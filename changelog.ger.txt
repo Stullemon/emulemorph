@@ -1,6 +1,317 @@
 	CHANGELOG FOR EMULE
 	===================
 
+
+v0.43b - Hotfix
+----------------------
+-  5. Juli 2004      -
+----------------------
+.: Korrektur eines Fehlers, der die meisten verfügbaren PeerCaches nicht nutzen liess
+Ornis: Statistiken (Anfragen,akzeptierte Anfragen, übertragene Daten) werden nun auch für aktuelle Downloads gespeichert und wiederhergestellt
+zz: Opens less slots if UploadSpeedSense lowers upload limit
+
+
+v0.43a
+----------------------
+- 28. Juni 2004      -
+----------------------
+bluecow/. : eMule unterstützt nun PeerCache, eine Technologie, welche es Internet Providern erlaubt, Bandbreitennutzung durch Daten-Zwischenspeicherung (Caching) zu reduzieren
+Unk: SMIRC: Option hinzugefügt, um andere User daran zu hindern, dich als Freund mittels SMIRC hinzuzufügen
+Ornis: Option, um das automatische Fortsetzen von pausierten Download (sobald ein Download fertiggestellt wird) so zu regeln, dass das Fortsetzen nur in der gleichen Kategorie erfolgt (zusätzlich zu Option, Downloads derselben Kategorien zu bevorzugen)
+Ornis: Log-Nachricht "neue Nachricht" erscheint nun nicht mehr für gefilterte Nachrichten
+bluecow: eMule betritt defcon level 3... :) (verschiedene Sicherheitsvorkehrungen)
+*) TCP Verbindungsversuche von gefilterten IPs werden nun direkt auf TCP-Protokoll Level abgewiesen
+*) TCP Verbindungsversuche von gebannten Clients werden nun direkt auf TCP-Protokoll Level abgewiesen
+*) LowID Callback-Requests von Servern werden ignoriert, wenn die IP gefiltert oder gebannt ist
+*) erhaltende Quellen (von Servern / Quellenaustausch) werden gefiltert, um bereits gebannte Clients zu ignorieren
+*) alle UDP Pakete von gebannten Clients werden ignoriert
+*) Extra Sicherheitscode um das Verbinden zu gefilterten IPs und gebannten Clients zu verhindern
+
+----------------------
+- 25. Juni 2004      -
+----------------------
+.: eMule kann nun selbstständig die benötigten Ports an der WinXP (SP1 & 0) -internen Firewall freischalten. Entweder permanent (Einstellungen->Verbindungen) oder temporär bei jedem Start (erweiterte Einstellungen)
+
+----------------------
+- 20. Juni 2004      -
+----------------------
+zz: (möglicher) Fix für die gemeldeten Fälle, dass eMule nicht das Upload-Limit erreicht
+bluecow: einige Protokoll-Prüfungen hinzugefügt, um zu verhindern, von fehlerhaften Clients geflooded zu werden
+bluecow: Korrektur einer Schwachstelle im IP-Filter beim Lesen einiger Zeilen einer PeerGuardian Filterliste mit fehlerhaftem Format
+
+----------------------
+- 15. Juni 2004      -
+----------------------
+bluecow: neuer Kontextmenüpunkt im Fenster der freigegebenen Dateien hinzugefügt (nur für fertige 'eMuleSkin.zip' Dateien) um eMule-Skins direkt zu installieren
+zz: Upload bandwidth throttler optimiert, um die Anzahl der ACK Pakete zu minimieren
+
+----------------------
+- 13. Juni 2004      -
+----------------------
+zz: einige Änderungen, um die UploadSpeedSense Startphase zu beschleunigen, wenn ein TTL nicht auf Pings reagiert. Und Erhöhung des Uploadlimits während der Vorbereitungsphase auf 2 KB/s, um falschen "Firewall"-Modus bei Kad zu vermeiden.
+zz: Änderung der "Gleichheit für alle"-Implementierung des Upload Bandwidth Throttlers, um die Paketfragmentierung zu minimieren bei TCP Paketen
+
+----------------------
+- 12. Juni 2004      -
+----------------------
+bluecow: Änderung der 'Zeichensatz' -Wahl für das Webinterface, um die richtige Codepage für den HTMLcode anzugeben
+bluecow: Suche via Web-Interface bzgl. der Dateityp-Suchparameter überarbeitet  (auch templates aktualisiert!)
+
+----------------------
+- 10. Juni 2004      -
+----------------------
+bluecow: Option zum Entfernen toter Server geändert: Jeder Server, der die maximale Fehlschlaganzahl überschreitet, wird aus der Liste gelöscht.
+bluecow: "Dokument" -Dateityp für das Bekanntgeben von Dateien hinzugefügt, wie auch zu den Suchparametern bei der ED2K- und Kad-Suche
+Ornis:   Statistiken werden nun in der Datei "Statistics.ini" gesichert (nicht mehr gemischt mit den Einstellungen in der preferences.ini)
+
+----------------------
+-  9. Juni 2004      -
+----------------------
+bluecow: viele kleine Korrekturen beim Wechsel der Sprache während der Laufzeit.
+
+----------------------
+-  6. Juni 2004      -
+----------------------
+zz: a4af-Manager verbessert. (Setze die Dateien, die du zuerst erhalten willst auf hohe Priorität. A4af-Entscheidungen sind mehr prioritätsgesteuert). Für die Priorisierung der alphabetische Reihenfolge, kann diese Option pro Kategorie über das Kategorie-Kontextmenü aktiviert werden. Eine Quelle kann weiterhin (automatisch) gewechselt werden, um einen Quellenaustausch zu fördern. Da die Neuanfrage-Verzögerungen immer eingehalten werden, kann der Quellenwechsel (Swap) verzögert stattfinden (dies verhindert, wegen a4af-Aktionen gebannt zu werden).
+
+----------------------
+-  3. Juni 2004      -
+----------------------
+bluecow: Unzipping von IP-Filter-Dateien von PeerGuardian ZIP-Dateien.
+
+----------------------
+-  2. Juni 2004      -
+----------------------
+Unk: GUI-Struktur von SMIRC komplett überarbeitet.
+Unk: SMIRC empfängt nun verfügbare Channel-Modes, beim Verbinden zum Server.
+Unk: Es können nun TypeD -Channel-Modi gesetzt/aufgehoben werden. Es können auch TypeC Channel Modi aufgehoben werden. (mehr Unterstützung folgt evtl. später)
+
+----------------------
+-  1. Juni 2004      -
+----------------------
+bluecow: IP Filter-Werkzeug überarbeitet, um große IP-Filter-Listen effizienter zu unterstützen.
+bluecow: Fortschrittsinformation wird nun angezeigt, wenn Tempdateien gehasht oder in das Zielverzeichnis kopiert werden.
+bluecow: Farben-Anpassungen (via Skin Profile) für Serverinfo, Log, Chat- und IRC Fenster.
+.: Loglevels für die Verbose-Anzeigen hinzugefügt, um zu ermöglichen, nur wichtige Nachrichten anzeigen zu lassen
+.: Korrektur eines Fehlers, dass einige bekannte Kontakte niemals gelöscht wurden, auch wenn sie nicht mehr gebraucht wurden
+.: Vollständige Quellen werden nun in Prozent in einer neuen Spalte im Suchfenster angezeigt. Wenn keine kompletten Quellen bekannt sind, wird diese Information rot dargestellt.
+
+----------------------
+- 31. Mai 2004       -
+----------------------
+Unk: SMIRC empfängt nun verfügbare User-Modi beim Verbinden vom Server, um um auch nicht-Standard-Usermodi zu erlauben.
+Unk: SMIRC erstellt nun ein dynamisches Nick-Menü, welches die verfügbaren Op-Kommandos enthält, abhängig vom markierten User und den verfügbaren UserModi.
+Unk: SMIRC kann nun eine Nickliste vom Server verarbeiten, welche ALLE Usermodi enthält - nicht nur die Haupt-Modi.
+Unk: SMIRC kann nun erkennen, welcher Typ von MODE-Change getätigt wurde, um diesen korrekt zu verarbeiten und anzuzeigen.
+
+----------------------
+- 27. Mai 2004       -
+----------------------
+bluecow: Korrektur eines Fehlers, welcher einen inkorrekten Wert für "fertiggestellte Größe" für Tempdateien zur Folge hatte.
+bluecow: mehrere kleine Fehlerkorrekturen und Optimierungen bei der Nutzung des  Bar-Shaders für Tempdateien und downloading/uploading Clients.
+bluecow: Korrektur eines Fehlers, welcher zufällig gelbe Blöcke in Quellenanzeigen zeichnete.
+Ornis:	 Kategorie-weites Fortsetzen von Downloads berücksichtigt nun auch "zu wenig Speicherplatz"-pausierte Downloads.
+
+----------------------
+- 26. Mai 2004       -
+----------------------
+bluecow: Korrektur eines Fehlers, beim Angeben leerer Verzeichnisse für Temp- und Eingangsverzeichnis.
+bluecow: hinzugefügt: Server-LowID-Statistik zum Server- und Statistikfenster.
+bluecow: hinzugefügt: Statistiken für die, durch I.C.H. gerettete Daten
+bluecow: hinzugefügt: Speichern/Wiederherstellen von fehlerhaften Partlisten zur part.met-Datei von Downloads. So dass I.C.H. an diesen Blöcken auch nach einem Neustart arbeiten kann.
+
+----------------------
+- 23. Mai 2004       -
+----------------------
+bluecow: Korrektur eines potentiellen Crashbugs unter Win98 mit Icons im Suchparameter-Fenster.
+bluecow: Korrektur eines Fehlers mit falscher Part-Anzahl bei sehr großen Dateien. [thx Pichuein]
+bluecow: Korrektur eines Fehlers im Einstellungen/Verzeichnisse-Fenster, welcher das aktive Verzeichnis veränderte.
+Ornis: 	 Korrektur eines Fehlers in der Toolbar, welcher beim Entfernen aller Knöpfe auftrat.
+Ornis:	 (mögliche) Korrektur des vereinzelt auftretenden Fehlplazierens des Kategorien-Reiters
+Ornis:   Korrektur eines Webinterface-Exploits (content lengt-Missbrauch)
+
+---------------------- 
+- 19. Mai 2004       -
+---------------------- 
+bluecow: Im Freigegebene Dateien-Fenster ist gibt es neuen einen Menüpunkt um Ed2K-links mit einem Hashset zu erzeugen 
+ 
+---------------------- 
+- 14. Mai 2004       -
+---------------------- 
+bluecow: Ein Bug im für in der Datenratenkontrolle Raten über 90KB wurde behoben [thx zz]
+
+---------------------- 
+- 13. Mai 2004       -
+---------------------- 
+bluecow: Dateien mit fehlendem Hashset werden nun richtig behandelt beim komplettieren 
+bluecow: Dateien ohne Hashsets werden nicht mehr freigegeben bis sie komplett sind oder ein Hashset empfangen 
+bluecow: Unterstützung für HTTP-Umleitung bei Webquellen wurde hinzugefügt 
+bluecow: Neue Icons für Webquellen im Transferfenster 
+bluecow: Neue Einstellung für preferences.ini für Speicherintervall der Statistik: Sektion "Statistics", Keyword "SaveInterval" 
+Ornis: Titel tags für images im Webinterface template "chicane" [mARKUS] 
+ 
+---------------------- 
+- 12. Mai 2004       -
+---------------------- 
+bluecow: Einfügen von erweiterten eD2k links für http-Quellen und Hashsets hinzugefügt 
+bleucow: eMule kann nun auch von HTTP-Quellen downloaden (Webquellen) 
+ 
+---------------------- 
+- 11. Mai 2004       -
+---------------------- 
+Unk: Der Kern von SMIRC wurde neu geschrieben um ihn stabiler und schneller zu machen 
+Unk: Ein Bug beim empfangen von langen Nachrichten auf dem IRC-Socket wurde behoben 
+Unk: Der SMIRC Verbindungsstatus zeigte gelegentlichen falsche Informationen 
+Unk: Ein einfacher Nicknameerzeuger wurde im SMIRC eingebunden 
+Unk: zz's USS (UploadSpeedSense) und Throttler wurden geupdated  
+ 
+---------------------- 
+- 10. Mai 2004       -
+---------------------- 
+bluecow: Ein Crash beim downloaden von verschiedenen Dateien mit gleichem Namen und Neuladen der freigegebenen Dateien-Liste wurde behoben 
+bluecow: periodischen Schreiben der Statistikdaten-Datei wurde optimiert 
+ 
+---------------------- 
+-  4. Mai 2004       -
+---------------------- 
+bluecow: Komplette Dateien mit fehlendem hashset werden nun am Dateihash überprüft 
+bluecow: Im Suchdialog sollten nun keine doppelten Scrollbalken mehr auftauchen 
+blueocw: Kad Suchausdruck-Verarbeitung: Das Kad Schlüsselwort ist nun ein Teil des Ed2k-Suchausdruckes 
+ 
+ 
+---------------------- 
+-  3. Mai 2004       -
+---------------------- 
+bluecow: ein Bug beim Empfangen von neuen ed2k Metatags wurde behoben 
+bluecow: das automatische Wiederherstellen von Suchparametern beim Anwählen/Schließen alter Suchen wurde wieder entfernt 
+bluecow: das Speichern der onlinesig.dat wurde überarbeitet um andere Programme, die diese Datei lesen besser zu unterstützen 
+bluecow: die Dateizugriffseinstellungen wurden geändert um anderen Programmen "Nur-Lesen" Zugriff zu erlauben 
+bluecow: ed2k and Kad suchen haben nun einen Icon welches zeigt ob sie grade in arbeit oder schon abgeschlossen sind 
+bluecow: Inaktive Suchergebnisseiten zeigen neu empfangene Ergebnisse durch roten Text im Tab an
+
+	
+v0.42f
+----------------------
+-  1. Mai 2004       -
+----------------------
+bluecow: Dateifehlerbehandlung beim Schreiben der onlinesig.dat hinzugefügt
+.: Korrektur eines Fehlers, welcher eine zu schnelle Warteschlangenrotation verursachte, wenn die Option "möglichst volle chunks uploaden" deaktiviert war
+
+----------------------
+-  30. April 2004    -
+----------------------
+bluecow: Fehlerbehebung im Kad Tagname Stringvergleich, im Zusammenhang mit multi byte character pages. [thx Big Mamma]
+bluecow: Fehlerbehebung beim generellen Stringvergleich, welcher von Spracheinstellungen abhähing.
+Ornis:   Problembehebung von springenden Kategorie-Tooltips
+Ornis:   2 weitere Statistiken zu Kategorien-Tooltips hinzugefügt
+
+----------------------
+-  29. April 2004    -
+----------------------
+Unk: Wenn ein Client mehrmals nicht auf UDP Pakete antwortet, wird eine TCP Verbindung erzwungen
+Unk: maximale Anzahl von Upload-Slots erhöht, um sehr hohen Bandbreiten gerecht zu werden
+
+----------------------
+-  24. April 2004    -
+----------------------
+bluecow: Kontextmenü für schliessbare Tabcontrols bei den Suchresultaten, Nachrichten und IRC-Chat-Tab hinzugefügt, um eine weitere Möglichkeit zum Schliessen zu bieten
+Unk: mehrere Bereiche im Code wurden angepasst, um Clients mit *.*.*.0 -IPs zu helfen, welche im ed2k Netzwerk immer als LowID geführt werden
+Unk: Fehlerbehebung: Wenn zu einem Server verbunden wurde, wurden die freigegebenen Dateien nicht bekannt gegeben, es sei denn, etwas in der Freigabeliste änderte sich [thx lugdunummaster]
+Unk: Korrektur eines Fehlers, welcher es erlaubte, das "Mehr"-Kommando zu einem faöscjem Suchfenster zu nutzen
+
+----------------------
+-  22. April 2004    -
+----------------------
+.: wenn eMule mit Administratorrechten gestartet wird, können nun für eMule diese Privilegien eingeschänkt werden, um ihn unter einem sichereren Benutzer-Account laufen zu lassen (Win 2k/XP)  - dies kann in den Einstellungen / Sicherheit aktiviert werden
+.: MobileMule Protokoll auf 0.8a aktualisiert
+Unk: Kad - Benutzerabschätzung basiert nun nicht mehr auf den Nutzerzahlen von Overnet, da diese Zahl zu hoch zu sein scheint.... (könnte für manche Nutzer noch immer hoch erscheinen, wird dann noch verbessert werden)
+Unk: obwohl ich den Doppel-Text-Fehler im IRC nicht nachstellen konnte, wurden einige Dinge geändert, die dies verursacht haben könnten
+
+----------------------
+-  21. April 2004    -
+----------------------
+bluecow: boch ein Absturzfehler beseitigt, welcher beim Umbenennen von fertiggestellten Dateien im Transferfenster auftrat
+bluecow: mehrere Änderungen in den Client-Statistiken: detaillierterte aMule-Versionsstatistiken, lphant ClientErkennung hinzugefügt, cDonkey zu den "eMule kompatibel" verschoben, und mehr...
+bluecow: Suche nach eD2K-Datei-Hashes auf eD2K-Servern hinzugefügt.  Um nach einem Datei-Hash zu suchen, gebe als Suchbegriff "ed2k::<hash>" an, oder den kompletten ed2k-Link  [thx lugdunummaster]
+bluecow: numerische Suchparameter werden nun auf sinnvolle Werte geprüft, um ungültige Sucheausdrücke zu vermeiden.
+
+----------------------
+-  20. April 2004    -
+----------------------
+bluecow: Fehler bei der globalen Serversuche korrigiert, welcher endlose Namen Anfragen in seltenen Situationen generieren konnte. [thx lugdunummaster]
+bluecow: werden fertiggestellte Dateien vom dem "freigegebene Dateien"-Fenster aus gelöscht, werden sie auch aus der Transfer-Anzeige entfernt
+bluecow: Download-Statistiken für UDP-File reask hinzugefügt
+
+----------------------
+-  19. April 2004    -
+----------------------
+bluecow: Behebung von Fehlern, bzgl "letzter Empfang" und DST
+
+----------------------
+-  15. April 2004    -
+----------------------
+bluecow: Absturzfehler beseitigt, welcher beim Umbenennen von fertiggestellten Dateien im Transferfenster auftrat
+bluecow: kleine Fehlerkorrektur bzgl. AutoTakeEd2kLinks
+Ornis:   Kategorieauswahl zur "Download durch ed2k-Links"-Box hinzugefügt
+
+----------------------
+-  14. April 2004    -
+----------------------
+bluecow: Korrektur eines "Fenstergröße-ändern-Absturzfehlers" im Nachrichten-Fenster
+bluecow: Nachrichten und IRC-Nachrichten auf 450 Zeichen begrenzt
+
+----------------------
+-  13. April 2004    -
+----------------------
+bluecow: das Auslesen von Metadaten aus OGM/OGG-Datei wurde deaktiviert, da zu viele Probleme damit im Zusammenhang mit DirectShow-Filter berichtet wurden
+Unk: IRC-Namen akzeptiert nun wieder Kleinschreibung
+Unk: das Publishing von Kad stoppt nun in Echtzeit, um etwas Overhead zu sparen
+
+----------------------
+-  11. April 2004    -
+----------------------
+bluecow: es könnten nun Dateien mit neuen Metadata Tags bei ed2k Servern bekannt gemacht werden [thx lugdunummaster]
+bluecow: Fehlerkorrektur bzgl. Fehler-Messageboxen, welche durch eine ferngesteuerte Suchanfrage auftreten konnten
+Ornis:	 einige kleinere GUI Erweiterungen und -korrekturen
+
+----------------------
+-  10. April 2004    -
+----------------------
+bluecow: neue ed2k-Metadaten-Tags können geparsed werden  [thx lugdunummaster]
+
+----------------------
+-  9. April 2004     -
+----------------------
+bluecow: hinzugefügt: andockendes/frei bewegbares Such-Parameter-Fenster im Suchfenster
+
+----------------------
+-  7. April 2004     -
+----------------------
+bluecow: sichereres Parsen der neuen OP_SERVER_DESC_RES Server Pakete
+bluecow: besseres Parsen von ungenutzen eD2K meta data tag Typen
+bluecow: Speicherleck korrigiert, welches im Zusammenhang mit known files Einträgen und ungültigen Hashsets auftreten konnte [thx bzubzu.]
+
+----------------------
+-  6. April 2004     -
+----------------------
+bluecow: Sortierfehler in der Liste der bekannten Clients korrigiert
+bluecow: Syntax-Coloring im Suchdialog entfernt - hat zu viele Probleme bei einigen Sprachen verursacht
+Ornis:   Suche im Webinterface korrigiert (Verfügbarkeit=0)
+
+----------------------
+-  3. April 2004     -
+----------------------
+bluecow: Strg+C Tastenkombination zu allen Listviews hinzugefügt, um eD2K-Links zu kopieren
+bluecow: Strg+V Tastenkombination zum Einfügen von Servern aus der Zwischenablage, innerhalb der Server-Liste
+Unk: Transfer: übrige Zeit wird für im Wartestatus befindliche Dateien, basierend auf bisheriger Warte- und Transferzeit, berechnet (Dateien, welche mit alten Clients oder Mods gestartet wurden, können seltsame Werte bringen)
+
+----------------------
+-  2. April 2004     -
+----------------------
+bluecow: Jigle-Suchmethode entfernt
+bluecow: Hilfe ist nun kontextsensitiv (F1 innerhalb eMule drücken)
+
+
 v0.42e
 ----------------------
 -  1. April 2004     -
@@ -11,12 +322,12 @@ Ornis: Javascript-Abhängigkeit der Webinterface-Templates reduziert
 - 31. März 2004      -
 ----------------------
 bluecow: Einfügen-Kommando für ed2k-Datei/Server-Links ins Kontexmenü des Transfer- und Server-Fenster hinzugefügt
-bluecow: Memoryleak in der Kad-Paket-Verarbeitung korregiert [thx bzubzu]
+bluecow: Memoryleak in der Kad-Paket-Verarbeitung korrigiert [thx bzubzu]
 
 ----------------------
 - 30. März 2004      -
 ----------------------
-bluecow: Security exploit im IRC_Modul und Webserver korregiert [thx DonDiego]
+bluecow: Security exploit im IRC_Modul und Webserver korrigiert (aka DecodeBase16 exploit) [thx DonDiego]
 
 ----------------------
 - 29. März 2004      -
@@ -27,7 +338,7 @@ bluecow: Erkennung des MLdonkey-kompatibler Client-Tags  hinzugefügt
 ----------------------
 - 28. März 2004      -
 ----------------------
-bluecow: Crashbug korregiert, welcher beim Löschen von ausgeklappten Surchresultaten auftreten konnte
+bluecow: Crashbug korrigiert, welcher beim Löschen von ausgeklappten Surchresultaten auftreten konnte
 Ornis:   wird der Kategorie-Dialog nach dessen Erstellung abgebrochen, wird die neue Kategorie nicht übernommen
 
 ----------------------
@@ -64,46 +375,46 @@ bluecow: mehr Vergleichsoperatoren zur Kad-Suchausdrucks-Verarbeitung hinzugefüg
 ----------------------
 - 20. März 2004      -
 ----------------------
-bluecow: Added a set of additional search parameters (Complete sources, Length, Bitrate, Codec, Title, Album, Artist)
-Ornis:   Preferences/Display: Option to clear or disable autocompletion boxes (search-name, servermet-urls, ipfilter-urls). Disabling takes full effect after restart.
+bluecow: einige neue Suchparameter (komplette Quellen, Länge, Bitrate, Codec, Titel, Album, Künstler) hinzugefügt
+Ornis:   Einstellungen/Anzeige: Option zum Löschen oder Deaktivierung der Autovervollständigung (Historyfunktion) (Suchbegriff und Servermet-URLs) hinzugefügt. (Die History kann weiterhin mit Strg+Entfernen  manuell gelöscht werden! siehe Hilfe!)
 
 ----------------------
 - 19. März 2004      -
 ----------------------
-bluecow: Webservices are split into file based and general URLs. General URLs are shown only in Tools/Links.
+bluecow: Webservices aufgeteilt in Dateibasierte und allgemeine URLs. allgemeine URLs werden nur in Tools/Links angezeigt
 
 ----------------------
 - 18. März 2004      -
 ----------------------
-bluecow: Fixed crash bug with downloading of already downloaded files which were already in known file list.
+bluecow: Crashbug korrigiert, welcher beim Download von bereits heruntergeladenen Dateien auftrat, die bereits in der knownfile-Liste waren
 
 ----------------------
 - 16. März 2004      -
 ----------------------
-bluecow: Fixed bug with recovering block requests of compressed packets after a zstream error occured.
+bluecow: Korrektur eines Fehler beim Wiederherstellen von block requests von komprimierten Paketen, nachdem ein zstream-Fehler auftrat
 
 ----------------------
 - 15. März 2004      -
 ----------------------
-bluecow: Added 'Active download time' stats for part files which shows the amount of time the file was active in download queue.
-bluecow: Added: Completed files are republished to servers to update the 'complete sources' info.
-bluecow: Fixed bug with reloading of shared files where just completed and externaly removed/renamed files still showed up.
+bluecow: Hinzugefügt: 'aktive Downloadzeit' Statistik zu Partfiles (Dateidetailsdialog), welche die Zeit angibt, welche die Datei aktiv in der Downloadqueue war.
+bluecow: Hinzugefügt: fertiggestellte Dateien werden den Servern bekannt gemacht, um die "komplette Quellen"-Info zu aktualisieren
+bluecow: Korrektur eines Fehlers: Neuladen der freigegebenen Dateien, welche gerade fertiggestellt wurden und extern gelöscht/umbenannt wurden - um falsche Anzeige zu vermeiden
 
 ----------------------
 - 14. März 2004      -
 ----------------------
-bluecow: Fixed possible mem leak with OP_REQUESTPARTS message. [thx eklmn]
-bluecow: Added support for integer media length eD2K tag for servers and clients. [thx lugdunummaster]
-bluecow: Added publishing of basic file status (complete/incomplete) to servers.
-bluecow: Added: Nr. of complete sources returned from servers are shown with availability data in search result list.
-bluecow: Added: Viewing shared files of remote clients also transferes the nr. of complete sources.
-unk: IRC now remembers your last nick.
-unk: Added a couple more IRC info message options.
+bluecow: mögliches Memleak bei der OP_REQUESTPARTS Nachricht behoben [thx eklmn]
+bluecow: Unterstützung für integer media length eD2K tag für Server und Clients hinzugefügt [thx lugdunummaster]
+bluecow: Hinzugefügt: Senden von grundlegendem Dateistatusinformationen (komplett/nicht komplett) an Server
+bluecow: hinzugefügt: von Servern empfangende Anzahl kompletter Quellen, werden mit der Verfügbarkeit in der Suchresultatsliste angezeigt
+bluecow: Hinzugefügt: Anzeige von freigegebenen Dateien anderer Clients überträgt nun auch die Anzahl kompletter Quellen
+unk: IRC speichert nun deinen zuletzt verwendeten Nick
+unk: einige weitere IRC-Infonachrichten-Optionen hinzugefügt
 
 ----------------------
 - 13. März 2004      -
 ----------------------
-bluecow: Added customizable preview commands (new config file PreviewApps.dat)
+bluecow: konfigurierbares Vorschau-Kommando hinzugefügt (neue Konfig-Datei: PreviewApps.dat)
 
 
 v0.42d

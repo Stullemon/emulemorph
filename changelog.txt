@@ -1,9 +1,318 @@
 	CHANGELOG FOR EMULE
 	===================
 
+
+v0.43b - Hotfix
+----------------------
+- Jul, 5rd 2004      -
+----------------------
+.:    Fixed a bug which let eMule reject most available PeerCaches
+Ornis:Statistics (requests,accepted requests,transfered) of partfiles are now saved and restored too (like for shared files)
+zz:   wenn UploadSpeedSense das Uploadlimit verringert, wird nun die Slotanzahl angepasst
+
+
+v0.43a
+----------------------
+- Jun, 28th 2004     -
+----------------------
+bluecow/. : eMule now supports PeerCache, a technology which allows ISPs to reduce the bandwidth usage by caching instead of throttling the downloadspeed
+Unk: Option to block people from adding you as a friend through SMIRC.
+Ornis: Option to auto resume paused downloads only for same category as a completed download (additional to option of prefering same category)
+Ornis: Dont show "new message" loginfo for filtered messages
+bluecow: eMule is entering defcon level 3..
+*) TCP connection attempts from filtered IPs are refused right at TCP protocol level.
+*) TCP connection attempts from banned clients are refused at TCP protocol level.
+*) LowID callback requests from servers are dropped if IP is filtered or banned.
+*) Received sources (servers, source exchange) are filtered to drop already banned clients.
+*) All UDP packets from banned clients are ignored.
+*) Extra safety code to prevent connecting to an IP filtered IP or banned client.
+
+----------------------
+- Jun, 25th 2004     -
+----------------------
+.: eMule can open the ports it needs on the internal WinXP(SP1 or 0) firewall itself either permanently (connection pref) or on each startup (extended settings)
+
+----------------------
+- Jun, 20th 2004     -
+----------------------
+zz: Possible fix to the reported cases when eMule doesn't reach the upload limit.
+bluecow: Added some protocol procedure sanity checks to avoid getting flooded by bugged clients.
+bluecow: Fixed a flaw in the IP filter which lead to not reading some lines from PeerGuardian filter lists which had a bad format.
+
+----------------------
+- Jun, 15th 2004     -
+----------------------
+bluecow: Added new context menu item in Shared Files window (only for completed 'eMuleSkin.zip' files) to install eMule Skins.
+zz: Changed upload bandwidth throttler to minimize the number of ACK packets.
+
+----------------------
+- Jun, 13th 2004     -
+----------------------
+zz: Some changes to speed up UploadSpeedSense preparing phase, when a ttl doesn't respond to pings. Also changed the upload limit during preparing phase to 2 KB/s instead of 512 bytes/s to prevent kademlia from getting false "firewalled" status.
+zz: Changed the equal-for-all implementation in upload bandwidth throttler to minimize packet fragmentation on tcp level.
+
+----------------------
+- Jun, 12th 2004     -
+----------------------
+bluecow: Reworked the 'charset' selection for emule web interface to use proper codepage value in returned HTML code.
+bluecow: Reworked searching via web interface in relation to file type search parameter. (New web templates!)
+
+----------------------
+- Jun, 10th 2004     -
+----------------------
+bluecow: Changed option to remove dead servers: Any server which exceeds a max. failure limit is removed from server list.
+bluecow: Added "Document" file type for published files and also to search parameter for eD2K and Kad.
+Ornis:   Splitted statistics to be stored in "Statistics.ini"
+
+----------------------
+- Jun, 9th 2004      -
+----------------------
+bluecow: Many small fixes for changing language during runtime.
+
+----------------------
+- Jun, 6th 2004      -
+----------------------
+zz: Improved a4af manager. Set the file you want first to "high" download priority (priorities now effects a4af decisions). You can chose to get the files in a category in their alphabetical order. A source may be (automatically) swapped to another file to enable source exchange on that file. Respects reask times in all cases, so it may take a while before sources are moved (but this change prevents banning due to a4af actions).
+
+----------------------
+- Jun, 3nd 2004      -
+----------------------
+bluecow: Added unzipping of IP filter files from PeerGuardian ZIP files.
+
+----------------------
+- Jun, 2nd 2004      -
+----------------------
+Unk: Completely reworked the gui structure for SMIRC.
+Unk: SMIRC will now get available channel modes from the server on connect.
+Unk: You can now set/unset TypeD channel modes.. You can also unset TypeC channel modes. (More support may be added later)
+
+----------------------
+- Jun, 1st 2004      -
+----------------------
+bluecow: Reworked IP Filter tool window to support large IP filter lists more effeciently.
+bluecow: Added progress information for part files when getting hashed or copied to incoming folder.
+bluecow: Added color customization (via skin profile) for server info, log, chat and IRC windows.
+.: Added loglevels for verbose output in order to allow showing only important messages
+.: Fixed a bug which caused that some known contacts were never deleted, even if not needed anymore
+.: Complete sources are now shown as percentage in a new column. If there are zero complete sources for a file, this colum is marked red
+
+----------------------
+- May, 31st 2004     -
+----------------------
+Unk: SMIRC will now get available user modes from the server on connect to allow it to use servers that use non standard usermodes.
+Unk: SMIRC Now creates a dynamic nick menu showing which Op commands are available based on the user you click and user modes available.
+Unk: SMIRC can now handle an nicklist from the server that contains ALL usermodes not just the major mode.
+Unk: SMIRC is now able to detect what type of MODE change was done so it can handle/display it correctly.
+
+----------------------
+- May, 27th 2004     -
+----------------------
+bluecow: Fixed bug with inaccurate completed size for part files.
+bluecow: Couple of minor bug fixes and optimisations in bar shader related usage for part files and downloading/uploading clients.
+bluecow: Fixed bug which sometimes draws randomly yellow blocks for sources.
+Ornis:	 Category-wide resume will now also care for out-of-diskspace-paused downloads
+
+----------------------
+- May, 26th 2004     -
+----------------------
+bluecow: Fixed bug with specifying empty directories for incoming and temp folders.
+bluecow: Added server LowID statistics to Server and Statistics window.
+bluecow: Added stats for showing amount of data saved by I.C.H.
+bluecow: Added saving/restoring of corrupted part list to part.met files so that I.C.H. can work on those parts even after eMule was restarted.
+
+----------------------
+- May, 23th 2004     -
+----------------------
+bluecow: Fixed potential crash bug under Win98 with helper icon in search parameters window.
+bluecow: Fixed bug with wrong part count for very large files. [thx Pichuein]
+bluecow: Fixed bug in Directory preferences dialog which changed the active directory.
+Ornis: 	 Fixed a bug in the toolbar button code, when all buttons were removed
+Ornis:	 (possibly) fixed the issue of misplaced category tabs (couldnt reproduce it at all, for testing)
+Ornis:   Fixed webinterface exploit (content length misuse)
+
+----------------------
+- May, 19th 2004     -
+----------------------
+bluecow: Added context menu command for creating eD2K links with hashsets to Shared Files window.
+
+----------------------
+- May, 14th 2004     -
+----------------------
+bluecow: Fixed data rate control for rates > 80kb [thx zz]
+
+----------------------
+- May, 13th 2004     -
+----------------------
+bluecow: Properly completing and sharing of files when no hashset is available.
+bluecow: Files without hashsets are no longer shared until they are completed or a hashset was received.
+bluecow: Added support for HTTP redirection for websources.
+bluecow: Added icons for websources in transfer window.
+bluecow: Added a setting to preferences.ini (Section "Statistics", Keyword "SaveInterval") to specify the time interval in seconds for saving statistics. Default value is 60 sec.
+Ornis:   title tags for images in Webinterface template "chicane"  	[mARKUS]
+
+----------------------
+- May, 12th 2004     -
+----------------------
+bluecow: Added pasting of extended eD2K links for http:// sources and hashsets.
+bluecow: Added downloading from http:// sources.
+
+----------------------
+- May, 11th 2004     -
+----------------------
+Unk: Rewrote most of the core of SMIRC to make it more stable and faster..
+Unk: I now read the entire receive buffer in SMIRC's socket on each receive. Messages were getting left in the buffer and backlog'd..
+Unk: SMIRC connection status could get a little messed up and not tell the user it failed to connect. (fix)
+Unk: Added a simple nick completer to SMIRC.
+Unk: Updated zz's USS and throttler.. With some modifications.. (I'm commiting this because I know blue wants to merge, this is still a work in progress..)
+
+----------------------
+- May, 10th 2004     -
+----------------------
+bluecow: Fixed crash with downloading of several files with same filename and reloading the shared files list.
+bluecow: Optimized periodically stats file writing.
+
+----------------------
+- May, 4th 2004      -
+----------------------
+bluecow: Added filehash evaluation for completed part files when hashset is missing.
+bluecow: Fixed bug with duplicate scrollbars in search window.
+bluecow: Kad search expression parsing: The Kad keyword is now part of the ed2k search expression to support "<keyword> <op> <ed2k-search>" expressions.
+
+----------------------
+- May, 3rd 2004      -
+----------------------
+bluecow: Fixed bug with receiving of new ed2k meta tags which used a too large tag type range for string types.
+bluecow: Removed auto restoring of search parameters when a search results tab is selected and/or closed.
+bluecow: Reworked saving of onlinesig.dat to provide better support for other applications which are reading that file concurrently.
+bluecow: Changed all file shareing modes (at OS level only) to allow read only access by other applications.
+bluecow: eD2K and Kad searches are shown as still active or stopped with an appropriate icon in the search results list.
+bluecow: Inactive search results panes show new received search results with red colored text in tab control.
+
+	
+v0.42f
+----------------------
+- May, 1st 2004      -
+----------------------
+bluecow: Added file error handling for writing of onlinesig.dat file.
+.: Fixed a bug which could cause a too fast queue rotation when not using the option "try to upload full chunks" for uploading
+
+----------------------
+- April 30th, 2004   -
+----------------------
+bluecow: Fixed bug in Kad tag name string compare which was dependent to locales with multi byte character pages. [thx Big Mamma]
+bluecow: Fixed bug with general string compares which were dependent on locale. (Note: Depending on your locale, you may experience somewhat different sorting orders for strings.)
+Ornis:   Fixed issue of jumping category tooltips
+Ornis:   Added 2 more statistics to category tooltips
+
+----------------------
+- April 29th, 2004   -
+----------------------
+Unk: If a client doesn't respond to udp packets after a few times, we force only tcp connections.
+Unk: Increased the maximum number of upload slots to accomidate high rate connections.
+
+----------------------
+- April 24th, 2004   -
+----------------------
+bluecow: Added context menu to closeable tab control in Search Results, Message and IRC Chat windows to have another way to closeing the tabs.
+Unk: Changed several areas of the code to help with *.*.*.0 clients that is labeled a lowID in the ed2k network.
+Unk: If you reconnect to a server, all your shares would not get published unless something in your share list changed..(fixed) (thanks lugdunummaster)
+Unk: Fixed a bug that allowed you to do a more command in search to the wrong search window.
+
+----------------------
+- April 22th, 2004   -
+----------------------
+.: eMule is now able to drop privileges and run on a secure user account on Win 2k/XP, when started as administrator (can be enabled in preferences -> security)
+.: Updated MobileMule protocol to 0.8a
+Unk: Kad user estimate is no longer based on Overnet's user count as the numbers appear to be to high.. (Numbers may still look to high for some users, will try to improve this as we go..)
+Unk: Although I couldn't reproduce the double text bug in the IRC, I changed a couple things that may be the cause. (Seems some still get the bug)
+
+----------------------
+- April 21th, 2004   -
+----------------------
+bluecow: Fixed another crash bug with renaming of completed files in transfere window.
+bluecow: Several changes in client statistics: detailed aMule version stats, added lphant client detection, cDonkey moved to eMule Compatible and more...
+bluecow: Added searching for eD2K file hashs on eD2K servers. To search for a file hash, either enter "ed2k::<hash>" or the complete ed2k link. [thx lugdunum]
+bluecow: Numeric search parameters are checked for reasonable values to avoid invalid search expressions.
+
+----------------------
+- April 20th, 2004   -
+----------------------
+bluecow: Fixed bug in global server searches which could send endless name queries in some rare situations. [thx lugdunum]
+bluecow: Completed shared files which are deleted from Shared Files window are also removed from Transfer window.
+bluecow: Added download statistics for UDP file reask.
+
+----------------------
+- April 19th, 2004   -
+----------------------
+bluecow: Fixed bugs with "Last Reception Time" and DST fix.
+
+----------------------
+- April 15th, 2004   -
+----------------------
+bluecow: Fixed crash bug with renaming of completed files in transfere window.
+bluecow: Fixed small bug with AutoTakeEd2kLinks.
+Ornis:   added category selector to the ed2k-box
+
+----------------------
+- April 14th, 2004   -
+----------------------
+bluecow: Fixed a window resizing crash bug in Message window.
+bluecow: Client chat and IRC chat messages are limited to 450 characters.
+
+----------------------
+- April 13th, 2004   -
+----------------------
+bluecow: Disabled extracting meta data from OGM/OGG files due to many bug reports about problems with according DirectShow filters.
+Unk: IRC names accept uppercase again.
+Unk: Kad Publishes now stop in real time to avoid some overhead.
+
+----------------------
+- April 11th, 2004   -
+----------------------
+bluecow: Added capability to publish files on ed2k servers with new meta data tags. [thx lugdunum]
+bluecow: Fixed bug with error message boxes which could show up due to a remote search invocation.
+Ornis:	 some minor GUI addons & corrections
+
+----------------------
+- April 10th, 2004   -
+----------------------
+bluecow: Added capability to parse new ed2k meta data tags. [thx lugdunum]
+
+----------------------
+- April 9th, 2004    -
+----------------------
+bluecow: Added docking/floating search parameters window to search dialog.
+
+----------------------
+- April 7th, 2004    -
+----------------------
+bluecow: More safety in parsing of new OP_SERVER_DESC_RES server packets.
+bluecow: Proper parsing of unused eD2K meta data tag types.
+bluecow: Fixed memory leak with known files entries and invalid hashsets in general [thx bzubzu.]
+
+----------------------
+- April 6th, 2004    -
+----------------------
+bluecow: Fixed sorting bugs in Known Client listview control.
+bluecow: Removed syntax coloring from search expression control (caused too much trouble for some languages).
+Ornis:   fixed search for webinterface
+
+----------------------
+- April 3nd, 2004    -
+----------------------
+bluecow: Added Ctrl+C keyboard shortcuts in all list views for copying eD2K links to clipboard.
+bluecow: Added Ctrl+V keyboard shortcut for pasting servers from clipboard to server list view.
+Unk: For waiting files, an remaining time will be estimated, based on previous idle time and downloaded data. (Note: Files started with some mods or older clients may give strange relults)
+
+----------------------
+- April 2nd, 2004    -
+----------------------
+bluecow: Removed Jigle search methods.
+bluecow: Added context sensitive help.
+
 v0.42e
 ----------------------
-- April 1st,2004     -
+- April 1st, 2004    -
 ----------------------
 Ornis: reduced javascript dependence on webinterface templates
 
@@ -16,7 +325,7 @@ bluecow: Fixed memory leak in Kad packet parsing [thx bzubzu.]
 ----------------------
 - Mar 30th, 2004     -
 ----------------------
-bluecow: Fixed security exploit in IRC module and Web server [thx DonDiego]
+bluecow: Fixed security exploit in IRC module and Web server (aka DecodeBase16 exploit) [thx DonDiego]
 
 ----------------------
 - Mar 29th, 2004     -

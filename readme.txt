@@ -1,4 +1,4 @@
-eMule Copyright (C)2002-2003 Merkur (merkur-@users.sourceforge.net)
+eMule Copyright (C)2002-2004 Merkur (merkur-@users.sourceforge.net)
 
 
 This program is free software; you can redistribute it and/or modify it under 
@@ -348,7 +348,7 @@ program?
 -John aka. Unknown1 - Developer
 -Ornis - Developer
 -bluecow - Developer
--Monk, Sony and Myxin - Testers
+-Monk - Testers
 
 -Merkur (merkur-@users.sourceforge.net) - Master of the Mule - retired, we miss you :)
 -Tecxx - Developer (retired)
@@ -356,14 +356,14 @@ program?
 -Juanjo - Developer (retired)
 -Dirus - Developer (retired)
 -Barry - Developer (retired)
--Mr. Ozon - Tester (retired)
+-Mr. Ozon, Sony, Myxin - Tester (retired)
 
 
 
 LEGAL:
 ------
 
-eMule Copyright (C)2002-2003 Merkur (merkur-@users.sourceforge.net)
+eMule Copyright (C)2002-2004 Merkur (merkur-@users.sourceforge.net)
 
 eDonkey2000 (C)Jed McCaleb, MetaMachine (www.eDonkey2000.com)
 
