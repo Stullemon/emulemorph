@@ -57,18 +57,18 @@ public:
 	CTag		*readTag(void);
 	TagList		*readTagList(void);
 
-	void		writeByte(const byte val);
-	void		writeUInt8BE(const uint8 val);
-	void		writeUInt16BE(const uint16 val);
-	void		writeUInt32BE(const uint32 val);
+	void		writeByte(byte val);
+	void		writeUInt8BE(uint8 val);
+	void		writeUInt16BE(uint16 val);
+	void		writeUInt32BE(uint32 val);
 	void		writeUInt128BE(const CUInt128 &val);
-	void		writeUInt8(const uint8 val);
-	void		writeUInt16(const uint16 val);
-	void		writeUInt32(const uint32 val);
+	void		writeUInt8(uint8 val);
+	void		writeUInt16(uint16 val);
+	void		writeUInt32(uint32 val);
 	void		writeUInt128(const CUInt128 &val);
-	void		writeFloat(const float val);
+	void		writeFloat(float val);
 	void		writeTag(const CTag *tag);
-	void		writeTag(const byte type, LPCSTR name);
+	void		writeTag(byte type, LPCSTR name);
 	void		writeTag(LPCSTR name, LPCSTR value);
 	void		writeTag(LPCSTR name, uint8 value);
 	void		writeTag(LPCSTR name, uint16 value);
@@ -76,8 +76,8 @@ public:
 	void		writeTag(LPCSTR name, float value);
 	void		writeTagList(const TagList &tagList);
 
-	virtual void readArray(LPVOID lpResult, const uint32 byteCount) = 0;
-	virtual void writeArray(LPCVOID lpVal, const uint32 byteCount) = 0;
+	virtual void readArray(LPVOID lpResult, uint32 byteCount) = 0;
+	virtual void writeArray(LPCVOID lpVal, uint32 byteCount) = 0;
 
 };
 

@@ -39,7 +39,11 @@ there client on the eMule forum..
 #include "../utils/MiscUtils.h"
 #include "../../sharedfilelist.h"
 #include "../routing/contact.h"
-#include "../routing/timer.h"
+#include "emule.h"
+#include "emuledlg.h"
+#include "opcodes.h"
+#include "defines.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -52,21 +56,14 @@ static char THIS_FILE[]=__FILE__;
 using namespace Kademlia;
 ////////////////////////////////////////
 
-CKademlia *CKademlia::instance = NULL;
-
-KADEMLIA_LOG_CALLBACK			CKademlia::m_logCallback = NULL;
-KADEMLIA_DEBUG_CALLBACK			CKademlia::m_debugCallback = NULL;
-KADEMLIA_ERROR_CALLBACK			CKademlia::m_errorCallback = NULL;
-KADEMLIA_SEARCHADD_CALLBACK		CKademlia::m_searchaddCallback = NULL;
-KADEMLIA_SEARCHREM_CALLBACK		CKademlia::m_searchremCallback = NULL;
-KADEMLIA_SEARCHREF_CALLBACK		CKademlia::m_searchrefCallback = NULL;
-KADEMLIA_CONTACTADD_CALLBACK	CKademlia::m_contactaddCallback = NULL;
-KADEMLIA_CONTACTREM_CALLBACK	CKademlia::m_contactremCallback = NULL;
-KADEMLIA_CONTACTREF_CALLBACK	CKademlia::m_contactrefCallback = NULL;
-KADEMLIA_REQUESTTCP_CALLBACK	CKademlia::m_requesttcpCallback = NULL;
-KADEMLIA_UPDATESTATUS_CALLBACK	CKademlia::m_updatestatusCallback = NULL;
-KADEMLIA_OVERHEADSEND_CALLBACK	CKademlia::m_overheadsendCallback = NULL;
-KADEMLIA_OVERHEADRECV_CALLBACK	CKademlia::m_overheadrecvCallback = NULL;
+CKademlia	*CKademlia::instance = NULL;
+EventMap	CKademlia::m_events;
+time_t		CKademlia::m_nextSearchJumpStart;
+time_t		CKademlia::m_nextSelfLookup;
+time_t		CKademlia::m_statusUpdate;
+time_t		CKademlia::m_bigTimer;
+time_t		CKademlia::m_nextFirewallCheck;
+bool		CKademlia::m_running = false;
 
 void CKademlia::start(void)
 {
@@ -79,20 +76,24 @@ void CKademlia::start(void)
 
 }
 
-void CKademlia::start(byte *clientID, uint16 tcpPort, uint16 udpPort)
-{
-	if (instance != NULL)
-	{
-		return;
-	}
-	start(new CPrefs(clientID, tcpPort, udpPort));
-}
-
 void CKademlia::start(CPrefs *prefs)
 {
 	try
 	{
+		if( m_running )
+		{
+			delete prefs;
+			return;
+		}
+
 		debugMsg("Starting Kademlia");
+
+		m_nextSearchJumpStart = time(NULL);
+		m_nextSelfLookup = time(NULL) + MIN2S(5);
+		m_statusUpdate = time(NULL);
+		m_bigTimer = time(NULL);
+		m_nextFirewallCheck = time(NULL) + (HR2S(1));
+
 		srand((UINT)time(NULL));
 		instance = new CKademlia();	
 		instance->m_prefs = prefs;
@@ -101,13 +102,7 @@ void CKademlia::start(CPrefs *prefs)
 		instance->m_indexed = new CIndexed();
 		instance->m_routingZone = new CRoutingZone();
 		instance->m_udpListener = new CKademliaUDPListener();
-		int result = instance->m_udpListener->start(instance->m_prefs->getUDPPort());
-		if (result != ERR_SUCCESS)
-		{
-			reportError(ERR_TCP_LISTENER_START_FAILURE, "Could not listen on udp port %ld", instance->m_prefs->getUDPPort());
-		}
-
-		CTimer::start();
+		m_running = true;
 	}
 	catch (CException *e)
 	{
@@ -118,15 +113,17 @@ void CKademlia::start(CPrefs *prefs)
 	}
 }
 
-void CKademlia::stop(bool bAppShutdown)
+void CKademlia::stop()
 {
-	debugMsg("Stopping Kademlia");
+	if( !m_running )
+		return;
 
-	CTimer::stop(bAppShutdown);
+	debugMsg("Stopping Kademlia");
+	m_running = false;
+
 	CSearchManager::stopAllSearches();
 	try
 	{
-		instance->m_udpListener->stop(bAppShutdown);
 		delete instance->m_udpListener;
 		instance->m_udpListener = NULL;
 	}
@@ -178,28 +175,220 @@ void CKademlia::stop(bool bAppShutdown)
 		CKademlia::debugLine("Exception in CKademlia::stop(5)");
 		ASSERT(0);
 	}
-
+	m_events.clear();
 	instance = NULL;
+}
+
+void CKademlia::process()
+{
+	if( instance == NULL || !m_running)
+		return;
+	ASSERT(instance != NULL);
+	time_t now;
+	CRoutingZone *zone;
+	EventMap::const_iterator it;
+	uint32 maxUsers = 0;
+	try
+	{
+		now = time(NULL);
+		ASSERT(instance->m_prefs != NULL); 
+		if( m_statusUpdate <= now )
+		{
+			CSearchManager::updateStats();
+			m_statusUpdate = SEC(1) + now;
+		}
+		if( m_nextFirewallCheck <= now)
+		{
+			instance->m_prefs->setRecheckIP();
+			m_nextFirewallCheck = HR2S(1) + now;
+		}
+		if (m_nextSelfLookup <= now)
+		{
+			CUInt128 me;
+			instance->m_prefs->getClientID(&me);
+			CSearchManager::findNodeComplete(me);
+			m_nextSelfLookup = HR2S(4) + now;
+		}
+		for (it = m_events.begin(); it != m_events.end(); it++)
+		{
+			zone = it->first;
+			if( zone->estimateCount() > maxUsers)
+				maxUsers = zone->estimateCount();
+			if (zone->m_nextBigTimer <= now && m_bigTimer <= now)
+			{
+				try
+				{
+					if(zone->onBigTimer())
+					{
+						zone->m_nextBigTimer = HR2S(1) + now;
+						m_bigTimer = SEC(10) + now;
+					}
+				} 
+				catch (...) 
+				{
+					CKademlia::debugLine("Exception in Kademlia::Process(1)");
+				}
+			}
+			if (zone->m_nextSmallTimer <= now)
+			{
+				try
+				{
+					zone->onSmallTimer();
+				}
+				catch (...) 
+				{
+					CKademlia::debugLine("Exception in Kademlia::Process(2)");
+				}
+				zone->m_nextSmallTimer = MIN2S(1) + now;
+			}
+				// This is a convenient place to add this, although not related to routing
+			if (m_nextSearchJumpStart <= now)
+			{
+				try
+				{
+					CSearchManager::jumpStart();
+				}
+				catch (...) 
+				{
+					CKademlia::debugLine("Exception in Kademlia::Process(3)");
+				}
+				m_nextSearchJumpStart += SEARCH_JUMPSTART;
+			}
+		}
+
+		//Update user count only if changed.
+		if( maxUsers != instance->m_prefs->getKademliaUsers())
+		{
+			instance->m_prefs->setKademliaUsers(maxUsers);
+			theApp.emuledlg->ShowUserCount();
+		}
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in Kademlia::Process(4)");
+	}
+}
+
+void CKademlia::addEvent(CRoutingZone *zone)
+{
+	m_events[zone] = zone;
+}
+
+void CKademlia::removeEvent(CRoutingZone *zone)
+{
+	m_events.erase(zone);
+}
+
+bool CKademlia::isConnected(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getLastContact();
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::isConnected");
+	return false;
+}
+
+bool CKademlia::isFirewalled(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getFirewalled(); 
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::isFirewalled");
+	return true;
+}
+
+uint32 CKademlia::getKademliaUsers(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getKademliaUsers();
+//	else
+//		CKademlia::debugLine("Exception in Kademlia::getKademliaUsers");
+	return 0;
+}
+
+uint32 CKademlia::getTotalStoreKey(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getTotalStoreKey();
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::getTotalStoreKey");
+	return 0;
+}
+
+uint32 CKademlia::getTotalStoreSrc(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getTotalStoreSrc();
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::getTotalStoreSrc");
+	return 0;
+}
+
+uint32 CKademlia::getTotalFile(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getTotalFile();
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::getTotalFile");
+	return 0;
+}
+
+uint32 CKademlia::getIPAddress(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getIPAddress();
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::getIPAddress");
+	return 0;
+}
+
+void CKademlia::processPacket(const byte *data, uint32 lenData, uint32 ip, uint16 port)
+{
+	if( instance && instance->m_udpListener )
+		instance->m_udpListener->processPacket( data, lenData, ip, port);
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::processPacket");
+}
+
+bool CKademlia::getPublish(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getPublish();
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::getKeywordPublish");
+	return 0;
+}
+
+void CKademlia::bootstrap(LPCSTR host, uint16 port)
+{
+	if( instance && instance->m_udpListener )
+		instance->m_udpListener->bootstrap( host, port);
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::bootstrap");
+}
+
+void CKademlia::bootstrap(uint32 ip, uint16 port)
+{
+	if( instance && instance->m_udpListener )
+		instance->m_udpListener->bootstrap( ip, port);
+//	else
+//		CKademlia::debugLine("Exception in CKademlia::bootstrap");
 }
 
 void CKademlia::logMsg(LPCSTR lpMsg, ...)
 {
 	try
 	{
-		if ( instance == NULL || m_logCallback == NULL )
-		{
-			return;
-		}
 		CString msg;
 		va_list args;
 		va_start(args, lpMsg);
 		msg.FormatV(lpMsg, args);
 		va_end(args);
-		(*m_logCallback)(msg.GetBuffer(0));
+		theApp.AddLogLine(false, msg);
 	}
 	catch(...)
 	{
-		CKademlia::debugLine("Exception in CKademlia::logMsg");
+		TRACE("Exception in CKademlia::logMsg");
 		return;
 	}
 }
@@ -208,15 +397,11 @@ void CKademlia::logLine(LPCSTR lpLine)
 {
 	try
 	{
-		if ( instance == NULL || m_logCallback == NULL )
-		{
-			return;
-		}
-		(*m_logCallback)(lpLine);
+		theApp.AddLogLine(false, lpLine);
 	}
 	catch(...)
 	{
-		CKademlia::debugLine("Exception in CKademlia::logLine");
+		TRACE("Exception in CKademlia::logLine");
 		return;
 	}
 }
@@ -225,20 +410,19 @@ void CKademlia::debugMsg(LPCSTR lpMsg, ...)
 {
 	try
 	{
-		if ( instance == NULL || m_debugCallback == NULL )
+		if (thePrefs.GetVerbose())
 		{
-			return;
+			CString msg;
+			va_list args;
+			va_start(args, lpMsg);
+			msg.FormatV(lpMsg, args);
+			va_end(args);
+			theApp.AddDebugLogLine( false, msg );
 		}
-		CString msg;
-		va_list args;
-		va_start(args, lpMsg);
-		msg.FormatV(lpMsg, args);
-		va_end(args);
-		(*m_debugCallback)(msg.GetBuffer(0));
 	}
 	catch(...)
 	{
-		CKademlia::debugLine("Exception in CKademlia::debugMsg");
+		TRACE("Exception in CKademlia::debugMsg");
 		return;
 	}
 }
@@ -247,219 +431,33 @@ void CKademlia::debugLine(LPCSTR lpLine)
 {
 	try
 	{
-		if ( instance == NULL || m_debugCallback == NULL )
-		{
-			return;
-		}
-		(*m_debugCallback)(lpLine);
+		if (thePrefs.GetVerbose())
+			theApp.AddDebugLogLine(false, lpLine);
 	}
 	catch(...)
 	{
-		CKademlia::debugLine("Exception in CKademlia::debugLine");
+		TRACE("Exception in CKademlia::debugLine");
 		return;
 	}
 }
-void CKademlia::reportError(const int errorCode, LPCSTR errorDescription, ...)
+void CKademlia::reportError(int errorCode, LPCSTR errorDescription, ...)
 {
 	try
 	{
-		if ( instance == NULL || m_errorCallback == NULL )
+		if (thePrefs.GetVerbose())
 		{
-			return;
+			CString msg;
+			va_list args;
+			va_start(args, errorDescription);
+			msg.FormatV(errorDescription, args);
+			va_end(args);
+			CKademliaError error(errorCode, msg.GetBuffer(0));
+			theApp.AddDebugLogLine(false, "(%i) : %u", errorCode, msg);
 		}
-		CString msg;
-		va_list args;
-		va_start(args, errorDescription);
-		msg.FormatV(errorDescription, args);
-		va_end(args);
-		CKademliaError error(errorCode, msg.GetBuffer(0));
-		(*m_errorCallback)(&error);
 	}
 	catch(...)
 	{
-		CKademlia::debugLine("Exception in CKademlia::reportError");
-		return;
-	}
-}
-
-void CKademlia::reportSearchAdd(CSearch* search)
-{
-	try
-	{
-		if ( instance == NULL || m_searchaddCallback == NULL  )
-		{
-			return;
-		}
-		(*m_searchaddCallback)(search);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportSearchAdd");
-		return;
-	}
-}
-
-void CKademlia::reportSearchRem(CSearch* search)
-{
-	try
-	{
-		if ( instance == NULL || m_searchremCallback == NULL )
-		{
-			return;
-		}
-		(*m_searchremCallback)(search);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportSearchRem");
-		return;
-	}
-}
-
-void CKademlia::reportSearchRef(CSearch* search)
-{
-	try
-	{
-		if ( instance == NULL || m_searchrefCallback == NULL )
-		{
-			return;
-		}
-		(*m_searchrefCallback)(search);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportSearchRef");
-		return;
-	}
-}
-
-void CKademlia::reportContactAdd(CContact* contact)
-{
-	try
-	{
-		if ( instance == NULL || m_contactaddCallback == NULL )
-		{
-			return;
-		}
-		(*m_contactaddCallback)(contact);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportContactAdd");
-		return;
-	}
-}
-
-void CKademlia::reportContactRem(CContact* contact)
-{
-	try
-	{
-		if ( instance == NULL || m_contactremCallback == NULL )
-		{
-			return;
-		}
-		(*m_contactremCallback)(contact);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportContactRem");
-		return;
-	}
-}
-
-void CKademlia::reportContactRef(CContact* contact)
-{
-	try
-	{
-		if ( instance == NULL || m_contactrefCallback == NULL )
-		{
-			return;
-		}
-		(*m_contactrefCallback)(contact);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportContactRef");
-		return;
-	}
-}
-
-void CKademlia::reportRequestTcp(CContact* contact)
-{
-	try
-	{
-		if ( instance == NULL || m_requesttcpCallback == NULL )
-		{
-			delete contact;
-			contact = NULL;
-			return;
-		}
-		(*m_requesttcpCallback)(contact);
-		//Contact was originally deleted in the callback method. This may have caused
-		//Messaging issues.. So, we now make sure and delete it in the Kad thread.
-		delete contact;
-		contact = NULL;
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportRequestTcp");
-		if(contact)
-		{
-			delete contact;
-			contact = NULL;
-		}
-		return;
-	}
-}
-
-void CKademlia::reportUpdateStatus(::Status* status)
-{
-	try
-	{
-		if ( instance == NULL || m_updatestatusCallback == NULL )
-		{
-			delete status;
-			return;
-		}
-		(*m_updatestatusCallback)(status);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportUpdateStatus");
-		return;
-	}
-}
-
-void CKademlia::reportOverheadSend(uint32 size)
-{
-	try
-	{
-		if ( instance == NULL || m_overheadsendCallback == 0 )
-		{
-			return;
-		}
-		(m_overheadsendCallback)(size);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportOverheadSend");
-		return;
-	}
-}
-
-void CKademlia::reportOverheadRecv(uint32 size)
-{
-	try
-	{
-		if ( instance == NULL || m_overheadrecvCallback == 0 )
-		{
-			return;
-		}
-		(m_overheadrecvCallback)(size);
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::reportOverheadRecv");
+		TRACE("Exception in CKademlia::reportError");
 		return;
 	}
 }
@@ -498,22 +496,6 @@ CKademliaUDPListener *CKademlia::getUDPListener(void)
 	return instance->m_udpListener;
 }
 
-UINT CKademlia::getUDPListenerThreadID()
-{
-	UINT uThreadID = 0;
-	try
-	{
-		if (instance != NULL && instance->m_udpListener != NULL)
-			uThreadID = instance->m_udpListener->getThreadID();
-	}
-	catch(...)
-	{ 
-		CKademlia::debugLine("Exception in " __FUNCTION__);
-		return NULL; 
-	}
-	return uThreadID;
-}
-
 CRoutingZone *CKademlia::getRoutingZone(void)
 {
 	try
@@ -531,23 +513,6 @@ CRoutingZone *CKademlia::getRoutingZone(void)
 	return instance->m_routingZone;
 }
 
-::CSharedFileList *CKademlia::getSharedFileList(void)
-{
-	try
-	{
-		if (instance == NULL || instance->m_sharedFileList == NULL)
-		{
-			return NULL;
-		}
-	}
-	catch(...)
-	{ 
-		CKademlia::debugLine("Exception in CKademlia::getSharedFileList");
-		return NULL; 
-	}
-	return instance->m_sharedFileList;
-}
-
 CIndexed *CKademlia::getIndexed(void)
 {
 	try
@@ -563,34 +528,4 @@ CIndexed *CKademlia::getIndexed(void)
 		return NULL; 
 	}
 	return instance->m_indexed;
-}
-
-void CKademlia::setSharedFileList(::CSharedFileList *in)
-{
-	try
-	{
-		if (instance != NULL)
-		{
-			instance->m_sharedFileList = in;
-		}
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::setSgaredFileList");
-	}
-}
-
-void CKademlia::bootstrap(LPCTSTR ip, uint16 port)
-{
-	try
-	{
-		if (instance != NULL)
-		{
-			instance->m_udpListener->bootstrap(ip, port);
-		}
-	}
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in CKademlia::bootstrap");
-	}
 }

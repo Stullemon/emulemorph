@@ -45,8 +45,8 @@ public:
 	CByteIO(byte *buffer, uint32 available) {m_bReadOnly = false; m_buffer = buffer; m_available = available; m_used = 0;}
 	CByteIO(const byte *buffer, uint32 available) {m_bReadOnly = true; m_buffer = (byte *)buffer; m_available = available; m_used = 0;}
 
-	void readArray(LPVOID lpResult, const uint32 byteCount);
-	void writeArray(LPCVOID lpVal, const uint32 byteCount);
+	void readArray(LPVOID lpResult, uint32 byteCount);
+	void writeArray(LPCVOID lpVal, uint32 byteCount);
 
 	uint32 getAvailable(void) {return m_available;}
 	void reset(void);

@@ -34,8 +34,9 @@ there client on the eMule forum..
 namespace Kademlia {
 ////////////////////////////////////////
 
+//NOTE: avoid those function whenever possible -> terribly slow
 uint16 le(uint16 val);
 uint32 le(uint32 val);
-ulong le(ulong val);
+uint64 le(uint64 val);
 
 } // End namespace

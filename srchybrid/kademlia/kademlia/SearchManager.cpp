@@ -41,6 +41,7 @@ there client on the eMule forum..
 #include "../io/ByteIO.h"
 #include "../io/IOException.h"
 #include "../kademlia/prefs.h"
+#include "SafeFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -57,7 +58,7 @@ uint32 CSearchManager::m_nextID = 0;
 SearchMap CSearchManager::m_searches;
 CCriticalSection CSearchManager::m_critical;
 
-void CSearchManager::stopSearch(uint32 searchID)
+void CSearchManager::stopSearch(uint32 searchID, bool delayDelete)
 {
 	m_critical.Lock();
 	try
@@ -67,8 +68,16 @@ void CSearchManager::stopSearch(uint32 searchID)
 		{
 			if (it->second->m_searchID == searchID)
 			{
-				delete it->second;
-				it = m_searches.erase(it);
+				if(delayDelete)
+				{
+					it->second->prepareToStop();
+					it++;
+				}
+				else
+				{
+					delete it->second;
+					it = m_searches.erase(it);
+				}
 			}
 			else
 				it++;
@@ -94,7 +103,7 @@ bool CSearchManager::isNodeSearch(const CUInt128 &target)
 		{
 			if (it->second->m_target == target)
 			{
-				if( it->second->m_type == Kademlia::CSearch::NODE || it->second->m_type == Kademlia::CSearch::NODECOMPLETE )
+				if( it->second->m_type == CSearch::NODE || it->second->m_type == CSearch::NODECOMPLETE )
 					return true;
 				else
 					return false;
@@ -128,15 +137,16 @@ void CSearchManager::stopAllSearches(void)
 	m_critical.Unlock();
 }
 
-void CSearchManager::startSearch(CSearch* pSearch)
+bool CSearchManager::startSearch(CSearch* pSearch)
 {
 	if (alreadySearchingFor(pSearch->m_target))
 	{
 		delete pSearch;
-		return;
+		return false;
 	}
 	m_searches[pSearch->m_target] = pSearch;
 	pSearch->go();
+	return true;
 }
 
 void CSearchManager::deleteSearch(CSearch* pSearch)
@@ -144,129 +154,12 @@ void CSearchManager::deleteSearch(CSearch* pSearch)
 	delete pSearch;
 }
 
-CSearch* CSearchManager::prepareFindKeywords(SEARCH_KEYWORD_CALLBACK callback, uint32 numParams, LPCSTR keyword1, ...)
-{
-	//uint32 searchID = 0;
-	CSearch *s = new CSearch;
-	try
-	{
-		s->m_type = CSearch::KEYWORD;
-		s->m_callbackKeyword = callback;
-
-		getWords(keyword1, &s->m_words);
-		if (numParams > 1)
-		{
-			va_list args;
-			va_start(args, keyword1);
-			while (--numParams > 0)
-				getWords(va_arg(args, LPCSTR), &s->m_words);
-			va_end(args);
-		}
-		if (s->m_words.size() == 0)
-		{
-			delete s;
-			return 0;
-		}
-
-		CString k = s->m_words.front();
-
-		CMD4::hash((byte*)k.GetBuffer(0), k.GetLength(), &s->m_target);
-		//if (alreadySearchingFor(s->m_target)) //-- this may block!
-		//{
-		//	delete s;
-		//	return 0;
-		//}
-
-		// Build keyword message (skip first keyword)
-		int count = 0;
-		byte keywords[4096];
-		CByteIO kio(keywords, 4096);
-		WordList::const_iterator it = s->m_words.begin();
-		for (it++; it != s->m_words.end(); it++)
-		{
-			if (!(*it).Compare(SEARCH_IMAGE))
-			{
-				kio.writeTag("Image", "\x03");
-				count++;
-			}
-			else if (!(*it).Compare(SEARCH_AUDIO))
-			{
-				kio.writeTag("Audio", "\x03");
-				count++;
-			}
-			else if (!(*it).Compare(SEARCH_VIDEO))
-			{
-				kio.writeTag("Video", "\x03");
-				count++;
-			}
-			else if (!(*it).Compare(SEARCH_DOC))
-			{
-				kio.writeTag("Doc", "\x03");
-				count++;
-			}
-			else if (!(*it).Compare(SEARCH_PRO))
-			{
-				kio.writeTag("Pro", "\x03");
-				count++;
-			}
-			else
-			{
-				kio.writeTag(1, *it);
-				count++;
-			}
-		}
-
-		// Write complete packet
-		s->m_searchTerms = new byte[4096];
-		CByteIO bio(s->m_searchTerms, 4096);
-		bio.writeByte(OP_KADEMLIAHEADER);
-		bio.writeByte(KADEMLIA_SEARCH_REQ);
-		bio.writeUInt128(s->m_target);
-		if (count == 0)
-			bio.writeByte(0);
-		else
-		{
-			bio.writeByte(1);
-			for (int i=0; i<(count - 1); i++)
-				bio.writeUInt16(0); // These are the operator / logical ANDs
-			bio.writeArray(keywords, 4096 - kio.getAvailable());
-		}
-
-		s->m_lenSearchTerms = 4096 - bio.getAvailable();
-		//m_searches[s->m_target] = s;
-
-		//searchID = ++m_nextID;
-		//s->m_searchID = searchID;
-		// NOTE: the following line does only work because this function is (currently) invoked from emule thread only!
-		// If that function once gets called from a different thread, the handling with 'm_nextID' has to by synchronized.
-		s->m_searchID = ++m_nextID;
-
-		//s->go(); //-- this may block!
-
-	} 
-	catch ( CIOException *ioe )
-	{
-		CKademlia::debugMsg("Exception in CSearchManager::prepareFindKeywords (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
-		delete s;
-		s = NULL;
-	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CSearchManager::prepareFindKeywords");
-		delete s;
-		s = NULL;
-	}
-	return s;
-}
-
-CSearch* CSearchManager::prepareFindKeywords(SEARCH_KEYWORD_CALLBACK callback, LPCSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
+CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
 {
 	CSearch *s = new CSearch;
 	try
 	{
-		s->m_type = CSearch::KEYWORD;
-		s->m_callbackKeyword = callback;
+		s->m_type = type;
 
 		getWords(keyword1, &s->m_words);
 		if (s->m_words.size() == 0)
@@ -276,23 +169,29 @@ CSearch* CSearchManager::prepareFindKeywords(SEARCH_KEYWORD_CALLBACK callback, L
 		}
 		CString k = s->m_words.front();
 		CMD4::hash((byte*)k.GetBuffer(0), k.GetLength(), &s->m_target);
+		if (alreadySearchingFor(s->m_target))
+		{
+			delete s;
+			return 0;
+		}
 
 		// Write complete packet
-		s->m_searchTerms = new byte[4096];
-		CByteIO bio(s->m_searchTerms, 4096);
-		bio.writeByte(OP_KADEMLIAHEADER);
-		bio.writeByte(KADEMLIA_SEARCH_REQ);
-		bio.writeUInt128(s->m_target);
+		s->m_searchTerms = new CSafeMemFile();
+		s->m_searchTerms->WriteUInt128(&s->m_target);
 		if (uSearchTermsSize == 0)
-			bio.writeByte(0);
+			s->m_searchTerms->WriteUInt8(0);
 		else
 		{
-			bio.writeByte(1);
-			bio.writeArray(pucSearchTermsData, uSearchTermsSize);
+			s->m_searchTerms->WriteUInt8(1);
+			s->m_searchTerms->Write(pucSearchTermsData, uSearchTermsSize);
 		}
 
-		s->m_lenSearchTerms = 4096 - bio.getAvailable();
 		s->m_searchID = ++m_nextID;
+		if( start )
+		{
+			m_searches[s->m_target] = s;
+			s->go();
+		}
 	} 
 	catch ( CIOException *ioe )
 	{
@@ -310,38 +209,28 @@ CSearch* CSearchManager::prepareFindKeywords(SEARCH_KEYWORD_CALLBACK callback, L
 	return s;
 }
 
-CSearch* CSearchManager::prepareFindFile(SEARCH_ID_CALLBACK callback, const CUInt128 &id)
+CSearch* CSearchManager::prepareFindFile(uint32 type, bool start, const CUInt128 &id)
 {
-	//if (alreadySearchingFor(id)) //-- this may block!
-	//	return 0;
+	if (alreadySearchingFor(id))
+		return 0;
 
-	//uint32 searchID = 0;
 	CSearch *s = new CSearch;
 	try
 	{
-		s->m_type = CSearch::FILE;
+		s->m_type = type;
 		s->m_target = id;
-		s->m_callbackID = callback;
 
 		// Write complete packet
-		s->m_searchTerms = new byte[4096];
-		CByteIO bio(s->m_searchTerms, 4096);
-		bio.writeByte(OP_KADEMLIAHEADER);
-		bio.writeByte(KADEMLIA_SEARCH_REQ);
-		bio.writeUInt128(s->m_target);
-		bio.writeByte(1);
+		s->m_searchTerms = new CSafeMemFile();
+		s->m_searchTerms->WriteUInt128(&s->m_target);
+		s->m_searchTerms->WriteUInt8(1);
 
-		s->m_lenSearchTerms = 4096 - bio.getAvailable();
-		//m_searches[s->m_target] = s;
-
-		//searchID = ++m_nextID;
-		//s->m_searchID = searchID;
-		// NOTE: the following line does only work because this function is (currently) invoked from emule thread only!
-		// If that function once gets called from a different thread, the handling with 'm_nextID' has to by synchronized.
 		s->m_searchID = ++m_nextID;
-
-		//s->go(); //-- this may block!
-
+		if( start )
+		{
+			m_searches[s->m_target] = s;
+			s->go();
+		}
 	} 
 	catch ( CIOException *ioe )
 	{
@@ -367,8 +256,8 @@ void CSearchManager::findNode(const CUInt128 &id)
 	if (alreadySearchingFor(id))
 		return;
 
-	CString idStr;
-	id.toHexString(&idStr);
+//	CString idStr;
+//	id.toHexString(&idStr);
 //	CKademlia::debugMsg("Find Node: %s", idStr);
 
 	try
@@ -377,7 +266,6 @@ void CSearchManager::findNode(const CUInt128 &id)
 		s->m_type = CSearch::NODE;
 		s->m_target = id;
 		s->m_searchTerms = NULL;
-		s->m_lenSearchTerms = 0;
 		s->m_searchID = 0;
 		m_searches[s->m_target] = s;
 		s->go();
@@ -394,8 +282,8 @@ void CSearchManager::findNodeComplete(const CUInt128 &id)
 	if (alreadySearchingFor(id))
 		return;
 
-	CString idStr;
-	id.toHexString(&idStr);
+//	CString idStr;
+//	id.toHexString(&idStr);
 //	CKademlia::debugMsg("Find Node: %s", idStr);
 
 	try
@@ -404,7 +292,6 @@ void CSearchManager::findNodeComplete(const CUInt128 &id)
 		s->m_type = CSearch::NODECOMPLETE;
 		s->m_target = id;
 		s->m_searchTerms = NULL;
-		s->m_lenSearchTerms = 0;
 		s->m_searchID = 0;
 		m_searches[s->m_target] = s;
 		s->go();
@@ -478,10 +365,15 @@ void CSearchManager::jumpStart(void)
 			switch(it->second->getSearchTypes()){
 				case CSearch::FILE:
 				{
-					if ((it->second->m_created + SEARCHFILE_LIFETIME < now)||(it->second->getCount() > SEARCHFILE_TOTAL))
+					if (it->second->m_created + SEARCHFILE_LIFETIME < now)
 					{
 						delete it->second;
 						it = m_searches.erase(it);
+					}
+					else if (it->second->getCount() > SEARCHFILE_TOTAL || it->second->m_created + SEARCHFILE_LIFETIME - SEC(20) < now)
+					{
+						it->second->prepareToStop();
+						it++;
 					}
 					else
 					{
@@ -492,10 +384,15 @@ void CSearchManager::jumpStart(void)
 				}
 				case CSearch::KEYWORD:
 				{
-					if ((it->second->m_created + SEARCHKEYWORD_LIFETIME < now) ||(it->second->getCount() > SEARCHKEYWORD_TOTAL))
+					if (it->second->m_created + SEARCHKEYWORD_LIFETIME < now)
 					{
 						delete it->second;
 						it = m_searches.erase(it);
+					}
+					else if (it->second->getCount() > SEARCHKEYWORD_TOTAL || it->second->m_created + SEARCHKEYWORD_LIFETIME - SEC(20) < now)
+					{
+						it->second->prepareToStop();
+						it++;
 					}
 					else
 					{
@@ -524,7 +421,7 @@ void CSearchManager::jumpStart(void)
 					{
 						CPrefs *prefs = CKademlia::getPrefs();
 						if(prefs)
-							prefs->setKeywordPublish(true);
+							prefs->setPublish(true);
 						else
 							CKademlia::debugLine("No preference object found CSearchManager::jumpStart");
 						delete it->second;
@@ -534,7 +431,7 @@ void CSearchManager::jumpStart(void)
 					{
 						CPrefs *prefs = CKademlia::getPrefs();
 						if(prefs)
-							prefs->setKeywordPublish(true);
+							prefs->setPublish(true);
 						else
 							CKademlia::debugLine("No preference object found CSearchManager::jumpStart");
 						delete it->second;
@@ -549,10 +446,15 @@ void CSearchManager::jumpStart(void)
 				}
 				case CSearch::STOREFILE:
 				{
-					if ((it->second->m_created + SEARCHSTOREFILE_LIFETIME < now)||(it->second->getCount() > SEARCHSTOREFILE_TOTAL))
+					if (it->second->m_created + SEARCHSTOREFILE_LIFETIME < now)
 					{
 						delete it->second;
 						it = m_searches.erase(it);
+					}
+					else if (it->second->getCount() > SEARCHSTOREFILE_TOTAL || it->second->m_created + SEARCHSTOREFILE_LIFETIME - SEC(20) < now)
+					{
+						it->second->prepareToStop();
+						it++;
 					}
 					else
 					{
@@ -563,10 +465,15 @@ void CSearchManager::jumpStart(void)
 				}
 				case CSearch::STOREKEYWORD:
 				{
-					if ((it->second->m_created + SEARCHSTOREKEYWORD_LIFETIME < now)||(it->second->getCount() > SEARCHSTOREKEYWORD_TOTAL))
+					if (it->second->m_created + SEARCHSTOREKEYWORD_LIFETIME < now)
 					{
 						delete it->second;
 						it = m_searches.erase(it);
+					}
+					else if (it->second->getCount() > SEARCHSTOREKEYWORD_TOTAL || it->second->m_created + SEARCHSTOREKEYWORD_LIFETIME - SEC(20)< now)
+					{
+						it->second->prepareToStop();
+						it++;
 					}
 					else
 					{

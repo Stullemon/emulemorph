@@ -34,6 +34,7 @@ there client on the eMule forum..
 #include "../io/ByteIO.h"
 
 class CKnownFile;
+class CSafeMemFile;
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -51,7 +52,6 @@ public:
 	void setSearchTypes( uint32 val ) {m_type = val;}
 	uint32 getCount() {if(bio2 == NULL)return m_count;else if(bio3 == NULL)return m_count/2;else return m_count/3;}
 	uint32 getCountSent() {return m_countSent;}
-	uint32 getLastSent() {return m_lastSent;}
 	CUInt128 m_keywordPublish; //Need to make this private...
 	byte packet1[1024*50];
 	byte packet2[1024*50];
@@ -64,6 +64,7 @@ public:
 	void addFileID(const CUInt128& id);
 	void PreparePacket(void);
 	void PreparePacketForTags( CByteIO* packet, CKnownFile* file );
+	bool Stoping(void) {return m_stoping;}
 
 	enum
 	{
@@ -75,10 +76,10 @@ public:
 		STOREKEYWORD
 	};
 
-private:
 	CSearch();
 	~CSearch();
 
+private:
 	void go(void);
 	void processResponse(const CUInt128 &target, uint32 fromIP, uint16 fromPort, ContactList *results);
 	void processResult(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
@@ -86,20 +87,17 @@ private:
 	void processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
 	void jumpStart(void);
 	void sendFindValue(const CUInt128 &target, const CUInt128 &check, uint32 ip, uint16 port);
+	void prepareToStop(void);
 
+	bool		m_stoping;
 	time_t		m_created;
-	time_t		m_lastSent;
 	uint32		m_type;
 	uint32		m_count; //Used for gui reasons.. May not be needed later..
 	uint32		m_countSent; //Used for gui reasons.. May not be needed later..
 
-	SEARCH_ID_CALLBACK		m_callbackID;
-	SEARCH_KEYWORD_CALLBACK	m_callbackKeyword;
-
 	uint32		m_searchID;
 	CUInt128	m_target;
-	byte		*m_searchTerms;
-	uint32		m_lenSearchTerms;
+	CSafeMemFile *m_searchTerms;
 	WordList	m_words;
 	CString		m_fileName;
 	UIntList	m_fileIDs;

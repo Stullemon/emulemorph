@@ -39,6 +39,9 @@ there client on the eMule forum..
 #include "../../opcodes.h"
 #include "../Routing/RoutingZone.h"
 #include "../kademlia/kademlia.h"
+#include "preferences.h"
+#include "emule.h"
+#include "emuledlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -59,22 +62,6 @@ CPrefs::CPrefs()
 	init(filename.GetBuffer(0));
 }
 
-CPrefs::CPrefs(LPCSTR filename)
-{
-	init(filename);
-}
-
-CPrefs::CPrefs(const CUInt128 &clientID, const uint16 tcpPort, const uint16 udpPort)
-{
-	reset();
-	
-	m_clientID = clientID;
-	m_tcpPort = tcpPort;
-	m_udpPort = udpPort;
-
-	setDefaults();
-}
-
 CPrefs::~CPrefs(void)
 {
 	if (m_filename.GetLength() > 0)
@@ -83,79 +70,23 @@ CPrefs::~CPrefs(void)
 
 void CPrefs::init(LPCSTR filename)
 {
-	m_filename = filename;
-	reset();
-	readFile();
-	setDefaults();
-}
-
-void CPrefs::setDefaults(void)
-{
-	// Set default values for anything not found
-//	if (m_nickname.GetLength() == 0)
-//		m_nickname = "http://emule-project.net";
 	if (m_clientID == NULL)
 		m_clientID.setValueRandom();
-	if (m_tcpPort == 0)
-		m_tcpPort = 4662;
-	if (m_udpPort == 0)
-		m_udpPort = 4673;
-//	if (m_incoming.GetLength() == 0)
-//	{
-//		m_incoming = CMiscUtils::getAppDir();
-//		m_incoming += "incoming";
-//	}
-//	if (m_temp.GetLength() == 0)
-//	{
-//		m_temp = CMiscUtils::getAppDir();
-//		m_temp += "temp";
-//	}
-	if (m_version == 0)
-		m_version = 0x3C;
-//	if (m_maxCon == 0)
-//		m_maxCon = 50;
-//	if (m_screenLines == 0)
-//		m_screenLines = 24;
 	m_lastContact = 0;
 	m_recheckip = 0;
 	m_firewalled = 0;
 	m_totalFile = 0;
 	m_totalStoreSrc = 0;
 	m_totalStoreKey = 0;
-	m_keywordPublish = false;
-}
-
-void CPrefs::reset(void)
-{
+	m_Publish = false;
 	m_clientHash	= NULL;
-	m_clientID		= NULL;
+	m_clientID.setValue((uchar*)thePrefs.GetUserHash());
 	m_ip			= 0;
-	m_tcpPort		= 0;
-//	m_nickname		= "";
-	m_version		= 0;
-//	m_adminDoorPort	= 0;
-//	m_adminName		= "";
-//	m_adminPass		= "";
-	m_tcpPort		= 0;
-	m_udpPort		= 0;
-//	m_doorPort		= 0;
-//	m_incoming		= "";
-//	m_temp			= "";
-//	m_saveCor		= 0;
-//	m_verifyCancel	= 0;
-//	m_pmAllow		= 0;
-//	m_frAllow		= 0;
-//	m_pType			= 0;
-//	m_userMaxUpF	= 0.0f;
-//	m_userMaxDownF	= 0.0f;
-//	m_lineDown		= 0.0f;
-//	m_maxUpSpeed	= 0.0f;
-//	m_maxDownSpeed	= 0.0f;
-//	m_maxCon		= 0;
-//	m_screenLines	= 0;
 	m_recheckip		= 0;
 	m_firewalled	= 0;
 	m_kademliaUsers	= 0;
+	m_filename = filename;
+	readFile();
 }
 
 void CPrefs::readFile(void)
@@ -165,70 +96,18 @@ void CPrefs::readFile(void)
 		CFileIO file;
 		if (file.Open(m_filename.GetBuffer(0), CFile::modeRead))
 		{
-
 			m_ip			= file.readUInt32();
-			m_tcpPort		= file.readUInt16();
-
-			if (m_clientID == NULL)
-				file.readUInt128(&m_clientID);
-
-			// Do this twice
-//			for (int i=0; i<2; i++)
-//			{
-				TagList *tags = file.readTagList();
-				CTag *tag;
-				TagList::const_iterator it;
-				for (it = tags->begin(); it != tags->end(); it++)
-				{
-					tag = *it;
-
-					if (!tag->m_name.Compare(TAG_VERSION))
-						m_version		= tag->GetInt();
-//					else if (!tag->m_name.Compare(TAG_NAME))
-//						m_nickname		= ((CTagStr *)tag)->m_value;
-//					else if (!tag->m_name.Compare("adminDoorPort"))
-//						m_adminDoorPort	= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("adminName"))
-//						m_adminName		= ((CTagStr *)tag)->m_value;
-//					else if (!tag->m_name.Compare("adminPass"))
-//						m_adminPass		= ((CTagStr *)tag)->m_value;
-//					else if (!tag->m_name.Compare("annexPort"))
-//						m_udpPort		= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("doorPort"))
-//						m_doorPort		= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("incoming"))
-//						m_incoming		= ((CTagStr *)tag)->m_value;
-//					else if (!tag->m_name.Compare("temp"))
-//						m_temp			= ((CTagStr *)tag)->m_value;
-//					else if (!tag->m_name.Compare("saveCor"))
-//						m_saveCor		= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("verifyCancel"))
-//						m_verifyCancel	= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("pmAllow"))
-//						m_pmAllow		= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("frAllow"))
-//						m_frAllow		= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("pType"))
-//						m_pType			= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("userMaxUpF"))
-//						m_userMaxUpF	= ((CTagFloat *)tag)->m_value;
-//					else if (!tag->m_name.Compare("userMaxDownF"))
-//						m_userMaxDownF	= ((CTagFloat *)tag)->m_value;
-//					else if (!tag->m_name.Compare("lineDown"))
-//						m_lineDown		= ((CTagFloat *)tag)->m_value;
-//					else if (!tag->m_name.Compare("maxUpSpeed"))
-//						m_maxUpSpeed	= ((CTagFloat *)tag)->m_value;
-//					else if (!tag->m_name.Compare("maxDownSpeed"))
-//						m_maxDownSpeed	= ((CTagFloat *)tag)->m_value;
-//					else if (!tag->m_name.Compare("maxCon"))
-//						m_maxCon		= ((CTagUInt32 *)tag)->m_value;
-//					else if (!tag->m_name.Compare("screenLines"))
-//						m_screenLines	= ((CTagUInt32 *)tag)->m_value;
-
-					delete tag;
-				}
-				delete tags;
-//			}
+			file.readUInt16();
+			file.readUInt128(&m_clientID);
+			TagList *tags = file.readTagList();
+			CTag *tag;
+			TagList::const_iterator it;
+			for (it = tags->begin(); it != tags->end(); it++)
+			{
+				tag = *it;
+				delete tag;
+			}
+			delete tags;
 			file.Close();
 		}
 	} 
@@ -246,32 +125,9 @@ void CPrefs::writeFile(void)
 		if (file.Open(m_filename.GetBuffer(0), CFile::modeWrite | CFile::modeCreate))
 		{
 			file.writeUInt32(m_ip);
-			file.writeUInt16(m_tcpPort);
+			file.writeUInt16(0);
 			file.writeUInt128(m_clientID);
-			//file.writeUInt32LE(1);
-			file.writeByte(1);
-//			file.writeTag("pType",			m_pType);
-			file.writeTag(TAG_VERSION, m_version);
-//			file.writeUInt32LE(19);
-//			file.writeTag(TAG_NAME, m_nickname);
-//			file.writeTag("adminDoorPort",	m_adminDoorPort);
-//			file.writeTag("adminName",		m_adminName);
-//			file.writeTag("adminPass",		m_adminPass);
-//			file.writeTag("annexPort",		m_udpPort);
-//			file.writeTag("doorPort",		m_doorPort);
-//			file.writeTag("incoming",		m_incoming);
-//			file.writeTag("temp",			m_temp);
-//			file.writeTag("saveCor",		m_saveCor);
-//			file.writeTag("verifyCancel",	m_verifyCancel);
-//			file.writeTag("pmAllow",		m_pmAllow);
-//			file.writeTag("frAllow",		m_frAllow);
-//			file.writeTag("userMaxUpF",		m_userMaxUpF);
-//			file.writeTag("userMaxDownF",	m_userMaxDownF);
-//			file.writeTag("lineDown",		m_lineDown);
-//			file.writeTag("maxUpSpeed",		m_maxUpSpeed);
-//			file.writeTag("maxDownSpeed",	m_maxDownSpeed);
-//			file.writeTag("maxCon",			m_maxCon);
-//			file.writeTag("screenLines",	m_screenLines);
+			file.writeByte(0);
 			file.Close();
 		}
 	} 
@@ -281,36 +137,19 @@ void CPrefs::writeFile(void)
 	}
 }
 
-Status* CPrefs::getStatus(bool closing)
-{
-	CRoutingZone *routingZone = CKademlia::getRoutingZone();
-	ASSERT(routingZone != NULL); 
-
-	CSearchManager::updateStats();
-	Status* status = new Status;
-	if(closing)
-	{
-		status->m_connected = false;
-		status->m_firewalled = 0;
-	}
-	else
-	{
-		status->m_connected = getLastContact();
-		status->m_firewalled = getFirewalled();
-	}
-	status->m_ip = getIPAddress();
-	status->m_udpport = getUDPPort();
-	status->m_tcpport = getTCPPort();
-	status->m_totalFile = getTotalFile();
-	status->m_totalStoreSrc = getTotalStoreSrc();
-	status->m_totalStoreKey = getTotalStoreKey();
-	status->m_kademliaUsers = getKademliaUsers();
-	status->m_keywordPublish = getKeywordPublish();
-	status->m_totalContacts = routingZone->getNumContacts();
-	return status;
-}
-
 bool CPrefs::getLastContact(void)
 {
 	return ((time(NULL) - m_lastContact) < KADEMLIADISCONNECTDELAY);
+}
+
+void CPrefs::setFirewalled(void)
+{
+	m_firewalled = 0;
+	theApp.emuledlg->ShowConnectionState();
+}
+
+void CPrefs::incFirewalled(void)
+{
+	m_firewalled++;
+	theApp.emuledlg->ShowConnectionState();
 }

@@ -28,11 +28,11 @@ Any mod that changes anything within the Kademlia side will not be allowed to ad
 there client on the eMule forum..
 */
 #pragma once
-#include "UDPSocketListener.h"
 #include "../utils/UInt128.h"
 #include "../io/ByteIO.h"
 
 class CKnownFile;
+class CSafeMemFile;
 
 
 // Thread messages recognized by an UDP Socket Listener thread
@@ -52,40 +52,39 @@ namespace Kademlia {
 
 class CSearch;
 
-class CKademliaUDPListener : public CUDPSocketListener
+class CKademliaUDPListener
 {
 	friend class CSearch;
 
 public:
-	void bootstrap(const LPCSTR ip, const uint16 port);
-	void bootstrap(const uint32 ip, const uint16 port);
-	void firewalledCheck(const uint32 ip, const uint16 port);
-	void sendMyDetails(const byte opcode, const uint32 ip, const uint16 port);
-	void publishPacket(const uint32 ip, const uint16 port, const CUInt128 &targetID, const CUInt128 &contactID, const TagList& tags);
+	void bootstrap(LPCSTR ip, uint16 port);
+	void bootstrap(uint32 ip, uint16 port);
+	void firewalledCheck(uint32 ip, uint16 port);
+	void sendMyDetails(byte opcode, uint32 ip, uint16 port);
+	void publishPacket(uint32 ip, uint16 port, const CUInt128& targetID, const CUInt128& contactID, const TagList& tags);
 	void sendNullPacket(byte opcode, uint32 ip, uint16 port);
-
-protected:
-	virtual LRESULT OnMessage(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual void processPacket(const byte* data, uint32 lenData, uint32 ip, uint16 port);
+	void sendPacket(const byte* data, uint32 lenData, uint32 destinationHost, uint16 destinationPort);
+	void sendPacket(const byte *data, uint32 lenData, byte opcode, uint32 destinationHost, uint16 destinationPort);
+	void sendPacket(CSafeMemFile* data, byte opcode, uint32 destinationHost, uint16 destinationPort);
 
 private:
-	void processPacket( byte *data, uint32 lenData, const sockaddr_in *senderAddress);
+	void addContact (const byte* data, uint32 lenData, uint32 ip, uint16 port, uint16 tport = 0);
+	void addContacts(const byte* data, uint32 lenData, uint16 numContacts);
 
-	void addContact (const byte *data, const uint32 lenData, const uint32 ip, const uint16 port, uint16 tport = 0);
-	void addContacts(const byte *data, const uint32 lenData, const uint16 numContacts);
-
-	void processBootstrapRequest		(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processBootstrapResponse		(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processHelloRequest			(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processHelloResponse			(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processKademliaRequest			(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processKademliaResponse		(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processSearchRequest			(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processSearchResponse			(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processPublishRequest			(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processPublishResponse			(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processFirewalledRequest		(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processFirewalledResponse		(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
-	void processFirewalledResponse2		(const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress);
+	void processBootstrapRequest		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processBootstrapResponse		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processHelloRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processHelloResponse			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processKademliaRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processKademliaResponse		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processSearchRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processSearchResponse			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processPublishRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processPublishResponse			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processFirewalledRequest		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processFirewalledResponse		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
+	void processFirewalledResponse2		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
 };
 
 } // End namespace

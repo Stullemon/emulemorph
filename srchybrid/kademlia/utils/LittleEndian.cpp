@@ -42,6 +42,7 @@ static char THIS_FILE[]=__FILE__;
 namespace Kademlia {
 ////////////////////////////////////////
 
+//NOTE: avoid those function whenever possible -> terribly slow
 uint16 le(uint16 val)
 {
 	uint32 b0 = (val      ) & 0xFF;
@@ -49,6 +50,7 @@ uint16 le(uint16 val)
 	return (uint16) ((b0 << 8) | b1);
 }
 
+//NOTE: avoid those function whenever possible -> terribly slow
 uint32 le(uint32 val)
 {
 	uint32 b0 = (val      ) & 0xFF;
@@ -58,7 +60,8 @@ uint32 le(uint32 val)
 	return (b0 << 24) | (b1 << 16) | (b2 << 8) | b3;
 }
 
-ulong le(ulong val)
+//NOTE: avoid those function whenever possible -> terribly slow
+uint64 le(uint64 val)
 {
 	uint32 b0 = (val      ) & 0xFF;
 	uint32 b1 = (val >>  8) & 0xFF;
@@ -68,7 +71,8 @@ ulong le(ulong val)
 	uint32 b5 = (val >> 40) & 0xFF;
 	uint32 b6 = (val >> 48) & 0xFF;
 	uint32 b7 = (val >> 56) & 0xFF;
-	return (b0 << 56) | (b1 << 48) | (b2 << 40) | (b3 << 32) | (b4 << 24) | (b5 << 16) | (b6 << 8) | b7;
+	return ((uint64)b0 << 56) | ((uint64)b1 << 48) | ((uint64)b2 << 40) | ((uint64)b3 << 32) | 
+		   ((uint64)b4 << 24) | ((uint64)b5 << 16) | ((uint64)b6 << 8) | (uint64)b7;
 }
 
 } // End namespace

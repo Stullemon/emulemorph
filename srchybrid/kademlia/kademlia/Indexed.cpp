@@ -40,6 +40,8 @@ there client on the eMule forum..
 #include "../kademlia/tag.h"
 #include "../io/FileIO.h"
 #include "../io/IOException.h"
+#include "emule.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -51,13 +53,23 @@ static char THIS_FILE[]=__FILE__;
 ////////////////////////////////////////
 using namespace Kademlia;
 ////////////////////////////////////////
-CString CIndexed::m_filename = "";
+
+void DebugSend(LPCTSTR pszMsg, uint32 ip, uint16 port);
+
+SSearchHits ssh;
+
+CString CIndexed::m_kfilename = "";
+CString CIndexed::m_sfilename = "";
 
 CIndexed::CIndexed()
 {
-	m_filename = CMiscUtils::getAppDir();
-	m_filename.Append(_T(CONFIGFOLDER));
-	m_filename.Append("index.dat");
+	m_Keyword_map.InitHashTable(1031);
+	m_sfilename = CMiscUtils::getAppDir();
+	m_sfilename.Append(_T(CONFIGFOLDER));
+	m_sfilename.Append("s_index.dat");
+	m_kfilename = CMiscUtils::getAppDir();
+	m_kfilename.Append(_T(CONFIGFOLDER));
+	m_kfilename.Append("k_index.dat");
 	m_lastClean = time(NULL) + (60*30);
 	m_totalIndexSource = 0;
 	m_totalIndexKeyword = 0;
@@ -74,41 +86,40 @@ void CIndexed::readFile(void)
 		uint32 numSource = 0;
 		uint32 numName = 0;
 		uint32 tagList = 0;
-		time_t now = time(NULL) - (KADEMLIAINDEXCLEAN);
-		CFileIO file;
-		if (file.Open(m_filename.GetBuffer(0), CFile::modeRead))
+		time_t s_expire = time(NULL) - (KADEMLIAREPUBLISHTIMES);
+		time_t k_expire = time(NULL) - (KADEMLIAREPUBLISHTIMEK);
+
+		CBufferedFileIO k_file;
+		if (k_file.Open(m_kfilename, CFile::modeRead | CFile::typeBinary))
 		{
-			numKeys = file.readUInt32();
+			setvbuf(k_file.m_pStream, NULL, _IOFBF, 32768);
+
+			numKeys = k_file.readUInt32();
 			CUInt128 id;
 			while( numKeys )
 			{
 				CUInt128 keyID;
-				file.readUInt128(&keyID);
-				numSource = file.readUInt32();
+				k_file.readUInt128(&keyID);
+				numSource = k_file.readUInt32();
 				while( numSource )
 				{
 					CUInt128 sourceID;
-					file.readUInt128(&sourceID);
-					numName = file.readUInt32();
+					k_file.readUInt128(&sourceID);
+					numName = k_file.readUInt32();
 					while( numName )
 					{
 						Kademlia::CEntry* toaddN = new Kademlia::CEntry();
-						uint32 test = file.readUInt32();
+						toaddN->source = false;
+						uint32 test = k_file.readUInt32();
 						toaddN->lifetime = test;
-						//tagList = file.readUInt32LE();
-						tagList = file.readByte();
-						bool source = true;
+						tagList = k_file.readByte();
 						while( tagList )
 						{
-							CTag* tag = file.readTag();
-							if (!tag->m_name.Compare(TAG_SOURCETYPE))
-							{
-								toaddN->source = true;
-							}
+							CTag* tag = k_file.readTag();
 							if (!tag->m_name.Compare(TAG_NAME))
 							{
 								toaddN->fileName = tag->GetStr();
-								source = false;
+								toaddN->fileName.MakeLower(); // make lowercase, the search code expects lower case strings!
 								// NOTE: always add the 'name' tag, even if it's stored separately in 'fileName'. the tag is still needed for answering search request
 								toaddN->taglist.push_back(tag);
 							}
@@ -139,7 +150,7 @@ void CIndexed::readFile(void)
 							}
 							tagList--;
 						}
-						if( toaddN->lifetime < now)	
+						if( toaddN->lifetime < k_expire )	
 						{
 							delete toaddN;
 						}
@@ -147,17 +158,8 @@ void CIndexed::readFile(void)
 						{
 							toaddN->keyID.setValue(keyID);
 							toaddN->sourceID.setValue(sourceID);
-							if(IndexedAdd(keyID, sourceID, toaddN))
-							{
-								if(toaddN->source)
-								{
-									totalSource++;
-								}
-								else
-								{
-									totalKeyword++;
-								}
-							}
+							if(AddKeyword(keyID, sourceID, toaddN))
+								totalKeyword++;
 						}
 						numName--;
 					}
@@ -165,7 +167,76 @@ void CIndexed::readFile(void)
 				}
 				numKeys--;
 			}
-			file.Close();
+			k_file.Close();
+		}
+
+		CBufferedFileIO s_file;
+		if (s_file.Open(m_sfilename, CFile::modeRead | CFile::typeBinary))
+		{
+			setvbuf(s_file.m_pStream, NULL, _IOFBF, 32768);
+
+			numKeys = s_file.readUInt32();
+			CUInt128 id;
+			while( numKeys )
+			{
+				CUInt128 keyID;
+				s_file.readUInt128(&keyID);
+				numSource = s_file.readUInt32();
+				while( numSource )
+				{
+					CUInt128 sourceID;
+					s_file.readUInt128(&sourceID);
+					numName = s_file.readUInt32();
+					while( numName )
+					{
+						Kademlia::CEntry* toaddN = new Kademlia::CEntry();
+						toaddN->source = true;
+						uint32 test = s_file.readUInt32();
+						toaddN->lifetime = test;
+						tagList = s_file.readByte();
+						while( tagList )
+						{
+							CTag* tag = s_file.readTag();
+							if (!tag->m_name.Compare(TAG_SOURCEIP))
+							{
+								toaddN->ip = tag->GetInt();
+								toaddN->taglist.push_back(tag);
+							}
+							else if (!tag->m_name.Compare(TAG_SOURCEPORT))
+							{
+								toaddN->tcpport = tag->GetInt();
+								toaddN->taglist.push_back(tag);
+							}
+							else if (!tag->m_name.Compare(TAG_SOURCEUPORT))
+							{
+								toaddN->udpport = tag->GetInt();
+								toaddN->taglist.push_back(tag);
+							}
+							else
+							{
+								toaddN->taglist.push_back(tag);
+							}
+							tagList--;
+						}
+						if( toaddN->lifetime < s_expire )	
+						{
+							delete toaddN;
+						}
+						else
+						{
+							toaddN->keyID.setValue(keyID);
+							toaddN->sourceID.setValue(sourceID);
+							if(AddSources(keyID, sourceID, toaddN))
+								totalSource++;
+						}
+						numName--;
+					}
+					numSource--;
+				}
+				numKeys--;
+			}
+			s_file.Close();
+
 			m_totalIndexSource = totalSource;
 			m_totalIndexKeyword = totalKeyword;
 			CKademlia::debugMsg("Read %u source and %u keyword entries", totalSource, totalKeyword);
@@ -182,53 +253,106 @@ void CIndexed::readFile(void)
 	}
 }
 
-void CIndexed::writeFile(void)
+CIndexed::~CIndexed()
 {
 	try
 	{
-		uint32 total = 0;
-		uint32 numKeys = 0;
-		uint32 numSource = 0;
-		uint32 numName = 0;
-		CFileIO file;
-		if (file.Open(m_filename.GetBuffer(0), CFile::modeWrite | CFile::modeCreate))
+		uint32 s_total = 0;
+		uint32 k_total = 0;
+
+		CBufferedFileIO s_file;
+		if (s_file.Open(m_sfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary))
 		{
-			numKeys = this->keywordHashList.GetCount();
-			file.writeUInt32(numKeys);
-			for(POSITION pos = keywordHashList.GetHeadPosition(); pos != NULL; )
+			setvbuf(s_file.m_pStream, NULL, _IOFBF, 32768);
+
+			CCKey key;
+			CCKey key2;
+
+			s_file.writeUInt32(m_Sources_map.GetCount());
+			POSITION pos = m_Sources_map.GetStartPosition();
+			while( pos != NULL )
 			{
-				KeywordHash* currKeywordHash = keywordHashList.GetNext(pos);
-				file.writeUInt128(currKeywordHash->keyID);
-				numSource = currKeywordHash->sourceList.GetCount();
-				file.writeUInt32(numSource);
-				for(POSITION pos3 = currKeywordHash->sourceList.GetHeadPosition(); pos3 != NULL; )
+				KeyHash* currKeyHash;
+				m_Sources_map.GetNextAssoc( pos, key, currKeyHash );
+				s_file.writeUInt128(currKeyHash->keyID);
+
+				CSourceKeyMap& KeyHashSrcMap = currKeyHash->m_Source_map;
+				s_file.writeUInt32(KeyHashSrcMap.GetCount());
+				POSITION pos2 = KeyHashSrcMap.GetStartPosition();
+				while( pos2 != NULL )
 				{
-					Source* currSource = currKeywordHash->sourceList.GetNext(pos3);
-					file.writeUInt128(currSource->sourceID);
-					numName = currSource->entryList.GetCount();
-					file.writeUInt32(numName);
-					for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
+					Source* currSource;
+					KeyHashSrcMap.GetNextAssoc( pos2, key2, currSource );
+					s_file.writeUInt128(currSource->sourceID);
+
+					CKadEntryPtrList& SrcEntryList = currSource->entryList;
+					s_file.writeUInt32(SrcEntryList.GetCount());
+					for(POSITION pos5 = SrcEntryList.GetHeadPosition(); pos5 != NULL; )
 					{
-						Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
-						uint32 test = (uint32)currName->lifetime;
-						file.writeUInt32(test);
-						file.writeTagList(currName->taglist);
-						total++;
+						Kademlia::CEntry* currName = SrcEntryList.GetNext(pos5);
+						s_file.writeUInt32(currName->lifetime);
+						s_file.writeTagList(currName->taglist);
+						delete currName;
+						s_total++;
 					}
+					delete currSource;
 				}
+				delete currKeyHash;
 			}
-			file.Close();
-			CKademlia::debugMsg("Wrote %u indexed entries", total);
+			s_file.Close();
 		}
+
+		CBufferedFileIO k_file;
+		if (k_file.Open(m_kfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary))
+		{
+			setvbuf(k_file.m_pStream, NULL, _IOFBF, 32768);
+
+			CCKey key;
+			CCKey key2;
+
+			k_file.writeUInt32(m_Keyword_map.GetCount());
+			POSITION pos = m_Keyword_map.GetStartPosition();
+			while( pos != NULL )
+			{
+				KeyHash* currKeyHash;
+				m_Keyword_map.GetNextAssoc( pos, key, currKeyHash );
+				k_file.writeUInt128(currKeyHash->keyID);
+
+				CSourceKeyMap& KeyHashSrcMap = currKeyHash->m_Source_map;
+				k_file.writeUInt32(KeyHashSrcMap.GetCount());
+				POSITION pos2 = KeyHashSrcMap.GetStartPosition();
+				while( pos2 != NULL )
+				{
+					Source* currSource;
+					KeyHashSrcMap.GetNextAssoc( pos2, key2, currSource );
+					k_file.writeUInt128(currSource->sourceID);
+				
+					CKadEntryPtrList& SrcEntryList = currSource->entryList;
+					k_file.writeUInt32(SrcEntryList.GetCount());
+					for(POSITION pos5 = SrcEntryList.GetHeadPosition(); pos5 != NULL; )
+					{
+						Kademlia::CEntry* currName = SrcEntryList.GetNext(pos5);
+						k_file.writeUInt32(currName->lifetime);
+						k_file.writeTagList(currName->taglist);
+						delete currName;
+						k_total++;
+					}
+					delete currSource;
+				}
+				delete currKeyHash;
+			}
+			k_file.Close();
+		}
+		CKademlia::debugMsg("Wrote %u source and %u keyword entries", s_total, k_total);
 	} 
 	catch ( CIOException *ioe )
 	{
-		CKademlia::debugMsg("Exception in CIndexed::writeFile (IO error(%i))", ioe->m_cause);
+		CKademlia::debugMsg("Exception in CIndexed::~CIndexed (IO error(%i))", ioe->m_cause);
 		ioe->Delete();
 	}
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CIndexed::writeFile");
+		CKademlia::debugLine("Exception in CIndexed::~CIndexed");
 	}
 }
 
@@ -236,56 +360,95 @@ void CIndexed::clean(void)
 {
 	try
 	{
-		uint32 removed = 0;
-		uint32 totalSource = 0;
-		uint32 totalKeyword = 0;
-		time_t expire = time(NULL) - (KADEMLIAINDEXCLEAN);
 		if( m_lastClean > time(NULL) )
 		{
 			return;
 		}
-		for(POSITION pos = keywordHashList.GetHeadPosition(); pos != NULL; )
+
+		uint32 k_Removed = 0;
+		uint32 s_Removed = 0;
+		uint32 s_Total = 0;
+		uint32 k_Total = 0;
+		time_t s_expire = time(NULL) - (KADEMLIAREPUBLISHTIMES);
+		time_t k_expire = time(NULL) - (KADEMLIAREPUBLISHTIMEK);
+
+		POSITION pos = m_Keyword_map.GetStartPosition();
+		while( pos != NULL )
 		{
-			POSITION pos2 = pos;
-			KeywordHash* currKeywordHash = keywordHashList.GetNext(pos);
-			for(POSITION pos3 = currKeywordHash->sourceList.GetHeadPosition(); pos3 != NULL; )
+			KeyHash* currKeyHash;
+			CCKey key;
+			m_Keyword_map.GetNextAssoc( pos, key, currKeyHash );
+			POSITION pos2 = currKeyHash->m_Source_map.GetStartPosition();
+			while( pos2 != NULL )
 			{
-				POSITION pos4 = pos3;
-				Source* currSource = currKeywordHash->sourceList.GetNext(pos3);
+				Source* currSource;
+				CCKey key2;
+                currKeyHash->m_Source_map.GetNextAssoc( pos2, key2, currSource );
 				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
 				{
 					POSITION pos6 = pos5;
 					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
-					if(currName->source)
+					k_Total++;
+					if( !currName->source && currName->lifetime < k_expire)
 					{
-						totalSource++;
-					}
-					else
-					{
-						totalKeyword++;
-					}
-					if( currName->lifetime < expire)
-					{
-						removed++;
+						k_Removed++;
 						currSource->entryList.RemoveAt(pos6);
 						delete currName;
 					}
 				}
 				if( currSource->entryList.IsEmpty())
 				{
-					currKeywordHash->sourceList.RemoveAt(pos4);
+					currKeyHash->m_Source_map.RemoveKey(key2);
 					delete currSource;
 				}
 			}
-			if( currKeywordHash->sourceList.IsEmpty())
+			if( currKeyHash->m_Source_map.IsEmpty())
 			{
-				keywordHashList.RemoveAt(pos2);
-				delete currKeywordHash;
+				m_Keyword_map.RemoveKey(key);
+				delete currKeyHash;
 			}
 		}
-		m_totalIndexSource = totalSource;
-		m_totalIndexKeyword = totalKeyword;
-		CKademlia::debugMsg("Active: Removed %u old indexed entries out of %u source %u keyword", removed, totalSource, totalKeyword);
+
+		pos = m_Sources_map.GetStartPosition();
+		while( pos != NULL )
+		{
+			KeyHash* currKeyHash;
+			CCKey key;
+			m_Sources_map.GetNextAssoc( pos, key, currKeyHash );
+			POSITION pos2 = currKeyHash->m_Source_map.GetStartPosition();
+			while( pos2 != NULL )
+			{
+				Source* currSource;
+				CCKey key2;
+                currKeyHash->m_Source_map.GetNextAssoc( pos2, key2, currSource );
+				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
+				{
+					POSITION pos6 = pos5;
+					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
+					s_Total++;
+					if( currName->lifetime < s_expire)
+					{
+						s_Removed++;
+						currSource->entryList.RemoveAt(pos6);
+						delete currName;
+					}
+				}
+				if( currSource->entryList.IsEmpty())
+				{
+					currKeyHash->m_Source_map.RemoveKey(key2);
+					delete currSource;
+				}
+			}
+			if( currKeyHash->m_Source_map.IsEmpty())
+			{
+				m_Sources_map.RemoveKey(key);
+				delete currKeyHash;
+			}
+		}
+
+		m_totalIndexSource = s_Total;
+		m_totalIndexKeyword = k_Total;
+		CKademlia::debugMsg("Removed %u keyword out of %u and %u source out of %u", k_Removed, k_Total, s_Removed, s_Total);
 		m_lastClean = time(NULL) + (60*30);
 	} 
 	catch(...)
@@ -295,121 +458,58 @@ void CIndexed::clean(void)
 	}
 }
 
-CIndexed::~CIndexed()
-{
-	try
-	{
-		writeFile();
-		while( !keywordHashList.IsEmpty()){
-			KeywordHash* currKeywordHash = keywordHashList.GetHead();
-			while( !currKeywordHash->sourceList.IsEmpty()){
-				Source* currSource = currKeywordHash->sourceList.GetHead();
-				while( !currSource->entryList.IsEmpty() ){
-					Kademlia::CEntry* del1 = currSource->entryList.GetHead();
-					currSource->entryList.RemoveHead();
-					delete del1;
-				}
-				Source* del2 = currKeywordHash->sourceList.GetHead();
-				currKeywordHash->sourceList.RemoveHead();
-				delete del2;
-			}
-			KeywordHash* del3 = keywordHashList.GetHead();
-			keywordHashList.RemoveHead();
-			delete del3;
-		}
-	} 
-	catch(...)
-	{
-		CKademlia::debugLine("Exception in ~CIndexed");
-		ASSERT(0);
-	}
-}
-
-bool CIndexed::IndexedAdd(Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourceID, Kademlia::CEntry* entry){
+bool CIndexed::AddKeyword(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry, bool ignoreSize){
 	try
 	{
 //		May add this a little later after testing a bit.
-//		if( m_totalIndexKeyword > KADEMLIAMAXINDEX && !entry->source)
+//		if( m_totalIndexKeyword > KADEMLIAMAXINDEX )
 //		{
 //			return false;
 //		}
-		if(keywordHashList.IsEmpty()){
-			KeywordHash* toaddH = new KeywordHash;
-			toaddH->keyID.setValue(keyWordID);
-			Source* toaddS = new Source;
-			toaddS->sourceID.setValue(sourceID);
-			Kademlia::CEntry* toaddN = entry;
-			toaddS->entryList.AddHead(toaddN);
-			toaddH->sourceList.AddHead(toaddS);
-			keywordHashList.AddHead(toaddH);
+
+		KeyHash* currKeyHash;
+		if(!m_Keyword_map.Lookup(CCKey(keyID.getData()), currKeyHash))
+		{
+			Source* currSource = new Source;
+			currSource->sourceID.setValue(sourceID);
+			currSource->entryList.AddHead(entry);
+			currKeyHash = new KeyHash;
+			currKeyHash->keyID.setValue(keyID);
+			currKeyHash->m_Source_map.SetAt(CCKey(currSource->sourceID.getData()), currSource);
+			m_Keyword_map.SetAt(CCKey(currKeyHash->keyID.getData()), currKeyHash);
 			return true;
 		}
-		for(POSITION pos = keywordHashList.GetHeadPosition(); pos != NULL; )
+		else
 		{
-			KeywordHash* currKeywordHash = keywordHashList.GetNext(pos);
-			if (currKeywordHash->keyID == keyWordID){
-				for(POSITION pos3 = currKeywordHash->sourceList.GetHeadPosition(); pos3 != NULL; ){
-					Source* currSource = currKeywordHash->sourceList.GetNext(pos3);
-					if (currSource->sourceID == sourceID){
-						for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; ){
-							POSITION pos6 = pos5;
-							Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
-							if ( !entry->source )
-							{
-								if(!currName->source)
-								{
-									currSource->entryList.RemoveAt(pos6);
-									delete currName;
-									currSource->entryList.AddHead(entry);
-									return true;
-								}
-							}
-							else if( entry->source )
-							{
-								if(currName->ip == entry->ip && currName->tcpport == entry->tcpport)
-								{
-									currSource->entryList.RemoveAt(pos6);
-									delete currName;
-									currSource->entryList.AddHead(entry);
-									return true;
-								}
-							}
-						}
-						//New entry
-						if(entry->source)
-						{
-							if( currSource->entryList.GetCount() > KADEMLIAMAXSOUCEPERFILE )
-							{
-								CKademlia::debugMsg("Rotating sources");
-								Kademlia::CEntry* toremove = currSource->entryList.GetTail();
-								currSource->entryList.RemoveTail();
-								delete toremove;
-							}
-							Kademlia::CEntry* toadd = entry;
-							currSource->entryList.AddHead(toadd);
-							return true;
-						}
-					}
+//			//Only index so many files per keyword.
+//			if( currKeyHash->m_Source_map.GetCount() > KADEMLIAMAXINDEX && !ignoreSize)
+//			{
+//				delete entry;
+//				entry = NULL;
+//				return false;
+//			}
+			Source* currSource;
+			if(currKeyHash->m_Source_map.Lookup(CCKey(sourceID.getData()), currSource))
+			{
+				// FIXME: There should never be an entry in the map which does have an empty 'entryList'
+				// We now ownly let the clean method remove entries. This should be fixed.
+				if (currSource->entryList.GetCount() > 0)
+				{
+					delete currSource->entryList.GetHead();
+					currSource->entryList.RemoveHead();
 				}
-				Source* toaddS = new Source;
-				toaddS->sourceID.setValue(sourceID);
-				Kademlia::CEntry* toaddN = entry;
-				toaddS->entryList.AddHead(toaddN);
-				currKeywordHash->sourceList.AddHead(toaddS);
+				currSource->entryList.AddHead(entry);
 				return true;
-				//New Source
+			}
+			else
+			{
+				currSource = new Source;
+				currSource->sourceID.setValue(sourceID);
+				currSource->entryList.AddHead(entry);
+				currKeyHash->m_Source_map.SetAt(CCKey(currSource->sourceID.getData()), currSource);
+				return true;
 			}
 		}
-		KeywordHash* toaddH = new KeywordHash;
-		toaddH->keyID.setValue(keyWordID);
-		Source* toaddS = new Source;
-		toaddS->sourceID.setValue(sourceID);
-		Kademlia::CEntry* toaddN = entry;
-		toaddS->entryList.AddHead(toaddN);
-		toaddH->sourceList.AddHead(toaddS);
-		keywordHashList.AddHead(toaddH);
-		return true;
-		//This is a new key!
 	}
 	catch(...)
 	{
@@ -419,37 +519,136 @@ bool CIndexed::IndexedAdd(Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourc
 	return false;
 
 }
-bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* item)
-{
-#define ASSERT_RETURN(x)	if (!(x)) { ASSERT(0); return false; } // it's not worth that we crash here
-	ASSERT_RETURN( pSearchTerm != NULL );
-	ASSERT_RETURN( item != NULL );
 
+bool CIndexed::AddSources(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry)
+{
+	try
+	{
+		KeyHash* currKeyHash;
+		if(!m_Sources_map.Lookup(CCKey(keyID.getData()), currKeyHash))
+		{
+			Source* currSource = new Source;
+			currSource->sourceID.setValue(sourceID);
+			currSource->entryList.AddHead(entry);
+			currKeyHash = new KeyHash;
+			currKeyHash->keyID.setValue(keyID);
+			currKeyHash->m_Source_map.SetAt(CCKey(currSource->sourceID.getData()), currSource);
+			m_Sources_map.SetAt(CCKey(currKeyHash->keyID.getData()), currKeyHash);
+			return true;
+		}
+		else
+		{
+			Source* currSource;
+			if(currKeyHash->m_Source_map.Lookup(CCKey(sourceID.getData()), currSource))
+			{
+				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
+				{
+					POSITION pos6 = pos5;
+					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
+					if(currName->ip == entry->ip && currName->tcpport == entry->tcpport)
+					{
+						currSource->entryList.RemoveAt(pos6);
+						delete currName;
+						currSource->entryList.AddHead(entry);
+						return true;
+					}
+				}
+				//New entry
+				if( currSource->entryList.GetCount() > KADEMLIAMAXSOUCEPERFILE )
+				{
+					CKademlia::debugMsg("Rotating sources");
+					Kademlia::CEntry* toremove = currSource->entryList.GetTail();
+					currSource->entryList.RemoveTail();
+					delete toremove;
+				}
+				Kademlia::CEntry* toadd = entry;
+				currSource->entryList.AddHead(toadd);
+				return true;
+			}
+			else
+			{
+				currSource = new Source;
+				currSource->sourceID.setValue(sourceID);
+				currSource->entryList.AddHead(entry);
+				currKeyHash->m_Source_map.SetAt(CCKey(currSource->sourceID.getData()), currSource);
+				return true;
+			}
+		}
+	}
+	catch(...)
+	{
+		CKademlia::debugLine("Exception in CIndexed::AddSource");
+	}
+	return false;
+}
+
+bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* item, CStringArray& astrFileNameTokens)
+{
 	// boolean operators
-	if (pSearchTerm->type == SSearchTerm::AND){
-		ASSERT_RETURN( pSearchTerm->left != NULL && pSearchTerm->right != NULL );
-		return SearchTermsMatch(pSearchTerm->left, item) && SearchTermsMatch(pSearchTerm->right, item);
-	}
-	if (pSearchTerm->type == SSearchTerm::OR){
-		ASSERT_RETURN( pSearchTerm->left != NULL && pSearchTerm->right != NULL );
-		return SearchTermsMatch(pSearchTerm->left, item) || SearchTermsMatch(pSearchTerm->right, item);
-	}
-	if (pSearchTerm->type == SSearchTerm::NAND){
-		ASSERT_RETURN( pSearchTerm->left != NULL && pSearchTerm->right != NULL );
-		return SearchTermsMatch(pSearchTerm->left, item) && !SearchTermsMatch(pSearchTerm->right, item);
-	}
+	if (pSearchTerm->type == SSearchTerm::AND)
+		return SearchTermsMatch(pSearchTerm->left, item, astrFileNameTokens) && SearchTermsMatch(pSearchTerm->right, item, astrFileNameTokens);
+	
+	if (pSearchTerm->type == SSearchTerm::OR)
+		return SearchTermsMatch(pSearchTerm->left, item, astrFileNameTokens) || SearchTermsMatch(pSearchTerm->right, item, astrFileNameTokens);
+	
+	if (pSearchTerm->type == SSearchTerm::NAND)
+		return SearchTermsMatch(pSearchTerm->left, item, astrFileNameTokens) && !SearchTermsMatch(pSearchTerm->right, item, astrFileNameTokens);
 
 	// word which is to be searched in the file name (and in additional meta data as done by some ed2k servers???)
-	if (pSearchTerm->type == SSearchTerm::String){
-		ASSERT_RETURN( pSearchTerm->str != NULL );
+	if (pSearchTerm->type == SSearchTerm::String)
+	{
+		int iStrSearchTerms = pSearchTerm->astr->GetCount();
+		if (iStrSearchTerms == 0)
+			return false;
+#if 0
 		//TODO: Use a pre-tokenized list for better performance.
-		int iPos = 0;
-		CString strTok(item->fileName.Tokenize(" ()[]{}<>,._-!?", iPos));
-		while (!strTok.IsEmpty()){
-			if (stricmp(strTok, *(pSearchTerm->str)) == 0)
-				return true;
-			strTok = item->fileName.Tokenize(" ()[]{}<>,._-!?", iPos);
+		// tokenize the filename (very expensive) only once per search expression and only if really needed
+		if (astrFileNameTokens.GetCount() == 0)
+		{
+			int iPosTok = 0;
+			CString strTok(item->fileName.Tokenize(" ()[]{}<>,._-!?", iPosTok));
+			while (!strTok.IsEmpty())
+			{
+				ssh.iFileNameSplits++;
+				astrFileNameTokens.Add(strTok);
+				strTok = item->fileName.Tokenize(" ()[]{}<>,._-!?", iPosTok);
+			}
 		}
+		if (astrFileNameTokens.GetCount() == 0)
+			return false;
+
+		// if there are more than one search strings specified (e.g. "aaa bbb ccc") the entire string is handled
+		// like "aaa AND bbb AND ccc". search all strings from the string search term in the tokenized list of
+		// the file name. all strings of string search term have to be found (AND)
+		for (int iSearchTerm = 0; iSearchTerm < iStrSearchTerms; iSearchTerm++)
+		{
+			bool bFoundSearchTerm = false;
+			for (int i = 0; i < astrFileNameTokens.GetCount(); i++)
+			{
+				ssh.iStringCmps++;
+				// the file name string was already stored in lowercase
+				// the string search term was already stored in lowercase
+				if (strcmp(astrFileNameTokens.GetAt(i), pSearchTerm->astr->GetAt(iSearchTerm)) == 0)
+				{
+					bFoundSearchTerm = true;
+					break;
+				}
+			}
+			if (!bFoundSearchTerm)
+				return false;
+		}
+#else
+		// if there are more than one search strings specified (e.g. "aaa bbb ccc") the entire string is handled
+		// like "aaa AND bbb AND ccc". search all strings from the string search term in the tokenized list of
+		// the file name. all strings of string search term have to be found (AND)
+		for (int iSearchTerm = 0; iSearchTerm < iStrSearchTerms; iSearchTerm++)
+		{
+			// this will not give the same results as when tokenizing the filename string, but it is 20 times faster.
+			if (strstr(item->fileName, pSearchTerm->astr->GetAt(iSearchTerm)) == NULL)
+				return false;
+		}
+#endif
+		return true;
 
 		// search string value in all string meta tags (this includes also the filename)
 		// although this would work, I am no longer sure if it's the correct way to process the search requests..
@@ -469,185 +668,212 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 					strTok = static_cast<const CTagStr *>(tag)->m_value.Tokenize(" ()[]{}<>,._-!?", iPos);
 				}
 			}
-		}*/
-
-		return false;
+		}
+		return false;*/
 	}
 
-	if (pSearchTerm->type == SSearchTerm::MetaTag){
-		ASSERT_RETURN( pSearchTerm->tag != NULL );
-		if (pSearchTerm->tag->m_type == 2){ // meta tags with string values
-			const Kademlia::CTag *tag;
+	if (pSearchTerm->type == SSearchTerm::MetaTag)
+	{
+		if (pSearchTerm->tag->m_type == 2) // meta tags with string values
+		{
 			TagList::const_iterator it;
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
-				tag = *it;
+				const Kademlia::CTag* tag = *it;
 				if (tag->IsStr() && pSearchTerm->tag->m_name == tag->m_name)
 					return tag->GetStr().CompareNoCase(pSearchTerm->tag->GetStr()) == 0;
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::Min){
-		ASSERT_RETURN( pSearchTerm->tag != NULL );
-		if (pSearchTerm->tag->IsInt()){ // meta tags with integer values
-			const Kademlia::CTag *tag;
+	else if (pSearchTerm->type == SSearchTerm::Min)
+	{
+		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		{
 			TagList::const_iterator it;
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
-				tag = *it;
+				const Kademlia::CTag* tag = *it;
 				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
 					return tag->GetInt() >= pSearchTerm->tag->GetInt();
 			}
 		}
-		else if (pSearchTerm->tag->IsFloat()){ // meta tags with float values
-			const Kademlia::CTag *tag;
+		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		{
 			TagList::const_iterator it;
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
-				tag = *it;
+				const Kademlia::CTag* tag = *it;
 				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
 					return tag->GetFloat() >= pSearchTerm->tag->GetFloat();
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::Max){
-		ASSERT_RETURN( pSearchTerm->tag != NULL );
-		if (pSearchTerm->tag->IsInt()){ // meta tags with integer values
-			const Kademlia::CTag *tag;
+	else if (pSearchTerm->type == SSearchTerm::Max)
+	{
+		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		{
 			TagList::const_iterator it;
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
-				tag = *it;
+				const Kademlia::CTag* tag = *it;
 				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
 					return tag->GetInt() <= pSearchTerm->tag->GetInt();
 			}
 		}
-		else if (pSearchTerm->tag->IsFloat()){ // meta tags with float values
-			const Kademlia::CTag *tag;
+		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		{
 			TagList::const_iterator it;
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
-				tag = *it;
+				const Kademlia::CTag* tag = *it;
 				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
 					return tag->GetFloat() <= pSearchTerm->tag->GetFloat();
 			}
 		}
 	}
 
-	//ASSERT(0);
 	return false;
-#undef ASSERT_RETURN
 }
 
-void CIndexed::SendValidResult( Kademlia::CUInt128 keyWordID, const SSearchTerm* pSearchTerms, const sockaddr_in *senderAddress, bool source ){
+bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* item)
+{
+	ssh.iSearchTerms++;
+	// tokenize the filename (very expensive) only once per search expression and only if really needed
+	CStringArray astrFileNameTokens;
+	return SearchTermsMatch(pSearchTerm, item, astrFileNameTokens);
+}
+
+void CIndexed::SendValidKeywordResult(const CUInt128& keyID, const SSearchTerm* pSearchTerms, uint32 ip, uint16 port)
+{
 	try
 	{
-		CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
-		ASSERT(udpListner != NULL); 
-		byte packet[1024*50];
-		CByteIO bio(packet,sizeof(packet));
-		bio.writeByte(OP_KADEMLIAHEADER);
-		bio.writeByte(KADEMLIA_SEARCH_RES);
-		bio.writeUInt128(keyWordID);
-		bio.writeUInt16(50);
-		time_t now = time(NULL) - (KADEMLIAINDEXCLEAN);
-		uint16 maxResults = 300;
-		uint16 count = 0;
-		uint32 removed = 0;
-		for(POSITION pos = keywordHashList.GetHeadPosition(); pos != NULL; )
+		KeyHash* currKeyHash;
+		if(m_Keyword_map.Lookup(CCKey(keyID.getData()), currKeyHash))
 		{
-			KeywordHash* currKeywordHash = keywordHashList.GetNext(pos);
-			if (currKeywordHash->keyID == keyWordID)
+			CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
+			ASSERT(udpListner != NULL); 
+			byte packet[1024*50];
+			CByteIO bio(packet,sizeof(packet));
+			bio.writeByte(OP_KADEMLIAHEADER);
+			bio.writeByte(KADEMLIA_SEARCH_RES);
+			bio.writeUInt128(keyID);
+			bio.writeUInt16(50);
+			uint16 maxResults = 300;
+			uint16 count = 0;
+			POSITION pos2 = currKeyHash->m_Source_map.GetStartPosition();
+			while( pos2 != NULL )
 			{
-				for(POSITION pos3 = currKeywordHash->sourceList.GetHeadPosition(); pos3 != NULL; )
+				ssh.iSourceMaps++;
+				Source* currSource;
+				CCKey key2;
+				currKeyHash->m_Source_map.GetNextAssoc( pos2, key2, currSource );
+				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
 				{
-					Source* currSource = currKeywordHash->sourceList.GetNext(pos3);
-					for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
+					ssh.iSourceMapsEntries++;
+					POSITION pos6 = pos5;
+					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
+					if ( !pSearchTerms || SearchTermsMatch(pSearchTerms, currName) )
 					{
-						POSITION pos6 = pos5;
-						Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
-						if( currName->lifetime < now )
-						{
-							removed++;
-							currSource->entryList.RemoveAt(pos6);
-							delete currName;
-							currName = NULL;
-						}
-						else
-						{
-							if( source )
+						if( count < maxResults ){
+							bio.writeUInt128(currName->sourceID);
+							bio.writeTagList(currName->taglist);
+							count++;
+							if( count % 50 == 0 )
 							{
-								if( currName->source )
-								{
-									if( count < maxResults )
-									{
-										bio.writeUInt128(currName->sourceID);
-										bio.writeTagList(currName->taglist);
-										count++;
-										if( count % 50 == 0 )
-										{
-											uint32 len = sizeof(packet)-bio.getAvailable();
-//											CKademlia::debugMsg("Search %u", count);
-											udpListner->sendPacket(packet, len, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-											bio.reset();
-											bio.writeByte(OP_KADEMLIAHEADER);
-											bio.writeByte(KADEMLIA_SEARCH_RES);
-											bio.writeUInt128(keyWordID);
-											bio.writeUInt16(50);
-										}
-									}
-								}
-							}
-							else
-							{
-								if( !currName->source)
-								{
-									if ( !pSearchTerms || SearchTermsMatch(pSearchTerms, currName) )
-									{
-										if( count < maxResults ){
-											bio.writeUInt128(currName->sourceID);
-											bio.writeTagList(currName->taglist);
-											count++;
-											if( count % 50 == 0 )
-											{
-												uint32 len = sizeof(packet)-bio.getAvailable();
-//												CKademlia::debugMsg("Search %u", count);
-												udpListner->sendPacket(packet, len, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-												bio.reset();
-												bio.writeByte(OP_KADEMLIAHEADER);
-												bio.writeByte(KADEMLIA_SEARCH_RES);
-												bio.writeUInt128(keyWordID);
-												bio.writeUInt16(50);
-											}
-										}
-									}
-								}
+								uint32 len = sizeof(packet)-bio.getAvailable();
+								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+									DebugSend("KadSearchRes", ip, port);
+								udpListner->sendPacket(packet, len, ip, port);
+								bio.reset();
+								bio.writeByte(OP_KADEMLIAHEADER);
+								bio.writeByte(KADEMLIA_SEARCH_RES);
+								bio.writeUInt128(keyID);
+								bio.writeUInt16(50);
 							}
 						}
 					}
 				}
 			}
+			uint16 ccount = count % 50;
+			if( ccount )
+			{
+				uint32 len = sizeof(packet)-bio.getAvailable();
+				memcpy(packet+18, &ccount, 2);
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+					DebugSend("KadSearchRes", ip, port);
+				udpListner->sendPacket(packet, len, ip, port);
+			}
+			clean();
 		}
-		int16 ccount = count % 50;
-		if( ccount )
-		{
-			uint32 len = sizeof(packet)-bio.getAvailable();
-//			CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_SEARCH_RESULT (Keyword)(%u)", ntohl(senderAddress->sin_addr.s_addr));
-//			CMiscUtils::debugHexDump(packet, len);
-//			CKademlia::debugMsg("Search %u", count);
-			memcpy(packet+18, &ccount, 2);
-			udpListner->sendPacket(packet, len, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-		}
-		if(removed)
-		{
-			CKademlia::debugMsg("Passive: Removed %u old indexed entries", removed);
-		}
-		clean();
 	} 
 	catch(...)
 	{
-		CKademlia::debugLine("Exception in CIndexed::SendValidResult");
-		ASSERT(0);
+		CKademlia::debugLine("Exception in CIndexed::SendValidKeywordResult");
+	}
+}
+
+void CIndexed::SendValidSourceResult(const CUInt128& keyID, uint32 ip, uint16 port)
+{
+	try
+	{
+		KeyHash* currKeyHash;
+		if(m_Sources_map.Lookup(CCKey(keyID.getData()), currKeyHash))
+		{
+			CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
+			ASSERT(udpListner != NULL); 
+			byte packet[1024*50];
+			CByteIO bio(packet,sizeof(packet));
+			bio.writeByte(OP_KADEMLIAHEADER);
+			bio.writeByte(KADEMLIA_SEARCH_RES);
+			bio.writeUInt128(keyID);
+			bio.writeUInt16(50);
+			uint16 maxResults = 300;
+			uint16 count = 0;
+			POSITION pos2 = currKeyHash->m_Source_map.GetStartPosition();
+			while( pos2 != NULL )
+			{
+				Source* currSource;
+				CCKey key2;
+				currKeyHash->m_Source_map.GetNextAssoc( pos2, key2, currSource );
+				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
+				{
+					POSITION pos6 = pos5;
+					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
+					if( count < maxResults )
+					{
+						bio.writeUInt128(currName->sourceID);
+						bio.writeTagList(currName->taglist);
+						count++;
+						if( count % 50 == 0 )
+						{
+							uint32 len = sizeof(packet)-bio.getAvailable();
+							if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+								DebugSend("KadSearchRes", ip, port);
+							udpListner->sendPacket(packet, len, ip, port);
+							bio.reset();
+							bio.writeByte(OP_KADEMLIAHEADER);
+							bio.writeByte(KADEMLIA_SEARCH_RES);
+							bio.writeUInt128(keyID);
+							bio.writeUInt16(50);
+						}
+					}
+				}
+			}
+			uint16 ccount = count % 50;
+			if( ccount )
+			{
+				uint32 len = sizeof(packet)-bio.getAvailable();
+				memcpy(packet+18, &ccount, 2);
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+					DebugSend("KadSearchRes", ip, port);
+				udpListner->sendPacket(packet, len, ip, port);
+			}
+			clean();
+		}
+	} 
+	catch(...)
+	{
+		CKademlia::debugLine("Exception in CIndexed::SendValidSourceResult");
 	}
 }
 
@@ -662,6 +888,6 @@ SSearchTerm::SSearchTerm()
 SSearchTerm::~SSearchTerm()
 {
 	if (type == String)
-		delete str;
+		delete astr;
 	delete tag;
 }

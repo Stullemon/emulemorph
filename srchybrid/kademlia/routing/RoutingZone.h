@@ -90,7 +90,7 @@ public:
 	void dumpContents(LPCSTR prefix = NULL) const;
 	void selfTest(void);
 
-	ULONG getApproximateNodeCount(UINT ourLevel) const;
+	uint64 getApproximateNodeCount(UINT ourLevel) const;
 
 private:
 

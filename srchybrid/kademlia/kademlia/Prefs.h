@@ -30,20 +30,6 @@ there client on the eMule forum..
 #pragma once
 #include "../utils/UInt128.h"
 
-struct Status{
-	uint32	m_ip;
-	uint16	m_udpport;
-	uint16	m_tcpport;
-	bool	m_connected;
-	bool	m_firewalled;
-	uint8	m_totalFile;
-	uint8	m_totalStoreSrc;
-	uint8	m_totalStoreKey;
-	uint32	m_kademliaUsers;
-	uint32	m_totalContacts;
-	bool	m_keywordPublish;
-};
-
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
@@ -52,14 +38,7 @@ class CPrefs
 {
 public:
 	
-	/** Use this to read preferences from the default file. */
-	CPrefs();
-
-	/** Use this to read preferences from the specified file. */
-	CPrefs(LPCSTR filename);
-
-	/** Use this to use given preferences without using file. */
-	CPrefs(const CUInt128 &clientID, const uint16 tcpPort, const uint16 udpPort);
+	CPrefs(void);
 
 	~CPrefs(void);
 
@@ -72,20 +51,8 @@ public:
 	void	getClientHash(CString *id)		{m_clientHash.toHexString(id);}
 	void	setClientHash(const CUInt128 &id)	{m_clientHash = id;}
 
-	//	void	getNickName(CString *name)		{name->SetString(m_nickname);}
-//	void	setNickName(const CString *name){m_nickname.SetString(*name);}
-
-	uint32	getVersion(void)				{return m_version;}
-	void	setVersion(const uint32 val)	{m_version = val;}
-
 	uint32	getIPAddress(void)				{return m_ip;}
-	void	setIPAddress(const uint32 val)	{m_ip = val;incRecheckIP();}
-
-	uint16	getTCPPort(void)				{return m_tcpPort;}
-	void	setTCPPort(const uint16 val)	{m_tcpPort = val;}
-
-	uint16	getUDPPort(void)				{return m_udpPort;}
-	void	setUDPPort(const uint16 val)	{m_udpPort = val;}
+	void	setIPAddress(uint32 val)		{m_ip = val;}
 
 	bool	getRecheckIP(void)				{return (m_recheckip<4);}
 	void	setRecheckIP()					{m_recheckip = 0;setFirewalled();}
@@ -95,53 +62,30 @@ public:
 	void	setLastContact(void)			{m_lastContact = time(NULL);}
 
 	bool	getFirewalled(void)				{return (m_firewalled<1);}
-	void	setFirewalled()					{m_firewalled = 0;}
-	void	incFirewalled()					{m_firewalled++;}
+	void	setFirewalled(void);
+	void	incFirewalled(void);
 
 	uint8	getTotalFile(void)				{return m_totalFile;}
-	void	setTotalFile(const uint8 val)	{m_totalFile = val;}
+	void	setTotalFile(uint8 val)			{m_totalFile = val;}
 
-	uint8	getTotalStoreSrc(void)				{return m_totalStoreSrc;}
-	void	setTotalStoreSrc(const uint8 val)	{m_totalStoreSrc = val;}
+	uint8	getTotalStoreSrc(void)			{return m_totalStoreSrc;}
+	void	setTotalStoreSrc(uint8 val)		{m_totalStoreSrc = val;}
 
-	uint8	getTotalStoreKey(void)				{return m_totalStoreKey;}
-	void	setTotalStoreKey(const uint8 val)	{m_totalStoreKey = val;}
+	uint8	getTotalStoreKey(void)			{return m_totalStoreKey;}
+	void	setTotalStoreKey(uint8 val)		{m_totalStoreKey = val;}
 
 	uint32	getKademliaUsers(void)			{return m_kademliaUsers;}
-	void	setKademliaUsers(const uint32 val){m_kademliaUsers = val;}
+	void	setKademliaUsers(uint32 val)	{m_kademliaUsers = val;}
 
-	bool	getKeywordPublish(void)				{return m_keywordPublish;}
-	void	setKeywordPublish(const bool val)	{m_keywordPublish = val;}
+	bool	getPublish(void)			{return m_Publish;}
+	void	setPublish(bool val)		{m_Publish = val;}
 
-	Status*	getStatus(bool closing = false);
 private:
 	CString	m_filename;
 
 	CUInt128	m_clientID;
 	CUInt128	m_clientHash;
 	uint32		m_ip;
-	uint32		m_tcpPort;
-//	CString		m_nickname;
-	uint32		m_version;
-//	uint32		m_adminDoorPort;
-//	CString		m_adminName;
-//	CString		m_adminPass;
-	uint32		m_udpPort;
-//	uint32		m_doorPort;
-//	CString		m_incoming;
-//	CString		m_temp;
-//	uint32		m_saveCor;
-//	uint32		m_verifyCancel;
-//	uint32		m_pmAllow;
-//	uint32		m_frAllow;
-//	uint32		m_pType;
-//	float		m_userMaxUpF;
-//	float		m_userMaxDownF;
-//	float		m_lineDown;
-//	float		m_maxUpSpeed;
-//	float		m_maxDownSpeed;
-//	uint32		m_maxCon;
-//	uint32		m_screenLines;
 	uint32		m_recheckip;
 	time_t		m_lastContact;
 	uint32		m_firewalled;
@@ -149,7 +93,7 @@ private:
 	uint8		m_totalStoreSrc;
 	uint8		m_totalStoreKey;
 	uint32		m_kademliaUsers;
-	bool		m_keywordPublish;
+	bool		m_Publish;
 
 	void init(LPCSTR filename);
 	void reset(void);

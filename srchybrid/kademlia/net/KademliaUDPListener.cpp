@@ -45,6 +45,15 @@ there client on the eMule forum..
 #include "../kademlia/tag.h"
 #include "../../OpCodes.h"
 #include "../kademlia/Defines.h"
+#include "emule.h"
+#include "ClientUDPSocket.h"
+#include "Packets.h"
+#include "emuledlg.h"
+#include "KadContactListCtrl.h"
+#include "kademliawnd.h"
+#include "clientlist.h"
+#include "UploadQueue.h"
+#include "SafeFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -57,591 +66,527 @@ static char THIS_FILE[]=__FILE__;
 using namespace Kademlia;
 ////////////////////////////////////////
 
-void CKademliaUDPListener::bootstrap(const LPCSTR ip, const uint16 port)
+void DebugSend(LPCTSTR pszOpcode, uint32 ip, uint16 port)
 {
-//	CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_CONNECT 0x0A (%u)", ip);
-	sendMyDetails(KADEMLIA_BOOTSTRAP_REQ, nameToIP(ip), port);
+	Debug(_T(">>> %-20s to   %-15s:%u\n"), pszOpcode, ipstr(ntohl(ip)), port);
 }
 
-void CKademliaUDPListener::bootstrap(const uint32 ip, const uint16 port)
+void DebugSendF(LPCTSTR pszOpcode, uint32 ip, uint16 port, LPCTSTR pszMsg, ...)
 {
-//	CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_CONNECT (%u)", ip);
+	va_list args;
+	va_start(args, pszMsg);
+	CString str;
+	str.Format(_T(">>> %-20s to   %-15s:%-5u; "), pszOpcode, ipstr(ntohl(ip)), port);
+	str.AppendFormatV(pszMsg, args);
+	va_end(args);
+	Debug(_T("%s\n"), str);
+}
+
+void DebugRecv(LPCTSTR pszOpcode, uint32 ip, uint16 port)
+{
+	Debug(_T("%-24s from %-15s:%u\n"), pszOpcode, ipstr(ntohl(ip)), port);
+}
+
+void CKademliaUDPListener::bootstrap(LPCSTR host, uint16 port)
+{
+	uint32 retVal = 0;
+	if (isalpha(host[0])) 
+	{
+		hostent *hp = gethostbyname(host);
+		if (hp == NULL) 
+			return;
+		memcpy (&retVal, hp->h_addr, sizeof(retVal));
+	}
+	else
+		retVal = inet_addr(host);
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadBootstrapReq", ntohl(retVal), port);
+	sendMyDetails(KADEMLIA_BOOTSTRAP_REQ, ntohl(retVal), port);
+}
+
+void CKademliaUDPListener::bootstrap(uint32 ip, uint16 port)
+{
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadBootstrapReq", ip, port);
 	sendMyDetails(KADEMLIA_BOOTSTRAP_REQ, ip, port);
 }
 
-void CKademliaUDPListener::sendMyDetails(const byte opcode, const uint32 ip, const uint16 port)
+void CKademliaUDPListener::sendMyDetails(byte opcode, uint32 ip, uint16 port)
 {
-	byte packet[27];
-	CByteIO bio(packet, sizeof(packet));
-	bio.writeByte(OP_KADEMLIAHEADER);
-	bio.writeByte(opcode);
-	CUInt128 id;
-	CPrefs *prefs = CKademlia::getPrefs();
-	ASSERT(prefs != NULL); 
-	prefs->getClientID(&id);
-	bio.writeUInt128(id);
-	bio.writeUInt32(prefs->getIPAddress());
-	bio.writeUInt16(prefs->getUDPPort());
-	bio.writeUInt16(prefs->getTCPPort());
-	bio.writeByte(0);
-//	CKademlia::debugMsg("Sent UDP OpCode MyDetails (%u)", opcode);
-	sendPacket(packet, sizeof(packet), ip, port);
+	ASSERT( CKademlia::getPrefs() != NULL );
+	CSafeMemFile bio(25);
+	bio.WriteUInt128(&CKademlia::getPrefs()->getClientID());
+	bio.WriteUInt32(CKademlia::getPrefs()->getIPAddress());
+	bio.WriteUInt16(thePrefs.GetUDPPort());
+	bio.WriteUInt16(thePrefs.GetPort());
+	bio.WriteUInt8(0);
+	sendPacket(&bio, opcode, ip, port);
 }
 
-void CKademliaUDPListener::firewalledCheck(const uint32 ip, const uint16 port)
+void CKademliaUDPListener::firewalledCheck(uint32 ip, uint16 port)
 {
-	byte packet[4];
-	CByteIO bio(packet, sizeof(packet));
-	bio.writeByte(OP_KADEMLIAHEADER);
-	bio.writeByte(KADEMLIA_FIREWALLED_REQ);
-	CPrefs *prefs = CKademlia::getPrefs();
-	ASSERT(prefs != NULL); 
-	bio.writeUInt16(prefs->getTCPPort());
-//	CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_FIREWALLED_REQ (%u)", ip);
-	sendPacket(packet, sizeof(packet), ip, port);
+	CSafeMemFile bio(2);
+	bio.WriteUInt16(thePrefs.GetPort());
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadFirewalledReq", ip, port);
+	sendPacket(&bio, KADEMLIA_FIREWALLED_REQ, ip, port);
 }
 
 void CKademliaUDPListener::sendNullPacket(byte opcode,uint32 ip, uint16 port)
 {
-	byte packet[2];
-	CByteIO bio(packet, sizeof(packet));
-	bio.writeByte(OP_KADEMLIAHEADER);
-	bio.writeByte(opcode);
-//	CKademlia::debugMsg("Sent UDP OpCode NullPacket (%u)", ip);
-	sendPacket(packet, sizeof packet, ip, port);
+	CSafeMemFile bio(0);
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadNullPacket", ip, port);
+	sendPacket(&bio, opcode, ip, port);
 }
 
-void CKademliaUDPListener::publishPacket(const uint32 ip, const uint16 port, const Kademlia::CUInt128 &targetID, const Kademlia::CUInt128 &contactID, const TagList& tags)
+void CKademliaUDPListener::publishPacket(uint32 ip, uint16 port, const CUInt128 &targetID, const CUInt128 &contactID, const TagList& tags)
 {
+	//We need to get the tag lists working with CSafeMemFiles..
 	byte packet[1024];
 	CByteIO bio(packet, sizeof(packet));
 	bio.writeByte(OP_KADEMLIAHEADER);
 	bio.writeByte(KADEMLIA_PUBLISH_REQ);
 	bio.writeUInt128(targetID);
-	//This is for future use.. This is the count of items to publish within the packet.
-	//This way if you have several items with the same key, you can send them all in one packet.
-	//This will be even greater use when compression is added..
-	bio.writeUInt16(1); //TODO: OPT???
+	//We only use this for publishing sources now.. So we always send one here..
+	bio.writeUInt16(1);
 	bio.writeUInt128(contactID);
 	bio.writeTagList(tags);
 	uint32 len = sizeof(packet) - bio.getAvailable();
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadPublishReq", ip, port);
 	sendPacket(packet, len,  ip, port);
 }
 
-LRESULT CKademliaUDPListener::OnMessage(UINT message, WPARAM wParam, LPARAM lParam)
+void CKademliaUDPListener::processPacket(const byte* data, uint32 lenData, uint32 ip, uint16 port)
 {
-	if (message == WM_KADEMLIA_FIREWALLED_ACK)
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL);
+
+	//Update constate only when it changes.
+	bool curCon = prefs->getLastContact();
+	prefs->setLastContact();
+	if( curCon != prefs->getLastContact())
+		theApp.emuledlg->ShowConnectionState();
+
+	byte opcode = data[1];
+	const byte *packetData = data + 2;
+	uint32 lenPacket = lenData - 2;
+
+//	CKademlia::debugMsg("Processing UDP Packet from %s port %ld : opcode length %ld", inet_ntoa(senderAddress->sin_addr), ntohs(senderAddress->sin_port), lenPacket);
+//	CMiscUtils::debugHexDump(packetData, lenPacket);
+
+	switch (opcode)
 	{
-		KADEMLIAFIREWALLEDACK* fwack = (KADEMLIAFIREWALLEDACK*)lParam;
-		sendNullPacket(KADEMLIA_FIREWALLED_ACK, fwack->ip, fwack->port);
-		delete fwack;
-		return 1;
-	}
-
-	CKademlia::debugMsg("*** %s; unknown message=0x%04x  wParam=%08x  lParam=%08x\n", __FUNCTION__, message, wParam, lParam);
-	return 0;
-}
-
-void CKademliaUDPListener::processPacket( byte *data, uint32 lenData, const sockaddr_in *senderAddress)
-{
-	try
-	{
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
-		prefs->setLastContact();
-
-		byte opcode = data[1];
-		const byte *packetData = data + 2;
-		uint32 lenPacket = lenData - 2;
-
-//		CKademlia::debugMsg("Processing UDP Packet from %s port %ld : opcode length %ld", inet_ntoa(senderAddress->sin_addr), ntohs(senderAddress->sin_port), lenPacket);
-//		CMiscUtils::debugHexDump(packetData, lenPacket);
-
-		switch (opcode)
+		case KADEMLIA_BOOTSTRAP_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadBootstrapReq", ip, port);
+			processBootstrapRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_BOOTSTRAP_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadBootstrapRes", ip, port);
+			processBootstrapResponse(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_HELLO_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadHelloReq", ip, port);
+			processHelloRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_HELLO_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadHelloRes", ip, port);
+			processHelloResponse(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadReq", ip, port);
+			processKademliaRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadRes", ip, port);
+			processKademliaResponse(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_SEARCH_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadSearchReq", ip, port);
+			processSearchRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_SEARCH_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadSearchRes", ip, port);
+			processSearchResponse(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_PUBLISH_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadPublishReq", ip, port);
+			processPublishRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_PUBLISH_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadPublishRes", ip, port);
+			processPublishResponse(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_FIREWALLED_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadFirewalledReq", ip, port);
+			processFirewalledRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_FIREWALLED_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadFirewalledRes", ip, port);
+			processFirewalledResponse(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_FIREWALLED_ACK:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadFirewalledAck", ip, port);
+			processFirewalledResponse2(packetData, lenPacket, ip, port);
+			break;
+		default:
 		{
-			case KADEMLIA_BOOTSTRAP_REQ:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_BOOTSTRAP_REQ (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processBootstrapRequest(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_BOOTSTRAP_RES:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_BOOTSTRAP_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processBootstrapResponse(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_HELLO_REQ:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_HELLO_REQ (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processHelloRequest(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_HELLO_RES:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_HELLO_RES_ACK (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processHelloResponse(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_REQ:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_REQ (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processKademliaRequest(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_RES:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processKademliaResponse(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_SEARCH_REQ:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_SEARCH_REQ (%u)", ntohl(senderAddress->sin_addr.s_addr));
-//				CMiscUtils::debugHexDump(packetData, lenPacket);
-				processSearchRequest(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_SEARCH_RES:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_SEARCH_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processSearchResponse(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_PUBLISH_REQ:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_PUBLISH_REQ (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processPublishRequest(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_PUBLISH_RES:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_PUBLISH_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processPublishResponse(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_FIREWALLED_REQ:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_FIREWALED_REQ_REQ (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processFirewalledRequest(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_FIREWALLED_RES:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_FIREWALLED_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				processFirewalledResponse(packetData, lenPacket, senderAddress);
-				break;
-			case KADEMLIA_FIREWALLED_ACK:
-//				CKademlia::debugMsg("Handled UDP OpCode KADEMLIA_FIREWALLED_ACK (%u)", ntohl(senderAddress->sin_addr.s_addr));
-				this->processFirewalledResponse2(packetData, lenPacket, senderAddress);
-				break;
-			default:
-				CKademlia::debugMsg("*************************");
-				CKademlia::debugMsg("Unhandled UDP OpCode 0x%02X (%u)", opcode, ntohl(senderAddress->sin_addr.s_addr));
-				CKademlia::debugMsg("*************************");
+			CString strError;
+			strError.Format("Unknown opcode %02x", opcode);
+			throw strError;
 		}
-	} 
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processPacket");
-	}
-}
-
-void CKademliaUDPListener::addContact(const byte *data, const uint32 lenData, const uint32 ip, const uint16 port, uint16 tport)
-{
-	try
-	{
-		CByteIO bio(data, lenData);
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-		CUInt128 id;
-		bio.readUInt128(&id);
-		bio.readUInt32();
-		bio.readUInt16();
-		if( tport )
-			bio.readUInt16();
-		else
-			tport = bio.readUInt16();
-		byte type = bio.readByte();
-		CString key;
-		id.toHexString(&key);
-		// Look for existing client
-		CContact *contact = routingZone->getContact(id);
-		if (contact != NULL)
-		{
-			contact->setIPAddress(ip);
-			contact->setUDPPort(port);
-			contact->setTCPPort(tport);
-			Kademlia::CKademlia::reportContactRef(contact);
-		}
-		else
-		{
-			if(::IsGoodIPPort(ntohl(ip),port))
-			{
-				// Ignore stated ip and port, use the address the packet came from
-				routingZone->add(id, ip, port, tport, type);
-			}
-		}
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::addContact (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
-	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::addContact");
 	}
 }
 
-void CKademliaUDPListener::addContacts(const byte *data, const uint32 lenData, const uint16 numContacts)
+void CKademliaUDPListener::addContact( const byte *data, uint32 lenData, uint32 ip, uint16 port, uint16 tport)
 {
-	try
+	CSafeMemFile bio( data, lenData);
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+	CUInt128 id;
+	bio.ReadUInt128(&id);
+	bio.ReadUInt32();
+	bio.ReadUInt16();
+	if( tport )
+		bio.ReadUInt16();
+	else
+		tport = bio.ReadUInt16();
+	byte type = bio.ReadUInt8();
+	// Look for existing client
+	CContact *contact = routingZone->getContact(id);
+	if (contact != NULL)
 	{
-		CByteIO bio(data, lenData);
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-		CUInt128 id;
-		for (uint16 i=0; i<numContacts; i++)
-		{
-			bio.readUInt128(&id);
-			uint32 ip = bio.readUInt32(); // Not LE
-			uint16 port = bio.readUInt16();
-			uint16 tport = bio.readUInt16();
-			byte type = bio.readByte();
-			if(::IsGoodIPPort(ntohl(ip),port))
-			{
-				routingZone->add(id, ip, port, tport, type);
-			}
-		}
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::addContacts (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+		contact->setIPAddress(ip);
+		contact->setUDPPort(port);
+		contact->setTCPPort(tport);
+		theApp.emuledlg->kademliawnd->contactList->ContactRef(contact);
 	}
-	catch (...) 
+	else
 	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::addContacts");
+		if(::IsGoodIPPort(ntohl(ip),port))
+		{
+			// Ignore stated ip and port, use the address the packet came from
+			routingZone->add(id, ip, port, tport, type);
+		}
+	}
+}
+
+void CKademliaUDPListener::addContacts( const byte *data, uint32 lenData, uint16 numContacts)
+{
+	CSafeMemFile bio( data, lenData );
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+	CUInt128 id;
+	for (uint16 i=0; i<numContacts; i++)
+	{
+		bio.ReadUInt128(&id);
+		uint32 ip = bio.ReadUInt32();
+		uint16 port = bio.ReadUInt16();
+		uint16 tport = bio.ReadUInt16();
+		byte type = bio.ReadUInt8();
+		if(::IsGoodIPPort(ntohl(ip),port))
+		{
+			routingZone->add(id, ip, port, tport, type);
+		}
 	}
 }
 
 //KADEMLIA_BOOTSTRAP_REQ
-void CKademliaUDPListener::processBootstrapRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processBootstrapRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		// Verify packet is expected size
-		if (lenPacket != 25){
-			ASSERT(0);
-			return;
-		}
-
-		//Used pointers.
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
-
-		// Add the sender to the list of contacts
-		addContact(packetData, lenPacket, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-		// Get some contacts to return
-		ContactList contacts;
-		uint16 numContacts = 1 + (uint16)routingZone->getBootstrapContacts(&contacts, 20);
-
-		// Create response packet
-		uint32 lenResponse = 4 + numContacts * 25;
-		byte *response = new byte[lenResponse];
-		CByteIO bio(response, lenResponse);
-		CUInt128 id;
-
-		// Write packet info
-		bio.writeByte(OP_KADEMLIAHEADER);
-		bio.writeByte(KADEMLIA_BOOTSTRAP_RES);
-		bio.writeUInt16(numContacts);//TODO: OPT??? ... (16+4+2+2+1)*255 = 6375 max.
-		CContact *contact;
-		ContactList::const_iterator it;
-		for (it = contacts.begin(); it != contacts.end(); it++)
-		{
-			contact = *it;
-			contact->getClientID(&id);
-			bio.writeUInt128(id);
-			bio.writeUInt32(contact->getIPAddress()); // Not LE
-			bio.writeUInt16(contact->getUDPPort());
-			bio.writeUInt16(contact->getTCPPort());
-			bio.writeByte(contact->getType());
-		}
-		prefs->getClientID(&id);
-		bio.writeUInt128(id);
-		bio.writeUInt32(prefs->getIPAddress()); // Not LE
-		bio.writeUInt16(prefs->getUDPPort());
-		bio.writeUInt16(prefs->getTCPPort());
-		bio.writeByte(0);
-
-		// Send response
-//		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_BOOTSTRAP_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-		sendPacket(response, lenResponse, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-		// Finished with memory
-		delete [] response;
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processBootstrapRequest (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+	// Verify packet is expected size
+	if (lenPacket != 25){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
 	}
-	catch (...) 
+
+	//Used pointers.
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL); 
+
+	// Add the sender to the list of contacts
+	addContact(packetData, lenPacket, ip, port);
+
+	// Get some contacts to return
+	ContactList contacts;
+	uint16 numContacts = 1 + (uint16)routingZone->getBootstrapContacts(&contacts, 20);
+
+	// Create response packet
+	//We only collect a max of 20 contacts here.. Max size is 527.
+	//2 + 25(20) + 15(1)
+	CSafeMemFile bio(527);
+
+	CUInt128 id;
+
+	// Write packet info
+	bio.WriteUInt16(numContacts);
+	CContact *contact;
+	ContactList::const_iterator it;
+	for (it = contacts.begin(); it != contacts.end(); it++)
 	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processBootstrapRequest");
+		contact = *it;
+		contact->getClientID(&id);
+		bio.WriteUInt128(&id);
+		bio.WriteUInt32(contact->getIPAddress());
+		bio.WriteUInt16(contact->getUDPPort());
+		bio.WriteUInt16(contact->getTCPPort());
+		bio.WriteUInt8(contact->getType());
 	}
+	prefs->getClientID(&id);
+	bio.WriteUInt128(&id);
+	bio.WriteUInt32(prefs->getIPAddress());
+	bio.WriteUInt16(thePrefs.GetUDPPort());
+	bio.WriteUInt16(thePrefs.GetPort());
+	bio.WriteUInt8(0);
+
+	// Send response
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadBootstrapRes", ip, port);
+
+	sendPacket(&bio, KADEMLIA_BOOTSTRAP_RES, ip, port);
 }
 
 //KADEMLIA_BOOTSTRAP_RES
-void CKademliaUDPListener::processBootstrapResponse (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processBootstrapResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		// Verify packet is expected size
-		if (lenPacket < 27){
-			ASSERT(0);
-			return;
-		}
-
-		//Used Pointers
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-
-		// How many contacts were given
-		CByteIO bio(packetData, lenPacket);
-		uint16 numContacts = bio.readUInt16();
-
-		// Verify packet is expected size
-		if (lenPacket != (2 + 25*numContacts))
-			return;
-
-		// Add these contacts to the list.
-		addContacts(packetData+2, lenPacket-2, numContacts);
-		// Send sender to alive.
-		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
+	// Verify packet is expected size
+	if (lenPacket < 27){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
 	}
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processBootstrapResponse (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
-	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processBootstrapResponse");
-	}
+
+	//Used Pointers
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	// How many contacts were given
+	CSafeMemFile bio( packetData, lenPacket);
+	uint16 numContacts = bio.ReadUInt16();
+
+	// Verify packet is expected size
+	if (lenPacket != (2 + 25*numContacts))
+		return;
+
+	// Add these contacts to the list.
+	addContacts(packetData+2, lenPacket-2, numContacts);
+	// Send sender to alive.
+	routingZone->setAlive(ip, port);
 }
 
 //KADEMLIA_HELLO_REQ
-void CKademliaUDPListener::processHelloRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processHelloRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		if (lenPacket != 25){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processHelloRequest");
-			return;
-		}
-
-		//Used Pointers
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
-
-		// Add the sender to the list of contacts
-		addContact(packetData, lenPacket, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-		// Send response
-//		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_HELLO_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-		sendMyDetails(KADEMLIA_HELLO_RES,ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-		if(prefs->getRecheckIP())
-		{
-			// Check if firewalled
-			firewalledCheck(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-		}	
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processHelloRequest (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+	// Verify packet is expected size
+	if (lenPacket != 25){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
 	}
-	catch (...) 
+
+	//Used Pointers
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL); 
+
+	// Add the sender to the list of contacts
+	addContact(packetData, lenPacket, ip, port);
+
+	// Send response
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadHelloRes", ip, port);
+	sendMyDetails(KADEMLIA_HELLO_RES, ip, port);
+
+	// Check if firewalled
+	if(prefs->getRecheckIP())
 	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processHelloRequest");
+		firewalledCheck(ip, port);
 	}
 }
 
 //KADEMLIA_HELLO_RES
-void CKademliaUDPListener::processHelloResponse (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processHelloResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		if (lenPacket != 25){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processHelloResponse");
-			return;
-		}
-	
-		//Used Pointers
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-	
-		// Add or Update contact.
-		addContact(packetData, lenPacket, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
+	// Verify packet is expected size
+	if (lenPacket != 25){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
+	}
 
-		// Set contact to alive.
-		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-	
-	}
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processHelloResponset (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
-	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processHelloResponse");
-	}
+	//Used Pointers
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	// Add or Update contact.
+	addContact(packetData, lenPacket, ip, port);
+
+	// Set contact to alive.
+	routingZone->setAlive(ip, port);
 }
+
 //KADEMLIA_REQ
-void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processKademliaRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
+	// Verify packet is expected size
+	if (lenPacket != 33){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL); 
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	//RecheckIP and firewall status
+	if(prefs->getRecheckIP())
 	{
-		// Verify packet is expected size
-		if (lenPacket != 33)
-		{
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processKademliaRequest");
-			return;
-		}
+		firewalledCheck(ip, port);
+		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+			DebugSend("KadHelloReq", ip, port);
+		sendMyDetails(KADEMLIA_HELLO_REQ, ip, port);
+	}
 
-		//Used Pointers
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-
-		//RecheckIP and firewall status
-		if(prefs->getRecheckIP())
-		{
-			firewalledCheck(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-			sendMyDetails(KADEMLIA_HELLO_REQ, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-		}
-
-		// Get target and type
-		CByteIO bio(packetData, lenPacket);
-		byte type = bio.readByte();
+	// Get target and type
+	CSafeMemFile bio( packetData, lenPacket);
+	byte type = bio.ReadUInt8();
 //		bool flag1 = (type >> 6); //Reserved
 //		bool flag2 = (type >> 7); //Reserved
 //		bool flag3 = (type >> 8); //Reserved
 
-		type = type & 0x1F;
-		if( type == 0 )
-		{
-			CKademlia::debugLine("Recieved wrong type packet in CKademliaUDPListener::processKademliaRequest");
-			return;
-		}
-
-		//This is the target node trying to be found.
-		CUInt128 target;
-		bio.readUInt128(&target);
-		CUInt128 distance(prefs->getClientID());
-		distance.xor(target);
-
-		//This makes sure we are not mistaken identify. Some client may have fresh installed and have a new hash.
-		CUInt128 check;
-		bio.readUInt128(&check);
-		if( prefs->getClientID().compareTo(check))
-			return;
-
-		// Get required number closest to target
-		ContactMap results;
-		routingZone->getClosestTo(0, distance, (int)type, &results);
-		uint16 count = (uint16)results.size();
-
-		// Write response
-		uint32 lenResponse = 1+1+16+1 + (16+4+2+2+1)*count;
-		byte response[1024];
-		ASSERT(lenResponse <= sizeof(response));
-		CByteIO bio2(response, lenResponse);
-		bio2.writeByte(OP_KADEMLIAHEADER);
-		bio2.writeByte(KADEMLIA_RES);
-		bio2.writeUInt128(target);
-		bio2.writeByte((byte)count);
-		CContact *c;
-		CUInt128 id;
-		ContactMap::const_iterator it;
-		for (it = results.begin(); it != results.end(); it++)
-		{
-			c = it->second;
-			c->getClientID(&id);
-			bio2.writeUInt128(id);
-			bio2.writeUInt32(c->getIPAddress());
-			bio2.writeUInt16(c->getUDPPort());
-			bio2.writeUInt16(c->getTCPPort());
-			bio2.writeByte(c->getType());
-		}
-
-//		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-		sendPacket(response, lenResponse, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-	} 
-	catch (CIOException *ioe)
+	type = type & 0x1F;
+	if( type == 0 )
 	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processKademliaRequest (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+		CKademlia::debugLine("***NOTE: Received wrong type packet in CKademliaUDPListener::processKademliaRequest");
+		return;
 	}
-	catch (...) 
+
+	//This is the target node trying to be found.
+	CUInt128 target;
+	bio.ReadUInt128(&target);
+	CUInt128 distance(prefs->getClientID());
+	distance.xor(target);
+
+	//This makes sure we are not mistaken identify. Some client may have fresh installed and have a new hash.
+	CUInt128 check;
+	bio.ReadUInt128(&check);
+	if( prefs->getClientID().compareTo(check))
+		return;
+
+	// Get required number closest to target
+	ContactMap results;
+	routingZone->getClosestTo(0, distance, (int)type, &results);
+	uint16 count = (uint16)results.size();
+
+	// Write response
+	// Max count is 32. size 817.. 
+	// 16 + 1 + 25(32)
+	CSafeMemFile bio2( 817 );
+	bio2.WriteUInt128(&target);
+	bio2.WriteUInt8((byte)count);
+	CContact *c;
+	CUInt128 id;
+	ContactMap::const_iterator it;
+	for (it = results.begin(); it != results.end(); it++)
 	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processKademliaRequest");
+		c = it->second;
+		c->getClientID(&id);
+		bio2.WriteUInt128(&id);
+		bio2.WriteUInt32(c->getIPAddress());
+		bio2.WriteUInt16(c->getUDPPort());
+		bio2.WriteUInt16(c->getTCPPort());
+		bio2.WriteUInt8(c->getType());
 	}
+
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSendF("KadRes", ip, port, "Count=%u", count);
+
+	sendPacket(&bio2, KADEMLIA_RES, ip, port);
 }
 
 //KADEMLIA_RES
-void CKademliaUDPListener::processKademliaResponse (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processKademliaResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
+	// Verify packet is expected size
+	if (lenPacket < 17){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL); 
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	if(prefs->getRecheckIP())
+	{
+		firewalledCheck(ip, port);
+		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+			DebugSend("KadHelloReq", ip, port);
+		sendMyDetails(KADEMLIA_HELLO_REQ, ip, port);
+	}
+
+	// What search does this relate to
+	CSafeMemFile bio( packetData, lenPacket);
+	CUInt128 target;
+	bio.ReadUInt128(&target);
+	uint16 numContacts = bio.ReadUInt8();
+
+	// Verify packet is expected size
+	if (lenPacket != 16+1 + (16+4+2+2+1)*numContacts){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	// Set contact to alive.
+	routingZone->setAlive(ip, port);
+
+	CUInt128 id;
+	ContactList *results = new ContactList;
 	try
 	{
-		// Verify packet is expected size
-		if (lenPacket < 17){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processKademliaResponse");
-			return;
-		}
-
-		//Used Pointers
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-
-		if(prefs->getRecheckIP())
-		{
-			firewalledCheck(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-			sendMyDetails(KADEMLIA_HELLO_REQ, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-		}
-
-		// What search does this relate to
-		CByteIO bio(packetData, lenPacket);
-		CUInt128 target;
-		bio.readUInt128(&target);
-		uint16 numContacts = bio.readByte();
-
-		// Verify packet is expected size
-		if (lenPacket != 16+1 + (16+4+2+2+1)*numContacts){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processKademliaResponse");
-			return;
-		}
-
-		// Set contact to alive.
-		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-		CUInt128 id;
-		ContactList *results = new ContactList;
 		for (uint16 i=0; i<numContacts; i++)
 		{
-			bio.readUInt128(&id);
-			uint32 ip = bio.readUInt32(); // Not LE
-			uint16 port = bio.readUInt16();
-			uint16 tport = bio.readUInt16();
-			byte type = bio.readByte();
+			bio.ReadUInt128(&id);
+			uint32 ip = bio.ReadUInt32();
+			uint16 port = bio.ReadUInt16();
+			uint16 tport = bio.ReadUInt16();
+			byte type = bio.ReadUInt8();
 			if(::IsGoodIPPort(ntohl(ip),port))
 			{
 				routingZone->add(id, ip, port, tport, type);
 				results->push_back(new CContact(id, ip, port, tport, type, target));
 			}
 		}
-		CSearchManager::processResponse(target, 
-										ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port), 
-										results);
 	}
-	catch (CIOException *ioe)
+	catch(...)
 	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processKademliaResponse (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+		delete results;
+		throw;
 	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processKademliaResponse");
-	}
+	CSearchManager::processResponse(target, ip, port, results);
 }
 
 void Free(SSearchTerm* pSearchTerms)
@@ -653,20 +598,22 @@ void Free(SSearchTerm* pSearchTerms)
 	delete pSearchTerms;
 }
 
-SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
+SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 {
 	// the max. depth has to match our own limit for creating the search expression 
 	// (see also 'ParsedSearchExpression' and 'GetSearchPacket')
 	if (iLevel >= 16){
-		CKademlia::debugLine("*** Search expression tree exceeds depth limit!");
+		CKademlia::debugLine("***NOTE: Search expression tree exceeds depth limit!");
 		return NULL;
 	}
 	iLevel++;
 
-	uint8 op = bio.readByte();
-	if (op == 0x00){
-		uint8 boolop = bio.readByte();
-		if (boolop == 0x00){ // AND
+	uint8 op = bio.ReadUInt8();
+	if (op == 0x00)
+	{
+		uint8 boolop = bio.ReadUInt8();
+		if (boolop == 0x00) // AND
+		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::AND;
 			CKademlia::debugLine(" AND");
@@ -683,7 +630,8 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 			}
 			return pSearchTerm;
 		}
-		else if (boolop == 0x01){ // OR
+		else if (boolop == 0x01) // OR
+		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::OR;
 			CKademlia::debugLine(" OR");
@@ -700,7 +648,8 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 			}
 			return pSearchTerm;
 		}
-		else if (boolop == 0x02){ // NAND
+		else if (boolop == 0x02) // NAND
+		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::NAND;
 			CKademlia::debugLine(" NAND");
@@ -722,32 +671,48 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 			return NULL;
 		}
 	}
-	else if (op == 0x01){ // String
+	else if (op == 0x01) // String
+	{
+		uint16 len = bio.ReadUInt16();
+		CString str;
+		bio.Read(str.GetBuffer(len), len);
+		str.ReleaseBuffer(len);
+
 		SSearchTerm* pSearchTerm = new SSearchTerm;
 		pSearchTerm->type = SSearchTerm::String;
-		uint16 len = bio.readUInt16();
-		pSearchTerm->str = new CString;
-		bio.readArray(pSearchTerm->str->GetBuffer(len), len);
-		pSearchTerm->str->ReleaseBuffer(len);
-		CKademlia::debugMsg(" \"%s\"", *(pSearchTerm->str));
+		pSearchTerm->astr = new CStringArray;
+
+		str.MakeLower(); // make lowercase, the search code expects lower case strings!
+		CKademlia::debugMsg(" \"%s\"", str);
+
+		// pre-tokenize the string term
+		int iPosTok = 0;
+		CString strTok(str.Tokenize(" ()[]{}<>,._-!?", iPosTok));
+		while (!strTok.IsEmpty())
+		{
+			pSearchTerm->astr->Add(strTok);
+			strTok = str.Tokenize(" ()[]{}<>,._-!?", iPosTok);
+		}
+
 		return pSearchTerm;
 	}
-	else if (op == 0x02){ // Meta tag
-		SSearchTerm* pSearchTerm = new SSearchTerm;
-		pSearchTerm->type = SSearchTerm::MetaTag;
-
+	else if (op == 0x02) // Meta tag
+	{
 		// read tag value
 		CString strValue;
-		uint16 lenValue = bio.readUInt16();
-		bio.readArray(strValue.GetBuffer(lenValue), lenValue);
+		uint16 lenValue = bio.ReadUInt16();
+		bio.Read(strValue.GetBuffer(lenValue), lenValue);
 		strValue.ReleaseBuffer(lenValue);
+		strValue.MakeLower(); // make lowercase, the search code expects lower case strings!
 
 		// read tag name
 		CString strTagName;
-		uint16 lenTagName = bio.readUInt16();
-		bio.readArray(strTagName.GetBuffer(lenTagName), lenTagName);
+		uint16 lenTagName = bio.ReadUInt16();
+		bio.Read(strTagName.GetBuffer(lenTagName), lenTagName);
 		strTagName.ReleaseBuffer(lenTagName);
 
+		SSearchTerm* pSearchTerm = new SSearchTerm;
+		pSearchTerm->type = SSearchTerm::MetaTag;
 		pSearchTerm->tag = new Kademlia::CTagStr(strTagName, strValue);
 		if (lenTagName == 1)
 			CKademlia::debugMsg(" Tag%02x=\"%s\"", strTagName[0], strValue);
@@ -755,22 +720,22 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 			CKademlia::debugMsg(" Tag\"%s\"=\"%s\"", strTagName, strValue);
 		return pSearchTerm;
 	}
-	else if (op == 0x03){ // Min/Max
-		SSearchTerm* pSearchTerm = new SSearchTerm;
-
+	else if (op == 0x03) // Min/Max
+	{
 		// read tag value
-		uint32 uValue = bio.readUInt32();
+		uint32 uValue = bio.ReadUInt32();
 
 		// read min/max operator
-		uint8 mmop = bio.readByte();
-		pSearchTerm->type = (mmop == 0x01) ? SSearchTerm::Min : SSearchTerm::Max;
+		uint8 mmop = bio.ReadUInt8();
 
 		// read tag name
 		CString strTagName;
-		uint16 lenTagName = bio.readUInt16();
-		bio.readArray(strTagName.GetBuffer(lenTagName), lenTagName);
+		uint16 lenTagName = bio.ReadUInt16();
+		bio.Read(strTagName.GetBuffer(lenTagName), lenTagName);
 		strTagName.ReleaseBuffer(lenTagName);
 
+		SSearchTerm* pSearchTerm = new SSearchTerm;
+		pSearchTerm->type = (mmop == 0x01) ? SSearchTerm::Min : SSearchTerm::Max;
 		pSearchTerm->tag = new Kademlia::CTagUInt32(strTagName, uValue);
 		if (lenTagName == 1)
 			CKademlia::debugMsg(" %s(Tag%02x)=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName[0], uValue);
@@ -785,153 +750,165 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 }
 
 //KADEMLIA_SEARCH_REQ
-void CKademliaUDPListener::processSearchRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
+	// Verify packet is expected size
+	if (lenPacket < 17){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CIndexed *indexed = CKademlia::getIndexed();
+	ASSERT(indexed != NULL); 
+
+	CSafeMemFile bio( packetData, lenPacket);
+	CUInt128 target;
+	bio.ReadUInt128(&target);
+	uint8 restrictive = bio.ReadUInt8();
+
+#ifdef _DEBUG
+	DWORD dwNow = GetTickCount();
+	memset(&ssh, 0, sizeof ssh);
+#endif
+	if(lenPacket == 17 )
 	{
-		if (lenPacket < 17){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processSearchRequest");
-			return;
+		if(restrictive)
+		{
+			//Source request
+			indexed->SendValidSourceResult(target, ip, port);
+#ifdef _DEBUG
+			Debug("SendValidSourceResult: Time=%.2fsec\n",
+			(GetTickCount() - dwNow) / 1000.0 );
+#endif
 		}
-
-		//Used Pointers
-		CIndexed *indexed = CKademlia::getIndexed();
-		ASSERT(indexed != NULL); 
-
-		CByteIO bio(packetData, lenPacket);
-		CUInt128 target;
-		bio.readUInt128(&target);
-		uint8 restrictive = bio.readByte();
-
-		if(lenPacket == 17 ){
-			if(restrictive)
-			{
-				//Source request
-				indexed->SendValidResult(target, NULL, senderAddress, true );
-			}
-			else
-			{
-				//Single keyword request
-				indexed->SendValidResult(target, NULL, senderAddress, false );
-			}
+		else
+		{
+			//Single keyword request
+			indexed->SendValidKeywordResult(target, NULL, ip, port );
+#ifdef _DEBUG
+			Debug("SendValidKeywordResult (Single): Time=%.2fsec\n",
+			(GetTickCount() - dwNow) / 1000.0,
+			ssh.iFileNameSplits);
+#endif
 		}
-		else if(lenPacket > 17){
+	}
+	else if(lenPacket > 17)
+	{
 
 			SSearchTerm* pSearchTerms = NULL;
-			if (restrictive){
-				pSearchTerms = CreateSearchExpressionTree(bio, 0);
+			if (restrictive)
+			{
+				try
+				{
+					pSearchTerms = CreateSearchExpressionTree(bio, 0);
+				}
+				catch(...)
+				{
+					Free(pSearchTerms);
+					throw;
+				}
 			}
 			//Keyword request with added options.
-			indexed->SendValidResult(target, pSearchTerms, senderAddress, false ); 
+			indexed->SendValidKeywordResult(target, pSearchTerms, ip, port); 
 			Free(pSearchTerms);
-		}
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processSearchRequest (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
-	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processSearchRequest");
+#ifdef _DEBUG
+			Debug("SendValidKeywordResult: Time=%.2fsec FileNameSplits=%u SearchTermSplits=%u StringCmps=%u SearchTerms=%u SourceMaps=%u SourceMapsEntries=%u\n",
+			(GetTickCount() - dwNow) / 1000.0,
+			ssh.iFileNameSplits,
+			ssh.iSearchTermSplits,
+			ssh.iStringCmps,
+			ssh.iSearchTerms,
+			ssh.iSourceMaps,
+			ssh.iSourceMapsEntries);
+#endif
 	}
 }
 
 //KADEMLIA_SEARCH_RES
-void CKademliaUDPListener::processSearchResponse (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processSearchResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		// Verify packet is expected size
-		if (lenPacket < 37){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processSearchResponse");
-			return;
-		}
-
-		//Used Pointers
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-
-		// Set contact to alive.
-		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-		// What search does this relate to
-		CByteIO bio(packetData, lenPacket);
-		CUInt128 target;
-		bio.readUInt128(&target);
-
-		// How many results.. Not supported yet..
-		uint16 count = bio.readUInt16();
-		while( count > 0 )
-		{
-			// What is the answer
-			CUInt128 answer;
-			bio.readUInt128(&answer);
-
-			// Get info about answer
-			TagList *tags = bio.readTagList();
-			CSearchManager::processResult(	target, 
-											ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port), 
-											answer,
-											tags);
-			count--;
-		}
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processSearchResponse (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+	// Verify packet is expected size
+	if (lenPacket < 37){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
 	}
-	catch (...) 
+
+	//Used Pointers
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	// Set contact to alive.
+	routingZone->setAlive(ip, port);
+
+	// What search does this relate to
+	CByteIO bio(packetData, lenPacket);
+	CUInt128 target;
+	bio.readUInt128(&target);
+
+	// How many results.. Not supported yet..
+	uint16 count = bio.readUInt16();
+	while( count > 0 )
 	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processSearchResponse");
+		// What is the answer
+		CUInt128 answer;
+		bio.readUInt128(&answer);
+
+		// Get info about answer
+		TagList *tags = bio.readTagList();
+		CSearchManager::processResult(target, ip, port, answer,tags);
+		count--;
 	}
 }
 
 //KADEMLIA_PUBLISH_REQ
-void CKademliaUDPListener::processPublishRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
 	//There are different types of publishing..
 	//Keyword and File are Stored..
-	try
+	// Verify packet is expected size
+	if (lenPacket < 37){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CIndexed *indexed = CKademlia::getIndexed();
+	ASSERT(indexed != NULL);
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL); 
+
+	CByteIO bio(packetData, lenPacket);
+	CUInt128 file;
+	bio.readUInt128(&file);
+
+	CUInt128 distance;
+	prefs->getClientID(&distance);
+	distance.xor(file);
+
+	if( thePrefs.FilterLANIPs() && distance.get32BitChunk(0) > SEARCHTOLERANCE)
+		return;
+
+	bool bDbgInfo = thePrefs.GetDebugClientKadUDPLevel() > 0;
+	CString strInfo;
+	//TODO: Most li
+	uint16 count = bio.readUInt16();
+	bool flag = false;
+	while( count > 0 )
 	{
-		if (lenPacket < 37){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processPublishRequest");
-			return;
-		}
+		strInfo.Empty();
 
-		//Used Pointers
-		CIndexed *indexed = CKademlia::getIndexed();
-		ASSERT(indexed != NULL);
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
+		CUInt128 target;
+		bio.readUInt128(&target);
 
-		CByteIO bio(packetData, lenPacket);
-		CUInt128 file;
-		bio.readUInt128(&file);
-
-		CUInt128 distance;
-		prefs->getClientID(&distance);
-		distance.xor(file);
-
-		if(distance.get32BitChunk(0) > SEARCHTOLERANCE)
-//		{
-//			CKademlia::debugLine("Dropped index");
-			return;
-//		}
-//		else
-//			CKademlia::debugLine("Insert index");
-
-		uint16 count = bio.readUInt16();
-		bool flag = false;
-		while( count > 0 )
+		Kademlia::CEntry* entry = new Kademlia::CEntry();
+		try
 		{
-			CUInt128 target;
-			bio.readUInt128(&target);
-	
-			Kademlia::CEntry* entry = new Kademlia::CEntry();
-			entry->ip = ntohl(senderAddress->sin_addr.s_addr);
-			entry->udpport = ntohs(senderAddress->sin_port);
+			entry->ip = ip;
+			entry->udpport = port;
 			entry->keyID.setValue(file);
 			entry->sourceID.setValue(target);
 			//uint32 tags = bio.readUInt32LE();
@@ -949,17 +926,25 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 					entry->source = true;
 				}
 				
-				if (!tag->m_name.Compare(TAG_NAME)){
+				if (!tag->m_name.Compare(TAG_NAME))
+				{
 					entry->fileName = tag->GetStr();
+					entry->fileName.MakeLower(); // make lowercase, the search code expects lower case strings!
+					if (bDbgInfo)
+						strInfo.AppendFormat("  Name=\"%s\"", entry->fileName);
 					// NOTE: always add the 'name' tag, even if it's stored separately in 'fileName'. the tag is still needed for answering search request
 					entry->taglist.push_back(tag);
 				}
-				else if (!tag->m_name.Compare(TAG_SIZE)){
+				else if (!tag->m_name.Compare(TAG_SIZE))
+				{
 					entry->size = tag->GetInt();
+					if (bDbgInfo)
+						strInfo.AppendFormat("  Size=%u", entry->size);
 					// NOTE: always add the 'size' tag, even if it's stored separately in 'size'. the tag is still needed for answering search request
 					entry->taglist.push_back(tag);
 				}
-				else if (!tag->m_name.Compare(TAG_SOURCEPORT)){
+				else if (!tag->m_name.Compare(TAG_SOURCEPORT))
+				{
 					entry->tcpport = tag->GetInt();
 					entry->taglist.push_back(tag);
 				}
@@ -970,186 +955,195 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 				}
 				tags--;
 			}
-			if( !entry->source && (entry->fileName == "" || entry->size == 0 ))
+			if (bDbgInfo && !strInfo.IsEmpty())
+				Debug("%s\n", strInfo);
+		}
+		catch(...)
+		{
+			delete entry;
+			throw;
+		}
+
+		if( entry->source == true )
+		{
+			if( indexed->AddSources(file, target, entry ) )
+				flag = true;
+			else
+			{
+				CKademlia::debugMsg("Source INDEX FULL %u (CKademliaUDPListener::processPublishRequest)", indexed->m_totalIndexSource);
+				delete entry;
+				entry = NULL;
+			}
+		}
+		else
+		{
+			if( entry->fileName.IsEmpty() || entry->size == 0 )
 			{
 				delete entry;
 				entry = NULL;
 				CKademlia::debugLine("Invalid entry CKademliaUDPListener::processPublishRequest");
 			}
+			else if( indexed->AddKeyword(file, target, entry, flag) )
+			{
+				//This makes sure we send a publish response.. This also makes sure we index all the files for this keyword.
+				flag = true;
+			}
 			else
 			{
-				if(	indexed->IndexedAdd(file, target, entry) )
-				{
-					flag = true;
-				}
-				else
-				{
-					CKademlia::debugMsg("INDEX FULL Source %u Keyword %u (CKademliaUDPListener::processPublishRequest)", indexed->m_totalIndexSource, indexed->m_totalIndexKeyword);
-					delete entry;
-					entry = NULL;
-				}
+				//We already indexed the maximum number of files for this keyword. Do not send a publish result so they index it to someone else.
+//				return;
 			}
-			count--;
-		}	
-//		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_PUBLISH_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-		if( flag )
-		{
-			byte response[18];
-			CByteIO bio2(response, sizeof(response));
-			bio2.writeByte(OP_KADEMLIAHEADER);
-			bio2.writeByte(KADEMLIA_PUBLISH_RES);
-			bio2.writeUInt128(file);
-			sendPacket(response, sizeof(response), ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 		}
-	} 
-	catch (CIOException *ioe)
+		count--;
+	}	
+	if( flag )
 	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processPublishRequest (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
-	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processPublishRequest");
+		CSafeMemFile bio2(16);
+		bio2.WriteUInt128(&file);
+		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+			DebugSend("KadPublishRes", ip, port);
+
+		sendPacket( &bio2, KADEMLIA_PUBLISH_RES, ip, port);
 	}
 }
 
 //KADEMLIA_PUBLISH_ACK
-void CKademliaUDPListener::processPublishResponse (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processPublishResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		if (lenPacket != 16){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processPublishResponse");
-			return;
-		}
-
-		//Used Pointers
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-
-		// Set contact to alive.
-		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-		CByteIO bio(packetData, lenPacket);
-		CUInt128 file;
-		bio.readUInt128(&file);
-		CSearchManager::processPublishResult(file);
+	// Verify packet is expected size
+	if (lenPacket != 16){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
 	}
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processPublishResponse (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
-	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processPublishResponse");
-	}
+
+	//Used Pointers
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	// Set contact to alive.
+	routingZone->setAlive(ip, port);
+
+	CSafeMemFile bio(packetData, lenPacket);
+	CUInt128 file;
+	bio.ReadUInt128(&file);
+	CSearchManager::processPublishResult(file);
 }
+
 //KADEMLIA_FIREWALLED_REQ
-void CKademliaUDPListener::processFirewalledRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processFirewalledRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		if (lenPacket != 2){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processFirewalledRequest");
-			return;
-		}
-
-		CByteIO bio(packetData, lenPacket);
-		uint16 tcpport = bio.readUInt16();
-		uint16 udpport = ntohs(senderAddress->sin_port);
-		uint32 ip = ntohl(senderAddress->sin_addr.s_addr);
-
-		CContact* contact = new CContact();
-		contact->setIPAddress(ip);
-		contact->setTCPPort(tcpport);
-		contact->setUDPPort(udpport);
-		Kademlia::CKademlia::reportRequestTcp(contact);
-
-		// Send response
-		byte response[6];
-		CByteIO bio2(response, sizeof(response));
-		bio2.writeByte(OP_KADEMLIAHEADER);
-		bio2.writeByte(KADEMLIA_FIREWALLED_RES);
-		bio2.writeUInt32(ip);
-//		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_FIREWALLED_RES (%u)", ip);
-		sendPacket(response, sizeof(response), ip, udpport);
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processFirewalledRequest (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+	// Verify packet is expected size
+	if (lenPacket != 2){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
 	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processFirewalledRequest");
-	}
+
+	CSafeMemFile bio(packetData, lenPacket);
+	uint16 tcpport = bio.ReadUInt16();
+
+	CContact contact;
+	contact.setIPAddress(ip);
+	contact.setTCPPort(tcpport);
+	contact.setUDPPort(port);
+	theApp.clientlist->RequestTCP(&contact);
+
+	// Send response
+	CSafeMemFile bio2(4);
+	bio2.WriteUInt32(ip);
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadFirewalledRes", ip, port);
+
+	sendPacket(&bio2, KADEMLIA_FIREWALLED_RES, ip, port);
 }
 
 //KADEMLIA_FIREWALLED_RES
-void CKademliaUDPListener::processFirewalledResponse (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processFirewalledResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		if (lenPacket != 4){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processFirewalledResponse");
-			return;
-		}
-
-		//Used Pointers
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-
-		// Set contact to alive.
-		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-		CByteIO bio(packetData, lenPacket);
-		uint32 ip = bio.readUInt32();
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
-		prefs->setIPAddress(ip);
-		CString ipStr;
-		CMiscUtils::ipAddressToString(ip, &ipStr);
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processFirewalledResponse (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+	// Verify packet is expected size
+	if (lenPacket != 4){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
 	}
-	catch (...) 
+
+	//Used Pointers
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	// Set contact to alive.
+	routingZone->setAlive(ip, port);
+
+	CSafeMemFile bio(packetData, lenPacket);
+	uint32 firewalledIP = bio.ReadUInt32();
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL);
+
+	//Update con state only if something changes.
+	if( prefs->getIPAddress() != firewalledIP )
 	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processFirewalledResponse");
+		prefs->setIPAddress(firewalledIP);
+		theApp.emuledlg->ShowConnectionState();
 	}
+	prefs->incRecheckIP();
 }
 
 //KADEMLIA_FIREWALLED_ACK
-void CKademliaUDPListener::processFirewalledResponse2 (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
+void CKademliaUDPListener::processFirewalledResponse2 (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
-	try
-	{
-		if (lenPacket != 0){
-			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processFirewalledResponse2");
-			return;
-		}
-
-		//Used Pointers
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-
-		// Set contact to alive.
-		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
-
-		prefs->incFirewalled();
-	} 
-	catch (CIOException *ioe)
-	{
-		CKademlia::debugMsg("Exception in CKademliaUDPListener::processFirewalledResponse2 (IO error(%i))", ioe->m_cause);
-		ioe->Delete();
+	// Verify packet is expected size
+	if (lenPacket != 0){
+		CString strError;
+		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		throw strError;
 	}
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CKademliaUDPListener::processFirewalledResponse2");
-	}
+
+	//Used Pointers
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL); 
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	// Set contact to alive.
+	routingZone->setAlive(ip, port);
+
+	prefs->incFirewalled();
+}
+
+void CKademliaUDPListener::sendPacket(const byte *data, uint32 lenData, uint32 destinationHost, uint16 destinationPort)
+{
+	//This is temp.. The entire Kad code will be rewritten using CMemFile and send a Packet object directly.
+	Packet* packet = new Packet(OP_KADEMLIAHEADER);
+	packet->opcode = data[1];
+	packet->pBuffer = new char[lenData+8];
+	memcpy(packet->pBuffer, data+2, lenData-2);
+	packet->size = lenData-2;
+	if( lenData > 200 )
+		packet->PackPacket();
+	theApp.uploadqueue->AddUpDataOverheadKad(packet->size);
+	theApp.clientudp->SendPacket(packet, ntohl(destinationHost), destinationPort);
+}
+
+void CKademliaUDPListener::sendPacket(const byte *data, uint32 lenData, byte opcode, uint32 destinationHost, uint16 destinationPort)
+{
+	Packet* packet = new Packet(OP_KADEMLIAHEADER);
+	packet->opcode = opcode;
+	packet->pBuffer = new char[lenData];
+	memcpy(packet->pBuffer, data, lenData);
+	packet->size = lenData;
+	if( lenData > 200 )
+		packet->PackPacket();
+	theApp.uploadqueue->AddUpDataOverheadKad(packet->size);
+	theApp.clientudp->SendPacket(packet, ntohl(destinationHost), destinationPort);
+}
+
+void CKademliaUDPListener::sendPacket(CSafeMemFile *data, byte opcode, uint32 destinationHost, uint16 destinationPort)
+{
+	Packet* packet = new Packet(data, OP_KADEMLIAHEADER);
+	packet->opcode = opcode;
+	if( packet->size > 200 )
+		packet->PackPacket();
+	theApp.uploadqueue->AddUpDataOverheadKad(packet->size);
+	theApp.clientudp->SendPacket(packet, ntohl(destinationHost), destinationPort);
 }

@@ -58,7 +58,7 @@ class CKademliaError
 {
 public:
 	
-	CKademliaError(const int errorCode, LPCSTR errorDescription) {m_ErrorCode = errorCode; m_ErrorDescription = errorDescription;}
+	CKademliaError(int errorCode, LPCSTR errorDescription) {m_ErrorCode = errorCode; m_ErrorDescription = errorDescription;}
 
 	int m_ErrorCode;
 	LPCSTR m_ErrorDescription; // For internationalisation use error code to lookup description

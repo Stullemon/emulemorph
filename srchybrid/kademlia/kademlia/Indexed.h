@@ -28,7 +28,7 @@ there client on the eMule forum..
 
 #pragma once
 
-#include "Indexed.h"
+#include "MapKey.h"
 #include "../../Types.h"
 #include <list>
 #include "SearchManager.h"
@@ -36,14 +36,18 @@ there client on the eMule forum..
 #include "../utils/UInt128.h"
 #include "Entry.h"
 
+typedef CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;
+
 struct Source{
 	Kademlia::CUInt128 sourceID;
-	CTypedPtrList<CPtrList, Kademlia::CEntry*> entryList;
+	CKadEntryPtrList entryList;
 };
 
-struct KeywordHash{
+typedef CMap<CCKey,const CCKey&,Source*,Source*> CSourceKeyMap;
+
+struct KeyHash{
 	Kademlia::CUInt128 keyID;
-	CTypedPtrList<CPtrList, Source*> sourceList;
+	CSourceKeyMap m_Source_map;
 };
 
 struct SSearchTerm
@@ -62,11 +66,23 @@ struct SSearchTerm
 	} type;
 	
 	Kademlia::CTag* tag;
-	CString* str;
+	CStringArray* astr;
 
 	SSearchTerm* left;
 	SSearchTerm* right;
 };
+
+struct SSearchHits
+{
+	int iFileNameSplits;
+	int iSearchTermSplits;
+	int iStringCmps;
+	int iSearchTerms;
+	int iSourceMaps;
+	int iSourceMapsEntries;
+};
+
+extern SSearchHits ssh;
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -78,17 +94,22 @@ class CIndexed
 public:
 	CIndexed();
 	~CIndexed();
-	bool IndexedAdd( Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourceID, Kademlia::CEntry* entry);
-	uint32 GetIndexedCount() {return keywordHashList.GetCount();}
-	void SendValidResult( Kademlia::CUInt128 keyWordID, const SSearchTerm* pSearchTerms, const sockaddr_in *senderAddress, bool source );
+
+	bool AddKeyword(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry, bool ignoreSize = false);
+	bool AddSources(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry);
+	uint32 GetIndexedCount() {return m_Keyword_map.GetCount();}
+	void SendValidKeywordResult(const CUInt128& keyID, const SSearchTerm* pSearchTerms, uint32 ip, uint16 port);
+	void SendValidSourceResult(const CUInt128& keyID, uint32 ip, uint16 port);
 	uint32 m_totalIndexSource;
 	uint32 m_totalIndexKeyword;
+
 private:
 	time_t m_lastClean;
-	CTypedPtrList<CPtrList, KeywordHash*> keywordHashList;
-	static CString m_filename;
+	CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> m_Keyword_map;
+	CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> m_Sources_map;
+	static CString m_sfilename;
+	static CString m_kfilename;
 	void readFile(void);
-	void writeFile(void);
 	void clean(void);
 };
 

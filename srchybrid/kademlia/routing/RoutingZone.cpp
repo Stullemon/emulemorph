@@ -49,7 +49,6 @@ there client on the eMule forum..
 #include "RoutingZone.h"
 #include "Contact.h"
 #include "RoutingBin.h"
-#include "Timer.h"
 #include "../utils/UInt128.h"
 #include "../utils/MiscUtils.h"
 #include "../kademlia/Kademlia.h"
@@ -62,6 +61,10 @@ there client on the eMule forum..
 #include "../net/KademliaUDPListener.h"
 #include "../../otherfunctions.h"
 #include "../../Opcodes.h"
+#include "emule.h"
+#include "emuledlg.h"
+#include "KadContactListCtrl.h"
+#include "kademliawnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -74,11 +77,13 @@ static char THIS_FILE[]=__FILE__;
 using namespace Kademlia;
 ////////////////////////////////////////
 
+void DebugSend(LPCTSTR pszMsg, uint32 ip, uint16 port);
+
 // This is just a safety precaution
 #define CONTACT_FILE_LIMIT 5000
 
 CString CRoutingZone::m_filename = "";
-CUInt128 CRoutingZone::me = (ulong)0;
+CUInt128 CRoutingZone::me = (ULONG)0;
 
 CRoutingZone::CRoutingZone()
 {
@@ -89,7 +94,7 @@ CRoutingZone::CRoutingZone()
 	m_filename = CMiscUtils::getAppDir();
 	m_filename.Append(CONFIGFOLDER);
 	m_filename.Append("nodes.dat");
-	CUInt128 zero((ulong)0);
+	CUInt128 zero((ULONG)0);
 	init(NULL, 0, zero);
 
 }
@@ -101,7 +106,7 @@ CRoutingZone::CRoutingZone(LPCSTR filename)
 	ASSERT(prefs != NULL); 
 	prefs->getClientID(&me);
 	m_filename = filename;
-	CUInt128 zero((ulong)0);
+	CUInt128 zero((ULONG)0);
 	init(NULL, 0, zero);
 }
 
@@ -130,8 +135,10 @@ void CRoutingZone::init(CRoutingZone *super_zone, int level, const CUInt128 &zon
 CRoutingZone::~CRoutingZone()
 {
 	if ((m_superZone == NULL) && (m_filename.GetLength() > 0))
+	{
+		theApp.emuledlg->kademliawnd->contactList->Hide();
 		writeFile();
-
+	}
 	if (isLeaf())
 		delete m_bin;
 	else
@@ -139,6 +146,8 @@ CRoutingZone::~CRoutingZone()
 		delete m_subZones[0];
 		delete m_subZones[1];
 	}
+	if (m_superZone == NULL)
+		theApp.emuledlg->kademliawnd->contactList->Visable();
 }
 
 void CRoutingZone::readFile(void)
@@ -146,10 +155,13 @@ void CRoutingZone::readFile(void)
 	Lock();
 	try
 	{
+		theApp.emuledlg->kademliawnd->contactList->Hide();
 		uint32 numContacts = 0;
-		CFileIO file;
-		if (file.Open(m_filename.GetBuffer(0), CFile::modeRead))
+		CBufferedFileIO file;
+		if (file.Open(m_filename, CFile::modeRead | CFile::typeBinary))
 		{
+			setvbuf(file.m_pStream, NULL, _IOFBF, 32768);
+
 			numContacts = file.readUInt32();
 
 			CUInt128 id;
@@ -185,6 +197,7 @@ void CRoutingZone::readFile(void)
 	{
 		CKademlia::debugLine("Exception in CRoutingZone::readFile");
 	}
+	theApp.emuledlg->kademliawnd->contactList->Visable();
 	Unlock();
 }
 
@@ -197,9 +210,11 @@ void CRoutingZone::writeFile(void)
 		uint32 count = 0;
 		CContact *c;
 		CUInt128 id;
-		CFileIO file;
-		if (file.Open(m_filename.GetBuffer(0), CFile::modeWrite | CFile::modeCreate))
+		CBufferedFileIO file;
+		if (file.Open(m_filename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary))
 		{
+			setvbuf(file.m_pStream, NULL, _IOFBF, 32768);
+
 			ContactList contacts;
 			getAllEntries(&contacts);
 			file.writeUInt32((uint32)min(contacts.size(), CONTACT_FILE_LIMIT));
@@ -308,14 +323,14 @@ bool CRoutingZone::add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport,
 				c->setUDPPort(port);
 				c->setTCPPort(tport);
 				retVal = true;
-				Kademlia::CKademlia::reportContactRef(c);
+				theApp.emuledlg->kademliawnd->contactList->ContactRef(c);
 			}
 			else if (m_bin->getRemaining() > 0)
 			{
 				c = new CContact(id, ip, port, tport, type);
 				retVal = m_bin->add(c);
 				if(retVal)
-					Kademlia::CKademlia::reportContactAdd(c);
+					theApp.emuledlg->kademliawnd->contactList->ContactAdd(c);
 			}
 			else if (canSplit()) 
 			{
@@ -328,7 +343,7 @@ bool CRoutingZone::add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport,
 				c = new CContact(id, ip, port, tport, type);
 				retVal = m_bin->add(c);
 				if(retVal)
-					Kademlia::CKademlia::reportContactAdd(c);
+					theApp.emuledlg->kademliawnd->contactList->ContactAdd(c);
 			}
 
 			if (!retVal)
@@ -471,10 +486,10 @@ uint32 CRoutingZone::getMaxDepth(void) const
 	return 1 + max(m_subZones[0]->getMaxDepth(), m_subZones[1]->getMaxDepth());
 }
 
-ulong CRoutingZone::getApproximateNodeCount(uint32 ourLevel) const
+uint64 CRoutingZone::getApproximateNodeCount(uint32 ourLevel) const
 {
 	if (isLeaf()) 
-		return ((ulong)1 << ourLevel) * (ulong)m_bin->getSize();
+		return ((uint64)1 << ourLevel) * (uint64)m_bin->getSize();
 	return (m_subZones[0]->getApproximateNodeCount(ourLevel+1) + m_subZones[1]->getApproximateNodeCount(ourLevel+1)) / 2;
 }
 
@@ -607,12 +622,12 @@ void CRoutingZone::startTimer(void)
 	time_t now = time(NULL);
 	// Start filling the tree, closest bins first.
 	m_nextBigTimer = now + (MIN2S(1)*m_zoneIndex.get32BitChunk(3)) + SEC(10);
-	CTimer::addEvent(this);
+	CKademlia::addEvent(this);
 }
 
 void CRoutingZone::stopTimer(void)
 {
-	CTimer::removeEvent(this);
+	CKademlia::removeEvent(this);
 }
 
 bool CRoutingZone::onBigTimer(void)
@@ -709,6 +724,8 @@ void CRoutingZone::onSmallTimer(void)
 		c->setType(c->getType()+1);
 		CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
 		ASSERT(udpListner != NULL); 
+		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+			DebugSend("KadHelloReq", c->getIPAddress(), c->getUDPPort());
 		udpListner->sendMyDetails(KADEMLIA_HELLO_REQ, c->getIPAddress(), c->getUDPPort());
 	}
 }

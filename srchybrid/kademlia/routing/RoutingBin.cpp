@@ -37,7 +37,6 @@ there client on the eMule forum..
 #include "stdafx.h"
 #include "RoutingBin.h"
 #include "Contact.h"
-#include "Timer.h"
 #include "../kademlia/Kademlia.h"
 #include "../kademlia/Defines.h"
 #include "../routing/RoutingZone.h"

@@ -43,7 +43,7 @@ static char THIS_FILE[]=__FILE__;
 using namespace Kademlia;
 ////////////////////////////////////////
 
-void CByteIO::readArray(LPVOID lpResult, const uint32 byteCount)
+void CByteIO::readArray(LPVOID lpResult, uint32 byteCount)
 {
 	if (m_available < byteCount)
 		throw new CIOException(ERR_BUFFER_TOO_SMALL);
@@ -54,7 +54,7 @@ void CByteIO::readArray(LPVOID lpResult, const uint32 byteCount)
 	m_available -= byteCount;
 }
 
-void CByteIO::writeArray(LPCVOID lpVal, const uint32 byteCount)
+void CByteIO::writeArray(LPCVOID lpVal, uint32 byteCount)
 {
 	if (m_bReadOnly)
 		throw new CIOException(ERR_READ_ONLY);

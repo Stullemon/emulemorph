@@ -43,14 +43,26 @@ static char THIS_FILE[]=__FILE__;
 using namespace Kademlia;
 ////////////////////////////////////////
 
-void CFileIO::readArray(LPVOID lpResult, const uint32 byteCount)
+void CFileIO::readArray(LPVOID lpResult, uint32 byteCount)
 {
 	uint32 test = Read(lpResult, byteCount);
 	if( test != byteCount )
 		throw new CIOException(ERR_END_OF_FILE);
 }
 
-void CFileIO::writeArray(LPCVOID lpVal, const uint32 byteCount)
+void CFileIO::writeArray(LPCVOID lpVal, uint32 byteCount)
+{
+	Write(lpVal, byteCount);
+}
+
+void CBufferedFileIO::readArray(LPVOID lpResult, uint32 byteCount)
+{
+	uint32 test = Read(lpResult, byteCount);
+	if( test != byteCount )
+		throw new CIOException(ERR_END_OF_FILE);
+}
+
+void CBufferedFileIO::writeArray(LPCVOID lpVal, uint32 byteCount)
 {
 	Write(lpVal, byteCount);
 }

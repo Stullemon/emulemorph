@@ -1593,12 +1593,12 @@ tcp_init(struct soap *soap)
   if (tcp_done)
     return 0;
   tcp_done = 1;
-  { WSADATA w;
-    if (WSAStartup(MAKEWORD(1, 1), &w))
-    { tcp_done = 0;
-      return -1;
-    }
-  }
+//  { WSADATA w;
+//    if (WSAStartup(MAKEWORD(1, 1), &w))
+//    { tcp_done = 0;
+//      return -1;
+//    }
+//  }
 #endif
   return 0;
 }
@@ -1666,7 +1666,7 @@ soap_cleanup(struct soap *soap)
   if (!tcp_done)
     return;
   tcp_done = 0;
-  WSACleanup();
+//  VERIFY( WSACleanup() == 0 );
 #endif
 }
 

@@ -37,27 +37,23 @@ namespace Kademlia {
 			ip = 0;
 			tcpport = 0;
 			udpport = 0;
-			fileName = "";
+			(void)fileName;
 			size = 0;
 			lifetime = time(NULL);
 			source = false;
 		}
 		~CEntry()
 		{
-			CTag* tag;
-			while( taglist.size() )
-			{
-				tag = taglist.front();
-				taglist.pop_front();
-				delete tag;
-			}
+			TagList::const_iterator it;
+			for (it = taglist.begin(); it != taglist.end(); it++)
+				delete *it;
 		}
 		uint32 ip;
 		uint16 tcpport;
 		uint16 udpport;
 		CUInt128 keyID;
 		CUInt128 sourceID;
-		CString fileName;
+		CString fileName; // NOTE: this always holds the string in LOWERCASE!!!
 		uint32	size;
 		TagList taglist;
 		time_t lifetime;

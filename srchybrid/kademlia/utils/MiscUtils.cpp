@@ -45,7 +45,7 @@ using namespace Kademlia;
 
 CString CMiscUtils::appDirectory = "";
 
-void CMiscUtils::ipAddressToString(const uint32 ip, CString *string)
+void CMiscUtils::ipAddressToString(uint32 ip, CString *string)
 {
 	string->Format("%ld.%ld.%ld.%ld", 
 					((ip >> 24) & 0xFF), 
@@ -68,7 +68,7 @@ LPCSTR CMiscUtils::getAppDir(void)
 	return appDirectory.GetBuffer(0);
 }
 
-void CMiscUtils::debugHexDump(const byte *data, const uint32 lenData)
+void CMiscUtils::debugHexDump(const byte *data, uint32 lenData)
 {
 #ifdef DEBUG
 	try

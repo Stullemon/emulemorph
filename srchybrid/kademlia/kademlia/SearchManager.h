@@ -40,7 +40,6 @@ namespace Kademlia {
 
 class CSearch;
 class CRoutingZone;
-class CTimer;
 class CTag;
 typedef std::list<CTag*> TagList;
 
@@ -61,24 +60,21 @@ typedef std::map<CUInt128, CSearch*> SearchMap;
 class CSearchManager
 {
 	friend class CRoutingZone;
-	friend class CTimer;
+	friend class CKademlia;
 
 public:
 
-	static void stopSearch(uint32 searchID);
+	static void stopSearch(uint32 searchID, bool delayDelete);
 	static void stopAllSearches(void);
 
 	// Search for a particular file
 	// Will return unique search id, returns zero if already searching for this file.
-	static CSearch* prepareFindFile(SEARCH_ID_CALLBACK callback, const CUInt128 &id);
+	static CSearch* prepareFindFile(uint32 type, bool start, const CUInt128 &id);
 
-	// Pass a list of keywords and restrictions.
-	// eg:  uint32 searchID = findFile(MyCallback, 2, "Britney", SEARCH_IMAGE);
 	// Will return unique search id, returns zero if already searching for this keyword.
-	static CSearch* prepareFindKeywords(SEARCH_KEYWORD_CALLBACK callback, uint32 numParams, LPCSTR keyword1, ...);
-	static CSearch* prepareFindKeywords(SEARCH_KEYWORD_CALLBACK callback, LPCSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
+	static CSearch* prepareFindKeywords(uint32 type, bool start, LPCSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
 
-	static void startSearch(CSearch* pSearch);
+	static bool startSearch(CSearch* pSearch);
 	static void deleteSearch(CSearch* pSearch);
 
 	static void processResponse(const CUInt128 &target, uint32 fromIP, uint16 fromPort, ContactList *results);

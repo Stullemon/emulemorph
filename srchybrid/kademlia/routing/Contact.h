@@ -52,9 +52,9 @@ public:
 
 	~CContact();
 	CContact();
-	CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPort, const uint16 tcpPort, const byte type);
-	CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPort, const uint16 tcpPort, const byte type, const CUInt128 &target);
-//	CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPort, const byte type, const uint16 tcpPort);
+	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type);
+	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type, const CUInt128 &target);
+//	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, byte type, uint16 tcpPort);
 
 	void getClientID(CUInt128 *id);
 	void getClientID(CString *id);
@@ -65,18 +65,18 @@ public:
 
 	uint32 getIPAddress(void);
 	void getIPAddress(CString *ip);
-	void setIPAddress(const uint32 ip);
+	void setIPAddress(uint32 ip);
 
 	uint16 getTCPPort(void);
 	void getTCPPort(CString *port);
-	void setTCPPort(const uint16 port);
+	void setTCPPort(uint16 port);
 
 	uint16 getUDPPort(void);
 	void getUDPPort(CString *port);
-	void setUDPPort(const uint16 port);
+	void setUDPPort(uint16 port);
 
 	byte getType(void);
-	void setType(const byte type);
+	void setType(byte type);
 
 	bool madeContact(void);
 	void madeContact(bool val);

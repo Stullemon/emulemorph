@@ -43,6 +43,10 @@ there client on the eMule forum..
 #include "../../OpCodes.h"
 #include "../net/KademliaUDPListener.h"
 #include "../kademlia/Defines.h"
+#include "emule.h"
+#include "emuledlg.h"
+#include "KadContactListCtrl.h"
+#include "kademliawnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -57,7 +61,7 @@ using namespace Kademlia;
 
 CContact::~CContact()
 {
-	Kademlia::CKademlia::reportContactRem(this);
+	theApp.emuledlg->kademliawnd->contactList->ContactRem(this);
 }
 
 CContact::CContact()
@@ -72,7 +76,7 @@ CContact::CContact()
 	m_lastTypeSet = time(NULL);
 }
 
-CContact::CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPort, const uint16 tcpPort, const byte type)
+CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type)
 {
 	m_clientID = clientID;
 	CPrefs *prefs = CKademlia::getPrefs();
@@ -88,7 +92,7 @@ CContact::CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPo
 	m_lastTypeSet = time(NULL);
 }
 
-CContact::CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPort, const uint16 tcpPort, const byte type, const CUInt128 &target)
+CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type, const CUInt128 &target)
 {
 	m_clientID = clientID;
 	m_distance.setValue(target);
@@ -102,7 +106,7 @@ CContact::CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPo
 	m_lastTypeSet = time(NULL);
 }
 
-/*CContact::CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPort, const byte type, const uint16 tcpPort)
+/*CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, byte type, uint16 tcpPort)
 {
 	m_clientID = clientID;
 	CPrefs *prefs = CKademlia::getPrefs();
@@ -158,7 +162,7 @@ void CContact::getIPAddress(CString *ip)
 	CMiscUtils::ipAddressToString(m_ip, ip);
 }
 
-void CContact::setIPAddress(const uint32 ip)
+void CContact::setIPAddress(uint32 ip)
 {
 	m_ip = ip;
 }
@@ -173,7 +177,7 @@ void CContact::getTCPPort(CString *port)
 	port->Format("%ld", m_tcpPort);
 }
 
-void CContact::setTCPPort(const uint16 port)
+void CContact::setTCPPort(uint16 port)
 {
 	m_tcpPort = port;
 }
@@ -188,7 +192,7 @@ void CContact::getUDPPort(CString *port)
 	port->Format("%ld", m_udpPort);
 }
 
-void CContact::setUDPPort(const uint16 port)
+void CContact::setUDPPort(uint16 port)
 {
 	m_udpPort = port;
 }
@@ -198,7 +202,7 @@ byte CContact::getType(void)
 	return m_type;
 }
 
-void CContact::setType(const byte type)
+void CContact::setType(byte type)
 {
 	if(type != 0 && time(NULL) - m_lastTypeSet < 10 )
 	{
@@ -211,7 +215,7 @@ void CContact::setType(const byte type)
 		else if( m_type == 1 )
 			m_expires = time(NULL) + MIN2S(3);
 		m_type = 2; //Just in case in case again..
-		Kademlia::CKademlia::reportContactRef(this);
+		theApp.emuledlg->kademliawnd->contactList->ContactRef(this);
 		return;
 	}
 	m_lastTypeSet = time(NULL);
@@ -220,7 +224,7 @@ void CContact::setType(const byte type)
 		m_expires = time(NULL) + HR2S(2);
 	else 
 		m_expires = time(NULL) + HR2S(1);
-	Kademlia::CKademlia::reportContactRef(this);
+	theApp.emuledlg->kademliawnd->contactList->ContactRef(this);
 }
 
 bool CContact::madeContact(void)

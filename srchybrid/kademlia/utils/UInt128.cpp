@@ -182,10 +182,20 @@ void CUInt128::toBinaryString(CString *str, bool trim) const
 		str->SetString("0");
 }
 
+#if defined(_M_IX86) && (_MSC_FULL_VER > 13009037)
+#pragma intrinsic(_byteswap_ulong)
+#endif
 void CUInt128::toByteArray(byte *b) const
 {
+#if defined(_M_IX86) && (_MSC_FULL_VER > 13009037)
+	((uint32*)b)[0] = _byteswap_ulong(m_data[0]);
+	((uint32*)b)[1] = _byteswap_ulong(m_data[1]);
+	((uint32*)b)[2] = _byteswap_ulong(m_data[2]);
+	((uint32*)b)[3] = _byteswap_ulong(m_data[3]);
+#else
 	for (int i=0; i<16; i++)
 		b[i] = (byte)(m_data[i/4] >> (8*(3-(i%4))));
+#endif
 }
 
 int CUInt128::compareTo(const CUInt128 &other) const

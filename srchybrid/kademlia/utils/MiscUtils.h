@@ -38,8 +38,8 @@ class CMiscUtils
 {
 public:
 
-	static void ipAddressToString(const uint32 ip, CString *string);
-	static void debugHexDump(const byte *data, const uint32 lenData);
+	static void ipAddressToString(uint32 ip, CString *string);
+	static void debugHexDump(const byte *data, uint32 lenData);
 	static LPCSTR getAppDir(void);
 
 private:

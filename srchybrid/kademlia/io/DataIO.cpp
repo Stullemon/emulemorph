@@ -187,22 +187,22 @@ TagList	*CDataIO::readTagList(void)
 	return retVal;
 }
 
-void CDataIO::writeByte(const byte val)
+void CDataIO::writeByte(byte val)
 {
 	writeArray(&val, 1);
 }
 
-void CDataIO::writeUInt8BE(const uint8 val)
+void CDataIO::writeUInt8BE(uint8 val)
 {
 	writeUInt8(val);
 }
 
-void CDataIO::writeUInt16BE(const uint16 val)
+void CDataIO::writeUInt16BE(uint16 val)
 {
 	writeUInt16(le(val));
 }
 
-void CDataIO::writeUInt32BE(const uint32 val)
+void CDataIO::writeUInt32BE(uint32 val)
 {
 	writeUInt32(le(val));
 }
@@ -214,17 +214,17 @@ void CDataIO::writeUInt128BE(const CUInt128 &val)
 	writeArray(b, 16);
 }
 
-void CDataIO::writeUInt8(const uint8 val)
+void CDataIO::writeUInt8(uint8 val)
 {
 	writeArray(&val, sizeof(uint8));
 }
 
-void CDataIO::writeUInt16(const uint16 val)
+void CDataIO::writeUInt16(uint16 val)
 {
 	writeArray(&val, sizeof(uint16));
 }
 
-void CDataIO::writeUInt32(const uint32 val)
+void CDataIO::writeUInt32(uint32 val)
 {
 	writeArray(&val, sizeof(uint32));
 }
@@ -234,7 +234,7 @@ void CDataIO::writeUInt128(const CUInt128 &val)
 	writeArray(val.getData(), sizeof(uint32)*4);
 }
 
-void CDataIO::writeFloat(const float val)
+void CDataIO::writeFloat(float val)
 {
 	writeArray(&val, sizeof(float));
 }
@@ -296,7 +296,7 @@ void CDataIO::writeTag(const CTag *tag)
 	}
 }
 
-void CDataIO::writeTag(const byte type, LPCSTR name)
+void CDataIO::writeTag(byte type, LPCSTR name)
 {
 	CTagUnk tag(type, name);
 	writeTag(&tag);
