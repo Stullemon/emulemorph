@@ -39,6 +39,58 @@ struct CreditStruct_29a{
 	uint32		nDownloadedHi;	// download high 32
 	uint16		nReserved3;
 };
+//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
+struct CreditStruct_30c{
+	uchar		abyKey[16];
+	uint32		nUploadedLo;	// uploaded TO him
+	uint32		nDownloadedLo;	// downloaded from him
+	uint32		nLastSeen;
+	uint32		nUploadedHi;	// upload high 32
+	uint32		nDownloadedHi;	// download high 32
+	uint16		nReserved3;
+	uint8		nKeySize;
+	uchar		abySecureIdent[MAXPUBKEYSIZE];
+};
+
+// Moonlight: SUQWT: Add the wait time data to the structure.
+#pragma pack(1)
+struct CreditStruct_30c_SUQWTv1{
+	uchar		abyKey[16];
+	uint32		nUploadedLo;	// uploaded TO him
+	uint32		nDownloadedLo;	// downloaded from him
+	uint32		nLastSeen;
+	uint32		nUploadedHi;	// upload high 32
+	uint32		nDownloadedHi;	// download high 32
+	uint16		nReserved3;
+	uint8		nKeySize;
+	uchar		abySecureIdent[MAXPUBKEYSIZE];
+	uint32		nSecuredWaitTime;	// Moonlight: SUQWT
+	uint32		nUnSecuredWaitTime;	// Moonlight: SUQWT
+};
+
+struct CreditStruct_30c_SUQWTv2{
+	uint32		nSecuredWaitTime;	// Moonlight: SUQWT
+	uint32		nUnSecuredWaitTime;	// Moonlight: SUQWT
+	uchar		abyKey[16];
+	uint32		nUploadedLo;	// uploaded TO him
+	uint32		nDownloadedLo;	// downloaded from him
+	uint32		nLastSeen;
+	uint32		nUploadedHi;	// upload high 32
+	uint32		nDownloadedHi;	// download high 32
+	uint16		nReserved3;
+	uint8		nKeySize;
+	uchar		abySecureIdent[MAXPUBKEYSIZE];
+};
+
+// Moonlight: SUQWT
+struct CreditStructSUQWT {
+	uint32		nSecuredWaitTime;
+	uint32		nUnSecuredWaitTime;
+};
+
+//original commented out
+/*
 struct CreditStruct{
 	uchar		abyKey[16];
 	uint32		nUploadedLo;	// uploaded TO him
@@ -50,8 +102,14 @@ struct CreditStruct{
 	uint8		nKeySize;
 	uchar		abySecureIdent[MAXPUBKEYSIZE];
 };
-#pragma pack()
+*/
 
+//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
+#pragma pack()
+//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+typedef CreditStruct_30c_SUQWTv2	CreditStruct;	// Moonlight: Standard name for the credit structure.
+//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 enum EIdentState{
 	IS_NOTAVAILABLE,
 	IS_IDNEEDED,
@@ -72,6 +130,10 @@ public:
 	uchar*	GetSecureIdent()				{return m_abyPublicKey;}
 	uint8	GetSecIDKeyLen()				{return m_nPublicKeyLen;}
 	CreditStruct* GetDataStruct()			{return m_pCredits;}
+//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	void	SaveUploadQueueWaitTime();		// Moonlight: SUQWT
+	void	ClearUploadQueueWaitTime();		// Moonlight: SUQWT
+//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	void	ClearWaitStartTime();
 	void	AddDownloaded(uint32 bytes, uint32 dwForIP);
 	void	AddUploaded(uint32 bytes, uint32 dwForIP);
@@ -81,6 +143,9 @@ public:
 	float	GetMyScoreRatio(uint32 dwForIP); //MORPH - Added by IceCream, VQB: ownCredits
 	void	SetLastSeen()					{m_pCredits->nLastSeen = time(NULL);}
 	bool	SetSecureIdent(uchar* pachIdent, uint8 nIdentLen); // Public key cannot change, use only if there is not public key yet
+//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	bool	IsActive(uint32 dwExpire);	// Moonlight: SUQWT, new function to determine if the record has expired.
+//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	uint32	m_dwCryptRndChallengeFor;
 	uint32	m_dwCryptRndChallengeFrom;
 	EIdentState	GetCurrentIdentState(uint32 dwForIP); // can be != IdentState

@@ -939,7 +939,7 @@ float CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 
     return m_fAverageCombinedFilePrioAndCredit;
 }
-
+// Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, bool updatewindow, bool earlyabort){
 	theApp.clientlist->AddTrackClient(client); // Keep track of this client
     uint32 posCounter = 0;
@@ -965,13 +965,15 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 					client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
 					/*totaluploadtime += client->GetUpStartTimeDelay()/1000;*/
 					totaluploadtime += tempUpStartTimeDelay/1000;
+					client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 					//wistily stop
                     totalCompletedBytes += client->GetSessionUp();
                 }
 			    //} else if(client->HasBlocks() || client->GetUploadState() != US_UPLOADING) {
-            } else if(earlyabort == false)
+            } else if(earlyabort == false){
 				failedupcount++;
-
+				client->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			}
             CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 
             if(requestedFile != NULL) {
@@ -1012,11 +1014,16 @@ bool CUploadQueue::RemoveFromWaitingQueue(CUpDownClient* client, bool updatewind
 		return false;
 }
 
+// Moonlight: SUQWT: Save queue wait time and clear wait start times before removing from queue.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){	
 	CUpDownClient* todelete = waitinglist.GetAt(pos);
 	waitinglist.RemoveAt(pos);
 	if (updatewindow)
 		theApp.emuledlg->transferwnd.queuelistctrl.RemoveClient(todelete);
+//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	todelete->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
+	todelete->Credits()->ClearWaitStartTime();		// Moonlight: SUQWT
+//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)	
 	todelete->SetUploadState(US_NONE);
 }
 

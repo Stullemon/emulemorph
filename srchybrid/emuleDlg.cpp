@@ -1133,6 +1133,10 @@ void CemuleDlg::OnClose()
 		theApp.ppgbackup->Backup("*.ini", false);
 		theApp.ppgbackup->Backup("*.dat", false);
 		theApp.ppgbackup->Backup("*.met", false);
+
+		//"Moonlight's Save Upload Queue Wait Time (MSUQWT)" 
+		//will Save a credits file in 0.30c format along with the modified one named clients.met.30c.bak name.
+		theApp.ppgbackup->Backup("*.bak", false);//Morph - added by AndCycle
 	}
 	//EastShare END - Pretender, TBH-AutoBackup
 

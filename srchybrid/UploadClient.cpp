@@ -219,7 +219,11 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		// the first 15 min downloadtime counts as 15 min waitingtime and you get a 15 min bonus while you are in the first 15 min :)
 		// (to avoid 20 sec downloads) after this the score won't raise anymore 
 		fBaseValue = (float)(m_dwUploadTime-GetWaitStartTime());
-		ASSERT ( m_dwUploadTime-GetWaitStartTime() >= 0 ); //oct 28, 02: changed this from "> 0" to ">= 0"
+//Morph Start- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		// Moonlight: SUQWT - I'm exploiting negative overflows to adjust wait start times. Overflows should not be an issue as long
+		// as queue turnover rate is faster than 49 days.
+		// ASSERT ( m_dwUploadTime-GetWaitStartTime() >= 0 ); //oct 28, 02: changed this from "> 0" to ">= 0"//original commented out
+//Morph End- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)		
 		fBaseValue += (float)(curTick - m_dwUploadTime > 900000)? 900000:1800000;
 		fBaseValue /= 1000;
 	}
@@ -1014,8 +1018,10 @@ void  CUpDownClient::UnBan(){
 //	theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(this, true, true);
 }
 
+// Moonlight: SUQWT - Reset the wait time on ban, do not give time credit for banned clients queue time!//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CUpDownClient::Ban(){
 	theApp.clientlist->AddTrackClient(this);
+	ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if ( !IsBanned() ){
 		AddDebugLogLine(false,GetResString(IDS_CLIENTBLOCKED),GetUserName());
 	}
@@ -1058,13 +1064,19 @@ void CUpDownClient::UDPFileReasked(){
 	theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
 }
 
+// Moonlight: SUQWT - Compare linear time instead of time indexes to avoid overflow-induced false positives.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 uint32 CUpDownClient::GetWaitStartTime(){
 	if (credits == NULL){
 		ASSERT ( false );
 		return 0;
 	}
 	uint32 dwResult = credits->GetSecureWaitStartTime(GetIP());
-	if (dwResult > m_dwUploadTime && IsDownloading()){
+//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	uint32 dwTicks = ::GetTickCount();
+	// Moonlight: SUQWT - To avoid erroneous check due to overflow, convert time index to plain time.
+	if ((dwTicks - dwResult) < (dwTicks - m_dwUploadTime) && IsDownloading()){	
+	//if (dwResult > m_dwUploadTime && IsDownloading()){//original commented out
+//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		//this happens only if two clients with invalid securehash are in the queue - if at all
 		dwResult = m_dwUploadTime-1;
 

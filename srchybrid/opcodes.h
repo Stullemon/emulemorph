@@ -23,8 +23,15 @@
 #define PREFFILE_VERSION		0x14	//<<-- last change: reduced .dat, by using .ini
 #define PARTFILE_VERSION		0xe0
 #define PARTFILE_SPLITTEDVERSION		0xe1
-#define CREDITFILE_VERSION		0x12
-#define CREDITFILE_VERSION_29	0x11
+//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+#define CREDITFILE_VERSION_30_DYN		0x81	// Moonlight: Dynamic Transportable CreditStruct.
+#define CREDITFILE_VERSION_30_SUQWTv2	0x80	// Moonlight: SUQWT CreditStruct v2.
+#define CREDITFILE_VERSION_30_SUQWTv1	0x13	// Moonlight: SUQWT CreditStruct v1.
+#define CREDITFILE_VERSION_30			0x12
+//#define CREDITFILE_VERSION		0x12//original commented out
+#define CREDITFILE_VERSION_29			0x11
+#define CREDITFILE_VERSION				CREDITFILE_VERSION_30_SUQWTv2	// Define the current version number.
+//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 #define COMPILE_DATE			__DATE__
 #define COMPILE_TIME			__TIME__
 #ifdef _DEBUG
