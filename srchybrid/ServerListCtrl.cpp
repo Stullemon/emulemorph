@@ -966,7 +966,17 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
-	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
+	const CServer* server = (CServer*)lpDrawItemStruct->itemData;
+	const CServer* cur_srv;
+	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )
+		||
+		(
+			theApp.serverconnect->IsConnected()
+			&& (cur_srv = theApp.serverconnect->GetCurrentServer()) != NULL
+			&& cur_srv->GetPort() == server->GetPort()
+			&& cur_srv->GetConnPort() == server->GetConnPort()//Morph - added by AndCycle, aux Ports, by lugdunummaster
+			&& _tcsicmp(cur_srv->GetAddress(), server->GetAddress()) == 0)
+		){
 		if(bCtrlFocused)
 			odc->SetBkColor(m_crHighlight);
 		else
@@ -974,7 +984,6 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 	else
 		odc->SetBkColor(GetBkColor());
-	const CServer* server = (CServer*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec = lpDrawItemStruct->rcItem;
