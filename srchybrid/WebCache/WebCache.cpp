@@ -452,7 +452,12 @@ bool PingviaProxy(CString WebCacheName, uint16 WebCachePort)
 	strWCPingRequest.AppendFormat("Host: %s:%u\r\n", ipstrA( theApp.GetPublicIP() ), thePrefs.port ); // our IP and port
 	strWCPingRequest.AppendFormat("Cache-Control: max-age=0\r\n" ); // do NOT DL this from the proxy! (timeout issue)
 	strWCPingRequest.AppendFormat("Connection: close\r\nProxy-Connection: close\r\n" ); //only needed for 1 transmission
+	//MORPH START - Changed by SiRoB, ModID
+	/*
 	strWCPingRequest.AppendFormat("User-Agent: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(MOD_VERSION));
+	*/
+	strWCPingRequest.AppendFormat("User-Agent: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
+	//MORPH END   - Changed by SiRoB, ModID
 	strWCPingRequest.AppendFormat("\r\n");
 		
 	CRawPacket* pHttpPacket = new CRawPacket(strWCPingRequest);

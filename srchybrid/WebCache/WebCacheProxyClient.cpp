@@ -160,7 +160,13 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 	else
 // yonatan - removed 'Connection: keep-alive' - RFC 2068		strWCRequest.AppendFormat("Connection: keep-alive\r\nProxy-Connection: keep-alive\r\n" );
 		strWCRequest.AppendFormat("Proxy-Connection: keep-alive\r\n" );
+	//MORPH START - Changed by SiRoB, ModID
+	/*
 	strWCRequest.AppendFormat("User-Agent: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(MOD_VERSION));
+	*/
+	strWCRequest.AppendFormat("User-Agent: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
+	//MORPH END   - Changed by SiRoB, ModID
+
 	strWCRequest.AppendFormat("\r\n");
 
 	if (thePrefs.GetDebugClientTCPLevel() > 0){
