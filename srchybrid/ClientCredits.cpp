@@ -373,75 +373,11 @@ void CClientCreditsList::LoadList()
 	CSafeBufferedFile	strFile, strSUQWTv2File;
 	
 	bool	successOpenStrFile, successOpenStrSUQWTv2File;
+	bool	haveTrouble = false;
 
-	successOpenStrFile = strFile.Open(strFileName, iOpenFlags, &fexp);
+	//check credits.met.SUQWTv2.met status
 	successOpenStrSUQWTv2File = strSUQWTv2File.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
-	strFile.Close();
-	strSUQWTv2File.Close();
-
-	//if credits.met and credits.met.SUQWTv2.met both exist, check which newer
-	if(successOpenStrFile && successOpenStrSUQWTv2File){
-		strFile.GetStatus(strFileStatus);
-		strSUQWTv2File.GetStatus(strSUQWTv2FileStatus);
-		if(strFileStatus.m_mtime > strSUQWTv2FileStatus.m_mtime){
-			//if original credits.met newer, take it
-			file.Open(strFileName, iOpenFlags, &fexp);
-			AddLogLine(false, "Original creditsfile.met newer, take over SUQWTv2.met");
-		}else{
-			//if SUQWTv2 newer, take it
-			file.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
-			AddLogLine(false, "take SUQWTv2.met for credits");
-		}
-		
-	}else if(!successOpenStrSUQWTv2File){//if credits.met.SUQWTv2.met does not exist
-		if (fexp.m_cause != CFileException::fileNotFound){
-			CString strError("Client.met.SUQWTv2.met does not exist.");
-			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-				strError += _T(" - ");
-				strError += szError;
-			}
-			AddLogLine(false, _T("%s"), strError);
-		}
-
-		if(file.Open(strFileName, iOpenFlags, &fexp)){//but original credits.met exist
-
-			file.Close(); // close the file before copying
-
-			//make a copy client.met.SUQWTv2.met for SUQWTv2
-			if (!::CopyFile(strFileName, strSUQWTv2FileName, FALSE))
-				AddLogLine(false, "Failed to create SUQWTv2.met file");
-			else
-				AddLogLine(false, "Make a copy to client.met.SUQWTv2.met for SaveUploadQueueWaitTimeV2");
-
-			// open new file
-			CFileException fexp;
-			if (!file.Open(strSUQWTv2FileName, iOpenFlags, &fexp)){
-				CString strError("Failed to open client.met.SUQWTv2.met");
-				TCHAR szError[MAX_CFEXP_ERRORMSG];
-				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-					strError += _T(" - ");
-					strError += szError;
-				}
-				AddLogLine(true, _T("%s"), strError);
-				return;
-			}
-			file.Seek(1, CFile::begin); //set filepointer behind file version byte
-
-		}else{
-			if (fexp.m_cause != CFileException::fileNotFound){
-				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-				TCHAR szError[MAX_CFEXP_ERRORMSG];
-				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-					strError += _T(" - ");
-					strError += szError;
-				}
-				AddLogLine(true, _T("%s"), strError);
-			}
-			return;
-		}
-	}else if(!successOpenStrFile){//original credits.met not exist
-		
+	if (!successOpenStrSUQWTv2File){
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -449,27 +385,82 @@ void CClientCreditsList::LoadList()
 				strError += _T(" - ");
 				strError += szError;
 			}
-			AddLogLine(false, _T("%s"), strError);
+			AddLogLine(true, _T("%s"), strError);
+			haveTrouble = true;
+		}else{
+			AddLogLine(false, "credits.met.SUQWTv2.met does not exist,");
 		}
+	}
 
-		if (!file.Open(strSUQWTv2FileName, iOpenFlags, &fexp)){//try out the SUQWTv2.met instead
-			CString strError("Failed to open client.met.SUQWTv2.met");
+	//check credits.met status
+	successOpenStrFile = strFile.Open(strFileName, iOpenFlags, &fexp);
+	if (!successOpenStrFile){
+		if (fexp.m_cause != CFileException::fileNotFound){
+			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
 			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
 				strError += _T(" - ");
 				strError += szError;
 			}
-			AddLogLine(false, _T("%s"), strError);
-			return;
+			AddLogLine(true, _T("%s"), strError);
+			haveTrouble = true;
+		}else{
+			AddLogLine(false, "credits.met does not exist,");
 		}
-		
-		AddLogLine(false, "original credits.met not exist, take SUQWTv2.met instead");
-
 	}
+
+	//if credits.met and credits.met.SUQWTv2.met both exist, check which newer
+	if(successOpenStrFile && successOpenStrSUQWTv2File){
+
+		strFile.GetStatus(strFileStatus);
+		strSUQWTv2File.GetStatus(strSUQWTv2FileStatus);
+
+		//close before handle over by CSafeBufferedFile file
+		strFile.Close();
+		strSUQWTv2File.Close();
+
+		if(strFileStatus.m_mtime > strSUQWTv2FileStatus.m_mtime){
+			//if original credits.met newer, take it
+			file.Open(strFileName, iOpenFlags, &fexp);
+			AddLogLine(false, "Original %s newer, load it instead of %s." , strFileName, strSUQWTv2FileName);
+		}else{
+			//if SUQWTv2 newer, take it
+			file.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
+			AddLogLine(false, "Load %s", strSUQWTv2FileName);
+		}
+	}
+
+	//if both doesn't exist or have trouble, stop load file
+	else if(!successOpenStrFile && !successOpenStrSUQWTv2File){
+
+		strFile.Close();
+		strSUQWTv2File.Close();
+		return;
+	}
+
+	//one of the credit.met have trouble or doesn't exist
+	else{
+
+		//close before handle over by CSafeBufferedFile file
+		strFile.Close();
+		strSUQWTv2File.Close();
+
+		if(haveTrouble)	return;//if there're trouble, don't load credits??
+
+		if(successOpenStrFile){
+			file.Open(strFileName, iOpenFlags, &fexp);
+			AddLogLine(false, "Load %s", strFileName);
+		}
+		if(successOpenStrSUQWTv2File){
+			file.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
+			AddLogLine(false, "Load %s", strSUQWTv2FileName);
+		}
+	}
+
 
 //original commented out
 /*
-	if(!file.Open(strFileName, iOpenFlags, &fexp)){
+	if (!file.Open(strFileName, iOpenFlags, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -479,6 +470,7 @@ void CClientCreditsList::LoadList()
 			}
 			AddLogLine(true, _T("%s"), strError);
 		}
+		return;
 	}
 */
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
@@ -505,100 +497,101 @@ void CClientCreditsList::LoadList()
 		}
 		*/
 		//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		//original commented out
-		/*
-		// everything is ok, lets see if the backup exist...
-		CString strBakFileName;
-		strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), m_pAppPrefs->GetConfigDir());
-		
-		DWORD dwBakFileSize = 0;
-		BOOL bCreateBackup = TRUE;
+		if(successOpenStrFile){//Morph - added by AndCycle, before backup check file first
+			// everything is ok, lets see if the backup exist...
+			CString strBakFileName;
+			strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), m_pAppPrefs->GetConfigDir());
+			
+			DWORD dwBakFileSize = 0;
+			BOOL bCreateBackup = TRUE;
 
-		HANDLE hBakFile = ::CreateFile(strBakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (hBakFile != INVALID_HANDLE_VALUE)
-		{
-			// Ok, the backup exist, get the size
-			dwBakFileSize = ::GetFileSize(hBakFile, NULL); //debug
-			if (dwBakFileSize > (DWORD)file.GetLength())
+			HANDLE hBakFile = ::CreateFile(strBakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
+											OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (hBakFile != INVALID_HANDLE_VALUE)
 			{
-				// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
-				bCreateBackup = FALSE;
-			}
-			//else: backup is smaller or the same size as org. file, proceed with copying of file
-			::CloseHandle(hBakFile);
-		}
-		//else: the backup doesn't exist, create it
-
-		if (bCreateBackup)
-		{
-			file.Close(); // close the file before copying
-
-			if (!::CopyFile(strFileName, strBakFileName, FALSE))
-				AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
-
-			// reopen file
-			CFileException fexp;
-			if (!file.Open(strFileName, iOpenFlags, &fexp)){
-				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-				TCHAR szError[MAX_CFEXP_ERRORMSG];
-				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-					strError += _T(" - ");
-					strError += szError;
+				// Ok, the backup exist, get the size
+				dwBakFileSize = ::GetFileSize(hBakFile, NULL); //debug
+				if (dwBakFileSize > (DWORD)file.GetLength())
+				{
+					// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
+					bCreateBackup = FALSE;
 				}
-				AddLogLine(true, _T("%s"), strError);
-				return;
+				//else: backup is smaller or the same size as org. file, proceed with copying of file
+				::CloseHandle(hBakFile);
 			}
-			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-			file.Seek(1, CFile::begin); //set filepointer behind file version byte
-		}
-		*/
+			//else: the backup doesn't exist, create it
+
+			if (bCreateBackup)
+			{
+				file.Close(); // close the file before copying
+
+				if (!::CopyFile(strFileName, strBakFileName, FALSE))
+					AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
+
+				// reopen file
+				CFileException fexp;
+				if (!file.Open(strFileName, iOpenFlags, &fexp)){
+					CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
+					TCHAR szError[MAX_CFEXP_ERRORMSG];
+					if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+						strError += _T(" - ");
+						strError += szError;
+					}
+					AddLogLine(true, _T("%s"), strError);
+					return;
+				}
+				setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+				file.Seek(1, CFile::begin); //set filepointer behind file version byte
+			}
+		}//Morph - added by AndCycle, before backup check file first
 //Morph Start - added by AndCycle, separate the .bak for SUQWT
-		// everything is ok, lets see if the backup exist...
-		CString strSUQWTv2BakFileName;
-		strSUQWTv2BakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.BAK"), m_pAppPrefs->GetConfigDir());
-		
-		DWORD dwSUQWTv2BakFileSize = 0;
-		BOOL bCreateBackupSUQWTv2 = TRUE;
+		if(successOpenStrSUQWTv2File){//Morph - added by AndCycle, before backup check file first
+			// everything is ok, lets see if the backup exist...
+			CString strSUQWTv2BakFileName;
+			strSUQWTv2BakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.BAK"), m_pAppPrefs->GetConfigDir());
+			
+			DWORD dwSUQWTv2BakFileSize = 0;
+			BOOL bCreateBackupSUQWTv2 = TRUE;
 
-		HANDLE hSUQWTv2BakFile = ::CreateFile(strSUQWTv2BakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (hSUQWTv2BakFile != INVALID_HANDLE_VALUE)
-		{
-			// Ok, the backup exist, get the size
-			dwSUQWTv2BakFileSize = ::GetFileSize(hSUQWTv2BakFile, NULL); //debug
-			if (dwSUQWTv2BakFileSize > (DWORD)file.GetLength())
+			HANDLE hSUQWTv2BakFile = ::CreateFile(strSUQWTv2BakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
+											OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (hSUQWTv2BakFile != INVALID_HANDLE_VALUE)
 			{
-				// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
-				bCreateBackupSUQWTv2 = FALSE;
-			}
-			//else: backup is smaller or the same size as org. file, proceed with copying of file
-			::CloseHandle(hSUQWTv2BakFile);
-		}
-		//else: the backup doesn't exist, create it
-
-		if (bCreateBackupSUQWTv2)
-		{
-			file.Close(); // close the file before copying
-
-			if (!::CopyFile(strSUQWTv2FileName, strSUQWTv2BakFileName, FALSE))
-				AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
-
-			// reopen file
-			CFileException fexp;
-			if (!file.Open(strFileName+".SUQWTv2.met", iOpenFlags, &fexp)){
-				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-				TCHAR szError[MAX_CFEXP_ERRORMSG];
-				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-					strError += _T(" - ");
-					strError += szError;
+				// Ok, the backup exist, get the size
+				dwSUQWTv2BakFileSize = ::GetFileSize(hSUQWTv2BakFile, NULL); //debug
+				if (dwSUQWTv2BakFileSize > (DWORD)file.GetLength())
+				{
+					// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
+					bCreateBackupSUQWTv2 = FALSE;
 				}
-				AddLogLine(true, _T("%s"), strError);
-				return;
+				//else: backup is smaller or the same size as org. file, proceed with copying of file
+				::CloseHandle(hSUQWTv2BakFile);
 			}
-			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-			file.Seek(1, CFile::begin); //set filepointer behind file version byte
-		}
+			//else: the backup doesn't exist, create it
+
+			if (bCreateBackupSUQWTv2)
+			{
+				file.Close(); // close the file before copying
+
+				if (!::CopyFile(strSUQWTv2FileName, strSUQWTv2BakFileName, FALSE))
+					AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
+
+				// reopen file
+				CFileException fexp;
+				if (!file.Open(strFileName+".SUQWTv2.met", iOpenFlags, &fexp)){
+					CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
+					TCHAR szError[MAX_CFEXP_ERRORMSG];
+					if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+						strError += _T(" - ");
+						strError += szError;
+					}
+					AddLogLine(true, _T("%s"), strError);
+					return;
+				}
+				setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+				file.Seek(1, CFile::begin); //set filepointer behind file version byte
+			}
+		}//Morph - added by AndCycle, before backup check file first
 //Morph End - added by AndCycle, separate the .bak for SUQWT
 
 		uint32 count;
