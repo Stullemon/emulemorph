@@ -18,6 +18,7 @@
 #include "Loggable.h"
 #include "BarShader.h"
 #include <list>
+#include "Preferences.h"//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 
 class CTag;
 class CxImage;
@@ -50,7 +51,11 @@ public:
 		lastSpreadSortValue = 0;;
 		lastFullSpreadCount = 0;
 		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
-		shareStartTime = 0;//this value init will be done in other place //Morph - Added by AndCycle, Equal Chance For Each File
+
+		//Morph Start - Added by AndCycle, Equal Chance For Each File
+		shareStartTime = 0;//this value init will be done in other place 
+		m_bCheckEqualChanceValue = true;
+		//Morph End - Added by AndCycle, Equal Chance For Each File
 	}
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 	void	MergeFileStats( CFileStatistic* toMerge );
@@ -75,9 +80,11 @@ public:
 	uint32	GetLastUsed()				{return lastused;} // EastShare - Added by TAHO, .met fiel control
 	void	SetLastUsed(uint32 inLastUsed)				{lastused = inLastUsed;} // EastShare - Added by TAHO, .met fiel control
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
-	void	SetSharedTime(uint32 sharedTime)		{ shareStartTime = time(NULL) - sharedTime;}
-	uint32	GetSharedTime()							{ return time(NULL) - shareStartTime;}
-	uint32	GetShareStartTime()						{ return shareStartTime;}
+	void	SetSharedTime(uint32 sharedTime)		{ shareStartTime = time(NULL) - sharedTime; }
+	uint32	GetSharedTime()							{ return time(NULL) - shareStartTime; }
+	uint32	GetShareStartTime()						{ return shareStartTime; }
+	bool	IsCheckEqualChanceValue()				{ return m_bCheckEqualChanceValue; }
+	void	ResetCheckEqualChanceValue()			{ m_bCheckEqualChanceValue = false; }
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 private:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
@@ -101,7 +108,11 @@ private:
 	uint64 alltimetransferred;
 	uint32 alltimeaccepted;
 	uint32 lastused; //EastShare - Added by TAHO, .met file control
-	uint32 shareStartTime;//Morph - Added by AndCycle, Equal Chance For Each File
+
+	//Morph Start - Added by AndCycle, Equal Chance For Each File
+	uint32	shareStartTime;
+	bool	m_bCheckEqualChanceValue;
+	//Morph End - Added by AndCycle, Equal Chance For Each File
 };
 
 /*
@@ -273,9 +284,10 @@ public:
 	CArray<uint16,uint16> m_PartSentCount;	// SLUGFILLER: hideOS
 	bool ShareOnlyTheNeed(CSafeMemFile* file);//wistily Share only the need
 
-	//Morph - added by AndCycle, Equal Chance For Each File
+	//Morph Start - added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue();
 	CString	GetEqualChanceValueString(bool detail = true);
+	//Morph End - added by AndCycle, Equal Chance For Each File
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -359,7 +371,12 @@ private:
 	bool	lastonlygreyrect;
 	bool	lastbFlat;
 	//MORPH END - Added by SiRoB,  SharedStatusBar CPU Optimisation
-	
+
+	//Morph Start - Added by AndCycle, Equal Chance For Each File, reduce CPU power
+	EqualChanceForEachFileSelection m_mLastEqualChanceSelection;
+	double	m_dLastEqualChanceSemiValue;
+	//Morph End - Added by AndCycle, Equal Chance For Each File, reduce CPU power
+
 	//MORPH START - Added by SiRoB, Show Permission
 	int		m_iPermissions;
 	//MORPH END   - Added by SiRoB, Show Permission
