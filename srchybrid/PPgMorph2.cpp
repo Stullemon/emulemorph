@@ -113,7 +113,7 @@ BOOL CPPgMorph2::OnApply()
 	strcpy(thePrefs.UpdateURLIPFilter, buffer);
 	thePrefs.AutoUpdateIPFilter = IsDlgButtonChecked(IDC_AUTOUPIPFILTER);
 	//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
-
+	
 	LoadSettings();
 	SetModified(FALSE);
 	

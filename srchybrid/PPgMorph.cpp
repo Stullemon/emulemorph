@@ -7,6 +7,7 @@
 #include "emuledlg.h"
 #include "serverWnd.h" //MORPH - Added by SiRoB
 #include "OtherFunctions.h"
+#include "Scheduler.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -513,6 +514,8 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.SetReportHashingFiles (m_bReportHashingFiles);
 	thePrefs.SetLogFriendlistActivities (m_bLogFriendlistActivities);
 	// [end] Mighty Knife
+
+	theApp.scheduler->SaveOriginals(); //Added by SiRoB, to set the right 
 
 	SetModified(FALSE);
 

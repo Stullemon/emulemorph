@@ -2370,19 +2370,19 @@ void CPreferences::SavePreferences(){
 	//EastShare End - Added by Pretender, TBH-AutoBackup
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-	ini.WriteString("CommunityName",GetCommunityName(),"eMule");
-	ini.WriteBool ("ReportHashingFiles",GetReportHashingFiles (),"eMule");
-	ini.WriteBool ("LogFriendlistActivities",GetLogFriendlistActivities (),"eMule");
+	ini.WriteString("CommunityName", m_sCommunityName,"eMule");
+	ini.WriteBool ("ReportHashingFiles",m_bReportHashingFiles,"eMule");
+	ini.WriteBool ("LogFriendlistActivities",m_bLogFriendlistActivities,"eMule");
 	// [end] Mighty Knife
 
 	// Mighty Knife: CRC32-Tag
-	ini.WriteBool ("DontAddCRC32ToFilename",GetDontAddCRCToFilename (),"eMule");
+	ini.WriteBool ("DontAddCRC32ToFilename",m_bDontAddCRCToFilename,"eMule");
 	CString temp;
 	// Encapsule these strings by "" because space characters are allowed at the
 	// beginning/end of the prefix/suffix !
-	temp.Format ("\"%s\"",GetCRC32Prefix ());
+	temp.Format ("\"%s\"",m_sCRC32Prefix);
 	ini.WriteString("LastCRC32Prefix",temp,"eMule");
-	temp.Format ("\"%s\"",GetCRC32Suffix());
+	temp.Format ("\"%s\"",m_sCRC32Suffix);
 	ini.WriteString("LastCRC32Suffix",temp,"eMule");
 	// [end] Mighty Knife
 

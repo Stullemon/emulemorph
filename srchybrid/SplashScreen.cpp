@@ -101,9 +101,10 @@ void CSplashScreen::OnPaint()
 			BITMAP BM;
 			m_imgSplash.GetBitmap(&BM);
 			dc.BitBlt(0, 0, BM.bmWidth, BM.bmHeight, &dcMem, 0, 0, SRCCOPY);
+			//MORPH - Removed by SiRoB
+			/*
 			if (pOldBM)
 				dcMem.SelectObject(pOldBM);
-
 			CRect rc(0, BM.bmHeight * 0.65, BM.bmWidth, BM.bmHeight);
 			dc.FillSolidRect(rc.left+1, rc.top+1, rc.Width()-2, rc.Height()-2, RGB(255,255,255));
 
@@ -132,6 +133,7 @@ void CSplashScreen::OnPaint()
 			if (pOldFont)
 				dc.SelectObject(pOldFont);
 			font.DeleteObject();
+			*/
 		}
 	}
 }
