@@ -425,8 +425,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory){
 		if (toadd){
 			toadd->SetPath(rstrDirectory);
 			toadd->SetFilePath(ff.GetFilePath());
-			AddFile(toadd);
-			toadd->UpdateClientUploadList();		// #zegzav:updcliuplst
+			//MORPH - Removed by SiRoB: Safe Hash
 			SafeAddKFile(toadd, true);	// SLUGFILLER: mergeKnown - no unmanagad adds
 		}
 		else{
