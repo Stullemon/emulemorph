@@ -32,6 +32,15 @@ protected:
 	int m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	HTREEITEM m_htiSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
+	//EastShare - added by AndCycle, IP to Country
+	IP2CountryNameSelection	m_iIP2CountryName;
+	HTREEITEM m_htiIP2CountryName;
+	HTREEITEM m_htiIP2CountryName_DISABLE;
+	HTREEITEM m_htiIP2CountryName_SHORT;
+	HTREEITEM m_htiIP2CountryName_MID;
+	HTREEITEM m_htiIP2CountryName_LONG;
+	//EastShare - added by AndCycle, IP to Country
+
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]
 	CreditSystemSelection m_iCreditSystem;
 	HTREEITEM m_htiCreditSystem;

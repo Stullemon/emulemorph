@@ -31,6 +31,10 @@ class CxImage;
 struct Requested_Block_Struct;
 class CSafeMemFile;
 
+//EastShare Start - added by AndCycle, IP to Country
+struct IPRange_Struct2;
+//EastShare End - added by AndCycle, IP to Country
+
 struct Pending_Block_Struct{
 	Requested_Block_Struct*	block;
 	struct z_stream_s*      zStream;       // Barry - Used to unzip packets
@@ -155,6 +159,10 @@ public:
 	uint32			GetIP() const				{return m_dwUserIP;}
 	bool			HasLowID() const;
 	LPCSTR			GetFullIP() const			{return m_szFullUserIP;}
+
+	//EastShare Start - added by AndCycle, IP to Country
+	CString			GetCountryName(bool longName = false) const;
+	//EastShare End - added by AndCycle, IP to Country
 
 	uint16			GetUserPort() const			{return m_nUserPort;}
 	void			SetUserPort( uint16 val )	{m_nUserPort = val;}
@@ -512,6 +520,9 @@ private:
 	
 	
 	uint32	m_dwUserIP;
+	//EastShare Start - added by AndCycle, IP to Country
+	struct	IPRange_Struct2* m_structUserCountry;
+	//EastShare End - added by AndCycle, IP to Country
 	uint32	m_dwServerIP;
 	uint32	m_nUserIDHybrid;
 	uint16	m_nUserPort;

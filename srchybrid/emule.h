@@ -42,6 +42,9 @@ class CClientCreditsList;
 class CFriendList;
 class CClientUDPSocket;
 class CIPFilter;
+//EastShare Start - added by AndCycle, IP to Country
+class CIP2Country;
+//EastShare End - added by AndCycle, IP to Country
 class CWebServer;
 class CMMServer;
 class CStatistics;
@@ -77,6 +80,9 @@ public:
 	CFriendList*		friendlist;
 	CClientUDPSocket*	clientudp;
 	CIPFilter*			ipfilter;
+	//EastShare Start - added by AndCycle, IP to Country
+	CIP2Country*		ip2country;
+	//EastShare End - added by AndCycle, IP to Country
 	CWebServer*			webserver;
 	CScheduler*			scheduler;
 	CMMServer*			mmserver;

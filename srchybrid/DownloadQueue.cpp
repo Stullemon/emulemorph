@@ -1947,7 +1947,9 @@ void CDownloadQueue::GetDownloadStats(int results[],uint64& pui64TotFileSize,uin
 		uint32 ui32SizeToTransfer=0;
 		uint32 ui32NeededSpace=0;
 		CPartFile* cur_file = filelist.GetAt(pos);
-		if (cur_file->getPartfileStatus() != GetResString(IDS_PAUSED)) { 
+		//Morph - modified by AndCycle, Bug In Getdownloadstats,  Jan 29 2004, 03:47 PM
+		//if (cur_file->getPartfileStatus() != GetResString(IDS_PAUSED)) { 
+		if (cur_file->GetStatus() != PS_PAUSED) { 
 			cur_file->GetSizeToTransferAndNeededSpace (ui32SizeToTransfer,ui32NeededSpace);
 			pui64TotFileSize += cur_file->GetFileSize(); 
 			pui64TotBytesLeftToTransfer += ui32SizeToTransfer;

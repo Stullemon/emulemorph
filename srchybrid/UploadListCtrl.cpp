@@ -34,6 +34,9 @@
 #include "Opcodes.h" //MORPH - Added by SiRoB
 #include "PartFile.h" //MORPH - Added by SiRoB
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
+//EastShare Start - added by AndCycle, IP to Country
+#include "IP2Country.h"
+//EastShare End - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -329,6 +332,13 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg, 0, odc->GetBkColor());
 					//MORPH END   - Modified by SiRoB, More client & Credit overlay icon
 					Sbuffer = client->GetUserName();
+					//EastShare Start - added by AndCycle, IP to Country
+					if(theApp.ip2country->IsIP2Country()){
+						CString tempStr;
+						tempStr.Format("%s : %s", client->GetCountryName(), Sbuffer);
+						Sbuffer = tempStr;
+					}
+					//EastShare End - added by AndCycle, IP to Country
 					cur_rec.left +=20;
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 					cur_rec.left -=20;

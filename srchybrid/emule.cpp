@@ -42,6 +42,9 @@
 #include "ClientUDPSocket.h"
 #include "DownloadQueue.h"
 #include "IPFilter.h"
+//EastShare Start - added by AndCycle, IP to Country
+#include "IP2Country.h"
+//EastShare End - added by AndCycle, IP to Country
 #include "MMServer.h"
 #include "Statistics.h"
 #include "OtherFunctions.h"
@@ -295,6 +298,9 @@ BOOL CemuleApp::InitInstance()
 	downloadqueue = new CDownloadQueue(glob_prefs,sharedfiles);	// bugfix - do this before creating the uploadqueue
 	uploadqueue = new CUploadQueue(glob_prefs);
 	ipfilter 	= new CIPFilter();
+	//EastShare Start - added by AndCycle, IP to Country
+	ip2country = new CIP2Country();
+	//EastShare End - added by AndCycle, IP to Country
 	webserver = new CWebServer(); // Webserver [kuchin]
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
@@ -818,7 +824,7 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 			else
 			{
 				// WINBUG???: 'ExtractIcon' does not work well on ICO-files when using the color 
-				// scheme 'Windows-Standard (extragroß)' -> always try to use 'LoadImage'!
+				// scheme 'Windows-Standard (extragro?' -> always try to use 'LoadImage'!
 				//
 				// If the ICO file contains a 16x16 icon, 'LoadImage' will though return a 32x32 icon,
 				// if LR_DEFAULTSIZE is specified! -> always specify the requested size!

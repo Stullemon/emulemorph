@@ -78,6 +78,9 @@
 #include "ClientCredits.h"
 #include "MenuCmds.h"
 #include "fakecheck.h" //MORPH - Added by SiRoB
+//EastShare Start - added by AndCycle, IP to Country
+#include "IP2Country.h"
+//EastShare End - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -1481,6 +1484,9 @@ void CemuleDlg::OnClose()
 	delete theApp.friendlist;
 	delete theApp.scheduler;
 	delete theApp.ipfilter;
+	//EastShare Start - added by AndCycle, IP to Country
+	delete theApp.ip2country;
+	//EastShare End - added by AndCycle, IP to Country
 	delete theApp.webserver;
 	delete theApp.statistics;
 

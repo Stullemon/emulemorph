@@ -2234,6 +2234,8 @@
 #define IDC_WARNINGEASTSHARE            4875
 #define IDC_WARNINGEAST                 4876
 #define IDC_URL_FOR_UPDATING2           4877
+#define IDC_DLOC                        4877
+#define IDC_DLOC2                       4878
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
@@ -2244,7 +2246,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        4877
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         4877
+#define _APS_NEXT_CONTROL_VALUE         4878
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

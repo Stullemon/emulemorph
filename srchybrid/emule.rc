@@ -13,12 +13,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// 中性 resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
+#pragma code_page(950)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1214,12 +1214,12 @@ BEGIN
     LTEXT           "Static",IDC_DID,215,31,93,8
     LTEXT           "Clientsoftware:",IDC_STATIC33,19,42,50,8
     LTEXT           "Static",IDC_DSOFT,72,42,234,8
-    LTEXT           "Server IP:",IDC_STATIC35,19,53,49,8
-    LTEXT           "Static",IDC_DSIP,72,53,83,8
-    LTEXT           "Servername:",IDC_STATIC38,163,53,47,8
-    LTEXT           "Static",IDC_DSNAME,215,53,92,8
+    LTEXT           "Server IP:",IDC_STATIC35,19,52,49,8
+    LTEXT           "Static",IDC_DSIP,72,52,83,8
+    LTEXT           "Servername:",IDC_STATIC38,163,52,47,8
+    LTEXT           "Static",IDC_DSNAME,215,52,92,8
     LTEXT           "Identification:",IDC_STATIC133x,19,64,53,8
-    LTEXT           "Static",IDC_CDIDENT,72,64,184,8
+    LTEXT           "Static",IDC_CDIDENT,72,64,91,8
     GROUPBOX        "Transfer",IDC_STATIC40,7,87,308,71,BS_FLAT
     LTEXT           "Currently downloading:",IDC_STATIC41,19,97,86,8
     LTEXT           "Static",IDC_DDOWNLOADING,110,97,202,8
@@ -1245,6 +1245,8 @@ BEGIN
     DEFPUSHBUTTON   "&Close",IDOK,268,207,47,14,BS_FLAT
     LTEXT           "Currently downloading:",IDC_STATIC48,19,108,86,8
     LTEXT           "Static",IDC_UPLOADING,110,108,202,8
+    LTEXT           "Static",IDC_DLOC,215,64,92,8
+    LTEXT           "Location:",IDC_DLOC2,163,64,49,8
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -2016,7 +2018,7 @@ BEGIN
         HORZGUIDE, 28
         HORZGUIDE, 39
         HORZGUIDE, 50
-        HORZGUIDE, 61
+        HORZGUIDE, 60
         HORZGUIDE, 72
         HORZGUIDE, 105
         HORZGUIDE, 116
@@ -2320,12 +2322,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // 中性 resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (尒ats-Unis) resources
+// 英文 (美國) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4222,7 +4224,7 @@ BEGIN
     IDS_SHAREONLYTHENEEDDEFAULT "Share Only The Need (0 = Disabled)"
 END
 
-#endif    // Anglais (尒ats-Unis) resources
+#endif    // 英文 (美國) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

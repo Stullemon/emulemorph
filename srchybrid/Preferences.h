@@ -108,7 +108,17 @@ struct Category_Struct{
 
 #pragma pack()
 
-//EastShare Start - added by AndCycle, here is better then opcode.h, creditsystem integration
+//EastShare Start - added by AndCycle, IP to Country
+enum IP2CountryNameSelection{
+
+	IP2CountryName_DISABLE = 0,
+	IP2CountryName_SHORT,
+	IP2CountryName_MID,
+	IP2CountryName_LONG
+};
+//EastShare End - added by AndCycle, IP to Country
+
+//EastShare Start - added by AndCycle, creditsystem integration
 enum CreditSystemSelection {
 	//becareful the sort order for the damn radio button in PPgEastShare.cpp
 	CS_OFFICIAL = 0,	
@@ -117,9 +127,9 @@ enum CreditSystemSelection {
 	CS_PAWCIO,
 	CS_EASTSHARE
 };
-//EastShare End - added by AndCycle, here is better then opcode.h, creditsystem integration
+//EastShare End - added by AndCycle, creditsystem integration
 
-//Morph Start - added by AndCycle, One-Queue-Per-File
+//Morph Start - added by AndCycle, Equal Chance For Each File
 enum EqualChanceForEachFileSelection{
 
 	ECFEF_DISABLE = 0,
@@ -129,7 +139,7 @@ enum EqualChanceForEachFileSelection{
 	ECFEF_TRANSFERRED_COMPLETE	//transfered base, one complete file
 
 };
-//Morph End - added by AndCycle, One-Queue-Per-File
+//Morph End - added by AndCycle, Equal Chance For Each File
 
 #pragma pack(1)
 struct Preferences_Struct{
@@ -586,13 +596,15 @@ struct Preferences_Struct{
 	bool		m_bPreviewEnabled;
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	uint32	m_FakesDatVersion;
-	bool	UpdateFakeStartup;
+	uint32		m_FakesDatVersion;
+	bool		UpdateFakeStartup;
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	bool		AutoUpdateIPFilter; //added by milobac: Ipfilter.dat update
 	uint32		m_IPfilterVersion; //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
+	IP2CountryNameSelection	m_iIP2CountryNameMode;//EastShare - added by AndCycle, IP to Country
+
 	// khaos::categorymod+
 	bool		m_bValidSrcsOnly;
 	bool		m_bShowCatNames;
@@ -782,7 +794,7 @@ public:
 	bool IsAutoDynUpSwitching() const {return prefs->isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
 	int NewDownloadFilePowerShareMode() const {return prefs->m_inewdownloadfilepowersharemode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	int NewSharedFilePowerShareMode() const {return prefs->m_inewsharedfilepowersharemode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
-	
+
 	CPreferences();
 	~CPreferences();
 
@@ -1215,6 +1227,8 @@ public:
 	uint32	GetIPfilterVersion()				{return prefs->m_IPfilterVersion;}
 	void	SetIpfilterVersion(uint32 version)	{prefs->m_IPfilterVersion = version;}
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
+	IP2CountryNameSelection	GetIP2CountryNameMode()	{return prefs->m_iIP2CountryNameMode;}//EastShare - added by AndCycle, IP to Country
+
 	// Barry
 	uint16	Get3DDepth() { return prefs->depth3D;}
 	bool	AutoTakeED2KLinks() {return prefs->autotakeed2klinks;}

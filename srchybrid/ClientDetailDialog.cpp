@@ -24,6 +24,9 @@
 #include "Server.h"
 #include "ServerList.h"
 #include "SharedFileList.h"
+//EastShare Start - added by AndCycle, IP to Country
+#include "IP2Country.h"
+//EastShare End - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -60,6 +63,17 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	else
 		GetDlgItem(IDC_DNAME)->SetWindowText("?");
 	
+	//EastShare Start - added by AndCycle, IP to Country
+	if(theApp.ip2country->IsIP2Country()){
+		// Superlexx
+		bool longCountryName = true;
+		GetDlgItem(IDC_DLOC)->SetWindowText(m_client->GetCountryName(longCountryName));
+	}
+	else{
+		GetDlgItem(IDC_DLOC)->SetWindowText(GetResString(IDS_DISABLED));
+	}
+	//EastShare End - added by AndCycle, IP to Country
+
 	if (m_client->HasValidHash()){
 		buffer ="";
 		CString buffer2;

@@ -33,6 +33,14 @@ CPPgEastShare::CPPgEastShare()
 	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_htiSaveUploadQueueWaitTime = NULL;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
+	//EastShare Start - added by AndCycle, IP to Country
+	m_htiIP2CountryName = NULL;
+	m_htiIP2CountryName_DISABLE = NULL;
+	m_htiIP2CountryName_SHORT = NULL;
+	m_htiIP2CountryName_MID = NULL;
+	m_htiIP2CountryName_LONG = NULL;
+	//EastShare End - added by AndCycle, IP to Country
+
 	//EastShare START - Added by Pretender
 	m_htiCreditSystem = NULL;
 	m_htiOfficialCredit = NULL;
@@ -68,11 +76,13 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EASTSHARE_OPTS, m_ctrlTreeOptions);
 	if (!m_bInitializedTreeOpts)
 	{
+		int iImgIP2Country = 8; //EastShare - added by AndCycle, IP to Country
 		int iImgCS = 8; //EastShare Added by linekin, CreditSystem
 		int iImgMETC = 8; //EastShare Added by TAHO, .met Control
 		int iImgECFEF = 8; //Morph - added by AndCycle, Equal Chance For Each File
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
+			iImgIP2Country = piml->Add(CTempIconLoader("SEARCHMETHOD_GLOBAL")); //EastShare - added by AndCycle, IP to Country
 			iImgCS = piml->Add(CTempIconLoader("STATSCLIENTS")); // EastShare START - Added by Pretender, CS icon
 			iImgMETC = piml->Add(CTempIconLoader("HARDDISK")); // EastShare START - Added by TAHO, .met control
 			iImgECFEF = piml->Add(CTempIconLoader("EQFILE"));//Morph - added by AndCycle, Equal Chance For Each File
@@ -80,6 +90,14 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		m_htiEnablePreferShareAll = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFER_SHARE_ALL), TVI_ROOT, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 		m_htiOnlyDownloadCompleteFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ONLY_DOWNLOAD_COMPLETE_FILES), TVI_ROOT, m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_htiSaveUploadQueueWaitTime = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME), TVI_ROOT, m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+
+		//EastShare Start - added by AndCycle, IP to Country
+		m_htiIP2CountryName = m_ctrlTreeOptions.InsertGroup("IP2Country", iImgIP2Country, TVI_ROOT);
+		m_htiIP2CountryName_DISABLE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DISABLED), m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_DISABLE);
+		m_htiIP2CountryName_SHORT = m_ctrlTreeOptions.InsertRadioButton("US", m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_SHORT);
+		m_htiIP2CountryName_MID = m_ctrlTreeOptions.InsertRadioButton("USA", m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_MID);
+		m_htiIP2CountryName_LONG = m_ctrlTreeOptions.InsertRadioButton("UNITED STATES", m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_LONG);
+		//EastShare End - added by AndCycle, IP to Country
 
 		// EastShare START - Added by linekin, new creditsystem by [lovelace]  // Modified by Pretender
 		m_htiCreditSystem = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_CREDIT_SYSTEM), iImgCS, TVI_ROOT);
@@ -110,7 +128,9 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		// EastShare END - Added by TAHO, .met control
 
 		// EastShare START - Added by Pretender
+		m_ctrlTreeOptions.Expand(m_htiIP2CountryName, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCreditSystem, TVE_EXPAND);//EastShare
+		m_ctrlTreeOptions.Expand(m_htiECFEF, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiMetControl, TVE_EXPAND);
 		// EastShare END - Added by Pretender
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
@@ -118,8 +138,10 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	}
 
 	//this is bad using enum for radio button...need (int &) ^*&^#*^$(, by AndCycle
+
+	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiIP2CountryName, (int &)m_iIP2CountryName);//EastShare - added by AndCycle, IP to Country
 	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiCreditSystem, (int &)m_iCreditSystem); //EastShare - added by linekin , CreditSystem
-	
+
 	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiECFEF, (int &)m_iEqualChanceForEachFile);//Morph - added by AndCycle, Equal Chance For Each File
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiECFEF_ALLTIME, m_bECFEFallTime);//Morph - added by AndCycle, Equal Chance For Each File
 
@@ -142,8 +164,8 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_bOnlyDownloadCompleteFiles = app_prefs->prefs->m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = app_prefs->prefs->m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
+	m_iIP2CountryName = app_prefs->GetIP2CountryNameMode(); //EastShare - added by AndCycle, IP to Country
 	m_iCreditSystem = app_prefs->GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
-
 	m_iEqualChanceForEachFile = app_prefs->GetEqualChanceForEachFileMode();//Morph - added by AndCycle, Equal Chance For Each File
 	m_bECFEFallTime = app_prefs->IsECFEFallTime();//Morph - added by AndCycle, Equal Chance For Each File
 
@@ -178,8 +200,19 @@ BOOL CPPgEastShare::OnApply()
 	app_prefs->prefs->shareall = m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 	app_prefs->prefs->m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	app_prefs->prefs->m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	if((bool)m_bSaveUploadQueueWaitTime != app_prefs->prefs->m_bSaveUploadQueueWaitTime)	bRestartApp = true;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	app_prefs->prefs->m_bSaveUploadQueueWaitTime = m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+
+	//EastShare Start - added by AndCycle, IP to Country
+	if(m_iIP2CountryName != app_prefs->prefs->m_iIP2CountryNameMode && 
+		(app_prefs->prefs->m_iIP2CountryNameMode == IP2CountryName_DISABLE || m_iIP2CountryName == IP2CountryName_DISABLE)){
+		bRestartApp = true;
+	}
+	app_prefs->prefs->m_iIP2CountryNameMode = m_iIP2CountryName;
+	//EastShare End - added by AndCycle, IP to Country
+
+	//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	if((bool)m_bSaveUploadQueueWaitTime != app_prefs->prefs->m_bSaveUploadQueueWaitTime)	bRestartApp = true;
+	app_prefs->prefs->m_bSaveUploadQueueWaitTime = m_bSaveUploadQueueWaitTime;
+	//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
 /*	theApp.emuledlg->serverwnd->ToggleDebugWindow();
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection(); */
@@ -187,8 +220,10 @@ BOOL CPPgEastShare::OnApply()
 
 	app_prefs->prefs->creditSystemMode = m_iCreditSystem; //EastShare - Added by linekin , CreditSystem 
 
-	app_prefs->prefs->equalChanceForEachFileMode = m_iEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
-	app_prefs->prefs->m_bECFEFallTime = m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
+	//Morph - added by AndCycle, Equal Chance For Each File
+	app_prefs->prefs->equalChanceForEachFileMode = m_iEqualChanceForEachFile;
+	app_prefs->prefs->m_bECFEFallTime = m_bECFEFallTime;
+	//Morph - added by AndCycle, Equal Chance For Each File
 
 	app_prefs->SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
 
@@ -237,6 +272,14 @@ void CPPgEastShare::OnDestroy()
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
 	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_htiSaveUploadQueueWaitTime = NULL;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+
+	//EastShare Start - added by AndCycle, IP to Country
+	m_htiIP2CountryName = NULL;
+	m_htiIP2CountryName_DISABLE = NULL;
+	m_htiIP2CountryName_SHORT = NULL;
+	m_htiIP2CountryName_MID = NULL;
+	m_htiIP2CountryName_LONG = NULL;
+	//EastShare End - added by AndCycle, IP to Country
 
 	//EastShare START - Added by Pretender
 	m_htiCreditSystem = NULL;

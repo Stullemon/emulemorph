@@ -34,6 +34,9 @@
 #include "Server.h"
 #include "ClientCredits.h"
 #include "IPFilter.h"
+//EastShare Start - added by AndCycle, IP to Country
+#include "IP2Country.h"
+//EastShare End - added by AndCycle, IP to Country
 #include "UploadQueue.h"
 #include "KademliaMain.h"
 #include "Version.h"
@@ -115,6 +118,9 @@ void CUpDownClient::Init(){
 	m_nUpDatarate = 0;
 	m_pszUsername = 0;
 	m_dwUserIP = 0;
+	//EastShare Start - added by AndCycle, IP to Country
+	m_structUserCountry = theApp.ip2country->GetDefaultIP2Country();
+	//EastShare End - added by AndCycle, IP to Country
 	m_nUserIDHybrid = 0;
 	m_nServerPort = 0;
 	m_bLeecher = false; //MORPH - Added by IceCream, Antileecher feature
@@ -177,6 +183,13 @@ void CUpDownClient::Init(){
 		memset(&sockAddr, 0, sizeof(sockAddr));
 		uint32 nSockAddrLen = sizeof(sockAddr);
 		socket->GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
+		//EastShare Start - added by AndCycle, IP to Country
+		if(theApp.ip2country->IsIP2Country()){
+			if(sockAddr.sin_addr.S_un.S_addr != m_dwUserIP){
+				m_structUserCountry = theApp.ip2country->GetCountryFromIP(sockAddr.sin_addr.S_un.S_addr);
+			}
+		}
+		//EastShare End - added by AndCycle, IP to Country
 		m_dwUserIP = sockAddr.sin_addr.S_un.S_addr;
 		strcpy(m_szFullUserIP,inet_ntoa(sockAddr.sin_addr));
 	}
@@ -535,6 +548,14 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 	
 
 	m_dwUserIP = sockAddr.sin_addr.S_un.S_addr;
+	//EastShare Start - added by AndCycle, IP to Country
+	if(theApp.ip2country->IsIP2Country()){
+		 // Superlexx
+		if (m_structUserCountry == theApp.ip2country->GetDefaultIP2Country()){
+			m_structUserCountry = theApp.ip2country->GetCountryFromIP(m_dwUserIP);
+		}
+	}
+	//EastShare End - added by AndCycle, IP to Country
 	strcpy(m_szFullUserIP,inet_ntoa(sockAddr.sin_addr));
 
 	if (theApp.glob_prefs->AddServersFromClient() && m_dwServerIP && m_nServerPort){
@@ -589,7 +610,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 	}
 
 	ReGetClientSoft();
-
+	
 	m_byInfopacketsReceived |= IP_EDONKEYPROTPACK;
 	// check if at least CT_EMULEVERSION was received, all other tags are optional
 	bool bIsMule = (dwEmuleTags & 0x04) == 0x04;
@@ -2021,3 +2042,21 @@ uint32	CUpDownClient::GetL2HACTime()
 	return m_L2HAC_time ? (m_L2HAC_time - L2HAC_CALLBACK_PRECEDE) : 0;
 }
 //MORPH END   - Moved by SiRoB, <<-- enkeyDEV(th1) -L2HAC-
+
+//EastShare Start - added by AndCycle, IP to Country
+// Superlexx - client's location
+CString	CUpDownClient::GetCountryName(bool longName) const {
+
+	if(longName) return m_structUserCountry->LongCountryName;
+
+	switch(theApp.glob_prefs->GetIP2CountryNameMode()){
+		case IP2CountryName_SHORT:
+			return m_structUserCountry->ShortCountryName;
+		case IP2CountryName_MID:
+			return m_structUserCountry->MidCountryName;
+		case IP2CountryName_LONG:
+			return m_structUserCountry->LongCountryName;
+	}
+	return "";
+}
+//EastShare End - added by AndCycle, IP to Country

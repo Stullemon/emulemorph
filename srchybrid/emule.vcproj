@@ -279,10 +279,13 @@
 				RelativePath="I18n.cpp">
 			</File>
 			<File
-				RelativePath="IPFilter.cpp">
+				RelativePath="Ini2.cpp">
 			</File>
 			<File
-				RelativePath="Ini2.cpp">
+				RelativePath=".\IP2Country.cpp">
+			</File>
+			<File
+				RelativePath="IPFilter.cpp">
 			</File>
 			<File
 				RelativePath="IrcMain.cpp">
@@ -312,13 +315,13 @@
 				RelativePath="MD5Sum.cpp">
 			</File>
 			<File
+				RelativePath="Mdump.cpp">
+			</File>
+			<File
 				RelativePath="MMServer.cpp">
 			</File>
 			<File
 				RelativePath="MMSocket.cpp">
-			</File>
-			<File
-				RelativePath="Mdump.cpp">
 			</File>
 			<File
 				RelativePath="OtherFunctions.cpp">
@@ -599,10 +602,13 @@
 				RelativePath="FunnyNick.h">
 			</File>
 			<File
-				RelativePath="IPFilter.h">
+				RelativePath="Ini2.h">
 			</File>
 			<File
-				RelativePath="Ini2.h">
+				RelativePath=".\IP2Country.h">
+			</File>
+			<File
+				RelativePath="IPFilter.h">
 			</File>
 			<File
 				RelativePath="IrcMain.h">
@@ -629,19 +635,19 @@
 				RelativePath="Loggable.h">
 			</File>
 			<File
+				RelativePath="MapKey.h">
+			</File>
+			<File
 				RelativePath="MD5Sum.h">
+			</File>
+			<File
+				RelativePath="Mdump.h">
 			</File>
 			<File
 				RelativePath="MMServer.h">
 			</File>
 			<File
 				RelativePath="MMSocket.h">
-			</File>
-			<File
-				RelativePath="MapKey.h">
-			</File>
-			<File
-				RelativePath="Mdump.h">
 			</File>
 			<File
 				RelativePath="Opcodes.h">
@@ -972,6 +978,12 @@
 				RelativePath="OScopeCtrl.cpp">
 			</File>
 			<File
+				RelativePath="Parser.cpp">
+			</File>
+			<File
+				RelativePath="Parser.y">
+			</File>
+			<File
 				RelativePath=".\PPgBackup.cpp">
 			</File>
 			<File
@@ -1029,15 +1041,6 @@
 				RelativePath="PPgWebServer.cpp">
 			</File>
 			<File
-				RelativePath="PShtWiz1.cpp">
-			</File>
-			<File
-				RelativePath="Parser.cpp">
-			</File>
-			<File
-				RelativePath="Parser.y">
-			</File>
-			<File
 				RelativePath="PreferencesDlg.cpp">
 			</File>
 			<File
@@ -1045,6 +1048,9 @@
 			</File>
 			<File
 				RelativePath="ProgressCtrlX.cpp">
+			</File>
+			<File
+				RelativePath="PShtWiz1.cpp">
 			</File>
 			<File
 				RelativePath="RichEditCtrlX.cpp">
@@ -1359,6 +1365,9 @@
 				RelativePath="OScopeCtrl.h">
 			</File>
 			<File
+				RelativePath="Parser.hpp">
+			</File>
+			<File
 				RelativePath=".\PPgBackup.h">
 			</File>
 			<File
@@ -1414,9 +1423,6 @@
 			</File>
 			<File
 				RelativePath="PPgWebServer.h">
-			</File>
-			<File
-				RelativePath="Parser.hpp">
 			</File>
 			<File
 				RelativePath="PreferencesDlg.h">
@@ -1540,195 +1546,6 @@
 			<File
 				RelativePath="res\About.jpg">
 			</File>
-						<File
-				RelativePath="res\Contact0.ico">
-			</File>
-			<File
-				RelativePath="res\Contact1.ico">
-			</File>
-			<File
-				RelativePath="res\Contact2.ico">
-			</File>
-			<File
-				RelativePath="res\Contact3.ico">
-			</File>
-			<File
-				RelativePath="res\Contact4.ico">
-			</File>
-			<File
-				RelativePath="res\CumulativeStats.ico">
-			</File>
-			<File
-				RelativePath="res\DirectDownload.ico">
-			</File>
-			<File
-				RelativePath="res\Display.ico">
-			</File>
-			<File
-				RelativePath="res\Filedonkey.ico">
-			</File>
-			<File
-				RelativePath="res\Friend.ico">
-			</File>
-			<File
-				RelativePath="res\IDI_TVI_DAY.ico">
-			</File>
-			<File
-				RelativePath="res\IDI_TVI_GENERIC3.ico">
-			</File>
-			<File
-				RelativePath="res\IDI_TVI_MONTH.ico">
-			</File>
-			<File
-				RelativePath="res\IDI_TVI_TIME.ico">
-			</File>
-			<File
-				RelativePath="res\IDI_TVI_YEAR.ico">
-			</File>
-			<File
-				RelativePath="res\IRC.ico">
-			</File>
-			<File
-				RelativePath="res\Jigle.ico">
-			</File>
-			<File
-				RelativePath="res\KadFileSearch.ico">
-			</File>
-			<File
-				RelativePath="res\KadNodeSearch.ico">
-			</File>
-			<File
-				RelativePath="res\KadStoreFile.ico">
-			</File>
-			<File
-				RelativePath="res\KadStoreWord.ico">
-			</File>
-			<File
-				RelativePath="res\KadWordSearch.ico">
-			</File>
-			<File
-				RelativePath="res\Log.ico">
-			</File>
-			<File
-				RelativePath="res\NewServer.ico">
-			</File>
-			<File
-				RelativePath="res\NormalSearch.ico">
-			</File>
-			<File
-				RelativePath="res\Overnet.ico">
-			</File>
-			<File
-				RelativePath="res\OvernetSearch.ico">
-			</File>
-			<File
-				RelativePath="res\PROVIDER.ICO">
-			</File>
-			<File
-				RelativePath="res\Prefs_Connection.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_Files.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_Folders.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_General.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_IRC.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_Notifications.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_Proxy.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_Scheduler.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_Server.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_Statistics.ico">
-			</File>
-			<File
-				RelativePath="res\Prefs_tweak.ico">
-			</File>
-			<File
-				RelativePath="res\Rating.ico">
-			</File>
-			<File
-				RelativePath="res\Rating_bad.ico">
-			</File>
-			<File
-				RelativePath="res\SafeWrite.ICO">
-			</File>
-			<File
-				RelativePath="res\SearchResults.ico">
-			</File>
-			<File
-				RelativePath="res\SecureHashOvl.ico">
-			</File>
-			<File
-				RelativePath="res\Security.ico">
-			</File>
-			<File
-				RelativePath="res\ServerInfo.ico">
-			</File>
-			<File
-				RelativePath="res\ServerList.ico">
-			</File>
-			<File
-				RelativePath="res\SetupStats.ico">
-			</File>
-			<File
-				RelativePath="res\SeverSearch.ico">
-			</File>
-			<File
-				RelativePath="res\Shareaza.ico">
-			</File>
-			<File
-				RelativePath="res\SharedFiles.ico">
-			</File>
-			<File
-				RelativePath="res\SmallStatistics.ico">
-			</File>
-			<File
-				RelativePath="res\Stats_HD.ico">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_BLUE.BMP">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
-			</File>
-			<File
-				RelativePath="res\Up0down1.ico">
-			</File>
-			<File
-				RelativePath="res\Up1down0.ico">
-			</File>
-			<File
-				RelativePath="res\Up1down1.ico">
-			</File>
-			<File
-				RelativePath="res\UpdateServers.ico">
-			</File>
-			<File
-				RelativePath="res\User.ico">
-			</File>
-			<File
-				RelativePath="res\WebBased.ico">
-			</File>
-			<File
-				RelativePath="res\WebServer.ico">
-			</File>
 			<File
 				RelativePath="res\back.ICO">
 			</File>
@@ -1790,13 +1607,49 @@
 				RelativePath="res\connectedhigh.ICO">
 			</File>
 			<File
+				RelativePath="res\Contact0.ico">
+			</File>
+			<File
+				RelativePath="res\Contact1.ico">
+			</File>
+			<File
+				RelativePath="res\Contact2.ico">
+			</File>
+			<File
+				RelativePath="res\Contact3.ico">
+			</File>
+			<File
+				RelativePath="res\Contact4.ico">
+			</File>
+			<File
 				RelativePath="res\convert.ico">
+			</File>
+			<File
+				RelativePath="res\CreditOvl.ico">
+			</File>
+			<File
+				RelativePath="res\CreditSecureOvl.ico">
+			</File>
+			<File
+				RelativePath="res\CumulativeStats.ico">
+			</File>
+			<File
+				RelativePath="res\DirectDownload.ico">
+			</File>
+			<File
+				RelativePath="res\Display.ico">
 			</File>
 			<File
 				RelativePath="res\down.bmp">
 			</File>
 			<File
 				RelativePath="res\down2x.bmp">
+			</File>
+			<File
+				RelativePath="res\EastShare.ico">
+			</File>
+			<File
+				RelativePath="res\eDonkey.ico">
 			</File>
 			<File
 				RelativePath="res\eDonkeyHybrid.ico">
@@ -1814,7 +1667,16 @@
 				RelativePath="res\emule.rc2">
 			</File>
 			<File
+				RelativePath="res\EQfile.ico">
+			</File>
+			<File
+				RelativePath="res\Filedonkey.ico">
+			</File>
+			<File
 				RelativePath="res\forward.ICO">
+			</File>
+			<File
+				RelativePath="res\Friend.ico">
 			</File>
 			<File
 				RelativePath="res\friends1.ico">
@@ -1844,10 +1706,49 @@
 				RelativePath="res\icon8.ico">
 			</File>
 			<File
+				RelativePath="res\IDI_TVI_DAY.ico">
+			</File>
+			<File
+				RelativePath="res\IDI_TVI_GENERIC3.ico">
+			</File>
+			<File
+				RelativePath="res\IDI_TVI_MONTH.ico">
+			</File>
+			<File
+				RelativePath="res\IDI_TVI_TIME.ico">
+			</File>
+			<File
+				RelativePath="res\IDI_TVI_YEAR.ico">
+			</File>
+			<File
 				RelativePath="res\idr_tray.ico">
 			</File>
 			<File
 				RelativePath="res\inetdownload.avi">
+			</File>
+			<File
+				RelativePath="res\IRC.ico">
+			</File>
+			<File
+				RelativePath="res\Jigle.ico">
+			</File>
+			<File
+				RelativePath="res\KadFileSearch.ico">
+			</File>
+			<File
+				RelativePath="res\KadNodeSearch.ico">
+			</File>
+			<File
+				RelativePath="res\KadStoreFile.ico">
+			</File>
+			<File
+				RelativePath="res\KadStoreWord.ico">
+			</File>
+			<File
+				RelativePath="res\KadWordSearch.ico">
+			</File>
+			<File
+				RelativePath="res\Log.ico">
 			</File>
 			<File
 				RelativePath="res\logo.bmp">
@@ -1862,19 +1763,22 @@
 				RelativePath="res\mldonk.ico">
 			</File>
 			<File
+				RelativePath="res\Morph.ico">
+			</File>
+			<File
 				RelativePath="res\mpending.ICO">
 			</File>
 			<File
 				RelativePath="res\mule.ico">
 			</File>
 			<File
+				RelativePath="res\mule_Tr_grey.ico">
+			</File>
+			<File
 				RelativePath="res\mule_Tr_LowID.ico">
 			</File>
 			<File
 				RelativePath="res\mule_Tr_LowID_grey.ico">
-			</File>
-			<File
-				RelativePath="res\mule_Tr_grey.ico">
 			</File>
 			<File
 				RelativePath="res\mule_TrayIcon.ico">
@@ -1892,7 +1796,19 @@
 				RelativePath="res\neutral.ico">
 			</File>
 			<File
+				RelativePath="res\NewServer.ico">
+			</File>
+			<File
+				RelativePath="res\NormalSearch.ico">
+			</File>
+			<File
 				RelativePath="res\notconnected.ICO">
+			</File>
+			<File
+				RelativePath="res\Overnet.ico">
+			</File>
+			<File
+				RelativePath="res\OvernetSearch.ico">
 			</File>
 			<File
 				RelativePath="res\plus.ICO">
@@ -1916,64 +1832,40 @@
 				RelativePath="res\preferences.ico">
 			</File>
 			<File
-				RelativePath="res\search.ico">
+				RelativePath="res\Prefs_Connection.ico">
 			</File>
 			<File
-				RelativePath="res\search_Overnet.ico">
+				RelativePath="res\Prefs_Files.ico">
 			</File>
 			<File
-				RelativePath="res\server.ico">
+				RelativePath="res\Prefs_Folders.ico">
 			</File>
 			<File
-				RelativePath="res\shared.ico">
+				RelativePath="res\Prefs_General.ico">
 			</File>
 			<File
-				RelativePath="res\taskbarNotifier.bmp">
+				RelativePath="res\Prefs_IRC.ico">
 			</File>
 			<File
-				RelativePath="res\taskbarNotifier.gif">
+				RelativePath="res\Prefs_Notifications.ico">
 			</File>
 			<File
-				RelativePath="res\taskbarNotifier.jpg">
+				RelativePath="res\Prefs_Proxy.ico">
 			</File>
 			<File
-				RelativePath="res\tools.ico">
+				RelativePath="res\Prefs_Scheduler.ico">
 			</File>
 			<File
-				RelativePath="res\transfer.ico">
+				RelativePath="res\Prefs_Server.ico">
 			</File>
 			<File
-				RelativePath="res\up.bmp">
+				RelativePath="res\Prefs_Statistics.ico">
 			</File>
 			<File
-				RelativePath="res\up2x.bmp">
+				RelativePath="res\Prefs_tweak.ico">
 			</File>
 			<File
-				RelativePath="res\updown.ICO">
-			</File>
-			<File
-				RelativePath="res\upload.ico">
-			</File>
-			<File
-				RelativePath="res\user1.ico">
-			</File>
-			<File
-				RelativePath="res\CreditOvl.ico">
-			</File>
-			<File
-				RelativePath="res\CreditSecureOvl.ico">
-			</File>
-			<File
-				RelativePath="res\EastShare.ico">
-			</File>
-			<File
-				RelativePath="res\eDonkey.ico">
-			</File>
-			<File
-				RelativePath="res\EQfile.ico">
-			</File>
-			<File
-				RelativePath="res\Morph.ico">
+				RelativePath="res\PROVIDER.ICO">
 			</File>
 			<File
 				RelativePath="res\Rating-Excellent.ico">
@@ -1992,6 +1884,60 @@
 			</File>
 			<File
 				RelativePath="res\Rating-Poor.ico">
+			</File>
+			<File
+				RelativePath="res\Rating.ico">
+			</File>
+			<File
+				RelativePath="res\Rating_bad.ico">
+			</File>
+			<File
+				RelativePath="res\SafeWrite.ICO">
+			</File>
+			<File
+				RelativePath="res\search.ico">
+			</File>
+			<File
+				RelativePath="res\search_Overnet.ico">
+			</File>
+			<File
+				RelativePath="res\SearchResults.ico">
+			</File>
+			<File
+				RelativePath="res\SecureHashOvl.ico">
+			</File>
+			<File
+				RelativePath="res\Security.ico">
+			</File>
+			<File
+				RelativePath="res\server.ico">
+			</File>
+			<File
+				RelativePath="res\ServerInfo.ico">
+			</File>
+			<File
+				RelativePath="res\ServerList.ico">
+			</File>
+			<File
+				RelativePath="res\SetupStats.ico">
+			</File>
+			<File
+				RelativePath="res\SeverSearch.ico">
+			</File>
+			<File
+				RelativePath="res\Shareaza.ico">
+			</File>
+			<File
+				RelativePath="res\shared.ico">
+			</File>
+			<File
+				RelativePath="res\SharedFiles.ico">
+			</File>
+			<File
+				RelativePath="res\SmallStatistics.ico">
+			</File>
+			<File
+				RelativePath="res\Stats_HD.ico">
 			</File>
 			<File
 				RelativePath="res\suc.ico">
@@ -2014,8 +1960,71 @@
 			<File
 				RelativePath="res\systray_tomax.ico">
 			</File>
+			<File
+				RelativePath="res\taskbarNotifier.bmp">
+			</File>
+			<File
+				RelativePath="res\taskbarNotifier.gif">
+			</File>
+			<File
+				RelativePath="res\taskbarNotifier.jpg">
+			</File>
+			<File
+				RelativePath="res\tools.ico">
+			</File>
+			<File
+				RelativePath="res\transfer.ico">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_BLUE.BMP">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
+			</File>
+			<File
+				RelativePath="res\up.bmp">
+			</File>
+			<File
+				RelativePath="res\Up0down1.ico">
+			</File>
+			<File
+				RelativePath="res\Up1down0.ico">
+			</File>
+			<File
+				RelativePath="res\Up1down1.ico">
+			</File>
+			<File
+				RelativePath="res\up2x.bmp">
+			</File>
+			<File
+				RelativePath="res\UpdateServers.ico">
+			</File>
+			<File
+				RelativePath="res\updown.ICO">
+			</File>
+			<File
+				RelativePath="res\upload.ico">
+			</File>
+			<File
+				RelativePath="res\User.ico">
+			</File>
+			<File
+				RelativePath="res\user1.ico">
+			</File>
+			<File
+				RelativePath="res\WebBased.ico">
+			</File>
+			<File
+				RelativePath="res\WebServer.ico">
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="emule.rc"/>
 	</Globals>
 </VisualStudioProject>

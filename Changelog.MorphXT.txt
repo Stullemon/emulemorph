@@ -1,9 +1,14 @@
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT
 ---------------------------------------- 
+ADDED  : IP2Country from Superlexx, http://forum.emule-project.net/index.php?showtopic=38374
 FIXED  : the wrong construction of the A4AF available part causing messageBox (invalide parameter) [SiRoB]
 FIXED  : Default ShareOnlyTheNeed State not saved [SiRoB]
 FIXED  : Give access to Multiple Comment Changing [SiRoB]
+CHANGED: PaybackFirst now have same priority as PowerShare and 
+         need (client uploaded to you-downloaded from you)>SESSIONAMOUNT(10MB) to reach the requirement [AndCycle]
+NOTE   : IP2Country require you to download latest IP-to-Country Database from http://ip-to-country.webhosting.info/,
+         unzip the file then put the ip-to-country.csv at /config/, then you can enable IP2Country at EastShare tab(will require restart mule)
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 1.1

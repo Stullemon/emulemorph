@@ -33,6 +33,9 @@
 #include "SharedFileList.h"
 #include "UpDownClient.h"
 #include "SafeFile.h"
+//EastShare Start - added by AndCycle, IP to Country
+#include "IP2Country.h"
+//EastShare End - added by AndCycle, IP to Country
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
@@ -1380,6 +1383,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("IPfilterVersion",prefs->m_IPfilterVersion); //added by milobac: Ipfilter.dat update
 	ini.WriteBool("AutoUPdateIPFilter",prefs->AutoUpdateIPFilter); //added by milobac: Ipfilter.dat update
 //MORPH END added by Yun.SF3: Ipfilter.dat update
+	ini.WriteInt("IP2Country", prefs->m_iIP2CountryNameMode); //EastShare - added by AndCycle, IP to Country
 
 	buffer.Format("%s",prefs->nick);
 	ini.WriteString("Nick",buffer);
@@ -1917,6 +1921,7 @@ void CPreferences::LoadPreferences(){
 	prefs->equalChanceForEachFileMode = (EqualChanceForEachFileSelection)ini.GetInt("EqualChanceForEachFileMode", ECFEF_DISABLE);//Morph - added by AndCycle, Equal Chance For Each File
 	prefs->m_bECFEFallTime = ini.GetBool("ECFEFallTime", false);//Morph - added by AndCycle, Equal Chance For Each File
 	prefs->m_bIsUSSLimit = ini.GetBool("IsUSSLimit", true); // EastShare - Added by TAHO, does USS limit
+
 	prefs->maxGraphDownloadRate=ini.GetInt("DownloadCapacity",96);
 	if (prefs->maxGraphDownloadRate==0) prefs->maxGraphDownloadRate=96;
 	prefs->maxGraphUploadRate=ini.GetInt("UploadCapacity",16);
@@ -1953,6 +1958,7 @@ void CPreferences::LoadPreferences(){
 	prefs->m_IPfilterVersion=ini.GetInt("IPfilterVersion",0); //added by milobac: Ipfilter.dat update
 	prefs->AutoUpdateIPFilter=ini.GetBool("AutoUPdateIPFilter",false); //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
+	prefs->m_iIP2CountryNameMode = (IP2CountryNameSelection)ini.GetInt("IP2Country", IP2CountryName_DISABLE); //EastShare - added by AndCycle, IP to Country
 
 	prefs->deadserverretries=ini.GetInt("DeadServerRetry",1);
 	prefs->m_dwServerKeepAliveTimeout=ini.GetInt("ServerKeepAliveTimeout",0);
