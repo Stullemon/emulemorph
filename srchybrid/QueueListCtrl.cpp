@@ -313,9 +313,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					}
 					case 1:
 						if(file)
-							//MORPH - Changed by SiRoB, To see the complet source number given by the client
-							//Sbuffer = file->GetFileName();
-							Sbuffer.Format("(%i) %s",client->GetUpCompleteSourcesCount(),file->GetFileName());
+							Sbuffer = file->GetFileName();
 						else
 							Sbuffer = "?";
 						break;
