@@ -499,10 +499,11 @@ BOOL CemuleDlg::OnInitDialog()
 	// initalize PeerCache
 	theApp.m_pPeerCache->Init(thePrefs.GetPeerCacheLastSearch(), thePrefs.WasPeerCacheFound(), thePrefs.IsPeerCacheDownloadEnabled(), thePrefs.GetPeerCachePort());
 
-    //Commander - Removed Invisible Mode
+        //Commander - Removed Invisible Mode
 	//EastShare, Added by linekin HotKey
 	//RegisterHotKey(this->m_hWnd,100,MOD_WIN,'S'); 
 	//EastShare, Added by linekin HotKey
+	IsWndVisible = true; //SLAHAM: ADDED Invisible Mode
 
 	return TRUE;
 }
@@ -1689,6 +1690,7 @@ void CemuleDlg::RestoreWindow(){
 		TrayHide();	
 	
 	ShowWindow(SW_SHOW);
+	IsWndVisible = true; //SLAHAM: ADDED Invisible Mode
 }
 
 void CemuleDlg::UpdateTrayIcon(int procent)
@@ -2690,11 +2692,17 @@ void CemuleDlg::OutputExtDebugMessages () {
 //Commander - Added: Invisible Mode [TPT] - Start
 LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)
 {
-	if(wParam == HOTKEY_INVISIBLEMODE_ID) RestoreWindow();
+	if(wParam == HOTKEY_INVISIBLEMODE_ID) 
+		//SLAHAM: MODIFIED Invisible Mode =>
+		if(IsWndVisible)
+			HideWindow();
+		else
+			RestoreWindow();
+	//SLAHAM: MODIFIED Invisible Mode <=
 
 	// Allows "invisible mode" on multiple instances of eMule
 	// Restore the rest of hidden emules
-	EnumWindows(AskEmulesForInvisibleMode, INVMODE_RESTOREWINDOW);
+	// EnumWindows(AskEmulesForInvisibleMode, INVMODE_RESTOREWINDOW); //SLAHAM: No Differece
 	
 	return 0;
 }
@@ -2761,3 +2769,11 @@ BOOL CALLBACK CemuleDlg::AskEmulesForInvisibleMode(HWND hWnd, LPARAM lParam){
 	return res; 
 } 
 //Commander - Added: Invisible Mode [TPT] - End
+
+//SLAHAM: ADDED Invisible Mode =>
+void CemuleDlg::HideWindow()
+{
+	theApp.emuledlg->HideTray();
+	IsWndVisible = false;
+}
+//SLAHAM: ADDED Invisible Mode <= 

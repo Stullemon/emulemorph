@@ -333,3 +333,10 @@ LRESULT CTrayDialog::OnTaskBarCreated(WPARAM wParam, LPARAM lParam)
 	}
 	return true;
 }
+
+//SLAHAM: ADDED Invisible Mode =>
+void CTrayDialog::HideTray()
+{
+	ShowWindow(SW_HIDE);
+}
+//SLAHAM: ADDED Invisible Mode <=

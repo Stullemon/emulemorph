@@ -215,6 +215,7 @@ private:
 	void StartConnection();
 	void CloseConnection();
 	void RestoreWindow();
+	void HideWindow(); //SLAHAM: ADDED Invisible Mode
 	void UpdateTrayIcon(int procent);
 	void ShowConnectionStateIcon();
 	void ShowTransferStateIcon();
@@ -242,6 +243,7 @@ public:
 public:
 	BOOL	RegisterInvisibleHotKey();
 	BOOL	UnRegisterInvisibleHotKey();
+	BOOL	IsWndVisible; //SLAHAM: ADDED Invisible Mode
 protected:
 	LRESULT	OnHotKey(WPARAM wParam, LPARAM lParam);
 
