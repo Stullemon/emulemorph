@@ -367,12 +367,12 @@ public:
 	void			SendHashsetPacket(char* forfileid);
 	const uchar*	GetUploadFileID() const							{ return requpfileid; }
 	void			SetUploadFileID(CKnownFile* newreqfile);
-	//MORPH - Changed by SiRoB,  -Fix-
+	//MORPH - Changed by SiRoB, uploadinglist -Fix-
 	/*
 	uint32			SendBlockData();
 	*/
 	bool			SendBlockData();
-	//MORPH - Changed by SiRoB, -Fix-
+	//MORPH - Changed by SiRoB, uploadinglist -Fix-
 	void			ClearUploadBlockRequests();
 	void			SendRankingInfo();
 	void			SendCommentInfo(/*const*/ CKnownFile *file);
