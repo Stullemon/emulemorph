@@ -501,7 +501,9 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	uint32 classID = LAST_CLASS;
-	if (newclient->IsFriend() && newclient->GetFriendSlot())
+	if (newclient->IsScheduledForRemoval())
+		classID = SCHED_CLASS;
+	else if (newclient->IsFriend() && newclient->GetFriendSlot())
 		classID = 0;
 	else if (newclient->IsPBForPS())
 		classID = 1;
@@ -1016,7 +1018,8 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 	   curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall+1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 	   */
 	   curUploadSlotsReal > curUploadSlots && curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall+1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
-        return true;
+        m_abAddClientOfThisClass[LAST_CLASS] = true; //MORPH - Added by SiRoB, Upload Splitting Class
+		return true;
     }
 
 	//nope
