@@ -86,7 +86,7 @@ public:
 	void	ReSortUploadSlots(bool force = false);
 
 	//Morph - added by AndCycle, separate special prio compare
-	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient, bool checkforaddinuploadinglist = false);  //MORPH - Changed by SiRoB, Upload Splitting Class
+	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient);
 	
 protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
