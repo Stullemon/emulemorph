@@ -22,9 +22,6 @@
 #include "resource.h"
 #include "UPnPNat.h" //MORPH - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 #include "WapServer/WapServer.h" //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
-//MORPH START - Added by SiRoB [itsonlyme: -modname-]
-#include "ModName.h"
-//MORPH END   - Added by SiRoB [itsonlyme: -modname-]
 
 #define	DEFAULT_NICK		thePrefs.GetHomepageBaseURL()
 #define	DEFAULT_TCP_PORT	4662
@@ -56,8 +53,8 @@ class CFirewallOpener;
 
 struct SLogItem;
 class CFakecheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
-#include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 class CIP2Country; //EastShare - added by AndCycle, IP to Country
+class CPPgBackup; //EastShare - Added by Pretender, TBH-AutoBackup
 
 enum AppState{
 	APP_STATE_RUNNING=0,

@@ -75,6 +75,9 @@
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
 // Commander - Added: Custom incoming folder icon [emulEspaña] - End
+//MORPH START - Added by SiRoB, ModID
+#include "ModName.h"
+//MORPH END   - Added by SiRoB, ModID
 
 CLogFile theLog;
 CLogFile theVerboseLog;

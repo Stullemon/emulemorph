@@ -56,6 +56,9 @@
 #include "KadContactListCtrl.h"
 #include "PerfLog.h"
 #include "version.h"
+//MORPH START - Added by SiRoB, ModID
+#include "ModName.h"
+//MORPH END   - Added by SiRoB, ModID
 #include "DropTarget.h"
 #include "LastCommonRouteFinder.h"
 #include "WebServer.h"
