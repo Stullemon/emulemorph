@@ -395,7 +395,16 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						Sbuffer = CastSecondsToHM((client->GetWaitTime())/1000);
 					break;
 				case 5:
-					Sbuffer = CastSecondsToHM((client->GetUpStartTimeDelay())/1000);
+					{//Morph - modified by AndCycle, upRemain
+						sint32 timeleft;
+						if(client->GetDatarate() == 0)	timeleft = -1;
+						else if(client->MoreUpThanDown() && client->GetSessionUp() > SESSIONAMOUNT)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
+						else if(client->GetPowerShared() && client->GetSessionUp() > SESSIONAMOUNT) timeleft = -1; //(float)(file->GetFileSize() - client->GetSessionUp())/client->GetDatarate();
+						else if(file->GetFileSize() > SESSIONAMOUNT)	timeleft = (float)(SESSIONAMOUNT - client->GetSessionUp())/client->GetDatarate();
+						else	timeleft = (float)(file->GetFileSize() - client->GetSessionUp())/client->GetDatarate();
+						Sbuffer = CastSecondsToHM((client->GetUpStartTimeDelay())/1000);//original
+						Sbuffer.Format("%s (+%s)", Sbuffer, CastSecondsToHM(timeleft));
+					}//Morph - modified by AndCycle, upRemain
 					break;
 				case 6:
 					switch (client->GetUploadState()){
@@ -465,10 +474,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 							Sbuffer = GetResString(IDS_UNKNOWN);
 					}
 					break;	
-					//MORPH END - Added By Yun.SF3, Remote Status
+				//MORPH END - Added By Yun.SF3, Remote Status
 
 				case 11:{
-                    Sbuffer.Format("%i", client->GetSlotNumber());
+					Sbuffer.Format("%i", client->GetSlotNumber());
 					//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
 					//EastShare START - Added by TAHO, Pay Back First
 					if (client->MoreUpThanDown())
@@ -775,11 +784,11 @@ void CUploadListCtrl::ShowSelectedUserDetails() {
 	POINT point;
 	::GetCursorPos(&point);
 	CPoint p = point; 
-    ScreenToClient(&p); 
-    int it = HitTest(p); 
+	ScreenToClient(&p); 
+	int it = HitTest(p); 
 
 	SetSelectionMark(it);   // display selection mark correctly! 
-    if (it == -1) return;
+	if (it == -1) return;
 
 	CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 
