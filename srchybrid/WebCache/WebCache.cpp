@@ -45,7 +45,13 @@ uint32 ResolveWebCacheName() // returns 0 on error
 				msg.Format( _T( "WebCache Error - Failed to resolve HTTP proxy address:\n" ) \
 							_T( "%s\n" ) \
 							_T( "Please review your webcache settings" ), thePrefs.webcacheName );
-				AfxMessageBox( msg );
+				//MORPH START - Changed by SiRoB, Avoid crash in some case
+				//if we want to popup a message we need to use windows sendmessage
+				/*
+				AfxMessageBox(msg);
+				*/
+				theApp.QueueLogLine(true,msg);
+				//MORPH END   - Changed by SiRoB, Avoid crash in some case
 			}
 			return 0; // can't resolve..
 		}
