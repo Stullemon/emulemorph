@@ -2147,3 +2147,35 @@ bool CKnownFile::ShareOnlyTheNeed(CFile* file)
 	return ok; //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
 }
 //Wistily : Share only the need STOP
+
+//Morph Start - added by AndCycle, Equal Chance For Each File
+double CKnownFile::GetEqualChanceValue(){
+	//smaller value means greater priority
+	switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
+		case ECFEF_ACCEPTED:
+
+			return theApp.glob_prefs->IsECFEFallTime() ?
+				statistic.GetAllTimeAccepts() :
+				statistic.GetAccepts();
+
+		case ECFEF_ACCEPTED_COMPLETE:
+
+			return theApp.glob_prefs->IsECFEFallTime() ?
+				(float)statistic.GetAllTimeAccepts()/GetPartCount() :
+				(float)statistic.GetAccepts()/GetPartCount();
+
+		case ECFEF_TRANSFERRED:
+
+			return theApp.glob_prefs->IsECFEFallTime() ?
+				(double)statistic.GetAllTimeTransferred() :
+				(double)statistic.GetTransferred();
+
+		case ECFEF_TRANSFERRED_COMPLETE:
+
+			return theApp.glob_prefs->IsECFEFallTime() ?
+				(double)statistic.GetAllTimeTransferred()/GetFileSize() :
+				(double)statistic.GetTransferred()/GetFileSize();
+	}
+	return 0;
+}
+//Morph End - added by AndCycle, Equal Chance For Each File

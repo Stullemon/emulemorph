@@ -236,105 +236,13 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 */
 bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore) {
 
-//Morph Start - added by AndCycle, Equal Chance For Each File
-	bool	rightGetQueueFile = false;
-	bool	bothGetQueueFile = true;
-	CKnownFile* rightReqFile = NULL;
-	CKnownFile* leftReqFile = NULL;
-
-	if(rightClient != NULL && leftClient != NULL ){
-		rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID());
-		leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID());
-	}
-	if(rightReqFile != NULL && leftReqFile != NULL && rightReqFile != leftReqFile){
-
-		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
-
-			case ECFEF_ACCEPTED:{
-				if(theApp.glob_prefs->IsECFEFallTime()){
-					rightGetQueueFile = 
-						rightReqFile->statistic.GetAllTimeAccepts() < leftReqFile->statistic.GetAllTimeAccepts();
-					bothGetQueueFile =
-						rightReqFile->statistic.GetAllTimeAccepts() == leftReqFile->statistic.GetAllTimeAccepts();
-
-				}
-				else{
-					rightGetQueueFile = 
-						rightReqFile->statistic.GetAccepts() < 
-						leftReqFile->statistic.GetAccepts();
-					bothGetQueueFile =
-						rightReqFile->statistic.GetAccepts() == 
-						leftReqFile->statistic.GetAccepts();
-				}
-			}break;
-
-			case ECFEF_ACCEPTED_COMPLETE:{
-				if(theApp.glob_prefs->IsECFEFallTime()){
-					rightGetQueueFile =
-						(float)rightReqFile->statistic.GetAllTimeAccepts()/rightReqFile->GetPartCount() <	
-						(float)leftReqFile->statistic.GetAllTimeAccepts()/leftReqFile->GetPartCount() ;
-					bothGetQueueFile =
-						(float)rightReqFile->statistic.GetAllTimeAccepts()/rightReqFile->GetPartCount() ==	
-						(float)leftReqFile->statistic.GetAllTimeAccepts()/leftReqFile->GetPartCount() ;
-				}
-				else{
-					rightGetQueueFile =
-						(float)rightReqFile->statistic.GetAccepts()/rightReqFile->GetPartCount() <	
-						(float)leftReqFile->statistic.GetAccepts()/leftReqFile->GetPartCount() ;
-					bothGetQueueFile =
-						(float)rightReqFile->statistic.GetAccepts()/rightReqFile->GetPartCount() ==	
-						(float)leftReqFile->statistic.GetAccepts()/leftReqFile->GetPartCount() ;
-				}
-			}break;
-
-			case ECFEF_TRANSFERRED:{
-				if(theApp.glob_prefs->IsECFEFallTime()){
-					rightGetQueueFile =
-						rightReqFile->statistic.GetAllTimeTransferred() < 
-						leftReqFile->statistic.GetAllTimeTransferred();
-					bothGetQueueFile =
-						rightReqFile->statistic.GetAllTimeTransferred() == 
-						leftReqFile->statistic.GetAllTimeTransferred();
-				}
-				else{
-					rightGetQueueFile =
-						rightReqFile->statistic.GetTransferred() < 
-						leftReqFile->statistic.GetTransferred();
-					bothGetQueueFile =
-						rightReqFile->statistic.GetTransferred() == 
-						leftReqFile->statistic.GetTransferred();
-				}
-			}break;
-
-			case ECFEF_TRANSFERRED_COMPLETE:{
-				if(theApp.glob_prefs->IsECFEFallTime()){
-					rightGetQueueFile =
-						(double)rightReqFile->statistic.GetAllTimeTransferred()/rightReqFile->GetFileSize() < 
-						(double)leftReqFile->statistic.GetAllTimeTransferred()/leftReqFile->GetFileSize();
-					bothGetQueueFile =
-						(double)rightReqFile->statistic.GetAllTimeTransferred()/rightReqFile->GetFileSize() == 
-						(double)leftReqFile->statistic.GetAllTimeTransferred()/leftReqFile->GetFileSize();
-				}
-				else{
-					rightGetQueueFile =
-						(double)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() < 
-						(double)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
-					bothGetQueueFile =
-						(double)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() == 
-						(double)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
-				}
-			}break;
-		}
-	}
-	//Morph End - added by AndCycle, Equal Chance For Each File
-
 	if(
 		(leftClient != NULL &&
 			(
-				(rightClient->IsFriend() && rightClient->GetFriendSlot()) == true && (leftClient->IsFriend() && leftClient->GetFriendSlot()) == false || // rightClient has friend slot, but leftClient has not, so rightClient is better
+				(leftClient->IsFriend() && leftClient->GetFriendSlot()) == false && (rightClient->IsFriend() && rightClient->GetFriendSlot()) || // rightClient has friend slot, but leftClient has not, so rightClient is better
 				(leftClient->IsFriend() && leftClient->GetFriendSlot()) == (rightClient->IsFriend() && rightClient->GetFriendSlot()) && // both or none have friend slot, let file prio and score decide
 				(//EastShare - added by AndCycle, PayBackFirst
-					rightClient->MoreUpThanDown() == true && leftClient->MoreUpThanDown() == false ||	// rightClient needs to be payback first, but left dont, so right is better
+					leftClient->MoreUpThanDown() == false && rightClient->MoreUpThanDown() == true ||	// rightClient needs to be payback first, but left dont, so right is better
 					leftClient->MoreUpThanDown() == rightClient->MoreUpThanDown() &&	//they both or none need to be payback first
 					(
 						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == true ||	// rightClient wants powershare file, but leftClient not, so rightClient is better
@@ -343,26 +251,26 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 							leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber() || // and rightClient wants higher prio file, so rightClient is better
 							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() && 
 							(//Morph - added by AndCycle, keep full chunk transfer
-								rightClient->needFullChunkTransfer() == true && leftClient->needFullChunkTransfer() == false ||	// rightClient hasn't finish a full chunk, let him get this first
-								rightClient->needFullChunkTransfer() == leftClient->needFullChunkTransfer() &&					// both or none havn't finish full chunk
+								leftClient->needFullChunkTransfer() == false && rightClient->needFullChunkTransfer() == true ||	// rightClient hasn't finish a full chunk, let him get this first
+								leftClient->needFullChunkTransfer() == rightClient->needFullChunkTransfer() &&					// both or none havn't finish full chunk
 								(//Morph - added by AndCycle, Equal Chance For Each File
-									rightGetQueueFile == true ||	// rightClient get a file needs to be treat equal, right get first
-									bothGetQueueFile == true &&		// both or none get a file needs to be treat equal
+									leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
+									leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
 									(
-										rightScore > leftScore  // same prio file, but rightClient has better score, so rightClient is better
+										leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
 									)
 								)
 							)
 						) ||  
 						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
 						(//Morph - added by AndCycle, keep full chunk transfer
-							rightClient->needFullChunkTransfer() == true && leftClient->needFullChunkTransfer() == false ||	// rightClient hasn't finish a full chunk, let him get this first
-							rightClient->needFullChunkTransfer() == leftClient->needFullChunkTransfer() &&					// both or none havn't finish full chunk
+							leftClient->needFullChunkTransfer() == false && rightClient->needFullChunkTransfer() == true ||	// rightClient hasn't finish a full chunk, let him get this first
+							leftClient->needFullChunkTransfer() == rightClient->needFullChunkTransfer() &&					// both or none havn't finish full chunk
 							(//Morph - added by AndCycle, Equal Chance For Each File
-								rightGetQueueFile == true ||	// rightClient get a file needs to be treat equal, right get first
-								bothGetQueueFile == true &&		// both or none get a file needs to be treat equal
+								leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
+								leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
 								(
-									rightScore > leftScore  // but rightClient has better score, so rightClient is better
+									leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
 								)
 							)
 						)

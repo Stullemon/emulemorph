@@ -427,14 +427,19 @@ public:
 	bool IsMorph() { return m_bIsMorph;}
 	//MORPH END   - Added by SiRoB, Is Morph Client
 
-	bool	MoreUpThanDown();	//EastShare - Added by AndCycle, PayBackFirst
-	void	setPayBackFirstTag(bool tag) {m_bPayBackFirstTag=tag;}	//EastShare - Added by AndCycle, PayBackFirst
-	bool	chkPayBackFirstTag() {return m_bPayBackFirstTag;} //EastShare - Added by AndCycle, PayBackFirst
+	//EastShare Start - Added by AndCycle, PayBackFirst
+	bool	MoreUpThanDown();
+	void	setPayBackFirstTag(bool tag)	{m_bPayBackFirstTag = tag;}
+	bool	chkPayBackFirstTag()			{return m_bPayBackFirstTag;}
+	//EastShare End - Added by AndCycle, PayBackFirst
+
+	//Morph - added by AndCycle, Equal Chance For Each File
+	double	GetEqualChanceValue();
 
 	//Morph - added by AndCycle, keep full chunk transfer
 	bool	needFullChunkTransfer();
 	void	setFullChunkTransferTag(bool tag)	{m_bFullChunkTransferTag = tag;}
-	bool	chkFullChunkTransferTag()	{return m_bFullChunkTransferTag;}
+	bool	chkFullChunkTransferTag()			{return m_bFullChunkTransferTag;}
 	//Morph - added by AndCycle, keep full chunk transfer
 
 	//wistily start

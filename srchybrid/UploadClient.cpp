@@ -358,9 +358,20 @@ bool CUpDownClient::MoreUpThanDown(){
 	}
 
 	return credits->GetPayBackFirstStatus();
-
 }
 //EastShare End - added by AndCycle, Pay Back First
+
+//Morph Start - added by AndCycle, Equal Chance For Each File
+double CUpDownClient::GetEqualChanceValue(){
+
+	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
+
+	if(currentReqFile != NULL){
+		return currentReqFile->GetEqualChanceValue();
+	}
+	return 0;
+}
+//Morph End - added by AndCycle, Equal Chance For Each File
 
 //Morph - added by AndCycle, keep full chunk transfer
 bool	CUpDownClient::needFullChunkTransfer(){

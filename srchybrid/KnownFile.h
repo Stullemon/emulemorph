@@ -251,6 +251,10 @@ public:
 	//MORPH START - Added by SiRoB, Track Part File Sent
 	bool	clientarevisible; // used for SharedFilesCtrl
 	//MORPH END   - Added by SiRoB, Track Part File Sent
+
+	//Morph - added by AndCycle, Equal Chance For Each File
+	double	GetEqualChanceValue();
+
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
