@@ -641,11 +641,11 @@ void CMMServer::Process(){
 	} 
 }
 
-CString CMMServer::GetContentType(){
+CStringA CMMServer::GetContentType(){
 	if (m_bUseFakeContent)
-		return CString("image/vnd.wap.wbmp");
+		return CStringA("image/vnd.wap.wbmp");
 	else
-		return CString("application/octet-stream");
+		return CStringA("application/octet-stream");
 }
 
 VOID CALLBACK CMMServer::CommandTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWORD dwTime)

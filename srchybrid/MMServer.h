@@ -55,7 +55,7 @@ public:
 	void	PreviewFinished(CxImage** imgFrames, uint8 nCount);
 	void	Process();
 	void	AddFinishedFile(CKnownFile* file)	{m_SentFinishedList.Add(file);}
-	CString GetContentType();
+	CStringA GetContentType();
 
 	UINT_PTR h_timer;
 	uint8	m_byPendingCommand;
