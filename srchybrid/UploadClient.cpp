@@ -1328,3 +1328,24 @@ uint32 CUpDownClient::GetAvUpDatarate() const
 		return 0;
 }
 //MORPH END  - Added by SIRoB, GetAverage Upload to client
+//MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
+void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUploaded, uint16 partcount)
+{
+	memset(m_abyUpPartUploadingAndUploaded,0,partcount);
+	const Requested_Block_Struct* block;
+	if (!m_BlockRequests_queue.IsEmpty()){
+		block = m_BlockRequests_queue.GetHead();
+		if(block){
+			uint32 start = block->StartOffset/PARTSIZE;
+			m_abyUpPartUploadingAndUploaded[start] = 1;
+		}
+	}
+	if (!m_DoneBlocks_list.IsEmpty()){
+		for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;){
+			block = m_DoneBlocks_list.GetNext(pos);
+			uint32 start = block->StartOffset/PARTSIZE;
+			m_abyUpPartUploadingAndUploaded[start] = 1;
+		}
+	}
+}
+//MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part

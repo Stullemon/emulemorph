@@ -723,6 +723,10 @@ public:
 	// <--- enkeyDEV: ICS
 	//Morph End - added by AndCycle, ICS
 
+	//MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
+	void GetUploadingAndUploadedPart(uint8* abyUpPartUploadingAndUploaded, uint16 partcount);
+	//MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
+
 	//wistily start
 	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}
 	void  Add2UpTotalTime(uint32 length){m_nUpTotalTime += length;}
