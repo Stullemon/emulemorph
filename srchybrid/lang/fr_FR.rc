@@ -2020,12 +2020,20 @@ BEGIN
     IDS_COUNTRYNAME_SHORT   "Afficher 2 lettres"  
     IDS_COUNTRYNAME_MID     "Afficher 3 lettres"  
     IDS_COUNTRYNAME_LONG    "Afficher le nom complet"  
-    IDS_COUNTRYNAME_SHOWFLAG "Montrer les drapeaux"  
+    IDS_COUNTRYNAME_SHOWFLAG "Montrer les drapeaux"
+    IDS_REMOVEALLFRIENDSLOT "Retirer tous les Slots Amis"
+    IDS_INFINITEQUEUE       "File d'attente infinie"
+    IDS_PAYBACKFIRSTLIMIT   "Quantité avant de le déclancher (Défaut 10MB)"
+    IDS_COMMUNITY           "Communauté"
+    IDS_COMMUNITYTAG        "Communauté Tags (separée par '|')"
 END  
   
 STRINGTABLE  
 BEGIN  
-    IDS_REMOVEALLFRIENDSLOT "Retirer tous les Slots Amis"  
+    IDS_AUXPORTS            "Ports Aux."
+    IDS_SOLIDGRAPH          "Dessiner des graphs plein"
+    IDS_POWERSHARE_LIMITED  "Limiter"
+    IDS_POWERSHARE_LIMIT    "Complète source limite"
 END
 #endif    // French (France) resources
 /////////////////////////////////////////////////////////////////////////////
