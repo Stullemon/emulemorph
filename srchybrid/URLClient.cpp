@@ -58,11 +58,11 @@ void CUrlClient::SetRequestFile(CPartFile* pReqFile)
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
 		memset(m_abyPartStatus, 1, m_nPartCount);
+		//MORPH START - Added by SiRoB, See A4AF PartStatus
+		m_PartStatus_list.SetAt(reqfile,m_abyPartStatus);
+		//MORPH END   - Added by SiRoB, See A4AF PartStatus
 		m_bCompleteSource = true;
 	}
-    // MORPH START - Added by Commander, WebCache 1.2e
-	else
-		ResetFileStatusInfo(); // Superlexx - from 0.44a code
 }
 
 bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
