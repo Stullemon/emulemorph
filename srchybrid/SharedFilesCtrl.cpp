@@ -791,7 +791,11 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			// EastShare Start added by linekin, TBH delete shared file
 			case MP_DELFILE:
 				{
-					DeleteFileFromHD(file);
+					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
+					{
+						file = arraySelFiles[i];	// itsonlyme: selFix
+						DeleteFileFromHD(file);
+					}
 					break;
 				}
 			// EastShare End
