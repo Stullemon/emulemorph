@@ -1364,7 +1364,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_STOP,((!file->IsStopped() && file->GetStatus() != PS_ERROR && !filedone ) ? MF_ENABLED:MF_GRAYED));
 			m_FileMenu.EnableMenuItem(MP_RESUME,((file->GetStatus() == PS_PAUSED) ? MF_ENABLED:MF_GRAYED));
 			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-			m_FileMenu.EnableMenuItem(MP_FORCE,((file->lastseencomplete == NULL && file->GetStatus() != PS_ERROR && !filedone) ? MF_ENABLED:MF_GRAYED));//shadow#(onlydownloadcompletefiles)
+			m_FileMenu.EnableMenuItem(MP_FORCE,((file->notSeenCompleteSource() && file->GetStatus() != PS_ERROR && !filedone) ? MF_ENABLED:MF_GRAYED));//shadow#(onlydownloadcompletefiles)
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	        m_FileMenu.EnableMenuItem(MP_OPEN,((file->GetStatus() == PS_COMPLETE) ? MF_ENABLED:MF_GRAYED)); //<<--9/21/02
 			m_FileMenu.EnableMenuItem(MP_PREVIEW,((file->PreviewAvailable()) ? MF_ENABLED:MF_GRAYED));
