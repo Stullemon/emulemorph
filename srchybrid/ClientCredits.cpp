@@ -371,15 +371,19 @@ void CClientCreditsList::LoadList()
 	}
 	uint8 tmpprioOrderfile;
 	uint8 maxavailablefile = index;
-	while (index-- > 0){
+	for (;index>0;index--){
 		for (uint8 i=1; i<index;i++)
 		{
 			if(m_bSaveUploadQueueWaitTime)
-				if(loadFileStatus[prioOrderfile[i-1]].m_mtime < loadFileStatus[prioOrderfile[i]].m_mtime)
+			{
+				if(loadFileStatus[prioOrderfile[i-1]].m_mtime > loadFileStatus[prioOrderfile[i]].m_mtime)
 					continue;
+			}
 			else
-				if(loadFileStatus[prioOrderfile[i-1]].m_mtime <= loadFileStatus[prioOrderfile[i]].m_mtime)
+			{
+				if(loadFileStatus[prioOrderfile[i-1]].m_mtime >= loadFileStatus[prioOrderfile[i]].m_mtime)
 					continue;
+			}
 			tmpprioOrderfile = prioOrderfile[i-1];
 			prioOrderfile[i-1] = prioOrderfile[i];
 			prioOrderfile[i] = tmpprioOrderfile;
