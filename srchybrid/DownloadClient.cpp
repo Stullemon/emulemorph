@@ -99,7 +99,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 			crClientOnly = RGB(0, 100, 255);
 			crPending = RGB(0,150,0);
 			crNextPending = RGB(255,208,0);
-			crMeOnly = RGB(112,112,112); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
+			crMeOnly = RGB(172,172,172); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 			crClientPartial = RGB(170,50,224); // enkeyDev: ICS //Morph - added by AndCycle, ICS
 			crA4AF = RGB(192, 100, 255);
 		} else { 
