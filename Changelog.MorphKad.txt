@@ -5,7 +5,7 @@ REMOVED: Useless CheckDiskSpace option in Morph Preferency [SiRoB]
 CHANGED: Updated HideOS from Slugfiller to avoid exception [Wistily]
 CHANGED: Use Official assigning category in the download popup [SiRoB]
 CHANGED: SLS save now 10 sources with a life time of 1 hour for file with less than 25 sources [SiRoB]
-FIXED: Old MorphNext Modification arrond HideOS feature on rare uploading files in some case [SiRoB]
+FIXED: Old MorphNext Modification arrond HideOS feature on rare files in some case [SiRoB]
 FIXED: Statistic Leecher counter missing [SiRoB]
 
 ----------------------------------------
