@@ -968,8 +968,8 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 		case 9:		// remaining time & size
 			// START enkeyDev(th1) -EDT-
 			if (lpUpDownClient->GetDownloadTimeVersion() &&
-					(lpCtrlItem->type != UNAVAILABLE_SOURCE) &&
-					(lpUpDownClient->GetDownloadState() != DS_DOWNLOADING))
+				(lpCtrlItem->type != UNAVAILABLE_SOURCE) &&
+				(lpUpDownClient->GetDownloadState() != DS_DOWNLOADING))
 				buffer = theApp.m_edt.FormatEDT(lpUpDownClient);
 			else
 				buffer.Empty();

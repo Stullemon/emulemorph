@@ -270,12 +270,13 @@ bool CUpDownClient::MoreUpThanDown(){
 	}else if(credits->GetDownloadedTotal() < 1048576){
 		return false;
 
-	}else if(GetUploadState() == US_UPLOADING){
-		//kick PayBackFirst client after full chunk transfer
-		if(GetQueueSessionPayloadUp() > SESSIONAMOUNT){
+//	}else if(GetUploadState() == US_UPLOADING){
+
+	}else if(GetQueueSessionPayloadUp() > 0){//keep PayBackFirst client for full chunk transfer
+
+		if(GetQueueSessionPayloadUp() > SESSIONAMOUNT){//kick PayBackFirst client after full chunk transfer
 			return false;
 		}else{
-		//keep PayBackFirst client for full chunk transfer
 			return chkPayBackFirstTag();
 		}
 	}else{
