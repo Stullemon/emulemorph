@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.43b MorphXT v4.x
+--------------------------------------
+FIXED  : TRAY EXIT [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
 --------------------------------------
 MERGED : Code merged to 0.43b [SiRoB]
