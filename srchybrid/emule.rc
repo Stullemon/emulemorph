@@ -5495,6 +5495,8 @@ BEGIN
     IDS_UPNP                "Universal Plug & Play (UPnP)"
     IDS_SOURCE_LOADER_SAVER "SLS"
     IDS_SHORTTAGS           "Short tags"
+    IDS_NEWFRIEND           "New friend:"
+    IDS_REMOVEDFRIEND       "Removed friend:"
 END
 //MORPH END - Added by FrankyFive
 

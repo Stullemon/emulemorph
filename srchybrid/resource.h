@@ -2839,6 +2839,8 @@
 #define IDS_IP2COUNTRY_NASHORT          6276
 #define IDS_SOURCE_LOADER_SAVER         6277
 #define IDS_SHORTTAGS                   6278
+#define IDS_NEWFRIEND                   6279
+#define IDS_REMOVEDFRIEND               6280
 //MORPH END - Added by FrankyFive
 
 #define IDS_TW_TRANSFERS                7051

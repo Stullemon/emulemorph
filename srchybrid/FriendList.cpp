@@ -192,12 +192,12 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 	// Mighty Knife: log friend activities
 	if (thePrefs.GetLogFriendlistActivities ()) {
 		#ifdef MIGHTY_TWEAKS
- 	    AddLogLine(false, _T("New friend: '%s', ip %i.%i.%i.%i:%i, hash %s"),
+ 	    AddLogLine(false, GetResString(IDS_NEWFRIEND)+_T(" '%s', ip %i.%i.%i.%i:%i, ")+GetResString(IDS_CD_UHASH)+_T(" %s"),
 									Record->m_strName, (uint8)Record->m_dwLastUsedIP, (uint8)(Record->m_dwLastUsedIP>>8), 
 									(uint8)(Record->m_dwLastUsedIP>>16),(uint8)(Record->m_dwLastUsedIP>>24), 
 									Record->m_nLastUsedPort, md4str(Record->m_abyUserhash));
 		#else
-		AddLogLine(false, _T("New friend: '%s', hash: %s"),
+		AddLogLine(false, GetResString(IDS_NEWFRIEND)+_T(" '%s', ")+GetResString(IDS_CD_UHASH)+_T(" %s"),
 									Record->m_strName, md4str(Record->m_abyUserhash));
 		#endif
 	}
@@ -234,13 +234,13 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 	// Mighty Knife: log friend activities
 	if (thePrefs.GetLogFriendlistActivities ()) {
 		#ifdef MIGHTY_TWEAKS
-		AddLogLine(false, _T("New friend: '%s', ip %i.%i.%i.%i:%i, hash %s"),
+		AddLogLine(false, GetResString(IDS_NEWFRIEND)+_T(" '%s', ip %i.%i.%i.%i:%i, ")+GetResString(IDS_CD_UHASH)+_T(" %s"),
 									NewFriend->m_strName, (uint8)NewFriend->m_dwLastUsedIP, 
 									(uint8)(NewFriend->m_dwLastUsedIP>>8), 
 									(uint8)(NewFriend->m_dwLastUsedIP>>16),(uint8)(NewFriend->m_dwLastUsedIP>>24), 
 									NewFriend->m_nLastUsedPort, md4str(NewFriend->m_abyUserhash));
 		#else
-		AddLogLine(false, _T("New friend: '%s', hash: %s"),
+		AddLogLine(false, GetResString(IDS_NEWFRIEND)+_T(" '%s', ")+GetResString(IDS_CD_UHASH)+_T(" %s"),
 									NewFriend->m_strName, md4str(NewFriend->m_abyUserhash));
 		#endif
 	}
@@ -259,13 +259,13 @@ void CFriendList::RemoveFriend(CFriend* todel){
 	// Mighty Knife: log friend activities
 	if (thePrefs.GetLogFriendlistActivities ()) {
 		#ifdef MIGHTY_TWEAKS
-		AddLogLine(false, _T("Removed friend: '%s', ip %i.%i.%i.%i:%i, hash %s"),
+		AddLogLine(false, GetResString(IDS_REMOVEDFRIEND)+_T(" '%s', ip %i.%i.%i.%i:%i, ")+GetResString(IDS_CD_UHASH)+_T(" %s"),
 									todel->m_strName, (uint8)todel->m_dwLastUsedIP, 
 									(uint8)(todel->m_dwLastUsedIP>>8), 
 									(uint8)(todel->m_dwLastUsedIP>>16),(uint8)(todel->m_dwLastUsedIP>>24), 
 									todel->m_nLastUsedPort, md4str(todel->m_abyUserhash));
 		#else
-		AddLogLine(false, _T("Removed friend: '%s', hash: %s"),
+		AddLogLine(false, GetResString(IDS_REMOVEDFRIEND)+_T(" '%s', ")+GetResString(IDS_CD_UHASH)+_T(" %s"),
 									todel->m_strName, md4str(todel->m_abyUserhash));
 		#endif
 	}
