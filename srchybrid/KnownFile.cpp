@@ -2329,4 +2329,54 @@ double CKnownFile::GetEqualChanceValue(){
 	}
 	return 0;
 }
+
+CString CKnownFile::GetEqualChanceValueString(bool detail){
+
+	CString tempString;
+
+	switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
+		case ECFEF_DISABLE:
+			{
+				tempString.Empty();
+			}break;
+
+		case ECFEF_ACCEPTED:
+			{
+				theApp.glob_prefs->IsECFEFallTime() ?
+					tempString.Format("%u", statistic.GetAllTimeAccepts()) :
+					tempString.Format("%u", statistic.GetAccepts());
+			}break;
+
+		case ECFEF_ACCEPTED_COMPLETE:
+			{
+				theApp.glob_prefs->IsECFEFallTime() ?
+					detail ?
+						tempString.Format("%.2f = %u/%u", (float)statistic.GetAllTimeAccepts()/GetPartCount(), statistic.GetAllTimeAccepts(), GetPartCount()) :
+						tempString.Format("%.2f", (float)statistic.GetAllTimeAccepts()/GetPartCount()) :
+					detail ?
+						tempString.Format("%.2f = %u/%u", (float)statistic.GetAccepts()/GetPartCount(), statistic.GetAccepts(), GetPartCount()) :
+						tempString.Format("%.2f", (float)statistic.GetAccepts()/GetPartCount());
+			}break;
+
+		case ECFEF_TRANSFERRED:
+			{
+				theApp.glob_prefs->IsECFEFallTime() ?
+					tempString.Format("%s", CastItoXBytes(statistic.GetAllTimeTransferred())) :
+					tempString.Format("%s", CastItoXBytes(statistic.GetTransferred()));
+			}break;
+
+		case ECFEF_TRANSFERRED_COMPLETE:
+			{
+				theApp.glob_prefs->IsECFEFallTime() ?
+					detail ?
+						tempString.Format("%.2f = %s/%s", (double)statistic.GetAllTimeTransferred()/GetFileSize(), CastItoXBytes(statistic.GetAllTimeTransferred()), CastItoXBytes(GetFileSize())) :
+						tempString.Format("%.2f", (double)statistic.GetAllTimeTransferred()/GetFileSize()) :
+					detail ?
+						tempString.Format("%.2f = %s/%s", (double)statistic.GetTransferred()/GetFileSize(), CastItoXBytes(statistic.GetTransferred()), CastItoXBytes(GetFileSize())) :
+						tempString.Format("%.2f", (double)statistic.GetTransferred()/GetFileSize());
+			}break;
+	}
+
+	return tempString;
+}
 //Morph End - added by AndCycle, Equal Chance For Each File

@@ -259,6 +259,7 @@ public:
 
 	//Morph - added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue();
+	CString	GetEqualChanceValueString(bool detail = true);
 
 #ifdef _DEBUG
 	// Diagnostic Support
