@@ -597,6 +597,7 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 		return false;
 	}
 	// SLUGFILLER: mergeKnown
+	pFile->SetLastSeen();	// okay, we see it
 	theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
 	// SLUGFILLER: mergeKnown
 	//MORPH - Removed by SiRoB, Safe Hash

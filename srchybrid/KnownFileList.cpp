@@ -82,14 +82,7 @@ bool CKnownFileList::Init()
 			file.Close();
 			return false;
 		}
-		
-		// EastShare START - Added by TAHO, .met file control
-		uint32 cDeleted = 0; 
-		uint32 cAdded = 0;
-		uint32 ExpiredTime = time(NULL) - thePrefs.GetKnownMetDays()*86400;
-		// EastShare END - Added by TAHO, .met file control
-		
-		
+
 		UINT RecordsNumber = file.ReadUInt32();
 		for (UINT i = 0; i < RecordsNumber; i++) {
 			pRecord = new CKnownFile(); //MORPH - Changed by SiRoB, Mem leak fix by bzubzu.
@@ -100,23 +93,10 @@ bool CKnownFileList::Init()
 				pRecord = NULL;  //MORPH - Added by SiRoB, Mem leak fix by bzubzu.
 				continue;
 			}
-			//EastShare START - Modified by TAHO, .met file control
-			//SafeAddKFile(pRecord);
-			if ( thePrefs.GetKnownMetDays() == 0 || pRecord->statistic.GetLastUsed() > ExpiredTime )
-			{
-				SafeAddKFile(pRecord);
-				cAdded++;
-			}
-			else
-			{
-				cDeleted++;
-				delete pRecord;
-				pRecord = NULL;
-			}
-			// EastShare END - Modified by TAHO, .met file control
+			SafeAddKFile(pRecord);
+			pRecord = NULL;
 		}
 		file.Close();
-		AddLogLine(false, "known.met loaded, %i files are known, %i files are deleted.", cAdded, cDeleted); // EastShare - Added by TAHO, .met file control
 	}
 	catch(CFileException* error){
 		if (error->m_cause == CFileException::endOfFile)
@@ -159,20 +139,32 @@ void CKnownFileList::Save()
 		file.WriteUInt8(MET_HEADER);
 
 		UINT nRecordsNumber = m_Files_map.GetCount();
-		// SLUGFILLER: mergeKnown - add part files
-		uint32 RecordsNumberWithPartFiles = nRecordsNumber + theApp.downloadqueue->GetPartFilesCount();
-		file.WriteUInt32(RecordsNumberWithPartFiles);
-		// SLUGFILLER: mergeKnown - add part files
+		// SLUGFILLER: mergeKnown
 		POSITION pos = m_Files_map.GetStartPosition();
-		while( pos != NULL)
+		// clean-up
+		const uint32 dwExpired = time(NULL) - thePrefs.GetKnownMetDays()*86400;	// Morph - modified by AndCycle, .met file control
+		while( pos != NULL )
 		{
 			CKnownFile* pFile;
 			CCKey key;
 			m_Files_map.GetNextAssoc( pos, key, pFile );
-			pFile->WriteToFile(&file);
+			if (theApp.sharedfiles->GetFileByID(pFile->GetFileHash()) == pFile)
+				pFile->SetLastSeen();
+			else if (pFile->GetLastSeen() < dwExpired)
+				nRecordsNumber--;
+		}
+		file.WriteUInt32(nRecordsNumber + theApp.downloadqueue->GetPartFilesCount());
+		pos = m_Files_map.GetStartPosition();
+		// SLUGFILLER: mergeKnown
+		while( pos != NULL )
+		{
+			CKnownFile* pFile;
+			CCKey key;
+			m_Files_map.GetNextAssoc( pos, key, pFile );
+			if (pFile->GetLastSeen() >= dwExpired)	// SLUGFILLER: mergeKnown
+				pFile->WriteToFile(&file);
 		}
 		theApp.downloadqueue->SavePartFilesToKnown(&file);	// SLUGFILLER: mergeKnown - add part files
-
 		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 			file.Flush(); // flush file stream buffers to disk buffers
 			if (_commit(_fileno(file.m_pStream)) != 0) // commit disk buffers to disk

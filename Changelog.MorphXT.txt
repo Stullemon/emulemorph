@@ -2,6 +2,7 @@
 Changelog for eMule 0.42g MorphXT v3.x
 --------------------------------------
 CHANGED: Simplify Equal Chance for Each File to a checkbox [AndCycle]
+CHANGED: Adapt to SLUGFILLER's expired time known.met control [AndCycle]
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v3.5

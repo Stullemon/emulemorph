@@ -198,6 +198,11 @@ public:
 	const CString& GetFilePath() const { return m_strFilePath; }
 	void SetFilePath(LPCTSTR pszFilePath);
 
+	// SLUGFILLER: mergeKnown
+	void	SetLastSeen()	{ m_dwLastSeen = time(NULL); }
+	uint32	GetLastSeen()	{ return m_dwLastSeen; }
+	// SLUGFILLER: mergeKnown
+
 	virtual bool CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam); // create date, hashset and tags from a file
 	virtual bool IsPartFile() const { return false; }
 	virtual bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
@@ -370,6 +375,8 @@ private:
 	uint32	m_PublishedKadSrc;
 	Kademlia::WordList wordlist;
 	UINT	m_uMetaDataVer;
+	uint32	m_dwLastSeen;	// SLUGFILLER: mergeKnown
+
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	bool	InChangedSharedStatusBar;
 	CDC 	m_dcSharedStatusBar;
