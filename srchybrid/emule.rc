@@ -5503,7 +5503,7 @@ BEGIN
 	IDS_SCHED_UPDATE_IPCONFIG  "Update IPCONFIG.DAT-file"
 	IDS_SCHED_UPDATE_FAKES     "Update FAKES.DAT-file"
 	IDS_SCHED_BACKUP_LOG            "Scheduled backup initiated."
-	IDS_SCHED_UPDATE_IPCONFIG_LOG   "Scheduled IPCONFIG.DAT-update initiated."
+	IDS_SCHED_UPDATE_IPCONFIG_LOG   "Scheduled IPFILTER.DAT-update initiated."
 	IDS_SCHED_UPDATE_FAKES_LOG      "Scheduled FAKES.DAT-update initiated."
 	IDS_SCHED_UPDATE_WARNING   "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
 END
