@@ -5468,7 +5468,8 @@ BEGIN
     IDS_WC_TEST             "Test webcache configuration. Might take up to 30 Seconds"
     IDS_WC_HIDE_ADV         "Hide advanced controls"
     IDS_WC_SUBMIT_WEB       "Submit webcache info via webform"
-    IDS_WC_SOURCES          "Webcache Sources"
+    IDS_WC_SOURCES          "Webcache Capable"
+	IDS_WC_UPDATESETTING   	"Update webcachesettings automatically"
 END
 
 STRINGTABLE 

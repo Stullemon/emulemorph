@@ -2159,6 +2159,7 @@
 #define IDS_WC_HIDE_ADV                 3227
 #define IDS_WC_SUBMIT_WEB               3228
 #define IDS_WC_SOURCES                  3229
+#define IDS_WC_UPDATESETTING            3230
 #define IDS_LD_ADDPHPBB                 3306
 #define IDS_POWERSHARE_INTERPRIO        3307
 #define IDC_INVISIBLE_MODE_GROUP_BOX    3308
