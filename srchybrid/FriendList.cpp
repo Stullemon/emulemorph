@@ -302,6 +302,9 @@ void CFriendList::RemoveAllFriendSlots(){
 		//MORPH START - Added by Yun.SF3, ZZ Upload System
 		cur_friend->SetFriendSlot(false);
 		//MORPH END - Added by Yun.SF3, ZZ Upload System
+		//MORPH - Added by SiRoB, Friend Addon
+		RefreshFriend(cur_friend);
+		//MORPH - Added by SiRoB, Friend Addon
 	}
 }
 

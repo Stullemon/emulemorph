@@ -89,8 +89,9 @@ void CFriendListCtrl::SetAllIcons()
 	iml.Add(CTempIconLoader("FriendWithClient"));
 	iml.Add(CTempIconLoader("FriendConnected"));
 	//MORPH START - Added by SiRoB, Friend Addon
-	iml.SetOverlayImage(iml.Add(CTempIconLoader("ClientFriendOvl")), 1);
-	iml.SetOverlayImage(iml.Add(CTempIconLoader("ClientFriendSlotOvl")), 2);
+	iml.Add(CTempIconLoader("FriendNoClientSlot"));
+	iml.Add(CTempIconLoader("FriendWithClientSlot"));
+	iml.Add(CTempIconLoader("FriendConnectedSlot"));
 	//MORPH END   - Added by SiRoB, Friend Addon
 
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
@@ -168,9 +169,11 @@ void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
 			image = 2;
 		else
 			image = 1;
-		//MORPH START - Changed by SiRoB, Friend Addon
-		SetItem(itemnr,0,LVIF_IMAGE | LVIF_STATE,0,image,INDEXTOOVERLAYMASK(toupdate->GetFS()?2:1),LVIS_OVERLAYMASK,0,0);
-		//MORPH END   - Changed by SiRoB, Friend Addon
+		//MORPH START - Added by SiRoB, 
+		if (toupdate->GetFS()) image += 3;
+		//MORPH END   - Added by SiRoB, 
+		
+		SetItem(itemnr,0,LVIF_IMAGE,0,image,0,0,0,0);
 	}
 	else
 		ASSERT(0);

@@ -1242,22 +1242,56 @@ bool CUpDownClient::SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensio
 			if (cur_file != reqfile && theApp.downloadqueue->IsPartFile(cur_file) && !cur_file->IsStopped() 
 				&& (cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) )	
 			{
-				if (toFile != NULL){
-					if (cur_file == toFile){
+				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+				if (!theApp.glob_prefs->UseSmartA4AFSwapping())
+				{
+				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
+					if (toFile != NULL){
+						if (cur_file == toFile){
+							SwapTo = cur_file;
+							finalpos = pos;
+							break;
+						}
+					}
+					else if ( cur_file->GetDownPriority()>cur_prio 
+						&& (ignoreSuspensions  || (!ignoreSuspensions && !IsSwapSuspended(cur_file)) ) )
+					{
 						SwapTo = cur_file;
-						finalpos = pos;
-						break;
+						cur_prio=cur_file->GetDownPriority();
+						finalpos=pos;
+						if (cur_prio==PR_HIGH)
+							break;
+					}
+				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+				}
+				else
+				{
+					if (theApp.glob_prefs->GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !theApp.glob_prefs->RespectMaxSources())
+					{
+						if (cur_file->ForceAllA4AF())
+						{
+							SwapTo = cur_file;
+							finalpos=pos;
+							break;
+						}
+						else if (!SwapTo)
+						{
+							SwapTo = cur_file;
+							finalpos=pos;
+						}
+						else if (SwapTo->GetDownPriority() > cur_file->GetDownPriority())
+						{
+							SwapTo = cur_file;
+							finalpos=pos;
+						}
+						else if (SwapTo->GetDownPriority() == cur_file->GetDownPriority() && SwapTo->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount())
+						{
+							SwapTo = cur_file;
+							finalpos=pos;
+						}
 					}
 				}
-				else if ( cur_file->GetDownPriority()>cur_prio 
-					&& (ignoreSuspensions  || (!ignoreSuspensions && !IsSwapSuspended(cur_file)) ) )
-				{
-					SwapTo = cur_file;
-					cur_prio=cur_file->GetDownPriority();
-					finalpos=pos;
-					if (cur_prio==PR_HIGH)
-						break;
-				}
+				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 			}
 		}
 	}

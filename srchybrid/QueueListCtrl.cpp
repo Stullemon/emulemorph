@@ -659,6 +659,7 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 						theApp.friendlist->RefreshFriend(cur_friend);
 					}
 					//KTS-
+					RefreshClient(client);
 				}
 				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 				break;

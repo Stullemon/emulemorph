@@ -2318,6 +2318,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							theApp.friendlist->RefreshFriend(cur_friend);
 						}
 						//KTS-
+						this->UpdateItem(client);
 					}
 					//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 					break;

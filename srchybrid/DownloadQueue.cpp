@@ -308,11 +308,11 @@ bool CDownloadQueue::StartNextFile(int cat){
 			if (!pfile)
 				pfile = cur_file;
 			else {
-				if (pfile->GetCategory()!=cat && cur_file->GetCategory()==cat  && cat!=-1) {
-					if (theApp.glob_prefs->GetResumeSameCat()){
-						pfile = cur_file;
-						if (pfile->GetDownPriority() == PR_HIGH && pfile->GetCatResumeOrder() == 0) break; continue;
-					}
+				if (pfile->GetCategory()==cat && theApp.glob_prefs->GetResumeSameCat() && cur_file->GetCategory()!=cat  && cat!=-1)
+					continue;
+				else if (pfile->GetCategory()!=cat && theApp.glob_prefs->GetResumeSameCat() && cur_file->GetCategory()==cat  && cat!=-1) {
+					pfile = cur_file;
+					if (pfile->GetDownPriority() == PR_HIGH && pfile->GetCatResumeOrder() == 0) break; continue;
 				}
 				else if (cur_file->GetCatResumeOrder() < pfile->GetCatResumeOrder()) {
 					pfile = cur_file;
