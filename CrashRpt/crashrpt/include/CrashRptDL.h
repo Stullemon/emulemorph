@@ -88,7 +88,7 @@ GetInstanceDL()
 {
 #ifdef _UNICODE
 	return LoadLibrary(_T("CrashRpt"));
-#elif
+#else
 	return LoadLibrary("CrashRpt");
 #endif
 }
