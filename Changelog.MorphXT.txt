@@ -1,4 +1,18 @@
 --------------------------------------
+Changelog for eMule 0.42g MorphXT v3.x
+--------------------------------------
+FIXED  : Share Only The Need [SiRoB]
+
+ADDED  : Chunk Dot display option from EastShare [SiRoB]
+ADDED  : Invisible mule application from EastShare with tweak [SiRoB]
+ADDED  : New friend message window from TPT [SiRoB]
+ADDED  : Splitting Bar from O2 [SiRoB]
+ADDED  : RSS from O2 [SiRoB]
+
+CHANGED: Set max ping limit as default in preferency [SiRoB]
+CHANGED: Activated Powershare Limit feature [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.42g MorphXT v3.2
 --------------------------------------
 FIXED  : Powershare Limit per file [SiRoB]
