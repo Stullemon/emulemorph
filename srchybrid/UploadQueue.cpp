@@ -129,11 +129,11 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	/*
 	CUpDownClient* newclient = FindBestClientInQueue(true, client);
 	*/
-	CUpDownClient* newclient = FindBestClientInQueue(true, client, onlyCheckForRemove == false);
+	CUpDownClient* newclient = FindBestClientInQueue(true, client, onlyCheckForRemove);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	
     if(newclient != NULL && // Only remove the client if there's someone to replace it
-		RightClientIsSuperior(client, newclient, onlyCheckForRemove == false) >= 0
+		RightClientIsSuperior(client, newclient, onlyCheckForRemove) >= 0
       ){
 
         // Remove client from ul list to make room for higher/same prio client
@@ -752,24 +752,23 @@ void CUploadQueue::Process() {
 	UpdateActiveClientsInfo(curTick);
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	if (m_nLastStartUpload + 5000 < curTick){
-		memzero(m_aiSlotCounter,sizeof(m_aiSlotCounter));
-		POSITION pos2 = uploadinglist.GetHeadPosition();
-		while(pos2 != NULL){
-			// Get the client. Note! Also updates pos as a side effect.
-			CUpDownClient* cur_client = uploadinglist.GetNext(pos2);
-			uint32 classID = cur_client->GetClassID();
-			uint32 maxdatarate = thePrefs.GetMaxClientDataRate();
-			switch (classID){
-				case 0: maxdatarate = thePrefs.GetMaxClientDataRateFriend();break;
-				case 1: maxdatarate = thePrefs.GetMaxClientDataRatePowerShare();break;
-				default: maxdatarate = thePrefs.GetMaxClientDataRate();break;
-			}
-			if (maxdatarate > 0 && cur_client->GetDatarate()*10 >= 11*maxdatarate)
-				m_abOnClientOverHideClientDatarate[classID] = true;
-			++m_aiSlotCounter[classID];
-			++m_aiSlotCounter[LAST_CLASS];
+	memzero(m_aiSlotCounter,sizeof(m_aiSlotCounter));
+	POSITION pos2 = uploadinglist.GetHeadPosition();
+	while(pos2 != NULL){
+		// Get the client. Note! Also updates pos as a side effect.
+		CUpDownClient* cur_client = uploadinglist.GetNext(pos2);
+		uint32 classID = cur_client->GetClassID();
+		uint32 maxdatarate = thePrefs.GetMaxClientDataRate();
+		switch (classID){
+			case 0: maxdatarate = thePrefs.GetMaxClientDataRateFriend();break;
+			case 1: maxdatarate = thePrefs.GetMaxClientDataRatePowerShare();break;
+			default: maxdatarate = thePrefs.GetMaxClientDataRate();break;
 		}
+		if (maxdatarate > 0 && m_nLastStartUpload + 5000 < curTick && cur_client->GetDatarate()*10 >= 11*maxdatarate)
+			m_abOnClientOverHideClientDatarate[classID] = true;
+		++m_aiSlotCounter[classID];
+		if (classID<LAST_CLASS)
+			++m_aiSlotCounter[LAST_CLASS];
 	}
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 		m_abAddClientOfThisClass[classID] = m_abOnClientOverHideClientDatarate[classID] || //one client in class reached max upload limit
