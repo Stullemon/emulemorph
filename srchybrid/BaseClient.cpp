@@ -365,6 +365,12 @@ void CUpDownClient::ClearHelloProperties()
 	m_nClientMajVersion = 0;
 	m_nClientMinVersion = 0;
 	m_nClientUpVersion = 0;
+	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
+	m_clientModString.Empty();
+	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
+	//MOPRH START - Added by SiRoB, Is Morph Client?
+	m_bIsMorph = false;
+	//MOPRH END   - Added by SiRoB, Is Morph Client?
 }
 
 bool CUpDownClient::ProcessHelloPacket(char* pachPacket, uint32 nSize){

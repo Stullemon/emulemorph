@@ -1,4 +1,9 @@
 ----------------------------------------
+Changelog for eMule 0.40e21 MorphKad 0.5
+----------------------------------------
+FIXED: Added initialisation of clientmodstring to avoid some strange client software version [SiRoB]
+
+----------------------------------------
 Changelog for eMule 0.40e21 MorphKad 0.4
 ----------------------------------------
 REMOVED: Useless CheckDiskSpace option in Morph Preferency [SiRoB]
