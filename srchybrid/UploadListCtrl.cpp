@@ -437,8 +437,6 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						else if(file)
 							if (file->GetFileSize() > SESSIONAMOUNT)	timeleft = (float)(SESSIONAMOUNT - client->GetSessionUp())/client->GetDatarate();
 							else timeleft = (float)(file->GetFileSize() - client->GetSessionUp())/client->GetDatarate();
-						else
-							timeleft = (float)(file->GetFileSize() - client->GetSessionUp())/client->GetDatarate();
 						Sbuffer.Format("%s (+%s)", CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
 					}//Morph - modified by AndCycle, upRemain
 					break;
