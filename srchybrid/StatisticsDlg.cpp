@@ -716,6 +716,7 @@ void CStatisticsDlg::RepaintMeters() {
 	m_Statistics.SetYUnits(GetResString(IDS_FSTAT_CONNECTION/*IDS_CONNECTIONSTATISTICS*/));
 	Buffer.Format(_T("%s (1:%u)"), GetResString(IDS_ST_ACTIVEC), thePrefs.GetStatsConnectionsGraphRatio());
 	m_Statistics.SetLegendLabel(Buffer,0);
+	m_Statistics.SetBarsPlot(thePrefs.IsSolidGraph(),0);//Commander - Added: Draw Active Connections Graph solid
 	m_Statistics.SetLegendLabel(GetResString(IDS_ST_ACTIVEU_ZZ),1);
 	m_Statistics.SetLegendLabel(GetResString(IDS_SP_TOTALUL),2);
 	m_Statistics.SetLegendLabel(GetResString(IDS_ST_ACTIVED),3);
