@@ -42,7 +42,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bF
 	//MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 	COLORREF crMeOnly; 
 	//--- :xrmb ---
-
+	
 	if(bFlat) { 
 		crBoth = RGB(0, 0, 0);
 		crNeither = RGB(224, 224, 224);
@@ -83,8 +83,10 @@ void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bF
 	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 	//if (!onlygreyrect && reqfile && m_abyPartStatus) { 
 	uint8* thisStatus;
-	if (!m_PartStatus_list.Lookup(file,thisStatus))
+	if (!m_PartStatus_list.Lookup(file,thisStatus)){
 		thisStatus = m_abyPartStatus;
+		crClientOnly = RGB(192, 100, 255);
+	}
 	if (thisStatus){
 	//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 		//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
