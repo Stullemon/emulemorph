@@ -161,15 +161,17 @@ bool CIP2Country::LoadFromFile(){
 				for(int forCount = 0; forCount !=  5; forCount++){
 					tempStr[forCount] = sbuffer.Tokenize(",", curPos);
 					if(tempStr[forCount].IsEmpty()) {
-						AddLogLine(false, "error line number : %i", count+1);
-						AddLogLine(false, "%s %s", "error line in", ip2countryCSVfile);
-						error = true;
+						if(forCount == 0 || forCount == 1) error = true; //no empty ip field
 						//no need to throw an exception, keep reading in next line
 						//throw CString(_T("error line in"));
 					}
 				}
 				
-				if(error) continue;
+				if(error){
+					AddLogLine(false, "error line number : %i", count+1);
+					AddLogLine(false, "%s %s", "possible error line in", ip2countryCSVfile);
+					continue;
+				}
 				//tempStr[4] is full country name, capitalize country name from rayita
 				tempStr[4] = FirstCharCap(tempStr[4]);
 
