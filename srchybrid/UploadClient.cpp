@@ -387,7 +387,7 @@ bool CUpDownClient::IsPBForPS() const
 	//<--Commun to both call
 	if(!IsSecure()) return false;
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
-	if (currentReqFile != NULL)
+	if (currentReqFile == NULL)
 		return false;
 	//-->Commun to both call
 	if (currentReqFile->GetPowerShared())
