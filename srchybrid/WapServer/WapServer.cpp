@@ -651,18 +651,7 @@ CString CWapServer::_GetMain(WapThreadData Data, long lSession)
 	MaxDownload.Format(_T("%i"),thePrefs.GetMaxDownload());
 	if (MaxUpload == _T("65535"))  MaxUpload = GetResString(IDS_PW_UNLIMITED);
 	if (MaxDownload == _T("65535")) MaxDownload = GetResString(IDS_PW_UNLIMITED);
-	/*/
-	if ( CPreferences::GetMaxUpload() < UNLIMITED )
-		MaxUpload.Format(_T("%.1f"), CPreferences::GetMaxUpload());
-	else
-		MaxUpload = GetResString(IDS_PW_UNLIMITED);
-	if ( CPreferences::GetMaxDownload() < UNLIMITED )
-		MaxDownload.Format(_T("%.1f"), CPreferences::GetMaxDownload());
-	else
-		MaxDownload = GetResString(IDS_PW_UNLIMITED);
-	/**/
-	// End emulEspaña
-
+	
 	sLimits.Format(_T("%s/%s"), MaxUpload, MaxDownload);
 	// EC Ends
 
@@ -2550,18 +2539,6 @@ CString CWapServer::_GetGraphs(WapThreadData Data)
 	Out.Replace(_T("[MaxDownload]"), s1);
 	Out.Replace(_T("[MaxUpload]"), s2);
 	Out.Replace(_T("[MaxConnections]"), s3);
-	/*/
-	CString s1, s2, s3;
-	s1.Format(_T("%d"), (int)thePrefs.GetMaxGraphDownloadRate() + 4);
-	s2.Format(_T("%d"), (int)thePrefs.GetMaxGraphUploadRate() + 4);
-	s3.Format(_T("%d"), thePrefs.GetMaxConnections()+20);
-	
-	Out.Replace("[ScaleTime]", sScale);
-	Out.Replace("[MaxDownload]", s1);
-	Out.Replace("[MaxUpload]", s2);
-	Out.Replace("[MaxConnections]", s3);
-	/**/
-	// End emulEspaña
 
 	return Out;
 }
@@ -2936,34 +2913,7 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 			theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.GetMaxGraphUploadRate());
 		if(lastmaxgd!=thePrefs.GetMaxGraphDownloadRate())
 			theApp.emuledlg->statisticswnd->SetARange(true,thePrefs.GetMaxGraphDownloadRate());
-		/*/
-		if(_ParseURL(Data.sURL, _T("maxdown")) != "")
-		{
-			float maxdown = _ttof(_ParseURL(Data.sURL, _T("maxdown")));
-			if(maxdown > 0.0f)
-				thePrefs.SetMaxDownload(maxdown);
-			else
-				thePrefs.SetMaxDownload(UNLIMITED);
-		}
-		if(_ParseURL(Data.sURL, _T("maxup")) != "")
-		{
-			float maxup = _ttof(_ParseURL(Data.sURL, _T("maxup")));
-			if(maxup > 0.0f)
-				thePrefs.SetMaxUpload(maxup);
-			else
-				thePrefs.SetMaxUpload(UNLIMITED);
-		}
-		if(_ParseURL(Data.sURL, _T("maxcapdown")) != "")
-		{
-			thePrefs.SetMaxGraphDownloadRate(_ttof(_ParseURL(Data.sURL, _T("maxcapdown"))));
-		}
-		if(_ParseURL(Data.sURL, _T("maxcapup")) != "")
-		{
-			thePrefs.SetMaxGraphUploadRate(_ttof(_ParseURL(Data.sURL, _T("maxcapup"))));
-		}
-		*/
-		// End emulEspaña
-
+		
 		if(_ParseURL(Data.sURL, _T("maxsources")) != "")
 		{
 			thePrefs.SetMaxSourcesPerFile(_ttoi(_ParseURL(Data.sURL, _T("maxsources"))));
@@ -2989,12 +2939,6 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 	Out.Replace(_T("[SendBWImagesVal]"),thePrefs.GetWapAllwaysSendBWImages()?_T("1"):_T("2"));
 	Out.Replace(_T("[SendImagesVal]"),thePrefs.GetWapSendImages()?_T("1"):_T("2"));
 	Out.Replace(_T("[SendProgressBarsVal]"),thePrefs.GetWapSendProgressBars()?_T("1"):_T("2"));
-	// emulEspaña: modified by Announ [Announ: -per file option for downloading preview parts-]
-	/*
-	Out.Replace("[FirstAndLastVal]",thePrefs.GetPreviewPrio()?"1":"2");
-	*/
-	// End emulEspaña
-
 	Out.Replace(_T("[FullChunksVal]"),thePrefs.TransferFullChunks()?_T("1"):_T("2"));
 
 	CString sRefresh;
@@ -4556,7 +4500,7 @@ CString	CWapServer::_GetKadPage(WapThreadData Data)
 			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADCONTACTLAB), theApp.emuledlg->kademliawnd->GetContactCount());
 			info.Append(buffer);
 
-			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADSEARCHLAB), theApp.emuledlg->kademliawnd->GetContactCount());
+			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADSEARCHLAB), theApp.emuledlg->kademliawnd->searchList->GetItemCount());
 			info.Append(buffer);
 
 		

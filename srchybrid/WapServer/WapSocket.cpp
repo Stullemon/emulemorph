@@ -432,17 +432,6 @@ UINT AFX_CDECL WapSocketListeningFunc(LPVOID pThis)
 				{
 					if (!WSAEventSelect(hSocket, hEvent, FD_ACCEPT))
 					{
-						//// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-						//CUPnPNat::UPNPNAT_MAPPING mapping;
-						//BOOL UPnP=false;
-
-						//mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
-						//mapping.protocol = CUPnPNat::UNAT_TCP;
-						//mapping.description = "Wap Interface";
-						//if(thePrefs.GetUPnPNat())
-						//	UPnP = theApp.AddUPnPNatPort(&mapping);
-						//// End emulEspaña
-
 						HANDLE pWait[] = { hEvent, s_hWapTerminate };
 						while (WAIT_OBJECT_0 == WaitForMultipleObjects(2, pWait, FALSE, INFINITE))
 						{
@@ -475,10 +464,6 @@ UINT AFX_CDECL WapSocketListeningFunc(LPVOID pThis)
 									VERIFY( !closesocket(hSocket) );
 							}
 						}
-						
-						//// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-						//if(UPnP) theApp.RemoveUPnPNatPort(&mapping);
-						//// End emulEspaña
 					}
 					VERIFY( CloseHandle(hEvent) );
 				}
