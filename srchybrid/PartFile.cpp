@@ -2960,6 +2960,17 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Str
 	uint32 size2transfer;
 	uint16* partsDownloading = CalcDownloadingParts(sender); //Pawcio for enkeyDEV -ICS-
 
+	//MORPH START - Added by SiRoB, WebCache for ICS
+	// Add up modifiers
+	// WebCache: for ICS
+	// WebCache: jp Don't request chunks for which we are currently receiving proxy sources START
+	ThrottledChunk cur_ThrottledChunk;
+	md4cpy(cur_ThrottledChunk.FileID, this->GetFileHash());
+	bool isthrottled = false;
+	// jp Don't request chunks for which we are currently receiving proxy sources START
+	// <--- WebCache: for ICS
+	//MORPH END   - Added by SiRoB, WebCache for ICS
+
 	for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
 	{
 		if (sender->IsPartAvailable(part_idx) && GetNextEmptyBlockInPart(part_idx, 0))
@@ -2994,6 +3005,15 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Str
 			}
 			size2transfer = GetPartSizeToDownload(part_idx);
 
+			//MORPH START - Added by SiRoB, WebCache for ICS
+			cur_ThrottledChunk.ChunkNr=part_idx;
+			cur_ThrottledChunk.timestamp=GetTickCount();
+			isthrottled = ThrottledChunkList.CheckList(cur_ThrottledChunk, false); //compare this chunk to chunks in list and throttle it if it is found
+
+			if (isthrottled)
+				size2transfer = min(((size2transfer + 2 * PARTSIZE / CM_MAX_SRC_CHUNK + 0xff) >> 8), 0xFFFF);
+			else
+			//MORPH END   - Added by SiRoB, WebCache for ICS
 			size2transfer = min(((size2transfer + (partsDownloading ? PARTSIZE * partsDownloading[part_idx] / CM_MAX_SRC_CHUNK : 0) + 0xff) >> 8), 0xFFFF);
 
 			switch (m_ics_filemode)
