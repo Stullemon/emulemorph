@@ -183,7 +183,7 @@ BOOL CServerWnd::OnInitDialog()
 	GetDlgItem(IDC_NEWSMSG)->DestroyWindow();
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
 		if (newsmsgbox->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_NEWSMSG)){
-		newsmsgbox->SetProfileSkinKey(_T("FeedInfoLog"));
+		newsmsgbox->SetProfileSkinKey(_T("NewsInfoLog"));
 		newsmsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 		newsmsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 		newsmsgbox->SetEventMask(newsmsgbox->GetEventMask() | ENM_LINK);

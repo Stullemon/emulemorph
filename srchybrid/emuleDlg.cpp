@@ -2406,6 +2406,10 @@ void CemuleDlg::ApplyHyperTextFont(LPLOGFONT plf)
 	{
 		thePrefs.SetHyperTextFont(plf);
 		serverwnd->servermsgbox->SetFont(&theApp.m_fontHyperText);
+		//MORPH START - Added by SiRoB, xml news
+		serverwnd->servermsgbox->SetFont(&theApp.m_fontHyperText);
+		serverwnd->newsmsgbox->SetFont(&theApp.m_fontHyperText);
+		//MORPH END   - Added by SiRoB, xml news
 		chatwnd->chatselector.UpdateFonts(&theApp.m_fontHyperText);
 		ircwnd->UpdateFonts(&theApp.m_fontHyperText);
 	}
