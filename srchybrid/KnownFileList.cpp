@@ -127,6 +127,10 @@ void CKnownFileList::Save()
 	m_nLastSaved = ::GetTickCount(); 
 	CString fullpath=thePrefs.GetConfigDir();
 	fullpath += KNOWN_MET_FILENAME;
+	//Morph Start - added by AndCycle, safe .met replace
+	CString origName = fullpath, oldName = fullpath + _T(".old");
+	fullpath = fullpath + _T(".new");
+	//Morph End   - added by AndCycle, safe .met replace
 	CSafeBufferedFile file;
 	CFileException fexp;
 	if (!file.Open(fullpath, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
@@ -176,6 +180,14 @@ void CKnownFileList::Save()
 				AfxThrowFileException(CFileException::hardIO, GetLastError(), file.GetFileName());
 		}
 		file.Close();
+
+		//Morph Start - added by AndCycle, safe .met replace
+		if(_taccess(oldName, 0) == 0)
+			CFile::Remove(oldName);
+		if(_taccess(origName, 0) == 0)
+			CFile::Rename(origName, oldName);
+		CFile::Rename(fullpath, origName);
+		//Morph End   - added by AndCycle, safe .met replace
 	}
 	catch(CFileException* error){
 		CString strError(_T("Failed to save ") KNOWN_MET_FILENAME _T(" file"));

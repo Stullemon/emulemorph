@@ -102,6 +102,10 @@ void CFriendList::SaveList(){
 	m_nLastSaved = ::GetTickCount();
 
 	CString strFileName = CString(thePrefs.GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
+	//Morph Start - added by AndCycle, safe .met replace
+	CString origName = strFileName, oldName = strFileName + _T(".old");
+	strFileName = strFileName + _T(".new");
+	//Morph End   - added by AndCycle, safe .met replace
 	CSafeBufferedFile file;
 	CFileException fexp;
 	if (!file.Open(strFileName.GetBuffer(),CFile::modeCreate|CFile::modeWrite|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
@@ -127,6 +131,13 @@ void CFriendList::SaveList(){
 				AfxThrowFileException(CFileException::hardIO, GetLastError(), file.GetFileName());
 		}
 		file.Close();
+		//Morph Start - added by AndCycle, safe .met replace
+		if(_taccess(oldName, 0) == 0)
+			CFile::Remove(oldName);
+		if(_taccess(origName, 0) == 0)
+			CFile::Rename(origName, oldName);
+		CFile::Rename(strFileName, origName);
+		//Morph End   - added by AndCycle, safe .met replace
 	}
 	catch(CFileException* error){
 		CString strError(_T("Failed to save ") EMFRIENDS_MET_FILENAME _T(" file"));

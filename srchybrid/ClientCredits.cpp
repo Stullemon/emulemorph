@@ -506,12 +506,7 @@ void CClientCreditsList::LoadList()
 			/*
 			m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
 			*/
-			int iPrime = 5003;
-			if(count*1.5 > 5003){
-				iPrime = getPrime(count*1.5);
-			}
-			AddDebugLogLine(false, _T("m_mapClients.InitHashTable with %i"), iPrime);
-			m_mapClients.InitHashTable(iPrime);
+			m_mapClients.InitHashTable(count*1.5 > 5003?getPrime(count*1.5):5003);
 			//Morph End - added by AndCycle, minor tweak - prime
 
 			const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
@@ -590,28 +585,13 @@ void CClientCreditsList::SaveList()
 	m_nLastSaved = ::GetTickCount();
 
 	CString name = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME);
+	//Morph Start - added by AndCycle, safe .met replace
+	CString origName = name, oldName = name + _T(".old");
+	name = name + _T(".new");
+	//Morph End   - added by AndCycle, safe .met replace
 	CFile file;// no buffering needed here since we swap out the entire array
 	CFileException fexp;
-	//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
-	/*
 	if (!file.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
-	*/
-	if (m_bSaveUploadQueueWaitTime){
-		if (!file.Open(name+_T(".SUQWTv2.met"), CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
-			CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
-			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
-				strError += _T(" - ");
-				strError += szError;
-			}
-			LogError(LOG_STATUSBAR, _T("%s"), strError);
-			return;
-		}
-	}
-
-	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	CFile fileBack; // Moonlight: SUQWT - Also open a file to save original 30c format.
-	if (!fileBack.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
@@ -621,74 +601,95 @@ void CClientCreditsList::SaveList()
 		LogError(LOG_STATUSBAR, _T("%s"), strError);
 		return;
 	}
-	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
 	uint32 count = m_mapClients.GetCount();
 	BYTE* pBuffer = NULL;
+	pBuffer = new BYTE[count*sizeof(CreditStruct_30c)]; //Morph - modified by AndCycle, original 30c file format
+	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	BYTE* pBufferSUQWT;
 	if (m_bSaveUploadQueueWaitTime)
-		pBuffer = new BYTE[count*sizeof(CreditStruct)];
+		pBufferSUQWT = new BYTE[count*sizeof(CreditStruct)];
+	const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
+	//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	CClientCredits* cur_credit;
 	CCKey tempkey(0);
 	POSITION pos = m_mapClients.GetStartPosition();
-	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	BYTE* pBuffer30c = new BYTE[count*sizeof(CreditStruct_30c)];
-	const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
-	//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	count = 0;
 	while (pos)
 	{
 		m_mapClients.GetNextAssoc(pos, tempkey, cur_credit);
-		//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		/*
-		if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
-		{
-			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
-			count++; 
-		}
-		*/
+		//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		if(m_bSaveUploadQueueWaitTime){
 			if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
 			{
 				cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
-				memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
-				memcpy(pBuffer30c+(count*sizeof(CreditStruct_30c)), (uint8 *)cur_credit->GetDataStruct() + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
+				memcpy(pBufferSUQWT+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+				memcpy(pBuffer+(count*sizeof(CreditStruct_30c)), (uint8 *)cur_credit->GetDataStruct() + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
 				count++; 
 			}
-		}else{
-			//official way to clean out client
-			if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
-			{
-				cur_credit->ClearUploadQueueWaitTime();//fair to all client
-				//memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
-				memcpy(pBuffer30c+(count*sizeof(CreditStruct_30c)), (uint8 *)cur_credit->GetDataStruct() + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
-				count++; 
-			}
+		}else 
+		//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
+		{
+			/*// Moonlight: SUQWT - Save 0.30c CreditStruct
+			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+			*/
+			memcpy(pBuffer+(count*sizeof(CreditStruct_30c)), (uint8 *)cur_credit->GetDataStruct() + 8, sizeof(CreditStruct_30c));
+			count++; 
 		}
-		//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	}
 
 	try{
-		//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		uint8 version30c = CREDITFILE_VERSION_30;//Morph - modified by AndCycle, corrected version
-		fileBack.SeekToBegin();
-		fileBack.Write(&version30c, 1);
-		fileBack.Write(&count, 4);
-		fileBack.Write(pBuffer30c, count*sizeof(CreditStruct_30c));
+		uint8 version = CREDITFILE_VERSION_30; //Morph - modified by AndCycle, original 30c file format
+		file.Write(&version, 1);
+		file.Write(&count, 4);
+		file.Write(pBuffer, count*sizeof(CreditStruct_30c)); //Morph - modified by AndCycle, original 30c file format
 		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
-			fileBack.Flush();
-		fileBack.Close();
-		//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			file.Flush();
+		file.Close();
 
+		//Morph Start - added by AndCycle, safe .met replace
+		if(_taccess(oldName, 0) == 0)
+			CFile::Remove(oldName);
+		if(_taccess(origName, 0) == 0)
+			CFile::Rename(origName, oldName);
+		CFile::Rename(name, origName);
+		//Morph End   - added by AndCycle, safe .met replace
+
+		//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		if (m_bSaveUploadQueueWaitTime)
 		{
+			CString nameSUQWT = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME) + _T(".SUQWTv2.met"); 
+			//Morph Start - added by AndCycle, safe .met replace
+			CString origNameSUQWT = nameSUQWT, oldNameSUQWT = nameSUQWT + _T(".old");
+			nameSUQWT = nameSUQWT + _T(".new");
+			//Morph End   - added by AndCycle, safe .met replace
+			if (!file.Open(nameSUQWT, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+				CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
+				TCHAR szError[MAX_CFEXP_ERRORMSG];
+				if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
+					strError += _T(" - ");
+					strError += szError;
+				}
+				LogError(LOG_STATUSBAR, _T("%s"), strError);
+				return;
+			}
 			uint8 version = CREDITFILE_VERSION;
 			file.Write(&version, 1);
 			file.Write(&count, 4);
-			file.Write(pBuffer, count*sizeof(CreditStruct));
+			file.Write(pBufferSUQWT, count*sizeof(CreditStruct)); //save SUQWT buffer
 			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
 				file.Flush();
 			file.Close();
+			//Morph Start - added by AndCycle, safe .met replace
+			if(_taccess(oldNameSUQWT, 0) == 0)
+				CFile::Remove(oldNameSUQWT);
+			if(_taccess(origNameSUQWT, 0) == 0)
+				CFile::Rename(origNameSUQWT, oldNameSUQWT);
+			CFile::Rename(nameSUQWT, origNameSUQWT);
+			//Morph End   - added by AndCycle, safe .met replace
 		}
+		//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	}
 	catch(CFileException* error){
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
@@ -700,9 +701,12 @@ void CClientCreditsList::SaveList()
 		LogError(LOG_STATUSBAR, _T("%s"), strError);
 		error->Delete();
 	}
-	delete[] pBuffer30c;
+	delete[] pBuffer;
+
+	//Morph Start - added by SiRoB, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if(m_bSaveUploadQueueWaitTime)
-		delete[] pBuffer;
+		delete[] pBufferSUQWT;
+	//Morph End   - added by SiRoB, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 }
 
 CClientCredits* CClientCreditsList::GetCredit(const uchar* key)
