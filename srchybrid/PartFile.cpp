@@ -2774,8 +2774,7 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 
 	UINT debug_lowiddropped = 0;
 	UINT debug_possiblesources = 0;
-	//for (UINT i = 0; i < count; i++)
-	for (UINT i = 1; i < count; i++)	// WiZaRd memory exception fix
+	for (UINT i = 0; i < count; i++)
 	{
 		uint32 userid = sources->ReadUInt32();
 		uint16 port = sources->ReadUInt16();
@@ -2821,10 +2820,10 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 			CUpDownClient* newsource = new CUpDownClient(this,port,userid,serverip,serverport,true);
 			theApp.downloadqueue->CheckAndAddSource(this,newsource);
 		}
-		else
+		else if (count>i+1) //MORPH - Added by SiRoB, Memory execption -Fix-
 		{
 			// since we may received multiple search source UDP results we have to "consume" all data of that packet
-			sources->Seek((count-i)*(4+2), SEEK_CUR);
+			sources->Seek((count-(i+1))*(4+2), SEEK_CUR); //MORPH - Added by SiRoB, Memory execption -Fix-
 			if(GetKadFileSearchID())
 				Kademlia::CSearchManager::stopSearch(GetKadFileSearchID(), false);
 			break;
