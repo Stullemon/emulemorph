@@ -176,6 +176,9 @@ public:
 	CPartFile* forcea4af_file;
 	// khaos::kmod-
 
+	//MORPH START - Added by SiRoB, ZZ Ratio in Work
+	bool	IsZZRatioInWork() {return m_bIsZZRatioInWork;}
+	//MORPH START - Added by SiRoB, ZZ Ratio in Work
 protected:
 	bool	SendNextUDPPacket();
 	void	ProcessLocalRequests();
@@ -229,4 +232,8 @@ private:
 
 	CTypedPtrList<CPtrList, CED2KFileLink*> m_ED2KLinkQueue;
 	// khaos::categorymod-
+
+	//MORPH START - Added by SiRoB, ZZ Ratio in Work
+	bool	m_bIsZZRatioInWork;
+	//MORPH START - Added by SiRoB, ZZ Ratio in Work
 };

@@ -991,7 +991,7 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 		//MORPH START - Added by SiRoB, Show zz ratio activation
 		if (thePrefs.IsZZRatioDoesWork()){
 			TCHAR buffer2[100];		
-			_sntprintf(buffer2,ARRSIZE(buffer2),_T("%s r"),buffer);
+			_sntprintf(buffer2,ARRSIZE(buffer2),theApp.downloadqueue->IsZZRatioInWork()?_T("%s R"):_T("%s r"),buffer);
 			statusbar->SetText(buffer2,2,0);
 		}else
 		//MORPH END   - Added by SiRoB, Show zz ratio activation

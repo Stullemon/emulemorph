@@ -835,14 +835,15 @@ void CDownloadQueue::Process(){
 	// ZZ:UploadSpeedSense <--
 
     uint32 friendDownspeed = downspeed;
+	bool tempIsZZRatioInWork = false; //MORPH - Added by SiRoB, ZZ Ratio in work
 
-    if(theApp.uploadqueue->GetUploadQueueLength() > 0 && thePrefs.IsZZRatioDoesWork()) {
+	if(theApp.uploadqueue->GetUploadQueueLength() > 0 && thePrefs.IsZZRatioDoesWork()) {
         // has this client downloaded more than it has uploaded this session? (friends excluded)
         // then limit its download speed from all clients but friends
         // limit will be removed as soon as upload has catched up to download
         if(theApp.stat_sessionReceivedBytes/3 > (theApp.stat_sessionSentBytes-theApp.stat_sessionSentBytesToFriend) &&
            datarate > 1500) {
-	
+
             // calc allowed dl speed for rest of network (those clients that don't have
             // friend slots. Since you don't upload as much to them, you won't be able to download
             // as much from them. This will only be lower than friends speed if you are currently
@@ -854,6 +855,7 @@ void CDownloadQueue::Process(){
            if(downspeed == 0 || tempDownspeed < downspeed) {
                 downspeed = tempDownspeed;
                 //AddLogLine(true, "Limiting downspeed");
+				tempIsZZRatioInWork = true; //MORPH - Added by SiRoB, ZZ Ratio in work
 		   }
 		}
 
@@ -868,9 +870,12 @@ void CDownloadQueue::Process(){
 
 			if(friendDownspeed == 0 || tempDownspeed < friendDownspeed) {
                 friendDownspeed = tempDownspeed;
+				tempIsZZRatioInWork = true; //MORPH - Added by SiRoB, ZZ Ratio in work
             }
         }
 	}
+
+	m_bIsZZRatioInWork = tempIsZZRatioInWork; //MORPH - Added by SiRoB, ZZ Ratio in work
 
 	uint32 datarateX=0;
 	udcounter++;
