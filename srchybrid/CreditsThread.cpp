@@ -435,7 +435,33 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(sTmp);
 	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2004 Merkur"));
 	m_arCredits.Add(_T("S:50"));
-	m_arCredits.Add(_T("02:04:Developers"));
+
+    //Commander - Added: MorphTeam - Start
+	m_arCredits.Add(_T("02:04:Morph Developers"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:AndCycle"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:Commander"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:IceCream"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:JLEE (inactive)"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:Mighty Knife"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:Milobac"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:Morpheus (founder)(retired)"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:SiRoB"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:Wistily (inactive)"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:Yun.SF3 (inactive)"));
+	m_arCredits.Add(_T("S:50"));
+    //Commander - Added: MorphTeam - End
+
+	m_arCredits.Add(_T("02:04:Official Developers")); //Commander - Modified: Make clear who belongs to the official Developers and who to the Mod ones
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Unknown1"));
 	m_arCredits.Add(_T("S:5"));
@@ -445,7 +471,7 @@ void CCreditsThread::InitText()
 
 	m_arCredits.Add(_T("S:50"));
 
-	m_arCredits.Add(_T("02:04:Tester"));
+	m_arCredits.Add(_T("02:04:Official Testers")); //Commander - Modified: Make clear who belongs to the official Developers and who to the Mod ones
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Sony666"));
 	m_arCredits.Add(_T("S:5"));
@@ -456,7 +482,7 @@ void CCreditsThread::InitText()
 	
 
 	m_arCredits.Add(_T("S:50"));
-	m_arCredits.Add(_T("02:04:Retired Members"));
+	m_arCredits.Add(_T("02:04:Official Retired Members")); //Commander - Modified: Make clear who belongs to the official Developers and who to the Mod ones
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Merkur (the Founder)"));
 	m_arCredits.Add(_T("S:5"));
