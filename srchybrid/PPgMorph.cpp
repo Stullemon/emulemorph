@@ -257,6 +257,11 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiPermAll = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_PUBLIC), m_htiPermissions, m_iPermissions == 0);
 		m_htiPermFriend = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_FRIENDSONLY), m_htiPermissions, m_iPermissions == 1);
 		m_htiPermNone = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_HIDDEN), m_htiPermissions, m_iPermissions == 2);
+
+		// Mighty Knife: Community visible filelist
+		m_htiPermCommunity = m_ctrlTreeOptions.InsertRadioButton("Community", m_htiPermissions, m_iPermissions == 3);
+		// [end] Mighty Knife
+
 		//MORPH END   - Added by SiRoB, Show Permission
 		m_htiIsAutoPowershareNewDownloadFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE), m_htiDM, m_bIsAutoPowershareNewDownloadFile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 		//MORPH START - Added by IceCream, high process priority
@@ -267,6 +272,13 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		// Mighty Knife: daylight saving patch
 		m_htiDaylightSavingPatch = m_ctrlTreeOptions.InsertCheckBox("Enable daylight saving patch (Warning: will eventually rehash your files! Please restart EMule!)", TVI_ROOT, m_iDaylightSavingPatch);
 		// #endif
+
+		// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
+		m_htiCommunityName = m_ctrlTreeOptions.InsertItem("Community Tags (separated by '|')", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT);
+		m_ctrlTreeOptions.AddEditBox(m_htiCommunityName, RUNTIME_CLASS(CTreeOptionsEdit));
+		m_htiReportHashingFiles = m_ctrlTreeOptions.InsertCheckBox("Report file hashing activities", TVI_ROOT, m_bReportHashingFiles);
+		m_htiLogFriendlistActivities = m_ctrlTreeOptions.InsertCheckBox("Report activities in friendlist", TVI_ROOT, m_bLogFriendlistActivities);
+		// [end] Mighty Knife
 
 		m_ctrlTreeOptions.Expand(m_htiDM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUM, TVE_EXPAND);
@@ -307,6 +319,11 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiIsBoostFriends, m_bIsBoostFriends);//Added by Yun.SF3, boost friends
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiIsAutoPowershareNewDownloadFile, m_bIsAutoPowershareNewDownloadFile);//MORPH - Added by SiRoB, Avoid misusing of powersharing
+
+	// Mighty Knife: Community visualization
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiCommunityName, m_sCommunityName);
+	// [end] Mighty Knife
+
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiHideOS, m_iHideOS);
 	DDV_MinMaxInt(pDX, m_iHideOS, 0, INT_MAX);
@@ -339,8 +356,13 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	// #ifdef MIGHTY_SUMMERTIME
 	// Mighty Knife: daylight saving patch
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDaylightSavingPatch, m_iDaylightSavingPatch); 
-	m_iDaylightSavingPatch;
 	// #endif
+
+	// Mighty Knife: Report hashing files, Log friendlist activities
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiReportHashingFiles, m_bReportHashingFiles); 
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiLogFriendlistActivities, m_bLogFriendlistActivities); 
+	// [end] Mighty Knife
+
 }
 
 
@@ -379,6 +401,11 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iSelectiveShare = app_prefs->prefs->selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iShareOnlyTheNeed = app_prefs->prefs->ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_iPermissions = app_prefs->prefs->permissions; //MORPH - Added by SiRoB, Show Permission
+	
+	// Mighty Knife: Community visualization
+	m_sCommunityName = app_prefs->prefs->m_sCommunityName;
+	// [end] Mighty Knife
+
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	m_iShowCatNames = app_prefs->ShowCatNameInDownList();
 	m_iSelectCat = app_prefs->SelectCatForNewDL();
@@ -403,6 +430,11 @@ BOOL CPPgMorph::OnInitDialog()
 	// Mighty Knife: daylight saving patch
 	m_iDaylightSavingPatch = app_prefs->GetDaylightSavingPatch();
 	// #endif
+
+	// Mighty Knife: Report hashing files, Log friendlist activities
+	m_bReportHashingFiles = app_prefs->GetReportHashingFiles ();
+	m_bLogFriendlistActivities = app_prefs->GetLogFriendlistActivities ();
+	// [end] Mighty Knife
 
 	CPropertyPage::OnInitDialog();
 	Localize();
@@ -462,6 +494,10 @@ BOOL CPPgMorph::OnApply()
 	theApp.emuledlg->serverwnd->ToggleDebugWindow();
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
 
+	// Mighty Knife: Community visualization
+	sprintf (app_prefs->prefs->m_sCommunityName,"%s", m_sCommunityName);
+	// [end] Mighty Knife
+
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	app_prefs->prefs->m_bShowCatNames = m_iShowCatNames;
 	app_prefs->prefs->m_bSelCatOnAdd = m_iSelectCat;
@@ -486,6 +522,11 @@ BOOL CPPgMorph::OnApply()
 	// Mighty Knife: daylight saving patch
 	app_prefs->SetDaylightSavingPatch(m_iDaylightSavingPatch);
 	// #endif
+
+	// Mighty Knife: Report hashing files
+	app_prefs->SetReportHashingFiles (m_bReportHashingFiles);
+	app_prefs->SetLogFriendlistActivities (m_bLogFriendlistActivities);
+	// [end] Mighty Knife
 
 	SetModified(FALSE);
 

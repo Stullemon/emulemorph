@@ -639,6 +639,12 @@ struct Preferences_Struct{
 	uint8		m_iTimeRemainingMode; // 0 = both, 1 = real time, 2 = average
 	// khaos::accuratetimerem-
 	
+	// Mighty Knife: Community Visualization, Report hashing files, Log friendlist activities
+	char		m_sCommunityName [256];
+	bool		m_bReportHashingFiles;
+	bool	    m_bLogFriendlistActivities;
+	// [end] Mighty Knife
+
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	bool		m_bDynUpEnabled;
 	int			m_iDynUpPingTolerance;
@@ -1392,6 +1398,16 @@ public:
 	void	SetMMIsEnabled(bool bEnable)			{ prefs->m_bMMEnabled=bEnable; }
 	uint16	GetMMPort()								{ return prefs->m_nMMPort; }
 	void	SetMMPort(uint16 uPort)					{ prefs->m_nMMPort=uPort; }
+
+	// Mighty Knife: Community visualization, report hashing files, Log friendlist activities
+	CString GetCommunityName ()						{ return prefs->m_sCommunityName; }
+	void	SetCommunityName (CString _CommName)	{ sprintf (prefs->m_sCommunityName,"%s",_CommName); }
+	bool	IsCommunityEnabled()					{ return prefs->m_sCommunityName [0] != '\0' ? true : false; }
+	bool    GetReportHashingFiles ()				{ return prefs->m_bReportHashingFiles; }
+	void	SetReportHashingFiles (bool _b)			{ prefs->m_bReportHashingFiles = _b; }
+	bool    GetLogFriendlistActivities ()			{ return prefs->m_bLogFriendlistActivities; }
+	void	SetLogFriendlistActivities (bool _b)	{ prefs->m_bLogFriendlistActivities = _b; }
+	// [end] Mighty Knife
 
 	// deadlake PROXYSUPPORT
 	const ProxySettings& GetProxy()								{return prefs->proxy;}

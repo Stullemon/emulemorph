@@ -349,6 +349,10 @@ bool CPreferences::IsZZRatioDoesWork(){
 
 uint16 CPreferences::GetMaxDownload(){
 	//dont be a Lam3r :)
+	#ifdef MIGHTY_TWEAKS
+	// Mighty Knife: Private modifications
+	return prefs->maxdownload;
+	#endif
 	//MORPH START - Added by SiRoB, ZZ Upload system
 	if (IsZZRatioDoesWork())
 		return prefs->maxdownload;
@@ -1771,6 +1775,12 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("Enabled", prefs->m_bMMEnabled);
 	ini.WriteInt("Port", prefs->m_nMMPort);
 
+	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
+	ini.WriteString("CommunityName",GetCommunityName());
+	ini.WriteBool ("ReportHashingFiles",GetReportHashingFiles ());
+	ini.WriteBool ("LogFriendlistActivities",GetLogFriendlistActivities ());
+	// [end] Mighty Knife
+
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool("DynUpEnabled", prefs->m_bDynUpEnabled);
 	ini.WriteInt("DynUpPingTolerance", prefs->m_iDynUpPingTolerance);
@@ -2398,6 +2408,12 @@ void CPreferences::LoadPreferences(){
 	sprintf(prefs->m_sMMPassword,"%s",ini.GetString("Password", "","MobileMule"));
 	prefs->m_bMMEnabled = ini.GetBool("Enabled", false);
 	prefs->m_nMMPort = ini.GetInt("Port", 80);
+
+	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
+	sprintf (prefs->m_sCommunityName,"%s",ini.GetString ("CommunityName"));
+	prefs->m_bReportHashingFiles = ini.GetBool ("ReportHashingFiles",true);
+	prefs->m_bLogFriendlistActivities = ini.GetBool ("LogFriendlistActivities",true);
+	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	if (!prefs->m_bSUCEnabled) prefs->m_bDynUpEnabled = ini.GetBool("DynUpEnabled", false);

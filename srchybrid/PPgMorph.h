@@ -134,15 +134,29 @@ protected:
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	HTREEITEM m_htiHighProcess; //MORPH - Added by IceCream, high process priority
+
 	// #ifdef MIGHTY_SUMMERTIME
 	// Mighty Knife: daylight saving patch
 	HTREEITEM m_htiDaylightSavingPatch;
 	int m_iDaylightSavingPatch;
 	// #endif
+
+	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
+	CString   m_sCommunityName;
+	HTREEITEM m_htiCommunityName;
+	BOOL      m_bReportHashingFiles;
+	HTREEITEM m_htiReportHashingFiles;
+	BOOL	  m_bLogFriendlistActivities;
+	HTREEITEM m_htiLogFriendlistActivities;
+	// [end] Mighty Knife
+
+	// Mighty Knife: Community visible filelist
+	HTREEITEM m_htiPermCommunity;
+	// [end] Mighty Knife
+
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
-	
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
