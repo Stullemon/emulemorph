@@ -1160,7 +1160,12 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 
 	CMemDC dc(odc,&lpDrawItemStruct->rcItem);
 	CFont *pOldFont;
+	//MORPH START - Changed by SiRoB, Show Downloading file in bold
+	/*
 	if (m_fontBold.m_hObject){
+	*/
+	if (m_fontBold.m_hObject && thePrefs.GetShowActiveDownloadsBold()){
+	//MORPH END   - Changed by SiRoB, Show Downloading file in bold
 		if (content->type == FILE_TYPE){
 			if (((const CPartFile*)content->value)->GetTransferingSrcCount())
 				pOldFont = dc->SelectObject(&m_fontBold);
