@@ -2795,3 +2795,35 @@ long FileSize(LPCTSTR fileName){
 	return 0;
 }
 //MORPH END   - Added by SiRoB, Used in Fake and ipfilter updater
+
+//Morph Start - added by AndCycle, minor tweak - prime
+uint32 getPrime(uint32 lower_bound)
+{
+	if(lower_bound < 2) return 2;//safe check
+
+	std::list<uint32> prime_no_list;
+	prime_no_list.push_back(2);
+
+	bool isPrime;
+	for(uint32 cur_no = 3; !(cur_no > lower_bound && isPrime); cur_no++){
+		isPrime = true;
+		for(std::list<uint32>::iterator cur_pos=prime_no_list.begin(); cur_pos!=prime_no_list.end(); cur_pos++){
+			if(cur_no%(*cur_pos) == 0){
+			    isPrime = false;
+			    break;
+			}
+		}
+		if(isPrime){
+			prime_no_list.push_back(cur_no);
+		}
+	}
+
+	/*
+	for(list<int>::iterator cur_pos=prime_no_list.begin(); cur_pos!=prime_no_list.end(); cur_pos++){
+		cout<<(*cur_pos)<<endl;
+	}
+	*/
+
+	return prime_no_list.back();
+}
+//Morph End - added by AndCycle, minor tweak - prime
