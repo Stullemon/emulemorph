@@ -661,16 +661,20 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					realBytesToSpend = realBytesToSpendClass[LAST_CLASS];
 				else
 					realBytesToSpend = realBytesToSpendClass[classID];
-				uint64 bandwidthSavedTolerance = ((allowedDataRateClass[classID]>0)?allowedDataRateClass[classID]:slotCounterClass[classID]*doubleSendSize)*500;
-				if (realBytesToSpend > 0){
-					if ((uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
-						realBytesToSpend = 999+bandwidthSavedTolerance;
-						if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
-							++m_highestNumberOfFullyActivatedSlots[classID];
-					}
-				}else if (m_highestNumberOfFullyActivatedSlots[classID] > sumofclientinclass)
-					--m_highestNumberOfFullyActivatedSlots[classID];
-				
+				if(realBytesToSpend < -(((sint64)((allowedDataRateClass[classID]>0)?allowedDataRateClass[classID]:(slotCounterClass[classID]+1)*doubleSendSize)*500))) {
+				    sint64 newRealBytesToSpend = -(((sint64)((allowedDataRateClass[classID]>0)?allowedDataRateClass[classID]:(slotCounterClass[classID]+1)*doubleSendSize)*500));
+				    realBytesToSpend = newRealBytesToSpend;
+				} else {
+					uint64 bandwidthSavedTolerance = ((allowedDataRateClass[classID]>0)?allowedDataRateClass[classID]:slotCounterClass[classID]*doubleSendSize)*500;
+					if (realBytesToSpend > 0){
+						if ((uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
+							realBytesToSpend = 999+bandwidthSavedTolerance;
+							if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
+								++m_highestNumberOfFullyActivatedSlots[classID];
+						}
+					}else if (m_highestNumberOfFullyActivatedSlots[classID] > sumofclientinclass)
+						--m_highestNumberOfFullyActivatedSlots[classID];
+				}
        			realBytesToSpendClass[classID] = realBytesToSpend;
 			}
 			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
