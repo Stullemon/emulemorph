@@ -118,13 +118,17 @@ BOOL CMassRenameDialog::OnInitDialog() {
 		else FileListString = FileListString + "\r\n" + file->GetFileName ();
 		m_FileList.GetNext (pos);
 	}
-	GetDlgItem(IDC_OLDFILENAMESEDIT)->SetWindowText (FileListString);
-	GetDlgItem(IDC_NEWFILENAMESEDITLEFT)->SetWindowText (FileListString);
-	GetDlgItem(IDC_NEWFILENAMESEDITRIGHT)->SetWindowText (FileListString);
+	OldFN = (CRichEditCtrl*) GetDlgItem(IDC_OLDFILENAMESEDIT);
+	NFNLeft = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITLEFT);
+	NFNRight = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITRIGHT);
+	
+	OldFN->SetWindowText (FileListString);
+	NFNLeft->SetWindowText (FileListString);
+	NFNRight->SetWindowText (FileListString);
 
 	// Show the left justify edit control
-	GetDlgItem(IDC_NEWFILENAMESEDITLEFT)->ModifyStyle (0,WS_VISIBLE);
-	GetDlgItem(IDC_NEWFILENAMESEDITRIGHT)->ModifyStyle (WS_VISIBLE,0);
+	NFNLeft->ModifyStyle (0,WS_VISIBLE);
+	NFNRight->ModifyStyle (WS_VISIBLE,0);
 
 	CheckDlgButton (IDC_FILENAMELEFT,BST_CHECKED);
 
@@ -142,37 +146,35 @@ BOOL CMassRenameDialog::OnInitDialog() {
 
 	m_DontTrackKeys = false;
 
+	// activate windows messages for scrolling events in the filename window(s)
+	NFNLeft->SetEventMask(NFNLeft->GetEventMask() | ENM_SCROLL);
+	NFNRight->SetEventMask(NFNRight->GetEventMask() | ENM_SCROLL);
+	OldFN->SetEventMask(OldFN->GetEventMask() | ENM_SCROLL);
+
 	return TRUE;
 }
 
 void CMassRenameDialog::OnEnVscrollOldfilenamesedit()
 {
 	// Scroll the "new filename" windows to the correct position
-	CEdit* OldEdit = (CEdit*) GetDlgItem(IDC_OLDFILENAMESEDIT);
-	CRichEditCtrl* NewEditLeft = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITLEFT);
-	CRichEditCtrl* NewEditRight = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITRIGHT);
-	int VDiff = OldEdit->GetFirstVisibleLine ()-NewEditLeft->GetFirstVisibleLine();
-	if (VDiff != 0) NewEditLeft->LineScroll (VDiff,0);
-	VDiff = OldEdit->GetFirstVisibleLine ()-NewEditRight->GetFirstVisibleLine();
-	if (VDiff != 0) NewEditRight->LineScroll (VDiff,0);
+	int VDiff = OldFN->GetFirstVisibleLine ()-NFNLeft->GetFirstVisibleLine();
+	if (VDiff != 0) NFNLeft->LineScroll (VDiff,0);
+	VDiff = OldFN->GetFirstVisibleLine ()-NFNRight->GetFirstVisibleLine();
+	if (VDiff != 0) NFNRight->LineScroll (VDiff,0);
 }
 
 void CMassRenameDialog::OnEnVscrollNewfilenameseditLeft()
 {
 	// Scroll the "old filename" windows to the correct position
-	CEdit* OldEdit = (CEdit*) GetDlgItem(IDC_OLDFILENAMESEDIT);
-	CRichEditCtrl* NewEditLeft = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITLEFT);
-	int VDiff = NewEditLeft->GetFirstVisibleLine()-OldEdit->GetFirstVisibleLine ();
-	if (VDiff != 0) OldEdit->LineScroll (VDiff,0);
+	int VDiff = NFNLeft->GetFirstVisibleLine()-OldFN->GetFirstVisibleLine ();
+	if (VDiff != 0) OldFN->LineScroll (VDiff,0);
 }
 
 void CMassRenameDialog::OnEnVscrollNewfilenameseditRight()
 {
 	// Scroll the "old filename" windows to the correct position
-	CEdit* OldEdit = (CEdit*) GetDlgItem(IDC_OLDFILENAMESEDIT);
-	CRichEditCtrl* NewEditRight = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITRIGHT);
-	int VDiff = NewEditRight->GetFirstVisibleLine()-OldEdit->GetFirstVisibleLine ();
-	if (VDiff != 0) OldEdit->LineScroll (VDiff,0);
+	int VDiff = NFNRight->GetFirstVisibleLine()-OldFN->GetFirstVisibleLine ();
+	if (VDiff != 0) OldFN->LineScroll (VDiff,0);
 }
 
 //typedef vector<bool> fnvector;
@@ -187,13 +189,11 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	// or if there are not enough filenames in the window, this is not correct.
 
 	bool RightJustify = !IsDlgButtonChecked (IDC_FILENAMELEFT);
-	CRichEditCtrl* NFNEdit = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITLEFT);
+	CRichEditCtrl* NFNEdit = NFNLeft;
 	if (RightJustify) {
-		NFNEdit = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITRIGHT);
+		NFNEdit = NFNRight;
 	}
 
-	CEdit* OldFNEdit = (CEdit*) GetDlgItem (IDC_OLDFILENAMESEDIT);
-	
 	if (NFNEdit->GetLineCount () < m_FileList.GetCount()) {
 		AfxMessageBox ("Not enough filenames in the list of new filenames. Rename not possible.",
 					   MB_OK|MB_ICONEXCLAMATION);
@@ -236,10 +236,10 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	}
 
 	// Sort the stringlist to check for duplicate items
-	sort (sList.begin(),sList.end());
+	std::sort (sList.begin(),sList.end());
 
 	// Check for duplicate filenames
-	for (int i=1; i < (int) sList.capacity(); i++) {
+	for (int i=1; i < (int) sList.size(); i++) {
 		if (sList.at (i-1) == sList.at (i)) {
 			CString er;
 			er.Format ("Two or more equal filenames within the same directory are not allowed (Line %d). Rename not possible.",i+1);
@@ -262,7 +262,7 @@ void CMassRenameDialog::OnEnSetfocusFilenamemaskedit()
 	m_DontTrackKeys = true;
 	// Take the first line of the "New filenames" edit control as a mask for all filenames
 	CString FirstLine;
-	GetDlgItem(IDC_NEWFILENAMESEDITLEFT)->GetWindowText (FirstLine);
+	NFNLeft->GetWindowText (FirstLine);
 	int i = FirstLine.Find ('\r');
 	if (i != -1) {
 		FirstLine = FirstLine.Left (i);
@@ -274,31 +274,33 @@ void CMassRenameDialog::OnEnSetfocusFilenamemaskedit()
 void CMassRenameDialog::OnBnClickedFilenameleft()
 {
 	// Show the left justify edit control
-	GetDlgItem(IDC_NEWFILENAMESEDITLEFT)->ModifyStyle (0,WS_VISIBLE);
-	GetDlgItem(IDC_NEWFILENAMESEDITRIGHT)->ModifyStyle (WS_VISIBLE,0);
+	NFNLeft->ModifyStyle (0,WS_VISIBLE);
+	NFNRight->ModifyStyle (WS_VISIBLE,0);
 	CString txt;
-	GetDlgItem(IDC_NEWFILENAMESEDITRIGHT)->GetWindowText (txt);
-	GetDlgItem(IDC_NEWFILENAMESEDITLEFT)->SetWindowText (txt);
+	NFNRight->GetWindowText (txt);
+	NFNLeft->SetWindowText (txt);
+
 	Invalidate();
 }
 
 void CMassRenameDialog::OnBnClickedFilenameright()
 {
 	// Show the right justify edit control
-	GetDlgItem(IDC_NEWFILENAMESEDITLEFT)->ModifyStyle (WS_VISIBLE,0);
-	GetDlgItem(IDC_NEWFILENAMESEDITRIGHT)->ModifyStyle (0,WS_VISIBLE);
+	NFNLeft->ModifyStyle (WS_VISIBLE,0);
+	NFNRight->ModifyStyle (0,WS_VISIBLE);
 	CString txt;
-	GetDlgItem(IDC_NEWFILENAMESEDITLEFT)->GetWindowText (txt);
-	GetDlgItem(IDC_NEWFILENAMESEDITRIGHT)->SetWindowText (txt);
+	NFNLeft->GetWindowText (txt);
+	NFNRight->SetWindowText (txt);
+
 	Invalidate();
 }
 
 void CMassRenameDialog::OnBnClickedReset()
 {
 	CString txt;
-	GetDlgItem(IDC_OLDFILENAMESEDIT)->GetWindowText (txt);
-	GetDlgItem(IDC_NEWFILENAMESEDITLEFT)->SetWindowText (txt);
-	GetDlgItem(IDC_NEWFILENAMESEDITRIGHT)->SetWindowText (txt);
+	OldFN->GetWindowText (txt);
+	NFNLeft->SetWindowText (txt);
+	NFNRight->SetWindowText (txt);
 	OnEnSetfocusFilenamemaskedit();
 }
 
@@ -323,7 +325,6 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 	End1 = MassRenameEdit->End1;
 	bool RightJustify = !IsDlgButtonChecked (IDC_FILENAMELEFT);
 
-	CRichEditCtrl* NFNEdit = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITLEFT);
 	int BeforeEditLen = MassRenameEdit->m_BeforeEdit.GetLength ();
 
 	StartR1 = BeforeEditLen-Start1;
@@ -331,8 +332,9 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 	EndR1 = BeforeEditLen-End1;
 	EndR2 = BeforeEditLen-End2;
 
+	CRichEditCtrl* NFNEdit = NFNLeft;
 	if (RightJustify) {
-		NFNEdit = (CRichEditCtrl*) GetDlgItem(IDC_NEWFILENAMESEDITRIGHT);
+		NFNEdit = NFNRight;
 	}
 
 	CString allFNText;

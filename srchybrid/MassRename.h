@@ -50,6 +50,9 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	DECLARE_MESSAGE_MAP()
 	bool m_DontTrackKeys;
+	CRichEditCtrl* NFNLeft;
+	CRichEditCtrl* NFNRight;
+	CRichEditCtrl* OldFN;
 public:
 	// The caller of this dialog has to store pointers for all files in the
 	// following list before calling DoModal
