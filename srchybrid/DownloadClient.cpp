@@ -1369,9 +1369,13 @@ void CUpDownClient::SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iD
 		m_abyPartStatus = NULL;
 	}
 	
+	SetDownloadState(DS_NONE);
+	m_nRemoteQueueRank = 0;
+		
+	reqfile->NewSrcPartsInfo();
+	
 	pNewFile->srclists[sourcesslot].AddTail(this);
 	theApp.emuledlg->transferwnd.downloadlistctrl.AddSource(pNewFile, this, false);
-	theApp.downloadqueue->UpdateDisplayedInfo();
 	pNewFile->UpdateAvailablePartsCount();
 
 	reqfile = pNewFile;
