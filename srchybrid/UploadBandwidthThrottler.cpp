@@ -592,7 +592,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if(socket != NULL) {
 						if(allowedDataRateClass[classID] > 0 && classID < LAST_CLASS && (bytesToSpendClass[classID] <= 0 || spentBytesClass[classID] >= (uint64)bytesToSpendClass[classID]))
 							break;
-						if(m_StandardOrder_list_stat.GetAt(posSocket)->classID == SCHED_LAST)
+						if(m_StandardOrder_list_stat.GetAt(posSocket)->classID == SCHED_CLASS)
 							continue;
 						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
