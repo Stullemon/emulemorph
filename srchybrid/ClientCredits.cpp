@@ -1048,12 +1048,8 @@ void CClientCredits::InitPayBackFirstStatus(){
 
 //test will be triggered at client have up/down transfered
 void CClientCredits::TestPayBackFirstStatus(){
-	if(GetDownloadedTotal() < SESSIONMAXTRANS) return; //MORPH - Added by SiRoB, Pay Back First Tweak
 	//MORPH START - Changed by SiRoB, Pay Back First Tweak
-	/*
-	if(GetDownloadedTotal() >= GetUploadedTotal()+SESSIONMAXTRANS){
-	*/
-	if(GetDownloadedTotal() >= GetUploadedTotal()+1024*1024*(uint64)thePrefs.GetPayBackFirstLimit()){
+	if(GetDownloadedTotal() > GetUploadedTotal()+1024*1024*(uint64)thePrefs.GetPayBackFirstLimit()){
 	//MORPH END   - Changed by SiRoB, Pay Back First Tweak
 		m_bPayBackFirst = true;
 	}
