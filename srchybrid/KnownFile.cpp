@@ -2540,7 +2540,7 @@ CString CKnownFile::GetEqualChanceValueString(bool detail){
 bool CKnownFile::GetPowerShared() const
 {
 	int temppowershared = (m_powershared>=0)?m_powershared:thePrefs.GetPowerShareMode();
-	return ((temppowershared == 1) || ((temppowershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized && !((temppowershared == 3) && m_bPowerShareLimited);
+	return ((temppowershared == 1) || (temppowershared == 3) || ((temppowershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized && !((temppowershared == 3) && m_bPowerShareLimited);
 }
 //MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 	
