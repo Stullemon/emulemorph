@@ -2794,7 +2794,7 @@ void CPartFile::UpdatePartsInfo()
 	{
 		CUpDownClient* cur_src = srclist.GetNext(pos);
 		if( cur_src->GetPartStatus() )
-		{		
+		{
 			for (int i = 0; i < partcount; i++)
 			{
 				if (cur_src->IsPartAvailable(i))
@@ -2810,6 +2810,29 @@ void CPartFile::UpdatePartsInfo()
 			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
 	}
+	//MORPH START - Added by SiRoB, Keep A4AF infos
+	for (POSITION pos = A4AFsrclist.GetHeadPosition(); pos != 0; )
+	{
+		CUpDownClient* cur_src = A4AFsrclist.GetNext(pos);
+		uint8* thisAbyPartStatus = cur_src->GetPartStatus(this);
+		if(thisAbyPartStatus)
+		{
+			for (int i = 0; i < partcount; i++)
+			{
+				if (thisAbyPartStatus[i])
+					m_SrcpartFrequency[i] += 1;
+			}
+			if ( flag )
+			{
+				count.Add(cur_src->GetUpCompleteSourcesCount(this));
+			}
+			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+			if (cur_src->GetUpCompleteSourcesCount(this)>0)
+				++iCompleteSourcesCountInfoReceived;
+			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+		}
+	}
+	//MORPH END - Added by SiRoB, Keep A4AF infos
 
 	if (flag)
 	{
@@ -2900,6 +2923,9 @@ void CPartFile::UpdatePartsInfo()
 		iCompleteSourcesCountInfoReceived /= 2+GetNotCurrentSourcesCount();
 	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, iCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi<=1) || m_nVirtualCompleteSourcesCount==1),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
+	m_bHideOSAuthorized = m_nVirtualCompleteSourcesCount<=1;
+	//MORPH END   - Added by SiRoB, Avoid misusing of HideOS
 	UpdateDisplayedInfo();
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	InChangedSharedStatusBar = false;

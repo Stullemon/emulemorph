@@ -55,7 +55,7 @@ static char THIS_FILE[]=__FILE__;
 //	members of CUpDownClient
 //	which are mainly used for downloading functions 
 CBarShader CUpDownClient::s_StatusBar(16);
-//MORPH - Changed by SiRoB, See A4AF PartStatus
+//MORPH - Changed by SiRoB, Keep A4AF infos
 /*
 void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) const
 { 
@@ -70,23 +70,23 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 	}
 
 	
-	//MORPH START - Changed by SiRoB, See A4AF PartStatus
+	//MORPH START - Changed by SiRoB, Keep A4AF infos
 	/*
 	ASSERT(reqfile);
 	s_StatusBar.SetFileSize(reqfile->GetFileSize()); 
 	*/
 	ASSERT(file);
 	s_StatusBar.SetFileSize(file->GetFileSize()); 
-	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
+	//MORPH END   - Changed by SiRoB, Keep A4AF infos
 	s_StatusBar.SetHeight(rect->bottom - rect->top); 
 	s_StatusBar.SetWidth(rect->right - rect->left); 
 	s_StatusBar.Fill(crNeither); 
 
-	//MORPH START - Changed by SiRoB, See A4AF PartStatus
+	//MORPH START - Changed by SiRoB, Keep A4AF infos
 	uint8* thisAbyPartStatus;
-	uint8* thisIncPartStatus; //MORPH - Added by AndCycle, ICS, See A4AF PartStatus
+	uint8* thisIncPartStatus; //MORPH - Added by AndCycle, ICS, Keep A4AF infos
 	if(m_PartStatus_list.Lookup(file,thisAbyPartStatus) && thisAbyPartStatus){
-		int b_incPartStatus = m_IncPartStatus_list.Lookup(file,thisIncPartStatus); //MORPH - Added by AndCycle, ICS, See A4AF PartStatus
+		int b_incPartStatus = m_IncPartStatus_list.Lookup(file,thisIncPartStatus); //MORPH - Added by AndCycle, ICS, Keep A4AF infos
 		COLORREF crBoth; 
 		COLORREF crClientOnly; 
 		COLORREF crPending;
@@ -167,7 +167,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 		}
 		delete[] pcNextPendingBlks;
 	} 
-	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
+	//MORPH END   - Changed by SiRoB, Keep A4AF infos
 	s_StatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 
 
@@ -507,7 +507,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		&& !SupportsWebCache()) // Superlexx - webcache - webcache-enabled clients might use IFP
 	// MORPH END - Modified by Commander, WebCache 1.2e
 	{
-		//MORPH START - Changed by SiRoB,  See A4AF PartStatus
+		//MORPH START - Changed by SiRoB,  Keep A4AF infos
 		/*
 		if (m_abyPartStatus)
 		{
@@ -522,18 +522,18 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			m_PartStatus_list.RemoveKey(reqfile);
 		}
 		m_abyPartStatus = NULL;
-		//MORPH   END - Changed by SiRoB, See A4AF PartStatus
+		//MORPH   END - Changed by SiRoB, Keep A4AF infos
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by SiRoB, See A4AF PartStatus
+		//MORPH START - Added by SiRoB, Keep A4AF infos
 		m_PartStatus_list.SetAt(reqfile,m_abyPartStatus);
-		//MORPH END   - Added by SiRoB, See A4AF PartStatus
+		//MORPH END   - Added by SiRoB, Keep A4AF infos
 		memset(m_abyPartStatus,1,m_nPartCount);
 		m_bCompleteSource = true;
 
 		//Morph Start - added by AndCycle, ICS
 		// enkeyDev: ICS
-		//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 		/*
 		if (m_abyIncPartStatus){
 			delete[] m_abyIncPartStatus;
@@ -547,13 +547,13 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			m_IncPartStatus_list.RemoveKey(reqfile);
 		}
 		m_abyIncPartStatus = NULL;
-		//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
+		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 		// <--- enkeyDev: ICS
 		// enkeyDev: ICS
 		m_abyIncPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 		m_IncPartStatus_list.SetAt(reqfile,m_abyIncPartStatus);
-		//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
+		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 		memset(m_abyIncPartStatus,1,m_nPartCount);
 		// <--- enkeyDev: ICS
 		//Morph End - added by AndCycle, ICS
@@ -608,7 +608,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	}
 	uint16 nED2KPartCount = data->ReadUInt16();
 
-	//MORPH START - Added by SiRoB, See A4AF PartStatus
+	//MORPH START - Added by SiRoB, Keep A4AF infos
 	/*
 	if (m_abyPartStatus)
 	{
@@ -623,7 +623,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		m_PartStatus_list.RemoveKey(reqfile);
 	}
 	m_abyPartStatus = NULL;
-	//MORPH   END - Added by SiRoB, See A4AF PartStatus
+	//MORPH   END - Added by SiRoB, Keep A4AF infos
 
 	bool bPartsNeeded = false;
 	int iNeeded = 0;
@@ -631,9 +631,9 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	{
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by SiRoB, See A4AF PartStatus
+		//MORPH START - Added by SiRoB, Keep A4AF infos
 		m_PartStatus_list.SetAt(reqfile, m_abyPartStatus);
-		//MORPH   END - Added by SiRoB, See A4AF PartStatus
+		//MORPH   END - Added by SiRoB, Keep A4AF infos
 		memset(m_abyPartStatus,1,m_nPartCount);
 		bPartsNeeded = true;
 		m_bCompleteSource = true;
@@ -659,9 +659,9 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 
 		m_bCompleteSource = false;
 		m_abyPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by SiRoB, See A4AF PartStatus
+		//MORPH START - Added by SiRoB, Keep A4AF infos
 		m_PartStatus_list.SetAt(reqfile, m_abyPartStatus);
-		//MORPH   END - Added by SiRoB, See A4AF PartStatus
+		//MORPH   END - Added by SiRoB, Keep A4AF infos
 		uint16 done = 0;
 		while (done != m_nPartCount)
 		{
@@ -745,7 +745,7 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool re
 		}
 	}
 	m_nPartCount = data->ReadUInt16();
-	//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 	/*
 	if (m_abyIncPartStatus) {
 		delete[] m_abyIncPartStatus;
@@ -759,13 +759,13 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool re
 		m_IncPartStatus_list.RemoveKey(reqfile);
 	}
 	m_abyIncPartStatus = NULL;
-	//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
+	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 	if (!m_nPartCount){
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyIncPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 		m_IncPartStatus_list.SetAt(reqfile, m_abyIncPartStatus);
-		//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
+		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 		memset(m_abyIncPartStatus,1,m_nPartCount);
 	}
 	else{
@@ -773,9 +773,9 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool re
 			throw GetResString(IDS_ERR_WRONGPARTNUMBER);
 		}
 		m_abyIncPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 		m_IncPartStatus_list.SetAt(reqfile, m_abyIncPartStatus);
-		//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
+		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 		uint16 done = 0;
 		while (done != m_nPartCount){
 			uint8 toread = data->ReadUInt8();
@@ -902,12 +902,12 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 
 			if (nNewState == DS_NONE){
 				
-				//MORPH START - Removed by SiRoB, See A4AF PartStatus
+				//MORPH START - Removed by SiRoB, Keep A4AF infos
 				/*
 				if (m_abyPartStatus)
 					delete[] m_abyPartStatus;
 				*/
-				//MORPH   END - Removed by SiRoB, See A4AF PartStatus
+				//MORPH   END - Removed by SiRoB, Keep A4AF infos
 				m_abyPartStatus = NULL;
 				m_nPartCount = 0;
 				//Morph Start - added by AndCycle, ICS
@@ -2095,6 +2095,11 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR re
 		theApp.emuledlg->transferwnd->downloadlistctrl.AddSource(reqfile,this,true);
     } else {
         m_fileReaskTimes.RemoveKey(reqfile); // ZZ:DownloadManager (one resk timestamp for each file)
+		//MORPH START - Changed by SiRoB, Keep A4AF infos
+		m_PartStatus_list.RemoveKey(reqfile);
+		m_IncPartStatus_list.RemoveKey(reqfile); //ICS, Keep A4AF infos
+		m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
+		//MORPH START - Changed by SiRoB, Keep A4AF infos
 	}
 
 	SetDownloadState(DS_NONE);

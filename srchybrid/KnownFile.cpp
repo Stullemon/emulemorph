@@ -745,6 +745,9 @@ void CKnownFile::UpdatePartsInfo()
 	}
 	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1 && iCompleteSourcesCountInfoReceived,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
+	m_bHideOSAuthorized = true;
+	//MORPH END   - Added by SiRoB, Avoid misusing of HideOS
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
 	//MORPH END   - Added by SiRoB, Reduce ShareStatusBar CPU consumption

@@ -444,6 +444,9 @@ public:
 	// [end] Mighty Knife
 
 	uint8*			GetPartStatus() const							{ return m_abyPartStatus; }
+	//MORPH START - Added by SiRoB, Keep A4AF infos
+	uint8*			GetPartStatus(CPartFile* partfile) const		{ uint8* thisAbyPartStatus; return m_PartStatus_list.Lookup(partfile,thisAbyPartStatus)?thisAbyPartStatus:0; }
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	uint16			GetPartCount() const							{ return m_nPartCount; }
 	uint32			GetDownloadDatarate() const						{ return m_nDownDatarate; }
 	uint16			GetRemoteQueueRank() const						{ return m_nRemoteQueueRank; }
@@ -503,8 +506,16 @@ public:
 	uint16			GetA4AFCount() const							{ return m_OtherRequests_list.GetCount(); }
 
 	uint16			GetUpCompleteSourcesCount() const				{ return m_nUpCompleteSourcesCount; }
+	//MORPH START - Added by SiRoB, Keep A4AF infos
+	uint16			GetUpCompleteSourcesCount(CPartFile* partfile) const				{ uint16 CompletSourceCount; return m_nUpCompleteSourcesCount_list.Lookup(partfile,CompletSourceCount)?CompletSourceCount:0; }
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
+	
+	//MORPH START - Changed by SiRoB, Keep A4AF infos
+	/*
 	void			SetUpCompleteSourcesCount(uint16 n)				{ m_nUpCompleteSourcesCount = n; }
-
+	*/
+	void			SetUpCompleteSourcesCount(uint16 n)				{ m_nUpCompleteSourcesCount = n; m_nUpCompleteSourcesCount_list.SetAt(reqfile,n); }
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	//chat
 	EChatState		GetChatState() const							{ return (EChatState)m_nChatstate; }
 	void			SetChatState(EChatState nNewS)					{ m_nChatstate = nNewS; }
@@ -1005,10 +1016,11 @@ protected:
     bool    RecentlySwappedForSourceExchange() { return ::GetTickCount()-lastSwapForSourceExchangeTick < 30*1000; } // ZZ:DownloadManager
     void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
 
-	//MORPH START - Added by SiRoB, m_PartStatus_list
+	//MORPH START - Added by SiRoB, Keep A4AF infos
 	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_PartStatus_list;
-	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_IncPartStatus_list; //MORPH - Added by AndCycle, ICS, See A4AF PartStatus
-	//MORPH END   - Added by SiRoB, m_PartStatus_list
+	CMap<CPartFile*, CPartFile*, uint16, uint16>	 m_nUpCompleteSourcesCount_list;
+	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_IncPartStatus_list; //MORPH - Added by AndCycle, ICS, Keep A4AF infos
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
 
 //EastShare Start - added by AndCycle, IP to Country
 public:

@@ -323,7 +323,7 @@ CUpDownClient::~CUpDownClient(){
 		socket->Safe_Delete();
 	}
 
-	//MORPH START - Added by SiRoB, See A4AF PartStatus
+	//MORPH START - Added by SiRoB, Keep A4AF infos
 	POSITION			pos = m_PartStatus_list.GetStartPosition();
 	CPartFile*			curFile;
 	uint8*				curPS;
@@ -333,7 +333,7 @@ CUpDownClient::~CUpDownClient(){
 		if (curPS != m_abyPartStatus)
 			delete[] curPS;
 	}
-	//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 	pos = m_IncPartStatus_list.GetStartPosition();
 	while (pos)
 	{
@@ -341,8 +341,9 @@ CUpDownClient::~CUpDownClient(){
 		if (curPS != m_abyIncPartStatus)
 			delete[] curPS;
 	}
-	//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
-	//MORPH END   - Added by SiRoB, See A4AF PartStatus
+	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
+	m_nUpCompleteSourcesCount_list.RemoveAll();
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
 
 	if (m_pPCDownSocket){
 		m_pPCDownSocket->client = NULL;
@@ -2330,7 +2331,7 @@ void CUpDownClient::InfoPacketsReceived(){
 
 void CUpDownClient::ResetFileStatusInfo()
 {
-	//MORPH START - Changed by SiRoB, See A4AF PartStatus
+	//MORPH START - Changed by SiRoB, Keep A4AF infos
 	/*
 	if (m_abyPartStatus){
 		delete[] m_abyPartStatus;
@@ -2338,17 +2339,17 @@ void CUpDownClient::ResetFileStatusInfo()
 	}
 	*/
 	m_abyPartStatus = NULL;
-	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
+	//MORPH END   - Changed by SiRoB, Keep A4AF infos
 	//Morph Start - added by AndCycle, ICS
 	// enkeyDev: ICS
-	//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 	/*
 	if (m_abyIncPartStatus){
 		delete[] m_abyIncPartStatus;
 		m_abyIncPartStatus = NULL;
 	}
 	*/
-	//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
+	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 	m_abyIncPartStatus = NULL;
 	// <--- enkeyDev: ICS
 	//Morph End - added by AndCycle, ICS

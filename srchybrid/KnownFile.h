@@ -192,6 +192,7 @@ protected:
 class CKnownFile : public CAbstractFile
 {
 	DECLARE_DYNAMIC(CKnownFile)
+	friend class CImportPartsFileThread; //MORPH - Added by SiRoB, ImportParts
 public:
 	CKnownFile();
 	~CKnownFile();

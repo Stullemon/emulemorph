@@ -58,9 +58,9 @@ void CUrlClient::SetRequestFile(CPartFile* pReqFile)
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
 		memset(m_abyPartStatus, 1, m_nPartCount);
-		//MORPH START - Added by SiRoB, See A4AF PartStatus
+		//MORPH START - Added by SiRoB, Keep A4AF infos
 		m_PartStatus_list.SetAt(reqfile,m_abyPartStatus);
-		//MORPH END   - Added by SiRoB, See A4AF PartStatus
+		//MORPH END   - Added by SiRoB, Keep A4AF infos
 		m_bCompleteSource = true;
 	}
 }

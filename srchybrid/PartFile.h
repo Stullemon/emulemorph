@@ -68,7 +68,7 @@ enum EPartFileOp{
 	PFOP_HASHING,
 	PFOP_COPYING,
 	PFOP_UNCOMPRESSING,
-	PFOP_IMPORTPARTS //MORPH - Added by SiRoB, ImportParts
+	PFOP_SR13_IMPORTPARTS //MORPH - Added by SiRoB, ImportParts
 };
 
 class CSearchFile;
@@ -108,7 +108,6 @@ class CPartFile : public CKnownFile
 	DECLARE_DYNAMIC(CPartFile)
 
 	friend class CPartFileConvert;
-	friend class CImportPartsFileThread; //MORPH - Added by SiRoB, ImportParts
 public:
 	CPartFile();
 	CPartFile(CSearchFile* searchresult);  //used when downloading a new file
