@@ -1552,21 +1552,21 @@ void CUpDownClient::InfoPacketsReceived(){
 	}
 }
 void CUpDownClient::ResetFileStatusInfo(){
-	//khaos::+
+	//MORPH START - Removed by SiRoB, khaos::+
 	/*if (m_abyPartStatus){
 		delete[] m_abyPartStatus;
 		m_abyPartStatus = NULL;
 	}
 	m_nPartCount = 0;*/
-	//khaos::-
+	//MORPH END   - Removed by SiRoB, khaos::-
 	m_strClientFilename = "";
 	m_bCompleteSource = false;
 	m_dwLastAskedTime = 0;
 	m_iRate=0;
 	m_strComment="";
-	//MORPH START - Added by SiRoB about problem of udp request during full connection reached
-	m_bUDPPending = true;
-	//MORPH END   - Added by SiRoB about problem of udp request during full connection reached
+	//MORPH START - Added by SiRoB, HotFix Due Complete Source Feature
+	m_nUpCompleteSourcesCount = 0;
+	//MORPH END   - Added by SiRoB, HotFix Due Complete Source Feature
 }
 
 bool CUpDownClient::IsBanned(){
