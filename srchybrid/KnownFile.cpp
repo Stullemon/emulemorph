@@ -398,6 +398,10 @@ CKnownFile::CKnownFile()
 	InChangedSharedStatusBar = false;
 	m_pbitmapOldSharedStatusBar = NULL;
 	//MORPH END   - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
+
+	// Mighty Knife: CRC32-Tag
+	m_sCRC32 [0] = '\0';
+	// [end] Mighty Knife
 }
 
 CKnownFile::~CKnownFile(){
@@ -702,7 +706,8 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	// Mighty Knife: Report hashing files
 	if (theApp.glob_prefs->GetReportHashingFiles ()) {
 		CString hashfilename;
-		hashfilename.Format ("%s%s",in_directory, in_filename);
+		hashfilename.Format ("%s\\%s",in_directory, in_filename);
+		if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",in_directory, in_filename);
 		theApp.emuledlg->AddLogLine(false, "Hashing file: '%s'", (const char*) hashfilename);
 	}
 	// [end] Mighty Knife
@@ -805,7 +810,8 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	// Mighty Knife: Report hashing files
 	if (theApp.glob_prefs->GetReportHashingFiles ()) {
 		CString hashfilename;
-		hashfilename.Format ("%s%s",in_directory, in_filename);
+		hashfilename.Format ("%s\\%s",in_directory, in_filename);
+		if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",in_directory, in_filename);
 		theApp.emuledlg->AddLogLine(false, "Hashing of file '%s' completed.", (const char*) hashfilename);
 	}
 	// [end] Mighty Knife

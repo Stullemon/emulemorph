@@ -64,7 +64,6 @@ public:
 	CKnownFile* fileParent;
 	uint32	GetLastUsed()				{return lastused;} // EastShare - Added by TAHO, .met fiel control
 	void	SetLastUsed(uint32 inLastUsed)				{lastused = inLastUsed;} // EastShare - Added by TAHO, .met fiel control
-
 private:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
 	CRBMap<uint32, uint32> spreadlist;
@@ -289,6 +288,15 @@ public:
 	void	UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare) {m_bPowerShareAuthorized = authorizepowershare;m_bPowerShareAuto = autopowershare;}
    	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
+
+	// Mighty Knife: CRC32-Tag
+	bool    IsCRC32Calculated () const			{return m_sCRC32[0]!='\0';}
+	CString GetLastCalculatedCRC32 () const		{return m_sCRC32;}
+	// The CRC32 is not created within this object but written to this object:
+	void    SetLastCalculatedCRC32 (const char* _CRC) {strcpy (m_sCRC32,_CRC);}
+
+	// [end] Mighty Knife
+
 protected:
 	//preview
 	bool	GrabImage(CString strFileName,uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
@@ -349,6 +357,10 @@ private:
 	bool	m_bPowerShareAuthorized;
 	bool	m_bPowerShareAuto;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+
+	// Mighty Knife: CRC32-Tag
+	char    m_sCRC32 [16];
+	// [end] Mighty Knife
 };
 
 // permission values for shared files

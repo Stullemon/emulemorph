@@ -327,7 +327,19 @@ void CSharedFileList::FindSharedFiles(){
 
 	// SLUGFILLER: SafeHash remove - only called after the download queue is created
 		CSingleLock sLock1(&list_mut,true); // list thread safe
+		
+		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
+		// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
+		// They must not be deleted when the CRC32-Thread writes the CRC into the object !
+		CSingleLock sLockCRC32 (&FileListLockMutex,true);
+		// [end] Mighty Knife
+		
 		m_Files_map.RemoveAll();
+
+		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
+		sLockCRC32.Unlock ();
+		// [end] Mighty Knife
+		
 		//m_keywords->RemoveAllKeywords();
 		sLock1.Unlock();
 		ASSERT( theApp.downloadqueue );
@@ -387,7 +399,8 @@ void CSharedFileList::FindSharedFiles(){
 			while (p != NULL) {
 				UnknownFile_Struct* f = waitingforhash_list.GetAt (p);
 				CString hashfilename;
-				hashfilename.Format ("%s%s",f->strDirectory, f->strName);
+				hashfilename.Format ("%s\\%s",f->strDirectory, f->strName);
+				if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",f->strDirectory, f->strName);
 				theApp.emuledlg->AddLogLine(false, "New file: '%s'", (const char*) hashfilename);
 				waitingforhash_list.GetNext (p);
 			}

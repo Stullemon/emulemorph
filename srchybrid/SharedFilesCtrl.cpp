@@ -34,6 +34,10 @@
 #include "Opcodes.h"
 #include "InputBox.h"
 
+// Mighty Knife: CRC32-Tag
+#include "AddCRC32TagDialog.h"
+// [end] Mighty Knife
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -175,6 +179,12 @@ void CSharedFilesCtrl::Init(){
 	m_ImageList.Add(theApp.LoadIcon("RATING_FAIR"));  // 4
 	m_ImageList.Add(theApp.LoadIcon("RATING_EXCELLENT"));  // 5
 	//MORPH END   - Added & Moddified by IceCream, SLUGFILLER: showComments
+
+	// Mighty Knife: CRC32-Tag
+	InsertColumn(20,"calculated CRC32",LVCFMT_LEFT,120,20);
+	InsertColumn(21,"CRC32-check ok",LVCFMT_LEFT,100,21);
+	// [end] Mighty Knife
+
 	CreateMenues();
 
 	LoadSettings(CPreferences::tableShared);
@@ -188,9 +198,12 @@ void CSharedFilesCtrl::Init(){
 		i--;
 		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared, i);
 		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableShared, i);
-		SortItems(SortProc, sortItem + (sortAscending ? 0:20));
+		// Mighty Knife: CRC32-Tag - Indexes shifted by 10
+		SortItems(SortProc, sortItem + (sortAscending ? 0:30));
+		// [end] Mighty Knife
 	}
 	// SLUGFILLER: multiSort
+
 }
 
 void CSharedFilesCtrl::Localize() {
@@ -622,6 +635,26 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							buffer = GetResString(IDS_DEFAULT);
 						break;
 					//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+
+					// Mighty Knife: CRC32-Tag
+					case 20:
+						if(file->IsCRC32Calculated()) {
+							buffer.Format ("%s",file->GetLastCalculatedCRC32());
+						} else buffer = "";
+						break;
+					case 21:
+						if(file->IsCRC32Calculated()) {
+							CString FName = file->GetFileName();
+							FName.MakeUpper (); // Uppercase the filename ! 
+												// Our CRC is upper case...
+							if (FName.Find (file->GetLastCalculatedCRC32()) != -1) {
+								buffer.Format ("%s",GetResString(IDS_YES));
+							} else {
+								buffer.Format ("%s",GetResString(IDS_NO));
+							}
+						} else buffer = "";
+						break;
+					// [end] Mighty Knife
 				}
 				if( iColumn != 8 && iColumn!=14)
 					dc->DrawText(buffer, buffer.GetLength(),&cur_rec,uDTFlags);
@@ -689,9 +722,11 @@ BEGIN_MESSAGE_MAP(CSharedFilesCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
+	// Mighty Knife: CRC32-Tag - Save rename
+	ON_MESSAGE(WM_CRC32_RENAMEFILE,	OnCRC32RenameFile)
+	ON_MESSAGE(WM_CRC32_UPDATEFILE, OnCRC32UpdateFile)
+	// [end] Mighty Knife
 END_MESSAGE_MAP()
-
-
 
 // CSharedFilesCtrl message handlers
 void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
@@ -1222,6 +1257,83 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				Invalidate();
 				break;
 			}
+		    // Mighty Knife: CRC32-Tag
+			case MP_CALCCRC32: 
+				if (!selectedList.IsEmpty()){
+					// For every chosen file create a worker thread and add it
+					// to the file processing thread
+					POSITION pos = selectedList.GetHeadPosition();
+					while (pos != NULL) {
+						CCRC32CalcWorker* worker = new CCRC32CalcWorker;
+						const uchar* FileHash = selectedList.GetAt (pos)->GetFileHash ();
+						worker->SetFileHashToProcess (FileHash);
+						m_FileProcessingThread.AddFileProcessingWorker (worker);
+						selectedList.GetNext (pos);
+					}
+					// Start the file processing thread to process the files.
+					if (!m_FileProcessingThread.IsRunning ()) {
+						// (Re-)start the thread, this will do the rest
+
+						// If the thread object already exists, this will result in an
+						// ASSERT - but that doesn't matter since we manually take care
+						// that the thread does not run at this moment...
+						m_FileProcessingThread.CreateThread ();
+					}
+				}
+				break;
+			case MP_ABORTCRC32CALC:
+				// Message the File processing thread to stop any pending calculations
+				if (m_FileProcessingThread.IsRunning ())
+					m_FileProcessingThread.Terminate ();
+				break;
+			case MP_ADDCRC32TOFILENAME:
+				if (!selectedList.IsEmpty()){
+					AddCRC32InputBox AddCRCDialog;
+					int result = AddCRCDialog.DoModal ();
+					if (result == IDOK) {
+						// For every chosen file create a worker thread and add it
+						// to the file processing thread
+						POSITION pos = selectedList.GetHeadPosition();
+						while (pos != NULL) {
+							// first create a worker thread that calculates the CRC
+							// if it's not already calculated...
+							const uchar* FileHash = selectedList.GetAt (pos)->GetFileHash ();
+
+							// But don't add the worker thread if the CRC32 should not
+							// be calculated !
+							if (!AddCRCDialog.GetDontAddCRC32 ()) {
+								CCRC32CalcWorker* workercrc = new CCRC32CalcWorker;
+								workercrc->SetFileHashToProcess (FileHash);
+								m_FileProcessingThread.AddFileProcessingWorker (workercrc);
+							}
+
+							// Now add a worker thread that informs this window when
+							// the calculation is completed.
+							// The method OnCRC32RenameFilename will then rename the file
+							CCRC32RenameWorker* worker = new CCRC32RenameWorker;
+							worker->SetFileHashToProcess (FileHash);
+							worker->SetFilenamePrefix (AddCRCDialog.GetCRC32Prefix ());
+							worker->SetFilenameSuffix (AddCRCDialog.GetCRC32Suffix ());
+							worker->SetDontAddCRCAndSuffix (AddCRCDialog.GetDontAddCRC32 ());
+							m_FileProcessingThread.AddFileProcessingWorker (worker);
+
+							// next file
+							selectedList.GetNext (pos);
+						}
+						// Start the file processing thread to process the files.
+						if (!m_FileProcessingThread.IsRunning ()) {
+							// (Re-)start the thread, this will do the rest
+
+							// If the thread object already exists, this will result in an
+							// ASSERT - but that doesn't matter since we manually take care
+							// that the thread does not run at this moment...
+							m_FileProcessingThread.CreateThread ();
+						}
+					}
+				}
+				break;
+			// [end] Mighty Knife
+
 			// xMule_MOD: showSharePermissions
 			default:
 				POSITION pos = selectedList.GetHeadPosition();
@@ -1251,6 +1363,84 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	}
 	return TRUE;
 }
+
+// Mighty Knife: CRC32-Tag - Save rename
+// File will be renamed in this method at the time it can be renamed.
+// Might be that the CRC had to be calculated before so the thread will inform
+// this window when the CRC is ok and the file can be renamed...
+afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lParam) {
+	// Get the worker thread
+	CCRC32RenameWorker* worker = (CCRC32RenameWorker*) lParam;
+	// In this case the worker thread is a helper thread for this routine !
+	CKnownFile* f = worker->ValidateKnownFile (worker->m_fileHashToProcess);
+	if (f==NULL) {
+		// File doesn't exist in the list; deleted and reloaded the shared files list in
+		// the meantime ?
+		theApp.AddLogLine (false,"Warning: File that should be renamed does not exist in the list anymore !");
+		return 0;         
+	}
+	if (f->IsPartFile () && !worker->m_DontAddCRCAndSuffix) {     
+		// We can't add a CRC suffix to files which are not complete
+		theApp.AddLogLine (false,"Can't add CRC to file '%s'; file is a part file and not complete !",
+						   f->GetFileName ());
+		worker->UnlockSharedFilesList ();
+		return 0;
+	}
+	if (!worker->m_DontAddCRCAndSuffix && !f->IsCRC32Calculated ()) {
+		// The CRC must have been calculate, otherwise we can't add it
+		theApp.AddLogLine (false,"Can't add CRC32 to file '%s'; CRC is not calculated !",
+						   f->GetFileName ());
+		worker->UnlockSharedFilesList ();
+		return 0;
+	}
+	CString fn = f->GetFilePath ();
+	char* p1 = (char*) malloc (fn.GetLength ()+1);
+	char* p2 = (char*) malloc (fn.GetLength ()+1);
+	char* p3 = (char*) malloc (fn.GetLength ()+1);
+	char* p4 = (char*) malloc (fn.GetLength ()+1);
+	_splitpath (fn,p1,p2,p3,p4);
+	CString NewFn = p3;
+	NewFn = NewFn + worker->m_FilenamePrefix;
+	if (!worker->m_DontAddCRCAndSuffix) {
+		NewFn = NewFn + f->GetLastCalculatedCRC32 () + worker->m_FilenameSuffix;
+	}
+	NewFn = NewFn + p4;
+
+	theApp.AddLogLine (false,"File '%s%s' will be renamed to '%s'...",
+					   p3,p4,NewFn);
+
+	CString NewPath; // = CString (p1) + CString (p2) + NewFn;
+	PathCombine(NewPath.GetBuffer(MAX_PATH), f->GetPath(), NewFn);
+	NewPath.ReleaseBuffer();
+
+	if (_trename(fn, NewPath) != 0) {
+		theApp.AddLogLine (false,"Can't rename file '%s%s' ! Error: %s",p3,p4,strerror(errno));
+	} else {
+		theApp.sharedfiles->RemoveKeywords(f);
+		f->SetFileName(NewFn);
+		theApp.sharedfiles->AddKeywords(f);
+		f->SetFilePath(NewPath);
+		UpdateFile (f);
+	}
+	
+	worker->UnlockSharedFilesList ();
+
+	// we don't need the splitted parts of the filename anymore
+	free (p4);
+	free (p3);
+	free (p2);
+	free (p1);
+	return 0;
+}
+
+// Update the file which CRC was just calculated.
+// The LPARAM parameter is a pointer to that file
+afx_msg LRESULT CSharedFilesCtrl::OnCRC32UpdateFile	(WPARAM wParam, LPARAM lParam) {
+	CKnownFile* file = (CKnownFile*) lParam;
+	UpdateFile (file);
+	return 0;
+}
+// [end] Mighty Knife
 
 void CSharedFilesCtrl::UpdateItem(CKnownFile* file)
 {
@@ -1301,31 +1491,34 @@ void CSharedFilesCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult)
 		SetSortArrow(sortItem, sortAscending); 
 	else
 		SetSortArrow(sortItem, sortAscending ? arrowDoubleUp : arrowDoubleDown);
-	SortItems(SortProc, sortItem + adder + (sortAscending ? 0:20));
+	// Mighty Knife: CRC32-Tag - Indexes shifted by 10
+	SortItems(SortProc, sortItem + adder + (sortAscending ? 0:30));
+	// [end] Mighty Knife
 
 	*pResult = 0;
 }
 
 int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
+	// Mighty Knife: CRC32-Tag - Indexes shifted by 10 !
 	const CKnownFile* item1 = (CKnownFile*)lParam1;
 	const CKnownFile* item2 = (CKnownFile*)lParam2;	
 	switch(lParamSort){
 		case 0: //filename asc
 			return _tcsicmp(item1->GetFileName(),item2->GetFileName());
-		case 20: //filename desc
+		case 30: //filename desc
 			return _tcsicmp(item2->GetFileName(),item1->GetFileName());
 
 		case 1: //filesize asc
 			return item1->GetFileSize()==item2->GetFileSize()?0:(item1->GetFileSize()>item2->GetFileSize()?1:-1);
 
-		case 21: //filesize desc
+		case 31: //filesize desc
 			return item1->GetFileSize()==item2->GetFileSize()?0:(item2->GetFileSize()>item1->GetFileSize()?1:-1);
 
 
 		case 2: //filetype asc
 			return item1->GetFileType().CompareNoCase(item2->GetFileType());
-		case 22: //filetype desc
+		case 32: //filetype desc
 			return item2->GetFileType().CompareNoCase(item1->GetFileType());
 
 		case 3: //prio asc
@@ -1342,7 +1535,7 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 				else
 					return item1->GetUpPriority()-item2->GetUpPriority();
 			//MORPH END   - Changed by SiRoB, Powerstate in prio colums
-		case 23: //prio desc
+		case 33: //prio desc
 			//MORPH START - Changed by SiRoB, Powerstate in prio colums
 			if (item2->GetPowerShared() == false && item1->GetPowerShared() == true)
 				return -1;			
@@ -1358,41 +1551,41 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			//MORPH END  - Changed by SiRoB, Powerstate in prio colums
 		case 4: //fileID asc
 			return memcmp(item1->GetFileHash(), item2->GetFileHash(), 16);
-		case 24: //fileID desc
+		case 34: //fileID desc
 			return memcmp(item2->GetFileHash(), item1->GetFileHash(), 16);
 
 		case 5: //requests asc
 			return item1->statistic.GetRequests() - item2->statistic.GetRequests();
-		case 25: //requests desc
+		case 35: //requests desc
 			return item2->statistic.GetRequests() - item1->statistic.GetRequests();
 		
 		case 6: //acc requests asc
 			return item1->statistic.GetAccepts() - item2->statistic.GetAccepts();
-		case 26: //acc requests desc
+		case 36: //acc requests desc
 			return item2->statistic.GetAccepts() - item1->statistic.GetAccepts();
 		
 		case 7: //all transferred asc
 			return item1->statistic.GetTransferred()==item2->statistic.GetTransferred()?0:(item1->statistic.GetTransferred()>item2->statistic.GetTransferred()?1:-1);
-		case 27: //all transferred desc
+		case 37: //all transferred desc
 			return item1->statistic.GetTransferred()==item2->statistic.GetTransferred()?0:(item2->statistic.GetTransferred()>item1->statistic.GetTransferred()?1:-1);
 
 		case 9: //folder asc
 			return _tcsicmp(item1->GetPath(),item2->GetPath());
-		case 29: //folder desc
+		case 39: //folder desc
 			return _tcsicmp(item2->GetPath(),item1->GetPath());
 
 		case 10: //complete sources asc
 			return CompareUnsigned(item1->m_nCompleteSourcesCount, item2->m_nCompleteSourcesCount);
-		case 30: //complete sources desc
+		case 40: //complete sources desc
 			return CompareUnsigned(item2->m_nCompleteSourcesCount, item1->m_nCompleteSourcesCount);
 		case 11: //ed2k shared asc
 			return item1->GetPublishedED2K() - item2->GetPublishedED2K();
-		case 31: //ed2k shared desc
+		case 41: //ed2k shared desc
 			return item2->GetPublishedED2K() - item1->GetPublishedED2K();
 
 		case 12: //permission asc
 			return item2->GetPermissions()-item1->GetPermissions();
-		case 32: //permission desc
+		case 42: //permission desc
 			return item1->GetPermissions()-item2->GetPermissions();
 
 		
@@ -1422,7 +1615,7 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 							return 1;
 						else
 							return 0;
-		case 33:
+		case 43:
 			if (item2->GetPowerShared() == false && item1->GetPowerShared() == true)
 				return -1;
 			else if (item2->GetPowerShared() == true && item1->GetPowerShared() == false)
@@ -1452,12 +1645,12 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 		case 14: //spread asc
 		case 15:
 			return 10000*(((CKnownFile*)lParam1)->statistic.GetSpreadSortValue()-((CKnownFile*)lParam2)->statistic.GetSpreadSortValue());
-		case 34: //spread desc
-		case 35:
+		case 44: //spread desc
+		case 45:
 			return 10000*(((CKnownFile*)lParam2)->statistic.GetSpreadSortValue()-((CKnownFile*)lParam1)->statistic.GetSpreadSortValue());
 
 		case 16: // VQB:  Simple UL asc
-		case 36: //VQB:  Simple UL desc
+		case 46: //VQB:  Simple UL desc
 			{
 				float x1 = ((float)item1->statistic.GetAllTimeTransferred())/((float)item1->GetFileSize());
 				float x2 = ((float)item2->statistic.GetAllTimeTransferred())/((float)item2->GetFileSize());
@@ -1465,7 +1658,7 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			}
 		case 17: // SF:  Full Upload Count asc
 			return 10000*(((CKnownFile*)lParam1)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam2)->statistic.GetFullSpreadCount());
-		case 37: // SF:  Full Upload Count desc
+		case 47: // SF:  Full Upload Count desc
 			return 10000*(((CKnownFile*)lParam2)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam1)->statistic.GetFullSpreadCount());
 		//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 		//MORPH START - Added by SiRoB, HIDEOS
@@ -1483,20 +1676,20 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 		case 19:
 			return item1->GetShareOnlyTheNeed() - item2->GetShareOnlyTheNeed();
-		case 39:
+		case 49:
 			return item2->GetShareOnlyTheNeed() - item1->GetShareOnlyTheNeed();
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 		case 105: //all requests asc
 			return item1->statistic.GetAllTimeRequests() - item2->statistic.GetAllTimeRequests();
-		case 125: //all requests desc
+		case 135: //all requests desc
 			return item2->statistic.GetAllTimeRequests() - item1->statistic.GetAllTimeRequests();
 		case 106: //all acc requests asc
 			return item1->statistic.GetAllTimeAccepts() - item2->statistic.GetAllTimeAccepts();
-		case 126: //all acc requests desc
+		case 136: //all acc requests desc
 			return item2->statistic.GetAllTimeAccepts() - item1->statistic.GetAllTimeAccepts();
 		case 107: //all transferred asc
 			return item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item1->statistic.GetAllTimeTransferred()>item2->statistic.GetAllTimeTransferred()?1:-1);
-		case 127: //all transferred desc
+		case 137: //all transferred desc
 			return item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item2->statistic.GetAllTimeTransferred()>item1->statistic.GetAllTimeTransferred()?1:-1);
 
 		case 111:{ //kad shared asc
@@ -1505,7 +1698,7 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			int i2 = (tNow - item2->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME) ? 1 : 0;
 			return i1 - i2;
 		}
-		case 131:{ //kad shared desc
+		case 141:{ //kad shared desc
 			uint32 tNow = time(NULL);
 			int i1 = (tNow - item1->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME) ? 1 : 0;
 			int i2 = (tNow - item2->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME) ? 1 : 0;
@@ -1668,6 +1861,13 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD)); 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	//****end  comments***//
+
+	// Mighty Knife: CRC32-Tag
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CALCCRC32,"Calculate CRC32");
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ADDCRC32TOFILENAME,"Add Release-Tag/CRC32 to filename...");
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ABORTCRC32CALC,"Abort CRC32 calculation");
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
+	// [end] Mighty Knife
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1));
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_GETHTMLED2KLINK, GetResString(IDS_DL_LINK2));

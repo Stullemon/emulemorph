@@ -157,6 +157,12 @@
 
 #define MP_GETHOSTNAMESOURCEED2KLINK	10361	// itsonlyme: hostnameSource
 
+// Mighty Knife: CRC32-Tag
+#define MP_CALCCRC32            10380
+#define MP_ADDCRC32TOFILENAME   10381
+#define MP_ABORTCRC32CALC		10382
+// [end] Mighty Knife
+
 // quick-speed changer
 #define MP_QS_U10				10501
 #define MP_QS_U20				10502

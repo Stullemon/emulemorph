@@ -1781,6 +1781,17 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool ("LogFriendlistActivities",GetLogFriendlistActivities ());
 	// [end] Mighty Knife
 
+	// Mighty Knife: CRC32-Tag
+	ini.WriteBool ("DontAddCRC32ToFilename",GetDontAddCRCToFilename ());
+	CString temp;
+	// Encapsule these strings by "" because space characters are allowed at the
+	// beginning/end of the prefix/suffix !
+	temp.Format ("\"%s\"",GetCRC32Prefix ());
+	ini.WriteString("LastCRC32Prefix",temp);
+	temp.Format ("\"%s\"",GetCRC32Suffix());
+	ini.WriteString("LastCRC32Suffix",temp);
+	// [end] Mighty Knife
+
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool("DynUpEnabled", prefs->m_bDynUpEnabled);
 	ini.WriteInt("DynUpPingTolerance", prefs->m_iDynUpPingTolerance);
@@ -2413,6 +2424,13 @@ void CPreferences::LoadPreferences(){
 	sprintf (prefs->m_sCommunityName,"%s",ini.GetString ("CommunityName"));
 	prefs->m_bReportHashingFiles = ini.GetBool ("ReportHashingFiles",true);
 	prefs->m_bLogFriendlistActivities = ini.GetBool ("LogFriendlistActivities",true);
+	// [end] Mighty Knife
+
+	// Mighty Knife: CRC32-Tag
+	SetDontAddCRCToFilename (ini.GetBool ("DontAddCRC32ToFilename",false));
+	// From the prefix/suffix delete the leading/trailing "".
+	SetCRC32Prefix (ini.GetString("LastCRC32Prefix","\" [\"").Trim ("\""));
+	SetCRC32Suffix (ini.GetString("LastCRC32Suffix","\"]\"").Trim ("\""));
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)

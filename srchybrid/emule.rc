@@ -1510,6 +1510,24 @@ BEGIN
     LTEXT           "Static",IDC_WARNINGEASTSHARE,7,7,213,39
 END
 
+IDD_ADDCRC32TAG DIALOGEX 0, 0, 250, 97
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "CRC32 to filename"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Prefix to add at the end of the filename before the CRC32:",
+                    IDC_IBLABEL,2,2,245,11
+    EDITTEXT        IDC_CRC32PREFIX,2,14,245,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,143,76,50,14,BS_FLAT
+    PUSHBUTTON      "Abbrechen",IDCANCEL,197,76,50,14,BS_FLAT
+    EDITTEXT        IDC_CRC32SUFFIX,2,44,245,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Suffix to add the end of the filename after the CRC32:",
+                    IDC_STATIC,2,33,245,9
+    CONTROL         "Don't add CRC32/Suffix to filename, only add prefix as static text",
+                    IDC_DONTADDCRC,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,2,61,245,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2092,6 +2110,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 240
         HORZGUIDE, 46
+    END
+
+    IDD_ADDCRC32TAG, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 247
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 90
     END
 END
 #endif    // APSTUDIO_INVOKED

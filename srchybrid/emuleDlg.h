@@ -290,7 +290,12 @@ enum EEmuleUserMsgs
 	WM_KAD_REQUESTTCP,
 	WM_KAD_UPDATESTATUS,
 	WM_KAD_OVERHEADSEND,
-	WM_KAD_OVERHEADRECV
+	WM_KAD_OVERHEADRECV,
+
+	// Mighty Knife: CRC32-Tag - save rename
+	WM_CRC32_RENAMEFILE,
+	WM_CRC32_UPDATEFILE
+	// [end] Mighty Knife
 };
 
 enum EEmlueAppMsgs

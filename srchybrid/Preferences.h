@@ -206,24 +206,27 @@ struct Preferences_Struct{
 	BOOL	downloadColumnHidden[16];
 	INT		downloadColumnOrder[16];
 	// khaos::categorymod-
-	int16	uploadColumnWidths[13];
-	BOOL	uploadColumnHidden[13];
-	INT		uploadColumnOrder[13];
-	int16	queueColumnWidths[11];
-	BOOL	queueColumnHidden[11];
-	INT		queueColumnOrder[11];
+	int16	uploadColumnWidths[14]; // Mighty Knife: Community visualization +1
+	BOOL	uploadColumnHidden[14]; // Mighty Knife: Community visualization +1
+	INT		uploadColumnOrder[14];  // Mighty Knife: Community visualization +1
+	int16	queueColumnWidths[12]; // Mighty Knife: Community visualization +1
+	BOOL	queueColumnHidden[12]; // Mighty Knife: Community visualization +1
+	INT		queueColumnOrder[12];  // Mighty Knife: Community visualization +1
 	int16	searchColumnWidths[12];//11+1/*Fakecheck*/
 	BOOL	searchColumnHidden[12];//11+1/*Fakecheck*/
 	INT		searchColumnOrder[12];//11+1/*Fakecheck*/
-	int16	sharedColumnWidths[20];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
-	BOOL	sharedColumnHidden[20];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
-	INT		sharedColumnOrder[20]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
+	int16	sharedColumnWidths[22];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
+									// Mighty Knife: CRC32-Tag - +2
+	BOOL	sharedColumnHidden[22];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
+									// Mighty Knife: CRC32-Tag - +2
+	INT		sharedColumnOrder[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
+									// Mighty Knife: CRC32-Tag - +2
 	int16	serverColumnWidths[13];
 	BOOL	serverColumnHidden[13];
 	INT 	serverColumnOrder[13];
-	int16	clientListColumnWidths[8];
-	BOOL	clientListColumnHidden[8];
-	INT 	clientListColumnOrder[8];
+	int16	clientListColumnWidths[9]; // Mighty Knife: Community visualization +1
+	BOOL	clientListColumnHidden[9]; // Mighty Knife: Community visualization +1
+	INT 	clientListColumnOrder[9];  // Mighty Knife: Community visualization +1
 	DWORD	statcolors[15];
 	//EastShare Start- Added by Pretender, TBH-AutoBackup
 	bool	autobackup;
@@ -643,6 +646,12 @@ struct Preferences_Struct{
 	char		m_sCommunityName [256];
 	bool		m_bReportHashingFiles;
 	bool	    m_bLogFriendlistActivities;
+	// [end] Mighty Knife
+
+	// Mighty Knife: CRC32-Tag - not accessible in preferences dialog !
+	bool		m_bDontAddCRCToFilename;
+	char		m_sCRC32Prefix [256];
+	char		m_sCRC32Suffix [256];
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
@@ -1407,6 +1416,15 @@ public:
 	void	SetReportHashingFiles (bool _b)			{ prefs->m_bReportHashingFiles = _b; }
 	bool    GetLogFriendlistActivities ()			{ return prefs->m_bLogFriendlistActivities; }
 	void	SetLogFriendlistActivities (bool _b)	{ prefs->m_bLogFriendlistActivities = _b; }
+	// [end] Mighty Knife
+
+	// Mighty Knife: CRC32-Tag - not accessible in preferences dialog !
+	bool    GetDontAddCRCToFilename ()				{ return prefs->m_bDontAddCRCToFilename; }
+	void	SetDontAddCRCToFilename (bool _b)		{ prefs->m_bDontAddCRCToFilename = _b; }
+	CString GetCRC32Prefix ()						{ return prefs->m_sCRC32Prefix; }
+	void	SetCRC32Prefix (CString _s)				{ sprintf (prefs->m_sCRC32Prefix,"%s",_s); }
+	CString GetCRC32Suffix ()						{ return prefs->m_sCRC32Suffix; }
+	void	SetCRC32Suffix (CString _s)				{ sprintf (prefs->m_sCRC32Suffix,"%s",_s); }
 	// [end] Mighty Knife
 
 	// deadlake PROXYSUPPORT

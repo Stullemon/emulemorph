@@ -82,6 +82,12 @@ private:
 	uint32 m_lastPublishKadSrc;
 	uint32 m_lastProcessPublishKadKeywordList;
 	CMutex	list_mut;
+
+// Mighty Knife: CRC32-Tag - Public method to lock the filelist to prevent it 
+// from being deleted; be careful using this not to produce deadlocks !
+public:
+	CMutex FileListLockMutex;
+// [end] Mighty Knife
 };
 
 class CAddFileThread : public CWinThread

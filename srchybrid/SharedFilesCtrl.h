@@ -18,6 +18,10 @@
 #include "MuleListCtrl.h"
 #include "TitleMenu.h"
 
+// Mighty Knife: CRC32-Tag
+#include "FileProcessing.h"
+// [end] Mighty Knife
+
 class CSharedFileList;
 class CKnownFile;
 class CPartFile; //MORPH - Added by SiRoB, delete shared file
@@ -53,6 +57,12 @@ protected:
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
 
+	// Mighty Knife: CRC32-Tag
+	CFileProcessingThread m_FileProcessingThread;
+	afx_msg LRESULT OnCRC32RenameFile (WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCRC32UpdateFile (WPARAM wParam, LPARAM lParam);
+	// [end] Mighty Knife
+
 private:
 
 	CTitleMenu	m_SharedFilesMenu;
@@ -66,4 +76,5 @@ private:
 	CMenu		m_HideOSMenu; //MORPH - Added by SiRoB, HIDEOS
 	CMenu		m_SelectiveChunkMenu; //MORPH - Added by SiRoB, HIDEOS
 	CMenu		m_ShareOnlyTheNeedMenu; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+
 };

@@ -1960,6 +1960,7 @@
 #define IDS_SLS_USESLS                  3618
 #define IDD_PPG_EASTSHARE               3618
 #define IDS_CAT_MERGE                   3619
+#define IDD_ADDCRC32TAG                 3619
 #define IDS_CAT_SETFILEGROUP            3620
 #define IDS_CAT_GROUP                   3621
 #define IDS_CAT_SETFILEGROUPMSG         3622
@@ -2238,8 +2239,12 @@
 #define IDC_URL_FOR_UPDATING2           4877
 #define IDC_DLOC                        4877
 #define IDC_DLOC2                       4878
+#define IDC_CRC32PREFIX                 4878
 #define IDS_IP2COUNTRY                  4879
+#define IDC_CRC32SUFFIX                 4879
 #define IDS_COUNTRYNAME_SHORT           4880
+#define IDC_CHECK1                      4880
+#define IDC_DONTADDCRC                  4880
 #define IDS_COUNTRYNAME_MID             4881
 #define IDS_COUNTRYNAME_LONG            4882
 #define IDS_COUNTRYNAME_SHOWFLAG        4883
@@ -2253,7 +2258,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        4878
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         4878
+#define _APS_NEXT_CONTROL_VALUE         4881
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

@@ -1,0 +1,188 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#include "stdafx.h"
+#include "resource.h"
+#include "AddCRC32TagDialog.h"
+#include "OtherFunctions.h"
+#include "emule.h"
+#include "emuleDlg.h"
+#include "SharedFilesWnd.h"
+#include <crypto51/crc.h>
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+// Original file: Written by Mighty Knife, EMule Morph Team
+
+// AddCRC32InputBox dialog
+
+IMPLEMENT_DYNAMIC(AddCRC32InputBox, CDialog)
+
+AddCRC32InputBox::AddCRC32InputBox(CWnd* pParent /*=NULL*/)
+	: CDialog(AddCRC32InputBox::IDD, pParent)
+{
+}
+
+AddCRC32InputBox::~AddCRC32InputBox()
+{
+}
+
+void AddCRC32InputBox::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+}
+
+BEGIN_MESSAGE_MAP(AddCRC32InputBox, CDialog)
+END_MESSAGE_MAP()
+
+void AddCRC32InputBox::OnOK()
+{	
+	GetDlgItem(IDC_CRC32PREFIX)->GetWindowText (m_CRC32Prefix);
+	theApp.glob_prefs->SetCRC32Prefix (m_CRC32Prefix);
+
+	GetDlgItem(IDC_CRC32SUFFIX)->GetWindowText (m_CRC32Suffix);
+	theApp.glob_prefs->SetCRC32Suffix (m_CRC32Suffix);
+	m_DontAddCRC32 = (bool)IsDlgButtonChecked(IDC_DONTADDCRC);
+	theApp.glob_prefs->SetDontAddCRCToFilename (m_DontAddCRC32);
+	CDialog::OnOK();
+}
+
+
+void AddCRC32InputBox::OnCancel()
+{
+	CDialog::OnCancel();
+}
+
+BOOL AddCRC32InputBox::OnInitDialog(){
+	CDialog::OnInitDialog();
+	InitWindowStyles(this);
+
+	CheckDlgButton(IDC_DONTADDCRC,theApp.glob_prefs->GetDontAddCRCToFilename() ? BST_CHECKED : BST_UNCHECKED);
+	GetDlgItem(IDC_CRC32PREFIX)->SetWindowText (theApp.glob_prefs->GetCRC32Prefix ());
+	GetDlgItem(IDC_CRC32SUFFIX)->SetWindowText (theApp.glob_prefs->GetCRC32Suffix ());
+
+	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
+
+	return TRUE;
+}
+
+IMPLEMENT_DYNCREATE(CCRC32RenameWorker, CFileProcessingWorker)
+
+void CCRC32RenameWorker::Run () {
+	// Inform the shared files window that the file can be renamed.
+	// It's saver to rename the file in the main thread than in this thread
+	// to avoid address conflicts in the pointer lists of all the files...
+	// They are not being thread save...
+	// We send the address of this thread in the LPARAM parameter to the
+	// shared files window so it can access all parameters needed to rename the file.
+	SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,WM_CRC32_RENAMEFILE,
+				 0, (LPARAM) this);
+}
+
+IMPLEMENT_DYNCREATE(CCRC32CalcWorker, CFileProcessingWorker)
+
+void CCRC32CalcWorker::Run () {
+	// This method calculates the CRC32 checksum of the file and stores it to the
+	// CKnownFile object. The CRC won't be calculated if it exists already.
+	CKnownFile* f = ValidateKnownFile (m_fileHashToProcess);
+	if (f==NULL) {
+		// File doesn't exist in the list; deleted and reloaded the shared files list in
+		// the meantime ?
+		theApp.AddLogLine (false,"Warning: A file for which the CRC32 should be calculated does not exist!");
+		return;         
+	}
+	if (f->IsCRC32Calculated ()) {     
+		// We already have the CRC
+		theApp.AddLogLine (false,"CRC32-calculation of file '%s' skipped - already calculated.",
+						   f->GetFileName ());
+		UnlockSharedFilesList ();
+		return;
+	}
+	if (f->IsPartFile ()) {     
+		// We can't add a CRC suffix to files which are not complete
+		theApp.AddLogLine (false,"Can't calculate CRC32 of file '%s'; file is a part file and not complete !",
+						   f->GetFileName ());
+		UnlockSharedFilesList ();
+		return;
+	}
+	theApp.AddLogLine (false,"Calculating CRC32 of file '%s'...",f->GetFileName ());
+	CString Filename = f->GetFileName ();
+	// Release the lock while computing...
+	UnlockSharedFilesList ();
+	CString sCRC32;
+	
+	// Calculate the CRC...
+	CFile file;
+	if (file.Open(f->GetFilePath (),CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone)){
+		// to be implemented...
+		CryptoPP::CRC32 CRC32Calculator;
+		byte* buffer = (byte*) malloc (65000);
+		int cnt;
+		do {
+			if (!theApp.emuledlg->IsRunning())	// in case of shutdown while still hashing
+				break;
+			if (m_pOwner->IsTerminating ())     // Stop the calculation if aborted
+				break;
+			cnt = file.Read (buffer, 65000);
+			if (cnt > 0) {
+				// Update the CRC32 in the calculation object
+				CRC32Calculator.Update (buffer, cnt);
+			}
+		} while (cnt == 65000);
+
+		free (buffer);
+		file.Close ();
+
+		if (!theApp.emuledlg->IsRunning()) {
+			// Abort and get back immediately
+			return;
+		}
+		if (m_pOwner->IsTerminating ()) {
+			// Calculation aborted
+			theApp.AddLogLine (false,"CRC32 calculation of file '%s' aborted.",Filename);
+			return;
+		}
+
+		// Calculation successfully completed. Update the CRC in the CKnownFile object.
+		byte FinalCRC32 [4];
+		CRC32Calculator.TruncatedFinal (FinalCRC32,4); // Get the CRC
+		sCRC32.Format ("%02X%02X%02X%02X",(int) FinalCRC32 [3],
+										  (int) FinalCRC32 [2],
+										  (int) FinalCRC32 [1],
+										  (int) FinalCRC32 [0]);
+		theApp.AddLogLine (false,"Calculation of CRC32 for file '%s' completed. File CRC: %s",Filename,sCRC32);
+
+		// relock the list, get the file pointer
+		f = ValidateKnownFile (m_fileHashToProcess);
+		// store the CRC
+		f->SetLastCalculatedCRC32 (sCRC32);
+		// Inform the file window that the CRC calculation was successful.
+		// The window should then show the CRC32 in the corresponding column.
+		::SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,WM_CRC32_UPDATEFILE,
+					0, (LPARAM) f);
+		// Release the lock of the list again
+		UnlockSharedFilesList ();
+	} else {
+		// File cannot be accessed
+		theApp.AddLogLine (false,"Warning: Can't open file '%s' for CRC32 calculation. File skipped.",
+						   Filename);
+	}
+
+}

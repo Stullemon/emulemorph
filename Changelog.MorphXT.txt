@@ -6,11 +6,16 @@ FIXED  : The default view value (HideOS, SelectiveChunk,  Permissions & Share On
 FIXED  : When using the SmartA4AFSwapping the requested download list is not well updated [SiRoB]
 FIXED  : Popup Category causing crash when NULL is returned by GetCategory() [SiRoB]
 FIXED  : Set the minupload and not the maxupload by using the minupload's textbox in the popup systray [SiRoB]
-ADDED  : Patch against daylight saving bug. Can be activated in Morph Preferences. EMule needs to be restarted because it must eventually rehash all files (but only once and then no more)! [MightyKnife]
+ADDED  : Patch against daylight saving bug. Prevents EMule from rehashing all known files after 6 months when daylight saving comes into effect.
+         Can be activated in Morph Preferences. EMule needs to be restarted because it must eventually rehash all files (but only once and then no more)! [MightyKnife]
 ADDED  : Limited community support with community tags: Community icon, Columns for community affiliation in up-/client-/queuelist, Shared files visible for community.
          (Of course no change of client rating in upload queue) [MightyKnife]
 ADDED  : Report hashing files activities [MightyKnife]
 ADDED  : Report activities in friendlist [MightyKnife]
+ADDED  : CRC32 calculation/testing for files. Right click on a file in the shared files list lets you calculate the CRC32 for the file.
+         Furthermore a releaser tag can be added (together with the CRC) to the filename (of course for multiple files at once, too).
+         The calculated CRC is shown in a column on the right - together with an info whether the calculated CRC was found in 
+         the filename. (Hint: The calculated CRC32 will not be stored in known.met) [MightyKnife]
 NOTE   : IP2Country now support to display flag of the country, this require countryflag.dll, also put it at /config/, currently you can get this from Morph CVS
 
 ---------------------------------------- 
