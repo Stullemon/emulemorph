@@ -134,7 +134,8 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
     //EastShare START - Added by linekin, CreditSystem 
 	switch (m_cssCurrentCreditSystem)	{
 
-		case CS_LOVELACE: // EastShare - Added by linekin, lovelace Credit
+		// EastShare - Added by linekin, lovelace Credit
+		case CS_LOVELACE: 
 		{
 			// new creditsystem by [lovelace]
 			double cl_up,cl_down; 
@@ -155,20 +156,41 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			// end new creditsystem by [lovelace]
 		}break;
 
-		case CS_RATIO: //Ratio mod Credit
+		//Ratio mod Credit
+		case CS_RATIO: 
 		{
-			if (!GetUploadedTotal())
-				result = 10;
-			else
-				result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
-			float result2 = 0;
-			result2 = (float)GetDownloadedTotal()/1048576.0;
+			float UploadedTotalMB = (float)GetUploadedTotal()/1048576.0;
+			float DownloadedTotalMB = (float)GetDownloadedTotal()/1048576.0;
+			if (DownloadedTotalMB < 1){
+				if (UploadedTotalMB >= 18)
+					return 0.1f;
+				else
+					return 1-(UploadedTotalMB/20);
+			}
+
+			float result = 10000;
+			if (UploadedTotalMB > 1){
+				result = (DownloadedTotalMB * 2)/UploadedTotalMB;
+				if (result < 2){
+					float BonusMB = (float)sqrt((double)DownloadedTotalMB) * 5;
+					result = (DownloadedTotalMB + BonusMB)/UploadedTotalMB;
+					if (result < 0.5){
+						result = 0.5f;
+					}
+				}
+			}
+
+			float result2 = DownloadedTotalMB;
 			result2 += 2;
-			result2 = (double)sqrt((double)result2);
+			result2 = (float)sqrt((double)result2);
+
 			if (result > result2)
 				result = result2;
-			if (result < 1)
-				result = 1;
+
+			if (result < 1.01){
+				if (DownloadedTotalMB > 9)
+					result = 1.01f;
+			}
 		}break;
 
 		//EastShare Start - added by AndCycle, Pawcio credit
@@ -305,6 +327,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 
 	//Morph End - Modified by AndCycle, reduce a litte CPU usage for ratio count
 }
+
 //MORPH START - Added by IceCream, VQB: ownCredits
 float CClientCredits::GetMyScoreRatio(uint32 dwForIP)
 {
