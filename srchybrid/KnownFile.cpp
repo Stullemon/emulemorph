@@ -659,7 +659,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 
 	m_AvailPartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
-		m_AvailPartFrequency.Add(0);
+		m_AvailPartFrequency[i] = 0;	// rayita: arraySetSizeFix
 	// create hashset
 	uint32 togo = m_nFileSize;
 	for (uint16 hashcount = 0; togo >= PARTSIZE; ) {
@@ -859,7 +859,7 @@ bool CKnownFile::LoadTagsFromFile(CFile* file){
 				SetFileSize(newtag->tag.intvalue);
 				m_AvailPartFrequency.SetSize(GetPartCount());
 				for (uint32 i = 0; i < GetPartCount();i++)
-					m_AvailPartFrequency.Add(0);
+					m_AvailPartFrequency[i] = 0;	// rayita: arraySetSizeFix
 				delete newtag;
 				break;
 			}

@@ -302,8 +302,7 @@ void CPartFile::CreatePartFile(){
 
 	m_SrcpartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
-		//m_SrcpartFrequency.Add(0);//original
-		m_SrcpartFrequency[i] = 0;//Morph - modified by AndCycle, Error in m_SrcpartFrequency sizing(rayita)
+		m_SrcpartFrequency[i] = 0;	// rayita: arraySetSizeFix
 	paused = false;
 
 	if (theApp.glob_prefs->AutoFilenameCleanup())
@@ -640,8 +639,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 
 	m_SrcpartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i != GetPartCount();i++)
-		//m_SrcpartFrequency.Add(0);//original
-		m_SrcpartFrequency[i] = 0;//Morph - modified by AndCycle, Error in m_SrcpartFrequency sizing(rayita)
+		m_SrcpartFrequency[i] = 0;	// rayita: arraySetSizeFix
 	SetStatus(PS_EMPTY);
 	// check hashcount, filesatus etc
 	if (GetHashCount() != GetED2KPartHashCount()){
