@@ -991,8 +991,14 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_RESUME);
 			break;
 		}
+		//MORPH START - Changed by SiRoB, Khaos Category
+		/*
 		case MP_RESUMENEXT: {
 			theApp.downloadqueue->StartNextFile(rightclickindex,false);
+		*/
+		case MP_CAT_RESUMENEXT: {
+			theApp.downloadqueue->StartNextFile(rightclickindex,false);
+		//MORPH END   - Changed by SiRoB, Khaos Category
 			break;
 		}
 
