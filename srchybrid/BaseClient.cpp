@@ -468,7 +468,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			return _T("Bad MODSTRING detected");
 		}
 	}
-	if (old_m_pszUsername != m_pszUsername)
+	/*if (old_m_pszUsername != m_pszUsername)
 	{
 		if (StrStrI(m_pszUsername,_T("$GAM3R$"))||
 			StrStrI(m_pszUsername,_T("G@m3r"))||
@@ -503,6 +503,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			return _T("Bad USERNAME detected");
 		}
 	}
+	*/
 	if (m_bNotOfficial && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
 		return _T("Ghost Mod Detected");
 	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion < MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
