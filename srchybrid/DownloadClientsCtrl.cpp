@@ -321,7 +321,6 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 			{
 			//MORPH END   - Added by SiRoB, Don't draw hidden columns
-				dc->SetTextColor(RGB(204,0,0)); //Pretender: transferers in darkred
 
 				switch(iColumn)
 				{
