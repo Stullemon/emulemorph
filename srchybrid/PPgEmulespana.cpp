@@ -628,6 +628,10 @@ BOOL CPPgEmulespana::OnApply()
 
 	bool bRestartApp = false;
 
+	// Added by MoNKi [MoNKi: -Random Ports-]
+	 thePrefs.SetRandomPortsSafeResetOnRestartTime(m_iRandomPortsResetTime);
+	// End MoNKi
+
 /*Commented by SiRoB
 	// Added by MoNKi [MoNKi: -invisible mode-]
 	thePrefs.SetInvisibleMode(m_bInvisibleMode, m_iInvisibleModeActualKeyModifier, m_sInvisibleModeKey.GetAt(0));

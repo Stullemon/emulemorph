@@ -240,6 +240,9 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 			m_htiLogWebCacheEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_WCEVENTS), m_htiVerboseGroup, m_iLogWebCacheEvents); //JP log webcache events
 			m_htiLogICHEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_IACH), m_htiVerboseGroup, m_iLogICHEvents); //JP log ICH events
 			//MORPH END   - Added by SiRoB, WebCache 1.2f
+			// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
+			m_htiLogUPnP = m_ctrlTreeOptions.InsertCheckBox(_T("Log UPnP"), m_htiVerboseGroup, m_iLogUPnP);
+			// End emulEspaña
 		}
 
 		m_htiCommit = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_COMMITFILES), iImgBackup, TVI_ROOT);

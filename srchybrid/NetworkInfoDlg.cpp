@@ -322,11 +322,24 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		CString count;
 		count.Format(_T("%i %s"),theApp.wapserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
 		rCtrl << _T("\t") << count << _T("\r\n");
+
 		CString strHostname;
 		if (!thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1)
 			strHostname = thePrefs.GetYourHostname();
+		else{
+			if(Kademlia::CKademlia::isConnected()){
+				strHostname = ipstr(ntohl(Kademlia::CKademlia::getPrefs()->getIPAddress()));
+			}
+			else if (theApp.serverconnect->IsConnected()){
+				if (theApp.serverconnect->IsLowID())
+					strHostname = GetResString(IDS_UNKNOWN);
 		else
-			strHostname = ipstr(theApp.serverconnect->GetLocalIP());
+					strHostname = ipstr(theApp.serverconnect->GetClientID());
+			}
+			else{
+				strHostname = GetResString(IDS_UNKNOWN);
+			}
+		}
 		rCtrl << _T("URL:\t") << _T("http://") << strHostname << _T(":") << thePrefs.GetWapPort() << _T("/\r\n");
 	}
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
