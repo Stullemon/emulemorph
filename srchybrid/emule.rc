@@ -4061,6 +4061,7 @@ END
 
 STRINGTABLE 
 BEGIN
+	IDS_TRICKLING           "(trickle)"
     IDS_ST_TOTALU           "total uploads"
     IDS_STATS_TOTALUL       "Total number of uploads: %i"
     IDS_SP_TOTALUL          "Total number of uploads"

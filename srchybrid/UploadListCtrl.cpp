@@ -462,8 +462,18 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							Sbuffer = GetResString(IDS_CONNVIASERVER);
 							break;
 						case US_UPLOADING:
-							Sbuffer = GetResString(IDS_TRANSFERRING);
+							//MORPH START - Added by SiRoB, ZZ Upload System
+							if(client->GetSlotNumber() <= (uint32)theApp.uploadqueue->GetActiveUploadsCount() || client->GetDatarate() > 600 /* || client->GetSlotNumber() <= 1*/) {
+                                if(client->GetSlotNumber() <= (uint32)theApp.uploadqueue->GetActiveUploadsCount()) {
+							        Sbuffer = GetResString(IDS_TRANSFERRING);
+                                } else {
+							        Sbuffer = GetResString(IDS_TRANSFERRING)+"*";
+                                }
+                            } else {
+                                Sbuffer = GetResString(IDS_TRICKLING);
+                            }
 							break;
+							//MORPH END - Added by SiRoB, ZZ Upload System
 						default:
 							Sbuffer = GetResString(IDS_UNKNOWN);
 					}

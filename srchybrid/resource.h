@@ -2129,8 +2129,9 @@
 #define IDS_LOWIDRETRYLABEL             3751
 #define IDS_ACTIVATIONLIMIT_SLS         3752
 #define IDS_SOURCESTOSAVE_SLS           3753
-#define IDS_SLS                         3753
-#define IDS_ENABLESLS                   3754
+#define IDS_SLS                         3754
+#define IDS_ENABLESLS                   3755
+#define IDS_TRICKLING                   3802
 #define IDS_ST_TOTALU                   3803
 #define IDS_STATS_TOTALUL               3804
 #define IDS_SP_TOTALUL                  3805
