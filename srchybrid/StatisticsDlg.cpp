@@ -310,9 +310,9 @@ void CStatisticsDlg::RepaintMeters() {
 	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(5) ,2) ;
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 	// friends line
-	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(13) ,3) ;
+	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(13) ,4) ;
 	// current upload without overhead included
-	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(14) ,4) ;
+	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(14) ,3) ;
 	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 	m_Statistics.SetBackgroundColor(thePrefs.GetStatsColor(0)) ;
 	m_Statistics.SetGridColor(thePrefs.GetStatsColor(1)) ;
@@ -336,9 +336,9 @@ void CStatisticsDlg::RepaintMeters() {
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,1);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT),2);
 	m_UploadOMeter.SetBarsPlot(true,2);
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND),3);
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),3);
 	m_UploadOMeter.SetBarsPlot(true,3);
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),4);
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND),4);
 	m_UploadOMeter.SetBarsPlot(true,4);
 
 	m_Statistics.SetYUnits(GetResString(IDS_FSTAT_CONNECTION/*IDS_CONNECTIONSTATISTICS*/));
@@ -365,10 +365,10 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float 
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 	// current rate to network (standardPackets+controlPackets)
 	m_dPlotDataUp[2]=uploadrate;
-	// current rate to network (friends excluded)
-	m_dPlotDataUp[3]=uploadtonetworkrate;
 	// current rate (overhead excluded)
-	m_dPlotDataUp[4]=uploadrate-uploadrateControlPackets;
+	m_dPlotDataUp[3]=uploadrate-uploadrateControlPackets;
+	// current rate to network (friends excluded)
+	m_dPlotDataUp[4]=uploadtonetworkrate;
 	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 
 	// -khaos--+++>

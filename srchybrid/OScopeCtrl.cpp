@@ -805,7 +805,8 @@ void COScopeCtrl::DrawPoint()
 			if(m_PlotData[iTrend].BarsPlot)
 				m_dcPlot.MoveTo(currX - 1, m_rectPlot.bottom);
 			else
-			{	if(abs(prevX - currX) > abs(prevY - currY))
+			{
+				if(abs(prevX - currX) > abs(prevY - currY))
 				{
 					currX += prevX - currX>0 ? -1 : 1;
 				}
