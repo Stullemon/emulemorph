@@ -927,9 +927,14 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
     if(!allowEmptyWaitingQueue && waitinglist.GetSize() <= 0)
         return false;
 
-	if (::GetTickCount() - m_nLastStartUpload < 1000 && datarate < 102400 )
+	//MORPH START - Changed by SiRoB, Upload Splitting Class
+	/*
+	if (::GetTickCount() - m_nLastStartUpload < 1000 && datarate < 102400)
+	*/
+	if (::GetTickCount() - m_nLastStartUpload < 3000)
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		return false;
-
+	
 	uint32 curUploadSlots = (uint32)uploadinglist.GetCount();
 
     if(!AcceptNewClient(curUploadSlots) || !theApp.lastCommonRouteFinder->AcceptNewClient()) { // UploadSpeedSense can veto a new slot if USS enabled

@@ -17,6 +17,7 @@ CHANGED: Overhead datarate calcul have been changed based on 10'' [SiRoB]
 
 TWEAKED: Parameters and file information will be saved before backing up config-folder, not only on program end. [MightyKnife]
 TWEAKED: Better datarate mesurement for low and high speed [SiRoB]
+TWEAKED: USC: Smoother opened slot [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.13
