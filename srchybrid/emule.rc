@@ -12,12 +12,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(950)
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1809,7 +1809,7 @@ BEGIN
     CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
                     IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,7,37,197,10
-    CONTROL         "Convert wrong apostrophes ""¡¦"", ""`"" to standard apostrophes "" ' """,
+    CONTROL         "Convert wrong apostrophes ""’"", ""`"" to standard apostrophes "" ' """,
                     IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
@@ -2885,12 +2885,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5310,11 +5310,15 @@ END
 
 STRINGTABLE 
 BEGIN
-	IDS_WEBCACHE_ISP        "ISP Proxyserver Settings"
+    IDS_WEBCACHE_ISP        "ISP Proxyserver Settings"
     IDS_WC_PORT             "Port"
     IDS_WC_ADDRESS          "Address"
     IDS_WC_CONTROLS         "Webcache Controls"
     IDS_WC_ENABLE           "Enable Webcached Downloads"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_WC_WRONGPORT        "You are using a TCP port that is usually not cached by ISP proxy-servers. Please change your TCP port to  21, 70, 80, 210, 443 563  or 1025-65535 to be able to activate the webcache download!"
     IDS_WC_AUTO             "Autodetect Webcache"
     IDS_WC_NRBLOCKS         "Number of blocks to download before reconnecting to the proxy (may help to solve disconnects in some cases)"
@@ -5328,10 +5332,21 @@ BEGIN
     IDS_WC_TEST             "Test webcache configuration. Might take up to 30 Seconds"
     IDS_WC_HIDE_ADV         "Hide advanced controls"
     IDS_WC_SUBMIT_WEB       "Submit webcache info via webform"
-    IDS_LOG_WCEVENTS	    "Log WebCache Events"
-    IDS_LOG_IACH	    "Log IACH Events"
 END
-#endif    // English (U.S.) resources
+
+STRINGTABLE 
+BEGIN
+    IDS_LOG_WCEVENTS        "Log WebCache Events"
+    IDS_LOG_IACH            "Log IACH Events"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IMPORTPARTS         "Import parts to file..."
+    IDS_INITIATEREHASH      "Initiate rehash"
+END
+
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -2095,8 +2095,8 @@
 #define IDC_UIP                         2910
 #define IDC_STATIC_ADDRESS              2912
 #define IDC_STATIC_PORT                 2913
-#define IDC_STATIC_CONTROLS            2914
-#define IDC_STATIC_NRBLOCKS                  2915
+#define IDC_STATIC_CONTROLS             2914
+#define IDC_STATIC_NRBLOCKS             2915
 #define IDC_TestProxy                   2916
 #define IDS_WEBCACHE_ISP                3209
 #define IDS_WC_PORT                     3212
@@ -2666,6 +2666,9 @@
 #define IDC_URL_FOR_UPDATING_IP2COUNTRY 5602
 #define IDS_URL_FOR_UPDATING_IP2COUNTRY 5602
 #define IDC_MORPH3_OPTS                 5700
+#define IDS_IMPORT_PARTS                5700
+#define IDS_IMPORTPARTS                 5700
+#define IDS_INITIATEREHASH              5701
 #define IDD_PPG_EMULESPANA1             6000
 #define IDS_WAPSRV                      6001
 #define IDS_PW_WAP                      6002
@@ -2773,8 +2776,8 @@
 #define IDS_GETMYHTMLFRIENDED2KLINK     21068
 #define IDS_FRIENDLINKMENUTITLE         21070
 #define IDC_WCSTATISTICS                22540
-#define IDS_LOG_WCEVENTS		        22541
-#define IDS_LOG_IACH					22542
+#define IDS_LOG_WCEVENTS                22541
+#define IDS_LOG_IACH                    22542
 #define IDC_TRUSTEDOHCBSENDER           22570
 #define IDC_WCReq                       27820
 #define IDC_WCDownl                     27830
