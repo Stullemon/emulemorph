@@ -344,16 +344,14 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 					//EastShare Start - added by AndCycle, IP to Country
 					if(theApp.ip2country->IsIP2Country()){
-
 						CString tempStr;
 						tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
 						Sbuffer = tempStr;
-
-						if(theApp.glob_prefs->IsIP2CountryShowFlag()){
-							cur_rec.left+=20;
-							POINT point2= {cur_rec.left,cur_rec.top+1};
-							imagelist.Draw(dc, client->GetCountryFlagIndex() + 11, point2, ILD_NORMAL);
-						}
+					}
+					if(theApp.ip2country->ShowCountryFlag()){
+						cur_rec.left+=20;
+						POINT point2= {cur_rec.left,cur_rec.top+1};
+						imagelist.DrawIndirect(dc, client->GetCountryFlagIndex() + 11, point2, CSize(16,16), CPoint(0,0), ILD_NORMAL);
 					}
 					//EastShare End - added by AndCycle, IP to Country
 
@@ -362,7 +360,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					cur_rec.left -=20;
 
 					//EastShare Start - added by AndCycle, IP to Country
-					if(theApp.ip2country->IsIP2Country() && theApp.glob_prefs->IsIP2CountryShowFlag()){
+					if(theApp.ip2country->ShowCountryFlag()){
 						cur_rec.left-=20;
 					}
 					//EastShare End - added by AndCycle, IP to Country

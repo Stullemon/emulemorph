@@ -335,7 +335,7 @@ int CIP2Country::GetCountryFlagAmount(){
 
 bool CIP2Country::ShowCountryFlag(){
 
-	return (theApp.glob_prefs->IsIP2CountryShowFlag() && EnableCountryFlag);
+	return (theApp.glob_prefs->IsIP2CountryShowFlag() && EnableCountryFlag && EnableIP2Country);
 }
 
 //EastShare End - added by AndCycle, IP to Country

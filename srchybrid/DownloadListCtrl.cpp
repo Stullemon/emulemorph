@@ -888,9 +888,9 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
 				//Morph Start - added by AndCycle, IP to Country
-				if(theApp.ip2country->IsIP2Country() && theApp.glob_prefs->IsIP2CountryShowFlag()){
+				if(theApp.glob_prefs->IsIP2CountryShowFlag()){
 					POINT point3= {cur_rec.left,cur_rec.top+1};
-					m_ImageList.Draw(dc, lpUpDownClient->GetCountryFlagIndex() + 24, point3, ILD_NORMAL);
+					m_ImageList.DrawIndirect(dc, lpUpDownClient->GetCountryFlagIndex() + 24, point3, CSize(16,16), CPoint(0,0), ILD_NORMAL);
 					cur_rec.left+=20;
 				}
 				//Morph End - added by AndCycle, IP to Country
