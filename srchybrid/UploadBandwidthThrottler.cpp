@@ -618,7 +618,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							else
 								break;
 						}
-						if (isFocused == false) bytesToSpendTemp = min(doubleSendSize,bytesToSpendTemp);
+						if (isFocused == false) bytesToSpendTemp = ClientDataRate[classID];
 						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 						spentBytesClass[classID] += lastSpentBytes;
