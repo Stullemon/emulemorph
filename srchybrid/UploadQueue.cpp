@@ -593,6 +593,31 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	}
 	else
 	{
+		//MORPH START - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
+		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(newclient->GetUploadFileID());
+		if (reqfile){
+			CSafeMemFile data(16+16);
+			data.WriteHash16(reqfile->GetFileHash());
+			bool send = true;
+			if (reqfile->IsPartFile()){
+				((CPartFile*)reqfile)->WritePartStatus(&data, newclient);	// SLUGFILLER: hideOS
+				send = reqfile->HideOSInWork();
+			}
+			else if (!reqfile->ShareOnlyTheNeed(&data, newclient)) // Wistly SOTN
+				if (!reqfile->HideOvershares(&data, newclient))	// Slugfiller: HideOS
+					send = false;
+			if (send){
+				Packet* packet = new Packet(&data);
+				packet->opcode = OP_FILESTATUS;
+				theStats.AddUpDataOverheadFileRequest(packet->size);
+				newclient->socket->SendPacket(packet,true);
+			}
+			else {
+				BYTE* tmp = data.Detach();
+				free(tmp);
+			}
+		}
+		//MORPH END   - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			DebugSend("OP__AcceptUploadReq", newclient);
 		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
@@ -1243,7 +1268,35 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 		theApp.clientlist->AddTrackClient(client); // Keep track of this client
 		client->SetUploadState(US_NONE);
 		client->ClearUploadBlockRequests();
-
+		if (client->socket){ 
+				//MORPH START - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
+				if (requestedFile){
+					CSafeMemFile data(16+16);
+					data.WriteHash16(requestedFile->GetFileHash());
+					bool send = true;
+					if (requestedFile->IsPartFile()){
+						((CPartFile*)requestedFile)->WritePartStatus(&data);	// SLUGFILLER: hideOS
+						send = requestedFile->GetHideOS()>=0 ? requestedFile->GetHideOS() : thePrefs.GetHideOvershares();
+					}
+					else {
+						if (!requestedFile->ShareOnlyTheNeed(&data, client)) // Wistly SOTN
+							if (!requestedFile->HideOvershares(&data, client))	// Slugfiller: HideOS
+								send = false;
+						data.WriteUInt16(0);
+					}
+					if (send){
+						Packet* packet = new Packet(&data);
+						packet->opcode = OP_FILESTATUS;
+						theStats.AddUpDataOverheadFileRequest(packet->size);
+						client->socket->SendPacket(packet,true);
+					}
+					else {
+						BYTE* tmp = data.Detach();
+						free(tmp);
+					}
+				}
+				//MORPH END   - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
+			}
         m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 
 		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
