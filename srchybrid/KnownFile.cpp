@@ -2175,7 +2175,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	if (!theApp.glob_prefs->IsSelectiveShareEnabled())
 		return parts;
 
-	uint8 hideOS = GetHideOS()==-1?theApp.glob_prefs->GetHideOvershares():GetHideOS();
+	uint8 hideOS = GetHideOS()>=0?GetHideOS():theApp.glob_prefs->GetHideOvershares();
 	ASSERT(hideOS != 0);
 
 	bool resetSentCount = false;
@@ -2236,7 +2236,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 };
 
 bool CKnownFile::HideOvershares(CFile* file, CUpDownClient* client){
-	uint8 hideOS = GetHideOS()==-1?theApp.glob_prefs->GetHideOvershares():GetHideOS();
+	uint8 hideOS = GetHideOS()>=0?GetHideOS():theApp.glob_prefs->GetHideOvershares();
 
 	if (!hideOS)
 		return FALSE;

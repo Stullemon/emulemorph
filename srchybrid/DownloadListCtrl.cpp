@@ -59,13 +59,13 @@ CDownloadListCtrl::CDownloadListCtrl() {
 CDownloadListCtrl::~CDownloadListCtrl(){
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
 	if (m_A4AFMenu) VERIFY( m_A4AFMenu.DestroyMenu() );
-	if (m_FileMenu) VERIFY( m_FileMenu.DestroyMenu() );
 	//MORPH START - Added by AndCycle, showSharePermissions
 	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );	// xMule_MOD: showSharePermissions
 	//MORPH END   - Added by AndCycle, showSharePermissions
 	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
 	if (m_A4AFMenuFlag) VERIFY( m_A4AFMenuFlag.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
+	if (m_FileMenu) VERIFY( m_FileMenu.DestroyMenu() );
 	while(m_ListItems.empty() == false){
 		delete m_ListItems.begin()->second; // second = CtrlItem_Struct*
 		m_ListItems.erase(m_ListItems.begin());
@@ -2645,13 +2645,14 @@ void CDownloadListCtrl::OnNMDblclkDownloadlist(NMHDR *pNMHDR, LRESULT *pResult) 
 
 void CDownloadListCtrl::CreateMenues() {
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
-	if (m_FileMenu) VERIFY( m_FileMenu.DestroyMenu() );
 	// khaos::kmod+
 	if (m_A4AFMenu)	VERIFY( m_A4AFMenu.DestroyMenu() );
 	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );	// xMule_MOD: showSharePermissions
 	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 	if (m_A4AFMenuFlag)	VERIFY( m_A4AFMenuFlag.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
+	if (m_FileMenu) VERIFY( m_FileMenu.DestroyMenu() );
+
 	m_PrioMenu.CreateMenu();
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOLOW,GetResString(IDS_PRIOLOW));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIONORMAL,GetResString(IDS_PRIONORMAL));
@@ -2684,6 +2685,7 @@ void CDownloadListCtrl::CreateMenues() {
 	if (theApp.glob_prefs->IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	// khaos::kmod-
+	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION));	// xMule_MOD: showSharePermissions
 	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) );
 	// khaos::kmod+
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
@@ -2703,8 +2705,7 @@ void CDownloadListCtrl::CreateMenues() {
 
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR));
-	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION));	// xMule_MOD: showSharePermissions
-
+	
 	//MORPH - Moved by SiRoB, see on top
 	//if (theApp.glob_prefs->IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
 

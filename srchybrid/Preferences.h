@@ -201,9 +201,9 @@ struct Preferences_Struct{
 	int16	searchColumnWidths[12];//11+1/*Fakecheck*/
 	BOOL	searchColumnHidden[12];//11+1/*Fakecheck*/
 	INT		searchColumnOrder[12];//11+1/*Fakecheck*/
-	int16	sharedColumnWidths[18];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/
-	BOOL	sharedColumnHidden[18];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/
-	INT		sharedColumnOrder[18]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/
+	int16	sharedColumnWidths[20];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
+	BOOL	sharedColumnHidden[20];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
+	INT		sharedColumnOrder[20]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/
 	int16	serverColumnWidths[13];
 	BOOL	serverColumnHidden[13];
 	INT 	serverColumnOrder[13];

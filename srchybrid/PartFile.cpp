@@ -1633,7 +1633,7 @@ void CPartFile::WritePartStatus(CFile* file, CUpDownClient* client) /*const*/
 	// SLUGFILLER: hideOS
 	CArray<uint32, uint32> partspread;
 	uint16 parts;
-	uint8 hideOS = GetHideOS()==-1?theApp.glob_prefs->GetHideOvershares():GetHideOS();
+	uint8 hideOS = GetHideOS()>=0?GetHideOS():theApp.glob_prefs->GetHideOvershares();
 	if (hideOS && client) {
 		parts = CalcPartSpread(partspread, client);
 	} else {	// simpler to set as 0 than to create another loop...

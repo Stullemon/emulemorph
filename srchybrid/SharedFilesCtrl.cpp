@@ -160,6 +160,12 @@ void CSharedFilesCtrl::Init(){
 	InsertColumn(16,GetResString(IDS_SF_TURN_SIMPLE),LVCFMT_LEFT,100,16); // VQB
 	InsertColumn(17,GetResString(IDS_SF_FULLUPLOAD),LVCFMT_LEFT,100,17); // SF
 	//MORPH END   - Added & Modified by IceCream, SLUGFILLER: Spreadbars
+	//MORPH START - Added by SiRoB, HIDEOS
+    InsertColumn(18,GetResString(IDS_HIDEOS),LVCFMT_LEFT,100,18);
+	//MORPH END   - Added by SiRoB, HIDEOS
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+	InsertColumn(19,GetResString(IDS_SHAREONLYTHENEED),LVCFMT_LEFT,100,19);
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,2);
 	m_ImageList.SetBkColor(CLR_NONE);
 	m_ImageList.Add(theApp.LoadIcon("RATING_NO"));  // 0
@@ -288,7 +294,19 @@ void CSharedFilesCtrl::Localize() {
 	pHeaderCtrl->SetItem(17, &hdi);
 	strRes.ReleaseBuffer();
 	//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
-
+	//MORPH START - Added by SiRoB, HIDEOS
+    strRes = GetResString(IDS_HIDEOS);
+	hdi.pszText = strRes.GetBuffer();
+	pHeaderCtrl->SetItem(18, &hdi);
+	strRes.ReleaseBuffer();
+	//MORPH END   - Added by SiRoB, HIDEOS
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+	strRes = GetResString(IDS_SHAREONLYTHENEED);
+	hdi.pszText = strRes.GetBuffer();
+	pHeaderCtrl->SetItem(19, &hdi);
+	strRes.ReleaseBuffer();
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	
 	CreateMenues();
 }
 
@@ -561,6 +579,31 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						buffer.Format("%.2f",((CKnownFile*)lpDrawItemStruct->itemData)->statistic.GetFullSpreadCount());
 						break;
 					// SLUGFILLER: Spreadbars
+					//MORPH START - Added by SiRoB, HIDEOS
+					case 18:
+						if(file->GetHideOS()>=0)
+							if (file->GetHideOS()){
+								buffer.Format("%i", file->GetHideOS());
+								if (file->GetSelectiveChunk()>=0)
+									if (file->GetSelectiveChunk())
+										buffer.AppendFormat(" + %s" ,GetResString(IDS_SELECTIVESHARE));
+							}else
+								buffer = GetResString(IDS_DISABLED);
+						else
+							buffer = GetResString(IDS_DEFAULT);
+						break;
+					//MORPH END   - Added by SiRoB, HIDEOS
+					//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+					case 19:
+						if(file->GetShareOnlyTheNeed()>=0)
+							if (file->GetShareOnlyTheNeed())
+								buffer.Format("%i" ,file->GetShareOnlyTheNeed());
+							else
+								buffer = GetResString(IDS_DISABLED);
+						else
+							buffer = GetResString(IDS_DEFAULT);
+						break;
+					//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 				}
 				if( iColumn != 8 && iColumn!=14)
 					dc->DrawText(buffer, buffer.GetLength(),&cur_rec,uDTFlags);
@@ -1332,6 +1375,24 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 		case 37: // SF:  Full Upload Count desc
 			return 10000*(((CKnownFile*)lParam2)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam1)->statistic.GetFullSpreadCount());
 		//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
+		//MORPH START - Added by SiRoB, HIDEOS
+		case 18:
+			if (item1->GetHideOS() == item2->GetHideOS())
+				return item1->GetSelectiveChunk() - item2->GetSelectiveChunk();
+			else
+				return item1->GetHideOS() - item2->GetHideOS();
+		case 38:
+			if (item2->GetHideOS() == item1->GetHideOS())
+				return item2->GetSelectiveChunk() - item1->GetSelectiveChunk();
+			else
+				return item2->GetHideOS() - item1->GetHideOS();
+		//MORPH END   - Added by SiRoB, HIDEOS
+		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+		case 19:
+			return item1->GetShareOnlyTheNeed() - item2->GetShareOnlyTheNeed();
+		case 39:
+			return item2->GetShareOnlyTheNeed() - item1->GetShareOnlyTheNeed();
+		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 		case 105: //all requests asc
 			return item1->statistic.GetAllTimeRequests() - item2->statistic.GetAllTimeRequests();
 		case 125: //all requests desc
@@ -1415,7 +1476,6 @@ void CSharedFilesCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 void CSharedFilesCtrl::CreateMenues()
 {
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
-	if (m_SharedFilesMenu) VERIFY( m_SharedFilesMenu.DestroyMenu() );
 	//MORPH START - Added by SiRoB, Keep Prermission Flag
 	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, Keep Prermission Flag
@@ -1429,6 +1489,8 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	if (m_ShareOnlyTheNeedMenu) VERIFY( m_ShareOnlyTheNeedMenu.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+
+	if (m_SharedFilesMenu) VERIFY( m_SharedFilesMenu.DestroyMenu() );
 
 	// add priority switcher
 	m_PrioMenu.CreateMenu();

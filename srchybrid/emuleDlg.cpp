@@ -912,19 +912,26 @@ void CemuleDlg::ShowConnectionState(){
 	
 	CString status;
 
+	//MORPH - Changed by SiRoB, Don't know why but arceling reporting
+	/*
 	if(theApp.serverconnect->IsConnected())
 		status = "ED2K:"+GetResString(IDS_CONNECTED);
 	else if (theApp.serverconnect->IsConnecting())
 		status = "ED2K:"+GetResString(IDS_CONNECTING);
 	else
 		status = "ED2K:"+GetResString(IDS_NOTCONNECTED);
+	*/
+	if(theApp.serverconnect->IsConnected())
+		status = "ED2K";
+	else if (theApp.serverconnect->IsConnecting())
+		status = "ed2k";
+	else
+		status = "";
 
 	if(theApp.kademlia->isConnected())
-		status += "|KAD:"+GetResString(IDS_CONNECTED);
+		status += "|KAD";
 	else if (Kademlia::CTimer::getThreadID())
-		status += "|KAD:"+GetResString(IDS_CONNECTING);
-	else
-		status += "|KAD:"+GetResString(IDS_NOTCONNECTED);
+		status += "|kad";
 
 	statusbar->SetTipText(3,status);
 	statusbar->SetText(status,3,0);
@@ -1153,7 +1160,7 @@ void CemuleDlg::SetStatusBarPartsSize()
 	statusbar->GetClientRect(&rect);
 	//MORPH START - Added by SiRoB, Related to SUC
 	//int aiWidths[5] = { rect.right-650, rect.right-440, rect.right-250, rect.right-25, -1 };
-	int aiWidths[5] = { rect.right-725, rect.right-515, rect.right-325, rect.right-150, -1 };
+	int aiWidths[5] = { rect.right-675, rect.right-465, rect.right-275, rect.right-175, -1 };
 	//MORPH END   - Added by SiRoB, Related to SUC
 	statusbar->SetParts(5, aiWidths);
 }

@@ -144,19 +144,19 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlSpeed.m_nBtnID = IDC_SPEED;
 		//p->GetWindowText(m_ctrlSpeed.m_strText);
 		
-		if (theApp.IsConnected())
-		{
-			if (theApp.serverconnect->IsConnected() && theApp.kademlia->isConnected())
-				buffer = "ED2K|KAD";
-			else if (theApp.kademlia->isConnected())
-				buffer = "KAD";
-			else if (theApp.serverconnect->IsConnected())
-				buffer = "ED2K";
-			else
-				buffer = "?";
-			m_ctrlSpeed.m_strText = (GetResString(IDS_CONNECTED) + " [" + buffer + "]");
-		} else
-			m_ctrlSpeed.m_strText = (GetResString(IDS_NOTCONNECTED));
+		if(theApp.serverconnect->IsConnected())
+			buffer = "ED2K";
+		else if (theApp.serverconnect->IsConnecting())
+			buffer = "ed2k";
+		else
+			buffer = "";
+
+		if(theApp.kademlia->isConnected())
+			buffer += "|KAD";
+		else if (theApp.kademlia->GetThreadID())
+			buffer += "|kad";
+
+		m_ctrlSpeed.m_strText = buffer;
 
 		m_ctrlSpeed.m_bUseIcon = true;
 		m_ctrlSpeed.m_sIcon.cx = 16;
