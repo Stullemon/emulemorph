@@ -1,8 +1,9 @@
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 
 ---------------------------------------- 
-FIXED  : The Multiple affectation to HideOS, SelectiveChunk, and ShareOnlyTheNeed [SiRoB]
+FIXED  : The Multiple affectation to HideOS, SelectiveChunk, and ShareOnlyTheNeed causing crash [SiRoB]
 FIXED  : TagCount Trouble [SiRoB]
+FIXED  : Popup menu permission state in the Download Windows  [SiRoB]
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 1.0 
