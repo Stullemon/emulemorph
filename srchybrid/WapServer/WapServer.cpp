@@ -3383,63 +3383,77 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 		}
 	}
 
-	if(_ParseURL(Data.sURL, _T("tosearch")) != "" && IsSessionAdmin(Data,sSession) )
-	{
-		// perform search
-		theApp.emuledlg->searchwnd->DeleteAllSearchs();
-		SSearchParams* pParams = new SSearchParams;
-		pParams->strExpression = _ParseURL(Data.sURL, _T("tosearch"));
-		pParams->strFileType = _ParseURL(Data.sURL, _T("type"));
-		pParams->ulMinSize = _ttol(_ParseURL(Data.sURL, _T("min")))*1048576;
-		pParams->ulMaxSize = _ttol(_ParseURL(Data.sURL, _T("max")))*1048576;
+	if(_ParseURL(Data.sURL, _T("tosearch")) != _T("") && IsSessionAdmin(Data,sSession) )
+		{
+			// perform search
+			theApp.emuledlg->searchwnd->DeleteAllSearchs();
+
+ 			// get method
+ 			CString method=(_ParseURL(Data.sURL, _T("method")));
+
+ 		SSearchParams* pParams = new SSearchParams;
+ 		pParams->strExpression = _ParseURL(Data.sURL, _T("tosearch"));
+ 		pParams->strFileType = _ParseURL(Data.sURL, _T("type"));
+		// for safety: this string is sent to servers and/or kad nodes, validate it!
+		if (!pParams->strFileType.IsEmpty()
+			&& pParams->strFileType != ED2KFTSTR_ARCHIVE
+			&& pParams->strFileType != ED2KFTSTR_AUDIO
+			&& pParams->strFileType != ED2KFTSTR_CDIMAGE
+			&& pParams->strFileType != ED2KFTSTR_DOCUMENT
+			&& pParams->strFileType != ED2KFTSTR_IMAGE
+			&& pParams->strFileType != ED2KFTSTR_PROGRAM
+			&& pParams->strFileType != ED2KFTSTR_VIDEO){
+			ASSERT(0);
+			pParams->strFileType.Empty();
+		}
+		pParams->ulMinSize = _tstol(_ParseURL(Data.sURL, _T("min")))*1048576;
+		pParams->ulMaxSize = _tstol(_ParseURL(Data.sURL, _T("max")))*1048576;
 		if (pParams->ulMaxSize < pParams->ulMinSize)
 			pParams->ulMaxSize = 0;
-		
-		pParams->uAvailability = (_ParseURL(Data.sURL, _T("avail"))=="")?0:_ttoi(_ParseURL(Data.sURL, _T("avail")));
+ 
+		pParams->uAvailability = (_ParseURL(Data.sURL, _T("avail"))==_T(""))?0:_tstoi(_ParseURL(Data.sURL, _T("avail")));
 		if (pParams->uAvailability > 1000000)
 			pParams->uAvailability = 1000000;
-			
+
 		pParams->strExtension = _ParseURL(Data.sURL, _T("ext"));
-	
-		CString method=(_ParseURL(Data.sURL, _T("method")));
-
-		if (method == "kademlia")
-			pParams->eType = SearchTypeKademlia;
-		else if (method == "global")
-			pParams->eType = SearchTypeEd2kGlobal;
+		if (method == _T("kademlia"))
+			 pParams->eType = SearchTypeKademlia;
+		else if (method == _T("global"))
+			 pParams->eType = SearchTypeEd2kGlobal;
 		else
-			pParams->eType = SearchTypeEd2kServer;
+			 pParams->eType = SearchTypeEd2kServer;
 
-		CString strResponse = _T("<a href=\"./?ses=[Session]&amp;w=search&amp;showlist=true\">") + _GetPlainResString(IDS_SW_SEARCHINGINFO) + _T("</a>");
-		try
+	 CString strResponse = _GetPlainResString(IDS_SW_SEARCHINGINFO);
+	 try
 		{
-		if (pParams->eType != SearchTypeKademlia){
+			if (pParams->eType != SearchTypeKademlia){
 				if (!theApp.emuledlg->searchwnd->DoNewEd2kSearch(pParams)){
-				delete pParams;
-					strResponse = _GetPlainResString(IDS_ERR_NOTCONNECTED);
-				}
-		}
-		else{
-				if (!theApp.emuledlg->searchwnd->DoNewKadSearch(pParams)){
+					delete pParams;
+					 strResponse = _GetPlainResString(IDS_ERR_NOTCONNECTED);
+				 }
+			}
+			else{
+				 if (!theApp.emuledlg->searchwnd->DoNewKadSearch(pParams)){
 					delete pParams;
 					strResponse = _GetPlainResString(IDS_ERR_NOTCONNECTEDKAD);
 				}
 			}
 		}
-		catch (CMsgBoxException* ex)
-		{
-			strResponse = ex->m_strMsg;
-			PlainString(strResponse, false);
-			ex->Delete();
-				delete pParams;
-		}
-		OutList.Replace(_T("[Message]"),strResponse);
+	 catch (CMsgBoxException* ex)
+	 {
+		strResponse = ex->m_strMsg;
+		PlainString(strResponse, false);
+		ex->Delete();
+	    delete pParams;
+	 }
+	 Out.Replace(_T("[Message]"),strResponse);
 	}
-	else if(_ParseURL(Data.sURL, _T("tosearch")) != "" && !IsSessionAdmin(Data,sSession) ) {
-		OutList.Replace(_T("[Message]"),_GetPlainResString(IDS_ACCESSDENIED));
-	}
-	else OutList.Replace(_T("[Message]"),_T(""));
 
+	else if(_ParseURL(Data.sURL, _T("tosearch")) != _T("") && !IsSessionAdmin(Data,sSession) ) {
+		 OutList.Replace(_T("[Message]"),_GetPlainResString(IDS_ACCESSDENIED));
+	}	
+	else OutList.Replace(_T("[Message]"),_T(""));
+	
 	if(_ParseURL(Data.sURL, _T("showlist")) == "true"){
 		CString sSort = _ParseURL(Data.sURL, _T("sort"));	if (sSort.GetLength()>0) pThis->m_iSearchSortby=_ttoi(sSort);
 		sSort = _ParseURL(Data.sURL, _T("sortAsc"));		if (sSort.GetLength()>0) pThis->m_bSearchAsc=_ttoi(sSort);
@@ -3569,17 +3583,32 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 
 	}
 	else
-	{ // No showlist
+		{ // No showlist
 		Out.Replace(_T("[Name]"), _GetPlainResString(IDS_SW_NAME));
 		Out.Replace(_T("[Type]"), _GetPlainResString(IDS_TYPE));
-		Out.Replace(_T("[Any]"), _GetPlainResString(IDS_SEARCH_ANY));
-		Out.Replace(_T("[Audio]"), _GetPlainResString(IDS_SEARCH_AUDIO));
-		Out.Replace(_T("[Image]"), _GetPlainResString(IDS_SEARCH_PICS));
 
-		Out.Replace(_T("[Video]"), _GetPlainResString(IDS_SEARCH_VIDEO));
-		Out.Replace(_T("[Other]"), _T("Other"));
+	 	// 'file type' display strings
+	 	Out.Replace(_T("[FileTypeAny]"), _GetPlainResString(IDS_SEARCH_ANY));
+	 	Out.Replace(_T("[FileTypeArc]"), _GetPlainResString(IDS_SEARCH_ARC));
+	 	Out.Replace(_T("[FileTypeAud]"), _GetPlainResString(IDS_SEARCH_AUDIO));
+	 	Out.Replace(_T("[FileTypeIso]"), _GetPlainResString(IDS_SEARCH_CDIMG));
+	 	Out.Replace(_T("[FileTypeDoc]"), _GetPlainResString(IDS_SEARCH_DOC));
+	 	Out.Replace(_T("[FileTypeImg]"), _GetPlainResString(IDS_SEARCH_PICS));
+	 	Out.Replace(_T("[FileTypePro]"), _GetPlainResString(IDS_SEARCH_PRG));
+	 	Out.Replace(_T("[FileTypeVid]"), _GetPlainResString(IDS_SEARCH_VIDEO));
+
+	 	// 'file type' ID strings
+	 	Out.Replace(_T("[FileTypeAnyId]"), _T(""));
+	 	Out.Replace(_T("[FileTypeArcId]"), _T(ED2KFTSTR_ARCHIVE));
+	 	Out.Replace(_T("[FileTypeAudId]"), _T(ED2KFTSTR_AUDIO));
+	 	Out.Replace(_T("[FileTypeIsoId]"), _T(ED2KFTSTR_CDIMAGE));
+	 	Out.Replace(_T("[FileTypeDocId]"), _T(ED2KFTSTR_DOCUMENT));
+	 	Out.Replace(_T("[FileTypeImgId]"), _T(ED2KFTSTR_IMAGE));
+	 	Out.Replace(_T("[FileTypeProId]"), _T(ED2KFTSTR_PROGRAM));
+	 	Out.Replace(_T("[FileTypeVidId]"), _T(ED2KFTSTR_VIDEO));
+
 		Out.Replace(_T("[Search]"), _GetPlainResString(IDS_SW_SEARCHBOX));
-		Out.Replace(_T("[Session]"), sSession);
+ 		Out.Replace(_T("[Session]"), sSession);
 
 		Out.Replace(_T("[SizeMin]"), _GetPlainResString(IDS_SEARCHMINSIZE));
 		Out.Replace(_T("[SizeMax]"), _GetPlainResString(IDS_SEARCHMAXSIZE));
