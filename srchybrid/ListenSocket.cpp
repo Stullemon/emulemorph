@@ -709,7 +709,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					{
 						if (theApp.uploadqueue->RemoveFromUploadQueue(client, _T("Remote client ended transfer."))){
 							if (thePrefs.GetLogUlDlEvents())
-								AddDebugLogLine(false, DLP_LOW, "%s: Upload session ended due to ended transfer.", client->GetUserName());
+								AddDebugLogLine(false, DLP_LOW, _T("%s: Upload session ended due to ended transfer."), client->GetUserName());
 						}
 					}
 					else

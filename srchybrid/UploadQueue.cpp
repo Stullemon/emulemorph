@@ -973,7 +973,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			{
 				// remove both since we dont know who the bad on is
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),"Both" );
+					AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),_T("Both") );
 				// EastShare - Added by TAHO, modified SUQWT
 				waitinglist.GetAt(pos2)->ClearWaitStartTime(); 
 				// EastShare - Added by TAHO, modified SUQWT
