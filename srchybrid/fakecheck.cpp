@@ -42,7 +42,12 @@ void CFakecheck::AddFake(CString Hash,uint32 Lenght,CString Realtitle){
 	newFilter->Hash=Hash;
 	newFilter->Lenght=Lenght;
 	newFilter->RealTitle=Realtitle;
-	Fakelist[Hash]=newFilter;
+	//MORPH START - Added by SiRoB, Fix Mem Leak at shutdown
+	if (IsFake(Hash,Lenght)!="" && Fakelist.size())
+		delete newFilter;
+	else
+	//MORPH   END - Added by SiRoB, Fix Mem Leak at shutdown	
+		Fakelist[Hash]=newFilter;
 }
 
 int CFakecheck::LoadFromFile(){
@@ -95,7 +100,7 @@ void CFakecheck::RemoveAllFakes(){
 }
 
 CString CFakecheck::IsFake(CString Hash2test, uint32 lenght){
-	if (Fakelist.size()==0) return "Fakelist.size()==0"; //MORPH - Modified by IceCream, return a CString
+	if (Fakelist.size()==0) return "No Data Base Loaded";
 	Fakes_Struct* search;
 	
 	map<CString, Fakes_Struct*>::const_iterator it=Fakelist.upper_bound(Hash2test);
@@ -104,12 +109,11 @@ CString CFakecheck::IsFake(CString Hash2test, uint32 lenght){
 		search=(*it).second;
 		if (search->Hash == Hash2test && search->Lenght == lenght) {
 			lasthit=search->RealTitle;
-			return lasthit + "lasthit";
-		} else
-			return "OK";
+			return lasthit;
+		}
 		it--;
 	} while (it!=Fakelist.begin());
-	return "Error"; //MORPH - Modified by IceCream, return a CString
+	return "";
 }
 bool CFakecheck::DownloadFakeList(){
 	char buffer[5];

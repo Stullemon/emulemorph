@@ -157,7 +157,7 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	InsertColumn(8,GetResString(IDS_LENGTH),LVCFMT_LEFT,50);
 	InsertColumn(9,GetResString(IDS_BITRATE),LVCFMT_LEFT,50);
 	InsertColumn(10,GetResString(IDS_CODEC),LVCFMT_LEFT,50);
-	InsertColumn(11,"Fake Check",LVCFMT_LEFT,220); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+	InsertColumn(11,GetResString(IDS_CHECKFAKE),LVCFMT_LEFT,220); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	m_iColumns = 11+1/*FakeCheck*/; // NOTE: One column is created dynamically as needed!
 
 	CreateMenues();
@@ -245,7 +245,7 @@ void CSearchListCtrl::Localize() {
 	strRes.ReleaseBuffer();
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	strRes = "Fake Check";
+	strRes = GetResString(IDS_CHECKFAKE);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(11, &hdi);
 	strRes.ReleaseBuffer();
@@ -340,6 +340,7 @@ void CSearchListCtrl::AddResult(CSearchFile* toshow)
 	SetItemText(itemnr,9,cbuffer);
 	SetItemText(itemnr,10,toshow->GetStrTagValue(FT_MEDIA_CODEC));
 	SetItemText(itemnr,11,theApp.FakeCheck->IsFake(EncodeBase16(toshow->GetFileHash(), 16),toshow->GetFileSize())); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+
 	if (toshow->GetDirectory()){
 		if (m_iColumns < 13){
 			InsertColumn(12,GetResString(IDS_FOLDER),LVCFMT_LEFT,220);
@@ -1312,7 +1313,16 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, CSear
 				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
 				break;
 			}
-			case 11:{		// dir
+			
+			//MORPH  START - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
+			//case 11:{		// dir
+			case 11:{		// fake check
+				buffer=theApp.FakeCheck->IsFake(EncodeBase16(src->GetFileHash(), 16),src->GetFileSize());
+				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				break;
+			}
+			case 12:{		// dir
+			//MORPH    END - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
 				if (src->GetDirectory()) {
 					buffer=src->GetDirectory();
 					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
@@ -1395,7 +1405,15 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, CSea
 				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
 				break;
 			}
-			case 11:{		// dir
+			//MORPH  START - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
+			//case 11:{		// dir
+			case 11:{		// fake check
+				buffer=theApp.FakeCheck->IsFake(EncodeBase16(src->GetFileHash(), 16),src->GetFileSize());
+				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				break;
+			}
+			case 12:{		// dir
+			//MORPH    END - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
 				if (src->GetDirectory()) {
 					buffer=src->GetDirectory();
 					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
