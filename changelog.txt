@@ -1,6 +1,175 @@
 	CHANGELOG FOR EMULE
 	===================
 
+
+----------------------
+- Dec 21st, 2003     -
+----------------------
+Unk: Fixed a bug with rechecking firewall.
+Unk: You can bootstrap into kad even if your not connected.
+
+----------------------
+- Dec 18th, 2003     -
+----------------------
+bluecow: Improved reading of UL/DL priorities read from known.met and part.met files to avoid usage of unknown values.
+bluecow: Fixed mem leak and possible stall in server UDP socket related to failed DNS queries.
+Unk: Adjusted disconnect timeout for Kad.
+Unk: IRC: Small tweak to add friend.
+Ornis: Fix of auto resume next file of same category
+
+----------------------
+- Dec 17th, 2003     -
+----------------------
+bluecow: Optimized processing of keyword publish list.
+bluecow: Removed multiple part file source lists for more performance.
+Unk: Search requests now send up to 300 results
+Unk: Keywords now publish in Clusters of 150 files making use of the keyword publish list.
+
+----------------------
+- Dec 13th, 2003     -
+----------------------
+bluecow: Added more memory and C++ object check code for debug builds.
+bluecow: Fixed wrong usage of some internal lists [rayita]
+bluecow: Improved updating of GUI for donwload queue [rayita]
+bluecow: Removed automatically resuming of files with state Insufficient diskspace.
+bluecow: Addeded manually resuming of files with state Insufficient diskspace.
+
+----------------------
+- Dec 10th, 2003     -
+----------------------
+bluecow: Improved sending of OP_CANCELTRANSFER.
+
+----------------------
+- Dec 8th, 2003      -
+----------------------
+bluecow: Reworked includes of entire source branch.
+bluecow: Added showing of server attributes to MyInfo panel.
+bluecow: Fixed very rare occuring bug with decompressing of high compressable blocks.
+bluecow: Improved error handling for decompressing corrupted blocks.
+bluecow: Upgraded to zlib 1.2.1
+
+----------------------
+- Nov 27th, 2003     -
+----------------------
+bluecow: Added Drag&Drop support for Windows Shell URLs and more IE URL formats. This means you can drag&drop eD2K-URLs which are stored as Windows Shell URLs (like the entries in IE Favorites folder) into the eMule window. Works for eD2K-file-, server- and serverlist-links.
+bluecow: Couple of code optimizations for processing the sources lists.
+
+----------------------
+- Nov 25th, 2003     -
+----------------------
+bluecow: Added Drag&Drop support for ANSI Text and HTML Text clipboard data formats. This means you can drag&drop eD2K-URLs from Internet Explorer Windows into eMule window. HTML fragments means: everything which is currently selected within the HTML page and which is allowed to contain more than just one eD2K-URL. Works for eD2K-file-, server- and serverlist-links.
+
+----------------------
+- Nov 24th, 2003     -
+----------------------
+bluecow: Fixed crash bug when file date of local files was out of range.
+bluecow: Fixed performance issue with log files which got too large.
+bluecow: Log files which are larger than 1MB are renamed to a filename with the start of the log and the current log file is restarted. Max. log file size can be specified in preferences.ini section "eMule" keyword "MaxLogFileSize=<bytes>".
+
+----------------------
+- Nov 23th, 2003     -
+----------------------
+bluecow: Fixed context menu support in IRC and Message window.
+bluecow: All listview context menus are positioned correctly when invoked with keyboard interface.
+bluecow: Statistics graphs are not deleted if according property page was opened and closed without changing values.
+
+----------------------
+- Nov 22th, 2003     -
+----------------------
+bluecow: Added support for selectable text, copy to clipboard, save log to disk and rotating log for IRC Chat windows.
+bluecow: Fixed handling of windows shutdown message (WM_QUERYENDSESSION).
+bluecow: Added support for external performance logging with NT Performance Monitor compatible log files.
+bluecow: Changed socket creation code for non-proxy connections to reduce system resource usage.
+
+----------------------
+- Nov 21th, 2003     -
+----------------------
+bluecow: Fixed performance problem with rotating log which could create very high CPU usage in some cases.
+bluecow: Fixed mem leaks in UDP sockets [rayita]
+bluecow: Added support for selectable text, copy to clipboard, save log to disk and rotating log for Message windows.
+
+----------------------
+- Nov 20th, 2003     -
+----------------------
+bluecow: Fixed window resizing problem related to customizable toolbar and system color/theme change.
+bluecow: Main windows are maximized correctly (depending on toolbar style/height) at startup.
+bluecow: Fixed string format buffer overflow with status command line argument [KuSh].
+bluecow: Fixed several problems with skinnable icons which were not updated on the fly.
+bluecow: Added background colors (skinnable) for IRC channel window and nick window.
+bluecow: Removed closeable tab control for IRC windows.
+bluecow: Added close command to context menus of IRC/Message windows.
+bluecow: Added tripple click feature to search term edit control.
+
+----------------------
+- 7. November 2003   -
+----------------------
+Ornis:  Abspeichern von Chats (IRC/Messages) , übers Kontextmenü  	(Req. Celvyn)
+
+----------------------
+- Nov 5th, 2003      -
+----------------------
+bluecow: Fixed rare occuring problem with staled server source request related to invalid part.met file contents.
+bluecow: More safety in part.met file reading.
+bluecow: Fixed problem with too frequently occuring server connection attempts with very short server lists.
+
+----------------------
+- Nov 2nd, 2003      -
+----------------------
+bluecow: Fixed minor issue with queued local server source requests after new server connect.
+bluecow: Fixed sorting of buffered part file blocks to achive less HD stress.
+bluecow: Fixed memory leaks and flushing of buffered data to HD of paused files when file was canceled.
+bluecow: Files which could not be completed because of not enough free disk space can be resumed manually to try another file completion process.
+bluecow: Fixed bug in check min. free disk space which could cause endless low disk space notifications.
+bluecow: Improved check min. free disk space for better handling NTFS compressed/sparse files.
+bluecow: Fixed a bug where an NTFS compressed file could not be created because there was not enough free disk space to hold the uncompressed file.
+
+Unk: Several bugs noted in the forum. Tried to check most of them.
+* Sources to a Paused or Stopped file will be removed once an hour to remove old sources..
+* We no longer send sources to Paused or Stopped files.
+* A better check of valid sources to Part files for source exchange.
+* Source exchanges for complete files now sends sources with obtained parts first.
+Unk: Removed some redundent For Loops to save CPU in the DownloadQueue..
+
+----------------------
+- Oct 30th, 2003     -
+----------------------
+bluecow: Added grouping of local server source reasks packets into one TCP frame
+bluecow: Fixed bug with check diskspace
+bluecow: Fixed problem with lost read-only settings in preferences.ini after version change
+bluecow: Fixed server TCP overhead statistics
+bluecow: Fixed HTTP download dialog string resources
+
+----------------------
+- Oct 29th, 2003     -
+----------------------
+Unk: Fixed a non thread safe area that moved Kad Contacts in the list.
+Unk: Fixed a area that would stop Kad sources from being added.
+Unk: Added zz upload throttler.
+
+----------------------
+- Oct 23th, 2003     -
+----------------------
+bluecow: Fixed multi threading problem with a completing file which was concurrently uploaded.
+
+----------------------
+- Oct 22th, 2003     -
+----------------------
+bluecow: Fixed bug in webserver which can cause memory corruption [MoNKi]
+
+----------------------
+- Oct 21th, 2003     -
+----------------------
+bluecow: Changed creation of Kademlia threads for proper RTL initialization.
+bluecow: Fixed some glitches in shared directories control; added keyboard interface; added volume labels
+
+----------------------
+- Oct 19th, 2003     -
+----------------------
+bluecow: Fixed bug with friends where a client without an IP or hash could be added as a friend.
+bluecow: Fixed bug with ed2k URL registry key where path contains special characters.
+bluecow: Fixed system and tray context menu items for connecting/disconnect to/from both networks.
+bluecow: Added new MyInfo control; shortcuts for Ctrl+C=copy selected text; Ctrl+A=select all text
+
 ----------------------
 - Oct 16th, 2003     -
 ----------------------
