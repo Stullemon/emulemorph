@@ -104,12 +104,10 @@ void CDownloadClientsCtrl::Init()
 	}
 	// SLUGFILLER: multiSort
 	
-	// EastShare - Added by Pretender: IP2Country column
-	// Mighty Knife: IP2Country column is no. 11, not 10!
-	if (theApp.ip2country->IsIP2Country()) ShowColumn (11);
-		else HideColumn (11);
-	// [end] Mighty Knife
-	// EastShare - Added by Pretender: IP2Country column
+	//MORPH START - Added by SiRoB, IP2Country column
+	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
+		HideColumn (11);
+	//MORPH END   - Added by SiRoB, IP2Country column
 }
 
 CDownloadClientsCtrl::~CDownloadClientsCtrl()
