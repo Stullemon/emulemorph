@@ -1893,8 +1893,12 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 					{
 						if (thePrefs.GetDebugClientUDPLevel() > 0)
 							DebugRecv("OP_REASKCALLBACKTCP", NULL, (char*)reqfilehash, destip);
-		
+						
+						//Morph - modified by AndCycle, SLUGFILLER: infiniteQueue
+						/*
 						if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize())
+						*/
+						if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize() && !thePrefs.IsInfiniteQueueEnabled())
 						{
 							if (thePrefs.GetDebugClientUDPLevel() > 0)
 								DebugSend("OP_REASKCALLBACKTCP", NULL);
