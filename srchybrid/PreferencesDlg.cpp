@@ -240,7 +240,12 @@ void CPreferencesDlg::Localize()
 	m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10,SWP_NOZORDER|SWP_NOACTIVATE);
 	m_groupbox.GetWindowRect(rectOld);
 	ScreenToClient(rectOld);
-	m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4,SWP_NOZORDER|SWP_NOACTIVATE);
+	//MORPH START - Changed by SiRoB
+	CRect rectwnd;
+	GetClientRect(rectwnd);
+	//m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4,SWP_NOZORDER|SWP_NOACTIVATE);
+	m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectwnd.Height()-13,SWP_NOZORDER|SWP_NOACTIVATE);	
+	//MORPH START - Changed by SiRoB
 	int _PropSheetButtons[] = {IDOK, IDCANCEL, ID_APPLY_NOW, IDHELP };
 	CWnd* PropSheetButton;
 	for (int i = 0; i < sizeof (_PropSheetButtons) / sizeof(_PropSheetButtons[0]); i++)
