@@ -151,6 +151,9 @@ to maintain a single distribution point for the source code.
 #endif
 #include "TreeOptionsCtrl.h"
 
+// emulEspaña: Added by MoNKi [ MoNKi: -Pass Edit on TreeOptionsCtrl- ]
+#include "Mod\TreeOptsPrefs\PassTreeOptionsEdit.h"
+// End emulEspaña
 
 
 //////////////// Macros / Locals /////////////////////////////////////
@@ -1705,13 +1708,57 @@ void CTreeOptionsCtrl::CreateBrowseButton(CRuntimeClass* pRuntimeClassBrowseButt
 CString CTreeOptionsCtrl::GetEditText(HTREEITEM hItem) const
 {
 	//Just call the combo box version as currently there is no difference
+	/*
+	//Just call the combo box version as currently there is no difference
 	return GetComboText(hItem);
+	*/
+	CTreeOptionsItemData* pItemData = (CTreeOptionsItemData*) GetItemData(hItem);
+	return 	pItemData->m_sEditText;
+	// End emulEspaña
 }
 
 void CTreeOptionsCtrl::SetEditText(HTREEITEM hItem, const CString& sEditText)
 {
 	//Just call the combo box version as currently there is no difference
+	/*
+	//Just call the combo box version as currently there is no difference
 	SetComboText(hItem, sEditText);
+	*/
+	CTreeOptionsItemData* pItemData = (CTreeOptionsItemData*) GetItemData(hItem);
+	pItemData->m_sEditText = sEditText;
+
+	CString sText = GetItemText(hItem);
+	CString sNewText;
+
+	if(pItemData->m_Type == CTreeOptionsItemData::PassEditBox){
+		TCHAR *buffer;
+		int buffLen = sEditText.GetLength()+1;
+		buffer = new TCHAR[buffLen];
+		if(buffer){
+			memset(buffer, '*', buffLen-1);
+			buffer[buffLen-1] = '\0';
+			sNewText = buffer;
+			delete[] buffer;
+		}
+		else
+			sNewText = _T("*****");
+	}
+	else
+		sNewText = sEditText;
+
+	int nSeparator = sText.Find(m_sSeparator);
+	if (nSeparator == -1)
+	{
+		sText += m_sSeparator;
+		sText += sNewText;
+	}
+	else
+	{
+		sText = sText.Left(nSeparator + m_sSeparator.GetLength());
+		sText += sNewText;
+	}
+	SetItemText(hItem, sText);
+	// End emulEspaña
 }
 
 BOOL CTreeOptionsCtrl::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -3148,3 +3195,18 @@ HTREEITEM CTreeOptionsCtrl::CopyBranch(HTREEITEM htiBranch, HTREEITEM htiNewPare
 	}
 	return hNewItem;
 }
+
+// emulEspaña: Added by MoNKi [ MoNKi: -Pass Edit on TreeOptionsCtrl- ]
+BOOL CTreeOptionsCtrl::AddPassEditBox(HTREEITEM hItem, CRuntimeClass* pRuntimeClassEditCtrl, DWORD dwItemData)
+{
+	//Just call the combo box version as currently there is no difference
+	BOOL bSuccess = AddComboBox(hItem, pRuntimeClassEditCtrl, dwItemData);
+
+	//Update the type in the item data
+	CTreeOptionsItemData* pItemData = (CTreeOptionsItemData*) GetItemData(hItem);
+	ASSERT(pItemData);
+	pItemData->m_Type = CTreeOptionsItemData::PassEditBox;
+
+	return bSuccess;
+}
+// End emulEspaña
