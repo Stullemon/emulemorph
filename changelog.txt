@@ -1,6 +1,73 @@
 	CHANGELOG FOR EMULE
 	===================
+	
+----------------------
+- Jan 05th, 2003     -
+----------------------
+bluecow: Fixed several flaws in client and server overhead computation. (Note: You will see somehow increased overhead).
+bluecow: Added Kademlia overhead statistics.
+bluecow: Added client protocol handshake validation.
+bluecow: To avoid spreading of false meta data, any (already) received meta data is dropped and locally created by examining file contents only.
+bluecow: Fixed bug server connection duration statistics [Gnaddelwarz]
+Unk: We delay publishing keywords to avoid spamming network with users that only stay connected for a very short time.
 
+----------------------
+- Jan 04th, 2003     -
+----------------------
+bluecow: Added thread safe synchronous command processing to Kad listener socket.
+bluecow: Added explicit removing of file block requests for disconnected client to avoid file completion problems.
+bluecow: Fixed sorting problems in shared files list control.
+bluecow: Fixed very tricky bug in structured exception handling of client TCP socket.
+bluecow: Already received but not processed packets are discarded after a client was disconnected.
+bluecow: Fixed a potential client deletion crash bug related to IP filter.
+bluecow: Added client protocol procedure state error log messages.
+
+----------------------
+- Dec 31th, 2003     -
+----------------------
+Unk:  Changed Log messaging from Kad to Emule to a thread safe method. win98 should be able to run a little better now.. But, there seem to still be issues.
+Ornis:Sharefileslistcontrol offers rename,delete,open it's folder via contextmenu for files
+      (deletes to recycle bin! use preferences.ini: RemoveFilesToBin=false, to have a eternal deletion)
+Unk:  Until a fix is found, we only update the clients ID when adding a Kad Contact to the list. This seems to avoid the win98 freeze.
+Unk: Small change in Kad search tolerance and bootstraping.
+
+----------------------
+- Dec 30th, 2003     -
+----------------------
+Ornis: Downloadfile-Details, Filenametab: improved listing and sorting of the available filenames
+Ornis: Allocating new filesize for tempfiles not blocking anymore  (threading+buffering)
+Ornis: Downloadlist: Sorting of the remain column for files now in 4-way-mode, to sort by remaining size OR by remaining time
+Unk: Auto Kad bootstrap if you are trying to connect and see a Kad client.
+Unk: The client now detects conflicts between UDP ports to prevent the client from freezing..
+Unk: Bootstrap selectable by IP:Port or by a known Kad-client (searches your known client list for a Kad client to boot from)
+bluecow: Reworked part file details dialog; added showing of several accumulated values for multiple selected part files.
+bluecow: Removed Permissions column from Shared Files window (don't worry, it was never used).
+bluecow: Reworked all Server-, Search-. Download- and Shared Files window context menus for supporting multiple selections.
+bluecow: Fixed bug with first runtime wizard and enabled startup minimized option.
+bluecow: Added option to restore the last used main window dialog at startup; (specify "RestoreLastMainWndDlg=1" in preferences.ini)
+bluecow: Added Ornis' 4-way sorting for shared column in shared files window.
+
+----------------------
+- Dec 28th, 2003     -
+----------------------
+Unk: Added a lot of exception catching to Kad and SMIRC.
+Unk: Gave incoming and outgoing Kad UDP packets same priority to keep outgoing packets from backlogging.
+Unk: We now keep track on how many packets are sent with Kad Node lookups.
+Unk: Search Jumpstarts are now only used when the search appears to have stalled.
+Unk: IRC: /hop added.
+Unk: Joined channels get focus now.
+Unk: Fixed several memleaks with the Kad client
+Unk: Added some flags to the Node lookups for future special purposes. (Can't be used until most client upgrade)
+Unk: Small change to contact tree. More nodes known so that you find your target faster.
+
+----------------------
+- Dec 22th, 2003     -
+----------------------
+bluecow: Fixed problem with servers with IP 255.255.255.255 which could be added to the server list.
+bluecow: Resolved IPs of DynDNS servers are now verified and optionally filtered (IP-filter).
+bluecow: Reduced memory usage of client instances.
+Ornis:   Option for automatic removal of completed downloads from list
+Ornis:   Create lang-folder if neccessary on language download
 
 ----------------------
 - Dec 21st, 2003     -

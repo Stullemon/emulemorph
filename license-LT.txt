@@ -1,0 +1,419 @@
+GNU Bendroji Vie?oji licenzija 
+[ Czech | English | Japanese | Lithuanian ] 
+
+K? daryti pama?ius galim? GPL licenzijos pa?eidim? 
+
+Da?nai u?duodami klausimai apie GPL 
+
+The GNU General Public License (GPL) paprasto teksto formatas (?veplas)) 
+
+The GNU General Public License (GPL) Texinfo formatas 
+
+Turinys 
+
+GNU BENDROJI VIE?OJI LICENZIJA 
+
+Pratarm? 
+
+KOPIJAVIMO, PLATINIMO IR MODIFIKAVIMO S?LYGOS 
+
+Kaip taikyti ?ias s?lygas savo naujoms programoms 
+
+This is an unofficial translation of the GNU General Public License into 
+Lithuanian. It was not published by the Free Software Foundation, and does not 
+legally state the distribution terms for software that uses the GNU GPL--only 
+the original English text of the GNU GPL does that. However, we hope that this 
+translation will help Lithuanian language speakers understand the GNU GPL 
+better. 
+
+?is dokumentas yra neoficialus GNU General Public License vertimas ? lietuvi? 
+kalb?. Jis n?ra platinamas Free Software Foundation organizacijos ir neturi 
+jokios juridin?s galios - tik originalus angl? kalba para?ytas tekstas yra 
+teisinis dokumentas, nusakantis GNU GPL s?lygas. Mes viliam?s, kad ?is vertimas 
+pad?s lietuvi?kai kalbantiems ?mon?ms geriau suprasti GNU GPL. 
+
+GNU BENDROJI VIE?OJI LICENZIJA 
+
+1991 met? bir?elis. Versijos numeris 2. 
+
+Copyright (C) 1989, 1991 Free Software Foundation, Inc.  
+59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+Kiekvienas gali kopijuoti ir platinti ?io dokumento (angli?kos originalios 
+versijos) tikslias kopijas, bet keisti j? (original?) draud?iama. 
+
+Pratarm? 
+
+Daugumos programini? produkt? licenzijos yra para?ytos, kad neleist? jums tuos 
+produktus dalinti ir keisti. GNU Bendroji Vie?oji licenzija, prie?ingai, yra 
+skirta garantuoti J?s? laisv? dalinti ir keisti ?iuo dokumentu apsaugotus 
+produktus. Tuo siekiama, kad programin? ?ranga b?t? nemokama visiems jos 
+vartotojams. ?i Bendroji Vie?oji licenzija (General Public License ) tinka 
+daugumai Free Software Foundation produkt? (dalis yra apsaugota GNU Library 
+General Public License - GNU Bibliotekine Bendr?ja Vie??ja licenzija) ir bet 
+kokiai kitai programai, kurios autoriai nusprend? j? naudoti. J?s taip pat 
+galite ?ia licenzij? taikyti savo programoms. 
+
+Kai mes ?nekame apie nemokamas, laisvas programas, mes turim omeny laisv?, o ne 
+kain?. M?s? Bendroji Vie?oji licenzija yra sukurta u?tikrinti J?s? laisv? 
+platinti nemokam? program? kopijas (ir imti mokest? u? j? aptarnavim?, jei 
+norite). Taip pat ji skirta u?tikrinti, kad J?s kartu su programa gautum?te jos 
+i?eities tekstus arba gal?tum?te juos gauti, jei tik jums prireikt?. ?i 
+licenzija garantuoja, kad ja apsaugotus produktus J?s galite keisti arba naudoti 
+j? dalis savo programose ir skirta Jums pasakyti, kad tikrai turite teis? 
+atlikti auk??iau min?tus veiksmus. 
+
+Nor?dami apsaugoti J?s? teises, mes turime ?vesti apribojimus, kurie u?draud?ia 
+bet kam var?yti auk??iau min?tas teises ar pra?yti J?s? ?i? teisi? atsisakyti. 
+?ie suvar?ymai suprantami kaip tam tikra J?s? atsakomyb?, jei J?s modifikuojate 
+ar platinate nemokam? program? kopijas. 
+
+Pavyzd?iui, jeigu J?s platinate toki? program? (nesvarbu u? dyk? ar u? pinigus), 
+J?s privalote gav?jui suteikti visas teises, kurias J?s pats turite. J?s taip 
+pat privalote u?tikrinti, kad ir gav?jas gaut? ar gal?t? gauti i?eities tekstus. 
+Be to, J?s privalote jam parodyti ?ias salygas, kad ir gav?jas ?inot? savo 
+teises. 
+
+Mes J?s? teises apsaugome dviem ?ingsniais: (1) Programinio produkto autorin?mis 
+teis?mis ir (2) suteikiame Jums licenzij?, kuri suteikia teis? kopijuoti, 
+platinti ir/arba modifikuoti programin? produkt?. 
+
+Kiekvieno autoriaus ir savo apsaugai mes norime ?sitikinti, kad kiekvienas 
+supranta, jog ?iai nemokamai programinei ?rangai nesuteikiama jokia garantija. 
+Jei produktas yra ka?kieno modifikuotas ir platinamas, tai mes norime, kad 
+gav?jas ?inot?, jog gauna pakeist?, o ne originali? program?. ?itaip siekiama 
+u?tikrinti, kad ka?kieno ?veltos klaidos ir j? sukeltos problemos neter?t? 
+originalaus produkto autoriaus reputacijos. 
+
+Pagaliau, bet kokiai nemokamai programai nuolatos gresia programini? produkt? 
+patentai. Mes norime i?vengti pavojaus, kai nemokam? program? platintojai 
+individualiai ?sigyja patent? licenzijas ir taip privatizuoja programas. 
+Nor?dami to i?vengti, mes u?tikrinome, kad bet kokie patentai privalo b?ti 
+registruoti kiekvieno laisvam naudojimui arba i? viso nelicenzijuoti. 
+
+Tikslios kopijavimo, platinimo ir modifikavimo s?lygos pateiktos ?emiau. 
+
+KOPIJAVIMO, PLATINIMO IR MODIFIKAVIMO S?LYGOS 
+
+0. ?i licenzija lie?ia visas programas ar kitokius produktus, kurie turi 
+prane?ima apie autorines teises sakant?, kad produktas yra platinamas pagal ?ios 
+Bendrosios Vie?osios licenzijos s?lygas. Bet kokia programa ar darbas (toliau 
+?Programa?) ir ?darbas pagr?stas ta Programa? rei?kia, kad Programa ar bet koks 
+darbas su ja, t.y. darbas, ? kur? ?traukta Programa ar jos dalis, originali ar 
+pakeista ir/arba i?versta ? kit? kalb?, yra ginamas autorini? teisi? ?statymo. 
+Toliau Programos vertimas yra ?trauktas ? s?vok? ?modifikacija? ir atskirai 
+neminimas. ? kiekvien? licenzijos tur?toj? tekste kreipiamasi ?J?s?. 
+
+Kitokia veikla nei kopijavimas, platinimas ir modifikavimas ?ia licenzija n?ra 
+numatoma ir apibr??iama. Programos vykdymas n?ra var?omas ir jos vykdymo 
+rezultatai yra ginami ?ios licenzijos tik tuo atveju, jeigu j? turinys sudarytas 
+i? darbo pagr?sto Programa (rezultatai ginami licenzijos tada, jei jie - 
+modifikuota Programa ir nepriklausomai nuo to ar darbas atliktas Programa). Ar 
+tai tiesa priklauso nuo to, k? Programa daro. 
+
+1. J?s galite kopijuoti ir platinti originalius Programos i?eities tekstus bet 
+kokiose laikmenose, kuriose J?s juos gavote ar patys patalpinote, ai?kiai ir 
+kaip priklauso kiekvienoje kopijoje ?traukdami atitinkamus garantijos nebuvimo 
+ir autorini? teisi? ?sp?jimus. Nekeiskite joki? ?sp?jim? susijusi? su ?ia 
+licenzija bei garantijos nebuvimu ir visiems Programos gav?jams pateikite ?ios 
+licenzijos (originalios angli?kos versijos) kopij? kartu su Programa. 
+
+J?s galite imti mokest? u? fizin? kopijos perdavim? ir taip pat galite savo 
+nuo?i?ra si?lyti garantin? aptarnavim? mainais ? pinigus. 
+
+2. J?s galite modifikuoti savo Programos kopij? (ar kopijas) ar bet kuri? jos 
+dal? tuo b?du sukurdami Programa paremt? produkt?, kur? J?s galite kopijuoti, 
+platinti arba dirbti pagal 1. skyriuje pamin?tas s?lygas, manant, kad J?s taip 
+pat laikysit?s ?i?, ?emiau i?vardint?, s?lyg?: 
+
+a) J?s privalote pakeistuose failuose (ir/arba kartu esan?iose tam tikrose 
+bylose) ?terpti pastabas, kad J?s pakeit?te failus ir bet koki? pakeitim? datas. 
+
+b) Bet kok? J?s? platinam? produkt?, kur? sudaro dalis ar visa Programa arba 
+kurio dalis ar visas yra sukurtas pagal Program?, J?s privalote paskelbti ginam? 
+?ios licenzijos s?lyg? be joki? moke??i? visoms tre?iosioms pus?ms. 
+
+c) Jeigu modifikuota Programa j? vykdant interaktyviai nuskaito komandas, ji 
+privalo kiekvien? kart? paleista tokiam interaktyviam naudojimui atspausdinti 
+prane?im?, kuriame nurodomos atitinkamos autorin?s teis?s ir ?sp?jimas, kad 
+nesuteikiama jokia garantija (arba kitu atveju, kad J?s suteikiate garantij?) ir 
+kad vartotojai gali Program? platinti pagal ?ias s?lygas. Taip pat reikia 
+vartotojui prane?ti, kaip jis gal?t? perskaityti ?ios licenzijos (originalios 
+angli?kos) kopij?. I?imtis galioja tuo atveju, jei pati Programa yra interaktyvi 
+(t.y. s?veikaujanti, dialogin?) ir paprastai nespausdina tokio prane?imo, tai ir 
+J?s? darbas pagr?stas Programa neprivalo spausdinti prane?imo. 
+?ie reikalavimai taikomi modifikuotam darbui kaip visumai. Jeigu ai?kios, 
+atskiriamos J?s? darbo dalys n?ra sukurtos naudojantis Programos i?eities 
+tekstais ir gali b?ti pagr?stai vadinamos nepriklausomais bei atskirais darbais, 
+tai ?i licenzija ir jos s?lygos netaikomos toms dalims, kai J?s jas platinate 
+kaip atskirus produktus. Tuo atveju, kai ?ias savo sukurtas nepriklausomas dalis 
+J?s platinate kaip pagr?sto Programa produkto dal?, platinimas produktas privalo 
+b?ti ginamas ?ios licenzijos s?lyg?. Tokiu atveju ?i licenzija gina visum? ir 
+kiekvien? jos dal? nepriklausomai nuo to, kas j? para??. 
+
+Taigi, ?io skyriaus tikslas n?ra reik?ti pretenzijas ? visi?kai J?s? para?yt? 
+darb? teises. Prie?ingai, siekiama ?gyvendinti teises, kuriomis b?t? 
+kontroliuojamas Programa paremt? bendr?, kolektyvini? darb? platinimas. 
+
+Be to, vien tik darbo nepagr?sto Programa atlikimas naudojantis Programa (ar 
+darbu pagr?stu Programa) kaip ?rankiu kei?iant kokio nors paketo (nepagr?sto 
+Programa) turin? ar platinimo laikmen? nepakli?na ? ?ios licenzijos veikimo 
+srit? ir n?ra jos ginamas. 
+
+3. J?s galite Program? (ar darb? pagr?sta ja, ?r. 2 skyri?) kopijuoti ir 
+platinti i?eities tekstais ar vykdom?ja, sukompiliuota forma laikydamiesi 1 ir 2 
+skyriuje minim? salyg?, manant, kad J?s taip pat: 
+
+a) Kartu su Programa pateiksite pilnus ir fizi?kai perskaitomus i?eities 
+tekstus, kurie turi b?ti platinami pagal 1 bei 2 skyriaus s?lygas ir esantys 
+laikmenose paprastai naudojamose programini? produkt? keitimuisi, arba 
+
+b) Kartu su Programa pateiksite si?lym? (galiojant? ma?iausiai tris metus) 
+suteikti pilnus ir fizi?kai perskaitomus atitinkamus i?eities tekstus bet kuriai 
+tre?iajai pusei u? mokest? nedidesn? nei fizinis duomen? perdavimas ir tie 
+i?eities tekstai bus platinami pagal 1 ir 2 skyriuose min?tas s?lygas 
+laikmenose, paprastai naudojamose programini? produkt? keitimuisi, arba 
+
+c) Kartu su Programa pateiksite informacij?, kuri? J?s gavote d?l pasi?lymo 
+platinti atitinkamus i?eities tekstus. ?i alternatyva leid?iama tik 
+nekomerciniam platinimui ir tik tada, jei J?s gavote Program? objektiniu kodu ar 
+vykdom?ja forma su tokiu pat pasi?lymu su s?lyga, kad pasi?lymo turinys 
+neprie?tarauja 3 skyriaus b) daliai. 
+Darbo i?eities tekstai tur?t? b?ti labiausiai tinkamos modifikavimui formos. 
+Prie vykdomos programos esantys i?eities tekstai - tai pilni programos i?eities 
+tekstai su visais moduliais, bet kokie programos s?sajos apra?ai ir skriptai 
+naudojami programos kompiliavimui ir ?diegimui. Kaip speciali i?imtis, platinami 
+i?eities tekstai neprivalo tur?ti nieko, kas paprastai yra platinama (i?eities 
+tekstais ar vykdom?ja forma) su pagrindiniais operacin?s sistemos, kurioje 
+minima programa veikia, komponentais (kompiliatoriumi, branduoliu ir pan.), 
+nebent tie komponentai ?eina ? platinam? programos vykdom?j? form?. 
+
+Jei Programos vykdomoji forma ar objektinis kodas platinami si?lant kopijuoti i? 
+tam tikros vietos, tai si?lymas ekvivalen?ios galimyb?s kopijuoti i?eities 
+tekstus i? tos pa?ios vietos laikomas i?eities tekst? platinimu net ir tuo 
+atveju, kai tretieji asmenys never?iami kopijuoti Programos kodo kartu su 
+objektiniu kodu. 
+
+4. J?s negalite kopijuoti, modifikuoti, licenzijuoti ar platinti Programos 
+kitaip nei ai?kiai numatyta ?ios licenzijos. Bet kokie bandymai kitaip 
+kopijuoti, modifikuoti, licenzijuoti ar platinti Program? yra negaliojantys ir 
+automati?kai panaikina J?s? teises suteiktas ?ios licenzijos. Tokiu atveju 
+asmen?, gavusi? i? J?s? kopijas ar teises remiantis ?ia licenzija, teis?s 
+(licenzijos) nebus panaikintos, nes ?ie asmenys nepa?eid12:50 AM 7/15/02? 
+licenzijos. 
+
+5. J?s? nereikalaujama ?ios licenzijos priimti, nes J?s jos nepasira??te. Vis 
+d?lto, niekas kitas Jums negarantuoja teis?s modifikuoti ir platinti Program? ar 
+ja paremtus darbus. Be to, min?ti veiksmai yra draud?iami ?statymo, jei J?s 
+nepriimate ?ios licenzijos s?lyg?. Taigi, modifikuodami ar platindami Program? 
+(ar bet kok? darb? paremt? Programa), J?s parodote, kad priimate ?i? licenzij? 
+ir visas jos s?lygas susijusias su Programos (ar bet kokio Programa paremto 
+darbo) kopijavimu, platinimu ar modifikavimu. 
+
+6. Kiekvien? kart?, kai J?s platinate Program? (ar bet kok? Programa paremt? 
+darb?), Programos gav?jas automati?kai gauna tikrojo licenzijos teik?jo 
+(autoriaus, platintojo) leidim?, suteikiant? teis? kopijuoti, platinti ar 
+modifikuoti Program? remiantis ?iomis s?lygomis. J?s negalite gav?jui primesti 
+joki? papildom? apribojim? nesan?i? ?ioje licenzijoje. J?s nesate atsakingas u? 
+tre?i?j? asmen? vertim? laikytis ?ios licenzijos s?lyg?. 
+
+7. Jeigu (kaip teismo nuosprendis ar ?tarimas patent? pa?eidimu ar bet kokiais 
+kitais atvejais ) Jums yra primetamos s?lygos (teismo orderiu, pagal susitarim? 
+ar kitaip), kurios prie?tarauja ?ios licenzijos s?lygoms, tai primetamos s?lygos 
+neatleid?ia Jus nuo ?ios licenzijos s?lyg?. Jeigu J?s negalite platinti 
+Programos taip, kad patenkintum?te savo ?sipareigojimus ?iai licenzijai ir kitus 
+susijusius ?sipareigojimus tuo pat metu, tai galite neplatinti Programos i? 
+viso. Pavyzd?iui, jeigu patentas neleis Programos platinti be autorini? honorar? 
+visiems tiems, kurie gaus kopijas tiesiogiai ar netiesiogiai i? J?s?, tai 
+vienintelis kelias patenkinti abi (Programos ir GNU Bendr?j? Vie??j?) licenzijas 
+yra i? viso neplatinti Programos. 
+
+Jeigu bet kuri ?io skyriaus dalis yra laikoma negaliojan?ia (neturin?ia 
+juridin?s galios) ar ne?vykdoma esant tam tikroms konkre?ioms aplinkyb?ms, tai 
+likusi skyriaus dalis lieka galioti. Visais kitais atvejais galioja visas 
+skyrius. 
+
+?io skyriaus tikslas n?ra skatinti pa?eisti kokius nors patentus, nuosavyb?s 
+teises ar u?gin?yti toki? teisi? pagr?stum?. ?is skyrius siekia tiktai 
+u?tikrinti nemokamos programin?s ?rangos platinimo sistemos vientisum?, kas yra 
+?gyvendinta vie??ja licenzija. Daug ?moni? prisid?jo prie plataus programin?s 
+?rangos rato platinimo per ?i? sistem? vildamiesi, kad ta sistema bus pastoviai 
+taikoma. Tik nuo autoriaus (autor?s) priklauso, ar jis (ji) nor?s platinti savo 
+programas per koki? nors kit? sistem? ar ne ir ?ios licenzijos tur?tojas negali 
+primesti sprendimo. 
+
+?is skyrius tur?t? kruop??iai paai?kinti, kokia tur?t? b?ti ?ios licenzijos 
+likusios dalies pasekm?. 
+
+8. Jeigu Programos platinimas ir/arba naudojimas tam tikrose ?alyse yra 
+u?draustas patentais ar autorin?mis teis?mis, originali? autorini? teisi? 
+tur?tojas, kuris padengia Program? ?ia licenzija, tur?t? prid?ti ai?kius 
+geografinius platinimo apribojimus pa?alinan?ius tas ?alis ir taip 
+informuodamas, kad platinimas yra leid?iamas tik nepamin?tose ?alyse. Tokiu 
+atveju apribojimai tampa licenzijos dalimi. 
+
+9. Free Software Foundation (angl. - Laisvos Programin?s ?rangos fondas) gali 
+laikas nuo laiko paskelbti i?taisytas ir/arba naujas Bendrosios Vie?osios 
+licenzijos (GPL) versijas. Naujos versijos savo dvasia bus pana?ios ? dabartin? 
+versij?, bet siekiant i?spr?sti naujai i?kilusias problemas gali skirtis kai 
+kurios detal?s. 
+
+Kiekvienai licenzijos versijai suteikiamas versij? i?skiriantis numeris. Jeigu 
+Programa nurodo numer? licenzijos versijos, kuri taikoma Programai ir ?bet 
+kuriai v?lesnei jos versijai?, tai J?s galite sekti arba nurodyta versija, arba 
+bet kuria v?lesne Free Software Foundation paskelbta licenzijos versija. Tuo 
+atveju, kai Programa nenurodo ?ios licenzijos versijos numerio, J?s galite 
+pasirinkti bet kuri? ( ir bet kada) Free Software Fuondation i?leistos ?ios 
+licenzijos versij?. 
+
+10. Jeigu J?s norite Programos dalis ?traukti ? kitas nemokamas programas, kuri? 
+platinimo s?lygos skiriasi, para?ykite autoriui ir papra?ykite leidimo. Free 
+Software Foundation programin?s ?rangos atveju ra?ykite Free Software Foundation 
+organizacijai; mes kartais tokiu atveju padarome i?imtis. M?s? sprendimas remsis 
+dviem tikslais: vis? (sukurt? m?s? nemokamos Programos pagrindu) program? 
+nemokamos programin?s ?rangos statuso i?saugojimu ir aplamai skatinimu dalintis 
+ir pakartotinai naudoti programin? ?rang?. 
+
+GARANTIJOS NEBUVIMAS 
+
+11. KADANGI PROGRAMA YRA LICENZIJUOTA KAIP NEMOKAMA, TAI N?RA JOKIOS GARANTIJOS 
+PROGRAMAI GALIOJAN?I? ?STATYM? LEISTU M?STU. I?KYRUS ATVEJ?, PARA?YT? AUTORIN?SE 
+TEIS?SE, (IR/ARBA) KAI KITOS PUS?S TEIKIA PROGRAM? ?KAIP YRA? IR BE JOKIOS 
+R??IES GARANTIJOS, ARBA KAI SUTEIKIAMOS (BET NEB?TINAI JOMIS APSIRIBOJANT) 
+PASAKYTOS AR NUMANOMOS PERKAMUMO IR TIKIMO KONKRE?IAI U?DUO?IAI GARANTIJOS. J?S 
+PRISIIMATE VIS? RIZIK?, SUSIJUSI? SU PROGRAMOS KOKYBE IR VYKDYMU. JEIGU PROGAMA 
+PASIRODYS TURINTI DEFEKT?, J?S PRISIIMATE VISAS B?TINAS TECHNIN?S AP?I?ROS, 
+SUTVARKYMO AR KOREGAVIMO I?LAIDAS. 
+
+12. JOKIU KITU ATVEJU, I?SKYRUS GALIOJAN?IAM ?STATYMUI REIKALAUJANT, ARBA 
+SUTINKANT RA?TU (AUTORIN?SE TEIS?SE AR KITUOSE, PROGRAMOS AUTORI? IR/ARBA 
+PLATINTOJ? PRIPA??STAMUOSE LEGALIUOSE IR GALIOJAN?IUOSE DOKUMENTUOSE), AUTORIN?S 
+TEIS?S, ARBA BET KURI KITA PUS? (KURI GALI MODIFIKUOTI IR/ARBA PLATINTI PROGRAM? 
+KAIP NURODYTA AUK??IAU) NEBUS JUMS ATSAKINGA U? NUOSTOLIUS (?TRAUKIANT BET 
+KOKIUS BENDRUS, I?SKIRTINIUS, ATSITIKTINIUS AR I?PLAUKIAN?IUS I? PROGRAMOS 
+NAUDOJIMO ARBA NESUGEB?JIMO NAUDOTI PROGRAM? NUOSTOLIUS: DUOMEN? PRARADIM?, 
+DUOMEN? SUGADINIM?, PROGRAMOS NESUDERINAMUM? SU KITOMIS PROGRAMOMIS AR BET 
+KOKIUS KITUS NUOSTOLIUS, PATIRTUS J?S? AR TRE?I?J? PUSI?) - NET IR TUO ATVEJU, 
+KAI DOKUMENTAI (AUTORIN?S TEIS?S AR KITI) AR KITOS PUS?S PRANE?? APIE TOKIUS 
+GALIMUS NUOSTOLIUS. 
+
+KOPIJAVIMO, PLATINIMO IR MODIFIKAVIMO S?LYG? PABAIGA 
+
+Kaip taikyti ?ias s?lygas savo naujoms programoms 
+
+Jeigu J?s sukur?te nauj? program? ir norite, kad ji b?t? kuo naudingesn? 
+visuomenei, geriausias b?das ?iam tikslui pasiekti yra padaryti j? nemokama 
+programa, kuri? kiekvienas gali platinti ir keisti pagal min?tas s?lygas. 
+
+Nor?dami pasiekti ?? tiksl?, prie programos prijunkite ?emiau esan?ius 
+?sp?jimus. Saugiausia informuojant apie garantijos nebuvim? ?sp?jimus ?d?ti 
+kiekvieno i?eities tekst? failo prad?ioje. Kiekvienas failas turi tur?ti 
+ma?iausiai ?autorini? teisi?? eilut? ir nuorod?, kur rasti piln? prane?im?. 
+
+
+Viena eilut? prane?ti programos autoriaus vardui ir k? ta programa daro:
+Copyright (C) metai  autoriaus vardas
+
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+Taip pat pateikite informacij?, kaip su jumis susisiekti elektroniniu ar 
+paprastu pa?tu. 
+
+Auk??iau esan?i? angli?k? prane?im? vertimai (vertimai tik pa?intiniai. Savo 
+programoms taikykite angli?kas versijas): 
+
+?i programa yra nemokama. J?s galite j? platinti ir/arba modifikuoti remdamiesi Free Software
+Foundation paskelbtomis GNU Bendrosios Vie?osios licenzijos s?lygomis: arba 2 licenzijos    
+versija, arba (savo nuo?i?ra) bet kuria v?lesne versija.                                                            )
+
+?i programa platinama su viltimi, kad ji bus naudinga, bet BE JOKIOS GARANTIJOS; be
+jokios numanomos PERKAMUMO ar TINKAMUMO KONKRETIEMS TIKSLAMS
+garantijos. ?i?r?kite GNU Bendr?j? Vie??j? licenzij? nor?dami su?inoti smulkmenas.       
+
+J?s tur?tum?te kartu su ?ia programa gauti ir GNU Bendrosios Vie?osios licenzjos s?lygas; jei
+ne - ra?ykite Free Software Foundation organizacijai, Inc., 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.
+
+Jeigu programa interaktyvi (bendrauja su vartotoju), padarykite, kad startuodama 
+interaktyviu re?imu ji i?vest? pana?? ? ?? prane?im?: 
+
+Gnomovision version 69, Copyright (C) year name of author
+Gnomovision comes with ABSOLUTELY NO WARRANTY; for details
+type `show w'.  This is free software, and you are welcome
+to redistribute it under certain conditions; type `show c' 
+for details.
+
+Vertimas
+Programos pavadinimas ir versijos numeris, Copyright (C) metai  autoriaus vardas
+Programa teikiama visi?kai be jokios garantijos; smulkmenoms surinkite 'rodyk w'.
+?i programa yra nemokama programin? ?ranga ir jos platinimas yra sveikintinas
+laikantis tam tikr? s?lyg?; surinkite 'rodyk c' parodyti smulkmenas.
+
+Hipotetin?s (sp?jamos) komandos 'rodyk w' ir 'rodyk c' tur?t? parodyti 
+atitinkamas GNU Bendrosios Vi?osios licenzijos dalis. ?inoma, J?s? komandos gali 
+vadintis kitaip nei 'rodyk w' ir 'rodyk c' . Jos netgi gali b?ti pel?s 
+spragtel?jimai ar meniu punktai - kas labiau tinka J?s? programai. 
+
+Jei b?tina, J?s taip pat tur?tum?te gauti savo darbdavio (jei dirbate 
+programuotoju) ar savo mokyklos (jei mokot?s) ?autorini? teisi? ? program? 
+atsisakym??. ?ia pavyzdys; pakeiskite tik vardus: 
+
+Yoyodyne, Inc., hereby disclaims all copyright
+interest in the program `Gnomovision'
+(which makes passes at compilers) written 
+by James Hacker.
+
+signature of Ty Coon, 1 April 1989
+Ty Coon, President of Vice
+
+Vertimas
+Yoyodyne, Inc., atsisako vis? autorini? teisi? ? program? 'programos vardas' (k? b?t? galima laikyti i???kiu sudarytojams) 
+para?yt? Jamso Hackerio.
+
+TY Coon para?as, 1 Baland?io 1989 Ty Coon, Generalinis direktorius
+
+?i Bendroji Vie?oji licenzija nedraud?ia ?traukti J?s? program? ? priva?ias, 
+patentuotas programas. Jeigu J?s? programa yra paprogramin? biblioteka, J?s 
+galite manyti, kad bus naudingiau u?drausti patentuotas programas susieti su 
+J?s? biblioteka. Jei tai yra kaip tik tai, k? J?s norite padaryti, tai naudokite 
+GNU Library General Public License (GNU Bibliotekin? Bendr?j? Vie??j? licenzij?) 
+vietoj ?ios licenzijos. 
+
+This is an unofficial translation of the GNU General Public License into 
+Lithuanian. It was not published by the Free Software Foundation, and does not 
+legally state the distribution terms for software that uses the GNU GPL--only 
+the original English text of the GNU GPL does that. However, we hope that this 
+translation will help Lithuanian language speakers understand the GNU GPL 
+better. 
+
+?is dokumentas yra neoficialus GNU General Public License vertimas ? lietuvi? 
+kalb?. Jis n?ra platinamas Free Software Foundation organizacijos ir neturi 
+jokios juridin?s galios - tik originalus angl? kalba para?ytas tekstas yra 
+teisinis dokumentas, nusakantis GNU GPL s?lygas. Mes viliam?s, kad ?is vertimas 
+pad?s lietuvi?kai kalbantiems ?mon?ms geriau suprasti GNU GPL. 
+
+I?vert? VU MIF studentas VDD (Vytautas Dvaronaitis). 
+
+Gr??ti ? GNU antra?tin? puslap?. 
+
+Klausimus FSF ir GNU si?sti gnu@gnu.org. Kiti b?dai susisiekti su FSF. 
+
+Copyright (C) 1989, 1991 Free Software Foundation, Inc.  
+59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+
+
+
+
+
