@@ -564,13 +564,24 @@ void CClientCreditsList::SaveList()
 	{
 //Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		m_mapClients.GetNextAssoc(pos, tempkey, cur_credit);
-		if (!theApp.emuledlg->IsRunning() && !theApp.clientcredits->IsSaveUploadQueueWaitTime()) cur_credit->ClearUploadQueueWaitTime();
-		if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
-		{
-			if (theApp.clientcredits->IsSaveUploadQueueWaitTime()) cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
-			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
-			fileBack.Write(((uint8*)cur_credit->GetDataStruct()) + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
-			count++; 
+		if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
+			if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
+			{
+//				if (theApp.clientcredits->IsSaveUploadQueueWaitTime()) cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT//not necessary in current way[AndCycle]
+				memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+				fileBack.Write(((uint8*)cur_credit->GetDataStruct()) + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
+				count++; 
+			}
+		}
+		else{
+			//official way to clean out client
+			if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
+			{
+				cur_credit->ClearUploadQueueWaitTime();//fair to all client
+				memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+				fileBack.Write(((uint8*)cur_credit->GetDataStruct()) + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
+				count++; 
+			}
 		}
 		//original commented out
 		/*
