@@ -3079,6 +3079,8 @@ switch(tag->GetNameID())
 	case CT_UNKNOWNx8c:			strSnafuTag=apszSnafuTag[5];break;//buffer=_T("[LSD7c]");break; 
 	case CT_UNKNOWNx8d:			strSnafuTag=apszSnafuTag[6];break;//buffer=_T("[0x8d] unknown Leecher - (client version:60)");break;
 	case CT_UNKNOWNx99:			strSnafuTag=apszSnafuTag[7];break;//buffer=_T("[RAMMSTEIN]");break;		//STRIKE BACK
+	case CT_UNKNOWNx98:
+	case CT_UNKNOWNx9C:			strSnafuTag=apszSnafuTag[18];break;
 	case CT_UNKNOWNxc4:			strSnafuTag=apszSnafuTag[8];break;//buffer=_T("[MD5 Community]");break;	//USED BY NEW BIONIC => 0x12 Sender
 	case CT_FRIENDSHARING:		//STRIKE BACK
 		//if (theApp.glob_prefs->GetAntiFriendshare())

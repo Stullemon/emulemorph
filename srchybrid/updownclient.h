@@ -1127,7 +1127,8 @@ static LPCTSTR apszSnafuTag[] =
 	_T("[Rumata (rus)(Plus v1f)]"),							//14
 	_T("[Fusspi]"),											//15
 	_T("[donkey2002]"),										//16
-	_T("[md4]")										        //17
+	_T("[md4]"),									        //17
+	_T("Emulereactor Community Mod")						//18
 	};
 
 //<<< new tags from eMule 0.04x
@@ -1153,11 +1154,14 @@ static LPCTSTR apszSnafuTag[] =
 #define CT_UNKNOWNx88			0x88 // DarkMule v6 |eVorte|X|
 #define CT_UNKNOWNx8c			0x8c // eMule v0.27c [LSD7c] 
 #define CT_UNKNOWNx8d			0x8d // unknown Leecher - (client version:60)
+#define CT_UNKNOWNx98			0x98 // Emulereactor Community Mod
 #define CT_UNKNOWNx99			0x99 // eMule v0.26d [RAMMSTEIN 8b]
+#define CT_UNKNOWNx9C			0x9C // Emulereactor Community Mod
 #define CT_UNKNOWNxbb			0xbb // emule.de (client version:60)
 #define CT_UNKNOWNxc4			0xc4 //MD5 Community from new bionic - hello
 #define CT_UNKNOWNxCA			0xCA // NewDarkMule
 #define CT_UNKNOWNxCD			0xCD // www.donkey2002.to
+#define CT_UNKNOWNxDA			0xDA // Emulereactor Community Mod
 #define CT_FRIENDSHARING		0x66 //eWombat  [SNAFU]
 #define CT_DARK					0x54 //eWombat [SNAFU]
 #define FRIENDSHARING_ID 0x5F73F1A0 // Magic Key, DO NOT CHANGE!
