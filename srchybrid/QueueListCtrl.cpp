@@ -845,72 +845,13 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			if( (file1 != NULL) && (file2 != NULL)){
 
 				//Morph - modified by AndCycle, definitely a correct compare to show queue
-				CUpDownClient *rClient = (CUpDownClient*)item1, *lClient = (CUpDownClient*)item2;
+				CUpDownClient *lClient = (CUpDownClient*)item2, *rClient = (CUpDownClient*)item1;
 
 				uint32 lScore = lClient->GetScore(false), rScore = rClient->GetScore(false);
 				result = 
 					theApp.uploadqueue->RightClientIsBetter(lClient, lScore, rClient, rScore) ? 1 :
 					theApp.uploadqueue->RightClientIsBetter(rClient, rScore, lClient, lScore) ? -1 :
 					0;
-				/*
-				//sort invalid client as no prio
-				if((item1->credits->GetCurrentIdentState(item1->GetIP()) == IS_IDFAILED || 
-					item1->credits->GetCurrentIdentState(item1->GetIP()) == IS_IDBADGUY || 
-					item1->credits->GetCurrentIdentState(item1->GetIP()) == IS_IDNEEDED
-					) && theApp.clientcredits->CryptoAvailable()){
-					result --;
-				}
-				if((item2->credits->GetCurrentIdentState(item2->GetIP()) == IS_IDFAILED || 
-					item2->credits->GetCurrentIdentState(item2->GetIP()) == IS_IDBADGUY || 
-					item2->credits->GetCurrentIdentState(item2->GetIP()) == IS_IDNEEDED
-					) && theApp.clientcredits->CryptoAvailable()){
-					result ++;
-				}
-
-
-				//Morph Start - added by AndCycle, take PayBackFirst have same class with PowerShare
-				if(result == 0){
-					result = 
-						item1->IsPBForPS() == true && item2->IsPBForPS() == false ? 1 :
-						item1->IsPBForPS() == false && item2->IsPBForPS() == true ? -1 :
-						item1->IsPBForPS() == true && item2->IsPBForPS() == true ? 
-							((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority()) :
-						0;
-				}
-				*/
-				/* original PowerShare judge function
-				if(result == 0){
-					result = 
-						item1->GetPowerShared() == true && item2->GetPowerShared() == false ? 1 :
-						item1->GetPowerShared() == false && item2->GetPowerShared() == true ? -1 :
-						item1->GetPowerShared() == true && item2->GetPowerShared() == true ? 
-							((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority()) :
-						0;
-				}
-				*/
-				//Morph End - added by AndCycle, take PayBackFirst have same class with PowerShare
-
-				/*
-				//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
-				if(result == 0){
-					result =
-						item1->GetQueueSessionUp() > item2->GetQueueSessionUp() ? 1 :
-						item1->GetQueueSessionUp() < item2->GetQueueSessionUp() ? -1 :
-						0;
-				}
-
-				//Morph - added by AndCycle, Equal Chance For Each File
-				if(result == 0 && file1 != file2){
-					result =
-						item1->GetEqualChanceValue() < item2->GetEqualChanceValue() ? 1 :
-						item1->GetEqualChanceValue() > item2->GetEqualChanceValue() ? -1 :
-						0;
-				}
-
-				if(result == 0){
-					result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
-				}
-				*/
 
 			}
 			else if( file1 == NULL )
