@@ -13,6 +13,7 @@ ADDED  : Show Client Percentage in the downloadlist [Commander]
 CHANGED: Invisible Mode [Commander]
 ADDED  : Dynamic Invisible Mode [Commander]
 TODO   : OnClick [HotKey] -> move to invisible mode, OnClick [HotKey] -> move out of invisible mode [Commander]
+FIXED  : duplicated part file statistics no longer save in known.met [AndCycle]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0

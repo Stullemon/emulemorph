@@ -153,7 +153,7 @@ void CKnownFileList::Save()
 			else if (pFile->GetLastSeen() < dwExpired)
 				nRecordsNumber--;
 		}
-		file.WriteUInt32(nRecordsNumber + theApp.downloadqueue->GetPartFilesCount());
+		file.WriteUInt32(nRecordsNumber/* + theApp.downloadqueue->GetPartFilesCount()*/);
 		pos = m_Files_map.GetStartPosition();
 		// SLUGFILLER: mergeKnown
 		while( pos != NULL )
@@ -164,7 +164,9 @@ void CKnownFileList::Save()
 			if (pFile->GetLastSeen() >= dwExpired)	// SLUGFILLER: mergeKnown
 				pFile->WriteToFile(&file);
 		}
-		theApp.downloadqueue->SavePartFilesToKnown(&file);	// SLUGFILLER: mergeKnown - add part files
+		//Morph Start - marked out by AndCycle, no longer need this
+		//theApp.downloadqueue->SavePartFilesToKnown(&file);	// SLUGFILLER: mergeKnown - add part files
+		//Morph End - marked out by AndCycle, no longer need this
 		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 			file.Flush(); // flush file stream buffers to disk buffers
 			if (_commit(_fileno(file.m_pStream)) != 0) // commit disk buffers to disk

@@ -598,7 +598,9 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 	}
 	// SLUGFILLER: mergeKnown
 	pFile->SetLastSeen();	// okay, we see it
-	theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
+	//Morph Start - marked out by AndCycle, no longer need this
+	//theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
+	//Morph End - marked out by AndCycle, no longer need this
 	// SLUGFILLER: mergeKnown
 	//MORPH - Removed by SiRoB, Safe Hash
 	/*
