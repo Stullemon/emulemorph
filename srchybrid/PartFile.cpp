@@ -2288,7 +2288,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 			FlushBuffer();
 	}
 
-	datarate = 0;
+	uint32 datarateX = 0; //MORPH - Changed by SiRoB,  -Fix-
 
 	// calculate datarate, set limit etc.
 	if(m_icounter < 10)
@@ -2309,7 +2309,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				*/
 					cur_src->CheckDownloadTimeout();
 					cur_datarate = cur_src->CalculateDownloadRate();
-					datarate+=cur_datarate;
+					datarateX+=cur_datarate;//MORPH - Changed by SiRoB,  -Fix-
 					if(reducedownload && cur_datarate)
 					{
 						uint32 limit = reducedownload*cur_datarate/1000;
@@ -2390,7 +2390,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 					*/
 						cur_src->CheckDownloadTimeout();
 						uint32 cur_datarate = cur_src->CalculateDownloadRate();
-						datarate += cur_datarate;
+						datarateX += cur_datarate; //MORPH - Changed by SiRoB,  -Fix-
 						if (curClientReducedDownload && cur_datarate)
 						{
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
@@ -2585,7 +2585,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 	}
 
-	return datarate;
+	return datarate = datarateX;//MORPH - Changed by SiRoB,  -Fix-
 }
 
 bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped, bool Ed2kID)
