@@ -586,7 +586,6 @@ public:
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 
 	static bool	infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	static bool	multipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
 
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	static uint8	ShareOnlyTheNeed;
@@ -1376,7 +1375,6 @@ public:
 	static	uint8	IsSelectiveShareEnabled()	{return selectiveShare;}
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 	static	bool	IsInfiniteQueueEnabled()		{return infiniteQueue;}	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	static	bool	IsMultipleInstanceEnabled()		{return multipleInstance;}	//Morph - added by AndCycle, VQB: multipleInstance
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	static	uint8	GetShareOnlyTheNeed()	{return ShareOnlyTheNeed;}
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea

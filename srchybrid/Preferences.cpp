@@ -517,7 +517,6 @@ uint8	CPreferences::selectiveShare;
 //MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 
 bool	CPreferences::infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-bool	CPreferences::multipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
 
 //MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 uint8	CPreferences::ShareOnlyTheNeed;
@@ -2298,7 +2297,6 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("Port", m_nMMPort);
 
 	ini.WriteBool("InfiniteQueue",infiniteQueue,"eMule");	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	ini.WriteBool("MultipleInstance",multipleInstance,"eMule");	//Morph - added by AndCycle, VQB: multipleInstance
 
 	ini.WriteBool("AutoDynUpSwitching",isautodynupswitching,"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
 	ini.WriteBool("AutoPowershareNewDownloadFile",m_bisautopowersharenewdownloadfile,"eMule"); //MORPH - Added by SiRoB, Avoid misusing of powersharing
