@@ -616,7 +616,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::AND;
-			CKademlia::debugLine(" AND");
+			TRACE(" AND");
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -634,7 +634,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::OR;
-			CKademlia::debugLine(" OR");
+			TRACE(" OR");
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -652,7 +652,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::NAND;
-			CKademlia::debugLine(" NAND");
+			TRACE(" NAND");
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -683,7 +683,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		pSearchTerm->astr = new CStringArray;
 
 		str.MakeLower(); // make lowercase, the search code expects lower case strings!
-		CKademlia::debugMsg(" \"%s\"", str);
+		TRACE(" \"%s\"", str);
 
 		// pre-tokenize the string term
 		int iPosTok = 0;
@@ -715,9 +715,9 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		pSearchTerm->type = SSearchTerm::MetaTag;
 		pSearchTerm->tag = new Kademlia::CTagStr(strTagName, strValue);
 		if (lenTagName == 1)
-			CKademlia::debugMsg(" Tag%02x=\"%s\"", strTagName[0], strValue);
+			TRACE(" Tag%02x=\"%s\"", strTagName[0], strValue);
 		else
-			CKademlia::debugMsg(" Tag\"%s\"=\"%s\"", strTagName, strValue);
+			TRACE(" Tag\"%s\"=\"%s\"", strTagName, strValue);
 		return pSearchTerm;
 	}
 	else if (op == 0x03) // Min/Max
@@ -738,9 +738,9 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		pSearchTerm->type = (mmop == 0x01) ? SSearchTerm::Min : SSearchTerm::Max;
 		pSearchTerm->tag = new Kademlia::CTagUInt32(strTagName, uValue);
 		if (lenTagName == 1)
-			CKademlia::debugMsg(" %s(Tag%02x)=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName[0], uValue);
+			TRACE(" %s(Tag%02x)=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName[0], uValue);
 		else
-			CKademlia::debugMsg(" %s(Tag\"%s\")=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName, uValue);
+			TRACE(" %s(Tag\"%s\")=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName, uValue);
 		return pSearchTerm;
 	}
 	else{
@@ -770,7 +770,6 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 
 
 #ifdef _DEBUG
 	DWORD dwNow = GetTickCount();
-	memset(&ssh, 0, sizeof ssh);
 #endif
 	if(lenPacket == 17 )
 	{
@@ -778,51 +777,34 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 
 		{
 			//Source request
 			indexed->SendValidSourceResult(target, ip, port);
-#ifdef _DEBUG
-			Debug("SendValidSourceResult: Time=%.2fsec\n",
-			(GetTickCount() - dwNow) / 1000.0 );
-#endif
+			DEBUG_ONLY( Debug("SendValidSourceResult: Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
 		}
 		else
 		{
 			//Single keyword request
 			indexed->SendValidKeywordResult(target, NULL, ip, port );
-#ifdef _DEBUG
-			Debug("SendValidKeywordResult (Single): Time=%.2fsec\n",
-			(GetTickCount() - dwNow) / 1000.0,
-			ssh.iFileNameSplits);
-#endif
+			DEBUG_ONLY( Debug("SendValidKeywordResult (Single): Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
 		}
 	}
 	else if(lenPacket > 17)
 	{
-
-			SSearchTerm* pSearchTerms = NULL;
-			if (restrictive)
+		SSearchTerm* pSearchTerms = NULL;
+		if (restrictive)
+		{
+			try
 			{
-				try
-				{
-					pSearchTerms = CreateSearchExpressionTree(bio, 0);
-				}
-				catch(...)
-				{
-					Free(pSearchTerms);
-					throw;
-				}
+				pSearchTerms = CreateSearchExpressionTree(bio, 0);
 			}
-			//Keyword request with added options.
-			indexed->SendValidKeywordResult(target, pSearchTerms, ip, port); 
-			Free(pSearchTerms);
-#ifdef _DEBUG
-			Debug("SendValidKeywordResult: Time=%.2fsec FileNameSplits=%u SearchTermSplits=%u StringCmps=%u SearchTerms=%u SourceMaps=%u SourceMapsEntries=%u\n",
-			(GetTickCount() - dwNow) / 1000.0,
-			ssh.iFileNameSplits,
-			ssh.iSearchTermSplits,
-			ssh.iStringCmps,
-			ssh.iSearchTerms,
-			ssh.iSourceMaps,
-			ssh.iSourceMapsEntries);
-#endif
+			catch(...)
+			{
+				Free(pSearchTerms);
+				throw;
+			}
+		}
+		//Keyword request with added options.
+		indexed->SendValidKeywordResult(target, pSearchTerms, ip, port); 
+		Free(pSearchTerms);
+		DEBUG_ONLY( Debug("SendValidKeywordResult: Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
 	}
 }
 
@@ -1011,7 +993,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 void CKademliaUDPListener::processPublishResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
 	// Verify packet is expected size
-	if (lenPacket != 16){
+	if (lenPacket < 16){
 		CString strError;
 		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;

@@ -25,14 +25,13 @@
 #include "ResizableGrip.h"
 #include "ResizableMinMax.h"
 #include "ResizableState.h"
-#include "loggable.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CResizableDialog window
 
 class CResizableDialog : public CDialog, public CResizableLayout,
 						 public CResizableGrip, public CResizableMinMax,
-						 public CResizableState, public CLoggable
+						 public CResizableState
 {
 
 // Construction

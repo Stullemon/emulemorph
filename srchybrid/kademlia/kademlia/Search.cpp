@@ -466,12 +466,17 @@ void CSearch::processResultFile(const CUInt128 &target, uint32 fromIP, uint16 fr
 			theApp.downloadqueue->KademliaSearchFile(m_searchID, &answer, type, ip, tcp, udp, serverip, serverport, clientid);
 			break;
 		}
-//		case 2:
-//		{
-//			//TODO add firewall support
-//			break;
-//		}
-	}
+/*		case 2:
+		{
+			//Don't use this type, some clients will process it wrong..
+			break;
+		}
+		case 3:
+		{
+			//This will be a firewaled client connected to Kad only.
+			break;
+		}
+*/	}
 }
 
 void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)

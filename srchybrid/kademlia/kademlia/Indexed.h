@@ -72,18 +72,6 @@ struct SSearchTerm
 	SSearchTerm* right;
 };
 
-struct SSearchHits
-{
-	int iFileNameSplits;
-	int iSearchTermSplits;
-	int iStringCmps;
-	int iSearchTerms;
-	int iSourceMaps;
-	int iSourceMapsEntries;
-};
-
-extern SSearchHits ssh;
-
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////

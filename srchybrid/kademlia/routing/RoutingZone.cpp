@@ -655,7 +655,7 @@ uint32 CRoutingZone::estimateCount(void)
 	uint32 userCountBase = (pow( 2, m_level+1))*10;
 	uint32 sample = curZone->getNumContacts();
 	float modifier = (float)sample/20;
-//	uint32 final = userCountBase * modifier;
+	uint32 final = userCountBase * modifier;
 //	CKademlia::debugLine("CBase(%u) | SBase(%u) | Sample(%u) | modifier(%f) | Final(%u)\n", userCountBase, sampleBase, sample, modifier, final);
 	return userCountBase * modifier;
 }

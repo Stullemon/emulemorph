@@ -58,7 +58,7 @@ CPrefs::CPrefs()
 {
 	CString filename = CMiscUtils::getAppDir();
 	filename.Append(_T(CONFIGFOLDER));
-	filename.Append("preferencesKad.dat");
+	filename.Append("preferencesK.dat");
 	init(filename.GetBuffer(0));
 }
 
@@ -70,8 +70,7 @@ CPrefs::~CPrefs(void)
 
 void CPrefs::init(LPCSTR filename)
 {
-	if (m_clientID == NULL)
-		m_clientID.setValueRandom();
+	m_clientID.setValueRandom();
 	m_lastContact = 0;
 	m_recheckip = 0;
 	m_firewalled = 0;
@@ -79,8 +78,7 @@ void CPrefs::init(LPCSTR filename)
 	m_totalStoreSrc = 0;
 	m_totalStoreKey = 0;
 	m_Publish = false;
-	m_clientHash	= NULL;
-	m_clientID.setValue((uchar*)thePrefs.GetUserHash());
+	m_clientHash.setValue((uchar*)thePrefs.GetUserHash());
 	m_ip			= 0;
 	m_recheckip		= 0;
 	m_firewalled	= 0;

@@ -56,8 +56,6 @@ using namespace Kademlia;
 
 void DebugSend(LPCTSTR pszMsg, uint32 ip, uint16 port);
 
-SSearchHits ssh;
-
 CString CIndexed::m_kfilename = "";
 CString CIndexed::m_sfilename = "";
 
@@ -609,7 +607,6 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			CString strTok(item->fileName.Tokenize(" ()[]{}<>,._-!?", iPosTok));
 			while (!strTok.IsEmpty())
 			{
-				ssh.iFileNameSplits++;
 				astrFileNameTokens.Add(strTok);
 				strTok = item->fileName.Tokenize(" ()[]{}<>,._-!?", iPosTok);
 			}
@@ -625,7 +622,6 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			bool bFoundSearchTerm = false;
 			for (int i = 0; i < astrFileNameTokens.GetCount(); i++)
 			{
-				ssh.iStringCmps++;
 				// the file name string was already stored in lowercase
 				// the string search term was already stored in lowercase
 				if (strcmp(astrFileNameTokens.GetAt(i), pSearchTerm->astr->GetAt(iSearchTerm)) == 0)
@@ -737,7 +733,6 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 
 bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* item)
 {
-	ssh.iSearchTerms++;
 	// tokenize the filename (very expensive) only once per search expression and only if really needed
 	CStringArray astrFileNameTokens;
 	return SearchTermsMatch(pSearchTerm, item, astrFileNameTokens);
@@ -763,13 +758,11 @@ void CIndexed::SendValidKeywordResult(const CUInt128& keyID, const SSearchTerm* 
 			POSITION pos2 = currKeyHash->m_Source_map.GetStartPosition();
 			while( pos2 != NULL )
 			{
-				ssh.iSourceMaps++;
 				Source* currSource;
 				CCKey key2;
 				currKeyHash->m_Source_map.GetNextAssoc( pos2, key2, currSource );
 				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
 				{
-					ssh.iSourceMapsEntries++;
 					POSITION pos6 = pos5;
 					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
 					if ( !pSearchTerms || SearchTermsMatch(pSearchTerms, currName) )
