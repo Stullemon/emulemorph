@@ -4,7 +4,7 @@ Changelog for eMule 0.40f26 MorphKad 0.6
 ADDED: Give more credits to rare files uploaders when boost the less uploaded files selected[Yun.SF3]
 FIXED: Bug making interraction between A4AF & Category [SiRoB]
 FIXED: Complet Source Number Should be ok [SiRoB]
-FIXED: Actualisation of Progress & Obtained Part Bar shader while there is swapping of source [SiRoB]
+FIXED: Actualisation of Progress & Obtained Part Bar shader when there is swapping of source [SiRoB]
 CHANGED: ZZ Patch Return of prio on uploading list [SiRoB]
 TWEAKED: PowerShare Limit don't depend only on the complet source (to avoid some possible wrong complet source report by other client or ours) [SiRoB]
 
