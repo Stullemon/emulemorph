@@ -5,6 +5,7 @@ Changelog for eMule 0.44b MorphXT v5.x
 FIXED  : HideOS Display Info in SharedFile [SiRoB]
 FIXED  : Ed2k Friend link past crash when they have wroung format [SiRoB]
 FIXED  : Columns in SharedFile where not displayed correctly when first column is hiddeen [SiRoB]
+FIXED  : AppVersion stored correctly in preference.ini (for onlinesig) [SiRoB]
 
 CHANGED: Don't remove custumization folder when we start emule [SiRoB]
 CHANGED: Removed controversal MODSTRING detection [SiRoB]

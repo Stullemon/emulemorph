@@ -2077,7 +2077,12 @@ void CPreferences::SavePreferences()
 	delete[] fullpath;
 	fullpath=NULL;
 	//---
+	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
+	/*
 	ini.WriteString(_T("AppVersion"), theApp.m_strCurVersionLong);
+	*/
+	ini.WriteString(_T("AppVersion"), theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"));
+	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 	//---
 
 #ifdef _DEBUG
