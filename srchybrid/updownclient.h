@@ -427,7 +427,11 @@ public:
 	void 			SetUpStartTime()
 					{
 						m_dwUploadTime = ::GetTickCount();
+	//MORPH START - Added by SiRoB, Better Upload rate Calcul	
+						m_AvarageUDRlastRemovedHeadTimestamp = 0;
+	//MORPH END   - Changed by SiRoB, Better Upload rate Calcul	
 					}
+	
 	void			SendHashsetPacket(char* forfileid);
 	const uchar*	GetUploadFileID() const	
 					{
@@ -989,9 +993,10 @@ private:
 
 	// By BadWolf - Accurate Speed Measurement (Ottavio84 idea)
 	CList<TransferredData,TransferredData>			 m_AvarageDDR_list;
-	//MORPH START - Added by SiRoB, Better Download Speed calcul
+	//MORPH START - Added by SiRoB, Better Download & Upload Speed calcul
 	uint32	m_AvarageDDRlastRemovedHeadTimestamp;
-	//MORPH END   - Added by SiRoB, Better Download Speed calcul
+	uint32	m_AvarageUDRlastRemovedHeadTimestamp;
+	//MORPH END   - Added by SiRoB, Better Download & Upload Speed calcul
 	sint32	sumavgUDR;
 	// END By BadWolf - Accurate Speed Measurement (Ottavio84 idea)
 

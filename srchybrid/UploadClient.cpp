@@ -840,8 +840,8 @@ uint32 CUpDownClient::SendBlockData(){
 		}
 	}
 
-	if(sentBytesCompleteFile + sentBytesPartFile > 0 ||
-        m_AvarageUDR_list.GetCount() == 0 || (curTick - m_AvarageUDR_list.GetTail().timestamp) > 1*1000) {
+	//MORPH START - Modified by SiRoB, Better Upload rate calcul
+	if(sentBytesCompleteFile + sentBytesPartFile > 0) {
 		// Store how much data we've transfered this round,
 		// to be able to calculate average speed later
 		// keep sum of all values in list up to date
@@ -851,18 +851,23 @@ uint32 CUpDownClient::SendBlockData(){
 	}
 			
 	// remove to old values in list
-    while (m_AvarageUDR_list.GetCount() > 0 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > 10*1000) {
-		// keep sum of all values in list up to date
-		sumavgUDR -= m_AvarageUDR_list.RemoveHead().datalen;
-	}
+	while (m_AvarageUDR_list.GetCount() > 0)
+		if ((curTick - m_AvarageUDR_list.GetHead().timestamp) > 30*1000) {
+			// keep sum of all values in list up to date
+			m_AvarageUDRlastRemovedHeadTimestamp = m_AvarageUDR_list.GetHead().timestamp;
+			sumavgUDR -=  m_AvarageUDR_list.RemoveHead().datalen;
+		}else
+			break;
 
 	// Calculate average speed for this slot
-    if(m_AvarageUDR_list.GetCount() > 0 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > 0 && GetUpStartTimeDelay() > 2*1000) {
-        m_nUpDatarate = (sumavgUDR*1000) / (curTick-m_AvarageUDR_list.GetHead().timestamp);
+    if(m_AvarageUDR_list.GetCount() > 0) {
+        DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - (m_AvarageUDRlastRemovedHeadTimestamp?m_AvarageUDRlastRemovedHeadTimestamp:m_dwUploadTime);
+		m_nUpDatarate = (1000 * sumavgUDR) / ((dwDuration>1000)?dwDuration:1000);
 	} else {
 		// not enough values to calculate trustworthy speed. Use -1 to tell this
-        m_nUpDatarate = -1;
+        m_nUpDatarate = 0;
 	}
+	//MORPH END   - Modified by SiRoB, Better Upload rate calcul
 
 	// Check if it's time to update the display.
 	if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {

@@ -230,9 +230,10 @@ void CUpDownClient::Init()
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	m_dwLastCheckedForEvictTick = 0;
     	//MORPH END   - Added by SiRoB, ZZ Upload System
-	//MORPH STRAT - Added by SiRoB, Better Download rate calcul
+	//MORPH STRAT - Added by SiRoB, Better Download & Upload rate calcul
 	m_AvarageDDRlastRemovedHeadTimestamp = 0;
-	//MORPH END   - Added by SiRoB, Better Download rate calcul
+	m_AvarageUDRlastRemovedHeadTimestamp = 0;
+	//MORPH END   - Added by SiRoB, Better Download & Upload rate calcul
 
 	m_nDownTotalTime = 0;//wistily Total download time for this client for this emule session
 	m_nUpTotalTime = 0;//wistily Total upload time for this client for this emule session

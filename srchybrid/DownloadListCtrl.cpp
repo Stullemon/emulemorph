@@ -966,8 +966,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 
 		case 4:		// speed
 			if (lpCtrlItem->type == AVAILABLE_SOURCE && lpUpDownClient->GetDownloadDatarate()){
-				if (lpUpDownClient->GetDownloadDatarate())
-					buffer.Format("%.1f %s", lpUpDownClient->GetDownloadDatarate()/1024.0f,GetResString(IDS_KBYTESEC));
+				buffer.Format("%.1f %s", lpUpDownClient->GetDownloadDatarate()/1024.0f,GetResString(IDS_KBYTESEC));
 				dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT | DT_RIGHT);
 			}
 			break;
