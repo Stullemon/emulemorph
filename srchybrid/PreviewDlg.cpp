@@ -30,7 +30,7 @@ IMPLEMENT_DYNAMIC(PreviewDlg, CDialog)
 PreviewDlg::PreviewDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(PreviewDlg::IDD, pParent)
 {
-	memset(m_icons, 0, sizeof m_icons);
+	MEMSET(m_icons, 0, sizeof m_icons);
 }
 
 PreviewDlg::~PreviewDlg()

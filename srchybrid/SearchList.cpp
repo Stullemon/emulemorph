@@ -113,7 +113,7 @@ void ConvertED2KTag(CTag*& pTag)
 	
 CSearchFile::CSearchFile(CSearchFile* copyfrom)
 {
-	MD4COPY(m_abyFileHash, copyfrom->GetFileHash());
+	md4cpy(m_abyFileHash, copyfrom->GetFileHash());
 	SetFileSize(copyfrom->GetIntTagValue(FT_FILESIZE));
 	SetFileName(copyfrom->GetStrTagValue(FT_FILENAME));
 	m_nClientServerIP = copyfrom->GetClientServerIP();
@@ -194,7 +194,7 @@ CSearchFile::CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP, uin
 CSearchFile::CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFileSize, LPCTSTR pszFileName, int iFileType, int iAvailability)
 {
 	m_nSearchID = nSearchID;
-	MD4COPY(m_abyFileHash, pucFileHash);
+	md4cpy(m_abyFileHash, pucFileHash);
 	taglist.Add(new CTag(FT_FILESIZE, uFileSize));
 	taglist.Add(new CTag(FT_FILENAME, pszFileName));
 	taglist.Add(new CTag(FT_SOURCES, iAvailability));

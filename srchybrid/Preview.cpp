@@ -82,7 +82,7 @@ BOOL CPreviewThread::Run(){
 		m_pPartfile->m_bPreviewing = false;
 
 		SHELLEXECUTEINFO SE;
-		memset(&SE,0,sizeof(SE));
+		MEMSET(&SE,0,sizeof(SE));
 		SE.fMask = SEE_MASK_NOCLOSEPROCESS ;
 		SE.lpVerb = "open";
 		

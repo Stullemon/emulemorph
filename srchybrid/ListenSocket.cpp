@@ -246,7 +246,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						if (!client->GetWaitStartTime())
 							client->SetWaitStartTime();
 						uchar reqfileid[16];
-						MD4COPY(reqfileid,packet);
+						md4cpy(reqfileid,packet);
 						CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(reqfileid);
 						if (!reqfile){
 							// if we've just started a download we may want to use that client as a source
@@ -266,7 +266,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							// DbT:FileRequest
 							// send file request no such file packet (0x48)
 //							Packet* replypacket = new Packet(OP_FILEREQANSNOFIL, 16);
-//							MD4COPY(replypacket->pBuffer, packet);
+//							md4cpy(replypacket->pBuffer, packet);
 //							theApp.uploadqueue->AddUpDataOverheadFileRequest(replypacket->size);
 //							SendPacket(replypacket, true);
 							// DbT:End
@@ -287,7 +287,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 //						reqfile->AddQueuedCount();
 						// send filename etc
 						client->SetUploadFileID((uchar*)packet);
-//						MD4COPY(client->reqfileid,packet);
+//						md4cpy(client->reqfileid,packet);
 						CSafeMemFile data(128);
 						data.Write(reqfile->GetFileHash(),16);
 						uint16 namelength = (uint16)strlen(reqfile->GetFileName());
@@ -347,7 +347,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
 					if( size == 16 ){
 						uchar reqfileid[16];
-						MD4COPY(reqfileid,packet);
+						md4cpy(reqfileid,packet);
 						CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(reqfileid);
 						if (reqfile){
 							if (reqfile->IsPartFile())
@@ -413,9 +413,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					data.Read(&reqblock1->EndOffset,4);
 					data.Read(&reqblock2->EndOffset,4);
 					data.Read(&reqblock3->EndOffset,4);
-					MD4COPY(&reqblock1->FileID,reqfilehash);
-					MD4COPY(&reqblock2->FileID,reqfilehash);
-					MD4COPY(&reqblock3->FileID,reqfilehash);
+					md4cpy(&reqblock1->FileID,reqfilehash);
+					md4cpy(&reqblock2->FileID,reqfilehash);
+					md4cpy(&reqblock3->FileID,reqfilehash);
 					
 					//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
 					uchar tempfileid[16];
@@ -451,7 +451,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 
 						// save original file id asked for, to be able to log it
 						uchar uploadFileId[16];
-						MD4COPY(uploadFileId, client->GetUploadFileID());
+						md4cpy(uploadFileId, client->GetUploadFileID());
 
 						if(client->HasLowID() && (client->IsFriend() && client->GetFriendSlot()) == true) {
 							allowSwitch = true;
@@ -589,7 +589,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						if (!reqfile){
 							// send file request no such file packet (0x48)
 							Packet* replypacket = new Packet(OP_FILEREQANSNOFIL, 16);
-							MD4COPY(replypacket->pBuffer, packet);
+							md4cpy(replypacket->pBuffer, packet);
 							theApp.uploadqueue->AddUpDataOverheadFileRequest(replypacket->size);
 							SendPacket(replypacket, true);
 							break;
@@ -611,7 +611,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 
 						//send filestatus
 						client->SetUploadFileID((uchar*)packet);
-//						MD4COPY(client->reqfileid,packet);
+//						md4cpy(client->reqfileid,packet);
 						CSafeMemFile data(16+16);
 						data.Write(reqfile->GetFileHash(),16);
 						if (reqfile->IsPartFile())
@@ -1207,7 +1207,7 @@ void CClientReqSocket::PacketReceivedCppEx(Packet* packet){
 			case OP_PACKEDPROT:
 				if (!packet->UnPackPacket()){
 					SOCKADDR_IN sockAddr;
-					memset(&sockAddr, 0, sizeof(sockAddr));
+					MEMSET(&sockAddr, 0, sizeof(sockAddr));
 					int nSockAddrLen = sizeof(sockAddr);
 					GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
 					AddDebugLogLine(false,_T("Failed to decompress client TCP packet; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet->prot, packet->opcode, packet->size);
@@ -1218,7 +1218,7 @@ void CClientReqSocket::PacketReceivedCppEx(Packet* packet){
 				break;
 		    default:{
 			    SOCKADDR_IN sockAddr;
-			    memset(&sockAddr, 0, sizeof(sockAddr));
+			    MEMSET(&sockAddr, 0, sizeof(sockAddr));
 			    int nSockAddrLen = sizeof(sockAddr);
 			    GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
 			    AddDebugLogLine(false,_T("Received unknown client TCP packet; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet->prot, packet->opcode, packet->size);
@@ -1234,7 +1234,7 @@ void CClientReqSocket::PacketReceivedCppEx(Packet* packet){
 	catch(...){
 		OUTPUT_DEBUG_TRACE();
 		SOCKADDR_IN sockAddr;
-		memset(&sockAddr, 0, sizeof(sockAddr));
+		MEMSET(&sockAddr, 0, sizeof(sockAddr));
 		int nSockAddrLen = sizeof(sockAddr);
 		GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
 		AddDebugLogLine(false,_T("Unknown exception in CClientReqSocket::PacketReceived; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet?packet->prot:0, packet?packet->opcode:0, packet?packet->size:0);
@@ -1409,7 +1409,7 @@ void CListenSocket::Process(){
 }
 
 void CListenSocket::RecalculateStats(){
-	memset(m_ConnectionStates,0,6);
+	MEMSET(m_ConnectionStates,0,6);
 	POSITION pos1,pos2;
 	for(pos1 = socket_list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
 		socket_list.GetNext(pos1);

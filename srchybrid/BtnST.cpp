@@ -467,7 +467,7 @@ BOOL CButtonST::OnClicked()
 			{
 				SHELLEXECUTEINFO	csSEI;
 
-				memset(&csSEI, 0, sizeof(csSEI));
+				MEMSET(&csSEI, 0, sizeof(csSEI));
 				csSEI.cbSize = sizeof(SHELLEXECUTEINFO);
 				csSEI.fMask = SEE_MASK_FLAG_NO_UI;
 				csSEI.lpVerb = _T("open");
@@ -1778,7 +1778,7 @@ DWORD CButtonST::SetBk(CDC* pDC)
 DWORD CButtonST::SetURL(LPCTSTR lpszURL)
 {
 	// Remove any existing URL
-	memset(m_szURL, 0, sizeof(m_szURL));
+	MEMSET(m_szURL, 0, sizeof(m_szURL));
 
 	if (lpszURL)
 	{

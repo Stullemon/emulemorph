@@ -483,7 +483,7 @@ void CUpDownClient::CreateNextBlockPackage(bool startNextChunk){
                     tempblock->StartOffset = 0;
                 }
                 tempblock->EndOffset = currentblock->EndOffset;
-                MD4COPY(&tempblock->FileID,&currentblock->FileID);
+                md4cpy(&tempblock->FileID,&currentblock->FileID);
 
                 m_BlockRequests_queue.AddHead(tempblock);
 
@@ -597,7 +597,7 @@ void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 	if (!nED2KUpPartCount){
 		m_nUpPartCount = tempreqfile->GetPartCount();
 		m_abyUpPartStatus = new uint8[m_nUpPartCount];
-		memset(m_abyUpPartStatus,0,m_nUpPartCount);
+		MEMSET(m_abyUpPartStatus,0,m_nUpPartCount);
 	}
 
 	else{
@@ -659,7 +659,7 @@ uint64 CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bl
 		// -khaos--+++> Create the packet with the new boolean.
 		Packet* packet = new Packet(OP_SENDINGPART,nPacketSize+24, OP_EDONKEYPROT, bFromPF);
 		// <-----khaos-
-		MD4COPY(&packet->pBuffer[0],GetUploadFileID());
+		md4cpy(&packet->pBuffer[0],GetUploadFileID());
 		uint32 statpos = (currentblock->EndOffset - togo) - nPacketSize;
 		MEMCOPY(&packet->pBuffer[16],&statpos,4);
 		uint32 endpos = (currentblock->EndOffset - togo);
@@ -721,7 +721,7 @@ uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Bloc
 		// -khaos--+++> Create the packet with the new boolean.
 		Packet* packet = new Packet(OP_COMPRESSEDPART,nPacketSize+24,OP_EMULEPROT,bFromPF);
 		// <-----khaos-
-		MD4COPY(&packet->pBuffer[0],GetUploadFileID());
+		md4cpy(&packet->pBuffer[0],GetUploadFileID());
 		uint32 statpos = currentblock->StartOffset;
 		MEMCOPY(&packet->pBuffer[16],&statpos,4);
 		MEMCOPY(&packet->pBuffer[20],&newsize,4);
@@ -758,7 +758,7 @@ void CUpDownClient::SetUploadFileID(uchar* tempreqfileid){
 	if(newreqfile){
 		newreqfile->AddQueuedCount();
 		newreqfile->AddUploadingClient(this);
-		MD4COPY(requpfileid,tempreqfileid);
+		md4cpy(requpfileid,tempreqfileid);
 	}
 	else{
 		md4clr(requpfileid);
@@ -948,7 +948,7 @@ void CUpDownClient::SendRankingInfo(){
 	if (!nRank)
 		return;
 	Packet* packet = new Packet(OP_QUEUERANKING,12,OP_EMULEPROT);
-	memset(packet->pBuffer,0,12);
+	MEMSET(packet->pBuffer,0,12);
 	MEMCOPY(packet->pBuffer+0,&nRank,2);
 	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 	socket->SendPacket(packet,true,true);
@@ -998,8 +998,8 @@ void  CUpDownClient::AddRequestCount(uchar* fileid){
 		}
 	}
 	Requested_File_Struct* new_struct = new Requested_File_Struct;
-	memset(new_struct,0,sizeof(Requested_File_Struct));
-	MD4COPY(new_struct->fileid,fileid);
+	MEMSET(new_struct,0,sizeof(Requested_File_Struct));
+	md4cpy(new_struct->fileid,fileid);
 	new_struct->lastasked = ::GetTickCount();
 	m_RequestedFiles_list.AddHead(new_struct);
 }

@@ -127,9 +127,9 @@ CFileInfoDialog::CFileInfoDialog()
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_bAudioRoundBitrate = FALSE;
 	m_lAudioBitrate = 0;
-	memset(&m_cfDef, 0, sizeof m_cfDef);
-	memset(&m_cfBold, 0, sizeof m_cfBold);
-	memset(&m_cfRed, 0, sizeof m_cfRed);
+	MEMSET(&m_cfDef, 0, sizeof m_cfDef);
+	MEMSET(&m_cfBold, 0, sizeof m_cfBold);
+	MEMSET(&m_cfRed, 0, sizeof m_cfRed);
 }
 
 CFileInfoDialog::~CFileInfoDialog()

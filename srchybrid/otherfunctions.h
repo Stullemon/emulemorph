@@ -160,11 +160,13 @@ __inline int md4cmp(const void* hash1, const void* hash2) {
 		     ((uint32*)hash1)[3] == ((uint32*)hash2)[3]);
 }
 
-// md4clr -- replacement for memset(hash,0,16)
+// md4clr -- replacement for MEMSET(hash,0,16)
 __inline void md4clr(const void* hash) {
 	((uint32*)hash)[0] = ((uint32*)hash)[1] = ((uint32*)hash)[2] = ((uint32*)hash)[3] = 0;
 }
 
+//Morph Start - commented by AndCycle, eMulePlus CPU optimize
+/*	//original commented
 // md4cpy -- replacement for memcpy(dst,src,16)
 __inline void md4cpy(void* dst, const void* src) {
 	((uint32*)dst)[0] = ((uint32*)src)[0];
@@ -172,6 +174,8 @@ __inline void md4cpy(void* dst, const void* src) {
 	((uint32*)dst)[2] = ((uint32*)src)[2];
 	((uint32*)dst)[3] = ((uint32*)src)[3];
 }
+*/
+//Morph End - commented by AndCycle, eMulePlus CPU optimize
 
 #define	MAX_HASHSTR_SIZE (16*2+1)
 CString md4str(const uchar* hash);

@@ -1984,16 +1984,13 @@
 			Name="system"
 			Filter="">
 			<File
-				RelativePath=".\system\cpu_info.cpp">
+				RelativePath=".\system\memcpy_amd.cpp">
 			</File>
 			<File
-				RelativePath=".\system\cpu_info.h">
+				RelativePath=".\system\memcpy_amd.h">
 			</File>
 			<File
-				RelativePath=".\system\cpu_optimize.cpp">
-			</File>
-			<File
-				RelativePath=".\system\cpu_optimize.h">
+				RelativePath=".\system\optimize.h">
 			</File>
 		</Filter>
 	</Files>

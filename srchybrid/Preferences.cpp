@@ -39,9 +39,9 @@ CPreferences::CPreferences(){
 	// khaos::kmod-
 
 	prefs = new Preferences_Struct;
-	memset(prefs,0,sizeof(Preferences_Struct));
+	MEMSET(prefs,0,sizeof(Preferences_Struct));
 	prefsExt=new Preferences_Ext_Struct;
-	memset(prefsExt,0,sizeof(Preferences_Ext_Struct));
+	MEMSET(prefsExt,0,sizeof(Preferences_Ext_Struct));
 
 	//get application start directory
 	char buffer[490];
@@ -72,7 +72,7 @@ CPreferences::CPreferences(){
 	if ( PathFileExists(appdir+"webservices.dat")) MoveFile(appdir+"webservices.dat",configdir+"webservices.dat");
 
 	CreateUserHash();
-	MD4COPY(&prefs->userhash,&userhash);
+	md4cpy(&prefs->userhash,&userhash);
 
 	// load preferences.dat or set standart values
 	char* fullpath = new char[strlen(configdir)+16];
@@ -97,11 +97,11 @@ CPreferences::CPreferences(){
 
 			if (prefsExt->version>17) {// v0.20b+
 				prefsImport20b=new Preferences_Import20b_Struct;
-				memset(prefsImport20b,0,sizeof(Preferences_Import20b_Struct));
+				MEMSET(prefsImport20b,0,sizeof(Preferences_Import20b_Struct));
 				fseek(preffile,0,0);
 				fread(prefsImport20b,sizeof(Preferences_Import20b_Struct),1,preffile);
 
-				MD4COPY(&prefs->userhash,&prefsImport20b->userhash);
+				md4cpy(&prefs->userhash,&prefsImport20b->userhash);
 				MEMCOPY(&prefs->incomingdir,&prefsImport20b->incomingdir,510);
 				MEMCOPY(&prefs->tempdir,&prefsImport20b->tempdir,510);
 				sprintf(prefs->nick,prefsImport20b->nick);
@@ -111,11 +111,11 @@ CPreferences::CPreferences(){
 
 			} else if (prefsExt->version>7) { // v0.20a
 				prefsImport20a=new Preferences_Import20a_Struct;
-				memset(prefsImport20a,0,sizeof(Preferences_Import20a_Struct));
+				MEMSET(prefsImport20a,0,sizeof(Preferences_Import20a_Struct));
 				fseek(preffile,0,0);
 				fread(prefsImport20a,sizeof(Preferences_Import20a_Struct),1,preffile);
 
-				MD4COPY(&prefs->userhash,&prefsImport20a->userhash);
+				md4cpy(&prefs->userhash,&prefsImport20a->userhash);
 				MEMCOPY(&prefs->incomingdir,&prefsImport20a->incomingdir,510);
 				MEMCOPY(&prefs->tempdir,&prefsImport20a->tempdir,510);
 				sprintf(prefs->nick,prefsImport20a->nick);
@@ -125,24 +125,24 @@ CPreferences::CPreferences(){
 
 			} else {	//v0.19c-
 				prefsImport19c=new Preferences_Import19c_Struct;
-				memset(prefsImport19c,0,sizeof(Preferences_Import19c_Struct));
+				MEMSET(prefsImport19c,0,sizeof(Preferences_Import19c_Struct));
 
 				fseek(preffile,0,0);
 				fread(prefsImport19c,sizeof(Preferences_Import19c_Struct),1,preffile);
 
 				if (prefsExt->version<3) {
 					CreateUserHash();
-					MD4COPY(&prefs->userhash,&userhash);
-				} else {MD4COPY(&prefs->userhash,&prefsImport19c->userhash);}
+					md4cpy(&prefs->userhash,&userhash);
+				} else {md4cpy(&prefs->userhash,&prefsImport19c->userhash);}
 				MEMCOPY(&prefs->incomingdir,&prefsImport19c->incomingdir,510);MEMCOPY(&prefs->tempdir,&prefsImport19c->tempdir,510);
 				sprintf(prefs->nick,prefsImport19c->nick);
 			}
  		} else {
-			MD4COPY(&prefs->userhash,&prefsExt->userhash);
+			md4cpy(&prefs->userhash,&prefsExt->userhash);
 			prefs->EmuleWindowPlacement=prefsExt->EmuleWindowPlacement;
 		}
 		fclose(preffile);
-		MD4COPY(&userhash,&prefs->userhash);
+		md4cpy(&userhash,&prefs->userhash);
 		prefs->smartidstate=0;
 	}
 
@@ -229,7 +229,7 @@ CPreferences::CPreferences(){
 
 void CPreferences::SetStandartValues(){
 	CreateUserHash();
-	MD4COPY(&prefs->userhash,&userhash);
+	md4cpy(&prefs->userhash,&userhash);
 
 	WINDOWPLACEMENT defaultWPM;
 	defaultWPM.length = sizeof(WINDOWPLACEMENT);
@@ -1073,7 +1073,7 @@ bool CPreferences::Save(){
 	if (preffile){
 		prefsExt->version=PREFFILE_VERSION;
 		prefsExt->EmuleWindowPlacement=prefs->EmuleWindowPlacement;
-		MD4COPY(&prefsExt->userhash,&prefs->userhash);
+		md4cpy(&prefsExt->userhash,&prefs->userhash);
 
 		error = fwrite(prefsExt,sizeof(Preferences_Ext_Struct),1,preffile);
 		if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
@@ -2208,7 +2208,7 @@ void CPreferences::LoadPreferences(){
 	if (ini.GetBinary("HyperTextFont", &pData, &uSize) && uSize == sizeof prefs->m_lfHyperText)
 		MEMCOPY(&prefs->m_lfHyperText, pData, sizeof prefs->m_lfHyperText);
 	else
-		memset(&prefs->m_lfHyperText, 0, sizeof prefs->m_lfHyperText);
+		MEMSET(&prefs->m_lfHyperText, 0, sizeof prefs->m_lfHyperText);
 	delete[] pData;
 
 	if (prefs->statsAverageMinutes<1) prefs->statsAverageMinutes=5;

@@ -1800,7 +1800,7 @@ void CDownloadQueue::ProcessLocalRequests(){
 			m_localServerReqQueue.RemoveAt(posNextRequest);
 			// send request packet
 			Packet* packet = new Packet(OP_GETSOURCES,16);
-			MD4COPY(packet->pBuffer,cur_file->GetFileHash());
+			md4cpy(packet->pBuffer,cur_file->GetFileHash());
 			if (theApp.glob_prefs->GetDebugServerTCP())
 				Debug(">>> Sending OP__GetSources; %s\n", DbgGetFileInfo(cur_file->GetFileHash()));
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
@@ -1868,7 +1868,7 @@ void CSourceHostnameResolveWnd::AddToResolve(const uchar* fileid, LPCTSTR pszHos
 		return;
 
 	Hostname_Entry* entry = new Hostname_Entry;
-	MD4COPY(entry->fileid, fileid);
+	md4cpy(entry->fileid, fileid);
 	entry->strHostname = pszHostname;
 	entry->port = port;
 	m_toresolve.AddTail(entry);
@@ -1876,7 +1876,7 @@ void CSourceHostnameResolveWnd::AddToResolve(const uchar* fileid, LPCTSTR pszHos
 	if (bResolving)
 		return;
 
-	memset(m_aucHostnameBuffer, 0, sizeof(m_aucHostnameBuffer));
+	MEMSET(m_aucHostnameBuffer, 0, sizeof(m_aucHostnameBuffer));
 	if (WSAAsyncGetHostByName(m_hWnd, WM_HOSTNAMERESOLVED, entry->strHostname, m_aucHostnameBuffer, sizeof m_aucHostnameBuffer) != 0)
 		return;
 	m_toresolve.RemoveHead();
@@ -1916,7 +1916,7 @@ LRESULT CSourceHostnameResolveWnd::OnHostnameResolved(WPARAM wParam,LPARAM lPara
 	while (!m_toresolve.IsEmpty())
 	{
 		Hostname_Entry* entry = m_toresolve.GetHead();
-		memset(m_aucHostnameBuffer, 0, sizeof(m_aucHostnameBuffer));
+		MEMSET(m_aucHostnameBuffer, 0, sizeof(m_aucHostnameBuffer));
 		if (WSAAsyncGetHostByName(m_hWnd, WM_HOSTNAMERESOLVED, entry->strHostname, m_aucHostnameBuffer, sizeof m_aucHostnameBuffer) != 0)
 			return TRUE;
 		m_toresolve.RemoveHead();

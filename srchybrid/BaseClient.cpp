@@ -73,7 +73,7 @@ CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_us
 }
 
 void CUpDownClient::Init(){
-	memset(m_szFullUserIP,0,21);
+	MEMSET(m_szFullUserIP,0,21);
 	credits = 0;
 	sumavgDDR = 0; // By BadWolf - Accurate Speed Measurement
 	sumavgUDR = 0; // by BadWolf - Accurate Speed Measurement
@@ -155,7 +155,7 @@ void CUpDownClient::Init(){
 	md4clr(m_achUserHash);
 	if (socket){
 		SOCKADDR_IN sockAddr;
-		memset(&sockAddr, 0, sizeof(sockAddr));
+		MEMSET(&sockAddr, 0, sizeof(sockAddr));
 		uint32 nSockAddrLen = sizeof(sockAddr);
 		socket->GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 		m_dwUserIP = sockAddr.sin_addr.S_un.S_addr;
@@ -506,7 +506,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 	// tecxx 1609 2002 - add client's servet to serverlist (Moved to uploadqueue.cpp)
 
 	SOCKADDR_IN sockAddr;
-	memset(&sockAddr, 0, sizeof(sockAddr));
+	MEMSET(&sockAddr, 0, sizeof(sockAddr));
 	uint32 nSockAddrLen = sizeof(sockAddr);
 	socket->GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 	
@@ -527,7 +527,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 	if(!HasLowID() || m_nUserIDHybrid == 0) 
 		m_nUserIDHybrid = ntohl(m_dwUserIP);
 	uchar key[16];
-	MD4COPY(key,m_achUserHash);
+	md4cpy(key,m_achUserHash);
 	CClientCredits* pFoundCredits = theApp.clientcredits->GetCredit(key);
 	if (credits == NULL){
 		credits = pFoundCredits;
@@ -585,7 +585,7 @@ void CUpDownClient::SendHelloPacket(){
 
 	// if IP is filtered, dont greet him but disconnect...
 	SOCKADDR_IN sockAddr;
-	memset(&sockAddr, 0, sizeof(sockAddr));
+	MEMSET(&sockAddr, 0, sizeof(sockAddr));
 	uint32 nSockAddrLen = sizeof(sockAddr);
 	socket->GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 	if ( theApp.ipfilter->IsFiltered(sockAddr.sin_addr.S_un.S_addr)) {
@@ -1362,7 +1362,7 @@ void CUpDownClient::SetUserHash(uchar* m_achTempUserHash){
 		md4clr(m_achUserHash);
 		return;
 	}
-	MD4COPY(m_achUserHash,m_achTempUserHash);
+	md4cpy(m_achUserHash,m_achTempUserHash);
 }
 
 void CUpDownClient::SendPublicKeyPacket(){

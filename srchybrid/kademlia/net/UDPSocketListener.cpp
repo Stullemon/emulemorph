@@ -125,7 +125,7 @@ DWORD CUDPSocketListener::listeningImpl(LPVOID lpParam)
 		uint32 lenPacket;
 		sockaddr_in senderAddress;
 		int lenAddress = sizeof(senderAddress);
-		memset(&senderAddress, 0, lenAddress);
+		MEMSET(&senderAddress, 0, lenAddress);
 		int err;
 		uint32 delay = 100;
 		uint32 sendQueueSize = 0;
@@ -292,7 +292,7 @@ void CUDPSocketListener::sendPacket(byte *data, uint32 lenData, const uint32 des
 	{
 		WaitingUDPData *w = new WaitingUDPData;
 		w->addr = new sockaddr_in;
-		memset(w->addr, 0, sizeof(w->addr));
+		MEMSET(w->addr, 0, sizeof(w->addr));
 		w->addr->sin_family = AF_INET;
 		w->addr->sin_addr.s_addr = htonl(destinationHost);
 		w->addr->sin_port = htons(destinationPort);

@@ -76,7 +76,7 @@ Packet::Packet(int8 in_opcode,uint32 in_size,uint8 protocol,bool bFromPF){
 	if (in_size){
 		completebuffer = new char[in_size+10];
 		pBuffer = completebuffer+6;
-		memset(completebuffer,0,in_size+10);
+		MEMSET(completebuffer,0,in_size+10);
 	}
 	else{
 		pBuffer = 0;
@@ -163,7 +163,7 @@ char* Packet::GetHeader(){
 
 char* Packet::GetUDPHeader(){
 	ASSERT ( !m_bSplitted );
-	memset(head,0,6);
+	MEMSET(head,0,6);
 	UDP_Header_Struct* header = (UDP_Header_Struct*) head;
 	header->command = opcode;
 	header->eDonkeyID =  prot;

@@ -577,7 +577,7 @@ CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen)
 //   buffer: byte array containing decoded string
 void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer)
 {
-    memset(buffer, 0, DecodeLengthBase16(base16BufLen));
+    MEMSET(buffer, 0, DecodeLengthBase16(base16BufLen));
   
     for(unsigned int i = 0; i < base16BufLen; i++) {
 		int lookup = toupper(base16Buffer[i]) - '0';
@@ -1564,7 +1564,7 @@ void DebugHexDump(CFile& file)
 
 bool strmd4(const char* pszHash, uchar* hash)
 {
-	memset(hash, 0, 16);
+	MEMSET(hash, 0, 16);
 	for (int i = 0; i < 16; i++)
 	{
 		char byte[3];
@@ -1582,7 +1582,7 @@ bool strmd4(const char* pszHash, uchar* hash)
 
 bool strmd4(const CString& rstr, uchar* hash)
 {
-	memset(hash, 0, 16);
+	MEMSET(hash, 0, 16);
 	if (rstr.GetLength() != 16*2)
 		return false;
 	for (int i = 0; i < 16; i++)

@@ -597,7 +597,7 @@ HRGN CTaskbarNotifier::CreateRgnFromBitmap(HBITMAP hBmp, COLORREF color)
 
 	// allocate memory for region data
 	RGNDATAHEADER* pRgnData = (RGNDATAHEADER*)new BYTE[ RDHDR + ++cBlocks * MAXBUF * sizeof(RECT) ];
-	memset( pRgnData, 0, RDHDR + cBlocks * MAXBUF * sizeof(RECT) );
+	MEMSET( pRgnData, 0, RDHDR + cBlocks * MAXBUF * sizeof(RECT) );
 	// fill it by default
 	pRgnData->dwSize	= RDHDR;
 	pRgnData->iType 	= RDH_RECTANGLES;

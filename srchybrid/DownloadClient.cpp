@@ -273,7 +273,7 @@ void CUpDownClient::SendFileRequest(){
 	if(IsSourceRequestAllowed()) {
 		reqfile->SetLastAnsweredTimeTimeout();
 		Packet* packet = new Packet(OP_REQUESTSOURCES,16,OP_EMULEPROT);
-		MD4COPY(packet->pBuffer,reqfile->GetFileHash());
+		md4cpy(packet->pBuffer,reqfile->GetFileHash());
 		theApp.uploadqueue->AddUpDataOverheadSourceExchange(packet->size);
 		socket->SendPacket(packet,true,true);
 		SetLastAskedForSources();
@@ -329,7 +329,7 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 		//MORPH START - Added by SiRoB, Hot Fix for m_PartStatus_list
 		m_PartStatus_list[reqfile] = m_abyPartStatus;
 		//MORPH END   - Added by SiRoB, Hot Fix for m_PartStatus_list
-		memset(m_abyPartStatus,1,m_nPartCount);
+		MEMSET(m_abyPartStatus,1,m_nPartCount);
 		m_bCompleteSource = true;
 
 		UpdateDisplayedInfo();
@@ -338,7 +338,7 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 		// even if the file is <= PARTSIZE, we _may_ need the hashset for that file (if the file size == PARTSIZE)
 		if (reqfile->hashsetneeded){
 			Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-			MD4COPY(packet->pBuffer,reqfile->GetFileHash());
+			md4cpy(packet->pBuffer,reqfile->GetFileHash());
 			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 			socket->SendPacket(packet,true,true);
 			SetDownloadState(DS_REQHASHSET);
@@ -379,7 +379,7 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	if (!nED2KPartCount){
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
-		memset(m_abyPartStatus,1,m_nPartCount);
+		MEMSET(m_abyPartStatus,1,m_nPartCount);
 		bPartsNeeded = true;
 		m_bCompleteSource = true;
 	}
@@ -419,7 +419,7 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 		SetDownloadState(DS_NONEEDEDPARTS);
 	else if (reqfile->hashsetneeded){
 		Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-		MD4COPY(packet->pBuffer,reqfile->GetFileHash());
+		md4cpy(packet->pBuffer,reqfile->GetFileHash());
 		theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 		socket->SendPacket(packet, true, true);
 		SetDownloadState(DS_REQHASHSET);
@@ -1024,7 +1024,7 @@ void CUpDownClient::UDPReaskForDownload(){
 		if (GetUDPVersion() >= 3)
 			packetsize+= 2;
 		Packet* response = new Packet(OP_REASKFILEPING,packetsize,OP_EMULEPROT);	// #zegzav:completesrc (modify)
-		MD4COPY(response->pBuffer,reqfile->GetFileHash());
+		md4cpy(response->pBuffer,reqfile->GetFileHash());
 		if (GetUDPVersion() >= 3)
 		{
 			uint16 completecount= reqfile->m_nCompleteSourcesCount;

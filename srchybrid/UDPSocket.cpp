@@ -351,7 +351,7 @@ void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
 	// see if we have a ip already
 	USES_CONVERSION;
 	SOCKADDR_IN sockAddr;
-	memset(&sockAddr,0,sizeof(sockAddr));
+	MEMSET(&sockAddr,0,sizeof(sockAddr));
 	LPSTR lpszAscii = T2A((LPTSTR)m_lpszHostAddress);
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_addr.s_addr = inet_addr(lpszAscii);
@@ -362,7 +362,7 @@ void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
 
 	if (sockAddr.sin_addr.s_addr == INADDR_NONE){
 		/* Resolve hostname "hostname" asynchronously */ 
-		memset(m_DnsHostBuffer, 0, sizeof(m_DnsHostBuffer));
+		MEMSET(m_DnsHostBuffer, 0, sizeof(m_DnsHostBuffer));
 
 		m_DnsTaskHandle = WSAAsyncGetHostByName(
 			m_hWndResolveMessage,
@@ -410,7 +410,7 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 				m_SaveAddr.sin_addr.s_addr = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
 		}
 		// also reset the receive buffer
-		memset(m_DnsHostBuffer, 0, sizeof(m_DnsHostBuffer));
+		MEMSET(m_DnsHostBuffer, 0, sizeof(m_DnsHostBuffer));
 	}
 	if (m_cur_server){
 		if (m_SaveAddr.sin_addr.s_addr != INADDR_NONE){

@@ -41,8 +41,8 @@ CMuleToolbarCtrl::CMuleToolbarCtrl()
 {
 	m_iLastPressedButton = -1;
 	m_buttoncount=0;
-	memset(TBButtons, 0, sizeof(TBButtons));
-	memset(TBStrings, 0, sizeof(TBStrings));
+	MEMSET(TBButtons, 0, sizeof(TBButtons));
+	MEMSET(TBStrings, 0, sizeof(TBStrings));
 	m_iToolbarLabelSettings = 0;
 }
 

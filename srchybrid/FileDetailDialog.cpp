@@ -285,7 +285,7 @@ CFileDetailDialogName::CFileDetailDialogName()
 	m_psp.pszTitle = m_strCaption;
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_timer = 0;
-	memset(m_aiColWidths, 0, sizeof m_aiColWidths);
+	MEMSET(m_aiColWidths, 0, sizeof m_aiColWidths);
 }
 
 CFileDetailDialogName::~CFileDetailDialogName()

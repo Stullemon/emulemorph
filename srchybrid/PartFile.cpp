@@ -51,7 +51,7 @@ CPartFile::CPartFile()
 CPartFile::CPartFile(CSearchFile* searchresult)
 {
 	Init();
-	MD4COPY(m_abyFileHash, searchresult->GetFileHash());
+	md4cpy(m_abyFileHash, searchresult->GetFileHash());
 	for (int i = 0; i < searchresult->taglist.GetCount();i++){
 		const CTag* pTag = searchresult->taglist[i];
 		switch (pTag->tag.specialtag){
@@ -139,7 +139,7 @@ void CPartFile::InitializeFromLink(CED2KFileLink* fileLink)
 	try{
 		SetFileName(fileLink->GetName());
 		SetFileSize(fileLink->GetSize());
-		MD4COPY(m_abyFileHash, fileLink->GetHashKey());
+		md4cpy(m_abyFileHash, fileLink->GetHashKey());
 		if (!theApp.downloadqueue->IsFileExisting(m_abyFileHash))
 			CreatePartFile();
 		else
@@ -180,7 +180,7 @@ void CPartFile::Init(){
 	}
 	srcarevisible = false;
 	// -khaos--+++> Initialize our stat vars to 0
-	memset(m_anStates,0,sizeof(m_anStates));
+	MEMSET(m_anStates,0,sizeof(m_anStates));
 	datarate = 0;
 	hashsetneeded = true;
 	count = 0;
@@ -209,7 +209,7 @@ void CPartFile::Init(){
 	m_lastRefreshedDLDisplay = 0;
 	m_is_A4AF_auto=false;
 	m_bLocalSrcReqQueued = false;	
-	memset(src_stats,0,sizeof(src_stats));
+	MEMSET(src_stats,0,sizeof(src_stats));
 	m_nCompleteSourcesTime = time(NULL);
 	m_nCompleteSourcesCount = 0;
 	m_nCompleteSourcesCountLo = 0;
@@ -360,7 +360,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			LoadDateFromFile(&metFile);
 			uchar gethash[16];
 			metFile.Read(&gethash, 16);
-			MD4COPY(m_abyFileHash, gethash);
+			md4cpy(m_abyFileHash, gethash);
 		} else {
 
 			LoadDateFromFile(&metFile);
@@ -550,7 +550,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			if (!hashlist.IsEmpty()){
 				uchar* buffer = new uchar[hashlist.GetCount()*16];
 				for (int i = 0; i < hashlist.GetCount(); i++)
-					MD4COPY(buffer+(i*16), hashlist[i]);
+					md4cpy(buffer+(i*16), hashlist[i]);
 				CreateHashFromString(buffer, hashlist.GetCount()*16, checkhash);
 				delete[] buffer;
 			}
@@ -1081,7 +1081,7 @@ bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struc
 			{
 				result->StartOffset = start;
 				result->EndOffset = end;
-				MD4COPY(result->FileID, GetFileHash());
+				md4cpy(result->FileID, GetFileHash());
 				result->transferred = 0;
 			}
 			return true;
@@ -1548,8 +1548,8 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	else{
 
 		// -khaos--+++> Moved this here, otherwise we were setting our permanent variables to 0 every tenth of a second...
-		memset(m_anStates,0,sizeof(m_anStates));
-		memset(src_stats,0,sizeof(src_stats));
+		MEMSET(m_anStates,0,sizeof(m_anStates));
+		MEMSET(src_stats,0,sizeof(src_stats));
 		uint16 nCountForState;
 
 		//MORPH START - Added by SiRoB, Spread Reask For Better SUC functioning and more
@@ -2613,7 +2613,7 @@ void CPartFile::StopFile(bool setVars){
 	stopped = setVars;
 	// khaos::kmod-
 	datarate = 0;
-	memset(m_anStates,0,sizeof(m_anStates));
+	MEMSET(m_anStates,0,sizeof(m_anStates));
 	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 	if ((status!=PS_COMPLETE)&&(status!=PS_COMPLETING)) lastseencomplete = NULL;//shadow#(onlydownloadcompletefiles)
 	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)

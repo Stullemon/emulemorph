@@ -2,6 +2,10 @@
 Changelog for eMule 0.40f26 MorphKad 0.8
 ----------------------------------------
 ADDED: name log file in date [AndCycle]
+ADDED: FPU/MMX/AMD/SSE memset FPU/MMX/SSE memcpy optimized (eMulePlus) [AndCycle]
+REMOVED: On The Fly Optimization(eWombat) [AndCycle]
+
+
 
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.7

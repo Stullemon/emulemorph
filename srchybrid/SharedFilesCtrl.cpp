@@ -115,7 +115,7 @@ BOOL CSharedFileDetailsSheet::OnInitDialog()
 IMPLEMENT_DYNAMIC(CSharedFilesCtrl, CMuleListCtrl)
 CSharedFilesCtrl::CSharedFilesCtrl() {
    sflist = 0;                // i_a 
-   memset(&sortstat, 0, sizeof(sortstat));  // i_a 
+   MEMSET(&sortstat, 0, sizeof(sortstat));  // i_a 
 }
 
 CSharedFilesCtrl::~CSharedFilesCtrl(){

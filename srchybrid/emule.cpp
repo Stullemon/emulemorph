@@ -152,14 +152,6 @@ void __cdecl __AfxSocketTerm()
 #error "You are using an MFC version which may require a special version of the above function!"
 #endif
 
-
-//Morph Start - added by AndCycle, On the fly processor optimization(eWombat)
-//eWombat [OnTheFly] Optimizer
-//Set Callbacks to unoptimized functions
-fnMemcpy _memcopy = (fnMemcpy)::GetProcAddress(::GetModuleHandle(NULL),"memcpy_std");
-fnMd4cpy _md4copy = (fnMd4cpy)::GetProcAddress(::GetModuleHandle(NULL),"md4cpy_std");
-//Morph End - added by AndCycle, On the fly processor optimization(eWombat)
-
 // CemuleApp Initialisierung
 
 BOOL CemuleApp::InitInstance()
@@ -175,11 +167,6 @@ BOOL CemuleApp::InitInstance()
 #ifdef _DUMP
 	MiniDumper dumper(m_strCurVersionLong);
 #endif
-
-//Morph Start - added by AndCycle, On the fly processor optimization(eWombat)
-Optimizer(); //eWombat [OnTheFly] Optimizer, let's do the wombat twist ;)
-// WARNING: for the moment, don't even think about calling this function from any other place, then this
-//Morph End - added by AndCycle, On the fly processor optimization(eWombat)
 
 	_tsetlocale(LC_ALL, _T(""));
 	_tsetlocale(LC_NUMERIC, _T("C"));
@@ -240,8 +227,6 @@ Optimizer(); //eWombat [OnTheFly] Optimizer, let's do the wombat twist ;)
 	CemuleDlg dlg;
 	emuledlg = &dlg;
 	m_pMainWnd = &dlg;
-
-	OptimizerInfo(); //eWombat [OnTheFly] Optimizer, show what we have done...//Morph - added by AndCycle, On the fly processor optimization(eWombat)
 
 	// Barry - Auto-take ed2k links
 	if (glob_prefs->AutoTakeED2KLinks())
@@ -1051,91 +1036,3 @@ void CALLBACK KademliaOverheadRecvCallback(uint32 size)
 	catch(...){ return; }
 	theApp.emuledlg->SendMessage(WM_KAD_OVERHEADRECV, 0, (LPARAM)size);
 }
-
-//Morph Start - added by AndCycle, On the fly processor optimization(eWombat)
-
-//<<< eWombat [OnTheFly] Optimizer
-//Copyright (C)2003 Darkwolf (Oliver J. Eifler) ( wombat@atrac-com.de / http://www.atrac-com.de )
-//
-void CemuleApp::Optimizer(void)
-{
-//Decide which level of optimization depending on detected cpu
-//ToDO: 
-// - more optimization's of course
-// - prevent this function to be interrupted by any other eMule/eWombat Task, Thread or anything from the current Instance
-// WARNING: for the moment, don't even think about calling this function from any other place, then app init	
-
-m_optlevel = OPTLEVEL_NONE; //std. no optimization 
-if (cpu.IsAthlon())
-	{
-	m_optlevel = OPTLEVEL_ATHLON;	//using optimization for amd athlon/duron cpu's, great ;)
-	_memcopy = (fnMemcpy)::GetProcAddress(::GetModuleHandle(NULL),"memcpy_amd");
-	_md4copy = (fnMd4cpy)::GetProcAddress(::GetModuleHandle(NULL),"md4cpy_amd");	
-	}
-else if (cpu.HasMMX())
-	{
-	m_optlevel = OPTLEVEL_MMX;		//using optimization for cpu's with mmx
-	_memcopy = (fnMemcpy)::GetProcAddress(::GetModuleHandle(NULL),"memcpy_mmx");
-	_md4copy = (fnMd4cpy)::GetProcAddress(::GetModuleHandle(NULL),"md4cpy_mmx");	
-	}
-else //to be sure
-	{
-	m_optlevel = OPTLEVEL_NONE; //no optimization (is there still someone out, having a cpu without mmx :o )
-	_memcopy = (fnMemcpy)::GetProcAddress(::GetModuleHandle(NULL),"memcpy_std");
-	_md4copy = (fnMd4cpy)::GetProcAddress(::GetModuleHandle(NULL),"md4cpy_std");	
-	}
-//Now it's time for a little test to be sure the callback's will work
-int *matrix1, *matrix2;
-matrix1 = new int[2048];
-matrix2 = new int[2048];
-for(int i=0;i<2048;i++)
-	{
-	matrix1[i] = rand();
-	matrix2[i] = rand();
-	}
-try {
-	MEMCOPY(&matrix1[0], &matrix2[0], sizeof(int)*2048);
-	MD4COPY(&matrix2[0], &matrix1[0]);
-	}
-catch(...)
-	{
-	//something is wrong with the optimized function, maybe wrong cpu detected :(
-	m_optlevel = OPTLEVEL_ERROR;
-	_memcopy = (fnMemcpy)::GetProcAddress(::GetModuleHandle(NULL),"memcpy_std"); //fallback to std. function
-	_md4copy = (fnMd4cpy)::GetProcAddress(::GetModuleHandle(NULL),"md4cpy_std");	
-	//AfxMessageBox("memcpy callback error");
-	}
-delete [] matrix1;
-delete [] matrix2;
-//Reaching this point anything is o.k. Let's rock with some optimized functions ;)
-}
-
-void CemuleApp::OptimizerInfo(void)
-{
-if (!glob_prefs || !emuledlg)
-	return;
-emuledlg->AddLogLine(false,_T("***"));
-emuledlg->AddLogLine(false,_T("*** Optimizer: %s"),cpu.GetExtendedProcessorName());
-switch(theApp.m_optlevel)
-	{
-	case OPTLEVEL_MMX:
-		emuledlg->AddLogLine(false,_T("*** Optimizer: MMX optimization activated!"));
-		m_strOptimizerInfo = _T("| MMX optimization active");
-		break;
-	case OPTLEVEL_ATHLON:
-		emuledlg->AddLogLine(false,_T("*** Optimizer: Athlon/Duron optimization activated!"));
-		m_strOptimizerInfo = _T("| Athlon/Duron optimization active");
-		break;
-	case OPTLEVEL_ERROR:
-		emuledlg->AddLogLine(false,_T("*** Optimizer Error: optimization deactivated!"));
-	case OPTLEVEL_NONE:
-		emuledlg->AddLogLine(false,_T("*** Decide to use a newer cpu ;)"));
-		m_strOptimizerInfo.Empty();
-		default:
-	break;
-	}
-emuledlg->AddLogLine(false,_T("***"));
-}
-//>>> eWombat [OnTheFly] Optimizer
-
-//Morph End - added by AndCycle, On the fly processor optimization(eWombat)

@@ -37,7 +37,7 @@ CFriend::CFriend(void)
 	m_dwLastChatted = 0;
 	(void)m_strName;
 	m_LinkedClient = 0;
-	MD4COPY(m_abyUserhash, sm_abyNullHash);
+	md4cpy(m_abyUserhash, sm_abyNullHash);
 	m_dwHasHash = 0;
 
 //MORPH START - Added by Yun.SF3, ZZ Upload System
@@ -53,11 +53,11 @@ CFriend::CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedI
 	m_nLastUsedPort = nLastUsedPort;
 	m_dwLastChatted = dwLastChatted;
 	if( dwHasHash && abyUserhash){
-		MD4COPY(m_abyUserhash,abyUserhash);
+		md4cpy(m_abyUserhash,abyUserhash);
 		m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
 	}
 	else{
-		MD4COPY(m_abyUserhash, sm_abyNullHash);
+		md4cpy(m_abyUserhash, sm_abyNullHash);
 		m_dwHasHash = 0;
 	}
 	m_strName = pszName;
@@ -75,7 +75,7 @@ CFriend::CFriend(CUpDownClient* client){
 	//m_nLastUsedPort = client->GetUserPort();
 	//m_dwLastChatted = 0;
 	//m_strName = client->GetUserName();
-	//MD4COPY(m_abyUserhash,client->GetUserHash());
+	//md4cpy(m_abyUserhash,client->GetUserHash());
 	//m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
 	//m_LinkedClient = client;
 	m_dwLastChatted = 0;
@@ -125,7 +125,7 @@ void CFriend::LoadFromFile(CFile* file){
 
 void CFriend::WriteToFile(CFile* file){
 	if (!m_dwHasHash)
-		MD4COPY(m_abyUserhash, sm_abyNullHash);
+		md4cpy(m_abyUserhash, sm_abyNullHash);
 	file->Write(m_abyUserhash,16);
 	file->Write(&m_dwLastUsedIP,4);
 	file->Write(&m_nLastUsedPort,2);
@@ -189,7 +189,7 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
 	    m_dwLastUsedIP = linkedClient->GetIP();
 	    m_nLastUsedPort = linkedClient->GetUserPort();
 	    m_strName = linkedClient->GetUserName();
-	    MD4COPY(m_abyUserhash,linkedClient->GetUserHash());
+	    md4cpy(m_abyUserhash,linkedClient->GetUserHash());
 	    m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
 
         linkedClient->m_Friend = this;

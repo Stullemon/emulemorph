@@ -1770,7 +1770,7 @@ tcp_connect(struct soap *soap, const char *endpoint, const char *host, int port)
     return -1;
   }
 #endif
-  memset(&sockaddr, 0, sizeof(sockaddr));
+  MEMSET(&sockaddr, 0, sizeof(sockaddr));
   sockaddr.sin_family = AF_INET;
   DBGLOG(TEST,SOAP_MESSAGE(fdebug, "Open socket %d to host='%s'\n", soap->socket, host));
   soap->errmode = 2;
@@ -1993,7 +1993,7 @@ soap_bind(struct soap *soap, const char *host, int port, int backlog)
     return -1;
   }
 #endif
-  memset(&sockaddr, 0, sizeof(sockaddr));
+  MEMSET(&sockaddr, 0, sizeof(sockaddr));
   sockaddr.sin_family = AF_INET;
   soap->errmode = 2;
   if (host)
@@ -2061,7 +2061,7 @@ soap_accept(struct soap *soap)
   int len = SOAP_BUFLEN;
   int set = 1;
   int n = sizeof(struct sockaddr_in);
-  memset(&sockaddr, 0, sizeof(sockaddr));
+  MEMSET(&sockaddr, 0, sizeof(sockaddr));
   soap->socket = -1;
   soap->errmode = 0;
   if (soap->master >= 0)
@@ -5523,7 +5523,7 @@ soap_s2dateTime(struct soap *soap, const char *s, time_t *p)
 { if (s)
   { struct tm T;
     char zone[16];
-    memset(&T, 0, sizeof(struct tm));
+    MEMSET(&T, 0, sizeof(struct tm));
     zone[sizeof(zone)-1] = '\0';
     sscanf(s, "%d-%d-%dT%d:%d:%d%15s", &T.tm_year, &T.tm_mon, &T.tm_mday, &T.tm_hour, &T.tm_min, &T.tm_sec, zone);
     if (T.tm_year <= 1901 && T.tm_year != 1)
@@ -6502,7 +6502,7 @@ soap_getcookies(struct soap *soap, const char *val)
       char a[3]; 
       static const char mns[] = "anebarprayunulugepctovec";
       s = soap_decode_string(tmp, sizeof(tmp), s);
-      memset(&T, 0, sizeof(struct tm));
+      MEMSET(&T, 0, sizeof(struct tm));
       a[0] = tmp[4];
       a[1] = tmp[5];
       a[2] = '\0';

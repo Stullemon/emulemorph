@@ -250,6 +250,32 @@ BOOL CemuleDlg::OnInitDialog()
 	//set title
 	CString buffer = "eMule v"; 
 	buffer += theApp.m_strCurVersionLong;
+
+	//Morph - added by AndCycle, eMulePlus CPU optimizie
+	CString optimizeType = " ";
+	switch (get_cpu_type())
+	{
+		case 1:
+			AddLogLine(false,"FPU optimizations active");
+			optimizeType += "FPU";
+			break;
+		case 2:
+			AddLogLine(false,"MMX optimizations active");
+			optimizeType += "MMX";
+			break;
+		case 3:
+			AddLogLine(false,"AMD optimizations active");
+			optimizeType += "AMD";
+			break;
+		case 4:
+		case 5:
+			AddLogLine(false,"SSE optimizations active");
+			optimizeType += "SSE";
+			break;
+	}
+	buffer += optimizeType;
+	//Morph - added by AndCycle, eMulePlus CPU optimizie
+
 	SetWindowText(buffer);
 
 	//START - enkeyDEV(kei-kun) -TaskbarNotifier-

@@ -671,14 +671,14 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	md4clr(lasthash);
 	CreateHashFromFile(file, togo, lasthash);
 	if (!hashcount){
-		MD4COPY(m_abyFileHash, lasthash);
+		md4cpy(m_abyFileHash, lasthash);
 		delete[] lasthash; // i_a: memleak 
 	} 
 	else {
 		hashlist.Add(lasthash);
 		uchar* buffer = new uchar[hashlist.GetCount()*16];
 		for (int i = 0; i < hashlist.GetCount(); i++)
-			MD4COPY(buffer+(i*16), hashlist[i]);
+			md4cpy(buffer+(i*16), hashlist[i]);
 		CreateHashFromString(buffer, hashlist.GetCount()*16, m_abyFileHash);
 		delete[] buffer;
 	}
@@ -799,7 +799,7 @@ bool CKnownFile::LoadHashsetFromFile(CFile* file, bool checkhash){
 
 	// SLUGFILLER: SafeHash - always check for valid hashlist
 	if (!checkhash){
-		MD4COPY(m_abyFileHash, checkid);
+		md4cpy(m_abyFileHash, checkid);
 		if (parts <= 1)	// nothing to check
 		return true;
 	}
@@ -814,7 +814,7 @@ bool CKnownFile::LoadHashsetFromFile(CFile* file, bool checkhash){
 	if (!hashlist.IsEmpty()){
 		uchar* buffer = new uchar[hashlist.GetCount()*16];
 		for (int i = 0; i < hashlist.GetCount(); i++)
-			MD4COPY(buffer+(i*16), hashlist[i]);
+			md4cpy(buffer+(i*16), hashlist[i]);
 		CreateHashFromString(buffer, hashlist.GetCount()*16, checkid);
 		delete[] buffer;
 	}
@@ -1149,20 +1149,20 @@ void CKnownFile::CreateHashFromInput(FILE* file,CFile* file2, int Length, uchar*
 	if (Required >= 56){
 		X[Required] = 0x80;
 		PaddingStarted = TRUE;
-		memset(&X[Required + 1], 0, 63 - Required);
+		MEMSET(&X[Required + 1], 0, 63 - Required);
 		MD4Transform(Hash, (uint32*)X);
 		Required = 0;
 	}
 	if (!PaddingStarted)
 		X[Required++] = 0x80;
-	memset(&X[Required], 0, 64 - Required);
+	MEMSET(&X[Required], 0, 64 - Required);
 	// add size (convert to bits)
 	uint32 Length2 = Length >> 29;
 	Length <<= 3;
 	MEMCOPY(&X[56], &Length, 4);
 	MEMCOPY(&X[60], &Length2, 4);
 	MD4Transform(Hash, (uint32*)X);
-	MD4COPY(Output, Hash);
+	md4cpy(Output, Hash);
 	safe_delete(data);
 }
 

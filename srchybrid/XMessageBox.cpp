@@ -319,7 +319,7 @@ int XMessageBox(HWND hwnd,
 	// get font for message box
 /*
 	LOGFONT lf;
-	memset(&lf, 0, sizeof(lf));
+	MEMSET(&lf, 0, sizeof(lf));
 	_tcscpy(lf.lfFaceName, _T("MS Sans Serif"));
 	lf.lfHeight = -12;
 	lf.lfWeight = FW_NORMAL;
@@ -327,7 +327,7 @@ int XMessageBox(HWND hwnd,
 */
 
 	NONCLIENTMETRICS ncm;
-	memset(&ncm, 0, sizeof(ncm));
+	MEMSET(&ncm, 0, sizeof(ncm));
 	ncm.cbSize = sizeof(ncm);
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, 0, &ncm, 0);
 	ghFont = ::CreateFontIndirect(&ncm.lfMessageFont);

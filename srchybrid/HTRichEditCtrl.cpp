@@ -239,7 +239,7 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, long& iStartChar, l
 	SetSel(nPos, nPos);
 	if (bLink){
 		CHARFORMAT2 cf;
-		memset(&cf, 0, sizeof cf);
+		MEMSET(&cf, 0, sizeof cf);
 		GetSelectionCharFormat(cf);
 		cf.dwMask |= CFM_LINK;
 		cf.dwEffects |= CFE_LINK;

@@ -86,7 +86,7 @@ CEMSocket::CEMSocket(void){
 	pendingOnReceive = false;
 
 	// Download partial header
-	// memset(pendingHeader, 0, sizeof(pendingHeader));
+	// MEMSET(pendingHeader, 0, sizeof(pendingHeader));
 	pendingHeaderSize = 0;
 
 	// Download partial packet
@@ -207,7 +207,7 @@ void CEMSocket::ClearQueues(){
 	pendingOnReceive = false;
 
 	// Download partial header
-	// memset(pendingHeader, 0, sizeof(pendingHeader));
+	// MEMSET(pendingHeader, 0, sizeof(pendingHeader));
 	pendingHeaderSize = 0;
 
 	// Download partial packet

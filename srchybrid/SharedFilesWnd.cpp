@@ -166,7 +166,7 @@ void CSharedFilesWnd::ShowDetails(CKnownFile* cur_file) {
 	buffer.Format("%u",cur_file->statistic.GetAllTimeAccepts());
 	GetDlgItem(IDC_SACCEPTED2)->SetWindowText(buffer);
 
-	MD4COPY(shownFileHash,cur_file->GetFileHash());
+	md4cpy(shownFileHash,cur_file->GetFileHash());
 
 	CString title=GetResString(IDS_SF_STATISTICS)+" ("+ MakeStringEscaped(cur_file->GetFileName()) +")";
 	m_ctrlStatisticsFrm.SetText(title);

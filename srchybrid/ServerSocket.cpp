@@ -53,7 +53,7 @@ void CServerSocket::OnConnect(int nErrorCode){
 		case 0:{
 			if (cur_server->HasDynIP()){
 				SOCKADDR_IN sockAddr;
-				memset(&sockAddr, 0, sizeof(sockAddr));
+				MEMSET(&sockAddr, 0, sizeof(sockAddr));
 				uint32 nSockAddrLen = sizeof(sockAddr);
 				GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 				cur_server->SetID(sockAddr.sin_addr.S_un.S_addr);

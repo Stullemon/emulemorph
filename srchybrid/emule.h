@@ -21,7 +21,6 @@
 	#error include 'stdafx.h' before including this file for PCH
 #endif
 
-#include "cpu_info.h"//>>> eWombat [OnTheFly] Optimizer //Morph - added by AndCycle, eWombat CPUinfo
 #include "resource.h"
 #include "emuleDlg.h"
 #include "knownfilelist.h"
@@ -149,17 +148,6 @@ protected:
 	HIMAGELIST m_hSystemImageList;
 	CMapStringToPtr m_aExtToSysImgIdx;
 	CSize m_sizSmallSystemIcon;
-//Morph Start - added by AndCycle, On the fly processor optimization
-//<<< eWombat [OnTheFly] Optimizer
-private:
-	void Optimizer(void);
-public:
-	CPUInfo cpu;
-	eOptLevel			m_optlevel;
-	void OptimizerInfo(void);
-	CString m_strOptimizerInfo;
-//>>> eWombat [OnTheFly] Optimizer
-//Morph End - added by AndCycle, On the fly processor optimization
 };
 extern CemuleApp theApp;
 

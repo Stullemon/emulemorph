@@ -41,7 +41,7 @@ CIrcWnd::CIrcWnd(CWnd* pParent /*=NULL*/)
    m_bConnected = false;          // i_a 
    m_bLoggedIn = false;          // i_a 
    m_pCurrentChannel = 0;         // i_a 
-   memset(&asc_sort, 0, sizeof(asc_sort)); // i_a 
+   MEMSET(&asc_sort, 0, sizeof(asc_sort)); // i_a 
 }
 
 CIrcWnd::~CIrcWnd()
