@@ -397,6 +397,7 @@ struct Preferences_Struct{
 	uint8	hideOS;
 	uint8	selectiveShare;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+	int8	infiniteQueue;	// SLUGFILLER: infiniteQueue
 	bool	m_bVerbose;
 	bool	m_bDebugSourceExchange; // Sony April 23. 2003, button to keep source exchange msg out of verbose log
 	bool	m_bDebugSecuredConnection; //MORPH - Added by SiRoB, Debug Log option for Secured Connection
@@ -1170,6 +1171,7 @@ public:
 	uint8	GetHideOvershares()		{return prefs->hideOS;}
 	uint8	IsSelectiveShareEnabled()	{return prefs->selectiveShare;}
 	//MORPH END - Added by SiRoB, SLUGFILLER: hideOS
+	int8	IsInfiniteQueueEnabled()		{return prefs->infiniteQueue;}	// SLUGFILLER: infiniteQueue
 
 	void	SetMinUpload(uint16 in) {  prefs->m_iMinUpload = in; } //MORPH - Added by SiRoB, (SUC) & (USS)
 	void	SetMaxUpload(uint16 in) {  prefs->maxupload = (in) ? in : 0xffff; }

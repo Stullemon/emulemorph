@@ -1548,6 +1548,24 @@
 				RelativePath="res\connectedhigh.ICO">
 			</File>
 			<File
+				RelativePath=".\res\Contact0.ico">
+			</File>
+			<File
+				RelativePath=".\res\Contact1.ico">
+			</File>
+			<File
+				RelativePath=".\res\Contact2.ico">
+			</File>
+			<File
+				RelativePath=".\res\Contact3.ico">
+			</File>
+			<File
+				RelativePath=".\res\Contact4.ico">
+			</File>
+			<File
+				RelativePath=".\res\convert.ico">
+			</File>
+			<File
 				RelativePath=".\res\CreditOvl.ico">
 			</File>
 			<File
@@ -1608,6 +1626,9 @@
 				RelativePath="res\global.ico">
 			</File>
 			<File
+				RelativePath=".\res\help.ico">
+			</File>
+			<File
 				RelativePath="res\ico00001.ico">
 			</File>
 			<File
@@ -1645,6 +1666,21 @@
 			</File>
 			<File
 				RelativePath="res\Jigle.ico">
+			</File>
+			<File
+				RelativePath=".\res\KadFileSearch.ico">
+			</File>
+			<File
+				RelativePath=".\res\KadNodeSearch.ico">
+			</File>
+			<File
+				RelativePath=".\res\KadStoreFile.ico">
+			</File>
+			<File
+				RelativePath=".\res\KadStoreWord.ico">
+			</File>
+			<File
+				RelativePath=".\res\KadWordSearch.ico">
 			</File>
 			<File
 				RelativePath="res\Log.ico">
@@ -1867,6 +1903,9 @@
 			</File>
 			<File
 				RelativePath="res\taskbarNotifier.jpg">
+			</File>
+			<File
+				RelativePath=".\res\tools.ico">
 			</File>
 			<File
 				RelativePath="res\transfer.ico">

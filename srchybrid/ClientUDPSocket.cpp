@@ -93,14 +93,7 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 					break;
 				}
 				else{
-//				#ifdef _DEBUG
-//					CUpDownClient* sender = theApp.uploadqueue->GetWaitingClientByIP(inet_addr(host));
-//					if (sender)
-//						TRACE("*** CClientUDPSocket: OP_REASKFILEPING from unknown client %s UDP:%u (found client with same IP but diff. UDP port %u)\n", host, port, sender->GetUDPPort());
-//					else
-//						TRACE("*** CClientUDPSocket: OP_REASKFILEPING from unknown client %s UDP:%u\n", host, port);
-//				#endif
-					if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > theApp.glob_prefs->GetQueueSize()){
+					if (!theApp.glob_prefs->IsInfiniteQueueEnabled() && ((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > theApp.glob_prefs->GetQueueSize()){	// SLUGFILLER: infiniteQueue
 						Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
 						theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size + 8);
 						SendPacket(response,inet_addr(host),port);

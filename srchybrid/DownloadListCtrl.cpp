@@ -2011,7 +2011,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				}
 				// khaos::kmod-				
 			}
-			ChangeCategory(curTab);
+			//ChangeCategory(curTab); Commented lines for bug of A4AF changing cats (a part of catmod from khaos, no longer remains here...)
 		}
 		else{
 			CUpDownClient* client = (CUpDownClient*)content->value;

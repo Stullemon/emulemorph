@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -2146,6 +2146,7 @@ SYSTRAY_RESTORE         ICON                    "res\\systray_restore.ico"
 SYSTRAY_CONNECT         ICON                    "res\\systray_connect.ico"
 SYSTRAY_DISCONNECT      ICON                    "res\\systray_disconnect.ico"
 SYSTRAY_EXIT            ICON                    "res\\systray_exit.ico"
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
@@ -2243,12 +2244,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -3649,6 +3650,7 @@ BEGIN
     IDS_SERVERKEEPALIVETIMEOUT "Server connection refresh interval [min.]"
     IDS_MORE                "&More"
     IDS_TOOLS               "T&ools"
+    IDS_INFINITEQUEUE       "Infinite Queue"
     IDS_CREATEHOSTNAMESRCLINK "Copy eD2K Link To Clipboard (Hostname)"
     IDS_HASHINGFILESCOUNT   " (%u hashing)"
     IDS_CHECKDISKSPACE      "Check Diskspace"
@@ -4074,7 +4076,7 @@ BEGIN
     IDS_SELECTIVESHARE      "Selective chunk sharing"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

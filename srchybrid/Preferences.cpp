@@ -1394,6 +1394,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("IndicateRatings",prefs->indicateratings);
 	ini.WriteBool("WatchClipboard4ED2kFilelinks",prefs->watchclipboard);
 	ini.WriteInt("SearchMethod",prefs->m_iSearchMethod);
+	ini.WriteBool("InfiniteQueue",prefs->infiniteQueue);	// SLUGFILLER: infiniteQueue
 	ini.WriteBool("CheckDiskspace",prefs->checkDiskspace);	// SLUGFILLER: checkDiskspace
 	ini.WriteInt("MinFreeDiskSpace",prefs->m_uMinFreeDiskSpace);
 	// itsonlyme: hostnameSource
@@ -1878,6 +1879,7 @@ void CPreferences::LoadPreferences(){
 
 	prefs->filterserverbyip=ini.GetBool("FilterServersByIP",false);
 	prefs->filterlevel=ini.GetInt("FilterLevel",127);
+	prefs->infiniteQueue=ini.GetBool("InfiniteQueue",true);	// SLUGFILLER: infiniteQueue
 	prefs->checkDiskspace=ini.GetBool("CheckDiskspace",false);	// SLUGFILLER: checkDiskspace
 	prefs->m_uMinFreeDiskSpace=ini.GetInt("MinFreeDiskSpace",0);
 	sprintf(prefs->yourHostname,"%s",ini.GetString("YourHostname",""));	// itsonlyme: hostnameSource
