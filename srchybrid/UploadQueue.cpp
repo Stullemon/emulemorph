@@ -477,12 +477,16 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		uploadinglist.InsertBefore(insertPosition, newclient);
 		if (newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
+		else if (newclient->GetPowerShared())
+			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,1);
 		else
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,2);
 	}	else{
 		// Add it last
 		if (newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
+		else if (newclient->GetPowerShared())
+			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,1);
 		else
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),2);
 		uploadinglist.AddTail(newclient);
