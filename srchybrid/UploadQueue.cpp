@@ -945,6 +945,9 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				//client has a valid secure hash, add him remove other one
 				if (thePrefs.GetVerbose())
 					AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),cur_client->GetUserName() );
+				// EastShare - Added by TAHO, modified SUQWT
+				waitinglist.GetAt(pos2)->ClearWaitStartTime();
+				// EastShare - Added by TAHO, modified SUQWT
 				RemoveFromWaitingQueue(pos2,true);
 				if (!cur_client->socket)
 				{
@@ -959,6 +962,9 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				// remove both since we dont know who the bad on is
 				if (thePrefs.GetVerbose())
 					AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),"Both" );
+				// EastShare - Added by TAHO, modified SUQWT
+				waitinglist.GetAt(pos2)->ClearWaitStartTime(); 
+				// EastShare - Added by TAHO, modified SUQWT
 				RemoveFromWaitingQueue(pos2,true);
 				if (!cur_client->socket)
 				{
@@ -1053,6 +1059,9 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 
 		client->ResetQueueSessionUp();
 	}
+	// EastShare - Added by TAHO, modified SUQWT
+	client->Credits()->SetSecWaitStartTime();
+	// EastShare - Added by TAHO, modified SUQWT
 	waitinglist.AddTail(client);
 	client->SetUploadState(US_ONUPLOADQUEUE);
 
@@ -1142,19 +1151,23 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
     }
 
 	//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
+	// EastShare START - Marked by TAHO, modified SUQWT
+	//if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 		if(earlyabort == true){
-			client->Credits()->SaveUploadQueueWaitTime();
+			//client->Credits()->SaveUploadQueueWaitTime();
 		}
 		else if(client->GetSessionUp() < SESSIONMAXTRANS){
 			int keeppct = (100 - (100 * client->GetSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
 			if (keeppct < 0)    keeppct = 0;
 			client->Credits()->SaveUploadQueueWaitTime(keeppct);
+			client->Credits()->SetSecWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
 		}
 		else{
 			client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
+			client->Credits()->ClearWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
 		}
-	}
+	//}
+	// EastShare END - Marked by TAHO, modified SUQWT
 	//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
 
@@ -1190,7 +1203,9 @@ void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){
 	//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 		todelete->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
-		todelete->Credits()->ClearWaitStartTime();		// Moonlight: SUQWT
+		// EastShare START - Marked by TAHO, modified SUQWT
+		//todelete->Credits()->ClearWaitStartTime();		// Moonlight: SUQWT 
+		// EastShare END - Marked by TAHO, modified SUQWT
 	}
 	//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	todelete->SetUploadState(US_NONE);
