@@ -15,6 +15,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
+class CSafeMemFile;
+
 // SLUGFILLER: hostnameSources
 struct SUnresolvedHostname{
 	CStringA strHostname;
@@ -76,7 +78,7 @@ public:
 	long GetSize() const { return atol(m_size); }
 	const uchar* GetHashKey() const { return m_hash;}
 	bool HasValidSources() const {return (SourcesList!=NULL); }
-	CMemFile* SourcesList;
+	CSafeMemFile* SourcesList;
 	// SLUGFILLER: hostnameSources
 	bool HasHostnameSources() const {return (!m_HostnameSourcesList.IsEmpty()); }
 	CTypedPtrList<CPtrList, SUnresolvedHostname*> m_HostnameSourcesList;

@@ -19,8 +19,7 @@
 #include "updownclient.h" //MORPH - Added by SiRoB
 
 class CClientReqSocket;
-//class CUpDownClient;
-
+class CUpDownClient;
 namespace Kademlia{
 	class CContact;
 };
@@ -62,14 +61,15 @@ public:
 	void	GetStatistics(uint32 &totalclient, int stats[], CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkey=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkeyHybrid=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionEMule=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionLMule=NULL); // xrmb : statsclientstatus
 	void	DeleteAll();
 	bool	AttachToAlreadyKnown(CUpDownClient** client, CClientReqSocket* sender);
-	CUpDownClient* FindClientByIP(uint32 clientip, UINT port);
-	CUpDownClient* FindClientByUserHash(const uchar* clienthash);
-	CUpDownClient* FindClientByIP(uint32 clientip);
-	CUpDownClient* FindClientByIP_UDP(uint32 clientip, UINT nUDPport);
-	CUpDownClient* FindClientByServerID(uint32 uServerIP, uint32 uUserID);
-	CUpDownClient* FindClientByID_KadPort(uint32 clientID,uint16 kadPort);
-	CUpDownClient* GetRandomKadClient();
-	void	GetClientListByFileID(CUpDownClientPtrList *clientlist, const uchar *fileid);	// #zegzav:updcliuplst
+	CUpDownClient* FindClientByIP(uint32 clientip, UINT port) const;
+	CUpDownClient* FindClientByUserHash(const uchar* clienthash) const;
+	CUpDownClient* FindClientByIP(uint32 clientip) const;
+	CUpDownClient* FindClientByIP_UDP(uint32 clientip, UINT nUDPport) const;
+	CUpDownClient* FindClientByServerID(uint32 uServerIP, uint32 uUserID) const;
+	CUpDownClient* FindClientByUserID_KadPort(uint32 clientID,uint16 kadPort) const;
+	CUpDownClient* FindClientByIP_KadPort(uint32 ip, uint16 port) const;
+	CUpDownClient* GetRandomKadClient() const;
+//	void	GetClientListByFileID(CUpDownClientPtrList *clientlist, const uchar *fileid);	// #zegzav:updcliuplst
 
 	void	AddBannedClient(uint32 dwIP);
 	bool	IsBannedClient(uint32 dwIP);

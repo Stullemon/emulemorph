@@ -18,6 +18,7 @@
 #include "resource.h"
 #include "ED2KLink.h"
 #include "OtherFunctions.h"
+#include "SafeFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -238,8 +239,8 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 
 			// increment pCh to point to the first "ip:port" and check for sources
 			if ( bAllowSources && ++pCh < pEnd ) {
-				SourcesList=new CMemFile();
-				SourcesList->Write(&nCount,sizeof(nCount)); // init to 0, we'll fix this at the end.
+				SourcesList = new CSafeMemFile(256);
+				SourcesList->WriteUInt16(nCount); // init to 0, we'll fix this at the end.
 				// for each "ip:port" source string until the end
 				// limit to prevent overflow (uint16 due to CPartFile::AddClientSources)
 				while( *pCh != 0 && nCount < MAXSHORT ) {
@@ -280,14 +281,14 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 					{	nInvalid++;	continue;	}
 					// SLUGFILLER: hostnameSources
 
-					SourcesList->Write(&dwID,sizeof(dwID));
-					SourcesList->Write(&nPort,sizeof(nPort));
-					SourcesList->Write(&dwServerIP,sizeof(dwServerIP));
-					SourcesList->Write(&nServerPort,sizeof(nServerPort));
+					SourcesList->WriteUInt32(dwID);
+					SourcesList->WriteUInt16(nPort);
+					SourcesList->WriteUInt32(dwServerIP);
+					SourcesList->WriteUInt16(nServerPort);
 					nCount++;
 				}
 				SourcesList->SeekToBegin();
-				SourcesList->Write(&nCount,sizeof(nCount));
+				SourcesList->WriteUInt16(nCount);
 				SourcesList->SeekToBegin();
 				if (nCount==0) {
 					delete SourcesList;

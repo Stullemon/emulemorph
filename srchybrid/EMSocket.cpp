@@ -150,8 +150,25 @@ CEMSocket::~CEMSocket(){
 // By Maverick: Connection initialisition is done by class itself
 BOOL CEMSocket::Connect(LPCTSTR lpszHostAddress, UINT nHostPort)
 {
+	InitProxySupport();
+	return CAsyncSocketEx::Connect(lpszHostAddress, nHostPort);
+}
+// end deadlake
+
+// deadlake PROXYSUPPORT
+// By Maverick: Connection initialisition is done by class itself
+//BOOL CEMSocket::Connect(LPCTSTR lpszHostAddress, UINT nHostPort)
+BOOL CEMSocket::Connect(SOCKADDR* pSockAddr, int iSockAddrLen)
+{
+	InitProxySupport();
+	return CAsyncSocketEx::Connect(pSockAddr, iSockAddrLen);
+}
+// end deadlake
+
+void CEMSocket::InitProxySupport()
+{
 	// ProxyInitialisation
-	const ProxySettings& settings = theApp.glob_prefs->GetProxy();
+	const ProxySettings& settings = thePrefs.GetProxy();
 	m_ProxyConnectFailed = false;
 	if (settings.UseProxy && settings.type != PROXYTYPE_NOPROXY)
 	{
@@ -186,20 +203,16 @@ BOOL CEMSocket::Connect(LPCTSTR lpszHostAddress, UINT nHostPort)
 		Create();
 		AsyncSelect(FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE);
 	}
-
-	return CAsyncSocketEx::Connect(lpszHostAddress, nHostPort);
 }
-// end deadlake
-
 
 void CEMSocket::ClearQueues(){
 	EMTrace("CEMSocket::ClearQueues on %d",(SOCKET)this);
-	for(POSITION pos = controlpacket_queue.GetHeadPosition(); pos != NULL; controlpacket_queue.GetNext(pos))
-		delete controlpacket_queue.GetAt(pos);
+	for(POSITION pos = controlpacket_queue.GetHeadPosition(); pos != NULL; )
+		delete controlpacket_queue.GetNext(pos);
 	controlpacket_queue.RemoveAll();
 
-	for(POSITION pos = standartpacket_queue.GetHeadPosition(); pos != NULL; standartpacket_queue.GetNext(pos))
-		delete standartpacket_queue.GetAt(pos).packet;
+	for(POSITION pos = standartpacket_queue.GetHeadPosition(); pos != NULL; )
+		delete standartpacket_queue.GetNext(pos).packet;
 	standartpacket_queue.RemoveAll();
 
 	// Download (pseudo) rate control	
@@ -694,7 +707,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
 			    } else{
                     // Send() gave an error
                     anErrorHasOccured = true;
-                    //AddDebugLogLine(true,"EMSocket: An error has occured: %i", error);
+                    //DEBUG_ONLY( AddDebugLogLine(true,"EMSocket: An error has occured: %i", error) );
                 }
             } else {
                 // we managed to send some bytes. Perform bookkeeping.
@@ -859,7 +872,7 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 				case PROXYERROR_NOCONN:{
 					//TODO: This error message(s) should be outputed only during startup - otherwise we'll see a lot of
 					//them in the log window which would be of no use.
-					if (theApp.glob_prefs->GetShowProxyErrors()){
+					if (thePrefs.GetShowProxyErrors()){
 						CString strError(_T("Can't connect to proxy"));
 						CString strErrInf;
 						if (nParam2 && GetErrorMessage(nParam2, strErrInf))
@@ -871,7 +884,7 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 				case PROXYERROR_REQUESTFAILED:{
 					//TODO: This error message(s) should be outputed only during startup - otherwise we'll see a lot of
 					//them in the log window which would be of no use.
-					if (theApp.glob_prefs->GetShowProxyErrors()){
+					if (thePrefs.GetShowProxyErrors()){
 						CString strError(_T("Proxy request failed"));
 						if (nParam2){
 							strError += _T(" - ");
@@ -905,19 +918,6 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 
 
 /**
- * Does this socket want to send?
- *
- * @return true if the socket has something to send, false otherwise
- */
-bool CEMSocket::HasQueues() {
-    sendLocker.Lock();
-    bool hasQueues = (sendbuffer != NULL || !controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty());
-    sendLocker.Unlock();
-
-    return hasQueues;
-}
-
-/**
  * Removes all packets from the standard queue that don't have to be sent for the socket to be able to send a control packet.
  *
  * Before a socket can send a new packet, the current packet has to be finished. If the current packet is part of
@@ -931,20 +931,12 @@ void CEMSocket::TruncateQueues() {
 
     // Clear the standard queue totally
     // Please not! There may still be a standardpacket in the sendbuffer variable!
-	for(POSITION pos = standartpacket_queue.GetHeadPosition(); pos != NULL; standartpacket_queue.GetNext(pos))
-		delete standartpacket_queue.GetAt(pos).packet;
+	for(POSITION pos = standartpacket_queue.GetHeadPosition(); pos != NULL; )
+		delete standartpacket_queue.GetNext(pos).packet;
 	standartpacket_queue.RemoveAll();
 
     sendLocker.Unlock();
 }
-
-//Morph Start - added by AndCycle, ZZ Upload System 20040106-1735
-void CEMSocket::OnConnect(int nErrorCode){
-  CAsyncSocketEx::OnConnect(nErrorCode);
-  if (nErrorCode /*&& nErrorCode != WSAEHOSTUNREACH*/)
-      OnConnectError(nErrorCode);
-}
-//Morph End - added by AndCycle, ZZ Upload System 20040106-1735
 
 #ifdef _DEBUG
 void CEMSocket::AssertValid() const

@@ -39,7 +39,7 @@ public:
 	bool	IsBusy() const { return m_bWouldBlock; }
 
 protected:
-	bool	ProcessPacket(char* packet, int16 size, int8 opcode, char* host, uint16 port);
+	bool	ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port);
 	
 	virtual void	OnSend(int nErrorCode);	
 	virtual void	OnReceive(int nErrorCode);

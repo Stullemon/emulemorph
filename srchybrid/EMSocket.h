@@ -57,7 +57,9 @@ public:
 
 	// deadlake PROXYSUPPORT
 	// By Maverick: Connection necessary initalizing calls are done by class itself and not anymore by the Owner
-	BOOL	virtual Connect(LPCTSTR lpszHostAddress, UINT nHostPort);
+	virtual BOOL Connect(LPCTSTR lpszHostAddress, UINT nHostPort);
+	virtual BOOL Connect(SOCKADDR* pSockAddr, int iSockAddrLen);
+	void InitProxySupport();
 	// Reset Layer Chain
 	virtual void RemoveAllLayers();
 
@@ -85,11 +87,6 @@ protected:
 	virtual void	OnClose(int nErrorCode);
 	virtual void	OnSend(int nErrorCode);	
 	virtual void	OnReceive(int nErrorCode);
-
-	//Morph Start - added by AndCycle, ZZ Upload System 20040106-1735
-    virtual void OnConnect(int nErrorCode);
-    virtual void OnConnectError(int nErrorCode) {};
-	//Morph End - added by AndCycle, ZZ Upload System 20040106-1735
 
 	uint8	byConnected;
 
