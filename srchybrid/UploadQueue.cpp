@@ -435,12 +435,20 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 					uploadingClient->IsPBForPS() == true && newclient->IsPBForPS() == true && uploadingClient->GetFilePrioAsNumber() == newclient->GetFilePrioAsNumber() ||
 					uploadingClient->IsPBForPS() == false && newclient->IsPBForPS() == false
 				)
-			)&&
+			)/*&&
 			(
 				!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
 				newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
 				// Compare scores is more right than comparing waittime.
-			)
+			)*/
+			/*
+				//Morph - commented by AndCycle, 
+				if there are client A and B, 
+				A have PBF or PS, high ID, lower score,
+				B have none prio, low ID, higher score, 
+				this cause racing status, duplicate slot number,
+				maybe not really need this because we keep the full chunk upload ?
+			*/
 		) {
 			foundposition = true;
 		} else {
