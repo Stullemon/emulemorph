@@ -484,6 +484,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		classID = 0;
 	else if (newclient->IsPBForPS())
 		classID = 1;
+	newclient->SetClassID(classID);
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 	if(insertPosition != NULL) {

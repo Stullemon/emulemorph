@@ -606,7 +606,10 @@ public:
 
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
 	uint32 GetSlotNumber() const { return m_slotNumber; }
-	uint32 GetClassID() const {return m_classID;} //MORPH - Added by SiRoB, UPload Splitting Class
+	//MORPH START - Added by SiRoB, UPload Splitting Class
+	uint32 GetClassID() const {return m_classID;}
+	void	SetClassID(uint32 newvalue) { m_classID = newvalue;}
+	//MORPH END   - Added by SiRoB, UPload Splitting Class
 	//MORPH - Changed by SiRoB, WebCache Fix
 	/*
 	CEMSocket* GetFileUploadSocket(bool log = false);
