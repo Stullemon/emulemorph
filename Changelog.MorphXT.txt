@@ -13,6 +13,7 @@ ADDED  : Bandwidth limit for friend in morph preferency [SiRoB]
 
 TEAWKED: Hide Over Share display info now show all value in the column [SiRoB]
 TEAWKED: The auto powershare mecanisme have been changed to wait some complet source info before triggering [SiRoB]
+TWEAKED: IP2Country have been improuved (some tweak from emule+) and binairy search methode have been implemented [SiRoB]
 
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]

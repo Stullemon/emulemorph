@@ -39,17 +39,20 @@ static char THIS_FILE[] = __FILE__;
 // N/A flag is the first Res, so it should at index zero
 #define NO_FLAG 0
 
-CString FirstCharCap(CString target){
-
-	target.TrimRight();//clean out the space at the end, prevent exception for index++
-	if(target.IsEmpty()) return _T("");
-	target.MakeLower();
-	target.SetAt(0, target.Left(1).MakeUpper().GetAt(0));
-	for(int index = target.Find(' '); index != -1; index = target.Find(' ', index)){
-		index++;//set the character next to space be Upper
-		target.SetAt(index, target.Mid(index, 1).MakeUpper().GetAt(0));
+void FirstCharCap(CString *pstrTarget)
+{
+	pstrTarget->TrimRight();//clean out the space at the end, prevent exception for index++
+	if(!pstrTarget->IsEmpty())
+	{
+		pstrTarget->MakeLower();
+		for (int iIdx = 0;;)
+		{
+			pstrTarget->SetAt(iIdx, pstrTarget->Mid(iIdx, 1).MakeUpper().GetAt(0));
+			iIdx = pstrTarget->Find(_T(' '), iIdx) + 1;
+			if (iIdx == 0)
+				break;
+		}
 	}
-	return target;
 }
 
 CIP2Country::CIP2Country(){
@@ -117,25 +120,35 @@ void CIP2Country::Refresh(){
 	theApp.emuledlg->serverwnd->serverlistctrl.RefreshAllServer();
 }
 
+static int __cdecl CmpIP2CountryByStartAddr(const void* p1, const void* p2)
+{
+	const IPRange_Struct2* rng1 = *(IPRange_Struct2**)p1;
+	const IPRange_Struct2* rng2 = *(IPRange_Struct2**)p2;
+	return CompareUnsigned(rng1->IPstart, rng2->IPstart);
+}
+
 bool CIP2Country::LoadFromFile(){
 
-	char buffer[1024];
-	int	lenBuf = 1024;
+	TCHAR szBuffer[512];
 	CString ip2countryCSVfile = GetDefaultFilePath();
 	FILE* readFile = _tfsopen(ip2countryCSVfile, _T("r"), _SH_DENYWR);
 
 	try{
 		if (readFile != NULL) {
 
-			int count = 0;
+			int iCount = 0;
+			int iLine = 0;
+			int iDuplicate = 0;
+			int iMerged = 0;
 			bool error = false;
-
+			CString tempStr[5];
+			CString	sbuffer;
 			while (!feof(readFile)) {
 				error = false;
-				if (fgets(buffer,lenBuf,readFile)==0) break;
-				CString	sbuffer;
-				sbuffer = buffer;
-				/*
+				if (_fgetts(szBuffer, ARRSIZE(szBuffer),readFile)==0) break;
+					sbuffer = szBuffer;
+					++iLine;
+					/*
 					http://ip-to-country.webhosting.info/node/view/54
 
 					This is a sample of how the CSV file is structured:
@@ -153,12 +166,10 @@ bool CIP2Country::LoadFromFile(){
 				*/
 				// we assume that the ip-to-country.csv is valid and doesn't cause any troubles
 				// get & process IP range
+				sbuffer.TrimRight(_T('\n'));
 				sbuffer.Remove('"'); // get rid of the " signs
 
-				CString tempStr[5];
-
-				int curPos;
-				curPos = 0;
+				int curPos = 0;
 
 				for(int forCount = 0; forCount !=  5; forCount++){
 					tempStr[forCount] = sbuffer.Tokenize(_T(","), curPos);
@@ -170,17 +181,61 @@ bool CIP2Country::LoadFromFile(){
 				}
 				
 				if(error){
-					AddLogLine(false, _T("error line number : %i"), count+1);
+					AddLogLine(false, _T("error line number : %i"), iCount+1);
 					AddLogLine(false, _T("%s %s"), _T("possible error line in"), ip2countryCSVfile);
 					continue;
 				}
 				//tempStr[4] is full country name, capitalize country name from rayita
-				tempStr[4] = FirstCharCap(tempStr[4]);
+				FirstCharCap(&tempStr[4]);
 
-				count++;
+				++iCount;
 				AddIPRange(_tstoi(tempStr[0]),_tstoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
 			}
 			fclose(readFile);
+
+			// sort the IP2Country list by IP range start addresses
+			qsort(m_iplist.GetData(), m_iplist.GetCount(), sizeof(m_iplist[0]), CmpIP2CountryByStartAddr);
+			if (m_iplist.GetCount() >= 2)
+			{
+				IPRange_Struct2* pPrv = m_iplist[0];
+				int i = 1;
+				while (i < m_iplist.GetCount())
+				{
+					IPRange_Struct2* pCur = m_iplist[i];
+					if (   pCur->IPstart >= pPrv->IPstart && pCur->IPstart <= pPrv->IPend	 // overlapping
+						|| pCur->IPstart == pPrv->IPend+1 && &pCur->ShortCountryName == &pPrv->ShortCountryName) // adjacent
+					{
+						if (pCur->IPstart != pPrv->IPstart || pCur->IPend != pPrv->IPend) // don't merge identical entries
+						{
+							//TODO: not yet handled, overlapping entries with different 'level'
+							if (pCur->IPend > pPrv->IPend)
+								pPrv->IPend = pCur->IPend;
+							//pPrv->desc += _T("; ") + pCur->desc; // this may create a very very long description string...
+							++iMerged;
+						}
+						else
+						{
+							// if we have identical entries, use the lowest 'level'
+							/*if (pCur->level < pPrv->level)
+								pPrv->level = pCur->level;
+							*/
+							iDuplicate++;
+						}
+						delete pCur;
+						m_iplist.RemoveAt(i);
+						continue;
+					}
+					pPrv = pCur;
+					++i;
+				}
+			}
+
+			if (thePrefs.GetVerbose())
+			{
+				theApp.emuledlg->AddDebugLogLine(false, _T("Loaded IP2Country from \"%s\""), ip2countryCSVfile);
+				theApp.emuledlg->AddDebugLogLine(false, _T("Parsed lines:%u  Found IPCountry ranges:%u  Duplicate:%u  Merged:%u"), iLine, iCount, iDuplicate, iMerged);
+			}
+
 		}
 		else{
 			throw CString(_T("Failed to load in"));
@@ -349,16 +404,9 @@ bool CIP2Country::LoadCountryFlagLib(){
 
 void CIP2Country::RemoveAllIPs(){
 
-	uint32 key;
-	IPRange_Struct2* value;
-	POSITION pos1;
-	for(POSITION pos = iplist.GetHeadPosition(); pos1 = pos; )
-	{
-		iplist.GetNextAssoc(pos, key, value);
-		delete value;
-		iplist.RemoveAt(pos1);
-	}
-	iplist.RemoveAll();
+	for (int i = 0; i < m_iplist.GetCount(); i++)
+		delete m_iplist[i];
+	m_iplist.RemoveAll();
 
 	AddDebugLogLine(false, _T("IP2Countryfile has been unloaded"));
 }
@@ -374,9 +422,8 @@ void CIP2Country::RemoveAllFlags(){
 	AddLogLine(false, _T("Country Flags have been unloaded"));
 }
 
-bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName, CString midCountryName, CString longCountryName){
+void CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString& shortCountryName, CString& midCountryName, CString& longCountryName){
 	IPRange_Struct2* newRange = new IPRange_Struct2();
-
 	newRange->IPstart = IPfrom;
 	newRange->IPend = IPto;
 	newRange->ShortCountryName = shortCountryName;
@@ -400,8 +447,19 @@ bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName
 		//newRange->FlagIndex = 0;
 	}
 	
-	iplist.SetAt(IPfrom, newRange);
-	return true;
+	m_iplist.Add(newRange);
+}
+
+static int __cdecl CmpIP2CountryByAddr(const void* pvKey, const void* pvElement)
+{
+	uint32 ip = *(uint32*)pvKey;
+	const IPRange_Struct2* pIP2Country = *(IPRange_Struct2**)pvElement;
+
+	if (ip < pIP2Country->IPstart)
+		return -1;
+	if (ip > pIP2Country->IPend)
+		return 1;
+	return 0;
 }
 
 struct IPRange_Struct2* CIP2Country::GetCountryFromIP(uint32 ClientIP){
@@ -409,30 +467,17 @@ struct IPRange_Struct2* CIP2Country::GetCountryFromIP(uint32 ClientIP){
 	if(EnableIP2Country == false){
 		return &defaultIP2Country;
 	}
-	else if (ClientIP == 0){
-		//AddDebugLogLine(false, "CIP2Country::GetCountryFromIP doesn't have ip to search for");
-		return &defaultIP2Country;
-	}
-	else if(iplist.IsEmpty()){
+	if(m_iplist.GetCount() == 0 || ClientIP == 0){
 		AddDebugLogLine(false, _T("CIP2Country::GetCountryFromIP iplist doesn't exist"));
 		return &defaultIP2Country;
 	}
-
 	ClientIP = htonl(ClientIP);
-	POSITION pos = iplist.FindFirstKeyAfter(ClientIP);
-	if(!pos){
-		pos = iplist.GetTailPosition();
-	}
-	else{
-		iplist.GetPrev(pos);
+	IPRange_Struct2** ppFound = (IPRange_Struct2**)bsearch(&ClientIP, m_iplist.GetData(), m_iplist.GetCount(), sizeof(m_iplist[0]), CmpIP2CountryByAddr);
+	if (ppFound)
+	{
+		return *ppFound;
 	}
 
-	while(pos){
-		const CRBMap<uint32, IPRange_Struct2*>::CPair* pair = iplist.GetPrev(pos);
-
-		if (ClientIP > pair->m_value->IPend) break;
-		if (ClientIP >= pair->m_key && ClientIP <= pair->m_value->IPend) return pair->m_value;
-	}
 	return &defaultIP2Country;
 }
 

@@ -12,10 +12,11 @@ struct IPRange_Struct2{
 	CString			MidCountryName;
 	CString			LongCountryName;
 	WORD			FlagIndex;
-	~IPRange_Struct2() {  }
 };
 
 #define DFLT_IP2COUNTRY_FILENAME  _T("ip-to-country.csv")//Commander - Added: IP2Country auto-updating
+
+typedef CTypedPtrArray<CPtrArray, IPRange_Struct2*> CIP2CountryArray;
 
 class CIP2Country: public CLoggable
 {
@@ -42,7 +43,7 @@ class CIP2Country: public CLoggable
 		void	RemoveAllIPs();
 		void	RemoveAllFlags();
 
-		bool	AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName, CString midCountryName, CString longCountryName);
+		void	AddIPRange(uint32 IPfrom,uint32 IPto, CString& shortCountryName, CString& midCountryName, CString& longCountryName);
 
 		IPRange_Struct2*	GetCountryFromIP(uint32 IP);
 		WORD	GetFlagResIDfromCountryCode(CString shortCountryName);
@@ -62,7 +63,7 @@ class CIP2Country: public CLoggable
 		bool	EnableCountryFlag;
 		struct	IPRange_Struct2 defaultIP2Country;
 
-		CRBMap<uint32, IPRange_Struct2*> iplist;
+		CIP2CountryArray m_iplist;
 		CRBMap<CString, uint16>	CountryIDtoFlagIndex;
 };
 
