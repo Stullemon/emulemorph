@@ -586,7 +586,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			uint32 lastpos = 0;
             for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
 			{
-				if (slotCounterClass[classID]==0) continue;
+				if (slotCounterClass[classID])
 				for(uint32 maxCounter = lastpos; maxCounter < lastpos+slotCounterClass[classID] && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(maxCounter);
 					if(socket != NULL) {
@@ -623,6 +623,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			lastpos = 0;
             for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{	
+				if (slotCounterClass[classID])
 				for(uint32 slotCounter = lastpos; slotCounter < lastpos+slotCounterClass[classID] && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; slotCounter++) {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 					if(bytesToSpendClass[classID] <= 0 || spentBytesClass[classID] >= (uint64)bytesToSpendClass[classID])
