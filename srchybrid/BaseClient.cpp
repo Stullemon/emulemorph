@@ -868,7 +868,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 			tag8.WriteTagToFile(&data);
 		}
 		else{
-			CTag tag8(ET_MOD_VERSION, MOD_VERSION);
+			CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
 			tag8.WriteTagToFile(&data);
 		}
 		//MORPH END   - Added by IceCream, Anti-leecher feature
@@ -1168,7 +1168,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 			tagMODVersion.WriteTagToFile(data);
 		}
 		else{
-			CTag tagMODVersion(ET_MOD_VERSION, MOD_VERSION);
+			CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersion);
 			tagMODVersion.WriteTagToFile(data);
 		}
 		//MORPH END   - Added by SiRoB, Anti-leecher feature

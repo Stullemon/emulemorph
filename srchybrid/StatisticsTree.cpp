@@ -345,7 +345,12 @@ CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theIte
 
 	CString	strBuffer;
 	if (firstItem)
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		/*
 		strBuffer.Format(_T("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		*/
+		strBuffer.Format(_T("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s [%s] %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 
 	while (hCurrent != NULL)
 	{
@@ -425,8 +430,12 @@ CString CStatisticsTree::GetText(bool onlyVisible, HTREEITEM theItem, int theIte
 
 	CString	strBuffer;
 	if (bPrintHeader)
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		/*
 		strBuffer.Format(_T("eMule v%s %s [%s]\r\n\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS) ,thePrefs.GetUserNick());
-
+		*/
+		strBuffer.Format(_T("eMule v%s [%s] %s [%s]\r\n\r\n"), theApp.m_strCurVersionLong,theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS) ,thePrefs.GetUserNick());
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 	while (hCurrent != NULL)
 	{
 		for (int i = 0; i < theItemLevel; i++)
@@ -522,13 +531,23 @@ void CStatisticsTree::ExportHTML(bool onlyvisible)
 
 	CFileDialog saveAsDlg (false, _T("html"), _T("*.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
 	if (saveAsDlg.DoModal() == IDOK) {
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		/*
 		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s %s [%s]</title>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		*/
+		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s [%s] %s [%s]</title>\r\n", theApp.m_strCurVersionLong,theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 		theHTML += "<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#sec { color: #000000; font: bold 11pt/13pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#item { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#bdy { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</header>\r\n";
 		theHTML += "<body id=\"bdy\">\r\n";
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		/*
 		theHTML.Format("%s<span id=\"pghdr\">eMule v%s %s [%s]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		*/
+		theHTML.Format("%s<span id=\"pghdr\">eMule v%s [%s] %s [%s]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong,theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 		theHTML += GetHTMLForExport(onlyvisible) + _T("</body></html>");
 
 		htmlFileName = saveAsDlg.GetPathName();
@@ -657,8 +676,12 @@ CString CStatisticsTree::GetWML(bool onlyVisible, bool onlyBold, bool noRecursiv
 	HTREEITEM	hCurrent;
 	
 	strBuffer.Empty();
+	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	/*
 	if (firstItem) strBuffer.Format(_T("<b>eMule v%s %s [%s]</b>\r\n<br/><br/>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-
+	*/
+	if (firstItem) strBuffer.Format(_T("<b>eMule v%s [%s] %s [%s]</b>\r\n<br/><br/>\r\n"), theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 	if (theItem == NULL) {
 		if (!onlyVisible) theApp.emuledlg->statisticswnd->ShowStatistics(true);
 		hCurrent = GetRootItem();
