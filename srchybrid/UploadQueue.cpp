@@ -222,14 +222,6 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 				(//Morph - added by AndCycle, Equal Chance For Each File
 					leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
 					leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
-					(
-						leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() || // same prio file
-						//MORPH START - Changed by SiRoB, Code Optimization
-						//Test only one client
-						//if we are here both client got the same powershare state
-						leftClient->GetPowerShared() == false //&& rightClient->GetPowerShared() == false //neither want powershare file
-						//MORPH END   - Changed by SiRoB, Code Optimization
-				    ) && // they are equal in powersharing
 				    (
 						!leftLowIdMissed && rightLowIdMissed || // rightClient is lowId and has missed a slot and is currently connected
 			
