@@ -480,7 +480,7 @@ void CIP2Country::UpdateIP2CountryURL()
 	_tremove(szTempFilePath);
 
     // Compare the Version numbers
-	if ((thePrefs.GetIP2CountryVersion()< (uint32) _tstoi(sbuffer)) || (readFile == NULL)) {
+	if ((thePrefs.GetIP2CountryVersion()< (uint32) _tstoi(sbuffer)) || !PathFileExists(GetDefaultFilePath())) {
 		
 		CString IP2CountryURL = thePrefs.GetUpdateURLIP2Country();
 		

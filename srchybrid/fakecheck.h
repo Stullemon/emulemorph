@@ -24,7 +24,7 @@ struct Fakes_Struct{
    CString			RealTitle;
 };
 
-#define	DFLT_FAKECHECK_FILENAME	_T("fake.dat")
+#define	DFLT_FAKECHECK_FILENAME	_T("fakes.dat")
 
 typedef CTypedPtrArray<CPtrArray, Fakes_Struct*> CFakecheckArray;
 

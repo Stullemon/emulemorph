@@ -436,13 +436,12 @@ void CIPFilter::UpdateIPFilterURL()
 	char buffer[9];
 	int lenBuf = 9;
 	fgets(buffer,lenBuf,readFile);
-
 	sbuffer = buffer;
 	sbuffer = sbuffer.Trim();
 	fclose(readFile);
 	_tremove(szTempFilePath);
 
-	if ((thePrefs.GetIPfilterVersion()< (uint32) _tstoi(sbuffer)) || (readFile == NULL)) {
+	if (thePrefs.GetIPfilterVersion()< (uint32) _tstoi(sbuffer) || !PathFileExists(GetDefaultFilePath())) {
 
 		CString IPFilterURL = thePrefs.GetUpdateURLIPFilter();
 
