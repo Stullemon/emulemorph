@@ -262,10 +262,9 @@ bool CIP2Country::LoadCountryFlagLib(){
 			IDI_COUNTRY_FLAG_VI, IDI_COUNTRY_FLAG_VN, IDI_COUNTRY_FLAG_VU, IDI_COUNTRY_FLAG_WF, 
 			IDI_COUNTRY_FLAG_WS, IDI_COUNTRY_FLAG_YE, IDI_COUNTRY_FLAG_YU, IDI_COUNTRY_FLAG_ZA, 
 			IDI_COUNTRY_FLAG_ZM, IDI_COUNTRY_FLAG_ZW, 
-			IDI_COUNTRY_FLAG_UK,
+			IDI_COUNTRY_FLAG_UK, //by tharghan
+			IDI_COUNTRY_FLAG_CS, //by propaganda
 
-			//http://home.12move.nl/~sh829487/ukvlaggen.gif
-			//http://geography.about.com/library/faq/blqzuk.htm, by tharghan
 
 			NO_FLAG};
 
@@ -286,9 +285,8 @@ bool CIP2Country::LoadCountryFlagLib(){
 			"SO", "SR", "ST", "SU", "SV", "SY", "SZ", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", 
 			"TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", 
 			"VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YU", "ZA", "ZM", "ZW", 
-			"UK",
-			//http://home.12move.nl/~sh829487/ukvlaggen.gif
-			//http://geography.about.com/library/faq/blqzuk.htm, by tharghan
+			"UK", //by tharghan
+			"CS", //by propaganda
 
 			"N/A"
 		};

@@ -254,6 +254,9 @@
 				RelativePath=".\res\cr.ico">
 			</File>
 			<File
+				RelativePath=".\res\cs.ico">
+			</File>
+			<File
 				RelativePath=".\res\cu.ico">
 			</File>
 			<File
@@ -776,6 +779,9 @@
 				RelativePath=".\res\ug.ico">
 			</File>
 			<File
+				RelativePath=".\res\uk.ico">
+			</File>
+			<File
 				RelativePath=".\res\um.ico">
 			</File>
 			<File
@@ -835,9 +841,6 @@
 		</File>
 		<File
 			RelativePath=".\resource.h">
-		</File>
-		<File
-			RelativePath=".\res\uk.ico">
 		</File>
 	</Files>
 	<Globals>
