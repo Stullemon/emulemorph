@@ -432,7 +432,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 		uint32 minFragSize = 1300;
-        uint32 doubleSendSize = minFragSize*2; // send two packages at a time so they can share an ACK
+        uint32 doubleSendSize = minFragSize/*2*/; // send two packages at a time so they can share an ACK
         if(allowedDataRateClass[LAST_CLASS] < 6*1024) {
             minFragSize = 536;
             doubleSendSize = minFragSize; // don't send two packages at a time at very low speeds to give them a smoother load

@@ -895,7 +895,7 @@ void CUploadQueue::Process() {
 				delete cur_client;
 			}
 		} else {
-			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL /*|| cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)*/) {
+			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || /*cur_client->GetSlotNumber() <= GetActiveUploadsCount() ||*/ ForceNewClient(true)) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
@@ -977,7 +977,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 	/*
 	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1) && datarate < 102400 )
     */
-	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1))
+	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(3))
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		return false;
 	
@@ -1348,18 +1348,13 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 		} else if(earlyabort == false)
 			++failedupcount;
 
-			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
-			/* //Morph - removed by SiRoB
-            if(requestedFile != NULL) {
-                requestedFile->UpdatePartsInfo();
-            }
-        	*/
 			//MORPH START - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
 			theApp.clientlist->AddTrackClient(client); // Keep track of this client
 			client->SetUploadState(US_NONE);
 			client->ClearUploadBlockRequests();
 			//MORPH END   - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
-			
+
+			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 			if(requestedFile != NULL) {
 			    //MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
 				if(requestedFile->IsPartFile())
