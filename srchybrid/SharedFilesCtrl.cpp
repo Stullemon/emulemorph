@@ -1171,6 +1171,11 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	#endif
 	m_SharedFilesMenu.EnableMenuItem(Irc_SetSendLink, iSelectedItems == 1 && theApp.emuledlg->ircwnd->IsConnected() ? MF_ENABLED : MF_GRAYED);
 
+	//MORPH START - Added by IceCream, copy feedback feature
+	m_SharedFilesMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem(MP_COPYFEEDBACK_US, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+	//MORPH END   - Added by IceCream, copy feedback feature
+	
 	CTitleMenu WebMenu;
 	WebMenu.CreateMenu();
 	WebMenu.AddMenuTitle(NULL, true);
@@ -1462,6 +1467,40 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					break;
 
 				}
+			//MORPH START - Added by IceCream, copy feedback feature
+ 			case MP_COPYFEEDBACK:
+			{
+				CString feed;
+				feed.AppendFormat(GetResString(IDS_FEEDBACK_FROM), thePrefs.GetUserNick(), theApp.m_strModLongVersion);
+				feed.AppendFormat(_T(" \r\n"));
+				POSITION pos = selectedList.GetHeadPosition();
+				while (pos != NULL)
+				{
+					CKnownFile* file = selectedList.GetNext(pos);
+					feed.Append(file->GetFeedback());
+					feed.Append(_T(" \r\n"));
+				}
+				//Todo: copy all the comments too
+				theApp.CopyTextToClipboard(feed);
+				break;
+			}
+			case MP_COPYFEEDBACK_US:
+			{
+				CString feed;
+				feed.AppendFormat(_T("Feedback from %s on [%s]\r\n"),thePrefs.GetUserNick(),theApp.m_strModLongVersion);
+				POSITION pos = selectedList.GetHeadPosition();
+				while (pos != NULL)
+				{
+					CKnownFile* file = selectedList.GetNext(pos);
+					feed.Append(file->GetFeedback(true));
+					feed.Append(_T("\r\n"));
+				}
+				//Todo: copy all the comments too
+				theApp.CopyTextToClipboard(feed);
+				break;
+			}
+			//MORPH END - Added by IceCream, copy feedback feature
+
 			//MORPH START - Added by SiRoB, ZZ Upload System
 			case MP_POWERSHARE_ON:
 			case MP_POWERSHARE_OFF:
@@ -2464,6 +2503,12 @@ void CSharedFilesCtrl::CreateMenues()
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC), _T("IRCCLIPBOARD"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
+
+	//MORPH START - Added by SiRoB, copy feedback feature
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_COPYFEEDBACK, GetResString(IDS_COPYFEEDBACK), _T("COPY"));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_COPYFEEDBACK_US, GetResString(IDS_COPYFEEDBACK_US), _T("COPY"));
+	m_SharedFilesMenu.AppendMenu(MF_SEPARATOR);
+	//MORPH END   - Added by SiRoB, copy feedback feature
 }
 
 void CSharedFilesCtrl::ShowComments(CKnownFile* file)

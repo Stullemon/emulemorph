@@ -74,29 +74,30 @@ static byte base16Lookup[BASE16_LOOKUP_MAX][2] = {
     { 'F', 0xF }
 };
 
-CString CastItoXBytes(uint16 count, bool isK, bool isPerSec, uint32 decimal){
-	return CastItoXBytes((double)count, isK, isPerSec, decimal);
+//MORPH - Changed by SiRoB, added flag to return US Text
+CString CastItoXBytes(uint16 count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
 }
 
-CString CastItoXBytes(uint32 count, bool isK, bool isPerSec, uint32 decimal){
-	return CastItoXBytes((double)count, isK, isPerSec, decimal);
+CString CastItoXBytes(uint32 count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
 }
 
-CString CastItoXBytes(uint64 count, bool isK, bool isPerSec, uint32 decimal){
-	return CastItoXBytes((double)count, isK, isPerSec, decimal);
+CString CastItoXBytes(uint64 count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
 }
 
-CString CastItoXBytes(float count, bool isK, bool isPerSec, uint32 decimal){
-	return CastItoXBytes((double)count, isK, isPerSec, decimal);
+CString CastItoXBytes(float count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
 }
 
-CString CastItoXBytes(double count, bool isK, bool isPerSec, uint32 decimal){
+CString CastItoXBytes(double count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
 	if( count <= 0.0 )
 	{
 		if(isPerSec)
-			return _T("0 ") + GetResString(IDS_BYTESPERSEC);
+			return isUS?_T("0 B/s"):_T("0 ") + GetResString(IDS_BYTESPERSEC);
 		else
-			return _T("0 ") + GetResString(IDS_BYTES);
+			return isUS?_T("0 Bytes"):_T("0 ") + GetResString(IDS_BYTES);
 	}
 	else if( isK )
 	{
@@ -109,28 +110,28 @@ CString CastItoXBytes(double count, bool isK, bool isPerSec, uint32 decimal){
 	if( isPerSec )
 	{
 		if (count < 1024.0)
-			buffer.Format(_T("%.0f %s"), count, GetResString(IDS_BYTESPERSEC));
+			buffer.Format(_T("%.0f %s"), count, isUS?_T("B/s"):GetResString(IDS_BYTESPERSEC));
 		else if (count < 1024000.0)
-			buffer.Format(_T("%.*f %s"), decimal, count/1024.0, GetResString(IDS_KBYTESPERSEC));
+			buffer.Format(_T("%.*f %s"), decimal, count/1024.0, isUS?_T("KB/s"):GetResString(IDS_KBYTESPERSEC));
 		else if (count < 1048576000.0)
-			buffer.Format(_T("%.*f %s"), decimal, count/1048576.0, GetResString(IDS_MBYTESPERSEC));
+			buffer.Format(_T("%.*f %s"), decimal, count/1048576.0, isUS?_T("MB/s"):GetResString(IDS_MBYTESPERSEC));
 		else if (count < 1073741824000.0)
-			buffer.Format(_T("%.*f %s"), decimal, count/1073741824.0, GetResString(IDS_GBYTESPERSEC));
+			buffer.Format(_T("%.*f %s"), decimal, count/1073741824.0, isUS?_T("GB/s"):GetResString(IDS_GBYTESPERSEC));
 		else 
-			buffer.Format(_T("%.*f %s"), decimal, count/1099511627776.0, GetResString(IDS_TBYTESPERSEC));
+			buffer.Format(_T("%.*f %s"), decimal, count/1099511627776.0, isUS?_T("TB/s"):GetResString(IDS_TBYTESPERSEC));
 	}
 	else
 	{
 		if (count < 1024.0)
-			buffer.Format(_T("%.0f %s"), count, GetResString(IDS_BYTES));
+			buffer.Format(_T("%.0f %s"), count, isUS?_T("Bytes"):GetResString(IDS_BYTES));
 		else if (count < 1024000.0)
-			buffer.Format(_T("%.*f %s"), decimal, count/1024.0, GetResString(IDS_KBYTES));
+			buffer.Format(_T("%.*f %s"), decimal, count/1024.0, isUS?_T("KB"):GetResString(IDS_KBYTES));
 		else if (count < 1048576000.0)
-			buffer.Format(_T("%.*f %s"), decimal, count/1048576.0, GetResString(IDS_MBYTES));
+			buffer.Format(_T("%.*f %s"), decimal, count/1048576.0, isUS?_T("MB"):GetResString(IDS_MBYTES));
 		else if (count < 1073741824000.0)
-			buffer.Format(_T("%.*f %s"), decimal, count/1073741824.0, GetResString(IDS_GBYTES));
+			buffer.Format(_T("%.*f %s"), decimal, count/1073741824.0, isUS?_T("GB"):GetResString(IDS_GBYTES));
 		else 
-			buffer.Format(_T("%.*f %s"), decimal, count/1099511627776.0, GetResString(IDS_TBYTES));
+			buffer.Format(_T("%.*f %s"), decimal, count/1099511627776.0, isUS?_T("TB"):GetResString(IDS_TBYTES));
 	}
 	return buffer;
 }

@@ -40,11 +40,13 @@ TCHAR *stristr(const TCHAR *str1, const TCHAR *str2);
 ///////////////////////////////////////////////////////////////////////////////
 // String conversion
 //
-CString CastItoXBytes(uint16 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
-CString CastItoXBytes(uint32 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
-CString CastItoXBytes(uint64 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
-CString CastItoXBytes(float count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
-CString CastItoXBytes(double count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
+//MOPRH START - Changed by SiRoB, Add isUS option
+CString CastItoXBytes(uint16 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
+CString CastItoXBytes(uint32 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
+CString CastItoXBytes(uint64 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
+CString CastItoXBytes(float count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
+CString CastItoXBytes(double count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
+//MOPRH END   - Changed by SiRoB, Add isUS option
 CString CastItoIShort(uint16 count, bool isK = false, uint32 decimal = 2);
 CString CastItoIShort(uint32 count, bool isK = false, uint32 decimal = 2);
 CString CastItoIShort(uint64 count, bool isK = false, uint32 decimal = 2);

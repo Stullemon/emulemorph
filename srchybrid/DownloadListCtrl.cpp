@@ -2278,22 +2278,14 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				{
 					CString feed;
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_FROM), thePrefs.GetUserNick(), theApp.m_strModLongVersion);
-					feed.AppendFormat(_T(" \r\n"));
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_FILENAME), file->GetFileName());
-					feed.AppendFormat(_T(" \r\n"));
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_FILETYPE), file->GetFileType());
-					feed.AppendFormat(_T(" \r\n"));
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_FILESIZE), (file->GetFileSize()/1048576));
-					feed.AppendFormat(_T(" \r\n"));
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_DOWNLOADED), (file->GetCompletedSize()/1048576));
-					feed.AppendFormat(_T(" \r\n"));
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_TOTAL), file->GetSourceCount());
-					feed.AppendFormat(_T(" \r\n"));
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_AVAILABLE),(file->GetAvailableSrcCount()));
-					feed.AppendFormat(_T(" \r\n"));
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_NONEEDPART), file->GetSrcStatisticsValue(DS_NONEEDEDPARTS));
-					feed.AppendFormat(_T(" \r\n"));
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_COMPLETE), file->m_nCompleteSourcesCount);
+					feed.Append(_T(" \r\n"));
+					POSITION pos = selectedList.GetHeadPosition();
+					while (pos != NULL)
+					{			
+						CKnownFile* file = selectedList.GetNext(pos);
+						feed.Append(file->GetFeedback());
+						feed.Append(_T("\r\n"));
+					}
 					//Todo: copy all the comments too
 					theApp.CopyTextToClipboard(feed);
 					break;
@@ -2301,16 +2293,14 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				case MP_COPYFEEDBACK_US:
 				{
 					CString feed;
-					feed.AppendFormat(_T("Feedback from %s "),thePrefs.GetUserNick());
-					feed.AppendFormat(_T("on [%s] \r\n"),theApp.m_strModLongVersion);
-					feed.AppendFormat(_T("File Name: %s \r\n"),file->GetFileName());
-					feed.AppendFormat(_T("File Type: %s \r\n"),file->GetFileType());
-					feed.AppendFormat(_T("Size: %i Mo\r\n"), (file->GetFileSize()/1048576));
-					feed.AppendFormat(_T("Downloaded: %i Mo\r\n"), (file->GetCompletedSize()/1048576));
-					feed.AppendFormat(_T("Total sources: %i \r\n"),file->GetSourceCount());
-					feed.AppendFormat(_T("Available sources : %i \r\n"),(file->GetAvailableSrcCount()));
-					feed.AppendFormat(_T("No Need Part sources: %i \r\n"),file->GetSrcStatisticsValue(DS_NONEEDEDPARTS));
-					feed.AppendFormat(_T("Estimate Complete source: %i \r\n"),file->m_nCompleteSourcesCount);
+					feed.AppendFormat(_T("Feedback from %s on [%s]\r\n"),thePrefs.GetUserNick(),theApp.m_strModLongVersion);
+					POSITION pos = selectedList.GetHeadPosition();
+					while (pos != NULL)
+					{
+						CKnownFile* file = selectedList.GetNext(pos);
+						feed.Append(file->GetFeedback(true));
+						feed.Append(_T("\r\n"));
+					}
 					//Todo: copy all the comments too
 					theApp.CopyTextToClipboard(feed);
 					break;

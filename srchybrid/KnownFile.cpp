@@ -2551,7 +2551,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 
 	if (IsPartFile())
 		for (i = 0; i < realparts; i++)
-			if (!((CPartFile*)this)->IsComplete(i*PARTSIZE,((i+1)*PARTSIZE)-1)){
+			if (!((CPartFile*)this)->IsPartShareable(i)){	// SLUGFILLER: SafeHash
 				partsavail[i] = false;
 				usepartsavail = true;
 			}
@@ -2633,7 +2633,12 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 
 	bool resetSentCount = false;
 	
+	//MORPH START - Changed by SiRoB, -HotFix-
+	/*
 	if (m_PartSentCount.GetSize() != partspread.GetSize())
+	*/
+	if (m_PartSentCount.GetSize() != partspread.GetSize() && m_PartSentCount.GetSize() != 0)
+	//MORPH END   - Changed by SiRoB, -HotFix-
 		resetSentCount = true;
 	else {
 		min = hideOS;
@@ -2844,3 +2849,45 @@ return returncounter;
 }
 //JP webcache release END
 // MORPH END - Added by Commander, WebCache 1.2e
+
+//MORPH START - Added by SiRoB, copy feedback feature
+CString CKnownFile::GetFeedback(bool isUS)
+{
+	CString feed;
+	if (isUS)
+	{
+		feed.AppendFormat(_T("File name: %s\r\n"),GetFileName());
+		feed.AppendFormat(_T("File type: %s\r\n"),GetFileType());
+		feed.AppendFormat(_T("Size: %s\r\n"), CastItoXBytes(GetFileSize(),false,false,3,true));
+		if(IsPartFile())
+			feed.AppendFormat(_T("Downloaded: %s\r\n"), CastItoXBytes(((CPartFile*)this)->GetCompletedSize(),false,false,3));
+		feed.AppendFormat(_T("Transfered: %s (%s)\r\n"), CastItoXBytes(statistic.GetTransferred(),false,false,3,true), CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3,true)); 
+		feed.AppendFormat(_T("Requested: %i (%i)\r\n"), statistic.GetRequests(), statistic.GetAllTimeRequests()); 
+		feed.AppendFormat(_T("Accepted Requests: %i (%i)\r\n"), statistic.GetAccepts(),statistic.GetAllTimeAccepts()); 
+		if(IsPartFile()){
+			feed.AppendFormat(_T("Total sources: %i \r\n"),((CPartFile*)this)->GetSourceCount());
+			feed.AppendFormat(_T("Available sources : %i \r\n"),((CPartFile*)this)->GetAvailableSrcCount());
+			feed.AppendFormat(_T("No Need Part sources: %i \r\n"),((CPartFile*)this)->GetSrcStatisticsValue(DS_NONEEDEDPARTS));
+		}
+		feed.AppendFormat(_T("Complete sources: %i (%i)\r\n"),m_nCompleteSourcesCount, m_nVirtualCompleteSourcesCount);
+	}
+	else
+	{
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILENAME), GetFileName()); feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILETYPE), GetFileType()); feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILESIZE), CastItoXBytes(GetFileSize(),false,false,3)); feed.Append(_T(" \r\n"));
+		if(IsPartFile())
+			feed.AppendFormat(GetResString(IDS_FEEDBACK_DOWNLOADED), CastItoXBytes(((CPartFile*)this)->GetCompletedSize(),false,false,3)); feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_TRANSFERED), CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3),CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3)); feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_REQUESTED), statistic.GetRequests(), statistic.GetAllTimeRequests()); feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_ACCEPTED), statistic.GetAccepts() , statistic.GetAllTimeAccepts()); feed.Append(_T(" \r\n"));
+		if(IsPartFile()){
+			feed.AppendFormat(GetResString(IDS_FEEDBACK_TOTAL), ((CPartFile*)this)->GetSourceCount()); feed.Append(_T(" \r\n"));
+			feed.AppendFormat(GetResString(IDS_FEEDBACK_AVAILABLE), ((CPartFile*)this)->GetAvailableSrcCount()); feed.Append(_T(" \r\n"));
+			feed.AppendFormat(GetResString(IDS_FEEDBACK_NONEEDPART), ((CPartFile*)this)->GetSrcStatisticsValue(DS_NONEEDEDPARTS)); feed.Append(_T(" \r\n"));
+		}
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_COMPLETE), m_nCompleteSourcesCount, m_nVirtualCompleteSourcesCount); feed.Append(_T(" \r\n"));
+	}
+	return feed;
+}
+//MORPH END   - Added by SiRoB, copy feedback feature

@@ -373,7 +373,10 @@ public:
 	void    SetLastCalculatedCRC32 (const LPCTSTR _CRC) {_tcscpy (m_sCRC32,_CRC);}
 
 	// [end] Mighty Knife
-
+	//
+	//MORPH START - Added by SiRoB, copy feedback feature
+	CString GetFeedback(bool isUS = false);
+	//MORPH END   - Added by SiRoB, copy feedback feature
 protected:
 	//preview
 	bool	GrabImage(CString strFileName,uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);

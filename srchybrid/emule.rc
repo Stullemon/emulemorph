@@ -12,12 +12,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(950)
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1809,7 +1809,7 @@ BEGIN
     CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
                     IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,7,37,197,10
-    CONTROL         "Convert wrong apostrophes ""¡¦"", ""`"" to standard apostrophes "" ' """,
+    CONTROL         "Convert wrong apostrophes ""’"", ""`"" to standard apostrophes "" ' """,
                     IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
@@ -2885,33 +2885,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (Taiwan) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
-#ifdef _WIN32
-LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
-#pragma code_page(950)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-
-#endif    // Chinese (Taiwan) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4868,6 +4847,10 @@ BEGIN
     IDS_HTTP_IPFILTERCAPTION "Updating IPFilter.dat"
     IDS_IPFILTER_PERCENTAGE "Updating IPFilter.dat: %s%% of %s completed"
     IDS_REMTIMEAVRREAL      "Remaining time display"
+    IDS_UPL_DL              "Upload/Download"
+    IDS_LISTREQUESTED       "List requested files"
+    IDS_LISTREQDL           "List of downloading files:"
+    IDS_LISTREQUL           "List of uploading files:"
 END
 
 STRINGTABLE 
@@ -4877,10 +4860,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPL_DL              "Upload/Download"
-    IDS_LISTREQUESTED       "List requested files"
-    IDS_LISTREQDL           "List of downloading files:"
-    IDS_LISTREQUL           "List of uploading files:"
     IDS_LISTREQNODL         "This user is not in download queue!!!"
     IDS_LISTREQNOUL         "This user is not in waiting queue!!!"
     IDS_CORRUPTDATASENT     "User '%s' (IP %s:%i), hash %s, client=%s added temporarily to the filtered list because corrupt data send"
@@ -4898,11 +4877,18 @@ BEGIN
     IDS_SUSPECTHAsHCHANGE   "Client '%s' using the mod '%s' changed hash, ip %i.%i.%i.%i:%i, suspicious actions: %i (%i in total/%i clients)!"
     IDS_FINPARTNUMOFFILE    "Finished part %u of '%s'"
     IDS_COMPLETESOURCES     "Complete sources"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FEEDBACK_TRANSFERED "Transfered: %s (%s)"
+    IDS_FEEDBACK_REQUESTED  "Requested: %i (%i)"
+    IDS_FEEDBACK_ACCEPTED   "Accepted Requests: %i (%i)"
     IDS_FEEDBACK_FROM       "Feedback from %s on [%s]"
     IDS_FEEDBACK_FILENAME   "File name: %s"
     IDS_FEEDBACK_FILETYPE   "File type: %s"
-    IDS_FEEDBACK_FILESIZE   "Size: %i MB"
-    IDS_FEEDBACK_DOWNLOADED "Downloaded: %i MB"
+    IDS_FEEDBACK_FILESIZE   "Size: %s"
+    IDS_FEEDBACK_DOWNLOADED "Downloaded: %s"
 END
 
 STRINGTABLE 
@@ -4910,7 +4896,7 @@ BEGIN
     IDS_FEEDBACK_TOTAL      "Total sources: %i"
     IDS_FEEDBACK_AVAILABLE  "Available sources : %i"
     IDS_FEEDBACK_NONEEDPART "No Needed Part sources: %i"
-    IDS_FEEDBACK_COMPLETE   "Estimated complete sources: %i"
+    IDS_FEEDBACK_COMPLETE   "Complete sources: %i (%i)"
     IDS_COPYFEEDBACK_US     "Copy feedback to clipboard (US)"
     IDS_UPDATEFAKES         "Update fake list"
     IDS_FAKECHECKUPERROR    "Error updating fake list list"
@@ -5321,7 +5307,7 @@ BEGIN
     IDS_POWERSHAER_INTERPRIO "Enable PS internal File Prio"
 END
 
-#endif    // English (U.S.) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
