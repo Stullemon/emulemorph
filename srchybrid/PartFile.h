@@ -148,6 +148,10 @@ public:
 	uint32	Process(uint32 reducedownload, uint8 m_icounter, uint32 friendReduceddownload);
 	uint8		LoadPartFile(LPCTSTR in_directory, LPCTSTR filename,bool getsizeonly=false); //filename = *.part.met
 //	uint8	ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename , bool getsizeonly);
+	//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash
+	bool	IsPartShareable(uint16 partnumber) const;
+	bool	IsRangeShareable(uint32 start, uint32 end) const;
+	//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
 
 	bool	SavePartFile();
 	void	PartFileHashFinished(CKnownFile* result);
@@ -416,6 +420,9 @@ private:
 	CTypedPtrList<CPtrList, Gap_Struct*> gaplist;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> requestedblocks_list;
 	CArray<uint16,uint16> m_SrcpartFrequency;
+	// SLUGFILLER: SafeHash
+	CArray<bool,bool> m_PartsShareable;
+	// SLUGFILLER: SafeHash
 	float	percentcompleted;
 	CList<uint16,uint16>	corrupted_list;
 	uint32	m_ClientSrcAnswered;

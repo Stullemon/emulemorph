@@ -490,8 +490,25 @@ void CPartFile::CreatePartFile()
 	if (m_dwFileAttributes == INVALID_FILE_ATTRIBUTES)
 		m_dwFileAttributes = 0;
 
+	//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash - setting at the hotspot
+	/*
 	if (GetED2KPartHashCount() == 0)
 		hashsetneeded = false;
+	*/
+	if (GetED2KPartCount() > 1)
+		hashsetneeded = true;
+	else {
+		hashsetneeded = false;
+		uchar* cur_hash = new uchar[16];
+		md4cpy(cur_hash, m_abyFileHash);
+		hashlist.Add(cur_hash);
+	}
+
+	// the important part
+	m_PartsShareable.SetSize(GetPartCount());
+	for (uint32 i = 0; i < GetPartCount();i++)
+		m_PartsShareable[i] = false;
+	//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
 
 	m_SrcpartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
@@ -1038,6 +1055,22 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		}
 		// SLUGFILLER: SafeHash
 
+		//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash - ignore loaded hash for 1-chunk files
+		if (GetED2KPartCount() <= 1) {
+			for (int i = 0; i < hashlist.GetSize(); i++)
+				delete[] hashlist[i];
+			hashlist.RemoveAll();
+			uchar* cur_hash = new uchar[16];
+			md4cpy(cur_hash, m_abyFileHash);
+			hashlist.Add(cur_hash);
+		}
+
+		// the important part
+		m_PartsShareable.SetSize(GetPartCount());
+		for (uint32 i = 0; i < GetPartCount();i++)
+			m_PartsShareable[i] = false;
+		//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash - ignore loaded hash for 1-chunk files
+
 		m_SrcpartFrequency.SetSize(GetPartCount());
 		for (uint32 i = 0; i != GetPartCount();i++)
 			m_SrcpartFrequency[i] = 0;
@@ -1104,6 +1137,13 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 				else
 					SetStatus(PS_ERROR);
 			}
+			//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash - update completed, even though unchecked
+			else {
+				for (int i = 0; i < GetPartCount(); i++)
+					if (IsComplete(i*PARTSIZE,((i+1)*PARTSIZE)-1))
+						m_PartsShareable[i] = true;
+			}
+			//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
 		}
 	}
 	catch(CFileException* error){
@@ -2143,7 +2183,7 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 		for (UINT i = 0; i < 8; i++){
 			if (partspread[done] < hideOS)	// SLUGFILLER: hideOS
 			{//MORPH - Added by SiRoB, See chunk that we hide
-				if (IsComplete(done*PARTSIZE,((done+1)*PARTSIZE)-1))	// SLUGFILLER: SafeHash
+				if (IsPartShareable(done))	// SLUGFILLER: SafeHash
 					towrite |= (1<<i);
 			//MORPH START - Added by SiRoB, See chunk that we hide
 			}else
@@ -4709,7 +4749,9 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 				{
 					LogWarning(LOG_STATUSBAR, GetResString(IDS_ERR_PARTCORRUPT), partNumber, GetFileName());
 					AddGap(PARTSIZE*partNumber, PARTSIZE*partNumber + partRange);
-
+					//MORPH START - Added by SiRoB, SafeHash
+                    m_PartsShareable[partNumber] = false;
+					//MORPH END   - Added by SiRoB, SafeHash
 					// add part to corrupted list, if not already there
 					if (!IsCorruptedPart(partNumber))
 						corrupted_list.AddTail(partNumber);
@@ -4731,6 +4773,9 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 					POSITION posCorrupted = corrupted_list.Find(partNumber);
 					if (posCorrupted)
 						corrupted_list.RemoveAt(posCorrupted);
+					//MORPH START - Added by SiRoB, SafeHash
+                    m_PartsShareable[partNumber] = true;
+					//MORPH END   - Added by SiRoB, SafeHash
 
 					if (status == PS_EMPTY)
 					{
@@ -4765,7 +4810,9 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 						corrupted_list.RemoveAt(posCorrupted);
 
 					AddLogLine(true, GetResString(IDS_ICHWORKED) , partNumber, GetFileName(), CastItoXBytes(uMissingInPart, false, false));
-
+					//MORPH START - Added by SiRoB, SafeHash
+                    m_PartsShareable[partNumber] = true;
+					//MORPH END   - Added by SiRoB, SafeHash
 					if (status == PS_EMPTY)
 					{
 						if (theApp.emuledlg->IsRunning()) // may be called during shutdown!
@@ -6078,6 +6125,9 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 			// now we are fu... unhappy
 			m_pAICHHashSet->SetStatus(AICH_ERROR);
 			AddGap(PARTSIZE*nPart, ((nPart*PARTSIZE)+length)-1);
+			//MORPH START - Added by SiRoB, SafeHash
+            m_PartsShareable[nPart] = false;
+			//MORPH END   - Added by SiRoB, SafeHash
 			ASSERT( false );
 			return;
 		}
@@ -6089,6 +6139,9 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 			POSITION posCorrupted = corrupted_list.Find(nPart);
 			if (posCorrupted)
 				corrupted_list.RemoveAt(posCorrupted);
+			//MORPH START - Added by SiRoB, SafeHash
+            m_PartsShareable[nPart] = true;
+			//MORPH END   - Added by SiRoB, SafeHash
 			if (status == PS_EMPTY && theApp.emuledlg->IsRunning()){
 				if (GetHashCount() == GetED2KPartHashCount() && !hashsetneeded){
 					// Successfully recovered part, make it available for sharing
@@ -6112,6 +6165,27 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 
 }
 
+//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash
+bool CPartFile::IsPartShareable(uint16 partnumber) const
+{
+	if (partnumber < GetPartCount())
+		return m_PartsShareable[partnumber];
+	else
+		return false;
+}
+
+bool CPartFile::IsRangeShareable(uint32 start, uint32 end) const
+{
+	uint16 first = start/PARTSIZE;
+	uint16 last = end/PARTSIZE+1;
+	if (last > GetPartCount() || first >= last)
+		return false;
+	for (uint16 i = first; i < last; i++)
+		if (!m_PartsShareable[i])
+			return false;
+	return true;
+}
+//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
 //Morph Start - added by AndCycle, ICS
 // Pawcio for enkeyDev: ICS
 uint16* CPartFile::CalcDownloadingParts(CUpDownClient* client){	//<<-- Pawcio for enkeyDEV -ICS-
