@@ -17,6 +17,8 @@
 #pragma once
 #include "loggable.h"
 
+struct DynDNS_Struct;
+
 class CDynDNS: public CLoggable
 {
 public:
