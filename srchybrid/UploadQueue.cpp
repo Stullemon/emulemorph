@@ -414,7 +414,7 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()) ){
 			RemoveFromWaitingQueue(pos2,true);	
 			if (!cur_client->socket)
-			cur_client->Disconnected("Socket it NULL. 1");
+				cur_client->Disconnected("Socket it NULL. 1");
 		} else {
 			// finished clearing
 			uint32 cur_score = cur_client->GetScore(false);
@@ -527,9 +527,12 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 				uploadingClient->MoreUpThanDown() == newclient->MoreUpThanDown() && //EastShare - added by AndCycle, PayBackFirst
 				(
 					uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == false ||
-					uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == true && uploadingClient->GetFilePrioAsNumber() >= newclient->GetFilePrioAsNumber() ||
-					uploadingClient->GetPowerShared() == false && newclient->GetPowerShared() == false
-				) &&
+					uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == true && uploadingClient->GetFilePrioAsNumber() > newclient->GetFilePrioAsNumber() ||
+					(
+						uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == true && uploadingClient->GetFilePrioAsNumber() == newclient->GetFilePrioAsNumber() ||
+						uploadingClient->GetPowerShared() == false && newclient->GetPowerShared() == false
+					)
+				)&&
 				(
 					!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
 					newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
@@ -595,11 +598,10 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 
 					if (
 						(newclient->IsFriend() && newclient->GetFriendSlot()) == true && (lastClient->IsFriend() && lastClient->GetFriendSlot()) == false ||
-						(
-							(newclient->IsFriend() && newclient->GetFriendSlot()) == (lastClient->IsFriend() && lastClient->GetFriendSlot()) &&
+						(newclient->IsFriend() && newclient->GetFriendSlot()) == (lastClient->IsFriend() && lastClient->GetFriendSlot()) &&
 							(//EastShare - added by AndCycle, PayBackFirst
 								newclient->MoreUpThanDown() == true && lastClient->MoreUpThanDown() == false ||
-								newclient->MoreUpThanDown() == lastClient->MoreUpThanDown()) &&
+								newclient->MoreUpThanDown() == lastClient->MoreUpThanDown() &&
 								(
 									newclient->GetPowerShared() == true && lastClient->GetPowerShared() == false ||
 									newclient->GetPowerShared() == true && lastClient->GetPowerShared() == true && newclient->GetFilePrioAsNumber() > lastClient->GetFilePrioAsNumber()
@@ -1038,7 +1040,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	client->SendRankingInfo();
 }
 
-float CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
+double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 	DWORD curTick = ::GetTickCount();
 
 	if (curTick - m_dwLastCalculatedAverageCombinedFilePrioAndCredit > 5*1000) {
