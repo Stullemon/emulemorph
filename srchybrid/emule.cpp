@@ -446,7 +446,7 @@ bool CemuleApp::ProcessCommandline()
 		}
     }
     // khaos::removed: return (maininst || bAlreadyRunning);
-	return false || strlen(MOD_VERSION)>12; // khaos::multiple_instances
+	return false || strlen(MOD_VERSION)>13; // khaos::multiple_instances
 }
 
 BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
