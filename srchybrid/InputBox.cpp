@@ -58,6 +58,18 @@ END_MESSAGE_MAP()
 
 void InputBox::OnOK()
 {	char buffer[510];
+	//kahos +
+	CWnd* textBox;
+	if (!isNumber) textBox = GetDlgItem(IDC_TEXT);
+	else textBox = GetDlgItem(IDC_TEXTNUM);
+
+	if(textBox->GetWindowTextLength())
+	{ 
+		textBox->GetWindowText(buffer,510);
+		m_return.Format("%s",buffer);
+	}
+	CDialog::OnOK();
+	/*//original
 	m_cancel=false;
 	if(GetDlgItem(IDC_TEXT)->GetWindowTextLength())
 	{ 
@@ -65,7 +77,10 @@ void InputBox::OnOK()
 		m_return.Format("%s",buffer);
 	}
 	CDialog::OnOK();
+	*/
+	//kahos -
 }
+
 
 // khaos::categorymod+
 void InputBox::OnCancel()
