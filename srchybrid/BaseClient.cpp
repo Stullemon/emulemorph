@@ -477,8 +477,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 				m_fSharedDirectories = 1;
 				dwEmuleTags |= 4;
 				break;
-//EastShare - commented out by AndCycle, just keep the rule until Kad is ready to go.
-/*				
 			//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 			case ET_MOD_VERSION: 
 				if( temptag.tag.stringvalue ){
@@ -489,7 +487,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 				}
 				break;
 			//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
-*/
 		}
 	}
 	m_nUserPort = nUserPort;
@@ -888,8 +885,6 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 				);
 	tagMuleVersion.WriteTagToFile(data);
 
-//EastShare - commented out by AndCycle, just keep the rule until Kad is ready to go.
-/*
 	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
 	//MORPH START - Added by SiRoB, Anti-leecher feature
 	if (StrStrI(m_clientModString,"Mison")||StrStrI(m_clientModString,"eVort")||StrStrI(m_clientModString,"booster")||IsLeecher())
@@ -904,7 +899,6 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 	}
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
 	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
-*/	
 
 	uint32 dwIP;
 	if (theApp.serverconnect->IsConnected()){

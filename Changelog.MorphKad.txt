@@ -23,7 +23,6 @@ TWEAKED: PowerShare Limit more occurate [SiRoB]
 CHANGED: reduce HD head moving (bluecow)[AndCycle]
 ADDED: Estimate Download Time(enkeyDEV)[AndCycle]
 ADDED: Lowid to Highid Automatic Callback(enkeyDEV)[AndCycle]
-REMOVED: ET_MOD_VERSION tag at Kad protocol
 
 
 ----------------------------------------
