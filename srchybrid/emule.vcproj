@@ -27,7 +27,7 @@
 				RuntimeLibrary="1"
 				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
-				TreatWChar_tAsBuiltInType="TRUE"
+				TreatWChar_tAsBuiltInType="FALSE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -2026,6 +2026,9 @@
 				RelativePath="res\eD2kLinkPaste.ico">
 			</File>
 			<File
+				RelativePath=".\res\Empty.ico">
+			</File>
+			<File
 				RelativePath="res\emule.manifest">
 			</File>
 			<File
@@ -2060,6 +2063,9 @@
 			</File>
 			<File
 				RelativePath="res\FileComments.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileCommentsOvl.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\FileCRC32.ico">
@@ -2113,10 +2119,40 @@
 				RelativePath=".\res\Mod\FileRequested.ico">
 			</File>
 			<File
+				RelativePath=".\res\FileSharedKad.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileSharedServer.ico">
+			</File>
+			<File
 				RelativePath=".\res\Mod\FileShareONlyTheNeed.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\FileSpreadbar.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileTypeAny.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileTypeArchive.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileTypeAudio.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileTypeCDImage.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileTypeDocument.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileTypePicture.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileTypeProgram.ico">
+			</File>
+			<File
+				RelativePath=".\res\FileTypeVideo.ico">
 			</File>
 			<File
 				RelativePath="res\FolderOpen.ico">
@@ -2540,6 +2576,9 @@
 				RelativePath="res\WideCharLowerMap.bin">
 			</File>
 			<File
+				RelativePath=".\res\Wizard.ico">
+			</File>
+			<File
 				RelativePath="res\Wizzard.ico">
 			</File>
 		</Filter>
@@ -2587,6 +2626,33 @@
 				RelativePath="WapServer\WebWapDefinitions.h">
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\res\Connected.gif">
+		</File>
+		<File
+			RelativePath=".\res\Download.gif">
+		</File>
+		<File
+			RelativePath=".\res\FileInfo.gif">
+		</File>
+		<File
+			RelativePath=".\res\FolderOpen.gif">
+		</File>
+		<File
+			RelativePath=".\res\HardDisk.gif">
+		</File>
+		<File
+			RelativePath=".\res\MiniMuleBack.gif">
+		</File>
+		<File
+			RelativePath=".\res\Preferences.gif">
+		</File>
+		<File
+			RelativePath=".\res\RestoreWindow.gif">
+		</File>
+		<File
+			RelativePath=".\res\Upload.gif">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
