@@ -5331,11 +5331,11 @@ STRINGTABLE
 BEGIN
     IDS_CRC32_ABORT         "Abort calculation"
     IDS_DONTREMOVESPARETRICKLESLOT "Don't remove spare trickle slot"
-    IDS_MINDATARATEFRIEND   "Global datarate (Default 0kB/s=unlimited)"
-    IDS_MINDATARATEPOWERSHARE "Global datarate (Default 0kB/s=unlimited)"
-    IDS_MAXCLIENTDATARATEFRIEND "Max client datarate (0kB/s=unlimited)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Max client datarate (0kB/s=unlimited)"
-    IDS_MAXCLIENTDATARATE   "Max client datarate (0kB/s=unlimited)"
+    IDS_MINDATARATEFRIEND   "Global datarate (0kB/s = unlimited, 1...3kB/s = no zzRatio)"
+    IDS_MINDATARATEPOWERSHARE "Global datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATEFRIEND "Max client datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Max client datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATE   "Max client datarate (0kB/s = unlimited)"
     IDS_DISPLAYFUNNYNICK    "Enable FunnyNick display"
 END
 
