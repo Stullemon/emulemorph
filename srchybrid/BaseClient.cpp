@@ -459,7 +459,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			return _T("Bad MODSTRING detected");
 		}
 	}
-	else if (old_m_pszUsername != m_pszUsername)
+	if (old_m_pszUsername != m_pszUsername)
 	{
 		if (StrStrI(m_pszUsername,_T("$GAM3R$"))||
 			StrStrI(m_pszUsername,_T("G@m3r"))||
@@ -493,6 +493,12 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			old_m_pszUsername = m_pszUsername;
 			return _T("Bad USERNAME detected");
 		}
+	//MOPRH START - Added by SiRoB, GhostMod
+	}
+	if (m_bNotOfficial == true && m_strModVersion.IsEmpty() == true && m_clientSoft == SO_EMULE && m_nClientVersion <= MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE)){
+		
+		return _T("Ghost Mod Detected");
+	//MOPRH END  - Added by SiRoB, GhostMod
 	}else if (IsLeecher())
 		return _T("Allready Known");
 	return NULL;
@@ -568,6 +574,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	uint32 tagcount = data->ReadUInt32();
 	if (bDbgInfo)
 		m_strHelloInfo.AppendFormat(_T("  Tags=%u"), tagcount);
+	m_bNotOfficial = false; //MOPRH - Added by SiRoB, GhostMod
 	for (uint32 i = 0;i < tagcount; i++){
 		CTag temptag(data, true);
 		switch (temptag.GetNameID()){
@@ -600,6 +607,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				nUserPort = temptag.GetInt();
 				break;
 			case CT_MOD_VERSION:
+				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
@@ -617,10 +625,12 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 			// MORPH START - Added by Commander, WebCache 1.2e
 			case WC_TAG_VOODOO:
+				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
 				if( temptag.IsInt() && temptag.GetInt() == 'ARC4' )
 					m_bWebCacheSupport = true;
 				break;
 			case WC_TAG_FLAGS:
+				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
 				if (m_bWebCacheSupport && temptag.IsInt())
 				{
 					m_uWebCacheFlags = temptag.GetInt();
@@ -701,6 +711,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			//Morph Start - added by AndCycle, ICS
 			// enkeyDEV: ICS
 			case ET_INCOMPLETEPARTS:
+				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
 				m_incompletepartVer = temptag.GetInt();
 				break;
 			// <--- enkeyDEV: ICS
@@ -950,7 +961,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 {
 	bool bDbgInfo = thePrefs.GetUseDebugDevice();
 	m_strMuleInfo.Empty();
-
+	
 	CSafeMemFile data((BYTE*)pachPacket,nSize);
 	m_byCompatibleClient = 0;
 	m_byEmuleVersion = data.ReadUInt8();
@@ -990,6 +1001,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 	uint32 tagcount = data.ReadUInt32();
 	if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("  Tags=%u"), (UINT)tagcount);
+	m_bNotOfficial = false; //MOPRH - Added by SiRoB, GhostMod
 	for (uint32 i = 0;i < tagcount; i++){
 		CTag temptag(&data, false);
 		switch (temptag.GetNameID()){
@@ -1052,6 +1064,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 					m_strMuleInfo.AppendFormat(_T("\n  SecIdent=%u  Preview=%u"), m_bySupportSecIdent, m_fSupportsPreview);
 				break;
  			case ET_MOD_VERSION: 
+				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
@@ -1070,6 +1083,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 			//Morph Start - added by AndCycle, ICS
 			// enkeyDEV: ICS
 			case ET_INCOMPLETEPARTS:
+				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
 				m_incompletepartVer = temptag.GetInt();
 				break;
 			// <--- enkeyDEV: ICS
@@ -2795,22 +2809,22 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 			break;
 	}
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	switch (m_ePeerCacheDownState)
 	{
 	case PCDS_WAIT_CLIENT_REPLY:
-		strState += _T(" ")+GetResString(IDS_PCDS_CLIENTWAIT);
+		strState += _T(" Peer")+GetResString(IDS_PCDS_CLIENTWAIT);
 		break;
 	case PCDS_WAIT_CACHE_REPLY:
-		strState += _T(" ")+GetResString(IDS_PCDS_CACHEWAIT);
+		strState += _T(" Peer")+GetResString(IDS_PCDS_CACHEWAIT);
 		break;
 	case PCDS_DOWNLOADING:
-		strState += _T(" ")+GetResString(IDS_CACHE);
+		strState += _T(" Peer")+GetResString(IDS_CACHE);
 		break;
 	}
 	if (m_ePeerCacheDownState != PCDS_NONE && m_bPeerCacheDownHit)
 		strState += _T(" Hit");
-#endif
+//#endif
 
 	// MORPH START - Added by Commander, WebCache 1.2e
 	switch (m_eWebCacheDownState)
@@ -2865,19 +2879,19 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 			break;
 	}
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	switch (m_ePeerCacheUpState)
 	{
 	case PCUS_WAIT_CACHE_REPLY:
-		strState += _T(" CacheWait");
+		strState += _T(" PeerCacheWait");
 		break;
 	case PCUS_UPLOADING:
-		strState += _T(" Cache");
+		strState += _T(" PeerCache");
 		break;
 	}
 	if (m_ePeerCacheUpState != PCUS_NONE && m_bPeerCacheUpHit)
 		strState += _T(" Hit");
-#endif
+//#endif
 
 	// MORPH START - Added by Commander, WebCache 1.2e
 	if( m_eWebCacheUpState == WCUS_UPLOADING )
@@ -3000,7 +3014,7 @@ void CUpDownClient::ProcessUnknownHelloTag(CTag *tag)
 {
 if (!thePrefs.GetEnableAntiLeecher() || IsLeecher())
 	return;
-
+m_bNotOfficial = true;
 LPCTSTR strSnafuTag=NULL;
 switch(tag->GetNameID())
 	{
@@ -3015,8 +3029,8 @@ switch(tag->GetNameID())
 	case CT_UNKNOWNx79:			strSnafuTag=apszSnafuTag[4];break;//buffer=_T("Bionic");break;
 	case CT_UNKNOWNx88:
 		////If its a LSD its o.k
-		//if (m_strModVersion.IsEmpty() || !stristrex(((CString)m_strModVersion).Left(3),"lsd"))
-		//	strSnafuTag=apszSnafuTag[5];//[LSD7c]
+		if (m_strModVersion.IsEmpty() || _tcsnicmp(m_strModVersion, _T("LSD"),3)!=0)
+			strSnafuTag=apszSnafuTag[5];//[LSD7c]
 		break;
 	case CT_UNKNOWNx8c:			strSnafuTag=apszSnafuTag[5];break;//buffer=_T("[LSD7c]");break; 
 	case CT_UNKNOWNx8d:			strSnafuTag=apszSnafuTag[6];break;//buffer=_T("[0x8d] unknown Leecher - (client version:60)");break;
@@ -3025,11 +3039,11 @@ switch(tag->GetNameID())
 	case CT_FRIENDSHARING:		//STRIKE BACK
 		//if (theApp.glob_prefs->GetAntiFriendshare())
 		//	{
-		//	if (tag->tag.type==TAGTYPE_UINT32 && tag->tag.intvalue == FRIENDSHARING_ID) //Mit dieser ID Definitiv
-		//		{
-		//		DoSnafu(snafu_friendsharemod,false,false);
-		//		return;				
-		//		}
+			if (tag->IsInt() && tag->GetInt() == FRIENDSHARING_ID) //Mit dieser ID Definitiv
+				{
+					BanLeecher(_T("Friend Sharing detected"));
+					return;				
+				}
 		//	}
 		break;
 	case CT_DARK:				//STRIKE BACK				

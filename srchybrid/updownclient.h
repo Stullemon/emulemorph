@@ -881,8 +881,8 @@ protected:
 
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bIsMorph; //MORPH - Added by SiRoB, Is Morph client?
-	bool		m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
-
+	bool	m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
+	bool    m_bNotOfficial; //MORPH - Added by SiRoB, Anti Ghost Mod
 	////////////////////////////////////////////////////////////////////////
 	// Upload
 	//
@@ -1082,6 +1082,8 @@ static LPCTSTR apszSnafuTag[] =
 #define CT_UNKNOWNxc4			0xc4 //MD5 Community from new bionic - hello
 #define CT_FRIENDSHARING		0x66 //eWombat  [SNAFU]
 #define CT_DARK					0x54 //eWombat [SNAFU]
+#define FRIENDSHARING_ID 0x5F73F1A0 // Magic Key, DO NOT CHANGE!
+
 // unknown eMule tags
 #define ET_MOD_UNKNOWNx12		0x12 // http://www.haspepapa-welt.de
 #define ET_MOD_UNKNOWNx13		0x13 // http://www.haspepapa-welt.de
