@@ -379,13 +379,14 @@ void CDownloadQueue::AddFileLinkToDownload(CED2KFileLink* pLink, int theCat, boo
 
 	int useCat = theCat;
 
-	if (thePrefs.UseAutoCat() && useCat == -1)
-		useCat = theApp.downloadqueue->GetAutoCat(CString(pLink->GetName()), (ULONG)pLink->GetSize());
-	else if (thePrefs.UseActiveCatForLinks() && useCat == -1)
-		useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
-	else if (useCat == -1)
-		useCat = 0;
-
+	if (useCat == -1){
+		if (thePrefs.UseAutoCat())
+			useCat = theApp.downloadqueue->GetAutoCat(CString(pLink->GetName()), (ULONG)pLink->GetSize());
+		else if (thePrefs.UseActiveCatForLinks())
+			useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
+		else
+			useCat = 0;
+	}
 	// Just in case...
 	if (m_ED2KLinkQueue.GetCount() && !thePrefs.SelectCatForNewDL()) PurgeED2KLinkQueue();
 	m_iLastLinkQueuedTick = 0;

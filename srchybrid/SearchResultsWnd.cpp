@@ -41,6 +41,7 @@
 #include "Scanner.h"
 #include "HelpIDs.h"
 #include "Exceptions.h"
+#include "TransferWnd.h" //MORPH - Added by SiRoB, Selective Category
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -81,6 +82,7 @@ BEGIN_MESSAGE_MAP(CSearchResultsWnd, CResizableFormView)
 	ON_MESSAGE(WM_IDLEUPDATECMDUI, OnIdleUpdateCmdUI)
 	ON_BN_CLICKED(IDC_OPEN_PARAMS_WND, OnBnClickedOpenParamsWnd)
 	ON_WM_SYSCOMMAND()
+	ON_NOTIFY(NM_CLICK, IDC_CATTAB2, OnNMClickCattab2) //MORPH - Added by SiRoB, Selection category support
 END_MESSAGE_MAP()
 
 CSearchResultsWnd::CSearchResultsWnd(CWnd* pParent /*=NULL*/)
@@ -332,19 +334,68 @@ void CSearchResultsWnd::DownloadSelected()
 void CSearchResultsWnd::DownloadSelected(bool paused)
 {
 	CWaitCursor curWait;
-	POSITION pos = searchlistctrl.GetFirstSelectedItemPosition();
-	while (pos != NULL)
+	POSITION pos = searchlistctrl.GetFirstSelectedItemPosition(); 
+	
+	// khaos::categorymod+ Category selection stuff...
+	if (!pos) return; // No point in asking for a category if there are no selected files to download.
+
+	int useCat;
+	bool	bCreatedNewCat = false;
+	bool	bCanceled = false;
+
+	if(thePrefs.SelectCatForNewDL())
 	{
-		int index = searchlistctrl.GetNextSelectedItem(pos);
+		CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
+		getCatDlg->DoModal();
+
+		// Returns 0 on 'Cancel', otherwise it returns the selected category
+		// or the index of a newly created category.  Users can opt to add the
+		// links into a new category.
+		useCat = getCatDlg->GetInput();
+		bCreatedNewCat = getCatDlg->CreatedNewCat();
+		bCanceled = getCatDlg->WasCancelled(); //MORPH - Added by SiRoB, WasCanceled
+		delete getCatDlg;
+	}
+	else if(thePrefs.UseActiveCatForLinks())
+		useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
+	else
+		useCat = 0;
+
+	int useOrder = theApp.downloadqueue->GetMaxCatResumeOrder(useCat);
+	// khaos::categorymod-
+
+	while (pos != NULL) 
+	{ 
+		int index = searchlistctrl.GetNextSelectedItem(pos); 
 		if (index > -1)
 		{
 			CSearchFile* cur_file = (CSearchFile*)searchlistctrl.GetItemData(index);
-			if (cur_file->GetListParent() != NULL)
-				cur_file = cur_file->GetListParent();
-			theApp.downloadqueue->AddSearchToDownload(cur_file, paused, m_cattabs.GetCurSel());
+			// khaos::categorymod+ m_cattabs is obsolete.
+			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat())
+			{
+				useCat = theApp.downloadqueue->GetAutoCat(CString(cur_file->GetFileName()), (ULONG)cur_file->GetFileSize());
+				if (!useCat && thePrefs.UseActiveCatForLinks())
+					useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
+			}
+			
+			if (thePrefs.SmallFileDLPush() && cur_file->GetFileSize() < 154624)
+				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, 0);
+			else if (thePrefs.AutoSetResumeOrder())
+			{
+				useOrder++;
+				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, useOrder);
+			}
+			// khaos::categorymod-
+			if (cur_file->GetListParent()!=NULL)
+				cur_file=cur_file->GetListParent();
 			searchlistctrl.UpdateSources(cur_file);
 		}
 	}
+	
+	// This bit of code will resume the number of files that the user specifies in preferences (Off by default)
+	if (thePrefs.StartDLInEmptyCats() > 0 && bCreatedNewCat && paused)
+		for (int i = 0; i < thePrefs.StartDLInEmptyCats(); i++)
+			if (!theApp.downloadqueue->StartNextFile(useCat)) break;
 }
 
 void CSearchResultsWnd::OnSysColorChange()
@@ -1323,14 +1374,17 @@ LRESULT CSearchResultsWnd::OnCloseTab(WPARAM wparam, LPARAM lparam)
 void CSearchResultsWnd::UpdateCatTabs() {
 	int oldsel=m_cattabs.GetCurSel();
 	m_cattabs.DeleteAllItems();
-	//MORPH START - Added by SiRoB, Select Category
-	if (thePrefs.SelectCatForNewDL())
-		return;
-	//MORPH END   - Added by SiRoB, Select Category
 	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
 		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title);
+
+	//MORPH START - Changed by SiRoB, Selection category support
+	/*
 	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
 		oldsel=0;
+	*/
+	if (oldsel>=m_cattabs.GetItemCount())
+		oldsel=-1;
+	//MORPH END   - Changed by SiRoB, Selection category support
 
 	m_cattabs.SetCurSel(oldsel);
 	int flag;
@@ -1424,3 +1478,27 @@ void CSearchResultsWnd::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 	__super::OnSysCommand(nID, lParam);
 }
+
+//MORPH START - Added by SiRoB, Selection category support
+void CSearchResultsWnd::OnNMClickCattab2(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	POINT point;
+	::GetCursorPos(&point);
+
+	CPoint pt(point);
+	TCHITTESTINFO hitinfo;
+	CRect rect;
+	m_cattabs.GetWindowRect(&rect);
+	pt.Offset(0-rect.left,0-rect.top);
+	hitinfo.pt = pt;
+
+	// Find the destination tab...
+	unsigned int nTab = m_cattabs.HitTest( &hitinfo );
+	if( hitinfo.flags != TCHT_NOWHERE )
+		if(nTab==m_cattabs.GetCurSel())
+		{
+			m_cattabs.DeselectAll(false);
+		}
+	*pResult = 0;
+}
+//MORPH END - Added by SiRoB, Selection category support

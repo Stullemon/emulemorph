@@ -37,6 +37,7 @@ IMPLEMENT_DYNAMIC(CDirectDownloadDlg, CDialog)
 BEGIN_MESSAGE_MAP(CDirectDownloadDlg, CResizableDialog)
 	ON_EN_KILLFOCUS(IDC_ELINK, OnEnKillfocusElink)
 	ON_EN_UPDATE(IDC_ELINK, OnEnUpdateElink)
+	ON_NOTIFY(NM_CLICK, IDC_CATS, OnNMClickCats) //MORPH - Changed by SiRoB, Selection category support
 END_MESSAGE_MAP()
 
 CDirectDownloadDlg::CDirectDownloadDlg(CWnd* pParent /*=NULL*/)
@@ -102,7 +103,7 @@ void CDirectDownloadDlg::OnOK()
 					/*/
 					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(strTok.Trim());
 					theApp.downloadqueue->AddFileLinkToDownload(pFileLink,
-						 thePrefs.SelectCatForNewDL()?-1:(thePrefs.GetCatCount()==0)?0 : m_cattabs.GetCurSel(), true);
+						 (thePrefs.GetCatCount()==0)?-1 : m_cattabs.GetCurSel(), true);
 					/**/
 					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 				}
@@ -174,14 +175,39 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 void CDirectDownloadDlg::UpdateCatTabs() {
 	int oldsel=m_cattabs.GetCurSel();
 	m_cattabs.DeleteAllItems();
-	//MORPH START - Added by SiRoB, Selection category support
-	if (thePrefs.SelectCatForNewDL())
-		return;
-	//MORPH END   - Added by SiRoB, Selection category support
 	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
 		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title);
+	//MORPH START - Changed by SiRoB, Selection category support
+	/*
 	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
-		oldsel=0;
-
+		oldsel=0; 
+	*/
+	if (oldsel>=m_cattabs.GetItemCount())
+		oldsel=-1; 
+	//MORPH END   - Changed by SiRoB, Selection category support
 	m_cattabs.SetCurSel(oldsel);
 }
+
+//MORPH START - Added by SiRoB, Selection category support
+void CDirectDownloadDlg::OnNMClickCats(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	POINT point;
+	::GetCursorPos(&point);
+
+	CPoint pt(point);
+	TCHITTESTINFO hitinfo;
+	CRect rect;
+	m_cattabs.GetWindowRect(&rect);
+	pt.Offset(0-rect.left,0-rect.top);
+	hitinfo.pt = pt;
+
+	// Find the destination tab...
+	unsigned int nTab = m_cattabs.HitTest( &hitinfo );
+	if( hitinfo.flags != TCHT_NOWHERE )
+		if(nTab==m_cattabs.GetCurSel())
+		{
+			m_cattabs.DeselectAll(false);
+		}
+	*pResult = 0;
+}
+//MORPH END - Added by SiRoB, Selection category support

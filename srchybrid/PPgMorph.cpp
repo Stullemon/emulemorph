@@ -493,7 +493,6 @@ BOOL CPPgMorph::OnApply()
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	thePrefs.m_bShowCatNames = m_iShowCatNames;
-	if (m_iSelectCat) theApp.emuledlg->searchwnd->UpdateCatTabs(); //MORPH - Added by SiRoB, Selection category support
 	thePrefs.m_bSelCatOnAdd = m_iSelectCat;
 	thePrefs.m_bActiveCatDefault = m_iUseActiveCat;
 	thePrefs.m_bAutoSetResumeOrder = m_iAutoSetResOrder;

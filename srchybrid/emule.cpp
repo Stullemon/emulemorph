@@ -140,7 +140,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_dwProductVersionLS = MAKELONG(VERSION_BUILD, VERSION_UPDATE);
 
 	// create a string version (e.g. "0.30a")
-	ASSERT( VERSION_UPDATE + 'a' <= 'f' );
+	ASSERT( VERSION_UPDATE + 'a' <= 'g' );
 #ifdef _DEBUG
 	m_strCurVersionLong.Format(_T("%u.%u%c.%u [%s]"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD, MOD_VERSION);
 #else

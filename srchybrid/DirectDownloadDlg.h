@@ -44,6 +44,7 @@ protected:
 	afx_msg void OnEnKillfocusElink();
 public:
 	afx_msg void OnEnUpdateElink();
+	afx_msg void OnNMClickCats(NMHDR *pNMHDR, LRESULT *pResult); //MORPH - Changed by SiRoB, Selection category support
 private:
 	void UpdateCatTabs();
 };

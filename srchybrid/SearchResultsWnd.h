@@ -112,4 +112,5 @@ protected:
 	afx_msg LRESULT OnIdleUpdateCmdUI(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnBnClickedOpenParamsWnd();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg void OnNMClickCattab2(NMHDR *pNMHDR, LRESULT *pResult); //MORPH - Added by SiRoB, Selection category support
 };
