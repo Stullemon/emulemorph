@@ -1,7 +1,14 @@
 --------------------------------------
-Changelog for eMule 0.44d MorphXT v5.8
+Changelog for eMule 0.44d MorphXT v5.x
 --------------------------------------
-MERGED : Merge to 0.44d in progress [SiRoB]
+MERGED : Code ported to 0.44d Official version [SiRoB]
+
+FIXED  : Official BugFix: Event on the two Chat button [SiRoB]
+FIXED  : Reworked some zz code to avoid some possible uploadinglist disturb [SiRoB]
+
+CHANGED: Now we see the flag on the clientdetail window [Commander]
+
+TWEAKED: Reviewed the Upload Splitting Class to open less slot [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44b MorphXT v5.7
