@@ -1135,7 +1135,7 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
     bool result = false;
 	uint32 slotCounter = 1;
-	//MORPH END - Changed by SiRoB, Fix ResortUploadSlot
+	//MORPH END - Changed by SiRoB, ResortUploadSlot Fix
 	/*
 	for (POSITION pos = uploadinglist.GetHeadPosition();pos != 0;){
         POSITION curPos = pos;
@@ -1155,7 +1155,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 	{
 	    POSITION curPos = pos;
     	CUpDownClient* curClient = tmpuploadinglist->GetNext(pos);
-	//MORPH END - Changed by SiRoB, Fix ResortUploadSlot
+	//MORPH END - Changed by SiRoB, ResortUploadSlot Fix
 		if (client == curClient){
 			if (updatewindow)
 				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
@@ -1643,7 +1643,7 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
    			// Get and remove the client from upload list.
 			CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
 
-   			//MORPH - Moved by SiRoB, See below
+   			//MORPH - Moved by SiRoB, See below ResortUploadSlot Fix
 			//uploadinglist.RemoveAt(curpos);
 			
 			// Remove the found Client from UploadBandwidthThrottler
