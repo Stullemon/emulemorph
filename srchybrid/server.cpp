@@ -20,6 +20,7 @@
 #include "Opcodes.h"
 #include "OtherFunctions.h"
 #include "Packets.h"
+#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -54,6 +55,8 @@ CServer::CServer(const ServerMet_Struct* in_data)
 	lastdescpingedcout = 0;
 	m_uTCPFlags = 0;
 	m_uUDPFlags = 0;
+
+	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
 CServer::CServer(uint16 in_port, LPCSTR i_addr)
@@ -90,6 +93,8 @@ CServer::CServer(uint16 in_port, LPCSTR i_addr)
 	lastdescpingedcout = 0;
 	m_uTCPFlags = 0;
 	m_uUDPFlags = 0;
+
+	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
 // copy constructor
@@ -131,6 +136,8 @@ CServer::CServer(const CServer* pOld)
 	m_strVersion = pOld->m_strVersion;
 	m_uTCPFlags = pOld->m_uTCPFlags;
 	m_uUDPFlags = pOld->m_uUDPFlags;
+
+	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
 CServer::~CServer()
@@ -261,6 +268,7 @@ void CServer::SetID(uint32 newip)
 	in_addr host;
 	host.S_un.S_addr = ip;
 	strcpy(ipfull,inet_ntoa(host));
+	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
 void CServer::SetDynIP(LPCSTR newdynip)
@@ -280,3 +288,32 @@ void CServer::SetLastDescPingedCount(bool bReset)
 	else
 		lastdescpingedcout++;
 }
+
+//EastShare Start - added by AndCycle, IP to Country
+CString CServer::GetCountryName() const{
+	CString tempStr;
+
+	if(!theApp.ip2country->IsIP2Country()) return "";
+
+	switch(theApp.glob_prefs->GetIP2CountryNameMode()){
+		case IP2CountryName_SHORT:
+			tempStr.Format("<%s>",m_structServerCountry->ShortCountryName);
+			return tempStr;
+		case IP2CountryName_MID:
+			tempStr.Format("<%s>",m_structServerCountry->MidCountryName);
+			return tempStr;
+		case IP2CountryName_LONG:
+			tempStr.Format("<%s>",m_structServerCountry->LongCountryName);
+			return tempStr;
+	}
+	return "";
+}
+
+int CServer::GetCountryFlagIndex() const{
+	return m_structServerCountry->FlagIndex;
+}
+
+void CServer::ResetIP2Country(){
+	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip);
+}
+//EastShare End - added by AndCycle, IP to Country
