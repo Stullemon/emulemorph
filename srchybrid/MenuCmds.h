@@ -168,8 +168,8 @@
 #define	MP_FORCEA4AFONFLAG		10361
 #define MP_FORCEA4AFOFFFLAG		10362
 
-// 10353 to 10355 reserved for A4AF menu items.
-#define MP_CAT_A4AF			10353
+// 10373 to 10375 reserved for A4AF menu items.
+#define MP_CAT_A4AF			10373
 // khaos::categorymod-
 
 // Mighty Knife: CRC32-Tag
