@@ -419,6 +419,9 @@ public:
 		DateTimeCtrl,
 		IPAddressCtrl,
 		OpaqueBrowser,
+		// emulEspaña: Added by MoNKi [ MoNKi: -Pass Edit on TreeOptionsCtrl- ]
+		PassEditBox,
+		// End emulEspaña
 	};
 
 	//Data
@@ -431,7 +434,9 @@ public:
 	SYSTEMTIME     m_DateTime;
 	DWORD          m_dwIPAddress;
 	BOOL           m_bDrawColorForIcon;
-
+	// emulEspaña: Added by MoNKi [ MoNKi: -Pass Edit on TreeOptionsCtrl- ]
+	CString		   m_sEditText;
+	// End emulEspaña
 
 	//Methods
 	CTreeOptionsItemData() 
@@ -517,6 +522,9 @@ public:
 	BOOL    AddEditBox(HTREEITEM hItem, CRuntimeClass* pRuntimeClassEditCtrl, CRuntimeClass* pRuntimeClassSpinCtrl, DWORD dwItemData = -1);
 	CString GetEditText(HTREEITEM hItem) const;
 	void    SetEditText(HTREEITEM hItem, const CString& sEditText);
+	// emulEspaña: Added by MoNKi [ MoNKi: -Pass Edit on TreeOptionsCtrl- ]
+	BOOL	AddPassEditBox(HTREEITEM hItem, CRuntimeClass* pRuntimeClassEditCtrl, DWORD dwItemData = -1);
+	// End emulEspaña
 
 	//Adding a file / Folder edit box (and a browse button) to an item
 	BOOL    AddFileEditBox(HTREEITEM hItem, CRuntimeClass* pRuntimeClassEditCtrl, CRuntimeClass* pRuntimeClassButton, DWORD dwItemData = -1);
