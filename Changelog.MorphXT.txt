@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.42g MorphXT v3.x
+--------------------------------------
+FIXED: Download file in search window will now work properly in case you don't use selectcategory or  you select a category tab item [SiRoB]
+
+NOTE: for the RSS news you can edit 
+
+--------------------------------------
 Changelog for eMule 0.42g MorphXT v3.3
 --------------------------------------
 ADDED  : Chunk Dot display option from EastShare [SiRoB]
