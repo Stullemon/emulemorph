@@ -159,6 +159,10 @@ void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
 
 void CFriendListCtrl::AddFriend(const CFriend* pFriend)
 {
+	//MORPH START - Added by SiRoB, HotFix to avoid crash at shutdown
+	if (!theApp.emuledlg->IsRunning())
+		return;
+	//MORPH END    - Added by SiRoB, HotFix to avoid crash at shutdown
 	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),pFriend->m_strName,0,0,0,(LPARAM)pFriend);
 	if (iItem >= 0)
 		UpdateFriend(iItem, pFriend);
@@ -167,6 +171,10 @@ void CFriendListCtrl::AddFriend(const CFriend* pFriend)
 
 void CFriendListCtrl::RemoveFriend(const CFriend* pFriend)
 {
+	//MORPH START - Added by SiRoB, HotFix to avoid crash at shutdown
+	if (!theApp.emuledlg->IsRunning())
+		return;
+	//MORPH END    - Added by SiRoB, HotFix to avoid crash at shutdown
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)pFriend;
@@ -178,6 +186,10 @@ void CFriendListCtrl::RemoveFriend(const CFriend* pFriend)
 
 void CFriendListCtrl::RefreshFriend(const CFriend* pFriend)
 {
+	//MORPH START - Added by SiRoB, HotFix to avoid crash at shutdown
+	if (!theApp.emuledlg->IsRunning())
+		return;
+	//MORPH END    - Added by SiRoB, HotFix to avoid crash at shutdown
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)pFriend;
@@ -490,7 +502,6 @@ int CFriendListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	switch (LOWORD(lParamSort))
 	{
 		case 0:
-			//TODO avoid crash here in some case
 			iResult = CompareLocaleStringNoCase(item1->m_strName, item2->m_strName);
 			break;
 		default:
