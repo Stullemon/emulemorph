@@ -1,7 +1,7 @@
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
 --------------------------------------
-FIXED  : TRAY EXIT [SiRoB]
+FIXED  : Systray exit [SiRoB]
 FIXED  : Mass-Rename: Cleanup now works correctly for every line in the "New filenames" window [MightyKnife]
 FIXED  : duplicated part file statistics no longer save in known.met [AndCycle] - Removed [Commander]
 FIXED  : Code alignment [Commander]
@@ -20,6 +20,7 @@ CHANGED: Added dots '...' behind some items in the Morph preferences tab to indi
 CHANGED: Log files are now placed in a 'logs' folder instead of the eMule folder [MightyKnife]
 CHANGED: PartFile Statistic are now saved in the .part (as well spreadBar statistic) (no more in known.met) [SiRoB]
 CHANGED: Draw Connections-Graph solid [Commander]
+CHANGED: Rise the file buffer to 3MBytes [SiRoB]
 
 ADDED  : CRC32-Calculation can now be used to convert existing CRC's to uppercase [MightyKnife]
 ADDED  : Mass-Rename: Insert-text-column-from-clipboard; pastes the clipboard data as a column to the current cursor position in the "New filenames" window. Should help to paste a list of episode titles into the filenames. [MightyKnife]

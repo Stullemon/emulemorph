@@ -380,7 +380,11 @@ BOOL CPPgTweaks::OnInitDialog()
 	InitWindowStyles(this);
 
 	m_iFileBufferSize = thePrefs.m_iFileBufferSize;
-	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetRange(16, 1024+512, TRUE);
+	//MORPH - Changed by SiRoB, Rise the file buffer to 3MBytes
+	/*
+	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetRange(16, (1024+512)*2, TRUE);
+	*/
+	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetRange(16, (1024+512)*2, TRUE);
 	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetPos(m_iFileBufferSize/1024);
 
 	m_iQueueSize = thePrefs.m_iQueueSize;
