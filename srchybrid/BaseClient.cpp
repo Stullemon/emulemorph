@@ -2998,9 +2998,11 @@ CString	CUpDownClient::GetCountryName(bool longName) const {
 int CUpDownClient::GetCountryFlagIndex() const {
 	return m_structUserCountry->FlagIndex;
 }
-void CUpDownClient::ResetIP2Country(){
-	m_structUserCountry = theApp.ip2country->GetCountryFromIP(m_dwUserIP);
+//MORPH START - Changed by SiRoB, ProxyClient
+void CUpDownClient::ResetIP2Country(uint32 m_dwIP){
+	m_structUserCountry = theApp.ip2country->GetCountryFromIP((m_dwIP)?m_dwIP:m_dwUserIP);
 }
+//MORPH END - Changed by SiRoB, ProxyClient
 //EastShare End - added by AndCycle, IP to Country
 //>>> eWombat [SNAFU_V3]
 //<<< eWombat [SNAFU_V3]

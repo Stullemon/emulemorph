@@ -1,11 +1,13 @@
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.x
 --------------------------------------
-FIXED  : Removed a check in AcceptNext that could block the open of new slot [SiRoB]
-FIXED  : DownloadClientList fix that could crash emule with WebCache activated [SiRoB]
+FIXED  : Removed a check in AcceptNewClient that could block the open of new slot [SiRoB]
+FIXED  : DownloadClientCtrl: fix that could crash emule with WebCache activated [SiRoB]
+FIXED  : DownloadClientCtrl: columns preferency [SiRoB]
 FIXED  : Infinit ReAsk state behavior have been isolated [SiRoB]
+FIXED  : WebCache: timeout fix [SiRoB]
 
-CHANGED: Reviewed some part of code [SiRoB]
+ADDED  : Ip Country for ProxyClient [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.15

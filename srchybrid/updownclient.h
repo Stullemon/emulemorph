@@ -1014,7 +1014,7 @@ protected:
 public:
 	CString			GetCountryName(bool longName = false) const;
 	int				GetCountryFlagIndex() const;
-	void			ResetIP2Country();
+	void			ResetIP2Country(uint32 dwIP = 0);
 
 	//SLAHAM: ADDED Show Downloading Time =>
 	uint16	uiStartDLCount;
