@@ -105,8 +105,10 @@ void CDownloadClientsCtrl::Init()
 	// SLUGFILLER: multiSort
 	
 	// EastShare - Added by Pretender: IP2Country column
-	if (theApp.ip2country->IsIP2Country()) ShowColumn (10);
-		else HideColumn (10);
+	// Mighty Knife: IP2Country column is no. 11, not 10!
+	if (theApp.ip2country->IsIP2Country()) ShowColumn (11);
+		else HideColumn (11);
+	// [end] Mighty Knife
 	// EastShare - Added by Pretender: IP2Country column
 }
 
