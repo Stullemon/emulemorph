@@ -31,7 +31,6 @@ void CPPgServer::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
-	ON_EN_CHANGE(IDC_LOWIDRETRY, OnSettingsChange)	//MORPH - Added by SiRoB, SLUGFILLER: lowIdRetry
 	ON_EN_CHANGE(IDC_SERVERRETRIES, OnSettingsChange)
 	ON_BN_CLICKED(IDC_AUTOSERVER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UPDATESERVERCONNECT, OnSettingsChange)
@@ -123,11 +122,6 @@ void CPPgServer::LoadSettings(void)
 		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,1);
 	else
 		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,0);
-	
-	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	strBuffer.Format("%d", app_prefs->GetLowIdRetries());
-	GetDlgItem(IDC_LOWIDRETRY)->SetWindowText(strBuffer);
-	//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
 }
 
 BOOL CPPgServer::OnApply()
@@ -166,15 +160,6 @@ BOOL CPPgServer::OnApply()
 	app_prefs->prefs->addserversfromclient = (int8)IsDlgButtonChecked(IDC_UPDATESERVERCLIENT);
 	// Barry
 	app_prefs->prefs->autoconnectstaticonly = (int8)IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY);
-	
-	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	if(GetDlgItem(IDC_LOWIDRETRY)->GetWindowTextLength())
-	{
-		GetDlgItem(IDC_LOWIDRETRY)->GetWindowText(buffer,20);
-		app_prefs->SetLowIdRetries(atoi(buffer));
-	}
-	//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
-
 	//	app_prefs->Save();
 	LoadSettings();
 
@@ -198,9 +183,6 @@ void CPPgServer::Localize(void)
 		GetDlgItem(IDC_SCORE)->SetWindowText(GetResString(IDS_PW_SCORE));
 		GetDlgItem(IDC_MANUALSERVERHIGHPRIO)->SetWindowText(GetResString(IDS_MANUALSERVERHIGHPRIO));
 		GetDlgItem(IDC_EDITADR)->SetWindowText(GetResString(IDS_EDITLIST));
-		//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-		GetDlgItem(IDC_LOWIDRETRYLABEL )->SetWindowText(GetResString(IDS_LOWIDRETRYLABEL));
-		//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
 		// Barry
 		GetDlgItem(IDC_AUTOCONNECTSTATICONLY)->SetWindowText(GetResString(IDS_PW_AUTOCONNECTSTATICONLY));
 	}

@@ -36,5 +36,4 @@ public:
 		GetDlgItem(IDC_STARTNEXTFILECAT)->EnableWindow(IsDlgButtonChecked(IDC_STARTNEXTFILE));
 	}
 	void Localize(void);
-	afx_msg void OnBnClickedUpdatefakes();
 };
