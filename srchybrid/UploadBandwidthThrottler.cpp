@@ -573,7 +573,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					
 					if(socket != NULL) {
 						uint32 bytesToSpendTemp = bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS];
-						if(allowedDataRateClass[classID] > 0 && classID < LAST_CLASS && slotCounterClass[classID]<m_StandardOrder_list.GetSize())){
+						if(allowedDataRateClass[classID] > 0 && classID < LAST_CLASS && (INT_PTR)slotCounterClass[classID]<m_StandardOrder_list.GetSize()){
 							if(bytesToSpendClass[classID] > 0 && spentBytesClass[classID] < (uint64)bytesToSpendClass[classID])
 								bytesToSpendTemp = min(bytesToSpendClass[classID]-spentBytesClass[classID],bytesToSpendTemp);
 							else
