@@ -5326,8 +5326,10 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 		return false;
 	//MORPH START - Added by SiRoB, ICS Optional
 	const bool isPreviewEnable = (thePrefs.GetPreviewPrio() || thePrefs.IsExtControlsEnabled() && GetPreviewPrio()) && IsPreviewableFileType();
+	uint16 countbackup = *count;
 	if(!isPreviewEnable && IsComplete(0,PARTSIZE-1) && IsComplete(PARTSIZE*(GetPartCount()-1),GetFileSize()-1) && thePrefs.UseICS() && GetNextRequestedBlockICS(sender,newblocks,count))
 		return true;
+	*count = countbackup;
 	//MORPH END   - Added by SiRoB, ICS Optional
 	
 	// Define and create the list of the chunks to download
