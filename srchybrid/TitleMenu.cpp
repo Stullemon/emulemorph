@@ -128,7 +128,7 @@ void CTitleMenu::AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu)
 		m_strTitle.Replace(_T("&"), _T(""));
 		InsertMenu(0, MF_BYPOSITION | MF_OWNERDRAW | MF_STRING | MF_DISABLED, MP_TITLE);
 	}
-	if (bIsIconMenu && thePrefs.GetWindowsVersion() > _WINVER_95_ ){
+	if (bIsIconMenu && (thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_) ){
 		m_bIconMenu = true;
 		m_ImageList.DeleteImageList();
 		m_ImageList.Create(ICONSIZE,ICONSIZE,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -259,7 +259,7 @@ BOOL CTitleMenu::GradientFill(HDC hdc, PTRIVERTEX pVertex, DWORD dwNumVertex, PV
 
 BOOL CTitleMenu::AppendMenu(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR lpszNewItem, LPCTSTR lpszIconName){
 	bool bResult = CMenu::AppendMenu(nFlags, nIDNewItem, lpszNewItem);
-	if (!m_bIconMenu || (nFlags & MF_SEPARATOR) != 0 || thePrefs.GetWindowsVersion() <= _WINVER_95_ ){
+	if (!m_bIconMenu || (nFlags & MF_SEPARATOR) != 0 || !(thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_) ){
 		if (lpszIconName != NULL)
 			ASSERT( false );
 		return bResult;

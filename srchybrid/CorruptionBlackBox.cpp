@@ -85,7 +85,7 @@ void CCorruptionBlackBox::TransferredData(uint32 nStartPos, uint32 nEndPos, cons
 		ASSERT( false );
 		return;
 	}
-	if (nStartPos >= nEndPos){
+	if (nStartPos > nEndPos){
 		ASSERT( false );
 		return;
 	}

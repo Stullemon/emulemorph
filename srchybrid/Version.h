@@ -30,8 +30,8 @@
 //
 #define VERSION_MJR		0
 #define VERSION_MIN		44
-#define VERSION_UPDATE	2
-#define VERSION_BUILD	43
+#define VERSION_UPDATE	3
+#define VERSION_BUILD	44
 
 // NOTE: This version string is also used by the language DLLs!
 #define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE)
