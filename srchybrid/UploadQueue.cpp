@@ -1094,13 +1094,10 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 					//wistily
 					uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
 					client->Add2UpTotalTime(tempUpStartTimeDelay);
-					if (client->GetUpTotalTime() > 999) //Added by SiRoB, to avoid div by zero
-						client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
+					totaluploadtime += tempUpStartTimeDelay/1000;
 					/*
 					totaluploadtime += client->GetUpStartTimeDelay()/1000;
 					*/
-					totaluploadtime += tempUpStartTimeDelay/1000;
-
 					//wistily stop
 				}
 			} else if(earlyabort == false)

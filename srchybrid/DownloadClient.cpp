@@ -848,10 +848,10 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			//wistily start
 			uint32 tempDownTimeDifference= GetDownTimeDifference();
 			Add2DownTotalTime(tempDownTimeDifference);
-			if (m_nDownTotalTime > 999) //Added by SiRoB, to avoid div by zero
-				m_nAvDownDatarate = m_nTransferedDown/(m_nDownTotalTime/1000);
 			thePrefs.Add2DownSAvgTime(tempDownTimeDifference/1000);
-			/*thePrefs.Add2DownSAvgTime(GetDownTimeDifference()/1000);*/
+			/*
+			thePrefs.Add2DownSAvgTime(GetDownTimeDifference()/1000);
+			*/
 			//wistily stop
 
 			// <-----khaos-
@@ -2381,3 +2381,12 @@ void CUpDownClient::ProcessAICHFileHash(CSafeMemFile* data, CPartFile* file){
 	else
 		AddDebugLogLine(DLP_HIGH, false, _T("ProcessAICHFileHash(): PartFile not found or Partfile differs from requested file, %s"), DbgGetClientInfo());
 }
+//MORPH START - Added by SIRoB, GetAverage Donwload from client Wistily idea
+uint32 CUpDownClient::GetAvDownDatarate() const
+{
+	if (GetDownTotalTime() > 999)
+		return	GetTransferedDown()/(GetDownTotalTime()/1000);
+	else
+		return 0;
+}
+//MORPH END  - Added by SIRoB, GetAverage Donwload from client Wistily idea

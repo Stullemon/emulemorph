@@ -1214,3 +1214,12 @@ bool CUpDownClient::IsCommunity() const {
 	return isCom;
 }
 // [end] Mighty Knife
+//MORPH START - Added by SIRoB, GetAverage Upload to client Wistily idea
+uint32 CUpDownClient::GetAvUpDatarate() const
+{
+	if (GetUpTotalTime() > 999)
+		return	GetTransferedUp()/(GetUpTotalTime()/1000);
+	else
+		return 0;
+}
+//MORPH END  - Added by SIRoB, GetAverage Upload to client
