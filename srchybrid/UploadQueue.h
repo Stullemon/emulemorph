@@ -148,9 +148,11 @@ private:
     //MORPH - Added by SiRoB, Upload Splitting Class
 	uint32  m_MaxActiveClients;
     uint32  m_MaxActiveClientsShortTime;
-	bool	m_abAddClientOfThisClass[3/*NB_SPLITTING_CLASS*/];	//MORPH - Added by SiRoB, Upload Splitting Class
-	bool	m_abOnClientOverHideClientDatarate[3/*NB_SPLITTING_CLASS*/];	//MORPH - Added by SiRoB, Upload Splitting Class
-	uint32	m_aiSlotCounter[3/*NB_SPLITTING_CLASS*/];	//MORPH - Added by SiRoB, Upload Splitting Class
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	bool	m_abAddClientOfThisClass[3/*NB_SPLITTING_CLASS*/];
+	bool	m_abOnClientOverHideClientDatarate[3/*NB_SPLITTING_CLASS*/];
+	uint32	m_aiSlotCounter[3/*NB_SPLITTING_CLASS*/];
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	DWORD   m_lastCalculatedDataRateTick;
     uint64  m_avarage_dr_sum;
 
