@@ -5,7 +5,23 @@ FIXED  : Fix the spreadbar default state [SiRoB]
 FIXED  : MassRename: No more crash with the cross closing button [SiRoB]
 FIXED  : MassRename: Insert text column from clipboard [SiRoB]
 
-CHANGED: localize some text for translation [SiRoB]
+REMOVED: Resend FilePartstatus in some circonstance from Pawcio (if you want to share with out interruption just disable SOTN and HideOS) [SiRoB]
+
+CHANGED: localize for translation [SiRoB]
+
+ADDED  : Webcache localization from pawcio [SiRoB]
+
+NOTE   : About Share Only The Need (SOTN) and Hide Over Share (HOS)
+SOTN
+- best suited for multiple sharer.
+- avoid to spread allready disponible and uploaded chunk.
+- allways upload rarest chunk.
+- virtual complet file (all chunk disponible) are allways seen by other due to the mecanisme.
+HOS
+- best suited for alone sharer starting to spread a file and wanted to upload all the file first.
+- becarefull other couldn't see commplete file in some case. And might abort it.
+- might be used, if you planed a share and other know it.
+SOTN overhide HOS mecanisme to allways get all chunk available on the network
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.9
