@@ -190,7 +190,11 @@ void CKCSideBannerWnd::SetSize(int nSize)
 		else if ( m_uPosFlag & KCSB_ATTACH_RIGHT )
 		{
 			rect.left -= (nSize - m_nSize);
+			//MORPH - Changed by SiRoB, Avoid moving window when we dynamicaly remove the the side banner in the preferency
+			/*
 			m_pOwner->SetWindowPos(NULL, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER);
+			*/
+			m_pOwner->SetWindowPos(NULL, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE | SWP_NOZORDER);
 		}
 		else if ( m_uPosFlag & KCSB_ATTACH_TOP )
 		{
