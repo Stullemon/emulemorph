@@ -31,15 +31,12 @@ ADDED  : Customized IncomingDir icon from emulEspaña [Commander]
 ADDED  : Preferency dialog use eMule Plus Group system [SiRoB]
 ADDED  : Intelligent Chunk Selection from stormit & pawcio by enkeyDEV [AndCycle]
 ADDED  : Option to stop removing trickle client from uploading [AndCycle]
+ADDED  : Adding UPNP,RandomPort,Inproved ICF from emulEspaña [SiRoB]
+ADDED  : Itsonlyme modname [SiRoB]
 
-TODO   : UNICODE Compatibility (in progess) [SiRoB]
-TODO   : Several Preferences Options (after new Preferences-Cats System arrived) [Commander]
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]
-TODO   : Fixing RSS News Feed Display ... [Commander]
-TODO   : Adding UPNP,RandomPort,Inproved ICF from emulespania [SiRoB]
 TODO   : Review HideOS and selective chunk sharing [SiRoB]
-TODO   : Fix Knowmet information expiration [SiRoB|AndCycle]
 TODO   : Tweak removing behavior for trickle slot, does remove trickle client really need? [AndCycle]
 
 --------------------------------------
