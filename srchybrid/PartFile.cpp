@@ -5360,6 +5360,11 @@ int CPartFile::RightFileHasHigherPrio(CPartFile* left, CPartFile* right) {
     if(!right) {
         return false;
     }
+	//MORPH START - Added by SiRoB, Avanced A4AF
+	if (!left) {
+		return true;
+	}
+	//MORPH END   - Added by SiRoB, Avanced A4AF
 	//MORPH START - Added by SiRoB, ForcedA4AF
 	if (thePrefs.UseSmartA4AFSwapping())
 	{
@@ -5369,7 +5374,7 @@ int CPartFile::RightFileHasHigherPrio(CPartFile* left, CPartFile* right) {
 			return true;
 	}
 	//MORPH END   - Added by SiRoB, ForcedA4AF
-    //MORPH START - Added by SiRoB, Avanced A4AF
+	//MORPH START - Added by SiRoB, Avanced A4AF
 	uint8 right_iA4AFMode = thePrefs.AdvancedA4AFMode();
 	if (right_iA4AFMode && thePrefs.GetCategory(right->GetCategory())->iAdvA4AFMode)
 		right_iA4AFMode = thePrefs.GetCategory(right->GetCategory())->iAdvA4AFMode;
