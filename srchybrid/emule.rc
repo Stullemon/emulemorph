@@ -206,7 +206,7 @@ BEGIN
     LTEXT           "-",IDC_FRIENDS_IDENTIFICACION_EDIT,73,239,60,8
     LTEXT           "-",IDC_FRIENDS_SUBIDO_EDIT,73,249,60,8
     LTEXT           "-",IDC_FRIENDS_DESCARGADO_EDIT,73,260,60,8
-	CONTROL         "",IDC_SPLITTER_FRIEND,"Static",SS_BLACKFRAME | NOT 
+    CONTROL         "",IDC_SPLITTER_FRIEND,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,139,5,3,278
     LTEXT           "Country:",IDC_FRIENDS_COUNTRY,10,271,60,8
     LTEXT           "-",IDC_FRIENDS_COUNTRY_EDIT,73,271,60,8
@@ -377,7 +377,7 @@ BEGIN
     GROUPBOX        "Language:",IDC_LANG_FRM,114,7,109,33,BS_FLAT
     GROUPBOX        "Static",IDC_STARTUP,14,111,202,56
     LTEXT           "days",IDC_DAYS,161,116,48,9
-	CONTROL         "Start with Windows",IDC_STARTWIN,"Button",
+    CONTROL         "Start with Windows",IDC_STARTWIN,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,169,190,10
     GROUPBOX        "Invisible Mode",IDC_INVISIBLE_MODE_GROUP_BOX,14,168,202,
                     60
@@ -1285,7 +1285,7 @@ BEGIN
     LTEXT           "Static",IDC_UPLOADING,110,102,202,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     LTEXT           "Static",IDC_CLIENTDETAIL_KADCON,219,57,92,8
-	LTEXT           "Static",IDC_DLOC,215,58,92,8
+    LTEXT           "Static",IDC_DLOC,215,58,92,8
     LTEXT           "Country:",IDC_DLOC2,163,58,49,8
 END
 
@@ -1610,7 +1610,8 @@ CAPTION "Morph"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP,7,46,216,204
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
+                    WS_BORDER | WS_TABSTOP,7,46,216,204
     LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
 END
 
@@ -2378,7 +2379,7 @@ BEGIN
         BOTTOMMARGIN, 48
     END
 
-	IDD_NETWORK_INFO, DIALOG
+    IDD_NETWORK_INFO, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 284
@@ -2662,7 +2663,7 @@ IDR_WIZ1_HEADER         GIF                     "res\\mule_wiz_hdr.gif"
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Dialog Info
+// WIDECHARMAP
 //
 
 IDR_WIDECHARLOWERMAP    WIDECHARMAP             "res\\WideCharLowerMap.bin"
@@ -2719,7 +2720,7 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -4895,6 +4896,10 @@ BEGIN
     IDS_MISSING_STARTUPSOUND 
                             "Missing startupsound.wav! Note: The file 'startupsound.wav' has to be placed in your config dir"
     IDS_PW_STARTUPSOUND     "Play startupsound"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CLIENTPERCENTAGE    "Show Client Percentage"
 END
 
@@ -4930,6 +4935,7 @@ BEGIN
     IDS_EDITNEWSFEED        "Edit news feeds"
     IDS_FEEDURL             "Please enter the URL of the feed source:"
     IDS_FEEDNAME            "Please enter a name for this feed (optional):"
+    IDS_FEED                "News"
 END
 
 STRINGTABLE 
@@ -4944,6 +4950,7 @@ BEGIN
     IDS_MASSRENAME3         "New filenames:"
     IDS_NOTENOUGHFILENAMES  "Not enough filenames in the list of new filenames. Rename not possible."
     IDS_IDENTICALFILENAMES  "Two or more equal filenames within the same directory are not allowed (Line %d). Rename not possible."
+    IDS_MR                  "Mass Rename..."
 END
 
 STRINGTABLE 
@@ -4972,6 +4979,19 @@ BEGIN
     IDS_SC_HEADLINE         "Simple cleanup"
     IDS_BANNER              "Show sidebanner"
     IDS_DOWNLOADALLFEEDS    "Update all"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CRC32_CALCULATE     "Calculate"
+    IDS_CRC32_RECALCULATE   "Recalculate"
+    IDS_CRC32               "CRC32"
+    IDS_CRC32_TAG           "Add Release-Tag to filename..."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CRC32_ABORT         "Abort calculation"
 END
 
 #endif    // Anglais (États-Unis) resources

@@ -2583,7 +2583,7 @@
 #define IDS_MISSING_STARTUPSOUND        5046
 #define IDS_PW_STARTUPSOUND             5047
 #define IDC_FRIENDS_COUNTRY_EDIT        5115
-#define IDS_CHAT_COUNTRY				5115
+#define IDS_CHAT_COUNTRY                5115
 #define IDC_SHOWCLIENTPERCENTAGE        5116
 #define IDC_FRIENDS_DESCARGADO_EDIT2    5116
 #define IDC_FRIENDS_COUNTRY             5116
@@ -2609,6 +2609,7 @@
 #define IDS_EDITNEWSFEED                5206
 #define IDS_FEEDURL                     5207
 #define IDS_FEEDNAME                    5208
+#define IDS_FEED                        5209
 #define IDS_MASSRENAME1                 5300
 #define IDS_FILENAMELEFT                5301
 #define IDS_FILENAMERIGHT               5302
@@ -2619,6 +2620,7 @@
 #define IDS_MASSRENAME3                 5307
 #define IDS_NOTENOUGHFILENAMES          5308
 #define IDS_IDENTICALFILENAMES          5309
+#define IDS_MR                          5310
 #define IDS_CHECKDOTTOSPACE             5400
 #define IDS_CHECKUNDERLINETOSPACE       5401
 #define IDS_CHECKCONVERTAPOSTROPHES     5402
@@ -2638,6 +2640,11 @@
 #define IDS_SC_HEADLINE                 5416
 #define IDS_BANNER                      5417
 #define IDS_DOWNLOADALLFEEDS            5418
+#define IDS_CRC32_CALCULATE             5500
+#define IDS_CRC32_RECALCULATE           5501
+#define IDS_CRC32                       5502
+#define IDS_CRC32_TAG                   5503
+#define IDS_CRC32_ABORT                 5504
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
