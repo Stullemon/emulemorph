@@ -2729,7 +2729,7 @@ void CPartFile::UpdatePartsInfo()
 				count.Add(cur_src->GetUpCompleteSourcesCount());
 			}
 			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-			if (cur_src->GetUpCompleteSourcesCount()>0)
+			if (cur_src->GetUpCompleteSourcesCount()>0 && 10*m_anStates[DS_TOOMANYCONNS]<GetSourceCount())
 				bCompleteSourcesCountInfoReceived = true;
 			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
@@ -2820,7 +2820,6 @@ void CPartFile::UpdatePartsInfo()
 		if(m_nVirtualCompleteSourcesCount > m_SrcpartFrequency[i])
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
-
 	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, bCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi==1) || m_nVirtualCompleteSourcesCount==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0)),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	UpdateDisplayedInfo();
@@ -3111,7 +3110,9 @@ void CPartFile::CompleteFile(bool bIsHashingDone)
 		StopFile();
 		SetStatus(PS_COMPLETING);
 		m_is_A4AF_auto=false;
+
 		CWinThread *pThread = AfxBeginThread(CompleteThreadProc, this, THREAD_PRIORITY_BELOW_NORMAL, 0, CREATE_SUSPENDED); // Lord KiRon - using threads for file completion
+		
 		if (pThread){
 			SetFileOp(PFOP_COPYING);
 			SetFileOpProgress(0);
@@ -4474,7 +4475,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 
 			// Allocate filesize
 			if (!forcewait) {
-				m_AllocateThread= AfxBeginThread(AllocateSpaceThread, this, THREAD_PRIORITY_LOWEST, 0, CREATE_SUSPENDED);
+					m_AllocateThread= AfxBeginThread(AllocateSpaceThread, this, THREAD_PRIORITY_LOWEST, 0, CREATE_SUSPENDED);
 				if (m_AllocateThread == NULL)
 				{
 					TRACE(_T("Failed to create alloc thread! -> allocate blocking\n"));
