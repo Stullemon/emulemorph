@@ -1409,7 +1409,7 @@ BEGIN
     GROUPBOX        "Dates",IDC_FD_X8,7,183,320,57,BS_FLAT
     CONTROL         "Static",IDC_WCReq,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,273,152,50,8
-    CONTROL         "not working yet",IDC_WCDownl,"Static",SS_LEFTNOWORDWRAP | 
+    CONTROL         "not working yet",IDC_WCDOWNL,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,273,162,50,8
     CONTROL         "WC Succ/Req:",IDC_WC_REQ_SUCC,"Static",
                     SS_LEFTNOWORDWRAP | WS_GROUP,201,152,64,8
@@ -4713,7 +4713,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UNASSIGN            "Unassign"
     IDS_DOWNLOAD_IN_RED     "Show downloading files in red"
     IDS_UPSLOTNUMBER        "Slot #"
     IDS_STATS_LEECHERCLIENTS "Leechers: %u"
@@ -4866,7 +4865,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPDATEIPFILTER      "Update IPFilter.dat"
     IDS_UPDATEIPFILTERONSTART "Update IPFilter.dat on startup"
     IDS_UPDATEIPFILTERERROR "Error updating IPFilter.dat"
     IDS_HTTP_IPFILTERCAPTION "Updating IPFilter.dat"
@@ -4923,7 +4921,6 @@ BEGIN
     IDS_FEEDBACK_NONEEDPART "No Needed Part sources: %i"
     IDS_FEEDBACK_COMPLETE   "Complete sources: %i (%i)"
     IDS_COPYFEEDBACK_US     "Copy feedback to clipboard (US)"
-    IDS_UPDATEFAKES         "Update fake list"
     IDS_FAKECHECKUPERROR    "Error updating fake list list"
     IDS_HTTP_FAKECHECKCAPTION "Updating fake list"
     IDS_UPDATEFAKECHECKONSTART "Update fake list on startup"
@@ -5098,7 +5095,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_URL_FOR_UPDATING2   "URL for updating"
     IDS_MORPH2_FILE         "File"
     IDS_MORPH2_SECURITY     "Security"
 END
@@ -5413,7 +5409,7 @@ BEGIN
     IDS_WEBCACHE_NOPROXY    "no proxy set"
     IDS_CD_WCSUCCFAIL       "Successful/Requested:"
     IDS_CD_WCTRUSTSENDER    "Is trusted OHCB sender:"
-    IDS_WCDownl             "not working yet"
+    IDS_WCDOWNL             "not working yet"
     IDS_WC_REQ_SUCC         "WC Succ/Req:"
     IDS_WC_DOWNLOADED       "WC-Download:"
 END

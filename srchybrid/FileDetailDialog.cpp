@@ -206,7 +206,7 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 	AddAnchor(IDC_DATARATE, TOP_LEFT, TOP_RIGHT); //JP
 */
 	AddAnchor(IDC_WCReq, TOP_LEFT, TOP_RIGHT); //JP
-	AddAnchor(IDC_WCDownl, TOP_LEFT, TOP_RIGHT); //JP
+	AddAnchor(IDC_WCDOWNL, TOP_LEFT, TOP_RIGHT); //JP
 //MORPH END   - Changed by SiRoB, WebCache 1.2f
 	AddAnchor(IDC_SOURCECOUNT, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_RECOVERED, TOP_LEFT, TOP_RIGHT);
@@ -462,7 +462,7 @@ void CFileDetailDialogInfo::Localize()
 	GetDlgItem(IDC_FD_RECOV)->SetWindowText(GetResString(IDS_FD_RECOV)+_T(":"));
 	GetDlgItem(IDC_FD_COMPR)->SetWindowText(GetResString(IDS_FD_COMPR)+_T(":"));
 	GetDlgItem(IDC_FD_XAICH)->SetWindowText(GetResString(IDS_IACHHASH)+_T(":"));
-    GetDlgItem(IDC_WCDownl)->SetWindowText(GetResString(IDS_WCDownl));
+    GetDlgItem(IDC_WCDOWNL)->SetWindowText(GetResString(IDS_WCDOWNL));
 	GetDlgItem(IDC_WC_REQ_SUCC)->SetWindowText(GetResString(IDS_WC_REQ_SUCC));
     GetDlgItem(IDC_WC_DOWNLOADED)->SetWindowText(GetResString(IDS_WC_DOWNLOADED));
 }

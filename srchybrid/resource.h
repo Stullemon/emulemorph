@@ -2148,13 +2148,10 @@
 #define IDS_COPYFEEDBACK                3532
 #define IDS_ANTILEECHERLOG              3534
 #define IDI_SUC                         3535
-#define IDS_UNASSIGN                    3536
 #define IDS_DOWNLOAD_IN_RED             3537
 #define IDS_UPSLOTNUMBER                3538
 #define IDS_STATS_LEECHERCLIENTS        3539
 #define IDS_STATS_SECUREDCLIENTS        3540
-#define IDS_STRING1141                  3541
-#define IDS_UPCHUNKAVAILABILITY         3541
 #define IDS_WARNINGMORPH                3542
 #define IDI_EDONKEY                     3543
 #define IDS_DM                          3543
@@ -2362,7 +2359,6 @@
 #define IDS_DELETEFILE                  4014
 #define IDS_PAWCIO_CREDIT               4015
 #define IDD_PPG_MORPH_SHARE             4100
-#define IDS_UPDATEIPFILTER              4642
 #define IDS_UPDATEIPFILTERONSTART       4643
 #define IDS_UPDATEIPFILTERERROR         4644
 #define IDS_HTTP_IPFILTERCAPTION        4646
@@ -2415,7 +2411,6 @@
 #define IDS_FEEDBACK_NONEEDPART         4786
 #define IDS_FEEDBACK_COMPLETE           4787
 #define IDS_COPYFEEDBACK_US             4788
-#define IDS_UPDATEFAKES                 4789
 #define IDS_FAKECHECKUPERROR            4791
 #define IDS_HTTP_FAKECHECKCAPTION       4792
 #define IDS_UPDATEFAKECHECKONSTART      4793
@@ -2485,6 +2480,7 @@
 #define IDS_IPIGNOREDSE                 4859
 #define IDS_SERVERFILTERED              4860
 #define IDS_SERVERIGNORED               4861
+#define IDC_URL_FOR_UPDATING2           4862
 #define IDS_URL_FOR_UPDATING            4863
 #define IDC_URL_FOR_UPDATING            4864
 #define IDS_HIDEOS                      4864
@@ -2508,7 +2504,6 @@
 #define IDC_UPDATE_VER_URL_IP2COUNTRY   4874
 #define IDC_WARNINGEASTSHARE            4875
 #define IDC_WARNINGEAST                 4876
-#define IDC_URL_FOR_UPDATING2           4877
 #define IDC_DLOC                        4877
 #define IDC_DLOC2                       4878
 #define IDC_CRC32PREFIX                 4878
@@ -2763,7 +2758,7 @@
 #define IDS_WEBCACHE_NOPROXY            6210
 #define IDS_CD_WCSUCCFAIL               6211
 #define IDS_CD_WCTRUSTSENDER            6212
-#define IDS_WCDownl                     6213
+#define IDS_WCDOWNL                     6213
 #define IDS_WC_REQ_SUCC                 6214
 #define IDS_WC_DOWNLOADED               6215
 #define IDS_CRC32_TITLE                 6216
@@ -2881,7 +2876,7 @@
 #define IDS_LOG_IACH                    22542
 #define IDC_TRUSTEDOHCBSENDER           22570
 #define IDC_WCReq                       27820
-#define IDC_WCDownl                     27830
+#define IDC_WCDOWNL                     27830
 #define IDC_WC_REQ_SUCC                 27970
 #define IDC_WC_DOWNLOADED               27980
 #define IDC_EDTINFO                     40125
@@ -2901,7 +2896,6 @@
 #define IDS_BACKUP_BACKUPNOW            51506
 #define IDS_BACKUP_MESSAGE              51507
 #define IDS_BACKUP_AUTOBACKUP2          51508
-#define IDS_URL_FOR_UPDATING2           51521
 #define IDS_MORPH2_SERVER               51522
 #define IDS_MORPH2_FILE                 51523
 #define IDS_MORPH2_SECURITY             51524
