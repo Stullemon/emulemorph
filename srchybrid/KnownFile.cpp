@@ -3032,7 +3032,7 @@ CString CKnownFile::GetFeedback(bool isUS)
 		feed.Append(_T(" \r\n"));
 		feed.AppendFormat(GetResString(IDS_FEEDBACK_DOWNLOADED), (IsPartFile()==false)?GetResString(IDS_COMPLETE):CastItoXBytes(((CPartFile*)this)->GetCompletedSize(),false,false,3));
 		feed.Append(_T(" \r\n"));
-		feed.AppendFormat(GetResString(IDS_FEEDBACK_Transferred), CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3),CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_TRANSFERRED), CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3),CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3));
 		feed.Append(_T(" \r\n"));
 		feed.AppendFormat(GetResString(IDS_FEEDBACK_REQUESTED), statistic.GetRequests(), statistic.GetAllTimeRequests());
 		feed.Append(_T(" \r\n"));

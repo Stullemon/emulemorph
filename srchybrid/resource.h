@@ -2406,7 +2406,7 @@
 #define IDS_SUSPECTHAsHCHANGE           4675
 #define IDS_FINPARTNUMOFFILE            4676
 #define IDS_COMPLETESOURCES             4677
-#define IDS_FEEDBACK_Transferred         4776
+#define IDS_FEEDBACK_TRANSFERRED        4776
 #define IDS_FEEDBACK_REQUESTED          4777
 #define IDS_FEEDBACK_ACCEPTED           4778
 #define IDS_FEEDBACK_FROM               4779

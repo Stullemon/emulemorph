@@ -4991,7 +4991,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_Transferred "Transferred: %s (%s)"
+    IDS_FEEDBACK_TRANSFERRED "Transferred: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Requested: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Accepted Requests: %i (%i)"
     IDS_FEEDBACK_FROM       "Feedback from %s on [%s]"
