@@ -694,7 +694,8 @@ public:
 	friend class CPPgDisplay;
 	friend class CPPgSecurity;
 	friend class CPPgScheduler;
-        friend class CPPgMorph;
+    friend class CPPgMorph; //MORPH - Added by SiRoB, Morph Prefs
+	friend class CPPgMorph2; //MORPH - Added by SiRoB, Morph Prefs
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
 	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
 	bool	GetEnableZeroFilledTest() const { return prefs->enableZeroFilledTest; }
