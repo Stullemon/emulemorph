@@ -141,11 +141,19 @@
 			IntermediateDirectory="..\..\Release"
 			ConfigurationType="4"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="1"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="TRUE"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="TRUE"
+				OptimizeForProcessor="0"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..,..\..\..\zlib"
 				PreprocessorDefinitions="WIN32,NDEBUG"
 				StringPooling="TRUE"
@@ -164,6 +172,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalOptions="/LTCG"
 				OutputFile="..\..\Release\png.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
