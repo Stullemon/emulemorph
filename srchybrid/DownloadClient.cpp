@@ -947,7 +947,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 							// Ban => serious error (Attack?)
 							if(lenUnzipped > 4*nBlockSize && reqfile->IsArchive() == true){
-								theApp.ipfilter->AddIPRange(GetIP(), GetIP(), 1, _T("Temporary"));
+								theApp.ipfilter->AddIPRange(GetConnectIP(), GetConnectIP(), 1, _T("Temporary"));
 								SetDownloadState(DS_ERROR);
 							}
 
@@ -1022,7 +1022,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 						}
 						// Ban => serious error (Attack?)
 						AddLogLine(false, _T(GetResString(IDS_CORRUPTDATASENT)), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash, GetClientSoftVer()); //MORPH - Modified by IceCream
-						theApp.ipfilter->AddIPRange(GetIP(), GetIP(), 1, _T("Temporary"));
+						theApp.ipfilter->AddIPRange(GetConnectIP(), GetConnectIP(), 1, _T("Temporary"));
 						SetDownloadState(DS_ERROR);
 					}
 					//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
