@@ -335,11 +335,20 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 			//MORPH START - Added by SiRoB, Don't draw hidden colums
 			CRect Rect;
 			this->GetClientRect(Rect);
-			if ((Rect.left<=cur_rec.right && cur_rec.right<=Rect.right)
-				||(Rect.left<=cur_rec.left && cur_rec.left<=Rect.right)
-				||(Rect.left>=cur_rec.left && cur_rec.right>=Rect.right)){
+			Rect.IntersectRect(Rect, &cur_rec);
+			if (!Rect.IsRectEmpty()){
 			//MORPH END   - Added by SiRoB, Don't draw hidden colums
-				switch(iColumn){
+					//MORPH - Moved by SiRoB, due to the draw system change on hidden rect
+					// xMule_MOD: showSharePermissions, modified by itsonlyme
+					// display not finished files in navy, blocked files in red and friend-only files in orange
+					if (file->GetPermissions() == PERM_NOONE)
+						dc->SetTextColor((COLORREF)RGB(240,0,0));
+					else if (file->GetPermissions() == PERM_FRIENDS)
+						dc->SetTextColor((COLORREF)RGB(208,128,0));
+					else if (file->IsPartFile())
+						dc->SetTextColor((COLORREF)RGB(0,0,192));
+					// xMule_MOD: showSharePermissions
+					switch(iColumn){
 					case 0:{
 						int iImage = theApp.GetFileTypeSystemImageIdx(file->GetFileName());
 						if (theApp.GetSystemImageList() != NULL)
@@ -359,15 +368,6 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						}
 						cur_rec.left+=9; //Modified by IceCream, eMule plus rating icon
 						//MORPH END   - Added by IceCream, SLUGFILLER: showComments
-						// xMule_MOD: showSharePermissions, modified by itsonlyme
-						// display not finished files in navy, blocked files in red and friend-only files in orange
-						if (file->GetPermissions() == PERM_NOONE)
-							dc->SetTextColor((COLORREF)RGB(240,0,0));
-						else if (file->GetPermissions() == PERM_FRIENDS)
-							dc->SetTextColor((COLORREF)RGB(208,128,0));
-						else if (file->IsPartFile())
-							dc->SetTextColor((COLORREF)RGB(0,0,192));
-						// xMule_MOD: showSharePermissions
 						break;
 					}
 					case 1:

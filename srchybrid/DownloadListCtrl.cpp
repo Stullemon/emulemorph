@@ -423,6 +423,13 @@ void CDownloadListCtrl::UpdateItem(void* toupdate){
 }
 
 void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem) {
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	CRect Rect;
+	this->GetClientRect(Rect);
+	Rect.IntersectRect(Rect,lpRect);
+	if (Rect.IsRectEmpty())
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	if(lpRect->left < lpRect->right) {
 		CString buffer;
 		CPartFile *lpPartFile = (CPartFile*)lpCtrlItem->value;
@@ -741,9 +748,8 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 	//MORPH START - Added by SiRoB, Don't draw hidden colums
 	CRect Rect;
 	this->GetClientRect(Rect);
-	if (!((Rect.left<=lpRect->right && lpRect->right<=Rect.right)
-		||(Rect.left<=lpRect->left && lpRect->left<=Rect.right)
-		||(Rect.left>=lpRect->left && lpRect->right>=Rect.right)))
+	Rect.IntersectRect(Rect,lpRect);
+	if (Rect.IsRectEmpty())
 		return;
 	//MORPH END   - Added by SiRoB, Don't draw hidden colums
 	if(lpRect->left < lpRect->right) { 
