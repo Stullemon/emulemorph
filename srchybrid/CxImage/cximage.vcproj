@@ -29,6 +29,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
 				PrecompiledHeaderFile=".\Release/CxImage.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
