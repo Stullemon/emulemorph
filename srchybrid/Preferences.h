@@ -168,9 +168,9 @@ public:
 	static	int		maxGraphUploadRate;
 	static	uint8	beepOnError;
 	static	uint8	confirmExit;
-	static	uint16	downloadColumnWidths[16]; /*13 Official+ 2 Khaos+1 WC*/
-	static	BOOL	downloadColumnHidden[16]; /*13 Official+ 2 Khaos+1 WC*/
-	static	INT		downloadColumnOrder[16];  /*13 Official+ 2 Khaos+1 WC*/
+	static	uint16	downloadColumnWidths[17]; /*13 Official+ 2 Khaos+1 WC+1 Country*/
+	static	BOOL	downloadColumnHidden[17]; /*13 Official+ 2 Khaos+1 WC+1 Country*/
+	static	INT		downloadColumnOrder[17];  /*13 Official+ 2 Khaos+1 WC+1 Country*/
 	//SLAHAM: ADDED DownloadClientsCtrl =>
 	static uint16	downloadClientsColumnWidths[12];
 	static BOOL		downloadClientsColumnHidden[12];
@@ -475,8 +475,8 @@ public:
 	// Barry - Provide a mechanism for all tables to store/retrieve sort order
 	// SLUGFILLER: multiSort - save multiple params
 	// SLUGFILLER: DLsortFix - double, for client-only sorting
-	static	int		tableSortItemDownload[32];
-	static	BOOL	tableSortAscendingDownload[32];
+	static	int		tableSortItemDownload[34];
+	static	BOOL	tableSortAscendingDownload[34];
 	// SLUGFILLER: DLsortFix
 	//SLAHAM: ADDED DownloadClientsCtrl =>
 	static	int		tableSortItemdownloadClients[8]; 	

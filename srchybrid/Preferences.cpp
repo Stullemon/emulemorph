@@ -191,9 +191,9 @@ int		CPreferences::maxGraphDownloadRate;
 int		CPreferences::maxGraphUploadRate;
 uint8	CPreferences::beepOnError;
 uint8	CPreferences::confirmExit;
-uint16	CPreferences::downloadColumnWidths[16]; /*13 Official+ 2 Khaos*+1 WC*/
-BOOL	CPreferences::downloadColumnHidden[16]; /*13 Official+ 2 Khaos+1 WC*/
-INT 	CPreferences::downloadColumnOrder[16];  /*13 Official+ 2 Khaos+1 WC*/
+uint16	CPreferences::downloadColumnWidths[17]; /*13 Official+ 2 Khaos+1 WC+1 Country*/
+BOOL	CPreferences::downloadColumnHidden[17]; /*13 Official+ 2 Khaos+1 WC+1 Country*/
+INT 	CPreferences::downloadColumnOrder[17];  /*13 Official+ 2 Khaos+1 WC+1 Country*/
 //SLAHAM: ADDED DownloadClientsCtrl =>
 uint16	CPreferences::downloadClientsColumnWidths[12];
 BOOL	CPreferences::downloadClientsColumnHidden[12];
@@ -443,8 +443,8 @@ bool	CPreferences::m_bTransflstRemain;
 uint8	CPreferences::versioncheckdays;
 // SLUGFILLER: multiSort - save multiple params
 // SLUGFILLER: DLsortFix - double, for client-only sorting
-int	CPreferences::tableSortItemDownload[32];
-BOOL	CPreferences::tableSortAscendingDownload[32];
+int	CPreferences::tableSortItemDownload[34];
+BOOL	CPreferences::tableSortAscendingDownload[34];
 // SLUGFILLER: DLsortFix
 //SLAHAM: ADDED DownloadClientsCtrl =>
 int		CPreferences::tableSortItemdownloadClients[8];

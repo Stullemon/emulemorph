@@ -91,7 +91,7 @@ void CQueueListCtrl::Init()
 	// Commander - Added: IP2Country column - End
 
 	//MORPH START - Added by SiRoB, WebCache 1.2f
-	InsertColumn(14, _T("Webcache Sources") ,LVCFMT_LEFT, 100,14); //JP Webcache column
+	InsertColumn(14, GetResString(IDS_WC_SOURCES) ,LVCFMT_LEFT, 100,14); //JP Webcache column
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
 
 	SetAllIcons();
@@ -109,12 +109,6 @@ void CQueueListCtrl::Init()
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
-/*
-	// Mighty Knife: Community affiliation
-	if (thePrefs.IsCommunityEnabled ()) ShowColumn (11);
-	else HideColumn (11);
-	// [end] Mighty Knife
-*/
 	// Commander - Added: IP2Country column - Start
 	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
 		HideColumn (13);
@@ -245,6 +239,34 @@ void CQueueListCtrl::Localize()
 		pHeaderCtrl->SetItem(10, &hdi);
 		strRes.ReleaseBuffer();
 		//MORPH END - Added by SiRoB, Client Software
+
+		// Mighty Knife: Community affiliation
+		strRes = GetResString(IDS_COMMUNITY);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(11, &hdi);
+		strRes.ReleaseBuffer();
+		// [end] Mighty Knife
+
+		// EastShare - Added by Pretender, Friend Tab
+		strRes = GetResString(IDS_FRIENDLIST);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(12, &hdi);
+		strRes.ReleaseBuffer();
+		// EastShare - Added by Pretender, Friend Tab
+
+		// Commander - Added: IP2Country column - Start
+		strRes = GetResString(IDS_COUNTRY);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(13, &hdi);
+		strRes.ReleaseBuffer();
+		// Commander - Added: IP2Country column - End
+
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		strRes = GetResString(IDS_WC_SOURCES);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(14, &hdi);
+		strRes.ReleaseBuffer();
+		//MORPH END   - Added by SiRoB, WebCache 1.2f
 	}
 }
 
@@ -414,29 +436,9 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//MORPH END   - Added by SiRoB, Friend Addon
 						Sbuffer = client->GetUserName();
 
-						//EastShare Start - added by AndCycle, IP to Country, modified by Commander
-						//CString tempStr;
-						//tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
-						//Sbuffer = tempStr;
-												//Commander: There is a column now to show the country name
-
-						if(theApp.ip2country->ShowCountryFlag()){
-							cur_rec.left+=20;
-							POINT point2= {cur_rec.left,cur_rec.top+1};
-							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
-						}
-						//EastShare End - added by AndCycle, IP to Country
-
 						cur_rec.left +=20;
 						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 						cur_rec.left -=20;
-
-						//EastShare Start - added by AndCycle, IP to Country
-						if(theApp.ip2country->ShowCountryFlag()){
-							cur_rec.left-=20;
-						}
-						//EastShare End - added by AndCycle, IP to Country
-
 						break;
 					}
 					case 1:
@@ -572,6 +574,15 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					// Commander - Added: IP2Country column - Start
 					case 13:
 						Sbuffer.Format(_T("%s"), client->GetCountryName());
+						if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+							POINT point2= {cur_rec.left,cur_rec.top+1};
+							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							cur_rec.left+=20;
+						}
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+							cur_rec.left-=20;
+						}
 						break;
 					// Commander - Added: IP2Country column - End
 					//MORPH START - Added by SiRoB, WebCache 1.2f
@@ -594,25 +605,12 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					}
 					//MORPH END   - Added by SiRoB, WebCache 1.2f
 				}
-				if( iColumn != 9 && iColumn != 0  && iColumn != 14) //JP Webcache added Column 14
+				if( iColumn != 9 && iColumn != 0 && iColumn != 13 && iColumn != 14) //JP Webcache added Column 14
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 			}//MORPH - Added by SiRoB, Don't draw hidden colums
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
-/*
-	// Mighty Knife: Community affiliation
-	// Show/Hide community column if changed in the preferences
-	if (thePrefs.IsCommunityEnabled () != !IsColumnHidden (11))
-		if (thePrefs.IsCommunityEnabled ())
-				ShowColumn (11);
-		else HideColumn (11);
-	// [end] Mighty Knife
-*/	
-	// Commander - Added: IP2Country column - Start
-	if ((thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE) && !IsColumnHidden(13))
-		HideColumn (13);
-	// Commander - Added: IP2Country column - End
 
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
@@ -718,13 +716,7 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 					} else {
 						client->SetFriendSlot(true);
 					}
-					//KTS+
-					for (POSITION pos = theApp.friendlist->m_listFriends.GetHeadPosition();pos != 0;theApp.friendlist->m_listFriends.GetNext(pos))
-					{
-						CFriend* cur_friend = theApp.friendlist->m_listFriends.GetAt(pos);
-						theApp.friendlist->RefreshFriend(cur_friend);
-					}
-					//KTS-
+					theApp.friendlist->ShowFriends();
 					Update(iSel);
 				}
 				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
@@ -945,15 +937,15 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 		// Mighty Knife: Community affiliation
 		case 11:
-			return (item1->IsCommunity() && !item2->IsCommunity()) ? -1 : 1;
+			return item1->IsCommunity() - item2->IsCommunity();
 		case 111:
-			return (item1->IsCommunity() && !item2->IsCommunity()) ? 1 : -1;
+			return item2->IsCommunity() - item1->IsCommunity();
 		// [end] Mighty Knife
 		// EastShare - Added by Pretender, Friend Tab
 		case 12:
-			return (item1->IsFriend() && !item2->IsFriend()) ? -1 : 1;
+			return item1->IsFriend() - item2->IsFriend();
 		case 112:
-			return (item1->IsFriend() && !item2->IsFriend()) ? 1 : -1;
+			return item2->IsFriend() - item1->IsFriend();
 		// EastShare - Added by Pretender, Friend Tab
                // Commander - Added: IP2Country column - Start
 		case 13:

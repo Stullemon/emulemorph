@@ -130,9 +130,11 @@ void CDownloadListCtrl::Init()
 	InsertColumn(14, GetResString(IDS_REMAININGSIZE), LVCFMT_LEFT, 80);
 	// khaos::accuratetimerem-
 	//MORPH START - Added by SiRoB, WebCache 1.2f
-	InsertColumn(15, _T("Webcache Sources") ,LVCFMT_LEFT, 100); //JP Webcache column
+	InsertColumn(15, GetResString(IDS_WC_SOURCES) ,LVCFMT_LEFT, 100); //JP Webcache column
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
-
+	//MORPH START - Added by SiRoB, IP2Country
+	InsertColumn(16, GetResString(IDS_COUNTRY) ,LVCFMT_LEFT, 100);
+	//MORPH END   - Added by SiRoB, IP2Country
 	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableDownload);
@@ -251,94 +253,110 @@ void CDownloadListCtrl::Localize()
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
-	CString strRes;
 
-	strRes = GetResString(IDS_DL_FILENAME);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(0, &hdi);
-	strRes.ReleaseBuffer();
+	if(pHeaderCtrl->GetItemCount() != 0) {
+		CString strRes;
 
-	strRes = GetResString(IDS_DL_SIZE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(1, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_FILENAME);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(0, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_TRANSF);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(2, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_SIZE);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(1, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_TRANSFCOMPL);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(3, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_TRANSF);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(2, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_SPEED);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(4, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_TRANSFCOMPL);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(3, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_PROGRESS);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(5, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_SPEED);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(4, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_SOURCES);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(6, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_PROGRESS);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(5, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_PRIORITY);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(7, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_SOURCES);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(6, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_STATUS);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(8, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_PRIORITY);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(7, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_REMAINS);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(9, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_STATUS);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(8, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_LASTSEENCOMPL);
-	strRes.Remove(':');
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(10, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_REMAINS);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(9, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_FD_LASTCHANGE);
-	strRes.Remove(':');
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(11, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_LASTSEENCOMPL);
+		strRes.Remove(':');
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(10, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_CAT);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(12, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_FD_LASTCHANGE);
+		strRes.Remove(':');
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(11, &hdi);
+		strRes.ReleaseBuffer();
 
-	// khaos::categorymod+
-	strRes = GetResString(IDS_CAT_COLCATEGORY);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(12, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_CAT);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(12, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_CAT_COLORDER);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(13, &hdi);
-	strRes.ReleaseBuffer();
-	// khaos::categorymod-
+		// khaos::categorymod+
+		strRes = GetResString(IDS_CAT_COLCATEGORY);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(12, &hdi);
+		strRes.ReleaseBuffer();
 
-	// khaos::accuratetimerem+
-	strRes = GetResString(IDS_REMAININGSIZE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(14, &hdi);
-	strRes.ReleaseBuffer();
-	// khaos::accuratetimerem-
+		strRes = GetResString(IDS_CAT_COLORDER);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(13, &hdi);
+		strRes.ReleaseBuffer();
+		// khaos::categorymod-
 
+		// khaos::accuratetimerem+
+		strRes = GetResString(IDS_REMAININGSIZE);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(14, &hdi);
+		strRes.ReleaseBuffer();
+		// khaos::accuratetimerem-
+		
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		strRes = GetResString(IDS_WC_SOURCES);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(15, &hdi);
+		strRes.ReleaseBuffer();
+		//MORPH END   - Added by SiRoB, WebCache 1.2f
+
+		//MORPH START - Added by SiRoB, IP2Country
+		strRes = GetResString(IDS_COUNTRY);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(16, &hdi);
+		strRes.ReleaseBuffer();
+		//MORPH END   - Added by SiRoB, IP2Country
+	}
 	CreateMenues();
 
 	ShowFilesCount();
@@ -936,14 +954,6 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				cur_rec.left += 20;
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
-				//Morph Start - added by AndCycle, IP to Country
-				if(theApp.ip2country->ShowCountryFlag()){
-					POINT point3= {cur_rec.left,cur_rec.top+1};
-					theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, lpUpDownClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
-					cur_rec.left+=20;
-				}
-				//Morph End - added by AndCycle, IP to Country
-
 				if (!lpUpDownClient->GetUserName())
 					buffer = "?";
 				else
@@ -1276,6 +1286,21 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 		}
 		//JP Webcache END
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
+		//MORPH START - Added by SiRoB, IP2Country
+		case 16:
+			RECT cur_rec = *lpRect;
+			if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+				POINT point3= {cur_rec.left,cur_rec.top+1};
+				theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, lpUpDownClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+				cur_rec.left+=20;
+			}
+			buffer.Format(_T("%s"), lpUpDownClient->GetCountryName());
+			dc->DrawText(buffer,buffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+			if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+				cur_rec.left-=20;
+			}
+			break;
+		//MORPH END   - Added by SiRoB, IP2Country
 		}
 	}
 }
@@ -2560,13 +2585,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						} else {
 							client->SetFriendSlot(true);
 						}
-						//KTS+
-						for (POSITION pos = theApp.friendlist->m_listFriends.GetHeadPosition();pos != 0;theApp.friendlist->m_listFriends.GetNext(pos))
-						{
-							CFriend* cur_friend = theApp.friendlist->m_listFriends.GetAt(pos);
-							theApp.friendlist->RefreshFriend(cur_friend);
-						}
-						//KTS-
+						theApp.friendlist->ShowFriends();
 						this->UpdateItem(client);
 					}
 					//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
@@ -3071,8 +3090,6 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			//SLAHAM: ADDED Show Downloading Time =>
 	case 9: 
 		return client1->dwSessionDLTime - client2->dwSessionDLTime;
-	case 90: 
-		return client1->dwTotalDLTime - client2->dwTotalDLTime;
 		//SLAHAM: ADDED Show Downloading Time <=
 		//SLAHAM: ADDED Known Since =>
 	case 10:
@@ -3081,13 +3098,7 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			uint32 known2 = client1->dwThisClientIsKnownSince;
 			return known1==known2? 0 : known1<known2? -1 : 1;
 		}
-	case 110:
-		{
-			uint32 known1 = client1->dwThisClientIsKnownSince;
-			uint32 known2 = client2->dwThisClientIsKnownSince;
-			return known1==known2? 0 : known1<known2? -1 : 1;
-		}
-		//SLAHAM: ADDED Known Since <=
+	//SLAHAM: ADDED Known Since <=
 	//MORPH START - Added by SiRoB, WebCache 1.2f
 	//JP Webcache START 
 	case 15:
@@ -3097,6 +3108,16 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			return client1->SupportsWebCache() - client2->SupportsWebCache();
 	//JP Webcache END
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
+	// Commander - Added: IP2Country column - Start
+    case 16:
+		if(client1->GetCountryName(true) && client2->GetCountryName(true))
+			return CompareLocaleStringNoCase(client1->GetCountryName(true), client2->GetCountryName(true));
+		else if(client1->GetCountryName(true))
+			return 1;
+		else
+			return -1;
+	// Commander - Added: IP2Country column - End
+		
 	default:
 		return 0;
 	}

@@ -112,12 +112,12 @@ void CUploadListCtrl::Init()
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
-/*
+
 	// Mighty Knife: Community affiliation
 	if (thePrefs.IsCommunityEnabled ()) ShowColumn (13);
 	else HideColumn (13);
 	// [end] Mighty Knife
-*/
+
 	// Commander - Added: IP2Country column - Start
 	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
 		HideColumn (15);
@@ -178,82 +178,105 @@ void CUploadListCtrl::Localize()
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
-	CString strRes;
 
-	strRes = GetResString(IDS_QL_USERNAME);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(0, &hdi);
-	strRes.ReleaseBuffer();
+	if(pHeaderCtrl->GetItemCount() != 0) {
+		CString strRes;
+		strRes = GetResString(IDS_QL_USERNAME);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(0, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_FILE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(1, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_FILE);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(1, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_SPEED);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(2, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_SPEED);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(2, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_TRANSF);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(3, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_DL_TRANSF);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(3, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_WAITED);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(4, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_WAITED);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(4, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_UPLOADTIME);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(5, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_UPLOADTIME);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(5, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_STATUS);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(6, &hdi);
-	strRes.ReleaseBuffer();
+		strRes = GetResString(IDS_STATUS);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(6, &hdi);
+		strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_UPSTATUS);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(7, &hdi);
-	strRes.ReleaseBuffer();
-	
-	//MORPH START - Modified by SiRoB, Client Software
-	strRes = GetResString(IDS_CLIENTSOFTWARE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(8, &hdi);
-	strRes.ReleaseBuffer();
-	//MORPH END - Modified by SiRoB, Client Software
+		strRes = GetResString(IDS_UPSTATUS);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(7, &hdi);
+		strRes.ReleaseBuffer();
+		
+		//MORPH START - Modified by SiRoB, Client Software
+		strRes = GetResString(IDS_CLIENTSOFTWARE);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(8, &hdi);
+		strRes.ReleaseBuffer();
+		//MORPH END - Modified by SiRoB, Client Software
 
-	//MORPH START - Modified by IceCream, Total up down
-	strRes = GetResString(IDS_UPL_DL);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(9, &hdi);
-	strRes.ReleaseBuffer();
-	//MORPH END - Modified by IceCream, Total up down
+		//MORPH START - Modified by IceCream, Total up down
+		strRes = GetResString(IDS_UPL_DL);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(9, &hdi);
+		strRes.ReleaseBuffer();
+		//MORPH END - Modified by IceCream, Total up down
 
-	//MORPH START - Modified by IceCream, Remote Status
-	strRes = GetResString(IDS_CL_DOWNLSTATUS);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(10, &hdi);
-	strRes.ReleaseBuffer();
-	//MORPH END - Modified by IceCream, Remote Status
+		//MORPH START - Modified by IceCream, Remote Status
+		strRes = GetResString(IDS_CL_DOWNLSTATUS);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(10, &hdi);
+		strRes.ReleaseBuffer();
+		//MORPH END - Modified by IceCream, Remote Status
 
-	//MORPH START - Added by SiRoB, ZZ Missing
-	strRes = GetResString(IDS_UPSLOTNUMBER);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(11, &hdi);
-	strRes.ReleaseBuffer();
-	//MORPH END - Added by SiRoB, ZZ Missing
+		//MORPH START - Added by SiRoB, ZZ Missing
+		strRes = GetResString(IDS_UPSLOTNUMBER);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(11, &hdi);
+		strRes.ReleaseBuffer();
+		//MORPH END - Added by SiRoB, ZZ Missing
 
-	//MORPH START - Added by SiRoB, Show Compression by Tarod
-	strRes = GetResString(IDS_COMPRESSIONGAIN);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(12, &hdi);
-	strRes.ReleaseBuffer();
-	//MORPH END - Added by SiRoB, Show Compression by Tarod
+		//MORPH START - Added by SiRoB, Show Compression by Tarod
+		strRes = GetResString(IDS_COMPRESSIONGAIN);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(12, &hdi);
+		strRes.ReleaseBuffer();
+		//MORPH END - Added by SiRoB, Show Compression by Tarod
+
+		// Mighty Knife: Community affiliation
+		strRes = GetResString(IDS_COMMUNITY);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(13, &hdi);
+		strRes.ReleaseBuffer();
+		// [end] Mighty Knife
+
+		// EastShare - Added by Pretender, Friend Tab
+		strRes = GetResString(IDS_FRIENDLIST);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(14, &hdi);
+		strRes.ReleaseBuffer();
+		// EastShare - Added by Pretender, Friend Tab
+
+		// Commander - Added: IP2Country column - Start
+		strRes = GetResString(IDS_COUNTRY);
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(15, &hdi);
+		strRes.ReleaseBuffer();
+		// Commander - Added: IP2Country column - End
+	}
 }
 
 void CUploadListCtrl::AddClient(const CUpDownClient* client)
@@ -409,29 +432,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							
 						Sbuffer = client->GetUserName();
 
-						//EastShare Start - added by AndCycle, IP to Country, modified by Commander
-						//CString tempStr;
-						//tempStr.Format("<%s>%s", client->GetCountryName(), Sbuffer);
-						//Sbuffer = tempStr;
-											//Commander: There is a column now to show the country name
-
-						if(theApp.ip2country->ShowCountryFlag()){
-							cur_rec.left+=20;
-							POINT point2= {cur_rec.left,cur_rec.top+1};
-							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
-						}
-						//EastShare End - added by AndCycle, IP to Country
-
 						cur_rec.left +=20;
 						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 						cur_rec.left -=20;
-
-						//EastShare Start - added by AndCycle, IP to Country
-						if(theApp.ip2country->ShowCountryFlag()){
-							cur_rec.left-=20;
-						}
-						//EastShare End - added by AndCycle, IP to Country
-
 						break;
 					}
 					case 1:
@@ -620,28 +623,24 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					// Commander - Added: IP2Country column - Start
 					case 15:
 						Sbuffer.Format(_T("%s"), client->GetCountryName());
+						if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+							POINT point2= {cur_rec.left,cur_rec.top+1};
+							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							cur_rec.left+=20;
+						}
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+							cur_rec.left-=20;
+						}
 						break;
 					// Commander - Added: IP2Country column - End	
 				}
-				if( iColumn != 7 && iColumn != 0 )
+				if( iColumn != 7 && iColumn != 0 && iColumn != 15)
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,dcdttext);
 			} //MORPH - Added by SiRoB, Don't draw hidden columns
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
-/*
-	// Mighty Knife: Community affiliation
-	// Show/Hide community column if changed in the preferences
-	if (thePrefs.IsCommunityEnabled () != !IsColumnHidden (13))
-		if (thePrefs.IsCommunityEnabled ())
-				ShowColumn (13);
-		else HideColumn (13);
-	// [end] Mighty Knife
-*/
-	// Commander - Added: IP2Country column - Start
-	if ((thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE) && !IsColumnHidden(15))
-		HideColumn (15);
-	// Commander - Added: IP2Country column - End
 
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
@@ -751,13 +750,7 @@ BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					} else {
 						client->SetFriendSlot(true);
 					}
-					//KTS+
-					for (POSITION pos = theApp.friendlist->m_listFriends.GetHeadPosition();pos != 0;theApp.friendlist->m_listFriends.GetNext(pos))
-					{
-						CFriend* cur_friend = theApp.friendlist->m_listFriends.GetAt(pos);
-						theApp.friendlist->RefreshFriend(cur_friend);
-					}
-					//KTS-
+					theApp.friendlist->ShowFriends();
 					RefreshClient(client);
 				}
 				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
@@ -893,22 +886,28 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 		//MORPH START - Added by SiRoB, Show Compression by Tarod
 		case 12:
-			return item1->GetCompression() - item2->GetCompression();
+			if (item1->GetCompression() == item2->GetCompression())
+				return 0;
+			else
+				return item1->GetCompression() > item2->GetCompression()?1:-1;
 		case 112:
-			return item2->GetCompression() - item1->GetCompression();
+			if (item1->GetCompression() == item2->GetCompression())
+				return 0;
+			else
+				return item2->GetCompression() > item1->GetCompression()?1:-1;
 		//MORPH END - Added by SiRoB, Show Compression by Tarod
 		
 		// Mighty Knife: Community affiliation
 		case 13:
-			return (item1->IsCommunity() && !item2->IsCommunity()) ? -1 : 1;
+			return item1->IsCommunity() - item2->IsCommunity();
 		case 113:
-			return (item1->IsCommunity() && !item2->IsCommunity()) ? 1 : -1;
+			return item2->IsCommunity() - item1->IsCommunity();
 		// [end] Mighty Knife
 		// EastShare - Added by Pretender, Friend Tab
 		case 14:
-			return (item1->IsFriend() && !item2->IsFriend()) ? -1 : 1;
+			return item1->IsFriend() - item2->IsFriend();
 		case 114:
-			return (item1->IsFriend() && !item2->IsFriend()) ? 1 : -1;
+			return item2->IsFriend() - item1->IsFriend();
 		// EastShare - Added by Pretender, Friend Tab
         // Commander - Added: IP2Country column - Start
         case 15:

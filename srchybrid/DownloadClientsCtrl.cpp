@@ -277,7 +277,14 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	if (!lpDrawItemStruct->itemData)
 		return;
-
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	RECT clientRect;
+	GetClientRect(&clientRect);
+	RECT cur_rec = lpDrawItemStruct->rcItem;
+	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
+	
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
 	if( odc && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
@@ -292,8 +299,11 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
 	CFont *pOldFont = dc.SelectObject(GetFont());
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
 	RECT cur_rec;
 	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	*/
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
 
 	CString Sbuffer;	
@@ -307,195 +317,179 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 		if( !IsColumnHidden(iColumn) ){
 			cur_rec.right += GetColumnWidth(iColumn);
-
-			dc->SetTextColor(RGB(204,0,0)); //Pretender: transferers in darkred
-
-			switch(iColumn)
+			//MORPH START - Added by SiRoB, Don't draw hidden columns
+			if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 			{
-			case 0:
-				{	
-					//MORPH START - Modified by SiRoB, More client & ownCredit overlay icon
-					UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->Credits() && client->Credits()->GetMyScoreRatio(client->GetIP()) > 1) ? 2 : 0));
-					POINT point2= {cur_rec.left,cur_rec.top+1};
+			//MORPH END   - Added by SiRoB, Don't draw hidden columns
+				dc->SetTextColor(RGB(204,0,0)); //Pretender: transferers in darkred
 
-					if (client->GetClientSoft() == SO_EDONKEYHYBRID)
-						m_ImageList.Draw(dc, 4, point2, ILD_NORMAL | uOvlImg);
-					else if(client->GetClientSoft() == SO_MLDONKEY)
-						m_ImageList.Draw(dc, 3, point2, ILD_NORMAL | uOvlImg);
-					else if (client->GetClientSoft() == SO_SHAREAZA)
-						m_ImageList.Draw(dc, 5, point2, ILD_NORMAL | uOvlImg);
-					else if (client->GetClientSoft() == SO_AMULE)
-						m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | uOvlImg);
-					else if (client->GetClientSoft() == SO_LPHANT)
-						m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | uOvlImg);
-					else if (client->ExtProtocolAvailable())
-						m_ImageList.Draw(dc, client->IsMorph()?8:0, point2, ILD_NORMAL | uOvlImg);
-					else if (client->GetClientSoft() == SO_EDONKEY)
-						m_ImageList.Draw(dc, 2, point2, ILD_NORMAL | uOvlImg);
-					else
-						m_ImageList.Draw(dc, 0, point2, ILD_NORMAL | uOvlImg);
-
-					// Mighty Knife: Community visualization
-					if (client->IsCommunity())
-						m_overlayimages.Draw(dc,0, point2, ILD_TRANSPARENT);
-					// [end] Mighty Knife
-					//MORPH START - Added by SiRoB, Friend Addon
-					if (client->IsFriend())
-						m_overlayimages.Draw(dc, client->GetFriendSlot()?2:1,point2, ILD_TRANSPARENT);
-					//MORPH END   - Added by SiRoB, Friend Addon
-					//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
-
-					POINT point = {cur_rec.left, cur_rec.top+1};
-					Sbuffer = client->GetUserName();
-
-					//EastShare Start - added by AndCycle, IP to Country 
-
-					/* Removed by Pretender
-					CString tempStr;
-					tempStr.Format(_T("%s%s"), client->GetCountryName(), Sbuffer);
-					Sbuffer = tempStr;
-					Removed by Pretender */
-
-					if(theApp.ip2country->ShowCountryFlag()){
-						cur_rec.left+=20;
+				switch(iColumn)
+				{
+				case 0:
+					{	
+						//MORPH START - Modified by SiRoB, More client & ownCredit overlay icon
+						UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->Credits() && client->Credits()->GetMyScoreRatio(client->GetIP()) > 1) ? 2 : 0));
 						POINT point2= {cur_rec.left,cur_rec.top+1};
-						int index = client->GetCountryFlagIndex();
-						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+
+						if (client->GetClientSoft() == SO_EDONKEYHYBRID)
+							m_ImageList.Draw(dc, 4, point2, ILD_NORMAL | uOvlImg);
+						else if(client->GetClientSoft() == SO_MLDONKEY)
+							m_ImageList.Draw(dc, 3, point2, ILD_NORMAL | uOvlImg);
+						else if (client->GetClientSoft() == SO_SHAREAZA)
+							m_ImageList.Draw(dc, 5, point2, ILD_NORMAL | uOvlImg);
+						else if (client->GetClientSoft() == SO_AMULE)
+							m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | uOvlImg);
+						else if (client->GetClientSoft() == SO_LPHANT)
+							m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | uOvlImg);
+						else if (client->ExtProtocolAvailable())
+							m_ImageList.Draw(dc, client->IsMorph()?8:0, point2, ILD_NORMAL | uOvlImg);
+						else if (client->GetClientSoft() == SO_EDONKEY)
+							m_ImageList.Draw(dc, 2, point2, ILD_NORMAL | uOvlImg);
+						else
+							m_ImageList.Draw(dc, 0, point2, ILD_NORMAL | uOvlImg);
+
+						// Mighty Knife: Community visualization
+						if (client->IsCommunity())
+							m_overlayimages.Draw(dc,0, point2, ILD_TRANSPARENT);
+						// [end] Mighty Knife
+						//MORPH START - Added by SiRoB, Friend Addon
+						if (client->IsFriend())
+							m_overlayimages.Draw(dc, client->GetFriendSlot()?2:1,point2, ILD_TRANSPARENT);
+						//MORPH END   - Added by SiRoB, Friend Addon
+						//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
+
+						POINT point = {cur_rec.left, cur_rec.top+1};
+						Sbuffer = client->GetUserName();
+
+						cur_rec.left +=20;
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						cur_rec.left -=20;
+						break;
 					}
-					//EastShare End - added by AndCycle, IP to Country
-
-					cur_rec.left +=20;
-					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
-					cur_rec.left -=20;
-
-					//EastShare Start - added by AndCycle, IP to Country
-					if(theApp.ip2country->ShowCountryFlag()){
-						cur_rec.left-=20;
-					}
-					//EastShare End - added by AndCycle, IP to Country
-
+				case 1:
+					Sbuffer.Format(_T("%s"), client->GetClientSoftVer());
 					break;
-				}
-			case 1:
-				Sbuffer.Format(_T("%s"), client->GetClientSoftVer());
-				break;
-			case 2:
-				Sbuffer.Format(_T("%s"), client->GetRequestFile()->GetFileName());
-				break;
-			case 3:
-				{
-					Sbuffer.Format(_T("%.2f KB/s"), (float)client->GetDownloadDatarate()/1024);
-					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT | DT_RIGHT);
+				case 2:
+					Sbuffer.Format(_T("%s"), client->GetRequestFile()->GetFileName());
 					break;
-				}
-			case 4:
-				{
-					cur_rec.bottom--;
-					cur_rec.top++;
-
-					client->DrawStatusBar(dc, &cur_rec, client->GetRequestFile(), thePrefs.UseFlatBar());
-					CString buffer;
-
-					//SLAHAM: ADDED Client Percentage =>
-					if (thePrefs.GetUseClientPercentage() && client->GetPartStatus())
+				case 3:
 					{
-						float percent = (float)client->GetAvailablePartCount() / (float)client->GetPartCount()* 100.0f;
-						COLORREF oldclr = dc->SetTextColor(RGB(255,255,255)); //Pretender: percentage in white
-						int iOMode = dc->SetBkMode(TRANSPARENT);
-						buffer.Format(_T("%.1f%%"), percent);
-
-						if (percent > 0.05f)
-						{
-							//Commander - Added: Draw Client Percentage xored, caching before draw - Start
-							COLORREF oldclr = dc.SetTextColor(RGB(0,0,0));
-							int iOMode = dc.SetBkMode(TRANSPARENT);
-							buffer.Format(_T("%.1f%%"), percent);
-							CFont *pOldFont = dc.SelectObject(&theApp.emuledlg->transferwnd->downloadlistctrl.m_fontBoldSmaller);
-#define	DrawClientPercentText		dc.DrawText(buffer, buffer.GetLength(),&cur_rec, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
-							cur_rec.top-=1;cur_rec.bottom-=1;
-							DrawClientPercentText;cur_rec.left+=1;cur_rec.right+=1;
-							DrawClientPercentText;cur_rec.left+=1;cur_rec.right+=1;
-							DrawClientPercentText;cur_rec.top+=1;cur_rec.bottom+=1;
-							DrawClientPercentText;cur_rec.top+=1;cur_rec.bottom+=1;
-							DrawClientPercentText;cur_rec.left-=1;cur_rec.right-=1;
-							DrawClientPercentText;cur_rec.left-=1;cur_rec.right-=1;
-							DrawClientPercentText;cur_rec.top-=1;cur_rec.bottom-=1;
-							DrawClientPercentText;cur_rec.left++;cur_rec.right++;
-							dc.SetTextColor(RGB(255,255,255));
-							DrawClientPercentText;
-							dc.SelectObject(pOldFont);
-							dc.SetBkMode(iOMode);
-							dc.SetTextColor(oldclr);
-							//Commander - Added: Draw Client Percentage xored, caching before draw - End	
-						}
-						//SLAHAM: ADDED Client Percentage <=
-
-						cur_rec.bottom++;
-						cur_rec.top--;
+						Sbuffer.Format(_T("%.2f KB/s"), (float)client->GetDownloadDatarate()/1024);
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT | DT_RIGHT);
+						break;
 					}
-					break;
-				}	
-			case 5:
-				if(client->Credits())
-					Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedDown()), CastItoXBytes(client->credits->GetDownloadedTotal()));
-				else
-				    Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferedDown()));
-				break;
-			case 6:
-				if(client->Credits())
-					Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedUp()), CastItoXBytes(client->credits->GetUploadedTotal()));
-				else
-                    Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferedUp()));
-				break;
-			case 7:
-				if(client->Credits())
-				    Sbuffer.Format(_T("%.1f/%.1f"),client->credits->GetScoreRatio(client->GetIP()), client->credits->GetMyScoreRatio(client->GetIP()));
-				else
-					Sbuffer.Format(_T(""));
-				break;
-				//SLAHAM: ADDED Last Asked Counter =>
-			case 8:
-				if( client->GetLastAskedTime() )
-					Sbuffer.Format(_T(" %s [%u]"), CastSecondsToHM((::GetTickCount()-client->GetLastAskedTime())/1000), client->uiDLAskingCounter);
-				else
-					Sbuffer.Format(_T("Reseted [%u]"), client->uiDLAskingCounter);
-				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT);
-				break;
-				//SLAHAM: ADDED Last Asked Counter <=
-				//SLAHAM: ADDED Show Downloading Time =>
-			case 9:	
-				Sbuffer.Format(_T(" %s (%s)[%u]"), CastSecondsToHM(client->dwSessionDLTime/1000), CastSecondsToHM(client->dwTotalDLTime/1000), client->uiStartDLCount);
-				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT);
-				break;
-				//SLAHAM: ADDED Show Downloading Time <=
-				//SLAHAM: ADDED Known Since =>
-			case 10: 
-				if( client->dwThisClientIsKnownSince )
-					Sbuffer.Format(_T(" %s"), CastSecondsToHM((::GetTickCount()-client->dwThisClientIsKnownSince)/1000));
-				else
-					Sbuffer.Format(_T("WHO IS THAT???"));
-				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT);
-				break;
-				//SLAHAM: ADDED Known Since <=
-			// EastShare - Added by Pretender: IP2Country column
-            case 11:
-				Sbuffer.Format(_T("%s"), client->GetCountryName());
-				break;
-			// EastShare - Added by Pretender: IP2Country column
-			}
+				case 4:
+					{
+						cur_rec.bottom--;
+						cur_rec.top++;
 
-			if( iColumn != 4 && iColumn != 0 && iColumn != 3)
+						client->DrawStatusBar(dc, &cur_rec, client->GetRequestFile(), thePrefs.UseFlatBar());
+						CString buffer;
+
+						//SLAHAM: ADDED Client Percentage =>
+						if (thePrefs.GetUseClientPercentage() && client->GetPartStatus())
+						{
+							float percent = (float)client->GetAvailablePartCount() / (float)client->GetPartCount()* 100.0f;
+							COLORREF oldclr = dc->SetTextColor(RGB(255,255,255)); //Pretender: percentage in white
+							int iOMode = dc->SetBkMode(TRANSPARENT);
+							buffer.Format(_T("%.1f%%"), percent);
+
+							if (percent > 0.05f)
+							{
+								//Commander - Added: Draw Client Percentage xored, caching before draw - Start
+								COLORREF oldclr = dc.SetTextColor(RGB(0,0,0));
+								int iOMode = dc.SetBkMode(TRANSPARENT);
+								buffer.Format(_T("%.1f%%"), percent);
+								CFont *pOldFont = dc.SelectObject(&theApp.emuledlg->transferwnd->downloadlistctrl.m_fontBoldSmaller);
+	#define	DrawClientPercentText		dc.DrawText(buffer, buffer.GetLength(),&cur_rec, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
+								cur_rec.top-=1;cur_rec.bottom-=1;
+								DrawClientPercentText;cur_rec.left+=1;cur_rec.right+=1;
+								DrawClientPercentText;cur_rec.left+=1;cur_rec.right+=1;
+								DrawClientPercentText;cur_rec.top+=1;cur_rec.bottom+=1;
+								DrawClientPercentText;cur_rec.top+=1;cur_rec.bottom+=1;
+								DrawClientPercentText;cur_rec.left-=1;cur_rec.right-=1;
+								DrawClientPercentText;cur_rec.left-=1;cur_rec.right-=1;
+								DrawClientPercentText;cur_rec.top-=1;cur_rec.bottom-=1;
+								DrawClientPercentText;cur_rec.left++;cur_rec.right++;
+								dc.SetTextColor(RGB(255,255,255));
+								DrawClientPercentText;
+								dc.SelectObject(pOldFont);
+								dc.SetBkMode(iOMode);
+								dc.SetTextColor(oldclr);
+								//Commander - Added: Draw Client Percentage xored, caching before draw - End	
+							}
+							//SLAHAM: ADDED Client Percentage <=
+
+							cur_rec.bottom++;
+							cur_rec.top--;
+						}
+						break;
+					}	
+				case 5:
+					if(client->Credits())
+						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedDown()), CastItoXBytes(client->credits->GetDownloadedTotal()));
+					else
+						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferedDown()));
+					break;
+				case 6:
+					if(client->Credits())
+						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedUp()), CastItoXBytes(client->credits->GetUploadedTotal()));
+					else
+						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferedUp()));
+					break;
+				case 7:
+					if(client->Credits())
+						Sbuffer.Format(_T("%.1f/%.1f"),client->credits->GetScoreRatio(client->GetIP()), client->credits->GetMyScoreRatio(client->GetIP()));
+					else
+						Sbuffer.Format(_T(""));
+					break;
+					//SLAHAM: ADDED Last Asked Counter =>
+				case 8:
+					if( client->GetLastAskedTime() )
+						Sbuffer.Format(_T(" %s [%u]"), CastSecondsToHM((::GetTickCount()-client->GetLastAskedTime())/1000), client->uiDLAskingCounter);
+					else
+						Sbuffer.Format(_T("Reseted [%u]"), client->uiDLAskingCounter);
+					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT);
+					break;
+					//SLAHAM: ADDED Last Asked Counter <=
+					//SLAHAM: ADDED Show Downloading Time =>
+				case 9:	
+					Sbuffer.Format(_T(" %s (%s)[%u]"), CastSecondsToHM(client->dwSessionDLTime/1000), CastSecondsToHM(client->dwTotalDLTime/1000), client->uiStartDLCount);
+					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT);
+					break;
+					//SLAHAM: ADDED Show Downloading Time <=
+					//SLAHAM: ADDED Known Since =>
+				case 10: 
+					if( client->dwThisClientIsKnownSince )
+						Sbuffer.Format(_T(" %s"), CastSecondsToHM((::GetTickCount()-client->dwThisClientIsKnownSince)/1000));
+					else
+						Sbuffer.Format(_T("WHO IS THAT???"));
+					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT);
+					break;
+					//SLAHAM: ADDED Known Since <=
+				// EastShare - Added by Pretender: IP2Country column
+				case 11:
+						if(theApp.ip2country->ShowCountryFlag()){
+							POINT point2= {cur_rec.left,cur_rec.top+1};
+							int index = client->GetCountryFlagIndex();
+							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							cur_rec.left+=20;
+						}
+						Sbuffer.Format(_T("%s"), client->GetCountryName());
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						if(theApp.ip2country->ShowCountryFlag()){
+							cur_rec.left-=20;
+						}
+						break;
+				// EastShare - Added by Pretender: IP2Country column
+				}
+
+				if( iColumn != 4 && iColumn != 0 && iColumn != 3)
 				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+			}//MORPH - Added by SiRoB, Don't draw hidden columns
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
-
-		// EastShare - Added by Pretender: IP2Country column
-		if ((thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE) != !IsColumnHidden (11))
-			if (thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE)
-				ShowColumn (11);
-			else HideColumn (11);
-		// EastShare - Added by Pretender: IP2Country column
 
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
@@ -584,13 +578,7 @@ BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					{
 						client->SetFriendSlot(true);
 					}
-					//KTS+
-					for (POSITION pos = theApp.friendlist->m_listFriends.GetHeadPosition();pos != 0;theApp.friendlist->m_listFriends.GetNext(pos))
-					{
-						CFriend* cur_friend = theApp.friendlist->m_listFriends.GetAt(pos);
-						theApp.friendlist->RefreshFriend(cur_friend);
-					}
-					//KTS-
+					theApp.friendlist->ShowFriends();
 					theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(client);
 				}
 				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
