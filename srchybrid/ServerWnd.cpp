@@ -259,7 +259,6 @@ BOOL CServerWnd::OnInitDialog()
 
 	//MORPH START - Added by SiRoB, XML News [O²]
 	ListFeeds(); // Added by O²: XML News
-	GetDlgItem(IDC_FEEDLIST)->RedrawWindow(); //Added by SiRoB
 	//MORPH END   - Added by SiRoB, XML News [O²]
 	return true;
 }

@@ -2280,3 +2280,27 @@ CString CastItoUIXBytes(uint32 count)
 }
 // khaos::categorymod-
 // khaos::kmod-
+
+//MORPH START - Added by SiRoB, XML News [O²]
+void HTMLParse(CString &buffer)
+{
+	buffer.Replace("&amp;","&");
+	buffer.Replace("&#34;","\"");
+	buffer.Replace("&quot;","\"");
+	buffer.Replace("&#38;","?");
+	buffer.Replace("&#039;","'");
+	buffer.Replace("&#60;","<");
+	buffer.Replace("&#lt;","<");
+	buffer.Replace("&#62;",">");
+	buffer.Replace("&#gt;",">");
+	buffer.Replace("&ccedil;","ç");
+	buffer.Replace("&eacute;","é");
+	buffer.Replace("&egrave;","è");
+	buffer.Replace("&agrave;","à");
+	if (buffer.Left(4) == "<br>")
+		buffer.Right(buffer.GetLength()-4);
+	if (buffer.Right(4) == "<br>")
+		buffer.Left(buffer.GetLength()-4);
+	buffer.Replace("<br>","\n");
+}
+//MORPH END  - Added by SiRoB, XML News [O²]

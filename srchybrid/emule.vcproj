@@ -658,6 +658,14 @@
 				RelativePath="Preview.h">
 			</File>
 			<File
+				RelativePath="pugxml.h">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="Quantize.h">
 			</File>
 			<File

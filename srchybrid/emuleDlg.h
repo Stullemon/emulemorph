@@ -111,7 +111,9 @@ public:
 	CFont			m_fontHyperText;
 	CFont			m_fontMarlett;
 	CFont			m_fontLog;
-
+	//EastShare, Added by linekin HotKey
+	LRESULT			OnHotKey(WPARAM wParam, LPARAM lParam); 
+	//EastShare, Added by linekin HotKey
 protected:
 	HICON m_hIcon;
 

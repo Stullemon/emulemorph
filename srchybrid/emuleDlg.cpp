@@ -246,6 +246,10 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_FRAMEGRABFINISHED,OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
 	ON_MESSAGE(TM_FILECOMPLETED, OnFileCompleted)
+	//EastShare, Added by linekin HotKey
+	ON_MESSAGE(WM_HOTKEY,OnHotKey) 
+	//EastShare, Added by linekin HotKey
+	
 END_MESSAGE_MAP()
 
 // CemuleDlg eventhandler
@@ -473,6 +477,9 @@ BOOL CemuleDlg::OnInitDialog()
 	}
 
 	VERIFY( m_pDropTarget->Register(this) );
+	//EastShare, Added by linekin HotKey
+	RegisterHotKey(this->m_hWnd,100,MOD_WIN,'S'); 
+	//EastShare, Added by linekin HotKey
 
 	return TRUE;
 }
@@ -546,7 +553,7 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 				
 				if (!bError) // show the success msg, only if we had no serious error
 					AddLogLine(true, GetResString(IDS_MAIN_READY)+" "+GetResString(IDS_TRANSVERSION),theApp.m_strCurVersionLong); //MORPH - Added by milobac, Translation version info
-				
+
 
 				// SLUGFILLER: SafeHash remove - moved down
 				theApp.emuledlg->status++;
@@ -978,7 +985,7 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 		//MORPH START - Added by SiRoB, Show zz ratio activation
 		if (thePrefs.IsZZRatioDoesWork()){
 			char buffer2[100];		
-			_snprintf(buffer2,sizeof buffer2,"%s r",buffer);
+			_snprintf(buffer2,sizeof buffer2,"%s ZZ-Ratio",buffer);
 			statusbar->SetText(buffer2,2,0);
 		}else
 		//MORPH END   - Added by SiRoB, Show zz ratio activation
@@ -1107,7 +1114,7 @@ void CemuleDlg::SetStatusBarPartsSize()
 	{
 		ussShift = 150;
 	}
-	int aiWidths[5] = { rect.right-525-ussShift, rect.right-315-ussShift, rect.right-125-ussShift, rect.right-25-ussShift, -1 };
+	int aiWidths[5] = { rect.right-535-ussShift, rect.right-315-ussShift, rect.right-110-ussShift, rect.right-25-ussShift, -1 };
 	//MORPH END   - Added by SiRoB, Related to SUC
 	statusbar->SetParts(5, aiWidths);
 }
@@ -1471,6 +1478,9 @@ void CemuleDlg::OnClose()
 	thePrefs.Uninit();
 	theApp.m_app_state = APP_STATE_DONE;
 	CTrayDialog::OnCancel();
+	//EastShare, Added by linekin HotKey
+	UnregisterHotKey(this->m_hWnd,100); 
+	//EastShare, Added by linekin HotKey
 }
 
 void CemuleDlg::OnTrayRButtonUp(CPoint pt)
@@ -2576,3 +2586,26 @@ void CemuleDlg::OutputExtDebugMessages () {
 	}
 }
 // [end] Mighty Knife
+
+//EastShare start, Added by linekin, HotKey
+LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)
+{
+	static boolean b_TrayWasVisible = TrayIsVisible();;
+	static boolean b_HideApp = false;
+	b_HideApp = !b_HideApp && thePrefs.InvisibleMode();
+	if (b_HideApp)
+	{
+		b_TrayWasVisible = TrayIsVisible();
+		TrayHide();
+		ShowWindow(SW_HIDE);
+	}
+	else{
+		if(b_TrayWasVisible)
+			TrayShow();
+		else
+			ShowWindow(SW_SHOW);
+	}
+	return 0;
+}
+//EastShare end, Added by linekin, HotKey
+
