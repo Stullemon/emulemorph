@@ -196,7 +196,7 @@ BOOL CPPgMorphShare::OnApply()
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
 	thePrefs.m_bPowershareInternalPrio = m_iPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
-	if(thePrefs.m_bShowFolderIcons != m_iFolderIcons)
+	if(thePrefs.m_bShowFolderIcons != (m_iFolderIcons == 1))
 	{
 		if(m_iFolderIcons)
 		{
