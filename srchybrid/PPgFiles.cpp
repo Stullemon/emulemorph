@@ -54,6 +54,10 @@ BOOL CPPgFiles::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
+	
+	//MORPH START - Added by SiRoB, Allways use securedid
+	GetDlgItem(IDC_FULLCHUNKTRANS)->EnableWindow(1);
+	//MORPH END   - Added by SiRoB, Allways use securedid
 
 	LoadSettings();
 	Localize();
