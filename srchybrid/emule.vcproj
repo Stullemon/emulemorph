@@ -1037,9 +1037,6 @@
 				RelativePath="EnBitmap.cpp">
 			</File>
 			<File
-				RelativePath=".\FadeWnd.cpp">
-			</File>
-			<File
 				RelativePath="FileDetailDialog.cpp">
 			</File>
 			<File
@@ -2526,6 +2523,9 @@
 			</File>
 			<File
 				RelativePath="res\Upload.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\UPnP.ico">
 			</File>
 			<File
 				RelativePath="res\User.ico">
