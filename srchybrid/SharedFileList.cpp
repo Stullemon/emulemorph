@@ -60,14 +60,14 @@ CSharedFileList::~CSharedFileList(){
 
 void CSharedFileList::FindSharedFiles(){
 
-	if (!m_Files_map.IsEmpty()){
+	// SLUGFILLER: SafeHash remove - only called after the download queue is created
 		CSingleLock sLock1(&list_mut,true); // list thread safe
 		m_Files_map.RemoveAll();
 		sLock1.Unlock();
 		ASSERT( theApp.downloadqueue );
 		if (theApp.downloadqueue)
 			theApp.downloadqueue->AddPartFilesToShare(); // read partfiles
-	}
+	// SLUGFILLER: SafeHash remove - only called after the download queue is created
 
 	// khaos::kmod+ Fix: Shared files loaded multiple times.
 	// TODO: Use a different list or array or something other which does not force use finally produce lowercased directory names
@@ -187,7 +187,6 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory){
 void CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd){
 	RemoveFromHashing(toadd);	// SLUGFILLER: SafeHash - hashed ok, remove from list, in case it was on the list
 	CSingleLock sLock(&list_mut,true);
-	
 	// SLUGFILLER: mergeKnown - check for duplicates
 	CKnownFile* other = GetFileByID(toadd->GetFileHash());
 	if (other && other != toadd){
@@ -224,21 +223,26 @@ void CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd){
 
 // removes first occurrence of 'toremove' in 'list'
 void CSharedFileList::RemoveFile(CKnownFile* toremove){
-	if (output) output->RemoveFile(toremove);	// SLUGFILLER: mergeKnown - prevent crash in case of no output
+	if (output)	// SLUGFILLER: mergeKnown - prevent crash in case of no output
+		output->RemoveFile(toremove);
 	m_Files_map.RemoveKey(CCKey(toremove->GetFileHash()));
 	toremove->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
 }
 
 void CSharedFileList::Reload(){
+	// SLUGFILLER: SafeHash - don't allow to be called until after the control is loaded
+	if (!output)
+		return;
 	this->FindSharedFiles();
-	if (output)
 		output->ShowFileList(this);
+	// SLUGFILLER: SafeHash
+
 }
 
 void CSharedFileList::SetOutputCtrl(CSharedFilesCtrl* in_ctrl){
 	output = in_ctrl;
 	output->ShowFileList(this);
-	HashNextFile();		// SLUGFILLER: SafeHash - if hashing not yet started, start it now
+	Reload();		// SLUGFILLER: SafeHash - load shared files after everything
 }
 
 void CSharedFileList::SendListToServer(){
@@ -484,9 +488,8 @@ CKnownFile*	CSharedFileList::GetFileByID(const uchar* filehash){
 
 void CSharedFileList::HashNextFile(){
 	// SLUGFILLER: SafeHash
-	if (!theApp.emuledlg || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
+	if (!theApp.emuledlg || !theApp.emuledlg->IsRunning() || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
 		return;
-	if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 	theApp.emuledlg->sharedfileswnd.sharedfilesctrl.ShowFilesCount();
 	if (!currentlyhashing_list.IsEmpty())	// one hash at a time
 		return;
@@ -495,10 +498,10 @@ void CSharedFileList::HashNextFile(){
 		return;
 	UnknownFile_Struct* nextfile = waitingforhash_list.RemoveHead();
 	currentlyhashing_list.AddTail(nextfile);	// SLUGFILLER: SafeHash - keep track
-	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);	// SLUGFILLER: SafeHash - full speed hashing
 	addfilethread->SetValues(this,nextfile->strDirectory,nextfile->strName);
 	addfilethread->ResumeThread();
-	// SLUGFILLER: SafeHash - nextfile deleting handled elsewhere
+	// SLUGFILLER: SafeHash remove - nextfile deleting handled elsewhere
 	//delete nextfile;
 }
 
@@ -564,11 +567,7 @@ int CAddFileThread::Run(){
 	
 	CoInitialize(NULL);
 
-	// locking that hashing thread is needed because we may create a couple of those threads at startup when rehashing
-	// potentially corrupted downloading part files. if all those hash threads would run concurrently, the io-system would be
-	// under very heavy load and slowly progressing
-	CSingleLock sLock1(&(theApp.hashing_mut)); // only one filehash at a time
-	sLock1.Lock();
+	// SLUGFILLER: SafeHash remove - locking code removed, unnececery
 	
 	CKnownFile* newrecord = new CKnownFile();
 	if (newrecord->CreateFromFile(strDirectory,strFilename) && theApp.emuledlg && theApp.emuledlg->IsRunning()){	// SLUGFILLER: SafeHash - in case of shutdown while still hashing
@@ -586,7 +585,7 @@ int CAddFileThread::Run(){
 		delete newrecord;
 	}
 
-	sLock1.Unlock();
+	// SLUGFILLER: SafeHash remove - locking code removed, unnececery
 	CoUninitialize();
 
 	AfxEndThread(0,true);
