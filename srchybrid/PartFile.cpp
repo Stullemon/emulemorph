@@ -2920,7 +2920,7 @@ void CPartFile::UpdatePartsInfo()
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
 	if(iCompleteSourcesCountInfoReceived)
-		iCompleteSourcesCountInfoReceived /= 2+GetNotCurrentSourcesCount();
+		iCompleteSourcesCountInfoReceived /= 2+GetNotCurrentSourcesCount()-GetSrcStatisticsValue(DS_NONEEDED);
 	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, iCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi<=1) || m_nVirtualCompleteSourcesCount==1),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
