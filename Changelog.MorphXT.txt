@@ -1,16 +1,17 @@
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.x
 --------------------------------------
-FIXED  : Identified a very old bug that make crash app in particular waiting-queue configuration [SiRoB]
+FIXED  : Identified a very old bug that make crash morph in particular waiting-queue configuration [SiRoB]
+FIXED  : Friend eLink minor fix from emulEspaña [SiRoB]
 
 ADDED  : CrashReporter from SF-IOM, gnaddelwarz: crashRpt[AndCycle]
 ADDED  : Scheduled remove slot from zz mod [AndCycle/SiRoB]
 
 CHANGED: SLS: LowID are now recorded [SiRoB]
 CHANGED: SpreadBar is now disabled by default in share preferency [SiRoB]
-CHANGED: USC: Reworked to work properly with the new scheduled remove system [SiRoB]
+CHANGED: USC: Reworked to work properly with the new scheduled remove slot [SiRoB]
 
-TWEAKED: USS: Ensure proper new open slot in all case [SiRoB]
+TWEAKED: USC: Ensure proper new open slot in all case [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.1

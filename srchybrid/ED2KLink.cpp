@@ -574,6 +574,26 @@ void CED2KFriendLink::GetLink(CString& lnk) const
 	lnk += _T("|/");
 }
 
+CED2KServerListLink* CED2KFriendLink::GetServerListLink() 
+{ 
+	return NULL;
+}
+
+CED2KServerLink* CED2KFriendLink::GetServerLink() 
+{ 
+	return NULL; 
+}
+
+CED2KFileLink* CED2KFriendLink::GetFileLink() 
+{ 
+	return NULL;
+}
+
+CED2KLink::LinkType CED2KFriendLink::GetKind() const
+{
+	return kFriend;
+}
+
 CED2KFriendListLink::CED2KFriendListLink(LPCTSTR address)
 {
 	m_address = address;
@@ -582,5 +602,25 @@ CED2KFriendListLink::CED2KFriendListLink(LPCTSTR address)
 void CED2KFriendListLink::GetLink(CString& lnk) const
 {
 	lnk.Format(_T("ed2k://|friendlist|%s|/"), m_address);
+}
+
+CED2KServerListLink* CED2KFriendListLink::GetServerListLink() 
+{ 
+	return NULL;
+}
+
+CED2KServerLink* CED2KFriendListLink::GetServerLink() 
+{ 
+	return NULL; 
+}
+
+CED2KFileLink* CED2KFriendListLink::GetFileLink() 
+{ 
+	return NULL;
+}
+
+CED2KLink::LinkType CED2KFriendListLink::GetKind() const
+{
+	return kFriendList;
 }
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]

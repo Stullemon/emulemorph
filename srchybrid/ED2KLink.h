@@ -142,12 +142,11 @@ public:
 	CED2KFriendLink(LPCTSTR userName, uchar userHash[]);
 	virtual ~CED2KFriendLink()	{ }
 
-	// Inherited pure virtual functions
-	virtual LinkType	GetKind() const					{ return kFriend; }
+	virtual LinkType	GetKind() const;
 	virtual void	GetLink(CString& lnk) const;
-	virtual CED2KServerListLink*	GetServerListLink()	{ return NULL; }
-	virtual CED2KServerLink*		GetServerLink()		{ return NULL; }
-	virtual CED2KFileLink*			GetFileLink()		{ return NULL; }
+	virtual CED2KServerListLink*	GetServerListLink();
+	virtual CED2KServerLink*		GetServerLink();
+	virtual CED2KFileLink*			GetFileLink();
 
 	CString	GetUserName() const						{ return m_sUserName; }
 	void	GetUserHash(uchar userHash[]) const		{ memcpy(userHash, m_hash, 16*sizeof(uchar)); }
@@ -163,12 +162,11 @@ public:
 	CED2KFriendListLink(LPCTSTR address);
 	virtual ~CED2KFriendListLink()	{ }
 
-	// Inherited pure virtual functions
-	virtual LinkType	GetKind() const					{ return kFriendList; }
+	virtual LinkType GetKind() const;
 	virtual void	GetLink(CString& lnk) const;
-	virtual CED2KServerListLink*	GetServerListLink()	{ return NULL; }
-	virtual CED2KServerLink*		GetServerLink()		{ return NULL; }
-	virtual CED2KFileLink*			GetFileLink()		{ return NULL; }
+	virtual CED2KServerListLink*	GetServerListLink();
+	virtual CED2KServerLink*		GetServerLink();
+	virtual CED2KFileLink*			GetFileLink();
 
 	CString	GetAddress() const		{ return m_address; }
 
