@@ -420,6 +420,11 @@ BOOL CemuleApp::InitInstance()
 		theApp.AddIncomingFolderIcon();
 		theApp.AddTempFolderIcon();
 	}
+	else
+	{
+		theApp.RemoveIncomingFolderIcon();
+		theApp.RemoveTempFolderIcon();
+	}
     //MORPH END   - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
 
 	// Barry - Auto-take ed2k links
@@ -1707,7 +1712,7 @@ void CemuleApp::AddTempFolderIcon(){
 	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
 
 	desktopIni.WriteString(_T("IconFile"),exePath);
-	desktopIni.WriteInt(_T("IconIndex"),2);
+	desktopIni.WriteInt(_T("IconIndex"),1);
 
 	SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
 	PathMakeSystemFolder(thePrefs.GetTempDir());

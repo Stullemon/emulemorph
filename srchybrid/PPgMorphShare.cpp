@@ -113,7 +113,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		// [end] Mighty Knife
 		//MORPH END   - Added by SiRoB, Show Permission
 
-		m_htiDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgPerm, TVI_ROOT);
+		m_htiDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, TVI_ROOT);
 		m_htiFolderIcons = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLDERICONS),m_htiDisplay, m_iFolderIcons);
 
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
@@ -187,9 +187,22 @@ BOOL CPPgMorphShare::OnApply()
 	theApp.sharedfiles->UpdatePartsInfo();
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
+	if(thePrefs.m_bShowFolderIcons != m_iFolderIcons)
+	{
+		if(m_iFolderIcons)
+		{
+			theApp.AddIncomingFolderIcon();
+			theApp.AddTempFolderIcon();
+		}
+		else
+		{
+			theApp.RemoveIncomingFolderIcon();
+			theApp.RemoveTempFolderIcon();
+		}
+	}
 	thePrefs.m_bShowFolderIcons = m_iFolderIcons;
-
-	//theApp.scheduler->SaveOriginals(); //Added by SiRoB, Fix for Param used in scheduler
+	
+	//theApp.scheduler->SaveOriginals(); //Removed by SiRoB, no scheduler param in this ppg //Added by SiRoB, Fix for Param used in scheduler
 
 	SetModified(FALSE);
 

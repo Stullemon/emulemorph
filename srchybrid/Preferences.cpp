@@ -3075,7 +3075,7 @@ void CPreferences::LoadPreferences()
     //MORPH END - Added by Commander, ClientQueueProgressBar
 
 	//MORPH START - Added by Commander, FolderIcons
-	m_bShowFolderIcons=ini.GetBool(_T("ShowFolderIcons"),true);
+	m_bShowFolderIcons=ini.GetBool(_T("ShowFolderIcons"),false);
 	//MORPH END - Added by Commander, FolderIcons
 
     m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
