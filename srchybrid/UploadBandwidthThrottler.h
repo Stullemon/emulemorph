@@ -37,7 +37,12 @@ public:
 
     uint64 GetNumberOfSentBytesSinceLastCallAndReset();
     uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset();
-    uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
+    //MORPH START - Changed by SiRoB, Upload Splitting Class
+    /*
+	uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
+	*/
+	uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset(uint32 * HighestNumberOfFullyActivatedSlotsSinceLastCallClass);
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
     INT_PTR GetStandardListSize() { return m_StandardOrder_list.GetSize(); };
 
 	//MORPH START - Changed by SiRoB, Upload Splitting Class
@@ -79,7 +84,7 @@ private:
 
     uint64 m_SentBytesSinceLastCall;
     uint64 m_SentBytesSinceLastCallOverhead;
-    uint32 m_highestNumberOfFullyActivatedSlots;
+    uint32 m_highestNumberOfFullyActivatedSlots[NB_SPLITTING_CLASS];
 	uint32 m_allowedDataRate;
 
     bool doRun;

@@ -84,12 +84,14 @@ public:
 //	void	FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash);
 
 	bool    RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemove = false);
-	CUpDownClient* FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet = false, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient = NULL);
-	bool	RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore);
+	//MORPH START - Changed by SiRoB, Upload Splitting Class
+	CUpDownClient* FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet = false, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient = NULL, bool checkforaddinuploadinglist = false);
+	bool	RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore, bool checkforaddinuploadinglist = false);
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	void	ReSortUploadSlots(bool force = false);
 
 	//Morph - added by AndCycle, separate special prio compare
-	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient);
+	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient, bool checkforaddinuploadinglist = false);  //MORPH - Changed by SiRoB, Upload Splitting Class
 
 protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
@@ -143,12 +145,15 @@ private:
 
     DWORD   m_dwLastCalculatedAverageCombinedFilePrioAndCredit;
     float   m_fAverageCombinedFilePrioAndCredit;
-    uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
-    uint32  m_MaxActiveClients;
+	uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
+    //MORPH - Added by SiRoB, Upload Splitting Class
+	uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[3/*NB_SPLITTING_CLASS*/];
+    //MORPH - Added by SiRoB, Upload Splitting Class
+	uint32  m_MaxActiveClients;
     uint32  m_MaxActiveClientsShortTime;
-	uint32	m_iHighestUploadDatarateReachedByOneClient;	//MORPH - Added by SiRoB, Upload Splitting Class
-
-    DWORD   m_lastCalculatedDataRateTick;
+	bool	m_abAddClientOfThisClass[3/*NB_SPLITTING_CLASS*/];	//MORPH - Added by SiRoB, Upload Splitting Class
+	uint32	m_aiSlotCounter[3/*NB_SPLITTING_CLASS*/];	//MORPH - Added by SiRoB, Upload Splitting Class
+	DWORD   m_lastCalculatedDataRateTick;
     uint64  m_avarage_dr_sum;
 
     DWORD   m_dwLastResortedUploadSlots;
