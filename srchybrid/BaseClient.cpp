@@ -371,7 +371,7 @@ void CUpDownClient::ClearHelloProperties()
 	m_fSharedDirectories = 0;
 
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
-	m_clientModString.Empty();
+	m_clientModString = "";
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
 	//MOPRH START - Added by SiRoB, Is Morph Client?
 	m_bIsMorph = false;
@@ -1082,9 +1082,10 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 			if(Disconnected("Failed to connect. Can not connect from low ID to another client with low ID.")){
 			//MORPH END   - Changed by SiRoB, ZZ UPload system
 				delete this;
-				return false;
 			}
 		}
+		//Never connect lowID to lowID
+		return false;
 	}
 
 	if (!socket){
