@@ -1239,7 +1239,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 					SetFileSize(newtag->GetInt());
 					m_AvailPartFrequency.SetSize(GetPartCount());
 					for (uint32 i = 0; i < GetPartCount();i++)
-						m_AvailPartFrequency[i] = 0;
+						m_AvailPartFrequency[i] = 1;
 				}
 				delete newtag;
 				break;
