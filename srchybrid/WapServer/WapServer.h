@@ -1,7 +1,7 @@
 //emulEspaña - Copied from WebServer.h and then modified by MoNKi [MoNKi: -Wap Server-]
 #pragma once
 
-#include "./CxImage/xImage.h"
+#include "../CxImage/xImage.h"
 #include <zlib/zlib.h>
 #include "WapSocket.h"
 #include "Partfile.h"

@@ -1,6 +1,5 @@
 //emulEspaña - Copied from WebServer.cpp and then modified by MoNKi [MoNKi: -Wap Server-]
 #include "StdAfx.h"
-#include "../CxImage/xImage.h"
 #include "emule.h"
 #include "OtherFunctions.h"
 #include "SearchDlg.h"
@@ -2927,9 +2926,9 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 		}
 
 		if(lastmaxgu != thePrefs.GetMaxGraphUploadRate()) 
-			theApp.emuledlg->statisticswnd.SetARange(false,thePrefs.GetMaxGraphUploadRate());
+			theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.GetMaxGraphUploadRate());
 		if(lastmaxgd!=thePrefs.GetMaxGraphDownloadRate())
-			theApp.emuledlg->statisticswnd.SetARange(true,thePrefs.GetMaxGraphDownloadRate());
+			theApp.emuledlg->statisticswnd->SetARange(true,thePrefs.GetMaxGraphDownloadRate());
 		/*/
 		if(_ParseURL(Data.sURL, _T("maxdown")) != "")
 		{
@@ -4546,10 +4545,10 @@ CString	CWapServer::_GetKadPage(WapThreadData Data)
 	if (thePrefs.GetNetworkKademlia()) {
 		CString buffer;
 			
-			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADCONTACTLAB), theApp.emuledlg->kademliawnd->contactList->GetItemCount());
+			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADCONTACTLAB), theApp.emuledlg->kademliawnd->GetContactCount());
 			info.Append(buffer);
 
-			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADSEARCHLAB), theApp.emuledlg->kademliawnd->searchList->GetItemCount());
+			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADSEARCHLAB), theApp.emuledlg->kademliawnd->GetContactCount());
 			info.Append(buffer);
 
 		
