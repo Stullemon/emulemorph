@@ -1,4 +1,13 @@
 --------------------------------------
+Changelog for eMule 0.42g MorphXT v3.5
+--------------------------------------
+FIXED  : Sort on Sipmle UL in the Sharedfile Window [SiRoB]
+
+REMOVED: 'resume paused file only in the same category' that caused the crash after a resume (my apologize) [SiRoB]
+
+ADDED  : 'resume paused file only in the same category' per category setting [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.42g MorphXT v3.4
 --------------------------------------
 FIXED  : Download file in search window will now work properly in case you don't use selectcategory or you didn't select the category tab item [SiRoB]
