@@ -1945,7 +1945,7 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			{
 				float x1 = ((float)item1->statistic.GetAllTimeTransferred())/((float)item1->GetFileSize());
 				float x2 = ((float)item2->statistic.GetAllTimeTransferred())/((float)item2->GetFileSize());
-				if (lParamSort == 13) return 10000*(x1-x2); else return 10000*(x2-x1);
+				if (lParamSort == 16) return 10000*(x1-x2); else return 10000*(x2-x1);
 			}
 		case 17: // SF:  Full Upload Count asc
 			return 10000*(((CKnownFile*)lParam1)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam2)->statistic.GetFullSpreadCount());
