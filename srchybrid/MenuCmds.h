@@ -263,8 +263,8 @@
 #define	Irc_Protect				10256
 #define Irc_DeProtect			10257
 */
-// Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 #define MP_GETFRIENDED2KLINK		15008
 #define MP_GETHTMLFRIENDED2KLINK	15009
-#define MP_GETBBCODEFRIENDED2KLINK	15010
-// End -Friend eLinks-
+#define MP_GETEMFRIENDMETFROMURL	15010
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]

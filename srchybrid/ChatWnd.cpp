@@ -28,10 +28,11 @@
 #include "friend.h"
 #include "ClientCredits.h"
 #include "IP2Country.h" //Commander - Added: IP2Country
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 #include "HttpDownloadDlg.h"
 #include "ED2KLink.h"
-// End -Friend eLinks-
+#include "InputBox.h"
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -59,9 +60,9 @@ BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_WM_HELPINFO()
 	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_LIST2, OnLvnItemActivateFrlist)
 	ON_NOTIFY(NM_CLICK, IDC_LIST2, OnNMClickFrlist)
-    // emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+    // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 	ON_BN_CLICKED(IDC_BTN_MENU, OnBnClickedBnmenu)
-    // End -Friend eLinks-
+    // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 END_MESSAGE_MAP()
 
 CChatWnd::CChatWnd(CWnd* pParent /*=NULL*/)
@@ -204,13 +205,13 @@ BOOL CChatWnd::OnInitDialog()
 	inputtext.SetLimitText(MAX_CLIENT_MSG_LEN);
 	chatselector.Init();
 	m_FriendListCtrl.Init();
-        // emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+    // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 	if ( theApp.emuledlg->m_fontMarlett.m_hObject )
 	{
 		GetDlgItem(IDC_BTN_MENU)->SetFont(&theApp.emuledlg->m_fontMarlett);
 		GetDlgItem(IDC_BTN_MENU)->SetWindowText(_T("6")); // show a down-arrow
 	}
-	// End -Friend eLinks-
+	// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 	SetAllIcons();
 
 	CRect rcSpl;
@@ -490,7 +491,7 @@ BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 				chatselector.EndSession(ci->client);
 			break;
 		}
-		// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+		// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 		case MP_GETFRIENDED2KLINK:
 			{
 				CString sLink;
@@ -508,10 +509,23 @@ BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 				theApp.CopyTextToClipboard(sLink);
 			}
 			break;
-		
+		//MORPH START - Added by Commander, Manual eMfriend.met download
+		case MP_GETEMFRIENDMETFROMURL: {
+
+			InputBox inp;
+			inp.SetLabels (GetResString (IDS_DOWNLOADEMFRIENDSMET),	GetResString (IDS_EMFRIENDSMETURL),_T(""));
+			inp.DoModal ();
+			CString url = inp.GetInput ();
+				if ( !url.IsEmpty() )
+					UpdateEmfriendsMetFromURL(url);
+
+			return true;
+		} break;
+        //MORPH END - Added by Commander, Manual eMfriend.met download
+
 		default:
 			return CResizableDialog::OnCommand(wParam, lParam);
-		// End -Friend eLinks-
+		// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 	}
 	return TRUE;
 }
@@ -543,7 +557,7 @@ BOOL CChatWnd::OnHelpInfo(HELPINFO* pHelpInfo)
 	return TRUE;
 }
 
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 bool CChatWnd::UpdateEmfriendsMetFromURL(const CString& strURL)
 {
 	if ( strURL.IsEmpty() || strURL.Find(_T("://")) == -1 )	// not a valid URL
@@ -580,10 +594,13 @@ void CChatWnd::OnBnClickedBnmenu()
 
 	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETFRIENDED2KLINK, GetResString(IDS_GETMYFRIENDED2KLINK)) );
 	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETMYHTMLFRIENDED2KLINK)) );
+	VERIFY ( tmColumnMenu.AppendMenu(MF_SEPARATOR) ); 
+    VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETEMFRIENDMETFROMURL, GetResString(IDS_DOWNLOADEMFRIENDSMET)) );
+
 	RECT rectBtn;
 	GetDlgItem(IDC_BTN_MENU)->GetWindowRect(&rectBtn);
 
 	tmColumnMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, rectBtn.right, rectBtn.bottom, this);
 	VERIFY( tmColumnMenu.DestroyMenu() );
 }
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]

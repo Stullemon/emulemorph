@@ -5174,18 +5174,24 @@ END
 STRINGTABLE 
 BEGIN
     IDS_USER_ALREADY_FRIEND "User ""%s"" is already in your friend list"
-    IDS_GETFRIENDED2KLINK   "Copy eD2K link to clipboard"
-    IDS_GETHTMLFRIENDED2KLINK "Copy eD2K link to clipboard (HTML)"
+    IDS_GETFRIENDED2KLINK   "Copy friend link to clipboard"
+    IDS_GETHTMLFRIENDED2KLINK "Copy friend link to clipboard (HTML)"
     IDS_ERR_FAILEDDOWNLOADEMFRIENDS 
                             "Failed to download the friendlist from %s"
-    IDS_GETMYFRIENDED2KLINK "Copy my eD2K link to clipboard"
-    IDS_GETMYHTMLFRIENDED2KLINK "Copy my eD2K link to clipboard (HTML)"
-    IDS_FRIENDLINKMENUTITLE "Copy self eLink"
+    IDS_GETMYFRIENDED2KLINK "Copy my friend link to clipboard"
+    IDS_GETMYHTMLFRIENDED2KLINK "Copy my friend link to clipboard (HTML)"
+    IDS_FRIENDLINKMENUTITLE "FriendLinks"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_FOLDERICONS         "Show Incoming / Temp Folder Icons"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOADEMFRIENDSMET "Download emfriends.met"
+    IDS_EMFRIENDSMETURL     "Please enter the URL of emfriends.met:"
 END
 
 #endif    // Englisch (USA) resources

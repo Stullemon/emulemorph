@@ -89,9 +89,9 @@
 
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 #include "Friend.h"
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -1237,7 +1237,7 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 					AddLogLine(true,GetResString(IDS_SERVERADDED), pSrv->GetListName());
 			}
 			break;
-		// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+		// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 		case CED2KLink::kFriend:
 			{
 				// Better with dynamic_cast, but no RTTI enabled in the project
@@ -1264,7 +1264,7 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 					chatwnd->UpdateEmfriendsMetFromURL(sAddress);
 			}
 			break;
-		// End -Friend eLinks-
+		// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 		default:
 			break;
 		}

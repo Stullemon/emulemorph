@@ -306,7 +306,7 @@ bool CFriendList::IsFriendSlot(){
 	return false;
 }
 //MORPH - Added by SiRoB, There is one slot friend or more
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 bool CFriendList::IsAlreadyFriend(uchar userHash[]) const
 {
 	CFriend* cur_friend;
@@ -375,4 +375,4 @@ bool CFriendList::AddEmfriendsMetToList(const CString& strFile)
 
 	return true;
 }
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]

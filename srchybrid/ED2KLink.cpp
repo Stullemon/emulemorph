@@ -535,7 +535,7 @@ CED2KLink::CreateLinkFromUrl( const TCHAR * uri)
 					return new CED2KServerLink(strServer, strPort);
 			}
 		}
-		// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+		// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 		else if ( strTok == _T("friend") )
 		{
 			CString sNick = strURI.Tokenize(_T("|"), iPos);
@@ -552,14 +552,14 @@ CED2KLink::CreateLinkFromUrl( const TCHAR * uri)
 			if ( !sURL.IsEmpty() && strURI.Tokenize(_T("|"), iPos) == _T("/") )
 				return new CED2KFriendListLink(sURL);
 		}
-		// End -Friend eLinks-
+		// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 	}
 
 	throw GetResString(IDS_ERR_NOSLLINK);
 	return NULL;
 }
 
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 CED2KFriendLink::CED2KFriendLink(LPCTSTR userName, LPCTSTR userHash)
 {
 	if ( _tcslen(userHash) != 32 )
@@ -603,4 +603,4 @@ void CED2KFriendListLink::GetLink(CString& lnk)
 {
 	lnk = _T("ed2k://|friendlist|") + m_address + _T("|/");
 }
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]

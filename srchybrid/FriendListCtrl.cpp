@@ -31,9 +31,9 @@
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
 #include "PartFile.h" //MORPH - Added by SiRoB
 #include "SharedFileList.h" //MORPH - Added by SiRoB
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 #include "ED2KLink.h"
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -68,9 +68,9 @@ END_MESSAGE_MAP()
 void CFriendListCtrl::Init()
 {
 	SetExtendedStyle(LVS_EX_FULLROWSELECT);
-	// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+	// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 	ModifyStyle(LVS_SINGLESEL,0);
-	// End -Friend eLinks-
+	// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 	RECT rcWindow;
 	GetWindowRect(&rcWindow);
@@ -186,7 +186,7 @@ void CFriendListCtrl::RefreshFriend(const CFriend* pFriend)
 		UpdateFriend(iItem, pFriend);
 }
 
-// emulEspaña: Modified by Announ [Announ: -Friend eLinks-]
+// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 
 void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
@@ -232,7 +232,7 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
-// End -Friend eLinks-
+// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 
 BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 {
@@ -418,7 +418,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	}
 	return true;
 }
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 void CFriendListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -503,7 +503,7 @@ void CFriendListCtrl::UpdateList()
 	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
 	SortItems(SortProc, MAKELONG(GetSortItem(), (GetSortAscending() ? 0 : 0x0001)));
 }
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 bool CFriendListCtrl::AddEmfriendsMetToList(const CString& strFile)
 {
 	ShowWindow(SW_HIDE);
@@ -513,4 +513,4 @@ bool CFriendListCtrl::AddEmfriendsMetToList(const CString& strFile)
 	ShowWindow(SW_SHOW);
 	return ret;
 }
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]

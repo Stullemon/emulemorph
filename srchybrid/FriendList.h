@@ -53,9 +53,9 @@ private:
 	CFriendListCtrl*					m_wndOutput;
 	uint32								m_nLastSaved;
 
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:
 	bool		IsAlreadyFriend(uchar userHash[]) const;
 	bool		AddEmfriendsMetToList(const CString& strFile);
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 };

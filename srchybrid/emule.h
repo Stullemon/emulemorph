@@ -227,10 +227,10 @@ public:
 public:
 	CWapServer*		wapserver;
 //MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
-// Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 	public:
 		bool	IsEd2kFriendLinkInClipboard();
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 };
 
 extern CemuleApp theApp;

@@ -65,10 +65,10 @@ protected:
 
 private:
 	void ShowFriendMsgDetails(CFriend* pFriend); // [TPT] - New friend message window
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:
 	bool	UpdateEmfriendsMetFromURL(const CString& strURL);
 protected:
 	afx_msg void	OnBnClickedBnmenu();
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]
 };

@@ -31,12 +31,12 @@ struct SUnresolvedHostname
 class CED2KLink {
 public:
 	static CED2KLink* CreateLinkFromUrl(  const TCHAR * url);
-	// emulEspaña: Modified by Announ [Announ: -Friend eLinks-]
+	// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 	/*
 	typedef enum { kServerList, kServer , kFile , kInvalid } LinkType;
 	*/
 	typedef enum { kServerList, kServer , kFile , kFriend, kFriendList, kInvalid } LinkType;
-	// End -Friend eLinks-
+	// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 
 	virtual LinkType GetKind() const =0;
 	virtual void GetLink(CString& lnk) =0;
@@ -119,7 +119,7 @@ private:
 	CString m_address;
 };
 
-// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 class CED2KFriendLink : public CED2KLink
 {
 public:
@@ -160,4 +160,4 @@ public:
 private:
 	CString	m_address;
 };
-// End -Friend eLinks-
+// MORPH END - Added by Commander, Friendlinks [emulEspaña]
