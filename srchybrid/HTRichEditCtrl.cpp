@@ -398,8 +398,18 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& iSt
 		}
 	}
 
-	AddString(nPos, pszLine, bLink, cr);
-
+	//MORPH START - Added by SiRoB, Draw date adn time with defaultcolor
+	if(_tcslen(pszLine)>20 && pszLine[2]==_T('/') && pszLine[5]==_T('/') && pszLine[19]==_T(':'))
+	{
+		TCHAR Date[21]=_T("\0");
+		_tcsncpy(Date,pszLine,20);
+		AddString(nPos, Date, false, CLR_DEFAULT);
+		AddString(nPos+20, pszLine+20, bLink, cr);
+	}
+	else
+	//MORPH END   - Added by SiRoB, Draw date adn time with defaultcolor
+		AddString(nPos, pszLine, bLink, cr);
+	
 	if (m_bEnErrSpace)
 	{
 		bool bOldNoPaint = m_bNoPaint;
