@@ -42,12 +42,12 @@ static char THIS_FILE[]=__FILE__;
 
 UINT GetPeerCacheSocketUploadTimeout()
 {
-	return SEC2MS(DOWNLOADTIMEOUT + 20 + 30);
+	return DOWNLOADTIMEOUT + SEC2MS(20 + 30);
 }
 
 UINT GetPeerCacheSocketDownloadTimeout()
 {
-	return SEC2MS(DOWNLOADTIMEOUT + 20);	// must be lower than Upload timeout
+	return DOWNLOADTIMEOUT + SEC2MS(20);	// must be lower than Upload timeout
 }
 
 
