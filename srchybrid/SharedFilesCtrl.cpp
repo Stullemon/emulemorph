@@ -481,7 +481,6 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							}
 							cur_rec.left+=11; //Modified by IceCream, eMule plus rating icon
 						}
-						
 						//MORPH END   - Added by IceCream, SLUGFILLER: showComments
 						break;
 					}
@@ -743,10 +742,18 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 				if( iColumn != 8 && iColumn!=14)
 					dc->DrawText(buffer, buffer.GetLength(),&cur_rec,uDTFlags);
-				if( iColumn == 0 )
+
+				if ( iColumn == 0 )
 					//MORPH - Changed by SiRoB, for rating icon
-					//cur_rec.left -= iIconDrawWidth;
-					cur_rec.left -= iIconDrawWidth + 11;
+					// Mighty Knife: if the rating item is not shown, we mustn't
+					// subtract its size, otherwise we end up in display problems
+					// with the other columns...
+					if ( thePrefs.ShowRatingIndicator () )
+						cur_rec.left -= iIconDrawWidth + 11;
+					else
+						cur_rec.left -= iIconDrawWidth;
+					// [end] Mighty Knife
+
 			//MORPH - Added by SiRoB, Don't draw hidden coloms
 			}
 			//MORPH END   - Added by SiRoB, Don't draw hidden coloms

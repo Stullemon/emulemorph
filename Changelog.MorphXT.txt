@@ -1,5 +1,6 @@
 FIXED  : Possible crash in mass-rename if filename contains "%"-characters [MightyKnife]
 FIXED  : Display bug: Category tab's weren't aligned properly on program start [MightyKnife]
+FIXED  : Display bug: If rating icon was disabled, the SharedFilesList was not aligned properly [MightyKnife]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.13
