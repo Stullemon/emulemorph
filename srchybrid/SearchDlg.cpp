@@ -547,11 +547,11 @@ void CSearchDlg::DownloadSelected(bool paused)
 			}
 
 			if (theApp.glob_prefs->SmallFileDLPush() && cur_file->GetFileSize() < 154624)
-				theApp.downloadqueue->AddSearchToDownload(cur_file, useCat, 0);
+				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, 0);
 			else
 			{
 				useOrder++;
-				theApp.downloadqueue->AddSearchToDownload(cur_file, useCat, useOrder);
+				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, useOrder);
 			}
 			// khaos::categorymod-
 			if (cur_file->GetListParent()!=NULL)
