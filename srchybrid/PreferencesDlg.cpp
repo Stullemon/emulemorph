@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -65,32 +65,27 @@ CPreferencesDlg::CPreferencesDlg()
 	//General group
 	AddPage(&m_wndGeneral);
 	AddPage(&m_wndDisplay);
+	AddPage(&m_wndConnection);
+	AddPage(&m_wndProxy);
+	AddPage(&m_wndServer);
 	AddPage(&m_wndDirectories);
 	AddPage(&m_wndFiles);
+	AddPage(&m_wndNotify);
 	AddPage(&m_wndStats);
+	AddPage(&m_wndIRC);
+	AddPage(&m_wndSecurity);
+	AddPage(&m_wndScheduler);
+	AddPage(&m_wndWebServer);
+	AddPage(&m_wndTweaks);
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	AddPage(&m_wndDebug);
 #endif
 
-	//Connexion group
-	AddPage(&m_wndConnection);
-	AddPage(&m_wndProxy);
-	AddPage(&m_wndServer);
-
-	//Advanced Official group
-	AddPage(&m_wndIRC);
-	AddPage(&m_wndNotify);
-	AddPage(&m_wndWebServer);
-	AddPage(&m_wndSecurity);
-	AddPage(&m_wndScheduler);
-	AddPage(&m_wndTweaks);
-
-	//MORPH group
 	AddPage(&m_wndBackup); //EastShare - Added by Pretender, TBH-AutoBackup
 	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
 	AddPage(&m_wndMorphShare); //MORPH - Added by SiRoB, Morph Prefs
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
-	AddPage(&m_wndMorph3); //Commander - Added: Morph III
+//	AddPage(&m_wndMorph3); //Commander - Added: Morph III
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
 	m_nActiveWnd = 0;
@@ -239,7 +234,6 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader(_T("PREF_SCHEDULER")));		//11
 	ImageList.Add(CTempIconLoader(_T("PREF_WEBSERVER")));		//12
 	ImageList.Add(CTempIconLoader(_T("PREF_TWEAK")));			//13
-	//MORPH group
 	ImageList.Add(CTempIconLoader(_T("PREF_BACKUP"))); //EastShare - Added by Pretender, TBH-AutoBackup
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by IceCream, Morph Prefs
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by SiRoB, Morph Prefs
@@ -247,6 +241,13 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH"))); //Commander - Added: Morph III
 	ImageList.Add(CTempIconLoader(_T("CLIENTEASTSHARE")));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
 	ImageList.Add(CTempIconLoader(_T("PREF_EMULESPANA")));  //MORPH - Added by IceCream, eMulEspaña Preferency
+	/*
+		m_listbox.SetImageList(&ImageList);
+
+	CString title = GetResString(IDS_EM_PREFS); 
+	title.Remove(_T('&')); 
+	SetTitle(title); 
+	*/
 	m_slideBar.SetImageList(&ImageList);
 
 	m_wndGeneral.Localize();
@@ -273,39 +274,33 @@ void CPreferencesDlg::Localize()
 
 	m_slideBar.ResetContent();
 
-//	General group
+//	Official group
 	int iGroup = m_slideBar.AddGroup(GetResString(IDS_PW_GENERAL)/*, 1*/);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_GENERAL), iGroup, 0);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_DISPLAY), iGroup, 1);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_CONNECTION), iGroup, 2);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_PROXY), iGroup, 3);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_SERVER), iGroup, 4);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_DIR), iGroup, 5);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_FILES), iGroup, 6);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_EKDEV_OPTIONS), iGroup, 7);
 	m_slideBar.AddGroupItem(GetResString(IDS_STATSSETUPINFO), iGroup, 8);
+	m_slideBar.AddGroupItem(GetResString(IDS_IRC), iGroup, 9);
+	m_slideBar.AddGroupItem(GetResString(IDS_SECURITY), iGroup, 10);
+	m_slideBar.AddGroupItem(GetResString(IDS_SCHEDULER), iGroup, 11);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_WS), iGroup, 12);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_TWEAK), iGroup, 13);
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	m_slideBar.AddGroupItem(_T("Debug"), iGroup, 13);
 #endif
 
-	//	Connexion group
-	iGroup = m_slideBar.AddGroup(GetResString(IDS_PW_CONNECTION)/*, 1*/);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_CONNECTION), iGroup, 2);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_PROXY), iGroup, 3);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_SERVER), iGroup, 4);
-
-	//	Advanced Official Group
-	iGroup = m_slideBar.AddGroup(GetResString(IDS_ADVANCED));
-	m_slideBar.AddGroupItem(GetResString(IDS_IRC), iGroup, 9);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_EKDEV_OPTIONS), iGroup, 7);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_WS), iGroup, 12);
-	m_slideBar.AddGroupItem(GetResString(IDS_SECURITY), iGroup, 10);
-	m_slideBar.AddGroupItem(GetResString(IDS_SCHEDULER), iGroup, 11);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_TWEAK), iGroup, 13);
-
-	//	Advanced group
+	//	MOD group
 	iGroup = m_slideBar.AddGroup(_T("MOD"));
 	m_slideBar.AddGroupItem(GetResString(IDS_BACKUP), iGroup, 14);
 	m_slideBar.AddGroupItem(_T("Morph"), iGroup, 15);
 	m_slideBar.AddGroupItem(_T("Morph Share"), iGroup, 16);
 	m_slideBar.AddGroupItem(_T("Morph Update"), iGroup, 17);
-	m_slideBar.AddGroupItem(_T("Morph DynDns"), iGroup, 18); //Commander - Added: Morph III
+	//m_slideBar.AddGroupItem(_T("Morph DynDNS"), iGroup, 18); //Commander - Added: Morph III
 	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, 19);
 	m_slideBar.AddGroupItem(_T("emulEspaña"), iGroup, 20); //MORPH - Added by SiRoB, emulEspaña preferency
 
