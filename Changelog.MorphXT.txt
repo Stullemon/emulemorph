@@ -34,6 +34,9 @@ ADDED  : CPU Optimization Mode display on Splashscreen [Commander]
 FIXED  : RSS news feeds should now work for most .rss/.rdf files. Please report nonstandard feed servers/files. [MightyKnife]
 ADDED  : RSS news feeds can be added/modified/deleted via a button/menu in the server window [MightyKnife]
 CHANGED: Log files are now placed in a 'logs' folder instead of the eMule folder [MightyKnife]
+CHANGED: PartFile Statistic are now saved in the .part (as well spreadBar statistic) (no more in known.met) [SiRoB]
+FIXED  : SmartA4AFSwaping reviewed [SiRoB]
+
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
