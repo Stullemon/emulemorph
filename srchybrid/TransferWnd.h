@@ -71,6 +71,7 @@ protected:
 	HICON icon_download;
 	POINT m_pLastMousePoint;
 	CProgressCtrlX queueBar; //Commander - Added: ClientQueueProgressBar
+	CFont bold;//Commander - Added: ClientQueueProgressBar
 
 	void ShowWnd2(uint8 uList);
 	void SetWnd2(uint8 uWnd2);

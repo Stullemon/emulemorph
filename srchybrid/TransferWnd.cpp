@@ -149,7 +149,13 @@ BOOL CTransferWnd::OnInitDialog()
 
 	UpdateListCount(m_uWnd2);
 	VerifyCatTabSize();
-
+	//Commander - Added: ClientQueueProgressBar - Start
+	bold.CreateFont(7,0,0,1,FW_BOLD,0,0,0,0,3,2,1,34,_T("MS Sherif"));
+	queueBar.SetFont(&bold);
+	queueBar.SetBkColor(RGB(255,255,255));
+	queueBar.SetShowPercent();
+	queueBar.SetGradientColors(RGB(0,255,0),RGB(255,0,0));
+	//Commander - Added: ClientQueueProgressBar - End
 	return true;
 }
 
@@ -165,21 +171,8 @@ void CTransferWnd::ShowQueueCount(uint32 number){
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_SHOW);
 		queueBar.SetRange32(0, (thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200))); //Softlimit -> GetQueueSize | Hardlimit -> (GetQueueSize + (GetQueueSize/4))
 		queueBar.SetPos(number);
-		queueBar.SetBkColor(RGB(255,255,255));
-		queueBar.SetShowPercent();
-		queueBar.SetGradientColors(RGB(0,255,0),RGB(255,0,0));
-        /*
-		CFont bold;
-		LOGFONT lf; 
-		GetFont()->GetLogFont(&lf); 
-		lf.lfWeight = FW_BOLD;
-		lf.lfHeight = 7;
-		bold.CreateFontIndirect(&lf);
-		queueBar.SetFont(&bold);
-		*/
-
 	}
-	//Commander - Added: ClientQueueProgressBar - End
+    //Commander - Added: ClientQueueProgressBar - End
 }
 
 void CTransferWnd::DoDataExchange(CDataExchange* pDX)
