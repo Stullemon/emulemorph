@@ -653,7 +653,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		buffer.Format(_T("USC: Added Slot in class %i -"),newclientClassID);
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			buffer.AppendFormat(_T("[C%i %i/%i %i]-"),classID,m_aiSlotCounter[classID],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID],m_abOnClientOverHideClientDatarate[classID]);
-		buffer.AppendFormat(_T( Client: %s"),newclient->DbgGetClientInfo());
+		buffer.AppendFormat(_T(" Client: %s"),newclient->DbgGetClientInfo());
 		DebugLog(LOG_USC,buffer);
 	}
 	m_abOnClientOverHideClientDatarate[newclientClassID] = False;
