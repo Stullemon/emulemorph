@@ -172,7 +172,11 @@ END_MESSAGE_MAP()
 BOOL COScopeCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID) 
 {
 	BOOL result;
+	//MORPH - Changed by SiRoB, mouse cursor fix [apph]
+	/*
 	static CString className = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW);
+	*/
+	static CString className = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW, AfxGetApp()->LoadStandardCursor(IDC_ARROW), NULL, NULL);
 	
 	result = CWnd::CreateEx(WS_EX_CLIENTEDGE /*| WS_EX_STATICEDGE*/, 
 		className, NULL, dwStyle, 
