@@ -652,12 +652,7 @@ void CKnownFile::UpdatePartsInfo()
 		if((m_AvailPartFrequency[i]) < m_nVirtualCompleteSourcesCount)
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
-	uint16 m_nMaxAvailPartFrequency = 0;
-	for (uint16 i = 0; i < partcount; i++){
-		if((m_AvailPartFrequency[i]) > m_nMaxAvailPartFrequency)
-			m_nMaxAvailPartFrequency = m_AvailPartFrequency[i];
-	}
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nMaxAvailPartFrequency>1 && m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
