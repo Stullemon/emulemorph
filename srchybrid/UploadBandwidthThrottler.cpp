@@ -606,7 +606,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			lastpos = 0;
             for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{	
-				if (allowedDataRateClass[classID]==0 || classID==LAST_CLASS &&  clientDatarate[classID]==0)
+				if (allowedDataRateClass[classID]==0 || classID==LAST_CLASS &&  ClientDataRate[classID]==0)
 				{
 					for(uint32 slotCounter = lastpos; slotCounter < lastpos+slotCounterClass[classID] && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
