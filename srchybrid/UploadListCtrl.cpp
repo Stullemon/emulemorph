@@ -485,9 +485,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 4:
 						if (client->HasLowID())
 							if(client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
-								Sbuffer.Format(_T("%s LowID delayed %s"),CastSecondsToHM((client->GetWaitTime())/1000), CastSecondsToHM((::GetTickCount()-client->GetUpStartTimeDelay()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
+								Sbuffer.Format(GetResString(IDS_UP_LOWID_DELAYED),CastSecondsToHM((client->GetWaitTime())/1000), CastSecondsToHM((::GetTickCount()-client->GetUpStartTimeDelay()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
 							else
-								Sbuffer.Format(_T("%s LowID"),CastSecondsToHM((client->GetWaitTime())/1000));
+								Sbuffer.Format(GetResString(IDS_UP_LOWID),CastSecondsToHM((client->GetWaitTime())/1000));
 						else
 							Sbuffer = CastSecondsToHM((client->GetWaitTime())/1000);
 						break;

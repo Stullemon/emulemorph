@@ -369,6 +369,7 @@ void CPPgEmulespana::Localize()
 		// End MoNKi
 */
 		// Added by MoNKi [MoNKi: -UPnPNAT Support-]
+		m_ctrlTreeOptions.SetItemText(m_htiUPnPRoot, GetResString(IDS_UPNP));
 		CString tmpString, tmpString2;
 		tmpString.Format(GetResString(IDS_UPNPNAT), GetResString(IDS_UPNPNATEMULE));
 		m_ctrlTreeOptions.SetItemText(m_htiUPnP, tmpString);

@@ -2820,6 +2820,9 @@
 #define IDS_SUQWT_LOAD                  6267
 #define IDS_VERBOSE_TITLE               6268
 #define IDS_CAT_TOTAL                   6269
+#define IDS_UP_LOWID                    6270
+#define IDS_UP_LOWID_DELAYED            6271
+#define IDS_UPNP                        6272
 #define IDS_TW_TRANSFERS                7051
 #define IDS_DL_ULDL                     7052
 #define IDS_TRANSDN                     7053

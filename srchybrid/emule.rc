@@ -5490,6 +5490,9 @@ BEGIN
     IDS_SUQWT_LOAD          "Load %s"
     IDS_VERBOSE_TITLE       "Verbose"
     IDS_CAT_TOTAL           "Total"
+    IDS_UP_LOWID            "%s LowID"
+    IDS_UP_LOWID_DELAYED    "%s LowID delayed %s"
+    IDS_UPNP                "Universal Plug & Play (UPnP)"
 END
 //MORPH END - Added by FrankyFive
 
