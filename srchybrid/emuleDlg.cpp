@@ -347,7 +347,7 @@ BOOL CemuleDlg::OnInitDialog()
 	buffer += theApp.m_strCurVersionLong;
 
 	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
-	buffer += theApp.m_strModLongVersion;
+	buffer += _T(" [") + theApp.m_strModLongVersion + _T("]");
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 
 	SetWindowText(buffer);
@@ -607,7 +607,7 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 				//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-] [MoNKi: -UPnPNAT Support-]
 
 				if (!bError) // show the success msg, only if we had no serious error
-					AddLogLine(true, GetResString(IDS_MAIN_READY) + _T(" %s"),theApp.m_strCurVersionLong + theApp.m_strModLongVersion,GetResString(IDS_TRANSVERSION));  //MORPH - Changed by milobac, Translation version info
+					AddLogLine(true, GetResString(IDS_MAIN_READY) + _T(" %s"),theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"),GetResString(IDS_TRANSVERSION));  //MORPH - Changed by milobac, Translation version info
 
 				if(thePrefs.DoAutoConnect())
 					theApp.emuledlg->OnBnClickedButton2();

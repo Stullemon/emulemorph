@@ -432,6 +432,10 @@ void CCreditsThread::InitText()
 
 	m_arCredits.Add(_T("03:00:eMule"));
 	sTmp.Format(_T("02:01:Version %s"),theApp.m_strCurVersionLong);
+	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
+	sTmp += _T(" [") + theApp.m_strModLongVersion + _T("]");
+	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
+
 #ifdef _UNICODE
 	sTmp += _T(" Unicode");
 #endif
