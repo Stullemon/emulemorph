@@ -2,13 +2,16 @@
 Changelog for eMule 0.42d MorphXT v2.?
 --------------------------------------
 FIXED  : Systray Fix to avoid all the schedulable parameter to not correctly be saved at shutdown [SiRoB]
-FIXED  : Some little fix [SiRoB]
 FIXED  : A wroung test causing zz ratio allways activated since the 2.0 version :) [SiRoB]
+FIXED  : Some little fix [SiRoB]
+
 ADDED  : modID Statistic from Slugfiller and code improvement from TPT [SiRoB]
-CHANGED: The current Download, Upload Slot+Overhead, Upload Friend Slot & Upload Slot are drawn in in solid in Statistic Window [SiRoB]
+
+CHANGED: The current Download, Upload Slot+Overhead, Upload Friend Slot & Upload Slot are drawn in solid in Statistic Window [SiRoB]
 CHANGED: The average speed rate are dynamicly mesured from 1'' to 30'' depending on the number of sample [SiRoB]
 CHANGED: Update Code to the latest ZZ Upload System [SiRoB]
 CHANGED: Update SUWQT code from MoonLight [AndCycle]
+CHANGED: Default Statistic Graph color [SiRoB]
 
 NOTE: About average speed mesurement change, i do this to show as much as possible the possible perturbation of the data rate.
 In the official and different mod the average speed datarate is calculated from 15'' to 40'' and are note exactly right.
@@ -22,15 +25,16 @@ FIXED  : All the schedulable parameter accessible in Morph Preferency are now co
 --------------------------------------
 Changelog for eMule 0.42d MorphXT v2.2
 --------------------------------------
+FIXED  : Advanced filter mask is now correctly saved [SiRoB]
+FIXED  : Missing the "safe .met/.dat file write" icon in the tweak preferency [SiRoB]
+FIXED  : Several parameter are now correctly reloaded [SiRoB]
+FIXED  : Change an old implemented calcul that could make a divide by zero (could explain some mysterious crash) [SiRoB]
+
 CHANGED: MultipleInstance from SF-IOM mod
 CHANGED: Update SafeHash and mergeKnown code from SF-IOM mod, partial changed mergeKnown code to adapt 0.42 code
 CHANGED: Take the average upload speed rate for 10kB/s limit related to ratio activation [SiRoB]
 CHANGED: Updated some part of code from latest zz upload system related to uploadBandwidthThrottler and LanCommunRouterFinder [SiRoB]
 CHANGED: Change the average download & upload speed rate calcul per client [SiRoB]
-FIXED  : Advanced filter mask is now correctly saved [SiRoB]
-FIXED  : Missing the "safe .met/.dat file write" icon in the tweak preferency [SiRoB]
-FIXED  : Several parameter are now correctly reloaded [SiRoB]
-FIXED  : Change an old implemented calcul that could make a divide by zero (could explain some mysterious crash) [SiRoB]
 
 --------------------------------------   
 Changelog for eMule 0.42d MorphXT v2.1
