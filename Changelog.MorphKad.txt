@@ -1,5 +1,10 @@
 ----------------------------------------
-Changelog for eMule 0.40e21 MorphKad 0.5
+Changelog for eMule 0.40f26 MorphKad 0.6
+----------------------------------------
+FIXED: A4AF & Category behaviors [SiRoB]
+
+----------------------------------------
+Changelog for eMule 0.40f26 MorphKad 0.5
 ----------------------------------------
 MERGED: Code merged to 0.40f26 [SiRoB]
 FIXED: Added initialisation of clientmodstring to avoid some strange client software version [SiRoB]

@@ -484,8 +484,6 @@
 #define MPG_ALTENTER			10330
 #define MPG_F2					10331
 
-#define MP_GETHOSTNAMESOURCEED2KLINK	10361	// itsonlyme: hostnameSource
-
 // khaos::categorymod+
 #define MP_CAT_SHOWHIDEPAUSED	10335
 #define MP_CAT_SETRESUMEORDER	10336
@@ -497,17 +495,18 @@
 #define MP_CAT_STOPLAST			10342
 #define MP_CAT_MERGE			10343
 #define MP_SETFILEGROUP			10344
-#define MP_ASSIGNCAT			10345
 
 // For the downloadlist menu
 #define MP_FORCEA4AF			10350
 #define	MP_FORCEA4AFONFLAG		10351
 #define MP_FORCEA4AFOFFFLAG		10352
 
-// 10360 to 10362 reserved for A4AF menu items.
-#define MP_CAT_A4AF				10360
-// khaos::categorymod-
 
+#define MP_GETHOSTNAMESOURCEED2KLINK	10361	// itsonlyme: hostnameSource
+
+// 10362 to 10364 reserved for A4AF menu items.
+#define MP_CAT_A4AF				10362
+// khaos::categorymod-
 
 // quick-speed changer
 #define MP_QS_U10				10501
@@ -541,8 +540,7 @@
 #define MP_WEBURL				10600
 // reserve some for weburls!
 
-// khaos::categorymod+ Obsolete
-//#define MP_ASSIGNCAT			10700
+#define MP_ASSIGNCAT			10700
 // reserve some for categories!
 #define MP_SCHACTIONS			10800
 // reserve some for schedules
