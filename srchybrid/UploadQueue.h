@@ -121,6 +121,7 @@ private:
 	CList<uint64,uint64> avarage_dr_list;
     CList<uint64,uint64> avarage_friend_dr_list;
 	CList<DWORD,DWORD> avarage_tick_list;
+	DWORD	avarage_tick_listPreviousAddedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	CList<int,int> activeClients_list;
 	CList<DWORD,DWORD> activeClients_tick_list;
 	uint32	datarate;   //datarate sent to network (including friends)

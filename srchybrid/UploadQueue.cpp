@@ -867,7 +867,11 @@ void CUploadQueue::Process() {
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
 	if (sentBytes>0) {
-    	// Save used bandwidth for speed calculations
+    	if (avarage_tick_list.GetCount() > 0)
+			avarage_tick_listPreviousAddedTimestamp = avarage_tick_list.GetTail();
+		else
+			avarage_tick_listPreviousAddedTimestamp = curTick;
+		// Save used bandwidth for speed calculations
 		avarage_dr_list.AddTail(sentBytes);
 		m_avarage_dr_sum += sentBytes;
 		uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
@@ -878,13 +882,11 @@ void CUploadQueue::Process() {
 	}
 
 	// don't save more than 5 secs of data
-	while(avarage_tick_list.GetCount() > 2)
-		if ((curTick - avarage_tick_list.GetHead()) > 10000) {
-			m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
-			avarage_friend_dr_list.RemoveHead();
-			avarage_tick_list.RemoveHead();
-		}else
-			break;
+	while(avarage_tick_list.GetCount() > 0 && (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
+		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
+		avarage_friend_dr_list.RemoveHead();
+		avarage_tick_list.RemoveHead();
+	}
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
 };
 
@@ -1654,20 +1656,22 @@ void CUploadQueue::UpdateDatarates() {
 
 		}
 		*/
-		if (avarage_tick_list.GetCount() > 0){
-			if (avarage_tick_list.GetCount() == 1){
-				datarate = (m_avarage_dr_sum*1000) / 10000;
-				friendDatarate = 0;
-			}
-			else {
-				DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
-				DWORD curtick = ::GetTickCount();
-				if ((avarage_tick_list.GetCount() - 1) * (curtick - avarage_tick_list.GetTail()) >= dwDuration)
-					dwDuration = curtick - avarage_tick_list.GetHead() - dwDuration / (avarage_tick_list.GetCount()-1);
-				if (dwDuration < 5000) dwDuration = 5000;
-				datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / dwDuration;
-				friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / dwDuration;
-			}
+		if (avarage_tick_list.GetCount() > 1){
+			DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
+			DWORD curTick = ::GetTickCount();
+			if ((curTick - avarage_tick_list.GetTail()) > (avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp))
+				dwDuration += curTick - avarage_tick_list.GetTail() - (avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp);
+			if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
+			datarate = 1000 * (m_avarage_dr_sum-avarage_dr_list.GetHead()) / dwDuration;
+			friendDatarate = 1000 * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / dwDuration;
+		}else if (avarage_tick_list.GetCount() == 1){
+			DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
+			DWORD curTick = ::GetTickCount();
+			if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
+				dwDuration = curTick - avarage_tick_list.GetTail();
+			if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
+			datarate = 1000 * m_avarage_dr_sum / dwDuration;
+			friendDatarate = 0;
 		}else {
 			datarate = 0;
 			friendDatarate = 0;

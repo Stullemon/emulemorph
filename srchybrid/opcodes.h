@@ -87,6 +87,11 @@
 #define	MAXFILECOMMENTLEN		50
 // MOD Note: end
 
+//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+#define	MAXAVERAGETIMEUPLOAD	SEC2MS(10)
+#define	MAXAVERAGETIMEDOWNLOAD	SEC2MS(10)
+//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
+
 #define CONFIGFOLDER			_T("config\\")
 #define MAXCONPER5SEC			20	
 #define MAXCON5WIN9X			10

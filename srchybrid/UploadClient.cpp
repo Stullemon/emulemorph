@@ -965,11 +965,7 @@ bool CUpDownClient::SendBlockData(){
 				credits->InitPayBackFirstStatus();
 				//EastShare End - added by AndCycle, Pay Back First
 
-                // first clear the average speed, to show ?? as speed in upload slot display
-                m_AvarageUDR_list.RemoveAll();
-                m_nSumForAvgUpDataRate = 0;
-
-	            // Give clients in queue a chance to kick this client out.
+                // Give clients in queue a chance to kick this client out.
                 // It will be kicked out only if queue contains a client
                 // of same/higher class as this client, and that new
                 // client must either be a high ID client, or a low ID
@@ -1006,26 +1002,30 @@ bool CUpDownClient::SendBlockData(){
 		// Store how much data we've transfered this round,
 		// to be able to calculate average speed later
 		// keep sum of all values in list up to date
+		if (m_AvarageUDR_list.GetCount() > 0)
+			m_AvarageUDRPreviousAddedTimestamp = m_AvarageUDR_list.GetTail().timestamp;
+		else
+			m_AvarageUDRPreviousAddedTimestamp = curTick;
 		TransferredData newitem = {sentBytesCompleteFile + sentBytesPartFile, curTick};
 		m_AvarageUDR_list.AddTail(newitem);
 		m_nSumForAvgUpDataRate += sentBytesCompleteFile + sentBytesPartFile;
 	}
 			
-	while (m_AvarageUDR_list.GetCount() > 2)
-		if ((curTick - m_AvarageUDR_list.GetHead().timestamp) > 10000) {
-			m_nSumForAvgUpDataRate -=  m_AvarageUDR_list.RemoveHead().datalen;
-		}else
-			break;
-    if(m_AvarageUDR_list.GetCount() > 0) {
-		if(m_AvarageUDR_list.GetCount() == 1)
-			m_nUpDatarate = ((ULONGLONG)m_nSumForAvgUpDataRate*1000) / max(1000,GetUpStartTimeDelay());
-		else {
-			DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
-			if ((m_AvarageUDR_list.GetCount() - 1)*(curTick - m_AvarageUDR_list.GetTail().timestamp) >= dwDuration)
-				dwDuration = curTick - m_AvarageUDR_list.GetHead().timestamp - dwDuration / (m_AvarageUDR_list.GetCount() - 1);
-			if (dwDuration < 5000) dwDuration = 5000;
-			m_nUpDatarate = ((ULONGLONG)(m_nSumForAvgUpDataRate - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
-		}
+	while (m_AvarageUDR_list.GetCount() > 0 && (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
+		m_nSumForAvgUpDataRate -=  m_AvarageUDR_list.RemoveHead().datalen;
+
+    if(m_AvarageUDR_list.GetCount() > 1) {
+		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
+		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp))
+			dwDuration += curTick - m_AvarageUDR_list.GetTail().timestamp - (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp);
+		if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
+		m_nUpDatarate = ((ULONGLONG)(m_nSumForAvgUpDataRate - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
+	}else if(m_AvarageUDR_list.GetCount() == 1) {
+		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp;
+		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwDuration)
+			dwDuration = curTick - m_AvarageUDR_list.GetTail().timestamp;
+		if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
+		m_nUpDatarate = ((ULONGLONG)m_nSumForAvgUpDataRate*1000) / dwDuration;
 	} else {
    	    m_nUpDatarate = 0;
 	}
@@ -1340,7 +1340,7 @@ uint32 CUpDownClient::GetAvUpDatarate() const
 	uint32 tempUpCurrentTotalTime = GetUpTotalTime();
 	if (GetUploadState() == US_UPLOADING)
 		tempUpCurrentTotalTime += GetTickCount() - m_dwUploadTime;
-	if (tempUpCurrentTotalTime & ~1023)
+	if (tempUpCurrentTotalTime > 999)
 		return	GetTransferedUp()/(tempUpCurrentTotalTime/1000);
 	else
 		return 0;

@@ -193,7 +193,10 @@ private:
 	static uint32	m_sumavgUDRO;
 	CList<TransferredData,TransferredData>	m_AvarageDDRO_list;
 	CList<TransferredData,TransferredData>	m_AvarageUDRO_list;
-
+	//MORPH START - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
+	static DWORD	m_AvarageDDROPreviousAddedTimestamp;
+	static DWORD	m_AvarageUDROPreviousAddedTimestamp;
+	//MORPH END   - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint64  m_nTotalCompletedBytes;//Morph
 };
 

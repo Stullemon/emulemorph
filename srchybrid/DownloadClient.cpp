@@ -1492,33 +1492,34 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 }
 
 uint32 CUpDownClient::CalculateDownloadRate(){
-	//MORPH START - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
+		//MORPH START - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint32 cur_tick = ::GetTickCount();
     if(m_nDownDataRateMS > 0) {
+		if (m_AvarageDDR_list.GetCount() > 0)
+			m_AvarageDDRPreviousAddedTimestamp = m_AvarageDDR_list.GetTail().timestamp;
+		else
+			m_AvarageDDRPreviousAddedTimestamp = cur_tick;
 		TransferredData newitem = {m_nDownDataRateMS,cur_tick};
 		m_AvarageDDR_list.AddTail(newitem);
 		m_nSumForAvgDownDataRate += m_nDownDataRateMS;
 		m_nDownDataRateMS = 0;
     }
 	
-	while (m_AvarageDDR_list.GetCount() > 2)
-		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 10000)
-			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
-		else
-			break;
+	while (m_AvarageDDR_list.GetCount() > 0 && (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
+		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 	
-	if (m_AvarageDDR_list.GetCount() > 0){
-		if (m_AvarageDDR_list.GetCount() == 1)
-			// Mighty Knife: Slight change in the formula to prevent a "Divide by 0" in Win98
-			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / ( (cur_tick-m_dwDownStartTime) == 0 ? 1 : (cur_tick-m_dwDownStartTime) );
-			// [end] Mighty Knife
-		else{
-			DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
-			if ((m_AvarageDDR_list.GetCount() - 1)*(cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
-				dwDuration = cur_tick - m_AvarageDDR_list.GetHead().timestamp - dwDuration / (m_AvarageDDR_list.GetCount() - 1);
-			if (dwDuration < 5000) dwDuration = 5000;
-			m_nDownDatarate = ((m_nSumForAvgDownDataRate - m_AvarageDDR_list.GetHead().datalen)*1000) / dwDuration;
-		}
+	if (m_AvarageDDR_list.GetCount() > 1){
+		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
+		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp))
+			dwDuration += cur_tick - m_AvarageDDR_list.GetTail().timestamp - (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp);
+		if (dwDuration < MAXAVERAGETIMEDOWNLOAD/2) dwDuration = MAXAVERAGETIMEDOWNLOAD/2;
+		m_nDownDatarate = (1000U * (ULONGLONG)(m_nSumForAvgDownDataRate - m_AvarageDDR_list.GetHead().datalen)) / dwDuration;
+	}else if (m_AvarageDDR_list.GetCount() == 1){
+		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp;
+		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
+			dwDuration = cur_tick - m_AvarageDDR_list.GetTail().timestamp;
+		if (dwDuration < MAXAVERAGETIMEDOWNLOAD/2) dwDuration = MAXAVERAGETIMEDOWNLOAD/2;
+		m_nDownDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgDownDataRate / dwDuration);
 	}else
 		m_nDownDatarate = 0;
 	//MORPH END   - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
@@ -2541,10 +2542,8 @@ uint32 CUpDownClient::GetAvDownDatarate() const
 	uint32 tempDownCurrentTotalTime = GetDownTotalTime();
 	if (GetDownloadState() == DS_DOWNLOADING)
 		tempDownCurrentTotalTime += GetTickCount() - m_dwDownStartTime;
-	if (tempDownCurrentTotalTime & ~1023)
-		// Mighty Knife: Slight change in the formula to prevent a "Divide by 0" in Win98
-		return	GetTransferedDown()/( (tempDownCurrentTotalTime==0 ? 1 : tempDownCurrentTotalTime) /1000);
-		// [end] Mighty Knife
+	if (tempDownCurrentTotalTime > 999)
+		return	GetTransferedDown()/(tempDownCurrentTotalTime/1000);
 	else
 		return 0;
 }
