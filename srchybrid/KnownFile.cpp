@@ -491,7 +491,7 @@ void CKnownFile::Dump(CDumpContext& dc) const
 #endif
 
 CBarShader CKnownFile::s_ShareStatusBar(16);
-
+//MORPH START - Changed by SIRoB, Maella -Code Improvement-
 //MORPH START - Modified by SiRoB, Reduce ShareStatusBar CPU consumption
 void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) /*const*/
 { 
@@ -510,12 +510,12 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 		lastSize=iWidth;
 		lastonlygreyrect=onlygreyrect;
 		lastbFlat=bFlat;
-		
+
 		m_bitmapSharedStatusBar.DeleteObject();
 		m_bitmapSharedStatusBar.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
 		m_bitmapSharedStatusBar.SetBitmapDimension(iWidth,  iHeight); 
 		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
-			
+
 		COLORREF crProgress;
 		COLORREF crHave;
 		COLORREF crPending;
@@ -535,14 +535,14 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 		s_ShareStatusBar.SetHeight(iHeight); 
 		s_ShareStatusBar.SetWidth(iWidth); 
 		s_ShareStatusBar.Fill(crMissing); 
-		COLORREF color;
-		if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
-			for (int i = 0;i < GetPartCount();i++)
-				if(m_AvailPartFrequency[i] > 0 ){
-					color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
+	COLORREF color;
+	if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
+		for (int i = 0;i < GetPartCount();i++)
+			if(m_AvailPartFrequency[i] > 0 ){
+				color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
 					s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
-				}
-		}
+			}
+	}
 		s_ShareStatusBar.Draw(&cdcStatus, 0, 0, bFlat); 
 	}
 	else
@@ -550,7 +550,7 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 	dc->BitBlt(rect->left, rect->top, iWidth, iHeight, &cdcStatus, 0, 0, SRCCOPY);
 	cdcStatus.SelectObject(hOldBitmap);
 } 
-//MORPH END - Modified by SiRoB,  Reduce ShareStatusBar CPU consumption
+//MORPH END - Changed by SiRoB, Maella -Code Improvement-
 
 // SLUGFILLER: heapsortCompletesrc
 static void HeapSort(CArray<uint16,uint16> &count, uint32 first, uint32 last){
@@ -1161,31 +1161,27 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 						spread_count_map.SetAt(spreadkey, newtag->tag.intvalue);
 						delete newtag;
 						break;
-					}else
 					//MORPH START - Added by SiRoB, ZZ Upload System				
-					if(strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
+					}else if(strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
 						//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 						//SetPowerShared(newtag->tag.intvalue == 1);
 						SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
 						//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 						delete newtag;
 						break;
-					}else
 					//MORPH END   - Added by SiRoB, ZZ Upload System
 					//MORPH START - Added by SiRoB, HIDEOS
-					if(strcmp(newtag->tag.tagname, FT_HIDEOS) == 0) {
+					}else if(strcmp(newtag->tag.tagname, FT_HIDEOS) == 0) {
 						SetHideOS((newtag->tag.intvalue<=6)?newtag->tag.intvalue:-1);
 						delete newtag;
 						break;
-					}else
-					if(strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0) {
+					}else if(strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0) {
 						SetSelectiveChunk(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
 						delete newtag;
 						break;
-					}else
 					//MORPH END   - Added by SiRoB, HIDEOS
 					//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-					if(strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0) {
+					}else if(strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0) {
 						SetShareOnlyTheNeed(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
 						delete newtag;
 						break;
@@ -1196,7 +1192,6 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				ConvertED2KTag(newtag);
 				if (newtag)
 					taglist.Add(newtag);
-			
 		}	
 	}
 	//MORPH START - Added by SiRoB, SLUGFILLER: Spreadbars - Now to flush the map into the list

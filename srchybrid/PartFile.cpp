@@ -772,29 +772,26 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 								gap->end = newtag->tag.intvalue-1;
 							delete newtag;
 					    	// End Changes by Slugfiller for better exception handling
-					    	}
-					    	else
-						//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-						if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
+					    //MORPH START - Added by SiRoB, Avoid misusing of powersharing
+						} else	if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
 							SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
 							delete newtag;
-						}else
 						//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 						//MORPH START - Added by SiRoB, HIDEOS per file
-						if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_HIDEOS) == 0) {
+						} else if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_HIDEOS) == 0) {
 							SetHideOS((newtag->tag.intvalue<=6)?newtag->tag.intvalue:-1);
 							delete newtag;
-						}else if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0) {
+						} else if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0) {
 							SetSelectiveChunk(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
 							delete newtag;
-						} else
 						//MORPH END   - Added by SiRoB, HIDEOS per file
 						//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-						if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0) {
+						} else	if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0) {
 							SetShareOnlyTheNeed(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
 							delete newtag;
-						} else
 						//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+						}
+						else
 							taglist.Add(newtag);
 					}
 				}

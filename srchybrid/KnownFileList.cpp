@@ -76,6 +76,8 @@ bool CKnownFileList::Init()
 	}
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 
+	CKnownFile* pRecord = NULL; //MORPH - Added by SiRoB, Mem leak fix by bzubzu.
+
 	try {
 		uint8 header = file.ReadUInt8();
 		if (header != MET_HEADER){
@@ -92,11 +94,12 @@ bool CKnownFileList::Init()
 		
 		UINT RecordsNumber = file.ReadUInt32();
 		for (UINT i = 0; i < RecordsNumber; i++) {
-			CKnownFile* pRecord =  new CKnownFile();
+			pRecord =  new CKnownFile(); //MORPH - Changed by SiRoB, Mem leak fix by bzubzu.
 			if (!pRecord->LoadFromFile(&file)){
 				TRACE("*** Failed to load entry %u (name=%s  hash=%s  size=%u  parthashs=%u expected parthashs=%u) from known.met\n", i, 
 					pRecord->GetFileName(), md4str(pRecord->GetFileHash()), pRecord->GetFileSize(), pRecord->GetHashCount(), pRecord->GetED2KPartCount());	// SLUGFILLER: SafeHash - removed unnececery hash counter
 				delete pRecord;
+				pRecord = NULL;  //MORPH - Added by SiRoB, Mem leak fix by bzubzu.
 				continue;
 			}
 			//EastShare START - Modified by TAHO, .met file control
@@ -109,6 +112,8 @@ bool CKnownFileList::Init()
 			else
 			{
 				cDeleted++;
+				delete pRecord;
+				pRecord = NULL;
 			}
 			// EastShare END - Modified by TAHO, .met file control
 		}
@@ -124,6 +129,7 @@ bool CKnownFileList::Init()
 			AddLogLine(true,GetResString(IDS_ERR_SERVERMET_UNKNOWN),buffer);
 		}
 		error->Delete();
+		if (pRecord) delete pRecord;  //MORPH - Added by SiRoB, Mem leak fix by bzubzu.
 		return false;
 	}
 
@@ -329,6 +335,7 @@ void CKnownFileList::FilterDuplicateKnownFiles(CKnownFile* original){
 		if(original != pFileInMap){
 			original->statistic.MergeFileStats(&pFileInMap->statistic); //MORPH - Changed by SiRoB, mergeKnown
 			m_Files_map.RemoveKey(key);
+			delete pFileInMap; //MORPH - Added by SiRoB
 		}
 	}
 }
