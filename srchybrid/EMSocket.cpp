@@ -880,13 +880,10 @@ uint32 CEMSocket::GetNeededBytes(bool lowspeed) {
 
 	uint32 sendgap = ::GetTickCount() - lastCalledSend;
 
-	//MORPH START - Changed by SiRoB, 1kB/s and 0.5kB/s for lowspeed
-	/*
 	uint64 timetotal = m_bAccelerateUpload?45000:90000;
-	*/
-	uint64 timetotal = m_bAccelerateUpload?27000:54000;
+	//MORPH START - Added by SiRoB, 1kB/s and 0.1kB/s for lowspeed
 	if (!lowspeed) timetotal = m_bAccelerateUpload?4500:9000;
-	//MORPH END   - Changed by SiRoB, Scale to lowspeed
+	//MORPH END   - Added by SiRoB, 1kB/s and 0.1kB/s for lowspeed
 	uint64 timeleft = ::GetTickCount() - lastFinishedStandard;
 	uint64 sizeleft, sizetotal;
 	if (sendbuffer && !m_currentPacket_is_controlpacket) {
