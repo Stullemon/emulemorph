@@ -1015,7 +1015,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 
 					//Commander - Added: Client percentage - Start
-					if (thePrefs.GetUseClientPercentage() && lpUpDownClient->GetPartStatus())
+					if (thePrefs.GetUseClientPercentage() && lpUpDownClient->GetPartStatus() && lpCtrlItem->type == AVAILABLE_SOURCE)
 					{
 						float percent = (float)lpUpDownClient->GetAvailablePartCount() / (float)lpUpDownClient->GetPartCount()* 100.0f;
 						if (percent > 0.05f)
