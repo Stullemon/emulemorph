@@ -33,6 +33,12 @@ protected:
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
+        //Commander - Added: CountryFlag - Start
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	CImageList imagelist;
+        //Commander - Added: CountryFlag - End
+
+
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSysColorChange();
 	afx_msg	void OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);

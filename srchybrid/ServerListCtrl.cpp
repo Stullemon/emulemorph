@@ -67,7 +67,7 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	InsertColumn(12,GetResString(IDS_VERSION),		LVCFMT_LEFT,  50);
 	InsertColumn(13,GetResString(IDS_IDLOW),		LVCFMT_RIGHT, 50);
 	InsertColumn(14,GetResString(IDS_AUXPORTS),		LVCFMT_LEFT,  50);//Morph - added by AndCycle, aux Ports, by lugdunummaster
-    InsertColumn(15,GetResString(IDS_COUNTRY),      LVCFMT_LEFT,100);// Commander - Added: IP2Country column
+    InsertColumn(15,GetResString(IDS_COUNTRY),      LVCFMT_LEFT, 100);// Commander - Added: IP2Country column
 
 	SetAllIcons();
 	Localize();
@@ -280,15 +280,6 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	//Servername
 	SetItemText(itemnr,0,server->GetListName());
 	
-        /* 
-		// Commander - Removed: IP2Country column - Start
-	CString tempServerName;
-	tempServerName = server->GetCountryName();
-	tempServerName.Append(server->GetListName());
-	SetItemText(itemnr,0,tempServerName);
-        */
-        // Commander - Removed: IP2Country column - End
-
     //Description
 	SetItemText(itemnr,2,server->GetDescription());
 
@@ -387,14 +378,17 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		SetItemText(itemnr,14,_T(""));
 	}
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-    
-	
-	//Morph Start - added by AndCycle, IP to Country, modified by Commander
+   
 	// Commander - Added: IP2Country column - Start
 	//Countryname
-	CString tempCountryName;
-	tempCountryName = server->GetCountryName();
-	SetItemText(itemnr,15,tempCountryName);
+	if(server->GetCountryName()){
+	   CString tempCountryName;
+	   tempCountryName = server->GetCountryName();
+	   SetItemText(itemnr,15,tempCountryName);
+	}
+	else{
+       SetItemText(itemnr,15,_T(""));
+	}
 	// Commander - Added: IP2Country column - End
 }
 
@@ -811,12 +805,19 @@ int CServerListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		  UNDEFINED_INT_AT_BOTTOM(item1->GetLowIDUsers(), item2->GetLowIDUsers());
 		  iResult = CompareUnsigned(item1->GetLowIDUsers(), item2->GetLowIDUsers());
 		  break;
+           // Commander - Added: AuxPort Sort - Start
+	  case 14:
+		  UNDEFINED_INT_AT_BOTTOM(item1->GetConnPort(), item2->GetConnPort());
+		  iResult = CompareUnsigned(item1->GetConnPort(), item2->GetConnPort());
+		  break;
+		  // Commander - Added: AuxPort Sort - End
           // Commander - Added: IP2Country column - Start
       case 15:
           UNDEFINED_STR_AT_BOTTOM(item1->GetCountryName(), item2->GetCountryName());
           iResult = item1->GetCountryName().CompareNoCase(item2->GetCountryName());
 		  break;
          // Commander - Added: IP2Country column - End
+
 	  default: 
 		  iResult = 0;
 	} 
@@ -953,3 +954,228 @@ void CServerListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 	CMuleListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
+
+//Commander - Added: CountryFlag - Start
+#define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
+
+void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	if( !theApp.emuledlg->IsRunning() )
+		return;
+	if (!lpDrawItemStruct->itemData)
+		return;
+	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
+	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
+	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
+		if(bCtrlFocused)
+			odc->SetBkColor(m_crHighlight);
+		else
+			odc->SetBkColor(m_crNoHighlight);
+	}
+	else
+		odc->SetBkColor(GetBkColor());
+	const CServer* server = (CServer*)lpDrawItemStruct->itemData;
+	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
+	CFont* pOldFont = dc.SelectObject(GetFont());
+	RECT cur_rec = lpDrawItemStruct->rcItem;
+	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
+
+	CString Sbuffer;
+	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
+	int iCount = pHeaderCtrl->GetItemCount();
+	cur_rec.right = cur_rec.left - 8;
+	cur_rec.left += 4;
+
+	for(int iCurrent = 0; iCurrent < iCount; iCurrent++){
+		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
+		if( !IsColumnHidden(iColumn) ){
+			cur_rec.right += GetColumnWidth(iColumn);
+			switch(iColumn){
+
+				case 0:{
+					uint8 image;
+					image = 0;
+					
+					POINT point = {cur_rec.left, cur_rec.top+1};
+					Sbuffer = server->GetListName();
+
+					//CString tempStr;
+					//tempStr.Format("%s%s", server->GetCountryName(), Sbuffer);
+					//Sbuffer = tempStr;
+                    
+					//Draw Country Flag
+					if(theApp.ip2country->ShowCountryFlag()){
+						POINT point2= {cur_rec.left,cur_rec.top+1};
+						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+					}
+
+					cur_rec.left +=20;
+					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+					cur_rec.left -=20;
+
+					break;
+				}
+				case 1:{
+					if (server->GetConnPort() != server->GetPort())
+			           Sbuffer.Format(_T("%s : %i/%i"), server->GetAddress(), server->GetPort(), server->GetConnPort());
+	               else 
+					Sbuffer.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
+					break;
+				}
+				case 2:{
+					Sbuffer = server->GetDescription();
+					break;
+			  }
+				case 3:{
+					if(server->GetPing())
+						Sbuffer.Format(_T("%i"), server->GetPing());
+					else
+						Sbuffer = "";
+					break;
+				}
+				case 4:{
+					if(server->GetUsers())
+						Sbuffer.Format(_T("%i"), server->GetUsers());
+					else
+						Sbuffer = "";
+					break;
+				}
+				case 5:{
+					if(server->GetMaxUsers())
+						Sbuffer.Format(_T("%i"), server->GetMaxUsers());
+					else
+						Sbuffer = "";
+					break;
+				}
+				case 6:{
+					if(server->GetFiles())
+						Sbuffer.Format(_T("%i"), server->GetFiles());
+					else
+						Sbuffer = "";
+					break;
+				}
+				case 7:{
+					switch(server->GetPreferences()){
+						case SRV_PR_LOW:
+							Sbuffer = GetResString(IDS_PRIOLOW);
+							break;
+						case SRV_PR_NORMAL:
+							Sbuffer = GetResString(IDS_PRIONORMAL);
+							break;
+						case SRV_PR_HIGH:
+							Sbuffer = GetResString(IDS_PRIOHIGH);
+							break;
+						default:
+							Sbuffer = GetResString(IDS_PRIONOPREF);
+						}
+					break;
+					}
+				case 8:{
+					Sbuffer.Format(_T("%i"), server->GetFailedCount());
+					break;
+				}
+				case 9:{
+					if (server->IsStaticMember())
+						Sbuffer = GetResString(IDS_YES); 
+					else
+						Sbuffer = GetResString(IDS_NO);
+					break;
+				}
+				case 10:{
+					if(server->GetSoftFiles())
+						Sbuffer.Format(_T("%i"), server->GetSoftFiles());
+					else
+						Sbuffer = "";
+					break;
+				}
+				case 11:{
+					if(server->GetHardFiles())
+						Sbuffer.Format(_T("%i"), server->GetHardFiles());
+					else
+						Sbuffer = "";
+					break;
+				}
+				case 12:{
+					Sbuffer = server->GetVersion();
+					if (thePrefs.GetDebugServerUDPLevel() > 0){
+						if (server->GetUDPFlags() != 0){
+							if (!Sbuffer.IsEmpty())
+								Sbuffer += _T("; ");
+							Sbuffer.AppendFormat(_T("ExtUDP=%x"), server->GetUDPFlags());
+							}
+						}
+						if (thePrefs.GetDebugServerTCPLevel() > 0){
+							if (server->GetTCPFlags() != 0){
+								if (!Sbuffer.IsEmpty())
+									Sbuffer += _T("; ");
+								Sbuffer.AppendFormat(_T("ExtTCP=%x"), server->GetTCPFlags());
+								}
+							}
+                        break;
+						}
+				//Commander - Lowid Column
+				case 13:{
+					if (server->GetLowIDUsers())
+						Sbuffer.Format(_T("%i"), CastItoIShort(server->GetLowIDUsers()));
+					else
+						Sbuffer = "";
+					break;
+						}
+
+				case 14:{
+					if(server->GetConnPort() != server->GetPort())
+						Sbuffer.Format(_T("%i"), server->GetConnPort());
+					else
+						Sbuffer = "";
+					break;
+						}
+
+				//Commander - Country Column
+				case 15:{
+					if(server->GetCountryName()){
+						CString tempStr2;
+						tempStr2.Format("%s", server->GetCountryName());
+						Sbuffer = tempStr2;
+					}
+					else{
+                        Sbuffer = "";
+					}
+					break;
+				}
+}//End of Switch
+				
+					if(iColumn != 0 )
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DT_LEFT);
+					cur_rec.left += GetColumnWidth(iColumn);
+				}
+			}
+			//draw rectangle around selected item(s)
+			if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
+			{
+				RECT outline_rec = lpDrawItemStruct->rcItem;
+				outline_rec.top--;
+				outline_rec.bottom++;
+				dc->FrameRect(&outline_rec, &CBrush(GetBkColor()));
+				outline_rec.top++;
+				outline_rec.bottom--;
+				outline_rec.left++;
+				outline_rec.right--;
+				if(bCtrlFocused)
+			dc->FrameRect(&outline_rec, &CBrush(m_crFocusLine));
+		else
+			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
+	}
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
+	dc.SelectObject(pOldFont);
+	dc.SetTextColor(crOldTextColor);
+}
+//Commander - Added: CountryFlag - End
