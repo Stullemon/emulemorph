@@ -298,8 +298,11 @@ BOOL CemuleApp::InitInstance()
 #ifdef _DEBUG
 	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), _T("%s\\%s"), thePrefs.GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
 #endif
-	VERIFY( theLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule.log")) );
-	VERIFY( theVerboseLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule_Verbose.log")) );
+	// Mighty Knife: log files are places in the "log" folder
+	::CreateDirectory(thePrefs.GetAppDir() + _T("logs"),0);
+	VERIFY( theLog.SetFilePath(thePrefs.GetAppDir() + _T("logs\\eMule.log")) );
+	VERIFY( theVerboseLog.SetFilePath(thePrefs.GetAppDir() + _T("logs\\eMule_Verbose.log")) );
+	// [end] Mighty Knife
 	theLog.SetMaxFileSize(thePrefs.GetMaxLogFileSize());
 	theVerboseLog.SetMaxFileSize(thePrefs.GetMaxLogFileSize());
 	if (thePrefs.GetLog2Disk())

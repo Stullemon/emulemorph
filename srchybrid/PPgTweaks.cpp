@@ -436,8 +436,10 @@ BOOL CPPgTweaks::OnApply()
 		theVerboseLog.Close();
 
 		//reset path
-		VERIFY( theLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule.log")) );
-		VERIFY( theVerboseLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule_Verbose.log")) );
+		// Mighty Knife: log files are places in the "log" folder
+		VERIFY( theLog.SetFilePath(thePrefs.GetAppDir() + _T("logs\\eMule.log")) );
+		VERIFY( theVerboseLog.SetFilePath(thePrefs.GetAppDir() + _T("logs\\eMule_Verbose.log")) );
+		// [end] Mighty Knife
 
 		//open log again
 		theLog.Open();
