@@ -27,7 +27,7 @@ protected:
 		//																			nSrcExchangeVer = srcexver;}
 		CSourceData(uint32 dwID, uint16 wPort, const TCHAR* exp, uint8 srcexver) {	sourceID = dwID; 
 																					sourcePort = wPort; 
-																					memcpy(expiration, exp, 11);
+																					memcpy(expiration, exp, 11*sizeof(TCHAR));
 																					expiration[10] = 0;
 																					nSrcExchangeVer = srcexver;}
 
@@ -41,7 +41,7 @@ protected:
 		//															nSrcExchangeVer = pOld->nSrcExchangeVer;}
 		CSourceData(CSourceData* pOld) {							sourceID = pOld->sourceID; 
 																	sourcePort = pOld->sourcePort; 
-																	memcpy(expiration, pOld->expiration, 11); 
+																	memcpy(expiration, pOld->expiration, 11*sizeof(TCHAR)); 
 																	partsavailable = pOld->partsavailable;
 																	expiration[10] = 0;
 																	nSrcExchangeVer = pOld->nSrcExchangeVer;}
@@ -54,7 +54,7 @@ protected:
 		uint32	partsavailable;
 		//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 		//char	expiration[7];
-		char	expiration[11];
+		TCHAR	expiration[11];
 		uint8	nSrcExchangeVer;
 	};
 	// khaos::kmod-

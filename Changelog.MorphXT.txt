@@ -2,6 +2,8 @@
 Changelog for eMule 0.44b MorphXT v5.x
 --------------------------------------
 
+FIXED : Source Load Saver have been corrected [SiRoB]
+
 CHANGED: Intelligent Chunk Selection now use the advanced per file setting for the preview first and last chunk [SiRoB]
 CHANGED: Normal slot are not focused [SiRoB]
 
