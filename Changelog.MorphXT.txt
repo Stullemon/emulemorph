@@ -5,8 +5,9 @@ MERGED: Code merged to 0.42b [SiRoB]
 
 FIXED  : When adding CRC32 tag to a filename, the tag suffix could not be changed. [MightyKnife]
 
-ADDED  : Multiple Instances option from SlugFiller-itsonlyme by VQB
 ADDED  : Infinite Queue option from SlugFiller-itsonlyme
+
+CHANGED: Powershare is now only applied for secured client [SiRoB]
 
 TWEAKED: Friend Slot Management, Show slot assignement in the message window and visual fix [SiRoB]
 
