@@ -106,6 +106,7 @@
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
 //MOPRH START - Added by SiRoB, ZZ Upload System 20030824-2238
 #define MINFRAGSIZE             2500/*512*/
+#define TRICKLE_CLIENT_DATARATE	(UPLOAD_CLIENT_DATARATE/6)
 //MOPRH END   - Added by SiRoB, ZZ Upload System 20030824-2238
 #define	MAXFRAGSIZE				1300
 #define EMBLOCKSIZE				184320
