@@ -107,10 +107,7 @@ void CUpDownClient::Init(){
 	m_bFriendSlot = false;
 	m_bCommentDirty = false;
 	m_bReaskPending = false;
-	//MORPH START - HotFix by SiRoB about problem of udp request during full connection reached
-	//m_bUDPPending = false;
-	m_bUDPPending = true;
-	//MORPH END   - HotFix by SiRoB about problem of udp request during full connection reached
+	m_bUDPPending = false;
 	m_byEmuleVersion = 0;
 	m_nUserPort = 0;
 	m_nPartCount = 0;
@@ -476,10 +473,12 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 				break;
 			//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 			case ET_MOD_VERSION: 
-				m_clientModString = temptag.tag.stringvalue;
-				//MOPRH START - Added by SiRoB, Is Morph Client?
-				m_bIsMorph = StrStrI(m_clientModString,"Morph");
-				//MOPRH END   - Added by SiRoB, Is Morph Client?
+				if( temptag.tag.stringvalue ){
+					m_clientModString = temptag.tag.stringvalue;
+					//MOPRH START - Added by SiRoB, Is Morph Client?
+					m_bIsMorph = StrStrI(m_clientModString,"Morph");
+					//MOPRH END   - Added by SiRoB, Is Morph Client?
+				}
 				break;
 			//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
 	
