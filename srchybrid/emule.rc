@@ -2396,6 +2396,7 @@ BEGIN
     IDS_WIZARD_NETWORK      "Choose which network(s) you want to use."
     IDS_MAIN_READY          "eMule Version %s ready"
     IDS_WIZARD_ED2K         "ED2k Settings"
+    IDS_IP2COUNTRY          "IP2Country"
 END
 
 STRINGTABLE 
@@ -2721,9 +2722,12 @@ BEGIN
     IDS_ERR_METCORRUPT      "Error: %s (%s) is corrupt, unable to load file"
     IDS_ERR_FILEERROR       "Unexpected file error while reading %s (%s): %s"
     IDS_ERR_FILEOPEN        "Failed to open %s (%s)"
+    IDS_COUNTRYNAME_SHORT   "US"
     IDS_ERR_REHASH          "Warning: %s might be corrupted, performing rehash of completed parts"
+    IDS_COUNTRYNAME_MID     "USA"
     IDS_ERR_PART_FNF        ".part file not found"
     IDS_ERR_OPENMETFILE     "Failed to open part.met file"
+    IDS_COUNTRYNAME_LONG    "UNITED STATES"
     IDS_ERR_SAVEMET         "ERROR while saving partfile: %s (%s)"
     IDS_ERR_FOUNDCORRUPTION "Found corrupted part (%i) in %s"
     IDS_HASHINGDONE         "Finished rehashing %s, file seems to be ok"

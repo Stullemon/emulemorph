@@ -51,6 +51,7 @@
 #define IDD_SEARCH                      142
 #define IDS_STRING142                   142
 #define IDS_WIZARD_ED2K                 142
+#define IDS_IP2COUNTRY                  143
 #define IDS_MAIN_SOCKETERROR            144
 #define IDS_MAIN_BTN_DISCONNECT         145
 #define IDS_MAIN_BTN_DISCONNECT_TOOLTIP 146
@@ -71,11 +72,14 @@
 #define IDS_ERR_FILEERROR               161
 #define IDS_ERR_FILEOPEN                162
 #define IDD_HTTPDOWNLOAD                163
+#define IDS_COUNTRYNAME_SHORT           163
 #define IDS_ERR_REHASH                  164
 #define IDD_CHAT                        165
+#define IDS_COUNTRYNAME_MID             165
 #define IDS_ERR_PART_FNF                166
 #define IDS_ERR_OPENMETFILE             167
 #define IDR_HTTPDOWNLOAD_ANIMATION      168
+#define IDS_COUNTRYNAME_LONG            168
 #define IDS_ERR_SAVEMET                 169
 #define IDS_ERR_FOUNDCORRUPTION         170
 #define IDS_HASHINGDONE                 171

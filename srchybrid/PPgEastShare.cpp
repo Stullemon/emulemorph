@@ -92,11 +92,11 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		m_htiSaveUploadQueueWaitTime = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME), TVI_ROOT, m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
 		//EastShare Start - added by AndCycle, IP to Country
-		m_htiIP2CountryName = m_ctrlTreeOptions.InsertGroup("IP2Country", iImgIP2Country, TVI_ROOT);
+		m_htiIP2CountryName = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_IP2COUNTRY), iImgIP2Country, TVI_ROOT);
 		m_htiIP2CountryName_DISABLE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DISABLED), m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_DISABLE);
-		m_htiIP2CountryName_SHORT = m_ctrlTreeOptions.InsertRadioButton("US", m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_SHORT);
-		m_htiIP2CountryName_MID = m_ctrlTreeOptions.InsertRadioButton("USA", m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_MID);
-		m_htiIP2CountryName_LONG = m_ctrlTreeOptions.InsertRadioButton("UNITED STATES", m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_LONG);
+		m_htiIP2CountryName_SHORT = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_COUNTRYNAME_SHORT), m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_SHORT);
+		m_htiIP2CountryName_MID = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_COUNTRYNAME_MID), m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_MID);
+		m_htiIP2CountryName_LONG = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_COUNTRYNAME_LONG), m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_LONG);
 		//EastShare End - added by AndCycle, IP to Country
 
 		// EastShare START - Added by linekin, new creditsystem by [lovelace]  // Modified by Pretender
