@@ -737,8 +737,9 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		uint32	statBadSessions =				0;
 		double	percentSessions =				0;
 		//MORPH START - Added by Commander, Show failed WC sessions
-		double  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS;
+		uint32  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS;
 		uint32  totalDLSessions =				statGoodSessions + statBadSessions;
+		double  percentWCSessions =				0;
 		//MORPH END - Added by Commander, Show failed WC sessions
 
 		// Transfer Ratios
@@ -1012,23 +1013,25 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					i++;
 				}
 				// Set Download Sessions
-				statGoodSessions =	(thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]) - thePrefs.ses_successfull_WCDOWNLOADS; // Add Active Downloads //MORPH - Changed by Commander, Show failed WC sessions
-				statBadSessions =	thePrefs.GetDownS_FailedSessions() - failedWCSessions; //MORPH - Changed by Commander, Show failed WC sessions
+				statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
+				statBadSessions =	thePrefs.GetDownS_FailedSessions();
 				cbuffer.Format( _T("%s: %u") , GetResString(IDS_STATS_DLSES) , statGoodSessions + statBadSessions );
 				stattree.SetItemText( down_S[4] , cbuffer );
 				if (forceUpdate || stattree.IsExpanded(down_S[4])) 
 				{
 					// Set Successful Download Sessions and Average Downloaded Per Session
 					percentSessions = 0;
+                    WC_excluded = statGoodSessions - thePrefs.ses_successfull_WCDOWNLOADS;
 					if (statGoodSessions > 0) 
 					{
 						percentSessions = (double) 100 * statGoodSessions / (statGoodSessions + statBadSessions);
+						percentWCSessions = (double) 100 * thePrefs.ses_successfull_WCDOWNLOADS / statGoodSessions; //MORPH - Added by Commander, Show amount of successful WC sessions
 						cbuffer.Format( _T("%s: %s") , GetResString(IDS_STATS_AVGDATADLSES) , CastItoXBytes( theStats.sessionReceivedBytes / statGoodSessions, false, false ) ); 
 					}
 					else 
 						cbuffer.Format( _T("%s: %s") , GetResString(IDS_STATS_AVGDATADLSES) , CastItoXBytes((uint32)0, false, false) );
 					stattree.SetItemText( down_ssessions[2] , cbuffer ); // Set Avg DL/Session
-					cbuffer.Format( _T("%s: %u (%1.1f%%)") , GetResString(IDS_STATS_SDLSES) , statGoodSessions , percentSessions );
+					cbuffer.Format( _T("%s: %u (%1.1f%%) (WC: %u (%1.1f%%))") , GetResString(IDS_STATS_SDLSES) , statGoodSessions , percentSessions, thePrefs.ses_successfull_WCDOWNLOADS, percentWCSessions ); //MORPH - Changed by Commander, Show amount of successful WC sessions
 					stattree.SetItemText( down_ssessions[0] , cbuffer ); // Set Succ Sessions
 					// Set Failed Download Sessions (Avoid Division)
 					if (percentSessions != 0 && statBadSessions > 0) 
@@ -1037,7 +1040,17 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						percentSessions = 100; // There were bad sessions and no good ones, must be 100%
 					else 
 						percentSessions = 0; // No sessions at all, or no bad ones.
-					cbuffer.Format( _T("%s: %u (%1.1f%%)") , GetResString(IDS_STATS_FDLSES) , statBadSessions , percentSessions );
+
+                    //MORPH START - Added by Commander, Show amount of failed WC sessions
+                    percentWCSessions = 0;
+					if(statBadSessions > 0)
+						percentWCSessions = (double) 100 * failedWCSessions / statBadSessions;
+					else
+						percentWCSessions = (double) 0;
+
+					cbuffer.Format( _T("%s: %u (%1.1f%%) (WC: %u ((%1.1f%%))") , GetResString(IDS_STATS_FDLSES) , statBadSessions , percentSessions, failedWCSessions, percentWCSessions );
+					//MORPH END - Added by Commander, Show amount of failed WC sessions
+
 					stattree.SetItemText( down_ssessions[1] , cbuffer );
 					// Set Average Download Time
 					//MORPH START - Added by SiRoB, WebCache 1.2f
@@ -1055,12 +1068,12 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		            
                     //MORPH START - Added by Commander, Show failed WC sessions
                     percentSessions = 0;
-					if (failedWCSessions > 0 && totalDLSessions > 0)
-                         percentSessions = (double) 100 * failedWCSessions / totalDLSessions;
+					if (thePrefs.ses_WEBCACHEREQUESTS > 0)
+                        percentSessions = (double) 100 * failedWCSessions / thePrefs.ses_WEBCACHEREQUESTS;
 					else
 						percentSessions = (double) 0;
 
-					cbuffer.Format( _T("Failed WebCache Sessions: %u (%1.1f%%)"), failedWCSessions, percentSessions);
+					cbuffer.Format( _T("Failed WC-DL/WC-Requests: %u/%u (%1.1f%%)"), failedWCSessions, thePrefs.ses_WEBCACHEREQUESTS, percentSessions);
 					stattree.SetItemText( down_ssessions[5] , cbuffer );
 					//MORPH END - Added by Commander, Show failed WC sessions
                     
