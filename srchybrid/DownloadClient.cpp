@@ -366,13 +366,18 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	uint16 nED2KPartCount;
 	data.Read(&nED2KPartCount,2);
 	
-	if (m_abyPartStatus){
-		//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-		uint8* thisStatus;
-		m_PartStatus_list.Lookup(reqfile, thisStatus);
+	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+	uint8* thisStatus;
+	m_PartStatus_list.Lookup(reqfile, thisStatus);
+	if (thisStatus){
+		delete[] m_abyPartStatus;
 		if (thisStatus==m_abyPartStatus)
-		//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
-			delete[] m_abyPartStatus;
+			m_abyPartStatus = NULL;
+	}
+	//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
+		
+	if (m_abyPartStatus){
+		delete[] m_abyPartStatus;
 		m_abyPartStatus = NULL;
 	}
 	bool bPartsNeeded = false;
@@ -956,11 +961,16 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 
 	//MORPH END   - Modified by SiRoB, Better Download rate calcul
 
+	// no need for a special timeout here. Socket timeout will take care of it.
+	// and we want to keep downloads going as long as possible.
+	//MORPH START - Changed by SiRoB, in fact we need it when client is in uploading state making the socket not to close soon
 	if ((::GetTickCount() - m_dwLastBlockReceived) > DOWNLOADTIMEOUT){
-		Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-		theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-		socket->SendPacket(packet,true,true);
-		SetDownloadState(DS_ONQUEUE);
+	//	Packet* packet = new Packet(OP_CANCELTRANSFER,0);
+	//	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+	//	socket->SendPacket(packet,true,true);
+		if(GetUploadState() == US_UPLOADING)
+			SetDownloadState(DS_ONQUEUE);
+	//MORPH END   - Changed by SiRoB, in fact we need it when client is in uploading state making the socket not to close soon
 	}
 		
 	return m_nDownDatarate;
