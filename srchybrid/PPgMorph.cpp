@@ -92,6 +92,7 @@ CPPgMorph::CPPgMorph()
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	m_htiInfiniteQueue = NULL;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_htiDontRemoveSpareTrickleSlot = NULL; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	m_htiCountWCSessionStats		= NULL; //MORPH - added by Commander, Show WC Session stats
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -283,7 +284,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_iHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
-
+		m_htiDisplayFunnyNick = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISPLAYFUNNYNICK), TVI_ROOT, m_iFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
 		// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 		m_htiCommunityName = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMMUNITYTAG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT);
 		m_ctrlTreeOptions.AddEditBox(m_htiCommunityName, RUNTIME_CLASS(CTreeOptionsEdit));
@@ -332,6 +333,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_iInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDontRemoveSpareTrickleSlot, m_iDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplayFunnyNick, m_iFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCountWCSessionStats, m_iCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiClientQueueProgressBar, m_iClientQueueProgressBar); //MORPH - Added by Commander, ClientQueueProgressBar
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalDataRateFriend, m_iGlobalDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
@@ -405,6 +407,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
 	m_iInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_iDontRemoveSpareTrickleSlot = thePrefs.m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	m_iFunnyNick = thePrefs.m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	m_iCountWCSessionStats = thePrefs.m_bCountWCSessionStats; //MORPH - added by Commander, Show WC Session stats
 	m_iClientQueueProgressBar = thePrefs.m_bClientQueueProgressBar;//MORPH - Added by Commander, ClientQueueProgressBar
 	m_iCountWCSessionStats	= thePrefs.m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
@@ -503,6 +506,7 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	thePrefs.infiniteQueue = m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	thePrefs.m_bDontRemoveSpareTrickleSlot = m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	thePrefs.m_bFunnyNick = m_iFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	thePrefs.m_bClientQueueProgressBar = m_iClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 	thePrefs.m_bCountWCSessionStats		   = m_iCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -623,6 +627,7 @@ void CPPgMorph::Localize(void)
 		if (m_htiEnableAntiCreditHack) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiCreditHack, GetResString(IDS_ANTI_CREDITHACK)); //MORPH - Added by IceCream, enable Anti-CreditHack
 		if (m_htiInfiniteQueue) m_ctrlTreeOptions.SetItemText(m_htiInfiniteQueue, GetResString(IDS_INFINITEQUEUE));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 		if (m_htiDontRemoveSpareTrickleSlot) m_ctrlTreeOptions.SetItemText(m_htiDontRemoveSpareTrickleSlot, GetResString(IDS_DONTREMOVESPARETRICKLESLOT));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+		if (m_htiDisplayFunnyNick) m_ctrlTreeOptions.SetItemText(m_htiDisplayFunnyNick, GetResString(IDS_DISPLAYFUNNYNICK));//MORPH - Added by SiRoB, Optionnal funnynick display
 		if (m_htiCountWCSessionStats) m_ctrlTreeOptions.SetItemText(m_htiCountWCSessionStats, GetResString(IDS_COUNTWCSESSIONSTATS)); //MORPH - added by Commander, Show WC Session stats 
 		if (m_htiClientQueueProgressBar) m_ctrlTreeOptions.SetItemText(m_htiClientQueueProgressBar, GetResString(IDS_CLIENTQUEUEPROGRESSBAR));//MORPH - Added by Commander, ClientQueueProgressBar
 		//MORPH START - Added by SiRoB, Upload Splitting Class

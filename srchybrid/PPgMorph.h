@@ -34,6 +34,7 @@ protected:
 	int m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	int m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	int m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	int m_iFunnyNick; //MORPH - Added by SiRoB, Optionnal funnynick display
 	int m_iClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
 	int m_iCountWCSessionStats; // MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -94,6 +95,7 @@ protected:
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	HTREEITEM m_htiInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	HTREEITEM m_htiDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	HTREEITEM m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	HTREEITEM m_htiCountWCSessionStats;//MORPH - Added by Commander, Show WC stats
 	HTREEITEM m_htiClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class

@@ -12,12 +12,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(950)
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1830,7 +1830,7 @@ BEGIN
     CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
                     IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,7,37,197,10
-    CONTROL         "Convert wrong apostrophes ""¡¦"", ""`"" to standard apostrophes "" ' """,
+    CONTROL         "Convert wrong apostrophes ""’"", ""`"" to standard apostrophes "" ' """,
                     IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
@@ -2937,12 +2937,12 @@ OPENINCOMING.GIF        HTML                    "res\\FolderOpen.gif"
 RESTOREWINDOW.GIF       HTML                    "res\\RestoreWindow.gif"
 TABLEBACKGND.GIF        HTML                    "res\\MiniMuleBack.gif"
 PREFERENCES.GIF         HTML                    "res\\Preferences.gif"
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5328,6 +5328,7 @@ BEGIN
     IDS_MAXCLIENTDATARATEFRIEND "Max client datarate (0kB/s=unlimited)"
     IDS_MAXCLIENTDATARATEPOWERSHARE "Max client datarate (0kB/s=unlimited)"
     IDS_MAXCLIENTDATARATE   "Max client datarate (0kB/s=unlimited)"
+    IDS_DISPLAYFUNNYNICK    "Enable FunnyNick display"
 END
 
 STRINGTABLE 
@@ -5338,7 +5339,7 @@ BEGIN
     IDS_RANDOMPORTS         "Random Ports"
     IDS_MINPORT             "Min Port"
     IDS_MAXPORT             "Max Port"
-	IDS_RANDOMPORTSRESETTIME "Random ports safe restart time (in seconds)"
+    IDS_RANDOMPORTSRESETTIME "Random ports safe restart time (in seconds)"
 END
 
 STRINGTABLE 
@@ -5589,7 +5590,7 @@ BEGIN
                             "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
 END
 
-#endif    // English (U.S.) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
