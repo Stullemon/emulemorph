@@ -1011,11 +1011,11 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
     }
 
     if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
-       //MORPH - Changed by SiRoB
+       //MORPH - Changed by SiRoB, Upload Splitting Class
 	   /*
 	   curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall+1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 	   */
-	   curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall/*+1*/ && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
+	   curUploadSlotsReal > curUploadSlots && curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall+1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
         return true;
     }
 

@@ -630,27 +630,24 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			lastpos = 0;
             for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{	
-				if ((allowedDataRateClass[classID]==0 || classID==LAST_CLASS) &&  ClientDataRate[classID]==0)
-				{
-					for(uint32 slotCounter = lastpos; slotCounter < lastpos+slotCounterClass[classID] && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; slotCounter++) {
-						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
-						if(socket != NULL) {
-							uint32 bytesToSpendTemp = bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS];
-							SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
-							uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
-							spentBytesClass[classID] += lastSpentBytes;
-							spentOverheadClass[classID] += socketSentBytes.sentBytesControlPackets;
-							if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes < bytesToSpendTemp || lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
-								m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
-							if (classID < LAST_CLASS){
-								spentBytesClass[LAST_CLASS] += lastSpentBytes;
-								spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID];
-								if(m_highestNumberOfFullyActivatedSlots[classID]>m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
-									m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
-							}
-						} else {
-							theApp.QueueDebugLogLine(false,_T("There was a NULL socket in the UploadBandwidthThrottler Standard list (fully activated)! Prevented usage. Index: %i Size: %i"), slotCounter, m_StandardOrder_list.GetSize());
+				for(uint32 slotCounter = lastpos; slotCounter < lastpos+slotCounterClass[classID] && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; slotCounter++) {
+					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
+					if(socket != NULL) {
+						uint32 bytesToSpendTemp = bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS];
+						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
+						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
+						spentBytesClass[classID] += lastSpentBytes;
+						spentOverheadClass[classID] += socketSentBytes.sentBytesControlPackets;
+						if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes < bytesToSpendTemp || lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
+							m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
+						if (classID < LAST_CLASS){
+							spentBytesClass[LAST_CLASS] += lastSpentBytes;
+							spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID];
+							if(m_highestNumberOfFullyActivatedSlots[classID]>m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
+								m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 						}
+					} else {
+						theApp.QueueDebugLogLine(false,_T("There was a NULL socket in the UploadBandwidthThrottler Standard list (fully activated)! Prevented usage. Index: %i Size: %i"), slotCounter, m_StandardOrder_list.GetSize());
 					}
 				}
 				lastpos += slotCounterClass[classID];
@@ -667,13 +664,23 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					realBytesToSpend = realBytesToSpendClass[LAST_CLASS];
 				else
 					realBytesToSpend = realBytesToSpendClass[classID];
-				uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*minFragSize*1000;
-				if(realBytesToSpend > 0 && (uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
-					realBytesToSpend = 999+bandwidthSavedTolerance;
-					if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
-						m_highestNumberOfFullyActivatedSlots[classID] = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1;
-					//theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
-           		}
+				if(realBytesToSpend < -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000) {
+					/*
+					sint64 newRealBytesToSpend = -(((sint64)m_StandardOrder_list.GetSize()+1)*minFragSize)*1000;
+	    			realBytesToSpend = newRealBytesToSpend;
+					*/
+					if (m_highestNumberOfFullyActivatedSlots[classID] > sumofclientinclass)
+						m_highestNumberOfFullyActivatedSlots[classID] = sumofclientinclass;
+				} else {
+					if(realBytesToSpend > 0 && (uint64)realBytesToSpend > 999) {
+						uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*minFragSize*1000;
+						if ((uint64)realBytesToSpend > 999+bandwidthSavedTolerance)
+							realBytesToSpend = 999+bandwidthSavedTolerance;
+						if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
+							m_highestNumberOfFullyActivatedSlots[classID] = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1;
+						//theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
+           			}
+				}
        			realBytesToSpendClass[classID] = realBytesToSpend;
 			}
 			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
