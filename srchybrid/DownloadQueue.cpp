@@ -441,8 +441,6 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 	else
 		useCat = 0;
 
-	int useOrder = GetMaxCatResumeOrder(useCat);
-
 	for (POSITION pos = m_ED2KLinkQueue.GetHeadPosition(); pos != 0; m_ED2KLinkQueue.GetNext(pos))
 	{
 		CED2KFileLink*	pLink = m_ED2KLinkQueue.GetAt(pos);
@@ -472,8 +470,7 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 			if (thePrefs.SmallFileDLPush() && newfile->GetFileSize() < 154624)
 				newfile->SetCatResumeOrder(0);
 			else if (thePrefs.AutoSetResumeOrder()) {
-				useOrder++;
-				newfile->SetCatResumeOrder(useOrder);
+				newfile->SetCatResumeOrder(GetMaxCatResumeOrder(useCat)+1);
 			}
 			AddDownload(newfile,thePrefs.AddNewFilesPaused());
 			addedFiles++;

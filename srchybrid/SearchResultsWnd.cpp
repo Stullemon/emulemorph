@@ -436,8 +436,6 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 		if (bCanceled)
 			return;
 	}
-
-	int useOrder = theApp.downloadqueue->GetMaxCatResumeOrder(useCat);
 	// khaos::categorymod-
 
 	while (pos != NULL) 
@@ -458,12 +456,11 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 			if (thePrefs.SmallFileDLPush() && cur_file->GetFileSize() < 154624)
 				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, 0);
 			else if (thePrefs.AutoSetResumeOrder())
-				useOrder++;
-
-
-			// use filename of selected listview item
-			theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, useOrder);
+				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat)+1);
+			else
 			// khaos::categorymod-
+			// use filename of selected listview item
+			theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat));
 
 			// get parent
 			if (cur_file->GetListParent()!=NULL)
