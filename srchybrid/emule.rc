@@ -13,12 +13,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 中性 resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(950)
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2224,6 +2224,7 @@ SYSTRAY_DISCONNECT      ICON                    "res\\systray_disconnect.ico"
 SYSTRAY_EXIT            ICON                    "res\\systray_exit.ico"
 PREF_BACKUP             ICON                    "res\\backup.ico"
 EQFILE                  ICON                    "res\\EQfile.ico"
+COMMUNITY               ICON                    "res\\community.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2322,12 +2323,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // 中性 resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// 英文 (美國) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4224,13 +4225,17 @@ BEGIN
     IDS_SHAREONLYTHENEEDDEFAULT "Share Only The Need (0 = Disabled)"
     IDS_SFM                 "Shared File Management"
     IDS_IP2COUNTRY          "IP2Country"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_COUNTRYNAME_SHORT   "US"
     IDS_COUNTRYNAME_MID     "USA"
     IDS_COUNTRYNAME_LONG    "UNITED STATES"
     IDS_COUNTRYNAME_SHOWFLAG "ShowFlag"
 END
 
-#endif    // 英文 (美國) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
