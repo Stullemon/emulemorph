@@ -29,9 +29,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -57,7 +57,7 @@ int CAICHSyncThread::Run()
 		return 0;
 
 	// we collect all masterhashs which we find in the known2.met and store them in a list
-	CList<CAICHHash,CAICHHash&> liKnown2Hashs;
+	CList<CAICHHash> liKnown2Hashs;
 	CString fullpath=thePrefs.GetConfigDir();
 	fullpath.Append(KNOWN2_MET_FILENAME);
 	CSafeFile file;
@@ -146,7 +146,7 @@ int CAICHSyncThread::Run()
 	}
 
 	if (!m_liToHash.IsEmpty()){
-		theApp.QueueLogLine(true, GetResString(IDS_AICH_SYNCTOTAL), m_liToHash.GetCount() );
+		AddLogLine(true, GetResString(IDS_AICH_SYNCTOTAL), m_liToHash.GetCount() );	// I18n: ThreadSafeLog
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.SetAICHHashing(m_liToHash.GetCount());
 		// let first all normal hashing be done before starting out synchashing
 		CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
@@ -167,11 +167,11 @@ int CAICHSyncThread::Run()
 			// just to be sure that the file hasnt been deleted lately
 			if (!(theApp.knownfiles->IsKnownFile(pCurFile) && theApp.sharedfiles->GetFileByID(pCurFile->GetFileHash())) )
 				continue;
-			theApp.QueueLogLine(false, GetResString(IDS_AICH_CALCFILE), pCurFile->GetFileName());
+			AddLogLine(false, GetResString(IDS_AICH_CALCFILE), pCurFile->GetFileName());	// I18n: ThreadSafeLog
 			if(!pCurFile->CreateAICHHashSetOnly())
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 				if(thePrefs.GetLogICHEvents()) //JP log ICH events
-				theApp.QueueDebugLogLine(false, _T("Failed to create AICH Hashset while sync. for file %s"), pCurFile->GetFileName());
+				AddDebugLogLine(false, _T("Failed to create AICH Hashset while sync. for file %s"), pCurFile->GetFileName());	// I18n: ThreadSafeLog
 		}
 
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.SetAICHHashing(0);
@@ -181,7 +181,7 @@ int CAICHSyncThread::Run()
 	}
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 	if(thePrefs.GetLogICHEvents()) //JP log ICH events
-	theApp.QueueDebugLogLine(false, _T("AICHSyncThread finished"));
+	AddDebugLogLine(false, _T("AICHSyncThread finished"));	// I18n: ThreadSafeLog
 	return 0;
 }
 

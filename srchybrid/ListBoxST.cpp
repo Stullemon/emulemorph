@@ -2,10 +2,11 @@
 #include "ListBoxST.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
+
 
 #define	MASK_DWDATA		0x01	// dwItemData is valid
 #define	MASK_LPDATA		0x02	// pData is valid

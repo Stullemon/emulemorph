@@ -94,6 +94,48 @@ BOOL CComboBoxEx2::PreTranslateMessage(MSG* pMsg)
 	return CComboBoxEx::PreTranslateMessage(pMsg);
 }
 
+BOOL CComboBoxEx2::SelectString(LPCTSTR pszText)
+{
+	// CComboBox::SelectString seems also not to work
+	CComboBox* pctrlCB = GetComboBoxCtrl();
+	if (pctrlCB != NULL)
+	{
+		int iCount = pctrlCB->GetCount();
+		for (int i = 0; i < iCount; i++)
+		{
+			CString strItem;
+			pctrlCB->GetLBText(i, strItem);
+			if (strItem == pszText)
+			{
+				SetCurSel(i);
+				GetParent()->SendMessage(WM_COMMAND, MAKELONG((WORD)GetWindowLong(m_hWnd, GWL_ID), CBN_SELCHANGE), (LPARAM)m_hWnd);
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
+BOOL CComboBoxEx2::SelectItemDataStringA(LPCSTR pszText)
+{
+	CComboBox* pctrlCB = GetComboBoxCtrl();
+	if (pctrlCB != NULL)
+	{
+		int iCount = pctrlCB->GetCount();
+		for (int i = 0; i < iCount; i++)
+		{
+			void* pvItemData = GetItemDataPtr(i);
+			if (pvItemData && strcmp((LPCSTR)pvItemData, pszText) == 0)
+			{
+				SetCurSel(i);
+				GetParent()->SendMessage(WM_COMMAND, MAKELONG((WORD)GetWindowLong(m_hWnd, GWL_ID), CBN_SELCHANGE), (LPARAM)m_hWnd);
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
 void UpdateHorzExtent(CComboBox &rctlComboBox, int iIconWidth)
 {
 	int iItemCount = rctlComboBox.GetCount();

@@ -14,10 +14,11 @@
 #include "clientlist.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
+
 
 #define	PREF_INI_SECTION	_T("NetworkInfoDlg")
 
@@ -245,8 +246,6 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	
 	rCtrl << GetResString(IDS_STATUS) << _T(":\t");
 	if(Kademlia::CKademlia::isConnected()){
-		ASSERT(Kademlia::CKademlia::getPrefs() != NULL);
-		ASSERT(Kademlia::CKademlia::getIndexed() != NULL);
 		if(Kademlia::CKademlia::isFirewalled())
 			rCtrl << GetResString(IDS_FIREWALLED);
 		else
@@ -256,7 +255,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		CString IP;
 		IP = ipstr(ntohl(Kademlia::CKademlia::getPrefs()->getIPAddress()));
 		buffer.Format(_T("%s:%i"), IP, thePrefs.GetUDPPort());
-		rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T("\t") << buffer << _T("\r\n");
+		rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T(":\t") << buffer << _T("\r\n");
 
 		buffer.Format(_T("%u"),Kademlia::CKademlia::getPrefs()->getIPAddress());
 		rCtrl << GetResString(IDS_ID) << _T(":\t") << buffer << _T("\r\n");
@@ -278,7 +277,6 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 
 		if (bFullInfo)
 		{
-			ASSERT(Kademlia::CKademlia::getIndexed() != NULL);
 			rCtrl <<  GetResString(IDS_INDEXED) << _T(":\r\n");
 			buffer.Format(GetResString(IDS_KADINFO_SRC) , Kademlia::CKademlia::getIndexed()->m_totalIndexSource);
 			rCtrl << buffer;
@@ -299,13 +297,17 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	rCtrl << GetResString(IDS_WEBSRV) << _T("\r\n");
 	rCtrl.SetSelectionCharFormat(rcfDef);
 	rCtrl << GetResString(IDS_STATUS) << _T(":\t");
-	rCtrl << (theApp.webserver->IsRunning() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << _T("\r\n");
+	rCtrl << (thePrefs.GetWSIsEnabled() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << _T("\r\n");
 	if (thePrefs.GetWSIsEnabled()){
 		CString count;
 		count.Format(_T("%i %s"),theApp.webserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
 		rCtrl << _T("\t") << count << _T("\r\n");
-		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
-		rCtrl << _T("URL:\t") << _T("http://") << ipstr(nLocalIP) << _T(":") << thePrefs.GetWSPort() << _T("/\r\n");
+		CString strHostname;
+		if (!thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1)
+			strHostname = thePrefs.GetYourHostname();
+		else
+			strHostname = ipstr(theApp.serverconnect->GetLocalIP());
+		rCtrl << _T("URL:\t") << _T("http://") << strHostname << _T(":") << thePrefs.GetWSPort() << _T("/\r\n");
 	}
 	
     //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]

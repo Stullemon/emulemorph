@@ -18,6 +18,7 @@
 #include "MuleListCtrl.h"
 #include "TitleMenu.h"
 #include <map>
+#include "ListCtrlItemWalk.h"
 
 #define COLLAPSE_ONLY	0
 #define EXPAND_ONLY		1
@@ -26,23 +27,56 @@
 // Foward declaration
 class CPartFile;
 class CUpDownClient;
-enum EInvokePage;
+class CDownloadListCtrl;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CtrlItem_Struct
 
 enum ItemType {FILE_TYPE = 1, AVAILABLE_SOURCE = 2, UNAVAILABLE_SOURCE = 3};
-struct CtrlItem_Struct{
+
+class CtrlItem_Struct : public CObject
+{
+	DECLARE_DYNAMIC(CtrlItem_Struct)
+
+public:
+	~CtrlItem_Struct() { status.DeleteObject(); }
+
    ItemType         type;
    CPartFile*       owner;
    void*            value; // could be both CPartFile or CUpDownClient
    CtrlItem_Struct* parent;
    DWORD            dwUpdated;
    CBitmap          status;
-   ~CtrlItem_Struct() { status.DeleteObject(); }
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+// CDownloadListListCtrlItemWalk
+
+class CDownloadListListCtrlItemWalk : public CListCtrlItemWalk
+{
+public:
+	CDownloadListListCtrlItemWalk(CDownloadListCtrl* pListCtrl);
+
+	virtual CObject* GetNextSelectableItem();
+	virtual CObject* GetPrevSelectableItem();
+
+	void SetItemType(ItemType eItemType) { m_eItemType = eItemType; }
+
+protected:
+	CDownloadListCtrl* m_pDownloadListCtrl;
+	ItemType m_eItemType;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
 // CDownloadListCtrl
-class CDownloadListCtrl : public CMuleListCtrl
+
+class CDownloadListCtrl : public CMuleListCtrl, public CDownloadListListCtrlItemWalk
 {
 	DECLARE_DYNAMIC(CDownloadListCtrl)
+	friend class CDownloadListListCtrlItemWalk;
 	friend class CDownloadClientsCtrl; //SLAHAM: ADDED DownloadClientsCtrl
 
 public:
@@ -62,17 +96,20 @@ public:
 	void	SetStyle();
 	void	CreateMenues();
 	void	Localize();
-	void	HideSources(CPartFile* toCollapse,bool isShift = false,bool isCtrl = false,bool isAlt = false);
 	void	ShowFilesCount();
 	void	ChangeCategory(int newsel);
 	CString getTextList();
 	void	ShowSelectedFileDetails();
 	void	HideFile(CPartFile* tohide);
 	void	ShowFile(CPartFile* tohide);
-	void	ExpandCollapseItem(int item,uint8 expand,bool collapsesource=false);
+	void	ExpandCollapseItem(int iItem, int iAction, bool bCollapseSource = false);
+	void	HideSources(CPartFile* toCollapse);
 	void	GetDisplayedFiles(CArray<CPartFile*,CPartFile*> *list);
 	void	MoveCompletedfilesCat(uint8 from, uint8 to);
 	int		GetCompleteDownloads(int cat,int &total);
+	void	UpdateCurrentCategoryView();
+	void	UpdateCurrentCategoryView(CPartFile* thisfile);
+
 protected:
 	CImageList  m_ImageList;
 	// Mighty Knife: Community visualization
@@ -97,11 +134,14 @@ protected:
 	CFont		m_fontBold;
 	CFont		m_fontBoldSmaller;//MORPH END   - Added by SiRoB, Draw Client Percentage
 
-	void ShowFileDialog(CPartFile* pFile, EInvokePage eInvokePage);
+	void ShowFileDialog(CPartFile* pFile, UINT uInvokePage = 0);
+	void ShowClientDialog(CUpDownClient* pClient);
 	void SetAllIcons();
 	void DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
 	void DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
-
+	/*
+	int GetFilesCountInCurCat();
+	*/
     static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
     static int Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort);
     static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort, int sortMod);

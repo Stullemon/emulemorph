@@ -28,6 +28,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 /////////////////////////////////////////////////////////////////////////////
 // COScopeCtrl
 COScopeCtrl::COScopeCtrl(int NTrends)
@@ -162,6 +163,7 @@ BEGIN_MESSAGE_MAP(COScopeCtrl, CWnd)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 	ON_WM_TIMER()
+	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 
@@ -172,11 +174,7 @@ END_MESSAGE_MAP()
 BOOL COScopeCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID) 
 {
 	BOOL result;
-	//MORPH - Changed by SiRoB, mouse cursor fix [apph]
-	/*
-	static CString className = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW);
-	*/
-	static CString className = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW, AfxGetApp()->LoadStandardCursor(IDC_ARROW), NULL, NULL);
+	static CString className = AfxRegisterWndClass(CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW, AfxGetApp()->LoadStandardCursor(IDC_ARROW));
 	
 	result = CWnd::CreateEx(WS_EX_CLIENTEDGE /*| WS_EX_STATICEDGE*/, 
 		className, NULL, dwStyle, 
@@ -405,23 +403,50 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 			m_dcGrid.SetPixel(i, GridPos, m_crGridColor);
 	}
 	
+	// CB Mod ---> Vertical lines
+	  
+	// Add vertical reference lines in the graphs. Each line indicates an elapsed hour from the current
+	// time (extreme right of the graph).
+	// Lines are always right aligned and the gap scales accordingly to the user horizontal scale.
+	// Intervals of 10 hours are marked with slightly stronger lines that go beyond the bottom border.
+	int hourSize, partialSize, surplus=0, extra=0;
+
+	if (m_nXGrids > 0) {
+		hourSize = (3600*m_rectPlot.Width())/(3600*m_nXGrids + m_nXPartial); // Size of an hour in pixels
+		partialSize = m_rectPlot.Width() - hourSize*m_nXGrids;
+		if (partialSize >= hourSize) {
+		partialSize = (hourSize*m_nXPartial)/3600; // real partial size
+		surplus = m_rectPlot.Width() - hourSize*m_nXGrids - partialSize; // Pixel surplus
+		}
+
+		GridPos = 0;
+		for(j = 1; j <= m_nXGrids; j++) {
+		extra = 0;
+		if (surplus) {
+			surplus--;
+			extra=1;
+		}
+		GridPos += (hourSize+extra);
+		if ((m_nXGrids-j+1)%10 == 0) {
+			for(i = m_rectPlot.top; i < m_rectPlot.bottom+10; i += 2)
+			m_dcGrid.SetPixel(m_rectPlot.left + GridPos - hourSize + partialSize, i, m_crGridColor);
+		} else {
+			for(i = m_rectPlot.top; i < m_rectPlot.bottom; i += 4)
+			m_dcGrid.SetPixel(m_rectPlot.left + GridPos - hourSize + partialSize, i, m_crGridColor);
+		}
+		}
+	}
+	// CB Mod <---
+
 	// create some fonts (horizontal and vertical)
-	// use a height of 14 pixels and 300 weight 
-	// (these may need to be adjusted depending on the display)
-	axisFont.CreateFont(14, 0, 0, 0, 300,
-		//FALSE, FALSE, 0, ANSI_CHARSET,
-		FALSE, FALSE, 0, DEFAULT_CHARSET, // EC
-		OUT_DEFAULT_PRECIS, 
-		CLIP_DEFAULT_PRECIS,
-		DEFAULT_QUALITY, 
-		DEFAULT_PITCH | FF_SWISS, _T("Arial"));
-	yUnitFont.CreateFont(14, 0, 900, 0, 300,
-		//FALSE, FALSE, 0, ANSI_CHARSET,
-		FALSE, FALSE, 0, DEFAULT_CHARSET, // EC
-		OUT_DEFAULT_PRECIS, 
-		CLIP_DEFAULT_PRECIS,
-		DEFAULT_QUALITY, 
-		DEFAULT_PITCH | FF_SWISS, _T("Arial"));
+	// ---
+	//  *)	Using "Arial" or "MS Sans Serif" gives a more accurate small font,
+	//		but does not work for Korean fonts.
+	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
+	//		does work for all languages which are currently supported by eMule.
+	axisFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
+	yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
+						 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("MS Shell Dlg"));
 	
 	// grab the horizontal font
 	oldFont = m_dcGrid.SelectObject(&axisFont);
@@ -472,30 +497,28 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		((m_rectPlot.bottom+m_rectPlot.top)/2)-rText.Height()/2, m_str.YUnits) ;
 	m_dcGrid.SelectObject(oldFont);
 	
-	LegendFont.CreateFont(12, 0, 0, 0, 300,
-		FALSE, FALSE, 0, DEFAULT_CHARSET, // EC
-		OUT_DEFAULT_PRECIS, 
-		CLIP_DEFAULT_PRECIS,
-		DEFAULT_QUALITY, 
-		DEFAULT_PITCH | FF_SWISS, _T("Arial"));
+	//  *)	Using "Arial" or "MS Sans Serif" gives a more accurate small font,
+	//		but does not work for Korean fonts.
+	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
+	//		does work for all languages which are currently supported by eMule.
+	LegendFont.CreatePointFont(7*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
 	oldFont = m_dcGrid.SelectObject(&LegendFont);
 	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
 	
-	int xpos,ypos;
-	xpos = m_rectPlot.left + 2;
-	ypos = m_rectPlot.bottom+2;
+	int xpos = m_rectPlot.left + 2;
+	int ypos = m_rectPlot.bottom + 2;
 	for (i=0 ; i < m_NTrends; i++){
-		int iLabelPixelSize = m_dcGrid.GetTextExtent(m_PlotData[i].LegendLabel).cx;
-		if (xpos+12+iLabelPixelSize+12>m_rectPlot.right){
+		CSize sizeLabel = m_dcGrid.GetTextExtent(m_PlotData[i].LegendLabel);
+		if (xpos + 12 + sizeLabel.cx + 12 > m_rectPlot.right){
 			xpos = m_rectPlot.left + 2;
-			ypos = m_rectPlot.bottom+12;
+			ypos = m_rectPlot.bottom + sizeLabel.cy;
 		}
 		CPen LegendPen(PS_SOLID, 3,m_PlotData[i].crPlotColor);
 		oldPen = m_dcGrid.SelectObject(&LegendPen);
 		m_dcGrid.MoveTo(xpos, ypos+8);
 		m_dcGrid.LineTo(xpos + 8, ypos+4);
 		m_dcGrid.TextOut(xpos + 12 ,ypos, m_PlotData[i].LegendLabel);
-		xpos += 12+iLabelPixelSize+12;
+		xpos += 12 + sizeLabel.cx + 12;
 		m_dcGrid.SelectObject(oldPen);
 	}
 	
@@ -531,7 +554,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 				m_bDoUpdate = false;
 			if(m_nRedrawTimer)
 				KillTimer(m_nRedrawTimer);
-				VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) ); // reduce flickering
+			VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) != NULL ); // reduce flickering
 		}
 	}
 
@@ -728,19 +751,10 @@ void COScopeCtrl::DrawPoint()
 	{
 		if(m_nShiftPixels > 0)
 		{
-			//MORPH - Removed by SiRoB, useless [apph]
-			/*
-			ScrollRect.left = m_rectPlot.left;
-			ScrollRect.top  = m_rectPlot.top + 1;
-			ScrollRect.right  = m_rectPlot.left + m_nPlotWidth;
-			ScrollRect.bottom = m_rectPlot.top + 1 + m_nPlotHeight;
-			*/
 			ScrollRect = m_rectPlot;
-			ScrollRect.right++;
-			//MORPH START - Added by SiRoB, fix [apph]
 			ScrollRect.left++;
+			ScrollRect.right++;
 			ScrollRect.bottom++;
-			//MORPH END - Added by SiRoB, fix [apph]
 			m_dcPlot.ScrollDC(-m_nShiftPixels, 0, (LPCRECT)&ScrollRect, (LPCRECT)&ScrollRect, NULL, NULL);
 
 			// establish a rectangle over the right side of plot
@@ -748,7 +762,7 @@ void COScopeCtrl::DrawPoint()
 			rectCleanUp = m_rectPlot;
 			rectCleanUp.left  = rectCleanUp.right - m_nShiftPixels + 1;
 			rectCleanUp.right ++;
-			rectCleanUp.bottom ++; //MORPH - Added by SiRoB, fix [apph]
+			rectCleanUp.bottom ++;
 			// fill the cleanup area with the background
 			m_dcPlot.FillRect(rectCleanUp, &m_brushBack);
 		}
@@ -780,7 +794,7 @@ void COScopeCtrl::DrawPoint()
 					prevY = m_rectPlot.bottom - 
 					(long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 				}
-				m_dcPlot.MoveTo(prevX /*- 1*/, prevY); //MORPH - Changed by SiRoB, fix [apph]
+				m_dcPlot.MoveTo(prevX, prevY);
 				// draw to the current point
 				currX = m_rectPlot.right;
 				currY = m_rectPlot.bottom -
@@ -794,12 +808,8 @@ void COScopeCtrl::DrawPoint()
 				{
 					currY += prevY - currY>0 ? -1 : 1;
 				}
-				m_dcPlot.LineTo(currX /*- 1*/, currY);//MORPH - Changed by SiRoB, fix [apph]
+				m_dcPlot.LineTo(currX, currY);
 			}
-			//if(drawBars) || m_PlotData[iTrend].BarsPlot)
-			//	m_dcPlot.LineTo(currX - 1, m_rectPlot.bottom);
-			
-			// m_dcPlot.Rectangle(currX-1,currY,currX-1,m_rectPlot.bottom);
 			
 			// restore the pen 
 			m_dcPlot.SelectObject(oldPen);
@@ -810,11 +820,6 @@ void COScopeCtrl::DrawPoint()
 			// as opposed to always calling IntersectClipRect
 			if((prevY <= m_rectPlot.top) || (currY <= m_rectPlot.top))
 				m_dcPlot.FillRect(CRect(prevX - 1, m_rectClient.top, currX + 5, m_rectPlot.top + 1), &m_brushBack);
-			
-			//MORPH - Changed by SiRoB, fix [apph]
-			/*
-			if((prevY >= m_rectPlot.bottom) || (currY >= m_rectPlot.bottom))
-			*/
 			if((prevY > m_rectPlot.bottom) || (currY > m_rectPlot.bottom))
 				m_dcPlot.FillRect(CRect(prevX - 1, m_rectPlot.bottom + 1, currX + 5, m_rectClient.bottom + 1), &m_brushBack);
 			
@@ -955,4 +960,13 @@ void COScopeCtrl::OnTimer(UINT nIDEvent)
 	}
 
 	CWnd::OnTimer(nIDEvent);
+}
+
+void COScopeCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	CWnd::OnLButtonDblClk(nFlags, point);
+
+	CWnd* pwndParent = GetParent();
+	if (pwndParent)
+		pwndParent->SendMessage(WM_COMMAND, MAKELONG(GetDlgCtrlID(), STN_DBLCLK), (LPARAM)m_hWnd);
 }

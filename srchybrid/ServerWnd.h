@@ -103,29 +103,10 @@ public:
 	void WriteXMLList (CStringList& _names, CStringList& _urls);
 	// [end] Mighty Knife
 
-protected:
-	void SetAllIcons();
-
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnInitDialog();
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	DECLARE_MESSAGE_MAP()
-	afx_msg void OnBnClickedAddserver();
-	afx_msg void OnBnClickedUpdateservermetfromurl();
-	afx_msg void OnBnClickedResetLog();
-	afx_msg void OnBnConnect();
-	afx_msg void OnTcnSelchangeTab3(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnSysColorChange();
-	afx_msg void OnDDClicked();
-	afx_msg void OnSvrTextChange();
-	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-
 private:
 	CIconStatic m_ctrlNewServerFrm;
 	CIconStatic m_ctrlUpdateServerFrm;
-	CIconStatic m_ctrlMyInfo;
+	CIconStatic m_ctrlMyInfoFrm;
 	CImageList m_imlLogPanes;
 	HICON icon_srvlist;
 	bool	debug;
@@ -141,6 +122,25 @@ private:
 	CString m_strMorphNewVersion;
 	//MORPH END   - Changed by SiRoB, New Version Check
 	LCID m_uLangID;
-public:
+protected:
+	void SetAllIcons();
+
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnBnClickedAddserver();
+	afx_msg void OnBnClickedUpdateservermetfromurl();
+	afx_msg void OnBnClickedResetLog();
+	afx_msg void OnBnConnect();
+	afx_msg void OnTcnSelchangeTab3(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
+	afx_msg void OnDDClicked();
+	afx_msg void OnSvrTextChange();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg void OnStnDblclickServlstIco();
 	afx_msg void OnBnClickedFeedchange();
 };

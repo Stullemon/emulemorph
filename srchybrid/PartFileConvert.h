@@ -46,24 +46,26 @@ private:
 	static UINT	PFConvertThread(LPVOID param);
 };
 
-class CModeless : public CResizableDialog
+
+class CPartFileConvertDlg : public CResizableDialog
 {
-	DECLARE_DYNAMIC(CModeless)
-
+	DECLARE_DYNAMIC(CPartFileConvertDlg)
 public:
+	CPartFileConvertDlg(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CPartFileConvertDlg();
 
-	friend class CPartFileConvert;
-
-	CModeless(CWnd* pParent = NULL);   // standard constructor
-	virtual ~CModeless();
+	enum { IDD = IDD_CONVERTPARTFILES };
+	CWnd* m_pParent;
 
 	void AddJob(ConvertJob* job);
 	void RemoveJob(ConvertJob* job);
 	void UpdateJobInfo(ConvertJob* job);
-// Dialog Data
-	enum { IDD = IDD_CONVERTPARTFILES };
 
 protected:
+	HICON m_icnWnd;
+	CProgressCtrlX pb_current;
+	CListCtrl	   joblist;
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void PostNcDestroy();
 
@@ -75,16 +77,10 @@ protected:
 	afx_msg void RemoveSel();
 	afx_msg void ShowInfo();
 
-public:
-	CWnd* m_pParent;
-
-private:
-	CProgressCtrlX pb_current;
-	CListCtrl	   joblist;
+	friend class CPartFileConvert;
 };
-
 
 static CWinThread*	convertPfThread;
 static CList<ConvertJob*,ConvertJob*> m_jobs;
 static ConvertJob*	pfconverting;
-static CModeless*	m_convertgui;
+static CPartFileConvertDlg*	m_convertgui;

@@ -22,11 +22,12 @@
 #include "Preferences.h"
 #include "StatisticsDlg.h"
 #include "HelpIDs.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -35,7 +36,7 @@ IMPLEMENT_DYNAMIC(CPPgStats, CPropertyPage)
 BEGIN_MESSAGE_MAP(CPPgStats, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_CBN_SELCHANGE(IDC_COLORSELECTOR, OnCbnSelchangeColorselector)
-    ON_MESSAGE(CPN_SELCHANGE, OnColorPopupSelChange)
+    ON_MESSAGE(UM_CPN_SELCHANGE, OnColorPopupSelChange)
 	ON_CBN_SELCHANGE(IDC_CRATIO, OnCbnSelchangeCRatio)
 	ON_EN_CHANGE(IDC_CGRAPHSCALE, OnEnChangeCGraphScale)
 	ON_WM_HELPINFO()
@@ -48,11 +49,14 @@ CPPgStats::CPPgStats()
 	m_iGraphsUpdate = 0;
 	m_iGraphsAvgTime = 0;
 	m_iStatsUpdate = 0;
+	m_iStatsColors = 0;
+	m_pdwStatsColors = NULL;
 	m_bModified = FALSE;
 }
 
 CPPgStats::~CPPgStats()
 {
+	delete[] m_pdwStatsColors;
 }
 
 void CPPgStats::DoDataExchange(CDataExchange* pDX)
@@ -84,7 +88,9 @@ BOOL CPPgStats::OnInitDialog()
 	m_ctlStatsUpdate.SetPos(thePrefs.GetStatsInterval());
 	m_ctlStatsUpdate.SetTicFreq(10);
 	m_ctlStatsUpdate.SetPageSize(10);
-	// Set the Connections Statistics Y-Axis Scale
+
+	((CSliderCtrl*)GetDlgItem(IDC_SLIDER))->SetRange(0, 200, TRUE);
+
 	m_ctlGraphsAvgTime.SetRange(0, 99);
 	m_ctlGraphsAvgTime.SetPos(thePrefs.GetStatsAverageMinutes() - 1);
 	for (int i = 10; i < 100; i += 10)
@@ -115,6 +121,11 @@ BOOL CPPgStats::OnInitDialog()
 	else
 		CheckDlgButton(IDC_SOLIDGRAPH,0);
 	//MORPH END   - Added by SiRoB, New Graph
+
+	m_iStatsColors = thePrefs.GetNumStatsColors();
+	m_pdwStatsColors = new DWORD[m_iStatsColors];
+	thePrefs.GetAllStatsColors(m_iStatsColors, m_pdwStatsColors);
+
 	Localize();
 	SetModified(FALSE);
 
@@ -128,6 +139,12 @@ BOOL CPPgStats::OnApply()
 	if (m_bModified)
 	{
 		bool bInvalidateGraphs = false;
+
+		if (thePrefs.SetAllStatsColors(m_iStatsColors, m_pdwStatsColors)){
+			theApp.emuledlg->ShowTransferRate(true);
+			bInvalidateGraphs = true;
+		}
+
 		if (thePrefs.GetTrafficOMeterInterval() != m_iGraphsUpdate){
 			thePrefs.SetTrafficOMeterInterval(m_iGraphsUpdate);
 			bInvalidateGraphs = true;
@@ -283,19 +300,22 @@ void CPPgStats::ShowInterval()
 
 void CPPgStats::OnCbnSelchangeColorselector()
 {
-	int sel = m_colors.GetCurSel();
-	COLORREF selcolor = thePrefs.GetStatsColor(sel);
-	m_ctlColor.SetColor(selcolor);
+	int iSel = m_colors.GetCurSel();
+	if (iSel >= 0 && iSel < m_iStatsColors)
+		m_ctlColor.SetColor(m_pdwStatsColors[iSel]);
 }
 
-LONG CPPgStats::OnColorPopupSelChange(UINT /*lParam*/, LONG /*wParam*/)
+LONG CPPgStats::OnColorPopupSelChange(UINT lParam, LONG wParam)
 {
-	COLORREF setcolor = m_ctlColor.GetColor();
-	int iCurColor = thePrefs.GetStatsColor(m_colors.GetCurSel());
-	if (iCurColor != setcolor){
-		thePrefs.SetStatsColor(m_colors.GetCurSel(), setcolor);
-		theApp.emuledlg->ShowTransferRate(true);
-		SetModified(TRUE);
+	int iSel = m_colors.GetCurSel();
+	if (iSel >= 0 && iSel < m_iStatsColors)
+	{
+		COLORREF crColor = m_ctlColor.GetColor();
+		if (crColor != m_pdwStatsColors[iSel])
+		{
+			m_pdwStatsColors[iSel] = crColor;
+			SetModified(TRUE);
+		}
 	}
 	return TRUE;
 }

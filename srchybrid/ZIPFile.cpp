@@ -24,9 +24,9 @@
 #include <zlib/zlib.h>
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -451,7 +451,7 @@ BOOL CZIPFile::File::Extract(LPCTSTR pszFile)
 			pStream.avail_out	= BUFFER_OUT_SIZE;
 			pStream.next_out	= pBufferOut;
 			
-			int nInflate = inflate( &pStream, Z_SYNC_FLUSH );
+			inflate( &pStream, Z_SYNC_FLUSH );
 			
 			if ( pStream.avail_out < BUFFER_OUT_SIZE )
 			{

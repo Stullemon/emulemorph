@@ -22,11 +22,12 @@
 #include "SharedFileList.h"
 #include "emuledlg.h"
 #include "TransferWnd.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 // CCatDialog dialog
@@ -119,7 +120,7 @@ BEGIN_MESSAGE_MAP(CCatDialog, CDialog)
 	ON_BN_CLICKED(IDC_BROWSE, OnBnClickedBrowse)
 	ON_BN_CLICKED(IDOK, OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
-	ON_MESSAGE(CPN_SELENDOK, OnSelChange) //CPN_SELCHANGE
+	ON_MESSAGE(UM_CPN_SELENDOK, OnSelChange) //CPN_SELCHANGE
 END_MESSAGE_MAP()
 
 

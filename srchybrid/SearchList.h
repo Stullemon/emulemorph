@@ -21,6 +21,8 @@ class CFileDataIO;
 
 class CSearchFile : public CAbstractFile
 {
+	DECLARE_DYNAMIC(CSearchFile)
+
 	friend class CPartFile;
 	friend class CSearchListCtrl;
 public:

@@ -15,6 +15,8 @@ public:
 	void Localize(void);
 
 protected:
+	int m_iStatsColors;
+	DWORD* m_pdwStatsColors;
 	CComboBox m_colors;
 	CComboBox m_cratio;
 	CColorButton m_ctlColor;

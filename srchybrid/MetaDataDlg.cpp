@@ -23,11 +23,12 @@
 #include "MenuCmds.h"
 #include "Packets.h"
 #include "KnownFile.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -59,12 +60,14 @@ BEGIN_MESSAGE_MAP(CMetaDataDlg, CResizablePage)
 	ON_COMMAND(MP_COPYSELECTED, OnCopyTags)
 	ON_COMMAND(MP_SELECTALL, OnSelectAllTags)
 	ON_WM_DESTROY()
+	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
 END_MESSAGE_MAP()
 
 CMetaDataDlg::CMetaDataDlg()
 	: CResizablePage(CMetaDataDlg::IDD, 0)
 {
-	m_file = NULL;
+	m_paFiles = NULL;
+	m_bDataChanged = false;
 	m_taglist = NULL;
 	m_strCaption = GetResString(IDS_META_DATA);
 	m_psp.pszTitle = m_strCaption;
@@ -105,8 +108,6 @@ BOOL CMetaDataDlg::OnInitDialog()
 	m_tags.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);
 	m_tags.CreateColumns(ARRSIZE(_aColumns), _aColumns);
 
-	InitTags();
-
 	m_pMenuTags = new CMenu();
 	if (m_pMenuTags->CreatePopupMenu())
 	{
@@ -121,6 +122,24 @@ BOOL CMetaDataDlg::OnInitDialog()
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+BOOL CMetaDataDlg::OnSetActive()
+{
+	if (!CResizablePage::OnSetActive())
+		return FALSE;
+	if (m_bDataChanged)
+	{
+		RefreshData();
+		m_bDataChanged = false;
+	}
+	return TRUE;
+}
+
+LRESULT CMetaDataDlg::OnDataChanged(WPARAM, LPARAM)
+{
+	m_bDataChanged = true;
+	return 1;
+}
+
 CString GetTagNameByID(UINT id)
 {
 	switch (id)
@@ -132,7 +151,7 @@ CString GetTagNameByID(UINT id)
 		case FT_LASTSEENCOMPLETE: return GetResString(IDS_LASTSEENCOMPL);	// 01-Nov-2004: Sent in server<->client protocol as 'Last Seen Complete'
 		case 0x06: return GetResString(IDS_META_PARTPATH);
 		case 0x07: return GetResString(IDS_META_PARTHASH);
-		case FT_TRANSFERED: return GetResString(IDS_DL_TRANSF);
+		case FT_TRANSFERRED: return GetResString(IDS_DL_TRANSF);
 		case FT_GAPSTART: return GetResString(IDS_META_GAPSTART);
 		case FT_GAPEND: return GetResString(IDS_META_GAPEND);
 		case 0x0B: return GetResString(IDS_DESCRIPTION);
@@ -261,14 +280,14 @@ CString GetType(UINT uType)
 	return strValue;
 }
 
-void CMetaDataDlg::InitTags()
+void CMetaDataDlg::RefreshData()
 {
 	CWaitCursor curWait;
 	m_tags.DeleteAllItems();
 	m_tags.SetRedraw(FALSE);
 
 	int iMetaTags = 0;
-	if (m_file != NULL)
+	if (m_paFiles->GetSize() >= 1)
 	{
 		LVITEM lvi;
 		lvi.mask = LVIF_TEXT;
@@ -288,13 +307,13 @@ void CMetaDataDlg::InitTags()
 			lvi.iSubItem = META_DATA_COL_TYPE;
 			m_tags.SetItem(&lvi);
 
-			strBuff = md4str(m_file->GetFileHash());
+			strBuff = md4str(STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[0])->GetFileHash());
 			lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
 			lvi.iSubItem = META_DATA_COL_VALUE;
 			m_tags.SetItem(&lvi);
 		}
 
-		const CArray<CTag*,CTag*>& aTags = m_file->GetTags();
+		const CArray<CTag*,CTag*>& aTags = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[0])->GetTags();
 		int iTags = aTags.GetCount();
 		for (int i = 0; i < iTags; i++)
 		{

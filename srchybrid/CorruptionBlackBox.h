@@ -43,8 +43,8 @@ public:
 	EBBRStatus 	m_BBRStatus;
 };
 
+typedef CArray<CCBBRecord> CRecordArray;
 
-typedef CArray<CCBBRecord, CCBBRecord&>	CRecordArray;
 
 class CCorruptionBlackBox
 {
@@ -59,5 +59,5 @@ public:
 
 
 private:
-	CArray<CRecordArray, CRecordArray&> m_aaRecords;
+	CArray<CRecordArray> m_aaRecords;
 };

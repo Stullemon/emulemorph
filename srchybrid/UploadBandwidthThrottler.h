@@ -58,7 +58,7 @@ public:
     void RemoveFromAllQueues(ThrottledFileSocket* socket);
 
     void EndThread();
-    void SetAllowedDataRate(uint32 newValue);
+
     void Pause(bool paused);
 private:
     static UINT RunProc(LPVOID pParam);
@@ -86,7 +86,5 @@ private:
     uint64 m_SentBytesSinceLastCallOverhead;
     uint32 m_highestNumberOfFullyActivatedSlots[NB_SPLITTING_CLASS];
 	uint32 slotCounterClass[NB_SPLITTING_CLASS]; //MORPH - Added by SiRoB, Upload Splitting Class
-	uint32 m_allowedDataRate;
-
     bool doRun;
 };

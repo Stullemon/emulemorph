@@ -17,6 +17,7 @@
 #pragma once
 #include "MuleListCtrl.h"
 #include "TitleMenu.h"
+#include "ListCtrlItemWalk.h"
 
 // Mighty Knife: CRC32-Tag
 #include "FileProcessing.h"
@@ -25,7 +26,7 @@
 class CSharedFileList;
 class CKnownFile;
 
-class CSharedFilesCtrl : public CMuleListCtrl
+class CSharedFilesCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
 	DECLARE_DYNAMIC(CSharedFilesCtrl)
 
@@ -35,9 +36,9 @@ public:
 
 	void	Init();
 	void	CreateMenues();
-	void	ShowFileList(const CSharedFileList* pSharedFiles);
-	void	ShowFile(const CKnownFile* file);
-	void	RemoveFile(const CKnownFile* toremove);
+	void	ReloadFileList();
+	void	AddFile(const CKnownFile* file);
+	void	RemoveFile(const CKnownFile* file);
 	void	UpdateFile(const CKnownFile* file);
 	void	Localize();
 	void	ShowFilesCount();
@@ -47,10 +48,7 @@ public:
 protected:
 	CTitleMenu	m_SharedFilesMenu;
 	CMenu		m_PrioMenu;
-	bool		sortstat[4];
-	volatile uint32 nAICHHashing;
 	CMenu		m_PermMenu; //MORPH START - Added by SiRoB, Keep Permission flag
-	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
 	CMenu       m_PowershareMenu; //MORPH - Added by SiRoB, ZZ Upload System
 	CMenu		m_SpreadbarMenu; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	CMenu		m_HideOSMenu; //MORPH - Added by SiRoB, HIDEOS
@@ -58,14 +56,21 @@ protected:
 	CMenu		m_ShareOnlyTheNeedMenu; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	CMenu		m_PowerShareLimitMenu; //MORPH - Added by SiRoB, POWERSHARE Limit
 	CMenu		m_CRC32Menu; //MORPH - Added by SiRoB, CRC32-Tag
+	bool		sortstat[4];
+	CImageList	m_ImageList;
+	volatile uint32 nAICHHashing;
+
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	void UpdateItem(CKnownFile* file);
 	void		OpenFile(const CKnownFile* file);
+	void ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFiles, UINT uPshInvokePage = 0);
+	void SetAllIcons();
+	int FindFile(const CKnownFile* pFile);
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSysColorChange();
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);

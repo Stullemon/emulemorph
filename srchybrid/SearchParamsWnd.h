@@ -53,7 +53,7 @@ public:
 protected:
 	HCURSOR m_hcurMove;
 	CComboBoxEx2 m_ctlMethod;
-	CComboBox m_ctlFileType;
+	CComboBoxEx2 m_ctlFileType;
 	CEditableListCtrl m_ctlOpts;
 	CRect m_rcNameLbl;
 	CRect m_rcName;
@@ -69,6 +69,7 @@ protected:
 	CRect m_rcCancel;
 	CRect m_rcUnicode;
 	CImageList m_imlSearchMethods;
+	CImageList m_imlFileType;
 	CSize m_szMRU;
 	CSize m_szFloat;
 	CCustomAutoComplete* m_pacSearchString;
@@ -78,6 +79,7 @@ protected:
 	BOOL SaveSearchStrings();
 	void SetAllIcons();
 	void InitMethodsCtrl();
+	void InitFileTypesCtrl();
 	ULONG GetSearchSize(const CString& strExpr);
 
 	virtual void DoDataExchange(CDataExchange* pDX);

@@ -36,9 +36,9 @@
 #include "FirewallOpener.h" //MORPH - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -52,6 +52,7 @@ struct SServerUDPPacket
 };
 #pragma pack()
 
+#define WM_DNSLOOKUPDONE	(WM_USER+0x101)		// does not need to be placed in "UserMsgs.h"
 
 CUDPSocketWnd::CUDPSocketWnd(){
 }
@@ -89,7 +90,7 @@ CUDPSocket::~CUDPSocket(){
 
 bool CUDPSocket::Create(){
 	if (thePrefs.GetServerUDPPort()){
-	    VERIFY( m_udpwnd.CreateEx(0, AfxRegisterWndClass(0),_T("Emule Socket Wnd"),WS_OVERLAPPED, 0, 0, 0, 0, NULL, NULL));
+		VERIFY( m_udpwnd.CreateEx(0, AfxRegisterWndClass(0), _T("eMule Async DNS Resolve Socket Wnd #1"), WS_OVERLAPPED, 0, 0, 0, 0, NULL, NULL));
 	    m_hWndResolveMessage = m_udpwnd.m_hWnd;
 	    m_udpwnd.m_pOwner = this;
 
@@ -369,7 +370,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 						UINT uTags = srvinfo.ReadUInt32();
 						for (UINT i = 0; i < uTags; i++)
 						{
-							CTag tag(&srvinfo, update->GetUnicodeSupport());
+							CTag tag(&srvinfo, true/*update->GetUnicodeSupport()*/);
 							if (tag.GetNameID() == ST_SERVERNAME && tag.IsStr())
 								update->SetListName(tag.GetStr());
 							else if (tag.GetNameID() == ST_DESCRIPTION && tag.IsStr())
@@ -406,8 +407,8 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 				}
 				else
 				{
-					CString strName = srvinfo.ReadString(update->GetUnicodeSupport());
-					CString strDesc = srvinfo.ReadString(update->GetUnicodeSupport());
+					CString strName = srvinfo.ReadString(true/*update->GetUnicodeSupport()*/);
+					CString strDesc = srvinfo.ReadString(true/*update->GetUnicodeSupport()*/);
 					update->SetDescription(strDesc);
 					update->SetListName(strName);
 				}

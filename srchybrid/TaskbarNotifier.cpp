@@ -21,14 +21,16 @@
 #include "enbitmap.h"
 #include "TaskbarNotifier.h"
 #include "emuledlg.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
-#define IDT_HIDDEN		0
+
+#define IDT_HIDDEN			0
 #define IDT_APPEARING		1
 #define IDT_WAITING			2
 #define IDT_DISAPPEARING	3
@@ -146,6 +148,7 @@ int CTaskbarNotifier::Create(CWnd *pWndParent)
 #else
 	wcx.lpfnWndProc = AfxWndProc;
 #endif
+	static const TCHAR s_szClassName[] = _T("eMule_TaskbarNotifierWndClass");
 	wcx.style = CS_DBLCLKS|CS_SAVEBITS;
 	wcx.cbClsExtra = 0;
 	wcx.cbWndExtra = 0;
@@ -154,11 +157,11 @@ int CTaskbarNotifier::Create(CWnd *pWndParent)
 	wcx.hCursor = LoadCursor(NULL,IDC_ARROW);
 	wcx.hbrBackground=::GetSysColorBrush(COLOR_WINDOW);
 	wcx.lpszMenuName = NULL;
-	wcx.lpszClassName = _T("TaskbarNotifierClass");
+	wcx.lpszClassName = s_szClassName;
 	wcx.hIconSm = NULL;
 	RegisterClassEx(&wcx);
 
-	return CreateEx(WS_EX_TOPMOST,_T("TaskbarNotifierClass"),NULL,WS_POPUP,0,0,0,0,pWndParent->m_hWnd,NULL);
+	return CreateEx(WS_EX_TOPMOST, s_szClassName, NULL, WS_POPUP, 0, 0, 0, 0, pWndParent->m_hWnd, NULL);
 }
 
 BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName)
@@ -746,7 +749,7 @@ void CTaskbarNotifier::OnLButtonUp(UINT nFlags, CPoint point)
 	{
 		// Notify the parent window that the Notifier popup was clicked
 		LPCTSTR pszLink = m_strLink.IsEmpty() ? NULL : _tcsdup(m_strLink);
-		m_pWndParent->PostMessage(WM_TASKBARNOTIFIERCLICKED, 0, (LPARAM)pszLink);
+		m_pWndParent->PostMessage(UM_TASKBARNOTIFIERCLICKED, 0, (LPARAM)pszLink);
 	}
 
 	CWnd::OnLButtonUp(nFlags, point);

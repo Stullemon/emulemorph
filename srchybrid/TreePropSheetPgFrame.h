@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.1 $
+* $Revision: 1.2 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -16,19 +16,12 @@
 *	$History:$
 *
 *********************************************************************/
-
-
 #if !defined(AFX_PROPPAGEFRAME_H__B968548B_F0B4_4C35_85DD_C44242A9D368__INCLUDED_)
 #define AFX_PROPPAGEFRAME_H__B968548B_F0B4_4C35_85DD_C44242A9D368__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-
-
-//namespace TreePropSheet
-//{
-
 
 /**
 An object of an CPropertyPageFrame-derived class is used by 
@@ -293,10 +286,6 @@ private:
 	/** Style to use when drawing the message text m_strMsg. */
 	DWORD m_dwMsgFormat;
 };
-
-
-//} //namespace TreePropSheet
-
 
 /////////////////////////////////////////////////////////////////////////////
 

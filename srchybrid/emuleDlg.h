@@ -43,6 +43,7 @@ class CTransferWnd;
 struct Status;
 class CSplashScreen;
 class CMuleSystrayDlg;
+class CMiniMule;
 
 // emuleapp <-> emuleapp
 #define OP_ED2KLINK				12000
@@ -54,46 +55,51 @@ class CMuleSystrayDlg;
 class CemuleDlg : public CTrayDialog
 {
 	friend class CMuleToolbarCtrl;
-// Konstruktion
+	friend class CMiniMule;
+
 public:
-	CemuleDlg(CWnd* pParent = NULL);	// Standardkonstruktor
+	CemuleDlg(CWnd* pParent = NULL);
 	~CemuleDlg();
+
 	enum { IDD = IDD_EMULE_DIALOG };
 
-	void			AddServerMessageLine(LPCTSTR line);
-	void			ShowConnectionState();
-	void			ShowNotifier(CString Text, int MsgType, LPCTSTR pszLink = NULL, bool ForceSoundOFF = false);
-	void			ShowUserCount();
-	void			ShowMessageState(uint8 iconnr);
-	void			SetActiveDialog(CWnd* dlg);
-	void			ShowTransferRate(bool forceAll=false);
-	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
-	void			ShowPing();
-	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
-	void			Localize();
+	bool IsRunning();
+	void ShowConnectionState();
+	void ShowNotifier(CString Text, int MsgType, LPCTSTR pszLink = NULL, bool ForceSoundOFF = false);
+	void ShowUserCount();
+	void ShowMessageState(uint8 iconnr);
+	void SetActiveDialog(CWnd* dlg);
+	void ShowTransferRate(bool forceAll=false);
+	void ShowPing();
+	void Localize();
 
 	// Logging
-	void			AddLogText(UINT uFlags, LPCTSTR pszText);
-	void			ResetLog();
-	void			ResetDebugLog();
-	CString			GetLastLogEntry();
-	CString			GetLastDebugLogEntry();
-	CString			GetAllLogEntries();
-	CString			GetAllDebugLogEntries();
+	void AddLogText(UINT uFlags, LPCTSTR pszText);
+	void AddServerMessageLine(LPCTSTR pszText);
+	void ResetLog();
+	void ResetDebugLog();
+	CString	GetLastLogEntry();
+	CString	GetLastDebugLogEntry();
+	CString	GetAllLogEntries();
+	CString	GetAllDebugLogEntries();
+	CString	GetConnectionStateString();
+	CString	GetTransferRateString();
+	CString	GetUpDatarateString(UINT uUpDatarate = -1);
+	CString	GetDownDatarateString(UINT uDownDatarate = -1);
 
-	void			OnCancel();
-	void			StopTimer();
-	// Barry - To find out if app is running or shutting/shut down
-	bool			IsRunning();
-	void			DoVersioncheck(bool manual);
+	void StopTimer();
+	void DoVersioncheck(bool manual);
 	//MORPH START - Added by SiRoB, New Version check
-	void			DoMVersioncheck(bool manual);
+	void DoMVersioncheck(bool manual);
 	//MORPH END   - Added by SiRoB, New Version check
-	void			ApplyHyperTextFont(LPLOGFONT pFont);
-	void			ApplyLogFont(LPLOGFONT pFont);
-	void			ProcessED2KLink(LPCTSTR pszData);
-	void			SetStatusBarPartsSize();
+	void ApplyHyperTextFont(LPLOGFONT pFont);
+	void ApplyLogFont(LPLOGFONT pFont);
+	void ProcessED2KLink(LPCTSTR pszData);
+	void SetStatusBarPartsSize();
+	int ShowPreferences(UINT uStartPageID = (UINT)-1);
+	bool IsPreferencesDlgOpen() const;
 
+	virtual void RestoreWindow();
 	virtual void HtmlHelp(DWORD_PTR dwData, UINT nCmd = 0x000F);
 
 	CTransferWnd*	transferwnd;
@@ -106,6 +112,7 @@ public:
 	CStatisticsDlg*  statisticswnd;
 	CIrcWnd*		ircwnd;
 	CTaskbarNotifier* m_wndTaskbarNotifier;
+	CReBarCtrl		m_ctlMainTopReBar;
 	CMuleToolbarCtrl* toolbar;
 	CKademliaWnd*	kademliawnd;
 	CWnd*			activewnd;
@@ -113,24 +120,83 @@ public:
 
 protected:
 	HICON m_hIcon;
+	bool			ready;
+	bool			m_bStartMinimizedChecked;
+	bool			m_bStartMinimized;
+	WINDOWPLACEMENT m_wpFirstRestore;
+	HICON			connicons[9];
+	HICON			transicons[4];
+	HICON			imicons[3];
+	HICON			m_icoSysTrayCurrent;
+	HICON			usericon;
+	CMeterIcon		m_TrayIcon;
+	HICON			m_icoSysTrayConnected;		// do not use those icons for anything else than the traybar!!!
+	HICON			m_icoSysTrayDisconnected;	// do not use those icons for anything else than the traybar!!!
+	HICON			m_icoSysTrayLowID;	// do not use those icons for anything else than the traybar!!!
+	int				m_iMsgIcon;
+	UINT			m_uLastSysTrayIconCookie;
+	uint32			m_uUpDatarate;
+	uint32			m_uDownDatarate;
+	CImageList		imagelist;
+	CTitleMenu		trayPopup;
+	CMuleSystrayDlg* m_pSystrayDlg;
+	CMainFrameDropTarget* m_pDropTarget;
+	CMenu			m_SysMenuOptions;
+	CMenu			m_menuUploadCtrl;
+	CMenu			m_menuDownloadCtrl;
+	char			m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
+	//MORPH START - Added by SiRoB, Version check
+	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
+	//MORPH END   - Added by SiRoB, Version check
 
+	// Splash screen
 	CSplashScreen *m_pSplashWnd;
 	DWORD m_dwSplashTime;
 	void ShowSplash();
 	void DestroySplash();
 
+	// Mini Mule
+	CMiniMule* m_pMiniMule;
+	void DestroyMiniMule();
+
+	//CMap<UINT, UINT, LPCTSTR, LPCTSTR> m_mapCmdToIcon;
+	//void CreateMenuCmdIconMap();
+	//LPCTSTR GetIconFromCmdId(UINT uId);
+
+	// Startup Timer
+	UINT_PTR m_hTimer;
+	static void CALLBACK StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
+
+	void StartConnection();
+	void CloseConnection();
+	void PostStartupMinimized();
+	void UpdateTrayIcon(int iPercent);
+	void ShowConnectionStateIcon();
+	void ShowTransferStateIcon();
+	void ShowUserStateIcon();
+	void AddSpeedSelectorSys(CMenu* addToMenu);
+	int  GetRecMaxUpload();
+	void LoadNotifier(CString configuration);
+	bool notifierenabled;
+	void ShowToolPopup(bool toolsonly=false);
+	void SetAllIcons();
+	bool CanClose();
+
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
+	virtual void OnCancel();
+	virtual void OnOK();
 	virtual void OnTrayRButtonUp(CPoint pt);
+	virtual void OnTrayLButtonUp(CPoint pt);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnClose();
 	afx_msg void OnSize(UINT nType,int cx,int cy);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedButton2();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnBnClickedHotmenu();
@@ -140,6 +206,7 @@ protected:
 	afx_msg void OnEndSession(BOOL bEnding);
 	afx_msg LRESULT OnKickIdle(UINT nWhy, long lIdleCount);
 	afx_msg void OnShowWindow( BOOL bShow, UINT nStatus );
+	afx_msg BOOL OnChevronPushed(UINT id, NMHDR *pnm, LRESULT *pResult);
 
 	// quick-speed changer -- based on xrmb
 	afx_msg void QuickSpeedUpload(UINT nID);
@@ -174,57 +241,9 @@ protected:
 
 	// Peercache DNS
 	afx_msg LRESULT OnPeerCacheResponse(WPARAM wParam, LPARAM lParam);
-	
-	void OnOK() {}
-	void OnClose();
-	bool CanClose();
 
-private:
-	bool			ready;
-	bool			startUpMinimizedChecked;
-	bool			m_bStartMinimized;
-	HICON			connicons[9];
-	HICON			transicons[4];
-	HICON			imicons[3];
-	HICON			mytrayIcon;
-	HICON			usericon;
-	CMeterIcon		trayIcon;
-	HICON			sourceTrayIcon;		// do not use those icons for anything else than the traybar!!!
-	HICON			sourceTrayIconGrey;	// do not use those icons for anything else than the traybar!!!
-	HICON			sourceTrayIconLow;	// do not use those icons for anything else than the traybar!!!
-	int				m_iMsgIcon;
-	uint8			m_lasticoninfo;
-
-	uint32			lastuprate;
-	uint32			lastdownrate;
-	CImageList		imagelist;
-	CTitleMenu		trayPopup;
-	CMuleSystrayDlg* m_pSystrayDlg;
-	CMainFrameDropTarget* m_pDropTarget;
-	CMenu			m_SysMenuOptions;
-	CMenu			m_menuUploadCtrl;
-	CMenu			m_menuDownloadCtrl;
-	char			m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
-	//MORPH START - Added by SiRoB, Version check
-	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
-	//MORPH END   - Added by SiRoB, Version check
-
-	UINT_PTR m_hTimer;
-	static void CALLBACK StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
-
-	void StartConnection();
-	void CloseConnection();
-	void RestoreWindow();
-	void UpdateTrayIcon(int procent);
-	void ShowConnectionStateIcon();
-	void ShowTransferStateIcon();
-	void ShowUserStateIcon();
-	void AddSpeedSelectorSys(CMenu* addToMenu);
-	int  GetRecMaxUpload();
-	void LoadNotifier(CString configuration); //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
-	bool notifierenabled;					  //<<-- enkeyDEV(kei-kun) -Quick disable/enable notifier-
-	void ShowToolPopup(bool toolsonly=false);
-	void SetAllIcons();
+	// Mini Mule
+	afx_msg LRESULT OnCloseMiniMule(WPARAM wParam, LPARAM lParam);
 
 //Commander - Added: Invisible Mode [TPT] - Start	
 public:
@@ -247,7 +266,7 @@ private:
 
 	//Commander - Added: Invisible Mode [TPT] - End
 //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
-	HICON	sourceTrayMessage;
+	HICON	m_icoSysTrayMessage;
 //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 
 	// Mighty Knife: Save settings
@@ -257,37 +276,7 @@ public:
 };
 
 
-// ALL emuledlg WM_USER messages are to be declared here!!
-enum EEmuleUserMsgs
-{
-	// Do *NOT* use any WM_USER messages in the range WM_USER - WM_USER+0x100!
-
-	// Taskbar
-	WM_TASKBARNOTIFIERCLICKED = WM_USER + 0x101,
-	WM_TRAY_ICON_NOTIFY_MESSAGE,
-
-	// Webserver
-	WEB_CONNECT_TO_SERVER,
-	WEB_DISCONNECT_SERVER,
-	WEB_REMOVE_SERVER,
-	WEB_SHARED_FILES_RELOAD,
-
-	// VC
-	WM_VERSIONCHECK_RESPONSE,
-
-	// PC
-	WM_PEERCHACHE_RESPONSE,
-
-	// Mighty Knife: CRC32-Tag - save rename
-	WM_CRC32_RENAMEFILE,
-	WM_CRC32_UPDATEFILE,
-	// [end] Mighty Knife
-	//MORPH START - Added by SiRoB, Version check
-	WM_MVERSIONCHECK_RESPONSE
-	//MORPH END   - Added by SiRoB, Version check
-};
-
-enum EEmlueAppMsgs
+enum EEMuleAppMsgs
 {
 	//thread messages
 	TM_FINISHEDHASHING = WM_APP + 10,

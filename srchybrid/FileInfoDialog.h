@@ -31,14 +31,15 @@ public:
 	CFileInfoDialog();   // standard constructor
 	virtual ~CFileInfoDialog();
 
-	void SetMyfile(const CSimpleArray<const CKnownFile*>* paFiles) { m_paFiles = paFiles; }
+	void SetFiles(const CSimpleArray<CObject*>* paFiles) { m_paFiles = paFiles; m_bDataChanged = true; }
 
 // Dialog Data
 	enum { IDD = IDD_FILEINFO };
 
 protected:
 	CString m_strCaption;
-	const CSimpleArray<const CKnownFile*>* m_paFiles;
+	const CSimpleArray<CObject*>* m_paFiles;
+	bool m_bDataChanged;
 	CRichEditCtrlX m_fi;
 //	CHARFORMAT m_cfDef;
 //	CHARFORMAT m_cfBold;
@@ -50,8 +51,10 @@ protected:
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnSetActive();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedRoundbit();
 	afx_msg LRESULT OnMediaInfoResult(WPARAM, LPARAM);
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
 };

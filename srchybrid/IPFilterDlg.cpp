@@ -196,8 +196,7 @@ BOOL CIPFilterDlg::OnInitDialog()
   	m_ipfilter.InitColumnOrders(ARRSIZE(_aColumns), _aColumns);
 	m_ipfilter.UpdateSortColumn(ARRSIZE(_aColumns), _aColumns);
 
-	m_icoDlg = theApp.LoadIcon(_T("IPFilter"));
-	SetIcon(m_icoDlg, FALSE);
+	SetIcon(m_icoDlg = theApp.LoadIcon(_T("IPFilter")), FALSE);
 
 	InitIPFilters();
 	

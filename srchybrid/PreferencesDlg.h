@@ -57,28 +57,24 @@ public:
 	CPPgMorph		m_wndMorph; //MORPH - Added by IceCream, Morph Prefs
 	CPPgMorphShare	m_wndMorphShare; //MORPH - Added by SiRoB, Morph Prefs
 	CPPgMorph2		m_wndMorph2; //MORPH - Added by SiRoB, Morph Prefs
-	//CPPgMorph3		m_wndMorph3; //Commander - Added: Morph III
 	CPPgBackup		m_wndBackup; //EastShare - Added by Pretender, TBH-AutoBackup
 	CPPgEastShare	m_wndEastShare; //EastShare - Added by Pretender, ES Prefs
 	CPPgEmulespana	m_wndEmulespana; //MORPH - Added by SiRoB, emulEspaña preferency
 	CPPgWebcachesettings	m_wndWebcachesettings; //MORPH - Added by SiRoB, WebCache 1.2f
 	
 	void Localize();
+	void SetStartPage(UINT uStartPageID);
 
 protected:
-	int m_iPrevPage;
-	UINT m_nActiveWnd;
+	LPCTSTR m_pPshStartPage;
 
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
-
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 public:
 	CKCSideBannerWnd m_banner;	//Commander - Added: Preferences Banner [TPT]	
-
-
 };

@@ -26,9 +26,7 @@
 #include "emule.h"
 #include "version.h"
 #include "opcodes.h"
-#ifdef _DUMP
 #include "mdump.h"
-#endif
 #include "Scheduler.h"
 #include "SearchList.h"
 #include "kademlia/kademlia/Kademlia.h"
@@ -83,9 +81,9 @@ CLogFile theLog;
 CLogFile theVerboseLog;
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -229,7 +227,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong.Format(_T("%u.%u%c"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE);
 #endif
 
-#ifdef _DUMP
+#ifdef _DEBUG
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 
@@ -301,6 +299,7 @@ BOOL CemuleApp::InitInstance()
 		free((void*)m_pszProfileName);
 	m_pszProfileName = _tcsdup(szPrefFilePath);
 
+
 #ifdef _DEBUG
 	oldMemState.Checkpoint();
 	// Installing that memory debug code works fine in Debug builds when running within VS Debugger,
@@ -309,13 +308,21 @@ BOOL CemuleApp::InitInstance()
 #endif
 	//afxMemDF = allocMemDF | delayFreeMemDF;
 
-#ifdef _DUMP
-	MiniDumper dumper(m_strCurVersionLong);
-#endif
 
+	///////////////////////////////////////////////////////////////////////////
+	// Install crash dump creation
+	//
+	if (GetProfileInt(_T("eMule"), _T("CreateCrashDump"), 0))
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLong, true);
+
+
+	///////////////////////////////////////////////////////////////////////////
+	// Locale initialization -- BE VERY CAREFUL HERE!!!
+	//
 	_tsetlocale(LC_ALL, _T(""));		// set all categories of locale to user-default ANSI code page obtained from the OS.
 	_tsetlocale(LC_NUMERIC, _T("C"));	// set numeric category to 'C'
 	//_tsetlocale(LC_CTYPE, _T("C"));		// set character types category to 'C' (VERY IMPORTANT, we need binary string compares!)
+
 	AfxOleInit();
 
 	pendinglink = 0;
@@ -326,14 +333,25 @@ BOOL CemuleApp::InitInstance()
 	if (!CheckThreadLocale())
 		return false;
 
-	// InitCommonControls() ist für Windows XP erforderlich, wenn ein Anwendungsmanifest
-	// die Verwendung von ComCtl32.dll Version 6 oder höher zum Aktivieren
-	// von visuellen Stilen angibt. Ansonsten treten beim Erstellen von Fenstern Fehler auf.
+	///////////////////////////////////////////////////////////////////////////
+	// Common Controls initialization
+	//
 	InitCommonControls();
 	DWORD dwComCtrlMjr = 4;
 	DWORD dwComCtrlMin = 0;
 	AtlGetCommCtrlVersion(&dwComCtrlMjr, &dwComCtrlMin);
 	m_ullComCtrlVer = MAKEDLLVERULL(dwComCtrlMjr,dwComCtrlMin,0,0);
+	if (m_ullComCtrlVer < MAKEDLLVERULL(5,8,0,0))
+	{
+		if (GetProfileInt(_T("eMule"), _T("CheckComctl32"), 1)) // just in case some user's can not install that package and have to survive without it..
+		{
+			if (AfxMessageBox(GetResString(IDS_COMCTRL32_DLL_TOOOLD),MB_ICONSTOP | MB_YESNO)==IDYES)
+				ShellOpenFile(_T("http://www.microsoft.com/downloads/details.aspx?FamilyID=cb2cf3a2-8025-4e8f-8511-9b476a8d35d2"));
+
+			// No need to exit eMule, it will most likely work as expected but it will have some GUI glitches here and there..
+		}
+	}
+
 	m_sizSmallSystemIcon.cx = GetSystemMetrics(SM_CXSMICON);
 	m_sizSmallSystemIcon.cy = GetSystemMetrics(SM_CYSMICON);
 
@@ -492,7 +510,7 @@ BOOL CemuleApp::InitInstance()
 	listensocket = new CListenSocket();
 	clientudp	= new CClientUDPSocket();
 	clientcredits = new CClientCreditsList();
-	downloadqueue = new CDownloadQueue(sharedfiles);	// bugfix - do this before creating the uploadqueue
+	downloadqueue = new CDownloadQueue();	// bugfix - do this before creating the uploadqueue
 	uploadqueue = new CUploadQueue();
 	ipfilter 	= new CIPFilter();
 	webserver = new CWebServer(); // Webserver [kuchin]
@@ -681,24 +699,11 @@ CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 		(uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), thePrefs.GetPort() );
 	return strLink;
 }
-/*
-CString CemuleApp::CreateED2kHostnameSourceLink(const CAbstractFile* f)
-{
-	CString strLink;
-	strLink.Format(_T("ed2k://|file|%s|%u|%s|/|sources,%s:%i|/"),
-		EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName(), false)),
-		f->GetFileSize(),
-		EncodeBase16(f->GetFileHash(),16),
-		thePrefs.GetYourHostname(), thePrefs.GetPort() );
-	return strLink;
-}
-*/
 
 CString CemuleApp::CreateKadSourceLink(const CAbstractFile* f)
 {
 	CString strLink;
-	ASSERT(Kademlia::CKademlia::getPrefs() != NULL);
-	if( theApp.clientlist->GetBuddy() && theApp.IsFirewalled() )
+	if( Kademlia::CKademlia::isConnected() && theApp.clientlist->GetBuddy() && theApp.IsFirewalled() )
 	{
 		CString KadID;
 		Kademlia::CKademlia::getPrefs()->getKadID().xor(Kademlia::CUInt128(true)).toHexString(&KadID);
@@ -1130,7 +1135,7 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 		ASSERT ( m_pPeerCache );
 		if ( GetPublicIP() == 0)
 			AddDebugLogLine(DLP_VERYLOW, false, _T("My public IP Address is: %s"),ipstr(dwIP));
-		else if (Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::getPrefs() && Kademlia::CKademlia::getPrefs()->getIPAddress())
+		else if (Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::getPrefs()->getIPAddress())
 			if(ntohl(Kademlia::CKademlia::getIPAddress()) != dwIP)
 			AddDebugLogLine(DLP_DEFAULT, false,  _T("Public IP Address reported from Kademlia (%s) differs from new found (%s)"),ipstr(ntohl(Kademlia::CKademlia::getIPAddress())),ipstr(dwIP));
 		m_pPeerCache->FoundMyPublicIPAddress(dwIP);	
@@ -1239,7 +1244,6 @@ bool CemuleApp::DoCallback( CUpDownClient *client )
 HICON CemuleApp::LoadIcon(UINT nIDResource) const
 {
 	// use string resource identifiers!!
-	ASSERT(0);
 	return CWinApp::LoadIcon(nIDResource);
 }
 
@@ -1354,7 +1358,6 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 
 HBITMAP CemuleApp::LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) const
 {
-	HBITMAP hBmp = NULL;
 	LPCTSTR pszSkinProfile = thePrefs.GetSkinProfile();
 	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
 	{
@@ -1399,7 +1402,47 @@ HBITMAP CemuleApp::LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) 
 	return NULL;
 }
 
-bool CemuleApp::LoadSkinColor(LPCTSTR pszKey, COLORREF& crColor)
+CString CemuleApp::GetSkinFileItem(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) const
+{
+	LPCTSTR pszSkinProfile = thePrefs.GetSkinProfile();
+	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
+	{
+		// load resource file specification from skin profile
+		TCHAR szSkinResource[MAX_PATH];
+		GetPrivateProfileString(pszResourceType, lpszResourceName, _T(""), szSkinResource, ARRSIZE(szSkinResource), pszSkinProfile);
+		if (szSkinResource[0] != _T('\0'))
+		{
+			// expand any optional available environment strings
+			TCHAR szExpSkinRes[MAX_PATH];
+			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, ARRSIZE(szExpSkinRes)) != 0)
+			{
+				_tcsncpy(szSkinResource, szExpSkinRes, ARRSIZE(szSkinResource));
+				szSkinResource[ARRSIZE(szSkinResource)-1] = _T('\0');
+			}
+
+			// create absolute path to resource file
+			TCHAR szFullResPath[MAX_PATH];
+			if (PathIsRelative(szSkinResource))
+			{
+				TCHAR szSkinResFolder[MAX_PATH];
+				_tcsncpy(szSkinResFolder, pszSkinProfile, ARRSIZE(szSkinResFolder));
+				szSkinResFolder[ARRSIZE(szSkinResFolder)-1] = _T('\0');
+				PathRemoveFileSpec(szSkinResFolder);
+				_tmakepath(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
+			}
+			else
+			{
+				_tcsncpy(szFullResPath, szSkinResource, ARRSIZE(szFullResPath));
+				szFullResPath[ARRSIZE(szFullResPath)-1] = _T('\0');
+			}
+
+			return szFullResPath;
+		}
+	}
+	return _T("");
+}
+
+bool CemuleApp::LoadSkinColor(LPCTSTR pszKey, COLORREF& crColor) const
 {
 	LPCTSTR pszSkinProfile = thePrefs.GetSkinProfile();
 	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
@@ -1420,6 +1463,13 @@ bool CemuleApp::LoadSkinColor(LPCTSTR pszKey, COLORREF& crColor)
 	return false;
 }
 
+bool CemuleApp::LoadSkinColorAlt(LPCTSTR pszKey, LPCTSTR pszAlternateKey, COLORREF& crColor) const
+{
+	if (LoadSkinColor(pszKey, crColor))
+		return true;
+	return LoadSkinColor(pszAlternateKey, crColor);
+}
+
 void CemuleApp::ApplySkin(LPCTSTR pszSkinProfile)
 {
 	thePrefs.SetSkinProfile(pszSkinProfile);
@@ -1429,6 +1479,12 @@ void CemuleApp::ApplySkin(LPCTSTR pszSkinProfile)
 CTempIconLoader::CTempIconLoader(LPCTSTR pszResourceID, int cx, int cy, UINT uFlags)
 {
 	m_hIcon = theApp.LoadIcon(pszResourceID, cx, cy, uFlags);
+}
+
+CTempIconLoader::CTempIconLoader(UINT uResourceID, int cx, int cy, UINT uFlags)
+{
+	ASSERT( uFlags == 0 );
+	m_hIcon = theApp.LoadIcon(uResourceID);
 }
 
 CTempIconLoader::~CTempIconLoader()
@@ -1442,7 +1498,7 @@ CTempIconLoader::~CTempIconLoader()
 void CemuleApp::AddEd2kLinksToDownload(CString strlink, uint8 cat)
 */
 void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
-//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 {
 	int curPos=0;
 	CString resToken = strlink.Tokenize(_T("\t\n\r"),curPos);
@@ -1460,7 +1516,7 @@ void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
 					//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 					// pFileLink IS NOT A LEAK, DO NOT DELETE.
 					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(resToken.Trim());
-					theApp.downloadqueue->AddFileLinkToDownload(pFileLink, cat, true);
+					downloadqueue->AddFileLinkToDownload(pFileLink, cat, true);
 					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 				}
 				else

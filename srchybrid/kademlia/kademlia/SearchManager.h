@@ -69,17 +69,17 @@ public:
 
 	// Search for a particular file
 	// Will return unique search id, returns zero if already searching for this file.
-	static CSearch* prepareFindFile(uint32 type, bool start, const CUInt128 &id);
+	static CSearch* prepareLookup(uint32 type, bool start, const CUInt128 &id);
 
 	// Will return unique search id, returns zero if already searching for this keyword.
-	static CSearch* prepareFindKeywords(uint32 type, bool start, bool bUnicode, LPCTSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
+	static CSearch* prepareFindKeywords(bool bUnicode, LPCTSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
 
 	static bool startSearch(CSearch* pSearch);
 	static void deleteSearch(CSearch* pSearch);
 
 	static void processResponse(const CUInt128 &target, uint32 fromIP, uint16 fromPort, ContactList *results);
 	static void processResult(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
-	static void processPublishResult(const CUInt128 &target);
+	static void processPublishResult(const CUInt128 &target, const uint8 load, const bool loadResponse);
 
 	static void getWords(LPCTSTR str, WordList *words);
 

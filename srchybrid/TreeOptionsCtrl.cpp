@@ -164,6 +164,7 @@ to maintain a single distribution point for the source code.
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 const UINT TREE_OPTIONS_COMBOBOX_ID = 100;
 const UINT TREE_OPTIONS_EDITBOX_ID  = 101;
 const UINT TREE_OPTIONS_SPINCTRL_ID = 102;
@@ -3133,7 +3134,7 @@ void DDX_TreeIPAddress(CDataExchange* pDX, int nIDC, HTREEITEM hItem, DWORD& dwA
 
 void DDX_TreeBoolean(CDataExchange* pDX, int nIDC, HTREEITEM hItem, BOOL& bValue)
 {
-	//Convert from the boolean to a string if we are transfering to the control
+	//Convert from the boolean to a string if we are transferring to the control
 	CString sText;
 	if (!pDX->m_bSaveAndValidate)
 	{
@@ -3146,7 +3147,7 @@ void DDX_TreeBoolean(CDataExchange* pDX, int nIDC, HTREEITEM hItem, BOOL& bValue
 	//Pass the buck to the combo DDX function
 	DDX_TreeCombo(pDX, nIDC, hItem, sText);
 
-	//Convert from the string to the boolean if we are transfering from the control
+	//Convert from the string to the boolean if we are transferring from the control
 	if (pDX->m_bSaveAndValidate)
 	{
 		CString sCompare;

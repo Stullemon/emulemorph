@@ -68,6 +68,9 @@ protected:
 	afx_msg void OnBnClickedBnIrcconnect();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnBnClickedChatsend();
+	afx_msg LRESULT OnCloseTab(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnQueryTab(WPARAM wParam, LPARAM lParam);
+
 	//MORPH START - Added by SiRoB, Splitting Bar [O²]
 	CSplitterControl m_wndSplitterIRC; //bzubzusplitchat
 	void DoResize(int delta);

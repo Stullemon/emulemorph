@@ -60,6 +60,12 @@ struct SrcHash
 	CKadSourcePtrList m_Source_map;
 };
 
+struct Load
+{
+	Kademlia::CUInt128 keyID;
+	uint32 time;
+};
+
 struct SSearchTerm
 {
 	SSearchTerm();
@@ -99,22 +105,26 @@ public:
 
 	bool AddKeyword(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load);
 	bool AddSources(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load);
-	bool AddNotes(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry);
+	bool AddNotes(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load);
+	bool AddLoad(const CUInt128& keyID, uint32 time);
 	uint32 GetIndexedCount() {return m_Keyword_map.GetCount();}
+	uint32 GetFileKeyCount() {return m_Keyword_map.GetCount();}
 	void SendValidKeywordResult(const CUInt128& keyID, const SSearchTerm* pSearchTerms, uint32 ip, uint16 port);
 	void SendValidSourceResult(const CUInt128& keyID, uint32 ip, uint16 port);
 	void SendValidNoteResult(const CUInt128& keyID, const CUInt128& CheckID, uint32 ip, uint16 port);
+	bool SendStoreRequest(const CUInt128& keyID);
 	uint32 m_totalIndexSource;
 	uint32 m_totalIndexKeyword;
-	uint32 GetFileKeyCount() {return m_Keyword_map.GetCount();}
 
 private:
 	time_t m_lastClean;
 	CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> m_Keyword_map;
 	CMap<CCKey,const CCKey&,SrcHash*,SrcHash*> m_Sources_map;
-	CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> m_Notes_map;
+	CMap<CCKey,const CCKey&,SrcHash*,SrcHash*> m_Notes_map;
+	CMap<CCKey,const CCKey&,Load*,Load*> m_Load_map;
 	static CString m_sfilename;
 	static CString m_kfilename;
+	static CString m_loadfilename;
 	void readFile(void);
 	void clean(void);
 };

@@ -26,12 +26,14 @@
 #include "HelpIDs.h"
 #include "Opcodes.h"
 #include "InputBox.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
+
 
 #define NICK_LV_PROFILE_NAME _T("IRCNicksLv")
 #define CHAN_LV_PROFILE_NAME _T("IRCChannelsLv")
@@ -69,6 +71,8 @@ BEGIN_MESSAGE_MAP(CIrcWnd, CDialog)
     ON_WM_CONTEXTMENU()
 	ON_WM_SYSCOLORCHANGE()
 	ON_WM_HELPINFO()
+	ON_MESSAGE(UM_CLOSETAB, OnCloseTab)
+	ON_MESSAGE(UM_QUERYTAB, OnQueryTab)
 END_MESSAGE_MAP()
 
 CIrcWnd::CIrcWnd(CWnd* pParent /*=NULL*/)
@@ -140,8 +144,7 @@ BOOL CIrcWnd::OnInitDialog()
 	//MORPH START -Added by SiRoB, Splitting Bar [O²]
 	CRect rc,rcSpl;
 
-	CWnd* pWnd = GetDlgItem(IDC_NICKLIST);
-	pWnd->GetWindowRect(rcSpl);
+	GetDlgItem(IDC_NICKLIST)->GetWindowRect(rcSpl);
 	ScreenToClient(rcSpl);
 	
 	GetWindowRect(rc);
@@ -164,8 +167,6 @@ BOOL CIrcWnd::OnInitDialog()
 	
 	int PosStatinit = rcSpl.left;
 	int PosStatnew = thePrefs.GetSplitterbarPositionIRC();
-	int max = 700;
-	int min = 200;
 	if (thePrefs.GetSplitterbarPositionIRC() > 700) PosStatnew = 700;
 	else if (thePrefs.GetSplitterbarPositionIRC() < 200) PosStatnew = 200;
 	rcSpl.left = PosStatnew;
@@ -352,7 +353,6 @@ void CIrcWnd::DoDataExchange(CDataExchange* pDX)
 
 BOOL CIrcWnd::OnCommand(WPARAM wParam,LPARAM lParam )
 {
-	int chanItem= m_channelselect.GetCurSel(); 
 	switch( wParam )
 	{
 		case IDC_BN_IRCCONNECT: 
@@ -965,4 +965,33 @@ void CIrcWnd::ParseChangeMode( CString channel, CString changer, CString command
 		AddInfoMessage( channel, GetResString(IDS_IRC_NOTSUPPORTED));
 		ASSERT(0);
 	}
+}
+
+LRESULT CIrcWnd::OnCloseTab(WPARAM wparam, LPARAM lparam) {
+
+	OnBnClickedClosechat( (int)wparam );
+
+	return TRUE;
+}
+
+LRESULT CIrcWnd::OnQueryTab(WPARAM wParam, LPARAM lParam)
+{
+	int nItem = (int)wParam;
+
+	TCITEM item;
+	item.mask = TCIF_PARAM;
+	m_channelselect.GetItem(nItem, &item);
+	Channel* partChannel = (Channel*)item.lParam;
+	if (partChannel)
+	{
+		if (partChannel->type == 4 && m_bConnected)
+		{
+			return 0;
+		}
+		else if (partChannel->type == 5 || partChannel->type == 4)
+		{
+			return 0;
+		}
+	}
+	return 1;
 }

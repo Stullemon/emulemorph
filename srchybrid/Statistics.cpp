@@ -21,9 +21,12 @@
 #include "Opcodes.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+#endif
+
+#ifdef _DEBUG
 extern _CRT_ALLOC_HOOK g_pfnPrevCrtAllocHook;
 #endif
 

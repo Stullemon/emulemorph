@@ -49,9 +49,9 @@ there client on the eMule forum..
 #include "kademliawnd.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -82,9 +82,7 @@ CContact::CContact()
 CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type)
 {
 	m_clientID = clientID;
-	CPrefs *prefs = CKademlia::getPrefs();
-	ASSERT(prefs != NULL); 
-	prefs->getKadID(&m_distance);
+	CKademlia::getPrefs()->getKadID(&m_distance);
 	m_distance.xor(clientID);
 	m_ip = ip;
 	m_udpPort = udpPort;
@@ -126,9 +124,7 @@ void CContact::getClientID(CString *id) const
 void CContact::setClientID(const CUInt128 &clientID)
 {
 	m_clientID = clientID;
-	CPrefs *prefs = CKademlia::getPrefs();
-	ASSERT(prefs != NULL); 
-	prefs->getKadID(&m_distance);
+	CKademlia::getPrefs()->getKadID(&m_distance);
 	m_distance.xor(clientID);
 }
 

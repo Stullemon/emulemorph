@@ -19,6 +19,17 @@
 //directly from http://www.irchelp.org/irchelp/rfc/rfc2812.txt
 //Much of it may never be used, but it's here just in case..
 #include "stdafx.h"
+#define MMNODRV			// mmsystem: Installable driver support
+//#define MMNOSOUND		// mmsystem: Sound support
+#define MMNOWAVE		// mmsystem: Waveform support
+#define MMNOMIDI		// mmsystem: MIDI support
+#define MMNOAUX			// mmsystem: Auxiliary audio support
+#define MMNOMIXER		// mmsystem: Mixer support
+#define MMNOTIMER		// mmsystem: Timer support
+#define MMNOJOY			// mmsystem: Joystick support
+#define MMNOMCI			// mmsystem: MCI support
+#define MMNOMMIO		// mmsystem: Multimedia file I/O support
+#define MMNOMMSYSTEM	// mmsystem: General MMSYSTEM functions
 #include <Mmsystem.h>
 #include "emule.h"
 #include "IRCMain.h"
@@ -37,9 +48,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -726,7 +737,7 @@ void CIrcMain::ParseMessage( CStringA rawMessage )
 					if( prefixStart != -1 )
 					{
 						int prefixEnd = message.Find(_T(")"), prefixStart );
-						if( prefixEnd != -1 )
+						if( prefixEnd != -1 && (prefixEnd - prefixStart) > 8)
 						{
 							//Set our channel modes actions
 							m_pwndIRC->m_nicklist.m_sUserModeSettings = message.Mid( prefixStart+8, prefixEnd-prefixStart-8 );
@@ -738,50 +749,40 @@ void CIrcMain::ParseMessage( CStringA rawMessage )
 						}
 					}
 					int chanmodesStart = message.Find(_T("CHANMODES=")) ;
-					int chanmodesEnd = -1;
 					if( chanmodesStart != -1 )
 					{
-						chanmodesEnd = message.Find(_T(","), chanmodesStart );
-						if( chanmodesEnd != -1 )
+						int chanmodesEnd = message.Find(_T(","), chanmodesStart );
+						if( chanmodesEnd != -1 && ( chanmodesEnd - chanmodesStart ) > 10 )
 						{
 							chanmodesStart += 10;
 							//Mode that adds or removes a nick or address to a list. Always has a parameter.
 							//Modes of type A return the list when there is no parameter present.
 							m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeA = message.Mid( chanmodesStart, chanmodesEnd-chanmodesStart );
 							m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeA.Replace( _T("\004"), _T("%") );
-						}
-					}
-					chanmodesStart = chanmodesEnd+1;
-					if( chanmodesStart != -1 )
-					{
-						chanmodesEnd = message.Find(_T(","), chanmodesStart );
-						if( chanmodesEnd != -1 )
-						{
-							//Mode that changes a setting and always has a parameter.
-							m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeB = message.Mid( chanmodesStart, chanmodesEnd-chanmodesStart );
-							m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeB.Replace( _T("\004"), _T("%") );
-						}
-					}
-					chanmodesStart = chanmodesEnd+1;
-					if( chanmodesStart != -1 )
-					{
-						chanmodesEnd = message.Find(_T(","), chanmodesStart );
-						if( chanmodesEnd != -1 )
-						{
-							//Mode that changes a setting and only has a parameter when set.
-							m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeC = message.Mid( chanmodesStart, chanmodesEnd-chanmodesStart );
-							m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeC.Replace( _T("\004"), _T("%") );
-						}
-					}
-					chanmodesStart = chanmodesEnd+1;
-					if( chanmodesStart != -1 )
-					{
-						chanmodesEnd = message.Find(_T(" "), chanmodesStart );
-						if( chanmodesEnd != -1 )
-						{
-							//Mode that changes a setting and never has a parameter.
-							m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeD = message.Mid( chanmodesStart, chanmodesEnd-chanmodesStart );
-							m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeD.Replace( _T("\004"), _T("%") );
+							chanmodesStart = chanmodesEnd+1;
+							chanmodesEnd = message.Find(_T(","), chanmodesStart );
+							if( chanmodesEnd != -1 )
+							{
+								//Mode that changes a setting and always has a parameter.
+								m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeB = message.Mid( chanmodesStart, chanmodesEnd-chanmodesStart );
+								m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeB.Replace( _T("\004"), _T("%") );
+								chanmodesStart = chanmodesEnd+1;
+								chanmodesEnd = message.Find(_T(","), chanmodesStart );
+								if( chanmodesEnd != -1 )
+								{
+									//Mode that changes a setting and only has a parameter when set.
+									m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeC = message.Mid( chanmodesStart, chanmodesEnd-chanmodesStart );
+									m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeC.Replace( _T("\004"), _T("%") );
+									chanmodesStart = chanmodesEnd+1;
+									chanmodesEnd = message.Find(_T(" "), chanmodesStart );
+									if( chanmodesEnd != -1 )
+									{
+										//Mode that changes a setting and never has a parameter.
+										m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeD = message.Mid( chanmodesStart, chanmodesEnd-chanmodesStart );
+										m_pwndIRC->m_channelselect.m_sChannelModeSettingsTypeD.Replace( _T("\004"), _T("%") );
+									}
+								}
+							}
 						}
 					}
 					m_pwndIRC->AddStatus( message );

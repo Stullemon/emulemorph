@@ -18,7 +18,11 @@
 #define	TEMPLATE	template <class BASE>
 #else
 // define this to instantiate functions for class 'BASE' right in this CPP module
+#if _MSC_VER >= 1310
 #define	TEMPLATE template <>
+#else
+#define	TEMPLATE
+#endif
 #define BASE		CResizableDialog
 #endif
 

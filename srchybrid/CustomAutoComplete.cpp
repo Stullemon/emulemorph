@@ -42,6 +42,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 CCustomAutoComplete::CCustomAutoComplete()
 {
 	InternalInit();

@@ -1,8 +1,6 @@
 #pragma once
 #include "TreeOptionsCtrl.h"
 
-#define	WM_TREEOPTSCTRL_NOTIFY		(WM_USER + 0x101 + 1)
-
 typedef struct
 {
 	NMHDR nmhdr;
@@ -44,6 +42,7 @@ protected:
 
 //Dialog Data exchange support
 
+void DDX_TreeCheck(CDataExchange* pDX, int nIDC, HTREEITEM hItem, bool& bCheck);
 void DDX_Text(CDataExchange* pDX, int nIDC, HTREEITEM hItem, CString& sText);
 void DDX_Text(CDataExchange* pDX, int nIDC, HTREEITEM hItem, int& value);
 void DDX_Text(CDataExchange* pDX, int nIDC, HTREEITEM hItem, UINT& value);
@@ -58,6 +57,8 @@ void DDX_Text(CDataExchange* pDX, int nIDC, HTREEITEM hItem, double& value);
 
 class CNumTreeOptionsEdit : public CTreeOptionsEdit
 {
+	DECLARE_DYNCREATE(CNumTreeOptionsEdit)
+
 public:
 	CNumTreeOptionsEdit(){}
 	virtual ~CNumTreeOptionsEdit(){}
@@ -71,5 +72,25 @@ protected:
 	afx_msg void OnEnChange();
 
 	DECLARE_MESSAGE_MAP()
-	DECLARE_DYNCREATE(CNumTreeOptionsEdit)
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CTreeOptionsEditEx
+
+class CTreeOptionsEditEx : public CTreeOptionsEdit
+{
+	DECLARE_DYNCREATE(CTreeOptionsEditEx)
+
+public:
+	CTreeOptionsEditEx(){}
+	virtual ~CTreeOptionsEditEx(){}
+
+protected:
+	bool m_bSelf;
+
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnEnChange();
+
+	DECLARE_MESSAGE_MAP()
 };

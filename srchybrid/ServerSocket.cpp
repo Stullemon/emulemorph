@@ -38,9 +38,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -312,6 +312,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 					Debug(_T("ServerMsg - OP_SearchResult\n"));
 				CServer* cur_srv = (serverconnect) ? serverconnect->GetCurrentServer() : NULL;
 				CServer* pServer = cur_srv ? theApp.serverlist->GetServerByAddress(cur_srv->GetAddress(), cur_srv->GetPort()) : NULL;
+				(void)pServer;
 				bool bMoreResultsAvailable;
 				uint16 uSearchResults = theApp.searchlist->ProcessSearchanswer(packet, size, true/*pServer ? pServer->GetUnicodeSupport() : false*/, cur_srv ? cur_srv->GetIP() : 0, cur_srv ? cur_srv->GetPort() : 0, &bMoreResultsAvailable);
 				theApp.emuledlg->searchwnd->LocalSearchEnd(uSearchResults, bMoreResultsAvailable);
@@ -424,8 +425,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 							pServer->SetVersion(_T("eFarm"));
 						}
 						theApp.emuledlg->ShowConnectionState(); 
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer); 
-						theApp.emuledlg->serverwnd->UpdateMyInfo();
+						theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer); 
 					}
 				break;
 			} 

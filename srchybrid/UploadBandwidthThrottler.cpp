@@ -25,10 +25,12 @@
 #include "emuledlg.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
+
+
 /**
  * The constructor starts the thread.
  */
@@ -56,14 +58,6 @@ UploadBandwidthThrottler::~UploadBandwidthThrottler(void) {
     EndThread();
     delete threadEndedEvent;
 	delete pauseEvent;
-}
-
-void UploadBandwidthThrottler::SetAllowedDataRate(uint32 newValue) {
-    sendLocker.Lock();
-
-    m_allowedDataRate = newValue;
-
-	sendLocker.Unlock();
 }
 
 /**
@@ -397,12 +391,8 @@ UINT AFX_CDECL UploadBandwidthThrottler::RunProc(LPVOID pParam) {
  */
 UINT UploadBandwidthThrottler::RunInternal() {
     DWORD lastLoopTick = ::GetTickCount();
-
 	sint64 realBytesToSpend = 0;
-
 	uint32 allowedDataRate = 0;
-	uint32 lastMaxAllowedDataRate = 1;
-
     uint32 rememberedSlotCounter = 0;
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class

@@ -181,8 +181,7 @@ private:
 	byte			m_abyPublicKey[80];			// even keys which are not verified will be stored here, and - if verified - copied into the struct
 	uint8			m_nPublicKeyLen;
 	uint32			m_dwIdentIP;
-	// uint32  m_dwWaitTime; // Dead member - only match in the whole source tree for m_dwWaitTime.
-        //Commander - Changed: SUQWT - Start
+    //Commander - Changed: SUQWT - Start
 	//EastShare START - Modified by TAHO, modified SUQWT
 	/*
 	uint32		m_dwSecureWaitTime;

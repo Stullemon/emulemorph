@@ -16,26 +16,37 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
+#include "ResizableLib/ResizablePage.h"
+#include "ResizableLib/ResizableSheet.h"
+#include "ListViewWalkerPropertySheet.h"
+
 class CUpDownClient;
 
-class CClientDetailDialog : public CDialog
+///////////////////////////////////////////////////////////////////////////////
+// CClientDetailPage
+
+class CClientDetailPage : public CResizablePage
 {
-	DECLARE_DYNAMIC(CClientDetailDialog)
+	DECLARE_DYNAMIC(CClientDetailPage)
 
 public:
-	CClientDetailDialog(const CUpDownClient* client);   // standard constructor
-	virtual ~CClientDetailDialog();
+	CClientDetailPage();   // standard constructor
+	virtual ~CClientDetailPage();
 
-	void Localize();
+	void SetClients(const CSimpleArray<CObject*>* paClients) { m_paClients = paClients; m_bDataChanged = true; }
 
-// Dialog Data
 	enum { IDD = IDD_SOURCEDETAILWND };
 
 protected:
-	const CUpDownClient* m_client;
+	const CSimpleArray<CObject*>* m_paClients;
+	bool m_bDataChanged;
+
+	void Localize();
+	void RefreshData();
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnSetActive();
 
 	// [MightyKnife] Private modification
 	#ifdef MIGHTY_TWEAKS
@@ -46,6 +57,30 @@ protected:
 	// [MightyKnife] end: Private Modifications
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
 private:
 	HICON countryflag; // MORPH - Added by Commander, CountryFlag
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// CClientDetailDialog
+
+class CClientDetailDialog : public CListViewWalkerPropertySheet
+{
+	DECLARE_DYNAMIC(CClientDetailDialog)
+
+public:
+	CClientDetailDialog(CUpDownClient* pClient, CListCtrlItemWalk* pListCtrl = NULL);
+	CClientDetailDialog(const CSimpleArray<CUpDownClient*>* paClients, CListCtrlItemWalk* pListCtrl = NULL);
+	virtual ~CClientDetailDialog();
+
+protected:
+	CClientDetailPage m_wndClient;
+
+	void Construct();
+
+	virtual BOOL OnInitDialog();
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnDestroy();
 };

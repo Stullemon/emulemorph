@@ -21,28 +21,38 @@
 #include "OtherFunctions.h"
 #include "Opcodes.h"
 #include "StringConversion.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
 // CommentDialog dialog
 
-IMPLEMENT_DYNAMIC(CCommentDialog, CDialog)
+IMPLEMENT_DYNAMIC(CCommentDialog, CResizablePage)
 
-BEGIN_MESSAGE_MAP(CCommentDialog, CDialog)
-	ON_BN_CLICKED(IDOK, OnBnClickedOk)
-	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
+BEGIN_MESSAGE_MAP(CCommentDialog, CResizablePage)
 	ON_BN_CLICKED(IDC_RESET, OnBnClickedReset)
+	ON_WM_DESTROY()
+	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
+	ON_EN_CHANGE(IDC_CMT_TEXT, OnEnChangeCmtText)
+	ON_CBN_SELENDOK(IDC_RATELIST, OnCbnSelendokRatelist)
+	ON_CBN_SELCHANGE(IDC_RATELIST, OnCbnSelchangeRatelist)
 END_MESSAGE_MAP()
 
-CCommentDialog::CCommentDialog(CKnownFile* file)
-	: CDialog(CCommentDialog::IDD, 0)
+CCommentDialog::CCommentDialog()
+	: CResizablePage(CCommentDialog::IDD, 0)
 {
-	m_file = file;
+	m_paFiles = NULL;
+	m_bDataChanged = false;
+	m_strCaption = GetResString(IDS_COMMENT);
+	m_psp.pszTitle = m_strCaption;
+	m_psp.dwFlags |= PSP_USETITLE;
+	m_bMergedComment = false;
+	m_bSelf = false;
 }
 
 CCommentDialog::~CCommentDialog()
@@ -51,45 +61,102 @@ CCommentDialog::~CCommentDialog()
 
 void CCommentDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CResizablePage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_RATELIST, m_ratebox);
 }
 
-void CCommentDialog::OnBnClickedOk()
+BOOL CCommentDialog::OnInitDialog()
 {
-	CString strComment;
-	GetDlgItem(IDC_CMT_TEXT)->GetWindowText(strComment);
-	m_file->SetFileComment(strComment);
-	m_file->SetFileRating((uint8)m_ratebox.GetCurSel());
-	CDialog::OnOK();
+	CResizablePage::OnInitDialog();
+	InitWindowStyles(this);
+
+	AddAnchor(IDC_CMT_LQUEST, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_CMT_LAIDE, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_CMT_TEXT, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_RATEQUEST, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_RATEHELP, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_RESET, TOP_RIGHT);
+
+	Localize();
+
+	return TRUE;
 }
 
-void CCommentDialog::OnBnClickedCancel()
+BOOL CCommentDialog::OnSetActive()
 {
-	CDialog::OnCancel();
+	if (!CResizablePage::OnSetActive())
+		return FALSE;
+	if (m_bDataChanged)
+	{
+		int iRating = -1;
+		m_bMergedComment = false;
+		CString strComment;
+		for (int i = 0; i < m_paFiles->GetSize(); i++)
+		{
+			CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
+			if (i == 0)
+			{
+				strComment = file->GetFileComment();
+				iRating = file->GetFileRating();
+			}
+			else
+			{
+				if (!m_bMergedComment && strComment.Compare(file->GetFileComment()) != 0)
+				{
+					strComment.Empty();
+					m_bMergedComment = true;
+				}
+				if (iRating != -1 && iRating != file->GetFileRating())
+					iRating = -1;
+			}
+		}
+
+		m_bSelf = true;
+		SetDlgItemText(IDC_CMT_TEXT, strComment);
+		((CEdit*)GetDlgItem(IDC_CMT_TEXT))->SetLimitText(MAXFILECOMMENTLEN);
+		m_ratebox.SetCurSel(iRating);
+		m_bSelf = false;
+
+		m_bDataChanged = false;
+	}
+
+	return TRUE;
+}
+
+LRESULT CCommentDialog::OnDataChanged(WPARAM, LPARAM)
+{
+	m_bDataChanged = true;
+	return 1;
 }
 
 void CCommentDialog::OnBnClickedReset()
 {
 	SetDlgItemText(IDC_CMT_TEXT, _T(""));
+	m_bMergedComment = false;
 	m_ratebox.SetCurSel(0);
 }
 
-BOOL CCommentDialog::OnInitDialog()
+BOOL CCommentDialog::OnApply()
 {
-	CDialog::OnInitDialog();
-	SetIcon(theApp.LoadIcon(_T("FileComments")), FALSE);
-	InitWindowStyles(this);
-	Localize();
-
-	GetDlgItem(IDC_CMT_TEXT)->SetWindowText(m_file->GetFileComment());
-	((CEdit*)GetDlgItem(IDC_CMT_TEXT))->SetLimitText(MAXFILECOMMENTLEN);
-	return TRUE;
+	if (!m_bDataChanged)
+	{
+	    CString strComment;
+	    GetDlgItem(IDC_CMT_TEXT)->GetWindowText(strComment);
+	    int iRating = m_ratebox.GetCurSel();
+	    for (int i = 0; i < m_paFiles->GetSize(); i++)
+	    {
+		    CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
+		    if (!strComment.IsEmpty() || !m_bMergedComment)
+			    file->SetFileComment(strComment);
+		    if (iRating != -1)
+			    file->SetFileRating(iRating);
+	    }
+	}
+	return CResizablePage::OnApply();
 }
 
 void CCommentDialog::Localize(void)
 {
-	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 	GetDlgItem(IDC_RESET)->SetWindowText(GetResString(IDS_PW_RESET));
 
 	GetDlgItem(IDC_CMT_LQUEST)->SetWindowText(GetResString(IDS_CMT_QUEST));
@@ -98,18 +165,49 @@ void CCommentDialog::Localize(void)
 	GetDlgItem(IDC_RATEQUEST)->SetWindowText(GetResString(IDS_CMT_RATEQUEST));
 	GetDlgItem(IDC_RATEHELP)->SetWindowText(GetResString(IDS_CMT_RATEHELP));
 
-	while (m_ratebox.GetCount()>0)
-		m_ratebox.DeleteString(0);
-	m_ratebox.AddString(GetResString(IDS_CMT_NOTRATED));
-	m_ratebox.AddString(GetResString(IDS_CMT_FAKE));
-	m_ratebox.AddString(GetResString(IDS_CMT_POOR));
-	m_ratebox.AddString(GetResString(IDS_CMT_GOOD));
-	m_ratebox.AddString(GetResString(IDS_CMT_FAIR));
-	m_ratebox.AddString(GetResString(IDS_CMT_EXCELLENT));
-	if (m_ratebox.SetCurSel(m_file->GetFileRating()) == CB_ERR)
-		m_ratebox.SetCurSel(0);
+	CImageList iml;
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.SetBkColor(CLR_NONE);
+	iml.Add(CTempIconLoader(_T("Rating_NotRated"), 16, 16));
+	iml.Add(CTempIconLoader(_T("Rating_Fake"), 16, 16));
+	iml.Add(CTempIconLoader(_T("Rating_Poor"), 16, 16));
+	iml.Add(CTempIconLoader(_T("Rating_Good"), 16, 16));
+	iml.Add(CTempIconLoader(_T("Rating_Fair"), 16, 16));
+	iml.Add(CTempIconLoader(_T("Rating_Excellent"), 16, 16));
+	m_ratebox.SetImageList(&iml);
+	m_imlRating.DeleteImageList();
+	m_imlRating.Attach(iml.Detach());
+	
+	m_ratebox.ResetContent();
+	m_ratebox.AddItem(GetResString(IDS_CMT_NOTRATED), 0);
+	m_ratebox.AddItem(GetResString(IDS_CMT_FAKE), 1);
+	m_ratebox.AddItem(GetResString(IDS_CMT_POOR), 2);
+	m_ratebox.AddItem(GetResString(IDS_CMT_GOOD), 3);
+	m_ratebox.AddItem(GetResString(IDS_CMT_FAIR), 4);
+	m_ratebox.AddItem(GetResString(IDS_CMT_EXCELLENT), 5);
+	UpdateHorzExtent(m_ratebox, 16); // adjust dropped width to ensure all strings are fully visible
+}
 
-	CString strTitle;
-	strTitle.Format(GetResString(IDS_CMT_TITLE),m_file->GetFileName());
-	SetWindowText(strTitle);
+void CCommentDialog::OnDestroy()
+{
+	m_imlRating.DeleteImageList();
+	CResizablePage::OnDestroy();
+}
+
+void CCommentDialog::OnEnChangeCmtText()
+{
+	if (!m_bSelf)
+		SetModified();
+}
+
+void CCommentDialog::OnCbnSelendokRatelist()
+{
+	if (!m_bSelf)
+		SetModified();
+}
+
+void CCommentDialog::OnCbnSelchangeRatelist()
+{
+	if (!m_bSelf)
+		SetModified();
 }

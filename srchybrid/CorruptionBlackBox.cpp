@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "StdAfx.h"
 #include "corruptionblackbox.h"
 #include "knownfile.h"
@@ -23,6 +22,13 @@
 #include "emule.h"
 #include "clientlist.h"
 #include "opcodes.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 
 #define	 CBB_BANTHRESHOLD	32 //% max corrupted data	
 

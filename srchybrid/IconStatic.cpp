@@ -25,13 +25,17 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CIconStatic
 
+IMPLEMENT_DYNAMIC(CIconStatic, CStatic)
+
+BEGIN_MESSAGE_MAP(CIconStatic, CStatic)
+END_MESSAGE_MAP()
+
 CIconStatic::CIconStatic()
 {
-	m_strText = "";
-	m_pszIconID = NULL;
 }
 
 CIconStatic::~CIconStatic()
@@ -39,23 +43,22 @@ CIconStatic::~CIconStatic()
 	m_MemBMP.DeleteObject();
 }
 
-
-BEGIN_MESSAGE_MAP(CIconStatic, CStatic)
-	//{{AFX_MSG_MAP(CIconStatic)
-		ON_WM_SYSCOLORCHANGE()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// Behandlungsroutinen für Nachrichten CIconStatic 
-bool CIconStatic::Init(LPCTSTR pszIconID)
+void CIconStatic::SetWindowText(LPCTSTR pszText)
 {
-	m_pszIconID = pszIconID;
+	m_strText = pszText;
+	SetIcon(m_strIconID);
+}
 
-	CString strText;	
-	GetWindowText(strText);
-	SetWindowText(_T(""));
-	if(!strText.IsEmpty())
+void CIconStatic::SetIcon(LPCTSTR pszIconID)
+{
+	m_strIconID = pszIconID;
+
+	// If this function is called for the first time and we did not yet call 'SetWindowText', we take
+	// take the window label which is already specified for the window (the label which comes from the resource)
+	CString strText;
+	CStatic::GetWindowText(strText);
+	CStatic::SetWindowText(_T(""));
+	if (!strText.IsEmpty() && m_strText.IsEmpty())
 		m_strText = strText;
 
 	CRect rRect;
@@ -86,7 +89,7 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
 
 	MemDC.FillSolidRect(rCaption, GetSysColor(COLOR_BTNFACE));
 	
-	VERIFY( DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(m_pszIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL) );
+	VERIFY( DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(pszIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL) );
 
 	// clear all alpha channel data
 	BITMAP bmMem;
@@ -133,19 +136,18 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
 		MemDC.DrawText(m_strText, rCaption, DT_SINGLELINE | DT_LEFT | DT_END_ELLIPSIS);
 	}
 
-	ReleaseDC( pDC );
+	ReleaseDC(pDC);
 
 	MemDC.SelectObject(pOldBMP);
 	MemDC.SelectObject(pOldFont);
 	
-	if(m_wndPicture.m_hWnd == NULL)
+	if (m_wndPicture.m_hWnd == NULL)
 		m_wndPicture.Create(NULL, WS_CHILD | WS_VISIBLE | SS_BITMAP, CRect(0,0,0,0), this);
-
 	m_wndPicture.SetWindowPos(NULL, rRect.left+8, rRect.top, rCaption.Width()+22, rCaption.Height(), SWP_SHOWWINDOW);
 	m_wndPicture.SetBitmap(m_MemBMP);
 
 	CWnd *pParent = GetParent();
-	if(pParent == NULL)
+	if (pParent == NULL)
 		pParent = GetDesktopWindow();
 	
 	CRect r;
@@ -153,24 +155,11 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
 	r.bottom = r.top + 20;
 	GetParent()->ScreenToClient(&r);
 	GetParent()->RedrawWindow(r);
-
-	return true;
-}
-
-bool CIconStatic::SetText(CString strText)
-{
-	m_strText = strText;
-	return Init(m_pszIconID);
-}
-
-bool CIconStatic::SetIcon(LPCTSTR pszIconID)
-{
-	return Init(pszIconID);
 }
 
 void CIconStatic::OnSysColorChange()
 {
 	CStatic::OnSysColorChange();
-	if (m_pszIconID)
-		Init(m_pszIconID);
+	if (!m_strIconID.IsEmpty())
+		SetIcon(m_strIconID);
 }

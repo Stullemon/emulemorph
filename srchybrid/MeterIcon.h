@@ -13,23 +13,21 @@
 class CMeterIcon  
 {
 public:
-	bool SetColorLevels(int *pLimits,COLORREF *pColors,int nEntries);
+	CMeterIcon();
+	virtual ~CMeterIcon();
+
+	bool SetColorLevels(const int* pLimits, const COLORREF* pColors, int nEntries);
 	COLORREF SetBorderColor(COLORREF crColor);
 	int SetNumBars(int nNum);
 	int SetMaxValue(int nVal);
 	int SetWidth(int nWidth);
-	SIZE SetDimensions(int nWidth,int nHeight);
+	SIZE SetDimensions(int nWidth, int nHeight);
 	bool Init(HICON hFrame, int nMaxVal, int nNumBars, int nSpacingWidth, int nWidth, int nHeight, COLORREF crColor);
-	HICON Create(int *pBarData);
+	HICON Create(const int* pBarData);
 	HICON SetFrame(HICON hIcon);
-	CMeterIcon();
-	virtual ~CMeterIcon();
 
 protected:
 	int m_nEntries;
-	bool DrawIconMeter(HDC destDC, HDC destDCMask, int nLevel, int nPos);
-	HICON CreateMeterIcon(int *pBarData);
-	COLORREF GetMeterColor(int nLevel);
 	bool m_bInit;
 	HICON m_hFrame;
 	int m_nSpacingWidth;
@@ -37,9 +35,12 @@ protected:
 	SIZE m_sDimensions;
 	int m_nNumBars;
 	COLORREF m_crBorderColor;
-	int *m_pLimits;
-	COLORREF *m_pColors;
+	int* m_pLimits;
+	COLORREF* m_pColors;
 
+	bool DrawIconMeter(HDC destDC, HDC destDCMask, int nLevel, int nPos);
+	HICON CreateMeterIcon(const int* pBarData);
+	COLORREF GetMeterColor(int nLevel) const;
 };
 
 #endif // !defined(AFX_METERICON_H__BDEBD2C3_BBC3_41B3_A502_E745FB08D90D__INCLUDED_)

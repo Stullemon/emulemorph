@@ -32,6 +32,7 @@ there client on the eMule forum..
 #include "SearchManager.h"
 #include "Search.h"
 #include "Kademlia.h"
+#include "Indexed.h"
 #include "../../OpCodes.h"
 #include "Defines.h"
 #include "Tag.h"
@@ -45,9 +46,9 @@ there client on the eMule forum..
 #include "Log.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -67,6 +68,8 @@ void CSearchManager::stopSearch(uint32 searchID, bool delayDelete)
 {
 	try
 	{
+		if(searchID == (uint32)-1)
+			return;
 		SearchMap::iterator it = m_searches.begin(); 
 		while (it != m_searches.end())
 		{
@@ -150,12 +153,12 @@ void CSearchManager::deleteSearch(CSearch* pSearch)
 	delete pSearch;
 }
 
-CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, bool bUnicode, LPCTSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
+CSearch* CSearchManager::prepareFindKeywords(bool bUnicode, LPCTSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
 {
 	CSearch *s = new CSearch;
 	try
 	{
-		s->m_type = type;
+		s->m_type = CSearch::KEYWORD;
 
 		getWords(keyword1, &s->m_words);
 		if (s->m_words.size() == 0)
@@ -195,11 +198,8 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, bool bUnic
 		}
 
 		s->m_searchID = ++m_nextID;
-		if( start )
-		{
-			m_searches[s->m_target] = s;
-			s->go();
-		}
+		m_searches[s->m_target] = s;
+		s->go();
 	} 
 	catch (CIOException* ioe)
 	{
@@ -234,14 +234,25 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, bool bUnic
 	return s;
 }
 
-CSearch* CSearchManager::prepareFindFile(uint32 type, bool start, const CUInt128 &id)
+CSearch* CSearchManager::prepareLookup(uint32 type, bool start, const CUInt128 &id)
 {
-	if (alreadySearchingFor(id))
-		return 0;
+	if(alreadySearchingFor(id))
+		return NULL;
 
 	CSearch *s = new CSearch;
 	try
 	{
+		switch(type)
+		{
+			case CSearch::STOREKEYWORD:
+				if(!Kademlia::CKademlia::getIndexed()->SendStoreRequest(id))
+				{
+					delete s;
+					return NULL;
+				}
+				break;
+		}
+
 		s->m_type = type;
 		s->m_target = id;
 
@@ -259,16 +270,16 @@ CSearch* CSearchManager::prepareFindFile(uint32 type, bool start, const CUInt128
 	} 
 	catch ( CIOException *ioe )
 	{
-		AddDebugLogLine( false, _T("Exception in CSearchManager::prepareFindFile (IO error(%i))"), ioe->m_cause);
+		AddDebugLogLine( false, _T("Exception in CSearchManager::prepareLookup (IO error(%i))"), ioe->m_cause);
 		ioe->Delete();
 		delete s;
-		s = NULL;
+		return NULL;
 	}
 	catch (...) 
 	{
-		AddDebugLogLine(false, _T("Exception in CSearchManager::prepareFindFile"));
+		AddDebugLogLine(false, _T("Exception in CSearchManager::prepareLookup"));
 		delete s;
-		s = NULL;
+		return NULL;
 	}
 	return s;
 }
@@ -284,7 +295,6 @@ void CSearchManager::findNode(const CUInt128 &id)
 		s->m_type = CSearch::NODE;
 		s->m_target = id;
 		s->m_searchTerms = NULL;
-		s->m_searchID = 0;
 		m_searches[s->m_target] = s;
 		s->go();
 	} 
@@ -306,7 +316,6 @@ void CSearchManager::findNodeComplete(const CUInt128 &id)
 		s->m_type = CSearch::NODECOMPLETE;
 		s->m_target = id;
 		s->m_searchTerms = NULL;
-		s->m_searchID = 0;
 		m_searches[s->m_target] = s;
 		s->go();
 	} 
@@ -412,6 +421,25 @@ void CSearchManager::jumpStart(void)
 					}
 					break;
 				}
+				case CSearch::NOTES:
+				{
+					if (it->second->m_created + SEARCHNOTES_LIFETIME < now)
+					{
+						delete it->second;
+						it = m_searches.erase(it);
+					}
+					else if (it->second->getCount() > SEARCHNOTES_TOTAL || it->second->m_created + SEARCHNOTES_LIFETIME - SEC(20) < now)
+					{
+						it->second->prepareToStop();
+						it++;
+					}
+					else
+					{
+						it->second->jumpStart();
+						it++;
+					}
+					break;
+				}
 				case CSearch::FINDBUDDY:
 				{
 					if (it->second->m_created + SEARCHFINDBUDDY_LIFETIME < now)
@@ -468,22 +496,13 @@ void CSearchManager::jumpStart(void)
 				{
 					if (it->second->m_created + SEARCHNODE_LIFETIME < now)
 					{
-						CPrefs *prefs = CKademlia::getPrefs();
-						ASSERT(prefs != NULL);
-						if(prefs)
-							prefs->setPublish(true);
-						else
-							AddDebugLogLine(false, _T("No preference object found CSearchManager::jumpStart"));
+						CKademlia::getPrefs()->setPublish(true);
 						delete it->second;
 						it = m_searches.erase(it);
 					}
 					else if ((it->second->m_created + SEARCHNODECOMP_LIFETIME < now) && (it->second->getCount() > SEARCHNODECOMP_TOTAL))
 					{
-						CPrefs *prefs = CKademlia::getPrefs();
-						if(prefs)
-							prefs->setPublish(true);
-						else
-							AddDebugLogLine(false, _T("No preference object found CSearchManager::jumpStart"));
+						CKademlia::getPrefs()->setPublish(true);
 						delete it->second;
 						it = m_searches.erase(it);
 					}
@@ -532,6 +551,25 @@ void CSearchManager::jumpStart(void)
 					}
 					break;
 				}
+				case CSearch::STORENOTES:
+				{
+					if (it->second->m_created + SEARCHSTORENOTES_LIFETIME < now)
+					{
+						delete it->second;
+						it = m_searches.erase(it);
+					}
+					else if (it->second->getCount() > SEARCHSTORENOTES_TOTAL || it->second->m_created + SEARCHSTORENOTES_LIFETIME - SEC(20)< now)
+					{
+						it->second->prepareToStop();
+						it++;
+					}
+					else
+					{
+						it->second->jumpStart();
+						it++;
+					}
+					break;
+				}
 				default:
 				{
 					if (it->second->m_created + SEARCH_LIFETIME < now)
@@ -561,6 +599,8 @@ void CSearchManager::updateStats(void)
 	uint8 m_totalStoreSrc = 0;
 	uint8 m_totalStoreKey = 0;
 	uint8 m_totalSource = 0;
+	uint8 m_totalNotes = 0;
+	uint8 m_totalStoreNotes = 0;
 	try
 	{
 		SearchMap::iterator it = m_searches.begin(); 
@@ -591,6 +631,18 @@ void CSearchManager::updateStats(void)
 					it++;
 					break;
 				}
+				case CSearch::STORENOTES:
+				{
+					m_totalStoreNotes++;
+					it++;
+					break;
+				}
+				case CSearch::NOTES:
+				{
+					m_totalNotes++;
+					it++;
+					break;
+				}
 				default:
 					it++;
 					break;
@@ -602,17 +654,15 @@ void CSearchManager::updateStats(void)
 		AddDebugLogLine(false, _T("Exception in CSearchManager::updateStats"));
 	}
 	CPrefs *prefs = CKademlia::getPrefs();
-	ASSERT(prefs != NULL);
-	if(prefs)
-	{
-		prefs->setTotalFile(m_totalFile);
-		prefs->setTotalStoreSrc(m_totalStoreSrc);
-		prefs->setTotalStoreKey(m_totalStoreKey);
-		prefs->setTotalSource(m_totalSource);
-	}
+	prefs->setTotalFile(m_totalFile);
+	prefs->setTotalStoreSrc(m_totalStoreSrc);
+	prefs->setTotalStoreKey(m_totalStoreKey);
+	prefs->setTotalSource(m_totalSource);
+	prefs->setTotalNotes(m_totalNotes);
+	prefs->setTotalStoreNotes(m_totalStoreNotes);
 }
 
-void CSearchManager::processPublishResult(const CUInt128 &target)
+void CSearchManager::processPublishResult(const CUInt128 &target, const uint8 load, const bool loadResponse)
 {
 	CSearch *s = NULL;
 	try
@@ -632,6 +682,10 @@ void CSearchManager::processPublishResult(const CUInt128 &target)
 		return;
 	}
 	s->m_count++;
+	if( loadResponse )
+	{
+		s->updateNodeLoad( load );
+	}
 }
 
 
@@ -659,7 +713,7 @@ void CSearchManager::processResponse(const CUInt128 &target, uint32 fromIP, uint
 		return;
 	}
 	else
-		s->processResponse(target, fromIP, fromPort, results);
+		s->processResponse(fromIP, fromPort, results);
 }
 
 void CSearchManager::processResult(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
@@ -685,5 +739,5 @@ void CSearchManager::processResult(const CUInt128 &target, uint32 fromIP, uint16
 		delete info;
 	}
 	else
-		s->processResult(target, fromIP, fromPort, answer, info);
+		s->processResult(fromIP, fromPort, answer, info);
 }

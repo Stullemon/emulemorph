@@ -3,7 +3,6 @@
 // written by robert rostek - tecxx@rrs.at //
 /////////////////////////////////////////////
 
-#define USRMSG_ITEMSTATECHANGED		(WM_USER + 0x101)
 #define MP_SHAREDFOLDERS_FIRST	46901
 
 class CDirectoryTreeCtrl : public CTreeCtrl

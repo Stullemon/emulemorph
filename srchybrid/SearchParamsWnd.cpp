@@ -26,12 +26,14 @@
 #include "HelpIDs.h"
 #include "Opcodes.h"
 #include "StringConversion.h"
+#include <list>
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
+
 
 #ifndef LVS_EX_LABELTIP
 #define LVS_EX_LABELTIP         0x00004000 // listview unfolds partly hidden labels if it does not have infotip text
@@ -50,7 +52,7 @@ BEGIN_MESSAGE_MAP(CSearchParamsWnd, CDialogBar)
 	ON_BN_CLICKED(IDC_CANCELS, OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_MORE, OnBnClickedMore)
 	ON_EN_CHANGE(IDC_SEARCHNAME, OnEnChangeName)
-	ON_CBN_SELCHANGE(IDC_TypeSearch, OnEnChangeName)
+	ON_CBN_SELCHANGE(IDC_TYPESEARCH, OnEnChangeName)
 	ON_BN_CLICKED(IDC_SEARCH_RESET, OnBnClickedSearchReset)
 	ON_BN_CLICKED(IDC_DD, OnDDClicked)
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnCbnSelChangeMethod)
@@ -103,7 +105,7 @@ void CSearchParamsWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogBar::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, m_ctlMethod);
-	DDX_Control(pDX, IDC_TypeSearch, m_ctlFileType);
+	DDX_Control(pDX, IDC_TYPESEARCH, m_ctlFileType);
 	DDX_Control(pDX, IDC_SEARCHNAME, m_ctlName);
 	DDX_Control(pDX, IDC_SEARCH_OPTS, m_ctlOpts);
 	DDX_Control(pDX, IDC_STARTS, m_ctlStart);
@@ -184,9 +186,15 @@ LRESULT CSearchParamsWnd::OnInitDialog(WPARAM wParam, LPARAM lParam)
 		GetDlgItem(IDC_DD)->ShowWindow(SW_HIDE);
 
 	m_ctlName.LimitText(MAX_SEARCH_EXPRESSION_LEN); // max. length of search expression
+	
 	InitMethodsCtrl();
 	if (m_ctlMethod.SetCurSel(thePrefs.GetSearchMethod()) == CB_ERR)
 		m_ctlMethod.SetCurSel(SearchTypeEd2kServer);
+
+	m_ctlFileType.GetComboBoxCtrl()->ModifyStyle(0, CBS_SORT);
+	InitFileTypesCtrl();
+	if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+		m_ctlFileType.SetCurSel(0);
 
 	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
 	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy, theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
@@ -473,21 +481,36 @@ void CSearchParamsWnd::UpdateControls()
 void CSearchParamsWnd::SetAllIcons()
 {
 	CImageList iml;
-	iml.Create(13,13,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader(_T("SearchMethod_SERVER"), 13, 13));
-	iml.Add(CTempIconLoader(_T("SearchMethod_GLOBAL"), 13, 13));
-	iml.Add(CTempIconLoader(_T("SearchMethod_KADEMLIA"), 13, 13));
-	iml.Add(CTempIconLoader(_T("SearchMethod_FILEDONKEY"), 13, 13));
+	iml.Add(CTempIconLoader(_T("SearchMethod_SERVER"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchMethod_GLOBAL"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchMethod_KADEMLIA"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchMethod_FILEDONKEY"), 16, 16));
 	m_ctlMethod.SetImageList(&iml);
 	m_imlSearchMethods.DeleteImageList();
 	m_imlSearchMethods.Attach(iml.Detach());
+
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.SetBkColor(CLR_NONE);
+	iml.Add(CTempIconLoader(_T("SearchFileType_Any"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Archive"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Audio"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_CDImage"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Picture"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Program"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Video"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Document"), 16, 16));
+	m_ctlFileType.SetImageList(&iml);
+	m_imlFileType.DeleteImageList();
+	m_imlFileType.Attach(iml.Detach());
 }
 
 void CSearchParamsWnd::OnDestroy()
 {
 	CDialogBar::OnDestroy();
 	m_imlSearchMethods.DeleteImageList();
+	m_imlFileType.DeleteImageList();
 }
 
 void CSearchParamsWnd::OnSysColorChange()
@@ -504,8 +527,73 @@ void CSearchParamsWnd::InitMethodsCtrl()
 	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_GLOBALSEARCH), 1) == SearchTypeEd2kGlobal );
 	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_KADEMLIA) + _T(" ") + GetResString(IDS_NETWORK), 2) == SearchTypeKademlia );
 	VERIFY( m_ctlMethod.AddItem(_T("FileDonkey (Web)"), 3) == SearchTypeFileDonkey );
-	UpdateHorzExtent(m_ctlMethod, 13); // adjust dropped width to ensure all strings are fully visible
+	UpdateHorzExtent(m_ctlMethod, 16); // adjust dropped width to ensure all strings are fully visible
 	m_ctlMethod.SetCurSel(iMethod != CB_ERR ? iMethod : SearchTypeEd2kServer);
+}
+
+class SFileTypeCbEntry
+{
+public:
+	SFileTypeCbEntry(const CString& strLabel, LPCSTR pszItemData, int iImage) {
+		m_strLabel = strLabel;
+		m_pszItemData = pszItemData;
+		m_iImage = iImage;
+	}
+
+	operator<(const SFileTypeCbEntry& e) const {
+		return (m_strLabel.Compare(e.m_strLabel) < 0);
+	}
+
+	CString m_strLabel;
+	LPCSTR m_pszItemData;
+	int m_iImage;
+};
+
+void CSearchParamsWnd::InitFileTypesCtrl()
+{
+	// get current selected entry by value (language independent)
+	CStringA strCurSelFileType;
+	int iItem = m_ctlFileType.GetCurSel();
+	if (iItem != CB_ERR)
+	{
+		LPCSTR pszED2KFileType = (LPCSTR)m_ctlFileType.GetItemDataPtr(iItem);
+		ASSERT( pszED2KFileType != NULL );
+		strCurSelFileType = pszED2KFileType;
+	}
+
+	m_ctlFileType.ResetContent();
+
+	// create temp. list of new entries (language dependent)
+	std::list<SFileTypeCbEntry> lstFileTypeCbEntries;
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_ANY), "", 0));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_ARC), ED2KFTSTR_ARCHIVE, 1));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_AUDIO), ED2KFTSTR_AUDIO, 2));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_CDIMG), ED2KFTSTR_CDIMAGE, 3));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_PICS), ED2KFTSTR_IMAGE, 4));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_PRG), ED2KFTSTR_PROGRAM, 5));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_VIDEO), ED2KFTSTR_VIDEO, 6));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_DOC), ED2KFTSTR_DOCUMENT, 7));
+
+	// sort list with current language locale
+	lstFileTypeCbEntries.sort();
+
+	// fill combobox control with already sorted list
+	std::list<SFileTypeCbEntry>::const_iterator it;
+	for (it = lstFileTypeCbEntries.begin(); it != lstFileTypeCbEntries.end(); it++)
+	{
+		int iItem;
+		if ((iItem = m_ctlFileType.AddItem((*it).m_strLabel, (*it).m_iImage)) != CB_ERR)
+			m_ctlFileType.SetItemData(iItem, (DWORD_PTR)(*it).m_pszItemData);
+	}
+
+	UpdateHorzExtent(m_ctlFileType, 16); // adjust dropped width to ensure all strings are fully visible
+
+	// restore previous selected entry by value (language independent)
+	if (!m_ctlFileType.SelectItemDataStringA(strCurSelFileType))
+	{
+		if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+			m_ctlFileType.SetCurSel(0);
+	}
 }
 
 void CSearchParamsWnd::Localize()
@@ -525,26 +613,7 @@ void CSearchParamsWnd::Localize()
 	SetWindowText(GetResString(IDS_SEARCHPARAMS));
 
 	InitMethodsCtrl();
-
-	m_ctlFileType.ResetContent();
-	int iItem;
-	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_ANY))) != CB_ERR)
-		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)"");
-	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_ARC))) != CB_ERR)
-		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_ARCHIVE);
-	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_AUDIO))) != CB_ERR)
-		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_AUDIO);
-	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_CDIMG))) != CB_ERR)
-		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_CDIMAGE);
-	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_PICS))) != CB_ERR)
-		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_IMAGE);
-	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_PRG))) != CB_ERR)
-		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_PROGRAM);
-	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_VIDEO))) != CB_ERR)
-		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_VIDEO);
-	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_DOC))) != CB_ERR)
-		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_DOCUMENT);
-	m_ctlFileType.SetCurSel(m_ctlFileType.FindString(-1,GetResString(IDS_SEARCH_ANY)));
+	InitFileTypesCtrl();
 
 	m_ctlOpts.SetItemText(orMinSize, 0, GetResString(IDS_SEARCHMINSIZE));
 	m_ctlOpts.SetItemText(orMaxSize, 0, GetResString(IDS_SEARCHMAXSIZE));
@@ -683,6 +752,7 @@ void CSearchParamsWnd::OnEnChangeName()
 
 void CSearchParamsWnd::UpdateUnicodeCtrl()
 {
+	bool bUnicodeIsDisabled = m_ctlUnicode.IsWindowEnabled() && m_ctlUnicode.GetCheck() == 0;
 	bool bOfferUnicode = false;
 #ifdef _UNICODE
 	if ((ESearchType)m_ctlMethod.GetCurSel() != SearchTypeFileDonkey)
@@ -703,12 +773,16 @@ void CSearchParamsWnd::UpdateUnicodeCtrl()
 		}
 	}
 	m_ctlUnicode.EnableWindow(bOfferUnicode);
+	if (!bUnicodeIsDisabled)
+		m_ctlUnicode.SetCheck(bOfferUnicode);
 }
 
 void CSearchParamsWnd::OnBnClickedSearchReset()
 {
 	m_ctlName.SetWindowText(_T(""));
-	m_ctlFileType.SetCurSel(m_ctlFileType.FindString(-1,GetResString(IDS_SEARCH_ANY)));
+
+	if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+		m_ctlFileType.SetCurSel(0);
 
 	for (int i = 0; i < m_ctlOpts.GetItemCount(); i++)
 		m_ctlOpts.SetItemText(i, 1, _T(""));
@@ -739,13 +813,7 @@ void CSearchParamsWnd::SetParameters(const SSearchParams* pParams)
 		else
 			m_ctlUnicode.SetCheck(0);
 
-		int iItems = m_ctlFileType.GetCount();
-		for (int i = 0; i < iItems; i++){
-			if (strcmp((LPCSTR)m_ctlFileType.GetItemDataPtr(i), pParams->strFileType) == 0){
-				m_ctlFileType.SetCurSel(i);
-				break;
-			}
-		}
+		m_ctlFileType.SelectItemDataStringA(pParams->strFileType);
 
 		m_ctlOpts.SetItemText(orMinSize, 1, pParams->strMinSize);
 		m_ctlOpts.SetItemText(orMaxSize, 1, pParams->strMaxSize);

@@ -37,9 +37,9 @@
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 

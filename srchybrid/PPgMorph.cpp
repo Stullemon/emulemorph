@@ -9,10 +9,12 @@
 #include "OtherFunctions.h"
 #include "Scheduler.h" //MORPH - Added by SiRoB, Fix for Param used in scheduler
 #include "searchDlg.h"
+#include "UserMsgs.h"
+
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -24,7 +26,7 @@ IMPLEMENT_DYNAMIC(CPPgMorph, CPropertyPage)
 BEGIN_MESSAGE_MAP(CPPgMorph, CPropertyPage)
 	ON_WM_HSCROLL()
     ON_WM_DESTROY()
-	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 END_MESSAGE_MAP()
 
 CPPgMorph::CPPgMorph()

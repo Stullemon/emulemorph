@@ -24,9 +24,9 @@
 #include "Preferences.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -37,16 +37,19 @@ IMPLEMENT_DYNAMIC(CDirectDownloadDlg, CDialog)
 BEGIN_MESSAGE_MAP(CDirectDownloadDlg, CResizableDialog)
 	ON_EN_KILLFOCUS(IDC_ELINK, OnEnKillfocusElink)
 	ON_EN_UPDATE(IDC_ELINK, OnEnUpdateElink)
-	ON_NOTIFY(NM_CLICK, IDC_CATS, OnNMClickCats) //MORPH - Changed by SiRoB, Selection category support
+	ON_NOTIFY(NM_CLICK, IDC_CATS, OnNMClickCats) //MORPH - Added by SiRoB, Selection category support
 END_MESSAGE_MAP()
 
 CDirectDownloadDlg::CDirectDownloadDlg(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CDirectDownloadDlg::IDD, pParent)
 {
+	m_icnWnd = NULL;
 }
 
 CDirectDownloadDlg::~CDirectDownloadDlg()
 {
+	if (m_icnWnd)
+		VERIFY( DestroyIcon(m_icnWnd) );
 }
 
 void CDirectDownloadDlg::DoDataExchange(CDataExchange* pDX)
@@ -134,22 +137,20 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
-	SetIcon(theApp.LoadIcon(_T("PASTELINK"),16,16),FALSE);
+	SetIcon(m_icnWnd = theApp.LoadIcon(_T("PasteLink")), FALSE);
 
 	AddAnchor(IDC_DDOWN_FRM, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_ELINK, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDCANCEL, BOTTOM_RIGHT);
 	AddAnchor(IDOK, BOTTOM_RIGHT);
-
 	AddAnchor(IDC_CATLABEL, BOTTOM_LEFT);
 	AddAnchor(IDC_CATS, BOTTOM_LEFT,BOTTOM_RIGHT);
 
 	EnableSaveRestore(PREF_INI_SECTION);
 
 	SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
-	m_ctrlDirectDlFrm.Init(_T("Download"));
 	m_ctrlDirectDlFrm.SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
-	m_ctrlDirectDlFrm.SetText(GetResString(IDS_SW_DIRECTDOWNLOAD));
+	m_ctrlDirectDlFrm.SetIcon(_T("Download"));
     GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_DOWNLOAD));
     GetDlgItem(IDC_FSTATIC2)->SetWindowText(GetResString(IDS_SW_LINK));
 	GetDlgItem(IDC_CATLABEL)->SetWindowText(GetResString(IDS_CAT)+_T(":"));

@@ -35,16 +35,19 @@
 #include "UploadQueue.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
 // CUploadListCtrl
 
 IMPLEMENT_DYNAMIC(CUploadListCtrl, CMuleListCtrl)
-CUploadListCtrl::CUploadListCtrl(){
+
+CUploadListCtrl::CUploadListCtrl()
+	: CListCtrlItemWalk(this)
+{
 }
 
 void CUploadListCtrl::Init()
@@ -359,7 +362,8 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	RECT cur_rec = lpDrawItemStruct->rcItem;
 	*/
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
-    if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
+
+	if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
         dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
     }
 
@@ -468,12 +472,14 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							Sbuffer = _T("?");
 						break;
 					case 2:
-						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetDatarate(), false, true));
+						Sbuffer = CastItoXBytes(client->GetDatarate(), false, true);
 						//MORPH START - Added by SiRoB, Right Justify
 						dcdttext |= DT_RIGHT;
 						//MORPH END   - Added by SiRoB, Right Justify
 						break;
 					case 3:
+						// this would be the logical correct data item to show here
+						//Sbuffer = CastItoXBytes(client->GetTransferredUp(), false, false);
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 						if(client->GetSessionUp() == client->GetQueueSessionUp()) {
 							Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false));
@@ -485,14 +491,14 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 4:
 						if (client->HasLowID())
 							if(client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
-								Sbuffer.Format(GetResString(IDS_UP_LOWID_DELAYED),CastSecondsToHM((client->GetWaitTime())/1000), CastSecondsToHM((::GetTickCount()-client->GetUpStartTimeDelay()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
+								Sbuffer.Format(GetResString(IDS_UP_LOWID_DELAYED),CastSecondsToHM(client->GetWaitTime()/1000), CastSecondsToHM((::GetTickCount()-client->GetUpStartTimeDelay()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
 							else
-								Sbuffer.Format(GetResString(IDS_UP_LOWID),CastSecondsToHM((client->GetWaitTime())/1000));
+								Sbuffer.Format(GetResString(IDS_UP_LOWID),CastSecondsToHM(client->GetWaitTime()/1000));
 						else
-							Sbuffer = CastSecondsToHM((client->GetWaitTime())/1000);
+							Sbuffer = CastSecondsToHM(client->GetWaitTime()/1000);
 						break;
 					case 5:
-						Sbuffer.Format(_T("%s"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000));
+						Sbuffer = CastSecondsToHM(client->GetUpStartTimeDelay()/1000);
 						//MORPH START - Added by SiRoB, Right Justify
 						dcdttext |= DT_RIGHT;
 						//MORPH END   - Added by SiRoB, Right Justify
@@ -501,15 +507,12 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer = client->GetUploadStateDisplayString();
 						break;
 					case 7:
-						//if( client->GetUpPartCount() )[
 							cur_rec.bottom--;
 							cur_rec.top++;
 							client->DrawUpStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
 							cur_rec.bottom++;
 							cur_rec.top--;
-						//}
 						break;
-
 					//MORPH START - Added by SiRoB, Client Software
 					case 8:			
 						Sbuffer = client->GetClientSoftVer();
@@ -727,7 +730,7 @@ BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				break;
 			case MPG_ALTENTER:
 			case MP_DETAIL:{
-				CClientDetailDialog dialog(client);
+				CClientDetailDialog dialog(client, this);
 				dialog.DoModal();
 				break;
 			}
@@ -950,9 +953,9 @@ void CUploadListCtrl::ShowSelectedUserDetails()
 	SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	SetSelectionMark(it);   // display selection mark correctly! 
 
-	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
+	CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 	if (client){
-		CClientDetailDialog dialog(client);
+		CClientDetailDialog dialog(client, this);
 		dialog.DoModal();
 	}
 }
@@ -961,9 +964,9 @@ void CUploadListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
-		const CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
+		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){
-			CClientDetailDialog dialog(client);
+			CClientDetailDialog dialog(client, this);
 			dialog.DoModal();
 		}
 	}

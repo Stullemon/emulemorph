@@ -3,8 +3,6 @@
 
 #pragma once
 
-#define NM_TABMOVED WM_USER+0x101+0x12
-
 class TabControl: public CTabCtrl
 {
 public:

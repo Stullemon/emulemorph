@@ -20,13 +20,6 @@
 // It's free - so you get what you pay for.
 
 
-// CColourPopup messages
-#define CPN_SELCHANGE        WM_USER + 1001        // Colour Picker Selection change
-#define CPN_DROPDOWN         WM_USER + 1002        // Colour Picker drop down
-#define CPN_CLOSEUP          WM_USER + 1003        // Colour Picker close up
-#define CPN_SELENDOK         WM_USER + 1004        // Colour Picker end OK
-#define CPN_SELENDCANCEL     WM_USER + 1005        // Colour Picker end (cancelled)
-
 // forward declaration
 class CColourPicker;
 

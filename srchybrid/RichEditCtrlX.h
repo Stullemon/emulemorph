@@ -7,6 +7,7 @@ class CRichEditCtrlX : public CRichEditCtrl
 {
 public:
 	CRichEditCtrlX();
+	virtual ~CRichEditCtrlX();
 
 	void SetDisableSelectOnFocus(bool bDisable = true);
 	void SetSyntaxColoring(const LPCTSTR* ppszKeywords = NULL, LPCTSTR pszSeperators = NULL);
@@ -19,8 +20,9 @@ public:
 
 protected:
 	bool m_bDisableSelectOnFocus;
-
 	bool m_bSelfUpdate;
+	bool m_bForceArrowCursor;
+	HCURSOR m_hArrowCursor;
 	CStringArray m_astrKeywords;
 	CString m_strSeperators;
 	CHARFORMAT m_cfDef;
@@ -36,4 +38,5 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnEnChange();
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 };

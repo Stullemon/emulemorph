@@ -28,9 +28,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 enum convstatus{
@@ -366,9 +366,9 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 	}
 
 	if (pfconverting->partmettype==PMT_NEWOLD || pfconverting->partmettype==PMT_SPLITTED ) {
-		file->completedsize=file->transfered;
-		file->m_iGainDueToCompression = 0;
-		file->m_iLostDueToCorruption = 0;
+		file->completedsize = file->m_uTransferred;
+		file->m_uCompressionGain = 0;
+		file->m_uCorruptionLoss = 0;
 	}
 
 	UpdateGUI( 100 ,GetResString(IDS_IMP_ADDDWL));
@@ -426,7 +426,7 @@ void CPartFileConvert::ShowGUI(){
 	if (m_convertgui)
 		m_convertgui->SetForegroundWindow();
 	else {
-		m_convertgui= new CModeless();
+		m_convertgui= new CPartFileConvertDlg();
 		m_convertgui->Create( IDD_CONVERTPARTFILES , CWnd::GetDesktopWindow() );//,  );
 		InitWindowStyles(m_convertgui);
 		m_convertgui->ShowWindow(SW_SHOW);
@@ -441,7 +441,7 @@ void CPartFileConvert::ShowGUI(){
 		m_convertgui->AddAnchor(IDC_CONVREMOVE, BOTTOM_LEFT);
 		m_convertgui->AddAnchor(IDC_HIDECONVDLG, BOTTOM_RIGHT);
 
-		m_convertgui->SetIcon(theApp.LoadIcon(_T("CONVERT"),16,16),FALSE);
+		m_convertgui->SetIcon(m_convertgui->m_icnWnd = theApp.LoadIcon(_T("Convert")), FALSE);
 		
 		// init gui
 		m_convertgui->pb_current.SetRange(0,100);
@@ -545,28 +545,32 @@ CString CPartFileConvert::GetReturncodeText(int ret) {
 }
 
 
-
-
-
-
-
-
-
 // Modless Dialog Implementation
-// CModeless dialog
+// CPartFileConvertDlg dialog
 
-IMPLEMENT_DYNAMIC(CModeless, CDialog)
-CModeless::CModeless(CWnd* pParent /*=NULL*/)
-	: CResizableDialog(CModeless::IDD, pParent)
+IMPLEMENT_DYNAMIC(CPartFileConvertDlg, CDialog)
+
+BEGIN_MESSAGE_MAP(CPartFileConvertDlg, CResizableDialog)
+	ON_BN_CLICKED(IDC_HIDECONVDLG, OnBnClickedOk)
+	ON_BN_CLICKED(IDC_ADDITEM, OnAddFolder)
+	ON_BN_CLICKED(IDC_RETRY,RetrySel)
+	ON_BN_CLICKED(IDC_CONVREMOVE,RemoveSel)
+END_MESSAGE_MAP()
+
+CPartFileConvertDlg::CPartFileConvertDlg(CWnd* pParent /*=NULL*/)
+	: CResizableDialog(CPartFileConvertDlg::IDD, pParent)
 {
 	m_pParent = pParent;
+	m_icnWnd = NULL;
 }
 
-CModeless::~CModeless()
+CPartFileConvertDlg::~CPartFileConvertDlg()
 {
+	if (m_icnWnd)
+		VERIFY( DestroyIcon(m_icnWnd) );
 }
 
-void CModeless::DoDataExchange(CDataExchange* pDX)
+void CPartFileConvertDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
 	
@@ -574,27 +578,18 @@ void CModeless::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_JOBLIST, joblist);
 }
 
+// CPartFileConvertDlg message handlers
 
-BEGIN_MESSAGE_MAP(CModeless, CResizableDialog)
-	ON_BN_CLICKED(IDC_HIDECONVDLG, OnBnClickedOk)
-	ON_BN_CLICKED(IDC_ADDITEM, OnAddFolder)
-	ON_BN_CLICKED(IDC_RETRY,RetrySel)
-	ON_BN_CLICKED(IDC_CONVREMOVE,RemoveSel)
-END_MESSAGE_MAP()
-
-
-// CModeless message handlers
-
-void CModeless::OnBnClickedOk()
+void CPartFileConvertDlg::OnBnClickedOk()
 {
     DestroyWindow();
 }
 
-void CModeless::OnCancel() {
+void CPartFileConvertDlg::OnCancel() {
     DestroyWindow();
 }
 
-void CModeless::PostNcDestroy()
+void CPartFileConvertDlg::PostNcDestroy()
 {
 	CPartFileConvert::ClosedGUI();
 
@@ -602,7 +597,7 @@ void CModeless::PostNcDestroy()
 	delete this;
 }
 
-void CModeless::OnAddFolder() {
+void CPartFileConvertDlg::OnAddFolder() {
 	// browse...
 	
 	LPMALLOC pMalloc = NULL;
@@ -653,7 +648,7 @@ void CModeless::OnAddFolder() {
 	}
 }
 
-void CModeless::UpdateJobInfo(ConvertJob* job) {
+void CPartFileConvertDlg::UpdateJobInfo(ConvertJob* job) {
 
 	if (job==NULL) {
 		SetDlgItemText(IDC_CURJOB, GetResString(IDS_FSTAT_WAITING) );
@@ -684,7 +679,7 @@ void CModeless::UpdateJobInfo(ConvertJob* job) {
 	}
 }
 
-void CModeless::RemoveJob(ConvertJob* job) {
+void CPartFileConvertDlg::RemoveJob(ConvertJob* job) {
 	// search jobitem in listctrl
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
@@ -695,12 +690,12 @@ void CModeless::RemoveJob(ConvertJob* job) {
 	}
 }
 
-void CModeless::AddJob(ConvertJob* job) {
+void CPartFileConvertDlg::AddJob(ConvertJob* job) {
     int ix=joblist.InsertItem(LVIF_TEXT|LVIF_PARAM,joblist.GetItemCount(),job->folder,0,0,0,(LPARAM)job);
 	joblist.SetItemText(ix,1,CPartFileConvert::GetReturncodeText(job->state));
 }
 
-void CModeless::RemoveSel() {
+void CPartFileConvertDlg::RemoveSel() {
 	if (joblist.GetSelectedCount()==0) return;
 
 	ConvertJob* job;
@@ -720,7 +715,7 @@ void CModeless::RemoveSel() {
 	}
 }
 
-void CModeless::RetrySel(){
+void CPartFileConvertDlg::RetrySel(){
 
 	if (joblist.GetSelectedCount()==0) return;
 

@@ -13,7 +13,7 @@
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
-#endif //_DEBUG
+#endif
 
 #define YY_NEVER_INTERACTIVE 1
 

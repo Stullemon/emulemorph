@@ -22,17 +22,11 @@
 #include "MetaDataDlg.h"
 #include "MuleListCtrl.h"
 #include "ED2kLinkDlg.h"
-//class CMuleListCtrl;
+#include "ListViewWalkerPropertySheet.h"
 
 struct FCtrlItem_Struct{
    CString	filename;
    uint16	count;
-};
-
-enum EInvokePage{
-	INP_NONE = 0,
-	INP_COMMENTPAGE,
-	INP_LINKPAGE
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,14 +40,15 @@ public:
 	CFileDetailDialogInfo();   // standard constructor
 	virtual ~CFileDetailDialogInfo();
 
-	void SetMyfile(const CSimpleArray<CPartFile*>* paFiles) { m_paFiles = paFiles; }
+	void SetFiles(const CSimpleArray<CObject*>* paFiles) { m_paFiles = paFiles; m_bDataChanged = true; }
 
 	// Dialog Data
 	enum { IDD = IDD_FILEDETAILS_INFO };
 
 protected:
 	CString m_strCaption;
-	const CSimpleArray<CPartFile*>* m_paFiles;
+	const CSimpleArray<CObject*>* m_paFiles;
+	bool m_bDataChanged;
 	uint32 m_timer;
 	static LPCTSTR sm_pszNotAvail;
 
@@ -67,6 +62,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnDestroy();
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
 };
 
 
@@ -81,16 +77,18 @@ public:
 	CFileDetailDialogName();   // standard constructor
 	virtual ~CFileDetailDialogName();
 
-	void SetMyfile(CPartFile* file)		{m_file=file;}
+	void SetFiles(const CSimpleArray<CObject*>* paFiles) { m_paFiles = paFiles; m_bDataChanged = true; }
 
 	// Dialog Data
 	enum { IDD = IDD_FILEDETAILS_NAME };
 
 protected:
 	CString m_strCaption;
-	CPartFile* m_file;
+	const CSimpleArray<CObject*>* m_paFiles;
+	bool m_bDataChanged;
 	bool m_bAppliedSystemImageList;
-	CMuleListCtrl pmyListCtrl;
+	CMuleListCtrl m_listFileNames;
+	bool m_bSelf;
 
 	uint32 m_timer;
 	int m_aiColWidths[2];
@@ -102,41 +100,41 @@ protected:
 	void FillSourcenameList();
 	void Copy();
 	bool CanRenameFile() const;
+	void RenameFile();
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnSetActive();
+	virtual BOOL OnApply();
 	
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	static int CALLBACK CompareListNameItems(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedButtonStrip();
 	afx_msg void TakeOver();
-	afx_msg void OnRename();
 	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclkList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMRclickList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnDestroy();
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
+	afx_msg void OnEnChangeFilename();
 };
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileDetailDialog
 
-class CFileDetailDialog : public CResizableSheet
+class CFileDetailDialog : public CListViewWalkerPropertySheet
 {
 	DECLARE_DYNAMIC(CFileDetailDialog)
 
 public:
-	CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, EInvokePage eInvokePage = INP_NONE);
+	CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, UINT uInvokePage = 0, CListCtrlItemWalk* pListCtrl = NULL);
 	virtual ~CFileDetailDialog();
 
 protected:
-	EInvokePage m_eInvokePage;
-	CPartFile*	m_file;
-	CSimpleArray<const CKnownFile*> m_aKnownFiles;
 	CFileDetailDialogInfo	m_wndInfo;
 	CFileDetailDialogName	m_wndName;
 	CFileInfoDialog			m_wndMediaInfo;
@@ -144,10 +142,14 @@ protected:
 	CMetaDataDlg			m_wndMetaData;
 	CED2kLinkDlg			m_wndFileLink;
 
+	UINT m_uPshInvokePage;
 	static LPCTSTR m_pPshStartPage;
+
+	void UpdateTitle();
 
 	virtual BOOL OnInitDialog();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
 };

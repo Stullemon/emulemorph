@@ -29,7 +29,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnTcnSelchangeTab2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
 	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );

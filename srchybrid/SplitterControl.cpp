@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "SplitterControl.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -23,13 +24,20 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CSplitterControl
 
-// hCursor1 is for vertiacal one
-// and hCursor2 is for horizontal one
-static HCURSOR SplitterControl_hCursor1 = NULL;
-static HCURSOR SplitterControl_hCursor2 = NULL;
+HCURSOR CSplitterControl::m_hcurMoveVert = NULL;
+HCURSOR CSplitterControl::m_hcurMoveHorz = NULL;
+
+BEGIN_MESSAGE_MAP(CSplitterControl, CStatic)
+	ON_WM_PAINT()
+	ON_WM_MOUSEMOVE()
+	ON_WM_SETCURSOR()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+END_MESSAGE_MAP()
 
 CSplitterControl::CSplitterControl()
 {
@@ -44,35 +52,13 @@ CSplitterControl::~CSplitterControl()
 {
 }
 
-
-BEGIN_MESSAGE_MAP(CSplitterControl, CStatic)
-	//{{AFX_MSG_MAP(CSplitterControl)
-	ON_WM_PAINT()
-	ON_WM_MOUSEMOVE()
-	ON_WM_SETCURSOR()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CSplitterControl message handlers
-
-/****************************************************
-*	Create(DWORD dwStyle, const CRect& rect, CWnd* pParent, nID)
-*	Use this function instead of the CStatic::Create function
-* Parameters: No need to explain (see MSDN (:-) )
-*
-****************************************************/
 void CSplitterControl::Create(DWORD dwStyle, const CRect &rect, CWnd *pParent, UINT nID)
 {
 	CRect rc = rect;
 	dwStyle |= SS_NOTIFY;
 	
 	// Determine default type base on it's size.
-	m_nType = (rc.Width() < rc.Height())?
-					SPS_VERTICAL:
-					SPS_HORIZONTAL;
+	m_nType = (rc.Width() < rc.Height()) ? SPS_VERTICAL : SPS_HORIZONTAL;
 	
 	if (m_nType == SPS_VERTICAL)
 		rc.right = rc.left + 5;
@@ -81,24 +67,23 @@ void CSplitterControl::Create(DWORD dwStyle, const CRect &rect, CWnd *pParent, U
 	
 	CStatic::Create(_T(""), dwStyle, rc, pParent, nID);
 	
-	if (!SplitterControl_hCursor1)
+	if (!m_hcurMoveVert)
 	{
-		SplitterControl_hCursor1 = AfxGetApp()->LoadStandardCursor(IDC_SIZEWE);
-		SplitterControl_hCursor2 = AfxGetApp()->LoadStandardCursor(IDC_SIZENS);
+		m_hcurMoveVert = AfxGetApp()->LoadStandardCursor(IDC_SIZEWE);
+		m_hcurMoveHorz = AfxGetApp()->LoadStandardCursor(IDC_SIZENS);
 	}
 	
 	// force the splitter not to be splited.
 	SetRange(0, 0, -1);
 }
 
-// Set style for splitter control
-// nStyle = SPS_VERTICAL or SPS_HORIZONTAL
 int CSplitterControl::SetStyle(int nStyle)
 {
 	int m_nOldStyle = m_nType;
 	m_nType = nStyle;
 	return m_nOldStyle;
 }
+
 int CSplitterControl::GetStyle()
 {
 	return m_nType;
@@ -107,28 +92,28 @@ int CSplitterControl::GetStyle()
 void CSplitterControl::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
+
 	CRect rcClient;
 	GetClientRect(rcClient);
 	
-	CBrush br, *pOB;
-	CPen pen, *pOP;
-
-	dc.Draw3dRect(rcClient, GetSysColor(COLOR_BTNHIGHLIGHT), GetSysColor(COLOR_BTNSHADOW));	
-	rcClient.DeflateRect(1,1,1,1);
+	dc.Draw3dRect(rcClient, GetSysColor(COLOR_BTNHIGHLIGHT), GetSysColor(COLOR_BTNSHADOW));
+	rcClient.DeflateRect(1, 1, 1, 1);
 	
+	CPen pen;
 	pen.CreatePen(0, 1, RGB(200, 200, 200));
+	CPen* pOP = dc.SelectObject(&pen);
+
+	CBrush br;
 	br.CreateSolidBrush(RGB(200, 220, 220));
-	pOB = dc.SelectObject(&br);
-	pOP = dc.SelectObject(&pen);
+	CBrush* pOB = dc.SelectObject(&br);
 	
 	dc.Rectangle(rcClient);
 
-	// Restore pen and brush
 	dc.SelectObject(pOB);
 	dc.SelectObject(pOP);
 }
 
-void CSplitterControl::OnMouseMove(UINT nFlags, CPoint point) 
+void CSplitterControl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (m_bIsPressed)
 	{
@@ -161,15 +146,14 @@ BOOL CSplitterControl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	if (nHitTest == HTCLIENT)
 	{
-		(m_nType == SPS_VERTICAL)?(::SetCursor(SplitterControl_hCursor1))
-			:(::SetCursor(SplitterControl_hCursor2));
+		(m_nType == SPS_VERTICAL) ? ::SetCursor(m_hcurMoveVert) : ::SetCursor(m_hcurMoveHorz);
 		return 0;
 	}
 	else
 		return CStatic::OnSetCursor(pWnd, nHitTest, message);
 }
 
-void CSplitterControl::OnLButtonDown(UINT nFlags, CPoint point) 
+void CSplitterControl::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	CStatic::OnLButtonDown(nFlags, point);
 	
@@ -179,8 +163,7 @@ void CSplitterControl::OnLButtonDown(UINT nFlags, CPoint point)
 	GetWindowRect(rcWnd);
 	
 	if (m_nType == SPS_VERTICAL)
-		m_nX = rcWnd.left + rcWnd.Width() / 2;	
-	
+		m_nX = rcWnd.left + rcWnd.Width() / 2;
 	else
 		m_nY = rcWnd.top  + rcWnd.Height() / 2;
 	
@@ -207,24 +190,21 @@ void CSplitterControl::OnLButtonUp(UINT nFlags, CPoint point)
 		if (pOwner && IsWindow(pOwner->m_hWnd))
 		{
 			CRect rc;
-			int delta;
 			pOwner->GetClientRect(rc);
 			pOwner->ScreenToClient(&pt);
 			MoveWindowTo(pt);
 
+			int delta;
 			if (m_nType == SPS_VERTICAL)
 				delta = m_nX - m_nSavePos;
 			else
 				delta = m_nY - m_nSavePos;
 			
-			
 			SPC_NMHDR nmsp;
-		
 			nmsp.hdr.hwndFrom = m_hWnd;
-			nmsp.hdr.idFrom   = GetDlgCtrlID();
-			nmsp.hdr.code     = SPN_SIZED;
+			nmsp.hdr.idFrom = GetDlgCtrlID();
+			nmsp.hdr.code = UM_SPN_SIZED;
 			nmsp.delta = delta;
-
 			pOwner->SendMessage(WM_NOTIFY, nmsp.hdr.idFrom, (LPARAM)&nmsp);
 		}
 	}
@@ -238,12 +218,13 @@ void CSplitterControl::DrawLine(CDC* pDC, int x, int y)
 	int nRop = pDC->SetROP2(R2_NOTXORPEN);
 
 	CRect rcWnd;
-	int d = 1;
 	GetWindowRect(rcWnd);
-	CPen  pen;
+	
+	CPen pen;
 	pen.CreatePen(0, 1, RGB(200, 200, 200));
 	CPen *pOP = pDC->SelectObject(&pen);
 	
+	int d = 1;
 	if (m_nType == SPS_VERTICAL)
 	{
 		pDC->MoveTo(m_nX - d, rcWnd.top);
@@ -268,6 +249,7 @@ void CSplitterControl::MoveWindowTo(CPoint pt)
 {
 	CRect rc;
 	GetWindowRect(rc);
+
 	CWnd* pParent;
 	pParent = GetParent();
 	if (!pParent || !::IsWindow(pParent->m_hWnd))
@@ -330,7 +312,6 @@ void CSplitterControl::ChangePos(CWnd* pWnd, int dx, int dy)
 		pWnd->GetWindowRect(rcWnd);
 		pParent->ScreenToClient(rcWnd);
 		rcWnd.OffsetRect(-dx, dy);
-
 		pWnd->MoveWindow(rcWnd);
 	}	
 }

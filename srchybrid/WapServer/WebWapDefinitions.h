@@ -6,7 +6,7 @@
 
 typedef struct { float download; float upload;  long connections; } UpDown;
 
-typedef struct { CTime startTime; long lSession; bool admin;} Session;
+typedef struct { CTime startTime; long lSession; bool admin; int lastcat;} Session;
 
 typedef struct
 {
@@ -122,9 +122,9 @@ typedef struct
 	bool			bSharedSortReverse;	
 	bool			bShowUploadQueue;
 
-	CArray<UpDown, UpDown>		PointsForWeb;
-	CArray<Session, Session>	Sessions;
-	CArray<BadLogin, BadLogin> badlogins;	//TransferredData= IP : time
+	CArray<UpDown>		PointsForWeb;
+	CArray<Session>	Sessions;
+	CArray<BadLogin> badlogins;	//TransferredData= IP : time
 	
 	CString sLastModified;
 	CString	sETag;

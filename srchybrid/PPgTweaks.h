@@ -58,8 +58,8 @@ protected:
     int m_iDynUpGoingDownDivider;
     int m_iDynUpNumberOfPings;
 	// ZZ:UploadSpeedSense <--
-
     int m_iA4AFSaveCpu; // ZZ:DownloadManager
+	int m_iExtractMetaData;
 
 	CSliderCtrl m_ctlFileBuffSize;
 	CSliderCtrl m_ctlQueueSize;
@@ -122,6 +122,10 @@ protected:
 	// ZZ:DownloadManager -->
     HTREEITEM m_htiA4AFSaveCpu;
 	// ZZ:DownloadManager <--
+	HTREEITEM m_htiExtractMetaData;
+	HTREEITEM m_htiExtractMetaDataNever;
+	HTREEITEM m_htiExtractMetaDataID3Lib;
+	HTREEITEM m_htiExtractMetaDataMediaDet;
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();

@@ -40,7 +40,6 @@ public:
 
 protected:
 	bool m_bRichEdit;
-	CTitleMenu m_LogMenu;
 	int m_iLimitText;
 	bool m_bAutoScroll;
 	CStringArray m_astrBuff;
@@ -50,6 +49,8 @@ protected:
 	CString m_strSkinKey;
 	bool m_bRestoreFormat;
 	CHARFORMAT m_cfDefault;
+	bool m_bForceArrowCursor;
+	HCURSOR m_hArrowCursor;
 
 	void AddLine(LPCTSTR pszMsg, int iLen = -1, bool bLink = false, COLORREF cr = CLR_DEFAULT);
 	void SelectAllItems();
@@ -71,4 +72,5 @@ protected:
 	afx_msg void OnEnMaxtext();
 	afx_msg BOOL OnEnLink(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 };

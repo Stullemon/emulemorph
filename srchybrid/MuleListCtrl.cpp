@@ -35,9 +35,9 @@
 #include "ListViewSearchDlg.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -369,49 +369,19 @@ void CMuleListCtrl::SetColors(LPCTSTR pszLvKey) {
 		if (strKey.IsEmpty())
 			strKey = _T("DefLv");
 
-		TCHAR szColor[MAX_PATH];
-		GetPrivateProfileString(_T("Colors"), strKey + _T("Bk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] == _T('\0'))
-			GetPrivateProfileString(_T("Colors"), _T("DefLvBk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] != _T('\0'))
-		{
-			UINT red, grn, blu;
-			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
-			if (iVals == 3)
-			{
-				m_crWindow = RGB(red, grn, blu);
+		if (theApp.LoadSkinColorAlt(strKey + _T("Bk" ), _T("DefLvBk"), m_crWindow))
 				m_crWindowTextBk = m_crWindow;
-			}
-		}
+		theApp.LoadSkinColorAlt(strKey + _T("Fg"), _T("DefLvFg"), m_crWindowText);
+		theApp.LoadSkinColorAlt(strKey + _T("Hl"), _T("DefLvHl"), crHighlight);
 
-		GetPrivateProfileString(_T("Colors"), strKey + _T("Fg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] == _T('\0'))
-			GetPrivateProfileString(_T("Colors"), _T("DefLvFg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] != _T('\0'))
-		{
-			UINT red, grn, blu;
-			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
-			if (iVals == 3)
-				m_crWindowText = RGB(red, grn, blu);
-		}
-
-		GetPrivateProfileString(_T("Colors"), strKey + _T("Hl"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] == _T('\0'))
-			GetPrivateProfileString(_T("Colors"), _T("DefLvHl"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] != _T('\0'))
-		{
-			UINT red, grn, blu;
-			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
-			if (iVals == 3)
-				crHighlight = RGB(red, grn, blu);
-		}
-
+		TCHAR szColor[MAX_PATH];
 		GetPrivateProfileString(_T("Colors"), strKey + _T("BkImg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
 		if (szColor[0] == _T('\0'))
 			GetPrivateProfileString(_T("Colors"), _T("DefLvBkImg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
 		if (szColor[0] != _T('\0'))
 			strBkImage = szColor;
 	}
+
 	SetBkColor(m_crWindow);
 	SetTextBkColor(m_crWindowTextBk);
 	SetTextColor(m_crWindowText);
@@ -443,7 +413,8 @@ void CMuleListCtrl::SetColors(LPCTSTR pszLvKey) {
 
 		CString strUrl(_T("file://"));
 		strUrl += szFullResPath;
-		if (SetBkImage(const_cast<LPTSTR>((LPCTSTR)strUrl), FALSE, 0, 0))
+		//if (SetBkImage(const_cast<LPTSTR>((LPCTSTR)strUrl), FALSE, 0, 0))
+		if (SetBkImage(const_cast<LPTSTR>((LPCTSTR)strUrl), FALSE, 100, 0))
 		{
 			m_crWindowTextBk = CLR_NONE;
 			SetTextBkColor(m_crWindowTextBk);
@@ -1413,10 +1384,24 @@ void CMuleListCtrl::OnFindPrev()
 
 BOOL CMuleListCtrl::PreTranslateMessage(MSG* pMsg) 
 {
-   	if ( pMsg->message == 260 && pMsg->wParam == 13 && GetAsyncKeyState(VK_MENU)<0 ) {
+	if (pMsg->message == WM_SYSKEYDOWN && pMsg->wParam == VK_RETURN && GetAsyncKeyState(VK_MENU)<0) {
 		PostMessage(WM_COMMAND, MPG_ALTENTER, 0);
 		return TRUE;
 	}
 
 	return CListCtrl::PreTranslateMessage(pMsg);
+}
+
+void CMuleListCtrl::AutoSelectItem()
+{
+	int iItem = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (iItem == -1)
+	{
+		iItem = GetNextItem(-1, LVIS_FOCUSED);
+		if (iItem != -1)
+		{
+			SetItemState(iItem, LVIS_SELECTED, LVIS_SELECTED);
+			SetSelectionMark(iItem);
+		}
+	}
 }

@@ -23,10 +23,11 @@
 #include "CxImage/xImage.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
+
 
 #define MP_TITLE	0xFFFE
 #define ICONSIZE	16
@@ -260,10 +261,20 @@ BOOL CTitleMenu::GradientFill(HDC hdc, PTRIVERTEX pVertex, DWORD dwNumVertex, PV
 BOOL CTitleMenu::AppendMenu(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR lpszNewItem, LPCTSTR lpszIconName){
 	bool bResult = CMenu::AppendMenu(nFlags, nIDNewItem, lpszNewItem);
 	if (!m_bIconMenu || (nFlags & MF_SEPARATOR) != 0 || !(thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_) ){
-		if (lpszIconName != NULL)
+		if (m_bIconMenu && lpszIconName != NULL)
 			ASSERT( false );
 		return bResult;
 	}
+
+	// Those MFC warnings which are thrown when one opens certain context menus 
+	// are because of sub menu items. All the IDs shown in the warnings are sub 
+	// menu handles! Seems to be a bug in MFC. Look at '_AfxFindPopupMenuFromID'.
+	// ---
+	// Warning: unknown WM_MEASUREITEM for menu item 0x530601.
+	// Warning: unknown WM_MEASUREITEM for menu item 0x4305E7.
+	// ---
+	//if (nFlags & MF_POPUP)
+	//	TRACE(_T("TitleMenu: adding popup menu item id=%x  str=%s\n"), nIDNewItem, lpszNewItem);
 
 	MENUITEMINFOEX info;
 	ZeroMemory(&info, sizeof(info));

@@ -31,10 +31,12 @@ public:
 	enum { IDD = IDD_DIRECT_DOWNLOAD };
 
 protected:
+	HICON m_icnWnd;
 	CIconStatic m_ctrlDirectDlFrm;
 	CTabCtrl	m_cattabs;
 
 	void UpdateControls();
+	void UpdateCatTabs();
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -42,11 +44,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnEnKillfocusElink();
-public:
 	afx_msg void OnEnUpdateElink();
 	//MORPH START - Added by SiRoB, Selection category support
 	afx_msg void OnNMClickCats(NMHDR *pNMHDR, LRESULT *pResult);
  	//MORPH END   - Added by SiRoB, Selection category support
-private:
-	void UpdateCatTabs();
 };

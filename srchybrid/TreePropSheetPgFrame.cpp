@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.1 $
+* $Revision: 1.2 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -16,7 +16,6 @@
 *	$History:$
 *
 *********************************************************************/
-
 #include "stdafx.h"
 #include "TreePropSheetPgFrame.h"
 
@@ -25,11 +24,6 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
-
-
-//namespace TreePropSheet
-//{
 
 
 //-------------------------------------------------------------------
@@ -189,7 +183,3 @@ void CPropPageFrame::SafeUpdateWindow(LPCRECT lpRect /* = NULL */)
 
 	GetWnd()->InvalidateRect(lpRect, TRUE);
 }
-
-
-
-//} //namespace TreePropSheet

@@ -99,7 +99,6 @@
 #define MP_HM_LINK2				10231
 #define MP_HM_LINK3				10232
 #define MP_HM_SCHEDONOFF		10233
-
 #define MP_SELECTTOOLBARBITMAPDIR 10234
 #define MP_SELECTTOOLBARBITMAP	10235
 #define MP_NOTEXTLABELS			10236
@@ -115,6 +114,8 @@
 #define	MP_WEBSVC_EDIT			10246
 #define	MP_HM_DIRECT_DOWNLOAD	10247
 #define	MP_INSTALL_SKIN			10248
+#define	MP_LARGEICONS			10249
+#define	MP_SMALLICONS			10250
 
 #define MP_PRIOVERYLOW			10300
 #define MP_PRIOLOW				10301
@@ -233,19 +234,13 @@
 #define MP_QS_PA				10533
 #define MP_QS_UA				10534
 
-#define MP_WEBURL				10600
-// reserve some for weburls!
-#define MP_ASSIGNCAT			10700
-// reserve some for categories!
-#define MP_SCHACTIONS			10800
-// reserve some for schedules
-#define MP_CAT_SET0				10900
-// reserve some for change all-cats (about 20)
-#define MP_TOOLBARBITMAP		10950
-// reserve max 50
-#define	MP_SKIN_PROFILE			11000
-// reserve max 50
-#define	MP_PREVIEW_APP_MIN		11050
+#define MP_WEBURL				10600	// reserve 100 entries for weburls!
+#define MP_ASSIGNCAT			10700	// reserve 100 entries for categories!
+#define MP_SCHACTIONS			10800	// reserve 100 entries for schedules
+#define MP_CAT_SET0				10900	// reserve 100 entries for change all-cats
+#define MP_TOOLBARBITMAP		11000	// reserve 100 entries for toolbar bitmaps
+#define	MP_SKIN_PROFILE			11100	// reserve 100 entries for skin profiles
+#define	MP_PREVIEW_APP_MIN		11200	// reserve 50 entries for preview apps
 #define	MP_PREVIEW_APP_MAX		(MP_PREVIEW_APP_MIN+49)
 
 #define Irc_Version				"(SMIRCv00.68)"

@@ -25,6 +25,7 @@
 */
 #include "OtherFunctions.h"
 #include "Preferences.h"
+#include "UserMsgs.h"
 
 /*Commented by SiRoB
 // added by MoNKi [MoNKi: -invisible mode-]
@@ -292,7 +293,7 @@ BEGIN_MESSAGE_MAP(CPPgEmulespana, CPropertyPage)
 /*Commented by SiRoB
 	ON_WM_PAINT()
 */
-	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 	ON_WM_DESTROY()
 /*Commented by SiRoB
 	 // Added by by MoNKi [MoNKi: -Skin Selector-]

@@ -105,6 +105,8 @@ public:
 	void DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL bShowError);
 	void DoFindNext(BOOL bShowError);
 
+	void AutoSelectItem();
+
 protected:
 	virtual void PreSubclassWindow();
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);

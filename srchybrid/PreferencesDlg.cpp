@@ -19,9 +19,9 @@
 #include "PreferencesDlg.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -51,7 +51,6 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
 	m_wndMorphShare.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
-//	m_wndMorph3.m_psp.dwFlags &= ~PSH_HASHELP; //Commander - Added: Morph III
 	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 	m_wndEmulespana.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, emulEspaña preferency
@@ -78,7 +77,6 @@ CPreferencesDlg::CPreferencesDlg()
 	CTreePropSheet::SetPageIcon(&m_wndMorph, _T("MORPH")); //MORPH - Added by IceCream, Morph Prefs
 	CTreePropSheet::SetPageIcon(&m_wndMorphShare, _T("MORPH")); //MORPH - Added by SiRoB, Morph Prefs
 	CTreePropSheet::SetPageIcon(&m_wndMorph2, _T("MORPH")); //MORPH - Added by SiRoB, Morph Prefs
-//	CTreePropSheet::SetPageIcon(&m_wndMorph3, _T("MORPH")); //Commander - Added: Morph III
 	CTreePropSheet::SetPageIcon(&m_wndEastShare, _T("EASTSHARE")); //EastShare - Added by Pretender, ES Prefs
 	CTreePropSheet::SetPageIcon(&m_wndEmulespana, _T("EMULESPANA")); //MORPH - Added by SiRoB, emulEspaña preferency
 	CTreePropSheet::SetPageIcon(&m_wndWebcachesettings, _T("WEBCACHE")); //MORPH - Added by SiRoB, WebCache 1.2f
@@ -104,18 +102,17 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
 	AddPage(&m_wndMorphShare); //MORPH - Added by SiRoB, Morph Prefs
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
-//	AddPage(&m_wndMorph3); //Commander - Added: Morph III
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
 	AddPage(&m_wndWebcachesettings); //MORPH - Added by SiRoB, WebCache 1.2f
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	AddPage(&m_wndDebug);
 #endif
+
 	SetTreeViewMode(TRUE, TRUE, TRUE);
 	SetTreeWidth(170);
 
-	m_nActiveWnd = 0;
-	m_iPrevPage = -1;
+	m_pPshStartPage = NULL;
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -126,14 +123,23 @@ void CPreferencesDlg::OnDestroy()
 {
 	CTreePropSheet::OnDestroy();
 	thePrefs.Save();
-	m_nActiveWnd = GetActiveIndex();
+	m_pPshStartPage = GetPage(GetActiveIndex())->m_psp.pszTemplate;
 }
 
 BOOL CPreferencesDlg::OnInitDialog()
 {		
 	BOOL bResult = CTreePropSheet::OnInitDialog();
 	InitWindowStyles(this);
-	SetActivePage(m_nActiveWnd);
+
+	for (int i = 0; i < m_pages.GetSize(); i++)
+	{
+		if (GetPage(i)->m_psp.pszTemplate == m_pPshStartPage)
+		{
+			SetActivePage(i);
+			break;
+		}
+	}
+
 	Localize();	
 
 	//MORPH START - Added by SiRoB, Load a jpg
@@ -151,8 +157,6 @@ BOOL CPreferencesDlg::OnInitDialog()
 		m_banner.Attach(this, KCSB_ATTACH_RIGHT);
 		//Commander - Added: Preferences Banner [TPT] - End
 	}
-
-	m_iPrevPage = GetActiveIndex();
 	return bResult;
 }
 
@@ -177,7 +181,6 @@ void CPreferencesDlg::Localize()
 	m_wndMorph.Localize();//MORPH - Added by IceCream, Morph Prefs
 	m_wndMorphShare.Localize();//MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.Localize();//MORPH - Added by SiRoB, Morph Prefs
-//	m_wndMorph3.Localize(); //Commander - Added: Morph III
 	m_wndEastShare.Localize();
 	m_wndEmulespana.Localize(); //MORPH - Added by SiRoB, emulEspaña preferency
 	m_wndWebcachesettings.Localize(); //MORPH - Added by SiRoB, WebCache 1.2f
@@ -204,7 +207,6 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(15), RemoveAmbersand(_T("Morph")));
 		pTree->SetItemText(GetPageTreeItem(16), RemoveAmbersand(_T("Morph Share")));
 		pTree->SetItemText(GetPageTreeItem(17), RemoveAmbersand(_T("Morph Update")));
-		//pTree->SetItemText(GetPageTreeItem(??), RemoveAmbersand(_T("Morph DynDNS")));
 		pTree->SetItemText(GetPageTreeItem(18), RemoveAmbersand(_T("EastShare")));
 		pTree->SetItemText(GetPageTreeItem(19), RemoveAmbersand(_T("emulEspaña")));
 		pTree->SetItemText(GetPageTreeItem(20), RemoveAmbersand(GetResString(IDS_PW_WEBCACHE)));  //MORPH - Added by SiRoB, WebCache 1.2f
@@ -258,4 +260,9 @@ BOOL CPreferencesDlg::OnHelpInfo(HELPINFO* pHelpInfo)
 {
 	OnHelp();
 	return TRUE;
+}
+
+void CPreferencesDlg::SetStartPage(UINT uStartPageID)
+{
+	m_pPshStartPage = MAKEINTRESOURCE(uStartPageID);
 }

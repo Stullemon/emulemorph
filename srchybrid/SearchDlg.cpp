@@ -23,9 +23,9 @@
 #include "OtherFunctions.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -77,6 +77,7 @@ int CSearchDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_pwndResults = (CSearchResultsWnd*)CreateView(&context);
 	m_pwndParams->m_searchdlg = m_pwndResults;
 	m_pwndResults->ModifyStyle(WS_BORDER, 0);
+	m_pwndResults->ModifyStyleEx(WS_EX_CLIENTEDGE, WS_EX_STATICEDGE);
 
 	m_pwndParams->Create(this, IDD_SEARCH_PARAMS, 
 						 WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_SIZE_FIXED | CBRS_SIZE_DYNAMIC | CBRS_GRIPPER, 

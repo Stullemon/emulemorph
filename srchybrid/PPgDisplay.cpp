@@ -28,9 +28,9 @@
 #include "HelpIDs.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -155,6 +155,7 @@ BOOL CPPgDisplay::OnApply()
 	thePrefs.m_bShowDwlPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWDWLPERCENT);
 	thePrefs.m_bRemoveFinishedDownloads=(uint8)IsDlgButtonChecked(IDC_CLEARCOMPL);
 	thePrefs.m_bUseAutocompl=(uint8)IsDlgButtonChecked(IDC_DISABLEHIST);
+
 	if(IsDlgButtonChecked(IDC_UPDATEQUEUE))
 		thePrefs.m_bupdatequeuelist = false;
 	else
@@ -394,7 +395,7 @@ void CPPgDisplay::On3DDepth(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	DrawPreview();
-AddLogLine(true,"ding");
+theApp.AddLogLine(true,"ding");
 
 	*pResult = 0;
 }

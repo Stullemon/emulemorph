@@ -37,59 +37,64 @@ namespace Kademlia {
 class CPrefs
 {
 public:
-	
-	CPrefs(void);
+	CPrefs();
+	~CPrefs();
 
-	~CPrefs(void);
+	void	getKadID(CUInt128 *id) const		{id->setValue(m_clientID);}
+	void	getKadID(CString *id) const			{m_clientID.toHexString(id);}
+	void	setKadID(const CUInt128 &id)		{m_clientID = id;}
+	CUInt128 getKadID() const					{return m_clientID;}
 
-	void	getKadID(CUInt128 *id)		{id->setValue(m_clientID);}
-	void	getKadID(CString *id)		{m_clientID.toHexString(id);}
-	void	setKadID(const CUInt128 &id)	{m_clientID = id;}
-	CUInt128 getKadID(void)					{return m_clientID;}
-
-	void	getClientHash(CUInt128 *id)	{id->setValue(m_clientHash);}
-	void	getClientHash(CString *id)	{m_clientHash.toHexString(id);}
+	void	getClientHash(CUInt128 *id) const	{id->setValue(m_clientHash);}
+	void	getClientHash(CString *id) const	{m_clientHash.toHexString(id);}
 	void	setClientHash(const CUInt128 &id)	{m_clientHash = id;}
-	CUInt128 getClientHash(void)		{return m_clientHash;}
+	CUInt128 getClientHash() const				{return m_clientHash;}
 
-	uint32	getIPAddress(void)				{return m_ip;}
+	uint32	getIPAddress() const				{return m_ip;}
 	void	setIPAddress(uint32 val);
 
-	bool	getRecheckIP(void)				{return (m_recheckip<4);}
-	void	setRecheckIP(void)					{m_recheckip = 0;setFirewalled();}
-	void	incRecheckIP(void)					{m_recheckip++;}
+	bool	getRecheckIP() const				{return (m_recheckip<4);}
+	void	setRecheckIP()						{m_recheckip = 0;setFirewalled();}
+	void	incRecheckIP()						{m_recheckip++;}
 
-	bool	getLastContact(void);
-	void	setLastContact(void)			{m_lastContact = time(NULL);}
-	bool	hasLostConnection(void);
+	bool	hasHadContact() const;
+	void	setLastContact()					{m_lastContact = time(NULL);}
+	bool	hasLostConnection() const;
+	uint32	getLastContact() const				{return m_lastContact;}
 
-	bool	getFirewalled(void);
-	void	setFirewalled(void);
-	void	incFirewalled(void);
+	bool	getFirewalled() const;
+	void	setFirewalled();
+	void	incFirewalled();
 
-	uint8	getTotalFile(void)				{return m_totalFile;}
-	void	setTotalFile(uint8 val)			{m_totalFile = val;}
+	uint8	getTotalFile() const				{return m_totalFile;}
+	void	setTotalFile(uint8 val)				{m_totalFile = val;}
 
-	uint8	getTotalStoreSrc(void)			{return m_totalStoreSrc;}
-	void	setTotalStoreSrc(uint8 val)		{m_totalStoreSrc = val;}
+	uint8	getTotalStoreSrc() const			{return m_totalStoreSrc;}
+	void	setTotalStoreSrc(uint8 val)			{m_totalStoreSrc = val;}
 
-	uint8	getTotalStoreKey(void)			{return m_totalStoreKey;}
-	void	setTotalStoreKey(uint8 val)		{m_totalStoreKey = val;}
+	uint8	getTotalStoreKey() const			{return m_totalStoreKey;}
+	void	setTotalStoreKey(uint8 val)			{m_totalStoreKey = val;}
 
-	uint8	getTotalSource(void)			{return m_totalSource;}
-	void	setTotalSource(uint8 val)		{m_totalSource = val;}
+	uint8	getTotalSource() const				{return m_totalSource;}
+	void	setTotalSource(uint8 val)			{m_totalSource = val;}
 
-	uint32	getKademliaUsers(void)			{return m_kademliaUsers;}
-	void	setKademliaUsers(uint32 val)	{m_kademliaUsers = val;}
+	uint8	getTotalNotes() const				{return m_totalNotes;}
+	void	setTotalNotes(uint8 val)			{m_totalNotes = val;}
 
-	uint32	getKademliaFiles(void)			{return m_kademliaFiles;}
-	void	setKademliaFiles(void);
+	uint8	getTotalStoreNotes() const			{return m_totalStoreNotes;}
+	void	setTotalStoreNotes(uint8 val)		{m_totalStoreNotes = val;}
 
-	bool	getPublish(void)				{return m_Publish;}
-	void	setPublish(bool val)			{m_Publish = val;}
+	uint32	getKademliaUsers() const			{return m_kademliaUsers;}
+	void	setKademliaUsers(uint32 val)		{m_kademliaUsers = val;}
 
-	bool	getFindBuddy(void);
-	void	setFindBuddy( bool val = true)	{m_findBuddy = val;}
+	uint32	getKademliaFiles() const			{return m_kademliaFiles;}
+	void	setKademliaFiles();
+
+	bool	getPublish() const					{return m_Publish;}
+	void	setPublish(bool val)				{m_Publish = val;}
+
+	bool	getFindBuddy();
+	void	setFindBuddy(bool val = true)		{m_findBuddy = val;}
 
 private:
 	CString	m_filename;
@@ -107,15 +112,17 @@ private:
 	uint8		m_totalStoreSrc;
 	uint8		m_totalStoreKey;
 	uint8		m_totalSource;
+	uint8		m_totalNotes;
+	uint8		m_totalStoreNotes;
 	bool		m_Publish;
 	bool		m_findBuddy;
 	bool		m_lastFirewallState;
 
 	void init(LPCTSTR filename);
-	void reset(void);
-	void setDefaults(void);
-	void readFile(void);
-	void writeFile(void);
+	void reset();
+	void setDefaults();
+	void readFile();
+	void writeFile();
 };
 
 } // End namespace

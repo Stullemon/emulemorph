@@ -34,8 +34,6 @@ namespace Kademlia
 #include "SelCategoryDlg.h"
 // khaos::categorymod-
 
-#define WM_HOSTNAMERESOLVED		(WM_USER + 0x101)
-
 class CSourceHostnameResolveWnd : public CWnd
 {
 // Construction
@@ -59,7 +57,6 @@ private:
 	CTypedPtrList<CPtrList, Hostname_Entry*> m_toresolve;
 	char m_aucHostnameBuffer[MAXGETHOSTSTRUCT];
 };
-// SLUGFILLER: hostnameSources
 
 class CDownloadQueue
 {
@@ -68,7 +65,7 @@ class CDownloadQueue
 	friend class CServerSocket;
 
 public:
-	CDownloadQueue(CSharedFileList* in_sharedfilelist);
+	CDownloadQueue();
 	~CDownloadQueue();
 
 	void	Process();
@@ -199,7 +196,6 @@ private:
 	// SLUGFILLER: checkDiskspace
 	CTypedPtrList<CPtrList, CPartFile*> filelist;
 	CTypedPtrList<CPtrList, CPartFile*> m_localServerReqQueue;
-	CSharedFileList* sharedfilelist;
 	uint16	filesrdy;
 	uint32	datarate;
 	
@@ -224,7 +220,7 @@ private:
 	};
 	//MORPH START - Removed by SiRoB, sum datarate calculated for each file
 	/*
-	CList<TransferredData,TransferredData> avarage_dr_list;
+	CList<TransferredData> avarage_dr_list;
 	*/
 	//MORPH END   - Removed by SiRoB, sum datarate calculated for each file
 	

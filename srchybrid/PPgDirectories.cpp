@@ -24,11 +24,12 @@
 #include "SharedFileList.h"
 #include "Preferences.h"
 #include "HelpIDs.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -106,7 +107,8 @@ void CPPgDirectories::OnBnClickedSeltempdir()
 
 BOOL CPPgDirectories::OnApply()
 {
-	CString testdirchanged=thePrefs.GetTempDir();
+	CString testtempdirchanged=thePrefs.GetTempDir();
+	CString testincdirchanged=thePrefs.GetIncomingDir();
 
 	CString strIncomingDir;
 	GetDlgItemText(IDC_INCFILES, strIncomingDir);
@@ -176,8 +178,19 @@ BOOL CPPgDirectories::OnApply()
 
 	theApp.emuledlg->sharedfileswnd->Reload();
 
-	if (testdirchanged.CompareNoCase(thePrefs.GetTempDir())!=0)
+	if (testtempdirchanged.CompareNoCase(thePrefs.GetTempDir())!=0)
 		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
+	
+	// on changing incoming dir, update incoming dirs of category of the same path
+	if (testincdirchanged.CompareNoCase(thePrefs.GetIncomingDir())!=0) {
+		CString oldpath;
+		for (int cat=1; cat<=thePrefs.GetCatCount()-1;cat++){
+			oldpath=CString(thePrefs.GetCatPath(cat));
+			if (oldpath.Left(testincdirchanged.GetLength()).CompareNoCase(testincdirchanged)==0) {
+				_sntprintf(thePrefs.GetCategory(cat)->incomingpath, ARRSIZE(thePrefs.GetCategory(cat)->incomingpath), _T("%s%s"), thePrefs.GetIncomingDir(), oldpath.Mid(testincdirchanged.GetLength()));
+			}
+		}
+	}
 	
 	SetModified(0);
 	return CPropertyPage::OnApply();
@@ -185,7 +198,7 @@ BOOL CPPgDirectories::OnApply()
 
 BOOL CPPgDirectories::OnCommand(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == USRMSG_ITEMSTATECHANGED)
+	if (wParam == UM_ITEMSTATECHANGED)
 		SetModified();	
 	else if (wParam == ID_HELP)
 	{

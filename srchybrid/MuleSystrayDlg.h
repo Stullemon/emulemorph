@@ -17,6 +17,7 @@ protected:
 #if !defined(AFX_MULESYSTRAYDLG_H__A3BFC8BE_562C_4838_936D_C3D7CF647DA9__INCLUDED_)
 #define AFX_MULESYSTRAYDLG_H__A3BFC8BE_562C_4838_936D_C3D7CF647DA9__INCLUDED_
 
+
 #include "TrayMenuBtn.h"		// Added by ClassView
 #include "GradientStatic.h"	// Added by ClassView
 #include "resource.h"
@@ -25,6 +26,7 @@ protected:
 #endif // _MSC_VER > 1000
 // MuleSystrayDlg.h : header file
 //
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CMuleSystrayDlg dialog
@@ -68,6 +70,7 @@ protected:
 protected:
 	CTrayMenuBtn m_ctrlSpeed;
 	CTrayMenuBtn m_ctrlAllToMax;
+	/*CTrayMenuBtn m_ctrlAllToMin;*/
 	CTrayMenuBtn m_ctrlRestore;
 	CTrayMenuBtn m_ctrlDisconnect;
 	CTrayMenuBtn m_ctrlConnect;
@@ -102,8 +105,6 @@ protected:
 	afx_msg void OnCaptureChanged(CWnd *pWnd);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-public:
-
 };
 
 //{{AFX_INSERT_LOCATION}}

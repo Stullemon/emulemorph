@@ -33,9 +33,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 #define HTTP_STATUS_INV_RANGE	416
@@ -208,7 +208,7 @@ bool CPeerCacheDownSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT uSi
 
 bool CPeerCacheDownSocket::ProcessHttpRequest()
 {
-	throw CString("Unexpected HTTP request received");
+	throw CString(_T("Unexpected HTTP request received"));
 	return false;
 }
 
@@ -277,7 +277,7 @@ bool CPeerCacheUpSocket::ProcessHttpResponse()
 
 bool CPeerCacheUpSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT uSize)
 {
-	throw CString("Unexpected HTTP body in response received");
+	throw CString(_T("Unexpected HTTP body in response received"));
 	return false;
 }
 
@@ -324,11 +324,11 @@ bool CUpDownClient::ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHe
 	ASSERT( m_ePeerCacheDownState == PCDS_WAIT_CACHE_REPLY );
 
 	if (reqfile == NULL)
-		throw CString("Failed to process HTTP response - No 'reqfile' attached");
+		throw CString(_T("Failed to process HTTP response - No 'reqfile' attached"));
 	if (GetDownloadState() != DS_DOWNLOADING)
-		throw CString("Failed to process HTTP response - Invalid client download state");
+		throw CString(_T("Failed to process HTTP response - Invalid client download state"));
 	if (astrHeaders.GetCount() == 0)
-		throw CString("Unexpected HTTP response - No headers available");
+		throw CString(_T("Unexpected HTTP response - No headers available"));
 
 	const CStringA& rstrHdr = astrHeaders.GetAt(0);
 	UINT uHttpMajVer, uHttpMinVer, uHttpStatusCode;
@@ -629,7 +629,7 @@ bool CUpDownClient::SendHttpBlockRequests()
 
 	m_uReqStart = pending->block->StartOffset;
 	m_uReqEnd = pending->block->EndOffset;
-	m_nUrlStartPos = -1;
+	m_nUrlStartPos = (UINT)-1;
 
 	CStringA strPCRequest;
 	strPCRequest.AppendFormat("GET http://%s/.ed2khash=%s HTTP/1.0\r\n", ipstrA(m_uPeerCacheRemoteIP), md4strA(reqfile->GetFileHash()));
@@ -669,6 +669,7 @@ bool CUpDownClient::SendPeerCacheFileRequest()
 		ASSERT(0);
 		return false;
 	}
+
 	m_uPeerCacheDownloadPushId = GetRandomUInt32();
 
 	CSafeMemFile data(128);

@@ -36,17 +36,6 @@ class CSafeMemFile;
 struct SSearchTerm;
 
 
-// Thread messages recognized by an UDP Socket Listener thread
-#define WM_KADEMLIA_FIREWALLED_ACK		(WM_USER+0x200)
-
-// params for WM_KADEMLIA_FIREWALLED_ACK (to be deleted by receiving thread)
-typedef struct
-{
-	uint32 ip;
-	uint16 port;
-} KADEMLIAFIREWALLEDACK;
-
-
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////

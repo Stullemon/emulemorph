@@ -2,6 +2,17 @@
 #include "BtnST.h"
 #include "emule.h"
 #ifdef	BTNST_USE_SOUND
+#define MMNODRV			// mmsystem: Installable driver support
+//#define MMNOSOUND		// mmsystem: Sound support
+#define MMNOWAVE		// mmsystem: Waveform support
+#define MMNOMIDI		// mmsystem: MIDI support
+#define MMNOAUX			// mmsystem: Auxiliary audio support
+#define MMNOMIXER		// mmsystem: Mixer support
+#define MMNOTIMER		// mmsystem: Timer support
+#define MMNOJOY			// mmsystem: Joystick support
+#define MMNOMCI			// mmsystem: MCI support
+#define MMNOMMIO		// mmsystem: Multimedia file I/O support
+#define MMNOMMSYSTEM	// mmsystem: General MMSYSTEM functions
 #include <Mmsystem.h>
 #endif
 
@@ -10,6 +21,7 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CButtonST
@@ -146,16 +158,22 @@ void CButtonST::FreeResources(BOOL bCheckForNULL)
 		// Destroy icons
 		// Note: the following two lines MUST be here! even if
 		// BoundChecker says they are unnecessary!
-		if (m_csIcons[0].hIcon)	::DestroyIcon(m_csIcons[0].hIcon);
-		if (m_csIcons[1].hIcon)	::DestroyIcon(m_csIcons[1].hIcon);
+		if (m_csIcons[0].hIcon)
+			VERIFY( ::DestroyIcon(m_csIcons[0].hIcon) );
+		if (m_csIcons[1].hIcon)
+			VERIFY( ::DestroyIcon(m_csIcons[1].hIcon) );
 
 		// Destroy bitmaps
-		if (m_csBitmaps[0].hBitmap)	::DeleteObject(m_csBitmaps[0].hBitmap);
-		if (m_csBitmaps[1].hBitmap)	::DeleteObject(m_csBitmaps[1].hBitmap);
+		if (m_csBitmaps[0].hBitmap)
+			VERIFY( ::DeleteObject(m_csBitmaps[0].hBitmap) );
+		if (m_csBitmaps[1].hBitmap)
+			VERIFY( ::DeleteObject(m_csBitmaps[1].hBitmap) );
 
 		// Destroy mask bitmaps
-		if (m_csBitmaps[0].hMask)	::DeleteObject(m_csBitmaps[0].hMask);
-		if (m_csBitmaps[1].hMask)	::DeleteObject(m_csBitmaps[1].hMask);
+		if (m_csBitmaps[0].hMask)
+			VERIFY( ::DeleteObject(m_csBitmaps[0].hMask) );
+		if (m_csBitmaps[1].hMask)
+			VERIFY( ::DeleteObject(m_csBitmaps[1].hMask) );
 	} // if
 
 	::ZeroMemory(&m_csIcons, sizeof(m_csIcons));
@@ -613,7 +631,8 @@ void CButtonST::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 		if (m_bIsFocused)
 		{
 			CRect focusRect = itemRect;
-			focusRect.DeflateRect(3, 3);
+			if (!m_bIsFlat)
+				focusRect.DeflateRect(3, 3);
 			pDC->DrawFocusRect(&focusRect);
 		} // if
 	} // if
@@ -841,7 +860,7 @@ void CButtonST::DrawTheBitmap(CDC* pDC, BOOL bHasTitle, RECT* rpItem, CRect* rpC
 						CSize(m_csBitmaps[byIndex].dwWidth, m_csBitmaps[byIndex].dwHeight), 
 						hBitmap, DST_BITMAP | DSS_DISABLED);
 
-		::DeleteObject(hBitmap);
+		VERIFY( ::DeleteObject(hBitmap) );
 	} // if
 	else
 	{
@@ -980,14 +999,14 @@ HICON CButtonST::CreateGrayscaleIcon(HICON hIcon)
 			hGrayIcon = ::CreateIconIndirect(&csGrayII);
 		} // if
 
-		::DeleteObject(csGrayII.hbmColor);
+		VERIFY( ::DeleteObject(csGrayII.hbmColor) );
 		//::DeleteObject(csGrayII.hbmMask);
 	} // if
 
-	::DeleteObject(csII.hbmColor);
-	::DeleteObject(csII.hbmMask);
-	::DeleteDC(hMemDC1);
-	::DeleteDC(hMemDC2);
+	VERIFY( ::DeleteObject(csII.hbmColor) );
+	VERIFY( ::DeleteObject(csII.hbmMask) );
+	VERIFY( ::DeleteDC(hMemDC1) );
+	VERIFY( ::DeleteDC(hMemDC2) );
 	::ReleaseDC(NULL, hMainDC);
 
 	return hGrayIcon;
@@ -1070,8 +1089,8 @@ DWORD CButtonST::SetIcon(HICON hIconIn, HICON hIconOut)
 
 		m_csIcons[0].dwWidth	= (DWORD)(ii.xHotspot * 2);
 		m_csIcons[0].dwHeight	= (DWORD)(ii.yHotspot * 2);
-		::DeleteObject(ii.hbmMask);
-		::DeleteObject(ii.hbmColor);
+		VERIFY( ::DeleteObject(ii.hbmMask) );
+		VERIFY( ::DeleteObject(ii.hbmColor) );
 
 		// Icon when mouse outside button?
 		if (hIconOut)
@@ -1093,8 +1112,8 @@ DWORD CButtonST::SetIcon(HICON hIconIn, HICON hIconOut)
 
 			m_csIcons[1].dwWidth	= (DWORD)(ii.xHotspot * 2);
 			m_csIcons[1].dwHeight	= (DWORD)(ii.yHotspot * 2);
-			::DeleteObject(ii.hbmMask);
-			::DeleteObject(ii.hbmColor);
+			VERIFY( ::DeleteObject(ii.hbmMask) );
+			VERIFY( ::DeleteObject(ii.hbmColor) );
 		} // if
 	} // if
 

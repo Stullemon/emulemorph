@@ -30,10 +30,11 @@
 #include "clientlist.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
+
 
 #define	ONBOOTSTRAP_STRINGS_PROFILE	_T("AC_BootstrapIPs.dat")
 
@@ -226,11 +227,11 @@ void CKademliaWnd::OnSysColorChange()
 void CKademliaWnd::SetAllIcons()
 {
 	// frames
-	m_ctrlBootstrap.Init(_T("KADBOOTSTRAP"));
+	m_ctrlBootstrap.SetIcon(_T("KadBootstrap"));
 
 	if (icon_kadcont)
 		VERIFY( DestroyIcon(icon_kadcont) );
-	icon_kadcont = theApp.LoadIcon(_T("KADContactList"), 16, 16);
+	icon_kadcont = theApp.LoadIcon(_T("KadContactList"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_KADICO1))->SetIcon(icon_kadcont);
 
 	if (icon_kadsea)
@@ -241,8 +242,7 @@ void CKademliaWnd::SetAllIcons()
 
 void CKademliaWnd::Localize()
 {
-	m_ctrlBootstrap.SetText(GetResString(IDS_BOOTSTRAP));
-	//GetDlgItem(IDC_BSSTATIC)->SetWindowText(GetResString(IDS_BOOTSTRAP));
+	m_ctrlBootstrap.SetWindowText(GetResString(IDS_BOOTSTRAP));
 	GetDlgItem(IDC_BOOTSTRAPBUTTON)->SetWindowText(GetResString(IDS_BOOTSTRAP));
 	GetDlgItem(IDC_SSTATIC4)->SetWindowText(GetResString(IDS_SV_ADDRESS) + _T(":"));
 	GetDlgItem(IDC_SSTATIC7)->SetWindowText(GetResString(IDS_SV_PORT) + _T(":"));

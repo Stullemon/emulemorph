@@ -5,8 +5,6 @@
 
 #pragma once
 
-#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
@@ -30,6 +28,10 @@
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 #define _ATL_ALL_WARNINGS
 #define _AFX_ALL_WARNINGS
+#ifdef _DEBUG
+#define	_ATL_DEBUG
+#define _ATL_DEBUG_QI
+#endif
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
@@ -52,6 +54,8 @@
 #include <afxcoll.h>
 #include <afxtempl.h>
 
+#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+
 //TODO: To be removed and properly resolved in the sources!!
 #pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union
 #pragma warning(disable:4244) // 'conversion' conversion from 'type1' to 'type2', possible loss of data
@@ -60,7 +64,6 @@
 // whenn using warning level 4
 #pragma warning(disable:4100) // unreferenced formal parameter
 #pragma warning(disable:4238) // nonstandard extension used : class rvalue used as lvalue
-#pragma warning(disable:4211) // nonstandard extension used : redefined extern to static
 #pragma warning(disable:4389) // signed/unsigned mismatch
 
 #include "types.h"
@@ -77,10 +80,10 @@
 #endif
 
 #ifdef _UNICODE
-typedef	CArray<CStringA,CStringA> CStringAArray;
+typedef	CArray<CStringA> CStringAArray;
 typedef	CStringArray CStringWArray;
 #else
-typedef	CArray<CStringW,CStringW> CStringWArray;
+typedef	CArray<CStringW> CStringWArray;
 typedef	CStringArray CStringAArray;
 #endif
 

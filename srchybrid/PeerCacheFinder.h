@@ -85,8 +85,8 @@ private:
 	uint16	m_nPCPort;
 	uint32	m_nDownloadAttempts;
 	uint32	m_nFailedDownloads;
-	CArray<CClientVersionInfo, CClientVersionInfo> liBannedVersions;
-	CArray<CClientVersionInfo, CClientVersionInfo> liAllowedVersions;
+	CArray<CClientVersionInfo> liBannedVersions;
+	CArray<CClientVersionInfo> liAllowedVersions;
 	CMutex	m_SettingsMutex;
 
 };

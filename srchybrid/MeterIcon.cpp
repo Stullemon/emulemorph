@@ -5,9 +5,9 @@
 #include "MeterIcon.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -39,7 +39,7 @@ CMeterIcon::~CMeterIcon()
 		delete []m_pColors;
 }
 
-COLORREF CMeterIcon::GetMeterColor(int nLevel)
+COLORREF CMeterIcon::GetMeterColor(int nLevel) const
 // it the nLevel is greater than the values defined in m_pLimits the last value in the array is used
 {// begin GetMeterColor
 	for(int i = 0;i < m_nEntries;i++)
@@ -53,7 +53,7 @@ COLORREF CMeterIcon::GetMeterColor(int nLevel)
 	return m_pColors[m_nEntries-1];
 }// end GetMeterColor
 
-HICON CMeterIcon::CreateMeterIcon(int *pBarData)
+HICON CMeterIcon::CreateMeterIcon(const int *pBarData)
 // the returned icon must be cleaned up using DestroyIcon()
 {// begin CreateMeterIcon
 	ICONINFO iiNewIcon={0};
@@ -221,7 +221,7 @@ HICON CMeterIcon::SetFrame(HICON hIcon)
 	return hOld;
 }// end SetFrame
 
-HICON CMeterIcon::Create(int *pBarData)
+HICON CMeterIcon::Create(const int *pBarData)
 // must call init once before calling
 {// begin Create
 	if(!m_bInit)
@@ -282,7 +282,7 @@ COLORREF CMeterIcon::SetBorderColor(COLORREF crColor)
 	return crOld;
 }// end SetBorderColor
 
-bool CMeterIcon::SetColorLevels(int *pLimits, COLORREF *pColors,int nEntries)
+bool CMeterIcon::SetColorLevels(const int* pLimits, const COLORREF* pColors, int nEntries)
 // pLimits is an array of int that contain the upper limit for the corresponding color
 {// begin SetColorLevels
 	// free exsisting memory

@@ -16,10 +16,11 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "MuleListCtrl.h"
+#include "ListCtrlItemWalk.h"
 
 class CUpDownClient;
 
-class CClientListCtrl : public CMuleListCtrl
+class CClientListCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
 	DECLARE_DYNAMIC(CClientListCtrl)
 

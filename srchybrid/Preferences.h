@@ -26,6 +26,8 @@ enum EViewSharedFilesAccess{
 	vsfaNobody = 2
 };
 
+enum EToolbarLabelType;
+
 // DO NOT EDIT VALUES like making a uint16 to uint32, or insert any value. ONLY append new vars
 #pragma pack(1)
 struct Preferences_Ext_Struct{
@@ -99,6 +101,7 @@ struct Category_Struct{
 	TCHAR	incomingpath[MAX_PATH];
 	TCHAR	title[64];
 	TCHAR	comment[255];
+
 	DWORD	color;
 	uint8	prio;
 	// khaos::kmod+ Category Advanced A4AF Mode
@@ -112,20 +115,18 @@ struct Category_Struct{
 	//MORPH - Removed by SiRoB, Due to Khaos Categorie
 	/*
 	CString autocat;
+	bool	ac_regexpeval;
 	*/
 	BOOL    downloadInAlphabeticalOrder; // ZZ:DownloadManager
+	/*
+	int		filter;
+	bool	filterNeg;
+	bool	care4all;
+
+	CString	regexp;
+	*/
 };
 #pragma pack()
-//MORPH START - Added by SiRoB, DynDNS
-#pragma pack(1)
-struct DynDNS_Struct{
-	bool	Enabled;
-	TCHAR	Username[256];
-	TCHAR	Password[256];
-	TCHAR	Hostname[256];
-};
-#pragma pack()
-//MORPH END - Added by SiRoB, DynDNS
 
 class CPreferences
 {
@@ -154,9 +155,10 @@ public:
 	static	uint8	autotakeed2klinks;	   // Barry
 	static	uint8	addnewfilespaused;	   // Barry
 	static	uint8	depth3D;			   // Barry
+	static	bool	m_bEnableMiniMule;
 	static	int		m_iStraightWindowStyles;
-	static	TCHAR	m_szSkinProfile[MAX_PATH];
-	static	TCHAR	m_szSkinProfileDir[MAX_PATH];
+	static	CString	m_strSkinProfile;
+	static	CString	m_strSkinProfileDir;
 	static	uint8	addserversfromserver;
 	static	uint8	addserversfromclient;
 	static	uint16	maxsourceperfile;
@@ -197,7 +199,7 @@ public:
 	static	uint16	FilenamesListColumnWidths[2];
 	static	BOOL	FilenamesListColumnHidden[2];
 	static	INT		FilenamesListColumnOrder[2];
-	static	DWORD	statcolors[15];
+	static	DWORD	m_adwStatsColors[15];
 
 	static	uint8	splashscreen;
 	static	uint8	startupsound;//Commander - Added: Enable/Disable Startupsound
@@ -256,9 +258,11 @@ public:
 	// Cumulative port breakdown stats for sent bytes...
 	static	uint64	cumUpDataPort_4662;
 	static	uint64	cumUpDataPort_OTHER;
+	static	uint64	cumUpDataPort_PeerCache;
 	// Session port breakdown stats for sent bytes...
 	static	uint64	sesUpDataPort_4662;
 	static	uint64	sesUpDataPort_OTHER;
+	static	uint64	sesUpDataPort_PeerCache;
 
 	// Cumulative source breakdown stats for sent bytes...
 	static	uint64	cumUpData_File;
@@ -315,9 +319,11 @@ public:
 	// Cumulative port breakdown stats for received bytes...
 	static	uint64	cumDownDataPort_4662;
 	static	uint64	cumDownDataPort_OTHER;
+	static	uint64	cumDownDataPort_PeerCache;
 	// Session port breakdown stats for received bytes...
 	static	uint64	sesDownDataPort_4662;
 	static	uint64	sesDownDataPort_OTHER;
+	static	uint64	sesDownDataPort_PeerCache;
 
 	// Saved stats for cumulative connection data...
 	static	float	cumConnAvgDownRate;
@@ -416,7 +422,7 @@ public:
 	static	bool	m_birchelpchannel;
 
 	static	bool	m_bRemove2bin;
-
+	static	bool	m_bShowCopyEd2kLinkCmd;
 	static	bool	m_bpreviewprio;
 	static	bool	smartidcheck;
 	static	uint8	smartidstate;
@@ -431,7 +437,7 @@ public:
 	static	int		checkDiskspace; // SLUGFILLER: checkDiskspace
 	static	UINT	m_uMinFreeDiskSpace;
 	static	bool	m_bSparsePartFiles;
-	static	TCHAR	yourHostname[127];	// itsonlyme: hostnameSource
+	static	CString	m_strYourHostname;
 	static	bool	m_bEnableVerboseOptions;
 	static	bool	m_bVerbose;
 	//MORPH START - Added by SiRoB, XML News [O²]
@@ -506,6 +512,7 @@ public:
 	static	int		m_iPreviewSmallBlocks;
 	static	int		m_iPreviewCopiedArchives;
 	static	int		m_iInspectAllFileTypes;
+	static	bool	m_bPreviewOnIconDblClk;
 	static	bool	indicateratings;
 	static	bool	watchclipboard;
 	static	bool	filterserverbyip;
@@ -589,10 +596,12 @@ public:
 	static	bool	networked2k;
 
 	// toolbar
-	static	uint8	m_nToolbarLabels;
-	static	TCHAR	m_sToolbarBitmap[256];
-	static	TCHAR	m_sToolbarBitmapFolder[256];
-	static	TCHAR	m_sToolbarSettings[256];
+	static	EToolbarLabelType m_nToolbarLabels;
+	static	CString	m_sToolbarBitmap;
+	static	CString	m_sToolbarBitmapFolder;
+	static	CString	m_sToolbarSettings;
+	static	bool	m_bReBarToolbar;
+	static	CSize	m_sizToolbarIconSize;
 
 	//preview
 	static	bool	m_bPreviewEnabled;
@@ -832,6 +841,7 @@ public:
 	static	bool	m_bPeerCacheWasFound;
 	static	bool	m_bPeerCacheEnabled;
 	static	uint16	m_nPeerCachePort;
+	static	bool	m_bPeerCacheShow;
 
 	// Firewall settings
 	static bool		m_bOpenPortsOnStartUp;
@@ -1007,7 +1017,7 @@ public:
 	static	void	Add2ConnDownloadTime(int in)		{ cumConnDownloadTime += in; }
 	static	void	Add2ConnUploadTime(int in)			{ cumConnUploadTime += in; }
 	static	void	Add2DownSessionCompletedFiles()		{ sesDownCompletedFiles++; }
-	static	void	Add2SessionTransferData				( uint8 uClientID , uint16 uClientPort , BOOL bFromPF, BOOL bUpDown, uint32 bytes, bool sentToFriend = false);
+	static	void	Add2SessionTransferData				(UINT uClientID, UINT uClientPort, BOOL bFromPF, BOOL bUpDown, uint32 bytes, bool sentToFriend = false);
 	static	void	Add2DownSuccessfulSessions()		{ sesDownSuccessfulSessions++;
 														  cumDownSuccessfulSessions++; }
 	static	void	Add2DownFailedSessions()			{ sesDownFailedSessions++;
@@ -1097,13 +1107,20 @@ public:
 	static	uint64	GetUpData_SHAREAZA()				{ return sesUpData_SHAREAZA;}
 
 	// Cumulative port breakdown stats for sent bytes...
-	static	uint64	GetUpTotalPortData()			{ return (GetCumUpDataPort_4662() +			GetCumUpDataPort_OTHER() );}
+	static	uint64	GetUpTotalPortData()			{ return   GetCumUpDataPort_4662() 
+															 + GetCumUpDataPort_OTHER()
+															 + GetCumUpDataPort_PeerCache(); }
 	static	uint64	GetCumUpDataPort_4662()			{ return (cumUpDataPort_4662 +		sesUpDataPort_4662 );}
 	static	uint64	GetCumUpDataPort_OTHER()		{ return (cumUpDataPort_OTHER +		sesUpDataPort_OTHER );}
+	static	uint64	GetCumUpDataPort_PeerCache()	{ return (cumUpDataPort_PeerCache +	sesUpDataPort_PeerCache );}
+
 	// Session port breakdown stats for sent bytes...
-	static	uint64	GetUpSessionPortData()			{ return (sesUpDataPort_4662 +		sesUpDataPort_OTHER );}
+	static	uint64	GetUpSessionPortData()			{ return   sesUpDataPort_4662 
+															 + sesUpDataPort_OTHER
+															 + sesUpDataPort_PeerCache; }
 	static	uint64	GetUpDataPort_4662()			{ return sesUpDataPort_4662;}
 	static	uint64	GetUpDataPort_OTHER()			{ return sesUpDataPort_OTHER;}
+	static	uint64	GetUpDataPort_PeerCache()		{ return sesUpDataPort_PeerCache; }
 
 	// Cumulative DS breakdown stats for sent bytes...
 	static	uint64	GetUpTotalDataFile()			{ return (GetCumUpData_File() +				GetCumUpData_Partfile() );}
@@ -1160,13 +1177,20 @@ public:
 	// MORPH END - Added by Commander, WebCache 1.2e
 
 	// Cumulative port breakdown stats for received bytes...
-	static	uint64	GetDownTotalPortData()			{ return (GetCumDownDataPort_4662() +			GetCumDownDataPort_OTHER() );}
-	static	uint64	GetCumDownDataPort_4662()		{ return (cumDownDataPort_4662 +			sesDownDataPort_4662 );}
-	static	uint64	GetCumDownDataPort_OTHER()		{ return (cumDownDataPort_OTHER +		sesDownDataPort_OTHER );}
+	static	uint64	GetDownTotalPortData()			{ return   GetCumDownDataPort_4662() 
+															 + GetCumDownDataPort_OTHER()
+															 + GetCumDownDataPort_PeerCache(); }
+	static	uint64	GetCumDownDataPort_4662()		{ return cumDownDataPort_4662		+ sesDownDataPort_4662; }
+	static	uint64	GetCumDownDataPort_OTHER()		{ return cumDownDataPort_OTHER		+ sesDownDataPort_OTHER; }
+	static	uint64	GetCumDownDataPort_PeerCache()	{ return cumDownDataPort_PeerCache	+ sesDownDataPort_PeerCache; }
+
 	// Session port breakdown stats for received bytes...
-	static	uint64	GetDownSessionDataPort()		{ return (sesDownDataPort_4662 +			sesDownDataPort_OTHER );}
+	static	uint64	GetDownSessionDataPort()		{ return   sesDownDataPort_4662 
+															 + sesDownDataPort_OTHER
+															 + sesDownDataPort_PeerCache; }
 	static	uint64	GetDownDataPort_4662()			{ return sesDownDataPort_4662;}
 	static	uint64	GetDownDataPort_OTHER()			{ return sesDownDataPort_OTHER;}
+	static	uint64	GetDownDataPort_PeerCache()		{ return sesDownDataPort_PeerCache; }
 
 	//		Saved stats for cumulative connection data
 	static	float	GetConnAvgDownRate()			{ return cumConnAvgDownRate;}
@@ -1289,10 +1313,13 @@ public:
 	// <-----khaos-
 	static	uint8	UseFlatBar()						{return (depth3D==0);}
 	static	int		GetStraightWindowStyles()			{return m_iStraightWindowStyles;}
-	static	LPCTSTR GetSkinProfile()					{return m_szSkinProfile;}
-	static	CString GetSkinProfileDir()					{return m_szSkinProfileDir;}
-	static	void	SetSkinProfile(LPCTSTR pszProfile)	{_sntprintf(m_szSkinProfile, ARRSIZE(m_szSkinProfile), _T("%s"), pszProfile); }
-	static	void	SetSkinProfileDir(LPCTSTR pszDir)	{_sntprintf(m_szSkinProfileDir, ARRSIZE(m_szSkinProfileDir), _T("%s"), pszDir); }
+
+	static	const CString& GetSkinProfile()				{return m_strSkinProfile;}
+	static	void	SetSkinProfile(LPCTSTR pszProfile)	{m_strSkinProfile = pszProfile; }
+
+	static	const CString& GetSkinProfileDir()			{return m_strSkinProfileDir;}
+	static	void	SetSkinProfileDir(LPCTSTR pszDir)	{m_strSkinProfileDir = pszDir; }
+
 	static	uint8	GetStatsAverageMinutes()			{return statsAverageMinutes;}
 	static	void	SetStatsAverageMinutes(uint8 in)	{statsAverageMinutes=in;}
 
@@ -1305,6 +1332,7 @@ public:
 	static	bool	GetNotifierPopOnImportantError()	{return notifierImportantError;}
 	static	bool	GetNotifierPopOnNewVersion()		{return notifierNewVersion;}
 	static	TCHAR*	GetNotifierWavSoundPath()			{return notifierSoundFilePath;}
+	static	bool	GetEnableMiniMule()					{return m_bEnableMiniMule;}
 
 	static	CString GetIRCNick()						{return m_sircnick;}
 	static	void	SetIRCNick( TCHAR in_nick[] )		{ _tcscpy(m_sircnick,in_nick);}
@@ -1372,6 +1400,7 @@ public:
 	static	UINT	GetFileBufferSize()					{return m_iFileBufferSize;}
 	static	UINT	GetQueueSize()						{return m_iQueueSize;}
 	static	int		GetCommitFiles()					{return m_iCommitFiles;}
+	static	bool	GetShowCopyEd2kLinkCmd()			{return m_bShowCopyEd2kLinkCmd;}
 
 	// Barry
 	static	uint16	Get3DDepth() { return depth3D;}
@@ -1381,8 +1410,13 @@ public:
 	static	bool	TransferlistRemainSortStyle()	{ return m_bTransflstRemain;}
 	static	void	TransferlistRemainSortStyle(bool in)	{ m_bTransflstRemain=in;}
 
-	static	void	SetStatsColor(int index,DWORD value) {statcolors[index]=value;}
-	static	DWORD	GetStatsColor(int index)			{return statcolors[index];}
+	static	DWORD	GetStatsColor(int index)			{return m_adwStatsColors[index];}
+	static	void	SetStatsColor(int index, DWORD value){m_adwStatsColors[index] = value;}
+	static	int		GetNumStatsColors()					{return ARRSIZE(m_adwStatsColors);}
+	static	void	GetAllStatsColors(int iCount, LPDWORD pdwColors);
+	static	bool	SetAllStatsColors(int iCount, const DWORD* pdwColors);
+	static	void	ResetStatsColor(int index);
+
 	static	void	SetMaxConsPerFive(int in)			{MaxConperFive=in;}
 	static	LPLOGFONT GetHyperTextLogFont()				{return &m_lfHyperText;}
 	static	void	SetHyperTextFont(LPLOGFONT plf)		{m_lfHyperText = *plf;}
@@ -1398,7 +1432,6 @@ public:
 	static	uint16	GetMaxConperFive()					{return MaxConperFive;}
 	static	uint16	GetDefaultMaxConperFive();
 
-	static	void	ResetStatsColor(int index);
 	static	bool	IsSafeServerConnectEnabled()		{return safeServerConnect;}
 	static	void	SetSafeServerConnectEnabled(bool in){safeServerConnect=in;}
 	static	bool	IsMoviePreviewBackup()				{return moviePreviewBackup;}
@@ -1408,10 +1441,8 @@ public:
 	static	int		GetExtractMetaData()				{return m_iExtractMetaData;}
 	static	bool	GetAdjustNTFSDaylightFileTime()		{return m_bAdjustNTFSDaylightFileTime;}
 
-	// itsonlyme: hostnameSource
-	static	TCHAR*	GetYourHostname()					{return yourHostname;}
-	static	void	SetYourHostname(CString in)			{_stprintf(yourHostname,_T("%s"),in);}
-	// itsonlyme: hostnameSource
+	static	const CString& GetYourHostname()			{return m_strYourHostname;}
+	static	void	SetYourHostname(LPCTSTR pszHostname){m_strYourHostname = pszHostname;}
 	static	bool	IsCheckDiskspaceEnabled()			{return checkDiskspace != 0;}	// SLUGFILLER: checkDiskspace
 	static	UINT	GetMinFreeDiskSpace()				{return m_uMinFreeDiskSpace;}
 	static	bool	GetSparsePartFiles()				{return m_bSparsePartFiles;}
@@ -1442,6 +1473,7 @@ public:
 	static	void	LoadCats();
 	static	CString GetDateTimeFormat()		{ return CString(datetimeformat);}
 	static	CString GetDateTimeFormat4Log() { return CString(datetimeformat4log);}
+
 	// Download Categories (Ornis)
 	static	int		AddCat(Category_Struct* cat) { catMap.Add(cat); return catMap.GetCount()-1;}
 	static	bool	MoveCat(UINT from, UINT to);
@@ -1457,10 +1489,8 @@ public:
 	static	TCHAR*	GetCatPath(uint8 index) { return catMap.GetAt(index)->incomingpath;}
 	static	DWORD	GetCatColor(uint8 index)	{ if (index>=0 && index<catMap.GetCount()) return catMap.GetAt(index)->color; else return 0;}
 
+	static	bool	GetPreviewOnIconDblClk() { return m_bPreviewOnIconDblClk; }
 	static	bool	ShowRatingIndicator()	{ return indicateratings;}
-	// khaos::kmod+ Obsolete static	int		GetAllcatType()			{ return allcatType;}
-	// khaos::kmod+ Obsolete static	void	SetAllcatType(int in)	{ allcatType=in; }
-
 	static	bool	WatchClipboard4ED2KLinks()	{ return watchclipboard;}
 	static	bool	GetRemoveToBin()			{ return m_bRemove2bin;}
 	static	bool	FilterServerByIP()		{ return filterserverbyip;}
@@ -1571,14 +1601,18 @@ public:
 	//MORPH END - Added by Commander, FolderIcons
 
 	//Toolbar
-	static	CString GetToolbarSettings()						{ return m_sToolbarSettings; }
-	static	void	SetToolbarSettings(CString in)				{ _stprintf(m_sToolbarSettings,_T("%s"),in);}
-	static	CString GetToolbarBitmapSettings()					{ return m_sToolbarBitmap; }
-	static	void	SetToolbarBitmapSettings(CString path)		{ _stprintf(m_sToolbarBitmap,_T("%s"),path);}
-	static	CString GetToolbarBitmapFolderSettings()			{ return m_sToolbarBitmapFolder; }
-	static	void	SetToolbarBitmapFolderSettings(CString path){ _stprintf(m_sToolbarBitmapFolder,_T("%s"),path); }
-	static	uint8	GetToolbarLabelSettings()					{ return m_nToolbarLabels; }
-	static	void	SetToolbarLabelSettings(uint8 settings)		{ m_nToolbarLabels= settings; }
+	static	const CString& GetToolbarSettings()					{ return m_sToolbarSettings; }
+	static	void	SetToolbarSettings(const CString& in)		{ m_sToolbarSettings = in; }
+	static	const CString& GetToolbarBitmapSettings()			{ return m_sToolbarBitmap; }
+	static	void	SetToolbarBitmapSettings(const CString& path){ m_sToolbarBitmap = path; }
+	static	const CString& GetToolbarBitmapFolderSettings()		{ return m_sToolbarBitmapFolder; }
+	static	void	SetToolbarBitmapFolderSettings(const CString& path){ m_sToolbarBitmapFolder = path; }
+	static	EToolbarLabelType GetToolbarLabelSettings()			{ return m_nToolbarLabels; }
+	static	void	SetToolbarLabelSettings(EToolbarLabelType eLabelType) { m_nToolbarLabels = eLabelType; }
+	static	bool	GetReBarToolbar()							{ return m_bReBarToolbar; }
+	static	bool	GetUseReBarToolbar();
+	static	CSize	GetToolbarIconSize()						{ return m_sizToolbarIconSize; }
+	static	void	SetToolbarIconSize(CSize siz)				{ m_sizToolbarIconSize = siz; }
 
 	static	int		GetSearchMethod()							{ return m_iSearchMethod; }
 	static	void	SetSearchMethod(int iMethod)				{ m_iSearchMethod = iMethod; }
@@ -1596,7 +1630,7 @@ public:
 	// ZZ:UploadSpeedSense <--
 
     static bool     GetA4AFSaveCpu()                            { return m_bA4AFSaveCpu; } // ZZ:DownloadManager
-	// ZZ:UploadSpeedSense <--
+
 	static	CString	GetHomepageBaseURL()						{ return GetHomepageBaseURLForLevel(GetWebMirrorAlertLevel()); }
 	static	CString	GetVersionCheckBaseURL();					
 	static	void	SetWebMirrorAlertLevel(uint8 newValue)		{ m_nWebMirrorAlertLevel = newValue; }
@@ -1614,6 +1648,7 @@ public:
 	static	void	SetPeerCacheWasFound(bool bFound)			{ m_bPeerCacheWasFound = bFound; }
 	static	uint16	GetPeerCachePort()							{ return m_nPeerCachePort; }
 	static	void	SetPeerCachePort(uint16 nPort)				{ m_nPeerCachePort = nPort; }
+	static	bool	GetPeerCacheShow()							{ return m_bPeerCacheShow; }
 
 	// Verbose log options
 	static	bool	GetEnableVerboseOptions()			{return m_bEnableVerboseOptions;}
@@ -1641,6 +1676,7 @@ public:
 
 	// Firewall settings
 	static  bool	IsOpenPortsOnStartupEnabled()		{return m_bOpenPortsOnStartUp; }
+	
 	//AICH Hash
 	static	bool	IsTrustingEveryHash()				{return m_bTrustEveryHash;} // this is a debug option
 
@@ -1837,15 +1873,6 @@ public:
 	static	uint32	GetMaxClientDataRate();
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
-	//MORPH START - Added by SiRoB, DynDNS
-	static	void	SaveDynDNS();
-	static	void	LoadDynDNS();
-	static	int		AddDynDNSAccount(DynDNS_Struct* DynDNSAccount) { DynDNSMap.Add(DynDNSAccount); return DynDNSMap.GetCount()-1;}
-	static	DynDNS_Struct* GetDynDNSAccount(int index) { if (index>=0 && index<DynDNSMap.GetCount()) return DynDNSMap.GetAt(index); else return NULL;}
-	static	void	RemoveDynDNSAccount(int index);
-	static	int		GetDynDNSCount()			{ return DynDNSMap.GetCount();}
-	//MORPH END   - Added by SiRoB, DynDNS
-
 protected:
 	static	CString appdir;
 	static	CString configdir;
@@ -1868,9 +1895,6 @@ protected:
 	static void LoadPreferences();
 	static void SavePreferences();
 	static CString GetHomepageBaseURLForLevel(uint8 nLevel);
-	//MORPH START -  Added by SiRoB, DynDNS
-	static	CArray<DynDNS_Struct*,DynDNS_Struct*> DynDNSMap;
-	//MORPH END   -  Added by SiRoB, DynDNS
 public:
 	//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 	static	bool	GetUPnPNat()						{ return m_bUPnPNat; }

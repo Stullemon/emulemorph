@@ -30,9 +30,9 @@
 // MORPH END - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -110,11 +110,7 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 	}
 	catch(CString ex)
 	{
-#ifdef _DEBUG
 		strError.Format(_T("Error: HTTP socket: %s; %s"), ex, DbgGetClientInfo());
-#else
-		strError.Format(_T("Error: HTTP socket: %s"), ex);
-#endif
 		if (thePrefs.GetVerbose())
 			AddDebugLogLine(false, _T("%s"), strError);
 		// MORPH START - Added by Commander, WebCache 1.2e
@@ -181,7 +177,7 @@ bool CHttpClientReqSocket::ProcessHttpPacket(const BYTE* pucData, UINT uSize)
 			theStats.AddDownDataOverheadFileRequest(iSizeHeader);
 
 			if (iSizeBody < 0)
-				throw CString("Internal HTTP header/body parsing error");
+				throw CString(_T("Internal HTTP header/body parsing error"));
 
 			if (m_astrHttpHeaders[0].GetLength() >= 4 && memcmp((LPCSTR)m_astrHttpHeaders[0], "HTTP", 4) == 0)
 			{
@@ -209,7 +205,7 @@ bool CHttpClientReqSocket::ProcessHttpPacket(const BYTE* pucData, UINT uSize)
 				}
 			}
 			else
-				throw CString("Invalid HTTP header received");
+				throw CString(_T("Invalid HTTP header received"));
 		}
 		else
 		{
@@ -311,7 +307,7 @@ void CHttpClientReqSocket::ProcessHttpHeaderPacket(const char* packet, UINT size
 
 				// safety check
 				if (m_iHttpHeadersSize > MAX_HTTP_HEADERS_SIZE)
-					throw CString("Received HTTP headers exceed limit");
+					throw CString(_T("Received HTTP headers exceed limit"));
 			}
 		}
 		else
@@ -322,7 +318,7 @@ void CHttpClientReqSocket::ProcessHttpHeaderPacket(const char* packet, UINT size
 
 			// safety check
 			if (m_strHttpCurHdrLine.GetLength() > MAX_HTTP_HEADER_LINE_SIZE)
-				throw CString("Received HTTP header line exceeds limit");
+				throw CString(_T("Received HTTP header line exceeds limit"));
 		}
 	}
 }
@@ -366,6 +362,6 @@ bool CHttpClientDownSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT si
 
 bool CHttpClientDownSocket::ProcessHttpRequest()
 {
-	throw CString("Unexpected HTTP request received");
+	throw CString(_T("Unexpected HTTP request received"));
 	return false;
 }

@@ -129,7 +129,7 @@ protected:
 	*/
 	//MOPRH - Moved by SiRoB, Due to Khaos Cat moved in public area
 	/*
-	int AddCategorie(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);
+	int AddCategory(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);
 	*/
 	void EditCatTabLabel(int index,CString newlabel);
 	void EditCatTabLabel(int index);
@@ -162,5 +162,5 @@ protected:
 	CTitleMenu	m_mnuCatA4AF;
 	// khaos::categorymod-
 public:
-	int AddCategorie(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);	
+	int AddCategory(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);	
 };

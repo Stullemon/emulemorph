@@ -14,6 +14,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 // drawable area of the dialog
 #define SCREEN_LEFT		6
 #define SCREEN_TOP		175

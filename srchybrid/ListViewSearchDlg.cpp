@@ -20,9 +20,9 @@
 #include "OtherFunctions.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -38,10 +38,13 @@ CListViewSearchDlg::CListViewSearchDlg(CWnd* pParent /*=NULL*/)
 {
 	m_pListView = NULL;
 	m_iSearchColumn = 0;
+	m_icnWnd = NULL;
 }
 
 CListViewSearchDlg::~CListViewSearchDlg()
 {
+	if (m_icnWnd)
+		VERIFY( DestroyIcon(m_icnWnd) );
 }
 
 void CListViewSearchDlg::DoDataExchange(CDataExchange* pDX)
@@ -65,7 +68,7 @@ void CListViewSearchDlg::UpdateControls()
 BOOL CListViewSearchDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	SetIcon(theApp.LoadIcon(_T("Search")), FALSE);
+	SetIcon(m_icnWnd = theApp.LoadIcon(_T("Search")), FALSE);
 	InitWindowStyles(this);
 
 	SetWindowText(GetResString(IDS_SW_SEARCHBOX));

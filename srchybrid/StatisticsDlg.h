@@ -19,7 +19,6 @@
 #include "StatisticsTree.h"
 #include "SplitterControl.h"
 #include "OScopeCtrl.h"
-#include "ColorFrameCtrl.h"
 
 // NOTE: Do not set specific 'Nr. of sub client versions' per client type, current code contains too much hardcoded
 // references to deal with that.
@@ -60,13 +59,13 @@ private:
 	CImageList	imagelistStatTree;
 	HTREEITEM	h_transfer, trans[3]; // Transfer Header and Items
 	HTREEITEM	h_upload, h_up_session, up_S[6], h_up_total, up_T[2]; // Uploads Session and Total Items and Headers
-	HTREEITEM	hup_scb, up_scb[7], hup_spb, up_spb[2], hup_ssb, up_ssb[2]; // Session Uploaded Byte Breakdowns
-	HTREEITEM	hup_tcb, up_tcb[7], hup_tpb, up_tpb[2], hup_tsb, up_tsb[2]; // Total Uploaded Byte Breakdowns
+	HTREEITEM	hup_scb, up_scb[7], hup_spb, up_spb[3], hup_ssb, up_ssb[2]; // Session Uploaded Byte Breakdowns
+	HTREEITEM	hup_tcb, up_tcb[7], hup_tpb, up_tpb[3], hup_tsb, up_tsb[2]; // Total Uploaded Byte Breakdowns
 	HTREEITEM	hup_soh, up_soh[4], hup_toh, up_toh[4]; // Upline Overhead
 	HTREEITEM	up_ssessions[4], up_tsessions[4]; // Breakdown of Upload Sessions
 	HTREEITEM	h_download, h_down_session, down_S[8], h_down_total, down_T[6]; // Downloads Session and Total Items and Headers
-	HTREEITEM	hdown_scb, down_scb[9/*8*Official+1*WC*/], hdown_spb, down_spb[2]; // Session Downloaded Byte Breakdowns
-	HTREEITEM	hdown_tcb, down_tcb[9/*8*Official+1*WC*/], hdown_tpb, down_tpb[2]; // Total Downloaded Byte Breakdowns
+	HTREEITEM	hdown_scb, down_scb[9/*8*Official+1*WC*/], hdown_spb, down_spb[3]; // Session Downloaded Byte Breakdowns
+	HTREEITEM	hdown_tcb, down_tcb[9/*8*Official+1*WC*/], hdown_tpb, down_tpb[3]; // Total Downloaded Byte Breakdowns
 	HTREEITEM	hdown_soh, down_soh[4], hdown_toh, down_toh[4]; // Downline Overhead
 	HTREEITEM	down_ssessions[6/*4*Official+2*WC*/], down_tsessions[4], down_sources[22]; // Breakdown of Download Sessions and Sources
 	HTREEITEM	h_connection, h_conn_session, h_conn_total; // Connection Section Headers
@@ -83,9 +82,9 @@ private:
 	HTREEITEM	h_time, tvitime[2], htime_s, tvitime_s[4], tvitime_st[2], htime_t, tvitime_t[3], tvitime_tt[2];
 	HTREEITEM	htime_aap, time_aaph[3], time_aap_hup[3], time_aap_hdown[3];
 	HTREEITEM	time_aap_up_hd[3][3], time_aap_down_hd[3][2];
-	HTREEITEM	time_aap_up[3][3], time_aap_up_dc[3][7], time_aap_up_dp[3][2];
+	HTREEITEM	time_aap_up[3][3], time_aap_up_dc[3][7], time_aap_up_dp[3][3];
 	HTREEITEM	time_aap_up_ds[3][2], time_aap_up_s[3][2], time_aap_up_oh[3][4];
-	HTREEITEM	time_aap_down[3][7], time_aap_down_dc[3][9/*8*Official+1*WC*/], time_aap_down_dp[3][2];
+	HTREEITEM	time_aap_down[3][7], time_aap_down_dc[3][9/*8*Official+1*WC*/], time_aap_down_dp[3][3];
 	HTREEITEM	time_aap_down_s[3][2], time_aap_down_oh[3][4];
 	// <-----khaos- End Changes
 
@@ -116,12 +115,6 @@ protected:
 	virtual void OnSize(UINT nType,int cx,int cy);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support	
 
-	DECLARE_MESSAGE_MAP()
-	afx_msg void OnSysColorChange();
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	// -khaos--+++> Buttons, stuff.
-	afx_msg void OnMenuButtonClicked();
-	// <-----khaos-
 	//MORPH START - Added by SiRoB, Splitting Bar [O²]
 	CSplitterControl m_wndSplitterstat; //bzubzusplitstat
 	CSplitterControl m_wndSplitterstat_HL; //bzubzusplitstat
@@ -132,4 +125,12 @@ protected:
 	void initCSize();
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSysColorChange();
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnMenuButtonClicked();
+	afx_msg void OnStnDblclickScopeD();
+	afx_msg void OnStnDblclickScopeU();
+	afx_msg void OnStnDblclickStatsscope();
 };

@@ -17,6 +17,9 @@
 #pragma once
 #include "MuleListCtrl.h"
 #include "TitleMenu.h"
+#include "ListCtrlItemWalk.h"
+
+#define AVBLYSHADECOUNT 13
 
 class CSearchList;
 class CSearchFile;
@@ -28,7 +31,7 @@ struct SearchCtrlItem_Struct{
    uint16			childcount;
 };
 
-class CSearchListCtrl : public CMuleListCtrl
+class CSearchListCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
 	DECLARE_DYNAMIC(CSearchListCtrl)
 
@@ -46,14 +49,22 @@ public:
 	void	NoTabs()	{ m_nResultsID = 0; }
 
 protected:
-	uint32	m_nResultsID;
-	CTitleMenu m_SearchFileMenu;
+	uint32		m_nResultsID;
+	CTitleMenu	m_SearchFileMenu;
 	CSearchList* searchlist;
 
+	COLORREF	m_crSearchResultDownloading;
+	COLORREF	m_crSearchResultDownloadStopped;
+	COLORREF	m_crSearchResultKnown;
+	COLORREF	m_crSearchResultShareing;
+	COLORREF	m_crShades[AVBLYSHADECOUNT];
+
+	COLORREF GetSearchItemColor(/*const*/ CSearchFile* src);
 	CString GetCompleteSourcesDisplayString(const CSearchFile* pFile, UINT uSources, bool* pbComplete = NULL) const;
-	void	ExpandCollapseItem(int item);
+	void	ExpandCollapseItem(int iItem, int iAction);
 	void	HideSources(CSearchFile* toCollapse);
 	void	SetStyle();
+	void	SetHighlightColors();
 
 	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
 	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
@@ -66,6 +77,7 @@ protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSysColorChange();
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 	afx_msg void OnLvnDeleteallitems(NMHDR *pNMHDR, LRESULT *pResult);
@@ -73,4 +85,5 @@ protected:
 	afx_msg void OnClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnDblClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnLvnKeydown(NMHDR *pNMHDR, LRESULT *pResult);
 };

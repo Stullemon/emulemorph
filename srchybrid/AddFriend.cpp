@@ -23,23 +23,31 @@
 #include "Preferences.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
 // CAddFriend dialog
 
 IMPLEMENT_DYNAMIC(CAddFriend, CDialog)
+
+BEGIN_MESSAGE_MAP(CAddFriend, CDialog)
+	ON_BN_CLICKED(IDC_ADD, OnAddBtn)
+END_MESSAGE_MAP()
+
 CAddFriend::CAddFriend()
-	: CDialog(CAddFriend::IDD, 0)
+	: CDialog(CAddFriend::IDD)
 {
 	m_pShowFriend = NULL;
+	m_icnWnd = NULL;
 }
 
 CAddFriend::~CAddFriend()
 {
+	if (m_icnWnd)
+		VERIFY( DestroyIcon(m_icnWnd) );
 }
 
 void CAddFriend::DoDataExchange(CDataExchange* pDX)
@@ -54,7 +62,7 @@ BOOL CAddFriend::OnInitDialog()
 	Localize();
 	if (m_pShowFriend)
 	{
-		SetIcon(theApp.LoadIcon(_T("CLIENTDETAILS")), FALSE);
+		SetIcon(m_icnWnd = theApp.LoadIcon(_T("ClientDetails")), FALSE);
 		SendDlgItemMessage(IDC_IP, EM_SETREADONLY, TRUE);
 		SendDlgItemMessage(IDC_PORT, EM_SETREADONLY, TRUE);
 		SendDlgItemMessage(IDC_USERNAME, EM_SETREADONLY, TRUE);
@@ -78,21 +86,17 @@ BOOL CAddFriend::OnInitDialog()
 
 		GetDlgItem(IDC_ADD)->ShowWindow(SW_HIDE);
 	}
-	else{
-		SetIcon(theApp.LoadIcon(_T("AddFriend")), FALSE);
+	else
+	{
+		SetIcon(m_icnWnd = theApp.LoadIcon(_T("AddFriend")), FALSE);
 		((CEdit*)GetDlgItem(IDC_USERNAME))->SetLimitText(thePrefs.GetMaxUserNickLength());
 		SetDlgItemText(IDC_USERHASH, _T(""));
 	}
 	return TRUE;
 }
 
-BEGIN_MESSAGE_MAP(CAddFriend, CDialog)
-	ON_BN_CLICKED(IDC_ADD, OnAddBtn)
-END_MESSAGE_MAP()
-
-
-// CAddFriend message handlers
-void CAddFriend::Localize(){
+void CAddFriend::Localize()
+{
 	SetWindowText(m_pShowFriend ? GetResString(IDS_DETAILS) : GetResString(IDS_ADDAFRIEND));
 	GetDlgItem(IDC_INFO1)->SetWindowText(GetResString(IDS_PAF_REQINFO));
 	GetDlgItem(IDC_INFO2)->SetWindowText(GetResString(IDS_PAF_MOREINFO));
@@ -108,8 +112,10 @@ void CAddFriend::Localize(){
 	//SetDlgItemText(IDC_LAST_CHATTED_LABEL, GetResString(IDS_LASTCHATTED)+_T(":"));
 }
 
-void CAddFriend::OnAddBtn() {
-	if (!m_pShowFriend){
+void CAddFriend::OnAddBtn()
+{
+	if (!m_pShowFriend)
+	{
 		CString strBuff;
 		uint32 ip;
 		GetDlgItemText(IDC_IP, strBuff);

@@ -24,9 +24,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CHTRichEditCtrl, CRichEditCtrl)
 	ON_NOTIFY_REFLECT_EX(EN_LINK, OnEnLink)
 	ON_WM_CREATE()
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 CHTRichEditCtrl::CHTRichEditCtrl()
@@ -51,9 +52,14 @@ CHTRichEditCtrl::CHTRichEditCtrl()
 	m_bEnErrSpace = false;
 	m_bRestoreFormat = false;
 	memset(&m_cfDefault, 0, sizeof m_cfDefault);
+	m_bForceArrowCursor = false;
+	m_hArrowCursor = ::LoadCursor(NULL, IDC_ARROW);
 }
 
-CHTRichEditCtrl::~CHTRichEditCtrl(){
+CHTRichEditCtrl::~CHTRichEditCtrl()
+{
+	if (m_hArrowCursor != NULL)
+		VERIFY( ::DestroyCursor(m_hArrowCursor) );
 }
 
 void CHTRichEditCtrl::Localize(){
@@ -63,6 +69,7 @@ void CHTRichEditCtrl::Init(LPCTSTR pszTitle, LPCTSTR pszSkinKey)
 {
 	SetProfileSkinKey(pszSkinKey);
 	SetTitle(pszTitle);
+
 
 	VERIFY( SendMessage(EM_SETUNDOLIMIT, 0, 0) == 0 );
 	int iMaxLogBuff = thePrefs.GetMaxLogBuff();
@@ -490,19 +497,16 @@ void CHTRichEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	int iTextLen = GetWindowTextLength();
 
-	// create menu here for runtime localisation
-
-	m_LogMenu.CreatePopupMenu();
-	m_LogMenu.AddMenuTitle(GetResString(IDS_LOGENTRY));
-	m_LogMenu.AppendMenu(MF_STRING | (iSelEnd > iSelStart ? MF_ENABLED : MF_GRAYED), MP_COPYSELECTED, GetResString(IDS_COPY));
-	m_LogMenu.AppendMenu(MF_SEPARATOR);
-	m_LogMenu.AppendMenu(MF_STRING | (iTextLen > 0 ? MF_ENABLED : MF_GRAYED), MP_SELECTALL, GetResString(IDS_SELECTALL));
-	m_LogMenu.AppendMenu(MF_STRING | (iTextLen > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEALL , GetResString(IDS_PW_RESET));
-	m_LogMenu.AppendMenu(MF_STRING | (iTextLen > 0 ? MF_ENABLED : MF_GRAYED), MP_SAVELOG, GetResString(IDS_SAVELOG) + _T("..."));
-	m_LogMenu.AppendMenu(MF_SEPARATOR);
-	m_LogMenu.AppendMenu(MF_STRING, MP_AUTOSCROLL, GetResString(IDS_AUTOSCROLL));
-
-	m_LogMenu.CheckMenuItem(MP_AUTOSCROLL, m_bAutoScroll ? MF_CHECKED : MF_UNCHECKED);
+	CTitleMenu menu;
+	menu.CreatePopupMenu();
+	menu.AddMenuTitle(GetResString(IDS_LOGENTRY));
+	menu.AppendMenu(MF_STRING | (iSelEnd > iSelStart ? MF_ENABLED : MF_GRAYED), MP_COPYSELECTED, GetResString(IDS_COPY));
+	menu.AppendMenu(MF_SEPARATOR);
+	menu.AppendMenu(MF_STRING | (iTextLen > 0 ? MF_ENABLED : MF_GRAYED), MP_SELECTALL, GetResString(IDS_SELECTALL));
+	menu.AppendMenu(MF_STRING | (iTextLen > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEALL , GetResString(IDS_PW_RESET));
+	menu.AppendMenu(MF_STRING | (iTextLen > 0 ? MF_ENABLED : MF_GRAYED), MP_SAVELOG, GetResString(IDS_SAVELOG) + _T("..."));
+	menu.AppendMenu(MF_SEPARATOR);
+	menu.AppendMenu(MF_STRING | (m_bAutoScroll ? MF_CHECKED : MF_UNCHECKED), MP_AUTOSCROLL, GetResString(IDS_AUTOSCROLL));
 
 	if (point.x == -1 && point.y == -1)
 	{
@@ -510,13 +514,21 @@ void CHTRichEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		point.y = 32;
 		ClientToScreen(&point);
 	}
-	m_LogMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	
+	// Cheap workaround for the "Text cursor is showing while context menu is open" glitch. It could be solved properly 
+	// with the RE's COM interface, but because the according messages are not routed with a unique control ID, it's not 
+	// really useable (e.g. if there are more RE controls in one window). Would to envelope each RE window to get a unique ID..
+	m_bForceArrowCursor = true;
+	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	m_bForceArrowCursor = false;
 
-	m_LogMenu.DestroyMenu();
+	VERIFY( menu.DestroyMenu() );
 }
 
-BOOL CHTRichEditCtrl::OnCommand(WPARAM wParam, LPARAM lParam){
-	switch (wParam) {
+BOOL CHTRichEditCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam)
+	{
 	case MP_COPYSELECTED:
 		CopySelectedItems();
 		break;
@@ -791,6 +803,19 @@ void CHTRichEditCtrl::ApplySkin()
 			SetBackgroundColor(TRUE, GetSysColor(COLOR_WINDOW));
 		}
 	}
+}
+
+BOOL CHTRichEditCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	// Cheap workaround for the "Text cursor is showing while context menu is open" glitch. It could be solved properly 
+	// with the RE's COM interface, but because the according messages are not routed with a unique control ID, it's not 
+	// really useable (e.g. if there are more RE controls in one window). Would to envelope each RE window to get a unique ID..
+	if (m_bForceArrowCursor && m_hArrowCursor)
+	{
+		::SetCursor(m_hArrowCursor);
+		return TRUE;
+	}
+	return CRichEditCtrl::OnSetCursor(pWnd, nHitTest, message);
 }
 
 //MORPH START - Added by SiRoB, XML News [O²]

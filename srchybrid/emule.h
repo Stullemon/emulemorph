@@ -165,7 +165,9 @@ public:
 	HICON		LoadIcon(UINT nIDResource) const;
 	HBITMAP		LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) const;
 	HBITMAP		LoadImage(UINT nIDResource, LPCTSTR pszResourceType) const;
-	bool		LoadSkinColor(LPCTSTR pszKey, COLORREF& crColor);
+	bool		LoadSkinColor(LPCTSTR pszKey, COLORREF& crColor) const;
+	bool		LoadSkinColorAlt(LPCTSTR pszKey, LPCTSTR pszAlternateKey, COLORREF& crColor) const;
+	CString		GetSkinFileItem(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) const;
 	void		ApplySkin(LPCTSTR pszSkinProfile);
 
 	bool		GetLangHelpFilePath(CString& strResult);
@@ -256,6 +258,7 @@ class CTempIconLoader
 public:
 	// because nearly all icons we are loading are 16x16, the default size is specified as 16 and not as 32 nor LR_DEFAULTSIZE
 	CTempIconLoader(LPCTSTR pszResourceID, int cx = 16, int cy = 16, UINT uFlags = LR_DEFAULTCOLOR);
+	CTempIconLoader(UINT uResourceID, int cx = 16, int cy = 16, UINT uFlags = LR_DEFAULTCOLOR);
 	~CTempIconLoader();
 
 	operator HICON() const{

@@ -37,6 +37,14 @@ public:
 
 	CSharedFilesCtrl sharedfilesctrl;
 
+private:
+	CProgressCtrlX pop_bar;
+	CProgressCtrlX pop_baraccept;
+	CProgressCtrlX pop_bartrans;
+	CFont bold;
+	CIconStatic m_ctrlStatisticsFrm;
+	HICON icon_files;
+
 protected:
 	void SetAllIcons();
 
@@ -49,12 +57,5 @@ protected:
 	afx_msg void OnLvnItemActivateSflist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMClickSflist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
-
-private:
-	CProgressCtrlX pop_bar;
-	CProgressCtrlX pop_baraccept;
-	CProgressCtrlX pop_bartrans;
-	CFont bold;
-	CIconStatic m_ctrlStatisticsFrm;
-	HICON icon_files;
+	afx_msg void OnStnDblclickFilesIco();
 };

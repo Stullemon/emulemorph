@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.1 $
+* $Revision: 1.2 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -16,8 +16,6 @@
 *	$History:$
 *
 *********************************************************************/
-
-
 #include "stdafx.h"
 #include "emule.h"
 #include "TreePropSheet.h"
@@ -30,10 +28,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-
-//namespace TreePropSheet
-//{
 
 //-------------------------------------------------------------------
 // class CTreePropSheet
@@ -404,7 +398,7 @@ HTREEITEM CTreePropSheet::CreatePageTreeItem(LPCTSTR lpszPath, HTREEITEM hParent
 	if (!hItem)
 	{
 		hItem = m_pwndPageTree->InsertItem(strTopMostItem, hParent);
-		m_pwndPageTree->SetItemData(hItem, -1);
+		m_pwndPageTree->SetItemData(hItem, (DWORD_PTR)-1);
 		if (!strPath.IsEmpty() && m_bTreeImages && m_DefaultImages.GetSafeHandle())
 			// set folder image
 			m_pwndPageTree->SetItemImage(hItem, m_Images.GetImageCount()-2, m_Images.GetImageCount()-2);
@@ -425,7 +419,7 @@ HTREEITEM CTreePropSheet::CreatePageTreeItem(LPCTSTR lpszPath, HTREEITEM hParent
 CString CTreePropSheet::SplitPageTreePath(CString &strRest)
 {
 	int	nSeperatorPos = 0;
-	while (TRUE)
+	for (;;)
 	{
 		nSeperatorPos = strRest.Find(_T("::"), nSeperatorPos);
 		if (nSeperatorPos == -1)
@@ -636,7 +630,7 @@ void CTreePropSheet::ActivatePreviousPage()
 			return;
 
 		HTREEITEM	hPrevItem = NULL;
-		if (hPrevItem=m_pwndPageTree->GetPrevSiblingItem(hItem))
+		if ((hPrevItem = m_pwndPageTree->GetPrevSiblingItem(hItem)) != NULL)
 		{
 			while (m_pwndPageTree->ItemHasChildren(hPrevItem))
 			{
@@ -653,7 +647,7 @@ void CTreePropSheet::ActivatePreviousPage()
 			// no prev item, so cycle to the last item
 			hPrevItem = m_pwndPageTree->GetRootItem();
 
-			while (TRUE)
+			for (;;)
 			{
 				while (m_pwndPageTree->GetNextSiblingItem(hPrevItem))
 					hPrevItem = m_pwndPageTree->GetNextSiblingItem(hPrevItem);
@@ -698,9 +692,9 @@ void CTreePropSheet::ActivateNextPage()
 			return;
 
 		HTREEITEM	hNextItem = NULL;
-		if (hNextItem=m_pwndPageTree->GetChildItem(hItem))
+		if ((hNextItem = m_pwndPageTree->GetChildItem(hItem)) != NULL)
 			;
-		else if (hNextItem=m_pwndPageTree->GetNextSiblingItem(hItem))
+		else if ((hNextItem = m_pwndPageTree->GetNextSiblingItem(hItem)) != NULL)
 			;
 		else if (m_pwndPageTree->GetParentItem(hItem))
 		{
@@ -1019,5 +1013,3 @@ LRESULT CTreePropSheet::OnIsDialogMessage(WPARAM wParam, LPARAM lParam)
 
 	return CPropertySheet::DefWindowProc(PSM_ISDIALOGMESSAGE, wParam, lParam);
 }
-
-//} //namespace TreePropSheet

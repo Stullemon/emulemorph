@@ -23,9 +23,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -54,7 +54,7 @@ bool CSecRunAsUser::PrepareUser(){
 		try{
 			IADsWinNTSystemInfoPtr pNTsys;
 			if (CoCreateInstance(CLSID_WinNTSystemInfo,NULL,CLSCTX_INPROC_SERVER,IID_IADsWinNTSystemInfo,(void**)&pNTsys) != S_OK)
-				throw CString("Failed to create IADsWinNTSystemInfo");
+			    throw CString(_T("Failed to create IADsWinNTSystemInfo"));
 			// check if we are already running on our eMule Account
 			// todo: check if the current account is an administrator
 			
@@ -65,7 +65,7 @@ bool CSecRunAsUser::PrepareUser(){
 			if (m_strCurrentUser == EMULEACCOUNTW){
 				theApp.QueueLogLine(false, GetResString(IDS_RAU_RUNNING), EMULEACCOUNT); 
 				bRunningAsEmule = true;
-				throw CString("Already running as eMule_Secure Account (everything is fine)");
+			    throw CString(_T("Already running as eMule_Secure Account (everything is fine)"));
 			}
 			CComBSTR bstrCompName;
 			pNTsys->get_ComputerName(&bstrCompName);
@@ -77,11 +77,10 @@ bool CSecRunAsUser::PrepareUser(){
 		
 			ADSPath.Format(L"WinNT://%s,computer",cscompName);
 			if ( !SUCCEEDED(ADsGetObject(ADSPath.AllocSysString(),IID_IADsContainer,(void **)&pUsers)) )
-				throw CString("Failed ADsGetObject()");
+			    throw CString(_T("Failed ADsGetObject()"));
 
 			IEnumVARIANTPtr pEnum; 
 			ADsBuildEnumerator (pUsers,&pEnum);
-			int cnt=0;
 
 			IADsUserPtr pChild;
 			_variant_t vChild;			  
@@ -99,7 +98,7 @@ bool CSecRunAsUser::PrepareUser(){
 					// account found, set new random password and save it
 					m_strPassword = CreateRandomPW();
 					if ( !SUCCEEDED(pChild->SetPassword(m_strPassword.AllocSysString())) )
-						throw CString("Failed to set password");
+					    throw CString(_T("Failed to set password"));
 
 					bResult = true;
 					break;
@@ -174,7 +173,7 @@ bool CSecRunAsUser::SetDirectoryPermissions(){
 	// if there is a dir which is also an incoming dir, rights will be overwritten below
 	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;)
 	{
-		VERIFY( SetObjectPermission(thePrefs.shareddir_list.GetNext(pos), ADS_RIGHT_GENERIC_READ) );
+		VERIFY( SetObjectPermission(thePrefs.shareddir_list.GetNext(pos), (DWORD)ADS_RIGHT_GENERIC_READ) );
 	}
 
 	// set special permission for emule account on needed folders

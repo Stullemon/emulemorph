@@ -43,9 +43,11 @@
 #define	SEC2MS(sec)		((sec)*1000)
 #define	MIN2MS(min)		SEC2MS((min)*60)
 #define	HR2MS(hr)		MIN2MS((hr)*60)
+#define DAY2MS(day)		HR2MS((day)*24)
 #define SEC(sec)		(sec)
 #define	MIN2S(min)		((min)*60)
 #define	HR2S(hr)		MIN2S((hr)*60)
+#define DAY2S(day)		HR2S((day)*24)
 
 // MOD Note: Do not change this part - Merkur
 #define UDPSEARCHSPEED			SEC2MS(1)	//1 sec - if this value is too low you will miss sources
@@ -62,16 +64,18 @@
 #define KADEMLIAASKTIME			SEC2MS(1)	//1 second
 #define KADEMLIATOTALFILE		7			//Total files to search sources for.
 #define KADEMLIAREASKTIME		HR2MS(1)	//1 hour
-#define KADEMLIAPUBLISHTIME		SEC2MS(2)	//2 second
+#define KADEMLIAPUBLISHTIME		SEC(2)		//2 second
+#define KADEMLIATOTALSTORENOTES	1			//Total hashes to store.
 #define KADEMLIATOTALSTORESRC	2		//Total hashes to store.
 #define KADEMLIATOTALSTOREKEY	1		//Total hashes to store.
 #define KADEMLIAREPUBLISHTIMES	HR2S(5)		//5 hours
+#define KADEMLIAREPUBLISHTIMEN	HR2S(24)	//24 hours
 #define KADEMLIAREPUBLISHTIMEK	HR2S(24)	//24 hours
 #define KADEMLIADISCONNECTDELAY	MIN2S(20)	//20 mins
 #define	KADEMLIAMAXINDEX		50000		//Total keyword indexes.
 #define	KADEMLIAMAXENTRIES		60000		//Total keyword entries.
 #define KADEMLIAMAXSOUCEPERFILE	300			//Max number of sources per file in index.
-#define KADEMLIAMAXNOTESPERETRY	50			//Max number of notes per entry in index.
+#define KADEMLIAMAXNOTESPERFILE	50			//Max number of notes per entry in index.
 
 #define ED2KREPUBLISHTIME		MIN2MS(1)	//1 min
 #define MINCOMMONPENALTY		4
@@ -97,8 +101,7 @@
 #define MAXCON5WIN9X			10
 #define	UPLOAD_CHECK_CLIENT_DR	2048
 #define	UPLOAD_CLIENT_DATARATE	3072		// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
-#define MINNUMBEROFTRICKLEUPLOADS 0
-#define	MIN_UP_CLIENTS_ALLOWED	0			// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
+#define	MIN_UP_CLIENTS_ALLOWED	2			// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define DOWNLOADTIMEOUT			SEC2MS(100)
 #define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
 #define RARE_FILE				50
@@ -107,7 +110,7 @@
 #define	MAX_PURGEQUEUETIME		HR2MS(1) 
 #define PURGESOURCESWAPSTOP		MIN2MS(15)	// (15 mins), how long forbid swapping a source to a certain file (NNP,...)
 #define CONNECTION_LATENCY		22050	// latency for responces
-#define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   1000
+#define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   3000
 #define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   1000
 #define CLIENTBANTIME			HR2MS(2)	// 2h
 #define TRACKED_CLEANUP_TIME	HR2MS(1)	// 1 hour
@@ -257,6 +260,8 @@
 #define OP_AICHANSWER			0x9C	// <HASH 16><uint16><HASH aichhashlen> <data>
 #define OP_AICHFILEHASHANS		0x9D	  
 #define OP_AICHFILEHASHREQ		0x9E
+#define OP_BUDDYPING			0x9F
+#define OP_BUDDYPONG			0xA0
 
 //MORPH START - Added by SiRoB, WebCache 1.2f
 // yonatan http start //////////////////////////////////////////////////////////////////////////
@@ -293,23 +298,24 @@
 
 //file tags
 #define FT_FILENAME				 0x01	// <string>
-#define TAG_NAME				"\x01"	// <string>
+#define TAG_FILENAME			"\x01"	// <string>
 #define FT_FILESIZE				 0x02	// <uint32>
-#define TAG_SIZE				"\x02"	// <uint32>
+#define TAG_FILESIZE			"\x02"	// <uint32>
 #define FT_FILETYPE				 0x03	// <string>
-#define TAG_TYPE				"\x03"	// <string>
+#define TAG_FILETYPE			"\x03"	// <string>
 #define FT_FILEFORMAT			 0x04	// <string>
-#define TAG_FORMAT				"\x04"	// <string>
+#define TAG_FILEFORMAT			"\x04"	// <string>
 #define FT_LASTSEENCOMPLETE		 0x05	// <uint32>
 #define TAG_COLLECTION			"\x05"
 #define	TAG_PART_PATH			"\x06"	// <string>
 #define	TAG_PART_HASH			"\x07"
-#define FT_TRANSFERED			 0x08	// <uint32>
-#define	TAG_COPIED				"\x08"	// <uint32>
+#define  FT_TRANSFERRED			 0x08	// <uint32>
+#define	TAG_TRANSFERRED			"\x08"	// <uint32>
 #define FT_GAPSTART				 0x09	// <uint32>
-#define	TAG_GAP_START			"\x09"	// <uint32>
+#define	TAG_GAPSTART			"\x09"	// <uint32>
 #define FT_GAPEND				 0x0A	// <uint32>
-#define	TAG_GAP_END				"\x0A"	// <uint32>
+#define	TAG_GAPEND				"\x0A"	// <uint32>
+#define  FT_DESCRIPTION			 0x0B	// <string>
 #define	TAG_DESCRIPTION			"\x0B"	// <string>
 #define	TAG_PING				"\x0C"
 #define	TAG_FAIL				"\x0D"
@@ -318,33 +324,37 @@
 #define TAG_IP_ADDRESS			"\x10"
 #define TAG_VERSION				"\x11"	// <string>
 #define FT_PARTFILENAME			 0x12	// <string>
-#define TAG_TEMPFILE			"\x12"	// <string>
+#define TAG_PARTFILENAME		"\x12"	// <string>
 //#define FT_PRIORITY			 0x13	// Not used anymore
 #define TAG_PRIORITY			"\x13"	// <uint32>
 #define FT_STATUS				 0x14	// <uint32>
 #define TAG_STATUS				"\x14"	// <uint32>
 #define FT_SOURCES				 0x15	// <uint32>
-#define TAG_AVAILABILITY		"\x15"	// <uint32>
+#define TAG_SOURCES				"\x15"	// <uint32>
 #define FT_PERMISSIONS			 0x16	// <uint32>
-#define TAG_QTIME				"\x16"
+#define TAG_PERMISSIONS			"\x16"
 //#define FT_ULPRIORITY			 0x17	// Not used anymore
 #define TAG_PARTS				"\x17"
 #define FT_DLPRIORITY			 0x18	// Was 13
 #define FT_ULPRIORITY			 0x19	// Was 17
+#define	 FT_COMPRESSION			 0x1A
+#define	 FT_CORRUPTED			 0x1B
 #define FT_KADLASTPUBLISHKEY	 0x20	// <uint32>
 #define FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
 #define	FT_FLAGS				 0x22	// <uint32>
 #define	FT_DL_ACTIVE_TIME		 0x23	// <uint32>
 #define	FT_CORRUPTEDPARTS		 0x24	// <string>
 #define FT_DL_PREVIEW            0x25
+#define  FT_KADLASTPUBLISHNOTES	 0x26	// <uint32> 
 #define FT_AICH_HASH			 0x27
 #define	FT_COMPLETE_SOURCES		 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
+#define TAG_COMPLETE_SOURCES	"/x30"
 // statistic
-#define FT_ATTRANSFERED			 0x50	// <uint32>
+#define  FT_ATTRANSFERRED		 0x50	// <uint32>
 #define FT_ATREQUESTED			 0x51	// <uint32>
 #define FT_ATACCEPTED			 0x52	// <uint32>
 #define FT_CATEGORY				 0x53	// <uint32>
-#define	FT_ATTRANSFEREDHI		 0x54	// <uint32>
+#define	FT_ATTRANSFERREDHI		 0x54	// <uint32>
 // khaos::categorymod+
 #define FT_CATRESUMEORDER		0x55
 // khaos::categorymod-
@@ -382,18 +392,21 @@
 #define FT_SPREADCOUNT			0x72
 //MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 #define FT_ATSHARED				0x96	// <uint32> // Morph - Added by AndCycle, Equal Chance For Each File
-#define	TAG_MEDIA_ARTIST		"\xD0"	// <string>
 #define	 FT_MEDIA_ARTIST		 0xD0	// <string>
-#define	TAG_MEDIA_ALBUM			"\xD1"	// <string>
+#define	TAG_MEDIA_ARTIST		"\xD0"	// <string>
 #define	 FT_MEDIA_ALBUM			 0xD1	// <string>
-#define	TAG_MEDIA_TITLE			"\xD2"	// <string>
+#define	TAG_MEDIA_ALBUM			"\xD1"	// <string>
 #define	 FT_MEDIA_TITLE			 0xD2	// <string>
-#define	TAG_MEDIA_LENGTH		"\xD3"	// <uint32> !!!
+#define	TAG_MEDIA_TITLE			"\xD2"	// <string>
 #define	 FT_MEDIA_LENGTH		 0xD3	// <uint32> !!!
-#define	TAG_MEDIA_BITRATE		"\xD4"	// <uint32>
+#define	TAG_MEDIA_LENGTH		"\xD3"	// <uint32> !!!
 #define	 FT_MEDIA_BITRATE		 0xD4	// <uint32>
-#define	TAG_MEDIA_CODEC			"\xD5"	// <string>
+#define	TAG_MEDIA_BITRATE		"\xD4"	// <uint32>
 #define	 FT_MEDIA_CODEC			 0xD5	// <string>
+#define	TAG_MEDIA_CODEC			"\xD5"	// <string>
+#define  FT_FILERATING			 0xF7	// <uint8>
+#define TAG_FILERATING			"\xF7"	// <uint8>
+
 #define TAG_BUDDYHASH			"\xF8"	// <string>
 #define TAG_CLIENTLOWID			"\xF9"	// <uint32>
 #define TAG_SERVERPORT			"\xFA"	// <uint16>
@@ -493,7 +506,7 @@
 #define	CT_EMULE_VERSION		0xfb
 #define CT_EMULE_BUDDYIP		0xfc
 #define CT_EMULE_BUDDYUDP		0xfd
-#define CT_EMULE_RESERVED12		0xfe
+#define CT_EMULE_MISCOPTIONS2	0xfe
 #define CT_EMULE_RESERVED13		0xff
 
 // values for CT_SERVER_FLAGS (server capabilities)
@@ -543,14 +556,18 @@
 #define KADEMLIA_RES			0x28	// <HASH (target) [16]> <CNT> <PEER [25]>*(CNT)
 
 #define KADEMLIA_SEARCH_REQ		0x30	// <HASH (key) [16]> <ext 0/1 [1]> <SEARCH_TREE>[ext]
-#define KADEMLIA_SRC_NOTES_REQ	0x31	// <HASH (key) [16]> <ext 0/1 [1]> <SEARCH_TREE>[ext]
+//#define UNUSED				0x31	// Old Opcode, don't use.
+#define KADEMLIA_SRC_NOTES_REQ	0x32	// <HASH (key) [16]>
 #define KADEMLIA_SEARCH_RES		0x38	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
-#define KADEMLIA_SRC_NOTES_RES	0x39	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+//#define UNUSED				0x39	// Old Opcode, don't use.
+#define KADEMLIA_SRC_NOTES_RES	0x3A	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 
 #define KADEMLIA_PUBLISH_REQ	0x40	// <HASH (key) [16]> <CNT1 [2]> (<HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
-#define KADEMLIA_PUB_NOTES_REQ	0x41	// <HASH (key) [16]> <CNT1 [2]> (<HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+//#define UNUSED				0x41	// Old Opcode, don't use.
+#define KADEMLIA_PUB_NOTES_REQ	0x42	// <HASH (key) [16]> <HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 #define KADEMLIA_PUBLISH_RES	0x48	// <HASH (key) [16]>
-#define KADEMLIA_PUB_NOTES_RES	0x49	// <HASH (key) [16]>
+//#define UNUSED				0x49	// Old Opcode, don't use.
+#define KADEMLIA_PUB_NOTES_RES	0x4A	// <HASH (key) [16]>
 
 #define KADEMLIA_FIREWALLED_REQ	0x50	// <TCPPORT (sender) [2]>
 #define KADEMLIA_FINDBUDDY_REQ	0x51	// <TCPPORT (sender) [2]>

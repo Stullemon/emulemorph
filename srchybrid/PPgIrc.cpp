@@ -22,11 +22,12 @@
 #include "Preferences.h"
 #include "IrcWnd.h"
 #include "HelpIDs.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -41,7 +42,7 @@ BEGIN_MESSAGE_MAP(CPPgIRC, CPropertyPage)
 	ON_EN_CHANGE(IDC_IRC_NAME_BOX, OnSettingsChange)
 	ON_EN_CHANGE(IDC_IRC_MINUSER_BOX, OnSettingsChange)
 	ON_WM_DESTROY()
-	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 

@@ -69,6 +69,7 @@ public:
 	static uint32				getKademliaFiles(void);
 	static uint32				getTotalStoreKey(void);
 	static uint32				getTotalStoreSrc(void);
+	static uint32				getTotalStoreNotes(void);
 	static uint32				getTotalFile(void);
 	static bool					getPublish(void);
 	static uint32				getIPAddress(void);

@@ -29,9 +29,9 @@
 #include "partfile.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 // for this version the limits are set very high, they might be lowered later
@@ -40,7 +40,7 @@ static char THIS_FILE[]=__FILE__;
 #define MINUNIQUEIPS_TOTRUST		10	// how many unique IPs most have send us a hash to make it trustworthy
 #define	MINPERCENTAGE_TOTRUST		92  // how many percentage of clients most have sent the same hash to make it trustworthy
 
-CList<CAICHRequestedData, CAICHRequestedData&> CAICHHashSet::m_liRequestedData;
+CList<CAICHRequestedData> CAICHHashSet::m_liRequestedData;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ///CAICHHash
@@ -697,14 +697,14 @@ bool CAICHHashSet::LoadHashSet(){
 					theApp.QueueDebugLogLine(true, _T("Failed to load HashSet: Available Hashs and expected hashcount differ!"));
 					return false;
 				}
-				uint32 dbgPos = file.GetPosition();
+				//uint32 dbgPos = file.GetPosition();
 				if (!m_pHashTree.LoadLowestLevelHashs(&file)){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 					if(thePrefs.GetLogICHEvents()) //JP log ICH events
 					theApp.QueueDebugLogLine(true, _T("Failed to load HashSet: LoadLowestLevelHashs failed!"));
 					return false;
 				}
-				uint32 dbgHashRead = (file.GetPosition()-dbgPos)/HASHSIZE;
+				//uint32 dbgHashRead = (file.GetPosition()-dbgPos)/HASHSIZE;
 				if (!ReCalculateHash(false)){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 					if(thePrefs.GetLogICHEvents()) //JP log ICH events
@@ -828,6 +828,7 @@ void CAICHHashSet::UntrustedHashReceived(const CAICHHash& Hash, uint32 dwFromIP)
 	if ( thePrefs.IsTrustingEveryHash() ||
 		(nMostTrustedIPs >= MINUNIQUEIPS_TOTRUST && (100 * nMostTrustedIPs)/nSigningIPsTotal >= MINPERCENTAGE_TOTRUST)){
 		//trusted
+			//theApp.QueueDebugLogLine(false, _T("AICH Hash received: %s (%sadded), We have now %u hash from %u unique IPs. We trust the Hash %s from %u clients (%u%%). Added IP:%s, file: %s")
 			//, Hash.GetString(), bAdded? _T(""):_T("not "), m_aUntrustedHashs.GetCount(), nSigningIPsTotal, m_aUntrustedHashs[nMostTrustedPos].m_Hash.GetString()
 			//, nMostTrustedIPs, (100 * nMostTrustedIPs)/nSigningIPsTotal, ipstr(dwFromIP & 0x00F0FFFF), m_pOwner->GetFileName());
 		
@@ -919,7 +920,7 @@ void CAICHHashSet::DbgTest(){
 	uint8 maxLevel = 0;
 	uint32 cHash = 1;
 	uint8 curLevel = 0;
-	uint32 cParts = 0;
+	//uint32 cParts = 0;
 	maxLevel = 0;
 /*	CAICHHashTree* pTest = new CAICHHashTree(TESTSIZE, true, 9728000);
 	for (uint64 i = 0; i+9728000 < TESTSIZE; i += 9728000){

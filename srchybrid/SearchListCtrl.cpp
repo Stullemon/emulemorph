@@ -39,49 +39,62 @@
 #include "WebServices.h"
 #include "Log.h"
 #include "HighColorTab.hpp"
+#include "ListViewWalkerPropertySheet.h"
+#include "UserMsgs.h"
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
+
+
+#define COLLAPSE_ONLY	0
+#define EXPAND_ONLY		1
+#define EXPAND_COLLAPSE	2
 
 
 //////////////////////////////////////////////////////////////////////////////
 // CSearchResultFileDetailSheet
 
-class CSearchResultFileDetailSheet : public CResizableSheet
+class CSearchResultFileDetailSheet : public CListViewWalkerPropertySheet
 {
 	DECLARE_DYNAMIC(CSearchResultFileDetailSheet)
 
 public:
-	CSearchResultFileDetailSheet(const CSearchFile* file);
+	CSearchResultFileDetailSheet(const CSearchFile* file, UINT uPshInvokePage = 0, CListCtrlItemWalk* pListCtrl = NULL);
 	virtual ~CSearchResultFileDetailSheet();
 
 protected:
-	const CSearchFile* m_file;
 	CMetaDataDlg m_wndMetaData;
 
-	static int sm_iLastActivePage;
+	UINT m_uPshInvokePage;
+	static LPCTSTR m_pPshStartPage;
+
+	void UpdateTitle();
 
 	virtual BOOL OnInitDialog();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
 };
 
-int CSearchResultFileDetailSheet::sm_iLastActivePage;
+LPCTSTR CSearchResultFileDetailSheet::m_pPshStartPage;
 
-IMPLEMENT_DYNAMIC(CSearchResultFileDetailSheet, CResizableSheet)
+IMPLEMENT_DYNAMIC(CSearchResultFileDetailSheet, CListViewWalkerPropertySheet)
 
-BEGIN_MESSAGE_MAP(CSearchResultFileDetailSheet, CResizableSheet)
+BEGIN_MESSAGE_MAP(CSearchResultFileDetailSheet, CListViewWalkerPropertySheet)
 	ON_WM_DESTROY()
+	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
 END_MESSAGE_MAP()
 
-CSearchResultFileDetailSheet::CSearchResultFileDetailSheet(const CSearchFile* file)
+CSearchResultFileDetailSheet::CSearchResultFileDetailSheet(const CSearchFile* file, UINT uPshInvokePage, CListCtrlItemWalk* pListCtrl)
+	: CListViewWalkerPropertySheet(pListCtrl)
 {
-	m_file = file;
+	m_uPshInvokePage = uPshInvokePage;
+	m_aItems.Add(const_cast<CSearchFile*>(file));
 	m_psh.dwFlags &= ~PSH_HASHELP;
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
 	
@@ -90,10 +103,23 @@ CSearchResultFileDetailSheet::CSearchResultFileDetailSheet(const CSearchFile* fi
 	m_wndMetaData.m_psp.pszIcon = _T("METADATA");
 
 	if (thePrefs.IsExtControlsEnabled())
-		m_wndMetaData.SetFile(file);
+		m_wndMetaData.SetFiles(&m_aItems);
 
 	if (thePrefs.IsExtControlsEnabled())
 		AddPage(&m_wndMetaData);
+
+	LPCTSTR pPshStartPage = m_pPshStartPage;
+	if (m_uPshInvokePage != 0)
+		pPshStartPage = MAKEINTRESOURCE(m_uPshInvokePage);
+	for (int i = 0; i < m_pages.GetSize(); i++)
+	{
+		CPropertyPage* pPage = GetPage(i);
+		if (pPage->m_psp.pszTemplate == pPshStartPage)
+		{
+			m_psh.nStartPage = i;
+			break;
+		}
+	}
 }
 
 CSearchResultFileDetailSheet::~CSearchResultFileDetailSheet()
@@ -102,21 +128,34 @@ CSearchResultFileDetailSheet::~CSearchResultFileDetailSheet()
 
 void CSearchResultFileDetailSheet::OnDestroy()
 {
-	sm_iLastActivePage = GetActiveIndex();
-	CResizableSheet::OnDestroy();
+	if (m_uPshInvokePage == 0)
+		m_pPshStartPage = GetPage(GetActiveIndex())->m_psp.pszTemplate;
+	CListViewWalkerPropertySheet::OnDestroy();
 }
 
 BOOL CSearchResultFileDetailSheet::OnInitDialog()
 {		
 	EnableStackedTabs(FALSE);
-	BOOL bResult = CResizableSheet::OnInitDialog();
+	BOOL bResult = CListViewWalkerPropertySheet::OnInitDialog();
 	HighColorTab::UpdateImageList(*this);
 	InitWindowStyles(this);
 	EnableSaveRestore(_T("SearchResultFileDetailsSheet")); // call this after(!) OnInitDialog
-	SetWindowText(GetResString(IDS_DETAILS) + _T(": ") + m_file->GetFileName());
-	if (sm_iLastActivePage < GetPageCount())
-		SetActivePage(sm_iLastActivePage);
+	UpdateTitle();
 	return bResult;
+}
+
+LRESULT CSearchResultFileDetailSheet::OnDataChanged(WPARAM, LPARAM)
+{
+	UpdateTitle();
+	return 1;
+}
+
+void CSearchResultFileDetailSheet::UpdateTitle()
+{
+	if (m_aItems.GetSize() == 1)
+		SetWindowText(GetResString(IDS_DETAILS) + _T(": ") + STATIC_DOWNCAST(CSearchFile, m_aItems[0])->GetFileName());
+	else
+		SetWindowText(GetResString(IDS_DETAILS));
 }
 
 
@@ -125,7 +164,9 @@ BOOL CSearchResultFileDetailSheet::OnInitDialog()
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 
 IMPLEMENT_DYNAMIC(CSearchListCtrl, CMuleListCtrl)
+
 CSearchListCtrl::CSearchListCtrl()
+	: CListCtrlItemWalk(this)
 {
 	searchlist = NULL;
 	m_nResultsID = 0;
@@ -177,6 +218,7 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	CreateMenues();
 
 	LoadSettings(CPreferences::tableSearch);
+	SetHighlightColors();
 
 	// Barry - Use preferred sort order from preferences
 	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableSearch);
@@ -239,6 +281,8 @@ BEGIN_MESSAGE_MAP(CSearchListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(NM_CLICK, OnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK,OnDblClick)
 	ON_WM_KEYDOWN()
+	ON_WM_SYSCOLORCHANGE()
+	ON_NOTIFY_REFLECT(LVN_KEYDOWN, OnLvnKeydown)
 END_MESSAGE_MAP()
 
 // CSearchListCtrl message handlers
@@ -433,9 +477,11 @@ void CSearchListCtrl::RemoveResult(const CSearchFile* toremove)
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)toremove;
-	sint32 result = FindItem(&find);
-	if(result != (-1) )
-		DeleteItem(result);
+	int iItem = FindItem(&find);
+	if (iItem != -1)
+	{
+		DeleteItem(iItem);
+	}
 }
 
 void CSearchListCtrl::ShowResults(uint32 nResultsID)
@@ -718,13 +764,14 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					HideSources(pItem);
 					theApp.searchlist->RemoveResult(pItem);
 					}
+				AutoSelectItem();
 				SetRedraw(TRUE);
 				return TRUE;
 				}
 			case MPG_ALTENTER:
 			case MP_DETAIL:
 				if (file){
-					CSearchResultFileDetailSheet sheet(file);
+					CSearchResultFileDetailSheet sheet(file, 0, this);
 					sheet.DoModal();
 				}
 				return TRUE;
@@ -1012,58 +1059,73 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CSearchListCtrl::ExpandCollapseItem(int item)
+void CSearchListCtrl::ExpandCollapseItem(int iItem, int iAction)
 {
-	if (item == -1)
+	if (iItem == -1)
 		return;
 
-	CSearchFile* searchfile = (CSearchFile*)GetItemData(item);
+	CSearchFile* searchfile = (CSearchFile*)GetItemData(iItem);
 	if (searchfile->GetListParent() != NULL)
 	{
 		searchfile=searchfile->GetListParent();
+
  		LVFINDINFO find;
 		find.flags = LVFI_PARAM;
 		find.lParam = (LPARAM)searchfile;
-		item = FindItem(&find);
-		if (item == -1)
+		iItem = FindItem(&find);
+		if (iItem == -1)
 			return;
 	}
 	if (!searchfile)
 		return;
 
-	// Check if the source branch is disable
 	if (!searchfile->GetListIsExpanded())
 	{
+		if (iAction > COLLAPSE_ONLY)
+		{
 		// only expand when more than one child (more than the original entry itself)
 		if (searchfile->GetListChildCount() < 2)
 			return;
 
 		// Go through the whole list to find out the sources for this file
 		SetRedraw(FALSE);
-		for (POSITION pos = theApp.searchlist->list.GetHeadPosition(); pos != NULL; ){
+			for (POSITION pos = theApp.searchlist->list.GetHeadPosition(); pos != NULL; )
+			{
 			const CSearchFile* cur_file = theApp.searchlist->list.GetNext(pos);
-			if(cur_file->GetListParent() == searchfile){
-				searchfile->SetListIsExpanded(true);
-				InsertItem(LVIF_PARAM|LVIF_TEXT,item+1,cur_file->GetFileName(),0,0,0,(LPARAM)cur_file);
+				if (cur_file->GetListParent() == searchfile)
+				{
+					searchfile->SetListIsExpanded(true);
+					InsertItem(LVIF_PARAM | LVIF_TEXT, iItem+1, cur_file->GetFileName(), 0, 0, 0, (LPARAM)cur_file);
+				}
 			}
+			SetRedraw(TRUE);
 		}
-		SetRedraw(TRUE);
 	}
 	else {
+		if (iAction == EXPAND_COLLAPSE || iAction == COLLAPSE_ONLY)
+		{
+			if (GetItemState(iItem, LVIS_SELECTED | LVIS_FOCUSED) != (LVIS_SELECTED | LVIS_FOCUSED))
+			{
+				SetItemState(iItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+				SetSelectionMark(iItem);
+			}
 		HideSources(searchfile);
 	}
+	}
 
-	Update(item);
+	Update(iItem);
 }
 
 void CSearchListCtrl::HideSources(CSearchFile* toCollapse)
 {
 	SetRedraw(FALSE);
-	int pre,post;
-	pre = post = 0;
-	for(int i = 0; i < GetItemCount(); i++) {
+	int pre = 0;
+	int post = 0;
+	for (int i = 0; i < GetItemCount(); i++)
+	{
 		const CSearchFile* item = (CSearchFile*)GetItemData(i);
-		if(item->GetListParent() == toCollapse) {
+		if (item->GetListParent() == toCollapse)
+		{
 			pre++;
 			DeleteItem(i--);
 			post++;
@@ -1084,7 +1146,7 @@ void CSearchListCtrl::OnClick(NMHDR *pNMHDR, LRESULT *pResult)
 	LPNMITEMACTIVATE pNMIA = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
 
 	if (p.x<10) 
-		ExpandCollapseItem(pNMIA->iItem);
+		ExpandCollapseItem(pNMIA->iItem, EXPAND_COLLAPSE);
 }
 
 void CSearchListCtrl::OnDblClick(NMHDR *pNMHDR, LRESULT *pResult)
@@ -1100,7 +1162,7 @@ void CSearchListCtrl::OnDblClick(NMHDR *pNMHDR, LRESULT *pResult)
 			if (iSel != -1){
 				const CSearchFile* file = (CSearchFile*)GetItemData(iSel);
 				if (file){
-					CSearchResultFileDetailSheet sheet(file);
+					CSearchResultFileDetailSheet sheet(file, 0, this);
 					sheet.DoModal();
 				}
 			}
@@ -1120,7 +1182,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	CSearchFile* content = (CSearchFile*)lpDrawItemStruct->itemData;
 	BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
-	if (content->GetListParent()==NULL && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
+	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
 		if(bCtrlFocused)
 			odc->SetBkColor(m_crHighlight);
@@ -1365,51 +1427,37 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	dc->SetTextColor(crOldTextColor);
 }
 
-static COLORREF GetSearchItemColor(/*const*/ CSearchFile* src)
+COLORREF CSearchListCtrl::GetSearchItemColor(/*const*/ CSearchFile* src)
 {
-	// default to black color (may be "corrected" below)
-	uint32 red = 0;
-	uint32 green = 0;
-	uint32 blue = 0;
-
 	const CKnownFile* pFile = theApp.downloadqueue->GetFileByID(src->GetFileHash());
+
 	if (pFile)
 	{
-		if (pFile->IsPartFile())
+		if (pFile->IsPartFile()) {
 			src->SetKnownType(CSearchFile::Downloading);
-		else
+			if ( ((CPartFile*)pFile)->GetStatus()==PS_PAUSED) {
+				return m_crSearchResultDownloadStopped;
+			}
+			return m_crSearchResultDownloading;
+		} else {
 			src->SetKnownType(CSearchFile::Shared);
-		red = 255;
+			return m_crSearchResultDownloading;
+		}
 	}
 	else if (theApp.sharedfiles->GetFileByID(src->GetFileHash()))
 	{
 		src->SetKnownType(CSearchFile::Shared);
-		red = 255;
+
+		return m_crSearchResultShareing;
 	}
 	else if (theApp.knownfiles->FindKnownFileByID(src->GetFileHash()))
 	{
 		src->SetKnownType(CSearchFile::Downloaded);
-		green = 128;
-	}
-	else
-	{
-		// shade of blue = availability of the file
-		blue = src->GetSourceCount() == 0 ? 0 : ((src->GetSourceCount() - 1) * 20);
-		if (blue > 255)
-			blue = 255;
-		else if (blue == 0)
-		{
-			// avoid the worst case (drawing black text on black background) for users 
-			// which are using extreme color schemes by eventually switching to default 
-			// windows text color
-			COLORREF crText = ::GetSysColor(COLOR_WINDOWTEXT);
-			red = GetRValue(crText);
-			green = GetGValue(crText);
-			blue = GetBValue(crText);
-		}
+		return m_crSearchResultKnown;
 	}
 
-	return RGB(red, green, blue);
+	// unknown, show shades of a color
+	return m_crShades[ (src->GetSourceCount()-1>=AVBLYSHADECOUNT)?AVBLYSHADECOUNT-1:src->GetSourceCount()-1];
 }
 
 void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src)
@@ -1535,10 +1583,12 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 			case 3:{		// complete sources
 				bool bComplete = false;
 				buffer = GetCompleteSourcesDisplayString(src, src->GetSourceCount(), &bComplete);
-				COLORREF crOldTextColor;
+				COLORREF crOldTextColor = 0;
 				if (!bComplete)
 					crOldTextColor = dc->SetTextColor(RGB(255, 0, 0));
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
+				if (!bComplete)
+					dc->SetTextColor(crOldTextColor);
 				break;
 			}
 			case 4:			// file type
@@ -1619,4 +1669,53 @@ void CSearchListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		return;
 	}
 	CMuleListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+void CSearchListCtrl::SetHighlightColors()
+{
+	COLORREF crSearchResultAvblyBase = RGB(0,0,255);
+	m_crSearchResultDownloading	= RGB(255,0,0);
+	m_crSearchResultDownloadStopped = m_crSearchResultDownloading;
+	m_crSearchResultKnown = RGB(0,128,0);
+	m_crSearchResultShareing = RGB(0,128,0);
+
+	theApp.LoadSkinColor(_T("SearchResultsLvFg_Downloading"), m_crSearchResultDownloading);
+	if (!theApp.LoadSkinColor(_T("SearchResultsLvFg_DownloadStopped"), m_crSearchResultDownloadStopped))
+		m_crSearchResultDownloadStopped = m_crSearchResultDownloading;
+	theApp.LoadSkinColor(_T("SearchResultsLvFg_Sharing"), m_crSearchResultShareing);
+	theApp.LoadSkinColor(_T("SearchResultsLvFg_Known"), m_crSearchResultKnown);
+	theApp.LoadSkinColor(_T("SearchResultsLvFg_AvblyBase"), crSearchResultAvblyBase);
+
+	// precalculate sources shades
+	COLORREF normFGC=GetTextColor();
+	float rdelta= (GetRValue(crSearchResultAvblyBase)-GetRValue(normFGC)) / AVBLYSHADECOUNT ;
+	float gdelta= (GetGValue(crSearchResultAvblyBase)-GetGValue(normFGC)) / AVBLYSHADECOUNT ;
+	float bdelta= (GetBValue(crSearchResultAvblyBase)-GetBValue(normFGC)) / AVBLYSHADECOUNT ;
+
+	for (int shades=0;shades<AVBLYSHADECOUNT;shades++) {
+		m_crShades[shades]=RGB(	GetRValue(normFGC) + (rdelta*shades),
+								GetGValue(normFGC) + (gdelta*shades),
+								GetBValue(normFGC) + (bdelta*shades));
+	}
+}
+
+void CSearchListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetHighlightColors();	
+}
+
+void CSearchListCtrl::OnLvnKeydown(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLVKEYDOWN pLVKeyDown = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
+
+	bool bAltKey = GetAsyncKeyState(VK_MENU) < 0;
+	int iAction = EXPAND_COLLAPSE;
+	if (pLVKeyDown->wVKey==VK_ADD || (bAltKey && pLVKeyDown->wVKey==VK_RIGHT))
+		iAction = EXPAND_ONLY;
+	else if (pLVKeyDown->wVKey==VK_SUBTRACT || (bAltKey && pLVKeyDown->wVKey==VK_LEFT))
+		iAction = COLLAPSE_ONLY;
+	if (iAction < EXPAND_COLLAPSE)
+		ExpandCollapseItem(GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED), iAction);
+	*pResult = 0;
 }

@@ -37,9 +37,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -127,6 +127,8 @@ void ConvertED2KTag(CTag*& pTag)
 ///////////////////////////////////////////////////////////////////////////////
 // CSearchFile
 	
+IMPLEMENT_DYNAMIC(CSearchFile, CAbstractFile)
+
 CSearchFile::CSearchFile(const CSearchFile* copyfrom)
 {
 	md4cpy(m_abyFileHash, copyfrom->GetFileHash());
@@ -682,7 +684,7 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 			cur_file->AddSources(uAvail);
 			AddResultCount(cur_file->GetSearchID(), toadd->GetFileHash(), uAvail);
 
-			uint32 uCompleteSources = -1;
+			uint32 uCompleteSources = (uint32)-1;
 			if (toadd->GetIntTagValue(FT_COMPLETE_SOURCES, uCompleteSources))
 				cur_file->AddCompleteSources(uCompleteSources);
 

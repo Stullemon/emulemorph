@@ -38,9 +38,9 @@
 #include "ClientUDPSocket.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -117,7 +117,7 @@ void CPPgConnection::OnEnChangePorts(uint8 istcpport)
 	// ports unchanged?
 	CString buffer;
 	GetDlgItem(IDC_PORT)->GetWindowText(buffer);
-	uint16 tcp= _ttoi(buffer);
+	uint16 tcp = _tstoi(buffer);
 	GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer);
 	uint16 udp= _tstoi(buffer);
 
@@ -125,7 +125,6 @@ void CPPgConnection::OnEnChangePorts(uint8 istcpport)
 		tcp==theApp.listensocket->GetConnectedPort() && 
 		udp==theApp.clientudp->GetConnectedPort() 
 	);
-
 
 	if (istcpport==0)
 		OnEnChangeUDPDisable();
@@ -531,7 +530,6 @@ void CPPgConnection::Localize(void)
 	if(m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_PW_CONNECTION));
-		
 		GetDlgItem(IDC_CAPACITIES_FRM)->SetWindowText(GetResString(IDS_PW_CON_CAPFRM));
 		GetDlgItem(IDC_DCAP_LBL)->SetWindowText(GetResString(IDS_PW_CON_DOWNLBL));
 		GetDlgItem(IDC_UCAP_LBL)->SetWindowText(GetResString(IDS_PW_CON_UPLBL));
@@ -564,7 +562,7 @@ void CPPgConnection::Localize(void)
 
 void CPPgConnection::OnBnClickedWizard()
 {
-	Wizard conWizard;
+	CConnectionWizardDlg conWizard;
 	conWizard.DoModal();
 }
 

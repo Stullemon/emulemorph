@@ -35,6 +35,7 @@ there client on the eMule forum..
 
 class CKnownFile;
 class CSafeMemFile;
+class CTag;
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -61,12 +62,17 @@ public:
 	CByteIO *bio1;
 	CByteIO *bio2;
 	CByteIO *bio3;
-	CString getFileName(void) const {return m_fileName;}
+	const CString& getFileName(void) const { return m_fileName; }
+	void setFileName(const CString& fileName) { m_fileName = fileName; }
 	CUInt128 getTarget(void) const {return m_target;}
 	void addFileID(const CUInt128& id);
 	void PreparePacket(void);
 	void PreparePacketForTags( CByteIO* packet, CKnownFile* file );
 	bool Stoping(void) const {return m_stoping;}
+	uint32 getNodeLoad() const;
+	uint32 getNodeLoadResonse() const {return m_totalLoadResponses;}
+	uint32 getNodeLoadTotal() const {return m_totalLoad;}
+	void updateNodeLoad( uint8 load ){ m_totalLoad += load; m_totalLoadResponses++; }
 
 	enum
 	{
@@ -74,8 +80,10 @@ public:
 		NODECOMPLETE,
 		FILE,
 		KEYWORD,
+		NOTES,
 		STOREFILE,
 		STOREKEYWORD,
+		STORENOTES,
 		FINDBUDDY,
 		FINDSOURCE
 	};
@@ -85,19 +93,22 @@ public:
 
 private:
 	void go(void);
-	void processResponse(const CUInt128 &target, uint32 fromIP, uint16 fromPort, ContactList *results);
-	void processResult(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
-	void processResultFile(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
-	void processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
+	void processResponse(uint32 fromIP, uint16 fromPort, ContactList *results);
+	void processResult(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
+	void processResultFile(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
+	void processResultKeyword(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
+	void processResultNotes(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
 	void jumpStart(void);
-	void sendFindValue(const CUInt128 &target, const CUInt128 &check, uint32 ip, uint16 port);
+	void sendFindValue(const CUInt128 &check, uint32 ip, uint16 port);
 	void prepareToStop(void);
 
 	bool		m_stoping;
 	time_t		m_created;
 	uint32		m_type;
-	uint32		m_count; //Used for gui reasons.. May not be needed later..
+	uint32		m_count;
 	uint32		m_countSent; //Used for gui reasons.. May not be needed later..
+	uint32		m_totalLoad;
+	uint32		m_totalLoadResponses;
 
 	uint32		m_searchID;
 	CUInt128	m_target;

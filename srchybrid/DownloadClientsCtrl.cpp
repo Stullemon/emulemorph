@@ -45,13 +45,15 @@
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 IMPLEMENT_DYNAMIC(CDownloadClientsCtrl, CMuleListCtrl)
-CDownloadClientsCtrl::CDownloadClientsCtrl(){
+CDownloadClientsCtrl::CDownloadClientsCtrl()
+	: CListCtrlItemWalk(this)
+{
 }
 
 BEGIN_MESSAGE_MAP(CDownloadClientsCtrl, CMuleListCtrl)
@@ -443,15 +445,15 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					}	
 				case 5:
 					if(client->Credits())
-						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedDown()), CastItoXBytes(client->credits->GetDownloadedTotal()));
+						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferredDown()), CastItoXBytes(client->credits->GetDownloadedTotal()));
 					else
-						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferedDown()));
+						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferredDown()));
 					break;
 				case 6:
 					if(client->Credits())
-						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedUp()), CastItoXBytes(client->credits->GetUploadedTotal()));
+						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferredUp()), CastItoXBytes(client->credits->GetUploadedTotal()));
 					else
-						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferedUp()));
+						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferredUp()));
 					break;
 				case 7:
 					if(client->Credits())
@@ -702,9 +704,9 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 	case 104: 
 		return CompareUnsigned(item1->GetPartCount(), item2->GetPartCount());
 	case 5:
-		return CompareUnsigned(item2->GetTransferedDown(), item1->GetTransferedDown());
+		return CompareUnsigned(item2->GetTransferredDown(), item1->GetTransferredDown());
 	case 105:
-		return CompareUnsigned(item1->GetTransferedDown(), item2->GetTransferedDown());
+		return CompareUnsigned(item1->GetTransferredDown(), item2->GetTransferredDown());
 	case 6:
 		return CompareUnsigned(item2->GetDatarate(), item1->GetDatarate());
 	case 106:
@@ -830,9 +832,9 @@ void CDownloadClientsCtrl::ShowSelectedUserDetails(){
 	SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	SetSelectionMark(it);   // display selection mark correctly!
 
-	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
+	CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 	if (client){
-		CClientDetailDialog dialog(client);
+		CClientDetailDialog dialog(client, this);
 		dialog.DoModal();
 	}
 }
@@ -840,9 +842,9 @@ void CDownloadClientsCtrl::ShowSelectedUserDetails(){
 void CDownloadClientsCtrl::OnNMDblclkDownloadClientlist(NMHDR *pNMHDR, LRESULT *pResult) {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
-		const CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
+		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){
-			CClientDetailDialog dialog(client);
+			CClientDetailDialog dialog(client,this);
 			dialog.DoModal();
 		}
 	}

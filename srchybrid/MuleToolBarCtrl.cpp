@@ -33,15 +33,22 @@
 #include "StatisticsDlg.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
+
 
 #if (_WIN32_IE < 0x0500)
 #define TBN_INITCUSTOMIZE       (TBN_FIRST - 23)
 #define    TBNRF_HIDEHELP       0x00000001
 #endif
+
+#ifndef TBSTYLE_EX_HIDECLIPPEDBUTTONS
+#define TBSTYLE_EX_HIDECLIPPEDBUTTONS       0x00000010  // don't show partially obscured buttons
+#endif
+
+#define	NUM_BUTTON_BITMAPS	14
 
 #define	EMULTB_BASEEXT		_T("eMuleToolbar.kad02")
 
@@ -57,25 +64,13 @@ static const LPCTSTR _apszSkinFiles[] =
 	_T("*.") EMULSKIN_BASEEXT _T(".ini"),
 };
 
-static int _iPreviousHeight = 0;
+#define	MAX_TOOLBAR_FILES	100
+#define	MAX_SKIN_FILES		100
 
 // CMuleToolbarCtrl
 
 IMPLEMENT_DYNAMIC(CMuleToolbarCtrl, CToolBarCtrl)
-CMuleToolbarCtrl::CMuleToolbarCtrl()
-{
-	m_iLastPressedButton = -1;
-	m_buttoncount=0;
-	memset(TBButtons, 0, sizeof(TBButtons));
-	memset(TBStrings, 0, sizeof(TBStrings));
-	m_iToolbarLabelSettings = 0;
-}
-
-CMuleToolbarCtrl::~CMuleToolbarCtrl()
-{
-}
-
-
+ 
 BEGIN_MESSAGE_MAP(CMuleToolbarCtrl, CToolBarCtrl)
 	ON_WM_SIZE()
 	ON_NOTIFY_REFLECT(NM_RCLICK, OnNMRclick)
@@ -85,16 +80,41 @@ BEGIN_MESSAGE_MAP(CMuleToolbarCtrl, CToolBarCtrl)
 	ON_NOTIFY_REFLECT(TBN_TOOLBARCHANGE, OnTbnToolbarChange)
 	ON_NOTIFY_REFLECT(TBN_RESET, OnTbnReset)
 	ON_NOTIFY_REFLECT(TBN_INITCUSTOMIZE, OnTbnInitCustomize)
+	ON_NOTIFY_REFLECT(TBN_ENDADJUST, OnTbnEndAdjust)
 	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
+CMuleToolbarCtrl::CMuleToolbarCtrl()
+{
+	m_sizBtnBmp.cx = thePrefs.GetToolbarIconSize().cx;
+	m_sizBtnBmp.cy = thePrefs.GetToolbarIconSize().cy;
+	m_iPreviousHeight = 0;
+	m_iLastPressedButton = -1;
+	m_buttoncount = 0;
+	memset(TBButtons, 0, sizeof(TBButtons));
+	memset(TBStrings, 0, sizeof(TBStrings));
+	m_eLabelType = NoLabels;
+}
+
+CMuleToolbarCtrl::~CMuleToolbarCtrl()
+{
+	if (m_bmpBack.m_hObject)
+		VERIFY( m_bmpBack.DeleteObject() );
+}
 
 void CMuleToolbarCtrl::Init(void)
 {
-	bitmappaths.RemoveAll();
+	m_astrToolbarPaths.RemoveAll();
 
-	ModifyStyle(0, TBSTYLE_FLAT | TBSTYLE_ALTDRAG | CCS_ADJUSTABLE | TBSTYLE_TRANSPARENT | CCS_NODIVIDER);
+	ModifyStyle(0, TBSTYLE_FLAT | TBSTYLE_ALTDRAG | CCS_ADJUSTABLE | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | CCS_NODIVIDER);
+	if (thePrefs.GetUseReBarToolbar())
+	{
+		ModifyStyle(0, CCS_NORESIZE);
+		SetExtendedStyle(GetExtendedStyle() | TBSTYLE_EX_HIDECLIPPEDBUTTONS);
+	}
+
 	ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), false);
+
 	// add button-text:
 	TCHAR cButtonStrings[2000];
 	int lLen, lLen2;
@@ -201,99 +221,91 @@ void CMuleToolbarCtrl::Init(void)
 	sepButton.iString = -1;
 	sepButton.iBitmap = -1;
 	
-	int iAddedButtons = 0;
 	CString config = thePrefs.GetToolbarSettings();
-	for(i=0;i<config.GetLength();i+=2)
+	for (i = 0; i < config.GetLength(); i += 2)
 	{
-		int index = _tstoi(config.Mid(i,2));
-		if(index==99)
+		int index = _tstoi(config.Mid(i, 2));
+		if (index == 99)
 		{
-			AddButtons(1,&sepButton);
+			AddButtons(1, &sepButton);
 			continue;
 		}
-		AddButtons(1,&TBButtons[index]);
-		iAddedButtons++;
+		AddButtons(1, &TBButtons[index]);
 	}
 
-	// recalc toolbar-size:	
-	Localize();		// at first we have to localize the button-text!!!
-	m_iToolbarLabelSettings=4;
-	ChangeTextLabelStyle(thePrefs.GetToolbarLabelSettings(), false);
-	SetBtnWidth();		// then calc and set the button width
-	AutoSize();		// and finally call the original (but maybe obsolete) function
-	
-	// add speed-meter to upper-right corner
-	CRect rClient;
-	GetClientRect(&rClient);
-	rClient.DeflateRect(7,7);
-	int iHeight = rClient.Height();
-	rClient.left = rClient.right - iHeight * 2;
+	// recalc toolbar-size
+	SetAllButtonsStrings();
+	ChangeTextLabelStyle(thePrefs.GetToolbarLabelSettings(), false, true);
+	SetAllButtonsWidth();	// then calc and set the button width
+	AutoSize();				// and finally call the original (but maybe obsolete) function
+	SaveCurHeight();
+}
 
-	// resize speed-meter	
-	CRect rcWnd;
-	GetWindowRect(&rcWnd);
-	OnSize(0, rcWnd.Width(), rcWnd.Height());
-	GetWindowRect(&rcWnd);
-	_iPreviousHeight = rcWnd.Height();
+void CMuleToolbarCtrl::SetAllButtonsStrings()
+{
+	static const int TBStringIDs[] =
+	{
+		IDS_EM_KADEMLIA, 
+		IDS_EM_SERVER,
+		IDS_EM_TRANS,
+		IDS_EM_SEARCH,
+		IDS_EM_FILES,
+		IDS_EM_MESSAGES,
+		IDS_IRC,
+		IDS_EM_STATISTIC,
+		IDS_EM_PREFS,
+		IDS_TOOLS,
+		IDS_EM_HELP
+	};
+	TBBUTTONINFO tbi;
+	tbi.dwMask = TBIF_TEXT;
+	tbi.cbSize = sizeof(TBBUTTONINFO);
+
+	CString buffer;
+	if (theApp.serverconnect->IsConnected())
+		buffer = GetResString(IDS_MAIN_BTN_DISCONNECT);
+	else if (theApp.serverconnect->IsConnecting())
+		buffer = GetResString(IDS_MAIN_BTN_CANCEL);
+	else
+		buffer = GetResString(IDS_MAIN_BTN_CONNECT);
+
+	_sntprintf(TBStrings[0], ARRSIZE(TBStrings[0]), _T("%s"), buffer);
+	tbi.pszText = TBStrings[0];
+	SetButtonInfo(IDC_TOOLBARBUTTON+0, &tbi);
+
+	for (int i = 1; i < m_buttoncount; i++)
+	{
+		_sntprintf(TBStrings[i], ARRSIZE(TBStrings[0]), _T("%s"), GetResString(TBStringIDs[i-1]));
+		tbi.pszText = TBStrings[i];
+		SetButtonInfo(IDC_TOOLBARBUTTON+i, &tbi);
+	}
 }
 
 void CMuleToolbarCtrl::Localize(void)
-{	
-	if(m_hWnd)
+{
+	if (m_hWnd)
 	{
-		static const int TBStringIDs[]={
-			IDS_EM_KADEMLIA, 
-			IDS_EM_SERVER,
-			IDS_EM_TRANS,
-			IDS_EM_SEARCH,
-			IDS_EM_FILES,
-			IDS_EM_MESSAGES,
-			IDS_IRC,
-			IDS_EM_STATISTIC,
-			IDS_EM_PREFS,
-			IDS_TOOLS,
-			IDS_EM_HELP
-		};
-		TBBUTTONINFO tbi;
-		tbi.dwMask = TBIF_TEXT;
-		tbi.cbSize = sizeof (TBBUTTONINFO);
-		CString buffer;
-		
-		if(theApp.serverconnect->IsConnected())
-			buffer = GetResString(IDS_MAIN_BTN_DISCONNECT);
-		else if(theApp.serverconnect->IsConnecting())
-			buffer = GetResString(IDS_MAIN_BTN_CANCEL);
-		else
-			buffer = GetResString(IDS_MAIN_BTN_CONNECT);
-
-		_stprintf(TBStrings[0], _T("%s"), buffer);
-		tbi.pszText = TBStrings[0];
-		SetButtonInfo(IDC_TOOLBARBUTTON+0, &tbi);
-
-		for (int i = 1; i < m_buttoncount; i++)
-		{
-			buffer = GetResString(TBStringIDs[i-1]); // EC
-			_stprintf(TBStrings[i], _T("%s"), buffer);
-			tbi.pszText = TBStrings[i];
-			SetButtonInfo(IDC_TOOLBARBUTTON+i, &tbi);
-		}
-
+		SetAllButtonsStrings();
+		SetAllButtonsWidth();
 		AutoSize();
-		SetBtnWidth();
+		UpdateIdealSize();
 	}
 }
 
 void CMuleToolbarCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CToolBarCtrl::OnSize(nType, cx, cy);
-		
-	SetBtnWidth();
+
+	SetAllButtonsWidth();
 	AutoSize();
 }
 
-void CMuleToolbarCtrl::SetBtnWidth()
+void CMuleToolbarCtrl::SetAllButtonsWidth()
 {
-	if(m_iToolbarLabelSettings==1)
+	if (GetButtonCount() == 0)
+		return;
+
+	if (m_eLabelType == LabelsBelow)
 	{
 		CDC *pDC = GetDC();
 		CFont *pFnt = GetFont();
@@ -302,34 +314,74 @@ void CMuleToolbarCtrl::SetBtnWidth()
 
 		// calculate the max. possible button-size
 		int iCalcSize = 0;
-
-		for(int i = 0; i < m_buttoncount ; i++)
-			if(!IsButtonHidden(IDC_TOOLBARBUTTON+i))
+		for (int i = 0; i < m_buttoncount ; i++)
+		{
+			if (!IsButtonHidden(IDC_TOOLBARBUTTON + i))
 			{
 				pDC->DrawText(TBStrings[i], -1, r, DT_SINGLELINE | DT_CALCRECT);
  				if (r.Width() > iCalcSize)
 					iCalcSize = r.Width();
 			}
-
+		}
 		iCalcSize += 10;
 
 		pDC->SelectObject(pOldFnt);
-		ReleaseDC(pDC); // FoRcHa
+		ReleaseDC(pDC);
 
-		GetClientRect(&r);
-		int bc=GetButtonCount(); if (bc==0) bc=1;
-		int iMaxPossible = r.Width() / bc;
+		if (!thePrefs.GetUseReBarToolbar())
+		{
+			GetClientRect(&r);
+			int bc = GetButtonCount();
+			if (bc == 0)
+				bc = 1;
+			int iMaxPossible = r.Width() / bc;
 
-		// if the buttons are to big, reduze their size
-		if(iCalcSize > iMaxPossible)
-			iCalcSize = iMaxPossible;
-
+			// if the buttons are to big, reduze their size
+			if (iCalcSize > iMaxPossible)
+				iCalcSize = iMaxPossible;
+		}
+		else
+		{
+			if (iCalcSize < 56)
+				iCalcSize = 56;
+			else if (iCalcSize > 70)
+				iCalcSize = 70;
+		}
 		SetButtonWidth(iCalcSize, iCalcSize);
 	}
 	else
 	{
-		SetButtonSize(CSize(0,0));
-		SetButtonWidth(0,0);
+		const int iSmallIconsButtonHeight = 28;
+
+		if (m_eLabelType == NoLabels)
+		{
+			DWORD dwSize = GetButtonSize();
+			int iFixedButtonWidth;
+			int iFixedButtonHeight = HIWORD(dwSize);
+			if (m_sizBtnBmp.cx == 16)
+			{
+				iFixedButtonWidth = 28;
+				iFixedButtonHeight = iSmallIconsButtonHeight;
+			}
+			else
+			{
+				iFixedButtonWidth = 56;
+			}
+
+			// it seems that the control updates itself more properly, if 'SetButtonWidth' id called *before* 'SetButtonSize'
+			SetButtonWidth(iFixedButtonWidth, iFixedButtonWidth);
+			SetButtonSize(CSize(iFixedButtonWidth, iFixedButtonHeight));
+		}
+		else
+		{
+			int iFixedButtonHeight = 0;
+			if (m_sizBtnBmp.cx == 16)
+				iFixedButtonHeight = iSmallIconsButtonHeight;
+
+			// it seems that the control updates itself more properly, if 'SetButtonWidth' id called *before* 'SetButtonSize'
+			SetButtonWidth(0, 0);
+			SetButtonSize(CSize(0, iFixedButtonHeight));
+		}
 	}
 }
 
@@ -339,145 +391,193 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 		if (!thePrefs.GetToolbarBitmapSettings().IsEmpty())
 			ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), true);
-		if (!CString(thePrefs.GetSkinProfile()).IsEmpty())
+		if (!thePrefs.GetSkinProfile().IsEmpty())
 			theApp.ApplySkin(thePrefs.GetSkinProfile());
 
 		*pResult = TRUE;
 		return;
 	}
 
-	POINT point;
-	GetCursorPos (&point);
-	
-	CMenu m_ToolbarMenu;
-	m_ToolbarMenu.CreatePopupMenu();
 
-	CMenu m_BitmapsMenu;
-	m_BitmapsMenu.CreateMenu();
-	m_BitmapsMenu.AppendMenu(MF_STRING,MP_SELECTTOOLBARBITMAP, GetResString(IDS_SELECTTOOLBARBITMAP));
-	m_BitmapsMenu.AppendMenu(MF_STRING,MP_SELECTTOOLBARBITMAPDIR, GetResString(IDS_SELECTTOOLBARBITMAPDIR));
-	m_BitmapsMenu.AppendMenu(MF_SEPARATOR);
-	m_BitmapsMenu.AppendMenu(MF_STRING,MP_TOOLBARBITMAP,GetResString(IDS_DEFAULT));
-	bitmappaths.RemoveAll();
+	///////////////////////////////////////////////////////////////////////////
+	// "Toolbar Bitmap" sub menu
+	//
+	CMenu menuBitmaps;
+	menuBitmaps.CreateMenu();
+	menuBitmaps.AppendMenu(MF_STRING, MP_SELECTTOOLBARBITMAP, GetResString(IDS_SELECTTOOLBARBITMAP));
+	menuBitmaps.AppendMenu(MF_STRING, MP_SELECTTOOLBARBITMAPDIR, GetResString(IDS_SELECTTOOLBARBITMAPDIR));
+	menuBitmaps.AppendMenu(MF_SEPARATOR);
+	menuBitmaps.AppendMenu(MF_STRING, MP_TOOLBARBITMAP, GetResString(IDS_DEFAULT));
+	
+	m_astrToolbarPaths.RemoveAll();
 	CString currentBitmapSettings = thePrefs.GetToolbarBitmapSettings();
-	bool checked=false;
-	if(currentBitmapSettings=="")
+	bool checked = false;
+	if (currentBitmapSettings.IsEmpty())
 	{
-		m_BitmapsMenu.CheckMenuItem(MP_TOOLBARBITMAP,MF_CHECKED);
-		m_BitmapsMenu.EnableMenuItem(MP_TOOLBARBITMAP,MF_DISABLED);
-		checked=true;
+		menuBitmaps.CheckMenuItem(MP_TOOLBARBITMAP, MF_CHECKED);
+		menuBitmaps.EnableMenuItem(MP_TOOLBARBITMAP, MF_DISABLED);
+		checked = true;
 	}
-	bitmappaths.Add(_T(""));
+	m_astrToolbarPaths.Add(_T("")); // dummy entry for 'Default' menu item
 	int i = 1;
 	if (!thePrefs.GetToolbarBitmapFolderSettings().IsEmpty())
 	{
+		CStringArray astrToolbarFiles;
 		for (int f = 0; f < ARRSIZE(_apszTBFiles); f++)
 		{
-			bool bFinished = false;
 			WIN32_FIND_DATA FileData;
 			HANDLE hSearch = FindFirstFile(thePrefs.GetToolbarBitmapFolderSettings() + CString(_T("\\")) + _apszTBFiles[f], &FileData);
-			if (hSearch == INVALID_HANDLE_VALUE)
-				bFinished = true;
-			for (/**/; !bFinished && i < 50; i++)
+			if (hSearch != INVALID_HANDLE_VALUE)
 			{
-				CString bitmapFileName = FileData.cFileName;
+				do {
+					astrToolbarFiles.Add(FileData.cFileName);
+				}
+				while (astrToolbarFiles.GetCount() < MAX_TOOLBAR_FILES && FindNextFile(hSearch, &FileData));
+				FindClose(hSearch);
+			}
+		}
+
+		if (astrToolbarFiles.GetCount() > 0)
+		{
+			Sort(astrToolbarFiles);
+			for (int f = 0; f < astrToolbarFiles.GetCount(); f++)
+			{
+				const CString& bitmapFileName = astrToolbarFiles.GetAt(f);
 				CString bitmapBaseName;
-				int iExt = bitmapFileName.Find(EMULTB_BASEEXT);
-				if (iExt > 0)
-					bitmapBaseName = bitmapFileName.Left(iExt - 1);
+				LPCTSTR pszTbBaseExt = stristr(bitmapFileName, EMULTB_BASEEXT);
+				if (pszTbBaseExt)
+					bitmapBaseName = bitmapFileName.Left(pszTbBaseExt - (LPCTSTR)bitmapFileName - 1);
 				else
 					bitmapBaseName = bitmapFileName;
-				m_BitmapsMenu.AppendMenu(MF_STRING, MP_TOOLBARBITMAP + i, bitmapBaseName);
-				bitmappaths.Add(thePrefs.GetToolbarBitmapFolderSettings() + CString(_T("\\")) + bitmapFileName);
-				if (!checked && currentBitmapSettings == bitmappaths[i])
+				menuBitmaps.AppendMenu(MF_STRING, MP_TOOLBARBITMAP + i, bitmapBaseName);
+				m_astrToolbarPaths.Add(thePrefs.GetToolbarBitmapFolderSettings() + CString(_T("\\")) + bitmapFileName);
+				if (!checked && currentBitmapSettings.CompareNoCase(m_astrToolbarPaths[i]) == 0)
 				{
-					m_BitmapsMenu.CheckMenuItem(MP_TOOLBARBITMAP+i, MF_CHECKED);
-					m_BitmapsMenu.EnableMenuItem(MP_TOOLBARBITMAP+i, MF_DISABLED);
+					menuBitmaps.CheckMenuItem(MP_TOOLBARBITMAP + i, MF_CHECKED);
+					menuBitmaps.EnableMenuItem(MP_TOOLBARBITMAP + i, MF_DISABLED);
 					checked = true;
 				}
-				if (!FindNextFile(hSearch, &FileData))
-					bFinished = true;
+				i++;
 			}
-			FindClose(hSearch);
 		}
+		ASSERT( i-1 == astrToolbarFiles.GetCount() );
 	}
-	if(!checked)
+	if (!checked)
 	{
-		m_BitmapsMenu.AppendMenu(MF_STRING,MP_TOOLBARBITMAP+i,currentBitmapSettings);
-		m_BitmapsMenu.CheckMenuItem(MP_TOOLBARBITMAP+i,MF_CHECKED);
-		m_BitmapsMenu.EnableMenuItem(MP_TOOLBARBITMAP+i,MF_DISABLED);
-		bitmappaths.Add(currentBitmapSettings);
+		menuBitmaps.AppendMenu(MF_STRING, MP_TOOLBARBITMAP + i, currentBitmapSettings);
+		menuBitmaps.CheckMenuItem(MP_TOOLBARBITMAP + i, MF_CHECKED);
+		menuBitmaps.EnableMenuItem(MP_TOOLBARBITMAP + i, MF_DISABLED);
+		m_astrToolbarPaths.Add(currentBitmapSettings);
 	}
-	m_ToolbarMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_BitmapsMenu.m_hMenu, GetResString(IDS_TOOLBARSKINS));
 
-	CMenu m_SkinsMenu;
-	m_SkinsMenu.CreateMenu();
-	m_SkinsMenu.AppendMenu(MF_STRING,MP_SELECT_SKIN_FILE, GetResString(IDS_SEL_SKIN));
-	m_SkinsMenu.AppendMenu(MF_STRING,MP_SELECT_SKIN_DIR, GetResString(IDS_SEL_SKINDIR));
-	m_SkinsMenu.AppendMenu(MF_SEPARATOR);
-	m_SkinsMenu.AppendMenu(MF_STRING,MP_SKIN_PROFILE,GetResString(IDS_DEFAULT));
-	aSkinPaths.RemoveAll();
+
+	///////////////////////////////////////////////////////////////////////////
+	// "Skin Profile" sub menu
+	//
+	CMenu menuSkins;
+	menuSkins.CreateMenu();
+	menuSkins.AppendMenu(MF_STRING, MP_SELECT_SKIN_FILE, GetResString(IDS_SEL_SKIN));
+	menuSkins.AppendMenu(MF_STRING, MP_SELECT_SKIN_DIR, GetResString(IDS_SEL_SKINDIR));
+	menuSkins.AppendMenu(MF_SEPARATOR);
+	menuSkins.AppendMenu(MF_STRING, MP_SKIN_PROFILE,GetResString(IDS_DEFAULT));
+
+	m_astrSkinPaths.RemoveAll();
 	CString currentSkin = thePrefs.GetSkinProfile();
-	checked=false;
-	if(currentSkin=="")
+	checked = false;
+	if (currentSkin.IsEmpty())
 	{
-		m_SkinsMenu.CheckMenuItem(MP_SKIN_PROFILE,MF_CHECKED);
-		m_SkinsMenu.EnableMenuItem(MP_SKIN_PROFILE,MF_DISABLED);
-		checked=true;
+		menuSkins.CheckMenuItem(MP_SKIN_PROFILE, MF_CHECKED);
+		menuSkins.EnableMenuItem(MP_SKIN_PROFILE, MF_DISABLED);
+		checked = true;
 	}
-	aSkinPaths.Add(_T(""));
+	m_astrSkinPaths.Add(_T("")); // dummy entry for 'Default' menu item
 	i = 1;
 	if (!thePrefs.GetSkinProfileDir().IsEmpty())
 	{
+		CStringArray astrSkinFiles;
 		for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++)
 		{
-			bool bFinished = false;
 			WIN32_FIND_DATA FileData;
 			HANDLE hSearch = FindFirstFile(thePrefs.GetSkinProfileDir() + CString(_T("\\")) + _apszSkinFiles[f], &FileData);
-			if (hSearch == INVALID_HANDLE_VALUE)
-				bFinished = true;
-			for (/**/; !bFinished && i < 50; i++)
+			if (hSearch != INVALID_HANDLE_VALUE)
 			{
-				CString skinFileName = FileData.cFileName;
+				do {
+					astrSkinFiles.Add(FileData.cFileName);
+				}
+				while (astrSkinFiles.GetCount() < MAX_SKIN_FILES && FindNextFile(hSearch, &FileData));
+				FindClose(hSearch);
+			}
+		}
+
+		if (astrSkinFiles.GetCount() > 0)
+		{
+			Sort(astrSkinFiles);
+			for (int f = 0; f < astrSkinFiles.GetCount(); f++)
+			{
+				const CString& skinFileName = astrSkinFiles.GetAt(f);
 				CString skinBaseName;
-				int iExt = skinFileName.Find(_T(".") EMULSKIN_BASEEXT _T(".ini"));
-				if (iExt > 0)
-					skinBaseName = skinFileName.Left(iExt);
+				LPCTSTR pszSkinBaseExt = stristr(skinFileName, _T(".") EMULSKIN_BASEEXT _T(".ini"));
+				if (pszSkinBaseExt)
+					skinBaseName = skinFileName.Left(pszSkinBaseExt - (LPCTSTR)skinFileName);
 				else
 					skinBaseName = skinFileName;
-				m_SkinsMenu.AppendMenu(MF_STRING, MP_SKIN_PROFILE + i, skinBaseName);
-				aSkinPaths.Add(thePrefs.GetSkinProfileDir() + CString(_T("\\")) + skinFileName);
-				if (!checked && currentSkin == aSkinPaths[i])
+				menuSkins.AppendMenu(MF_STRING, MP_SKIN_PROFILE + i, skinBaseName);
+				m_astrSkinPaths.Add(thePrefs.GetSkinProfileDir() + CString(_T("\\")) + skinFileName);
+				if (!checked && currentSkin.CompareNoCase(m_astrSkinPaths[i]) == 0)
 				{
-					m_SkinsMenu.CheckMenuItem(MP_SKIN_PROFILE + i, MF_CHECKED);
-					m_SkinsMenu.EnableMenuItem(MP_SKIN_PROFILE + i, MF_DISABLED);
+					menuSkins.CheckMenuItem(MP_SKIN_PROFILE + i, MF_CHECKED);
+					menuSkins.EnableMenuItem(MP_SKIN_PROFILE + i, MF_DISABLED);
 					checked = true;
 				}
-				if (!FindNextFile(hSearch, &FileData))
-					bFinished = true;
+				i++;
 			}
-			FindClose(hSearch);
 		}
+		ASSERT( i-1 == astrSkinFiles.GetCount() );
 	}
-	if(!checked)
+	if (!checked)
 	{
-		m_SkinsMenu.AppendMenu(MF_STRING, MP_SKIN_PROFILE + i, currentSkin);
-		m_SkinsMenu.CheckMenuItem(MP_SKIN_PROFILE + i, MF_CHECKED);
-		m_SkinsMenu.EnableMenuItem(MP_SKIN_PROFILE + i, MF_DISABLED);
-		aSkinPaths.Add(currentSkin);
+		menuSkins.AppendMenu(MF_STRING, MP_SKIN_PROFILE + i, currentSkin);
+		menuSkins.CheckMenuItem(MP_SKIN_PROFILE + i, MF_CHECKED);
+		menuSkins.EnableMenuItem(MP_SKIN_PROFILE + i, MF_DISABLED);
+		m_astrSkinPaths.Add(currentSkin);
 	}
-	m_ToolbarMenu.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_SkinsMenu.m_hMenu, GetResString(IDS_SKIN_PROF));
 	
-	CMenu m_TextLabelsMenu;
-	m_TextLabelsMenu.CreateMenu();
-	m_TextLabelsMenu.AppendMenu(MF_STRING,MP_NOTEXTLABELS, GetResString(IDS_NOTEXTLABELS));
-	m_TextLabelsMenu.AppendMenu(MF_STRING,MP_TEXTLABELS,GetResString(IDS_ENABLETEXTLABELS));
-	m_TextLabelsMenu.AppendMenu(MF_STRING,MP_TEXTLABELSONRIGHT,GetResString(IDS_TEXTLABELSONRIGHT));
-	m_TextLabelsMenu.CheckMenuItem(thePrefs.GetToolbarLabelSettings(),MF_BYPOSITION|MF_CHECKED);
-	m_TextLabelsMenu.EnableMenuItem(thePrefs.GetToolbarLabelSettings(),MF_BYPOSITION|MF_DISABLED);
-	m_ToolbarMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_TextLabelsMenu.m_hMenu, GetResString(IDS_TEXTLABELS));
-	m_ToolbarMenu.AppendMenu(MF_STRING,MP_CUSTOMIZETOOLBAR, GetResString(IDS_CUSTOMIZETOOLBAR));
-	m_ToolbarMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+
+	///////////////////////////////////////////////////////////////////////////
+	// "Text Label" sub menu
+	//
+	CMenu menuTextLabels;
+	menuTextLabels.CreateMenu();
+	ASSERT( MP_NOTEXTLABELS == MP_TEXTLABELS-1 && MP_NOTEXTLABELS == MP_TEXTLABELSONRIGHT-2 );
+	ASSERT( MP_NOTEXTLABELS + (int)NoLabels == MP_NOTEXTLABELS );
+	ASSERT( MP_NOTEXTLABELS + (int)LabelsBelow == MP_TEXTLABELS );
+	ASSERT( MP_NOTEXTLABELS + (int)LabelsRight == MP_TEXTLABELSONRIGHT );
+	menuTextLabels.AppendMenu(MF_STRING | MF_ENABLED, MP_NOTEXTLABELS, GetResString(IDS_NOTEXTLABELS));
+	menuTextLabels.AppendMenu(MF_STRING | MF_ENABLED, MP_TEXTLABELS, GetResString(IDS_ENABLETEXTLABELS));
+	menuTextLabels.AppendMenu(MF_STRING | MF_ENABLED, MP_TEXTLABELSONRIGHT, GetResString(IDS_TEXTLABELSONRIGHT));
+	menuTextLabels.CheckMenuRadioItem(MP_NOTEXTLABELS, MP_TEXTLABELSONRIGHT, MP_NOTEXTLABELS + (int)thePrefs.GetToolbarLabelSettings(), MF_BYCOMMAND);
+	menuTextLabels.EnableMenuItem(MP_NOTEXTLABELS + (int)thePrefs.GetToolbarLabelSettings(), MF_BYCOMMAND | MF_DISABLED);
+
+	menuTextLabels.AppendMenu(MF_SEPARATOR);
+	menuTextLabels.AppendMenu(MF_STRING, MP_LARGEICONS, GetResString(IDS_LARGEICONS));
+	menuTextLabels.AppendMenu(MF_STRING, MP_SMALLICONS, GetResString(IDS_SMALLICONS));
+	ASSERT( MP_LARGEICONS == MP_SMALLICONS-1 );
+	menuTextLabels.CheckMenuRadioItem(MP_LARGEICONS, MP_SMALLICONS, m_sizBtnBmp.cx == 16 ? MP_SMALLICONS : MP_LARGEICONS, MF_BYCOMMAND);
+	menuTextLabels.EnableMenuItem(m_sizBtnBmp.cx == 16 ? MP_SMALLICONS : MP_LARGEICONS, MF_BYCOMMAND | MF_DISABLED);
+
+
+	///////////////////////////////////////////////////////////////////////////
+	// Toolbar context menu
+	//
+	CMenu menuToolbar;
+	menuToolbar.CreatePopupMenu();
+	menuToolbar.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)menuBitmaps.m_hMenu, GetResString(IDS_TOOLBARSKINS));
+	menuToolbar.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)menuSkins.m_hMenu, GetResString(IDS_SKIN_PROF));
+	menuToolbar.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)menuTextLabels.m_hMenu, GetResString(IDS_TEXTLABELS));
+	menuToolbar.AppendMenu(MF_STRING, MP_CUSTOMIZETOOLBAR, GetResString(IDS_CUSTOMIZETOOLBAR));
+	CPoint point;
+	GetCursorPos(&point);
+	menuToolbar.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 
 	*pResult = TRUE;
 }
@@ -506,7 +606,7 @@ void CMuleToolbarCtrl::OnTbnGetButtonInfo(NMHDR *pNMHDR, LRESULT *pResult)
 		_tcsncpy(pNMTB->pszText, strText, pNMTB->cchText - 1);
 		pNMTB->pszText[pNMTB->cchText - 1] = _T('\0');
 		pNMTB->tbButton = TBButtons[pNMTB->iItem];
-		if (m_iToolbarLabelSettings == 2)
+		if (m_eLabelType == LabelsRight)
 			pNMTB->tbButton.fsStyle |= TBSTYLE_AUTOSIZE;
 		*pResult = TRUE;
 	}
@@ -514,29 +614,26 @@ void CMuleToolbarCtrl::OnTbnGetButtonInfo(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CMuleToolbarCtrl::OnTbnToolbarChange(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	TBBUTTON buttoninfo;
 	CString config;
-	CString buffer;
-
-	for(int i=0;i<GetButtonCount();i++)
-		if(GetButton(i, &buttoninfo))
-		{
-			buffer.Format(_T("%02i"), (buttoninfo.idCommand!=0)?buttoninfo.idCommand-IDC_TOOLBARBUTTON:99);
-			config.Append(buffer);
-		}
+	for (int i = 0; i < GetButtonCount();i++)
+	{
+		TBBUTTON buttoninfo;
+		if (GetButton(i, &buttoninfo))
+			config.AppendFormat(_T("%02i"), (buttoninfo.idCommand != 0) ? buttoninfo.idCommand - IDC_TOOLBARBUTTON : 99);
+	}
 
 	thePrefs.SetToolbarSettings(config);
 	Localize();
 
 	theApp.emuledlg->ShowConnectionState();
 
-	SetBtnWidth();
+	SetAllButtonsWidth();
 	AutoSize();
 
 	*pResult = 0;
 }
 
-void CMuleToolbarCtrl::ChangeToolbarBitmap(CString path, bool refresh)
+void CMuleToolbarCtrl::ChangeToolbarBitmap(const CString& path, bool bRefresh)
 {
 	bool bResult = false;
 	CImageList ImageList;
@@ -545,15 +642,18 @@ void CMuleToolbarCtrl::ChangeToolbarBitmap(CString path, bool refresh)
 	{
 		BITMAP bm = {0};
 		Bitmap.GetObject(sizeof(bm), &bm);
-		bool bAlpha = bm.bmBitsPixel > 24;
-		if (ImageList.Create(32, bm.bmHeight, bAlpha ? ILC_COLOR32 : (theApp.m_iDfltImageListColorFlags | ILC_MASK), 0, 1))
+		if (bm.bmWidth == NUM_BUTTON_BITMAPS*m_sizBtnBmp.cx && bm.bmHeight == m_sizBtnBmp.cy)
 		{
-			ImageList.Add(&Bitmap,  bAlpha ? 0xFF000000 : RGB(255, 0, 255));
-			CImageList* pimlOld = SetImageList(&ImageList);
-			ImageList.Detach();
-			if (pimlOld)
-				pimlOld->DeleteImageList();
-			bResult = true;
+			bool bAlpha = bm.bmBitsPixel > 24;
+			if (ImageList.Create(m_sizBtnBmp.cx, bm.bmHeight, bAlpha ? ILC_COLOR32 : (theApp.m_iDfltImageListColorFlags | ILC_MASK), 0, 1))
+			{
+				ImageList.Add(&Bitmap,  bAlpha ? 0xFF000000 : RGB(255, 0, 255));
+				CImageList* pimlOld = SetImageList(&ImageList);
+				ImageList.Detach();
+				if (pimlOld)
+					pimlOld->DeleteImageList();
+				bResult = true;
+			}
 		}
 		Bitmap.DeleteObject();
 	}
@@ -562,29 +662,34 @@ void CMuleToolbarCtrl::ChangeToolbarBitmap(CString path, bool refresh)
 	if (!bResult)
 	{
 		// load from icon ressources
-		ImageList.Create(32, 32, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-		ImageList.Add(CTempIconLoader(_T("CONNECT"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("DISCONNECT"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("STOPCONNECTING"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("KADEMLIA"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("SERVER"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("TRANSFER"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("SEARCH"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("SharedFiles"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("MESSAGES"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("IRC"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("STATISTICS"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("PREFERENCES"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("TOOLS"), 32, 32));
-		ImageList.Add(CTempIconLoader(_T("HELP"), 32, 32));
+		ImageList.Create(m_sizBtnBmp.cx, m_sizBtnBmp.cy, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+		ImageList.Add(CTempIconLoader(_T("CONNECT"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("DISCONNECT"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("STOPCONNECTING"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("KADEMLIA"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("SERVER"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("TRANSFER"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("SEARCH"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("SharedFiles"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("MESSAGES"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("IRC"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("STATISTICS"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("PREFERENCES"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("TOOLS"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ImageList.Add(CTempIconLoader(_T("HELP"), m_sizBtnBmp.cx, m_sizBtnBmp.cy));
+		ASSERT( ImageList.GetImageCount() == NUM_BUTTON_BITMAPS );
 		CImageList* pimlOld = SetImageList(&ImageList);
 		ImageList.Detach();
 		if (pimlOld)
 			pimlOld->DeleteImageList();
 	}
 
-	if (refresh)
+	if (bRefresh)
+	{
+		UpdateBackground();
+		Invalidate();
 		Refresh();
+	}
 }
 
 BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
@@ -629,19 +734,36 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			break;
 		}
 
+		case MP_LARGEICONS:
+			m_sizBtnBmp.cx = m_sizBtnBmp.cy = 32;
+			ForceRecalcLayout();
+			ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), true);
+			thePrefs.SetToolbarIconSize(m_sizBtnBmp);
+			break;
+
+       	case MP_SMALLICONS:
+			m_sizBtnBmp.cx = m_sizBtnBmp.cy = 16;
+			ForceRecalcLayout();
+			ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), true);
+			thePrefs.SetToolbarIconSize(m_sizBtnBmp);
+			break;
+
 		case MP_NOTEXTLABELS:
-			ChangeTextLabelStyle(0,TRUE);
-			thePrefs.SetToolbarLabelSettings(0);
+			ForceRecalcLayout();
+			ChangeTextLabelStyle(NoLabels, true);
+			thePrefs.SetToolbarLabelSettings(NoLabels);
 			break;
 
 		case MP_TEXTLABELS:
-			ChangeTextLabelStyle(1,TRUE);
-			thePrefs.SetToolbarLabelSettings(1);
+			ForceRecalcLayout();
+			ChangeTextLabelStyle(LabelsBelow, true);
+			thePrefs.SetToolbarLabelSettings(LabelsBelow);
 			break;
 
 		case MP_TEXTLABELSONRIGHT:
-			ChangeTextLabelStyle(2,TRUE);
-			thePrefs.SetToolbarLabelSettings(2);
+			ForceRecalcLayout();
+			ChangeTextLabelStyle(LabelsRight, true);
+			thePrefs.SetToolbarLabelSettings(LabelsRight);
 			break;
 
 		case MP_SELECT_SKIN_DIR:{
@@ -667,89 +789,106 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			}
 			strFilter += _T("||");
 			CFileDialog dialog(TRUE, EMULSKIN_BASEEXT _T(".ini"), NULL, OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST, strFilter, NULL, 0);
-			if (IDOK == dialog.DoModal())
+			if (dialog.DoModal() == IDOK)
 			{
-				if(thePrefs.GetSkinProfile()!=dialog.GetPathName())
+				if (thePrefs.GetSkinProfile().CompareNoCase(dialog.GetPathName()) != 0)
 					theApp.ApplySkin(dialog.GetPathName());
 			}
 			break;
 		}
 
 		default:
-			if(wParam >= MP_TOOLBARBITMAP && wParam < MP_TOOLBARBITMAP + 50)
+			if (wParam >= MP_TOOLBARBITMAP && wParam < MP_TOOLBARBITMAP + MAX_TOOLBAR_FILES)
 			{
-				if(thePrefs.GetToolbarBitmapSettings()!=bitmappaths[wParam-MP_TOOLBARBITMAP])
+				if (thePrefs.GetToolbarBitmapSettings().CompareNoCase(m_astrToolbarPaths[wParam-MP_TOOLBARBITMAP]) != 0)
 				{
-					ChangeToolbarBitmap(bitmappaths[wParam-MP_TOOLBARBITMAP], true);
-					thePrefs.SetToolbarBitmapSettings(bitmappaths[wParam-MP_TOOLBARBITMAP]);
+					ChangeToolbarBitmap(m_astrToolbarPaths[wParam-MP_TOOLBARBITMAP], true);
+					thePrefs.SetToolbarBitmapSettings(m_astrToolbarPaths[wParam-MP_TOOLBARBITMAP]);
 				}
 			}
-			else if (wParam >= MP_SKIN_PROFILE && wParam < MP_SKIN_PROFILE + 50)
+			else if (wParam >= MP_SKIN_PROFILE && wParam < MP_SKIN_PROFILE + MAX_SKIN_FILES)
 			{
-				if (thePrefs.GetSkinProfile() != aSkinPaths[wParam - MP_SKIN_PROFILE])
-					theApp.ApplySkin(aSkinPaths[wParam - MP_SKIN_PROFILE]);
+				if (thePrefs.GetSkinProfile().CompareNoCase(m_astrSkinPaths[wParam - MP_SKIN_PROFILE]) != 0)
+					theApp.ApplySkin(m_astrSkinPaths[wParam - MP_SKIN_PROFILE]);
 			}
 	}
 
 	return true;
 }
 
-void CMuleToolbarCtrl::ChangeTextLabelStyle(int settings, bool refresh)
+void CMuleToolbarCtrl::ChangeTextLabelStyle(EToolbarLabelType eLabelType, bool bRefresh, bool bForceUpdateButtons)
 {
-	if(m_iToolbarLabelSettings!=settings)
+	if (m_eLabelType != eLabelType || bForceUpdateButtons)
 	{
-		switch(settings)
+		switch (eLabelType)
 		{
-			case 0:
+			case NoLabels:
 				SetStyle(GetStyle() & ~TBSTYLE_LIST);
 				SetMaxTextRows(0);
 				break;
-			case 1:
+			case LabelsBelow:
 				SetStyle(GetStyle() & ~TBSTYLE_LIST);
 				SetMaxTextRows(1);
 				break;
-			case 2:
+			case LabelsRight:
 				SetStyle(GetStyle() | TBSTYLE_LIST);
 				SetMaxTextRows(1);
 				break;
 		}
-		if((m_iToolbarLabelSettings+settings)!=2) //if not changing between no labels and labels on right 
-		{
-			for(int i = 0; i < m_buttoncount; i++)
-			{	
-				TBBUTTONINFO buttonInfo;
-				buttonInfo.cbSize=sizeof(buttonInfo);
-				buttonInfo.dwMask=TBIF_STYLE;
-				GetButtonInfo(IDC_TOOLBARBUTTON + i, &buttonInfo);
-				if(settings==1)
-					buttonInfo.fsStyle &= ~TBSTYLE_AUTOSIZE;
-				else
-					buttonInfo.fsStyle |= TBSTYLE_AUTOSIZE;
-				SetButtonInfo(IDC_TOOLBARBUTTON + i, &buttonInfo);
-			}
+
+		for (int i = 0; i < m_buttoncount; i++)
+		{	
+			TBBUTTONINFO tbbi = {0};
+			tbbi.cbSize = sizeof(tbbi);
+			tbbi.dwMask = TBIF_STYLE;
+			GetButtonInfo(IDC_TOOLBARBUTTON + i, &tbbi);
+			if (eLabelType == LabelsRight)
+				tbbi.fsStyle |= TBSTYLE_AUTOSIZE;
+			else
+				tbbi.fsStyle &= ~TBSTYLE_AUTOSIZE;
+			SetButtonInfo(IDC_TOOLBARBUTTON + i, &tbbi);
 		}
-		m_iToolbarLabelSettings=settings;
-		if(refresh)
+
+		m_eLabelType = eLabelType;
+		if (bRefresh)
 			Refresh();
 	}
 }
 
 void CMuleToolbarCtrl::Refresh()
 {
-	SetBtnWidth();
-	AutoSize();
+	SetAllButtonsWidth();
+	AutoSize();	// Causes a toolbar to be resized.
+
+	if (theApp.emuledlg->m_ctlMainTopReBar.m_hWnd)
+	{
+	    theApp.emuledlg->RemoveAnchor(theApp.emuledlg->m_ctlMainTopReBar.m_hWnd);
+
+	    REBARBANDINFO rbbi = {0};
+	    CSize sizeBar;
+	    GetMaxSize(&sizeBar);
+		ASSERT( sizeBar.cx != 0 && sizeBar.cy != 0 );
+	    rbbi.cbSize = sizeof(rbbi);
+	    rbbi.fMask = RBBIM_CHILDSIZE | RBBIM_IDEALSIZE;
+	    rbbi.cxMinChild = sizeBar.cy;
+	    rbbi.cyMinChild = sizeBar.cy;
+	    rbbi.cxIdeal = sizeBar.cx;
+	    VERIFY( theApp.emuledlg->m_ctlMainTopReBar.SetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi) );
+
+	    theApp.emuledlg->AddAnchor(theApp.emuledlg->m_ctlMainTopReBar.m_hWnd, TOP_LEFT, TOP_RIGHT);
+	}
 
 	CRect rToolbarRect;
 	GetWindowRect(&rToolbarRect);
 
-	if (_iPreviousHeight == rToolbarRect.Height())
+	if (m_iPreviousHeight == rToolbarRect.Height())
 	{
 		Invalidate();
 		RedrawWindow();
 	}
 	else
 	{
-		_iPreviousHeight = rToolbarRect.Height();
+		m_iPreviousHeight = rToolbarRect.Height();
 
 		CRect rClientRect;
 		theApp.emuledlg->GetClientRect(&rClientRect);
@@ -786,22 +925,22 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// First get rid of old buttons
 	// while saving their states
-	for ( int i = GetButtonCount()-1; i >= 0 ; i-- )
+	for (int i = GetButtonCount()-1; i >= 0; i--)
 	{
 		TBBUTTON Button;
-		GetButton(i,&Button);
-		for ( int j= 0; j <m_buttoncount ; j++ )
+		GetButton(i, &Button);
+		for (int j = 0; j < m_buttoncount ; j++)
 		{
-			if ( TBButtons[j].idCommand == Button.idCommand )
+			if (TBButtons[j].idCommand == Button.idCommand)
 			{
-				TBButtons[j].fsState	=	Button.fsState;
-				TBButtons[j].fsStyle	=	Button.fsStyle;
-				TBButtons[j].iString	=	Button.iString;
+				TBButtons[j].fsState = Button.fsState;
+				TBButtons[j].fsStyle = Button.fsStyle;
+				TBButtons[j].iString = Button.iString;
 			}
 		}
 		DeleteButton(i);
 	}
-	
+
 	TBBUTTON sepButton;
 	sepButton.idCommand = 0;
 	sepButton.fsStyle = TBSTYLE_SEP;
@@ -811,33 +950,38 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR *pNMHDR, LRESULT *pResult)
 	
 	// set default configuration 
 	CString config = strDefaultToolbar;
-	for(i=0;i<config.GetLength();i+=2)
+	for (i = 0; i <config.GetLength(); i += 2)
 	{
-		int index = _tstoi(config.Mid(i,2));
-		if(index==99)
+		int index = _tstoi(config.Mid(i, 2));
+		if (index == 99)
 		{
-			AddButtons(1,&sepButton);
+			AddButtons(1, &sepButton);
 			continue;
 		}
-		AddButtons(1,&TBButtons[index]);
+		AddButtons(1, &TBButtons[index]);
 	}
+
 	// save new (default) configuration 
-	thePrefs.SetToolbarSettings(config.GetBuffer(256));
-	config.ReleaseBuffer();
+	thePrefs.SetToolbarSettings(config);
 
 	Localize();		// we have to localize the button-text
 
 	theApp.emuledlg->ShowConnectionState();
 
-	m_iToolbarLabelSettings=4;
-	ChangeTextLabelStyle(thePrefs.GetToolbarLabelSettings(), false);
-	SetBtnWidth();		// then calc and set the button width
-	AutoSize();		
+	ChangeTextLabelStyle(thePrefs.GetToolbarLabelSettings(), false, true);
+	SetAllButtonsWidth();	// then calc and set the button width
+	AutoSize();
 }
 
 void CMuleToolbarCtrl::OnTbnInitCustomize(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	*pResult = TBNRF_HIDEHELP;
+}
+
+void CMuleToolbarCtrl::OnTbnEndAdjust(NMHDR*, LRESULT* pResult)
+{
+	UpdateIdealSize();
+	*pResult = 0; // return value is ignored
 }
 
 void CMuleToolbarCtrl::OnSysColorChange()
@@ -846,8 +990,173 @@ void CMuleToolbarCtrl::OnSysColorChange()
 	ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), true);
 }
 
-void CMuleToolbarCtrl::ReloadConfig(){
-	while (GetButtonCount() != 0)
-		DeleteButton(0);
-	Init();
+void CMuleToolbarCtrl::PressMuleButton(int nID)
+{
+	// Customization might splits up the button-group, so we have to (un-)press them on our own
+	if (m_iLastPressedButton != -1)
+		CheckButton(m_iLastPressedButton, FALSE);
+	CheckButton(nID, TRUE);
+	m_iLastPressedButton = nID;
+}
+
+void CMuleToolbarCtrl::UpdateIdealSize()
+{
+	if (theApp.emuledlg->m_ctlMainTopReBar.m_hWnd)
+	{
+		// let the rebar know what's our new current ideal size, so the chevron is handled correctly..
+		CSize sizeBar;
+		GetMaxSize(&sizeBar);
+		ASSERT( sizeBar.cx != 0 && sizeBar.cy != 0 );
+
+	    REBARBANDINFO rbbi = {0};
+	    rbbi.cbSize = sizeof(rbbi);
+	    rbbi.fMask = RBBIM_IDEALSIZE;
+		rbbi.cxIdeal = sizeBar.cx;
+	    VERIFY( theApp.emuledlg->m_ctlMainTopReBar.SetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi) );
+	}
+}
+
+void CMuleToolbarCtrl::ForceRecalcLayout()
+{
+	// Force a recalc of the toolbar's layout to work around a comctl bug
+	int iTextRows = GetMaxTextRows();
+	SetRedraw(FALSE);
+	SetMaxTextRows(iTextRows+1);
+	SetMaxTextRows(iTextRows);
+	SetRedraw(TRUE);
+}
+
+#ifdef _DEBUG
+
+#ifndef TBIF_BYINDEX
+#define TBIF_BYINDEX            0x80000000
+#endif
+
+void CMuleToolbarCtrl::Dump()
+{
+	TRACE("---\n");
+	CRect rcWnd;
+	GetWindowRect(&rcWnd);
+	TRACE("Wnd =%4d,%4d-%4d,%4d (%4d x %4d)\n", rcWnd.left, rcWnd.top, rcWnd.right, rcWnd.bottom, rcWnd.Width(), rcWnd.Height());
+
+	CRect rcClnt;
+	GetClientRect(&rcClnt);
+	TRACE("Clnt=%4d,%4d-%4d,%4d (%4d x %4d)\n", rcClnt.left, rcClnt.top, rcClnt.right, rcClnt.bottom, rcClnt.Width(), rcClnt.Height());
+
+	// Total size of all of the visible buttons and separators in the toolbar.
+	CSize siz;
+	GetMaxSize(&siz);
+	TRACE("MaxSize=                  %4d x %4d\n", siz.cx, siz.cy);
+
+	int iButtons = GetButtonCount();	// Count of the buttons currently in the toolbar.
+	int iRows = GetRows();				// Number of rows of buttons in a toolbar with the TBSTYLE_WRAPABLE style
+	int iMaxTextRows = GetMaxTextRows();// Maximum number of text rows that can be displayed on a toolbar button.
+	TRACE("ButtonCount=%d  Rows=%d  MaxTextRows=%d\n", iButtons, iRows, iMaxTextRows);
+
+	// Current width and height of toolbar buttons, in pixels.
+	DWORD dwButtonSize = GetButtonSize();
+	TRACE("ButtonSize=%dx%d\n", LOWORD(dwButtonSize), HIWORD(dwButtonSize));
+
+	// Padding for a toolbar control.
+	DWORD dwPadding = SendMessage(TB_GETPADDING);
+	TRACE("Padding=%dx%d\n", LOWORD(dwPadding), HIWORD(dwPadding));
+
+	DWORD dwBitmapFlags = GetBitmapFlags(); // TBBF_LARGE=0x0001
+	TRACE("BitmapFlags=%u\n", dwBitmapFlags);
+
+	// Bounding rectangle of a button in a toolbar.
+	TRACE("ItemRects:");
+	for (int i = 0; i < iButtons; i++)
+	{
+		CRect rcButton(0,0,0,0);
+		GetItemRect(i, &rcButton);
+		TRACE(" %2dx%2d", rcButton.Width(), rcButton.Height());
+	}
+	TRACE("\n");
+
+	// Bounding rectangle for a specified toolbar button.
+	TRACE("Rects    :");
+	for (int i = 0; i < iButtons; i++)
+	{
+		CRect rcButton(0,0,0,0);
+		GetRect(IDC_TOOLBARBUTTON + i, &rcButton);
+		TRACE(" %2dx%2d", rcButton.Width(), rcButton.Height());
+	}
+	TRACE("\n");
+
+	TRACE("Info     :");
+	for (int i = 0; i < iButtons; i++)
+	{
+		TCHAR szLabel[256];
+		TBBUTTONINFO tbi = {0};
+		tbi.cbSize = sizeof(tbi);
+		tbi.dwMask |= TBIF_BYINDEX | TBIF_COMMAND | TBIF_IMAGE | TBIF_LPARAM | TBIF_SIZE | TBIF_STATE | TBIF_STYLE | TBIF_TEXT;
+		tbi.cchText = ARRSIZE(szLabel);
+		tbi.pszText = szLabel;
+		GetButtonInfo(i, &tbi);
+		TRACE(" %2d ", tbi.cx);
+	}
+	TRACE("\n");
+}
+#endif
+
+void CMuleToolbarCtrl::AutoSize()
+{
+	CToolBarCtrl::AutoSize();
+#ifdef _DEBUG
+	//Dump();
+#endif
+}
+
+void CMuleToolbarCtrl::SaveCurHeight()
+{
+	CRect rcWnd;
+	GetWindowRect(&rcWnd);
+	m_iPreviousHeight = rcWnd.Height();
+}
+
+void CMuleToolbarCtrl::UpdateBackground()
+{
+	if (theApp.emuledlg->m_ctlMainTopReBar)
+	{
+		HBITMAP hbmp = theApp.LoadImage(_T("MainToolBarBk"), _T("BMP"));
+		if (hbmp)
+		{
+			REBARBANDINFO rbbi = {0};
+			rbbi.cbSize = sizeof(rbbi);
+			rbbi.fMask = RBBIM_STYLE;
+			if (theApp.emuledlg->m_ctlMainTopReBar.GetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi))
+			{
+				rbbi.fMask = RBBIM_STYLE | RBBIM_BACKGROUND;
+				rbbi.fStyle |= RBBS_FIXEDBMP;
+				rbbi.hbmBack = hbmp;
+				if (theApp.emuledlg->m_ctlMainTopReBar.SetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi))
+				{
+					if (m_bmpBack.m_hObject)
+						VERIFY( m_bmpBack.DeleteObject() );
+					m_bmpBack.Attach(hbmp);
+					hbmp = NULL;
+				}
+			}
+			if (hbmp)
+				VERIFY( DeleteObject(hbmp) );
+		}
+		else
+		{
+			REBARBANDINFO rbbi = {0};
+			rbbi.cbSize = sizeof(rbbi);
+			rbbi.fMask = RBBIM_STYLE;
+			if (theApp.emuledlg->m_ctlMainTopReBar.GetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi))
+			{
+				rbbi.fMask = RBBIM_STYLE | RBBIM_BACKGROUND;
+				rbbi.fStyle &= ~RBBS_FIXEDBMP;
+				rbbi.hbmBack = NULL;
+				if (theApp.emuledlg->m_ctlMainTopReBar.SetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi))
+				{
+					if (m_bmpBack.m_hObject)
+						VERIFY( m_bmpBack.DeleteObject() );
+				}
+			}
+		}
+	}
 }

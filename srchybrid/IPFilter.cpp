@@ -122,8 +122,11 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 			sbuffer = szBuffer;
 			
 			// ignore comments & too short lines
-			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5)
+			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5) {
+				sbuffer.Trim(_T(" \t\r\n"));
+				DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IP filter: ignored line %u\n", iLine) : 0 );
 				continue;
+			}
 
 			if (eFileType == Unknown)
 			{
@@ -154,8 +157,9 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 			}
 
 			bool bValid = false;
-			uint32 start, end;
-			UINT level;
+			uint32 start = 0;
+			uint32 end = 0;
+			UINT level = 0;
 			CString desc;
 			if (eFileType == FilterDat)
 				bValid = ParseFilterLine1(sbuffer, start, end, level, desc);
@@ -167,6 +171,11 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 			{
 				AddIPRange(start, end, level, desc);
 				iFoundRanges++;
+			}
+			else
+			{
+				sbuffer.Trim(_T(" \t\r\n"));
+				DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IP filter: ignored line %u\n", iLine) : 0 );
 			}
 		}
 		fclose(readFile);
@@ -451,13 +460,13 @@ void CIPFilter::UpdateIPFilterURL()
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
-		dlgDownload.m_strTitle = GetResString(IDS_IPFILTER_DLFILE);
+		dlgDownload.m_strTitle = GetResString(IDS_DWL_IPFILTERFILE);
 		dlgDownload.m_sURLToDownload = IPFilterURL;
 		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 		if (dlgDownload.DoModal() != IDOK || FileSize(szTempFilePath) < 10240)
 		{
 			_tremove(szTempFilePath);
-			LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_DLFAIL));
+			LogError(LOG_STATUSBAR, GetResString(IDS_DWLIPFILTERFAILED));
 			return;
 		}
 
@@ -487,10 +496,10 @@ void CIPFilter::UpdateIPFilterURL()
 					bUnzipped = true;
 				}
 				else
-					LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_ERR1), szTempFilePath);
+					LogError(LOG_STATUSBAR, GetResString(IDS_ERR_IPFILTERZIPEXTR), szTempFilePath);
 			}
 			else
-				LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_ERR2), szTempFilePath);
+				LogError(LOG_STATUSBAR, GetResString(IDS_ERR_IPFILTERCONTENTERR), szTempFilePath);
 
 			zip.Close();
 		}

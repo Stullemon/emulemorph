@@ -24,6 +24,7 @@ All rights reserved.
 
 ///////////////////////////////// Defines /////////////////////////////////////
 #define HAS_ZLIB
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -242,7 +243,7 @@ LRESULT CHttpDownloadDlg::OnThreadFinished(WPARAM wParam, LPARAM /*lParam*/)
 	else if (wParam)
 	{
 		if (!m_sError.IsEmpty())
-			AddDebugLogLine(false, _T("%s"), m_sError);
+			LogError(LOG_STATUSBAR, _T("%s"), m_sError);
 		EndDialog(IDCANCEL);
 	}
 	else
@@ -411,7 +412,7 @@ void CHttpDownloadDlg::PlayAnimation()
 	m_ctrlAnimate.Play(0, (UINT)-1, (UINT)-1);
 }
 
-void CHttpDownloadDlg::HandleThreadErrorWithLastError(CString nIDError, DWORD dwLastError)
+void CHttpDownloadDlg::HandleThreadErrorWithLastError(CString strIDError, DWORD dwLastError)
 {
 	//Form the error string to report
 	CString sError;
@@ -419,7 +420,7 @@ void CHttpDownloadDlg::HandleThreadErrorWithLastError(CString nIDError, DWORD dw
 		sError.Format(_T("%d"), dwLastError);
 	else
 		sError.Format(_T("%d"), ::GetLastError());
-	m_sError.Format(nIDError, sError);
+	m_sError.Format(strIDError, sError);
 
 	//Delete the file being downloaded to if it is present
 	m_FileToWrite.Close();
@@ -428,9 +429,9 @@ void CHttpDownloadDlg::HandleThreadErrorWithLastError(CString nIDError, DWORD dw
 	PostMessage(WM_HTTPDOWNLOAD_THREAD_FINISHED, 1);
 }
 
-void CHttpDownloadDlg::HandleThreadError(CString nIDError)
+void CHttpDownloadDlg::HandleThreadError(CString strIDError)
 {
-	m_sError = nIDError;
+	m_sError = strIDError;
 	PostMessage(WM_HTTPDOWNLOAD_THREAD_FINISHED, 1);
 }
 

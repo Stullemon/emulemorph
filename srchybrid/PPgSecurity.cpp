@@ -28,10 +28,11 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
+
 
 #define	IPFILTERUPDATEURL_STRINGS_PROFILE	_T("AC_IPFilterUpdateURLs.dat")
 
@@ -221,6 +222,7 @@ void CPPgSecurity::Localize(void)
 
 void CPPgSecurity::OnReloadIPFilter()
 {
+	CWaitCursor curHourglass;
 	theApp.ipfilter->LoadFromDefaultFile();
 }
 
@@ -243,13 +245,16 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
-		dlgDownload.m_strTitle = GetResString(IDS_IPFILTER_DLFILE);
+		dlgDownload.m_strTitle = GetResString(IDS_DWL_IPFILTERFILE);
 		dlgDownload.m_sURLToDownload = url;
 		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 		if (dlgDownload.DoModal() != IDOK)
 		{
 			_tremove(szTempFilePath);
-			LogWarning(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_DLFAIL));
+			CString strError=GetResString(IDS_DWLIPFILTERFAILED);
+			if (!dlgDownload.GetError().IsEmpty())
+				strError += _T("\r\n\r\n") + dlgDownload.GetError();
+			AfxMessageBox(strError);
 			return;
 		}
 
@@ -278,11 +283,17 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 						TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
 					bUnzipped = true;
 				}
-				else
-					LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_ERR1), szTempFilePath);
+				else {
+					CString strError;
+					strError.Format( GetResString(IDS_ERR_IPFILTERZIPEXTR) , szTempFilePath);
+					AfxMessageBox(strError);
+				}
 			}
-			else
-				LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_ERR2), szTempFilePath);
+			else {
+				CString strError;
+				strError.Format( GetResString(IDS_ERR_IPFILTERCONTENTERR) , szTempFilePath);
+				AfxMessageBox(strError);
+			}
 
 			zip.Close();
 		}

@@ -10,6 +10,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CTrayMenuBtn
 
@@ -75,7 +76,7 @@ void CTrayMenuBtn::OnMouseMove(UINT nFlags, CPoint point)
 		m_bMouseOver = false;
 		Invalidate();
 	}
-
+	
 	CWnd::OnMouseMove(nFlags, point);
 }
 
@@ -97,14 +98,14 @@ void CTrayMenuBtn::OnLButtonUp(UINT nFlags, CPoint point)
 		m_bMouseOver = false;
 		Invalidate();
 	}		
-
+	
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
 void CTrayMenuBtn::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
-
+		
 	CRect rClient;
 	GetClientRect(rClient);
 
@@ -144,7 +145,7 @@ void CTrayMenuBtn::OnPaint()
 	CPoint pt(rClient.left+2+iLeftOffset, rClient.Height()/2-rText.Height()/2);
 	CPoint sz(rText.Width(),rText.Height());
 	MemDC.DrawState(pt, sz, m_strText, DST_TEXT | (bEnabled ? DSS_NORMAL : DSS_DISABLED), 
-		FALSE, m_strText.GetLength(), (CBrush*)NULL);  			
+						FALSE, m_strText.GetLength(), (CBrush*)NULL);  			
 
 	dc.BitBlt(0,0,rClient.Width(),rClient.Height(),&MemDC,0,0,SRCCOPY);
 	MemDC.SelectObject(pOldBMP);

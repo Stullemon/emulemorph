@@ -73,9 +73,9 @@ to tim.kosse@gmx.de
 #endif //NOLAYERS
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 #ifndef CCRITICALSECTIONWRAPPERINCLUDED

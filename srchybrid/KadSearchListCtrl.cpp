@@ -26,9 +26,9 @@
 #include "PartFile.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -40,7 +40,10 @@ enum ECols
 	colKey,
 	colType,
 	colName,
-	colStop
+	colStop,
+	colLoad,
+	colPacketsSent,
+	colResponses
 };
 
 IMPLEMENT_DYNAMIC(CKadSearchListCtrl, CMuleListCtrl)
@@ -69,6 +72,9 @@ void CKadSearchListCtrl::Init()
 	InsertColumn(colType, GetResString(IDS_TYPE) ,LVCFMT_LEFT,100);
 	InsertColumn(colName, GetResString(IDS_SW_NAME) ,LVCFMT_LEFT,100);
 	InsertColumn(colStop, GetResString(IDS_STATUS),LVCFMT_LEFT,100);
+	InsertColumn(colLoad, GetResString(IDS_THELOAD) ,LVCFMT_LEFT,100);
+	InsertColumn(colPacketsSent, GetResString(IDS_PACKSENT) ,LVCFMT_LEFT,100);
+	InsertColumn(colResponses, GetResString(IDS_RESPONSES) ,LVCFMT_LEFT, 100);
 	SetAllIcons();
 	Localize();
 
@@ -130,13 +136,17 @@ void CKadSearchListCtrl::Localize()
 
 	for (int icol=0;icol<pHeaderCtrl->GetItemCount();icol++) {
 		switch (icol) {
-			case 0: strRes = GetResString(IDS_NUMBER); break;
-			case 1: strRes = GetResString(IDS_KEY); break;
-			case 2: strRes = GetResString(IDS_TYPE); break;
-			case 3: strRes = GetResString(IDS_SW_NAME); break;
-			case 4: strRes = GetResString(IDS_STATUS); break;
+			case colNum: strRes = GetResString(IDS_NUMBER); break;
+			case colKey: strRes = GetResString(IDS_KEY); break;
+			case colType: strRes = GetResString(IDS_TYPE); break;
+			case colName: strRes = GetResString(IDS_SW_NAME); break;
+			case colStop: strRes = GetResString(IDS_STATUS); break;
+			case colResponses: strRes = GetResString(IDS_RESPONSES); break;
+			case colLoad: strRes = GetResString(IDS_THELOAD); break;
+			case colPacketsSent: strRes = GetResString(IDS_PACKSENT); break;
+			default: strRes = _T(""); break;
 		}
-	
+
 		hdi.pszText = strRes.GetBuffer();
 		pHeaderCtrl->SetItem(icol, &hdi);
 		strRes.ReleaseBuffer();
@@ -155,28 +165,39 @@ void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search
 
 	switch(search->getSearchTypes()){
 		case Kademlia::CSearch::FILE:
-			id.Format(GetResString(IDS_KAD_SEARCHSRC), search->getCount(), search->getCountSent());
+			id = GetResString(IDS_KAD_SEARCHSRC);
 			SetItem(iItem,0,LVIF_IMAGE,0,0,0,0,0,0);
 			break;
 		case Kademlia::CSearch::KEYWORD:
-			id.Format(GetResString(IDS_KAD_SEARCHKW), search->getCount(), search->getCountSent());
+			id = GetResString(IDS_KAD_SEARCHKW);
 			SetItem(iItem,0,LVIF_IMAGE,0,1,0,0,0,0);
 			break;
 		case Kademlia::CSearch::NODE:
 		case Kademlia::CSearch::NODECOMPLETE:
-			id.Format(GetResString(IDS_KAD_NODE), search->getCount(), search->getCountSent());
+			id = GetResString(IDS_KAD_NODE);
 			SetItem(iItem,0,LVIF_IMAGE,0,2,0,0,0,0);
 			break;
 		case Kademlia::CSearch::STOREFILE:
-			id.Format(GetResString(IDS_KAD_STOREFILE), search->getCount(), search->getCountSent());
+			id = GetResString(IDS_KAD_STOREFILE);
 			SetItem(iItem,0,LVIF_IMAGE,0,3,0,0,0,0);
 			break;
 		case Kademlia::CSearch::STOREKEYWORD:
-			id.Format(GetResString(IDS_KAD_STOREKW), search->getCount(), search->getCountSent());
+			id = GetResString(IDS_KAD_STOREKW);
 			SetItem(iItem,0,LVIF_IMAGE,0,4,0,0,0,0);
 			break;
+		//JOHNTODO: -
+		//I also need to understand skinning so the icons are done correctly.
+		case Kademlia::CSearch::FINDBUDDY:
+			id= GetResString(IDS_FINDBUDDY);
+			break;
+		case Kademlia::CSearch::STORENOTES:
+			id=GetResString(IDS_STORENOTES);
+			break;
+		case Kademlia::CSearch::NOTES:
+			id=GetResString(IDS_NOTES);
+			break;
 		default:
-			id.Format(GetResString(IDS_KAD_UNKNOWN), search->getCount(), search->getCountSent());
+			id = GetResString(IDS_KAD_UNKNOWN);
 	}
 	SetItemText(iItem,colType,id);
 
@@ -192,6 +213,15 @@ void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search
 		SetItemText(iItem,colStop,GetResString(IDS_KADSTATUS_STOPPING));
 	else
 		SetItemText(iItem,colStop,GetResString(IDS_KADSTATUS_ACTIVE));
+
+	id.Format( _T("%u (%u|%u)"), search->getNodeLoad(), search->getNodeLoadResonse(), search->getNodeLoadTotal() );
+	SetItemText(iItem, colLoad, id );
+
+	id.Format( _T("%u"), search->getCount() );
+	SetItemText(iItem, colResponses, id );
+
+	id.Format( _T("%u"), search->getCountSent());
+	SetItemText(iItem, colPacketsSent, id );
 }
 
 void CKadSearchListCtrl::SearchAdd(const Kademlia::CSearch* search)
@@ -291,6 +321,16 @@ int CKadSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSo
 			break;
 		case colName:
 			iResult = item1->getFileName().CompareNoCase(item2->getFileName());
+			break;
+		case colLoad:
+			iResult = item1->getNodeLoad() - item2->getNodeLoad();
+			break;
+		case colResponses:
+			iResult = item1->getCount() - item2->getCount();
+			break;
+		case colPacketsSent:
+			iResult = item1->getCountSent() - item2->getCountSent();
+			break;
 		default:
 			return 0;
 	}

@@ -48,9 +48,9 @@ there client on the eMule forum..
 #include "StringConversion.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -91,13 +91,13 @@ void CKademlia::start(CPrefs *prefs)
 		AddDebugLogLine(false, _T("Starting Kademlia"));
 
 		m_nextSearchJumpStart = time(NULL);
-		m_nextSelfLookup = time(NULL) + MIN2S(5);
+		m_nextSelfLookup = time(NULL) + MIN2S(3);
 		m_statusUpdate = time(NULL);
 		m_bigTimer = time(NULL);
 		m_nextFirewallCheck = time(NULL) + (HR2S(1));
 		//Frist Firewall check is done on connect, find a buddy after the first 10min of starting
 		//the client to try to allow it to settle down..
-		m_nextFindBuddy = time(NULL) + (MIN2S(10));
+		m_nextFindBuddy = time(NULL) + (MIN2S(5));
 		m_bootstrap = 0;
 
 		srand((UINT)time(NULL));
@@ -195,11 +195,13 @@ void CKademlia::process()
 	EventMap::const_iterator it;
 	uint32 maxUsers = 0;
 	uint32 tempUsers = 0;
+	uint32 lastContact = 0;
 	bool updateUserFile = false;
 	try
 	{
 		now = time(NULL);
-		ASSERT(instance->m_prefs != NULL); 
+		ASSERT(instance->m_prefs != NULL);
+		lastContact = instance->m_prefs->getLastContact();
 		CSearchManager::updateStats();
 		if( m_statusUpdate <= now )
 		{
@@ -231,16 +233,30 @@ void CKademlia::process()
 				if( maxUsers < tempUsers )
 					maxUsers = tempUsers;
 			}
-			if (zone->m_nextBigTimer <= now && m_bigTimer <= now)
+			if (m_bigTimer <= now)
 			{
 				try
 				{
-					if(zone->onBigTimer())
+					if( zone->m_nextBigTimer <= now )
 					{
-						zone->m_nextBigTimer = HR2S(1) + now;
-						m_bigTimer = SEC(10) + now;
+						if(zone->onBigTimer())
+						{
+							zone->m_nextBigTimer = HR2S(1) + now;
+							m_bigTimer = SEC(10) + now;
+						}
+					} 
+					else
+					{
+						if( lastContact && ( (now - lastContact) > (KADEMLIADISCONNECTDELAY-MIN2S(5))))
+						{
+							if(zone->onBigTimer())
+							{
+								zone->m_nextBigTimer = HR2S(1) + now;
+								m_bigTimer = SEC(10) + now;
+							}
+						} 
 					}
-				} 
+				}
 				catch (...) 
 				{
 					AddDebugLogLine(false, _T("Exception in Kademlia::Process(1)"));
@@ -303,7 +319,7 @@ void CKademlia::removeEvent(CRoutingZone *zone)
 bool CKademlia::isConnected(void)
 {
 	if( instance && instance->m_prefs )
-		return instance->m_prefs->getLastContact();
+		return instance->m_prefs->hasHadContact();
 	return false;
 }
 
@@ -339,6 +355,13 @@ uint32 CKademlia::getTotalStoreSrc(void)
 {
 	if( instance && instance->m_prefs )
 		return instance->m_prefs->getTotalStoreSrc();
+	return 0;
+}
+
+uint32 CKademlia::getTotalStoreNotes(void)
+{
+	if( instance && instance->m_prefs )
+		return instance->m_prefs->getTotalStoreNotes();
 	return 0;
 }
 
@@ -395,28 +418,40 @@ void CKademlia::RecheckFirewalled()
 CPrefs *CKademlia::getPrefs(void)
 {
 	if (instance == NULL || instance->m_prefs == NULL)
+	{
+		ASSERT(0);
 		return NULL;
+	}
 	return instance->m_prefs;
 }
 
 CKademliaUDPListener *CKademlia::getUDPListener(void)
 {
 	if (instance == NULL || instance->m_udpListener == NULL)
+	{
+		ASSERT(0);
 		return NULL;
+	}
 	return instance->m_udpListener;
 }
 
 CRoutingZone *CKademlia::getRoutingZone(void)
 {
 	if (instance == NULL || instance->m_routingZone == NULL)
+	{
+		ASSERT(0);
 		return NULL;
+	}
 	return instance->m_routingZone;
 }
 
 CIndexed *CKademlia::getIndexed(void)
 {
 	if ( instance == NULL || instance->m_indexed == NULL)
+	{
+		ASSERT(0);
 		return NULL;
+	}
 	return instance->m_indexed;
 }
 

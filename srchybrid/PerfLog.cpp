@@ -27,9 +27,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -111,7 +111,7 @@ void CPerfLog::LogSamples()
 	if (dwNow - m_dwLastSampled < m_dwInterval)
 		return;
 
-	// 'data counters' amount of transfered file data
+	// 'data counters' amount of transferred file data
 	UINT nCurDn = theStats.sessionReceivedBytes - m_nLastSessionRecvBytes;
 	UINT nCurUp = theStats.sessionSentBytes - m_nLastSessionSentBytes;
 

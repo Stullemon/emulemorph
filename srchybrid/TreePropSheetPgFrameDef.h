@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.1 $
+* $Revision: 1.2 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -16,8 +16,6 @@
 *	$History:$
 *
 *********************************************************************/
-
-
 #if !defined(AFX_PROPPAGEFRAMEDEFAULT_H__5C5B7AC9_2DF5_4E8C_8F5E_DE2CC04BBED7__INCLUDED_)
 #define AFX_PROPPAGEFRAMEDEFAULT_H__5C5B7AC9_2DF5_4E8C_8F5E_DE2CC04BBED7__INCLUDED_
 
@@ -26,11 +24,6 @@
 #endif // _MSC_VER > 1000
 
 #include "TreePropSheetPgFrame.h"
-
-
-//namespace TreePropSheet
-//{
-
 
 /**
 An implementation of CPropPageFrame, that works well for Windows XP
@@ -104,10 +97,6 @@ protected:
 	*/
 	CImageList m_Images;
 };
-
-
-//} //namespace TreePropSheet
-
 
 /////////////////////////////////////////////////////////////////////////////
 

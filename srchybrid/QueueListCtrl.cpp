@@ -38,17 +38,19 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
 // CQueueListCtrl
 
 IMPLEMENT_DYNAMIC(CQueueListCtrl, CMuleListCtrl)
-CQueueListCtrl::CQueueListCtrl(){
 
+CQueueListCtrl::CQueueListCtrl()
+	: CListCtrlItemWalk(this)
+{
 	// Barry - Refresh the queue every 10 secs
 	VERIFY( (m_hTimer = ::SetTimer(NULL, NULL, 10000, QueueUpdateTimer)) != NULL );
 	if (thePrefs.GetVerbose() && !m_hTimer)
@@ -741,7 +743,7 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 			//MORPH END  - Added by SiRoB, Friend Addon
 			case MPG_ALTENTER:
 			case MP_DETAIL: {
-				CClientDetailDialog dialog(client);
+				CClientDetailDialog dialog(client, this);
 				dialog.DoModal();
 				break;
 			}
@@ -1023,7 +1025,7 @@ void CALLBACK CQueueListCtrl::QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEve
 void CQueueListCtrl::ShowQueueClients()
 {
 	DeleteAllItems(); 
-	/*const*/ CUpDownClient* update = theApp.uploadqueue->GetNextClient(NULL);
+	CUpDownClient* update = theApp.uploadqueue->GetNextClient(NULL);
 	while( update )
 	{
 		AddClient(update,false);
@@ -1045,9 +1047,9 @@ void CQueueListCtrl::ShowSelectedUserDetails()
 	SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	SetSelectionMark(it);   // display selection mark correctly! 
 
-	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
+	CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 	if (client){
-		CClientDetailDialog dialog(client);
+		CClientDetailDialog dialog(client, this);
 		dialog.DoModal();
 	}
 }
@@ -1056,9 +1058,9 @@ void CQueueListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {
-		const CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
+		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){
-			CClientDetailDialog dialog(client);
+			CClientDetailDialog dialog(client, this);
 			dialog.DoModal();
 		}
 	}

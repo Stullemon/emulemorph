@@ -23,6 +23,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 // critical section to protect while drawing to the DC
 CCriticalSection CGDIThread::m_csGDILock;
 

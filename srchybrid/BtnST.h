@@ -95,7 +95,6 @@ public:
 				BTNST_COLOR_FG_OUT,				// Text color when mouse is OUTside
 				BTNST_COLOR_BK_FOCUS,			// Background color when the button is focused
 				BTNST_COLOR_FG_FOCUS,			// Text color when the button is focused
-
 				BTNST_MAX_COLORS
 			};
 

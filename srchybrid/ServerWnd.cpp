@@ -49,9 +49,9 @@
 //MORPH END   - Added by SiRoB, XML News [O²]
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 #define	SERVERMET_STRINGS_PROFILE	_T("AC_ServerMetURLs.dat")
@@ -75,6 +75,7 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_EN_CHANGE(IDC_SPORT, OnSvrTextChange)
 	ON_EN_CHANGE(IDC_SNAME, OnSvrTextChange)
 	ON_EN_CHANGE(IDC_SERVERMETURL, OnSvrTextChange)
+	ON_STN_DBLCLK(IDC_SERVLST_ICO, OnStnDblclickServlstIco)
 	//MORPH START - Added by SiRoB, XML News [O²]
 	ON_NOTIFY(EN_LINK, IDC_NEWSMSG, OnEnLinkNewsBox)
 	ON_BN_CLICKED(IDC_FEEDUPDATE, DownloadFeed)
@@ -165,6 +166,7 @@ BOOL CServerWnd::OnInitDialog()
 		// MOD Note: end
 		servermsgbox->AppendText(_T("\n\n"));
 	}
+
 	GetDlgItem(IDC_LOGBOX)->GetWindowRect(rect);
 	GetDlgItem(IDC_LOGBOX)->DestroyWindow();
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
@@ -242,8 +244,8 @@ BOOL CServerWnd::OnInitDialog()
 	newitem.iImage = 0;
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneVerboseLog );
 
-	AddAnchor(IDC_SERVLIST, TOP_LEFT, MIDDLE_RIGHT);
-	AddAnchor(IDC_SSTATIC,TOP_RIGHT);
+	AddAnchor(serverlistctrl, TOP_LEFT, MIDDLE_RIGHT);
+	AddAnchor(m_ctrlNewServerFrm, TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC4,TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC7,TOP_RIGHT);
 	AddAnchor(IDC_IPADDRESS,TOP_RIGHT);
@@ -251,13 +253,13 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(IDC_SNAME,TOP_RIGHT);
 	AddAnchor(IDC_ADDSERVER,TOP_RIGHT );
 	AddAnchor(IDC_SSTATIC5,TOP_RIGHT);
-	AddAnchor(IDC_MYINFO, TOP_RIGHT, BOTTOM_RIGHT);
-	AddAnchor(IDC_MYINFOLIST, TOP_RIGHT, BOTTOM_RIGHT);
+	AddAnchor(m_ctrlMyInfoFrm, TOP_RIGHT, BOTTOM_RIGHT);
+	AddAnchor(m_MyInfo, TOP_RIGHT, BOTTOM_RIGHT);
 	AddAnchor(IDC_SPORT,TOP_RIGHT);
-	AddAnchor(IDC_SSTATIC6,TOP_RIGHT);
+	AddAnchor(m_ctrlUpdateServerFrm, TOP_RIGHT);
 	AddAnchor(IDC_SERVERMETURL,TOP_RIGHT);
 	AddAnchor(IDC_UPDATESERVERMETFROMURL,TOP_RIGHT);
-	AddAnchor(IDC_TAB3,MIDDLE_LEFT, BOTTOM_RIGHT);
+	AddAnchor(StatusSelector, MIDDLE_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_LOGRESET, MIDDLE_RIGHT); // avoid resizing GUI glitches with the tab control by adding this control as the last one (Z-order)
 	AddAnchor(IDC_ED2KCONNECT,TOP_RIGHT);
 	AddAnchor(IDC_DD,TOP_RIGHT);
@@ -360,7 +362,7 @@ void CServerWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SERVLIST, serverlistctrl);
 	DDX_Control(pDX, IDC_SSTATIC, m_ctrlNewServerFrm);
 	DDX_Control(pDX, IDC_SSTATIC6, m_ctrlUpdateServerFrm);
-	DDX_Control(pDX, IDC_MYINFO, m_ctrlMyInfo);
+	DDX_Control(pDX, IDC_MYINFO, m_ctrlMyInfoFrm);
 	DDX_Control(pDX, IDC_TAB3, StatusSelector);
 	DDX_Control(pDX, IDC_MYINFOLIST, m_MyInfo);
 	//MORPH START - Added by SiRoB, XML News [O²]
@@ -409,9 +411,9 @@ void CServerWnd::OnSysColorChange()
 
 void CServerWnd::SetAllIcons()
 {
-	m_ctrlNewServerFrm.Init(_T("AddServer"));
-	m_ctrlUpdateServerFrm.Init(_T("ServerUpdateMET"));
-	m_ctrlMyInfo.Init(_T("Info"));
+	m_ctrlNewServerFrm.SetIcon(_T("AddServer"));
+	m_ctrlUpdateServerFrm.SetIcon(_T("ServerUpdateMET"));
+	m_ctrlMyInfoFrm.SetIcon(_T("Info"));
 
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -434,18 +436,15 @@ void CServerWnd::Localize()
 	if (thePrefs.GetLanguageID() != m_uLangID){
 		m_uLangID = thePrefs.GetLanguageID();
 	    GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST));
-	    GetDlgItem(IDC_SSTATIC)->SetWindowText(GetResString(IDS_SV_NEWSERVER));
-	    m_ctrlNewServerFrm.SetText(GetResString(IDS_SV_NEWSERVER));
+	    m_ctrlNewServerFrm.SetWindowText(GetResString(IDS_SV_NEWSERVER));
 	    GetDlgItem(IDC_SSTATIC4)->SetWindowText(GetResString(IDS_SV_ADDRESS));
 	    GetDlgItem(IDC_SSTATIC7)->SetWindowText(GetResString(IDS_SV_PORT));
 	    GetDlgItem(IDC_SSTATIC3)->SetWindowText(GetResString(IDS_SW_NAME));
 	    GetDlgItem(IDC_ADDSERVER)->SetWindowText(GetResString(IDS_SV_ADD));
-	    GetDlgItem(IDC_SSTATIC6)->SetWindowText(GetResString(IDS_SV_MET));
-	    m_ctrlUpdateServerFrm.SetText(GetResString(IDS_SV_MET));
+	    m_ctrlUpdateServerFrm.SetWindowText(GetResString(IDS_SV_MET));
 	    GetDlgItem(IDC_UPDATESERVERMETFROMURL)->SetWindowText(GetResString(IDS_SV_UPDATE));
 	    GetDlgItem(IDC_LOGRESET)->SetWindowText(GetResString(IDS_PW_RESET));
-	    GetDlgItem(IDC_MYINFO)->SetWindowText(GetResString(IDS_MYINFO));
-	    m_ctrlMyInfo.SetText(GetResString(IDS_MYINFO));
+	    m_ctrlMyInfoFrm.SetWindowText(GetResString(IDS_MYINFO));
 
     	//MORPH START - Added by SiRoB, XML News [O²]
 		GetDlgItem(IDC_FEEDUPDATE)->SetWindowText(GetResString(IDS_SF_RELOAD)); // Added by O? XML News
@@ -961,6 +960,11 @@ void CServerWnd::OnSvrTextChange()
 {
 	GetDlgItem(IDC_ADDSERVER)->EnableWindow(GetDlgItem(IDC_IPADDRESS)->GetWindowTextLength());
 	GetDlgItem(IDC_UPDATESERVERMETFROMURL)->EnableWindow( GetDlgItem(IDC_SERVERMETURL)->GetWindowTextLength()>0 );
+}
+
+void CServerWnd::OnStnDblclickServlstIco()
+{
+	theApp.emuledlg->ShowPreferences(IDD_PPG_SERVER);
 }
 
 //MORPH START - Added by SiRoB, XML News [O²]

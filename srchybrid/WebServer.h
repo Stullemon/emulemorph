@@ -13,7 +13,7 @@ class CUpDownClient;
 
 typedef struct { float download; float upload;  long connections; } UpDown;
 
-typedef struct { CTime startTime; long lSession; bool admin;} Session;
+typedef struct { CTime startTime; long lSession; bool admin; int lastcat;} Session;
 
 typedef struct
 {
@@ -108,9 +108,9 @@ typedef struct
 	bool			bSharedSortReverse;	
 	bool			bShowUploadQueue;
 
-	CArray<UpDown, UpDown>		PointsForWeb;
-	CArray<Session, Session>	Sessions;
-	CArray<BadLogin, BadLogin> badlogins;	//TransferredData= IP : time
+	CArray<UpDown>		PointsForWeb;
+	CArray<Session>	Sessions;
+	CArray<BadLogin> badlogins;	//TransferredData= IP : time
 	
 	CString sLastModified;
 	CString	sETag;
@@ -189,7 +189,7 @@ public:
 	void ReloadTemplates();
 	uint16	GetSessionCount()	{ return m_Params.Sessions.GetCount();}
 	bool IsRunning()	{ return m_bServerWorking;}
-	CArray<UpDown, UpDown>* GetPointsForWeb()	{return &m_Params.PointsForWeb;} // MobileMule
+	CArray<UpDown>* GetPointsForWeb()	{return &m_Params.PointsForWeb;} // MobileMule
 protected:
 	static void		ProcessURL(ThreadData);
 	static void		ProcessFileReq(ThreadData);
@@ -198,7 +198,7 @@ private:
 	static CString	_GetHeader(ThreadData, long lSession);
 	static CString	_GetFooter(ThreadData);
 	static CString	_GetServerList(ThreadData);
-	static CString	_GetTransferList(ThreadData);
+	static CString	_GetTransferList(ThreadData,long lSession);
 	static CString	_GetDownloadLink(ThreadData);
 	static CString	_GetSharedFilesList(ThreadData);
 	static CString	_GetGraphs(ThreadData);
@@ -243,6 +243,8 @@ private:
 	CString			_LoadTemplate(CString sAll, CString sTemplateName);
 	static Session	GetSessionByID(ThreadData Data,long sessionID);
 	static bool		IsSessionAdmin(ThreadData Data,CString SsessionID);
+	static int		_GetLastUserCat(ThreadData Data, long lSession);
+	static void		_SetLastUserCat(ThreadData Data, long lSession, int cat);
 	static CString	GetPermissionDenied();
 	static CString	_GetDownloadGraph(ThreadData Data,CString filehash);
 	static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump=false,bool extraCats=false);

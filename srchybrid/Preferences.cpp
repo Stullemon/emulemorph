@@ -36,13 +36,14 @@
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
 #include "Log.h"
+#include "MuleToolbarCtrl.h"
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB
 #include "friendlist.h" //MORPH - Added by SiRoB, There is one slot friend or more
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -176,9 +177,10 @@ uint8	CPreferences::autoconnectstaticonly;
 uint8	CPreferences::autotakeed2klinks;
 uint8	CPreferences::addnewfilespaused;
 uint8	CPreferences::depth3D;
+bool	CPreferences::m_bEnableMiniMule;
 int		CPreferences::m_iStraightWindowStyles;
-TCHAR	CPreferences::m_szSkinProfile[MAX_PATH];
-TCHAR	CPreferences::m_szSkinProfileDir[MAX_PATH];
+CString	CPreferences::m_strSkinProfile;
+CString	CPreferences::m_strSkinProfileDir;
 uint8	CPreferences::addserversfromserver;
 uint8	CPreferences::addserversfromclient;
 uint16	CPreferences::maxsourceperfile;
@@ -220,7 +222,7 @@ INT 	CPreferences::clientListColumnOrder[11]; /*8+1 Community+ 1 friend+1 Countr
 uint16	CPreferences::FilenamesListColumnWidths[2];
 BOOL	CPreferences::FilenamesListColumnHidden[2];
 INT		CPreferences::FilenamesListColumnOrder[2];
-DWORD	CPreferences::statcolors[15];
+DWORD	CPreferences::m_adwStatsColors[15];
 uint8	CPreferences::splashscreen;
 uint8	CPreferences::startupsound;//Commander - Added: Enable/Disable Startupsound
 uint8	CPreferences::sidebanner;//Commander - Added: Side Banner
@@ -266,8 +268,10 @@ uint64	CPreferences::sesUpData_EMULECOMPAT;
 uint64	CPreferences::sesUpData_SHAREAZA;
 uint64	CPreferences::cumUpDataPort_4662;
 uint64	CPreferences::cumUpDataPort_OTHER;
+uint64	CPreferences::cumUpDataPort_PeerCache;
 uint64	CPreferences::sesUpDataPort_4662;
 uint64	CPreferences::sesUpDataPort_OTHER;
+uint64	CPreferences::sesUpDataPort_PeerCache;
 uint64	CPreferences::cumUpData_File;
 uint64	CPreferences::cumUpData_Partfile;
 uint64	CPreferences::sesUpData_File;
@@ -310,8 +314,10 @@ uint32	CPreferences::ses_successfull_WCDOWNLOADS; //jp webcache statistics needs
 // MORPH END - Added by Commander, WebCache 1.2e
 uint64	CPreferences::cumDownDataPort_4662;
 uint64	CPreferences::cumDownDataPort_OTHER;
+uint64	CPreferences::cumDownDataPort_PeerCache;
 uint64	CPreferences::sesDownDataPort_4662;
 uint64	CPreferences::sesDownDataPort_OTHER;
+uint64	CPreferences::sesDownDataPort_PeerCache;
 float	CPreferences::cumConnAvgDownRate;
 float	CPreferences::cumConnMaxAvgDownRate;
 float	CPreferences::cumConnMaxDownRate;
@@ -386,6 +392,7 @@ bool	CPreferences::m_bircallowemuleprotoaddfriend;
 bool	CPreferences::m_bircignoreemuleprotosendlink;
 bool	CPreferences::m_birchelpchannel;
 bool	CPreferences::m_bRemove2bin;
+bool	CPreferences::m_bShowCopyEd2kLinkCmd;
 bool	CPreferences::m_bpreviewprio;
 bool	CPreferences::smartidcheck;
 uint8	CPreferences::smartidstate;
@@ -400,7 +407,7 @@ uint16	CPreferences::MaxConperFive;
 int		CPreferences::checkDiskspace;
 UINT	CPreferences::m_uMinFreeDiskSpace;
 bool	CPreferences::m_bSparsePartFiles;
-TCHAR	CPreferences::yourHostname[127];
+CString	CPreferences::m_strYourHostname;
 bool	CPreferences::m_bEnableVerboseOptions;
 bool	CPreferences::m_bVerbose;
 bool	CPreferences::m_bFullVerbose;
@@ -472,6 +479,7 @@ bool	CPreferences::moviePreviewBackup;
 int		CPreferences::m_iPreviewSmallBlocks;
 int		CPreferences::m_iPreviewCopiedArchives;
 int		CPreferences::m_iInspectAllFileTypes;
+bool	CPreferences::m_bPreviewOnIconDblClk;
 bool	CPreferences::indicateratings;
 bool	CPreferences::watchclipboard;
 bool	CPreferences::filterserverbyip;
@@ -513,10 +521,6 @@ int		CPreferences::m_iExtractMetaData;
 bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
 TCHAR	CPreferences::m_sWebPassword[256];
 TCHAR	CPreferences::m_sWebLowPassword[256];
-
-//MORPH START - Added by SiRoB/Commander, DynDNS
-CArray<DynDNS_Struct*,DynDNS_Struct*> CPreferences::DynDNSMap;
-//MORPH END   - Added by SiRoB/Commander, DynDNS
 
 //MORPH START - Added by Commander, ClientQueueProgressBar
 bool CPreferences::m_bClientQueueProgressBar;
@@ -560,10 +564,12 @@ bool	CPreferences::m_bMMEnabled;
 uint16	CPreferences::m_nMMPort;
 bool	CPreferences::networkkademlia;
 bool	CPreferences::networked2k;
-uint8	CPreferences::m_nToolbarLabels;
-TCHAR	CPreferences::m_sToolbarBitmap[256];
-TCHAR	CPreferences::m_sToolbarBitmapFolder[256];
-TCHAR	CPreferences::m_sToolbarSettings[256];
+EToolbarLabelType CPreferences::m_nToolbarLabels;
+CString	CPreferences::m_sToolbarBitmap;
+CString	CPreferences::m_sToolbarBitmapFolder;
+CString	CPreferences::m_sToolbarSettings;
+bool	CPreferences::m_bReBarToolbar;
+CSize	CPreferences::m_sizToolbarIconSize;
 bool	CPreferences::m_bPreviewEnabled;
 bool	CPreferences::enableHighProcess;//MORPH - Added by IceCream, high process priority
 bool	CPreferences::enableDownloadInRed; //MORPH - Added by IceCream, show download in red
@@ -744,6 +750,7 @@ uint32	CPreferences::m_uPeerCacheLastSearch;
 bool	CPreferences::m_bPeerCacheWasFound;
 bool	CPreferences::m_bPeerCacheEnabled;
 uint16	CPreferences::m_nPeerCachePort;
+bool	CPreferences::m_bPeerCacheShow;
 
 bool	CPreferences::m_bOpenPortsOnStartUp;
 uint8	CPreferences::m_byLogLevel;
@@ -907,6 +914,9 @@ void CPreferences::Init()
 	m_strFeedsDir = appdir + _T("feeds\\"); // Added by N_OxYdE: XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
 
+	///////////////////////////////////////////////////////////////////////////
+	// Create 'config' directory (and optionally move files from application directory)
+	//
 	::CreateDirectory(GetConfigDir(),0);
 	//MORPH START - Added by SiRoB, XML News [O²]
 	::CreateDirectory(GetFeedsDir(),0); // Added by N_OxYdE: XML News
@@ -1021,13 +1031,22 @@ void CPreferences::Init()
 	}
 
 	// shared directories
-	fullpath = new TCHAR[_tcslen(configdir)+MAX_PATH]; // i_a
+	fullpath = new TCHAR[_tcslen(configdir) + MAX_PATH];
 	_stprintf(fullpath,_T("%sshareddir.dat"),configdir);
 	CStdioFile* sdirfile = new CStdioFile();
-	if (sdirfile->Open(fullpath,CFile::modeRead|CFile::shareDenyWrite)){
+	bool bIsUnicodeFile = IsUnicodeFile(fullpath); // check for BOM
+	// open the text file either in ANSI (text) or Unicode (binary), this way we can read old and new files
+	// with nearly the same code..
+	if (sdirfile->Open(fullpath, CFile::modeRead | CFile::shareDenyWrite | (bIsUnicodeFile ? CFile::typeBinary : 0)))
+	{
+		try {
+			if (bIsUnicodeFile)
+				sdirfile->Seek(sizeof(WORD), SEEK_CUR); // skip BOM
+
 		CString toadd;
 		while (sdirfile->ReadString(toadd))
 		{
+				toadd.Trim(_T("\r\n")); // need to trim '\r' in binary mode
 			TCHAR szFullPath[MAX_PATH];
 			if (PathCanonicalize(szFullPath, toadd))
 				toadd = szFullPath;
@@ -1041,6 +1060,11 @@ void CPreferences::Init()
 				shareddir_list.AddHead(toadd);
 			}
 		}
+		}
+		catch (CFileException* ex) {
+			ASSERT(0);
+			ex->Delete();
+		}
 		sdirfile->Close();
 	}
 	delete sdirfile;
@@ -1050,10 +1074,24 @@ void CPreferences::Init()
 	fullpath = new TCHAR[_tcslen(configdir)+20];
 	_stprintf(fullpath,_T("%sadresses.dat"),configdir);
 	sdirfile = new CStdioFile();
-	if (sdirfile->Open(fullpath,CFile::modeRead|CFile::shareDenyWrite)){
+	bIsUnicodeFile = IsUnicodeFile(fullpath);
+	if (sdirfile->Open(fullpath, CFile::modeRead | CFile::shareDenyWrite | (bIsUnicodeFile ? CFile::typeBinary : 0)))
+	{
+		try {
+			if (bIsUnicodeFile)
+				sdirfile->Seek(sizeof(WORD), SEEK_CUR); // skip BOM
+
 		CString toadd;
 		while (sdirfile->ReadString(toadd))
+			{
+				toadd.Trim(_T("\r\n")); // need to trim '\r' in binary mode
 			adresses_list.AddHead(toadd);
+			}
+		}
+		catch (CFileException* ex) {
+			ASSERT(0);
+			ex->Delete();
+		}
 		sdirfile->Close();
 	}
 	delete sdirfile;
@@ -1096,6 +1134,19 @@ void CPreferences::Init()
 		AfxMessageBox(strError, MB_ICONERROR);
 	}
 	// khaos::kmod-
+
+	// Create 'skins' directory
+	if (!PathFileExists(GetSkinProfileDir()) && !CreateDirectory(GetSkinProfileDir(), 0)) {
+		m_strSkinProfileDir = appdir + _T("skins");
+		CreateDirectory(GetSkinProfileDir(), 0);
+	}
+
+	// Create 'toolbars' directory
+	if (!PathFileExists(GetToolbarBitmapFolderSettings()) && !CreateDirectory(GetToolbarBitmapFolderSettings(), 0)) {
+		m_sToolbarBitmapFolder = appdir + _T("skins");
+		CreateDirectory(GetToolbarBitmapFolderSettings(), 0);
+	}
+
 
 	if (((int*)userhash[0]) == 0 && ((int*)userhash[1]) == 0 && ((int*)userhash[2]) == 0 && ((int*)userhash[3]) == 0)
 		CreateUserHash();
@@ -1301,6 +1352,7 @@ void CPreferences::SaveStats(int bBackUp){
 	// MORPH END - Added by Commander, WebCache 1.2e
 	ini.WriteUInt64(_T("DownDataPort_4662"), GetCumDownDataPort_4662());
 	ini.WriteUInt64(_T("DownDataPort_OTHER"), GetCumDownDataPort_OTHER());
+	ini.WriteUInt64(_T("DownDataPort_PeerCache"), GetCumDownDataPort_PeerCache());
 
 	ini.WriteUInt64(_T("DownOverheadTotal"),theStats.GetDownDataOverheadFileRequest() +
 										theStats.GetDownDataOverheadSourceExchange() +
@@ -1338,6 +1390,7 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteUInt64(_T("UpData_SHAREAZA"), GetCumUpData_SHAREAZA());
 	ini.WriteUInt64(_T("UpDataPort_4662"), GetCumUpDataPort_4662());
 	ini.WriteUInt64(_T("UpDataPort_OTHER"), GetCumUpDataPort_OTHER());
+	ini.WriteUInt64(_T("UpDataPort_PeerCache"), GetCumUpDataPort_PeerCache());
 	ini.WriteUInt64(_T("UpData_File"), GetCumUpData_File());
 	ini.WriteUInt64(_T("UpData_Partfile"), GetCumUpData_Partfile());
 
@@ -1516,7 +1569,7 @@ void CPreferences::SaveCompletedDownloadsStat(){
 	ini.WriteInt(_T("DownSessionCompletedFiles"),	GetDownSessionCompletedFiles());
 } // SaveCompletedDownloadsStat()
 
-void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, BOOL bFromPF, 
+void CPreferences::Add2SessionTransferData(UINT uClientID, UINT uClientPort, BOOL bFromPF, 
 										   BOOL bUpDown, uint32 bytes, bool sentToFriend)
 {
 	//	This function adds the transferred bytes to the appropriate variables,
@@ -1548,6 +1601,8 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 			switch (uClientPort){
 				// Update session port breakdown stats for sent bytes...
 				case 4662:				sesUpDataPort_4662+=bytes;		break;
+				case (UINT)-1:			sesUpDataPort_PeerCache+=bytes;	break;
+				//case (UINT)-2:		sesUpDataPort_URL+=bytes;		break;
 				default:				sesUpDataPort_OTHER+=bytes;		break;
 			}
 
@@ -1585,14 +1640,14 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 				// A statistical analysis of all data sent from every single port/domain is
 				// beyond the scope of this add-on.
 				case 4662:				sesDownDataPort_4662+=bytes;	break;
+				case (UINT)-1:			sesDownDataPort_PeerCache+=bytes;break;
+				//case (UINT)-2:		sesDownDataPort_URL+=bytes;		break;
 				default:				sesDownDataPort_OTHER+=bytes;	break;
 			}
 
 			//	Add to our total for received bytes...
 			theApp.UpdateReceivedBytes(bytes);
-
 	}
-
 }
 
 // Reset Statistics by Khaos
@@ -1638,6 +1693,7 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumUpData_SHAREAZA=0;
 	cumUpDataPort_4662=0;
 	cumUpDataPort_OTHER=0;
+	cumUpDataPort_PeerCache=0;
 	cumDownCompletedFiles=0;
 	cumDownSuccessfulSessions=0;
 	cumDownFailedSessions=0;
@@ -1658,6 +1714,7 @@ void CPreferences::ResetCumulativeStatistics(){
 	// MORPH END - Added by Commander, WebCache 1.2e
 	cumDownDataPort_4662=0;
 	cumDownDataPort_OTHER=0;
+	cumDownDataPort_PeerCache=0;
 	cumConnAvgDownRate=0;
 	cumConnMaxAvgDownRate=0;
 	cumConnMaxDownRate=0;
@@ -1681,14 +1738,13 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumSharedLargestAvgFileSize=0;
 
 	// Set the time of last reset...
-	time_t	timeNow;time(&timeNow);stat_datetimeLastReset = (__int64) timeNow;
+	time_t timeNow;
+	time(&timeNow);
+	stat_datetimeLastReset = (__int64)timeNow;
 
 	// Save the reset stats
 	SaveStats();
 	theApp.emuledlg->statisticswnd->ShowStatistics(true);
-
-	// End Reset Statistics
-
 }
 
 
@@ -1773,6 +1829,7 @@ bool CPreferences::LoadStats(int loadBackUp)
 	// Load cumulative port breakdown stats for sent bytes
 	cumUpDataPort_4662				= ini.GetUInt64(_T("UpDataPort_4662"));
 	cumUpDataPort_OTHER				= ini.GetUInt64(_T("UpDataPort_OTHER"));
+	cumUpDataPort_PeerCache			= ini.GetUInt64(_T("UpDataPort_PeerCache"));
 
 	// Load cumulative source breakdown stats for sent bytes
 	cumUpData_File					= ini.GetUInt64(_T("UpData_File"));
@@ -1805,6 +1862,7 @@ bool CPreferences::LoadStats(int loadBackUp)
 	// Load cumulative port breakdown stats for received bytes
 	cumDownDataPort_4662			= ini.GetUInt64(_T("DownDataPort_4662"));
 	cumDownDataPort_OTHER			= ini.GetUInt64(_T("DownDataPort_OTHER"));
+	cumDownDataPort_PeerCache		= ini.GetUInt64(_T("DownDataPort_PeerCache"));
 
 	// Load stats for cumulative connection data
 	cumConnAvgDownRate				= ini.GetFloat(_T("ConnAvgDownRate"));
@@ -1894,6 +1952,7 @@ bool CPreferences::LoadStats(int loadBackUp)
 		sesUpData_SHAREAZA			= 0;
 		sesUpDataPort_4662			= 0;
 		sesUpDataPort_OTHER			= 0;
+		sesUpDataPort_PeerCache		= 0;
 
 		sesDownData_EDONKEY			= 0;
 		sesDownData_EDONKEYHYBRID	= 0;
@@ -1911,6 +1970,7 @@ bool CPreferences::LoadStats(int loadBackUp)
 
 		sesDownDataPort_4662		= 0;
 		sesDownDataPort_OTHER		= 0;
+		sesDownDataPort_PeerCache	= 0;
 
 		sesDownSuccessfulSessions	= 0;
 		sesDownFailedSessions		= 0;
@@ -1997,12 +2057,17 @@ bool CPreferences::Save(){
 	fullpath = new TCHAR[_tcslen(configdir)+14];
 	_stprintf(fullpath,_T("%sshareddir.dat"),configdir);
 	CStdioFile sdirfile;
-	if (sdirfile.Open(fullpath,CFile::modeCreate|CFile::modeWrite|CFile::shareDenyWrite))
+	if (sdirfile.Open(fullpath, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite | CFile::typeBinary))
 	{
 		try{
+		#ifdef _UNICODE
+			// write Unicode byte-order mark 0xFEFF
+			WORD wBOM = 0xFEFF;
+			sdirfile.Write(&wBOM, sizeof(wBOM));
+		#endif
 			for (POSITION pos = shareddir_list.GetHeadPosition();pos != 0;){
 				sdirfile.WriteString(shareddir_list.GetNext(pos).GetBuffer());
-				sdirfile.Write(_T("\n"),1);
+				sdirfile.Write(_T("\r\n"), sizeof(TCHAR)*2);
 			}
 			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 				sdirfile.Flush(); // flush file stream buffers to disk buffers
@@ -2341,10 +2406,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("CheckDiskspace"),checkDiskspace);	// SLUGFILLER: checkDiskspace
 	ini.WriteInt(_T("MinFreeDiskSpace"),m_uMinFreeDiskSpace);
 	ini.WriteBool(_T("SparsePartFiles"),m_bSparsePartFiles);
-	// itsonlyme: hostnameSource
-	buffer.Format(_T("%s"),yourHostname);
-	ini.WriteString(_T("YourHostname"),buffer);
-	// itsonlyme: hostnameSource
+	ini.WriteString(_T("YourHostname"),m_strYourHostname);
 
 	// Barry - New properties...
     ini.WriteBool(_T("AutoConnectStaticOnly"), autoconnectstaticonly);  
@@ -2434,7 +2496,6 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("CommitFiles"), m_iCommitFiles);
 	ini.WriteBool(_T("DAPPref"), m_bDAP);
 	ini.WriteBool(_T("UAPPref"), m_bUAP);
-	// khaos::kmod+ Obsolete ini.WriteInt("AllcatType", allcatType);
 	ini.WriteBool(_T("FilterServersByIP"),filterserverbyip);
 	ini.WriteBool(_T("DisableKnownClientList"),m_bDisableKnownClientList);
 	ini.WriteBool(_T("DisableQueueList"),m_bDisableQueueList);
@@ -2465,14 +2526,16 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("AdvancedSpamFilter"),m_bAdvancedSpamfilter);
 	ini.WriteBool(_T("ShowDwlPercentage"),m_bShowDwlPercentage);
 	ini.WriteBool(_T("RemoveFilesToBin"),m_bRemove2bin);
+	//ini.WriteBool(_T("ShowCopyEd2kLinkCmd"),m_bShowCopyEd2kLinkCmd);
 
 	// Toolbar
 	ini.WriteString(_T("ToolbarSetting"), m_sToolbarSettings);
 	ini.WriteString(_T("ToolbarBitmap"), m_sToolbarBitmap );
 	ini.WriteString(_T("ToolbarBitmapFolder"), m_sToolbarBitmapFolder);
 	ini.WriteInt(_T("ToolbarLabels"), m_nToolbarLabels);
-	ini.WriteString(_T("SkinProfile"), m_szSkinProfile);
-	ini.WriteString(_T("SkinProfileDir"), m_szSkinProfileDir);
+	ini.WriteInt(_T("ToolbarIconSize"), m_sizToolbarIconSize.cx);
+	ini.WriteString(_T("SkinProfile"), m_strSkinProfile);
+	ini.WriteString(_T("SkinProfileDir"), m_strSkinProfileDir);
 
 	
 	ini.SerGet(false, downloadColumnWidths,
@@ -2867,96 +2930,55 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("InvisibleModeHKKey"), (int)m_cInvisibleModeHotKey);
 	ini.WriteInt(_T("InvisibleModeHKKeyModifier"), m_iInvisibleModeHotKeyModifier);
     //Commander - Added: Invisible Mode [TPT] - End        
-	//MORPH START - Added by SiRoB, DynDNS
-	SaveDynDNS();
-	//MORPH END - Added by SiRoB, DynDNS
-    
-}
-
-void CPreferences::SaveCats(){
-
-	// Cats
-	CString catinif,ixStr,buffer;
-	catinif.Format(_T("%sCategory.ini"),configdir);
-	_tremove(catinif);
-
-	CIni catini( catinif, _T("Category") );
-	catini.WriteInt(_T("Count"),catMap.GetCount()-1,_T("General"));
-	catini.WriteInt(_T("CategoryVersion"), 2, _T("General")); // khaos::categorymod+
-	for (int ix=0;ix<catMap.GetCount();ix++){
-		ixStr.Format(_T("Cat#%i"),ix);
-		catini.WriteString(_T("Title"),catMap.GetAt(ix)->title,ixStr);
-		catini.WriteString(_T("Incoming"),catMap.GetAt(ix)->incomingpath,ixStr);
-		catini.WriteString(_T("Comment"),catMap.GetAt(ix)->comment,ixStr);
-		buffer.Format(_T("%lu"),catMap.GetAt(ix)->color,ixStr);
-		catini.WriteString(_T("Color"),buffer,ixStr);
-		catini.WriteInt(_T("a4afPriority"),catMap.GetAt(ix)->prio,ixStr);
-		catini.WriteInt(_T("AdvancedA4AFMode"), catMap.GetAt(ix)->iAdvA4AFMode, ixStr);
-		/*Removed by SiRoB
-		catini.WriteString(_T("AutoCat"),catMap.GetAt(ix)->autocat,ixStr); 
-		*/
-        catini.WriteBool(_T("downloadInAlphabeticalOrder"), catMap.GetAt(ix)->downloadInAlphabeticalOrder, ixStr); // ZZ:DownloadManager
-
-		// khaos::categorymod+ Save View Filters
-		catini.WriteInt(_T("vfFromCats"), catMap.GetAt(ix)->viewfilters.nFromCats, ixStr);
-		catini.WriteBool(_T("vfVideo"), catMap.GetAt(ix)->viewfilters.bVideo, ixStr);
-		catini.WriteBool(_T("vfAudio"), catMap.GetAt(ix)->viewfilters.bAudio, ixStr);
-		catini.WriteBool(_T("vfArchives"), catMap.GetAt(ix)->viewfilters.bArchives, ixStr);
-		catini.WriteBool(_T("vfImages"), catMap.GetAt(ix)->viewfilters.bImages, ixStr);
-		catini.WriteBool(_T("vfWaiting"), catMap.GetAt(ix)->viewfilters.bWaiting, ixStr);
-		catini.WriteBool(_T("vfTransferring"), catMap.GetAt(ix)->viewfilters.bTransferring, ixStr);
-		catini.WriteBool(_T("vfPaused"), catMap.GetAt(ix)->viewfilters.bPaused, ixStr);
-		catini.WriteBool(_T("vfStopped"), catMap.GetAt(ix)->viewfilters.bStopped, ixStr);
-		catini.WriteBool(_T("vfComplete"), catMap.GetAt(ix)->viewfilters.bComplete, ixStr);
-		catini.WriteBool(_T("vfHashing"), catMap.GetAt(ix)->viewfilters.bHashing, ixStr);
-		catini.WriteBool(_T("vfErrorUnknown"), catMap.GetAt(ix)->viewfilters.bErrorUnknown, ixStr);
-		catini.WriteBool(_T("vfCompleting"), catMap.GetAt(ix)->viewfilters.bCompleting, ixStr);
-		catini.WriteBool(_T("vfSeenComplet"), catMap.GetAt(ix)->viewfilters.bSeenComplet, ixStr); //MORPH - Added by SiRoB, Seen Complet filter
-		catini.WriteInt(_T("vfFSizeMin"), catMap.GetAt(ix)->viewfilters.nFSizeMin, ixStr);
-		catini.WriteInt(_T("vfFSizeMax"), catMap.GetAt(ix)->viewfilters.nFSizeMax, ixStr);
-		catini.WriteInt(_T("vfRSizeMin"), catMap.GetAt(ix)->viewfilters.nRSizeMin, ixStr);
-		catini.WriteInt(_T("vfRSizeMax"), catMap.GetAt(ix)->viewfilters.nRSizeMax, ixStr);
-		catini.WriteInt(_T("vfTimeRemainingMin"), catMap.GetAt(ix)->viewfilters.nTimeRemainingMin, ixStr);
-		catini.WriteInt(_T("vfTimeRemainingMax"), catMap.GetAt(ix)->viewfilters.nTimeRemainingMax, ixStr);
-		catini.WriteInt(_T("vfSourceCountMin"), catMap.GetAt(ix)->viewfilters.nSourceCountMin, ixStr);
-		catini.WriteInt(_T("vfSourceCountMax"), catMap.GetAt(ix)->viewfilters.nSourceCountMax, ixStr);
-		catini.WriteInt(_T("vfAvailSourceCountMin"), catMap.GetAt(ix)->viewfilters.nAvailSourceCountMin, ixStr);
-		catini.WriteInt(_T("vfAvailSourceCountMax"), catMap.GetAt(ix)->viewfilters.nAvailSourceCountMax, ixStr);
-		catini.WriteString(_T("vfAdvancedFilterMask"), catMap.GetAt(ix)->viewfilters.sAdvancedFilterMask, ixStr);
-		// Save Selection Criteria
-		catini.WriteBool(_T("scFileSize"), catMap.GetAt(ix)->selectioncriteria.bFileSize, ixStr);
-		catini.WriteBool(_T("scAdvancedFilterMask"), catMap.GetAt(ix)->selectioncriteria.bAdvancedFilterMask, ixStr);
-		// khaos::categorymod-
-		catini.WriteBool(_T("ResumeFileOnlyInSameCat"), catMap.GetAt(ix)->bResumeFileOnlyInSameCat, ixStr); //MORPH - Added by SiRoB, Resume file only in the same category
-	}
 }
 
 void CPreferences::ResetStatsColor(int index){
 	switch(index) {
-		case 0 : statcolors[0]=RGB(0,0,0);break;  //MORPH - HotFix by SiRoB & IceCream, Default Black color for BackGround
-		case 1 : statcolors[1]=RGB(192,192,255);break;
-		case 2 : statcolors[2]=RGB(0, 255, 0);break;
-		case 3 : statcolors[3]=RGB(0, 255, 255);break;
-		case 4 : statcolors[4]=RGB(255, 255, 255);break;
-		case 5 : statcolors[5]=RGB(255, 0, 0);break;
-		case 6 : statcolors[6]=RGB(0, 255, 255);break;
-		case 7 : statcolors[7]=RGB(255, 255, 255);break;
-		case 8 : statcolors[8]=RGB(150, 150, 255);break;
-		case 9 : statcolors[9]=RGB(255, 255, 128);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 10 : statcolors[10]=RGB(0, 255, 0);break;
-		case 11 : statcolors[11]=RGB(0, 0, 0);break; //MORPH - HotFix by SiRoB & IceCream, Default Black color for SystrayBar
-		case 12 : statcolors[12]=RGB(192,   0, 192);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 13 : statcolors[13]=RGB(0, 0, 255);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 14 : statcolors[14]=RGB(0, 255, 0);break;
+		case 0 : m_adwStatsColors[0]=RGB(0,0,0);break;  //MORPH - HotFix by SiRoB & IceCream, Default Black color for BackGround
+		case 1 : m_adwStatsColors[1]=RGB(192,192,255);break;
+		case 2 : m_adwStatsColors[2]=RGB(0, 255, 0);break;
+		case 3 : m_adwStatsColors[3]=RGB(0, 255, 255);break;
+		case 4 : m_adwStatsColors[4]=RGB(255, 255, 255);break;
+		case 5 : m_adwStatsColors[5]=RGB(255, 0, 0);break;
+		case 6 : m_adwStatsColors[6]=RGB(0, 255, 255);break;
+		case 7 : m_adwStatsColors[7]=RGB(255, 255, 255);break;
+		case 8 : m_adwStatsColors[8]=RGB(150, 150, 255);break;
+		case 9 : m_adwStatsColors[9]=RGB(255, 255, 128);break; //MORPH - Added by Yun.SF3, ZZ Upload System
+		case 10 : m_adwStatsColors[10]=RGB(0, 255, 0);break;
+		case 11 : m_adwStatsColors[11]=RGB(0, 0, 0);break; //MORPH - HotFix by SiRoB & IceCream, Default Black color for SystrayBar
+		case 12 : m_adwStatsColors[12]=RGB(192,   0, 192);break; //MORPH - Added by Yun.SF3, ZZ Upload System
+		case 13 : m_adwStatsColors[13]=RGB(0, 0, 255);break; //MORPH - Added by Yun.SF3, ZZ Upload System
+		case 14 : m_adwStatsColors[14]=RGB(0, 255, 0);break;
 
 		default:break;
 	}
 }
 
+void CPreferences::GetAllStatsColors(int iCount, LPDWORD pdwColors)
+{
+	memset(pdwColors, 0, sizeof(*pdwColors) * iCount);
+	memcpy(pdwColors, m_adwStatsColors, sizeof(*pdwColors) * min(ARRSIZE(m_adwStatsColors), iCount));
+}
+
+bool CPreferences::SetAllStatsColors(int iCount, const DWORD* pdwColors)
+{
+	bool bModified = false;
+	int iMin = min(ARRSIZE(m_adwStatsColors), iCount);
+	for (int i = 0; i < iMin; i++)
+	{
+		if (m_adwStatsColors[i] != pdwColors[i])
+		{
+			m_adwStatsColors[i] = pdwColors[i];
+			bModified = true;
+		}
+	}
+	return bModified;
+}
+
 void CPreferences::LoadPreferences()
 {
 	USES_CONVERSION;
-	TCHAR buffer[200];
+	TCHAR buffer[256];
 	// -khaos--+++> Fix to stats being lost when version changes!
 	int loadstatsFromOld = 0;
 	// <-----khaos-
@@ -3135,13 +3157,14 @@ void CPreferences::LoadPreferences()
 	checkDiskspace=ini.GetBool(_T("CheckDiskspace"),false);	// SLUGFILLER: checkDiskspace
 	m_uMinFreeDiskSpace=ini.GetInt(_T("MinFreeDiskSpace"),20*1024*1024);
 	m_bSparsePartFiles=ini.GetBool(_T("SparsePartFiles"),false);
-	_stprintf(yourHostname,_T("%s"),ini.GetString(_T("YourHostname"),_T("")));	// itsonlyme: hostnameSource
+	m_strYourHostname=ini.GetString(_T("YourHostname"), _T(""));
 
 	// Barry - New properties...
 	autoconnectstaticonly = ini.GetBool(_T("AutoConnectStaticOnly"),false); 
 	autotakeed2klinks = ini.GetBool(_T("AutoTakeED2KLinks"),true); 
 	addnewfilespaused = ini.GetBool(_T("AddNewFilesPaused"),false); 
 	depth3D = ini.GetInt(_T("3DDepth"), 0);
+	m_bEnableMiniMule = ini.GetBool(_T("MiniMule"), true);
 
 	// as temporarial converter for previous versions
 	if (strPrefsVersion < _T("0.25a")) // before 0.25a
@@ -3266,12 +3289,8 @@ void CPreferences::LoadPreferences()
 	versioncheckdays=ini.GetInt(_T("Check4NewVersionDelay"),5);
 	m_bDAP=ini.GetBool(_T("DAPPref"),true);
 	m_bUAP=ini.GetBool(_T("UAPPref"),true);
+	m_bPreviewOnIconDblClk=ini.GetBool(_T("PreviewOnIconDblClk"),false);
 	indicateratings=ini.GetBool(_T("IndicateRatings"),true);
-	// khaos::kmod+ Obsolete
-	/*
-	allcatType=ini.GetInt(_T("AllcatType"),0);
-	allcatTypeNeg=ini.GetBool(_T("AllcatTypeNeg"),false);
-	*/
 	watchclipboard=ini.GetBool(_T("WatchClipboard4ED2kFilelinks"),false);
 	m_iSearchMethod=ini.GetInt(_T("SearchMethod"),0);
 
@@ -3299,6 +3318,7 @@ void CPreferences::LoadPreferences()
 	networkkademlia=ini.GetBool(_T("NetworkKademlia"),false);
 	networked2k=ini.GetBool(_T("NetworkED2K"),true);
 	m_bRemove2bin=ini.GetBool(_T("RemoveFilesToBin"),true);
+	m_bShowCopyEd2kLinkCmd=ini.GetBool(_T("ShowCopyEd2kLinkCmd"),false);
 
 	m_iMaxChatHistory=ini.GetInt(_T("MaxChatHistoryLines"),100);
 	if (m_iMaxChatHistory < 1)
@@ -3324,13 +3344,15 @@ void CPreferences::LoadPreferences()
 	m_bUseOldTimeRemaining= ini.GetBool(_T("UseSimpleTimeRemainingcomputation"),false);
 
 	// Toolbar
-	_stprintf(m_sToolbarSettings,_T("%s"), ini.GetString(_T("ToolbarSetting"), strDefaultToolbar));
-	_stprintf(m_sToolbarBitmap,_T("%s"), ini.GetString(_T("ToolbarBitmap"), _T("")));
-	_stprintf(m_sToolbarBitmapFolder,_T("%s"), ini.GetString(_T("ToolbarBitmapFolder"), incomingdir));
-	m_nToolbarLabels = ini.GetInt(_T("ToolbarLabels"),1);
+	m_sToolbarSettings = ini.GetString(_T("ToolbarSetting"), strDefaultToolbar);
+	m_sToolbarBitmap = ini.GetString(_T("ToolbarBitmap"), _T(""));
+	m_sToolbarBitmapFolder = ini.GetString(_T("ToolbarBitmapFolder"), appdir + _T("skins"));
+	m_nToolbarLabels = (EToolbarLabelType)ini.GetInt(_T("ToolbarLabels"), CMuleToolbarCtrl::GetDefaultLabelType());
+	m_bReBarToolbar = ini.GetBool(_T("ReBarToolbar"), 1);
+	m_sizToolbarIconSize.cx = m_sizToolbarIconSize.cy = ini.GetInt(_T("ToolbarIconSize"), 32);
 	m_iStraightWindowStyles=ini.GetInt(_T("StraightWindowStyles"),0);
-	_sntprintf(m_szSkinProfile, ARRSIZE(m_szSkinProfile), _T("%s"), ini.GetString(_T("SkinProfile"), _T("")));
-	_sntprintf(m_szSkinProfileDir, ARRSIZE(m_szSkinProfileDir), _T("%s"), ini.GetString(_T("SkinProfileDir"), _T("")));
+	m_strSkinProfile = ini.GetString(_T("SkinProfile"), _T(""));
+	m_strSkinProfileDir = ini.GetString(_T("SkinProfileDir"), appdir + _T("skins"));
 
     //Commander - Added: Invisible Mode [TPT] - Start
     SetInvisibleMode( ini.GetBool(_T("InvisibleMode"), false),
@@ -3729,11 +3751,11 @@ void CPreferences::LoadPreferences()
 	statsConnectionsGraphRatio = ini.GetInt(_T("statsConnectionsGraphRatio"), 3, _T("Statistics"));
 	_stprintf(statsExpandedTreeItems,_T("%s"),ini.GetString(_T("statsExpandedTreeItems"),_T("111000000100000110000010000011110000010010"),_T("Statistics")));
 	CString buffer2;
-	for (int i=0;i<ARRSIZE(statcolors);i++) {
+	for (int i=0;i<ARRSIZE(m_adwStatsColors);i++) {
 		buffer2.Format(_T("StatColor%i"),i);
 		_stprintf(buffer,_T("%s"),ini.GetString(buffer2,_T("0"),_T("Statistics")));
-		statcolors[i] = 0;
-		if (_stscanf(buffer, _T("%i"), &statcolors[i]) != 1 || statcolors[i] == 0)
+		m_adwStatsColors[i] = 0;
+		if (_stscanf(buffer, _T("%i"), &m_adwStatsColors[i]) != 1 || m_adwStatsColors[i] == 0)
 			ResetStatsColor(i);
 	}
 
@@ -3769,6 +3791,7 @@ void CPreferences::LoadPreferences()
 	m_bPeerCacheWasFound = ini.GetBool(_T("Found"), false);
 	m_bPeerCacheEnabled = ini.GetBool(_T("Enabled"), true);
 	m_nPeerCachePort = ini.GetInt(_T("PCPort"), 0);
+	m_bPeerCacheShow = ini.GetBool(_T("Show"), false);
         
     //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	m_bUPnPNat = ini.GetBool(_T("UPnPNAT"), false, _T("eMule"));
@@ -3810,155 +3833,13 @@ void CPreferences::LoadPreferences()
 	m_bWapLowEnabled = ini.GetBool(_T("WapLowEnable"), false, _T("WapServer"));
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
-	//MORPH START - Added by SiRoB, DynDNS
-	LoadDynDNS();
-	//MORPH END - Added by SiRoB, DynDNS
     LoadCats();
-	//MORPH - Khaos Obsolete
-	/*
-	if (GetCatCount()==1)
-		SetAllcatType(0);
-	*/
-
 	SetLanguage();
+
 	if (loadstatsFromOld == 2)
 		SavePreferences();
 }
 
-// khaos::categorymod+
-void CPreferences::LoadCats() {
-	CString ixStr,catinif;//,cat_a,cat_b,cat_c;
-	TCHAR buffer[100];
-
-	catinif.Format(_T("%sCategory.ini"),configdir);
-	CIni catini;
-	
-	bool bCreateDefault = false;
-	bool bSkipLoad = false;
-	if (!PathFileExists(catinif))
-	{
-		bCreateDefault = true;
-		bSkipLoad = true;
-	}
-	else
-	{
-		catini.SetFileName(catinif);
-		catini.SetSection(_T("General"));
-		if (catini.GetInt(_T("CategoryVersion")) == 0)
-			bCreateDefault = true;
-	}
-
-	if (bCreateDefault)
-	{
-		Category_Struct* defcat=new Category_Struct;
-
-		_stprintf(defcat->title,_T("Default"));
-    	defcat->prio=PR_NORMAL; // ZZ:DownloadManager
-		defcat->iAdvA4AFMode = 0;
-		_stprintf(defcat->incomingpath, incomingdir);
-		_stprintf(defcat->comment, _T("The default category.  It can't be merged or deleted."));
-		defcat->color = 0;
-		defcat->viewfilters.bArchives = true;
-		defcat->viewfilters.bAudio = true;
-		defcat->viewfilters.bComplete = true;
-		defcat->viewfilters.bCompleting = true;
-		defcat->viewfilters.bSeenComplet = true; //MORPH - Added by SiRoB, Seen Complet filter
-		defcat->viewfilters.bErrorUnknown = true;
-		defcat->viewfilters.bHashing = true;
-		defcat->viewfilters.bImages = true;
-		defcat->viewfilters.bPaused = true;
-		defcat->viewfilters.bStopped = true;
-		defcat->viewfilters.bSuspendFilters = false;
-		defcat->viewfilters.bTransferring = true;
-		defcat->viewfilters.bVideo = true;
-		defcat->viewfilters.bWaiting = true;
-		defcat->viewfilters.nAvailSourceCountMax = 0;
-		defcat->viewfilters.nAvailSourceCountMin = 0;
-		defcat->viewfilters.nFromCats = 2;
-		defcat->viewfilters.nFSizeMax = 0;
-		defcat->viewfilters.nFSizeMin = 0;
-		defcat->viewfilters.nRSizeMax = 0;
-		defcat->viewfilters.nRSizeMin = 0;
-		defcat->viewfilters.nSourceCountMax = 0;
-		defcat->viewfilters.nSourceCountMin = 0;
-		defcat->viewfilters.nTimeRemainingMax = 0;
-		defcat->viewfilters.nTimeRemainingMin = 0;
-		defcat->viewfilters.sAdvancedFilterMask = "";
-		defcat->selectioncriteria.bAdvancedFilterMask = true;
-		defcat->selectioncriteria.bFileSize = true;
-		defcat->bResumeFileOnlyInSameCat = false; //MORPH - Added by SiRoB, Resume file only in the same category
-		AddCat(defcat);
-		if (bSkipLoad)
-		{
-			SaveCats();
-			return;
-		}
-	}
-
-	int max=catini.GetInt(_T("Count"),0,_T("General"));
-
-	for (int ix = bCreateDefault ? 1 : 0; ix <= max; ix++)
-	{
-		ixStr.Format(_T("Cat#%i"),ix);
-        catini.SetSection(ixStr);
-
-		Category_Struct* newcat = new Category_Struct;
-		_stprintf(newcat->title,_T("%s"),catini.GetString(_T("Title"),_T(""),ixStr));
-		_stprintf(newcat->incomingpath,_T("%s"),catini.GetString(_T("Incoming"),_T(""),ixStr));
-		MakeFoldername(newcat->incomingpath);
-		if (!IsShareableDirectory(newcat->incomingpath)){
-			_sntprintf(newcat->incomingpath, ARRSIZE(newcat->incomingpath), _T("%s"), GetIncomingDir());
-			MakeFoldername(newcat->incomingpath);
-		}
-		_stprintf(newcat->comment,_T("%s"),catini.GetString(_T("Comment"),_T(""),ixStr));
-		newcat->prio =catini.GetInt(_T("a4afPriority"),PR_NORMAL,ixStr); // ZZ:DownloadManager
-		_stprintf(buffer,_T("%s"),catini.GetString(_T("Color"),_T("0"),ixStr));
-		newcat->color=_tstoi64(buffer);
-		/*
-		newcat->autocat=catini.GetString(_T("Autocat"),_T(""),ixStr);
-		*/
-        newcat->downloadInAlphabeticalOrder = catini.GetBool(_T("downloadInAlphabeticalOrder"), FALSE, ixStr); // ZZ:DownloadManager
-
-		// khaos::kmod+ Category Advanced A4AF Mode
-		newcat->iAdvA4AFMode = catini.GetInt(_T("AdvancedA4AFMode"), 0);
-		//newcat->autocat = catini.GetString(_T("AutoCatString"),_T(""),ixStr);
-		// khaos::kmod-
-		// Load View Filters
-		newcat->viewfilters.nFromCats = catini.GetInt(_T("vfFromCats"), ix==0?0:2);
-		newcat->viewfilters.bSuspendFilters = false;
-		newcat->viewfilters.bVideo = catini.GetBool(_T("vfVideo"), true);
-		newcat->viewfilters.bAudio = catini.GetBool(_T("vfAudio"), true);
-		newcat->viewfilters.bArchives = catini.GetBool(_T("vfArchives"), true);
-		newcat->viewfilters.bImages = catini.GetBool(_T("vfImages"), true);
-		newcat->viewfilters.bWaiting = catini.GetBool(_T("vfWaiting"), true);
-		newcat->viewfilters.bTransferring = catini.GetBool(_T("vfTransferring"), true);
-		newcat->viewfilters.bPaused = catini.GetBool(_T("vfPaused"), true);
-		newcat->viewfilters.bStopped = catini.GetBool(_T("vfStopped"), true);
-		newcat->viewfilters.bComplete = catini.GetBool(_T("vfComplete"), true);
-		newcat->viewfilters.bHashing = catini.GetBool(_T("vfHashing"), true);
-		newcat->viewfilters.bErrorUnknown = catini.GetBool(_T("vfErrorUnknown"), true);
-		newcat->viewfilters.bCompleting = catini.GetBool(_T("vfCompleting"), true);
-		newcat->viewfilters.bSeenComplet = catini.GetBool(_T("vfSeenComplet"), true); //MORPH - Added by SiRoB, Seen Complet filter
-		newcat->viewfilters.nFSizeMin = catini.GetInt(_T("vfFSizeMin"), 0);
-		newcat->viewfilters.nFSizeMax = catini.GetInt(_T("vfFSizeMax"), 0);
-		newcat->viewfilters.nRSizeMin = catini.GetInt(_T("vfRSizeMin"), 0);
-		newcat->viewfilters.nRSizeMax = catini.GetInt(_T("vfRSizeMax"), 0);
-		newcat->viewfilters.nTimeRemainingMin = catini.GetInt(_T("vfTimeRemainingMin"), 0);
-		newcat->viewfilters.nTimeRemainingMax = catini.GetInt(_T("vfTimeRemainingMax"), 0);
-		newcat->viewfilters.nSourceCountMin = catini.GetInt(_T("vfSourceCountMin"), 0);
-		newcat->viewfilters.nSourceCountMax = catini.GetInt(_T("vfSourceCountMax"), 0);
-		newcat->viewfilters.nAvailSourceCountMin = catini.GetInt(_T("vfAvailSourceCountMin"), 0);
-		newcat->viewfilters.nAvailSourceCountMax = catini.GetInt(_T("vfAvailSourceCountMax"), 0);
-		newcat->viewfilters.sAdvancedFilterMask = catini.GetString(_T("vfAdvancedFilterMask"), _T(""));
-		// Load Selection Criteria
-		newcat->selectioncriteria.bFileSize = catini.GetBool(_T("scFileSize"), true);
-		newcat->selectioncriteria.bAdvancedFilterMask = catini.GetBool(_T("scAdvancedFilterMask"), true);
-		newcat->bResumeFileOnlyInSameCat = catini.GetBool(_T("ResumeFileOnlyInSameCat"), false); //MORPH - Added by SiRoB, Resume file only in the same category
-		AddCat(newcat);
-		if (!PathFileExists(newcat->incomingpath)) ::CreateDirectory(newcat->incomingpath, 0);
-	}
-}
-// khaos::categorymod-
 
 WORD CPreferences::GetWindowsVersion(){
 	static bool bWinVerAlreadyDetected = false;
@@ -4266,6 +4147,204 @@ void CPreferences::SetColumnSortAscending(Table t, bool sortAscending)
 	}
 }
 
+//////////////////////////////////////////////////////////
+// category implementations
+//////////////////////////////////////////////////////////
+
+void CPreferences::SaveCats(){
+
+	// Cats
+	CString catinif,ixStr,buffer;
+	catinif.Format(_T("%sCategory.ini"),configdir);
+	_tremove(catinif);
+
+	CIni catini( catinif, _T("Category") );
+	catini.WriteInt(_T("Count"),catMap.GetCount()-1,_T("General"));
+	catini.WriteInt(_T("CategoryVersion"), 2, _T("General")); // khaos::categorymod+
+	for (int ix=0;ix<catMap.GetCount();ix++){
+		ixStr.Format(_T("Cat#%i"),ix);
+		catini.WriteString(_T("Title"),catMap.GetAt(ix)->title,ixStr);
+		catini.WriteString(_T("Incoming"),catMap.GetAt(ix)->incomingpath,ixStr);
+		catini.WriteString(_T("Comment"),catMap.GetAt(ix)->comment,ixStr);
+		buffer.Format(_T("%lu"),catMap.GetAt(ix)->color,ixStr);
+		catini.WriteString(_T("Color"),buffer,ixStr);
+		catini.WriteInt(_T("a4afPriority"),catMap.GetAt(ix)->prio,ixStr);
+		catini.WriteInt(_T("AdvancedA4AFMode"), catMap.GetAt(ix)->iAdvA4AFMode, ixStr);
+		/*Removed by SiRoB
+		catini.WriteString(_T("AutoCat"),catMap.GetAt(ix)->autocat,ixStr); 
+		*/
+        catini.WriteBool(_T("downloadInAlphabeticalOrder"), catMap.GetAt(ix)->downloadInAlphabeticalOrder, ixStr); // ZZ:DownloadManager
+
+		// khaos::categorymod+ Save View Filters
+		catini.WriteInt(_T("vfFromCats"), catMap.GetAt(ix)->viewfilters.nFromCats, ixStr);
+		catini.WriteBool(_T("vfVideo"), catMap.GetAt(ix)->viewfilters.bVideo, ixStr);
+		catini.WriteBool(_T("vfAudio"), catMap.GetAt(ix)->viewfilters.bAudio, ixStr);
+		catini.WriteBool(_T("vfArchives"), catMap.GetAt(ix)->viewfilters.bArchives, ixStr);
+		catini.WriteBool(_T("vfImages"), catMap.GetAt(ix)->viewfilters.bImages, ixStr);
+		catini.WriteBool(_T("vfWaiting"), catMap.GetAt(ix)->viewfilters.bWaiting, ixStr);
+		catini.WriteBool(_T("vfTransferring"), catMap.GetAt(ix)->viewfilters.bTransferring, ixStr);
+		catini.WriteBool(_T("vfPaused"), catMap.GetAt(ix)->viewfilters.bPaused, ixStr);
+		catini.WriteBool(_T("vfStopped"), catMap.GetAt(ix)->viewfilters.bStopped, ixStr);
+		catini.WriteBool(_T("vfComplete"), catMap.GetAt(ix)->viewfilters.bComplete, ixStr);
+		catini.WriteBool(_T("vfHashing"), catMap.GetAt(ix)->viewfilters.bHashing, ixStr);
+		catini.WriteBool(_T("vfErrorUnknown"), catMap.GetAt(ix)->viewfilters.bErrorUnknown, ixStr);
+		catini.WriteBool(_T("vfCompleting"), catMap.GetAt(ix)->viewfilters.bCompleting, ixStr);
+		catini.WriteBool(_T("vfSeenComplet"), catMap.GetAt(ix)->viewfilters.bSeenComplet, ixStr); //MORPH - Added by SiRoB, Seen Complet filter
+		catini.WriteInt(_T("vfFSizeMin"), catMap.GetAt(ix)->viewfilters.nFSizeMin, ixStr);
+		catini.WriteInt(_T("vfFSizeMax"), catMap.GetAt(ix)->viewfilters.nFSizeMax, ixStr);
+		catini.WriteInt(_T("vfRSizeMin"), catMap.GetAt(ix)->viewfilters.nRSizeMin, ixStr);
+		catini.WriteInt(_T("vfRSizeMax"), catMap.GetAt(ix)->viewfilters.nRSizeMax, ixStr);
+		catini.WriteInt(_T("vfTimeRemainingMin"), catMap.GetAt(ix)->viewfilters.nTimeRemainingMin, ixStr);
+		catini.WriteInt(_T("vfTimeRemainingMax"), catMap.GetAt(ix)->viewfilters.nTimeRemainingMax, ixStr);
+		catini.WriteInt(_T("vfSourceCountMin"), catMap.GetAt(ix)->viewfilters.nSourceCountMin, ixStr);
+		catini.WriteInt(_T("vfSourceCountMax"), catMap.GetAt(ix)->viewfilters.nSourceCountMax, ixStr);
+		catini.WriteInt(_T("vfAvailSourceCountMin"), catMap.GetAt(ix)->viewfilters.nAvailSourceCountMin, ixStr);
+		catini.WriteInt(_T("vfAvailSourceCountMax"), catMap.GetAt(ix)->viewfilters.nAvailSourceCountMax, ixStr);
+		catini.WriteString(_T("vfAdvancedFilterMask"), catMap.GetAt(ix)->viewfilters.sAdvancedFilterMask, ixStr);
+		// Save Selection Criteria
+		catini.WriteBool(_T("scFileSize"), catMap.GetAt(ix)->selectioncriteria.bFileSize, ixStr);
+		catini.WriteBool(_T("scAdvancedFilterMask"), catMap.GetAt(ix)->selectioncriteria.bAdvancedFilterMask, ixStr);
+		// khaos::categorymod-
+		catini.WriteBool(_T("ResumeFileOnlyInSameCat"), catMap.GetAt(ix)->bResumeFileOnlyInSameCat, ixStr); //MORPH - Added by SiRoB, Resume file only in the same category
+	}
+}
+// khaos::categorymod+
+void CPreferences::LoadCats() {
+	CString ixStr,catinif;//,cat_a,cat_b,cat_c;
+	TCHAR buffer[100];
+
+	catinif.Format(_T("%sCategory.ini"),configdir);
+	CIni catini;
+	
+	bool bCreateDefault = false;
+	bool bSkipLoad = false;
+	if (!PathFileExists(catinif))
+	{
+		bCreateDefault = true;
+		bSkipLoad = true;
+	}
+	else
+	{
+		catini.SetFileName(catinif);
+		catini.SetSection(_T("General"));
+		if (catini.GetInt(_T("CategoryVersion")) == 0)
+			bCreateDefault = true;
+	}
+
+	if (bCreateDefault)
+	{
+		Category_Struct* defcat=new Category_Struct;
+
+		_stprintf(defcat->title,_T("Default"));
+    	defcat->prio=PR_NORMAL; // ZZ:DownloadManager
+		defcat->iAdvA4AFMode = 0;
+		_stprintf(defcat->incomingpath, incomingdir);
+		_stprintf(defcat->comment, _T("The default category.  It can't be merged or deleted."));
+		defcat->color = 0;
+		defcat->viewfilters.bArchives = true;
+		defcat->viewfilters.bAudio = true;
+		defcat->viewfilters.bComplete = true;
+		defcat->viewfilters.bCompleting = true;
+		defcat->viewfilters.bSeenComplet = true; //MORPH - Added by SiRoB, Seen Complet filter
+		defcat->viewfilters.bErrorUnknown = true;
+		defcat->viewfilters.bHashing = true;
+		defcat->viewfilters.bImages = true;
+		defcat->viewfilters.bPaused = true;
+		defcat->viewfilters.bStopped = true;
+		defcat->viewfilters.bSuspendFilters = false;
+		defcat->viewfilters.bTransferring = true;
+		defcat->viewfilters.bVideo = true;
+		defcat->viewfilters.bWaiting = true;
+		defcat->viewfilters.nAvailSourceCountMax = 0;
+		defcat->viewfilters.nAvailSourceCountMin = 0;
+		defcat->viewfilters.nFromCats = 2;
+		defcat->viewfilters.nFSizeMax = 0;
+		defcat->viewfilters.nFSizeMin = 0;
+		defcat->viewfilters.nRSizeMax = 0;
+		defcat->viewfilters.nRSizeMin = 0;
+		defcat->viewfilters.nSourceCountMax = 0;
+		defcat->viewfilters.nSourceCountMin = 0;
+		defcat->viewfilters.nTimeRemainingMax = 0;
+		defcat->viewfilters.nTimeRemainingMin = 0;
+		defcat->viewfilters.sAdvancedFilterMask = "";
+		defcat->selectioncriteria.bAdvancedFilterMask = true;
+		defcat->selectioncriteria.bFileSize = true;
+		defcat->bResumeFileOnlyInSameCat = false; //MORPH - Added by SiRoB, Resume file only in the same category
+		AddCat(defcat);
+		if (bSkipLoad)
+		{
+			SaveCats();
+			return;
+		}
+	}
+
+	int max=catini.GetInt(_T("Count"),0,_T("General"));
+
+	for (int ix = bCreateDefault ? 1 : 0; ix <= max; ix++)
+	{
+		ixStr.Format(_T("Cat#%i"),ix);
+        catini.SetSection(ixStr);
+
+		Category_Struct* newcat = new Category_Struct;
+		_stprintf(newcat->title,_T("%s"),catini.GetString(_T("Title"),_T(""),ixStr));
+		_stprintf(newcat->incomingpath,_T("%s"),catini.GetString(_T("Incoming"),_T(""),ixStr));
+		MakeFoldername(newcat->incomingpath);
+		if (!IsShareableDirectory(newcat->incomingpath)){
+			_sntprintf(newcat->incomingpath, ARRSIZE(newcat->incomingpath), _T("%s"), GetIncomingDir());
+			MakeFoldername(newcat->incomingpath);
+		}
+		_stprintf(newcat->comment,_T("%s"),catini.GetString(_T("Comment"),_T(""),ixStr));
+		newcat->prio =catini.GetInt(_T("a4afPriority"),PR_NORMAL,ixStr); // ZZ:DownloadManager
+		_stprintf(buffer,_T("%s"),catini.GetString(_T("Color"),_T("0"),ixStr));
+		newcat->color=_tstoi64(buffer);
+		/*
+		newcat->autocat=catini.GetString(_T("Autocat"),_T(""),ixStr);
+		*/
+        newcat->downloadInAlphabeticalOrder = catini.GetBool(_T("downloadInAlphabeticalOrder"), FALSE, ixStr); // ZZ:DownloadManager
+
+		// khaos::kmod+ Category Advanced A4AF Mode
+		newcat->iAdvA4AFMode = catini.GetInt(_T("AdvancedA4AFMode"), 0);
+		//newcat->autocat = catini.GetString(_T("AutoCatString"),_T(""),ixStr);
+		// khaos::kmod-
+		// Load View Filters
+		newcat->viewfilters.nFromCats = catini.GetInt(_T("vfFromCats"), ix==0?0:2);
+		newcat->viewfilters.bSuspendFilters = false;
+		newcat->viewfilters.bVideo = catini.GetBool(_T("vfVideo"), true);
+		newcat->viewfilters.bAudio = catini.GetBool(_T("vfAudio"), true);
+		newcat->viewfilters.bArchives = catini.GetBool(_T("vfArchives"), true);
+		newcat->viewfilters.bImages = catini.GetBool(_T("vfImages"), true);
+		newcat->viewfilters.bWaiting = catini.GetBool(_T("vfWaiting"), true);
+		newcat->viewfilters.bTransferring = catini.GetBool(_T("vfTransferring"), true);
+		newcat->viewfilters.bPaused = catini.GetBool(_T("vfPaused"), true);
+		newcat->viewfilters.bStopped = catini.GetBool(_T("vfStopped"), true);
+		newcat->viewfilters.bComplete = catini.GetBool(_T("vfComplete"), true);
+		newcat->viewfilters.bHashing = catini.GetBool(_T("vfHashing"), true);
+		newcat->viewfilters.bErrorUnknown = catini.GetBool(_T("vfErrorUnknown"), true);
+		newcat->viewfilters.bCompleting = catini.GetBool(_T("vfCompleting"), true);
+		newcat->viewfilters.bSeenComplet = catini.GetBool(_T("vfSeenComplet"), true); //MORPH - Added by SiRoB, Seen Complet filter
+		newcat->viewfilters.nFSizeMin = catini.GetInt(_T("vfFSizeMin"), 0);
+		newcat->viewfilters.nFSizeMax = catini.GetInt(_T("vfFSizeMax"), 0);
+		newcat->viewfilters.nRSizeMin = catini.GetInt(_T("vfRSizeMin"), 0);
+		newcat->viewfilters.nRSizeMax = catini.GetInt(_T("vfRSizeMax"), 0);
+		newcat->viewfilters.nTimeRemainingMin = catini.GetInt(_T("vfTimeRemainingMin"), 0);
+		newcat->viewfilters.nTimeRemainingMax = catini.GetInt(_T("vfTimeRemainingMax"), 0);
+		newcat->viewfilters.nSourceCountMin = catini.GetInt(_T("vfSourceCountMin"), 0);
+		newcat->viewfilters.nSourceCountMax = catini.GetInt(_T("vfSourceCountMax"), 0);
+		newcat->viewfilters.nAvailSourceCountMin = catini.GetInt(_T("vfAvailSourceCountMin"), 0);
+		newcat->viewfilters.nAvailSourceCountMax = catini.GetInt(_T("vfAvailSourceCountMax"), 0);
+		newcat->viewfilters.sAdvancedFilterMask = catini.GetString(_T("vfAdvancedFilterMask"), _T(""));
+		// Load Selection Criteria
+		newcat->selectioncriteria.bFileSize = catini.GetBool(_T("scFileSize"), true);
+		newcat->selectioncriteria.bAdvancedFilterMask = catini.GetBool(_T("scAdvancedFilterMask"), true);
+		newcat->bResumeFileOnlyInSameCat = catini.GetBool(_T("ResumeFileOnlyInSameCat"), false); //MORPH - Added by SiRoB, Resume file only in the same category
+
+		AddCat(newcat);
+		if (!PathFileExists(newcat->incomingpath))
+			::CreateDirectory(newcat->incomingpath, 0);
+	}
+}
+// khaos::categorymod-
+
 void CPreferences::RemoveCat(int index)	{
 	if (index>=0 && index<catMap.GetCount()) { 
 		Category_Struct* delcat;
@@ -4277,9 +4356,7 @@ void CPreferences::RemoveCat(int index)	{
 
 /*
 bool CPreferences::SetCatFilter(int index, int filter){
-	if (index==0)
-		allcatType=filter;
-	else if (index>0 && index<catMap.GetCount()) { 
+	if (index>=0 && index<catMap.GetCount()) { 
 		Category_Struct* cat;
 		cat=catMap.GetAt(index); 
 		cat->filter=filter;
@@ -4290,9 +4367,7 @@ bool CPreferences::SetCatFilter(int index, int filter){
 }
 
 int CPreferences::GetCatFilter(int index){
-	if (index==0)
-		return allcatType;
-	else if (index>0 && index<catMap.GetCount()) {
+	if (index>=0 && index<catMap.GetCount()) {
 		return catMap.GetAt(index)->filter;
 	}
 	
@@ -4300,9 +4375,7 @@ int CPreferences::GetCatFilter(int index){
 }
 
 bool CPreferences::GetCatFilterNeg(int index){
-	if (index==0)
-		return allcatTypeNeg;
-	else if (index>0 && index<catMap.GetCount()) {
+	if (index>=0 && index<catMap.GetCount()) {
 		return catMap.GetAt(index)->filterNeg;
 	}
 	
@@ -4310,9 +4383,7 @@ bool CPreferences::GetCatFilterNeg(int index){
 }
 
 void CPreferences::SetCatFilterNeg(int index, bool val) {
-	if (index==0)
-		allcatTypeNeg=val;
-	else if (index>0 && index<catMap.GetCount()) {
+	if (index>=0 && index<catMap.GetCount()) {
 		catMap.GetAt(index)->filterNeg=val;
 	}
 }
@@ -4337,6 +4408,7 @@ bool CPreferences::MoveCat(UINT from, UINT to){
 
 	return true;
 }
+
 
 bool CPreferences::IsInstallationDirectory(const CString& rstrDir)
 {
@@ -4391,6 +4463,7 @@ void CPreferences::UpdateLastMVC()
 	mversioncheckLastAutomatic = safe_mktime(CTime::GetCurrentTime().GetLocalTm());
 }
 //MORPH END   - Added by SiRoB, New Version check
+
 void CPreferences::SetWSPass(CString strNewPass)
 {
 	_stprintf(m_sWebPassword,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
@@ -4432,9 +4505,9 @@ uint16 CPreferences::GetMaxSourcePerFileUDP()
 	return temp;
 }
 
-void CPreferences::SetNetworkKademlia(bool val)	{ 
+void CPreferences::SetNetworkKademlia(bool val)
+{
 	networkkademlia = val; 
-//	theApp.emuledlg->toolbar->ReloadConfig();// TODO: Remove this line as soon as we always show the kadbutton
 }
 
 CString CPreferences::GetHomepageBaseURLForLevel(uint8 nLevel){
@@ -4508,6 +4581,11 @@ uint8 CPreferences::GetWebMirrorAlertLevel(){
 
 bool CPreferences::IsRunAsUserEnabled(){
 	return (GetWindowsVersion() == _WINVER_XP_ || GetWindowsVersion() == _WINVER_2K_) && m_bRunAsUser;
+}
+
+bool CPreferences::GetUseReBarToolbar()
+{
+	return GetReBarToolbar() && theApp.m_ullComCtrlVer >= MAKEDLLVERULL(5,8,0,0);
 }
 
 //MORPH START - Added by IceCream, high process priority
@@ -4635,53 +4713,3 @@ void CPreferences::SetWapLowPass(CString strNewPass)
 	m_sWapLowPassword = MD5Sum(strNewPass).GetHash();
 }
 //MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
-
-//MORPH START - Added by SiRoB, DynDNS
-void CPreferences::SaveDynDNS(){
-
-	CString DynDNSinif,ixStr,buffer;
-	DynDNSinif.Format(_T("%sDynDNS.ini"),configdir);
-	_tremove(DynDNSinif);
-
-	CIni DynDNSini( DynDNSinif, _T("DynDNS") );
-	DynDNSini.WriteInt(_T("Count"),DynDNSMap.GetCount()-1,_T("General"));
-	DynDNSini.WriteInt(_T("DynDNSVersion"), 1, _T("General"));
-	for (int ix=0;ix<DynDNSMap.GetCount();ix++){
-		ixStr.Format(_T("DynDNS#%i"),ix);
-		DynDNSini.WriteBool(_T("Enabled"), DynDNSMap.GetAt(ix)->Enabled, ixStr);
-		DynDNSini.WriteString(_T("Username"),DynDNSMap.GetAt(ix)->Username,ixStr);
-		DynDNSini.WriteString(_T("Password"),DynDNSMap.GetAt(ix)->Password,ixStr);
-		DynDNSini.WriteString(_T("Hostname"),DynDNSMap.GetAt(ix)->Hostname,ixStr);
-	}
-}
-
-void CPreferences::LoadDynDNS() {
-	CString ixStr,DynDNSinif;
-
-	DynDNSinif.Format(_T("%sDynDNS.ini"),configdir);
-	CIni DynDNSini;
-
-	int max=DynDNSini.GetInt(_T("Count"),0,_T("General"));
-
-	for (int ix = 1; ix <= max; ix++)
-	{
-		ixStr.Format(_T("DynDNS#%i"),ix);
-        DynDNSini.SetSection(ixStr);
-
-		DynDNS_Struct* newDynDNSAccount = new DynDNS_Struct;
-		_stprintf(newDynDNSAccount->Username,_T("%s"),DynDNSini.GetString(_T("Username"),_T(""),ixStr));
-		_stprintf(newDynDNSAccount->Password,_T("%s"),DynDNSini.GetString(_T("Password"),_T(""),ixStr));
-		_stprintf(newDynDNSAccount->Hostname,_T("%s"),DynDNSini.GetString(_T("Hostname"),_T(""),ixStr));
-		newDynDNSAccount->Enabled = DynDNSini.GetBool(_T("Enabled"), false);
-		AddDynDNSAccount(newDynDNSAccount);
-	}
-}
-void CPreferences::RemoveDynDNSAccount(int index)	{
-	if (index>=0 && index<DynDNSMap.GetCount()) { 
-		DynDNS_Struct* delDynDNSAccount;
-		delDynDNSAccount=DynDNSMap.GetAt(index); 
-		DynDNSMap.RemoveAt(index); 
-		delete delDynDNSAccount;
-	}
-}
-//MORPH END   - Added by SiRoB, DynDNS

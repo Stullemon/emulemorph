@@ -44,9 +44,9 @@ there client on the eMule forum..
 #include "Log.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -62,7 +62,7 @@ CPrefs::CPrefs()
 	init(filename.GetBuffer(0));
 }
 
-CPrefs::~CPrefs(void)
+CPrefs::~CPrefs()
 {
 	if (m_filename.GetLength() > 0)
 		writeFile();
@@ -78,6 +78,8 @@ void CPrefs::init(LPCTSTR filename)
 	m_totalStoreSrc = 0;
 	m_totalStoreKey = 0;
 	m_totalSource = 0;
+	m_totalNotes = 0;
+	m_totalStoreNotes = 0;
 	m_Publish = false;
 	m_clientHash.setValue((uchar*)thePrefs.GetUserHash());
 	m_ip			= 0;
@@ -92,7 +94,7 @@ void CPrefs::init(LPCTSTR filename)
 	readFile();
 }
 
-void CPrefs::readFile(void)
+void CPrefs::readFile()
 {
 	try
 	{
@@ -114,7 +116,7 @@ void CPrefs::readFile(void)
 	}
 }
 
-void CPrefs::writeFile(void)
+void CPrefs::writeFile()
 {
 	try
 	{
@@ -137,13 +139,6 @@ void CPrefs::writeFile(void)
 	}
 }
 
-bool CPrefs::hasLostConnection(void)
-{
-	if( m_lastContact )
-		return !((time(NULL) - m_lastContact) < KADEMLIADISCONNECTDELAY);
-	return false;
-}
-
 void CPrefs::setIPAddress(uint32 val)
 {
 	//This is our first check on connect, init our IP..
@@ -161,12 +156,22 @@ void CPrefs::setIPAddress(uint32 val)
 		m_ipLast = val;
 }
 
-bool CPrefs::getLastContact(void)
+
+bool CPrefs::hasLostConnection() const
 {
-	return ((time(NULL) - m_lastContact) < KADEMLIADISCONNECTDELAY);
+	if( m_lastContact )
+		return !((time(NULL) - m_lastContact) < KADEMLIADISCONNECTDELAY);
+	return false;
 }
 
-bool CPrefs::getFirewalled(void)
+bool CPrefs::hasHadContact() const
+{
+	if( m_lastContact )
+		return ((time(NULL) - m_lastContact) < KADEMLIADISCONNECTDELAY);
+	return false;
+}
+
+bool CPrefs::getFirewalled() const
 {
 	if( m_firewalled<2 )
 	{
@@ -180,7 +185,7 @@ bool CPrefs::getFirewalled(void)
 	//We had enough tell us we are not firewalled..
 	return false;
 }
-void CPrefs::setFirewalled(void)
+void CPrefs::setFirewalled()
 {
 	//Are are checking our firewall state.. Let keep a snapshot of our
 	//current state to prevent false reports during the recheck..
@@ -189,13 +194,13 @@ void CPrefs::setFirewalled(void)
 	theApp.emuledlg->ShowConnectionState();
 }
 
-void CPrefs::incFirewalled(void)
+void CPrefs::incFirewalled()
 {
 	m_firewalled++;
 	theApp.emuledlg->ShowConnectionState();
 }
 
-bool CPrefs::getFindBuddy(void)
+bool CPrefs::getFindBuddy() /*const*/
 {
 	if( m_findBuddy )
 	{
@@ -205,41 +210,40 @@ bool CPrefs::getFindBuddy(void)
 	return false;
 }
 
-void CPrefs::setKademliaFiles(void)
+void CPrefs::setKademliaFiles()
 {
 	//There is no real way to know how many files are in the Kad network..
 	//So we first try to see how many files per user are in the ED2K network..
 	//If that fails, we use a set value based on previous tests..
 	uint32 nServerAverage = 0;
 	theApp.serverlist->GetAvgFile( nServerAverage );
-	ASSERT(Kademlia::CKademlia::getIndexed()!=NULL);
 	uint32 nKadAverage = Kademlia::CKademlia::getIndexed()->GetFileKeyCount();
 
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	CString method;
-	#endif
+#endif
 	if( nServerAverage > nKadAverage )
 	{
-		#ifdef _DEBUG
+#ifdef _DEBUG
 		method.Format(_T("Kad file estimate used Server avg(%u)"), nServerAverage);
-		#endif
+#endif
 		nKadAverage = nServerAverage;
 	}
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	else
 	{
 		method.Format(_T("Kad file estimate used Kad avg(%u)"), nKadAverage);
 	}
-	#endif
+#endif
 	if( nKadAverage < 108 )
 	{
-		#ifdef _DEBUG
+#ifdef _DEBUG
 		method.Format(_T("Kad file estimate used default avg(108)"));
-		#endif
+#endif
 		nKadAverage = 108;
 	}
-	#ifdef _DEBUG
+#ifdef _DEBUG
 	AddDebugLogLine(false, method);
-	#endif
+#endif
 	m_kademliaFiles = nKadAverage*m_kademliaUsers;
 }

@@ -10,9 +10,9 @@
 #include "TransferWnd.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 // CSelCategoryDlg dialog
@@ -83,7 +83,7 @@ void CSelCategoryDlg::OnOK()
 		m_Return = comboIndex;
 	else {
 		m_bCreatedNew = true;
-		m_Return = theApp.emuledlg->transferwnd->AddCategorie(comboText, thePrefs.GetIncomingDir(), _T(""),_T(""));
+		m_Return = theApp.emuledlg->transferwnd->AddCategory(comboText, thePrefs.GetIncomingDir(), _T(""),_T(""));
 	}
 
 	delete catTitle;

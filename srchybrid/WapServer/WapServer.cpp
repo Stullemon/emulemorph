@@ -31,6 +31,7 @@
 #include "Kademlia/Net/KademliaUDPListener.h"
 #include "Exceptions.h"
 #include "Log.h"
+#include "UserMsgs.h"
 // emulEspaña: added by Announ [Maella: -Allow Bandwidth Settings in <1KB Incremements-]
 #include "opcodes.h"
 // End emulEspaña
@@ -199,7 +200,7 @@ void CWapServer::StartServer(void)
 void CWapServer::_RemoveServer(CString sIP, int nPort)
 {
 	CServer* server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer() ,nPort);
-	if (server!=NULL) theApp.emuledlg->SendMessage(WEB_REMOVE_SERVER, (WPARAM)server, NULL);
+	if (server!=NULL) theApp.emuledlg->SendMessage(UM_WEB_REMOVE_SERVER, (WPARAM)server, NULL);
 }
 
 void CWapServer::_SetSharedFilePriority(CString hash, uint8 priority)
@@ -254,7 +255,7 @@ void CWapServer::_ConnectToServer(CString sIP, int nPort)
 {
 	CServer* server=NULL;
 	if (!sIP.IsEmpty()) server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer(),nPort);
-	theApp.emuledlg->SendMessage(WEB_CONNECT_TO_SERVER, (WPARAM)server, NULL);
+	theApp.emuledlg->SendMessage(UM_WEB_CONNECT_TO_SERVER, (WPARAM)server, NULL);
 }
 
 void CWapServer::ProcessFileReq(WapThreadData Data) {
@@ -737,7 +738,7 @@ CString CWapServer::_GetServerList(WapThreadData Data)
 		}	
 		else if (sCmd == _T("disconnect") && IsSessionAdmin(Data,sSession)) 
 		{
-			theApp.emuledlg->SendMessage(WEB_DISCONNECT_SERVER, NULL);
+			theApp.emuledlg->SendMessage(UM_WEB_DISCONNECT_SERVER, NULL);
 		}	
 		
 		if (_ParseURL(Data.sURL, _T("showlist"))==_T("true")){
@@ -1303,7 +1304,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 				HTTPTemp.Format(_T("%i&nbsp;/&nbsp;%8i&nbsp;(%i)"),
 					found_file->GetSourceCount()-found_file->GetNotCurrentSourcesCount(),
 					found_file->GetSourceCount(),
-					found_file->GetTransferingSrcCount());
+					found_file->GetTransferringSrcCount());
 
 				Out.Replace(_T("[5]"), HTTPTemp);
 			}
@@ -1450,7 +1451,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 				dFile.sFileHash = EncodeBase16(cur_file->GetFileHash(), 16);
 				dFile.lSourceCount = cur_file->GetSourceCount();
 				dFile.lNotCurrentSourceCount = cur_file->GetNotCurrentSourcesCount();
-				dFile.lTransferringSourceCount = cur_file->GetTransferingSrcCount();
+				dFile.lTransferringSourceCount = cur_file->GetTransferringSrcCount();
 				if (theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID())
 					dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
 				else
@@ -1463,8 +1464,8 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 						case -1 : if (cur_file->GetCategory()!=0) continue; break;
 						case -2 : if (!cur_file->IsPartFile()) continue; break;
 						case -3 : if (cur_file->IsPartFile()) continue; break;
-						case -4 : if (!((cur_file->GetStatus()==PS_READY|| cur_file->GetStatus()==PS_EMPTY) && cur_file->GetTransferingSrcCount()==0)) continue; break;
-						case -5 : if (!((cur_file->GetStatus()==PS_READY|| cur_file->GetStatus()==PS_EMPTY) && cur_file->GetTransferingSrcCount()>0)) continue; break;
+						case -4 : if (!((cur_file->GetStatus()==PS_READY|| cur_file->GetStatus()==PS_EMPTY) && cur_file->GetTransferringSrcCount()==0)) continue; break;
+						case -5 : if (!((cur_file->GetStatus()==PS_READY|| cur_file->GetStatus()==PS_EMPTY) && cur_file->GetTransferringSrcCount()>0)) continue; break;
 						case -6 : if (cur_file->GetStatus()!=PS_ERROR) continue; break;
 						case -7 : if (cur_file->GetStatus()!=PS_PAUSED) continue; break;
 						case -8 : if (!cur_file->IsStopped()) continue; break;
@@ -1825,10 +1826,10 @@ CString CWapServer::_GetTransferUpList(WapThreadData Data)
 			else
 				HTTPProcessData.Replace(_T("[2]"), _GetPlainResString(IDS_REQ_UNKNOWNFILE));
 
-			fTotalSize += cur_client->GetTransferedDown();
-			fTotalTransferred += cur_client->GetTransferedUp();
+			fTotalSize += cur_client->GetTransferredDown();
+			fTotalTransferred += cur_client->GetTransferredUp();
 			CString HTTPTemp;
-			HTTPTemp.Format(_T("%s / %s"), CastItoXBytes(cur_client->GetTransferedDown()),CastItoXBytes(cur_client->GetTransferedUp()));
+			HTTPTemp.Format(_T("%s / %s"), CastItoXBytes(cur_client->GetTransferredDown()),CastItoXBytes(cur_client->GetTransferredUp()));
 			HTTPProcessData.Replace(_T("[3]"), HTTPTemp);
 
 			fTotalSpeed += cur_client->GetDatarate();
@@ -2076,7 +2077,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 
 	if(_ParseURL(Data.sURL, _T("reload")) == "true")
 	{
-		theApp.emuledlg->SendMessage(WEB_SHARED_FILES_RELOAD);
+		theApp.emuledlg->SendMessage(UM_WEB_SHARED_FILES_RELOAD);
 	}
 
 	CString sSharedSortRev;

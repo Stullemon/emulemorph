@@ -1,24 +1,26 @@
 #pragma once
 
-class Wizard : public CDialog
+class CConnectionWizardDlg : public CDialog
 {
-	DECLARE_DYNAMIC(Wizard)
-
+	DECLARE_DYNAMIC(CConnectionWizardDlg)
 public:
-	Wizard(CWnd* pParent = NULL);   // standard constructor
-	virtual ~Wizard();
-	void Localize();
-	virtual BOOL OnInitDialog();
+	CConnectionWizardDlg(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CConnectionWizardDlg();
 
+	enum { IDD = IDD_WIZARD };
 	int m_iOS;
 	int m_iTotalDownload;
 	int m_iBitByte;
 
-// Dialog Data
-	enum { IDD = IDD_WIZARD };
+	void Localize();
+
 protected:
+	HICON m_icnWnd;
+	CListCtrl m_provider;
+
 	void SetCustomItemsActivation();
 
+	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
@@ -31,5 +33,4 @@ protected:
 	afx_msg void OnBnClickedWizHighdownloadRadio();
 	afx_msg void OnBnClickedWizResetButton();
 	afx_msg void OnNMClickProviders(NMHDR *pNMHDR, LRESULT *pResult);
-	CListCtrl m_provider;
 };

@@ -21,9 +21,9 @@
 #include "Preferences.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -69,7 +69,7 @@ void CBarShader::BuildModifiers() {
 	// Depth must be at least 2
 	// 2 gives greatest depth, the higher the value, the flatter the appearance
 	// m_Modifiers[count-1] will always be 1, m_Modifiers[0] depends on the value of depth
-
+	
 	int depth = (7-m_used3dlevel);
 	int count = HALF(m_iHeight);
 	double piOverDepth = PI/depth;

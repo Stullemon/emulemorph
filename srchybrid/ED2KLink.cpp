@@ -23,9 +23,9 @@
 #include "StringConversion.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -81,34 +81,27 @@ CED2KServerListLink::~CED2KServerListLink()
 {
 } 
 
-void
-CED2KServerListLink::GetLink(CString& lnk)
+void CED2KServerListLink::GetLink(CString& lnk) const
 {
-	lnk = _T("ed2k://|serverlist|");
-	lnk += m_address;
-	lnk += _T("|/");
+	lnk.Format(_T("ed2k://|serverlist|%s|/"), m_address);
 }
 
-CED2KServerListLink*
-CED2KServerListLink::GetServerListLink()
+CED2KServerListLink* CED2KServerListLink::GetServerListLink()
 {
 	return this;
 }
 
-CED2KServerLink*
-CED2KServerListLink::GetServerLink()
+CED2KServerLink* CED2KServerListLink::GetServerLink()
 {
-	return 0;
+	return NULL;
 }
 
-CED2KFileLink*
-CED2KServerListLink::GetFileLink()
+CED2KFileLink* CED2KServerListLink::GetFileLink()
 {
-	return 0;
+	return NULL;
 }
 
-CED2KLink::LinkType
-CED2KServerListLink::GetKind() const
+CED2KLink::LinkType CED2KServerListLink::GetKind() const
 {
 	return kServerList;
 }
@@ -134,39 +127,27 @@ CED2KServerLink::~CED2KServerLink()
 {
 }
 
-
-void 
-CED2KServerLink::GetLink(CString& lnk)
+void CED2KServerLink::GetLink(CString& lnk) const
 {
-	TCHAR buffer[32];
-	lnk = _T("ed2k://|server|");
-	lnk += ipstr(m_ip);
-	lnk += _T("|");
-	_stprintf(buffer,_T("%d"),static_cast<int>(m_port));
-	lnk += buffer;
-	lnk += _T("|/");
+	lnk.Format(_T("ed2k://|server|%s|%u|/"), ipstr(m_ip), (UINT)m_port);
 }
 
-CED2KServerListLink*
-CED2KServerLink::GetServerListLink() 
+CED2KServerListLink* CED2KServerLink::GetServerListLink() 
 { 
-	return 0; 
+	return NULL;
 }
 
-CED2KServerLink* 
-CED2KServerLink::GetServerLink() 
+CED2KServerLink* CED2KServerLink::GetServerLink() 
 { 
 	return this; 
 }
 
-CED2KFileLink* 
-CED2KServerLink::GetFileLink() 
+CED2KFileLink* CED2KServerLink::GetFileLink() 
 { 
-	return 0; 
+	return NULL;
 }
 
-CED2KLink::LinkType 
-CED2KServerLink::GetKind() const
+CED2KLink::LinkType CED2KServerLink::GetKind() const
 {
 	return kServer;
 }
@@ -175,25 +156,34 @@ CED2KServerLink::GetKind() const
 /////////////////////////////////////////////
 // CED2KFileLink implementation
 /////////////////////////////////////////////
-CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* hash, const CStringArray& astrParams, const TCHAR* sources)
-	: m_name(name)
-	, m_size(size)
+CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const TCHAR* pszHash, 
+							 const CStringArray& astrParams, const TCHAR* pszSources)
+	: m_size(pszSize)
 {
+	// Here we have a little problem.. Actually the proper solution would be to decode from UTF8,
+	// only if the string does contain escape sequences. But if user pastes a raw UTF8 encoded
+	// string (for whatever reason), we would miss to decode that string. On the other side, 
+	// always decoding UTF8 can give flaws in case the string is valid for Unicode and UTF8
+	// at the same time. However, to avoid the pasting of raw UTF8 strings (which would lead
+	// to a greater mess in the network) we always try to decode from UTF8, even if the string
+	// did not contain escape sequences.
+	m_name = OptUtf8ToStr(URLDecode(pszName));
+
 	SourcesList = NULL;
 	m_hashset = NULL;
 	m_bAICHHashValid = false;
 
-	if ( _tcslen(hash) != 32 )
+	if (_tcslen(pszHash) != 32)
 		throw GetResString(IDS_ERR_ILLFORMEDHASH);
 
-	if (_tstoi64(size)>=4294967295)
+	if (_tstoi64(pszSize)>=4294967295)
 		throw GetResString(IDS_ERR_TOOLARGEFILE);
-	if (_tstoi64(size)<=0)
+	if (_tstoi64(pszSize)<=0)
 		throw GetResString(IDS_ERR_NOTAFILELINK);
 	
 	for ( int idx = 0 ; idx < 16 ; ++idx) {
-		m_hash[idx] = FromHexDigit(*hash++)*16;
-		m_hash[idx] += FromHexDigit(*hash++);
+		m_hash[idx] = FromHexDigit(*pszHash++)*16;
+		m_hash[idx] += FromHexDigit(*pszHash++);
 	}
 
 	bool bError = false;
@@ -303,9 +293,9 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 		m_hashset = NULL;
 	}
 
-	if (sources){
-
-		TCHAR* pNewString = _tcsdup(sources);
+	if (pszSources)
+	{
+		TCHAR* pNewString = _tcsdup(pszSources);
 		autoFree liberator(pNewString);
 		TCHAR* pCh = pNewString;
 		TCHAR* pEnd;
@@ -408,7 +398,6 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 	}
 }
 
-
 CED2KFileLink::~CED2KFileLink()
 {
 	if (SourcesList){
@@ -420,8 +409,7 @@ CED2KFileLink::~CED2KFileLink()
 	delete m_hashset;
 }
 
-void 
-CED2KFileLink::GetLink(CString& lnk)
+void CED2KFileLink::GetLink(CString& lnk) const
 {
 	lnk = _T("ed2k://|file|");
 	lnk += EncodeUrlUtf8(m_name);
@@ -437,34 +425,27 @@ CED2KFileLink::GetLink(CString& lnk)
 	lnk += _T("|/");
 }
 
-CED2KServerListLink*
-CED2KFileLink::GetServerListLink() 
+CED2KServerListLink* CED2KFileLink::GetServerListLink()
 { 
-	return 0; 
+	return NULL;
 }
 
-CED2KServerLink* 
-CED2KFileLink::GetServerLink() 
+CED2KServerLink* CED2KFileLink::GetServerLink()
 { 
-	return 0; 
+	return NULL;
 }
-CED2KFileLink* 
-CED2KFileLink::GetFileLink() 
+
+CED2KFileLink* CED2KFileLink::GetFileLink()
 { 
-	m_name = OptUtf8ToStr(URLDecode(m_name));
 	return this; 
 }
 
-CED2KLink::LinkType 
-CED2KFileLink::GetKind() const
+CED2KLink::LinkType CED2KFileLink::GetKind() const
 {
 	return kFile;
 }
 
-
-//static 
-CED2KLink* 
-CED2KLink::CreateLinkFromUrl( const TCHAR * uri)
+CED2KLink* CED2KLink::CreateLinkFromUrl(const TCHAR* uri)
 {
 	CString strURI(uri);
 	int iPos = 0;
@@ -579,7 +560,7 @@ CED2KFriendLink::CED2KFriendLink(LPCTSTR userName, uchar userHash[])
 	memcpy(m_hash, userHash, 16*sizeof(uchar));
 }
 
-void CED2KFriendLink::GetLink(CString& lnk)
+void CED2KFriendLink::GetLink(CString& lnk) const
 {
 	lnk = _T("ed2k://|friend|");
 	lnk += m_sUserName + _T("|");
@@ -598,8 +579,8 @@ CED2KFriendListLink::CED2KFriendListLink(LPCTSTR address)
 	m_address = address;
 }
 
-void CED2KFriendListLink::GetLink(CString& lnk)
+void CED2KFriendListLink::GetLink(CString& lnk) const
 {
-	lnk = _T("ed2k://|friendlist|") + m_address + _T("|/");
+	lnk.Format(_T("ed2k://|friendlist|%s|/"), m_address);
 }
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]

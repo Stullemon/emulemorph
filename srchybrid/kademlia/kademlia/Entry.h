@@ -40,7 +40,7 @@ public:
 		udpport = 0;
 		(void)fileName;
 		size = 0;
-		lifetime = time(NULL);
+		lifetime = 0;
 		source = false;
 	}
 	~CEntry()
@@ -49,6 +49,33 @@ public:
 		for (it = taglist.begin(); it != taglist.end(); it++)
 			delete *it;
 	}
+	
+	uint32 GetIntTagValue(LPCSTR tagname) const
+	{
+		TagList::const_iterator it;
+		Kademlia::CTag* tag;
+		for (it = taglist.begin(); it != taglist.end(); it++)
+		{
+			tag = *it;
+			if (!tag->m_name.Compare(tagname)&& tag->IsInt())
+				return tag->GetInt();
+		}
+		return 0;
+	}
+
+	CStringW GetStrTagValue(LPCSTR tagname) const
+	{
+		TagList::const_iterator it;
+		Kademlia::CTag* tag;
+		for (it = taglist.begin(); it != taglist.end(); it++)
+		{
+			tag = *it;
+			if (!tag->m_name.Compare(tagname)&& tag->IsStr())
+				return tag->GetStr();
+		}
+		return _T("");
+	}
+
 	uint32 ip;
 	uint16 tcpport;
 	uint16 udpport;

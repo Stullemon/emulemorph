@@ -33,12 +33,14 @@
 #include "stdafx.h"
 #include <math.h>
 #include "ColourPopup.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
 
 #define DEFAULT_BOX_VALUE -3
 #define CUSTOM_BOX_VALUE  -2
@@ -182,7 +184,7 @@ BOOL CColourPopup::Create(CPoint p, COLORREF crColour, CWnd* pParentWnd,
 
     // Get the class name and create the window
     CString szClassName = AfxRegisterWndClass(CS_CLASSDC|CS_SAVEBITS|CS_HREDRAW|CS_VREDRAW,
-                                              0,
+                                              AfxGetApp()->LoadStandardCursor(IDC_ARROW),
                                               (HBRUSH) (COLOR_BTNFACE+1), 
                                               0);
 
@@ -380,13 +382,13 @@ void CColourPopup::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
     if (nChar == VK_ESCAPE) 
     {
         m_crColour = m_crInitialColour;
-        EndSelection(CPN_SELENDCANCEL);
+        EndSelection(UM_CPN_SELENDCANCEL);
         return;
     }
 
     if (nChar == VK_RETURN || nChar == VK_SPACE)
     {
-        EndSelection(CPN_SELENDOK);
+        EndSelection(UM_CPN_SELENDOK);
         return;
     }
 
@@ -470,9 +472,9 @@ void CColourPopup::OnLButtonUp(UINT nFlags, CPoint point)
     point = CPoint(LOWORD(pos), HIWORD(pos));
 
     if (m_WindowRect.PtInRect(point))
-        EndSelection(CPN_SELENDOK);
+        EndSelection(UM_CPN_SELENDOK);
     else
-        EndSelection(CPN_SELENDCANCEL);
+        EndSelection(UM_CPN_SELENDCANCEL);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -708,16 +710,16 @@ void CColourPopup::ChangeSelection(int nIndex)
 
     // Store the current colour
     if (m_nCurrentSel == CUSTOM_BOX_VALUE)
-        m_pParent->SendMessage(CPN_SELCHANGE, (WPARAM) m_crInitialColour, 0);
+        m_pParent->SendMessage(UM_CPN_SELCHANGE, (WPARAM) m_crInitialColour, 0);
     else if (m_nCurrentSel == DEFAULT_BOX_VALUE)
     {
         m_crColour = CLR_DEFAULT;
-        m_pParent->SendMessage(CPN_SELCHANGE, (WPARAM) CLR_DEFAULT, 0);
+        m_pParent->SendMessage(UM_CPN_SELCHANGE, (WPARAM) CLR_DEFAULT, 0);
     }
     else
     {
         m_crColour = GetColour(m_nCurrentSel);
-        m_pParent->SendMessage(CPN_SELCHANGE, (WPARAM) m_crColour, 0);
+        m_pParent->SendMessage(UM_CPN_SELCHANGE, (WPARAM) m_crColour, 0);
     }
 }
 
@@ -726,7 +728,7 @@ void CColourPopup::EndSelection(int nMessage)
     ReleaseCapture();
 
     // If custom text selected, perform a custom colour selection
-    if (nMessage != CPN_SELENDCANCEL && m_nCurrentSel == CUSTOM_BOX_VALUE)
+    if (nMessage != UM_CPN_SELENDCANCEL && m_nCurrentSel == CUSTOM_BOX_VALUE)
     {
         m_bChildWindowVisible = TRUE;
 
@@ -735,12 +737,12 @@ void CColourPopup::EndSelection(int nMessage)
         if (dlg.DoModal() == IDOK)
             m_crColour = dlg.GetColor();
         else
-            nMessage = CPN_SELENDCANCEL;
+            nMessage = UM_CPN_SELENDCANCEL;
 
         m_bChildWindowVisible = FALSE;
     } 
 
-    if (nMessage == CPN_SELENDCANCEL)
+    if (nMessage == UM_CPN_SELENDCANCEL)
         m_crColour = m_crInitialColour;
 
     m_pParent->SendMessage(nMessage, (WPARAM) m_crColour, 0);
@@ -906,5 +908,5 @@ void CColourPopup::OnActivateApp(BOOL bActive, DWORD hTask)
 
 	// If Deactivating App, cancel this selection
 	if (!bActive)
-		 EndSelection(CPN_SELENDCANCEL);
+		 EndSelection(UM_CPN_SELENDCANCEL);
 }

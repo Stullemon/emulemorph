@@ -23,10 +23,11 @@
 #include "SharedFilesWnd.h"
 #include <crypto51/crc.h>
 #include "log.h"
+#include "UserMsgs.h"
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 // Original file: Written by Mighty Knife, EMule Morph Team
@@ -109,7 +110,7 @@ void CCRC32RenameWorker::Run () {
 	// They are not being thread save...
 	// We send the address of this thread in the LPARAM parameter to the
 	// shared files window so it can access all parameters needed to rename the file.
-	::SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,WM_CRC32_RENAMEFILE,
+	::SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,UM_CRC32_RENAMEFILE,
 		  		   0, (LPARAM) this);
 }
 
@@ -208,7 +209,7 @@ void CCRC32CalcWorker::Run () {
 		// CKnownFile object because this could lead to a deadlock if the list
 		// is blocked and the user pressed the Reload button at the time when the message
 		// is pending !
-		::SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,WM_CRC32_UPDATEFILE,
+		::SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,UM_CRC32_UPDATEFILE,
 					0, (LPARAM) m_fileHashToProcess);
 	} else {
 		// File cannot be accessed

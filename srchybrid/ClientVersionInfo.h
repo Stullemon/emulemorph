@@ -30,67 +30,68 @@ public:
 
 	CClientVersionInfo(CString strPCEncodedVersion)
 	{
-			m_nVerMajor = CVI_IGNORED;
-			m_nVerMinor = CVI_IGNORED;
-			m_nVerUpdate = CVI_IGNORED;
-			m_nVerBuild = CVI_IGNORED;
-			m_ClientTypeMajor = SO_UNKNOWN; 
-			m_ClientTypeMinor = SO_UNKNOWN;
+		m_nVerMajor = (uint16)CVI_IGNORED;
+		m_nVerMinor = (uint16)CVI_IGNORED;
+		m_nVerUpdate = (uint16)CVI_IGNORED;
+		m_nVerBuild = (uint16)CVI_IGNORED;
+		m_ClientTypeMajor = SO_UNKNOWN; 
+		m_ClientTypeMinor = SO_UNKNOWN;
 
-			int posSeperator = strPCEncodedVersion.Find('/',1);
-			if (posSeperator == (-1) || strPCEncodedVersion.GetLength() - posSeperator < 2){
-				theApp.QueueDebugLogLine( false, _T("PeerCache Error: Bad Version info in PeerCache Descriptor found: %s"), strPCEncodedVersion);
-				return;
-			}
-			CString strClientType = strPCEncodedVersion.Left(posSeperator).Trim();
-			CString strVersionNumber = strPCEncodedVersion.Mid(posSeperator+1).Trim();
+		int posSeperator = strPCEncodedVersion.Find('/',1);
+		if (posSeperator == (-1) || strPCEncodedVersion.GetLength() - posSeperator < 2){
+			theApp.QueueDebugLogLine( false, _T("PeerCache Error: Bad Version info in PeerCache Descriptor found: %s"), strPCEncodedVersion);
+			return;
+		}
+		CString strClientType = strPCEncodedVersion.Left(posSeperator).Trim();
+		CString strVersionNumber = strPCEncodedVersion.Mid(posSeperator+1).Trim();
 
-			if (strClientType.CompareNoCase(_T("eMule")) == 0)
-				m_ClientTypeMajor = SO_EMULE;
-			else if (strClientType.CompareNoCase(_T("eDonkey")) == 0)
-				m_ClientTypeMajor = SO_EDONKEYHYBRID;
-			// can add more types here
-			else{
-				theApp.QueueDebugLogLine(false, _T("PeerCache Warning: Unknown Clienttype in descriptor file found"));
-				m_ClientTypeMajor = SO_UNKNOWN;
-			}
+		if (strClientType.CompareNoCase(_T("eMule")) == 0)
+			m_ClientTypeMajor = SO_EMULE;
+		else if (strClientType.CompareNoCase(_T("eDonkey")) == 0)
+			m_ClientTypeMajor = SO_EDONKEYHYBRID;
+		// can add more types here
+		else{
+			theApp.QueueDebugLogLine(false, _T("PeerCache Warning: Unknown Clienttype in descriptor file found"));
+			m_ClientTypeMajor = SO_UNKNOWN;
+		}
 
-			int curPos2= 0;
-			CString strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
-			if (strNumber.IsEmpty())
-				return;
-			else if (strNumber == _T("*"))
-				m_nVerMajor = -1;
-			else
-				m_nVerMajor = _tstol(strNumber.GetBuffer());
-			strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
-			if (strNumber.IsEmpty())
-				return;
-			else if (strNumber == _T("*"))
-				m_nVerMinor = -1;
-			else
-				m_nVerMinor = _tstol(strNumber.GetBuffer());
-			strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
-			if (strNumber.IsEmpty())
-				return;
-			else if (strNumber == _T("*"))
-				m_nVerUpdate = -1;
-			else
-				m_nVerUpdate = _tstol(strNumber.GetBuffer());
-			strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
-			if (strNumber.IsEmpty())
-				return;
-			else if (strNumber == _T("*"))
-				m_nVerBuild = -1;
-			else
-				m_nVerBuild = _tstol(strNumber.GetBuffer());
+		int curPos2= 0;
+		CString strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
+		if (strNumber.IsEmpty())
+			return;
+		else if (strNumber == _T("*"))
+			m_nVerMajor = (uint16)-1;
+		else
+			m_nVerMajor = _tstol(strNumber.GetBuffer());
+		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
+		if (strNumber.IsEmpty())
+			return;
+		else if (strNumber == _T("*"))
+			m_nVerMinor = (uint16)-1;
+		else
+			m_nVerMinor = _tstol(strNumber.GetBuffer());
+		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
+		if (strNumber.IsEmpty())
+			return;
+		else if (strNumber == _T("*"))
+			m_nVerUpdate = (uint16)-1;
+		else
+			m_nVerUpdate = _tstol(strNumber.GetBuffer());
+		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
+		if (strNumber.IsEmpty())
+			return;
+		else if (strNumber == _T("*"))
+			m_nVerBuild = (uint16)-1;
+		else
+			m_nVerBuild = _tstol(strNumber.GetBuffer());
 	}
 	
-	CClientVersionInfo(uint32 dwTagVersionInfo, uint16 nClientMajor){
-			uint16 nClientMajVersion = (dwTagVersionInfo >> 17) & 0x7f;
-			uint16 nClientMinVersion = (dwTagVersionInfo>> 10) & 0x7f;
-			uint16 nClientUpVersion  = (dwTagVersionInfo >>  7) & 0x07;
-			CClientVersionInfo(nClientMajVersion, nClientMinVersion, nClientUpVersion, CVI_IGNORED, nClientMajor, SO_UNKNOWN);
+	CClientVersionInfo(uint32 dwTagVersionInfo, uint16 nClientMajor)
+	{
+		uint16 nClientMajVersion = (dwTagVersionInfo >> 17) & 0x7f;
+		uint16 nClientMinVersion = (dwTagVersionInfo>> 10) & 0x7f;
+		uint16 nClientUpVersion  = (dwTagVersionInfo >>  7) & 0x07;
+		CClientVersionInfo(nClientMajVersion, nClientMinVersion, nClientUpVersion, (UINT)CVI_IGNORED, nClientMajor, SO_UNKNOWN);
 	}
 
 	CClientVersionInfo(uint32 nVerMajor, uint32 nVerMinor, uint32 nVerUpdate, uint32 nVerBuild, uint32 ClientTypeMajor, uint32 ClientTypeMinor = SO_UNKNOWN)
@@ -104,7 +105,7 @@ public:
 	}
 
 	CClientVersionInfo(){
-		CClientVersionInfo(CVI_IGNORED, CVI_IGNORED, CVI_IGNORED, CVI_IGNORED, SO_UNKNOWN, SO_UNKNOWN); 
+		CClientVersionInfo((UINT)CVI_IGNORED, (UINT)CVI_IGNORED, (UINT)CVI_IGNORED, (UINT)CVI_IGNORED, SO_UNKNOWN, SO_UNKNOWN); 
 	}
 
 	CClientVersionInfo(const CClientVersionInfo& cv)		{*this = cv;}

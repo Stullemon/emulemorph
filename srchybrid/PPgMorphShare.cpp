@@ -11,10 +11,12 @@
 #include "searchDlg.h"
 #include "sharedfilelist.h" //MORPH - Added by SiRoB, POWERSHARE Limit
 #include "uploadqueue.h" //MORPH - Added by SiRoB, PS Internal prio
+#include "UserMsgs.h"
+
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -26,7 +28,7 @@ IMPLEMENT_DYNAMIC(CPPgMorphShare, CPropertyPage)
 BEGIN_MESSAGE_MAP(CPPgMorphShare, CPropertyPage)
 	ON_WM_HSCROLL()
     ON_WM_DESTROY()
-	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 END_MESSAGE_MAP()
 
 CPPgMorphShare::CPPgMorphShare()

@@ -52,13 +52,14 @@ CString CastItoIShort(uint32 count, bool isK = false, uint32 decimal = 2);
 CString CastItoIShort(uint64 count, bool isK = false, uint32 decimal = 2);
 CString CastItoIShort(float count, bool isK = false, uint32 decimal = 2);
 CString CastItoIShort(double count, bool isK = false, uint32 decimal = 2);
-CString CastSecondsToHM(sint32 seconds);
-CString	CastSecondsToLngHM(__int64 count);
+CString CastSecondsToHM(time_t seconds);
+CString	CastSecondsToLngHM(LONGLONG count);
 CString GetFormatedUInt(ULONG ulVal);
 CString GetFormatedUInt64(ULONGLONG ullVal);
 void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength);
 void SecToTimeLength(unsigned long ulSec, CStringW& rstrTimeLength);
 CString LeadingZero(uint32 units);
+bool RegularExpressionMatch(CString regexpr, CString teststring);
 // khaos::categorymod+ Takes a string and returns bytes...
 ULONG	CastXBytesToI(const CString& strExpr);
 // Takes bytes and returns a string with only integers...
@@ -109,8 +110,13 @@ int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
 CString StringLimit(CString in,uint16 length);
 CString CleanupFilename(CString filename);
 bool ExpandEnvironmentStrings(CString& rstrStrings);
+int CompareLocaleString(LPCTSTR psz1, LPCTSTR psz2);
 int CompareLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2);
+int __cdecl CompareCStringPtrLocaleString(const void* p1, const void* p2);
+int __cdecl CompareCStringPtrLocaleStringNoCase(const void* p1, const void* p2);
+void Sort(CStringArray& astr, int (__cdecl *pfnCompare)(const void*, const void*) = CompareCStringPtrLocaleStringNoCase);
 void StripTrailingCollon(CString& rstr);
+bool IsUnicodeFile(LPCTSTR pszFilePath);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,6 +133,7 @@ void InitWindowStyles(CWnd* pWnd);
 CString GetRateString(uint16 rate);
 HWND GetComboBoxEditCtrl(CComboBox& cb);
 HWND ReplaceRichEditCtrl(CWnd* pwndRE, CWnd* pwndParent, CFont* pFont);
+int  FontPointSizeToLogUnits(int nPointSize);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,6 +272,15 @@ __inline int CompareUnsigned(uint32 uSize1, uint32 uSize2)
 }
 
 __inline int CompareUnsigned64(uint64 uSize1, uint64 uSize2)
+{
+	if (uSize1 < uSize2)
+		return -1;
+	if (uSize1 > uSize2)
+		return 1;
+	return 0;
+}
+
+__inline int CompareFloat(float uSize1, float uSize2)
 {
 	if (uSize1 < uSize2)
 		return -1;

@@ -27,9 +27,9 @@
 #include "ServerList.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -118,10 +118,6 @@ CString CMuleStatusBarCtrl::GetPaneToolTipText(EStatusBarPane iPane) const
 
 int CMuleStatusBarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-#ifdef _DEBUG
-	if (theApp.emuledlg->IsZoomed())
-		TRACE("%s; %08x, \n", __FUNCTION__, GetTickCount());
-#endif
 	int iHit = CWnd::OnToolHitTest(point, pTI);
 	if (iHit == -1 && pTI != NULL && pTI->cbSize >= sizeof(AFX_OLDTOOLINFO))
 	{
@@ -141,9 +137,5 @@ int CMuleStatusBarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			}
 		}
 	}
-#ifdef _DEBUG
-	if (theApp.emuledlg->IsZoomed())
-		TRACE(_T("%hs; %08x, iHit=%d, \"%s\"\n"), __FUNCTION__, GetTickCount(), iHit, pTI->lpszText);
-#endif
 	return iHit;
 }

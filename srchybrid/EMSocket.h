@@ -129,7 +129,7 @@ private:
 	uint32	sent;
 
 	CTypedPtrList<CPtrList, Packet*> controlpacket_queue;
-	CList<StandardPacketQueueEntry, StandardPacketQueueEntry> standartpacket_queue;
+	CList<StandardPacketQueueEntry> standartpacket_queue;
 
     bool m_currentPacket_is_controlpacket;
 
@@ -150,7 +150,7 @@ private:
     //void StoppedSendSoUpdateStats();
     //void CleanSendLatencyList();
     //DWORD   m_startSendTick;
-    //CList<SocketTransferStats,SocketTransferStats>	m_Average_sendlatency_list;
+    //CList<SocketTransferStats>	m_Average_sendlatency_list;
     //DWORD   m_lastSendLatency;
     //uint32 m_latency_sum;
     //bool m_wasBlocked;

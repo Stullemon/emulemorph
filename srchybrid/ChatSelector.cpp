@@ -35,9 +35,9 @@
 #include "ClientList.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -73,7 +73,9 @@ BEGIN_MESSAGE_MAP(CChatSelector, CClosableTabCtrl)
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnTcnSelchangeChatsel)
 	ON_BN_CLICKED(IDC_CCLOSE, OnBnClickedCclose)
 	ON_BN_CLICKED(IDC_CSEND, OnBnClickedCsend)
+	//MORPH START - Added by SiRoB, keep 0.44d code
 	ON_WM_CONTEXTMENU()
+	//MORPH END   - Added by SiRoB, keep 0.44d code
 END_MESSAGE_MAP()
 
 CChatSelector::CChatSelector()
@@ -84,7 +86,7 @@ CChatSelector::CChatSelector()
 	m_lastemptyicon = false;
 	m_blinkstate = false;
 	m_Timer = 0;
-	m_bCloseable = false;
+	m_bCloseable = true;
 }
 
 CChatSelector::~CChatSelector()
@@ -658,6 +660,7 @@ void CChatSelector::OnDestroy()
 	CClosableTabCtrl::OnDestroy();
 }
 
+//MORPH START - Added by SiRoB, keep 0.44d code
 void CChatSelector::OnContextMenu(CWnd* pWnd, CPoint point)
 { 
 	const CChatItem* ci = GetCurrentChatItem();
@@ -681,6 +684,7 @@ void CChatSelector::OnContextMenu(CWnd* pWnd, CPoint point)
  	VERIFY( ChatMenu.DestroyMenu() );
 	
 }
+//MORPH END   - Added by SiRoB, keep 0.44d code
 
 BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 {
@@ -691,24 +695,20 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 				CClientDetailDialog dialog(ci->client);
 				dialog.DoModal();
 			}
-			break;
+			return TRUE;
 		}
 		case MP_ADDFRIEND:{
 			const CChatItem* ci = GetCurrentChatItem();
 			if (ci && !ci->client->IsFriend() )
 				theApp.friendlist->AddFriend(ci->client);
-			break;
+			return TRUE;
 		}
 		case MP_REMOVE:{
 			const CChatItem* ci = GetCurrentChatItem();
 			if (ci)
 				EndSession(ci->client);
-			break;
+			return TRUE;
 		}
-		// MORPH START - Added by SiRoB, event on chat button -Fix-
-		default:
-			return CClosableTabCtrl::OnCommand(wParam, lParam);
-		// MORPH END - Added by SiRoB, event on chat button -Fix-
 	}
-	return TRUE;
+	return CClosableTabCtrl::OnCommand(wParam, lParam);
 }

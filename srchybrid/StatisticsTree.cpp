@@ -35,9 +35,9 @@
 #include "StringConversion.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 int j=0;
@@ -351,9 +351,9 @@ CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theIte
 	if (firstItem)
 		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
 		/*
-		strBuffer.Format(_T("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		strBuffer.Format(_T("<font face=\"Tahoma,Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		*/
-		strBuffer.Format(_T("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s [%s] %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		strBuffer.Format(_T("<font face=\"Tahoma,Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s [%s] %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 
 	while (hCurrent != NULL)
@@ -502,31 +502,35 @@ bool CStatisticsTree::CopyText(int copyMode)
 //					bdy		= The BODY tag.  Used to control the background color.
 CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, int theItemLevel, bool firstItem)
 {
-	CString		strBuffer, strItem;
 	HTREEITEM	hCurrent;
+	if (firstItem)
+		hCurrent = GetRootItem();
+	else
+		hCurrent = theItem;
+
 	//MORPH START - Added by SiRoB, Tree Stat from eMule+
 	CString		strImage, strChild, strTab;
 	int			nImage=0, nSelectedImage=0;
 	CString strDivStart, strDiv, strDivA, strDivEnd, strJ, strName;
 	//MORPH END   - Added by SiRoB, Tree Stat from eMule+
 
-	strBuffer.Empty();
-
-	if (firstItem) hCurrent = GetRootItem();
-	else hCurrent = theItem;
-
+	CString		strBuffer, strItem;
 	while (hCurrent != NULL)
 	{
 		//MORPH START - Changed by SiRoB, Tree Stat from eMule+
 		/*
-		if (IsBold(hCurrent)) strItem = _T("<span id=\"sec\">") + GetItemText(hCurrent) + _T("</span>");
-		else strItem = _T("<span id=\"item\">") + GetItemText(hCurrent) + _T("</span>");
-		for (int i = 0; i < theItemLevel; i++) strBuffer += _T("&nbsp;&nbsp;&nbsp;");
-		if (theItemLevel==0) strBuffer .Append(_T("\n"));
+				if (IsBold(hCurrent))
+			strItem = _T("<span id=\"sec\">") + GetItemText(hCurrent) + _T("</span>\r\n");
+		else
+			strItem = _T("<span id=\"item\">") + GetItemText(hCurrent) + _T("</span>\r\n");
+
+		for (int i = 0; i < theItemLevel; i++)
+			strBuffer += _T("&nbsp;&nbsp;&nbsp;");
+		if (theItemLevel == 0)
+			strBuffer.Append(_T("\r\n"));
 		strBuffer += strItem + _T("<br>");
 		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
-			strBuffer += (CString) GetHTMLForExport(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
-		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
+			strBuffer += GetHTMLForExport(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
 		*/
 		strItem.Empty();
 		if (ItemHasChildren(hCurrent))
@@ -588,8 +592,8 @@ CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, i
 			strBuffer += strTab + _T("\t") + (CString) GetHTMLForExport(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
 			strBuffer += strTab + strDivEnd;
 		}
-		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
 		//MORPH END   - Changed by SiRoB, Tree Stat from eMule+
+		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
 	}
 	return strBuffer;
 }
@@ -600,6 +604,8 @@ void CStatisticsTree::ExportHTML(bool onlyvisible)
 	CFile htmlFile;
 	CString htmlFileName;
 	CString theHTML;
+
+	theApp.emuledlg->statisticswnd->ShowStatistics(!onlyvisible);
 
 	CFileDialog saveAsDlg (false, _T("html"), _T("eMule Statistics.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
 	if (saveAsDlg.DoModal() == IDOK)
@@ -614,14 +620,15 @@ void CStatisticsTree::ExportHTML(bool onlyvisible)
 #ifdef _UNICODE
 		theHTML += _T("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">");
 #endif
-		theHTML += _T("<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n");
-		theHTML += _T("#sec { color: #000000; font: bold 11pt/13pt Verdana, Courier New, Helvetica; }\r\n");
-		theHTML += _T("#item { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; }\r\n");
-		theHTML += _T("#bdy { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</head>\r\n");
+		theHTML += _T("<meta name=vs_targetSchema content=\"http://schemas.microsoft.com/intellisense/ie5\">\r\n");
+		theHTML += _T("<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Tahoma, Verdana, Courier New, Helvetica; }\r\n");
+		theHTML += _T("#sec { color: #000000; font: bold 11pt/13pt Tahoma, Verdana, Courier New, Helvetica; }\r\n");
+		theHTML += _T("#item { color: #000000; font: normal 10pt/12pt Tahoma, Verdana, Courier New, Helvetica; }\r\n");
+		theHTML += _T("#bdy { color: #000000; font: normal 10pt/12pt Tahoma, Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</head>\r\n");
 		theHTML += _T("<body id=\"bdy\">\r\n");
 		theHTML.Format(_T("%s<span id=\"pghdr\">eMule v%s %s [%s]</span>\r\n<br><br>\r\n"), theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		theHTML += GetHTMLForExport(onlyvisible) + _T("</body></html>");
-		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+
 		htmlFileName = saveAsDlg.GetPathName();
 		htmlFile.Open(htmlFileName, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite);
 #ifdef _UNICODE

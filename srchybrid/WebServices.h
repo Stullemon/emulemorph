@@ -28,7 +28,7 @@ protected:
 		CString strUrl;
 		BOOL bFileMacros;
 	};
-	CArray<SEd2kLinkService, SEd2kLinkService> m_aServices;
+	CArray<SEd2kLinkService> m_aServices;
 	time_t m_tDefServicesFileLastModified;
 };
 

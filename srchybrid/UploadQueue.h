@@ -48,6 +48,7 @@ public:
 	int		GetWaitingUserCount()					{return waitinglist.GetCount();}
 	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
 	uint32	GetActiveUploadsCount()					{return m_MaxActiveClientsShortTime;}
+	uint32	GetActiveUploadsCountLongPerspective()					{return m_MaxActiveClients;}
 
 	POSITION GetFirstFromUploadList()				{return uploadinglist.GetHeadPosition();}
 	CUpDownClient* GetNextFromUploadList(POSITION &curpos)	{return uploadinglist.GetNext(curpos);}
@@ -69,16 +70,12 @@ public:
 	void	DeleteAll();
 	uint16	GetWaitingPosition(CUpDownClient* client);
 
-
-
-
-
 	uint32	GetSuccessfullUpCount()					{return successfullupcount;}
 	uint32	GetFailedUpCount()						{return failedupcount;}
 	uint32	GetAverageUpTime();
-//	void	FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash);
 
 	bool    RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemove = false);
+	void	MoveDownInUploadQueue(CUpDownClient* client);
 	//MORPH START - Changed by SiRoB, Upload Splitting Class
 	CUpDownClient* FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet = false, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient = NULL, bool checkforaddinuploadinglist = false);
 	bool	RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore, bool checkforaddinuploadinglist = false);
@@ -90,14 +87,11 @@ public:
 	
 protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
-//	POSITION	GetWaitingClient(CUpDownClient* client);
-//	POSITION	GetWaitingClientByID(CUpDownClient* client);
-//	POSITION	GetDownloadingClient(CUpDownClient* client);
 	bool		AcceptNewClient();
 	bool		AcceptNewClient(uint32 curUploadSlots);
-	bool		ForceNewClient(bool allowEmptyWaitingQueue = false);
+	bool		ForceNewClient();
 
-	bool		AddUpNextClient(CUpDownClient* directadd = 0, bool highPrioCheck = false);
+	bool		AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd = 0, bool highPrioCheck = false);
 	
 	static VOID CALLBACK UploadTimer(HWND hWnd, UINT nMsg, UINT nId, DWORD dwTime);
 
@@ -118,8 +112,8 @@ private:
 		uint32	datalen;
 		DWORD	timestamp;
 	};
-	CList<uint64,uint64> avarage_dr_list;
-    CList<uint64,uint64> avarage_friend_dr_list;
+	CList<uint64> avarage_dr_list;
+    CList<uint64> avarage_friend_dr_list;
 	CList<DWORD,DWORD> avarage_tick_list;
 	DWORD	avarage_tick_listPreviousAddedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	CList<int,int> activeClients_list;
@@ -133,7 +127,6 @@ private:
 	uint32	failedupcount;
 	uint32	totaluploadtime;
 	uint32	m_nLastStartUpload;
-	bool	lastupslotHighID; // VQB lowID alternation
 	uint32	m_dwRemovedClientByScore;
 
 	uint32	m_imaxscore;

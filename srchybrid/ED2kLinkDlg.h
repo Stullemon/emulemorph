@@ -32,25 +32,26 @@ public:
 	CED2kLinkDlg(); 
 	virtual ~CED2kLinkDlg(); 
 
-	void	SetMyfile(const CSimpleArray<const CKnownFile*>* paFiles) { m_paFiles = paFiles; }
+	void SetFiles(const CSimpleArray<CObject*>* paFiles) { m_paFiles = paFiles; m_bDataChanged = true; }
 
 // Dialog Data 
 	enum { IDD = IDD_ED2KLINK }; 
 
 protected: 
-	void	UpdateLink();	
-
+	CEdit m_ctrlLinkEdit;
 	CString m_strCaption;
-	const CSimpleArray<const CKnownFile*>* m_paFiles;
+	const CSimpleArray<CObject*>* m_paFiles;
+	bool m_bDataChanged;
 
 	void Localize(); 
+	void UpdateLink();
 
 	virtual BOOL OnInitDialog(); 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support 
+	virtual BOOL OnSetActive();
 
 	DECLARE_MESSAGE_MAP() 
-	CEdit m_ctrlLinkEdit;
-public:
 	afx_msg void OnBnClickedClipboard();
 	afx_msg void OnSettingsChange();
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
 };

@@ -26,6 +26,8 @@
 #include "Opcodes.h"
 #include "friend.h"
 #include "ClientCredits.h"
+#include "IconStatic.h"
+#include "UserMsgs.h"
 #include "IP2Country.h" //Commander - Added: IP2Country
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 #include "HttpDownloadDlg.h"
@@ -36,10 +38,11 @@
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
+
 
 #define	SPLITTER_RANGE_WIDTH	200
 #define	SPLITTER_RANGE_HEIGHT	700
@@ -55,7 +58,7 @@ IMPLEMENT_DYNAMIC(CChatWnd, CDialog)
 BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_WM_KEYDOWN()
 	ON_WM_SHOWWINDOW()
-	ON_MESSAGE(WM_CLOSETAB, OnCloseTab)
+	ON_MESSAGE(UM_CLOSETAB, OnCloseTab)
 	ON_WM_SYSCOLORCHANGE()
     ON_WM_CONTEXTMENU()
 	ON_WM_HELPINFO()
@@ -142,9 +145,9 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(_T("?"));
 
 	// Identification
-	if (pFriend->GetLinkedClient())
+		if (pFriend->GetLinkedClient() && pFriend->GetLinkedClient()->Credits())
 	{
-		if (pFriend->GetLinkedClient()->Credits() && theApp.clientcredits->CryptoAvailable())
+		if (theApp.clientcredits->CryptoAvailable())
 		{
 			switch(pFriend->GetLinkedClient()->Credits()->GetCurrentIdentState(pFriend->GetLinkedClient()->GetIP()))
 			{
@@ -167,15 +170,15 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	else
 		GetDlgItem(IDC_FRIENDS_IDENTIFICACION_EDIT)->SetWindowText(_T("?"));
 
-	// Upoload and downloaded
-	if (pFriend->GetLinkedClient())
+	// Upload and downloaded
+		if (pFriend->GetLinkedClient() && pFriend->GetLinkedClient()->Credits())
 	{
 			GetDlgItem(IDC_FRIENDS_DESCARGADO_EDIT)->SetWindowText(CastItoXBytes(pFriend->GetLinkedClient()->Credits()->GetDownloadedTotal(), false, false));
 	}
 	else
 		GetDlgItem(IDC_FRIENDS_DESCARGADO_EDIT)->SetWindowText(_T("?"));
 
-	if (pFriend->GetLinkedClient())
+		if (pFriend->GetLinkedClient() && pFriend->GetLinkedClient()->Credits())
 	{
 			GetDlgItem(IDC_FRIENDS_SUBIDO_EDIT)->SetWindowText(CastItoXBytes(pFriend->GetLinkedClient()->Credits()->GetUploadedTotal(), false, false));
 	}
@@ -216,8 +219,7 @@ BOOL CChatWnd::OnInitDialog()
 	SetAllIcons();
 
 	CRect rcSpl;
-	CWnd* pWnd = GetDlgItem(IDC_LIST2);
-	pWnd->GetWindowRect(rcSpl);
+	GetDlgItem(IDC_LIST2)->GetWindowRect(rcSpl);
 	ScreenToClient(rcSpl);
 	
 	CRect rc;
@@ -252,8 +254,6 @@ BOOL CChatWnd::OnInitDialog()
 	//Commander - Added: IP2Country - Start
 	AddAnchor(IDC_FRIENDS_COUNTRY, BOTTOM_LEFT);
     //Commander - Added: IP2Country - End
-
-	m_cUserInfo.Init(_T("Info"));
 
 	Localize();
 	theApp.friendlist->ShowFriends();
@@ -344,9 +344,8 @@ LRESULT CChatWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			ScreenToClient(rcW);
 			if (rcW.Width() > 0)
 			{
-				CWnd* pWnd = GetDlgItem(IDC_LIST2);
 				CRect rctree;
-				pWnd->GetWindowRect(rctree);
+				GetDlgItem(IDC_LIST2)->GetWindowRect(rctree);
 				ScreenToClient(rctree);
 
 				CRect rcSpl;
@@ -432,19 +431,19 @@ void CChatWnd::SetAllIcons()
 	icon_msg = theApp.LoadIcon(_T("Message"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_MESSAGEICON))->SetIcon(icon_msg);
 	((CStatic*)GetDlgItem(IDC_FRIENDSICON))->SetIcon(icon_friend);
+	m_cUserInfo.SetIcon(_T("Info"));
 }
 
 void CChatWnd::Localize()
 {
 	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(GetResString(IDS_CW_FRIENDS));
 	GetDlgItem(IDC_MESSAGES_LBL)->SetWindowText(GetResString(IDS_CW_MESSAGES));
+	m_cUserInfo.SetWindowText(GetResString(IDS_INFO));
 	GetDlgItem(IDC_FRIENDS_DOWNLOADED)->SetWindowText(GetResString(IDS_CHAT_DOWNLOADED));
 	GetDlgItem(IDC_FRIENDS_UPLOADED)->SetWindowText(GetResString(IDS_CHAT_UPLOADED));
 	GetDlgItem(IDC_FRIENDS_IDENT)->SetWindowText(GetResString(IDS_CHAT_IDENT));
 	GetDlgItem(IDC_FRIENDS_CLIENT)->SetWindowText(GetResString(IDS_CHAT_CLIENT));
 	GetDlgItem(IDC_FRIENDS_NAME)->SetWindowText(GetResString(IDS_NICKNAME));
-	GetDlgItem(IDC_FRIENDS_MSG)->SetWindowText(GetResString(IDS_INFO));
-	m_cUserInfo.SetText(GetResString(IDS_INFO));
 	GetDlgItem(IDC_FRIENDS_USERHASH)->SetWindowText(GetResString(IDS_CD_UHASH));	
 	//MORPH START - Added by SiRoB, New friend message window
 	GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(GetResString(IDS_COUNTRY) + _T(":"));
@@ -497,6 +496,11 @@ BOOL CChatWnd::OnHelpInfo(HELPINFO* pHelpInfo)
 {
 	theApp.ShowHelp(eMule_FAQ_Friends);
 	return TRUE;
+}
+
+void CChatWnd::OnStnDblclickFriendsicon()
+{
+	theApp.emuledlg->ShowPreferences(IDD_PPG_FILES);
 }
 
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]

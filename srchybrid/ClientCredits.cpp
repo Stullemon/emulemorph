@@ -31,9 +31,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 #define CLIENTS_MET_FILENAME	_T("clients.met")
@@ -454,9 +454,9 @@ void CClientCreditsList::LoadList()
 			CString strBakFileName;
 			//Morph start - modify by AndCycle, backup loaded file
 			/*
-			strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), thePrefs.GetConfigDir());
+			strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), thePrefs.GetConfigDir());
 			*/
-			strBakFileName.Format(_T("%s") _T(".BAK"), strFileName);
+			strBakFileName.Format(_T("%s") _T(".bak"), strFileName);
 			//Morph end - modify by AndCycle, backup loaded file
 
 			DWORD dwBakFileSize = 0;
@@ -783,7 +783,7 @@ void CClientCreditsList::InitalizeCrypting(){
 		return;
 	// check if keyfile is there
 	bool bCreateNewKey = false;
-	HANDLE hKeyFile = ::CreateFile(thePrefs.GetConfigDir() + CString("cryptkey.dat"), GENERIC_READ, FILE_SHARE_READ, NULL,
+	HANDLE hKeyFile = ::CreateFile(thePrefs.GetConfigDir() + _T("cryptkey.dat"), GENERIC_READ, FILE_SHARE_READ, NULL,
 										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hKeyFile != INVALID_HANDLE_VALUE)
 	{
@@ -1099,7 +1099,7 @@ void CClientCredits::ClearWaitStartTime(){
 
 //init will be triggered at 
 //1. client credit create, 
-//2. when reach 10MB transfered, between first time remove check and second time remove check
+//2. when reach 10MB Transferred, between first time remove check and second time remove check
 //anyway, this just make a check at "check point" :p
 
 void CClientCredits::InitPayBackFirstStatus(){
@@ -1109,7 +1109,7 @@ void CClientCredits::InitPayBackFirstStatus(){
 	//MORPH END   - Changed by SiRoB, Pay Back First Tweak
 }
 
-//test will be triggered at client have up/down transfered
+//test will be triggered at client have up/down Transferred
 void CClientCredits::TestPayBackFirstStatus(){
 
 	if(GetDownloadedTotal() < 9728000){

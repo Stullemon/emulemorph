@@ -18,8 +18,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //MORPH START - Added by SiRoB, [itsonlyme: -modname-]
-#define MOD_VERSION_MJR		5
-#define MOD_VERSION_MIN		18
+#define MOD_VERSION_MJR		6
+#define MOD_VERSION_MIN		0
 #define MOD_VERSION_BUILD   1
 
 // this one is sent as the mod ID

@@ -33,6 +33,7 @@ there client on the eMule forum..
 #include "../../OpCodes.h"
 #include "Defines.h"
 #include "Prefs.h"
+#include "Indexed.h"
 #include "../io/IOException.h"
 #include "../routing/RoutingZone.h"
 #include "../routing/Contact.h"
@@ -59,9 +60,9 @@ there client on the eMule forum..
 #include "Log.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -80,8 +81,10 @@ CSearch::CSearch()
 	m_countSent = 0;
 	m_searchID = (uint32)-1;
 	m_keywordPublish = NULL;
-	m_fileName = "";
+	(void)m_fileName;
 	m_stoping = false;
+	m_totalLoad = 0;
+	m_totalLoadResponses = 0;
 	bio1 = NULL;
 	bio2 = NULL;
 	bio3 = NULL;
@@ -104,6 +107,16 @@ CSearch::~CSearch()
 	delete bio1;
 	delete bio2;
 	delete bio3;
+
+	if(CKademlia::isRunning() && getNodeLoad() > 20)
+	{
+		switch(getSearchTypes())
+		{
+			case CSearch::STOREKEYWORD:
+				Kademlia::CKademlia::getIndexed()->AddLoad(getTarget(), ((uint32)(DAY2S(7)*((double)getNodeLoad()/100.0))+(uint32)time(NULL)));
+				break;
+		}
+	}
 }
 
 void CSearch::go(void)
@@ -112,13 +125,9 @@ void CSearch::go(void)
 	// Start with a lot of possible contacts, this is a fallback in case search stalls due to dead contacts
 	if (m_possible.empty())
 	{
-		CRoutingZone *routingZone = CKademlia::getRoutingZone();
-		ASSERT(routingZone != NULL); 
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
-		CUInt128 distance(prefs->getKadID());
+		CUInt128 distance(CKademlia::getPrefs()->getKadID());
 		distance.xor(m_target);
-		routingZone->getClosestTo(1, distance, 50, &m_possible, true, true);
+		CKademlia::getRoutingZone()->getClosestTo(1, distance, 50, &m_possible, true, true);
 	}
 	if (m_possible.empty())
 		return;
@@ -142,7 +151,7 @@ void CSearch::go(void)
 		c->setType(c->getType()+1);
 		CUInt128 check;
 		c->getClientID(&check);
-		sendFindValue(m_target, check, c->getIPAddress(), c->getUDPPort());
+		sendFindValue(check, c->getIPAddress(), c->getUDPPort());
 		if(m_type == NODE)
 		{
 			break;
@@ -169,11 +178,17 @@ void CSearch::prepareToStop()
 			baseTime = SEARCHKEYWORD_LIFETIME;
 			theApp.emuledlg->searchwnd->CancelKadSearch(getSearchID());
 			break;
+		case NOTES:
+			baseTime = SEARCHNOTES_LIFETIME;
+			break;
 		case STOREFILE:
             baseTime = SEARCHSTOREFILE_LIFETIME;
 			break;
 		case STOREKEYWORD:
 			baseTime = SEARCHSTOREKEYWORD_LIFETIME;
+			break;
+		case STORENOTES:
+			baseTime = SEARCHSTORENOTES_LIFETIME;
 			break;
 		case FINDBUDDY:
 			baseTime = SEARCHFINDBUDDY_LIFETIME;
@@ -224,10 +239,10 @@ void CSearch::jumpStart(void)
 	c->setType(c->getType()+1);
 	CUInt128 check;
 	c->getClientID(&check);
-	sendFindValue(m_target, check, c->getIPAddress(), c->getUDPPort());
+	sendFindValue(check, c->getIPAddress(), c->getUDPPort());
 }
 
-void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 fromPort, ContactList *results)
+void CSearch::processResponse(uint32 fromIP, uint16 fromPort, ContactList *results)
 {
 	// Remember the contacts to be deleted when finished
 	ContactList::iterator response;
@@ -274,7 +289,7 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 					c = *response;
 
 					c->getClientID(&distance);
-					distance.xor(target);
+					distance.xor(m_target);
 
 					// Ignore if already tried
 					if (m_tried.count(distance) > 0)	
@@ -308,7 +323,7 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 							c->setType(c->getType()+1);
 							CUInt128 check;
 							c->getClientID(&check);
-							sendFindValue(m_target, check, c->getIPAddress(), c->getUDPPort());
+							sendFindValue(check, c->getIPAddress(), c->getUDPPort());
 						}
 						else
 						{
@@ -331,8 +346,6 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 						case FILE:
 						case KEYWORD:
 						{
-							CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
-							ASSERT(udpListner != NULL); 
 							if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							{
 								if (m_type == FILE)
@@ -343,7 +356,16 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 							ASSERT( m_searchTerms->GetLength() > 0 );
 							// the data in 'm_searchTerms' is to be sent several times. do not pass the m_searchTerms (CSafeMemFile) to 'sendPacket' as it would get detached.
 							//udpListner->sendPacket(m_searchTerms, KADEMLIA_SEARCH_REQ, from->getIPAddress(), from->getUDPPort());
-							udpListner->sendPacket(m_searchTerms->GetBuffer(), m_searchTerms->GetLength(), KADEMLIA_SEARCH_REQ, from->getIPAddress(), from->getUDPPort());
+							CKademlia::getUDPListener()->sendPacket(m_searchTerms->GetBuffer(), m_searchTerms->GetLength(), KADEMLIA_SEARCH_REQ, from->getIPAddress(), from->getUDPPort());
+							break;
+						}
+						case NOTES:
+						{
+							CSafeMemFile bio(34);
+							bio.WriteUInt128(&m_target);
+							bio.WriteUInt128(&CKademlia::getPrefs()->getKadID());
+							m_count++;
+							CKademlia::getUDPListener()->sendPacket( &bio, KADEMLIA_SRC_NOTES_REQ, from->getIPAddress(), from->getUDPPort());
 							break;
 						}
 						case STOREFILE:
@@ -354,19 +376,14 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 								break;
 							}
 							uchar fileid[16];
-							target.toByteArray(fileid);
+							m_target.toByteArray(fileid);
 							CKnownFile* file = theApp.sharedfiles->GetFileByID(fileid);
 							if (file)
 							{
 								m_fileName = file->GetFileName();
-								file->SetPublishedKadSrc();
-								CPrefs *prefs = CKademlia::getPrefs();
-								ASSERT(prefs != NULL); 
-								CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
-								ASSERT(udpListner != NULL);
 
 								CUInt128 id;
-								prefs->getClientHash(&id);
+								CKademlia::getPrefs()->getClientHash(&id);
 								TagList taglist;
 
 								//We can use type for different types of sources. 
@@ -379,11 +396,12 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 									if( theApp.clientlist->GetBuddy() )
 									{
 										CUInt128 buddyID(true);
-										buddyID.xor(prefs->getKadID());
+										buddyID.xor(CKademlia::getPrefs()->getKadID());
 										taglist.push_back(new CTagUInt8(TAG_SOURCETYPE, 3));
 										taglist.push_back(new CTagUInt32(TAG_SERVERIP, theApp.clientlist->GetBuddy()->GetIP()));
 										taglist.push_back(new CTagUInt16(TAG_SERVERPORT, theApp.clientlist->GetBuddy()->GetUDPPort()));
 										taglist.push_back(new CTagStr(TAG_BUDDYHASH, CStringW(md4str(buddyID.getData()))));
+										taglist.push_back(new CTagUInt16(TAG_SOURCEPORT, thePrefs.GetPort()));
 									}
 								}
 								else
@@ -392,7 +410,7 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 									taglist.push_back(new CTagUInt16(TAG_SOURCEPORT, thePrefs.GetPort()));
 								}
 
-								udpListner->publishPacket(from->getIPAddress(), from->getUDPPort(),target,id, taglist);
+								CKademlia::getUDPListener()->publishPacket(from->getIPAddress(), from->getUDPPort(),m_target,id, taglist);
 								theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 								TagList::const_iterator it;
 								for (it = taglist.begin(); it != taglist.end(); it++)
@@ -407,27 +425,62 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 								prepareToStop();
 								break;
 							}
-							CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
-							ASSERT(udpListner != NULL); 
 							if( bio1 )
 							{
 								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 									DebugSend("KadStoreKeywReq", from->getIPAddress(), from->getUDPPort());
-								udpListner->sendPacket( packet1, ((1024*50)-bio1->getAvailable()), from->getIPAddress(), from->getUDPPort() );
+								CKademlia::getUDPListener()->sendPacket( packet1, ((1024*50)-bio1->getAvailable()), from->getIPAddress(), from->getUDPPort() );
 								theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 							}
 							if( bio2 )
 							{
 								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 									DebugSend("KadStoreKeywReq", from->getIPAddress(), from->getUDPPort());
-								udpListner->sendPacket( packet2, ((1024*50)-bio2->getAvailable()), from->getIPAddress(), from->getUDPPort() );
+								CKademlia::getUDPListener()->sendPacket( packet2, ((1024*50)-bio2->getAvailable()), from->getIPAddress(), from->getUDPPort() );
 								theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 							}
 							if( bio3 )
 							{
 								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 									DebugSend("KadStoreKeywReq", from->getIPAddress(), from->getUDPPort());
-								udpListner->sendPacket( packet3, ((1024*50)-bio3->getAvailable()), from->getIPAddress(), from->getUDPPort() );
+								CKademlia::getUDPListener()->sendPacket( packet3, ((1024*50)-bio3->getAvailable()), from->getIPAddress(), from->getUDPPort() );
+								theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
+							}
+							break;
+						}
+						case STORENOTES:
+						{
+							uchar fileid[16];
+							m_target.toByteArray(fileid);
+							CKnownFile* file = theApp.sharedfiles->GetFileByID(fileid);
+							if (file)
+							{
+								byte packet[1024*2];
+								CByteIO bio(packet,sizeof(packet));
+								bio.writeUInt128(m_target);
+								bio.writeUInt128(CKademlia::getPrefs()->getKadID());
+								uint8 tagcount = 1;
+								if(file->GetFileRating() != 0)
+									tagcount++;
+								if(file->GetFileComment() != "")
+									tagcount++;
+								//Number of tags.
+								bio.writeUInt8(tagcount);
+								CTagStr fileName(TAG_FILENAME, file->GetFileName());
+								bio.writeTag(&fileName);
+								if(file->GetFileRating() != 0)
+								{
+									CTagUInt16 rating(TAG_FILERATING, file->GetFileRating());
+									bio.writeTag(&rating);
+								}
+								if(file->GetFileComment() != "")
+								{
+									CTagStr description(TAG_DESCRIPTION, file->GetFileComment());
+									bio.writeTag(&description);
+								}
+
+								CKademlia::getUDPListener()->sendPacket( packet, sizeof(packet)-bio.getAvailable(), KADEMLIA_PUB_NOTES_REQ, from->getIPAddress(), from->getUDPPort());
+
 								theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 							}
 							break;
@@ -439,15 +492,11 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 								prepareToStop();
 								break;
 							}
-							CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
-							ASSERT(udpListner != NULL); 
-							CPrefs *prefs = CKademlia::getPrefs();
-							ASSERT(prefs != NULL); 
 							CSafeMemFile bio(34);
 							bio.WriteUInt128(&m_target);
-							bio.WriteUInt128(&prefs->getClientHash());
+							bio.WriteUInt128(&CKademlia::getPrefs()->getClientHash());
 							bio.WriteUInt16(thePrefs.GetPort());
-							udpListner->sendPacket( &bio, KADEMLIA_FINDBUDDY_REQ, from->getIPAddress(), from->getUDPPort());
+							CKademlia::getUDPListener()->sendPacket( &bio, KADEMLIA_FINDBUDDY_REQ, from->getIPAddress(), from->getUDPPort());
 							m_count++;
 							theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 							break;
@@ -459,15 +508,13 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 								prepareToStop();
 								break;
 							}
-							CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
-							ASSERT(udpListner != NULL); 
 							CSafeMemFile bio(34);
 							bio.WriteUInt128(&m_target);
 							if( m_fileIDs.size() != 1)
 								throw CString(_T("Kademlia.CSearch.processResponse: m_fileIDs.size() != 1"));
 							bio.WriteUInt128(&m_fileIDs.front());
 							bio.WriteUInt16(thePrefs.GetPort());
-							udpListner->sendPacket( &bio, KADEMLIA_FINDSOURCE_REQ, from->getIPAddress(), from->getUDPPort());
+							CKademlia::getUDPListener()->sendPacket( &bio, KADEMLIA_FINDSOURCE_REQ, from->getIPAddress(), from->getUDPPort());
 							m_count++;
 							theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 							break;
@@ -484,21 +531,24 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 	delete results;
 }
 
-void CSearch::processResult(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
+void CSearch::processResult(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
 {
 	switch(m_type)
 	{
 		case FILE:
-			processResultFile(target, fromIP, fromPort, answer, info);
+			processResultFile(fromIP, fromPort, answer, info);
 			break;
 		case KEYWORD:
-			processResultKeyword(target, fromIP, fromPort, answer, info);
+			processResultKeyword(fromIP, fromPort, answer, info);
+			break;
+		case NOTES:
+			processResultNotes(fromIP, fromPort, answer, info);
 			break;
 	}
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 }
 
-void CSearch::processResultFile(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
+void CSearch::processResultFile(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
 {
 	CString temp;
 	uint8  type = 0;
@@ -557,7 +607,51 @@ void CSearch::processResultFile(const CUInt128 &target, uint32 fromIP, uint16 fr
 	}
 }
 
-void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
+void CSearch::processResultNotes(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
+{
+	CEntry* entry = new CEntry();
+	entry->keyID.setValue(m_target);
+	entry->sourceID.setValue(answer);
+
+	CTag *tag;
+	TagList::const_iterator it;
+	for (it = info->begin(); it != info->end(); it++)
+	{
+		tag = *it;
+		if (!tag->m_name.Compare(TAG_SOURCEIP))
+		{
+            entry->ip		= tag->GetInt();
+			delete tag;
+		}
+		else if (!tag->m_name.Compare(TAG_SOURCEPORT))
+		{
+			entry->tcpport	= tag->GetInt();
+			delete tag;
+		}
+		else if (!tag->m_name.Compare(TAG_FILENAME))
+		{
+			entry->fileName	= tag->GetStr();
+			delete tag;
+		}
+		else if (!tag->m_name.Compare(TAG_DESCRIPTION))
+			entry->taglist.push_front(tag);
+		else if (!tag->m_name.Compare(TAG_FILERATING))
+			entry->taglist.push_front(tag);
+		else 
+			delete tag;
+	}
+	delete info;
+	uchar fileid[16];
+	m_target.toByteArray(fileid);
+	CKnownFile* file = theApp.sharedfiles->GetFileByID(fileid);
+	if(!file)
+		file = (CKnownFile*)theApp.downloadqueue->GetFileByID(fileid);
+
+	if(file)
+		file->AddNote(entry);
+}
+
+void CSearch::processResultKeyword(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
 {
 	bool interested = false;
 	CString name;
@@ -578,7 +672,7 @@ void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16
 	{
 		tag = *it;
 
-		if (!tag->m_name.Compare(TAG_NAME))
+		if (!tag->m_name.Compare(TAG_FILENAME))
 		{
 			name			= tag->GetStr();
 			if( name != "" )
@@ -586,11 +680,11 @@ void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16
 				interested = true;
 			}
 		}
-		else if (!tag->m_name.Compare(TAG_SIZE))
+		else if (!tag->m_name.Compare(TAG_FILESIZE))
 			size			= tag->GetInt();
-		else if (!tag->m_name.Compare(TAG_TYPE))
+		else if (!tag->m_name.Compare(TAG_FILETYPE))
 			type			= tag->GetStr();
-		else if (!tag->m_name.Compare(TAG_FORMAT))
+		else if (!tag->m_name.Compare(TAG_FILEFORMAT))
 			format			= tag->GetStr();
 		else if (!tag->m_name.Compare(TAG_MEDIA_ARTIST))
 			artist			= tag->GetStr();
@@ -604,7 +698,7 @@ void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16
 			bitrate			= tag->GetInt();
 		else if (!tag->m_name.Compare(TAG_MEDIA_CODEC))
 			codec			= tag->GetStr();
-		else if (!tag->m_name.Compare(TAG_AVAILABILITY))
+		else if (!tag->m_name.Compare(TAG_SOURCES))
 		{
 			availability	= tag->GetInt();
 			if( availability > 65500 )
@@ -646,18 +740,18 @@ void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16
 	{
 		m_count++;
 		theApp.searchlist->KademliaSearchKeyword(m_searchID, &answer, name, size, type, 8, 
-				2, TAG_FORMAT, (LPCTSTR)format, 
+				2, TAG_FILEFORMAT, (LPCTSTR)format, 
 				2, TAG_MEDIA_ARTIST, (LPCTSTR)artist, 
 				2, TAG_MEDIA_ALBUM, (LPCTSTR)album, 
 				2, TAG_MEDIA_TITLE, (LPCTSTR)title, 
 				3, TAG_MEDIA_LENGTH, length, 
 				3, TAG_MEDIA_BITRATE, bitrate, 
 				2, TAG_MEDIA_CODEC, (LPCTSTR)codec, 
-				3, TAG_AVAILABILITY, availability);
+				3, TAG_SOURCES, availability);
 	}
 }
 
-void CSearch::sendFindValue(const CUInt128 &target, const CUInt128 &check, uint32 ip, uint16 port)
+void CSearch::sendFindValue(const CUInt128 &check, uint32 ip, uint16 port)
 {
 	try
 	{
@@ -672,40 +766,57 @@ void CSearch::sendFindValue(const CUInt128 &target, const CUInt128 &check, uint3
 			case FILE:
 			case KEYWORD:
 			case FINDSOURCE:
+			case NOTES:
 				bio.WriteUInt8(KADEMLIA_FIND_VALUE);
 				break;
 			case FINDBUDDY:
 			case STOREFILE:
 			case STOREKEYWORD:
+			case STORENOTES:
 				bio.WriteUInt8(KADEMLIA_STORE);
 				break;
 			default:
 				AddDebugLogLine(false, _T("Invalid search type. (CSearch::sendFindValue)"));
 				return;
 		}
-		bio.WriteUInt128(&target);
+		bio.WriteUInt128(&m_target);
 		bio.WriteUInt128(&check);
-		CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
-		ASSERT(udpListner != NULL); 
 		m_countSent++;
 		theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 		{
-			if (m_type == NODE)
+			switch(m_type)
+			{
+			case NODE:
 				DebugSend("KadReqFindNode", ip, port);
-			else if (m_type == NODECOMPLETE)
+				break;
+			case NODECOMPLETE:
 				DebugSend("KadReqFindNodeCompl", ip, port);
-			else if (m_type == FILE)
+				break;
+			case FILE:
 				DebugSend("KadReqFindFile", ip, port);
-			else if (m_type == KEYWORD)
+				break;
+			case KEYWORD:
 				DebugSend("KadReqFindKeyw", ip, port);
-			else if (m_type == STOREFILE)
+				break;
+			case STOREFILE:
 				DebugSend("KadReqStoreFile", ip, port);
-			else
+				break;
+			case STOREKEYWORD:
 				DebugSend("KadReqStoreKeyw", ip, port);
+				break;
+			case STORENOTES:
+				DebugSend("KadReqStoreNotes", ip, port);
+				break;
+			case NOTES:
+				DebugSend("KadReqNotes", ip, port);
+				break;
+			default:
+				DebugSend("KadReqUnknown", ip, port);
+			}
 		}
 
-		udpListner->sendPacket(&bio, KADEMLIA_REQ, ip, port);
+		CKademlia::getUDPListener()->sendPacket(&bio, KADEMLIA_REQ, ip, port);
 	} 
 	catch ( CIOException *ioe )
 	{
@@ -732,15 +843,15 @@ void CSearch::PreparePacketForTags( CByteIO *bio, CKnownFile *file)
 			TagList taglist;
 			
 			// Name, Size
-			taglist.push_back(new CTagStr(TAG_NAME, file->GetFileName()));
-			taglist.push_back(new CTagUInt(TAG_SIZE, file->GetFileSize()));
-			taglist.push_back(new CTagUInt(TAG_AVAILABILITY, (uint32)file->m_nCompleteSourcesCount));
+			taglist.push_back(new CTagStr(TAG_FILENAME, file->GetFileName()));
+			taglist.push_back(new CTagUInt(TAG_FILESIZE, file->GetFileSize()));
+			taglist.push_back(new CTagUInt(TAG_SOURCES, (uint32)file->m_nCompleteSourcesCount));
 			
 			// eD2K file type (Audio, Video, ...)
 			// NOTE: Archives and CD-Images are published with file type "Pro"
 			CString strED2KFileType(GetED2KFileTypeSearchTerm(GetED2KFileTypeID(file->GetFileName())));
 			if (!strED2KFileType.IsEmpty())
-				taglist.push_back(new CTagStr(TAG_TYPE, strED2KFileType));
+				taglist.push_back(new CTagStr(TAG_FILETYPE, strED2KFileType));
 			
 			// file format (filename extension)
 			int iExt = file->GetFileName().ReverseFind(_T('.'));
@@ -751,7 +862,7 @@ void CSearch::PreparePacketForTags( CByteIO *bio, CKnownFile *file)
 				{
 					strExt = strExt.Mid(1);
 					if (!strExt.IsEmpty())
-						taglist.push_back(new CTagStr(TAG_FORMAT, strExt));
+						taglist.push_back(new CTagStr(TAG_FILEFORMAT, strExt));
 				}
 			}
 
@@ -885,4 +996,13 @@ void CSearch::PreparePacket(void)
 	{
 		AddDebugLogLine(false, _T("Exception in CSearch::PreparePacket"));
 	}
+}
+
+uint32 CSearch::getNodeLoad() const
+{
+	if( m_totalLoadResponses == 0 )
+	{
+		return 0;
+	}
+	return m_totalLoad/m_totalLoadResponses;
 }

@@ -1,4 +1,15 @@
 #include "StdAfx.h"
+#define MMNODRV			// mmsystem: Installable driver support
+//#define MMNOSOUND		// mmsystem: Sound support
+#define MMNOWAVE		// mmsystem: Waveform support
+#define MMNOMIDI		// mmsystem: MIDI support
+#define MMNOAUX			// mmsystem: Auxiliary audio support
+#define MMNOMIXER		// mmsystem: Mixer support
+#define MMNOTIMER		// mmsystem: Timer support
+#define MMNOJOY			// mmsystem: Joystick support
+#define MMNOMCI			// mmsystem: MCI support
+#define MMNOMMIO		// mmsystem: Multimedia file I/O support
+#define MMNOMMSYSTEM	// mmsystem: General MMSYSTEM functions
 #include <Mmsystem.h>
 #include "ircchanneltabctrl.h"
 #include "ircwnd.h"
@@ -10,9 +21,9 @@
 #include "HTRichEditCtrl.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -37,7 +48,7 @@ IMPLEMENT_DYNAMIC(CIrcChannelTabCtrl, CClosableTabCtrl)
 
 BEGIN_MESSAGE_MAP(CIrcChannelTabCtrl, CClosableTabCtrl)
 	ON_WM_CONTEXTMENU()
-	ON_WM_LBUTTONUP()
+	//ON_WM_LBUTTONUP()
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnTcnSelchangeTab2)
 END_MESSAGE_MAP()
 
@@ -450,32 +461,6 @@ bool CIrcChannelTabCtrl::ChangeChanMode( CString channel, CString nick, CString 
 		return true;
 	}
 	return false;
-}
-
-void CIrcChannelTabCtrl::OnLButtonUp(UINT nFlags, CPoint point)
-{
-	if (m_bCloseable)
-	{
-		int iTabs = GetItemCount();
-		for (int i = 0; i < iTabs; i++)
-		{
-			CRect rcItem;
-			GetItemRect(i, rcItem);
-			CRect rcCloseButton;
-			GetCloseButtonRect(rcItem, rcCloseButton);
-			rcCloseButton.top -= 2;
-			rcCloseButton.left -= 4;
-			rcCloseButton.right += 2;
-			rcCloseButton.bottom += 4;
-			if (rcCloseButton.PtInRect(point))
-			{
-				m_pParent->OnBnClickedClosechat( i );
-				return; 
-			}
-		}
-	}
-	
-	CTabCtrl::OnLButtonDown(nFlags, point);
 }
 
 void CIrcChannelTabCtrl::OnTcnSelchangeTab2(NMHDR *pNMHDR, LRESULT *pResult)

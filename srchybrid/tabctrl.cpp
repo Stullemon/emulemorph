@@ -1,18 +1,15 @@
 #include "stdafx.h"
 #include "tabctrl.hpp"
-
-// Standard C++ includes
 #include <algorithm>
-
-// Debug includes
 #include <cassert>
-
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
+
 
 /************************************************
 *
@@ -127,11 +124,11 @@ void TabControl::OnLButtonUp( UINT nFlags, CPoint point )
 
 	// Inform Parent about Dragrequest
 	NMHDR nmh;
-	nmh.code = NM_TABMOVED;
+	nmh.code = UM_TABMOVED;
 	nmh.hwndFrom = GetSafeHwnd();
 	nmh.idFrom = GetDlgCtrlID();
 
-	// Send parent NM_TABMOVED
+	// Send parent UM_TABMOVED
 	GetParent()->SendMessage(WM_NOTIFY, nmh.idFrom, (LPARAM)&nmh);
 
   }

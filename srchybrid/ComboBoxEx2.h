@@ -8,6 +8,8 @@ public:
 	virtual ~CComboBoxEx2();
 
 	int AddItem(LPCTSTR pszText, int iImage);
+	BOOL SelectString(LPCTSTR pszText);
+	BOOL SelectItemDataStringA(LPCSTR pszText);
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 

@@ -35,7 +35,7 @@ struct SSearchParams
 		ulMinBitrate = 0;
 		ulMinLength = 0;
 		bMatchKeywords = false;
-		bUnicode = false;
+		bUnicode = true;
 	}
 	DWORD dwSearchID;
 	bool bClientSharedFiles;

@@ -48,17 +48,19 @@
 #include "Opcodes.h"
 #include "StringConversion.h"
 #include "Log.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
+
 
 #define HTTPInit _T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\n")
 #define HTTPInitGZ _T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n")
 
-#define WEB_SERVER_TEMPLATES_VERSION	5
+#define WEB_SERVER_TEMPLATES_VERSION	6
 
 CWebServer::CWebServer(void)
 {
@@ -229,7 +231,7 @@ void CWebServer::StartServer(void)
 void CWebServer::_RemoveServer(CString sIP, int nPort)
 {
 	CServer* server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer() ,nPort);
-	if (server!=NULL) theApp.emuledlg->SendMessage(WEB_REMOVE_SERVER, (WPARAM)server, NULL);
+	if (server!=NULL) theApp.emuledlg->SendMessage(UM_WEB_REMOVE_SERVER, (WPARAM)server, NULL);
 }
 
 void CWebServer::_SetSharedFilePriority(CString hash, uint8 priority)
@@ -291,7 +293,7 @@ void CWebServer::_ConnectToServer(CString sIP, int nPort)
 {
 	CServer* server=NULL;
 	if (!sIP.IsEmpty()) server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer(),nPort);
-	theApp.emuledlg->SendMessage(WEB_CONNECT_TO_SERVER, (WPARAM)server, NULL);
+	theApp.emuledlg->SendMessage(UM_WEB_CONNECT_TO_SERVER, (WPARAM)server, NULL);
 }
 
 void CWebServer::ProcessFileReq(ThreadData Data) {
@@ -384,6 +386,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				    ses.admin=true;
 				    ses.startTime = CTime::GetCurrentTime();
 				    ses.lSession = lSession = GetRandomUInt32();
+					ses.lastcat= 0;//- thePrefs.GetCatFilter(0);
 				    pThis->m_Params.Sessions.Add(ses);
                 }
 				theApp.emuledlg->serverwnd->UpdateMyInfo();
@@ -451,7 +454,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 			else
 			if (sPage == _T("transfer")) 
 			{
-				Out += _GetTransferList(Data);
+				Out += _GetTransferList(Data,lSession);
 			}
 			else
 			if (sPage == _T("websearch")) 
@@ -603,9 +606,6 @@ CString CWebServer::_ParseURL(CString URL, CString fieldname)
 {
 	CString value = _T("");
 	CString Parameter = _T("");
-	TCHAR fromReplace[4] = _T("");	// decode URL
-	TCHAR toReplace[2] = _T("");		// decode URL
-	int i = 0;
 	int findPos = -1;
 	int findLength = 0;
 
@@ -635,14 +635,7 @@ CString CWebServer::_ParseURL(CString URL, CString fieldname)
 		}
 	}
 
-#ifdef _UNICODE
-	CStringA strValueA;
-	LPSTR pszA = strValueA.GetBuffer(value.GetLength());
-	for (int i = 0; i < value.GetLength(); i++)
-		*pszA++ = (CHAR)value[i];
-	strValueA.ReleaseBuffer(value.GetLength());
-	value = strValueA;
-#endif
+	value = OptUtf8ToStr(value);
 
 	return value;
 }
@@ -810,7 +803,7 @@ CString CWebServer::_GetServerList(ThreadData Data)
 	}	
 	else if (sCmd == _T("disconnect") && IsSessionAdmin(Data,sSession)) 
 	{
-		theApp.emuledlg->SendMessage(WEB_DISCONNECT_SERVER, NULL);
+		theApp.emuledlg->SendMessage(UM_WEB_DISCONNECT_SERVER, NULL);
 	}	
 	else if (sCmd == _T("remove") && IsSessionAdmin(Data,sSession)) 
 	{
@@ -897,7 +890,7 @@ CString CWebServer::_GetServerList(ThreadData Data)
 	OutE.Replace(_T("[RemoveServer]"), _GetPlainResString(IDS_REMOVETHIS));
 	OutE.Replace(_T("[ConfirmRemove]"), _GetPlainResString(IDS_WEB_CONFIRM_REMOVE_SERVER));
 
-	CArray<ServerEntry, ServerEntry> ServerArray;
+	CArray<ServerEntry> ServerArray;
 
 	// Populating array
 	for (uint32 sc=0;sc<theApp.serverlist->GetServerCount();sc++)
@@ -989,15 +982,25 @@ CString CWebServer::_GetServerList(ThreadData Data)
 	return Out;
 }
 
-CString CWebServer::_GetTransferList(ThreadData Data)
+CString CWebServer::_GetTransferList(ThreadData Data,long lSession)
 {
 	CWebServer *pThis = (CWebServer *)Data.pThis;
 	if(pThis == NULL)
 		return _T("");
 
 	CString sSession = _ParseURL(Data.sURL, _T("ses"));
-	int cat=_tstoi(_ParseURL(Data.sURL,_T("cat")));
 
+	// cat
+	int cat;
+	CString catp=_ParseURL(Data.sURL,_T("cat"));
+	if (catp.IsEmpty())
+		cat=_GetLastUserCat(Data,lSession);
+	else {
+		cat=_tstoi(catp);
+		_SetLastUserCat(Data,lSession,cat);
+	}
+
+	// commands
 	bool clcompl=(_ParseURL(Data.sURL,_T("ClCompl"))==_T("yes") );
 	CString sCat; (cat!=0)?sCat.Format(_T("&cat=%i"),cat):sCat=_T("");
 
@@ -1168,7 +1171,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 	CString OutE2 = pThis->m_Templates.sTransferDownLineGood;
 
 	float fTotalSize = 0, fTotalTransferred = 0, fTotalSpeed = 0;
-	CArray<DownloadFiles, DownloadFiles> FilesArray;
+	CArray<DownloadFiles> FilesArray;
 
 	CArray<CPartFile*,CPartFile*> partlist;
 	theApp.emuledlg->transferwnd->downloadlistctrl.GetDisplayedFiles(&partlist);
@@ -1193,30 +1196,36 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 			dFile.sFileHash = EncodeBase16(cur_file->GetFileHash(), 16);
 			dFile.lSourceCount = cur_file->GetSourceCount();
 			dFile.lNotCurrentSourceCount = cur_file->GetNotCurrentSourcesCount();
-			dFile.lTransferringSourceCount = cur_file->GetTransferingSrcCount();
+			dFile.lTransferringSourceCount = cur_file->GetTransferringSrcCount();
 			if (theApp.IsConnected() && !theApp.IsFirewalled())
 				dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
 			else
 				dFile.sED2kLink = CreateED2kLink(cur_file);
 			dFile.sFileInfo = _SpecialChars(cur_file->GetInfoSummary(cur_file));
 
-			if (cat>0 && cur_file->GetCategory()!=cat) continue;
+			if (cat>0 && cur_file->GetCategory()!=cat) 
+				continue;
+
 			if (cat<0) {
 				switch (cat) {
 					case -1 : if (cur_file->GetCategory()!=0) continue; break;
 					case -2 : if (!cur_file->IsPartFile()) continue; break;
 					case -3 : if (cur_file->IsPartFile()) continue; break;
-					case -4 : if (!((cur_file->GetStatus()==PS_READY|| cur_file->GetStatus()==PS_EMPTY) && cur_file->GetTransferingSrcCount()==0)) continue; break;
-					case -5 : if (!((cur_file->GetStatus()==PS_READY|| cur_file->GetStatus()==PS_EMPTY) && cur_file->GetTransferingSrcCount()>0)) continue; break;
+					case -4 : if (!((cur_file->GetStatus()==PS_READY|| cur_file->GetStatus()==PS_EMPTY) && cur_file->GetTransferringSrcCount()==0)) continue; break;
+					case -5 : if (!((cur_file->GetStatus()==PS_READY|| cur_file->GetStatus()==PS_EMPTY) && cur_file->GetTransferringSrcCount()>0)) continue; break;
 					case -6 : if (cur_file->GetStatus()!=PS_ERROR) continue; break;
-					case -7 : if (cur_file->GetStatus()!=PS_PAUSED) continue; break;
-					case -8 : if (!cur_file->IsStopped()) continue; break;
+					case -7 : if (cur_file->GetStatus()!=PS_PAUSED && !cur_file->IsStopped()) continue; break;
+					case -8 : if (cur_file->lastseencomplete!=NULL) continue; break;
 					case -9 : if (!cur_file->IsMovie()) continue; break;
 					case -10 : if (ED2KFT_AUDIO != GetED2KFileTypeID(cur_file->GetFileName())) continue; break;
 					case -11 : if (!cur_file->IsArchive()) continue; break;
 					case -12 : if (ED2KFT_CDIMAGE != GetED2KFileTypeID(cur_file->GetFileName())) continue; break;
+					case -13 : if (ED2KFT_DOCUMENT != GetED2KFileTypeID(cur_file->GetFileName())) continue; break;
+					case -14 : if (ED2KFT_IMAGE != GetED2KFileTypeID(cur_file->GetFileName())) continue; break;
+					case -15 : if (ED2KFT_PROGRAM != GetED2KFileTypeID(cur_file->GetFileName())) continue; break;
 				}
 			}
+
 			FilesArray.Add(dFile);
 			if (!cur_file->IsPartFile()) completedAv=true;
 		}
@@ -1434,10 +1443,10 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 		else
 			HTTPProcessData.Replace(_T("[2]"), _GetPlainResString(IDS_REQ_UNKNOWNFILE));
 
-		fTotalSize += cur_client->GetTransferedDown();
-		fTotalTransferred += cur_client->GetTransferedUp();
+		fTotalSize += cur_client->GetTransferredDown();
+		fTotalTransferred += cur_client->GetTransferredUp();
 		CString HTTPTemp;
-		HTTPTemp.Format(_T("%s / %s"), CastItoXBytes(cur_client->GetTransferedDown(), false, false),CastItoXBytes(cur_client->GetTransferedUp(), false, false));
+		HTTPTemp.Format(_T("%s / %s"), CastItoXBytes(cur_client->GetTransferredDown(), false, false),CastItoXBytes(cur_client->GetTransferredUp(), false, false));
 		HTTPProcessData.Replace(_T("[3]"), HTTPTemp);
 
 		fTotalSpeed += cur_client->GetDatarate();
@@ -1582,7 +1591,7 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 
 	if(_ParseURL(Data.sURL, _T("reload")) == _T("true"))
 	{
-		theApp.emuledlg->SendMessage(WEB_SHARED_FILES_RELOAD);
+		theApp.emuledlg->SendMessage(UM_WEB_SHARED_FILES_RELOAD);
 	}
 
 	CString sSharedSortRev;
@@ -1697,15 +1706,14 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 	CString OutE2 = pThis->m_Templates.sSharedLineChanged; 
 	OutE.Replace(_T("[Ed2klink]"), _GetPlainResString(IDS_SW_LINK));
     OutE.Replace(_T("[PriorityUp]"), _GetPlainResString(IDS_PRIORITY_UP));
-    OutE.Replace(_T("[PriorityUp]"), _GetPlainResString(IDS_PRIORITY_DOWN));
+    OutE.Replace(_T("[PriorityDown]"), _GetPlainResString(IDS_PRIORITY_DOWN));
 
-	CArray<SharedFiles, SharedFiles> SharedArray;
+	CArray<SharedFiles> SharedArray;
 	// Populating array
 	for (int ix=0;ix<theApp.sharedfiles->GetCount();ix++)
 	{
 		CCKey bufKey;
-		CKnownFile* cur_file;
-		cur_file=theApp.sharedfiles->GetFileByIndex(ix);// m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
+		CKnownFile* cur_file = theApp.sharedfiles->GetFileByIndex(ix);
 
 		SharedFiles dFile;
 		dFile.sFileName = cur_file->GetFileName();
@@ -2439,7 +2447,7 @@ CString CWebServer::_GetConnectedServer(ThreadData Data)
 	OutS.Replace(_T("[Disconnect]"), _GetPlainResString(IDS_IRC_DISCONNECT));
 	OutS.Replace(_T("[Connect]"), _GetPlainResString(IDS_CONNECTTOANYSERVER));
 	OutS.Replace(_T("[URL_ServerOptions]"), IsSessionAdmin(Data,sSession)?CString(_T("?ses=") + sSession + _T("&w=server&c=options")):GetPermissionDenied());
-	OutS.Replace(_T("[ServerOptions]"), CString(_GetPlainResString(IDS_SERVER)+_GetPlainResString(IDS_EM_PREFS)));
+	OutS.Replace(_T("[ServerOptions]"), CString(_GetPlainResString(IDS_SERVER)+_T(" ")+_GetPlainResString(IDS_EM_PREFS)));
 
 	if (theApp.IsConnected()) {
 		if(!theApp.IsFirewalled())
@@ -2516,6 +2524,48 @@ int CWebServer::_GzipCompress(BYTE* dest, ULONG* destLen, const BYTE* source, UL
 	// return  destLength
 	*destLen = 10 + stream.total_out + 8;
 	return err;
+}
+
+void CWebServer::_SetLastUserCat(ThreadData Data, long lSession,int cat){
+	CWebServer *pThis = (CWebServer *)Data.pThis;
+	if(pThis == NULL)
+		return;
+
+	_RemoveTimeOuts(Data,lSession);
+
+	// find our session
+	for(int i = 0; i < pThis->m_Params.Sessions.GetSize(); i++)
+	{
+		if(pThis->m_Params.Sessions[i].lSession == lSession && lSession != 0)
+		{
+			// if found, also reset expiration time
+			pThis->m_Params.Sessions[i].startTime = CTime::GetCurrentTime();
+			pThis->m_Params.Sessions[i].lastcat=cat;
+			return;
+		}
+	}
+}
+
+int CWebServer::_GetLastUserCat(ThreadData Data, long lSession)
+{
+	CWebServer *pThis = (CWebServer *)Data.pThis;
+	if(pThis == NULL)
+		return 0;
+
+	_RemoveTimeOuts(Data,lSession);
+
+	// find our session
+	for(int i = 0; i < pThis->m_Params.Sessions.GetSize(); i++)
+	{
+		if(pThis->m_Params.Sessions[i].lSession == lSession && lSession != 0)
+		{
+			// if found, also reset expiration time
+			pThis->m_Params.Sessions[i].startTime = CTime::GetCurrentTime();
+			return pThis->m_Params.Sessions[i].lastcat;
+		}
+	}
+
+	return 0;
 }
 
 bool CWebServer::_IsLoggedIn(ThreadData Data, long lSession)
@@ -2742,6 +2792,7 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 		SSearchParams* pParams = new SSearchParams;
 		pParams->strExpression = _ParseURL(Data.sURL, _T("tosearch"));
 		pParams->strFileType = _ParseURL(Data.sURL, _T("type"));
+		pParams->bUnicode = (_ParseURL(Data.sURL, _T("unicode")).MakeLower() == _T("on"));
 		// for safety: this string is sent to servers and/or kad nodes, validate it!
 		if (!pParams->strFileType.IsEmpty()
 			&& pParams->strFileType != ED2KFTSTR_ARCHIVE
@@ -2779,6 +2830,8 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 					delete pParams;
 					strResponse = _GetPlainResString(IDS_ERR_NOTCONNECTED);
 				}
+				else 
+					Sleep(2000);	// wait for some results to come in (thanks thread)
 			}
 			else{
 				if (!theApp.emuledlg->searchwnd->DoNewKadSearch(pParams)){
@@ -2820,6 +2873,7 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 	Out.Replace(_T("[WebSearch]"), _GetPlainResString(IDS_SW_WEBBASED));
 	Out.Replace(_T("[Name]"), _GetPlainResString(IDS_SW_NAME));
 	Out.Replace(_T("[Type]"), _GetPlainResString(IDS_TYPE));
+	Out.Replace(_T("[Unicode]"), _GetPlainResString(IDS_SEARCH_UNICODE));
 
 	// 'file type' display strings
 	Out.Replace(_T("[FileTypeAny]"), _GetPlainResString(IDS_SEARCH_ANY));
@@ -2905,6 +2959,7 @@ int CWebServer::UpdateSessionCount() {
 		
 	return m_Params.Sessions.GetCount();
 }
+
 void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool jump,bool extraCats) {
 	CString tempBuf2,tempBuf3;
 	if (jump) tempBuf2=_T("onchange=GotoCat(this.form.cat.options[this.form.cat.selectedIndex].value)>");
@@ -2922,7 +2977,7 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 			tempBuf.Append(tempBuf2);
 		}
 	
-		for (int i=(thePrefs.GetCatCount()>1)?1:2;i<=12;i++) {
+		for (int i=(thePrefs.GetCatCount()>1)?1:2;i<=15;i++) {
 			tempBuf3= ( (-i)==preselect)? _T(" selected"):_T("");
 			tempBuf2.Format(_T("<option%s value=\"%i\">%s</option>"),tempBuf3,-i, GetSubCatLabel(-i) );
 			tempBuf.Append(tempBuf2);
@@ -2941,11 +2996,14 @@ CString CWebServer::GetSubCatLabel(int cat) {
 		case -5: return _GetPlainResString(IDS_DOWNLOADING);
 		case -6: return _GetPlainResString(IDS_ERRORLIKE);
 		case -7: return _GetPlainResString(IDS_PAUSED);
-		case -8: return _GetPlainResString(IDS_STOPPED);
+		case -8: return _GetPlainResString(IDS_SEENCOMPL);
 		case -9: return _GetPlainResString(IDS_VIDEO);
 		case -10: return _GetPlainResString(IDS_AUDIO);
 		case -11: return _GetPlainResString(IDS_SEARCH_ARC);
 		case -12: return _GetPlainResString(IDS_SEARCH_CDIMG);
+		case -13: return _GetPlainResString(IDS_SEARCH_DOC);
+		case -14: return _GetPlainResString(IDS_SEARCH_PICS);
+		case -15: return _GetPlainResString(IDS_SEARCH_PRG);
 	}
 	return _T("?");
 }

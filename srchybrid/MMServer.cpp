@@ -41,9 +41,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 #ifndef EWX_FORCEIFHUNG
@@ -256,7 +256,7 @@ void CMMServer::ProcessFileListRequest(CMMSocket* sender, CMMPacket* packet){
 		if (cur_file->GetStatus(false) == PS_PAUSED)
 			packet->WriteByte(MMT_PAUSED);
 		else{
-			if (cur_file->GetTransferingSrcCount() > 0)
+			if (cur_file->GetTransferringSrcCount() > 0)
 				packet->WriteByte(MMT_DOWNLOADING);
 			else
 				packet->WriteByte(MMT_WAITING);
@@ -641,7 +641,7 @@ void CMMServer::Process(){
 		m_pSocket->Process(); 
 	} 
 }
-//Changed by SiRoB, UNICODE -Fix-
+
 CStringA CMMServer::GetContentType(){
 	if (m_bUseFakeContent)
 		return CStringA("image/vnd.wap.wbmp");
@@ -690,7 +690,7 @@ VOID CALLBACK CMMServer::CommandTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWOR
 
 void  CMMServer::ProcessStatisticsRequest(CMMData* data, CMMSocket* sender){
 	uint16 nWidth = data->ReadShort();
-	CArray<UpDown, UpDown>* rawData = theApp.webserver->GetPointsForWeb();
+	CArray<UpDown>* rawData = theApp.webserver->GetPointsForWeb();
 	int nRawDataSize = rawData->GetSize();
 	int nCompressEvery = (nRawDataSize > nWidth) ? nRawDataSize / nWidth : 1;
 	int nPos = (nRawDataSize > nWidth) ? (nRawDataSize % nWidth) : 0;
@@ -724,11 +724,11 @@ void  CMMServer::ProcessStatisticsRequest(CMMData* data, CMMSocket* sender){
 
 void CMMServer::WriteFileInfo(CPartFile* selFile, CMMPacket* packet){
 	packet->WriteInt(selFile->GetFileSize());
-	packet->WriteInt(selFile->GetTransfered());
+	packet->WriteInt(selFile->GetTransferred());
 	packet->WriteInt(selFile->GetCompletedSize());
 	packet->WriteShort(selFile->GetDatarate()/100);
 	packet->WriteShort(selFile->GetSourceCount());
-	packet->WriteShort(selFile->GetTransferingSrcCount());
+	packet->WriteShort(selFile->GetTransferringSrcCount());
 	if (selFile->IsAutoDownPriority()){
 		packet->WriteByte(4);
 	}

@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.1 $
+* $Revision: 1.2 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -16,8 +16,6 @@
 *	$History:$
 *
 *********************************************************************/
-
-
 #if !defined(AFX_TREEPROPSHEET_H__50695CFB_FCE4_4188_ADB4_BF05A5488E41__INCLUDED_)
 #define AFX_TREEPROPSHEET_H__50695CFB_FCE4_4188_ADB4_BF05A5488E41__INCLUDED_
 
@@ -26,10 +24,6 @@
 #endif // _MSC_VER > 1000
 
 #include "TreePropSheetPgFrame.h"
-#include <afxtempl.h>
-
-//namespace TreePropSheet
-//{
 
 /**
 A property sheet, which can use a tree control instead of a tab 
@@ -469,9 +463,6 @@ private:
 	/** The id of the tree view control, that shows the pages. */
 	static const UINT s_unPageTreeId;
 };
-
-
-//} //namespace TreePropSheet
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -19,11 +19,13 @@
 #include <list>
 
 #define	PARTSIZE			9728000
+#define	MAX_EMULE_FILE_SIZE	4290048000	// (4294967295/PARTSIZE)*PARTSIZE
 
 class CTag;
 class CxImage;
 namespace Kademlia{
-class CUInt128;
+	class CUInt128;
+	class CEntry;
 	typedef std::list<CStringW> WordList;
 };
 class CUpDownClient;
@@ -47,7 +49,6 @@ public:
 		alltimerequested= 0;
 		alltimetransferred = 0;
 		alltimeaccepted = 0;
-
 		//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
 		InChangedSpreadSortValue = false;
 		InChangedFullSpreadCount = false;
@@ -55,7 +56,6 @@ public:
 		lastSpreadSortValue = 0;;
 		lastFullSpreadCount = 0;
 		//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
-
 		//Morph Start - Added by AndCycle, Equal Chance For Each File
 		shareStartTime = time(NULL);//this value init will be done in other place
 		m_bInChangedEqualChanceValue = false;
@@ -172,6 +172,8 @@ public:
 	CTag* GetTag(LPCSTR tagname) const;
 	void AddTagUnique(CTag* pTag);
 	const CArray<CTag*,CTag*>& GetTags() const { return taglist; }
+	void AddNote(Kademlia::CEntry* pEntry);
+	const CTypedPtrList<CPtrList, Kademlia::CEntry*>& getNotes() const { return CKadEntryPtrList; }
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -187,6 +189,7 @@ protected:
 	uint8	m_uRating;
 	CString m_strFileType;
 	CArray<CTag*,CTag*> taglist;
+	CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;
 };
 
 class CKnownFile : public CAbstractFile
@@ -281,15 +284,16 @@ public:
 	uint32	GetKadFileSearchID() const { return kadFileSearchID; }
 	void	SetKadFileSearchID( uint32 id )	{kadFileSearchID = id;} //Don't use this unless you know what your are DOING!! (Hopefully I do.. :)
 
-	uint32	GetPublishedKadSrc() const { return m_PublishedKadSrc; }
-	void	SetPublishedKadSrc();
-
 	const Kademlia::WordList& GetKadKeywords() const { return wordlist; }
 
 	uint32	GetLastPublishTimeKadSrc() const { return m_lastPublishTimeKadSrc; }
-	void	SetLastPublishTimeKadSrc( uint32 val ) {m_lastPublishTimeKadSrc = val;}
+	void	SetLastPublishTimeKadSrc(uint32 time, uint32 buddyip) { m_lastPublishTimeKadSrc = time; m_lastBuddyIP = buddyip;}
+	uint32	GetLastPublishBuddy() const { return m_lastBuddyIP; }
+	void	SetLastPublishTimeKadNotes(uint32 time) {m_lastPublishTimeKadNotes = time;}
+	uint32	GetLastPublishTimeKadNotes() const { return m_lastPublishTimeKadNotes; }
 
 	bool	PublishSrc();
+	bool	PublishNotes();
 
 	// file sharing
 	virtual	Packet*	CreateSrcInfoPacket(CUpDownClient* forClient) const;
@@ -300,7 +304,6 @@ public:
 	// preview
 	bool	IsMovie() const;
 	bool	IsMusic() const; //MORPH - Added by IceCream, added preview also for music files
-
 	virtual	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	virtual void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
 
@@ -322,7 +325,7 @@ public:
 	uint16 m_nVirtualCompleteSourcesCount;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	
-	CArray<uint16,uint16> m_PartSentCount;	// SLUGFILLER: hideOS
+	CArray<uint16> m_PartSentCount;	// SLUGFILLER: hideOS
 	bool ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client);//wistily Share only the need
 
 #ifdef _DEBUG
@@ -389,11 +392,12 @@ protected:
 	bool	CreateHash(FILE* fp, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	bool	CreateHash(const uchar* pucData, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	void	LoadComment();
-	uint16	CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
+	uint16	CalcPartSpread(CArray<uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*,uchar*> hashlist;
 	CString	m_strDirectory;
 	CString m_strFilePath;
 	CAICHHashSet*			m_pAICHHashSet; 
+
 private:
 	static CBarShader s_ShareStatusBar;
 	uint16	m_iPartCount;
@@ -405,7 +409,8 @@ private:
 	bool	m_PublishedED2K;
 	uint32	kadFileSearchID;
 	uint32	m_lastPublishTimeKadSrc;
-	uint32	m_PublishedKadSrc;
+	uint32	m_lastPublishTimeKadNotes;
+	uint32	m_lastBuddyIP;
 	Kademlia::WordList wordlist;
 	UINT	m_uMetaDataVer;
 	uint32	m_dwLastSeen;	// SLUGFILLER: mergeKnown, for TAHO, .met file control
@@ -460,53 +465,3 @@ private:
 // MightyKnife: Community visible files
 #define PERM_COMMUNITY  3
 // [end] Mighty Knife
-
-// constants for MD4Transform
-#define S11 3
-#define S12 7
-#define S13 11
-#define S14 19
-#define S21 3
-#define S22 5
-#define S23 9
-#define S24 13
-#define S31 3
-#define S32 9
-#define S33 11
-#define S34 15
-
-// basic MD4 functions
-#define MD4_F(x, y, z) (((x) & (y)) | ((~x) & (z)))
-#define MD4_G(x, y, z) (((x) & (y)) | ((x) & (z)) | ((y) & (z)))
-#define MD4_H(x, y, z) ((x) ^ (y) ^ (z))
-
-// rotates x left n bits
-// 15-April-2003 Sony: use MSVC intrinsic to save a few cycles
-#ifdef _MSC_VER
-#pragma intrinsic(_rotl)
-#define MD4_ROTATE_LEFT(x, n) _rotl((x), (n))
-#else
-#define MD4_ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
-#endif
-
-// partial transformations
-#define MD4_FF(a, b, c, d, x, s) \
-{ \
-  (a) += MD4_F((b), (c), (d)) + (x); \
-  (a) = MD4_ROTATE_LEFT((a), (s)); \
-}
-
-#define MD4_GG(a, b, c, d, x, s) \
-{ \
-  (a) += MD4_G((b), (c), (d)) + (x) + (uint32)0x5A827999; \
-  (a) = MD4_ROTATE_LEFT((a), (s)); \
-}
-
-#define MD4_HH(a, b, c, d, x, s) \
-{ \
-  (a) += MD4_H((b), (c), (d)) + (x) + (uint32)0x6ED9EBA1; \
-  (a) = MD4_ROTATE_LEFT((a), (s)); \
-}
-
-static void MD4Transform(uint32 Hash[4], uint32 x[16]);
-

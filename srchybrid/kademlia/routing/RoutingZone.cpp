@@ -66,9 +66,9 @@ there client on the eMule forum..
 #include "Log.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -87,9 +87,7 @@ CUInt128 CRoutingZone::me = (ULONG)0;
 CRoutingZone::CRoutingZone()
 {
 	// Can only create routing zone after prefs
-	CPrefs *prefs = CKademlia::getPrefs();
-	ASSERT(prefs != NULL); 
-	prefs->getKadID(&me);
+	CKademlia::getPrefs()->getKadID(&me);
 	m_filename = CMiscUtils::getAppDir();
 	m_filename.Append(CONFIGFOLDER);
 	m_filename.Append(_T("nodes.dat"));
@@ -101,9 +99,7 @@ CRoutingZone::CRoutingZone()
 CRoutingZone::CRoutingZone(LPCSTR filename)
 {
 	// Can only create routing zone after prefs
-	CPrefs *prefs = CKademlia::getPrefs();
-	ASSERT(prefs != NULL); 
-	prefs->getKadID(&me);
+	CKademlia::getPrefs()->getKadID(&me);
 	m_filename = filename;
 	CUInt128 zero((ULONG)0);
 	init(NULL, 0, zero);
@@ -612,11 +608,9 @@ void CRoutingZone::onSmallTimer(void)
 	if(c != NULL)
 	{
 		c->setType(c->getType()+1);
-		CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
-		ASSERT(udpListner != NULL); 
 		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 			DebugSend("KadHelloReq", c->getIPAddress(), c->getUDPPort());
-		udpListner->sendMyDetails(KADEMLIA_HELLO_REQ, c->getIPAddress(), c->getUDPPort());
+		CKademlia::getUDPListener()->sendMyDetails(KADEMLIA_HELLO_REQ, c->getIPAddress(), c->getUDPPort());
 	}
 }
 

@@ -19,11 +19,12 @@
 
 #pragma once
 #include "MuleListCtrl.h"
+#include "ListCtrlItemWalk.h"
 
 class CUpDownClient;
 class CPartFile;
 
-class CDownloadClientsCtrl : public CMuleListCtrl
+class CDownloadClientsCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
 	DECLARE_DYNAMIC(CDownloadClientsCtrl)
 

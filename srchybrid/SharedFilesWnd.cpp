@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "emuleDlg.h"
 #include "SharedFilesWnd.h"
 #include "OtherFunctions.h"
 #include "SharedFileList.h"
@@ -23,15 +24,24 @@
 #include "KnownFile.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
 // CSharedFilesWnd dialog
 
 IMPLEMENT_DYNAMIC(CSharedFilesWnd, CDialog)
+
+BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
+	ON_BN_CLICKED(IDC_RELOADSHAREDFILES, OnBnClickedReloadsharedfiles)
+	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_SFLIST, OnLvnItemActivateSflist)
+	ON_NOTIFY(NM_CLICK, IDC_SFLIST, OnNMClickSflist)
+	ON_WM_SYSCOLORCHANGE()
+	ON_STN_DBLCLK(IDC_FILES_ICO, OnStnDblclickFilesIco)
+END_MESSAGE_MAP()
+
 CSharedFilesWnd::CSharedFilesWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CSharedFilesWnd::IDD, pParent)
 {
@@ -72,9 +82,9 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	GetFont()->GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
 	bold.CreateFontIndirect(&lf);
-	m_ctrlStatisticsFrm.Init(_T("StatsDetail"));
-    m_ctrlStatisticsFrm.SetFont(&bold); // should run Init() *first* before setting font bold. 
-    m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS)); // i_a: XXX: moved here from 'Localize()' 
+	m_ctrlStatisticsFrm.SetIcon(_T("StatsDetail"));
+    //m_ctrlStatisticsFrm.SetFont(&bold); // should run 'SetIcon' *first* before setting bold font
+    m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
     
 	Localize();
 
@@ -98,10 +108,10 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	AddAnchor(IDC_FSTATIC8,BOTTOM_LEFT);
 	AddAnchor(IDC_SACCEPTED2,BOTTOM_LEFT);
 	AddAnchor(IDC_FSTATIC6,BOTTOM_LEFT);
-	AddAnchor(IDC_STRANSFERED,BOTTOM_LEFT);
+	AddAnchor(IDC_STRANSFERRED,BOTTOM_LEFT);
 	AddAnchor(IDC_POPBAR3,BOTTOM_LEFT);
 	AddAnchor(IDC_FSTATIC9,BOTTOM_LEFT);
-	AddAnchor(IDC_STRANSFERED2,BOTTOM_LEFT);
+	AddAnchor(IDC_STRANSFERRED2,BOTTOM_LEFT);
 	
 	return TRUE;
 }
@@ -112,15 +122,10 @@ void CSharedFilesWnd::Reload()
 	ShowSelectedFilesSummary();
 }
 
-BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
-	ON_BN_CLICKED(IDC_RELOADSHAREDFILES, OnBnClickedReloadsharedfiles)
-	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_SFLIST, OnLvnItemActivateSflist)
-	ON_NOTIFY(NM_CLICK, IDC_SFLIST, OnNMClickSflist)
-	ON_WM_SYSCOLORCHANGE()
-END_MESSAGE_MAP()
-
-
-// CSharedFilesWnd message handlers
+void CSharedFilesWnd::OnStnDblclickFilesIco()
+{
+	theApp.emuledlg->ShowPreferences(IDD_PPG_DIRECTORIES);
+}
 
 void CSharedFilesWnd::OnBnClickedReloadsharedfiles()
 {
@@ -139,10 +144,10 @@ void CSharedFilesWnd::ShowSelectedFilesSummary()
 {
 	const CKnownFile* pTheFile = NULL;
 	int iFiles = 0;
-	uint64 uTransfered = 0;
+	uint64 uTransferred = 0;
 	UINT uRequests = 0;
 	UINT uAccepted = 0;
-	uint64 uAllTimeTransfered = 0;
+	uint64 uAllTimeTransferred = 0;
 	UINT uAllTimeRequests = 0;
 	UINT uAllTimeAccepted = 0;
 	POSITION pos = sharedfilesctrl.GetFirstSelectedItemPosition();
@@ -154,11 +159,11 @@ void CSharedFilesWnd::ShowSelectedFilesSummary()
 		if (iFiles == 1)
 			pTheFile = pFile;
 
-		uTransfered += pFile->statistic.GetTransferred();
+		uTransferred += pFile->statistic.GetTransferred();
 		uRequests += pFile->statistic.GetRequests();
 		uAccepted += pFile->statistic.GetAccepts();
 
-		uAllTimeTransfered += pFile->statistic.GetAllTimeTransferred();
+		uAllTimeTransferred += pFile->statistic.GetAllTimeTransferred();
 		uAllTimeRequests += pFile->statistic.GetAllTimeRequests();
 		uAllTimeAccepted += pFile->statistic.GetAllTimeAccepts();
 	}
@@ -166,9 +171,9 @@ void CSharedFilesWnd::ShowSelectedFilesSummary()
 	if (iFiles != 0)
 	{
 		pop_bartrans.SetRange32(0,theApp.knownfiles->transferred/1024);
-		pop_bartrans.SetPos(uTransfered/1024);
+		pop_bartrans.SetPos(uTransferred/1024);
 		pop_bartrans.SetShowPercent();			
-		SetDlgItemText(IDC_STRANSFERED, CastItoXBytes(uTransfered, false, false));
+		SetDlgItemText(IDC_STRANSFERRED, CastItoXBytes(uTransferred, false, false));
 
 		pop_bar.SetRange32(0,theApp.knownfiles->requested);
 		pop_bar.SetPos(uRequests);
@@ -180,21 +185,21 @@ void CSharedFilesWnd::ShowSelectedFilesSummary()
 		pop_baraccept.SetShowPercent();
 		SetDlgItemInt(IDC_SACCEPTED, uAccepted, FALSE);
 
-		SetDlgItemText(IDC_STRANSFERED2, CastItoXBytes(uAllTimeTransfered, false, false));
+		SetDlgItemText(IDC_STRANSFERRED2, CastItoXBytes(uAllTimeTransferred, false, false));
 		SetDlgItemInt(IDC_SREQUESTED2, uAllTimeRequests, FALSE);
 		SetDlgItemInt(IDC_SACCEPTED2, uAllTimeAccepted, FALSE);
 
 		CString str(GetResString(IDS_SF_STATISTICS));
 		if (iFiles == 1 && pTheFile != NULL)
 			str += _T(" (") + MakeStringEscaped(pTheFile->GetFileName()) +_T(")");
-		m_ctrlStatisticsFrm.SetText(str);
+		m_ctrlStatisticsFrm.SetWindowText(str);
 	}
 	else
 	{
 		pop_bartrans.SetRange32(0, 100);
 		pop_bartrans.SetPos(0);
 		pop_bartrans.SetTextFormat(_T(""));
-		SetDlgItemText(IDC_STRANSFERED, _T("-"));
+		SetDlgItemText(IDC_STRANSFERRED, _T("-"));
 
 		pop_bar.SetRange32(0, 100);
 		pop_bar.SetPos(0);
@@ -206,11 +211,11 @@ void CSharedFilesWnd::ShowSelectedFilesSummary()
 		pop_baraccept.SetTextFormat(_T(""));
 		SetDlgItemText(IDC_SACCEPTED, _T("-"));
 
-		SetDlgItemText(IDC_STRANSFERED2, _T("-"));
+		SetDlgItemText(IDC_STRANSFERRED2, _T("-"));
 		SetDlgItemText(IDC_SREQUESTED2, _T("-"));
 		SetDlgItemText(IDC_SACCEPTED2, _T("-"));
 
-		m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS));
+		m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
 	}
 }
 
@@ -249,7 +254,6 @@ void CSharedFilesWnd::OnSysColorChange()
 {
 	CResizableDialog::OnSysColorChange();
 	SetAllIcons();
-	sharedfilesctrl.CreateMenues();
 }
 
 void CSharedFilesWnd::SetAllIcons()
@@ -265,10 +269,7 @@ void CSharedFilesWnd::Localize()
 	sharedfilesctrl.Localize();
 	GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES));
 	GetDlgItem(IDC_RELOADSHAREDFILES)->SetWindowText(GetResString(IDS_SF_RELOAD));
-
 	m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
-	m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS));	
-	
 	GetDlgItem(IDC_CURSESSION_LBL)->SetWindowText(GetResString(IDS_SF_CURRENT));
 	GetDlgItem(IDC_TOTAL_LBL)->SetWindowText(GetResString(IDS_SF_TOTAL));
 	GetDlgItem(IDC_FSTATIC6)->SetWindowText(GetResString(IDS_SF_TRANS));

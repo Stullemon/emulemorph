@@ -19,13 +19,22 @@
 #include "ClosableTabCtrl.h"
 #include "OtherFunctions.h"
 #include "MenuCmds.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
+
+// _WIN32_WINNT >= 0x0501 (XP only)
+#define _WM_THEMECHANGED                0x031A	
+#define _ON_WM_THEMECHANGED()														\
+	{	_WM_THEMECHANGED, 0, 0, 0, AfxSig_l,										\
+		(AFX_PMSG)(AFX_PMSGW)														\
+		(static_cast< LRESULT (AFX_MSG_CALL CWnd::*)(void) > (_OnThemeChanged))		\
+	},
 
 // CClosableTabCtrl
 // by enkeyDEV(Ottavio84)
@@ -35,9 +44,11 @@ IMPLEMENT_DYNAMIC(CClosableTabCtrl, CTabCtrl)
 BEGIN_MESSAGE_MAP(CClosableTabCtrl, CTabCtrl)
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDBLCLK()
+	ON_WM_MBUTTONUP()
 	ON_WM_CREATE()
 	ON_WM_SYSCOLORCHANGE()
 	ON_WM_CONTEXTMENU()
+	_ON_WM_THEMECHANGED()
 END_MESSAGE_MAP()
 
 CClosableTabCtrl::CClosableTabCtrl()
@@ -59,6 +70,26 @@ void CClosableTabCtrl::GetCloseButtonRect(const CRect& rcItem, CRect& rcCloseBut
 	rcCloseButton.left = rcCloseButton.right - (m_iiCloseButton.rcImage.right - m_iiCloseButton.rcImage.left);
 }
 
+void CClosableTabCtrl::OnMButtonUp(UINT nFlags, CPoint point)
+{
+	if (m_bCloseable)
+	{
+		int iTabs = GetItemCount();
+		for (int i = 0; i < iTabs; i++)
+		{
+			CRect rcItem;
+			GetItemRect(i, rcItem);
+			if (rcItem.PtInRect(point))
+			{
+				GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)i);
+				return;
+			}
+		}
+	}
+
+	CTabCtrl::OnMButtonUp(nFlags, point);
+}
+
 void CClosableTabCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if (m_bCloseable)
@@ -76,13 +107,13 @@ void CClosableTabCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 			rcCloseButton.bottom += 4;
 			if (rcCloseButton.PtInRect(point))
 			{
-				GetParent()->SendMessage(WM_CLOSETAB, (WPARAM) i);
-				return; 
+				GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)i);
+				return;
 			}
 		}
 	}
 	
-	CTabCtrl::OnLButtonDown(nFlags, point);
+	CTabCtrl::OnLButtonUp(nFlags, point);
 }
 
 void CClosableTabCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
@@ -94,7 +125,7 @@ void CClosableTabCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 		GetItemRect(i, rcItem);
 		if (rcItem.PtInRect(point))
 		{
-			GetParent()->SendMessage(WM_DBLCLICKTAB, (WPARAM)i);
+			GetParent()->SendMessage(UM_DBLCLICKTAB, (WPARAM)i);
 			return;
 		}
 	}
@@ -138,7 +169,7 @@ void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 
 	bool bCloseable = m_bCloseable;
-	if (bCloseable && GetParent()->SendMessage(WM_QUERYTAB, nTabIndex))
+	if (bCloseable && GetParent()->SendMessage(UM_QUERYTAB, nTabIndex))
 		bCloseable = false;
 
 	// Draw 'Close button' at right side
@@ -150,7 +181,7 @@ void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		rect.right = rcCloseButton.left - 2;
 	}
 
-	COLORREF crOldColor;
+	COLORREF crOldColor = RGB(0, 0, 0);
 	if (tci.dwState & TCIS_HIGHLIGHTED)
 		crOldColor = pDC->SetTextColor(RGB(192, 0, 0));
 
@@ -165,17 +196,21 @@ void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 void CClosableTabCtrl::PreSubclassWindow()
 {
 	CTabCtrl::PreSubclassWindow();
-	ModifyStyle(0, TCS_OWNERDRAWFIXED);
-	SetAllIcons();
+	InternalInit();
 }
 
 int CClosableTabCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CTabCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
+	InternalInit();
+	return 0;
+}
+
+void CClosableTabCtrl::InternalInit()
+{
 	ModifyStyle(0, TCS_OWNERDRAWFIXED);
 	SetAllIcons();
-	return 0;
 }
 
 void CClosableTabCtrl::OnSysColorChange()
@@ -223,7 +258,7 @@ BOOL CClosableTabCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				GetItemRect(i, rcItem);
 				if (rcItem.PtInRect(m_ptCtxMenu))
 				{
-					GetParent()->SendMessage(WM_CLOSETAB, (WPARAM)i);
+					GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)i);
 					break;
 				}
 			}
@@ -231,4 +266,13 @@ BOOL CClosableTabCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		}
 	}
 	return CTabCtrl::OnCommand(wParam, lParam);
+}
+
+LRESULT CClosableTabCtrl::_OnThemeChanged()
+{
+	// Owner drawn tab control seems to have troubles with updating itself due to an XP theme change..
+	ModifyStyle(TCS_OWNERDRAWFIXED, 0);	// Reset control style to not-owner drawn
+    Default();							// Process original WM_THEMECHANGED message
+	ModifyStyle(0, TCS_OWNERDRAWFIXED);	// Apply owner drawn style again
+	return 0;
 }

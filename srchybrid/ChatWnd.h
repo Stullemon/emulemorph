@@ -40,12 +40,18 @@ public:
 
 	CFriendListCtrl m_FriendListCtrl;
 
+private:
+	void ShowFriendMsgDetails(CFriend* pFriend); // [TPT] - New friend message window
+	CIconStatic m_cUserInfo;
+
 protected:
 	CEdit inputtext;
 	HICON icon_friend;
 	HICON icon_msg;
+	CSplitterControl m_wndSplitterchat;
 
 	void SetAllIcons();
+	void DoResize(int delta);
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support	
 	virtual BOOL OnInitDialog(); 
@@ -53,6 +59,8 @@ protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	// MORPH END   - Added by Commander, Friendlinks [emulEspaña]
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	afx_msg void OnStnDblclickFriendsicon();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
@@ -61,13 +69,7 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnLvnItemActivateFrlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMClickFrlist(NMHDR *pNMHDR, LRESULT *pResult);
-	CSplitterControl m_wndSplitterchat; //bzubzusplitchat
-	void DoResize(int delta);
-	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
-private:
-	void ShowFriendMsgDetails(CFriend* pFriend); // [TPT] - New friend message window
-	CIconStatic m_cUserInfo;
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:
 	bool	UpdateEmfriendsMetFromURL(const CString& strURL);

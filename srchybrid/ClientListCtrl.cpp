@@ -34,16 +34,19 @@
 #include "Kademlia/net/KademliaUDPListener.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
 // CClientListCtrl
 
 IMPLEMENT_DYNAMIC(CClientListCtrl, CMuleListCtrl)
-CClientListCtrl::CClientListCtrl(){
+
+CClientListCtrl::CClientListCtrl()
+	: CListCtrlItemWalk(this)
+{
 }
 
 void CClientListCtrl::Init()
@@ -566,7 +569,7 @@ BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 				break;
 			case MPG_ALTENTER:
 			case MP_DETAIL:{
-				CClientDetailDialog dialog(client);
+				CClientDetailDialog dialog(client, this);
 				dialog.DoModal();
 				break;
 			}
@@ -799,9 +802,9 @@ void CClientListCtrl::ShowSelectedUserDetails()
 	SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	SetSelectionMark(it);   // display selection mark correctly! 
 
-	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
+	CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 	if (client){
-		CClientDetailDialog dialog(client);
+		CClientDetailDialog dialog(client, this);
 		dialog.DoModal();
 	}
 }
@@ -809,9 +812,9 @@ void CClientListCtrl::ShowSelectedUserDetails()
 void CClientListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {
-		const CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
+		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){
-			CClientDetailDialog dialog(client);
+			CClientDetailDialog dialog(client, this);
 			dialog.DoModal();
 		}
 	}

@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <share.h>
 #include <io.h>
+#include <atlrx.h>
 #include "emule.h"
 #include "OtherFunctions.h"
 #include "DownloadQueue.h"
@@ -36,9 +37,9 @@
 #include "shahashset.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -178,11 +179,14 @@ CString CastItoIShort(double count, bool isK, uint32 decimal){
 	return output;
 }
 
-CString CastSecondsToHM(sint32 count){
+CString CastSecondsToHM(time_t tSeconds)
+{
+	if (tSeconds == -1)	// invalid or unknown time value
+		return _T("?");
+
 	CString buffer;
-	if (count < 0)
-		buffer = _T("?"); 
-	else if (count < 60)
+	UINT count = tSeconds;
+	if (count < 60)
 		buffer.Format(_T("%i %s"),count,GetResString(IDS_SECS)); 
 	else if (count < 3600) 
 		buffer.Format(_T("%i:%s %s"),count/60,LeadingZero(count-(count/60)*60),GetResString(IDS_MINS));
@@ -193,20 +197,22 @@ CString CastSecondsToHM(sint32 count){
 	return buffer;
 }
 
-// -khaos--+++> Prettier.
-CString CastSecondsToLngHM(__int64 count){
+CString CastSecondsToLngHM(LONGLONG llSeconds)
+{
+	if (llSeconds == -1) // invalid or unknown time value
+		return _T("?");
+
 	CString buffer;
-	if (count < 0)
-		buffer = _T("?"); 
-	else if (count < 60)
+	ULONGLONG count = llSeconds;
+	if (count < 60)
 		buffer.Format(_T("%I64d %s"),count,GetResString(IDS_LONGSECS)); 
 	else if (count < 3600) 
 		buffer.Format(_T("%I64d:%s %s"),count/60,LeadingZero(count-(count/60)*60),GetResString(IDS_LONGMINS));
 	else if (count < 86400) 
 		buffer.Format(_T("%I64d:%s %s"),count/3600,LeadingZero((count-(count/3600)*3600)/60),GetResString(IDS_LONGHRS));
 	else {
-		__int64 cntDays = count/86400;
-		__int64 cntHrs = (count-(count/86400)*86400)/3600;
+		ULONGLONG cntDays = count/86400;
+		ULONGLONG cntHrs = (count - (count/86400)*86400)/3600;
 		if (cntHrs)
 			buffer.Format(_T("%I64d %s %I64d:%s %s"),cntDays,GetResString(IDS_DAYS2),cntHrs,LeadingZero((uint32)(count-(cntDays*86400)-(cntHrs*3600))/60),GetResString(IDS_LONGHRS)); 
 		else
@@ -214,11 +220,14 @@ CString CastSecondsToLngHM(__int64 count){
 	}
 	return buffer;
 } 
-// <-----khaos-
 
-CString LeadingZero(uint32 units) {
+CString LeadingZero(uint32 units)
+{
 	CString temp;
-	if (units<10) temp.Format(_T("0%i"),units); else temp.Format(_T("%i"),units);
+	if (units < 10)
+		temp.Format(_T("0%i"), units);
+	else
+		temp.Format(_T("%i"), units);
 	return temp;
 }
 
@@ -969,13 +978,14 @@ bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle, LPCTSTR pszDlgTitle)
 	return bResult;
 }
 
-void MakeFoldername(TCHAR* path){
-//	CString string(path);
-//	if (string.GetLength()>0) if (string.Right(1)=='\\') string=string.Left(string.GetLength()-1);
-//	sprintf(path,"%s",string);
-	CString strPath(path);
-	PathCanonicalize(path, strPath);
-	PathRemoveBackslash(path);
+void MakeFoldername(LPTSTR pszPath)
+{
+	CString strPath(pszPath);
+	if (!strPath.IsEmpty()) // don't canonicalize an empty path, we would get a "\"
+	{
+		PathCanonicalize(pszPath, strPath);
+		PathRemoveBackslash(pszPath);
+	}
 }
 
 CString StringLimit(CString in,uint16 length){
@@ -2563,14 +2573,41 @@ int CompareLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
 	return iResult - 2;
 }
 
+int CompareLocaleString(LPCTSTR psz1, LPCTSTR psz2)
+{
+	// SDK says: The 'CompareString' function is optimized to run at the highest speed when 'dwCmpFlags' is set to 0 
+	// or NORM_IGNORECASE, and 'cchCount1' and 'cchCount2' have the value -1.
+	int iResult = CompareString(GetThreadLocale(), 0, psz1, -1, psz2, -1);
+	if (iResult == 0)
+		return 0;
+	return iResult - 2;
+}
+
+int __cdecl CompareCStringPtrLocaleStringNoCase(const void* p1, const void* p2)
+{
+	const CString* pstr1 = (const CString*)p1;
+	const CString* pstr2 = (const CString*)p2;
+	return CompareLocaleStringNoCase(*pstr1, *pstr2);
+}
+
+int __cdecl CompareCStringPtrLocaleString(const void* p1, const void* p2)
+{
+	const CString* pstr1 = (const CString*)p1;
+	const CString* pstr2 = (const CString*)p2;
+	return CompareLocaleString(*pstr1, *pstr2);
+}
+
+void Sort(CStringArray& astr, int (__cdecl *pfnCompare)(const void*, const void*))
+{
+	qsort(astr.GetData(), astr.GetCount(), sizeof(CString*), pfnCompare);
+}
+
 void AddAutoStart()
 {
-	#if defined(_DEBUG)
-		return;
-	#endif
+#ifndef _DEBUG
 	RemAutoStart();
 	CString strKeyName;
-	strKeyName = "eMuleAutoStart";
+	strKeyName = _T("eMuleAutoStart");
     TCHAR sExeFilePath[490];
 	DWORD length;
 	length = ::GetModuleFileName(NULL, sExeFilePath, 490);
@@ -2585,12 +2622,13 @@ void AddAutoStart()
 		KEY_ALL_ACCESS,	NULL,NULL);
 	mKey.SetStringValue(strKeyName, sFullExeCommand);
 	mKey.Close();
+#endif
 }
 
 void RemAutoStart()
 {
 	CString strKeyName;
-	strKeyName = "eMuleAutoStart";
+	strKeyName = _T("eMuleAutoStart");
 	CRegKey mKey;
 	mKey.Create(HKEY_CURRENT_USER,
 		_T("Software\\Microsoft\\Windows\\CurrentVersion\\Run"),
@@ -2598,6 +2636,61 @@ void RemAutoStart()
 		KEY_ALL_ACCESS,	NULL,NULL);
 	mKey.DeleteValue(strKeyName);
 	mKey.Close();
+}
+
+int FontPointSizeToLogUnits(int nPointSize)
+{
+	HDC hDC = ::GetDC(NULL);
+	if (hDC)
+	{
+		// convert nPointSize to logical units based on pDC
+		POINT pt;
+		pt.y = ::GetDeviceCaps(hDC, LOGPIXELSY) * nPointSize;
+		pt.y /= 720;    // 72 points/inch, 10 decipoints/point
+		pt.x = 0;
+		::DPtoLP(hDC, &pt, 1);
+		POINT ptOrg = { 0, 0 };
+		::DPtoLP(hDC, &ptOrg, 1);
+		nPointSize = -abs(pt.y - ptOrg.y);
+		::ReleaseDC(NULL, hDC);
+	}
+	return nPointSize;
+}
+
+bool IsUnicodeFile(LPCTSTR pszFilePath)
+{
+	bool bResult = false;
+	FILE* fp = _tfsopen(pszFilePath, _T("rb"), _SH_DENYWR);
+	if (fp != NULL)
+	{
+		WORD wBOM = 0;
+		bResult = (fread(&wBOM, sizeof(wBOM), 1, fp) == 1 && wBOM == 0xFEFF);
+		fclose(fp);
+	}
+	return bResult;
+}
+
+bool RegularExpressionMatch(CString regexpr, CString teststring) {
+	
+	CAtlRegExp<> reFN;
+
+	REParseError status = reFN.Parse( regexpr );
+	if (REPARSE_ERROR_OK != status)
+	{
+		// Unexpected error.
+		return false;
+	}
+
+	CAtlREMatchContext<> mcUrl;
+	if (!reFN.Match(
+		teststring,
+		&mcUrl))
+	{
+		// Unexpected error.
+		return false;
+	} else {
+		return true;
+	}
 }
 
 // khaos::kmod+ Functions to return a random number within a given range.

@@ -28,9 +28,12 @@ struct SUnresolvedHostname
 	CString strURL;
 };
 
-class CED2KLink {
+class CED2KLink
+{
 public:
 	static CED2KLink* CreateLinkFromUrl(  const TCHAR * url);
+	virtual ~CED2KLink();
+
 	// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 	/*
 	typedef enum { kServerList, kServer , kFile , kInvalid } LinkType;
@@ -39,46 +42,50 @@ public:
 	// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 
 	virtual LinkType GetKind() const =0;
-	virtual void GetLink(CString& lnk) =0;
+	virtual void GetLink(CString& lnk) const = 0;
 	virtual class CED2KServerListLink* GetServerListLink() =0;
 	virtual class CED2KServerLink* GetServerLink() =0;
 	virtual class CED2KFileLink* GetFileLink() =0;
-	virtual ~CED2KLink();
 };
 
-class CED2KServerLink : public CED2KLink {
+class CED2KServerLink : public CED2KLink
+{
 public:
 	CED2KServerLink(const TCHAR* ip,const TCHAR* port);
 	virtual ~CED2KServerLink();
-	// inherited from CED2KLink
+
 	virtual LinkType GetKind() const;
+	virtual void GetLink(CString& lnk) const;
 	virtual CED2KServerListLink* GetServerListLink();
 	virtual CED2KServerLink* GetServerLink();
 	virtual CED2KFileLink* GetFileLink();
-	virtual void GetLink(CString& lnk);
 
-    // Accessors
 	uint32 GetIP() const { return m_ip;}
 	uint16 GetPort() const { return m_port;}
 	void GetDefaultName(CString& defName) const { defName = m_defaultName; }
+
 private:
-	CED2KServerLink(); // Not defined
-	CED2KServerLink(const CED2KServerLink&); // Not defined
-	CED2KServerLink& operator=(const CED2KServerLink&); // Not defined
+	CED2KServerLink();
+	CED2KServerLink(const CED2KServerLink&);
+	CED2KServerLink& operator=(const CED2KServerLink&);
+
 	uint32 m_ip;
 	uint16 m_port;
 	CString m_defaultName;
 };
 
-class CED2KFileLink : public CED2KLink {
+
+class CED2KFileLink : public CED2KLink
+{
 public:
-	CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* hash, const CStringArray& param, const TCHAR* sources);
+	CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const TCHAR* pszHash, const CStringArray& param, const TCHAR* pszSources);
 	virtual ~CED2KFileLink();
+
 	virtual LinkType GetKind() const;
+	virtual void GetLink(CString& lnk) const;
 	virtual CED2KServerListLink*	GetServerListLink();
 	virtual CED2KServerLink*		GetServerLink();
 	virtual CED2KFileLink*			GetFileLink();
-	virtual void					GetLink(CString& lnk);
 	
 	const TCHAR*		GetName() const			{ return m_name; }
 	const uchar*		GetHashKey() const		{ return m_hash;}
@@ -91,10 +98,12 @@ public:
 	CSafeMemFile* SourcesList;
 	CSafeMemFile* m_hashset;
 	CTypedPtrList<CPtrList, SUnresolvedHostname*> m_HostnameSourcesList;
+
 private:
-	CED2KFileLink(); // Not defined
-	CED2KFileLink(const CED2KFileLink&); // Not defined
-	CED2KFileLink& operator=(const CED2KFileLink&); // Not defined
+	CED2KFileLink();
+	CED2KFileLink(const CED2KFileLink&);
+	CED2KFileLink& operator=(const CED2KFileLink&);
+
 	CString m_name;
 	CString m_size;
 	uchar	m_hash[16];
@@ -102,20 +111,26 @@ private:
 	CAICHHash	m_AICHHash;
 };
 
-class CED2KServerListLink : public CED2KLink {
+
+class CED2KServerListLink : public CED2KLink
+{
 public:
-	CED2KServerListLink(const TCHAR* address);
+	CED2KServerListLink(const TCHAR* pszAddress);
 	virtual ~CED2KServerListLink();
+
 	virtual LinkType GetKind() const;
+	virtual void GetLink(CString& lnk) const;
 	virtual CED2KServerListLink* GetServerListLink();
 	virtual CED2KServerLink* GetServerLink();
 	virtual CED2KFileLink* GetFileLink();
-	virtual void GetLink(CString& lnk);
+
 	const TCHAR* GetAddress() const { return m_address; }
+
 private:
-	CED2KServerListLink(); // Not defined
-	CED2KServerListLink(const CED2KFileLink&); // Not defined
-	CED2KServerListLink& operator=(const CED2KFileLink&); // Not defined
+	CED2KServerListLink();
+	CED2KServerListLink(const CED2KFileLink&);
+	CED2KServerListLink& operator=(const CED2KFileLink&);
+
 	CString m_address;
 };
 
@@ -129,10 +144,10 @@ public:
 
 	// Inherited pure virtual functions
 	virtual LinkType	GetKind() const					{ return kFriend; }
+	virtual void	GetLink(CString& lnk) const;
 	virtual CED2KServerListLink*	GetServerListLink()	{ return NULL; }
 	virtual CED2KServerLink*		GetServerLink()		{ return NULL; }
 	virtual CED2KFileLink*			GetFileLink()		{ return NULL; }
-	virtual void	GetLink(CString& lnk);
 
 	CString	GetUserName() const						{ return m_sUserName; }
 	void	GetUserHash(uchar userHash[]) const		{ memcpy(userHash, m_hash, 16*sizeof(uchar)); }
@@ -150,10 +165,10 @@ public:
 
 	// Inherited pure virtual functions
 	virtual LinkType	GetKind() const					{ return kFriendList; }
+	virtual void	GetLink(CString& lnk) const;
 	virtual CED2KServerListLink*	GetServerListLink()	{ return NULL; }
 	virtual CED2KServerLink*		GetServerLink()		{ return NULL; }
 	virtual CED2KFileLink*			GetFileLink()		{ return NULL; }
-	virtual void	GetLink(CString& lnk);
 
 	CString	GetAddress() const		{ return m_address; }
 

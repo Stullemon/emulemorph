@@ -47,9 +47,9 @@
 // MORPH END - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 //	members of CUpDownClient
@@ -836,7 +836,7 @@ void CUpDownClient::ClearDownloadBlockRequests()
 	m_PendingBlocks_list.RemoveAll();
 }
 
-void CUpDownClient::SetDownloadState(EDownloadState nNewState){
+void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason){
 	if (m_nDownloadState != nNewState){
 		switch( nNewState )
 		{
@@ -874,8 +874,27 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			}
 		}
 
+        if(nNewState == DS_DOWNLOADING){
+		    socket->SetTimeOut(CONNECTION_TIMEOUT*4);
+        }
+
 		if (m_nDownloadState == DS_DOWNLOADING ){
 			theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
+			if(socket)
+				socket->SetTimeOut(CONNECTION_TIMEOUT);
+
+			if (thePrefs.GetLogUlDlEvents()) {
+				switch( nNewState )
+				{
+					case DS_NONEEDEDPARTS:
+						pszReason = _T("NNP. You don't need any parts from this client.");
+				}
+
+				AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended. User: %s in SetDownloadState(). New State: %i, Length: %s, Transferred: %s. Reason: %s"), DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionDown(), false, false), pszReason);
+			}
+
+			ResetSessionDown();
+
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
 			if ( m_bTransferredDownMini && nNewState != DS_ERROR )
 				thePrefs.Add2DownSuccessfulSessions(); // Increment our counters for successful sessions (Cumulative AND Session)
@@ -1151,11 +1170,12 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	uint32 nStartPos;
 	uint32 nEndPos;
 	uint32 nBlockSize = 0;
+	uint32 uTransferredFileDataSize = size - HEADER_SIZE;
 		nStartPos = data.ReadUInt32();
 	if (packed)
 	{
 			nBlockSize = data.ReadUInt32();
-		nEndPos = nStartPos + (size - HEADER_SIZE);
+		nEndPos = nStartPos + uTransferredFileDataSize;
 	}
 	else
 			nEndPos = data.ReadUInt32();
@@ -1168,14 +1188,14 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	// Extended statistics information based on which client and remote port sent this data.
 	// The new function adds the bytes to the grand total as well as the given client/port.
 	// bFromPF is not relevant to downloaded data.  It is purely an uploads statistic.
-	thePrefs.Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, false, size - HEADER_SIZE, false);
+	thePrefs.Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, false, uTransferredFileDataSize, false);
 	// <-----khaos-
 
-	theApp.emuledlg->transferwnd->downloadclientsctrl.RefreshClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
-	
-	m_nDownDataRateMS += size - HEADER_SIZE;
+	m_nDownDataRateMS += uTransferredFileDataSize;
 	if (credits)
-		credits->AddDownloaded(size - HEADER_SIZE, GetIP());
+		credits->AddDownloaded(uTransferredFileDataSize, GetIP());
+
+	theApp.emuledlg->transferwnd->downloadclientsctrl.RefreshClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
 
 	// Move end back one, should be inclusive
 	nEndPos--;
@@ -1191,7 +1211,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 				if (cur_block->fZStreamError){
 					if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because of errornous zstream state for file \"%s\" - %s"), size - HEADER_SIZE, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+					AddDebugLogLine(false, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because of errornous zstream state for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 			    reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 			    return;
 		    }
@@ -1207,7 +1227,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 			if (!packed)
 			{
 				// Write to disk (will be buffered in part file class)
-				lenWritten = reqfile->WriteToBuffer(size - HEADER_SIZE, 
+				lenWritten = reqfile->WriteToBuffer(uTransferredFileDataSize, 
 													(BYTE *) (packet + HEADER_SIZE),
 													nStartPos,
 													nEndPos,
@@ -1225,7 +1245,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 				BYTE *unzipped = new BYTE[lenUnzipped];
 
 				// Try to unzip the packet
-				int result = unzip(cur_block, (BYTE *)(packet + HEADER_SIZE), (size - HEADER_SIZE), &unzipped, &lenUnzipped);
+				int result = unzip(cur_block, (BYTE*)(packet + HEADER_SIZE), uTransferredFileDataSize, &unzipped, &lenUnzipped);
 				// no block can be uncompressed to >2GB, 'lenUnzipped' is obviously errornous.
 				if (result == Z_OK && (int)lenUnzipped >= 0)
 				{
@@ -1245,7 +1265,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 						}
 						else{
 							// Write uncompressed data to file
-							lenWritten = reqfile->WriteToBuffer(size - HEADER_SIZE,
+							lenWritten = reqfile->WriteToBuffer(uTransferredFileDataSize,
 								unzipped,
 								nStartPos,
 								nEndPos,
@@ -1289,9 +1309,8 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 			// These checks only need to be done if any data was written
 			if (lenWritten > 0)
 			{
-				m_nTransferedDown += lenWritten;
-				
-				SetTransferredDownMini(); // Sets boolean m_bTransferredDownMini to true // -khaos--+++> For determining whether the current download session was a success or not.
+				m_nTransferredDown += uTransferredFileDataSize;
+				SetTransferredDownMini();
 
 				// If finished reserved block
 				if (nEndPos == cur_block->block->EndOffset)
@@ -1535,7 +1554,7 @@ void CUpDownClient::CheckDownloadTimeout()
 				if (!socket->IsRawDataMode())
 					SendCancelTransfer();
 			}
-			SetDownloadState(DS_ONQUEUE);
+			SetDownloadState(DS_ONQUEUE, _T("Timeout. More than 100 seconds since last complete block was received."));
 		}
 	}
 }
@@ -1851,7 +1870,7 @@ bool CUpDownClient::SwapToAnotherFile(LPCTSTR reason, bool bIgnoreNoNeeded, bool
 	CPartFile* cur_file = NULL;
 	//int cur_prio= -1; //ZZ:DownloadManager
 	POSITION finalpos = NULL;
-	CTypedPtrList<CPtrList, CPartFile*>* usedList;
+	CTypedPtrList<CPtrList, CPartFile*>* usedList = NULL;
 
     if(allowSame && !bRemoveCompletely) {
         SwapTo = reqfile;
@@ -2533,7 +2552,7 @@ uint32 CUpDownClient::GetAvDownDatarate() const
 	if (GetDownloadState() == DS_DOWNLOADING)
 		tempDownCurrentTotalTime += GetTickCount() - m_dwDownStartTime;
 	if (tempDownCurrentTotalTime > 999)
-		return	GetTransferedDown()/(tempDownCurrentTotalTime/1000);
+		return	GetTransferredDown()/(tempDownCurrentTotalTime/1000);
 	else
 		return 0;
 }

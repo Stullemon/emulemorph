@@ -39,9 +39,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -145,8 +145,7 @@ void CServerConnect::ConnectToServer(CServer* server, bool multiconnect)
 	m_lstOpenSockets.AddTail((void*&)newsocket);
 	newsocket->Create(0,SOCK_STREAM,FD_READ|FD_WRITE|FD_CLOSE|FD_CONNECT,NULL);
 	newsocket->ConnectToServer(server);
-	ULONG x=GetTickCount();
-	connectionattemps.SetAt(x,newsocket);
+	connectionattemps.SetAt(GetTickCount(), newsocket);
 }
 
 void CServerConnect::StopConnectionTry()

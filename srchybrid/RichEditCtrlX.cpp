@@ -21,9 +21,9 @@
 #include "OtherFunctions.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -36,12 +36,21 @@ BEGIN_MESSAGE_MAP(CRichEditCtrlX, CRichEditCtrl)
 	ON_WM_GETDLGCODE()
 	ON_NOTIFY_REFLECT_EX(EN_LINK, OnEnLink)
 	ON_CONTROL_REFLECT(EN_CHANGE, OnEnChange)
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 CRichEditCtrlX::CRichEditCtrlX()
 {
 	m_bDisableSelectOnFocus = true;
 	m_bSelfUpdate = false;
+	m_bForceArrowCursor = false;
+	m_hArrowCursor = ::LoadCursor(NULL, IDC_ARROW);
+}
+
+CRichEditCtrlX::~CRichEditCtrlX()
+{
+	if (m_hArrowCursor != NULL)
+		VERIFY( ::DestroyCursor(m_hArrowCursor) );
 }
 
 void CRichEditCtrlX::SetDisableSelectOnFocus(bool bDisable)
@@ -188,7 +197,12 @@ void CRichEditCtrlX::OnContextMenu(CWnd* pWnd, CPoint point)
 		point.y = 32;
 		ClientToScreen(&point);
 	}
+	// Cheap workaround for the "Text cursor is showing while context menu is open" glitch. It could be solved properly 
+	// with the RE's COM interface, but because the according messages are not routed with a unique control ID, it's not 
+	// really useable (e.g. if there are more RE controls in one window). Would to envelope each RE window to get a unique ID..
+	m_bForceArrowCursor = true;
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	m_bForceArrowCursor = false;
 }
 
 BOOL CRichEditCtrlX::OnCommand(WPARAM wParam, LPARAM lParam)
@@ -297,4 +311,17 @@ void CRichEditCtrlX::UpdateSyntaxColoring()
 	UpdateWindow();
 
 	m_bSelfUpdate = false;
+}
+
+BOOL CRichEditCtrlX::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	// Cheap workaround for the "Text cursor is showing while context menu is open" glitch. It could be solved properly 
+	// with the RE's COM interface, but because the according messages are not routed with a unique control ID, it's not 
+	// really useable (e.g. if there are more RE controls in one window). Would to envelope each RE window to get a unique ID..
+	if (m_bForceArrowCursor && m_hArrowCursor)
+	{
+		::SetCursor(m_hArrowCursor);
+		return TRUE;
+	}
+	return CRichEditCtrl::OnSetCursor(pWnd, nHitTest, message);
 }

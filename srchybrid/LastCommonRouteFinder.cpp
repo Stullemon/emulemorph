@@ -26,9 +26,9 @@
 #include "emuledlg.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -348,8 +348,7 @@ UINT LastCommonRouteFinder::RunInternal() {
             uint32 lastCommonHost = 0;
             uint32 lastCommonTTL = 0;
             uint32 hostToPing = 0;
-
-            bool useUdp;
+			bool useUdp = false;
 
             hostsToTraceRoute.RemoveAll();
 

@@ -63,7 +63,7 @@ protected:
 		CString strCommand;
 		CString strCommandArgs;
 	};
-	CArray<SPreviewApp, SPreviewApp> m_aApps;
+	CArray<SPreviewApp> m_aApps;
 	time_t m_tDefAppsFileLastModified;
 };
 

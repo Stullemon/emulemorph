@@ -40,9 +40,9 @@
 #include "Log.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -308,9 +308,10 @@ CSharedFileList::CSharedFileList(CServerConnect* in_server)
 	m_lastPublishED2K = 0;
 	m_lastPublishED2KFlag = true;
 	m_currFileSrc = 0;
+	m_currFileNotes = 0;
 	m_lastPublishKadSrc = 0;
+	m_lastPublishKadNotes = 0;
 	m_currFileKey = 0;
-	m_lastProcessPublishKadKeywordList = 0;
 	FindSharedFiles();
 }
 
@@ -341,7 +342,6 @@ void CSharedFileList::FindSharedFiles()
 		POSITION pos = m_Files_map.GetStartPosition();
 		while (pos)
 		{
-			POSITION posLast = pos;
 			CCKey key;
 			CKnownFile* cur_file;
 			m_Files_map.GetNextAssoc(pos, key, cur_file);
@@ -447,7 +447,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 	while (!end)
 	{
 		end = !ff.FindNextFile();
-		if (ff.IsDirectory() || ff.IsDots() || ff.IsSystem() || ff.IsTemporary() || ff.GetLength()==0 || ff.GetLength()>=4294967295 )
+		if (ff.IsDirectory() || ff.IsDots() || ff.IsSystem() || ff.IsTemporary() || ff.GetLength()==0 || ff.GetLength()>MAX_EMULE_FILE_SIZE)
 			continue;
 
 		// ignore real(!) LNK files
@@ -553,8 +553,8 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 	bAdded = AddFile(toadd);
 	if (bOnlyAdd)
 		return bAdded;
-	if (output)
-		output->ShowFile(toadd);
+	if (bAdded && output)
+		output->AddFile(toadd);
 	m_lastPublishED2KFlag = true;
 	return bAdded;
 }
@@ -637,13 +637,13 @@ void CSharedFileList::Reload()
 	FindSharedFiles();
 	m_keywords->PurgeUnreferencedKeywords();
 	if (output)
-		output->ShowFileList(this);
+		output->ReloadFileList();
 }
 
 void CSharedFileList::SetOutputCtrl(CSharedFilesCtrl* in_ctrl)
 {
 	output = in_ctrl;
-	output->ShowFileList(this);
+	output->ReloadFileList();
 	HashNextFile();		// SLUGFILLER: SafeHash - if hashing not yet started, start it now
 }
 
@@ -756,13 +756,26 @@ CKnownFile* CSharedFileList::GetFileByIndex(int index){
 	return 0;
 }
 
-void CSharedFileList::ClearED2KPublishInfo(){
+void CSharedFileList::ClearED2KPublishInfo()
+{
 	CKnownFile* cur_file;
 	CCKey bufKey;
 	m_lastPublishED2KFlag = true;
-	for (POSITION pos = m_Files_map.GetStartPosition();pos != 0;){
+	for (POSITION pos = m_Files_map.GetStartPosition();pos != 0;)
+	{
 		m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
 		cur_file->SetPublishedED2K(false);
+	}
+}
+
+void CSharedFileList::ClearKadSourcePublishInfo()
+{
+	CKnownFile* cur_file;
+	CCKey bufKey;
+	for (POSITION pos = m_Files_map.GetStartPosition();pos != 0;)
+	{
+		m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
+		cur_file->SetLastPublishTimeKadSrc(0,0);
 	}
 }
 
@@ -1155,6 +1168,7 @@ void CSharedFileList::UpdateFile(CKnownFile* toupdate)
 
 void CSharedFileList::Process()
 {
+	Publish();
 	if( !m_lastPublishED2KFlag || ( ::GetTickCount() - m_lastPublishED2K < ED2KREPUBLISHTIME ) )
 	{
 		return;
@@ -1165,129 +1179,132 @@ void CSharedFileList::Process()
 
 void CSharedFileList::Publish()
 {
+	// Variables to save cpu.
 	UINT tNow = time(NULL);
-
 	bool isFirewalled = theApp.IsFirewalled();
+
 	if( Kademlia::CKademlia::isConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == 2)) && GetCount() && Kademlia::CKademlia::getPublish())
 	{ 
+		//We are connected to Kad. We are either open or have a buddy. And Kad is ready to start publishing.
 		if( Kademlia::CKademlia::getTotalStoreKey() < KADEMLIATOTALSTOREKEY)
 		{
-			if( (!m_lastProcessPublishKadKeywordList || (::GetTickCount() - m_lastProcessPublishKadKeywordList) > KADEMLIAPUBLISHTIME) )
+			//We are not at the max simultaneous keyword publishes 
+			if (tNow >= m_keywords->GetNextPublishTime())
 			{
-				if (tNow >= m_keywords->GetNextPublishTime())
+				//Enough time has passed since last keyword publish
+
+				//Get the next keyword which has to be (re)-published
+				CPublishKeyword* pPubKw = m_keywords->GetNextKeyword();
+				if(pPubKw)
 				{
-					// faile safe; reset the next publish keyword, the "worse case" would be that we process the
-					// keyword list each KADEMLIAPUBLISHTIME seconds
-					m_keywords->SetNextPublishTime(0);
+					//We have the next keyword to check if it can be published
 
-					// search the next keyword which has to be (re)-published
-					UINT tMinNextPublishTime = (UINT)-1;
-					int iCheckedKeywords = 0;
-					CPublishKeyword* pPubKw = m_keywords->GetNextKeyword();
-					while (pPubKw)
+					//Debug check to make sure things are going well.
+					ASSERT( pPubKw->GetRefCount() != 0 );
+
+					if (tNow >= pPubKw->GetNextPublishTime())
 					{
-						iCheckedKeywords++;
-						UINT tNextKwPublishTime = pPubKw->GetNextPublishTime();
-
-						ASSERT( pPubKw->GetRefCount() != 0 );
-
-						if (tNextKwPublishTime == 0 || tNextKwPublishTime <= tNow)
+						//This keyword can be published.
+						Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareLookup(Kademlia::CSearch::STOREKEYWORD, false, pPubKw->GetKadID());
+						if (pSearch)
 						{
-							DEBUG_ONLY( Debug(_T("pkwlst: %-18ls  Refs=%3u  Published=%2u  NextPublish=%s  Publishing\n"), pPubKw->GetKeyword(), pPubKw->GetRefCount(), pPubKw->GetPublishedCount(), CastSecondsToHM(tNextKwPublishTime - tNow)) );
+							//pSearch was created. Which means no search was already being done with this HashID.
+							//This also means that it was checked to see if network load wasn't a factor.
 
-							Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(Kademlia::CSearch::STOREKEYWORD, false, pPubKw->GetKadID());
-							if (pSearch)
+							//This sets the filename into the search object so we can show it in the gui.
+							pSearch->setFileName(pPubKw->GetKeyword());
+
+							//Add all file IDs which relate to the current keyword to be published
+							const CSimpleKnownFileArray& aFiles = pPubKw->GetReferences();
+							uint32 count = 0;
+							for (int f = 0; f < aFiles.GetSize(); f++)
 							{
-								// add all file IDs which relate to the current keyword to be published
-								const CSimpleKnownFileArray& aFiles = pPubKw->GetReferences();
-								uint32 count = 0;
-								for (int f = 0; f < aFiles.GetSize(); f++)
+								//Debug check to make sure things are working well.
+								ASSERT_VALID( aFiles[f] );
+
+								//Only publish complete files as someone else should have the full file to publish these keywords.
+								//As a side effect, this may help reduce people finding incomplete files in the network.
+								if( !aFiles[f]->IsPartFile() )
 								{
-									ASSERT_VALID( aFiles[f] );
-									//Only publish complete files as someone else should have the full file to publish these keywords.
-									//As a side effect, this may help reduce people finding incomplete files in the network.
-									if( !aFiles[f]->IsPartFile() )
-									{
-										count++;
+									count++;
 									Kademlia::CUInt128 kadFileID(aFiles[f]->GetFileHash());
 									pSearch->addFileID(kadFileID);
-										if( count > 150 )
-										{
-											pPubKw->RotateReferences(f);
-											break;
-										}
+									if( count > 150 )
+									{
+										//We only publish up to 150 files per keyword publish then rotate the list.
+										pPubKw->RotateReferences(f);
+										break;
 									}
 								}
-
-								if( count )
-								{
-								pSearch->PreparePacket();
-									pPubKw->SetNextPublishTime(tNow + (KADEMLIAREPUBLISHTIMEK));
-									pPubKw->IncPublishedCount();
-									Kademlia::CSearchManager::startSearch(pSearch);
-								}
-								else
-								{
-									pPubKw->SetNextPublishTime(tNow + (KADEMLIAREPUBLISHTIMEK/2));
-									pPubKw->IncPublishedCount();
-									delete pSearch;
-								}
 							}
-							break;
+
+							if( count )
+							{
+								//Start our keyword publish
+								pSearch->PreparePacket();
+								pPubKw->SetNextPublishTime(tNow+(KADEMLIAREPUBLISHTIMEK));
+								pPubKw->IncPublishedCount();
+								Kademlia::CSearchManager::startSearch(pSearch);
+							}
+							else
+							{
+								//There were no valid files to publish with this keyword.
+								delete pSearch;
+							}
 						}
-						//DEBUG_ONLY( Debug("pkwlst: %-18s  Refs=%3u  Published=%2u  NextPublish=%s\n", pPubKw->GetKeyword(), pPubKw->GetRefCount(), pPubKw->GetPublishedCount(), CastSecondsToHM(tNextKwPublishTime - tNow)) );
-
-						if (tNextKwPublishTime < tMinNextPublishTime)
-							tMinNextPublishTime = tNextKwPublishTime;
-
-						if (iCheckedKeywords >= m_keywords->GetCount()){
-							DEBUG_ONLY( Debug(_T("pkwlst: EOL\n")) );
-							// we processed the entire list of keywords to be published, set the next list processing
-							// time to the min. time the next keyword has to be published.
-							m_keywords->SetNextPublishTime(tMinNextPublishTime);
-							break;
-						}
-
-						pPubKw = m_keywords->GetNextKeyword();
 					}
 				}
-				else{
-					//DEBUG_ONLY( Debug("Next processing of publish keyword list in %s\n", CastSecondsToHM(m_keywords->GetNextPublishTime() - tNow)) );
-				}
-
-				// even if we did not publish a keyword, reset the timer so that this list is processed
-				// only every KADEMLIAPUBLISHTIME seconds.
-				m_lastProcessPublishKadKeywordList = GetTickCount();
+				m_keywords->SetNextPublishTime(KADEMLIAPUBLISHTIME+tNow);
 			}
 		}
 		
 		if( Kademlia::CKademlia::getTotalStoreSrc() < KADEMLIATOTALSTORESRC)
 		{
-			if( (!m_lastPublishKadSrc || (::GetTickCount() - m_lastPublishKadSrc) > KADEMLIAPUBLISHTIME) )
+			if(tNow >= m_lastPublishKadSrc)
 			{
 				if(m_currFileSrc > GetCount())
 					m_currFileSrc = 0;
 				CKnownFile* pCurKnownFile = GetFileByIndex(m_currFileSrc);
 				if(pCurKnownFile)
 				{
-					//Only publish source if two conditions.
-					//1) We are not firewalled..
-					//2) We are firewalled, but it's a complete source..
-					//
-					//HighID users will find incomplete sources passively..
-					//If the overhead of lowID is not to high, maybe we can start publishing all lowID sources..
-					if (pCurKnownFile->PublishSrc() && (!theApp.IsFirewalled() || (theApp.IsFirewalled() && !pCurKnownFile->IsPartFile())))
+					if(pCurKnownFile->PublishSrc())
 					{
 						Kademlia::CUInt128 kadFileID;
 						kadFileID.setValue(pCurKnownFile->GetFileHash());
-						Kademlia::CSearchManager::prepareFindFile(Kademlia::CSearch::STOREFILE, true, kadFileID);
+						if(Kademlia::CSearchManager::prepareLookup(Kademlia::CSearch::STOREFILE, true, kadFileID )==NULL)
+							pCurKnownFile->SetLastPublishTimeKadSrc(0,0);
 					}	
 				}
 				m_currFileSrc++;
 
 				// even if we did not publish a source, reset the timer so that this list is processed
 				// only every KADEMLIAPUBLISHTIME seconds.
-				m_lastPublishKadSrc = ::GetTickCount();
+				m_lastPublishKadSrc = KADEMLIAPUBLISHTIME+tNow;
+			}
+		}
+
+		if( Kademlia::CKademlia::getTotalStoreNotes() < KADEMLIATOTALSTORENOTES)
+		{
+			if(tNow >= m_lastPublishKadNotes)
+			{
+				if(m_currFileNotes > GetCount())
+					m_currFileNotes = 0;
+				CKnownFile* pCurKnownFile = GetFileByIndex(m_currFileNotes);
+				if(pCurKnownFile)
+				{
+					if(pCurKnownFile->PublishNotes())
+					{
+						Kademlia::CUInt128 kadFileID;
+						kadFileID.setValue(pCurKnownFile->GetFileHash());
+						if(Kademlia::CSearchManager::prepareLookup(Kademlia::CSearch::STORENOTES, true, kadFileID )==NULL)
+							pCurKnownFile->SetLastPublishTimeKadNotes(0);
+					}	
+				}
+				m_currFileNotes++;
+
+				// even if we did not publish a source, reset the timer so that this list is processed
+				// only every KADEMLIAPUBLISHTIME seconds.
+				m_lastPublishKadNotes = KADEMLIAPUBLISHTIME+tNow;
 			}
 		}
 	}

@@ -33,9 +33,9 @@
 #include "MemDC.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -560,7 +560,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MPG_DELETE:
             case MP_REMOVE: 
             { 
-				ShowWindow(SW_HIDE); 
+					SetRedraw(FALSE);
 				POSITION pos;
 					while (GetFirstSelectedItemPosition() != NULL)
 				{ 
@@ -570,8 +570,9 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					DeleteItem(item);
 				}
 					ShowServerCount();
-				ShowWindow(SW_SHOW); 
+					SetRedraw(TRUE);
 					SetFocus();
+					AutoSelectItem();
 					return TRUE;
             }
 			case MP_ADDTOSTATIC:

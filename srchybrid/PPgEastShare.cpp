@@ -5,6 +5,7 @@
 #include "emule.h"
 #include "PPgEastShare.h"
 #include "OtherFunctions.h"
+#include "UserMsgs.h"
 
 //EastShare Start - added by AndCycle, IP to Country
 #include "ip2country.h"
@@ -28,7 +29,7 @@ IMPLEMENT_DYNAMIC(CPPgEastShare, CPropertyPage)
 BEGIN_MESSAGE_MAP(CPPgEastShare, CPropertyPage)
 	ON_WM_HSCROLL()
     ON_WM_DESTROY()
-	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 END_MESSAGE_MAP()
 
 CPPgEastShare::CPPgEastShare()

@@ -25,11 +25,12 @@
 #include <crypto51/rsa.h>
 #include <crypto51/integer.h>
 #include "Log.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -257,7 +258,7 @@ LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM wParam, LPARAM lParam)
 }
 
 void CPeerCacheFinder::DoLookUp(CStringA strHostname){
-	if (WSAAsyncGetHostByName(theApp.emuledlg->m_hWnd, WM_PEERCHACHE_RESPONSE, strHostname, _acDNSBuffer, sizeof(_acDNSBuffer)) == 0){
+	if (WSAAsyncGetHostByName(theApp.emuledlg->m_hWnd, UM_PEERCHACHE_RESPONSE, strHostname, _acDNSBuffer, sizeof(_acDNSBuffer)) == 0){
 		DEBUG_ONLY(AddDebugLogLine(false, _T("DNS Lookup for PC, state %i, failed (DoLookUP) - PC not found yet"), m_PCLUState));
 	}
 }
@@ -743,7 +744,7 @@ BOOL CPCReverseDnsThread::InitInstance()
 		else
 			uError = WSAENOBUFS;
 
-		VERIFY( PostMessage(m_hwndAsyncResult, WM_PEERCHACHE_RESPONSE, 0, WSAMAKEASYNCREPLY(uBufLen, uError)) );
+		VERIFY( PostMessage(m_hwndAsyncResult, UM_PEERCHACHE_RESPONSE, 0, WSAMAKEASYNCREPLY(uBufLen, uError)) );
 	}
 	else
 	{
@@ -751,7 +752,7 @@ BOOL CPCReverseDnsThread::InitInstance()
 		// FIXME: Unable to resolve my own host - will always get the Windows Computer/Domainname. Dunno how to avoid this
 		// cheap walk arround below by using another IP
 		IPHost.s_addr = ntohl(ntohl(m_dwIP)+1);
-		if (WSAAsyncGetHostByAddr(theApp.emuledlg->m_hWnd, WM_PEERCHACHE_RESPONSE, (const char*) &IPHost, sizeof(struct in_addr), AF_INET, _acDNSBuffer, sizeof(_acDNSBuffer)) == 0){
+		if (WSAAsyncGetHostByAddr(theApp.emuledlg->m_hWnd, UM_PEERCHACHE_RESPONSE, (const char*) &IPHost, sizeof(struct in_addr), AF_INET, _acDNSBuffer, sizeof(_acDNSBuffer)) == 0){
 			if (thePrefs.GetVerbose())
 				DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("DNS Reverse Lookup for own IP failed")));
 		}	

@@ -17,8 +17,6 @@
 #pragma once
 #include "UploadBandwidthThrottler.h" // ZZ:UploadBandWithThrottler (UDP)
 
-#define WM_DNSLOOKUPDONE	(WM_USER+0x101)
-
 class CServerConnect;
 struct SServerUDPPacket;
 class CUDPSocket;

@@ -3,47 +3,13 @@
 #include "emule.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
+#include "langids.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
-
-
-#define LANGID_AR_AE MAKELANGID(LANG_ARABIC,SUBLANG_ARABIC_UAE)
-#define LANGID_BG_BG MAKELANGID(LANG_BULGARIAN ,SUBLANG_DEFAULT)
-#define LANGID_CA_ES MAKELANGID(LANG_CATALAN ,SUBLANG_DEFAULT)
-#define LANGID_CZ_CZ MAKELANGID(LANG_CZECH,SUBLANG_DEFAULT)
-#define LANGID_DA_DK MAKELANGID(LANG_DANISH,SUBLANG_DEFAULT)
-#define LANGID_DE_DE MAKELANGID(LANG_GERMAN,SUBLANG_DEFAULT)
-#define LANGID_EL_GR MAKELANGID(LANG_GREEK,SUBLANG_DEFAULT)
-#define LANGID_EN_US MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT)
-#define LANGID_ES_ES_T MAKELANGID(LANG_SPANISH,SUBLANG_SPANISH)
-#define LANGID_ET_EE MAKELANGID(LANG_ESTONIAN,SUBLANG_DEFAULT)
-#define LANGID_FI_FI MAKELANGID(LANG_FINNISH,SUBLANG_DEFAULT)
-#define LANGID_FR_FR MAKELANGID(LANG_FRENCH,SUBLANG_DEFAULT)
-#define LANGID_GL_ES MAKELANGID(LANG_GALICIAN,SUBLANG_DEFAULT)
-#define LANGID_HE_IL MAKELANGID(LANG_HEBREW,SUBLANG_DEFAULT)
-#define LANGID_HU_HU MAKELANGID(LANG_HUNGARIAN,SUBLANG_DEFAULT)
-#define LANGID_IT_IT MAKELANGID(LANG_ITALIAN,SUBLANG_DEFAULT)
-//#define LANGID_JP_JP MAKELANGID(LANG_JAPANESE,SUBLANG_DEFAULT)
-#define LANGID_KO_KR MAKELANGID(LANG_KOREAN,SUBLANG_DEFAULT)
-#define LANGID_LT_LT MAKELANGID(LANG_LITHUANIAN,SUBLANG_DEFAULT)
-#define LANGID_LV_LV MAKELANGID(LANG_LATVIAN,SUBLANG_DEFAULT)
-#define LANGID_NB_NO MAKELANGID(LANG_NORWEGIAN,SUBLANG_NORWEGIAN_BOKMAL)
-#define LANGID_NL_NL MAKELANGID(LANG_DUTCH,SUBLANG_DEFAULT)
-#define LANGID_PL_PL MAKELANGID(LANG_POLISH,SUBLANG_DEFAULT)
-#define LANGID_PT_BR MAKELANGID(LANG_PORTUGUESE,SUBLANG_PORTUGUESE_BRAZILIAN)
-#define LANGID_PT_PT MAKELANGID(LANG_PORTUGUESE,SUBLANG_PORTUGUESE)
-#define LANGID_RO_RO MAKELANGID(LANG_ROMANIAN,SUBLANG_DEFAULT)
-#define LANGID_RU_RU MAKELANGID(LANG_RUSSIAN,SUBLANG_DEFAULT)
-#define LANGID_SL_SI MAKELANGID(LANG_SLOVENIAN,SUBLANG_DEFAULT)
-#define LANGID_SV_SE MAKELANGID(LANG_SWEDISH,SUBLANG_DEFAULT)
-#define LANGID_TR_TR MAKELANGID(LANG_TURKISH,SUBLANG_DEFAULT)
-#define LANGID_ZH_CN MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_SIMPLIFIED)
-#define LANGID_ZH_TW MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_TRADITIONAL)
-
 
 static HINSTANCE _hLangDLL = NULL;
 
@@ -136,11 +102,12 @@ static SLanguage _aLanguages[] =
 	{LANGID_ET_EE,	_T(""),				FALSE,	_T("et_EE"),	1257,	_T("windows-1257")},	// Estonian
 	{LANGID_FI_FI,	_T("finnish"),		FALSE,	_T("fi_FI"),	1252,	_T("windows-1252")},	// Finnish
 	{LANGID_FR_FR,	_T("french"),		FALSE,	_T("fr_FR"),	1252,	_T("windows-1252")},	// French (France)
+	{LANGID_FR_BR,	_T("french"),		FALSE,	_T("fr_BR"),	1252,	_T("windows-1252")},	// French (Breton)
 	{LANGID_GL_ES,	_T(""),				FALSE,	_T("gl_ES"),	1252,	_T("windows-1252")},	// Galician
 	{LANGID_HE_IL,	_T(""),				FALSE,	_T("he_IL"),	1255,	_T("windows-1255")},	// Hebrew
 	{LANGID_HU_HU,	_T("hungarian"),	FALSE,	_T("hu_HU"),	1250,	_T("windows-1250")},	// Hungarian
 	{LANGID_IT_IT,	_T("italian"),		FALSE,	_T("it_IT"),	1252,	_T("windows-1252")},	// Italian (Italy)
-//	{LANGID_JP_JP,	_T("japanese"),		FALSE,	_T("jp_JP"),	 932,	_T("shift_jis")},		// Japanese
+	{LANGID_JP_JP,	_T("japanese"),		FALSE,	_T("jp_JP"),	 932,	_T("shift_jis")},		// Japanese
 	{LANGID_KO_KR,	_T("korean"),		FALSE,	_T("ko_KR"),	 949,	_T("euc-kr")},			// Korean
 	{LANGID_LT_LT,	_T(""),				FALSE,	_T("lt_LT"),	1257,	_T("windows-1257")},	// Lithuanian
 	{LANGID_LV_LV,	_T(""),				FALSE,	_T("lv_LV"),	1257,	_T("windows-1257")},	// Latvian
@@ -340,7 +307,7 @@ CString CPreferences::GetLangDLLNameByID(LANGID lidSelected){
 			return CString(pLang->pszISOLocale) + _T(".dll"); 
 	}
 	ASSERT ( false );
-	return CString("");
+	return CString(_T(""));
 }
 
 void CPreferences::SetRtlLocale(LCID lcid)
@@ -371,7 +338,7 @@ void CPreferences::InitThreadLocale()
 	// NOTE: This function is *NOT* to be enabled in release builds nor to be offered by any Mod!
 	if (theApp.GetProfileInt(_T("eMule"), _T("SetLanguageACP"), 0) != 0)
 	{
-		LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
+		//LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
 
 		// get the ANSI codepage which is to be used for all non-Unicode conversions.
 		LANGID lidSystem = m_wLanguageID;
@@ -397,7 +364,7 @@ void CPreferences::InitThreadLocale()
 	else if (theApp.GetProfileInt(_T("eMule"), _T("SetSystemACP"), 0) != 0)
 	{
 		LCID lcidSystem = GetSystemDefaultLCID();	// Installation, or altered by user in control panel (WinXP)
-		LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
+		//LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
 
 		// get the ANSI codepage which is to be used for all non-Unicode conversions.
 		LANGID lidSystem = LANGIDFROMLCID(lcidSystem);
@@ -443,7 +410,7 @@ bool CheckThreadLocale()
 	iSetSysACP = 0;
 
 	LCID lcidSystem = GetSystemDefaultLCID();	// Installation, or altered by user in control panel (WinXP)
-	LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
+	//LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
 
 	// get the ANSI codepage which is to be used for all non-Unicode conversions.
 	LANGID lidSystem = LANGIDFROMLCID(lcidSystem);

@@ -22,37 +22,17 @@
 #include "StatisticsDlg.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
-// Wizard dialog
+// CConnectionWizardDlg dialog
 
-IMPLEMENT_DYNAMIC(Wizard, CDialog)
-Wizard::Wizard(CWnd* pParent /*=NULL*/)
-	: CDialog(Wizard::IDD, pParent)
-{
-	m_iBitByte = 0;
-	m_iOS = 0;
-	m_iTotalDownload = 0;
-}
+IMPLEMENT_DYNAMIC(CConnectionWizardDlg, CDialog)
 
-Wizard::~Wizard()
-{
-}
-
-void Wizard::DoDataExchange(CDataExchange* pDX)
-{
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_PROVIDERS, m_provider);
-	DDX_Radio(pDX, IDC_WIZ_XP_RADIO, m_iOS);
-	DDX_Radio(pDX, IDC_WIZ_LOWDOWN_RADIO, m_iTotalDownload);
-	DDX_Radio(pDX, IDC_KBITS, m_iBitByte);
-}
-
-BEGIN_MESSAGE_MAP(Wizard, CDialog)
+BEGIN_MESSAGE_MAP(CConnectionWizardDlg, CDialog)
 	ON_BN_CLICKED(IDC_WIZ_APPLY_BUTTON, OnBnClickedApply)
 	ON_BN_CLICKED(IDC_WIZ_CANCEL_BUTTON, OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_WIZ_XP_RADIO, OnBnClickedWizRadioOsNtxp)
@@ -63,10 +43,31 @@ BEGIN_MESSAGE_MAP(Wizard, CDialog)
 	ON_NOTIFY(NM_CLICK, IDC_PROVIDERS, OnNMClickProviders)
 END_MESSAGE_MAP()
 
+CConnectionWizardDlg::CConnectionWizardDlg(CWnd* pParent /*=NULL*/)
+	: CDialog(CConnectionWizardDlg::IDD, pParent)
+{
+	m_iBitByte = 0;
+	m_iOS = 0;
+	m_iTotalDownload = 0;
+	m_icnWnd = NULL;
+}
 
-// Wizard message handlers
+CConnectionWizardDlg::~CConnectionWizardDlg()
+{
+	if (m_icnWnd)
+		VERIFY( DestroyIcon(m_icnWnd) );
+}
 
-void Wizard::OnBnClickedApply()
+void CConnectionWizardDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_PROVIDERS, m_provider);
+	DDX_Radio(pDX, IDC_WIZ_XP_RADIO, m_iOS);
+	DDX_Radio(pDX, IDC_WIZ_LOWDOWN_RADIO, m_iTotalDownload);
+	DDX_Radio(pDX, IDC_KBITS, m_iBitByte);
+}
+
+void CConnectionWizardDlg::OnBnClickedApply()
 {
 	TCHAR buffer[510];
 	int upload, download;
@@ -202,37 +203,37 @@ void Wizard::OnBnClickedApply()
 	CDialog::OnOK();
 }
 
-void Wizard::OnBnClickedCancel()
+void CConnectionWizardDlg::OnBnClickedCancel()
 {
 	CDialog::OnCancel();
 }
 
-void Wizard::OnBnClickedWizRadioOsNtxp()
+void CConnectionWizardDlg::OnBnClickedWizRadioOsNtxp()
 {
 	m_iOS = 0;
 }
 
-void Wizard::OnBnClickedWizRadioUs98me()
+void CConnectionWizardDlg::OnBnClickedWizRadioUs98me()
 {
 	m_iOS = 1;
 }
 
-void Wizard::OnBnClickedWizLowdownloadRadio()
+void CConnectionWizardDlg::OnBnClickedWizLowdownloadRadio()
 {
 	m_iTotalDownload = 0;
 }
 
-void Wizard::OnBnClickedWizMediumdownloadRadio()
+void CConnectionWizardDlg::OnBnClickedWizMediumdownloadRadio()
 {
 	m_iTotalDownload = 1;
 }
 
-void Wizard::OnBnClickedWizHighdownloadRadio()
+void CConnectionWizardDlg::OnBnClickedWizHighdownloadRadio()
 {
 	m_iTotalDownload = 2;
 }
 
-void Wizard::OnBnClickedWizResetButton()
+void CConnectionWizardDlg::OnBnClickedWizResetButton()
 {
 	CString strBuffer;
 	strBuffer.Format(_T("%i"), 0);
@@ -240,28 +241,26 @@ void Wizard::OnBnClickedWizResetButton()
 	GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(strBuffer); 
 }
 
-BOOL Wizard::OnInitDialog(){
+BOOL CConnectionWizardDlg::OnInitDialog()
+{
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
 
-	HICON myicon;
-	myicon=theApp.LoadIcon(_T("WIZZARD"),16,16);
-	SetIcon(myicon,FALSE);
-
+	SetIcon(m_icnWnd = theApp.LoadIcon(_T("Wizard")), FALSE);
 
 	if (::DetectWinVersion()== _WINVER_95_ || ::DetectWinVersion()==_WINVER_98_ || ::DetectWinVersion()==_WINVER_ME_){
-		this->CheckDlgButton(IDC_WIZ_XP_RADIO,0);
-		this->CheckDlgButton(IDC_WIZ_ME_RADIO,1);
+		CheckDlgButton(IDC_WIZ_XP_RADIO,0);
+		CheckDlgButton(IDC_WIZ_ME_RADIO,1);
 		m_iOS = 1;
 	}
 	else{
-		this->CheckDlgButton(IDC_WIZ_ME_RADIO,0);
-		this->CheckDlgButton(IDC_WIZ_XP_RADIO,1);
+		CheckDlgButton(IDC_WIZ_ME_RADIO,0);
+		CheckDlgButton(IDC_WIZ_XP_RADIO,1);
 		m_iOS = 0;
 	}
-	this->CheckDlgButton(IDC_WIZ_LOWDOWN_RADIO,1);
-	this->CheckDlgButton(IDC_KBITS,1);
-	this->CheckDlgButton(IDC_KBYTES,0);
+	CheckDlgButton(IDC_WIZ_LOWDOWN_RADIO,1);
+	CheckDlgButton(IDC_KBITS,1);
+	CheckDlgButton(IDC_KBYTES,0);
 
 	CString temp;
 	temp.Format(_T("%u"),thePrefs.maxGraphDownloadRate *8);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
@@ -298,7 +297,7 @@ BOOL Wizard::OnInitDialog(){
 	return TRUE;
 }
 
-void Wizard::OnNMClickProviders(NMHDR *pNMHDR, LRESULT *pResult)
+void CConnectionWizardDlg::OnNMClickProviders(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	SetCustomItemsActivation();
 	uint16 up,down;
@@ -328,13 +327,13 @@ void Wizard::OnNMClickProviders(NMHDR *pNMHDR, LRESULT *pResult)
 	CString temp;
 	temp.Format(_T("%u"),down);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
 	temp.Format(_T("%u"),up);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
-	this->CheckDlgButton(IDC_KBITS,1);
-	this->CheckDlgButton(IDC_KBYTES,0);
+	CheckDlgButton(IDC_KBITS,1);
+	CheckDlgButton(IDC_KBYTES,0);
 
 	*pResult = 0;
 }
 
-void Wizard::Localize(void){
+void CConnectionWizardDlg::Localize(void){
 	GetDlgItem(IDC_WIZ_OS_FRAME)->SetWindowText(GetResString(IDS_WIZ_OS_FRAME));
 	GetDlgItem(IDC_WIZ_TRUEUPLOAD_TEXT)->SetWindowText(GetResString(IDS_WIZ_TRUEUPLOAD_TEXT));
 	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_WIZ_TRUEDOWNLOAD_TEXT));
@@ -355,7 +354,7 @@ void Wizard::Localize(void){
 	SetWindowText(GetResString(IDS_WIZARD));
 }
 
-void Wizard::SetCustomItemsActivation() {
+void CConnectionWizardDlg::SetCustomItemsActivation() {
 	BOOL active=(m_provider.GetSelectionMark()<1);
 
 	GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->EnableWindow(active);

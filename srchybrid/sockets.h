@@ -86,5 +86,5 @@ private:
 	UINT			m_idRetryTimer;
 	uint32	m_nLocalIP;
 
-	CMap<ULONG ,ULONG&,CServerSocket*,CServerSocket*> connectionattemps;
+	CMap<ULONG, ULONG, CServerSocket*, CServerSocket*> connectionattemps;
 };

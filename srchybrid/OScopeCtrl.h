@@ -1,6 +1,3 @@
-#ifndef __OScopeCtrl_H__
-#define __OScopeCtrl_H__
-
 #pragma once
 
 /////////////////////////////////////////////////////////////////////////////
@@ -8,9 +5,11 @@
 
 class COScopeCtrl : public CWnd
 {
-	// Construction
 public:
 	COScopeCtrl(int NTrends = 1);
+	virtual ~COScopeCtrl();
+	
+	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL);
 	
 	// Attributes
 	//  Added parameters: bool bUseTrendRatio = true (AppendPoints and AppendEmptyPoints)
@@ -31,23 +30,15 @@ public:
 	void InvalidateCtrl(bool deleteGraph = true);
 	void DrawPoint();
 	void Reset();
-	bool ready;
-	
-	// Operations
-	
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(COScopeCtrl)
-public:
-	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL);
-	//}}AFX_VIRTUAL
-	
-	// Implementation
+	int ReCreateGraph(void);
+	void GetPlotRect(CRect& rPlotRect) { rPlotRect = m_rectPlot; }
 
+	bool ready;
 	bool drawBars;
 	bool autofitYscale;
 	int m_nXGrids;
 	int m_nYGrids;
+	int m_nXPartial;
 	int m_nShiftPixels;         // amount to shift with each new point 
 	int m_nTrendPoints;			// when you set this to > 0, then plot will
 	int m_nMaxPointCnt;
@@ -87,22 +78,14 @@ public:
 		int		iTrendRatio;
 		CString LegendLabel;
 		bool BarsPlot;
-		CList<double,double> lstPoints;
+		CList<double> lstPoints;
 	} PlotData_t;
-	
-	virtual ~COScopeCtrl();
-	
+
 	// Generated message map functions
 protected:
 	int m_NTrends;
-	
-	//{{AFX_MSG(COScopeCtrl)
-	afx_msg void OnPaint();
-	afx_msg void OnSize(UINT nType, int cx, int cy); 
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
 		
-		struct CustShiftStruct 
+	struct CustShiftStruct 
 	{		// when m_nTrendPoints > 0, this structure will contain needed vars
 		int m_nRmndr;				// reminder after dividing m_nWidthToDo/m_nPointsToDo
 		int m_nWidthToDo;
@@ -110,7 +93,7 @@ protected:
 	} CustShift;
 	
 	PlotData_t *m_PlotData; // !!! !!!
-	
+
 	int m_nClientHeight;
 	int m_nClientWidth;
 	int m_nPlotHeight;
@@ -129,15 +112,10 @@ protected:
 
 	bool m_bDoUpdate;
 	UINT m_nRedrawTimer;
-public:
-	int ReCreateGraph(void);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnPaint();
+	afx_msg void OnSize(UINT nType, int cx, int cy); 
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnTimer(UINT nIDEvent);
-
-	void GetPlotRect(CRect& rPlotRect)
-	{
-		rPlotRect = m_rectPlot;
-	}
 };
-
-/////////////////////////////////////////////////////////////////////////////
-#endif

@@ -211,14 +211,12 @@ public:
 	CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_userid, uint32 in_serverup, uint16 in_serverport, bool ed2kID = false);
 	virtual ~CUpDownClient();
 
-
 	void StartDownload();
 	virtual void CheckDownloadTimeout();
 	virtual void SendCancelTransfer(Packet* packet = NULL);
 	virtual bool	IsEd2kClient() const { return true; }
 	virtual bool	Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
 	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL);
-
 	virtual bool	Connect();
 	virtual void	ConnectionEstablished();
 	virtual void	OnSocketConnected(int nErrorCode);
@@ -238,8 +236,8 @@ public:
 	uint32			GetConnectIP() const				{return m_nConnectIP;}
 	uint16			GetUserPort() const								{ return m_nUserPort; }
 	void			SetUserPort(uint16 val)							{ m_nUserPort = val; }
-	uint32			GetTransferedUp() const							{ return m_nTransferedUp; }
-	uint32			GetTransferedDown() const						{ return m_nTransferedDown; }
+	uint32			GetTransferredUp() const							{ return m_nTransferredUp; }
+	uint32			GetTransferredDown() const						{ return m_nTransferredDown; }
 	uint32			GetServerIP() const								{ return m_dwServerIP; }
 	void			SetServerIP(uint32 nIP)							{ m_dwServerIP = nIP; }
 	uint16			GetServerPort() const							{ return m_nServerPort; }
@@ -318,6 +316,10 @@ public:
 	void			SetSentCancelTransfer(bool bVal)				{ m_fSentCancelTransfer = bVal; }
 	void			ProcessPublicIPAnswer(const BYTE* pbyData, UINT uSize);
 	void			SendPublicIPRequest();
+	uint8			GetKadVersion()									{ return m_byKadVersion; }
+	bool			SendBuddyPingPong()								{ return m_dwLastBuddyPingPongTime < ::GetTickCount(); }
+	bool			AllowIncomeingBuddyPingPong()					{ return m_dwLastBuddyPingPongTime < (::GetTickCount()-(3*60*1000)); }
+	void			SetLastBuddyPingPongTime()						{ m_dwLastBuddyPingPongTime = (::GetTickCount()+(10*60*1000)); }
 
 	//MORPH START - Added by IceCream, Anti-leecher feature
 	bool			IsLeecher()	const				{return m_bLeecher;}
@@ -376,43 +378,46 @@ public:
 	void			UnBan();
 	void			Ban(LPCTSTR pszReason = NULL);
 	void			BanLeecher(LPCTSTR pszReason = NULL); //MORPH - Added by IceCream, Anti-leecher feature
-
 	uint32			GetAskedCount() const							{ return m_cAsked; }
 	void			AddAskedCount()									{ m_cAsked++; }
 	void			SetAskedCount(uint32 m_cInAsked)				{ m_cAsked = m_cInAsked; }
 	void			FlushSendBlocks(); // call this when you stop upload, or the socket might be not able to send
 	uint32			GetLastUpRequest() const						{ return m_dwLastUpRequest; }
 	void			SetLastUpRequest()								{ m_dwLastUpRequest = ::GetTickCount(); }
-	uint32			GetSessionUp() const							{ return m_nTransferedUp - m_nCurSessionUp; }
+
+	uint32			GetSessionUp() const							{ return m_nTransferredUp - m_nCurSessionUp; }
 	void			ResetSessionUp(){
-						m_nCurSessionUp = m_nTransferedUp;
+						m_nCurSessionUp = m_nTransferredUp;
 						m_addedPayloadQueueSession = GetQueueSessionPayloadUp(); 
 						//m_nCurQueueSessionPayloadUp = 0;
 					}
 	uint32			GetQueueSessionUp() const
                     {
-                        return m_nTransferedUp - m_nCurQueueSessionUp;
+                        return m_nTransferredUp - m_nCurQueueSessionUp;
                     }
 
 	void			ResetQueueSessionUp()
                     {
-                        m_nCurQueueSessionUp = m_nTransferedUp;
+                        m_nCurQueueSessionUp = m_nTransferredUp;
 						m_nCurQueueSessionPayloadUp = 0;
                         m_curSessionAmountNumber = 0;
 					} 
-	uint32			GetQueueSessionPayloadUp() { return m_nCurQueueSessionPayloadUp; }
 
+	uint32			GetSessionDown() const							{ return m_nTransferredDown - m_nCurSessionDown; }
+	void			ResetSessionDown() {
+						m_nCurSessionDown = m_nTransferredDown;
+					}
+	uint32			GetQueueSessionPayloadUp() const				{ return m_nCurQueueSessionPayloadUp; }
+    uint32          GetPayloadInBuffer() const						{ return m_addedPayloadQueueSession - GetQueueSessionPayloadUp(); }
 
-	uint32			GetQueueSessionPayloadUp() const { return m_nCurQueueSessionPayloadUp; }
     uint64          GetCurrentSessionLimit() const
                     {
-                        return (uint64)SESSIONMAXTRANS*(m_curSessionAmountNumber+1)+20*1024;
+                        return (uint64)SESSIONMAXTRANS*(m_curSessionAmountNumber+1)+1*1024;
                     }
 
 	void			ProcessExtendedInfo(CSafeMemFile* packet, CKnownFile* tempreqfile);
 	uint16			GetUpPartCount() const							{ return m_nUpPartCount; }
 	void			DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const;
-    uint32          GetPayloadInBuffer() const						{ return m_addedPayloadQueueSession - GetQueueSessionPayloadUp(); }
 	bool			IsUpPartAvailable(uint16 iPart) const {
 						return (iPart>=m_nUpPartCount || !m_abyUpPartStatus) ? 0 : m_abyUpPartStatus[iPart];
 					}
@@ -427,8 +432,7 @@ public:
 	void			AddAskedCountDown()								{ m_cDownAsked++; }
 	void			SetAskedCountDown(uint32 m_cInDownAsked)		{ m_cDownAsked = m_cInDownAsked; }
 	EDownloadState	GetDownloadState() const						{ return (EDownloadState)m_nDownloadState; }
-	void			SetDownloadState(EDownloadState nNewState);
-
+	void			SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason = _T("Unspecified"));
 	uint32			GetLastAskedTime(const CPartFile* partFile = NULL) const;
     void            SetLastAskedTime()								{ m_fileReaskTimes.SetAt(reqfile, ::GetTickCount()); }
 	bool			IsPartAvailable(uint16 iPart) const {
@@ -471,6 +475,7 @@ public:
 	virtual void	ProcessBlockPacket(char* packet, uint32 size, bool packed = false);
 	virtual void	ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize);
 	void			ClearDownloadBlockRequests();
+	void			SendOutOfPartReqsAndAddToWaitingQueue();
 	uint32			CalculateDownloadRate();
 	UINT			GetAvailablePartCount() const;
 	bool			SwapToAnotherFile(LPCTSTR pszReason, bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile = NULL, bool allowSame = true, bool isAboutToAsk = false, bool debug = false); // ZZ:DownloadManager
@@ -488,11 +493,11 @@ public:
 	bool			IsValidSource() const;
 	ESourceFrom		GetSourceFrom() const							{ return (ESourceFrom)m_nSourceFrom; }
 	void			SetSourceFrom(ESourceFrom val) {m_nSourceFrom = val;}
-	// -khaos--+++> Download Sessions Stuff
+
 	void			SetDownStartTime()								{ m_dwDownStartTime = ::GetTickCount(); }
-	uint32			GetDownTimeDifference() {
+	uint32			GetDownTimeDifference(boolean clear = true)	{
 						uint32 myTime = m_dwDownStartTime; 
-						m_dwDownStartTime = 0;
+						if(clear) m_dwDownStartTime = 0;
 						return ::GetTickCount() - myTime;
 					}
 	bool			GetTransferredDownMini() const					{ return m_bTransferredDownMini; }
@@ -511,10 +516,11 @@ public:
 	*/
 	void			SetUpCompleteSourcesCount(uint16 n)				{ m_nUpCompleteSourcesCount = n; m_nUpCompleteSourcesCount_list.SetAt(reqfile,n); }
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
+
 	//chat
 	EChatState		GetChatState() const							{ return (EChatState)m_nChatstate; }
 	void			SetChatState(EChatState nNewS)					{ m_nChatstate = nNewS; }
-	//chat
+
 	//KadIPCheck
 	EKadState		GetKadState() const								{ return (EKadState)m_nKadState; }
 	void			SetKadState(EKadState nNewS)					{ m_nKadState = nNewS; }
@@ -573,7 +579,6 @@ public:
 
 // ZZ:DownloadManager -->
     const bool      IsInNoNeededList(const CPartFile* fileToCheck) const;
-
     const bool      SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file, bool ignoreSuspensions, bool SwapToIsNNPFile, bool isNNPFile, bool& wasSkippedDueToSourceExchange, bool doAgressiveSwapping = false, bool debug = false);
     const DWORD     getLastTriedToConnectTime() { return m_dwLastTriedToConnect; }
 // <-- ZZ:DownloadManager
@@ -583,6 +588,7 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
+
 	CClientReqSocket* socket;
 	CClientCredits*	credits;
 	CFriend*		m_Friend;
@@ -600,7 +606,7 @@ public:
 	uint16			m_lastPartAsked;
 	//MORPH START - Changed by SiRoB, ZZ LowID handling
 	/*
-	bool			m_bAddNextConnect;  // VQB Fix for LowID slots only on connection
+	bool			m_bAddNextConnect;
 	*/
 	DWORD			m_dwWouldHaveGottenUploadSlotIfNotLowIdTick;  // VQB Fix for LowID slots only on connection
 	//MORPH END   - Changed by SiRoB, ZZ LowID handling
@@ -677,7 +683,6 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	// PeerCache client
 	// 
-
 	bool IsDownloadingFromPeerCache() const;
 	bool IsUploadingToPeerCache() const;
 	void SetPeerCacheDownState(EPeerCacheDownState eState);
@@ -852,17 +857,19 @@ protected:
 	uint8	m_cMessagesReceived;		// count of chatmessages he sent to me
 	uint8	m_cMessagesSent;			// count of chatmessages I sent to him
 	bool	m_bMultiPacket;
-
+	//--group to aligned int32
 	bool	m_bUnicodeSupport;
 	bool	m_bBuddyIDValid;
 	uint16	m_nBuddyPort;
 	//--group to aligned int32
 	uint32	m_nBuddyIP;
+	uint32	m_dwLastBuddyPingPongTime;
 	uchar	m_achBuddyID[16];
 	CString m_strHelloInfo;
 	CString m_strMuleInfo;
+	uint8	m_byKadVersion;
 
-	// states
+	// States
 #ifdef _DEBUG
 	// use the 'Enums' only for debug builds, each enum costs 4 bytes (3 unused)
 	EClientSoftware		m_clientSoft;
@@ -883,7 +890,7 @@ protected:
 #endif
 
 	CTypedPtrList<CPtrList, Packet*> m_WaitingPackets_list;
-	CList<PartFileStamp, PartFileStamp> m_DontSwap_list;
+	CList<PartFileStamp> m_DontSwap_list;
 
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bIsMorph; //MORPH - Added by SiRoB, Is Morph client?
@@ -894,13 +901,14 @@ protected:
 	//
     int	GetFilePrioAsNumber() const;
 
-	uint32		m_nTransferedUp;
+	uint32		m_nTransferredUp;
 	uint32		m_dwUploadTime;
 	uint32		m_nAvUpDatarate; //Wistily
 	uint32		m_nUpTotalTime;//wistily total lenght of this client's uploads during this session in ms
 	uint32		m_cAsked;
 	uint32		m_dwLastUpRequest;
 	uint32		m_nCurSessionUp;
+	uint32		m_nCurSessionDown;
     uint32      m_nCurQueueSessionUp;
 	uint32      m_nCurQueueSessionPayloadUp;
 	uint32      m_addedPayloadQueueSession;
@@ -921,7 +929,7 @@ protected:
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DoneBlocks_list;
 	CTypedPtrList<CPtrList, Requested_File_Struct*>	 m_RequestedFiles_list;
 
-
+	//////////////////////////////////////////////////////////
 	// Download
 	//
 	CPartFile*	reqfile;
@@ -929,7 +937,7 @@ protected:
 	uint32		m_cDownAsked;
 	uint8*		m_abyPartStatus;
 	CString		m_strClientFilename;
-	uint32		m_nTransferedDown;
+	uint32		m_nTransferredDown;
 	uint32		m_dwDownStartTime;
 	uint32      m_nLastBlockOffset;
 	uint32		m_dwLastBlockReceived;
@@ -950,7 +958,7 @@ protected:
 	bool		m_bUDPPending;
 	bool		m_bTransferredDownMini;
 
-
+	// Download from URL
 	CStringA	m_strUrlPath;
 	UINT		m_uReqStart;
 	UINT		m_uReqEnd;
@@ -962,7 +970,7 @@ protected:
 	//
 	uint32		m_nUpDatarate;
 	uint32		m_nSumForAvgUpDataRate;
-	CList<TransferredData, TransferredData> m_AvarageUDR_list;
+	CList<TransferredData> m_AvarageUDR_list;
 	DWORD		m_AvarageUDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	//////////////////////////////////////////////////////////
 	// Download data rate computation
@@ -972,12 +980,12 @@ protected:
 	uint32		m_nDownTotalTime;// wistily total lenght of this client's downloads during this session in ms
 	uint32		m_nDownDataRateMS;
 	uint32		m_nSumForAvgDownDataRate;
-	CList<TransferredData,TransferredData> m_AvarageDDR_list;
+	CList<TransferredData> m_AvarageDDR_list;
 	uint32		m_AvarageDDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	
 	//////////////////////////////////////////////////////////
 	// GUI helpers
-	
+	//
 	static CBarShader s_StatusBar;
 	static CBarShader s_UpStatusBar;
 	DWORD		m_lastRefreshedDLDisplay;
@@ -1000,7 +1008,8 @@ protected:
 		 m_fFailedFileIdReqs  : 4, // nr. of failed file-id related requests per connection
 		 m_fNeedOurPublicIP	  : 1, // we requested our IP from this client
 		 m_fSupportsAICH	  : 3,
-		 m_fAICHRequested     : 1; 
+		 m_fAICHRequested     : 1,
+		 m_fSentOutOfPartReqs : 1;
 
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DownloadBlocks_list;

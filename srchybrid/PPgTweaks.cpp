@@ -28,11 +28,12 @@
 #include "ServerWnd.h"
 #include "HelpIDs.h"
 #include "Log.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -47,7 +48,7 @@ IMPLEMENT_DYNAMIC(CPPgTweaks, CPropertyPage)
 BEGIN_MESSAGE_MAP(CPPgTweaks, CPropertyPage)
 	ON_WM_HSCROLL()	
 	ON_WM_DESTROY()
-	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
@@ -100,6 +101,7 @@ CPPgTweaks::CPPgTweaks()
     m_iDynUpNumberOfPings = 0;
 	// ZZ:DownloadManager
     m_iA4AFSaveCpu = 0; 
+	m_iExtractMetaData = 0;
 
 	m_bInitializedTreeOpts = false;
 	m_htiMaxCon5Sec = NULL;
@@ -155,8 +157,7 @@ CPPgTweaks::CPPgTweaks()
     // ZZ:DownloadManager
     m_htiA4AFSaveCpu = NULL;
 	m_htiLogA4AF = NULL;
-
-
+	m_htiExtractMetaData = NULL;
 }
 
 CPPgTweaks::~CPPgTweaks()
@@ -177,6 +178,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		int iImgDynyp = 8; // default icon
 		// ZZ:UploadSpeedSense <--
 		int iImgA4AF = 8; // default icon // ZZ:DownloadManager
+		int iImgMetaData = 8; // default icon
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
 			iImgBackup = piml->Add(CTempIconLoader(_T("Harddisk")));
@@ -185,6 +187,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 			iImgDynyp = piml->Add(CTempIconLoader(_T("upload")));
 			// ZZ:UploadSpeedSense <--
             iImgA4AF =  piml->Add(CTempIconLoader(_T("Download"))); // ZZ:DownloadManager 
+            iImgMetaData =  piml->Add(CTempIconLoader(_T("MediaInfo"))); // ZZ:DownloadManager 
 		}
 
 		m_htiMaxCon5Sec = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCON5SECLABEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
@@ -209,7 +212,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiMinFreeDiskSpace = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINFREEDISKSPACE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiCheckDiskspace);
 		m_ctrlTreeOptions.AddEditBox(m_htiMinFreeDiskSpace, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiYourHostname = m_ctrlTreeOptions.InsertItem(GetResString(IDS_YOURHOSTNAME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
-		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEdit));
+		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEditEx));
 		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), TVI_ROOT, m_iDisablePeerCache);
 
 		m_htiLog2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), TVI_ROOT, m_iLog2Disk);
@@ -270,6 +273,11 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiDynUpNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		// ZZ:UploadSpeedSense <--
 
+		m_htiExtractMetaData = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_EXTRACT_META_DATA), iImgMetaData, TVI_ROOT);
+		m_htiExtractMetaDataNever = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_NEVER), m_htiExtractMetaData, m_iExtractMetaData == 0);
+		m_htiExtractMetaDataID3Lib = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_META_DATA_ID3LIB), m_htiExtractMetaData, m_iExtractMetaData == 1);
+		m_htiExtractMetaDataMediaDet = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_META_DATA_MEDIADET), m_htiExtractMetaData, m_iExtractMetaData == 2);
+
 		if (m_htiVerboseGroup)
 			m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
@@ -278,9 +286,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.Expand(m_htiDynUp, TVE_EXPAND);
         m_ctrlTreeOptions.Expand(m_htiDynUpPingToleranceGroup, TVE_EXPAND);
 		// ZZ:UploadSpeedSense <--
-
+		m_ctrlTreeOptions.Expand(m_htiExtractMetaData, TVE_EXPAND);
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
-
         m_bInitializedTreeOpts = true;
 	}
 
@@ -310,6 +317,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLog2Disk, m_iLog2Disk);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDateFileNameLog, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiCommit, m_iCommitFiles);
+	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiExtractMetaData, m_iExtractMetaData);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFilterLANIPs, m_iFilterLANIPs);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiExtControls, m_iExtControls);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiServerKeepAliveTimeout, m_uServerKeepAliveTimeout);
@@ -404,6 +412,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iDateFileNameLog = thePrefs.m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	m_iCreditSystem = thePrefs.m_bCreditSystem;
 	m_iCommitFiles = thePrefs.m_iCommitFiles;
+	m_iExtractMetaData = thePrefs.m_iExtractMetaData;
 	m_iFilterLANIPs = thePrefs.filterLANIPs;
 	m_iExtControls = thePrefs.m_bExtControls;
 	m_uServerKeepAliveTimeout = thePrefs.m_dwServerKeepAliveTimeout / 60000;
@@ -433,6 +442,7 @@ BOOL CPPgTweaks::OnInitDialog()
 
     CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
+	m_ctrlTreeOptions.SetItemHeight(m_ctrlTreeOptions.GetItemHeight() + 2);
 
 	m_iFileBufferSize = thePrefs.m_iFileBufferSize;
 	m_ctlFileBuffSize.SetRange(16, 1024+512, TRUE);
@@ -539,6 +549,7 @@ BOOL CPPgTweaks::OnApply()
 
 	thePrefs.m_bCreditSystem = m_iCreditSystem;
 	thePrefs.m_iCommitFiles = m_iCommitFiles;
+	thePrefs.m_iExtractMetaData = m_iExtractMetaData;
 	thePrefs.filterLANIPs = m_iFilterLANIPs;
 	thePrefs.m_iFileBufferSize = m_iFileBufferSize;
 	thePrefs.m_iQueueSize = m_iQueueSize;
@@ -552,7 +563,10 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bSparsePartFiles = m_iSparsePartFiles;
 	thePrefs.checkDiskspace = m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	thePrefs.m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
-	thePrefs.SetYourHostname(m_sYourHostname);	// itsonlyme: hostnameSource
+	if (thePrefs.GetYourHostname() != m_sYourHostname) {
+		thePrefs.SetYourHostname(m_sYourHostname);
+		theApp.emuledlg->serverwnd->UpdateMyInfo();
+	}
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
 	thePrefs.m_bOpenPortsOnStartUp = m_iFirewallStartup; 
@@ -639,6 +653,12 @@ void CPPgTweaks::Localize(void)
 		if (m_htiCommitNever) m_ctrlTreeOptions.SetItemText(m_htiCommitNever, GetResString(IDS_NEVER));
 		if (m_htiCommitOnShutdown) m_ctrlTreeOptions.SetItemText(m_htiCommitOnShutdown, GetResString(IDS_ONSHUTDOWN));
 		if (m_htiCommitAlways) m_ctrlTreeOptions.SetItemText(m_htiCommitAlways, GetResString(IDS_ALWAYS));
+
+		if (m_htiExtractMetaData) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaData, GetResString(IDS_EXTRACT_META_DATA));
+		if (m_htiExtractMetaDataNever) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaDataNever, GetResString(IDS_NEVER));
+		if (m_htiExtractMetaDataID3Lib) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaDataID3Lib, GetResString(IDS_META_DATA_ID3LIB));
+		if (m_htiExtractMetaDataMediaDet) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaDataMediaDet, GetResString(IDS_META_DATA_MEDIADET));
+
 		if (m_htiFilterLANIPs) m_ctrlTreeOptions.SetItemText(m_htiFilterLANIPs, GetResString(IDS_PW_FILTER));
 		if (m_htiExtControls) m_ctrlTreeOptions.SetItemText(m_htiExtControls, GetResString(IDS_SHOWEXTSETTINGS));
 		if (m_htiServerKeepAliveTimeout) m_ctrlTreeOptions.SetEditLabel(m_htiServerKeepAliveTimeout, GetResString(IDS_SERVERKEEPALIVETIMEOUT));
@@ -735,6 +755,10 @@ void CPPgTweaks::OnDestroy()
     // ZZ:DownloadManager -->
     m_htiA4AFSaveCpu = NULL;
     // ZZ:DownloadManager <--
+	m_htiExtractMetaData = NULL;
+	m_htiExtractMetaDataNever = NULL;
+	m_htiExtractMetaDataID3Lib = NULL;
+	m_htiExtractMetaDataMediaDet = NULL;
     
     CPropertyPage::OnDestroy();
 }

@@ -25,18 +25,19 @@ class CAddFriend : public CDialog
 	DECLARE_DYNAMIC(CAddFriend)
 
 public:
-	CAddFriend(void);   // standard constructor
-	void Localize();
+	CAddFriend();   // standard constructor
 	virtual ~CAddFriend();
-	virtual BOOL OnInitDialog();
-// Dialog Data
-	enum { IDD = IDD_ADDFRIEND };
 
+	enum { IDD = IDD_ADDFRIEND };
 	CFriend* m_pShowFriend;
+
+	void Localize();
+
 protected:
+	HICON m_icnWnd;
+	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-private:
-	void OnAddBtn();
+	afx_msg void OnAddBtn();
 };

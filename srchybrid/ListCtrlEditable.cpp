@@ -387,7 +387,7 @@ void CEditableListCtrl::OnLvnBeginScroll(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// This feature requires Internet Explorer 5.5 or greater.
 	// The symbol _WIN32_IE must be >= 0x0560.
-	LPNMLVSCROLL pStateChanged = reinterpret_cast<LPNMLVSCROLL>(pNMHDR);
+	//LPNMLVSCROLL pStateChanged = reinterpret_cast<LPNMLVSCROLL>(pNMHDR);
 	if (m_pctrlEdit)
 	{
 		CommitEditCtrl();
@@ -402,7 +402,7 @@ void CEditableListCtrl::OnLvnEndScroll(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// This feature requires Internet Explorer 5.5 or greater.
 	// The symbol _WIN32_IE must be >= 0x0560.
-	LPNMLVSCROLL pStateChanged = reinterpret_cast<LPNMLVSCROLL>(pNMHDR);
+	//LPNMLVSCROLL pStateChanged = reinterpret_cast<LPNMLVSCROLL>(pNMHDR);
 	if (m_pctrlEdit)
 		ShowEditCtrl();
 	*pResult = 0;

@@ -23,9 +23,9 @@
 #include "otherfunctions.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -221,8 +221,7 @@ bool CFirewallOpener::FindRule(const EFOCAction eAction, const CICSRuleInfo& riP
     RETURN_ON_FAIL(pNSPMC->get__NewEnum(&pUnk));
     RETURN_ON_FAIL(pUnk->QueryInterface(__uuidof(IEnumVARIANT), (void**)&varEnum));
 	_variant_t var;
-    bool bFoundIt = false;
-	while (S_OK == varEnum->Next(1, &var, NULL)) {
+    while (S_OK == varEnum->Next(1, &var, NULL)) {
 		INetSharingPortMappingPropsPtr pNSPMP;
 		if (V_VT(&var) == VT_DISPATCH
 			&& SUCCEEDED(V_DISPATCH(&var)->QueryInterface(__uuidof(INetSharingPortMapping),(void**)&pNSPM)) 

@@ -204,9 +204,9 @@ public:
 	void			DbgTest();
 
 	CAICHHashTree	m_pHashTree;
-	static CList<CAICHRequestedData, CAICHRequestedData&> m_liRequestedData;
+	static CList<CAICHRequestedData> m_liRequestedData;
 private:
 	CKnownFile*		m_pOwner;
 	EAICHStatus		m_eStatus;
-	CArray<CAICHUntrustedHash, CAICHUntrustedHash&> m_aUntrustedHashs;
+	CArray<CAICHUntrustedHash> m_aUntrustedHashs;
 };

@@ -17,11 +17,12 @@
 #include "stdafx.h"
 #include "TreeOptionsCtrlEx.h"
 #include "VisualStylesXP.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -215,8 +216,7 @@ BOOL CTreeOptionsCtrlEx::SetRadioButton(HTREEITEM hItem)
 			//Turn this item on
 			BOOL bOldState;
 			GetRadioButton(hChild, bOldState);
-			BOOL bSuccess = SetItemImage(hChild, 3, 3);
-			ASSERT(bSuccess);
+			VERIFY( SetItemImage(hChild, 3, 3) );
 			if (!bOldState)
 				NotifyParent(BN_CLICKED, hChild);
 		}
@@ -253,7 +253,7 @@ BOOL CTreeOptionsCtrlEx::NotifyParent(UINT uCode, HTREEITEM hItem)
 	ton.nmhdr.idFrom = GetWindowLong(m_hWnd, GWL_ID);
 	ton.nmhdr.code = uCode;
 	ton.hItem = hItem;
-	return pWnd->SendMessage(WM_TREEOPTSCTRL_NOTIFY, GetWindowLong(m_hWnd, GWL_ID), (LPARAM)&ton);
+	return pWnd->SendMessage(UM_TREEOPTSCTRL_NOTIFY, GetWindowLong(m_hWnd, GWL_ID), (LPARAM)&ton);
 }
 
 void CTreeOptionsCtrlEx::OnCreateImageList()
@@ -262,7 +262,7 @@ void CTreeOptionsCtrlEx::OnCreateImageList()
 	if (pDCScreen)
 	{
 		const int iBmpWidth = 16;
-		const int iBmpHeight = 17;
+		const int iBmpHeight = 16;
 		const int iBitmaps = 13;
 		CBitmap bmpControls;
 		if (bmpControls.CreateCompatibleBitmap(pDCScreen, iBmpWidth*iBitmaps, iBmpHeight))
@@ -502,6 +502,13 @@ void EditTextWithFormat(CDataExchange* pDX, int nIDC, HTREEITEM hItem, LPCTSTR l
 	va_end(pData);
 }
 
+void DDX_TreeCheck(CDataExchange* pDX, int nIDC, HTREEITEM hItem, bool& bCheck)
+{
+	BOOL biBool = bCheck;
+	DDX_TreeCheck(pDX, nIDC, hItem, biBool);
+	bCheck = (bool)biBool;
+}
+
 void DDX_Text(CDataExchange* pDX, int nIDC, HTREEITEM hItem, int& value)
 {
 	if (pDX->m_bSaveAndValidate)
@@ -584,3 +591,29 @@ void CNumTreeOptionsEdit::OnEnChange()
 		((CTreeOptionsCtrlEx*)m_pTreeCtrl)->NotifyParent(EN_CHANGE, m_hTreeCtrlItem);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+// CTreeOptionsEditEx
+
+IMPLEMENT_DYNCREATE(CTreeOptionsEditEx, CTreeOptionsEdit)
+
+BEGIN_MESSAGE_MAP(CTreeOptionsEditEx, CTreeOptionsEdit)
+	ON_WM_CREATE()
+	ON_CONTROL_REFLECT(EN_CHANGE, OnEnChange)
+END_MESSAGE_MAP()
+
+int CTreeOptionsEditEx::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	m_bSelf = true;
+	if (CTreeOptionsEdit::OnCreate(lpCreateStruct) == -1)
+		return -1;
+	m_bSelf = false;
+
+	return 0;
+}
+
+void CTreeOptionsEditEx::OnEnChange()
+{
+	if (!m_bSelf)
+		((CTreeOptionsCtrlEx*)m_pTreeCtrl)->NotifyParent(EN_CHANGE, m_hTreeCtrlItem);
+}

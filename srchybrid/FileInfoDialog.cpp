@@ -22,6 +22,7 @@
 #include "OtherFunctions.h"
 #include "PartFile.h"
 #include "Preferences.h"
+#include "UserMsgs.h"
 
 // id3lib
 #include <id3/tag.h>
@@ -36,6 +37,17 @@ _DEFINE_GUID(MEDIATYPE_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa
 _DEFINE_GUID(MEDIATYPE_Audio, 0x73647561, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 _DEFINE_GUID(FORMAT_VideoInfo,0x05589f80, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
 _DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
+//#define MMNODRV		// mmsystem: Installable driver support
+#define MMNOSOUND		// mmsystem: Sound support
+//#define MMNOWAVE		// mmsystem: Waveform support
+#define MMNOMIDI		// mmsystem: MIDI support
+#define MMNOAUX			// mmsystem: Auxiliary audio support
+#define MMNOMIXER		// mmsystem: Mixer support
+#define MMNOTIMER		// mmsystem: Timer support
+#define MMNOJOY			// mmsystem: Joystick support
+#define MMNOMCI			// mmsystem: MCI support
+//#define MMNOMMIO		// mmsystem: Multimedia file I/O support
+#define MMNOMMSYSTEM	// mmsystem: General MMSYSTEM functions
 #include <qedit.h>
 typedef struct tagVIDEOINFOHEADER {
 	RECT			rcSource;		   // The bit we really want to use
@@ -95,9 +107,9 @@ typedef enum _info_t
 
 
 #ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -202,8 +214,6 @@ struct SMediaInfo
 /////////////////////////////////////////////////////////////////////////////
 // CGetMediaInfoThread
 
-#define WM_MEDIA_INFO_RESULT	(WM_USER+0x100+1)
-
 class CGetMediaInfoThread : public CWinThread
 {
 	DECLARE_DYNCREATE(CGetMediaInfoThread)
@@ -218,7 +228,7 @@ protected:
 public:
 	virtual BOOL InitInstance();
 	virtual int	Run();
-	void SetValues(HWND hWnd, const CSimpleArray<const CKnownFile*>* paFiles)
+	void SetValues(HWND hWnd, const CSimpleArray<CObject*>* paFiles)
 	{
 		m_hWndOwner = hWnd;
 		m_paFiles = paFiles;
@@ -226,7 +236,7 @@ public:
 
 private:
 	HWND m_hWndOwner;
-	const CSimpleArray<const CKnownFile*>* m_paFiles;
+	const CSimpleArray<CObject*>* m_paFiles;
 };
 
 
@@ -297,12 +307,15 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 IMPLEMENT_DYNAMIC(CFileInfoDialog, CResizablePage)
 
 BEGIN_MESSAGE_MAP(CFileInfoDialog, CResizablePage)
-	ON_MESSAGE(WM_MEDIA_INFO_RESULT, OnMediaInfoResult)
+	ON_MESSAGE(UM_MEDIA_INFO_RESULT, OnMediaInfoResult)
+	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
 END_MESSAGE_MAP()
 
 CFileInfoDialog::CFileInfoDialog()
 	: CResizablePage(CFileInfoDialog::IDD, 0)
 {
+	m_paFiles = NULL;
+	m_bDataChanged = false;
 	m_strCaption = GetResString(IDS_FILEINFO);
 	m_psp.pszTitle = m_strCaption;
 	m_psp.dwFlags |= PSP_USETITLE;
@@ -568,31 +581,46 @@ BOOL CFileInfoDialog::OnInitDialog()
 
 	CResizablePage::UpdateData(FALSE);
 	Localize();
-
-	CString strWait = GetResString(IDS_FSTAT_WAITING);
-	SetDlgItemText(IDC_FORMAT, strWait);
-	SetDlgItemText(IDC_FILESIZE, strWait);
-	SetDlgItemText(IDC_LENGTH, strWait);
-	SetDlgItemText(IDC_VCODEC, strWait);
-	SetDlgItemText(IDC_VBITRATE, strWait);
-	SetDlgItemText(IDC_VWIDTH, strWait);
-	SetDlgItemText(IDC_VHEIGHT, strWait);
-	SetDlgItemText(IDC_VASPECT, strWait);
-	SetDlgItemText(IDC_VFPS, strWait);
-	SetDlgItemText(IDC_ACODEC, strWait);
-	SetDlgItemText(IDC_ACHANNEL, strWait);
-	SetDlgItemText(IDC_ASAMPLERATE, strWait);
-	SetDlgItemText(IDC_ABITRATE, strWait);
-	SetDlgItemText(IDC_FULL_FILE_INFO, strWait);
-
-	CGetMediaInfoThread* pThread = (CGetMediaInfoThread*)AfxBeginThread(RUNTIME_CLASS(CGetMediaInfoThread), THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED);
-	if (pThread)
-	{
-		pThread->SetValues(m_hWnd, m_paFiles);
-		pThread->ResumeThread();
-	}
-
 	return TRUE;
+}
+
+BOOL CFileInfoDialog::OnSetActive()
+{
+	if (!CResizablePage::OnSetActive())
+		return FALSE;
+	if (m_bDataChanged)
+	{
+		CString strWait = GetResString(IDS_FSTAT_WAITING);
+		SetDlgItemText(IDC_FORMAT, strWait);
+		SetDlgItemText(IDC_FILESIZE, strWait);
+		SetDlgItemText(IDC_LENGTH, strWait);
+		SetDlgItemText(IDC_VCODEC, strWait);
+		SetDlgItemText(IDC_VBITRATE, strWait);
+		SetDlgItemText(IDC_VWIDTH, strWait);
+		SetDlgItemText(IDC_VHEIGHT, strWait);
+		SetDlgItemText(IDC_VASPECT, strWait);
+		SetDlgItemText(IDC_VFPS, strWait);
+		SetDlgItemText(IDC_ACODEC, strWait);
+		SetDlgItemText(IDC_ACHANNEL, strWait);
+		SetDlgItemText(IDC_ASAMPLERATE, strWait);
+		SetDlgItemText(IDC_ABITRATE, strWait);
+		SetDlgItemText(IDC_FULL_FILE_INFO, strWait);
+
+		CGetMediaInfoThread* pThread = (CGetMediaInfoThread*)AfxBeginThread(RUNTIME_CLASS(CGetMediaInfoThread), THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED);
+		if (pThread)
+		{
+			pThread->SetValues(m_hWnd, m_paFiles);
+			pThread->ResumeThread();
+		}
+		m_bDataChanged = false;
+	}
+	return TRUE;
+}
+
+LRESULT CFileInfoDialog::OnDataChanged(WPARAM, LPARAM)
+{
+	m_bDataChanged = true;
+	return 1;
 }
 
 IMPLEMENT_DYNCREATE(CGetMediaInfoThread, CWinThread)
@@ -608,13 +636,13 @@ int CGetMediaInfoThread::Run()
 {
 	CoInitialize(NULL);
 
-	CArray<SMediaInfo, SMediaInfo>* paMediaInfo = new CArray<SMediaInfo, SMediaInfo>;
+	CArray<SMediaInfo>* paMediaInfo = new CArray<SMediaInfo>;
 	try
 	{
 		for (int i = 0; i < m_paFiles->GetSize(); i++)
 		{
 			SMediaInfo mi;
-			if (IsWindow(m_hWndOwner) && GetMediaInfo(m_hWndOwner, (*m_paFiles)[i], &mi, m_paFiles->GetSize() == 1))
+			if (IsWindow(m_hWndOwner) && GetMediaInfo(m_hWndOwner, STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]), &mi, m_paFiles->GetSize() == 1))
 				paMediaInfo->Add(mi);
 			else
 			{
@@ -629,7 +657,7 @@ int CGetMediaInfoThread::Run()
 		ASSERT(0);
 	}
 
-	if (!IsWindow(m_hWndOwner) || !PostMessage(m_hWndOwner, WM_MEDIA_INFO_RESULT, 0, (LPARAM)paMediaInfo))
+	if (!IsWindow(m_hWndOwner) || !PostMessage(m_hWndOwner, UM_MEDIA_INFO_RESULT, 0, (LPARAM)paMediaInfo))
 		delete paMediaInfo;
 
 	CoUninitialize();
@@ -664,7 +692,7 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 	SetDlgItemText(IDC_ABITRATE, _T("-"));
 	SetDlgItemText(IDC_FULL_FILE_INFO, _T(""));
 
-	CArray<SMediaInfo, SMediaInfo>* paMediaInfo = (CArray<SMediaInfo, SMediaInfo>*)lParam;
+	CArray<SMediaInfo>* paMediaInfo = (CArray<SMediaInfo>*)lParam;
 	if (paMediaInfo == NULL)
 		return 0;
 

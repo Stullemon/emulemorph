@@ -40,7 +40,7 @@ public:
 	int			m_nCreditsBmpWidth;
 	int			m_nCreditsBmpHeight;
 
-	CArray<CString, CString>	m_arCredits;
+	CArray<CString>				m_arCredits;
 	CArray<COLORREF, COLORREF>	m_arColors;
 	CArray<CFont*, CFont*>		m_arFonts;
 	CArray<int, int>			m_arFontHeights;
