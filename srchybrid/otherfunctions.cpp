@@ -1016,7 +1016,10 @@ CString CleanupFilename(CString filename) {
 
 		for (int ix=0; ix<topos; ix++)
 		{
-			if (!IsCharAlpha(filename.GetAt(ix))) //if (filename.GetAt(ix) == ' ' || isdigit(filename.GetAt(ix)) ) 
+			//EastShare - Added by Pretender, so8so's fix
+			//if (!IsCharAlpha(filename.GetAt(ix))) //if (filename.GetAt(ix) == ' ' || isdigit(filename.GetAt(ix)) ) 
+			if ((IsCharAlpha(filename.GetAt(ix)) == 0) && ((uint8)filename.GetAt(ix) < 0x80))  
+			//EastShare - Added by Pretender, so8so's fix
 			{
 				if (ix<filename.GetLength()-2 && isdigit(filename.GetAt(ix+2) ))
 					continue;
