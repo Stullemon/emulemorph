@@ -5,6 +5,7 @@ MERGED : Code merged to 0.42g [SiRoB]
 FIXED  : Columns Preferency Saving (Sort, Size, Visibility) [SiRoB]
 CHANGED: Now Canceling Selection category mean aborting [SiRoB]
 CHANGED: Review the Selection category support (if not used take the official way) [SiRoB]
+REMOVED: Group notion for downloading files have been removed (never implemented) [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42e MorphXT v2.8
