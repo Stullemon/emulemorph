@@ -207,7 +207,7 @@ BOOL CClientDetailDialog::OnInitDialog(){
 					(ClientIP >> 24) & 0xFF, (ClientIP >> 16) & 0xFF,
 					(ClientIP >> 8) & 0xFF, ClientIP & 0xFF, 
 					m_client->GetUserPort ());
-	CRect R (29,340,300,360);
+	CRect R (19,450,300,464);
 	m_sAdditionalInfo.Create (AddInfo,WS_CHILD|WS_VISIBLE,R,this);
 	VERIFY(m_fStdFont.CreateFont(
 					12,                        // nHeight
