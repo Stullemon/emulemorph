@@ -567,7 +567,7 @@ void CClientCreditsList::SaveList()
 		if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 			if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
 			{
-//				if (theApp.clientcredits->IsSaveUploadQueueWaitTime()) cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT//not necessary in current way[AndCycle]
+				cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
 				memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
 				fileBack.Write(((uint8*)cur_credit->GetDataStruct()) + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
 				count++; 
