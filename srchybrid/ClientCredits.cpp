@@ -997,11 +997,17 @@ void CClientCredits::ClearWaitStartTime(){
 }
 
 //EastShare Start - added by AndCycle, Pay Back First
+
+//init will be triggered at 
+//1. client credit create, 
+//2. when reach 10MB transfered, between first time remove check and second time remove check
 void CClientCredits::InitPayBackFirstStatus(){
 
 	m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal()+SESSIONMAXTRANS;
 
 }
+
+//test will be triggered at client have up/down transfered
 void CClientCredits::TestPayBackFirstStatus(){
 
 	if(GetDownloadedTotal() >= GetUploadedTotal()+SESSIONMAXTRANS){
