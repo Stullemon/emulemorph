@@ -363,6 +363,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 			{
 			//MORPH END   - Added by SiRoB, Don't draw hidden columns
+				UINT dcdttext = DLC_DT_TEXT; //MORPH - Added by SiRoB, Justify Text Option
 				switch(iColumn){
 					case 0:{
 						//MORPH START - Modified by SiRoB, More client & Credit overlay icon
@@ -450,6 +451,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					case 2:
 						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetDatarate(), false, true));
+						//MORPH START - Added by SIRoB, Right Justify and AverageDatarate display
+						dcdttext |= DT_RIGHT;
+						//MORPH END   - Added by SIRoB, Right Justify and AverageDatarate display
 						break;
 					case 3:
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
@@ -472,12 +476,13 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 5:
 						{//Morph - modified by AndCycle, upRemain
 							sint32 timeleft;
-							if(client->GetDatarate() == 0)	timeleft = -1;
-							else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
-							else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
+							uint32 UpDatarate = client->GetDatarate();
+							if(UpDatarate == 0)	timeleft = -1;
+							else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/UpDatarate;
+							else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
 							else if(file)
-								if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/client->GetDatarate();
-								else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
+								if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/UpDatarate;
+								else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
 							Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
 						}//Morph - modified by AndCycle, upRemain
 						break;
@@ -619,7 +624,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					// Commander - Added: IP2Country column - End	
 				}
 				if( iColumn != 7 && iColumn != 0 )
-					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,dcdttext);
 			} //MORPH - Added by SiRoB, Don't draw hidden columns
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
