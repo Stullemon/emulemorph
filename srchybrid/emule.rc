@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1812,8 +1812,8 @@ BEGIN
     LTEXT           "Password",IDC_STATIC,14,203,81,11
     PUSHBUTTON      "Reset",IDC_BUTTON2,160,232,56,11,BS_FLAT
     LTEXT           "Last Update - #",IDC_STATIC,15,237,78,8
-    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_NOSCROLL | WS_BORDER | 
-                    WS_TABSTOP,7,3,217,136
+    CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_NOSCROLL | 
+                    WS_BORDER | WS_TABSTOP,7,3,217,136
 END
 
 
@@ -2641,6 +2641,10 @@ FRIENDNOCLIENTSLOT      ICON                    "res\\friends1slot.ico"
 FRIENDWITHCLIENTSLOT    ICON                    "res\\friends2slot.ico"
 FRIENDCONNECTEDSLOT     ICON                    "res\\friends3slot.ICO"
 AABINCOMINGFOLDER       ICON                    "res\\incomingfolder.ico"
+TRAY_MESSAGE            ICON                    "res\\mule_tray_message.ico"
+TRAY_MESSAGE_GREY       ICON                    "res\\mule_tray_message_grey.ico"
+TRAY_MESSAGE_LOW        ICON                    "res\\mule_tray_message_low.ico"
+MOBILE                  ICON                    "res\\mobile.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2746,35 +2750,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
-#ifdef _WIN32
-LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-TRAY_MESSAGE            ICON                    "res\\mule_tray_message.ico"
-TRAY_MESSAGE_GREY       ICON                    "res\\mule_tray_message_grey.ico"
-TRAY_MESSAGE_LOW        ICON                    "res\\mule_tray_message_low.ico"
-#endif    // Deutsch (Deutschland) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5065,6 +5046,10 @@ BEGIN
     IDS_WAP_SENDBWIMAGES    "Allways send black and white images"
     IDS_WAP_GRAPHSWIDTH     "Graphs width"
     IDS_WAP_GRAPHSHEIGHT    "Graphs height"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_WAP_FILLEDGRAPHS    "Filled graphs"
     IDS_WAP_LOGSSIZE        "Logs size"
     IDS_WAP_ITEMSPERPAGE    "Items per page"
@@ -5077,7 +5062,7 @@ BEGIN
     IDS_WAP_SORTBY          "Sort By"
 END
 
-#endif    // Englisch (USA) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
