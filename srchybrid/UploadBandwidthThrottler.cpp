@@ -212,7 +212,7 @@ bool UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket*
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	if(resort == false && foundSocket) {
-        for (uint32 i = classID; i <= LAST_CLASS;i++)
+        for (uint32 i = classID; i < NB_SPLITTING_CLASS;i++)
 			if (m_highestNumberOfFullyActivatedSlots[i] > 0) --m_highestNumberOfFullyActivatedSlots[i];
     }
 	//MORPH END  - Added by SiRoB, Upload Splitting Class
