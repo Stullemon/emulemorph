@@ -146,7 +146,9 @@ void CWebServer::ReloadTemplates()
 			m_Templates.sStats = _LoadTemplate(sAll,_T("TMPL_STATS"));
 			m_Templates.sPreferences = _LoadTemplate(sAll,_T("TMPL_PREFERENCES_KAD"));
 			m_Templates.sLogin = _LoadTemplate(sAll,_T("TMPL_LOGIN"));
+			//MORPH START - Added by SiRoB/Commander, FAILEDLOGIN
 			m_Templates.sFailedLogin = _LoadTemplate(sAll,_T("TMPL_FAILEDLOGIN"));
+			//MORPH END   - Added by SiRoB/Commander, FAILEDLOGIN
 			m_Templates.sConnectedServer = _LoadTemplate(sAll,_T("TMPL_CONNECTED_SERVER"));
 			m_Templates.sAddServerBox = _LoadTemplate(sAll,_T("TMPL_ADDSERVERBOX"));
 			m_Templates.sWebSearch = _LoadTemplate(sAll,_T("TMPL_WEBSEARCH"));
@@ -535,7 +537,13 @@ void CWebServer::ProcessURL(ThreadData Data)
 				if ( pThis->m_Params.badlogins[i].datalen==ip ) faults++;
 
 			if (faults>4) {
+				//MORPH START - Changed by SiRoB/Commander, FAILEDLOGIN
+				/*
+				Out += _GetPlainResString(IDS_ACCESSDENIED);
+				*/
 				Out += _GetFailedLoginScreen(Data);
+				//MORPH END   - Changed by SiRoB/Commander, FAILEDLOGIN
+				
 				
 				// set 15 mins ban by using the badlist
 				BadLogin preventive={ip, ::GetTickCount() + (15*60*1000) };
@@ -2114,7 +2122,12 @@ CString CWebServer::_GetStats(ThreadData Data)
 	theApp.emuledlg->statisticswnd->ShowStatistics(true);
 
 	CString Out = pThis->m_Templates.sStats;
+	//MORPH START - Changed by SiRoB/Commander, Tree Stat
+	/*
+	Out.Replace(_T("[STATSDATA]"), theApp.emuledlg->statisticswnd->stattree.GetHTML(false));
+	*/
 	Out.Replace(_T("[Stats]"), theApp.emuledlg->statisticswnd->stattree.GetHTMLForExport());
+	//MORPH END   - Changed by SiRoB/Commander, Tree Stat
 
 	return Out;
 
@@ -2328,6 +2341,7 @@ CString CWebServer::_GetLoginScreen(ThreadData Data)
 	return Out;
 }
 
+//MORPH START - Added by SiRoB/Commander, FAILEDLOGIN
 CString CWebServer::_GetFailedLoginScreen(ThreadData Data)
 {
 
@@ -2357,6 +2371,7 @@ CString CWebServer::_GetFailedLoginScreen(ThreadData Data)
 
 	return Out;
 }
+//MORPH END   - Added by SiRoB/Commander, FAILEDLOGIN
 
 CString CWebServer::_GetRemoteLinkAddedOk(ThreadData Data)
 {
