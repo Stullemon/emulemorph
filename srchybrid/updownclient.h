@@ -1003,9 +1003,6 @@ public:
 private:
 	struct	IPRange_Struct2* m_structUserCountry; //EastShare - added by AndCycle, IP to Country
 //EastShare End - added by AndCycle, IP to Country
-	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-	bool	m_bPowerShared;
-	//MORPH END   - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 
 //Morph Start - added by AndCycle, ICS
 	// enkeyDEV: ICS

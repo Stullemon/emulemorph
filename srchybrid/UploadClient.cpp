@@ -179,16 +179,11 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 	{
 		if (m_nUploadState == US_UPLOADING)
 		{
-
 			m_nUpDatarate = 0;
 			m_nSumForAvgUpDataRate = 0;
 			m_AvarageUDR_list.RemoveAll();
 		}
 		// don't add any final cleanups for US_NONE here	
-		//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-		if (eNewState!=US_UPLOADING)
-			m_bPowerShared = GetPowerShared();
-		//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 		m_nUploadState = eNewState;
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 	}
@@ -413,7 +408,7 @@ bool CUpDownClient::IsPBForPS() const
 		return true;
 	if(currentReqFile->IsPartFile()==false && thePrefs.IsPayBackFirst() && credits->GetPayBackFirstStatus())
 		return true;
-	return (m_bPowerShared && (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING));
+	return false;
 }
 //MORPH END   - Added by SiRoB, Code Optimization PBForPS()
 
@@ -426,12 +421,10 @@ bool CUpDownClient::IsPBForPS() const
 bool CUpDownClient::GetPowerShared() const {
 //Comment : becarefull when changing this function don't forget to change IsPBForPS() 
 	if(!IsSecure()) return false;
-	//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
 	if (currentReqFile != NULL && currentReqFile->GetPowerShared())
 		return true;
-	return (m_bPowerShared && (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING));
-	//MORPH END   - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+	return false;
 }
 //MORPH END - Added by Yun.SF3, ZZ Upload System
 
@@ -866,9 +859,6 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 	m_nUpCompleteSourcesCount= 0;
 
 	if(newreqfile){
-		//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-		m_bPowerShared = newreqfile->GetPowerShared();
-		//MORPH END   - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 		newreqfile->AddUploadingClient(this);
 		md4cpy(requpfileid, newreqfile->GetFileHash());
 	}
@@ -957,10 +947,6 @@ uint32 CUpDownClient::SendBlockData(){
             if(GetQueueSessionPayloadUp() > SESSIONMAXTRANS+20*1024 && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
                 m_dwLastCheckedForEvictTick = curTick;
                 wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
-				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-				//reset
-				m_bPowerShared = false;
-				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
             }
 			//The main reason for this is that if we put the client back on queue and it goes
             if(wasRemoved == false && GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
