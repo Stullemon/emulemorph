@@ -21,7 +21,7 @@
 // Fields:
 //	<major>		major number (e.g. 0)
 //	<minor>		minor number (e.g. 30)
-//	<update>	update number (e.g. 0='a'  1='b'  2='c' ...)
+//	<update>	update number (e.g. 0='a'  1='b'  2='c'  3='d'  4='e'  5='f' ...)
 //	<build>		build number; currently not used
 //
 // Currently used:
@@ -33,7 +33,7 @@
 #define VERSION_UPDATE	1
 #define VERSION_BUILD	38
 
-#define MOD_VERSION		_T("MorphXT v5.0") //MORPH - Added by SiRoB
 // NOTE: This version string is also used by the language DLLs!
 #define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE)
+
 #endif /* !__VERSION_H__ */

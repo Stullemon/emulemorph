@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -56,9 +56,6 @@ BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_AUTOCONNECTSTATICONLY, OnSettingsChange)
 	ON_BN_CLICKED(IDC_MANUALSERVERHIGHPRIO, OnSettingsChange)
 	ON_BN_CLICKED(IDC_EDITADR, OnBnClickedEditadr)
-    //MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	ON_EN_CHANGE(IDC_LOWIDRETRY, OnSettingsChange)
-	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
@@ -120,12 +117,6 @@ void CPPgServer::LoadSettings(void)
 		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,1);
 	else
 		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,0);
-
-    CString strBuffer;
-    //MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	strBuffer.Format(_T("%d"), thePrefs.GetLowIdRetries());
-	GetDlgItem(IDC_LOWIDRETRY)->SetWindowText(strBuffer);
-	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 }
 
 BOOL CPPgServer::OnApply()
@@ -154,14 +145,6 @@ BOOL CPPgServer::OnApply()
 	thePrefs.addserversfromclient = (uint8)IsDlgButtonChecked(IDC_UPDATESERVERCLIENT);
 	thePrefs.autoconnectstaticonly = (uint8)IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY);
 
-    CString buffer;
-	
-	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	thePrefs.LowIdRetries = GetDlgItemInt(IDC_LOWIDRETRY,NULL,FALSE);
-	if (thePrefs.LowIdRetries > 5)
-		thePrefs.LowIdRetries = 5;
-	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
-	
 	LoadSettings();
 
 	SetModified();
@@ -187,9 +170,6 @@ void CPPgServer::Localize(void)
 		
 		// Barry
 		GetDlgItem(IDC_AUTOCONNECTSTATICONLY)->SetWindowText(GetResString(IDS_PW_AUTOCONNECTSTATICONLY));
-		//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-		GetDlgItem(IDC_LOWIDRETRYLABEL)->SetWindowText(GetResString(IDS_LOWIDRETRYLABEL));
-		//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
 	}
 }
 
