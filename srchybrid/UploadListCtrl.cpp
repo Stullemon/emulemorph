@@ -531,9 +531,16 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					}
 					//Morph - modified by AndCycle, take PayBackFirst have same class with PowerShare
 					else if (client->IsPBForPS()){
-						if(client->IsMoreUpThanDown() && client->GetPowerShared())	Sbuffer.Append(_T(" PBF/PS"));
-						else if (client->IsMoreUpThanDown())	Sbuffer.Append(_T(" PBF"));
-						else if (client->GetPowerShared())	Sbuffer.Append(_T(" PS"));
+						if (client->IsMoreUpThanDown())
+						{
+							Sbuffer.Append(_T(" PBF"));
+							if (client->Credits())
+								Sbuffer.AppendFormat( _T("(%i)"),
+								CastItoXBytes((float)client->Credits()->GetUploadedTotal()-
+								(float)client->Credits()->GetDownloadedTotal()));
+						}
+						if (client->GetPowerShared())
+							Sbuffer.Append(_T(" PS"));
 
 						CString tempFilePrio;
 						if (file)
