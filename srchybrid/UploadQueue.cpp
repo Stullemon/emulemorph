@@ -445,7 +445,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	POSITION insertPosition = NULL;
 	uint32 posCounter = uploadinglist.GetCount();
 
-	uint32 newclientScore = newclient->GetScore(false);
+	//uint32 newclientScore = newclient->GetScore(false);
 
 	bool foundposition = false;
 	POSITION pos = uploadinglist.GetTailPosition();
@@ -596,7 +596,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 			bool send = true;
 			if (reqfile->IsPartFile()){
 				((CPartFile*)reqfile)->WritePartStatus(&data, newclient);	// SLUGFILLER: hideOS
-				send = reqfile->GetHideOS()>=0 ? reqfile->GetHideOS() : thePrefs.GetHideOvershares();
+				send = reqfile->HideOSInWork();
 			}
 			else if (!reqfile->ShareOnlyTheNeed(&data, newclient)) // Wistly SOTN
 				if (!reqfile->HideOvershares(&data, newclient))	// Slugfiller: HideOS
@@ -803,9 +803,9 @@ void CUploadQueue::Process() {
 		avarage_tick_list.AddTail(curTick);
 	}
 
-	// don't save more than 30 secs of data
+	// don't save more than 5 secs of data
 	while(avarage_tick_list.GetCount() > 0)
-		if ((curTick - avarage_tick_list.GetHead()) > 15000) {
+		if ((curTick - avarage_tick_list.GetHead()) > 10000) {
 			m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 			avarage_friend_dr_list.RemoveHead();
 			avarage_tick_list.RemoveHead();
@@ -1646,7 +1646,7 @@ void CUploadQueue::UpdateDatarates() {
 		*/
 		if (avarage_tick_list.GetCount() > 0){
 			if (avarage_tick_list.GetCount() == 1){
-				datarate = (m_avarage_dr_sum*1000) / 15000;
+				datarate = (m_avarage_dr_sum*1000) / 10000;
 				friendDatarate = 0;
 			}
 			else {
