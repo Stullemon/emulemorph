@@ -333,7 +333,7 @@ void CClientCreditsList::LoadList()
 	CSafeBufferedFile file;
 	CFileException fexp;
 
-	//MORPH START - Changed by SiRoB, Allternative choose .met to load
+	m_bSaveUploadQueueWaitTime = thePrefs.SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 	//Morph Start - added by AndCycle, choose .met to load
 
 	CSafeBufferedFile	loadFile;
@@ -374,12 +374,15 @@ void CClientCreditsList::LoadList()
 	while (index-- > 0){
 		for (uint8 i=1; i<index;i++)
 		{
-			if(loadFileStatus[prioOrderfile[i-1]].m_mtime < loadFileStatus[prioOrderfile[i]].m_mtime)
-			{
-				tmpprioOrderfile = prioOrderfile[i-1];
-				prioOrderfile[i-1] = prioOrderfile[i];
-				prioOrderfile[i] = tmpprioOrderfile;
-			}
+			if(m_bSaveUploadQueueWaitTime)
+				if(loadFileStatus[prioOrderfile[i-1]].m_mtime > loadFileStatus[prioOrderfile[i]].m_mtime)
+					continue;
+			else
+				if(loadFileStatus[prioOrderfile[i-1]].m_mtime >= loadFileStatus[prioOrderfile[i]].m_mtime)
+					continue;
+			tmpprioOrderfile = prioOrderfile[i-1];
+			prioOrderfile[i-1] = prioOrderfile[i];
+			prioOrderfile[i] = tmpprioOrderfile;
 		}
 	}
 
