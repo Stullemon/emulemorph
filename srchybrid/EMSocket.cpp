@@ -901,10 +901,3 @@ void CEMSocket::TruncateQueues() {
 	sendLocker.Unlock();
 }
 
-//EastShare Start - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
-void CEMSocket::OnConnect(int nErrorCode){
-  CAsyncSocketEx::OnConnect(nErrorCode);
-  if (nErrorCode && nErrorCode != WSAEHOSTUNREACH)
-      OnConnectError(nErrorCode);
-}
-//EastShare End - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)

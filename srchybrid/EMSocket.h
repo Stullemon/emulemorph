@@ -91,11 +91,6 @@ protected:
 	virtual void	OnSend(int nErrorCode);	
 	virtual void	OnReceive(int nErrorCode);
 
-	//EastShare Start - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
-	virtual void OnConnect(int nErrorCode);
-	virtual void OnConnectError(int nErrorCode) {};
-	//EastShare End - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
-
 	uint8	byConnected;
 
 	// deadlake PROXYSUPPORT

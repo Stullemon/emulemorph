@@ -1283,7 +1283,7 @@ void CClientReqSocket::OnReceive(int nErrorCode){
 
 bool CClientReqSocket::Create(){
 	theApp.listensocket->AddConnection();
-	BOOL result = CAsyncSocketEx::Create(0,SOCK_STREAM,FD_WRITE|FD_READ|FD_CLOSE|FD_CONNECT); // deadlake PROXYSUPPORT - changed to AsyncSocketEx //EastShare - modified by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
+	BOOL result = CAsyncSocketEx::Create(0,SOCK_STREAM,FD_WRITE|FD_READ|FD_CLOSE); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	OnInit();
 	return result;
 }
@@ -1549,14 +1549,3 @@ void CListenSocket::SwitchSUC(bool bSetSUCOn)
 	}
 }
 //MORPH END - Added by Yun.SF3, Auto DynUp changing
-
-
-//EastShare Start - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
-void CClientReqSocket::OnConnectError(int nErrorCode){
-#ifdef _DEBUG
-  if (client)
-      theApp.emuledlg->AddDebugLogLine(false,"Can't connect to client %s IP: %s - %s", (client->GetUserName() ? client->GetUserName() : "[Server/Exchange source]") , client->GetFullIP(), GetErrorMessage(nErrorCode, 1));//(bluecow)
-#endif
-  Disconnect();
-}
-//EastShare End - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
