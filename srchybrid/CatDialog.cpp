@@ -100,6 +100,8 @@ void CCatDialog::UpdateData(){
 
 	CheckDlgButton(IDC_CHECK_FS, m_myCat->selectioncriteria.bFileSize?1:0);
 	CheckDlgButton(IDC_CHECK_MASK, m_myCat->selectioncriteria.bAdvancedFilterMask?1:0);
+
+	CheckDlgButton(IDC_CHECK_DONTRESUMEPAUSEDFILE, m_myCat->bDontResumePausedFile?1:0); //MORPH - Added by SiRoB, Don't resume paused file
 	// khaos::categorymod-
 }
 
@@ -175,6 +177,7 @@ void CCatDialog::Localize(){
 	GetDlgItem(IDC_STATIC_SCOUNT)->SetWindowText(GetResString(IDS_CAT_SC));
 	GetDlgItem(IDC_STATIC_ASCOUNT)->SetWindowText(GetResString(IDS_CAT_ASC));
 	// khaos::categorymod-
+	GetDlgItem(IDC_CHECK_DONTRESUMEPAUSEDFILE)->SetWindowText(GetResString(IDS_CAT_DONTRESUMEPAUSEDFILE)); //MORPH - Added by SiRoB, Don't resume paused file
 
 	m_ctlColor.CustomText = _T(GetResString(IDS_COL_MORECOLORS));
 	m_ctlColor.DefaultText = _T(GetResString(IDS_DEFAULT));
@@ -270,8 +273,9 @@ void CCatDialog::OnBnClickedOk()
 
 	m_myCat->selectioncriteria.bFileSize = IsDlgButtonChecked(IDC_CHECK_FS)?true:false;
 	m_myCat->selectioncriteria.bAdvancedFilterMask = IsDlgButtonChecked(IDC_CHECK_MASK)?true:false;	
+	m_myCat->bDontResumePausedFile = IsDlgButtonChecked(IDC_CHECK_DONTRESUMEPAUSEDFILE)?true:false;	//MORPH - Added by SiRoB, Don't resume paused file
 	// khaos::categorymod-
-
+	
 	theApp.emuledlg->transferwnd->downloadlistctrl.Invalidate();
 
 	OnOK();

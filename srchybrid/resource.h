@@ -2045,7 +2045,7 @@
 #define IDS_CAT_GROUP                   3621
 #define IDS_CAT_SETFILEGROUPMSG         3622
 #define IDC_AUTOCAT                     3622
-#define IDS_CAT_RESUMEFILEONLYINSAMECAT 3622
+#define IDS_CAT_DONTRESUMEPAUSEDFILE    3622
 #define IDS_A4AF_FORCEALL               3623
 #define IDS_A4AF_FLAGS                  3624
 #define IDS_A4AF_ONFLAG                 3625
@@ -2313,6 +2313,7 @@
 #define IDC_CHECK_FS                    4869
 #define IDC_CHECK_MASK                  4870
 #define IDC_AUTOUPIPFILTER              4871
+#define IDC_CHECK_DONTRESUMEPAUSEDFILE  4871
 #define IDC_VIDEOBACKUP2                4872
 #define IDC_UPDATEFAKELISTSTART         4873
 #define IDC_EASTSHARE_OPTS              4874
@@ -2325,7 +2326,6 @@
 #define IDS_IP2COUNTRY                  4879
 #define IDC_CRC32SUFFIX                 4879
 #define IDS_COUNTRYNAME_SHORT           4880
-#define IDC_CHECK1                      4880
 #define IDC_DONTADDCRC                  4880
 #define IDS_COUNTRYNAME_MID             4881
 #define IDC_FILENAMEMASKEDITTEMPLATE    4881

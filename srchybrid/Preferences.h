@@ -105,6 +105,7 @@ struct Category_Struct{
 	// khaos::kmod+ Category Advanced A4AF Mode
 	// 0 = Default, 1 = Balancing, 2 = Stacking
 	uint8	iAdvA4AFMode;
+	bool	bDontResumePausedFile; //MORPH - Added by SiRoB, Don't resume paused file
 	// View Filter Struct
 	CategoryViewFilter_Struct viewfilters;
 	CategorySelectionCriteria_Struct selectioncriteria;
@@ -661,7 +662,6 @@ public:
 	static uint8		m_iStartDLInEmptyCats;
 	static bool		m_bRespectMaxSources;
 	static bool		m_bUseAutoCat;
-	static bool		m_bResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume File Only in the same cat
 	// khaos::categorymod-
 	// khaos::kmod+
 	static bool		m_bShowA4AFDebugOutput;
@@ -1499,7 +1499,6 @@ public:
 	static	bool	SmallFileDLPush()		{ return m_bSmallFileDLPush; }
 	static	uint8	StartDLInEmptyCats()	{ return m_iStartDLInEmptyCats; } // 0 = disabled, otherwise num to resume
 	static	bool	UseAutoCat()			{ return m_bUseAutoCat; }
-	static	bool	ResumeFileOnlyInSameCat(){ return m_bResumeFileOnlyInSameCat; } //MORPH - Added by SiRoB, Resume File Only in the same cat
 	// khaos::categorymod-
 	// khaos::kmod+
 	static	bool	UseSmartA4AFSwapping()	{ return m_bSmartA4AFSwapping; } // only for NNP swaps and file completes, stops, cancels, etc.

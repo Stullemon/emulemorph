@@ -298,9 +298,13 @@ bool CDownloadQueue::StartNextFile(int cat){
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->GetStatus() == PS_PAUSED) {
-			if (!pfile)
-				if (thePrefs.ResumeFileOnlyInSameCat() && cur_file->GetCategory()==cat) //MORPH - Added by SiRoB, Resume File Only in the same category
-					pfile = cur_file;
+			//MORPH START - Added by SiRoB, Don't resume paused file
+			if (thePrefs.GetCategory(cur_file->GetCategory())->bDontResumePausedFile)
+				continue;
+			//MORPH END   - Added by SiRoB, Don't resume paused file
+			if (!pfile) {
+				pfile = cur_file;
+			}
 			else {
 				if (pfile->GetCategory()==cat && thePrefs.GetResumeSameCat() && cur_file->GetCategory()!=cat  && cat!=-1)
 					continue;

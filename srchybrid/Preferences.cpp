@@ -578,7 +578,6 @@ bool	CPreferences::m_bSmallFileDLPush;
 uint8	CPreferences::m_iStartDLInEmptyCats;
 bool	CPreferences::m_bRespectMaxSources;
 bool	CPreferences::m_bUseAutoCat;
-bool	CPreferences::m_bResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume File Only in the same cat
 // khaos::categorymod-
 // khaos::kmod+
 bool	CPreferences::m_bShowA4AFDebugOutput;
@@ -2392,7 +2391,6 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("SmallFileDLPush", m_bSmallFileDLPush,"eMule");
 	ini.WriteInt("StartDLInEmptyCats", m_iStartDLInEmptyCats,"eMule");
 	ini.WriteBool("UseAutoCat", m_bUseAutoCat,"eMule");
-	ini.WriteBool("ResumeFileOnlyInSameCat", m_bResumeFileOnlyInSameCat,"eMule"); //MORPH - Added by SiRoB, Resume File Only in the same cat
 	// khaos::categorymod-
 	// khaos::kmod+
 	ini.WriteBool("SmartA4AFSwapping", m_bSmartA4AFSwapping,"eMule");
@@ -2473,21 +2471,21 @@ void CPreferences::SaveCats(){
 	catinif.Format("%sCategory.ini",configdir);
 	remove(catinif);
 
-		CIni catini( catinif, "Category" );
-		catini.WriteInt("Count",catMap.GetCount()-1,"General");
-		catini.WriteInt("CategoryVersion", 2, "General"); // khaos::categorymod+
-		for (int ix=0;ix<catMap.GetCount();ix++){
-			ixStr.Format("Cat#%i",ix);
-			catini.WriteString("Title",catMap.GetAt(ix)->title,ixStr);
-			catini.WriteString("Incoming",catMap.GetAt(ix)->incomingpath,ixStr);
-			catini.WriteString("Comment",catMap.GetAt(ix)->comment,ixStr);
-			buffer.Format("%lu",catMap.GetAt(ix)->color,ixStr);
-			catini.WriteString("Color",buffer,ixStr);
-			catini.WriteInt("Priority",catMap.GetAt(ix)->prio,ixStr);
-			// khaos::kmod+ Category Advanced A4AF Mode and Auto Cat
-			catini.WriteInt("AdvancedA4AFMode", catMap.GetAt(ix)->iAdvA4AFMode, ixStr);
-			//catini.WriteString("AutoCatString", catMap.GetAt(ix)->autocat, ixStr);
-			// khaos::kmod-
+	CIni catini( catinif, "Category" );
+	catini.WriteInt("Count",catMap.GetCount()-1,"General");
+	catini.WriteInt("CategoryVersion", 2, "General"); // khaos::categorymod+
+	for (int ix=0;ix<catMap.GetCount();ix++){
+		ixStr.Format("Cat#%i",ix);
+		catini.WriteString("Title",catMap.GetAt(ix)->title,ixStr);
+		catini.WriteString("Incoming",catMap.GetAt(ix)->incomingpath,ixStr);
+		catini.WriteString("Comment",catMap.GetAt(ix)->comment,ixStr);
+		buffer.Format("%lu",catMap.GetAt(ix)->color,ixStr);
+		catini.WriteString("Color",buffer,ixStr);
+		catini.WriteInt("Priority",catMap.GetAt(ix)->prio,ixStr);
+		// khaos::kmod+ Category Advanced A4AF Mode and Auto Cat
+		catini.WriteInt("AdvancedA4AFMode", catMap.GetAt(ix)->iAdvA4AFMode, ixStr);
+		//catini.WriteString("AutoCatString", catMap.GetAt(ix)->autocat, ixStr);
+		// khaos::kmod-
 		// khaos::categorymod+ Save View Filters
 		catini.WriteInt("vfFromCats", catMap.GetAt(ix)->viewfilters.nFromCats, ixStr);
 		catini.WriteBool("vfVideo", catMap.GetAt(ix)->viewfilters.bVideo, ixStr);
@@ -2518,7 +2516,8 @@ void CPreferences::SaveCats(){
 		catini.WriteBool("scFileSize", catMap.GetAt(ix)->selectioncriteria.bFileSize, ixStr);
 		catini.WriteBool("scAdvancedFilterMask", catMap.GetAt(ix)->selectioncriteria.bAdvancedFilterMask, ixStr);
 		// khaos::categorymod-
-		}
+		catini.WriteBool("DontResumePausedFile", catMap.GetAt(ix)->bDontResumePausedFile, ixStr); //MORPH - Added by SiRoB, Don't resume paused file
+	}
 }
 
 void CPreferences::ResetStatsColor(int index){
@@ -2959,7 +2958,6 @@ void CPreferences::LoadPreferences(){
 	m_bSmallFileDLPush=ini.GetBool("SmallFileDLPush", true);
 	m_iStartDLInEmptyCats=ini.GetInt("StartDLInEmptyCats", 0);
 	m_bUseAutoCat=ini.GetBool("UseAutoCat", true);
-	m_bResumeFileOnlyInSameCat=ini.GetBool("ResumeFileONlyInSameCat", true); //MORPH - Added by SiRoB, Resume File Only in the same cat
 	// khaos::categorymod-
 	// khaos::kmod+
 	m_bUseSaveLoadSources=ini.GetBool("UseSaveLoadSources", true);
@@ -3271,6 +3269,7 @@ void CPreferences::LoadCats() {
 		defcat->viewfilters.sAdvancedFilterMask = "";
 		defcat->selectioncriteria.bAdvancedFilterMask = true;
 		defcat->selectioncriteria.bFileSize = true;
+		defcat->bDontResumePausedFile = false; //MORPH - Added by SiRoB, Don't resume paused file
 		AddCat(defcat);
 		if (bSkipLoad)
 		{
@@ -3329,7 +3328,7 @@ void CPreferences::LoadCats() {
 		// Load Selection Criteria
 		newcat->selectioncriteria.bFileSize = catini.GetBool("scFileSize", true);
 		newcat->selectioncriteria.bAdvancedFilterMask = catini.GetBool("scAdvancedFilterMask", true);
-
+		newcat->bDontResumePausedFile = catini.GetBool("DontResumePausedFile", false); //MORPH - Added by SiRoB, Don't resume paused file
 		AddCat(newcat);
 		if (!PathFileExists(newcat->incomingpath)) ::CreateDirectory(newcat->incomingpath, 0);
 	}
