@@ -3408,7 +3408,7 @@ void CPreferences::LoadPreferences()
 	LowIdRetries=ini.GetInt(_T("ReconnectOnLowIdRetries"),3);	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	m_iSpreadbarSetStatus = ini.GetInt(_T("SpreadbarSetStatus"), 1);
+	m_iSpreadbarSetStatus = ini.GetInt(_T("SpreadbarSetStatus"), 0);
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	hideOS=ini.GetInt(_T("HideOvershares"),0/*5*/);
