@@ -348,6 +348,7 @@ program?
 -John aka. Unknown1 - Developer
 -Ornis - Developer
 -bluecow - Developer
+-zz - Developer
 -Monk - Testers
 
 -Merkur (merkur-@users.sourceforge.net) - Master of the Mule - retired, we miss you :)

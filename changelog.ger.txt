@@ -1,15 +1,229 @@
-	CHANGELOG FOR EMULE
+	CHANGELOG FÜR EMULE
 	===================
 
+v0.44b
+----------------------
+- 10. September 2004 -
+----------------------
+bluecow: Korrektur eines Unicode-Win9x-Fehlers, bei dem ein falscher freier-Festplattenplatz-Wert ermittelt wurde
+bluecow: Korrektur eines Unicode-Win9x-Fehlers: Kontrollen der Verzeichnisfreigabe-Einstellung funktionierten nicht
+bluecow: Korrektur eines Unicode-Fehlers, welcher zu fehlenden UTF8 Umwandlungen im Webinterface führte
+bluecow: 7-zip -Dateierweitung wurde zu den bekannten Archiv-Typen hinzugefügt, für das Veröffentlichen und Suchen von Dateien
+bluecow: Korrektur eines Unicode-Fehlers mit der Haupt-Toolbar-Initialisierung, welcher zu nicht funktionierenden Tastaturkombinationen führte
+bluecow: Korrektur eines Unicode-Win9x-Fehlers mit dem Kopieren von ed2k-Links in die Zwischenablage
+bluecow: Workaround für einen offensichtlichen Fehler in der Windows DNS Bibliothek, welche ungültige Daten lieferte
+bluecow: Korrektur eines Fehlers, welcher fortgesetzte Dateien sofort wieder (aufgrund von Festplattenplatzmangels) in den Pausezustand wechseln ließ.
+bluecow: neue Option, um festzulegen, ob die Systemcodepage fpr die Nicht-Unicode-Stringumwandlungen genutzt werden soll (SetSystemACP=1). Dies ist nur zu Kompatibilitätszwecken für Nutzer, welche eine andere Codepage für Nicht-Unicode-Anwendungen angegeben haben. Es ist nicht ratsam, diese Option ohne einen triftigen Grund zu nutzen.
+bluecow: automatische Erkennung des Systemcodes und der aktuellen Codepage wenn eMule das erste Mal startet (setzt SetSystemACP=1).
+bluecow: Korrektur eines Unicode-Win9x-Fehlers: leere IP-Filterlisten-Anzeige
+bluecow: Korrektur eines Unicode-Win9x-Fehlers: fehlende Tooltips in der Downloadliste
+.: Korrektur in der "Starten als unpriviligierter Benutzer"-Funktion
+.: Korrektur eines "Laufzeitfehler"-Absturzes, welcher auftreten konnte, wenn Kad aktiviert war
+.: Korrektur in der Behandlung von fehlerhaften known2.met Dateien
+.: Korrektur eines Fehlers, welcher eMule zwischenzeitlich einen falschen AICH-Hash für eine Tempdatei zuwies, welche nach dem Start neu gehasht wurde
+.: Korrektur einiger potentieller Probleme beim Auslesen von Mediainfos aus Dateien
+
+----------------------
+- 9. September 2004  -
+----------------------
+bluecow: Korrektur eines divide by zero Fehlers im Kad Kontakte Histogramm
+zz, bluecow: Korrektur des UploadSpeedSense UDP Pingers
+zz: Korrektur in der alphabetischen Sortierung für das fortsetzen des nächsten Downloads
+Unk: Korrektur: Die Verzögerung bei der Erstellung von Uploadslots konnte bei der creditsystembasierten Uploadmethode zu viele Upload Slots entfernen
+
+----------------------
+- 8. September 2004  -
+----------------------
+Unk: mögliches Memleak durch ein fehlerhaftes Kad-Tag korrigiert
+bluecow: Memleak im PC-Sucher- und im Einzelbildgrabber -Thread korrigiert
+bluecow: Hinzugefügt: Bildseitenverhältnis wird nun im Mediainfo-Dialog angezeigt
+bluecow: Überprüfung hinzugefügt, ob die Dateierweiterung herunterladener/freigegebener Dateien dem Dateityp entspricht. (wird nur genutzt, wenn die MediaInfo-Bibliothek installiert ist - siehe dazu auch ältere Changelog-Einträge bzgl. MediaInfo-Bibliothek).
+bluecow: neue Einstellung für die preferences.ini: "InspectAllFileTypes=1", derzeit nur für den MediaInfo-Dialog genutzt - um das Dateiformat von herunterladenen/freigegebenen Dateien durch Auswertung des Headers (am nützlichsten, wenn die MediaInfo-Bibliothek installiert ist) zu ermitteln
+bluecow: Korrektur von Fehlern in der Videovorschau und Archivvorschau, im Zusammengang mit falscher Dateipointer-Nutzung, welche in seltenen Fällen zur Vorschau einer falschen Datei führte
+bluecow: neue Einstellung für die preferences.ini: "PreviewCopiedArchives=0", um eine alternative Methode für die Vorschau eines Archives zu nutzen (schneller und nutzt weniger Festplattenplatz auf dem Temp-Laufwerk).
+bluecow: neue Einstellung für die preferences.ini: "ShowActiveDownloadsBold=1". Aktive Downloads und uploadene Quellen werden fett im Transfer-Fenster angezeigt
+bluecow: Änderung: server.met und ipfilter.dat URLs werden zu der Autovervollständigung hinzugefügt, auch wenn der Download fehlschlug, um keine eingegebenen URLs zu verlieren
+bluecow: Hinzugefügt: Wenn mehrere  Server in der Serverliste ausgewählt werden, zeigt ein Tooltip die zusammengefassten Statistiken der Server an
+bluecow: Hinzugefügt: wenn mehrere Suchergebnisse ausgewählt werden, zeigt ein Tooltip die Gesamtdateigröße aller gewählten Dateien
+bluecow: Unicode-Fehler korrigiert, beim manuellen Speichern von Log-Dateien
+bluecow: Unicode-Fehler, wenn ein "?" im Datei-Kommentar angegeben wurde
+bluecow: Unicode-Fehler korrigiert, wenn ANSI-Logfile in Unicode fortgeführt wurde
+
+----------------------
+- 3. September 2004  -
+----------------------
+Unk: Änderung in der Quellenindexierung, so dass nur die neusten Einträge gesendet werden
+
+
+v0.44a
+----------------------
+- Sep, 2nd 2004     -
+----------------------
+Unk: Kad erinnert sich nun an den letzten offen/firewalled status während einer erneuten Überprüfung um zwischenzeitlich falsche Meldungen zu vermeiden.
+Unk: Es werden nun zwei aufeinanderfolgende IP-Antworten benötigt um die derzeitig bekannte IP zu ändern um die Auswirkungen von falschen Antworten zu reduzieren
+.: Das MobileMule Protokoll wurde auf 0.9a aktualisiert (bugfix)
+.: Ein Bug der einen falschen Status von empfangenden Parts für Uploads verursachen könnte wurde behoben.
+
+----------------------
+- Sep, 1th 2004     -
+----------------------
+.: Eine neue Dialogseite für die Erstellung von ED2K-Links von freigegebenen und downloadenen Dateien ersetzt die alten Contextmenü Einträge
+.: LibPng wurde auf version 1.26 aktualisiert um eine Sicherheitslücke zu schließen (die allerdings in eMule nur geringe Auswirkungen hat)
+.: Der IP-Filter wird nun auch benutzt um eintreffende UDP-Pakete zu ignorieren
+.: Eine Option in den Einstellungen erlaubt nun die Auswahl zwischen der einfachen (vor 0.43) und einer erweiterten Methode zur Berechnung der verbleibenen Zeit von zu ladenen Dateien
+.: Ein neues zusätzliches Hashsystem (AICH Hashs) wurde eingeführt, welches den durchschnittlichen Datenverlust bei einer Korruption von 4.64MB (mit ICH) auf 180KB senkt (AICH). Das System ist im effektivsten wenn Links mit zusätzlichem AICH Hash verwendet werden, die eMule nun auch erzeugen kann.
+.: WICHTIG: Wegen des neuen Hashsystem ist es notwendig dass eMule alle freigegebenen Datei neu hasht - dies ist ein einmaliger Vorgang der sich nicht vermeiden lässt.
+
+----------------------
+- Aug, 26th 2004      -
+----------------------
+Unk: eMule versucht nun zu schätzen wieviele Dateien in Kad vorhanden sind
+
+----------------------
+- Aug, 23rd 2004      -
+----------------------
+Unk: Potentielles Memleak behoben
+Unk: Die Berechnung der Anzahl der Benutzer von Kad wurde geändert
+
+----------------------
+- Aug, 22nd 2004      -
+----------------------
+Unk: Die Methode wie Kad Kontakte löscht wurde geändert so dass die Kontakt aktueller bleiben sollte.
+Unk: Es werden nicht mehr alle Kad Kontakte beim Beenden gespeichert sondern nur noch eine Stichprobe von bis zu 200
+Unk: Alle angezeigten Werte gehen durch ein Format-Funktion um sie zu standarisieren
+
+----------------------
+- Aug, 21st 2004      -
+----------------------
+Unk: Es gibt nun die Möglichkeit eine Quelle manuell hinzuzufügen
+Unk: wenn Kad keinen eingehenden Traffic für eine bestimmte zeit feststellt nimmt es an dass die Verbingung verloren wurde
+Unk: ein bug der viele unböntigte Kad Bootstrap Pakete sendete wurde behoben
+Unk: Eine Wartung des Kad Codes (unnötigen Code entfernen, log events ändern usw)
+
+----------------------
+- Aug, 20th 2004      -
+----------------------
+Unk: Die Methode zu berenchnung der verbleibenen Downloadzeit wurde angepasst
+.: Die Behandlung von toten Quellen wurde überarbeitet (verhindert das Quellen bei denen bekannt ist dass sie unerreichbar sind innerhalb einer bestimmten Zeit erneut befragt werden) 
+
+----------------------
+- Aug, 19th 2004      -
+----------------------
+Unk: Die Möglichkeit eMule automatisch beim Windowsstart zu starten wurde hinzugefügt
+Unk: Ein bug der für ausgehende Verbindungen die falsche ID/IP des Clienten beim IP-Filter kontrollieren könnte wurde behoben
+unk: Die Anzahl der bekannten Clienten zu Kad/Ed2k verbunden sind wurde zur Statistik hinzugefügt
+
+----------------------
+- Aug, 18th 2004      -
+----------------------
+Unk: eMuel kontrolliert nun die Anzahl der Halb-offenen Verbindungen und limitiert neue Verbingsversuche wenn ein Limit erreich ist (vermeidet das WinXP Sp2 alle Verbindungen verlangsamt)
+Unk: We no longer allow a socket pending Connect to time out until OnConnect is called. ( If approved and kept in, it should help with SP2 and lost sources..)
+Unk: Die Warnungen das Kad beta ist wurden entfernt
+
+----------------------
+- Aug, 15th 2004      -
+----------------------
+Unk: Erste Schritte zur Einbindung von firewalled Clienten in Kad. Dies wird erst Wirkung zeigen wenn die meisten Benutzer die Version aktualisiert haben
+
+----------------------
+- Aug, 9th 2004      -
+----------------------
+Unk: Die Zeit zwischen Veröffentlichungen von Schlüsseln in Kad wurde erhöht um den Overhead zu senken
+Unk: Möglichen Memleak bei eingehenen fehlerhaften Kad Veröffentlichungen wurde behoben
+Unk: Einige Limits wieviele Kad Schlüssel indiziert werden wurden hinzugefügt
+
+----------------------
+- Aug, 8th 2004      -
+----------------------
+zz: Nächste Datei fortsetzen benutzt nun die gleichen Optionen wie A4Af (alphabetisch, Kategorie-, Dateipriorität usw.)
+
+----------------------
+- Aug, 5th 2004      -
+----------------------
+zz: UploadSpeedSense minimum limit darf nun unter 10KB/s gehen, nutzt jedoch in dem Fall eine andere Ratio um reines Downloaden ohne Uploaden zu verhinden 
+
+----------------------
+- Aug, 4th 2004      -
+----------------------
+zz: die Behandlung im A4AF Managment von Quellen die keine benötigten Teile haben wurde verbessert
+
+----------------------
+- Aug, 1st 2004      -
+----------------------
+bluecow: Ein Bug in der Client Versions-Statistik wurde korregiert
+
+----------------------
+- Jul, 31st 2004     -
+----------------------
+Unk: Ein Bug der die Unterbrechung des Uploads nach einem kompletten Part selbst bei leerer queue verursachte wurde behoben
+Unk: Die IRC-, Nachrichten- und Statistik GUI wurde mit Veränderungen aus Mods [] aktualisiert
+
+----------------------
+- Jul, 26th 2004     -
+----------------------
+bluecow: Sortieren von String im Benutzerinterface ist abhängig von der lokalen Sprache (sehr ähnlich zum IE)
+Ornis: Ein bug in der Downloadliste des Webinterface wurde behoben
+
+----------------------
+- Jul, 24th 2004     -
+----------------------
+bluecow: Eine Netzwerk Info-Dialog wurde hinzugefügt, der durch ein Doppelklick auf das verbindungsicon in der Statusbar geöffnet wird.
+bluecow: Einige kleinere Bugs im Dateikommentar-System wurden behoben
+bluecow: Das Downloadfenster zeigt nun das Systemicon für den entsprechenden Typ der Datei
+
+----------------------
+- Jul, 20th 2004     -
+----------------------
+buecow: Ein bug der server auf, die per ED2K Link aufgenommen wurde, auf niedriege Priorität setzte wurde behoben
+Ornis: Ctrl-V fügt einen ED2k-Link aus der Zwischenablage in die Downloadliste ein
+
+----------------------
+- Jul, 17th 2004     -
+----------------------
+bluecow: Ein Kad histogram welches die bekannten Kontakte zeigt wurde hinzugefügt
+Ornis: Im Erster-Start Wizzard und in den Verbingungseinstellungen gibt es nun die Möglichkeit einen webbasierten Porttest durchzuführen.
+Ornis: TCP und UDP Ports können während der Laufzeit gewechselt werden wenn eMule nicht bereits verbunden ist
+
+----------------------
+- Jul, 16th 2004     -
+----------------------
+zz: USS wurde geändert um seltene Probleme mit TTLs besser zu handhaben
+zz: Ein Fehler der nicht alle Dateien stoppte/pausierte wenn das Kontextmenü dafür benutzt wurde, wurde beseitigt
+
+----------------------
+- Jul, 12th 2004     -
+----------------------
+zz: Es wird verhindert das Clienten, die keinen Uploadslot haben Blockanforderungen zur Warteliste hinzufügen, was verhindert dass diese Blocks gesendet werden sobald die Clienten einen Slot bekommen
+
+----------------------
+- Jul, 7th 2004      -
+----------------------
+zz: Die Anforderung von Quellen wird nun in der gleichen Reihenfolge wie A4AF Priorität ausgeführt
+zz: Standby-Uploadslots werden grau gekennzeichnet
+
+----------------------
+- Jul, 6th 2004      -
+----------------------
+zz: Das limit der Warteliste erlaubt nun maximal 25% zusätzliche Clienten mit hohem Creditwert
+Unk: Ein Bug in Datei-Prioritäten wurde behoben
+
+----------------------
+- Jul, 5th 2004      -
+----------------------
+zz: ´Versuche ersten und letzten Teil zuerst zu laden´ ist nun individuell für jede Datei anwählbar wenn die globale option ausgeschaltet ist.
+
+----------------------
+- Jul, 3rd 2004      -
+----------------------
+bluecow: Bei mehrern markierten freigegeben Datein zeigt die Statistik nun eine Zusammenfassung aller Datein an
 
 v0.43b - Hotfix
 ----------------------
--  5. Juli 2004      -
+- Jul, 5th 2004      -
 ----------------------
-.: Korrektur eines Fehlers, der die meisten verfügbaren PeerCaches nicht nutzen liess
-Ornis: Statistiken (Anfragen,akzeptierte Anfragen, übertragene Daten) werden nun auch für aktuelle Downloads gespeichert und wiederhergestellt
+.:    Fixed a bug which let eMule reject most available PeerCaches
+Ornis:Statistics (requests,accepted requests,transfered) of partfiles are now saved and restored too (like for shared files)
 zz: Opens less slots if UploadSpeedSense lowers upload limit
-
 
 v0.43a
 ----------------------
@@ -1404,3 +1618,1197 @@ Unk: Changed opcodes to match eMule for easier merging later.
 ----------------------
 Unk: Original Programmer seems to have left the building. I'm am going through the code trying to see where he was going with it..
 
+
+	ÄNDERUNGSPROTOKOLL VON EMULE
+	============================
+
+
+v0.30e
+----------------------
+- Dec 9th, 2003      -
+----------------------
+bluecow: Korrektur eines selten auftretenden Fehlers, beim Entpacken von stark komprimierbaren Blöcken
+bluecow: verbesserte Fehlerbehandlung für die Dekomprimierung fehlerhafter Blöcke
+bluecow: Upgrade auf zlib Verion 1.2.1.
+
+
+v0.30d
+----------------------
+- 20. November 2003  -
+----------------------
+.: fehlende benötigte Sprach-Bibliotheken können durch eMule automatisch heruntergeladen und installiert werden
+.: Auto-Versionsüberprüfung wurde zu einer DNS-basierten Methode geändert, welche nun effektiver ist. Die Überprüfung ist nun auch standardmäßig aktiv
+.: MobileMule-Protokoll auf v6b aktualisiert
+
+
+----------------------
+- 16. November 2003  -
+----------------------
+Ornis:  geringere CPU Last
+Ornis:  Suchliste: Kontextmenü bietet nun auch an, die Datei im pausierten Modus den Downloads hinzuzufügen (wenn erweiterte Kontrollen aktiviert)
+Ornis:  ein ausgewählter Datei-Kommentar kann nun in die Zwischenablage kopiert werden [NoamSon]
+
+----------------------
+- 7. November 2003   -
+----------------------
+Ornis:  Abspeichern von Chats (IRC/Nachrichten) , über's Kontextmenü
+Ornis:  Einstellungen-Webinterface: aktivieren/deaktivieren der GZIP-Kompression
+
+----------------------
+- 5. November 2003   -
+----------------------
+bluecow: Fehlerkorrektur vom selten auftretenden hängender Server-Quellenanfrage, aufgrund fehlerhaften part.met-Inhalts
+bluecow: sicheres Lesen aus der part.met
+bluecow: Korrektur eines Problems von zu häufigen Server-Verbindungsversuchen bei sehr kleinen Serverlisten
+
+----------------------
+- 2. November 2003   -
+----------------------
+bluecow: Fixed minor issue with queued local server source requests after new server connect.
+bluecow: Fixed sorting of buffered part file blocks to achive less HD stress.
+bluecow: Fixed memory leaks and flushing of buffered data to HD of paused files when file was canceled.
+bluecow: Files which could not be completed because of not enough free disk space can be resumed manually to try another file completion process.
+bluecow: Fixed bug in check min. free disk space which could cause endless low disk space notifications.
+bluecow: Improved check min. free disk space for better handling NTFS compressed/sparse files.
+bluecow: Fixed a bug where an NTFS compressed file could not be created because there was not enough free disk space to hold the uncompressed file.
+Ornis:   Importer aktualisiert, um Downloads von eD/ON v0.48 zu importieren
+
+Unk: Several bugs noted in the forum. Tried to check most of them.
+* Sources to a Paused or Stopped file will be removed once an hour to remove old sources..
+* We no longer send sources to Paused or Stopped files.
+* A better check of valid sources to Part files for source exchange.
+* Source exchanges for complete files now sends sources with obtained parts first.
+Unk: Removed some redundent For Loops to save CPU in the DownloadQueue..
+
+----------------------
+- 30. Oktober 2003   -
+----------------------
+bluecow: Added grouping of local server source reasks packets into one TCP frame
+bluecow: Fixed bug with check diskspace
+bluecow: Fixed problem with lost read-only settings in pref.ini after version change
+bluecow: Fixed server TCP overhead statistics
+bluecow: Fixed HTTP download dialog string resources
+
+
+v0.30c
+----------------------
+- 23. Oktober 2003   -
+----------------------
+bluecow: Korrektur eines Problems bei Dateifertigstellung wenn die Datei zugleich upgeloaded wurde.
+
+----------------------
+- 22. Oktober 2003   -
+----------------------
+Ornis:  es können nun auch Downloads importiert werden, die mit ON/Edonkey im "alten Format" begonnen wurden
+bluecow:Korrektur eines Crashbugs und potentiellen Exploits im Webserver interface [thx MoNKi]
+
+----------------------
+- 19. Oktober 2003   -
+----------------------
+bluecow: Korrektur eines Fehlers, der erlaubte Clients ohne IP oder Hash als Freund hinzuzufügen
+bluecow: Fehlerkorrektur in Verbindung mit ed2k URL Registry-Schlüssel, welcher Sonderzeichen enthielt
+bluecow: Korrektur eines GDI-Ressource-Leaks im Video-Vorschaudialog
+
+----------------------
+- 12. Oktober 2003   -
+----------------------
+Ornis: Import von begonnenen Download von eDonkey/Overnet's "neuem Format" (gesplittete Partfiles). Integrierter Konverter um temporäre Downloaddateien aus ausgewählten Verzeichnissen direkt in eMule zu übernehmen. (Aufruf über das Hotmenü Alt+X)
+Ornis: Serverliste markiert den aktuell verbundenen Server
+
+----------------------
+- 9. Oktober 2003    -
+----------------------
+Ornis: dynamische Kategorien-Reiter-Größe
+Ornis: verhindern von leerer Datum/Zeit Angabe bei fehlerhafter preferences.ini
+
+----------------------
+- 7. Oktober 2003    -
+----------------------
+bluecow: Fehlerkorrektur, die Uploadliste aktualisierte sich nicht automatisch [Xman1+KuSh]
+bluecow: Fehlerkorrektur bei Maus/Tastatur-Zugriff in HyperText-Control [MoNKi]
+bluecow: Hinzugefügt: Tastaturkürzel zur Toolbar
+
+----------------------
+- 5. Oktober 2003    -
+----------------------
+bluecow: Fixed bug with server warning messages which were shown as errors.
+bluecow: Fixed bug with random drawn block requests in file progress bars.
+
+----------------------
+- 4. Oktober 2003    -
+----------------------
+bluecow: Änderung verschiedener Ressourcen-Strings-Lade-Algorithmen (Übersetzung 5-) um stringbasierte Ressourcenidentifizierer zu unterstützen [SlugFiller+itsonlyme]
+bluecow: Hinzugefügt: Downloadlinks können Hostnamen als Quellen enthalten anstatt nur IPs. Der eigene Hostname kann in den Einstellungen gesetzt werden um diese bei ed2k-Links mit Quellen zu nutzen. [SlugFiller+itsonlyme]
+bluecow: Hinzugefügt: deutliche Geschwindigkeitsverbesserungen im bar-shader-Code (Balken-Zeichnung) [SlugFiller]
+bluecow: Hinzugefügt: verbesserte/schnellere Sortierung von kompletten-Quellen-Angaben [SlugFiller]
+bluecow: Fehlerkorrektur eines Darstellungfehlers im Upload-Status-Balken [wistily]
+bluecow: Hinzugefügt: Option zum Prüfen des freien Festplattenspeichers, um sicherstellen zu können, dass komplette Downloads auch Platz haben [SlugFiller]
+bluecow: Hinzugefügt: Option um sicherzustellen, dass ein angegebener Speicherplatz auf der Festplatte freigehalten wird
+bluecow: Hinzugefügt: Dekomprimieren von NTFS-Komprimierten Dateien für fertiggestellte Downloads
+Ornis:   Download-Geschwindigkeitslimits manuell aufhebbar
+
+----------------------
+- 1. Oktober 2003    -
+----------------------
+bluecow: ersehnter "Mehr"-Knopf in der Suche, um mehr Resultate vom lokalen Server abzufragen
+bluecow: Tooltips für das Transferfenster neu geschrieben, um mehrere kleine Unstimmigkeiten zu beheben
+bluecow: zwischengespeicherte Partfile-Daten werden explizit geschrieben, bevor eine Vorschau ausgeführt wird
+bluecow: Partfile-Plattenplatznutzung wird unter Berücksichtigung der NTFS-Kompression und/oder NTFS-Sparse-Files-Nutzung ermittelt
+Ornis: neue Übersetzung: Tschechisch, von Patejl
+
+
+v0.30b
+----------------------
+- 25. September 2003 -
+----------------------
+bluecow: Server TCP-Verbindung "keep-alive"-Funktion hinzugefügt (erweiterte Einstellungen).
+bluecow: Die Tooltips bei den Suchergebnissen werden nur noch angezeigt wenn SHIFT und STRG gleichzeitg gedrückt werden während der Mauszeiger auf einem Ergebnis steht.
+
+----------------------
+- 24. September 2003 -
+----------------------
+.: Erweiterung der Vorschau Funktion: Es können bis zu 5 Screenshots der ersten ~10min einer Video Datei empfangen werden, wenn der andere die Anzeige seiner freigegebenen Dateien erlaubt
+.: MobileMule Protokoll v5. Es muss ebenfalls der neue Handyclient verwendet werden.
+.: Einige Code Änderungen von eMule+ übernommen
+Ornis: Mehr Platz für Kategorien
+Ornis: Die Anzahl der Andere-Datei-Angefordert-Quellen wird für jeden Download mit +xx angezeigt wenn die zusätzlichen Kontrollen aktiviert sind.
+
+----------------------
+- 21. September 2003 -
+----------------------
+Ornis: Statistiken über den Festplatten Verbrauch hinzugefügt [emule+]
+
+----------------------
+- 18. September 2003 -
+---------------------- 
+bluecow: Bug Fix: Ungültige Client Objekte nachdem eine Datei aus der Freigabe genommen / hinzugefügt wurde [zegzav]
+bluecow: ALT + Doppelklick öffnet den Dateidetail Dialog in der Liste der freigegebenen Dateien und bei den Suchergebnissen
+bluecow: Einige Formatierungsfehler behoben [mandrag0re]
+
+----------------------
+- 15. September 2003 -
+----------------------
+bluecow: Alle vorhandenen mp3 ID Tags werden für Downloads und freigegebene Dateien angezeigt 
+
+----------------------
+- 14. September 2003 -
+----------------------
+bluecow: Lugdunum 16.40 Server Erweiterung: Suchergebnisse werden in einem UDP Paket gebündelt [Dank an Lugdunum für Zusammenarbeit]
+bluecow: Anpassung der UDP socket Behandlung für grosse UDP Pakete
+bluecow: Erweiterete Log Fehlerausgabe für das Server UDP Protokoll
+bluecow: Optimierung der UDP Server sockets für geringere CPU Last (weniger Speicheroperationen)
+bluecow: Bug-Fix: Sperrung der Client UDP sockets wurde nicht korrekt abgefragt
+bluecow: Einzelne Suchergebnisse speichern ihre Einstellungen. Diese werden wiederhergestellt wenn man das betreffende Suchfenster aktiviert
+bluecow: Verbesserung in der Bedienung: Wird ein Suchfenster geschlossen wird das vor dem geschlossenen aktiviert
+bluecow: Die zuletzt verwendeten Suchparameter werden auch über eMule Neustarts hinweg gespeichert
+bluecow: Die IP Eingabe bei neuer Server akzeptiert Server jetzt auch im eD2k Link Format
+bluecow: Freigegebne Dateien und welche die sich gerade im Download befinden werden nicht mehr gegen die maximale Anzahl der Suchergebnisse gezählt
+
+----------------------
+- 11. September 2003 -
+----------------------
+bluecow: Log-Funktion um das Server TCP/UDP Protokoll erweitert
+bluecow: Unterstützung der Welcome Nachricht der neuen Lugdunum 16.40 hinzugefügt
+bluecow: Unterstützung der Lugdunum 16.40 Protokoll Kompression: Welcome Nachricht und Suchresultate werden komprimiert empfangen; die Liste der freigegebene Dateien komprimiert gesendet
+bluecow: Unterstützung der Lugdunum 16.40 UDP Protokollerweiterungen: Globale Quellensuche wird effizienter und verbraucht weniger Bandbreite
+bluecow: Bug-Fix in der Namensauflösung
+bluecow: Automatischer Start einer Globalen Suche falls der lokale Server nicht innerhalb 50s antwortet
+bluecow: Bug-Fix: Das Fenster zum Hinzufügen mehrerer eD2k Links akzeptierte nur 3-4 Links
+
+----------------------
+-  1. September 2003 -
+----------------------
+bluecow: Meta-Daten und Datei-Kommentare Dialoge in Property Pages konvertiert sodass diese gemeinsam mit dem neuen Dateidetail-Dialog angezeigt werden können. Alle Property Sheets/Pages Dialoge in der Größe beliebig veränderbar; zuletzt benutzt Größe u. Position wird gespeichert
+bluecow: Hinzugefügt: Neue "Match keywords" Suchoption für beide Jigle-Suchmethoden.
+
+----------------------
+- 30. Aug 2003       -
+----------------------
+bluecow: Bei einer Suche nach einem File mit Typ "Programm" werden die Suchresultate nicht mehr entsprechend den Windows Programm Fileextensions (*.exe, *.com, *.bat) lokal gefiltert. Die Bedeutung des eD2K Filetyps "Programm" beinhaltet alle Filetypen die von einem "Programm" benutzt werden, also z.B. komprimierte Archive oder CD-ROM Images. Das bedeuted, dass du mehr Suchresultate bekommst. Wenn du trotzdem nach einem Windows Programm File suchen möchtest, gibt die Fileextension "exe" an.
+bluecow: Hinzugefügt: Proxy-Support für IRC; alle Proxy-Einstellungen werden jetzt auch für IRC benutzt
+Ornis:   bugfix im Webinterface socket code, [Jan B.,nice bugreport]
+
+----------------------
+- 29. Aug 2003       -
+----------------------
+Ornis: Dateidetail-Dialog neu strukturiert, + Datumsanzeige des Downloadstarts sowie der Zeitdauer seitem (bis zur aktuellen Zeit bzw. Downloadfertigstellung)
+Ornis: hinzufügen einiger fehlender Prozentanzeigen
+Ornis: Option für Zeitplaner, um keine Endzeit anzugeben (-> nicht temporär)
+
+----------------------
+- 26. Aug 2003       -
+----------------------
+bluecow: Änderungen im Jigle gSOAP Module für bessere Performance und zuverlässige und korrekte Compilierung der Sourcen von Moddern (Modder: stelle sicher, dass die Jigle gSOAP Sourcen mit dem Symbol WITH_GZIP compiliert werden!); eine Jigle Suchanfrage muss entweder einen Filetyp oder eine Fileextension beinhalten; HTTP User-Agent Feld beinhaltet eMule-Version.
+bluecow: Korrektur einiger Fehler im neuen ComboBox control (keyboard interface).
+bluecow: Mehrere Änderungen in der GUI der neuen Suchresultatliste; korrekte Farbdarstellung unter allen Windows Farbschema; Sortierung der Filenamen-Listeinträge
+
+----------------------
+- 24. Aug 2003       -
+----------------------
+bluecow: Hinzugefügt: Neue Suchmethode "Jigle SOAP Interface" um die Jigle-Datenbank mit eMule benutzen zu können [Vielen Dank an Melange von Jigle, der dieses großartige Feature eMule angeboten hat]
+bluecow: Jigle SOAP Interface: Suchresultate werden auf 100 Files limitiert; Code-Optimierungen zur Entlastung des Servers; lokales Filtern der Suchresultate
+bluecow: Hinzugefügt: Erweitertes ComboBox Control für Suchmethode [eMulePlus]
+
+----------------------
+- 22. Aug    2003    -
+----------------------
+Unk: Irc: Nicks werden nun richtig sortiert
+Unk: Irc: wenn ein anderer Nick ein eMule'er ist, kann dieser direkt als Freund hinzugefügt werden (beide Clients müssen v0.30b oder höher sein)
+Unk: Irc: Downloadlinks können nun direkt an andere eMule-Clients gesendet werden. (DCC-ähnlich, beide Clients müssen v0.30b oder höher sein)
+Unk: Senden der freigegebenen Dateien an Server wurde verbessert, um Datenverkehr zu verringern
+Unk: Hinzugefügt: Anzeige einer Abzahl-Abschätzung vollständiger Quellen in der Downloadliste und Freigabeliste [Zegzav,modifiziert]
+
+----------------------
+- 20. Aug 2003       -
+----------------------
+Ornis: Korrektur einiger Statistikwerte, gebannte Quellen, A4AF-Quellen
+Ornis: Fehler in der Webinterface-Suche korrigiert
+Ornis: Korrektur: beim Sprachenwechsel wurden einige Texte nicht aktualisiert [itsonlyme]
+
+----------------------
+- 19. Aug 2003       -
+----------------------
+bluecow: Sprach-DLLs werden nur dann geladen, wenn die Versionsnummer mit der eMule-Version übereinstimmt.
+bluecow: Textfarben für Suchresultate u. Log-Fenster bzgl. Kontrast-Windows-Farbschema korrigiert.
+
+
+v0.30a
+----------------------
+- 15. Aug 2003       -
+----------------------
+bluecow: Hinzugefügt: Dialog zur Anzeige von eD2K Meta Daten für Suchresultate, Download-Files und Shared-Files. Der entsprechende Eintrag im Kontextmenü ist nur im "Modus für Fortgeschrittene" vorhanden.
+
+----------------------
+- 14. Aug, 2003     -
+----------------------
+.: Einige neue Überprüfungen wurden hinzugefügt and Reparaturen gemacht um unfair Clients zu verhindern
+.: Die TCP (lokal) und UDP (global) Quellensuche für Benutzer die viele Dateien auf einmal laden wurde geändert um eine Serversoftware wieder glücklich zu machen und Blacklisting zu vermeiden
+.: Nichtmehr benutzte Credits werden nach 5 Monaten gelöscht (um den dafür benötigten Speicher in Grenzen zu halten) 
+
+----------------------
+- 12. Aug, 2003      -
+----------------------
+bluecow: Server-Fehlermeldungen werden nicht mehr im Serverinfo-Fenster sondern im Log-Fenster angezeigt.
+bluecow: ED2K File Meta Daten die während einer Filesuche empfangen wurden, werden gefiltert um nicht unnötige Daten im part.met und schließlich auch im known.met File zu speichern.
+bluecow: Mehrere Änderungen bei der Vorschau Funktion: Die Vorschau Funktion wird freigeschalten, wenn mindestens 16 KB (MPEG Audio/Video) oder 256 KB am Anfang des Files vorhanden sind. Die Vorschau Funktion wird auch für Files vom Typ "CD-ROM Image" bzw. für Files deren ED2K Meta Daten einen Audio/Video Eintrag beinhalten freigeschalten. Um diese neue Vorschau Funktion zu benutzen, ist entweder VideoLAN Client als Video Player für Vorschau zu konfigurieren oder das 'PreviewSmallBlocks=1' (Section=eMule) Setting im preferences.ini File anzugeben und die Option "Erstelle Kopie für die Vorschau" auszuschalten.
+Ornis:   präzisere Statistiken für: gerettet durch ICH, Kompressionsgewinn & Korruptionsverlust
+Ornis:   kleinere GUI Korrekturen/Änderungen
+
+----------------------
+- 10. Aug, 2003      -
+----------------------
+Ornis: "Quellenrecycling" (wenn Quellen an andere Dateien übergeben werden (NNP,...)) beachtet nun Prioritäten der Downloaddateien und ist sicherer gegen endloses hin- & herreichen
+Ornis: Alt-Enter öffnet Detail-Dialog für Downloads & User
+Ornis: hinzugefügt: Erweiterte Chunk Selektion, für eine bessere Wahl, welcher Teil einer Datei als nächstes heruntergeladen wird [Maella & jicxicmic]
+
+----------------------
+- 4. Aug, 2003       -
+----------------------
+bluecow: Hinzugefügt: Extrahieren von Meta Daten und Audio/Video Charakteristika für MP3,AVI,MPEG und andere Files. Um diese Funktion auszuschalten benutze das "ExtractMetaData" Setting (File=preferences.ini, Section="eMule", Name=ExtractMetaData, Value=0 (disable), Value=1 (einschalten für MP3 und AVI Files), value=2 (Standard; einschalten für MP3, AVI, MPEG und andere Files).
+bluecow: Hinzugefügt: Senden von Meta Daten und Audio/Video Charakteristika für MP3,AVI,MPEG und andere Files an Server und andere Clients. Die Text Meta Daten (z.B. Title, Author, Album) werden nicht an die Server aber an andere Clients gesendet. Daten die an die Server gesendet werden, beinhalten: Audio/Video Codec, Media Länge und Bitrate.
+bluecow: Mehr Sicherheit beim Überprüfen von sharebaren Files im temporären Verzeichnis.
+
+----------------------
+- 2. Aug, 2003       -
+----------------------
+bluecow: Hinzugefügt: Server Info Window mit optionalen Autoscroll, rotierendem Log, Copy+Paste.
+bluecow: Hinzugefügt: Option um den Server UDP Port einzustellen bzw. auszuschalten (file=preferences.ini, section="eMule", name=ServerUDPPort, value=0 (keinen Server UDP Port verwenden), value=65535 (standard, einen zufällig gewählten Server UDP Port verwenden), value=<n> (UDP Port)
+bluecow: Hinzugefügt: Einige ausführliche Server Socket Error Messages.
+bluecow: Korrektur: Einige kleine Focus Problem im Suchfenster.
+bluecow: Hinzugefügt: Mehr Spalten im Suchfenster um neue ed2k Meta Tags anzuzeigen.
+bluecow: Format von Datum/Zeit Strings ist nicht mehr von der ausgewählten Sprache abhängig.
+bluecow: Hinzugefügt: Statusbars von Files im Pause Modus werden mit abgeschwächten Farben angezeigt [SlugFiller grayPause]
+
+----------------------
+- 1. Aug, 2003       -
+----------------------
+bluecow: Taskbar Notification für "Download beendet und hinzugefügt" aufgeteilt
+
+----------------------
+- 30. Juli, 2003    --
+----------------------
+bluecow: Sicherheitskorrekturen einiger Log-Meldungen [thx i0nic]
+
+----------------------
+- 29. Juli, 2003    --
+----------------------
+.: Einige kleinere Änderungen/Bugfixes am SecureHash wurden gemacht. Außerdem kann ein Client mit dem Status "Ungültig" keinen FreundSlot mehr erhalten
+ : MobileMule Protokoll 0.3x wurde hinzugefügt (siehe mobil.emule-project.net für mehr Infos)
+bluecow: ED2K Protokoll: Korrektur von OP_FILESTATUS für Files mit einer Länge von PARTSIZE*N
+bluecow: Korrektur: Absturz beim Schließen wenn interne File Puffer auf HD geschrieben wurden
+bluecow: Korrektur: Einige Clients die mehr als ein OP_HELLO sendeten wurden falsch behandelt.
+
+----------------------
+- 27. Juli, 2003    --
+----------------------
+bluecow: Korrektur: Behandlung von Hashsets für Files mit einer Länge von PARTSIZE*N
+bluecow: Korrektur: Ungültige Einträge in known.met werden beim Starten entfernt
+bluecow: ED2K Protokoll: OP_SETREQFILEID wird nicht mehr für Files mit einer Länge <= PARTSIZE gesendet
+bluecow: ED2K Protokoll: OP_FILEREQANSNOFIL wird nicht mehr beim Empfangen von OP_FILEREQUEST gesendet
+
+----------------------
+- 25. Juli, 2003     -
+----------------------
+Ornis:   manuelles Deaktivieren der Autovervollständigung: setze in der "config\preferences.ini" den Eintrag "UseAutocompletion=0"
+Ornis:   Webinterface: Sortieren von Suchergebnissen ermöglicht
+bluecow: Es kann in allen Listen mit der Tastatur gesucht werden (einfach die ersten Zeichen des gesuchten Labels eintippen) [ZZ]
+
+----------------------
+- 22. Juli, 2003     -
+----------------------
+bluecow: Korrektur/Hinzugefügt: Unbeabsichtigtes Freigeben der eMule Installationsverzeichnisse (config, lang, webserver) und einiger Dateitypen im Temp-Verzeichnis.
+bluecow: Korrektur: Einem Client wurden manchmal korrekt komprimierte Daten gesendet, trotzdem konnte der empfangende Client diese nicht immer korrekt dekomprimieren.
+Ornis  : Position des Drag&Drop-Bildes beim Schieben von Downloadeinträgen korrigiert
+
+----------------------
+- 20. Juli, 2003     -
+----------------------
+Ornis: IRC- & Nachrichten-Dialoge nutzen nun auch direkt schließbare Reiter
+Ornis: History-Funktion für das IRC- & Nachrichten-Fenster, um alte eingegeben Nachrichten via Cursor hoch/runter abzurufen
+Ornis: Doppelklick auf die Serverinformation der Statusleiste öffnet ein Dialog mit den Details des aktuell verbundenen Servers
+Ornis: neue Downloads via Browser-Link werden nun auch der in der Suche aktuell gewählten Zielkategorie zugeordnet
+Ornis: Leeren der History der Suchbegriffe/Serverlisten-URLs : ALT oder STRG gedrückt halten, + ENTFERNEN drücken
+Ornis: Statistiken: Prozentanzeige der erfolgreichen&fehlgeschlagenen Uploadsessions eingefügt
+Ornis: Zählen der fehlgeschlagenen Uploadsessions korrigiert [Maella]
+
+----------------------
+- 19. Juli, 2003     -
+----------------------
+bluecow: Korrektur: Download von Files mit einer Länge von 9728000 Bytes.
+bluecow: Korrekturen/Hinzugefügt: Mehrere Teile von SlugFiller's SafeHash [SlugFiller]
+- SafeHash: Known file hashing features
+- SafeHash: Miscellanious safety and tweaking features
+Ornis:   verbesserte Aktualisierung der Downloadliste bei neuen Quellen einer (Quelle-)aufgeklappten Download-Datei
+Ornis:   Korrektur eines Typos im Webinterface, der u.U. Instabilitäten verursachten konnte
+Ornis:   2 Einstellungsmöglichkeiten im Webinterface (wieder) hinzugefügt
+Ornis:   automatisches Zuweisen von neuen Downloads zu Kategorien anhand eines Filters [HoaX69
+bluecow: Upgrade auf CTreeOptionsCtrl v1.55 [thx PJ Naughter]
+bluecow: Neue Log Panes, Multiline Edit Controls mit optional Auto Scroll und Rotating Log.
+(Note: The previously used "MaxLogMessages" entry in preferences.ini is obsolete and is replaced with "MaxLogBuff" which
+can be used to specify the size of the buffer(s) in KByte. Default size = 64 KByte)
+bluecow: Searchresult list: Search results which match files in the download list are shown in a fixed shade of red.
+bluecow: Font for Server-, Message- and IRC-Window can be specified.
+bluecow: Timestamp setting for IRC-Chat also applies timestamps to messages from clients in Message window.
+bluecow: Timestamps in IRC-Window and Message-Window localized.
+bluecow: Added memory debug statistics for debug builds only [UVman]
+
+----------------------
+- 18. Juli, 2003     -
+----------------------
+Ornis: Hinzugefügt: manuelles Verwalten von Quellen, bei mehreren Anfragen bei gleichen Clients (A4AF) [basierend auf sivka,enkeyDEV]
+Ornis: Hinzugefügt: automatisches Zuweisen neuer Downloads zu Kategorien, anhand von Dateinamen-Filtern  [HoaX_69]
+Ornis: Korrektur des Zeitplaner-ini-Speicherorts -> \config\
+
+----------------------
+- 16. Juli, 2003     -
+----------------------
+bluecow: Korrektur: Download von Files mit einer Größe von mehr als 2 GB [thx Maella]
+Ornis:   Korrektur: spanische & franz. Übersetzungsfehler->wenig Suchergebnisse
+Ornis:   verbesserte Aktualisierung der Secure-Ident-Statistikanzeige
+
+
+v0.29c
+----------------------
+- 13. Juli, 2003     -
+----------------------
+bluecow: Mehrere kleine Korrekturen und Code Verbesserungen [Maella, dpr, rayita]
+
+----------------------
+- 11. Juli, 2003     -
+----------------------
+Ornis+bluecow: String Resourcen in Language Resource DLLs aufgeteilt [Elandal]
+
+----------------------
+- 9. Juli, 2003      -
+----------------------
+bluecow: Korrektur im IPFilter.
+
+----------------------
+- 7. Juli, 2003      -
+----------------------
+bluecow: Hinzugefügt: LAN-IP und IP-Filter für Server IPs und für Client IPs die von Servern oder von anderen 
+Clients empfangen wurden (Source Exchange).
+Beachte: Die Option "Server/Filtere ungültige IPs" wurde dahingehen erweitert dass nun die Server IPs und die 
+Client IPs bzg. LAN IPs gefiltert werden. Weiters wurde diese Option von der "Server" Page auf die 
+"Erweitere Optionen" Page verschoben und lautet nun "Filtere Server und Client LAN IPs". Wenn eMule innerhalb 
+eines LANs eingesetzt wird, ist das Desaktivieren dieser Option womöglich sinnvoll um die Kommunikation mit 
+Servern und Clients innerhalb des LANs zu ermöglichen.
+
+----------------------
+- 5. Juli, 2003      -
+----------------------
+.: Einige Sicherheitskorrekturen wurden am SecureHash gemacht. Außerdem ist dieser nun in der Standarteinstellung aktiviert.
+.: Die Wartepostion ist nun auch durch SecureHash geschützt (wenn eingeschlatet)
+.: ein Bug der zur Folge hatte das Quellen falsche Informationen und Dateikommentare/namen hatten wurde behoben
+bluecow: Korrektur mit 'completing' Datei die gleichzeitig im Uploaded stand.
+bluecow: Korrektur von Datei Preview wenn der Pfad Leerzeichen beinhaltet [mediterranean]
+bluecow: Korrektur: Fehler beim Disconnecten und Löschen Clients [SlugFiller]
+bluecow: Korrektur: Fehler in Statistiken. Error- und Banned Clients wurden nicht korrekt ausgwertet.
+
+----------------------
+- 2. Juli, 2003      -
+----------------------
+bluecow: Besseres Filtern der Sourcen bzlg. gülter IP+Port die bei einer Dateisuche gefunden werden.
+bluecow: Hinzugefügt: Boolsche Suchausdrücke (AND, OR und NOT Operator sowie Klammerungen)
+
+----------------------
+- 1. Juli, 2003      -
+----------------------
+bluecow: Korrektur: Suchanfragen haben das falsche Metatag für die File-Extension benutzt.
+bluecow: Hinzugefügt: Spalte in Server-Fenster um Server-Version anzuzeigen.
+bluecow: Korrektur: Server mit 0.0.0.0 IP wurden manchmal zur serverlist hinzugefügt
+bluecow: Korrektur: Länge der komprimierten Control Data Packete [thx MKThunderStorm]
+bluecow: Optimierung bei Source Exchange wenn ein Client zum ersten mal nach Sourcen gefragt wird.
+
+----------------------
+- 30. Juni, 2003     -
+----------------------
+bluecow: Hinzugefügt: min/max filesize im Suchendialog kann mit einer der Einheiten (b[yte],k[byte],m[byte],g[byte]) angegeben werden.
+Ornis:   kleine Anpassungen in der Dateinamen-Bereinigung
+Ornis:   Webinterface: Korrektur der Einstellung für die richtige Seitencodierung türkischer Nutzer
+
+----------------------
+- 29. Juni, 2003     -
+----------------------
+bluecow: Korrektur von Memleaks in Uploadclients, hervorgerufen durch Clients die zu große Blöcke anfragen
+bluecow: Korrektur von Memleaks bei doppelt gehashten Dateien
+bluecow: mehrere Änderungen für stabileren Code und weniger potentielle Memleaks
+Ornis:   Korrektur gegen Abstürze nach Verbindungstrennung des IRC
+Ornis:   Anzeige der aktuellen Größe von Partfiles auf der Festplatte (Dateidetails & Tooltips)
+Ornis:   kleinere GUI Korrekturen
+
+----------------------
+- 27. Juni, 2003     -
+----------------------
+bluecow: Hinzugefügt: Liste freigegebener Dateien werden mit ClientIP & Port zum Server geschickt, um mehr Quellen bei globalen UDP-Suchanfragen zu erhalten
+bluecow: Hinzugefügt: Liste freigegebener Dateien wird mit mehr Metatags zum Server geschickt, um genauere Suchresultate bei Dateierweiterung & -typ zu erhalten
+bluecow: Hinzugefügt: Tooltips für Suchresultate um alle Meta-Daten anzuzeigen.
+
+----------------------
+- 25. Juni, 2003     -
+----------------------
+bluecow: Hinzugefügt: Overlay Icons für Clients die erfolgreich mit Secure-Ident identifiziert wurden.
+bluecow: Korrektur: Fehler bei GetTickCount Zeit Messung [dpr]
+Ornis:   Hinzugefügt: Secure-Ident-Statistik (wie viele erfolgreiche & fehlgeschlagene Clients bekannt)
+Ornis:   Korrektur: Menü-Resourcen-Bug im Einstellungsdialog/Zeitplaner
+Ornis:   Korrektur: Crash der türkischen Übersetzung
+
+
+v0.29b
+----------------------
+- 17. Juni, 2003     -
+----------------------
+bluecow: Dragstart von Kategorien nicht mehr übersensibel
+Unk: Irc: erkennt nun auch UnderOps.
+Unk: Pings (für Info) zu Servern sind nun seltener
+Unk: Bugfix bzgl. der Pausen zwischen Server-Pings
+Unk: kleiner Bugfix in den Statistiken
+Ornis:genauere Downloadgeschwindigkeitsangabe [zz]
+
+----------------------
+- 15. Juni, 2003     -
+----------------------
+bluecow: Korrektur: gelöschter Client konnte u.U. für die A4AF-Statistik genutzt werden
+bluecow: Überarbeiung d. Ext. Settings Dialog um zukünftig mehr Optionen zu unterstützen
+Ornis:   Webinterface: Links are relative now
+Ornis:   verbesserter Umgang mit UNC-Pfaden für die Verzeichnisfreigabe
+Ornis:   known.met wird nun korrekt im Konfigurationsverzeichnis verarbeitet
+Ornis:   verbesserte Prüfung, welche neuen Dateien gehasht werden müssen
+.: Ein neues sichers Identifkationssystem (gegen userhash "stehlen") wurde implementiert. Aus Testgründen ist es in Version 29b per Voreinstellung deaktiviert. Unter Sichherheitseinstellungen kann es aktiviert werden. Bitte konsultiere die FAQ für mehr Infos.
+.: Der erste Teil eines erweiterten Spamfilters, der automatisch verdächtige Nachrichten erkennt und filtert wurde implementiert.
+
+----------------------
+- 13. Juni, 2003     -
+----------------------
+Ornis: Webinterface: Graphen verbessert, größer, schöner, inklusive Verbindungsgraph [emule+]
+Ornis: Webinterface: Knopf zum Entfernen fertiggestellter Downloads
+Ornis: Liste freigegebener Dateien: Mittelklick auf einen Eintrag öffnet dessen Kommentardialog
+bluecow: Implementierung der ed2k-Protokoll-Nachricht OP_CHANGE_CLIENT_ID für besseren Umgang mit LowID-Quellen
+bluecow: Korrektur mehrerer Probleme beim Umgang mit uninitialisierten Speicherinhalten [donq]
+bluecow: Korrektur eines Problems beim Empfang falscher IDs von einem Client
+bluecow: Workaround für vereinzelte Abstürze durch Socket-Löschung bei Win-XP Nutzern
+
+----------------------
+- 12. Juni, 2003     -
+----------------------
+bluecow: Korrektur mehrerer potentieller Heap-Corruptions.
+bluecow: Korrektur von Problemen mit der Downloadraten-Messung, welche einen Absturz auf langsamen/Win98 Systemen hervorrufen konnte
+bluecow: Korrektur eines Problems beim Verarbeiten von fehlerhaften OP_HELLO -Paketen von anderen Clients
+
+----------------------
+- 9. Juni, 2003      -
+----------------------
+bluecow: Option hinzugefügt, um den Sicherheitsgrad für das Schreiben von Kerndatei-Daten anzupassen (evtl. hilfreich für Win98 Nutzer) [Idee SlugFiller]
+
+----------------------
+- 8. Juni, 2003      -
+----------------------
+bluecow: Für Modder: Möglichkeit für das Compilieren des Sourcecodes für stringbasierte Ressourcenidentifikation (suche nach USE_STRING_IDS !)
+
+----------------------
+- 7. Juni, 2003      -
+----------------------
+bluecow: Fehlerkorrektur im Server-Nachrichtenhandler für OP_SERVERIDENT
+bluecow: verbessertes Handling der Server-Nachrichten OP_SERVERMESSAGE und Client-Nachrichten OP_MESSAGE.
+
+----------------------
+- 6. Juni, 2003      -
+----------------------
+Ornis: Fix: Speicherort eigener Kommentare korrigiert (config-Ornder)
+Ornis: Webinterface: Kategoriensupport bei Spaltensortierung korrigiert
+bluecow: Korrektur eines potentiellen Problems mit dem Systemtray-Icon bei Win98-Systemen (Vielen Dank an Ergol/donq)
+bluecow: Größe von Suchausdrücken verringert
+
+
+0.29a
+----------------------
+- 2. Juni, 2003      -
+----------------------
+Ornis: Win9x-Inkompatibilität korrigiert (Win9x absturzfreudig)
+Ornis: einige Menüs wurden nicht auf die neue Sprache umgestellt, wenn diese geändert wurde - korrigiert
+
+----------------------
+- 1. Juni, 2003      -
+----------------------
+bluecow: Quellen von der lokalen/globalen Serversuche werdeb vorgefiltert, um falsche Anzeigen in der Quellenspalte der Suchliste zu vermeiden, als auch von manchen Servern falsch geschickten Quellen
+bluecow: Korrektur eines Fehlers bei fertiggestellten Dateien, welche beim Neustart neu gehasht wurden und einen Doppeleintrag in der known.met verursachen konnte
+
+----------------------
+- 31. Mai, 2003      -
+----------------------
+bluecow: Korrektur eines Problems mit Servern welche verschiedene Serverbeschreibungspakete während der Laufzeit schicken
+
+----------------------
+- 29. Mai, 2003      -
+----------------------
+bluecow: Korrektur: Temp-Verzeichnis wurde unter Umständen auf das Incoming-Verzeichnis gesetzt
+bluecow: Korrektur: kleiner Fehler beim Dateiöffnen- und Verzeichnissuchen-Dialog und den zugehörigen Property-Pages
+Ornis: Erkennung von Shareaza für allg. Information und Statistiken
+Ornis: neue Sprache: Galizisch (von Emilio)
+
+----------------------
+- 28. Mai, 2003      -
+----------------------
+bluecow: Fixed memory leaks in uploader.
+bluecow: Fixed memory leaks in all timer callback functions; added exception handling.
+bluecow: Reduced GDI resource usage for Win9x/WinME.
+bluecow: Added more debug log messages for unknown TCP packets.
+bluecow: Statusbar text is cleared when reseting the log or debug log.
+bluecow: Fixed missing file exception handler in upload function.
+
+----------------------
+- 27. Mai, 2003      -
+----------------------
+bluecow: Korrektur einiger Probleme mit part.met/part-Dateien die zu gross/klein sind (potentieller File-Completion bug). [SlugFiller]
+bluecow: Korrektur: Nicht freigegebener Speicher im Archive Recovery thread.
+bluecow: Korrektur: Absturz im Archive Recovery thread bei Archive das gerade "completed" wird.
+
+----------------------
+- 26. Mai, 2003      -
+----------------------
+Ornis: Webinterface: Korrektur: u.U. wurden aktive Downloads als fertiggestellt dargestellt
+Ornis: neue Sprache: Galizisch (von Emilio)
+bluecow: Korrektur: Nicht freigegebener Speicher im WebSocket.
+bluecow: Korrektur: Nicht freigegebene GDI Resourcen und falsch benutzt GDI Resourcen
+bluecow: Proxy Error Meldungen. Einschalten mit Eintrag "ShowErrors=1" in "[Proxy]" Section von PREFERENCES.INI.
+bluecow: Korrektur: Doppelte Quellen durch Source Exchange Packete mit falschen Versionsnummern.
+bluecow: More reliable identification of clients sending an UDP packet by searching clients with IP and UDP port
+
+----------------------
+- 24. Mai, 2003      -
+----------------------
+Ornis: Konfigurationsdateien haben ein eigenes Verzeichnis "config\". Dies kann nicht freigegeben werden. Beim Erststart werden alte Konfigurationen dorthin verschoben.
+Ornis: Kategorien-Reiter sind nun sortierbar (Drag&Drop)
+
+----------------------
+- 21. Mai, 2003      -
+----------------------
+VQB:  LowID-Uploadslot-Behandlung alterniert nun mit HighID-Uploads
+VQB:  Code-cleanup und Änderungen zu mehr Integerarithmetik [Elandal]
+Ornis:Webinterface: Fortschrittsbalken zeigt Blauabstufungen, je nach Quellenanzahl von Dateiteilen [Ju1i3n]
+VQB:  Anpassung der Reihenfolde für QR (high speed -> low speed DL gefolgt von low -> high QR)
+
+----------------------
+- 19. Mai, 2003      -
+----------------------
+Ornis: Webinterface: fix: ED2k-Links in Kategorie downloaden
+Ornis: Webinterface: Transferliste nun mit weiteren Kategorien (Dateityp,Status)
+Ornis: Aktualisierung der Skala der Statistik-Graphen wenn up/down Bandbreite übers Webinterface geändert wird
+Ornis: Asynchsocket auf v1.2 aktualisiert
+bluecow: Korrektur potentieller Probleme unter Win98 betreffend einiger Windows Messages.
+
+----------------------
+- 17. Mai, 2003      -
+----------------------
+bluecow: Korrektur im Serverfenster: Server werden korrekt nacj IP sortiert.
+bluecow: Korrektur: Es werden keine Backup Dateien mit 0 Byte Länge oder mit fehlerhaftem Inhalt erzeugt.
+bluecow: Korrektur: Exception handling und zuverlässige Speicherfreigabe im Falle eines Fehlers für alle met-Dateioperationen.
+bluecow: Alle eMule Fehlermeldungen die sich auf Dateien beziehen beinhalten eine Fehlermeldung vom Betriebssystem.
+bluecow: Suchen:Suchname , Server:Servermet-URL - diese Kontrollen beinhalten eine Liste der zuletzt benutzten Einträge (aka Autovervollständigung), AltGr+Entfernen löscht jeweils die History
+bluecow: Serverfenster/Suchfenster: Im Listview kann mit einem Dialog gesucht werden (Ctrl+F,F3,Shift+F3)
+Ornis: Korrektur: Win9x-Crash, beim Zugreifen auf das Kategorien-Reiter-Popupmenü für das Einstellen des Filters des ersten Reiters
+Ornis: Korrektur, bzgl. Vorschau von Archiven vor jeglichem Download 
+Unk: Fix small overhead bug
+Unk: irc: Liquid updated their ircd. It broke eMules IRC.. It is now updated..
+Unk: irc: eMule now should support multi mode commands.
+
+----------------------
+- 16. Mai, 2003      -
+----------------------
+bluecow: Korrektur: Beim Kopieren von Text ins Windows Clipboard, konnte es zu nicht freigegebenen Windows Resourcen kommen.
+Ornis: viele neue Statistiken hinzugefügt (von Khaos)
+Ornis: Fehlerbehebung im Zeitplaner
+Ornis: konfigurierbares Datums-/Zeitformat des Logs
+
+----------------------
+- 15. Mai, 2003      -
+----------------------
+bluecow: Korrektur des LowID Fehlers der durch beschädigte part.met Dateien hervorgerufen wurde.
+bluecow: Korrektur des Ladens der part.met Dateien: Bei einer beschädigten part.met Datei wird der Ladevorgang fortgesetzt.
+Sony: Problem behoben für sehr grosse Datein in MSVC 7.1 release builds; Korrektur beim "Minimiere zu Icon" Button (danke zegzav)
+
+
+0.28b:
+----------------------
+- 8. Mai, 2003       -
+----------------------
+Ornis: Kategorien: erweiterte Auswahl von Funktionen des alten "alle"-Reiters. Umschaltbar auch zu u.a. Video, Audio, Pausiert, Ladend, Übertragen,...
+Ornis: Upload-, Warteschlange- und Bekannteclients-Listen werden nun mit der Anzahl der aufgelisteten Clients angezeigt
+Ornis: anderes Trayicon, wenn eMule mit einer niedigen ID zum Server verbunden ist (eMule mit Augenbinde (emule+) )
+Ornis: Webinterface: Kategorienunterstützung
+Ornis: Webinterface: stellt nun auch fertig übertragende Dateien dar
+
+----------------------
+- 3. Mai, 2003       -
+----------------------
+bluecow: Korrektur: Nicht freigegebener Speicher beim Download von server.met via HTTP [UVman]
+
+----------------------
+- 2. Mai 2003        -
+----------------------
+bluecow: Korrektur einer weiteren Möglichkeit dass ein ungewollter Client zu einem Freund wird.
+
+----------------------
+- 28. April 2003     -
+----------------------
+bluecow: Kleine Korrekturen bei Icons in Server- und Nachrichtenfenster.
+bluecow: Standard Shortcuts für Log- und Debug-Listview Controls (Kopieren=Strg+C, Alles Selektieren=Ctrl+A)
+Ornis:   Websuche von Filedonkey.com filtert nun auch mittels Dateigrößenbeschränkung
+
+----------------------
+- 27. April 2003     -
+----------------------
+bluecow: Überarbeitung des gesamten Packet Lese-Codes um ein zuverlässiges Exception Handling und Speicherfreigabe zu ermöglichen.
+bluecow: Überarbeitung des Meta Tag Verarbeitung-Codes um neue Meta Tags zu unterstützen.
+bluecow: Korrektur: Files die auf Pause oder Stopp gesetzt wurden konnten manchmal weiterhin empfangene Daten in das Partfile schreiben.
+bluecow: Neu: Passive Quellensuche für neu zur Downloadliste hinzugefügte Dateien die noch nicht geshared wurden.
+bluecow: Korrektur: Kleinere nicht freigegebene Speicherblöcke und nicht korrekte Verwendung des C++ delete Operators [NoamSon]
+Ornis:   Webinterface weist IPs nach 5 fehlgeschlagenen Loginversuchen für 15 Minuten ab
+Ornis:   Bereinigung von Dateinamen: Anpassbarer Teilstringfilter (.ini : FilenameCleanups= )
+Ornis:   Option zur automatischen Dateinamenbereinigung bei Downloadstart (Einstellungen/Dateien)
+
+----------------------
+- 26. April 2003     -
+----------------------
+Ornis: wenn der verbundene Server ein Limit für die Anname freigegebener Dateien hat, sendet eMule nur entsprechend viele
+
+----------------------
+- 25. April 2003     -
+----------------------
+bluecow: Korrektur von leeren freigegebenen Verzeichnissen und eDonkey Protokoll Meldung OP_ASKSHAREDFILESDIR
+bluecow: First Run Time wizard hat einen "Fertigstellen" Button bekommen.
+Ornis: Links im Chat (hypertextctrl) stoppen nun nicht mehr an Umlauten
+Ornis: bessere URL-Decodierung (z.B. Sonderzeichen in ed2k-Links)
+
+----------------------
+- 24. April 2003     -
+----------------------
+bluecow: Korrektur bei Behandlung von eDonkey Protokoll Meldung OP_ASKSHAREDIRS. Ein Client konnte einen nach freigegebenen Verzeichnisse fragen obwohl gerade freigegebene Verzeichiss/Dateien empfangen wurden.
+bluecow: Korrektur von nicht freigegebenen Speicher bei komprimierten Packeten (Danke Blackstar2)
+bluecow: Korrektur von eDonkey Protokoll Meta Tags vom Typ "float", die von Servern gesendet wurden die freigegebene Dateien von Hybrids 0.48+ anbieten.
+Ornis: Zeitplaner Korrekturen
+Ornis: Zeitplaner-Einträge können via Hotmenü (Alt-X) direkt aktiviert werden, als auch (de)aktivieren des Zeitplaners
+Ornis: Senden von gleichen freigegebenen Verzeichnissen nicht mehr mehrfacht (u.U.)
+Ornis: Hinzugefügt: genauere Datentransfermessung auch unter CPU-Volllast [Ottavio84+Badwolf]
+Ornis: kleinere GUI-Fixes
+
+----------------------
+- 23. April 2003     -
+----------------------
+bluecow: Korrektur: Breite des Logfensters ist nun frei einstellbar, damit auch sehr lange Meldungen vollständig gelesen werden können.
+bluecow: Korrektur: Potentieller Bug in MFC der die Windows Sockets DLL nicht freigegeben hat.
+Sony: neue Option in erw. Einstellungen (Abstellen von Source Exchange Meldungen im verbose Log)
+
+----------------------
+- 22. April 2003     -
+----------------------
+Ornis: Zeitplaner-Kontrollen dem Hotmenü hinzugefügt
+Ornis: klarere Tastaturkontrolle für Quellen ausklappen/einziehen via Tastatur
+
+----------------------
+- 20. April 2003     -
+----------------------
+Ornis: Zeitplaner: Einstellungen sichern korrigiert
+Ornis: Kategorie fortsetzen & Statistiken-nicht-neu-zeichnen - Einstellungen korrigiert
+Ornis: wechselnde Kategorie Titel bei aktivierter Downloadinfo-in-den-Reitertiteln, korrigiert
+
+----------------------
+- 19. April 2003     -
+----------------------
+bluecow:Korrektur: Einstellungen/Verzeichnisse - DirectoryTree Control hat die Windows Icon Image Liste gelöscht.
+bluecow:Korrektur: Einstellungen/Verzeichnisse Dialog hat nicht (mehr) existierende freigegebene Verzeichnisse angezeigt.
+bluecow:Doppelklick im Freigegebenen Dateien Fenster öffnet die Datei mit dem assozierten Programm.
+bluecow:Datei Öffnen Befehl im Download/Freigegebenen Dateien Fenster bewirkt die gleiche Aktion wie ein Doppelklick im Windows Explorer.
+
+----------------------
+- 18. April 2003     -
+----------------------
+bluecow:Korrektur: einige Log-Meldungen wurden beim Starten nicht angezeigt.
+
+----------------------
+- 17. April 2003     -
+----------------------
+bluecow:Suchfenster und Freigegebene Dateienfenster zeigen die Dateiicons an.
+bluecow:Korrektur im Suchfenster: Die Anzeige der Anzahl der gefundenen Dateien eines anderen Clients stimmte nicht, wenn er mehrere Verzeichnisse hatte.
+
+
+v0.28a
+----------------------
+- 15. April 2003     -
+----------------------
+VQB: lange Uploadsessions werden auf die "voller-Chunk"-Methode geprüft
+VQB: vermeide mehrfaches hashen von Verzeichnissen (khaos)
+Sony/bluecow: der Hashing-Algorithmus wurde verbessert, nimmt nun weniger CPU Zeit in Anspruch
+
+----------------------
+- 14. April 2003     -
+----------------------
+VQB:  Langzeit UL/DL-Verhälnis zu den Statistiken hinzugfügt
+
+----------------------
+- 13. April 2003     -
+----------------------
+bluecow:"einen Freund hinzufügen" Dialog überarbeitet.
+bluecow:"Zeige Details" Funktion für Freund zeigt den Freund-"Details" Dialog wenn man nicht mit dem Freund verbunden ist. Wenn man gerade mit dem Freund verbunden ist, wird der "Quellen Details" Dialog angezeigt.
+
+----------------------
+- 12. April 2003     -
+----------------------
+Unk: Es werden Dateilimits vom Server ausgewertet (Hard- und Softfile limits)
+Unk: Serverliste wurde nicht aktualisiert, wenn eine Serverbeschreibung empfangen wurde
+bluecow:Provisorische Lösung (wahrscheinlich für immer :) um bei einem Doppelklick auf die Spaltenseparatoren die Spaltenbreite der Listen nicht auf 0 zu setzen.
+bluecow:Korrektur der Möglichkeit dass ein ungewollter Client zu einem Freund wird.
+bluecow:Korrektur von OP_ASKSHAREDFILESDIR: Dateien in freigegebenen Verzeichnissen die nicht mit einem Backslash geendet haben wurden nicht gesendet.
+bluecow:Anzeige der freigegebenen Verzeichnisse eines anderen Clients im Suchfenster.
+bluecow:Korrektur Quellenaustausch: Beim Wechsel von HighID zu LowID kann ein anderer Client eine Quelle zurückliefern die sich auf die aktuelle IP bezieht und eMule versucht zu sich selbst zu verbinden.
+
+----------------------
+- 11. April 2003     -
+----------------------
+bluecow:Vereinheitlichen aller Hinweisdialoge.
+bluecow:Optimierungen der Ausgabe- und Sortierungsfunktionen aller Listen-Fenster.
+bluecow:Korrektur im Quellenaustausch: Ein Client bekam erst dann anderen Quellen, wenn er zumindest einen Teil der Datei zum Sharen anbieten konnte.
+bluecow:Kleine Optimierungen beim Laden von server.met
+bluecow:Behandlung von eDonkey Protokoll Meldung OP_END_OF_DOWNLOAD
+bluecow:Mehrere kleine Source Code Änderungen und Korrekturen von potentiellen Fehlern die durch die Kompilierung mit Warnungsstufe 4 erkannt wurden.
+
+----------------------
+- 9. April 2003      -
+----------------------
+bluecow:Korrektur der Hashset Anfrage/Antwort wenn der andere Client nicht sofort einen Hashset sendet.
+bluecow:Korrektur der Speicherstruktur bei Empfang des Server Datums OP_SERVERIDENT ohne Zeichenketten.
+
+----------------------
+- 7. April 2003      -
+----------------------
+Ornis: Kategorien: Doppelklick öffnet die Kategorie-Eigenschaften; Kategorien können in der Downloadlist als Spalte angezeigt werden (optional)
+Ornis: Kategorien: neu Auto-Prioritätseigenschaft, neu zu einer Kategorie zugewiesene Dateien erhalten diese Downloadpriorität
+Ornis: Kategorien: nächste pausierte Datei fortsetzen - für die gleiche Kategorie möglich (optional & manuell)
+Ornis,bluecow: bessere Erkennung von MLDonkey
+Ornis: rotes Warn-Bewertungsicon erscheint wenn mehr als 1/3 der Bewertungen negativ sind
+
+----------------------
+- 6. April 2003      -
+----------------------
+bluecow:Neuer First Run Time Wizard
+bluecow:Hotfix für zu lange geratene partfiles.
+bluecow:Korrektur des Credit-Übertragungszählers für Clients die mehr als 4GB mit einem anderen Client transferiert haben (Dank an le_fred+Harvey56)
+
+----------------------
+- 5. April 2003      -
+----------------------
+bluecow:Neues Logfenster mit rotierendem Inhalt, max. Anzahl der Zeilen kann in PREFERENCES.INI angegeben werden (MaxLogMessages=<n>; <n>=-1 ... kein Limit)
+Ornis:  Webinterface: Downloadliste zeigt Prioritäten an und die Kontrollen um diese zu ändern
+Ornis:  Webinterface gibt nun Bilddateien zurück, um diese auch für die eigene Darstellung zu nutzen. (notwendige Bilder sind im Installer und dem Binary-Paket enthalten)
+
+----------------------
+- 4. April 2003      -
+----------------------
+Ornis: unnötiges Neuzeichnen (+Programmfreeze) der Statistikgraphen entfernt
+
+----------------------
+- 3. April 2003      -
+----------------------
+bluecow:Korrektur des Dialoges "Es wurde versucht, auf eine Stelle hinter dem Ende von unbenannt zuzugreifen".
+bluecow:Kleine Optimierungen um mit MD4 Hashs effektiver zu arbeiten.
+bluecow:Unbekannte Packete werden mit einem kleinen hex-dump der Daten im Debug Window angezeigt (Maella).
+bluecow:Doppel-Klick in allen Client bezogenen Fenstern öffnet den Quellendetaildialog.
+bluecow:Doppel-Klick auf Dateiname im Downloadfenster, öffnet den Dateidetaildialog.
+bluecow:Quellen die während des Suchens vom lokalen oder globalen Server retourniert werden, stehen beim Download sofort zur Verfügung.
+bluecow:Beim Hinzufügen eines Downloads aus der Dateiliste eines anderen Clients, wird der Client sofort als Quelle eingetragen.
+bluecow:Suchfenster: Bereits in KNOWN.MET eingetragene Dateien werden farblich angezeigt.
+bluecow:Serverfenster: Zuletzt eingetippte SERVER.MET URL wird in Settings gespeichert.
+
+----------------------
+- 1. April 2003      -
+----------------------
+bluecow:Korrektur von Deadlock nach Abbrechen eines HTTP Downloads von server.met
+Ornis:  Kategorie-Reiter zeigen als Tooltip einige Zusammenfassungs-Informationen an
+Ornis:  Optionale Anzeige der Kategorie-Reiter als "Titel (ladend/Gesamtanzahl)"  (Einstellungen->Anzeige)
+Ornis:  Statusbar-Doppelklick Reaktion, z.B. auf Log-Spalte zeigt ganze letzte Log-Zeile in einem Infofenster, Doppelklick auf Nachricht-Icon öffnet das Nachrichten-Fenster
+Ornis:  Zeige Webinterface-Status in "Meine Info", inkl. aktive Sessions
+
+----------------------
+- 30. März 2003      -
+----------------------
+Ornis: Webinterface Transferliste nach Fortschritt sortieren verbessert
+Ornis: Kategorien-Einstellungen werden nun nicht erst beim Programmende gespeichert
+Ornis: Datum&Zeit in den Logs entsprechend nun Landeseinstellungen
+
+----------------------
+- 28. März 2003      -
+----------------------
+Ornis: Webinterface: Gast darf nicht mehr Logs löschen
+Ornis: Webinterface: Server-Suche und Downloads starten
+Ornis: Webinterface: Dateieinstellungen werden nun übernommen
+Ornis: mehr Tastaturkürzel für Listen:Strg+A wählt ganze Liste aus; Downloadliste: +,-,Cursor links/rechts für Quellenanzeige ein/aus
+
+----------------------
+- 27. März 2003      -
+----------------------
+Ornis: Upload-Tooltipps zeigen übertragene Datenmengen besser an
+Ornis: neu:Zeitplaner(Scheduler), um Einstellungsänderungen und Aktionen zeitgesteuert zu planen
+Ornis: Webinterface-Vorlagendatei kann in den Einstellungen nun via Dateibrowser frei gewählt werden
+
+----------------------
+- 26. März 2003      -
+----------------------
+Ornis: Webinterface: Portänderungen startet Webserver automatisch neu [cax2]
+Ornis: Webinterface: Gastzugang deaktivieren funktioniert nun sofort
+Ornis: einigen eventuellen Programmende-Crashes vorgebeugt [2bottleMOD]
+
+
+v0.27c
+----------------------
+- 23. März 2003      -
+----------------------
+Ornis:Korrektur eines Sicherheitsfehlers, der zum Absturz von eMule führen konnte (neue Einstellungen in Einstellungen/Sicherheit)
+Ornis:Webserver: Anzeige von Dateigrößen >2GB korrigiert
+Ornis:Webserver-Template verbessert von Daan
+
+
+v0.27b
+----------------------
+- 21. März 2003      -
+----------------------
+Unk: Korrektur eines möglichen Crashs bzgl. Kommentarpaketen
+Unk: Entpackte Größe von Paketen wird überprüft, um Problemen vorzubeugen (emarc)
+Ornis:Korrektur für die Verzeichnisauswahlbox, wenn kein C-Laufwerk vorhanden ist
+Ornis:Korrektur eines Zugriffsproblems bei sehr großen Dateien  [gabest]
+Ornis:Übertragungszähler im Credit speichert nun auch >4GB
+
+----------------------
+- 19. März 2003      -
+----------------------
+VQB: Selber in die Zwischenablage kopierte ed2k Links werden nicht mehr durch die Zwischenablage-Überwachung gemeldet
+Ornis: Webserver Kontroll-Oberfläche hinzugefügt [Dank an kuchin],  mit folgenden Änderungen/Korrekturen:
+  -Fortschrittbalken nun farbig (Part-Status-Farben)!
+  -mehrere Darstellungsverbesserungen
+  -Datengrößen besser umgerechnet
+  -neue Einstellungsmöglichkeiten: Quellen-Pro-Datei-Limit, Verbindungen-Limit, neue Verbindungen pro 5sek, 2 Dateien-Einstellungen
+  -Zwei Nutzeraccounts möglich: Admin(voller Zugriff) & Gast(nur Einsicht)
+  -Inkompatibilität der Kontrollen-Iconanzeige bzgl. Opera- & alte Mozillabrowser korrigiert
+  -Sicherheitsbug-Korrektur, bzgl der SessionsID Erstellung
+  -Anmeldungen und Abmeldungen werden im Log vermerkt
+Unk: Eine alte Version oder MOD schaint den client hash auf Nullen zu setzen. eMule prüft das  und resettet diesen wenn nötig.
+Unk: UDP nutzt jetzt zur Client IP auch den Port um einen Sender zu identifizieren/finden
+
+----------------------
+- 16. März 2003      -
+----------------------
+Unk: Doppelupdate in der bekannte-Clients-Liste behoben (JustusJonas)
+
+----------------------
+- 15. März 2003      -
+----------------------
+Ornis: Beim Abbruch von Downloads einer ganzen Kazegorie wird nun vorher nach Bestätigung gefragt.
+Ornis: Korrigiert: Es war möglich, die gleiche Datei via Weblink mehrfach hinzuzufügen, wenn eMule gerade nicht lief
+Ornis: Es kann nun das Verbose-Log auf Disk protokolliert werden, ohne es im Serverfenster anzeigen zu müssen
+Unk: Bugfix: beim Warteschlange dekaktivieren
+Unk: Quellenaustausch aktualisiert, um den Usershash zu berücksichtigen - hilft gegen Doppelt-Clients
+Unk: Client-Detailsanzeige Korrektur
+Unk: Korrekur eines Fehlers, der "zuletzt gesehen" eines Clients nicht aktualisierte, wenn dieser nur UDP nutzte
+Unk: Übersetzungen der Bekannte-Clients-Liste erweitert
+Unk: Korrektur eines Fehlers, der eine Quelle ewig beim Statusnachfragen ließ
+
+----------------------
+- 14. März 2003      -
+----------------------
+Ornis: Korrektur: Versionstatistiken für die Hybridversionen nun sichtbar
+Ornis: Verzeichnisanzahl für das Senden des Paketes SHAREDDIRS korrigiert
+Ornis: Entscheidung über das Packen vom Paket wurde Case sensitive von der Dateierweiterung gefällt - korrigiert
+Ornis: Download-Tooltip korrigiert (eine Info war verloren)
+Ornis: Kommandos an Kategorie "alle unkatalogisierten" werden nun auch entsprechend behandelt
+
+
+v0.27a
+----------------------
+- 13. März 2003      -
+----------------------
+Ornis:Neue Optionen um die Logs mitzuspeichern
+Unk: Kredit-System optional
+Unk: Einfacher Erst-Start-Assistent
+Unk: Weitere Protokolländerung für bessere Kompatibilität mit dem Hybriden
+Team:viele kleine Fixes, Anpassungen & kleine grafische Aktualisierungen
+
+----------------------
+- 11. März 2003      -
+----------------------
+Ornis:Liste freigegebener Dateien: Linkkopieren nun auch bei Mehrfachauswahl
+Ornis:Suchfenster: Eingabe von mehreren ED2k-Dateilinks zum Download möglich
+Ornis:Option zum Überwachen der Zwischenablage auf ED2k-Dateilinks -> Abfrage ob diese zum Download hinzugefügt werden sollen
+Ornis:Einstellungen: neue Sektion: Sicherheit (Filter,...) - neuer Filter für Kommentare
+Ornis:neue Spalte "Verzeichnis" in Liste freigegebener Dateien
+Unk: lMule wird nun erkannt
+Unk: eMule v0.19 und früher bekommen eine geringere Warteschlangenbewertung. Dies soll deren Nutzer zu einem Upgrade bewegen, da diese alten Clients u.U. an falsche Ports senden.
+Ornis:"Hotmenu" hinzugefügt, für schnellere Kontrolle via Tastatur. Drücke Alt+x !
+
+----------------------
+- 10. März 2003      -
+----------------------
+Ornis: Fertiggestellter Download in der Downloadliste wird bei Aktivierung geöffnet
+Unk: Neue Liste "bekannte Clients" im Transferfenster
+Unk: Uploadclients mit unbekanntem Dateinamen werden nicht entfernt- für bessere Kompatibilität mit dem Hybriden.
+Unk: Liste der freigegebenen Dateien nutzt Warteschlange und Uploadliste, um einen Balken darzustellen, der anzeigt, wie verbreitet die Datei im Netzwerk ist.
+Unk: Fehlerkorrektur im Assistenten
+Ornis:Kommentaricon sollte nun mehr Uptodate sein [Moosetea]
+Unk: Korrektur eines Bugs, der bei Internet-Verbindungsunterbrechung zum Crash führen konnte
+
+----------------------
+- 2. März 2003       -
+----------------------
+Ornis:Fix: Speichern der gesamten gesendeten Datenmenge einzelner Dateien nicht mehr auf 4GB limitiert
+Ornis:Korrektur eines Fehlers, der die Vorschau von Videodateien mir großgeschriebener Erweiterung verhinderte
+Ornis:Einstellungendialog etwas umorganisiert
+Ornis:Neue Option, um das Bewertungs-/Kommentar-Icon in der Downloadliste ein-/auszuschalten
+
+----------------------
+- 1. März 2003      -
+----------------------
+Unk: Quellen die gerade nicht downloaden, werden nun seltener (1/10 der Zeit) aktualisiert [basierend auf Maella]
+Unk: Name und Beschreibung von Servern werden nun aktualisiert. Maximale Nutzeranzahl ist nun in separater Spalte
+Unk: Auswahlknopf-Fehler im Assisten korrigiert
+Unk: wie eMule den Versionstyp austauscht wurde verändert
+Ornis:Downloadliste kann nun in Kategorien organisiert werden (Downloadliste einteilen, unterschiedliche Eingangsverzeichnisse setzen, farbliche Markierung konfigurieren, Befehle auf alle Downloads in der Gruppe absetzen,...)
+Ornis:Datums/Zeitformat kann in der preferences.ini geändert werden - strftime()-kompatible Formatierung!!!
+
+----------------------
+- 26. Februar 2003   -
+----------------------
+Ornis: Korrektur: Quellenaustausch war u.U. seltener
+Ornis: gestoppte Downloads erhalten keine Quellen mehr
+Unk: Korrektur eines Fehlers, der einen Upload länger als einen Chunk erlaubte (im kompletten Chunk-Modus)
+
+----------------------
+- 25. Februar 2003   -
+----------------------
+Unk: View transfering parts in uploadlist. (Lonestar)
+
+----------------------
+- 24. Februar 2003   -
+----------------------
+Ornis: mittlerer Mausklick auf ein Kommentar-Symbol öffnet die Kommentarliste
+Unk:   Uploadbalken sind nun im 3D-Stil
+Ornis: Korrektur in automatischer Versionsüberprüfung [thx bluecow]
+Ornis: Anzeige des letzten Zeitpunktes wann für die Downloads jeweils der letzte Empfang einging (Tooltip, Downloadlisten-Spalte, Dateidetaildialog)
+
+----------------------
+- 21. Februar 2003   -
+----------------------
+Unk: Auto-Priorisierungs komplett erneuert. Download und Freigegebene Dateien sind nun komplett separat. Auto Priorität ist nun standardmäßig aktiv
+
+----------------------
+- 19. Februar 2003   -
+----------------------
+Unk: DownloadListCtrl. verbessert+Korrekturen (Maella)
+Unk: Eingearbeitet: Abfrage der freigegebenen Datein von Hybrid-Clients. (Bluecow)
+Unk: Aktualisiert die Warteschlange nicht dort, wo sie eh nicht sichtbar ist (zz)
+Unk: Another Update on the Min to Tray Button. (Zegzav)
+Ornis:Nachrichten-Benachrichtiger wurde erweitert, unterstützt nun frei definierbaren Skin, Schließ- & History-Funktion [enkeydev]
+Ornis:Doppelklick auf eine Quelle in der Kommentarliste öffnen einen Nachrichten-Chat mit diesem Benutzer
+Ornis:Fehlerkorrektur beim Limitieren der Downloadgeschwindigkeit während der Laufzeit und via Kommandozeile
+
+
+v0.26d
+----------------------
+- 15. Februar 2003   -
+----------------------
+Unk: Fix: Warteschlangen-Rotation wurde korrgiert - einige Clients wurde sofort wieder aus der Uploadschlange gekickt
+Unk: mehrer Optimierungen von BadWolf63,ichi
+Unk: Darstellungsfehler des Knopfes für Minimieren zum Tray korrigiert (zegzav)
+Unk: cDonkey ist nun auch in den Statistiken
+Unk: Splitter-bar Position wird nun präziser gespeichert
+
+
+v0.26c
+----------------------
+- 13. Februar 2003   -
+----------------------
+Unk: Hybriden-Erkennung geändert
+Unk: Uploadslot Management etwas verändert - es sind davon sehr langsame und sehr schneller Verbindungen betroffen (Koop. mit VQB)
+Unk: Einige Uploads waren viel zu lange im Chunk-Modus. Dies wird nun geprüft und vermieden.
+Unk: Dateien im Auto-Modus bleiben nun nicht mehr beim Neustart hängen (jicxicmic)
+Unk: Rundungsfehler korrigiert für Datenraten (Maella)
+Unk: Verbindungsvorgang etwas verändert. eMule verbindet nun klüger bei "sicheres Verbinden" deaktiviert - um LowID zu vermeiden
+Unk: Serverinformationen gehen nun nicht mehr beim Serverlistenupdate verloren
+Ornis:Neuer Kommandozeilen-Befehl: "limits=up,down" (z.B.: "emule.exe limits=50,12") um die Limits für den Up- & Download zu setzen
+Ornis:neue Option um die Transferraten in der Titelleiste von eMule anzeigen zu lassen
+Ornis:mittlerer Mausknopf ruft die Detailanzeige des aktivierten Eintrags auf in Download-, Upload- & Queueliste
+Ornis:Fix: Webservices in der Liste freigegebener Dateien funktioniert wieder
+
+----------------------
+- 11. Februar 2003   -
+----------------------
+Ornis:Fix: Statusbar-Icon erscheint wieder bei neuen Nachrichten 
+Ornis:eine Reihe kleiner Korrekturen, sowohl GUI als auch funktionale [Teils von JonnyB]
+Unk: automatisches Speichern der Serverliste und Freundesliste nun im akzeptablen Abstand
+Unk: Quellenaustausch sendet nun nur betötigte Quellen zu einem Client!
+Unk: weitere kleine GUI-Fixes
+Unk: Korrektur ein paar weiterer Sicherheitslücken (teils von beef2k & bluecow & juanjo)
+Unk: kleiner Fix bzgl. der Max.Verbindungen in den Einstellungen
+Unk: Pause und Priorität werden nun wieder bei Programmende gesichert
+
+----------------------
+- 10. Februar 2003   -
+----------------------
+Ozon: Bugfix: ED2k Links werden nun auch für Dateien >2GB korrekt erstellt
+Ornis:Darstellungsfehler im Kommentaranzeige-Fenster korrigiert
+Ornis:Anzeige der Anzahl von Downloads über der Downloadliste
+Ornis:Korrigiert: Speichern&Wiederherstellen der Spaltenreihenfolge der Downloadliste
+Ornis:Filter für eingehende Nachrichten (Konfig. in Einstellungen/Benachrichtigung, Standard Filterbeispiel: "Your client has an infinite queue")
+
+
+v0.26b
+----------------------
+- 8. Februar 2003    -
+----------------------
+Unk: Konvertierung vieler char[] in CStrings, um Pufferüberläufe zu vermeiden
+Unk: Wenn ein Hashset Probleme bereitet, wird er neu angefragt
+Ornis:Fix: Webservices im Suchfenster aufrufen
+Ornis:Fix: Vorschau starten [jicxicmic]
+Ozon: neu: kontinuierliches Backup für .part.met Dateien
+Ornis:mehrere kleine GUI & andere Fixes
+Ornis:IP-range Filter (für Blacklists) - cDonkey's filter-file-Format wird benutzt (Grundfiltering-mehr wird kommen) (mehr siehe FAQ!)
+Ornis:MeineInfo zeigt nun auch IP & Port an
+
+----------------------
+- 7. Februar 2003    -
+----------------------
+Ozon: Netzung des macro THIS_FILE in allen Quellcodes, um Leaks im VS besser aufzuspüren (nicht entfernen!)
+Unk:  Sicherheitslücke gestopft (bluecow/zegzav)
+Unk:  Serverliste und Freundeslist werden nun auch zwischendurch gesichert
+Ornis:Kommentardialog (Ansicht) umgestaltet (Listenansicht)
+
+----------------------
+- 6. Februar 2003    -
+----------------------
+Ozon: EMSOCKET_DEBUG definiert für EMSocket-logfile
+Ozon: Veränderter Packalgorithmus für die meisten structs/classes (nicht die Kritischen, weiterhin 1 byte) zu 8 bytes.
+(kann Performance verbessern...)
+Ozon: Clients.met wird bei jedem Start von eMule gesichert
+Ozon: Variablenumbenennung begonnen... (CAbstractFile, CClientCredits for now...)
+Unk:  Statistiken haben nun einen Paketzähler, und einige kleine Fehlerkorrekturen
+
+Fehlerkorrekturen, mit Hilfe von ZegZav, Bluecow, Ese Juani, jicxicmic
+Optimierungen, mit Hilfe von ichi, Maella, zz
+
+
+v0.26a
+---------------
+2. Februar 2003
+---------------
+Ornis: Crash behoben (Absturz nach Löschen des Serverlogs)
+Unk: Sicherheitslücke gestopft (Danke beef2k)
+
+---------------
+1. Februar 2003
+---------------
+Unk: Neuer Algorithmus zur gleichmässigeren Verteilung der TCP Connections. Nützlich für verschiedene Dinge..
+ -weniger Spitzenbelastung der CPU und der Bandbreite, wenn viele Quellen auf einmal angefragt werden müssen
+ -Wenier Konflikte zwischen Source Exchange und UDP file reasks, daraus folgend weniger TCP Verbindungen sind nötig und damit weniger Overhead
+Unk: IRC: Bug behoben "mögl. Absturz beim Verlassen eines Channels"
+Unk: Die Länge der Queue ist nun einstellbar (min. 2000)
+ Entgegen der üblichen Meinung hat die Grösse der Queue NICHTS mit dem Verbrauch an Bandbreite zu tun. Der Standardwert ist nun 5000)
+Unk: Die Grösse der Download Buffer pro Datei sind nun einstellbar. Wenn Du einer der wenigen bist, die meinen ein Problem zu haben mit zu viel Festplattenzugriffen, setze den Wert niedriger.
+Unk: Die Downloadprioritäten werden nun benutzt bei der Reihenfolge des Nachfragens bei Quellen.
+
+---------------
+31. Januar 2003
+---------------
+Unk: Einige Clients melden fälschlicherweise sie hatten eine Datei komplett. Einige Änderungen sollten dem entgegenwirken.
+Unk: Der Queue Rank (QR) bei den neuen eDonkey/Overnet Hybriden wird nun erkannt und angezeigt
+Unk: Protokoll-Fix: eMule rutscht nun nicht mehr ständig aus der Queue beim eDonkey/Obernet Hybriden (Anm. eDonkey hat das nicht absichtlich gemacht)
+Unk: Beim Wechsel der IP muss man sich nun nicht mehr wieder hinten in der Queue anstellen :)
+Unk: Nochmal am Sortieren der Downloadliste gearbeitet...
+Unk: Quellen mit voller Queue werden nun behandelt wie "Keine benötigten Teile" (d.h. sie werden langsam durch andere ersetzt, sobald man die max. zulässige Anzahl der Quellen erreicht)
+
+---------------
+28. Januar 2003
+---------------
+Unk: Bugfix: eDonkey und eMule Versionen wurden manchmal falsch angezeigt
+Unk: Die eDonkey/Overnet Hybriden werden nun erkannt, und auch in der Statistik aufgeführt
+Ornis: Für das Fertigstellen eines Downloads wird nun ein eigener Thread benutzt (Danke Lord KiRon)
+Ornis: Socket reading modifiziert (Danke Jordy)
+
+---------------
+24. Januar 2003
+---------------
+Ornis: Support für Opcode 0x48 (OP_FILEREQANSNOFILE) des eDOnkey Protokolls [references: DoubleT,eMule+/Tarod]
+Ornis: Der zu verwendende Videoplayer für avi und mpg Dateien ist nun wählbar (bei VideoLAN kann das Backup der part Datei ausgeschaltet werden)
+Unk: Komplettes Neuschreiben der Update Funktion der Queue und Uploadliste für weniger CPU Verbrauch.
+Unk: Die Overhead Anzeige würde überarbeitet... Die Abschätzung der TCP/UDP Header ist entfallen, es werden nur noch die Nutzdaten angezeigt. Die Statistik wurde um einige Overhead Sachen erweitert.
+
+---------------
+21. Januar 2003
+---------------
+Ornis: Interne Handhabung der Quellen optimiert, weniger CPU Verbrauch
+Ornis: diverse CPU Optimierungen (Stats, tray&maindlg, GUI) (Coop. mit Esejuani)
+Ornis: Bei den shared files können nun mehrere Dateien für Befehle ausgewählt werden
+Ornis: optionaler Update-Check (automatisch beim Start oder manuell)
+Ornis: voll konfigurierbare Web-Services für Downloads (z.B. Fakecheck oder ähnliches)
+Ozon: Crash behoben, wenn man den Statusbalken benutzen wollte befor er fertig erstellt war (AddLogLine)
+
+---------------
+20. Januar 2003
+---------------
+Unk: Protokoll-Erweiterung: Man kann nun sehen, welche Teile einer Datei der Downloader hat (wenn auch er eMule 0.26 oder höher benutzt)
+Ornis: Dateien, für die ein Kommentar oder Bewertung vorliegt, haben nun ein Symbol vor dem Dateinamen in der Downloadliste (Grün/rot)
+Ornis: Downloadliste: die Quellen können nun speziell gefiltert werden.. bitte lest die FAQ wie es funktioniert! :)  (Danke xrmb und Ese Juani)
+
+---------------
+19. Januar 2003
+---------------
+Unk: IRC: Crash beim Neuverbinden behoben
+Unk: kleine Änderung in der Downloadliste...
+Unk: Der Server eines anderen Clients wird nun zur Serverliste hinzugefügt sobald man das erste Mal mit ihm Verbindung aufnimmt.
+
+---------------
+18. Januar 2003
+---------------
+Ornis: Die Sprachen in der Sprachauswahlbox werden nun in der eigenen Sprache angezeigt (pooz)
+Ornis: Behoben: wenn man die Sprache mehrmals änderte, wurden die Toolbar Buttons immer grösser (pooz)
+
+.
+.
+.
+ältere Einträge sind im englischen Changelog verfügbar.
