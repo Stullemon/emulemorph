@@ -441,7 +441,6 @@ void CTransferWnd::UpdateListCount(uint8 listindex, int iCount /*=-1*/)
 {
 	if (m_uWnd2 != listindex)
 		return;
-	return;
 	CString buffer;
 	switch (m_uWnd2){
         case 1: {
