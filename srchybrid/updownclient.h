@@ -939,7 +939,7 @@ public:
 
 	//Morph Start - added by AndCycle, take PayBackFirst have same class with PowerShare
 	//this is used to replace all "GetPowerShared()" with "IsPBForPS()" in UploadQueue.cpp
-	bool	IsPBForPS() const{return (IsMoreUpThanDown() || GetPowerShared());}
+	bool	IsPBForPS() const;
 	//Morph End - added by AndCycle, take PayBackFirst have same class with PowerShare
 
 	//Morph - added by AndCycle, separate secure check

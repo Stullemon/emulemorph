@@ -224,7 +224,11 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 					leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
 					(
 						leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() || // same prio file
-						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false //neither want powershare file
+						//MORPH START - Changed by SiRoB, Code Optimization
+						//Test only one client
+						//if we are here both client got the same powershare state
+						leftClient->GetPowerShared() == false //&& rightClient->GetPowerShared() == false //neither want powershare file
+						//MORPH END   - Changed by SiRoB, Code Optimization
 				    ) && // they are equal in powersharing
 				    (
 						!leftLowIdMissed && rightLowIdMissed || // rightClient is lowId and has missed a slot and is currently connected
@@ -270,6 +274,8 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 	if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == true && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == false){
 		return -1;
 	}
+	//MORPH START - Changed by SiRoB, Code Optimization
+	/*
 	if(leftClient->IsPBForPS() == false && rightClient->IsPBForPS() == true){
 		return 1;
 	}
@@ -287,6 +293,18 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 		}
 	}
 	return 0;
+	*/
+	int retvalue = 0;
+	if (leftClient->IsPBForPS()) --retvalue;
+	if (rightClient->IsPBForPS()){
+		++retvalue;
+		//Morph - added by AndCyle, selective PS internal Prio
+		if(thePrefs.IsPSinternalPrioEnable() && retvalue == 0)
+			return rightClient->GetFilePrioAsNumber() - leftClient->GetFilePrioAsNumber();
+		//Morph - added by AndCyle, selective PS internal Prio
+	}
+	return retvalue;
+	//MORPH END   - Changed by SiRoB, Code Optimization
 }
 //Morph End - added by AndCycle, separate special prio compare
 
