@@ -327,17 +327,17 @@ public:
 #endif
 	//MORPH START - Added by SiRoB, Show Permissions
 	// shared file view permissions (all, only friends, no one)
-	int		GetPermissions(void) const	{ return m_iPermissions; };
-	void	SetPermissions(int iNewPermissions);
+	int		GetPermissions(void) const	{ return m_iPermissions; }
+	void	SetPermissions(int iNewPermissions)
 	//MORPH END   - Added by SiRoB, Show Permissions
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
-	void    SetPowerShared(int newValue) {m_powershared = newValue};
+	void    SetPowerShared(int newValue) {m_powershared = newValue;}
 	bool    GetPowerShared() const;
 	//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, HIDEOS
-	void	SetHideOS(int newValue) {m_iHideOS = newValue;};
+	void	SetHideOS(int newValue) {m_iHideOS = newValue;}
 	int		GetHideOS() const {return m_iHideOS;}
-	void	SetSelectiveChunk(int newValue) {m_iSelectiveChunk = newValue;};
+	void	SetSelectiveChunk(int newValue) {m_iSelectiveChunk = newValue;}
 	int		GetSelectiveChunk() const {return m_iSelectiveChunk;}
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
@@ -346,7 +346,7 @@ public:
 	void	UpdateHideOSLimit(bool authorizehideos) {m_bHideOSAuthorized = authorizehideos;}
 	//MORPH END   - Added by SiRoB, Avoid misusing of hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
-	void	SetShareOnlyTheNeed(int newValue) {m_iShareOnlyTheNeed = newValue;};
+	void	SetShareOnlyTheNeed(int newValue) {m_iShareOnlyTheNeed = newValue;}
 	int		GetShareOnlyTheNeed() const {return m_iShareOnlyTheNeed;}
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
@@ -354,7 +354,7 @@ public:
 	bool	GetPowerShareAuthorized() const {return m_bPowerShareAuthorized;}
 	bool	GetPowerShareAuto() const {return m_bPowerShareAuto;}
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	void	SetPowerShareLimit(int newValue) {m_iPowerShareLimit = newValue;};
+	void	SetPowerShareLimit(int newValue) {m_iPowerShareLimit = newValue;}
 	int		GetPowerShareLimit() const {return m_iPowerShareLimit;}
 	bool	GetPowerShareLimited() const {return m_bPowerShareLimited;}
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit

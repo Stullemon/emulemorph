@@ -418,8 +418,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         if(allowedDataRateClass[LAST_CLASS] < 6*1024) {
             minFragSize = 536;
             doubleSendSize = minFragSize; // don't send two packages at a time at very low speeds to give them a smoother load
-        }else
-			doubleSendSize = max(minFragSize * (2+(allowedDataRateClass[LAST_CLASS]>>15)),8192);
+        }
 
 #define TIME_BETWEEN_UPLOAD_LOOPS 1
         uint32 sleepTime;
@@ -557,7 +556,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							maxSlot[classID] = allowedDataRateClass[classID]/ClientDataRate[classID];
 						}
 					}
-					if(TotalMaxSlot+=maxSlot[classID] > m_highestNumberOfFullyActivatedSlots) {
+					TotalMaxSlot+=maxSlot[classID];
+					if( TotalMaxSlot > m_highestNumberOfFullyActivatedSlots) {
 						m_highestNumberOfFullyActivatedSlots = TotalMaxSlot;
             		}
 				}
