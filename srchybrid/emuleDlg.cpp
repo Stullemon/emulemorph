@@ -345,6 +345,11 @@ BOOL CemuleDlg::OnInitDialog()
 	//set title
 	CString buffer = _T("eMule v"); 
 	buffer += theApp.m_strCurVersionLong;
+
+	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
+	buffer += theApp.m_strModLongVersion;
+	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
+
 	SetWindowText(buffer);
 
 	//START - enkeyDEV(kei-kun) -TaskbarNotifier-
@@ -597,8 +602,12 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 					bError = true;
 				}
 				
+				//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-] [MoNKi: -UPnPNAT Support-]
+				theApp.emuledlg->serverwnd->UpdateMyInfo();
+				//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-] [MoNKi: -UPnPNAT Support-]
+
 				if (!bError) // show the success msg, only if we had no serious error
-					AddLogLine(true, GetResString(IDS_MAIN_READY) + _T(" %s"),theApp.m_strCurVersionLong,GetResString(IDS_TRANSVERSION));  //MORPH - Changed by milobac, Translation version info
+					AddLogLine(true, GetResString(IDS_MAIN_READY) + _T(" %s"),theApp.m_strCurVersionLong + theApp.m_strModLongVersion,GetResString(IDS_TRANSVERSION));  //MORPH - Changed by milobac, Translation version info
 
 				if(thePrefs.DoAutoConnect())
 					theApp.emuledlg->OnBnClickedButton2();
@@ -1030,9 +1039,9 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 
 		//MORPH START - Added by IceCream, Correct the bug of the download speed shown in the systray
 		if (theApp.IsConnected())
-			_sntprintf(buffer2,ARRSIZE(buffer2),_T("[%s] (%s)\r\n%s"),MOD_VERSION,GetResString(IDS_CONNECTED),buffer);
+			_sntprintf(buffer2,ARRSIZE(buffer2),_T("[%s] (%s)\r\n%s"),theApp.m_strModLongVersion,GetResString(IDS_CONNECTED),buffer);
 		else 
-			_sntprintf(buffer2,ARRSIZE(buffer2),_T("[%s] (%s)\r\n%s"),MOD_VERSION,GetResString(IDS_DISCONNECTED),buffer);
+			_sntprintf(buffer2,ARRSIZE(buffer2),_T("[%s] (%s)\r\n%s"),theApp.m_strModLongVersion,GetResString(IDS_DISCONNECTED),buffer);
 		//MORPH END   - Added by IceCream, Correct the bug of the download speed shown in the systray
 
 		buffer2[63]=0;
@@ -1051,7 +1060,12 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 		ShowTransferStateIcon();
 	}
 	if (IsWindowVisible() && thePrefs.ShowRatesOnTitle()) {
-		_sntprintf(buffer,ARRSIZE(buffer),_T("(U:%.1f D:%.1f) eMule v%s"),(float)lastuprate/1024, (float)lastdownrate/1024,theApp.m_strCurVersionLong);
+		 //MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		/*
+		_sntprintf(buffer,ARRSIZE(buffer),_T("(U:%.1f D:%.1f) eMule v%s [%s]"),(float)lastuprate/1024, (float)lastdownrate/1024,theApp.m_strCurVersionLong,theApp.m_strModLongVersion);
+		*/
+		_sntprintf(buffer,ARRSIZE(buffer),_T("(U:%.1f D:%.1f) eMule v%s [%s]"),(float)lastuprate/1024, (float)lastdownrate/1024,theApp.m_strCurVersionLong,theApp.m_strModLongVersion);
+		 //MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 		SetWindowText(buffer);
 	}
 }
@@ -1726,9 +1740,6 @@ void CemuleDlg::RestoreWindow()
 
 void CemuleDlg::UpdateTrayIcon(int procent)
 {
-	/*
-	//Commander - Temporary removed - Start
-	// compute an id of the icon to be generated
 	uint8 m_newiconinfo=(procent>0)?(16-((procent*15/100)+1)):0;
 
 	if (theApp.IsConnected()){
@@ -1738,16 +1749,21 @@ void CemuleDlg::UpdateTrayIcon(int procent)
 		m_newiconinfo += 100;
 
 	// dont update if the same icon as displayed would be generated
-	if ( m_lasticoninfo==m_newiconinfo )
+	//MORPH START - Changed by SiRoB, Blinking Tray Icon On Message Recieve
+	/*
+	if ( m_lasticoninfo==m_newiconinfo)
 		return;
+	*/
+	static bool messageIcon = false;
+	if ( m_lasticoninfo==m_newiconinfo && m_iMsgIcon == 0 && messageIcon)
+		return;
+	//MORPH START - Changed by SiRoB, Blinking Tray Icon On Message Recieve
+
 
 	m_lasticoninfo=m_newiconinfo;
-    //Commander - Temporary removed - End
-    */
 
-	// prepare it up
     //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
-	static bool messageIcon = false;
+	//static bool messageIcon = false;
 	if(m_iMsgIcon == 0 || !messageIcon){
 	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 	if (theApp.IsConnected()){
