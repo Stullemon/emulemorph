@@ -146,6 +146,7 @@ private:
     uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
     uint32  m_MaxActiveClients;
     uint32  m_MaxActiveClientsShortTime;
+	uint32	m_iHighestUploadDatarateReachedByOneClient;	//MORPH - Added by SiRoB, Upload Splitting Class
 
     DWORD   m_lastCalculatedDataRateTick;
     uint64  m_avarage_dr_sum;

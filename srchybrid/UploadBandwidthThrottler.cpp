@@ -201,9 +201,11 @@ bool UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket*
         }
     }
 
-    if(foundSocket && (INT_PTR)m_highestNumberOfFullyActivatedSlots >= m_StandardOrder_list.GetSize() && m_highestNumberOfFullyActivatedSlots > 0) {
+    /*
+	if(foundSocket && (INT_PTR)m_highestNumberOfFullyActivatedSlots >= m_StandardOrder_list.GetSize() && m_highestNumberOfFullyActivatedSlots > 0) {
         --m_highestNumberOfFullyActivatedSlots;
     }
+	*/
 	return foundSocket;
 }
 
@@ -377,6 +379,13 @@ UINT AFX_CDECL UploadBandwidthThrottler::RunProc(LPVOID pParam) {
 UINT UploadBandwidthThrottler::RunInternal() {
     DWORD lastLoopTick = ::GetTickCount();
 
+	sint64 realBytesToSpend = 0;
+
+	uint32 allowedDataRate = 0;
+	uint32 lastMaxAllowedDataRate = 1;
+
+    uint32 rememberedSlotCounter = 0;
+
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	sint64 realBytesToSpendClass[NB_SPLITTING_CLASS];
 	memzero(realBytesToSpendClass,sizeof(realBytesToSpendClass));
@@ -408,9 +417,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
         DWORD timeSinceLastLoop = ::GetTickCount() - lastLoopTick;
 
 		// Get current speed from UploadSpeedSense
-        //MORPH START - Added by SiRoB, Upload Splitting Class
+        //MORPH START - Changed by SiRoB, Upload Splitting Class
+		/*
+		allowedDataRate = theApp.lastCommonRouteFinder->GetUpload();
+		*/
 		theApp.lastCommonRouteFinder->GetClassByteToSend(allowedDataRateClass,ClientDataRate);
-		//MORPH END   - Added by SiRoB, Upload Splitting Class
+		//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 		uint32 minFragSize = 1300;
         uint32 doubleSendSize = minFragSize*2; // send two packages at a time so they can share an ACK
@@ -438,40 +450,53 @@ UINT UploadBandwidthThrottler::RunInternal() {
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
 
 		// Calculate how many bytes we can spend
-		//MORPH START - Changed by SiRoB, Upload Splitting Class
+		sint64 bytesToSpend = 0;
+		lastLoopTick = thisLoopTick; //MORPH - Moved by SiRoB, -Fix-
+
+		//MORPH START - Added by SiRoB, Upload Splitting Class
 		sint64 bytesToSpendClass[NB_SPLITTING_CLASS];
 		memzero(bytesToSpendClass,sizeof(bytesToSpendClass));
 		DWORD temptimeSinceLastLoop = timeSinceLastLoop;
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 		{
-			if(allowedDataRateClass[classID] != 0 && allowedDataRateClass[classID] != _UI32_MAX) {
+			allowedDataRate = allowedDataRateClass[classID];
+			bytesToSpend = bytesToSpendClass[classID];
+			realBytesToSpend = realBytesToSpendClass[classID];
+		//MORPH END   - Added by SiRoB, Upload Splitting Class
+			if(allowedDataRate != 0 && allowedDataRate != _UI32_MAX) {
         	    // prevent overflow
         	    if(timeSinceLastLoop == 0) {
         	        // no time has passed, so don't add any bytes. Shouldn't happen.
-        	        bytesToSpendClass[classID] = 0; //realBytesToSpendClass[classID]/1000;
-        	    } else if(_I64_MAX/timeSinceLastLoop > allowedDataRateClass[classID] && _I64_MAX-allowedDataRateClass[classID]*timeSinceLastLoop > realBytesToSpendClass[classID]) {
+        	        bytesToSpend = 0; //realBytesToSpend/1000;
+        	    } else if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpend) {
         	        if(timeSinceLastLoop > sleepTime + 2000) {
-				        theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler: Time since last loop too long. time: %ims wanted: %ims Max: %ims"), timeSinceLastLoop, sleepTime, sleepTime + 2000);
+				        if (classID == LAST_CLASS)
+							theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler: Time since last loop too long. time: %ims wanted: %ims Max: %ims"), timeSinceLastLoop, sleepTime, sleepTime + 2000);
         
-        	            temptimeSinceLastLoop = sleepTime + 2000;
-        	            lastLoopTick = thisLoopTick - temptimeSinceLastLoop;
+        	            timeSinceLastLoop = sleepTime + 2000;
+						if (classID == LAST_CLASS)
+							lastLoopTick = thisLoopTick - timeSinceLastLoop;
         	        }
 
-        	        realBytesToSpendClass[classID] += allowedDataRateClass[classID]*temptimeSinceLastLoop;
+        	        realBytesToSpend += allowedDataRate*timeSinceLastLoop;
 
-        	        bytesToSpendClass[classID] = realBytesToSpendClass[classID]/1000;
+        	        bytesToSpend = realBytesToSpend/1000;
         		} else {
-        		    realBytesToSpendClass[classID] = _I64_MAX;
-        	        bytesToSpendClass[classID] = _I32_MAX;
+        		    realBytesToSpend = _I64_MAX;
+        	        bytesToSpend = _I32_MAX;
         	    }
         	} else {
-        	    realBytesToSpendClass[classID] = 0; //_I64_MAX;
-        	    bytesToSpendClass[classID] = _I32_MAX;
+        	    realBytesToSpend = 0; //_I64_MAX;
+        	    bytesToSpend = _I32_MAX;
         	}
+		//MORPH START - Added by SiRoB, Upload Splitting Class
+			bytesToSpendClass[classID] = bytesToSpend;
+			realBytesToSpendClass[classID] = realBytesToSpend;
+			if (classID < LAST_CLASS)
+				timeSinceLastLoop = temptimeSinceLastLoop;
 		}
-		timeSinceLastLoop = temptimeSinceLastLoop;
-		//MORPH END   - Changed by SiRoB, Upload Splitting Class
-		lastLoopTick = thisLoopTick;
+		//MORPH END   - Added by SiRoB, Upload Splitting Class
+
 		if(bytesToSpendClass[LAST_CLASS] >= 1) {
         	uint64 spentBytesClass[NB_SPLITTING_CLASS];
 			memzero(spentBytesClass,sizeof(spentBytesClass));
@@ -552,19 +577,19 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				bool isFocused = ClientDataRate[classID] == 0;
 				if (!isFocused) {
 					if (allowedDataRateClass[classID] > 0){
+						uint32 desiredslotinclass = maxSlot[classID];
 						if (maxSlot[classID] > 0 && allowedDataRateClass[classID]/maxSlot[classID] < ClientDataRate[classID]) {
-							maxSlot[classID] = 1+allowedDataRateClass[classID]/ClientDataRate[classID];
+							desiredslotinclass = 1+allowedDataRateClass[classID]/ClientDataRate[classID];
 						}
-						if(lastpos+maxSlot[classID] > m_highestNumberOfFullyActivatedSlots) {
-							m_highestNumberOfFullyActivatedSlots = lastpos+maxSlot[classID];
+						if(lastpos+desiredslotinclass > m_highestNumberOfFullyActivatedSlots) {
+							m_highestNumberOfFullyActivatedSlots = lastpos+desiredslotinclass;
             			}
 					}
 				}
 				for(uint32 maxCounter = lastpos; maxCounter < lastpos+(isFocused?slotCounterClass[classID]:maxSlot[classID]) && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
 					if(isFocused == false)
 					{
-						if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID] ||
-	                		rememberedSlotCounterClass[classID] >= maxSlot[classID]) {
+						if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID]) {
 	                		rememberedSlotCounterClass[classID] = 0;
 						}
 					}
@@ -579,11 +604,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							else
 								break;
 						}
-						if(!isFocused) bytesToSpendTemp = min(ClientDataRate[classID],bytesToSpendTemp);
-						Socket_stat* stat = m_StandardOrder_list_stat.GetAt(posSocket);
-						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(min((bytesToSpendTemp+stat->LastSpentBytes)/2,bytesToSpendTemp), doubleSendSize);
+						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(min(doubleSendSize, bytesToSpendTemp), doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
-						stat->LastSpentBytes = lastSpentBytes;
 						//MORPH START - Added by SiRoB, Upload Splitting Class
 						if(posSocket+1 > m_highestNumberOfFullyActivatedSlots && (lastSpentBytes < bytesToSpendTemp || lastSpentBytes >= doubleSendSize)) { // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/)) {
 							m_highestNumberOfFullyActivatedSlots = posSocket+1;
@@ -609,7 +631,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			lastpos = 0;
             for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{	
-				if (allowedDataRateClass[classID]==0 || classID==LAST_CLASS &&  ClientDataRate[classID]==0)
+				if ((allowedDataRateClass[classID]==0 || classID==LAST_CLASS) &&  ClientDataRate[classID]==0)
 				{
 					for(uint32 slotCounter = lastpos; slotCounter < lastpos+slotCounterClass[classID] && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
@@ -640,32 +662,34 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			{
 				if (allowedDataRateClass[classID] && (slotCounterClass[classID]>0 || classID==LAST_CLASS))
 				{
-					if(realBytesToSpendClass[classID] < -(((sint64)((classID==LAST_CLASS)?m_highestNumberOfFullyActivatedSlots:slotCounterClass[classID])+1)*minFragSize)*1000) {
+					realBytesToSpend = realBytesToSpendClass[classID];
+					if(realBytesToSpend < -(((sint64)((classID==LAST_CLASS)?m_highestNumberOfFullyActivatedSlots:slotCounterClass[classID])+1)*minFragSize)*1000) {
 	           			sint64 newRealBytesToSpend = -(((sint64)((classID==LAST_CLASS)?m_highestNumberOfFullyActivatedSlots:slotCounterClass[classID])+1)*minFragSize)*1000;
-	           			realBytesToSpendClass[classID] = newRealBytesToSpend;
-	           		    if (classID==LAST_CLASS) templastTickReachedBandwidth = thisLoopTick;
+	           			realBytesToSpend = newRealBytesToSpend;
+	           		    lastTickReachedBandwidth = thisLoopTick;
 	       			} else {
 	           		    uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_highestNumberOfFullyActivatedSlots:slotCounterClass[classID])*512*1000;
-	           		    if(realBytesToSpendClass[classID] > 0 && (uint64)realBytesToSpendClass[classID] > 999+bandwidthSavedTolerance) {
+	           		    if(realBytesToSpend > 0 && (uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
 					        sint64 newRealBytesToSpend = 999+bandwidthSavedTolerance;
 					        //theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler::RunInternal(): Too high saved bytesToSpend. Limiting value. Old value: %I64i New value: %I64i"), realBytesToSpend, newRealBytesToSpend);
-	           				realBytesToSpendClass[classID] = newRealBytesToSpend;
-							if(thisLoopTick-lastTickReachedBandwidth > max(250, timeSinceLastLoop*2)) {
-	           		            if (classID==LAST_CLASS && (INT_PTR)m_highestNumberOfFullyActivatedSlots < m_StandardOrder_list.GetSize()+1)
-								{
-									m_highestNumberOfFullyActivatedSlots = m_highestNumberOfFullyActivatedSlots+1;
-									templastTickReachedBandwidth = thisLoopTick;
-								}
+	           				realBytesToSpend = newRealBytesToSpend;
+							if(thisLoopTick-lastTickReachedBandwidth > max(1000, timeSinceLastLoop*2)) {
+	           		            if (classID==LAST_CLASS)
+									m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize()+1;
+								lastTickReachedBandwidth = thisLoopTick;
 	           		            //theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
 	       					}
-	           		    } else {
-	           		        if (classID==LAST_CLASS) templastTickReachedBandwidth = thisLoopTick;
+	           		    //} else {
+	           		    //    lastTickReachedBandwidth = thisLoopTick;
 	           			}
 	       			}
+					if (classID<LAST_CLASS)
+						lastTickReachedBandwidth = templastTickReachedBandwidth;
+					realBytesToSpendClass[classID] = realBytesToSpend;
 				}
 			}
-			lastTickReachedBandwidth = templastTickReachedBandwidth;
 			//MORPH END   - Added by SiRoB, Upload Splitting Class
+
        		m_SentBytesSinceLastCall += spentBytesClass[LAST_CLASS];
 	    	m_SentBytesSinceLastCallOverhead += spentOverheadClass[LAST_CLASS];
        		sendLocker.Unlock();

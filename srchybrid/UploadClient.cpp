@@ -1018,7 +1018,7 @@ bool CUpDownClient::SendBlockData(){
 			break;
     if(m_AvarageUDR_list.GetCount() > 0) {
 		if(m_AvarageUDR_list.GetCount() == 1)
-			m_nUpDatarate = ((ULONGLONG)m_nSumForAvgUpDataRate*1000) / GetUpStartTimeDelay();
+			m_nUpDatarate = ((ULONGLONG)m_nSumForAvgUpDataRate*1000) / max(1000,GetUpStartTimeDelay());
 		else {
 			DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
 			if ((m_AvarageUDR_list.GetCount() - 1)*(curTick - m_AvarageUDR_list.GetTail().timestamp) >= dwDuration)
