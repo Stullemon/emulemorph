@@ -640,10 +640,13 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	newclient->SetPendingUploadingConnection(false); //MORPH - Added by SiRoB,
 	
 	//MORPH START - Changed by SiRoB, Upload Splitting Class
-	if(thePrefs.GetLogUlDlEvents())
-		DebugLog(LOG_USC, _T("USC: Added new slot in class %i - [C0 %i/%i %i]-[C1 %i/%i %i]-[C2 %i/%i %i]"),newclient->GetClassID(), m_aiSlotCounter[0],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[0],m_abOnClientOverHideClientDatarate[0]
-																																	,m_aiSlotCounter[1],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[1],m_abOnClientOverHideClientDatarate[1]
-																																	,m_aiSlotCounter[2],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[2],m_abOnClientOverHideClientDatarate[2]);
+	if(thePrefs.GetLogUlDlEvents()){
+		CString buffer;
+		buffer.Format(_T("USC: Added new slot in class %i -"),newclient->GetClassID());
+		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
+			buffer.AppendFormat(_T("[C%i %i/%i %i]-"),classID,m_aiSlotCounter[classID],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID],m_abOnClientOverHideClientDatarate[classID]);
+		DebugLog(LOG_USC,buffer);
+	}
 	memzero(m_abOnClientOverHideClientDatarate,sizeof(m_abOnClientOverHideClientDatarate));
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	
