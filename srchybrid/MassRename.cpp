@@ -124,7 +124,7 @@ BOOL CMassRenameDialog::OnInitDialog() {
 	while (pos != NULL) {
 		CKnownFile* file = m_FileList.GetAt (pos);
 		if (FileListString=="") FileListString = file->GetFileName ();
-		else FileListString = FileListString + "\r\n" + file->GetFileName ();
+		else FileListString = FileListString + _T("\r\n") + file->GetFileName ();
 		m_FileList.GetNext (pos);
 	}
 	OldFN = (CRichEditCtrl*) GetDlgItem(IDC_OLDFILENAMESEDIT);
@@ -144,6 +144,7 @@ BOOL CMassRenameDialog::OnInitDialog() {
 	LastEditPos = -10;
 	LastDelPos = -10;
 	InDel = false;
+	LastEditWasUndo = false;
 	UndoBuffer = FileListString;
 
 	// Show the left justify edit control
@@ -215,7 +216,7 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	}
 
 	if (NFNEdit->GetLineCount () < m_FileList.GetCount()) {
-		AfxMessageBox ("Not enough filenames in the list of new filenames. Rename not possible.",
+		AfxMessageBox (_T("Not enough filenames in the list of new filenames. Rename not possible."),
 					   MB_OK|MB_ICONEXCLAMATION);
 		return;
 	}
@@ -234,7 +235,7 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 		FName.Trim (' ');
 		if ((FName=="") || (FName==".") || (FName=="..") || (FName.FindOneOf (":\\?*") >= 0)){
 			CString er;
-			er.Format ("Invalid filename in line %d. Rename not possible.",i+1);
+			er.Format (_T("Invalid filename in line %d. Rename not possible."),i+1);
 			AfxMessageBox (er,MB_OK|MB_ICONEXCLAMATION);
 			return;
 		}
@@ -262,7 +263,7 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	for (int i=1; i < (int) sList.size(); i++) {
 		if (sList.at (i-1) == sList.at (i)) {
 			CString er;
-			er.Format ("Two or more equal filenames within the same directory are not allowed (Line %d). Rename not possible.",i+1);
+			er.Format (_T("Two or more equal filenames within the same directory are not allowed (Line %d). Rename not possible."),i+1);
 			AfxMessageBox (er,MB_OK|MB_ICONEXCLAMATION);
 			return;
 		}
@@ -323,6 +324,7 @@ void CMassRenameDialog::OnBnClickedReset()
 	NFNRight->SetWindowText (txt);
 	UndoBuffer = txt;
 	InDel = false;
+	LastEditWasUndo = false;
 	LastDelPos = -10;
 	OnEnSetfocusFilenamemaskedit();
 }
@@ -369,7 +371,13 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 		NFNLeft->SetWindowText (UndoBuffer);
 		NFNRight->SetWindowText (UndoBuffer);
 		UndoBuffer = allFNText;
+		LastEditWasUndo = true;
 		return; // Cancel here
+	}
+
+	if (LastEditWasUndo) {
+		UndoBuffer = allFNText;
+		LastEditWasUndo = false;
 	}
 
 	if ((MassRenameEdit->Start1==End1) && (Start2==End2) && (Start2 <= Start1)) {
@@ -402,8 +410,21 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 			if (!nochange) NFNEdit->ReplaceSel ("");
 		}
 	} else {
-		// Save the old content for Undo
-		if (InDel) {
+		CString NewChars = AfterEdit.Mid (Start1,End2-Start1);
+		if (NewChars=="") {
+			// Oh, that's dangerous. The user replaced the string by "" which is
+			// a delete action, not an insert action !
+			// In this case the Insert-routine has actually to be a Delete-routine !
+			if (!InDel)
+				UndoBuffer = allFNText;
+			InDel = true;
+			LastDelPos = Start1;
+		} else if (LastEditWasUndo) { // Save the old content for Undo
+			UndoBuffer = allFNText;
+			LastEditPos = Start1;
+			InDel = false;
+			LastEditWasUndo = false;
+		} else if (InDel) {
 			if (!(Start1 == LastDelPos))
 				UndoBuffer = allFNText;
 			LastEditPos = Start1;
@@ -414,7 +435,6 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 			LastEditPos = Start1;
 		}
 		// Remove some characters Start1..End1 and replace them by Start1..End2
-		CString NewChars = AfterEdit.Mid (Start1,End2-Start1);
 		for (int i=0; i < NFNEdit->GetLineCount (); i++) {
 			int lstart = NFNEdit->LineIndex (i);
 			int llen = NFNEdit->LineLength (lstart);
