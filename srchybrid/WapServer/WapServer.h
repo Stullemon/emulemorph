@@ -139,9 +139,7 @@ private:
 	static void SendImageFile(WapThreadData Data, CString file);
 	static void SendProgressBar(WapThreadData Data, CString filehash);
 	static bool BrowserAccept(WapThreadData Data, CString sAccept);
-	static bool FileExist(CString fileName);
-	static long FileSize(CString fileName);
-	static bool SendFile(WapThreadData Data, CString fileName, CString contentType);
+	static bool SendFile(WapThreadData Data, LPCTSTR fileName, CString contentType);
 	static void SendSmallestCxImage(WapThreadData Data, CxImage *cImage);
 	static CString RemoveWMLScriptInvalidChars(CString input);
 

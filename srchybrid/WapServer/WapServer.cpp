@@ -4018,6 +4018,7 @@ bool CWapServer::BrowserAccept(WapThreadData Data, CString sAccept){
 }
 
 void CWapServer::SendImageFile(WapThreadData Data, CString filename){
+	USES_CONVERSION;
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if (pThis == NULL) return;
 
@@ -4036,14 +4037,17 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 		gif=true;
 	}
 
-	CString pngFile = filename.Left(filename.ReverseFind(_T('.'))) + _T(".png");
-	CString gifFile = filename.Left(filename.ReverseFind(_T('.'))) + _T(".gif");
-	CString wbmpFile = filename.Left(filename.ReverseFind(_T('.'))) + _T(".wbmp");
+	TCHAR pngFile[_MAX_PATH];
+	_stprintf(pngFile, filename.Left(filename.ReverseFind(_T('.'))) + _T(".png"));
+	TCHAR gifFile[_MAX_PATH];
+	_stprintf(gifFile, filename.Left(filename.ReverseFind(_T('.'))) + _T(".png"));
+	TCHAR wbmpFile[_MAX_PATH];
+	_stprintf(wbmpFile, filename.Left(filename.ReverseFind(_T('.'))) + _T(".png"));
 
 	bool pngExist,gifExist,wbmpExist;
-	pngExist=FileExist(pngFile);
-	gifExist=FileExist(gifFile);
-	wbmpExist=FileExist(wbmpFile);
+	pngExist=PathFileExists(pngFile);
+	gifExist=PathFileExists(gifFile);
+	wbmpExist=PathFileExists(wbmpFile);
 
 	if(thePrefs.GetWapAllwaysSendBWImages()){
 		filename=wbmpFile;
@@ -4069,8 +4073,7 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 					cImage->Encode(bufferGIF, sizeGIF, CXIMAGE_FORMAT_GIF);
 				}
 
-				sizeWBMP=FileSize(wbmpFile);
-				USES_CONVERSION;
+				sizeWBMP=PathFileExists(wbmpFile);
 				if(bufferPNG && bufferGIF && (sizePNG<=sizeGIF) && (sizePNG<=sizeWBMP)){
 					Data.pSocket->SendContent(T2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType), bufferPNG, sizePNG);
 				}
@@ -4319,38 +4322,13 @@ void CWapServer::SendProgressBar(WapThreadData Data, CString filehash)
 	SendSmallestCxImage(Data, &progressImage);
 }
 
-bool CWapServer::FileExist(CString fileName){
-	CFile file;
-	CFileException e;
-	if(file.Open(fileName, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary, &e))
-	{
-		file.Close();
-		return true;
-	}
-	return false;
-}
-
-long CWapServer::FileSize(CString fileName){
-	CFile file;
-	CFileException e;
-	long size=0;
-	
-	if(file.Open(fileName, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary, &e))
-	{
-		size=file.GetLength();
-		file.Close();
-		return size;
-	}
-	return 0;
-}
-
-bool CWapServer::SendFile(WapThreadData Data, CString fileName, CString contentType){
+bool CWapServer::SendFile(WapThreadData Data, LPCTSTR szfileName, CString contentType){
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
 		return false;
 
 	CFile file;
-	if(file.Open(fileName, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary))
+	if(file.Open(szfileName, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary))
 	{
 		char* buffer=new char[file.GetLength()];
 		int size=file.Read(buffer,file.GetLength());
