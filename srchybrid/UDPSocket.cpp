@@ -54,10 +54,10 @@ LRESULT CUDPSocketWnd::OnDNSLookupDone(WPARAM wParam,LPARAM lParam){
 
 CUDPSocket::CUDPSocket(CServerConnect* in_serverconnect){
 	m_hWndResolveMessage = NULL;
-	m_sendbuffer = 0;
-	m_cur_server = 0;
+	m_sendbuffer = NULL;
+	m_cur_server = NULL;
 	m_serverconnect = in_serverconnect;
-	m_DnsTaskHandle = 0;
+	m_DnsTaskHandle = NULL;
 	m_bWouldBlock = false;
 }
 
@@ -66,19 +66,12 @@ CUDPSocket::~CUDPSocket(){
 		delete m_cur_server;
 	if (m_sendbuffer)
 		delete[] m_sendbuffer;
-	//original commented start
-	//POSITION pos = controlpacket_queue.GetHeadPosition();
-	//while (pos)
-	//	delete controlpacket_queue.GetNext(pos);
-	//original commented end
-	//EastShare Start - added by AndCycle, [patch] CUDPSocket memory leak, CUDPSocket incorrect destructor (rayita)
-    while (!controlpacket_queue.IsEmpty())
-    {
-        SServerUDPPacket* cur_pack = controlpacket_queue.RemoveHead();
-        delete cur_pack->packet;
-        delete cur_pack;
-    }
-	//EastShare End - added by AndCycle, [patch] CUDPSocket memory leak, CUDPSocket incorrect destructor (rayita)
+	POSITION pos = controlpacket_queue.GetHeadPosition();
+	while (pos){
+		SServerUDPPacket* p = controlpacket_queue.GetNext(pos);
+		delete[] p->packet;
+		delete p;
+	}
 	m_udpwnd.DestroyWindow();
 }
 
@@ -378,11 +371,11 @@ void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
 			m_DnsHostBuffer,
 			MAXGETHOSTSTRUCT);
 
-		if (m_DnsTaskHandle == 0){
+		if (m_DnsTaskHandle == NULL){
 			delete[] m_sendbuffer;
-			m_sendbuffer = 0;
+			m_sendbuffer = NULL;
 			delete m_cur_server;
-			m_cur_server = 0;
+			m_cur_server = NULL;
 #ifdef _DEBUG
 			AfxMessageBox("LOOKUPERROR DNSTASKHANDLE = 0");
 #endif
@@ -413,7 +406,7 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 		int iBufLen = WSAGETASYNCBUFLEN(lp);
 		if (iBufLen >= sizeof(HOSTENT)){
 			LPHOSTENT pHost = (LPHOSTENT)m_DnsHostBuffer;
-			if (pHost->h_length >= 4 && pHost->h_addr_list && pHost->h_addr_list[0])
+			if (pHost->h_length == 4 && pHost->h_addr_list && pHost->h_addr_list[0])
 				m_SaveAddr.sin_addr.s_addr = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
 		}
 		// also reset the receive buffer
@@ -440,7 +433,7 @@ void CUDPSocket::OnSend(int nErrorCode){
 		SServerUDPPacket* packet = controlpacket_queue.GetHead();
 		if (SendTo(packet->packet, packet->size, packet->dwIP, packet->nPort) > 0){
 			controlpacket_queue.RemoveHead();
-			delete packet->packet;
+			delete[] packet->packet;
 			delete packet;
 		}
 	}
@@ -477,8 +470,7 @@ void CUDPSocket::SendBuffer(){
 		}
 		else{
 			// on success or error, delete the packet
-			//delete m_sendbuffer;//original commented
-			delete[] m_sendbuffer;//EastShare - Added by AndCycle, [patch]CUDPSocket memory leak(Xman1)
+			delete[] m_sendbuffer;
 		}
 		m_sendbuffer = NULL;
 		m_sendblen = 0;
