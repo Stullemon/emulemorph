@@ -251,8 +251,9 @@ BOOL CemuleDlg::OnInitDialog()
 	CString buffer = "eMule v"; 
 	buffer += theApp.m_strCurVersionLong;
 
-	//Morph - added by AndCycle, eMulePlus CPU optimizie
+//Morph - added by AndCycle, eMulePlus CPU optimize
 	CString optimizeType = " ";
+#if !defined(MMX) && !defined(AMD) && !defined(SSE)
 	switch (get_cpu_type())
 	{
 		case 1:
@@ -273,8 +274,22 @@ BOOL CemuleDlg::OnInitDialog()
 			optimizeType += "SSE";
 			break;
 	}
+#else
+	#ifdef MMX
+		AddLogLine(false,"MMX optimizations active");
+		optimizeType += "MMX";
+	#endif MMX
+	#ifdef AMD
+		AddLogLine(false,"AMD optimizations active");
+		optimizeType += "AMD";
+	#endif AMD
+	#ifdef SSE
+		AddLogLine(false,"SSE optimizations active");
+		optimizeType += "SSE";
+	#endif SSE
+#endif
 	buffer += optimizeType;
-	//Morph - added by AndCycle, eMulePlus CPU optimizie
+//Morph - added by AndCycle, eMulePlus CPU optimize
 
 	SetWindowText(buffer);
 
