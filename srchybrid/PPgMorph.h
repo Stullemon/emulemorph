@@ -39,6 +39,7 @@ protected:
 	int m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	int m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	int m_bIsBoostFriends;//Added by Yun.SF3, boost friends
+	int m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	int	m_iDynUpMode;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	int	m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	int m_bIsAutoPowershareNewDownloadFile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -94,6 +95,7 @@ protected:
 	HTREEITEM m_htiEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	HTREEITEM m_htiIsBoostFriends;//Added by Yun.SF3, boost friends
+	HTREEITEM m_htiInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	HTREEITEM m_htiIsAutoPowershareNewDownloadFile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	HTREEITEM m_htiHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	HTREEITEM m_htiSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS

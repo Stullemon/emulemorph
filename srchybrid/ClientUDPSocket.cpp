@@ -102,7 +102,9 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 					break;
 				}
 				else{
-					if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > theApp.glob_prefs->GetQueueSize()){
+					//Morph - modified by AndCycle, SLUGFILLER: infiniteQueue
+					if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > theApp.glob_prefs->GetQueueSize() && !theApp.glob_prefs->IsInfiniteQueueEnabled()){
+					//if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > theApp.glob_prefs->GetQueueSize()){
 						Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
 						theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
 						SendPacket(response,inet_addr(host),port);
