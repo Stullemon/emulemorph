@@ -30,10 +30,16 @@ IMPLEMENT_DYNAMIC(PreviewDlg, CDialog)
 PreviewDlg::PreviewDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(PreviewDlg::IDD, pParent)
 {
+	memset(m_icons, 0, sizeof m_icons);
 }
 
 PreviewDlg::~PreviewDlg()
 {
+	for (int i = 0; i < ARRSIZE(m_icons); i++)
+	{
+		if (m_icons[i])
+			VERIFY( DestroyIcon(m_icons[i]) );
+	}
 }
 
 void PreviewDlg::DoDataExchange(CDataExchange* pDX)
@@ -53,25 +59,21 @@ END_MESSAGE_MAP()
 BOOL PreviewDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	InitWindowStyles(this);
 	if (m_pFile == NULL){
 		ASSERT ( false );
 		return FALSE;
 	}
+	InitWindowStyles(this);
 	CString title =GetResString(IDS_DL_PREVIEW);
-	title.Remove('&');
+	title.Remove(_T('&'));
 	SetWindowText( title + CString(_T(": ")) + m_pFile->GetFileName());
+
 	m_nCurrentImage = 0;
 	ShowImage(0);
-	CImageList m_ImageList;
-	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,10);
-	m_ImageList.SetBkColor(CLR_NONE);
-	m_ImageList.Add(theApp.LoadIcon(IDI_CANCEL));
-	m_ImageList.Add(theApp.LoadIcon(IDI_FORWARD));
-	m_ImageList.Add(theApp.LoadIcon(IDI_BACK));
-	((CButton*)GetDlgItem(IDC_PV_EXIT))->SetIcon(m_ImageList.ExtractIcon(0));
-	((CButton*)GetDlgItem(IDC_PV_NEXT))->SetIcon(m_ImageList.ExtractIcon(1));
-	((CButton*)GetDlgItem(IDC_PV_PRIOR))->SetIcon(m_ImageList.ExtractIcon(2));
+
+	((CButton*)GetDlgItem(IDC_PV_EXIT))->SetIcon(m_icons[0] = theApp.LoadIcon("Cancel"));
+	((CButton*)GetDlgItem(IDC_PV_NEXT))->SetIcon(m_icons[1] = theApp.LoadIcon("Forward"));
+	((CButton*)GetDlgItem(IDC_PV_PRIOR))->SetIcon(m_icons[2] = theApp.LoadIcon("Back"));
 	return TRUE;
 }
 
@@ -85,8 +87,9 @@ void PreviewDlg::ShowImage(sint16 nNumber){
 		nNumber = nImageCount-1;
 
 	m_nCurrentImage = nNumber;
-	HBITMAP m_bitmap = m_pFile->GetPreviews()[nNumber]->MakeBitmap(m_ImageStatic.GetDC()->m_hDC);
-	m_ImageStatic.SetBitmap(m_bitmap);
+	HBITMAP hbitmap = m_ImageStatic.SetBitmap(m_pFile->GetPreviews()[nNumber]->MakeBitmap(m_ImageStatic.GetDC()->m_hDC));
+	if (hbitmap)
+		DeleteObject(hbitmap);
 }
 
 void PreviewDlg::Show(){
@@ -111,6 +114,9 @@ void PreviewDlg::OnBnClickedPvPrior()
 }
 
 void PreviewDlg::OnClose(){
+	HBITMAP hbitmap = m_ImageStatic.SetBitmap(NULL);
+	if (hbitmap)
+		DeleteObject(hbitmap);
 	CDialog::OnClose();
 	delete this;
 }

@@ -8,6 +8,10 @@
 #include "memdc.h"
 #include "MuleListCtrl.h"
 #include "Ini2.h"
+#include "SharedFilesCtrl.h"
+#include "SearchListCtrl.h"
+#include "KadContactListCtrl.h"
+#include "KadSearchListCtrl.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -59,6 +63,7 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
     m_crWindow = 0;
     m_crWindowText = 0;
     m_crHighlight = 0;
+	m_crGlow=0;
     m_crFocusLine = 0;
     m_crNoHighlight = 0;
     m_crNoFocusLine = 0;
@@ -299,10 +304,83 @@ void CMuleListCtrl::SetColors() {
 	m_crWindowText  = ::GetSysColor(COLOR_WINDOWTEXT);
 
 	COLORREF crHighlight = ::GetSysColor(COLOR_HIGHLIGHT);
+
+	LPCTSTR pszSkinProfile = theApp.glob_prefs->GetSkinProfile();
+	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
+	{
+		CString strKey;
+		if (IsKindOf(RUNTIME_CLASS(CServerListCtrl)))
+			strKey = "ServersLv";
+		else if (IsKindOf(RUNTIME_CLASS(CSearchListCtrl)))
+			strKey = "SearchResultsLv";
+		else if (IsKindOf(RUNTIME_CLASS(CDownloadListCtrl)))
+			strKey = "DownloadsLv";
+		else if (IsKindOf(RUNTIME_CLASS(CUploadListCtrl)))
+			strKey = "UploadsLv";
+		else if (IsKindOf(RUNTIME_CLASS(CQueueListCtrl)))
+			strKey = "QueuedLv";
+		else if (IsKindOf(RUNTIME_CLASS(CClientListCtrl)))
+			strKey = "ClientsLv";
+		else if (IsKindOf(RUNTIME_CLASS(CFriendListCtrl)))
+			strKey = "FriendsLv";
+		else if (IsKindOf(RUNTIME_CLASS(CSharedFilesCtrl)))
+			strKey = "SharedFilesLv";
+		else if (IsKindOf(RUNTIME_CLASS(CKadContactListCtrl)))
+			strKey = "KadContactsLv";
+		else if (IsKindOf(RUNTIME_CLASS(CKadSearchListCtrl)))
+			strKey = "KadActionsLv";
+		else
+			strKey = "DefLv";
+
+		TCHAR szColor[MAX_PATH];
+		GetPrivateProfileString(_T("Colors"), strKey + _T("Bk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] == _T('\0'))
+			GetPrivateProfileString(_T("Colors"), _T("DefLvBk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+		{
+			UINT red, grn, blu;
+			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
+			if (iVals == 3)
+				m_crWindow = RGB(red, grn, blu);
+		}
+
+		GetPrivateProfileString(_T("Colors"), strKey + _T("Fg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] == _T('\0'))
+			GetPrivateProfileString(_T("Colors"), _T("DefLvFg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+		{
+			UINT red, grn, blu;
+			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
+			if (iVals == 3)
+				m_crWindowText = RGB(red, grn, blu);
+		}
+
+		GetPrivateProfileString(_T("Colors"), strKey + _T("Hl"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] == _T('\0'))
+			GetPrivateProfileString(_T("Colors"), _T("DefLvHl"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+		{
+			UINT red, grn, blu;
+			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
+			if (iVals == 3)
+				crHighlight = RGB(red, grn, blu);
+		}
+	}
+	SetBkColor(m_crWindow);
+	SetTextBkColor(m_crWindow);
+	SetTextColor(m_crWindowText);
+
+	// This can not be used, because currently the DrawItem and related functions are not prepared to deal
+	// with that (Hint: the biggest problem is the CMemDC BitBlt)..
+//	if (SetBkImage("file://C:\\WINDOWS\\ServicePackFiles\\i386\\lvback.gif", FALSE)){
+//		SetTextBkColor(CLR_NONE);
+//	}
+
 	m_crFocusLine   = crHighlight;
 	m_crNoHighlight = MLC_RGBBLEND(crHighlight, m_crWindow, 8);
 	m_crNoFocusLine = MLC_RGBBLEND(crHighlight, m_crWindow, 2);
 	m_crHighlight   = MLC_RGBBLEND(crHighlight, m_crWindow, 4);
+	m_crGlow		= MLC_RGBBLEND(crHighlight, m_crWindow, 3);
 }
 
 void CMuleListCtrl::SetSortArrow(int iColumn, ArrowType atType) {
@@ -422,7 +500,7 @@ int CMuleListCtrl::MoveItem(int iOldIndex, int iNewIndex) { //move item in list,
 					lvi.pszText = LPSTR_TEXTCALLBACK;
 				else
 					lvi.pszText = (LPTSTR)((LPCTSTR)*((CString*)pstrSubItem));
-			DefWindowProc(LVM_SETITEMTEXT, iNewIndex, (LPARAM)&lvi);
+				DefWindowProc(LVM_SETITEMTEXT, iNewIndex, (LPARAM)&lvi);
 				if (pstrSubItem != LPSTR_TEXTCALLBACK)
 					delete (CString*)pstrSubItem;
 			}
@@ -899,7 +977,7 @@ END_MESSAGE_MAP()
 // CMuleListCtrl message handlers
 
 void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
-	//set up our ficker free drawing
+	//set up our flicker free drawing
 	CRect rcItem(lpDrawItemStruct->rcItem);
 	CDC *oDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	COLORREF crOldDCBkColor = oDC->SetBkColor(m_crWindow);
@@ -921,12 +999,13 @@ void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	lvi.mask = LVIF_IMAGE | LVIF_STATE;
 	lvi.iItem = iItem;
 	lvi.iSubItem = 0;
-	lvi.stateMask = LVIS_DROPHILITED | LVIS_FOCUSED | LVIS_SELECTED;
+	lvi.stateMask = LVIS_DROPHILITED | LVIS_FOCUSED | LVIS_SELECTED | LVIS_GLOW; 
 	GetItem(&lvi);
 
 	//see if the item be highlighted
 	BOOL bHighlight = ((lvi.state & LVIS_DROPHILITED) || (lvi.state & LVIS_SELECTED));
 	BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
+	BOOL bGlowing = ( lvi.state & LVIS_GLOW );
 
 	//get rectangles for drawing
 	CRect rcBounds, rcLabel, rcIcon;
@@ -956,17 +1035,30 @@ void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 		{
 			pDC->FillRect(rcHighlight, &CBrush(m_crHighlight));
 			crOldBckColor = pDC->SetBkColor(m_crHighlight);
-		} 
+		}
+		else if(bGlowing)
+		{
+			pDC->FillRect(rcHighlight, &CBrush(m_crGlow));
+			crOldBckColor = pDC->SetBkColor(m_crGlow);
+		}
 		else 
 		{
 			pDC->FillRect(rcHighlight, &CBrush(m_crNoHighlight));
 			crOldBckColor = pDC->SetBkColor(m_crNoHighlight);
 		}
 	} 
-	else 
+	else
 	{
-		pDC->FillRect(rcHighlight, &CBrush(m_crWindow));
-		crOldBckColor = pDC->SetBkColor(GetBkColor());
+		if(bGlowing)
+		{
+			pDC->FillRect(rcHighlight, &CBrush(m_crGlow));
+			crOldBckColor = pDC->SetBkColor(m_crGlow);
+		}
+		else
+		{
+			pDC->FillRect(rcHighlight, &CBrush(m_crWindow));
+			crOldBckColor = pDC->SetBkColor(m_crWindow);
+		}
 	}
 
 	//update column
@@ -1097,7 +1189,8 @@ BOOL CMuleListCtrl::OnEraseBkgnd(CDC* pDC) {
 	return TRUE;
 }
 
-void CMuleListCtrl::OnSysColorChange() {
+void CMuleListCtrl::OnSysColorChange()
+{
 	//adjust colors
 	CListCtrl::OnSysColorChange();
 	SetColors();
@@ -1107,14 +1200,15 @@ void CMuleListCtrl::OnSysColorChange() {
 		SetSortArrow(m_iCurrentSortItem, (ArrowType)m_atSortArrow);
 }
 
-void CMuleListCtrl::ApplyImageList(HIMAGELIST himl)
+HIMAGELIST CMuleListCtrl::ApplyImageList(HIMAGELIST himl)
 {
-	SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)himl);
+	HIMAGELIST himlOld = (HIMAGELIST)SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)himl);
 	if (m_imlHeaderCtrl.m_hImageList != NULL){
 		// Must *again* set the image list for the header control, because LVM_SETIMAGELIST
 		// always resets any already specified header control image lists!
 		GetHeaderCtrl()->SetImageList(&m_imlHeaderCtrl);
 	}
+	return himlOld;
 }
 
 

@@ -365,6 +365,7 @@ void CUpDownClient::ClearHelloProperties()
 	m_nClientMajVersion = 0;
 	m_nClientMinVersion = 0;
 	m_nClientUpVersion = 0;
+	m_fSharedDirectories = 0;
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_clientModString.Empty();
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
@@ -464,6 +465,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 				m_byCompatibleClient = (temptag.tag.intvalue >> 24);
 				m_nClientVersion = temptag.tag.intvalue & 0x00ffffff;
 				m_byEmuleVersion = 0x99;
+				m_fSharedDirectories = 1;
 				dwEmuleTags |= 4;
 				break;
 			//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
@@ -923,6 +925,13 @@ void CUpDownClient::ProcessMuleCommentPacket(char* pachPacket, uint32 nSize){
 //MORPH START - Changed by SiRoB, ZZ UPload system
 bool CUpDownClient::Disconnected(CString reason, bool m_FromSocket){
 //MORPH END   - Changed by SiRoB, ZZ UPload system
+	//If this is a KAD client object, just delete it!
+	if(this->GetKadIPCheckState() != KS_NONE){
+		return true;
+	}	
+	// There is at least one case where this ASSERT will give a false warning. When a new client instance is created
+	// on receiving OP_HELLO and the packet is parsed, it may throw an exception which let us delete/Disconnect that
+	// client which is not yet in the client-list.
 	ASSERT(theApp.clientlist->IsValidClient(this));
 
 	if (GetUploadState() == US_UPLOADING)
@@ -1427,7 +1436,7 @@ void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
 	}
 	else{
 		if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
-			AddDebugLogLine(false, "Failed to use new recieved public key");
+			AddDebugLogLine(false, "Failed to use new received public key");
 	}
 }
 
@@ -1455,17 +1464,17 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 	// we accept only one signature per IP, to avoid floods which need a lot cpu time for cryptfunctions
 	if (m_dwLastSignatureIP == GetIP()){
 		if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
-			AddDebugLogLine(false, "recieved multiple signatures from one client");
+			AddDebugLogLine(false, "received multiple signatures from one client");
 		return;
 	}
 	// also make sure this client has a public key
 	if (credits->GetSecIDKeyLen() == 0){
-		AddDebugLogLine(false, "recieved signature for client without public key");
+		AddDebugLogLine(false, "received signature for client without public key");
 		return;
 	}
 	// and one more check: did we ask for a signature and sent a challange packet?
 	if (credits->m_dwCryptRndChallengeFor == 0){
-		AddDebugLogLine(false, "recieved signature for client with invalid challenge value ('%s')", GetUserName());
+		AddDebugLogLine(false, "received signature for client with invalid challenge value ('%s')", GetUserName());
 		return;
 	}
 

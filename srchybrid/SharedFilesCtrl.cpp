@@ -155,12 +155,12 @@ void CSharedFilesCtrl::Init(){
 	//MORPH END   - Added & Modified by IceCream, SLUGFILLER: Spreadbars
 	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,2);
 	m_ImageList.SetBkColor(CLR_NONE);
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_NO));  // 0
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_FAKE));  // 1
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_POOR));  // 2
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_GOOD));  // 3
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_FAIR));  // 4
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_EXCELLENT));  // 5
+	m_ImageList.Add(theApp.LoadIcon("RATING_NO"));  // 0
+	m_ImageList.Add(theApp.LoadIcon("RATING_FAKE"));  // 1
+	m_ImageList.Add(theApp.LoadIcon("RATING_POOR"));  // 2
+	m_ImageList.Add(theApp.LoadIcon("RATING_GOOD"));  // 3
+	m_ImageList.Add(theApp.LoadIcon("RATING_FAIR"));  // 4
+	m_ImageList.Add(theApp.LoadIcon("RATING_EXCELLENT"));  // 5
 	//MORPH END   - Added & Moddified by IceCream, SLUGFILLER: showComments
 	CreateMenues();
 
@@ -308,7 +308,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 			odc->SetBkColor(m_crNoHighlight);
 	}
 	else
-		odc->SetBkColor(GetBkColor());
+		odc->SetBkColor(m_crWindow);
 
 	CKnownFile* file = (CKnownFile*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
@@ -466,13 +466,19 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					case 12:{
 						CString ed2k;
 						if(file->GetPublishedED2K())
-							ed2k = GetResString(IDS_YES);
+							buffer = GetResString(IDS_YES);
 						else
-							ed2k = GetResString(IDS_NO);
-						if( (uint32)time(NULL)-file->GetLastPublishTimeKad() < KADEMLIAREPUBLISHTIME )
-							buffer.Format("%s|%s", ed2k, GetResString(IDS_YES));
+							buffer = GetResString(IDS_NO);
+						buffer += "|";
+						if( (uint32)time(NULL)-file->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME )
+							buffer += GetResString(IDS_YES);
 						else
-							buffer.Format("%s|%s", ed2k,GetResString(IDS_NO));
+							buffer += GetResString(IDS_NO);
+						buffer +="-";
+						if( (uint32)time(NULL)-file->GetLastPublishTimeKadKey() < KADEMLIAREPUBLISHTIME )
+							buffer += GetResString(IDS_YES);
+						else
+							buffer += GetResString(IDS_NO);
 						break;
 					}
 					//MORPH START - Added by SiRoB, ZZ Upload System
@@ -539,7 +545,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 		outline_rec.top--;
 		outline_rec.bottom++;
-		dc->FrameRect(&outline_rec, &CBrush(GetBkColor()));
+		dc->FrameRect(&outline_rec, &CBrush(m_crWindow));
 		outline_rec.top++;
 		outline_rec.bottom--;
 		outline_rec.left++;
@@ -582,49 +588,76 @@ END_MESSAGE_MAP()
 // CSharedFilesCtrl message handlers
 void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	m_PrioMenu.EnableMenuItem(MP_PRIOAUTO, MF_ENABLED);
-	//MORPH START- Added by SiRoB, Avoid misusing of powershare
-	UINT selectedCount = this->GetSelectedCount(); 
-	int iSel = GetSelectionMark();
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	CKnownFile* file = NULL;
+	UINT uFlags = MF_GRAYED;
+	if (iSel != -1){
+		file = (CKnownFile*)GetItemData(iSel);
+		uFlags = MF_ENABLED;
+	}
+	m_PrioMenu.EnableMenuItem(MP_PRIOVERYLOW, uFlags);
+	m_PrioMenu.EnableMenuItem(MP_PRIOLOW, uFlags);
+	m_PrioMenu.EnableMenuItem(MP_PRIONORMAL, uFlags);
+	m_PrioMenu.EnableMenuItem(MP_PRIOHIGH, uFlags);
+	m_PrioMenu.EnableMenuItem(MP_PRIOVERYHIGH, uFlags);
+	m_PrioMenu.EnableMenuItem(MP_PRIOAUTO, uFlags);
 
-	if (selectedCount>0){
-		CKnownFile* file = (CKnownFile*)GetItemData(iSel);	
+	m_PermMenu.EnableMenuItem(MP_PERMNONE, uFlags);
+	m_PermMenu.EnableMenuItem(MP_PERMFRIENDS, uFlags);
+	m_PermMenu.EnableMenuItem(MP_PERMALL, uFlags);
+
+	//MORPH START- Added by SiRoB, Avoid misusing of powershare
+	m_PowershareMenu.EnableMenuItem(MP_POWERSHARE_OFF, uFlags);
+	m_PowershareMenu.EnableMenuItem(MP_POWERSHARE_ON, uFlags);
+	m_PowershareMenu.EnableMenuItem(MP_POWERSHARE_AUTO, uFlags);
+	if (GetSelectedCount()==1){
 		int powersharemode = file->GetPowerSharedMode();
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_OFF, (powersharemode == 0) ? MF_CHECKED : MF_UNCHECKED);
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_ON, (powersharemode == 1) ? MF_CHECKED : MF_UNCHECKED);
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_AUTO, (powersharemode == 2) ? MF_CHECKED : MF_UNCHECKED);
+	}else{
+		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_OFF, MF_UNCHECKED);
+		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_ON, MF_UNCHECKED);
+		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_AUTO, MF_UNCHECKED);
 	}
 	//MORPH END  - Added by SiRoB, Avoid misusing of powershare
+
+	m_SharedFilesMenu.EnableMenuItem(MP_OPEN, (file!=NULL && !file->IsPartFile())?MF_ENABLED:MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem(MP_CMT, uFlags); 
+	m_SharedFilesMenu.EnableMenuItem(MP_DETAIL, uFlags);
+
+	m_SharedFilesMenu.EnableMenuItem(MP_GETED2KLINK, uFlags);
+	m_SharedFilesMenu.EnableMenuItem(MP_GETHTMLED2KLINK, uFlags);
+	m_SharedFilesMenu.EnableMenuItem(MP_GETSOURCEED2KLINK, (file && theApp.IsConnected() && !theApp.IsFirewalled()) ? MF_ENABLED : MF_GRAYED);
+
 	// itsonlyme: hostnameSource
-	if (!CString(theApp.glob_prefs->GetYourHostname()).IsEmpty() &&
+	if (file && theApp.IsConnected() && !theApp.IsFirewalled() &&
+		!CString(theApp.glob_prefs->GetYourHostname()).IsEmpty() &&
 		CString(theApp.glob_prefs->GetYourHostname()).Find(".") != -1)
 		m_SharedFilesMenu.EnableMenuItem(MP_GETHOSTNAMESOURCEED2KLINK, MF_ENABLED);
 	else
 		m_SharedFilesMenu.EnableMenuItem(MP_GETHOSTNAMESOURCEED2KLINK, MF_GRAYED);
 	// itsonlyme: hostnameSource
+
+	m_SharedFilesMenu.EnableMenuItem(Irc_SetSendLink, file && theApp.emuledlg->ircwnd.IsConnected() ? MF_ENABLED : MF_GRAYED);
+
 	int counter;
-	CMenu m_Web;
-	m_Web.CreateMenu();
-	UpdateURLMenu(m_Web,counter);
-	UINT flag2;
-	flag2=(counter==0) ? MF_GRAYED:MF_STRING;
-	m_SharedFilesMenu.AppendMenu(flag2|MF_POPUP,(UINT_PTR)m_Web.m_hMenu, GetResString(IDS_WEBSERVICES) );
-	
-	CKnownFile* file = NULL;
-	if (GetSelectionMark()!=-1) file=(CKnownFile*)GetItemData(GetSelectionMark());
-	m_SharedFilesMenu.EnableMenuItem(MP_OPEN, (file!=NULL && !file->IsPartFile())?MF_ENABLED:MF_GRAYED);
+	CMenu Web;
+	Web.CreateMenu();
+	UpdateURLMenu(Web,counter);
+	UINT flag2 = ((counter == 0) || !file) ? MF_GRAYED : MF_STRING;
+	m_SharedFilesMenu.AppendMenu(flag2 | MF_POPUP, (UINT_PTR)Web.m_hMenu, GetResString(IDS_WEBSERVICES));
 
 	m_SharedFilesMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON,point.x,point.y,this);
 
 	m_SharedFilesMenu.RemoveMenu(m_SharedFilesMenu.GetMenuItemCount()-1,MF_BYPOSITION);
-	VERIFY( m_Web.DestroyMenu() );
-
+	VERIFY( Web.DestroyMenu() );
 }
 
 BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	UINT selectedCount = this->GetSelectedCount(); 
-	int iSel = GetSelectionMark();
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 
 	if (selectedCount>0){
 		CKnownFile* file = (CKnownFile*)GetItemData(iSel);
@@ -1100,7 +1133,7 @@ void CSharedFilesCtrl::OpenFile(CKnownFile* file){
 
 void CSharedFilesCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	int iSel = GetSelectionMark();
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {
 		CKnownFile* file = (CKnownFile*)GetItemData(iSel);
 		if (file){

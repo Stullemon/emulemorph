@@ -15,7 +15,8 @@ CKademliaMain::CKademliaMain(void)
 	status->m_ip = 0;
 	status->m_tcpport = 0;
 	status->m_totalFile = 0;
-	status->m_totalStore = 0;
+	status->m_totalStoreSrc = 0;
+	status->m_totalStoreKey = 0;
 	status->m_udpport = 0;
 	status->m_kademliaUsers = 0;
 }
@@ -46,7 +47,8 @@ void CKademliaMain::setStatus(Status* val)
 	else{
 		status->m_kademliaUsers = val->m_kademliaUsers;
 		status->m_totalFile = val->m_totalFile;
-		status->m_totalStore = val->m_totalStore;
+		status->m_totalStoreSrc = val->m_totalStoreSrc;
+		status->m_totalStoreKey = val->m_totalStoreKey;
 		theApp.emuledlg->ShowUserCount();
 		delete val;
 	}
@@ -77,7 +79,7 @@ void CKademliaMain::Connect(){
 UINT AFX_CDECL KadStopFunc(LPVOID pvParams)
 {
 	DWORD dwFlags = (DWORD)pvParams;
-	Kademlia::CKademlia::stop();
+	Kademlia::CKademlia::stop(FALSE);
 	// if that thread was started during application shutdown, the 'theApp.emuledlg' may get
 	// deleted while this thread is still running.
 	if ((dwFlags & 1) && (theApp.emuledlg != NULL && theApp.emuledlg->IsRunning())){
@@ -124,7 +126,7 @@ void CKademliaMain::DisConnect(){
 			// kad threads exit the message loops, close the sockets, save the files (all this should not take too
 			// much time) in a synchronized way and after that just asynchronously kill the kad threads, not caring
 			// about memory (will be freed by system).
-			Kademlia::CKademlia::stop();
+			Kademlia::CKademlia::stop(TRUE);
 		}
 	}
 	//Please leave this in a bit for testing to see if it does lockup.. 

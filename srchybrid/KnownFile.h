@@ -110,7 +110,7 @@ public:
 
 	const uchar* GetFileHash() const { return m_abyFileHash; }
 
-	uint32	GetFileSize() const { return m_nFileSize; }
+	uint32 GetFileSize() const { return m_nFileSize; }
 	void SetFileSize(uint32 nFileSize) { m_nFileSize = nFileSize; }
 
 	uint32 GetIntTagValue(uint8 tagname) const;
@@ -123,7 +123,7 @@ public:
 	CTag* GetTag(LPCSTR tagname) const;
 	void AddTagUnique(CTag* pTag);
 	const CArray<CTag*,CTag*>& GetTags() const { return taglist; }
-	
+
 protected:
 	CString m_strFileName;
 	uchar	m_abyFileHash[16];
@@ -143,6 +143,7 @@ public:
 	~CKnownFile();
 
 	virtual bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename); // create date, hashset and tags from a file
+	
 	const CString& GetPath() const	{return m_strDirectory;}
 	void	SetPath(LPCTSTR path);
 
@@ -207,19 +208,23 @@ public:
 	bool	GetPublishedED2K()	{return m_PublishedED2K;}
 	uint32	GetKadFileSearchID()	{return kadFileSearchID;}
 	void	SetKadFileSearchID( uint32 id )	{kadFileSearchID = id;} //Don't use this unless you know what your are DOING!! (Hopefully I do.. :)
-	void	SetPublishedKad();
-	uint32	GetPublishedKad()	{return m_PublishedKad;}
+	void	SetPublishedKadSrc();
+	uint32	GetPublishedKadSrc()	{return m_PublishedKadSrc;}
+	void	SetPublishedKadKey();
+	uint32	GetPublishedKadKey()	{return m_PublishedKadKey;}
 	uint32	GetKadKeywordCount() {return m_keywordcount;}
-	uint32	GetLastPublishTimeKad() {return m_lastPublishTimeKad;}
-	void	SetLastPublishTimeKad( uint32 val ) {m_lastPublishTimeKad = val;}
-	int		Publish( Kademlia::CUInt128* nextID);
+	uint32	GetLastPublishTimeKadSrc() {return m_lastPublishTimeKadSrc;}
+	void	SetLastPublishTimeKadSrc( uint32 val ) {m_lastPublishTimeKadSrc = val;}
+	uint32	GetLastPublishTimeKadKey() {return m_lastPublishTimeKadKey;}
+	void	SetLastPublishTimeKadKey( uint32 val ) {m_lastPublishTimeKadKey = val;}
+	int		PublishKey( Kademlia::CUInt128* nextID);
+	bool	PublishSrc( Kademlia::CUInt128* nextID);
 
 	// file sharing
 	virtual	Packet*	CreateSrcInfoPacket(CUpDownClient* forClient);
 	void GetMetaDataTags();
 
-void	UpdateClientUploadList();	// #zegzav:updcliuplst
-
+	void	UpdateClientUploadList();	// #zegzav:updcliuplst
 
 	// preview
 	bool	IsMovie();
@@ -267,8 +272,10 @@ private:
 	static	CBarShader s_ShareStatusBar;
 	bool	m_PublishedED2K;
 	uint32	kadFileSearchID;
-	uint32	m_lastPublishTimeKad;
-	uint32	m_PublishedKad;
+	uint32	m_lastPublishTimeKadSrc;
+	uint32	m_lastPublishTimeKadKey;
+	uint32	m_PublishedKadSrc;
+	uint32	m_PublishedKadKey;
 	uint32	m_keywordcount;
 	Kademlia::WordList wordlist;
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation

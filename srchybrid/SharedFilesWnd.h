@@ -56,4 +56,6 @@ private:
 	uchar shownFileHash[16];
 	CIconStatic m_ctrlStatisticsFrm;
 	HICON icon_files;
+public:
+	afx_msg void OnSysColorChange();
 };

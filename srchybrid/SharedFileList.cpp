@@ -39,8 +39,10 @@ CSharedFileList::CSharedFileList(CPreferences* in_prefs,CServerConnect* in_serve
 	FindSharedFiles();
 	m_lastPublishED2K = 0;
 	m_lastPublishED2KFlag = true;
-	m_currFile = 0;
-	m_lastPublishKad = 0;
+	m_currFileSrc = 0;
+	m_lastPublishKadSrc = 0;
+	m_currFileKey = 0;
+	m_lastPublishKadKey = 0;
 }
 
 CSharedFileList::~CSharedFileList(){
@@ -291,7 +293,9 @@ void CSharedFileList::SendListToServer(){
 	for (pos = sortedList.GetHeadPosition();pos != 0 && count<limit; )
 	{
 		count++;
-		CreateOfferedFilePacket(sortedList.GetNext(pos),&files);
+		CKnownFile* file = sortedList.GetNext(pos);
+		CreateOfferedFilePacket(file, &files);
+		file->SetPublishedED2K(true);
 	}
 	sortedList.RemoveAll();
 	Packet* packet = new Packet(&files);
@@ -341,8 +345,9 @@ void CSharedFileList::ClearED2KPublishInfo(){
 	}
 }
 
-void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file,CMemFile* files, bool bForServer, bool bSendED2KTags){
-	cur_file->SetPublishedED2K(true);
+void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file,CMemFile* files, bool bForServer, bool bSendED2KTags)
+{
+	// NOTE: This function is used for creating the offered file packet for Servers _and_ for Clients..
 	files->Write(cur_file->GetFileHash(),16);
 
 	// This function is used for offering files to the local server and for sending
@@ -602,54 +607,73 @@ void CSharedFileList::Process()
 }
 
 void CSharedFileList::Publish(){
-	if( theApp.kademlia->getStatus()->m_totalStore > KADEMLIATOTALSTORE || !GetCount())
-		return;
-	if( (!m_lastPublishKad || (::GetTickCount() - m_lastPublishKad) > KADEMLIAPUBLISHTIME) && Kademlia::CTimer::getThreadID() && theApp.kademlia->isConnected() && theApp.IsConnected()){ //Once we can handle lowID users in Kad, we need to publish firewalled sources.
-		if(m_currFile > GetCount())
-			m_currFile = 0;
-		CSingleLock sLock(&list_mut,true);
-		CKnownFile* pCurKnownFile = GetFileByIndex(m_currFile);
-		if(pCurKnownFile){
-			Kademlia::CUInt128 testID;
-			int test = pCurKnownFile->Publish(&testID);
-			if (test == (-2)){
-				return;
-			}
-			if (test == (-1)){
-				m_currFile++;
-				return;
-			}
-			else{
-				if( test == 0){
-					m_lastPublishKad = ::GetTickCount();
-					Kademlia::CUInt128 kadFileID;
-					kadFileID.setValue(pCurKnownFile->GetFileHash());
-					Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(NULL, kadFileID);
-					if (pSearch){
-						pSearch->setSearchTypes(Kademlia::CSearch::STOREFILE);
-						if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch))
-							Kademlia::CSearchManager::deleteSearch(pSearch);
+	if(Kademlia::CTimer::getThreadID() && theApp.kademlia->isConnected() && theApp.IsConnected() && GetCount())
+	{ //Once we can handle lowID users in Kad, we need to publish firewalled sources.
+		if( theApp.kademlia->getStatus()->m_totalStoreKey < KADEMLIATOTALSTOREKEY)
+		{
+			if( (!m_lastPublishKadKey || (::GetTickCount() - m_lastPublishKadKey) > KADEMLIAPUBLISHTIME) )
+			{
+				if(m_currFileKey > GetCount())
+					m_currFileKey = 0;
+				CSingleLock sLock(&list_mut,true);
+				CKnownFile* pCurKnownFile = GetFileByIndex(m_currFileKey);
+				if(pCurKnownFile)
+				{
+					Kademlia::CUInt128 testID;
+					int test = pCurKnownFile->PublishKey(&testID);
+					if (test)
+					{
+						m_lastPublishKadKey = ::GetTickCount();
+						Kademlia::CUInt128 kadFileID;
+						kadFileID.setValue(pCurKnownFile->GetFileHash());
+						Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(NULL, testID);
+						if (pSearch)
+						{
+							pSearch->setSearchTypes(Kademlia::CSearch::STOREKEYWORD);
+							pSearch->m_keywordPublish = kadFileID;
+							pSearch->setKeywordCount(test);
+							if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch))
+								Kademlia::CSearchManager::deleteSearch(pSearch);
+						}
 					}
-					return;
+					else
+					{
+						m_currFileKey++;
+					}
 				}
-				else{
-					m_lastPublishKad = ::GetTickCount();
-					Kademlia::CUInt128 kadFileID;
-					kadFileID.setValue(pCurKnownFile->GetFileHash());
-					Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(NULL, testID);
-					if (pSearch){
-						pSearch->setSearchTypes(Kademlia::CSearch::STOREKEYWORD);
-						pSearch->m_keywordPublish = kadFileID;
-						pSearch->setKeywordCount(test);
-						if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch))
-							Kademlia::CSearchManager::deleteSearch(pSearch);
-					}
-					return;
+				else
+				{
+					m_currFileKey++;
 				}
 			}
 		}
-		else{
-			m_currFile++;
+		if( theApp.kademlia->getStatus()->m_totalStoreSrc< KADEMLIATOTALSTORESRC)
+		{
+			if( (!m_lastPublishKadSrc || (::GetTickCount() - m_lastPublishKadSrc) > KADEMLIAPUBLISHTIME) )
+			{
+				if(m_currFileSrc > GetCount())
+					m_currFileSrc = 0;
+				CSingleLock sLock(&list_mut,true);
+				CKnownFile* pCurKnownFile = GetFileByIndex(m_currFileSrc);
+				if(pCurKnownFile)
+				{
+					Kademlia::CUInt128 testID;
+					if (pCurKnownFile->PublishSrc(&testID))
+					{
+						m_lastPublishKadSrc = ::GetTickCount();
+						Kademlia::CUInt128 kadFileID;
+						kadFileID.setValue(pCurKnownFile->GetFileHash());
+						Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(NULL, kadFileID);
+						if (pSearch)
+						{
+							pSearch->setSearchTypes(Kademlia::CSearch::STOREFILE);
+							if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch))
+								Kademlia::CSearchManager::deleteSearch(pSearch);
+						}
+					}	
+				}
+				m_currFileSrc++;
+			}
 		}
 	}
 }

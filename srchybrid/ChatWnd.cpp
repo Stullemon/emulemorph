@@ -35,12 +35,16 @@ IMPLEMENT_DYNAMIC(CChatWnd, CDialog)
 CChatWnd::CChatWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CChatWnd::IDD, pParent)
 {
+	icon_friend = NULL;
+	icon_msg = NULL;
 }
 
 CChatWnd::~CChatWnd()
 {
-	DestroyIcon(icon_friend);
-	DestroyIcon(icon_msg);
+	if (icon_friend)
+		VERIFY( DestroyIcon(icon_friend) );
+	if (icon_msg)
+		VERIFY( DestroyIcon(icon_msg) );
 }
 
 void CChatWnd::DoDataExchange(CDataExchange* pDX)
@@ -55,28 +59,24 @@ BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_WM_KEYDOWN()
 	ON_WM_SHOWWINDOW()
 	ON_MESSAGE(WM_CLOSETAB, OnCloseTab)
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 // CChatWnd message handlers
 
-BOOL CChatWnd::OnInitDialog(){
+BOOL CChatWnd::OnInitDialog()
+{
 	CResizableDialog::OnInitDialog();
 
 	chatselector.Init();
 	m_FriendListCtrl.Init();
-	InitWindowStyles(this);
-
-	icon_friend=(HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_FRIEND), IMAGE_ICON, 16, 16, 0);
-	icon_msg=(HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_MESSAGE), IMAGE_ICON, 16, 16, 0);
-	((CStatic*)GetDlgItem(IDC_MESSAGEICON))->SetIcon(icon_msg);
-	((CStatic*)GetDlgItem(IDC_FRIENDSICON))->SetIcon(icon_friend);
 
 	AddAnchor(IDC_CHATSEL,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_LIST2,TOP_LEFT,BOTTOM_LEFT);
 	AddAnchor(IDC_FRIENDS_LBL,TOP_LEFT);
-	AddAnchor(IDC_FRIENDSICON,TOP_LEFT);
 
 	Localize();
+	theApp.friendlist->ShowFriends();
 
 	return true;
 }
@@ -95,20 +95,26 @@ void CChatWnd::OnShowWindow(BOOL bShow,UINT nStatus){
 
 BOOL CChatWnd::PreTranslateMessage(MSG* pMsg) 
 {
-   
-
-   return CResizableDialog::PreTranslateMessage(pMsg);
+	return CResizableDialog::PreTranslateMessage(pMsg);
 }
 
 void CChatWnd::Localize()
 {
-	if(m_hWnd)
-	{
-		GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(GetResString(IDS_CW_FRIENDS));
-		GetDlgItem(IDC_MESSAGES_LBL)->SetWindowText(GetResString(IDS_CW_MESSAGES));
-		chatselector.Localize();
-		m_FriendListCtrl.Localize();
-	}
+	InitWindowStyles(this);
+
+	if (icon_friend)
+		VERIFY( DestroyIcon(icon_friend) );
+	if (icon_msg)
+		VERIFY( DestroyIcon(icon_msg) );
+	icon_friend = theApp.LoadIcon("Friend", 16, 16);
+	icon_msg = theApp.LoadIcon("Message", 16, 16);
+	((CStatic*)GetDlgItem(IDC_MESSAGEICON))->SetIcon(icon_msg);
+	((CStatic*)GetDlgItem(IDC_FRIENDSICON))->SetIcon(icon_friend);
+
+	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(GetResString(IDS_CW_FRIENDS));
+	GetDlgItem(IDC_MESSAGES_LBL)->SetWindowText(GetResString(IDS_CW_MESSAGES));
+	chatselector.Localize();
+	m_FriendListCtrl.Localize();
 }
 
 LRESULT CChatWnd::OnCloseTab(WPARAM wparam, LPARAM lparam) {
@@ -136,4 +142,10 @@ void CChatWnd::ScrollHistory(bool down) {
 
 	inputtext.SetWindowText(buffer);
 	inputtext.SetSel(buffer.GetLength(),buffer.GetLength());
+}
+
+void CChatWnd::OnSysColorChange()
+{
+	Localize();
+	CResizableDialog::OnSysColorChange();
 }

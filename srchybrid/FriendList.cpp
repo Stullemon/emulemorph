@@ -16,8 +16,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "StdAfx.h"
-#include "friendlist.h"
 #include "emule.h"
+#include "friendlist.h"
 #include <io.h>
 
 #ifdef _DEBUG
@@ -171,17 +171,19 @@ void CFriendList::ShowFriends() const {
 		CFriend* cur_friend = m_listFriends.GetAt(pos);
 		m_wndOutput->AddFriend(cur_friend);	
 	}
+	m_wndOutput->UpdateList();
 }
 
 //You can add a friend without a IP to allow the IRC to trade links with lowID users.
-void CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
+bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
 							uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash){
 	if( dwLastUsedIP && IsAlreadyFriend(dwLastUsedIP, nLastUsedPort))
-		return;
+		return false;
 	CFriend* Record = new CFriend( abyUserhash, dwLastSeen, dwLastUsedIP, nLastUsedPort, dwLastChatted, pszName, dwHasHash );
 	m_listFriends.AddTail(Record);
 	ShowFriends();
 	SaveList();
+	return true;
 }
 
 // Added for the friends function in the IRC..
@@ -195,15 +197,18 @@ bool CFriendList::IsAlreadyFriend( uint32 dwLastUsedIP, uint32 nLastUsedPort ) c
 	return false;
 }
 
-void CFriendList::AddFriend(CUpDownClient* toadd){
+bool CFriendList::AddFriend(CUpDownClient* toadd){
 	if (toadd->IsFriend())
-		return;
+		return false;
 	CFriend* NewFriend = new CFriend(toadd);
 	toadd->m_Friend = NewFriend;
 	m_listFriends.AddTail(NewFriend);
-	if (m_wndOutput)
+	if (m_wndOutput){
 		m_wndOutput->AddFriend(NewFriend);	
+		m_wndOutput->UpdateList();
+	}
 	SaveList();
+	return true;
 }
 
 void CFriendList::RemoveFriend(CFriend* todel){

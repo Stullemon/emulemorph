@@ -51,5 +51,4 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	CImageList	imagelist;
-	CTitleMenu	m_ClientMenu;
 };

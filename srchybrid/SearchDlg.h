@@ -167,6 +167,8 @@ private:
 
 	CJigleSOAPThread* m_pJigleThread;
 	bool DoNewJigleSearch(SSearchParams* pParams);
+public:
+	afx_msg void OnSysColorChange();
 };
 
 bool GetSearchPacket(CSafeMemFile& data,

@@ -130,6 +130,11 @@ public:
 	uint32		GetID();
 	bool		IsFirewalled();
 
+	// because nearly all icons we are loading are 16x16, the default size is specified as 16 and not as 32 nor LR_DEFAULTSIZE
+	HICON		LoadIcon(LPCTSTR lpszResourceName, int cx = 16, int cy = 16, UINT uFlags = LR_DEFAULTCOLOR) const;
+	HICON		LoadIcon(UINT nIDResource) const;
+	void		ApplySkin(LPCTSTR pszSkinProfile);
+
 	DECLARE_MESSAGE_MAP()
 protected:
 	bool ProcessCommandline();
@@ -142,3 +147,22 @@ protected:
 	CSize m_sizSmallSystemIcon;
 };
 extern CemuleApp theApp;
+
+
+//////////////////////////////////////////////////////////////////////////////
+// CTempIconLoader
+
+class CTempIconLoader
+{
+public:
+	// because nearly all icons we are loading are 16x16, the default size is specified as 16 and not as 32 nor LR_DEFAULTSIZE
+	CTempIconLoader(LPCTSTR pszResourceID, int cx = 16, int cy = 16, UINT uFlags = LR_DEFAULTCOLOR);
+	~CTempIconLoader();
+
+	operator HICON() const{
+		return this == NULL ? NULL : m_hIcon;
+	}
+
+protected:
+	HICON m_hIcon;
+};

@@ -212,9 +212,6 @@ BOOL CemuleApp::InitInstance()
 		if (!AfxInitRichEdit())
 			AfxMessageBox(_T("No Rich Edit control library found!")); // should never happen..
 	}
-	CemuleDlg dlg;
-	emuledlg = &dlg;
-	m_pMainWnd = &dlg;
 
 	// create & initalize all the important stuff 
 	glob_prefs = new CPreferences();
@@ -226,6 +223,10 @@ BOOL CemuleApp::InitInstance()
 #ifdef _DEBUG
 	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), "%s\\%s", glob_prefs->GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
 #endif
+
+	CemuleDlg dlg;
+	emuledlg = &dlg;
+	m_pMainWnd = &dlg;
 
 	// Barry - Auto-take ed2k links
 	if (glob_prefs->AutoTakeED2KLinks())
@@ -716,6 +717,140 @@ bool CemuleApp::IsFirewalled(){
 		return false;
 	return true;
 }
+
+HICON CemuleApp::LoadIcon(UINT nIDResource) const
+{
+	// use string resource identifiers!!
+	ASSERT(0);
+	return CWinApp::LoadIcon(nIDResource);
+}
+
+HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags) const
+{
+	HICON hIcon = NULL;
+	LPCTSTR pszSkinProfile = glob_prefs ? glob_prefs->GetSkinProfile() : NULL;
+	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
+	{
+		// load icon resource file specification from skin profile
+		TCHAR szSkinResource[MAX_PATH];
+		GetPrivateProfileString(_T("Icons"), lpszResourceName, _T(""), szSkinResource, ARRSIZE(szSkinResource), pszSkinProfile);
+		if (szSkinResource[0] != _T('\0'))
+		{
+			// expand any optional available environment strings
+			TCHAR szExpSkinRes[MAX_PATH];
+			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, ARRSIZE(szExpSkinRes)) != 0)
+			{
+				_tcsncpy(szSkinResource, szExpSkinRes, ARRSIZE(szSkinResource));
+				szSkinResource[ARRSIZE(szSkinResource)-1] = _T('\0');
+			}
+
+			// create absolute path to icon resource file
+			TCHAR szFullResPath[MAX_PATH];
+			if (PathIsRelative(szSkinResource))
+			{
+				TCHAR szSkinResFolder[MAX_PATH];
+				_tcsncpy(szSkinResFolder, pszSkinProfile, ARRSIZE(szSkinResFolder));
+				szSkinResFolder[ARRSIZE(szSkinResFolder)-1] = _T('\0');
+				PathRemoveFileSpec(szSkinResFolder);
+				_tmakepath(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
+			}
+			else
+			{
+				_tcsncpy(szFullResPath, szSkinResource, ARRSIZE(szFullResPath));
+				szFullResPath[ARRSIZE(szFullResPath)-1] = _T('\0');
+			}
+
+			// check for optional icon index or resource identifier within the icon resource file
+			bool bExtractIcon = false;
+			CString strFullResPath = szFullResPath;
+			int iIconIndex = 0;
+			int iComma = strFullResPath.ReverseFind(_T(','));
+			if (iComma != -1){
+				if (_stscanf((LPCTSTR)strFullResPath + iComma + 1, _T("%d"), &iIconIndex) == 1)
+					bExtractIcon = true;
+				strFullResPath = strFullResPath.Left(iComma);
+			}
+
+			if (bExtractIcon)
+			{
+				HICON aIconsLarge[1] = {0};
+				HICON aIconsSmall[1] = {0};
+				int iExtractedIcons = ExtractIconEx(strFullResPath, iIconIndex, aIconsLarge, aIconsSmall, 1);
+				if (iExtractedIcons > 0) // 'iExtractedIcons' is 2(!) if we get a large and a small icon
+				{
+					// alway try to return the icon size which was requested
+					if (cx == 16 && aIconsSmall[0] != NULL)
+					{
+						hIcon = aIconsSmall[0];
+						aIconsSmall[0] = NULL;
+					}
+					else if (cx == 32 && aIconsLarge[0] != NULL)
+					{
+						hIcon = aIconsLarge[0];
+						aIconsLarge[0] = NULL;
+					}
+					else
+					{
+						if (aIconsSmall[0] != NULL)
+						{
+							hIcon = aIconsSmall[0];
+							aIconsSmall[0] = NULL;
+						}
+						else if (aIconsLarge[0] != NULL)
+						{
+							hIcon = aIconsLarge[0];
+							aIconsLarge[0] = NULL;
+						}
+					}
+
+					for (int i = 0; i < ARRSIZE(aIconsLarge); i++)
+					{
+						if (aIconsLarge[i] != NULL)
+							VERIFY( DestroyIcon(aIconsLarge[i]) );
+						if (aIconsSmall[i] != NULL)
+							VERIFY( DestroyIcon(aIconsSmall[i]) );
+					}
+				}
+			}
+			else
+			{
+				// WINBUG???: 'ExtractIcon' does not work well on ICO-files when using the color 
+				// scheme 'Windows-Standard (extragroß)' -> always try to use 'LoadImage'!
+				//
+				// If the ICO file contains a 16x16 icon, 'LoadImage' will though return a 32x32 icon,
+				// if LR_DEFAULTSIZE is specified! -> always specify the requested size!
+				hIcon = (HICON)::LoadImage(NULL, szFullResPath, IMAGE_ICON, cx, cy, uFlags | LR_LOADFROMFILE);
+			}
+		}
+	}
+
+	if (hIcon == NULL)
+	{
+		if (cx != LR_DEFAULTSIZE || cy != LR_DEFAULTSIZE || uFlags != LR_DEFAULTCOLOR)
+			hIcon = (HICON)::LoadImage(AfxGetResourceHandle(), lpszResourceName, IMAGE_ICON, cx, cy, uFlags);
+		if (hIcon == NULL)
+			hIcon = CWinApp::LoadIcon(lpszResourceName);
+	}
+	return hIcon;
+}
+
+void CemuleApp::ApplySkin(LPCTSTR pszSkinProfile)
+{
+	theApp.glob_prefs->SetSkinProfile(pszSkinProfile);
+	AfxGetMainWnd()->SendMessage(WM_SYSCOLORCHANGE);
+}
+
+CTempIconLoader::CTempIconLoader(LPCTSTR pszResourceID, int cx, int cy, UINT uFlags)
+{
+	m_hIcon = theApp.LoadIcon(pszResourceID, cx, cy, uFlags);
+}
+
+CTempIconLoader::~CTempIconLoader()
+{
+	if (m_hIcon)
+		VERIFY( DestroyIcon(m_hIcon) );
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // those funcs are called from a different thread

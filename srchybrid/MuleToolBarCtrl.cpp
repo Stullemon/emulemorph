@@ -19,11 +19,19 @@ static char THIS_FILE[]=__FILE__;
 #define    TBNRF_HIDEHELP       0x00000001
 #endif
 
+#define	EMULTB_BASEEXT		_T("eMuleToolbar.kad02")
+#define	EMULSKIN_BASEEXT	_T("eMuleSkin")
+
 static const LPCTSTR _apszTBFiles[] = 
 {
-	_T("*.eMuleToolbar.kad01.bmp"),
-	_T("*.eMuleToolbar.kad01.gif"),
-	_T("*.eMuleToolbar.kad01.png")
+	_T("*.") EMULTB_BASEEXT _T(".bmp"),
+	_T("*.") EMULTB_BASEEXT _T(".gif"),
+	_T("*.") EMULTB_BASEEXT _T(".png")
+};
+
+static const LPCTSTR _apszSkinFiles[] = 
+{
+	_T("*.") EMULSKIN_BASEEXT _T(".ini"),
 };
 
 // CMuleToolbarCtrl
@@ -52,6 +60,7 @@ BEGIN_MESSAGE_MAP(CMuleToolbarCtrl, CToolBarCtrl)
 	ON_NOTIFY_REFLECT(TBN_TOOLBARCHANGE, OnTbnToolbarChange)
 	ON_NOTIFY_REFLECT(TBN_RESET, OnTbnReset)
 	ON_NOTIFY_REFLECT(TBN_INITCUSTOMIZE, OnTbnInitCustomize)
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 
@@ -115,29 +124,51 @@ void CMuleToolbarCtrl::Init(void)
 	lLen += lLen2;
 	++m_buttoncount;
 
+	lLen2 = _tcslen(GetResString(IDS_TOOLS)) + 1;
+	memcpy(cButtonStrings+lLen, GetResString(IDS_TOOLS), lLen2);
+	lLen += lLen2;
+	++m_buttoncount;
+
+	lLen2 = _tcslen(GetResString(IDS_EM_HELP)) + 1;
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_HELP), lLen2);
+	lLen += lLen2;
+	++m_buttoncount;
+
 	// terminate
 	memcpy(cButtonStrings+lLen, "\0", 1);
 
 	AddStrings(cButtonStrings);
 
-	// add buttons:	
+	// initialize buttons:	
 	for(int i = 0; i < m_buttoncount; i++)
 	{		
 		TBButtons[i].fsState	= TBSTATE_ENABLED;
-		TBButtons[i].fsStyle	= TBSTYLE_CHECK;//TBSTYLE_CHECKGROUP;
-		TBButtons[i].iBitmap	= i;
+		TBButtons[i].fsStyle	= TBSTYLE_CHECKGROUP;
 		TBButtons[i].idCommand	= IDC_TOOLBARBUTTON + i;
 		TBButtons[i].iString	= i;
 
 		switch(i)
-		{		
+		{
 		case 0:
-		case 8:
+		case 9:
+		case 10:
+		case 11:
 			TBButtons[i].fsStyle = TBSTYLE_BUTTON;
 			break;
 		case 2:
 			TBButtons[i].fsState |= TBSTATE_CHECKED;
 		}
+	}
+
+	// set button image indices
+	int iBitmap = 0;
+	for(int i = 0; i < m_buttoncount; i++)
+	{		
+		TBButtons[i].iBitmap = iBitmap;
+		if (i == 0) // 'Connect' button has 3 states
+			iBitmap += 3;
+		else
+			iBitmap += 1;
 	}
 	m_iLastPressedButton = IDC_TOOLBARBUTTON+2;
 	
@@ -148,6 +179,7 @@ void CMuleToolbarCtrl::Init(void)
 	sepButton.iString = -1;
 	sepButton.iBitmap = -1;
 	
+	int iAddedButtons = 0;
 	CString config = theApp.glob_prefs->GetToolbarSettings();
 	for(i=0;i<config.GetLength();i+=2)
 	{
@@ -158,6 +190,7 @@ void CMuleToolbarCtrl::Init(void)
 			continue;
 		}
 		AddButtons(1,&TBButtons[index]);
+		iAddedButtons++;
 	}
 
 	// recalc toolbar-size:	
@@ -186,7 +219,19 @@ void CMuleToolbarCtrl::Localize(void)
 {	
 	if(m_hWnd)
 	{
-		static const int TBStringIDs[]={IDS_EM_KADEMLIA , IDS_EM_SERVER,IDS_EM_TRANS,IDS_EM_SEARCH,IDS_EM_FILES,IDS_EM_MESSAGES,IDS_IRC,IDS_EM_STATISTIC,IDS_EM_PREFS};
+		static const int TBStringIDs[]={
+			IDS_EM_KADEMLIA, 
+			IDS_EM_SERVER,
+			IDS_EM_TRANS,
+			IDS_EM_SEARCH,
+			IDS_EM_FILES,
+			IDS_EM_MESSAGES,
+			IDS_IRC,
+			IDS_EM_STATISTIC,
+			IDS_EM_PREFS,
+			IDS_TOOLS,
+			IDS_EM_HELP
+		};
 		TBBUTTONINFO tbi;
 		tbi.dwMask = TBIF_TEXT;
 		tbi.cbSize = sizeof (TBBUTTONINFO);
@@ -267,11 +312,20 @@ void CMuleToolbarCtrl::SetBtnWidth()
 
 void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 {
+	if (GetKeyState(VK_CONTROL) & 0x8000)
+	{
+		if (!theApp.glob_prefs->GetToolbarBitmapSettings().IsEmpty())
+			ChangeToolbarBitmap(theApp.glob_prefs->GetToolbarBitmapSettings(), true);
+		if (!CString(theApp.glob_prefs->GetSkinProfile()).IsEmpty())
+			theApp.ApplySkin(theApp.glob_prefs->GetSkinProfile());
+	}
+
 	POINT point;
 	GetCursorPos (&point);
 	
 	CMenu m_ToolbarMenu;
 	m_ToolbarMenu.CreatePopupMenu();
+
 	CMenu m_BitmapsMenu;
 	m_BitmapsMenu.CreateMenu();
 	m_BitmapsMenu.AppendMenu(MF_STRING,MP_SELECTTOOLBARBITMAP, GetResString(IDS_SELECTTOOLBARBITMAP));
@@ -301,7 +355,13 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 			for (/**/; !bFinished && i < 50; i++)
 			{
 				CString bitmapFileName = FileData.cFileName;
-				m_BitmapsMenu.AppendMenu(MF_STRING, MP_TOOLBARBITMAP + i, bitmapFileName.Left(bitmapFileName.GetLength() - 23));
+				CString bitmapBaseName;
+				int iExt = bitmapFileName.Find(EMULTB_BASEEXT);
+				if (iExt > 0)
+					bitmapBaseName = bitmapFileName.Left(iExt - 1);
+				else
+					bitmapBaseName = bitmapFileName;
+				m_BitmapsMenu.AppendMenu(MF_STRING, MP_TOOLBARBITMAP + i, bitmapBaseName);
 				bitmappaths.Add(theApp.glob_prefs->GetToolbarBitmapFolderSettings() + CString(_T("\\")) + bitmapFileName);
 				if (!checked && currentBitmapSettings == bitmappaths[i])
 				{
@@ -323,6 +383,65 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 		bitmappaths.Add(currentBitmapSettings);
 	}
 	m_ToolbarMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_BitmapsMenu.m_hMenu, GetResString(IDS_TOOLBARSKINS));
+
+	CMenu m_SkinsMenu;
+	m_SkinsMenu.CreateMenu();
+	m_SkinsMenu.AppendMenu(MF_STRING,MP_SELECT_SKIN_FILE, "Select Skin...");
+	m_SkinsMenu.AppendMenu(MF_STRING,MP_SELECT_SKIN_DIR, "Select Skin Directory...");
+	m_SkinsMenu.AppendMenu(MF_SEPARATOR);
+	m_SkinsMenu.AppendMenu(MF_STRING,MP_SKIN_PROFILE,GetResString(IDS_DEFAULT));
+	aSkinPaths.RemoveAll();
+	CString currentSkin = theApp.glob_prefs->GetSkinProfile();
+	checked=false;
+	if(currentSkin=="")
+	{
+		m_SkinsMenu.CheckMenuItem(MP_SKIN_PROFILE,MF_CHECKED);
+		m_SkinsMenu.EnableMenuItem(MP_SKIN_PROFILE,MF_DISABLED);
+		checked=true;
+	}
+	aSkinPaths.Add(_T(""));
+	i = 1;
+	if (!theApp.glob_prefs->GetSkinProfileDir().IsEmpty())
+	{
+		for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++)
+		{
+			bool bFinished = false;
+			WIN32_FIND_DATA FileData;
+			HANDLE hSearch = FindFirstFile(theApp.glob_prefs->GetSkinProfileDir() + CString(_T("\\")) + _apszSkinFiles[f], &FileData);
+			if (hSearch == INVALID_HANDLE_VALUE)
+				bFinished = true;
+			for (/**/; !bFinished && i < 50; i++)
+			{
+				CString skinFileName = FileData.cFileName;
+				CString skinBaseName;
+				int iExt = skinFileName.Find(_T(".") EMULSKIN_BASEEXT _T(".ini"));
+				if (iExt > 0)
+					skinBaseName = skinFileName.Left(iExt);
+				else
+					skinBaseName = skinFileName;
+				m_SkinsMenu.AppendMenu(MF_STRING, MP_SKIN_PROFILE + i, skinBaseName);
+				aSkinPaths.Add(theApp.glob_prefs->GetSkinProfileDir() + CString(_T("\\")) + skinFileName);
+				if (!checked && currentSkin == aSkinPaths[i])
+				{
+					m_SkinsMenu.CheckMenuItem(MP_SKIN_PROFILE + i, MF_CHECKED);
+					m_SkinsMenu.EnableMenuItem(MP_SKIN_PROFILE + i, MF_DISABLED);
+					checked = true;
+				}
+				if (!FindNextFile(hSearch, &FileData))
+					bFinished = true;
+			}
+			FindClose(hSearch);
+		}
+	}
+	if(!checked)
+	{
+		m_SkinsMenu.AppendMenu(MF_STRING, MP_SKIN_PROFILE + i, currentSkin);
+		m_SkinsMenu.CheckMenuItem(MP_SKIN_PROFILE + i, MF_CHECKED);
+		m_SkinsMenu.EnableMenuItem(MP_SKIN_PROFILE + i, MF_DISABLED);
+		aSkinPaths.Add(currentSkin);
+	}
+	m_ToolbarMenu.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_SkinsMenu.m_hMenu, "Skin Profiles");
+	
 	CMenu m_TextLabelsMenu;
 	m_TextLabelsMenu.CreateMenu();
 	m_TextLabelsMenu.AppendMenu(MF_STRING,MP_NOTEXTLABELS, GetResString(IDS_NOTEXTLABELS));
@@ -351,13 +470,16 @@ void CMuleToolbarCtrl::OnTbnQueryInsert(NMHDR *pNMHDR, LRESULT *pResult)
 void CMuleToolbarCtrl::OnTbnGetButtonInfo(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMTOOLBAR pNMTB = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
-	if (pNMTB->iItem > 8)
+	if (pNMTB->iItem >= ARRSIZE(TBButtons))
 	{
 		*pResult = FALSE;
 	}
 	else
 	{
-		pNMTB->pszText=TBStrings[pNMTB->iItem];
+		CString strText = TBStrings[pNMTB->iItem];
+		strText.Remove(_T('&'));
+		_tcsncpy(pNMTB->pszText, strText, pNMTB->cchText - 1);
+		pNMTB->pszText[pNMTB->cchText - 1] = _T('\0');
 		pNMTB->tbButton = TBButtons[pNMTB->iItem];
 		*pResult = TRUE;
 	}
@@ -397,7 +519,7 @@ void CMuleToolbarCtrl::ChangeToolbarBitmap(CString path, bool refresh)
 		BITMAP bm = {0};
 		Bitmap.GetObject(sizeof(bm), &bm);
 		bool bAlpha = bm.bmBitsPixel > 24;
-		if (ImageList.Create(32, bm.bmHeight, bAlpha ? ILC_COLOR32 : (theApp.m_iDfltImageListColorFlags | ILC_MASK), 10, 1))
+		if (ImageList.Create(32, bm.bmHeight, bAlpha ? ILC_COLOR32 : (theApp.m_iDfltImageListColorFlags | ILC_MASK), 0, 1))
 		{
 			ImageList.Add(&Bitmap,  bAlpha ? 0xFF000000 : RGB(255, 0, 255));
 			CImageList* pimlOld = SetImageList(&ImageList);
@@ -413,19 +535,21 @@ void CMuleToolbarCtrl::ChangeToolbarBitmap(CString path, bool refresh)
 	if (!bResult)
 	{
 		// load from icon ressources
-		ImageList.Create(32, 32, theApp.m_iDfltImageListColorFlags | ILC_MASK, 10, 1);
-		ImageList.Add(theApp.LoadIcon(IDI_BN_CONNECT));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_KADEMLIA));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_SERVER));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_DOWNLOAD));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_SEARCH));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_FILES));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_MESSAGES));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_IRC));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_STATISTICS));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_PREFERENCES));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_DISCONNECT));
-		ImageList.Add(theApp.LoadIcon(IDI_BN_STOPCONNECTING));
+		ImageList.Create(32, 32, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+		ImageList.Add(CTempIconLoader("BN_CONNECT", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_DISCONNECT", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_STOPCONNECTING", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_KADEMLIA", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_SERVER", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_DOWNLOAD", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_SEARCH", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_FILES", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_MESSAGES", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_IRC", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_STATISTICS", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_PREFERENCES", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_TOOLS", 32, 32));
+		ImageList.Add(CTempIconLoader("BN_HELP", 32, 32));
 		CImageList* pimlOld = SetImageList(&ImageList);
 		ImageList.Detach();
 		if (pimlOld)
@@ -453,7 +577,7 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		case MP_SELECTTOOLBARBITMAP:
 		{
-			// we could also load "*.eMuleToolbar.jpg" here, but because of the typical non solid background of JPGs this
+			// we could also load "*.jpg" here, but because of the typical non solid background of JPGs this
 			// doesn't make sense here.
 			CString strFilter(_T("eMule Toolbar Bitmap Files ("));
 			for (int f = 0; f < ARRSIZE(_apszTBFiles); f++){
@@ -468,7 +592,7 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				strFilter += _apszTBFiles[f];
 			}
 			strFilter += _T("||");
-			CFileDialog dialog(TRUE, _T("eMuleToolbar.kad01.bmp"), NULL, OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST, strFilter, NULL, 0);
+			CFileDialog dialog(TRUE, EMULTB_BASEEXT _T(".bmp"), NULL, OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST, strFilter, NULL, 0);
 			if (IDOK == dialog.DoModal())
 				if(theApp.glob_prefs->GetToolbarBitmapSettings()!=dialog.GetPathName())
 				{
@@ -492,13 +616,52 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			ChangeTextLabelStyle(2,TRUE);
 			theApp.glob_prefs->SetToolbarLabelSettings(2);
 			break;
+
+		case MP_SELECT_SKIN_DIR:{
+			TCHAR buffer[MAX_PATH];
+			_sntprintf(buffer,ARRSIZE(buffer),_T("%s"), theApp.glob_prefs->GetSkinProfileDir());
+			if(SelectDir(m_hWnd, buffer, "Select skin profile directory"))
+				theApp.glob_prefs->SetSkinProfileDir(buffer);
+			break;
+		}
+		case MP_SELECT_SKIN_FILE:
+		{
+			CString strFilter(_T("eMule Skin Files ("));
+			for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++){
+				if (f > 0)
+					strFilter += _T(';');
+				strFilter += _apszSkinFiles[f];
+			}
+			strFilter += _T(")|");
+			for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++){
+				if (f > 0)
+					strFilter += _T(';');
+				strFilter += _apszSkinFiles[f];
+			}
+			strFilter += _T("||");
+			CFileDialog dialog(TRUE, EMULSKIN_BASEEXT _T(".ini"), NULL, OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST, strFilter, NULL, 0);
+			if (IDOK == dialog.DoModal())
+			{
+				if(theApp.glob_prefs->GetSkinProfile()!=dialog.GetPathName())
+					theApp.ApplySkin(dialog.GetPathName());
+			}
+			break;
+		}
+
 		default:
-			if(wParam >= MP_TOOLBARBITMAP && wParam <= MP_TOOLBARBITMAP+50)
+			if(wParam >= MP_TOOLBARBITMAP && wParam < MP_TOOLBARBITMAP + 50)
+			{
 				if(theApp.glob_prefs->GetToolbarBitmapSettings()!=bitmappaths[wParam-MP_TOOLBARBITMAP])
 				{
 					ChangeToolbarBitmap(bitmappaths[wParam-MP_TOOLBARBITMAP], true);
 					theApp.glob_prefs->SetToolbarBitmapSettings(bitmappaths[wParam-MP_TOOLBARBITMAP]);
 				}
+			}
+			else if (wParam >= MP_SKIN_PROFILE && wParam < MP_SKIN_PROFILE + 50)
+			{
+				if (theApp.glob_prefs->GetSkinProfile() != aSkinPaths[wParam - MP_SKIN_PROFILE])
+					theApp.ApplySkin(aSkinPaths[wParam - MP_SKIN_PROFILE]);
+			}
 	}
 
 	return true;
@@ -566,7 +729,17 @@ void CMuleToolbarCtrl::Refresh()
 		theApp.emuledlg->statusbar.GetWindowRect(&rStatusbarRect);
 		rClientRect.top += rToolbarRect.Height();
 		rClientRect.bottom -= rStatusbarRect.Height();
-		CWnd* wnds[]={&theApp.emuledlg->serverwnd,theApp.emuledlg->kademliawnd,&theApp.emuledlg->transferwnd,&theApp.emuledlg->sharedfileswnd,theApp.emuledlg->searchwnd,&theApp.emuledlg->chatwnd,&theApp.emuledlg->ircwnd,&theApp.emuledlg->statisticswnd};
+		CWnd* wnds[] =
+		{
+			&theApp.emuledlg->serverwnd,
+			theApp.emuledlg->kademliawnd,
+			&theApp.emuledlg->transferwnd,
+			&theApp.emuledlg->sharedfileswnd,
+			theApp.emuledlg->searchwnd,
+			&theApp.emuledlg->chatwnd,
+			&theApp.emuledlg->ircwnd,
+			&theApp.emuledlg->statisticswnd
+		};
 		for(int i=0;i<8;i++)
 		{
 			wnds[i]->SetWindowPos(NULL, rClientRect.left, rClientRect.top,rClientRect.Width(), rClientRect.Height(), SWP_NOZORDER);
@@ -633,4 +806,10 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR *pNMHDR, LRESULT *pResult)
 void CMuleToolbarCtrl::OnTbnInitCustomize(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	*pResult = TBNRF_HIDEHELP;
+}
+
+void CMuleToolbarCtrl::OnSysColorChange()
+{
+	ChangeToolbarBitmap(theApp.glob_prefs->GetToolbarBitmapSettings(), true);
+	CToolBarCtrl::OnSysColorChange();
 }

@@ -39,7 +39,14 @@ IMPLEMENT_DYNAMIC(CUploadListCtrl, CMuleListCtrl)
 CUploadListCtrl::CUploadListCtrl(){
 }
 
-void CUploadListCtrl::Init(){
+void CUploadListCtrl::Init()
+{
+	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
+	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
+	SetImageList(&ilDummyImageList, LVSIL_SMALL);
+	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
+	ilDummyImageList.Detach();
+
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 	CToolTipCtrl* tooltip = GetToolTips();
@@ -68,28 +75,6 @@ void CUploadListCtrl::Init(){
 	//MORPH START - Added by SiRoB, Show Compression by Tarod
 	InsertColumn(12,GetResString(IDS_COMPRESSIONGAIN),LVCFMT_LEFT,50,12);
 	//MORPH END - Added by SiRoB, Show Compression by Tarod
-	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,10);
-	imagelist.SetBkColor(RGB(255,255,255));
-	imagelist.Add(theApp.LoadIcon(IDI_USER0));
-	imagelist.Add(theApp.LoadIcon(IDI_COMPPROT));
-	//MORPH START - Modified by SiRoB, More client & Credit overlay icon
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUS));
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUSCOMPROT));
-	imagelist.Add(theApp.LoadIcon(IDI_FRIEND));
-	imagelist.Add(theApp.LoadIcon(IDI_MLDONK));
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUSMLDONK));
-	imagelist.Add(theApp.LoadIcon(IDI_EDONKEYHYBRID));
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUSEDONKEYHYBRID));
-	imagelist.Add(theApp.LoadIcon(IDI_SHAREAZA));
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUSSHAREAZA));
-	imagelist.Add(theApp.LoadIcon(IDI_EDONKEY));
-	imagelist.Add(theApp.LoadIcon(IDI_MORPHNEXT));
-	imagelist.SetOverlayImage(imagelist.Add(theApp.LoadIcon(IDI_SECUREHASHCLIENTOVL)), 1);
-	imagelist.SetOverlayImage(imagelist.Add(theApp.LoadIcon(IDI_CREDITCLIENTOVL)), 2);
-	imagelist.SetOverlayImage(imagelist.Add(theApp.LoadIcon(IDI_CREDITSECUREOVL)), 3);
-	//MORPH END   - Modified by SiRoB, More client & Credit overlay icon
-	
-	SetImageList(&imagelist,LVSIL_SMALL);
 	LoadSettings(CPreferences::tableUpload);
 
 	// Barry - Use preferred sort order from preferences
@@ -109,7 +94,30 @@ void CUploadListCtrl::Init(){
 CUploadListCtrl::~CUploadListCtrl(){
 }
 
-void CUploadListCtrl::Localize() {
+void CUploadListCtrl::Localize()
+{
+	imagelist.DeleteImageList();
+	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	imagelist.SetBkColor(CLR_NONE);
+	imagelist.Add(CTempIconLoader("ClientEDonkey"));
+	imagelist.Add(CTempIconLoader("ClientCompatible"));
+	//MORPH START - Modified by SiRoB, More client & Credit overlay icon
+	//imagelist.Add(CTempIconLoader("ClientEDonkeyPlus"));
+	//imagelist.Add(CTempIconLoader("ClientCompatiblePlus"));
+	imagelist.Add(CTempIconLoader("Friend"));
+	imagelist.Add(CTempIconLoader("ClientMLDonkey"));
+	//imagelist.Add(CTempIconLoader("ClientMLDonkeyPlus"));
+	imagelist.Add(CTempIconLoader("ClientEDonkeyHybrid"));
+	//imagelist.Add(CTempIconLoader("ClientEDonkeyHybridPlus"));
+	imagelist.Add(CTempIconLoader("ClientShareaza"));
+	//imagelist.Add(CTempIconLoader("ClientShareazaPlus"));
+	imagelist.Add(CTempIconLoader("ClientRightEdonkey"));
+	imagelist.Add(CTempIconLoader("ClientMorph"));
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientSecureOvl")), 1);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
+	//MORPH END   - Modified by SiRoB, More client & Credit overlay icon
+
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -389,8 +397,14 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						break;	
 				case 11:
                     Sbuffer.Format("%i", client->GetSlotNumber());
-                    break;
-				//MORPH END - Added By Yun.SF3, Remote Status
+					//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
+					if (client->GetFriendSlot() && client->IsFriend())
+						Sbuffer.Append(" FS");
+					else if (client->GetPowerShared())
+						Sbuffer.Append(" PS");
+					//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
+					break;
+					//MORPH END - Added By Yun.SF3, Remote Status
 				//MORPH START - Added by SiRoB, Show Compression by Tarod
 				case 12:
 					if (client->GetCompression() < 0.1f)
@@ -439,33 +453,31 @@ BEGIN_MESSAGE_MAP(CUploadListCtrl, CMuleListCtrl)
 END_MESSAGE_MAP()
 
 // CUploadListCtrl message handlers
-void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point){
+void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+{
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	UINT uFlags = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
 
-	if (m_ClientMenu) VERIFY( m_ClientMenu.DestroyMenu() );
-	m_ClientMenu.CreatePopupMenu();
-	m_ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_MESSAGE, GetResString(IDS_SEND_MSG));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	CTitleMenu ClientMenu;
+	ClientMenu.CreatePopupMenu();
+	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_MESSAGE, GetResString(IDS_SEND_MSG));
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
 	if(theApp.kademlia->GetThreadID() && !theApp.kademlia->isConnected() )
-		m_ClientMenu.AppendMenu(MF_STRING,MP_BOOT, "BootStrap");
+		ClientMenu.AppendMenu(MF_STRING | uFlags,MP_BOOT, "BootStrap");
 	//MORPH START - Added by Yun.SF3, List Requested Files
-	m_ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
-	m_ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
+	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
-	//not needed since the button, is it?!
-	//m_ClientMenu.AppendMenu(MF_SEPARATOR);
-	//m_ClientMenu.AppendMenu(MF_STRING,MP_SWITCHCTRL, GetResString(IDS_VIEWQUEUE));
-	
-	//SetMenu(&m_ClientMenu);
-	m_ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
-	VERIFY( m_ClientMenu.DestroyMenu() );
+	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
 BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
-	if (GetSelectionMark() != (-1)){
-		CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (iSel != -1){
+		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		switch (wParam){
 			case MP_SHOWLIST:
 				client->RequestSharedFileList();
@@ -667,7 +679,7 @@ void CUploadListCtrl::ShowSelectedUserDetails() {
 }
 
 void CUploadListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
-	int iSel = GetSelectionMark();
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
 		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){

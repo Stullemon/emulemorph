@@ -22,7 +22,7 @@
 #include "loggable.h"
 
 
-const CString strDefaultToolbar = _T("009901020304050607089909");
+const CString strDefaultToolbar = _T("0099010203040506070899091011");
 
 // DO NOT EDIT VALUES like making a uint16 to uint32, or insert any value. ONLY append new vars
 #pragma pack(1)
@@ -150,7 +150,9 @@ struct Preferences_Struct{
 	int8	autotakeed2klinks;     // Barry
 	int8	addnewfilespaused;     // Barry
 	int8	depth3D;			   // Barry
-	bool	m_bStraightWindowStyles;
+	int		m_iStraightWindowStyles;
+	TCHAR	m_szSkinProfile[MAX_PATH];
+	TCHAR	m_szSkinProfileDir[MAX_PATH];
 	int8	addserversfromserver;
 	int8	addserversfromclient;
 	int16	maxsourceperfile;
@@ -1046,7 +1048,11 @@ public:
 	uint16	GetStatsMax()				{return prefs->statsMax;}
 	// <-----khaos-
 	int8	UseFlatBar()				{return (prefs->depth3D==0);}
-	bool	GetStraightWindowStyles()	{return prefs->m_bStraightWindowStyles;}
+	int		GetStraightWindowStyles()	{return prefs->m_iStraightWindowStyles;}
+	LPCTSTR GetSkinProfile()			{return prefs->m_szSkinProfile;}
+	CString GetSkinProfileDir()			{return prefs->m_szSkinProfileDir;}
+	void	SetSkinProfile(LPCTSTR pszProfile) { _sntprintf(prefs->m_szSkinProfile, ARRSIZE(prefs->m_szSkinProfile), _T("%s"), pszProfile); }
+	void	SetSkinProfileDir(LPCTSTR pszDir) { _sntprintf(prefs->m_szSkinProfileDir, ARRSIZE(prefs->m_szSkinProfileDir), _T("%s"), pszDir); }
 	int8	GetStatsAverageMinutes()	{return prefs->statsAverageMinutes;}
 	void	SetStatsAverageMinutes(int8 in)	{prefs->statsAverageMinutes=in;}
 

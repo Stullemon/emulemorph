@@ -110,42 +110,40 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    GROUPBOX        "Add Server",IDC_SSTATIC,367,13,140,78,BS_FLAT
-    LTEXT           "&IP or Address:",IDC_SSTATIC4,375,24,76,8
-    EDITTEXT        IDC_IPADDRESS,372,34,84,12,ES_AUTOHSCROLL
-    LTEXT           ":",IDC_SSTATIC5,459,35,8,8
-    LTEXT           "&Port:",IDC_SSTATIC7,473,24,27,8
-    EDITTEXT        IDC_SPORT,472,34,26,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "&Name:",IDC_SSTATIC3,373,48,65,8
-    EDITTEXT        IDC_SNAME,372,58,130,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Chec&k Server",IDC_SBUTTON1,387,74,50,13,BS_FLAT | NOT 
-                    WS_VISIBLE | WS_DISABLED
-    PUSHBUTTON      "&Add",IDC_ADDSERVER,445,74,57,13,BS_FLAT
-    GROUPBOX        "Update server.met from UR&L",IDC_SSTATIC6,367,95,140,45,
-                    BS_FLAT
-    EDITTEXT        IDC_SERVERMETURL,372,107,130,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Update",IDC_UPDATESERVERMETFROMURL,445,123,57,13,
+    PUSHBUTTON      "Connect",IDC_ED2KCONNECT,420,16,80,13,BS_FLAT
+    GROUPBOX        "Add Server",IDC_SSTATIC,367,36,140,78,BS_FLAT
+    LTEXT           "&IP or Address:",IDC_SSTATIC4,375,47,76,8
+    EDITTEXT        IDC_IPADDRESS,372,57,84,12,ES_AUTOHSCROLL
+    LTEXT           "&Port:",IDC_SSTATIC7,473,47,27,8
+    EDITTEXT        IDC_SPORT,472,57,26,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "&Name:",IDC_SSTATIC3,373,70,65,8
+    EDITTEXT        IDC_SNAME,372,81,130,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Add",IDC_ADDSERVER,445,97,57,13,BS_FLAT
+    GROUPBOX        "Update server.met from UR&L",IDC_SSTATIC6,367,117,140,
+                    46,BS_FLAT
+    EDITTEXT        IDC_SERVERMETURL,372,129,130,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Update",IDC_UPDATESERVERMETFROMURL,445,145,57,13,
                     BS_FLAT
     ICON            "",IDC_SERVLST_ICO,5,3,20,20
     CONTROL         "&Servers:",IDC_SERVLIST_TEXT,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,18,6,88,8
     CONTROL         "",IDC_SERVLIST,"SysListView32",LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | WS_TABSTOP,5,17,358,159,WS_EX_STATICEDGE
-    GROUPBOX        "My Info",IDC_MYINFO,367,144,140,32,BS_FLAT
+    GROUPBOX        "My Info",IDC_MYINFO,367,164,140,122,BS_FLAT
     CONTROL         "",IDC_MYINFOLIST,"SysListView32",LVS_REPORT | 
                     LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | 
-                    WS_BORDER | WS_TABSTOP,372,153,131,21
-    CONTROL         "",IDC_TAB3,"SysTabControl32",0x0,5,184,500,102
-    EDITTEXT        IDC_LOGBOX,9,200,491,82,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    WS_BORDER | WS_TABSTOP,372,176,131,106
+    CONTROL         "",IDC_TAB3,"SysTabControl32",0x0,5,184,358,102
+    EDITTEXT        IDC_LOGBOX,9,200,348,82,ES_MULTILINE | ES_AUTOVSCROLL | 
                     ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE | NOT 
                     WS_BORDER | WS_VSCROLL,WS_EX_STATICEDGE
-    PUSHBUTTON      "&Reset",IDC_LOGRESET,461,181,45,15,BS_FLAT
+    PUSHBUTTON      "&Reset",IDC_LOGRESET,312,178,45,15,BS_FLAT
     CONTROL         "",IDC_SERVMSG,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,9,
-                    200,491,82
-    EDITTEXT        IDC_DEBUG_LOG,9,200,491,82,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    200,348,82
+    EDITTEXT        IDC_DEBUG_LOG,9,200,348,82,ES_MULTILINE | ES_AUTOVSCROLL | 
                     ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE | NOT 
                     WS_BORDER | WS_VSCROLL,WS_EX_STATICEDGE
-    PUSHBUTTON      "Connect",IDC_ED2KCONNECT,283,4,80,13,BS_FLAT
+    LTEXT           ":",IDC_SSTATIC5,459,59,8,8
 END
 
 IDD_SEARCH DIALOGEX 3, 35, 507, 289
@@ -155,11 +153,11 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     GROUPBOX        "Search",IDC_SEARCH_FRM,4,5,207,62,BS_FLAT
     CONTROL         "&Name:",IDC_MSTATIC3,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,11,14,48,8
+                    WS_GROUP,11,14,63,8
     EDITTEXT        IDC_SEARCHNAME,11,23,194,12,ES_AUTOHSCROLL
     CONTROL         "Matc&h keywords",IDC_MATCH_KEYWORDS,"Button",
                     BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_RIGHT | BS_FLAT | 
-                    WS_TABSTOP,137,12,68,10
+                    WS_TABSTOP,115,12,90,10
     CONTROL         "&Type",IDC_MSTATIC7,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,11,39,60,8
     COMBOBOX        IDC_TypeSearch,11,48,66,85,CBS_DROPDOWNLIST | CBS_SORT | 
@@ -217,7 +215,7 @@ BEGIN
     DEFPUSHBUTTON   "Send",IDC_CSEND,397,262,50,14,BS_FLAT
     PUSHBUTTON      "Close",IDC_CCLOSE,449,262,50,14,BS_FLAT
     CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | 
-                    LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_TABSTOP,0,24,114,
+                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,0,24,114,
                     260,WS_EX_STATICEDGE
     CONTROL         "Messages",IDC_MESSAGES_LBL,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,138,11,236,13
@@ -1176,21 +1174,23 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Connect",IDC_KADCONNECT,3,14,60,14,BS_FLAT
-    PUSHBUTTON      "Recheck Firewallwall",IDC_FIREWALLCHECKBUTTON,75,14,83,
+    PUSHBUTTON      "Connect",IDC_KADCONNECT,441,18,60,14,BS_FLAT
+    PUSHBUTTON      "Recheck Firewallwall",IDC_FIREWALLCHECKBUTTON,350,18,83,
                     14,BS_FLAT
-    EDITTEXT        IDC_BOOTSTRAPIP,313,16,82,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_BOOTSTRAPPORT,399,16,40,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "BootStrap",IDC_BOOTSTRAPBUTTON,444,16,55,13,BS_FLAT
+    EDITTEXT        IDC_BOOTSTRAPIP,358,55,82,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BOOTSTRAPPORT,455,55,40,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "BootStrap",IDC_BOOTSTRAPBUTTON,440,71,55,13,BS_FLAT
     CONTROL         "",IDC_CONTACTLIST,"SysListView32",LVS_REPORT | 
-                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,3,43,498,104
+                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,3,18,342,152
     CONTROL         "",IDC_SEARCHLIST,"SysListView32",LVS_REPORT | 
-                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,3,160,498,126
-    LTEXT           "Contacts",IDC_KADCONTACTLAB,3,35,145,8
-    LTEXT           "Current Searches",IDC_KADSEARCHLAB,3,152,231,8
-    LTEXT           "IP or Address",IDC_SSTATIC4,313,8,65,8
-    LTEXT           "Port",IDC_SSTATIC7,399,8,27,8
-    GROUPBOX        "BootStrap",IDC_BSSTATIC,306,0,195,33
+                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,3,180,498,106
+    LTEXT           "Contacts",IDC_KADCONTACTLAB,3,10,145,8
+    LTEXT           "Current Searches",IDC_KADSEARCHLAB,3,172,342,8
+    LTEXT           "IP or Address",IDC_SSTATIC4,358,47,65,8
+    LTEXT           "Port",IDC_SSTATIC7,455,47,27,8
+    GROUPBOX        "BootStrap",IDC_BSSTATIC,350,39,151,50
 END
 
 IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 225
@@ -1300,11 +1300,35 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE |
 CAPTION "Dialog"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "",IDC_PV_EXIT,257,212,16,14,BS_ICON | BS_FLAT
-    PUSHBUTTON      "",IDC_PV_NEXT,238,212,16,14,BS_ICON | BS_FLAT
-    PUSHBUTTON      "",IDC_PV_PRIOR,218,212,16,14,BS_ICON | BS_FLAT
     CONTROL         "",IDC_PV_IMAGE,"Static",SS_BITMAP | SS_CENTERIMAGE | 
                     SS_SUNKEN,7,7,266,200,WS_EX_TRANSPARENT
+    PUSHBUTTON      "",IDC_PV_NEXT,238,212,16,14,BS_ICON | BS_FLAT
+    PUSHBUTTON      "",IDC_PV_PRIOR,218,212,16,14,BS_ICON | BS_FLAT
+    PUSHBUTTON      "",IDC_PV_EXIT,257,212,16,14,BS_ICON | BS_FLAT
+END
+
+IDD_CONVERTPARTFILES DIALOGEX 0, 0, 448, 238
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_CAPTION | 
+    WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Convert Partfiles"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&Close",IDC_HIDECONVDLG,391,215,50,16,BS_FLAT
+    LTEXT           "",IDC_CONV_PB_LABEL,13,36,380,8,SS_ENDELLIPSIS
+    PUSHBUTTON      "Add imports",IDC_ADDITEM,7,215,70,16,BS_FLAT
+    RTEXT           "",IDC_CONV_PROZENT,399,34,33,10
+    GROUPBOX        "Idle...",IDC_CURJOB,7,7,434,59
+    CONTROL         "",IDC_JOBLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,70,434,142
+    CONTROL         "",IDC_CONV_PB_CURRENT,"msctls_progress32",WS_BORDER,13,
+                    48,419,15
+    PUSHBUTTON      "Retry",IDC_RETRY,83,215,70,16,BS_FLAT
+    LTEXT           "",IDC_JOBINFO,13,17,419,10
+    PUSHBUTTON      "Info && Explaination",IDC_CONV_EXPLAIN,297,215,87,16,
+                    BS_FLAT
+    PUSHBUTTON      "Remove",IDC_CONVREMOVE,156,215,70,16,BS_FLAT
 END
 
 IDD_MULETRAYDLG DIALOGEX 0, 0, 179, 180
@@ -1889,16 +1913,14 @@ BEGIN
     BEGIN
         LEFTMARGIN, 3
         RIGHTMARGIN, 505
-        VERTGUIDE, 234
-        VERTGUIDE, 239
+        VERTGUIDE, 345
+        VERTGUIDE, 350
         VERTGUIDE, 501
         TOPMARGIN, 4
         BOTTOMMARGIN, 286
-        HORZGUIDE, 21
-        HORZGUIDE, 35
-        HORZGUIDE, 147
-        HORZGUIDE, 149
-        HORZGUIDE, 160
+        HORZGUIDE, 18
+        HORZGUIDE, 170
+        HORZGUIDE, 180
     END
 
     IDD_SOURCEDETAILWND, DIALOG
@@ -1968,6 +1990,17 @@ BEGIN
         BOTTOMMARGIN, 226
     END
 
+    IDD_CONVERTPARTFILES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 441
+        VERTGUIDE, 13
+        VERTGUIDE, 432
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 231
+        HORZGUIDE, 201
+    END
+
     IDD_PPG_MORPH, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1996,112 +2029,123 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\mule.ico"
-IDI_SERVERICON          ICON                    "res\\PROVIDER.ICO"
-IDI_NOTCONNECTED        ICON                    "res\\notconnected.ICO"
-IDI_CONNECTED           ICON                    "res\\connected.ICO"
-IDI_UPDOWN              ICON                    "res\\updown.ICO"
-IDI_UP1DOWN1            ICON                    "res\\Up1down1.ico"
-IDI_UP1DOWN0            ICON                    "res\\Up1down0.ico"
-IDI_UP0DOWN1            ICON                    "res\\Up0down1.ico"
-IDI_USER0               ICON                    "res\\neutral.ico"
-IDI_DCS1                ICON                    "res\\client0.ICO"
-IDI_DCS3                ICON                    "res\\client1.ICO"
-IDI_DCS2                ICON                    "res\\client2.ICO"
-IDI_DCS4                ICON                    "res\\client3.ICO"
-IDI_DCS5                ICON                    "res\\client4.ICO"
-IDI_MESSAGE             ICON                    "res\\message.ICO"
-IDI_MPENDING            ICON                    "res\\mpending.ICO"
-IDI_CHAT                ICON                    "res\\chat.ico"
-IDI_CONNECTEDHIGH       ICON                    "res\\connectedhigh.ICO"
-IDI_COMPPROT            ICON                    "res\\compatible.ICO"
-IDI_BN_CONNECT          ICON                    "res\\bn_connect.ico"
-IDI_BN_DISCONNECT       ICON                    "res\\bn_disconnect.ico"
-IDI_BN_SERVER           ICON                    "res\\server.ico"
-IDI_BN_SEARCH           ICON                    "res\\search.ico"
-IDI_BN_DOWNLOAD         ICON                    "res\\transfer.ico"
-IDI_BN_FILES            ICON                    "res\\shared.ico"
-IDI_BN_STATISTICS       ICON                    "res\\bn_statistics.ico"
-IDI_BN_PREFERENCES      ICON                    "res\\preferences.ico"
-IDI_BN_MESSAGES         ICON                    "res\\bn_messages.ico"
-IDR_TRAYICON            ICON                    "res\\mule_TrayIcon.ico"
-IDI_BN_STOPCONNECTING   ICON                    "res\\bn_stopcon.ico"
-IDR_TRAYICON_GREY       ICON                    "res\\mule_Tr_grey.ico"
-IDI_CLOSE               ICON                    "res\\close.ico"
-IDI_MLDONK              ICON                    "res\\mldonk.ico"
-IDI_RATING              ICON                    "res\\Rating.ico"
-IDI_RATINGBAD           ICON                    "res\\Rating_bad.ico"
-IDI_MYINFO              ICON                    "res\\myinfo.ico"
-IDI_EDONKEYHYBRID       ICON                    "res\\eDonkeyHybrid.ico"
-IDI_PREF_DISPLAY        ICON                    "res\\Display.ico"
-IDI_PREF_SECURITY       ICON                    "res\\Security.ico"
-IDI_PREF_WEBSERVER      ICON                    "res\\WebServer.ico"
-IDI_PREF_SCHEDULER      ICON                    "res\\Prefs_Scheduler.ico"
-IDI_PREF_TWEAK          ICON                    "res\\Prefs_tweak.ico"
-IDR_TRAYICONLOW         ICON                    "res\\mule_Tr_LowID.ico"
-IDI_TVI_CUMULATIVE      ICON                    "res\\CumulativeStats.ico"
-IDI_TVI_GENERIC         ICON                    "res\\IDI_TVI_GENERIC3.ico"
-IDI_TVI_DAY             ICON                    "res\\IDI_TVI_DAY.ico"
-IDI_TVI_MONTH           ICON                    "res\\IDI_TVI_MONTH.ico"
-IDI_TVI_YEAR            ICON                    "res\\IDI_TVI_YEAR.ico"
-IDI_BACKUP              ICON                    "res\\SafeWrite.ico"
-IDI_SECUREHASHCLIENTOVL ICON                    "res\\SecureHashOvl.ico"
-IDI_TRAY_CONNECT        ICON                    "res\\systray_connect.ico"
-IDI_TRAY_DISCONNECT     ICON                    "res\\systray_disconnect.ico"
-IDI_TRAY_EXIT           ICON                    "res\\systray_exit.ico"
-IDI_TRAY_RESTORE        ICON                    "res\\systray_restore.ico"
-IDI_TRAY_SPEED          ICON                    "res\\systray_speed.ico"
-IDI_TRAY_TOMAX          ICON                    "res\\systray_tomax.ico"
-IDI_SHAREDFILES         ICON                    "res\\SharedFiles.ico"
-IDI_SMALLSTATISTICS     ICON                    "res\\SmallStatistics.ico"
-IDI_SEARCHRESULTS       ICON                    "res\\SearchResults.ico"
-IDI_NORMALSEARCH        ICON                    "res\\NormalSearch.ico"
-IDI_WEBBASED            ICON                    "res\\WebBased.ico"
-IDI_DIRECTDOWNLOAD      ICON                    "res\\DirectDownload.ico"
-IDI_NEWSERVER           ICON                    "res\\NewServer.ico"
-IDI_UPDATESERVERS       ICON                    "res\\UpdateServers.ico"
-IDI_SERVERLIST          ICON                    "res\\ServerList.ico"
-IDI_SERVERINFO          ICON                    "res\\ServerInfo.ico"
-IDI_LOG                 ICON                    "res\\Log.ico"
-IDI_FRIEND              ICON                    "res\\Friend.ico"
-IDI_UPLOAD              ICON                    "res\\upload.ico"
-IDI_USER                ICON                    "res\\User.ico"
-IDI_BN_IRC              ICON                    "res\\IRC.ico"
-IDI_FRIENDS1            ICON                    "res\\friends1.ico"
-IDI_FRIENDS2            ICON                    "res\\friends2.ico"
-IDI_FRIENDS3            ICON                    "res\\friends3.ICO"
-IDI_PREF_SERVER         ICON                    "res\\Prefs_Server.ico"
-IDI_PREF_NOTIFICATIONS  ICON                    "res\\Prefs_Notifications.ico"
-IDI_PREF_CONNECTION     ICON                    "res\\Prefs_Connection.ico"
-IDI_PREF_FILES          ICON                    "res\\Prefs_Files.ico"
-IDI_PREF_FOLDERS        ICON                    "res\\Prefs_Folders.ico"
-IDI_PREF_GENERAL        ICON                    "res\\Prefs_General.ico"
-IDI_PREF_IRC            ICON                    "res\\Prefs_IRC.ico"
-IDI_PREF_STATISTICS     ICON                    "res\\Prefs_Statistics.ico"
-IDI_PREF_PROXY          ICON                    "res\\Prefs_Proxy.ico"
-IDI_SHAREAZA            ICON                    "res\\Shareaza.ico"
-IDI_BN_KADEMLIA         ICON                    "res\\Overnet.ico"
-IDI_SCH_SERVER          ICON                    "res\\SeverSearch.ico"
-IDI_SCH_FILEDONKEY      ICON                    "res\\Filedonkey.ico"
-IDI_SCH_JIGLE           ICON                    "res\\Jigle.ico"
-IDI_SCH_GLOBAL          ICON                    "res\\global.ico"
-IDI_SCH_KADEMLIA        ICON                    "res\\OvernetSearch.ico"
-IDI_STATS_HD            ICON                    "res\\Stats_HD.ico"
-IDI_CANCEL              ICON                    "res\\cancel.ICO"
-IDI_FORWARD             ICON                    "res\\forward.ICO"
-IDI_BACK                ICON                    "res\\back.ICO"
-IDI_SUC                 ICON                    "res\\suc.ico"
-IDI_RATING_NO           ICON                    "res\\Rating-NotRated.ico"
-IDI_RATING_EXCELLENT    ICON                    "res\\Rating-Excellent.ico"
-IDI_RATING_FAIR         ICON                    "res\\Rating-Fair.ico"
-IDI_RATING_GOOD         ICON                    "res\\Rating-Good.ico"
-IDI_RATING_POOR         ICON                    "res\\Rating-Poor.ico"
-IDI_RATING_FAKE         ICON                    "res\\Rating-Fake.ico"
-IDI_EDONKEY             ICON                    "res\\eDonkey.ico"
-IDI_CREDITCLIENTOVL     ICON                    "res\\CreditOvl.ico"
-IDI_CREDITSECUREOVL     ICON                    "res\\CreditSecureOvl.ico"
-IDI_MORPHNEXT           ICON                    "res\\MorphNext.ico"
-
+AAAEMULEAPP             ICON                    "res\\mule.ico"
+BN_CONNECT              ICON                    "res\\bn_connect.ico"
+BN_DISCONNECT           ICON                    "res\\bn_disconnect.ico"
+BN_STOPCONNECTING       ICON                    "res\\bn_stopcon.ico"
+BN_KADEMLIA             ICON                    "res\\Overnet.ico"
+BN_SERVER               ICON                    "res\\server.ico"
+BN_SEARCH               ICON                    "res\\search.ico"
+BN_DOWNLOAD             ICON                    "res\\transfer.ico"
+BN_FILES                ICON                    "res\\shared.ico"
+BN_STATISTICS           ICON                    "res\\bn_statistics.ico"
+BN_MESSAGES             ICON                    "res\\bn_messages.ico"
+BN_IRC                  ICON                    "res\\IRC.ico"
+BN_PREFERENCES          ICON                    "res\\preferences.ico"
+BN_TOOLS                ICON                    "res\\tools.ICO"
+BN_HELP                 ICON                    "res\\help.ico"
+TRAYCONNECTED           ICON                    "res\\mule_TrayIcon.ico"
+TRAYNOTCONNECTED        ICON                    "res\\mule_Tr_grey.ico"
+TRAYLOWID               ICON                    "res\\mule_Tr_LowID.ico"
+PREF_DISPLAY            ICON                    "res\\Display.ico"
+PREF_SECURITY           ICON                    "res\\Security.ico"
+PREF_WEBSERVER          ICON                    "res\\WebServer.ico"
+PREF_SCHEDULER          ICON                    "res\\Prefs_Scheduler.ico"
+PREF_TWEAK              ICON                    "res\\Prefs_tweak.ico"
+PREF_SERVER             ICON                    "res\\Prefs_Server.ico"
+PREF_NOTIFICATIONS      ICON                    "res\\Prefs_Notifications.ico"
+PREF_CONNECTION         ICON                    "res\\Prefs_Connection.ico"
+PREF_FILES              ICON                    "res\\Prefs_Files.ico"
+PREF_FOLDERS            ICON                    "res\\Prefs_Folders.ico"
+PREF_GENERAL            ICON                    "res\\Prefs_General.ico"
+PREF_IRC                ICON                    "res\\Prefs_IRC.ico"
+PREF_STATISTICS         ICON                    "res\\Prefs_Statistics.ico"
+PREF_PROXY              ICON                    "res\\Prefs_Proxy.ico"
+SEARCHPARAMS            ICON                    "res\\NormalSearch.ico"
+SEARCHMETHOD_SERVER     ICON                    "res\\SeverSearch.ico"
+SEARCHMETHOD_FILEDONKEY ICON                    "res\\Filedonkey.ico"
+SEARCHMETHOD_JIGLE      ICON                    "res\\Jigle.ico"
+SEARCHMETHOD_GLOBAL     ICON                    "res\\global.ico"
+SEARCHMETHOD_KADEMLIA   ICON                    "res\\OvernetSearch.ico"
+SEARCHRESULTS           ICON                    "res\\SearchResults.ico"
+SERVERLIST              ICON                    "res\\ServerList.ico"
+SERVER                  ICON                    "res\\PROVIDER.ICO"
+SERVERINFO              ICON                    "res\\ServerInfo.ico"
+ADDSERVER               ICON                    "res\\NewServer.ico"
+SERVERUPDATEMET         ICON                    "res\\UpdateServers.ico"
+SHAREDFILES             ICON                    "res\\SharedFiles.ico"
+STATISTICS              ICON                    "res\\SmallStatistics.ico"
+STATSCUMULATIVE         ICON                    "res\\CumulativeStats.ico"
+STATSGENERIC            ICON                    "res\\IDI_TVI_GENERIC3.ico"
+STATSDAY                ICON                    "res\\IDI_TVI_DAY.ico"
+STATSMONTH              ICON                    "res\\IDI_TVI_MONTH.ico"
+STATSYEAR               ICON                    "res\\IDI_TVI_YEAR.ico"
+STATSCLIENTS            ICON                    "res\\User.ico"
+HARDDISK                ICON                    "res\\Stats_HD.ico"
+UP1DOWN1                ICON                    "res\\Up1down1.ico"
+UP1DOWN0                ICON                    "res\\Up1down0.ico"
+UP0DOWN1                ICON                    "res\\Up0down1.ico"
+UPLOADDOWNLOAD          ICON                    "res\\updown.ICO"
+UPLOAD                  ICON                    "res\\upload.ico"
+NOTCONNECTED            ICON                    "res\\notconnected.ICO"
+CONNECTED               ICON                    "res\\connected.ICO"
+CONNECTEDHIGHID         ICON                    "res\\connectedhigh.ICO"
+CONVERT                 ICON                    "res\\convert.ico"
+MYINFO                  ICON                    "res\\myinfo.ico"
+RATINGRECEIVED          ICON                    "res\\Rating.ico"
+BADRATINGRECEIVED       ICON                    "res\\Rating_bad.ico"
+CANCEL                  ICON                    "res\\cancel.ICO"
+FORWARD                 ICON                    "res\\forward.ICO"
+BACK                    ICON                    "res\\back.ICO"
+SAFEFILEWRITE           ICON                    "res\\SafeWrite.ico"
+CLOSETAB                ICON                    "res\\close.ico"
+SEARCHDIRECTDOWNLOAD    ICON                    "res\\DirectDownload.ico"
+MESSAGE                 ICON                    "res\\message.ICO"
+MESSAGEPENDING          ICON                    "res\\mpending.ICO"
+CHAT                    ICON                    "res\\chat.ico"
+LOG                     ICON                    "res\\Log.ico"
+FRIEND                  ICON                    "res\\Friend.ico"
+FRIENDNOCLIENT          ICON                    "res\\friends1.ico"
+FRIENDWITHCLIENT        ICON                    "res\\friends2.ico"
+FRIENDCONNECTED         ICON                    "res\\friends3.ICO"
+CLIENTEDONKEY           ICON                    "res\\neutral.ico"
+CLIENTEDONKEYHYBRID     ICON                    "res\\eDonkeyHybrid.ico"
+CLIENTMLDONKEY          ICON                    "res\\mldonk.ico"
+CLIENTSHAREAZA          ICON                    "res\\Shareaza.ico"
+CLIENTSECUREOVL         ICON                    "res\\SecureHashOvl.ico"
+CLIENTCOMPATIBLE        ICON                    "res\\compatible.ICO"
+SRCDOWNLOADING          ICON                    "res\\client0.ICO"
+SRCCONNECTING           ICON                    "res\\client1.ICO"
+SRCONQUEUE              ICON                    "res\\client2.ICO"
+SRCNNPQF                ICON                    "res\\client3.ICO"
+SRCUNKNOWN              ICON                    "res\\client4.ICO"
+CONTACT0                ICON                    "res\\Contact0.ico"
+CONTACT1                ICON                    "res\\Contact1.ico"
+CONTACT2                ICON                    "res\\Contact2.ico"
+CONTACT3                ICON                    "res\\Contact3.ico"
+CONTACT4                ICON                    "res\\Contact4.ico"
+KADFILESEARCH           ICON                    "res\\KadFileSearch.ico"
+KADWORDSEARCH           ICON                    "res\\KadWordSearch.ico"
+KADNODESEARCH           ICON                    "res\\KadNodeSearch.ico"
+KADSTOREFILE            ICON                    "res\\KadStoreFile.ico"
+KADSTOREWORD            ICON                    "res\\KadStoreWord.ico"
+SUC                     ICON                    "res\\suc.ico"
+RATING_NO               ICON                    "res\\Rating-NotRated.ico"
+RATING_EXCELLENT        ICON                    "res\\Rating-Excellent.ico"
+RATING_FAIR             ICON                    "res\\Rating-Fair.ico"
+RATING_GOOD             ICON                    "res\\Rating-Good.ico"
+RATING_POOR             ICON                    "res\\Rating-Poor.ico"
+RATING_FAKE             ICON                    "res\\Rating-Fake.ico"
+CLIENTRIGHTEDONKEY      ICON                    "res\\eDonkey.ico"
+CLIENTCREDITOVL         ICON                    "res\\CreditOvl.ico"
+CLIENTCREDITSECUREOVL   ICON                    "res\\CreditSecureOvl.ico"
+CLIENTMORPH             ICON                    "res\\MorphNext.ico"
+SYSTRAY_SPEED           ICON                    "res\\systray_speed.ico"
+SYSTRAY_TOMAX           ICON                    "res\\systray_tomax.ico"
+SYSTRAY_RESTORE         ICON                    "res\\systray_restore.ico"
+SYSTRAY_CONNECT         ICON                    "res\\systray_connect.ico"
+SYSTRAY_DISCONNECT      ICON                    "res\\systray_disconnect.ico"
+SYSTRAY_EXIT            ICON                    "res\\systray_exit.ico"
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
@@ -2121,7 +2165,6 @@ TRAYBUTTON_LUNA_HOMESTEAD_BMP BITMAP                  "res\\TRAYBUTTON_LUNA_HOME
 //
 
 IDR_MANIFEST            RT_MANIFEST             "res\\emule.manifest"
-IDR_RT_MANIFEST1        RT_MANIFEST             "res\\emule.manifest"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3605,6 +3648,7 @@ BEGIN
     IDS_NEEDFREEDISKSPACE   "%s (you need to free %s!)"
     IDS_SERVERKEEPALIVETIMEOUT "Server connection refresh interval [min.]"
     IDS_MORE                "&More"
+    IDS_TOOLS               "T&ools"
     IDS_CREATEHOSTNAMESRCLINK "Copy eD2K Link To Clipboard (Hostname)"
     IDS_HASHINGFILESCOUNT   " (%u hashing)"
     IDS_CHECKDISKSPACE      "Check Diskspace"
@@ -3616,11 +3660,39 @@ END
 STRINGTABLE 
 BEGIN
     IDS_WARNING             "Warning"
+    IDS_IMPORTSPLPF         "Import partfiles (eM, eD, ON)"
+    IDS_IMP_STEPREADPF      "Reading part folder"
+    IDS_IMP_STEPBASICINF    "Retriving basic information from partfile"
+    IDS_IMP_STEPCRDESTFILE  "Creating destination partfile"
+    IDS_IMP_LOADDATA        "Loading data from old part file (%i of %i)"
+    IDS_IMP_SAVEDATA        "Saving data block into new single partfile (%i of %i)"
+    IDS_IMP_IOERROR         "Fileerror while converting partfile"
+    IDS_IMP_GETPFINFO       "Retriving source partfile information"
+    IDS_IMP_ADDDWL          "Adding download and save new partfile"
+    IDS_IMP_FETCHSTATUS     "Fetching status..."
+    IDS_IMP_INPROGR         "in progress"
+    IDS_IMP_ERR_DISKSP      "Error: Out of diskspace"
+    IDS_IMP_ERR_PARTMETIO   "Error: Partmet not found"
+    IDS_IMP_ERR_IO          "Error: IO Error!"
+    IDS_IMP_ERR_FAILED      "Error: Failed!"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_CUSTOMIZETOOLBAR    "Customize Toolbar"
+    IDS_IMP_STATUSQUEUED    "Queued"
+    IDS_IMP_ALRDWL          "Already downloading"
+    IDS_IMP_ADDBTN          "&Add imports"
+    IDS_IMP_RETRYBTN        "&Retry selected"
+    IDS_IMP_REMOVEBTN       "Re&move selected"
+    IDS_IMP_SELFOLDER       "Please choose a single partmet-folder or your old tempfolder with all the partmet-subfolders!"
+    IDS_IMP_DELSRC          "Do you want the source-partfile of successfully imported downloads?"
+    IDS_IMP_SIZE            "%s (Disk:%s)"
+    IDS_IMP_STATUS          "Importing %s: %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CUSTOMIZETOOLBAR    "Customize Toolbar..."
     IDS_KAD_RECHECKFW       "Recheck Firewall"
     IDS_SHAREDTITLE         "Shared ED2K|Kademlia"
     IDS_WARNINGNOBS         "Bootstrapping inactive now (Kademlia disabled or already connected)."
@@ -3642,8 +3714,8 @@ BEGIN
     IDS_EM_KADEMLIA         "&Kademlia"
     IDS_VIAKAD              "via Kademlia"
     IDS_VIASE               "via Source Exchange"
-    IDS_SELECTTOOLBARBITMAP "Select Toolbar Bitmap"
-    IDS_SELECTTOOLBARBITMAPDIR "Select Toolbar Bitmap Directory"
+    IDS_SELECTTOOLBARBITMAP "Select Toolbar Bitmap..."
+    IDS_SELECTTOOLBARBITMAPDIR "Select Toolbar Bitmap Directory..."
     IDS_TOOLBARSKINS        "Toolbar Skins"
     IDS_NOTEXTLABELS        "No Labels"
     IDS_TEXTLABELSONRIGHT   "Right of Icon"
@@ -3660,6 +3732,9 @@ BEGIN
     IDS_KADSEARCHLAB        "Current Searches"
     IDS_SRV_UDPSR           "Extended UDP protocol for source requests"
     IDS_SRV_UDPFR           "Extended UDP protocol for file requests"
+    IDS_EM_HELP             "&Help"
+    IDS_WRN_FRIENDDUPLIPPORT 
+                            "Friend not added.\r\n\r\nThere is already a friend with same IP address and port available."
 END
 
 STRINGTABLE 

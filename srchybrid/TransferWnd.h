@@ -113,6 +113,9 @@ public:
 	void OnMouseMove(UINT nFlags, CPoint point);
 	void OnLButtonUp(UINT nFlags, CPoint point);
 	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
+	// khaos::categorymod+	
 	int AddCategorie(CString newtitle,CString newincoming,CString newcomment,bool addTab=true);
+	// khaos::categorymod-
 	afx_msg void OnLvnKeydownDownloadlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
 };

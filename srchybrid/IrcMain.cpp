@@ -26,6 +26,7 @@ static char THIS_FILE[]=__FILE__;
 
 CIrcMain::CIrcMain(void)
 {
+	ircsocket = NULL;
 	m_pwndIRC = 0; // i_a 
 	preParseBuffer = "";
 	srand( (unsigned)time( NULL ) );
@@ -517,6 +518,7 @@ void CIrcMain::Connect(){
 void CIrcMain::Disconnect(bool isshuttingdown){
 	ircsocket->Close();
 	delete ircsocket;
+	ircsocket = NULL;
 	if( !isshuttingdown )
 		m_pwndIRC->SetConnectStatus(false);
 }

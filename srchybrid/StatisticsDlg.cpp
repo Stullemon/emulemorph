@@ -70,41 +70,20 @@ BEGIN_MESSAGE_MAP(CStatisticsDlg, CResizableDialog)
 	// -khaos--+++> Menu button.
 	ON_BN_CLICKED(IDC_BNMENU, OnMenuButtonClicked)	
 	// <-----khaos-
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
-
-// CStatisticsDlg message handlers
-
-BOOL CStatisticsDlg::OnInitDialog(){
-
-	CResizableDialog::OnInitDialog();
-	InitWindowStyles(this);
-	EnableWindow( FALSE );
-
+void CStatisticsDlg::OnSysColorChange()
+{
 	Localize();
+	CResizableDialog::OnSysColorChange();
+}
 
-	// Setup ImageList For Tree (2-18-03)
-	imagelistStatTree.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 12, 0);
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_TVI_GENERIC));		// Dots & Arrow (Default icon for stats)
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_UP1DOWN1));			// Transfer
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_CONNECTEDHIGH));		// Connection
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_USER));				// Clients
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_PREF_SERVER));		// Server
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_SHAREDFILES));		// Shared Files
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_UPLOAD));				// Transfer > Upload
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_DIRECTDOWNLOAD));		// Transfer > Download
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_SMALLSTATISTICS));	// Session Sections
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_TVI_CUMULATIVE));		// Cumulative Sections
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_PREF_TWEAK));			// Records
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_PREF_CONNECTION));	// Connection > General
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_PREF_SCHEDULER));		// Time Section
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_PREF_STATISTICS));	// Time > Averages and Projections
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_TVI_DAY));			// Time > Averages and Projections > Daily
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_TVI_MONTH));			// Time > Averages and Projections > Monthly
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_TVI_YEAR));			// Time > Averages and Projections > Yearly
-	imagelistStatTree.Add(theApp.LoadIcon(IDI_STATS_HD));		// Diskspace
-
-	stattree.SetImageList(&imagelistStatTree, TVSIL_NORMAL);
+BOOL CStatisticsDlg::OnInitDialog()
+{
+	CResizableDialog::OnInitDialog();
+	EnableWindow( FALSE );
+	Localize();
 
 	CreateMyTree();
 
@@ -2350,7 +2329,65 @@ void CStatisticsDlg::SetARange(bool SetDownload,int maxValue){
 }
 //MORPH END   - Changed by SiRoB, New Graph
 // -khaos--+++> Various changes in Localize() and a new button event...
-void CStatisticsDlg::Localize(){
+void CStatisticsDlg::Localize()
+{
+	InitWindowStyles(this);
+
+	CImageList iml;
+	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+	iml.Add(CTempIconLoader("StatsGeneric"));			// Dots & Arrow (Default icon for stats)
+	iml.Add(CTempIconLoader("UP1DOWN1"));				// Transfer
+	iml.Add(CTempIconLoader("ConnectedHighID"));		// Connection
+	iml.Add(CTempIconLoader("StatsClients"));			// Clients
+	iml.Add(CTempIconLoader("PREF_SERVER"));			// Server
+	iml.Add(CTempIconLoader("SharedFiles"));			// Shared Files
+	iml.Add(CTempIconLoader("Upload"));					// Transfer > Upload
+	iml.Add(CTempIconLoader("SearchDirectDownload"));	// Transfer > Download
+	iml.Add(CTempIconLoader("Statistics"));				// Session Sections
+	iml.Add(CTempIconLoader("StatsCUMULATIVE"));		// Cumulative Sections
+	iml.Add(CTempIconLoader("PREF_TWEAK"));				// Records
+	iml.Add(CTempIconLoader("PREF_CONNECTION"));		// Connection > General
+	iml.Add(CTempIconLoader("PREF_SCHEDULER"));			// Time Section
+	iml.Add(CTempIconLoader("PREF_STATISTICS"));		// Time > Averages and Projections
+	iml.Add(CTempIconLoader("StatsDay"));				// Time > Averages and Projections > Daily
+	iml.Add(CTempIconLoader("StatsMonth"));				// Time > Averages and Projections > Monthly
+	iml.Add(CTempIconLoader("StatsYear"));				// Time > Averages and Projections > Yearly
+	iml.Add(CTempIconLoader("HardDisk"));				// Diskspace
+	stattree.SetImageList(&iml, TVSIL_NORMAL);
+	imagelistStatTree.DeleteImageList();
+	imagelistStatTree.Attach(iml.Detach());
+
+	COLORREF crBk = GetSysColor(COLOR_WINDOW);
+	COLORREF crFg = GetSysColor(COLOR_WINDOWTEXT);
+	LPCTSTR pszSkinProfile = theApp.glob_prefs->GetSkinProfile();
+	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
+	{
+		TCHAR szColor[MAX_PATH];
+		GetPrivateProfileString(_T("Colors"), _T("StatisticsTvBk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] == _T('\0'))
+			GetPrivateProfileString(_T("Colors"), _T("DefLvBk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+		{
+			UINT red, grn, blu;
+			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
+			if (iVals == 3)
+				crBk = RGB(red, grn, blu);
+		}
+
+		GetPrivateProfileString(_T("Colors"), _T("StatisticsTvFg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] == _T('\0'))
+			GetPrivateProfileString(_T("Colors"), _T("DefLvFg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+		{
+			UINT red, grn, blu;
+			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
+			if (iVals == 3)
+				crFg = RGB(red, grn, blu);
+		}
+	}
+	stattree.SetBkColor(crBk);
+	stattree.SetTextColor(crFg);
+
 	// Used for formatting the Active Connections ratio and the time for average graphs
 	CString myBuffer;
 

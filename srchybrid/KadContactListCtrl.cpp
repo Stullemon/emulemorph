@@ -67,6 +67,7 @@ void CKadContactListCtrl::Init()
 	InsertColumn(colType,GetResString(IDS_TYPE) ,LVCFMT_LEFT,50);
 	InsertColumn(colContact, GetResString(IDS_KADCONTACTLAB) ,LVCFMT_LEFT,50);
 	InsertColumn(colDistance,GetResString(IDS_KADDISTANCE),LVCFMT_LEFT,50);
+	Localize();
 
 	CString strIniFile;
 	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
@@ -87,6 +88,19 @@ void CKadContactListCtrl::SaveAllSettings(CIni* ini)
 
 void CKadContactListCtrl::Localize()
 {
+	CImageList iml;
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.SetBkColor(CLR_NONE);
+	iml.Add(CTempIconLoader("Contact0"));
+	iml.Add(CTempIconLoader("Contact2"));
+	iml.Add(CTempIconLoader("Contact4"));
+	//right now we only have 3 types... But this may change in the future..
+	iml.Add(CTempIconLoader("Contact3"));
+	iml.Add(CTempIconLoader("Contact4"));
+	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
+	HIMAGELIST himl = ApplyImageList(iml.Detach());
+	if (himl)
+		ImageList_Destroy(himl);
 }
 
 void CKadContactListCtrl::ContactAdd(Kademlia::CContact* contact)
@@ -133,6 +147,8 @@ void CKadContactListCtrl::ContactRef(Kademlia::CContact* contact)
 		find.lParam = (LPARAM)contact;
 		sint32 result = FindItem(&find);
 		if (result != (-1)){
+			SetItem(result,0,LVIF_IMAGE,0,contact->getType()>4?4:contact->getType(),0,0,0,0);
+
 			CString id;
 			contact->getClientID(&id);
 			SetItemText(result,colID,id);
@@ -214,10 +230,10 @@ int CKadContactListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamS
 			break;
 		case colDistance:
 			{
-				CString distance1, distance2;
+				Kademlia::CUInt128 distance1, distance2;
 				item1->getDistance(&distance1);
 				item2->getDistance(&distance2);
-				iResult = distance1.Compare(distance2);
+				iResult = distance1.compareTo(distance2);
 				break;
 			}
 		default:

@@ -47,4 +47,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	HICON icon_friend,icon_msg;
+public:
+	afx_msg void OnSysColorChange();
 };

@@ -204,4 +204,6 @@ protected:
 	// -khaos--+++> Buttons, stuff.
 	afx_msg void OnMenuButtonClicked();
 	// <-----khaos-
+public:
+	afx_msg void OnSysColorChange();
 };

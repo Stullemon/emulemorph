@@ -38,16 +38,11 @@ CServerListCtrl::CServerListCtrl() {
 	SetGeneralPurposeFind(true);
 }
 
-bool CServerListCtrl::Init(CServerList* in_list){ 
-	this->ModifyStyle(0,LVS_SINGLESEL|LVS_REPORT);
-	// Set Imagelist
+bool CServerListCtrl::Init(CServerList* in_list)
+{
 	server_list = in_list;
-	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,10);
-	imagelist.SetBkColor(RGB(255,255,255));
-	imagelist.Add(theApp.LoadIcon(IDI_SERVERICON));
-
-	this->SetImageList(&imagelist,LVSIL_SMALL);
-	this->ModifyStyle(LVS_SINGLESEL|LVS_LIST|LVS_ICON|LVS_SMALLICON,LVS_REPORT); //here the CListCtrl is set to report-style
+	ModifyStyle(0,LVS_SINGLESEL|LVS_REPORT);
+	ModifyStyle(LVS_SINGLESEL|LVS_LIST|LVS_ICON|LVS_SMALLICON,LVS_REPORT); //here the CListCtrl is set to report-style
 
 	InsertColumn(0,GetResString(IDS_SL_SERVERNAME),LVCFMT_LEFT, 150);
 	InsertColumn(1,GetResString(IDS_IP),LVCFMT_LEFT, 140);
@@ -63,6 +58,7 @@ bool CServerListCtrl::Init(CServerList* in_list){
 	InsertColumn(11,GetResString(IDS_HARDFILES),	LVCFMT_RIGHT, 50);
 	InsertColumn(12,GetResString(IDS_VERSION),LVCFMT_LEFT, 50);
 
+	Localize();
 	LoadSettings(CPreferences::tableServer);
 
 	// Barry - Use preferred sort order from preferences
@@ -84,7 +80,16 @@ bool CServerListCtrl::Init(CServerList* in_list){
 CServerListCtrl::~CServerListCtrl() {
 }
 
-void CServerListCtrl::Localize() {
+void CServerListCtrl::Localize()
+{
+	CImageList iml;
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.SetBkColor(CLR_NONE);
+	iml.Add(CTempIconLoader("Server"));
+	HIMAGELIST himl = ApplyImageList(iml.Detach());
+	if (himl)
+		ImageList_Destroy(himl);
+
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -222,10 +227,17 @@ void CServerListCtrl::RefreshServer( CServer* server ){
 	sint32 itemnr = FindItem(&find);
 	if (itemnr == (-1))
 		return;
-	CString temp;
 	if( !server )
 		return;
 
+	if (theApp.serverconnect->IsConnected() && 
+		theApp.serverconnect->GetCurrentServer()->GetPort() ==server->GetPort() &&
+		strcmp(theApp.serverconnect->GetCurrentServer()->GetAddress(),server->GetAddress())==0
+		)
+		SetItemState(itemnr,LVIS_GLOW,LVIS_GLOW);
+	else SetItemState(itemnr,0,LVIS_GLOW);
+
+	CString temp;
 	temp.Format( "%s : %i",server->GetAddress(),server->GetPort());
 
 	SetItemText(itemnr,1,(LPCTSTR)temp);

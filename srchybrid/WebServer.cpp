@@ -231,8 +231,9 @@ CString CWebServer::_SpecialChars(CString str)
 
 void CWebServer::_ConnectToServer(CString sIP, int nPort)
 {
-	CServer* server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer(),nPort);
-	if (server!=NULL) theApp.emuledlg->SendMessage(WEB_CONNECT_TO_SERVER, (WPARAM)server, NULL);
+	CServer* server=NULL;
+	if (!sIP.IsEmpty()) server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer(),nPort);
+	theApp.emuledlg->SendMessage(WEB_CONNECT_TO_SERVER, (WPARAM)server, NULL);
 }
 
 void CWebServer::ProcessFileReq(ThreadData Data) {
@@ -708,16 +709,11 @@ CString CWebServer::_GetServerList(ThreadData Data)
 	CString sCmd = _ParseURL(Data.sURL, "c");
 	if (sCmd == "connect" && IsSessionAdmin(Data,sSession) )
 	{
-		CString sIP = _ParseURL(Data.sURL, "ip");
-		int nPort = atoi(_ParseURL(Data.sURL, "port"));
-		if(sIP.IsEmpty())
-			theApp.emuledlg->SendMessage(WM_COMMAND, MP_CONNECT);
-		else
-			_ConnectToServer(sIP,nPort);
+		_ConnectToServer(_ParseURL(Data.sURL, "ip"),atoi(_ParseURL(Data.sURL, "port")));
 	}	
 	else if (sCmd == "disconnect" && IsSessionAdmin(Data,sSession)) 
 	{
-		theApp.emuledlg->SendMessage(WM_COMMAND, MP_DISCONNECT);
+		theApp.emuledlg->SendMessage(WEB_DISCONNECT_SERVER, NULL);
 	}	
 	else if (sCmd == "remove" && IsSessionAdmin(Data,sSession)) 
 	{
@@ -2035,7 +2031,6 @@ CString CWebServer::_GetStats(ThreadData Data)
 
 	CString Out = pThis->m_Templates.sStats;
 	Out.Replace("[STATSDATA]", theApp.emuledlg->statisticswnd.stattree.GetHTML(false));
-	Out.Replace("[EXTRASTATSDATA]", GetResString(IDS_STATS_FREESPACE)+CastItoXBytes(GetFreeDiskSpaceX(theApp.glob_prefs->GetTempDir())));
 
 	return Out;
 
@@ -2597,6 +2592,7 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 			pParams->eType = SearchTypeGlobal;
 		else
 			pParams->eType = SearchTypeServer;
+
 		if (pParams->eType != SearchTypeKademlia){
 		    if (!theApp.emuledlg->searchwnd->DoNewSearch(pParams))
 				delete pParams;

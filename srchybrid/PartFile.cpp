@@ -313,8 +313,11 @@ void CPartFile::CreatePartFile(){
 	SavePartFile();
 }
 
-bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
+uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool getsizeonly)
 {
+	bool isnewstyle;
+	uint8 version;
+
 	CMap<uint16, uint16, Gap_Struct*, Gap_Struct*> gap_map; // Slugfiller
 	transfered = 0;
 	m_partmetfilename = in_filename;
@@ -343,16 +346,29 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 	setvbuf(metFile.m_pStream, NULL, _IOFBF, 16384);
 
 	try{
-		uint8 version;
 		metFile.Read(&version,1);
-		if (version != PARTFILE_VERSION){
+		if (version != PARTFILE_VERSION && version!= PARTFILE_SPLITTEDVERSION ){
 			metFile.Close();
 			AddLogLine(false, GetResString(IDS_ERR_BADMETVERSION), m_partmetfilename, GetFileName());
 			return false;
 		}
-		LoadDateFromFile(&metFile);
-		LoadHashsetFromFile(&metFile, false);
+		
+		isnewstyle=(version== PARTFILE_SPLITTEDVERSION);
 
+		if (isnewstyle) {
+			uint64 temp;
+			metFile.Read(&temp,1);
+
+			LoadDateFromFile(&metFile);
+			uchar gethash[16];
+			metFile.Read(&gethash, 16);
+			md4cpy(m_abyFileHash, gethash);
+		} else {
+
+			LoadDateFromFile(&metFile);
+			LoadHashsetFromFile(&metFile, false);
+
+		}
 		uint32 tagcount;
 		metFile.Read(&tagcount, 4);
 
@@ -360,6 +376,10 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 
 		for (uint32 j = 0; j != tagcount; j++){
 			CTag* newtag = new CTag(&metFile);
+
+			if (!getsizeonly || 
+				(getsizeonly && (newtag->tag.specialtag==FT_FILESIZE || newtag->tag.specialtag==FT_FILENAME ) )
+				)
 			switch(newtag->tag.specialtag){
 				case FT_FILENAME:{
 					if(newtag->tag.stringvalue == NULL) {
@@ -372,12 +392,20 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 					break;
 				}
 				case FT_LASTSEENCOMPLETE: {
+					if (isnewstyle) taglist.Add(newtag); else
+					{
 					lastseencomplete = newtag->tag.intvalue;
 					delete newtag;
+					}
 					break;
 				}
 				case FT_FILESIZE:{
 					SetFileSize(newtag->tag.intvalue);
+					delete newtag;
+					break;
+				}
+				case FT_FILETYPE:{
+					SetFileType(newtag->tag.stringvalue);
 					delete newtag;
 					break;
 				}
@@ -392,6 +420,8 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 					break;
 				}
 				case FT_DLPRIORITY:{
+					if (isnewstyle) taglist.Add(newtag); else
+					{
 					m_iDownPriority = newtag->tag.intvalue;
 					delete newtag;
 					if( m_iDownPriority == PR_AUTO ){
@@ -400,6 +430,7 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 					}
 					else
 						SetAutoDownPriority(false);
+					}
 					break;
 				}
 				case FT_STATUS:{
@@ -419,8 +450,13 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 						SetAutoUpPriority(false);
 					break;
 				}
-				case FT_ONLASTPUBLISH:{
-					SetLastPublishTimeKad(newtag->tag.intvalue);
+				case FT_KADLASTPUBLISHKEY:{
+					SetLastPublishTimeKadKey(newtag->tag.intvalue);
+					delete newtag;
+					break;
+				}
+				case FT_KADLASTPUBLISHSRC:{
+					SetLastPublishTimeKadSrc(newtag->tag.intvalue);
 					delete newtag;
 					break;
 				}
@@ -496,8 +532,42 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 					else
 						taglist.Add(newtag);
 				}
-			}
+			} else delete newtag;
 		}
+
+		// load the hashsets from the hybridstylepartmet
+		if (isnewstyle && !getsizeonly ) {
+			int8 temp;
+			metFile.Read(&temp,1);
+			
+			uint16 parts=GetPartCount();	// assuming we will get all hashsets
+			
+			for (uint16 i = 0; i < parts && (metFile.GetPosition()+16<metFile.GetLength()); i++){
+				uchar* cur_hash = new uchar[16];
+				metFile.Read(cur_hash, 16);
+				hashlist.Add(cur_hash);
+			}
+
+			uchar* checkhash= new uchar[16];
+			if (!hashlist.IsEmpty()){
+				uchar* buffer = new uchar[hashlist.GetCount()*16];
+				for (int i = 0; i < hashlist.GetCount(); i++)
+					md4cpy(buffer+(i*16), hashlist[i]);
+				CreateHashFromString(buffer, hashlist.GetCount()*16, checkhash);
+				delete[] buffer;
+			}
+			bool flag=false;
+			if (!md4cmp(m_abyFileHash, checkhash))
+				flag=true;
+			else{
+				for (int i = 0; i < hashlist.GetSize(); i++)
+					delete[] hashlist[i];
+				hashlist.RemoveAll();
+				flag=false;
+			}
+			delete[] checkhash;
+		}
+
 		metFile.Close();
 	}
 	catch(CFileException* error){
@@ -516,6 +586,10 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 		OUTPUT_DEBUG_TRACE();
 		AddLogLine(true, GetResString(IDS_ERR_METCORRUPT), m_partmetfilename, GetFileName());
 		return false;
+	}
+
+	if (getsizeonly) {
+		return version;
 	}
 
 	// Now to flush the map into the list (Slugfiller)
@@ -589,19 +663,22 @@ bool CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename)
 		return true;
 	}
 
-	// check date of .part file - if its wrong, rehash file
-	CFileStatus filestatus;
-	m_hpartfile.GetStatus(filestatus); // this; "...returns m_attribute without high-order flags" indicates a known MFC bug, wonder how many unknown there are... :)
-	time_t fdate = mktime(filestatus.m_mtime.GetLocalTm());
-	if (fdate == -1)
-		AddDebugLogLine(false, "Failed to convert file date of %s (%s)", filestatus.m_szFullName, GetFileName());
-	if (date != fdate){
-		AddLogLine(false, GetResString(IDS_ERR_REHASH), m_fullname, GetFileName());
-		// rehash
-		SetStatus(PS_WAITINGFORHASH);
-		CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
-		addfilethread->SetValues(0, GetPath(), m_hpartfile.GetFileName().GetBuffer(), this);
-		addfilethread->ResumeThread();
+	if (!isnewstyle) // not for importing
+	{
+		// check date of .part file - if its wrong, rehash file
+		CFileStatus filestatus;
+		m_hpartfile.GetStatus(filestatus); // this; "...returns m_attribute without high-order flags" indicates a known MFC bug, wonder how many unknown there are... :)
+		time_t fdate = mktime(filestatus.m_mtime.GetLocalTm());
+		if (fdate == -1)
+			AddDebugLogLine(false, "Failed to convert file date of %s (%s)", filestatus.m_szFullName, GetFileName());
+		if (date != fdate){
+			AddLogLine(false, GetResString(IDS_ERR_REHASH), m_fullname, GetFileName());
+			// rehash
+			SetStatus(PS_WAITINGFORHASH);
+			CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+			addfilethread->SetValues(0, GetPath(), m_hpartfile.GetFileName().GetBuffer(), this);
+			addfilethread->ResumeThread();
+		}
 	}
 
 	UpdateCompletedInfos();
@@ -681,7 +758,7 @@ bool CPartFile::SavePartFile(){
 		// -khaos--+++>
 		//uint32 tagcount = 9+(gaplist.GetCount()*2);
 		//MORPH START - Modified by SiRoB, ZZ Upload System
-		uint32 tagcount = 9/*Official*/+5/*Khaos*/+1/*ZZ*/+(gaplist.GetCount()*2);
+		uint32 tagcount = 10/*Official*/+5/*Khaos*/+1/*ZZ*/+(gaplist.GetCount()*2);
 		//MORPH START - Modified by SiRoB, ZZ Upload System
 		// <-----khaos-
 		// khaos::categorymod-
@@ -724,8 +801,11 @@ bool CPartFile::SavePartFile(){
 		CTag categorytag(FT_CATEGORY, m_category);
 		categorytag.WriteTagToFile(&file);
 
-		CTag onLastPub(FT_ONLASTPUBLISH, GetLastPublishTimeKad());
-		onLastPub.WriteTagToFile(&file);
+		CTag kadLastPubKey(FT_KADLASTPUBLISHKEY, GetLastPublishTimeKadKey());
+		kadLastPubKey.WriteTagToFile(&file);
+
+		CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, GetLastPublishTimeKadSrc());
+		kadLastPubSrc.WriteTagToFile(&file);
 
 		//MORPH START - Added by SiRoB, ZZ Upload System
 		//MORPH START - Added by SiRoB, Avoid misusing of powersharing
@@ -3559,35 +3639,7 @@ void CPartFile::SetStatus(uint8 in) {
 	}
 }
 
-ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath)
-{
-	static BOOL _bInitialized = FALSE;
-	static DWORD (WINAPI *_pfnGetCompressedFileSize)(LPCSTR, LPDWORD) = NULL;
 
-	if (!_bInitialized){
-		_bInitialized = TRUE;
-		(FARPROC&)_pfnGetCompressedFileSize = GetProcAddress(GetModuleHandle("kernel32.dll"), "GetCompressedFileSizeA");
-	}
-
-	// If the file is not compressed nor sparse, 'GetCompressedFileSize' returns the 'normal' file size.
-	if (_pfnGetCompressedFileSize)
-	{
-		ULONGLONG ullCompFileSize;
-		LPDWORD pdwCompFileSize = (LPDWORD)&ullCompFileSize;
-		pdwCompFileSize[0] = (*_pfnGetCompressedFileSize)(pszFilePath, &pdwCompFileSize[1]);
-		if (pdwCompFileSize[0] != INVALID_FILE_SIZE || GetLastError() == NO_ERROR)
-			return ullCompFileSize;
-	}
-
-	// If 'GetCompressedFileSize' failed or is not available, use the default function
-    WIN32_FIND_DATA fd;
-    HANDLE hFind = FindFirstFile(pszFilePath, &fd);
-    if (hFind == INVALID_HANDLE_VALUE)
-		return 0;
-	FindClose(hFind);
-
-	return (ULONGLONG)fd.nFileSizeHigh << 32 | (ULONGLONG)fd.nFileSizeLow;
-}
 uint64 CPartFile::GetRealFileSize()
 {
 //	if (IsPartFile()){

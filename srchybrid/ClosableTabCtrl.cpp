@@ -17,9 +17,9 @@ static char THIS_FILE[]=__FILE__;
 IMPLEMENT_DYNAMIC(CClosableTabCtrl, CTabCtrl)
 CClosableTabCtrl::CClosableTabCtrl()
 {
-	m_pImgLst.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,10);
+	m_pImgLst.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	m_pImgLst.SetBkColor(CLR_NONE);
-	m_pImgLst.Add(theApp.LoadIcon(IDI_CLOSE));
+	m_pImgLst.Add(CTempIconLoader("CloseTab"));
 }
 
 CClosableTabCtrl::~CClosableTabCtrl()

@@ -66,9 +66,9 @@ void CServerConnect::ConnectToAnyServer(uint32 startAt,bool prioSort,bool isAuto
 	lastStartAt=startAt;
 	StopConnectionTry();
 	Disconnect();
-	theApp.emuledlg->ShowConnectionState();
 	connecting = true;
 	singleconnecting = false;
+	theApp.emuledlg->ShowConnectionState();
 
 	// Barry - Only auto-connect to static server option
 	if (theApp.glob_prefs->AutoConnectStaticOnly() && isAuto)
@@ -113,6 +113,7 @@ void CServerConnect::ConnectToServer(CServer* server, bool multiconnect){
 	}
 	connecting = true;
 	singleconnecting = !multiconnect;
+	theApp.emuledlg->ShowConnectionState();
 
 	CServerSocket* newsocket = new CServerSocket(this);
 	m_lstOpenSockets.AddTail((void*&)newsocket);
@@ -126,6 +127,7 @@ void CServerConnect::StopConnectionTry(){
 	connectionattemps.RemoveAll();
 	connecting = false;
 	singleconnecting = false;
+	theApp.emuledlg->ShowConnectionState();
 
 	if (m_idRetryTimer) 
 	{ 
@@ -217,7 +219,10 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 			SendPacket(packet,true);
 		}
+		CServer* update = theApp.serverlist->GetServerByAddress( sender->cur_server->GetAddress(), sender->cur_server->GetPort() );
+		theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer( update);
 	}
+	theApp.emuledlg->ShowConnectionState();
 }
 bool CServerConnect::SendPacket(Packet* packet,bool delpacket, CServerSocket* to){
 	if (!to){
@@ -387,9 +392,14 @@ void CServerConnect::CheckForTimeout()
 bool CServerConnect::Disconnect(){
 	if (connected && connectedsocket){
 		theApp.sharedfiles->ClearED2KPublishInfo();
+		
+		connected = false;
+
+		CServer* update = theApp.serverlist->GetServerByAddress( connectedsocket->cur_server->GetAddress(), connectedsocket->cur_server->GetPort() );
+		theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer( update);
+		
 		DestroySocket(connectedsocket);
 		connectedsocket = NULL;
-		connected = false;
 		theApp.emuledlg->ShowConnectionState();
 		theApp.emuledlg->AddServerMessageLine(_T(""));
 		theApp.emuledlg->AddServerMessageLine(_T(""));

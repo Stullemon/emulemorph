@@ -19,7 +19,7 @@
 #include "titlemenu.h"
 // CFriendListCtrl
 
-class CFriendListCtrl : public CListCtrl
+class CFriendListCtrl : public CMuleListCtrl
 {
 	DECLARE_DYNAMIC(CFriendListCtrl)
 	friend class CFriendList;
@@ -30,6 +30,7 @@ public:
 
 	void	Init();
 	void	Localize();
+	void	UpdateList();
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -39,13 +40,11 @@ protected:
 	void	RefreshFriend(CFriend* toupdate);
 	void	ShowFriendDetails(CFriend* pFriend);
 	BOOL	OnCommand(WPARAM wParam,LPARAM lParam );
-	void	OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-
-private:
-	CTitleMenu m_ClientMenu;
-	CImageList imagelist;
+	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+public:
+	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 };
-
-

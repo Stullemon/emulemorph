@@ -22,6 +22,7 @@
 #define	EDONKEYVERSION			0x3C
 #define PREFFILE_VERSION		0x14	//<<-- last change: reduced .dat, by using .ini
 #define PARTFILE_VERSION		0xe0
+#define PARTFILE_SPLITTEDVERSION		0xe1
 #define CREDITFILE_VERSION		0x12
 #define CREDITFILE_VERSION_29	0x11
 #define COMPILE_DATE			__DATE__
@@ -48,9 +49,10 @@
 #define KADEMLIAASKTIME			1000	//10 second
 #define KADEMLIATOTALFILE		3		//Total files to search sources for.
 #define KADEMLIAREASKTIME		3600000 //1 hour
-#define KADEMLIAPUBLISHTIME		1000	//10 second
-#define KADEMLIATOTALSTORE		4		//Total hashes to store.
-#define KADEMLIAREPUBLISHTIME	10800	//3 hours
+#define KADEMLIAPUBLISHTIME		2000	//2 second
+#define KADEMLIATOTALSTORESRC	2		//Total hashes to store.
+#define KADEMLIATOTALSTOREKEY	1		//Total hashes to store.
+#define KADEMLIAREPUBLISHTIME	18000	//5 hours
 #define KADEMLIAINDEXCLEAN		18000	//5 hours
 #define ED2KREPUBLISHTIME		60000	//1 min
 #define MINCOMMONPENALTY		9
@@ -276,7 +278,8 @@
 #define TAG_PARTS				"\x17"
 #define FT_DLPRIORITY			0x18	// Was 13
 #define FT_ULPRIORITY			0x19	// Was 17
-#define FT_ONLASTPUBLISH		 0x20	// <uint32>
+#define FT_KADLASTPUBLISHKEY	 0x20	// <uint32>
+#define FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
 #define	TAG_MEDIA_ARTIST		"\xD0"	// <string>
 #define	 FT_MEDIA_ARTIST		 0xD0	// <string>
 #define	TAG_MEDIA_ALBUM			"\xD1"	// <string>
@@ -404,6 +407,7 @@
 #define MP_SWAP_A4AF_TO_OTHER	10224
 #define MP_META_DATA			10225
 #define MP_BOOT					10226
+#define MP_HM_CONVERTPF			10227
 
 #define MP_HM_LINK1				10230
 #define MP_HM_LINK2				10231
@@ -416,12 +420,14 @@
 #define MP_TEXTLABELS			10237
 #define MP_TEXTLABELSONRIGHT	10238
 #define	MP_CUSTOMIZETOOLBAR		10239
+#define	MP_SELECT_SKIN_FILE		10240
+#define	MP_SELECT_SKIN_DIR		10241
 
-//MORPH START - Added by SiRoB, ZZ Upload System, Kademlia 40c13
-#define MP_POWERSHARE_ON        10240
-#define MP_POWERSHARE_OFF       10241
-#define MP_POWERSHARE_AUTO      10242
-//MORPH END - Added by SiRoB, ZZ Upload System, Kademlia 40c13
+//MORPH START - Added by SiRoB, ZZ Upload System, Kademlia 40f26
+#define MP_POWERSHARE_ON        10242
+#define MP_POWERSHARE_OFF       10243
+#define MP_POWERSHARE_AUTO      10244
+//MORPH END - Added by SiRoB, ZZ Upload System, Kademlia 40f26
 
 #define Irc_Version				"(SMIRCv00.66)"
 #define Irc_Op					10240
@@ -543,6 +549,8 @@
 #define MP_CAT_SET0				10900
 // reserve some for change all-cats (about 20)
 #define MP_TOOLBARBITMAP		10950
+// reserve max 50
+#define	MP_SKIN_PROFILE			11000
 // reserve max 50
 
 // emule tagnames

@@ -354,9 +354,11 @@ CKnownFile::CKnownFile()
 	(void)m_strComment;
 	m_PublishedED2K = false;
 	kadFileSearchID = 0;
-	m_PublishedKad = 0;
+	m_PublishedKadKey = 0;
+	m_PublishedKadSrc = 0;
 	m_keywordcount = 0;
-	m_lastPublishTimeKad = 0;
+	m_lastPublishTimeKadKey = 0;
+	m_lastPublishTimeKadSrc = 0;
 	m_nCompleteSourcesTime = time(NULL);
 	m_nCompleteSourcesCount = 1;
 	m_nCompleteSourcesCountLo = 1;
@@ -890,8 +892,13 @@ bool CKnownFile::LoadTagsFromFile(CFile* file){
 				delete newtag;
 				break;
 			}
-			case FT_ONLASTPUBLISH:{
-				m_lastPublishTimeKad = newtag->tag.intvalue;
+			case FT_KADLASTPUBLISHKEY:{
+				m_lastPublishTimeKadKey = newtag->tag.intvalue;
+				delete newtag;
+				break;
+			}
+			case FT_KADLASTPUBLISHSRC:{
+				m_lastPublishTimeKadSrc = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
@@ -972,8 +979,8 @@ bool CKnownFile::WriteToFile(CFile* file){
 		file->Write(hashlist[i],16);
 	//tags
 	//MORPH START - Modified by SiRoB, ZZ Upload System
-	//const int iFixedTags = 9;
-	const int iFixedTags = 10;
+	//const int iFixedTags = 10;
+	const int iFixedTags = 11;
 	//MORPH END - Modified by SiRoB, ZZ Upload System
 	uint32 tagcount = iFixedTags;
 	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
@@ -1025,8 +1032,11 @@ bool CKnownFile::WriteToFile(CFile* file){
 	CTag permtag(FT_PERMISSIONS, m_iPermissions);
 	permtag.WriteTagToFile(file);
 
-	CTag onLastPub(FT_ONLASTPUBLISH, m_lastPublishTimeKad);
-	onLastPub.WriteTagToFile(file);
+	CTag kadLastPubKey(FT_KADLASTPUBLISHKEY, m_lastPublishTimeKadKey);
+	kadLastPubKey.WriteTagToFile(file);
+
+	CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, m_lastPublishTimeKadSrc);
+	kadLastPubSrc.WriteTagToFile(file);
 
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
@@ -1830,46 +1840,58 @@ void CKnownFile::SetPublishedED2K(bool val){
 	theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
 }
 
-void CKnownFile::SetPublishedKad(){
-	m_PublishedKad++;
+void CKnownFile::SetPublishedKadSrc(){
+	m_PublishedKadSrc++;
+	theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
+}
+void CKnownFile::SetPublishedKadKey(){
+	m_PublishedKadKey++;
 	theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
 }
 
-int CKnownFile::Publish(Kademlia::CUInt128 *nextID)
+int CKnownFile::PublishKey(Kademlia::CUInt128 *nextID)
 {
-	if( m_lastPublishTimeKad > 0)
+	if( m_lastPublishTimeKadKey > 0)
 	{
-		if( ((uint32)time(NULL)-m_lastPublishTimeKad) < KADEMLIAREPUBLISHTIME)
+		if( ((uint32)time(NULL)-m_lastPublishTimeKadKey) < KADEMLIAREPUBLISHTIME)
 		{
-			return -1;
+			return false;
 		}
 	}
 	if(wordlist.empty())
 	{
 		if(m_keywordcount)
 		{
-			m_lastPublishTimeKad = (uint32)time(NULL);
+			m_lastPublishTimeKadKey = (uint32)time(NULL);
 			m_keywordcount = 0;
-			return -1;
+			return false;
 		}
-		Kademlia::CSearchManager::getWords(this->GetFileName(), &wordlist);
+		Kademlia::CSearchManager::getWordsValid(this->GetFileName(), &wordlist);
 		if(wordlist.empty())
 		{
-			return -1;
+			return false;
 		}
-		m_keywordcount = 0;
-		return 0;
 	}
 	CString word = wordlist.front();
 	wordlist.pop_front();
-	if(m_keywordcount > 5)
-	{
-		return -2;
-	}
 	Kademlia::CMD4::hash((byte*)word.GetBuffer(0), word.GetLength(), nextID);
 	m_keywordcount++;
 	return m_keywordcount;
 }
+
+bool CKnownFile::PublishSrc(Kademlia::CUInt128 *nextID)
+{
+	if( m_lastPublishTimeKadSrc > 0)
+	{
+		if( ((uint32)time(NULL)-m_lastPublishTimeKadSrc) < KADEMLIAREPUBLISHTIME)
+		{
+			return false;
+		}
+	}
+	m_lastPublishTimeKadSrc = (uint32)time(NULL);
+	return true;
+}
+
 
 
 bool CKnownFile::IsMovie(){

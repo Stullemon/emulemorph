@@ -140,7 +140,11 @@ void CAddFriend::OnAddBtn() {
 		// why did we offer an edit control for entering the userhash but did not store it?
 		;
 
-		theApp.friendlist->AddFriend(NULL, 0, ip, uPort, 0, strUserName, 0);
+		if (!theApp.friendlist->AddFriend(NULL, 0, ip, uPort, 0, strUserName, 0)){
+			AfxMessageBox(GetResString(IDS_WRN_FRIENDDUPLIPPORT));
+			GetDlgItem(IDC_IP)->SetFocus();
+			return;
+		}
 	}
 	else{
 		// No "update" friend's data for now -- too much work to synchronize/update all

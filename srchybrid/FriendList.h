@@ -33,8 +33,8 @@ public:
 	CFriend*	SearchFriend(const uchar* achUserHash, uint32 dwIP, uint16 nPort) const;
 	void		SetWindow(CFriendListCtrl* NewWnd)	{ m_wndOutput = NewWnd; }
 	void		ShowFriends() const;
-	void		AddFriend(CUpDownClient* toadd);
-	void		AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
+	bool		AddFriend(CUpDownClient* toadd);
+	bool		AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
                           uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash);
 	void		RemoveFriend(CFriend* todel);
 	void		RemoveAllFriendSlots();

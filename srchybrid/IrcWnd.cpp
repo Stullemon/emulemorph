@@ -141,10 +141,10 @@ void CIrcWnd::Localize(){
 BOOL CIrcWnd::OnInitDialog(){
 	CResizableDialog::OnInitDialog();
 
-	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags | ILC_MASK ,0,10);
-	imagelist.Add(theApp.LoadIcon(IDI_CHAT));
-	imagelist.Add(theApp.LoadIcon(IDI_MESSAGE));
-	imagelist.Add(theApp.LoadIcon(IDI_MPENDING));
+	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags | ILC_MASK,0,1);
+	imagelist.Add(CTempIconLoader("Chat"));
+	imagelist.Add(CTempIconLoader("Message"));
+	imagelist.Add(CTempIconLoader("MessagePending"));
 	channelselect.SetImageList(&imagelist);
 
 	m_bConnected = false;

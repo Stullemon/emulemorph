@@ -51,14 +51,8 @@ protected:
 	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
 	DECLARE_MESSAGE_MAP()
 private:
-//	CDC			cdcStatus;
-//	CBitmap		status;
-//	int			m_statusWidth;
 	CImageList imagelist;
-	CTitleMenu	   m_ClientMenu;
 	// Barry - Refresh the queue every 10 seconds
 	UINT_PTR m_hTimer;
 	static void CALLBACK QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
 };
-
-

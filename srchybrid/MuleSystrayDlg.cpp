@@ -113,9 +113,9 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	CString buffer;
 	CString buffer2;
 
-	m_hUpArrow = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_UPLOAD), IMAGE_ICON, 16, 16, 0);
-	m_hDownArrow = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_DIRECTDOWNLOAD), IMAGE_ICON, 16, 16, 0);
-	m_hSUCIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_SUC), IMAGE_ICON, 16, 16, 0);
+	m_hUpArrow = theApp.LoadIcon("UPLOAD");
+	m_hDownArrow = theApp.LoadIcon("SEARCHDIRECTDOWNLOAD");
+	m_hSUCIcon = theApp.LoadIcon("SUC");
 	m_ctrlUpArrow.SetIcon(m_hUpArrow);
 	m_ctrlDownArrow.SetIcon(m_hDownArrow);
 	m_ctrlMinUpIcon.SetIcon(m_hSUCIcon); 
@@ -150,7 +150,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlSpeed.m_bUseIcon = true;
 		m_ctrlSpeed.m_sIcon.cx = 16;
 		m_ctrlSpeed.m_sIcon.cy = 16;
-		m_ctrlSpeed.m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_TRAY_SPEED), IMAGE_ICON, m_ctrlSpeed.m_sIcon.cx, m_ctrlSpeed.m_sIcon.cy, 0);
+		m_ctrlSpeed.m_hIcon = theApp.LoadIcon("SYSTRAY_SPEED", m_ctrlSpeed.m_sIcon.cx, m_ctrlSpeed.m_sIcon.cy, 0);
 		m_ctrlSpeed.m_bParentCapture = true;
 		if(bValidFont)
 		{	
@@ -175,7 +175,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlAllToMax.m_bUseIcon = true;
 		m_ctrlAllToMax.m_sIcon.cx = 16;
 		m_ctrlAllToMax.m_sIcon.cy = 16;
-		m_ctrlAllToMax.m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_TRAY_TOMAX), IMAGE_ICON, m_ctrlAllToMax.m_sIcon.cx, m_ctrlAllToMax.m_sIcon.cy, 0);
+		m_ctrlAllToMax.m_hIcon = theApp.LoadIcon("SYSTRAY_TOMAX", m_ctrlAllToMax.m_sIcon.cx, m_ctrlAllToMax.m_sIcon.cy, 0);
 		m_ctrlAllToMax.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlAllToMax.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -194,7 +194,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlRestore.m_bUseIcon = true;
 		m_ctrlRestore.m_sIcon.cx = 16;
 		m_ctrlRestore.m_sIcon.cy = 16;
-		m_ctrlRestore.m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_TRAY_RESTORE), IMAGE_ICON, m_ctrlRestore.m_sIcon.cx, m_ctrlRestore.m_sIcon.cy, 0);
+		m_ctrlRestore.m_hIcon = theApp.LoadIcon("SYSTRAY_RESTORE", m_ctrlRestore.m_sIcon.cx, m_ctrlRestore.m_sIcon.cy, 0);
 		m_ctrlRestore.m_bParentCapture = true;
 		if(bValidFont)
 		{	
@@ -217,7 +217,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlConnect.m_bUseIcon = true;
 		m_ctrlConnect.m_sIcon.cx = 16;
 		m_ctrlConnect.m_sIcon.cy = 16;
-		m_ctrlConnect.m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_TRAY_CONNECT), IMAGE_ICON, m_ctrlConnect.m_sIcon.cx, m_ctrlConnect.m_sIcon.cy, 0);
+		m_ctrlConnect.m_hIcon = theApp.LoadIcon("SYSTRAY_CONNECT", m_ctrlConnect.m_sIcon.cx, m_ctrlConnect.m_sIcon.cy, 0);
 		m_ctrlConnect.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlConnect.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -237,7 +237,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlDisconnect.m_bUseIcon = true;
 		m_ctrlDisconnect.m_sIcon.cx = 16;
 		m_ctrlDisconnect.m_sIcon.cy = 16;
-		m_ctrlDisconnect.m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_TRAY_DISCONNECT), IMAGE_ICON, m_ctrlDisconnect.m_sIcon.cx, m_ctrlDisconnect.m_sIcon.cy, 0);
+		m_ctrlDisconnect.m_hIcon = theApp.LoadIcon("SYSTRAY_DISCONNECT", m_ctrlDisconnect.m_sIcon.cx, m_ctrlDisconnect.m_sIcon.cy, 0);
 		m_ctrlDisconnect.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlDisconnect.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -256,7 +256,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlPreferences.m_bUseIcon = true;
 		m_ctrlPreferences.m_sIcon.cx = 16;
 		m_ctrlPreferences.m_sIcon.cy = 16;
-		m_ctrlPreferences.m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_PREF_GENERAL), IMAGE_ICON, m_ctrlPreferences.m_sIcon.cx, m_ctrlPreferences.m_sIcon.cy, 0);
+		m_ctrlPreferences.m_hIcon = theApp.LoadIcon("PREF_GENERAL", m_ctrlPreferences.m_sIcon.cx, m_ctrlPreferences.m_sIcon.cy, 0);
 		m_ctrlPreferences.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlPreferences.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -275,7 +275,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlReloadShares.m_bUseIcon = true;
 		m_ctrlReloadShares.m_sIcon.cx = 16;
 		m_ctrlReloadShares.m_sIcon.cy = 16;
-		m_ctrlReloadShares.m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_SHAREDFILES), IMAGE_ICON, m_ctrlReloadShares.m_sIcon.cx, m_ctrlReloadShares.m_sIcon.cy, 0);
+		m_ctrlReloadShares.m_hIcon = theApp.LoadIcon("SHAREDFILES", m_ctrlReloadShares.m_sIcon.cx, m_ctrlReloadShares.m_sIcon.cy, 0);
 		m_ctrlReloadShares.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlReloadShares.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -294,7 +294,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlExit.m_bUseIcon = true;
 		m_ctrlExit.m_sIcon.cx = 16;
 		m_ctrlExit.m_sIcon.cy = 16;
-		m_ctrlExit.m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_TRAY_EXIT), IMAGE_ICON, m_ctrlExit.m_sIcon.cx, m_ctrlExit.m_sIcon.cy, 0);
+		m_ctrlExit.m_hIcon = theApp.LoadIcon("SYSTRAY_EXIT", m_ctrlExit.m_sIcon.cx, m_ctrlExit.m_sIcon.cy, 0);
 		m_ctrlExit.m_bParentCapture = true;
 		if(bValidFont)
 		{	

@@ -49,5 +49,5 @@ private:
 	CSearchFile*	m_pFile;
 	uint16			m_nCurrentImage;
 	CStatic			m_ImageStatic;
-	CImageList		m_ImageList;
+	HICON			m_icons[3];
 };

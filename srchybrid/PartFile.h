@@ -67,6 +67,7 @@ struct PartFileBufferedData
 
 class CPartFile : public CKnownFile {
 public:
+	friend class CPartFileConvert;
 	CPartFile();
 	CPartFile(CSearchFile* searchresult);  //used when downloading a new file
 	CPartFile(CString edonkeylink);
@@ -76,11 +77,12 @@ public:
 	
 	bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename)	{return false;}// not supported in this class
 	bool	LoadFromFile(FILE* file)						{return false;}
+	// SLUGFILLER: mergeKnown - allow WriteToFile to be called	
 	bool	IsPartFile()									{return !(status == PS_COMPLETE);}
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	uint32	Process(uint32 reducedownload,uint8 m_icounter, uint32 friendReduceddownload);
 	//MORPH END - Added by Yun.SF3, ZZ Upload System
-		bool	LoadPartFile(LPCTSTR in_directory, LPCTSTR filename); //filename = *.part.met
+	uint8		LoadPartFile(LPCTSTR in_directory, LPCTSTR filename,bool getsizeonly=false); //filename = *.part.met
 	bool	SavePartFile();
 	void	PartFileHashFinished(CKnownFile* result);
 	bool	HashSinglePart(uint16 partnumber); // true = ok , false = corrupted	
@@ -96,7 +98,7 @@ public:
 	void	UpdateCompletedInfos();
 
 	bool	GetNextRequestedBlock(CUpDownClient* sender,Requested_Block_Struct** newblocks,uint16* count);
-	void	WritePartStatus(CFile* file, CUpDownClient* client = NULL);
+	void	WritePartStatus(CFile* file, CUpDownClient* client = NULL); // SLUGFILLER: hideOS
 	void	WriteCompleteSourcesCount(CFile* file);
 	void	AddSources(CMemFile* sources,uint32 serverip, uint16 serverport);
 	static bool	CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, uint8* pdebug_lowiddropped = NULL);
@@ -110,6 +112,7 @@ public:
 	uint32	GetTransfered()									{return transfered;}
 	uint8	GetDownPriority()								{return m_iDownPriority;}
 	const CString& GetFullName() const						{return m_fullname;}
+	void	SetFullName(CString name)						{m_fullname=name;}
 	uint16	GetSourceCount();
 	// khaos::kmod+ Source Counts Are Cached
 	uint16	GetAvailableSrcCount()							{return m_anStates[0]+m_anStates[1];}	

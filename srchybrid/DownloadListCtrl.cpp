@@ -58,16 +58,15 @@ CDownloadListCtrl::~CDownloadListCtrl(){
 	}
 }
 
-void CDownloadListCtrl::Init(){
+void CDownloadListCtrl::Init()
+{
 	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
-	ilDummyImageList.Create(1, 17,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
+	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy, theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
 	SetImageList(&ilDummyImageList, LVSIL_SMALL);
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
 	ilDummyImageList.Detach();
 
 	SetStyle();
-	SetColors();
-
 	ModifyStyle(LVS_SINGLESEL,0);
 	
 	CToolTipCtrl* tooltip = GetToolTips();
@@ -87,6 +86,7 @@ void CDownloadListCtrl::Init(){
 	InsertColumn(7,GetResString(IDS_PRIORITY),LVCFMT_LEFT, 55);
 	InsertColumn(8,GetResString(IDS_STATUS),LVCFMT_LEFT, 70);
 	// khaos::accuratetimerem+
+	//InsertColumn(9,GetResString(IDS_DL_REMAINS),LVCFMT_LEFT, 110);
 	InsertColumn(9,GetResString(IDS_DL_REMAINS),LVCFMT_LEFT, 100);
 	// khaos::accuratetimerem-
 
@@ -105,38 +105,7 @@ void CDownloadListCtrl::Init(){
 	InsertColumn(15, GetResString(IDS_REMAININGSIZE), LVCFMT_LEFT, 80);
 	// khaos::accuratetimerem-
 
-	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,10);
-	m_ImageList.SetBkColor(CLR_NONE);
-	m_ImageList.Add(theApp.LoadIcon(IDI_DCS1));
-	m_ImageList.Add(theApp.LoadIcon(IDI_DCS2));
-	m_ImageList.Add(theApp.LoadIcon(IDI_DCS3));
-	m_ImageList.Add(theApp.LoadIcon(IDI_DCS4));
-	m_ImageList.Add(theApp.LoadIcon(IDI_DCS5));
-	m_ImageList.Add(theApp.LoadIcon(IDI_COMPPROT));
-	m_ImageList.Add(theApp.LoadIcon(IDI_FRIEND));
-	m_ImageList.Add(theApp.LoadIcon(IDI_USER0));
-	m_ImageList.Add(theApp.LoadIcon(IDI_MLDONK));
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING));
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATINGBAD));
-	m_ImageList.Add(theApp.LoadIcon(IDI_EDONKEYHYBRID));
-	m_ImageList.Add(theApp.LoadIcon(IDI_SHAREAZA));
-	m_ImageList.SetOverlayImage(m_ImageList.Add(theApp.LoadIcon(IDI_SECUREHASHCLIENTOVL)), 1);
-	//MORPH START - Added by SiRoB, More client & Credit ovelay ocon
-	m_ImageList.Add(theApp.LoadIcon(IDI_EDONKEY)); //14
-	m_ImageList.Add(theApp.LoadIcon(IDI_MORPHNEXT)); //15
-	m_ImageList.SetOverlayImage(m_ImageList.Add(theApp.LoadIcon(IDI_CREDITCLIENTOVL)), 2); //16
-	m_ImageList.SetOverlayImage(m_ImageList.Add(theApp.LoadIcon(IDI_CREDITSECUREOVL)), 3); //17
-	//MORPH END   - Added by SiRoB, More client & Credit Ovelay Icon
-	//MORPH START - Added by IceCream, eMule Plus rating icones
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_NO));  // 18
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_EXCELLENT));  // 19
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_FAIR));  // 20
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_GOOD));  // 21
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_POOR));  // 22
-	m_ImageList.Add(theApp.LoadIcon(IDI_RATING_FAKE));  // 23
-	//MORPH END   - Added by IceCream, eMule Plus rating icones
-
-	CreateMenues();
+	Localize();
 	LoadSettings(CPreferences::tableDownload);
 	curTab=0;
 	// Barry - Use preferred sort order from preferences
@@ -154,7 +123,40 @@ void CDownloadListCtrl::Init(){
 	// SLUGFILLER: multiSort
 }
 
-void CDownloadListCtrl::Localize() {
+void CDownloadListCtrl::Localize()
+{
+	m_ImageList.DeleteImageList();
+	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	m_ImageList.SetBkColor(CLR_NONE);
+	m_ImageList.Add(CTempIconLoader("SrcDownloading"));
+	m_ImageList.Add(CTempIconLoader("SrcOnQueue"));
+	m_ImageList.Add(CTempIconLoader("SrcConnecting"));
+	m_ImageList.Add(CTempIconLoader("SrcNNPQF"));
+	m_ImageList.Add(CTempIconLoader("SrcUnknown"));
+	m_ImageList.Add(CTempIconLoader("ClientCompatible"));
+	m_ImageList.Add(CTempIconLoader("Friend"));
+	m_ImageList.Add(CTempIconLoader("ClientEDonkey"));
+	m_ImageList.Add(CTempIconLoader("ClientMLDonkey"));
+	m_ImageList.Add(CTempIconLoader("RatingReceived"));
+	m_ImageList.Add(CTempIconLoader("BadRatingReceived"));
+	m_ImageList.Add(CTempIconLoader("ClientEDonkeyHybrid"));
+	m_ImageList.Add(CTempIconLoader("ClientShareaza"));
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader("ClientSecureOvl")), 1);
+
+	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
+	m_ImageList.Add(CTempIconLoader("ClientRightEdonkey")); //14
+	m_ImageList.Add(CTempIconLoader("ClientMorph")); //15
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader("ClientCreditOvl")), 2); //16
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader("ClientCreditSecureOvl")), 3); //17
+	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
+	//MORPH START - Added by IceCream, eMule Plus rating icones
+	m_ImageList.Add(CTempIconLoader("RATING_NO"));  // 18
+	m_ImageList.Add(CTempIconLoader("RATING_EXCELLENT"));  // 19
+	m_ImageList.Add(CTempIconLoader("RATING_FAIR"));  // 20
+	m_ImageList.Add(CTempIconLoader("RATING_GOOD"));  // 21
+	m_ImageList.Add(CTempIconLoader("RATING_POOR"));  // 22
+	m_ImageList.Add(CTempIconLoader("RATING_FAKE"));  // 23
+	//MORPH END   - Added by IceCream, eMule Plus rating icones
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -791,12 +793,12 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				else{
 					if( lpUpDownClient->GetClientSoft() == SO_MLDONKEY )
 						m_ImageList.Draw(dc, 8, point2, ILD_NORMAL | uOvlImg);
+					else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEY )
+						m_ImageList.Draw(dc, 14, point2, ILD_NORMAL | uOvlImg);
 					else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEYHYBRID )
 						m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | uOvlImg);
 					else if ( lpUpDownClient->GetClientSoft() == SO_SHAREAZA )
 						m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | uOvlImg);
-					else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEY )
-						m_ImageList.Draw(dc, 14, point2, ILD_NORMAL | uOvlImg);
 					else if (lpUpDownClient->ExtProtocolAvailable())
 						m_ImageList.Draw(dc, (lpUpDownClient->IsMorph())?15:5, point2, ILD_NORMAL | uOvlImg);
 					else

@@ -81,8 +81,10 @@ private:
 	CSharedFilesCtrl*	output;
 	uint32 m_lastPublishED2K;
 	uint32 m_lastPublishED2KFlag;
-	int m_currFile;
-	uint32 m_lastPublishKad;
+	int m_currFileSrc;
+	int m_currFileKey;
+	uint32 m_lastPublishKadSrc;
+	uint32 m_lastPublishKadKey;
 };
 
 //class CPartFile;

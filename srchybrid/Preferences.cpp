@@ -1530,10 +1530,13 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("MaxConnectionsSwitchBorder",prefs->maxconnectionsswitchborder);//MORPH - Added by Yun.SF3, Auto DynUp changing
 
 	// Toolbar
-	ini.WriteString("ToolbarSettings", prefs->m_sToolbarSettings);
+	ini.WriteString("ToolbarSetting", prefs->m_sToolbarSettings);
 	ini.WriteString("ToolbarBitmap", prefs->m_sToolbarBitmap );
 	ini.WriteString("ToolbarBitmapFolder", prefs->m_sToolbarBitmapFolder);
 	ini.WriteInt("ToolbarLabels", prefs->m_nToolbarLabels);
+	ini.WriteString("SkinProfile", prefs->m_szSkinProfile);
+	ini.WriteString("SkinProfileDir", prefs->m_szSkinProfileDir);
+
 
 	ini.SerGet(false, prefs->downloadColumnWidths,
 		ELEMENT_COUNT(prefs->downloadColumnWidths), "DownloadColumnWidths");
@@ -1916,7 +1919,6 @@ void CPreferences::LoadPreferences(){
 			prefs->depth3D = 0;
 		else 
 			prefs->depth3D = 5;
-	prefs->m_bStraightWindowStyles=ini.GetBool("StraightWindowStyles",false);
 
 	prefs->useDownloadNotifier=ini.GetBool("NotifyOnDownload",false);	// Added by enkeyDEV
 	prefs->useNewDownloadNotifier=ini.GetBool("NotifyOnNewDownload",false);
@@ -1929,7 +1931,10 @@ void CPreferences::LoadPreferences(){
 	sprintf(prefs->notifierSoundFilePath,"%s",ini.GetString("NotifierSoundPath",""));
 	sprintf(prefs->notifierConfiguration,"%s",ini.GetString("NotifierConfiguration","")); // Added by enkeyDEV
 	sprintf(prefs->datetimeformat,"%s",ini.GetString("DateTimeFormat","%A, %x, %X"));
+	if (strlen(prefs->datetimeformat)==0) strcpy(prefs->datetimeformat,"%A, %x, %X");
+
 	sprintf(prefs->datetimeformat4log,"%s",ini.GetString("DateTimeFormat4Log","%c"));
+	if (strlen(prefs->datetimeformat4log)==0) strcpy(prefs->datetimeformat4log,"%c");
 
 	sprintf(prefs->m_sircserver,"%s",ini.GetString("DefaultIRCServer","irc.emule-project.net"));
 	sprintf(prefs->m_sircnick,"%s",ini.GetString("IRCNick","eMule"));
@@ -2015,10 +2020,13 @@ void CPreferences::LoadPreferences(){
 	prefs->m_bAdvancedSpamfilter=ini.GetBool("AdvancedSpamFilter",true);
 
 	// Toolbar
-	sprintf(prefs->m_sToolbarSettings,ini.GetString("ToolbarSettings", strDefaultToolbar));
+	sprintf(prefs->m_sToolbarSettings,ini.GetString("ToolbarSetting", strDefaultToolbar));
 	sprintf(prefs->m_sToolbarBitmap,ini.GetString("ToolbarBitmap", ""));
-	sprintf(prefs->m_sToolbarBitmapFolder,ini.GetString("ToolbarBitmapsFolder", prefs->incomingdir));
+	sprintf(prefs->m_sToolbarBitmapFolder,ini.GetString("ToolbarBitmapFolder", prefs->incomingdir));
 	prefs->m_nToolbarLabels = ini.GetInt("ToolbarLabels",1);
+	prefs->m_iStraightWindowStyles=ini.GetInt("StraightWindowStyles",0);
+	_sntprintf(prefs->m_szSkinProfile, ARRSIZE(prefs->m_szSkinProfile), "%s", ini.GetString(_T("SkinProfile"), _T("")));
+	_sntprintf(prefs->m_szSkinProfileDir, ARRSIZE(prefs->m_szSkinProfileDir), "%s", ini.GetString(_T("SkinProfileDir"), _T("")));
 
 	// khaos::categorymod+ Load Preferences
 	prefs->m_bShowCatNames=ini.GetBool("ShowCatName",true);

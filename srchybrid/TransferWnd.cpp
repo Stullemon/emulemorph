@@ -38,11 +38,13 @@ IMPLEMENT_DYNAMIC(CTransferWnd, CDialog)
 CTransferWnd::CTransferWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CTransferWnd::IDD, pParent)
 {
+	icon_download = NULL;
 }
 
 CTransferWnd::~CTransferWnd()
 {
-	DestroyIcon(icon_download);
+	if (icon_download)
+		VERIFY( DestroyIcon(icon_download) );
 	// khaos::categorymod+
 	VERIFY(m_mnuCatPriority.DestroyMenu());
 	VERIFY(m_mnuCatViewFilter.DestroyMenu());
@@ -62,10 +64,12 @@ BEGIN_MESSAGE_MAP(CTransferWnd, CResizableDialog)
 	ON_WM_MOUSEMOVE()
 	ON_NOTIFY(LVN_KEYDOWN, IDC_DOWNLOADLIST, OnLvnKeydownDownloadlist)
 	ON_NOTIFY(NM_TABMOVED, IDC_DLTAB, OnTabMovement)
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 
-BOOL CTransferWnd::OnInitDialog(){
+BOOL CTransferWnd::OnInitDialog()
+{
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
 	windowtransferstate = 1;
@@ -80,10 +84,8 @@ BOOL CTransferWnd::OnInitDialog(){
 
     Localize(); // i_a 
 
-	icon_download=(HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_DIRECTDOWNLOAD), IMAGE_ICON, 16, 16, 0);
-	((CStatic*)GetDlgItem(IDC_DOWNLOAD_ICO))->SetIcon(icon_download);
-
-	m_uplBtn.SetIcon(IDI_UPLOAD);	m_uplBtn.SetAlign(CButtonST::ST_ALIGN_HORIZ);
+	m_uplBtn.SetIcon("Upload");
+	m_uplBtn.SetAlign(CButtonST::ST_ALIGN_HORIZ);
 	m_uplBtn.SetFlat();
 	m_uplBtn.SetLeftAlign(true); 
 	
@@ -95,9 +97,7 @@ BOOL CTransferWnd::OnInitDialog(){
 	AddAnchor(IDC_QUEUECOUNT,BOTTOM_LEFT);
 	AddAnchor(IDC_TSTATIC1,BOTTOM_LEFT);
 	AddAnchor(IDC_QUEUE_REFRESH_BUTTON, BOTTOM_RIGHT);
-	// khaos::categorymod+ Changed resize behavior of the tabs
-	AddAnchor(IDC_DLTAB,TOP_LEFT,TOP_RIGHT);
-	// khaos::categorymod-
+	AddAnchor(IDC_DLTAB,CSize(50,0) ,TOP_RIGHT);
 
 	// splitting functionality
 	CRect rc,rcSpl,rcDown;
@@ -458,7 +458,20 @@ void CTransferWnd::SwitchUploadList()
 	UpdateListCount(windowtransferstate);
 }
 
-void CTransferWnd::Localize(){
+void CTransferWnd::OnSysColorChange()
+{
+	Localize();
+	CResizableDialog::OnSysColorChange();
+}
+
+void CTransferWnd::Localize()
+{
+	if (icon_download)
+		VERIFY( DestroyIcon(icon_download) );
+	icon_download = theApp.LoadIcon("SearchDirectDownload", 16, 16);
+	((CStatic*)GetDlgItem(IDC_DOWNLOAD_ICO))->SetIcon(icon_download);
+	m_uplBtn.SetIcon("Upload");
+
 	GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_TW_DOWNLOADS));
 	GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
 	GetDlgItem(IDC_TSTATIC1)->SetWindowText(GetResString(IDS_TW_QUEUE));

@@ -36,4 +36,7 @@ protected:
 	afx_msg void OnBnClickedBootstrapbutton();
 	afx_msg void OnBnConnect();
 	afx_msg void OnBnClickedFirewallcheckbutton();
+public:
+	afx_msg void OnSysColorChange();
+	afx_msg void OnStnClickedKadcontactlab();
 };

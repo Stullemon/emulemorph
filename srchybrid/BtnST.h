@@ -144,8 +144,8 @@ public:
 	DWORD DrawBorder(BOOL bDrawBorder = TRUE, BOOL bRepaint = TRUE);
 	DWORD DrawFlatFocus(BOOL bDrawFlatFocus, BOOL bRepaint = TRUE);
 
-	DWORD SetIcon(int nIconIn, int nIconOut = NULL);
 	DWORD SetIcon(HICON hIconIn, HICON hIconOut = NULL);
+	DWORD SetIcon(LPCTSTR hIconIn, LPCTSTR hIconOut = NULL);
 
 	DWORD SetBitmaps(int nBitmapIn, COLORREF crTransColorIn, int nBitmapOut = NULL, COLORREF crTransColorOut = 0);
 	DWORD SetBitmaps(HBITMAP hBitmapIn, COLORREF crTransColorIn, HBITMAP hBitmapOut = NULL, COLORREF crTransColorOut = 0);

@@ -34,6 +34,8 @@
 #include "ED2KLink.h"
 #include "math.h"
 #include "Splashscreen.h"
+#include "PartFileConvert.h"
+
 #pragma comment(lib, "winmm.lib")
 #include "Mmsystem.h"
 #include "enbitmap.h"
@@ -70,7 +72,9 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	preferenceswnd = new CPreferencesDlg;
 	searchwnd = new CSearchDlg;
 	kademliawnd = new CKademliaWnd;
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	// NOTE: the application icon name is prefixed with "AAA" to make sure it's alphabetically sorted by the
+	// resource compiler as the 1st icon in the resource table!
+	m_hIcon = AfxGetApp()->LoadIcon("AAAEMULEAPP");
 	theApp.m_app_state	=	APP_STATE_RUNNING;
 	ready = false; 
 	startUpMinimized=false;
@@ -78,20 +82,20 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	lastdownrate = 0;
 	status = 0;
 	activewnd = NULL;
-	connicons[0] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_NOTCONNECTED),IMAGE_ICON,16,16,0);
-	connicons[1] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_CONNECTED),IMAGE_ICON,16,16,0);
-	connicons[2] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_CONNECTEDHIGH),IMAGE_ICON,16,16,0);
-	transicons[0] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_UPDOWN),IMAGE_ICON,16,16,0);
-	transicons[1] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_UP0DOWN1),IMAGE_ICON,16,16,0);
-	transicons[2] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_UP1DOWN0),IMAGE_ICON,16,16,0);
-	transicons[3] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_UP1DOWN1),IMAGE_ICON,16,16,0);
-	imicons[0] =0;
-	imicons[1] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_MESSAGE),IMAGE_ICON,16,16,0);
-	imicons[2] = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_MPENDING),IMAGE_ICON,16,16,0);
-	sourceTrayIcon= (HICON)LoadImage(AfxGetInstanceHandle() ,MAKEINTRESOURCE(IDR_TRAYICON),IMAGE_ICON,16,16,LR_DEFAULTCOLOR);
-	sourceTrayIconGrey= (HICON)LoadImage(AfxGetInstanceHandle() ,MAKEINTRESOURCE(IDR_TRAYICON_GREY),IMAGE_ICON,16,16,LR_DEFAULTCOLOR);
-	sourceTrayIconLow= (HICON)LoadImage(AfxGetInstanceHandle() ,MAKEINTRESOURCE(IDR_TRAYICONLOW),IMAGE_ICON,16,16,LR_DEFAULTCOLOR);
-	usericon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_USER),IMAGE_ICON,16,16,0);
+	connicons[0] = NULL;
+	connicons[1] = NULL;
+	connicons[2] = NULL;
+	transicons[0] = NULL;
+	transicons[1] = NULL;
+	transicons[2] = NULL;
+	transicons[3] = NULL;
+	imicons[0] = NULL;
+	imicons[1] = NULL;
+	imicons[2] = NULL;
+	sourceTrayIcon = NULL;
+	sourceTrayIconGrey = NULL;
+	sourceTrayIconLow = NULL;
+	usericon = NULL;
 	mytrayIcon = NULL;
 	m_hTimer = 0;
 	notifierenabled = false;
@@ -101,21 +105,22 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 
 CemuleDlg::~CemuleDlg()
 {
-	if (mytrayIcon) DestroyIcon(mytrayIcon);
-	VERIFY( ::DestroyIcon(m_hIcon) );
-	VERIFY( ::DestroyIcon(connicons[0]) );
-	VERIFY( ::DestroyIcon(connicons[1]) );
-	VERIFY( ::DestroyIcon(connicons[2]) );
-	VERIFY( ::DestroyIcon(transicons[0]) );
-	VERIFY( ::DestroyIcon(transicons[1]) );
-	VERIFY( ::DestroyIcon(transicons[2]) );
-	VERIFY( ::DestroyIcon(transicons[3]) );
-	VERIFY( ::DestroyIcon(imicons[1]) );
-	VERIFY( ::DestroyIcon(imicons[2]) );
-	VERIFY( ::DestroyIcon(sourceTrayIcon) );
-	VERIFY( ::DestroyIcon(sourceTrayIconGrey) );
-	VERIFY( ::DestroyIcon(sourceTrayIconLow) );
-	VERIFY( ::DestroyIcon(usericon) );
+	if (mytrayIcon) VERIFY( DestroyIcon(mytrayIcon) );
+	if (m_hIcon) VERIFY( ::DestroyIcon(m_hIcon) );
+	if (connicons[0]) VERIFY( ::DestroyIcon(connicons[0]) );
+	if (connicons[1]) VERIFY( ::DestroyIcon(connicons[1]) );
+	if (connicons[2]) VERIFY( ::DestroyIcon(connicons[2]) );
+	if (transicons[0]) VERIFY( ::DestroyIcon(transicons[0]) );
+	if (transicons[1]) VERIFY( ::DestroyIcon(transicons[1]) );
+	if (transicons[2]) VERIFY( ::DestroyIcon(transicons[2]) );
+	if (transicons[3]) VERIFY( ::DestroyIcon(transicons[3]) );
+	if (imicons[0]) VERIFY( ::DestroyIcon(imicons[0]) );
+	if (imicons[1]) VERIFY( ::DestroyIcon(imicons[1]) );
+	if (imicons[2]) VERIFY( ::DestroyIcon(imicons[2]) );
+	if (sourceTrayIcon) VERIFY( ::DestroyIcon(sourceTrayIcon) );
+	if (sourceTrayIconGrey) VERIFY( ::DestroyIcon(sourceTrayIconGrey) );
+	if (sourceTrayIconLow) VERIFY( ::DestroyIcon(sourceTrayIconLow) );
+	if (usericon) VERIFY( ::DestroyIcon(usericon) );
 	delete preferenceswnd;
 	delete searchwnd;
 	delete kademliawnd;
@@ -161,6 +166,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(WM_TASKBARNOTIFIERCLICKED, OnTaskbarNotifierClicked)
 	//Webserver [kuchin]
 	ON_MESSAGE(WEB_CONNECT_TO_SERVER, OnWebServerConnect)
+	ON_MESSAGE(WEB_DISCONNECT_SERVER, OnWebServerDisonnect)
 	ON_MESSAGE(WEB_REMOVE_SERVER, OnWebServerRemove)
 	ON_MESSAGE(WEB_SHARED_FILES_RELOAD, OnWebSharedFilesReload)
 
@@ -191,6 +197,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	// Framegrabbing
 	ON_MESSAGE(TM_FRAMEGRABFINISHED,OnFrameGrabFinished)
 
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 // CemuleDlg eventhandler
@@ -200,7 +207,8 @@ LRESULT CemuleDlg::OnAreYouEmule(WPARAM, LPARAM)
   return UWM_ARE_YOU_EMULE;
 } 
 
-BOOL CemuleDlg::OnInitDialog(){	
+BOOL CemuleDlg::OnInitDialog()
+{
 	CTrayDialog::OnInitDialog();
 	InitWindowStyles(this);
 
@@ -268,8 +276,6 @@ BOOL CemuleDlg::OnInitDialog(){
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 	//MORPH END   - Changed by SiRoB, Related to SUC
 	statusbar.SetParts(5, widths);
-	statusbar.SetIcon(1,usericon);
-	statusbar.SetText(GetResString(IDS_UUSERS)+": 0",1,0);
 
 	LPLOGFONT plfHyperText = theApp.glob_prefs->GetHyperTextLogFont();
 	if (plfHyperText==NULL || plfHyperText->lfFaceName[0]=='\0' || !m_fontHyperText.CreateFontIndirect(plfHyperText))
@@ -287,6 +293,8 @@ BOOL CemuleDlg::OnInitDialog(){
 	ircwnd.Create(IDD_IRC);
 	serverwnd.ShowWindow(SW_SHOW);
 	activewnd = &serverwnd;
+
+	Localize();
 
 	// set updateintervall of graphic rate display (in seconds)
 	//ShowConnectionState(false);
@@ -319,7 +327,6 @@ BOOL CemuleDlg::OnInitDialog(){
 	wp=theApp.glob_prefs->GetEmuleWindowPlacement();
 	SetWindowPlacement(&wp);
 
-	Localize();
 	if (theApp.glob_prefs->GetWSIsEnabled())
 		theApp.webserver->StartServer();
 	theApp.mmserver->Init();
@@ -729,7 +736,7 @@ void CemuleDlg::ShowConnectionState(){
 		lptbbi = &tbi;
 		tbi.dwMask = TBIF_IMAGE | TBIF_TEXT;
 		tbi.cbSize = sizeof (TBBUTTONINFO);
-		tbi.iImage = 10;
+		tbi.iImage = 1;
 		tbi.pszText = pszBuf;
 		tbi.cchText = sizeof (szBuf);
 		toolbar.SetButtonInfo(IDC_TOOLBARBUTTON+0, lptbbi);
@@ -748,7 +755,7 @@ void CemuleDlg::ShowConnectionState(){
 			lptbbi = &tbi;
 			tbi.dwMask = TBIF_IMAGE | TBIF_TEXT;
 			tbi.cbSize = sizeof (TBBUTTONINFO);
-			tbi.iImage = 11;
+			tbi.iImage = 2;
 			tbi.pszText = pszBuf;
 			tbi.cchText = sizeof (szBuf);
 			toolbar.SetButtonInfo(IDC_TOOLBARBUTTON+0, lptbbi);
@@ -1132,6 +1139,9 @@ void CemuleDlg::OnClose()
     transferwnd.queuelistctrl.DeleteAllItems();
 	transferwnd.clientlistctrl.DeleteAllItems();
 	transferwnd.uploadlistctrl.DeleteAllItems();
+
+	CPartFileConvert::CloseGUI();
+	CPartFileConvert::RemoveAllJobs();
 
 	theApp.uploadBandwidthThrottler->EndThread(); //MORPH - Added by Yun.SF3, ZZ Upload System
 	theApp.lastCommonRouteFinder->EndThread(); //MORPH - Added by SiRoB, ZZ Upload system (USS)
@@ -1534,7 +1544,46 @@ LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 }
 //END - enkeyDEV(kei-kun) -TaskbarNotifier-
 
-void CemuleDlg::Localize(){
+void CemuleDlg::OnSysColorChange()
+{
+	Localize();
+	CTrayDialog::OnSysColorChange();
+}
+
+void CemuleDlg::Localize()
+{
+	if (connicons[0]) VERIFY( ::DestroyIcon(connicons[0]) );
+	if (connicons[1]) VERIFY( ::DestroyIcon(connicons[1]) );
+	if (connicons[2]) VERIFY( ::DestroyIcon(connicons[2]) );
+	if (transicons[0]) VERIFY( ::DestroyIcon(transicons[0]) );
+	if (transicons[1]) VERIFY( ::DestroyIcon(transicons[1]) );
+	if (transicons[2]) VERIFY( ::DestroyIcon(transicons[2]) );
+	if (transicons[3]) VERIFY( ::DestroyIcon(transicons[3]) );
+	if (imicons[0]) VERIFY( ::DestroyIcon(imicons[0]) );
+	if (imicons[1]) VERIFY( ::DestroyIcon(imicons[1]) );
+	if (imicons[2]) VERIFY( ::DestroyIcon(imicons[2]) );
+	if (sourceTrayIcon) VERIFY( ::DestroyIcon(sourceTrayIcon) );
+	if (sourceTrayIconGrey) VERIFY( ::DestroyIcon(sourceTrayIconGrey) );
+	if (sourceTrayIconLow) VERIFY( ::DestroyIcon(sourceTrayIconLow) );
+	if (usericon) VERIFY( ::DestroyIcon(usericon) );
+
+	connicons[0] = theApp.LoadIcon("NotConnected", 16, 16);
+	connicons[1] = theApp.LoadIcon("Connected", 16, 16);
+	connicons[2] = theApp.LoadIcon("ConnectedHighID", 16, 16);
+	transicons[0] = theApp.LoadIcon("UploadDownload", 16, 16);
+	transicons[1] = theApp.LoadIcon("UP0DOWN1", 16, 16);
+	transicons[2] = theApp.LoadIcon("UP1DOWN0", 16, 16);
+	transicons[3] = theApp.LoadIcon("UP1DOWN1", 16, 16);
+	imicons[0] = NULL;
+	imicons[1] = theApp.LoadIcon("Message", 16, 16);
+	imicons[2] = theApp.LoadIcon("MessagePending", 16, 16);
+	sourceTrayIcon = theApp.LoadIcon("TrayConnected", 16, 16);
+	sourceTrayIconGrey = theApp.LoadIcon("TrayNotConnected", 16, 16);
+	sourceTrayIconLow = theApp.LoadIcon("TrayLowID", 16, 16);
+	usericon = theApp.LoadIcon("StatsClients", 16, 16);
+
+	statusbar.SetIcon(1,usericon);
+
 	toolbar.Localize();
 	ShowConnectionState();
 	ShowTransferRate(true);
@@ -1645,12 +1694,18 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			preferenceswnd->DoModal();
 			toolbar.CheckButton(IDC_TOOLBARBUTTON+9,FALSE);
 			break;
-		case MP_HM_CON:
-			OnBnClickedButton2();
+		case IDC_TOOLBARBUTTON + 10:
+			ShowToolPopup(true);
 			break;
 
 		case MP_HM_OPENINC:
 			ShellExecute(NULL, "open", theApp.glob_prefs->GetIncomingDir(),NULL, NULL, SW_SHOW); 
+			break;
+		case IDC_TOOLBARBUTTON + 11:
+			wParam = ID_HELP;
+			break;
+		case MP_HM_CON:
+			OnBnClickedButton2();
 			break;
 		case MP_HM_EXIT:
 			OnClose();
@@ -1665,13 +1720,15 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 				CString theUrl;
 				theUrl.Format("http://emule-project.net");
 				ShellExecute(NULL, NULL, theUrl, NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
-		  }
-		break;
+			break;
+		}
+		case MP_HM_CONVERTPF:
+			CPartFileConvert::ShowGUI();
+			break;
 		case MP_HM_SCHEDONOFF:
 			theApp.glob_prefs->SetSchedulerEnabled(!theApp.glob_prefs->IsSchedulerEnabled());
 			theApp.scheduler->Check(true);
 			break;
-		default: break;
 	}
 	if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+99) {
 		RunURL(NULL, theApp.webservices.GetAt(wParam-MP_WEBURL) );
@@ -1760,6 +1817,10 @@ int CemuleDlg::IsNewVersionAvailable(){
 
 void CemuleDlg::OnBnClickedHotmenu()
 {
+	ShowToolPopup(false);
+}
+
+void CemuleDlg::ShowToolPopup(bool toolsonly) {
 	int counter;
 	POINT point;
 
@@ -1767,7 +1828,8 @@ void CemuleDlg::OnBnClickedHotmenu()
 
 	CTitleMenu menu;
 	menu.CreatePopupMenu();
-	menu.AddMenuTitle(GetResString(IDS_HOTMENU));
+	if (!toolsonly) menu.AddMenuTitle(GetResString(IDS_HOTMENU));
+		else menu.AddMenuTitle(GetResString(IDS_TOOLS));
 
 	CMenu m_Links;
 	m_Links.CreateMenu();
@@ -1792,28 +1854,34 @@ void CemuleDlg::OnBnClickedHotmenu()
 	UINT flag2;
 	flag2=(counter==0) ? MF_GRAYED:MF_STRING;
 
-	if (theApp.serverconnect->IsConnected()) menu.AppendMenu(MF_STRING,MP_HM_CON,GetResString(IDS_MAIN_BTN_DISCONNECT));
-	else 
-		if (theApp.serverconnect->IsConnecting()) menu.AppendMenu(MF_STRING,MP_HM_CON,GetResString(IDS_MAIN_BTN_CANCEL));
-		else menu.AppendMenu(MF_STRING,MP_HM_CON,GetResString(IDS_MAIN_BTN_CONNECT));
+	if (!toolsonly) {
+		if (theApp.serverconnect->IsConnected()) menu.AppendMenu(MF_STRING,MP_HM_CON,GetResString(IDS_MAIN_BTN_DISCONNECT));
+		else 
+			if (theApp.serverconnect->IsConnecting()) menu.AppendMenu(MF_STRING,MP_HM_CON,GetResString(IDS_MAIN_BTN_CANCEL));
+			else menu.AppendMenu(MF_STRING,MP_HM_CON,GetResString(IDS_MAIN_BTN_CONNECT));
 
-	menu.AppendMenu(MF_STRING,MP_HM_SRVR, GetResString(IDS_EM_SERVER) );
-	menu.AppendMenu(MF_STRING,MP_HM_TRANSFER, GetResString(IDS_EM_TRANS));
-	menu.AppendMenu(MF_STRING,MP_HM_SEARCH, GetResString(IDS_EM_SEARCH));
-	menu.AppendMenu(MF_STRING,MP_HM_FILES, GetResString(IDS_EM_FILES));
-	menu.AppendMenu(MF_STRING,MP_HM_MSGS, GetResString(IDS_EM_MESSAGES));
-	menu.AppendMenu(MF_STRING,MP_HM_IRC, GetResString(IDS_IRC));
-	menu.AppendMenu(MF_STRING,MP_HM_STATS, GetResString(IDS_EM_STATISTIC));
-	menu.AppendMenu(MF_STRING,MP_HM_PREFS, GetResString(IDS_EM_PREFS));
-	menu.AppendMenu(MF_SEPARATOR);
+		menu.AppendMenu(MF_STRING,MP_HM_SRVR, GetResString(IDS_EM_SERVER) );
+		menu.AppendMenu(MF_STRING,MP_HM_TRANSFER, GetResString(IDS_EM_TRANS));
+		menu.AppendMenu(MF_STRING,MP_HM_SEARCH, GetResString(IDS_EM_SEARCH));
+		menu.AppendMenu(MF_STRING,MP_HM_FILES, GetResString(IDS_EM_FILES));
+		menu.AppendMenu(MF_STRING,MP_HM_MSGS, GetResString(IDS_EM_MESSAGES));
+		menu.AppendMenu(MF_STRING,MP_HM_IRC, GetResString(IDS_IRC));
+		menu.AppendMenu(MF_STRING,MP_HM_STATS, GetResString(IDS_EM_STATISTIC));
+		menu.AppendMenu(MF_STRING,MP_HM_PREFS, GetResString(IDS_EM_PREFS));
+		menu.AppendMenu(MF_SEPARATOR);
+	}
 	menu.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC));
+	menu.AppendMenu(MF_STRING,MP_HM_CONVERTPF, GetResString(IDS_IMPORTSPLPF));
+
 	menu.AppendMenu(MF_SEPARATOR);
 	menu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_Links.m_hMenu, GetResString(IDS_LINKS) );
 	menu.AppendMenu(flag2|MF_POPUP,(UINT_PTR)m_Web.m_hMenu, GetResString(IDS_WEBSERVICES) );
 	menu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_scheduler.m_hMenu, GetResString(IDS_SCHEDULER) );
-	menu.AppendMenu(MF_SEPARATOR);
-	menu.AppendMenu(MF_STRING,MP_HM_EXIT, GetResString(IDS_EXIT));
 
+	if (!toolsonly) {
+		menu.AppendMenu(MF_SEPARATOR);
+		menu.AppendMenu(MF_STRING,MP_HM_EXIT, GetResString(IDS_EXIT));
+	}
 	menu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 	VERIFY( m_Web.DestroyMenu() );
 	VERIFY( m_Links.DestroyMenu() );
@@ -1823,7 +1891,17 @@ void CemuleDlg::OnBnClickedHotmenu()
 
 LRESULT CemuleDlg::OnWebServerConnect(WPARAM wParam, LPARAM lParam)
 {
-	theApp.serverconnect->ConnectToServer((CServer*)wParam);
+	CServer* server=(CServer*)wParam;
+	if (server==NULL) theApp.serverconnect->ConnectToAnyServer();
+		else theApp.serverconnect->ConnectToServer(server);
+	
+	return 0;
+}
+
+LRESULT CemuleDlg::OnWebServerDisonnect(WPARAM wParam, LPARAM lParam)
+{
+	theApp.serverconnect->Disconnect();
+	
 	return 0;
 }
 
@@ -2041,7 +2119,9 @@ void FlatWindowStyles(CWnd* pWnd)
 
 void InitWindowStyles(CWnd* pWnd)
 {
-	if (theApp.glob_prefs->GetStraightWindowStyles())
+	if (theApp.glob_prefs->GetStraightWindowStyles() < 0)
+		return;
+	else if (theApp.glob_prefs->GetStraightWindowStyles() > 0)
 		StraightWindowStyles(pWnd);
 	else
 		FlatWindowStyles(pWnd);

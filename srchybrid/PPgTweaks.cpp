@@ -68,17 +68,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		int iImgLog = 8; // default icon
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
-			HICON hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_BACKUP),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgBackup = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
-			
-			hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_LOG),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgLog = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
+			iImgBackup = piml->Add(CTempIconLoader("SafeFileWrite"));
+			iImgLog = piml->Add(CTempIconLoader("Log"));
 		}
 
 		m_htiMaxCon5Sec = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCON5SECLABEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);

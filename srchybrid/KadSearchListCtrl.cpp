@@ -62,10 +62,12 @@ CKadSearchListCtrl::~CKadSearchListCtrl()
 void CKadSearchListCtrl::Init()
 {
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
+
 	InsertColumn(colNum, GetResString(IDS_NUMBER) ,LVCFMT_LEFT,50);
 	InsertColumn(colKey, GetResString(IDS_KEY) ,LVCFMT_LEFT,50);
 	InsertColumn(colType, GetResString(IDS_TYPE) ,LVCFMT_LEFT,100);
 	InsertColumn(colName, GetResString(IDS_SW_NAME) ,LVCFMT_LEFT,100);
+	Localize();
 
 	CString strIniFile;
 	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
@@ -84,7 +86,20 @@ void CKadSearchListCtrl::SaveAllSettings(CIni* ini)
 	ini->WriteInt(m_strLVName + "SortAscending", GetSortAscending());
 }
 
-void CKadSearchListCtrl::Localize() {
+void CKadSearchListCtrl::Localize()
+{
+	CImageList iml;
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.SetBkColor(CLR_NONE);
+	iml.Add(CTempIconLoader("KadFileSearch"));
+	iml.Add(CTempIconLoader("KadWordSearch"));
+	iml.Add(CTempIconLoader("KadNodeSearch"));
+	iml.Add(CTempIconLoader("KadStoreFile"));
+	iml.Add(CTempIconLoader("KadStoreWord"));
+	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
+	HIMAGELIST himl = ApplyImageList(iml.Detach());
+	if (himl)
+		ImageList_Destroy(himl);
 }
 
 void CKadSearchListCtrl::SearchAdd(Kademlia::CSearch* search)
@@ -141,19 +156,24 @@ void CKadSearchListCtrl::SearchRef(Kademlia::CSearch* search)
 			switch(search->getSearchTypes()){
 				case Kademlia::CSearch::FILE:
 					id.Format(GetResString(IDS_KAD_SEARCHSRC), search->getCount());
+					SetItem(result,0,LVIF_IMAGE,0,0,0,0,0,0);
 					break;
 				case Kademlia::CSearch::KEYWORD:
 					id.Format(GetResString(IDS_KAD_SEARCHKW), search->getCount());
+					SetItem(result,0,LVIF_IMAGE,0,1,0,0,0,0);
 					break;
 				case Kademlia::CSearch::NODE:
 				case Kademlia::CSearch::NODECOMPLETE:
 					id.Format(GetResString(IDS_KAD_NODE), search->getCount());
+					SetItem(result,0,LVIF_IMAGE,0,2,0,0,0,0);
 					break;
 				case Kademlia::CSearch::STOREFILE:
 					id.Format(GetResString(IDS_KAD_STOREFILE), search->getCount(), search->getKeywordCount());
+					SetItem(result,0,LVIF_IMAGE,0,3,0,0,0,0);
 					break;
 				case Kademlia::CSearch::STOREKEYWORD:
 					id.Format(GetResString(IDS_KAD_STOREKW), search->getCount(), search->getKeywordCount());
+					SetItem(result,0,LVIF_IMAGE,0,4,0,0,0,0);
 					break;
 				default:
 					id.Format(GetResString(IDS_KAD_UNKNOWN), search->getCount());

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "BtnST.h"
+#include "emule.h"
 
 #ifdef	BTNST_USE_SOUND
 #pragma comment(lib, "winmm.lib")
@@ -1011,25 +1012,21 @@ HICON CButtonST::CreateGrayscaleIcon(HICON hIcon)
 //		BTNST_INVALIDRESOURCE
 //			Failed loading the specified resource.
 //
-DWORD CButtonST::SetIcon(int nIconIn, int nIconOut)
+DWORD CButtonST::SetIcon(LPCTSTR pszIconIn, LPCTSTR pszIconOut)
 {
 	HICON		hIconIn			= NULL;
 	HICON		hIconOut		= NULL;
-	HINSTANCE	hInstResource	= NULL;
-
-	// Find correct resource handle
-	hInstResource = AfxFindResourceHandle(MAKEINTRESOURCE(nIconIn), RT_GROUP_ICON);
 
 	// Set icon when the mouse is IN the button
-	hIconIn = (HICON)::LoadImage(hInstResource, MAKEINTRESOURCE(nIconIn), IMAGE_ICON, 0, 0, 0);
+	hIconIn = theApp.LoadIcon(pszIconIn, 16, 16);
 
   	// Set icon when the mouse is OUT the button
-	if (nIconOut)
+	if (pszIconOut)
 	{
-		if (nIconOut == (int)BTNST_AUTO_GRAY)
+		if ((UINT)pszIconOut == (UINT)BTNST_AUTO_GRAY)
 			hIconOut = BTNST_AUTO_GRAY;
 		else
-			hIconOut = (HICON)::LoadImage(hInstResource, MAKEINTRESOURCE(nIconOut), IMAGE_ICON, 0, 0, 0);
+			hIconOut = theApp.LoadIcon(pszIconOut, 16, 16);
 	} // if
 
 	return SetIcon(hIconIn, hIconOut);

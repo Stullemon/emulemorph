@@ -18,6 +18,8 @@
 #include "stdafx.h"
 #include "otherfunctions.h"
 #include "emule.h"
+#include "shlobj.h" 
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -1667,6 +1669,37 @@ bool	IsLowIDHybrid(uint32 id){
 bool	IsLowIDED2K(uint32 id){
 	return (id < 16777216); //Need to verify what the highest LowID can be returned by the server.
 }
+
+ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath)
+{
+	static BOOL _bInitialized = FALSE;
+	static DWORD (WINAPI *_pfnGetCompressedFileSize)(LPCSTR, LPDWORD) = NULL;
+
+	if (!_bInitialized){
+		_bInitialized = TRUE;
+		(FARPROC&)_pfnGetCompressedFileSize = GetProcAddress(GetModuleHandle("kernel32.dll"), "GetCompressedFileSizeA");
+	}
+
+	// If the file is not compressed nor sparse, 'GetCompressedFileSize' returns the 'normal' file size.
+	if (_pfnGetCompressedFileSize)
+	{
+		ULONGLONG ullCompFileSize;
+		LPDWORD pdwCompFileSize = (LPDWORD)&ullCompFileSize;
+		pdwCompFileSize[0] = (*_pfnGetCompressedFileSize)(pszFilePath, &pdwCompFileSize[1]);
+		if (pdwCompFileSize[0] != INVALID_FILE_SIZE || GetLastError() == NO_ERROR)
+			return ullCompFileSize;
+	}
+
+	// If 'GetCompressedFileSize' failed or is not available, use the default function
+    WIN32_FIND_DATA fd;
+    HANDLE hFind = FindFirstFile(pszFilePath, &fd);
+    if (hFind == INVALID_HANDLE_VALUE)
+		return 0;
+	FindClose(hFind);
+
+	return (ULONGLONG)fd.nFileSizeHigh << 32 | (ULONGLONG)fd.nFileSizeLow;
+}
+
 // khaos::kmod+ Functions to return a random number within a given range.
 int GetRandRange( int from, int to )
 {

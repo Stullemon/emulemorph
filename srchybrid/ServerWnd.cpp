@@ -42,14 +42,18 @@ static char THIS_FILE[]=__FILE__;
 
 IMPLEMENT_DYNAMIC(CServerWnd, CDialog)
 CServerWnd::CServerWnd(CWnd* pParent /*=NULL*/)
-	: CResizableDialog(CServerWnd::IDD, pParent) {
+	: CResizableDialog(CServerWnd::IDD, pParent)
+{
 	servermsgbox = new CHTRichEditCtrl;
 	m_pacServerMetURL=NULL;
 	m_uLangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
+	icon_srvlist = NULL;
 }
 
-CServerWnd::~CServerWnd(){
-	DestroyIcon(icon_srvlist);
+CServerWnd::~CServerWnd()
+{
+	if (icon_srvlist)
+		VERIFY( DestroyIcon(icon_srvlist) );
 	if (m_pacServerMetURL){
 		m_pacServerMetURL->Unbind();
 		m_pacServerMetURL->Release();
@@ -57,24 +61,18 @@ CServerWnd::~CServerWnd(){
 	delete servermsgbox;
 }
 
-BOOL CServerWnd::OnInitDialog(){
+BOOL CServerWnd::OnInitDialog()
+{
 	CResizableDialog::OnInitDialog();
 	logbox.Init(GetResString(IDS_SV_LOG));
 	debuglog.Init(SZ_DEBUG_LOG_TITLE);
 
-	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,2,2);
-	imagelist.Add(theApp.LoadIcon(IDI_LOG));
-	imagelist.Add(theApp.LoadIcon(IDI_SERVERINFO));
-	StatusSelector.SetImageList(&imagelist);
 	Localize();
 	serverlistctrl.Init(theApp.serverlist);
 	
-	m_ctrlNewServerFrm.Init(IDI_NEWSERVER);
-	m_ctrlUpdateServerFrm.Init(IDI_UPDATESERVERS);
-	m_ctrlMyInfo.Init(IDI_MYINFO);
-
-	icon_srvlist=(HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_SERVERLIST), IMAGE_ICON, 16, 16, 0);
-	((CStatic*)GetDlgItem(IDC_SERVLST_ICO))->SetIcon(icon_srvlist);
+	m_ctrlNewServerFrm.Init("AddServer");
+	m_ctrlUpdateServerFrm.Init("ServerUpdateMET");
+	m_ctrlMyInfo.Init("MyInfo");
 
 	((CEdit*)GetDlgItem(IDC_SPORT))->SetLimitText(5);
 	GetDlgItem(IDC_SPORT)->SetWindowText("4661");
@@ -125,10 +123,9 @@ BOOL CServerWnd::OnInitDialog(){
 	AddAnchor(IDC_SSTATIC3,TOP_RIGHT);
 	AddAnchor(IDC_SNAME,TOP_RIGHT);
 	AddAnchor(IDC_ADDSERVER,TOP_RIGHT );
-	AddAnchor(IDC_SBUTTON1,TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC5,TOP_RIGHT);
-	AddAnchor(IDC_MYINFO,TOP_RIGHT ,CSize(100,50) );
-	AddAnchor(IDC_MYINFOLIST,TOP_RIGHT,CSize(100,50));
+	AddAnchor(IDC_MYINFO,TOP_RIGHT ,CSize(100, 100));
+	AddAnchor(IDC_MYINFOLIST,TOP_RIGHT,CSize(100,100));
 	AddAnchor(IDC_SPORT,TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC6,TOP_RIGHT);
 	AddAnchor(IDC_SERVERMETURL,TOP_RIGHT);
@@ -153,7 +150,7 @@ BOOL CServerWnd::OnInitDialog(){
 
 	if (MyInfoList->GetHeaderCtrl()->GetItemCount() < 2) { 
 		MyInfoList->DeleteColumn(0); 
-		MyInfoList->InsertColumn(0, "", LVCFMT_LEFT, 50, -1); 
+		MyInfoList->InsertColumn(0, "", LVCFMT_LEFT, 60, -1); 
 		MyInfoList->InsertColumn(1, "", LVCFMT_LEFT, 126, 1); 
 	}
 
@@ -212,7 +209,28 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL) {
 	return true;
 }
 
-void CServerWnd::Localize() {
+void CServerWnd::OnSysColorChange()
+{
+	Localize();
+	CResizableDialog::OnSysColorChange();
+}
+
+void CServerWnd::Localize()
+{
+	CImageList iml;
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.Add(CTempIconLoader("Log"));
+	iml.Add(CTempIconLoader("ServerInfo"));
+	CImageList* piml = StatusSelector.SetImageList(&iml);
+	if (piml)
+		piml->DeleteImageList();
+	iml.Detach();
+
+	if (icon_srvlist)
+		VERIFY( DestroyIcon(icon_srvlist) );
+	icon_srvlist = theApp.LoadIcon("ServerList", 16, 16);
+	((CStatic*)GetDlgItem(IDC_SERVLST_ICO))->SetIcon(icon_srvlist);
+
 	serverlistctrl.Localize();
 
 	if (theApp.glob_prefs->GetLanguageID() != m_uLangID){
@@ -260,6 +278,7 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_WM_CTLCOLOR()
 	ON_NOTIFY(EN_LINK, 123, OnEnLinkServerBox)
 	ON_BN_CLICKED(IDC_ED2KCONNECT, OnBnConnect)
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 

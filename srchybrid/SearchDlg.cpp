@@ -76,9 +76,12 @@ CSearchDlg::CSearchDlg(CWnd* pParent /*=NULL*/)
 	m_iSentMoreReq = 0;
 }
 
-CSearchDlg::~CSearchDlg(){
-	if (globsearch) delete searchpacket;
-	DestroyIcon(icon_search);
+CSearchDlg::~CSearchDlg()
+{
+	if (globsearch)
+		delete searchpacket;
+	if (icon_search)
+		VERIFY( DestroyIcon(icon_search) );
 	if (m_pacSearchString){
 		m_pacSearchString->Unbind();
 		m_pacSearchString->Release();
@@ -87,34 +90,17 @@ CSearchDlg::~CSearchDlg(){
 		VERIFY( KillTimer(m_uTimerLocalServer) );
 }
 
-BOOL CSearchDlg::OnInitDialog(){
+BOOL CSearchDlg::OnInitDialog()
+{
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
 	theApp.searchlist->SetOutputWnd(&searchlistctrl);
 	searchlistctrl.Init(theApp.searchlist);
-	m_imlSearchMethods.Create(13,13,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,10);
-	m_imlSearchMethods.SetBkColor(CLR_NONE);
-	m_imlSearchMethods.Add(CTempIconLoader(IDI_SCH_SERVER, 13, 13));
-	m_imlSearchMethods.Add(CTempIconLoader(IDI_SCH_GLOBAL, 13, 13));
-	m_imlSearchMethods.Add(CTempIconLoader(IDI_SCH_JIGLE, 13, 13));
-	m_imlSearchMethods.Add(CTempIconLoader(IDI_SCH_FILEDONKEY, 13, 13));
-	m_imlSearchMethods.Add(CTempIconLoader(IDI_SCH_KADEMLIA, 13, 13));
 	Localize();
 	searchprogress.SetStep(1);
 	global_search_timer = 0;
 	globsearch = false;
 	m_guardCBPrompt=false;
-
-	m_ctrlSearchFrm.Init(IDI_NORMALSEARCH);
-	m_ctrlDirectDlFrm.Init(IDI_DIRECTDOWNLOAD);
-
-	icon_search=(HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_SEARCHRESULTS), IMAGE_ICON, 16, 16, 0);
-	((CStatic*)GetDlgItem(IDC_SEARCHLST_ICO))->SetIcon(icon_search);
-	
-	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,10);
-	m_ImageList.SetBkColor(CLR_NONE);
-	m_ImageList.Add(theApp.LoadIcon(IDI_BN_SEARCH));
-	searchselect.SetImageList(&m_ImageList);
 
 	AddAnchor(IDC_SDOWNLOAD,BOTTOM_LEFT);
 	AddAnchor(IDC_SEARCHLIST,TOP_LEFT,BOTTOM_RIGHT);
@@ -188,6 +174,7 @@ BEGIN_MESSAGE_MAP(CSearchDlg, CResizableDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnCbnSelchangeCombo1)
 	ON_CBN_SELENDOK(IDC_COMBO1, OnCbnSelendokCombo1)
 	ON_BN_CLICKED(IDC_MORE, OnBnClickedMore)
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 
@@ -229,8 +216,6 @@ void CSearchDlg::OnBnClickedStarts()
 		case SearchTypeFileDonkey:
 		case SearchTypeJigle:
 			ShellOpenFile(CreateWebQuery());
-			return;
-		default:
 			return;
 		}
 	}
@@ -567,8 +552,30 @@ void CSearchDlg::DownloadSelected() {
 	} 
 }
 
+void CSearchDlg::OnSysColorChange()
+{
+	Localize();
+	CResizableDialog::OnSysColorChange();
+}
 
-void CSearchDlg::Localize(){
+void CSearchDlg::Localize()
+{
+	m_ctrlSearchFrm.Init("SearchParams");
+	m_ctrlDirectDlFrm.Init("SearchDirectDownload");
+
+	if (icon_search)
+		VERIFY( DestroyIcon(icon_search) );
+	icon_search = theApp.LoadIcon("SearchResults", 16, 16);
+	((CStatic*)GetDlgItem(IDC_SEARCHLST_ICO))->SetIcon(icon_search);
+
+	CImageList iml;
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.SetBkColor(CLR_NONE);
+	iml.Add(CTempIconLoader("BN_SEARCH"));
+	searchselect.SetImageList(&iml);
+	m_ImageList.DeleteImageList();
+	m_ImageList.Attach(iml.Detach());
+
 	searchlistctrl.Localize();
 	//MORPH Removed by SiRoB, Due to Khaos Category
 	/*UpdateCatTabs();*/
@@ -602,9 +609,20 @@ void CSearchDlg::Localize(){
 		SetDlgItemText(IDC_MORE,GetResString(IDS_MORE));
 	}
 
+	iml.Create(13,13,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	iml.SetBkColor(CLR_NONE);
+	iml.Add(CTempIconLoader("SearchMethod_SERVER", 13, 13));
+	iml.Add(CTempIconLoader("SearchMethod_GLOBAL", 13, 13));
+	iml.Add(CTempIconLoader("SearchMethod_JIGLE", 13, 13));
+	iml.Add(CTempIconLoader("SearchMethod_FILEDONKEY", 13, 13));
+	iml.Add(CTempIconLoader("SearchMethod_KADEMLIA", 13, 13));
+
 	int iMethod = methodBox.GetCurSel();
 	methodBox.ResetContent();
-	methodBox.SetImageList(&m_imlSearchMethods);
+	methodBox.SetImageList(&iml);
+	m_imlSearchMethods.DeleteImageList();
+	m_imlSearchMethods.Attach(iml.Detach());
+
 	VERIFY( methodBox.AddItem(GetResString(IDS_SERVER), 0) == SearchTypeServer );
 	VERIFY( methodBox.AddItem(GetResString(IDS_GLOBALSEARCH), 1) == SearchTypeGlobal );
 	VERIFY( methodBox.AddItem(_T("Kademlia"), 4) == SearchTypeKademlia );
@@ -1388,7 +1406,6 @@ void CSearchDlg::OnBnClickedSearchReset()
 	GetDlgItem(IDC_EDITSEARCHMAX)->SetWindowText("");	
 	GetDlgItem(IDC_SEARCHNAME)->SetWindowText("");
 	Stypebox.SetCurSel(Stypebox.FindString(-1,GetResString(IDS_SEARCH_ANY)));
-	methodBox.SetCurSel(0);
 
 	OnEnChangeSearchname();
 }

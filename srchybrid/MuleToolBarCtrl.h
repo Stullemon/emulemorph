@@ -31,10 +31,12 @@ public:
 protected:
 	int			m_iLastPressedButton;
 	int			m_buttoncount;
-	TBBUTTON	TBButtons[10];
-	TCHAR		TBStrings[10][200];
+	TBBUTTON	TBButtons[12];
+	TCHAR		TBStrings[12][200];
 	CStringArray bitmappaths;
 	int			m_iToolbarLabelSettings;
+	CStringArray aSkinPaths;
+
 	virtual		BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
@@ -53,4 +55,6 @@ protected:
 	void ChangeToolbarBitmap(CString path, bool refresh);
 	void ChangeTextLabelStyle(int settings, bool refresh);
 	void Refresh();
+public:
+	afx_msg void OnSysColorChange();
 };

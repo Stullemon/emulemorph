@@ -104,43 +104,15 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//MORPH END - Added by SiRoB, khaos::categorymod+
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
-			HICON hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_UPLOAD),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgUM = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
-			hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_SUC),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgDYNUP = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
-			hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_DIRECTDOWNLOAD),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgDM = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
+			iImgUM = piml->Add(CTempIconLoader("UPLOAD"));
+			iImgDYNUP = piml->Add(CTempIconLoader("SUC"));
+			iImgDM = piml->Add(CTempIconLoader("SEARCHDIRECTDOWNLOAD"));
 			//MORPH START - Added by SiRoB, khaos::categorymod+
-			hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_PREF_FOLDERS),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgSCC = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
-			hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_COMPPROT),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgSAC = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
-			hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_SERVERLIST),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgA4AF = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
+			iImgSCC = piml->Add(CTempIconLoader("PREF_FOLDERS"));
+			iImgSAC = piml->Add(CTempIconLoader("ClientCompatible"));
+			iImgA4AF = piml->Add(CTempIconLoader("SERVERLIST"));
 			// khaos::accuratetimerem+
-			hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(),MAKEINTRESOURCE(IDI_PREF_SCHEDULER),IMAGE_ICON,16,16,0);
-			if (hIcon){
-				iImgTimeRem = piml->Add(hIcon);
-				VERIFY( ::DestroyIcon(hIcon) );
-			}
+			iImgTimeRem = piml->Add(CTempIconLoader("PREF_SCHEDULER"));
 			// khaos::accuratetimerem-
 			//MORPH END - Added by SiRoB, khaos::categorymod+
 		}

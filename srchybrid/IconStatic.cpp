@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "IconStatic.h"
 #include "VisualStylesXP.h"
+#include "emule.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 CIconStatic::CIconStatic()
 {
 	m_strText = "";
-	m_nIconID = 0;     // i_a 
+	m_pszIconID = NULL;
 }
 
 CIconStatic::~CIconStatic()
@@ -34,9 +35,9 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CIconStatic 
-bool CIconStatic::Init(UINT nIconID)
+bool CIconStatic::Init(LPCTSTR pszIconID)
 {
-	m_nIconID = nIconID;
+	m_pszIconID = pszIconID;
 
 	CString strText;	
 	GetWindowText(strText);
@@ -69,10 +70,7 @@ bool CIconStatic::Init(UINT nIconID)
 
 	MemDC.FillSolidRect(rCaption, GetSysColor(COLOR_BTNFACE));
 	
-    DrawState( MemDC.m_hDC, NULL, NULL,
-		(LPARAM)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(m_nIconID), IMAGE_ICON, 16, 16, LR_SHARED), // added LR_SHARED to make the icon handle reusable
-		// i_a: long --> LPARAM -- reduce number of warnings in VC7
-		NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL);
+	DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(m_pszIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL);
 
 	rCaption.left += 22;
 	
@@ -118,14 +116,14 @@ bool CIconStatic::Init(UINT nIconID)
 bool CIconStatic::SetText(CString strText)
 {
 	m_strText = strText;
-	return Init(m_nIconID);
+	return Init(m_pszIconID);
 }
 
-bool CIconStatic::SetIcon(UINT nIconID)
+bool CIconStatic::SetIcon(LPCTSTR pszIconID)
 {
-	return Init(nIconID);
+	return Init(pszIconID);
 }
 
 void CIconStatic::OnSysColorChange() {
-	Init(m_nIconID);
+	Init(m_pszIconID);
 }

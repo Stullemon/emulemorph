@@ -99,7 +99,7 @@ public:
 	int GetSortItem() const { return m_iCurrentSortItem; }
 	bool GetSortAscending() const { return m_atSortArrow == arrowUp || m_atSortArrow == arrowDoubleUp; }
 
-	void ApplyImageList(HIMAGELIST himl);
+	HIMAGELIST ApplyImageList(HIMAGELIST himl);
 
 	// General purpose listview find dialog+functions (optional)
 	void SetGeneralPurposeFind(bool bEnable) { m_bGeneralPurposeFind = bEnable; }
@@ -135,6 +135,7 @@ protected:
 	COLORREF         m_crWindow;
 	COLORREF         m_crWindowText;
 	COLORREF         m_crHighlight;
+	COLORREF		 m_crGlow;
 	COLORREF         m_crFocusLine;
 	COLORREF         m_crNoHighlight;
 	COLORREF         m_crNoFocusLine;

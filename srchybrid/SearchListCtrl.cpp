@@ -559,17 +559,18 @@ int CSearchListCtrl::Compare(CSearchFile* item1, CSearchFile* item2, LPARAM lPar
 
 void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	UINT flag=(GetSelectionMark()!=(-1)) ? MF_ENABLED:MF_GRAYED;
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	UINT flag = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
 
 	m_SearchFileMenu.EnableMenuItem(MP_RESUME,flag);
-	if (theApp.glob_prefs->IsExtControlsEnabled())
-		m_SearchFileMenu.EnableMenuItem(MP_META_DATA,flag);
+	m_SearchFileMenu.EnableMenuItem(MP_DETAIL,flag);
 	m_SearchFileMenu.EnableMenuItem(MP_GETED2KLINK,flag);
 	m_SearchFileMenu.EnableMenuItem(MP_GETHTMLED2KLINK,flag);
+	m_SearchFileMenu.EnableMenuItem(MP_REMOVESELECTED,flag);
 	
 	UINT dwPVFlag = MF_GRAYED;
-	if (GetSelectionMark() != (-1)){
-		CSearchFile* file = (CSearchFile*)GetItemData(GetSelectionMark());
+	if (iSel != -1){
+		CSearchFile* file = (CSearchFile*)GetItemData(iSel);
 		if (file && file->IsPreviewPossible())
 			dwPVFlag = MF_ENABLED;
 	}
@@ -579,8 +580,7 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CMenu m_Web;
 	m_Web.CreateMenu();
 	UpdateURLMenu(m_Web,counter);
-	UINT flag2;
-	flag2=(counter==0) ? MF_GRAYED:MF_STRING;
+	UINT flag2 = (iSel == -1 || counter == 0) ? MF_GRAYED : MF_STRING;
 	
 	m_SearchFileMenu.AppendMenu(flag2|MF_POPUP,(UINT_PTR)m_Web.m_hMenu, GetResString(IDS_WEBSERVICES) );
 	
@@ -595,8 +595,9 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	CSearchFile* file ;
 	int item;
 
-	if (GetSelectionMark() != (-1)){
-		file = (CSearchFile*)GetItemData(GetSelectionMark());
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (iSel != -1){
+		file = (CSearchFile*)GetItemData(iSel);
 		if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+256) {
 			RunURL(file, theApp.webservices.GetAt(wParam-MP_WEBURL) );
 		}
@@ -965,7 +966,7 @@ void CSearchListCtrl::OnDblClick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if (p.x > 10){
 		if (GetKeyState(VK_MENU) & 0x8000){
-			int iSel = GetSelectionMark();
+			int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 			if (iSel != -1){
 				CSearchFile* file = (CSearchFile*)GetItemData(iSel);
 				if (file){

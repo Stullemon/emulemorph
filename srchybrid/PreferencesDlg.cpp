@@ -51,25 +51,6 @@ CPreferencesDlg::CPreferencesDlg(){
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
 	m_nActiveWnd = 0;
 	m_iPrevPage = -1;
-
-	ImageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 14, 0);
-
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_GENERAL));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_DISPLAY));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_CONNECTION));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_PROXY));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_SERVER));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_FOLDERS));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_FILES));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_NOTIFICATIONS));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_STATISTICS));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_IRC));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_SECURITY));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_SCHEDULER));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_WEBSERVER));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_TWEAK));
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_TWEAK));  //MORPH - Added by IceCream, Morph Prefs
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_TWEAK));  //MORPH - Added by SiRoB, Morph Prefs
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -100,7 +81,6 @@ BOOL CPreferencesDlg::OnInitDialog()
 	::SendMessage(m_groupbox.m_hWnd, WM_SETFONT, (WPARAM) ::GetStockObject(DEFAULT_GUI_FONT),0);
 	InitWindowStyles(this);
 
-	m_listbox.SetImageList(&ImageList);
 	SetActivePage(m_nActiveWnd);
 	Localize();	
 	m_listbox.SetFocus();
@@ -130,6 +110,26 @@ void CPreferencesDlg::OnSelChanged()
 
 void CPreferencesDlg::Localize()
 {
+	ImageList.DeleteImageList();
+	ImageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+	ImageList.Add(CTempIconLoader("PREF_GENERAL"));
+	ImageList.Add(CTempIconLoader("PREF_DISPLAY"));
+	ImageList.Add(CTempIconLoader("PREF_CONNECTION"));
+	ImageList.Add(CTempIconLoader("PREF_PROXY"));
+	ImageList.Add(CTempIconLoader("PREF_SERVER"));
+	ImageList.Add(CTempIconLoader("PREF_FOLDERS"));
+	ImageList.Add(CTempIconLoader("PREF_FILES"));
+	ImageList.Add(CTempIconLoader("PREF_NOTIFICATIONS"));
+	ImageList.Add(CTempIconLoader("PREF_STATISTICS"));
+	ImageList.Add(CTempIconLoader("PREF_IRC"));
+	ImageList.Add(CTempIconLoader("PREF_SECURITY"));
+	ImageList.Add(CTempIconLoader("PREF_SCHEDULER"));
+	ImageList.Add(CTempIconLoader("PREF_WEBSERVER"));
+	ImageList.Add(CTempIconLoader("PREF_TWEAK"));
+	ImageList.Add(CTempIconLoader("PREF_TWEAK"));  //MORPH - Added by IceCream, Morph Prefs
+	ImageList.Add(CTempIconLoader("PREF_TWEAK"));  //MORPH - Added by SiRoB, Morph Prefs
+	m_listbox.SetImageList(&ImageList);
+
 	CString title = GetResString(IDS_EM_PREFS); 
 	title.Remove('&'); 
 	SetTitle(title); 

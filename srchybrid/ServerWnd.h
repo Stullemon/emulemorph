@@ -77,4 +77,6 @@ private:
 	CCustomAutoComplete* m_pacServerMetURL;
 	CString m_strClickNewVersion;
 	LCID m_uLangID;
+public:
+	afx_msg void OnSysColorChange();
 };

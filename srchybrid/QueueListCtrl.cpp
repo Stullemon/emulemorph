@@ -45,7 +45,14 @@ CQueueListCtrl::CQueueListCtrl(){
 		AddDebugLogLine(true,_T("Failed to create 'queue list control' timer - %s"),GetErrorMessage(GetLastError()));
 }
 
-void CQueueListCtrl::Init(){
+void CQueueListCtrl::Init()
+{
+	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
+	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
+	SetImageList(&ilDummyImageList, LVSIL_SMALL);
+	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
+	ilDummyImageList.Detach();
+
 	SetExtendedStyle(LVS_EX_FULLROWSELECT);
 	InsertColumn(0,GetResString(IDS_QL_USERNAME),LVCFMT_LEFT,150,0);
 	InsertColumn(1,GetResString(IDS_FILE),LVCFMT_LEFT,275,1);
@@ -57,31 +64,11 @@ void CQueueListCtrl::Init(){
 	InsertColumn(7,GetResString(IDS_ENTERQUEUE),LVCFMT_LEFT,110,7);
 	InsertColumn(8,GetResString(IDS_BANNED),LVCFMT_LEFT,60,8);
 	InsertColumn(9,GetResString(IDS_UPSTATUS),LVCFMT_LEFT,100,9);
-	//MORPH START - Modified by SiRoB, Client Software
+	//MORPH START - Added by SiRoB, Client Software
 	InsertColumn(10,GetResString(IDS_CLIENTSOFTWARE),LVCFMT_LEFT,100,10);
-	//MORPH END - Modified by SiRoB, Client Software
-	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,10);
-	imagelist.SetBkColor(RGB(255,255,255));
-	imagelist.Add(theApp.LoadIcon(IDI_USER0));
-	imagelist.Add(theApp.LoadIcon(IDI_COMPPROT));
-	//MORPH START - Changed by SiRoB, More client & Credit ovelay icon
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUS));
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUSCOMPROT));
-	imagelist.Add(theApp.LoadIcon(IDI_FRIEND));
-	imagelist.Add(theApp.LoadIcon(IDI_MLDONK));
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUSMLDONK));
-	imagelist.Add(theApp.LoadIcon(IDI_EDONKEYHYBRID));
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUSEDONKEYHYBRID));
-	imagelist.Add(theApp.LoadIcon(IDI_SHAREAZA));
-	//imagelist.Add(theApp.LoadIcon(IDI_PLUSSHAREAZA));
-	imagelist.Add(theApp.LoadIcon(IDI_EDONKEY));
-	imagelist.Add(theApp.LoadIcon(IDI_MORPHNEXT));
-	imagelist.SetOverlayImage(imagelist.Add(theApp.LoadIcon(IDI_SECUREHASHCLIENTOVL)), 1);
-	imagelist.SetOverlayImage(imagelist.Add(theApp.LoadIcon(IDI_CREDITCLIENTOVL)), 2);
-	imagelist.SetOverlayImage(imagelist.Add(theApp.LoadIcon(IDI_CREDITSECUREOVL)), 3);
-	//MORPH END   - Added by SiRoB, More client icone & Credit ovelay icon
+	//MORPH END - Added by SiRoB, Client Software
 	
-	SetImageList(&imagelist,LVSIL_SMALL);
+	Localize();
 	LoadSettings(CPreferences::tableQueue);
 	// Barry - Use preferred sort order from preferences
 	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue);
@@ -107,7 +94,30 @@ CQueueListCtrl::~CQueueListCtrl()
 	} catch (...) {}
 }
 
-void CQueueListCtrl::Localize() {
+void CQueueListCtrl::Localize()
+{
+	imagelist.DeleteImageList();
+	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	imagelist.SetBkColor(CLR_NONE);
+	imagelist.Add(CTempIconLoader("ClientEDonkey"));
+	//MORPH START - Changed by SiRoB, More client & Credit overlay icon
+	imagelist.Add(CTempIconLoader("ClientCompatible"));
+	//imagelist.Add(CTempIconLoader("ClientEDonkeyPlus"));
+	//imagelist.Add(CTempIconLoader("ClientCompatiblePlus"));
+	imagelist.Add(CTempIconLoader("Friend"));
+	imagelist.Add(CTempIconLoader("ClientMLDonkey"));
+	//imagelist.Add(CTempIconLoader("ClientMLDonkeyPlus"));
+	imagelist.Add(CTempIconLoader("ClientEDonkeyHybrid"));
+	//imagelist.Add(CTempIconLoader("ClientEDonkeyHybridPlus"));
+	imagelist.Add(CTempIconLoader("ClientShareaza"));
+	//imagelist.Add(CTempIconLoader("ClientShareazaPlus"));
+	imagelist.Add(CTempIconLoader("ClientRightEdonkey"));
+	imagelist.Add(CTempIconLoader("ClientMorph"));
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientSecureOvl")), 1);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
+	//MORPH END   - Added by SiRoB, More client icone & Credit overlay icon
+	
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -433,32 +443,32 @@ END_MESSAGE_MAP()
 
 // CQueueListCtrl message handlers
 void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point){
-	if (m_ClientMenu) VERIFY( m_ClientMenu.DestroyMenu() );
-	m_ClientMenu.CreatePopupMenu();
-	m_ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_MESSAGE, GetResString(IDS_SEND_MSG));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
-	m_ClientMenu.AppendMenu(MF_STRING,MP_UNBAN, GetResString(IDS_UNBAN));
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	UINT uFlags = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
+	CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
+
+	CTitleMenu ClientMenu;
+	ClientMenu.CreatePopupMenu();
+	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_MESSAGE, GetResString(IDS_SEND_MSG));
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsBanned()) ? MF_ENABLED : MF_GRAYED),MP_UNBAN, GetResString(IDS_UNBAN));
 	if(theApp.kademlia->GetThreadID() && !theApp.kademlia->isConnected() )
-		m_ClientMenu.AppendMenu(MF_STRING,MP_BOOT, "BootStrap");
+		ClientMenu.AppendMenu(MF_STRING | uFlags,MP_BOOT, "BootStrap");
 	//MORPH START - Added by Yun.SF3, List Requested Files
-	m_ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
-	m_ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
+	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
+	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
-	//not needed since the button, is it?!
-	//m_ClientMenu.AppendMenu(MF_SEPARATOR);
-	//m_ClientMenu.AppendMenu(MF_STRING,MP_SWITCHCTRL, GetResString(IDS_VIEWQUEUE));
 	
-	//SetMenu(&m_ClientMenu);
-	m_ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
-	VERIFY( m_ClientMenu.DestroyMenu() );
+	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
 BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
-	if (GetSelectionMark() != (-1)){
-		CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (iSel != -1){
+		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		switch (wParam){
 			case MP_SHOWLIST:
 				client->RequestSharedFileList();
@@ -735,7 +745,7 @@ void CQueueListCtrl::ShowSelectedUserDetails() {
 }
 
 void CQueueListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
-	int iSel = GetSelectionMark();
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {
 		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){

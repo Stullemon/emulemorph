@@ -147,6 +147,7 @@ protected:
 
 	//Webserver [kuchin]
 	afx_msg LRESULT OnWebServerConnect(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnWebServerDisonnect(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnWebServerRemove(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnWebSharedFilesReload(WPARAM wParam, LPARAM lParam);
 
@@ -206,6 +207,7 @@ private:
 	int	 IsNewVersionAvailable();
 	void LoadNotifier(CString configuration); //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
 	bool notifierenabled;					  //<<-- enkeyDEV(kei-kun) -Quick disable/enable notifier-
+	void ShowToolPopup(bool toolsonly=false);
 
 	//MORPH START - Added by SiRoB, New Systray Popup from fusion
 	CMuleSystrayDlg *m_pSystrayDlg;
@@ -218,6 +220,7 @@ private:
 public:
 	afx_msg void OnBnClickedHotmenu();
 	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
+	afx_msg void OnSysColorChange();
 };
 
 void InitWindowStyles(CWnd* pWnd);
@@ -234,6 +237,7 @@ enum EEmuleUserMsgs
 
 	// Webserver
 	WEB_CONNECT_TO_SERVER,
+	WEB_DISCONNECT_SERVER,
 	WEB_REMOVE_SERVER,
 	WEB_SHARED_FILES_RELOAD,
 

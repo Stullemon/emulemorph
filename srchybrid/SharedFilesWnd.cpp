@@ -56,7 +56,8 @@ void CSharedFilesWnd::DoDataExchange(CDataExchange* pDX){
 	DDX_Control(pDX, IDC_STATISTICS, m_ctrlStatisticsFrm);
 }
 
-BOOL CSharedFilesWnd::OnInitDialog(){
+BOOL CSharedFilesWnd::OnInitDialog()
+{
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
 	sharedfilesctrl.Init();
@@ -67,15 +68,12 @@ BOOL CSharedFilesWnd::OnInitDialog(){
 	pop_baraccept.SetTextColor(RGB(20,70,255));
 	pop_bartrans.SetGradientColors(RGB(255,255,240),RGB(255,255,0));
 	pop_bartrans.SetTextColor(RGB(20,70,255));
-	
-	icon_files=(HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_SHAREDFILES), IMAGE_ICON, 16, 16, 0);
-	((CStatic*)GetDlgItem(IDC_FILES_ICO))->SetIcon(icon_files);
 
 	LOGFONT lf;
 	GetFont()->GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
 	bold.CreateFontIndirect(&lf);
-	m_ctrlStatisticsFrm.Init(IDI_SMALLSTATISTICS);
+	m_ctrlStatisticsFrm.Init("Statistics");
 
     // i_a: XXX: should run Init() *first* before setting font bold. 
     m_ctrlStatisticsFrm.SetFont(&bold); 
@@ -85,7 +83,6 @@ BOOL CSharedFilesWnd::OnInitDialog(){
 	GetDlgItem(IDC_CURSESSION_LBL)->SetFont(&bold);
 	GetDlgItem(IDC_TOTAL_LBL)->SetFont(&bold);
 	
-	AddAnchor(IDC_FILES_ICO, TOP_LEFT);
 	AddAnchor(IDC_TRAFFIC_TEXT, TOP_LEFT);
 	AddAnchor(IDC_SFLIST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_RELOADSHAREDFILES, BOTTOM_RIGHT);
@@ -114,9 +111,9 @@ BOOL CSharedFilesWnd::OnInitDialog(){
 
 BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_RELOADSHAREDFILES, OnBnClickedReloadsharedfiles)
-	//ON_BN_CLICKED(IDC_MANUAL_CHECKDISKSPACE, OnBnClickedManualCheckDiskSpace)//Morph - Added By Yun.SF3, Manual CheckDiskSpace
 	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_SFLIST, OnLvnItemActivateSflist)
 	ON_NOTIFY(NM_CLICK, IDC_SFLIST, OnNMClickSflist)
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 
@@ -187,31 +184,43 @@ BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg)
 			OnLvnItemActivateSflist(0,0);
    }
    if (pMsg->message == WM_MBUTTONUP) {
-		   	POINT point;
-			::GetCursorPos(&point);
-			CPoint p = point; 
-			sharedfilesctrl.ScreenToClient(&p); 
-			int it = sharedfilesctrl.HitTest(p); 
+		POINT point;
+		::GetCursorPos(&point);
+		CPoint p = point; 
+		sharedfilesctrl.ScreenToClient(&p); 
+		int it = sharedfilesctrl.HitTest(p); 
 		if (it == -1) return FALSE;
 
-			sharedfilesctrl.SetSelectionMark(it);   // display selection mark correctly! 
+		sharedfilesctrl.SetSelectionMark(it);   // display selection mark correctly! 
 
-			sharedfilesctrl.ShowComments(it);
+		sharedfilesctrl.ShowComments(it);
 
-			return TRUE;
+		return TRUE;
    }
 
    return CResizableDialog::PreTranslateMessage(pMsg);
 }
 
-void CSharedFilesWnd::Localize(){
+void CSharedFilesWnd::OnSysColorChange()
+{
+	Localize();
+	CResizableDialog::OnSysColorChange();
+}
+
+void CSharedFilesWnd::Localize()
+{
+	if (icon_files)
+		VERIFY( DestroyIcon(icon_files) );
+	icon_files = theApp.LoadIcon("SharedFiles", 16, 16);
+	((CStatic*)GetDlgItem(IDC_FILES_ICO))->SetIcon(icon_files);
+
 	sharedfilesctrl.Localize();
 	GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES));
 	GetDlgItem(IDC_RELOADSHAREDFILES)->SetWindowText(GetResString(IDS_SF_RELOAD));
-	
-	m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
-	m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS));
 
+	m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
+	m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS));	
+	
 	GetDlgItem(IDC_CURSESSION_LBL)->SetWindowText(GetResString(IDS_SF_CURRENT));
 	GetDlgItem(IDC_TOTAL_LBL)->SetWindowText(GetResString(IDS_SF_TOTAL));
 	GetDlgItem(IDC_FSTATIC6)->SetWindowText(GetResString(IDS_SF_TRANS));

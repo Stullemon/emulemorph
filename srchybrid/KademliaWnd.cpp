@@ -64,6 +64,8 @@ BOOL CKademliaWnd::OnInitDialog()
 	AddAnchor(IDC_CONTACTLIST,TOP_LEFT, CSize(100,50));
 	AddAnchor(IDC_SEARCHLIST,CSize(0,50),CSize(100,100));
 	AddAnchor(IDC_KADCONTACTLAB,TOP_LEFT);
+	AddAnchor(IDC_FIREWALLCHECKBUTTON, TOP_RIGHT);
+	AddAnchor(IDC_KADCONNECT, TOP_RIGHT);
 	AddAnchor(IDC_KADSEARCHLAB,CSize(0,50));
 	AddAnchor(IDC_BSSTATIC, TOP_RIGHT);
 	AddAnchor(IDC_BOOTSTRAPBUTTON, TOP_RIGHT);
@@ -98,6 +100,8 @@ BEGIN_MESSAGE_MAP(CKademliaWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_BOOTSTRAPBUTTON, OnBnClickedBootstrapbutton)
 	ON_BN_CLICKED(IDC_FIREWALLCHECKBUTTON, OnBnClickedFirewallcheckbutton)
 	ON_BN_CLICKED(IDC_KADCONNECT, OnBnConnect)
+	ON_WM_SYSCOLORCHANGE()
+	ON_STN_CLICKED(IDC_KADCONTACTLAB, OnStnClickedKadcontactlab)
 END_MESSAGE_MAP()
 
 
@@ -151,6 +155,12 @@ void CKademliaWnd::OnBnConnect() {
 		theApp.kademlia->Connect();
 }
 
+void CKademliaWnd::OnSysColorChange()
+{
+	Localize();
+	CResizableDialog::OnSysColorChange();
+}
+
 void CKademliaWnd::Localize() {
 	GetDlgItem(IDC_BSSTATIC)->SetWindowText(GetResString(IDS_BOOTSTRAP));
 	GetDlgItem(IDC_BOOTSTRAPBUTTON)->SetWindowText(GetResString(IDS_BOOTSTRAP));
@@ -162,6 +172,8 @@ void CKademliaWnd::Localize() {
 	SetDlgItemText(IDC_KADSEARCHLAB,GetResString(IDS_KADSEARCHLAB));
 
 	UpdateControlsState();
+	contactList->Localize();
+	searchList->Localize();
 }
 
 void CKademliaWnd::UpdateControlsState() {
@@ -182,4 +194,9 @@ void CKademliaWnd::UpdateControlsState() {
 	}
 	if (!theApp.glob_prefs->GetNetworkKademlia())
 		GetDlgItem(IDC_KADCONNECT)->EnableWindow(FALSE);
+}
+
+void CKademliaWnd::OnStnClickedKadcontactlab()
+{
+	// TODO: Add your control notification handler code here
 }

@@ -30,15 +30,15 @@ public:
 
 // Implementierung
 public:
-	bool SetIcon(UINT nIconID);
+	bool SetIcon(LPCTSTR pszIconID);
 	bool SetText(CString strText);
-	bool Init(UINT nIconID);
+	bool Init(LPCTSTR pszIconID);
 	virtual ~CIconStatic();
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 protected:
 	CStatic m_wndPicture;
-	UINT	m_nIconID;
+	LPCTSTR	m_pszIconID;
 	CString m_strText;
 	CBitmap m_MemBMP;
 

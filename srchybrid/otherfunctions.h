@@ -109,6 +109,7 @@ LPCTSTR DbgGetHashTypeString(const uchar* hash);
 CString DbgGetClientID(uint32 nClientID);
 CString GetFormatedUInt(ULONG ulVal);
 void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength);
+ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
 
 void URLDecode(CString& result, const char* buff); // Make a malloc'd decoded strnig from an URL encoded string (with escaped spaces '%20' and  the like
 CString URLDecode(CString sIn);
@@ -204,25 +205,6 @@ EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
 
 bool IsGoodIP(uint32 nIP, bool forceCheck = false); //MORPH - Modified by SiRoB, ZZ Upload system (USS)
 bool IsGoodIPPort(uint32 nIP, uint16 nPort);
-class CTempIconLoader
-{
-public:
-	CTempIconLoader(UINT uResourceID, int cx, int cy, UINT uFlags = 0){
-		m_hIcon = (HICON)::LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(uResourceID), IMAGE_ICON, cx, cy, uFlags);
-	}
-	~CTempIconLoader(){
-		if (m_hIcon)
-			VERIFY( DestroyIcon(m_hIcon) );
-	}
-
-	operator HICON() const{
-		return this == NULL ? NULL : m_hIcon;
-	}
-
-protected:
-	HICON m_hIcon;
-};
 
 bool	IsLowIDHybrid(uint32 id);
 bool	IsLowIDED2K(uint32 id);
-

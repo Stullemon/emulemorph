@@ -31,7 +31,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	CServerList*	server_list;
-	CImageList		imagelist;
 	afx_msg void OnNMLdblclk (NMHDR *pNMHDR, LRESULT *pResult); //<-- mod bb 27.09.02
 
 	// Barry - New methods
