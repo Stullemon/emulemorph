@@ -194,12 +194,12 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 		char buffer[100]; buffer [0] = 0;
 		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,Record->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
- 	    theApp.emuledlg->AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+ 	    AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
 									Record->m_strName, (uint8)Record->m_dwLastUsedIP, (uint8)(Record->m_dwLastUsedIP>>8), 
 									(uint8)(Record->m_dwLastUsedIP>>16),(uint8)(Record->m_dwLastUsedIP>>24), 
 									Record->m_nLastUsedPort, buffer);
 		#else
-		theApp.emuledlg->AddLogLine(false, "New friend: '%s', hash: %s",
+		AddLogLine(false, "New friend: '%s', hash: %s",
 									Record->m_strName, buffer);
 		#endif
 	}
@@ -238,13 +238,13 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 		char buffer[100]; buffer [0] = 0;
 		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,NewFriend->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
-		theApp.emuledlg->AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+		AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
 									NewFriend->m_strName, (uint8)NewFriend->m_dwLastUsedIP, 
 									(uint8)(NewFriend->m_dwLastUsedIP>>8), 
 									(uint8)(NewFriend->m_dwLastUsedIP>>16),(uint8)(NewFriend->m_dwLastUsedIP>>24), 
 									NewFriend->m_nLastUsedPort, buffer);
 		#else
-		theApp.emuledlg->AddLogLine(false, "New friend: '%s', hash: %s",
+		AddLogLine(false, "New friend: '%s', hash: %s",
 									NewFriend->m_strName, buffer);
 		#endif
 	}
@@ -265,13 +265,13 @@ void CFriendList::RemoveFriend(CFriend* todel){
 		char buffer[100]; buffer [0] = 0;
 		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,todel->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
-		theApp.emuledlg->AddLogLine(false, "Removed friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+		AddLogLine(false, "Removed friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
 									todel->m_strName, (uint8)todel->m_dwLastUsedIP, 
 									(uint8)(todel->m_dwLastUsedIP>>8), 
 									(uint8)(todel->m_dwLastUsedIP>>16),(uint8)(todel->m_dwLastUsedIP>>24), 
 									todel->m_nLastUsedPort, buffer);
 		#else
-		theApp.emuledlg->AddLogLine(false, "Removed friend: '%s', hash: %s",
+		AddLogLine(false, "Removed friend: '%s', hash: %s",
 									todel->m_strName, buffer);
 		#endif
 	}

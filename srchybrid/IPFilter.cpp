@@ -403,7 +403,7 @@ void CIPFilter::UpdateIPFilterURL()
 	dlgDownload.m_sFileToDownloadInto = strTempFilename;
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
+		AddLogLine(true, "Error downloading %s", strURL);
 		return;
 	}
 	readFile= fopen(strTempFilename, "r");
@@ -431,7 +431,7 @@ void CIPFilter::UpdateIPFilterURL()
 		dlgDownload.m_sURLToDownload = IPFilterURL;
 		dlgDownload.m_sFileToDownloadInto = strTempFilename;
 		if (dlgDownload.DoModal() != IDOK)
-			theApp.emuledlg->AddLogLine(true,GetResString(IDS_UPDATEIPFILTERERROR));
+			AddLogLine(true,GetResString(IDS_UPDATEIPFILTERERROR));
 		else
 			LoadFromDefaultFile();
 	}

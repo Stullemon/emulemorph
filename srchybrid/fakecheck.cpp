@@ -117,10 +117,10 @@ int CFakecheck::LoadFromFile(){
 			}
 		}
 
-		theApp.emuledlg->AddLogLine(false, _T("%i Fake Check reference loaded"), m_fakelist.GetCount());
+		AddLogLine(false, _T("%i Fake Check reference loaded"), m_fakelist.GetCount());
 		if (thePrefs.GetVerbose())
 		{
-			theApp.emuledlg->AddDebugLogLine(false, _T("Found Fake Reference:%u  Duplicate:%u  Merged:%u"), fakecounter, iDuplicate, iMerged);
+			AddDebugLogLine(false, _T("Found Fake Reference:%u  Duplicate:%u  Merged:%u"), fakecounter, iDuplicate, iMerged);
 		}
 	}
 	return m_fakelist.GetCount();
@@ -165,7 +165,7 @@ void CFakecheck::DownloadFakeList()
 	dlgDownload.m_sFileToDownloadInto = strTempFilename;
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
+		AddLogLine(true, "Error downloading %s", strURL);
 		return;
 	}
 	readFile= fopen(strTempFilename, "r");
@@ -192,7 +192,7 @@ void CFakecheck::DownloadFakeList()
 		dlgDownload.m_sURLToDownload = FakeCheckURL;
 		dlgDownload.m_sFileToDownloadInto = strTempFilename;
 		if (dlgDownload.DoModal() != IDOK)
-			theApp.emuledlg->AddLogLine(true,GetResString(IDS_FAKECHECKUPERROR));
+			AddLogLine(true,GetResString(IDS_FAKECHECKUPERROR));
 		else
 			LoadFromFile();
 	}

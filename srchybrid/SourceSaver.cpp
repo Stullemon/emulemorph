@@ -80,7 +80,7 @@ void CSourceSaver::DeleteFile(CPartFile* file)
 	// khaos::kmod+ Source Lists directory
 	slsfilepath.Format("%s\\%s\\%s.txtsrc", thePrefs.GetTempDir(), "Source Lists", file->GetPartMetFileName());
 	if (remove(slsfilepath)) if (errno != ENOENT)
-		theApp.emuledlg->AddLogLine(true, "Failed to delete 'Temp\\Source Lists\\%s.txtsrc', you will need to do this by hand.", file->GetPartMetFileName());    
+		AddLogLine(true, "Failed to delete 'Temp\\Source Lists\\%s.txtsrc', you will need to do this by hand.", file->GetPartMetFileName());    
 }
 
 void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, CString& slsfile)
@@ -149,7 +149,7 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 		theApp.downloadqueue->CheckAndAddSource(file, newclient);
         
 	}
-	//theApp.emuledlg->AddLogLine(/*TBN_NONOTIFY, */false, "Loaded %i sources for file %s", sources->GetCount(), file->GetFileName());	
+	//AddLogLine(/*TBN_NONOTIFY, */false, "Loaded %i sources for file %s", sources->GetCount(), file->GetFileName());	
 
 }
 
@@ -236,7 +236,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString
 			
 	}
 
-	//DEBUG_ONLY(theApp.emuledlg->AddLogLine(/*TBN_NONOTIFY, */false, "Saving %i sources for file %s", srcstosave.GetCount(), file->GetFileName()));	
+	//DEBUG_ONLY(AddLogLine(/*TBN_NONOTIFY, */false, "Saving %i sources for file %s", srcstosave.GetCount(), file->GetFileName()));	
 
 	CString strLine;
 	CStdioFile f;
