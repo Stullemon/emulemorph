@@ -1371,13 +1371,13 @@ void CSearchResultsWnd::UpdateCatTabs() {
 	int oldsel=m_cattabs.GetCurSel();
 	m_cattabs.DeleteAllItems();
 	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
-		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title);
-
 	//MORPH START - Changed by SiRoB, Selection category support
 	/*
+		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title);
 	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
 		oldsel=0;
 	*/
+		m_cattabs.InsertItem(ix,thePrefs.GetCategory(ix)->title);
 	if (oldsel>=m_cattabs.GetItemCount())
 		oldsel=-1;
 	//MORPH END   - Changed by SiRoB, Selection category support
