@@ -212,8 +212,8 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 		AddLogLine(bShowResponse, GetResString(IDS_IPFILTERLOADED), m_iplist.GetCount());
 		if (thePrefs.GetVerbose())
 		{
-			AddDebugLogLine(false, _T("Loaded IP filters from \"%s\" in %ums"), pszFilePath, GetTickCount()-startMesure);
-			AddDebugLogLine(false, _T("Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"), iLine, iFoundRanges, iDuplicate, iMerged);
+			AddDebugLogLine(false, GetResString(IDS_LOG_IPFILTER_LOADED), pszFilePath, GetTickCount()-startMesure);
+			AddDebugLogLine(false, GetResString(IDS_LOG_IPFILTER_INFO), iLine, iFoundRanges, iDuplicate, iMerged);
 		}
 	}
 	return m_iplist.GetCount();
@@ -238,7 +238,7 @@ void CIPFilter::SaveToDefaultFile()
 			if (_ftprintf(fp, _T("%-15s - %-15s , %3u , %s\n"), szStart, szEnd, flt->level, flt->desc) == 0 || ferror(fp))
 			{
 				CString strError;
-				strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, _tcserror(errno));
+				strError.Format(GetResString(IDS_IPFILTER_SAVERR), strFilePath, _tcserror(errno));
 				throw strError;
 			}
 		}
@@ -247,7 +247,7 @@ void CIPFilter::SaveToDefaultFile()
 	else
 	{
 		CString strError;
-		strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, _tcserror(errno));
+		strError.Format(GetResString(IDS_IPFILTER_SAVERR), strFilePath, _tcserror(errno));
 		throw strError;
 	}
 }
@@ -387,7 +387,7 @@ bool CIPFilter::IsFiltered(uint32 ip, UINT level) /*const*/
 
 LPCTSTR CIPFilter::GetLastHit() const
 {
-	return m_pLastHit ? m_pLastHit->desc : _T("Not available");
+	return m_pLastHit ? m_pLastHit->desc : GetResString(IDS_IPFILTER_NOTAVAIL);
 }
 
 const CIPFilterArray& CIPFilter::GetIPFilter() const
@@ -424,14 +424,14 @@ void CIPFilter::UpdateIPFilterURL()
 	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
 
 	CHttpDownloadDlg dlgDownload;
-	dlgDownload.m_strTitle = _T("Downloading IP filter version file");
+	dlgDownload.m_strTitle = GetResString(IDS_IPFILTER_DLVERSION);
 	dlgDownload.m_sURLToDownload = strURL;
 	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		_tremove(szTempFilePath);
-		LogError(LOG_STATUSBAR, _T("Error downloading %s"), strURL);
+		LogError(LOG_STATUSBAR, GetResString(IDS_LOG_ERRDWN), strURL);
 		return;
 	}
 	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
@@ -451,13 +451,13 @@ void CIPFilter::UpdateIPFilterURL()
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
-		dlgDownload.m_strTitle = _T("Downloading IP filter file");
+		dlgDownload.m_strTitle = GetResString(IDS_IPFILTER_DLFILE);
 		dlgDownload.m_sURLToDownload = IPFilterURL;
 		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 		if (dlgDownload.DoModal() != IDOK || FileSize(szTempFilePath) < 10240)
 		{
 			_tremove(szTempFilePath);
-			LogError(LOG_STATUSBAR, _T("IP Filter download failed"));
+			LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_DLFAIL));
 			return;
 		}
 
@@ -487,10 +487,10 @@ void CIPFilter::UpdateIPFilterURL()
 					bUnzipped = true;
 				}
 				else
-					LogError(LOG_STATUSBAR, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
+					LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_ERR1), szTempFilePath);
 			}
 			else
-				LogError(LOG_STATUSBAR, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
+				LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_ERR2), szTempFilePath);
 
 			zip.Close();
 		}

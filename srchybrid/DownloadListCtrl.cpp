@@ -1259,7 +1259,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 			//SLAHAM: ADDED Known Since =>
 		case 10:	// last seen complete
 			if( lpUpDownClient->dwThisClientIsKnownSince )
-				buffer.Format(_T("Known Since %s"), CastSecondsToHM((::GetTickCount()-lpUpDownClient->dwThisClientIsKnownSince)/1000));
+				buffer.Format(GetResString(IDS_KNOWN_SINCE) + _T(" %s"), CastSecondsToHM((::GetTickCount()-lpUpDownClient->dwThisClientIsKnownSince)/1000));
 			else
 				buffer.Format(_T("WHO IS THAT???"));
 			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);

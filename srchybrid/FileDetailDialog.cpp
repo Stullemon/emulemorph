@@ -441,10 +441,10 @@ void CFileDetailDialogInfo::OnDestroy()
 void CFileDetailDialogInfo::Localize()
 {
 	GetDlgItem(IDC_FD_X0)->SetWindowText(GetResString(IDS_FD_GENERAL));
-	GetDlgItem(IDC_FD_X1)->SetWindowText(GetResString(IDS_SW_NAME));
+	GetDlgItem(IDC_FD_X1)->SetWindowText(GetResString(IDS_SW_NAME)+_T(":"));
 	GetDlgItem(IDC_FD_X2)->SetWindowText(GetResString(IDS_FD_MET));
 	GetDlgItem(IDC_FD_X3)->SetWindowText(GetResString(IDS_FD_HASH));
-	GetDlgItem(IDC_FD_X4)->SetWindowText(GetResString(IDS_DL_SIZE));
+	GetDlgItem(IDC_FD_X4)->SetWindowText(GetResString(IDS_DL_SIZE)+_T(":"));
 	GetDlgItem(IDC_FD_X9)->SetWindowText(GetResString(IDS_FD_PARTS)+_T(":") );
 	GetDlgItem(IDC_FD_X5)->SetWindowText(GetResString(IDS_FD_STATUS));
 	GetDlgItem(IDC_FD_X6)->SetWindowText(GetResString(IDS_FD_TRANSFER));
@@ -462,6 +462,9 @@ void CFileDetailDialogInfo::Localize()
 	GetDlgItem(IDC_FD_RECOV)->SetWindowText(GetResString(IDS_FD_RECOV)+_T(":"));
 	GetDlgItem(IDC_FD_COMPR)->SetWindowText(GetResString(IDS_FD_COMPR)+_T(":"));
 	GetDlgItem(IDC_FD_XAICH)->SetWindowText(GetResString(IDS_IACHHASH)+_T(":"));
+    GetDlgItem(IDC_WCDownl)->SetWindowText(GetResString(IDS_WCDownl));
+	GetDlgItem(IDC_WC_REQ_SUCC)->SetWindowText(GetResString(IDS_WC_REQ_SUCC));
+    GetDlgItem(IDC_WC_DOWNLOADED)->SetWindowText(GetResString(IDS_WC_DOWNLOADED));
 }
 
 

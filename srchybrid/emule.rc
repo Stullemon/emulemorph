@@ -496,11 +496,11 @@ BEGIN
     EDITTEXT        IDC_UPLOAD_CAP,14,57,32,12,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Downloadlimit",IDC_DLIMIT_LBL,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,86,18,68,10
+                    BS_FLAT | WS_TABSTOP,86,18,70,10
     CONTROL         "",IDC_MAXDOWN_SLIDER,"msctls_trackbar32",WS_TABSTOP,85,
                     30,131,11,WS_EX_STATICEDGE
     CONTROL         "Uploadlimit",IDC_ULIMIT_LBL,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,86,48,68,10
+                    BS_FLAT | WS_TABSTOP,86,48,70,10
     CONTROL         "",IDC_MAXUP_SLIDER,"msctls_trackbar32",WS_TABSTOP,86,60,
                     130,11,WS_EX_STATICEDGE
     EDITTEXT        IDC_PORT,41,89,38,12,ES_AUTOHSCROLL | ES_NUMBER
@@ -1305,11 +1305,11 @@ BEGIN
     LTEXT           "Static",IDC_CLIENTDETAIL_KADCON,219,57,92,8
     LTEXT           "Static",IDC_DLOC,84,69,92,8
     LTEXT           "Country:",IDC_DLOC2,19,69,49,8
-    LTEXT           "WebCache:",IDC_STATIC,19,229,64,10
+    LTEXT           "WebCache:",IDC_STATIC56,19,229,64,10
     LTEXT           "Static",IDC_Webcache,110,229,197,10
-    GROUPBOX        "Webcache",IDC_STATIC,7,218,308,48
-    LTEXT           "Successfull/Requested:",IDC_STATIC,19,242,84,10
-    LTEXT           "Is trusted OHCB sender:",IDC_STATIC,19,255,83,10
+    GROUPBOX        "WebCache",IDC_STATIC57,7,218,308,48
+    LTEXT           "Successful/Requested:",IDC_STATIC54,19,242,84,10
+    LTEXT           "Is trusted OHCB sender:",IDC_STATIC55,19,255,100,10
     LTEXT           "Static",IDC_TRUSTEDOHCBSENDER,110,255,197,8
     ICON            "",IDC_COUNTRYFLAG,68,68,20,20,NOT WS_VISIBLE
 END
@@ -1408,13 +1408,13 @@ BEGIN
     GROUPBOX        "Transfer",IDC_FD_X6,7,111,320,66,BS_FLAT
     GROUPBOX        "Dates",IDC_FD_X8,7,183,320,57,BS_FLAT
     CONTROL         "Static",IDC_WCReq,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,246,152,79,8
+                    SS_NOPREFIX | WS_GROUP,273,152,50,8
     CONTROL         "not working yet",IDC_WCDownl,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,246,162,79,8
+                    SS_NOPREFIX | WS_GROUP,273,162,50,8
     CONTROL         "WC Succ/Req:",IDC_WC_REQ_SUCC,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,190,152,54,8
+                    SS_LEFTNOWORDWRAP | WS_GROUP,201,152,64,8
     CONTROL         "WC-Download:",IDC_WC_DOWNLOADED,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,190,162,54,8
+                    SS_LEFTNOWORDWRAP | WS_GROUP,201,162,64,8
 END
 
 IDD_PREVIEWDIALOG DIALOGEX 0, 0, 280, 233
@@ -3756,7 +3756,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_WEBCACHE         "Webcache"
+    IDS_PW_WEBCACHE         "WebCache"
 END
 
 STRINGTABLE 
@@ -5404,6 +5404,68 @@ BEGIN
     IDS_CRC_SUFFIX          "Suffix to add at the end of the filename after the CRC32:"
     IDS_COUNTWCSESSIONSTATS "Count WC-Sessions to session stats"
 END
+
+//MORPH START - Added by FrankyFive
+STRINGTABLE 
+BEGIN
+    IDS_STATS_SUCCESSFULLWC "Successful WC-DL/WC-Requests:"
+    IDS_STATS_FAILEDWC      "Failed WC-DL/WC-Requests:"
+    IDS_WEBCACHE_NOPROXY    "no proxy set"
+    IDS_CD_WCSUCCFAIL       "Successful/Requested:"
+    IDS_CD_WCTRUSTSENDER    "Is trusted OHCB sender:"
+    IDS_WCDownl             "not working yet"
+    IDS_WC_REQ_SUCC         "WC Succ/Req:"
+    IDS_WC_DOWNLOADED       "WC-Download:"
+    IDS_CRC32_TITLE         "CRC32 to filename"
+    IDS_LOG_IPFILTER_LOADED "Loaded IP filters from \""%s\"" in %ums"
+    IDS_LOG_IPFILTER_INFO   "Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"
+    IDS_IPFILTER_SAVERR     "Failed to save IP filter to file \""%s\"" - %hs"
+    IDS_IPFILTER_NOTAVAIL   "Not available"
+    IDS_IPFILTER_DLVERSION  "Downloading IP filter version file"
+    IDS_IPFILTER_DLFILE     "Downloading IP filter file"
+    IDS_LOG_ERRDWN          "Error downloading %s"
+    IDS_LOG_IPFILTER_DLFAIL "IP Filter download failed"
+    IDS_LOG_IPFILTER_ERR1   "Failed to extract IP filter file from downloaded IP filter ZIP file \""%s\""."
+    IDS_LOG_IPFILTER_ERR2   "Downloaded IP filter file \""%s\"" is a ZIP file with unexpected content."
+    IDS_DOWNFAKECHECKVER    "Downloading Fake Check version file"
+    IDS_DOWNFAKECHECKFILE   "Downloading Fake Check file"
+    IDS_FC_LOADED           "%i Fake Check reference loaded"
+    IDS_LOG_FC_LOADED       "Loaded Fake Check from \""%s\"" in %ums"
+    IDS_LOG_FC_INFO         "Found Fake Reference:%u  Duplicate:%u  Merged:%u"
+    IDS_LOG_FC_ERR1         "Failed to extract fake check file from downloaded fake check ZIP file \""%s\""."
+    IDS_LOG_FC_ERR2         "Downloaded fake check file \""%s\"" is a ZIP file with unexpected content."
+    IDS_MASSRENAME_TITLE    "Mass-Rename"
+    IDS_LOG_CRC32_WRN1      "Warning: A file for which the CRC32 should be calculated is not shared anymore. Calculation skipped."
+    IDS_LOG_CRC32_WRN2      "Warning: File '%s' is not shared anymore. CRC32 calculation skipped."
+    IDS_LOG_CRC32_WRN3      "Warning: Can't open file '%s' for CRC32 calculation. File skipped."
+    IDS_LOG_CRC32_SKIP1     "CRC32-calculation of file '%s' skipped - already calculated."
+    IDS_LOG_CRC32_SKIP2     "Can't calculate CRC32 of file '%s'; file is a part file and not complete !"
+    IDS_LOG_CRC32_CALC      "Calculating CRC32 of file '%s'..."
+    IDS_LOG_CRC32_ADORT     "CRC32 calculation aborted."
+    IDS_LOG_CRC32_COMPLETED "Calculation of CRC32 for file '%s' completed. File CRC: %s"
+    IDS_IP2COUNTRY_MSG1     "IP2Country uses the IP-to-Country Database provided by WebHosting."
+    IDS_IP2COUNTRY_MSG2     "Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info."
+    IDS_IP2COUNTRY_LOADED   "IP2Country loaded"
+    IDS_IP2COUNTRY_UNLOADED "IP2Country unloaded"
+    IDS_IP2COUNTRY_ERROR1   "error line number : %i"
+    IDS_IP2COUNTRY_ERROR2   "possible error line in"
+    IDS_IP2COUNTRY_ERROR3   "Failed to load in"
+    IDS_IP2COUNTRY_ERROR4   "CountryFlag Disabled, failed to load"
+    IDS_IP2COUNTRY_ERROR5   "Invalid resID, maybe you need to upgrade your flag icon Dll,"
+    IDS_IP2COUNTRY_ERROR6   "IP to Country file download failed"
+    IDS_IP2COUNTRY_ERROR7   "Failed to extract IP to Country file from downloaded IP to Country ZIP file \""%s\""."
+    IDS_IP2COUNTRY_ERROR8   "Downloaded IP to Country file \""%s\"" is a ZIP file with unexpected content."
+    IDS_IP2COUNTRY_LOADED2  "Loaded IP2Country from \""%s\"" in %ums"
+    IDS_IP2COUNTRY_INFO     "Parsed lines:%u  Found IPCountry ranges:%u  Duplicate:%u  Merged:%u"
+    IDS_IP2COUNTRY_FLAGLOAD "Country Flags have been loaded"
+    IDS_IP2COUNTRY_FILELOAD "IP2Countryfile has been unloaded"
+    IDS_IP2COUNTRY_FLAGUNLD "Country Flags have been unloaded"
+    IDS_IP2COUNTRY_VERFILE  "Downloading IP2Country version file"
+    IDS_IP2COUNTRY_DWNFILE  "Downloading IP2Country file"
+    IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv unloaded due to update in progress"
+    IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv loaded after successful update"
+END
+//MORPH END - Added by FrankyFive
 
 #endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////

@@ -123,11 +123,11 @@ int CFakecheck::LoadFromFile(){
 			}
 		}
 
-		AddLogLine(false, _T("%i Fake Check reference loaded"), m_fakelist.GetCount());
+		AddLogLine(false, GetResString(IDS_FC_LOADED), m_fakelist.GetCount());
 		if (thePrefs.GetVerbose())
 		{
-			AddDebugLogLine(false, _T("Loaded Fake Check from \"%s\" in %ums"), strfakecheckfile, GetTickCount()-startMesure);
-			AddDebugLogLine(false, _T("Found Fake Reference:%u  Duplicate:%u  Merged:%u"), fakecounter, iDuplicate, iMerged);
+			AddDebugLogLine(false, GetResString(IDS_LOG_FC_LOADED), strfakecheckfile, GetTickCount()-startMesure);
+			AddDebugLogLine(false, GetResString(IDS_LOG_FC_INFO), fakecounter, iDuplicate, iMerged);
 		}
 	}
 	return m_fakelist.GetCount();
@@ -172,14 +172,14 @@ void CFakecheck::DownloadFakeList()
 	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
 
 	CHttpDownloadDlg dlgDownload;
-	dlgDownload.m_strTitle = _T("Downloading Fake Check version file");
+	dlgDownload.m_strTitle = GetResString(IDS_DOWNFAKECHECKVER);
 	dlgDownload.m_sURLToDownload = strURL;
 	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		_tremove(szTempFilePath);
-		LogError(LOG_STATUSBAR, _T("Error downloading %s"), strURL);
+		LogError(LOG_STATUSBAR, GetResString(IDS_LOG_ERRDWN), strURL);
 		return;
 	}
 	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
@@ -199,7 +199,7 @@ void CFakecheck::DownloadFakeList()
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_FAKECHECK_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
-		dlgDownload.m_strTitle = _T("Downloading Fake Check file");
+		dlgDownload.m_strTitle = GetResString(IDS_DOWNFAKECHECKFILE);
 		dlgDownload.m_sURLToDownload = FakeCheckURL;
 		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 		if (dlgDownload.DoModal() != IDOK || FileSize(szTempFilePath) < 10240)
@@ -235,10 +235,10 @@ void CFakecheck::DownloadFakeList()
 					bUnzipped = true;
 				}
 				else
-					LogError(LOG_STATUSBAR, _T("Failed to extract fake check file from downloaded fake check ZIP file \"%s\"."), szTempFilePath);
+					LogError(LOG_STATUSBAR, GetResString(IDS_LOG_FC_ERR1), szTempFilePath);
 			}
 			else
-				LogError(LOG_STATUSBAR, _T("Downloaded fake check file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
+				LogError(LOG_STATUSBAR, GetResString(IDS_LOG_FC_ERR2), szTempFilePath);
 
 			zip.Close();
 		}

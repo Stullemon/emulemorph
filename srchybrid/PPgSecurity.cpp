@@ -243,13 +243,13 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
-		dlgDownload.m_strTitle = _T("Downloading IP filter file");
+		dlgDownload.m_strTitle = GetResString(IDS_IPFILTER_DLFILE);
 		dlgDownload.m_sURLToDownload = url;
 		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 		if (dlgDownload.DoModal() != IDOK)
 		{
 			_tremove(szTempFilePath);
-			LogWarning(LOG_STATUSBAR, _T("IP Filter download failed"));
+			LogWarning(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_DLFAIL));
 			return;
 		}
 
@@ -279,10 +279,10 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 					bUnzipped = true;
 				}
 				else
-					LogError(LOG_STATUSBAR, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
+					LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_ERR1), szTempFilePath);
 			}
 			else
-				LogError(LOG_STATUSBAR, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
+				LogError(LOG_STATUSBAR, GetResString(IDS_LOG_IPFILTER_ERR2), szTempFilePath);
 
 			zip.Close();
 		}

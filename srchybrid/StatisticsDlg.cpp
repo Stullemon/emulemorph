@@ -1092,7 +1092,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					else 
 						percentSessions = (double) 0;
 
-					cbuffer.Format( _T("Successful WC-DL/WC-Requests: %u/%u (%1.1f%%)"), thePrefs.ses_successfull_WCDOWNLOADS, thePrefs.ses_WEBCACHEREQUESTS, percentSessions );
+					cbuffer.Format(GetResString(IDS_STATS_SUCCESSFULLWC) + _T(" %u/%u (%1.1f%%)"), thePrefs.ses_successfull_WCDOWNLOADS, thePrefs.ses_WEBCACHEREQUESTS, percentSessions );
 					stattree.SetItemText( down_ssessions[4] , cbuffer ); // Set Succ WC Sessions
 					//MORPH END   - Added by SiRoB, WebCache 1.2f
 		            
@@ -1103,7 +1103,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					else
 						percentSessions = (double) 0;
 
-					cbuffer.Format( _T("Failed WC-DL/WC-Requests: %u/%u (%1.1f%%)"), failedWCSessions, thePrefs.ses_WEBCACHEREQUESTS, percentSessions);
+					cbuffer.Format(GetResString(IDS_STATS_FAILEDWC) + _T(" %u/%u (%1.1f%%)"), failedWCSessions, thePrefs.ses_WEBCACHEREQUESTS, percentSessions);
 					stattree.SetItemText( down_ssessions[5] , cbuffer );
 					//MORPH END - Added by Commander, Show failed WC sessions
                     

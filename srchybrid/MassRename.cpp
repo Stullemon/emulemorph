@@ -143,6 +143,7 @@ BOOL CMassRenameDialog::OnInitDialog() {
 
 	InitWindowStyles(this);
 	SetIcon(theApp.LoadIcon(_T("FILEMASSRENAME"),16,16),FALSE);
+	SetWindowText(GetResString(IDS_MASSRENAME_TITLE));
 
 	// Go through the list of files, collect all filenames to one string and
 	// show it in the list of the old filenames

@@ -231,7 +231,7 @@ BOOL CClientDetailDialog::OnInitDialog(){
 
 	//MORPH START - Modified by Commander, WebCacheName
 	if(m_client->SupportsWebCache() && m_client->GetWebCacheName() == "")
-		GetDlgItem(IDC_Webcache)->SetWindowText(_T("no proxy set"));
+		GetDlgItem(IDC_Webcache)->SetWindowText(GetResString(IDS_WEBCACHE_NOPROXY));
 	if(m_client->SupportsWebCache() && m_client->GetWebCacheName() != "")
 	GetDlgItem(IDC_Webcache)->SetWindowText(m_client->GetWebCacheName()); // Superlexx - webcache //JP changed to new GetWebcacheName-function
     if(!m_client->SupportsWebCache())
@@ -244,9 +244,9 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	buffer.Format( _T("%u/%u (%1.1f%%)"), m_client->SuccessfulWebCachedBlockDownloads, m_client->WebCachedBlockRequests, percentSessions );
 	GetDlgItem(IDC_WCSTATISTICS)->SetWindowText(buffer); //JP Client WC-Statistics
 	if (m_client->IsTrustedOHCBSender())
-		buffer.Format(_T("Yes"));
+		buffer.Format(GetResString(IDS_YES));
 	else
-		buffer.Format(_T("No"));
+		buffer.Format(GetResString(IDS_NO));
 	GetDlgItem(IDC_TRUSTEDOHCBSENDER)->SetWindowText(buffer); //JP Is trusted OHCB sender
 	//MORPH END   - Added by SiRoB, Webcache 1.2f
 	return true;
@@ -279,7 +279,12 @@ void CClientDetailDialog::Localize(){
 	GetDlgItem(IDC_STATIC51)->SetWindowText(GetResString(IDS_CD_MOD));
 	GetDlgItem(IDC_STATIC52)->SetWindowText(GetResString(IDS_CD_RATING));
 	GetDlgItem(IDC_STATIC53)->SetWindowText(GetResString(IDS_CD_USCORE));
+	GetDlgItem(IDC_STATIC54)->SetWindowText(GetResString(IDS_CD_WCSUCCFAIL));
+	GetDlgItem(IDC_STATIC55)->SetWindowText(GetResString(IDS_CD_WCTRUSTSENDER));
+	GetDlgItem(IDC_STATIC56)->SetWindowText(GetResString(IDS_PW_WEBCACHE) + _T(":"));
+	GetDlgItem(IDC_STATIC57)->SetWindowText(GetResString(IDS_PW_WEBCACHE));
 	GetDlgItem(IDC_STATIC133x)->SetWindowText(GetResString(IDS_CD_IDENT));
+	GetDlgItem(IDC_DLOC2)->SetWindowText(GetResString(IDS_COUNTRY) + _T(":"));
 	CString buffer;
 	buffer.Format(_T("%s:"), GetResString(IDS_KADEMLIA)); 
 	GetDlgItem(IDC_CLIENTDETAIL_KAD)->SetWindowText(buffer);
