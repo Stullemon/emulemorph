@@ -14,9 +14,9 @@
 #include "StringConversion.h"
 
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 
@@ -237,18 +237,14 @@ void CWapSocket::SendContent(LPCSTR szStdResponse, const void* pContent, DWORD d
 
 void CWapSocket::SendContent(LPCSTR szStdResponse, const CString& rstr)
 {
-#ifdef _UNICODE
 	CStringA strA(wc2utf8(rstr));
 	SendContent(szStdResponse, strA, strA.GetLength());
-#else
-	SendContent(szStdResponse, rstr, rstr.GetLength());
-#endif
 }
 
 void CWapSocket::SendError404(bool sendInfo)
 {
 	char szBuf[0x1000];
-	CStringA Out;
+	CString Out;
 	if (sendInfo){
 		Out="<?xml version=\"1.0\"?>"
 			"<!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\">"
@@ -433,11 +429,11 @@ UINT AFX_CDECL WapSocketListeningFunc(LPVOID pThis)
 					if (!WSAEventSelect(hSocket, hEvent, FD_ACCEPT))
 					{
 						// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-						CUPnPNat::UPNPNAT_MAPPING mapping;
+						CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 						BOOL UPnP=false;
 
 						mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
-						mapping.protocol = CUPnPNat::UNAT_TCP;
+						mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 						mapping.description = "Wap Interface";
 						if(thePrefs.GetUPnPNat())
 							UPnP = theApp.AddUPnPNatPort(&mapping);
