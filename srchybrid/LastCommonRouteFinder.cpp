@@ -182,11 +182,13 @@ CurrentPingStruct LastCommonRouteFinder::GetCurrentPing() {
         returnVal.state = m_state;
         returnVal.latency = m_pingAverage;
         returnVal.lowest = m_lowestPing;
+        returnVal.currentLimit = m_upload;
         pingLocker.Unlock();
     } else {
         returnVal.state = "";
         returnVal.latency = 0;
         returnVal.lowest = 0;
+        returnVal.currentLimit = 0;
     }
 
     return returnVal;
@@ -570,6 +572,10 @@ UINT LastCommonRouteFinder::RunInternal() {
                         pingLocker.Unlock();
 
                         prefsEvent->Lock(3*60*1000);
+
+                        pingLocker.Lock();
+                        m_state = "Preparing...";
+                        pingLocker.Unlock();
                     }
                 }
 

@@ -782,8 +782,11 @@ void CUploadQueue::Process() {
 
 			m_FirstRanOutOfSlotsTick = 0;
 
-			//theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload since there are too many upload slots opened.", lastClient->GetUserName());
-		    // add to queue again.
+            //AddDebugLogLine(false, "%s: Ended upload since there are too many upload slots opened.", lastClient->GetUserName());
+            // Remove from upload list.
+            RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULMANYSLOTS), true, true);
+
+			// add to queue again.
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
 			AddClientToQueue(lastClient, true, true);
 		}

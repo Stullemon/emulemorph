@@ -25,6 +25,7 @@ struct CurrentPingStruct {
     CString state;
 	uint32	latency;
 	uint32	lowest;
+    uint32  currentLimit;
 };
 
 class LastCommonRouteFinder :

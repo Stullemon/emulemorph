@@ -718,7 +718,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         //    int val_len = sizeof(val);
         //    GetSockOpt(SO_MAX_MSGSIZE , &val, &val_len);
         //    if(val != 8192) {
-        //        theApp.emuledlg->QueueDebugLogLine(true,"EMSocket: value: %i", val);
+        //        theApp.QueueDebugLogLine(true,"EMSocket: value: %i", val);
         //    }
 
         //    BOOL t = FALSE;
@@ -859,9 +859,10 @@ uint32 CEMSocket::GetNeededBytes() {
 		return 0;
 	}
 
+    // PENDING: probably unessecary with ZZ throttler
     if (!((sendbuffer && !m_currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty())) {
 		sendLocker.Unlock();
-		return 1;	// Queues empty, try to fill
+		return 0;	// Queues empty
 	}
 
 	if (((sendbuffer && !m_currentPacket_is_controlpacket)) && !controlpacket_queue.IsEmpty())
@@ -885,7 +886,7 @@ uint32 CEMSocket::GetNeededBytes() {
 		return sizeleft;
 	timeleft = timetotal-timeleft;
 	if (timeleft*sizetotal >= timetotal*sizeleft) {
-		if (sendgap > CONNECTION_TIMEOUT/2)
+		if (sendgap > SEC2MS(20))
 			return 1;	// Don't let the socket itself time out - Might happen when switching from spread(non-focus) slot to trickle slot
 		return 0;
 	}

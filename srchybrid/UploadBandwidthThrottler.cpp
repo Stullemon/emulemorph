@@ -526,19 +526,19 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	realBytesToSpend -= spentBytes*1000;
 
         	//if(spentBytes > 0) {
-        	//    theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler::RunInternal(): Sent: %I64i ControlQueueSize: %i", spentBytes, m_ControlQueue_list.GetSize());
+            //    theApp.QueueDebugLogLine(false,"UploadBandwidthThrottler::RunInternal(): Sent: %I64i ControlQueueSize: %i", spentBytes, m_ControlQueue_list.GetSize());
         	//}
 
         	if(realBytesToSpend < -(((sint64)m_StandardOrder_list.GetSize()+1)*minFragSize)*1000) {
             	sint64 newRealBytesToSpend = -(((sint64)m_StandardOrder_list.GetSize()+1)*minFragSize)*1000;
 
-            	//theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler::RunInternal(): Overcharged bytesToSpend. Limiting negative value. Old value: %I64i New value: %I64i", realBytesToSpend, newRealBytesToSpend);
+                //theApp.QueueDebugLogLine(false,"UploadBandwidthThrottler::RunInternal(): Overcharged bytesToSpend. Limiting negative value. Old value: %I64i New value: %I64i", realBytesToSpend, newRealBytesToSpend);
 
             	realBytesToSpend = newRealBytesToSpend;
         	} else if(realBytesToSpend > minFragSize*1000+999) {
             	sint64 newRealBytesToSpend = minFragSize*1000+999;
 
-            	//theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler::RunInternal(): Too high saved bytesToSpend. Limiting value. Old value: %I64i New value: %I64i", realBytesToSpend, newRealBytesToSpend);
+                //theApp.QueueDebugLogLine(false,"UploadBandwidthThrottler::RunInternal(): Too high saved bytesToSpend. Limiting value. Old value: %I64i New value: %I64i", realBytesToSpend, newRealBytesToSpend);
             	realBytesToSpend = newRealBytesToSpend;
 
             	highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize()+1;

@@ -1017,12 +1017,12 @@ void CemuleDlg::ShowPing() {
             if(lastPing.state.GetLength() == 0) {
 				if (!thePrefs.IsUSSLimit()){
 					if(lastPing.lowest > 0 ) {
-						sprintf(buffer,"USS %i ms %i%% %.1f%s/s",lastPing.latency, lastPing.latency*100/lastPing.lowest, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+						sprintf(buffer,"USS %i ms %i%% %.1f%s/s",lastPing.latency, lastPing.latency*100/lastPing.lowest, (float)lastPing.currentLimit/1024,GetResString(IDS_KBYTES));
 					} else {
-						sprintf(buffer,"USS %i ms %.1f%s/s",lastPing.latency, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+						sprintf(buffer,"USS %i ms %.1f%s/s",lastPing.latency, (float)lastPing.currentLimit/1024,GetResString(IDS_KBYTES));
 					}
 				} else
-					sprintf(buffer,"USS %i ms %i ms %.1f%s/s",lastPing.latency, thePrefs.GetDynUpPingLimit(), (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+					sprintf(buffer,"USS %i ms %i ms %.1f%s/s",lastPing.latency, thePrefs.GetDynUpPingLimit(), (float)lastPing.currentLimit/1024,GetResString(IDS_KBYTES));
 			} else {
                 sprintf(buffer,lastPing.state);
             }
@@ -1140,7 +1140,7 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 				*/
 				CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(link.Trim());
 				_ASSERT(pFileLink !=0);
-				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, searchwnd->GetSelectedCat(), true);
+				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, -1, true);
 				//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 			}
 			break;
@@ -1413,10 +1413,6 @@ void CemuleDlg::OnClose()
 		theApp.ppgbackup->Backup("*.met", false);
 	}
 	//EastShare END - Pretender, TBH-AutoBackup
-
-	// Barry - Restore old registry if required
-	if (thePrefs.AutoTakeED2KLinks())
-		RevertReg();
 
 	// explicitly delete all listview items which may hold ptrs to objects which will get deleted
 	// by the dtors (some lines below) to avoid potential problems during application shutdown.

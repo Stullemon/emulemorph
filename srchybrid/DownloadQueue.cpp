@@ -481,13 +481,16 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 	for (POSITION pos = m_ED2KLinkQueue.GetHeadPosition(); pos != 0; m_ED2KLinkQueue.GetNext(pos))
 	{
 		CED2KFileLink*	pLink = m_ED2KLinkQueue.GetAt(pos);
+		//MORPH START - Added by SiRoB, WasCanceled
+		if (bCanceled) {
+			delete pLink;
+			pLink = NULL;
+			continue;
+		}
+		//MORPH END   - Added by SiRoB, WasCanceled
 		CPartFile*		pNewFile =	new CPartFile(pLink);
 		
-		//MORPH - Changed by SiRoB, WasCanceled
-		/*
 		if (pNewFile->GetStatus() == PS_ERROR) 
-		*/
-		if (pNewFile->GetStatus() == PS_ERROR || bCanceled) 
 		{
 			delete pNewFile;
 			pNewFile = NULL;

@@ -99,6 +99,8 @@
 #include "emuledlg.h"
 #endif
 
+extern CString GetErrorMessage(DWORD dwError, DWORD dwFlags);
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -174,9 +176,9 @@ Pinger::Pinger() {
             us = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
             if (us == INVALID_SOCKET) {
                 closesocket(is);            // ignore return value - we need to close it anyway!
+            } else {
+              udpStarted = true;
             }
-
-            udpStarted = true;
         }
     }
     // udp end
@@ -484,30 +486,10 @@ void Pinger::PIcmpErr(int nICMPErr) {
         (nICMPErr < IP_STATUS_BASE+1)) {
 
         // Error value is out of range, display normally
-        theApp.QueueDebugLogLine(false,"(%d) ", nICMPErr);
-        DisplayErr(nICMPErr);
+		theApp.QueueDebugLogLine(false,"Pinger: %s",GetErrorMessage(nICMPErr,1));
     } else {
 
         // Display ICMP Error String
         theApp.QueueDebugLogLine(false,"%s", aszSendEchoErr[nErrIndex]);
     }
 }
-
-void Pinger::DisplayErr(int nWSAErr) {
-    char* lpMsgBuf; // Pending: was LPVOID
-
-    FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL,
-        nWSAErr,
-        MAKELANGID(LANG_NEUTRAL, 
-        SUBLANG_DEFAULT), // Default language
-        (LPTSTR) &lpMsgBuf,
-        0,    
-        NULL );   
-    theApp.QueueDebugLogLine(false,lpMsgBuf);
-
-    // Free the buffer
-    LocalFree(lpMsgBuf);
-}
-
