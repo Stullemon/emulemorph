@@ -117,7 +117,7 @@ void CPPgConnection::OnEnChangePorts(uint8 istcpport)
 	// ports unchanged?
 	CString buffer;
 	GetDlgItem(IDC_PORT)->GetWindowText(buffer);
-	uint16 tcp= _tstoi(buffer);
+	uint16 tcp= _ttoi(buffer);
 	GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer);
 	uint16 udp= _tstoi(buffer);
 
@@ -458,21 +458,15 @@ BOOL CPPgConnection::OnApply()
 	theApp.scheduler->SaveOriginals();
 
 	//MORPH START - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
-	if((bool)IsDlgButtonChecked(IDC_RANDOMPORTS) != thePrefs.GetUseRandomPorts()){
-		bRestartApp = true;
-		//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
-		theApp.m_pFirewallOpener->ClearMappingsAtEnd();
-		//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
-	}
-
+	bool oldUseRandom = thePrefs.GetUseRandomPorts();
 	thePrefs.SetUseRandomPorts((BOOL)IsDlgButtonChecked(IDC_RANDOMPORTS));
 
-	unsigned long rndValue1, rndValue2;
+	unsigned long rndValue1, rndValue2, oldRndMin, oldRndMax;
 	CString rndText;
 	m_minRndPort.GetWindowText(rndText);
-	rndValue1 = _ttoi(rndText);
+	rndValue1 = _tstoi(rndText);
 	m_maxRndPort.GetWindowText(rndText);
-	rndValue2 = _ttoi(rndText);
+	rndValue2 = _tstoi(rndText);
 
 	if (rndValue1 > 0xFFFF) rndValue1 = 0xFFFF;
 	if (rndValue1 < 1) rndValue1 = 1;
@@ -484,12 +478,40 @@ BOOL CPPgConnection::OnApply()
 		rndValue1 = tmp;
 	}
 
-	if(rndValue1 != thePrefs.GetMinRandomPort() || rndValue2 != thePrefs.GetMaxRandomPort()){
-		bRestartApp = true;
+	oldRndMin = thePrefs.GetMinRandomPort();
+	oldRndMax = thePrefs.GetMaxRandomPort();
+
+	if(rndValue1 != oldRndMin || rndValue2 != oldRndMax){
 		thePrefs.SetMinRandomPort(rndValue1);
 		thePrefs.SetMaxRandomPort(rndValue2);
 	}
-	//MORPH END   - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
+
+	if((bool)IsDlgButtonChecked(IDC_RANDOMPORTS) != oldUseRandom){
+		if (theApp.IsPortchangeAllowed()){
+			theApp.listensocket->Rebind();
+			theApp.clientudp->Rebind();
+		}
+		else 
+			bRestartApp = true;
+		// Added by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+		theApp.m_pFirewallOpener->ClearMappingsAtEnd();
+		// End -Improved ICS-Firewall support-
+	}
+	else if(oldUseRandom){
+		if(rndValue1 != oldRndMin || rndValue2 != oldRndMax){
+			if (theApp.IsPortchangeAllowed()){
+				theApp.listensocket->Rebind();
+				theApp.clientudp->Rebind();
+			}
+			else 
+				bRestartApp = true;
+
+			// Added by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+			theApp.m_pFirewallOpener->ClearMappingsAtEnd();
+			// End -Improved ICS-Firewall support-
+		}
+	}
+	// End emulEspaña
 
 	SetModified(FALSE);
 	LoadSettings();
@@ -712,7 +734,7 @@ void CPPgConnection::OnRandomPortsChange() {
 	unsigned int udp;
 
 	GetDlgItem(IDC_UDPPORT)->GetWindowText(udpStr);
-	udp = _ttoi(udpStr);
+	udp = _tstoi(udpStr);
 
 	GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_RANDOMPORTS) && udp>0);
 	GetDlgItem(IDC_PORT)->EnableWindow(!IsDlgButtonChecked(IDC_RANDOMPORTS));

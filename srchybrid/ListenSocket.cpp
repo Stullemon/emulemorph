@@ -2456,8 +2456,14 @@ CListenSocket::~CListenSocket(){
 }
 
 bool CListenSocket::Rebind(){
+	// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
+	/*
 	if (thePrefs.GetPort()==m_port)
 		return false;
+	*/
+	if (!thePrefs.GetUseRandomPorts() && thePrefs.GetPort(false, true)==m_port)
+		return false;
+	// End emulEspaña
 
 	Close();
 	KillAllSockets();
@@ -2470,21 +2476,25 @@ bool CListenSocket::StartListening(){
 	// Creating the socket with SO_REUSEADDR may solve LowID issues if emule was restarted
 	// quickly or started after a crash, but(!) it will also create another problem. If the
 	// socket is already used by some other application (e.g. a 2nd emule), we though bind
+	/*
 	// to that socket leading to the situation that 2 applications are listening at the same
 	// port!
 	//
 	//MORPH START - Modified by SiRoB, [MoNKi: -UPnPNAT Support-]
 	//MORPH START - Modified by SiRoB, [MoNKi: -Random Ports-]
 	
+	bool ret=(Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*//*) && Listen());
+	if (ret)
+		m_port=thePrefs.GetPort();
 	//bool ret=(Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/) && Listen());
-	//if (ret)
-	//	m_port=thePrefs.GetPort();
-	//return ret;
-
-	bool ret;
+	return ret;
+	*/
+	bool ret = false;
 	WORD rndPort;
 	int retries=0;
 	int maxRetries = 50;
+
+	thePrefs.GetPort(false, false, true); //Resets port data
 
 	if(thePrefs.GetUseRandomPorts()){
 		do{
@@ -2501,14 +2511,11 @@ bool CListenSocket::StartListening(){
 		}while(!ret && retries<maxRetries);
 	}
 	else
-		ret = Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/);
-
-	//MORPH START - Added by SiRoB, Merged to 0.44b
-	if (ret)
-		m_port=thePrefs.GetPort(); //GetPort return the rndport one too
-	//MORPH END   - Added by SiRoB, Merged to 0.44b
+		ret = Create(thePrefs.GetPort(false, true), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/);
 
 	if(ret && Listen()){
+		m_port=thePrefs.GetPort();		
+	
 		if(thePrefs.GetICFSupport()){
 			if (theApp.m_pFirewallOpener->OpenPort(thePrefs.GetPort(), NAT_PROTOCOL_TCP, EMULE_DEFAULTRULENAME_TCP, thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetUseRandomPorts()))
 				theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_S), thePrefs.GetPort());

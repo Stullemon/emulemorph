@@ -606,10 +606,11 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 }
 
 bool CClientUDPSocket::Create(){
-	bool ret=true;
 	// emulEspaña: Modified by MoNKi [MoNKi: -UPnPNAT Support-]
 	// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
 	/*
+	bool ret=true;
+
 	if (thePrefs.GetUDPPort()) {
 		ret=CAsyncSocket::Create(thePrefs.GetUDPPort(),SOCK_DGRAM,FD_READ|FD_WRITE);
 		if (ret)
@@ -621,11 +622,12 @@ bool CClientUDPSocket::Create(){
 
 	return ret;
 	*/
+	bool ret = true;
 	WORD rndPort;
 	int retries=0;
 	int maxRetries = 50;
 
-	if (thePrefs.GetUDPPort()){
+	if (thePrefs.GetUDPPort(false, false, true)){
 		if(thePrefs.GetUseRandomPorts()){
 			do{
 				retries++;
@@ -640,14 +642,11 @@ bool CClientUDPSocket::Create(){
 			}while(!ret && retries<maxRetries);
 		}
 		else
-			ret = CAsyncSocket::Create(thePrefs.GetUDPPort(),SOCK_DGRAM,FD_READ|FD_WRITE);
+			ret = CAsyncSocket::Create(thePrefs.GetUDPPort(false, true),SOCK_DGRAM,FD_READ|FD_WRITE);
 
-		//MORPH START - Added by SiRoB, Merged to 44b
-		if (ret)
-			m_port=thePrefs.GetUDPPort(); //checked that the port was the rnd one if we use rndport
-		//MORPH END   - Added by SiRoB, Merged to 44b
-		
 		if(ret){
+			m_port=thePrefs.GetUDPPort();
+		
 			if(thePrefs.GetICFSupport()){
 				if (theApp.m_pFirewallOpener->OpenPort(thePrefs.GetUDPPort(), NAT_PROTOCOL_UDP, EMULE_DEFAULTRULENAME_UDP, thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetUseRandomPorts()))
 					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_S), thePrefs.GetUDPPort());
@@ -673,16 +672,23 @@ bool CClientUDPSocket::Create(){
 			}
 		}
 	}
-	// End emulEspaña
 	if (ret)
 		m_port=thePrefs.GetUDPPort();
+
 	return ret;
+	// End emulEspaña	
 }
 
 bool CClientUDPSocket::Rebind(){
 	
+	// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
+	/*
 	if (thePrefs.GetUDPPort()==m_port)
 		return false;
+	*/
+	if (!thePrefs.GetUseRandomPorts() && thePrefs.GetUDPPort(false, true)==m_port)
+		return false;
+	// End emulEspaña
 
 	Close();
 

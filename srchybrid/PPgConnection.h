@@ -43,6 +43,7 @@ protected:
 	afx_msg void OnEnChangePorts(uint8 istcpport);
 
 //MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+private:
 	afx_msg void OnRandomPortsChange();
 	CEdit m_minRndPort;
 	CEdit m_maxRndPort;
