@@ -641,7 +641,7 @@ void CUploadQueue::Process() {
 	UpdateActiveClientsInfo(curTick);
 
     CheckForHighPrioClient();
-
+/*//Morph - commented by AndCycle, we can trickle all of the current uploading client :X
     if(uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
         // we need to close a trickle slot and put it back first on the queue
 
@@ -666,7 +666,7 @@ void CUploadQueue::Process() {
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
             AddClientToQueue(lastClient,true, true);
         }
-    } else if (ForceNewClient()){
+    } else*/ if (ForceNewClient()){
         // There's not enough open uploads. Open another one.
 		AddUpNextClient();
 	}
@@ -1536,7 +1536,7 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
     	    InsertInUploadingList(cur_client);
 		}
 
-	theApp.uploadBandwidthThrottler->Pause(false);
+		theApp.uploadBandwidthThrottler->Pause(false);
 	}
 }
 

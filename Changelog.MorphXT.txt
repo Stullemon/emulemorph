@@ -39,6 +39,7 @@ TODO   : Fixing RSS News Feed Display ... [Commander]
 TODO   : Adding UPNP,RandomPort,Inproved ICF from emulespania [SiRoB]
 TODO   : Review HideOS and selective chunk sharing [SiRoB]
 TODO   : Fix Knowmet information expiration [SiRoB|AndCycle]
+TODO   : Tweak removing behavior for trickle slot, does remove trickle client really need? [AndCycle]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
