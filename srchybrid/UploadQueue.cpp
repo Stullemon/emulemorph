@@ -881,16 +881,18 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
    uint32 softQueueLimit;
    uint32 hardQueueLimit;
 
-   // these proportions could be tweaked. Right now it's 50/50, and that seems to work
-       softQueueLimit = (theApp.glob_prefs->GetQueueSize())/2;
+   // these proportions could be tweaked. take 10 precent of queue size to buffer new client
+       softQueueLimit = theApp.glob_prefs->GetQueueSize() - theApp.glob_prefs->GetQueueSize()/10;
        hardQueueLimit = theApp.glob_prefs->GetQueueSize();
 
-    if ((uint32)waitinglist.GetCount() > hardQueueLimit ||
-       (uint32)waitinglist.GetCount() > softQueueLimit &&
-       (client->IsFriend() == false || client->GetFriendSlot() == false) &&
-        client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {
- return;
-   }
+	if ((uint32)waitinglist.GetCount() > hardQueueLimit ||//let hard limit really hard
+		(uint32)waitinglist.GetCount() > softQueueLimit && // soft queue limit is reached
+		(client->IsFriend() == false || client->GetFriendSlot() == false) && // client is not a friend with friend slot
+		client->MoreUpThanDown() == false && // client don't need Pay Back First //Morph - Added by AndCycle, Pay Back First
+		client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {// and client has lower credits/wants lower prio file than average client in queue
+	// then block client from getting on queue
+	return;
+}
 
 // <<---- end of change ---->
 
