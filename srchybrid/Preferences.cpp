@@ -451,6 +451,8 @@ TCHAR	CPreferences::TxtEditor[256];
 TCHAR	CPreferences::VideoPlayer[256];
 bool	CPreferences::moviePreviewBackup;
 int		CPreferences::m_iPreviewSmallBlocks;
+int		CPreferences::m_iPreviewCopiedArchives;
+int		CPreferences::m_iInspectAllFileTypes;
 bool	CPreferences::indicateratings;
 bool	CPreferences::watchclipboard;
 bool	CPreferences::filterserverbyip;
@@ -502,6 +504,7 @@ bool	CPreferences::m_bShowDwlPercentage;
 bool    CPreferences::m_bShowClientPercentage;  //Commander - Added: Client Percentage
 bool	CPreferences::m_bRemoveFinishedDownloads;
 uint16	CPreferences::m_iMaxChatHistory;
+bool	CPreferences::m_bShowActiveDownloadsBold;
 int		CPreferences::m_iSearchMethod;
 bool	CPreferences::m_bAdvancedSpamfilter;
 bool	CPreferences::m_bUseSecureIdent;
@@ -520,7 +523,6 @@ bool	CPreferences::enableHighProcess;//MORPH - Added by IceCream, high process p
  bool	CPreferences::enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 bool	CPreferences::enableDownloadInRed; //MORPH - Added by IceCream, show download in red
-bool	CPreferences::enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 bool	CPreferences::enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 bool	CPreferences::enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 CreditSystemSelection	CPreferences::creditSystemMode; // EastShare - Added by linekin, creditsystem integration
@@ -2124,7 +2126,6 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("FullChunkTransfers"), m_btransferfullchunks);
 	ini.WriteBool(_T("ShowOverhead"), m_bshowoverhead);
 	ini.WriteBool(_T("VideoPreviewBackupped"), moviePreviewBackup);
-	ini.WriteInt(_T("PreviewSmallBlocks"), m_iPreviewSmallBlocks);
 	ini.WriteInt(_T("StartNextFile"), m_istartnextfile);
 
 	ini.DeleteKey(_T("FileBufferSizePref")); // delete old 'file buff size' setting
@@ -2348,7 +2349,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("EnableHighProcess"), enableHighProcess,_T("eMule")); //MORPH - Added by IceCream, high process priority
 
 	ini.WriteBool(_T("EnableDownloadInRed"), enableDownloadInRed,_T("eMule")); //MORPH - Added by IceCream, show download in red
-	ini.WriteBool(_T("EnableDownloadInBold"), enableDownloadInBold,_T("eMule")); //MORPH - Added by SiRoB, show download in Bold
+	ini.WriteBool(_T("EnableDownloadInBold"), m_bShowActiveDownloadsBold,_T("eMule")); //MORPH - Added by SiRoB, show download in Bold
 	ini.WriteBool(_T("EnableAntiLeecher"), enableAntiLeecher,_T("eMule")); //MORPH - Added by IceCream, enable AntiLeecher
 	ini.WriteBool(_T("EnableAntiCreditHack"), enableAntiCreditHack,_T("eMule")); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
@@ -2826,6 +2827,8 @@ void CPreferences::LoadPreferences()
 	m_bshowoverhead=ini.GetBool(_T("ShowOverhead"),false);
 	moviePreviewBackup=ini.GetBool(_T("VideoPreviewBackupped"),true);
 	m_iPreviewSmallBlocks=ini.GetInt(_T("PreviewSmallBlocks"), 0);
+	m_iPreviewCopiedArchives=ini.GetInt(_T("PreviewCopiedArchives"), 1);
+	m_iInspectAllFileTypes=ini.GetInt(_T("InspectAllFileTypes"), 0);
 
 	// read file buffer size (with backward compatibility)
 	m_iFileBufferSize=ini.GetInt(_T("FileBufferSizePref"),0); // old setting
@@ -2878,9 +2881,10 @@ void CPreferences::LoadPreferences()
 	m_bRemove2bin=ini.GetBool(_T("RemoveFilesToBin"),true);
 
 	m_iMaxChatHistory=ini.GetInt(_T("MaxChatHistoryLines"),100);
-	if (m_iMaxChatHistory<1) m_iMaxChatHistory=100;
-
+	if (m_iMaxChatHistory < 1)
+		m_iMaxChatHistory = 100;
 	maxmsgsessions=ini.GetInt(_T("MaxMessageSessions"),50);
+	m_bShowActiveDownloadsBold = ini.GetBool(_T("ShowActiveDownloadsBold"), false);
 
 	_stprintf(TxtEditor,_T("%s"),ini.GetString(_T("TxtEditor"),_T("notepad.exe")));
 	_stprintf(VideoPlayer,_T("%s"),ini.GetString(_T("VideoPlayer"),_T("")));
@@ -2922,7 +2926,7 @@ void CPreferences::LoadPreferences()
 
     m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
 	enableDownloadInRed = ini.GetBool(_T("EnableDownloadInRed"), true); //MORPH - Added by IceCream, show download in red
-	enableDownloadInBold = ini.GetBool(_T("EnableDownloadInBold"), true); //MORPH - Added by SiRoB, show download in Bold
+	m_bShowActiveDownloadsBold = ini.GetBool(_T("EnableDownloadInBold"), true); //MORPH - Added by SiRoB, show download in Bold
 	enableAntiLeecher = ini.GetBool(_T("EnableAntiLeecher"), true); //MORPH - Added by IceCream, enable AntiLeecher
 	enableAntiCreditHack = ini.GetBool(_T("EnableAntiCreditHack"), true); //MORPH - Added by IceCream, enable AntiCreditHack
 	enableHighProcess = ini.GetBool(_T("EnableHighProcess"), false); //MORPH - Added by IceCream, high process priority

@@ -129,7 +129,7 @@ private:
 	uint32	totaluploadtime;
 	uint32	m_nLastStartUpload;
 	bool	lastupslotHighID; // VQB lowID alternation
-	bool	m_bRemovedClientByScore;
+	uint32	m_dwRemovedClientByScore;
 
 	uint32	m_imaxscore;
 

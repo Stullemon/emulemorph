@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -51,48 +51,50 @@ CPreviewThread::~CPreviewThread()
 
 BOOL CPreviewThread::InitInstance()
 {
+	DbgSetThreadName("PartFilePreview");
 	InitThreadLocale();
 	return TRUE;
 }
 
-BOOL CPreviewThread::Run(){
-	DbgSetThreadName("PartFilePreview");
-
+BOOL CPreviewThread::Run()
+{
 	ASSERT (m_pPartfile) ;
-	CFile* srcFile = 0;
 	CFile destFile;
+	CFile srcFile;
+	if (!srcFile.Open(m_pPartfile->GetFilePath(), CFile::modeRead | CFile::shareDenyNone))
+		return FALSE;
 	try{
-		srcFile = m_pPartfile->m_hpartfile.Duplicate();
 		uint32 nSize = m_pPartfile->GetFileSize();
-		CString strExtension = CString(_tcsrchr(m_pPartfile->GetFileName(), '.'));
-		CString strPreviewName = CString(thePrefs.GetTempDir())+ CString("\\") + CString(m_pPartfile->GetFileName()).Mid(0,5) + CString("_preview") + strExtension;
+		CString strExtension = CString(_tcsrchr(m_pPartfile->GetFileName(), _T('.')));
+		CString strPreviewName = CString(thePrefs.GetTempDir()) + _T("\\") + m_pPartfile->GetFileName().Mid(0, 5) + _T("_preview") + strExtension;
 		bool bFullSized = true;
 		if (!strExtension.CompareNoCase(_T(".mpg")) || !strExtension.CompareNoCase(_T(".mpeg")))
 			bFullSized = false;
-		destFile.Open(strPreviewName, CFile::modeWrite | CFile::shareDenyWrite | CFile::modeCreate);
-		srcFile->SeekToBegin();
+		if (!destFile.Open(strPreviewName, CFile::modeWrite | CFile::shareDenyWrite | CFile::modeCreate))
+			return FALSE;
+		srcFile.SeekToBegin();
 		if (bFullSized)
 			destFile.SetLength(nSize);
 		destFile.SeekToBegin();
 		BYTE abyBuffer[4096];
 		uint32 nRead;
 		while (destFile.GetPosition()+4096 < PARTSIZE*2){
-			nRead = srcFile->Read(abyBuffer,4096);
+			nRead = srcFile.Read(abyBuffer,4096);
 			destFile.Write(abyBuffer,nRead);
 		}
-		srcFile->Seek(-(PARTSIZE*2),CFile::end);
+		srcFile.Seek(-(PARTSIZE*2),CFile::end);
 		uint32 nToGo =PARTSIZE*2;
 		if (bFullSized)
 			destFile.Seek(-(PARTSIZE*2),CFile::end);
 		do{
 			nRead = (nToGo - 4096 < 1)? nToGo:4096;
 			nToGo -= nRead;
-			nRead = srcFile->Read(abyBuffer,4096);
+			nRead = srcFile.Read(abyBuffer,4096);
 			destFile.Write(abyBuffer,nRead);
 		}
 		while (nToGo);
 		destFile.Close();
-		srcFile->Close();
+		srcFile.Close();
 		m_pPartfile->m_bPreviewing = false;
 
 		SHELLEXECUTEINFO SE;
@@ -101,18 +103,23 @@ BOOL CPreviewThread::Run(){
 		SE.lpVerb = _T("open");
 		
 		CString path;
-		if (m_player.GetLength()>0) {
-
+		if (!m_player.IsEmpty())
+		{
 			TCHAR shortPath[512]; //Cax2 short path for vlc
-			GetShortPathName(strPreviewName,shortPath,512);
+			GetShortPathName(strPreviewName, shortPath, ARRSIZE(shortPath));
 
 			path=thePrefs.GetVideoPlayer();
-			int pos=path.ReverseFind('\\');
-			if (pos==-1) path=""; else path=path.Left(pos+1);
+			int pos = path.ReverseFind(_T('\\'));
+			if (pos == -1)
+				path.Empty();
+			else
+				path = path.Left(pos + 1);
 			SE.lpFile = m_player.GetBuffer();
 			SE.lpParameters=shortPath;
 			SE.lpDirectory=path.GetBuffer();
-		} else SE.lpFile = strPreviewName.GetBuffer();
+		}
+		else
+			SE.lpFile = strPreviewName.GetBuffer();
 		SE.nShow = SW_SHOW;
 		SE.cbSize = sizeof(SE);
 		ShellExecuteEx(&SE);
@@ -120,23 +127,17 @@ BOOL CPreviewThread::Run(){
 			WaitForSingleObject(SE.hProcess, INFINITE);
 			CloseHandle(SE.hProcess);
 		}
-		CFile::Remove(strPreviewName.GetBuffer());
+		CFile::Remove(strPreviewName);
 	}	
 	catch(CFileException* error){
 		m_pPartfile->m_bPreviewing = false;
-		if (srcFile->m_hFile != INVALID_HANDLE_VALUE)
-			srcFile->Close();
-		if (destFile.m_hFile != INVALID_HANDLE_VALUE)
-			destFile.Close();
-		error->Delete();	//mf
+		error->Delete();
 	}
-	if (srcFile)
-		delete srcFile;
-	AfxEndThread(0,true);
-	return 0;
+	return TRUE;
 }
 
-void CPreviewThread::SetValues(CPartFile* pPartFile,CString player){
+void CPreviewThread::SetValues(CPartFile* pPartFile, CString player)
+{
 	m_pPartfile = pPartFile;
 	m_player=player;
 }

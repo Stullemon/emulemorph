@@ -146,6 +146,7 @@ CLog::CLog()
 	m_uBytesWritten = 0;
 	m_tStarted = 0;
 	m_fp = NULL;
+	m_bInOpenCall = false;
 }
 
 CLog::~CLog()
@@ -214,7 +215,7 @@ bool CLog::Open()
 	if (m_fp != NULL)
 		return true;
 
-	m_fp = _tfsopen(m_strFilePath, _T("ab"), _SH_DENYWR);
+	m_fp = _tfsopen(m_strFilePath, _T("a+b"), _SH_DENYWR);
 	if (m_fp != NULL)
 	{
 		m_tStarted = time(NULL);
@@ -296,34 +297,37 @@ bool CLog::Log(LPCTSTR pszMsg, int iLen)
 	if (m_uBytesWritten >= m_uMaxFileSize)
 	*/
 	//Morph END - added by AndCycle, Date File Name Log
-	{
-		time_t tStarted = m_tStarted;
-		Close();
-
-		TCHAR szDateLogStarted[40];
-		_tcsftime(szDateLogStarted, ARRSIZE(szDateLogStarted), _T("%Y.%m.%d %H.%M.%S"), localtime(&tStarted));
-
-		TCHAR szDrv[_MAX_DRIVE];
-		TCHAR szDir[_MAX_DIR];
-		TCHAR szNam[_MAX_FNAME];
-		TCHAR szExt[_MAX_EXT];
-		_tsplitpath(m_strFilePath, szDrv, szDir, szNam, szExt);
-
-		CString strLogBakNam;
-		strLogBakNam = szNam;
-		strLogBakNam += _T(" - ");
-		strLogBakNam += szDateLogStarted;
-
-		TCHAR szLogBakFilePath[MAX_PATH];
-		_tmakepath(szLogBakFilePath, szDrv, szDir, strLogBakNam, szExt);
-
-		if (_trename(m_strFilePath, szLogBakFilePath) != 0)
-			_tremove(m_strFilePath);
-
-		Open();
-	}
+		StartNewLogFile();
 	else
 		fflush(m_fp);
 
 	return bResult;
+}
+
+void CLog::StartNewLogFile()
+{
+	time_t tStarted = m_tStarted;
+	Close();
+
+	TCHAR szDateLogStarted[40];
+	_tcsftime(szDateLogStarted, ARRSIZE(szDateLogStarted), _T("%Y.%m.%d %H.%M.%S"), localtime(&tStarted));
+
+	TCHAR szDrv[_MAX_DRIVE];
+	TCHAR szDir[_MAX_DIR];
+	TCHAR szNam[_MAX_FNAME];
+	TCHAR szExt[_MAX_EXT];
+	_tsplitpath(m_strFilePath, szDrv, szDir, szNam, szExt);
+
+	CString strLogBakNam;
+	strLogBakNam = szNam;
+	strLogBakNam += _T(" - ");
+	strLogBakNam += szDateLogStarted;
+
+	TCHAR szLogBakFilePath[MAX_PATH];
+	_tmakepath(szLogBakFilePath, szDrv, szDir, strLogBakNam, szExt);
+
+	if (_trename(m_strFilePath, szLogBakFilePath) != 0)
+	_tremove(m_strFilePath);
+
+	Open();
 }

@@ -30,8 +30,8 @@
 //
 #define VERSION_MJR		0
 #define VERSION_MIN		44
-#define VERSION_UPDATE	0
-#define VERSION_BUILD	34
+#define VERSION_UPDATE	1
+#define VERSION_BUILD	38
 
 #define MOD_VERSION		_T("MorphXT v5.0") //MORPH - Added by SiRoB
 // NOTE: This version string is also used by the language DLLs!

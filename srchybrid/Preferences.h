@@ -496,6 +496,8 @@ public:
 	static	TCHAR	VideoPlayer[256];
 	static	bool	moviePreviewBackup;
 	static	int		m_iPreviewSmallBlocks;
+	static	int		m_iPreviewCopiedArchives;
+	static	int		m_iInspectAllFileTypes;
 	static	bool	indicateratings;
 	static	bool	watchclipboard;
 	static	bool	filterserverbyip;
@@ -554,6 +556,7 @@ public:
 	static	bool	m_bShowClientPercentage; //Commander - Added: Client Percentage
 	static	bool	m_bRemoveFinishedDownloads;
 	static	uint16	m_iMaxChatHistory;
+	static	bool	m_bShowActiveDownloadsBold;
 
 	static	int		m_iSearchMethod;
 	static	bool	m_bAdvancedSpamfilter;
@@ -579,7 +582,6 @@ public:
 	static bool	enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	static bool	enableDownloadInRed; //MORPH - Added by IceCream, show download in red
-	static bool	enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	static bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	static bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 	static CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
@@ -1107,6 +1109,7 @@ public:
 	static	bool	IsLanguageSupported(LANGID lidSelected, bool bUpdateBefore);
 	static	CString GetLangDLLNameByID(LANGID lidSelected);
 	static	void	InitThreadLocale();
+	static	void	SetRtlLocale(LCID lcid);
 	static	CString GetHtmlCharset();
 
 	static	uint8	IsDoubleClickEnabled()				{return transferDoubleclick;}
@@ -1243,6 +1246,8 @@ public:
 	static	void	SetSafeServerConnectEnabled(bool in){safeServerConnect=in;}
 	static	bool	IsMoviePreviewBackup()				{return moviePreviewBackup;}
 	static	int		GetPreviewSmallBlocks()				{return m_iPreviewSmallBlocks;}
+	static	int		GetPreviewCopiedArchives()			{return m_iPreviewCopiedArchives;}
+	static	int		GetInspectAllFileTypes()			{return m_iInspectAllFileTypes;}
 	static	int		GetExtractMetaData()				{return m_iExtractMetaData;}
 	static	bool	GetAdjustNTFSDaylightFileTime()		{return m_bAdjustNTFSDaylightFileTime;}
 
@@ -1369,7 +1374,8 @@ public:
 	static	bool	GetUseAutocompletion()						{ return m_bUseAutocompl;}
 	static	bool	GetUseDwlPercentage()						{ return m_bShowDwlPercentage;}
 	static	void	SetUseDwlPercentage(bool in)				{ m_bShowDwlPercentage=in;}
-        
+	static	bool	GetShowActiveDownloadsBold()				{ return m_bShowActiveDownloadsBold; }        
+
     //Commander - Added: Client Percentage - Start
 	static	bool	GetUseClientPercentage()					{ return m_bShowClientPercentage;}
 	static	void	SetUseClientPercentage(bool in)				{ m_bShowClientPercentage=in;}
@@ -1467,7 +1473,6 @@ public:
 	static	bool	GetEnableAntiCreditHack()					{ return enableAntiCreditHack; }//MORPH - Added by IceCream, enable AntiCreditHack
 
 	static	bool GetEnableDownloadInRed()	{ return enableDownloadInRed; } //MORPH - Added by IceCream, show download in red
-	static	bool GetEnableDownloadInBold()	{ return enableDownloadInBold; } //MORPH - Added by SiRoB, show download in Bold
 	static	bool GetEnableAntiLeecher()		{ return enableAntiLeecher; } //MORPH - Added by IceCream, enable Anti-leecher
 	
 	static	CreditSystemSelection	GetCreditSystem()	{return creditSystemMode;} // EastShare - Added by linekin, creditsystem integration

@@ -42,6 +42,9 @@ CTransferWnd::CTransferWnd(CWnd* pParent /*=NULL*/)
 {
 	icon_download = NULL;
 	m_uWnd2 = DFLT_TRANSFER_WND2;
+	m_pLastMousePoint.x = -1;
+	m_pLastMousePoint.y = -1;
+	m_nLastCatTT = -1;
 }
 
 CTransferWnd::~CTransferWnd()

@@ -45,13 +45,13 @@ CAICHSyncThread::CAICHSyncThread()
 
 BOOL CAICHSyncThread::InitInstance()
 {
+	DbgSetThreadName("AICHSyncThread");
 	InitThreadLocale();
 	return TRUE;
 }
 
 int CAICHSyncThread::Run()
 {
-	DbgSetThreadName("AICHSyncThread");
 	if ( !theApp.emuledlg->IsRunning() )
 		return 0;
 
@@ -62,7 +62,7 @@ int CAICHSyncThread::Run()
 	CSafeFile file;
 	CFileException fexp;
 	uint32 nLastVerifiedPos = 0;
-	if (!file.Open(fullpath,CFile::modeCreate|CFile::modeRead|CFile::modeNoTruncate|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyNone, &fexp)){
+	if (!file.Open(fullpath,CFile::modeCreate|CFile::modeReadWrite|CFile::modeNoTruncate|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyNone, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(_T("Failed to load ") KNOWN2_MET_FILENAME _T(" file"));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -93,7 +93,12 @@ int CAICHSyncThread::Run()
 		if (error->m_cause == CFileException::endOfFile){
 			theApp.QueueLogLine(true,GetResString(IDS_ERR_SERVERMET_BAD));
 			// truncate the file to the size to the last verified valid pos
-			file.SetLength(nLastVerifiedPos);
+			try{
+				file.SetLength(nLastVerifiedPos);
+			}
+			catch(CFileException* error2){
+				error2->Delete();
+			}
 		}
 		else{
 			TCHAR buffer[MAX_CFEXP_ERRORMSG];

@@ -818,10 +818,6 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	{
 		Pending_Block_Struct* pblock = new Pending_Block_Struct;
 		pblock->block = m_DownloadBlocks_list.RemoveHead();
-		pblock->zStream = NULL;
-		pblock->totalUnzipped = 0;
-		pblock->fZStreamError = 0;
-		pblock->fRecovered = 0;
 		m_PendingBlocks_list.AddTail(pblock);
 	}
 }
@@ -974,7 +970,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 				if (cur_block->fZStreamError){
 					if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, _T("Ignoring %u bytes of block starting at %u because of errornous zstream state for file \"%s\" - %s"), size - HEADER_SIZE, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+					AddDebugLogLine(false, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because of errornous zstream state for file \"%s\" - %s"), size - HEADER_SIZE, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 			    reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 			    return;
 		    }
@@ -1057,7 +1053,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 					    if (nStartPos > cur_block->block->EndOffset || nEndPos > cur_block->block->EndOffset){
 							if (thePrefs.GetVerbose())
-								AddDebugLogLine(false, GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
+								AddDebugLogLine(false, _T("PrcBlkPkt: ") + GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
 							reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 							// There is no chance to recover from this error
 						}
@@ -1083,7 +1079,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 								ASSERT(0);
 								strZipError.AppendFormat(_T("; Z_OK,lenUnzipped=%d"), lenUnzipped);
 							}
-							AddDebugLogLine(false, GetResString(IDS_ERR_CORRUPTCOMPRPKG) + strZipError, reqfile->GetFileName(), result);
+						AddDebugLogLine(false, _T("PrcBlkPkt: ") + GetResString(IDS_ERR_CORRUPTCOMPRPKG) + strZipError, reqfile->GetFileName(), result);
 						}
 						reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 

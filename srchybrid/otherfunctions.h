@@ -21,6 +21,7 @@ class CKnownFile;
 struct Requested_Block_Struct;
 class CUpDownClient;
 class CAICHHash;
+class CPartFile;
 
 #define ROUND(x) (floor((float)x+0.5f))
 
@@ -162,6 +163,8 @@ CString DbgGetMuleClientTCPOpcode(UINT opcode);
 CString DbgGetClientTCPOpcode(UINT protocol, UINT opcode);
 CString DbgGetClientTCPPacket(UINT protocol, UINT opcode, UINT size);
 CString DbgGetBlockInfo(const Requested_Block_Struct* block);
+CString DbgGetBlockInfo(uint32 StartOffset, uint32 EndOffset);
+CString DbgGetBlockFileInfo(const Requested_Block_Struct* block, const CPartFile* partfile);
 void DebugRecv(LPCSTR pszMsg, const CUpDownClient* client, const char* packet = NULL, uint32 nIP = 0);
 void DebugRecv(LPCSTR pszOpcode, uint32 ip, uint16 port);
 void DebugSend(LPCSTR pszMsg, const CUpDownClient* client, const char* packet = NULL);

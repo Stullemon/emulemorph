@@ -135,6 +135,19 @@ void CDownloadListCtrl::Init()
 	LoadSettings(CPreferences::tableDownload);
 	curTab=0;
 
+	//MORPH - Removed by SiRoB, Allways creat the font
+	/*
+	if (thePrefs.GetShowActiveDownloadsBold())
+	{
+	*/
+		CFont* pFont = GetFont();
+		LOGFONT lfFont = {0};
+		pFont->GetLogFont(&lfFont);
+		lfFont.lfWeight = FW_BOLD;
+		m_fontBold.CreateFontIndirect(&lfFont);
+	//} //MORPH - Removed by SiRoB, Allways creat the font
+
+
 	// Barry - Use preferred sort order from preferences
 	//MORPH START - Changed by SiRoB, Remain time and size Columns have been splited
 	/*
@@ -510,18 +523,6 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 		if(thePrefs.GetEnableDownloadInRed() && lpPartFile->GetTransferingSrcCount())
 			dc->SetTextColor(RGB(192,0,0));
 		//MORPH END   - Added by IceCream, show download in red
-		//MORPH START - Added by SiRoB, show download in Bold
-		CFont newInBoldFont;
-		CFont *pOldInBoldFont;
-		if(thePrefs.GetEnableDownloadInBold() && lpPartFile->GetTransferingSrcCount()){
-			LOGFONT logInBoldFont;
-			CFont *pInBoldFont = GetFont();
-			pInBoldFont->GetLogFont(&logInBoldFont);
-			logInBoldFont.lfWeight = FW_BOLD;
-			newInBoldFont.CreateFontIndirect(&logInBoldFont);
-			pOldInBoldFont = dc->SelectObject(&newInBoldFont);
-		}
-		//MORPH END  - Added by SiRoB, show download in Bold
 
 		switch(nColumn)
 		{
@@ -610,22 +611,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 					COLORREF oldclr = dc->SetTextColor(RGB(255,255,255));
 					int iOMode = dc->SetBkMode(TRANSPARENT);
 					buffer.Format(_T("%.1f%%"), lpPartFile->GetPercentCompleted());
-					   
-					//MORPH START - Added by SiRoB, Bold percentage
-					CFont newFont;
-					CFont *pOldFont;
-					LOGFONT logFont;
-					CFont *pFont = GetFont();
-					pFont->GetLogFont(&logFont);
-					logFont.lfWeight = FW_BOLD;
-					newFont.CreateFontIndirect(&logFont);
-					pOldFont = dc->SelectObject(&newFont);
-					//MORPH END   - Added by SiRoB, Bold percentage
-					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, (DLC_DT_TEXT & ~DT_RIGHT) | DT_CENTER);
-					//MORPH START - Added by SiRoB, Bold percentage
-					dc->SelectObject (pOldFont);
-					newFont.DeleteObject ();
-					//MORPH END   - Added by SiRoB, Bold percentage					   
+					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, (DLC_DT_TEXT & ~DT_LEFT) | DT_CENTER);
 					dc->SetBkMode(iOMode);
 					dc->SetTextColor(oldclr);
 					// HoaX_69: END
@@ -784,12 +770,6 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			break;
 		// khaos::accuratetimerem-
 		}
-		//MORPH START - Added by SiRoB, show download in Bold
-		if(thePrefs.GetEnableDownloadInBold() && lpPartFile->GetTransferingSrcCount()){
-			dc->SelectObject (pOldInBoldFont);
-			newInBoldFont.DeleteObject ();
-		}
-		//MORPH END   - Added by SiRoB, show download in Bold
 	}
 }
 
@@ -1151,7 +1131,25 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		odc->SetBkColor(GetBkColor());
 
 	CMemDC dc(odc,&lpDrawItemStruct->rcItem);
-	CFont *pOldFont = dc->SelectObject(GetFont());
+	CFont *pOldFont;
+	if (m_fontBold.m_hObject && thePrefs.GetShowActiveDownloadsBold()){
+		if (content->type == FILE_TYPE){
+			if (((const CPartFile*)content->value)->GetTransferingSrcCount())
+				pOldFont = dc->SelectObject(&m_fontBold);
+			else
+				pOldFont = dc->SelectObject(GetFont());
+		}
+		else if (content->type == UNAVAILABLE_SOURCE || content->type == AVAILABLE_SOURCE){
+			if (((const CUpDownClient*)content->value)->GetDownloadState() == DS_DOWNLOADING)
+				pOldFont = dc->SelectObject(&m_fontBold);
+			else
+				pOldFont = dc->SelectObject(GetFont());
+		}
+		else
+			pOldFont = dc->SelectObject(GetFont());
+	}
+	else
+		pOldFont = dc->SelectObject(GetFont());
 	COLORREF crOldTextColor = dc->SetTextColor(m_crWindowText);
 
 	int iOldBkMode;
@@ -1854,7 +1852,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							quest=GetResString(IDS_Q_CANCELDL2);
 						else
 							quest=GetResString(IDS_Q_CANCELDL);
-						if ( (removecompl && !validdelete ) || (validdelete && AfxMessageBox(quest + fileList,MB_ICONQUESTION|MB_YESNO) == IDYES) )
+						if ( (removecompl && !validdelete ) || (validdelete && AfxMessageBox(quest + fileList,MB_DEFBUTTON2 | MB_ICONQUESTION|MB_YESNO) == IDYES) )
 						{ 
 							while(!selectedList.IsEmpty())
 							{

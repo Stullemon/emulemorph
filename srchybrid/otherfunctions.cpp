@@ -520,19 +520,40 @@ WORD DetectWinVersion()
 
 uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 {	
+	extern bool g_bUnicoWS;
 	static BOOL _bInitialized = FALSE;
-	static BOOL (WINAPI *_pGetDiskFreeSpaceEx)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER) = NULL;
+	static BOOL (WINAPI *_pfnGetDiskFreeSpaceEx)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER) = NULL;
+	static BOOL (WINAPI *_pfnGetDiskFreeSpaceExA)(LPCSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER) = NULL;
 
-	if (!_bInitialized){
+	if (!_bInitialized)
+	{
 		_bInitialized = TRUE;
-		(FARPROC&)_pGetDiskFreeSpaceEx = GetProcAddress(GetModuleHandle(_T("kernel32.dll")), _TWINAPI("GetDiskFreeSpaceEx"));
+		if (g_bUnicoWS)
+		{
+			(FARPROC&)_pfnGetDiskFreeSpaceExA = GetProcAddress(GetModuleHandle(_T("kernel32.dll")), "GetDiskFreeSpaceExA");
+		}
+		else
+		{
+			// Why does it not work to load "GetDiskFreeSpaceExW" explicitly from UnicoWS.dll ?
+			//extern HMODULE g_hUnicoWS;
+			//(FARPROC&)_pGetDiskFreeSpaceEx = GetProcAddress(g_hUnicoWS != NULL ? g_hUnicoWS : GetModuleHandle(_T("kernel32.dll")), _TWINAPI("GetDiskFreeSpaceEx"));
+			(FARPROC&)_pfnGetDiskFreeSpaceEx = GetProcAddress(GetModuleHandle(_T("kernel32.dll")), _TWINAPI("GetDiskFreeSpaceEx"));
+		}
 	}
 
-	if(_pGetDiskFreeSpaceEx)
+	if (_pfnGetDiskFreeSpaceEx)
 	{
 		ULARGE_INTEGER nFreeDiskSpace;
 		ULARGE_INTEGER dummy;
-		_pGetDiskFreeSpaceEx(pDirectory, &nFreeDiskSpace, &dummy, &dummy);
+		(*_pfnGetDiskFreeSpaceEx)(pDirectory, &nFreeDiskSpace, &dummy, &dummy);
+		return nFreeDiskSpace.QuadPart;
+	}
+	else if (_pfnGetDiskFreeSpaceExA)
+	{
+		USES_CONVERSION;
+		ULARGE_INTEGER nFreeDiskSpace;
+		ULARGE_INTEGER dummy;
+		(*_pfnGetDiskFreeSpaceExA)(T2CA(pDirectory), &nFreeDiskSpace, &dummy, &dummy);
 		return nFreeDiskSpace.QuadPart;
 	}
 	else 
@@ -816,7 +837,7 @@ int CWebServices::GetAllMenuEntries(CMenu& rMenu, DWORD dwFlags)
 		int pos;
 		for(pos=1;rSvc.strMenuLabel.GetAt(0)==rSvc.strMenuLabel.GetAt(pos)&&pos<4;pos++) continue;
 
-		if (( pos>2 || rSvc.strMenuLabel.GetAt(0)=='-') && !iMenuEntries)
+		if (( pos>2 || rSvc.strMenuLabel.GetAt(0)=='-') && iMenuEntries)
 		{
 			bIsLastMenuSeparator = true;
 			rMenu.AppendMenu(MF_SEPARATOR);
@@ -1236,6 +1257,7 @@ struct SED2KFileType
     { _T(".wmf"),   ED2KFT_IMAGE },
     { _T(".xif"),   ED2KFT_IMAGE },
 
+    { _T(".7z"),	ED2KFT_ARCHIVE },
     { _T(".ace"),   ED2KFT_ARCHIVE },
     { _T(".arj"),   ED2KFT_ARCHIVE },
     { _T(".bz2"),   ED2KFT_ARCHIVE },
@@ -1820,21 +1842,34 @@ CString DbgGetFileInfo(const uchar* hash)
 
 CString DbgGetBlockInfo(const Requested_Block_Struct* block)
 {
+	return DbgGetBlockInfo(block->StartOffset, block->EndOffset);
+}
+
+CString DbgGetBlockInfo(uint32 StartOffset, uint32 EndOffset)
+{
 	CString strInfo;
-	strInfo.Format(_T("%u-%u (%u bytes)"), block->StartOffset, block->EndOffset, block->EndOffset - block->StartOffset + 1);
+	strInfo.Format(_T("%u-%u (%u bytes)"), StartOffset, EndOffset, EndOffset - StartOffset + 1);
 
-	strInfo.AppendFormat(_T(", Part %u"), block->StartOffset/PARTSIZE);
-	if (block->StartOffset/PARTSIZE != block->EndOffset/PARTSIZE)
-		strInfo.AppendFormat(_T("-%u(**)"), block->EndOffset/PARTSIZE);
+	strInfo.AppendFormat(_T(", Part %u"), StartOffset/PARTSIZE);
+	if (StartOffset/PARTSIZE != EndOffset/PARTSIZE)
+		strInfo.AppendFormat(_T("-%u(**)"), EndOffset/PARTSIZE);
 
-	strInfo.AppendFormat(_T(", Block %u"), block->StartOffset/EMBLOCKSIZE);
-	if (block->StartOffset/EMBLOCKSIZE != block->EndOffset/EMBLOCKSIZE)
+	strInfo.AppendFormat(_T(", Block %u"), StartOffset/EMBLOCKSIZE);
+	if (StartOffset/EMBLOCKSIZE != EndOffset/EMBLOCKSIZE)
 	{
-		strInfo.AppendFormat(_T("-%u"), block->EndOffset/EMBLOCKSIZE);
-		if (block->EndOffset/EMBLOCKSIZE - block->StartOffset/EMBLOCKSIZE > 1)
+		strInfo.AppendFormat(_T("-%u"), EndOffset/EMBLOCKSIZE);
+		if (EndOffset/EMBLOCKSIZE - StartOffset/EMBLOCKSIZE > 1)
 			strInfo += _T("(**)");
 	}
 
+	return strInfo;
+}
+
+CString DbgGetBlockFileInfo(const Requested_Block_Struct* block, const CPartFile* partfile)
+{
+	CString strInfo(DbgGetBlockInfo(block));
+	strInfo += _T("; ");
+	strInfo += DbgGetFileInfo(partfile ? partfile->GetFileHash() : NULL);
 	return strInfo;
 }
 

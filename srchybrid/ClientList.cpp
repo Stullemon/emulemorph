@@ -159,19 +159,20 @@ void CClientList::GetStatistics(uint32 &totalclient, int stats[],
 				stats[9]++; // Other Port
 		}
 
+		// Network client stats
 		if (cur_client->GetServerIP() && cur_client->GetServerPort())
 		{
-			stats[15]++;
+			stats[15]++;		// eD2K
 			if(cur_client->GetKadPort())
 			{
-				stats[17]++;
-				stats[16]++;
+				stats[17]++;	// eD2K/Kad
+				stats[16]++;	// Kad
 			}
 		}
 		else if (cur_client->GetKadPort())
-			stats[16]++;
+			stats[16]++;		// Kad
 		else
-			stats[18]++;
+			stats[18]++;		// Unknown
 	}
 }
 

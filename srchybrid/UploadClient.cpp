@@ -306,12 +306,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
 
-	if (!isdownloading && !onlybasevalue){
-		if (sysvalue && HasLowID() && !(socket && socket->IsConnected()) ){
-			if (!theApp.serverconnect->IsConnected() || theApp.serverconnect->IsLowID() || theApp.listensocket->TooManySockets()) //This may have to change when I add firewall support to Kad
-				return 0;
-		}
-	}
 	if( (IsEmuleClient() || this->GetClientSoft() < 10) && m_byEmuleVersion <= 0x19 )
 		fBaseValue *= 0.5f;
 
@@ -601,6 +595,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 	while (togo){
 		if (togo < nPacketSize*2)
 			nPacketSize = togo;
+		ASSERT( nPacketSize );
 		togo -= nPacketSize;
 
 		uint32 statpos = (currentblock->EndOffset - togo) - nPacketSize;
@@ -691,6 +686,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 	while (togo){
 		if (togo < nPacketSize*2)
 			nPacketSize = togo;
+		ASSERT( nPacketSize );
 		togo -= nPacketSize;
 		Packet* packet = new Packet(OP_COMPRESSEDPART,nPacketSize+24,OP_EMULEPROT,bFromPF);
 		md4cpy(&packet->pBuffer[0],GetUploadFileID());

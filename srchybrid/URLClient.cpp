@@ -153,8 +153,6 @@ bool CUrlClient::SendHttpBlockRequests()
 	Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
 	m_uReqStart = pending->block->StartOffset;
 	m_uReqEnd = pending->block->EndOffset;
-	pending->fZStreamError = 0;
-	pending->fRecovered = 0;
 	bool bMergeBlocks = true;
 	while (pos)
 	{

@@ -92,7 +92,9 @@
 */
 
 #include "stdafx.h"
+#include <Ws2tcpip.h>       // UDPing - raw socket and TTL setting support
 #include "emule.h"
+#include "TimeTick.h"
 #include "Pinger.h"
 #include "emuledlg.h"
 #include "OtherFunctions.h"
@@ -282,8 +284,7 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
 	// eMule is linking sockets functions using wsock32.lib (IP_TTL=7)
 	// to use IP_TTL define, we must enforce linker to bind this function 
 	// to ws2_32.lib (IP_TTL=4) (linker options: ignore wsock32.lib)
-	nRet = setsockopt(us, IPPROTO_IP, 7, (char*)&nTTL, sizeof(int));
-	//nRet = setsockopt(us, IPPROTO_IP, IP_TTL, (char*)&nTTL, sizeof(int));
+	nRet = setsockopt(us, IPPROTO_IP, IP_TTL, (char*)&nTTL, sizeof(int));
 	if (nRet==SOCKET_ERROR) { 
 		DWORD lastError = WSAGetLastError();
         PingStatus returnValue;

@@ -46,6 +46,7 @@
 #include "Kademlia/Net/KademliaUDPListener.h"
 #include "Exceptions.h"
 #include "Opcodes.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -490,7 +491,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				{
 					const CStringA* pstrOutA;
 #ifdef _UNICODE
-					CStringA strA(Out);
+					CStringA strA(wc2utf8(Out));
 					pstrOutA = &strA;
 #else
 					pstrOutA = &Out;
@@ -1686,7 +1687,7 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 		cur_file=theApp.sharedfiles->GetFileByIndex(ix);// m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
 
 		SharedFiles dFile;
-		dFile.sFileName = _SpecialChars(cur_file->GetFileName());
+		dFile.sFileName = cur_file->GetFileName();
 		dFile.lFileSize = cur_file->GetFileSize();
 		if (theApp.IsConnected() && !theApp.IsFirewalled()) 
 			dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
@@ -2563,10 +2564,14 @@ CString	CWebServer::_GetPlainResString(RESSTRIDTYPE nID, bool noquot)
 
 CString	CWebServer::_GetWebCharSet()
 {
+#ifdef _UNICODE
+	return _T("utf-8");
+#else
 	CString strHtmlCharset = thePrefs.GetHtmlCharset();
 	if (!strHtmlCharset.IsEmpty())
 		return strHtmlCharset;
 	return _T("ISO-8859-1"); // Western European (ISO)
+#endif
 }
 
 // Ornis: creating the progressbar. colored if ressources are given/available

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -182,6 +182,10 @@ void CDirectoryTreeCtrl::OnTvnGetdispinfo(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CDirectoryTreeCtrl::Init(void)
 {
+#ifdef _UNICODE
+	SendMessage(CCM_SETUNICODEFORMAT, TRUE);
+#endif
+
 	ShowWindow(SW_HIDE);
 	DeleteAllItems();
 
@@ -324,7 +328,7 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 		}
 	}
 	// END: added by FoRcHa //////////////
-	
+
 	HTREEITEM hItem = InsertItem(&itInsert);
 	if (IsShared(strDir))
 		SetCheck(hItem);

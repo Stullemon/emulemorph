@@ -240,43 +240,41 @@ void CDownloadQueue::StartNextFileIfPrefs(int cat) {
     }
 }
 
-// New parameter: int Category = -1 By Default
-// This entire function was rewritten.
-bool CDownloadQueue::StartNextFile(int cat , bool force){
-	
-	CPartFile*  pfile = NULL;
-	
+ //MORPH - Changed by SiRoB, Khaos Category
+bool CDownloadQueue::StartNextFile(int cat, bool force){
 
-	// Standard operation of StartNextFile is supported by passing -1 for Category...
-	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
-		CPartFile* cur_file = filelist.GetNext(pos);
-		if (cur_file->GetStatus() == PS_PAUSED)
-		{
-			if ((force || thePrefs.StartNextFile()==3 || thePrefs.GetCategory(cur_file->GetCategory())->bResumeFileOnlyInSameCat) && cur_file->GetCategory()!=cat && cat!=-1) //MORPH START - Added by SiRoB, Resume file only in the same category
-				continue;
-			if (!pfile) {
-				pfile = cur_file;
-			}
-			else {
-				if (pfile->GetCategory()==cat && thePrefs.GetResumeSameCat() && cur_file->GetCategory()!=cat  && cat!=-1)
-					continue;
-				else if (pfile->GetCategory()!=cat && thePrefs.GetResumeSameCat() && cur_file->GetCategory()==cat  && cat!=-1) {
-					pfile = cur_file;
-					if (pfile->GetDownPriority() == PR_HIGH && pfile->GetCatResumeOrder() == 0) break; continue;
-				}
-				else if (cur_file->GetCatResumeOrder() < pfile->GetCatResumeOrder()) {
-					pfile = cur_file;
-					if (pfile->GetDownPriority() == PR_HIGH && pfile->GetCatResumeOrder() == 0) break; continue;
-				}
-				else if (cur_file->GetCatResumeOrder() == pfile->GetCatResumeOrder() && (cur_file->GetDownPriority() > pfile->GetDownPriority())){
-					pfile = cur_file; 
-					if (pfile->GetDownPriority() == PR_HIGH && pfile->GetCatResumeOrder() == 0) break; continue;
-				}
+	CPartFile*  pfile = NULL;
+	CPartFile* cur_file ;
+	POSITION pos;
+	
+	if (cat != -1) {
+        // try to find in specified category
+		for (pos = filelist.GetHeadPosition();pos != 0;){
+			cur_file = filelist.GetNext(pos);
+			if (cur_file->GetStatus()==PS_PAUSED &&
+				cur_file->GetCategory()==cat &&
+                CPartFile::RightFileHasHigherPrio(pfile, cur_file)
+			   ) {
+    			pfile = cur_file;
 			}
 		}
+		if (pfile == NULL && !force)
+			return false;
 	}
+
+    if(cat == -1 || pfile == NULL && force) {
+	    for (pos = filelist.GetHeadPosition();pos != 0;){
+		    cur_file = filelist.GetNext(pos);
+		    if (cur_file->GetStatus() == PS_PAUSED &&
+                CPartFile::RightFileHasHigherPrio(pfile, cur_file))
+		    {
+                // pick first found matching file, since they are sorted in prio order with most important file first.
+			    pfile = cur_file;
+		    }
+	    }
+    }
 	if (pfile) pfile->ResumeFile();
-	return pfile;
+	return pfile; //MORPH - Added by SiRoB, Khaos Category
 }
 
 // This function is used for the category commands Stop Last and Pause Last.
@@ -2007,6 +2005,8 @@ void CSourceHostnameResolveWnd::AddToResolve(const uchar* fileid, LPCSTR pszHost
 
 LRESULT CSourceHostnameResolveWnd::OnHostnameResolved(WPARAM wParam,LPARAM lParam)
 {
+	if (m_toresolve.IsEmpty())
+		return TRUE;
 	Hostname_Entry* resolved = m_toresolve.RemoveHead();
 	if (WSAGETASYNCERROR(lParam) == 0)
 	{

@@ -59,11 +59,6 @@ void CCommentDialog::OnBnClickedOk()
 {
 	CString strComment;
 	GetDlgItem(IDC_CMT_TEXT)->GetWindowText(strComment);
-	if (!IsValidEd2kString(strComment)){
-		strComment.Empty();
-		SetDlgItemText(IDC_CMT_TEXT, strComment);
-		return;
-	}
 	m_file->SetFileComment(strComment);
 	m_file->SetFileRating((uint8)m_ratebox.GetCurSel());
 	CDialog::OnOK();

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2003 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2003 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -62,19 +62,18 @@ CFrameGrabThread::~CFrameGrabThread()
 
 BOOL CFrameGrabThread::InitInstance()
 {
+	DbgSetThreadName("FrameGrabThread");
 	InitThreadLocale();
 	return TRUE;
 }
 
 BOOL CFrameGrabThread::Run(){
-	DbgSetThreadName("FrameGrabThread");
 	imgResults = new CxImage*[nFramesToGrab];
 	FrameGrabResult_Struct* result = new FrameGrabResult_Struct;
 	result->nImagesGrabbed = GrabFrames();
 	result->imgResults = imgResults;
 	result->pSender = pSender;
 	VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FRAMEGRABFINISHED, (WPARAM)pOwner,(LPARAM)result) );
-	AfxEndThread(0,true);
 	return 0;
 }
 

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -187,7 +187,7 @@ BOOL COScopeCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 } // Create
 
 /////////////////////////////////////////////////////////////////////////////
-// -khaos--+++> Set Trend Ratio
+// Set Trend Ratio
 // This allows us to set a ratio for a trend in our plot.  Basically, this
 // trend will be divided by whatever the ratio was set to, so that we can have
 // big numbers and little numbers in the same plot.  Wrote this especially for
@@ -495,7 +495,6 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	}
 	
 	m_dcGrid.SelectObject(oldFont);
-	//MORPH END - Added by SiRoB, Legend Graph
 	
 	// at this point we are done filling the the grid bitmap, 
 	// no more drawing to this bitmap is needed until the setting are changed
@@ -530,8 +529,8 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 				VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) ); // reduce flickering
 		}
 	}
-	//MORPH END   - Changed by SiRoB, Maella -Code Fix- [TPT]
 
+	// finally, force the plot area to redraw
 	InvalidateRect(m_rectClient);
 } // InvalidateCtrl
 
@@ -539,7 +538,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 /////////////////////////////////////////////////////////////////////////////
 // G.Hayduk: now, there are two methods: AppendPoints and AppendEmptyPoints
 
-// -khaos--+++> Added new parameter: bool bUseTrendRatio (TRUE by default)
+// Added new parameter: bool bUseTrendRatio (TRUE by default)
 void COScopeCtrl::AppendPoints(double dNewPoint[], bool bInvalidate, bool bAdd2List, bool bUseTrendRatio)
 {
 	int iTrend;
@@ -547,7 +546,7 @@ void COScopeCtrl::AppendPoints(double dNewPoint[], bool bInvalidate, bool bAdd2L
 	// append a data point to the plot
 	for(iTrend = 0; iTrend < m_NTrends; iTrend ++)
 	{
-		// -khaos--+++> Changed this to support the new TrendRatio var
+		// Changed this to support the new TrendRatio var
 		if (bUseTrendRatio)
 			m_PlotData[iTrend].dCurrentPosition = (double) dNewPoint[iTrend] / m_PlotData[iTrend].iTrendRatio;
 		else
@@ -597,7 +596,7 @@ void COScopeCtrl::AppendPoints(double dNewPoint[], bool bInvalidate, bool bAdd2L
 // for first valid vector of data points, and then call AppendPoints again and again 
 // for valid points
 
-// -khaos--+++> Added parameter: bool bUseTrendRatio (TRUE by default)
+// Added parameter: bool bUseTrendRatio (TRUE by default)
 void COScopeCtrl::AppendEmptyPoints(double dNewPoint[], bool bInvalidate, bool bAdd2List, bool bUseTrendRatio)
 {
 	int iTrend, currY;
@@ -606,7 +605,7 @@ void COScopeCtrl::AppendEmptyPoints(double dNewPoint[], bool bInvalidate, bool b
 	// return the previous point
 	for(iTrend = 0; iTrend < m_NTrends; iTrend ++)
 	{
-		// -khaos--+++> Changed to support new Trend Ratio var and bUseTrendRatio parameter.
+		// Changed to support new Trend Ratio var and bUseTrendRatio parameter.
 		if (bUseTrendRatio)
 			m_PlotData[iTrend].dCurrentPosition = (double) dNewPoint[iTrend] / m_PlotData[iTrend].iTrendRatio;
 		else
@@ -703,7 +702,7 @@ void COScopeCtrl::OnPaint()
 		dc.BitBlt(0, 0, m_nClientWidth, m_nClientHeight, 
 		          &memDC, 0, 0, SRCCOPY);
 	}
-	memDC.SelectObject(oldBitmap); // FoRcHa
+	memDC.SelectObject(oldBitmap);
 	memBitmap.DeleteObject();
 } // OnPaint
 
@@ -722,11 +721,6 @@ void COScopeCtrl::DrawPoint()
 	
 	if(m_dcPlot.GetSafeHdc() != NULL)
 	{
-		//	BitBlt was replaced by call to ScrollDC
-		//		m_dcPlot.BitBlt(m_rectPlot.left, m_rectPlot.top+1, 
-		//		                m_nPlotWidth, m_nPlotHeight, &m_dcPlot, 
-		//		                m_rectPlot.left+m_nShiftPixels, m_rectPlot.top+1, 
-		//		                SRCCOPY) ;
 		if(m_nShiftPixels > 0)
 		{
 			ScrollRect.left = m_rectPlot.left;
@@ -810,7 +804,6 @@ void COScopeCtrl::DrawPoint()
 /////////////////////////////////////////////////////////////////////////////
 void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 {
-	// [TPT]
 	if (!cx && !cy)
 		return;
 
@@ -867,7 +860,6 @@ void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 /////////////////////////////////////////////////////////////////////////////
 void COScopeCtrl::Reset()
 {
-	//MORPH START - Added by SiRoB, Maella -Code Fix- [TPT]
 	// simply invalidate the entire control
 	for(int i = 0; i < m_NTrends; i++)
 	{
@@ -879,14 +871,12 @@ void COScopeCtrl::Reset()
 			m_PlotData[iTrend].lstPoints.RemoveAll();
 		}
 	}
-	//MORPH END   - Added by SiRoB, Maella -Code Fix- [TPT]
 
 	// to clear the existing data (in the form of a bitmap)
 	// simply invalidate the entire control
 	InvalidateCtrl();
 }
 
-//MORPH START - Changed by SiRoB, Maella -Code Inprovement- [TPT]
 int COScopeCtrl::ReCreateGraph(void)
 {
 	for(int i = 0; i < m_NTrends; i++)
@@ -908,8 +898,8 @@ int COScopeCtrl::ReCreateGraph(void)
 	int startIndex = m_PlotData[0].lstPoints.GetCount() - pointToDraw;
 
 	// Prepare to go through the elements on n lists in parallel
-		for(int iTrend = 0; iTrend < m_NTrends; iTrend++)
-		{
+	for(int iTrend = 0; iTrend < m_NTrends; iTrend++)
+	{
 		pPosArray[iTrend] = m_PlotData[iTrend].lstPoints.FindIndex(startIndex);
 	}	
 	
@@ -918,9 +908,8 @@ int COScopeCtrl::ReCreateGraph(void)
 		for(int iTrend = 0; iTrend < m_NTrends; iTrend++){
 			pAddPoints[iTrend] = m_PlotData[iTrend].lstPoints.GetNext(pPosArray[iTrend]);
 		}
-		// -khaos--+++> Pass false for new bUseTrendRatio parameter so that graph is recreated correctly...
+		// Pass false for new bUseTrendRatio parameter so that graph is recreated correctly...
 		AppendPoints(pAddPoints, false, false, false);
-		// <-----khaos-
 	}
 	
 	delete[] pAddPoints;
@@ -931,7 +920,6 @@ int COScopeCtrl::ReCreateGraph(void)
 
 	return 0;
 }
-//MORPH END   - Changed by SiRoB, Maella -Code Inprovement- [TPT]
 
 void COScopeCtrl::OnTimer(UINT nIDEvent)
 {

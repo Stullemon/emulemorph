@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -34,7 +34,7 @@ struct Gap_Struct;
 0x32, 0xFB, 0x9E, 0x04, 0x10, 0x50, 0xD7, 0xFE, 0xCD, 0x75, 0x87, 0x9C, 0x28, 0x85, 0xDF, 0xA3, \
 0x97, 0xE0 }
 
-#pragma pack(1) //???
+#pragma pack(1)
 struct ZIP_Entry
 {
 	uint32	header;
@@ -112,18 +112,19 @@ struct ThreadParam
 	CPartFile *partFile;
 	CTypedPtrList<CPtrList, Gap_Struct*> *filled;
 	bool preview;
+	bool bCreatePartFileCopy;
 };
 
 class CArchiveRecovery: public CLoggable
 {
 public:
-	static void recover(CPartFile *partFile, bool preview = false);
+	static void recover(CPartFile *partFile, bool preview = false, bool bCreatePartFileCopy = true);
 
 private:
 	CArchiveRecovery(void); // Just use static recover method
 
 	static UINT AFX_CDECL run(LPVOID lpParam);
-	static bool performRecovery(CPartFile *partFile, CTypedPtrList<CPtrList, Gap_Struct*> *filled, bool preview);
+	static bool performRecovery(CPartFile *partFile, CTypedPtrList<CPtrList, Gap_Struct*> *filled, bool preview, bool bCreatePartFileCopy = true);
 
 	static bool recoverZip(CFile *zipInput, CFile *zipOutput, CTypedPtrList<CPtrList, Gap_Struct*> *filled, bool fullSize);
 	static bool recoverRar(CFile *rarInput, CFile *rarOutput, CTypedPtrList<CPtrList, Gap_Struct*> *filled);

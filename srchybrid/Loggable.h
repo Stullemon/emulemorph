@@ -46,6 +46,7 @@ public:
 	bool Open();
 	bool Close();
 	bool Log(LPCTSTR psz, int iLen = -1);
+	void StartNewLogFile();
 
 protected:
 	FILE* m_fp;
@@ -53,7 +54,7 @@ protected:
 	CString m_strFilePath;
 	UINT m_uBytesWritten;
 	UINT m_uMaxFileSize;
-
+	bool m_bInOpenCall;
 //Morph START - added by AndCycle, Date File Name Log
 private:
 	CString m_strOriginFileName;

@@ -3340,7 +3340,7 @@ void CStatisticsDlg::CreateMyTree()
 	stattree.Init();
 
 	// -khaos--+++>  Initialize our client version counts
-	for (uint32 i = 0; i < 5; i++) cli_lastCount[i] = 0;
+	for (int i = 0; i < 5; i++)	cli_lastCount[i] = 0;
 
 	// End Tree Setup
 }

@@ -78,7 +78,7 @@ CUploadQueue::CUploadQueue()
 	// -khaos--+++>
 	iupdateconnstats=0;
 	// <-----khaos-
-	m_bRemovedClientByScore = false;
+	m_dwRemovedClientByScore = ::GetTickCount();
     m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 	m_MaxActiveClients = 0;
 	m_MaxActiveClientsShortTime = 0;
@@ -230,8 +230,7 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 *
 * @return address of the highest ranking client.
 */
-CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient)
-{
+CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient){
 	POSITION toadd = 0;
 	POSITION toaddlow = 0;
 	uint32	bestscore = 0;
@@ -249,6 +248,7 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		ASSERT ( cur_client->GetLastUpRequest() );
 		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()) )
 		{
+			//This client has either not been seen in a long time, or we no longer share the file he wanted anymore..
 			cur_client->ClearWaitStartTime();
 			RemoveFromWaitingQueue(pos2,true);	
 			continue;
@@ -324,8 +324,9 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd){
 		newclient = FindBestClientInQueue(true);
 
 		if(newclient) {
-		    lastupslotHighID = true; // VQB LowID alternate
-		    //AddLogLine(true,"Added High ID: %s", newclient->GetUserName()); // VQB:  perhaps only add to debug log?
+          	//Set this true so a tagged lowID can get the next reserved slot
+            lastupslotHighID = true;
+            //AddLogLine(true,"Added High ID: %s", newclient->GetUserName());
 			RemoveFromWaitingQueue(newclient, true);
 			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 		}
@@ -407,7 +408,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 
     // save 15 minutes of data about number of fully active clients
     uint32 tempMaxRemoved = 0;
-    while(!activeClients_tick_list.IsEmpty() && curTick-activeClients_tick_list.GetHead() > 20*1000) {
+    while(!activeClients_tick_list.IsEmpty() && !activeClients_list.IsEmpty() && curTick-activeClients_tick_list.GetHead() > 20*1000) {
             activeClients_tick_list.RemoveHead();
 	        uint32 removed = activeClients_list.RemoveHead();
 
@@ -472,8 +473,6 @@ void CUploadQueue::Process() {
         // There's not enough open uploads. Open another one.
 		AddUpNextClient();
 	}
-
-	m_bRemovedClientByScore = false;
 
     // The loop that feeds the upload slots with data.
 	POSITION pos = uploadinglist.GetHeadPosition();
@@ -868,6 +867,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 	
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
+            client->m_bAddNextConnect = false;
             uploadinglist.RemoveAt(curPos);
 			bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
             bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
@@ -952,6 +952,7 @@ bool CUploadQueue::RemoveFromWaitingQueue(CUpDownClient* client, bool updatewind
 		RemoveFromWaitingQueue(pos,updatewindow);
 		if (updatewindow)
 			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
+		client->m_bAddNextConnect = false;
 		return true;
 	}
 	else
@@ -1000,10 +1001,13 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 		const uint32 score = client->GetScore(true, true);
 
 		// Check if another client has a bigger score
-		if (score < GetMaxClientScore() && !m_bRemovedClientByScore) {
+		if (score < GetMaxClientScore() && m_dwRemovedClientByScore < GetTickCount()) {
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, false, _T("%s: Upload session ended due to score."), client->GetUserName());
-			m_bRemovedClientByScore = true; //makes sure only one client gets removed per round, so we the best score can be recalculated after the next has its downloadslot
+			//Set timer to prevent to many uploadslot getting kick do to score.
+			//Upload slots are delayed by a min of 1 sec and the maxscore is reset every 5 sec.
+			//So, I choose 6 secs to make sure the maxscore it updated before doing this again.
+			m_dwRemovedClientByScore = GetTickCount()+SEC2MS(6);
 			return true;
 		}
 	}

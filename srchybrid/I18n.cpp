@@ -343,47 +343,141 @@ CString CPreferences::GetLangDLLNameByID(LANGID lidSelected){
 	return CString("");
 }
 
+void CPreferences::SetRtlLocale(LCID lcid)
+{
+	const SLanguage* pLangs = _aLanguages;
+	while (pLangs->lid)
+	{
+		if (pLangs->lid == LANGIDFROMLCID(lcid))
+		{
+			if (pLangs->uCodepage)
+			{
+				CString strCodepage;
+				strCodepage.Format(_T(".%u"), pLangs->uCodepage);
+				_tsetlocale(LC_CTYPE, strCodepage);
+			}
+			break;
+		}
+		pLangs++;
+	}
+}
+
 void CPreferences::InitThreadLocale()
 {
 #ifdef _UNICODE
-//#ifdef _DEBUG
 	ASSERT( m_wLanguageID != 0 );
 
 	// NOTE: This function is for testing multi language support only.
 	// NOTE: This function is *NOT* to be enabled in release builds nor to be offered by any Mod!
 	if (theApp.GetProfileInt(_T("eMule"), _T("SetLanguageACP"), 0) != 0)
 	{
+		LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
+
+		// get the ANSI codepage which is to be used for all non-Unicode conversions.
+		LANGID lidSystem = m_wLanguageID;
+
+		// get user's sorting preferences
+		//UINT uSortIdUser = SORTIDFROMLCID(lcidUser);
+		//UINT uSortVerUser = SORTVERSIONFROMLCID(lcidUser);
+		// we can't use the same sorting paramters for 2 different Languages..
+		UINT uSortIdUser = SORT_DEFAULT;
+		UINT uSortVerUser = 0;
+
 		// set thread locale, this is used for:
 		//	- MBCS->Unicode conversions (e.g. search results).
 		//	- Unicode->MBCS conversions (e.g. publishing local files (names) in network, or savint text files on local disk)...
-		SetThreadLocale(m_wLanguageID);
+		LCID lcid = MAKESORTLCID(lidSystem, uSortIdUser, uSortVerUser);
+		SetThreadLocale(lcid);
 
-		const SLanguage* pLangs = _aLanguages;
-		while (pLangs->lid)
+		// if we set the thread locale (see comments above) we also have to specify the proper
+		// codepage for the C-RTL, otherwise we may not be able to store some strings as MBCS
+		// (Unicode->MBCS conversion may fail)
+		SetRtlLocale(lcid);
+	}
+	else if (theApp.GetProfileInt(_T("eMule"), _T("SetSystemACP"), 0) != 0)
+	{
+		LCID lcidSystem = GetSystemDefaultLCID();	// Installation, or altered by user in control panel (WinXP)
+		LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
+
+		// get the ANSI codepage which is to be used for all non-Unicode conversions.
+		LANGID lidSystem = LANGIDFROMLCID(lcidSystem);
+
+		// get user's sorting preferences
+		//UINT uSortIdUser = SORTIDFROMLCID(lcidUser);
+		//UINT uSortVerUser = SORTVERSIONFROMLCID(lcidUser);
+		// we can't use the same sorting paramters for 2 different Languages..
+		UINT uSortIdUser = SORT_DEFAULT;
+		UINT uSortVerUser = 0;
+
+		// create a thread locale which gives full backward compability for users which had run ANSI emule on 
+		// a system where the system's code page did not match the user's language..
+		LCID lcid = MAKESORTLCID(lidSystem, uSortIdUser, uSortVerUser);
+		LCID lcidThread = GetThreadLocale();
+		if (lcidThread != lcid)
 		{
-			if (pLangs->lid == m_wLanguageID)
-			{
-				// if we set the thread locale (see comments above) we also have to specify the proper
-				// codepage for the C-RTL, otherwise we may not be able to store some strings as MBCS (Unicode->MBCS
-				// conversion may fail)
-				if (pLangs->uCodepage)
-				{
-					CString strCodepage;
-					strCodepage.Format(_T(".%u"), pLangs->uCodepage);
-					_tsetlocale(LC_CTYPE, strCodepage);
-				}
-				break;
-			}
-			pLangs++;
+			TRACE("+++ Setting thread locale: 0x%08x\n", lcid);
+			SetThreadLocale(lcid);
+
+			// if we set the thread locale (see comments above) we also have to specify the proper
+			// codepage for the C-RTL, otherwise we may not be able to store some strings as MBCS
+			// (Unicode->MBCS conversion may fail)
+			SetRtlLocale(lcid);
 		}
 	}
-//#endif //_DEBUG
 #endif //_UNICODE
 }
 
 void InitThreadLocale()
 {
 	thePrefs.InitThreadLocale();
+}
+
+bool CheckThreadLocale()
+{
+#ifdef _UNICODE
+	if (theApp.GetProfileInt(_T("eMule"), _T("SetLanguageACP"), 0) != 0)
+		return true;
+	int iSetSysACP = theApp.GetProfileInt(_T("eMule"), _T("SetSystemACP"), -1);
+	if (iSetSysACP != -1)
+		return true;
+	iSetSysACP = 0;
+
+	LCID lcidSystem = GetSystemDefaultLCID();	// Installation, or altered by user in control panel (WinXP)
+	LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
+
+	// get the ANSI codepage which is to be used for all non-Unicode conversions.
+	LANGID lidSystem = LANGIDFROMLCID(lcidSystem);
+
+	// get user's sorting preferences
+	//UINT uSortIdUser = SORTIDFROMLCID(lcidUser);
+	//UINT uSortVerUser = SORTVERSIONFROMLCID(lcidUser);
+	// we can't use the same sorting paramters for 2 different Languages..
+	UINT uSortIdUser = SORT_DEFAULT;
+	UINT uSortVerUser = 0;
+
+	// create a thread locale which gives full backward compability for users which had run ANSI emule on 
+	// a system where the system's code page did not match the user's language..
+	LCID lcid = MAKESORTLCID(lidSystem, uSortIdUser, uSortVerUser);
+	LCID lcidThread = GetThreadLocale();
+	if (lcidThread != lcid)
+	{
+		CString str =
+			_T("eMule has detected that your system's codepage is not the same as eMule's current codepage. Do you want eMule to use your system's codepage for converting non-Unicode data to Unicode?\r\n")
+			_T("\r\n")
+			_T("If you want eMule to use your system's codepage for converting non-Unicode data, click 'Yes'. (This will give you more backward compatibility when reading older *.met files created with non-Unicode eMule versions.)\r\n")
+			_T("\r\n")
+			_T("If you want eMule to use the current codepage for converting non-Unicode data, click 'No'. (If you are using eMule the first time or if you don't care about this issue at all, chose this option. This is recommended.)\r\n")
+			_T("\r\n")
+			_T("If you want to cancel and create backup of all your config files or visit our forum to learn more about this issue, click 'Cancel'.\r\n");
+		int iAnswer = AfxMessageBox(str, MB_ICONSTOP | MB_YESNOCANCEL | MB_DEFBUTTON2);
+		if (iAnswer == IDCANCEL)
+			return false;
+		if (iAnswer == IDYES)
+			iSetSysACP = 1;
+	}
+	theApp.WriteProfileInt(_T("eMule"), _T("SetSystemACP"), iSetSysACP);
+#endif
+	return true;
 }
 
 CString CPreferences::GetHtmlCharset()

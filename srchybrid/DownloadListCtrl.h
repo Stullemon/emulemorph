@@ -92,6 +92,7 @@ protected:
 	typedef std::pair<void*, CtrlItem_Struct*> ListItemsPair;
 	typedef std::multimap<void*, CtrlItem_Struct*> ListItems;
     ListItems	m_ListItems;
+	CFont		m_fontBold;
 
 	void ShowFileDialog(CPartFile* pFile, EInvokePage eInvokePage);
 	void SetAllIcons();

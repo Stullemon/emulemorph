@@ -229,7 +229,7 @@ void CPartFile::Init(){
 	transfered = 0;
 	m_iLastPausePurge = time(NULL);
 	m_AllocateThread=NULL;
-
+	m_iAllocinfo = 0;
 	if(thePrefs.GetNewAutoDown()){
 		m_iDownPriority = PR_HIGH;
 		m_bAutoDownPriority = true;
@@ -1462,12 +1462,12 @@ void CPartFile::PartFileHashFinished(CKnownFile* result){
 			}
 		}
 	}
-	if (!errorfound && result->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE){
+	if (!errorfound && result->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE && status == PS_COMPLETING){
 		delete m_pAICHHashSet;
 		m_pAICHHashSet = result->GetAICHHashset();
 		result->SetAICHHashset(NULL);
 	}
-	else{
+	else if (status == PS_COMPLETING){
 		AddDebugLogLine(false, _T("Failed to store new AICH Hashset for completed file %s"), GetFileName());
 	}
 
@@ -3032,7 +3032,7 @@ BOOL CPartFile::PerformFileComplete()
 		while (PathFileExists(strTestName));
 		strNewname = strTestName;
 	}
-	delete[] newfilename;
+	free(newfilename);
 
 	DWORD dwMoveResult;
 	if ((dwMoveResult = MoveCompletedPartFile(strPartfilename, strNewname, this)) != ERROR_SUCCESS)
@@ -3277,8 +3277,8 @@ bool CPartFile::IsCorruptedPart(uint16 partnumber) const
 bool CPartFile::IsArchive(bool onlyPreviewable) const
 {
 	if (onlyPreviewable){
-		CString extension = CString(GetFileName()).Right(4);
-		return ((extension.CompareNoCase(_T(".zip")) == 0) || (extension.CompareNoCase(_T(".rar")) == 0));
+		CString extension = GetFileName().Right(4);
+		return (extension.CompareNoCase(_T(".zip")) == 0 || extension.CompareNoCase(_T(".rar")) == 0);
 	}
 
 	return (ED2KFT_ARCHIVE == GetED2KFileTypeID(GetFileName()));
@@ -3619,10 +3619,11 @@ sint32 CPartFile::GetTimeRemainingAvg() const
 }
 // khaos::accuratetimerem-
 
-void CPartFile::PreviewFile(){
+void CPartFile::PreviewFile()
+{
 	if (IsArchive(true)){
-		if ((!m_bRecoveringArchive) && (!m_bPreviewing))
-			CArchiveRecovery::recover(this, true);
+		if (!m_bRecoveringArchive && !m_bPreviewing)
+			CArchiveRecovery::recover(this, true, thePrefs.GetPreviewCopiedArchives());
 		return;
 	}
 
@@ -3673,11 +3674,38 @@ bool CPartFile::IsReadyForPreview() const
 	// Barry - Allow preview of archives of any length > 1k
 	if (IsArchive(true))
 	{
-		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && (!m_bRecoveringArchive) && ((GetFreeDiskSpaceX(thePrefs.GetTempDir()) + 100000000) > (2*GetFileSize())))
-			return true; 
-		else 
+		//if (GetStatus() != PS_COMPLETE && GetStatus() != PS_COMPLETING 
+		//	&& GetFileSize()>1024 && GetCompletedSize()>1024 
+		//	&& !m_bRecoveringArchive 
+		//	&& GetFreeDiskSpaceX(thePrefs.GetTempDir())+100000000 > 2*GetFileSize())
+		//	return true;
+
+		// check part file state
+	    EPartFileStatus uState = GetStatus();
+		if (uState == PS_COMPLETE || uState == PS_COMPLETING)
 			return false;
+
+		// check part file size(s)
+		if (GetFileSize() < 1024 || GetCompletedSize() < 1024)
+			return false;
+
+		// check if we already trying to recover an archive file from this part file
+		if (m_bRecoveringArchive)
+			return false;
+
+		// check free disk space
+		UINT uMinFreeDiskSpace = (thePrefs.IsCheckDiskspaceEnabled() && thePrefs.GetMinFreeDiskSpace() > 0)
+									? thePrefs.GetMinFreeDiskSpace()
+									: 20*1024*1024;
+		if (thePrefs.GetPreviewCopiedArchives())
+			uMinFreeDiskSpace += GetFileSize()*2;
+		else 
+			uMinFreeDiskSpace += GetCompletedSize() + 16*1024;
+		if (GetFreeDiskSpaceX(thePrefs.GetTempDir()) < uMinFreeDiskSpace)
+			return false;
+		return true; 
 	}
+
 	//MORPH START - Added by SiRoB, preview music file
 	if (IsMusic())
 		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && ((GetFreeDiskSpaceX(thePrefs.GetTempDir()) + 100000000) > (2*GetFileSize())))
@@ -3739,8 +3767,14 @@ bool CPartFile::IsReadyForPreview() const
 			}
 			else{
 			    // For AVI files it depends on the used codec..
+				if (thePrefs.GetPreviewSmallBlocks() >= 2){
+					if (GetCompletedSize() < 256*1024)
+						return false;
+				}
+				else{
 				if (!IsComplete(0, 256*1024))
 					return false;
+				}
 			}
 	
 			return true;
@@ -5323,6 +5357,9 @@ void CPartFile::SetFileOpProgress(UINT uProgress)
 }
 
 int CPartFile::RightFileHasHigherPrio(CPartFile* left, CPartFile* right) {
+    if(!right) {
+        return false;
+    }
 	//MORPH START - Added by SiRoB, ForcedA4AF
 	if (thePrefs.UseSmartA4AFSwapping())
 	{
@@ -5341,7 +5378,7 @@ int CPartFile::RightFileHasHigherPrio(CPartFile* left, CPartFile* right) {
 		left_iA4AFMode = thePrefs.GetCategory(left->GetCategory())->iAdvA4AFMode;
 			
 	//MORPH END   - Added by SiRoB, Avanced A4AF
-	if(
+	if(!left ||
 		//MORPH START - Added by SiRoB, ForcedA4AF
 		(
 			thePrefs.UseSmartA4AFSwapping() && left != theApp.downloadqueue->forcea4af_file

@@ -38,11 +38,19 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-// CServerListCtrl
-
 IMPLEMENT_DYNAMIC(CServerListCtrl, CMuleListCtrl)
-CServerListCtrl::CServerListCtrl() {
-	server_list = 0; // i_a 
+// CServerListCtrl
+BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl)
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMLdblclk)
+	ON_NOTIFY_REFLECT(LVN_GETINFOTIP, OnLvnGetInfoTip)
+	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
+END_MESSAGE_MAP()
+
+CServerListCtrl::CServerListCtrl()
+{
+	server_list = NULL;
 	SetGeneralPurposeFind(true);
 }
 
@@ -51,6 +59,7 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	server_list = in_list;
 	ModifyStyle(0,LVS_SINGLESEL|LVS_REPORT);
 	ModifyStyle(LVS_SINGLESEL|LVS_LIST|LVS_ICON|LVS_SMALLICON,LVS_REPORT); //here the CListCtrl is set to report-style
+	SetExtendedStyle(GetExtendedStyle() | LVS_EX_INFOTIP);
 
 	InsertColumn(0, GetResString(IDS_SL_SERVERNAME),LVCFMT_LEFT, 150);
 	InsertColumn(1, GetResString(IDS_IP),			LVCFMT_LEFT, 140);
@@ -416,13 +425,6 @@ void CServerListCtrl::RefreshAllServer(){
 }
 //EastShare End - added by AndCycle, IP to Country
 
-BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl) 
-	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick) 
-	ON_NOTIFY_REFLECT (NM_DBLCLK, OnNMLdblclk) //<-- mod bb 27.09.02 
-	ON_WM_CONTEXTMENU()
-	ON_WM_SYSCOLORCHANGE()
-END_MESSAGE_MAP()
-
 // CServerListCtrl message handlers
 
 void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
@@ -569,6 +571,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 					ShowServerCount();
 				ShowWindow(SW_SHOW); 
+					SetFocus();
 					return TRUE;
             }
 			case MP_ADDTOSTATIC:
@@ -946,11 +949,76 @@ bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 	return true;
 }
 
-void CServerListCtrl::ShowServerCount() {
+void CServerListCtrl::ShowServerCount()
+{
 	CString counter;
 
 	counter.Format(_T(" (%i)"), GetItemCount());
 	theApp.emuledlg->serverwnd->GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST)+counter  );
+}
+
+void CServerListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLVGETINFOTIP pGetInfoTip = reinterpret_cast<LPNMLVGETINFOTIP>(pNMHDR);
+	if (pGetInfoTip->iSubItem == 0)
+	{
+		LVHITTESTINFO hti = {0};
+		::GetCursorPos(&hti.pt);
+		ScreenToClient(&hti.pt);
+		bool bOverMainItem = (SubItemHitTest(&hti) != -1 && hti.iItem == pGetInfoTip->iItem && hti.iSubItem == 0);
+
+		// those tooltips are very nice for debugging/testing but pretty annoying for general usage
+		// enable tooltips only if Shift+Ctrl is currently pressed
+		bool bShowInfoTip = GetSelectedCount() > 1 || ((GetKeyState(VK_SHIFT) & 0x8000) && (GetKeyState(VK_CONTROL) & 0x8000));
+
+		if (!bShowInfoTip){
+			if (!bOverMainItem){
+				// don' show the default label tip for the main item, if the mouse is not over the main item
+				if ((pGetInfoTip->dwFlags & LVGIT_UNFOLDED) == 0 && pGetInfoTip->cchTextMax > 0 && pGetInfoTip->pszText[0] != '\0')
+					pGetInfoTip->pszText[0] = '\0';
+			}
+			return;
+		}
+
+		if (GetSelectedCount() == 1)
+		{
+			;
+		}
+		else
+		{
+			int iSelected = 0;
+			ULONGLONG ulTotalUsers = 0;
+			ULONGLONG ulTotalLowIdUsers = 0;
+			ULONGLONG ulTotalFiles = 0;
+			POSITION pos = GetFirstSelectedItemPosition();
+			while (pos)
+			{
+				const CServer* pServer = (CServer*)GetItemData(GetNextSelectedItem(pos));
+				if (pServer)
+				{
+					iSelected++;
+					ulTotalUsers += pServer->GetUsers();
+					ulTotalFiles += pServer->GetFiles();
+					ulTotalLowIdUsers += pServer->GetLowIDUsers();
+				}
+			}
+
+			if (iSelected > 0)
+			{
+				CString strInfo;
+				strInfo.Format(_T("%s: %u\r\n%s: %s\r\n%s: %s\r\n%s: %s"), 
+					GetResString(IDS_FSTAT_SERVERS), iSelected, 
+					GetResString(IDS_UUSERS), CastItoIShort(ulTotalUsers),
+					GetResString(IDS_IDLOW), CastItoIShort(ulTotalLowIdUsers),
+					GetResString(IDS_PW_FILES), CastItoIShort(ulTotalFiles));
+
+				_tcsncpy(pGetInfoTip->pszText, strInfo, pGetInfoTip->cchTextMax);
+				pGetInfoTip->pszText[pGetInfoTip->cchTextMax-1] = _T('\0');
+			}
+		}
+	}
+
+	*pResult = 0;
 }
 
 //Commander - Added: CountryFlag - Start

@@ -85,6 +85,8 @@ static char THIS_FILE[]=__FILE__;
 ///////////////////////////////////////////////////////////////////////////////
 // MSLU (Microsoft Layer for Unicode) support - UnicoWS
 // 
+HMODULE g_hUnicoWS = NULL;
+bool g_bUnicoWS = false;
 #ifdef _UNICODE
 bool _bUsingUnicows = false;
 
@@ -127,15 +129,15 @@ extern "C" HMODULE __stdcall ExplicitPreLoadUnicows()
 #endif
 
 	// Pre-Load UnicoWS -- needed for proper initialization of MFC/C-RTL
-	HMODULE hModule = LoadLibraryA("unicows.dll");
-	if (hModule == NULL)
+	HMODULE g_hUnicoWS = LoadLibraryA("unicows.dll");
+	if (g_hUnicoWS == NULL)
 	{
 		ShowUnicowsError();
 		exit(1);
 	}
 
-	_bUsingUnicows = true;
-	return hModule;
+	g_bUnicoWS = true;
+	return g_hUnicoWS;
 }
 
 // NOTE: Do *NOT* change the name of this function. It *HAS* to be named "_PfnLoadUnicows" !
@@ -307,6 +309,13 @@ BOOL CemuleApp::InitInstance()
 	pendinglink = 0;
 	if (ProcessCommandline())
 		return false;
+
+	extern bool CheckThreadLocale();
+#ifdef _UNICODE
+	if (!CheckThreadLocale())
+#endif
+		return false;
+
 	// InitCommonControls() ist für Windows XP erforderlich, wenn ein Anwendungsmanifest
 	// die Verwendung von ComCtl32.dll Version 6 oder höher zum Aktivieren
 	// von visuellen Stilen angibt. Ansonsten treten beim Erstellen von Fenstern Fehler auf.
@@ -661,38 +670,102 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 	if (strText.IsEmpty())
 		return false;
 
-	//allocate global memory & lock it
-	HGLOBAL hGlobal = GlobalAlloc(GHND | GMEM_SHARE, (strText.GetLength() + 1)*sizeof(TCHAR));
-	if(hGlobal == NULL)
-		return false;
-
-	PTSTR pGlobal = static_cast<PTSTR>(GlobalLock(hGlobal));
-	if( pGlobal == NULL ){
-		GlobalFree(hGlobal);
-		return false;
+	HGLOBAL hGlobalT = GlobalAlloc(GHND | GMEM_SHARE, (strText.GetLength() + 1) * sizeof(TCHAR));
+	if (hGlobalT != NULL)
+	{
+		LPTSTR pGlobalT = static_cast<LPTSTR>(GlobalLock(hGlobalT));
+		if (pGlobalT != NULL)
+		{
+			_tcscpy(pGlobalT, strText);
+			GlobalUnlock(hGlobalT);
+		}
+		else
+		{
+			GlobalFree(hGlobalT);
+			hGlobalT = NULL;
+		}
 	}
+	//allocate global memory & lock it
+#ifdef _UNICODE
+	CStringA strTextA(strText);
+	HGLOBAL hGlobalA = GlobalAlloc(GHND | GMEM_SHARE, (strTextA.GetLength() + 1) * sizeof(CHAR));
+	if (hGlobalA != NULL)
+	{
+		LPSTR pGlobalA = static_cast<LPSTR>(GlobalLock(hGlobalA));
+		if (pGlobalA != NULL)
+		{
+			strcpy(pGlobalA, strTextA);
+			GlobalUnlock(hGlobalA);
+		}
+		else
+		{
+			GlobalFree(hGlobalA);
+			hGlobalA = NULL;
+		}
+	}
+#endif
 
-	//copy the text
-	_tcscpy(pGlobal, (LPCTSTR)strText);
-	GlobalUnlock(hGlobal);
+	if (hGlobalT == NULL
+#ifdef _UNICODE
+		&& hGlobalA == NULL
+#endif
+		)
+		return false;
 
-	//Open the Clipboard and insert the handle into the global memory
-	bool bResult = false;
+	int iCopied = 0;
 	if( OpenClipboard(NULL) )
 	{
 		if( EmptyClipboard() )
+		{
 #ifdef _UNICODE
-			bResult = (SetClipboardData(CF_UNICODETEXT,hGlobal) != NULL);
+			if (hGlobalT){
+				if (SetClipboardData(CF_UNICODETEXT, hGlobalT) != NULL){
+					iCopied++;
+				}
+				else{
+					GlobalFree(hGlobalT);
+					hGlobalT = NULL;
+				}
+			}
+			if (hGlobalA){
+				if (SetClipboardData(CF_TEXT, hGlobalA) != NULL){
+					iCopied++;
+				}
+				else{
+					GlobalFree(hGlobalA);
+					hGlobalA = NULL;
+				}
+			}
 #else
-			bResult = (SetClipboardData(CF_TEXT,hGlobal) != NULL);
+			if (SetClipboardData(CF_TEXT, hGlobalT) != NULL){
+				iCopied++;
+			}
+			else{
+				GlobalFree(hGlobalT);
+				hGlobalT = NULL;
+			}
 #endif
+		}
 		CloseClipboard();
 	}
-	if (bResult)
-		IgnoreClipboardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
+
+	if (iCopied == 0)
+	{
+		if (hGlobalT){
+			GlobalFree(hGlobalT);
+			hGlobalT = NULL;
+		}
+#ifdef _UNICODE
+		if (hGlobalA){
+			GlobalFree(hGlobalA);
+			hGlobalA = NULL;
+		}
+#endif
+	}
 	else
-		GlobalFree(hGlobal);
-	return bResult;
+		IgnoreClipboardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
+
+	return (iCopied != 0);
 }
 
 //TODO: Move to emule-window

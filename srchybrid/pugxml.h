@@ -14,8 +14,8 @@
 #pragma once
 
 
-//#define PUGOPT_MEMFIL //Uncomment to enable memory-mapped file parsing support.
-//#define PUGOPT_NONSEG //Uncomment to enable non-destructive (non-segmenting) parsing support.
+#define PUGOPT_MEMFIL //Uncomment to enable memory-mapped file parsing support.
+#define PUGOPT_NONSEG //Uncomment to enable non-destructive (non-segmenting) parsing support.
 
 
 #ifdef PUGOPT_MEMFIL
@@ -1899,7 +1899,7 @@ public:
 	//<summary>Cast attribute value as std::string. If not found, return empty.</summary>
 	//<returns>The std::string attribute value, or empty.</returns>
 	//<remarks>Note: Modifying this will not change the value, e.g. read only.</remarks>
-	operator std::string()
+	/*operator std::string()
 	{
 		std::string temp;
 		if(!empty() && has_value())
@@ -1911,7 +1911,7 @@ public:
 #endif
 		}
 		return temp;
-	}
+	}*/
 	//<summary>Cast attribute value as integral character string. If not found, return NULL.</summary>
 	//<returns>Integral character string attribute value, or NULL.</returns>
 	//<remarks>Warning: Modifying this may corrupt portions of the document tree.</remarks>
@@ -1976,7 +1976,7 @@ public:
 	//<summary>Set attribute to std::string.</summary>
 	//<param name="rhs">Value std::string to set.</param>
 	//<returns>Reference to xml_attribute.</returns>
-	xml_attribute& operator=(const std::string& rhs){ value(rhs.c_str()); return *this; }
+	//xml_attribute& operator=(const std::string& rhs){ value(rhs.c_str()); return *this; }
 	//<summary>Set attribute to string.</summary>
 	//<param name="rhs">Value string to set.</param>
 	//<returns>Reference to xml_attribute.</returns>
@@ -2012,7 +2012,7 @@ public:
 	//<summary>Right-shift attribute value to std::string.</summary>
 	//<param name="rhs">Reference to std::string to set.</param>
 	//<returns>Reference to xml_attribute.</returns>
-	xml_attribute& operator>>(std::string& rhs)
+	/*xml_attribute& operator>>(std::string& rhs)
 	{
 #ifdef PUGOPT_NONSEG
 		rhs.clear();
@@ -2021,7 +2021,7 @@ public:
 		rhs = value();
 #endif
 		return *this;
-	}
+	}*/
 	//<summary>Right-shift attribute value to long.</summary>
 	//<param name="rhs">Reference to long to set.</param>
 	//<returns>Reference to xml_attribute.</returns>
@@ -2382,9 +2382,7 @@ public:
 	bool has_attributes() { return (!empty() && attributes() > 0); } //Node has 1 or more attributes.
 	bool has_siblings() { return (!empty() && siblings() > 0); } //Node has one or more siblings.
 	bool has_name() { return (!empty() && _root->name != 0); } //Node has a name.
-	
-	bool has_name(/*const*/ std::string& name) { return has_name(name.c_str()); } //Node is named 'name'.
-	
+	bool has_name(const std::string& name) { return has_name(name.c_str()); } //Node is named 'name'.
 	bool has_attribute(const std::string& name) { return has_attribute(name.c_str()); } //Node has an attribute named 'name'.
 #ifdef PUGOPT_NONSEG
 	bool has_name(const TCHAR* name) const { return (name && _root && _root->name && _tcsncmp(_root->name,name,_root->name_size)==0); } //Node is named 'name'.
@@ -3078,39 +3076,39 @@ public:
 	//<summary>Compile the absolute node path from root as a text string.</summary>
 	//<param name="delimiter">Delimiter string to insert between element names.</param>
 	//<returns>Path string (e.g. with '/' as delimiter, '/document/.../this'.</returns>
-	std::string path(const TCHAR* delimiter = _T("/"))
-	{
-		TCHAR* path = NULL; //Current path.
-		TCHAR* temp; //Temporary pointer.
-		xml_node cursor = *this; //Make a copy.
-#ifdef PUGOPT_NONSEG
-		unsigned int destlen = 0;
-		strcatgrown_impl(&path,cursor.name(),destlen,cursor.name_size()); //Get this name.
-#else
-		strcatgrow(&path,cursor.name()); //Get this name.
-#endif
-		while(cursor.moveto_parent() && !cursor.type_document()) //Loop to parent (stopping on actual root because it has no name).
-		{
-			temp = NULL; //Mark as null so 'strcatgrow' will allocate memory.
-#ifdef PUGOPT_NONSEG
-			destlen = 0;
-			strcatgrown_impl(&temp,cursor.name(),destlen,cursor.name_size()); //Append next element name.
-#else
-			strcatgrow(&temp,cursor.name()); //Append next element name.
-#endif
-			strcatgrow(&temp,delimiter); //Append delimiter.
-			strcatgrow(&temp,path); //Append current path.
-			free(path); //Free the old path.
-			path = temp; //Set path as new string.
-		}
-		temp = NULL;
-		strcatgrow(&temp,delimiter); //Prepend final delimiter.
-		strcatgrow(&temp,path); //Append current path.
-		free(path); //Free the old path.
-		std::string returns = temp; //Set path as new string.
-		free(temp);
-		return returns; //Return the path;
-	}
+//	std::string path(const TCHAR* delimiter = _T("/"))
+//	{
+//		TCHAR* path = NULL; //Current path.
+//		TCHAR* temp; //Temporary pointer.
+//		xml_node cursor = *this; //Make a copy.
+//#ifdef PUGOPT_NONSEG
+//		unsigned int destlen = 0;
+//		strcatgrown_impl(&path,cursor.name(),destlen,cursor.name_size()); //Get this name.
+//#else
+//		strcatgrow(&path,cursor.name()); //Get this name.
+//#endif
+//		while(cursor.moveto_parent() && !cursor.type_document()) //Loop to parent (stopping on actual root because it has no name).
+//		{
+//			temp = NULL; //Mark as null so 'strcatgrow' will allocate memory.
+//#ifdef PUGOPT_NONSEG
+//			destlen = 0;
+//			strcatgrown_impl(&temp,cursor.name(),destlen,cursor.name_size()); //Append next element name.
+//#else
+//			strcatgrow(&temp,cursor.name()); //Append next element name.
+//#endif
+//			strcatgrow(&temp,delimiter); //Append delimiter.
+//			strcatgrow(&temp,path); //Append current path.
+//			free(path); //Free the old path.
+//			path = temp; //Set path as new string.
+//		}
+//		temp = NULL;
+//		strcatgrow(&temp,delimiter); //Prepend final delimiter.
+//		strcatgrow(&temp,path); //Append current path.
+//		free(path); //Free the old path.
+//		std::string returns = temp; //Set path as new string.
+//		free(temp);
+//		return returns; //Return the path;
+//	}
 
 	//<summary>Search for a node by path.</summary>
 	//<param name="path">
@@ -3119,7 +3117,7 @@ public:
 	//</param>
 	//<param name="delimiter">Delimiter string to use in tokenizing path.</param>
 	//<returns>Matching node, or xml_node(NULL) if not found.</returns>
-	xml_node first_element_by_path(const std::string& path,const std::string& delimiter = "/"){ return first_element_by_path(path.c_str(),delimiter.c_str()); }
+	//xml_node first_element_by_path(const std::string& path,string& delimiter = _T("/")){ return first_element_by_path(path.c_str(),delimiter.c_str()); }
 
 	//<summary>Search for a node by path.</summary>
 	//<param name="path">

@@ -109,6 +109,8 @@ void CKadContactHistogramCtrl::OnPaint()
 
 	CRect rcClnt;
 	GetClientRect(&rcClnt);
+	if (rcClnt.IsRectEmpty())
+		return;
 	dc.FillSolidRect(rcClnt, RGB(255,255,255));
 
 	CFont* pOldFont = dc.SelectObject(&m_fontLabel);
@@ -138,7 +140,15 @@ void CKadContactHistogramCtrl::OnPaint()
 	UINT uHistWidth = rcClnt.Width() - iLeftBorder - iRightBorder;
 	if (uHistWidth > ARRSIZE(m_aHist))
 		uHistWidth = ARRSIZE(m_aHist);
+	else if (uHistWidth == 0){
+		dc.SelectObject(pOldFont);
+		return;
+	}
 	UINT uHistHeight = rcClnt.Height() - iTopBorder - iBottomBorder;
+	if (uHistHeight == 0){
+		dc.SelectObject(pOldFont);
+		return;
+	}
 
 	int i = 0;
 	UINT uMax = m_aHist[i++];
@@ -152,23 +162,25 @@ void CKadContactHistogramCtrl::OnPaint()
 	//Lets take the average. This will keep the cluster of closest contacts from
 	//streching the graph too far..
 	uMax /= ARRSIZE(m_aHist);
-
 	if (uMax < 15)
 		uMax = 15/*uHistHeight*/;
 
+	UINT uLabels = uHistHeight / (m_iMaxLabelHeight + m_iMaxLabelHeight/2);
+	if (uLabels == 0){
+		dc.SelectObject(pOldFont);
+		return;
+	}
+	UINT uStep = ((uMax / uLabels + 5) / 10) * 10;
+	if (uStep < 5)
+		uStep = 5;
+
 	CPen* pOldPen = dc.SelectObject(&m_penAxis);
-	
+
 	dc.MoveTo(iBaseLineX, rcClnt.top + iTopBorder);
 	dc.LineTo(iBaseLineX, iBaseLineY);
 	dc.LineTo(iBaseLineX + uHistWidth, iBaseLineY);
 
 	dc.SelectObject(&m_penAux);
-	UINT uLabels = uHistHeight / (m_iMaxLabelHeight + m_iMaxLabelHeight/2);
-	UINT uStep = ((uMax / uLabels + 5) / 10) * 10;
-
-	if( uStep < 5 )
-		uStep = 5;
-
 	for (UINT s = 0; s <= uMax; s += uStep)
 	{
 		int y = iBaseLineY - (uHistHeight * s) / uMax;

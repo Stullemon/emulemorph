@@ -308,12 +308,17 @@ void CServerWnd::DoDataExchange(CDataExchange* pDX)
 	//MORPH END   - Added by SiRoB, XML News [O²]
 }
 
-bool CServerWnd::UpdateServerMetFromURL(CString strURL) {
-	if ((strURL==_T("")) || (strURL.Find(_T("://")) == -1))	// not a valid URL
+bool CServerWnd::UpdateServerMetFromURL(CString strURL)
+{
+	if (strURL.IsEmpty() || (strURL.Find(_T("://")) == -1))	// not a valid URL
 	{
 		AddLogLine(true, GetResString(IDS_INVALIDURL) );
 		return false;
 	}
+
+	// add entered URL to LRU list even if it's not yet known whether we can download from this URL (it's just more convenient this way)
+	if (m_pacServerMetURL && m_pacServerMetURL->IsBound())
+		m_pacServerMetURL->AddItem(strURL, 0);
 
 	CString strTempFilename;
 	strTempFilename.Format(_T("%stemp-%d-server.met"), thePrefs.GetConfigDir(), ::GetTickCount());
@@ -327,9 +332,6 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL) {
 		AddLogLine(true, GetResString(IDS_ERR_FAILEDDOWNLOADMET), strURL);
 		return false;
 	}
-
-	if (m_pacServerMetURL && m_pacServerMetURL->IsBound())
-		m_pacServerMetURL->AddItem(strURL,0);
 
 	// step3 - add content of server.met to serverlist
 	serverlistctrl.Hide();
@@ -1039,19 +1041,19 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 	xml_node_list item;
 	for(xml_node::child_iterator i = _node.children_begin(); i < _node.children_end(); ++i) {
 		CString c = CString(i->name());
-		if (CString(i->name()) == CString("item")) {
-			aXMLUrls.Add(i->first_element_by_path("./link").child(0).value());
-			sbuffer = i->first_element_by_path("./title").child(0).value();
+		if (CString(i->name()) == _T("item")) {
+			aXMLUrls.Add(i->first_element_by_path(_T("./link")).child(0).value());
+			sbuffer = i->first_element_by_path(_T("./title")).child(0).value();
 			HTMLParse(sbuffer);
 			newsmsgbox->AppendText(_T("\n• "));
 			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
 			aXMLNames.Add(sbuffer);
-			if (!i->first_element_by_path("./author").child(0).empty())
+			if (!i->first_element_by_path(_T("./author")).child(0).empty())
 			{
-				sxmlbuffer = i->first_element_by_path("./author").child(0).value();
-				newsmsgbox->AppendText(CString(" - Par: ")+sxmlbuffer);
+				sxmlbuffer = i->first_element_by_path(_T("./author")).child(0).value();
+				newsmsgbox->AppendText(_T(" - Par: ")+sxmlbuffer);
 			}
-			CString buffer = i->first_element_by_path("./description").child(0).value();
+			CString buffer = i->first_element_by_path(_T("./description")).child(0).value();
 			HTMLParse(buffer);
 			if (buffer != _xmlbuffer && !buffer.IsEmpty())
 			{
@@ -1107,12 +1109,12 @@ void CServerWnd::ParseNewsFile(CString strTempFilename)
 	// the "channel" section in the file.
 	xml_node itelem;
 	xml_node itelemroot;
-	if (!xml->document().first_element_by_path("./rss").empty()) {
-		itelemroot = xml->document().first_element_by_path("./rss");
-		itelem = xml->document().first_element_by_path("./rss/channel");
-	} else if (!xml->document().first_element_by_path("./rdf:RDF").empty()) {
-		itelemroot = xml->document().first_element_by_path("./rdf:RDF");
-		itelem = xml->document().first_element_by_path("./rdf:RDF/channel");
+	if (!xml->document().first_element_by_path(_T("./rss")).empty()) {
+		itelemroot = xml->document().first_element_by_path(_T("./rss"));
+		itelem = xml->document().first_element_by_path(_T("./rss/channel"));
+	} else if (!xml->document().first_element_by_path(_T("./rdf:RDF")).empty()) {
+		itelemroot = xml->document().first_element_by_path(_T("./rdf:RDF"));
+		itelem = xml->document().first_element_by_path(_T("./rdf:RDF/channel"));
 	} else {
 		delete xml;
 		return;
@@ -1122,8 +1124,8 @@ void CServerWnd::ParseNewsFile(CString strTempFilename)
 	if(!itelem.empty()) {
 		// Add the data in this section to the News box. 
 		// It represents the title of the news channel and so on...
-		aXMLUrls.Add(itelem.first_element_by_path("./link").child(0).value());
-		sbuffer = itelem.first_element_by_path("./title").child(0).value();
+		aXMLUrls.Add(itelem.first_element_by_path(_T("./link")).child(0).value());
+		sbuffer = itelem.first_element_by_path(_T("./title")).child(0).value();
 		HTMLParse(sbuffer);
 		sbuffer.Replace(_T("'"),_T("`"));
 		newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
@@ -1132,7 +1134,7 @@ void CServerWnd::ParseNewsFile(CString strTempFilename)
 		// We pass this to ParseNewsNode to prevent this description to be
 		// added twice: Some news pages put the most important message
 		// in both the page description and the first item.
-		CString xmlbuffer = itelem.first_element_by_path("./description").child(0).value();
+		CString xmlbuffer = itelem.first_element_by_path(_T("./description")).child(0).value();
 		HTMLParse(xmlbuffer);
 		newsmsgbox->AddEntry(CString("\n	")+xmlbuffer);
 		// News-items can be found either in the "channel"-node...

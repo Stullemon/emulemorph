@@ -37,11 +37,21 @@ enum EUtf8Str;
 struct IPRange_Struct2; //EastShare - added by AndCycle, IP to Country
 
 struct Pending_Block_Struct{
+	Pending_Block_Struct()
+	{
+		block = NULL;
+		zStream = NULL;
+		totalUnzipped = 0;
+		fZStreamError = 0;
+		fRecovered = 0;
+		fQueued = 0;
+	}
 	Requested_Block_Struct*	block;
 	struct z_stream_s*      zStream;       // Barry - Used to unzip packets
 	uint32                  totalUnzipped; // Barry - This holds the total unzipped bytes for all packets so far
 	UINT					fZStreamError : 1,
-							fRecovered    : 1;
+							fRecovered    : 1,
+							fQueued		  : 3;
 };
 
 #pragma pack(1)

@@ -223,14 +223,14 @@ LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM wParam, LPARAM lParam)
 				LPHOSTENT pHost = (LPHOSTENT)_acDNSBuffer;
 				m_strMyHostname = pHost->h_name;
 				if (!m_strMyHostname.IsEmpty()){
-					AddDebugLogLine(false, _T("PeerCache: Found my Hostname: %s, continue search"), m_strMyHostname);
+					DEBUG_ONLY(AddDebugLogLine(false, _T("PeerCache: Found my Hostname: %s, continue search"), m_strMyHostname));
 					SearchForPC();
 					return 0;
 				}
 			}
 		}
 		m_PCStatus = PCS_NOTFOUND;
-		AddDebugLogLine(false, _T("DNS Reverse Lookup for own IP failed, aborting PC search"));
+		DEBUG_ONLY(AddDebugLogLine(false, _T("DNS Reverse Lookup for own IP failed, aborting PC search")));
 
 	}
 	else{
@@ -243,7 +243,7 @@ LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM wParam, LPARAM lParam)
 				if (pHost->h_length == 4 && pHost->h_addr_list && pHost->h_addr_list[0])
 				{
 					m_dwPCIP = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
-					AddDebugLogLine(false, _T("Found PeerCache IP: %s"), ipstr(m_dwPCIP) );
+					DEBUG_ONLY(AddDebugLogLine(false, _T("Found PeerCache IP: %s"), ipstr(m_dwPCIP) ));
 					
 					m_PCLUState = LUS_FINISHED;
 					SearchForPC();
@@ -252,7 +252,7 @@ LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		// no luck, continue search
-		AddDebugLogLine(false, _T("DNS Lookup for PC, state %i, failed - PC not found yet"), m_PCLUState);
+		DEBUG_ONLY(AddDebugLogLine(false, _T("DNS Lookup for PC, state %i, failed - PC not found yet"), m_PCLUState));
 		SearchForPC();
 	}
 	return 0;
@@ -260,7 +260,7 @@ LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM wParam, LPARAM lParam)
 
 void CPeerCacheFinder::DoLookUp(CStringA strHostname){
 	if (WSAAsyncGetHostByName(theApp.emuledlg->m_hWnd, WM_PEERCHACHE_RESPONSE, strHostname, _acDNSBuffer, sizeof(_acDNSBuffer)) == 0){
-		AddDebugLogLine(false, _T("DNS Lookup for PC, state %i, failed (DoLookUP) - PC not found yet"), m_PCLUState);
+		DEBUG_ONLY(AddDebugLogLine(false, _T("DNS Lookup for PC, state %i, failed (DoLookUP) - PC not found yet"), m_PCLUState));
 	}
 }
 
@@ -326,10 +326,12 @@ CString ReverseDnsLookup(DWORD dwIP)
 			nDnsState = (*pfnDnsQuery)(strDnsQuery, DNS_TYPE_PTR, DNS_QUERY_BYPASS_CACHE, pDnsServers, &pDnsRecords, NULL);
 			if (nDnsState == 0)
 			{
-				if (pDnsRecords)
-					strHostName = pDnsRecords->Data.PTR.pNameHost;
-				if (pDnsRecords)
+				if (AtlIsValidAddress(pDnsRecords, sizeof(*pDnsRecords) - sizeof(pDnsRecords->Data) + sizeof(pDnsRecords->Data.PTR), FALSE))
+				{
+					if (AtlIsValidAddress(pDnsRecords->Data.PTR.pNameHost, sizeof(TCHAR), FALSE))
+						strHostName = pDnsRecords->Data.PTR.pNameHost;
 					(*pfnDnsRecordListFree)(pDnsRecords, DnsFreeRecordListDeep);
+				}
 			}
 			else{
 				if (thePrefs.GetVerbose())
@@ -390,7 +392,7 @@ bool CPeerCacheFinder::IsClientPCCompatible(const CClientVersionInfo& cviToCheck
 void CPeerCacheFinder::DownloadAttemptFailed(){
 	m_nFailedDownloads++;
 	if(m_nDownloadAttempts > 20 && m_nFailedDownloads > 0){
-		AddDebugLogLine(DLP_LOW, false, _T("PeerCache fail value: %0.2f"), (float)(m_nDownloadAttempts/m_nFailedDownloads));
+		DEBUG_ONLY(AddDebugLogLine(DLP_LOW, false, _T("PeerCache fail value: %0.2f"), (float)(m_nDownloadAttempts/m_nFailedDownloads)));
 		if ( (float)(m_nDownloadAttempts/m_nFailedDownloads) < (float)2)
 			AddDebugLogLine(DLP_LOW, false, _T("PeerCache fail value too high, disabling cache downloads"));
 	}
@@ -411,6 +413,7 @@ CPCValditeThread::~CPCValditeThread()
 
 BOOL CPCValditeThread::InitInstance()
 {
+	DbgSetThreadName("PCValditeThread");
 	InitThreadLocale();
 	return TRUE;
 }
@@ -434,7 +437,6 @@ BOOL CPCValditeThread::Run(){
 			m_pOwner->m_nPCPort = 0;
 		}
 	}
-	AfxEndThread(0,true);
 	return 0;
 }
 

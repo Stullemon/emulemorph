@@ -417,8 +417,8 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,13,72,206,10
     CONTROL         "Cleanup filenames of new downloads",IDC_FNCLEANUP,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,13,84,
-                    161,10
-    PUSHBUTTON      "Button1",IDC_FNC,176,82,46,12,BS_FLAT
+                    158,10
+    PUSHBUTTON      "Button1",IDC_FNC,174,82,46,14,BS_FLAT
     CONTROL         "Try to transfer full chunks to all uploads",
                     IDC_FULLCHUNKTRANS,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,13,102,209,10
@@ -434,8 +434,8 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,157,197,8
     CONTROL         "only same cat",IDC_STARTNEXTFILECAT2,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,168,197,8
-    EDITTEXT        IDC_VIDEOPLAYER,15,204,144,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_BROWSEV,167,203,51,14,BS_FLAT
+    EDITTEXT        IDC_VIDEOPLAYER,15,204,151,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BROWSEV,169,203,51,14,BS_FLAT
     LTEXT           "(empty = default)",IDC_STATIC_EMPTY,15,217,173,10
     CONTROL         "Create file backup for preview",IDC_VIDEOBACKUP,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,15,229,195,8
@@ -702,42 +702,36 @@ STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "File &Info"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    LTEXT           "Filesize:",IDC_FD_XI1,7,5,51,8
+    RTEXT           "Filesize:",IDC_FD_XI1,7,5,50,8
     LTEXT           "-",IDC_FILESIZE,60,5,87,8
-    LTEXT           "Length:",IDC_FD_XI2,7,15,50,8
+    RTEXT           "Length:",IDC_FD_XI2,7,15,50,8
     LTEXT           "-",IDC_LENGTH,60,15,87,8
-    LTEXT           "File format:",IDC_STATICFI,7,25,50,8
+    RTEXT           "File format:",IDC_STATICFI,7,25,50,8
     LTEXT           "-",IDC_FORMAT,60,25,334,8
     GROUPBOX        "Video",IDC_FD_XI3,7,35,195,66,BS_FLAT
-    GROUPBOX        "Audio",IDC_FD_XI4,206,35,195,66,BS_FLAT
-    CONTROL         "Codec:",IDC_FD_XI5,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,46,47,8
-    CONTROL         "Bitrate:",IDC_FD_XI7,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,56,47,8
-    CONTROL         "Width:",IDC_FD_XI9,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,66,47,8
-    CONTROL         "Height:",IDC_FD_XI11,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,76,47,8
-    CONTROL         "Frames/Sec:",IDC_FD_XI13,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,86,47,8
-    CONTROL         "Codec:",IDC_FD_XI6,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,213,46,47,8
-    CONTROL         "Bitrate:",IDC_FD_XI8,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,213,56,47,8
-    CONTROL         "Channel:",IDC_FD_XI10,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,213,66,47,8
-    CONTROL         "Samplerate:",IDC_FD_XI12,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,213,76,47,8
+    RTEXT           "Codec:",IDC_FD_XI5,14,46,47,8
     CONTROL         "-",IDC_VCODEC,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
                     WS_GROUP,65,46,132,8
+    RTEXT           "Bitrate:",IDC_FD_XI7,14,56,47,8
     CONTROL         "-",IDC_VBITRATE,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,65,56,132,8
+    RTEXT           "Width:",IDC_FD_XI9,14,66,47,8
     CONTROL         "-",IDC_VWIDTH,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
-                    WS_GROUP,65,66,132,8
+                    WS_GROUP,65,66,30,8
+    RTEXT           "Height:",IDC_FD_XI11,102,66,47,8
     CONTROL         "-",IDC_VHEIGHT,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
+                    WS_GROUP,153,66,30,8
+    RTEXT           "Aspect Ratio:",IDC_FD_XI14,14,76,47,8
+    CONTROL         "-",IDC_VASPECT,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
                     WS_GROUP,65,76,132,8
+    RTEXT           "Frames/Sec:",IDC_FD_XI13,14,86,47,8
     CONTROL         "-",IDC_VFPS,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
                     WS_GROUP,65,86,132,8
+    GROUPBOX        "Audio",IDC_FD_XI4,206,35,195,66,BS_FLAT
+    RTEXT           "Codec:",IDC_FD_XI6,213,46,47,8
+    RTEXT           "Bitrate:",IDC_FD_XI8,213,56,47,8
+    RTEXT           "Channel:",IDC_FD_XI10,213,66,47,8
+    RTEXT           "Samplerate:",IDC_FD_XI12,213,76,47,8
     CONTROL         "-",IDC_ACODEC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,267,
                     46,127,8
     CONTROL         "-",IDC_ABITRATE,"Static",SS_LEFTNOWORDWRAP | 
@@ -1112,8 +1106,8 @@ BEGIN
     EDITTEXT        IDC_NICK,30,41,148,12,ES_AUTOHSCROLL
     LTEXT           "Username:",IDC_NICK_FRM,30,31,148,8
     CONTROL         "Do you want eMule to run when you start windows?",
-                    IDC_AUTOSTART,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,30,58,254,47
+                    IDC_AUTOSTART,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
+                    BS_FLAT | WS_TABSTOP,30,58,254,47
     GROUPBOX        "",IDC_STATIC,21,9,275,146
     CONTROL         "Do you want eMule to connect at startup?",
                     IDC_AUTOCONNECT,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
@@ -4504,7 +4498,7 @@ BEGIN
     IDS_USERSIP             "Users IP"
     IDS_FEATURES            "Features"
     IDS_IRC_NEWNICK         "Select a IRC nick."
-    IDS_IRC_NEWNICKDESC     "Should be one word less then 20 characters containing (A-Z, 0-9). It can be changed again in Preferences->Irc."
+    IDS_IRC_NEWNICKDESC     "Should be one word less than 20 characters containing (A-Z, 0-9). It can be changed again in Preferences->Irc."
 END
 
 STRINGTABLE 

@@ -693,6 +693,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MP_RESUME:
 					theApp.emuledlg->searchwnd->DownloadSelected(wParam==MP_RESUMEPAUSED);
 				return TRUE;
+			case MPG_DELETE:
 			case MP_REMOVESELECTED:{
 					CWaitCursor curWait;
 				SetRedraw(FALSE);
@@ -799,7 +800,7 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 
 		// those tooltips are very nice for debugging/testing but pretty annoying for general usage
 		// enable tooltips only if Shift+Ctrl is currently pressed
-		bool bShowInfoTip = ((GetKeyState(VK_SHIFT) & 0x8000) && (GetKeyState(VK_CONTROL) & 0x8000));
+		bool bShowInfoTip = GetSelectedCount() > 1 || ((GetKeyState(VK_SHIFT) & 0x8000) && (GetKeyState(VK_CONTROL) & 0x8000));
 
 		if (!bShowInfoTip){
 			if (!bOverMainItem){
@@ -810,6 +811,8 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 			return;
 		}
 
+		if (GetSelectedCount() == 1)
+		{
 		const CSearchFile* file = (CSearchFile*)GetItemData(pGetInfoTip->iItem);
 		if (file && pGetInfoTip->pszText && pGetInfoTip->cchTextMax > 0){
 			CString strInfo;
@@ -954,6 +957,31 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 #endif
 			_tcsncpy(pGetInfoTip->pszText, strInfo, pGetInfoTip->cchTextMax);
 			pGetInfoTip->pszText[pGetInfoTip->cchTextMax-1] = _T('\0');
+		}
+	}
+		else
+		{
+			int iSelected = 0;
+			ULONGLONG ulTotalSize = 0;
+			POSITION pos = GetFirstSelectedItemPosition();
+			while (pos)
+			{
+				const CSearchFile* pFile = (CSearchFile*)GetItemData(GetNextSelectedItem(pos));
+				if (pFile)
+				{
+					iSelected++;
+					ulTotalSize += pFile->GetFileSize();
+				}
+			}
+
+			if (iSelected > 0)
+			{
+				CString strInfo;
+				strInfo.Format(_T("%s: %u\r\n%s: %s"), GetResString(IDS_FILES), iSelected, GetResString(IDS_DL_SIZE), CastItoXBytes(ulTotalSize));
+
+				_tcsncpy(pGetInfoTip->pszText, strInfo, pGetInfoTip->cchTextMax);
+				pGetInfoTip->pszText[pGetInfoTip->cchTextMax-1] = _T('\0');
+			}
 		}
 	}
 	

@@ -167,7 +167,11 @@ BOOL CPPgGeneral::OnInitDialog()
 	thePrefs.GetLanguages(aLanguageIDs);
 	for (int i = 0; i < aLanguageIDs.GetSize(); i++){
 		TCHAR szLang[128];
-		GetLocaleInfo(aLanguageIDs[i], LOCALE_SLANGUAGE, szLang, ARRSIZE(szLang));
+		int ret=GetLocaleInfo(aLanguageIDs[i], LOCALE_SLANGUAGE, szLang, ARRSIZE(szLang));
+
+		if (ret==0 && aLanguageIDs[i]==MAKELANGID(LANG_GALICIAN,SUBLANG_DEFAULT) )
+			_tcscpy(szLang,_T("Galician") );
+
 		m_language.SetItemData(m_language.AddString(szLang), aLanguageIDs[i]);
 	}
 

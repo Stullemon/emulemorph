@@ -220,12 +220,12 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 			{
 				if( size < 17 || buddy->socket == NULL )
 					break;
-				AddDebugLogLine(false, _T("Found buddy in OP_REASKCALLBACKUDP"));
+				//AddDebugLogLine(false, _T("Found buddy in OP_REASKCALLBACKUDP"));
 				uchar check[16];
 				memcpy(&check, packet, 16);
 				if( !memcmp(&check, buddy->GetBuddyID(), 16) )
 				{
-					AddDebugLogLine(false, _T("Match Hash - buddy in OP_REASKCALLBACKUDP"));
+					//AddDebugLogLine(false, _T("Match Hash - buddy in OP_REASKCALLBACKUDP"));
 					memcpy(packet+10, &ip, 4);
 					memcpy(packet+14, &port, 2);
 					Packet* response = new Packet(OP_EMULEPROT);
@@ -235,8 +235,8 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 					response->size = size-10;
 					buddy->socket->SendPacket(response);
 				}
-				else
-					AddDebugLogLine(false, _T("No Matched Hash - buddy in OP_REASKCALLBACKUDP"));
+//				else
+//					AddDebugLogLine(false, _T("No Matched Hash - buddy in OP_REASKCALLBACKUDP"));
 			}
 			break;
 		}

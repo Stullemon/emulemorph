@@ -619,8 +619,6 @@ bool CUpDownClient::SendHttpBlockRequests()
 	POSITION pos = m_PendingBlocks_list.GetHeadPosition();
 	Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
 	ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-	pending->fZStreamError = 0;
-	pending->fRecovered = 0;
 
 	m_uReqStart = pending->block->StartOffset;
 	m_uReqEnd = pending->block->EndOffset;
@@ -1021,7 +1019,7 @@ void CUpDownClient::OnPeerCacheDownSocketClosed(int nErrorCode)
 		&& !m_PendingBlocks_list.IsEmpty())
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(DLP_HIGH, false, _T("PeerCache: Socket closed unexpedtedly, trying to reestablish connection %s"), DbgGetClientInfo());
+			AddDebugLogLine(DLP_HIGH, false, _T("PeerCache: Socket closed unexpedtedly, trying to reestablish connection"));
 		theApp.m_pPeerCache->DownloadAttemptFailed();
 		TRACE("+++ Restarting PeerCache download - socket closed\n");
 		ASSERT( m_pPCDownSocket == NULL );

@@ -1546,6 +1546,8 @@
 #define IDC_UPDATESERVERCONNECT         2190
 #define IDC_VWIDTH                      2191
 #define IDC_QUEUECOUNT                  2192
+#define IDC_VWIDTH2                     2192
+#define IDC_VASPECT                     2192
 #define IDC_UPDATESERVERCLIENT          2194
 #define IDC_VHEIGHT                     2195
 #define IDC_MORE                        2196
@@ -1610,6 +1612,7 @@
 #define IDC_POPBAR3                     2268
 #define IDC_SCOPE_D                     2270
 #define IDC_FD_XI9                      2271
+#define IDC_FD_XI14                     2272
 #define IDC_FD_XI11                     2274
 #define IDC_SLIDER                      2276
 #define IDC_FD_XI13                     2277

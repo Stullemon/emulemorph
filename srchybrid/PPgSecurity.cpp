@@ -235,6 +235,10 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 	GetDlgItemText(IDC_UPDATEURL,url);
 	if (!url.IsEmpty())
 	{
+		// add entered URL to LRU list even if it's not yet known whether we can download from this URL (it's just more convenient this way)
+		if (m_pacIPFilterURL && m_pacIPFilterURL->IsBound())
+			m_pacIPFilterURL->AddItem(url, 0);
+
 		TCHAR szTempFilePath[MAX_PATH];
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
 

@@ -824,7 +824,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                     pingDelaysTotal += raw_ping;
                     pingDelays.AddTail(raw_ping);
-                    while((uint32)pingDelays.GetCount() > numberOfPingsForAverage) {
+					while(!pingDelays.IsEmpty() && (uint32)pingDelays.GetCount() > numberOfPingsForAverage) {
                         uint32 pingDelay = pingDelays.RemoveHead();
                         pingDelaysTotal -= pingDelay;
                     }

@@ -138,8 +138,8 @@ int CTaskbarNotifier::Create(CWnd *pWndParent)
 	// Unfortunately, MSLU breaks this code by having its own proc be the one that shows up. MFC has no way of 
 	// detecting this case so it calls the MSLU proc which calls AfxWndProc which calls the MSLU proc, etc., until 
 	// the stack overflows. By using either DefWindowProc or your own proc yourself, you avoid the stack overflow.
-	extern bool _bUsingUnicows;
-	if (_bUsingUnicows)
+	extern bool g_bUnicoWS;
+	if (g_bUnicoWS)
 		wcx.lpfnWndProc = My_AfxWndProc;
 	else
 		wcx.lpfnWndProc = AfxWndProc;

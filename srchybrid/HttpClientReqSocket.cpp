@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -97,14 +97,18 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 	{
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		ex->GetErrorMessage(szError, ARRSIZE(szError));
-		strError.Format(_T("Error: HTTP socket: File exception - %s; %s"), szError, DbgGetClientInfo());
+		strError.Format(_T("Error: HTTP socket: File exception - %s"), szError);
 		if (thePrefs.GetVerbose())
 			theApp.AddDebugLogLine(false, _T("%s"), strError);
 		ex->Delete();
 	}
 	catch(CString ex)
 	{
+#ifdef _DEBUG
 		strError.Format(_T("Error: HTTP socket: %s; %s"), ex, DbgGetClientInfo());
+#else
+		strError.Format(_T("Error: HTTP socket: %s"), ex);
+#endif
 		if (thePrefs.GetVerbose())
 			theApp.AddDebugLogLine(false, _T("%s"), strError);
 	}
