@@ -910,11 +910,16 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 
 				//EastShare Start - added by AndCycle, IP to Country, modified by Commander
 				//CString tempStr2;
-				//tempStr2.Format("%s%s", lpUpDownClient->GetCountryName(), buffer);
+				//COLORREF crOldTxtColor;
+				//crOldTxtColor = dc->SetTextColor((COLORREF)RGB(255,0,0));
+				//tempStr2.Format("%s%s ", lpUpDownClient->GetCountryName(), buffer);
 				//buffer = tempStr2;
 				//EastShare End - added by AndCycle, IP to Country
 
 				dc->DrawText(buffer,buffer.GetLength(),&cur_rec, DLC_DT_TEXT);
+				//dc->SetTextColor(crOldTxtColor);
+
+
 			}
 			break;
 
@@ -1027,7 +1032,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 
 							cdcClientPercent.BitBlt(0, 0, iWidth, iHeight,  NULL, 0, 0, BLACKNESS);
 							cdcClientPercent.DrawText(csClientPercent, &rec_status, (DLC_DT_TEXT & ~DT_LEFT) | DT_CENTER);
-							cdcStatus.BitBlt(0, 0, iWidth, iHeight,  &cdcClientPercent, 0, 0, SRCINVERT);
+							cdcStatus.BitBlt(0, 0, iWidth, iHeight,  &cdcClientPercent, 0, 0, SRCPAINT);
 
 							cdcClientPercent.SetBkMode(iOMode);
 							cdcClientPercent.SetTextColor(oldclr);

@@ -1074,7 +1074,7 @@ void CemuleDlg::ShowPing() {
 void CemuleDlg::OnCancel()
 {
 	if (*thePrefs.GetMinTrayPTR()){
-		//Commander - Modified: Invisible Mode [TPT] - Start
+		//Commander - Added: Invisible Mode [TPT] - Start
 		if (!thePrefs.GetInvisibleMode())
 		{
 			if(TrayShow())
@@ -1082,7 +1082,7 @@ void CemuleDlg::OnCancel()
 	}
 		else
 			ShowWindow(SW_HIDE);
-		//Commander - Modified: Invisible Mode [TPT] - End
+		//Commander - Added: Invisible Mode [TPT] - End
 	} else {
 		ShowWindow(SW_MINIMIZE);
 	}
@@ -1434,7 +1434,7 @@ void CemuleDlg::OnClose()
 		else if (activewnd->IsKindOf(RUNTIME_CLASS(CKademliaWnd)))
 			thePrefs.SetLastMainWndDlgID(IDD_KADEMLIAWND);
 		else if (activewnd->IsKindOf(RUNTIME_CLASS(CIrcWnd)))
-			thePrefs.SetLastMainWndDlgID(IDD_IRC);
+			thePrefs.SetLastMainWndDlgID(IDD_IRC);        
 		else{
 			ASSERT(0);
 			thePrefs.SetLastMainWndDlgID(0);
@@ -2008,7 +2008,7 @@ int CemuleDlg::GetRecMaxUpload() {
 BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	switch(wParam)
-	{	
+	{
 		case IDC_TOOLBARBUTTON + 0:
 			OnBnClickedButton2();
 			break;
@@ -2210,7 +2210,7 @@ void CemuleDlg::ShowToolPopup(bool toolsonly)
 		menu.AppendMenu(MF_STRING,MP_HM_STATS, GetResString(IDS_EM_STATISTIC));
 		menu.AppendMenu(MF_STRING,MP_HM_PREFS, GetResString(IDS_EM_PREFS));
 		menu.AppendMenu(MF_STRING,MP_HM_HELP, GetResString(IDS_EM_HELP));
-		menu.AppendMenu(MF_SEPARATOR);
+      		menu.AppendMenu(MF_SEPARATOR);
 	}
 
 	menu.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC) + _T("..."));
@@ -2688,7 +2688,7 @@ void CemuleDlg::OutputExtDebugMessages () {
 //EastShare start, Added by linekin, HotKey
 
 //Commander - Added: Invisible Mode [TPT] - Start
-       LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)
+LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)
 {
 	if(wParam == HOTKEY_INVISIBLEMODE_ID) RestoreWindow();
 
