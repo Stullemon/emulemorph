@@ -547,7 +547,12 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			LoadDateFromFile(&metFile);
 			LoadHashsetFromFile(&metFile, false);
 		}
-
+		//MORPH START - Added by SiRoB, Spreadbars
+		CMap<uint16,uint16,uint32,uint32> spread_start_map;
+		CMap<uint16,uint16,uint32,uint32> spread_end_map;
+		CMap<uint16,uint16,uint32,uint32> spread_count_map;
+		//MORPH END - Added by SiRoB, Spreadbars
+	
 		UINT tagcount = metFile.ReadUInt32();
 		for (UINT j = 0; j < tagcount; j++){
 			CTag* newtag = new CTag(&metFile);
@@ -656,8 +661,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						delete newtag;
 						break;
 					}
-				    //Commander - Removed: Not needed because of SF MergeKnown - Start
-				    /*
+				   // statistics
 					case FT_ATTRANSFERED:{
 						ASSERT( newtag->IsInt() );
 						if (newtag->IsInt())
@@ -694,8 +698,6 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						delete newtag;
 						break;
 					}
-					*/
-                    //Commander - Removed: Not needed because of SF MergeKnown - End
 
 					// old tags: as long as they are not needed, take the chance to purge them
 					case FT_PERMISSIONS:
@@ -790,29 +792,38 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 									gap->end = newtag->tag.intvalue-1;
 							}
 							delete newtag;
-					    //MORPH START - Added by SiRoB, Avoid misusing of powersharing
-						} else	if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
-							SetPowerShared((newtag->tag.intvalue<=3)?newtag->tag.intvalue:-1);
+						}
+						//MORPH START - Added by SiRoB, Extra test
+						else if(!newtag->tag.specialtag && newtag->IsInt() && newtag->tag.tagname){
+						//MORPH END   - Added by SiRoB, Extra test
+							//MORPH START - Added by SiRoB, SpreadBars
+							uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
+							if (newtag->tag.tagname[0] == FT_SPREADSTART)
+								spread_start_map.SetAt(spreadkey, newtag->tag.intvalue);
+							else if (newtag->tag.tagname[0] == FT_SPREADEND)
+								spread_end_map.SetAt(spreadkey, newtag->tag.intvalue);
+							else if (newtag->tag.tagname[0] == FT_SPREADCOUNT)
+								spread_count_map.SetAt(spreadkey, newtag->tag.intvalue);
+							//MORPH END   - Added by SiRoB, SpreadBars
+							//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+							else if(strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0)
+								SetPowerShared((newtag->GetInt()<=3)?newtag->GetInt():-1);
+							//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+							//MORPH START - Added by SiRoB, POWERSHARE Limit
+							else if(strcmp(newtag->tag.tagname, FT_POWERSHARE_LIMIT) == 0)
+								SetPowerShareLimit((newtag->GetInt()<=200)?newtag->GetInt():-1);
+							//MORPH END   - Added by SiRoB, POWERSHARE Limit
+							//MORPH START - Added by SiRoB, HIDEOS per file
+							else if(strcmp(newtag->tag.tagname, FT_HIDEOS) == 0)
+								SetHideOS((newtag->GetInt()<=10)?newtag->GetInt():-1);
+							else if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0)
+								SetSelectiveChunk(newtag->GetInt()<=1?newtag->GetInt():-1);
+							//MORPH END   - Added by SiRoB, HIDEOS per file
+							//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+							else if(strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0)
+								SetShareOnlyTheNeed(newtag->GetInt()<=1?newtag->GetInt():-1);
+							//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 							delete newtag;
-						//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-						//MORPH START - Added by SiRoB, POWERSHARE Limit
-						} else	if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE_LIMIT) == 0) {
-							SetPowerShareLimit((newtag->tag.intvalue<=200)?newtag->tag.intvalue:-1);
-							delete newtag;
-						//MORPH END   - Added by SiRoB, POWERSHARE Limit
-						//MORPH START - Added by SiRoB, HIDEOS per file
-						} else if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_HIDEOS) == 0) {
-							SetHideOS((newtag->tag.intvalue<=10)?newtag->tag.intvalue:-1);
-							delete newtag;
-						} else if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0) {
-							SetSelectiveChunk(newtag->tag.intvalue<=1?newtag->tag.intvalue:-1);
-							delete newtag;
-						//MORPH END   - Added by SiRoB, HIDEOS per file
-						//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-						} else	if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0) {
-							SetShareOnlyTheNeed(newtag->tag.intvalue<=1?newtag->tag.intvalue:-1);
-							delete newtag;
-						//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 						}
 						else
 							taglist.Add(newtag);
@@ -822,6 +833,23 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			else
 				delete newtag;
 		}
+		
+		//MORPH START - Added by SiRoB, SLUGFILLER: Spreadbars - Now to flush the map into the list
+		for (POSITION pos = spread_start_map.GetStartPosition(); pos != NULL; ){
+			uint16 spreadkey;
+			uint32 spread_start;
+			uint32 spread_end;
+			uint32 spread_count;
+			spread_start_map.GetNextAssoc(pos, spreadkey, spread_start);
+			if (!spread_end_map.Lookup(spreadkey, spread_end))
+				continue;
+			if (!spread_count_map.Lookup(spreadkey, spread_count))
+				continue;
+			if (!spread_count || spread_start >= spread_end)
+				continue;
+			statistic.AddBlockTransferred(spread_start, spread_end, spread_count);	// All tags accounted for
+		}
+		//MORPH END   - Added by SiRoB, SLUGFILLER: Spreadbars
 
 		// load the hashsets from the hybridstylepartmet
 		if (isnewstyle && !getsizeonly && (metFile.GetPosition()<metFile.GetLength()) ) {
@@ -1319,6 +1347,30 @@ bool CPartFile::SavePartFile()
 			
 			i_pos++;
 		}
+
+		//MORPH START - Added by SiRoB, Spreadbars
+		i_pos = 0;
+		for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; ){
+			uint32 count = statistic.spreadlist.GetValueAt(pos);
+			if (!count) {
+				statistic.spreadlist.GetNext(pos);
+				continue;
+			}
+			uint32 start = statistic.spreadlist.GetKeyAt(pos);
+			statistic.spreadlist.GetNext(pos);
+			ASSERT(pos != NULL);	// Last value should always be 0
+			uint32 end = statistic.spreadlist.GetKeyAt(pos);
+			itoa(i_pos,number,10);
+			namebuffer[0] = FT_SPREADSTART;
+			CTag(namebuffer,start).WriteTagToFile(&file);
+			namebuffer[0] = FT_SPREADEND;
+			CTag(namebuffer,end).WriteTagToFile(&file);
+			namebuffer[0] = FT_SPREADCOUNT;
+			CTag(namebuffer,count).WriteTagToFile(&file);
+			uTagCount+=3;
+			i_pos++;
+		}
+		//MORPH END   - Added by SiRoB, Spreadbars
 
 		file.Seek(uTagCountFilePos, CFile::begin);
 		file.WriteUInt32(uTagCount);

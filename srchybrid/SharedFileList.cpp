@@ -338,8 +338,6 @@ CSharedFileList::~CSharedFileList(){
 void CSharedFileList::FindSharedFiles()
 {
 	// SLUGFILLER: SafeHash remove - only called after the download queue is created
-
-	//Morph - ??? by AndCycle, could someone tell me why this part be commentted?
 	/*
 	POSITION pos = m_Files_map.GetStartPosition();
 	while (pos)
@@ -598,12 +596,10 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 	}
 	// SLUGFILLER: mergeKnown
 	pFile->SetLastSeen();	// okay, we see it
-	theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
+	//MORPH - Removed by SiRoB, No longer needed
+	//theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
 	// SLUGFILLER: mergeKnown
-	//MORPH - Removed by SiRoB, Safe Hash
-	/*
 	m_UnsharedFiles_map.RemoveKey(CSKey(pFile->GetFileHash()));	
-	*/
 	m_Files_map.SetAt(key, pFile);
 	m_keywords->AddKeywords(pFile);
 
@@ -642,10 +638,7 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 void CSharedFileList::RemoveFile(CKnownFile* pFile)
 {
 	output->RemoveFile(pFile);
-	//MORPH - Removed by SiRoB, Safe Hash
-	/*
 	m_UnsharedFiles_map.SetAt(CSKey(pFile->GetFileHash()), true);
-	*/
 	m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
 	m_keywords->RemoveKeywords(pFile);
 	pFile->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
@@ -850,7 +843,7 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 #define CTAG(n, s)	CTag(n, s)
 #endif
 
-	tags.Add(new CTag(FT_FILENAME,cur_file->GetFileName()));
+	tags.Add(new CTAG(FT_FILENAME, cur_file->GetFileName()));
 	tags.Add(new CTag(FT_FILESIZE,cur_file->GetFileSize()));
 
 	// NOTE: Archives and CD-Images are published with file type "Pro"
@@ -866,7 +859,7 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 			strExt = strExt.Mid(1);
 			if (!strExt.IsEmpty()){
 				strExt.MakeLower();
-				tags.Add(new CTag(FT_FILEFORMAT,strExt)); // file extension without a "."
+				tags.Add(new CTAG(FT_FILEFORMAT, strExt)); // file extension without a "."
 			}
 		}
 	}

@@ -86,18 +86,19 @@ void CDownloadQueue::AddPartFilesToShare()
 	}
 }
 
-// SLUGFILLER: mergeKnown
-void CDownloadQueue::SavePartFilesToKnown(CFileDataIO* file){
-	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
-		CKnownFile* cur_file = (CKnownFile*)filelist.GetAt(pos);	// Write as known files
-			cur_file->WriteToFile(file);
-		}
-}
-
-uint32 CDownloadQueue::GetPartFilesCount(){
-	return filelist.GetCount();
-}
-// SLUGFILLER: mergeKnown
+//MORPH - Removed by SiRoB, No Longer Needed
+//// SLUGFILLER: mergeKnown
+//void CDownloadQueue::SavePartFilesToKnown(CFileDataIO* file){
+//	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
+//		CKnownFile* cur_file = (CKnownFile*)filelist.GetAt(pos);	// Write as known files
+//			cur_file->WriteToFile(file);
+//		}
+//}
+//
+//uint32 CDownloadQueue::GetPartFilesCount(){
+//	return filelist.GetCount();
+//}
+//// SLUGFILLER: mergeKnown
 
 void CDownloadQueue::Init(){
 	// find all part files, read & hash them if needed and store into a list

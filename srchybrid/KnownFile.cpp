@@ -87,7 +87,7 @@ void CFileStatistic::MergeFileStats(CFileStatistic *toMerge)
 	alltimerequested += toMerge->GetAllTimeRequests();
 	alltimetransferred += toMerge->GetAllTimeTransferred();
 	alltimeaccepted += toMerge->GetAllTimeAccepts();
-	// SLUGFILLER: mergeKnown
+
 	// SLUGFILLER: Spreadbars
 	if (!toMerge->spreadlist.IsEmpty()) {
 		POSITION pos = toMerge->spreadlist.GetHeadPosition();
@@ -104,7 +104,6 @@ void CFileStatistic::MergeFileStats(CFileStatistic *toMerge)
 		}
 	}
 	// SLUGFILLER: Spreadbars
-	// SLUGFILLER: mergeKnown
 
 	m_bCheckEqualChanceValue = true;//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 }
@@ -1405,7 +1404,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	}
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
-	char* namebuffer = new char[10];
+	char namebuffer[10];
 	char* number = &namebuffer[1];
 	uint16 i_pos = 0;
 	for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; ){
@@ -1428,7 +1427,6 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 		uTagCount+=3;
 		i_pos++;
 	}
-	delete[] namebuffer;
 	//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
 	file->Seek(uTagCountFilePos, CFile::begin);

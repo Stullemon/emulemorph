@@ -164,7 +164,8 @@ void CKnownFileList::Save()
 			if (pFile->GetLastSeen() >= dwExpired)	// SLUGFILLER: mergeKnown
 				pFile->WriteToFile(&file);
 		}
-		theApp.downloadqueue->SavePartFilesToKnown(&file);	// SLUGFILLER: mergeKnown - add part files
+		//MORPH - Removed by SiRoB, No Longer Needed
+		//theApp.downloadqueue->SavePartFilesToKnown(&file);	// SLUGFILLER: mergeKnown - add part files
 		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 			file.Flush(); // flush file stream buffers to disk buffers
 			if (_commit(_fileno(file.m_pStream)) != 0) // commit disk buffers to disk
@@ -315,19 +316,20 @@ bool CKnownFileList::IsFilePtrInList(const CKnownFile* file) const
 	return false;
 }
 
-// SLUGFILLER: mergeKnown
-void CKnownFileList::MergePartFileStats(CKnownFile* original){
-	CCKey key(original->GetFileHash());
-	CKnownFile* pFileInMap;
-	if (m_Files_map.Lookup(key, pFileInMap) && pFileInMap != original)
-	{
-		m_Files_map.RemoveKey(CCKey(pFileInMap->GetFileHash()));
-
-		ASSERT( original->GetFileSize() == pFileInMap->GetFileSize() );
-		if (original->GetFileSize() == pFileInMap->GetFileSize())
-			original->statistic.MergeFileStats(&pFileInMap->statistic);
-
-		delete pFileInMap;
-	}
-}
-// SLUGFILLER: mergeKnown
+//MORPH - Removed by SiRoB, No longer needed
+//// SLUGFILLER: mergeKnown
+//void CKnownFileList::MergePartFileStats(CKnownFile* original){
+//	CCKey key(original->GetFileHash());
+//	CKnownFile* pFileInMap;
+//	if (m_Files_map.Lookup(key, pFileInMap) && pFileInMap != original)
+//	{
+//		m_Files_map.RemoveKey(CCKey(pFileInMap->GetFileHash()));
+//
+//		ASSERT( original->GetFileSize() == pFileInMap->GetFileSize() );
+//		if (original->GetFileSize() == pFileInMap->GetFileSize())
+//			original->statistic.MergeFileStats(&pFileInMap->statistic);
+//
+//		delete pFileInMap;
+//	}
+//}
+//// SLUGFILLER: mergeKnown

@@ -18,7 +18,8 @@
 #include "MenuCmds.h"
 
 class CSafeMemFile;
-class CFileDataIO;	// SLUGFILLER: mergeKnown
+//MORPH - Removed by SiRoB, No Longer Needed
+//class CFileDataIO;	// SLUGFILLER: mergeKnown
 class CSearchFile;
 class CUpDownClient;
 class CServer;
@@ -110,10 +111,11 @@ public:
 
 	void	DisableAllA4AFAuto(void);
 
-	// SLUGFILLER: mergeKnown - include part files in known.met
-	void	SavePartFilesToKnown(CFileDataIO* file);
-	uint32	GetPartFilesCount();
-	// SLUGFILLER: mergeKnown
+	//MORPH - Removed by SiRoB, No longer needed
+	//// SLUGFILLER: mergeKnown - include part files in known.met
+	//void	SavePartFilesToKnown(CFileDataIO* file);
+	//uint32	GetPartFilesCount();
+	//// SLUGFILLER: mergeKnown
 
 	CUpDownClient* GetDownloadClientByIP(uint32 dwIP);
 	CUpDownClient* GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
