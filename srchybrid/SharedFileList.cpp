@@ -379,7 +379,27 @@ void CSharedFileList::FindSharedFiles(){
 		AddLogLine(false,GetResString(IDS_SHAREDFOUND), m_Files_map.GetCount());
 	else
 		AddLogLine(false,GetResString(IDS_SHAREDFOUNDHASHING), m_Files_map.GetCount(), waitingforhash_list.GetCount());
-	HashNextFile();
+	
+	// Mighty Knife: Report hashing files
+	if (!waitingforhash_list.IsEmpty()) {
+		if (theApp.glob_prefs->GetReportHashingFiles ()) {
+			POSITION p = waitingforhash_list.GetHeadPosition ();
+			while (p != NULL) {
+				UnknownFile_Struct* f = waitingforhash_list.GetAt (p);
+				CString hashfilename;
+				hashfilename.Format ("%s%s",f->strDirectory, f->strName);
+				theApp.emuledlg->AddLogLine(false, "New file: '%s'", (const char*) hashfilename);
+				waitingforhash_list.GetNext (p);
+			}
+		}
+		HashNextFile();   // Why should we call this procedure if there's no file to hash ?
+						  // so i moved the call into this if clause. This also removes
+					      // an unnecessary message "All files hashed", which is added to
+						  // the log there.
+	}
+	// HashNextFile();
+	// [end] Mighty Knife
+
 }
 
 void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory){
@@ -812,6 +832,15 @@ void CSharedFileList::HashNextFile(){
 	if (!currentlyhashing_list.IsEmpty())	// one hash at a time
 		return;
 	// SLUGFILLER: SafeHash
+
+	// Mighty Knife: Report hashing files
+	if (waitingforhash_list.IsEmpty()) {
+		if (theApp.glob_prefs->GetReportHashingFiles ()) {
+			theApp.emuledlg->AddLogLine(false, "Hashing of new files completed.");
+		}
+	}
+	// [end] Mighty Knife
+
 	if (waitingforhash_list.IsEmpty())
 		return;
 	UnknownFile_Struct* nextfile = waitingforhash_list.RemoveHead();
