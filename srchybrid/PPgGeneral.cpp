@@ -30,6 +30,7 @@
 #include "SharedFilesWnd.h"
 #include "KademliaWnd.h"
 #include "IrcWnd.h"
+#include "WebServices.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -242,8 +243,9 @@ void CPPgGeneral::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CPropertyPage::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
-void CPPgGeneral::OnBnClickedEditWebservices(){
-	ShellExecute(NULL, "open", thePrefs.GetTxtEditor(), "\""+CString(thePrefs.GetConfigDir())+"webservices.dat\"", NULL, SW_SHOW); 
+void CPPgGeneral::OnBnClickedEditWebservices()
+{
+	theWebServices.Edit();
 }
 
 void CPPgGeneral::OnLangChange()

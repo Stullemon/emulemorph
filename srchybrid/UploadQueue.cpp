@@ -38,6 +38,8 @@
 #include "ClientCredits.h"
 #include "Server.h"
 #include "ServerList.h"
+#include "WebServer.h"
+
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "ServerWnd.h"
@@ -759,19 +761,19 @@ void CUploadQueue::Process() {
 	}*/
 	
 	while(avarage_dr_list.GetCount() > 0)
-		if (avarage_dr_list.GetCount() > 60000 / (1 + curTick - avarage_dr_list.GetHead().timestamp) ||
+		if (avarage_dr_list.GetCount() > (60000 / (1 + curTick - avarage_dr_list.GetHead().timestamp)) ||
 			(curTick - avarage_dr_list.GetHead().timestamp) > 30000) {
 			m_avarage_dr_sum -= avarage_dr_list.RemoveHead().datalen;
 		}else
 			break;
 	while(m_AvarageUDRO_list.GetCount() > 0)
-		if (m_AvarageUDRO_list.GetCount() > 60000 / (1 + curTick - m_AvarageUDRO_list.GetHead().timestamp) ||
+		if (m_AvarageUDRO_list.GetCount() > (60000 / (1 + curTick - m_AvarageUDRO_list.GetHead().timestamp)) ||
 			(curTick - m_AvarageUDRO_list.GetHead().timestamp) > 30000) {
 			sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
 		}else
 			break;
 	while(avarage_friend_dr_list.GetCount() > 0)
-		if (avarage_friend_dr_list.GetCount() > 60000 / (1 + curTick - avarage_friend_dr_list.GetHead().timestamp) ||
+		if (avarage_friend_dr_list.GetCount() > (60000 / (1 + curTick - avarage_friend_dr_list.GetHead().timestamp)) ||
 			(curTick - avarage_friend_dr_list.GetHead().timestamp) > 30000) {
 			avarage_friend_dr_list.RemoveHead();
 		}else
@@ -1287,7 +1289,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 
 			theApp.listensocket->UpdateConnectionsStatus();
 			if (thePrefs.WatchClipboard4ED2KLinks())
-				theApp.emuledlg->searchwnd->SearchClipBoard();		
+				theApp.SearchClipboard();		
 
 			if (theApp.serverconnect->IsConnecting())
 				theApp.serverconnect->CheckForTimeout();
@@ -1373,6 +1375,8 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			if (statsave>=60) {
 				// Time to save our cumulative statistics.
 				statsave=0;
+				if (thePrefs.GetWSIsEnabled())
+					theApp.webserver->UpdateSessionCount();
 				
 				// CPreferences::SaveStats() in Preferences.cpp
 				// This function does NOT update the tree!

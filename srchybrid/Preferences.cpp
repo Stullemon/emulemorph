@@ -327,6 +327,7 @@ EViewSharedFilesAccess CPreferences::m_iSeeShares;
 uint8	CPreferences::m_iToolDelayTime;
 uint8	CPreferences::bringtoforeground;
 uint8	CPreferences::splitterbarPosition;
+uint8	CPreferences::m_uTransferWnd2;
 uint16	CPreferences::deadserverretries;
 DWORD	CPreferences::m_dwServerKeepAliveTimeout;
 uint16	CPreferences::statsMax;
@@ -356,7 +357,8 @@ bool	CPreferences::m_bircignoremiscmessage;
 bool	CPreferences::m_bircignorejoinmessage;
 bool	CPreferences::m_bircignorepartmessage;
 bool	CPreferences::m_bircignorequitmessage;
-bool	CPreferences::m_bircignoreemuleprotoinfomessage;
+bool	CPreferences::m_bircignoreemuleprotoaddfriend;
+bool	CPreferences::m_bircignoreemuleprotosendlink;
 bool	CPreferences::m_birchelpchannel;
 bool	CPreferences::m_bRemove2bin;
 bool	CPreferences::m_bpreviewprio;
@@ -372,7 +374,9 @@ uint16	CPreferences::MaxConperFive;
 int		CPreferences::checkDiskspace;
 UINT	CPreferences::m_uMinFreeDiskSpace;
 char	CPreferences::yourHostname[127];
+bool	CPreferences::m_bEnableVerboseOptions;
 bool	CPreferences::m_bVerbose;
+bool	CPreferences::m_bFullVerbose;
 bool	CPreferences::m_bDebugSourceExchange;
 bool	CPreferences::m_bLogBannedClients;
 bool	CPreferences::m_bLogRatingDescReceived;
@@ -450,6 +454,7 @@ char	CPreferences::notifierConfiguration[510];
 char	CPreferences::datetimeformat[64];
 char	CPreferences::datetimeformat4log[64];
 LOGFONT CPreferences::m_lfHyperText;
+LOGFONT CPreferences::m_lfLogText;
 int		CPreferences::m_iExtractMetaData;
 bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
 char	CPreferences::m_sWebPassword[256];
@@ -617,6 +622,7 @@ WORD	CPreferences::m_wWinVer;
 bool	CPreferences::m_UseProxyListenPort;
 uint16	CPreferences::ListenPort;
 CArray<Category_Struct*,Category_Struct*> CPreferences::catMap;
+uint8	CPreferences::m_nWebMirrorAlertLevel;
 
 
 CPreferences::CPreferences()
@@ -1983,6 +1989,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("DeadServerRetry",deadserverretries);
 	ini.WriteInt("ServerKeepAliveTimeout",m_dwServerKeepAliveTimeout);
 	ini.WriteInt("SplitterbarPosition",splitterbarPosition+2);
+	ini.WriteInt("TransferWnd2",m_uTransferWnd2);
 	ini.WriteInt("VariousStatisticsMaxValue",statsMax);
 	ini.WriteInt("StatsAverageMinutes",statsAverageMinutes);
 	ini.WriteInt("MaxConnectionsPerFiveSeconds",MaxConperFive);
@@ -2046,7 +2053,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteString("FilenameCleanups",filenameCleanups);
 	ini.WriteInt("ExtractMetaData",m_iExtractMetaData);
 
-	ini.WriteString("DefaultIRCServer",m_sircserver);
+	ini.WriteString("DefaultIRCServerNew",m_sircserver);
 	ini.WriteString("IRCNick",m_sircnick);
 	ini.WriteBool("IRCAddTimestamp", m_bircaddtimestamp);
 	ini.WriteString("IRCFilterName", m_sircchannamefilter);
@@ -2062,7 +2069,8 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("IRCIgnoreJoinMessages", m_bircignorejoinmessage);
 	ini.WriteBool("IRCIgnorePartMessages", m_bircignorepartmessage);
 	ini.WriteBool("IRCIgnoreQuitMessages", m_bircignorequitmessage);
-	ini.WriteBool("IRCIgnoreEmuleProtoInfoMessage", m_bircignoreemuleprotoinfomessage);
+	ini.WriteBool("IRCIgnoreEmuleProtoAddFriend", m_bircignoreemuleprotoaddfriend);
+	ini.WriteBool("IRCIgnoreEmuleProtoSendLink", m_bircignoreemuleprotosendlink);
 	ini.WriteBool("IRCHelpChannel", m_birchelpchannel);
 	ini.WriteBool("SmartIdCheck", smartidcheck);
 	ini.WriteBool("Verbose", m_bVerbose);
@@ -2224,6 +2232,7 @@ void CPreferences::SavePreferences(){
 		GetColumnSortCount(tableFilenames), "TableSortAscendingFilenames");
 	// SLUGFILLER: multiSort
 	ini.WriteBinary("HyperTextFont", (LPBYTE)&m_lfHyperText, sizeof m_lfHyperText);
+	ini.WriteBinary("LogTextFont", (LPBYTE)&m_lfLogText, sizeof m_lfLogText);
 
 	// deadlake PROXYSUPPORT
 	ini.WriteBool("ProxyEnablePassword",proxy.EnablePassword,"Proxy");
@@ -2398,6 +2407,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("USSGoingDownDivider", m_iDynUpGoingDownDivider, "eMule");
 	ini.WriteInt("USSNumberOfPings", m_iDynUpNumberOfPings, "eMule");
 	// ZZ:UploadSpeedSense <--
+	ini.WriteInt("WebMirrorAlertLevel", m_nWebMirrorAlertLevel, "eMule");
 }
 
 void CPreferences::SaveCats(){
@@ -2526,8 +2536,11 @@ void CPreferences::LoadPreferences(){
 	m_iDbgHeap = 0;
 #endif
 
+	m_nWebMirrorAlertLevel = ini.GetInt("WebMirrorAlertLevel",0,"eMule");
+	updatenotify=ini.GetBool("UpdateNotifyTestClient",true, "eMule");
+	
 	_snprintf(nick, ARRSIZE(nick), "%s", ini.GetString("Nick", DEFAULT_NICK));
-	if (nick[0] == '\0' || strcmp(nick, "http://www.emule-project.net") == 0)
+	if (nick[0] == '\0' || IsDefaultNick(nick))
 		_snprintf(nick, ARRSIZE(nick), "%s", DEFAULT_NICK);
 
 	sprintf(buffer,"%sIncoming",appdir);
@@ -2554,7 +2567,7 @@ void CPreferences::LoadPreferences(){
 	if (maxdownload>maxGraphDownloadRate && maxdownload!=UNLIMITED) maxdownload=maxGraphDownloadRate*.8;
 	maxconnections=ini.GetInt("MaxConnections",GetRecommendedMaxConnections());
 	deadserver=ini.GetInt("RemoveDeadServer",2);
-	port=ini.GetInt("Port",4662);
+	port=ini.GetInt("Port", DEFAULT_TCP_PORT);
 	udpport=ini.GetInt("UDPPort",port+10);
 	nServerUDPPort = ini.GetInt("ServerUDPPort", -1); // 0 = Don't use UDP port for servers, -1 = use a random port (for backward compatibility)
 	maxsourceperfile=ini.GetInt("MaxSourcesPerFile",400 );
@@ -2567,7 +2580,11 @@ void CPreferences::LoadPreferences(){
 	deadserverretries=ini.GetInt("DeadServerRetry",1);
 	m_dwServerKeepAliveTimeout=ini.GetInt("ServerKeepAliveTimeout",0);
 	splitterbarPosition=ini.GetInt("SplitterbarPosition",75);
-	if (splitterbarPosition>93 || splitterbarPosition<10) splitterbarPosition=75;
+	if (splitterbarPosition < 9)
+		splitterbarPosition = 9;
+	else if (splitterbarPosition > 93)
+		splitterbarPosition = 93;
+	m_uTransferWnd2 = ini.GetInt("TransferWnd2",DFLT_TRANSFER_WND2);
 
 	statsMax=ini.GetInt("VariousStatisticsMaxValue",100);
 	statsAverageMinutes=ini.GetInt("StatsAverageMinutes",5);
@@ -2577,7 +2594,7 @@ void CPreferences::LoadPreferences(){
 	scorsystem=ini.GetBool("Scoresystem",true);
 	ICH=ini.GetBool("ICH",true);
 	autoserverlist=ini.GetBool("Serverlist",false);
-	updatenotify=ini.GetBool("UpdateNotifyTestClient",true);
+
 	mintotray=ini.GetBool("MinToTray",false);
 	addserversfromserver=ini.GetBool("AddServersFromServer",true);
 	addserversfromclient=ini.GetBool("AddServersFromClient",true);
@@ -2635,7 +2652,7 @@ void CPreferences::LoadPreferences(){
 	sprintf(datetimeformat4log,"%s",ini.GetString("DateTimeFormat4Log","%c"));
 	if (strlen(datetimeformat4log)==0) strcpy(datetimeformat4log,"%c");
 
-	sprintf(m_sircserver,"%s",ini.GetString("DefaultIRCServer","irc.emule-project.net"));
+	sprintf(m_sircserver,"%s",ini.GetString("DefaultIRCServerNew","ircchat.emule-project.net"));
 	sprintf(m_sircnick,"%s",ini.GetString("IRCNick","eMule"));
 	m_bircaddtimestamp=ini.GetBool("IRCAddTimestamp",true);
 	sprintf(m_sircchannamefilter,"%s",ini.GetString("IRCFilterName", "" ));
@@ -2651,16 +2668,32 @@ void CPreferences::LoadPreferences(){
 	m_bircignorejoinmessage=ini.GetBool("IRCIgnoreJoinMessages", true);
 	m_bircignorepartmessage=ini.GetBool("IRCIgnorePartMessages", true);
 	m_bircignorequitmessage=ini.GetBool("IRCIgnoreQuitMessages", true);
-	m_bircignoreemuleprotoinfomessage=ini.GetBool("IRCIgnoreEmuleProtoInfoMessage", true);
+	m_bircignoreemuleprotoaddfriend=ini.GetBool("IRCIgnoreEmuleProtoAddFriend", false);
+	m_bircignoreemuleprotosendlink=ini.GetBool("IRCIgnoreEmuleProtoSendLink", false);
 	m_birchelpchannel=ini.GetBool("IRCHelpChannel",true);
 	smartidcheck=ini.GetBool("SmartIdCheck",true);
-	m_bVerbose=ini.GetBool("Verbose",false);
-	m_bDebugSourceExchange=ini.GetBool("DebugSourceExchange",false);
-	m_bLogBannedClients=ini.GetBool("LogBannedClients", true);
-	m_bLogRatingDescReceived=ini.GetBool("LogRatingDescReceived",true);
-	m_bLogSecureIdent=ini.GetBool("LogSecureIdent",true);
-	m_bLogFilteredIPs=ini.GetBool("LogFilteredIPs",true);
-	m_bLogFileSaving=ini.GetBool("LogFileSaving",false);
+
+	log2disk=ini.GetBool("SaveLogToDisk",false);
+	uMaxLogFileSize = ini.GetInt("MaxLogFileSize", 1024*1024);
+	iMaxLogBuff = ini.GetInt("MaxLogBuff",64) * 1024;
+	m_bEnableVerboseOptions=ini.GetBool("VerboseOptions", true);
+	if (m_bEnableVerboseOptions)
+	{
+		m_bVerbose=ini.GetBool("Verbose",false);
+		m_bFullVerbose=ini.GetBool("FullVerbose",false);
+		debug2disk=ini.GetBool("SaveDebugToDisk",false);
+		m_bDebugSourceExchange=ini.GetBool("DebugSourceExchange",false);
+		m_bLogBannedClients=ini.GetBool("LogBannedClients", true);
+		m_bLogRatingDescReceived=ini.GetBool("LogRatingDescReceived",true);
+		m_bLogSecureIdent=ini.GetBool("LogSecureIdent",true);
+		m_bLogFilteredIPs=ini.GetBool("LogFilteredIPs",true);
+		m_bLogFileSaving=ini.GetBool("LogFileSaving",false);
+	}
+	else
+	{
+		if (m_bRestoreLastLogPane && m_iLastLogPaneID>=2)
+			m_iLastLogPaneID = 1;
+	}
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	// following options are for debugging or when using an external debug device viewer only.
 	m_iDebugServerTCPLevel=ini.GetInt("DebugServerTCP",0);
@@ -2714,10 +2747,6 @@ void CPreferences::LoadPreferences(){
 	watchclipboard=ini.GetBool("WatchClipboard4ED2kFilelinks",false);
 	m_iSearchMethod=ini.GetInt("SearchMethod",0);
 	
-	log2disk=ini.GetBool("SaveLogToDisk",false);
-	debug2disk=ini.GetBool("SaveDebugToDisk",false);
-	uMaxLogFileSize = ini.GetInt("MaxLogFileSize", 1024*1024);
-	iMaxLogBuff = ini.GetInt("MaxLogBuff",64) * 1024;
 	showCatTabInfos=ini.GetBool("ShowInfoOnCatTabs",false);
 	resumeSameCat=ini.GetBool("ResumeNextFromSameCat",false);
 	dontRecreateGraphs =ini.GetBool("DontRecreateStatGraphsOnResize",false);
@@ -3005,7 +3034,16 @@ void CPreferences::LoadPreferences(){
 		memset(&m_lfHyperText, 0, sizeof m_lfHyperText);
 	delete[] pData;
 
-	if (statsAverageMinutes<1) statsAverageMinutes=5;
+	pData = NULL;
+	uSize = sizeof m_lfLogText;
+	if (ini.GetBinary("LogTextFont", &pData, &uSize) && uSize == sizeof m_lfLogText)
+		memcpy(&m_lfLogText, pData, sizeof m_lfLogText);
+	else
+		memset(&m_lfLogText, 0, sizeof m_lfLogText);
+	delete[] pData;
+
+	if (statsAverageMinutes < 1)
+		statsAverageMinutes = 5;
 
 	// deadlake PROXYSUPPORT
 	proxy.EnablePassword = ini.GetBool("ProxyEnablePassword",false,"Proxy");
@@ -3605,6 +3643,77 @@ uint16 CPreferences::GetMaxSourcePerFileUDP()
 void CPreferences::SetNetworkKademlia(bool val)	{ 
 	networkkademlia = val; 
 //	theApp.emuledlg->toolbar->ReloadConfig();// TODO: Remove this line as soon as we always show the kadbutton
+}
+
+CString CPreferences::GetHomepageBaseURLForLevel(uint8 nLevel){
+	CString tmp;
+	if (nLevel == 0)
+		tmp = _T("http://emule-project.net");
+	else if (nLevel == 1)
+		tmp = _T("http://www.emule-project.org");
+	else if (nLevel == 2)
+		tmp = _T("http://www.emule-project.com");
+	else if (nLevel < 100)
+		tmp.Format(_T("http://www%i.emule-project.net"),nLevel-2);
+	else if (nLevel < 150)
+		tmp.Format(_T("http://www%i.emule-project.org"),nLevel);
+	else if (nLevel < 200)
+		tmp.Format(_T("http://www%i.emule-project.com"),nLevel);
+	else if (nLevel == 200)
+		tmp = _T("http://emule.sf.net");
+	else if (nLevel == 201)
+		tmp = _T("http://www.emuleproject.net");
+	else if (nLevel == 202)
+		tmp = _T("http://sourceforge.net/projects/emule/");
+	else
+		tmp = _T("http://www.emule-project.net");
+	return tmp;
+}
+
+CString CPreferences::GetVersionCheckBaseURL(){
+	CString tmp;
+	uint8 nWebMirrorAlertLevel = GetWebMirrorAlertLevel();
+	if (nWebMirrorAlertLevel < 100)
+		tmp = _T("http://vcheck.emule-project.net");
+	else if (nWebMirrorAlertLevel < 150)
+		tmp.Format(_T("http://vcheck%i.emule-project.org"),nWebMirrorAlertLevel);
+	else if (nWebMirrorAlertLevel < 200)
+		tmp.Format(_T("http://vcheck%i.emule-project.com"),nWebMirrorAlertLevel);
+	else if (nWebMirrorAlertLevel == 200)
+		tmp = _T("http://emule.sf.net");
+	else if (nWebMirrorAlertLevel == 201)
+		tmp = _T("http://www.emuleproject.net");
+	else
+		tmp = _T("http://vcheck.emule-project.net");
+	return tmp;
+}
+
+bool CPreferences::IsDefaultNick(const CString strCheck){
+	// not fast, but this function is called often
+	for (int i = 0; i != 255; i++){
+		if (GetHomepageBaseURLForLevel(i) == strCheck)
+			return true;
+	}
+	return ( strCheck == _T("http://emule-project.net") );
+}
+
+uint8 CPreferences::GetWebMirrorAlertLevel(){
+	// Known upcoming DDoS Attacks
+	if (m_nWebMirrorAlertLevel == 0){
+		//somefool.q 7th - 12th march on www.emule-project.net, mirrorlevel 1
+		if (CTime::GetCurrentTime() > CTime(2004,04,07,0,1,0) && CTime::GetCurrentTime() < CTime(2004,04,12,0,1,0)){
+			return 1;
+		}
+		//somefool.r 12th - 18th march on www.emule-project.net, mirrorlevel 1
+		if (CTime::GetCurrentTime() > CTime(2004,04,12,0,1,0) && CTime::GetCurrentTime() < CTime(2004,04,18,0,1,0)){
+			return 1;
+		}
+	}
+	// end
+	if (UpdateNotify())
+		return m_nWebMirrorAlertLevel;
+	else
+		return 0;
 }
 
 //MORPH START - Added by IceCream, high process priority

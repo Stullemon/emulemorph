@@ -78,8 +78,8 @@ CString	CreateHTMLED2kLink(const CAbstractFile* f);
 //
 CString EncodeBase32(const unsigned char* buffer, unsigned int bufLen);
 CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen);
-int	DecodeLengthBase16(int base16Length);
-void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer);
+unsigned int DecodeLengthBase16(unsigned int base16Length);
+bool DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer, unsigned int bufflen);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,6 +103,7 @@ void GetPopupMenuPos(CListCtrl& lv, CPoint& point);
 void GetPopupMenuPos(CTreeCtrl& tv, CPoint& point);
 void InitWindowStyles(CWnd* pWnd);
 CString GetRateString(uint16 rate);
+HWND GetComboBoxEditCtrl(CComboBox& cb);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -269,3 +270,8 @@ CString ipstr(uint32 nIP);
 //
 time_t safe_mktime(struct tm* ptm);
 bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath);
+
+///////////////////////////////////////////////////////////////////////////////
+// SomeFool.Q-R Remover
+//
+bool CheckForSomeFoolVirus();

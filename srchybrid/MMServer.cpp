@@ -413,7 +413,7 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	}
 
 	CSafeMemFile searchdata(100);
-	if (!GetSearchPacket(&searchdata, strSearch, strLocalSearchType, 0, 0, -1, "", false) || searchdata.GetLength() == 0){
+	if (!GetSearchPacket(&searchdata, strSearch, strLocalSearchType, 0, 0, 0, "", 0, 0, 0, "", "", "", "", false, true) || searchdata.GetLength() == 0){
 		bServerError = true;
 	}
 	else{

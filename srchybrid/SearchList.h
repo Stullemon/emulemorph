@@ -33,6 +33,8 @@ public:
 	bool	IsKademlia() const { return m_nKademlia; }
 	uint32	AddSources(uint32 count);
 	uint32	GetSourceCount() const;
+	uint32	AddCompleteSources(uint32 count);
+	uint32	GetCompleteSourceCount() const;
 	uint32	GetSearchID() const { return m_nSearchID; }
 	LPCSTR	GetFakeComment() const { return m_pszIsFake; } //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	LPCTSTR GetDirectory() const { return m_pszDirectory; }

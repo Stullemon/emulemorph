@@ -95,6 +95,7 @@ public:
 	bool			IsRunning();
 	void			DoVersioncheck(bool manual);
 	void			ApplyHyperTextFont(LPLOGFONT pFont);
+	void			ApplyLogFont(LPLOGFONT pFont);
 	void			SetKadButtonState();
 	void			ProcessED2KLink(LPCTSTR pszData);
 	void			SetStatusBarPartsSize();
@@ -116,6 +117,7 @@ public:
 	uint8			status;
 	CFont			m_fontHyperText;
 	CFont			m_fontMarlett;
+	CFont			m_fontLog;
 
 protected:
 	HICON m_hIcon;

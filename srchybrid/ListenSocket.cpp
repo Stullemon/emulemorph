@@ -486,111 +486,106 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					CSafeMemFile data((BYTE*)packet,size);
 					uchar reqfilehash[16];
 					data.ReadHash16(reqfilehash);
-					Requested_Block_Struct* reqblock1 = new Requested_Block_Struct;
-					Requested_Block_Struct* reqblock2 = new Requested_Block_Struct;
-					Requested_Block_Struct* reqblock3 = new Requested_Block_Struct;
-					reqblock1->StartOffset = data.ReadUInt32();
-					reqblock2->StartOffset = data.ReadUInt32();
-					reqblock3->StartOffset = data.ReadUInt32();
-					reqblock1->EndOffset = data.ReadUInt32();
-					reqblock2->EndOffset = data.ReadUInt32();
-					reqblock3->EndOffset = data.ReadUInt32();
-					md4cpy(&reqblock1->FileID,reqfilehash);
-					md4cpy(&reqblock2->FileID,reqfilehash);
-					md4cpy(&reqblock3->FileID,reqfilehash);
+
+					uint32 auStartOffsets[3];
+					auStartOffsets[0] = data.ReadUInt32();
+					auStartOffsets[1] = data.ReadUInt32();
+					auStartOffsets[2] = data.ReadUInt32();
+
+					uint32 auEndOffsets[3];
+					auEndOffsets[0] = data.ReadUInt32();
+					auEndOffsets[1] = data.ReadUInt32();
+					auEndOffsets[2] = data.ReadUInt32();
+
 					if (thePrefs.GetDebugClientTCPLevel() > 0){
-						Debug("  Start1=%u  End1=%u  Size=%u\n", reqblock1->StartOffset, reqblock1->EndOffset, reqblock1->EndOffset - reqblock1->StartOffset);
-						Debug("  Start2=%u  End2=%u  Size=%u\n", reqblock2->StartOffset, reqblock2->EndOffset, reqblock2->EndOffset - reqblock2->StartOffset);
-						Debug("  Start3=%u  End3=%u  Size=%u\n", reqblock3->StartOffset, reqblock3->EndOffset, reqblock3->EndOffset - reqblock3->StartOffset);
+						Debug("  Start1=%u  End1=%u  Size=%u\n", auStartOffsets[0], auEndOffsets[0], auEndOffsets[0] - auStartOffsets[0]);
+						Debug("  Start2=%u  End2=%u  Size=%u\n", auStartOffsets[1], auEndOffsets[1], auEndOffsets[1] - auStartOffsets[1]);
+						Debug("  Start3=%u  End3=%u  Size=%u\n", auStartOffsets[2], auEndOffsets[2], auEndOffsets[2] - auStartOffsets[2]);
 					}
-					//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
-					uchar tempfileid[16];
-                    			md4clr(tempfileid);
-					//MORPH START - Added by SiRoB, Anti-leecher feature
-					if(client->IsLeecher()) {
-						// Flag blocks to delete
-						reqblock1->StartOffset = 0; reqblock1->EndOffset = 0; 
-						reqblock2->StartOffset = 0; reqblock2->EndOffset = 0; 
-						reqblock3->StartOffset = 0; reqblock3->EndOffset = 0; 
-					
-						// Remove client from the upload queue
-						theApp.uploadqueue->RemoveFromUploadQueue(client,GetResString(IDS_UPSTOPPEDLEECHER), true, true);
-						AddDebugLogLine(false, GetResString(IDS_LEECHERDETREM));
+					for (int i = 0; i < ARRSIZE(auStartOffsets); i++)
+					{
+						if (auEndOffsets[i] > auStartOffsets[i])
+						{
+							Requested_Block_Struct* reqblock = new Requested_Block_Struct;
+							reqblock->StartOffset = auStartOffsets[i];
+							reqblock->EndOffset = auEndOffsets[i];
+							md4cpy(reqblock->FileID, reqfilehash);
+							reqblock->transferred = 0;
+							//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
+							uchar tempfileid[16];
+                    		md4clr(tempfileid);
+							//MORPH START - Added by SiRoB, Anti-leecher feature
+							if(client->IsLeecher()) {
+								// Remove client from the upload queue
+								theApp.uploadqueue->RemoveFromUploadQueue(client,GetResString(IDS_UPSTOPPEDLEECHER), true, true);
+								AddDebugLogLine(false, GetResString(IDS_LEECHERDETREM));
 						
-						theApp.uploadqueue->AddClientToQueue(client);
-						AddDebugLogLine(false, GetResString(IDS_LEECHERPUTBACK));
-					
-						client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock1->FileID));
-					}
-					
-					//MORPH END   - Added by SiRoB, Anti-leecher feature
-					
-					// Remark: There is a security leak that a leecher mod might exploit here.
-					//         A client might send reqblock for another file than the one it 
-					//         was granted to download. As long as the file ID in reqblock
-					//         is the same in all reqblocks, it won't be rejected.  
-					//         With this a client might be in a waiting queue with a high 
-					//         priority but download block of a file set to a lower priority.
-					else if(md4cmp(reqblock1->FileID, client->GetUploadFileID()) != 0 && md4cmp(reqblock1->FileID, tempfileid) != 0 && client->GetSessionUp() == 0){
-						// client requested another file than it queued up for. Try to decide if the swith should be allowed.
-						bool allowSwitch = false;
+								theApp.uploadqueue->AddClientToQueue(client);
+								AddDebugLogLine(false, GetResString(IDS_LEECHERPUTBACK));
+								client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock->FileID));
+								delete reqblock;
+								break;
+							}
+							//MORPH END   - Added by SiRoB, Anti-leecher feature
+							// Remark: There is a security leak that a leecher mod might exploit here.
+							//         A client might send reqblock for another file than the one it 
+							//         was granted to download. As long as the file ID in reqblock
+							//         is the same in all reqblocks, it won't be rejected.  
+							//         With this a client might be in a waiting queue with a high 
+							//         priority but download block of a file set to a lower priority.
+							else if(md4cmp(reqblock->FileID, client->GetUploadFileID()) != 0 && md4cmp(reqblock->FileID, tempfileid) != 0 && client->GetSessionUp() == 0){
+								// client requested another file than it queued up for. Try to decide if the swith should be allowed.
+								bool allowSwitch = false;
 
-						// save original file id asked for, to be able to log it
-						uchar uploadFileId[16];
-						md4cpy(uploadFileId, client->GetUploadFileID());
+								// save original file id asked for, to be able to log it
+								uchar uploadFileId[16];
+								md4cpy(uploadFileId, client->GetUploadFileID());
 
-						if(client->HasLowID() && (client->IsFriend() && client->GetFriendSlot()) == true) {
-							allowSwitch = true;
-						} else {
-							client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock1->FileID));
+								if(client->HasLowID() && (client->IsFriend() && client->GetFriendSlot()) == true) {
+									allowSwitch = true;
+								} else {
+									client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock->FileID));
 
-							// we need to compare with the client that would get to replace this if we kick it out
-							CUpDownClient* bestQueuedClient = theApp.uploadqueue->FindBestClientInQueue();
+									// we need to compare with the client that would get to replace this if we kick it out
+									CUpDownClient* bestQueuedClient = theApp.uploadqueue->FindBestClientInQueue();
 
-							// This checks if which of client and bestClient would be on top on the queue, if client is put back.
-							// Allow switch of file if bestClient wouldn't be on top. Clients score is calculated with the new file
-							// it requested, since we used SetUploadFileID above.
-							if(bestQueuedClient == NULL || !theApp.uploadqueue->RightClientIsBetter(client, client->GetScore(false), bestQueuedClient, bestQueuedClient->GetScore(false))) {
-								allowSwitch = true;
+									// This checks if which of client and bestClient would be on top on the queue, if client is put back.
+									// Allow switch of file if bestClient wouldn't be on top. Clients score is calculated with the new file
+									// it requested, since we used SetUploadFileID above.
+									if(bestQueuedClient == NULL || !theApp.uploadqueue->RightClientIsBetter(client, client->GetScore(false), bestQueuedClient, bestQueuedClient->GetScore(false))) {
+										allowSwitch = true;
+									}
+								}
+								if(allowSwitch == false) {
+									// Ban client and trace some info
+									AddDebugLogLine(false, GetResString(IDS_TRIEDDLOTHERFILE), 
+										client->GetUserName(), md4str(uploadFileId), md4str(reqblock->FileID));
+
+									// Remove client from the upload queue
+									theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_IPSTOPPEDOTHFILE), true, true);
+	
+									// Put back with wating time intact
+									theApp.uploadqueue->AddClientToQueue(client, true, true);
+
+									AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
+						
+									client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock->FileID));
+									delete reqblock;
+									break;
+								}
+							}
+							//MORPH END - Added by SiRoB, ZZ Upload System
+							client->AddReqBlock(reqblock);
+						}
+						else
+						{
+							if (thePrefs.GetVerbose())
+							{
+								if (auEndOffsets[i] != 0 || auStartOffsets[i] != 0)
+									AddDebugLogLine(false, "Client requests invalid %u. file block %u-%u (%d bytes): %s", i, auStartOffsets[i], auEndOffsets[i], auEndOffsets[i] - auStartOffsets[i], client->DbgGetClientInfo());
 							}
 						}
-						if(allowSwitch == false) {
-							// Flag blocks to delete
-							reqblock1->StartOffset = 0; reqblock1->EndOffset = 0; 
-							reqblock2->StartOffset = 0; reqblock2->EndOffset = 0; 
-							reqblock3->StartOffset = 0; reqblock3->EndOffset = 0; 
-						
-							// Ban client and trace some info
-							AddDebugLogLine(false, GetResString(IDS_TRIEDDLOTHERFILE), 
-								client->GetUserName(), md4str(uploadFileId), md4str(reqblock1->FileID));
-
-							// Remove client from the upload queue
-							theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_IPSTOPPEDOTHFILE), true, true);
-	
-							// Put back with wating time intact
-							theApp.uploadqueue->AddClientToQueue(client, true, true);
-
-							AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
-						
-							client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock1->FileID));
-						}
 					}
-					//MORPH END - Added by SiRoB, ZZ Upload System
-						
-					if (reqblock1->EndOffset-reqblock1->StartOffset == 0)			
-						delete reqblock1;
-					else
-						client->AddReqBlock(reqblock1);
-
-					if (reqblock2->EndOffset-reqblock2->StartOffset == 0)			
-						delete reqblock2;
-					else
-						client->AddReqBlock(reqblock2);
-
-					if (reqblock3->EndOffset-reqblock3->StartOffset == 0)			
-						delete reqblock3;
-					else
-						client->AddReqBlock(reqblock3);
 					break;
 				}
 				case OP_CANCELTRANSFER:
@@ -813,7 +808,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					tempfile.WriteUInt32(iTotalCount);
 					while (list.GetCount())
 					{
-						theApp.sharedfiles->CreateOfferedFilePacket((CKnownFile*)list.GetHead(), &tempfile, false);
+						theApp.sharedfiles->CreateOfferedFilePacket((CKnownFile*)list.GetHead(), &tempfile, NULL, client->IsEmuleClient() ? client->GetVersion() : 0);
 						list.RemoveHead();
 					}
 					// create a packet and send it
@@ -1034,7 +1029,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						tempfile.WriteUInt32(list.GetCount());
 						while (list.GetCount())
 						{
-                                theApp.sharedfiles->CreateOfferedFilePacket(list.GetHead(), &tempfile, false);
+							theApp.sharedfiles->CreateOfferedFilePacket(list.GetHead(), &tempfile, NULL, client->IsEmuleClient() ? client->GetVersion() : 0);
                                 list.RemoveHead();
                             }
  
@@ -1821,7 +1816,12 @@ CListenSocket::~CListenSocket(){
 
 bool CListenSocket::StartListening(){
 	bListening = true;
-	return (this->Create(thePrefs.GetPort(),SOCK_STREAM,FD_ACCEPT) && this->Listen());
+	// Creating the socket with SO_REUSEADDR may solve LowID issues if emule was restarted
+	// quickly or started after a crash, but(!) it will also create another problem. If the
+	// socket is already used by some other application (e.g. a 2nd emule), we though bind
+	// to that socket leading to the situation that 2 applications are listening at the same
+	// port!
+	return (Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/) && Listen());
 }
 
 void CListenSocket::ReStartListening(){

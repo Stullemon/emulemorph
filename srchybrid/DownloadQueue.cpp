@@ -2215,6 +2215,15 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 		(void)_tremove(file.GetFilePath());
 	}
 }
+void CDownloadQueue::OnConnectionState(bool bConnected)
+{
+	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; )
+	{
+		CPartFile* pPartFile = filelist.GetNext(pos);
+		if (pPartFile->IsPartFile())
+			pPartFile->SetActive(bConnected);
+	}
+}
 
 //MORPH START - Added by SiRoB, ZZ Ratio
 bool CDownloadQueue::IsFilesPowershared()

@@ -493,7 +493,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 				//MORPH START - Modified by SiRoB, Client Software
 				case 8:			
-					Sbuffer = client->GetClientSoftVer();
+					Sbuffer = client->DbgGetFullClientSoftVer();
 					break;
 				//MORPH END - Modified by SiRoB, Client Software
 			
@@ -868,9 +868,9 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return item2->GetUpPartCount() - item1->GetUpPartCount();
 		//MORPH START - Modified by SiRoB, Client Software	
 		case 8:
-			return item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
+			return item2->DbgGetFullClientSoftVer().CompareNoCase(item1->DbgGetFullClientSoftVer());
 		case 108:
-			return item1->GetClientSoftVer().CompareNoCase(item2->GetClientSoftVer());
+			return item1->DbgGetFullClientSoftVer().CompareNoCase(item2->DbgGetFullClientSoftVer());
 		//MORPH END - Modified by SiRoB, Client Software
 		
 		//MORPH START - Added By Yun.SF3, Upload/Download

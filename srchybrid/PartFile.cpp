@@ -239,6 +239,8 @@ void CPartFile::Init(){
 	m_nCompleteSourcesCountHi = 0;
 	m_dwFileAttributes = 0;
 	m_bDeleteAfterAlloc=false;
+	m_tActivated = 0;
+	m_nDlActiveTime = 0;
 
 	m_PartsHashing = 0;		// SLUGFILLER: SafeHash
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
@@ -431,6 +433,7 @@ void CPartFile::CreatePartFile()
 		SetFileName(CleanupFilename(GetFileName()));
 
 	SavePartFile();
+	SetActive(theApp.IsConnected());
 }
 
 uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool getsizeonly)
@@ -744,7 +747,12 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						// SLUGFILLER: SafeHash
 						delete newtag;
 						break;
-					default:{
+					case FT_DL_ACTIVE_TIME:
+						if (newtag->tag.type == 3)
+							m_nDlActiveTime = newtag->tag.intvalue;
+						delete newtag;
+						break;
+				    default:{
 					    // Start Changes by Slugfiller for better exception handling
 						if ((!newtag->tag.specialtag) &&
 							 (newtag->tag.tagname[0] == FT_GAPSTART ||
@@ -1073,7 +1081,7 @@ bool CPartFile::SavePartFile(){
 		for (UINT x = 0; x < parts; x++)
 			file.WriteHash16(hashlist[x]);
 		//tags
-		uint32 tagcount = 9/*Official*/ +5/*Khaos*/ +1/*ZZ*/ +(gaplist.GetCount()*2);
+		uint32 tagcount = 10/*Official*/ +5/*Khaos*/ +1/*ZZ*/ +(gaplist.GetCount()*2);
 		// Float meta tags are currently not written. All older eMule versions < 0.28b have 
 		// a bug in the meta tag reading+writing code. To achive maximum backward 
 		// compatibility for met files with older eMule versions we just don't write float 
@@ -1129,6 +1137,9 @@ bool CPartFile::SavePartFile(){
 
 		CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, GetLastPublishTimeKadSrc());
 		kadLastPubSrc.WriteTagToFile(&file);
+
+		CTag tagDlActiveTime(FT_DL_ACTIVE_TIME, GetDlActiveTime());
+		tagDlActiveTime.WriteTagToFile(&file);
 
 		//MORPH START - Added by SiRoB, Show Permissions
 		// xMule_MOD: showSharePermissions - save permissions
@@ -1511,7 +1522,6 @@ void CPartFile::UpdateCompletedInfos()
 //MORPH START - Modified by SiRoB, Reduce ShareStatusBar CPU consumption
 void CPartFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool bFlat) /*const*/
 { 
-	//We need to find where the dangling pointers are before uncommenting this..
 	if( !IsPartFile() )
 	{
 		CKnownFile::DrawShareStatusBar( dc, rect, onlygreyrect, bFlat );
@@ -2385,7 +2395,6 @@ static void HeapSort(CArray<uint16,uint16> &count, uint32 first, uint32 last){
 
 void CPartFile::UpdatePartsInfo()
 {
-	//We need to find where the dangling pointers are before uncommenting this..
 	if( !IsPartFile() )
 	{
 		CKnownFile::UpdatePartsInfo();
@@ -2408,15 +2417,18 @@ void CPartFile::UpdatePartsInfo()
 	for (POSITION pos = srclist.GetHeadPosition(); pos != 0; )
 	{
 		CUpDownClient* cur_src = srclist.GetNext(pos);
-		for (int i = 0; i < partcount; i++)
-		{
-			if (cur_src->IsPartAvailable(i))
-				m_SrcpartFrequency[i] += 1;
+		if( cur_src->GetPartStatus() )
+		{		
+			for (int i = 0; i < partcount; i++)
+			{
+				if (cur_src->IsPartAvailable(i))
+					m_SrcpartFrequency[i] += 1;
+			}
+			if ( flag )
+			{
+				count.Add(cur_src->GetUpCompleteSourcesCount());
+			}
 		}
-		
-		uint16 cur_count;
-		if ( flag && (cur_count = cur_src->GetUpCompleteSourcesCount()) != 0 )
-			count.Add(cur_count);
 	}
 
 	if (flag)
@@ -2431,8 +2443,7 @@ void CPartFile::UpdatePartsInfo()
 				m_nCompleteSourcesCount = m_SrcpartFrequency[i];
 		}
 	
-		if (m_nCompleteSourcesCount)
-			count.Add(m_nCompleteSourcesCount);
+		count.Add(m_nCompleteSourcesCount);
 	
 		int n = count.GetSize();
 		if (n > 0)
@@ -2453,29 +2464,48 @@ void CPartFile::UpdatePartsInfo()
 			int i = n >> 1;			// (n / 2)
 			int j = (n * 3) >> 2;	// (n * 3) / 4
 			int k = (n * 7) >> 3;	// (n * 7) / 8
+
+			//When still a part file, adjust your guesses by 20% to what you see..
+
+			//Not many sources, so just use what you see..
 			if (n < 5)
 			{
-				m_nCompleteSourcesCount= count.GetAt(i);
-				m_nCompleteSourcesCountLo= 0;
+				m_nCompleteSourcesCount;
+				m_nCompleteSourcesCountLo= m_nCompleteSourcesCount;
 				m_nCompleteSourcesCountHi= m_nCompleteSourcesCount;
 			}
-			else if (n < 10)
-			{
-				m_nCompleteSourcesCount= count.GetAt(i);
-				m_nCompleteSourcesCountLo= count.GetAt(i - 1);
-				m_nCompleteSourcesCountHi= count.GetAt(i + 1);
-			}
+			//For low guess and normal guess count
+			//	If we see more sources then the guessed low and normal, use what we see.
+			//	If we see less sources then the guessed low, adjust network accounts for 80%, we account for 20% with what we see and make sure we are still above the normal.
+			//For high guess
+			//  Adjust 80% network and 20% what we see.
 			else if (n < 20)
 			{
-				m_nCompleteSourcesCount= count.GetAt(i);
-				m_nCompleteSourcesCountLo= count.GetAt(i);
-				m_nCompleteSourcesCountHi= count.GetAt(j);
+				if ( count.GetAt(i) < m_nCompleteSourcesCount )
+					m_nCompleteSourcesCountLo = m_nCompleteSourcesCount;
+				else
+					m_nCompleteSourcesCountLo = (uint16)((float)(count.GetAt(i)*.8)+(float)(m_nCompleteSourcesCount*.2));
+				m_nCompleteSourcesCount= m_nCompleteSourcesCountLo;
+				m_nCompleteSourcesCountHi= (uint16)((float)(count.GetAt(j)*.8)+(float)(m_nCompleteSourcesCount*.2));
+				if( m_nCompleteSourcesCountHi < m_nCompleteSourcesCount )
+					m_nCompleteSourcesCountHi = m_nCompleteSourcesCount;
 			}
 			else
+			//Many sources..
+			//For low guess
+			//	Use what we see.
+			//For normal guess
+			//	Adjust network accounts for 80%, we account for 20% with what we see and make sure we are still above the low.
+			//For high guess
+			//  Adjust network accounts for 80%, we account for 20% with what we see and make sure we are still above the normal.
 			{
-				m_nCompleteSourcesCount= count.GetAt(j);
 				m_nCompleteSourcesCountLo= m_nCompleteSourcesCount;
-				m_nCompleteSourcesCountHi= count.GetAt(k);
+				m_nCompleteSourcesCount= (uint16)((float)(count.GetAt(j)*.8)+(float)(m_nCompleteSourcesCount*.2));
+				if( m_nCompleteSourcesCount < m_nCompleteSourcesCountLo )
+					m_nCompleteSourcesCount = m_nCompleteSourcesCountLo;
+				m_nCompleteSourcesCountHi= (uint16)((float)(count.GetAt(k)*.8)+(float)(m_nCompleteSourcesCount*.2));
+				if( m_nCompleteSourcesCountHi < m_nCompleteSourcesCount )
+					m_nCompleteSourcesCountHi = m_nCompleteSourcesCount;
 			}
 		}
 		m_nCompleteSourcesTime = time(NULL) + (60);
@@ -2786,6 +2816,9 @@ void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 		UpdateMetaDataTags();
 		//This was to update the sharedfile bar as this will now use different data.. But I think there may be a sync issue here.
 		//UpdatePartsInfo();
+
+		// republish that file to the ed2k-server to update the 'FT_COMPLETE_SOURCES' counter on the server.
+		theApp.sharedfiles->RepublishFile(this);
 	}
 
 	if (thePrefs.StartNextFile())
@@ -3019,8 +3052,11 @@ void CPartFile::StopPausedFile()
 	if( (uState==PS_PAUSED || uState==PS_INSUFFICIENT || uState==PS_ERROR) && !stopped && time(NULL) - m_iLastPausePurge > (60*60) )
 	{
 		StopFile();
-	} else {
-		if (m_bDeleteAfterAlloc && m_AllocateThread==NULL) {
+	}
+	else
+	{
+		if (m_bDeleteAfterAlloc && m_AllocateThread==NULL)
+		{
 			DeleteFile();
 			return;
 		}
@@ -3050,6 +3086,8 @@ void CPartFile::PauseFile(bool bInsufficient)
 		Kademlia::CSearchManager::stopSearch(GetKadFileSearchID(), true);
 		lastsearchtimeKad = 0; //If we were in the middle of searching, reset timer so they can resume searching.
 	}
+
+	SetActive(false);
 
 	if (status==PS_COMPLETE || status==PS_COMPLETING)
 		return;
@@ -3115,6 +3153,7 @@ void CPartFile::ResumeFile()
 	}
 	paused = false;
 	stopped = false;
+	SetActive(theApp.IsConnected());
 	lastsearchtime = 0;
 	theApp.downloadqueue->SortByPriority();
 	theApp.downloadqueue->CheckDiskspace(); // SLUGFILLER: checkDiskspace
@@ -3131,6 +3170,7 @@ void CPartFile::ResumeFileInsufficient()
 		return;
 	AddLogLine(false, _T("Resuming download of \"%s\""), GetFileName());
 	insufficient = false;
+	SetActive(theApp.IsConnected());
 	lastsearchtime = 0;
 	UpdateDisplayedInfo(true);
 }
@@ -3271,26 +3311,27 @@ void CPartFile::PreviewFile(){
 
 bool CPartFile::CanPreviewFile() const
 {
-	uint64 space = GetFreeDiskSpaceX(thePrefs.GetTempDir());
-
 	// Barry - Allow preview of archives of any length > 1k
-	if (IsArchive(true)) {
-		if (GetStatus() != PS_COMPLETE && GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && (!m_bRecoveringArchive) && ((space + 100000000) > (2*GetFileSize())))
+	if (IsArchive(true))
+	{
+		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && (!m_bRecoveringArchive) && ((GetFreeDiskSpaceX(thePrefs.GetTempDir()) + 100000000) > (2*GetFileSize())))
 			return true; 
 		else 
 			return false;
 	}
 	//MORPH START - Added by SiRoB, preview music file
 	if (IsMusic())
-		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && ((space + 100000000) > (2*GetFileSize())))
+		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && ((GetFreeDiskSpaceX(thePrefs.GetTempDir()) + 100000000) > (2*GetFileSize())))
 			return true;
 	//MORPH END   - Added by SiRoB, preview music file
 	
 	if (thePrefs.IsMoviePreviewBackup())
+	{
 		//MORPH - Changed by SiRoB, Authorize preview of files with 2 chunk available
 		return !( (GetStatus() != PS_READY && GetStatus() != PS_PAUSED) 
-			|| m_bPreviewing || GetPartCount() < 2 || !IsMovie() || (space + 100000000) < GetFileSize()
+			|| m_bPreviewing || GetPartCount() < 2 || !IsMovie() || (GetFreeDiskSpaceX(thePrefs.GetTempDir()) + 100000000) < GetFileSize()
 			|| ( !IsPartShareable(0) || !IsPartShareable(GetPartCount()-1) ) );		// SLUGFILLER: SafeHash - only play hashed parts
+	}
 	else
 	{
 		TCHAR szVideoPlayerFileName[_MAX_FNAME];
@@ -3298,7 +3339,8 @@ bool CPartFile::CanPreviewFile() const
 
 		// enable the preview command if the according option is specified 'PreviewSmallBlocks' 
 		// or if VideoLAN client is specified
-		if (thePrefs.GetPreviewSmallBlocks() || !_tcsicmp(szVideoPlayerFileName, _T("vlc"))){
+		if (thePrefs.GetPreviewSmallBlocks() || !_tcsicmp(szVideoPlayerFileName, _T("vlc")))
+		{
 			if (m_bPreviewing)
 				return false;
 
@@ -3322,7 +3364,7 @@ bool CPartFile::CanPreviewFile() const
 				}
 			}
 
-			// If it's an MPEG file, VLC is even capable of showing parts of the file if the beginning of the file is missing!
+		    // If it's an MPEG file, VLC is even capable of showing parts of the file if the beginning of the file is missing!
 			bool bMPEG = false;
 			LPCTSTR pszExt = _tcsrchr(GetFileName(), _T('.'));
 			if (pszExt != NULL){
@@ -3332,12 +3374,12 @@ bool CPartFile::CanPreviewFile() const
 			}
 
 			if (bMPEG){
-				// TODO: search a block which is at least 16K (Audio) or 256K (Video)
+			    // TODO: search a block which is at least 16K (Audio) or 256K (Video)
 				if (GetCompletedSize() < 16*1024)
 					return false;
 			}
 			else{
-				// For AVI files it depends on the used codec..
+			    // For AVI files it depends on the used codec..
 				if (!IsComplete(0, 256*1024))
 					return false;
 			}
@@ -3994,7 +4036,7 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 	DbgSetThreadName("Partfile-Allocate Space");
 
 	CPartFile* myfile=(CPartFile*)lpParam;
-	theApp.emuledlg->QueueDebugLogLine(true,"ALLOC:Start (%s) (%s)",myfile->GetFileName(), CastItoXBytes(myfile->m_iAllocinfo) );
+	theApp.emuledlg->QueueDebugLogLine(false,"ALLOC:Start (%s) (%s)",myfile->GetFileName(), CastItoXBytes(myfile->m_iAllocinfo) );
 
 	try{
 		// If this is a NTFS compressed file and the current block is the 1st one to be written and there is not 
@@ -4027,7 +4069,7 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 	}
 
 	myfile->m_AllocateThread=NULL;
-	theApp.emuledlg->QueueDebugLogLine(true,"ALLOC:End (%s)",myfile->GetFileName());
+	theApp.emuledlg->QueueDebugLogLine(false,"ALLOC:End (%s)",myfile->GetFileName());
 	return 0;
 }
 
@@ -4839,6 +4881,35 @@ void CPartFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemC
 	}
 	else
 		CKnownFile::SetFileName(pszFileName, bReplaceInvalidFileSystemChars);
+}
+
+void CPartFile::SetActive(bool bActive)
+{
+	time_t tNow = time(NULL);
+	if (bActive)
+	{
+		if (theApp.IsConnected())
+		{
+			if (m_tActivated == 0)
+				m_tActivated = tNow;
+		}
+	}
+	else
+	{
+		if (m_tActivated != 0)
+		{
+			m_nDlActiveTime += tNow - m_tActivated;
+			m_tActivated = 0;
+		}
+	}
+}
+
+uint32 CPartFile::GetDlActiveTime() const
+{
+	uint32 nDlActiveTime = m_nDlActiveTime;
+	if (m_tActivated != 0)
+		nDlActiveTime += time(NULL) - m_tActivated;
+	return nDlActiveTime;
 }
 
 // SLUGFILLER: SafeHash

@@ -250,7 +250,8 @@ BOOL CIrcWnd::OnInitDialog()
 	m_pCurrentChannel = (Channel*)channelPtrList.GetTail();
 	AddStatus( GetResString(IDS_IRC_STATUSLOG ));
 	titleWindow.SetWindowText(GetResString(IDS_IRC_CHANNELLIST));
-	channelselect.SetCurSel(1);
+	channelselect.SetCurSel(0);
+	OnTcnSelchangeTab2( NULL, NULL );
 	
 	AddAnchor(IDC_BN_IRCCONNECT,BOTTOM_LEFT);
 	AddAnchor(IDC_CLOSECHAT,BOTTOM_LEFT);
@@ -1382,7 +1383,7 @@ CString CIrcWnd::StripMessageOfFontCodes( CString temp ){
 	temp.Replace("\003","");
 	temp.Replace("\017","");
 	temp.Replace("\026","");
-	temp.Replace("\047","");
+	temp.Replace("\037","");
 	return temp;
 }
 
@@ -1477,7 +1478,8 @@ void CIrcWnd::OnBnClickedChatsend()
 	GetDlgItem(IDC_INPUTWINDOW)->SetWindowText("");
 	GetDlgItem(IDC_INPUTWINDOW)->SetFocus();
 
-	if (m_pCurrentChannel->history.GetCount()==thePrefs.GetMaxChatHistoryLines()) m_pCurrentChannel->history.RemoveAt(0);
+	if (m_pCurrentChannel->history.GetCount()==thePrefs.GetMaxChatHistoryLines()) 
+		m_pCurrentChannel->history.RemoveAt(0);
 	m_pCurrentChannel->history.Add(send);
 	m_pCurrentChannel->history_pos=m_pCurrentChannel->history.GetCount();
 
@@ -1497,43 +1499,61 @@ void CIrcWnd::OnBnClickedChatsend()
 		}
 		return;
 	}
-	if( send.Left(1) == "/" && send.Left(3).MakeLower() != "/me" && send.Left(6).MakeLower() != "/sound" ){
-		if (send.Left(4) == "/msg"){
-			if( m_pCurrentChannel->type == 4 || m_pCurrentChannel->type == 5){
+	if( send.Left(1) == "/" && send.Left(3).MakeLower() != "/me" && send.Left(6).MakeLower() != "/sound" )
+	{
+		if (send.Left(4) == "/msg")
+		{
+			if( m_pCurrentChannel->type == 4 || m_pCurrentChannel->type == 5)
+			{
 				send.Replace( "%", "\004" );
 				AddInfoMessage( m_pCurrentChannel->name ,CString("* >> ")+send.Mid(5));
 				send.Replace( "\004", "%" );
 			}
-			else{
+			else
+			{
 				send.Replace( "%", "\004" );
 				AddStatus( CString("* >> ")+send.Mid(5));
 				send.Replace( "\004", "%" );
 			}
 			send = CString("/PRIVMSG") + send.Mid(4);
-			
 		}
-		if( ((CString)send.Left(17)).CompareNoCase( "/PRIVMSG nickserv"  )== 0){
+		if( ((CString)send.Left(17)).CompareNoCase( "/PRIVMSG nickserv"  )== 0)
+		{
 			send = CString("/ns") + send.Mid(17);
 		}
-		if( ((CString)send.Left(17)).CompareNoCase( "/PRIVMSG chanserv" )== 0){
+		else if( ((CString)send.Left(17)).CompareNoCase( "/PRIVMSG chanserv" )== 0)
+		{
 			send = CString("/cs") + send.Mid(17);
+		}
+		else if( ((CString)send.Left(8)).CompareNoCase( "/PRIVMSG" )== 0)
+		{
+			int index = send.Find(" ", send.Find(" ")+1);
+			send.Insert(index+1, ":");
+		}
+		else if( ((CString)send.Left(6)).CompareNoCase( "/TOPIC" )== 0)
+		{
+			int index = send.Find(" ", send.Find(" ")+1);
+			send.Insert(index+1, ":");
 		}
 		m_pIrcMain->SendString(send.Mid(1));
 		return;
 	}
-	if( m_pCurrentChannel->type < 4 ){
+	if( m_pCurrentChannel->type < 4 )
+	{
 		m_pIrcMain->SendString(send);
 		return;
 	}
-	if( send.Left(3) == "/me" ){
+	if( send.Left(3) == "/me" )
+	{
 		CString build;
-	   build.Format( "PRIVMSG %s :\001ACTION %s\001", m_pCurrentChannel->name, send.Mid(4) );
-	   send.Replace( "%", "\004" );
-	   AddInfoMessage( m_pCurrentChannel->name, "* %s %s", m_pIrcMain->GetNick(), send.Mid(4));
-	   m_pIrcMain->SendString(build);
-	   return;
+		build.Format( "PRIVMSG %s :\001ACTION %s\001", m_pCurrentChannel->name, send.Mid(4) );
+		send.Replace( "%", "\004" );
+		AddInfoMessage( m_pCurrentChannel->name, "* %s %s", m_pIrcMain->GetNick(), send.Mid(4));
+		m_pIrcMain->SendString(build);
+		return;
 	}
-	if( send.Left(6) == "/sound" ){
+	if( send.Left(6) == "/sound" )
+	{
 	   CString build, sound;
 	   build.Format( "PRIVMSG %s :\001SOUND %s\001", m_pCurrentChannel->name, send.Mid(7) );
 	   m_pIrcMain->SendString(build);

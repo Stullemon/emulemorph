@@ -55,14 +55,18 @@ struct SSearchTerm
 	SSearchTerm();
 	~SSearchTerm();
 	
-	enum {
+	enum ESearchTermType {
 		AND,
 		OR,
 		NAND,
 		String,
 		MetaTag,
-		Min,
-		Max,
+		OpGreaterEqual,
+		OpLessEqual,
+		OpGreater,
+		OpLess,
+		OpEqual,
+		OpNotEqual
 	} type;
 	
 	Kademlia::CTag* tag;

@@ -23,9 +23,12 @@ protected:
 	int m_iPartMessage;
 	int m_iQuitMessage;
 	int m_iEmuleProto;
+	int m_iEmuleAddFriend;
+	int m_iEmuleSendLink;
 	int m_iAcceptLinks;
 	int m_iAcceptLinksFriends;
 	int m_iHelpChannel;
+	int m_iChannelsOnConnect;
 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
@@ -37,11 +40,13 @@ protected:
 	HTREEITEM m_htiPartMessage;
 	HTREEITEM m_htiQuitMessage;
 	HTREEITEM m_htiEmuleProto;
+	HTREEITEM m_htiEmuleAddFriend;
+	HTREEITEM m_htiEmuleSendLink;
 	HTREEITEM m_htiAcceptLinks;
 	HTREEITEM m_htiAcceptLinksFriends;
 	HTREEITEM m_htiHelpChannel;
+	HTREEITEM m_htiChannelsOnConnect;
 
-	bool m_bnickModified;
 	void LoadSettings(void);
 	void UpdateControls();
 
@@ -53,7 +58,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
 	afx_msg void OnSettingsChange()					{ SetModified(); }
-	afx_msg void OnEnChangeNick()					{ SetModified(); m_bnickModified = true;}
 	afx_msg void OnBtnClickPerform();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 };

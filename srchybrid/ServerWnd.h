@@ -41,6 +41,9 @@ public:
 	BOOL SaveServerMetStrings();
 	void ShowServerInfo();
 	void UpdateControlsState();
+	void ResetHistory();
+	void PasteServerFromClipboard();
+	bool AddServer(uint16 uPort, CString strIP, CString strName = _T(""), bool bShowErrorMB = true);
 
 // Dialog Data
 	enum { IDD = IDD_SERVER };

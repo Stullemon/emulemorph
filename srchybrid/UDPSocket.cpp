@@ -64,11 +64,10 @@ LRESULT CUDPSocketWnd::OnDNSLookupDone(WPARAM wParam,LPARAM lParam){
 	return true;
 };
 
-CUDPSocket::CUDPSocket(CServerConnect* in_serverconnect){
+CUDPSocket::CUDPSocket(){
 	m_hWndResolveMessage = NULL;
 	m_sendbuffer = NULL;
 	m_cur_server = NULL;
-	m_serverconnect = in_serverconnect;
 	m_DnsTaskHandle = NULL;
 	m_bWouldBlock = false;
 }
@@ -277,20 +276,58 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 					Debug("ServerUDPMessage from %s:%u - OP_ServerDescRes\n", host, nUDPPort-4);
 				if(!update)
 					return true;
+
+				// old packet: <name_len 2><name name_len><desc_len 2 desc_en>
+				// new packet: <challenge 4><taglist>
+				//
+				// NOTE: To properly distinguish between the two packets which are both useing the same opcode...
+				// the first two bytes of <challenge> (in network byte order) have to be an invalid <name_len> at least.
+
 				CSafeMemFile srvinfo(packet,size);
-				CString strName = srvinfo.ReadString();
-				CString strDesc = srvinfo.ReadString();
+				if (size >= 8 && update->GetDescReqChallenge() != 0 && PeekUInt32(packet) == update->GetDescReqChallenge())
+				{
+					update->SetDescReqChallenge(0);
+					(void)srvinfo.ReadUInt32(); // skip challenge
+					UINT uTags = srvinfo.ReadUInt32();
+					for (UINT i = 0; i < uTags; i++)
+					{
+						CTag tag(&srvinfo);
+						if (tag.tag.specialtag == ST_SERVERNAME && tag.tag.type == 2)
+							update->SetListName(tag.tag.stringvalue);
+						else if (tag.tag.specialtag == ST_DESCRIPTION && tag.tag.type == 2)
+							update->SetDescription(tag.tag.stringvalue);
+						else if (tag.tag.specialtag == ST_DYNIP && tag.tag.type == 2)
+							update->SetDynIP(tag.tag.stringvalue);
+						else if (tag.tag.specialtag == ST_VERSION && tag.tag.type == 2)
+							update->SetVersion(tag.tag.stringvalue);
+						else if (tag.tag.specialtag == ST_VERSION && tag.tag.type == 3){
+							CString strVersion;
+							strVersion.Format(_T("%u.%u"), tag.tag.intvalue >> 16, tag.tag.intvalue & 0xFFFF);
+							update->SetVersion(strVersion);
+						}
+						else if (tag.tag.specialtag == ST_AUXPORTSLIST && tag.tag.type == 2)
+							// currently not implemented.
+							; // <string> = <port> [, <port>...]
+						else{
+							if (thePrefs.GetDebugServerUDPLevel() > 0)
+								Debug("***NOTE: Unknown tag in OP_ServerDescRes: %s\n", tag.GetFullInfo());
+						}
+					}
+				}
+				else
+				{
+					CString strName = srvinfo.ReadString();
+					CString strDesc = srvinfo.ReadString();
+					update->SetDescription(strDesc);
+					update->SetListName(strName);
+				}
 
 				if (thePrefs.GetDebugServerUDPLevel() > 0){
 					UINT uAddData = srvinfo.GetLength() - srvinfo.GetPosition();
 					if (uAddData)
 						Debug("***NOTE: ServerUDPMessage from %s:%u - OP_ServerDescRes:  ***AddData: %s\n", host, nUDPPort-4, GetHexDump(packet + srvinfo.GetPosition(), uAddData));
 				}
-				if(update){
-					update->SetDescription(strDesc);
-					update->SetListName(strName);
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
-				}
+				theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
 				break;
 			}
 			default:
@@ -308,6 +345,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 			szError[0] = _T('\0');
 		ProcessPacketError(size, opcode, host, nUDPPort-4, szError);
 		error->Delete();
+		ASSERT(0);
 		if (opcode==OP_GLOBSEARCHRES || opcode==OP_GLOBFOUNDSOURCES)
 			return true;
 	}
@@ -317,11 +355,13 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 			szError[0] = _T('\0');
 		ProcessPacketError(size, opcode, host, nUDPPort-4, szError);
 		error->Delete();
+		ASSERT(0);
 		if (opcode==OP_GLOBSEARCHRES || opcode==OP_GLOBFOUNDSOURCES)
 			return true;
 	}
 	catch(CString error){
 		ProcessPacketError(size, opcode, host, nUDPPort-4, error);
+		ASSERT(0);
 	}
 	catch(...){
 		ProcessPacketError(size, opcode, host, nUDPPort-4, _T("Unknown exception"));

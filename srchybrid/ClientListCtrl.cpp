@@ -436,7 +436,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 				}
 				case 5:{
-					Sbuffer = client->GetClientSoftVer();
+					Sbuffer = client->DbgGetFullClientSoftVer();
 					if (Sbuffer.IsEmpty())
 						Sbuffer = GetResString(IDS_UNKNOWN);
 					break;
@@ -744,7 +744,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 5:
 			if(item1->GetClientSoft() == item2->GetClientSoft())
 				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					return strcmpi(item2->GetClientSoftVer(), item1->GetClientSoftVer());
+					return strcmpi(item2->DbgGetFullClientSoftVer(), item1->DbgGetFullClientSoftVer());
 				}
 				else {
 					return item2->GetVersion() - item1->GetVersion();
@@ -754,7 +754,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 105:
 			if(item1->GetClientSoft() == item2->GetClientSoft())
 				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					return strcmpi(item1->GetClientSoftVer(), item2->GetClientSoftVer());
+					return strcmpi(item1->DbgGetFullClientSoftVer(), item2->DbgGetFullClientSoftVer());
 				}
 				else {
 					return item1->GetVersion() - item2->GetVersion();

@@ -87,11 +87,6 @@
 #define MP_HM_CONVERTPF			10227
 #define MP_RESUMEPAUSED			10228
 #define MP_HM_KAD				10229
-#define MP_HM_HELP				10242
-#define MP_HM_1STSWIZARD		10243
-#define MP_OPENFOLDER			10244
-#define	MP_HM_IPFILTER			10245
-
 #define MP_HM_LINK1				10230
 #define MP_HM_LINK2				10231
 #define MP_HM_LINK3				10232
@@ -105,6 +100,12 @@
 #define	MP_CUSTOMIZETOOLBAR		10239
 #define	MP_SELECT_SKIN_FILE		10240
 #define	MP_SELECT_SKIN_DIR		10241
+#define MP_HM_HELP				10242
+#define MP_HM_1STSWIZARD		10243
+#define MP_OPENFOLDER			10244
+#define	MP_HM_IPFILTER			10245
+#define	MP_WEBSVC_EDIT			10246
+#define	MP_HM_DIRECT_DOWNLOAD	10247
 
 #define MP_PRIOVERYLOW			10300
 #define MP_PRIOLOW				10301
@@ -138,18 +139,21 @@
 #define MPG_F2					10331
 #define	MP_RENAME				10332
 #define	MP_FIND					10333
+#define	MP_UNDO					10334
+#define	MP_CUT					10335
+#define	MP_PASTE				10336
 
 // khaos::categorymod+
-#define MP_CAT_SHOWHIDEPAUSED	10335
-#define MP_CAT_SETRESUMEORDER	10336
-#define	MP_CAT_ORDERAUTOINC		10337
-#define MP_CAT_ORDERSTEPTHRU	10338
-#define MP_CAT_ORDERALLSAME		10339
-#define MP_CAT_RESUMENEXT		10340
-#define	MP_CAT_PAUSELAST		10341
-#define MP_CAT_STOPLAST			10342
-#define MP_CAT_MERGE			10343
-#define MP_SETFILEGROUP			10344
+#define MP_CAT_SHOWHIDEPAUSED	10340
+#define MP_CAT_SETRESUMEORDER	10341
+#define	MP_CAT_ORDERAUTOINC		10342
+#define MP_CAT_ORDERSTEPTHRU	10343
+#define MP_CAT_ORDERALLSAME		10344
+#define MP_CAT_RESUMENEXT		10345
+#define	MP_CAT_PAUSELAST		10346
+#define MP_CAT_STOPLAST			10347
+#define MP_CAT_MERGE			10348
+#define MP_SETFILEGROUP			10349
 
 // For the downloadlist menu
 #define MP_FORCEA4AF			10350
@@ -213,9 +217,10 @@
 // reserve max 50
 #define	MP_SKIN_PROFILE			11000
 // reserve max 50
+#define	MP_PREVIEW_APP_MIN		11050
+#define	MP_PREVIEW_APP_MAX		(MP_PREVIEW_APP_MIN+49)
 
-
-#define Irc_Version				"(SMIRCv00.67)"
+#define Irc_Version				"(SMIRCv00.68)"
 #define Irc_Op					10240
 #define Irc_DeOp				10241
 #define Irc_Voice				10242

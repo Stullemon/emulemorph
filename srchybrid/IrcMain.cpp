@@ -319,7 +319,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						build.Format( "PRIVMSG %s :\001REPFRIEND eMule%s%s|%s|%u:%u|%s:%s|%s|\001", source, theApp.m_strCurVersionLong, Irc_Version, sverify, theApp.IsFirewalled() ? 0 : theApp.GetID(), thePrefs.GetPort(), sip, sport, EncodeBase16((const unsigned char*)thePrefs.GetUserHash(), 16));
 						ircsocket->SendString( build );
 						build.Format( "%s %s", source, GetResString(IDS_IRC_ADDASFRIEND));
-						if( !thePrefs.GetIrcIgnoreEmuleProtoInfoMessage() )
+						if( !thePrefs.GetIrcIgnoreEmuleProtoAddFriend() )
 							m_pwndIRC->NoticeMessage( "*EmuleProto*", build );
 						return;
 					}
@@ -327,7 +327,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 					{
 						if ( !thePrefs.GetIrcAcceptLinks() )
 						{
-							if( !thePrefs.GetIrcIgnoreEmuleProtoInfoMessage() )
+							if( !thePrefs.GetIrcIgnoreEmuleProtoSendLink() )
 							{
 								m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file. If you wanted to accept the files from this person, enable Recieve files in the IRC Preferences.");
 							}
@@ -343,13 +343,14 @@ void CIrcMain::ParseMessage( CString rawMessage )
 							return;
 						CString hash = message.Mid(index1+1, index2-index1-1);
 						uchar userid[16];
-						DecodeBase16(hash.GetBuffer(),hash.GetLength(),userid);
+						if (hash.GetLength()!=32 || !DecodeBase16(hash.GetBuffer(),hash.GetLength(),userid,ARRSIZE(userid)))
+							return;
 						CString RecieveString, build;
 						if(!theApp.friendlist->SearchFriend(userid, 0, 0))
 						{
 							if( thePrefs.GetIrcAcceptLinksFriends() )
 							{
-								if( !thePrefs.GetIrcIgnoreEmuleProtoInfoMessage() )
+								if( !thePrefs.GetIrcIgnoreEmuleProtoSendLink() )
 								{
 									m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file but wasn't a friend. If you wanted to accept files from this person, add person as a friend or disable from friends only in the IRC preferences.");
 								}
@@ -360,7 +361,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						if( !RecieveString.IsEmpty() )
 						{
 							build.Format( GetResString(IDS_IRC_RECIEVEDLINK), source, RecieveString );
-							if( !thePrefs.GetIrcIgnoreEmuleProtoInfoMessage() )
+							if( !thePrefs.GetIrcIgnoreEmuleProtoSendLink() )
 								m_pwndIRC->NoticeMessage( "*EmuleProto*", build );
 							ProcessLink( RecieveString );
 						}
@@ -400,7 +401,8 @@ void CIrcMain::ParseMessage( CString rawMessage )
 							return;
 						CString hash = message.Mid( index2 + 1, index1 - index2 -1);
 						uchar userid[16];
-						DecodeBase16(hash.GetBuffer(),hash.GetLength(),userid);
+						if (hash.GetLength()!=32 || !DecodeBase16(hash.GetBuffer(),hash.GetLength(),userid,ARRSIZE(userid)))
+							return;
 						theApp.friendlist->AddFriend( userid, 0, newClientID, newClientPort, 0, source, 1);
 					}
 					return;
@@ -417,7 +419,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 			if( source == nick )
 			{
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_HASJOINED), source, target );
-			return;
+				return;
 			}
 			if( !thePrefs.GetIrcIgnoreJoinMessage() )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_HASJOINED), source, target );
@@ -427,7 +429,6 @@ void CIrcMain::ParseMessage( CString rawMessage )
 		}
 		if( command == "PART" )
 		{
-			CString test = nick;
 			if ( source == nick )
 			{
 				m_pwndIRC->RemoveChannel( target );
@@ -456,7 +457,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 			if( source == nick )
 			{
 				nick = target;
-	//			m_pwenIRC->SetNick( nick );
+				thePrefs.SetIRCNick( nick.GetBuffer() );
 			}
 			m_pwndIRC->ChangeAllNick( source, target );
 			return;
@@ -564,7 +565,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 		{
 			if( !m_pwndIRC->GetLoggedIn() )
 				Disconnect();
-			m_pwndIRC->AddStatus(  GetResString(IDS_IRC_NICKUSED));
+			m_pwndIRC->AddStatus( GetResString(IDS_IRC_NICKUSED));
 			return;
 		}
 		m_pwndIRC->AddStatus( message );

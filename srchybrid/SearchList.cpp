@@ -79,7 +79,8 @@ void ConvertED2KTag(CTag*& pTag)
 		{
 			if (stricmp(pTag->tag.tagname, _aEmuleToED2KMetaTagsMap[j].pszED2KName) == 0)
 			{
-				if (pTag->tag.type == _aEmuleToED2KMetaTagsMap[j].nED2KType)
+				if (   pTag->tag.type == _aEmuleToED2KMetaTagsMap[j].nED2KType
+					|| (_aEmuleToED2KMetaTagsMap[j].nID == FT_MEDIA_LENGTH && pTag->tag.type == 3))
 				{
 					if (pTag->tag.type == 2)
 					{
@@ -257,13 +258,48 @@ uint32 CSearchFile::AddSources(uint32 count)
 			return pTag->tag.intvalue;
 		}
 	}
-	return 0;
+
+	// FT_SOURCES is not yet supported by clients, we may have to create such a tag..
+	CTag* pTag = new CTag(FT_SOURCES, count);
+	taglist.Add(pTag);
+	return count;
 }
 
 uint32 CSearchFile::GetSourceCount() const
 {
 	return GetIntTagValue(FT_SOURCES);
 }
+
+uint32 CSearchFile::AddCompleteSources(uint32 count)
+{
+	for (int i = 0; i < taglist.GetSize(); i++)
+	{
+		CTag* pTag = taglist[i];
+		if (pTag->tag.specialtag == FT_COMPLETE_SOURCES)
+		{
+			if (m_nKademlia)
+			{
+				if (pTag->tag.intvalue < count)
+					pTag->tag.intvalue = count;
+			}
+			else
+				pTag->tag.intvalue += count;
+			return pTag->tag.intvalue;
+		}
+	}
+
+	// FT_COMPLETE_SOURCES is not yet supported by all servers, we may have to create such a tag..
+	CTag* pTag = new CTag(FT_COMPLETE_SOURCES, count);
+	taglist.Add(pTag);
+	return count;
+}
+
+uint32 CSearchFile::GetCompleteSourceCount() const
+{
+	return GetIntTagValue(FT_COMPLETE_SOURCES);
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // CSearchList
@@ -641,11 +677,23 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 			&& cur_file->GetListParent()==NULL
 			)
 		{
-			UINT uAvail = toadd->GetIntTagValue(FT_SOURCES);
+			UINT uAvail;
+			if (bClientResponse)
+			{
+				// If this is a response from a client ("View Shared Files"), we set the "Availability" at least to 1.
+				if (!toadd->GetIntTagValue(FT_SOURCES, uAvail) || uAvail==0)
+					uAvail = 1;
+			}
+			else
+				uAvail = toadd->GetIntTagValue(FT_SOURCES);
 			
 			// already a result in list (parent exists)
 			cur_file->AddSources(uAvail);
 			AddResultCount(cur_file->GetSearchID(), toadd->GetFileHash(), uAvail);
+
+			uint32 uCompleteSources = -1;
+			if (toadd->GetIntTagValue(FT_COMPLETE_SOURCES, uCompleteSources))
+				cur_file->AddCompleteSources(uCompleteSources);
 
 			// check if child with same filename exists
 			bool found = false;
@@ -670,6 +718,8 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 						found=true;
 						cur_file2->SetListAddChildCount(uAvail);
 						cur_file2->AddSources(uAvail);
+						if (uCompleteSources != -1)
+							cur_file2->AddCompleteSources(uCompleteSources);
 	
 						// copy servers to child item -- this is not really needed because the servers are also stored
 						// in the parent item, but it gives a correct view of the server list within the server property page
@@ -750,7 +800,16 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 		m_foundFilesCount.SetAt(toadd->GetSearchID(),tempValue+1);
 
 		// new search result entry (no parent); add to result count for search result limit
-		UINT uAvail = toadd->GetIntTagValue(FT_SOURCES);
+		UINT uAvail;
+		if (bClientResponse)
+		{
+			// If this is a response from a client ("View Shared Files"), we set the "Availability" at least to 1.
+			if (!toadd->GetIntTagValue(FT_SOURCES, uAvail) || uAvail==0)
+				uAvail = 1;
+			toadd->AddSources(uAvail);
+		}
+		else
+			uAvail = toadd->GetIntTagValue(FT_SOURCES);
 		AddResultCount(toadd->GetSearchID(), toadd->GetFileHash(), uAvail);
 
 		CSearchFile* neu = new CSearchFile(toadd);

@@ -175,6 +175,7 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 	AddAnchor(IDC_SOURCECOUNT, TOP_LEFT, TOP_RIGHT);
 
 	AddAnchor(IDC_FILECREATED, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_DL_ACTIVE_TIME, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_LASTSEENCOMPL, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_LASTRECEIVED, TOP_LEFT, TOP_RIGHT);
 
@@ -240,6 +241,12 @@ void CFileDetailDialogInfo::RefreshData()
 		SetDlgItemText(IDC_FILECREATED, str);
 
 		// last seen complete
+		uint32 nDlActiveTime = (*m_paFiles)[0]->GetDlActiveTime();
+		if (nDlActiveTime) str=CastSecondsToLngHM(nDlActiveTime);
+			else str = GetResString(IDS_UNKNOWN);
+		SetDlgItemText(IDC_DL_ACTIVE_TIME, str);
+
+		// last seen complete
 		struct tm* ptimLastSeenComplete = (*m_paFiles)[0]->lastseencomplete.GetLocalTm();
 		if ((*m_paFiles)[0]->lastseencomplete == NULL || ptimLastSeenComplete == NULL)
 			str.Format(GetResString(IDS_UNKNOWN));
@@ -266,6 +273,7 @@ void CFileDetailDialogInfo::RefreshData()
 		SetDlgItemText(IDC_PARTCOUNT, sm_pszNotAvail);
 
 		SetDlgItemText(IDC_FILECREATED, sm_pszNotAvail);
+		SetDlgItemText(IDC_DL_ACTIVE_TIME, sm_pszNotAvail);
 		SetDlgItemText(IDC_LASTSEENCOMPL, sm_pszNotAvail);
 		SetDlgItemText(IDC_LASTRECEIVED, sm_pszNotAvail);
 	}
@@ -363,8 +371,7 @@ void CFileDetailDialogInfo::Localize()
 	GetDlgItem(IDC_FD_LASTCHANGE)->SetWindowText(GetResString(IDS_FD_LASTCHANGE));
 	GetDlgItem(IDC_FD_X8)->SetWindowText(GetResString(IDS_FD_TIMEDATE));
 	GetDlgItem(IDC_FD_X16)->SetWindowText(GetResString(IDS_FD_DOWNLOADSTARTED));
-
-	
+	GetDlgItem(IDC_DL_ACTIVE_TIME_LBL)->SetWindowText(GetResString(IDS_DL_ACTIVE_TIME)+_T(':'));
 	GetDlgItem(IDC_HSAV)->SetWindowText(GetResString(IDS_HSAV)+_T(":"));
 	GetDlgItem(IDC_FD_CORR)->SetWindowText(GetResString(IDS_FD_CORR)+_T(":"));
 	GetDlgItem(IDC_FD_RECOV)->SetWindowText(GetResString(IDS_FD_RECOV)+_T(":"));
@@ -402,7 +409,7 @@ CFileDetailDialogName::CFileDetailDialogName()
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_timer = 0;
 	memset(m_aiColWidths, 0, sizeof m_aiColWidths);
-
+	m_bAppliedSystemImageList = false;
 	m_sortorder=0;
 	m_sortindex=1;
 }
@@ -431,8 +438,6 @@ BOOL CFileDetailDialogName::OnInitDialog()
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
 	//pmyListCtrl = (CListCtrl*)GetDlgItem(IDC_LISTCTRLFILENAMES);
-//	pmyListCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT);
-
 	AddAnchor(IDC_FD_SN, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_LISTCTRLFILENAMES, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_TAKEOVER, BOTTOM_LEFT);
@@ -442,6 +447,7 @@ BOOL CFileDetailDialogName::OnInitDialog()
 
 	pmyListCtrl.InsertColumn(0, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, 380); 
 	pmyListCtrl.InsertColumn(1, GetResString(IDS_DL_SOURCES), LVCFMT_LEFT, 80); 
+	ASSERT( (pmyListCtrl.GetStyle() & LVS_SHAREIMAGELISTS) != 0 );
 	pmyListCtrl.LoadSettings(CPreferences::tableFilenames);
 
 	m_sortindex = thePrefs.GetColumnSortItem(CPreferences::tableFilenames);
@@ -523,8 +529,16 @@ void CFileDetailDialogName::FillSourcenameList()
 			newitem->count=1;
 			newitem->filename=cur_src->GetClientFilename();
 			
-			pmyListCtrl.InsertItem(LVIF_TEXT|LVIF_PARAM,0,cur_src->GetClientFilename(),0,0,0,(LPARAM)newitem);
-			pmyListCtrl.SetItemText(0, 1, "1"); 
+			int iSystemIconIdx = theApp.GetFileTypeSystemImageIdx(cur_src->GetClientFilename());
+			if (theApp.GetSystemImageList() && !m_bAppliedSystemImageList)
+			{
+				pmyListCtrl.ApplyImageList(theApp.GetSystemImageList());
+				ASSERT( (pmyListCtrl.GetStyle() & LVS_SHAREIMAGELISTS) != 0 );
+				m_bAppliedSystemImageList = true;
+			}
+
+			int ix=pmyListCtrl.InsertItem(LVIF_TEXT|LVIF_PARAM|LVIF_IMAGE, pmyListCtrl.GetItemCount() ,cur_src->GetClientFilename(),0,0,iSystemIconIdx,(LPARAM)newitem);
+			pmyListCtrl.SetItemText(ix, 1, "1"); 
 		}
 		else
 		{

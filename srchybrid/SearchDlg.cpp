@@ -48,14 +48,29 @@ static char THIS_FILE[]=__FILE__;
 
 #define	SEARCH_STRINGS_PROFILE	_T("AC_SearchStrings.dat")
 
+typedef enum EOptsRows
+{
+	orCompleteSources,
+	orCodec,
+	orBitrate,
+	orLength,
+	orTitle,
+	orAlbum,
+	orArtist
+};
+
 extern int yyparse();
 extern int yyerror(const char* errstr);
+extern LPCTSTR _aszInvKadKeywordChars;
 
 enum ESearchTimerID
 {
 	TimerServerTimeout = 1,
 	TimerGlobalSearch
 };
+
+static const LPCTSTR _apszSearchExprKeywords[] = { _T("AND"), _T("OR"), _T("NOT"), NULL };
+static const TCHAR _szSearchExprSeperators[] = _T(" ()<>=");
 
 // CSearchDlg dialog
 
@@ -71,7 +86,6 @@ CSearchDlg::CSearchDlg(CWnd* pParent /*=NULL*/)
 	canceld = false;
 	servercount = 0;
 	globsearch = false;
-	m_guardCBPrompt = false;
 	icon_search = NULL;
 	m_uTimerLocalServer = 0;
 	m_uLangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
@@ -104,13 +118,10 @@ BOOL CSearchDlg::OnInitDialog()
 	searchprogress.SetStep(1);
 	global_search_timer = 0;
 	globsearch = false;
-	m_guardCBPrompt=false;
 
 	AddAnchor(IDC_SDOWNLOAD,BOTTOM_LEFT);
 	AddAnchor(IDC_SEARCHLIST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_PROGRESS1,BOTTOM_LEFT,BOTTOM_RIGHT);
-	AddAnchor(IDC_DDOWN_FRM, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_ELINK, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_STARTS, TOP_RIGHT);
 	AddAnchor(IDC_MORE, TOP_RIGHT);
 	AddAnchor(IDC_CANCELS, TOP_RIGHT);
@@ -119,8 +130,14 @@ BOOL CSearchDlg::OnInitDialog()
 	AddAnchor(searchselect.m_hWnd,TOP_LEFT,TOP_RIGHT);
 	// khaos::categorymod+ obsolete //AddAnchor(IDC_STATIC_DLTOof,BOTTOM_LEFT);
 	// khaos::categorymod+ obsolete //AddAnchor(IDC_CATTAB2,BOTTOM_LEFT);
+	AddAnchor(IDC_STATIC_FILTER,TOP_LEFT,TOP_RIGHT);
+	AddAnchor(IDC_SEARCH_OPTS,TOP_LEFT,TOP_RIGHT);
+
 	ShowSearchSelector(false);
-	m_lastclpbrd="";
+
+	m_ctlName.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+	m_ctlName.SetDisableSelectOnFocus(false);
+	m_ctlName.SetSyntaxColoring(_apszSearchExprKeywords, _szSearchExprSeperators);
 
 	if (thePrefs.GetUseAutocompletion()){
 		m_pacSearchString = new CCustomAutoComplete();
@@ -149,6 +166,25 @@ BOOL CSearchDlg::OnInitDialog()
 	if (methodBox.SetCurSel(thePrefs.GetSearchMethod()) == CB_ERR)
 		methodBox.SetCurSel(SearchTypeServer);
 
+	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
+	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy, theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
+	m_ctlOpts.SetImageList(&ilDummyImageList, LVSIL_SMALL);
+	ASSERT( (m_ctlOpts.GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
+	ilDummyImageList.Detach();
+
+	m_ctlOpts.SetExtendedStyle(LVS_EX_GRIDLINES);
+	m_ctlOpts.InsertColumn(0, ""); // Parameter
+	m_ctlOpts.InsertColumn(1, ""); // Value
+	m_ctlOpts.InsertItem(orCompleteSources, GetResString(IDS_COMPLSOURCES));
+	m_ctlOpts.InsertItem(orCodec, GetResString(IDS_CODEC));
+	m_ctlOpts.InsertItem(orBitrate, GetResString(IDS_MINBITRATE));
+	m_ctlOpts.InsertItem(orLength, GetResString(IDS_MINLENGTH));
+	m_ctlOpts.InsertItem(orTitle, GetResString(IDS_TITLE));
+	m_ctlOpts.InsertItem(orAlbum, GetResString(IDS_ALBUM));
+	m_ctlOpts.InsertItem(orArtist, GetResString(IDS_ARTIST));
+	m_ctlOpts.SetColumnWidth(0, LVSCW_AUTOSIZE);
+	m_ctlOpts.SetColumnWidth(1, 120);
+
 	UpdateControls();
 
 	return true;
@@ -162,10 +198,10 @@ void CSearchDlg::DoDataExchange(CDataExchange* pDX){
 	DDX_Control(pDX, IDC_TypeSearch, Stypebox);
 	DDX_Control(pDX, IDC_TAB1, searchselect);
 	DDX_Control(pDX, IDC_SEARCH_FRM, m_ctrlSearchFrm);
-	DDX_Control(pDX, IDC_DDOWN_FRM, m_ctrlDirectDlFrm);
 	// khaos::categorymod+ obsolete //DDX_Control(pDX, IDC_CATTAB2, m_cattabs);
 	DDX_Control(pDX, IDC_MORE, m_ctlMore);
 	DDX_Control(pDX, IDC_SEARCHNAME, m_ctlName);
+	DDX_Control(pDX, IDC_SEARCH_OPTS, m_ctlOpts);
 }
 
 
@@ -185,12 +221,13 @@ BEGIN_MESSAGE_MAP(CSearchDlg, CResizableDialog)
 	ON_EN_CHANGE(IDC_SEARCHMAXSIZE, OnEnChangeSearchname)
 	ON_BN_CLICKED(IDC_SEARCH_RESET, OnBnClickedSearchReset)
 	ON_BN_CLICKED(IDC_DD, OnDDClicked)
-	ON_EN_KILLFOCUS(IDC_ELINK, OnEnKillfocusElink)
 	ON_WM_DESTROY()
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnCbnSelchangeCombo1)
 	ON_CBN_SELENDOK(IDC_COMBO1, OnCbnSelendokCombo1)
 	ON_BN_CLICKED(IDC_MORE, OnBnClickedMore)
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_SIZE()
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -200,15 +237,8 @@ void CSearchDlg::OnBnClickedStarts()
 {
 	searchprogress.SetPos(0);
 
-	// ed2k-links
-	if (GetDlgItem(IDC_ELINK)->GetWindowTextLength()){
-		CString strlink;
-		GetDlgItem(IDC_ELINK)->GetWindowText(strlink);
-		GetDlgItem(IDC_ELINK)->SetWindowText("");
-
-		AddEd2kLinksToDownload(strlink);
-		return;
-	}
+	if (m_ctlOpts.GetEditCtrl()->GetSafeHwnd())
+		m_ctlOpts.CommitEditCtrl();
 
 	// start "normal" server-search
 	if (m_ctlName.GetWindowTextLength())
@@ -366,7 +396,8 @@ BOOL CSearchDlg::PreTranslateMessage(MSG* pMsg)
 	if( m_pacSearchString && m_pacSearchString->IsBound() && ((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_DELETE) && (pMsg->hwnd == m_ctlName.m_hWnd) && (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)) )
 		m_pacSearchString->Clear();
 
-   	if((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_RETURN)){
+   	if((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_RETURN))
+	{
 	   	if (pMsg->hwnd == GetDlgItem(IDC_SEARCHLIST)->m_hWnd)
 			OnBnClickedSdownload();
 	   	else if (pMsg->hwnd == m_ctlName.m_hWnd || 
@@ -376,7 +407,10 @@ BOOL CSearchDlg::PreTranslateMessage(MSG* pMsg)
 				 pMsg->hwnd == GetDlgItem(IDC_EDITSEARCHAVAIBILITY)->m_hWnd || 
 				 pMsg->hwnd == GetDlgItem(IDC_COMBO1)->m_hWnd || 
 				 pMsg->hwnd == ((CComboBoxEx2*)GetDlgItem(IDC_COMBO1))->GetComboBoxCtrl()->GetSafeHwnd() ||
-				 pMsg->hwnd == GetDlgItem(IDC_EDITSEARCHEXTENSION)->m_hWnd){
+				 pMsg->hwnd == GetDlgItem(IDC_EDITSEARCHEXTENSION)->m_hWnd ||
+				 pMsg->hwnd == m_ctlOpts.m_hWnd ||
+				 pMsg->hwnd == m_ctlOpts.GetEditCtrl()->GetSafeHwnd()
+				){
 			if (m_pacSearchString && m_pacSearchString->IsBound() && pMsg->hwnd == m_ctlName.m_hWnd){
 				CString strText;
 				m_ctlName.GetWindowText(strText);
@@ -591,7 +625,6 @@ void CSearchDlg::OnSysColorChange()
 void CSearchDlg::SetAllIcons()
 {
 	m_ctrlSearchFrm.Init("SearchParams");
-	m_ctrlDirectDlFrm.Init("Download");
 
 	if (icon_search)
 		VERIFY( DestroyIcon(icon_search) );
@@ -635,13 +668,10 @@ void CSearchDlg::Localize()
 		m_uLangID = thePrefs.GetLanguageID();
 		m_ctrlSearchFrm.SetWindowText(GetResString(IDS_SW_SEARCHBOX));
 		m_ctrlSearchFrm.SetText(GetResString(IDS_SW_SEARCHBOX));
-		m_ctrlDirectDlFrm.SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
-		m_ctrlDirectDlFrm.SetText(GetResString(IDS_SW_DIRECTDOWNLOAD));
 
 		GetDlgItem(IDC_MSTATIC3)->SetWindowText(GetResString(IDS_SW_NAME));
 		GetDlgItem(IDC_MSTATIC7)->SetWindowText(GetResString(IDS_SW_TYPE));
 		GetDlgItem(IDC_STATIC_FILTER)->SetWindowText(GetResString(IDS_FILTER));
-		GetDlgItem(IIDC_FSTATIC2)->SetWindowText(GetResString(IDS_SW_LINK));
 		GetDlgItem(IDC_STARTS)->SetWindowText(GetResString(IDS_SW_START));
 		GetDlgItem(IDC_CANCELS)->SetWindowText(GetResString(IDS_CANCEL));
 		GetDlgItem(IDC_CLEARALL)->SetWindowText(GetResString(IDS_REMOVEALLSEARCH));
@@ -658,6 +688,15 @@ void CSearchDlg::Localize()
 		GetDlgItem(IDC_SD_MB2)->SetWindowText(GetResString(IDS_MBYTES));
 	  	SetDlgItemText(IDC_MATCH_KEYWORDS, GetResString(IDS_MATCH_KEYWORDS));
 		SetDlgItemText(IDC_MORE,GetResString(IDS_MORE));
+
+		m_ctlOpts.SetItemText(orCompleteSources, 0, GetResString(IDS_COMPLSOURCES));
+		m_ctlOpts.SetItemText(orCodec, 0, GetResString(IDS_CODEC));
+		m_ctlOpts.SetItemText(orBitrate, 0, GetResString(IDS_MINBITRATE));
+		m_ctlOpts.SetItemText(orLength, 0, GetResString(IDS_MINLENGTH));
+		m_ctlOpts.SetItemText(orTitle, 0, GetResString(IDS_TITLE));
+		m_ctlOpts.SetItemText(orAlbum, 0, GetResString(IDS_ALBUM));
+		m_ctlOpts.SetItemText(orArtist, 0, GetResString(IDS_ARTIST));
+
 	}
 
 	int iMethod = methodBox.GetCurSel();
@@ -760,6 +799,20 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 		Debug("Search Expr: %s\n", strDbg);
 
 	// this limit (+ the additonal operators which will be added later) has to match the limit in 'CreateSearchExpressionTree'
+	//	+1 Type (Audio, Video)
+	//	+1 MinSize
+	//	+1 MaxSize
+	//	+1 Avail
+	//	+1 Extension
+	//	+1 Complete sources
+	//	+1 Codec
+	//	+1 Bitrate
+	//	+1 Length
+	//	+1 Title
+	//	+1 Album
+	//	+1 Artist
+	// ---------------
+	//  12
 	if (iOpAnd + iOpOr + iOpNot > 10)
 		yyerror(GetResString(IDS_SEARCH_TOOCOMPLEX));
 
@@ -789,25 +842,181 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 #endif
 }
 
+CString DbgGetMetaTagName(UINT uMetaTagID)
+{
+	extern CString GetMetaTagName(UINT uTagID);
+	return GetMetaTagName(uMetaTagID);
+}
+
+CString DbgGetMetaTagName(LPCSTR pszMetaTagID)
+{
+	extern CString GetMetaTagName(UINT uTagID);
+
+	if (strlen(pszMetaTagID) == 1)
+		return GetMetaTagName(((BYTE*)pszMetaTagID)[0]);
+	CString strName;
+	strName.Format(_T("\"%s\""), pszMetaTagID);
+	return strName;
+}
+
+CString DbgGetOperatorName(bool bEd2k, UINT uOperator)
+{
+	static const LPCTSTR _aszEd2kOps[] = 
+	{
+		_T("="),
+		_T(">"),
+		_T("<"),
+		_T(">="),
+		_T("<="),
+		_T("<>"),
+	};
+	static const LPCTSTR _aszKadOps[] = 
+	{
+		_T("="),
+		_T(">="),
+		_T("<="),
+		_T(">"),
+		_T("<"),
+		_T("<>"),
+	};
+
+	if (bEd2k)
+	{
+		if (uOperator >= ARRSIZE(_aszEd2kOps)){
+			ASSERT(0);
+			return _T("*UnkOp*");
+		}
+		return _aszEd2kOps[uOperator];
+	}
+	else
+	{
+		if (uOperator >= ARRSIZE(_aszKadOps)){
+			ASSERT(0);
+			return _T("*UnkOp*");
+		}
+		return _aszKadOps[uOperator];
+	}
+}
+
+void WriteBooleanAND(CString& rstrDbg, CSafeMemFile& data)
+{
+	data.WriteUInt8(0);				// boolean operator parameter type
+	data.WriteUInt8(0x00);			// "AND"
+	rstrDbg.AppendFormat("AND ");
+}
+
+void WriteBooleanOR(CString& rstrDbg, CSafeMemFile& data)
+{
+	data.WriteUInt8(0);				// boolean operator parameter type
+	data.WriteUInt8(0x01);			// "OR"
+	rstrDbg.AppendFormat("OR ");
+}
+
+void WriteBooleanNOT(CString& rstrDbg, CSafeMemFile& data)
+{
+	data.WriteUInt8(0);				// boolean operator parameter type
+	data.WriteUInt8(0x02);			// "NOT"
+	rstrDbg.AppendFormat("NOT ");
+}
+
+void WriteMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, const CString& rstrValue)
+{
+	data.WriteUInt8(1);				// string parameter type
+	data.WriteString(rstrValue);	// string value
+	rstrDbg.AppendFormat("\"%s\" ", rstrValue);
+}
+
+void WriteMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, UINT uMetaTagID, const CString& rstrValue)
+{
+	data.WriteUInt8(2);				// string parameter type
+	data.WriteString(rstrValue);	// string value
+	data.WriteUInt16(sizeof uint8);	// meta tag ID length
+	data.WriteUInt8(uMetaTagID);	// meta tag ID name
+	rstrDbg.AppendFormat("%s=\"%s\" ", DbgGetMetaTagName(uMetaTagID), rstrValue);
+}
+
+void WriteMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, LPCSTR pszMetaTagID, const CString& rstrValue)
+{
+	data.WriteUInt8(2);				// string parameter type
+	data.WriteString(rstrValue);	// string value
+	data.WriteString(pszMetaTagID);	// meta tag ID
+	rstrDbg.AppendFormat("%s=\"%s\" ", DbgGetMetaTagName(pszMetaTagID), rstrValue);
+}
+
+void WriteMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, UINT uMetaTagID, UINT uOperator, UINT uValue, bool bEd2k)
+{
+	data.WriteUInt8(3);				// numeric parameter type
+	data.WriteUInt32(uValue);		// numeric value
+	data.WriteUInt8(uOperator);		// comparison operator
+	data.WriteUInt16(sizeof uint8);	// meta tag ID length
+	data.WriteUInt8(uMetaTagID);	// meta tag ID name
+	rstrDbg.AppendFormat("%s%s%u ", DbgGetMetaTagName(uMetaTagID), DbgGetOperatorName(bEd2k, uOperator), uValue);
+}
+
+void WriteMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, LPCSTR pszMetaTagID, UINT uOperator, UINT uValue, bool bEd2k)
+{
+	data.WriteUInt8(3);				// numeric parameter type
+	data.WriteUInt32(uValue);		// numeric value
+	data.WriteUInt8(uOperator);		// comparison operator
+	data.WriteString(pszMetaTagID);	// meta tag ID
+	rstrDbg.AppendFormat("%s%s%u ", DbgGetMetaTagName(pszMetaTagID), DbgGetOperatorName(bEd2k, uOperator), uValue);
+}
+
+void WriteOldMinMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, UINT uMetaTagID, UINT uValue, bool bEd2k)
+{
+	UINT uOperator;
+	if (bEd2k){
+		uOperator = ED2K_SEARCH_OP_GREATER;
+		uValue -= 1;
+	}
+	else
+		uOperator = KAD_SEARCH_OP_GREATER_EQUAL;
+	WriteMetaDataSearchParam(rstrDbg, data, uMetaTagID, uOperator, uValue, bEd2k);
+}
+
+void WriteOldMinMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, LPCSTR pszMetaTagID, UINT uValue, bool bEd2k)
+{
+	UINT uOperator;
+	if (bEd2k){
+		uOperator = ED2K_SEARCH_OP_GREATER;
+		uValue -= 1;
+	}
+	else
+		uOperator = KAD_SEARCH_OP_GREATER_EQUAL;
+	WriteMetaDataSearchParam(rstrDbg, data, pszMetaTagID, uOperator, uValue, bEd2k);
+}
+
+void WriteOldMaxMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, LPCSTR pszMetaTagID, UINT uValue, bool bEd2k)
+{
+	UINT uOperator;
+	if (bEd2k){
+		uOperator = ED2K_SEARCH_OP_LESS;
+		uValue += 1;
+	}
+	else
+		uOperator = KAD_SEARCH_OP_LESS_EQUAL;
+	WriteMetaDataSearchParam(rstrDbg, data, pszMetaTagID, uOperator, uValue, bEd2k);
+}
+
+void WriteOldMaxMetaDataSearchParam(CString& rstrDbg, CSafeMemFile& data, UINT uMetaTagID, UINT uValue, bool bEd2k)
+{
+	UINT uOperator;
+	if (bEd2k){
+		uOperator = ED2K_SEARCH_OP_LESS;
+		uValue += 1;
+	}
+	else
+		uOperator = KAD_SEARCH_OP_LESS_EQUAL;
+	WriteMetaDataSearchParam(rstrDbg, data, uMetaTagID, uOperator, uValue, bEd2k);
+}
+
 bool GetSearchPacket(CSafeMemFile* pData,
 					 const CString& strSearchString, const CString& strLocalizedType,
-					 ULONG ulMinSize, ULONG ulMaxSize, int iAvailability, 
-					 const CString& strExtension, bool bAllowEmptySearchString)
+					 ULONG ulMinSize, ULONG ulMaxSize, UINT uAvailability, const CString& strExtension, 
+					 UINT uComplete, ULONG ulMinBitrate, ULONG ulMinLength, const CString& strCodec,
+					 const CString& strTitle, const CString& strAlbum, const CString& strArtist,
+					 bool bAllowEmptySearchString, bool bEd2k)
 {
-	static const uchar _aucSearchType[3]         = {       0x01, 0x00, FT_FILETYPE	 };
-	static const uchar _aucSearchExtension[3]    = {       0x01, 0x00, FT_FILEFORMAT };
-	static const uchar _aucSearchAvailability[4] = { 0x01, 0x01, 0x00, FT_SOURCES    };
-	static const uchar _aucSearchMin[4]			 = { 0x01, 0x01, 0x00, FT_FILESIZE   };
-	static const uchar _aucSearchMax[4]			 = { 0x02, 0x01, 0x00, FT_FILESIZE   };
-
-	static const byte stringParameter  = 1;
-	static const byte typeParameter    = 2;
-	static const byte numericParameter = 3;
-
-	static const uint16 andParameter = 0x0000;	// 0x00, 0x00
-	static const uint16 orParameter  = 0x0100;	// 0x00, 0x01
-	static const uint16 notParameter = 0x0200;	// 0x00, 0x02
-
 	CSafeMemFile& data = *pData;
 
 	//TODO: use 'GetE2DKFileTypeSearchTerm'
@@ -860,15 +1069,27 @@ bool GetSearchPacket(CSafeMemFile* pData,
 	int iTotalTerms = 0;
 	if (!strExtension.IsEmpty())
 		iTotalTerms++;
-	// Because the availability is used with the 'Min' operator, we decrement the entered value by one to get
-	// more 'useable' results from the server (from a user's POV).
-	if (iAvailability >= 0)
+	if (uAvailability > 0)
 		iTotalTerms++;
 	if (ulMaxSize > 0)
 		iTotalTerms++;
 	if (ulMinSize > 0)
 		iTotalTerms++;
 	if (!strType.IsEmpty())
+		iTotalTerms++;
+	if (uComplete > 0)
+		iTotalTerms++;
+	if (ulMinBitrate > 0)
+		iTotalTerms++;
+	if (ulMinLength > 0)
+		iTotalTerms++;
+	if (!strCodec.IsEmpty())
+		iTotalTerms++;
+	if (!strTitle.IsEmpty())
+		iTotalTerms++;
+	if (!strAlbum.IsEmpty())
+		iTotalTerms++;
+	if (!strArtist.IsEmpty())
 		iTotalTerms++;
 	iTotalTerms += _SearchExpr.m_aExpr.GetCount();
 
@@ -885,75 +1106,81 @@ bool GetSearchPacket(CSafeMemFile* pData,
 		// we use:     AND "a" AND min=1 max=2
 
 		if (_SearchExpr.m_aExpr.GetCount() > 0){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter, 2);
-				strDbg.AppendFormat("AND ");
-			}
-			data.Write(&stringParameter, 1);
-			uint16 nSize = _SearchExpr.m_aExpr[0].GetLength();
-			data.WriteUInt16(nSize);
-			data.Write((LPCSTR)_SearchExpr.m_aExpr[0], nSize);
-			strDbg.AppendFormat("\"%s\" ", _SearchExpr.m_aExpr[0]);
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteMetaDataSearchParam(strDbg, data, _SearchExpr.m_aExpr[0]);
 		}
 
 		if (!strType.IsEmpty()){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter, 2);
-				strDbg.AppendFormat("AND ");
-			}
-			data.Write(&typeParameter, 1);
-			uint16 nSize = strType.GetLength();
-			data.WriteUInt16(nSize);
-			data.Write((LPCSTR)strType, nSize);
-			data.Write(_aucSearchType, sizeof _aucSearchType);
-			strDbg.AppendFormat("type=\"%s\" ", strType);
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteMetaDataSearchParam(strDbg, data, FT_FILETYPE, strType);
 		}
 		
 		if (ulMinSize > 0){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter, 2);
-				strDbg.AppendFormat("AND ");
-			}
-			data.Write(&numericParameter, 1);
-			data.WriteUInt32(ulMinSize);
-			data.Write(_aucSearchMin, sizeof _aucSearchMin);
-			strDbg.AppendFormat("min=%u ", ulMinSize);
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteOldMinMetaDataSearchParam(strDbg, data, FT_FILESIZE, ulMinSize, bEd2k);
 		}
 
 		if (ulMaxSize > 0){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter, 2);
-				strDbg.AppendFormat("AND ");
-			}
-			data.Write(&numericParameter, 1);
-			data.WriteUInt32(ulMaxSize);
-			data.Write(_aucSearchMax, sizeof _aucSearchMax);
-			strDbg.AppendFormat("max=%u ", ulMaxSize);
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteOldMaxMetaDataSearchParam(strDbg, data, FT_FILESIZE, ulMaxSize, bEd2k);
 		}
 		
-		if (iAvailability >= 0){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter, 2);
-				strDbg.AppendFormat("AND ");
-			}
-			data.Write(&numericParameter, 1);
-			data.WriteUInt32(iAvailability);
-			data.Write(_aucSearchAvailability, sizeof _aucSearchAvailability);
-			strDbg.AppendFormat("avail=%u ", iAvailability);
+		if (uAvailability > 0){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteOldMinMetaDataSearchParam(strDbg, data, FT_SOURCES, uAvailability, bEd2k);
 		}
 
 		if (!strExtension.IsEmpty()){
-			if (++iParameterCount < iTotalTerms){
-		    	data.Write(&andParameter,2);
-				strDbg.AppendFormat("AND ");
-			}
-			CString strData(strExtension);
-			data.Write(&typeParameter, 1);
-			uint16 nSize = strData.GetLength();
-			data.WriteUInt16(nSize);
-			data.Write((LPCSTR)strData, nSize);
-			data.Write(_aucSearchExtension, sizeof _aucSearchExtension);
-			strDbg.AppendFormat("ext=\"%s\" ", strData);
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteMetaDataSearchParam(strDbg, data, FT_FILEFORMAT, strExtension);
+		}
+
+		if (uComplete > 0){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteOldMinMetaDataSearchParam(strDbg, data, FT_COMPLETE_SOURCES, uComplete, bEd2k);
+		}
+
+		if (ulMinBitrate > 0){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteOldMinMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_BITRATE : TAG_MEDIA_BITRATE, ulMinBitrate, bEd2k);
+		}
+
+		if (ulMinLength > 0){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteOldMinMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_LENGTH : TAG_MEDIA_LENGTH, ulMinLength, bEd2k);
+		}
+
+		if (!strCodec.IsEmpty()){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_CODEC : TAG_MEDIA_CODEC, strCodec);
+		}
+
+		if (!strTitle.IsEmpty()){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_TITLE : TAG_MEDIA_TITLE, strTitle);
+		}
+
+		if (!strAlbum.IsEmpty()){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_ALBUM : TAG_MEDIA_ALBUM, strAlbum);
+		}
+
+		if (!strArtist.IsEmpty()){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+			WriteMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_ARTIST : TAG_MEDIA_ARTIST, strArtist);
 		}
 
 		ASSERT( iParameterCount == iTotalTerms );
@@ -961,102 +1188,114 @@ bool GetSearchPacket(CSafeMemFile* pData,
 	else
 	{
 		if (!strExtension.IsEmpty()){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter, 2);
-				strDbg.AppendFormat("AND ");
-			}
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
 		}
 
-		if (iAvailability >= 0){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter,2);
-				strDbg.AppendFormat("AND ");
-			}
+		if (uAvailability > 0){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
 		}
 	  
 		if (ulMaxSize > 0){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter,2);
-				strDbg.AppendFormat("AND ");
-			}
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
 		}
         
 		if (ulMinSize > 0){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter,2);
-				strDbg.AppendFormat("AND ");
-			}
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
 		}
         
 		if (!strType.IsEmpty()){
-			if (++iParameterCount < iTotalTerms){
-				data.Write(&andParameter,2);
-				strDbg.AppendFormat("AND ");
-			}
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
 		}
         
+		if (uComplete > 0){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+		}
+
+		if (ulMinBitrate > 0){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+		}
+
+		if (ulMinLength > 0){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+		}
+
+		if (!strCodec.IsEmpty()){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+		}
+
+		if (!strTitle.IsEmpty()){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+		}
+
+		if (!strAlbum.IsEmpty()){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+		}
+
+		if (!strArtist.IsEmpty()){
+			if (++iParameterCount < iTotalTerms)
+				WriteBooleanAND(strDbg, data);
+		}
+
+		ASSERT( iParameterCount + _SearchExpr.m_aExpr.GetCount() == iTotalTerms );
+
 		for (int j = 0; j < _SearchExpr.m_aExpr.GetCount(); j++){
 			CString str(_SearchExpr.m_aExpr[j]);
-			if (str == SEARCHOPTOK_AND){
-				data.Write(&andParameter,2);
-				strDbg.AppendFormat("AND ");
-			}
-			else if (str == SEARCHOPTOK_OR){
-				data.Write(&orParameter, 2);
-				strDbg.AppendFormat("OR ");
-			}
-			else if (str == SEARCHOPTOK_NOT){
-				data.Write(&notParameter, 2);
-				strDbg.AppendFormat("NOT ");
-			}
-			else{
-				data.Write(&stringParameter, 1);
-				uint16 nSize = str.GetLength();
-				data.WriteUInt16(nSize);
-				data.Write((LPCSTR)str, nSize);
-				strDbg.AppendFormat("\"%s\" ", str);
-			}
+			if (str == SEARCHOPTOK_AND)
+				WriteBooleanAND(strDbg, data);
+			else if (str == SEARCHOPTOK_OR)
+				WriteBooleanOR(strDbg, data);
+			else if (str == SEARCHOPTOK_NOT)
+				WriteBooleanNOT(strDbg, data);
+			else
+				WriteMetaDataSearchParam(strDbg, data, str);
 		}
 
-		if (!strType.IsEmpty()){
-			data.Write(&typeParameter, 1);
-			uint16 nSize = strType.GetLength();
-			data.WriteUInt16(nSize);
-			data.Write((LPCSTR)strType, nSize);
-			data.Write(_aucSearchType, sizeof _aucSearchType);
-			strDbg.AppendFormat("type=\"%s\" ", strType);
-		}
+		if (!strType.IsEmpty())
+			WriteMetaDataSearchParam(strDbg, data, FT_FILETYPE, strType);
 
-		if (ulMinSize > 0){
-			data.Write(&numericParameter, 1);
-			data.WriteUInt32(ulMinSize);
-			data.Write(_aucSearchMin, sizeof _aucSearchMin);
-			strDbg.AppendFormat("min=%u ", ulMinSize);
-		}
+		if (ulMinSize > 0)
+			WriteOldMinMetaDataSearchParam(strDbg, data, FT_FILESIZE, ulMinSize, bEd2k);
 
-		if (ulMaxSize > 0){
-			data.Write(&numericParameter, 1);
-			data.WriteUInt32(ulMaxSize);
-			data.Write(_aucSearchMax, sizeof _aucSearchMax);
-			strDbg.AppendFormat("max=%u ", ulMaxSize);
-		}
+		if (ulMaxSize > 0)
+			WriteOldMaxMetaDataSearchParam(strDbg, data, FT_FILESIZE, ulMaxSize, bEd2k);
 
-		if (iAvailability >= 0){
-			data.Write(&numericParameter, 1);
-			data.WriteUInt32(iAvailability);
-			data.Write(_aucSearchAvailability, sizeof _aucSearchAvailability);
-			strDbg.AppendFormat("avail=%u ", iAvailability);
-		}
+		if (uAvailability > 0)
+			WriteOldMinMetaDataSearchParam(strDbg, data, FT_SOURCES, uAvailability, bEd2k);
 
-		if (!strExtension.IsEmpty()){
-			CString strData(strExtension);
-			data.Write(&typeParameter, 1);
-			uint16 nSize = strData.GetLength();
-			data.WriteUInt16(nSize);
-			data.Write((LPCSTR)strData, nSize);
-			data.Write(_aucSearchExtension, sizeof _aucSearchExtension);
-			strDbg.AppendFormat("ext=\"%s\" ", strData);
-		}
+		if (!strExtension.IsEmpty())
+			WriteMetaDataSearchParam(strDbg, data, FT_FILEFORMAT, strExtension);
+
+		if (uComplete > 0)
+			WriteOldMinMetaDataSearchParam(strDbg, data, FT_COMPLETE_SOURCES, uComplete, bEd2k);
+
+		if (ulMinBitrate > 0)
+			WriteOldMinMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_BITRATE : TAG_MEDIA_BITRATE, ulMinBitrate, bEd2k);
+
+		if (ulMinLength > 0)
+			WriteOldMinMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_LENGTH : TAG_MEDIA_LENGTH, ulMinLength, bEd2k);
+
+		if (!strCodec.IsEmpty())
+			WriteMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_CODEC : TAG_MEDIA_CODEC, strCodec);
+
+		if (!strTitle.IsEmpty())
+			WriteMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_TITLE : TAG_MEDIA_TITLE, strTitle);
+
+		if (!strAlbum.IsEmpty())
+			WriteMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_ALBUM : TAG_MEDIA_ALBUM, strAlbum);
+
+		if (!strArtist.IsEmpty())
+			WriteMetaDataSearchParam(strDbg, data, bEd2k ? FT_ED2K_MEDIA_ARTIST : TAG_MEDIA_ARTIST, strArtist);
 	}
 
 	if (thePrefs.GetDebugServerSearchesLevel() > 0)
@@ -1072,7 +1311,10 @@ bool CSearchDlg::DoNewSearch(SSearchParams* pParams)
 
 	CSafeMemFile data(100);
 	if (!GetSearchPacket(&data, pParams->strExpression, pParams->strFileType, 
-						 pParams->ulMinSize, pParams->ulMaxSize, pParams->iAvailability, pParams->strExtension, false) 
+						 pParams->ulMinSize, pParams->ulMaxSize, pParams->uAvailability, pParams->strExtension, 
+						 pParams->uComplete, pParams->ulMinBitrate, pParams->ulMinLength, pParams->strCodec,
+						 "", "", "",
+						 false, true) 
 		|| data.GetLength() == 0)
 		return false;
 
@@ -1186,8 +1428,6 @@ void CSearchDlg::StartNewSearch(bool bKademlia)
 		if (ulMaxSize == (ULONG)-1)
 			return;
 		
-		// 06-Mai-2003: always sending the max-size is no longer needed
-		// there is no need to always send a default max size (confirmed by lugdunummaster)
 		if (ulMaxSize < ulMinSize){
 			ulMaxSize = 0; // TODO: Create a message box for that
 			SetDlgItemText(IDC_EDITSEARCHMAX, _T(""));
@@ -1201,16 +1441,42 @@ void CSearchDlg::StartNewSearch(bool bKademlia)
 			SetDlgItemText(IDC_EDITSEARCHEXTENSION, strExtension);
 		}
 
-		// Because the availability is used with the 'Min' operator, we decrement the entered value by one to get
-		// more 'useable' results from the server (from a user's POV). Therefore its correct to send an
-		// 'Availability' of 0, because it will return all files with an 'Availability' of >= 1.
 		CString strAvailability;
 		GetDlgItem(IDC_EDITSEARCHAVAIBILITY)->GetWindowText(strAvailability);
-		int iAvailability;
-		if (strAvailability.IsEmpty())
-			iAvailability = -1; // No Availability specified
-		else
-			iAvailability = _tstoi(strAvailability) - 1;
+		UINT uAvailability = 0;
+		_stscanf(strAvailability, _T("%u"), &uAvailability);
+
+		UINT uComplete = 0;
+		if ((m_ctlOpts.GetItemData(orCompleteSources) & 1) == 0){
+			CString strComplete = m_ctlOpts.GetItemText(orCompleteSources, 1);
+			_stscanf(strComplete, _T("%u"), &uComplete);
+		}
+	
+		CString strCodec;
+		if ((m_ctlOpts.GetItemData(orCodec) & 1) == 0)
+			strCodec = m_ctlOpts.GetItemText(orCodec, 1);
+		strCodec.Trim();
+
+		ULONG ulMinBitrate = 0;
+		if ((m_ctlOpts.GetItemData(orBitrate) & 1) == 0){
+			CString strMinBitrate = m_ctlOpts.GetItemText(orBitrate, 1);
+			_stscanf(strMinBitrate, _T("%u"), &ulMinBitrate);
+		}
+
+		ULONG ulMinLength = 0;
+		if ((m_ctlOpts.GetItemData(orLength) & 1) == 0){
+			CString strMinLength = m_ctlOpts.GetItemText(orLength, 1);
+			if (!strMinLength.IsEmpty())
+			{
+				UINT hour = 0, min = 0, sec = 0;
+				if (sscanf(strMinLength, "%u : %u : %u", &hour, &min, &sec) == 3)
+					ulMinLength = hour * 3600 + min * 60 + sec;
+				else if (sscanf(strMinLength, "%u : %u", &min, &sec) == 2)
+					ulMinLength = min * 60 + sec;
+				else if (sscanf(strMinLength, "%u", &sec) == 1)
+					ulMinLength = sec;
+			}
+		}
 
 		SSearchParams* pParams = new SSearchParams;
 		pParams->strExpression = strSearchString;
@@ -1220,9 +1486,25 @@ void CSearchDlg::StartNewSearch(bool bKademlia)
 		pParams->ulMinSize = ulMinSize;
 		pParams->strMaxSize = strMaxSize;
 		pParams->ulMaxSize = ulMaxSize;
-		pParams->iAvailability = iAvailability == -1 ? -1 : (iAvailability + 1);
+		pParams->uAvailability = uAvailability;
 		pParams->strExtension = strExtension;
 		pParams->bMatchKeywords = IsDlgButtonChecked(IDC_MATCH_KEYWORDS);
+		pParams->uComplete = uComplete;
+		pParams->strCodec = strCodec;
+		pParams->ulMinBitrate = ulMinBitrate;
+		pParams->ulMinLength = ulMinLength;
+		if ((m_ctlOpts.GetItemData(orTitle) & 1) == 0){
+			pParams->strTitle = m_ctlOpts.GetItemText(orTitle, 1);
+			pParams->strTitle.Trim();
+		}
+		if ((m_ctlOpts.GetItemData(orAlbum) & 1) == 0){
+			pParams->strAlbum = m_ctlOpts.GetItemText(orAlbum, 1);
+			pParams->strAlbum.Trim();
+		}
+		if ((m_ctlOpts.GetItemData(orArtist) & 1) == 0){
+			pParams->strArtist = m_ctlOpts.GetItemText(orArtist, 1);
+			pParams->strArtist.Trim();
+		}
 
 		if (!bKademlia)
 		{
@@ -1271,12 +1553,22 @@ bool CSearchDlg::DoNewKadSearch(SSearchParams* pParams)
 
 	int iPos = 0;
 	CString strKeyWord = pParams->strExpression.Tokenize(_T(" "), iPos);
-	if (strKeyWord.IsEmpty())
+	strKeyWord.Trim();
+	if (strKeyWord.IsEmpty() || strKeyWord.FindOneOf(_aszInvKadKeywordChars) != -1){
+		CString strError;
+		strError.Format(GetResString(IDS_KAD_SEARCH_KEYWORD_INVALID), _aszInvKadKeywordChars);
+		AfxMessageBox(strError);
 		return false;
+	}
 	CString strSearchExpr = (iPos >= pParams->strExpression.GetLength()) ? _T("") : pParams->strExpression.Mid(iPos);
 
 	CSafeMemFile data(100);
-	if (!GetSearchPacket(&data, strSearchExpr, pParams->strFileType, pParams->ulMinSize, pParams->ulMaxSize, pParams->iAvailability, pParams->strExtension, true) || (!strSearchExpr.IsEmpty() && data.GetLength() == 0))
+	if (!GetSearchPacket(&data, strSearchExpr, 
+						 pParams->strFileType, pParams->ulMinSize, pParams->ulMaxSize, pParams->uAvailability, 
+						 pParams->strExtension, 0/*pParams->uComplete*/, pParams->ulMinBitrate, pParams->ulMinLength,
+						 pParams->strCodec, pParams->strTitle, pParams->strAlbum, pParams->strArtist,
+						 true, false) 
+		|| (!strSearchExpr.IsEmpty() && data.GetLength() == 0))
 		return false;
 
 	LPBYTE pSearchTermsData = NULL;
@@ -1286,10 +1578,21 @@ bool CSearchDlg::DoNewKadSearch(SSearchParams* pParams)
 		data.SeekToBegin();
 		data.Read(pSearchTermsData, uSearchTermsSize);
 	}
-	Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindKeywords(Kademlia::CSearch::KEYWORD, true, strKeyWord, uSearchTermsSize, pSearchTermsData);
-	delete pSearchTermsData;
-	if (!pSearch)
+
+	Kademlia::CSearch* pSearch = NULL;
+	try
 	{
+		pSearch = Kademlia::CSearchManager::prepareFindKeywords(Kademlia::CSearch::KEYWORD, true, strKeyWord, uSearchTermsSize, pSearchTermsData);
+	delete pSearchTermsData;
+		if (!pSearch){
+			ASSERT(0);
+			return false;
+		}
+	}
+	catch (CString strException)
+	{
+		AfxMessageBox(strException);
+		delete pSearchTermsData;
 		return false;
 	}
 	pParams->dwSearchID = pSearch->getSearchID();
@@ -1429,12 +1732,32 @@ void CSearchDlg::ShowResults(const SSearchParams* pParams)
 		SetDlgItemText(IDC_EDITSEARCHMAX, pParams->strMaxSize);
 		SetDlgItemText(IDC_EDITSEARCHEXTENSION, pParams->strExtension);
 
+		if (pParams->uAvailability > 0)
+			SetDlgItemInt(IDC_EDITSEARCHAVAIBILITY, pParams->uAvailability, FALSE);
+
 		CString strBuff;
-		if (pParams->iAvailability > 0)
-			strBuff.Format(_T("%u"), pParams->iAvailability);
+		if (pParams->uComplete > 0)
+			strBuff.Format(_T("%u"), pParams->uComplete);
 		else
 			strBuff.Empty();
-		SetDlgItemText(IDC_EDITSEARCHAVAIBILITY, strBuff);
+		m_ctlOpts.SetItemText(orCompleteSources, 1, strBuff);
+
+		m_ctlOpts.SetItemText(orCodec, 1, pParams->strCodec);
+
+		if (pParams->ulMinBitrate > 0)
+			strBuff.Format(_T("%u"), pParams->ulMinBitrate);
+		else
+			strBuff.Empty();
+		m_ctlOpts.SetItemText(orBitrate, 1, strBuff);
+
+		if (pParams->ulMinLength > 0)
+			SecToTimeLength(pParams->ulMinLength, strBuff);
+		else
+			strBuff.Empty();
+		m_ctlOpts.SetItemText(orLength, 1, strBuff);
+		m_ctlOpts.SetItemText(orTitle, 1, pParams->strTitle);
+		m_ctlOpts.SetItemText(orAlbum, 1, pParams->strAlbum);
+		m_ctlOpts.SetItemText(orArtist, 1, pParams->strArtist);
 	}
 	searchlistctrl.ShowResults(pParams->dwSearchID);
 }
@@ -1473,12 +1796,15 @@ void CSearchDlg::OnEnChangeSearchname()
 
 void CSearchDlg::OnBnClickedSearchReset()
 {
-	GetDlgItem(IDC_EDITSEARCHAVAIBILITY)->SetWindowText("");	
-	GetDlgItem(IDC_EDITSEARCHEXTENSION)->SetWindowText("");	
-	GetDlgItem(IDC_EDITSEARCHMIN)->SetWindowText("");	
-	GetDlgItem(IDC_EDITSEARCHMAX)->SetWindowText("");	
-	m_ctlName.SetWindowText("");
+	GetDlgItem(IDC_EDITSEARCHAVAIBILITY)->SetWindowText(_T(""));
+	GetDlgItem(IDC_EDITSEARCHEXTENSION)->SetWindowText(_T(""));
+	GetDlgItem(IDC_EDITSEARCHMIN)->SetWindowText(_T(""));
+	GetDlgItem(IDC_EDITSEARCHMAX)->SetWindowText(_T(""));
+	m_ctlName.SetWindowText(_T(""));
 	Stypebox.SetCurSel(Stypebox.FindString(-1,GetResString(IDS_SEARCH_ANY)));
+
+	for (int i = 0; i < m_ctlOpts.GetItemCount(); i++)
+		m_ctlOpts.SetItemText(i, 1, _T(""));
 
 	OnEnChangeSearchname();
 }
@@ -1497,79 +1823,12 @@ void CSearchDlg::UpdateCatTabs() {
 	int flag;
 	flag=(m_cattabs.GetItemCount()>1) ? SW_SHOW:SW_HIDE;
 	
-	this->GetDlgItem(IDC_CATTAB2)->ShowWindow(flag);
-	this->GetDlgItem(IDC_STATIC_DLTOof)->ShowWindow(flag);
+	GetDlgItem(IDC_CATTAB2)->ShowWindow(flag);
+	GetDlgItem(IDC_STATIC_DLTOof)->ShowWindow(flag);
 }
 */
 // khaos::categorymod-
 
-void CSearchDlg::SearchClipBoard() {
-	if (m_guardCBPrompt) return;
-
-	CString clpbrd=theApp.CopyTextFromClipboard();
-	if (clpbrd=="") return;
-
-	if (clpbrd.Compare(m_lastclpbrd)==0) return;
-
-	if (clpbrd.Left(13).CompareNoCase("ed2k://|file|")==0) {
-		m_guardCBPrompt=true;
-		if (AfxMessageBox(GetResString(IDS_ED2KLINKFIX) + _T("\r\n\r\n") + GetResString(IDS_ADDDOWNLOADSFROMCB)+_T("\r\n") + clpbrd,MB_YESNO|MB_TOPMOST)==IDYES)
-			// khaos::categorymod+ Modified so that it will display the Sel Cat dlg.
-			AddEd2kLinksToDownload(clpbrd);
-			// khaos::categorymod-
-	}
-	m_lastclpbrd=clpbrd;
-	m_guardCBPrompt=false;
-
-}
-
-// khaos::categorymod+ Removed Param: uint8 cat
-void CSearchDlg::AddEd2kLinksToDownload(CString strlink, int theCat){
-// khaos:: categorymod-
-	CString resToken;
-	int curPos=0;
-
-	resToken= strlink.Tokenize("\t\n\r",curPos);
-	while (resToken != "")
-	{
-		
-		if (resToken.Right(1)!="/") resToken+="/";
-		try {
-			CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(resToken.Trim());
-			_ASSERT( pLink !=0 );
-			if ( pLink->GetKind() == CED2KLink::kFile) {
-				// khaos::categorymod+ Modified to support sel cat
-				// pFileLink IS NOT A LEAK, DO NOT DELETE.
-				//MORPH START - HotFix by SiRoB, Khaos 14.6 Tempory Patch
-				//CED2KFileLink* pFileLink = new CED2KFileLink(pLink);
-				CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(resToken.Trim());
-				//MORPH END - HotFix by SiRoB, Khaos 14.6 Tempory Patch
-				pFileLink->SetCat(theCat);
-				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, true, theCat>=0?true:false);
-				// khaos::categorymod-
-			} else {
-				delete pLink; // [i_a] memleak
-				throw CString(_T("bad link"));
-			}
-			delete pLink;
-		} catch(CString error){
-			char buffer[200];
-			sprintf(buffer,GetResString(IDS_ERR_INVALIDLINK),error.GetBuffer());
-			AddLogLine(true, GetResString(IDS_ERR_LINKERROR), buffer);
-		}
-		resToken= strlink.Tokenize("\t\n\r",curPos);
-	}
-}
-
-void CSearchDlg::OnEnKillfocusElink()
-{
-	CString content;
-	GetDlgItem(IDC_ELINK)->GetWindowText(content);
-	if (content.GetLength()==0 || content.Find('\n')==-1) return;
-	content.Replace("\n","\r\n");
-	content.Replace("\r\r","\r");
-	GetDlgItem(IDC_ELINK)->SetWindowText(content);
-}
 CString	CSearchDlg::ToQueryString(CString str){
 	CString sTmp = URLEncode(str);
 	sTmp.Replace("%20","+");
@@ -1631,6 +1890,14 @@ void CSearchDlg::UpdateControls()
 		thePrefs.SetSearchMethod(iMethod);
 	GetDlgItem(IDC_MATCH_KEYWORDS)->EnableWindow(iMethod == SearchTypeJigleSOAP || iMethod == SearchTypeJigle);
 	GetDlgItem(IDC_MATCH_KEYWORDS)->ShowWindow((iMethod == SearchTypeJigleSOAP || iMethod == SearchTypeJigle) ? SW_SHOW : SW_HIDE);
+
+	m_ctlOpts.SetItemData(orCompleteSources, (iMethod==SearchTypeKademlia || iMethod==SearchTypeJigleSOAP || iMethod==SearchTypeJigle || iMethod==SearchTypeFileDonkey) ? 1 : 0);
+	m_ctlOpts.SetItemData(orCodec, (iMethod==SearchTypeJigleSOAP || iMethod==SearchTypeJigle || iMethod==SearchTypeFileDonkey) ? 1 : 0);
+	m_ctlOpts.SetItemData(orBitrate, (iMethod==SearchTypeJigleSOAP || iMethod==SearchTypeJigle || iMethod==SearchTypeFileDonkey) ? 1 : 0);
+	m_ctlOpts.SetItemData(orLength, (iMethod==SearchTypeJigleSOAP || iMethod==SearchTypeJigle || iMethod==SearchTypeFileDonkey) ? 1 : 0);
+	m_ctlOpts.SetItemData(orTitle, (iMethod==SearchTypeServer || iMethod==SearchTypeGlobal || iMethod==SearchTypeJigleSOAP || iMethod==SearchTypeJigle || iMethod==SearchTypeFileDonkey) ? 1 : 0);
+	m_ctlOpts.SetItemData(orAlbum, (iMethod==SearchTypeServer || iMethod==SearchTypeGlobal || iMethod==SearchTypeJigleSOAP || iMethod==SearchTypeJigle || iMethod==SearchTypeFileDonkey) ? 1 : 0);
+	m_ctlOpts.SetItemData(orArtist, (iMethod==SearchTypeServer || iMethod==SearchTypeGlobal || iMethod==SearchTypeJigleSOAP || iMethod==SearchTypeJigle || iMethod==SearchTypeFileDonkey) ? 1 : 0);
 }
 
 void CSearchDlg::OnCbnSelchangeCombo1()
@@ -1650,4 +1917,36 @@ void CSearchDlg::OnDDClicked() {
 	box->SetWindowText("");
 	box->SendMessage(WM_KEYDOWN,VK_DOWN,0x00510001);
 	
+}
+
+void CSearchDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CResizableDialog::OnSize(nType, cx, cy);
+	if (m_ctlOpts.m_hWnd)
+	{
+		CRect rcClnt;
+		m_ctlOpts.GetClientRect(&rcClnt);
+		int iCol1Width = rcClnt.Width() - m_ctlOpts.GetColumnWidth(0) /*- GetSystemMetrics(SM_CXVSCROLL)*/;
+		m_ctlOpts.SetColumnWidth(1, iCol1Width);
+	}
+}
+
+void CSearchDlg::ResetHistory()
+{
+	if (m_pacSearchString==NULL) 
+		return;
+
+	CWnd* box=GetDlgItem(IDC_SEARCHNAME);
+	box->SetFocus();
+	box->SendMessage(WM_KEYDOWN,VK_ESCAPE ,0x00510001);
+
+	m_pacSearchString->Clear(); 
+}
+
+void CSearchDlg::OnClose()
+{
+	// Do not pass the WM_CLOSE to the base class. Since we have a rich edit control *and* an attached auto complete
+	// control, the WM_CLOSE will get generated by the rich edit control when user presses ESC while the auto complete
+	// is open.
+	//__super::OnClose();
 }

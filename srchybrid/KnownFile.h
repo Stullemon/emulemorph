@@ -30,13 +30,19 @@ class Packet;
 class CFileDataIO;
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
-class CFileStatistic{
+class CFileStatistic
+{
 	friend class CKnownFile;
 public:
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
 	//	CFileStatistic()					{requested = transferred = accepted = alltimerequested= alltimetransferred = alltimeaccepted = 0;}
 	CFileStatistic(){
-		requested = transferred = accepted = alltimerequested= alltimetransferred = alltimeaccepted = 0;
+		requested = 0;
+		transferred = 0;
+		accepted = 0;
+		alltimerequested= 0;
+		alltimetransferred = 0;
+		alltimeaccepted = 0;
 		InChangedSpreadSortValue = false;
 		InChangedFullSpreadCount = false;
 		InChangedSpreadBar = false;
@@ -120,6 +126,7 @@ public:
 
 	uint32 GetIntTagValue(uint8 tagname) const;
 	uint32 GetIntTagValue(LPCSTR tagname) const;
+	bool GetIntTagValue(uint8 tagname, uint32& ruValue) const;
 	LPCSTR GetStrTagValue(uint8 tagname) const;
 	LPCSTR GetStrTagValue(LPCSTR tagname) const;
 	CTag* GetTag(uint8 tagname, uint8 tagtype) const;

@@ -519,7 +519,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					//MORPH START - Modified by SiRoB, Client Software
 					case 10:
-						Sbuffer = client->GetClientSoftVer();
+						Sbuffer = client->DbgGetFullClientSoftVer();
 						break;
 					//MORPH END - Modified by SiRoB, Client Software
 
@@ -917,9 +917,9 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return item2->GetUpPartCount() - item1->GetUpPartCount();
 		//MORPH START - Modified by SiRoB, Client Software
 		case 10:
-			return item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
+			return item2->DbgGetFullClientSoftVer().CompareNoCase(item1->DbgGetFullClientSoftVer());
 		case 110:
-			return item1->GetClientSoftVer().CompareNoCase(item2->GetClientSoftVer());
+			return item1->DbgGetFullClientSoftVer().CompareNoCase(item2->DbgGetFullClientSoftVer());
 		//MORPH END - Modified by SiRoB, Client Software
 
 		// Mighty Knife: Community affiliation

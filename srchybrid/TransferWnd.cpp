@@ -41,6 +41,7 @@ CTransferWnd::CTransferWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CTransferWnd::IDD, pParent)
 {
 	icon_download = NULL;
+	m_uWnd2 = DFLT_TRANSFER_WND2;
 }
 
 CTransferWnd::~CTransferWnd()
@@ -74,15 +75,15 @@ BOOL CTransferWnd::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
-	windowtransferstate = 1;
 
 	uploadlistctrl.Init();
 	downloadlistctrl.Init();
 	queuelistctrl.Init();
 	clientlistctrl.Init();
-	queuelistctrl.Hide();
-	clientlistctrl.Hide();
-	uploadlistctrl.Visable();
+
+	if (thePrefs.GetRestoreLastMainWndDlg())
+		m_uWnd2 = thePrefs.GetTransferWnd2();
+	ShowWnd2(m_uWnd2);
 
 	SetAllIcons();
     Localize(); // i_a 
@@ -134,15 +135,15 @@ BOOL CTransferWnd::OnInitDialog()
 		m_dlTab.InsertItem(ix,thePrefs.GetCategory(ix)->title );
 	}
 	// khaos::categorymod-
-	m_tooltip.Create(this, TTS_NOPREFIX);
-	m_dlTab.SetToolTips(&m_tooltip);
+	m_tooltipCats.Create(this, TTS_NOPREFIX);
+	m_dlTab.SetToolTips(&m_tooltipCats);
 	UpdateTabToolTips();
-	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, SHRT_MAX); // recognize \n chars!
-	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 20000);
-	m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
-	m_tooltip.Activate(TRUE);
+	m_tooltipCats.SendMessage(TTM_SETMAXTIPWIDTH, 0, SHRT_MAX); // recognize \n chars!
+	m_tooltipCats.SetDelayTime(TTDT_AUTOPOP, 20000);
+	m_tooltipCats.SetDelayTime(TTDT_INITIAL, 0);
+	m_tooltipCats.Activate(TRUE);
 
-	UpdateListCount(windowtransferstate);
+	UpdateListCount(m_uWnd2);
 	VerifyCatTabSize();
 
 	return true;
@@ -357,7 +358,7 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 					m_nLastCatTT=m_nDropIndex;
 				    if (m_nDropIndex!=-1)
 					    UpdateTabToolTips(m_nDropIndex);
-				    m_tooltip.Update();
+			    m_tooltipCats.Update();
 				}
 			}
 	}
@@ -366,7 +367,7 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 		if (downloadlistactive)
 			downloadlistctrl.ShowSelectedFileDetails();
 		else {
-			switch(windowtransferstate){
+			switch (m_uWnd2){
 				case 2:
 					queuelistctrl.ShowSelectedUserDetails();
 					break;
@@ -404,11 +405,11 @@ int CTransferWnd::GetItemUnderMouse(CListCtrl* ctrl)
 
 void CTransferWnd::UpdateListCount(uint8 listindex, int iCount /*=-1*/)
 {
-	if (windowtransferstate != listindex)
+	if (m_uWnd2 != listindex)
 		return;
 
 	CString buffer;
-	switch (windowtransferstate) {
+	switch (m_uWnd2){
 		case 1:
 			buffer.Format(" (%i)", iCount == -1 ? uploadlistctrl.GetItemCount() : iCount);
 					GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS)+buffer);
@@ -425,8 +426,8 @@ void CTransferWnd::UpdateListCount(uint8 listindex, int iCount /*=-1*/)
 
 void CTransferWnd::SwitchUploadList()
 {
-	if( windowtransferstate == 1){
-		windowtransferstate = 2;		
+	if( m_uWnd2 == 1){
+		SetWnd2(2);
 		if( thePrefs.IsQueueListDisabled()){
 			SwitchUploadList();
 			return;
@@ -437,8 +438,8 @@ void CTransferWnd::SwitchUploadList()
 		queuelistctrl.Visable();
 		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_ONQUEUE));
 	}
-	else if( windowtransferstate == 2){
-		windowtransferstate = 0;
+	else if( m_uWnd2 == 2){
+		SetWnd2(0);
 		if( thePrefs.IsKnownClientListDisabled()){
 			SwitchUploadList();
 			return;
@@ -454,10 +455,47 @@ void CTransferWnd::SwitchUploadList()
 		clientlistctrl.Hide();
 		uploadlistctrl.Visable();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-		windowtransferstate = 1;
+		SetWnd2(1);
 		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
 	}
-	UpdateListCount(windowtransferstate);
+	UpdateListCount(m_uWnd2);
+}
+
+void CTransferWnd::ShowWnd2(uint8 uWnd2)
+{
+	if (uWnd2 == 2 && !thePrefs.IsQueueListDisabled())
+	{
+		uploadlistctrl.Hide();
+		clientlistctrl.Hide();
+		queuelistctrl.Visable();
+		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_ONQUEUE));
+		SetWnd2(uWnd2);
+	}
+	else if (uWnd2 == 0 && !thePrefs.IsKnownClientListDisabled())
+	{
+		uploadlistctrl.Hide();
+		queuelistctrl.Hide();
+		clientlistctrl.Visable();
+		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_CLIENTLIST));
+		SetWnd2(uWnd2);
+	}
+	else
+	{
+		queuelistctrl.Hide();
+		clientlistctrl.Hide();
+		uploadlistctrl.Visable();
+		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
+		SetWnd2(1);
+	}
+}
+
+void CTransferWnd::SetWnd2(uint8 uWnd2)
+{
+	m_uWnd2 = uWnd2;
+	thePrefs.SetTransferWnd2(m_uWnd2);
 }
 
 void CTransferWnd::OnSysColorChange()
@@ -752,12 +790,17 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 		case MP_CAT_ADD: {
 			m_nLastCatTT=-1;
 			int newindex=AddCategorie("?",thePrefs.GetIncomingDir(),"","",false);
-			m_dlTab.InsertItem(newindex,thePrefs.GetCategory(newindex)->title);
 			CCatDialog dialog(newindex);
 			dialog.DoModal();
-			// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
-			EditCatTabLabel(newindex,thePrefs.GetCategory(newindex)->title);
-			thePrefs.SaveCats();
+			if (dialog.WasCancelled())
+				thePrefs.RemoveCat(newindex);
+			else {
+				// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
+				m_dlTab.InsertItem(newindex,thePrefs.GetCategory(newindex)->title);
+				EditCatTabLabel(newindex,thePrefs.GetCategory(newindex)->title);
+				thePrefs.SaveCats();
+				VerifyCatTabSize();
+			}
 			break;
 		}
 		// khaos::categorymod+						 
@@ -813,6 +856,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			downloadlistctrl.ChangeCategory(0);
 			thePrefs.SaveCats();
 			// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
+			VerifyCatTabSize();
 			break;
 		}
 		case MP_PRIOLOW: {
@@ -1079,21 +1123,21 @@ void CTransferWnd::UpdateTabToolTips(int tab)
 
 	if (tab==-1) {
 
-		for (i=0;i<m_tooltip.GetToolCount();i++)
-			m_tooltip.DelTool(&m_dlTab,i+1);
+		for (i=0;i<m_tooltipCats.GetToolCount();i++)
+			m_tooltipCats.DelTool(&m_dlTab,i+1);
 
 		for (i = 0; i < m_dlTab.GetItemCount(); i++)
 		{
 			CRect r;
 			m_dlTab.GetItemRect(i, &r);
-			VERIFY(m_tooltip.AddTool(&m_dlTab, GetTabStatistic(i), &r, i+1));
+			VERIFY(m_tooltipCats.AddTool(&m_dlTab, GetTabStatistic(i), &r, i+1));
 		}
 	} else {
 			CRect r;
 			m_dlTab.GetItemRect(tab, &r);
 
-		m_tooltip.DelTool(&m_dlTab,tab+1);
-		VERIFY(m_tooltip.AddTool(&m_dlTab, GetTabStatistic(tab), &r, tab+1));
+		m_tooltipCats.DelTool(&m_dlTab,tab+1);
+		VERIFY(m_tooltipCats.AddTool(&m_dlTab, GetTabStatistic(tab), &r, tab+1));
 	}
 }
 

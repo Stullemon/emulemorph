@@ -244,8 +244,9 @@
 #define ST_SOFTFILES			0x88
 #define ST_HARDFILES			0x89
 #define ST_LASTPING				0x90	// <int>
-#define	ST_VERSION				0x91	// <string>
+#define	ST_VERSION				0x91	// <string>|<int>
 #define	ST_UDPFLAGS				0x92	// <int>
+#define	ST_AUXPORTSLIST			0x93	// <string>
 
 //file tags
 #define FT_FILENAME				 0x01
@@ -289,7 +290,9 @@
 #define FT_ULPRIORITY			 0x19	// Was 17
 #define FT_KADLASTPUBLISHKEY	 0x20	// <uint32>
 #define FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
-#define	FT_FLAGS				 0x22
+#define	FT_FLAGS				 0x22	// <uint32>
+#define	FT_DL_ACTIVE_TIME		 0x23	// <uint32>
+#define	FT_COMPLETE_SOURCES		 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
 #define	TAG_MEDIA_ARTIST		"\xD0"	// <string>
 #define	 FT_MEDIA_ARTIST		 0xD0	// <string>
 #define	TAG_MEDIA_ALBUM			"\xD1"	// <string>
@@ -364,9 +367,26 @@
 //MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 #define FT_LASTUSED				0x95	// <uint32> // EastShare - Added by TAHO, .met file control
 
+// ed2k search expression comparison operators
+#define ED2K_SEARCH_OP_EQUAL         0 // eserver 16.45+
+#define ED2K_SEARCH_OP_GREATER       1 // dserver
+#define ED2K_SEARCH_OP_LESS          2 // dserver
+#define ED2K_SEARCH_OP_GREATER_EQUAL 3 // eserver 16.45+
+#define ED2K_SEARCH_OP_LESS_EQUAL    4 // eserver 16.45+
+#define ED2K_SEARCH_OP_NOTEQUAL      5 // eserver 16.45+
+
+// Kad search expression comparison operators
+#define KAD_SEARCH_OP_EQUAL         0 // eMule 0.43+
+#define KAD_SEARCH_OP_GREATER_EQUAL 1 // eMule 0.40+; NOTE: this different than ED2K!
+#define KAD_SEARCH_OP_LESS_EQUAL    2 // eMule 0.40+; NOTE: this different than ED2K!
+#define KAD_SEARCH_OP_GREATER       3 // eMule 0.43+; NOTE: this different than ED2K!
+#define KAD_SEARCH_OP_LESS          4 // eMule 0.43+; NOTE: this different than ED2K!
+#define KAD_SEARCH_OP_NOTEQUAL      5 // eMule 0.43+
+
 #define CT_NAME					0x01
-#define CT_VERSION				0x11
 #define	CT_PORT					0x0f
+#define CT_VERSION				0x11
+#define	CT_SERVER_FLAGS			0x20	// currently only used to inform a server about supported features
 #define	CT_EMULE_RESERVED1		0xf0
 #define	CT_EMULE_RESERVED2		0xf1
 #define	CT_EMULE_RESERVED3		0xf2

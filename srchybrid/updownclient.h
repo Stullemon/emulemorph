@@ -94,15 +94,16 @@ enum EKadState{
 };
 
 enum EClientSoftware{
-	SO_EMULE			= 0,
-	SO_CDONKEY			= 1,
-	SO_XMULE			= 2,
-	SO_SHAREAZA			= 4,
+	SO_EMULE			= 0,	// default
+	SO_CDONKEY			= 1,	// ET_COMPATIBLECLIENT
+	SO_XMULE			= 2,	// ET_COMPATIBLECLIENT
+	SO_SHAREAZA			= 4,	// ET_COMPATIBLECLIENT
+	SO_MLDONKEY			= 10,	// ET_COMPATIBLECLIENT
+	// other client types which are not identified with ET_COMPATIBLECLIENT
 	SO_EDONKEYHYBRID	= 50,
-	SO_EDONKEY			= 51,
-	SO_MLDONKEY			= 52,
-	SO_OLDEMULE			= 53,
-	SO_UNKNOWN			= 54
+	SO_EDONKEY,
+	SO_OLDEMULE,
+	SO_UNKNOWN
 };
 
 enum ESecureIdentState{
@@ -131,6 +132,9 @@ struct PartFileStamp {
 	CPartFile*	file;
 	DWORD		timestamp;
 };
+
+#define	MAKE_CLIENT_VERSION(mjr, min, upd) \
+	((UINT)(mjr)*100U*10U*100U + (UINT)(min)*100U*10U + (UINT)(upd)*100U)
 
 //#pragma pack(2)
 class CUpDownClient: public CLoggable
@@ -384,7 +388,7 @@ public:
 						return m_fNoViewSharedFiles==0;
 					}
 	bool			SafeSendPacket(Packet* packet);
-
+	void			CheckForGPLEvilDoer();
 	//upload
 	EUploadState	GetUploadState() const
 					{

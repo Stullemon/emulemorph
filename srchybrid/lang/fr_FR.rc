@@ -81,7 +81,7 @@ BEGIN
                             "Erreur durant le téléchargement du fichier, Erreur : %s"
     IDS_HTTPDOWNLOAD_PERCENTAGE 
                             "Mise à jour liste de serveurs : %s%% de %s effectué"
-    IDS_HTTPDOWNLOAD_RETREIVEING_FILE "Recouvrement du fichier"
+    IDS_HTTPDOWNLOAD_RETREIVEING_FILE "Récupération du fichier"
     IDS_HTTPDOWNLOAD_OF     "%s de %s"
     IDS_HTTPDOWNLOAD_SECONDS "%s sec"
     IDS_HTTPDOWNLOAD_MINUTES "%s min"
@@ -97,7 +97,7 @@ BEGIN
     IDS_HTTP_CAPTION        "Mise à jour liste de serveurs"
     IDS_HTTPDOWNLOAD_TIMELEFT "%s (%s copiés)"
     IDS_HTTPDOWNLOAD_BYTESPERSECOND "%s Octets/Sec"
-    IDS_HSAV                "Hashset disponible"
+    IDS_HSAV                "Table de hachage"
     IDS_HTTPDOWNLOAD_KILOBYTESPERSECOND "%s Ko/Sec"
     IDS_FD_CORR             "Corrompu"
     IDS_HTTPDOWNLOAD_OK_TO_OVERWRITE 
@@ -108,7 +108,7 @@ BEGIN
     IDS_HTTPDOWNLOAD_ABORTING_TRANSFER "Abandon du transfert"
     IDS_FD_COMPR            "Compression"
     IDS_WIZARD_NETWORK      "Choisissez quel(s) réseau(x) vous souhaitez utiliser."
-    IDS_MAIN_READY          "eMule Version %s prêt"
+    IDS_MAIN_READY          "eMule Version %s prête"
     IDS_WIZARD_ED2K         "Paramètres ED2k"
     IDS_SEL_SKIN            "Choisir un thème..."
 END
@@ -118,10 +118,10 @@ BEGIN
     IDS_MAIN_SOCKETERROR    "Erreur fatale: impossible de créer socket sur port %i"
     IDS_MAIN_BTN_DISCONNECT "Dé&connecter"
     IDS_MAIN_BTN_DISCONNECT_TOOLTIP "Déconnecté du serveur courant"
-    IDS_ERR_WRONGFILEID     "Mauvais FileID envoyé"
-    IDS_ERR_BADHASHSET      "Hashset corrompu ou invalide reçu"
-    IDS_ERR_BADDATABLOCK    "DataBlock corrompu ou invalide reçu"
-    IDS_ERR_ILLFORMEDHASH   "Hash invalide"
+    IDS_ERR_WRONGFILEID     "Mauvaise ID Fichier envoyée"
+    IDS_ERR_BADHASHSET      "La table de hachache reçue est corrompue ou invalide"
+    IDS_ERR_BADDATABLOCK    "Le bloc de données reçu est corrompu ou invalide"
+    IDS_ERR_ILLFORMEDHASH   "Hachage invalide"
     IDS_ERR_BADED2KLINK     "Lien ed2k invalide"
     IDS_ERR_NOSLLINK        "Lien ed2k invalide"
     IDS_ERR_WRONGPACKAGESIZE "Taille de paquet invalide"
@@ -130,7 +130,7 @@ BEGIN
     IDS_ERR_UNKNOWNCLIENTACTION "Des clients inconnus envoient des paquets IP"
     IDS_ERR_OPENMET         "Impossible d'ouvrir part.met ! (%s => %s)"
     IDS_ERR_BADMETVERSION   "Version de part.met invalide ! (%s => %s)"
-    IDS_ERR_BADGAP          "Gap-Tag invalide dans part.met"
+    IDS_ERR_BADGAP          "Balise de zone vide invalide dans part.met"
 END
 
 STRINGTABLE 
@@ -185,8 +185,8 @@ BEGIN
     IDS_DOWNLOADDONE        "Téléchargement terminé de %s"
     IDS_ERR_DELETE          "Impossible de supprimer %s"
     IDS_ERR_HASHERRORWARNING 
-                            "Impossible de hacher la partie téléchargée : hashset incomplet (%s)"
-    IDS_ERR_INCOMPLETEHASH  "Impossible de hacher la partie téléchargée : hashset incomplet (%s)."
+                            "Impossible de hacher la partie téléchargée : table de hachage incomplète (%s)."
+    IDS_ERR_INCOMPLETEHASH  "Impossible de hacher la partie téléchargée : table de hachage incomplète (%s)."
     IDS_DOWNLOADING         "Réception"
     IDS_WAITING             "En attente"
     IDS_HASHING             "Hachage"
@@ -194,7 +194,7 @@ BEGIN
     IDS_COMPLETE            "Terminé"
     IDS_PAUSED              "En pause"
     IDS_ERRORLIKE           "Erroné"
-    IDS_ASSIGNED2K          "eMule n'est pas associé aux liens ED2K. Voulez-vous associer eMule aux liens ED2K maintenant  (recommandé) ?"
+    IDS_ASSIGNED2K          "eMule n'est pas associée aux liens ED2K. Voulez-vous associer eMule aux liens ED2K maintenant (recommandé) ?"
     IDS_ERR_EMPTYADRESSESDAT 
                             "Aucun serveur n'est répertorié dans 'adresses.dat'. Placez-y une liste de serveurs avec leur adresse pour assurer une mise à jour automatique."
 END
@@ -243,7 +243,7 @@ STRINGTABLE
 BEGIN
     IDS_ONQUEUE             "En attente"
     IDS_TRANSFERRING        "Transfert"
-    IDS_RECHASHSET          "Réception hashset"
+    IDS_RECHASHSET          "Réception table de hachage"
     IDS_NONEEDEDPARTS       "Pas de parties à charger"
     IDS_NOCONNECTLOW2LOW    "Connexion impossible entre deux LowID"
     IDS_UNKNOWN             "Inconnu"
@@ -310,7 +310,7 @@ BEGIN
     IDS_FSTATUS_PUBLIC      "Public"
     IDS_ERR_RENAMESF        "Impossible de renommer\r\n    ""%s""\r\nen\r\n    ""%s""\r\n\r\n%hs"
     IDS_PRIOHIGHEST         "Très haute"
-    IDS_AVAILABLE           "disponible"
+    IDS_AVAILABLE           "disponibles"
     IDS_ERR_NOPRIMCHANGE    "Vous ne pouvez pas changer les permissions en cours de téléchargement !"
     IDS_HIDDEN              "Caché"
 END
@@ -378,7 +378,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_UDPEXT          "Erreur durant l'exécution du protocole UDP Packet"
+    IDS_ERR_UDPEXT          "Erreur durant l'exécution du protocole Paquet UDP"
     IDS_ERR_INCOMPLETEBLOCK "Demande d'un bloc incomplet "
     IDS_ERR_OPEN            "Echec d'ouverture du fichier demandé"
     IDS_ERR_CLIENTERRORED   "Le client '%s' a provoqué une erreur (%s). Client déconnecté"
@@ -549,9 +549,9 @@ BEGIN
     IDS_PW_BEEP             "Bip erreurs"
     IDS_PW_PROMPT           "Confirmation en sortie"
     IDS_PW_SPLASH           "Affiche écran démarrage"
-    IDS_PW_DBLCLICK         "Double-clique pour voir les sources"
+    IDS_PW_DBLCLICK         "Double-clic pour voir les sources"
     IDS_PW_TOOL             "Délai affichage infobulles(sec)"
-    IDS_PW_FRONT            "Premier plan après clique sur lien ED2K"
+    IDS_PW_FRONT            "Premier plan après clic sur lien ED2K"
     IDS_PW_LANG             "Langue"
 END
 
@@ -580,12 +580,12 @@ BEGIN
     IDS_FD_GENERAL          "Général"
     IDS_FD_NAME             "Nom complet : "
     IDS_FD_MET              "Fichier .met : "
-    IDS_FD_HASH             "Hash : "
+    IDS_FD_HASH             "Hachage : "
     IDS_FD_SIZE             "Taille : "
     IDS_FD_STATUS           "Etat : "
     IDS_FD_TRANSFER         "Transfert"
     IDS_FD_SOURCES          "Sources trouvées : "
-    IDS_FD_PARTS            "Parts:"
+    IDS_FD_PARTS            "Parties:"
     IDS_FD_TRANS            "Transféré : "
     IDS_FD_DATARATE         "Débit : "
     IDS_FD_TRANSI           "Transfert : "
@@ -598,7 +598,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CD_UNAME            "Nom utilisateur : "
-    IDS_CD_UHASH            "Hash client : "
+    IDS_CD_UHASH            "Hachage client : "
     IDS_CD_CSOFT            "Logiciel client : "
     IDS_CD_UIP              "Adresse IP : "
     IDS_CD_SIP              "IP Serveur : "
@@ -677,7 +677,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_REMOVESEARCHSTRING  "Supprimer recherche(s) sélectionné(es)"
+    IDS_REMOVESEARCHSTRING  "Supprimer recherche(s) sélectionnée(s)"
     IDS_REMOVESELECTED      "Supprimer sélection"
     IDS_REMOVEALLSEARCH     "Tout supprimer"
     IDS_ENTERQUEUE          "Placé en file d'attente"
@@ -771,7 +771,7 @@ BEGIN
     IDS_VERBOSE             "Fenêtre Debug"
     IDS_FLAT                "plat"
     IDS_ROUND               "arrondi"
-    IDS_SAMEUSERHASH        "Les clients '%s' et '%s' ont le même userhash ou IP - '%s' enlevé"
+    IDS_SAMEUSERHASH        "Les clients '%s' et '%s' ont le même hachage utilisateur ou IP - '%s' enlevé"
     IDS_SEARCHEXTENTION     "Extension"
     IDS_SEARCHAVAIL         "Disponibilité"
 END
@@ -781,7 +781,7 @@ BEGIN
     IDS_HARDLIMIT           "Limite forte"
     IDS_COL_MORECOLORS      "plus ..."
     IDS_KBYTESEC            "Ko/s"
-    IDS_TOOMANYCONNS        "En attente de connexion"
+    IDS_TOOMANYCONNS        "Trop de connexions"
     IDS_DOWNLOADRENAMED     "Un fichier avec le même nom existe déjà, Le fichier a été sauvé comme %s"
     IDS_TBN_DOWNLOADDONE    "Téléchargé : "
     IDS_TBN_DOWNLOADADDED   "Ajouté aux réceptions : "
@@ -812,7 +812,7 @@ BEGIN
     IDS_IRC_KICK            "Kick"
     IDS_IRC_SLAP            "Slap"
     IDS_IRC_JOIN            "Join"
-    IDS_IRC_CHANNELLIST     "Liste des channels"
+    IDS_IRC_CHANNELLIST     "Liste des salons"
     IDS_IRC_CONNECT         "Connecter"
 END
 
@@ -827,8 +827,8 @@ BEGIN
     IDS_IRC_HASQUIT         "* %s est déconnecté (%s)"
     IDS_IRC_NOWKNOWNAS      "* %s s'appelle maintenant %s"
     IDS_IRC_SETSMODE        "* %s a effectué un changement de mode : %s %s"
-    IDS_IRC_NOTSUPPORTED    "** Des modes ont été changés et ils ne sont pas supportés. Vous devez sortir puis revenir dans le channel pour mettre à jour votre liste de surnoms.."
-    IDS_IRC_CHANNEL         "Channel"
+    IDS_IRC_NOTSUPPORTED    "** Des modes ont été changés et ils ne sont pas supportés. Vous devez sortir puis revenir dans le salon pour mettre à jour votre liste de surnoms.."
+    IDS_IRC_CHANNEL         "Salon"
     IDS_IRC_NICK            "Surnom"
     IDS_IRC_SEND            "Envoyer"
     IDS_IRC_NAME            "Nom"
@@ -838,23 +838,23 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_IRC_USEFILTER       "Utiliser un filtre pour la liste de channels"
+    IDS_IRC_USEFILTER       "Utiliser un filtre pour la liste de salons"
     IDS_IRC_PERFORM         "Exécution"
     IDS_IRC_USEPERFORM      "Exécuter un script à la connexion."
     IDS_IRC_ADDTOFRIENDLIST "Ajouter à la liste des amis"
     IDS_IRC_LOADCHANNELLISTONCON 
-                            "Charger la liste des channels à la connexion"
+                            "Charger la liste des salons à la connexion"
     IDS_IRC_ADDASFRIEND     "Vous a ajouté comme ami !"
     IDS_PW_WARNING          "La valeur choisie ""%s"" est trop importante pour être supportée par votre système d'exploitation :  %d\nCela peux rendre votre système instable.\n\nEtes-vous sûrs de vouloir faire cela ?"
     IDS_TAKEOVER            "Recouvrir"
     IDS_CLEANUP             "Nettoyer"
     IDS_RENAME              "Renommer"
-    IDS_IRC_ADDLINKTOIRC    "Ajouter ceci dans le presse-papiers de l'IRC pour l'envoyer à un ami."
+    IDS_IRC_ADDLINKTOIRC    "Copier dans le presse-papiers IRC."
     IDS_IRC_SENDLINK        "Envoyer à un ami : "
     IDS_IRC_RECIEVEDLINK    "%s a envoyé (%s), il va être lancé automatiquement."
     IDS_IRC_ACCEPTLINKS     "Accepter liens ED2K ds IRC(Faites attention à son utilisation!)"
-    IDS_SHARED              "Shared"
-    IDS_DOWNLOADED          "Downloaded"
+    IDS_SHARED              "Partagés"
+    IDS_DOWNLOADED          "Téléchargés"
 END
 
 STRINGTABLE 
@@ -889,7 +889,7 @@ BEGIN
     IDS_WIZ_OS_FRAME        "Système d'exploitation"
     IDS_WIZ_CONCURENTDOWN_FRAME 
                             "Combien de téléchargements simultanés lancez-vous d'habitude ?"
-    IDS_HASHINGFILE         "Hashing file:"
+    IDS_HASHINGFILE         "Hachage du fichier:"
     IDS_WIZ_CUSTOM_FRAME    "Si vous avez testé votre vitesse de connexion, veuillez mettre les résultats ici."
     IDS_WIZ_HOTBUTTON_FRAME "Boutons réglages"
     IDS_WIZ_TRUEUPLOAD_TEXT "Véritable b.p. en Emission"
@@ -935,12 +935,14 @@ BEGIN
     IDS_WIZARD_CUSTOM       "Personnaliser"
     IDS_WIZARD_ENTERBELOW   "valeur ci-dessous"
     IDS_STATS_MAXAVGDL      "Meilleure vitesse moyenne de réception: %.2f Ko/s"
-    IDS_USS_MIN             "Warning: USS currently does not support upload speeds less then 10K. If you know your connection is not able to handle this, please disable USS."
+    IDS_USS_MIN             "Avertissement: l'USS ne supporte pas pour l'instant les vitesses inférieures à 10Ko/s. Si vous savez que votre connexion ne peut atteindre cette vitesse, veuillez désactiver l'USS"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_STATS_MAXDL         "Meilleure vitesse de réception: %.2f Ko/s"
+    IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
+                            "Ignorer les messages d'ajout d'ami"
     IDS_PW_FASTSRVCON       "Connexion serveur respectueuse"
     IDS_SOURCELINKFAILED    "Vous devez avoir un HighID pour créer un Lien avec IP source valide"
     IDS_CREATESOURCELINK    "Copier lien ED2k (avec IP source)"
@@ -969,7 +971,7 @@ BEGIN
     IDS_OUTOFSERVERS        "Plus de serveurs disponibles pour se connecter."
     IDS_PW_CONLIMITS        "Limites de connexion "
     IDS_MAXCON5SECLABEL     "Max. nouvelles connexions / 5 secs"
-    IDS_PW_UAP              "Mettre les nouveaux fichiers en partage en Auto priorité"
+    IDS_PW_UAP              "Mettre les nouveaux fichiers en partage en priorité Auto"
     IDS_MAXCLIENT           "Max utilisateurs"
     IDS_PW_TWEAK            "Propriétés étendues"
     IDS_TWEAKS_WARNING      "Attention : Ne changez pas ces paramètres sans savoir ce que vous faites. Vous risquez de faire de mauvaises manipulations.\neMule fonctionnera correctement sans ajuster ces paramètres."
@@ -1025,11 +1027,13 @@ BEGIN
     IDS_SHOWOVERHEAD        "Montrer le surplus de bande passante"
     IDS_UPDOWNSMALL         "E : %.1f | R : %.1f"
     IDS_EDITLIST            "Editer"
-    IDS_SP_ICONBAR          "Icone de barre de tâches"
+    IDS_SP_ICONBAR          "Icône de barre des tâches"
     IDS_RATINGRECV          "Evaluation du fichier '%s' : %i"
     IDS_DESCRIPTIONRECV     "Commentaire du fichier '%s' : %s"
     IDS_WEBSERVICES         "WebServices"
     IDS_WEBSVEDIT           "Editer WebServices"
+    IDS_IRC_EMULEPROTO_IGNORESENDLINK 
+                            "Ignorer les messages d'envoi de lien"
     IDS_CHECK4UPDATE        "Vérifier nouvelle version"
     IDS_STARTUP             "Démarrage"
     IDS_NEWVERSIONAVL       "Une nouvelle version de eMule est disponible. Regardez sur http://emule.sourceforge.net pour plus d'infos."
@@ -1060,27 +1064,27 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_FILECOMPLETIONTHREAD 
-                            "La création d'un thread pour finaliser un fichier a échouée"
+                            "La création d'un processus pour finaliser un fichier a échoué"
     IDS_FILEBUFFERSIZE      "Taille fichier buffer"
     IDS_QUEUESIZE           "Taille file d'attente"
     IDS_DAYS2               "jours"
     IDS_ERR_MAKEBAKCREDITFILE 
-                            "La création d'une sauvegarde du fichier de crédits a échouée"
+                            "La création d'une sauvegarde du fichier de crédits a échoué"
     IDS_COMMENT             "Commentaire"
     IDS_IPFILTERED          "IP filtrée : %s (%s)"
     IDS_DL_TRANSFCOMPL      "Accompli"
-    IDS_STATS_FILTEREDCLIENTS "Filtré : %i"
+    IDS_STATS_FILTEREDCLIENTS "Filtrés : %i"
     IDS_FILTERLABEL         "Les messages filtrés contiennent : (Séparateur | )"
-    IDS_ERR_LARGEREQBLOCK   "Demande client bloc trop gros."
+    IDS_ERR_LARGEREQBLOCK   "Le client demande un bloc trop important."
     IDS_SHOWRATEONTITLE     "Montrer les taux de transfert dans le titre"
     IDS_TBN_NOMESSAGEHISTORY "Pas d'historique des messages !"
-    IDS_PW_DAP              "Mettre les nouveaux téléchargements en Auto priorité"
+    IDS_PW_DAP              "Mettre les nouveaux téléchargements en priorité Auto"
     IDS_FD_LASTCHANGE       "Dernière fois reçu :"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_STATS_RUNTIME       "Temps d'execution"
+    IDS_STATS_RUNTIME       "Temps d'exécution"
     IDS_ALL                 "Tout"
     IDS_CAT_ADD             "Ajouter une catégorie"
     IDS_CAT_EDIT            "Editer cette catégorie"
@@ -1092,7 +1096,7 @@ BEGIN
     IDS_PW_DISPLAY          "Affichage"
     IDS_CAT_INVADD          "Voir tous les non assignés"
     IDS_CAT_REINVADD        "Tout voir"
-    IDS_INDICATERATINGS     "Icônes pour les fichiers avec commentaires/évaluation"
+    IDS_INDICATERATINGS     "Icônes pour les fichiers avec commentaires/évaluations"
     IDS_ALLOTHERS           "Tous les autres"
     IDS_TOCAT               "Assigner à la catégorie"
     IDS_CAT_UNASSIGN        "(Non assigné)"
@@ -1100,7 +1104,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ADDDOWNLOADSFROMCB  "Ajouter ces liens ED2k à télécharger ?\n"
+    IDS_ADDDOWNLOADSFROMCB  "Ajouter ces liens ED2k aux téléchargements ?\n"
     IDS_ADDDOWNLOADSFROMCBTITLE "Liens ED2k dans le presse-papiers"
     IDS_PF_WATCHCB          "Regarder le presse-papiers pour les liens ED2k"
     IDS_SECURITY            "Sécurité"
@@ -1128,7 +1132,7 @@ BEGIN
     IDS_DISABLEKNOWNLIST    "Enlever la liste des clients connus"
     IDS_DISABLEQUEUELIST    "Enlever la file d'attente"
     IDS_USECREDITSYSTEM     "Utiliser le système de crédit (Récompense les envois)"
-    IDS_FIRSTAUTODOWN       "Voulez-vous que eMule gère vos priorités de téléchargements ?\r\rL'activation de ceci permettra à eMule de s'assurer que les téléchargements avec beaucoup de sources n'interfèrent pas les téléchargements qui ont peu de sources.\r\rSi vous venez de mettre à jour depuis la version 0.26 ou précédente, Tous vos téléchargements sont mis par défaut en auto-priorité.\rCette option n'affectera que vos futurs téléchargements. (Défaut Oui)"
+    IDS_FIRSTAUTODOWN       "Voulez-vous que eMule gère vos priorités de téléchargements ?\r\rL'activation de ceci permettra à eMule de s'assurer que les téléchargements disposant de beaucoup de sources n'interfèrent pas avec les téléchargements qui ont peu de sources.\r\rSi vous venez de mettre à jour depuis la version 0.26 ou précédente, tous vos téléchargements sont mis par défaut en priorité auto.\rCette option n'affectera que vos futurs téléchargements. (Défaut Oui)"
     IDS_FIRSTAUTOUP         "Voulez-vous que eMule gère vos priorités d'émission ?\r\rL'activation de ceci permettra à eMule d'encourager les fichiers rares, ce qui signifie que les fichiers populaires seront plus difficiles à obtenir pour les autres utilisateurs.\rLa désactivation de ceci permettra à eMule d'uploader les fichiers populaires plus facilement et les fichiers rares seront plus difficiles à obtenir pour les autres utilisateurs.\r\rSi vous venez de mettre à jour depuis la version 0.26 ou précédente, Tous vos fichiers en partage sont mis par défaut en auto-priorité.\rCette option n'affectera que vos futurs fichiers en partage. (Défaut Oui)"
     IDS_FIRSTCREDITSYSTEM   "Voulez-vous récompenser les gens chez qui vous téléchargez ?\r\rCeci est plus communément appelé le système de crédits. Son activation permet de combattre les leechers. Si vous partagez des fichiers exclusifs, vous ne devriez pas l'activer.\r\r(Défaut Oui)"
     IDS_FIRSTFULLCHUNK      "Voulez-vous envoyer des parties complètes de vos fichiers ?\r\rUtiliser cette option permet aux gens d'obtenir plus facilement une partie complète d'un fichier. Si vous désactivez cette option, vous allez permettre aux clients de votre file d'attente d'avancer plus vite. Si vous partagez des fichiers exclusifs, vous devriez l'activer.\r\r(Défaut Oui)"
@@ -1142,7 +1146,13 @@ STRINGTABLE
 BEGIN
     IDS_ENTERUSERNAME       "Veuillez entrer votre nom d'utilisateur :"
     IDS_STATIC_CPUMEM       "Sauvegarde CPU && Utilisation Mémoire"
-    IDS_LOG2DISK            "Save log to disk"
+    IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 
+                            "Mot-clé trop court.\r\n\r\nLes mots-clés utilisés dans les expressions de recherche Kad doivent avoir une taille minimale de 3 caractères."
+    IDS_LOG2DISK            "Enregistrer le journal sur le disque"
+    IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING 
+                            "Une recherche est déjà en cours sur Kad pour le mot-clé ""%s"".\r\n\r\nPour lancer une nouvelle recherche sur ce mot-clé, vous pouvez soit attendre la fin de la recherche en cours, soit fermer l'onglet de recherche correspondant."
+    IDS_KAD_SEARCH_KEYWORD_INVALID 
+                            "Mot-clé Kad invalide.\r\n\r\nLe format d'une expression de recherche Kad est le suivant:\r\n\r\n\t<mot-clé-kad> [ <expression de recherche-ed2k> ]\r\n\r\nL'expression <mot-clé-kad> ne doit contenir aucun des caractères suivants:\r\n\r\n\t%s"
     IDS_EDITCAT             "Editer les propriétés des catégories"
     IDS_PW_WS               "Serveur Web"
     IDS_ENABLED             "Activé"
@@ -1203,7 +1213,7 @@ BEGIN
     IDS_ACTSESSIONS         "Sessions actives"
     IDS_WEBSRV              "WebSrv."
     IDS_SW_REFETCHRES       "Résultats de la recherche"
-    IDS_FILEHASH            "Hash Fichier"
+    IDS_FILEHASH            "Hachage Fichier"
     IDS_GLOBALSEARCH2       "Recherche globale"
     IDS_PW_PROXY            "Proxy"
     IDS_PROXY_ENABLE        "Activer Proxy"
@@ -1286,8 +1296,8 @@ BEGIN
     IDS_STATS_SHRECASIZE    "Plus grande moyenne de taille de fichier"
     IDS_STATS_MYRUNTIME     "Temps d'exécution global: %s"
     IDS_STATS_SESSION       "Session"
-    IDS_STATS_SRATIO        "Ratio E:R pour la session:"
-    IDS_STATS_CRATIO        "Ratio E:R cumulé:"
+    IDS_STATS_SRATIO        "Taux E:R pour la session:"
+    IDS_STATS_CRATIO        "Taux E:R cumulé:"
     IDS_SEARCH_NORESULT     "Aucun résultat trouvé."
     IDS_STATS_CURRSRVDUR    "Temps sur le serveur actuel"
     IDS_LONGSECS            "Secondes"
@@ -1320,7 +1330,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PPGSTATS_ACRATIO    "Ratio connexions actives:"
+    IDS_PPGSTATS_ACRATIO    "Taux de connexions actives:"
     IDS_STATS_PROBLEMATIC   "Problématiques"
     IDS_LONGHRS             "Heures"
     IDS_STATS_LARGESTFILE   "Plus grand fichier partagé"
@@ -1456,7 +1466,7 @@ BEGIN
     IDS_IRC_HELPCHANNEL     "Se connecter aux canaux d'aide."
     IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-french"
     IDS_IRC_ACCEPTLINKSFRIENDS "Venant d'amis seulement."
-    IDS_COMPLSOURCES        "Srcs Complètes"
+    IDS_COMPLSOURCES        "Complets"
     IDS_CHECKNOENDTIME      "pas de date de fin"
     IDS_FD_DOWNLOADSTARTED  "Téléchargement ajouté:"
 END
@@ -1552,6 +1562,7 @@ BEGIN
     IDS_KADSEARCHLAB        "Recherches en cours"
     IDS_SRV_UDPSR           "Protocole UDP étendu pour les requêtes de sources"
     IDS_SRV_UDPFR           "Protocole UDP étendu pour les requêtes de fichiers"
+    IDS_MINLENGTH           "Durée min. [hh:mm:ss]"
     IDS_EM_HELP             "Ai&de"
     IDS_WRN_FRIENDDUPLIPPORT 
                             "Ami non ajouté.\r\n\r\nIl y a déjà un ami enregistré avec les mêmes adresse IP et port."
@@ -1587,6 +1598,7 @@ BEGIN
     IDS_TEXTLABELS          "Etiquettes texte"
     IDS_ENABLETEXTLABELS    "sous l'icône"
     IDS_CUSTOMIZETOOLBAR    "Personnaliser la barre d'outils"
+    IDS_MINBITRATE          "Débit min. [kBit/s]"
     IDS_KAD_RECHECKFW       "Revérifier le pare-feu"
     IDS_SHAREDTITLE         "Partages ED2K|Kad"
     IDS_WARNINGNOBS         "Amorçage inactif actuellement (Kad désactivé ou déjà connecté)."
@@ -1623,9 +1635,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_NOTCONNECTEDKAD "Vous n'êtes pas connecté au réseau Kad!"
-    IDS_IRC_NOSFS           "No Shared Files Selected"
-    IDS_IRC_IGNOREMISCMESSAGE "Ignore Misc info messages"
-    IDS_KNOWN               "Known"
+    IDS_IRC_NOSFS           "Aucun fichier partagé n'est sélectionné"
+    IDS_IRC_IGNOREMISCMESSAGE "Ignorer les messages d'infos diverses"
+    IDS_KNOWN               "Connu"
+    IDS_DL_ACTIVE_TIME      "Temps de réception"
+    IDS_RESETLABEL          "Auto completion (history function)"
 END
 
 STRINGTABLE 

@@ -947,6 +947,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_STATS_MAXDL         "Velocità di Download Massima: %.2f kB/s"
+    IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
+                            "Ignore eMule add friend protocol messages"
     IDS_PW_FASTSRVCON       "Connessione Veloce ai Server"
     IDS_SOURCELINKFAILED    "Devi avere un ID Alto per poter crare un eD2k link con fonti"
     IDS_CREATESOURCELINK    "Copia eD2k link negli appunti (con fonti)"
@@ -1039,6 +1041,8 @@ BEGIN
     IDS_DESCRIPTIONRECV     "Descrizione per il file ricevuto '%s': %s"
     IDS_WEBSERVICES         "Risorse Web"
     IDS_WEBSVEDIT           "Modifica Risorse Web"
+    IDS_IRC_EMULEPROTO_IGNORESENDLINK 
+                            "Ignore eMule send link protocol messages"
     IDS_CHECK4UPDATE        "Controlla Aggiornamenti"
     IDS_STARTUP             "Avvio"
     IDS_NEWVERSIONAVL       "E' disponibile una nuova versione di eMule! Per maggiori informazioni vai sul sito di eMule."
@@ -1152,7 +1156,13 @@ STRINGTABLE
 BEGIN
     IDS_ENTERUSERNAME       "Inserisci il tuo nick per eMule (max 33 caratteri):"
     IDS_STATIC_CPUMEM       "Risparmio CPU e Memoria"
+    IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 
+                            "Keyword too short.\r\n\r\nThe keyword(s) used in a Kad search expression must have a minimum length of 3 characters."
     IDS_LOG2DISK            "Save log to disk"
+    IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING 
+                            "There is already a Kad search ongoing for the keyword ""%s"".\r\n\r\nTo search again for that keyword, either wait until this keyword search is finished or close the according search results pane."
+    IDS_KAD_SEARCH_KEYWORD_INVALID 
+                            "Invalid Kad keyword.\r\n\r\nA Kad search expression has the following format:\r\n\r\n\t<kad-keyword> [ <ed2k-search-expression> ]\r\n\r\nThe <kad-keyword> must not contain any of the following characters:\r\n\r\n\t%s"
     IDS_EDITCAT             "Modifica le proprietà delle Categorie"
     IDS_PW_WS               "Webserver"
     IDS_ENABLED             "Attivo"
@@ -1561,6 +1571,7 @@ BEGIN
     IDS_KADSEARCHLAB        "Ricerche Correnti"
     IDS_SRV_UDPSR           "Protocollo UDP Esteso per la richiesta fonti:\n    "
     IDS_SRV_UDPFR           "Protocollo UDP Esteso per la richiesta files:\n    "
+    IDS_MINLENGTH           "Min. length [hh:mm:ss]"
     IDS_EM_HELP             "&Aiuto"
     IDS_WRN_FRIENDDUPLIPPORT 
                             "Slot amico non aggiunto.\r\n\r\nEsiste già un amico con lo stesso IP e la stessa Porta."
@@ -1596,6 +1607,7 @@ BEGIN
     IDS_TEXTLABELS          "Etichette"
     IDS_ENABLETEXTLABELS    "sotto l'icona"
     IDS_CUSTOMIZETOOLBAR    "Personalizza Barra degli Strumenti"
+    IDS_MINBITRATE          "Min. bitrate [kBit/s]"
     IDS_KAD_RECHECKFW       "Ricontrolla Firewall"
     IDS_SHAREDTITLE         "Files eD2k|Kad"
     IDS_WARNINGNOBS         "Bootstrapping inattivo (Kad disattiva o già connessa)."
@@ -1632,9 +1644,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_NOTCONNECTEDKAD "Attualmente non sei connesso alla Rete Kad!"
-    IDS_IRC_NOSFS           "No Shared Files Selected"
-    IDS_IRC_IGNOREMISCMESSAGE "Ignore Misc info messages"
-    IDS_KNOWN               "Known"
+    IDS_IRC_NOSFS           "Nessun file condiviso selezionato"
+    IDS_IRC_IGNOREMISCMESSAGE "Ignora i messaggi di informazioni varie"
+    IDS_KNOWN               "Conosciuto"
+    IDS_DL_ACTIVE_TIME      "Tempo di Download"
+    IDS_RESETLABEL          "Completamento automatico (funzione cronologia)"
 END
 
 STRINGTABLE 

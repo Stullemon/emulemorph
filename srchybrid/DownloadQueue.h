@@ -171,6 +171,7 @@ public:
 	bool	DoKademliaFileRequest();
 	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint32 clientid);
 	void	ExportPartMetFilesOverview() const;
+	void	OnConnectionState(bool bConnected);
 
 	CServer* cur_udpserver;
 	bool	IsFilesPowershared(); //MORPH - Added by SiRoB, ZZ Ratio

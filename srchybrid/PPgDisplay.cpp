@@ -24,6 +24,7 @@
 #include "OtherFunctions.h"
 #include "emuledlg.h"
 #include "TransferWnd.h"
+#include "ServerWnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -36,6 +37,7 @@ IMPLEMENT_DYNAMIC(CPPgDisplay, CPropertyPage)
 CPPgDisplay::CPPgDisplay()
 	: CPropertyPage(CPPgDisplay::IDD)
 {
+	m_eSelectFont = sfServer;
 }
 
 CPPgDisplay::~CPPgDisplay()
@@ -56,6 +58,7 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_UPDATEQUEUE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWRATEONTITLE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_INDICATERATINGS , OnSettingsChange)
+	ON_BN_CLICKED(IDC_DISABLEHIST , OnSettingsChange)
 	ON_BN_CLICKED(IDC_DISABLEKNOWNLIST, OnSettingsChange)
 	ON_BN_CLICKED(IDC_DISABLEQUEUELIST, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWCATINFO, OnSettingsChange)
@@ -63,6 +66,7 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_REPAINT,OnSettingsChange)
 	ON_BN_CLICKED(IDC_SELECT_HYPERTEXT_FONT, OnBnClickedSelectHypertextFont)
 	ON_BN_CLICKED(IDC_CLEARCOMPL,OnSettingsChange)
+	ON_BN_CLICKED(IDC_RESETHIST, OnBtnClickedResetHist)
 END_MESSAGE_MAP()
 
 void CPPgDisplay::LoadSettings(void)
@@ -107,6 +111,8 @@ void CPPgDisplay::LoadSettings(void)
 	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)thePrefs.GetUseDwlPercentage() );
 	CheckDlgButton(IDC_CLEARCOMPL, (uint8)thePrefs.GetRemoveFinishedDownloads());
 
+	CheckDlgButton(IDC_DISABLEHIST, (uint8)thePrefs.GetUseAutocompletion());
+
 	CString strBuffer;
 	strBuffer.Format("%u", thePrefs.m_iToolDelayTime);
 	GetDlgItem(IDC_TOOLTIPDELAY)->SetWindowText(strBuffer);
@@ -141,6 +147,7 @@ BOOL CPPgDisplay::OnApply()
 	thePrefs.dontRecreateGraphs=(uint8)IsDlgButtonChecked(IDC_REPAINT);
 	thePrefs.m_bShowDwlPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWDWLPERCENT);
 	thePrefs.m_bRemoveFinishedDownloads=(uint8)IsDlgButtonChecked(IDC_CLEARCOMPL);
+	thePrefs.m_bUseAutocompl=(uint8)IsDlgButtonChecked(IDC_DISABLEHIST);
 
 	if(IsDlgButtonChecked(IDC_UPDATEQUEUE))
 		thePrefs.m_bupdatequeuelist = false;
@@ -163,8 +170,10 @@ BOOL CPPgDisplay::OnApply()
 	if (!thePrefs.ShowCatTabInfos()) theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 
 	if( flag != thePrefs.m_bDisableKnownClientList){
-		if( !flag )
+		if( !flag ){
 			theApp.emuledlg->transferwnd->clientlistctrl.DeleteAllItems();
+			theApp.emuledlg->transferwnd->SwitchUploadList();
+		}
 		else
 			theApp.emuledlg->transferwnd->clientlistctrl.ShowKnownClients();
 	}
@@ -177,8 +186,10 @@ BOOL CPPgDisplay::OnApply()
 		thePrefs.m_bDisableQueueList = false;
 
 	if( flag != thePrefs.m_bDisableQueueList){
-		if( !flag )
+		if( !flag ){
 			theApp.emuledlg->transferwnd->queuelistctrl.DeleteAllItems();
+			theApp.emuledlg->transferwnd->SwitchUploadList();
+		}
 		else
 			theApp.emuledlg->transferwnd->queuelistctrl.ShowQueueClients();
 	}
@@ -189,17 +200,17 @@ BOOL CPPgDisplay::OnApply()
 	else
 		thePrefs.m_iToolDelayTime = atoi(buffer);
 	
-	((CemuleDlg*)AfxGetMainWnd())->transferwnd->m_tooltip.SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
+	theApp.emuledlg->transferwnd->m_tooltipCats.SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
-	CToolTipCtrl* tooltip = ((CemuleDlg*)AfxGetMainWnd())->searchwnd->searchlistctrl.GetToolTips();
+	CToolTipCtrl* tooltip = theApp.emuledlg->searchwnd->searchlistctrl.GetToolTips();
 	if (tooltip)
 		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
-	tooltip = ((CemuleDlg*)AfxGetMainWnd())->transferwnd->downloadlistctrl.GetToolTips();
+	tooltip = theApp.emuledlg->transferwnd->downloadlistctrl.GetToolTips();
 	if (tooltip)
 		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
-	tooltip = ((CemuleDlg*)AfxGetMainWnd())->transferwnd->uploadlistctrl.GetToolTips();
+	tooltip = theApp.emuledlg->transferwnd->uploadlistctrl.GetToolTips();
 	if (tooltip)
 		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
@@ -240,6 +251,10 @@ void CPPgDisplay::Localize(void)
 		SetDlgItemText(IDC_SELECT_HYPERTEXT_FONT, GetResString(IDS_SELECT_FONT) + _T("..."));
 		SetDlgItemText(IDC_SHOWDWLPERCENT, GetResString(IDS_SHOWDWLPERCENTAGE));
 		GetDlgItem(IDC_CLEARCOMPL)->SetWindowText(GetResString(IDS_AUTOREMOVEFD));
+
+		GetDlgItem(IDC_RESETLABEL)->SetWindowText(GetResString(IDS_RESETLABEL));
+		GetDlgItem(IDC_RESETHIST)->SetWindowText(GetResString(IDS_PW_RESET));
+		GetDlgItem(IDC_DISABLEHIST)->SetWindowText(GetResString(IDS_ENABLED));
 	}
 }
 
@@ -255,8 +270,9 @@ void CPPgDisplay::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 // because '_pfnChooseFontHook' will be needed *before* WM_INITDIALOG (which would
 // give as the 'lCustData').
 LPCFHOOKPROC _pfnChooseFontHook = NULL;
+CPPgDisplay* _pThis = NULL;
 
-UINT CALLBACK ChooseFontHook(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
+UINT CALLBACK CPPgDisplay::ChooseFontHook(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 {
 	UINT uResult;
 
@@ -278,7 +294,10 @@ UINT CALLBACK ChooseFontHook(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam
 			if (pDlg != NULL)
 			{
 				pDlg->GetCurrentFont(&lf);
-				theApp.emuledlg->ApplyHyperTextFont(&lf);
+				if (_pThis->m_eSelectFont == sfLog)
+					theApp.emuledlg->ApplyLogFont(&lf);
+				else
+					theApp.emuledlg->ApplyHyperTextFont(&lf);
 			}
 		}
 		break;
@@ -290,8 +309,17 @@ UINT CALLBACK ChooseFontHook(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam
 
 void CPPgDisplay::OnBnClickedSelectHypertextFont()
 {
+	if (GetAsyncKeyState(VK_CONTROL) < 0)
+		m_eSelectFont = sfLog;
+	else
+		m_eSelectFont = sfServer;
+
 	// get current font description
-	CFont* pFont = &theApp.emuledlg->m_fontHyperText;
+	CFont* pFont;
+	if (m_eSelectFont == sfLog)
+		pFont = &theApp.emuledlg->m_fontLog;
+	else
+		pFont = &theApp.emuledlg->m_fontHyperText;
 	LOGFONT lf;
 	if (pFont != NULL)
 	   pFont->GetObject(sizeof(LOGFONT), &lf);
@@ -305,9 +333,21 @@ void CPPgDisplay::OnBnClickedSelectHypertextFont()
 	// Set 'lpfnHook' to our own Hook function. But save MFC's hook!
 	_pfnChooseFontHook = dlg.m_cf.lpfnHook;
 	dlg.m_cf.lpfnHook = ChooseFontHook;
+	_pThis = this;
 
 	if (dlg.DoModal() == IDOK)
-		theApp.emuledlg->ApplyHyperTextFont(&lf);
+	{
+		if (m_eSelectFont == sfLog)
+			theApp.emuledlg->ApplyLogFont(&lf);
+		else
+			theApp.emuledlg->ApplyHyperTextFont(&lf);
+	}
 
 	_pfnChooseFontHook = NULL;
+	_pThis = NULL;
+}
+
+void CPPgDisplay::OnBtnClickedResetHist() {
+	theApp.emuledlg->searchwnd->ResetHistory();
+	theApp.emuledlg->serverwnd->ResetHistory();
 }

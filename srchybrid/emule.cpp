@@ -54,6 +54,7 @@
 #include "KnownFileList.h"
 #include "Server.h"
 #include "UpDownClient.h"
+#include "ED2KLink.h"
 #ifndef _CONSOLE
 #include "emuleDlg.h"
 #include "SearchDlg.h"
@@ -150,6 +151,8 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	VERIFY( _stscanf(strTmp, _T("0x%x"), &m_uCurVersionCheck) == 1 );
 	ASSERT( m_uCurVersionCheck < 0x999 );
 // MOD Note: end
+
+	m_bGuardClipboardPrompt = false;
 }
 
 
@@ -243,6 +246,9 @@ BOOL CemuleApp::InitInstance()
 		if (!AfxInitRichEdit())
 			AfxMessageBox(_T("No Rich Edit control library found!")); // should never happen..
 	}
+	// remove viruses which ddos us
+	if (!CheckForSomeFoolVirus())
+		return FALSE;
 
 	// create & initalize all the important stuff 
 	thePrefs.Init();
@@ -400,7 +406,13 @@ bool CemuleApp::ProcessCommandline()
 	while((pszFileName = _tcschr(buffer, '\\')) != NULL)
 		*pszFileName = '/';
 
-	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, CString(EMULE_GUID)+'/'+buffer);
+	// If we create our TCP listen socket with SO_REUSEADDR, we have to ensure that there are
+	// not 2 emules are running using the same port.
+	// NOTE: This will not prevent from some other application using that port!
+	UINT uTcpPort = GetProfileInt(_T("eMule"), _T("Port"), DEFAULT_TCP_PORT);
+	CString strMutextName;
+	strMutextName.Format(_T("%s:%u/%s"), EMULE_GUID, uTcpPort,buffer);
+	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);
 
 	lpfnGetWindowModuleFileName = NULL;
 	HMODULE hUser32_DLL = LoadLibrary("USER32.DLL");
@@ -568,7 +580,7 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 		CloseClipboard();
 	}
 	if (bResult)
-		emuledlg->searchwnd->IgnoreClipBoardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
+		IgnoreClipboardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
 	else
 		GlobalFree(hGlobal);
 	return bResult;
@@ -679,8 +691,11 @@ void CemuleApp::OnHelp() {
 	// lets just open the helpfile by associated program, instead of more windows-dependency :)
 	if (ff.FindFile(strHelpFile, 0)) ShellOpenFile(strHelpFile); 
 	else
-		if (IDYES==AfxMessageBox(GetResString(IDS_ERR_NOHELP)+"\n"+strHelpFile, MB_YESNO | MB_ICONERROR) )
-			ShellExecute(NULL, NULL, "http://www.emule-project.net/home/perl/help.cgi", NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);	
+		if (IDYES==AfxMessageBox(strHelpFile + _T("\n\n") + GetResString(IDS_ERR_NOHELP), MB_YESNO | MB_ICONERROR) ){
+			CString strUrl = thePrefs.GetHomepageBaseURL() + CString("/home/perl/help.cgi");
+			ShellExecute(NULL, NULL, strUrl, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+
+		}
 }
 
 int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -1 */)
@@ -1008,4 +1023,118 @@ CTempIconLoader::~CTempIconLoader()
 {
 	if (m_hIcon)
 		VERIFY( DestroyIcon(m_hIcon) );
+}
+
+// khaos::categorymod+ Removed Param: uint8 cat
+void CemuleApp::AddEd2kLinksToDownload(CString strlink, int theCat){
+// khaos:: categorymod-
+
+	int curPos=0;
+	CString resToken = strlink.Tokenize(_T("\t\n\r"),curPos);
+	while (resToken != _T(""))
+	{
+		if (resToken.Right(1) != _T("/"))
+			resToken += _T("/");
+		try
+		{
+			CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(resToken.Trim());
+			if (pLink)
+			{
+				if (pLink->GetKind() == CED2KLink::kFile)
+				{
+					// khaos::categorymod+ Modified to support sel cat
+					// pFileLink IS NOT A LEAK, DO NOT DELETE.
+					//MORPH START - HotFix by SiRoB, Khaos 14.6 Tempory Patch
+					//CED2KFileLink* pFileLink = new CED2KFileLink(pLink);
+					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(resToken.Trim());
+					//MORPH END - HotFix by SiRoB, Khaos 14.6 Tempory Patch
+					pFileLink->SetCat(theCat);
+					theApp.downloadqueue->AddFileLinkToDownload(pFileLink, true, theCat>=0?true:false);
+					// khaos::categorymod-
+				}
+				else
+				{
+					delete pLink; // [i_a] memleak
+					throw CString(_T("bad link"));
+				}
+				delete pLink;
+			}
+		}
+		catch(CString error)
+		{
+			TCHAR szBuffer[200];
+			_snprintf(szBuffer, ARRSIZE(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
+			AddLogLine(true, GetResString(IDS_ERR_LINKERROR), szBuffer);
+		}
+		resToken = strlink.Tokenize(_T("\t\n\r"), curPos);
+	}
+}
+
+void CemuleApp::SearchClipboard()
+{
+	if (m_bGuardClipboardPrompt)
+		return;
+
+	CString strLinks = CopyTextFromClipboard();
+	if (strLinks.IsEmpty())
+		return;
+
+	if (strLinks.Compare(m_strLastClipboardContents) == 0)
+		return;
+
+	if (strLinks.Left(13).CompareNoCase(_T("ed2k://|file|")) == 0)
+	{
+		m_bGuardClipboardPrompt = true;
+		if (AfxMessageBox(GetResString(IDS_ED2KLINKFIX) + _T("\r\n\r\n") + GetResString(IDS_ADDDOWNLOADSFROMCB)+_T("\r\n") + strLinks, MB_YESNO | MB_TOPMOST) == IDYES)
+			AddEd2kLinksToDownload(strLinks, 0);
+	}
+	m_strLastClipboardContents = strLinks;
+	m_bGuardClipboardPrompt = false;
+}
+
+void CemuleApp::PasteClipboard()
+{
+	CString strLinks = CopyTextFromClipboard();
+	strLinks.Trim();
+	if (strLinks.IsEmpty())
+		return;
+
+	AddEd2kLinksToDownload(strLinks, 0);
+}
+
+bool CemuleApp::IsEd2kLinkInClipboard(LPCTSTR pszLinkType, int iLinkTypeLen)
+{
+	bool bFoundLink = false;
+	if (IsClipboardFormatAvailable(CF_TEXT))
+	{
+		if (OpenClipboard(NULL))
+		{
+			HGLOBAL	hText = GetClipboardData(CF_TEXT);
+			if (hText != NULL)
+			{ 
+				LPCTSTR pszText = (LPCTSTR)GlobalLock(hText);
+				if (pszText != NULL)
+				{
+					while (*pszText == _T(' ') || *pszText == _T('\t') || *pszText == _T('\r') || *pszText == _T('\n'))
+						pszText++;
+					bFoundLink = (_tcsncmp(pszText, pszLinkType, iLinkTypeLen) == 0);
+				}
+			}
+			CloseClipboard();
+		}
+	}
+
+	return bFoundLink;
+}
+
+bool CemuleApp::IsEd2kFileLinkInClipboard()
+{
+	static const TCHAR _szEd2kFileLink[] = _T("ed2k://|file|");
+	return IsEd2kLinkInClipboard(_szEd2kFileLink, ARRSIZE(_szEd2kFileLink)-1);
+}
+
+bool CemuleApp::IsEd2kServerLinkInClipboard()
+{
+	static const TCHAR _szEd2kServerLink[] = _T("ed2k://|server|");
+	return IsEd2kLinkInClipboard(_szEd2kServerLink, ARRSIZE(_szEd2kServerLink)-1);
 }

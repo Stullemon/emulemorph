@@ -17,6 +17,7 @@
 #pragma once
 #include "loggable.h"
 
+#define	DFLT_TRANSFER_WND2	1
 
 const CString strDefaultToolbar = _T("0099010203040506070899091011");
 
@@ -373,6 +374,7 @@ public:
 	static	uint8	m_iToolDelayTime;	// tooltip delay time in seconds
 	static	uint8	bringtoforeground;
 	static	uint8	splitterbarPosition;
+	static	uint8	m_uTransferWnd2;
 	static	uint16	deadserverretries;
 	static	DWORD	m_dwServerKeepAliveTimeout;
 	// -khaos--+++> Changed data type to avoid overflows
@@ -406,7 +408,8 @@ public:
 	static	bool	m_bircignorejoinmessage;
 	static	bool	m_bircignorepartmessage;
 	static	bool	m_bircignorequitmessage;
-	static	bool	m_bircignoreemuleprotoinfomessage;
+	static	bool	m_bircignoreemuleprotoaddfriend;
+	static	bool	m_bircignoreemuleprotosendlink;
 	static	bool	m_birchelpchannel;
 
 	static	bool	m_bRemove2bin;
@@ -424,7 +427,9 @@ public:
 	static	int		checkDiskspace; // SLUGFILLER: checkDiskspace
 	static	UINT	m_uMinFreeDiskSpace;
 	static	char	yourHostname[127];	// itsonlyme: hostnameSource
+	static	bool	m_bEnableVerboseOptions;
 	static	bool	m_bVerbose;
+	static	bool	m_bFullVerbose;
 	static	bool	m_bDebugSourceExchange; // Sony April 23. 2003, button to keep source exchange msg out of verbose log
 	static	bool	m_bLogBannedClients;
 	static	bool	m_bLogRatingDescReceived;
@@ -510,6 +515,7 @@ public:
 	static	char	datetimeformat[64];
 	static	char	datetimeformat4log[64];
 	static	LOGFONT m_lfHyperText;
+	static	LOGFONT m_lfLogText;
 	static	int		m_iExtractMetaData;
 	static	bool	m_bAdjustNTFSDaylightFileTime;
 
@@ -682,6 +688,7 @@ public:
 	static	CStringList adresses_list;
 
 	static	int		m_iDbgHeap;
+	static	uint8	m_nWebMirrorAlertLevel;
 
 	enum Table
 	{
@@ -1022,6 +1029,8 @@ public:
 
 	static	uint8	GetSplitterbarPosition()			{return splitterbarPosition;}
 	static	void	SetSplitterbarPosition(uint8 pos)	{splitterbarPosition=pos;}
+	static	uint8	GetTransferWnd2()					{return m_uTransferWnd2;}
+	static	void	SetTransferWnd2(uint8 uWnd2)		{m_uTransferWnd2 = uWnd2;}
 	// -khaos--+++> Changed datatype to avoid overflows
 	static	uint16	GetStatsMax()						{return statsMax;}
 	// <-----khaos-
@@ -1061,7 +1070,8 @@ public:
 	static	bool	GetIrcIgnoreJoinMessage()			{return m_bircignorejoinmessage;}
 	static	bool	GetIrcIgnorePartMessage()			{return m_bircignorepartmessage;}
 	static	bool	GetIrcIgnoreQuitMessage()			{return m_bircignorequitmessage;}
-	static	bool	GetIrcIgnoreEmuleProtoInfoMessage()	{return m_bircignoreemuleprotoinfomessage;}
+	static	bool	GetIrcIgnoreEmuleProtoAddFriend()	{return m_bircignoreemuleprotoaddfriend;}
+	static	bool	GetIrcIgnoreEmuleProtoSendLink()	{return m_bircignoreemuleprotosendlink;}
 	static	bool	GetIrcHelpChannel()					{return m_birchelpchannel;}
 	static	WORD	GetWindowsVersion();
 	static	bool	GetStartMinimized()					{return startMinimized;}
@@ -1079,7 +1089,9 @@ public:
 	static	void	SetSmartIdCheck(bool in_smartidcheck) {smartidcheck = in_smartidcheck;}
 	static	uint8	GetSmartIdState()					{return smartidstate;}
 	static	void	SetSmartIdState(uint8 in_smartidstate) {smartidstate = in_smartidstate;}
+	static	bool	GetEnableVerboseOptions()			{return m_bEnableVerboseOptions;}
 	static	bool	GetVerbose()						{return m_bVerbose;}
+	static	bool	GetFullVerbose()					{return m_bVerbose && m_bFullVerbose;}
 	static	bool	GetDebugSourceExchange()			{return m_bVerbose && m_bDebugSourceExchange;}
 	static	bool	GetLogBannedClients()				{return m_bVerbose && m_bLogBannedClients;}
 	static	bool	GetLogRatingDescReceived()			{return m_bVerbose && m_bLogRatingDescReceived;}
@@ -1131,6 +1143,8 @@ public:
 	static	void	SetMaxConsPerFive(int in)			{MaxConperFive=in;}
 	static	LPLOGFONT GetHyperTextLogFont()				{return &m_lfHyperText;}
 	static	void	SetHyperTextFont(LPLOGFONT plf)		{m_lfHyperText = *plf;}
+	static	LPLOGFONT GetLogFont()						{return &m_lfLogText;}
+	static	void	SetLogFont(LPLOGFONT plf)			{m_lfLogText = *plf;}
 
 	static	uint16	GetMaxConperFive()					{return MaxConperFive;}
 	static	uint16	GetDefaultMaxConperFive();
@@ -1288,6 +1302,12 @@ public:
 	static	int		GetDynUpGoingDownDivider()					{ return m_iDynUpGoingDownDivider; }
 	static	int		GetDynUpNumberOfPings()						{ return m_iDynUpNumberOfPings; }
 	// ZZ:UploadSpeedSense <--
+	static	CString	GetHomepageBaseURL()						{ return GetHomepageBaseURLForLevel(GetWebMirrorAlertLevel()); }
+	static	CString	GetVersionCheckBaseURL();					
+	static	void	SetWebMirrorAlertLevel(uint8 newValue)		{ m_nWebMirrorAlertLevel = newValue; }
+	static bool	IsDefaultNick(const CString strCheck);
+	static	uint8	GetWebMirrorAlertLevel();
+
 	static	bool	IsUSSLog() {return m_bDynUpLog;}
 	static	bool	IsUSSLimit() { return m_bIsUSSLimit;} // EastShare - Added by TAHO, USS limit
 	static	int		GetDynUpPingLimit() { return m_iDynUpPingLimit; } // EastShare - Added by TAHO, USS limit
@@ -1447,6 +1467,7 @@ protected:
 	static int	GetRecommendedMaxConnections();
 	static void LoadPreferences();
 	static void SavePreferences();
+	static CString GetHomepageBaseURLForLevel(uint8 nLevel);
 };
 
 extern CPreferences thePrefs;

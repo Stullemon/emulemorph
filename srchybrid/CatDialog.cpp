@@ -44,6 +44,7 @@ BOOL CCatDialog::OnInitDialog(){
 	InitWindowStyles(this);
 	Localize();
 	UpdateData();
+	m_bCancelled=false;
 
 	return true;
 }
@@ -120,6 +121,7 @@ void CCatDialog::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CCatDialog, CDialog)
 	ON_BN_CLICKED(IDC_BROWSE, OnBnClickedBrowse)
 	ON_BN_CLICKED(IDOK, OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
 	ON_MESSAGE(CPN_SELENDOK, OnSelChange) //CPN_SELCHANGE
 END_MESSAGE_MAP()
 
@@ -273,6 +275,13 @@ void CCatDialog::OnBnClickedOk()
 	theApp.emuledlg->transferwnd->downloadlistctrl.Invalidate();
 
 	OnOK();
+}
+
+void CCatDialog::OnBnClickedCancel()
+{
+	m_bCancelled=true;
+	
+	OnCancel();
 }
 
 LONG CCatDialog::OnSelChange(UINT lParam, LONG wParam)

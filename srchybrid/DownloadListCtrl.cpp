@@ -38,6 +38,7 @@
 #include "Kademlia/Kademlia/Prefs.h"
 #include "Kademlia/net/KademliaUDPListener.h"
 #include "WebServices.h"
+#include "Preview.h"
 #include "SharedFileList.h" //MORPH - Added by SiRoB
 #include "version.h" //MORPH - Added by SiRoB
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
@@ -667,19 +668,19 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 
 		case 7:		// prio
 			switch(lpPartFile->GetDownPriority()) {
-			case 0:
+			case PR_LOW:
 				if( lpPartFile->IsAutoDownPriority() )
 					dc->DrawText(GetResString(IDS_PRIOAUTOLOW),GetResString(IDS_PRIOAUTOLOW).GetLength(),lpRect, DLC_DT_TEXT);
 				else
 					dc->DrawText(GetResString(IDS_PRIOLOW),GetResString(IDS_PRIOLOW).GetLength(),lpRect, DLC_DT_TEXT);
 				break;
-			case 1:
+			case PR_NORMAL:
 				if( lpPartFile->IsAutoDownPriority() )
 					dc->DrawText(GetResString(IDS_PRIOAUTONORMAL),GetResString(IDS_PRIOAUTONORMAL).GetLength(),lpRect, DLC_DT_TEXT);
 				else
 					dc->DrawText(GetResString(IDS_PRIONORMAL),GetResString(IDS_PRIONORMAL).GetLength(),lpRect, DLC_DT_TEXT);
 				break;
-			case 2:
+			case PR_HIGH:
 				if( lpPartFile->IsAutoDownPriority() )
 					dc->DrawText(GetResString(IDS_PRIOAUTOHIGH),GetResString(IDS_PRIOAUTOHIGH).GetLength(),lpRect, DLC_DT_TEXT);
 				else
@@ -729,14 +730,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 				CString tempbuffer;
 				if (lpPartFile->m_nCompleteSourcesCountLo == 0)
 				{
-					if (lpPartFile->m_nCompleteSourcesCountHi == 0)
-					{
-						tempbuffer= "?";
-					}
-					else
-					{
-						tempbuffer.Format("< %u", lpPartFile->m_nCompleteSourcesCountHi);
-					}
+					tempbuffer.Format("< %u", lpPartFile->m_nCompleteSourcesCountHi);
 				}
 				else if (lpPartFile->m_nCompleteSourcesCountLo == lpPartFile->m_nCompleteSourcesCountHi)
 				{
@@ -1013,7 +1007,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 			break;
 
 		case 6:{		// sources
-			buffer = lpUpDownClient->GetClientSoftVer();
+			buffer = lpUpDownClient->DbgGetFullClientSoftVer();
 			if (buffer.IsEmpty())
 				buffer = GetResString(IDS_UNKNOWN);
 			dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
@@ -1444,7 +1438,8 @@ void CDownloadListCtrl::OnItemActivate(NMHDR *pNMHDR, LRESULT *pResult){
 void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	if (iSel != -1){
+	if (iSel != -1)
+	{
 		const CtrlItem_Struct* content = (CtrlItem_Struct*)GetItemData(iSel);
 		if (content->type == FILE_TYPE)
 		{
@@ -1466,6 +1461,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			int iFileNotSeenCompleteSource = 0; //MORPH - Added by SiRoB, Only download complete files v2.1 (shadow)
 			UINT uPrioMenuItem = 0;
 			UINT uPermMenuItem = 0; //MORPH - Added by SiRoB, showSharePermissions
+			const CPartFile* file1 = NULL;
 			POSITION pos = GetFirstSelectedItemPosition();
 			while (pos)
 			{
@@ -1473,6 +1469,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 				if (pItemData->type != FILE_TYPE)
 					continue;
 				const CPartFile* pFile = (CPartFile*)pItemData->value;
+				if (bFirstItem)
+					file1 = pFile;
 				iSelectedItems++;
 
 				bool bFileDone = (pFile->GetStatus()==PS_COMPLETE || pFile->GetStatus()==PS_COMPLETING);
@@ -1558,6 +1556,12 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			bool bOpenEnabled = (iSelectedItems == 1 && iFilesToOpen == 1);
 			m_FileMenu.EnableMenuItem(MP_OPEN, bOpenEnabled ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_PREVIEW, (iSelectedItems == 1 && iFilesToPreview == 1) ? MF_ENABLED : MF_GRAYED);
+			CMenu PreviewMenu;
+			PreviewMenu.CreateMenu();
+			int iPreviewMenuEntries = thePreviewApps.GetAllMenuEntries(PreviewMenu, (iSelectedItems == 1) ? file1 : NULL);
+			if (iPreviewMenuEntries)
+				m_FileMenu.InsertMenu(MP_METINFO, MF_POPUP | (iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED), (UINT_PTR)PreviewMenu.m_hMenu, GetResString(IDS_DL_PREVIEW));
+
 			bool bDetailsEnabled = (iSelectedItems > 0);
 			m_FileMenu.EnableMenuItem(MP_METINFO, bDetailsEnabled ? MF_ENABLED : MF_GRAYED);
 			if (thePrefs.IsDoubleClickEnabled() && bOpenEnabled)
@@ -1577,6 +1581,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			
 			m_FileMenu.EnableMenuItem(MP_GETED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_GETHTMLED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+			m_FileMenu.EnableMenuItem(MP_PASTE, theApp.IsEd2kFileLinkInClipboard() ? MF_ENABLED : MF_GRAYED);
 
 			//MORPH START - Added by SiRoB, Show Share Permissions
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
@@ -1611,7 +1616,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	
 			CMenu WebMenu;
 			WebMenu.CreateMenu();
-			int iWebMenuEntries = theWebServices.GetAllMenuEntries(WebMenu);
+			int iWebMenuEntries = theWebServices.GetFileMenuEntries(WebMenu);
 			UINT flag = (iWebMenuEntries == 0 || iSelectedItems != 1) ? MF_GRAYED : MF_ENABLED;
 			m_FileMenu.AppendMenu(MF_POPUP | flag, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
 
@@ -1643,8 +1648,10 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			GetPopupMenuPos(*this, point);
 			m_FileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
-			m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount()-1,MF_BYPOSITION);
-			m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount()-1,MF_BYPOSITION);
+			VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
+			VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
+			if (iPreviewMenuEntries)
+				VERIFY( m_FileMenu.RemoveMenu((UINT)PreviewMenu.m_hMenu, MF_BYCOMMAND) );
 			//MORPH START - Added by SiRoB, Khaos Category
 			m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount()-1,MF_BYPOSITION);
 			if (mnuOrder) VERIFY( mnuOrder.DestroyMenu() );
@@ -1652,6 +1659,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			VERIFY( WebMenu.DestroyMenu() );
 			VERIFY( CatsMenu.DestroyMenu() );
+			VERIFY( PreviewMenu.DestroyMenu() );
 		}
 		else {
 			const CUpDownClient* client = (CUpDownClient*)content->value;
@@ -1725,13 +1733,14 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_GETED2KLINK, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_GETHTMLED2KLINK, MF_GRAYED);
+		m_FileMenu.EnableMenuItem(MP_PASTE, theApp.IsEd2kFileLinkInClipboard() ? MF_ENABLED : MF_GRAYED);
 		m_FileMenu.SetDefaultItem((UINT)-1);
 
 		// also show the "Web Services" entry, even if its disabled and therefore not useable, it though looks a little 
 		// less confusing this way.
 		CMenu WebMenu;
 		WebMenu.CreateMenu();
-		int iWebMenuEntries = theWebServices.GetAllMenuEntries(WebMenu);
+		int iWebMenuEntries = theWebServices.GetFileMenuEntries(WebMenu);
 		m_FileMenu.AppendMenu(MF_POPUP | MF_GRAYED, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
 
 		GetPopupMenuPos(*this, point);
@@ -1743,6 +1752,13 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 {
+	switch (wParam)
+	{
+		case MP_PASTE:
+			theApp.PasteClipboard();
+			return TRUE;
+	}
+
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1)
 	{
@@ -2271,6 +2287,9 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						SetRedraw(TRUE);
 						ChangeCategory(curTab);
 					}
+					else if (wParam>=MP_PREVIEW_APP_MIN && wParam<=MP_PREVIEW_APP_MAX){
+						thePreviewApps.RunApp(file, wParam);
+					}
 					break;
 			}
 		}
@@ -2675,7 +2694,7 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 		// Maella -Support for tag ET_MOD_VERSION 0x55-
 		if( client1->GetClientSoft() == client2->GetClientSoft() )
 			if(client2->GetVersion() == client1->GetVersion() && client1->GetClientSoft() == SO_EMULE){
-				return strcmpi(client2->GetClientSoftVer(), client1->GetClientSoftVer());
+				return strcmpi(client2->DbgGetFullClientSoftVer(), client1->DbgGetFullClientSoftVer());
 			}
 			else {
 			return client2->GetVersion() - client1->GetVersion();
@@ -2827,10 +2846,15 @@ void CDownloadListCtrl::CreateMenues() {
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR));
 	
 	//MORPH - Moved by SiRoB, see on top
-	//if (thePrefs.IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
+	/*
+	if (thePrefs.IsExtControlsEnabled())
+		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
+	*/
 
+	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1) );
 	m_FileMenu.AppendMenu(MF_STRING,MP_GETHTMLED2KLINK, GetResString(IDS_DL_LINK2));
+	m_FileMenu.AppendMenu(MF_STRING,MP_PASTE, GetResString(IDS_SW_DIRECTDOWNLOAD));
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	//MORPH START - Added by IceCream, copy feedback feature
 	m_FileMenu.AppendMenu(MF_STRING,MP_COPYFEEDBACK, GetResString(IDS_COPYFEEDBACK));

@@ -43,13 +43,11 @@
 #define IDS_FD_RECOV                    136
 #define IDS_HTTPDOWNLOAD_FAIL_FILE_OPEN 137
 #define IDS_HTTPDOWNLOAD_ABORTING_TRANSFER 138
-#define IDS_STRING139                   139
 #define IDS_FD_COMPR                    139
 #define IDD_FILES                       140
 #define IDS_WIZARD_NETWORK              140
 #define IDS_MAIN_READY                  141
 #define IDD_SEARCH                      142
-#define IDS_STRING142                   142
 #define IDS_WIZARD_ED2K                 142
 #define IDS_SEL_SKIN                    143
 #define IDS_MAIN_SOCKETERROR            144
@@ -111,7 +109,6 @@
 #define IDS_ERR_BADSERVERLIST           196
 #define IDS_ERR_FILEERROR_SERVERMET     197
 #define IDS_ERR_SAVESERVERMET           198
-#define IDS_STRING199                   199
 #define IDS_PASSIVE                     199
 #define IDS_MAIN_CONNECTEDTO            200
 #define IDS_MAIN_BTN_CANCEL             201
@@ -194,7 +191,6 @@
 #define IDB_UP                          278
 #define IDS_UPDATEFROM                  278
 #define IDS_QL_USERNAME                 279
-#define IDS_STRING280                   280
 #define IDS_LOADURL                     280
 #define IDB_DOWN                        281
 #define IDS_DELETEAFTERALLOC            281
@@ -238,7 +234,6 @@
 #define IDS_ERR_RENAMESF                315
 #define IDS_PRIOHIGHEST                 316
 #define IDD_PPG_SERVER                  317
-#define IDS_STRING317                   317
 #define IDS_AVAILABLE                   317
 #define IDS_ERR_NOPRIMCHANGE            318
 #define IDS_HIDDEN                      319
@@ -524,7 +519,6 @@
 #define IDS_RECONNECT                   599
 #define IDS_SERVERADDED                 600
 #define IDB_UP2X                        601
-#define IDS_STRING6IDS_IRC_IGNOREJOINMESSAGE 601
 #define IDS_IRC_IGNOREJOINMESSAGE       601
 #define IDS_STATS_SUCCUPCOUNT           602
 #define IDB_DOWN2X                      603
@@ -613,7 +607,6 @@
 #define IDS_IRC_RECIEVEDLINK            684
 #define IDS_IRC_ACCEPTLINKS             685
 #define IDS_SHARED                      686
-#define IDR_ABOUT                       687
 #define IDS_DOWNLOADED                  687
 #define IDS_SOURCENAMES                 688
 #define IDS_PREF_STARTMIN               689
@@ -641,7 +634,6 @@
 #define IDS_WIZ_OS_FRAME                711
 #define IDS_WIZ_CONCURENTDOWN_FRAME     712
 #define IDD_FILEINFO                    713
-#define IDS_STRING713                   713
 #define IDS_HASHINGFILE                 713
 #define IDS_WIZ_CUSTOM_FRAME            714
 #define IDS_WIZ_HOTBUTTON_FRAME         715
@@ -684,6 +676,7 @@
 #define IDS_USS_MIN                     751
 #define IDS_STATS_MAXDL                 752
 #define IDD_COMMENTLST                  753
+#define IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 753
 #define IDS_PW_FASTSRVCON               754
 #define IDS_SOURCELINKFAILED            755
 #define IDS_CREATESOURCELINK            756
@@ -774,6 +767,7 @@
 #define IDS_WEBSERVICES                 840
 #define IDS_WEBSVEDIT                   841
 #define IDC_CHECK4UPDATE                842
+#define IDS_IRC_EMULEPROTO_IGNORESENDLINK 842
 #define IDS_CHECK4UPDATE                843
 #define IDS_STARTUP                     844
 #define IDS_NEWVERSIONAVL               845
@@ -804,6 +798,7 @@
 #define IDS_IPFILTERED                  870
 #define IDS_DL_TRANSFCOMPL              871
 #define IDD_LISTVIEW_SEARCH             872
+#define IDS_DL_ACTIVE_TIME              872
 #define IDS_STATS_FILTEREDCLIENTS       873
 #define IDS_FILTERLABEL                 874
 #define IDS_ERR_LARGEREQBLOCK           875
@@ -861,8 +856,11 @@
 #define IDS_FIRSTCOMPLETE               927
 #define IDS_ENTERUSERNAME               928
 #define IDS_STATIC_CPUMEM               929
+#define IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 930
 #define IDS_LOG2DISK                    931
+#define IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING 932
 #define IDD_INPUTBOX                    933
+#define IDS_KAD_SEARCH_KEYWORD_INVALID  933
 #define IDS_EDITCAT                     934
 #define IDS_PW_WS                       935
 #define IDS_ENABLED                     936
@@ -904,6 +902,7 @@
 #define IDS_SETUPSPEED                  972
 #define IDS_SETDOWNSPEED                973
 #define IDD_PPG_SCHEDULER               974
+#define IDS_UNDO                        974
 #define IDS_DAYLY                       975
 #define IDS_DAY_MO_FR                   976
 #define IDS_DAY_SA_SO                   977
@@ -1094,6 +1093,7 @@
 #define IDS_UNCFOLDERS                  1149
 #define IDS_USESECIDENT                 1150
 #define IDS_ADVSPAMFILTER               1151
+#define IDS_CUT                         1152
 #define IDS_STATS_SECUREIDENT           1153
 #define IDS_ONDISK                      1154
 #define IDS_CLIENTCOL                   1155
@@ -1112,6 +1112,7 @@
 #define IDS_VERSION                     1168
 #define IDS_ALL_A4AF_TO_THIS            1169
 #define IDD_META_DATA                   1170
+#define IDS_PASTE                       1170
 #define IDS_ALL_A4AF_TO_OTHER           1171
 #define IDS_ALL_A4AF_AUTO               1172
 #define IDS_SWAP_A4AF_TO_THIS           1173
@@ -1216,6 +1217,7 @@
 #define IDS_CMT_COPYCLIPBOARD           1272
 #define IDS_ASKDOWNLOADLANG             1273
 #define IDS_ASKDOWNLOADLANGCAP          1274
+#define IDS_DELETESELECTED              1275
 #define IDS_ERR_FAILEDDOWNLOADLANG      1276
 #define IDS_ERR_BADFOLDER               1277
 #define IDS_AUTOREMOVEFD                1278
@@ -1239,6 +1241,7 @@
 #define IDS_TEXTLABELS                  1297
 #define IDS_ENABLETEXTLABELS            1298
 #define IDS_CUSTOMIZETOOLBAR            1299
+#define IDS_MINBITRATE                  1300
 #define IDS_KAD_RECHECKFW               1301
 #define IDS_SHAREDTITLE                 1302
 #define IDS_WARNINGNOBS                 1303
@@ -1258,6 +1261,7 @@
 #define IDS_KADSEARCHLAB                1317
 #define IDS_SRV_UDPSR                   1318
 #define IDS_SRV_UDPFR                   1319
+#define IDS_MINLENGTH                   1320
 #define IDS_EM_HELP                     1321
 #define IDS_WRN_FRIENDDUPLIPPORT        1322
 #define IDS_DYNUP                       1323
@@ -1282,10 +1286,10 @@
 #define IDS_IP_HITS                     1342
 #define IDS_IP_RULES                    1343
 #define IDS_ERR_NOTCONNECTEDKAD         1344
-#define IDS_STRING601                   1345
 #define IDS_IRC_NOSFS                   1345
-#define IDS_STRING6IDS_IRC_IGNOREPARTMESSAGE 1346
+#define IDS_RESETLABEL                  1346
 #define IDS_IRC_IGNOREMISCMESSAGE       1347
+#define IDD_DIRECT_DOWNLOAD             1347
 #define IDS_KNOWN                       1348
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
@@ -1313,6 +1317,7 @@
 #define IDC_REMOVE                      2028
 #define IDC_TMPLBROWSE                  2029
 #define IDC_SELECT_HYPERTEXT_FONT       2030
+#define IDC_RESETHIST                   2031
 #define IDC_ADDITEM                     2032
 #define IDC_INCFILES                    2035
 #define IDC_UPLOADLIST                  2036
@@ -1363,7 +1368,6 @@
 #define IDC_CB_TBN_ONNEWDOWNLOAD        2113
 #define IDC_NETWORK_KADEMLIA            2114
 #define IDC_WIZARD_NETWORK_ED2K         2115
-#define IDC_IRC_HELPCHANNEL             2116
 #define IDC_MATCH_KEYWORDS              2117
 #define IDC_SERVERMETURL                2118
 #define IDC_WIZ_XP_RADIO                2122
@@ -1429,7 +1433,7 @@
 #define IDC_SSTATIC6                    2213
 #define IDC_SSTATIC7                    2215
 #define IDC_CURSESSION_LBL              2216
-#define IIDC_FSTATIC2                   2217
+#define IDC_FSTATIC2                    2217
 #define IDC_MYINFO                      2219
 #define IDC_MSTATIC3                    2221
 #define IDC_FSTATIC4                    2222
@@ -1535,13 +1539,12 @@
 #define IDC_FILECREATED                 2357
 #define IDC_LASTRECEIVED                2358
 #define IDC_LANGS                       2359
+#define IDC_DL_ACTIVE_TIME              2359
 #define IDC_SEESHARE1                   2360
 #define IDC_SEESHARE2                   2361
 #define IDC_SEESHARE3                   2362
 #define IDC_NETWORK_ED2K                2363
-#define IDC_IRC_ACCEPTLINKSFRIENDS      2364
 #define IDC_BRINGTOFOREGROUND           2365
-#define IDC_IRC_LISTONCONNECT           2366
 #define IDC_AUTOCONNECTSTATICONLY       2367
 #define IDC_STARTNEXTFILE               2368
 #define IDC_DISABLEQUEUELIST            2369
@@ -1673,10 +1676,8 @@
 #define IDC_CB_TBN_ONNEWVERSION         2525
 #define IDC_TAB2                        2526
 #define IDC_FILENAME                    2528
-#define IDC_IRC_ACCEPTLINKS             2529
 #define IDC_FD_SN                       2530
 #define IDC_PREFCOLORS                  2531
-#define IDC_IRC_INFOMESSAGE             2532
 #define IDC_WIZ_TRUEUPLOAD_BOX          2535
 #define IDC_UDPPORT                     2536
 #define IDC_USERNAME                    2537
@@ -1730,7 +1731,6 @@
 #define IDC_3DDEP                       2601
 #define IDC_MANUALSERVERHIGHPRIO        2602
 #define IDC_DAYS                        2603
-#define IDC_ROUNDBIT                    2604
 #define IDC_ROUND                       2605
 #define IDC_STARTUP                     2606
 #define IDC_STATICVIDEOPLAYER           2607
@@ -1786,7 +1786,6 @@
 #define IDC_MSGONLYSEC                  2661
 #define IDC_RECONN                      2662
 #define IDC_SNAME                       2663
-#define IDC_IRC_TIMESTAMP               2664
 #define IDC_UAP                         2665
 #define IDC_SMARTIDCHECK                2666
 #define IDC_UPDATEQUEUE                 2667
@@ -1832,7 +1831,6 @@
 #define IDD_CAT                         2708
 #define IDR_TASKBAR                     2709
 #define IDD_PPG_SECURITY                2710
-#define IDC_IRC_EMULEPROTO_INFOMESSAGE  2711
 #define IDC_STATIC_PRIO                 2712
 #define IDC_PRIOCOMBO                   2713
 #define IDR_WIZ1_WATERMARK              2714
@@ -1867,10 +1865,9 @@
 #define IDC_MMPASSWORDFIELD             2749
 #define IDC_HYPERTEXT_FONT_HINT         2750
 #define IDC_GUIDELINK                   2751
+#define IDC_RESETLABEL                  2752
 #define IDC_KADSEARCHLAB                2753
 #define IDC_KADCONTACTLAB               2754
-#define IDC_KADUDPPORT_LABEL            2758
-#define IDC_KADUDPPORT                  2759
 #define IDC_BOOTSTRAPPORT               2760
 #define IDC_PV_IMAGE                    2761
 #define IDC_CONNECTION_NETWORK          2762
@@ -1908,7 +1905,6 @@
 #define IDC_FD_COMPR                    2796
 #define IDC_UPDATEURL                   2797
 #define IDC_DD                          2799
-#define IDC_DDI                         2801
 #define IDC_TRAY_EXIT                   2802
 #define IDC_DOWNKB                      2803
 #define IDC_UPKB                        2804
@@ -1916,7 +1912,6 @@
 #define IDC_UPLBL                       2806
 #define IDC_PREFERENCES                 2807
 #define IDC_TOTAL_IPFILTER_LABEL        2808
-#define IDC_TOTAL_IP_RANGES             2809
 #define IDC_TOTAL_IPFILTER              2809
 #define IDC_IPFILTER                    2810
 #define IDC_SAVE                        2811
@@ -1928,6 +1923,10 @@
 #define IDC_KADALPHA                    2817
 #define IDC_STATICIPLABEL               2818
 #define IDC_MISC_IRC                    2819
+#define IDC_DL_ACTIVE_TIME_LBL          2820
+#define IDC_SEARCH_OPTS                 2833
+#define IDC_DISABLEHIST                 2834
+
 #define IDC_PARTMET                     3345
 #define IDD_PPG_BACKUP                  3378
 #define IDS_SWITCHSUC                   3468

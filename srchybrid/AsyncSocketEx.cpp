@@ -483,7 +483,7 @@ CAsyncSocketEx::~CAsyncSocketEx()
 	FreeAsyncSocketExInstance();
 }
 
-BOOL CAsyncSocketEx::Create( UINT nSocketPort /*=0*/, int nSocketType /*=SOCK_STREAM*/, long lEvent /*=FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE*/, LPCTSTR lpszSocketAddress /*=NULL*/ )
+BOOL CAsyncSocketEx::Create( UINT nSocketPort /*=0*/, int nSocketType /*=SOCK_STREAM*/, long lEvent /*=FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE*/, LPCTSTR lpszSocketAddress /*=NULL*/, BOOL bReuseAddr /*=FALSE*/ )
 {
 	ASSERT(GetSocketHandle()==INVALID_SOCKET);
 
@@ -528,6 +528,13 @@ BOOL CAsyncSocketEx::Create( UINT nSocketPort /*=0*/, int nSocketType /*=SOCK_ST
 			}
 		}
 #endif //NOLAYERS
+
+		if (bReuseAddr)
+		{
+			// Has to be done right before binding the socket!
+			int iOptVal = 1;
+			VERIFY( SetSockOpt(SO_REUSEADDR, &iOptVal, sizeof iOptVal) );
+		}
 
 		if (!Bind(nSocketPort, lpszSocketAddress))
 		{

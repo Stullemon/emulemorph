@@ -132,3 +132,19 @@ void UpdateHorzExtent(CComboBox &rctlComboBox, int iIconWidth)
 	else
 		rctlComboBox.SetHorizontalExtent(0);
 }
+
+HWND GetComboBoxEditCtrl(CComboBox& cb)
+{
+	CWnd* pWnd = cb.GetWindow(GW_CHILD);
+	while (pWnd)
+	{
+		TCHAR szClassName[MAX_PATH];
+		if (::GetClassName(*pWnd, szClassName, ARRSIZE(szClassName)))
+		{
+			if (_tcsicmp(szClassName, _T("EDIT")) == 0)
+				return pWnd->m_hWnd;
+		}
+		pWnd = pWnd->GetNextWindow();
+	}
+	return NULL;
+}

@@ -514,9 +514,9 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Finnish: Nikerabbit"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:French: Lalrobin, Alexis, Bouc7, abc, obi1"));
+	m_arCredits.Add(_T("01:06:French: Emzc, Lalrobin, Alexis, Bouc7, abc, obi1"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Galician: Emilio R."));
+	m_arCredits.Add(_T("01:06:Galician: Juan, Emilio R."));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Greek: Michael Papadakis"));
 	m_arCredits.Add(_T("S:05"));
@@ -538,7 +538,7 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Polish: Tomasz \"TMouse\" Broniarek"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Portugese: Luís Claro"));
+	m_arCredits.Add(_T("01:06:Portugese: Filipe, Luís Claro"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Portugese Brasilian: DarthMaul,Brasco"));
 	m_arCredits.Add(_T("S:05"));

@@ -11,17 +11,25 @@ public:
 // Dialog Data
 	enum { IDD = IDD_PPG_DISPLAY };
 
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	DECLARE_MESSAGE_MAP()
-public:
-	virtual BOOL OnInitDialog();
-private:
-	void LoadSettings(void);
-public:
-	virtual BOOL OnApply();
 	void Localize(void);
+
+protected:
+	enum ESelectFont
+	{
+		sfServer,
+		sfLog
+	} m_eSelectFont;
+	void LoadSettings(void);
+
+	virtual BOOL OnInitDialog();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnApply();
+
+	static UINT CALLBACK ChooseFontHook(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSettingsChange()					{ SetModified(); }
 	afx_msg void OnBnClickedSelectHypertextFont();
+	afx_msg void OnBtnClickedResetHist();
 };

@@ -766,6 +766,8 @@ void CUpDownClient::SendBlockRequests(){
 		if (pos){
 			Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
 			ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
+			//ASSERT( pending->zStream == NULL );
+			//ASSERT( pending->totalUnzipped == 0 );
 			pending->fZStreamError = 0;
 			pending->fRecovered = 0;
 			data.WriteUInt32(pending->block->StartOffset);
@@ -1008,10 +1010,11 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 					    cur_block->zStream = NULL;
 				    }
     
-				    // Although we can't further use the current zstream, there is no need to disconnect the sending 
-				    // client because the next zstream (a series of 10K-blocks which build a 180K-block) could be
-				    // valid again. Just ignore all further blocks for the current zstream.
-				    cur_block->fZStreamError = 1;					
+					// Although we can't further use the current zstream, there is no need to disconnect the sending 
+					// client because the next zstream (a series of 10K-blocks which build a 180K-block) could be
+					// valid again. Just ignore all further blocks for the current zstream.
+					cur_block->fZStreamError = 1;
+					cur_block->totalUnzipped = 0;
 					//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 					if(thePrefs.GetEnableZeroFilledTest() == true) {
 						CString userHash;
@@ -1096,6 +1099,8 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 				TRACE_UNZIP("; Error: new stream failed: %d\n", err);
 			    return err;
 			}
+
+			ASSERT( block->totalUnzipped == 0 );
 		}
 
 	    // Use whatever input is provided
@@ -1203,7 +1208,7 @@ uint32 CUpDownClient::CalculateDownloadRate(){
     }
 	
 	while (m_AvarageDDR_list.GetCount() > 0)
-		if(m_AvarageDDR_list.GetCount() > 60000 / (1 + cur_tick - m_AvarageDDR_list.GetHead().timestamp) ||
+		if(m_AvarageDDR_list.GetCount() > (60000 / (1 + cur_tick - m_AvarageDDR_list.GetHead().timestamp)) ||
 			(cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000) {
 			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 		}else

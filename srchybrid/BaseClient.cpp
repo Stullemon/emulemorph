@@ -481,7 +481,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_strHelloInfo.AppendFormat("  PORT=%u", temptag.tag.intvalue);
 				nUserPort = temptag.tag.intvalue;
 				break;
-			//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 			case ET_MOD_VERSION: 
 				if (temptag.tag.type == 2)
 				{
@@ -496,8 +495,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_strModVersion = _T("ModID=<Unknwon>");
 				if (bDbgInfo)
 					m_strHelloInfo.AppendFormat("  Mod=%s", m_strModVersion);
+				CheckForGPLEvilDoer();
 				break;
-			//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
 			case CT_EMULE_UDPPORTS:
 				// 16 KAD Port
 				// 16 UDP Port
@@ -544,7 +543,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				m_fSharedDirectories = 1;
 				dwEmuleTags |= 4;
 				if (bDbgInfo)
-					m_strHelloInfo.AppendFormat("  Comptbl=%u  ClientVer=%u", m_byCompatibleClient, m_nClientVersion);
+					m_strHelloInfo.AppendFormat("  Comptbl=%u  ClientVer=%u.%u.%u.%u", m_byCompatibleClient, (m_nClientVersion >> 17) & 0x7f, (m_nClientVersion >> 10) & 0x7f, (m_nClientVersion >> 7) & 0x07, m_nClientVersion & 0x7f);
 				break;
 			default:
 				if (bDbgInfo)
@@ -644,8 +643,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	}
 
 	// We want to educate Users of major comercial GPL breaking mods by telling them about the effects
-	// check for known advertising in usernames
-	// the primary aim is not to technical block those but to make users use a GPL-conform version
 	CString strBuffer = m_pszUsername;
 	strBuffer.MakeUpper();
 	strBuffer.Remove(' ');
@@ -896,6 +893,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 					m_strModVersion = _T("ModID=<Unknwon>");
 				if (bDbgInfo)
 					m_strMuleInfo.AppendFormat("  Mod=%s", m_strModVersion);
+				CheckForGPLEvilDoer();
 				break;
 			default:
 				if (bDbgInfo)
@@ -964,7 +962,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	//MORPH START - Added by IceCream, Anti-leecher feature
 	LPCSTR strUsedName;
 	if (m_bGPLEvildoer)
-		strUsedName = "Lies Mich! http://ReadMe.emule-project.net <- Please use a GPL-conform version";
+		strUsedName = "Please use a GPL-conform version of eMule";
 	else if (StrStrI(m_pszUsername,"G@m3r")||StrStrI(m_pszUsername,"$WAREZ$")||StrStrI(m_pszUsername,"chief"))
 		strUsedName = m_pszUsername;
 	else
@@ -1120,11 +1118,11 @@ bool CUpDownClient::Disconnected(CString strReason, bool bFromSocket){
 		ClearDownloadBlockRequests();
 
 		if(GetDownloadState() == DS_CONNECTED){
-			// client didn't responsed to our request for some reasons (remotely banned?)
-			// or it just doesn't has this file, so try to swap first
+		    // client didn't responsed to our request for some reasons (remotely banned?)
+		    // or it just doesn't has this file, so try to swap first
 			if (!SwapToAnotherFile(true, true, true, NULL)){
 				theApp.downloadqueue->RemoveSource(this);
-				//DEBUG_ONLY(AddDebugLogLine(false, "Removed %s from downloadqueue - didn't responsed to filerequests",GetUserName()));
+			    //DEBUG_ONLY(AddDebugLogLine(false, "Removed %s from downloadqueue - didn't responsed to filerequests",GetUserName()));
 			}
 		}
 	}	
@@ -1418,7 +1416,7 @@ void CUpDownClient::ReGetClientSoft()
 				pszSoftware = _T("Shareaza");
 				break;
 			default:
-				if (m_bIsML){
+				if (m_bIsML || m_byCompatibleClient == SO_MLDONKEY){
 					m_clientSoft = SO_MLDONKEY;
 					pszSoftware = _T("MLdonkey");
 				}
@@ -1439,28 +1437,26 @@ void CUpDownClient::ReGetClientSoft()
 		int iLen;
 		TCHAR szSoftware[128];
 		if (m_byEmuleVersion == 0){
-			m_nClientVersion = 0;
+			m_nClientVersion = MAKE_CLIENT_VERSION(0, 0, 0);
 			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s"), pszSoftware);
 		}
 		else if (m_byEmuleVersion != 0x99){
 			UINT nClientMinVersion = (m_byEmuleVersion >> 4)*10 + (m_byEmuleVersion & 0x0f);
-			m_nClientVersion = nClientMinVersion*100*10;
+			m_nClientVersion = MAKE_CLIENT_VERSION(0, nClientMinVersion, 0);
 			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v0.%u"), pszSoftware, nClientMinVersion);
 		}
 		else{
 			UINT nClientMajVersion = (m_nClientVersion >> 17) & 0x7f;
 			UINT nClientMinVersion = (m_nClientVersion >> 10) & 0x7f;
 			UINT nClientUpVersion  = (m_nClientVersion >>  7) & 0x07;
-			m_nClientVersion = nClientMajVersion*100*10*100 + nClientMinVersion*100*10 + nClientUpVersion*100;
+			m_nClientVersion = MAKE_CLIENT_VERSION(nClientMajVersion, nClientMinVersion, nClientUpVersion);
 			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u%c"), pszSoftware, nClientMajVersion, nClientMinVersion, _T('a') + nClientUpVersion);
 		}
 		if (iLen > 0){
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
 		}
-		//MORPH - Changed by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
-		//return;
-		goto suite;
+		return;
 	}
 
 	if (m_bIsHybrid){
@@ -1503,7 +1499,7 @@ void CUpDownClient::ReGetClientSoft()
 			nClientMinVersion = m_nClientVersion;
 			nClientUpVersion = 0;
 		}
-		m_nClientVersion = nClientMajVersion*100*10*100 + nClientMinVersion*100*10 + nClientUpVersion*100;
+		m_nClientVersion = MAKE_CLIENT_VERSION(nClientMajVersion, nClientMinVersion, nClientUpVersion);
 
 		int iLen;
 		TCHAR szSoftware[128];
@@ -1515,58 +1511,44 @@ void CUpDownClient::ReGetClientSoft()
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
 		}
-		//MORPH - Changed by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
-		//return;
-		goto suite;
+		return;
 	}
 
 	if (m_bIsML || iHashType == SO_MLDONKEY){
 		m_clientSoft = SO_MLDONKEY;
 		UINT nClientMinVersion = m_nClientVersion;
-		m_nClientVersion = nClientMinVersion*100*10;
+		m_nClientVersion = MAKE_CLIENT_VERSION(0, nClientMinVersion, 0);
 		TCHAR szSoftware[128];
 		int iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("MLdonkey v0.%u"), nClientMinVersion);
 		if (iLen > 0){
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
 		}
-		//MORPH - Changed by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
-		//return;
-		goto suite;
+		return;
 	}
 
 	if (iHashType == SO_OLDEMULE){
 		m_clientSoft = SO_OLDEMULE;
 		UINT nClientMinVersion = m_nClientVersion;
-		m_nClientVersion = nClientMinVersion*100*10;
+		m_nClientVersion = MAKE_CLIENT_VERSION(0, nClientMinVersion, 0);
 		TCHAR szSoftware[128];
 		int iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("Old eMule v0.%u"), nClientMinVersion);
 		if (iLen > 0){
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
 		}
-		//MORPH - Changed by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
-		//return;
-		goto suite;
+		return;
 	}
 
 	m_clientSoft = SO_EDONKEY;
 	UINT nClientMinVersion = m_nClientVersion;
-	m_nClientVersion = nClientMinVersion*100*10;
+	m_nClientVersion = MAKE_CLIENT_VERSION(0, nClientMinVersion, 0);
 	TCHAR szSoftware[128];
 	int iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("eDonkey v0.%u"), nClientMinVersion);
 	if (iLen > 0){
 		memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 		m_strClientSoftware.ReleaseBuffer(iLen);
 	}
-//MORPH START - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
-suite:
-	if (m_strModVersion.IsEmpty() == false){
-		m_strClientSoftware += _T(" [");
-		m_strClientSoftware += m_strModVersion;
-		m_strClientSoftware += _T("]");
-	}	
-//MORPH END   - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 }
 
 int CUpDownClient::GetHashType() const
@@ -2046,7 +2028,7 @@ void CUpDownClient::AssertValid() const
 	CHECK_BOOL(m_bFriendSlot);
 	CHECK_BOOL(m_bCommentDirty);
 	CHECK_BOOL(m_bIsML);
-	ASSERT( m_clientSoft >= SO_EMULE && m_clientSoft <= SO_SHAREAZA ||  m_clientSoft >= SO_EDONKEYHYBRID && m_clientSoft <= SO_UNKNOWN );
+	ASSERT( m_clientSoft >= SO_EMULE && m_clientSoft <= SO_SHAREAZA || m_clientSoft == SO_MLDONKEY || m_clientSoft >= SO_EDONKEYHYBRID && m_clientSoft <= SO_UNKNOWN );
 	(void)m_strClientSoftware;
 	(void)m_dwLastSourceRequest;
 	(void)m_dwLastSourceAnswer;
@@ -2201,6 +2183,13 @@ bool CUpDownClient::CheckHandshakeFinished(UINT protocol, UINT opcode) const
 	}
 
 	return true;
+}
+
+void CUpDownClient::CheckForGPLEvilDoer(){
+	// check for known major gpl breaker 
+	if (((CString)m_strModVersion).Trim().MakeUpper().Find("LH") == 0 || ((CString)m_strModVersion).Trim().MakeUpper().Find("LIO") == 0){
+		m_bGPLEvildoer = true;
+	}
 }
 
 //EastShare Start - added by AndCycle, IP to Country

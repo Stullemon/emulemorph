@@ -29,6 +29,7 @@
 #include <shlobj.h>
 #include "emuledlg.h"
 #include "MenuCmds.h"
+#include "KillProcess.h"
 #endif
 
 #ifdef _DEBUG
@@ -596,9 +597,12 @@ CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen)
 //
 // [Out]
 //   buffer: byte array containing decoded string
-void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer)
+bool DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer, unsigned int bufflen)
 {
-    memset(buffer, 0, DecodeLengthBase16(base16BufLen));
+	unsigned int uDecodeLengthBase16 = DecodeLengthBase16(base16BufLen);
+	if (uDecodeLengthBase16 > bufflen)
+		return false;
+    memset(buffer, 0, uDecodeLengthBase16);
   
     for(unsigned int i = 0; i < base16BufLen; i++) {
 		int lookup = toupper(base16Buffer[i]) - '0';
@@ -617,6 +621,7 @@ void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buf
 			buffer[(i-1)/2] |= word;
 		}
 	}
+	return true;
 }
 
 // Calculates length to decode from BASE16
@@ -626,9 +631,9 @@ void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buf
 //
 // [Return]
 //   New length of byte array decoded
-int	DecodeLengthBase16(int base16Length)
+unsigned int DecodeLengthBase16(unsigned int base16Length)
 {
-	return base16Length / 2;
+	return base16Length / 2U;
 }
 
 CWebServices::CWebServices()
@@ -671,10 +676,27 @@ int CWebServices::ReadAllServices()
 			int iPos = sbuffer.Find(_T(','));
 			if (iPos > 0)
 			{
-				SEd2kLinkService svc;
-				svc.strMenuLabel = sbuffer.Left(iPos).Trim();
-				svc.strUrl = sbuffer.Right(sbuffer.GetLength() - iPos - 1).Trim();
-				m_aServices.Add(svc);
+				CString strUrlTemplate = sbuffer.Right(sbuffer.GetLength() - iPos - 1).Trim();
+				if (!strUrlTemplate.IsEmpty())
+				{
+					bool bFileMacros = false;
+					static const LPCTSTR _apszMacros[] = { _T("#hashid"), _T("#filesize"), _T("#filename") };
+					for (int i = 0; i < ARRSIZE(_apszMacros); i++)
+					{
+						if (strUrlTemplate.Find(_apszMacros[i]) != -1)
+						{
+							bFileMacros = true;
+							break;
+						}
+					}
+
+					SEd2kLinkService svc;
+					svc.uMenuID = MP_WEBURL + m_aServices.GetCount();
+					svc.strMenuLabel = sbuffer.Left(iPos).Trim();
+					svc.strUrl = strUrlTemplate;
+					svc.bFileMacros = bFileMacros;
+					m_aServices.Add(svc);
+				}
 			}
 		}
 		fclose(readFile);
@@ -687,7 +709,7 @@ int CWebServices::ReadAllServices()
 	return m_aServices.GetCount();
 }
 
-int CWebServices::GetAllMenuEntries(CMenu& rMenu)
+int CWebServices::GetAllMenuEntries(CMenu& rMenu, DWORD dwFlags)
 {
 	if (m_aServices.GetCount() == 0)
 	{
@@ -699,6 +721,8 @@ int CWebServices::GetAllMenuEntries(CMenu& rMenu)
 		if (_tstat(GetDefaultServicesFile(), &st) == 0 && st.st_mtime > m_tDefServicesFileLastModified)
 			ReadAllServices();
 	}
+
+	int iMenuEntries = 0;
 	for (int i = 0; i < m_aServices.GetCount(); i++)
 	{
 		const SEd2kLinkService& rSvc = m_aServices.GetAt(i);
@@ -712,29 +736,49 @@ int CWebServices::GetAllMenuEntries(CMenu& rMenu)
 			continue;
 		}
 		//MORPH END   - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
-		rMenu.AppendMenu(MF_STRING, MP_WEBURL + i, rSvc.strMenuLabel);
+		if ((dwFlags & WEBSVC_GEN_URLS) && rSvc.bFileMacros)
+			continue;
+		if ((dwFlags & WEBSVC_FILE_URLS) && !rSvc.bFileMacros)
+			continue;
+		if(rMenu.AppendMenu(MF_STRING, MP_WEBURL + i, rSvc.strMenuLabel))
+			iMenuEntries++;
 	}
-	return m_aServices.GetCount();
+	return iMenuEntries;
 }
 
 bool CWebServices::RunURL(const CAbstractFile* file, UINT uMenuID)
 {
-	CString strUrlTemplate = m_aServices.GetAt(uMenuID - MP_WEBURL).strUrl;
-	if (file != NULL)
+	for (int i = 0; i < m_aServices.GetCount(); i++)
 	{
-		// Convert hash to hexadecimal text and add it to the URL
-		strUrlTemplate.Replace(_T("#hashid"), md4str(file->GetFileHash()));
+		const SEd2kLinkService& rSvc = m_aServices.GetAt(i);
+		if (rSvc.uMenuID == uMenuID)
+		{
+			CString strUrlTemplate = rSvc.strUrl;
+			if (file != NULL)
+			{
+				// Convert hash to hexadecimal text and add it to the URL
+				strUrlTemplate.Replace(_T("#hashid"), md4str(file->GetFileHash()));
 
-		// Add file size to the URL
-		CString temp;
-		temp.Format(_T("%u"), file->GetFileSize());
-		strUrlTemplate.Replace(_T("#filesize"), temp);
+				// Add file size to the URL
+				CString temp;
+				temp.Format(_T("%u"), file->GetFileSize());
+				strUrlTemplate.Replace(_T("#filesize"), temp);
 
-		// add filename to the url
-		strUrlTemplate.Replace(_T("#filename"), URLEncode(file->GetFileName()));
+				// add filename to the url
+				strUrlTemplate.Replace(_T("#filename"), URLEncode(file->GetFileName()));
+			}
+
+			// Open URL
+			TRACE("Starting URL: %s\n", strUrlTemplate);
+			return (int)ShellExecute(NULL, NULL, strUrlTemplate, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT) > 32;
+		}
 	}
-	// Open URL
-	return (int)ShellExecute(NULL, NULL, strUrlTemplate, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT) > 32;
+	return false;
+}
+
+void CWebServices::Edit()
+{
+	ShellExecute(NULL, _T("open"), thePrefs.GetTxtEditor(), _T("\"") + thePrefs.GetConfigDir() + _T("webservices.dat\""), NULL, SW_SHOW);
 }
 
 typedef struct
@@ -2058,6 +2102,91 @@ bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath)
 	}
 
 	return false;
+}
+
+bool CheckForSomeFoolVirus(){
+	CFileFind ff;
+	char buffer[512];
+	GetWindowsDirectory(buffer, 511);
+	CString searchpath;
+	CKillProcess kp;	
+	
+	//******************* SomeFool.Q
+	searchpath.Format(_T("%s\\SysMonXP.exe"),buffer);
+	bool found;
+	if ( (found = ff.FindFile(searchpath,0)) )
+		ff.FindNextFile();
+	if (found && ff.GetLength() == 28008){
+		//infected
+		int result = MessageBox(NULL,_T("eMule has detected that your PC is infected with the SomeFool.Q (alias netsky.q) virus, which is build to start a DDoS Attack against eMule's Homepage.\n\nDo you want eMule to try to remove this virus now (this may take some seconds)?\n\nNote: eMule will not start as long as your PC is infected"),
+			_T("Virus found"),MB_YESNO | MB_ICONWARNING);
+		if (result == IDNO)
+			return false;
+		// kill process
+		kp.KillProcess(_T("SysMonXP.exe"));
+		// delete its files
+		uint32 nTimeOut = GetTickCount() + 20000;
+		bool success = false;
+		while (nTimeOut > GetTickCount()){
+			if ( (success = DeleteFile(searchpath.GetBuffer())) )
+				break;
+		}
+		searchpath.Format(_T("%s\\firewalllogger.txt"),buffer);
+		DeleteFile(searchpath.GetBuffer());
+		// remove registry entry
+		CRegKey regkey;
+		if (regkey.Open(HKEY_LOCAL_MACHINE,_T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")) == ERROR_SUCCESS)
+			regkey.DeleteValue(_T("SysMonXP"));
+
+		// finished - hopefully	
+		if (success){
+			MessageBox(NULL,_T("eMule was able to remove the virus. However we STRONGLY recommend to install an up-to-date anti-virus software to run a full system check!"),
+			_T("Virus removed"),MB_ICONINFORMATION | MB_OK);
+		}
+		else{
+			MessageBox(NULL,_T("eMule was not able to remove the virus.\nPlease install an up-to-date anti-virus software and run a full system check!"),
+			_T("Virus removed"),MB_ICONERROR | MB_OK);
+		}
+	}
+
+	//******************* SomeFool.R
+	searchpath.Format(_T("%s\\PandaAVEngine.exe"),buffer);
+	if ( (found = ff.FindFile(searchpath,0)) )
+		ff.FindNextFile();
+	if (found && ff.GetLength() == 20624){
+		//infected
+		int result = MessageBox(NULL,_T("eMule has detected that your PC is infected with the SomeFool.R (alias netsky.r) virus, which is build to start a DDoS Attack against eMule's Homepage.\n\nDo you want eMule to try to remove this virus now (this may take some seconds)?\n\nNote: eMule will not start as long as your PC is infected"),
+			_T("Virus found"),MB_YESNO | MB_ICONWARNING);
+		if (result == IDNO)
+			return false;
+		// kill process
+		kp.KillProcess(_T("PandaAVEngine.exe"));
+		// delete its files
+		uint32 nTimeOut = GetTickCount() + 20000;
+		bool success = false;
+		while (nTimeOut > GetTickCount()){
+			if ( (success = DeleteFile(searchpath.GetBuffer())) )
+				break;
+		}
+		searchpath.Format(_T("%s\\temp09094283.dll"),buffer);
+		DeleteFile(searchpath.GetBuffer());
+		// remove registry entry
+		CRegKey regkey;
+		if (regkey.Open(HKEY_LOCAL_MACHINE,_T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")) == ERROR_SUCCESS)
+			regkey.DeleteValue(_T("PandaAVEngine"));
+
+		// finished - hopefully	
+		if (success){
+			MessageBox(NULL,_T("eMule was able to remove the virus. However we STRONGLY recommend to install an up-to-date anti-virus software to run a full system check!"),
+			_T("Virus removed"),MB_ICONINFORMATION | MB_OK);
+		}
+		else{
+			MessageBox(NULL,_T("eMule was not able to remove the virus.\nPlease install an up-to-date anti-virus software and run a full system check!"),
+			_T("Virus removed"),MB_ICONERROR | MB_OK);
+		}
+	}
+
+	return true;
 }
 
 // khaos::kmod+ Functions to return a random number within a given range.

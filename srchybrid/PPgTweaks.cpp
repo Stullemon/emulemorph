@@ -169,16 +169,19 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 
 
 		m_htiLog2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), TVI_ROOT, m_iLog2Disk);
-		m_htiVerboseGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_VERBOSE), iImgLog, TVI_ROOT);
-		m_htiVerbose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ENABLED), m_htiVerboseGroup, m_iVerbose);
-		m_htiDebug2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), m_htiVerboseGroup, m_iDebug2Disk);
-		m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), m_htiVerboseGroup, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
-		m_htiDebugSourceExchange = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG_SOURCE_EXCHANGE), m_htiVerboseGroup, m_iDebugSourceExchange);
-		m_htiLogBannedClients = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_BANNED_CLIENTS), m_htiVerboseGroup, m_iLogBannedClients);
-		m_htiLogRatingDescReceived = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_RATING_RECV), m_htiVerboseGroup, m_iLogRatingDescReceived);
-		m_htiLogSecureIdent = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_SECURE_IDENT), m_htiVerboseGroup, m_iLogSecureIdent);
-		m_htiLogFilteredIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILTERED_IPS), m_htiVerboseGroup, m_iLogFilteredIPs);
-		m_htiLogFileSaving = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILE_SAVING), m_htiVerboseGroup, m_iLogFileSaving);
+		if (thePrefs.GetEnableVerboseOptions())
+		{
+			m_htiVerboseGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_VERBOSE), iImgLog, TVI_ROOT);
+			m_htiVerbose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ENABLED), m_htiVerboseGroup, m_iVerbose);
+			m_htiDebug2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), m_htiVerboseGroup, m_iDebug2Disk);
+			m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), m_htiVerboseGroup, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
+			m_htiDebugSourceExchange = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG_SOURCE_EXCHANGE), m_htiVerboseGroup, m_iDebugSourceExchange);
+			m_htiLogBannedClients = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_BANNED_CLIENTS), m_htiVerboseGroup, m_iLogBannedClients);
+			m_htiLogRatingDescReceived = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_RATING_RECV), m_htiVerboseGroup, m_iLogRatingDescReceived);
+			m_htiLogSecureIdent = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_SECURE_IDENT), m_htiVerboseGroup, m_iLogSecureIdent);
+			m_htiLogFilteredIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILTERED_IPS), m_htiVerboseGroup, m_iLogFilteredIPs);
+			m_htiLogFileSaving = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILE_SAVING), m_htiVerboseGroup, m_iLogFileSaving);
+		}
 
 		m_htiCommit = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_COMMITFILES), iImgBackup, TVI_ROOT);
 		m_htiCommitNever = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_NEVER), m_htiCommit, m_iCommitFiles == 0);
@@ -211,7 +214,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		*/
 
 		//m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
-		m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
+		if (m_htiVerboseGroup)
+			m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCheckDiskspace, TVE_EXPAND);
 		/*
@@ -227,17 +231,17 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiMaxCon5Sec, m_iMaxConnPerFive);
 	DDV_MinMaxInt(pDX, m_iMaxConnPerFive, 1, INT_MAX);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoTakeEd2kLinks, m_iAutoTakeEd2kLinks);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_iVerbose);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebugSourceExchange, m_iDebugSourceExchange);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogBannedClients, m_iLogBannedClients);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogRatingDescReceived, m_iLogRatingDescReceived);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogSecureIdent, m_iLogSecureIdent);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFilteredIPs, m_iLogFilteredIPs);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFileSaving, m_iLogFileSaving);
+if (m_htiVerbose)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_iVerbose);
+	if (m_htiDebug2Disk)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebug2Disk, m_iDebug2Disk);
+	if (m_htiDebugSourceExchange)	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebugSourceExchange, m_iDebugSourceExchange);
+	if (m_htiLogBannedClients)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogBannedClients, m_iLogBannedClients);
+	if (m_htiLogRatingDescReceived) DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogRatingDescReceived, m_iLogRatingDescReceived);
+	if (m_htiLogSecureIdent)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogSecureIdent, m_iLogSecureIdent);
+	if (m_htiLogFilteredIPs)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFilteredIPs, m_iLogFilteredIPs);
+	if (m_htiLogFileSaving)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFileSaving, m_iLogFileSaving);
 	//MORPH - Removed by SiRoB, Hot fix to show correct disabled checkbox
 	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_iCreditSystem);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLog2Disk, m_iLog2Disk);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebug2Disk, m_iDebug2Disk);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDateFileNameLog, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiCommit, m_iCommitFiles);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFilterLANIPs, m_iFilterLANIPs);
@@ -248,13 +252,13 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);	// itsonlyme: hostnameSource
 
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_iVerbose);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, m_iVerbose);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, m_iVerbose);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, m_iVerbose);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, m_iVerbose);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, m_iVerbose);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, m_iVerbose);
+	if (m_htiDebug2Disk)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, m_iVerbose);
+	if (m_htiDebugSourceExchange)	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_iVerbose);
+	if (m_htiLogBannedClients)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, m_iVerbose);
+	if (m_htiLogRatingDescReceived) m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, m_iVerbose);
+	if (m_htiLogSecureIdent)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, m_iVerbose);
+	if (m_htiLogFilteredIPs)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, m_iVerbose);
+	if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, m_iVerbose);
 
 	/*
 	// ZZ:UploadSpeedSense -->
@@ -282,15 +286,17 @@ BOOL CPPgTweaks::OnInitDialog()
 {
 	m_iMaxConnPerFive = thePrefs.GetMaxConperFive();
 	m_iAutoTakeEd2kLinks = thePrefs.autotakeed2klinks;
-	m_iVerbose = thePrefs.m_bVerbose;
-	m_iDebugSourceExchange = thePrefs.m_bDebugSourceExchange;		// do *not* use the according 'Get...' function here!
-	m_iLogBannedClients = thePrefs.m_bLogBannedClients;				// do *not* use the according 'Get...' function here!
-	m_iLogRatingDescReceived = thePrefs.m_bLogRatingDescReceived;	// do *not* use the according 'Get...' function here!
-	m_iLogSecureIdent = thePrefs.m_bLogSecureIdent;					// do *not* use the according 'Get...' function here!
-	m_iLogFilteredIPs = thePrefs.m_bLogFilteredIPs;					// do *not* use the according 'Get...' function here!
-	m_iLogFileSaving = thePrefs.m_bLogFileSaving;					// do *not* use the according 'Get...' function here!
+	if (thePrefs.GetEnableVerboseOptions())
+	{
+		m_iVerbose = thePrefs.m_bVerbose;
+		m_iDebugSourceExchange = thePrefs.m_bDebugSourceExchange;		// do *not* use the according 'Get...' function here!
+		m_iLogBannedClients = thePrefs.m_bLogBannedClients;				// do *not* use the according 'Get...' function here!
+		m_iLogRatingDescReceived = thePrefs.m_bLogRatingDescReceived;	// do *not* use the according 'Get...' function here!
+		m_iLogSecureIdent = thePrefs.m_bLogSecureIdent;					// do *not* use the according 'Get...' function here!
+		m_iLogFilteredIPs = thePrefs.m_bLogFilteredIPs;					// do *not* use the according 'Get...' function here!
+		m_iLogFileSaving = thePrefs.m_bLogFileSaving;					// do *not* use the according 'Get...' function here!
+	}
 	m_iLog2Disk = thePrefs.log2disk;
-	m_iDebug2Disk = thePrefs.debug2disk;							// do *not* use the according 'Get...' function here!
 	m_iDateFileNameLog = thePrefs.m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	m_iCreditSystem = thePrefs.m_bCreditSystem;
 	m_iCommitFiles = thePrefs.m_iCommitFiles;
@@ -354,13 +360,11 @@ BOOL CPPgTweaks::OnApply()
 		RevertReg();
 	}
 
-	thePrefs.m_bDebugSourceExchange = m_iDebugSourceExchange;
-	thePrefs.m_bLogBannedClients = m_iLogBannedClients;
-	thePrefs.m_bLogRatingDescReceived = m_iLogRatingDescReceived;
-	thePrefs.m_bLogSecureIdent = m_iLogSecureIdent;
-	thePrefs.m_bLogFilteredIPs = m_iLogFilteredIPs;
-	thePrefs.m_bLogFileSaving = m_iLogFileSaving;
-	thePrefs.m_bCreditSystem = m_iCreditSystem;
+	if (!thePrefs.log2disk && m_iLog2Disk)
+		theLog.Open();
+	else if (thePrefs.log2disk && !m_iLog2Disk)
+		theLog.Close();
+	thePrefs.log2disk = m_iLog2Disk;
 
 	//Morph Start - added by AndCycle, Date File Name Log
 	if(thePrefs.m_bDateFileNameLog != (m_iDateFileNameLog != 0)){
@@ -380,20 +384,25 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bDateFileNameLog = m_iDateFileNameLog;
 	//Morph End - added by AndCycle, Date File Name Log
 
-	if (!thePrefs.log2disk && m_iLog2Disk)
-		theLog.Open();
-	else if (thePrefs.log2disk && !m_iLog2Disk)
-		theLog.Close();
-	thePrefs.log2disk = m_iLog2Disk;
+	if (thePrefs.GetEnableVerboseOptions())
+	{
+		if (!thePrefs.GetDebug2Disk() && m_iVerbose && m_iDebug2Disk)
+			theVerboseLog.Open();
+		else if (thePrefs.GetDebug2Disk() && (!m_iVerbose || !m_iDebug2Disk))
+			theVerboseLog.Close();
+		thePrefs.debug2disk = m_iDebug2Disk;
 
-	if (!thePrefs.GetDebug2Disk() && m_iVerbose && m_iDebug2Disk)
-		theVerboseLog.Open();
-	else if (thePrefs.GetDebug2Disk() && (!m_iVerbose || !m_iDebug2Disk))
-		theVerboseLog.Close();
-	thePrefs.debug2disk = m_iDebug2Disk;
+		thePrefs.m_bDebugSourceExchange = m_iDebugSourceExchange;
+		thePrefs.m_bLogBannedClients = m_iLogBannedClients;
+		thePrefs.m_bLogRatingDescReceived = m_iLogRatingDescReceived;
+		thePrefs.m_bLogSecureIdent = m_iLogSecureIdent;
+		thePrefs.m_bLogFilteredIPs = m_iLogFilteredIPs;
+		thePrefs.m_bLogFileSaving = m_iLogFileSaving;
 
-	thePrefs.m_bVerbose = m_iVerbose; // store after related options were stored!
+		thePrefs.m_bVerbose = m_iVerbose; // store after related options were stored!
+	}
 
+	thePrefs.m_bCreditSystem = m_iCreditSystem;
 	thePrefs.m_iCommitFiles = m_iCommitFiles;
 	thePrefs.filterLANIPs = m_iFilterLANIPs;
 	thePrefs.m_iFileBufferSize = m_iFileBufferSize;
@@ -420,8 +429,11 @@ BOOL CPPgTweaks::OnApply()
 	// ZZ:UploadSpeedSense <--
 	*/
 
-    theApp.emuledlg->serverwnd->ToggleDebugWindow();
-	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
+	if (thePrefs.GetEnableVerboseOptions())
+	{
+    	theApp.emuledlg->serverwnd->ToggleDebugWindow();
+		theApp.emuledlg->serverwnd->UpdateLogTabSelection();
+	}
 	theApp.downloadqueue->CheckDiskspace();
 
 	SetModified(FALSE);
@@ -547,19 +559,21 @@ void CPPgTweaks::OnDestroy()
 
 LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == IDC_EXT_OPTS){
+	if (wParam == IDC_EXT_OPTS)
+	{
 		TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
-		if (pton->hItem == m_htiVerbose){
+		if (m_htiVerbose && pton->hItem == m_htiVerbose)
+		{
 			BOOL bCheck;
 			if (m_ctrlTreeOptions.GetCheckBox(m_htiVerbose, bCheck))
 			{
-				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, bCheck);
-				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, bCheck);
-				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, bCheck);
-				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, bCheck);
-				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, bCheck);
-				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, bCheck);
-				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, bCheck);
+				if (m_htiDebugSourceExchange)	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, bCheck);
+				if (m_htiLogBannedClients)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, bCheck);
+				if (m_htiLogRatingDescReceived) m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, bCheck);
+				if (m_htiLogSecureIdent)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, bCheck);
+				if (m_htiLogFilteredIPs)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, bCheck);
+				if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, bCheck);
+				if (m_htiDebug2Disk)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, bCheck);
 			}
 		}
 		SetModified();

@@ -24,6 +24,7 @@ class CPartFile;
 class CKnownFile;
 class CPublishKeywordList;
 class CSafeMemFile;
+class CServer;
 
 struct UnknownFile_Struct{
 	CString strName;
@@ -42,12 +43,13 @@ public:
 	void	SendListToServer();
 	void	Reload();
 	bool	SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd = false);
+	void	RepublishFile(CKnownFile* pFile);
 	void	SetOutputCtrl(CSharedFilesCtrl* in_ctrl);
 	void	RemoveFile(CKnownFile* toremove);
 	CKnownFile* GetFileByID(const uchar* filehash) const;
 	CKnownFile*	GetFileByIndex(int index);
 	bool	IsFilePtrInList(const CKnownFile* file) const;
-	void	CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, bool bForServer = true, bool bSendED2KTags = true);
+	void	CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, CServer* pServer, UINT uEmuleVer = 0);
 	uint64	GetDatasize(uint64 &pbytesLargest);
 	uint16	GetCount()	{return m_Files_map.GetCount(); }
 	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER: SafeHash

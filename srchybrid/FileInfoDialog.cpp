@@ -562,19 +562,20 @@ BOOL CFileInfoDialog::OnInitDialog()
 	CResizablePage::UpdateData(FALSE);
 	Localize();
 
-	SetDlgItemText(IDC_FORMAT, _T("Waiting..."));
-	SetDlgItemText(IDC_FILESIZE, _T("Waiting..."));
-	SetDlgItemText(IDC_LENGTH, _T("Waiting..."));
-	SetDlgItemText(IDC_VCODEC, _T("Waiting..."));
-	SetDlgItemText(IDC_VWIDTH, _T("Waiting..."));
-	SetDlgItemText(IDC_VHEIGHT, _T("Waiting..."));
-	SetDlgItemText(IDC_VFPS, _T("Waiting..."));
-	SetDlgItemText(IDC_VBITRATE, _T("Waiting..."));
-	SetDlgItemText(IDC_ACODEC, _T("Waiting..."));
-	SetDlgItemText(IDC_ACHANNEL, _T("Waiting..."));
-	SetDlgItemText(IDC_ASAMPLERATE, _T("Waiting..."));
-	SetDlgItemText(IDC_ABITRATE, _T("Waiting..."));
-	SetDlgItemText(IDC_FULL_FILE_INFO, _T("Waiting..."));
+	CString strWait = GetResString(IDS_FSTAT_WAITING);
+	SetDlgItemText(IDC_FORMAT, strWait);
+	SetDlgItemText(IDC_FILESIZE, strWait);
+	SetDlgItemText(IDC_LENGTH, strWait);
+	SetDlgItemText(IDC_VCODEC, strWait);
+	SetDlgItemText(IDC_VWIDTH, strWait);
+	SetDlgItemText(IDC_VHEIGHT, strWait);
+	SetDlgItemText(IDC_VFPS, strWait);
+	SetDlgItemText(IDC_VBITRATE, strWait);
+	SetDlgItemText(IDC_ACODEC, strWait);
+	SetDlgItemText(IDC_ACHANNEL, strWait);
+	SetDlgItemText(IDC_ASAMPLERATE, strWait);
+	SetDlgItemText(IDC_ABITRATE, strWait);
+	SetDlgItemText(IDC_FULL_FILE_INFO, strWait);
 
 	CGetMediaInfoThread* pThread = (CGetMediaInfoThread*)AfxBeginThread(RUNTIME_CLASS(CGetMediaInfoThread), THREAD_PRIORITY_NORMAL, 0, CREATE_SUSPENDED);
 	if (pThread)
@@ -1665,6 +1666,8 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 		// since we have a thread here, this should not be a performance problem any longer.
 //		EED2KFileType eFileType = GetED2KFileTypeID(pFile->GetFileName());
 //		if ((eFileType == ED2KFT_AUDIO || eFileType == ED2KFT_VIDEO) && (!pFile->IsPartFile() || pFile->GetFileSize() >= 32768))
+		EED2KFileType eFileType = GetED2KFileTypeID(pFile->GetFileName());
+		if (eFileType == ED2KFT_AUDIO || eFileType == ED2KFT_VIDEO)
 		{
 			// Use MediaInfo only for non AVI files.. Reading potentially broken AVI files with the VfW API (as MediaInfo
 			// is doing) is rather dangerous.

@@ -162,6 +162,20 @@ static const struct {
 	{ 0xFF,					_T("Source type") }
 };
 
+CString GetMetaTagName(UINT uTagID)
+{
+	CString strName;
+	for (int i = 0; i < ARRSIZE(_aTagNames); i++){
+		if (uTagID == _aTagNames[i].uID){
+			strName = _aTagNames[i].pszName;
+			break;
+		}
+	}
+	if (strName.IsEmpty())
+		strName.Format(_T("Tag0x%02X"), uTagID);
+	return strName;
+}
+
 CString GetName(const CTag* pTag)
 {
 	CString strName;

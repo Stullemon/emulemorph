@@ -428,9 +428,8 @@ void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVE, GetResString(IDS_REMOVETHIS));
 	ServerMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEALL, GetResString(IDS_REMOVEALL));
-	ServerMenu.AppendMenu(MF_SEPARATOR);
-
 	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_GETED2KLINK, GetResString(IDS_DL_LINK1));
+	ServerMenu.AppendMenu(MF_STRING | (theApp.IsEd2kServerLinkInClipboard() ? MF_ENABLED : MF_GRAYED), MP_PASTE, GetResString(IDS_PASTE));
 
 	ServerMenu.AppendMenu(MF_SEPARATOR);
 	ServerMenu.AppendMenu(MF_ENABLED | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND));
@@ -462,6 +461,11 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	else if (wParam == MP_FIND)
 	{
 		OnFindStart();
+		return TRUE;
+	}
+	else if (wParam == MP_PASTE)
+	{
+		theApp.emuledlg->serverwnd->PasteServerFromClipboard();
 		return TRUE;
 	}
 

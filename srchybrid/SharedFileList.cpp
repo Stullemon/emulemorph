@@ -15,6 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <io.h>
 #include "emule.h"
 #include "SharedFileList.h"
 #include "KnownFileList.h"
@@ -346,7 +347,8 @@ void CSharedFileList::FindSharedFiles()
 		m_Files_map.GetNextAssoc(pos, key, cur_file);
 		if (cur_file->IsKindOf(RUNTIME_CLASS(CPartFile)) 
 			&& !theApp.downloadqueue->IsPartFile(cur_file) 
-			&& !theApp.knownfiles->IsFilePtrInList(cur_file))
+				&& !theApp.knownfiles->IsFilePtrInList(cur_file)
+				&& _taccess(cur_file->GetFilePath(), 0) == 0)
 			continue;
 		m_Files_map.RemoveKey(key);
 	}
@@ -584,6 +586,16 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 	return bAdded;
 }
 
+void CSharedFileList::RepublishFile(CKnownFile* pFile)
+{
+	CServer* pCurServer = server->GetCurrentServer();
+	if (pCurServer && (pCurServer->GetTCPFlags() & SRV_TCPFLG_COMPRESSION))
+	{
+		m_lastPublishED2KFlag = true;
+		pFile->SetPublishedED2K(false); // FIXME: this creates a wrong 'No' for the ed2k shared info in the listview until the file is shared again.
+	}
+}
+
 bool CSharedFileList::AddFile(CKnownFile* pFile)
 {
 	CCKey key(pFile->GetFileHash());
@@ -726,7 +738,7 @@ void CSharedFileList::SendListToServer(){
 	{
 		count++;
 		CKnownFile* file = sortedList.GetNext(pos);
-		CreateOfferedFilePacket(file, &files);
+		CreateOfferedFilePacket(file, &files, pCurServer);
 		file->SetPublishedED2K(true);
 	}
 	sortedList.RemoveAll();
@@ -777,31 +789,53 @@ void CSharedFileList::ClearED2KPublishInfo(){
 	}
 }
 
-void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, bool bForServer, bool bSendED2KTags)
+void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, 
+											  CServer* pServer, UINT uEmuleVer)
 {
 	// NOTE: This function is used for creating the offered file packet for Servers _and_ for Clients..
 	files->WriteHash16(cur_file->GetFileHash());
 
-	// This function is used for offering files to the local server and for sending
-	// shared files to some other client. In each case we send our IP+Port only, if
-	// we have a HighID.
-	bool bOfferIP = false;
-	if (bForServer){
-		// check eD2K ID state
-		bOfferIP = (theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID());
+	// *) This function is used for offering files to the local server and for sending
+	//    shared files to some other client. In each case we send our IP+Port only, if
+	//    we have a HighID.
+	// *) Newer eservers also support 2 special IP+port values which are used to hold basic file status info.
+	uint32 nClientID = 0;
+	uint16 nClientPort = 0;
+	if (pServer)
+	{
+		// we use the 'TCP-compression' server feature flag as indicator for a 'newer' server.
+		if (pServer->GetTCPFlags() & SRV_TCPFLG_COMPRESSION)
+		{
+			if (cur_file->IsPartFile())
+			{
+				// publishing an incomplete file
+				nClientID = 0xFCFCFCFC;
+				nClientPort = 0xFCFC;
+			}
+			else
+			{
+				// publishing a complete file
+				nClientID = 0xFBFBFBFB;
+				nClientPort = 0xFBFB;
+			}
+		}
+		else
+		{
+			// check eD2K ID state
+			if (theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID())
+			{
+				nClientID = theApp.GetID();
+				nClientPort = thePrefs.GetPort();
+			}
+		}
 	}
-	else{
-		bOfferIP = (theApp.IsConnected() && !theApp.IsFirewalled());
-	}
-	uint32 nClientID;
-	uint16 nClientPort;
-	if (bOfferIP){
-		nClientID = 0;
-		nClientPort = 0;
-	}
-	else{
-		nClientID = theApp.GetID();
-		nClientPort = thePrefs.GetPort();
+	else
+	{
+		if (theApp.IsConnected() && !theApp.IsFirewalled())
+		{
+			nClientID = theApp.GetID();
+			nClientPort = thePrefs.GetPort();
+		}
 	}
 	files->WriteUInt32(nClientID);
 	files->WriteUInt16(nClientPort);
@@ -831,58 +865,84 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 	// only send verified meta data to servers/clients
 	if (cur_file->GetMetaDataVer() > 0)
 	{
-	static const struct
-	{
-		bool	bSendToServer;
-		uint8	nName;
-		uint8	nED2KType;
-		LPCSTR	pszED2KName;
-	} _aMetaTags[] = 
-	{
-		// Artist, Album and Title are disabled because they should be already part of the filename
-		// and would therefore be redundant information sent to the servers.. and the servers count the
-		// amount of sent data!
-		{ false, FT_MEDIA_ARTIST,	2, FT_ED2K_MEDIA_ARTIST },
-		{ false, FT_MEDIA_ALBUM,	2, FT_ED2K_MEDIA_ALBUM },
-		{ false, FT_MEDIA_TITLE,	2, FT_ED2K_MEDIA_TITLE },
-		{ true,  FT_MEDIA_LENGTH,	2, FT_ED2K_MEDIA_LENGTH },
-		{ true,  FT_MEDIA_BITRATE,	3, FT_ED2K_MEDIA_BITRATE },
-		{ true,  FT_MEDIA_CODEC,	2, FT_ED2K_MEDIA_CODEC }
-	};
-	for (int i = 0; i < ARRSIZE(_aMetaTags); i++){
-		if (bForServer && !_aMetaTags[i].bSendToServer)
-			continue;
-		CTag* pTag = cur_file->GetTag(_aMetaTags[i].nName);
-		if (pTag != NULL)
+		static const struct
 		{
-			// skip string tags with empty string values
-			if (pTag->tag.type == 2 && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
+			bool	bSendToServer;
+			uint8	nName;
+			uint8	nED2KType;
+			LPCSTR	pszED2KName;
+		} _aMetaTags[] = 
+		{
+			// Artist, Album and Title are disabled because they should be already part of the filename
+			// and would therefore be redundant information sent to the servers.. and the servers count the
+			// amount of sent data!
+			{ false, FT_MEDIA_ARTIST,	2, FT_ED2K_MEDIA_ARTIST },
+			{ false, FT_MEDIA_ALBUM,	2, FT_ED2K_MEDIA_ALBUM },
+			{ false, FT_MEDIA_TITLE,	2, FT_ED2K_MEDIA_TITLE },
+			{ true,  FT_MEDIA_LENGTH,	2, FT_ED2K_MEDIA_LENGTH },
+			{ true,  FT_MEDIA_BITRATE,	3, FT_ED2K_MEDIA_BITRATE },
+			{ true,  FT_MEDIA_CODEC,	2, FT_ED2K_MEDIA_CODEC }
+		};
+		for (int i = 0; i < ARRSIZE(_aMetaTags); i++)
+		{
+			if (pServer!=NULL && !_aMetaTags[i].bSendToServer)
 				continue;
-			
-			// skip integer tags with '0' values
-			if (pTag->tag.type == 3 && pTag->tag.intvalue == 0)
-				continue;
-			
-			if (bSendED2KTags)
+			CTag* pTag = cur_file->GetTag(_aMetaTags[i].nName);
+			if (pTag != NULL)
 			{
+				// skip string tags with empty string values
+				if (pTag->tag.type == 2 && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
+					continue;
+				
+				// skip integer tags with '0' values
+				if (pTag->tag.type == 3 && pTag->tag.intvalue == 0)
+					continue;
+				
 				if (_aMetaTags[i].nED2KType == 2 && pTag->tag.type == 2)
 					tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.stringvalue));
 				else if (_aMetaTags[i].nED2KType == 3 && pTag->tag.type == 3)
 					tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.intvalue));
-				else if (_aMetaTags[i].nName == FT_MEDIA_LENGTH && pTag->tag.type == 3){
+				else if (_aMetaTags[i].nName == FT_MEDIA_LENGTH && pTag->tag.type == 3)
+				{
 					ASSERT( _aMetaTags[i].nED2KType == 2 );
-					CStringA strValue;
-					SecToTimeLength(pTag->tag.intvalue, strValue);
-					tags.Add(new CTag(_aMetaTags[i].pszED2KName, strValue));
+					// All 'eserver' versions and eMule versions >= 0.42.4 support the media length tag with type 'integer'
+					if (   pServer!=NULL && (pServer->GetTCPFlags() & SRV_TCPFLG_COMPRESSION)
+						|| uEmuleVer >= MAKE_CLIENT_VERSION(0,42,4))
+					{
+						tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.intvalue));
+					}
+					else
+					{
+						CStringA strValue;
+						SecToTimeLength(pTag->tag.intvalue, strValue);
+						tags.Add(new CTag(_aMetaTags[i].pszED2KName, strValue));
+					}
 				}
 				else
 					ASSERT(0);
 			}
-			else{
-				tags.Add(new CTag(pTag->tag));
-			}
 		}
 	}
+
+	// send nr. of complete sources to remote client.. low priority thingy, this is only here to have a chance to test 
+	// the FT_COMPLETE_SOURCES tag in search results until the eservers are supporting it..
+	if (pServer == NULL && uEmuleVer >= MAKE_CLIENT_VERSION(0,42,4))
+	{
+		UINT uCompleteSources = -1;
+		if (cur_file->m_nCompleteSourcesCountLo == 0)
+		{
+			if (cur_file->m_nCompleteSourcesCountHi == 0)
+				;
+			else
+				uCompleteSources = cur_file->m_nCompleteSourcesCountHi / 2;
+		}
+		else if (cur_file->m_nCompleteSourcesCountLo == cur_file->m_nCompleteSourcesCountHi)
+			uCompleteSources = cur_file->m_nCompleteSourcesCountLo;
+		else
+			uCompleteSources = cur_file->m_nCompleteSourcesCountLo + (cur_file->m_nCompleteSourcesCountHi - cur_file->m_nCompleteSourcesCountLo) / 2;
+
+		if (uCompleteSources != -1)
+			tags.Add(new CTag(FT_COMPLETE_SOURCES, uCompleteSources));
 	}
 
 	files->WriteUInt32(tags.GetSize());
@@ -1076,7 +1136,7 @@ void CSharedFileList::Process()
 	{
 		return;
 	}
-	this->SendListToServer();
+	SendListToServer();
 	m_lastPublishED2K = ::GetTickCount();
 }
 

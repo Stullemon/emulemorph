@@ -515,10 +515,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					case 10:{
 						if (file->m_nCompleteSourcesCountLo == 0){
-							if (file->m_nCompleteSourcesCountHi == 0)
-								buffer= "?";
-							else
-								buffer.Format("< %u", file->m_nCompleteSourcesCountHi);
+							buffer.Format("< %u", file->m_nCompleteSourcesCountHi);
 						}
 						else if (file->m_nCompleteSourcesCountLo == file->m_nCompleteSourcesCountHi)
 							buffer.Format("%u", file->m_nCompleteSourcesCountLo);
@@ -947,7 +944,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	CMenu WebMenu;
 	WebMenu.CreateMenu();
-	int iWebMenuEntries = theWebServices.GetAllMenuEntries(WebMenu);
+	int iWebMenuEntries = theWebServices.GetFileMenuEntries(WebMenu);
 	UINT flag2 = (iWebMenuEntries == 0 || iSelectedItems != 1) ? MF_GRAYED : MF_STRING;
 	m_SharedFilesMenu.AppendMenu(flag2 | MF_POPUP, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
 	
@@ -1057,6 +1054,13 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					CString newname = inputbox.GetInput();
 					if (!inputbox.WasCancelled() && newname.GetLength()>0)
 					{
+						// at least prevent users from specifying something like "..\dir\file"
+						static const TCHAR _szInvFileNameChars[] = _T("\\/:*?\"<>|");
+						if (newname.FindOneOf(_szInvFileNameChars) != -1){
+							AfxMessageBox(GetErrorMessage(ERROR_BAD_PATHNAME));
+							break;
+						}
+
 						CString newpath;
 						PathCombine(newpath.GetBuffer(MAX_PATH), file->GetPath(), newname);
 						newpath.ReleaseBuffer();

@@ -19,8 +19,9 @@
 #include "SearchListCtrl.h"
 #include "ClosableTabCtrl.h"
 #include "IconStatic.h"
-#include "EditX.h"
+#include "RichEditCtrlX.h"
 #include "ComboBoxEx2.h"
+#include "ListCtrlEditable.h"
 
 class CCustomAutoComplete;
 class CJigleSOAPThread;
@@ -55,9 +56,14 @@ struct SSearchParams
 		bClientSharedFiles = false;
 		ulMinSize = 0;
 		ulMaxSize = 0;
-		iAvailability = -1;
+		uAvailability = 0;
+		uComplete = 0;
+		ulMinBitrate = 0;
+		ulMinLength = 0;
+		bMatchKeywords = false;
 	}
 	DWORD dwSearchID;
+	bool bClientSharedFiles;
 	CString strExpression;
 	ESearchType eType;
 	CString strFileType;
@@ -65,10 +71,16 @@ struct SSearchParams
 	ULONG ulMinSize;
 	CString strMaxSize;
 	ULONG ulMaxSize;
-	int iAvailability;
+	UINT uAvailability;
 	CString strExtension;
+	UINT uComplete;
+	CString strCodec;
+	ULONG ulMinBitrate;
+	ULONG ulMinLength;
+	CString strTitle;
+	CString strAlbum;
+	CString strArtist;
 	bool bMatchKeywords;
-	bool bClientSharedFiles;
 };
 
 
@@ -104,18 +116,8 @@ public:
 	void	LocalSearchEnd(uint16 count, bool bMoreResultsAvailable);
 	void	AddUDPResult(uint16 count);
 
-	void	SearchClipBoard();
-	// khaos::categorymod+ Changed Param: uint8 cat
-	void	AddEd2kLinksToDownload(CString strlink, int theCat = -1);
-	// Removed overloaded function
-	/*
-	void	AddEd2kLinksToDownload(CString strlink)	{AddEd2kLinksToDownload(strlink,m_cattabs.GetCurSel());}
-	*/
-	// khaos::categorymod-
-	void	IgnoreClipBoardLinks(CString strlink)		{m_lastclpbrd = strlink; }
 	bool	CreateNewTab(SSearchParams* pParams);
 	void	ShowSearchSelector(bool visible);
-	
 	//MORPH - Removed by SiRoB, Khaos Category
 	/*
 	uint8	GetSelectedCat()							{return m_cattabs.GetCurSel();}
@@ -124,6 +126,7 @@ public:
 	void	SaveAllSettings();
 	BOOL	SaveSearchStrings();
 	LRESULT ProcessJigleSearchResponse(WPARAM wParam, LPARAM lParam);
+	void	ResetHistory();
 
 protected:
 	void StartNewSearch(bool bKademlia = false);
@@ -152,10 +155,11 @@ protected:
 	afx_msg void OnBnClickedSdownload();
 	afx_msg void OnBnClickedClearall();
 	afx_msg void OnBnClickedSearchReset();
-	afx_msg void OnEnKillfocusElink();
 	afx_msg void OnSearchKeyDown();
 	afx_msg void OnDDClicked();
 	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnClose();
 
 private:
 	Packet*		searchpacket;		
@@ -166,17 +170,15 @@ private:
 	uint16		servercount;
 	bool		globsearch;
 	uint32		m_nSearchID;
-	CEditX		m_ctlName;
+	CRichEditCtrlX m_ctlName;
 	CComboBoxEx2 methodBox;
 	CComboBox	Stypebox;
+	CEditableListCtrl m_ctlOpts;
 	CImageList	m_imlSearchResults;
 	CTabCtrl	m_cattabs;
-	CString		m_lastclpbrd;
-	bool		m_guardCBPrompt;
 	CCustomAutoComplete* m_pacSearchString;
 	HICON icon_search;
 	CIconStatic m_ctrlSearchFrm;
-	CIconStatic m_ctrlDirectDlFrm;
 	CImageList m_imlSearchMethods;
 	LCID		m_uLangID;
 	CButton		m_ctlMore;
@@ -189,5 +191,7 @@ private:
 
 bool GetSearchPacket(CSafeMemFile* data,
 					 const CString& strSearchString, const CString& strLocalizedType,
-					 ULONG ulMinSize, ULONG ulMaxSize, int iAvailability, 
-					 const CString& strExtension, bool bAllowEmptySearchString);
+					 ULONG ulMinSize, ULONG ulMaxSize, UINT uAvailability, const CString& strExtension, 
+					 UINT uComplete, ULONG ulMinBitrate, ULONG ulMinLength, const CString& strCodec,
+					 const CString& strTitle, const CString& strAlbum, const CString& strArtist,
+					 bool bAllowEmptySearchString, bool bEd2k);

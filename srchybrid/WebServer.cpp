@@ -228,7 +228,8 @@ void CWebServer::_SetSharedFilePriority(CString hash, uint8 priority)
 {	
 	CKnownFile* cur_file;
 	uchar fileid[16];
-	DecodeBase16(hash.GetBuffer(),hash.GetLength(),fileid);
+	if (hash.GetLength()!=32 || !DecodeBase16(hash.GetBuffer(),hash.GetLength(),fileid,ARRSIZE(fileid)))
+		return;
 
 	cur_file=theApp.sharedfiles->GetFileByID(fileid);
 	
@@ -946,7 +947,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 	if (_ParseURL(Data.sURL, "c") != "" && IsSessionAdmin(Data,sSession)) 
 	{
 		CString HTTPTemp = _ParseURL(Data.sURL, "c");
-		theApp.emuledlg->searchwnd->AddEd2kLinksToDownload(HTTPTemp,cat);
+		theApp.AddEd2kLinksToDownload(HTTPTemp,cat);
 	}
 
 	if (_ParseURL(Data.sURL, "op") != "" &&
@@ -2539,8 +2540,8 @@ CString CWebServer::_GetDownloadGraph(ThreadData Data,CString filehash)
 	progresscolor[11]="greenpercent.gif";
 
 	uchar fileid[16];
-	DecodeBase16(filehash.GetBuffer(),filehash.GetLength(),fileid);
-	
+	if (filehash.GetLength()!=32 || !DecodeBase16(filehash.GetBuffer(),filehash.GetLength(),fileid,ARRSIZE(fileid)))
+		return "";
 
 	CString Out = "";
 	CString temp;
@@ -2552,7 +2553,7 @@ CString CWebServer::_GetDownloadGraph(ThreadData Data,CString filehash)
 		temp.Format(pThis->m_Templates.sProgressbarImgs,progresscolor[10],pThis->m_Templates.iProgressbarWidth);
 		Out+=temp;
 	}
-		else
+	else
 	{
 		CString s_ChunkBar=cur_file->GetProgressString(pThis->m_Templates.iProgressbarWidth);
 
@@ -2599,8 +2600,8 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 		while (resToken != "")
 		{
 			uchar fileid[16];
-			DecodeBase16(resToken.GetBuffer(),resToken.GetLength(),fileid);
-			theApp.searchlist->AddFileToDownloadByHash(fileid,cat);
+			if (resToken.GetLength()==32 && DecodeBase16(resToken.GetBuffer(),resToken.GetLength(),fileid,ARRSIZE(fileid)))
+				theApp.searchlist->AddFileToDownloadByHash(fileid,cat);
 			resToken= downloads.Tokenize("|",curPos);
 		}
 	}
@@ -2618,7 +2619,7 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 		pParams->strFileType = _ParseURL(Data.sURL, "type");
 		pParams->ulMinSize = atol(_ParseURL(Data.sURL, "min"))*1048576;
 		pParams->ulMaxSize = atol(_ParseURL(Data.sURL, "max"))*1048576;
-		pParams->iAvailability = (_ParseURL(Data.sURL, "avail")=="")?-1:atoi(_ParseURL(Data.sURL, "avail"));
+		pParams->uAvailability = (_ParseURL(Data.sURL, "avail")=="")?-1:atoi(_ParseURL(Data.sURL, "avail"));
 		pParams->strExtension = _ParseURL(Data.sURL, "ext");
 		if (method == "kademlia")
 			pParams->eType = SearchTypeKademlia;
@@ -2719,6 +2720,8 @@ int CWebServer::UpdateSessionCount() {
 		CTimeSpan ts = CTime::GetCurrentTime() - m_Params.Sessions[i].startTime;
 		if(ts.GetTotalSeconds() > SESSION_TIMEOUT_SECS) {
 			m_Params.Sessions.RemoveAt(i);
+			theApp.emuledlg->serverwnd->UpdateMyInfo();
+			AddLogLine(true,GetResString(IDS_WEB_SESSIONEND));
 		}
 		else
 			i++;

@@ -85,6 +85,8 @@ public:
 	bool	IsStaticMember() const					{return staticservermember;}
 	uint32	GetChallenge() const					{return challenge;}
 	void	SetChallenge(uint32 in_challenge)		{challenge = in_challenge;}
+	uint32	GetDescReqChallenge() const				{return m_uDescReqChallenge;}
+	void	SetDescReqChallenge(uint32 uDescReqChallenge) {m_uDescReqChallenge = uDescReqChallenge;}
 	uint32	GetSoftFiles() const					{return softfiles;}
 	void	SetSoftFiles(uint32 in_softfiles)		{softfiles = in_softfiles;}
 	uint32	GetHardFiles() const					{return hardfiles;}
@@ -98,6 +100,7 @@ public:
 
 private:
 	uint32		challenge;
+	uint32		m_uDescReqChallenge;
 	uint32		lastpinged; //This is to get the ping delay.
 	uint32		lastpingedtime; //This is to decided when we retry the ping.
 	uint32		lastdescpingedcout;

@@ -275,16 +275,16 @@ BOOL Wizard::OnInitDialog(){
 	m_provider.InsertItem(6,"DSL");m_provider.SetItemText(6,1,"512");m_provider.SetItemText(6,2,"91");
 	m_provider.InsertItem(7 ,"DSL");m_provider.SetItemText(7,1,"512");m_provider.SetItemText(7,2,"128");
 	m_provider.InsertItem(8,"DSL");m_provider.SetItemText(8,1,"640");m_provider.SetItemText(8,2,"90");
-	m_provider.InsertItem(9,"DSL (T-DSL, newDSL, 1&1-DSL");m_provider.SetItemText(9,1,"768");m_provider.SetItemText(9,2,"128");
-	m_provider.InsertItem(10,"DSL (QDSL, NGI-DSL");m_provider.SetItemText(10,1,"1024");m_provider.SetItemText(10,2,"256");
-	m_provider.InsertItem(11,"DSL 1500 ('TDSL 1500')");m_provider.SetItemText(11,1,"1500");m_provider.SetItemText(11,2,"192");
-	m_provider.InsertItem(12,"DSL 1600");m_provider.SetItemText(12,1,"1600");m_provider.SetItemText(12,2,"90");
-	m_provider.InsertItem(13,"DSL 2000");m_provider.SetItemText(13,1,"2000");m_provider.SetItemText(13,2,"300");
-	m_provider.InsertItem(14,"Cable");m_provider.SetItemText(14,1,"187");m_provider.SetItemText(14,2,"32");
-	m_provider.InsertItem(15,"Cable");m_provider.SetItemText(15,1,"187");m_provider.SetItemText(15,2,"64");
-	m_provider.InsertItem(16,"T1");m_provider.SetItemText(16,1,"1500");m_provider.SetItemText(16,2,"1500");
-	m_provider.InsertItem(17,"T3+");m_provider.SetItemText(17,1,"44 Mbps");m_provider.SetItemText(17,2,"44 Mbps");
-
+	m_provider.InsertItem(9,"DSL (newDSL, 1&1-DSL");m_provider.SetItemText(9,1,"768");m_provider.SetItemText(9,2,"128");
+	m_provider.InsertItem(10,"DSL (T-DSL 1000)");m_provider.SetItemText(10,1,"1000");m_provider.SetItemText(10,2,"128");
+	m_provider.InsertItem(11,"DSL (QDSL, NGI-DSL");m_provider.SetItemText(11,1,"1024");m_provider.SetItemText(11,2,"256");
+	m_provider.InsertItem(12,"DSL 1500 ('TDSL 1500')");m_provider.SetItemText(12,1,"1500");m_provider.SetItemText(12,2,"192");
+	m_provider.InsertItem(13,"DSL 1600");m_provider.SetItemText(13,1,"1600");m_provider.SetItemText(13,2,"90");
+	m_provider.InsertItem(14,"DSL 2000");m_provider.SetItemText(14,1,"2000");m_provider.SetItemText(14,2,"300");
+	m_provider.InsertItem(15,"Cable");m_provider.SetItemText(15,1,"187");m_provider.SetItemText(15,2,"32");
+	m_provider.InsertItem(16,"Cable");m_provider.SetItemText(16,1,"187");m_provider.SetItemText(16,2,"64");
+	m_provider.InsertItem(17,"T1");m_provider.SetItemText(17,1,"1500");m_provider.SetItemText(17,2,"1500");
+	m_provider.InsertItem(18,"T3+");m_provider.SetItemText(18,1,"44 Mbps");m_provider.SetItemText(18,2,"44 Mbps");
 
 	m_provider.SetSelectionMark(0);
 
@@ -337,14 +337,15 @@ void Wizard::OnNMClickProviders(NMHDR *pNMHDR, LRESULT *pResult)
 		case 7 : down=512;up=128; break;
 		case 8 : down=640;up=90; break;
 		case 9 : down=768;up=128; break;
-		case 10 : down=1024;up=256; break;
-		case 11 : down=1500;up=192; break;
-		case 12: down=1600;up=90; break;
-		case 13: down=2000;up=300; break;
-		case 14: down=187;up=32; break;
-		case 15: down=187;up=64; break;
-		case 16: down=1500;up=1500; break;
-		case 17: down=44000;up=44000; break;
+		case 10 : down=1000;up=128; break;
+		case 11 : down=1024;up=256; break;
+		case 12 : down=1500;up=192; break;
+		case 13: down=1600;up=90; break;
+		case 14: down=2000;up=300; break;
+		case 15: down=187;up=32; break;
+		case 16: down=187;up=64; break;
+		case 17: down=1500;up=1500; break;
+		case 18: down=44000;up=44000; break;
 		
 		default: return;
 	}

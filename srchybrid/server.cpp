@@ -56,7 +56,7 @@ CServer::CServer(const ServerMet_Struct* in_data)
 	lastdescpingedcout = 0;
 	m_uTCPFlags = 0;
 	m_uUDPFlags = 0;
-
+	m_uDescReqChallenge = 0;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
@@ -94,7 +94,7 @@ CServer::CServer(uint16 in_port, LPCSTR i_addr)
 	lastdescpingedcout = 0;
 	m_uTCPFlags = 0;
 	m_uUDPFlags = 0;
-
+	m_uDescReqChallenge = 0;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
@@ -137,7 +137,7 @@ CServer::CServer(const CServer* pOld)
 	m_strVersion = pOld->m_strVersion;
 	m_uTCPFlags = pOld->m_uTCPFlags;
 	m_uUDPFlags = pOld->m_uUDPFlags;
-
+	m_uDescReqChallenge = pOld->m_uDescReqChallenge;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
@@ -209,6 +209,8 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 	case ST_VERSION:
 		if (tag->tag.type == 2)
 			m_strVersion = tag->tag.stringvalue;
+		else if (tag->tag.type == 3)
+			m_strVersion.Format(_T("%u.%u"), tag->tag.intvalue >> 16, tag->tag.intvalue & 0xFFFF);
 		delete tag;
 		break;
 	case ST_UDPFLAGS:

@@ -25,6 +25,7 @@
 #include "SafeFile.h"
 #include "OtherFunctions.h"
 #include "UpDownClient.h"
+#include "DownloadQueue.h"
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #endif
@@ -214,7 +215,7 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 	{
 		TRACE("%s: File already in known file list: %s \"%s\" \"%s\"\n", __FUNCTION__, md4str(pFileInMap->GetFileHash()), pFileInMap->GetFileName(), pFileInMap->GetFilePath());
 		TRACE("%s: Old entry replaced with:         %s \"%s\" \"%s\"\n", __FUNCTION__, md4str(toadd->GetFileHash()), toadd->GetFileName(), toadd->GetFilePath());
-#if 0
+#if 1
 		// if we hash files which are already in known file list and add them later (when the hashing thread is finished),
 		// we can not delete any already available entry from known files list. that entry can already be used by the
 		// shared file list -> crash.
@@ -232,13 +233,20 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 		}
 		//Double check to make sure this is the same file as it's possible that a two files have the same hash.
 		//Maybe in the furture we can change the client to not just use Hash as a key throughout the entire client..
+		ASSERT( toadd->GetFileSize() == pFileInMap->GetFileSize() );
+		ASSERT( toadd != pFileInMap );
 		if( toadd->GetFileSize() == pFileInMap->GetFileSize() )
 			toadd->statistic.MergeFileStats( &pFileInMap->statistic );
+
+		ASSERT( theApp.sharedfiles==NULL || !theApp.sharedfiles->IsFilePtrInList(pFileInMap) );
+		ASSERT( theApp.downloadqueue==NULL || !theApp.downloadqueue->IsPartFile(pFileInMap) );
 		delete pFileInMap;
 #else
 		// if the new entry is already in list, update the stats and return false, but do not delete the entry which is
 		// alreay in known file list!
-		if (toadd->GetFileSize() == pFileInMap->GetFileSize())
+		ASSERT( toadd->GetFileSize() == pFileInMap->GetFileSize() );
+		ASSERT( toadd != pFileInMap );
+		if (toadd->GetFileSize() == pFileInMap->GetFileSize() && toadd != pFileInMap)
 		{
 			pFileInMap->statistic.MergeFileStats(&toadd->statistic);
 			pFileInMap->SetFileName(toadd->GetFileName(), false);
@@ -246,6 +254,8 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 			pFileInMap->SetFilePath(toadd->GetFilePath());
 			pFileInMap->date = toadd->date;
 		}
+		ASSERT( !theApp.sharedfiles->IsFilePtrInList(pFileInMap) );
+		ASSERT( theApp.sharedfiles->IsFilePtrInList(toadd) );
 		return false;
 #endif
 	}

@@ -153,7 +153,7 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 
 	InsertColumn(0,GetResString(IDS_DL_FILENAME),LVCFMT_LEFT,250);
 	InsertColumn(1,GetResString(IDS_DL_SIZE),LVCFMT_LEFT,70);
-	InsertColumn(2,GetResString(IDS_SEARCHAVAIL) + _T(" (") + GetResString(IDS_DL_SOURCES) + _T(')'),LVCFMT_LEFT,50);
+	InsertColumn(2,GetResString(IDS_SEARCHAVAIL) + _T("/") + GetResString(IDS_COMPLETE) + _T(" (") + GetResString(IDS_DL_SOURCES) + _T(')'),LVCFMT_LEFT,50);
 	InsertColumn(3,GetResString(IDS_TYPE),LVCFMT_LEFT,65);
 	InsertColumn(4,GetResString(IDS_FILEID),LVCFMT_LEFT,220);
 	InsertColumn(5,GetResString(IDS_ARTIST),LVCFMT_LEFT,100);
@@ -200,7 +200,7 @@ void CSearchListCtrl::Localize()
 		switch (icol) {
 			case 0: strRes = GetResString(IDS_DL_FILENAME); break;
 			case 1: strRes = GetResString(IDS_DL_SIZE); break;
-			case 2: strRes = GetResString(IDS_SEARCHAVAIL) + _T(" (") + GetResString(IDS_DL_SOURCES) + _T(')'); break;
+			case 2: strRes = GetResString(IDS_SEARCHAVAIL) + _T("/") + GetResString(IDS_COMPLETE) + _T(" (") + GetResString(IDS_DL_SOURCES) + _T(')'); break;
 			case 3: strRes = GetResString(IDS_TYPE); break;
 			case 4: strRes = GetResString(IDS_FILEID); break;
 			case 5: strRes = GetResString(IDS_ARTIST); break;
@@ -284,9 +284,12 @@ void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 	//wrong item contents (which are stored in the listview items right here in this function).
 
 	int itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),toshow->GetFileName(),0,0,0,(LPARAM)toshow);
-	TCHAR cbuffer[50];
+	TCHAR cbuffer[80];
 	SetItemText(itemnr,1,CastItoXBytes(toshow->GetFileSize()));
-	_itot(toshow->GetIntTagValue(FT_SOURCES),cbuffer,10);
+	_itot(toshow->GetSourceCount(),cbuffer,10);
+	uint32 uCompleteSources;
+	if (toshow->GetIntTagValue(FT_COMPLETE_SOURCES, uCompleteSources))
+		_sntprintf(cbuffer,ARRSIZE(cbuffer),_T("%s/%u"),cbuffer,uCompleteSources);
 	int iClients = toshow->GetClientsCount();
 	if (iClients)
 		_sntprintf(cbuffer,ARRSIZE(cbuffer),_T("%s (%u)"),cbuffer,iClients);
@@ -331,11 +334,15 @@ void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
 	find.lParam = (LPARAM)toupdate;
 	int index = FindItem(&find);
 	if (index != (-1)){
-		TCHAR buffer[50];
-		if (toupdate->GetClientsCount())
-			_sntprintf(buffer,ARRSIZE(buffer),_T("%u (%u)"),toupdate->GetSourceCount(),toupdate->GetClientsCount());
-		else 
-			_itot(toupdate->GetSourceCount(),buffer,10);
+		CString buffer;
+		buffer.Format(_T("%u"), toupdate->GetSourceCount());
+		uint32 uCompleteSources;
+		if (toupdate->GetIntTagValue(FT_COMPLETE_SOURCES, uCompleteSources))
+			buffer.AppendFormat(_T("/%u"), uCompleteSources);
+		int iClientsCount = toupdate->GetClientsCount();
+		if (iClientsCount)
+			buffer.AppendFormat(_T(" (%u)"), iClientsCount);
+
 		SetItemText(index,2,buffer);
 
 		uint16 maxhitsname = (uint16)-1;
@@ -583,7 +590,7 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	
 	CMenu WebMenu;
 	WebMenu.CreateMenu();
-	int iWebMenuEntries = theWebServices.GetAllMenuEntries(WebMenu);
+	int iWebMenuEntries = theWebServices.GetFileMenuEntries(WebMenu);
 	UINT flag2 = (iWebMenuEntries == 0 || iSelected != 1) ? MF_GRAYED : MF_STRING;
 	m_SearchFileMenu.AppendMenu(MF_POPUP | flag2, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
 	
@@ -649,7 +656,9 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					while (GetFirstSelectedItemPosition()!=NULL) 
 					{
 					POSITION pos = GetFirstSelectedItemPosition();
-					theApp.searchlist->RemoveResult((CSearchFile*)GetItemData(GetNextSelectedItem(pos)));
+					CSearchFile* pItem = (CSearchFile*)GetItemData(GetNextSelectedItem(pos));
+					HideSources(pItem);
+					theApp.searchlist->RemoveResult(pItem);
 					}
 				SetRedraw(TRUE);
 				return TRUE;
@@ -1417,13 +1426,17 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 				buffer = CastItoXBytes(src->GetFileSize());
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
-			case 2:			// avail
-				if (src->GetClientsCount())
-					buffer.Format(_T("%u (%u)"), src->GetIntTagValue(FT_SOURCES), src->GetClientsCount());
-				else
+			case 2:{		// avail
 					buffer.Format(_T("%u"), src->GetIntTagValue(FT_SOURCES));
+				uint32 uCompleteSources;
+				if (src->GetIntTagValue(FT_COMPLETE_SOURCES, uCompleteSources))
+					buffer.AppendFormat(_T("/%u"), uCompleteSources);
+				int iClientsCount = src->GetClientsCount();
+				if (iClientsCount)
+					buffer.AppendFormat(_T(" (%u)"), iClientsCount);
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
+			}
 			case 3:			// file type
 				dc->DrawText(src->GetFileType(), src->GetFileType().GetLength(), lpRect, DLC_DT_TEXT);
 				break;

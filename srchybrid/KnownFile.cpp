@@ -598,10 +598,8 @@ void CKnownFile::UpdatePartsInfo()
 				if (cur_src->IsUpPartAvailable(i))
 					m_AvailPartFrequency[i] += 1;
 			}
-
-			uint16 cur_count;
-			if ( flag && (cur_count = cur_src->GetUpCompleteSourcesCount()) != 0 )
-				count.Add(cur_count);
+			if ( flag )
+				count.Add(cur_src->GetUpCompleteSourcesCount());
 		}
 	}
 
@@ -617,8 +615,7 @@ void CKnownFile::UpdatePartsInfo()
 				m_nCompleteSourcesCount = m_AvailPartFrequency[i];
 		}
 	
-		if (m_nCompleteSourcesCount)
-			count.Add(m_nCompleteSourcesCount);
+		count.Add(m_nCompleteSourcesCount);
 	
 		int n = count.GetSize();
 		if (n > 0)
@@ -639,35 +636,41 @@ void CKnownFile::UpdatePartsInfo()
 			int i = n >> 1;			// (n / 2)
 			int j = (n * 3) >> 2;	// (n * 3) / 4
 			int k = (n * 7) >> 3;	// (n * 7) / 8
-			if (n == 1)
+
+			//For complete files, trust the people your uploading to more...
+
+			//For low guess and normal guess count
+			//	If we see more sources then the guessed low and normal, use what we see.
+			//	If we see less sources then the guessed low, adjust network accounts for 100%, we account for 0% with what we see and make sure we are still above the normal.
+			//For high guess
+			//  Adjust 100% network and 0% what we see.
+			if (n < 20)
 			{
-				m_nCompleteSourcesCount= 1;
-				m_nCompleteSourcesCountLo= 1;
-				m_nCompleteSourcesCountHi= 1;
-			}
-			if (n < 5)
-			{
-				m_nCompleteSourcesCount= count.GetAt(i);
-				m_nCompleteSourcesCountLo= 1;
-				m_nCompleteSourcesCountHi= m_nCompleteSourcesCount;
-			}
-			else if (n < 10)
-			{
-				m_nCompleteSourcesCount= count.GetAt(i);
-				m_nCompleteSourcesCountLo= count.GetAt(i - 1);
-				m_nCompleteSourcesCountHi= count.GetAt(i + 1);
-			}
-			else if (n < 20)
-			{
-				m_nCompleteSourcesCount= count.GetAt(i);
+				if ( count.GetAt(i) < m_nCompleteSourcesCount )
+					m_nCompleteSourcesCountLo = m_nCompleteSourcesCount;
+				else
 				m_nCompleteSourcesCountLo= count.GetAt(i);
+				m_nCompleteSourcesCount= m_nCompleteSourcesCountLo;
 				m_nCompleteSourcesCountHi= count.GetAt(j);
+				if( m_nCompleteSourcesCountHi < m_nCompleteSourcesCount )
+					m_nCompleteSourcesCountHi = m_nCompleteSourcesCount;
 			}
 			else
+			//Many sources..
+			//For low guess
+			//	Use what we see.
+			//For normal guess
+			//	Adjust network accounts for 100%, we account for 0% with what we see and make sure we are still above the low.
+			//For high guess
+			//  Adjust network accounts for 100%, we account for 0% with what we see and make sure we are still above the normal.
 			{
-				m_nCompleteSourcesCount= count.GetAt(j);
 				m_nCompleteSourcesCountLo= m_nCompleteSourcesCount;
+				m_nCompleteSourcesCount= count.GetAt(j);
+				if( m_nCompleteSourcesCount < m_nCompleteSourcesCountLo )
+					m_nCompleteSourcesCount = m_nCompleteSourcesCountLo;
 				m_nCompleteSourcesCountHi= count.GetAt(k);
+				if( m_nCompleteSourcesCountHi < m_nCompleteSourcesCount )
+					m_nCompleteSourcesCountHi = m_nCompleteSourcesCount;
 			}
 		}
 		m_nCompleteSourcesTime = time(NULL) + (60);
@@ -1563,6 +1566,18 @@ uint32 CAbstractFile::GetIntTagValue(uint8 tagname) const
 			return pTag->tag.intvalue;
 	}
 	return NULL;
+}
+
+bool CAbstractFile::GetIntTagValue(uint8 tagname, uint32& ruValue) const
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		const CTag* pTag = taglist[i];
+		if (pTag->tag.specialtag==tagname && pTag->tag.type==3){
+			ruValue = pTag->tag.intvalue;
+			return true;
+		}
+	}
+	return false;
 }
 
 uint32 CAbstractFile::GetIntTagValue(LPCSTR tagname) const

@@ -51,7 +51,7 @@ class CUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledSocket
 	friend class CServerConnect;
 
 public:
-	CUDPSocket(CServerConnect* in_serverconnect);
+	CUDPSocket();
 	~CUDPSocket();
 
 	bool	Create();
@@ -77,7 +77,6 @@ private:
 	bool	ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR host, uint16 nUDPPort);
 	void	ProcessPacketError(UINT size, uint8 opcode, LPCTSTR host, uint16 nTCPPort, LPCTSTR pszError);
 
-	CServerConnect*	m_serverconnect;
 	uint8*	m_sendbuffer;
 	uint32	m_sendblen;
 	CServer* m_cur_server;

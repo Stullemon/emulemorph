@@ -31,6 +31,7 @@
 #include "SafeFile.h"
 #include "Packets.h"
 #include "SharedFileList.h"
+#include "Version.h"
 #ifndef _CONSOLE
 #include "emuleDlg.h"
 #include "SearchDlg.h"
@@ -202,7 +203,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		data.WriteUInt32(GetClientID());
 		data.WriteUInt16(thePrefs.GetPort());
 
-		uint32 tagcount = 4;
+		uint32 tagcount = 5;
 		data.WriteUInt32(tagcount);
 
 		CTag tagName(CT_NAME,thePrefs.GetUserNick());
@@ -214,8 +215,17 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		CTag tagPort(CT_PORT,thePrefs.GetPort());
 		tagPort.WriteTagToFile(&data);
 
-		CTag tagFlags(0x20,0x00000001);
+		CTag tagFlags(CT_SERVER_FLAGS,0x00000001);
 		tagFlags.WriteTagToFile(&data);
+
+		// eMule Version (14-Mar-2004: requested by lugdunummaster (need for LowID clients which have no chance 
+		// to send an Hello packet to the server during the callback test))
+		CTag tagMuleVersion(CT_EMULE_VERSION, 
+							//(uCompatibleClientID	<< 24) |
+							(VERSION_MJR			<< 17) |
+							(VERSION_MIN			<< 10) |
+							(VERSION_UPDATE			<<  7) );
+		tagMuleVersion.WriteTagToFile(&data);
 
 		Packet* packet = new Packet(&data);
 		packet->opcode = OP_LOGINREQUEST;
@@ -455,7 +465,7 @@ CServerConnect::CServerConnect(CServerList* in_serverlist)
 	clientid = 0;
 	singleconnecting = false;
 	if (thePrefs.GetServerUDPPort() != 0){
-	    udpsocket = new CUDPSocket(this); // initalize socket for udp packets
+	    udpsocket = new CUDPSocket(); // initalize socket for udp packets
 		if (!udpsocket->Create()){
 			delete udpsocket;
 			udpsocket = NULL;

@@ -81,7 +81,7 @@ bool CSearchDlg::DoNewJigleSearch(SSearchParams* pParams)
 	// Set Jigle search parameters
 	pReq->strPhrase = pParams->strExpression;
 	pReq->strExt = pParams->strExtension;
-	pReq->iAvail = pParams->iAvailability <= 2 ? 3 : pParams->iAvailability;
+	pReq->iAvail = pParams->uAvailability <= 2 ? 3 : pParams->uAvailability;
 	pReq->llMinSize = (pParams->ulMinSize == 0) ?  1I64 : pParams->ulMinSize;
 	pReq->llMaxSize = (pParams->ulMaxSize == 0) ? -1I64 : pParams->ulMaxSize;
 	pReq->iOffset = 0;

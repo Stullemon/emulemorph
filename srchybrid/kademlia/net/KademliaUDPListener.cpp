@@ -602,7 +602,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 {
 	// the max. depth has to match our own limit for creating the search expression 
 	// (see also 'ParsedSearchExpression' and 'GetSearchPacket')
-	if (iLevel >= 16){
+	if (iLevel >= 24){
 		CKademlia::debugLine("***NOTE: Search expression tree exceeds depth limit!");
 		return NULL;
 	}
@@ -717,16 +717,33 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		if (lenTagName == 1)
 			TRACE(" Tag%02x=\"%s\"", strTagName[0], strValue);
 		else
-			TRACE(" Tag\"%s\"=\"%s\"", strTagName, strValue);
+			TRACE(" \"%s\"=\"%s\"", strTagName, strValue);
 		return pSearchTerm;
 	}
 	else if (op == 0x03) // Min/Max
 	{
+		static const struct {
+			SSearchTerm::ESearchTermType eSearchTermOp;
+			LPCTSTR pszOp;
+		} _aOps[] =
+		{
+			{ SSearchTerm::OpEqual,			"="		}, // mmop=0x00
+			{ SSearchTerm::OpGreaterEqual,	">="	}, // mmop=0x01
+			{ SSearchTerm::OpLessEqual,		"<="	}, // mmop=0x02
+			{ SSearchTerm::OpGreater,		">"		}, // mmop=0x03
+			{ SSearchTerm::OpLess,			"<"		}, // mmop=0x04
+			{ SSearchTerm::OpNotEqual,		"!="	}  // mmop=0x05
+		};
+
 		// read tag value
 		uint32 uValue = bio.ReadUInt32();
 
-		// read min/max operator
+		// read integer operator
 		uint8 mmop = bio.ReadUInt8();
+		if (mmop >= ARRSIZE(_aOps)){
+			CKademlia::debugMsg("*** Unknown integer search op=0x%02x (CreateSearchExpressionTree)", mmop);
+			return NULL;
+		}
 
 		// read tag name
 		CString strTagName;
@@ -735,12 +752,14 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		strTagName.ReleaseBuffer(lenTagName);
 
 		SSearchTerm* pSearchTerm = new SSearchTerm;
-		pSearchTerm->type = (mmop == 0x01) ? SSearchTerm::Min : SSearchTerm::Max;
+		pSearchTerm->type = _aOps[mmop].eSearchTermOp;
 		pSearchTerm->tag = new Kademlia::CTagUInt32(strTagName, uValue);
+
 		if (lenTagName == 1)
-			TRACE(" %s(Tag%02x)=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName[0], uValue);
+			TRACE(" Tag%02x%s%u", strTagName[0], _aOps[mmop].pszOp, uValue);
 		else
-			TRACE(" %s(Tag\"%s\")=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName, uValue);
+			TRACE(" \"%s\"%s%u", strTagName, _aOps[mmop].pszOp, uValue);
+
 		return pSearchTerm;
 	}
 	else{
@@ -777,13 +796,13 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 
 		{
 			//Source request
 			indexed->SendValidSourceResult(target, ip, port);
-			DEBUG_ONLY( Debug("SendValidSourceResult: Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
+			//DEBUG_ONLY( Debug("SendValidSourceResult: Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
 		}
 		else
 		{
 			//Single keyword request
 			indexed->SendValidKeywordResult(target, NULL, ip, port );
-			DEBUG_ONLY( Debug("SendValidKeywordResult (Single): Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
+			//DEBUG_ONLY( Debug("SendValidKeywordResult (Single): Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
 		}
 	}
 	else if(lenPacket > 17)
@@ -794,6 +813,7 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 
 			try
 			{
 				pSearchTerms = CreateSearchExpressionTree(bio, 0);
+				TRACE("\n");
 			}
 			catch(...)
 			{
@@ -804,7 +824,7 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 
 		//Keyword request with added options.
 		indexed->SendValidKeywordResult(target, pSearchTerms, ip, port); 
 		Free(pSearchTerms);
-		DEBUG_ONLY( Debug("SendValidKeywordResult: Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
+		//DEBUG_ONLY( Debug("SendValidKeywordResult: Time=%.2f sec\n", (GetTickCount() - dwNow) / 1000.0) );
 	}
 }
 

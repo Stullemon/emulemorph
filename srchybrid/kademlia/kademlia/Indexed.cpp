@@ -681,7 +681,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::Min)
+	else if (pSearchTerm->type == SSearchTerm::OpGreaterEqual)
 	{
 		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
 		{
@@ -704,7 +704,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::Max)
+	else if (pSearchTerm->type == SSearchTerm::OpLessEqual)
 	{
 		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
 		{
@@ -724,6 +724,98 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 				const Kademlia::CTag* tag = *it;
 				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
 					return tag->GetFloat() <= pSearchTerm->tag->GetFloat();
+			}
+		}
+	}
+	else if (pSearchTerm->type == SSearchTerm::OpGreater)
+	{
+		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		{
+			TagList::const_iterator it;
+			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			{
+				const Kademlia::CTag* tag = *it;
+				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+					return tag->GetInt() > pSearchTerm->tag->GetInt();
+			}
+		}
+		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		{
+			TagList::const_iterator it;
+			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			{
+				const Kademlia::CTag* tag = *it;
+				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+					return tag->GetFloat() > pSearchTerm->tag->GetFloat();
+			}
+		}
+	}
+	else if (pSearchTerm->type == SSearchTerm::OpLess)
+	{
+		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		{
+			TagList::const_iterator it;
+			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			{
+				const Kademlia::CTag* tag = *it;
+				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+					return tag->GetInt() < pSearchTerm->tag->GetInt();
+			}
+		}
+		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		{
+			TagList::const_iterator it;
+			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			{
+				const Kademlia::CTag* tag = *it;
+				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+					return tag->GetFloat() < pSearchTerm->tag->GetFloat();
+			}
+		}
+	}
+	else if (pSearchTerm->type == SSearchTerm::OpEqual)
+	{
+		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		{
+			TagList::const_iterator it;
+			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			{
+				const Kademlia::CTag* tag = *it;
+				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+					return tag->GetInt() == pSearchTerm->tag->GetInt();
+			}
+		}
+		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		{
+			TagList::const_iterator it;
+			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			{
+				const Kademlia::CTag* tag = *it;
+				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+					return tag->GetFloat() == pSearchTerm->tag->GetFloat();
+			}
+		}
+	}
+	else if (pSearchTerm->type == SSearchTerm::OpNotEqual)
+	{
+		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		{
+			TagList::const_iterator it;
+			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			{
+				const Kademlia::CTag* tag = *it;
+				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+					return tag->GetInt() != pSearchTerm->tag->GetInt();
+			}
+		}
+		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		{
+			TagList::const_iterator it;
+			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			{
+				const Kademlia::CTag* tag = *it;
+				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+					return tag->GetFloat() != pSearchTerm->tag->GetFloat();
 			}
 		}
 	}

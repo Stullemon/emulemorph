@@ -35,10 +35,40 @@ BEGIN_MESSAGE_MAP(CRichEditCtrlX, CRichEditCtrl)
 	ON_WM_KEYDOWN()
 	ON_WM_GETDLGCODE()
 	ON_NOTIFY_REFLECT_EX(EN_LINK, OnEnLink)
+	ON_CONTROL_REFLECT(EN_CHANGE, OnEnChange)
 END_MESSAGE_MAP()
 
 CRichEditCtrlX::CRichEditCtrlX()
 {
+	m_bDisableSelectOnFocus = true;
+	m_bSelfUpdate = false;
+}
+
+void CRichEditCtrlX::SetDisableSelectOnFocus(bool bDisable)
+{
+	m_bDisableSelectOnFocus = bDisable;
+}
+
+void CRichEditCtrlX::SetSyntaxColoring(const LPCTSTR* ppszKeywords, LPCTSTR pszSeperators)
+{
+	int i = 0;
+	while (ppszKeywords[i] != NULL)
+		m_astrKeywords.Add(ppszKeywords[i++]);
+	m_strSeperators = pszSeperators;
+
+	if (m_astrKeywords.GetCount() == 0)
+		m_strSeperators.Empty();
+	else
+	{
+		SetEventMask(GetEventMask() | ENM_CHANGE);
+		GetDefaultCharFormat(m_cfDef);
+		m_cfKeyword = m_cfDef;
+		m_cfKeyword.dwMask |= CFM_COLOR;
+		m_cfKeyword.dwEffects &= ~CFE_AUTOCOLOR;
+		m_cfKeyword.crTextColor = RGB(0,0,255);
+
+		ASSERT( GetTextMode() & TM_MULTILEVELUNDO );
+	}
 }
 
 CRichEditCtrlX& CRichEditCtrlX::operator<<(LPCTSTR psz)
@@ -79,12 +109,17 @@ CRichEditCtrlX& CRichEditCtrlX::operator<<(double fVal)
 
 UINT CRichEditCtrlX::OnGetDlgCode() 
 {
-	// Avoid that the edit control will select the entire contents, if the
-	// focus is moved via tab into the edit control
-	//
-	// DLGC_WANTALLKEYS is needed, if the control is within a wizard property
-	// page and the user presses the Enter key to invoke the default button of the property sheet!
-	return CRichEditCtrl::OnGetDlgCode() & ~(DLGC_HASSETSEL | DLGC_WANTALLKEYS);
+	if (m_bDisableSelectOnFocus)
+	{
+		// Avoid that the edit control will select the entire contents, if the
+		// focus is moved via tab into the edit control
+		//
+		// DLGC_WANTALLKEYS is needed, if the control is within a wizard property
+		// page and the user presses the Enter key to invoke the default button of the property sheet!
+		return CRichEditCtrl::OnGetDlgCode() & ~(DLGC_HASSETSEL | DLGC_WANTALLKEYS);
+	}
+	// if there is an auto complete control attached to the rich edit control, we have to explicitly disable DLGC_WANTTAB
+	return CRichEditCtrl::OnGetDlgCode() & ~DLGC_WANTTAB;
 }
 
 BOOL CRichEditCtrlX::OnEnLink(NMHDR *pNMHDR, LRESULT *pResult)
@@ -110,14 +145,44 @@ void CRichEditCtrlX::OnContextMenu(CWnd* pWnd, CPoint point)
 	GetSel(iSelStart, iSelEnd);
 	int iTextLen = GetWindowTextLength();
 
+	// Context menu of standard edit control
+	// 
+	// Undo
+	// ----
+	// Cut
+	// Copy
+	// Paste
+	// Delete
+	// ------
+	// Select All
+
+	bool bReadOnly = (GetStyle() & ES_READONLY);
+
 	CMenu menu;
 	menu.CreatePopupMenu();
+	if (!bReadOnly){
+		menu.AppendMenu(MF_STRING, MP_UNDO, GetResString(IDS_UNDO));
+		menu.AppendMenu(MF_SEPARATOR);
+	}
+	if (!bReadOnly)
+		menu.AppendMenu(MF_STRING, MP_CUT, GetResString(IDS_CUT));
 	menu.AppendMenu(MF_STRING, MP_COPYSELECTED, GetResString(IDS_COPY));
+	if (!bReadOnly){
+		menu.AppendMenu(MF_STRING, MP_PASTE, GetResString(IDS_PASTE));
+		menu.AppendMenu(MF_STRING, MP_REMOVESELECTED, GetResString(IDS_DELETESELECTED));
+	}
 	menu.AppendMenu(MF_SEPARATOR);
 	menu.AppendMenu(MF_STRING, MP_SELECTALL, GetResString(IDS_SELECTALL));
+
+	menu.EnableMenuItem(MP_UNDO, CanUndo() ? MF_ENABLED : MF_GRAYED);
+	menu.EnableMenuItem(MP_CUT, iSelEnd > iSelStart ? MF_ENABLED : MF_GRAYED);
 	menu.EnableMenuItem(MP_COPYSELECTED, iSelEnd > iSelStart ? MF_ENABLED : MF_GRAYED);
+	menu.EnableMenuItem(MP_PASTE, CanPaste() ? MF_ENABLED : MF_GRAYED);
+	menu.EnableMenuItem(MP_REMOVESELECTED, iSelEnd > iSelStart ? MF_ENABLED : MF_GRAYED);
 	menu.EnableMenuItem(MP_SELECTALL, iTextLen > 0 ? MF_ENABLED : MF_GRAYED);
-	if (point.x == -1 && point.y == -1){
+
+	if (point.x == -1 && point.y == -1)
+	{
 		point.x = 16;
 		point.y = 32;
 		ClientToScreen(&point);
@@ -128,8 +193,20 @@ void CRichEditCtrlX::OnContextMenu(CWnd* pWnd, CPoint point)
 BOOL CRichEditCtrlX::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam) {
+	case MP_UNDO:
+		Undo();
+		break;
+	case MP_CUT:
+		Cut();
+		break;
 	case MP_COPYSELECTED:
 		Copy();
+		break;
+	case MP_PASTE:
+		Paste();
+		break;
+	case MP_REMOVESELECTED:
+		Clear();
 		break;
 	case MP_SELECTALL:
 		SetSel(0, -1);
@@ -154,4 +231,69 @@ void CRichEditCtrlX::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 
 	CRichEditCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+void CRichEditCtrlX::OnEnChange()
+{
+	if (!m_bSelfUpdate && m_astrKeywords.GetCount())
+		UpdateSyntaxColoring();
+}
+
+void CRichEditCtrlX::UpdateSyntaxColoring()
+{
+	CString strText;
+	GetWindowText(strText);
+	if (strText.IsEmpty())
+		return;
+
+	m_bSelfUpdate = true;
+
+	long lCurSelStart, lCurSelEnd;
+	GetSel(lCurSelStart, lCurSelEnd);
+	SetSel(0, -1);
+	SetSelectionCharFormat(m_cfDef);
+	SetSel(lCurSelStart, lCurSelEnd);
+
+	LPTSTR pszStart = const_cast<LPTSTR>((LPCTSTR)strText);
+	LPCTSTR psz = pszStart;
+	while (*psz != _T('\0'))
+	{
+		if (*psz == _T('\"'))
+		{
+			LPCTSTR pszEnd = _tcschr(psz + 1, _T('\"'));
+			if (pszEnd)
+				psz = pszEnd + 1;
+			else
+				break;
+		}
+		else
+		{
+			bool bFoundKeyword = false;
+			for (int k = 0; k < m_astrKeywords.GetCount(); k++)
+			{
+				const CString& rstrKeyword = m_astrKeywords[k];
+				int iKwLen = rstrKeyword.GetLength();
+				if (_tcsncmp(psz, rstrKeyword, iKwLen)==0 && (psz[iKwLen]==_T('\0') || _tcschr(m_strSeperators, psz[iKwLen])!=NULL))
+				{
+					int iStart = psz - pszStart;
+					int iEnd = iStart + iKwLen;
+					long lCurSelStart, lCurSelEnd;
+					GetSel(lCurSelStart, lCurSelEnd);
+					SetSel(iStart, iEnd);
+					SetSelectionCharFormat(m_cfKeyword);
+					SetSel(lCurSelStart, lCurSelEnd);
+					psz += iKwLen;
+					bFoundKeyword = true;
+					break;
+				}
+			}
+
+			if (!bFoundKeyword)
+				psz++;
+		}
+	}
+
+	UpdateWindow();
+
+	m_bSelfUpdate = false;
 }

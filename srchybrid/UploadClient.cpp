@@ -181,7 +181,7 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	if (IsFriend() && GetFriendSlot() && !HasLowID())
 		return 0x0FFFFFFF;
 
-	if (IsBanned())
+	if (IsBanned() || m_bGPLEvildoer)
 		return 0;
 
 	if (sysvalue && HasLowID() && !(socket && socket->IsConnected())){
@@ -378,7 +378,8 @@ double CUpDownClient::GetEqualChanceValue() const
 
 //Morph Start - added by AndCycle, Pay Back First
 bool CUpDownClient::IsMoreUpThanDown() const{
-	return thePrefs.IsPayBackFirst() ? credits->GetPayBackFirstStatus() : false ;
+	if (!credits || !theApp.clientcredits->CryptoAvailable()) return false;
+	return (thePrefs.IsPayBackFirst() && credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED)? credits->GetPayBackFirstStatus() : false ;
 }
 //Morph End - added by AndCycle, Pay Back First
 
@@ -390,9 +391,9 @@ bool CUpDownClient::IsMoreUpThanDown() const{
 */
 bool CUpDownClient::GetPowerShared() const {
 	//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-	if (credits)
-		if (credits->GetCurrentIdentState(GetIP()) != IS_IDENTIFIED)
-			return false;
+	if (!credits || !theApp.clientcredits->CryptoAvailable()) return false;
+	if (credits->GetCurrentIdentState(GetIP()) != IS_IDENTIFIED) return false;
+			
 	bool bPowerShared;
 	if (GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
 		bPowerShared = theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();
@@ -852,8 +853,8 @@ uint32 CUpDownClient::SendBlockData(){
 			
 	// remove to old values in list
 	while (m_AvarageUDR_list.GetCount() > 0)
-		if (m_AvarageUDR_list.GetCount() > 60000 / (1 + curTick - m_AvarageUDR_list.GetHead().timestamp) ||
-			(curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
+		if (m_AvarageUDR_list.GetCount() > (uint32)(60000 / (1 + curTick - m_AvarageUDR_list.GetHead().timestamp)) ||
+			(uint32)(curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
 			// keep sum of all values in list up to date
 			sumavgUDR -=  m_AvarageUDR_list.RemoveHead().datalen;
 		}else

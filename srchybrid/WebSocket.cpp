@@ -46,10 +46,13 @@ void CWebSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData
 	if(sURL.Find(" ") > -1)
 		sURL = sURL.Left(sURL.Find(" "));
 
-	if (sURL.GetLength()>4 && sURL.Right(4).MakeLower()==".gif" || sURL.Right(4).MakeLower()==".jpg" || sURL.Right(4).MakeLower()==".png" ||
+	if (sURL.GetLength()>4 &&	// min length (for valid extentions)
+		(sURL.Right(4).MakeLower()==".gif" || sURL.Right(4).MakeLower()==".jpg" || sURL.Right(4).MakeLower()==".png" ||
 		sURL.Right(4).MakeLower()==".ico" ||sURL.Right(4).MakeLower()==".css" ||sURL.Right(3).MakeLower()==".js" ||
-		sURL.Right(4).MakeLower()==".bmp" || sURL.Right(5).MakeLower()==".jpeg")
-		filereq=true;
+		sURL.Right(4).MakeLower()==".bmp" || sURL.Right(5).MakeLower()==".jpeg") // extentions check
+		&& sURL.Find("..")==-1	// dont allow leaving the emule-webserver-folder for accessing files
+		)
+			filereq=true;
 
 	ThreadData Data;
 	Data.sURL = sURL;

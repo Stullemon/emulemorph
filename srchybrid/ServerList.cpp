@@ -55,7 +55,6 @@ CServerList::CServerList()
 	serverpos = 0;
 	searchserverpos = 0;
 	statserverpos = 0;
-	//udp_timer = 0;
 	delservercount = 0;
 	m_nLastSaved = ::GetTickCount();
 }
@@ -305,7 +304,14 @@ void CServerList::ServerStats()
 		if(ping_server->GetLastDescPingedCount() < 2){
 			if (thePrefs.GetDebugServerUDPLevel() > 0)
 				Debug(">>> Sending OP__ServDescReq     to %s:%u\n", ping_server->GetAddress(), ping_server->GetPort());
-			packet = new Packet( OP_SERVER_DESC_REQ,0);
+			// eserver 16.45+ supports a new OP_SERVER_DESC_RES answer, if the OP_SERVER_DESC_REQ contains a uint32
+			// challenge, the server returns additional info with OP_SERVER_DESC_RES. To properly distinguish the
+			// old and new OP_SERVER_DESC_RES answer, the challenge has to be selected carefully. The first 2 bytes 
+			// of the challenge (in network byte order) MUST NOT be a valid string-len-int16!
+			packet = new Packet(OP_SERVER_DESC_REQ,4);
+			uint32 uDescReqChallenge = ((uint32)rand() << 16) + 0x0000F0FF; // 0xF0FF = an 'invalid' string length.
+			ping_server->SetDescReqChallenge(uDescReqChallenge);
+			PokeUInt32(packet->pBuffer, uDescReqChallenge);
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 			theApp.serverconnect->SendUDPPacket( packet, ping_server, true );
 		}
@@ -665,6 +671,7 @@ bool CServerList::SaveServermetToFile()
 			softfiles.WriteTagToFile(&servermet);
 			CTag hardfiles(ST_HARDFILES, nextserver->GetHardFiles() );
 			hardfiles.WriteTagToFile(&servermet);
+			// as long as we don't receive an integer version tag from the local server (TCP) we store it as string
 			CTag version(ST_VERSION, (LPCSTR)nextserver->GetVersion() );
 			version.WriteTagToFile(&servermet);
 			CTag tagUDPFlags(ST_UDPFLAGS, nextserver->GetUDPFlags() );

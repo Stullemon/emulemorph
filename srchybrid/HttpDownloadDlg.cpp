@@ -369,7 +369,7 @@ void CHttpDownloadDlg::SetPercentage(int nPercentage)
 
 	//Change the caption text
 	CString sPercentage;
-	sPercentage.Format(_T("%d %%"), nPercentage);
+	sPercentage.Format(_T("%d"), nPercentage);
 	CString sCaption;
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	//MORPH START- Added by Yun.SF3--- ipfilter.dat update ---

@@ -29,6 +29,7 @@ there client on the eMule forum..
 */
 
 #include "stdafx.h"
+#include "resource.h"
 #include "SearchManager.h"
 #include "Search.h"
 #include "Kademlia.h"
@@ -42,6 +43,7 @@ there client on the eMule forum..
 #include "../io/IOException.h"
 #include "../kademlia/prefs.h"
 #include "SafeFile.h"
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -49,6 +51,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+
+LPCTSTR _aszInvKadKeywordChars = " ()[]{}<>,._-!?";
 
 ////////////////////////////////////////
 using namespace Kademlia;
@@ -165,14 +169,17 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCSTR key
 		if (s->m_words.size() == 0)
 		{
 			delete s;
-			return 0;
+			throw GetResString(IDS_KAD_SEARCH_KEYWORD_TOO_SHORT);
 		}
+
 		CString k = s->m_words.front();
 		CMD4::hash((byte*)k.GetBuffer(0), k.GetLength(), &s->m_target);
 		if (alreadySearchingFor(s->m_target))
 		{
 			delete s;
-			return 0;
+			CString strError;
+			strError.Format(GetResString(IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING), k);
+			throw strError;
 		}
 
 		// Write complete packet
@@ -193,18 +200,35 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCSTR key
 			s->go();
 		}
 	} 
-	catch ( CIOException *ioe )
+	catch (CIOException* ioe)
 	{
-		CKademlia::debugMsg("Exception in CSearchManager::prepareFindKeywords (IO error(%i))", ioe->m_cause);
+		CString strError;
+		strError.Format(_T("IO-Exception in %s: Error %u"), __FUNCTION__, ioe->m_cause);
 		ioe->Delete();
 		delete s;
-		s = NULL;
+		throw strError;
+	}
+	catch (CFileException* e)
+	{
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		e->m_strFileName = "search packet";
+		e->GetErrorMessage(szError, ARRSIZE(szError));
+		CString strError;
+		strError.Format(_T("Exception in %s: %s"), __FUNCTION__, szError);
+		e->Delete();
+		delete s;
+		throw strError;
+	}
+	catch (CString strException)
+	{
+		throw strException;
 	}
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::prepareFindKeywords");
+		CString strError;
+		strError.Format(_T("Unknown exception in %s"), __FUNCTION__);
 		delete s;
-		s = NULL;
+		throw strError;
 	}
 	return s;
 }
@@ -328,7 +352,7 @@ void CSearchManager::getWords(LPCSTR str, WordList *words)
 	uint32 i;
 	while (strlen(s) > 0)
 	{
-		len = (int)strcspn(s, " ()[]{}<>,._-!?");
+		len = (int)strcspn(s, _aszInvKadKeywordChars);
 		if (len > 2)
 		{
 			word = s;

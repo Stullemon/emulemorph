@@ -71,7 +71,20 @@ BOOL CServerWnd::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 	logbox.Init(GetResString(IDS_SV_LOG));
+	if (theApp.emuledlg->m_fontLog.m_hObject)
+		logbox.SetFont(&theApp.emuledlg->m_fontLog);
+	else{
+		CFont* pFont = logbox.GetFont();
+		if (pFont){
+			LOGFONT lf;
+			pFont->GetObject(sizeof lf, &lf);
+			theApp.emuledlg->m_fontLog.CreateFontIndirect(&lf);
+		}
+	}
+
 	debuglog.Init(SZ_DEBUG_LOG_TITLE);
+	if (theApp.emuledlg->m_fontLog.m_hObject)
+		debuglog.SetFont(&theApp.emuledlg->m_fontLog);
 
 	SetAllIcons();
 	Localize();
@@ -383,33 +396,79 @@ void CServerWnd::OnBnClickedAddserver()
 		return;
 	}
 
-	CServer* toadd = new CServer(uPort,serveraddr.GetBuffer());
+	CString strServerName;
+	GetDlgItem(IDC_SNAME)->GetWindowText(strServerName);
+
+	AddServer(uPort, serveraddr, strServerName);
+}
+
+void CServerWnd::PasteServerFromClipboard()
+{
+	CString strServer = theApp.CopyTextFromClipboard();
+	strServer.Trim();
+	if (strServer.IsEmpty())
+		return;
+
+	int nPos = 0;
+	CString strTok = strServer.Tokenize(_T(" \t\r\n"), nPos);
+	while (!strTok.IsEmpty())
+	{
+		uint32 nIP = 0;
+		uint16 nPort = 0;
+		CED2KLink* pLink = NULL;
+		try{
+			pLink = CED2KLink::CreateLinkFromUrl(strTok);
+			if (pLink && pLink->GetKind() == CED2KLink::kServer){
+				CED2KServerLink* pServerLink = pLink->GetServerLink();
+				if (pServerLink){
+					nIP = pServerLink->GetIP();
+					nPort = pServerLink->GetPort();
+				}
+			}
+		}
+		catch(CString strError){
+			AfxMessageBox(strError);
+		}
+		delete pLink;
+
+		if (nIP == 0 || nPort == 0)
+			break;
+
+		(void)AddServer(nPort, inet_ntoa(*(in_addr*)&nIP), _T(""), false);
+		strTok = strServer.Tokenize(_T(" \t\r\n"), nPos);
+	}
+}
+
+bool CServerWnd::AddServer(uint16 nPort, CString strIP, CString strName, bool bShowErrorMB)
+{
+	CServer* toadd = new CServer(nPort, strIP);
 
 	// Barry - Default all manually added servers to high priority
 	if( thePrefs.GetManualHighPrio() )
 		toadd->SetPreference(SRV_PR_HIGH);
 
-	int namelen = GetDlgItem(IDC_SNAME)->GetWindowTextLength();
-	if (namelen > 0){
-		char* servername = new char[namelen+2];
-		GetDlgItem(IDC_SNAME)->GetWindowText(servername,namelen+1);
-		toadd->SetListName(servername);
-		delete[] servername;
-	}
-	else{
-		toadd->SetListName(serveraddr.GetBuffer());
-	}
-	if (!serverlistctrl.AddServer(toadd,true)){
+	if (strName.IsEmpty())
+		strName = strIP;
+	toadd->SetListName(strName);
+
+	if (!serverlistctrl.AddServer(toadd, true))
+	{
 		CServer* update = theApp.serverlist->GetServerByAddress(toadd->GetAddress(), toadd->GetPort());
-		if(update){
+		if(update)
+		{
 			update->SetListName(toadd->GetListName());
 			serverlistctrl.RefreshServer(update);
 		}
 		delete toadd;
+		if (bShowErrorMB)
 		AfxMessageBox(GetResString(IDS_SRV_NOTADDED));
+		return false;
 	}
 	else
+	{
 		AddLogLine(true,GetResString(IDS_SERVERADDED), toadd->GetListName());
+		return true;
+	}
 }
 
 void CServerWnd::OnBnClickedUpdateservermetfromurl()
@@ -768,7 +827,8 @@ void CServerWnd::OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult)
 		servermsgbox->GetTextRange(pEnLink->chrg.cpMin, pEnLink->chrg.cpMax, strUrl);
 		if (strUrl == m_strClickNewVersion){
 			// MOD Note: Do not remove this part - Merkur
-			strUrl.Format("http://vcheck.emule-project.net/en/version_check.php?version=%i&language=%i",theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
+					strUrl.Format("/en/version_check.php?version=%i&language=%i",theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
+					strUrl = thePrefs.GetVersionCheckBaseURL()+strUrl;
 			// MOD Note: end
 		}
 		ShellExecute(NULL, NULL, strUrl, NULL, NULL, SW_SHOWDEFAULT);
@@ -813,4 +873,8 @@ void CServerWnd::OnDDClicked() {
 	box->SetWindowText("");
 	box->SendMessage(WM_KEYDOWN,VK_DOWN,0x00510001);
 	
+}
+void CServerWnd::ResetHistory() {
+	if (m_pacServerMetURL!=NULL)
+		m_pacServerMetURL->Clear();
 }

@@ -944,6 +944,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_STATS_MAXDL         "Max Ontvangstratio (Sessie): %.2f kB/s"
+    IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
+                            "Ignore eMule add friend protocol messages"
     IDS_PW_FASTSRVCON       "Snel met de server verbinden"
     IDS_SOURCELINKFAILED    "U heeft een Hoge ID nodig voor het creëeren van een geldige bronverwijzing"
     IDS_CREATESOURCELINK    "Kopieer ED2k link naar klembord (bron)"
@@ -1033,6 +1035,8 @@ BEGIN
     IDS_DESCRIPTIONRECV     "Beschrijving voor bestand '%s' ontvangen: %s"
     IDS_WEBSERVICES         "Web Services"
     IDS_WEBSVEDIT           "Bewerk Webservices"
+    IDS_IRC_EMULEPROTO_IGNORESENDLINK 
+                            "Ignore eMule send link protocol messages"
     IDS_CHECK4UPDATE        "Controleer op nieuwe versie"
     IDS_STARTUP             "Opstarten"
     IDS_NEWVERSIONAVL       "Een nieuwe eMule versie is beschikbaar! Kijk op de Project Homepage voor meer informatie."
@@ -1144,7 +1148,13 @@ STRINGTABLE
 BEGIN
     IDS_ENTERUSERNAME       "Vul aub. uw gebruikersnaam in:"
     IDS_STATIC_CPUMEM       "Bewaar CPU- && geheugen gebruik"
+    IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 
+                            "Keyword too short.\r\n\r\nThe keyword(s) used in a Kad search expression must have a minimum length of 3 characters."
     IDS_LOG2DISK            "Save log to disk"
+    IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING 
+                            "There is already a Kad search ongoing for the keyword ""%s"".\r\n\r\nTo search again for that keyword, either wait until this keyword search is finished or close the according search results pane."
+    IDS_KAD_SEARCH_KEYWORD_INVALID 
+                            "Invalid Kad keyword.\r\n\r\nA Kad search expression has the following format:\r\n\r\n\t<kad-keyword> [ <ed2k-search-expression> ]\r\n\r\nThe <kad-keyword> must not contain any of the following characters:\r\n\r\n\t%s"
     IDS_EDITCAT             "Bewerk Categorie-Instellingen"
     IDS_PW_WS               "Web Server"
     IDS_ENABLED             "geactiveerd"
@@ -1571,6 +1581,7 @@ BEGIN
     IDS_KADSEARCHLAB        "Actieve Zoekopdrachten"
     IDS_SRV_UDPSR           "Uitgebreid UDP protocol voor bron-verzoeken"
     IDS_SRV_UDPFR           "Uitgebreid UDP protocol voor bestands-verzoeken"
+    IDS_MINLENGTH           "Min. length [hh:mm:ss]"
     IDS_EM_HELP             "&Help"
     IDS_WRN_FRIENDDUPLIPPORT 
                             "Vriend niet toegevoegd.\r\n\r\nEr is al een vriend met hetzelfde IP adres en poort beschikbaar."
@@ -1587,6 +1598,7 @@ BEGIN
     IDS_TEXTLABELS          "Tekst labels"
     IDS_ENABLETEXTLABELS    "Onder het icoon"
     IDS_CUSTOMIZETOOLBAR    "Aanpassen Toolbar"
+    IDS_MINBITRATE          "Min. bitrate [kBit/s]"
     IDS_KAD_RECHECKFW       "Hertesten Firewall"
     IDS_SHAREDTITLE         "Gedeeld ED2K|Kad"
     IDS_WARNINGNOBS         "Bootstrapping is inactief (Kad is uitgeschakeld of reeds verbonden)."
@@ -1626,6 +1638,8 @@ BEGIN
     IDS_IRC_NOSFS           "No Shared Files Selected"
     IDS_IRC_IGNOREMISCMESSAGE "Ignore Misc info messages"
     IDS_KNOWN               "Known"
+    IDS_DL_ACTIVE_TIME      "Download time"
+    IDS_RESETLABEL          "Auto completion (history function)"
 END
 STRINGTABLE 
 BEGIN

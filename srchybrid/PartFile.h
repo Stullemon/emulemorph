@@ -167,6 +167,7 @@ public:
 	uint32  GetCompletedSize() const { return completedsize; }
 	CString getPartfileStatus() const;
 	int		getPartfileStatusRang() const;
+	void	SetActive(bool bActive);
 	
 	uint8	GetDownPriority() const { return m_iDownPriority; }
 	void	SetDownPriority(uint8 iNewDownPriority);
@@ -191,6 +192,7 @@ public:
 	//MORPH END   - Modifified by SiRoB
 	bool	IsArchive(bool onlyPreviewable = false) const; // Barry - Also want to preview archives
 	sint32	getTimeRemaining() const;
+	uint32	GetDlActiveTime() const;
 	bool	IsMovie() const; //MORPH - Added by IceCream, added preview also for music files
 	bool	IsMusic() const; //MORPH - Added by IceCream, added preview also for music files
 	bool	IsCDImage() const; //MORPH - Added by IceCream, for defeat 0-filler
@@ -404,6 +406,9 @@ private:
 	uint32 m_nLastBufferFlushTime;
 	uint8	m_category;
 	DWORD	m_dwFileAttributes;
+	time_t	m_tActivated;
+	uint32	m_nDlActiveTime;
+
 
 	BOOL 	PerformFileComplete(); // Lord KiRon
 	static UINT CompleteThreadProc(LPVOID pvParams); // Lord KiRon - Used as separate thread to complete file

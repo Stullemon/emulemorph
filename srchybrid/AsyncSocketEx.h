@@ -110,7 +110,7 @@ public:
 	//Creates a socket.
 	BOOL Create(UINT nSocketPort = 0, int nSocketType = SOCK_STREAM,
 				long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT |	FD_CONNECT | FD_CLOSE,
-				LPCTSTR lpszSocketAddress = NULL );
+				LPCTSTR lpszSocketAddress = NULL, BOOL bReuseAddr = FALSE );
 
 
 	//Attributes

@@ -475,6 +475,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 			AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),szError);
 		}
 		error->Delete();
+		ASSERT(0);
 		if (opcode==OP_SEARCHRESULT || opcode==OP_FOUNDSOURCES)
 			return true;
 	}
@@ -483,6 +484,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 		if (thePrefs.GetVerbose())
 			AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),_T("CMemoryException"));
 		error->Delete();
+		ASSERT(0);
 		if (opcode==OP_SEARCHRESULT || opcode==OP_FOUNDSOURCES)
 			return true;
 	}
@@ -490,6 +492,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 	{
 		if (thePrefs.GetVerbose())
 			AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),error.GetBuffer());
+		ASSERT(0);
 	}
 	catch(...)
 	{

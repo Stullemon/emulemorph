@@ -77,6 +77,9 @@
 #include "MenuCmds.h"
 #include "MuleSystrayDlg.h"
 #include "IPFilterDlg.h"
+#include "WebServices.h"
+#include "DirectDownloadDlg.h"
+
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
@@ -334,6 +337,14 @@ BOOL CemuleDlg::OnInitDialog()
 	LPLOGFONT plfHyperText = thePrefs.GetHyperTextLogFont();
 	if (plfHyperText==NULL || plfHyperText->lfFaceName[0]=='\0' || !m_fontHyperText.CreateFontIndirect(plfHyperText))
 		m_fontHyperText.CreatePointFont(100, _T("Times New Roman"));
+
+	LPLOGFONT plfLog = thePrefs.GetLogFont();
+	if (plfLog!=NULL && plfLog->lfFaceName[0]!='\0')
+		m_fontLog.CreateFontIndirect(plfLog);
+
+	// Why can't this font set via the font dialog??
+//	HFONT hFontMono = CreateFont(10, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, _T("Lucida Console"));
+//	m_fontLog.Attach(hFontMono);
 
 	// create main window dialog pages
 	serverwnd->Create(IDD_SERVER);
@@ -726,7 +737,7 @@ void CemuleDlg::AddLogText(bool addtostatusbar, const CString& txt, bool bDebug)
 				theLog.Log(temp, iLen);
 		}
 
-		if (thePrefs.GetVerbose())
+		if (thePrefs.GetVerbose() && (bDebug || thePrefs.GetFullVerbose()))
 		{
 				serverwnd->debuglog.Add(temp, iLen);
 			if (IsWindow(serverwnd->StatusSelector) && serverwnd->StatusSelector.GetCurSel() != CServerWnd::PaneVerboseLog)
@@ -860,19 +871,6 @@ void CemuleDlg::AddServerMessageLine(LPCTSTR pszLine)
 
 void CemuleDlg::ShowConnectionStateIcon()
 {
-	//if( theApp.IsConnected()){ We can use this once we handle firewalled users in Kademlia.
-//	if (theApp.serverconnect->IsConnected() || Kademlia::CKademlia::isConnected())
-//	{
-//		if (!theApp.IsFirewalled())
-//			statusbar->SetIcon(3, connicons[2]);
-//		else
-//			statusbar->SetIcon(3, connicons[1]);
-//	}
-//	else
-//	{
-//		statusbar->SetIcon(3, connicons[0]);
-//	}
-
 	if (theApp.serverconnect->IsConnected() && !Kademlia::CKademlia::isConnected())
 	{
 		if (theApp.serverconnect->IsLowID())
@@ -906,6 +904,7 @@ void CemuleDlg::ShowConnectionStateIcon()
 
 void CemuleDlg::ShowConnectionState()
 {
+	theApp.downloadqueue->OnConnectionState(theApp.IsConnected());
 	serverwnd->UpdateMyInfo();
 	serverwnd->UpdateControlsState();
 	kademliawnd->UpdateControlsState();
@@ -1817,28 +1816,29 @@ void CemuleDlg::LoadNotifier(CString configuration) {
 LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 {
 	switch(m_wndTaskbarNotifier->GetMessageType()){
-	case TBN_CHAT:
-		RestoreWindow();
-		SetActiveDialog(chatwnd);
-		break;
-	case TBN_DLOAD:
-	case TBN_DLOADADDED:
-		RestoreWindow();
-		SetActiveDialog(transferwnd);
-		break;
-	case TBN_IMPORTANTEVENT:
-		RestoreWindow();
-		SetActiveDialog(serverwnd);	
-		break;
-	case TBN_LOG:
-		RestoreWindow();
-		SetActiveDialog(serverwnd);	
-		break;
-	case TBN_NEWVERSION:{
-		CString theUrl;
-			theUrl.Format("http://vcheck.emule-project.net/en/version_check.php?version=%i&language=%i",theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());;
-		ShellExecute(NULL, NULL, theUrl, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
-		break;
+		case TBN_CHAT:
+			RestoreWindow();
+			SetActiveDialog(chatwnd);
+			break;
+		case TBN_DLOAD:
+		case TBN_DLOADADDED:
+			RestoreWindow();
+			SetActiveDialog(transferwnd);
+			break;
+		case TBN_IMPORTANTEVENT:
+			RestoreWindow();
+			SetActiveDialog(serverwnd);	
+			break;
+		case TBN_LOG:
+			RestoreWindow();
+			SetActiveDialog(serverwnd);	
+			break;
+		case TBN_NEWVERSION:{
+			CString theUrl;
+			theUrl.Format("/en/version_check.php?version=%i&language=%i",theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
+			theUrl = thePrefs.GetVersionCheckBaseURL()+theUrl;
+			ShellExecute(NULL, NULL, theUrl, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+			break;
 		}
 	}
     return 0;
@@ -2034,17 +2034,20 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			OnClose();
 			break;
 		case MP_HM_LINK1: // MOD: dont remove!
-			ShellExecute(NULL, NULL, "http://www.emule-project.net", NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+			ShellExecute(NULL, NULL, thePrefs.GetHomepageBaseURL(), NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
 			break;
 		case MP_HM_LINK2:
-			ShellExecute(NULL, NULL, "http://www.emule-project.net/faq/", NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+			ShellExecute(NULL, NULL, thePrefs.GetHomepageBaseURL()+ CString(_T("/faq/")), NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
 			break;
 		case MP_HM_LINK3: {
 			CString theUrl;
-			theUrl.Format("http://vcheck.emule-project.net/en/version_check.php?version=%i&language=%i",theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
+			theUrl.Format( thePrefs.GetVersionCheckBaseURL() + CString(_T("/en/version_check.php?version=%i&language=%i")),theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
 			ShellExecute(NULL, NULL, theUrl, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
 			break;
 		}
+		case MP_WEBSVC_EDIT:
+			theWebServices.Edit();
+			break;
 		case MP_HM_CONVERTPF:
 			CPartFileConvert::ShowGUI();
 			break;
@@ -2065,8 +2068,16 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			dlg.DoModal();
 			break;
 	}	
+		case MP_HM_DIRECT_DOWNLOAD:{
+			CDirectDownloadDlg dlg;
+			dlg.DoModal();
+			break;
 	}
-	if (wParam>=MP_SCHACTIONS && wParam<=MP_SCHACTIONS+99) {
+	}	
+	if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+99) {
+		theWebServices.RunURL(NULL, wParam);
+	}
+	else if (wParam>=MP_SCHACTIONS && wParam<=MP_SCHACTIONS+99) {
 		theApp.scheduler->ActivateSchedule(wParam-MP_SCHACTIONS);
 		theApp.scheduler->SaveOriginals(); // use the new settings as original
 	}
@@ -2133,6 +2144,9 @@ void CemuleDlg::ShowToolPopup(bool toolsonly)
 	Links.AppendMenu(MF_STRING,MP_HM_LINK1, GetResString(IDS_HM_LINKHP));
 	Links.AppendMenu(MF_STRING,MP_HM_LINK2, GetResString(IDS_HM_LINKFAQ));
 	Links.AppendMenu(MF_STRING,MP_HM_LINK3, GetResString(IDS_HM_LINKVC));
+	theWebServices.GetGeneralMenuEntries(Links);
+	Links.InsertMenu(3, MF_BYPOSITION | MF_SEPARATOR);
+	Links.AppendMenu(MF_STRING, MP_WEBSVC_EDIT, GetResString(IDS_WEBSVEDIT));
 
 	CMenu scheduler;
 	scheduler.CreateMenu();
@@ -2166,10 +2180,11 @@ void CemuleDlg::ShowToolPopup(bool toolsonly)
 		menu.AppendMenu(MF_SEPARATOR);
 	}
 
-	menu.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC));
-	menu.AppendMenu(MF_STRING,MP_HM_CONVERTPF, GetResString(IDS_IMPORTSPLPF));
-	menu.AppendMenu(MF_STRING,MP_HM_1STSWIZARD, GetResString(IDS_WIZ1));
-	menu.AppendMenu(MF_STRING,MP_HM_IPFILTER, GetResString(IDS_IPFILTER));
+	menu.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC) + _T("..."));
+	menu.AppendMenu(MF_STRING,MP_HM_CONVERTPF, GetResString(IDS_IMPORTSPLPF) + _T("..."));
+	menu.AppendMenu(MF_STRING,MP_HM_1STSWIZARD, GetResString(IDS_WIZ1) + _T("..."));
+	menu.AppendMenu(MF_STRING,MP_HM_IPFILTER, GetResString(IDS_IPFILTER) + _T("..."));
+	menu.AppendMenu(MF_STRING,MP_HM_DIRECT_DOWNLOAD, GetResString(IDS_SW_DIRECTDOWNLOAD) + _T("..."));
 
 	menu.AppendMenu(MF_SEPARATOR);
 	menu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)Links.m_hMenu, GetResString(IDS_LINKS) );
@@ -2222,6 +2237,17 @@ void CemuleDlg::ApplyHyperTextFont(LPLOGFONT plf)
 		serverwnd->servermsgbox->SetFont(&m_fontHyperText);
 		chatwnd->chatselector.UpdateFonts(&m_fontHyperText);
 		ircwnd->UpdateFonts(&m_fontHyperText);
+	}
+}
+
+void CemuleDlg::ApplyLogFont(LPLOGFONT plf)
+{
+	m_fontLog.DeleteObject();
+	if (m_fontLog.CreateFontIndirect(plf))
+	{
+		thePrefs.SetLogFont(plf);
+		serverwnd->logbox.SetFont(&m_fontLog);
+		serverwnd->debuglog.SetFont(&m_fontLog);
 	}
 }
 
@@ -2336,7 +2362,10 @@ LRESULT CemuleDlg::OnVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 			if (pHost->h_length == 4 && pHost->h_addr_list && pHost->h_addr_list[0])
 			{
 				uint32 dwResult = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
-				uint8 abyCurVer[4] = { VERSION_BUILD + 1, VERSION_UPDATE, VERSION_MIN, VERSION_MJR};
+				// last byte contains informations about mirror urls, to avoid effects of future DDoS Attacks against eMules Homepage
+				thePrefs.SetWebMirrorAlertLevel((uint8)(dwResult >> 24));
+				uint8 abyCurVer[4] = { VERSION_BUILD + 1, VERSION_UPDATE, VERSION_MIN, 0};
+				dwResult &= 0x00FFFFFF;
 				if (dwResult > *(uint32*)abyCurVer){
 					thePrefs.UpdateLastVC();
 					SetActiveWindow();
@@ -2345,7 +2374,8 @@ LRESULT CemuleDlg::OnVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 					if (!thePrefs.GetNotifierPopOnNewVersion()){
 						if (AfxMessageBox(GetResString(IDS_NEWVERSIONAVL)+GetResString(IDS_VISITVERSIONCHECK),MB_YESNO)==IDYES) {
 							CString theUrl;
-							theUrl.Format("http://vcheck.emule-project.net/en/version_check.php?version=%i&language=%i",theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
+							theUrl.Format("/en/version_check.php?version=%i&language=%i",theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
+							theUrl = thePrefs.GetVersionCheckBaseURL()+theUrl;
 							ShellExecute(NULL, NULL, theUrl, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
 						}
 					}

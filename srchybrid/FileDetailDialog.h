@@ -82,7 +82,7 @@ public:
 protected:
 	CString m_strCaption;
 	CPartFile* m_file;
-	//CListCtrl* pmyListCtrl;
+	bool m_bAppliedSystemImageList;
 	CMuleListCtrl pmyListCtrl;
 
 	uint32 m_timer;

@@ -165,6 +165,7 @@ void CIPFilterDlg::OnLvnColumnClickIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 BOOL CIPFilterDlg::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
+	InitWindowStyles(this);
 
 	AddAnchor(IDC_IPFILTER, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_TOTAL_IPFILTER_LABEL, BOTTOM_LEFT);

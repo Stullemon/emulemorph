@@ -40,9 +40,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib"
+				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\Debug\ResizableLib.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames="wsock32.lib;LIBCMT;msvcrtd.lib"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -113,9 +114,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib"
+				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Release\ResizableLib.lib"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="wsock32.lib"
+				IgnoreDefaultLibraryNames="wsock32.lib;LIBC;msvcrt.lib"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -610,6 +611,9 @@
 				RelativePath="IrcSocket.h">
 			</File>
 			<File
+				RelativePath="KillProcess.h">
+			</File>
+			<File
 				RelativePath="KnownFile.h">
 			</File>
 			<File
@@ -728,6 +732,9 @@
 			</File>
 			<File
 				RelativePath="Version.h">
+			</File>
+			<File
+				RelativePath="WebServices.h">
 			</File>
 			<File
 				RelativePath="WebSocket.h">
@@ -884,6 +891,9 @@
 				RelativePath="CustomAutoComplete.cpp">
 			</File>
 			<File
+				RelativePath="DirectDownloadDlg.cpp">
+			</File>
+			<File
 				RelativePath="DirectoryTreeCtrl.cpp">
 			</File>
 			<File
@@ -936,6 +946,9 @@
 			</File>
 			<File
 				RelativePath="ListBoxST.cpp">
+			</File>
+			<File
+				RelativePath="ListCtrlEditable.cpp">
 			</File>
 			<File
 				RelativePath="ListCtrlX.cpp">
@@ -1158,58 +1171,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="ResizeLib"
-				Filter="">
-				<File
-					RelativePath="ResizableLib\ResizableDialog.cpp">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableDialog.h">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableGrip.cpp">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableGrip.h">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableLayout.cpp">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableLayout.h">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableMinMax.cpp">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableMinMax.h">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableMsgSupport.h">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableMsgSupport.inl">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizablePage.cpp">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizablePage.h">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableSheet.cpp">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableSheet.h">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableState.cpp">
-				</File>
-				<File
-					RelativePath="ResizableLib\ResizableState.h">
-				</File>
-			</Filter>
-			<Filter
 				Name="TrayMenu"
 				Filter="">
 				<File
@@ -1290,6 +1251,9 @@
 				RelativePath="CustomAutoComplete.h">
 			</File>
 			<File
+				RelativePath="DirectDownloadDlg.h">
+			</File>
+			<File
 				RelativePath="DirectoryTreeCtrl.h">
 			</File>
 			<File
@@ -1342,6 +1306,9 @@
 			</File>
 			<File
 				RelativePath="ListBoxST.h">
+			</File>
+			<File
+				RelativePath="ListCtrlEditable.h">
 			</File>
 			<File
 				RelativePath="ListCtrlX.h">

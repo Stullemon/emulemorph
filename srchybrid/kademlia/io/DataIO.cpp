@@ -115,16 +115,15 @@ float CDataIO::readFloat(void)
 CTag *CDataIO::readTag(void)
 {
 	CTag *retVal = NULL;
+	char *name = NULL;
+	char *value = NULL;
 	try
 	{
 		byte type = readByte();
 		uint16 lenName = readUInt16();
-		char *name = new char[lenName+1];
+		name = new char[lenName+1];
 		name[lenName] = 0;
 		readArray(name, lenName);
-
-		uint16 lenValue;
-		char *value;
 
 		switch (type)
 		{
@@ -132,14 +131,16 @@ CTag *CDataIO::readTag(void)
 				retVal = new CTagUnk(type, name);
 				break;
 
-			case 0x02:
-				lenValue = readUInt16();
+			case 0x02:{
+				UINT lenValue = readUInt16();
 				value = new char[lenValue+1];
 				value[lenValue] = 0;
 				readArray(value, lenValue);
 				retVal = new CTagStr(name, value);
 				delete [] value;
+				value = NULL;
 				break;
+			}
 
 			case 0x03:
 				retVal = new CTagUInt32(name, readUInt32());
@@ -164,15 +165,20 @@ CTag *CDataIO::readTag(void)
 				retVal = new CTagUnk(type, name);
 		}
 		delete [] name;
+		name = NULL;
 	} 
 	catch (CIOException *ioe)
 	{
 		CKademlia::debugMsg("Exception in CDataIO:readTag (IO Error(%i))", ioe->m_cause);
+		delete [] name;
+		delete [] value;
 		throw ioe;
 	}
 	catch (...) 
 	{
 		CKademlia::debugLine("Exception in CDataIO:readTag");
+		delete [] name;
+		delete [] value;
 		throw;
 	}
 	return retVal;

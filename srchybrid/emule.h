@@ -21,7 +21,8 @@
 #include "resource.h"
 #include "loggable.h"
 
-#define	DEFAULT_NICK	_T("http://emule-project.net")
+#define	DEFAULT_NICK		thePrefs.GetHomepageBaseURL()
+#define	DEFAULT_TCP_PORT	4662
 
 class CSearchList;
 class CUploadQueue;
@@ -113,8 +114,23 @@ public:
 	virtual BOOL InitInstance();
 
 	// ed2k link functions
+	// khaos::categorymod+ Changed Param: uint8 cat
+	/*
+	void		AddEd2kLinksToDownload(CString strLinks, uint8 cat);
+	*/
+	void	AddEd2kLinksToDownload(CString strlink, int theCat = -1);
+	// khaos::categorymod-
+	void		SearchClipboard();
+	void		IgnoreClipboardLinks(CString strLinks) {m_strLastClipboardContents = strLinks;}
+	void		PasteClipboard();
+	bool		IsEd2kFileLinkInClipboard();
+	bool		IsEd2kServerLinkInClipboard();
+	bool		IsEd2kLinkInClipboard(LPCTSTR pszLinkType, int iLinkTypeLen);
+
 	CString		CreateED2kSourceLink(const CAbstractFile* f);
 	CString		CreateED2kHostnameSourceLink(const CAbstractFile* f);
+
+	// clipboard (text)
 	bool		CopyTextToClipboard( CString strText );
 	CString		CopyTextFromClipboard();
 	void		OnlineSig();
@@ -146,6 +162,9 @@ protected:
 	HIMAGELIST m_hSystemImageList;
 	CMapStringToPtr m_aExtToSysImgIdx;
 	CSize m_sizSmallSystemIcon;
+
+	bool		m_bGuardClipboardPrompt;
+	CString		m_strLastClipboardContents;
 };
 
 extern CemuleApp theApp;
