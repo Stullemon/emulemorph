@@ -614,8 +614,8 @@ public:
 	static bool	autobackup2;
 	//EastShare End - Added by Pretender, TBH-AutoBackup
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	static uint16	mindataratefriend;
-	static uint16	mindataratepowershare;
+	static uint16	globaldataratefriend;
+	static uint16	globaldataratepowershare;
 	static uint16	maxclientdataratefriend;
 	static uint16	maxclientdataratepowershare;
 	static uint16	maxclientdatarate;
@@ -1820,8 +1820,8 @@ public:
    //Commander - Added: Invisible Mode [TPT] - End
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	static	uint32	GetMinDataRateFriend();
-	static	uint32	GetMinDataRatePowerShare();
+	static	uint32	GetGlobalDataRateFriend();
+	static	uint32	GetGlobalDataRatePowerShare();
 	static	uint32	GetMaxClientDataRateFriend();
 	static	uint32	GetMaxClientDataRatePowerShare();
 	static	uint32	GetMaxClientDataRate();

@@ -580,8 +580,8 @@ bool	CPreferences::autobackup;
 bool	CPreferences::autobackup2;
 //EastShare End - Added by Pretender, TBH-AutoBackup
 //MORPH START - Added by SiRoB, Upload Splitting Class
-uint16	CPreferences::mindataratefriend;
-uint16	CPreferences::mindataratepowershare;
+uint16	CPreferences::globaldataratefriend;
+uint16	CPreferences::globaldataratepowershare;
 uint16	CPreferences::maxclientdataratefriend;
 uint16	CPreferences::maxclientdataratepowershare;
 uint16	CPreferences::maxclientdatarate;
@@ -1233,17 +1233,17 @@ uint64 CPreferences::GetMaxDownloadInBytesPerSec(bool dynamic){
 }
 
 //MORPH START - Added by SiRoB, Upload Splitting Class
-uint32	CPreferences::GetMinDataRateFriend()
+uint32	CPreferences::GetGlobalDataRateFriend()
 {
-	return mindataratefriend*1024;//_UI32_MAX;
+	return globaldataratefriend*1024;//_UI32_MAX;
 }
 uint32	CPreferences::GetMaxClientDataRateFriend()
 {
 	return maxclientdataratefriend*1024;
 }
-uint32	CPreferences::GetMinDataRatePowerShare()
+uint32	CPreferences::GetGlobalDataRatePowerShare()
 {
-	return mindataratepowershare*1024;//_UI32_MAX;
+	return globaldataratepowershare*1024;//_UI32_MAX;
 }
 uint32	CPreferences::GetMaxClientDataRatePowerShare()
 {
@@ -2709,8 +2709,8 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	ini.WriteInt(_T("MinDataRateFriend"),mindataratefriend,_T("eMule"));
-	ini.WriteInt(_T("MinDataRatePowerShare"),mindataratepowershare,_T("eMule"));
+	ini.WriteInt(_T("GlobalDataRateFriend"),globaldataratefriend,_T("eMule"));
+	ini.WriteInt(_T("GlobalDataRatePowerShare"),globaldataratepowershare,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRateFriend"),maxclientdataratefriend,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRatePowerShare"),maxclientdataratepowershare,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRate"),maxclientdatarate,_T("eMule"));
@@ -3367,8 +3367,8 @@ void CPreferences::LoadPreferences()
 	//EastShare - added by AndCycle, IP to Country
 	
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	mindataratefriend=ini.GetInt(_T("MinDataRateFriend"),0);
-	mindataratepowershare=ini.GetInt(_T("MinDataRatePowerShare"),0);
+	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),0);
+	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);
 	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
 	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
 	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),3);

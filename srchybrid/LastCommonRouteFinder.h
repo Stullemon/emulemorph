@@ -101,8 +101,8 @@ private:
 	bool m_bIsUSSLog;
 	//MORPH END   - Added by SiRoB, Log Flag to trace or not the USS activities
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	uint32 m_iMinDataRateFriend;
-	uint32 m_iMinDataRatePowerShare;
+	uint32 m_iGlobalDataRateFriend;
+	uint32 m_iGlobalDataRatePowerShare;
 	uint32 m_iMaxClientDataRateFriend;
 	uint32 m_iMaxClientDataRatePowerShare;
 	uint32 m_iMaxClientDataRate;

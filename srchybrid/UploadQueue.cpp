@@ -808,6 +808,7 @@ void CUploadQueue::Process() {
 
 	//MOPRH START - Added by SiRoB, Upload Splitting Class
 	memzero(m_abAddClientOfThisClass,sizeof(m_abAddClientOfThisClass)); 
+	memzero(m_abOnClientOverHideClientDatarate,sizeof(m_abOnClientOverHideClientDatarate)); 
 	//MOPRH END   - Added by SiRoB, Upload Splitting Class
 
 	// The loop that feeds the upload slots with data.
@@ -849,7 +850,7 @@ void CUploadQueue::Process() {
 					classID = 1;
 				}
 				if (maxdatarate > 0 && cur_client->GetDatarate()*10 >= 11*maxdatarate)
-					m_abAddClientOfThisClass[classID] = true;
+					m_abOnClientOverHideClientDatarate[classID] = true;
 			}
 			//MORPH END   - Added by SiRoB, Upload Splitting Class
 		}
@@ -861,15 +862,8 @@ void CUploadQueue::Process() {
 	
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-	{
-		bool isFocused = false;
-		switch (classID){
-			case 0:	isFocused = thePrefs.GetMaxClientDataRateFriend() == 0;
-			case 1:	isFocused = thePrefs.GetMaxClientDataRatePowerShare() == 0;
-			default: isFocused = thePrefs.GetMaxClientDataRate() == 0;
-		}
-		m_abAddClientOfThisClass[classID] |= (m_aiSlotCounter[classID] == 0) || isFocused;
-	}
+		if (isUnlimitedClass(classID) || m_abOnClientOverHideClientDatarate[classID])
+			m_abAddClientOfThisClass[classID] = true;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
@@ -1006,27 +1000,12 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 	{
-		if(m_abAddClientOfThisClass[classID] == true)
-		{
-			if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]){
-				if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
-					DebugLog(LOG_USC, _T("USC: Added new slot since throttler needs it for class %i. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i m_aiSlotCounter[classID]: %i tick: %i"), classID, m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
-				return true;
-			}
-			else if (m_aiSlotCounter[classID]>0){
-				if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
-				{
-					uint32 datarateperclient;
-					switch (classID)
-					{
-						case 0: datarateperclient = thePrefs.GetMaxClientDataRateFriend();break;
-						case 1: datarateperclient = thePrefs.GetMaxClientDataRatePowerShare();break;
-						default: datarateperclient = thePrefs.GetMaxClientDataRate();break;
-					}
-					DebugLog(LOG_USC, _T("USC: Added New Slot for class %i to respect %s per client: %i wanted, %i currently, %i tick"), classID, CastItoXBytes(datarateperclient,false,true), m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
-				}
-				return true;
-			}
+		if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]){
+			m_abAddClientOfThisClass[classID] = true;
+			return true;
+		}
+		else if (m_abOnClientOverHideClientDatarate[classID] == true){
+			return true;
 		}
 	}
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
@@ -1497,7 +1476,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		// ZZ:UploadSpeedSense -->
 		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
 		*/
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog(), thePrefs.GetMinDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetMinDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog(), thePrefs.GetGlobalDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetGlobalDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
 		//MOPRH END   - Modified by SiRoB, Upload Splitting Class
 
 		theApp.uploadqueue->Process();
@@ -1848,3 +1827,14 @@ uint32	CUploadQueue::GetMaxVUR()
 	return min(max(MaxVUR,(uint32)1024*thePrefs.GetMinUpload()),(uint32)1024*thePrefs.GetMaxUpload());
 }
 //MORPH END   - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
+
+bool CUploadQueue::isUnlimitedClass(uint32 classID){
+	bool bunlimited = false;
+	switch (classID){
+		case 0:	bunlimited = thePrefs.GetGlobalDataRateFriend() == 0;break;
+		case 1:	bunlimited = thePrefs.GetGlobalDataRatePowerShare() == 0;break;
+		default: bunlimited = thePrefs.GetMaxUpload() == UNLIMITED;break;
+	}
+	return bunlimited;
+}
+	

@@ -37,9 +37,9 @@ protected:
 	int m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	int m_iClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	int m_iMinDataRateFriend;
+	int m_iGlobalDataRateFriend;
 	int m_iMaxClientDataRateFriend;
-	int m_iMinDataRatePowerShare;
+	int m_iGlobalDataRatePowerShare;
 	int m_iMaxClientDataRatePowerShare;
 	int m_iMaxClientDataRate;
 	//MORPH END  - Added by SiRoB, Upload Splitting Class
@@ -98,10 +98,10 @@ protected:
 	HTREEITEM m_htiClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	HTREEITEM m_htiFriend;
-	HTREEITEM m_htiMinDataRateFriend;
+	HTREEITEM m_htiGlobalDataRateFriend;
 	HTREEITEM m_htiMaxClientDataRateFriend;
 	HTREEITEM m_htiPowerShare;
-	HTREEITEM m_htiMinDataRatePowerShare;
+	HTREEITEM m_htiGlobalDataRatePowerShare;
 	HTREEITEM m_htiMaxClientDataRatePowerShare;
 	HTREEITEM m_htiMaxClientDataRate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class

@@ -94,10 +94,10 @@ CPPgMorph::CPPgMorph()
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_htiFriend = NULL;
-	m_htiMinDataRateFriend = NULL;
+	m_htiGlobalDataRateFriend = NULL;
 	m_htiMaxClientDataRateFriend = NULL;
 	m_htiPowerShare = NULL;
-	m_htiMinDataRatePowerShare = NULL;
+	m_htiGlobalDataRatePowerShare = NULL;
 	m_htiMaxClientDataRatePowerShare = NULL;
 	m_htiMaxClientDataRate = NULL;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
@@ -263,13 +263,13 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		m_htiFriend = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_FRIENDS), iImgFriend, m_htiUM);
-		m_htiMinDataRateFriend = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINDATARATEFRIEND), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiFriend);
-		m_ctrlTreeOptions.AddEditBox(m_htiMinDataRateFriend, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiGlobalDataRateFriend = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINDATARATEFRIEND), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiFriend);
+		m_ctrlTreeOptions.AddEditBox(m_htiGlobalDataRateFriend, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiMaxClientDataRateFriend = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCLIENTDATARATEFRIEND), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiFriend);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxClientDataRateFriend, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiPowerShare = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_POWERSHARE), iImgPowerShare, m_htiUM);
-		m_htiMinDataRatePowerShare = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINDATARATEPOWERSHARE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiPowerShare);
-		m_ctrlTreeOptions.AddEditBox(m_htiMinDataRatePowerShare, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiGlobalDataRatePowerShare = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINDATARATEPOWERSHARE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiPowerShare);
+		m_ctrlTreeOptions.AddEditBox(m_htiGlobalDataRatePowerShare, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiMaxClientDataRatePowerShare = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCLIENTDATARATEPOWERSHARE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiPowerShare);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxClientDataRatePowerShare, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiMaxClientDataRate = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCLIENTDATARATE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
@@ -328,9 +328,9 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_iInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDontRemoveSpareTrickleSlot, m_iDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiClientQueueProgressBar, m_iClientQueueProgressBar); //MORPH - Added by Commander, ClientQueueProgressBar
-	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMinDataRateFriend, m_iMinDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalDataRateFriend, m_iGlobalDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRateFriend, m_iMaxClientDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
-	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMinDataRatePowerShare, m_iMinDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalDataRatePowerShare, m_iGlobalDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRatePowerShare, m_iMaxClientDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRate, m_iMaxClientDataRate);//MORPH - Added by SiRoB, Upload Splitting Class
 	// Mighty Knife: Community visualization
@@ -399,9 +399,9 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iDontRemoveSpareTrickleSlot = thePrefs.m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	m_iClientQueueProgressBar = thePrefs.m_bClientQueueProgressBar;//MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	m_iMinDataRateFriend = thePrefs.mindataratefriend;
+	m_iGlobalDataRateFriend = thePrefs.globaldataratefriend;
 	m_iMaxClientDataRateFriend = thePrefs.maxclientdataratefriend;
-	m_iMinDataRatePowerShare = thePrefs.mindataratepowershare;
+	m_iGlobalDataRatePowerShare = thePrefs.globaldataratepowershare;
 	m_iMaxClientDataRatePowerShare = thePrefs.maxclientdataratepowershare;
 	m_iMaxClientDataRate = thePrefs.maxclientdatarate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
@@ -492,9 +492,9 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bDontRemoveSpareTrickleSlot = m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	thePrefs.m_bClientQueueProgressBar = m_iClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	thePrefs.mindataratefriend = m_iMinDataRateFriend;
+	thePrefs.globaldataratefriend = m_iGlobalDataRateFriend;
 	thePrefs.maxclientdataratefriend = m_iMaxClientDataRateFriend;
-	thePrefs.mindataratepowershare = m_iMinDataRatePowerShare;
+	thePrefs.globaldataratepowershare = m_iGlobalDataRatePowerShare;
 	thePrefs.maxclientdataratepowershare = m_iMaxClientDataRatePowerShare;
 	thePrefs.maxclientdatarate = m_iMaxClientDataRate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
@@ -608,9 +608,9 @@ void CPPgMorph::Localize(void)
 		if (m_htiDontRemoveSpareTrickleSlot) m_ctrlTreeOptions.SetItemText(m_htiDontRemoveSpareTrickleSlot, GetResString(IDS_DONTREMOVESPARETRICKLESLOT));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 		if (m_htiClientQueueProgressBar) m_ctrlTreeOptions.SetItemText(m_htiClientQueueProgressBar, GetResString(IDS_CLIENTQUEUEPROGRESSBAR));//MORPH - Added by Commander, ClientQueueProgressBar
 		//MORPH START - Added by SiRoB, Upload Splitting Class
-		if (m_htiMinDataRateFriend) m_ctrlTreeOptions.SetEditLabel(m_htiMinDataRateFriend, GetResString(IDS_MINDATARATEFRIEND));
+		if (m_htiGlobalDataRateFriend) m_ctrlTreeOptions.SetEditLabel(m_htiGlobalDataRateFriend, GetResString(IDS_MINDATARATEFRIEND));
 		if (m_htiMaxClientDataRateFriend) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRateFriend, GetResString(IDS_MAXCLIENTDATARATEFRIEND));
-		if (m_htiMinDataRatePowerShare) m_ctrlTreeOptions.SetEditLabel(m_htiMinDataRatePowerShare, GetResString(IDS_MINDATARATEPOWERSHARE));
+		if (m_htiGlobalDataRatePowerShare) m_ctrlTreeOptions.SetEditLabel(m_htiGlobalDataRatePowerShare, GetResString(IDS_MINDATARATEPOWERSHARE));
 		if (m_htiMaxClientDataRatePowerShare) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRatePowerShare, GetResString(IDS_MAXCLIENTDATARATEPOWERSHARE));
 		if (m_htiMaxClientDataRate) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRate, GetResString(IDS_MAXCLIENTDATARATE));
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
@@ -685,10 +685,10 @@ void CPPgMorph::OnDestroy()
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_htiFriend = NULL;
-	m_htiMinDataRateFriend = NULL;
+	m_htiGlobalDataRateFriend = NULL;
 	m_htiMaxClientDataRateFriend = NULL;
 	m_htiPowerShare = NULL;
-	m_htiMinDataRatePowerShare = NULL;
+	m_htiGlobalDataRatePowerShare = NULL;
 	m_htiMaxClientDataRatePowerShare = NULL;
 	m_htiMaxClientDataRate = NULL;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class

@@ -87,7 +87,8 @@ public:
 
 	//Morph - added by AndCycle, separate special prio compare
 	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient, bool checkforaddinuploadinglist = false);  //MORPH - Changed by SiRoB, Upload Splitting Class
-
+	bool isUnlimitedClass(uint32 classID);  //MORPH - Added by SiRoB, Upload Splitting Class
+	
 protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
 //	POSITION	GetWaitingClient(CUpDownClient* client);
@@ -146,6 +147,7 @@ private:
 	uint32  m_MaxActiveClients;
     uint32  m_MaxActiveClientsShortTime;
 	bool	m_abAddClientOfThisClass[3/*NB_SPLITTING_CLASS*/];	//MORPH - Added by SiRoB, Upload Splitting Class
+	bool	m_abOnClientOverHideClientDatarate[3/*NB_SPLITTING_CLASS*/];	//MORPH - Added by SiRoB, Upload Splitting Class
 	uint32	m_aiSlotCounter[3/*NB_SPLITTING_CLASS*/];	//MORPH - Added by SiRoB, Upload Splitting Class
 	DWORD   m_lastCalculatedDataRateTick;
     uint64  m_avarage_dr_sum;
