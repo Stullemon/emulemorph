@@ -34,8 +34,9 @@
 #include "Opcodes.h"
 #include "InputBox.h"
 
-// Mighty Knife: CRC32-Tag
+// Mighty Knife: CRC32-Tag, Mass Rename
 #include "AddCRC32TagDialog.h"
+#include "MassRename.h"
 // [end] Mighty Knife
 
 #ifdef _DEBUG
@@ -1339,6 +1340,49 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 			// [end] Mighty Knife
 
+			// Mighty Knife: Mass Rename
+			case MP_MASSRENAME: {
+					CMassRenameDialog MRDialog;
+					// Add the files to the dialog
+					POSITION pos = selectedList.GetHeadPosition();
+					while (pos != NULL) {
+						CKnownFile*  file = selectedList.GetAt (pos);
+						MRDialog.m_FileList.AddTail (file);
+						selectedList.GetNext (pos);
+					}
+					int result = MRDialog.DoModal ();
+					if (result == IDOK) {
+						// The user has successfully entered new filenames. Now we have
+						// to rename all the files...
+						POSITION pos = selectedList.GetHeadPosition();
+						int i=0;
+						while (pos != NULL) {
+							CString newname = MRDialog.m_NewFilenames.at (i);
+							CString newpath = MRDialog.m_NewFilePaths.at (i);
+							CKnownFile* file = selectedList.GetAt (pos);
+							if (_trename(file->GetFilePath(), newpath) != 0){
+								CString strError;
+								strError.Format(_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, strerror(errno));
+								AddLogLine(false,strError);
+							} else {
+								CString strres;
+								strres.Format(_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
+								AddLogLine(false,strres);
+								theApp.sharedfiles->RemoveKeywords(file);
+								file->SetFileName(newname);
+								theApp.sharedfiles->AddKeywords(file);
+								file->SetFilePath(newpath);
+								UpdateFile(file);
+							}
+
+							// Next item
+							selectedList.GetNext (pos);
+							i++;
+						}
+					}
+				}
+				break;
+			// [end] Mighty Knife
 			// xMule_MOD: showSharePermissions
 			default:
 				POSITION pos = selectedList.GetHeadPosition();
@@ -1888,6 +1932,10 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CALCCRC32,"Calculate CRC32");
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ADDCRC32TOFILENAME,"Add Release-Tag/CRC32 to filename...");
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ABORTCRC32CALC,"Abort CRC32 calculation");
+	// [end] Mighty Knife
+
+	// Mighty Knife: Mass Rename
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_MASSRENAME,"Mass rename...");
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	// [end] Mighty Knife
 

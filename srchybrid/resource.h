@@ -1962,6 +1962,7 @@
 #define IDS_CAT_MERGE                   3619
 #define IDD_ADDCRC32TAG                 3619
 #define IDS_CAT_SETFILEGROUP            3620
+#define IDD_MASSRENAME                  3620
 #define IDS_CAT_GROUP                   3621
 #define IDS_CAT_SETFILEGROUPMSG         3622
 #define IDC_AUTOCAT                     3622
@@ -2246,8 +2247,18 @@
 #define IDC_CHECK1                      4880
 #define IDC_DONTADDCRC                  4880
 #define IDS_COUNTRYNAME_MID             4881
+#define IDC_FILENAMEMASKEDITTEMPLATE    4881
 #define IDS_COUNTRYNAME_LONG            4882
+#define IDC_OLDFILENAMESEDIT            4882
 #define IDS_COUNTRYNAME_SHOWFLAG        4883
+#define IDC_NEWFILENAMESEDITLEFT        4883
+#define ID_MASSRENAMEOK                 4885
+#define ID_MASSRENAMECANCEL             4886
+#define IDC_FILENAMELEFT                4888
+#define IDC_FILENAMERIGHT               4889
+#define IDC_NEWFILENAMESEDITRIGHT       4890
+#define IDC_RESETBUTTON                 4891
+#define IDC_RICHEDIT23                  4896
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
@@ -2258,7 +2269,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        4878
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         4881
+#define _APS_NEXT_CONTROL_VALUE         4897
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

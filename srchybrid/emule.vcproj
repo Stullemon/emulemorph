@@ -966,6 +966,9 @@
 				RelativePath="LogEditCtrl.cpp">
 			</File>
 			<File
+				RelativePath=".\MassRename.cpp">
+			</File>
+			<File
 				RelativePath="MetaDataDlg.cpp">
 			</File>
 			<File
@@ -1351,6 +1354,9 @@
 			</File>
 			<File
 				RelativePath="LogEditCtrl.h">
+			</File>
+			<File
+				RelativePath=".\MassRename.h">
 			</File>
 			<File
 				RelativePath="MemDC.h">

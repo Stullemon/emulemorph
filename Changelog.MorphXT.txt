@@ -16,6 +16,8 @@ ADDED  : CRC32 calculation/testing for files. Right click on a file in the share
          Furthermore a releaser tag can be added (together with the CRC) to the filename (of course for multiple files at once, too).
          The calculated CRC is shown in a column on the right - together with an info whether the calculated CRC was found in 
          the filename. (Hint: The calculated CRC32 will not be stored in known.met) [MightyKnife]
+ADDED  : Mass-Rename. Rename multiple files at once in a text field or with a file mask. Select some files in the shared files list,
+         right-click and choose 'Mass rename...'. [MightyKnife]
 ADDED  : searchCatch and cacheUDPsearchResults from [SlugFiller-itsonlyme]
 NOTE   : IP2Country now support to display flag of the country, this require countryflag.dll, also put it at /config/, currently you can get this from Morph CVS
 

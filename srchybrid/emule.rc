@@ -13,12 +13,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 中性 resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(950)
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1528,6 +1528,37 @@ BEGIN
                     WS_TABSTOP,2,61,245,10
 END
 
+IDD_MASSRENAME DIALOGEX 0, 0, 377, 258
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Mass-Rename"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "OK",ID_MASSRENAMEOK,264,237,50,14,BS_FLAT
+    PUSHBUTTON      "Abbrechen",ID_MASSRENAMECANCEL,319,237,50,14,BS_FLAT
+    LTEXT           "Filename mask (changes here will be done to all filenames below):",
+                    IDC_STATIC,4,4,210,8
+    EDITTEXT        IDC_FILENAMEMASKEDITTEMPLATE,4,16,310,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_OLDFILENAMESEDIT,196,53,173,177,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
+                    WS_VSCROLL
+    CONTROL         "Original filenames:",IDC_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,196,45,60,8
+    LTEXT           "New filenames:",IDC_STATIC,4,45,50,8
+    CONTROL         "Filenames left-justified",IDC_FILENAMELEFT,"Button",
+                    BS_AUTORADIOBUTTON | BS_FLAT,4,32,87,10
+    CONTROL         "Filenames right-justified",IDC_FILENAMERIGHT,"Button",
+                    BS_AUTORADIOBUTTON | BS_FLAT,100,32,96,10
+    PUSHBUTTON      "&Reset",IDC_RESETBUTTON,319,16,50,14
+    CONTROL         "",IDC_NEWFILENAMESEDITLEFT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | 
+                    WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,4,53,
+                    180,177
+    CONTROL         "",IDC_NEWFILENAMESEDITRIGHT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | 
+                    WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,4,53,
+                    180,177,WS_EX_RIGHT
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2119,6 +2150,20 @@ BEGIN
         TOPMARGIN, 1
         BOTTOMMARGIN, 90
     END
+
+    IDD_MASSRENAME, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 369
+        VERTGUIDE, 100
+        VERTGUIDE, 184
+        VERTGUIDE, 196
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 251
+        HORZGUIDE, 32
+        HORZGUIDE, 53
+        HORZGUIDE, 230
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2349,12 +2394,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // 中性 resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// 英文 (美國) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4261,7 +4306,7 @@ BEGIN
     IDS_COUNTRYNAME_SHOWFLAG "ShowFlag"
 END
 
-#endif    // 英文 (美國) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

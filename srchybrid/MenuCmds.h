@@ -163,6 +163,10 @@
 #define MP_ABORTCRC32CALC		10382
 // [end] Mighty Knife
 
+// Mighty Knife: Mass Rename
+#define MP_MASSRENAME    		10385
+// [end] Mighty Knife
+
 // quick-speed changer
 #define MP_QS_U10				10501
 #define MP_QS_U20				10502
