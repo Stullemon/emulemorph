@@ -1032,9 +1032,15 @@ uint16 CUpDownClient::GetAvailablePartCount(){
 
 void CUpDownClient::SetRemoteQueueRank(uint16 nr){
 
-	if(m_nRemoteQueueRank){
-		m_iDifferenceQueueRank = (nr-m_nRemoteQueueRank);//Morph - added by AndCycle, DiffQR
+	//Morph - added by AndCycle, DiffQR
+	if(nr == 0){
+		m_iDifferenceQueueRank = 0;
 	}
+	else if(m_nRemoteQueueRank){
+		m_iDifferenceQueueRank = (nr-m_nRemoteQueueRank);
+	}
+	//Morph - added by AndCycle, DiffQR
+
 	m_nRemoteQueueRank = nr;
 	UpdateDisplayedInfo();
 }
