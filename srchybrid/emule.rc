@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -89,7 +89,7 @@ BEGIN
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
                     WS_TABSTOP,5,234,500,43,WS_EX_STATICEDGE
     LTEXT           "IDS_TW_QUEUE",IDC_TSTATIC1,6,280,87,8
-    LTEXT           "0",IDC_QUEUECOUNT,100,280,78,8
+    LTEXT           "0",IDC_QUEUECOUNT,100,280,86,8
     CONTROL         "",IDC_SPLITTER,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,
                     85,102,420,4
     CONTROL         "",IDC_QUEUELIST,"SysListView32",LVS_REPORT | 
@@ -103,6 +103,7 @@ BEGIN
                     WS_VISIBLE | WS_TABSTOP,5,171,500,106,WS_EX_STATICEDGE
     CONTROL         "",IDC_DLTAB,"SysTabControl32",TCS_RAGGEDRIGHT | 
                     TCS_TOOLTIPS,239,2,263,17,WS_EX_RIGHT
+    CONTROL         "",IDC_QUEUE,"msctls_progress32",0x1,190,281,243,6
 END
 
 IDD_SERVER DIALOGEX 0, 35, 511, 289
@@ -378,11 +379,11 @@ BEGIN
     GROUPBOX        "Static",IDC_STARTUP,14,111,202,56
     LTEXT           "days",IDC_DAYS,161,116,48,9
     CONTROL         "Start with Windows",IDC_STARTWIN,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,169,190,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,137,155,75,10
     GROUPBOX        "Invisible Mode",IDC_INVISIBLE_MODE_GROUP_BOX,14,168,202,
                     60
-    CONTROL         "Aktivate Invisible Mode",IDC_INVISIBLE_MODE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,18,179,146,8
+    CONTROL         "Activate Invisible Mode",IDC_INVISIBLE_MODE,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,18,179,146,8
     LTEXT           "Select the hotkey to restore the window",
                     IDC_INVISIBLE_MODE_SELECT_STATIC,18,190,146,8
     LTEXT           "Modifier Keys:",IDC_INVISIBLE_MODE_MODIFIER_STATIC,18,
@@ -394,7 +395,7 @@ BEGIN
                     CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "+",IDC_INVISIBLE_MODE_SYMBOL_STATIC,125,213,8,8
     CONTROL         "Play startupsound",IDC_STARTUPSOUNDON,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,155,138,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,155,102,10
 END
 
 IDD_PPG_FILES DIALOGEX 0, 0, 229, 243
@@ -1232,13 +1233,13 @@ BEGIN
                     358,111,148,59
 END
 
-IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 225
+IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 231
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Client Details"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "General",IDC_STATIC30,7,1,308,74,BS_FLAT
+    GROUPBOX        "General",IDC_STATIC30,7,1,308,80,BS_FLAT
     LTEXT           "Username:",IDC_STATIC31,19,14,60,8
     LTEXT           "Static",IDC_DNAME,84,14,224,8
     LTEXT           "Userhash:",IDC_STATIC32,19,25,59,8
@@ -1252,35 +1253,35 @@ BEGIN
     LTEXT           "Static",IDC_DSNAME,219,47,92,8
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8
     LTEXT           "Static",IDC_CDIDENT,84,58,106,8
-    GROUPBOX        "Transfer",IDC_STATIC40,7,81,308,71,BS_FLAT
-    LTEXT           "Currently downloading:",IDC_STATIC41,19,91,86,8
-    LTEXT           "Static",IDC_DDOWNLOADING,110,91,202,8
-    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,113,87,8
-    LTEXT           "Static",IDC_DDOWN,110,113,53,8
-    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,124,86,8
-    LTEXT           "Static",IDC_DAVDR,110,124,53,8
-    LTEXT           "Downloaded total:",IDC_STATIC44,19,135,83,8
-    LTEXT           "Static",IDC_DDOWNTOTAL,110,135,53,8
-    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,113,93,8
-    LTEXT           "Static",IDC_DDUP,256,113,51,8
-    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,124,93,8
-    LTEXT           "Static",IDC_DAVUR,256,124,50,8
-    LTEXT           "Uploaded total:",IDC_STATIC47,163,135,93,8
-    LTEXT           "Static",IDC_DUPTOTAL,256,135,50,8
-    GROUPBOX        "Scores",IDC_STATIC50,7,156,308,47,BS_FLAT
-    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,169,87,8
-    LTEXT           "Static",IDC_DRATIO,110,169,53,8
-    LTEXT           "Rating (total):",IDC_STATIC52,19,180,84,8
-    LTEXT           "Static",IDC_DRATING,110,180,53,8
-    LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,191,91,8
-    LTEXT           "Static",IDC_DSCORE,110,191,105,8
-    DEFPUSHBUTTON   "&Close",IDOK,268,207,47,14,BS_FLAT
-    LTEXT           "Currently downloading:",IDC_STATIC48,19,102,86,8
-    LTEXT           "Static",IDC_UPLOADING,110,102,202,8
+    GROUPBOX        "Transfer",IDC_STATIC40,7,86,308,71,BS_FLAT
+    LTEXT           "Currently downloading:",IDC_STATIC41,19,96,86,8
+    LTEXT           "Static",IDC_DDOWNLOADING,110,96,202,8
+    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,118,87,8
+    LTEXT           "Static",IDC_DDOWN,110,118,53,8
+    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,129,86,8
+    LTEXT           "Static",IDC_DAVDR,110,129,53,8
+    LTEXT           "Downloaded total:",IDC_STATIC44,19,140,83,8
+    LTEXT           "Static",IDC_DDOWNTOTAL,110,140,53,8
+    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,118,93,8
+    LTEXT           "Static",IDC_DDUP,256,118,51,8
+    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,129,93,8
+    LTEXT           "Static",IDC_DAVUR,256,129,50,8
+    LTEXT           "Uploaded total:",IDC_STATIC47,163,140,93,8
+    LTEXT           "Static",IDC_DUPTOTAL,256,140,50,8
+    GROUPBOX        "Scores",IDC_STATIC50,7,161,308,47,BS_FLAT
+    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,174,87,8
+    LTEXT           "Static",IDC_DRATIO,110,174,53,8
+    LTEXT           "Rating (total):",IDC_STATIC52,19,185,84,8
+    LTEXT           "Static",IDC_DRATING,110,185,53,8
+    LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,196,91,8
+    LTEXT           "Static",IDC_DSCORE,110,196,105,8
+    DEFPUSHBUTTON   "&Close",IDOK,268,213,47,14,BS_FLAT
+    LTEXT           "Currently downloading:",IDC_STATIC48,19,107,86,8
+    LTEXT           "Static",IDC_UPLOADING,110,107,202,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     LTEXT           "Static",IDC_CLIENTDETAIL_KADCON,219,57,92,8
-    LTEXT           "Static",IDC_DLOC,215,58,92,8
-    LTEXT           "Country:",IDC_DLOC2,163,58,49,8
+    LTEXT           "Static",IDC_DLOC,84,69,92,8
+    LTEXT           "Country:",IDC_DLOC2,19,69,49,8
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -2293,7 +2294,7 @@ BEGIN
         VERTGUIDE, 215
         VERTGUIDE, 256
         TOPMARGIN, 7
-        BOTTOMMARGIN, 221
+        BOTTOMMARGIN, 227
         HORZGUIDE, 28
         HORZGUIDE, 39
         HORZGUIDE, 50
@@ -2714,12 +2715,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Allemand (Allemagne) resources
+// Deutsch (Deutschland) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -2737,12 +2738,12 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 TRAY_MESSAGE            ICON                    "res\\mule_tray_message.ico"
 TRAY_MESSAGE_GREY       ICON                    "res\\mule_tray_message_grey.ico"
 TRAY_MESSAGE_LOW        ICON                    "res\\mule_tray_message_low.ico"
-#endif    // Allemand (Allemagne) resources
+#endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5011,7 +5012,7 @@ BEGIN
     IDS_CRC32_ABORT         "Abort calculation"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

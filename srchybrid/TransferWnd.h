@@ -23,6 +23,7 @@
 #include "DownloadListCtrl.h"
 #include "QueueListCtrl.h"
 #include "ClientListCtrl.h"
+#include "progressctrlx.h" //Commander - Added: ClientQueueProgressBar
 
 class CUploadListCtrl;
 class CDownloadListCtrl;
@@ -69,6 +70,7 @@ protected:
 	CImageList* m_pDragImage;
 	HICON icon_download;
 	POINT m_pLastMousePoint;
+	CProgressCtrlX queueBar; //Commander - Added: ClientQueueProgressBar
 
 	void ShowWnd2(uint8 uList);
 	void SetWnd2(uint8 uWnd2);

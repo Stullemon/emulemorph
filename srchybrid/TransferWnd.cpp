@@ -101,6 +101,7 @@ BOOL CTransferWnd::OnInitDialog()
 	AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_UPLOAD_ICO,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_QUEUECOUNT,BOTTOM_LEFT);
+    AddAnchor(IDC_QUEUE, BOTTOM_LEFT, BOTTOM_RIGHT); //Commander - Added: ClientQueueProgressBar
 	AddAnchor(IDC_TSTATIC1,BOTTOM_LEFT);
 	AddAnchor(IDC_QUEUE_REFRESH_BUTTON, BOTTOM_RIGHT);
 	AddAnchor(IDC_DLTAB,CSize(50,0) ,TOP_RIGHT);
@@ -154,8 +155,31 @@ BOOL CTransferWnd::OnInitDialog()
 
 void CTransferWnd::ShowQueueCount(uint32 number){
 	TCHAR buffer[100];
-	_stprintf(buffer,_T("%u (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"), number,theApp.clientlist->GetBannedCount() );
+	_stprintf(buffer,_T("%u / %u (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"),number,(thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200)),theApp.clientlist->GetBannedCount()); //Commander - Modified: ClientQueueProgressBar
 	GetDlgItem(IDC_QUEUECOUNT)->SetWindowText(buffer);
+    //Commander - Added: ClientQueueProgressBar - Start
+	if(thePrefs.IsInfiniteQueueEnabled()){
+		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_HIDE);
+	}
+	else{
+		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_SHOW);
+		queueBar.SetRange32(0, (thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200))); //Softlimit -> GetQueueSize | Hardlimit -> (GetQueueSize + (GetQueueSize/4))
+		queueBar.SetPos(number);
+		queueBar.SetBkColor(RGB(255,255,255));
+		queueBar.SetShowPercent();
+		queueBar.SetGradientColors(RGB(0,255,0),RGB(255,0,0));
+        /*
+		CFont bold;
+		LOGFONT lf; 
+		GetFont()->GetLogFont(&lf); 
+		lf.lfWeight = FW_BOLD;
+		lf.lfHeight = 7;
+		bold.CreateFontIndirect(&lf);
+		queueBar.SetFont(&bold);
+		*/
+
+	}
+	//Commander - Added: ClientQueueProgressBar - End
 }
 
 void CTransferWnd::DoDataExchange(CDataExchange* pDX)
@@ -167,6 +191,7 @@ void CTransferWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CLIENTLIST, clientlistctrl);
 	DDX_Control(pDX, IDC_UPLOAD_ICO, m_uplBtn);
 	DDX_Control(pDX, IDC_DLTAB, m_dlTab);
+	DDX_Control(pDX, IDC_QUEUE, queueBar); //Commander - Added: ClientQueueProgressBar - Start
 }
 
 void CTransferWnd::SetInitLayout() {
