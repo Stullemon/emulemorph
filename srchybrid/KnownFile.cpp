@@ -2656,7 +2656,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	/*
 	if (m_PartSentCount.GetSize() != partspread.GetSize())
 	*/
-	if (m_PartSentCount.GetSize() != partspread.GetSize() && m_PartSentCount.GetSize() != 0)
+	if (m_PartSentCount.GetSize() != partspread.GetSize() || m_PartSentCount.GetSize() == 0)
 	//MORPH END   - Changed by SiRoB, -HotFix-
 		resetSentCount = true;
 	else {

@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.44d MorphXT v5.11
+--------------------------------------
+FIXED  : HideOS: right HotFix [SiRoB]
+FIXED  : Webcache: Avanced control are now available again [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44d MorphXT v5.10
 --------------------------------------
 FIXED  : Fix the spreadbar default state [SiRoB]
