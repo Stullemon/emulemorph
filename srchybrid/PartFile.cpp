@@ -1339,39 +1339,19 @@ void CPartFile::WritePartStatus(CFile* file, CUpDownClient* client){
 	}
 	file->Write(&parts,2);
 	ASSERT(parts != 0);
-	//wistily SOTN START
-	if (GetPowerShareAuto()){ 
-        uint16 done = 0;
-		if(m_AvailPartFrequency.GetSize() == parts) //MORPH - Added by SiRoB, fixe when m_AvailPartFrequency is not as expected
-			while (done != parts){
-				uint8 towrite = 0;
-				for (uint32 i = 0;i != 8;i++){
-					if (m_AvailPartFrequency[done]==0)	
-						if (IsComplete(done*PARTSIZE,((done+1)*PARTSIZE)-1))
-						towrite |= (1<<i);
-					done++;
-					if (done == parts)
-						break;
-				}
-				file->Write(&towrite,1);
-			}
-	}
-	//wistily SOTN END
-	else {		
-		// SLUGFILLER: hideOS
-		uint16 done = 0;
-		while (done != parts){
-			uint8 towrite = 0;
-			for (uint32 i = 0;i != 8;i++){
-				if (partspread[done] < hideOS)	// SLUGFILLER: hideOS
-					if (IsComplete(done*PARTSIZE,((done+1)*PARTSIZE)-1))
-						towrite |= (1<<i);
-				done++;
-				if (done == parts)
-					break;
-			}
-			file->Write(&towrite,1);
+	// SLUGFILLER: hideOS
+	uint16 done = 0;
+	while (done != parts){
+		uint8 towrite = 0;
+		for (uint32 i = 0;i != 8;i++){
+			if (partspread[done] < hideOS)	// SLUGFILLER: hideOS
+				if (IsComplete(done*PARTSIZE,((done+1)*PARTSIZE)-1))
+					towrite |= (1<<i);
+			done++;
+			if (done == parts)
+				break;
 		}
+		file->Write(&towrite,1);
 	}
 }
 
