@@ -50,6 +50,7 @@ public:
 		lastSpreadSortValue = 0;;
 		lastFullSpreadCount = 0;
 		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
+		shareStartTime = 0;//this value init will be done in other place //Morph - Added by AndCycle, Equal Chance For Each File
 	}
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 	void	MergeFileStats( CFileStatistic* toMerge );
@@ -73,6 +74,11 @@ public:
 	CKnownFile* fileParent;
 	uint32	GetLastUsed()				{return lastused;} // EastShare - Added by TAHO, .met fiel control
 	void	SetLastUsed(uint32 inLastUsed)				{lastused = inLastUsed;} // EastShare - Added by TAHO, .met fiel control
+	//Morph Start - Added by AndCycle, Equal Chance For Each File
+	void	SetSharedTime(uint32 sharedTime)		{ shareStartTime = time(NULL) - sharedTime;}
+	uint32	GetSharedTime()							{ return time(NULL) - shareStartTime;}
+	uint32	GetShareStartTime()						{ return shareStartTime;}
+	//Morph End - Added by AndCycle, Equal Chance For Each File
 private:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
 	CRBMap<uint32, uint32> spreadlist;
@@ -95,6 +101,7 @@ private:
 	uint64 alltimetransferred;
 	uint32 alltimeaccepted;
 	uint32 lastused; //EastShare - Added by TAHO, .met file control
+	uint32 shareStartTime;//Morph - Added by AndCycle, Equal Chance For Each File
 };
 
 /*
