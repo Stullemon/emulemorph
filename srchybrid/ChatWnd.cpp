@@ -134,7 +134,8 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	// Client
 	if (pFriend->GetLinkedClient())
 	{
-		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->DbgGetFullClientSoftVer());
+		//Morph
+		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->GetClientSoftVer());
 	}
 	else
 		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(_T("?"));
