@@ -5467,6 +5467,8 @@ BEGIN
     IDS_IP2COUNTRY_ERROR6   "IP to Country file download failed"
     IDS_IP2COUNTRY_ERROR7   "Failed to extract IP to Country file from downloaded IP to Country ZIP file \""%s\""."
     IDS_IP2COUNTRY_ERROR8   "Downloaded IP to Country file \""%s\"" is a ZIP file with unexpected content."
+    IDS_IP2COUNTRY_NALONG   "Not Applicable"
+    IDS_IP2COUNTRY_NASHORT  "N/A"
     IDS_IP2COUNTRY_LOADED2  "Loaded IP2Country from \""%s\"" in %ums"
     IDS_IP2COUNTRY_INFO     "Parsed lines:%u  Found IPCountry ranges:%u  Duplicate:%u  Merged:%u"
     IDS_IP2COUNTRY_FLAGLOAD "Country Flags have been loaded"

@@ -63,9 +63,9 @@ CIP2Country::CIP2Country(){
 	defaultIP2Country.IPstart = 0;
 	defaultIP2Country.IPend = 0;
 
-	defaultIP2Country.ShortCountryName = "N/A";
-	defaultIP2Country.MidCountryName = "N/A";
-	defaultIP2Country.LongCountryName = "Not Applicable";
+	defaultIP2Country.ShortCountryName = GetResString(IDS_IP2COUNTRY_NASHORT);
+	defaultIP2Country.MidCountryName = GetResString(IDS_IP2COUNTRY_NASHORT);
+	defaultIP2Country.LongCountryName = GetResString(IDS_IP2COUNTRY_NALONG);
 
 	defaultIP2Country.FlagIndex = NO_FLAG;
 
