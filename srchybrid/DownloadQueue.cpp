@@ -1926,69 +1926,57 @@ LRESULT CSourceHostnameResolveWnd::OnHostnameResolved(WPARAM wParam,LPARAM lPara
 }
 // SLUGFILLER: hostnameSources
 // START enkeyDEV(ColdShine) -PartfileNameRecovery-
-void CDownloadQueue::UpdatePNRFile(CPartFile * ppfChanged)
+void CDownloadQueue::UpdatePNRFile(CPartFile * ppfUpdate)
 {
+	// All PNR records are 1KB fixed-length:
+	// |--262---|   |---262---|   |--262---|   |-236-|   |2-|
+	// 1 <=260  1   1  <=260  1   1 <=260  1             1 1
+	// <partname<   >ed2k_link>   "filename"             \r\n
+
 	CFile file;
-	if (!file.Open(CString(theApp.glob_prefs->GetAppDir()) + "config\\PNRecovery.dat", CFile::modeCreate | CFile::modeNoTruncate | CFile::modeReadWrite | CFile::osSequentialScan))
+	if (!file.Open(theApp.glob_prefs->GetConfigDir() + _T("PNRecovery.dat"), CFile::modeCreate | CFile::modeNoTruncate | CFile::modeReadWrite | CFile::osSequentialScan))
 	{
-//		AddLogLine(TBN_ERROR, true, GetResString(IDS_ERROR_SAVEFILE) + CString(" PNRecovery.dat"));
-		AddLogLine(true, GetResString(IDS_ERROR_SAVEFILE) + CString(" PNRecovery.dat"));
+		AddLogLine(true, GetResString(IDS_ERROR_SAVEFILE) + _T(" PNRecovery.dat"));
 		return;
 	}
-	char szRecord[1025];	// 1024 + NULL by sprintf()
-	if (ppfChanged)
+	char achRecord[1024];
+	if (ppfUpdate)
 	{
-		// Only update ppfChanged's record.
-		char sPFNum[4];		// nnn + NULL by strcpy()
-		char sReadPFNum[5];	// <nnn<
-		lstrcpyn(sPFNum, ppfChanged->GetPartMetFileName(), sizeof(sPFNum) / sizeof(char)); // Faster than .Left(3) ;)
-		for (unsigned i = (unsigned)file.GetLength() >> 10; i > 0; --i)
-		{
-			file.Read(sReadPFNum, sizeof(sReadPFNum) / sizeof(char));
-			if (sReadPFNum[0] != '<' ||
-				sReadPFNum[1] < '0' || sReadPFNum[1] > '9' ||
-				sReadPFNum[2] < '0' || sReadPFNum[2] > '9' ||
-				sReadPFNum[3] < '0' || sReadPFNum[3] > '9' ||
-				sReadPFNum[0] != '<')
+		// Only one record to update: need to find it (or append at EOF), then overwrite.
+		BuildPNRRecord(ppfUpdate, achRecord, sizeof(achRecord));
+		char achField1[262];
+		for (unsigned cRecords = file.GetLength() >> 10; cRecords--;)
+	{
+			file.Read(achField1, sizeof(achField1));
+			if (memicmp(achField1, achRecord, sizeof(achField1)) == 0)			// Have we found it?
 			{
-				// If sReadPFNum is not "<nnn<", then the file is corrupted, so force a full rewrite.
-				file.Close();
-				UpdatePNRFile();
-				return;
-			}
-			if (sPFNum[0] == sReadPFNum[1] &&
-				sPFNum[1] == sReadPFNum[2] &&
-				sPFNum[2] == sReadPFNum[3])
-			{
-				// We've found it, so rewind to overwrite this record.
-				file.Seek(-int(sizeof(sReadPFNum) / sizeof(char)), CFile::current);
+				file.Seek(-int(sizeof(achField1)), CFile::current);				// Seek back to beginning of record.
 				break;
 			}
-			// Skip bytes to catch next record up.
-			file.Seek(1024 - sizeof(sReadPFNum) / sizeof(char), CFile::current);
+			else
+				file.Seek(1024 - sizeof(achField1), CFile::current);			// Skip this record.
 		}
-		// Here we are. Now just build the record and write it at current seek pos.
-		BuildPNRRecord(ppfChanged, szRecord, sizeof(szRecord) / sizeof(char));
-		file.Write(szRecord, 1024);
+		file.Write(achRecord, sizeof(achRecord));								// We are at EOF or just over the record, write either case.
 	}
 	else
-	{
-		// No particular PartFile specified, need to write the entire list (because of add/remove).
+		// Need to write the entire list, so just write 'em in random order.
 		for (POSITION pos = filelist.GetHeadPosition(); pos != 0; filelist.GetNext(pos))
 		{
-			BuildPNRRecord(filelist.GetAt(pos), szRecord, sizeof(szRecord) / sizeof(char));
-			file.Write(szRecord, 1024);
-		}
-		file.SetLength(1024 * filelist.GetCount()); // Trim exceeding records.
+			BuildPNRRecord(filelist.GetAt(pos), achRecord, sizeof(achRecord));
+			file.Write(achRecord, sizeof(achRecord));
 	}
 }
 
 void CDownloadQueue::BuildPNRRecord(CPartFile * ppf, char * pszBuff, unsigned cchBuffMax)
 {
-	// All PNR records are 1KB fixed-length:
-	//   5         507           510      2
-	// 1|3|1   1|--505--|1   1|--508-|1   1 1
-	// <nnn<   >ed2k_link>   "filename"    \r\n
-	wnsprintf(pszBuff, cchBuffMax, "<%3.3s<>%-505s>\"%-508s\"\r\n", ppf->GetPartMetFileName(), theApp.CreateED2kLink(ppf), ppf->GetFileName());
+	assert(cchBuffMax == 1024);													// PNR record size.
+	unsigned cch = wnsprintf(pszBuff, 262, "<%s<", ppf->GetFullName());			// Write full path to the partfile.
+	FillMemory(pszBuff + cch, 262 - cch, ' ');									// Pad out "partfile" field to 262 chars.
+	cch = wnsprintf(pszBuff + 262, 262, ">%s>", theApp.CreateED2kLink(ppf));	// Write eD2k link.
+	FillMemory(pszBuff + 262 + cch, 262 - cch, ' ');							// Pad out "link" field to 262 chars.
+	cch = wnsprintf(pszBuff + 262 + 262, 262, "\"%s\"", ppf->GetFileName());	// Write final filename.
+	FillMemory(pszBuff + 262 + 262 + cch, 262 + 236 - cch, ' ');				// Pad out "filename" field to 262 chars, and fill 236 chars of padding.
+	pszBuff[1022] = '\r';														// Add carriage return to make it readable with (e.g.) notepad.
+	pszBuff[1023] = '\n';
 }
 // END enkeyDEV(ColdShine) -PartfileNameRecovery-

@@ -140,7 +140,7 @@ public:
 	void	SendLocalSrcRequest(CPartFile* sender);
 	void	SetLastKademliaFileRequest()	{lastkademliafilerequest = ::GetTickCount();}
 	bool	DoKademliaFileRequest()	{return ((::GetTickCount() - lastkademliafilerequest) > KADEMLIAASKTIME);}
-	void	UpdatePNRFile(CPartFile * ppfChanged = NULL);							//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
+	void	UpdatePNRFile(CPartFile * ppfUpdate = NULL);							//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 	void	BuildPNRRecord(CPartFile * ppf, char * pszBuff, unsigned cchBuffMax);	//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 
 	// khaos::kmod+ Advanced A4AF: Brute Force

@@ -386,6 +386,8 @@ BOOL CemuleDlg::OnInitDialog()
 	theApp.stat_starttime=GetTickCount();
 
 	if( theApp.glob_prefs->IsFirstStart()){
+		::DeleteFile(theApp.glob_prefs->GetConfigDir() + _T("PNRecovery.dat"));	//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery- Avoid clashes with previous file format.
+		theApp.downloadqueue->UpdatePNRFile();									//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery- Force full rewrite.
 		extern BOOL FirstTimeWizard();
 		if (FirstTimeWizard()){
 			// start connection wizard
