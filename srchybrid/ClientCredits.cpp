@@ -625,7 +625,8 @@ void CClientCreditsList::SaveList()
 	fileBack.SeekToBegin();
 	fileBack.Write(&version, 1);
 	fileBack.Write(&count, 4);
-	fileBack.Flush();
+	if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
+		fileBack.Flush();
 	fileBack.Close();
 	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	try{
