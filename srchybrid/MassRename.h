@@ -89,6 +89,7 @@ public:
 	afx_msg void OnBnClickedButtonStrip(); //MORPH - Added by SiRoB, Clean MassRename
 	afx_msg void OnBnClickedSimplecleanup();
 	afx_msg void OnBnClickedInserttextcolumn();
+	afx_msg void OnClose();
 };
 
 CString SimpleCleanupFilename (CString _filename);

@@ -23,6 +23,7 @@
 #include "MassRename.h"
 #include "OtherFunctions.h"
 #include "SimpleCleanup.h"
+#include ".\massrename.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -110,6 +111,7 @@ BEGIN_MESSAGE_MAP(CMassRenameDialog, CDialog)
 	ON_BN_CLICKED(IDC_BUTTONSTRIP, OnBnClickedButtonStrip) //MORPH - Added by SiRoB, Clean MassRename
 	ON_BN_CLICKED(IDC_SIMPLECLEANUP, OnBnClickedSimplecleanup)
 	ON_BN_CLICKED(IDC_INSERTTEXTCOLUMN, OnBnClickedInserttextcolumn)
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 void CMassRenameDialog::OnOK() {
@@ -178,6 +180,14 @@ BOOL CMassRenameDialog::OnInitDialog() {
 	OldFN->SetEventMask(OldFN->GetEventMask() | ENM_SCROLL);
 
 	return TRUE;
+}
+
+void CMassRenameDialog::OnClose()
+{
+	// Delete the CMassRenameEdit object we allocated in OnInitDialog
+	delete MassRenameEdit;
+	
+	CDialog::OnClose();
 }
 
 void CMassRenameDialog::OnEnVscrollOldfilenamesedit()
@@ -276,11 +286,15 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 
 	// Everything is ok, the caller can take m_NewFilenames to rename the files.
 	EndDialog (IDOK);
+	// Delete the CMassRenameEdit object we allocated in OnInitDialog
+	delete MassRenameEdit;
 }
 
 void CMassRenameDialog::OnBnClickedMassrenamecancel()
 {
 	EndDialog (IDCANCEL);
+	// Delete the CMassRenameEdit object we allocated in OnInitDialog
+	delete MassRenameEdit;
 }
 
 // Copy the first line of the New-filenames edit field to the Mask edit-field
@@ -678,6 +692,9 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 	int clstart=0;
 	int clend=0;
 
+	// Remove any CR characters
+	ClipboardData.Remove ('\r');
+
 	// Only proceed if there's something to insert
 	if (!ClipboardData.IsEmpty ()) {
 
@@ -701,10 +718,10 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 
 				// Delete the marked characters from the filename (if anything is marked) and
 				// insert the next part of the clipboard at the current cursor position
-				clend = ClipboardData.Find ("\r",clstart);
+				clend = ClipboardData.Find ("\n",clstart);
 				if (clend==-1) clend = ClipboardData.GetLength ();
 				// Extract the characters to be inserted. Make sure not to copy the
-				// trailing "\r"!
+				// trailing "\n"!
 				CString NextChars = ClipboardData.Mid (clstart,clend-clstart);
 				CurrentLineLength = filename.GetLength ();
 				if (!RightJustify) {
@@ -719,8 +736,8 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 					// string has changed!
 					filename.Delete (filename.GetLength () - StartX, StartX-EndX);
 				}
-				// Move the clipboard cursor position to the next line; skip "\r\n"
-				clstart = clend+2;
+				// Move the clipboard cursor position to the next line; skip "\n"
+				clstart = clend+1;
 			}
 
 			// and add it to the current list of filenames
@@ -738,3 +755,4 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 	}
 
 }
+
