@@ -1125,6 +1125,18 @@ void CemuleDlg::OnClose()
 	searchwnd->SaveSearchStrings();
 	serverwnd.SaveServerMetStrings();
 
+	//EastShare START - Pretender, TBH-AutoBackup
+	if (theApp.glob_prefs->GetAutoBackup2())
+		theApp.ppgbackup->Backup3();
+	if (theApp.glob_prefs->GetAutoBackup())
+	{
+		theApp.ppgbackup->Backup("*.ini", false);
+		theApp.ppgbackup->Backup("*.dat", false);
+		theApp.ppgbackup->Backup("*.met", false);
+	}
+	//EastShare END - Pretender, TBH-AutoBackup
+
+
 	// Barry - Restore old registry if required
 	if (theApp.glob_prefs->AutoTakeED2KLinks())
 		RevertReg();

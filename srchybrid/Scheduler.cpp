@@ -187,6 +187,13 @@ void CScheduler::SaveOriginals() {
 	original_connections=theApp.glob_prefs->GetMaxConnections();
 	original_cons5s=theApp.glob_prefs->GetMaxConperFive();
 	original_sources=theApp.glob_prefs->GetMaxSourcePerFile();
+	
+	//EastShare START - Added by Pretender, add USS settings in scheduler tab
+	original_ussmaxping=theApp.glob_prefs->GetDynUpPingLimit();
+	original_ussgoup=theApp.glob_prefs->GetDynUpGoingUpDivider();
+	original_ussgodown=theApp.glob_prefs->GetDynUpGoingDownDivider();
+	original_ussminup=theApp.glob_prefs->GetMinUpload();
+	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 }
 
 void CScheduler::RestoreOriginals() {
@@ -195,6 +202,13 @@ void CScheduler::RestoreOriginals() {
 	theApp.glob_prefs->SetMaxConnections(original_connections);
 	theApp.glob_prefs->SetMaxConsPerFive(original_cons5s);
 	theApp.glob_prefs->SetMaxSourcesPerFile(original_sources);
+
+	//EastShare START - Added by Pretender, add USS settings in scheduler tab
+	theApp.glob_prefs->SetDynUpPingLimit(original_ussmaxping);
+	theApp.glob_prefs->SetDynUpGoingUpDivider(original_ussgoup);
+	theApp.glob_prefs->SetDynUpGoingDownDivider(original_ussgodown);
+	theApp.glob_prefs->SetMinUpload(original_ussminup);
+	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 }
 
 void CScheduler::ActivateSchedule(uint8 index,bool makedefault) {
@@ -223,6 +237,21 @@ void CScheduler::ActivateSchedule(uint8 index,bool makedefault) {
 			
 			case 6 : theApp.downloadqueue->SetCatStatus(atoi(schedule->values[ai]),MP_STOP);break;
 			case 7 : theApp.downloadqueue->SetCatStatus(atoi(schedule->values[ai]),MP_RESUME);break;
+
+			//EastShare START - Added by Pretender, add USS settings in scheduler tab
+			case 8 : theApp.glob_prefs->SetDynUpPingLimit(atoi(schedule->values[ai]));
+				if (makedefault) original_sources=atoi(schedule->values[ai]);
+				break;
+			case 9 : theApp.glob_prefs->SetDynUpGoingUpDivider(atoi(schedule->values[ai]));
+				if (makedefault) original_sources=atoi(schedule->values[ai]);
+				break;
+			case 10 : theApp.glob_prefs->SetDynUpGoingDownDivider(atoi(schedule->values[ai]));
+				if (makedefault) original_sources=atoi(schedule->values[ai]);
+				break;
+			case 11 : theApp.glob_prefs->SetMinUpload(atoi(schedule->values[ai]));
+				if (makedefault) original_sources=atoi(schedule->values[ai]);
+				break;
+			//EastShare END - Added by Pretender, add USS settings in scheduler tab
 		}
 	}
 }

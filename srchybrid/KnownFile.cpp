@@ -597,7 +597,7 @@ void CKnownFile::NewAvailPartsInfo(){
 			m_nVirtualCompleteSourcesCountMin = m_AvailPartFrequency[i];
 	}
 
-	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCountMin<10, m_nVirtualCompleteSourcesCountMin==1);//changed (temporaly perhaps) [Yun.SF3]
+	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<51)?true:(m_nVirtualCompleteSourcesCountMin==1), m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCountMin==1);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
@@ -914,6 +914,13 @@ bool CKnownFile::LoadTagsFromFile(CFile* file){
 				delete newtag;
 				break;
 			}
+			// EastShare START - Added by TAHO, .met file control
+			case FT_LASTUSED:{
+				statistic.SetLastUsed(newtag->tag.intvalue);
+				delete newtag;
+				break;
+			}
+			// EastShare END - Added by TAHO, .met file control
 			default:
 				//MORPH START - Added by SiRoB, ZZ Upload System
 				if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
@@ -1049,6 +1056,13 @@ bool CKnownFile::WriteToFile(CFile* file){
 
 	CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, m_lastPublishTimeKadSrc);
 	kadLastPubSrc.WriteTagToFile(file);
+
+	//EastShare START - Added by TAHO, .met file control
+	uint32 value;
+	value = ( theApp.sharedfiles->GetFileByID(GetFileHash())) ? time(NULL) : statistic.GetLastUsed();
+	CTag lastUsedTag(FT_LASTUSED, value);
+	lastUsedTag.WriteTagToFile(file);
+	//EastShare END - Added by TAHO, .met file control
 
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing

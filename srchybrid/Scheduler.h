@@ -25,6 +25,13 @@
 #define ACTION_CONS			5
 #define ACTION_CATSTOP		6
 #define ACTION_CATRESUME	7
+//EastShare START - Added by Pretender, add USS settings in scheduler tab
+#define ACTION_USSMAXPING	8
+#define ACTION_USSGOUP		9
+#define ACTION_USSGODOWN	10
+#define ACTION_USSMINUP		11
+//EastShare END - Added by Pretender, add USS settings in scheduler tab
+
 
 #define DAY_DAYLY		0
 #define DAY_MO			1
@@ -75,6 +82,12 @@ public:
 	uint16	original_connections;
 	uint16	original_cons5s;
 	uint16	original_sources;
+	//EastShare START - Added by Pretender, add USS settings in scheduler tab
+	uint16	original_ussmaxping;
+	uint16	original_ussgoup;
+	uint16	original_ussgodown;
+	uint16	original_ussminup;
+	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 
 private:
 	CArray<Schedule_Struct*,Schedule_Struct*> schedulelist;

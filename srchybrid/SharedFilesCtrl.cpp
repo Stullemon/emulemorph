@@ -695,6 +695,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 			}
 			case MP_GETHTMLED2KLINK:
+			{
 				if(selectedCount > 1)
 				{
 					CString str;
@@ -710,6 +711,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				} 
 				theApp.CopyTextToClipboard(theApp.CreateHTMLED2kLink(file));
 				break;
+			}
 			case MP_GETSOURCEED2KLINK:
 			{
 				if(selectedCount > 1)
@@ -730,6 +732,13 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					theApp.CopyTextToClipboard(strLink);
 				break;
 			}
+			// EastShare Start added by linekin, TBH delete shared file
+			case MP_DELFILE:
+				{
+					DeleteFileFromHD(file);
+					break;
+				}
+			// EastShare End
 			// itsonlyme: hostnameSource
 			case MP_GETHOSTNAMESOURCEED2KLINK:
 			{
@@ -775,12 +784,17 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 			//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 			case MP_OPEN:
+			{
+				if (!file->IsPartFile())	//EastShare -  [fix] small bug, eMule allows to open unfinished files (NoamSon) by AndCycle
 				OpenFile(file);
 				break; 
+			}
 			//MORPH START - Added by SiRoB, About Popup Open File Folder entry
 			case MP_OPENFILEFOLDER:
+			{
 				OpenFileFolder(file);
 				break;
+			}
 			//MORPH END - Added by SiRoB, About Popup Open File Folder entry
 			//For Comments 
 			case MP_CMT: 
@@ -885,6 +899,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					break;
 				}
 			case MP_PERMALL:
+				{
 				POSITION pos = this->GetFirstSelectedItemPosition();
 				while( pos != NULL ) {
 					int iSel=this->GetNextSelectedItem(pos);
@@ -892,6 +907,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					file->SetPermissions(PERM_ALL);SetItemText(iSel,4,GetResString(IDS_FSTATUS_PUBLIC));
 				}
 				break;
+			}
 		}
 	}
 	return true;
@@ -1200,6 +1216,7 @@ void CSharedFilesCtrl::CreateMenues() {
 	//MORPH START - Added by SiRoB, About Open File Folder entry
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPENFILEFOLDER, GetResString(IDS_OPENFILEFOLDER)); //MORPH - Added by SiRoB, About Popup Open File Folder entry
 	//MORPH END - Added by SiRoB, About Open File Folder entry
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DELFILE, "Delete File"); // EastShare added by linekin, TBH delete shared file
 	//***Comments 11/27/03**// 
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD)); 
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
@@ -1286,3 +1303,45 @@ void CSharedFilesCtrl::OpenFileFolder(CKnownFile* file){
 	delete[] buffer;
 }
 //MORPH END - Added by SiRoB, About Popup Open File Folder entry
+// EastShare Start added by linekin, TBH delete shared file
+void CSharedFilesCtrl::DeleteFileFromHD(CKnownFile *file)
+{
+	if (((CPartFile*)file)->IsPartFile())
+		DeleteFileFromHDPart((CPartFile*)file);
+	else DeleteFileFromHDByKnown(file);
+}
+void CSharedFilesCtrl::DeleteFileFromHDByKnown(CKnownFile* file)
+{
+	char buffer[200];
+	char* buffer2 = new char[MAX_PATH];
+	_snprintf(buffer2,MAX_PATH,"%s\\%s",file->GetPath(),file->GetFileName());
+	sprintf(buffer,"Are you sure you want to delete \"%s\"?",file->GetFileName());
+	if (MessageBox(buffer,"Really?",MB_ICONQUESTION|MB_YESNO) == IDYES)
+	{
+		if (!DeleteFile(buffer2))
+		{
+			sprintf(buffer,"Couldn't delete \"%s\".",file->GetFileName());
+			MessageBox(buffer,"Error",MB_ICONERROR|MB_OK);
+		}
+		else
+		{
+			theApp.emuledlg->AddLogLine(true,"\"%s\" successfully deleted.",file->GetFileName());
+			theApp.sharedfiles->Reload();
+		}
+	}
+	delete[] buffer2;
+}
+void CSharedFilesCtrl::DeleteFileFromHDPart(CPartFile* file)
+{
+	ASSERT ( !file->m_bPreviewing );
+	char buffer[200];
+	sprintf(buffer,"Are you sure you want to delete \"%s\"?",file->GetFileName());
+	if (MessageBox(buffer,"Really?",MB_ICONQUESTION|MB_YESNO) == IDYES)
+	{
+		file->DeleteFile();
+		theApp.emuledlg->AddLogLine(true,"\"%s\" successfully deleted.",file->GetFileName());
+		theApp.sharedfiles->Reload();
+	}
+}
+// EastShare End
+

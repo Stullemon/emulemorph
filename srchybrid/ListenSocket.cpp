@@ -371,7 +371,10 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_ACCEPTUPLOADREQ:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
-					if (client->reqfile && !client->reqfile->IsStopped() && 
+				//EastShare Start - Only download complete files v2.1 by AndCycle
+					//if (client->reqfile && !client->reqfile->IsStopped() && 
+					if (client->reqfile && !client->reqfile->IsStopped() && client->reqfile->lastseencomplete!=NULL /*shadow#(onlydownloadcompletefiles)*/ &&
+				//EastShare End - Only download complete files v2.1 by AndCycle
 						(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						if (client->GetDownloadState() == DS_ONQUEUE){
 							client->SetDownloadState(DS_DOWNLOADING);
@@ -540,10 +543,16 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_SENDINGPART:{
 //					theApp.downloadqueue->AddDownDataOverheadOther(0, 24);
-					if (client->reqfile && !client->reqfile->IsStopped() && 
+				//EastShare Start - Only download complete files v2.1 by AndCycle
+					//if (client->reqfile && !client->reqfile->IsStopped() && 
+					if (client->reqfile && !client->reqfile->IsStopped() && client->reqfile->lastseencomplete!=NULL /*shadow#(onlydownloadcompletefiles)*/ &&
+				//EastShare End - Only download complete files v2.1 by AndCycle
 						(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						client->ProcessBlockPacket(packet,size);
-						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR){
+					//EastShare Start - Only download complete files v2.1 by AndCycle
+						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR || client->reqfile->lastseencomplete==NULL){
+						//if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR){
+					//EastShare End - Only download complete files v2.1 by AndCycle		
 							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
 							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 							client->socket->SendPacket(packet,true,true);
@@ -1273,7 +1282,7 @@ void CClientReqSocket::OnReceive(int nErrorCode){
 
 bool CClientReqSocket::Create(){
 	theApp.listensocket->AddConnection();
-	BOOL result = CAsyncSocketEx::Create(0,SOCK_STREAM,FD_WRITE|FD_READ|FD_CLOSE); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+	BOOL result = CAsyncSocketEx::Create(0,SOCK_STREAM,FD_WRITE|FD_READ|FD_CLOSE|FD_CONNECT); // deadlake PROXYSUPPORT - changed to AsyncSocketEx //EastShare - modified by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
 	OnInit();
 	return result;
 }
@@ -1539,3 +1548,14 @@ void CListenSocket::SwitchSUC(bool bSetSUCOn)
 	}
 }
 //MORPH END - Added by Yun.SF3, Auto DynUp changing
+
+
+//EastShare Start - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
+void CClientReqSocket::OnConnectError(int nErrorCode){
+#ifdef _DEBUG
+  if (client)
+      theApp.emuledlg->AddDebugLogLine(false,"Can't connect to client %s IP: %s - %s", (client->GetUserName() ? client->GetUserName() : "[Server/Exchange source]") , client->GetFullIP(), GetErrorMessage(nErrorCode, 1));//(bluecow)
+#endif
+  Disconnect();
+}
+//EastShare End - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)

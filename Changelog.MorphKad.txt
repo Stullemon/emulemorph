@@ -7,6 +7,18 @@ FIXED: Complet Source Number Should be ok [SiRoB]
 FIXED: Actualisation of Progress & Obtained Part Bar shader when there is swapping of source [SiRoB]
 CHANGED: ZZ Patch Return of prio on uploading list [SiRoB]
 TWEAKED: PowerShare Limit don't depend only on the complet source (to avoid some possible wrong complet source report by other client or ours) [SiRoB]
+ADDED: Only download complete files v2.1 (shadow)[AndCycle]
+ADDED: PreferShareAll option (SlugFiller) [AndCycle]
+ADDED: OnConnect notification for sockets (Pawcio) [AndCycle]
+FIXED: Small bug, eMule allows to open unfinished files (NoamSon) [AndCycle]
+ADDED: options to set expired time of  known files [TAHO]
+ADDED: Option to use max-ping-value instead of tolerance in USS [TAHO]
+ADDED: AutoBackup from TheBlackHand mod [Pretender]
+ADDED: Automatically backup backups in backup2 directory [linekin]
+ADDED: "Yes To All" selection for the popup confirmation message in the BackUp Utility (TheBlackHand) [Pretender]
+ADDED: Add USS settings in scheduler tab [Pretender]
+ADDED: Pay Back First [AndCycle]
+ADDED: Delete Shared File (TheBlackHand) [linekin]
 
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.5

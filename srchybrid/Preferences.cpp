@@ -1341,6 +1341,8 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("EnableAntiLeecher", prefs->enableAntiLeecher); //MORPH - Added by IceCream, enable AntiLeecher
 	ini.WriteBool("EnableAntiCreditHack", prefs->enableAntiCreditHack); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteBool("IsBoostLess", prefs->isboostless);//Added by Yun.SF3, boost the less uploaded files
+ini.WriteInt("CreditSystemMode", prefs->creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
+	ini.WriteBool("IsUSSLimit", prefs->m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
 	ini.WriteBool("IsBoostFriends", prefs->isboostfriends);//Added by Yun.SF3, boost friends
 	ini.WriteInt("MaxUpload",prefs->maxupload);
 	ini.WriteInt("MaxDownload",prefs->maxdownload);
@@ -1407,6 +1409,15 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("FakesDatVersion",prefs->m_FakesDatVersion);
 	ini.WriteBool("UpdateFakeStartup",prefs->UpdateFakeStartup);
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+
+	//EastShare Start - PreferShareAll by AndCycle
+	ini.WriteBool("ShareAll",prefs->shareall);	// SLUGFILLER: preferShareAll
+	//EastShare END - PreferShareAll by AndCycle
+	// EastShare START - Added by TAHO, .met file control
+//	ini.WriteInt("ClientsMetDays", prefs->m_iClientsMetDays);//EastShare - AndCycle, this official setting shoudlnt be change by user
+	ini.WriteInt("KnownMetDays", prefs->m_iKnownMetDays);
+	// EastShare END - Added by TAHO, .met file control
+
 	// Barry - New properties...
     ini.WriteBool("AutoConnectStaticOnly", prefs->autoconnectstaticonly);  
 	ini.WriteBool("AutoTakeED2KLinks", prefs->autotakeed2klinks);  
@@ -1475,6 +1486,9 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("DisableKnownClientList",prefs->m_bDisableKnownClientList);
 	ini.WriteBool("DisableQueueList",prefs->m_bDisableQueueList);
 	ini.WriteBool("UseCreditSystem",prefs->m_bCreditSystem);
+
+	ini.WriteBool("IsPayBackFirst",prefs->m_bPayBackFirst);//EastShare - added by AndCycle, Pay Back First
+
 	ini.WriteBool("SaveLogToDisk",prefs->log2disk);
 	ini.WriteBool("SaveDebugToDisk",prefs->debug2disk);
 	ini.WriteBool("EnableScheduler",prefs->scheduler);
@@ -1528,6 +1542,11 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("SUCPitch",prefs->m_iSUCPitch);
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	ini.WriteInt("MaxConnectionsSwitchBorder",prefs->maxconnectionsswitchborder);//MORPH - Added by Yun.SF3, Auto DynUp changing
+
+	//EastShare Start - Added by Pretender, TBH-AutoBackup
+	ini.WriteBool("AutoBackup",prefs->autobackup);
+	ini.WriteBool("AutoBackup2",prefs->autobackup2);
+	//EastShare End - Added by Pretender, TBH-AutoBackup
 
 	// Toolbar
 	ini.WriteString("ToolbarSetting", prefs->m_sToolbarSettings);
@@ -1659,6 +1678,9 @@ void CPreferences::SavePreferences(){
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool("DynUpEnabled", prefs->m_bDynUpEnabled);
 	ini.WriteBool("DynUpLog", prefs->m_bDynUpLog);
+
+	ini.WriteInt("DynUpPingLimit", prefs->m_iDynUpPingLimit); // EastShare - Add by TAHO, USS limit
+
 	ini.WriteInt("DynUpPingTolerance", prefs->m_iDynUpPingTolerance);
 	ini.WriteInt("DynUpGoingUpDivider", prefs->m_iDynUpGoingUpDivider);
 	ini.WriteInt("DynUpGoingDownDivider", prefs->m_iDynUpGoingDownDivider);
@@ -1811,6 +1833,8 @@ void CPreferences::LoadPreferences(){
 	prefs->enableAntiCreditHack = ini.GetBool("EnableAntiCreditHack", true); //MORPH - Added by IceCream, enable AntiCreditHack
 	enableHighProcess = ini.GetBool("EnableHighProcess", false); //MORPH - Added by IceCream, high process priority
 	prefs->isboostless = ini.GetBool("IsBoostLess", false);//Added by Yun.SF3, boost the less uploaded files
+	prefs->creditSystemMode = (CreditSystemSelection)ini.GetInt("CreditSystemMode", CS_OFFICIAL); // EastShare - Added by linekin, ES CreditSystem
+	prefs->m_bIsUSSLimit = ini.GetBool("IsUSSLimit", true); // EastShare - Added by TAHO, does USS limit
 	prefs->isboostfriends = ini.GetBool("IsBoostFriends", false);//Added by Yun.SF3, boost friends
 	prefs->maxGraphDownloadRate=ini.GetInt("DownloadCapacity",96);
 	if (prefs->maxGraphDownloadRate==0) prefs->maxGraphDownloadRate=96;
@@ -1854,6 +1878,12 @@ void CPreferences::LoadPreferences(){
 	prefs->hideOS=ini.GetInt("HideOvershares",0/*5*/);
 	prefs->selectiveShare=ini.GetBool("SelectiveShare",false);
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+
+	//EastShare - Added by Pretender, TBH-AutoBackup
+	prefs->autobackup = ini.GetBool("AutoBackup",true);
+	prefs->autobackup2 = ini.GetBool("AutoBackup2",true);
+	//EastShare - Added by Pretender, TBH-AutoBackup
+
 	prefs->reconnect=ini.GetBool("Reconnect",true);
 	prefs->scorsystem=ini.GetBool("Scoresystem",true);
 	prefs->ICH=ini.GetBool("ICH",true);
@@ -1907,6 +1937,15 @@ void CPreferences::LoadPreferences(){
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	prefs->maxconnectionsswitchborder = ini.GetInt("MaxConnectionsSwitchBorder",100);//MORPH - Added by Yun.SF3, Auto DynUp changing
 	prefs->maxconnectionsswitchborder = min(max(prefs->maxconnectionsswitchborder,50),60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
+
+	//EastShare Start - PreferShareAll by AndCycle
+	prefs->shareall=ini.GetBool("ShareAll",true);	// SLUGFILLER: preferShareAll
+	//EastShare END - PreferShareAll by AndCycle
+	// EastShare START - Added by TAHO, .met file control
+//	prefs->m_iClientsMetDays = ini.GetInt("ClientsMetDays", 150);//EastShare - AndCycle, this official setting shoudlnt be change by user
+	prefs->m_iKnownMetDays = ini.GetInt("KnownMetDays", 0);
+	// EastShare END - Added by TAHO, .met file control
+
 	// Barry - New properties...
 	prefs->autoconnectstaticonly = ini.GetBool("AutoConnectStaticOnly",false); 
 	prefs->autotakeed2klinks = ini.GetBool("AutoTakeED2KLinks",true); 
@@ -1990,6 +2029,9 @@ void CPreferences::LoadPreferences(){
 	prefs->m_bDisableKnownClientList=ini.GetInt("DisableKnownClientList",false);
 	prefs->m_bDisableQueueList=ini.GetInt("DisableQueueList",false);
 	prefs->m_bCreditSystem=true; //ini.GetInt("UseCreditSystem",true); //MORPH - Changed by SiRoB, CreditSystem allways used
+
+	prefs->m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
+
 	prefs->scheduler=ini.GetBool("EnableScheduler",false);
 	prefs->msgonlyfriends=ini.GetBool("MessagesFromFriendsOnly",false);
 	prefs->msgsecure=ini.GetBool("MessageFromValidSourcesOnly",true);
@@ -2210,6 +2252,9 @@ void CPreferences::LoadPreferences(){
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	if (!prefs->m_bSUCEnabled) prefs->m_bDynUpEnabled = ini.GetBool("DynUpEnabled", false);
 	prefs->m_bDynUpLog = ini.GetBool("DynUpLog", false);
+
+	prefs->m_iDynUpPingLimit = ini.GetInt("DynUpPingLimit", 200); // EastShare - Added by TAHO, USS limit
+
 	prefs->m_iDynUpPingTolerance = ini.GetInt("DynUpPingTolerance", 800);
 	prefs->m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000);
 	prefs->m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000);

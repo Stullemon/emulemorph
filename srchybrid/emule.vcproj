@@ -4,7 +4,6 @@
 	Version="7.10"
 	Name="emule"
 	ProjectGUID="{584EA69D-3443-4197-8994-364880FC1B9B}"
-	RootNamespace="emule"
 	Keyword="MFCProj">
 	<Platforms>
 		<Platform
@@ -41,7 +40,6 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
 				AdditionalDependencies="delayimp.lib vfw32.lib version.lib gdiplus.lib ..\zlib\debug\libz.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib"
-				OutputFile="c:\emule\debug.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
@@ -88,13 +86,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="0"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
-				ImproveFloatingPointConsistency="TRUE"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="3"
+				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories=".,..;..\id3lib\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1"
@@ -976,6 +973,9 @@
 				RelativePath="Parser.y">
 			</File>
 			<File
+				RelativePath=".\PPgBackup.cpp">
+			</File>
+			<File
 				RelativePath="PPgConnection.cpp">
 			</File>
 			<File
@@ -983,6 +983,9 @@
 			</File>
 			<File
 				RelativePath="PPgDisplay.cpp">
+			</File>
+			<File
+				RelativePath=".\PPgEastShare.cpp">
 			</File>
 			<File
 				RelativePath="PPgFiles.cpp">
@@ -1112,6 +1115,9 @@
 			</File>
 			<File
 				RelativePath="Wizard.cpp">
+			</File>
+			<File
+				RelativePath=".\XMessageBox.cpp">
 			</File>
 			<Filter
 				Name="Lists"
@@ -1330,6 +1336,9 @@
 				RelativePath="Parser.hpp">
 			</File>
 			<File
+				RelativePath=".\PPgBackup.h">
+			</File>
+			<File
 				RelativePath="PPgConnection.h">
 			</File>
 			<File
@@ -1337,6 +1346,9 @@
 			</File>
 			<File
 				RelativePath="PPgDisplay.h">
+			</File>
+			<File
+				RelativePath=".\PPgEastShare.h">
 			</File>
 			<File
 				RelativePath="PPgFiles.h">
@@ -1445,6 +1457,9 @@
 			</File>
 			<File
 				RelativePath="Wizard.h">
+			</File>
+			<File
+				RelativePath=".\XMessageBox.h">
 			</File>
 			<Filter
 				Name="Lists"
@@ -1588,6 +1603,9 @@
 			</File>
 			<File
 				RelativePath="res\down2x.bmp">
+			</File>
+			<File
+				RelativePath=".\res\EastShare.ico">
 			</File>
 			<File
 				RelativePath=".\res\eDonkey.ico">

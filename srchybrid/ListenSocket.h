@@ -54,6 +54,9 @@ protected:
 	void		 OnSend(int nErrorCode);
 	void		 OnReceive(int nErrorCode);
 	void		 OnError(int nErrorCode);
+	//EastShare Start - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
+	virtual void OnConnectError(int nErrorCode); 
+	//EastShare End - added by AndCycle,[patch] OnConnect notification for sockets (Pawcio)
 	void		 PacketReceived(Packet* packet);
 	void		 PacketReceivedCppEx(Packet* packet);
 private:

@@ -41,6 +41,7 @@ public:
 		lastSpreadSortValue = 0;;
 		lastFullSpreadCount = 0;
 		m_pbitmapOldSpreadBar = NULL;
+		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
 	}
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 	~CFileStatistic();	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
@@ -61,6 +62,8 @@ public:
 	uint16	GetAllTimeAccepts()			{return alltimeaccepted;}
 	uint64	GetAllTimeTransferred()		{return alltimetransferred;}
 	CKnownFile* fileParent;
+	uint32	GetLastUsed()				{return lastused;} // EastShare - Added by TAHO, .met fiel control
+	void	SetLastUsed(uint32 inLastUsed)				{lastused = inLastUsed;} // EastShare - Added by TAHO, .met fiel control
 
 private:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
@@ -85,6 +88,7 @@ private:
 	uint32 alltimerequested;
 	uint64 alltimetransferred;
 	uint32 alltimeaccepted;
+	uint32 lastused; //EastShare - Added by TAHO, .met file control
 };
 
 /*

@@ -113,6 +113,17 @@ struct Category_Struct{
 
 #pragma pack()
 
+//EastShare - added by AndCycle, here is better then opcode.h, creditsystem integration
+enum CreditSystemSelection {
+	//becareful the sort order for the damn radio button in PPgEastShare.cpp
+	CS_OFFICIAL = 0,	
+	CS_LOVELACE,
+	CS_RATIO,
+	CS_PAWCIO,
+	CS_EASTSHARE
+};
+//EastShare - added by AndCycle, here is better then opcode.h, creditsystem integration
+
 #pragma pack(1)
 struct Preferences_Struct{
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
@@ -124,6 +135,7 @@ struct Preferences_Struct{
 	bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 	bool	isZZRatioActivated;// Added By Yun.SF3, Option for Ratio Systems
 	bool	isboostless;//Added by Yun.SF3, boost the less uploaded files
+	CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	bool	isboostfriends;//Added by Yun.SF3, boost friends
 	bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	bool	m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -178,6 +190,10 @@ struct Preferences_Struct{
 	int16	searchColumnWidths[12];//11+1/*Fakecheck*/
 	BOOL	searchColumnHidden[12];//11+1/*Fakecheck*/
 	INT		searchColumnOrder[12];//11+1/*Fakecheck*/
+	//EastShare Start- Added by Pretender, TBH-AutoBackup
+	bool	autobackup;
+	bool	autobackup2;
+	//EastShare End - Added by Pretender, TBH-AutoBackup
 	// SLUGFILLER: Spreadbars
 	int16	sharedColumnWidths[18];	//13+1/*PWSHARE*/+4/*Spreadbars*/
 	BOOL	sharedColumnHidden[18];	//13+1/*PWSHARE*/+4/*Spreadbars*/
@@ -397,6 +413,11 @@ struct Preferences_Struct{
 	uint8	hideOS;
 	uint8	selectiveShare;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+
+	//EastShare Start - PreferShareAll by AndCycle
+	bool	shareall;	// SLUGFILLER: preferShareAll
+	//EastShare End - PreferShareAll by AndCycle
+
 	bool	m_bVerbose;
 	bool	m_bDebugSourceExchange; // Sony April 23. 2003, button to keep source exchange msg out of verbose log
 	bool	m_bDebugSecuredConnection; //MORPH - Added by SiRoB, Debug Log option for Secured Connection
@@ -458,6 +479,9 @@ struct Preferences_Struct{
 	bool	filterserverbyip;
 	bool	m_bFirstStart;
 	bool	m_bCreditSystem;
+	bool	m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+//	int		m_iClientsMetDays; // EastShare - Added by TAHO, .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
+	int		m_iKnownMetDays; // EastShare - Added by TAHO, .met file control
 
 	bool	log2disk;
 	bool	debug2disk;
@@ -560,10 +584,12 @@ struct Preferences_Struct{
 	//MORPH END   - Added by SiRoB, (SUC) & (USS)
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	bool		m_bDynUpEnabled;
+	int			m_iDynUpPingLimit; // EastShare - Added by TAHO, USS limit
 	int			m_iDynUpPingTolerance;
 	int			m_iDynUpGoingUpDivider;
 	int			m_iDynUpGoingDownDivider;
 	int			m_iDynUpNumberOfPings;
+	bool		m_bIsUSSLimit; // EastShare - Added by linekin, USS limit applied?
 	bool		m_bDynUpLog;
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
@@ -699,6 +725,7 @@ public:
 	friend class CPPgScheduler;
     friend class CPPgMorph; //MORPH - Added by SiRoB, Morph Prefs
 	friend class CPPgMorph2; //MORPH - Added by SiRoB, Morph Prefs
+	friend class CPPgEastShare; //EastShare - Added by Pretender, ES Prefs
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
 	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
 	bool	GetEnableZeroFilledTest() const { return prefs->enableZeroFilledTest; }
@@ -718,6 +745,10 @@ public:
 	bool GetEnableDownloadInRed () const { return prefs->enableDownloadInRed; } //MORPH - Added by IceCream, show download in red
 	bool GetEnableAntiLeecher () const { return prefs->enableAntiLeecher; } //MORPH - Added by IceCream, enable Anti-leecher
 	bool IsBoostLess() const {return prefs->isboostless;}//Added by Yun.SF3, boost the less uploaded files
+
+	CreditSystemSelection  GetCreditSystem() const {return prefs->creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
+//	int  GetClientsMetDays() const {return prefs->m_iClientsMetDays;} // EastShare - Added by TAHO, .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
+	int  GetKnownMetDays() const {return prefs->m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	bool IsBoostFriends() const {return prefs->isboostfriends;}//Added by Yun.SF3, boost friends
 	bool IsAutoDynUpSwitching() const {return prefs->isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
 	bool IsAutoPowershareNewDownloadFile() const {return prefs->m_bisautopowersharenewdownloadfile;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -737,6 +768,12 @@ public:
 
 	bool	Save();
 	void	SaveCats();
+	//EastShare START - Pretender, TBH-AutoBackup
+	bool    GetAutoBackup()	{ return prefs->autobackup;}
+	bool    GetAutoBackup2()	{ return prefs->autobackup2;}
+	void    SetAutoBackup(bool in) { prefs->autobackup = in;}
+	void    SetAutoBackup2(bool in) { prefs->autobackup2 = in;}
+	//EastShare END - Pretender, TBH-AutoBackup
 
 	int8	Score()			{return prefs->scorsystem;}
 	bool	Reconnect()		{return prefs->reconnect;}
@@ -1110,8 +1147,12 @@ public:
 	bool	IsKnownClientListDisabled()			{return prefs->m_bDisableKnownClientList;}
 	bool	IsQueueListDisabled()				{return prefs->m_bDisableQueueList;}
 	bool	IsFirstStart()						{return prefs->m_bFirstStart;}
-	bool	UseCreditSystem()					{return prefs->m_bCreditSystem;}
-	void	SetCreditSystem(bool m_bInCreditSystem)	{prefs->m_bCreditSystem = m_bInCreditSystem;}
+	bool	UseCreditSystem()					{return true;} // EastShare - Fixed by linekin
+	void	SetCreditSystem(bool m_bInCreditSystem)	{prefs->m_bCreditSystem = m_bInCreditSystem;}	//EastShare - Credit System select
+//	void	SetClientsMetDays(int m_iInClientsMetDays)	{prefs->m_iClientsMetDays = m_iInClientsMetDays;}	//EastShare - Added by TAHO, .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
+	void	SetKnownMetDays(int m_iInKnownMetDays)	{prefs->m_iKnownMetDays = m_iInKnownMetDays;}	//EastShare - Added by TAHO, .met file control
+	bool	IsPayBackFirst()					{return prefs->m_bPayBackFirst;}	//EastShare - added by AndCycle, Pay Back First
+
 
 	char*	GetTxtEditor()						{return prefs->TxtEditor;}
 	CString	GetVideoPlayer()					{if (strlen(prefs->VideoPlayer)==0) return ""; else return CString(prefs->VideoPlayer);}
@@ -1170,6 +1211,10 @@ public:
 	uint8	GetHideOvershares()		{return prefs->hideOS;}
 	uint8	IsSelectiveShareEnabled()	{return prefs->selectiveShare;}
 	//MORPH END - Added by SiRoB, SLUGFILLER: hideOS
+
+	//EastShare Start - PreferShareAll by AndCycle
+	bool	ShareAll()			{return prefs->shareall;}	// SLUGFILLER: preferShareAll
+	//EastShare End - PreferShareAll by AndCycle
 
 	void	SetMinUpload(uint16 in) {  prefs->m_iMinUpload = in; } //MORPH - Added by SiRoB, (SUC) & (USS)
 	void	SetMaxUpload(uint16 in) {  prefs->maxupload = (in) ? in : 0xffff; }
@@ -1331,7 +1376,14 @@ bool	IsExtControlsEnabled()		{ return prefs->m_bExtControls;}
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	bool	IsDynUpEnabled() { return prefs->m_bDynUpEnabled; }
 	bool	IsUSSLog() {return prefs->m_bDynUpLog;}
+	bool	IsUSSLimit() { return prefs->m_bIsUSSLimit;} // EastShare - Added by TAHO, USS limit
 	void	SetDynUpEnabled(bool newValue) { prefs->m_bDynUpEnabled = newValue; }
+	//EastShare START - Added by Pretender, add USS settings in scheduler tab
+	void	SetDynUpPingLimit(int in) { prefs->m_iDynUpPingLimit = in; }
+	void	SetDynUpGoingUpDivider(int in) { prefs->m_iDynUpGoingUpDivider = in; }
+	void	SetDynUpGoingDownDivider(int in) { prefs->m_iDynUpGoingDownDivider = in; }
+	//EastShare END - Added by Pretender, add USS settings in scheduler tab
+	int		GetDynUpPingLimit() { return prefs->m_iDynUpPingLimit; } // EastShare - Added by TAHO, USS limit
 	int		GetDynUpPingTolerance() { return prefs->m_iDynUpPingTolerance; }
 	int		GetDynUpGoingUpDivider() { return prefs->m_iDynUpGoingUpDivider; }
 	int		GetDynUpGoingDownDivider() { return prefs->m_iDynUpGoingDownDivider; }

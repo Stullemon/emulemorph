@@ -241,7 +241,10 @@ BOOL CemuleApp::InitInstance()
 	clientlist = new CClientList();
 	friendlist = new CFriendList();
 	searchlist = new CSearchList();
-	knownfiles = new CKnownFileList();
+	//EastShare START - Modified by TAHO, .met files control
+	//knownfiles = new CKnownFileList();
+	knownfiles = new CKnownFileList(glob_prefs);
+	//EastShare END - Added by TAHO, .met files control
 	serverlist = new CServerList(glob_prefs);
 	serverconnect = new CServerConnect(serverlist,theApp.glob_prefs);
 	sharedfiles = new CSharedFileList(glob_prefs,serverconnect,knownfiles);

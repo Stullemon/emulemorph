@@ -42,6 +42,8 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 	m_dwWaitTimeIP = 0;
+	lastscore=1.0f; //EastShare - Added by linekin ,CreditSystem lovelace CreditSys
+	lastscoretime=0; //EastShare - Added by linekin ,CreditSystem lovelace CreditSys
 }
 
 CClientCredits::CClientCredits(const uchar* key)
@@ -53,6 +55,8 @@ CClientCredits::CClientCredits(const uchar* key)
 	m_dwUnSecureWaitTime = ::GetTickCount();
 	m_dwSecureWaitTime = ::GetTickCount();
 	m_dwWaitTimeIP = 0;
+	lastscore=1.0f; //EastShare - Added by linekin ,CreditSystem lovelace CreditSys
+	lastscoretime=0; //EastShare - Added by linekin ,CreditSystem lovelace CreditSys
 }
 
 CClientCredits::~CClientCredits()
@@ -96,39 +100,178 @@ uint64	CClientCredits::GetDownloadedTotal(){
 
 float CClientCredits::GetScoreRatio(uint32 dwForIP)
 {
+	float result = 0.0f;//everybody share one result.(?)
+    //EastShare START - Added by linekin, CreditSystem 
+	
+	switch (theApp.glob_prefs->GetCreditSystem())	{
+
+		case CS_LOVELACE: // EastShare - Added by linekin, lovelace Credit
+		{
+			// check the client ident status
+			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+				// bad guy - no credits for you
+				return 0.0f;//lovelace
+			}
+
+			// new creditsystem by [lovelace]
+			double cl_up,cl_down; 
+			if (this->m_pCredits){
+				if (this->lastscoretime > GetTickCount()) 
+					return this->lastscore; 
+				cl_up = GetUploadedTotal()/(double)1048576;
+			  	cl_down = GetDownloadedTotal()/(double)1048576;
+			  	result=(float)(3.0 * cl_down * cl_down - cl_up * cl_up);
+			  	if (fabs(result)>20000.0f) 
+					result*=20000.0f/fabs(result);
+		  		result=100.0f*powf((float)(1-1/(1.0f+expf(result*0.001))),6.6667f);
+			  	if (result<0.1f) 
+					result=0.1f;
+			   	if (((m_pCredits->nKeySize == 0)||(GetCurrentIdentState(dwForIP)!=IS_IDENTIFIED))&&(result>10.0f)) 
+					result=10.0f;
+			  	this->lastscoretime=GetTickCount()+120000;
+		  		this->lastscore=result;
+		  		return (result);
+			}
+		 	return 0.1f;
+			// end new creditsystem by [lovelace]
+		}break;
+		case CS_RATIO: //Ratio mod Credit
+		{
+			// check the client ident status
+			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+			// bad guy - no credits for you
+			return 1;
+			}
+			/* Official
+				if (GetDownloadedTotal() < 1000000)
+				return 1;
+			*/
+			//removed by linekin start
+			/* New--Ratio, UL:DL > 0:2 -> Ratio=0.5
+				if (GetDownloadedTotal() < 1048576){
+				if (theApp.uploadqueue->IsSessionCredits()){
+					if (GetUploadedTotal() > 2432000) // PARTSIZE / 4
+						return 0.5f;
+					else
+						return 1.1f;
+				}
+				else
+					return 1;
+			}*/
+			//removed by linekin end
+			if (!GetUploadedTotal())
+				result = 10;
+			else
+				result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
+			float result2 = 0;
+			result2 = (float)GetDownloadedTotal()/1048576.0;
+			result2 += 2;
+			result2 = (double)sqrt((double)result2);
+				if (result > result2)
+				result = result2;
+				if (result < 1)
+					return 1;
+			/* Official
+				else if (result > 10)
+					return 10;
+			*/
+			// New--Ratio, Max = ¡Û
+			/*	if (theApp.uploadqueue->IsSessionCredits()){
+				}
+				else if (result > 10)
+					return 10; //Removed by linekin */
+			return result;
+		}break;
+
+		//EastShare Start - added by AndCycle, Pawcio credit
+		case CS_PAWCIO:{	
 	// check the client ident status
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
 	// bad guy - no credits for you
 	return 1;
 	}
-//MORPH START - Added by Yun.SF3, Boost the less uploaded files
-	if (theApp.glob_prefs->IsBoostLess())
-	{
-		if (!GetDownloadedTotal())
-			return 1;
-		float result = 0;
-		if (!GetUploadedTotal())
-			result = 100000;
-		else
-			result = (float)(((double)GetDownloadedTotal()*200.0)/(double)GetUploadedTotal());
-		float result2 = 0;
-		result2 = (float)GetDownloadedTotal()/100.0;
-		result2 += 2;
-		result2 = (double)sqrt((double)result2);
-		if (result > result2)
-			result = result2;
+			//Pawcio: Credits
+			if ((GetDownloadedTotal() < 1000000)&&(GetUploadedTotal() > 1000000)){
+				return 1.0f;
+			}
+			else if ((GetDownloadedTotal() < 1000000)&&(GetUploadedTotal()<1000000)) return 3.0f;
+			result = 0;
+			if (GetUploadedTotal()<1000000)
+				result = 100.0f;
+			else
+				result = (float)(GetDownloadedTotal()*3)/GetUploadedTotal();
+			if ((GetDownloadedTotal() > 100000000)&&(GetUploadedTotal()<GetDownloadedTotal()+8000000)&&(result<50)) result=50;
+			else if ((GetDownloadedTotal() > 50000000)&&(GetUploadedTotal()<GetDownloadedTotal()+5000000)&&(result<25)) result=25;
+			else if ((GetDownloadedTotal() > 25000000)&&(GetUploadedTotal()<GetDownloadedTotal()+3000000)&&(result<12)) result=12;
+			else if ((GetDownloadedTotal() > 10000000)&&(GetUploadedTotal()<GetDownloadedTotal()+2000000)&&(result<5)) result=5;
+			if (result > 100.0f)
+				return 100.0f;
+			if (result < 1.0f)
+				return 1.0f;
+		}break;
+		//EastShare End - added by AndCycle, Pawcio credit
+/*
+		case CS_BOOST_LESS:	//Boost less uploaded files
+		//MORPH START - Added by Yun.SF3, Boost the less uploaded files
+		//if (theApp.glob_prefs->IsBoostLess())
+		{
+			// check the client ident status
+			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+			// bad guy - no credits for you
+				return 1;
+			}
+			if (!GetDownloadedTotal())
+				return 1;
+			float result = 0;
+			if (!GetUploadedTotal())
+				result = 10000;
+			else
+				result = (float)(((double)GetDownloadedTotal()*200.0)/(double)GetUploadedTotal());
+			float result2 = 0;
+			result2 = (float)GetDownloadedTotal()/1024.0;
+			result2 += 2;
+			result2 = (double)sqrt((double)result2);
+			if (result > result2)
+				result = result2;
 
-		if (result < 1)
-			return 1;
-		else if (result > 100000)
-			return 100000;
-		return result;
-	}
-	else
-	{
+			if (result < 1)
+				return 1;
+			else if (result > 10000)
+				return 10000;
+			return result;
+		}break;
+*/		
+		// EastShare START - Added by TAHO, new Credit System //Modified by Pretender
+		case CS_EASTSHARE:{
+			// check the client ident status
+			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+				// bad guy - no credits for you
+				return 0.0f;//lovelace
+			}
+			result = ((m_pCredits->nKeySize == 0)||(GetCurrentIdentState(dwForIP)!=IS_IDENTIFIED)) ? 80 : 100;
+			
+			if (GetDownloadedTotal() < GetUploadedTotal())
+				result += (float)(((double)GetDownloadedTotal()-(double)GetUploadedTotal())/524288.0 + (double)pow((double)GetDownloadedTotal()/1048576.0,0.7));
+			else if ((double)GetDownloadedTotal() <= 1048576.0)
+				result += (float)((double)GetDownloadedTotal()/174762.7 - (double)GetUploadedTotal()/174762.7);
+			else
+				result += (float)((double)GetDownloadedTotal()/174762.7 - (double)GetUploadedTotal()/174762.7 + (double)pow((double)GetDownloadedTotal()/1048576.0,0.7));
+			
+			if ( result < 10 ) {result = 10;}
+			else if ( result > 2500 ) { result = 2500;}
+			result = result / 100;
+			return result;
+		}break;
+		// EastShare END - Added by TAHO, new Credit System
+
+		case CS_OFFICIAL:{
+			// check the client ident status
+			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+			// bad guy - no credits for you
+				return 1;
+			}
 		if (GetDownloadedTotal() < 1000000)
 			return 1;
-		float result = 0;
 		if (!GetUploadedTotal())
 			result = 10;
 		else
@@ -147,8 +290,37 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			return 10;
 		return result;
 	}
+
+		default:{
+			// check the client ident status
+			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+			// bad guy - no credits for you
+				return 1;
+			}
+			if (GetDownloadedTotal() < 1000000)
+				return 1;
+			if (!GetUploadedTotal())
+				result = 10;
+			else
+				result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
+			float result2 = 0;
+			result2 = (float)GetDownloadedTotal()/1048576.0;
+			result2 += 2;
+			result2 = (double)sqrt((double)result2);
+
+			if (result > result2)
+				result = result2;
+
+			if (result < 1)
+				return 1;
+			else if (result > 10)
+				return 10;
+			return result;
+		}
+	}
+	return result;//becareful for this, at least return something.
+	//EastShare END - Added by linekin, CreditSystem 
 }
-//MORPH END - Added by Yun.SF3, Boost the less uploaded files
 //MORPH START - Added by IceCream, VQB: ownCredits
 float CClientCredits::GetMyScoreRatio(uint32 dwForIP)
 {
@@ -287,7 +459,10 @@ void CClientCreditsList::LoadList()
 		file.Read(&count, 4);
 		m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
 
+		//EastShare START - modified by TAHO, .met control
 		const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
+		//const uint32 dwExpired = time(NULL) - m_pAppPrefs->GetClientsMetDays()*86400; //EastShare - AndCycle, this official setting shoudlnt be change by user
+		//EastShare END - modified by TAHO, .met control
 		uint32 cDeleted = 0;
 		for (uint32 i = 0; i < count; i++){
 			CreditStruct* newcstruct = new CreditStruct;
@@ -297,6 +472,10 @@ void CClientCreditsList::LoadList()
 			else
 				file.Read(newcstruct, sizeof(CreditStruct));
 			
+			//EastShare START - modified by TAHO, .met control
+			//if (newcstruct->nLastSeen < dwExpired){
+			//if ( m_pAppPrefs->GetClientsMetDays() != 0 && newcstruct->nLastSeen < dwExpired){//EastShare - AndCycle, this official setting shoudlnt be change by user
+			//EastShare END - modified by TAHO, .met control
 			if (newcstruct->nLastSeen < dwExpired){
 				cDeleted++;
 				delete newcstruct;

@@ -63,4 +63,9 @@ private:
 	//MORPH START - Added by SiRoB, About Open File Folder entry
 	void		OpenFileFolder(CKnownFile* file);
 	//MORPH END - Added by SiRoB, About Open File Folder entry
+	// EastShare Start added by linekin, TBH delete shared file
+	void		DeleteFileFromHDPart(CPartFile* file);
+	void		DeleteFileFromHDByKnown(CKnownFile* file);
+	void		DeleteFileFromHD(CKnownFile* file);
+	// EastShare End
 };

@@ -38,7 +38,17 @@ CKnownFileList::CKnownFileList()
 	m_nLastSaved = ::GetTickCount();
 	Init();
 }
-
+//EastShare START - Added by TAHO, .met files control
+CKnownFileList::CKnownFileList(CPreferences* in_prefs)
+{
+	app_prefs = in_prefs;
+	accepted = 0;
+	requested = 0;
+	transferred = 0;
+	m_nLastSaved = ::GetTickCount();
+	Init();
+}
+//EastShare END - Added by TAHO, .met files control
 CKnownFileList::~CKnownFileList()
 {
 	Clear();
@@ -74,6 +84,11 @@ bool CKnownFileList::Init()
 		}
 		
 		uint32 RecordsNumber;
+		// EastShare START - Added by TAHO, .met file control
+		uint32 cDeleted = 0; 
+		uint32 cAdded = 0;
+		uint32 ExpiredTime = time(NULL) - app_prefs->GetKnownMetDays()*86400;
+		// EastShare END - Added by TAHO, .met file control
 		file.Read(&RecordsNumber,4);
 		sLock.Lock();
 		for (uint32 i = 0; i < RecordsNumber; i++) {
@@ -84,10 +99,22 @@ bool CKnownFileList::Init()
 				delete pRecord;
 				continue;
 			}
+			// EastShare START - Modified by TAHO, .met file control
+			//Add(pRecord);
+			if ( app_prefs->GetKnownMetDays() == 0 || pRecord->statistic.GetLastUsed() > ExpiredTime )
+			{
 			Add(pRecord);
+				cAdded++;
+			}
+			else
+			{
+				cDeleted++;
+			}
+			// EastShare END - Modified by TAHO, .met file control
 		}
 		sLock.Unlock();
 		file.Close();
+		AddLogLine(false, "known.met loaded, %i files are known, %i files are deleted.", cAdded, cDeleted); // EastShare - Added by TAHO, .met file control
 	}
 	catch(CFileException* error){
 		OUTPUT_DEBUG_TRACE();

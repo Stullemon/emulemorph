@@ -95,6 +95,10 @@ void CServerConnect::ConnectToAnyServer(uint32 startAt,bool prioSort,bool isAuto
 	used_list->SetServerPosition( startAt );
 	if( theApp.glob_prefs->Score() && prioSort ) used_list->Sort();
 
+	//EastShare Start - PreferShareAll by AndCycle
+	if( theApp.glob_prefs->ShareAll() && prioSort ) used_list->PushBackNoShare();	// SLUGFILLER: preferShareAll
+	//EastShare End - PreferShareAll by AndCycle
+
 	if (used_list->GetServerCount()==0 ){
 		connecting = false;
 		AddLogLine(true,GetResString(IDS_ERR_NOVALIDSERVERSFOUND));

@@ -1417,6 +1417,50 @@ BEGIN
     GROUPBOX        "Security",IDC_STATIC,7,76,217,69,BS_FLAT
 END
 
+IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Backup"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Select File Types to Backup",IDC_STATIC,7,7,213,91,
+                    BS_FLAT
+    GROUPBOX        "Auto Backup",IDC_STATIC,8,103,112,47,BS_FLAT
+    CONTROL         "Note:",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    10,160,22,8
+    LTEXT           "A Directory named ""Backup"" will be created  under your eMule Application directory to store Backups",
+                    IDC_STATIC,10,172,205,21
+    CONTROL         "*.dat",IDC_DAT,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,22,33,10
+    CONTROL         "*.met",IDC_MET,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,37,35,10
+    CONTROL         "*.ini",IDC_INI,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,52,29,10
+    CONTROL         "*.part",IDC_PART,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,67,36,10
+    CONTROL         "*.part.met",IDC_PARTMET,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,82,51,10
+    DEFPUSHBUTTON   "Select All",IDC_SELECTALL,169,55,44,14,BS_FLAT
+    PUSHBUTTON      "Backup Now",IDC_BACKUPNOW,169,78,44,14,BS_FLAT | 
+                    WS_DISABLED
+    CONTROL         "Auto Backup on Exit",IDC_AUTOBACKUP,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,118,87,10
+    CONTROL         "Double Backup",IDC_AUTOBACKUP2,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,25,133,63,10
+END
+
+IDD_PPG_EASTSHARE DIALOGEX 0, 0, 230, 247
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "EastShare"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_EASTSHARE_OPTS,"SysTreeView32",
+                    TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP,7,46,216,
+                    194
+    LTEXT           "Static",IDC_WARNINGEASTSHARE,7,7,213,39
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2018,6 +2062,15 @@ BEGIN
         VERTGUIDE, 216
         BOTTOMMARGIN, 209
     END
+
+    IDD_PPG_EASTSHARE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 240
+        HORZGUIDE, 46
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2146,6 +2199,8 @@ SYSTRAY_RESTORE         ICON                    "res\\systray_restore.ico"
 SYSTRAY_CONNECT         ICON                    "res\\systray_connect.ico"
 SYSTRAY_DISCONNECT      ICON                    "res\\systray_disconnect.ico"
 SYSTRAY_EXIT            ICON                    "res\\systray_exit.ico"
+PREF_BACKUP             ICON                    "res\\backup.ico"
+CLIENTEASTSHARE         ICON                    "res\\EastShare.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3650,6 +3705,7 @@ BEGIN
     IDS_SERVERKEEPALIVETIMEOUT "Server connection refresh interval [min.]"
     IDS_MORE                "&More"
     IDS_TOOLS               "T&ools"
+    IDS_PAWCIO_CREDIT       "Pawcio Credit"
     IDS_CREATEHOSTNAMESRCLINK "Copy eD2K Link To Clipboard (Hostname)"
     IDS_HASHINGFILESCOUNT   " (%u hashing)"
     IDS_CHECKDISKSPACE      "Check Diskspace"
@@ -4075,7 +4131,24 @@ BEGIN
     IDS_SELECTIVESHARE      "Selective chunk sharing"
 END
 
-#endif    // English (U.S.) resources
+STRINGTABLE 
+BEGIN
+    IDS_BACKUP              "Backup"
+    IDS_USS_MAXPING         "Max ping value (ms) (Default %i)"
+    IDS_PAYBACKFIRST        "Pay Back First"
+    IDS_USS_USEMAXPING      "use max ping value"
+    IDS_CREDIT_SYSTEM       "Credit System"
+    IDS_OFFICIAL_CREDIT     "Official Credit"
+    IDS_LOVELACE_CREDIT     "lovelace Credit"
+    IDS_RATIO_CREDIT        "Ratio Credit"
+    IDS_EASTSHARE_CREDIT    "EastShare Credit"
+    IDS_PREFER_SHARE_ALL    "Prefer Share All"
+    IDS_MET_FILE_CONTROL    ".met File Control (be ware of changing any value !!)"
+    IDS_EXPIRED_CLIENTS     "Expired time of clients (day) (0 = Disabled)"
+    IDS_EXPIRED_KNOWN       "Expired time of known files (day) (0 = Disabled)"
+END
+
+#endif    // 英文 (美國) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

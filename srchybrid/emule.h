@@ -44,6 +44,7 @@
 #include "UploadBandwidthThrottler.h" //MORPH - Added by Yun.SF3, ZZ Upload System
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB, ZZ Upload system (USS)
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+#include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 
 #define MAX_NICK_LENGTH 49 // max. length of nick without trailing NUL char
 
@@ -89,6 +90,8 @@ public:
 	CScheduler*			scheduler;
 	CMMServer*			mmserver;
 	CFakecheck*			FakeCheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+	CPPgBackup*			ppgbackup; //EastShare - Added by Pretender, TBH-AutoBackup
+
 	uint64				stat_sessionReceivedBytes;
 	uint64				stat_sessionSentBytes;
 	uint64				stat_sessionSentBytesToFriend; //MORPH - Added by Yun.SF3, ZZ Upload System

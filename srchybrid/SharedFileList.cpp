@@ -212,6 +212,7 @@ void CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd){
 	filelist->FilterDuplicateKnownFiles(toadd);
 	// SLUGFILLER: mergeKnown
 	m_Files_map.SetAt(CCKey(toadd->GetFileHash()),toadd);
+	toadd->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
 	sLock.Unlock();
 	toadd->UpdateClientUploadList();		// #zegzav:updcliuplst
 	if (bOnlyAdd)
@@ -225,6 +226,7 @@ void CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd){
 void CSharedFileList::RemoveFile(CKnownFile* toremove){
 	if (output) output->RemoveFile(toremove);	// SLUGFILLER: mergeKnown - prevent crash in case of no output
 	m_Files_map.RemoveKey(CCKey(toremove->GetFileHash()));
+	toremove->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
 }
 
 void CSharedFileList::Reload(){

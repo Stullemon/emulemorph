@@ -1667,6 +1667,10 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 								break; 
 						}
 						case DS_ONQUEUE:{
+							//EastShare Start - Only download complete files v2.1 by AndCycle
+							if ((cur_src->GetLastAskedTime()) && ((dwCurTick - cur_src->GetLastAskedTime()) < FILEREASKTIME*2) && (lastseencomplete==NULL))
+								break;//shadow#(onlydownloadcompletefiles)
+							//EastShare End - Only download complete files v2.1 by AndCycle
 							if( cur_src->IsRemoteQueueFull() ) {
 								if( ((dwCurTick - lastpurgetime) > 60000) && (this->GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8 )) ){
 									theApp.downloadqueue->RemoveSource( cur_src );
@@ -2037,7 +2041,7 @@ void CPartFile::NewSrcPartsInfo(){
 			m_nVirtualCompleteSourcesCountMin = m_SrcpartFrequency[i];
 	}
 
-	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCountMin<10, m_nVirtualCompleteSourcesCountMin==1); //changed (temporaly perhaps) [Yun.SF3]
+	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<21)?true:(m_nVirtualCompleteSourcesCountMin==0), m_nCompleteSourcesCountHi==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCountMin>0));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	UpdateDisplayedInfo();
@@ -2597,6 +2601,9 @@ void CPartFile::StopFile(bool setVars){
 	// khaos::kmod-
 	datarate = 0;
 	memset(m_anStates,0,sizeof(m_anStates));
+	//EastShare Start - Only download complete files v2.1 by AndCycle
+	if ((status!=PS_COMPLETE)&&(status!=PS_COMPLETING)) lastseencomplete = NULL;//shadow#(onlydownloadcompletefiles)
+	//EastShare End - Only download complete files v2.1 by AndCycle
 	FlushBuffer();
 	theApp.downloadqueue->SortByPriority();
 	theApp.downloadqueue->CheckDiskspace();	// SLUGFILLER: checkDiskspace

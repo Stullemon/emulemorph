@@ -336,6 +336,12 @@ bool CUpDownClient::TestLeecher(){
 	StrStrI(m_clientModString,"Killians")||
 	StrStrI(m_pszUsername,"Killians")||
 	StrStrI(m_pszUsername,"pubsman")||
+	// EastShare START - Added by TAHO, Pretender
+	StrStrI(m_pszUsername,"emule-element")||
+	StrStrI(m_clientModString,"Element")|| 
+	StrStrI(m_clientModString,"§¯Å]")|| 
+	(StrStrI(m_clientModString,"EastShare") && StrStrI(m_clientVerString,"0.29"))||
+	// EastShare END - Added by TAHO, Pretender
 	(StrStrI(m_pszUsername,"emule") && StrStrI(m_pszUsername,"booster"))||
 	(StrStrI(m_clientModString,"LSD.7c") && !StrStrI(m_clientVerString,"27"))||
 	(StrStrI(m_clientModString,"Morph") && StrStrI(m_clientModString,"Max"))||

@@ -356,6 +356,14 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 								Sbuffer = tempString;
 							}
 							//MORPH END - Added by SiRoB, ZZ Upload System
+							//EastShare START - Added by TAHO, Pay Back First
+							if(client->MoreUpThanDown()) {
+								CString tempString2 = "PBF ";
+								tempString2.Append(Sbuffer);
+								Sbuffer.Empty();
+								Sbuffer = tempString2;
+							}
+							//EastShare END - Added by TAHO, Pay Back First
 						}
 						else
 							Sbuffer = "?";
@@ -636,6 +644,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
+				//EastShare - added by AndCycle, PayBackFirst
+				if(item1->MoreUpThanDown() == true && item2->MoreUpThanDown() == false)
+					result = 1;
+				else if(item1->MoreUpThanDown() == false && item2->MoreUpThanDown() == true)
+					result = -1;
+                else 
+				//EastShare - added by AndCycle, PayBackFirst
+
                 		if(item1->GetPowerShared() == true && item2->GetPowerShared() == false)
 					result = 1;
                 		else if(item1->GetPowerShared() == false && item2->GetPowerShared() == true)

@@ -21,11 +21,13 @@ protected:
 	CPreferences *app_prefs;
 	
 	int m_iSUCLog;
+	int m_iUSSLimit; // EastShare - Added by TAHO, USS limit
 	int m_iSUCHigh;
 	int m_iSUCLow;
 	int m_iSUCPitch;
 	int m_iSUCDrift;
 	int m_iUSSLog;
+	int m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     int m_iUSSPingTolerance;
     int m_iUSSGoingUpDivider;
     int m_iUSSGoingDownDivider;
@@ -76,6 +78,8 @@ protected:
 	HTREEITEM m_htiSUCPitch;
 	HTREEITEM m_htiSUCDrift;
 	HTREEITEM m_htiUSSLog;
+	HTREEITEM m_htiUSSLimit; // EastShare - Added by TAHO, USS limit
+	HTREEITEM m_htiUSSPingLimit; // EastShare - Added by TAHO, USS limit
     HTREEITEM m_htiUSSPingTolerance;
     HTREEITEM m_htiUSSGoingUpDivider;
     HTREEITEM m_htiUSSGoingDownDivider;

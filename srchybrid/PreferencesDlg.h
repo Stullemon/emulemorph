@@ -18,6 +18,8 @@
 #include "PPgProxy.h"
 #include "otherfunctions.h"
 #include "ListBoxST.h"
+#include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
+#include "PPgEastShare.h" //EastShare - Added by Pretender, TBH-AutoBackup
 
 // CPreferencesDlg
 
@@ -29,6 +31,9 @@ public:
 	CPreferencesDlg();
 	virtual ~CPreferencesDlg();
 	
+private:
+	bool isEnlarged; // EastShare, Added by TAHO, enlarge Windows
+
 protected:
 	UINT m_nActiveWnd;
 	DECLARE_MESSAGE_MAP()
@@ -49,6 +54,8 @@ public:
 	CPPgProxy		m_wndProxy;
 	CPPgMorph		m_wndMorph; //MORPH - Added by IceCream, Morph Prefs
 	CPPgMorph2		m_wndMorph2; //MORPH - Added by SiRoB, Morph Prefs
+	CPPgBackup		m_wndBackup; //EastShare - Added by Pretender, TBH-AutoBackup
+	CPPgEastShare	m_wndEastShare; //EastShare - Added by Pretender, ES Prefs
 
 	CPreferences	*app_prefs;
 	CListBoxST		m_listbox;
@@ -75,6 +82,7 @@ public:
 		m_wndMorph2.SetPrefs(in_prefs);	//MORPH - Added by SiRoB, Morph Prefs
 		m_wndScheduler.SetPrefs(in_prefs);
 		m_wndProxy.SetPrefs(in_prefs);
+		m_wndEastShare.SetPrefs(in_prefs);	//EastShare - Added by Pretender, ES Prefs
 	}
 	afx_msg void OnDestroy();
 	afx_msg void OnSelChanged();

@@ -400,7 +400,27 @@ void CServerList::Sort(){
 		   break;
    }
 }
-
+//EastShare Start - PreferShareAll by AndCycle
+// SLUGFILLER: preferShareAll
+void CServerList::PushBackNoShare(){
+	uint32 files = theApp.sharedfiles->GetCount()+theApp.sharedfiles->GetHashingCount();	// SLUGFILLER: SafeHash - use estimate
+	POSITION pos1, pos2;
+	uint16 i = 0;
+	for( pos1 = list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
+		list.GetNext(pos1);
+		CServer* cur_server = list.GetAt(pos2);
+		if ((cur_server->GetSoftFiles() && cur_server->GetSoftFiles() < files) ||
+			(cur_server->GetHardFiles() && cur_server->GetHardFiles() < files)){
+			list.AddTail(cur_server);
+			list.RemoveAt(pos2);
+		}
+		i++;
+		if (i == list.GetCount())
+			break;
+	}
+}
+// SLUGFILLER: preferShareAll
+//EastShare End - PreferShareAll by AndCycle
 CServer* CServerList::GetNextServer(){
 	CServer* nextserver = 0;
 	uint32 i = 0;

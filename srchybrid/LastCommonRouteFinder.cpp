@@ -610,6 +610,13 @@ UINT LastCommonRouteFinder::RunInternal() {
                 prefsLocker.Unlock();
 
                 uint32 soll_ping = initial_ping*pingTolerance;
+                // EastShare START - Add by TAHO, USS limit
+				if ( theApp.glob_prefs->IsUSSLimit() ) {
+					soll_ping = theApp.glob_prefs->GetDynUpPingLimit(); 
+				}else{
+					soll_ping = initial_ping*pingTolerance; // ZZ, USS
+				}
+                // EastShare END - Add by TAHO, USS limit
 
                 uint32 raw_ping = soll_ping; // this value will cause the upload speed not to change at all.
                         

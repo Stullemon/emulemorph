@@ -1,0 +1,57 @@
+#pragma once
+
+#include "preferences.h"
+#include "afxwin.h"
+
+
+
+class CPPgBackup : public CPropertyPage
+{
+	DECLARE_DYNAMIC(CPPgBackup)
+public:
+	CPPgBackup();
+	virtual ~CPPgBackup();
+
+	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs;}
+
+	// Dialog Data
+	enum { IDD = IDD_PPG_BACKUP };
+protected:
+	bool m_bModified;
+	void SetModified(BOOL bChanged = TRUE)
+	{
+		m_bModified = bChanged;
+		CPropertyPage::SetModified(bChanged);
+	}
+	CPreferences *app_prefs;
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+
+public:
+	virtual BOOL OnInitDialog();
+	virtual BOOL OnApply();
+	void Backup(LPCSTR extensionToBack, BOOL conFirm);
+	void Backup3(); //eastshare added by linekin, backup backup
+
+
+private:
+	//void Backup(LPCSTR extensionToBack);
+	void Backup2(LPCSTR extensionToBack);
+	void LoadSettings(void);
+	BOOL y2All;
+public:
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnBnClickedBackupnow();
+	afx_msg void OnBnClickedDat();
+	afx_msg void OnBnClickedMet();
+	afx_msg void OnBnClickedIni();
+	afx_msg void OnBnClickedPart();
+	afx_msg void OnBnClickedPartMet();
+	afx_msg void OnBnClickedSelectall();
+	afx_msg void OnBnClickedAutobackup();
+	//EastShare Start- Added by Pretender, Double Backup
+	afx_msg void OnBnClickedAutobackup2();
+	//EastShare End- Added by Pretender, Double Backup
+};

@@ -951,8 +951,10 @@
 #define IDS_HM_SCHED_ON                 1007
 #define IDS_HM_SCHED_OFF                1008
 #define IDS_HM_LINKHP                   1009
+#define IDC_SELECTALL                   1009
 #define IDS_HM_LINKFAQ                  1010
 #define IDS_HM_LINKVC                   1011
+#define IDC_BACKUPNOW                   1011
 #define IDS_DEBUG_SOURCE_EXCHANGE       1012
 #define IDS_SHAREDREQ1                  1013
 #define IDS_SHAREDREQ2                  1014
@@ -963,8 +965,10 @@
 #define IDS_SHAREDANSW3                 1019
 #define IDS_SHAREDREQDENIED             1020
 #define IDS_AUTOCLEANUPFN               1021
+#define IDC_DAT                         1021
 #define IDS_ONNEWDOWNLOAD               1022
 #define IDS_FILTERFILENAMEWORD          1023
+#define IDC_INI                         1023
 #define IDS_FNFILTERTITLE               1024
 #define IDS_CHANGECATVIEW               1025
 #define IDS_STATUS_NOTCOMPLETED         1026
@@ -1074,6 +1078,7 @@
 #define IDS_SEARCH_TOOCOMPLEX           1129
 #define IDS_SEARCH_INVALIDMINMAX        1130
 #define IDS_VERSION                     1131
+#define IDC_MET                         1131
 #define IDS_ALL_A4AF_TO_THIS            1132
 #define IDD_META_DATA                   1132
 #define IDS_ALL_A4AF_TO_OTHER           1133
@@ -1100,6 +1105,7 @@
 #define IDS_KBYTESSEC                   1150
 #define IDS_ERR_CREATE_DIR              1151
 #define IDS_WRN_INCFILE_RESERVED        1152
+#define IDC_PART                        1152
 #define IDS_WRN_TEMPFILES_RESERVED      1153
 #define IDS_WRN_INCTEMP_SAME            1154
 #define IDS_MMFAILED                    1155
@@ -1140,6 +1146,7 @@
 #define IDS_SERVERKEEPALIVETIMEOUT      1190
 #define IDS_MORE                        1191
 #define IDS_TOOLS                       1192
+#define IDS_PAWCIO_CREDIT               1193
 #define IDS_CREATEHOSTNAMESRCLINK       1194
 #define IDS_HASHINGFILESCOUNT           1195
 #define IDS_CHECKDISKSPACE              1196
@@ -1207,6 +1214,8 @@
 #define IDS_EM_TOOLS                    1335
 #define IDS_EM_HELP                     1336
 #define IDS_WRN_FRIENDDUPLIPPORT        1337
+#define IDC_PARTMET                     1345
+#define IDD_PPG_BACKUP                  1378
 #define IDS_SWITCHSUC                   1468
 #define IDS_SWITCHDYNUP                 1469
 #define IDS_AUTODYNUPSWITCHING          1470
@@ -2063,7 +2072,10 @@
 #define IDC_HYPERTEXT_FONT_HINT         2479
 #define IDC_GUIDELINK                   2480
 #define IDC_INDEXEDLIST                 2481
+#define IDC_EASTSHARE_OPTS              2481
 #define IDC_KADSEARCHLAB                2482
+#define IDC_WARNINGEASTSHARE            2482
+#define IDC_WARNINGEAST                 2482
 #define IDC_KADCONTACTLAB               2483
 #define IDC_KADINDEXLAB                 2484
 #define IDC_KADPUBLAB                   2485
@@ -2159,6 +2171,7 @@
 #define IDD_PPG_MORPH2                  2617
 #define IDS_CAT_USEAUTOCAT              2617
 #define IDS_SLS_USESLS                  2618
+#define IDD_PPG_EASTSHARE               2618
 #define IDS_CAT_MERGE                   2619
 #define IDS_CAT_SETFILEGROUP            2620
 #define IDS_CAT_GROUP                   2621
@@ -2220,6 +2233,19 @@
 #define IDS_DYNUP                       3122
 #define IDS_HIDEOVERSHARES              3123
 #define IDS_SELECTIVESHARE              3124
+#define IDS_BACKUP                      4001
+#define IDS_USS_MAXPING                 4002
+#define IDS_PAYBACKFIRST                4003
+#define IDS_USS_USEMAXPING              4004
+#define IDS_CREDIT_SYSTEM               4005
+#define IDS_OFFICIAL_CREDIT              4006
+#define IDS_LOVELACE_CREDIT             4007
+#define IDS_RATIO_CREDIT                4008
+#define IDS_EASTSHARE_CREDIT            4009
+#define IDS_PREFER_SHARE_ALL            4010
+#define IDS_MET_FILE_CONTROL            4011
+#define IDS_EXPIRED_CLIENTS             4012
+#define IDS_EXPIRED_KNOWN               4013
 #define IDS_UPDATEIPFILTER              4742
 #define IDS_UPDATEIPFILTERONSTART       4743
 #define IDS_UPDATEIPFILTERERROR         4744
@@ -2343,6 +2369,9 @@
 #define IDC_UPDATE_URL_FAKELIST         4865
 #define IDC_UPDATE_URL_IPFILTER         4866
 #define IDC_URL_FOR_UPDATING2           4867
+#define IDC_AUTOBACKUP                  13324
+#define IDC_AUTOBACKUP2                 13325
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED

@@ -398,6 +398,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 				case 11:
                     Sbuffer.Format("%i", client->GetSlotNumber());
 					//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
+					//EastShare START - Added by TAHO, Pay Back First
+					if (client->MoreUpThanDown())
+						Sbuffer.Append(" PBF");
+					//EastShare END - Added by TAHO, Pay Back First
 					if (client->GetFriendSlot() && client->IsFriend())
 						Sbuffer.Append(" FS");
 					else if (client->GetPowerShared())

@@ -32,6 +32,8 @@ CPreferencesDlg::CPreferencesDlg(){
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndScheduler.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndProxy.m_psp.dwFlags &= ~PSH_HASHELP; // deadlake PROXYSUPPORT
+	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
+	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 
 	AddPage(&m_wndGeneral);
 	AddPage(&m_wndDisplay);
@@ -47,10 +49,13 @@ CPreferencesDlg::CPreferencesDlg(){
 	AddPage(&m_wndScheduler);
 	AddPage(&m_wndWebServer);
 	AddPage(&m_wndTweaks);
+	AddPage(&m_wndBackup); //EastShare - Added by Pretender, TBH-AutoBackup
 	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
+	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	m_nActiveWnd = 0;
 	m_iPrevPage = -1;
+	isEnlarged = false; // EastShare, Added by TAHO, enlarge Windows
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -68,6 +73,7 @@ void CPreferencesDlg::OnDestroy()
 	CPropertySheet::OnDestroy();
 	app_prefs->Save();
 	m_nActiveWnd = GetActiveIndex();
+	isEnlarged = false; // EastShare, Added by TAHO, enlarge Windows
 }
 
 BOOL CPreferencesDlg::OnInitDialog()
@@ -89,6 +95,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 	m_listbox.GetText(curSel,currenttext);
 	m_groupbox.SetWindowText(currenttext);
 	m_iPrevPage = curSel;
+	isEnlarged = false; // EastShare , Added by TAHO, enlarge Windows
 	return bResult;
 }
 
@@ -126,8 +133,10 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader("PREF_SCHEDULER"));
 	ImageList.Add(CTempIconLoader("PREF_WEBSERVER"));
 	ImageList.Add(CTempIconLoader("PREF_TWEAK"));
+	ImageList.Add(CTempIconLoader("PREF_BACKUP")); //EastShare - Added by Pretender, TBH-AutoBackup
 	ImageList.Add(CTempIconLoader("PREF_TWEAK"));  //MORPH - Added by IceCream, Morph Prefs
 	ImageList.Add(CTempIconLoader("PREF_TWEAK"));  //MORPH - Added by SiRoB, Morph Prefs
+	ImageList.Add(CTempIconLoader("PREF_TWEAK"));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
 	m_listbox.SetImageList(&ImageList);
 
 	CString title = GetResString(IDS_EM_PREFS); 
@@ -169,8 +178,10 @@ void CPreferencesDlg::Localize()
 	buffer.Add(GetResString(IDS_SCHEDULER));
 	buffer.Add(GetResString(IDS_PW_WS));
 	buffer.Add(GetResString(IDS_PW_TWEAK)); 
+	buffer.Add(GetResString(IDS_BACKUP)); //EastShare - Added by Pretender, TBH-AutoBackup
 	buffer.Add("Morph"); //MORPH - Added by IceCream, Morph Prefs
 	buffer.Add("Morph II"); //MORPH - Added by SiRoB, Morph Prefs
+	buffer.Add("Morph III"); //EastShare - Added by Pretender, ES Prefs
 	for (int i = 0; i < buffer.GetCount(); i++)
 		buffer[i].Remove(_T('&'));
 
@@ -207,7 +218,11 @@ void CPreferencesDlg::Localize()
 		yoffset=-rectOld.Height();
 	}
 	GetWindowRect(rectOld);
-	SetWindowPos(NULL,0,0,rectOld.Width()+xoffset,rectOld.Height()+yoffset,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+	// EastShare START - Modified by TAHO, enlarge Preferences Windows
+	int offset2 = (isEnlarged) ? 0 : 30;
+	int offset3 = (isEnlarged) ? 0 : 38;
+	//SetWindowPos(NULL,0,0,rectOld.Width()+xoffset,rectOld.Height()+yoffset,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+	SetWindowPos(NULL,0,0,rectOld.Width()+xoffset,rectOld.Height()+yoffset+offset2,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
 	tab->GetWindowRect (rectOld);
 	ScreenToClient (rectOld);
 	tab->SetWindowPos(NULL,rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
@@ -217,10 +232,12 @@ void CPreferencesDlg::Localize()
 	activepage->SetWindowPos(NULL,rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 	activepage->GetWindowRect(rectOld);
 	ScreenToClient (rectOld);
-	m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10,SWP_NOZORDER|SWP_NOACTIVATE);
+	//m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10,SWP_NOZORDER|SWP_NOACTIVATE);
+	m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10+offset2,SWP_NOZORDER|SWP_NOACTIVATE);
 	m_groupbox.GetWindowRect(rectOld);
 	ScreenToClient(rectOld);
-	m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4,SWP_NOZORDER|SWP_NOACTIVATE);
+	//m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4,SWP_NOZORDER|SWP_NOACTIVATE);
+	m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4+offset3,SWP_NOZORDER|SWP_NOACTIVATE);	// EastShare END - Modified by TAHO, enlarge Preferences Windows
 	int _PropSheetButtons[] = {IDOK, IDCANCEL, ID_APPLY_NOW, IDHELP };
 	CWnd* PropSheetButton;
 	for (int i = 0; i < sizeof (_PropSheetButtons) / sizeof(_PropSheetButtons[0]); i++)
@@ -229,9 +246,12 @@ void CPreferencesDlg::Localize()
 		{
 			PropSheetButton->GetWindowRect (rectOld);
 			ScreenToClient (rectOld);
-			PropSheetButton->SetWindowPos (NULL, rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+			//PropSheetButton->SetWindowPos (NULL, rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+			PropSheetButton->SetWindowPos (NULL, rectOld.left+xoffset,rectOld.top+yoffset+offset2,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 		}
 	}
+	isEnlarged = true;
+	// EastShare END - Modified by TAHO, enlarge Preferences Windows
 	tab->ShowWindow(SW_HIDE);
 	m_listbox.SetCurSel(GetActiveIndex());		
 	CenterWindow();

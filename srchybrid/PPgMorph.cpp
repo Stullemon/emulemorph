@@ -41,6 +41,8 @@ CPPgMorph::CPPgMorph()
 	m_htiSUCPitch = NULL;
 	m_htiSUCDrift = NULL;
 	m_htiUSSLog = NULL;
+	m_htiUSSLimit = NULL; // EastShare - Added by TAHO , USS limit
+	m_htiUSSPingLimit = NULL; // EastShare - Added by TAHO, USS limit
     m_htiUSSPingTolerance = NULL;
     m_htiUSSGoingUpDivider = NULL;
     m_htiUSSGoingDownDivider = NULL;
@@ -181,6 +183,15 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		
 		m_htiDynUpUSS = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_USS), m_htiDYNUP, m_iDynUpMode == 2);
 		m_htiUSSLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_LOG), m_htiDynUpUSS, m_iUSSLog);
+
+		// EastShare START - Added by TAHO, USS limit
+		m_htiUSSLimit = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_USEMAXPING), m_htiDynUpUSS, m_iUSSLimit);
+		//Buffer.Format("Max ping value (ms): ",800); //modified by Pretender
+		Buffer.Format(GetResString(IDS_USS_MAXPING),500); //Added by Pretender
+		m_htiUSSPingLimit = m_ctrlTreeOptions.InsertItem(Buffer, TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpUSS);
+		m_ctrlTreeOptions.AddEditBox(m_htiUSSPingLimit, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		// EastShare END - Added by TAHO, USS limit
+
 		Buffer.Format(GetResString(IDS_USS_PINGTOLERANCE),800);
 		m_htiUSSPingTolerance = m_ctrlTreeOptions.InsertItem(Buffer, TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpUSS);
 		m_ctrlTreeOptions.AddEditBox(m_htiUSSPingTolerance, RUNTIME_CLASS(CNumTreeOptionsEdit));
@@ -237,6 +248,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_iSUCDrift, 0, 100);
 	
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLog, m_iUSSLog);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLimit, m_iUSSLimit); // EastShare - Added by TAHO, USS limit
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingLimit, m_iUSSPingLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingTolerance, m_iUSSPingTolerance);
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSGoingUpDivider, m_iUSSGoingUpDivider);
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSGoingDownDivider, m_iUSSGoingDownDivider);
@@ -297,6 +310,8 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iSUCPitch = app_prefs->prefs->m_iSUCPitch;
 	m_iSUCDrift = app_prefs->prefs->m_iSUCDrift;;
 	m_iUSSLog = app_prefs->prefs->m_bDynUpLog;
+	m_iUSSLimit = app_prefs->prefs->m_bIsUSSLimit; // EastShare - Added by TAHO, USS limit
+	m_iUSSPingLimit = app_prefs->prefs->m_iDynUpPingLimit; // EastShare - Added by TAHO, USS limit
     m_iUSSPingTolerance = app_prefs->prefs->m_iDynUpPingTolerance;
     m_iUSSGoingUpDivider = app_prefs->prefs->m_iDynUpGoingUpDivider;
     m_iUSSGoingDownDivider = app_prefs->prefs->m_iDynUpGoingDownDivider;
@@ -368,6 +383,8 @@ BOOL CPPgMorph::OnApply()
 	app_prefs->prefs->m_iSUCPitch = m_iSUCPitch;
 	app_prefs->prefs->m_iSUCDrift = m_iSUCDrift;
 	app_prefs->prefs->m_bDynUpLog = m_iUSSLog;
+	app_prefs->prefs->m_bIsUSSLimit = m_iUSSLimit; // EastShare - Added by TAHO, USS limit
+	app_prefs->prefs->m_iDynUpPingLimit = m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     app_prefs->prefs->m_iDynUpPingTolerance = m_iUSSPingTolerance;
     app_prefs->prefs->m_iDynUpGoingUpDivider = m_iUSSGoingUpDivider;
     app_prefs->prefs->m_iDynUpGoingDownDivider = m_iUSSGoingDownDivider;
@@ -529,6 +546,8 @@ void CPPgMorph::OnDestroy()
 	m_htiSUCPitch = NULL;
 	m_htiSUCDrift = NULL;
 	m_htiUSSLog = NULL;
+	m_htiUSSLimit = NULL; // EastShare - Added by TAHO, USS limit
+	m_htiUSSPingLimit = NULL;
     m_htiUSSPingTolerance = NULL;
     m_htiUSSGoingUpDivider = NULL;
     m_htiUSSGoingDownDivider = NULL;

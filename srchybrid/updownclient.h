@@ -368,6 +368,11 @@ public:
 	//MORPH START - Added by SiRoB, Is Morph Client
 	bool IsMorph() { return m_bIsMorph;}
 	//MORPH END   - Added by SiRoB, Is Morph Client
+
+	bool	MoreUpThanDown();	//EastShare - Added by AndCycle, PayBackFirst
+	void	setPayBackFirstTag(bool tag) {m_bPayBackFirstTag=tag;}	//EastShare - Added by AndCycle, PayBackFirst
+	bool	chkPayBackFirstTag() {return m_bPayBackFirstTag;} //EastShare - Added by AndCycle, PayBackFirst
+
 	//wistily start
 	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}//wistily
 	void  Add2UpTotalTime(uint32 length){m_nUpTotalTime += length;}//wistily
@@ -473,6 +478,7 @@ private:
 
 	DWORD       m_dwLastCheckedForEvictTick;
 //MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
+	bool		m_bPayBackFirstTag; //EastShare - added by AndCycle, Pay Back First
 public:
 	uint16		m_lastPartAsked;
 	uint8*		m_abyUpPartStatus;

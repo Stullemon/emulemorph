@@ -107,6 +107,7 @@
 #define MINFRAGSIZE             2500/*512*/
 //MOPRH END   - Added by SiRoB, ZZ Upload System 20030824-2238
 #define	MAXFRAGSIZE				1300
+#define MP_FORCE 10200//shadow#(onlydownloadcompletefiles) //EastShare - Added by AndCycle
 #define	PARTSIZE				9728000
 #define EMBLOCKSIZE				184320
 #define OP_EDONKEYHEADER		0xE3
@@ -342,6 +343,7 @@
 #define FT_SPREADEND			0x71
 #define FT_SPREADCOUNT			0x72
 //MORPH - Added by IceCream, SLUGFILLER: Spreadbars
+#define FT_LASTUSED				0x95	// <uint32> // EastShare - Added by TAHO, .met file control
 
 #define CT_NAME					0x01
 #define CT_VERSION				0x11
@@ -666,3 +668,7 @@ float   line down speed */
 #define KADEMLIA_FIND_VALUE		0x02
 #define KADEMLIA_STORE			0x04
 #define KADEMLIA_FIND_NODE		0x0B
+
+#define MP_DELFILE			10333 // eastshare added by linekin, TBH delete shared file
+
+

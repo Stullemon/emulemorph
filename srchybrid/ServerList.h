@@ -55,6 +55,9 @@ public:
 //	void		CancelUDPBroadcast();
 //	void static CALLBACK UDPTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWORD dwTime);
 	void		Sort();
+	//EastShare Start - PreferShareAll by AndCycle
+	void		PushBackNoShare();	// SLUGFILLER: preferShareAll
+	//EastShare End - PreferShareAll by AndCycle
 	void		MoveServerDown(CServer* aServer);
 	uint32		GetServerPostion()	{return serverpos;}
 	void		SetServerPosition(uint32 newPosition) { if (newPosition<(uint32)list.GetCount() ) serverpos=newPosition; else serverpos=0;}

@@ -239,6 +239,12 @@ CString CPPgScheduler::GetActionLabel(uint8 index) {
 		case ACTION_CATSTOP		: return GetResString(IDS_SCHED_CATSTOP);
 		case ACTION_CATRESUME	: return GetResString(IDS_SCHED_CATRESUME);
 		case ACTION_CONS		: return GetResString(IDS_PW_MAXC);
+		//EastShare START - Added by Pretender, add USS settings in scheduler tab
+		case ACTION_USSMAXPING	: return GetResString(IDS_USS_MAXPING);
+		case ACTION_USSGOUP		: return GetResString(IDS_USS_GOINGUPDIVIDER);
+		case ACTION_USSGODOWN	: return GetResString(IDS_USS_GOINGDOWNDIVIDER);
+		case ACTION_USSMINUP	: return GetResString(IDS_MINUPLOAD);
+		//EastShare END - Added by Pretender, add USS settings in scheduler tab
 	}
 	return ""; //MORPH - Modified by IceCream, return a CString
 }
@@ -300,6 +306,16 @@ void CPPgScheduler::OnNMRclickActionlist(NMHDR *pNMHDR, LRESULT *pResult)
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_CONS,GetResString(IDS_PW_MAXC));
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_CATSTOP,GetResString(IDS_SCHED_CATSTOP));
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_CATRESUME,GetResString(IDS_SCHED_CATRESUME));
+	//EastShare START - Added by Pretender, add USS settings in scheduler tab
+	CString Buffer;
+	Buffer.Format(GetResString(IDS_USS_MAXPING),500);
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_USSMAXPING,Buffer);
+	Buffer.Format(GetResString(IDS_USS_GOINGUPDIVIDER),1000);
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_USSGOUP,Buffer);
+	Buffer.Format(GetResString(IDS_USS_GOINGDOWNDIVIDER),1000);
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_USSGODOWN,Buffer);
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_USSMINUP,GetResString(IDS_MINUPLOAD));
+	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 
 	m_ActionMenu.AddMenuTitle(GetResString(IDS_ACTION));
 	m_ActionMenu.AppendMenu(MF_POPUP,(UINT_PTR)m_ActionSel.m_hMenu,	GetResString(IDS_ADD));

@@ -256,6 +256,33 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	return (uint32)fBaseValue;
 }
 
+//EastShare Start - added by AndCycle, Pay Back First
+bool CUpDownClient::MoreUpThanDown(){
+
+	if(!theApp.glob_prefs->IsPayBackFirst()){
+		return false;
+
+	}else if((credits->GetCurrentIdentState(GetIP()) == IS_IDFAILED || 
+		credits->GetCurrentIdentState(GetIP()) == IS_IDBADGUY || 
+		credits->GetCurrentIdentState(GetIP()) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable()){
+		return false;
+
+	}else if(GetUploadState() == US_UPLOADING){
+		//kick PayBackFirst client after full chunk transfer
+		if(GetQueueSessionPayloadUp() > SESSIONAMOUNT){
+			return false;
+		}else{
+		//keep PayBackFirst client for full chunk transfer
+			return chkPayBackFirstTag();
+		}
+	}else{
+		setPayBackFirstTag(credits->GetDownloadedTotal() > credits->GetUploadedTotal());
+	}
+
+	return chkPayBackFirstTag();
+}
+//EastShare End - added by AndCycle, Pay Back First
+
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**
  * Checks if the file this client has requested has release priority.
@@ -263,6 +290,11 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
  * @return true if the requested file has release priority
  */
 bool CUpDownClient::GetPowerShared() {
+	if ((credits->GetCurrentIdentState(GetIP()) == IS_IDFAILED || 
+		credits->GetCurrentIdentState(GetIP()) == IS_IDBADGUY || 
+		credits->GetCurrentIdentState(GetIP()) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable()){
+		return false;
+	}
 	if(GetUploadFileID() != NULL &&
        theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
 		return theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();

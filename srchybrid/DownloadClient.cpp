@@ -625,7 +625,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	m_nDownDataRateMS += size - HEADER_SIZE;
 //Give more credits to rare files uploaders [Yun.SF3]
 	if (reqfile->m_nCompleteSourcesCount && theApp.glob_prefs->IsBoostLess())
-		credits->AddDownloaded((size - HEADER_SIZE)/reqfile->m_nVirtualCompleteSourcesCountMin, GetIP());
+		credits->AddDownloaded((size - HEADER_SIZE)/reqfile->m_nCompleteSourcesCount, GetIP());
 	else
 		credits->AddDownloaded(size - HEADER_SIZE, GetIP());
 //Give more credits to rare files uploaders [Yun.SF3]

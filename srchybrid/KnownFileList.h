@@ -29,6 +29,7 @@ class CKnownFileList : public CArray<CKnownFile*,CKnownFile*>, public CLoggable
 	friend class CFileStatistic;
 public:
 	CKnownFileList();
+	CKnownFileList(CPreferences* in_prefs);//EastShare - Added by TAHO, .met files control
 	~CKnownFileList();
 	void	SafeAddKFile(CKnownFile* toadd);
 	void	RemoveFile(CKnownFile* toremove);	// SLUGFILLER: mergeKnown - for duplicate removal
@@ -46,6 +47,7 @@ private:
 	uint16 accepted;
 	uint64 transferred;
 	uint32 m_nLastSaved;
+	CPreferences* app_prefs;//EastShare - Added by TAHO, .met files control
 };
 
 
