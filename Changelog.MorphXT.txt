@@ -28,10 +28,11 @@ ADDED  : Optimizer [ePlus] [Commander]
 ADDED  : Displaying the friend's country in the chatwnd info groupbox [Commander]
 FIXED  : Serverlist->LowId column display and sort [Commander]
 FIXED  : cat->rightclick->Resume Next works now [Commander]
-TODO   : Make RSS-Feed fully RDF compatible [?]
 FIXED  : SharedFileList -> Transfered data now saved correctly [AndCycle/Commander]
 TODO   : Recheck file completing (user report->possible bug?)
 ADDED  : CPU Optimization Mode display on Splashscreen [Commander]
+FIXED  : RSS news feeds should now work for most .rss/.rdf files. Please report nonstandard feed servers/files. [MightyKnife]
+ADDED  : RSS news feeds can be added/modified/deleted via a button/menu in the server window [MightyKnife]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
