@@ -3051,15 +3051,15 @@ void CPreferences::LoadPreferences(){
 	m_nMMPort = ini.GetInt("Port", 80);
 
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
-	if (!m_bSUCEnabled) m_bDynUpEnabled = ini.GetBool("DynUpEnabled", false);
+	if (!m_bSUCEnabled) m_bDynUpEnabled = ini.GetBool("DynUpEnabled", false, "eMule");
 
-	m_iDynUpPingTolerance = ini.GetInt("DynUpPingTolerance", 800);
-	m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000);
-	m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000);
-	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1);
-	m_bDynUpLog = ini.GetBool("USSLog", false);
-	m_iDynUpPingLimit = ini.GetInt("USSPingLimit", 200); // EastShare - Added by TAHO, USS limit
-	m_bIsUSSLimit = ini.GetBool("IsUSSLimit",false); // EastShare - Added by TAHO, does USS limit
+	m_iDynUpPingTolerance = ini.GetInt("DynUpPingTolerance", 800, "eMule");
+	m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000, "eMule");
+	m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000, "eMule");
+	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1, "eMule");
+	m_bDynUpLog = ini.GetBool("USSLog", false, "eMule");
+	m_iDynUpPingLimit = ini.GetInt("USSPingLimit", 200, "eMule"); // EastShare - Added by TAHO, USS limit
+	m_bIsUSSLimit = ini.GetBool("IsUSSLimit", false, "eMule"); // EastShare - Added by TAHO, does USS limit
 	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
 
 	// ZZ:UploadSpeedSense -->
