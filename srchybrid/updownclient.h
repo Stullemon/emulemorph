@@ -455,6 +455,7 @@ public:
     CString         GetScheduledRemovalDisplayReason() const { return m_strScheduledForRemovalDisplayReason; }
 
 	bool			GetScheduledRemovalLimboComplete() { return m_bScheduledForRemoval && ::GetTickCount()-m_bScheduledForRemovalAtTick > SEC2MS(10); }
+	DWORD			GetScheduledForRemovalAtTick() {return m_bScheduledForRemovalAtTick;} //MORPH Added by SiRoB
 	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
 	//download
@@ -968,7 +969,6 @@ protected:
 	uchar		requpfileid[16];
     uint32      m_slotNumber;
 	uint32		m_classID; //MORPH - Added by SiRoB, UPload Splitting Class
-	uint32		m_uFailedConnect;
 
 	DWORD       m_dwLastCheckedForEvictTick;
 
