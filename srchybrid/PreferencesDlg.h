@@ -23,6 +23,7 @@
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 #include "PPgEastShare.h" //EastShare - Added by Pretender, TBH-AutoBackup
 #include "KCSideBannerWnd.h" //Commander - Added: Preferences Banner [TPT]
+#include "SlideBar.h" //MORPH - Added by SiRoB, ePLus Group
 
 class CPreferencesDlg : public CPropertySheet
 {
@@ -58,7 +59,10 @@ public:
 	CButton			m_groupbox;
 	CImageList		ImageList;
 	int				m_iPrevPage;
-
+	//MORPH START - Changed by SiRoB, ePlus Group
+	CSlideBar	 	m_slideBar;
+	//MORPH END   - Changed by SiRoB, ePlus Group
+	
 	void Localize();
 	void OpenPage(UINT uResourceID);
 
@@ -70,7 +74,13 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
+	//MORPH START - Changed by SiRoB, ePlus Group
+	/*
 	afx_msg void OnSelChanged();
+	*/
+	afx_msg LRESULT		OnSlideBarSelChanged(WPARAM wParam, LPARAM lParam);
+	//MORPH END   - Changed by SiRoB, ePlus Group
+
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);

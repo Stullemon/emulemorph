@@ -2651,6 +2651,7 @@
 #define IDC_SHOWQUEUEBAR                5505
 #define IDC_QUEUE                       5506
 #define IDC_QUEUEBORDER                 5507
+#define IDS_ADVANCED                    5600
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125

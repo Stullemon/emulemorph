@@ -1396,6 +1396,9 @@
 				RelativePath=".\SimpleCleanup.cpp">
 			</File>
 			<File
+				RelativePath=".\SlideBar.cpp">
+			</File>
+			<File
 				RelativePath="SplashScreen.cpp">
 			</File>
 			<File
@@ -1779,6 +1782,9 @@
 			</File>
 			<File
 				RelativePath=".\SimpleCleanup.h">
+			</File>
+			<File
+				RelativePath=".\SlideBar.h">
 			</File>
 			<File
 				RelativePath="SplashScreen.h">

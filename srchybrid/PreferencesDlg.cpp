@@ -29,7 +29,7 @@ IMPLEMENT_DYNAMIC(CPreferencesDlg, CPropertySheet)
 
 BEGIN_MESSAGE_MAP(CPreferencesDlg, CPropertySheet)
 	ON_WM_DESTROY()
-	ON_LBN_SELCHANGE(111,OnSelChanged)
+		ON_MESSAGE(WM_SBN_SELCHANGED, OnSlideBarSelChanged) //MORPH - Changed by SiRoB, ePlus Group
 	ON_WM_CTLCOLOR()
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
@@ -58,23 +58,31 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 
+	//	WARNING: Pages must be added with the same order as the slidebar group items.
+	//General group
 	AddPage(&m_wndGeneral);
 	AddPage(&m_wndDisplay);
-	AddPage(&m_wndConnection);
-	AddPage(&m_wndProxy);
-	AddPage(&m_wndServer);
 	AddPage(&m_wndDirectories);
 	AddPage(&m_wndFiles);
-	AddPage(&m_wndNotify);
 	AddPage(&m_wndStats);
-	AddPage(&m_wndIRC);
-	AddPage(&m_wndSecurity);
-	AddPage(&m_wndScheduler);
-	AddPage(&m_wndWebServer);
-	AddPage(&m_wndTweaks);
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	AddPage(&m_wndDebug);
 #endif
+
+	//Connexion group
+	AddPage(&m_wndConnection);
+	AddPage(&m_wndProxy);
+	AddPage(&m_wndServer);
+
+	//Advanced Official group
+	AddPage(&m_wndIRC);
+	AddPage(&m_wndNotify);
+	AddPage(&m_wndWebServer);
+	AddPage(&m_wndSecurity);
+	AddPage(&m_wndScheduler);
+	AddPage(&m_wndTweaks);
+
+	//MORPH group
 	AddPage(&m_wndBackup); //EastShare - Added by Pretender, TBH-AutoBackup
 	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
@@ -98,23 +106,51 @@ BOOL CPreferencesDlg::OnInitDialog()
 {		
 	EnableStackedTabs(FALSE);
 	BOOL bResult = CPropertySheet::OnInitDialog();
-
+	//MORPH START - Changed by SIRoB, ePlus Group
+	/*
 	m_listbox.CreateEx(WS_EX_CLIENTEDGE,_T("Listbox"),0,WS_CHILD|WS_VISIBLE|LBS_NOTIFY|WS_TABSTOP|LBS_HASSTRINGS|LBS_OWNERDRAWVARIABLE|WS_BORDER,CRect(0,0,0,0),this,111);
 	::SendMessage(m_listbox.m_hWnd, WM_SETFONT, (WPARAM) ::GetStockObject(DEFAULT_GUI_FONT),0);
 	m_groupbox.Create(0,BS_GROUPBOX|WS_CHILD|WS_VISIBLE|BS_FLAT,CRect(0,0,0,0),this,666);
 	::SendMessage(m_groupbox.m_hWnd, WM_SETFONT, (WPARAM) ::GetStockObject(DEFAULT_GUI_FONT),0);
+	*/
+	m_slideBar.CreateEx(WS_EX_CLIENTEDGE, WS_CHILD | WS_VISIBLE | WS_BORDER, CRect(0, 0, 0, 0), this, 111);
+	m_slideBar.SetImageList(&ImageList);
+	m_slideBar.SetHAlignCaption(DT_CENTER);
+	m_groupbox.Create(0,BS_GROUPBOX|WS_CHILD|WS_VISIBLE|BS_FLAT,CRect(0,0,0,0),this,666);
+	::SendMessage(m_groupbox.m_hWnd, WM_SETFONT, (WPARAM) ::GetStockObject(DEFAULT_GUI_FONT),0);
+
+	//sets a bold font for the group buttons
+	CFont* pGroupFont = m_slideBar.GetGroupFont();
+	ASSERT_VALID(pGroupFont);
+	LOGFONT logFont;
+	pGroupFont->GetLogFont(&logFont);
+	logFont.lfWeight *= 2;
+	if (logFont.lfWeight > FW_BLACK)
+	{
+		logFont.lfWeight = FW_BLACK;
+	}
+	pGroupFont->DeleteObject();
+	pGroupFont->CreateFontIndirect(&logFont);
+	ASSERT_VALID(pGroupFont);
+
+	//MORPH END - Changed by SIRoB, ePlus Group
+
 	InitWindowStyles(this);
 
 	SetActivePage(m_nActiveWnd);
 	Localize();	
+	//MORPH START - Changed by SiRoB, ePlus Group
+	/*
 	m_listbox.SetFocus();
 	CString currenttext;
 	int curSel=m_listbox.GetCurSel();
 	m_listbox.GetText(curSel,currenttext);
 	m_groupbox.SetWindowText(currenttext);
 	m_iPrevPage = curSel;
-    
-	
+    */
+	m_slideBar.SetFocus();
+	//MORPH END - Changed by SiRoB, ePlus Group
+
 	//MORPH START - Added by SiRoB, Load a jpg
 	CBitmap bmp;
 	VERIFY( bmp.Attach(theApp.LoadImage(_T("BANNER"), _T("JPG"))) );
@@ -134,6 +170,8 @@ BOOL CPreferencesDlg::OnInitDialog()
 	return bResult;
 }
 
+//MORPH START - Changed by SIRoB, ePlus Group
+/*
 void CPreferencesDlg::OnSelChanged()
 {
 	int curSel=m_listbox.GetCurSel();
@@ -149,34 +187,58 @@ void CPreferencesDlg::OnSelChanged()
 	m_listbox.SetFocus();
 	m_iPrevPage = curSel;
 }
+*/
+LRESULT CPreferencesDlg::OnSlideBarSelChanged(WPARAM wParam, LPARAM lParam)
+{
+	int iCurrentGlobalSel	= m_slideBar.GetGlobalSelectedItem();
+
+	SetActivePage(iCurrentGlobalSel);
+
+	CListBoxST* pListBox = m_slideBar.GetGroupListBox(m_slideBar.GetSelectedGroupIndex());
+	ASSERT_VALID(pListBox);
+
+	CString strCurrentItemText;
+	pListBox->GetText(pListBox->GetCurSel(), strCurrentItemText);
+
+	CString strCurrentGroupText = m_slideBar.GetGroupName(m_slideBar.GetSelectedGroupIndex());
+	strCurrentGroupText.Remove('&');
+
+	CString strTitle = GetResString(IDS_EM_PREFS);
+	strTitle.Remove('&');
+	SetWindowText(strTitle /*+ _T(" -> ") + strCurrentGroupText + _T(" -> ") + strCurrentItemText*/);
+
+	m_groupbox.SetWindowText(strCurrentItemText);
+
+	pListBox->SetFocus();
+
+	return true;
+}
+//MORPH END   - Changed by SIRoB, ePlus Group
 
 void CPreferencesDlg::Localize()
 {
 	ImageList.DeleteImageList();
 	ImageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-	ImageList.Add(CTempIconLoader(_T("PREF_GENERAL")));
-	ImageList.Add(CTempIconLoader(_T("PREF_DISPLAY")));
-	ImageList.Add(CTempIconLoader(_T("PREF_CONNECTION")));
-	ImageList.Add(CTempIconLoader(_T("PREF_PROXY")));
-	ImageList.Add(CTempIconLoader(_T("PREF_SERVER")));
-	ImageList.Add(CTempIconLoader(_T("PREF_FOLDERS")));
-	ImageList.Add(CTempIconLoader(_T("PREF_FILES")));
-	ImageList.Add(CTempIconLoader(_T("PREF_NOTIFICATIONS")));
-	ImageList.Add(CTempIconLoader(_T("PREF_STATISTICS")));
-	ImageList.Add(CTempIconLoader(_T("PREF_IRC")));
-	ImageList.Add(CTempIconLoader(_T("PREF_SECURITY")));
-	ImageList.Add(CTempIconLoader(_T("PREF_SCHEDULER")));
-	ImageList.Add(CTempIconLoader(_T("PREF_WEBSERVER")));
-	ImageList.Add(CTempIconLoader(_T("PREF_TWEAK")));
+	ImageList.Add(CTempIconLoader(_T("PREF_GENERAL")));			//0
+	ImageList.Add(CTempIconLoader(_T("PREF_DISPLAY")));			//1
+	ImageList.Add(CTempIconLoader(_T("PREF_CONNECTION")));		//2
+	ImageList.Add(CTempIconLoader(_T("PREF_PROXY")));			//3
+	ImageList.Add(CTempIconLoader(_T("PREF_SERVER")));			//4
+	ImageList.Add(CTempIconLoader(_T("PREF_FOLDERS")));			//5
+	ImageList.Add(CTempIconLoader(_T("PREF_FILES")));			//6
+	ImageList.Add(CTempIconLoader(_T("PREF_NOTIFICATIONS")));	//7
+	ImageList.Add(CTempIconLoader(_T("PREF_STATISTICS")));		//8
+	ImageList.Add(CTempIconLoader(_T("PREF_IRC")));				//9
+	ImageList.Add(CTempIconLoader(_T("PREF_SECURITY")));		//10
+	ImageList.Add(CTempIconLoader(_T("PREF_SCHEDULER")));		//11
+	ImageList.Add(CTempIconLoader(_T("PREF_WEBSERVER")));		//12
+	ImageList.Add(CTempIconLoader(_T("PREF_TWEAK")));			//13
+	//MORPH group
 	ImageList.Add(CTempIconLoader(_T("PREF_BACKUP"))); //EastShare - Added by Pretender, TBH-AutoBackup
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by IceCream, Morph Prefs
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by SiRoB, Morph Prefs
 	ImageList.Add(CTempIconLoader(_T("CLIENTEASTSHARE")));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
-	m_listbox.SetImageList(&ImageList);
-
-	CString title = GetResString(IDS_EM_PREFS); 
-	title.Remove(_T('&')); 
-	SetTitle(title); 
+	m_slideBar.SetImageList(&ImageList);
 
 	m_wndGeneral.Localize();
 	m_wndDisplay.Localize();
@@ -192,57 +254,54 @@ void CPreferencesDlg::Localize()
 	m_wndWebServer.Localize();
 	m_wndScheduler.Localize();
 	m_wndProxy.Localize();
+
 	m_wndMorph.Localize();//MORPH - Added by IceCream, Morph Prefs
 	m_wndMorph2.Localize();//MORPH - Added by SiRoB, Morph Prefs
-	
-	TC_ITEM item; 
-	item.mask = TCIF_TEXT; 
+	m_wndEastShare.Localize();
 
-	CStringArray buffer; 
-	buffer.Add(GetResString(IDS_PW_GENERAL)); 
-	buffer.Add(GetResString(IDS_PW_DISPLAY)); 
-	buffer.Add(GetResString(IDS_PW_CONNECTION)); 
-	buffer.Add(GetResString(IDS_PW_PROXY)); 
-	buffer.Add(GetResString(IDS_PW_SERVER)); 
-	buffer.Add(GetResString(IDS_PW_DIR)); 
-	buffer.Add(GetResString(IDS_PW_FILES)); 
-	buffer.Add(GetResString(IDS_PW_EKDEV_OPTIONS)); 
-	buffer.Add(GetResString(IDS_STATSSETUPINFO)); 
-	buffer.Add(GetResString(IDS_IRC));
-	buffer.Add(GetResString(IDS_SECURITY)); 
-	buffer.Add(GetResString(IDS_SCHEDULER));
-	buffer.Add(GetResString(IDS_PW_WS));
-	buffer.Add(GetResString(IDS_PW_TWEAK)); 
+	m_slideBar.ResetContent();
+
+//	General group
+	int iGroup = m_slideBar.AddGroup(GetResString(IDS_PW_GENERAL)/*, 1*/);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_GENERAL), iGroup, 0);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_DISPLAY), iGroup, 1);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_DIR), iGroup, 5);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_FILES), iGroup, 6);
+	m_slideBar.AddGroupItem(GetResString(IDS_STATSSETUPINFO), iGroup, 8);
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
-	buffer.Add(_T("Debug"));
+	m_slideBar.AddGroupItem(_T("Debug"), iGroup, 13);
 #endif
-	buffer.Add(GetResString(IDS_BACKUP)); //EastShare - Added by Pretender, TBH-AutoBackup
-	buffer.Add(_T("Morph")); //MORPH - Added by IceCream, Morph Prefs
-	buffer.Add(_T("Morph II")); //MORPH - Added by SiRoB, Morph Prefs
-	buffer.Add(_T("EastShare")); //EastShare - Added by Pretender, ES Prefs
-	for (int i = 0; i < buffer.GetCount(); i++)
-		buffer[i].Remove(_T('&'));
 
-	m_listbox.ResetContent();
-	int width = 0;
+	//	Connexion group
+	iGroup = m_slideBar.AddGroup(GetResString(IDS_PW_CONNECTION)/*, 1*/);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_CONNECTION), iGroup, 2);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_PROXY), iGroup, 3);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_SERVER), iGroup, 4);
+
+	//	Advanced Official Group
+	iGroup = m_slideBar.AddGroup(GetResString(IDS_ADVANCED));
+	m_slideBar.AddGroupItem(GetResString(IDS_IRC), iGroup, 9);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_EKDEV_OPTIONS), iGroup, 7);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_WS), iGroup, 12);
+	m_slideBar.AddGroupItem(GetResString(IDS_SECURITY), iGroup, 10);
+	m_slideBar.AddGroupItem(GetResString(IDS_SCHEDULER), iGroup, 11);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_TWEAK), iGroup, 13);
+
+	//	Advanced group
+	iGroup = m_slideBar.AddGroup(_T("Morph"));
+	m_slideBar.AddGroupItem(GetResString(IDS_BACKUP), iGroup, 14);
+	m_slideBar.AddGroupItem(_T("Morph"), iGroup, 15);
+	m_slideBar.AddGroupItem(_T("Morph II"), iGroup, 16);
+	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, 17);
+
+	//	Determines the width needed to the slidebar, and its position
+	int width = m_slideBar.GetGreaterStringWidth();
 	CTabCtrl* tab = GetTabControl();
-	CClientDC dc(this);
-	CFont *pOldFont = dc.SelectObject(m_listbox.GetFont());
-	CSize sz;
-	for(int i = 0; i < GetPageCount(); i++) 
-	{ 
-		item.pszText = buffer[i].GetBuffer(); 
-		tab->SetItem (i, &item); 
-		buffer[i].ReleaseBuffer();
-		m_listbox.AddString(buffer[i].GetBuffer(),i);
-		sz = dc.GetTextExtent(buffer[i]);
-		if(sz.cx > width)
-			width = sz.cx;
-	}
-	m_groupbox.SetWindowText(GetResString(IDS_PW_GENERAL));
-	width+=50;
+	width += 60;
 	CRect rectOld;
-	m_listbox.GetWindowRect(&rectOld);
+
+	m_slideBar.GetWindowRect(rectOld);
+
 	int xoffset, yoffset;
 	if(IsWindowVisible())
 	{
@@ -252,6 +311,7 @@ void CPreferencesDlg::Localize()
 	else
 	{
 		xoffset=width-rectOld.Width()+10;
+		GetActivePage()->GetWindowRect(rectOld);
 		tab->GetItemRect(0,rectOld);
 		yoffset=-rectOld.Height();
 	}
@@ -269,12 +329,8 @@ void CPreferencesDlg::Localize()
 	m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10,SWP_NOZORDER|SWP_NOACTIVATE);
 	m_groupbox.GetWindowRect(rectOld);
 	ScreenToClient(rectOld);
-	//MORPH START - Changed by SiRoB
-	CRect rectwnd;
-	GetClientRect(rectwnd);
-	//m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4,SWP_NOZORDER|SWP_NOACTIVATE);
-	m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectwnd.Height()-13,SWP_NOZORDER|SWP_NOACTIVATE);	
-	//MORPH START - Changed by SiRoB
+	GetClientRect(rectOld);
+	m_slideBar.SetWindowPos(NULL, 6, 6, width, rectOld.Height() - 12, SWP_NOZORDER | SWP_NOACTIVATE);
 	int _PropSheetButtons[] = {IDOK, IDCANCEL, ID_APPLY_NOW, IDHELP };
 	CWnd* PropSheetButton;
 	for (int i = 0; i < sizeof (_PropSheetButtons) / sizeof(_PropSheetButtons[0]); i++)
@@ -287,12 +343,12 @@ void CPreferencesDlg::Localize()
 		}
 	}
 	tab->ShowWindow(SW_HIDE);
-	m_listbox.SetCurSel(GetActiveIndex());		
-	CenterWindow();
+	m_slideBar.SelectGlobalItem(GetActiveIndex());
+	OnSlideBarSelChanged(NULL, NULL);
 	m_banner.UpdateSize(); //Commander - Added: Preferences Banner [TPT]	
+	CenterWindow();
 	Invalidate();
 	RedrawWindow();
-	dc.SelectObject(pOldFont); //restore default font object
 }
 
 HBRUSH CPreferencesDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -342,7 +398,6 @@ BOOL CPreferencesDlg::OnHelpInfo(HELPINFO* pHelpInfo)
 	OnHelp();
 	return TRUE;
 }
-
 void CPreferencesDlg::OpenPage(UINT uResourceID)
 {
 	int iCurActiveWnd = m_nActiveWnd;

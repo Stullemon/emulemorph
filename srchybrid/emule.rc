@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -2715,12 +2715,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// Allemand (Allemagne) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -2738,12 +2738,12 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 TRAY_MESSAGE            ICON                    "res\\mule_tray_message.ico"
 TRAY_MESSAGE_GREY       ICON                    "res\\mule_tray_message_grey.ico"
 TRAY_MESSAGE_LOW        ICON                    "res\\mule_tray_message_low.ico"
-#endif    // Deutsch (Deutschland) resources
+#endif    // Allemand (Allemagne) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5012,7 +5012,12 @@ BEGIN
     IDS_CRC32_ABORT         "Abort calculation"
 END
 
-#endif    // Englisch (USA) resources
+STRINGTABLE 
+BEGIN
+    IDS_ADVANCED            "Advanced"
+END
+
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

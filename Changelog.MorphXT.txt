@@ -6,7 +6,8 @@ Changelog for eMule 0.44b MorphXT v5.x
 |NOTE:     MERGE IN PROGRESS!        |
 --------------------------------------
 
-MERGED : Merging in progress (plz to other dev tell me if you made change before commite) [SiRoB]
+MERGED : Code merged to 0.44a [SiRoB]
+MERGED : Code merged to 0.44b [SiRoB]
 
 FIXED  : Resource ID [SiRoB]
 FIXED  : minor gui display bug arround the category priority [SiRoB]
@@ -16,16 +17,20 @@ FIXED  : Temporary banned client by ip detected by the zerofilled feature are we
 CHANGED: Removed the "..." and change the tree in Morph preferency [SiRoB]
 CHANGED: Make one menu for CRC32 related function [SiRoB]
 CHANGED: Anti-Leecher Mecanisme by adding the reason of detection in log [SiRoB]
+CHANGED: Percentage aspect on progress bar [SiRoB]
+CHANGED: To give as much as possible allways a chunk to other client we never remove it from the uploading queue [SiRoB]
+CHANGED: Friend Slot can be used until friend ratio reach 1:3, after the Bandwidth allowed for friend slot is restricted [SiRoB]
 
 ADDED  : Recalculate CRC32. Can be used to force EMule to compute the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
 ADDED  : CRC32 Localize [SiRoB]
 ADDED  : ClientQueueProgressBar [Commander/SiRoB] (Idea by Roman2k)
 ADDED  : Blinking Tray On Message Recieve from emulEspaña [Commander]
+ADDED  : Preferency dialog use eMule Plus Group system [SiRoB]
 
-REMOVED: Ratio no longer present use official way [SiRoB]
+REMOVED: Ratio no longer present use official way (Friend still have ratio limiter) [SiRoB]
+
 
 TODO   : UNICODE Compatibility (in progess) [SiRoB]
-TODO   : Review Prio related to FS, PS and PBF [SiRoB]
 TODO   : Several Preferences Options (after new Preferences-Cats System arrived) [Commander]
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]

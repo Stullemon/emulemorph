@@ -3953,5 +3953,5 @@ void CPreferences::SetInvisibleMode(bool on, UINT keymodifier, char key)
 		theApp.emuledlg->UnRegisterInvisibleHotKey();
 		if(m_bInvisibleMode)	theApp.emuledlg->RegisterInvisibleHotKey();
 	}
-}	
+}
 //Commander - Added: Invisible Mode [TPT] - End
