@@ -192,7 +192,7 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 	// Mighty Knife: log friend activities
 	if (thePrefs.GetLogFriendlistActivities ()) {
 		#ifdef MIGHTY_TWEAKS
- 	    AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+ 	    AddLogLine(false, _T("New friend: '%s', ip %i.%i.%i.%i:%i, hash %s"),
 									Record->m_strName, (uint8)Record->m_dwLastUsedIP, (uint8)(Record->m_dwLastUsedIP>>8), 
 									(uint8)(Record->m_dwLastUsedIP>>16),(uint8)(Record->m_dwLastUsedIP>>24), 
 									Record->m_nLastUsedPort, md4str(Record->m_abyUserhash));
@@ -234,7 +234,7 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 	// Mighty Knife: log friend activities
 	if (thePrefs.GetLogFriendlistActivities ()) {
 		#ifdef MIGHTY_TWEAKS
-		AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+		AddLogLine(false, _T("New friend: '%s', ip %i.%i.%i.%i:%i, hash %s"),
 									NewFriend->m_strName, (uint8)NewFriend->m_dwLastUsedIP, 
 									(uint8)(NewFriend->m_dwLastUsedIP>>8), 
 									(uint8)(NewFriend->m_dwLastUsedIP>>16),(uint8)(NewFriend->m_dwLastUsedIP>>24), 
