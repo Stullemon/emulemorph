@@ -10,6 +10,8 @@ FIXED  : Oscop mouse cursor fix by apph [SiRoB]
 FIXED  : USC: Friend, Powershare and Pay Back First slots are properly added by respecting setting [SiRoB]
 FIXED  : USC: Small mistake that create some extra slot open while we remove one [SiRoB]
 
+REMOVED: Defeat zero filled part sender (use less now) [SiRoB]
+
 ADDED  : Backup of config-folder, update of fakes.dat and update of ipfilter.dat can be scheduled. [MightyKnife]
 
 CHANGED: ImportParts: you can take temp part file without the need to copy them manualy [SiRoB]

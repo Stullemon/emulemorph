@@ -650,7 +650,7 @@ void CKnownFile::UpdatePartsInfo()
 				count.Add(cur_src->GetUpCompleteSourcesCount());
 			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 			if (cur_src->GetUpCompleteSourcesCount()>0)
-				iCompleteSourcesCountInfoReceived += 1;
+				++iCompleteSourcesCountInfoReceived;
 			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
 		//MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
@@ -2451,22 +2451,12 @@ bool CKnownFile::IsMovie() const
 {
 	return (ED2KFT_VIDEO == GetED2KFileTypeID(GetFileName()) );
 }
-//MORPH START - Added by IceCream, music preview and defeat 0-filler
+//MORPH START - Added by IceCream, music preview
 bool CKnownFile::IsMusic() const
 {
 	return (ED2KFT_AUDIO == GetED2KFileTypeID(GetFileName()) );
 }
-
-bool CKnownFile::IsCDImage() const
-{
-	return (ED2KFT_CDIMAGE == GetED2KFileTypeID(GetFileName()) );
-}
-
-bool CKnownFile::IsDocument() const
-{
-	return (ED2KFT_DOCUMENT == GetED2KFileTypeID(GetFileName()) );
-}
-//MORPH END   - Added by IceCream, music preview and defeat 0-filler
+//MORPH END   - Added by IceCream, music preview
 
 // function assumes that this file is shared and that any needed permission to preview exists. checks have to be done before calling! 
 bool CKnownFile::GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender)

@@ -597,9 +597,6 @@ public:
 	//preview
 	static	bool	m_bPreviewEnabled;
 
-//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
-	static bool	enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
-//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	static bool	enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	static bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	static bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
@@ -1653,10 +1650,6 @@ public:
 	static	void	SetDynUpGoingUpDivider(int in) { m_iDynUpGoingUpDivider = in; }
 	static	void	SetDynUpGoingDownDivider(int in) { m_iDynUpGoingDownDivider = in; }
 	//EastShare END - Added by Pretender, add USS settings in scheduler tab
-
-	//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
-	static	bool	GetEnableZeroFilledTest() { return enableZeroFilledTest; }
-	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
 	//MORPH START - Added by IceCream, high process priority
 	static	bool	enableHighProcess;

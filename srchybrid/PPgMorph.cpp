@@ -55,7 +55,6 @@ CPPgMorph::CPPgMorph()
 	m_htiMinUpload = NULL;
 	m_htiUpSecu = NULL;
 	m_htiDlSecu = NULL;
-	m_htiEnableZeroFilledTest = NULL;
 	m_htiDisp = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
@@ -187,7 +186,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//m_ctrlTreeOptions.Expand(m_htiTimeRemainingMode, TVE_EXPAND); // khaos::accuratetimerem+
 		// khaos::accuratetimerem-
 		m_htiDlSecu = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SECURITY), iImgSecu, m_htiDM);
-		m_htiEnableZeroFilledTest = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ZERO_FILLED_TEST), m_htiDlSecu, m_bEnableZeroFilledTest);
 		m_htiDisp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, m_htiDM);
 		m_htiEnableDownloadInRed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_RED), m_htiDisp, m_bEnableDownloadInRed); //MORPH - Added by SiRoB, show download in Bold
 		m_htiEnableDownloadInBold = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_BOLD), m_htiDisp, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
@@ -325,7 +323,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMinUpload, m_iMinUpload);
 	DDV_MinMaxInt(pDX, m_iMinUpload, 1, thePrefs.GetMaxGraphUploadRate());
 
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableZeroFilledTest, m_bEnableZeroFilledTest);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInRed, m_bEnableDownloadInRed); //MORPH - Added by IceCream, show download in red
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInBold, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowClientPercentage, m_bShowClientPercentage);
@@ -399,7 +396,6 @@ BOOL CPPgMorph::OnInitDialog()
     m_iUSSGoingDownDivider = thePrefs.m_iDynUpGoingDownDivider;
     m_iUSSNumberOfPings = thePrefs.m_iDynUpNumberOfPings;
 	m_iMinUpload = thePrefs.minupload;
-	m_bEnableZeroFilledTest = thePrefs.enableZeroFilledTest;
 	m_bEnableDownloadInRed = thePrefs.enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	m_bEnableDownloadInBold = thePrefs.m_bShowActiveDownloadsBold; //MORPH - Added by SiRoB, show download in Bold
 	m_bShowClientPercentage = thePrefs.m_bShowClientPercentage;
@@ -498,7 +494,6 @@ BOOL CPPgMorph::OnApply()
     thePrefs.m_iDynUpGoingDownDivider = m_iUSSGoingDownDivider;
     thePrefs.m_iDynUpNumberOfPings = m_iUSSNumberOfPings;
 	thePrefs.SetMinUpload(m_iMinUpload);
-	thePrefs.enableZeroFilledTest = m_bEnableZeroFilledTest;
 	thePrefs.enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	thePrefs.m_bShowActiveDownloadsBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	thePrefs.m_bShowClientPercentage = m_bShowClientPercentage;
@@ -619,7 +614,6 @@ void CPPgMorph::Localize(void)
 			m_ctrlTreeOptions.SetEditLabel(m_htiUSSNumberOfPings, Buffer);
 		}
 		if (m_htiMinUpload) m_ctrlTreeOptions.SetEditLabel(m_htiMinUpload, GetResString(IDS_MINUPLOAD));
-		if (m_htiEnableZeroFilledTest) m_ctrlTreeOptions.SetItemText(m_htiEnableZeroFilledTest, GetResString(IDS_ZERO_FILLED_TEST));
 		if (m_htiEnableDownloadInRed) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInRed, GetResString(IDS_DOWNLOAD_IN_RED)); //MORPH - Added by IceCream, show download in red
 		if (m_htiEnableDownloadInBold) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInBold, GetResString(IDS_DOWNLOAD_IN_BOLD)); //MORPH - Added by SiRoB, show download in Bold
 		if (m_htiShowClientPercentage) m_ctrlTreeOptions.SetItemText(m_htiShowClientPercentage, GetResString(IDS_CLIENTPERCENTAGE));
@@ -696,7 +690,6 @@ void CPPgMorph::OnDestroy()
     m_htiUSSNumberOfPings = NULL;
 	m_htiMinUpload = NULL;
 	m_htiDlSecu = NULL;
-	m_htiEnableZeroFilledTest = NULL;
 	m_htiDisp = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold

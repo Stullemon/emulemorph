@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "stdafx.h"
 #include <io.h>
 #include <share.h>
@@ -567,9 +566,6 @@ TCHAR	CPreferences::m_sToolbarBitmapFolder[256];
 TCHAR	CPreferences::m_sToolbarSettings[256];
 bool	CPreferences::m_bPreviewEnabled;
 bool	CPreferences::enableHighProcess;//MORPH - Added by IceCream, high process priority
-//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
- bool	CPreferences::enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
-//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 bool	CPreferences::enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 bool	CPreferences::enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 bool	CPreferences::enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
@@ -2710,12 +2706,6 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("PowershareMode"),m_iPowershareMode,_T("eMule")); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	ini.WriteBool(_T("PowershareInternalPrio"),m_bPowershareInternalPrio,_T("eMule"));//Morph - added by AndCyle, selective PS internal Prio
 
-//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
-	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
-	ini.WriteBool(_T("EnableZeroFilledTest"), enableZeroFilledTest,_T("eMule"));
-	// Maella end
-//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
-
 	ini.WriteBool(_T("EnableHighProcess"), enableHighProcess,_T("eMule")); //MORPH - Added by IceCream, high process priority
 
 	ini.WriteBool(_T("EnableDownloadInRed"), enableDownloadInRed,_T("eMule")); //MORPH - Added by IceCream, show download in red
@@ -3341,12 +3331,6 @@ void CPreferences::LoadPreferences()
 	m_iStraightWindowStyles=ini.GetInt(_T("StraightWindowStyles"),0);
 	_sntprintf(m_szSkinProfile, ARRSIZE(m_szSkinProfile), _T("%s"), ini.GetString(_T("SkinProfile"), _T("")));
 	_sntprintf(m_szSkinProfileDir, ARRSIZE(m_szSkinProfileDir), _T("%s"), ini.GetString(_T("SkinProfileDir"), _T("")));
-
-	//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
-	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
-	enableZeroFilledTest = ini.GetBool(_T("EnableZeroFilledTest"), false);
-	// Maella end
-	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
     //Commander - Added: Invisible Mode [TPT] - Start
     SetInvisibleMode( ini.GetBool(_T("InvisibleMode"), false),

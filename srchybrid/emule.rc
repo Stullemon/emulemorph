@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -2907,12 +2907,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4815,7 +4815,6 @@ BEGIN
     IDS_SUC_PITCH           "Pitch (default %i)"
     IDS_SUC_DRIFT           "Drift (default %i)"
     IDS_SHOWSECUREDCONNECTION "Display secured client connection"
-    IDS_ZERO_FILLED_TEST    "Defeat 0-filled part senders"
     IDS_SUC_LOG             "Show activities in debug log"
     IDS_A4AF_SHOWDEBUG      "Show activities in debug log"
 END
@@ -5018,6 +5017,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SELECTIVESHARE      "Selective chunk sharing"
+    IDS_SCHED_BACKUP        "Backup CONFIG-folder"
+    IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT-file"
+    IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT-file"
 END
 
 STRINGTABLE 
@@ -5306,6 +5308,8 @@ BEGIN
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Show progress of client queue"
     IDS_WEBCACHE_NOSUPPORT  "not supported"
+    IDS_STATS_SUCCESSFULLWC "Successful WC-DL/WC-Requests:"
+    IDS_STATS_FAILEDWC      "Failed WC-DL/WC-Requests:"
 END
 
 STRINGTABLE 
@@ -5399,62 +5403,47 @@ STRINGTABLE
 BEGIN
     IDS_CRC_SUFFIX          "Suffix to add at the end of the filename after the CRC32:"
     IDS_COUNTWCSESSIONSTATS "Count WC-Sessions to session stats"
-END
-
-//MORPH START - Added by FrankyFive
-STRINGTABLE 
-BEGIN
-    IDS_STATS_SUCCESSFULLWC "Successful WC-DL/WC-Requests:"
-    IDS_STATS_FAILEDWC      "Failed WC-DL/WC-Requests:"
     IDS_WEBCACHE_NOPROXY    "no proxy set"
     IDS_CD_WCSUCCFAIL       "Successful/Requested:"
     IDS_CD_WCTRUSTSENDER    "Is trusted OHCB sender:"
     IDS_WCDOWNL             "not working yet"
     IDS_WC_REQ_SUCC         "WC Succ/Req:"
     IDS_WC_DOWNLOADED       "WC-Download:"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_CRC32_TITLE         "CRC32 to filename"
-    IDS_MASSRENAME_TITLE    "Mass-Rename"
-    IDS_LOG_IPFILTER_LOADED "Loaded IP filters from \""%s\"" in %ums"
+    IDS_LOG_IPFILTER_LOADED "Loaded IP filters from ""%s"" in %ums"
     IDS_LOG_IPFILTER_INFO   "Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"
-    IDS_IPFILTER_SAVERR     "Failed to save IP filter to file \""%s\"" - %hs"
+    IDS_IPFILTER_SAVERR     "Failed to save IP filter to file ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Not available"
     IDS_IPFILTER_DLVERSION  "Downloading IP filter version file"
     IDS_IPFILTER_DLFILE     "Downloading IP filter file"
     IDS_LOG_ERRDWN          "Error downloading %s"
-    IDS_LOG_IPFILTER_DLFAIL "IP Filter download failed"
-    IDS_LOG_IPFILTER_ERR1   "Failed to extract IP filter file from downloaded IP filter ZIP file \""%s\""."
-    IDS_LOG_IPFILTER_ERR2   "Downloaded IP filter file \""%s\"" is a ZIP file with unexpected content."
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_LOG_IPFILTER_DLFAIL "IP Filter download failed"
+    IDS_LOG_IPFILTER_ERR1   "Failed to extract IP filter file from downloaded IP filter ZIP file ""%s""."
+    IDS_LOG_IPFILTER_ERR2   "Downloaded IP filter file ""%s"" is a ZIP file with unexpected content."
     IDS_DOWNFAKECHECKVER    "Downloading Fake Check version file"
     IDS_DOWNFAKECHECKFILE   "Downloading Fake Check file"
     IDS_FC_LOADED           "%i Fake Check reference loaded"
-    IDS_LOG_FC_LOADED       "Loaded Fake Check from \""%s\"" in %ums"
+    IDS_LOG_FC_LOADED       "Loaded Fake Check from ""%s"" in %ums"
     IDS_LOG_FC_INFO         "Found Fake Reference:%u  Duplicate:%u  Merged:%u"
-    IDS_LOG_FC_ERR1         "Failed to extract fake check file from downloaded fake check ZIP file \""%s\""."
-    IDS_LOG_FC_ERR2         "Downloaded fake check file \""%s\"" is a ZIP file with unexpected content."
-END
-
-STRINGTABLE 
-BEGIN
+    IDS_LOG_FC_ERR1         "Failed to extract fake check file from downloaded fake check ZIP file ""%s""."
+    IDS_LOG_FC_ERR2         "Downloaded fake check file ""%s"" is a ZIP file with unexpected content."
+    IDS_MASSRENAME_TITLE    "Mass-Rename"
     IDS_LOG_CRC32_WRN1      "Warning: A file for which the CRC32 should be calculated is not shared anymore. Calculation skipped."
     IDS_LOG_CRC32_WRN2      "Warning: File '%s' is not shared anymore. CRC32 calculation skipped."
     IDS_LOG_CRC32_WRN3      "Warning: Can't open file '%s' for CRC32 calculation. File skipped."
     IDS_LOG_CRC32_SKIP1     "CRC32-calculation of file '%s' skipped - already calculated."
     IDS_LOG_CRC32_SKIP2     "Can't calculate CRC32 of file '%s'; file is a part file and not complete !"
-    IDS_LOG_CRC32_CALC      "Calculating CRC32 of file '%s'..."
-    IDS_LOG_CRC32_ADORT     "CRC32 calculation aborted."
-    IDS_LOG_CRC32_COMPLETED "Calculation of CRC32 for file '%s' completed. File CRC: %s"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_LOG_CRC32_CALC      "Calculating CRC32 of file '%s'..."
+    IDS_LOG_CRC32_ADORT     "CRC32 calculation aborted."
+    IDS_LOG_CRC32_COMPLETED "Calculation of CRC32 for file '%s' completed. File CRC: %s"
     IDS_IP2COUNTRY_MSG1     "IP2Country uses the IP-to-Country Database provided by WebHosting."
     IDS_IP2COUNTRY_MSG2     "Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info."
     IDS_IP2COUNTRY_LOADED   "IP2Country loaded"
@@ -5465,11 +5454,26 @@ BEGIN
     IDS_IP2COUNTRY_ERROR4   "CountryFlag Disabled, failed to load"
     IDS_IP2COUNTRY_ERROR5   "Invalid resID, maybe you need to upgrade your flag icon Dll,"
     IDS_IP2COUNTRY_ERROR6   "IP to Country file download failed"
-    IDS_IP2COUNTRY_ERROR7   "Failed to extract IP to Country file from downloaded IP to Country ZIP file \""%s\""."
-    IDS_IP2COUNTRY_ERROR8   "Downloaded IP to Country file \""%s\"" is a ZIP file with unexpected content."
+    IDS_IP2COUNTRY_ERROR7   "Failed to extract IP to Country file from downloaded IP to Country ZIP file ""%s""."
+    IDS_IP2COUNTRY_ERROR8   "Downloaded IP to Country file ""%s"" is a ZIP file with unexpected content."
+    IDS_IP2COUNTRY_LOADED2  "Loaded IP2Country from ""%s"" in %ums"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UPNP                "Universal Plug & Play (UPnP)"
+    IDS_UP_LOWID2           "%i LowID"
+    IDS_UP_LOWID_AWAITED    "%i **** Awaited reconnect %s"
     IDS_IP2COUNTRY_NALONG   "Not Applicable"
     IDS_IP2COUNTRY_NASHORT  "N/A"
-    IDS_IP2COUNTRY_LOADED2  "Loaded IP2Country from \""%s\"" in %ums"
+    IDS_SOURCE_LOADER_SAVER "SLS"
+    IDS_SHORTTAGS           "Short tags"
+    IDS_NEWFRIEND           "New friend:"
+    IDS_REMOVEDFRIEND       "Removed friend:"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_IP2COUNTRY_INFO     "Parsed lines:%u  Found IPCountry ranges:%u  Duplicate:%u  Merged:%u"
     IDS_IP2COUNTRY_FLAGLOAD "Country Flags have been loaded"
     IDS_IP2COUNTRY_FILELOAD "IP2Countryfile has been unloaded"
@@ -5478,10 +5482,6 @@ BEGIN
     IDS_IP2COUNTRY_DWNFILE  "Downloading IP2Country file"
     IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv unloaded due to update in progress"
     IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv loaded after successful update"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_HASHING_COMPLETED   "Completed hashing of file '%s'."
     IDS_HASHING_COMPLETED2  "Hashing of new files completed."
     IDS_HASHING_NEWFILE     "New file: '%s'"
@@ -5490,29 +5490,18 @@ BEGIN
     IDS_CAT_TOTAL           "Total"
     IDS_UP_LOWID            "%s LowID"
     IDS_UP_LOWID_DELAYED    "%s LowID delayed %s"
-    IDS_UP_LOWID2           "%i LowID"
-    IDS_UP_LOWID_AWAITED    "%i **** Awaited reconnect %s"
-    IDS_UPNP                "Universal Plug & Play (UPnP)"
-    IDS_SOURCE_LOADER_SAVER "SLS"
-    IDS_SHORTTAGS           "Short tags"
-    IDS_NEWFRIEND           "New friend:"
-    IDS_REMOVEDFRIEND       "Removed friend:"
 END
-//MORPH END - Added by FrankyFive
 
-// Mighty Knife: Additional scheduler events
 STRINGTABLE 
 BEGIN
-    IDS_SCHED_BACKUP        "Backup CONFIG-folder"
-    IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT-file"
-    IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT-file"
     IDS_SCHED_BACKUP_LOG    "Scheduled backup initiated."
     IDS_SCHED_UPDATE_IPCONFIG_LOG "Scheduled IPFILTER.DAT-update initiated."
     IDS_SCHED_UPDATE_FAKES_LOG "Scheduled FAKES.DAT-update initiated."
-    IDS_SCHED_UPDATE_WARNING   "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
+    IDS_SCHED_UPDATE_WARNING 
+                            "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
 END
 
-#endif    // Englisch (USA) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

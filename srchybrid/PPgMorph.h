@@ -27,7 +27,6 @@ protected:
     int m_iUSSGoingDownDivider;
     int m_iUSSNumberOfPings;
 	int m_iMinUpload;
-	int m_bEnableZeroFilledTest;
 	int m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	int m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	int m_bShowClientPercentage;
@@ -88,7 +87,6 @@ protected:
     HTREEITEM m_htiUSSGoingDownDivider;
     HTREEITEM m_htiUSSNumberOfPings;
 	HTREEITEM m_htiMinUpload;
-	HTREEITEM m_htiEnableZeroFilledTest;
 	HTREEITEM m_htiEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	HTREEITEM m_htiEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	HTREEITEM m_htiShowClientPercentage;

@@ -299,8 +299,6 @@ public:
 	// preview
 	bool	IsMovie() const;
 	bool	IsMusic() const; //MORPH - Added by IceCream, added preview also for music files
-	bool	IsCDImage() const; //MORPH - Added by IceCream, for defeat 0-filler
-	bool	IsDocument() const; //MORPH - Added by IceCream, for defeat 0-filler
 
 	virtual	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	virtual void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
