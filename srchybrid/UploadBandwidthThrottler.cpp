@@ -154,7 +154,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
 				if(index > (uint32)m_FriendOrder_list.GetSize()) {
 					index = m_FriendOrder_list.GetSize();
 				}
-				m_StandardOrder_list.InsertAt(index, socket);
+				m_FriendOrder_list.InsertAt(index, socket);
 				break;
 			case 1: //PowerShare
 				if(index > (uint32)m_PowerShareOrder_list.GetSize()) {
