@@ -148,7 +148,13 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
             // Remove the found Client
 		    uploadinglist.RemoveAt(foundPos);
             theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
-
+			//MORPH START - Added by SiRoB, due to zz upload system PeerCache
+			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
+			//MORPH END   - Added by SiRoB, due to zz upload system PeerCache
+    	   	//MORPH START - Added by SiRoB, due to zz upload system WebCache
+			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
+			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
+    	   
             // then add it last in it's class
             InsertInUploadingList(client);
         }
@@ -1147,7 +1153,10 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 
             bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
             bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
-
+			//MORPH START - Added by SiRoB, due to zz upload system WebCache
+			bool wcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
+			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
+    	    
             //if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved)) {
             //    AddDebugLogLine(false, _T("UploadQueue: Didn't find socket to delete. Adress: 0x%x"), client->socket);
             //}
@@ -1587,7 +1596,9 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
     	    // Remove the found Client from UploadBandwidthThrottler
     	    theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
             theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
-
+			//MORPH START - Added by SiRoB, WebCache due to zz upload system
+			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket);
+			//MORPH END   - Added by SiRoB, WebCache due to zz upload system
     	    tempUploadinglist.AddTail(cur_client);
     	}
 
