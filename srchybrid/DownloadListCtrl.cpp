@@ -42,6 +42,7 @@
 #include "SharedFileList.h" //MORPH - Added by SiRoB
 #include "version.h" //MORPH - Added by SiRoB
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
+#include "MassRename.h" //SLAHAM: ADDED MassRename DownloadList
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -1625,21 +1626,21 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			CString buffer;
 			switch (thePrefs.GetPermissions()){
 				case PERM_ALL:
-					buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
+				buffer.Format(_T(" (%s)"),GetResString(IDS_FSTATUS_PUBLIC));
 					break;
 				case PERM_FRIENDS:
-					buffer.Format(" (%s)",GetResString(IDS_FSTATUS_FRIENDSONLY));
+				buffer.Format(_T(" (%s)"),GetResString(IDS_FSTATUS_FRIENDSONLY));
 					break;
 				case PERM_NOONE:
-					buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
+				buffer.Format(_T(" (%s)"),GetResString(IDS_HIDDEN));
 					break;
 				// Mighty Knife: Community visible filelist
 				case PERM_COMMUNITY:
-					buffer.Format(" (%s)",GetResString(IDS_COMMUNITY));
+				buffer.Format(_T(" (%s)"),GetResString(IDS_COMMUNITY));
 					break;
 				// [end] Mighty Knife
 				default:
-					buffer = " (?)";
+				buffer = _T(" (?)");
 					break;
 			}
 			m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
@@ -1650,6 +1651,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK_US, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
+            m_FileMenu.EnableMenuItem(MP_MASSRENAME, iSelectedItems > 0? MF_ENABLED : MF_GRAYED); //Commander - Added: MassRename [Dragon]
 	
 			CMenu WebMenu;
 			WebMenu.CreateMenu();
@@ -1760,6 +1762,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK_US, MF_GRAYED);
 		//MORPH END   - Added by SiRoB, copy feedback feature
+		m_FileMenu.EnableMenuItem(MP_MASSRENAME,MF_GRAYED);//Commander - Added: MassRename
 		m_FileMenu.EnableMenuItem(MP_PREVIEW,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_METINFO, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, MF_GRAYED);
@@ -1917,6 +1920,61 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					}
 					SetRedraw(true);
 					break;
+                //Commander - Added: MassRename [Dragon] - Start
+				// Mighty Knife: Mass Rename
+			case MP_MASSRENAME: {
+				CMassRenameDialog MRDialog;
+				// Add the files to the dialog
+				POSITION pos = selectedList.GetHeadPosition();
+				while (pos != NULL) {
+					CPartFile*  file = selectedList.GetAt (pos);
+					MRDialog.m_FileList.AddTail (file);
+					selectedList.GetNext (pos);
+				}
+				int result = MRDialog.DoModal ();
+				if (result == IDOK) {
+					// The user has successfully entered new filenames. Now we have
+					// to rename all the files...
+					POSITION pos = selectedList.GetHeadPosition();
+					int i=0;
+					while (pos != NULL) {
+						CString newname = MRDialog.m_NewFilenames.at (i);
+						CString newpath = MRDialog.m_NewFilePaths.at (i);
+						CPartFile* file = selectedList.GetAt (pos);
+						// .part files could be renamed by simply changing the filename
+						// in the CKnownFile object.
+						if ((!file->IsPartFile()) && (_trename(file->GetFilePath(), newpath) != 0)){
+							CString strError;
+							strError.Format(_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, strerror(errno));
+							AddLogLine(false,strError);
+						} else {
+							CString strres;
+							if (!file->IsPartFile()) {
+								strres.Format(_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
+								theApp.sharedfiles->RemoveKeywords(file);
+								file->SetFileName(newname);
+								theApp.sharedfiles->AddKeywords(file);
+								file->SetFilePath(newpath);
+								file->UpdateDisplayedInfo();
+							} else {
+								strres.Format(_T("Successfully renamed .part file '%s' to '%s'"), file->GetFileName(), newname);
+								AddLogLine(false,strres);
+								file->SetFileName(newname, true); 
+								((CPartFile*) file)->UpdateDisplayedInfo();
+								((CPartFile*) file)->SavePartFile(); 
+								file->UpdateDisplayedInfo();
+							}
+						}
+
+						// Next item
+						selectedList.GetNext (pos);
+						i++;
+					}
+				}
+								}
+								break;
+				// [end] Mighty Knife
+				//Commander - Added: MassRename [Dragon] - End
 				case MP_PAUSE:
 					SetRedraw(false);
 					while(!selectedList.IsEmpty()) { 
@@ -2817,7 +2875,7 @@ void CDownloadListCtrl::CreateMenues() {
 	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW) );
 	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO) );//<--9/21/02
 	m_FileMenu.AppendMenu(MF_STRING,MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL) );
-
+    m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, "Mass Rename...");//Commander - Added: MassRename [Dragon]
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR));
 	
