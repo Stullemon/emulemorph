@@ -136,19 +136,13 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	if(newclient != NULL && // Only remove the client if there's someone to replace it
 		(
 			(client->IsFriend() && client->GetFriendSlot()) == false &&	// if it is not in a class that gives it a right
-			client->GetPowerShared() == false &&						// to have a check performed to see if it can stay, we remove at once
-			client->MoreUpThanDown() == false ||						// EastShare - added by AndCycle, PayBackFirst
+			client->IsPBForPS() == false &&						// to have a check performed to see if it can stay, we remove at once
 			//client->m_BlockRequests_queue.IsEmpty() ||				// or if it doesn't want any more blocks
 			(
 				(
-					(//EastShare - added by AndCycle, PayBackFirst
-						newclient->MoreUpThanDown() == true && client->MoreUpThanDown() == false || //newclient needs to be payback first
-						newclient->MoreUpThanDown() == client->MoreUpThanDown() &&
-						(
-							newclient->MoreUpThanDown() == true && client->MoreUpThanDown() == true ||	// both need to be payback first, rotate client
-							newclient->GetPowerShared() == true && client->GetPowerShared() == false || // new client wants powershare file, but old client don't
-							newclient->GetPowerShared() == true && client->GetPowerShared() == true && newclient->GetFilePrioAsNumber() >= client->GetFilePrioAsNumber() // both want powersharedfile, and newer wants higher/same prio file
-						)
+					(
+						newclient->IsPBForPS() == true && client->IsPBForPS() == false || // new client wants powershare file, but old client don't
+						newclient->IsPBForPS() == true && client->IsPBForPS() == true && newclient->GetFilePrioAsNumber() >= client->GetFilePrioAsNumber() // both want powersharedfile, and newer wants higher/same prio file
 					) &&
 					(client->IsFriend() && client->GetFriendSlot()) == false
 				) || // old client don't have friend slot
@@ -243,28 +237,12 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 			(
 				(leftClient->IsFriend() && leftClient->GetFriendSlot()) == false && (rightClient->IsFriend() && rightClient->GetFriendSlot()) || // rightClient has friend slot, but leftClient has not, so rightClient is better
 				(leftClient->IsFriend() && leftClient->GetFriendSlot()) == (rightClient->IsFriend() && rightClient->GetFriendSlot()) && // both or none have friend slot, let file prio and score decide
-				(//EastShare - added by AndCycle, PayBackFirst
-					leftClient->MoreUpThanDown() == false && rightClient->MoreUpThanDown() == true ||	// rightClient needs to be payback first, but left dont, so right is better
-					leftClient->MoreUpThanDown() == rightClient->MoreUpThanDown() &&	//they both or none need to be payback first
+				(
+					leftClient->IsPBForPS() == false && rightClient->IsPBForPS() == true ||	// rightClient wants powershare file, but leftClient not, so rightClient is better
+					leftClient->IsPBForPS() == true && rightClient->IsPBForPS() == true &&	// they both want powershare file
 					(
-						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == true ||	// rightClient wants powershare file, but leftClient not, so rightClient is better
-						leftClient->GetPowerShared() == true && rightClient->GetPowerShared() == true &&	// they both want powershare file
-						(
-							leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber() || // and rightClient wants higher prio file, so rightClient is better
-							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() && 
-							(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
-								leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
-								leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
-								(//Morph - added by AndCycle, Equal Chance For Each File
-									leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
-									leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
-									(
-										leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
-									)
-								)
-							)
-						) ||  
-						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
+						leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber() || // and rightClient wants higher prio file, so rightClient is better
+						leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() && 
 						(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
 							leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
 							leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
@@ -274,6 +252,18 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 								(
 									leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
 								)
+							)
+						)
+					) ||  
+					leftClient->IsPBForPS() == false && rightClient->IsPBForPS() == false && //neither want powershare file
+					(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
+						leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
+						leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
+						(//Morph - added by AndCycle, Equal Chance For Each File
+							leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
+							leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
+							(
+								leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
 							)
 						)
 					)
@@ -383,14 +373,10 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 			(newclient->IsFriend() && newclient->GetFriendSlot()) == false || // lowIdClientMustBeInSameOrBetterClassAsThisClient has friend slot, but newclient not. lowIdClientMustBeInSameOrBetterClassAsThisClient is better
 			(lowIdClientMustBeInSameOrBetterClassAsThisClient->IsFriend() && lowIdClientMustBeInSameOrBetterClassAsThisClient->GetFriendSlot()) == (newclient->IsFriend() && newclient->GetFriendSlot()) && // both, or neither has friend slots, let powershared and file prio decide
 			(
-		    	lowIdClientMustBeInSameOrBetterClassAsThisClient->MoreUpThanDown() == true && newclient->MoreUpThanDown() == false || //EastShare - added by AndCycle, PayBackFirst
-				(lowIdClientMustBeInSameOrBetterClassAsThisClient->MoreUpThanDown() == newclient->MoreUpThanDown()) && //EastShare - added by AndCycle, PayBackFirst
-				(//EastShare - added by AndCycle, PayBackFirst
-					lowIdClientMustBeInSameOrBetterClassAsThisClient->GetPowerShared() == true && newclient->GetPowerShared() == false ||
-					lowIdClientMustBeInSameOrBetterClassAsThisClient->GetPowerShared() == true && newclient->GetPowerShared() == true && // Both want powershared
-					lowIdClientMustBeInSameOrBetterClassAsThisClient->GetFilePrioAsNumber() >= newclient->GetFilePrioAsNumber() || // and lowIdClientMustBeInSameOrBetterClassAsThisClient wants same or higher prio, it's ok
-					lowIdClientMustBeInSameOrBetterClassAsThisClient->GetPowerShared() == false && newclient->GetPowerShared() == false // neither wants powershared file, it's ok
-				)//EastShare - added by AndCycle, PayBackFirst
+				lowIdClientMustBeInSameOrBetterClassAsThisClient->IsPBForPS() == true && newclient->IsPBForPS() == false ||
+				lowIdClientMustBeInSameOrBetterClassAsThisClient->IsPBForPS() == true && newclient->IsPBForPS() == true && // Both want powershared
+				lowIdClientMustBeInSameOrBetterClassAsThisClient->GetFilePrioAsNumber() >= newclient->GetFilePrioAsNumber() || // and lowIdClientMustBeInSameOrBetterClassAsThisClient wants same or higher prio, it's ok
+				lowIdClientMustBeInSameOrBetterClassAsThisClient->IsPBForPS() == false && newclient->IsPBForPS() == false // neither wants powershared file, it's ok
 			)
 		){
 			newclient->m_bAddNextConnect = true;
@@ -450,28 +436,18 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		if(
 			(uploadingClient->IsFriend() && uploadingClient->GetFriendSlot()) == true && (newclient->IsFriend() && newclient->GetFriendSlot()) == false ||
 			(uploadingClient->IsFriend() && uploadingClient->GetFriendSlot()) == (newclient->IsFriend() && newclient->GetFriendSlot()) &&
-			(//EastShare - added by AndCycle, PayBackFirst
-				uploadingClient->MoreUpThanDown() == true && newclient->MoreUpThanDown() == false || //EastShare - added by AndCycle, PayBackFirst
-				uploadingClient->MoreUpThanDown() == newclient->MoreUpThanDown() && //EastShare - added by AndCycle, PayBackFirst
+			(
+				uploadingClient->IsPBForPS() == true && newclient->IsPBForPS() == false ||
+				uploadingClient->IsPBForPS() == true && newclient->IsPBForPS() == true && uploadingClient->GetFilePrioAsNumber() > newclient->GetFilePrioAsNumber() ||
 				(
-					uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == false ||
-					uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == true && uploadingClient->GetFilePrioAsNumber() > newclient->GetFilePrioAsNumber() ||
-					(
-						uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == true && uploadingClient->GetFilePrioAsNumber() == newclient->GetFilePrioAsNumber() ||
-						uploadingClient->GetPowerShared() == false && newclient->GetPowerShared() == false
-						/* should this apply in uploading list?
-						uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == true && uploadingClient->GetFilePrioAsNumber() == newclient->GetFilePrioAsNumber() &&
-						uploadingClient->GetQueueSessionUp() >= newclient->GetQueueSessionUp() || //Morph - added by AndCycle, try to finish faster for the one have finished more than others
-						uploadingClient->GetPowerShared() == false && newclient->GetPowerShared() == false &&
-						uploadingClient->GetQueueSessionUp() >= newclient->GetQueueSessionUp() //Morph - added by AndCycle, try to finish faster for the one have finished more than others
-						*/
-					)
-				)&&
-				(
-					!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
-					newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
-					// Compare scores is more right than comparing waittime.
+					uploadingClient->IsPBForPS() == true && newclient->IsPBForPS() == true && uploadingClient->GetFilePrioAsNumber() == newclient->GetFilePrioAsNumber() ||
+					uploadingClient->IsPBForPS() == false && newclient->IsPBForPS() == false
 				)
+			)&&
+			(
+				!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
+				newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
+				// Compare scores is more right than comparing waittime.
 			)
 		) {
 			foundposition = true;
@@ -531,13 +507,9 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 					if (
 						(newclient->IsFriend() && newclient->GetFriendSlot()) == true && (lastClient->IsFriend() && lastClient->GetFriendSlot()) == false ||
 						(newclient->IsFriend() && newclient->GetFriendSlot()) == (lastClient->IsFriend() && lastClient->GetFriendSlot()) &&
-							(//EastShare - added by AndCycle, PayBackFirst
-								newclient->MoreUpThanDown() == true && lastClient->MoreUpThanDown() == false ||
-								newclient->MoreUpThanDown() == lastClient->MoreUpThanDown() &&
-								(
-									newclient->GetPowerShared() == true && lastClient->GetPowerShared() == false ||
-									newclient->GetPowerShared() == true && lastClient->GetPowerShared() == true && newclient->GetFilePrioAsNumber() > lastClient->GetFilePrioAsNumber()
-								)
+							(
+								newclient->IsPBForPS() == true && lastClient->IsPBForPS() == false ||
+								newclient->IsPBForPS() == true && lastClient->IsPBForPS() == true && newclient->GetFilePrioAsNumber() > lastClient->GetFilePrioAsNumber()
 							)
 						) {
 
@@ -777,7 +749,7 @@ bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 
 	//now the final check
 	if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
-		GetDatarate() < 2400*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
+        GetDatarate() < UPLOAD_LOW_CLIENT_DR*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
 			return true;
 	//nope
 	return false;
@@ -945,8 +917,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		else if((uint32)waitinglist.GetCount() > softQueueLimit){// soft queue limit is reached
 
 			if (client->IsFriend() && client->GetFriendSlot() == false && // client is not a friend with friend slot
-				client->MoreUpThanDown() == false && // client don't need Pay Back First //Morph - Added by AndCycle, Pay Back First
-				client->GetPowerShared() == false && // client don't want powershared file //Morph - Added by AndCycle
+				client->IsPBForPS() == false && // client don't want powershared file
 					(
 						client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE ||
 						client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE//Morph - added by AndCycle, Equal Chance For Each File
@@ -1008,6 +979,13 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 			if (updatewindow)
 				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(uploadinglist.GetAt(pos));
 	        
+			//EastShare Start - added by AndCycle, Pay Back First
+			//client normal leave the upload queue, check does client still satisfy requirement
+			if(earlyabort == false){
+				client->InitMoreUpThanDown();
+			}
+			//EastShare End - added by AndCycle, Pay Back First
+
 			if(!reason.IsEmpty())
 				AddDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
 			uploadinglist.RemoveAt(pos);
