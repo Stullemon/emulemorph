@@ -158,6 +158,7 @@ void CDownloadQueue::Init(){
 			delete toadd;
 	}
 	ff.Close();
+	UpdatePNRFile(); //<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 
 	//try recovering any part.met files
 	searchPath += ".backup";
@@ -182,6 +183,7 @@ void CDownloadQueue::Init(){
 		}
 	}
 	ff.Close();
+	UpdatePNRFile(); //<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 
 	if(count == 0) {
 		AddLogLine(false,GetResString(IDS_NOPARTSFOUND));
@@ -782,6 +784,7 @@ void CDownloadQueue::AddDownload(CPartFile* newfile) {
 	//MORPH - Removed by SiRoB, Due to Khaos Categorie
 	//SetAutoCat(newfile);// HoaX_69 / Slugfiller: AutoCat
 	filelist.AddTail(newfile);
+	UpdatePNRFile(); //<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 	SortByPriority();
 	CheckDiskspace();	// SLUGFILLER: checkDiskspace
 	theApp.emuledlg->transferwnd.downloadlistctrl.AddFile(newfile);
@@ -1179,6 +1182,7 @@ void CDownloadQueue::RemoveFile(CPartFile* toremove){
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
 		if (toremove == filelist.GetAt(pos)){
 			filelist.RemoveAt(pos);
+			UpdatePNRFile(); //<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 			return;
 		}
 	}
@@ -1463,6 +1467,7 @@ void CDownloadQueue::SortByPriority(){
 		SwapParts(filelist.FindIndex(0), filelist.FindIndex(i));
 		HeapSort(0, i-1);
 	}
+	UpdatePNRFile(); //<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 }
 
 void CDownloadQueue::CheckDiskspace()
@@ -1912,3 +1917,70 @@ LRESULT CSourceHostnameResolveWnd::OnHostnameResolved(WPARAM wParam,LPARAM lPara
 	return TRUE;
 }
 // SLUGFILLER: hostnameSources
+// START enkeyDEV(ColdShine) -PartfileNameRecovery-
+void CDownloadQueue::UpdatePNRFile(CPartFile * ppfChanged)
+{
+	CFile file;
+	if (!file.Open(CString(theApp.glob_prefs->GetAppDir()) + "config\\PNRecovery.dat", CFile::modeCreate | CFile::modeNoTruncate | CFile::modeReadWrite | CFile::osSequentialScan))
+	{
+//		AddLogLine(TBN_ERROR, true, GetResString(IDS_ERROR_SAVEFILE) + CString(" PNRecovery.dat"));
+		AddLogLine(true, GetResString(IDS_ERROR_SAVEFILE) + CString(" PNRecovery.dat"));
+		return;
+	}
+	char szRecord[1025];	// 1024 + NULL by sprintf()
+	if (ppfChanged)
+	{
+		// Only update ppfChanged's record.
+		char sPFNum[4];		// nnn + NULL by strcpy()
+		char sReadPFNum[5];	// <nnn<
+		lstrcpyn(sPFNum, ppfChanged->GetPartMetFileName(), sizeof(sPFNum) / sizeof(char)); // Faster than .Left(3) ;)
+		for (unsigned i = (unsigned)file.GetLength() >> 10; i > 0; --i)
+		{
+			file.Read(sReadPFNum, sizeof(sReadPFNum) / sizeof(char));
+			if (sReadPFNum[0] != '<' ||
+				sReadPFNum[1] < '0' || sReadPFNum[1] > '9' ||
+				sReadPFNum[2] < '0' || sReadPFNum[2] > '9' ||
+				sReadPFNum[3] < '0' || sReadPFNum[3] > '9' ||
+				sReadPFNum[0] != '<')
+			{
+				// If sReadPFNum is not "<nnn<", then the file is corrupted, so force a full rewrite.
+				file.Close();
+				UpdatePNRFile();
+				return;
+			}
+			if (sPFNum[0] == sReadPFNum[1] &&
+				sPFNum[1] == sReadPFNum[2] &&
+				sPFNum[2] == sReadPFNum[3])
+			{
+				// We've found it, so rewind to overwrite this record.
+				file.Seek(-int(sizeof(sReadPFNum) / sizeof(char)), CFile::current);
+				break;
+			}
+			// Skip bytes to catch next record up.
+			file.Seek(1024 - sizeof(sReadPFNum) / sizeof(char), CFile::current);
+		}
+		// Here we are. Now just build the record and write it at current seek pos.
+		BuildPNRRecord(ppfChanged, szRecord, sizeof(szRecord) / sizeof(char));
+		file.Write(szRecord, 1024);
+	}
+	else
+	{
+		// No particular PartFile specified, need to write the entire list (because of add/remove).
+		for (POSITION pos = filelist.GetHeadPosition(); pos != 0; filelist.GetNext(pos))
+		{
+			BuildPNRRecord(filelist.GetAt(pos), szRecord, sizeof(szRecord) / sizeof(char));
+			file.Write(szRecord, 1024);
+		}
+		file.SetLength(1024 * filelist.GetCount()); // Trim exceeding records.
+	}
+}
+
+void CDownloadQueue::BuildPNRRecord(CPartFile * ppf, char * pszBuff, unsigned cchBuffMax)
+{
+	// All PNR records are 1KB fixed-length:
+	//   5         507           510      2
+	// 1|3|1   1|--505--|1   1|--508-|1   1 1
+	// <nnn<   >ed2k_link>   "filename"    \r\n
+	wnsprintf(pszBuff, cchBuffMax, "<%3.3s<>%-505s>\"%-508s\"\r\n", ppf->GetPartMetFileName(), theApp.CreateED2kLink(ppf), ppf->GetFileName());
+}
+// END enkeyDEV(ColdShine) -PartfileNameRecovery-

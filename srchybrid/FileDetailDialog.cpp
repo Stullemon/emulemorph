@@ -516,6 +516,7 @@ void CFileDetailDialogName::OnRename()
 
 	m_file->SetFileName(NewFileName, true); 
 	m_file->SavePartFile(); 
+	theApp.downloadqueue->UpdatePNRFile(m_file); //<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 } 
 
 BOOL CFileDetailDialogName::PreTranslateMessage(MSG* pMsg) 
