@@ -1348,7 +1348,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_FileMenu.AppendMenu(flag|MF_POPUP,(UINT_PTR)m_Web.m_hMenu, GetResString(IDS_WEBSERVICES) );
 
 			// khaos::categorymod+
-			/*CTitleMenu cats;
+			//MORPH START- Readded by SiRoB, Use Official ASSIGNCAT methode
+			CTitleMenu cats;
 			cats.CreatePopupMenu();
 			cats.AddMenuTitle(GetResString(IDS_CAT));
 			flag=(theApp.glob_prefs->GetCatCount()==1) ? MF_GRAYED:MF_STRING;
@@ -1356,11 +1357,13 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 				for (int i=0;i<theApp.glob_prefs->GetCatCount();i++) {
 					cats.AppendMenu(MF_STRING,MP_ASSIGNCAT+i, (i==0)?GetResString(IDS_CAT_UNASSIGN):theApp.glob_prefs->GetCategory(i)->title);
 				}
-			}*/
-			// Assign Cat now uses the SelCatDlg.
-			flag=(theApp.glob_prefs->GetCatCount()==1) ? MF_GRAYED:MF_STRING;
-			m_FileMenu.AppendMenu(flag, MP_ASSIGNCAT, GetResString(IDS_TOCAT) );
-            //m_FileMenu.AppendMenu(MF_STRING, MP_SETFILEGROUP, GetResString(IDS_CAT_SETFILEGROUP));
+			}
+			m_FileMenu.AppendMenu(flag|MF_POPUP,(UINT_PTR)cats.m_hMenu, GetResString(IDS_TOCAT) );
+			//// Assign Cat now uses the SelCatDlg.
+			//flag=(theApp.glob_prefs->GetCatCount()==1) ? MF_GRAYED:MF_STRING;
+			//m_FileMenu.AppendMenu(flag, MP_ASSIGNCAT, GetResString(IDS_TOCAT) );
+            //MORPH END - Readded by SiRoB, Use Official ASSIGNCAT methode
+			//m_FileMenu.AppendMenu(MF_STRING, MP_SETFILEGROUP, GetResString(IDS_CAT_SETFILEGROUP));
 			
 			CTitleMenu mnuOrder;
 			if (this->GetSelectedCount() > 1) {
@@ -1453,15 +1456,16 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 			if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+99) {
 				RunURL(file, theApp.webservices.GetAt(wParam-MP_WEBURL) );
 			}
+			//MOPRH - Readded by SiRoB, Use Official ASSIGNCAT methode
 			// khaos::categorymod+
-			/*if (wParam>=MP_ASSIGNCAT && wParam<=MP_ASSIGNCAT+99) {
+			if (wParam>=MP_ASSIGNCAT && wParam<=MP_ASSIGNCAT+99) {
 				while(!selectedList.IsEmpty()) { 
 					CPartFile *selected = selectedList.GetHead();
 					selected->SetCategory(wParam-MP_ASSIGNCAT);
 					selectedList.RemoveHead(); 
 				}				
 				ChangeCategory(curTab);
-			}*/
+			}
 			// khaos::categorymod-
 
 			switch (wParam)
@@ -1948,23 +1952,24 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					RedrawItems(0, GetItemCount() - 1);
 					break;
 				}
-				case MP_ASSIGNCAT: {
-					// Changed this to use SelCatDlg
+				//MORPH - Removed by SiRoB, Use Official ASSIGNCAT methode
+				//case MP_ASSIGNCAT: {
+				//	// Changed this to use SelCatDlg
 
-					CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
+				//	CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
 
-					if (getCatDlg->DoModal() == IDCANCEL)
-						break;
+				//	if (getCatDlg->DoModal() == IDCANCEL)
+				//		break;
 
-					uint8 useCat = getCatDlg->GetInput();
-					delete getCatDlg;
+				//	uint8 useCat = getCatDlg->GetInput();
+				//	delete getCatDlg;
 
-					while(!selectedList.IsEmpty()) { 
-						selectedList.GetHead()->SetCategory(useCat);
-						selectedList.RemoveHead(); 
-					}
-					break;
-				}
+				//	while(!selectedList.IsEmpty()) { 
+				//		selectedList.GetHead()->SetCategory(useCat);
+				//		selectedList.RemoveHead(); 
+				//	}
+				//	break;
+				//}
 				// khaos::categorymod-
 				// khaos::kmod+
 				case MP_FORCEA4AF: {
