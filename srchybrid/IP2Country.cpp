@@ -38,7 +38,8 @@ flags are from http://sf.net/projects/flags/
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define	NO_FLAG	65535
+// N/A flag is the first Res, so it should at index zero
+#define NO_FLAG 0
 
 CString FirstCharCap(CString target){
 
@@ -192,9 +193,21 @@ bool CIP2Country::LoadFromFile(){
 
 bool CIP2Country::LoadCountryFlagLib(){
 
-	CString ip2countryCountryFlag = theApp.glob_prefs->GetConfigDir()+"countryflag.dll";
+
+	CString ip2countryCountryFlag;
 
 	try{
+
+		//detect windows version
+		if(theApp.glob_prefs->GetWindowsVersion() == _WINVER_XP_){
+			//it's XP, we can use beautiful 32bits flags with alpha channel :)
+			ip2countryCountryFlag = theApp.glob_prefs->GetConfigDir()+"countryflag32.dll";
+		}
+		else{
+			//oh~ it's not XP, but we still can load the 24bits flags
+			ip2countryCountryFlag = theApp.glob_prefs->GetConfigDir()+"countryflag.dll";
+		}
+
 		_hCountryFlagDll = LoadLibrary(ip2countryCountryFlag); 
 		if (_hCountryFlagDll == NULL) 
 		{ 
@@ -202,6 +215,8 @@ bool CIP2Country::LoadCountryFlagLib(){
 		} 
 
 		uint16	resID[] = {
+			IDI_COUNTRY_FLAG_NOFLAG,//first res in image list should be N/A
+
 			IDI_COUNTRY_FLAG_AD, IDI_COUNTRY_FLAG_AE, IDI_COUNTRY_FLAG_AF, IDI_COUNTRY_FLAG_AG, 
 			IDI_COUNTRY_FLAG_AI, IDI_COUNTRY_FLAG_AL, IDI_COUNTRY_FLAG_AM, IDI_COUNTRY_FLAG_AN, 
 			IDI_COUNTRY_FLAG_AO, IDI_COUNTRY_FLAG_AR, IDI_COUNTRY_FLAG_AS, IDI_COUNTRY_FLAG_AT, 
@@ -265,10 +280,12 @@ bool CIP2Country::LoadCountryFlagLib(){
 			IDI_COUNTRY_FLAG_UK, //by tharghan
 			IDI_COUNTRY_FLAG_CS, //by propaganda
 
-
-			NO_FLAG};
+			65535//the end
+		};
 
 		CString countryID[] = {
+			"N/A",//first res in image list should be N/A
+
 			"AD", "AE", "AF", "AG", "AI", "AL", "AM", "AN", "AO", "AR", "AS", "AT", "AU", "AW", "AZ", 
 			"BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BM", "BN", "BO", "BR", "BS", "BT", 
 			"BW", "BY", "BZ", "CA", "CC", "CD", "CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN", "CO", 
@@ -286,23 +303,23 @@ bool CIP2Country::LoadCountryFlagLib(){
 			"TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", 
 			"VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YU", "ZA", "ZM", "ZW", 
 			"UK", //by tharghan
-			"CS", //by propaganda
-
-			"N/A"
+			"CS" //by propaganda
+			
 		};
 
 		HICON iconHandle;
 
 		CountryFlagImageList.DeleteImageList();
-		CountryFlagImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+		CountryFlagImageList.Create(18,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 		CountryFlagImageList.SetBkColor(CLR_NONE);
 
-		for(int cur_pos = 0; resID[cur_pos] != NO_FLAG; cur_pos++){
+		//the res Array have one element to be the STOP
+		for(int cur_pos = 0; resID[cur_pos] != 65535; cur_pos++){
 
 			CountryIDtoFlagIndex.SetAt(countryID[cur_pos], cur_pos);
 
 			iconHandle = LoadIcon(_hCountryFlagDll, MAKEINTRESOURCE(resID[cur_pos]));
-			if(iconHandle == NULL) throw CString(_T("Invalid resID"));
+			if(iconHandle == NULL) throw CString(_T("Invalid resID, maybe you need to upgrade your flag icon Dll,"));
 			
 			CountryFlagImageList.Add(iconHandle);
 		}
@@ -374,7 +391,8 @@ bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName
 		}
 	}
 	else{
-		newRange->FlagIndex = NO_FLAG;
+		//this valuse is useless if the country flag havn't been load up, should be safe I think ...
+		//newRange->FlagIndex = 0;
 	}
 	
 	iplist.SetAt(IPfrom, newRange);

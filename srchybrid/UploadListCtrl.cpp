@@ -373,7 +373,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					if(theApp.ip2country->ShowCountryFlag()){
 						cur_rec.left+=20;
 						POINT point2= {cur_rec.left,cur_rec.top+1};
-						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(16,16), CPoint(0,0), ILD_NORMAL);
+						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 					}
 					//EastShare End - added by AndCycle, IP to Country
 
