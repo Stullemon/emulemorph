@@ -1,8 +1,7 @@
 --------------------------------------
-Changelog for eMule 0.44b MorphXT v5.x
+Changelog for eMule 0.44b MorphXT v5.2
 --------------------------------------
-MERGED : Merged WebCache 1.2f and fixed some issue [Commander/SiRoB]
-
+MERGED : Merged WebCache 1.2f and fixed 2 issue [Commander/SiRoB]
 
 FIXED  : Source Load Saver have been corrected [SiRoB]
 FIXED  : Patch taken from other ListCtrl to avoid crash in the FriendListCtrl (at shutdown some item were not valide) [SiRoB]
@@ -12,11 +11,13 @@ FIXED  : Put back in waitingqueue when too many upload slot occur [SiRoB]
 
 CHANGED: Intelligent Chunk Selection now use the advanced per file setting for the preview first and last chunk [SiRoB]
 CHANGED: Intelligent Chunk Selection adapted to work with WebCache [SiRoB]
+CHANGED: Web server now display a statistic tree taken from emule+ [Commander]
 
 ADDED  : "Using phpBB URL-Tags style" checkbox in FileDetail for ed2kFileLink creation [AndCycle]
 ADDED  : Options to Enable/Disable PowerShare internal File Priority [AndCycle]
-ADDED  : Bandwidth Class Control in morph preferency [SiRoB]
+ADDED  : Upload Splitting Class in morph preferency [SiRoB]
 ADDED  : Don't Refresh item if not needed (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
+ADDED  : Version checker [SiRoB]
 
 TEAWKED: Hide Over Share display info now show all value in the column [SiRoB]
 TEAWKED: The auto powershare mecanisme have been changed to wait some complet source info before triggering [SiRoB]
