@@ -1,0 +1,10 @@
+A4AF:
+ -Lock source on target downloading file
+
+HideOS,ShareOnlyTheNeed:
+ -Making auto mecanisme like PowerShare
+
+
+SharedFile:
+ -Add user item on each file to show uploaded stat on client
+ -ShareDirectory
