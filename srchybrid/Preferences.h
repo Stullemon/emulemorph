@@ -731,7 +731,7 @@ public:
         static bool     m_bA4AFSaveCpu; // ZZ:DownloadManager
         
         // Added by MoNKi [MoNKi: -Wap Server-]
-	static char		m_sWapTemplateFile[MAX_PATH];
+	static TCHAR	m_sWapTemplateFile[MAX_PATH];
 	static bool		m_bWapEnabled;
 	static uint16	m_nWapPort;
 	static uint8	m_iWapGraphWidth;
