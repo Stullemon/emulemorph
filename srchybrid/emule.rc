@@ -2351,7 +2351,7 @@ IDR_HTTPDOWNLOAD_ANIMATION AVI                     "res\\inetdownload.avi"
 // JPG
 //
 
-IDR_SPLASH              JPG                     "res\\About.jpg"
+SPLASH              JPG                     "res\\About.jpg"
 ABOUT                   JPG                     "res\\logo.jpg"
 
 /////////////////////////////////////////////////////////////////////////////

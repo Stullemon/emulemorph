@@ -52,7 +52,7 @@ BOOL CSplashScreen::OnInitDialog()
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
 
-	VERIFY( m_imgSplash.Attach(theApp.LoadImage(_T("ABOUT"), _T("JPG"))) );
+	VERIFY( m_imgSplash.Attach(theApp.LoadImage(_T("SPLASH"), _T("JPG"))) );
 	if (m_imgSplash.GetSafeHandle())
 	{
 		BITMAP bmp = {0};
