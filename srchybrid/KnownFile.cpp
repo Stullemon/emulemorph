@@ -323,6 +323,8 @@ float CFileStatistic::GetFullSpreadCount() /*const*/
 }
 //MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
+//MORPH - Removed by SiRoB, Please see on the top
+/*
 // SLUGFILLER: mergeKnown
 void CFileStatistic::Merge(CFileStatistic* other){
 	transferred += other->transferred;
@@ -349,7 +351,7 @@ void CFileStatistic::Merge(CFileStatistic* other){
 	// SLUGFILLER: Spreadbars
 }
 // SLUGFILLER: mergeKnown
-
+*/
 IMPLEMENT_DYNAMIC(CAbstractFile, CObject)
 
 CAbstractFile::CAbstractFile()

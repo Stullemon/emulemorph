@@ -56,7 +56,6 @@ public:
 	float	GetSpreadSortValue() /*const*/;
 	float	GetFullSpreadCount() /*const*/;
 	//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
-	void	Merge(CFileStatistic *other);	// SLUGFILLER: mergeKnown
 	uint16	GetRequests() const				{return requested;}
 	uint16	GetAccepts() const				{return accepted;}
 	uint64	GetTransferred() const			{return transferred;}

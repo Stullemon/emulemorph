@@ -515,10 +515,10 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					
 						// Remove client from the upload queue
 						theApp.uploadqueue->RemoveFromUploadQueue(client,GetResString(IDS_UPSTOPPEDLEECHER), true, true);
-						theApp.emuledlg->AddDebugLogLine(false, GetResString(IDS_LEECHERDETREM));
+						AddDebugLogLine(false, GetResString(IDS_LEECHERDETREM));
 						
 						theApp.uploadqueue->AddClientToQueue(client);
-						theApp.emuledlg->AddDebugLogLine(false, GetResString(IDS_LEECHERPUTBACK));
+						AddDebugLogLine(false, GetResString(IDS_LEECHERPUTBACK));
 					
 						client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock1->FileID));
 					}
@@ -561,7 +561,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 							reqblock3->StartOffset = 0; reqblock3->EndOffset = 0; 
 						
 							// Ban client and trace some info
-							theApp.emuledlg->AddDebugLogLine(false, GetResString(IDS_TRIEDDLOTHERFILE), 
+							AddDebugLogLine(false, GetResString(IDS_TRIEDDLOTHERFILE), 
 								client->GetUserName(), md4str(uploadFileId), md4str(reqblock1->FileID));
 
 							// Remove client from the upload queue
@@ -570,7 +570,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 							// Put back with wating time intact
 							theApp.uploadqueue->AddClientToQueue(client, true, true);
 
-							theApp.emuledlg->AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
+							AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
 						
 							client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock1->FileID));
 						}
@@ -2040,7 +2040,7 @@ void CClientReqSocket::SmartUploadControl()
 	  theApp.uploadqueue->SetMaxVUR(theApp.uploadqueue->GetDatarate()+thePrefs.GetSUCDrift());
 	}
   if (thePrefs.IsSUCLog ()) {
-	theApp.emuledlg->AddDebugLogLine(false,"Smart Upload Control: (time:%ims, clip:%ims, ratio:%i) VUR:%iB/s",
+	AddDebugLogLine(false,"Smart Upload Control: (time:%ims, clip:%ims, ratio:%i) VUR:%iB/s",
 		checkrespond,
 		theApp.uploadqueue->GetAvgRespondTime(1),
 		theApp.uploadqueue->GetAvgRespondTime(0),
@@ -2054,12 +2054,12 @@ void CListenSocket::SwitchSUC(bool bSetSUCOn)
 {
 	if (bSetSUCOn){
 		thePrefs.SetDynUpEnabled(false);
-		theApp.emuledlg->AddDebugLogLine(false,GetResString(IDS_SWITCHSUC));
+		AddDebugLogLine(false,GetResString(IDS_SWITCHSUC));
 		thePrefs.SetSUCEnabled(true);
 	}
 	else{
 		thePrefs.SetSUCEnabled(false);
-		theApp.emuledlg->AddDebugLogLine(false,GetResString(IDS_SWITCHDYNUP));
+		AddDebugLogLine(false,GetResString(IDS_SWITCHDYNUP));
 		thePrefs.SetDynUpEnabled(true);
 
 	}

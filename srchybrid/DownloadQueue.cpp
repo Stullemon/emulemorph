@@ -715,7 +715,7 @@ bool CDownloadQueue::ApplyFilterMask(CString sFullName, uint8 nCat)
 
 				if (iEnd == -1 || (iLT != -1 && iLT < iEnd) || iGT < iEnd)
 				{
-				theApp.emuledlg->AddDebugLogLine(false, "Category '%s' has invalid Category Mask String.", thePrefs.GetCategory(nCat)->title);
+				AddDebugLogLine(false, "Category '%s' has invalid Category Mask String.", thePrefs.GetCategory(nCat)->title);
 					break; // Move on to next category.
 				}
 				if (iStart == iEnd)
@@ -950,7 +950,7 @@ void CDownloadQueue::Process(){
 	else if (m_ED2KLinkQueue.GetCount() && !thePrefs.SelectCatForNewDL()) // This should not happen.
 	{
 		PurgeED2KLinkQueue();
-		theApp.emuledlg->AddDebugLogLine(false, "ERROR: Links in ED2K Link Queue while SelectCatForNewDL was disabled!");
+		AddDebugLogLine(false, "ERROR: Links in ED2K Link Queue while SelectCatForNewDL was disabled!");
 	}
 	// khaos::categorymod-
 
