@@ -37,6 +37,8 @@ there client on the eMule forum..
 #include "../utils/MiscUtils.h"
 #include "../kademlia/SearchManager.h"
 #include "../../opcodes.h"
+#include "../Routing/RoutingZone.h"
+#include "../kademlia/kademlia.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -120,6 +122,7 @@ void CPrefs::setDefaults(void)
 	m_totalFile = 0;
 	m_totalStoreSrc = 0;
 	m_totalStoreKey = 0;
+	m_keywordPublish = false;
 }
 
 void CPrefs::reset(void)
@@ -228,7 +231,11 @@ void CPrefs::readFile(void)
 //			}
 			file.Close();
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		TRACE("Exception in CPrefs::readFile\n");
+	}
 }
 
 void CPrefs::writeFile(void)
@@ -267,10 +274,18 @@ void CPrefs::writeFile(void)
 //			file.writeTag("screenLines",	m_screenLines);
 			file.Close();
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		TRACE("Exception in CPrefs::writeFile\n");
+	}
 }
 
-Status* CPrefs::getStatus(bool closing){
+Status* CPrefs::getStatus(bool closing)
+{
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
 	CSearchManager::updateStats();
 	Status* status = new Status;
 	if(closing)
@@ -290,6 +305,8 @@ Status* CPrefs::getStatus(bool closing){
 	status->m_totalStoreSrc = getTotalStoreSrc();
 	status->m_totalStoreKey = getTotalStoreKey();
 	status->m_kademliaUsers = getKademliaUsers();
+	status->m_keywordPublish = getKeywordPublish();
+	status->m_totalContacts = routingZone->getNumContacts();
 	return status;
 }
 

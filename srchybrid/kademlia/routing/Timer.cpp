@@ -40,6 +40,7 @@ there client on the eMule forum..
 #include "../kademlia/Search.h"
 #include "../net/KademliaUDPListener.h"
 #include "../../PartFile.h"
+#include "../../opcodes.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -68,10 +69,10 @@ void CTimer::start(void)
 		return;
 
 	m_nextSearchJumpStart = time(NULL);
-	m_nextSelfLookup = time(NULL) + TEN_MINS/2;
+	m_nextSelfLookup = time(NULL) + MIN2S(10);
 	m_statusUpdate = time(NULL);
 	m_bigTimer = time(NULL);
-	m_nextFirewallCheck = time(NULL) + (HOUR);
+	m_nextFirewallCheck = time(NULL) + (HR2S(1));
 
 	ASSERT( m_pThread == NULL );
 	m_pThread = new CWinThread(timer, NULL);
@@ -108,7 +109,7 @@ void CTimer::stop(bool bAppShutdown)
 					DWORD dwEvent = MsgWaitForMultipleObjects(iNumEvents, &m_pThread->m_hThread, FALSE, INFINITE, QS_ALLINPUT);
 					if (dwEvent == -1)
 					{
-						TRACE("%s: Error in MsgWaitForMultipleObjects: %08x\n", __FUNCTION__, GetLastError());
+						CKademlia::debugMsg("%s: Error in MsgWaitForMultipleObjects: %08x (CTimer::stop)\n", __FUNCTION__, GetLastError());
 						ASSERT(0);
 					}
 					else if (dwEvent == WAIT_OBJECT_0 + iNumEvents)
@@ -117,7 +118,7 @@ void CTimer::stop(bool bAppShutdown)
 						MSG* pMsg = AfxGetCurrentMessage();
 						while (::PeekMessage(pMsg, NULL, NULL, NULL, PM_NOREMOVE))
 						{
-							TRACE("%s: Message %08x arrived while waiting on thread shutdown\n", __FUNCTION__, pMsg->message);
+							CKademlia::debugMsg("%s: Message %08x arrived while waiting on thread shutdown (CTimer::stop)\n", __FUNCTION__, pMsg->message);
 							// pump message, but quit on WM_QUIT
 							if (!pThread->PumpMessage()) {
 								AfxPostQuitMessage(0);
@@ -179,21 +180,21 @@ UINT AFX_CDECL CTimer::timer(LPVOID lpParam)
 			if( m_statusUpdate <= now )
 			{
 				Kademlia::CKademlia::reportUpdateStatus(prefs->getStatus());
-				m_statusUpdate = ONE_SEC + now;
+				m_statusUpdate = SEC(1) + now;
 			}
 			prefs->setKademliaUsers(maxUsers);
 			maxUsers = 0;
 			if( m_nextFirewallCheck <= now)
 			{
 				prefs->setRecheckIP();
-				m_nextFirewallCheck = HOUR + now;
+				m_nextFirewallCheck = HR2S(1) + now;
 			}
 			if (m_nextSelfLookup <= now)
 			{
 				CUInt128 me;
 				prefs->getClientID(&me);
 				CSearchManager::findNodeComplete(me);
-				m_nextSelfLookup = (4 * HOUR) + now;
+				m_nextSelfLookup = HR2S(4) + now;
 			}
 			for (it = m_events.begin(); it != m_events.end(); it++)
 			{
@@ -206,18 +207,26 @@ UINT AFX_CDECL CTimer::timer(LPVOID lpParam)
 					{
 						if(zone->onBigTimer())
 						{
-							zone->m_nextBigTimer = HOUR + now;
-							m_bigTimer = ONE_SEC*10 + now;
+							zone->m_nextBigTimer = HR2S(1) + now;
+							m_bigTimer = SEC(10) + now;
 						}
-					} catch (...) {}
+					} 
+					catch (...) 
+					{
+						CKademlia::debugLine("Exception in CTimer::timer(1)");
+					}
 				}
 				if (zone->m_nextSmallTimer <= now)
 				{
 					try
 					{
 						zone->onSmallTimer();
-					} catch (...) {}
-					zone->m_nextSmallTimer = ONE_MIN + now;
+					}
+					catch (...) 
+					{
+						CKademlia::debugLine("Exception in CTimer::timer(2)");
+					}
+					zone->m_nextSmallTimer = MIN2S(1) + now;
 				}
 
 				// This is a convenient place to add this, although not related to routing
@@ -226,7 +235,11 @@ UINT AFX_CDECL CTimer::timer(LPVOID lpParam)
 					try
 					{
 						CSearchManager::jumpStart();
-					}catch (...) {}
+					}
+					catch (...) 
+					{
+						CKademlia::debugLine("Exception in CTimer::timer(3)");
+					}
 					m_nextSearchJumpStart += SEARCH_JUMPSTART;
 				}
 			}
@@ -253,7 +266,7 @@ UINT AFX_CDECL CTimer::timer(LPVOID lpParam)
 						CSearchManager::stopSearch(msg.lParam);
 					}
 					else{
-						TRACE("*** CTimer::timer; unknown message=0x%04x  wParam=%08x  lParam=%08x\n", msg.message, msg.wParam, msg.lParam);
+						CKademlia::debugMsg("*** CTimer::timer; unknown message=0x%04x  wParam=%08x  lParam=%08x\n", msg.message, msg.wParam, msg.lParam);
 					}
 				}
 
@@ -261,7 +274,11 @@ UINT AFX_CDECL CTimer::timer(LPVOID lpParam)
 				// MsgWaitForMultipleObjects call, according the consumed time.
 			}
 
-		} catch (...) {}
+		} 
+		catch (...) 
+		{
+			CKademlia::debugLine("Exception in CTimer::timer(4)");
+		}
 	}
 	return 0;
 }

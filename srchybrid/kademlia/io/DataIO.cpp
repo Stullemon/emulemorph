@@ -34,6 +34,7 @@ there client on the eMule forum..
 #include "../kademlia/Tag.h"
 #include "../utils/LittleEndian.h"
 #include "../utils/UInt128.h"
+#include "IOException.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -163,7 +164,17 @@ CTag *CDataIO::readTag(void)
 				retVal = new CTagUnk(type, name);
 		}
 		delete [] name;
-	} catch (...) {}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CDataIO:readTag (IO Error(%i))", ioe->m_cause);
+		throw ioe;
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CDataIO:readTag");
+		throw;
+	}
 	return retVal;
 }
 
@@ -271,10 +282,18 @@ void CDataIO::writeTag(const CTag *tag)
 			case 0x09:
 				writeUInt8(tag->GetInt());
 				break;
-			default:
-				ASSERT(0);
 		}
-	} catch (...) {}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CDataIO:writeTag (IO Error(%i))", ioe->m_cause);
+		throw ioe;
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CDataIO:writeTag");
+		throw;
+	}
 }
 
 void CDataIO::writeTag(const byte type, LPCSTR name)

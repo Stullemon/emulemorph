@@ -45,6 +45,7 @@ public:
 	virtual int start(uint16 port) = 0;
 
 	static uint32 nameToIP(LPCSTR host);
+	DWORD getThreadID();
 
 protected:
 	
@@ -65,6 +66,7 @@ private:
 	
 	bool		m_bRunning;
 	CWinThread*	m_pThread;
+	volatile DWORD m_dwThreadID;
 	HANDLE		m_hStopEvent;
 
 	static UINT AFX_CDECL listening(LPVOID lpParam);

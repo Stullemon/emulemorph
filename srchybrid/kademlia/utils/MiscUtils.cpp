@@ -100,7 +100,11 @@ void CMiscUtils::debugHexDump(const byte *data, const uint32 lenData)
 			CKademlia::debugLine(line);
 			pos += lenLine;
 		}
-	} catch (...) {}
+	} 
+	catch (...)
+	{
+		CKademlia::debugLine("Exception in CMiscUtils::debugHexDump\n");
+	}
 #endif
 }
 

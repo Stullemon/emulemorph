@@ -39,6 +39,7 @@ there client on the eMule forum..
 #include "../../OtherFunctions.h"
 #include "../kademlia/tag.h"
 #include "../io/FileIO.h"
+#include "../io/IOException.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -169,7 +170,16 @@ void CIndexed::readFile(void)
 			m_totalIndexKeyword = totalKeyword;
 			CKademlia::debugMsg("Read %u source and %u keyword entries", totalSource, totalKeyword);
 		}
-	} catch (...) {TRACE("\n************Error reading Entries!\n");ASSERT(0);}
+	} 
+	catch ( CIOException *ioe )
+	{
+		CKademlia::debugMsg("Exception in CIndexed::readFile (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CIndexed::readFile");
+	}
 }
 
 void CIndexed::writeFile(void)
@@ -211,7 +221,15 @@ void CIndexed::writeFile(void)
 			CKademlia::debugMsg("Wrote %u indexed entries", total);
 		}
 	} 
-	catch (...) {ASSERT(0);}
+	catch ( CIOException *ioe )
+	{
+		CKademlia::debugMsg("Exception in CIndexed::writeFile (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CIndexed::writeFile");
+	}
 }
 
 void CIndexed::clean(void)
@@ -269,7 +287,12 @@ void CIndexed::clean(void)
 		m_totalIndexKeyword = totalKeyword;
 		CKademlia::debugMsg("Active: Removed %u old indexed entries out of %u source %u keyword", removed, totalSource, totalKeyword);
 		m_lastClean = time(NULL) + (60*30);
-	} catch(...){ASSERT(0);}
+	} 
+	catch(...)
+	{
+		CKademlia::debugLine("Exception in CIndexed::clean");
+		ASSERT(0);
+	}
 }
 
 CIndexed::~CIndexed()
@@ -294,7 +317,12 @@ CIndexed::~CIndexed()
 			keywordHashList.RemoveHead();
 			delete del3;
 		}
-	} catch(...){ASSERT(0);}
+	} 
+	catch(...)
+	{
+		CKademlia::debugLine("Exception in ~CIndexed");
+		ASSERT(0);
+	}
 }
 
 bool CIndexed::IndexedAdd(Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourceID, Kademlia::CEntry* entry){
@@ -382,7 +410,12 @@ bool CIndexed::IndexedAdd(Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourc
 		keywordHashList.AddHead(toaddH);
 		return true;
 		//This is a new key!
-	} catch(...){ASSERT(0);}
+	}
+	catch(...)
+	{
+		CKademlia::debugLine("Exception in CIndexed::writeFile");
+		ASSERT(0);
+	}
 	return false;
 
 }
@@ -554,7 +587,7 @@ void CIndexed::SendValidResult( Kademlia::CUInt128 keyWordID, const SSearchTerm*
 										if( count % 50 == 0 )
 										{
 											uint32 len = sizeof(packet)-bio.getAvailable();
-											TRACE("Search %u\n", count);
+//											CKademlia::debugMsg("Search %u", count);
 											udpListner->sendPacket(packet, len, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 											bio.reset();
 											bio.writeByte(OP_KADEMLIAHEADER);
@@ -578,7 +611,7 @@ void CIndexed::SendValidResult( Kademlia::CUInt128 keyWordID, const SSearchTerm*
 											if( count % 50 == 0 )
 											{
 												uint32 len = sizeof(packet)-bio.getAvailable();
-												TRACE("Search %u\n", count);
+//												CKademlia::debugMsg("Search %u", count);
 												udpListner->sendPacket(packet, len, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 												bio.reset();
 												bio.writeByte(OP_KADEMLIAHEADER);
@@ -601,7 +634,7 @@ void CIndexed::SendValidResult( Kademlia::CUInt128 keyWordID, const SSearchTerm*
 			uint32 len = sizeof(packet)-bio.getAvailable();
 //			CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_SEARCH_RESULT (Keyword)(%u)", ntohl(senderAddress->sin_addr.s_addr));
 //			CMiscUtils::debugHexDump(packet, len);
-			TRACE("Search %u\n", count);
+//			CKademlia::debugMsg("Search %u", count);
 			memcpy(packet+18, &ccount, 2);
 			udpListner->sendPacket(packet, len, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 		}
@@ -610,7 +643,12 @@ void CIndexed::SendValidResult( Kademlia::CUInt128 keyWordID, const SSearchTerm*
 			CKademlia::debugMsg("Passive: Removed %u old indexed entries", removed);
 		}
 		clean();
-	} catch(...){ASSERT(0);}
+	} 
+	catch(...)
+	{
+		CKademlia::debugLine("Exception in CIndexed::SendValidResult");
+		ASSERT(0);
+	}
 }
 
 SSearchTerm::SSearchTerm()

@@ -71,7 +71,11 @@ CUDPSocketListener::~CUDPSocketListener()
 			delete [] w->data;
 			delete w;
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in ~CUDPSocketListener");
+	}
 	m_sendQueue.clear();
 	m_critical.Unlock();
 }
@@ -154,7 +158,11 @@ DWORD CUDPSocketListener::listeningImpl(LPVOID lpParam)
 						if (sendto(m_hSocket, (char*)w->data, w->lenData, 0, (sockaddr*)w->addr, sizeof(*w->addr)) == SOCKET_ERROR){
 							CKademlia::logMsg("Failed to send UDP packet to %s port %ld. %s", inet_ntoa(w->addr->sin_addr), ntohs(w->addr->sin_port), GetErrorMessage(WSAGetLastError(), 1));
 						}
-					} catch (...) {}
+					} 
+					catch (...) 
+					{
+						CKademlia::debugLine("Exception in CUDPSocketListener::listeningImpl(1)");
+					}
 
 					delete w->addr;
 					delete [] w->data;
@@ -194,6 +202,8 @@ DWORD CUDPSocketListener::listeningImpl(LPVOID lpParam)
 						lenPacket = recvfrom(m_hSocket, (char*)buffer, lenBuf, 0, (sockaddr*)&senderAddress, &lenAddress);
 						if ((int)lenPacket > 1)
 						{
+							CKademlia::reportOverheadRecv(lenPacket);
+
 							// If we don't know the opcode, we could save some CPU cycles with ignoring that packet
 							if (buffer[0] == OP_KADEMLIAPACKEDPROT /*&& IsKnownKadOpcode(buffer[1])*/)
 							{
@@ -205,35 +215,58 @@ DWORD CUDPSocketListener::listeningImpl(LPVOID lpParam)
 								{
 									unpack[0] = OP_KADEMLIAHEADER;
 									unpack[1] = buffer[1];
-									CKademlia::reportOverheadRecv(lenPacket);
 									processPacket(unpack, unpackedsize+2, &senderAddress);
 								}
 								else{
-									TRACE("Error: Failed to uncompress Kademlia packet\n");
+									CKademlia::debugLine("Error: Failed to uncompress Kademlia packet");
 								}
 								delete[] unpack;
 							}
 							else if ( buffer[0] == OP_KADEMLIAHEADER )
 							{
-								CKademlia::reportOverheadRecv(lenPacket);
 								processPacket(buffer, lenPacket, &senderAddress);
 							}
 						}
 						delete[] buffer;
 					}
 				}
-			} catch (...) {}
+			} 
+			catch (...) 
+			{
+				CKademlia::debugLine("Exception in CUDPSocketListener::listeningImpl(2)");
+			}
 
 			// Is the thread supposed to finish
-			if (WaitForSingleObject(hStopEvent, 100) == WAIT_OBJECT_0)
-			{
+//			if (WaitForSingleObject(hStopEvent, 100) == WAIT_OBJECT_0)
+//			{
+//				break;
+//			}
+			DWORD dwEvent = MsgWaitForMultipleObjects(1, &hStopEvent, FALSE, 100, QS_SENDMESSAGE | QS_POSTMESSAGE | QS_TIMER);
+			if (dwEvent == WAIT_OBJECT_0)
 				break;
+			else if (dwEvent == -1){
+				ASSERT(0);
+				//break;
+			}
+			else if (dwEvent != WAIT_TIMEOUT)
+			{
+				MSG msg;
+				while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+				{
+					OnMessage(msg.message, msg.wParam, msg.lParam);
+				}
+
+				// TODO: If we need accurate time managment here, we have to update the 'dwTimeout' for the next
+				// MsgWaitForMultipleObjects call, according the consumed time.
 			}
 		}
 
 		closesocket(m_hSocket);
-
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CUDPSocketListener::listeningImpl(3)");
+	}
 	return 0;
 }
 
@@ -245,9 +278,13 @@ void CUDPSocketListener::tryConnResetFix(void)
 		int result = ioctlsocket(m_hSocket, SIO_UDP_CONNRESET, &bNewBehavior);
 		if (result == SOCKET_ERROR)
 		{
-			CKademlia::debugMsg("Cound not resolve WSAECONNRESET problem (ioctlsocket returned %ld).", result);
+			CKademlia::debugMsg("Cound not resolve WSAECONNRESET problem (ioctlsocket returned %ld) (CUDPSocketListener::tryConnResetFix).", result);
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CUDPSocketListener::tryConnResetFix");
+	}
 }
 
 void CUDPSocketListener::sendPacket(byte *data, uint32 lenData, const uint32 destinationHost, const uint16 destinationPort)
@@ -266,7 +303,7 @@ void CUDPSocketListener::sendPacket(byte *data, uint32 lenData, const uint32 des
 		{
 			if (result != Z_OK)
 			{
-				TRACE("Error: Failed to compress Kademlia packet\n");
+				CKademlia::debugLine("Error: Failed to compress Kademlia packet");
 			}
 			memcpy(output, data, lenData);
 		}
@@ -296,9 +333,17 @@ void CUDPSocketListener::sendPacket(byte *data, uint32 lenData, const uint32 des
 		try
 		{
 			m_sendQueue.push_back(w);
-		} catch (...) {}
+		} 
+		catch (...) 
+		{
+			CKademlia::debugLine("Exception in CUDPSocketListener::sendPacket(1)");
+		}
 		m_critical.Unlock();
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CUDPSocketListener::sendPacket(2)");
+	}
 }
 
 void CUDPSocketListener::sendPacket( byte *data, uint32 lenData, LPCSTR destinationHost, const uint16 destinationPort)

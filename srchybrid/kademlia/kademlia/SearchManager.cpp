@@ -39,6 +39,7 @@ there client on the eMule forum..
 #include "../utils/UInt128.h"
 #include "../utils/MD4.h"
 #include "../io/ByteIO.h"
+#include "../io/IOException.h"
 #include "../kademlia/prefs.h"
 
 #ifdef _DEBUG
@@ -72,7 +73,11 @@ void CSearchManager::stopSearch(uint32 searchID)
 			else
 				it++;
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::stopSearch");
+	}
 	m_critical.Unlock();
 }
 
@@ -97,7 +102,11 @@ bool CSearchManager::isNodeSearch(const CUInt128 &target)
 			else
 				it++;
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::isNodeSearch");
+	}
 	return false;
 //	m_critical.Unlock();
 }
@@ -111,7 +120,11 @@ void CSearchManager::stopAllSearches(void)
 		for (it = m_searches.begin(); it != m_searches.end(); it++)
 			delete it->second;
 		m_searches.clear();
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::stopAllSearches");
+	}
 	m_critical.Unlock();
 }
 
@@ -230,7 +243,17 @@ CSearch* CSearchManager::prepareFindKeywords(SEARCH_KEYWORD_CALLBACK callback, u
 
 		//s->go(); //-- this may block!
 
-	} catch (...) {
+	} 
+	catch ( CIOException *ioe )
+	{
+		CKademlia::debugMsg("Exception in CSearchManager::prepareFindKeywords (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+		delete s;
+		s = NULL;
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::prepareFindKeywords");
 		delete s;
 		s = NULL;
 	}
@@ -270,7 +293,17 @@ CSearch* CSearchManager::prepareFindKeywords(SEARCH_KEYWORD_CALLBACK callback, L
 
 		s->m_lenSearchTerms = 4096 - bio.getAvailable();
 		s->m_searchID = ++m_nextID;
-	} catch (...) {
+	} 
+	catch ( CIOException *ioe )
+	{
+		CKademlia::debugMsg("Exception in CSearchManager::prepareFindKeywords (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+		delete s;
+		s = NULL;
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::prepareFindKeywords");
 		delete s;
 		s = NULL;
 	}
@@ -309,7 +342,17 @@ CSearch* CSearchManager::prepareFindFile(SEARCH_ID_CALLBACK callback, const CUIn
 
 		//s->go(); //-- this may block!
 
-	} catch (...) {
+	} 
+	catch ( CIOException *ioe )
+	{
+		CKademlia::debugMsg("Exception in CSearchManager::prepareFindFile (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+		delete s;
+		s = NULL;
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::prepareFindFile");
 		delete s;
 		s = NULL;
 	}
@@ -338,7 +381,11 @@ void CSearchManager::findNode(const CUInt128 &id)
 		s->m_searchID = 0;
 		m_searches[s->m_target] = s;
 		s->go();
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::findNode");
+	}
 	return;
 }
 
@@ -361,7 +408,11 @@ void CSearchManager::findNodeComplete(const CUInt128 &id)
 		s->m_searchID = 0;
 		m_searches[s->m_target] = s;
 		s->go();
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::findNodeComplete");
+	}
 	return;
 }
 
@@ -372,7 +423,11 @@ bool CSearchManager::alreadySearchingFor(const CUInt128 &target)
 	try
 	{
 		retVal = (m_searches.count(target) > 0);
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::alreadySearchingFor");
+	}
 	m_critical.Unlock();
 	return retVal;
 }
@@ -467,11 +522,21 @@ void CSearchManager::jumpStart(void)
 				{
 					if (it->second->m_created + SEARCHNODE_LIFETIME < now)
 					{
+						CPrefs *prefs = CKademlia::getPrefs();
+						if(prefs)
+							prefs->setKeywordPublish(true);
+						else
+							CKademlia::debugLine("No preference object found CSearchManager::jumpStart");
 						delete it->second;
 						it = m_searches.erase(it);
 					}
 					else if ((it->second->m_created + SEARCHNODECOMP_LIFETIME < now) && (it->second->getCount() > SEARCHNODECOMP_TOTAL))
 					{
+						CPrefs *prefs = CKademlia::getPrefs();
+						if(prefs)
+							prefs->setKeywordPublish(true);
+						else
+							CKademlia::debugLine("No preference object found CSearchManager::jumpStart");
 						delete it->second;
 						it = m_searches.erase(it);
 					}
@@ -526,7 +591,11 @@ void CSearchManager::jumpStart(void)
 				}
 			}
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::jumpStart");
+	}
 	m_critical.Unlock();
 }
 
@@ -565,7 +634,11 @@ void CSearchManager::updateStats(void)
 					break;
 			}
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::updateStats");
+	}
 	m_critical.Unlock();
 	CPrefs *prefs = CKademlia::getPrefs();
 	if(prefs != NULL)
@@ -585,11 +658,18 @@ void CSearchManager::processPublishResult(const CUInt128 &target)
 		SearchMap::const_iterator it = m_searches.find(target);
 		if (it != m_searches.end())
 			s = it->second;
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::processPublishResults");
+	}
 	m_critical.Unlock();
 
 	if (s == NULL)
+	{
+//		CKademlia::debugLine("Search either never existed or receiving late results (CSearchManager::processPublishResults)");
 		return;
+	}
 	s->m_count++;
 }
 
@@ -603,11 +683,16 @@ void CSearchManager::processResponse(const CUInt128 &target, uint32 fromIP, uint
 		SearchMap::const_iterator it = m_searches.find(target);
 		if (it != m_searches.end())
 			s = it->second;
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::processResponse");
+	}
 	m_critical.Unlock();
 
 	if (s == NULL)
 	{
+//		CKademlia::debugLine("Search either never existed or receiving late results (CSearchManager::processResponse)");
 		ContactList::const_iterator it2;
 		for (it2 = results->begin(); it2 != results->end(); it2++)
 			delete (*it2);
@@ -627,11 +712,16 @@ void CSearchManager::processResult(const CUInt128 &target, uint32 fromIP, uint16
 		SearchMap::const_iterator it = m_searches.find(target);
 		if (it != m_searches.end())
 			s = it->second;
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearchManager::processResult");
+	}
 	m_critical.Unlock();
 
 	if (s == NULL)
 	{
+//		CKademlia::debugLine("Search either never existed or receiving late results (CSearchManager::processResult)");
 		TagList::const_iterator it;
 		for (it = info->begin(); it != info->end(); it++)
 			delete *it;

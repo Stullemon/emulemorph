@@ -40,15 +40,12 @@ there client on the eMule forum..
 namespace Kademlia {
 ////////////////////////////////////////
 
+#define SEARCHTOLERANCE				16777216
 #define K							10
 #define KBASE						4
-#define KK							4
+#define KK							5
 #define ALPHA_QUERY					3
 #define LOG_BASE_EXPONENT			5
-#define HOUR						3600
-#define TEN_MINS					600
-#define ONE_MIN						60
-#define ONE_SEC						1
 #define HELLO_TIMEOUT				20
 #define SEARCH_JUMPSTART			10
 #define SEARCH_LIFETIME				120

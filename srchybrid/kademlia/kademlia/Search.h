@@ -49,9 +49,9 @@ public:
 	uint32 getSearchID() {return m_searchID;}
 	uint32 getSearchTypes() {return m_type;}
 	void setSearchTypes( uint32 val ) {m_type = val;}
-	uint32 getCount() {return m_count;}
-	uint32 getKeywordCount() {return m_keywordcount;}
-	void setKeywordCount(uint32 val) {m_keywordcount = val;}
+	uint32 getCount() {if(bio2 == NULL)return m_count;else if(bio3 == NULL)return m_count/2;else return m_count/3;}
+	uint32 getCountSent() {return m_countSent;}
+	uint32 getLastSent() {return m_lastSent;}
 	CUInt128 m_keywordPublish; //Need to make this private...
 	byte packet1[1024*50];
 	byte packet2[1024*50];
@@ -88,9 +88,10 @@ private:
 	void sendFindValue(const CUInt128 &target, const CUInt128 &check, uint32 ip, uint16 port);
 
 	time_t		m_created;
+	time_t		m_lastSent;
 	uint32		m_type;
 	uint32		m_count; //Used for gui reasons.. May not be needed later..
-	uint32		m_keywordcount; //Used for gui reasons.. May not be needed later..
+	uint32		m_countSent; //Used for gui reasons.. May not be needed later..
 
 	SEARCH_ID_CALLBACK		m_callbackID;
 	SEARCH_KEYWORD_CALLBACK	m_callbackKeyword;

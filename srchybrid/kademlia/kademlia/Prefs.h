@@ -40,6 +40,8 @@ struct Status{
 	uint8	m_totalStoreSrc;
 	uint8	m_totalStoreKey;
 	uint32	m_kademliaUsers;
+	uint32	m_totalContacts;
+	bool	m_keywordPublish;
 };
 
 ////////////////////////////////////////
@@ -108,6 +110,9 @@ public:
 	uint32	getKademliaUsers(void)			{return m_kademliaUsers;}
 	void	setKademliaUsers(const uint32 val){m_kademliaUsers = val;}
 
+	bool	getKeywordPublish(void)				{return m_keywordPublish;}
+	void	setKeywordPublish(const bool val)	{m_keywordPublish = val;}
+
 	Status*	getStatus(bool closing = false);
 private:
 	CString	m_filename;
@@ -144,6 +149,7 @@ private:
 	uint8		m_totalStoreSrc;
 	uint8		m_totalStoreKey;
 	uint32		m_kademliaUsers;
+	bool		m_keywordPublish;
 
 	void init(LPCSTR filename);
 	void reset(void);

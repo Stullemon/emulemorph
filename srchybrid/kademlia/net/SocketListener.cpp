@@ -66,8 +66,8 @@ CSocketListener::CSocketListener()
 	m_type = 0;
 	m_hSocket = NULL;
 	m_bRunning = false;
-	//m_hThread = NULL;
 	m_pThread = NULL;
+	m_dwThreadID = 0;
 	m_hStopEvent = NULL;
 }
 
@@ -120,7 +120,10 @@ int CSocketListener::start(uint16 nSocketPort, int nSocketType)
 		CloseHandle(tp.hReturnEvent);
 
 		if (tp.nReturnValue == ERR_SUCCESS)
+		{
 			m_bRunning = true;
+			m_dwThreadID = m_pThread->m_nThreadID;
+		}
 		else
 			throw new CNetException(tp.nReturnValue);
 	}
@@ -147,6 +150,8 @@ void CSocketListener::stop(bool bAppShutdown)
 	if (!m_bRunning)
 		return;
 
+	m_dwThreadID = 0; // don't all other threads to post messages to the thread during thread termination
+
 	if (m_hStopEvent != NULL)
 		SetEvent(m_hStopEvent);
 
@@ -165,7 +170,7 @@ void CSocketListener::stop(bool bAppShutdown)
 					DWORD dwEvent = MsgWaitForMultipleObjects(iNumEvents, &m_pThread->m_hThread, FALSE, INFINITE, QS_ALLINPUT);
 					if (dwEvent == -1)
 					{
-						TRACE("%s: Error in MsgWaitForMultipleObjects: %08x\n", __FUNCTION__, GetLastError());
+						CKademlia::debugMsg("%s: Error in MsgWaitForMultipleObjects: %08x (CSocketListener::stop)", __FUNCTION__, GetLastError());
 						ASSERT(0);
 					}
 					else if (dwEvent == WAIT_OBJECT_0 + iNumEvents)
@@ -174,7 +179,7 @@ void CSocketListener::stop(bool bAppShutdown)
 						MSG* pMsg = AfxGetCurrentMessage();
 						while (::PeekMessage(pMsg, NULL, NULL, NULL, PM_NOREMOVE))
 						{
-							TRACE("%s: Message %08x arrived while waiting on thread shutdown\n", __FUNCTION__, pMsg->message);
+							CKademlia::debugMsg("%s: Message %08x arrived while waiting on thread shutdown (CSocketListener::stop)", __FUNCTION__, pMsg->message);
 							// pump message, but quit on WM_QUIT
 							if (!pThread->PumpMessage()) {
 								AfxPostQuitMessage(0);
@@ -253,6 +258,15 @@ uint32 CSocketListener::nameToIP(LPCSTR host)
 		}
 		else
 			retVal = inet_addr(host);
-	} catch (...) {}
+	} catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSocketListener::nameToIP");
+	}
 	return ntohl(retVal);
+}
+
+DWORD CSocketListener::getThreadID()
+{
+	// this function is allowed to be called from any thread -> do not use 'm_pThread->m_nThreadID'
+	return m_dwThreadID;
 }

@@ -13,6 +13,7 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 #pragma warning(disable:4060) // switch statement contains no 'case' or 'default' labels
+#pragma warning(disable:4706) // assignment within conditional expression
 
 SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.2.3b 2003-09-05 09:45:55 GMT")
 

@@ -58,6 +58,7 @@ there client on the eMule forum..
 #include "../kademlia/Defines.h"
 #include "../kademlia/Error.h"
 #include "../io/FileIO.h"
+#include "../io/IOException.h"
 #include "../net/KademliaUDPListener.h"
 #include "../../otherfunctions.h"
 #include "../../Opcodes.h"
@@ -171,13 +172,19 @@ void CRoutingZone::readFile(void)
 			}
 			file.Close();
 			CKademlia::logMsg("Read %ld contact%s from file.", numContacts, ((numContacts == 1) ? "" : "s"));
-//			dumpContents();
 		}
-		else
-			CKademlia::reportError(ERR_NO_CONTACTS, "No contacts found, please bootstrap, or download a contact.dat file.");
 		if (numContacts == 0)
-			CKademlia::reportError(ERR_NO_CONTACTS, "No contacts found, please bootstrap, or download a contact.dat file.");
-	} catch (...) {}
+			CKademlia::reportError(ERR_NO_CONTACTS, "No contacts found, please bootstrap, or download a nodes.dat file.");
+	} 
+	catch ( CIOException *ioe )
+	{
+		CKademlia::debugMsg("Exception in CRoutingZone::readFile (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::readFile");
+	}
 	Unlock();
 }
 
@@ -213,7 +220,16 @@ void CRoutingZone::writeFile(void)
 			file.Close();
 		}
 		CKademlia::debugMsg("Wrote %ld contact%s to file.", count, ((count == 1) ? "" : "s"));
-	} catch (...) {}
+	} 
+	catch ( CIOException *ioe )
+	{
+		CKademlia::debugMsg("Exception in CRoutingZone::writeFile (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::writeFile");
+	}
 	Unlock();
 }
 
@@ -260,7 +276,11 @@ void CRoutingZone::consolidate(void)
 			if (m_superZone != NULL)
 				m_superZone->consolidate();
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::consolidate");
+	}
 	Unlock();
 }
 
@@ -317,7 +337,11 @@ bool CRoutingZone::add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport,
 					delete c;
 			}
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::add");
+	}
 	Unlock();
 	return retVal;
 }
@@ -334,7 +358,11 @@ void CRoutingZone::setAlive(uint32 ip, uint16 port)
 			m_subZones[0]->setAlive(ip, port);
 			m_subZones[1]->setAlive(ip, port);
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::setAlive");
+	}
 	Unlock();
 }
 
@@ -379,7 +407,11 @@ void CRoutingZone::getAllEntries(ContactList *result, bool emptyFirst)
 		try
 		{
 			m_bin->getEntries(result, emptyFirst);
-		} catch (...) {}
+		} 
+		catch (...) 
+		{
+			CKademlia::debugLine("Exception in CRoutingZone::getAllEntries");
+		}
 		Unlock();
 	}
 	else
@@ -397,7 +429,11 @@ void CRoutingZone::topDepth(int depth, ContactList *result, bool emptyFirst)
 		try
 		{
 			m_bin->getEntries(result, emptyFirst);
-		} catch (...) {}
+		} 
+		catch (...) 
+		{
+			CKademlia::debugLine("Exception in CRoutingZone::topDepth");
+		}
 		Unlock();
 	}
 	else if (depth <= 0)
@@ -417,7 +453,11 @@ void CRoutingZone::randomBin(ContactList *result, bool emptyFirst)
 		try
 		{
 			m_bin->getEntries(result, emptyFirst);
-		} catch (...) {}
+		} 
+		catch (...) 
+		{
+			CKademlia::debugLine("Exception in CRoutingZone::randomBin");
+		}
 		Unlock();
 	}
 	else
@@ -488,7 +528,11 @@ void CRoutingZone::split(void)
 		m_bin->m_dontDeleteContacts = true;
 		delete m_bin;
 		m_bin = NULL;
-	} catch (...) {}
+	} 
+	catch (...)
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::split");
+	}
 	Unlock();
 }
 
@@ -535,7 +579,11 @@ void CRoutingZone::merge(void)
 			if (m_superZone != NULL)
 				m_superZone->merge();
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::merge");
+	}
 	Unlock();
 }
 
@@ -558,7 +606,7 @@ void CRoutingZone::startTimer(void)
 {
 	time_t now = time(NULL);
 	// Start filling the tree, closest bins first.
-	m_nextBigTimer = now + (ONE_MIN*m_zoneIndex.get32BitChunk(3)) + ONE_SEC*10;
+	m_nextBigTimer = now + (MIN2S(1)*m_zoneIndex.get32BitChunk(3)) + SEC(10);
 	CTimer::addEvent(this);
 }
 
@@ -582,7 +630,8 @@ bool CRoutingZone::onBigTimer(void)
 }
 
 //This estimate does not work very well.. Once the network is working well with many
-//users, we can then start to test methods simular to this..
+//users, we can then start to test methods simular to this.. This estimate is based
+//on Overnets method of estimating users.
 uint32 CRoutingZone::estimateCount(void)
 {
 	if( m_level < KBASE )
@@ -592,7 +641,7 @@ uint32 CRoutingZone::estimateCount(void)
 	uint32 sample = curZone->getNumContacts();
 	float modifier = (float)sample/20;
 //	uint32 final = userCountBase * modifier;
-//	TRACE("CBase(%u) | SBase(%u) | Sample(%u) | modifier(%f) | Final(%u)\n", userCountBase, sampleBase, sample, modifier, final);
+//	CKademlia::debugLine("CBase(%u) | SBase(%u) | Sample(%u) | modifier(%f) | Final(%u)\n", userCountBase, sampleBase, sample, modifier, final);
 	return userCountBase * modifier;
 }
 
@@ -630,7 +679,7 @@ void CRoutingZone::onSmallTimer(void)
 			{
 				if( c->getType() > 1)
 					//Don't lower this timer. This timer makes sure you don't delete a contact that is still being used!
-					c->m_expires = now + (ONE_MIN*3);
+					c->m_expires = now + MIN2S(3);
 				else
 					c->m_expires = now;
 			}
@@ -649,7 +698,11 @@ void CRoutingZone::onSmallTimer(void)
 				c = NULL;
 			}
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::onSmallTimer");
+	}
 	Unlock();
 	if(c != NULL)
 	{
@@ -701,7 +754,11 @@ uint32 CRoutingZone::getBootstrapContacts(ContactList *results, uint32 maxRequir
 					break;
 			}
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CRoutingZone::getBoostStrapContacts");
+	}
 	Unlock();
 	return retVal;
 }

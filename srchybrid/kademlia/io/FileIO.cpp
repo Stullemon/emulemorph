@@ -30,6 +30,7 @@ there client on the eMule forum..
 
 #include "stdafx.h"
 #include "FileIO.h"
+#include "IOException.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -44,7 +45,9 @@ using namespace Kademlia;
 
 void CFileIO::readArray(LPVOID lpResult, const uint32 byteCount)
 {
-	Read(lpResult, byteCount);
+	uint32 test = Read(lpResult, byteCount);
+	if( test != byteCount )
+		throw new CIOException(ERR_END_OF_FILE);
 }
 
 void CFileIO::writeArray(LPCVOID lpVal, const uint32 byteCount)

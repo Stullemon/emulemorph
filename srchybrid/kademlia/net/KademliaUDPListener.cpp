@@ -36,6 +36,7 @@ there client on the eMule forum..
 #include "../routing/Contact.h"
 #include "../routing/RoutingZone.h"
 #include "../io/ByteIO.h"
+#include "../io/IOException.h"
 #include "../utils/MiscUtils.h"
 #include "../../knownfile.h"
 #include "../../knownfilelist.h"
@@ -43,6 +44,7 @@ there client on the eMule forum..
 #include "../kademlia/Indexed.h"
 #include "../kademlia/tag.h"
 #include "../../OpCodes.h"
+#include "../kademlia/Defines.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -126,6 +128,20 @@ void CKademliaUDPListener::publishPacket(const uint32 ip, const uint16 port, con
 	sendPacket(packet, len,  ip, port);
 }
 
+LRESULT CKademliaUDPListener::OnMessage(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	if (message == WM_KADEMLIA_FIREWALLED_ACK)
+	{
+		KADEMLIAFIREWALLEDACK* fwack = (KADEMLIAFIREWALLEDACK*)lParam;
+		sendNullPacket(KADEMLIA_FIREWALLED_ACK, fwack->ip, fwack->port);
+		delete fwack;
+		return 1;
+	}
+
+	CKademlia::debugMsg("*** %s; unknown message=0x%04x  wParam=%08x  lParam=%08x\n", __FUNCTION__, message, wParam, lParam);
+	return 0;
+}
+
 void CKademliaUDPListener::processPacket( byte *data, uint32 lenData, const sockaddr_in *senderAddress)
 {
 	try
@@ -201,7 +217,11 @@ void CKademliaUDPListener::processPacket( byte *data, uint32 lenData, const sock
 				CKademlia::debugMsg("Unhandled UDP OpCode 0x%02X (%u)", opcode, ntohl(senderAddress->sin_addr.s_addr));
 				CKademlia::debugMsg("*************************");
 		}
-	} catch (...) {TRACE("Exception is Kad Process Packet\n");}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processPacket");
+	}
 }
 
 void CKademliaUDPListener::addContact(const byte *data, const uint32 lenData, const uint32 ip, const uint16 port, uint16 tport)
@@ -239,7 +259,16 @@ void CKademliaUDPListener::addContact(const byte *data, const uint32 lenData, co
 				routingZone->add(id, ip, port, tport, type);
 			}
 		}
-	} catch (...) {TRACE("Exception in Kademlia Add Contact\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::addContact (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::addContact");
+	}
 }
 
 void CKademliaUDPListener::addContacts(const byte *data, const uint32 lenData, const uint16 numContacts)
@@ -262,7 +291,16 @@ void CKademliaUDPListener::addContacts(const byte *data, const uint32 lenData, c
 				routingZone->add(id, ip, port, tport, type);
 			}
 		}
-	} catch (...) {TRACE("Exception in Kad Add Contacts\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::addContacts (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::addContacts");
+	}
 }
 
 //KADEMLIA_BOOTSTRAP_REQ
@@ -324,7 +362,16 @@ void CKademliaUDPListener::processBootstrapRequest (const byte *packetData, cons
 
 		// Finished with memory
 		delete [] response;
-	} catch (...) {TRACE("Exception in Kad Bootstrap Requests\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processBootstrapRequest (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processBootstrapRequest");
+	}
 }
 
 //KADEMLIA_BOOTSTRAP_RES
@@ -355,7 +402,16 @@ void CKademliaUDPListener::processBootstrapResponse (const byte *packetData, con
 		// Send sender to alive.
 		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 
-	} catch (...) {TRACE("Exception in Kad Bootstrap Response\n");}
+	}
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processBootstrapResponse (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processBootstrapResponse");
+	}
 }
 
 //KADEMLIA_HELLO_REQ
@@ -364,7 +420,7 @@ void CKademliaUDPListener::processHelloRequest (const byte *packetData, const ui
 	try
 	{
 		if (lenPacket != 25){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processHelloRequest");
 			return;
 		}
 
@@ -383,7 +439,16 @@ void CKademliaUDPListener::processHelloRequest (const byte *packetData, const ui
 			// Check if firewalled
 			firewalledCheck(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 		}	
-	} catch (...) {TRACE("Exception in Kad Hello Requests\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processHelloRequest (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processHelloRequest");
+	}
 }
 
 //KADEMLIA_HELLO_RES
@@ -392,7 +457,7 @@ void CKademliaUDPListener::processHelloResponse (const byte *packetData, const u
 	try
 	{
 		if (lenPacket != 25){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processHelloResponse");
 			return;
 		}
 	
@@ -406,7 +471,16 @@ void CKademliaUDPListener::processHelloResponse (const byte *packetData, const u
 		// Set contact to alive.
 		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 	
-	} catch (...) {TRACE("Exception in Kad Hello Response\n");}
+	}
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processHelloResponset (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processHelloResponse");
+	}
 }
 //KADEMLIA_REQ
 void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
@@ -414,8 +488,10 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const
 	try
 	{
 		// Verify packet is expected size
-		if (lenPacket != 33){
-		return;
+		if (lenPacket != 33)
+		{
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processKademliaRequest");
+			return;
 		}
 
 		//Used Pointers
@@ -424,6 +500,7 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const
 		CRoutingZone *routingZone = CKademlia::getRoutingZone();
 		ASSERT(routingZone != NULL); 
 
+		//RecheckIP and firewall status
 		if(prefs->getRecheckIP())
 		{
 			firewalledCheck(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
@@ -433,18 +510,31 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const
 		// Get target and type
 		CByteIO bio(packetData, lenPacket);
 		byte type = bio.readByte();
+//		bool flag1 = (type >> 6); //Reserved
+//		bool flag2 = (type >> 7); //Reserved
+//		bool flag3 = (type >> 8); //Reserved
+
+		type = type & 0x1F;
+		if( type == 0 )
+		{
+			CKademlia::debugLine("Recieved wrong type packet in CKademliaUDPListener::processKademliaRequest");
+			return;
+		}
+
+		//This is the target node trying to be found.
 		CUInt128 target;
 		bio.readUInt128(&target);
+		CUInt128 distance(prefs->getClientID());
+		distance.xor(target);
+
+		//This makes sure we are not mistaken identify. Some client may have fresh installed and have a new hash.
 		CUInt128 check;
 		bio.readUInt128(&check);
-
 		if( prefs->getClientID().compareTo(check))
 			return;
 
 		// Get required number closest to target
 		ContactMap results;
-		CUInt128 distance(prefs->getClientID());
-		distance.xor(target);
 		routingZone->getClosestTo(0, distance, (int)type, &results);
 		uint16 count = (uint16)results.size();
 
@@ -470,10 +560,20 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const
 			bio2.writeUInt16(c->getTCPPort());
 			bio2.writeByte(c->getType());
 		}
+
 //		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
 		sendPacket(response, lenResponse, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 
-	} catch (...) {TRACE("Exception in Kad Request\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processKademliaRequest (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processKademliaRequest");
+	}
 }
 
 //KADEMLIA_RES
@@ -483,7 +583,7 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, cons
 	{
 		// Verify packet is expected size
 		if (lenPacket < 17){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processKademliaResponse");
 			return;
 		}
 
@@ -507,7 +607,7 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, cons
 
 		// Verify packet is expected size
 		if (lenPacket != 16+1 + (16+4+2+2+1)*numContacts){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processKademliaResponse");
 			return;
 		}
 
@@ -532,7 +632,16 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, cons
 		CSearchManager::processResponse(target, 
 										ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port), 
 										results);
-	} catch (...) {TRACE("Exception in Kademlia Response\n");}
+	}
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processKademliaResponse (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processKademliaResponse");
+	}
 }
 
 void Free(SSearchTerm* pSearchTerms)
@@ -549,7 +658,7 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 	// the max. depth has to match our own limit for creating the search expression 
 	// (see also 'ParsedSearchExpression' and 'GetSearchPacket')
 	if (iLevel >= 16){
-		TRACE("*** Search expression tree exceeds depth limit!\n");
+		CKademlia::debugLine("*** Search expression tree exceeds depth limit!");
 		return NULL;
 	}
 	iLevel++;
@@ -560,7 +669,7 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 		if (boolop == 0x00){ // AND
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::AND;
-			TRACE(" AND");
+			CKademlia::debugLine(" AND");
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -577,7 +686,7 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 		else if (boolop == 0x01){ // OR
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::OR;
-			TRACE(" OR");
+			CKademlia::debugLine(" OR");
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -594,7 +703,7 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 		else if (boolop == 0x02){ // NAND
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::NAND;
-			TRACE(" NAND");
+			CKademlia::debugLine(" NAND");
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -609,7 +718,7 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 			return pSearchTerm;
 		}
 		else{
-			TRACE("*** Unknown boolean search operator 0x%02x\n", boolop);
+			CKademlia::debugMsg("*** Unknown boolean search operator 0x%02x (CreateSearchExpressionTree)", boolop);
 			return NULL;
 		}
 	}
@@ -620,7 +729,7 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 		pSearchTerm->str = new CString;
 		bio.readArray(pSearchTerm->str->GetBuffer(len), len);
 		pSearchTerm->str->ReleaseBuffer(len);
-		TRACE(" \"%s\"", *(pSearchTerm->str));
+		CKademlia::debugMsg(" \"%s\"", *(pSearchTerm->str));
 		return pSearchTerm;
 	}
 	else if (op == 0x02){ // Meta tag
@@ -641,9 +750,9 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 
 		pSearchTerm->tag = new Kademlia::CTagStr(strTagName, strValue);
 		if (lenTagName == 1)
-			TRACE(" Tag%02x=\"%s\"", strTagName[0], strValue);
+			CKademlia::debugMsg(" Tag%02x=\"%s\"", strTagName[0], strValue);
 		else
-			TRACE(" Tag\"%s\"=\"%s\"", strTagName, strValue);
+			CKademlia::debugMsg(" Tag\"%s\"=\"%s\"", strTagName, strValue);
 		return pSearchTerm;
 	}
 	else if (op == 0x03){ // Min/Max
@@ -664,13 +773,13 @@ SSearchTerm* CreateSearchExpressionTree(CByteIO& bio, int iLevel)
 
 		pSearchTerm->tag = new Kademlia::CTagUInt32(strTagName, uValue);
 		if (lenTagName == 1)
-			TRACE(" %s(Tag%02x)=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName[0], uValue);
+			CKademlia::debugMsg(" %s(Tag%02x)=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName[0], uValue);
 		else
-			TRACE(" %s(Tag\"%s\")=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName, uValue);
+			CKademlia::debugMsg(" %s(Tag\"%s\")=%u", pSearchTerm->type == SSearchTerm::Min ? "Min" : "Max", strTagName, uValue);
 		return pSearchTerm;
 	}
 	else{
-		TRACE("*** Unknown search op=0x%02x\n", op);
+		CKademlia::debugMsg("*** Unknown search op=0x%02x (CreateSearchExpressionTree)", op);
 		return NULL;
 	}
 }
@@ -681,7 +790,7 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, const u
 	try
 	{
 		if (lenPacket < 17){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processSearchRequest");
 			return;
 		}
 
@@ -716,7 +825,16 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, const u
 			indexed->SendValidResult(target, pSearchTerms, senderAddress, false ); 
 			Free(pSearchTerms);
 		}
-	} catch (...) {TRACE("Exception in Kad Search Request\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processSearchRequest (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processSearchRequest");
+	}
 }
 
 //KADEMLIA_SEARCH_RES
@@ -726,7 +844,7 @@ void CKademliaUDPListener::processSearchResponse (const byte *packetData, const 
 	{
 		// Verify packet is expected size
 		if (lenPacket < 37){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processSearchResponse");
 			return;
 		}
 
@@ -758,7 +876,16 @@ void CKademliaUDPListener::processSearchResponse (const byte *packetData, const 
 											tags);
 			count--;
 		}
-	} catch (...) {TRACE("Exception in Kad Search Response\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processSearchResponse (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processSearchResponse");
+	}
 }
 
 //KADEMLIA_PUBLISH_REQ
@@ -769,7 +896,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 	try
 	{
 		if (lenPacket < 37){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processPublishRequest");
 			return;
 		}
 
@@ -787,11 +914,14 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 		prefs->getClientID(&distance);
 		distance.xor(file);
 
-		CString dist;
-		distance.toBinaryString(&dist);
-		if(dist.Left(5) != "00000")
+		if(distance.get32BitChunk(0) > SEARCHTOLERANCE)
+//		{
+//			CKademlia::debugLine("Dropped index");
 			return;
-		// How many results.. Not supported yet..
+//		}
+//		else
+//			CKademlia::debugLine("Insert index");
+
 		uint16 count = bio.readUInt16();
 		bool flag = false;
 		while( count > 0 )
@@ -844,7 +974,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 			{
 				delete entry;
 				entry = NULL;
-				TRACE("Invalid entry\n");
+				CKademlia::debugLine("Invalid entry CKademliaUDPListener::processPublishRequest");
 			}
 			else
 			{
@@ -854,7 +984,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 				}
 				else
 				{
-					TRACE("INDEX FULL Source %u Keyword %u\n", indexed->m_totalIndexSource, indexed->m_totalIndexKeyword);
+					CKademlia::debugMsg("INDEX FULL Source %u Keyword %u (CKademliaUDPListener::processPublishRequest)", indexed->m_totalIndexSource, indexed->m_totalIndexKeyword);
 					delete entry;
 					entry = NULL;
 				}
@@ -871,7 +1001,16 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 			bio2.writeUInt128(file);
 			sendPacket(response, sizeof(response), ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 		}
-	} catch (...) {TRACE("Exception in Kad Publish Request\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processPublishRequest (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processPublishRequest");
+	}
 }
 
 //KADEMLIA_PUBLISH_ACK
@@ -880,7 +1019,7 @@ void CKademliaUDPListener::processPublishResponse (const byte *packetData, const
 	try
 	{
 		if (lenPacket != 16){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processPublishResponse");
 			return;
 		}
 
@@ -895,7 +1034,16 @@ void CKademliaUDPListener::processPublishResponse (const byte *packetData, const
 		CUInt128 file;
 		bio.readUInt128(&file);
 		CSearchManager::processPublishResult(file);
-	} catch (...) {TRACE("Exception in Kademlia Publish Response\n");}
+	}
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processPublishResponse (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processPublishResponse");
+	}
 }
 //KADEMLIA_FIREWALLED_REQ
 void CKademliaUDPListener::processFirewalledRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
@@ -903,7 +1051,7 @@ void CKademliaUDPListener::processFirewalledRequest (const byte *packetData, con
 	try
 	{
 		if (lenPacket != 2){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processFirewalledRequest");
 			return;
 		}
 
@@ -926,7 +1074,16 @@ void CKademliaUDPListener::processFirewalledRequest (const byte *packetData, con
 		bio2.writeUInt32(ip);
 //		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_FIREWALLED_RES (%u)", ip);
 		sendPacket(response, sizeof(response), ip, udpport);
-	} catch (...) {TRACE("Exception in Kademlia Firewall Request\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processFirewalledRequest (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processFirewalledRequest");
+	}
 }
 
 //KADEMLIA_FIREWALLED_RES
@@ -935,7 +1092,7 @@ void CKademliaUDPListener::processFirewalledResponse (const byte *packetData, co
 	try
 	{
 		if (lenPacket != 4){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processFirewalledResponse");
 			return;
 		}
 
@@ -953,7 +1110,16 @@ void CKademliaUDPListener::processFirewalledResponse (const byte *packetData, co
 		prefs->setIPAddress(ip);
 		CString ipStr;
 		CMiscUtils::ipAddressToString(ip, &ipStr);
-	} catch (...) {TRACE("Exception in Kad Firewall Response\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processFirewalledResponse (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processFirewalledResponse");
+	}
 }
 
 //KADEMLIA_FIREWALLED_ACK
@@ -962,7 +1128,7 @@ void CKademliaUDPListener::processFirewalledResponse2 (const byte *packetData, c
 	try
 	{
 		if (lenPacket != 0){
-			ASSERT(0);
+			CKademlia::debugLine("Recieved wrong size packet in CKademliaUDPListener::processFirewalledResponse2");
 			return;
 		}
 
@@ -976,5 +1142,14 @@ void CKademliaUDPListener::processFirewalledResponse2 (const byte *packetData, c
 		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 
 		prefs->incFirewalled();
-	} catch (...) {TRACE("Exception in Kademlia Firewall Response2\n");}
+	} 
+	catch (CIOException *ioe)
+	{
+		CKademlia::debugMsg("Exception in CKademliaUDPListener::processFirewalledResponse2 (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CKademliaUDPListener::processFirewalledResponse2");
+	}
 }

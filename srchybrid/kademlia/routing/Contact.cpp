@@ -207,9 +207,9 @@ void CContact::setType(const byte type)
 	if(type > 1 )
 	{
 		if( m_expires == 0 ) // Just in case..
-			m_expires = time(NULL) + ONE_MIN*3;
+			m_expires = time(NULL) + MIN2S(3);
 		else if( m_type == 1 )
-			m_expires = time(NULL) + ONE_MIN*3;
+			m_expires = time(NULL) + MIN2S(3);
 		m_type = 2; //Just in case in case again..
 		Kademlia::CKademlia::reportContactRef(this);
 		return;
@@ -217,9 +217,9 @@ void CContact::setType(const byte type)
 	m_lastTypeSet = time(NULL);
 	m_type = type;
 	if( m_type == 0 )
-		m_expires = time(NULL) + HOUR*2;
+		m_expires = time(NULL) + HR2S(2);
 	else 
-		m_expires = time(NULL) + HOUR*1;
+		m_expires = time(NULL) + HR2S(1);
 	Kademlia::CKademlia::reportContactRef(this);
 }
 

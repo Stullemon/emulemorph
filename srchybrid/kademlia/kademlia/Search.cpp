@@ -34,6 +34,7 @@ there client on the eMule forum..
 #include "../../OpCodes.h"
 #include "Defines.h"
 #include "Prefs.h"
+#include "../io/IOException.h"
 #include "../routing/RoutingZone.h"
 #include "../routing/Contact.h"
 #include "../net/KademliaUDPListener.h"
@@ -59,11 +60,12 @@ using namespace Kademlia;
 CSearch::CSearch()
 {
 	m_created = time(NULL);
+	m_lastSent = time(NULL);
 	m_searchTerms = NULL;
 	m_lenSearchTerms = 0;
 	m_type = (uint32)-1;
 	m_count = 0;
-	m_keywordcount = 0;
+	m_countSent = 0;
 	m_callbackID = NULL;
 	m_callbackKeyword = NULL;
 	m_searchID = (uint32)-1;
@@ -136,8 +138,8 @@ void CSearch::jumpStart(void)
 {
 	if (m_possible.empty())
 	{
-		if ( m_created + SEARCHNODE_LIFETIME - time(NULL) > (15*ONE_SEC) )
-			m_created = time(NULL) - SEARCHNODE_LIFETIME - (15*ONE_SEC);
+		if ( m_created + SEARCHNODE_LIFETIME - time(NULL) > SEC(15) )
+			m_created = time(NULL) - SEARCHNODE_LIFETIME - SEC(15);
 		return;
 	}
 
@@ -157,6 +159,9 @@ void CSearch::jumpStart(void)
 	}
 
 	if (m_possible.empty())
+		return;
+
+	if (time(NULL)-m_lastSent < SEC(10))
 		return;
 
 	// Move to tried
@@ -268,9 +273,6 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 //					break;
 				}
 
-				CString dist;
-				fromDistance.toBinaryString(&dist);
-
 				// We don't want anything from these people, so just increment the counter.
 				if( m_type == NODECOMPLETE )
 				{
@@ -278,7 +280,8 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 					CKademlia::reportSearchRef(this);
 				}
 				// Ask 'from' for the file if closest
-				else if (!returnedCloser && dist.Left(5) == "00000"){
+				else if (!returnedCloser && fromDistance.get32BitChunk(0) < SEARCHTOLERANCE)
+				{
 					switch(m_type){
 						case FILE:
 						case KEYWORD:
@@ -348,7 +351,11 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 				}
 			}
 		}
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearch::processResponse");
+	}
 	delete results;
 }
 
@@ -454,7 +461,11 @@ void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16
 		else if (!tag->m_name.CompareNoCase(TAG_MEDIA_CODEC))
 			codec			= tag->GetStr();
 		else if (!tag->m_name.CompareNoCase(TAG_AVAILABILITY))
+		{
 			availability	= tag->GetInt();
+			if( availability > 65500 )
+				availability = 0;
+		}
 		delete tag;
 	}
 	delete info;
@@ -552,14 +563,29 @@ void CSearch::sendFindValue(const CUInt128 &target, const CUInt128 &check, uint3
 			case STOREKEYWORD:
 				bio.writeByte(KADEMLIA_STORE);
 				break;
+			default:
+				CKademlia::debugLine("Invalid search type. (CSearch::sendFindValue)");
+				return;
 		}
 		bio.writeUInt128(target);
 		bio.writeUInt128(check);
 //		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_REQUEST(%u)", ip);
 		CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
 		ASSERT(udpListner != NULL); 
+		m_countSent++;
+		m_lastSent = time(NULL);
+		Kademlia::CKademlia::reportSearchRef(this);
 		udpListner->sendPacket(packet, 35, ip, port);
-	} catch (...) {}
+	} 
+	catch ( CIOException *ioe )
+	{
+		CKademlia::debugMsg("Exception in CSearch::sendFindValue (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearch::sendFindValue");
+	}
 }
 
 void CSearch::addFileID(const CUInt128& id)
@@ -569,137 +595,169 @@ void CSearch::addFileID(const CUInt128& id)
 
 void CSearch::PreparePacketForTags( CByteIO *bio, CKnownFile *file)
 {
-	if( file && bio )
+	try
 	{
-		TagList taglist;
-		// Name, Size
-		taglist.push_back(new CTagStr(TAG_NAME, file->GetFileName()));
-		taglist.push_back(new CTagUInt(TAG_SIZE, file->GetFileSize()));
-		taglist.push_back(new CTagUInt(TAG_AVAILABILITY, (uint32)file->m_nCompleteSourcesCount));
-		// eD2K file type (Audio, Video, ...)
-		CString strED2KFileType(GetED2KFileTypeSearchTerm(GetED2KFileTypeID(file->GetFileName())));
-		if (!strED2KFileType.IsEmpty())
-			taglist.push_back(new CTagStr(TAG_TYPE, strED2KFileType));
-		// file format (filename extension)
-		int iExt = file->GetFileName().ReverseFind(_T('.'));
-		if (iExt != -1)
+		if( file && bio )
 		{
-			CString strExt(file->GetFileName().Mid(iExt));
-			if (!strExt.IsEmpty())
+			TagList taglist;
+			
+			// Name, Size
+			taglist.push_back(new CTagStr(TAG_NAME, file->GetFileName()));
+			taglist.push_back(new CTagUInt(TAG_SIZE, file->GetFileSize()));
+			taglist.push_back(new CTagUInt(TAG_AVAILABILITY, (uint32)file->m_nCompleteSourcesCount));
+			
+			// eD2K file type (Audio, Video, ...)
+			CString strED2KFileType(GetED2KFileTypeSearchTerm(GetED2KFileTypeID(file->GetFileName())));
+			if (!strED2KFileType.IsEmpty())
+				taglist.push_back(new CTagStr(TAG_TYPE, strED2KFileType));
+			
+			// file format (filename extension)
+			int iExt = file->GetFileName().ReverseFind(_T('.'));
+			if (iExt != -1)
 			{
-				strExt = strExt.Mid(1);
+				CString strExt(file->GetFileName().Mid(iExt));
 				if (!strExt.IsEmpty())
-					taglist.push_back(new CTagStr(TAG_FORMAT, strExt));
+				{
+					strExt = strExt.Mid(1);
+					if (!strExt.IsEmpty())
+						taglist.push_back(new CTagStr(TAG_FORMAT, strExt));
+				}
 			}
-		}
-		// additional meta data (Artist, Album, Codec, Length, ...)
-		static const struct{
-			uint8	nName;
-			uint8	nType;
-		} _aMetaTags[] = 
-		{
-			{ FT_MEDIA_ARTIST,  2 },
-			{ FT_MEDIA_ALBUM,   2 },
-			{ FT_MEDIA_TITLE,   2 },
-			{ FT_MEDIA_LENGTH,  3 },
-			{ FT_MEDIA_BITRATE, 3 },
-			{ FT_MEDIA_CODEC,   2 }
-		};
-		for (int i = 0; i < ARRSIZE(_aMetaTags); i++)
-		{
-			const ::CTag* pTag = file->GetTag(_aMetaTags[i].nName, _aMetaTags[i].nType);
-			if (pTag)
+
+			// additional meta data (Artist, Album, Codec, Length, ...)
+			// only send verified meta data to nodes
+			if (file->GetMetaDataVer() > 0)
 			{
-				// skip string tags with empty string values
-				if (pTag->tag.type == 2 && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
-					continue;
-				// skip integer tags with '0' values
-				if (pTag->tag.type == 3 && pTag->tag.intvalue == 0)
-					continue;
-				char szKadTagName[2];
-				szKadTagName[0] = pTag->tag.specialtag;
-				szKadTagName[1] = '\0';
-				if (pTag->tag.type == 2)
-					taglist.push_back(new CTagStr(szKadTagName, pTag->tag.stringvalue));
-				else
-					taglist.push_back(new CTagUInt(szKadTagName, pTag->tag.intvalue));
+				static const struct{
+					uint8	nName;
+					uint8	nType;
+				} _aMetaTags[] = 
+				{
+					{ FT_MEDIA_ARTIST,  2 },
+					{ FT_MEDIA_ALBUM,   2 },
+					{ FT_MEDIA_TITLE,   2 },
+					{ FT_MEDIA_LENGTH,  3 },
+					{ FT_MEDIA_BITRATE, 3 },
+					{ FT_MEDIA_CODEC,   2 }
+				};
+				for (int i = 0; i < ARRSIZE(_aMetaTags); i++)
+				{
+					const ::CTag* pTag = file->GetTag(_aMetaTags[i].nName, _aMetaTags[i].nType);
+					if (pTag)
+					{
+						// skip string tags with empty string values
+						if (pTag->tag.type == 2 && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
+							continue;
+						// skip integer tags with '0' values
+						if (pTag->tag.type == 3 && pTag->tag.intvalue == 0)
+							continue;
+						char szKadTagName[2];
+						szKadTagName[0] = pTag->tag.specialtag;
+						szKadTagName[1] = '\0';
+						if (pTag->tag.type == 2)
+							taglist.push_back(new CTagStr(szKadTagName, pTag->tag.stringvalue));
+						else
+							taglist.push_back(new CTagUInt(szKadTagName, pTag->tag.intvalue));
+					}
+				}
 			}
+			bio->writeTagList(taglist);
+			TagList::const_iterator it;
+			for (it = taglist.begin(); it != taglist.end(); it++)
+				delete *it;
 		}
-		bio->writeTagList(taglist);
-		TagList::const_iterator it;
-		for (it = taglist.begin(); it != taglist.end(); it++)
-			delete *it;
+		else
+		{
+			//If we get here.. Bad things happen.. Will fix this later if it is a real issue.
+			ASSERT(0);
+		}
 	}
-	else
+	catch ( CIOException *ioe )
 	{
-		//If we get here.. Bad things happen.. Will fix this later if it is a real issue.
-		ASSERT(0);
+		CKademlia::debugMsg("Exception in CSearch::PreparePacketForTags (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
+	}
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in CSearch::PreparePacketForTags");
 	}
 }
 
 void CSearch::PreparePacket(void)
 {
-	//TODO Move the tag reading to a seperate method to reduce code.
-	::CSharedFileList *sharedFileList = CKademlia::getSharedFileList();
-	ASSERT(sharedFileList != NULL); 
-	int count = m_fileIDs.size();
-	CString fileID;
-	uchar fileid[16];
-	CKnownFile* file = NULL;
-	if( count > 150 )
-		count = 150;
-	if( count > 100 )
+	try
 	{
-		bio3 = new CByteIO(packet3,sizeof(packet3));
-		bio3->writeByte(OP_KADEMLIAHEADER);
-		bio3->writeByte(KADEMLIA_PUBLISH_REQ);
-		bio3->writeUInt128(m_target);
-		bio3->writeUInt16(count-100);
-		while ( count > 100 )
+		//TODO Move the tag reading to a seperate method to reduce code.
+		::CSharedFileList *sharedFileList = CKademlia::getSharedFileList();
+		ASSERT(sharedFileList != NULL); 
+		int count = m_fileIDs.size();
+		CString fileID;
+		uchar fileid[16];
+		CKnownFile* file = NULL;
+		if( count > 150 )
+			count = 150;
+		if( count > 100 )
 		{
-			count--;
-			bio3->writeUInt128(m_fileIDs.front());
-			m_fileIDs.front().toHexString(&fileID);
-			m_fileIDs.pop_front();
-			DecodeBase16(fileID.GetBuffer(),fileID.GetLength(),fileid);
-			file = sharedFileList->GetFileByID(fileid);
-			PreparePacketForTags( bio3, file );
+			bio3 = new CByteIO(packet3,sizeof(packet3));
+			bio3->writeByte(OP_KADEMLIAHEADER);
+			bio3->writeByte(KADEMLIA_PUBLISH_REQ);
+			bio3->writeUInt128(m_target);
+			bio3->writeUInt16(count-100);
+			while ( count > 100 )
+			{
+				count--;
+				bio3->writeUInt128(m_fileIDs.front());
+				m_fileIDs.front().toHexString(&fileID);
+				m_fileIDs.pop_front();
+				DecodeBase16(fileID.GetBuffer(),fileID.GetLength(),fileid);
+				file = sharedFileList->GetFileByID(fileid);
+				PreparePacketForTags( bio3, file );
+			}
+		}
+		if( count > 50 )
+		{
+			bio2 = new CByteIO(packet2,sizeof(packet2));
+			bio2->writeByte(OP_KADEMLIAHEADER);
+			bio2->writeByte(KADEMLIA_PUBLISH_REQ);
+			bio2->writeUInt128(m_target);
+			bio2->writeUInt16(count-50);
+			while ( count > 50 )
+			{
+				count--;
+				bio2->writeUInt128(m_fileIDs.front());
+				m_fileIDs.front().toHexString(&fileID);
+				m_fileIDs.pop_front();
+				DecodeBase16(fileID.GetBuffer(),fileID.GetLength(),fileid);
+				file = sharedFileList->GetFileByID(fileid);
+				PreparePacketForTags( bio2, file );
+			}
+		}
+		if( count > 0 )
+		{
+			bio1 = new CByteIO(packet1,sizeof(packet1));
+			bio1->writeByte(OP_KADEMLIAHEADER);
+			bio1->writeByte(KADEMLIA_PUBLISH_REQ);
+			bio1->writeUInt128(m_target);
+			bio1->writeUInt16(count);
+			while ( count > 0 )
+			{
+				count--;
+				bio1->writeUInt128(m_fileIDs.front());
+				m_fileIDs.front().toHexString(&fileID);
+				m_fileIDs.pop_front();
+				DecodeBase16(fileID.GetBuffer(),fileID.GetLength(),fileid);
+				file = sharedFileList->GetFileByID(fileid);
+				PreparePacketForTags( bio1, file );
+			}
 		}
 	}
-	if( count > 50 )
+	catch ( CIOException *ioe )
 	{
-		bio2 = new CByteIO(packet2,sizeof(packet2));
-		bio2->writeByte(OP_KADEMLIAHEADER);
-		bio2->writeByte(KADEMLIA_PUBLISH_REQ);
-		bio2->writeUInt128(m_target);
-		bio2->writeUInt16(count-50);
-		while ( count > 50 )
-		{
-			count--;
-			bio2->writeUInt128(m_fileIDs.front());
-			m_fileIDs.front().toHexString(&fileID);
-			m_fileIDs.pop_front();
-			DecodeBase16(fileID.GetBuffer(),fileID.GetLength(),fileid);
-			file = sharedFileList->GetFileByID(fileid);
-			PreparePacketForTags( bio2, file );
-		}
+		CKademlia::debugMsg("Exception in CSearch::PreparePacket (IO error(%i))", ioe->m_cause);
+		ioe->Delete();
 	}
-	if( count > 0 )
+	catch (...) 
 	{
-		bio1 = new CByteIO(packet1,sizeof(packet1));
-		bio1->writeByte(OP_KADEMLIAHEADER);
-		bio1->writeByte(KADEMLIA_PUBLISH_REQ);
-		bio1->writeUInt128(m_target);
-		bio1->writeUInt16(count);
-		while ( count > 0 )
-		{
-			count--;
-			bio1->writeUInt128(m_fileIDs.front());
-			m_fileIDs.front().toHexString(&fileID);
-			m_fileIDs.pop_front();
-			DecodeBase16(fileID.GetBuffer(),fileID.GetLength(),fileid);
-			file = sharedFileList->GetFileByID(fileid);
-			PreparePacketForTags( bio1, file );
-		}
+		CKademlia::debugLine("Exception in CSearch::PreparePacket");
 	}
 }

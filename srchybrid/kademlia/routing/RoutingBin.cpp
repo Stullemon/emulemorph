@@ -69,7 +69,11 @@ CRoutingBin::~CRoutingBin()
 				delete *it;
 		}
 		m_entries.clear();
-	} catch (...) {}
+	} 
+	catch (...) 
+	{
+		CKademlia::debugLine("Exception in ~CRoutingBin");
+	}
 }
 
 bool CRoutingBin::add(CContact *contact)

@@ -45,10 +45,10 @@ struct WaitingUDPData
 
 typedef std::list<WaitingUDPData*> UDPQueue;
 
+
 class CUDPSocketListener : public CSocketListener
 {
 public:
-
 	~CUDPSocketListener();
 	CUDPSocketListener();
 
@@ -58,8 +58,10 @@ public:
 	void sendPacket( byte *data, uint32 lenData, const uint32 destinationHost, const uint16 destinationPort);
 	void sendPacket( byte *data, uint32 lenData, LPCSTR destinationHost, const uint16 destinationPort);
 
-private:
+protected:
+	virtual LRESULT OnMessage(UINT message, WPARAM wParam, LPARAM lParam) = 0;
 
+private:
 	CCriticalSection m_critical;
 	UDPQueue m_sendQueue;
 	uint32 timer;

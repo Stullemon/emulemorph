@@ -113,6 +113,7 @@ public:
 	static CPrefs				*getPrefs(void);
 	static CRoutingZone			*getRoutingZone(void);
 	static CKademliaUDPListener	*getUDPListener(void);
+	static UINT					getUDPListenerThreadID();
 	static CIndexed				*getIndexed(void);
 	static ::CSharedFileList	*getSharedFileList(void);
 	static void					setSharedFileList(::CSharedFileList *in);

@@ -33,6 +33,19 @@ there client on the eMule forum..
 #include "../io/ByteIO.h"
 
 class CKnownFile;
+
+
+// Thread messages recognized by an UDP Socket Listener thread
+#define WM_KADEMLIA_FIREWALLED_ACK		(WM_USER+0x200)
+
+// params for WM_KADEMLIA_FIREWALLED_ACK (to be deleted by receiving thread)
+typedef struct
+{
+	uint32 ip;
+	uint16 port;
+} KADEMLIAFIREWALLEDACK;
+
+
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
@@ -42,16 +55,19 @@ class CSearch;
 class CKademliaUDPListener : public CUDPSocketListener
 {
 	friend class CSearch;
-public:
 
+public:
 	void bootstrap(const LPCSTR ip, const uint16 port);
 	void bootstrap(const uint32 ip, const uint16 port);
 	void firewalledCheck(const uint32 ip, const uint16 port);
 	void sendMyDetails(const byte opcode, const uint32 ip, const uint16 port);
 	void publishPacket(const uint32 ip, const uint16 port, const CUInt128 &targetID, const CUInt128 &contactID, const TagList& tags);
 	void sendNullPacket(byte opcode, uint32 ip, uint16 port);
-private:
 
+protected:
+	virtual LRESULT OnMessage(UINT message, WPARAM wParam, LPARAM lParam);
+
+private:
 	void processPacket( byte *data, uint32 lenData, const sockaddr_in *senderAddress);
 
 	void addContact (const byte *data, const uint32 lenData, const uint32 ip, const uint16 port, uint16 tport = 0);

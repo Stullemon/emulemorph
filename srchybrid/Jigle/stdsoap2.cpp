@@ -30,6 +30,11 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+#pragma warning(disable:4706) // assignment within conditional expression
+#pragma warning(disable:4310) // cast truncates constant value
+#pragma warning(disable:4701) // local variable 'c' may be used without having been initialized
+#pragma warning(disable:4127) // conditional expression is constant
+
 // eMule has to *ensure* that the "gzip compression" is compiled. Do NOT change this!!
 #if !defined(_DEBUG_SOAP) && (!defined(WITH_GZIP) || !defined(WITH_ZLIB))
 #error "You have to define WITH_GZIP and WITH_ZLIB to complile this module for usage in the eMule project!"
