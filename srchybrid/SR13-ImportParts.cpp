@@ -48,8 +48,7 @@ bool CKnownFile::SR13_ImportParts(){
 		partfile->SetFileOpProgress(0);
         importpartsfilethread->SetValues(pathName,partfile);
 		importpartsfilethread->ResumeThread();
-	}else
-
+	}
 	return true;
 }
 
