@@ -1,4 +1,4 @@
-// eMule 0.44d MorphXT 5.12 PL by [OSIOL.NET]_lcf_[PL]
+// eMule 0.44d MorphXT 5.13 PL by [OSIOL.NET]_lcf_[PL]
 // Microsoft Visual C++ generated resource script.
 //
 #include "pl_PL.h"
@@ -2365,9 +2365,9 @@ BEGIN
     IDS_DONTREMOVESPARETRICKLESLOT "Nie usuwaj klientów na slocie trickle"
     IDS_MINDATARATEFRIEND   "Prêdkoœæ globalna (domyœlna 0kB/s=bez ograniczeñ)"
     IDS_MINDATARATEPOWERSHARE "Prêdkoœæ globalna (domyœlna 0kB/s=bez ograniczeñ)"
-    IDS_MAXCLIENTDATARATEFRIEND "Prêdkoœæ klienta (domyœlna 0kB/s=skupiona)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Prêdkoœæ klienta (domyœlna 0kB/s=skupiona)"
-    IDS_MAXCLIENTDATARATE   "Prêdkoœæ klienta (domyœlna 0kB/s=skupiona)"
+    IDS_MAXCLIENTDATARATEFRIEND "Maks. prêdkoœæ klienta (0kB/s=bez ograniczeñ)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Maks. prêdkoœæ klienta (0kB/s=bez ograniczeñ)"
+    IDS_MAXCLIENTDATARATE   "Maks. prêdkoœæ klienta (0kB/s=bez ograniczeñ)"
 END
 
 STRINGTABLE 
@@ -2529,6 +2529,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC_SUFFIX          "Przyrostek do dodania na koñcy nazwy pliku po CRC32:"
+    IDS_COUNTWCSESSIONSTATS "Uwzglêdniaj sesje webcache w statystykach sesji"
 END
 
 
@@ -2547,4 +2548,4 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-// eMule 0.44d MorphXT 5.12 PL by [OSIOL.NET]_lcf_[PL]
+// eMule 0.44d MorphXT 5.13 PL by [OSIOL.NET]_lcf_[PL]

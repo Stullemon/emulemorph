@@ -2377,9 +2377,9 @@ BEGIN
     IDS_DONTREMOVESPARETRICKLESLOT "No eliminar slot de reserva"
     IDS_MINDATARATEFRIEND   "Flujo de datos Global (Por Defecto 0kB/s=ilimitado)"
     IDS_MINDATARATEPOWERSHARE "Flujo de datos Global (Por Defecto 0kB/s=ilimitado)"
-    IDS_MAXCLIENTDATARATEFRIEND "Flujo de datos de Usuario (Por Defecto 0kB/s=centrado)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Flujo de datos de Usuario (Por Defecto 0kB/s=centrado)"
-    IDS_MAXCLIENTDATARATE   "Flujo de datos de Usuario (Por Defecto 0kB/s=centrado)"
+    IDS_MAXCLIENTDATARATEFRIEND "Máximo flujo de datos por Usuario (Por Defecto 0kB/s=centrado)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Máximo flujo de datos por Usuario (Por Defecto 0kB/s=centrado)"
+    IDS_MAXCLIENTDATARATE   "Máximo flujo de datos por Usuario (Por Defecto 0kB/s=centrado)"
 END
 
 STRINGTABLE 
@@ -2541,6 +2541,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC_SUFFIX          "Sufijo a añadir al final del nombre de archivo después del CRC32:"
+    IDS_COUNTWCSESSIONSTATS "Contar Sesiones-WebCaché en estadísticas de sesión"
 END
 
 #endif    // Spanish (Castilian) resources
