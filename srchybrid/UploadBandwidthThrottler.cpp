@@ -308,7 +308,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
     sint64 realBytesToSpend = 0;
 
     uint32 allowedDataRate = 0;
-    uint32 lastMaxAllowedDataRate = 1;
+    //uint32 lastMaxAllowedDataRate = 1;
 
     while(doRun) {
         DWORD timeSinceLastLoop = ::GetTickCount() - lastLoopTick;
@@ -329,6 +329,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         } else if(minFragSize > 1440) {
             minFragSize = 1440;
         }
+		minFragSize = 2500;
 
         const DWORD thisLoopTick = ::GetTickCount();
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
