@@ -380,10 +380,10 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				// xMule_MOD: showSharePermissions, modified by itsonlyme
 				// display not finished files in navy, blocked files in red and friend-only files in orange
 				uint8 Perm = file->GetPermissions()>=0?file->GetPermissions():theApp.glob_prefs->GetPermissions();
-				if (iColumn==0)
+				if (iColumn==0){
 					if (file->IsPartFile())
 						dc->SetTextColor((COLORREF)RGB(0,0,192));
-				else if (Perm == PERM_NOONE)
+				}else if (Perm == PERM_NOONE)
 					dc->SetTextColor((COLORREF)RGB(0,175,0));
 				else if (Perm == PERM_FRIENDS)
 					dc->SetTextColor((COLORREF)RGB(208,128,0));
