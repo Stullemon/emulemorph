@@ -98,6 +98,7 @@ protected:
 	HTREEITEM m_htiSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	HTREEITEM m_htiSCC;
 	HTREEITEM m_htiSAC;
+	HTREEITEM m_htiUpSecu;
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	HTREEITEM m_htiShowCatNames;
 	HTREEITEM m_htiSelectCat;

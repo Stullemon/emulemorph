@@ -52,6 +52,7 @@ CPPgMorph::CPPgMorph()
     m_htiUSSGoingDownDivider = NULL;
     m_htiUSSNumberOfPings = NULL;
 	m_htiMinUpload = NULL;
+	m_htiUpSecu = NULL;
 	m_htiEnableZeroFilledTest = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
@@ -109,6 +110,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		int iImgA4AF = 8;
 		int iImgTimeRem = 8;
 		//MORPH END - Added by SiRoB, khaos::categorymod+
+		int iImgSecu = 8;
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
 			iImgUM = piml->Add(CTempIconLoader("UPLOAD"));
@@ -122,6 +124,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 			iImgTimeRem = piml->Add(CTempIconLoader("PREF_SCHEDULER"));
 			// khaos::accuratetimerem-
 			//MORPH END - Added by SiRoB, khaos::categorymod+
+			iImgSecu = piml->Add(CTempIconLoader("PREF_SECURITY"));
 		}
 		
 		m_htiDM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DM), iImgDM, TVI_ROOT);
@@ -220,9 +223,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	
 		m_htiMinUpload = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINUPLOAD), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDYNUP);
 		m_ctrlTreeOptions.AddEditBox(m_htiMinUpload, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
-		m_htiEnableAntiLeecher = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ANTI_LEECHER), m_htiUM, m_bEnableAntiLeecher); //MORPH - Added by IceCream, Enable Anti-leecher
-		m_htiEnableAntiCreditHack = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ANTI_CREDITHACK), m_htiUM, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, Enable Anti-CreditHack
+		
+		m_htiUpSecu = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SECURITY), iImgSecu, m_htiUM);
+		m_htiEnableAntiLeecher = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ANTI_LEECHER), m_htiUpSecu, m_bEnableAntiLeecher); //MORPH - Added by IceCream, Enable Anti-leecher
+		m_htiEnableAntiCreditHack = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ANTI_CREDITHACK), m_htiUpSecu, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, Enable Anti-CreditHack
 		m_htiIsAutoPowershareNewDownloadFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE), m_htiUM, m_bIsAutoPowershareNewDownloadFile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 		//MORPH - Removed by SiRoB, Due to zz change
 		//m_htiEnableChunkAvaibility = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHUNKAVAIBILITY_OPTION), m_htiUM, m_bEnableChunkAvaibility); //MORPH - Added by IceCream, Enable ChunkAvaibility
@@ -566,6 +570,7 @@ void CPPgMorph::OnDestroy()
 	m_htiEnableZeroFilledTest = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
+	m_htiUpSecu = NULL;
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, enable Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, enable Anti-CreditHack
 	m_htiSCC = NULL;
