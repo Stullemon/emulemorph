@@ -2486,7 +2486,6 @@ bool CListenSocket::StartListening(){
 	bool ret=(Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*//*) && Listen());
 	if (ret)
 		m_port=thePrefs.GetPort();
-	//bool ret=(Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/) && Listen());
 	return ret;
 	*/
 	bool ret = false;

@@ -323,7 +323,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		count.Format(_T("%i %s"),theApp.wapserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
 		rCtrl << _T("\t") << count << _T("\r\n");
 		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
-		rCtrl << _T("URL:\t") << _T("http://") << inet_ntoa(*(in_addr*)&nLocalIP) << _T(":") << thePrefs.GetWapPort() << _T("/\r\n");
+		rCtrl << _T("URL:\t") << _T("http://") << ipstr(nLocalIP) << _T(":") << thePrefs.GetWapPort() << _T("/\r\n");
 	}
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 

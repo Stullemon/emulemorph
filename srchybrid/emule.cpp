@@ -1826,15 +1826,18 @@ void CemuleApp::AddIncomingFolderIcon(){
 	PathMakeSystemFolder(thePrefs.GetIncomingDir());
 }
 
-void CemuleApp::RemoveIncomingFolderIcon(){
-	CString desktopFile;
+void CemuleApp::RemoveIncomingFolderIcon()
+{
+	if(!IsCustomIncomingFolderIcon()){
+		CString desktopFile;
 	
-	desktopFile = CString(thePrefs.GetIncomingDir()) + _T("\\Desktop.ini");
+		desktopFile = CString(thePrefs.GetIncomingDir()) + _T("\\Desktop.ini");
 
-	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+		CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
 	
-	desktopIni.DeleteKey(_T("IconFile"));
-	desktopIni.DeleteKey(_T("IconIndex"));
+		desktopIni.DeleteKey(_T("IconFile"));
+		desktopIni.DeleteKey(_T("IconIndex"));
+	}
 }
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
 
@@ -1855,17 +1858,49 @@ void CemuleApp::AddTempFolderIcon(){
 }
 
 void CemuleApp::RemoveTempFolderIcon(){
-	CString desktopFile;
+	if(!IsCustomIncomingFolderIcon()){
+		CString desktopFile;
+		desktopFile = CString(thePrefs.GetTempDir()) + _T("\\Desktop.ini");
 
-	desktopFile = CString(thePrefs.GetTempDir()) + _T("\\Desktop.ini");
+		CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
 
-	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
-
-	desktopIni.DeleteKey(_T("IconFile"));
-	desktopIni.DeleteKey(_T("IconIndex"));
+		desktopIni.DeleteKey(_T("IconFile"));
+		desktopIni.DeleteKey(_T("IconIndex"));
+	}
 }
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
+BOOL CemuleApp::IsCustomIncomingFolderIcon(){
+	CString desktopFile;
+	
+	desktopFile = CString(thePrefs.GetIncomingDir()) + _T("\\Desktop.ini");
 
+	if(CFileFind().FindFile(desktopFile) == TRUE){
+		CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+		
+		CString iconFile, exePath;
+		int iconIndex;
+		iconFile = desktopIni.GetString(_T("IconFile"), _T(""), _T(".ShellClassInfo"));
+		iconIndex = desktopIni.GetInt(_T("IconIndex"),0,_T(".ShellClassInfo"));
+		exePath = thePrefs.GetAppDir() + CString(theApp.m_pszExeName) + _T(".exe");
+		
+		iconFile.MakeLower();
+		exePath.MakeLower();
+		if (iconFile == exePath){
+			if(iconIndex == 1)
+				return false;
+			else
+				return true;
+		}else{
+			if(iconFile == _T(""))
+				return false;
+			else
+				return true;
+		}
+	}
+	else
+		return false;
+}
+// End MoNKi
 // Commander - Added: FriendLinks [emulEspaña] - Start
 
 bool CemuleApp::IsEd2kFriendLinkInClipboard()

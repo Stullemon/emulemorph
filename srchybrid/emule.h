@@ -219,6 +219,7 @@ public:
 	void	RemoveIncomingFolderIcon();
 	void	AddTempFolderIcon();
 	void	RemoveTempFolderIcon();
+	BOOL	IsCustomIncomingFolderIcon();
 	// Commander - Added: Custom incoming folder icon [emulEspaña] - End
 
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
