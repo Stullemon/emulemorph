@@ -117,6 +117,16 @@ struct Category_Struct{
 	BOOL    downloadInAlphabeticalOrder; // ZZ:DownloadManager
 };
 #pragma pack()
+//MORPH START - Added by SiRoB, DynDNS
+#pragma pack(1)
+struct DynDNS_Struct{
+	bool	Enabled;
+	TCHAR	Username[256];
+	TCHAR	Password[256];
+	TCHAR	Hostname[256];
+};
+#pragma pack()
+//MORPH END - Added by SiRoB, DynDNS
 
 //EastShare Start - added by AndCycle, IP to Country
 enum IP2CountryNameSelection{
@@ -541,28 +551,6 @@ public:
 	static	bool	m_bWebLowEnabled;
 	static	TCHAR	m_sWebResDir[MAX_PATH];
 
-    // DynDNS
-    
-	// Account 1
-	static	TCHAR	m_sDynDNSUsername_a1[256];
-	static	TCHAR	m_sDynDNSPassword_a1[256];
-	static	TCHAR	m_sDynDNSHostname_a1[256];
-	static	bool	m_bDynDNSEnabled_a1;
-
-	// Account 2
-	static	TCHAR	m_sDynDNSUsername_a2[256];
-	static	TCHAR	m_sDynDNSPassword_a2[256];
-	static	TCHAR	m_sDynDNSHostname_a2[256];
-	static	bool	m_bDynDNSEnabled_a2;
-
-	// Account 3
-	static	TCHAR	m_sDynDNSUsername_a3[256];
-	static	TCHAR	m_sDynDNSPassword_a3[256];
-	static	TCHAR	m_sDynDNSHostname_a3[256];
-	static	bool	m_bDynDNSEnabled_a3;
-
-    //DynDNS End
-
 	static	TCHAR	m_sTemplateFile[MAX_PATH];
 	static	ProxySettings proxy; // deadlake PROXYSUPPORT
 	static	bool	m_bIsASCWOP;
@@ -873,7 +861,7 @@ public:
 
 	static	bool	Save();
 	static	void	SaveCats();
-	
+
 	static	uint8	Score()							{return scorsystem;}
 	static	bool	Reconnect()						{return reconnect;}
 	static	const CString& GetUserNick()			{return strNick;}
@@ -1413,17 +1401,6 @@ public:
 	static	bool	GetNetworkED2K()						{ return networked2k;}
 	static	void	SetNetworkED2K(bool val)				{ networked2k = val;}
 
-    //DynDNS
-    
-	static	CString GetDynDNSUsername(int account)						{ return CString(m_sDynDNSUsername_a1); }
-    static	void	SetDynDNSUsername(CString strNewUsername, int account);
-	static	CString GetDynDNSPassword(int account)						{ return CString(m_sDynDNSPassword_a2); }
-	static	void	SetDynDNSPassword(CString strNewPass, int account);
-	static	CString GetDynDNSHostname(int account)						{ return CString(m_sDynDNSHostname_a3); }
-	static	void	SetDynDNSHostname(CString strNewHostname, int account);
-	static	bool	GetDynDNSIsEnabled(int account)					{ return m_bDynDNSEnabled; }
-	static	void	SetDynDNSIsEnabled(bool bEnable, int account)	{ m_bDynDNSEnabled=bEnable; }
-	
 	// mobileMule
 	static	CString GetMMPass()								{ return CString(m_sMMPassword); }
 	static	void	SetMMPass(CString strNewPass);
@@ -1726,6 +1703,15 @@ public:
    //Commander - Added: Invisible Mode [TPT] - End
 
 	static	uint32	GetMaxFriendByteToSend();  //MORPH - Added by SiRoB, Upload Splitting Class
+	
+	//MORPH START - Added by SiRoB, DynDNS
+	static	void	SaveDynDNS();
+	static	void	LoadDynDNS();
+	static	int		AddDynDNSAccount(DynDNS_Struct* DynDNSAccount) { DynDNSMap.Add(DynDNSAccount); return DynDNSMap.GetCount()-1;}
+	static	DynDNS_Struct* GetDynDNSAccount(int index) { if (index>=0 && index<DynDNS.GetCount()) return DynDNSMap.GetAt(index); else return NULL;}
+	static	void	RemoveDynDNSAccount(int index);
+	static	int		GetDynDNSCount()			{ return DynDNSMap.GetCount();}
+	//MORPH END   - Added by SiRoB, DynDNS
 
 protected:
 	static	CString appdir;
@@ -1741,14 +1727,16 @@ protected:
 	static	bool m_UseProxyListenPort;
 	static	uint16	ListenPort;
 	static	CArray<Category_Struct*,Category_Struct*> catMap;
-
+	
 	static void	CreateUserHash();
 	static void	SetStandartValues();
 	static int	GetRecommendedMaxConnections();
 	static void LoadPreferences();
 	static void SavePreferences();
 	static CString GetHomepageBaseURLForLevel(uint8 nLevel);
-
+	//MORPH START -  Added by SiRoB, DynDNS
+	static	CArray<DynDNS_Struct*,DynDNS_Struct*> DynDNSMap;
+	//MORPH END   -  Added by SiRoB, DynDNS
 public:
 	//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 	static	bool	GetUPnPNat()						{ return m_bUPnPNat; }

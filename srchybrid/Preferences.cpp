@@ -485,26 +485,9 @@ bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
 TCHAR	CPreferences::m_sWebPassword[256];
 TCHAR	CPreferences::m_sWebLowPassword[256];
 
-//DynDNS
-
-//Account 1
-TCHAR	CPreferences::m_sDynDNSUsername_a1[256];
-TCHAR	CPreferences::m_sDynDNSPassword_a1[256];
-TCHAR	CPreferences::m_sDynDNSHostname_a1[256];
-bool	CPreferences::m_bDynDNSEnabled_a1;
-
-//Account 2
-TCHAR	CPreferences::m_sDynDNSUsername_a2[256];
-TCHAR	CPreferences::m_sDynDNSPassword_a2[256];
-TCHAR	CPreferences::m_sDynDNSHostname_a2[256];
-bool	CPreferences::m_bDynDNSEnabled_a2;
-
-//Account 3
-TCHAR	CPreferences::m_sDynDNSUsername_a3[256];
-TCHAR	CPreferences::m_sDynDNSPassword_a3[256];
-TCHAR	CPreferences::m_sDynDNSHostname_a3[256];
-bool	CPreferences::m_bDynDNSEnabled_a3;
-//DynDNS End
+//MORPH START - Added by SiRoB/Commander, DynDNS
+CArray<DynDNS_Struct*,DynDNS_Struct*> CPreferences::DynDNSMap;
+//MORPH END   - Added by SiRoB/Commander, DynDNS
 
 uint16	CPreferences::m_nWebPort;
 bool	CPreferences::m_bWebEnabled;
@@ -2426,27 +2409,6 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("UseLowRightsUser"), m_bWebLowEnabled);
 
 	///////////////////////////////////////////////////////////////////////////
-	// Section: "DynDNS"
-	//
-	int account
-	ini.WriteString(_T("Username_a1"), GetDynDNSUsername(1), _T("DynDNS"));
-	ini.WriteString(_T("Password_a1"), GetDynDNSPassword(1), _T("DynDNS"));
-	ini.WriteString(_T("Hostname_a1"), GetDynDNSHostname(1), _T("DynDNS"));
-	ini.WriteBool(_T("Enabled_a1"), m_bDynDNSEnabled_a1);
-
-	int account
-	ini.WriteString(_T("Username_a2"), GetDynDNSUsername(2), _T("DynDNS"));
-	ini.WriteString(_T("Password_a2"), GetDynDNSPassword(2), _T("DynDNS"));
-	ini.WriteString(_T("Hostname_a2"), GetDynDNSHostname(2), _T("DynDNS"));
-	ini.WriteBool(_T("Enabled_a2"), m_bDynDNSEnabled_a2);
-
-	int account
-	ini.WriteString(_T("Username_a3"), GetDynDNSUsername(3), _T("DynDNS"));
-	ini.WriteString(_T("Password_a3"), GetDynDNSPassword(3), _T("DynDNS"));
-	ini.WriteString(_T("Hostname_a3"), GetDynDNSHostname(3), _T("DynDNS"));
-	ini.WriteBool(_T("Enabled_a3"), m_bDynDNSEnabled_a3);
-
-	///////////////////////////////////////////////////////////////////////////
 	// Section: "MobileMule"
 	//
 	ini.WriteString(_T("Password"), GetMMPass(), _T("MobileMule"));
@@ -2653,6 +2615,10 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("InvisibleModeHKKey"), (int)m_cInvisibleModeHotKey);
 	ini.WriteInt(_T("InvisibleModeHKKeyModifier"), m_iInvisibleModeHotKeyModifier);
     //Commander - Added: Invisible Mode [TPT] - End        
+	//MORPH START - Added by SiRoB, DynDNS
+	SaveDynDNS();
+	//MORPH END - Added by SiRoB, DynDNS
+    
 }
 
 void CPreferences::SaveCats(){
@@ -3457,29 +3423,6 @@ void CPreferences::LoadPreferences()
 	m_nWebPageRefresh=ini.GetInt(_T("PageRefreshTime"), 120);
 
 	///////////////////////////////////////////////////////////////////////////
-	// Section: "DynDNS"
-	//
-
-	//Account 1
-	_stprintf(m_sDynDNSUsername_a1,_T("%s"),ini.GetString(_T("Username_a1"), _T(""),_T("DynDNS")));
-    _stprintf(m_sDynDNSPassword_a1,_T("%s"),ini.GetString(_T("Password_a1"), _T(""),_T("DynDNS")));
-	_stprintf(m_sDynDNSHostname_a1,_T("%s"),ini.GetString(_T("Hostname_a1"), _T(""),_T("DynDNS")));
-	m_bDynDNSEnabled_a1=ini.GetBool(_T("Enabled_a1"), false);
-
-	//Account 2
-	_stprintf(m_sDynDNSUsername_a2,_T("%s"),ini.GetString(_T("Username_a2"), _T(""),_T("DynDNS")));
-	_stprintf(m_sDynDNSPassword_a2,_T("%s"),ini.GetString(_T("Password_a2"), _T(""),_T("DynDNS")));
-	_stprintf(m_sDynDNSHostname_a2,_T("%s"),ini.GetString(_T("Hostname_a2"), _T(""),_T("DynDNS")));
-	m_bDynDNSEnabled_a2=ini.GetBool(_T("Enabled_a2"), false);
-
-	//Account 3
-	_stprintf(m_sDynDNSUsername_a3,_T("%s"),ini.GetString(_T("Username_a3"), _T(""),_T("DynDNS")));
-	_stprintf(m_sDynDNSPassword_a3,_T("%s"),ini.GetString(_T("Password_a3"), _T(""),_T("DynDNS")));
-	_stprintf(m_sDynDNSHostname_a3,_T("%s"),ini.GetString(_T("Hostname_a3"), _T(""),_T("DynDNS")));
-	m_bDynDNSEnabled_a3=ini.GetBool(_T("Enabled_a3"), false);
-	
-
-	///////////////////////////////////////////////////////////////////////////
 	// Section: "MobileMule"
 	//
 	_stprintf(m_sMMPassword,_T("%s"),ini.GetString(_T("Password"), _T(""),_T("MobileMule")));
@@ -3534,6 +3477,9 @@ void CPreferences::LoadPreferences()
 	m_bWapLowEnabled = ini.GetBool(_T("WapLowEnable"), false, _T("WapServer"));
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
+	//MORPH START - Added by SiRoB, DynDNS
+	LoadDynDNS();
+	//MORPH END - Added by SiRoB, DynDNS
     LoadCats();
 	//MORPH - Khaos Obsolete
 	/*
@@ -4034,66 +3980,6 @@ void CPreferences::SetWSPass(CString strNewPass)
 	_stprintf(m_sWebPassword,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
 }
 
-//DynDNS
-void CPreferences::SetDynDNSPassword(CString strNewPass, int account)
-{    
-	switch(account){
-		case '1':
-			_stprintf(m_sDynDNSPassword_a1,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
-			break;
-		case '2':
-			_stprintf(m_sDynDNSPassword_a2,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
-			break;
-		case '3':
-			_stprintf(m_sDynDNSPassword_a3,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
-			break;
-
-		default:
-			AddLogLine(false,_T("Invalid Account ID!"));
-			break;
-	}
-}
-
-void CPreferences::SetDynDNSUsername(CString strNewUsername, int account)
-{
-	switch(account){
-		case '1':
-			_stprintf(m_sDynDNSUsername_a1,_T("%s"),strNewUsername);
-			break;
-		case '2':
-			_stprintf(m_sDynDNSUsername_a2,_T("%s"),strNewUsername);
-			break;
-		case '3':
-			_stprintf(m_sDynDNSUsername_a3,_T("%s"),strNewUsername);
-			break;
-
-		default:
-			AddLogLine(false,_T("Invalid Account ID!"));
-			break;
-	}
-}
-
-void CPreferences::SetDynDNSHostname(CString strNewHostname,int account)
-{
-	switch(account){
-		case '1':
-			_stprintf(m_sDynDNSHostname_a1,_T("%s"),strNewHostname);
-			break;
-		case '2':
-		    _stprintf(m_sDynDNSHostname_a2,_T("%s"),strNewHostname);
-			break;
-		case '3':
-			_stprintf(m_sDynDNSHostname_a3,_T("%s"),strNewHostname);
-			break;
-
-		default:
-			AddLogLine(false,_T("Invalid Account ID!"));
-			break;
-	}
-
-}
-//End DynDNS
-
 void CPreferences::SetWSLowPass(CString strNewPass)
 {
 	_stprintf(m_sWebLowPassword,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
@@ -4311,3 +4197,54 @@ void CPreferences::SetWapLowPass(CString strNewPass)
 	m_sWapLowPassword = MD5Sum(strNewPass).GetHash();
 }
 //MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
+
+//MORPH START - Added by SiRoB, DynDNS
+void CPreferences::SaveDynDNS(){
+
+	CString DynDNSinif,ixStr,buffer;
+	catinif.Format(_T("%sDynDNS.ini"),configdir);
+	_tremove(DynDNSinif);
+
+	CIni DynDNSini( DynDNSinif, _T("DynDNS") );
+	DynDNSini.WriteInt(_T("Count"),DynDNSMap.GetCount()-1,_T("General"));
+	DynDNSini.WriteInt(_T("DynDNSVersion"), 1, _T("General"));
+	for (int ix=0;ix<DynDNSMap.GetCount();ix++){
+		ixStr.Format(_T("DynDNS#%i"),ix);
+		DynDNSini.WriteBool(_T("Enabled"), DynDNSMap.GetAt(ix)->Enabled, ixStr);
+		DynDNSini.WriteString(_T("Username"),DynDNSMap.GetAt(ix)->Username,ixStr);
+		DynDNSini.WriteString(_T("Password"),DynDNSMap.GetAt(ix)->Password,ixStr);
+		DynDNSini.WriteString(_T("Hostname"),DynDNSMap.GetAt(ix)->Hostname,ixStr);
+	}
+}
+
+void CPreferences::LoadCats() {
+	CString ixStr,DynDNSinif;
+	TCHAR buffer[100];
+
+	catinif.Format(_T("%sDynDNS.ini"),configdir);
+	CIni DynDNSini;
+
+	int max=DynDNSini.GetInt(_T("Count"),0,_T("General"));
+
+	for (int ix = bCreateDefault ? 1 : 0; ix <= max; ix++)
+	{
+		ixStr.Format(_T("DynDNS#%i"),ix);
+        catini.SetSection(ixStr);
+
+		DynDNS_Struct* newDynDNSAccount = new DynDNS_Struct;
+		_stprintf(newDynDNSAccount->Username,_T("%s"),DynDNSini.GetString(_T("Username"),_T(""),ixStr));
+		_stprintf(newDynDNSAccount->Password,_T("%s"),DynDNSini.GetString(_T("Password"),_T(""),ixStr));
+		_stprintf(newDynDNSAccount->Hostname,_T("%s"),DynDNSini.GetString(_T("Hostname"),_T(""),ixStr));
+		newDynDNSAccount->Enabled = DynDNSini.GetBool(_T("Enabled"), false);
+		AddDynDNSAccount(newDynDNSAccount);
+	}
+}
+void CPreferences::RemoveDynDNSAccount(int index)	{
+	if (index>=0 && index<DynDNSMap.GetCount()) { 
+		DynDNS_Struct* delDynDNSAccount;
+		delDynDNSAccount=DynDNSMap.GetAt(index); 
+		DynDNSMap.RemoveAt(index); 
+		delete delDynDNSAccount;
+	}
+}
+//MORPH END   - Added by SiRoB, DynDNS
