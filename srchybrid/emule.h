@@ -21,6 +21,7 @@
 #include ".\Optimizer\cpu_info.h" //Commander - Added: Optimizer [ePlus]
 #include "resource.h"
 #include "loggable.h"
+#include "WapServer/WapServer.h" // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
 
 #define	DEFAULT_NICK		thePrefs.GetHomepageBaseURL()
 #define	DEFAULT_TCP_PORT	4662
@@ -201,6 +202,14 @@ protected:
 	bool m_bAutoStart;
 public:
 	void OptimizerInfo(void); // Commander - Added: Optimizer [ePlus]
+       // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+	void	AddIncomingFolderIcon();
+	void	RemoveIncomingFolderIcon();
+       // Commander - Added: Custom incoming folder icon [emulEspaña] - End
+// Added by MoNKi [MoNKi: -Wap Server-]
+public:
+	CWapServer*		wapserver;
+// End -Wap Server-
 };
 
 extern CemuleApp theApp;

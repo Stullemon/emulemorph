@@ -135,9 +135,18 @@ BOOL CPPgDirectories::OnApply()
 		return FALSE;
 	}
 
+	// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+	if(CString(thePrefs.GetIncomingDir()).Trim().MakeLower() != CString(strIncomingDir).Trim().MakeLower())
+		theApp.RemoveIncomingFolderIcon();
+	// Commander - Added: Custom incoming folder icon [emulEspaña] - End
+
 	_sntprintf(thePrefs.incomingdir, ARRSIZE(thePrefs.incomingdir), _T("%s"), strIncomingDir);
 	MakeFoldername(thePrefs.incomingdir);
 	_stprintf(thePrefs.GetCategory(0)->incomingpath,_T("%s"),thePrefs.incomingdir);
+
+	// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+	theApp.AddIncomingFolderIcon();
+	// Commander - Added: Custom incoming folder icon [emulEspaña] - End
 
 	_sntprintf(thePrefs.tempdir, ARRSIZE(thePrefs.tempdir), _T("%s"), strTempDir);
 	MakeFoldername(thePrefs.tempdir);

@@ -55,6 +55,7 @@ CPreferencesDlg::CPreferencesDlg()
 #endif
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
+	m_wndMorph3.m_psp.dwFlags &= ~PSH_HASHELP; //Commander - Added: Morph III
 	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 
@@ -86,6 +87,7 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndBackup); //EastShare - Added by Pretender, TBH-AutoBackup
 	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
+	AddPage(&m_wndMorph3); //Commander - Added: Morph III
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	m_nActiveWnd = 0;
 	m_iPrevPage = -1;
@@ -237,6 +239,7 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader(_T("PREF_BACKUP"))); //EastShare - Added by Pretender, TBH-AutoBackup
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by IceCream, Morph Prefs
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by SiRoB, Morph Prefs
+	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH"))); //Commander - Added: Morph III
 	ImageList.Add(CTempIconLoader(_T("CLIENTEASTSHARE")));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
 	m_slideBar.SetImageList(&ImageList);
 
@@ -257,6 +260,7 @@ void CPreferencesDlg::Localize()
 
 	m_wndMorph.Localize();//MORPH - Added by IceCream, Morph Prefs
 	m_wndMorph2.Localize();//MORPH - Added by SiRoB, Morph Prefs
+	m_wndMorph3.Localize(); //Commander - Added: Morph III
 	m_wndEastShare.Localize();
 
 	m_slideBar.ResetContent();
@@ -290,9 +294,10 @@ void CPreferencesDlg::Localize()
 	//	Advanced group
 	iGroup = m_slideBar.AddGroup(_T("Morph"));
 	m_slideBar.AddGroupItem(GetResString(IDS_BACKUP), iGroup, 14);
-	m_slideBar.AddGroupItem(_T("Morph"), iGroup, 15);
+	m_slideBar.AddGroupItem(_T("Morph I"), iGroup, 15);
 	m_slideBar.AddGroupItem(_T("Morph II"), iGroup, 16);
-	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, 17);
+	m_slideBar.AddGroupItem(_T("Morph III"), iGroup, 17); //Commander - Added: Morph III
+	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, 18);
 
 	//	Determines the width needed to the slidebar, and its position
 	int width = m_slideBar.GetGreaterStringWidth();

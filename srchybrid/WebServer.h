@@ -1,5 +1,6 @@
 #pragma once
 #include "Loggable.h"
+#include "WapServer/WebWapDefinitions.h"	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
 
 class CWebSocket;
 class CUpDownClient;
@@ -7,6 +8,8 @@ class CUpDownClient;
 #define WEB_GRAPH_HEIGHT		120
 #define WEB_GRAPH_WIDTH			500
 
+// emulEspaña: Removed by MoNKi, now in WebWapDefinitions.h [MoNKi: -Wap Server-]
+/*
 #define SESSION_TIMEOUT_SECS	300	// 5 minutes session expiration
 #define SHORT_FILENAME_LENGTH	40	// Max size of file name.
 
@@ -114,7 +117,7 @@ typedef struct
 	CString sLastModified;
 	CString	sETag;
 } GlobalParams;
-
+*/
 typedef struct
 {
 	CString			sURL;

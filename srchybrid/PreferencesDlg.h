@@ -20,6 +20,7 @@
 #include "ListBoxST.h"
 #include "PPgMorph.h" //MORPH - Added by IceCream, Morph Prefs
 #include "PPgMorph2.h" //MORPH - Added by SiRoB, Morph Prefs
+#include "PPgMorph3.h" //Commander - Added: Morph III
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 #include "PPgEastShare.h" //EastShare - Added by Pretender, TBH-AutoBackup
 #include "KCSideBannerWnd.h" //Commander - Added: Preferences Banner [TPT]
@@ -52,6 +53,7 @@ public:
 #endif
 	CPPgMorph		m_wndMorph; //MORPH - Added by IceCream, Morph Prefs
 	CPPgMorph2		m_wndMorph2; //MORPH - Added by SiRoB, Morph Prefs
+	CPPgMorph3		m_wndMorph3; //Commander - Added: Morph III
 	CPPgBackup		m_wndBackup; //EastShare - Added by Pretender, TBH-AutoBackup
 	CPPgEastShare	m_wndEastShare; //EastShare - Added by Pretender, ES Prefs
 

@@ -694,6 +694,10 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 	updown.connections=theApp.listensocket->GetActiveConnections();
 	theApp.webserver->AddStatsLine(updown);
 
+	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]	
+	theApp.wapserver->AddStatsLine(updown);	
+	// End emulEspaña
+
 	// averages
 	m_dPlotDataDown[0]=	theStats.GetAvgDownloadRate(AVG_SESSION);
 	m_dPlotDataUp[0]=	theStats.GetAvgUploadRate(AVG_SESSION);

@@ -490,6 +490,11 @@ BOOL CemuleDlg::OnInitDialog()
 		theApp.webserver->StartServer();
 	theApp.mmserver->Init();
 
+	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+	if (thePrefs.GetWapServerEnabled())
+		theApp.wapserver->StartServer();
+	// End emulEspaña
+
 	VERIFY( (m_hTimer = ::SetTimer(NULL, NULL, 300, StartupTimer)) != NULL );
 	if (thePrefs.GetVerbose() && !m_hTimer)
 		AddDebugLogLine(true,_T("Failed to create 'startup' timer - %s"),GetErrorMessage(GetLastError()));
@@ -1514,6 +1519,10 @@ void CemuleDlg::OnClose()
 
 	//MORPH - Added by SiRoB, More clean :|
 	delete theApp.FakeCheck;		theApp.FakeCheck = NULL;
+        
+        // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+	delete theApp.wapserver;		theApp.wapserver = NULL;
+	// End emulEspaña
 
 	thePrefs.Uninit();
 	theApp.m_app_state = APP_STATE_DONE;

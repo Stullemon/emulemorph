@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1794,6 +1794,28 @@ BEGIN
                     WS_TABSTOP,19,137,164,64
 END
 
+IDD_PPG_MORPH3 DIALOGEX 0, 0, 230, 252
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Morph3"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "DynIP",IDC_GROUP_DYNIP,7,142,217,104
+    EDITTEXT        IDC_EDIT1,97,167,119,11,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT11,97,203,119,11,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT12,97,185,119,11,ES_AUTOHSCROLL
+    PUSHBUTTON      "Update",IDC_BUTTON1,160,219,56,11,BS_FLAT
+    CONTROL         "Enable automatic DynIP Update",IDC_CHECK1,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,153,202,10
+    LTEXT           "DynDNS Host",IDC_STATIC,14,167,81,11
+    LTEXT           "Username",IDC_STATIC,14,185,81,11
+    LTEXT           "Password",IDC_STATIC,14,203,81,11
+    PUSHBUTTON      "Reset",IDC_BUTTON2,160,232,56,11,BS_FLAT
+    LTEXT           "Last Update - #",IDC_STATIC,15,237,78,8
+    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_NOSCROLL | WS_BORDER | 
+                    WS_TABSTOP,7,3,217,136
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2460,6 +2482,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 221
     END
+
+    IDD_PPG_MORPH3, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 224
+        VERTGUIDE, 14
+        VERTGUIDE, 216
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2610,6 +2640,7 @@ CLIENTFRIENDSLOTOVL     ICON                    "res\\friendslotovl.ico"
 FRIENDNOCLIENTSLOT      ICON                    "res\\friends1slot.ico"
 FRIENDWITHCLIENTSLOT    ICON                    "res\\friends2slot.ico"
 FRIENDCONNECTEDSLOT     ICON                    "res\\friends3slot.ICO"
+AABINCOMINGFOLDER       ICON                    "res\\incomingfolder.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2715,12 +2746,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Allemand (Allemagne) resources
+// Deutsch (Deutschland) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -2738,12 +2769,12 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 TRAY_MESSAGE            ICON                    "res\\mule_tray_message.ico"
 TRAY_MESSAGE_GREY       ICON                    "res\\mule_tray_message_grey.ico"
 TRAY_MESSAGE_LOW        ICON                    "res\\mule_tray_message_low.ico"
-#endif    // Allemand (Allemagne) resources
+#endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5017,7 +5048,7 @@ BEGIN
     IDS_ADVANCED            "Advanced"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

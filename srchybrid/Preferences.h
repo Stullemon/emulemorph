@@ -729,6 +729,25 @@ public:
     //Commander - Added: Invisible Mode [TPT] - End
 
         static bool     m_bA4AFSaveCpu; // ZZ:DownloadManager
+        
+        // Added by MoNKi [MoNKi: -Wap Server-]
+	static char		m_sWapTemplateFile[MAX_PATH];
+	static bool		m_bWapEnabled;
+	static uint16	m_nWapPort;
+	static uint8	m_iWapGraphWidth;
+	static uint8	m_iWapGraphHeight;
+	static bool		m_bWapFilledGraphs;
+	static int		m_iWapMaxItemsInPages;
+	static bool		m_bWapSendImages;
+	static bool		m_bWapSendGraphs;
+	static bool		m_bWapSendProgressBars;
+	static bool		m_bWapAllwaysSendBWImages;
+	static UINT		m_iWapLogsSize;
+	static CString	m_strWapServerDir;
+	static CString	m_sWapPassword;
+	static CString	m_sWapLowPassword;
+	static bool		m_bWapLowEnabled;
+	// End MoNKi
 
 	static	CStringList shareddir_list;
 	static	CStringList adresses_list;
@@ -781,6 +800,7 @@ public:
 	friend class CPPgDebug;
 	friend class CPPgMorph; //MORPH - Added by SiRoB, Morph Prefs
 	friend class CPPgMorph2; //MORPH - Added by SiRoB, Morph Prefs
+	friend class CPPgMorph3; //Commander - Added: Morph III
 	friend class CPPgEastShare; //EastShare - Added by Pretender, ES Prefs
 	
 	CPreferences();
@@ -1650,6 +1670,39 @@ protected:
 	static void LoadPreferences();
 	static void SavePreferences();
 	static CString GetHomepageBaseURLForLevel(uint8 nLevel);
+        // added by MoNKi [ MoNKi: -Wap Server- ]
+	static CString	GetWapTemplate()				{ return CString(m_sWapTemplateFile);}
+	static void		SetWapTemplate(CString in)		{ sprintf(m_sWapTemplateFile,"%s",in);}
+	static bool		GetWapServerEnabled()			{ return m_bWapEnabled; }
+	static void		SetWapServerEnabled(bool on)	{ m_bWapEnabled=on; }
+	static uint16	GetWapPort()					{ return m_nWapPort; }
+	static void		SetWapPort(uint16 uPort)		{ m_nWapPort=uPort; }
+	static const CString& GetWapServerDir() 		{return m_strWapServerDir;}
+	static uint8	GetWapGraphWidth()				{ return m_iWapGraphWidth; }
+	static uint8	GetWapGraphHeight()				{ return m_iWapGraphHeight; }
+	static void		SetWapGraphWidth(int width)		{ m_iWapGraphWidth=width; }
+	static void		SetWapGraphHeight(int height)	{ m_iWapGraphHeight=height; }
+	static bool		GetWapGraphsFilled()			{ return m_bWapFilledGraphs; }
+	static void		SetWapGraphsFilled(bool on)		{ m_bWapFilledGraphs=on; }
+	static void		SetWapMaxItemsInPages(int n)    { m_iWapMaxItemsInPages=n; }
+	static int		GetWapMaxItemsInPages()		    { return m_iWapMaxItemsInPages; }
+	static void		SetWapSendImages(bool on)		{ m_bWapSendImages=on; }
+	static bool		GetWapSendImages()				{ return m_bWapSendImages; }
+	static void		SetWapSendGraphs(bool on)		{ m_bWapSendGraphs=on; }
+	static bool		GetWapSendGraphs()				{ return m_bWapSendGraphs; }
+	static void		SetWapSendProgressBars(bool on)	{ m_bWapSendProgressBars=on; }
+	static bool		GetWapSendProgressBars()		{ return m_bWapSendProgressBars; }
+	static bool		GetWapAllwaysSendBWImages()		{ return m_bWapAllwaysSendBWImages; }
+	static void		SetWapAllwaysSendBWImages(bool on)	{ m_bWapAllwaysSendBWImages=on; }
+	static UINT		GetWapLogsSize()				{ return m_iWapLogsSize; }
+	static void		SetWapLogsSize(UINT size)		{ m_iWapLogsSize=size; }
+	static const	CString& GetWapPass()				{ return m_sWapPassword; }
+	static void		SetWapPass(CString strNewPass);
+	static bool		GetWapIsLowUserEnabled()		{ return m_bWapLowEnabled; }
+	static void		SetWapIsLowUserEnabled(bool in)	{ m_bWapLowEnabled=in; }
+	static const	CString& GetWapLowPass()			{ return m_sWapLowPassword; }
+	static void		SetWapLowPass(CString strNewPass);
+	// End MoNKi
 };
 
 extern CPreferences thePrefs;

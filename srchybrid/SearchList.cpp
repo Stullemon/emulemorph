@@ -956,3 +956,86 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 	
 	delete temp;
 }
+
+// emulEspaña - Added by MoNKi [MoNKi: -Wap Server-]
+CString CSearchList::GetWapList(CString linePattern,int sortby,bool asc, int start, int max, bool &more) const {
+	CString buffer;
+	CString temp;
+	CArray<CSearchFile*, CSearchFile*> sortarray;
+	int swap;
+	bool inserted;
+
+	// insertsort
+	CSearchFile* sf1;
+	CSearchFile* sf2;
+	for (POSITION pos = list.GetHeadPosition(); pos !=0;) {
+		inserted=false;
+		sf1 = list.GetNext(pos);
+		
+		if (sf1->GetListParent()!=NULL) continue;		
+		
+		for (uint16 i1=0;i1<sortarray.GetCount();++i1) {
+			sf2 = sortarray.GetAt(i1);
+			
+			switch (sortby) {
+				case 0: swap=sf1->GetFileName().CompareNoCase(sf2->GetFileName()); break;
+				case 1: swap=sf1->GetFileSize()-sf2->GetFileSize();break;
+				case 2: swap=CString(sf1->GetFileHash()).CompareNoCase(CString(sf2->GetFileHash())); break;
+				case 3: swap=sf1->GetSourceCount()-sf2->GetSourceCount(); break;
+			}
+			if (!asc) swap=0-swap;
+			if (swap<0) {inserted=true; sortarray.InsertAt(i1,sf1);break;}
+		}
+		if (!inserted) sortarray.Add(sf1);
+	}
+	
+	int endpos;
+
+	endpos = start + max;
+
+	if (endpos>sortarray.GetCount())
+		endpos=sortarray.GetCount();
+
+	if (start>sortarray.GetCount()){
+		start=endpos-max;
+		if (start<0) start=0;
+	}
+
+	for (uint16 i=start;i<endpos;++i) {
+		const CSearchFile* sf = sortarray.GetAt(i);
+
+		// colorize
+		CString coloraddon;
+		CString coloraddonE;
+		CKnownFile* sameFile = theApp.sharedfiles->GetFileByID(sf->GetFileHash());
+		if (!sameFile)
+			sameFile = theApp.downloadqueue->GetFileByID(sf->GetFileHash());
+
+		if (sameFile) {
+			if (sameFile->IsPartFile())
+				coloraddon = _T("<b>");
+			else
+				coloraddon = _T("");
+		}
+		if (coloraddon.GetLength()>0)
+			coloraddonE = _T("</b>");
+
+		CString strHash(EncodeBase16(sf->GetFileHash(),16));
+		temp.Format(linePattern,
+					coloraddon + StringLimit(sf->GetFileName(),70) + coloraddonE,
+					CastItoXBytes(sf->GetFileSize()),
+					strHash,
+					sf->GetSourceCount(),
+					strHash);
+
+		buffer.Append(temp);
+	}
+	
+	if(endpos<sortarray.GetCount())
+		more=true;
+	else
+		more=false;
+
+	return buffer;
+}
+// End emulEspaña

@@ -2102,7 +2102,9 @@
 #define IDC_EDIT1                       2877
 #define IDC_LD_LINKEDI                  2877
 #define IDC_CLIENTDETAIL_KADCON         2878
+#define IDC_EDIT11                      2878
 #define IDC_SEARCH_UNICODE              2879
+#define IDC_EDIT12                      2879
 #define IDC_AUTOSTART                   2880
 #define IDC_STARTWIN                    2882
 #define IDC_RADIO1                      2883
@@ -2124,6 +2126,7 @@
 #define IDC_RADIO7                      2898
 #define IDC_BUTTON1                     2899
 #define IDC_LD_LINKGROUP                2900
+#define IDC_BUTTON2                     2900
 #define IDC_LD_BASICGROUP               2901
 #define IDC_LD_ADVANCEDGROUP            2902
 #define IDC_LD_CLIPBOARDBUT             2903
@@ -2573,10 +2576,14 @@
 #define IDC_MR_STATIC3                  5033
 #define IDC_MR_STATIC2                  5034
 #define IDC_SIMPLECLEANUP               5035
+#define IDC_GROUP_DYNIP                 5035
 #define IDC_NEWCHARACTER                5036
+#define IDC_CHECK1                      5036
 #define IDC_FEEDCHANGE                  5037
 #define IDD_SIMPLECLEANUP               5038
 #define IDC_INSERTTEXTCOLUMN            5039
+#define IDD_PPG_MORPH3                  5039
+#define IDC_CHECK2                      5039
 #define IDC_DELETECHARACTER             5040
 #define IDC_CRCFORCEUPPERCASE           5041
 #define IDC_CRCFORCEADDING              5042
@@ -2584,6 +2591,7 @@
 #define IDC_BANNER                      5044
 #define IDC_STARTUPSOUNDON              5045
 #define IDS_MISSING_STARTUPSOUND        5046
+#define IDC_TREE1                       5046
 #define IDS_PW_STARTUPSOUND             5047
 #define IDC_FRIENDS_COUNTRY_EDIT        5115
 #define IDS_CHAT_COUNTRY                5115
@@ -2683,9 +2691,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        5016
+#define _APS_NEXT_RESOURCE_VALUE        5017
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5035
+#define _APS_NEXT_CONTROL_VALUE         5047
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

@@ -648,3 +648,72 @@ int CStatisticsTree::ApplyExpandedMask(CString theMask, HTREEITEM theItem, int t
 	}
 	return theStringIndex;
 }
+// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+//	This is the primary function for generating basic WML output of the statistics tree.
+//	It is recursive.
+CString CStatisticsTree::GetWML(bool onlyVisible, bool onlyBold, bool noRecursive, HTREEITEM theItem, int theItemLevel, bool firstItem)
+{
+	CString		strBuffer, strItem, stheItemPos;
+	HTREEITEM	hCurrent;
+	
+	strBuffer.Empty();
+	// modified by Announ [itsonlyme: -modname-]
+	/*
+	if (firstItem) strBuffer.Format("<b>eMule v%s %s [%s]</b>\r\n<br/><br/>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+	*/
+	if (firstItem) strBuffer.Format("<b>eMule v%s %s %s [%s]</b>\r\n<br/><br/>\r\n", theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+	// End itsonlyme
+
+	if (theItem == NULL) {
+		if (!onlyVisible) theApp.emuledlg->statisticswnd->ShowStatistics(true);
+		hCurrent = GetRootItem();
+	}
+	else if (firstItem) {
+		if (ItemHasChildren(theItem)) hCurrent = theItem; // Copy Branch issued for item with children, use item.
+		else hCurrent = GetParentItem(theItem); // Copy Branch issued for item with no children, use parent.
+	}
+	else hCurrent = theItem; // This function has been recursed.
+
+	while (hCurrent != NULL)
+	{
+		if((IsBold(hCurrent) && onlyBold) || !onlyBold){
+			strItem = GetItemText(hCurrent);
+
+			for (int i = 0; i < theItemLevel; i++) strBuffer += "...";
+			if (ItemHasChildren(hCurrent)){
+				stheItemPos.Format("%p",hCurrent);
+				strBuffer += "<b><a href=\"./?ses=[Session]&amp;w=stats&amp;show=" + stheItemPos + "\">" + strItem + "</a></b><br/>";
+			}else
+				strBuffer += strItem + "<br/>";
+		}
+		if (!noRecursive && ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
+			strBuffer += (CString) GetWML(onlyVisible, onlyBold, false, GetChildItem(hCurrent), theItemLevel+1, false);
+		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
+	}
+	return strBuffer;
+}
+
+bool CStatisticsTree::ItemExist(HTREEITEM item, HTREEITEM curItem)
+{
+	if (item == NULL) return false;
+
+	HTREEITEM	hCurrent;
+	bool found=false;
+
+	if(curItem==NULL)
+		hCurrent = GetRootItem();
+	else
+		hCurrent = curItem;
+
+	while (hCurrent != NULL && found == false)
+	{
+		if(hCurrent == item) found = true;
+		
+		if(!found && ItemHasChildren(hCurrent))
+			found = ItemExist(item, GetChildItem(hCurrent));
+
+		if(!found) hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
+	}
+	return found;
+}
+// End emulEspaña

@@ -187,7 +187,7 @@ void CTransferWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CLIENTLIST, clientlistctrl);
 	DDX_Control(pDX, IDC_UPLOAD_ICO, m_uplBtn);
 	DDX_Control(pDX, IDC_DLTAB, m_dlTab);
-	DDX_Control(pDX, IDC_QUEUE, queueBar); //Commander - Added: ClientQueueProgressBar - Start
+	DDX_Control(pDX, IDC_QUEUE, queueBar); //Commander - Added: ClientQueueProgressBar
 }
 
 void CTransferWnd::SetInitLayout() {

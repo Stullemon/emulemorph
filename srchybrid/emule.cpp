@@ -48,6 +48,7 @@
 #include "Statistics.h"
 #include "OtherFunctions.h"
 #include "WebServer.h"
+#include "WapServer/WapServer.h"	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
 #include "UploadQueue.h"
 #include "SharedFileList.h"
 #include "ServerList.h"
@@ -70,6 +71,11 @@
 
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
+
+
+// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+#include "Ini2.h"
+// Commander - Added: Custom incoming folder icon [emulEspaña] - End
 
 CLog theLog;
 CLog theVerboseLog;
@@ -397,6 +403,9 @@ BOOL CemuleApp::InitInstance()
 	emuledlg = &dlg;
 	m_pMainWnd = &dlg;
 	OptimizerInfo();//Commander - Added: Optimizer [ePlus]
+        // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+	theApp.AddIncomingFolderIcon();
+        // Commander - Added: Custom incoming folder icon [emulEspaña] - End        
 
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
@@ -450,6 +459,7 @@ BOOL CemuleApp::InitInstance()
 	uploadqueue = new CUploadQueue();
 	ipfilter 	= new CIPFilter();
 	webserver = new CWebServer(); // Webserver [kuchin]
+	wapserver = new CWapServer(); // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
 		m_pPeerCache = new CPeerCacheFinder();
@@ -1590,3 +1600,30 @@ if (!emuledlg)
 	AddLogLine(false,_T("********Optimizer********"));
 }
 //Commander - Added: Optimizer [ePlus] - End
+// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+void CemuleApp::AddIncomingFolderIcon(){
+	CString desktopFile, exePath;
+	
+	desktopFile = CString(thePrefs.GetIncomingDir()) + _T("\\Desktop.ini");
+	exePath = thePrefs.GetAppDir() + CString(theApp.m_pszExeName) + _T(".exe");
+
+	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+	
+	desktopIni.WriteString(_T("IconFile"),exePath);
+	desktopIni.WriteInt(_T("IconIndex"),1);
+
+	SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
+	PathMakeSystemFolder(thePrefs.GetIncomingDir());
+}
+
+void CemuleApp::RemoveIncomingFolderIcon(){
+	CString desktopFile;
+	
+	desktopFile = CString(thePrefs.GetIncomingDir()) + _T("\\Desktop.ini");
+
+	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+	
+	desktopIni.DeleteKey(_T("IconFile"));
+	desktopIni.DeleteKey(_T("IconIndex"));
+}
+// Commander - Added: Custom incoming folder icon [emulEspaña] - End
