@@ -3,6 +3,7 @@ Changelog for eMule 0.42d MorphXT v2.x
 --------------------------------------
 CHANGED: MultipleInstance from SF-IOM mod
 CHANGED: update SafeHash and mergeKnown code from SF-IOM mod, partial changed mergeKnown code to adapt 0.42 code
+CHANGED: take the averageupload speed rate for 10kB/s limit related to ratio activation [SiRoB]
 FIXED  : Advanced filter mask is now correctly saved [SiRoB]
 
 --------------------------------------   
