@@ -551,8 +551,21 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 					   
 					int iOLeft = lpRect->left;
 					lpRect->left += iWidth / 2 - 10; // Close enough 
+					//MORPH START - Added by SiRoB, Bold percentage
+					CFont newFont;
+					CFont *pOldFont;
+					LOGFONT logFont;
+					CFont *pFont = GetFont();
+					pFont->GetLogFont(&logFont);
+					logFont.lfWeight = FW_BOLD;
+					newFont.CreateFontIndirect(&logFont);
+					pOldFont = dc->SelectObject(&newFont);
+					//MORPH END   - Added by SiRoB, Bold percentage
 					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
-					   
+					//MORPH START - Added by SiRoB, Bold percentage
+					dc->SelectObject (pOldFont);
+					newFont.DeleteObject ();
+					//MORPH END   - Added by SiRoB, Bold percentage					   
 					lpRect->left = iOLeft;
 					dc->SetBkMode(iOMode);
 					dc->SetTextColor(oldclr);

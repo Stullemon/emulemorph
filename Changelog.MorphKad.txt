@@ -1,7 +1,7 @@
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.?
 ----------------------------------------
-CHANGED: Put the Official Percentage Display on the download progress bare [SiRoB]
+CHANGED: Put the Official Percentage Display on the download progress bare with bold font [SiRoB]
 CHANGED: A4AF from Khaos related to the completes sources feature and ObtainedPart [SiRoB]
 ADDED: Only download complete files v2.1 (shadow)[AndCycle]
 ADDED: PreferShareAll option (SlugFiller) [AndCycle]
