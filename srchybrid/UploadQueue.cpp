@@ -1053,6 +1053,22 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 	if(client->GetQueueSessionUp()){
 		successfullupcount++;
 
+		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
+			if(earlyabort == true){
+				client->Credits()->SaveUploadQueueWaitTime();
+			}
+			else if(client->GetSessionUp() < SESSIONAMOUNT){
+				int keeppct = ((100 * client->GetSessionUp())/SESSIONAMOUNT) - 10;// At least 10% time credit 'penalty'
+				if (keeppct < 0)    keeppct = 0;
+				client->Credits()->SaveUploadQueueWaitTime(keeppct);
+			}
+			else{
+				client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
+			}
+		}
+		//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
 		if(client->GetSessionUp()) {
 			//wistily
 			uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
@@ -1060,30 +1076,12 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 			client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
 			/*totaluploadtime += client->GetUpStartTimeDelay()/1000;*/
 			totaluploadtime += tempUpStartTimeDelay/1000;
-			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-			if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-				if(earlyabort == true){
-					client->Credits()->SaveUploadQueueWaitTime();
-				}
-				else if(client->GetSessionUp() < SESSIONAMOUNT){
-					int keeppct = ((100 * client->GetSessionUp())/SESSIONAMOUNT) - 10;// At least 10% time credit 'penalty'
-					if (keeppct < 0)    keeppct = 0;
-					client->Credits()->SaveUploadQueueWaitTime(keeppct);
-				}
-				else{
-					client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
-				}
-			}
-			//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
 			//wistily stop
 			totalCompletedBytes += client->GetSessionUp();
 		}
 		//} else if(client->HasBlocks() || client->GetUploadState() != US_UPLOADING) {
-		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		else if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-			client->Credits()->SaveUploadQueueWaitTime(90);	// At least 10% time credit 'penalty'
-		}
-		//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
 	} else if(earlyabort == false){
 		failedupcount++;
 		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
