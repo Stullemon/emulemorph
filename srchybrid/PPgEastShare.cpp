@@ -29,8 +29,8 @@ CPPgEastShare::CPPgEastShare()
 	m_bInitializedTreeOpts = false;
 //	m_htiIsBoostLess = NULL;//Added by Yun.SF3, boost the less uploaded files //EastShare removed by linekin for CreditSystem integration
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
-	m_htiAutoClearComplete = NULL; //EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
+	m_htiAutoClearComplete = NULL; //EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	//EastShare START - Added by Pretender
 	m_htiCreditSystem = NULL;
 	m_htiOfficialCredit = NULL;
@@ -106,6 +106,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnablePreferShareAll, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiIsPayBackFirst, m_bIsPayBackFirst);//EastShare - added by AndCycle, Pay Back First
+	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiAutoClearComplete, m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 }
 
 

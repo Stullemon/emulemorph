@@ -1418,8 +1418,6 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("KnownMetDays", prefs->m_iKnownMetDays);
 	// EastShare END - Added by TAHO, .met file control
 
-	ini.WriteBool("AutoClearComplete", prefs->m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
-
 	// Barry - New properties...
     ini.WriteBool("AutoConnectStaticOnly", prefs->autoconnectstaticonly);  
 	ini.WriteBool("AutoTakeED2KLinks", prefs->autotakeed2klinks);  
@@ -1490,6 +1488,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("UseCreditSystem",prefs->m_bCreditSystem);
 
 	ini.WriteBool("IsPayBackFirst",prefs->m_bPayBackFirst);//EastShare - added by AndCycle, Pay Back First
+	ini.WriteBool("AutoClearComplete", prefs->m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 
 	ini.WriteBool("SaveLogToDisk",prefs->log2disk);
 	ini.WriteBool("SaveDebugToDisk",prefs->debug2disk);
