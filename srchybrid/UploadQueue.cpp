@@ -977,7 +977,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 	/*
 	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1) && datarate < 102400 )
     */
-	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(3))
+	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1))
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		return false;
 	
@@ -999,24 +999,18 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 		return false;
     }
 
-    //MORPH START - Added by SiRoB, Upload Splitting Class
-	/*
     uint32 activeSlots = m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
 
     if(simulateScheduledClosingOfSlot) {
         activeSlots = m_MaxActiveClientsShortTime;
     }
 
-    if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall ||
+    if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
        curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall+1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
         return true;
     }
-	*/
-	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-		if (m_abAddClientOfThisClass[classID])
-   			return true;
-	//MORPH END   - Added by SiRoB, Upload Splitting Class
-    //nope
+
+	//nope
 	return false;
 }
 
@@ -1276,7 +1270,13 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			renumberClient->SetSlotNumber(renumberClient->GetSlotNumber()-1);
 			uploadinglist.GetPrev(renumberPosition);
 		}
-
+        if(client->socket) {
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+			    DebugSend("OP__OutOfPartReqs", client);
+			Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
+			theStats.AddUpDataOverheadFileRequest(pCancelTransferPacket->size);
+			client->socket->SendPacket(pCancelTransferPacket,true,true);
+        }
 		if (updatewindow)
 			theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
 		if (thePrefs.GetLogUlDlEvents())
