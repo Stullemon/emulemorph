@@ -1,8 +1,9 @@
 --------------------------------------
-Changelog for eMule 0.44d MorphXT v5.13
+Changelog for eMule 0.44d MorphXT v5.1x
 --------------------------------------
 FIXED  : crash (introduced in previous version) when strat resume next occur and 'prefer same category' or 'only in same categry' prefrency is not checked [SiRoB]
 
+TWEAKED: USC: Fully splittable upload bandwidth [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.12
@@ -31,7 +32,7 @@ ADDED  : Country column in download window [SiRoB]
 ADDED  : Fading window on exit (only for XP) [Commander]
 ADDED  : Ban Ghost mod (ie: mod client that don't provide modID) [SiRoB]
 
-TEAWED: Better datarate mesurement for low and high speed [SiRoB]
+TWEAKED: Better datarate mesurement for low and high speed [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.11
