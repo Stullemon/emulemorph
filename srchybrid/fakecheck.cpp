@@ -59,7 +59,7 @@ static int __cdecl CmpFakeByHash_Lenght(const void* p1, const void* p2)
 }
 
 int CFakecheck::LoadFromFile(){
-	FILE* readFile = _tfsopen(thePrefs.GetConfigDir()+_T("fakes.dat"), _T("r"), _SH_DENYWR);
+	FILE* readFile = _tfsopen(thePrefs.GetConfigDir()+DFLT_FAKECHECK_FILENAME, _T("r"), _SH_DENYWR);
 	if (readFile!=NULL) {
 		CString sbuffer, sbuffer2;
 		int pos;
