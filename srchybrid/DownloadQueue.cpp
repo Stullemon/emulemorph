@@ -225,8 +225,10 @@ void CDownloadQueue::AddSearchToDownload(CString link,uint8 paused, uint8 cat, u
 void CDownloadQueue::StartNextFileIfPrefs(int cat) {
     if (thePrefs.StartNextFile()) {
         int catTemp = thePrefs.StartNextFile() > 1?cat:-1;
-        bool force = thePrefs.StartNextFile()==3?false:true;
-
+		bool force = thePrefs.StartNextFile()==3?false:true;
+		//MORPH START - Added by SiRoB, Per cat Resume file only in the same category
+		force &= !thePrefs.GetCategory(catTemp)->bResumeFileOnlyInSameCat;
+		//MORPH END  - Added by SiRoB, Per cat Resume file only in the same category
 		StartNextFile(catTemp, force);
     }
 }
@@ -257,7 +259,7 @@ bool CDownloadQueue::StartNextFile(int cat, bool force){
 	    for (pos = filelist.GetHeadPosition();pos != 0;){
 		    cur_file = filelist.GetNext(pos);
 		    if (cur_file->GetStatus() == PS_PAUSED &&
-                CPartFile::RightFileHasHigherPrio(pfile, cur_file) && !thePrefs.GetCategory(cur_file->GetCategory())->bResumeFileOnlyInSameCat)  //MORPH - Added by SiRoB, Resume file only in the same category
+                                CPartFile::RightFileHasHigherPrio(pfile, cur_file) && !thePrefs.GetCategory(cur_file->GetCategory())->bResumeFileOnlyInSameCat)  //MORPH - Added by SiRoB, Resume file only in the same category
 		    {
                 // pick first found matching file, since they are sorted in prio order with most important file first.
 			    pfile = cur_file;
