@@ -1,4 +1,9 @@
 -----------------------------------------
+Changelog for eMule 0.41b29 MorphKad 0.11
+-----------------------------------------
+Merging in Progress [SiRoB]
+
+-----------------------------------------
 Changelog for eMule 0.41a10 MorphKad 0.10
 -----------------------------------------
 ADDED: Show download in bold in morph preferency [SiRoB]
@@ -8,6 +13,7 @@ FIXED: Statistic for max download average stay at 0 [SiRoB]
 FIXED: Category tab masking [SiRoB]
 FIXED: Rating icons always display no rating [SiRoB]
 FIXED: Source Saver isn't correct work [SiRoB]
+FIXED: Wrong information used for the powershare limit on shared complet file [SiRoB]
 CHANGED: Morph Preferency for futur feature [SiRoB]
 
 ----------------------------------------
