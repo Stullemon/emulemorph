@@ -201,6 +201,17 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 * @return true if right client is better, false if clients are equal. False if left client is better.
 */
 bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore) {
+    if(!rightClient) {
+        return false;
+    }
+
+    bool leftLowIdMissed = false;
+    bool rightLowIdMissed = false;
+    
+    if(leftClient) {
+        leftLowIdMissed = leftClient->HasLowID() && leftClient->socket && leftClient->socket->IsConnected() && leftClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick;
+        rightLowIdMissed = rightClient->HasLowID() && rightClient->socket && rightClient->socket->IsConnected() && rightClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick;
+    }
 
 	int iSuperior;
 	if(
@@ -215,7 +226,22 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 						leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
 						leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
 						(
-							leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
+							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() || // same prio file
+							leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false //neither want powershare file
+				        ) && // they are equal in powersharing
+				        (
+							!leftLowIdMissed && rightLowIdMissed || // rightClient is lowId and has missed a slot and is currently connected
+				
+							leftLowIdMissed && rightLowIdMissed && // both have missed a slot and both are currently connected
+							leftClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick > rightClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick || // but right client missed earlier
+				
+							(
+								!leftLowIdMissed && !rightLowIdMissed || // none have both missed and is currently connected
+				
+								leftLowIdMissed && rightLowIdMissed && // both have missed a slot
+								leftClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick == rightClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick // and at same time (should hardly ever happen)
+				            ) &&
+							rightScore > leftScore // but rightClient has better score, so rightClient is better
 						)
 					)
 				)
@@ -1076,6 +1102,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 	
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
+            client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
             uploadinglist.RemoveAt(curPos);
 
             bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
@@ -1118,9 +1145,8 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			client->SetUploadState(US_NONE);
 			client->ClearUploadBlockRequests();
 	
-            client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
+            m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 
-		    m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			// EastShare START - Marked by TAHO, modified SUQWT
 			if(earlyabort == true)
