@@ -525,6 +525,8 @@ BOOL CemuleApp::InitInstance()
 	uploadBandwidthThrottler = new UploadBandwidthThrottler();
 	//MORPH END - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
 
+	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
+	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	clientlist = new CClientList();
 	friendlist = new CFriendList();
 	searchlist = new CSearchList();
@@ -538,8 +540,6 @@ BOOL CemuleApp::InitInstance()
 	downloadqueue = new CDownloadQueue();	// bugfix - do this before creating the uploadqueue
 	uploadqueue = new CUploadQueue();
 	ipfilter 	= new CIPFilter();
-	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
 	webserver = new CWebServer(); // Webserver [kuchin]
 	wapserver = new CWapServer(); //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	mmserver = new CMMServer();

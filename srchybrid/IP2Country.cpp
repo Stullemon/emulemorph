@@ -130,23 +130,20 @@ static int __cdecl CmpIP2CountryByStartAddr(const void* p1, const void* p2)
 
 bool CIP2Country::LoadFromFile(){
 	DWORD startMesure = GetTickCount();
-	TCHAR szBuffer[128];
+	TCHAR* szbuffer = new TCHAR[88];
 	CString ip2countryCSVfile = GetDefaultFilePath();
 	FILE* readFile = _tfsopen(ip2countryCSVfile, _T("r"), _SH_DENYWR);
 	try{
 		if (readFile != NULL) {
-
 			int iCount = 0;
 			int iLine = 0;
 			int iDuplicate = 0;
 			int iMerged = 0;
 			bool error = false;
-			CString tempStr[5];
-			CString	sbuffer;
+			TCHAR *szIPStart,*szIPEnd,*sz2L,*sz3L,*szCountry;
 			while (!feof(readFile)) {
 				error = false;
-				if (_fgetts(szBuffer, ARRSIZE(szBuffer),readFile)==0) break;
-				sbuffer = szBuffer;
+				if (_fgetts(szbuffer, 88,readFile)==0) break;
 				++iLine;
 				/*
 				http://ip-to-country.webhosting.info/node/view/54
@@ -166,31 +163,32 @@ bool CIP2Country::LoadFromFile(){
 				*/
 				// we assume that the ip-to-country.csv is valid and doesn't cause any troubles
 				// get & process IP range
-				sbuffer.TrimRight(_T('\n'));
-				//sbuffer.Remove('"'); // get rid of the " signs
-
-				int curPos = 0;
-
-				for(int forCount = 0; forCount !=  5; forCount++){
-					tempStr[forCount] = sbuffer.Tokenize(_T(","), curPos);
-					tempStr[forCount].Remove('"'); // get rid of the " signs
-					if(tempStr[forCount].IsEmpty()) {
-						if(forCount == 0 || forCount == 1) error = true; //no empty ip field
-						// ignore comments & too short lines
-						//throw CString(_T("error line in"));
-					}
-				}
-
-				if(error){
-					AddLogLine(false, GetResString(IDS_IP2COUNTRY_ERROR1), iCount+1);
-					AddLogLine(false, _T("%s %s"), GetResString(IDS_IP2COUNTRY_ERROR2), ip2countryCSVfile);
+				
+				if (*szbuffer != _T('"'))
 					continue;
-				}
-				//tempStr[4] is full country name, capitalize country name from rayita
-				FirstCharCap(&tempStr[4]);
-
+				szIPStart=++szbuffer;
+				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
+				*szbuffer = '\0';
+				szIPEnd=szbuffer+=3;
+				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
+				*szbuffer = '\0';
+				sz2L = szbuffer+=3;
+				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
+				*szbuffer = '\0';
+				sz3L = szbuffer+=3;
+				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
+				*szbuffer = '\0';
+				szCountry = szbuffer+=3;
+				++szbuffer;
+				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ )
+					if ( (*szbuffer >= (TCHAR)L'A') && (*szbuffer <= (TCHAR)L'Z') )
+						*szbuffer -= L'A' - L'a';
+					else if (*szbuffer == (TCHAR)L' ')
+						++szbuffer;
+				*szbuffer= '\0';
+				szbuffer=szIPStart-1;
 				++iCount;
-				AddIPRange(_tstoi(tempStr[0]),_tstoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
+				AddIPRange(_tstoi(szIPStart),_tstoi(szIPEnd), sz2L, sz3L, szCountry);
 			}
 			fclose(readFile);
 
@@ -204,7 +202,7 @@ bool CIP2Country::LoadFromFile(){
 				{
 					IPRange_Struct2* pCur = m_iplist[i];
 					if (   pCur->IPstart >= pPrv->IPstart && pCur->IPstart <= pPrv->IPend	 // overlapping
-						|| pCur->IPstart == pPrv->IPend+1 && &pCur->ShortCountryName == &pPrv->ShortCountryName) // adjacent
+						|| pCur->IPstart == pPrv->IPend+1 && pCur->ShortCountryName == pPrv->ShortCountryName) // adjacent
 					{
 						if (pCur->IPstart != pPrv->IPstart || pCur->IPend != pPrv->IPend) // don't merge identical entries
 						{
@@ -247,6 +245,7 @@ bool CIP2Country::LoadFromFile(){
 		RemoveAllIPs();
 		return false;
 	}
+	delete[] szbuffer;
 	return true;
 
 }
@@ -422,7 +421,7 @@ void CIP2Country::RemoveAllFlags(){
 	AddLogLine(false, GetResString(IDS_IP2COUNTRY_FLAGUNLD));
 }
 
-void CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString& shortCountryName, CString& midCountryName, CString& longCountryName){
+void CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, TCHAR* shortCountryName, TCHAR* midCountryName, TCHAR* longCountryName){
 	IPRange_Struct2* newRange = new IPRange_Struct2();
 	newRange->IPstart = IPfrom;
 	newRange->IPend = IPto;
