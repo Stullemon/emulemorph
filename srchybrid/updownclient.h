@@ -505,8 +505,6 @@ private:
 	DWORD       m_dwLastCheckedForEvictTick;
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
 	bool		m_bPayBackFirstTag; //EastShare - added by AndCycle, Pay Back First
-	uint32		m_dwLastBaseValue;	//Morph - added by AndCycle, reduce a little CPU usage for score count
-	DWORD		m_dwLastGetScore;	//Morph - added by AndCycle, reduce a little CPU usage for score count
 public:
 	uint16		m_lastPartAsked;
 	uint8*		m_abyUpPartStatus;

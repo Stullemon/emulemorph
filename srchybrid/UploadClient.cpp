@@ -205,19 +205,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		return 0;
 	}
 
-
-	//Morph Start - added by AndCycle, reduce a little CPU usage for score count
-	//well...I dont know how many CPU usage can this reduce...maybe even doesnt work....
-	bool onlycurrentwaitingscore = !sysvalue && !isdownloading && !onlybasevalue;
-	if(onlycurrentwaitingscore){
-
-		if(curTick - m_dwLastGetScore < 100)
-			return m_dwLastBaseValue;
-		else
-			m_dwLastGetScore = curTick;
-	}
-	//Morph End - added by AndCycle, reduce a little CPU usage for score count
-
 	int filepriority = GetFilePrioAsNumber();
 	//MORPH - Added by Yun.SF3, ZZ Upload System
 
@@ -278,11 +265,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	}
 	if( (IsEmuleClient() || this->GetClientSoft() < 10) && m_byEmuleVersion <= 0x19 )
 		fBaseValue *= 0.5f;
-
-	//Morph Start - added by AndCycle, reduce a little CPU usage for score count
-	if(onlycurrentwaitingscore)
-		m_dwLastBaseValue = (uint32)fBaseValue;
-	//Morph End - added by AndCycle, reduce a little CPU usage for score count
 
 	return (uint32)fBaseValue;
 }
