@@ -422,7 +422,7 @@ void CKnownFile::AssertValid() const
 	CHECK_BOOL(m_bCommentLoaded);
 	(void)m_iPartCount;
 	(void)m_iED2KPartCount;
-	(void)m_iED2KPartHashCount;
+	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 	ASSERT( m_iUpPriority == PR_VERYLOW || m_iUpPriority == PR_LOW || m_iUpPriority == PR_NORMAL || m_iUpPriority == PR_HIGH || m_iUpPriority == PR_VERYHIGH );
 	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE );
 	CHECK_BOOL(m_bAutoUpPriority);
