@@ -610,7 +610,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							else if (Sbuffer != "")
 								dc->SetTextColor(RGB(255, 0, 0)); // if webcache info is there but not our own set red
 							else
-								Sbuffer = "no proxy set";	// if no webcache info colour is black
+								Sbuffer = GetResString(IDS_WEBCACHE_NOPROXY);	// if no webcache info colour is black
 						   }
 						else
 							Sbuffer = "";

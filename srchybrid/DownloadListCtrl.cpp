@@ -1284,7 +1284,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				else if (buffer != "")
 					dc->SetTextColor(RGB(255, 0, 0)); // if webcache info is there but not our own set red
 				else
-					buffer = "no proxy set";	// if no webcache info colour is black
+					buffer = GetResString(IDS_WEBCACHE_NOPROXY);	// if no webcache info colour is black
 			}
 			else
 				buffer = "";
