@@ -388,7 +388,7 @@ void CTransferWnd::UpdateSplitterRange()
 	//SLAHAM: ADDED DownloadClientsCtrl <=
 
 		// [Comment by Mighty Knife:]
-		// Calculate the procentual position of the splitter bar and save it.
+		// Calculate the percentage position of the splitter bar and save it.
 		// Make sure to subtract the 5 pixel we added to the bottom position of
 		// the downloadlist!
 		// Furthermore we add another Height/2 before dividing by Height to perform
@@ -1016,7 +1016,7 @@ void CTransferWnd::OnBnClickedDownUploads()
 	// [Comment by Mighty Knife:]
 	//
 	// thePrefs.GetSplitterbarPosition() retrieves the SplitterBar position.
-	// This is a procentual value (0-100%) of height of the whole window.
+	// This is a percentage value (0-100%) of height of the whole window.
 	// Therefore the "splitpos" variable calculates the vertical pixel-position
 	// of the SplitterBar relative to the height of the whole window, i.e.
 	// the Transfer-window!
@@ -1030,7 +1030,7 @@ void CTransferWnd::OnBnClickedDownUploads()
 	rcDown.bottom=splitpos+5;
 	// [Comment by Mighty Knife:]
 	// In UpdateSplitterRange we used this downloadlist here to recalculate the
-	// procentual splitter position from the current absolute pixel position
+	// percentage splitter position from the current absolute pixel position
 	// on the screen. We added 5 pixel here to the splitpos to get the bottom
 	// position of the downloadlist. So in UpdateSplitterRange we have to remember
 	// subtracting these 5 pixel again!
