@@ -399,9 +399,9 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& iSt
 	}
 
 	//MORPH START - Added by SiRoB, Draw date adn time with defaultcolor
-	if(_tcslen(pszLine)>20 && (
-		pszLine[2]==_T('/') && pszLine[5]==_T('/') && pszLine[19]==_T(':')||
-		pszLine[2]==_T('.') && pszLine[5]==_T('.') && pszLine[19]==_T(':'))
+	TCHAR temp[128];
+	 _sntprintf(temp, ARRSIZE(temp), _T("%s:"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()));	
+	if(_tcslen(pszLine)>20 && _tcsncmp(pszLine,temp,15)==0)
 	{
 		TCHAR Date[21]=_T("\0");
 		_tcsncpy(Date,pszLine,20);
