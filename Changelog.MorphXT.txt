@@ -1,16 +1,24 @@
 --------------------------------------
 Changelog for eMule 0.44a MorphXT v5.x
 --------------------------------------
-MERGED : Merging in progress [SiRoB]
+MERGED : Merging in progress (plz to other dev tell me if you made change before commite) [SiRoB]
 
 FIXED  : Resource ID [SiRoB]
 FIXED  : minor gui display bug arround the category priority [SiRoB]
 FIXED  : Definitly fixed the Resume Next in the category context menu, this is not anymore a globaly Resume Next but a per-category resume [SiRoB]
-FIXED  : Anti-Leecher [SiRoB]
+FIXED  : Temporary banned client by ip detected by the zerofilled feature are well done (resort ip binary array) [SiRoB]
 
 CHANGED: Removed the "..." and change the tree in Morph preferency [SiRoB]
+CHANGED: Make one menu for CRC32 related function [SiRoB]
+CHANGED: Anti-Leecher Mecanisme by adding the reason of detection in log [SiRoB]
 
 ADDED  : Recalculate CRC32. Can be used to force EMule to compute the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
+ADDED  : CRC32 Localize [SiRoB]
+
+REMOVED: Ratio no longer present [SiRoB]
+
+TODO   : UNICODE Compatibility (in progess) [SiRoB]
+TODO   : Review Prio related to FS, PS and PBF [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
