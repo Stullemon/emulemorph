@@ -2149,11 +2149,6 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 		memset(src_stats,0,sizeof(src_stats));
 		uint16 nCountForState;
 
-		//MORPH START - Added by SiRoB, Spread Reask For Better SUC functioning and more
-		uint16 AvailableSrcCount = this->GetAvailableSrcCount()+1;
-		uint16 srcPosReask = 0;
-		//MORPH END   - Added by SiRoB, Spread Reask For Better SUC functioning and more
-		
 		for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;)
 		{
 			CUpDownClient* cur_src = srclist.GetNext(pos);
@@ -2294,13 +2289,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				case DS_NONE:
 				case DS_WAITCALLBACK:
 				{
-					//MORPH START - Changed by SiRoB, Changed Spread Reask For Better SUC result and more
-					/**/
 					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME))
-					/*/
-					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || ((dwCurTick > (cur_src->GetLastAskedTime()+FILEREASKTIME)) &&  (dwCurTick % FILEREASKTIME > (UINT32)((FILEREASKTIME / AvailableSrcCount) * (srcPosReask++ % AvailableSrcCount))))))
-					/**/
-					//MORPH END   - Changed by SiRoB, Spread Reask For Better SUC functioning and more
 					{
 						if(!cur_src->AskForDownload()) // NOTE: This may *delete* the client!!
 							break; //I left this break here just as a reminder just in case re rearange things..
@@ -3905,7 +3894,7 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 				{ 
 					// check for 0-IP, localhost and optionally for LAN addresses
 					if (thePrefs.GetLogFilteredIPs())
-						AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange - bad IP"), inet_ntoa(*(in_addr*)&dwID));
+						AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange - bad IP"), ipstr(dwID));
 					continue;
 				}
 				if (theApp.ipfilter->IsFiltered(dwID))
