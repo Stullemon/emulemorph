@@ -225,6 +225,11 @@ void CDownloadQueue::AddSearchToDownload(CString link,uint8 paused, uint8 cat, u
 void CDownloadQueue::StartNextFileIfPrefs(int cat) {
     if (thePrefs.StartNextFile()) {
         int catTemp = thePrefs.StartNextFile() > 1?cat:-1;
+		//MORPH START - Added by SiRoB, Per cat Resume file only in the same category
+		if (cat!=-1 && catTemp!=-1 && thePrefs.GetCategory(cat)->bResumeFileOnlyInSameCat)
+			int catTemp = cat;
+		//MORPH END  - Added by SiRoB, Per cat Resume file only in the same category
+		
 		bool force = thePrefs.StartNextFile()==3?false:true;
 		StartNextFile(catTemp, force);
     }
@@ -241,7 +246,6 @@ bool CDownloadQueue::StartNextFile(int cat, bool force){
         //MORPH START - Added by SiRoB, Per cat Resume file only in the same category
 		force &= !thePrefs.GetCategory(cat)->bResumeFileOnlyInSameCat;
 		//MORPH END  - Added by SiRoB, Per cat Resume file only in the same category
-		
 		// try to find in specified category
 		for (pos = filelist.GetHeadPosition();pos != 0;){
 			cur_file = filelist.GetNext(pos);
