@@ -512,44 +512,44 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		for (uint32 j = 0; j != tagcount; j++){
 			CTag* newtag = new CTag(&metFile);
 			if (!getsizeonly || (getsizeonly && (newtag->tag.specialtag==FT_FILESIZE || newtag->tag.specialtag==FT_FILENAME))){
-			    switch(newtag->tag.specialtag){
-				    case FT_FILENAME:{
-					    if (newtag->tag.stringvalue == NULL) {
-						    AddLogLine(true, GetResString(IDS_ERR_METCORRUPT), m_partmetfilename, GetFileName());
-						    delete newtag;
-						    return false;
-					    }
-					    SetFileName(newtag->tag.stringvalue);
-					    delete newtag;
-					    break;
-				    }
-				    case FT_LASTSEENCOMPLETE:{
+				switch(newtag->tag.specialtag){
+					case FT_FILENAME:{
+						if (newtag->tag.stringvalue == NULL) {
+							AddLogLine(true, GetResString(IDS_ERR_METCORRUPT), m_partmetfilename, GetFileName());
+							delete newtag;
+							return false;
+						}
+						SetFileName(newtag->tag.stringvalue);
+						delete newtag;
+						break;
+					}
+					case FT_LASTSEENCOMPLETE:{
 						if (newtag->tag.type == 3)
-						    lastseencomplete = newtag->tag.intvalue;
-					    delete newtag;
-					    break;
-				    }
-				    case FT_FILESIZE:{
-					    SetFileSize(newtag->tag.intvalue);
-					    delete newtag;
-					    break;
-				    }
-				    case FT_TRANSFERED:{
-					    transfered = newtag->tag.intvalue;
-					    delete newtag;
-					    break;
-				    }
-				    case FT_FILETYPE:{
-					    SetFileType(newtag->tag.stringvalue);
-					    delete newtag;
-					    break;
-				    }
-				    case FT_CATEGORY:{
-					    m_category = newtag->tag.intvalue;
-					    delete newtag;
-					    break;
-				    }
-				    case FT_DLPRIORITY:{
+							lastseencomplete = newtag->tag.intvalue;
+						delete newtag;
+						break;
+					}
+					case FT_FILESIZE:{
+						SetFileSize(newtag->tag.intvalue);
+						delete newtag;
+						break;
+					}
+					case FT_TRANSFERED:{
+						transfered = newtag->tag.intvalue;
+						delete newtag;
+						break;
+					}
+					case FT_FILETYPE:{
+						SetFileType(newtag->tag.stringvalue);
+						delete newtag;
+						break;
+					}
+					case FT_CATEGORY:{
+						m_category = newtag->tag.intvalue;
+						delete newtag;
+						break;
+					}
+					case FT_DLPRIORITY:{
 						if (!isnewstyle){
 							m_iDownPriority = newtag->tag.intvalue;
 							if( m_iDownPriority == PR_AUTO ){
@@ -564,14 +564,14 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						}
 						delete newtag;
 						break;
-				    }
-				    case FT_STATUS:{
-					    paused = newtag->tag.intvalue;
-					    stopped=paused;
-					    delete newtag;
-					    break;
-				    }
-				    case FT_ULPRIORITY:{
+					}
+					case FT_STATUS:{
+						paused = newtag->tag.intvalue;
+						stopped=paused;
+						delete newtag;
+						break;
+					}
+					case FT_ULPRIORITY:{
 						if (!isnewstyle){
 							int iUpPriority = newtag->tag.intvalue;
 							if( iUpPriority == PR_AUTO ){
@@ -586,14 +586,14 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 							}
 						}
 						delete newtag;
-					    break;
-				    }
-				    case FT_KADLASTPUBLISHSRC:{
-					    SetLastPublishTimeKadSrc(newtag->tag.intvalue);
-					    delete newtag;
-					    break;
-				    }
-				    // xMule_MOD: showSharePermissions - load permissions
+						break;
+					}
+					case FT_KADLASTPUBLISHSRC:{
+						SetLastPublishTimeKadSrc(newtag->tag.intvalue);
+						delete newtag;
+						break;
+					}
+					// xMule_MOD: showSharePermissions - load permissions
 					case FT_PERMISSIONS: {
 						SetPermissions(newtag->tag.intvalue);
 						delete newtag;
@@ -1252,7 +1252,7 @@ bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struc
 			end = blockLimit;
 		if (end > partEnd)
 			end = partEnd;
-    
+	
 		// If this gap has not already been requested, we have found a valid entry
 		if (!IsAlreadyRequested(start, end))
 		{
@@ -1407,13 +1407,13 @@ void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat){
 		crProgress = RGB(0, 224, 0);
 	if(notgray) {
 		crMissing = RGB(255, 0, 0);
-	    if(bFlat) {
-		    crHave = RGB(0, 0, 0);
-		    crPending = RGB(255,208,0);
-	    } else {
-		    crHave = RGB(104, 104, 104);
-		    crPending = RGB(255, 208, 0);
-	    }
+		if(bFlat) {
+			crHave = RGB(0, 0, 0);
+			crPending = RGB(255,208,0);
+		} else {
+			crHave = RGB(104, 104, 104);
+			crPending = RGB(255, 208, 0);
+		}
 	} else {
 		crMissing = RGB(191, 64, 64);
 		if(bFlat) {
@@ -1461,10 +1461,10 @@ void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat){
 				// SLUGFILLER: grayPause
 				{
 					if(notgray)
-					    color = RGB(0,
-								    (210-(22*(m_SrcpartFrequency[(uint16)i]-1)) <  0)? 0:210-(22*(m_SrcpartFrequency[(uint16)i]-1))
-								    ,255);
-				    else
+						color = RGB(0,
+									(210-(22*(m_SrcpartFrequency[(uint16)i]-1)) <  0)? 0:210-(22*(m_SrcpartFrequency[(uint16)i]-1))
+									,255);
+					else
 						color = RGB(64,
 									(169-(11*(m_SrcpartFrequency[(uint16)i]-1)) <  64)? 64:169-(11*(m_SrcpartFrequency[(uint16)i]-1))
 									,191);
@@ -2382,7 +2382,7 @@ BOOL CPartFile::PerformFileComplete()
 		AddLogLine(true,GetResString(IDS_ERR_DELETEFAILED) + _T(" - ") + CString(strerror(errno)),m_fullname);
 	// khaos::kmod+ Save/Load Sources
 	else
-        m_sourcesaver.DeleteFile(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
+		m_sourcesaver.DeleteFile(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
 	// khaos::kmod-
 
 	// remove backup files
@@ -2850,12 +2850,12 @@ bool CPartFile::PreviewAvailable()
 		// enable the preview command if the according option is specified 'PreviewSmallBlocks' 
 		// or if VideoLAN client is specified
 		if (theApp.glob_prefs->GetPreviewSmallBlocks() || !_tcsicmp(szVideoPlayerFileName, _T("vlc"))){
-		    if (m_bPreviewing)
-			    return false;
+			if (m_bPreviewing)
+				return false;
 
-		    uint8 uState = GetStatus();
-		    if (!(uState == PS_READY || uState == PS_EMPTY || uState == PS_PAUSED))
-			    return false;
+			uint8 uState = GetStatus();
+			if (!(uState == PS_READY || uState == PS_EMPTY || uState == PS_PAUSED))
+				return false;
 
 			// default: check the ED2K file format to be of type audio, video or CD image. 
 			// but because this could disable the preview command for some file types which eMule does not know,
@@ -2873,31 +2873,31 @@ bool CPartFile::PreviewAvailable()
 				}
 			}
 
-		    // If it's an MPEG file, VLC is even capable of showing parts of the file if the beginning of the file is missing!
-		    bool bMPEG = false;
-		    LPCTSTR pszExt = _tcsrchr(GetFileName(), _T('.'));
-		    if (pszExt != NULL){
-			    CString strExt(pszExt);
-			    strExt.MakeLower();
-			    bMPEG = (strExt==_T(".mpg") || strExt==_T(".mpeg") || strExt==_T(".mpe") || strExt==_T(".mp3") || strExt==_T(".mp2") || strExt==_T(".mpa"));
-		    }
+			// If it's an MPEG file, VLC is even capable of showing parts of the file if the beginning of the file is missing!
+			bool bMPEG = false;
+			LPCTSTR pszExt = _tcsrchr(GetFileName(), _T('.'));
+			if (pszExt != NULL){
+				CString strExt(pszExt);
+				strExt.MakeLower();
+				bMPEG = (strExt==_T(".mpg") || strExt==_T(".mpeg") || strExt==_T(".mpe") || strExt==_T(".mp3") || strExt==_T(".mp2") || strExt==_T(".mpa"));
+			}
 
-		    if (bMPEG){
-			    // TODO: search a block which is at least 16K (Audio) or 256K (Video)
-			    if (GetCompletedSize() < 16*1024)
-				    return false;
-		    }
-		    else{
-			    // For AVI files it depends on the used codec..
-			    if (!IsComplete(0, 256*1024))
-				    return false;
-		    }
-    
-		    return true;
+			if (bMPEG){
+				// TODO: search a block which is at least 16K (Audio) or 256K (Video)
+				if (GetCompletedSize() < 16*1024)
+					return false;
+			}
+			else{
+				// For AVI files it depends on the used codec..
+				if (!IsComplete(0, 256*1024))
+					return false;
+			}
+	
+			return true;
 		}
 		else{
 			return !((GetStatus() != PS_READY && GetStatus() != PS_PAUSED) 
-				    || m_bPreviewing || GetPartCount() < 2 || !IsMovie() || !IsPartShareable(0));	// SLUGFILLER: SafeHash - only play hashed parts
+					|| m_bPreviewing || GetPartCount() < 2 || !IsMovie() || !IsPartShareable(0));	// SLUGFILLER: SafeHash - only play hashed parts
 		}
 	}
 }
@@ -3136,20 +3136,20 @@ int CPartFile::GetCommonFilePenalty() {
 
 /* Barry - Replaces BlockReceived() 
 
-           Originally this only wrote to disk when a full 180k block 
-           had been received from a client, and only asked for data in 
-		   180k blocks.
+		Originally this only wrote to disk when a full 180k block 
+		had been received from a client, and only asked for data in 
+		180k blocks.
 
-		   This meant that on average 90k was lost for every connection
-		   to a client data source. That is a lot of wasted data.
+		This meant that on average 90k was lost for every connection
+		to a client data source. That is a lot of wasted data.
 
-		   To reduce the lost data, packets are now written to a buffer
-		   and flushed to disk regularly regardless of size downloaded.
-		   This includes compressed packets.
+		To reduce the lost data, packets are now written to a buffer
+		and flushed to disk regularly regardless of size downloaded.
+		This includes compressed packets.
 
-		   Data is also requested only where gaps are, not in 180k blocks.
-		   The requests will still not exceed 180k, but may be smaller to
-		   fill a gap.
+		Data is also requested only where gaps are, not in 180k blocks.
+		The requests will still not exceed 180k, but may be smaller to
+		fill a gap.
 */
 uint32 CPartFile::WriteToBuffer(uint32 transize, BYTE *data, uint32 start, uint32 end, Requested_Block_Struct *block)
 {
@@ -3447,31 +3447,31 @@ void CPartFile::FlushBuffer(void)
 		}
 		else
 		{
-		    if (theApp.glob_prefs->IsErrorBeepEnabled())
-			    Beep(800,200);
-    
-		    if (error->m_cause == CFileException::diskFull) 
-		    {
-			    AddLogLine(true, GetResString(IDS_ERR_OUTOFSPACE), this->GetFileName());
-			    // may be called during shutdown!
-			    if (theApp.emuledlg->IsRunning() && theApp.glob_prefs->GetNotifierPopOnImportantError()){
-				    CString msg;
-				    msg.Format(GetResString(IDS_ERR_OUTOFSPACE), this->GetFileName());
-				    theApp.emuledlg->ShowNotifier(msg, TBN_IMPORTANTEVENT, false);
-			    }
-		    }
-		    else
-		    {
-			    char buffer[MAX_CFEXP_ERRORMSG];
-			    error->GetErrorMessage(buffer,MAX_CFEXP_ERRORMSG);
-			    AddLogLine(true, GetResString(IDS_ERR_WRITEERROR), GetFileName(), buffer);
-			    SetStatus(PS_ERROR);
-		    }
-		    paused = true;
+			if (theApp.glob_prefs->IsErrorBeepEnabled())
+				Beep(800,200);
+	
+			if (error->m_cause == CFileException::diskFull) 
+			{
+				AddLogLine(true, GetResString(IDS_ERR_OUTOFSPACE), this->GetFileName());
+				// may be called during shutdown!
+				if (theApp.emuledlg->IsRunning() && theApp.glob_prefs->GetNotifierPopOnImportantError()){
+					CString msg;
+					msg.Format(GetResString(IDS_ERR_OUTOFSPACE), this->GetFileName());
+					theApp.emuledlg->ShowNotifier(msg, TBN_IMPORTANTEVENT, false);
+				}
+			}
+			else
+			{
+				char buffer[MAX_CFEXP_ERRORMSG];
+				error->GetErrorMessage(buffer,MAX_CFEXP_ERRORMSG);
+				AddLogLine(true, GetResString(IDS_ERR_WRITEERROR), GetFileName(), buffer);
+				SetStatus(PS_ERROR);
+			}
+			paused = true;
 			m_iLastPausePurge = time(NULL);
 			theApp.downloadqueue->RemoveLocalServerRequest(this);
 			datarate = 0;
-		    m_anStates[DS_DOWNLOADING] = 0;
+			m_anStates[DS_DOWNLOADING] = 0;
 		}
 	
 		if (theApp.emuledlg->IsRunning()) // may be called during shutdown!
@@ -3661,9 +3661,9 @@ CString CPartFile::GetProgressString(uint16 size){
 				}
 				// paint
 				uint8 color;
-				if (m_SrcpartFrequency.GetCount() >= (INT_PTR)i && m_SrcpartFrequency[i])  // frequency?
+				if (m_SrcpartFrequency.GetCount() >= (INT_PTR)i && m_SrcpartFrequency[(uint16)i])  // frequency?
 					//color = crWaiting;
-					color = m_SrcpartFrequency[i] <  10 ? crWaiting[m_SrcpartFrequency[i]/2]:crWaiting[5];
+					color = m_SrcpartFrequency[(uint16)i] <  10 ? crWaiting[m_SrcpartFrequency[(uint16)i]/2]:crWaiting[5];
 				else
 					color = crMissing;
 
@@ -3797,8 +3797,8 @@ struct Chunk {
 #pragma pack()
 
 bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, 
-                                      Requested_Block_Struct** newblocks, 
-                                      uint16* count){
+									Requested_Block_Struct** newblocks, 
+									uint16* count){
 
 	// The purpose of this function is to return a list of blocks (~180KB) to
 	// download. To avoid a prematurely stop of the downloading, all blocks that 
@@ -3922,7 +3922,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 					// Offsets of chunk
 					const uint32 uStart = cur_chunk.part * PARTSIZE;
 					const uint32 uEnd  = ((GetFileSize() - 1) < (uStart + PARTSIZE - 1)) ? 
-										  (GetFileSize() - 1) : (uStart + PARTSIZE - 1);
+										(GetFileSize() - 1) : (uStart + PARTSIZE - 1);
 
 					// Criterion 2. Parts used for preview
 					// Remark: - We need to download the first part and the last part(s).
@@ -3978,21 +3978,21 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 					if(cur_chunk.frequency <= veryRareBound){
 						// 0..xxxx unrequested + requested very rare chunks
 						cur_chunk.rank = (25 * cur_chunk.frequency) +      // Criterion 1
-							             ((critPreview == true) ? 0 : 1) + // Criterion 2
-										 (100 - critCompletion);           // Criterion 4
+										((critPreview == true) ? 0 : 1) + // Criterion 2
+										(100 - critCompletion);           // Criterion 4
 					}
 					else if(critPreview == true){
 						// 10000..10100  unrequested preview chunks
 						// 30000..30100  requested preview chunks
 						cur_chunk.rank = ((critRequested == false) ? 10000 : 30000) + // Criterion 3
-										 (100 - critCompletion);                      // Criterion 4
+										(100 - critCompletion);                      // Criterion 4
 					}
 					else if(cur_chunk.frequency <= rareBound){
 						// 10101..1xxxx  unrequested rare chunks
 						// 30101..3xxxx  requested rare chunks
 						cur_chunk.rank = (25 * cur_chunk.frequency) +                 // Criterion 1 
-										 ((critRequested == false) ? 10101 : 30101) + // Criterion 3
-										 (100 - critCompletion);                      // Criterion 4
+										((critRequested == false) ? 10101 : 30101) + // Criterion 3
+										(100 - critCompletion);                      // Criterion 4
 					}
 					else { // common chunk
 						if(critRequested == false){ // Criterion 3
@@ -4491,26 +4491,26 @@ int CPartHashThread::Run(){
 
 //MORPH START - Added by IceCream, eMule Plus rating icons
 int CPartFile::GetRating(){  
-    if (!hasRating) return 0;  
-    int num,tot,fRate;  
-    num=tot=0;  
-    for(POSITION pos = m_downloadingSourceList.GetHeadPosition();pos!=0;){
-		fRate =((CUpDownClient*) m_downloadingSourceList.GetNext(pos))->GetFileRate();  
-		if (fRate>0)  
-		{  
-			num++;
-			//Cax2 - bugfix: for some ?%#ing reason  fair=4 & good=3, breaking the progression from fake(1) to excellent(5)
-			if (fRate==3 || fRate==4) fRate=(fRate==3)?4:3;
-			tot+=fRate;  
-		}  
-	}  
-	if (num>0)
-	{
-		num=(float)tot/num+.5; //Cax2 - get the average of all the ratings
-		//Cax2 - bugfix: for some ?%#ing reason good=3 & fair=4, breaking the progression from fake(1) to excellent(5)
-		if (num==3 || num==4) num=(num==3)?4:3;
+	if (!hasRating) return 0;
+	int number, total, fRate;
+	number = total = 0;
+
+	for(POSITION pos = srclist.GetHeadPosition(); pos != 0; srclist.GetNext(pos)){
+		CUpDownClient* cur_client = m_downloadingSourceList.GetAt(pos);
+		fRate = cur_client->GetFileRate();
+		if (fRate > 0)  
+		{
+			number++;
+			total += fRate;
+		}
 	}
-    return num; //Cax2 - if no ratings found, will return 0!
+	if (number > 0)
+	{
+		int	result = (float)total/number + 0.5;
+		return result; //Cax2 - get the average of all the ratings
+	}
+
+	return 0; //Cax2 - if no ratings found, will return 0!
 }
 //MORPH END   - Added by IceCream, eMule Plus rating icons
 
