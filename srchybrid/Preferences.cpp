@@ -2458,19 +2458,19 @@ void CPreferences::ResetStatsColor(int index){
 	switch(index) {
 		case 0 : statcolors[0]=RGB(0,0,0);break;  //MORPH - HotFix by SiRoB & IceCream, Default Black color for BackGround
 		case 1 : statcolors[1]=RGB(192,192,255);break;
-		case 2 : statcolors[2]=RGB(128, 255, 128);break;
-		case 3 : statcolors[3]=RGB(0, 210, 0);break;
-		case 4 : statcolors[4]=RGB(0, 128, 0);break;
-		case 5 : statcolors[5]=RGB(255, 128, 128);break;
-		case 6 : statcolors[6]=RGB(200, 0, 0);break;
-		case 7 : statcolors[7]=RGB(140, 0, 0);break;
+		case 2 : statcolors[2]=RGB(0, 255, 0);break;
+		case 3 : statcolors[3]=RGB(0, 255, 255);break;
+		case 4 : statcolors[4]=RGB(255, 255, 255);break;
+		case 5 : statcolors[5]=RGB(255, 0, 0);break;
+		case 6 : statcolors[6]=RGB(0, 255, 255);break;
+		case 7 : statcolors[7]=RGB(255, 255, 255);break;
 		case 8 : statcolors[8]=RGB(150, 150, 255);break;
 		case 9 : statcolors[9]=RGB(255, 255, 128);break; //MORPH - Added by Yun.SF3, ZZ Upload System
 		case 10 : statcolors[10]=RGB(0, 255, 0);break;
 		case 11 : statcolors[11]=RGB(0, 0, 0);break; //MORPH - HotFix by SiRoB & IceCream, Default Black color for SystrayBar
 		case 12 : statcolors[12]=RGB(192,   0, 192);break; //MORPH - Added by Yun.SF3, ZZ Upload System
 		case 13 : statcolors[13]=RGB(0, 0, 255);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 14 : statcolors[14]=RGB(200, 200, 0);break;
+		case 14 : statcolors[14]=RGB(0, 255, 0);break;
 
 		default:break;
 	}
