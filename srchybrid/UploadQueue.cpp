@@ -427,7 +427,7 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 								(
 									rightScore > leftScore  // same prio file, but rightClient has better score, so rightClient is better
 								)
-							}
+							)
 						) ||  
 						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
 						(
