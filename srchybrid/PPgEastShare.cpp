@@ -169,21 +169,21 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 BOOL CPPgEastShare::OnInitDialog()
 {
 
-	m_bEnablePreferShareAll = app_prefs->prefs->shareall;//EastShare - PreferShareAll by AndCycle
-	m_bIsPayBackFirst = app_prefs->prefs->m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
-	m_bOnlyDownloadCompleteFiles = app_prefs->prefs->m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	m_bSaveUploadQueueWaitTime = app_prefs->prefs->m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	m_bEnablePreferShareAll = thePrefs.shareall;//EastShare - PreferShareAll by AndCycle
+	m_bIsPayBackFirst = thePrefs.m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	m_bOnlyDownloadCompleteFiles = thePrefs.m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	m_bSaveUploadQueueWaitTime = thePrefs.m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
 	//EastShare Start - added by AndCycle, IP to Country
-	m_iIP2CountryName = app_prefs->GetIP2CountryNameMode(); 
-	m_bIP2CountryShowFlag = app_prefs->IsIP2CountryShowFlag();
+	m_iIP2CountryName = thePrefs.GetIP2CountryNameMode(); 
+	m_bIP2CountryShowFlag = thePrefs.IsIP2CountryShowFlag();
 	//EastShare End - added by AndCycle, IP to Country
 
-	m_iCreditSystem = app_prefs->GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
-	m_iEqualChanceForEachFile = app_prefs->GetEqualChanceForEachFileMode();//Morph - added by AndCycle, Equal Chance For Each File
-	m_bECFEFallTime = app_prefs->IsECFEFallTime();//Morph - added by AndCycle, Equal Chance For Each File
+	m_iCreditSystem = thePrefs.GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
+	m_iEqualChanceForEachFile = thePrefs.GetEqualChanceForEachFileMode();//Morph - added by AndCycle, Equal Chance For Each File
+	m_bECFEFallTime = thePrefs.IsECFEFallTime();//Morph - added by AndCycle, Equal Chance For Each File
 
-	m_iKnownMetDays = app_prefs->GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
+	m_iKnownMetDays = thePrefs.GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
 	
 	CPropertyPage::OnInitDialog();
 	Localize();
@@ -211,12 +211,12 @@ BOOL CPPgEastShare::OnApply()
 	if (!UpdateData())
 		return FALSE;
 
-	app_prefs->prefs->shareall = m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
-	app_prefs->prefs->m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
-	app_prefs->prefs->m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	thePrefs.shareall = m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
+	thePrefs.m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	thePrefs.m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
 	//EastShare Start - added by AndCycle, IP to Country
-	if(	(app_prefs->prefs->m_iIP2CountryNameMode != IP2CountryName_DISABLE || app_prefs->prefs->m_bIP2CountryShowFlag) !=
+	if(	(thePrefs.m_iIP2CountryNameMode != IP2CountryName_DISABLE || thePrefs.m_bIP2CountryShowFlag) !=
 		((IP2CountryNameSelection)m_iIP2CountryName != IP2CountryName_DISABLE || m_bIP2CountryShowFlag)	){
 		//check if need to load or unload DLL and ip table
 		if((IP2CountryNameSelection)m_iIP2CountryName != IP2CountryName_DISABLE || m_bIP2CountryShowFlag){
@@ -226,28 +226,28 @@ BOOL CPPgEastShare::OnApply()
 			theApp.ip2country->Unload();
 		}
 	}
-	app_prefs->prefs->m_iIP2CountryNameMode = m_iIP2CountryName;
-	app_prefs->prefs->m_bIP2CountryShowFlag = m_bIP2CountryShowFlag;
+	thePrefs.m_iIP2CountryNameMode = m_iIP2CountryName;
+	thePrefs.m_bIP2CountryShowFlag = m_bIP2CountryShowFlag;
 	theApp.ip2country->Refresh();//refresh passive windows
 	//EastShare End - added by AndCycle, IP to Country
 
 	//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	if((bool)m_bSaveUploadQueueWaitTime != app_prefs->prefs->m_bSaveUploadQueueWaitTime)	bRestartApp = true;
-	app_prefs->prefs->m_bSaveUploadQueueWaitTime = m_bSaveUploadQueueWaitTime;
+	if((bool)m_bSaveUploadQueueWaitTime != thePrefs.m_bSaveUploadQueueWaitTime)	bRestartApp = true;
+	thePrefs.m_bSaveUploadQueueWaitTime = m_bSaveUploadQueueWaitTime;
 	//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
 /*	theApp.emuledlg->serverwnd->ToggleDebugWindow();
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection(); */
 
 
-	app_prefs->prefs->creditSystemMode = m_iCreditSystem; //EastShare - Added by linekin , CreditSystem 
+	thePrefs.creditSystemMode = m_iCreditSystem; //EastShare - Added by linekin , CreditSystem 
 
 	//Morph - added by AndCycle, Equal Chance For Each File
-	app_prefs->prefs->equalChanceForEachFileMode = m_iEqualChanceForEachFile;
-	app_prefs->prefs->m_bECFEFallTime = m_bECFEFallTime;
+	thePrefs.equalChanceForEachFileMode = m_iEqualChanceForEachFile;
+	thePrefs.m_bECFEFallTime = m_bECFEFallTime;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
-	app_prefs->SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
+	thePrefs.SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
 
 	SetModified(FALSE);
 

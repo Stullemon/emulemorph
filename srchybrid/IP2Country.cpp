@@ -70,8 +70,8 @@ CIP2Country::CIP2Country(){
 	EnableIP2Country = false;
 	EnableCountryFlag = false;
 
-	if(theApp.glob_prefs->GetIP2CountryNameMode() != IP2CountryName_DISABLE || 
-		theApp.glob_prefs->IsIP2CountryShowFlag()){
+	if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || 
+		thePrefs.IsIP2CountryShowFlag()){
 		Load();
 	}
 
@@ -124,7 +124,7 @@ bool CIP2Country::LoadFromFile(){
 	char buffer[1024];
 	int	lenBuf = 1024;
 
-	CString ip2countryCSVfile = theApp.glob_prefs->GetConfigDir()+"ip-to-country.csv";
+	CString ip2countryCSVfile = thePrefs.GetConfigDir()+"ip-to-country.csv";
 
 	FILE* readFile = fopen(ip2countryCSVfile, "r");
 
@@ -193,19 +193,18 @@ bool CIP2Country::LoadFromFile(){
 
 bool CIP2Country::LoadCountryFlagLib(){
 
-
 	CString ip2countryCountryFlag;
 
 	try{
 
 		//detect windows version
-		if(theApp.glob_prefs->GetWindowsVersion() == _WINVER_XP_){
+		if(thePrefs.GetWindowsVersion() == _WINVER_XP_){
 			//it's XP, we can use beautiful 32bits flags with alpha channel :)
-			ip2countryCountryFlag = theApp.glob_prefs->GetConfigDir()+"countryflag32.dll";
+			ip2countryCountryFlag = thePrefs.GetConfigDir()+"countryflag32.dll";
 		}
 		else{
 			//oh~ it's not XP, but we still can load the 24bits flags
-			ip2countryCountryFlag = theApp.glob_prefs->GetConfigDir()+"countryflag.dll";
+			ip2countryCountryFlag = thePrefs.GetConfigDir()+"countryflag.dll";
 		}
 
 		_hCountryFlagDll = LoadLibrary(ip2countryCountryFlag); 
@@ -304,7 +303,6 @@ bool CIP2Country::LoadCountryFlagLib(){
 			"VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YU", "ZA", "ZM", "ZW", 
 			"UK", //by tharghan
 			"CS" //by propaganda
-			
 		};
 
 		HICON iconHandle;
@@ -435,7 +433,7 @@ bool CIP2Country::ShowCountryFlag(){
 
 	return 
 		//user wanna see flag,
-		(theApp.glob_prefs->IsIP2CountryShowFlag() && 
+		(thePrefs.IsIP2CountryShowFlag() && 
 		//flag have been loaded
 		EnableCountryFlag && 
 		//ip table have been loaded

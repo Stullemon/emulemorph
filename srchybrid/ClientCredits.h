@@ -172,7 +172,7 @@ private:
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	bool			m_bCheckScoreRatio;
 	float			m_fLastScoreRatio;
-	CreditSystemSelection	m_cssCurrentCreditSystem;
+	int /*CreditSystemSelection*/	m_cssCurrentCreditSystem;
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
 	//EastShare Start - added by AndCycle, Pay Back First

@@ -69,14 +69,14 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	LoadSettings(CPreferences::tableServer);
 
 	// Barry - Use preferred sort order from preferences
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableServer);
-	bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableServer);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer);
+	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer);
 	SetSortArrow(sortItem, sortAscending);
 	// SLUGFILLER: multiSort - load multiple params
-	for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableServer); i > 0; ) {
+	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableServer); i > 0; ) {
 		i--;
-		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableServer, i);
-		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableServer, i);
+		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer, i);
+		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer, i);
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
@@ -195,11 +195,11 @@ void CServerListCtrl::RemoveServer(CServer* todel)
 // Remove Dead Servers
 void CServerListCtrl::RemoveDeadServer()
 {
-	if( theApp.glob_prefs->DeadServer() ){
+	if( thePrefs.DeadServer() ){
 	   ShowWindow(SW_HIDE); 
 		for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos)) { 
 			CServer* cur_server = server_list->list.GetAt(pos); 
-			if( cur_server->GetFailedCount() > theApp.glob_prefs->GetDeadserverRetries() ){	// MAX_SERVERFAILCOUNT 
+			if( cur_server->GetFailedCount() > thePrefs.GetDeadserverRetries() ){	// MAX_SERVERFAILCOUNT 
 				RemoveServer(cur_server);
 				pos = server_list->list.GetHeadPosition();
 			}
@@ -334,14 +334,14 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		SetItemText(itemnr,11,_T(""));
 
 	temp = server->GetVersion();
-	if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
+	if (thePrefs.GetDebugServerUDPLevel() > 0){
 		if (server->GetUDPFlags() != 0){
 			if (!temp.IsEmpty())
 				temp += _T("; ");
 			temp.AppendFormat(_T("ExtUDP=%x"), server->GetUDPFlags());
 		}
 	}
-	if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0){
+	if (thePrefs.GetDebugServerTCPLevel() > 0){
 		if (server->GetTCPFlags() != 0){
 			if (!temp.IsEmpty())
 				temp += _T("; ");
@@ -431,6 +431,9 @@ void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_GETED2KLINK, GetResString(IDS_DL_LINK1));
 
+	ServerMenu.AppendMenu(MF_SEPARATOR);
+	ServerMenu.AppendMenu(MF_ENABLED | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND));
+
 	GetPopupMenuPos(*this, point);
 	ServerMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 
@@ -455,14 +458,22 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		ShowServerCount();
        return true;
    } 
+	else if (wParam == MP_FIND)
+	{
+		OnFindStart();
+		return TRUE;
+	}
 
 	int item = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-   if (item != -1){ 
-		if (((CServer*)GetItemData(item)) != NULL){
+	if (item != -1)
+	{
+		if (((CServer*)GetItemData(item)) != NULL)
+		{
 		  switch (wParam){ 
             case MP_CONNECTTO: 
 			{
-					if ( GetSelectedCount()>1 ) {
+					if (GetSelectedCount() > 1)
+					{
 					CServer* aServer;
 
 					theApp.serverconnect->Disconnect();
@@ -476,11 +487,12 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						}
 					}
 					theApp.serverconnect->ConnectToAnyServer( theApp.serverlist->GetServerCount()-  this->GetSelectedCount(),false, false );
-				} else {
+					}
+					else{
 						theApp.serverconnect->ConnectToServer((CServer*)GetItemData(item));
 				}
 				theApp.emuledlg->ShowConnectionState();
-			    break; 
+					return TRUE;
 			}			
 			case MPG_DELETE:
             case MP_REMOVE: 
@@ -496,7 +508,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 					ShowServerCount();
 				ShowWindow(SW_SHOW); 
-				break; 
+					return TRUE;
             }
 			case MP_ADDTOSTATIC:
 				{
@@ -508,7 +520,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					change->SetIsStaticMember(true);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
-				break;
+					return TRUE;
 			}
 			// Remove Static Servers [Barry]
 			case MP_REMOVEFROMSTATIC:
@@ -521,7 +533,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					change->SetIsStaticMember(false);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
-				break;
+					return TRUE;
 			}
 			case MP_PRIOLOW:
 			{
@@ -533,7 +545,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 //						StaticServerFileAppend(change); //Why are you adding to static when changing prioity? If I want it static I set it static.. I set server to LOW because I HATE this server, not because I like it!!!
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
-				break;
+					return TRUE;
 			}
 			case MP_PRIONORMAL:
 			{
@@ -545,7 +557,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 //						StaticServerFileAppend(change);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
-				break;
+					return TRUE;
 			}
 			case MP_PRIOHIGH:
 			{
@@ -557,7 +569,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 //						StaticServerFileAppend(change);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
-				break;
+					return TRUE;
 			}
 			case MP_GETED2KLINK: 
 			{ 
@@ -571,7 +583,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					link += buffer; 
 				} 
 				theApp.CopyTextToClipboard(link); 
-				break; 
+					return TRUE;
 			}
 			case Irc_SetSendLink:
 			{
@@ -582,16 +594,15 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						buffer.Format(_T("ed2k://|server|%s|%d|/"), change->GetFullIP(), change->GetPort());
 						if (link.GetLength() > 0)
 							buffer = _T("\r\n") + buffer;
-					link += buffer; 
-				} 
-				theApp.emuledlg->ircwnd->SetSendFileString(link);
-				break;
+						link += buffer;
+					}
+					theApp.emuledlg->ircwnd->SetSendFileString(link);
+					return TRUE;
+				}
 			}
-
-         } 
-      } 
-   } 
-	return TRUE;
+		}
+  	}
+	return FALSE;
 }
 
 void CServerListCtrl::OnNMLdblclk(NMHDR *pNMHDR, LRESULT *pResult)
@@ -619,16 +630,16 @@ void CServerListCtrl::OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableServer);
-	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableServer);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer);
+	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer);
 	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 
 	// Item is column clicked
 	sortItem = pNMListView->iSubItem;
 
 	// Save new preferences
-	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableServer, sortItem);
-	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableServer, sortAscending);
+	thePrefs.SetColumnSortItem(CPreferences::tableServer, sortItem);
+	thePrefs.SetColumnSortAscending(CPreferences::tableServer, sortAscending);
 
 	// Sort table
 	SetSortArrow(sortItem, sortAscending);
@@ -862,7 +873,7 @@ bool CServerListCtrl::StaticServerFileAppend(CServer *server)
 		// Remove any entry before writing to avoid duplicates
 		StaticServerFileRemove(server);
 
-		FILE* staticservers = fopen(theApp.glob_prefs->GetConfigDir() + CString("staticservers.dat"), "a");
+		FILE* staticservers = fopen(thePrefs.GetConfigDir() + CString("staticservers.dat"), "a");
 		if (staticservers==NULL) 
 		{
 			AddLogLine( false, GetResString(IDS_ERROR_SSF));
@@ -903,8 +914,8 @@ bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 		char buffer[1024];
 		int lenBuf = 1024;
 		int pos;
-		CString StaticFilePath = theApp.glob_prefs->GetConfigDir() + CString("staticservers.dat");
-		CString StaticTempPath = theApp.glob_prefs->GetConfigDir() + CString("statictemp.dat");
+		CString StaticFilePath = thePrefs.GetConfigDir() + CString("staticservers.dat");
+		CString StaticTempPath = thePrefs.GetConfigDir() + CString("statictemp.dat");
 		FILE* staticservers = fopen(StaticFilePath , "r");
 		FILE* statictemp = fopen(StaticTempPath , "w");
 

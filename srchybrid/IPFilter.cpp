@@ -435,7 +435,7 @@ void CIPFilter::UpdateIPFilterURL()
 	else
 	{
 	RemoveAllIPs();
-	int count=AddFromFile();
+	int count=LoadFromDefaultFile();
 	}
 	}
 }

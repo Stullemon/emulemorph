@@ -1802,14 +1802,14 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 
 		case 111:{ //kad shared asc
 			uint32 tNow = time(NULL);
-			int i1 = (tNow - item1->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME) ? 1 : 0;
-			int i2 = (tNow - item2->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME) ? 1 : 0;
+			int i1 = (tNow - item1->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIMES) ? 1 : 0;
+			int i2 = (tNow - item2->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIMES) ? 1 : 0;
 			return i1 - i2;
 		}
 		case 141:{ //kad shared desc
 			uint32 tNow = time(NULL);
-			int i1 = (tNow - item1->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME) ? 1 : 0;
-			int i2 = (tNow - item2->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME) ? 1 : 0;
+			int i1 = (tNow - item1->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIMES) ? 1 : 0;
+			int i2 = (tNow - item2->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIMES) ? 1 : 0;
 			return i2 - i1;
 		}
 		default: 
@@ -1853,7 +1853,7 @@ void CSharedFilesCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1)
 	{
-		const CKnownFile* file = (CKnownFile*)GetItemData(iSel);
+		CKnownFile* file = (CKnownFile*)GetItemData(iSel);
 		if (file)
 		{
 			//MORPH Changed by SiRoB - Double click unfinished files in SharedFile window display FileDetail

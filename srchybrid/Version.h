@@ -29,9 +29,9 @@
 //	<major>.<minor>			 is used for the protocol(!) version
 //
 #define VERSION_MJR		0
-#define VERSION_MIN		41
+#define VERSION_MIN		42
 #define VERSION_UPDATE	1
-#define VERSION_BUILD	29
+#define VERSION_BUILD	14
 #ifdef _DEBUG
   #ifdef _UNICODE
     #define VERSION_SPECIAL_BUILD	_T(" - Unicode Debug")
@@ -46,6 +46,6 @@
   #endif
 #endif
 
-#define MOD_VERSION		"MorphXT v1.5" //MORPH - Added by SiRoB
+#define MOD_VERSION		"MorphXT v2.0" //MORPH - Added by SiRoB
 #define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(" [") MOD_VERSION _T("]")
 #endif /* !__VERSION_H__ */

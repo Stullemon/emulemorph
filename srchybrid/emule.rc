@@ -1402,7 +1402,7 @@ BEGIN
                     WS_VISIBLE | WS_BORDER
     LTEXT           "Disconnect",IDC_DISCONNECT,17,99,161,14,NOT WS_VISIBLE | 
                     WS_BORDER
-    LTEXT           "Exit",IDC_TRAYEXIT,17,165,161,14,NOT WS_VISIBLE | 
+    LTEXT           "Exit",IDC_TRAY_EXIT,17,165,161,14,NOT WS_VISIBLE | 
                     WS_BORDER
     LTEXT           "Download:",IDC_DOWNLBL,32,18,43,12,SS_CENTERIMAGE
     CONTROL         "",IDC_DOWNSLD,"msctls_trackbar32",0x0,75,18,56,12

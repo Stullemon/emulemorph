@@ -1,6 +1,5 @@
 #pragma once
 
-#include "preferences.h"
 // CPPgMorph dialog
 
 class CPPgMorph2 : public CPropertyPage
@@ -11,12 +10,9 @@ public:
 	CPPgMorph2();
 	virtual ~CPPgMorph2();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs;}
-
 // Dialog Data
 	enum { IDD = IDD_PPG_MORPH2 };
 protected:
-	CPreferences *app_prefs;
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	DECLARE_MESSAGE_MAP()

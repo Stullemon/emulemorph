@@ -97,7 +97,7 @@ CFriend::~CFriend(void)
 	//MORPH END - Added by SiRoB, ZZ Upload System
 }
 
-void CFriend::LoadFromFile(CFile* file)
+void CFriend::LoadFromFile(CFileDataIO* file)
 {
 	file->ReadHash16(m_abyUserhash);
 	m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;

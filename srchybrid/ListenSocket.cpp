@@ -221,7 +221,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						Disconnect("IPFilter");
 						return false;
 					}
-
 					// now we check if we know this client already. if yes this socket will
 					// be attached to the known client, the new client will be deleted
 					// and the var. "client" will point to the known client.
@@ -230,7 +229,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					{
 						// update the old client informations
 						bIsMuleHello = client->ProcessHelloPacket(packet,size);
-						client->DisableL2HAC(); //<<-- enkeyDEV(th1) -L2HAC- lowid side
 					}
 					else 
 					{
@@ -239,7 +237,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					}
 
 					theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(client);
-
 					// send a response packet with standart informations
 					if (client->GetHashType() == SO_EMULE && !bIsMuleHello)
 						client->SendMuleInfoPacket(false);
@@ -247,7 +244,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					client->SendHelloAnswer();
 					if (client)
 						client->ConnectionEstablished();
-
 					// start secure identification, if
 					//	- we have received eMule-OP_HELLO (new eMule)
 					if (client->GetInfoPacketsReceived() == IP_BOTH)
@@ -259,8 +255,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_FileRequest", client, packet);
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
-					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
-					
 					// IP banned, no answer for this request
 					if (client->IsBanned())
 						break;						
@@ -342,12 +336,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						data.WriteHash16(reqfile->GetFileHash());
 						if (reqfile->IsPartFile())
 							((CPartFile*)reqfile)->WritePartStatus(&data, client);	// SLUGFILLER: hideOS
-						else if (!reqfile->ShareOnlyTheNeed(&data)){ //wistily SOTN
-							if (!reqfile->HideOvershares(&data, client)){	//Slugfiller: HideOS
-								uint32 null = 0;
-								data.Write(&null,3);
-							}
-						}
+						else if (!reqfile->ShareOnlyTheNeed(&data)) //wistily SOTN
+							if (!reqfile->HideOvershares(&data, client))	//Slugfiller: HideOS
+								data.WriteUInt16(0);
 						Packet* packet = new Packet(&data);
 						packet->opcode = OP_FILESTATUS;
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -370,7 +361,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						CPartFile* reqfile = theApp.downloadqueue->GetFileByID((uchar*)packet);
 						if (!reqfile)
 							break;
-
 						// we try to swap to another file ignoring no needed parts files
 						switch (client->GetDownloadState())
 						{
@@ -385,7 +375,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					}
 					throw GetResString(IDS_ERR_WRONGPACKAGESIZE);
 					break;
-					// DbT:End
 				}
 				case OP_REQFILENAMEANSWER:
 				{
@@ -531,7 +520,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						theApp.uploadqueue->AddClientToQueue(client);
 						theApp.emuledlg->AddDebugLogLine(false, GetResString(IDS_LEECHERPUTBACK));
 					
-						client->SetUploadFileID(reqblock1->FileID);
+						client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock1->FileID));
 					}
 					
 					//MORPH END   - Added by SiRoB, Anti-leecher feature
@@ -553,7 +542,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						if(client->HasLowID() && (client->IsFriend() && client->GetFriendSlot()) == true) {
 							allowSwitch = true;
 						} else {
-							client->SetUploadFileID(reqblock1->FileID);
+							client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock1->FileID));
 
 							// we need to compare with the client that would get to replace this if we kick it out
 							CUpDownClient* bestQueuedClient = theApp.uploadqueue->FindBestClientInQueue();
@@ -583,7 +572,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 
 							theApp.emuledlg->AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
 						
-							client->SetUploadFileID(reqblock1->FileID);
+							client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock1->FileID));
 						}
 					}
 					//MORPH END - Added by SiRoB, ZZ Upload System
@@ -663,7 +652,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						/*
 						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR)
 						*/
-						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR || client->reqfile->notSeenCompleteSource()){
+						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR || client->reqfile->notSeenCompleteSource())
 						//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)	
 						{
 							if (!client->GetSentCancelTransfer())
@@ -818,7 +807,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					{
 						AddLogLine(true,GetResString(IDS_REQ_SHAREDFILES),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_DENIED) );
 					}
-
 					// now create the memfile for the packet
 					uint32 iTotalCount = list.GetCount();
 					CSafeMemFile tempfile(80);
@@ -851,7 +839,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						DebugRecv("OP_AskSharedDirectories", client);
 					theApp.downloadqueue->AddDownDataOverheadOther(size);
 					ASSERT( size == 0 );
-					
 					// IP banned, no answer for this request
 					if (client->IsBanned() )
 						break;						
@@ -980,8 +967,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_AskSharedFilesInDirectory", client);
                     theApp.downloadqueue->AddDownDataOverheadOther(size);
-
-					
 					// IP banned, no answer for this request
 					if (client->IsBanned() )
 						break;						
@@ -1009,8 +994,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 								// most of their files but hesitate to show a few ones (for some reasons :))
 								uint8 Perm = pFile->GetPermissions()>=0?pFile->GetPermissions():thePrefs.GetPermissions();
 								// Migty Knife: Community visible filelist
-								if ( strReqDir.CompareNoCase(strSharedFileDir) == 0 &&
-									( (Perm==PERM_ALL)
+								if (( (Perm==PERM_ALL)
 									|| ((Perm==PERM_COMMUNITY) && (client->IsCommunity() || client->IsFriend()) )
 									|| ((Perm==PERM_FRIENDS) && client->IsFriend()) ) )
 										list.AddTail(pFile);
@@ -2020,8 +2004,8 @@ void CClientReqSocket::SmartUploadControl()
   uint32 VUR=theApp.uploadqueue->GetMaxVUR();
   uint32 checkrespond=(::GetTickCount() - client->GetAskTime());
   
-  uint32 VURstep=(((app_prefs->GetMaxUpload()*1024-theApp.uploadqueue->GetDatarate())>10000)
-         ? (app_prefs->GetMaxUpload()*1024-theApp.uploadqueue->GetDatarate())/2 
+  uint32 VURstep=(((thePrefs.GetMaxUpload()*1024-theApp.uploadqueue->GetDatarate())>10000)
+         ? (thePrefs.GetMaxUpload()*1024-theApp.uploadqueue->GetDatarate())/2 
          : UPLOAD_CHECK_CLIENT_DR/2);
 
   if (checkrespond<theApp.uploadqueue->GetAvgRespondTime(1))

@@ -32,12 +32,12 @@ CStatistics::CStatistics()
 {
 	maxDown=0;
 	maxDownavg=0;
-	maxcumDown =			theApp.glob_prefs->GetConnMaxDownRate();
-	cumUpavg =				theApp.glob_prefs->GetConnAvgUpRate();
-	maxcumDownavg =			theApp.glob_prefs->GetConnMaxAvgDownRate();
-	cumDownavg =			theApp.glob_prefs->GetConnAvgDownRate();
-	maxcumUpavg =			theApp.glob_prefs->GetConnMaxAvgUpRate();
-	maxcumUp =				theApp.glob_prefs->GetConnMaxUpRate();
+	maxcumDown =			thePrefs.GetConnMaxDownRate();
+	cumUpavg =				thePrefs.GetConnAvgUpRate();
+	maxcumDownavg =			thePrefs.GetConnMaxAvgDownRate();
+	cumDownavg =			thePrefs.GetConnAvgDownRate();
+	maxcumUpavg =			thePrefs.GetConnMaxAvgUpRate();
+	maxcumUp =				thePrefs.GetConnMaxUpRate();
 	maxUp =					0;
 	maxUpavg =				0;
 	rateDown =				0;
@@ -70,25 +70,25 @@ void CStatistics::UpdateConnectionStats(float uploadrate, float downloadrate){
 	if (maxUp<uploadrate) maxUp=uploadrate;
 	if (maxcumUp<maxUp) {
 		maxcumUp=maxUp;
-		theApp.glob_prefs->Add2ConnMaxUpRate(maxcumUp);
+		thePrefs.Add2ConnMaxUpRate(maxcumUp);
 	}
 
 	if (maxDown<downloadrate) maxDown=downloadrate; // MOVED from SetCurrentRate!
 	if (maxcumDown<maxDown) {
 		maxcumDown=maxDown;
-		theApp.glob_prefs->Add2ConnMaxDownRate(maxcumDown);
+		thePrefs.Add2ConnMaxDownRate(maxcumDown);
 	}
 
 	cumDownavg = GetAvgDownloadRate(AVG_TOTAL);
 	if (maxcumDownavg<cumDownavg) {
 		maxcumDownavg=cumDownavg;
-		theApp.glob_prefs->Add2ConnMaxAvgDownRate(maxcumDownavg);
+		thePrefs.Add2ConnMaxAvgDownRate(maxcumDownavg);
 	}
 
 	cumUpavg = GetAvgUploadRate(AVG_TOTAL);
 	if (maxcumUpavg<cumUpavg) {
 		maxcumUpavg=cumUpavg;
-		theApp.glob_prefs->Add2ConnMaxAvgUpRate(maxcumUpavg);
+		thePrefs.Add2ConnMaxAvgUpRate(maxcumUpavg);
 	}
 	
 
@@ -151,7 +151,7 @@ void CStatistics::RecordRate() {
 	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
 
 	// limit to maxmins
-	int iAverageSeconds = theApp.glob_prefs->GetStatsAverageMinutes()*60;
+	int iAverageSeconds = thePrefs.GetStatsAverageMinutes()*60;
 	while ((float)(downrateHistory.front().timestamp - downrateHistory.back().timestamp) / 1000.0 > iAverageSeconds)
 		downrateHistory.pop_back();
 	while ((float)(uprateHistory.front().timestamp - uprateHistory.back().timestamp) / 1000.0 > iAverageSeconds)
@@ -174,10 +174,10 @@ float CStatistics::GetAvgDownloadRate(int averageType) {
 			return (float) (theApp.stat_sessionReceivedBytes/1024) / running;
 
 		case AVG_TOTAL:
-			if (theApp.stat_transferStarttime == 0) return theApp.glob_prefs->GetConnAvgDownRate();
+			if (theApp.stat_transferStarttime == 0) return thePrefs.GetConnAvgDownRate();
 			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return theApp.glob_prefs->GetConnAvgDownRate();
-			return (float) ((( (float) (theApp.stat_sessionReceivedBytes/1024) / running ) + theApp.glob_prefs->GetConnAvgDownRate() ) / 2 );
+			if (running<5) return thePrefs.GetConnAvgDownRate();
+			return (float) ((( (float) (theApp.stat_sessionReceivedBytes/1024) / running ) + thePrefs.GetConnAvgDownRate() ) / 2 );
 
 		default:
 			// By BadWolf - Accurate datarate Calculation
@@ -201,10 +201,10 @@ float CStatistics::GetAvgUploadRate(int averageType) {
 			return (float) (theApp.stat_sessionSentBytes/1024) / running;
 
 		case AVG_TOTAL:
-			if (theApp.stat_transferStarttime == 0) return theApp.glob_prefs->GetConnAvgUpRate();
+			if (theApp.stat_transferStarttime == 0) return thePrefs.GetConnAvgUpRate();
 			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return theApp.glob_prefs->GetConnAvgUpRate();
-			return (float) ((( (float) (theApp.stat_sessionSentBytes/1024) / running ) + theApp.glob_prefs->GetConnAvgUpRate() ) / 2 );
+			if (running<5) return thePrefs.GetConnAvgUpRate();
+			return (float) ((( (float) (theApp.stat_sessionSentBytes/1024) / running ) + thePrefs.GetConnAvgUpRate() ) / 2 );
 
 		default:
 			// By BadWolf - Accurate datarate Calculation

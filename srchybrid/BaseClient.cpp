@@ -223,10 +223,6 @@ void CUpDownClient::Init()
 	m_bMultiPacket = 0;
 	md4clr(requpfileid);
 
-	m_last_l2hac_exec = 0;				//<<--enkeyDEV(th1) -L2HAC-
-	m_L2HAC_time = 0;					//<<--enkeyDEV(th1) -L2HAC-
-	m_l2hac_enabled = false;			//<<--enkeyDEV(th1) -L2HAC- lowid side
-
 	// khaos::kmod+
 	m_iLastSwapAttempt = 0;
 	m_iLastActualSwap = 0;
@@ -679,7 +675,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		if(thePrefs.GetEnableAntiCreditHack())
 			if (theApp.GetID()!=m_nUserIDHybrid && memcmp(m_achUserHash, thePrefs.GetUserHash(), 16)==0)
 				bLeecher = true;
-		if(thePrefs->GetEnableAntiLeecher())
+		if(thePrefs.GetEnableAntiLeecher())
 			if(TestLeecher())
 				bLeecher = true;
 		if(bLeecher)
@@ -743,7 +739,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	}
 
 	CSafeMemFile data(128);
-	data.WriteUInt32(9/*7 OFFICIAL+1 ET_MOD_VERSION+1 -L2HAC-*/); // nr. of tags
+	data.WriteUInt32(8/*7 OFFICIAL+1 ET_MOD_VERSION*/); // nr. of tags
 	CTag tag(ET_COMPRESSION,1);
 	tag.WriteTagToFile(&data);
 	CTag tag2(ET_UDPVER,4);
@@ -773,8 +769,6 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	}
 	//MORPH END   - Added by IceCream, Anti-leecher feature
 
-	CTag tag9(ET_L2HAC,FILEREASKTIME);	//<<--enkeyDEV(th1) -L2HAC-
-	tag9.WriteTagToFile(&data);			//<<--enkeyDEV(th1) -L2HAC-
 	Packet* packet = new Packet(&data,OP_EMULEPROT);
 	if (!bAnswer)
 		packet->opcode = OP_EMULEINFO;
@@ -829,7 +823,6 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 		return;
 	}
 	m_bEmuleProtocol = true;
-	m_L2HAC_time = 0;			//<<--enkeyDEV(th1) -L2HAC-
 
 	uint32 tagcount = data.ReadUInt32();
 	if (bDbgInfo)
@@ -895,11 +888,6 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 				if (bDbgInfo)
 					m_strMuleInfo.AppendFormat("  SecIdent=%u  Preview=%u", m_bySupportSecIdent, m_fSupportsPreview);
 				break;
-			// START enkeyDEV(th1) -L2HAC-
-			case ET_L2HAC:
-				m_L2HAC_time = temptag.tag.intvalue;
-				break;
-			// END enkeyDEV(th1) -L2HAC-
  			case ET_MOD_VERSION: 
 				if (temptag.tag.type == 2)
 				{
@@ -921,17 +909,11 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 		}
 	}
 
-	// START enkeyDEV(th1) -L2HAC- Enable every emule anyway and disable bad clients
-	if (!m_L2HAC_time) m_L2HAC_time = L2HAC_DEFAULT_EMULE;
-	if (m_L2HAC_time < L2HAC_MIN_TIME || m_L2HAC_time > L2HAC_MAX_TIME) m_L2HAC_time = 0;
-	// END enkeyDEV(th1) -L2HAC-
-
 	if( m_byDataCompVer == 0 ){
 		m_bySourceExchangeVer = 0;
 		m_byExtendedRequestsVer = 0;
 		m_byAcceptCommentVer = 0;
 		m_nUDPPort = 0;
-		m_L2HAC_time = 0;			//<<-- enkeyDEV(th1) -L2HAC-
 	}
 	if (bDbgInfo && data.GetPosition() < data.GetLength()){
 		m_strMuleInfo.AppendFormat("  ***AddData: %u bytes", data.GetLength() - data.GetPosition());
@@ -943,7 +925,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 		AddDebugLogLine(false, _T("Received invalid server IP %s from %s"), ipstr(GetServerIP()), DbgGetClientInfo());
 
 	//MORPH START - Added by SiRoB, Anti-leecher feature
-	if(thePrefs->GetEnableAntiLeecher())
+	if(thePrefs.GetEnableAntiLeecher())
 		if(TestLeecher())
 			BanLeecher(!IsBanned());
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
@@ -983,14 +965,11 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	data->WriteUInt32(clientid);
 	data->WriteUInt16(thePrefs.GetPort());
 
-	uint32 tagcount = 5;
-	data->WriteUInt32(tagcount);
-
 	uint32 tagcount = 6/*5 OFFICIAL+1 MOD_VERSION*/;//MORPH - Changed by SiRoB
 	data->WriteUInt32(tagcount);
 
 	//MORPH START - Added by IceCream, Anti-leecher feature
-	char* strUsedName;
+	LPCSTR strUsedName;
 	if (m_bGPLEvildoer)
 		strUsedName = "Lies Mich! http://ReadMe.emule-project.net <- Please use a GPL-conform version";
 	else if (StrStrI(m_pszUsername,"G@m3r")||StrStrI(m_pszUsername,"$WAREZ$")||StrStrI(m_pszUsername,"chief"))
@@ -2231,12 +2210,6 @@ bool CUpDownClient::CheckHandshakeFinished(UINT protocol, UINT opcode) const
 
 	return true;
 }
-//MORPH START - Moved by SiRoB, <<-- enkeyDEV(th1) -L2HAC-
-uint32	CUpDownClient::GetL2HACTime()
-{
-	return m_L2HAC_time ? (m_L2HAC_time - L2HAC_CALLBACK_PRECEDE) : 0;
-}
-//MORPH END   - Moved by SiRoB, <<-- enkeyDEV(th1) -L2HAC-
 
 //EastShare Start - added by AndCycle, IP to Country
 // Superlexx - client's location

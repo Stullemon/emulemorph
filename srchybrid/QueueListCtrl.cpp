@@ -23,7 +23,6 @@
 #include "Exceptions.h"
 #include "KademliaWnd.h"
 #include "emuledlg.h"
-#include "KademliaMain.h"
 #include "FriendList.h"
 #include "UploadQueue.h"
 #include "UpDownClient.h"
@@ -33,6 +32,10 @@
 #include "ClientCredits.h"
 #include "PartFile.h"
 #include "ChatWnd.h"
+#include "Kademlia/Kademlia/Kademlia.h"
+#include "Kademlia/Kademlia/Prefs.h"
+#include "kademlia/net/KademliaUDPListener.h"
+
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
@@ -50,7 +53,7 @@ CQueueListCtrl::CQueueListCtrl(){
 
 	// Barry - Refresh the queue every 10 secs
 	VERIFY( (m_hTimer = ::SetTimer(NULL, NULL, 10000, QueueUpdateTimer)) != NULL );
-	if (!m_hTimer)
+	if (thePrefs.GetVerbose() && !m_hTimer)
 		AddDebugLogLine(true,_T("Failed to create 'queue list control' timer - %s"),GetErrorMessage(GetLastError()));
 }
 
@@ -85,20 +88,20 @@ void CQueueListCtrl::Init()
 	Localize();
 	LoadSettings(CPreferences::tableQueue);
 	// Barry - Use preferred sort order from preferences
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue);
-	bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableQueue);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableQueue);
+	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableQueue);
 	SetSortArrow(sortItem, sortAscending);
 	// SLUGFILLER: multiSort - load multiple params
-	for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableQueue); i > 0; ) {
+	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableQueue); i > 0; ) {
 		i--;
-		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue, i);
-		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableQueue, i);
+		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableQueue, i);
+		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableQueue, i);
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
 
 	// Mighty Knife: Community affiliation
-	if (theApp.glob_prefs->IsCommunityEnabled ()) ShowColumn (11);
+	if (thePrefs.IsCommunityEnabled ()) ShowColumn (11);
 	else HideColumn (11);
 	// [end] Mighty Knife
 
@@ -240,24 +243,31 @@ void CQueueListCtrl::AddClient(/*const*/CUpDownClient* client, bool resetclient)
 		client->SetAskedCount(0);
 	//MORPH END - Added by SiRoB, ZZ Upload System
 	}
-	if(theApp.glob_prefs->IsQueueListDisabled())
+
+	if (!theApp.emuledlg->IsRunning())
 		return;
-	uint32 itemnr = GetItemCount();
-	itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,LPSTR_TEXTCALLBACK,0,0,1,(LPARAM)client);
-	RefreshClient(client);
-	theApp.emuledlg->transferwnd->UpdateListCount(2);
+	if(thePrefs.IsQueueListDisabled())
+		return;
+
+	int iItemCount = GetItemCount();
+	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,iItemCount,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)client);
+	Update(iItem);
+	theApp.emuledlg->transferwnd->UpdateListCount(2, iItemCount+1);
 }
 
 void CQueueListCtrl::RemoveClient(const CUpDownClient* client)
 {
-	if (!theApp.emuledlg->IsRunning()) return;
+	if (!theApp.emuledlg->IsRunning())
+		return;
+
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
 	sint32 result = FindItem(&find);
-	if (result != (-1) )
+	if (result != -1){
 		DeleteItem(result);
-	theApp.emuledlg->transferwnd->UpdateListCount(2);
+		theApp.emuledlg->transferwnd->UpdateListCount(2);
+	}
 }
 
 void CQueueListCtrl::RefreshClient(const CUpDownClient* client)
@@ -275,7 +285,6 @@ void CQueueListCtrl::RefreshClient(const CUpDownClient* client)
 	sint16 result = FindItem(&find);
 	if(result != -1)
 		Update(result);
-	return;
 }
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
@@ -299,8 +308,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
-	RECT cur_rec;
-	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	RECT cur_rec = lpDrawItemStruct->rcItem;
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
 
 	int iOldBkMode;
@@ -433,7 +441,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							}
 
 							//Morph Start - added by AndCycle, Equal Chance For Each File
-							if(theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
+							if(thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
 								if(file->GetPowerShared()){//keep file prio at PS
 									Sbuffer.Append(" ");
 									Sbuffer.Append(file->GetEqualChanceValueString());
@@ -504,7 +512,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						if( client->GetUpPartCount()){
 							cur_rec.bottom--;
 							cur_rec.top++;
-							client->DrawUpStatusBar(dc,&cur_rec,false,theApp.glob_prefs->UseFlatBar());
+							client->DrawUpStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
 							cur_rec.bottom++;
 							cur_rec.top--;
 						}
@@ -532,8 +540,8 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	// Mighty Knife: Community affiliation
 	// Show/Hide community column if changed in the preferences
-	if (theApp.glob_prefs->IsCommunityEnabled () != !IsColumnHidden (11))
-		if (theApp.glob_prefs->IsCommunityEnabled ())
+	if (thePrefs.IsCommunityEnabled () != !IsColumnHidden (11))
+		if (thePrefs.IsCommunityEnabled ())
 				ShowColumn (11);
 		else HideColumn (11);
 	// [end] Mighty Knife
@@ -541,8 +549,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
-		RECT outline_rec;
-		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		RECT outline_rec = lpDrawItemStruct->rcItem;
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -583,25 +590,17 @@ void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.CreatePopupMenu();
 	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+	ClientMenu.SetDefaultItem(MP_DETAIL);
+	ClientMenu.AppendMenu(MF_STRING | ((client && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
 	//MORPH START - Added by SiRoB, Friend Addon
-	if (GetSelectedCount() == 1){
-		if(client->IsFriend()){
-			ClientMenu.AppendMenu(MF_STRING, MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-			ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
-			if (!client->HasLowID())
-				ClientMenu.CheckMenuItem(MP_FRIENDSLOT, ((client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) );
-			else
-				ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_GRAYED);
-		}else
-			ClientMenu.AppendMenu(MF_STRING | uFlags,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
-	}
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH END - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_MESSAGE, GetResString(IDS_SEND_MSG));
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	ClientMenu.AppendMenu(MF_STRING | ((!client || !client->GetViewSharedFilesSupport()) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsBanned()) ? MF_ENABLED : MF_GRAYED),MP_UNBAN, GetResString(IDS_UNBAN));
-	if(theApp.kademlia->GetThreadID() && !theApp.kademlia->isConnected() )
-		ClientMenu.AppendMenu(MF_STRING | uFlags,MP_BOOT, "BootStrap");
-			
+	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::getPrefs()->getLastContact())
+		ClientMenu.AppendMenu(MF_STRING | ((!client || client->GetKadPort()==0) ? MF_GRAYED : MF_ENABLED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
@@ -619,25 +618,25 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 			case MP_SHOWLIST:
 				client->RequestSharedFileList();
 				break;
-			case MP_MESSAGE:{
+			case MP_MESSAGE:
 				theApp.emuledlg->chatwnd->StartSession(client);
 				break;
-			}
-			case MP_ADDFRIEND:{
-				theApp.friendlist->AddFriend(client);
+			case MP_ADDFRIEND:
+				if (theApp.friendlist->AddFriend(client))
+					Update(iSel);
 				break;
-			}
-			case MP_UNBAN:{
-				if( client->IsBanned() )
+			case MP_UNBAN:
+				if (client->IsBanned()){
 					client->UnBan();
+					Update(iSel);
+				}
 				break;
-			}
   			//MORPH START - Added by SiRoB, Friend Addon
 			case MP_REMOVEFRIEND:{//LSD
 				if (client && client->IsFriend())
 				{
 					theApp.friendlist->RemoveFriend(client->m_Friend);
-					RefreshClient(client);
+					Update(iSel);
 				}
 				break;
 			}
@@ -659,7 +658,7 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 						theApp.friendlist->RefreshFriend(cur_friend);
 					}
 					//KTS-
-					RefreshClient(client);
+					Update(iSel);
 				}
 				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 				break;
@@ -672,13 +671,10 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 				dialog.DoModal();
 				break;
 			}
-			case MP_BOOT:{
-				if(	theApp.kademlia->GetThreadID() && client->GetKadPort())
-				{
-					theApp.kademlia->Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
-				}
+			case MP_BOOT:
+				if (client->GetKadPort())
+					Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 				break;
-			}
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			case MP_LIST_REQUESTED_FILES: { // added by sivka
 				if (client != NULL)
@@ -726,14 +722,14 @@ void CQueueListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue);
-	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableQueue);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableQueue);
+	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableQueue);
 	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 	// Item is column clicked
 	sortItem = pNMListView->iSubItem;
 	// Save new preferences
-	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableQueue, sortItem);
-	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableQueue, sortAscending);
+	thePrefs.SetColumnSortItem(CPreferences::tableQueue, sortItem);
+	thePrefs.SetColumnSortAscending(CPreferences::tableQueue, sortAscending);
 	// Sort table
 	SetSortArrow(sortItem, sortAscending);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
@@ -793,9 +789,9 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				if (item1->GetPowerShared()) result ++;
  				if (item2->GetPowerShared()) result --;
 				//Morph Start - added by AndCycle, Equal Chance For Each File
-				if(result == 0 && (theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE || (item1->GetPowerShared() == true && item2->GetPowerShared() == true)))
+				if(result == 0 && (thePrefs.GetEqualChanceForEachFileMode() == ECFEF_DISABLE || (item1->GetPowerShared() == true && item2->GetPowerShared() == true)))
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
-				if (result == 0 && file1 != file2 && theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
+				if (result == 0 && file1 != file2 && thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
 					result =
 						file1->GetEqualChanceValue() < file2->GetEqualChanceValue() ? 1 :
 						file1->GetEqualChanceValue() > file2->GetEqualChanceValue() ? -1 :
@@ -945,7 +941,7 @@ void CALLBACK CQueueListCtrl::QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEve
 	try
 	{
 		if (   !theApp.emuledlg->IsRunning() // Don't do anything if the app is shutting down - can cause unhandled exceptions
-			|| !theApp.glob_prefs->GetUpdateQueueList()
+			|| !thePrefs.GetUpdateQueueList()
 			|| theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd
 			|| !theApp.emuledlg->transferwnd->queuelistctrl.IsWindowVisible() )
 			return;
@@ -978,7 +974,11 @@ void CQueueListCtrl::ShowSelectedUserDetails()
 	CPoint p = point; 
     ScreenToClient(&p); 
     int it = HitTest(p); 
-    if (it == -1) return;
+    if (it == -1)
+	return;
+
+	SetItemState(-1, 0, LVIS_SELECTED);
+	SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	SetSelectionMark(it);   // display selection mark correctly! 
 
 	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());

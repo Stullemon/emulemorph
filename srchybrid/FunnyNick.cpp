@@ -156,7 +156,7 @@ CFunnyNick::CFunnyNick()
 
 
 
-char* CFunnyNick::gimmeFunnyNick(const char *id)
+char* CFunnyNick::gimmeFunnyNick(const uchar *id)
 {
 	//--- if we get an id, we can generate the same random name for this user over and over... so much about randomness :) ---
 	if(id)

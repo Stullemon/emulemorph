@@ -34,7 +34,6 @@
 #include "PerfLog.h"
 #include <..\src\mfc\sockimpl.h>
 #include <..\src\mfc\afximpl.h>
-#include "KademliaMain.h"
 #include "LastCommonRouteFinder.h"
 #include "UploadBandwidthThrottler.h"
 #include "ClientList.h"
@@ -54,16 +53,17 @@
 #include "ClientCredits.h"
 #include "KnownFileList.h"
 #include "Server.h"
+#include "UpDownClient.h"
 #ifndef _CONSOLE
 #include "emuleDlg.h"
 #include "SearchDlg.h"
+#include "enbitmap.h"
 #endif
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
 CLog theLog;
 CLog theVerboseLog;
-int _iDbgHeap = 1;
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -129,7 +129,12 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 
 	// create a string version (e.g. "0.30a")
 	ASSERT( VERSION_UPDATE + 'a' <= 'f' );
-	m_strCurVersionLong.Format(_T("%u.%u%c.%u [%s]"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD,MOD_VERSION);
+#ifdef _DEBUG
+	m_strCurVersionLong.Format(_T("%u.%u%c.%u [%s]"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD, MOD_VERSION);
+#else
+	m_strCurVersionLong.Format(_T("%u.%u%c [%s]"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, MOD_VERSION);
+#endif
+
 #ifdef _DUMP
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
@@ -155,8 +160,8 @@ CemuleApp theApp(_T("eMule"));
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710
 void __cdecl __AfxSocketTerm()
 {
-#if defined(USE_SHARED_MFC) && (_MFC_VER==0x0700 || _MFC_VER==0x0710)
-	WSACleanup();
+#if defined(_AFXDLL) && (_MFC_VER==0x0700 || _MFC_VER==0x0710)
+	VERIFY( WSACleanup() == 0 );
 #else
 	_AFX_SOCK_STATE* pState = _afxSockState.GetData();
 	if (pState->m_pfnSockTerm != NULL){
@@ -199,14 +204,8 @@ BOOL CemuleApp::InitInstance()
 	AfxOleInit();
 
 	pendinglink = 0;
-	//Morph Start - added by AndCycle, VQB: multipleInstance - moved this here...
-	// create & initalize all the important stuff 
-	glob_prefs = new CPreferences();
-	if (ProcessCommandline()){
-		delete glob_prefs;	// must be delete
+	if (ProcessCommandline())
 		return false;
-	}
-	//Morph End - added by AndCycle, VQB: multipleInstance
 	// InitCommonControls() ist für Windows XP erforderlich, wenn ein Anwendungsmanifest
 	// die Verwendung von ComCtl32.dll Version 6 oder höher zum Aktivieren
 	// von visuellen Stilen angibt. Ansonsten treten beim Erstellen von Fenstern Fehler auf.
@@ -245,23 +244,24 @@ BOOL CemuleApp::InitInstance()
 			AfxMessageBox(_T("No Rich Edit control library found!")); // should never happen..
 	}
 
-	//Morph - moved by AndCycle, VQB: multipleInstance remove - moved up
-	
+	// create & initalize all the important stuff 
+	thePrefs.Init();
+
 	//MORPH START - Added by IceCream, high process priority
-	if (glob_prefs->GetEnableHighProcess())
+	if (thePrefs.GetEnableHighProcess())
 		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	//MORPH END   - Added by IceCream, high process priority
 
 #ifdef _DEBUG
-	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), "%s\\%s", glob_prefs->GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
+	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), "%s\\%s", thePrefs.GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
 #endif
-	VERIFY( theLog.SetFilePath(glob_prefs->GetAppDir() + _T("eMule.log")) );
-	VERIFY( theVerboseLog.SetFilePath(glob_prefs->GetAppDir() + _T("eMule_Verbose.log")) );
-	theLog.SetMaxFileSize(glob_prefs->GetMaxLogFileSize());
-	theVerboseLog.SetMaxFileSize(glob_prefs->GetMaxLogFileSize());
-	if (glob_prefs->Log2Disk())
+	VERIFY( theLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule.log")) );
+	VERIFY( theVerboseLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule_Verbose.log")) );
+	theLog.SetMaxFileSize(thePrefs.GetMaxLogFileSize());
+	theVerboseLog.SetMaxFileSize(thePrefs.GetMaxLogFileSize());
+	if (thePrefs.GetLog2Disk())
 		theLog.Open();
-	if (glob_prefs->Debug2Disk())
+	if (thePrefs.GetDebug2Disk())
 		theVerboseLog.Open();
 
 	CemuleDlg dlg;
@@ -269,7 +269,7 @@ BOOL CemuleApp::InitInstance()
 	m_pMainWnd = &dlg;
 
 	// Barry - Auto-take ed2k links
-	if (glob_prefs->AutoTakeED2KLinks())
+	if (thePrefs.AutoTakeED2KLinks())
 		Ask4RegFix(false, true);
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	lastCommonRouteFinder = new LastCommonRouteFinder();
@@ -277,22 +277,18 @@ BOOL CemuleApp::InitInstance()
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	uploadBandwidthThrottler = new UploadBandwidthThrottler();
 	//MORPH END - Added by Yun.SF3, ZZ Upload System
-	kademlia = new CKademliaMain();
 	clientlist = new CClientList();
 	friendlist = new CFriendList();
 	searchlist = new CSearchList();
-	//EastShare START - Modified by TAHO, .met files control
-	//knownfiles = new CKnownFileList();
-	knownfiles = new CKnownFileList(glob_prefs);
-	//EastShare END - Added by TAHO, .met files control
-	serverlist = new CServerList(glob_prefs);
-	serverconnect = new CServerConnect(serverlist,theApp.glob_prefs);
-	sharedfiles = new CSharedFileList(glob_prefs,serverconnect);
-	listensocket = new CListenSocket(glob_prefs);
+	knownfiles = new CKnownFileList();
+	serverlist = new CServerList();
+	serverconnect = new CServerConnect(serverlist);
+	sharedfiles = new CSharedFileList(serverconnect);
+	listensocket = new CListenSocket();
 	clientudp	= new CClientUDPSocket();
-	clientcredits = new CClientCreditsList(glob_prefs);
-	downloadqueue = new CDownloadQueue(glob_prefs,sharedfiles);	// bugfix - do this before creating the uploadqueue
-	uploadqueue = new CUploadQueue(glob_prefs);
+	clientcredits = new CClientCreditsList();
+	downloadqueue = new CDownloadQueue(sharedfiles);	// bugfix - do this before creating the uploadqueue
+	uploadqueue = new CUploadQueue();
 	ipfilter 	= new CIPFilter();
 	webserver = new CWebServer(); // Webserver [kuchin]
 	mmserver = new CMMServer();
@@ -315,23 +311,6 @@ BOOL CemuleApp::InitInstance()
 	theApp.stat_leecherclients=0; //Added by IceCream
 	//MORPH END   - Added by IceCream, Anti-leecher/Secure counter feature
 	thePerfLog.Startup();
-
-#ifdef _DEBUG
-	Kademlia::CKademlia::setErrorCallback			(myErrHandler);
-#endif
-	Kademlia::CKademlia::setLogCallback				(myLogHandler);
-	Kademlia::CKademlia::setDebugCallback			(myDebugAndLogHandler);
-	Kademlia::CKademlia::setSearchAddCallback		(KademliaSearchAddCallback);
-	Kademlia::CKademlia::setSearchRemCallback		(KademliaSearchRemCallback);
-	Kademlia::CKademlia::setSearchRefCallback		(KademliaSearchRefCallback);
-	Kademlia::CKademlia::setContactAddCallback		(KademliaContactAddCallback);
-	Kademlia::CKademlia::setContactRemCallback		(KademliaContactRemCallback);
-	Kademlia::CKademlia::setContactRefCallback		(KademliaContactRefCallback);
-	Kademlia::CKademlia::setRequestTCPCallback		(KademliaRequestTCPCallback);
-	Kademlia::CKademlia::setUpdateStatusCallback	(KademliaUpdateStatusCallback);
-	Kademlia::CKademlia::setOverheadSendCallback	(KademliaOverheadSendCallback);
-	Kademlia::CKademlia::setOverheadRecvCallback	(KademliaOverheadRecvCallback);
-
 	dlg.DoModal();
 
 	::CloseHandle(m_hMutexOneInstance);
@@ -437,14 +416,7 @@ bool CemuleApp::ProcessCommandline()
 			}
 		}
     }
-    // khaos::removed: return (maininst || bAlreadyRunning);
-	// return false; // khaos::multiple_instances
-	//Morph Start - added by AndCycle, VQB: multipleInstance
-	if (theApp.glob_prefs->IsMultipleInstanceEnabled())
-		return false;
-	else
-	//Morph End - added by AndCycle, VQB: multipleInstance
-		return (maininst || bAlreadyRunning);
+    	return (maininst || bAlreadyRunning);
 }
 
 BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
@@ -461,13 +433,13 @@ BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
 } 
 
 
-void CemuleApp::UpdateReceivedBytes(int32 bytesToAdd) {
+void CemuleApp::UpdateReceivedBytes(uint32 bytesToAdd) {
 	SetTimeOnTransfer();
 	stat_sessionReceivedBytes+=bytesToAdd;
 }
 
 //MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-void CemuleApp::UpdateSentBytes(int32 bytesToAdd, bool sentToFriend) {
+void CemuleApp::UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend) {
 	SetTimeOnTransfer();
 
 	stat_sessionSentBytes += bytesToAdd;
@@ -497,7 +469,7 @@ CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
 		f->GetFileSize(),
 		EncodeBase16(f->GetFileHash(),16),
-		(uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), glob_prefs->GetPort() );
+		(uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), thePrefs.GetPort() );
 	return strLink;
 }
 
@@ -508,7 +480,7 @@ CString CemuleApp::CreateED2kHostnameSourceLink(const CAbstractFile* f)
 		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
 		f->GetFileSize(),
 		EncodeBase16(f->GetFileHash(),16),
-		glob_prefs->GetYourHostname(), glob_prefs->GetPort() );
+		thePrefs.GetYourHostname(), thePrefs.GetPort() );
 	return strLink;
 }
 // itsonlyme: hostnameSource
@@ -575,10 +547,10 @@ CString CemuleApp::CopyTextFromClipboard()
 
 void CemuleApp::OnlineSig() // Added By Bouc7 
 { 
-	if (!theApp.glob_prefs->IsOnlineSignatureEnabled()) return;
+	if (!thePrefs.IsOnlineSignatureEnabled()) return;
 
-    char* fullpath = new char[strlen(glob_prefs->GetAppDir())+MAX_PATH]; 
-    sprintf(fullpath,"%sonlinesig.dat",glob_prefs->GetAppDir()); 
+    char* fullpath = new char[strlen(thePrefs.GetAppDir())+MAX_PATH]; 
+    sprintf(fullpath,"%sonlinesig.dat",thePrefs.GetAppDir()); 
     CFile file; 
     if (!file.Open(fullpath,CFile::modeCreate|CFile::modeReadWrite)){ 
 		AddLogLine(true,GetResString(IDS_ERROR_SAVEFILE)+CString(" OnlineSig.dat"));
@@ -639,20 +611,23 @@ void CemuleApp::OnHelp() {
 	CString strHelpFile = m_pszHelpFilePath;
 	CFileFind ff;
 
-	if (glob_prefs->GetLanguageID()!=MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT)) {
+	if (thePrefs.GetLanguageID()!=MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT)) {
 		int pos=strHelpFile.ReverseFind('.');
 		CString temp;
-		temp.Format("%s.%u.chm",strHelpFile.Left(pos),glob_prefs->GetLanguageID());
+		temp.Format("%s.%u.chm",strHelpFile.Left(pos),thePrefs.GetLanguageID());
 		if (pos>0) strHelpFile=temp;
 		
 		// if not exists, use original help (english)
 		if (!ff.FindFile(strHelpFile, 0)) strHelpFile = m_pszHelpFilePath;
 	}
+	ff.Close();
 	strHelpFile.Replace(".HLP", ".chm");
 
 	// lets just open the helpfile by associated program, instead of more windows-dependency :)
-	if (ff.FindFile(strHelpFile, 0)) ShellOpenFile(strHelpFile); else AfxMessageBox(GetResString(IDS_ERR_NOHELP)+"\n"+strHelpFile, MB_OK | MB_ICONERROR);
-	ff.Close();
+	if (ff.FindFile(strHelpFile, 0)) ShellOpenFile(strHelpFile); 
+	else
+		if (IDYES==AfxMessageBox(GetResString(IDS_ERR_NOHELP)+"\n"+strHelpFile, MB_YESNO | MB_ICONERROR) )
+			ShellExecute(NULL, NULL, "http://www.emule-project.net/home/perl/help.cgi", NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);	
 }
 
 int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -1 */)
@@ -704,14 +679,16 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 	return (int)vData;
 }
 
-bool CemuleApp::IsConnected(){
-	return (theApp.serverconnect->IsConnected() || (theApp.kademlia->isConnected() && !theApp.kademlia->isFirewalled())); //Once we can handle lowID users in Kad, we remove the IsFirewalled!
+bool CemuleApp::IsConnected()
+{
+	//Once we can handle lowID users in Kad, we remove the IsFirewalled!
+	return (theApp.serverconnect->IsConnected() || (Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled()));
 }
 
 uint32 CemuleApp::GetID(){
 	uint32 ID;
-	if( theApp.kademlia->isConnected() && !theApp.kademlia->isFirewalled() )
-		ID = ntohl(theApp.kademlia->getIP());
+	if( Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled() )
+		ID = ntohl(Kademlia::CKademlia::getIPAddress());
 	else if( theApp.serverconnect->IsConnected() )
 		ID = theApp.serverconnect->GetClientID();
 	else 
@@ -719,12 +696,85 @@ uint32 CemuleApp::GetID(){
 	return ID;
 }
 
-bool CemuleApp::IsFirewalled(){
+bool CemuleApp::IsFirewalled()
+{
 	if( theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID())
+		return false; // we have an eD2K HighID -> not firewalled
+
+	if (Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled())
+		return false; // we have an Kad HighID -> not firewalled
+
+	return true; // firewalled
+}
+
+bool CemuleApp::DoCallback( CUpDownClient *client )
+{
+	if(Kademlia::CKademlia::isConnected())
+	{
+		if(theApp.serverconnect->IsConnected())
+		{
+			if(theApp.serverconnect->IsLowID())
+			{
+				if(Kademlia::CKademlia::isFirewalled())
+				{
+					//Both Connected - Both Firewalled
+					return false;
+				}
+				else
+				{
+					if(client->GetServerIP() == theApp.serverconnect->GetCurrentServer()->GetIP() && client->GetServerPort() == theApp.serverconnect->GetCurrentServer()->GetPort())
+					{
+						//Both Connected - Server lowID, Kad Open - Client on same server
 		return false;
-	if( theApp.kademlia->isConnected() && !theApp.kademlia->isFirewalled() )
+					}
+					else
+					{
+						//Both Connected - Server lowID, Kad Open - Client on remote server
+						return true;
+					}
+				}
+			}
+			else
+			{
+				//Both Connected - Server HighID, Kad don't care
+				return true;
+			}
+		}
+		else
+		{
+			if(Kademlia::CKademlia::isFirewalled())
+			{
+				//Only Kad Connected - Kad Firewalled
+				return false;
+			}
+			else
+			{
+				//Only Kad Conected - Kad Open
+				return true;
+			}
+		}
+	}
+	else
+	{
+		if( theApp.serverconnect->IsConnected() )
+		{
+			if( theApp.serverconnect->IsLowID() )
+			{
+				//Only Server Connected - Server LowID
 		return false;
-	return true;
+			}
+			else
+			{
+				//Only Server Connected - Server HighID
+				return true;
+			}
+		}
+		else
+		{
+			//We are not connected at all!
+			return false;
+		}
+	}
 }
 
 HICON CemuleApp::LoadIcon(UINT nIDResource) const
@@ -737,7 +787,7 @@ HICON CemuleApp::LoadIcon(UINT nIDResource) const
 HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags) const
 {
 	HICON hIcon = NULL;
-	LPCTSTR pszSkinProfile = glob_prefs ? glob_prefs->GetSkinProfile() : NULL;
+	LPCTSTR pszSkinProfile = thePrefs.GetSkinProfile();
 	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
 	{
 		// load icon resource file specification from skin profile
@@ -843,9 +893,56 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 	return hIcon;
 }
 
+HBITMAP CemuleApp::LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) const
+{
+	HBITMAP hBmp = NULL;
+	LPCTSTR pszSkinProfile = thePrefs.GetSkinProfile();
+	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
+	{
+		// load resource file specification from skin profile
+		TCHAR szSkinResource[MAX_PATH];
+		GetPrivateProfileString(_T("Bitmaps"), lpszResourceName, _T(""), szSkinResource, ARRSIZE(szSkinResource), pszSkinProfile);
+		if (szSkinResource[0] != _T('\0'))
+		{
+			// expand any optional available environment strings
+			TCHAR szExpSkinRes[MAX_PATH];
+			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, ARRSIZE(szExpSkinRes)) != 0)
+			{
+				_tcsncpy(szSkinResource, szExpSkinRes, ARRSIZE(szSkinResource));
+				szSkinResource[ARRSIZE(szSkinResource)-1] = _T('\0');
+			}
+
+			// create absolute path to resource file
+			TCHAR szFullResPath[MAX_PATH];
+			if (PathIsRelative(szSkinResource))
+			{
+				TCHAR szSkinResFolder[MAX_PATH];
+				_tcsncpy(szSkinResFolder, pszSkinProfile, ARRSIZE(szSkinResFolder));
+				szSkinResFolder[ARRSIZE(szSkinResFolder)-1] = _T('\0');
+				PathRemoveFileSpec(szSkinResFolder);
+				_tmakepath(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
+			}
+			else
+			{
+				_tcsncpy(szFullResPath, szSkinResource, ARRSIZE(szFullResPath));
+				szFullResPath[ARRSIZE(szFullResPath)-1] = _T('\0');
+			}
+
+			CEnBitmap bmp;
+			if (bmp.LoadImage(szFullResPath))
+				return (HBITMAP)bmp.Detach();
+		}
+	}
+
+	CEnBitmap bmp;
+	if (bmp.LoadImage(lpszResourceName, pszResourceType))
+		return (HBITMAP)bmp.Detach();
+	return NULL;
+}
+
 void CemuleApp::ApplySkin(LPCTSTR pszSkinProfile)
 {
-	theApp.glob_prefs->SetSkinProfile(pszSkinProfile);
+	thePrefs.SetSkinProfile(pszSkinProfile);
 	AfxGetMainWnd()->SendMessage(WM_SYSCOLORCHANGE);
 }
 
@@ -858,187 +955,4 @@ CTempIconLoader::~CTempIconLoader()
 {
 	if (m_hIcon)
 		VERIFY( DestroyIcon(m_hIcon) );
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// those funcs are called from a different thread
-// to stay synchronized with the main app each function+data is forced through the
-// app message queue
-
-void CALLBACK KademliaSearchAddCallback(Kademlia::CSearch* search)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_SEARCHADD, 0, (LPARAM)search);
-}
-
-void CALLBACK KademliaSearchRemCallback(Kademlia::CSearch* search)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_SEARCHREM, 0, (LPARAM)search);
-}
-
-void CALLBACK KademliaSearchRefCallback(Kademlia::CSearch* search)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_SEARCHREF, 0, (LPARAM)search);
-}
-
-void CALLBACK KademliaContactAddCallback(Kademlia::CContact* contact)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_CONTACTADD, 0, (LPARAM)contact);
-}
-
-void CALLBACK KademliaContactRemCallback(Kademlia::CContact* contact)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_CONTACTREM, 0, (LPARAM)contact);
-}
-
-void CALLBACK KademliaContactRefCallback(Kademlia::CContact* contact)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_CONTACTREF, 0, (LPARAM)contact);
-}
-
-void CALLBACK KademliaResultFileCallback(uint32 searchID, Kademlia::CUInt128 contactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	KADFILERESULT kadfr;
-	kadfr.searchID = searchID;
-	kadfr.pcontactID = &contactID;
-	kadfr.type = type;
-	kadfr.ip = ip;
-	kadfr.tcp = tcp;
-	kadfr.udp = udp;
-	kadfr.serverip = serverip;
-	kadfr.serverport = serverport;
-	theApp.emuledlg->SendMessage(WM_KAD_RESULTFILE, 0, (LPARAM)&kadfr);
-}
-
-void CALLBACK KademliaResultKeywordCallback(uint32 searchID, Kademlia::CUInt128 fileID, LPCSTR name, uint32 size, LPCSTR type, uint16 numProperties, ...)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	va_list args;
-	va_start(args, numProperties);
-	KADKEYWORDRESULT kadkwr;
-	kadkwr.searchID = searchID;
-	kadkwr.pfileID = &fileID;
-	kadkwr.name = name;
-	kadkwr.size = size;
-	kadkwr.type = type;
-	kadkwr.numProperties = numProperties;
-	kadkwr.args = args;
-	va_end(args);
-
-	theApp.emuledlg->SendMessage(WM_KAD_RESULTKEYWORD, 0, (LPARAM)&kadkwr);
-}
-
-void CALLBACK KademliaRequestTCPCallback(Kademlia::CContact* contact)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_REQUESTTCP, 0, (LPARAM)contact);
-}
-
-void CALLBACK KademliaUpdateStatusCallback(Status* status)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_UPDATESTATUS, 0, (LPARAM)status);
-}
-
-void CALLBACK KademliaOverheadSendCallback(uint32 size)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_OVERHEADSEND, 0, (LPARAM)size);
-}
-
-void CALLBACK KademliaOverheadRecvCallback(uint32 size)
-{
-	try
-	{
-		if ( !theApp.emuledlg->IsRunning() )
-		{
-			return;
-		}
-	}
-	catch(...){ ASSERT(0); return; }
-	theApp.emuledlg->SendMessage(WM_KAD_OVERHEADRECV, 0, (LPARAM)size);
 }

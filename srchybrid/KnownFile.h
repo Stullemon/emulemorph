@@ -203,7 +203,7 @@ public:
 	void	AddUploadingClient(CUpDownClient* client);
 	void	RemoveUploadingClient(CUpDownClient* client);
 	virtual void	UpdatePartsInfo();
-	virtual void	DrawShareStatusBar(CDC* dc, LPRECT rect, bool onlygreyrect, bool bFlat) /*const*/;
+	virtual void	DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool bFlat) /*const*/;
 
 	// comment 
 	CString GetFileComment() /*const*/ { if (!m_bCommentLoaded) LoadComment(); return m_strComment; }

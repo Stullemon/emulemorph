@@ -1,7 +1,4 @@
 #pragma once
-
-#include "preferences.h"
-#include "wizard.h"
 #include "TreeOptionsCtrlEx.h"
 // CPPgMorph dialog
 
@@ -13,13 +10,10 @@ public:
 	CPPgMorph();
 	virtual ~CPPgMorph();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs;}
-
 // Dialog Data
 	enum { IDD = IDD_PPG_MORPH };
 protected:
-	CPreferences *app_prefs;
-	
+
 	int m_iSUCLog;
 	int m_iUSSLimit; // EastShare - Added by TAHO, USS limit
 	int m_iSUCHigh;

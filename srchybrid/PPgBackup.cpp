@@ -6,8 +6,7 @@
 #include "PPgBackup.h"
 #include "XMessageBox.h"
 #include "string.h"
-
-
+#include "Preferences.h"
 
 // CPPgBackup dialog
 

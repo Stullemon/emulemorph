@@ -326,7 +326,7 @@ void CClientCreditsList::LoadList()
 	CSafeBufferedFile file;
 	CFileException fexp;
 
-	m_bSaveUploadQueueWaitTime = thePrefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
+	m_bSaveUploadQueueWaitTime = thePrefs.SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 //Morph Start - added by AndCycle, choose .met to load
 
 	CSafeBufferedFile	loadFile;
@@ -340,15 +340,15 @@ void CClientCreditsList::LoadList()
 	int	countFile = 0;
 
 	//SUQWTv2.met must have bigger number than original clients.met to have higher prio
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".MSUQWT"), m_pAppPrefs->GetConfigDir());//Pawcio
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup2\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir());
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), thePrefs.GetConfigDir());
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".MSUQWT"), thePrefs.GetConfigDir());//Pawcio
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir());
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), thePrefs.GetConfigDir());
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+"Backup\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+"Backup\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+"Backup2\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+"Backup2\\");
 	//totalLoadFile = 9;
 
 	int	lastFile = -1;
@@ -395,7 +395,7 @@ void CClientCreditsList::LoadList()
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 	
 	try{
-		uint8 version = file.ReadUint();
+		uint8 version = file.ReadUInt8();
 		//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		/*
 		if (version != CREDITFILE_VERSION && version != CREDITFILE_VERSION_29){

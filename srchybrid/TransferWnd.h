@@ -38,7 +38,7 @@ public:
 	virtual ~CTransferWnd();
 	void	ShowQueueCount(uint32 number);
 	void	SwitchUploadList();
-	void	UpdateListCount(uint8 listindex);
+	void	UpdateListCount(uint8 listindex, int iCount = -1);
 	void	OnBnClickedQueueRefreshButton();
 	void	Localize();
 	void	UpdateCatTabTitles();

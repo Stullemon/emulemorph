@@ -85,7 +85,7 @@ bool CKnownFileList::Init()
 		// EastShare START - Added by TAHO, .met file control
 		uint32 cDeleted = 0; 
 		uint32 cAdded = 0;
-		uint32 ExpiredTime = time(NULL) - app_prefs->GetKnownMetDays()*86400;
+		uint32 ExpiredTime = time(NULL) - thePrefs.GetKnownMetDays()*86400;
 		// EastShare END - Added by TAHO, .met file control
 		
 		
@@ -155,7 +155,7 @@ void CKnownFileList::Save()
 
 		UINT nRecordsNumber = m_Files_map.GetCount();
 		// SLUGFILLER: mergeKnown - add part files count
-		UINT nRecordsNumberWithPartFiles = RecordsNumber + theApp.downloadqueue->GetPartFilesCount();
+		UINT nRecordsNumberWithPartFiles = nRecordsNumber + theApp.downloadqueue->GetPartFilesCount();
 		file.WriteUInt32(nRecordsNumberWithPartFiles);
 		// SLUGFILLER: mergeKnown
 		POSITION pos = m_Files_map.GetStartPosition();
@@ -269,9 +269,9 @@ CKnownFile* CKnownFileList::FindKnownFile(LPCTSTR filename, uint32 date, uint32 
 		// If theApp.importknowndates has set bit 1, found files are reported even if the
 		// date does not match. The caller can then retrieve the correct date
 		// from the file directly and save it to known.met.
-		if (cur_file->GetFileSize() == in_size && (!strcmp(filename,cur_file->GetFileName())))
-			if ((cur_file->GetFileDate() == in_date)) // importing disabled at the moment
-				return ElementAt(i);
+		if (cur_file->GetFileSize() == size && (!strcmp(filename,cur_file->GetFileName())))
+			if ((cur_file->GetFileDate() == date)) // importing disabled at the moment
+				return cur_file;
 //#else
 //		if (cur_file->GetFileDate() == in_date && cur_file->GetFileSize() == in_size && (!_tcscmp(filename,cur_file->GetFileName())))
 //			return cur_file;

@@ -127,7 +127,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		if (piml){
 			iImgUM = piml->Add(CTempIconLoader("UPLOAD"));
 			iImgDYNUP = piml->Add(CTempIconLoader("SUC"));
-			iImgDM = piml->Add(CTempIconLoader("SEARCHDIRECTDOWNLOAD"));
+			iImgDM = piml->Add(CTempIconLoader("DOWNLOAD"));
 			iImgSFM = piml->Add(CTempIconLoader("SHAREDFILES"));
 			//MORPH START - Added by SiRoB, khaos::categorymod+
 			iImgSCC = piml->Add(CTempIconLoader("PREF_FOLDERS"));
@@ -312,7 +312,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSNumberOfPings, m_iUSSNumberOfPings);
 	
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMinUpload, m_iMinUpload);
-	DDV_MinMaxInt(pDX, m_iMinUpload, 1, app_prefs->GetMaxGraphUploadRate());
+	DDV_MinMaxInt(pDX, m_iMinUpload, 1, thePrefs.GetMaxGraphUploadRate());
 
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableZeroFilledTest, m_bEnableZeroFilledTest);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInRed, m_bEnableDownloadInRed); //MORPH - Added by IceCream, show download in red
@@ -371,73 +371,73 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPPgMorph::OnInitDialog()
 {
-	if (app_prefs->prefs->isautodynupswitching)
+	if (thePrefs.isautodynupswitching)
 		m_iDynUpMode = 3;
-	else if (app_prefs->prefs->m_bSUCEnabled)
+	else if (thePrefs.m_bSUCEnabled)
 		m_iDynUpMode = 1;
-	else if (app_prefs->prefs->m_bDynUpEnabled)
+	else if (thePrefs.m_bDynUpEnabled)
 		m_iDynUpMode = 2;
 	else
 		m_iDynUpMode = 0;
-	m_iMaxConnectionsSwitchBorder = app_prefs->prefs->maxconnectionsswitchborder;//MORPH - Added by Yun.SF3, Auto DynUp changing
-	m_iSUCLog =  app_prefs->prefs->m_bSUCLog;
-	m_iSUCHigh = app_prefs->prefs->m_iSUCHigh;
-	m_iSUCLow = app_prefs->prefs->m_iSUCLow;
-	m_iSUCPitch = app_prefs->prefs->m_iSUCPitch;
-	m_iSUCDrift = app_prefs->prefs->m_iSUCDrift;;
-	m_iUSSLog = app_prefs->prefs->m_bDynUpLog;
-	m_iUSSLimit = app_prefs->prefs->m_bIsUSSLimit; // EastShare - Added by TAHO, USS limit
-	m_iUSSPingLimit = app_prefs->prefs->m_iDynUpPingLimit; // EastShare - Added by TAHO, USS limit
-    m_iUSSPingTolerance = app_prefs->prefs->m_iDynUpPingTolerance;
-    m_iUSSGoingUpDivider = app_prefs->prefs->m_iDynUpGoingUpDivider;
-    m_iUSSGoingDownDivider = app_prefs->prefs->m_iDynUpGoingDownDivider;
-    m_iUSSNumberOfPings = app_prefs->prefs->m_iDynUpNumberOfPings;
-	m_iMinUpload = app_prefs->prefs->minupload;
-	m_bEnableZeroFilledTest = app_prefs->prefs->enableZeroFilledTest;
-	m_bEnableDownloadInRed = app_prefs->prefs->enableDownloadInRed; //MORPH - Added by IceCream, show download in red
-	m_bEnableDownloadInBold = app_prefs->prefs->enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
-	m_bEnableAntiLeecher = app_prefs->prefs->enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
-	m_bEnableAntiCreditHack = app_prefs->prefs->enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
-	m_bIsBoostFriends = app_prefs->prefs->isboostfriends;//Added by Yun.SF3, boost friends
-	m_bIsAutoPowershareNewDownloadFile = app_prefs->prefs->m_bisautopowersharenewdownloadfile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
-	m_iInfiniteQueue = app_prefs->prefs->infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	m_iHideOS = app_prefs->prefs->hideOS; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	m_iSelectiveShare = app_prefs->prefs->selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	m_iShareOnlyTheNeed = app_prefs->prefs->ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-	m_iPermissions = app_prefs->prefs->permissions; //MORPH - Added by SiRoB, Show Permission
+	m_iMaxConnectionsSwitchBorder = thePrefs.maxconnectionsswitchborder;//MORPH - Added by Yun.SF3, Auto DynUp changing
+	m_iSUCLog =  thePrefs.m_bSUCLog;
+	m_iSUCHigh = thePrefs.m_iSUCHigh;
+	m_iSUCLow = thePrefs.m_iSUCLow;
+	m_iSUCPitch = thePrefs.m_iSUCPitch;
+	m_iSUCDrift = thePrefs.m_iSUCDrift;;
+	m_iUSSLog = thePrefs.m_bDynUpLog;
+	m_iUSSLimit = thePrefs.m_bIsUSSLimit; // EastShare - Added by TAHO, USS limit
+	m_iUSSPingLimit = thePrefs.m_iDynUpPingLimit; // EastShare - Added by TAHO, USS limit
+    m_iUSSPingTolerance = thePrefs.m_iDynUpPingTolerance;
+    m_iUSSGoingUpDivider = thePrefs.m_iDynUpGoingUpDivider;
+    m_iUSSGoingDownDivider = thePrefs.m_iDynUpGoingDownDivider;
+    m_iUSSNumberOfPings = thePrefs.m_iDynUpNumberOfPings;
+	m_iMinUpload = thePrefs.minupload;
+	m_bEnableZeroFilledTest = thePrefs.enableZeroFilledTest;
+	m_bEnableDownloadInRed = thePrefs.enableDownloadInRed; //MORPH - Added by IceCream, show download in red
+	m_bEnableDownloadInBold = thePrefs.enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
+	m_bEnableAntiLeecher = thePrefs.enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
+	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
+	m_bIsBoostFriends = thePrefs.isboostfriends;//Added by Yun.SF3, boost friends
+	m_bIsAutoPowershareNewDownloadFile = thePrefs.m_bisautopowersharenewdownloadfile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	m_iInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	m_iHideOS = thePrefs.hideOS; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
+	m_iSelectiveShare = thePrefs.selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
+	m_iShareOnlyTheNeed = thePrefs.ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	m_iPermissions = thePrefs.permissions; //MORPH - Added by SiRoB, Show Permission
 	
 	// Mighty Knife: Community visualization
-	m_sCommunityName = app_prefs->prefs->m_sCommunityName;
+	m_sCommunityName = thePrefs.m_sCommunityName;
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
-	m_iShowCatNames = app_prefs->ShowCatNameInDownList();
-	m_iSelectCat = app_prefs->SelectCatForNewDL();
-	m_iUseActiveCat = app_prefs->UseActiveCatForLinks();
-	m_iAutoSetResOrder = app_prefs->AutoSetResumeOrder();
-	m_iShowA4AFDebugOutput = app_prefs->prefs->m_bShowA4AFDebugOutput;
-	m_iSmartA4AFSwapping = app_prefs->UseSmartA4AFSwapping();
-	m_iAdvA4AFMode = app_prefs->AdvancedA4AFMode();
-	m_iSmallFileDLPush = app_prefs->SmallFileDLPush();
-	m_iResumeFileInNewCat = app_prefs->StartDLInEmptyCats();
-	m_iUseAutoCat = app_prefs->UseAutoCat();
-	m_iUseSLS = app_prefs->UseSaveLoadSources();
+	m_iShowCatNames = thePrefs.ShowCatNameInDownList();
+	m_iSelectCat = thePrefs.SelectCatForNewDL();
+	m_iUseActiveCat = thePrefs.UseActiveCatForLinks();
+	m_iAutoSetResOrder = thePrefs.AutoSetResumeOrder();
+	m_iShowA4AFDebugOutput = thePrefs.m_bShowA4AFDebugOutput;
+	m_iSmartA4AFSwapping = thePrefs.UseSmartA4AFSwapping();
+	m_iAdvA4AFMode = thePrefs.AdvancedA4AFMode();
+	m_iSmallFileDLPush = thePrefs.SmallFileDLPush();
+	m_iResumeFileInNewCat = thePrefs.StartDLInEmptyCats();
+	m_iUseAutoCat = thePrefs.UseAutoCat();
+	m_iUseSLS = thePrefs.UseSaveLoadSources();
 	// khaos::accuratetimerem+
-	m_iTimeRemainingMode = app_prefs->GetTimeRemainingMode();
+	m_iTimeRemainingMode = thePrefs.GetTimeRemainingMode();
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	//MORPH START - Added by IceCream, high process priority
-	m_iHighProcess = app_prefs->GetEnableHighProcess();
+	m_iHighProcess = thePrefs.GetEnableHighProcess();
 	//MORPH END   - Added by IceCream, high process priority
 	
 	// #ifdef MIGHTY_SUMMERTIME
 	// Mighty Knife: daylight saving patch
-	m_iDaylightSavingPatch = app_prefs->GetDaylightSavingPatch();
+	m_iDaylightSavingPatch = thePrefs.GetDaylightSavingPatch();
 	// #endif
 
 	// Mighty Knife: Report hashing files, Log friendlist activities
-	m_bReportHashingFiles = app_prefs->GetReportHashingFiles ();
-	m_bLogFriendlistActivities = app_prefs->GetLogFriendlistActivities ();
+	m_bReportHashingFiles = thePrefs.GetReportHashingFiles ();
+	m_bLogFriendlistActivities = thePrefs.GetLogFriendlistActivities ();
 	// [end] Mighty Knife
 
 	CPropertyPage::OnInitDialog();
@@ -463,74 +463,74 @@ BOOL CPPgMorph::OnApply()
 	if (!UpdateData())
 		return FALSE;
 	if (m_iDynUpMode == 3)
-		app_prefs->prefs->isautodynupswitching = true;//MORPH - Added by Yun.SF3, Auto DynUp changing
+		thePrefs.isautodynupswitching = true;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	else{
-		app_prefs->prefs->isautodynupswitching = false;
-		app_prefs->prefs->m_bSUCEnabled = (m_iDynUpMode == 1);
-		app_prefs->prefs->m_bDynUpEnabled = (m_iDynUpMode == 2);
+		thePrefs.isautodynupswitching = false;
+		thePrefs.m_bSUCEnabled = (m_iDynUpMode == 1);
+		thePrefs.m_bDynUpEnabled = (m_iDynUpMode == 2);
 	}
-	app_prefs->prefs->maxconnectionsswitchborder = m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
+	thePrefs.maxconnectionsswitchborder = m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	
-	app_prefs->prefs->m_bSUCLog = m_iSUCLog;
-	app_prefs->prefs->m_iSUCHigh = m_iSUCHigh;
-	app_prefs->prefs->m_iSUCLow = m_iSUCLow;
-	app_prefs->prefs->m_iSUCPitch = m_iSUCPitch;
-	app_prefs->prefs->m_iSUCDrift = m_iSUCDrift;
-	app_prefs->prefs->m_bDynUpLog = m_iUSSLog;
-	app_prefs->prefs->m_bIsUSSLimit = m_iUSSLimit; // EastShare - Added by TAHO, USS limit
-	app_prefs->prefs->m_iDynUpPingLimit = m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
-    app_prefs->prefs->m_iDynUpPingTolerance = m_iUSSPingTolerance;
-    app_prefs->prefs->m_iDynUpGoingUpDivider = m_iUSSGoingUpDivider;
-    app_prefs->prefs->m_iDynUpGoingDownDivider = m_iUSSGoingDownDivider;
-    app_prefs->prefs->m_iDynUpNumberOfPings = m_iUSSNumberOfPings;
-	app_prefs->SetMinUpload(m_iMinUpload);
-	app_prefs->prefs->enableZeroFilledTest = m_bEnableZeroFilledTest;
-	app_prefs->prefs->enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
-	app_prefs->prefs->enableDownloadInBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
-	app_prefs->prefs->enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
-	app_prefs->prefs->enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
-	app_prefs->prefs->isboostfriends = m_bIsBoostFriends;//Added by Yun.SF3, boost friends
-	app_prefs->prefs->infiniteQueue = m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	app_prefs->prefs->m_bisautopowersharenewdownloadfile = m_bIsAutoPowershareNewDownloadFile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
-	app_prefs->prefs->hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	app_prefs->prefs->selectiveShare = m_iSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	app_prefs->prefs->ShareOnlyTheNeed = m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-	app_prefs->prefs->permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
+	thePrefs.m_bSUCLog = m_iSUCLog;
+	thePrefs.m_iSUCHigh = m_iSUCHigh;
+	thePrefs.m_iSUCLow = m_iSUCLow;
+	thePrefs.m_iSUCPitch = m_iSUCPitch;
+	thePrefs.m_iSUCDrift = m_iSUCDrift;
+	thePrefs.m_bDynUpLog = m_iUSSLog;
+	thePrefs.m_bIsUSSLimit = m_iUSSLimit; // EastShare - Added by TAHO, USS limit
+	thePrefs.m_iDynUpPingLimit = m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
+    thePrefs.m_iDynUpPingTolerance = m_iUSSPingTolerance;
+    thePrefs.m_iDynUpGoingUpDivider = m_iUSSGoingUpDivider;
+    thePrefs.m_iDynUpGoingDownDivider = m_iUSSGoingDownDivider;
+    thePrefs.m_iDynUpNumberOfPings = m_iUSSNumberOfPings;
+	thePrefs.SetMinUpload(m_iMinUpload);
+	thePrefs.enableZeroFilledTest = m_bEnableZeroFilledTest;
+	thePrefs.enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
+	thePrefs.enableDownloadInBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
+	thePrefs.enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
+	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
+	thePrefs.isboostfriends = m_bIsBoostFriends;//Added by Yun.SF3, boost friends
+	thePrefs.infiniteQueue = m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	thePrefs.m_bisautopowersharenewdownloadfile = m_bIsAutoPowershareNewDownloadFile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	thePrefs.hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
+	thePrefs.selectiveShare = m_iSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
+	thePrefs.ShareOnlyTheNeed = m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
 	theApp.emuledlg->serverwnd->ToggleDebugWindow();
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
 
 	// Mighty Knife: Community visualization
-	sprintf (app_prefs->prefs->m_sCommunityName,"%s", m_sCommunityName);
+	sprintf (thePrefs.m_sCommunityName,"%s", m_sCommunityName);
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
-	app_prefs->prefs->m_bShowCatNames = m_iShowCatNames;
-	app_prefs->prefs->m_bSelCatOnAdd = m_iSelectCat;
-	app_prefs->prefs->m_bActiveCatDefault = m_iUseActiveCat;
-	app_prefs->prefs->m_bAutoSetResumeOrder = m_iAutoSetResOrder;
-	app_prefs->prefs->m_bShowA4AFDebugOutput = m_iShowA4AFDebugOutput;
-	app_prefs->prefs->m_bSmartA4AFSwapping = m_iSmartA4AFSwapping;
-	app_prefs->prefs->m_iAdvancedA4AFMode = m_iAdvA4AFMode;
-	app_prefs->prefs->m_bSmallFileDLPush = m_iSmallFileDLPush;
-	app_prefs->prefs->m_iStartDLInEmptyCats = m_iResumeFileInNewCat;
-	app_prefs->prefs->m_bUseAutoCat = m_iUseAutoCat;
-	app_prefs->prefs->m_bUseSaveLoadSources = m_iUseSLS;
+	thePrefs.m_bShowCatNames = m_iShowCatNames;
+	thePrefs.m_bSelCatOnAdd = m_iSelectCat;
+	thePrefs.m_bActiveCatDefault = m_iUseActiveCat;
+	thePrefs.m_bAutoSetResumeOrder = m_iAutoSetResOrder;
+	thePrefs.m_bShowA4AFDebugOutput = m_iShowA4AFDebugOutput;
+	thePrefs.m_bSmartA4AFSwapping = m_iSmartA4AFSwapping;
+	thePrefs.m_iAdvancedA4AFMode = m_iAdvA4AFMode;
+	thePrefs.m_bSmallFileDLPush = m_iSmallFileDLPush;
+	thePrefs.m_iStartDLInEmptyCats = m_iResumeFileInNewCat;
+	thePrefs.m_bUseAutoCat = m_iUseAutoCat;
+	thePrefs.m_bUseSaveLoadSources = m_iUseSLS;
 	// khaos::accuratetimerem+
-	app_prefs->prefs->m_iTimeRemainingMode = m_iTimeRemainingMode;
+	thePrefs.m_iTimeRemainingMode = m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	//MORPH START - Added by IceCream, high process priority
-	app_prefs->SetEnableHighProcess(m_iHighProcess);
+	thePrefs.SetEnableHighProcess(m_iHighProcess);
 	//MORPH END   - Added by IceCream, high process priority
 
 	// #ifdef MIGHTY_SUMMERTIME
 	// Mighty Knife: daylight saving patch
-	app_prefs->SetDaylightSavingPatch(m_iDaylightSavingPatch);
+	thePrefs.SetDaylightSavingPatch(m_iDaylightSavingPatch);
 	// #endif
 
 	// Mighty Knife: Report hashing files, Log friendlist activities
-	app_prefs->SetReportHashingFiles (m_bReportHashingFiles);
-	app_prefs->SetLogFriendlistActivities (m_bLogFriendlistActivities);
+	thePrefs.SetReportHashingFiles (m_bReportHashingFiles);
+	thePrefs.SetLogFriendlistActivities (m_bLogFriendlistActivities);
 	// [end] Mighty Knife
 
 	SetModified(FALSE);

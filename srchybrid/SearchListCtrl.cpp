@@ -33,6 +33,7 @@
 #include "OtherFunctions.h"
 #include "Opcodes.h"
 #include "Packets.h"
+#include "WebServices.h"
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 #ifdef _DEBUG
@@ -81,10 +82,10 @@ CSearchResultFileDetailSheet::CSearchResultFileDetailSheet(const CSearchFile* fi
 	
 	m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
 
-	if (theApp.glob_prefs->IsExtControlsEnabled())
+	if (thePrefs.IsExtControlsEnabled())
 		m_wndMetaData.SetFile(file);
 
-	if (theApp.glob_prefs->IsExtControlsEnabled())
+	if (thePrefs.IsExtControlsEnabled())
 		AddPage(&m_wndMetaData);
 }
 
@@ -125,7 +126,7 @@ CSearchListCtrl::CSearchListCtrl()
 
 void CSearchListCtrl::SetStyle()
 {
-	if (theApp.glob_prefs->IsDoubleClickEnabled())
+	if (thePrefs.IsDoubleClickEnabled())
 		SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 	else
 		SetExtendedStyle(LVS_EX_ONECLICKACTIVATE | LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
@@ -146,7 +147,7 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	if (tooltip){
 		tooltip->ModifyStyle(0, TTS_NOPREFIX);
 		tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
-		tooltip->SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
+		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 	}
 	searchlist = in_searchlist;
 
@@ -162,22 +163,23 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	InsertColumn(9,GetResString(IDS_BITRATE),LVCFMT_LEFT,50);
 	InsertColumn(10,GetResString(IDS_CODEC),LVCFMT_LEFT,50);
 	InsertColumn(11,GetResString(IDS_FOLDER),LVCFMT_LEFT,220);
-	InsertColumn(12,GetResString(IDS_CHECKFAKE),LVCFMT_LEFT,220); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+	InsertColumn(12,_T("Known"),LVCFMT_LEFT,50);
+	InsertColumn(13,GetResString(IDS_CHECKFAKE),LVCFMT_LEFT,220); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 	CreateMenues();
 
 	LoadSettings(CPreferences::tableSearch);
 
 	// Barry - Use preferred sort order from preferences
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableSearch);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableSearch);
 	if (sortItem != -1){// don't force a sorting if '-1' is specified, so we can better see how the search results are arriving
-		bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableSearch);
+		bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableSearch);
 		SetSortArrow(sortItem, sortAscending);
 		// SLUGFILLER: multiSort - load multiple params
-		for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableSearch); i > 0; ) {
+		for (int i = thePrefs.GetColumnSortCount(CPreferences::tableSearch); i > 0; ) {
 			i--;
-			sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableSearch, i);
-			sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableSearch, i);
+			sortItem = thePrefs.GetColumnSortItem(CPreferences::tableSearch, i);
+			sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableSearch, i);
 			SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 		}
 		// SLUGFILLER: multiSort
@@ -257,7 +259,7 @@ void CSearchListCtrl::Localize()
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	strRes = GetResString(IDS_CHECKFAKE);
 	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(12, &hdi);
+	pHeaderCtrl->SetItem(13, &hdi);
 	strRes.ReleaseBuffer();
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
@@ -351,7 +353,13 @@ void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 	SetItemText(itemnr,10,toshow->GetStrTagValue(FT_MEDIA_CODEC));
 	if (toshow->GetDirectory())
 		SetItemText(itemnr,11,toshow->GetDirectory());
-	SetItemText(itemnr,12,toshow->GetFakeComment()); //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
+	if (toshow->m_eKnown == CSearchFile::Shared)
+		SetItemText(itemnr,12,_T("Shared"));
+	else if (toshow->m_eKnown == CSearchFile::Downloading)
+		SetItemText(itemnr,12,_T("Downloading"));
+	else if (toshow->m_eKnown == CSearchFile::Downloaded)
+		SetItemText(itemnr,12,_T("Downloaded"));
+	SetItemText(itemnr,13,toshow->GetFakeComment()); //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 }
 
 void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
@@ -426,16 +434,16 @@ void CSearchListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableSearch);
-	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableSearch);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableSearch);
+	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableSearch);
 	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 
 	// Item is column clicked
 	sortItem = pNMListView->iSubItem;
 
 	// Save new preferences
-	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableSearch, sortItem);
-	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableSearch, sortAscending);
+	thePrefs.SetColumnSortItem(CPreferences::tableSearch, sortItem);
+	thePrefs.SetColumnSortAscending(CPreferences::tableSearch, sortAscending);
 
 	// Sort table
 	SetSortArrow(sortItem, sortAscending);
@@ -564,10 +572,15 @@ int CSearchListCtrl::Compare(const CSearchFile* item1, const CSearchFile* item2,
 			return CompareOptStringNoCase(item1->GetDirectory(), item2->GetDirectory());
 		case 111: //path desc
 			return -CompareOptStringNoCase(item1->GetDirectory(), item2->GetDirectory());
-		//Morph Start - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
 		case 12:
+			return item1->GetKnownType() - item2->GetKnownType();
+		case 121:
+			return -(item1->GetKnownType() - item2->GetKnownType());
+
+		//Morph Start - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
+		case 13:
 			return CompareOptStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
-		case 112:
+		case 113:
 			return -CompareOptStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
 		//Morph End - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
 		default:
@@ -594,7 +607,7 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		}
 	}
 
-	if (theApp.glob_prefs->IsExtControlsEnabled())
+	if (thePrefs.IsExtControlsEnabled())
 		m_SearchFileMenu.EnableMenuItem(MP_RESUMEPAUSED, iToDownload > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SearchFileMenu.EnableMenuItem(MP_RESUME, iToDownload > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SearchFileMenu.EnableMenuItem(MP_DETAIL, iSelected == 1 ? MF_ENABLED : MF_GRAYED);
@@ -604,32 +617,40 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SearchFileMenu.EnableMenuItem(MP_PREVIEW, iToPreview == 1 ? MF_ENABLED : MF_GRAYED);
 	m_SearchFileMenu.EnableMenuItem(MP_REMOVEALL, theApp.emuledlg->searchwnd->CanDeleteAllSearches() ? MF_ENABLED : MF_GRAYED);
 	m_SearchFileMenu.EnableMenuItem(MP_REMOVE, theApp.emuledlg->searchwnd->CanDeleteSearch(m_nResultsID) ? MF_ENABLED : MF_GRAYED);
+	m_SearchFileMenu.EnableMenuItem(MP_FIND, GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED);
 	
-	CMenu m_Web;
-	m_Web.CreateMenu();
-	int iWebMenuEntries;
-	UpdateURLMenu(m_Web, iWebMenuEntries);
+	CMenu WebMenu;
+	WebMenu.CreateMenu();
+	int iWebMenuEntries = theWebServices.GetAllMenuEntries(WebMenu);
 	UINT flag2 = (iWebMenuEntries == 0 || iSelected != 1) ? MF_GRAYED : MF_STRING;
-	m_SearchFileMenu.AppendMenu(MF_POPUP | flag2, (UINT_PTR)m_Web.m_hMenu, GetResString(IDS_WEBSERVICES));
+	m_SearchFileMenu.AppendMenu(MF_POPUP | flag2, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
 	
 	if (iToDownload > 0)
-	m_SearchFileMenu.SetDefaultItem( ( !theApp.glob_prefs->AddNewFilesPaused() || !theApp.glob_prefs->IsExtControlsEnabled() )?MP_RESUME:MP_RESUMEPAUSED);
+	m_SearchFileMenu.SetDefaultItem( ( !thePrefs.AddNewFilesPaused() || !thePrefs.IsExtControlsEnabled() )?MP_RESUME:MP_RESUMEPAUSED);
 	else
-		m_SearchFileMenu.SetDefaultItem(-1);
+		m_SearchFileMenu.SetDefaultItem((UINT)-1);
 
 	GetPopupMenuPos(*this, point);
 	m_SearchFileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON,point.x,point.y,this);
 	m_SearchFileMenu.RemoveMenu(m_SearchFileMenu.GetMenuItemCount()-1,MF_BYPOSITION);
-	VERIFY( m_Web.DestroyMenu() );
+	VERIFY( WebMenu.DestroyMenu() );
 }
 
 
 BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 {
+	if (wParam == MP_FIND)
+	{
+		OnFindStart();
+		return TRUE;
+	}
+
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	if (iSel != -1){
+	if (iSel != -1)
+	{
 		const CSearchFile* file = (CSearchFile*)GetItemData(iSel);
-		switch (wParam){
+		switch (wParam)
+		{
 			case MP_GETED2KLINK:{
 					CWaitCursor curWait;
 					CString clpbrd;
@@ -641,7 +662,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					clpbrd += CreateED2kLink((CSearchFile*)GetItemData(GetNextSelectedItem(pos)));
 					}
 					theApp.CopyTextToClipboard(clpbrd);
-					break;
+				return TRUE;
 				}
 			case MP_GETHTMLED2KLINK:{
 					CWaitCursor curWait;
@@ -654,22 +675,22 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					clpbrd += CreateHTMLED2kLink((CSearchFile*)GetItemData(GetNextSelectedItem(pos)));
 					}
 					theApp.CopyTextToClipboard(clpbrd);
-					break;
+				return TRUE;
 				}
 			case MP_RESUMEPAUSED:
 			case MP_RESUME:
 					theApp.emuledlg->searchwnd->DownloadSelected(wParam==MP_RESUMEPAUSED);
-					break;
+				return TRUE;
 			case MP_REMOVESELECTED:{
 					CWaitCursor curWait;
 				SetRedraw(FALSE);
 					while (GetFirstSelectedItemPosition()!=NULL) 
 					{
 					POSITION pos = GetFirstSelectedItemPosition();
-					theApp.searchlist->RemoveResults((CSearchFile*)GetItemData(GetNextSelectedItem(pos)));
+					theApp.searchlist->RemoveResult((CSearchFile*)GetItemData(GetNextSelectedItem(pos)));
 					}
 				SetRedraw(TRUE);
-					break;
+				return TRUE;
 				}
 			case MPG_ALTENTER:
 			case MP_DETAIL:
@@ -677,7 +698,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					CSearchResultFileDetailSheet sheet(file);
 					sheet.DoModal();
 				}
-				break;
+				return TRUE;
 			case MP_PREVIEW:
 				if (file){
 					if (file->GetPreviews().GetSize() > 0){
@@ -694,11 +715,12 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						AddLogLine(true, "Preview Requested - Please wait");
 					}
 				}
-				break;
+				return TRUE;
 			default:
 				if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+256){
-					RunURL(file, theApp.webservices.GetAt(wParam - MP_WEBURL));
-			}
+					theWebServices.RunURL(file, wParam);
+					return TRUE;
+				}
 				break;
 		}
 	}
@@ -715,7 +737,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			}
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 void CSearchListCtrl::OnLvnDeleteallitems(NMHDR *pNMHDR, LRESULT *pResult)
@@ -733,11 +755,11 @@ void CSearchListCtrl::CreateMenues()
 	m_SearchFileMenu.AddMenuTitle(GetResString(IDS_FILE));
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DOWNLOAD));
 
-	if (theApp.glob_prefs->IsExtControlsEnabled())
+	if (thePrefs.IsExtControlsEnabled())
 		m_SearchFileMenu.AppendMenu(MF_STRING, MP_RESUMEPAUSED, GetResString(IDS_DOWNLOAD) + _T(" (") + GetResString(IDS_PAUSED) + _T(")"));
 
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW));
-	if (theApp.glob_prefs->IsExtControlsEnabled())
+	if (thePrefs.IsExtControlsEnabled())
 		m_SearchFileMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1));
@@ -748,7 +770,7 @@ void CSearchListCtrl::CreateMenues()
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_REMOVEALLSEARCH));
 
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
-
+	m_SearchFileMenu.AppendMenu(MF_STRING, MP_FIND, GetResString(IDS_FIND));
 }
 
 void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
@@ -1033,8 +1055,8 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	const CSearchFile* content = (CSearchFile*)lpDrawItemStruct->itemData;
 	BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
-
-	if (content->GetListParent()==NULL && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED)){
+	if (content->GetListParent()==NULL && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
+	{
 		if(bCtrlFocused)
 			odc->SetBkColor(m_crHighlight);
 		else
@@ -1048,7 +1070,8 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	COLORREF crOldTextColor = dc->SetTextColor(m_crWindowText);
 
 	int iOldBkMode;
-	if (m_crWindowTextBk == CLR_NONE){
+	if (m_crWindowTextBk == CLR_NONE)
+	{
 		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
 		iOldBkMode = dc.SetBkMode(TRANSPARENT);
 	}
@@ -1080,58 +1103,73 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	ImageList_Draw(theApp.GetSystemImageList(), iImage, dc, cur_rec.left+ofs, cur_rec.top, ILD_NORMAL|ILD_TRANSPARENT);
 
 	// Parent entries
-	if (content->GetListParent()==NULL){
-		for(int iCurrent = 0; iCurrent < iCount; ++iCurrent) {
-
+	if (content->GetListParent() == NULL)
+	{
+		for (int iCurrent = 0; iCurrent < iCount; iCurrent++)
+		{
 			int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
+			if (!IsColumnHidden(iColumn))
+			{
 			int cx = CListCtrl::GetColumnWidth(iColumn);
-			if(iColumn == 0) {
-				int iNextLeft = cur_rec.left + cx;
-				//set up tree vars
-				cur_rec.left = cur_rec.right + iOffset;
-				cur_rec.right = cur_rec.left + min(8, cx);
-				tree_start = cur_rec.left + 1;
-				tree_end = cur_rec.right;
-				//normal column stuff
-				cur_rec.left = cur_rec.right + 1;
-				cur_rec.right = tree_start + cx - iOffset;
-				DrawSourceParent(dc, 0, &cur_rec, content);
-				cur_rec.left = iNextLeft;
-			} else {
-				cur_rec.right += cx;
-				DrawSourceParent(dc, iColumn, &cur_rec, content);
-				cur_rec.left += cx;
+				if (iColumn == 0)
+				{
+					int iNextLeft = cur_rec.left + cx;
+					//set up tree vars
+					cur_rec.left = cur_rec.right + iOffset;
+					cur_rec.right = cur_rec.left + min(8, cx);
+					tree_start = cur_rec.left + 1;
+					tree_end = cur_rec.right;
+					//normal column stuff
+					cur_rec.left = cur_rec.right + 1;
+					cur_rec.right = tree_start + cx - iOffset;
+					DrawSourceParent(dc, 0, &cur_rec, content);
+					cur_rec.left = iNextLeft;
+				}
+				else
+				{
+					cur_rec.right += cx;
+					DrawSourceParent(dc, iColumn, &cur_rec, content);
+					cur_rec.left += cx;
+				}
 			}
 		}
 	}
-	else {
-		for(int iCurrent = 0; iCurrent < iCount; iCurrent++) {
+	else
+	{
+		for(int iCurrent = 0; iCurrent < iCount; iCurrent++)
+		{
 
 			int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
+			if (!IsColumnHidden(iColumn))
+			{
 			int cx = CListCtrl::GetColumnWidth(iColumn);
+				if (iColumn == 0)
+				{
+					int iNextLeft = cur_rec.left + cx;
 
-			if(iColumn == 0) {
-				int iNextLeft = cur_rec.left + cx;
-				//set up tree vars
-				cur_rec.left = cur_rec.right + iOffset;
-				cur_rec.right = cur_rec.left + min(8, cx);
-				tree_start = cur_rec.left + 1;
-				tree_end = cur_rec.right;
-				//normal column stuff
-				cur_rec.left = cur_rec.right + 1;
-				cur_rec.right = tree_start + cx - iOffset;
-				DrawSourceChild(dc, 0, &cur_rec, content);
-				cur_rec.left = iNextLeft;
-			} else {
-				cur_rec.right += cx;
-				DrawSourceChild(dc, iColumn, &cur_rec, content);
-				cur_rec.left += cx;
+					//set up tree vars
+					cur_rec.left = cur_rec.right + iOffset;
+					cur_rec.right = cur_rec.left + min(8, cx);
+					tree_start = cur_rec.left + 1;
+					tree_end = cur_rec.right;
+					//normal column stuff
+					cur_rec.left = cur_rec.right + 1;
+					cur_rec.right = tree_start + cx - iOffset;
+					DrawSourceChild(dc, 0, &cur_rec, content);
+					cur_rec.left = iNextLeft;
+				}
+				else
+				{
+					cur_rec.right += cx;
+					DrawSourceChild(dc, iColumn, &cur_rec, content);
+					cur_rec.left += cx;
+				}
 			}
 		}
 	}
-
 	//draw rectangle around selected item(s)
-	if (content->GetListParent()==NULL && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED)) {
+	if (content->GetListParent()==NULL && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
+	{
 		RECT outline_rec = lpDrawItemStruct->rcItem;
 
 		outline_rec.top--;
@@ -1142,26 +1180,28 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		outline_rec.left++;
 		outline_rec.right--;
 
-		if(notFirst && GetItemState(lpDrawItemStruct->itemID - 1, LVIS_SELECTED)) {
+		if (notFirst && GetItemState(lpDrawItemStruct->itemID - 1, LVIS_SELECTED))
+		{
 			const CSearchFile* prev = (CSearchFile*)GetItemData(lpDrawItemStruct->itemID - 1);
-			if(prev->GetListParent()==NULL)
+			if (prev->GetListParent()==NULL)
 				outline_rec.top--;
 		} 
 
-		if(notLast && GetItemState(lpDrawItemStruct->itemID + 1, LVIS_SELECTED)) {
+		if (notLast && GetItemState(lpDrawItemStruct->itemID + 1, LVIS_SELECTED))
+		{
 			const CSearchFile* next = (CSearchFile*)GetItemData(lpDrawItemStruct->itemID + 1);
-			if(next->GetListParent()==NULL)
+			if (next->GetListParent()==NULL)
 				outline_rec.bottom++;
 		} 
 
-		if(bCtrlFocused)
+		if (bCtrlFocused)
 			dc->FrameRect(&outline_rec, &CBrush(m_crFocusLine));
 		else
 			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
-
 	//draw focus rectangle around non-highlightable items when they have the focus
-	else if (GetFocus() == this && (lpDrawItemStruct->itemState & ODS_FOCUS) == ODS_FOCUS) {
+	else if (GetFocus() == this && (lpDrawItemStruct->itemState & ODS_FOCUS) == ODS_FOCUS)
+	{
 		RECT focus_rec;
 		focus_rec.top    = lpDrawItemStruct->rcItem.top;
 		focus_rec.bottom = lpDrawItemStruct->rcItem.bottom;
@@ -1171,7 +1211,8 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 
 	//draw tree last so it draws over selected and focus (looks better)
-	if(tree_start < tree_end) {
+	if(tree_start < tree_end)
+	{
 		//set new bounds
 		RECT tree_rect;
 		tree_rect.top    = lpDrawItemStruct->rcItem.top;
@@ -1194,17 +1235,21 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		pn.CreatePen(PS_SOLID, 1, RGB(128,128,128)/*m_crWindowText*/);
 		oldpn = dc->SelectObject(&pn);
 
-		if(isChild) {
+		if(isChild)
+		{
 			//draw the line to the status bar
 			dc->MoveTo(tree_end+10, middle);
 			dc->LineTo(tree_start + 4, middle);
 
 			//draw the line to the child node
-			if(hasNext) {
+			if(hasNext)
+			{
 				dc->MoveTo(treeCenter, middle);
 				dc->LineTo(treeCenter, cur_rec.bottom + 1);
 			}
-		} else if(isOpenRoot || (content->GetListParent() == NULL && content->GetListChildCount()>1) ) {
+		}
+		else if (isOpenRoot || (content->GetListParent() == NULL && content->GetListChildCount() > 1))
+		{
 			//draw box
 			RECT circle_rec;
 			circle_rec.top    = middle - 5;
@@ -1219,20 +1264,23 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			dc->MoveTo(treeCenter-2,middle - 1);
 			dc->LineTo(treeCenter+3,middle - 1);
 			
-			if (!content->GetListIsExpanded()){
+			if (!content->GetListIsExpanded())
+			{
 				dc->MoveTo(treeCenter,middle-3);
 				dc->LineTo(treeCenter,middle+2);
 			}
 			dc->SelectObject(pOldPen2);
 			//draw the line to the child node
-			if(hasNext) {
+			if (hasNext)
+			{
 				dc->MoveTo(treeCenter, middle + 4);
 				dc->LineTo(treeCenter, cur_rec.bottom + 1);
 			}
 		}
 
 		//draw the line back up to parent node
-		if(notFirst && isChild) {
+		if (notFirst && isChild)
+		{
 			dc->MoveTo(treeCenter, middle);
 			dc->LineTo(treeCenter, cur_rec.top - 1);
 		}
@@ -1256,28 +1304,22 @@ static COLORREF GetSearchItemColor(const CSearchFile* src)
 	uint32 green = 0;
 	uint32 blue = 0;
 
-	CKnownFile* sameFile = theApp.sharedfiles->GetFileByID(src->GetFileHash());
-	if (!sameFile)
-		sameFile = theApp.downloadqueue->GetFileByID(src->GetFileHash());
-	if (!sameFile) // Show already downloaded files
-		sameFile = theApp.knownfiles->FindKnownFileByID(src->GetFileHash());
-
-	if (sameFile) {
-		if (sameFile->IsPartFile()) {
-			// red = Already downloading
-			red = 255;
-		}
-		else {
-			// green = Already downloaded
-			green = 128;
-		}
+	if (src->GetKnownType() == CSearchFile::Downloading || src->GetKnownType() == CSearchFile::Shared)
+	{
+		red = 255;
 	}
-	else {
+	else if (src->GetKnownType() == CSearchFile::Downloaded)
+	{
+		green = 128;
+	}
+	else
+	{
 		// shade of blue = availability of the file
-		blue = src->GetSourceCount()==0 ? 0 : ((src->GetSourceCount()-1) * 20);
+		blue = src->GetSourceCount() == 0 ? 0 : ((src->GetSourceCount() - 1) * 20);
 		if (blue > 255)
 			blue = 255;
-		else if (blue == 0){
+		else if (blue == 0)
+		{
 			// avoid the worst case (drawing black text on black background) for users 
 			// which are using extreme color schemes by eventually switching to default 
 			// windows text color
@@ -1293,67 +1335,80 @@ static COLORREF GetSearchItemColor(const CSearchFile* src)
 
 void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, const CSearchFile* src)
 {
-		if (!src)
-			return;
-	if(lpRect->left < lpRect->right) {
+	if (!src)
+		return;
+	if (lpRect->left < lpRect->right)
+	{
 		CString buffer;
-		dc->SetTextColor( GetSearchItemColor(src) );
-		switch(nColumn) {
+		dc->SetTextColor(GetSearchItemColor(src));
+		switch (nColumn)
+		{
 			case 0:			// file name
-				lpRect->left+=30;
+				lpRect->left += 30;
 				dc->DrawText(src->GetFileName(), src->GetFileName().GetLength(), lpRect, DLC_DT_TEXT);
-				lpRect->left-=30;
+				lpRect->left -= 30;
 				break;
 			case 1:			// file size
 				break;
 			case 2:			// number of same filenames
 				buffer.Format(_T("%u"), src->GetListChildCount());
-				dc->DrawText(buffer,buffer.GetLength(),lpRect,DLC_DT_TEXT | DT_RIGHT);
+				dc->DrawText(buffer,buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
 			case 3:			// file type
 				break;
 			case 4:			// file hash
 				break;
 			case 5:
-				buffer=src->GetStrTagValue(FT_MEDIA_ARTIST);
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = src->GetStrTagValue(FT_MEDIA_ARTIST);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
 			case 6:
-				buffer=src->GetStrTagValue(FT_MEDIA_ALBUM);
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = src->GetStrTagValue(FT_MEDIA_ALBUM);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
 			case 7:
-				buffer=src->GetStrTagValue(FT_MEDIA_TITLE);
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = src->GetStrTagValue(FT_MEDIA_TITLE);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
-			case 8:{	
+			case 8:{
 				uint32 nMediaLength = src->GetIntTagValue(FT_MEDIA_LENGTH);
 				if (nMediaLength){
 					SecToTimeLength(nMediaLength, buffer);
-					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT | DT_RIGHT);
+					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				}
 				break;
 			}
 			case 9:{
 				uint32 nBitrate = src->GetIntTagValue(FT_MEDIA_BITRATE);
 				if (nBitrate){
-					buffer.Format("%u",nBitrate);
-					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT | DT_RIGHT);
+					buffer.Format(_T("%u kBit/s"), nBitrate);
+					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				}
 				break;
 			}
 			case 10:
-				buffer=src->GetStrTagValue(FT_MEDIA_CODEC);
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = src->GetStrTagValue(FT_MEDIA_CODEC);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
 			case 11:		// dir
-				if (src->GetDirectory()) {
-					buffer=src->GetDirectory();
-					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				if (src->GetDirectory()){
+					buffer = src->GetDirectory();
+					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				}
 				break;
+			case 12:
+				if (src->m_eKnown == CSearchFile::Shared)
+					buffer = _T("Shared");
+				else if (src->m_eKnown == CSearchFile::Downloading)
+					buffer = _T("Downloading");
+				else if (src->m_eKnown == CSearchFile::Downloaded)
+					buffer = _T("Downloaded");
+				else
+					buffer.Empty();
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
+				break;
 			//MORPH  START - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
-			case 12:		// fake check
+			case 13:		// fake check
 				if (src->GetFakeComment()){
 					buffer=src->GetFakeComment();
 					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
@@ -1366,53 +1421,55 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, const
 
 void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, const CSearchFile* src)
 {
-		if (!src)
-			return;
+	if (!src)
+		return;
 
-	if(lpRect->left < lpRect->right) {
+	if (lpRect->left < lpRect->right)
+	{
 		CString buffer;
-		dc->SetTextColor( GetSearchItemColor(src) );
-		switch(nColumn) {
+		dc->SetTextColor(GetSearchItemColor(src));
+		switch (nColumn)
+		{
 			case 0:			// file name
-				lpRect->left+=22;
+				lpRect->left += 22;
 				dc->DrawText(src->GetFileName(), src->GetFileName().GetLength(), lpRect, DLC_DT_TEXT);
-				lpRect->left-=22;
+				lpRect->left -= 22;
 				break;
 			case 1:			// file size
-				buffer=CastItoXBytes(src->GetFileSize());
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT | DT_RIGHT);
+				buffer = CastItoXBytes(src->GetFileSize());
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
 			case 2:			// avail
 				if (src->GetClientsCount())
 					buffer.Format(_T("%u (%u)"), src->GetIntTagValue(FT_SOURCES), src->GetClientsCount());
 				else
 					buffer.Format(_T("%u"), src->GetIntTagValue(FT_SOURCES));
-				dc->DrawText(buffer,buffer.GetLength(),lpRect,DLC_DT_TEXT | DT_RIGHT);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
 			case 3:			// file type
-				dc->DrawText(src->GetFileType(), src->GetFileType().GetLength() ,lpRect, DLC_DT_TEXT);
+				dc->DrawText(src->GetFileType(), src->GetFileType().GetLength(), lpRect, DLC_DT_TEXT);
 				break;
 			case 4:			// file hash
-				buffer=md4str(src->GetFileHash());
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = md4str(src->GetFileHash());
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
 			case 5:
-				buffer=src->GetStrTagValue(FT_MEDIA_ARTIST);
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = src->GetStrTagValue(FT_MEDIA_ARTIST);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
 			case 6:
-				buffer=src->GetStrTagValue(FT_MEDIA_ALBUM);
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = src->GetStrTagValue(FT_MEDIA_ALBUM);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
 			case 7:
-				buffer=src->GetStrTagValue(FT_MEDIA_TITLE);
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = src->GetStrTagValue(FT_MEDIA_TITLE);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
-			case 8:{	
+			case 8:{
 				uint32 nMediaLength = src->GetIntTagValue(FT_MEDIA_LENGTH);
 				if (nMediaLength){
 					SecToTimeLength(nMediaLength, buffer);
-					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT | DT_RIGHT);
+					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				}
 				break;
 			}
@@ -1420,28 +1477,37 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, cons
 				uint32 nBitrate = src->GetIntTagValue(FT_MEDIA_BITRATE);
 				if (nBitrate){
 					buffer.Format(_T("%u kBit/s"), nBitrate);
-					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT | DT_RIGHT);
+					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				}
 				break;
 			}
 			case 10:
-				buffer=src->GetStrTagValue(FT_MEDIA_CODEC);
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				buffer = src->GetStrTagValue(FT_MEDIA_CODEC);
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				break;
 			case 11:		// dir
-				if (src->GetDirectory()) {
-					buffer=src->GetDirectory();
-					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				if (src->GetDirectory()){
+					buffer = src->GetDirectory();
+					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 				}
 				break;
+			case 12:
+				if (src->m_eKnown == CSearchFile::Shared)
+					buffer = _T("Shared");
+				else if (src->m_eKnown == CSearchFile::Downloading)
+					buffer = _T("Downloading");
+				else if (src->m_eKnown == CSearchFile::Downloaded)
+					buffer = _T("Downloaded");
+				else
+					buffer.Empty();
+				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
 			//MORPH  START - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating
-			case 12:		// fake check
+			case 13:		// fake check
 				if (src->GetFakeComment()){
 					buffer=src->GetFakeComment();
 					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
 				}
 				break;
-			
 			//MORPH    END - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating
 		}
 	}

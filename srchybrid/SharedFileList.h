@@ -83,6 +83,13 @@ private:
 	int m_currFileKey;
 	uint32 m_lastPublishKadSrc;
 	uint32 m_lastProcessPublishKadKeywordList;
+	CMutex	list_mut;
+
+// Mighty Knife: CRC32-Tag - Public method to lock the filelist to prevent it 
+// from being deleted; be careful using this not to produce deadlocks !
+public:
+	CMutex FileListLockMutex;
+// [end] Mighty Knife
 };
 
 class CAddFileThread : public CWinThread
@@ -91,7 +98,7 @@ class CAddFileThread : public CWinThread
 protected:
 	CAddFileThread();
 public:
-	virtual	BOOL	InitInstance() {return true;}
+	virtual BOOL InitInstance() {return TRUE;}
 	virtual int		Run();
 	void	SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* partfile = NULL);
 

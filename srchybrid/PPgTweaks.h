@@ -11,6 +11,9 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_PPG_TWEAKS };
+
+	void Localize(void);
+
 protected:
 	UINT m_iFileBufferSize;
 	UINT m_iQueueSize;

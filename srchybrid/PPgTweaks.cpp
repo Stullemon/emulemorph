@@ -95,7 +95,6 @@ CPPgTweaks::CPPgTweaks()
 	m_htiLogFilteredIPs = NULL;
 	m_htiLogFileSaving = NULL;
 	m_htiCreditSystem = NULL;
-	m_htiSaveLogs = NULL;
 	m_htiLog2Disk = NULL;
 	m_htiDebug2Disk = NULL;
 	m_htiDateFileNameLog = NULL;//Morph - added by AndCycle, Date File Name Log
@@ -173,7 +172,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiVerboseGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_VERBOSE), iImgLog, TVI_ROOT);
 		m_htiVerbose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ENABLED), m_htiVerboseGroup, m_iVerbose);
 		m_htiDebug2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), m_htiVerboseGroup, m_iDebug2Disk);
-		m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), m_htiSaveLogs, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
+		m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), m_htiVerboseGroup, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 		m_htiDebugSourceExchange = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG_SOURCE_EXCHANGE), m_htiVerboseGroup, m_iDebugSourceExchange);
 		m_htiLogBannedClients = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_BANNED_CLIENTS), m_htiVerboseGroup, m_iLogBannedClients);
 		m_htiLogRatingDescReceived = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_RATING_RECV), m_htiVerboseGroup, m_iLogRatingDescReceived);
@@ -291,7 +290,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iLogFileSaving = thePrefs.m_bLogFileSaving;					// do *not* use the according 'Get...' function here!
 	m_iLog2Disk = thePrefs.log2disk;
 	m_iDebug2Disk = thePrefs.debug2disk;							// do *not* use the according 'Get...' function here!
-	m_iDateFileNameLog = thePrefs.DateFileNameLog;//Morph - added by AndCycle, Date File Name Log
+	m_iDateFileNameLog = thePrefs.m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	m_iCreditSystem = thePrefs.m_bCreditSystem;
 	m_iCommitFiles = thePrefs.m_iCommitFiles;
 	m_iFilterLANIPs = thePrefs.filterLANIPs;
@@ -363,7 +362,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bCreditSystem = m_iCreditSystem;
 
 	//Morph Start - added by AndCycle, Date File Name Log
-	if(thePrefs.DateFileNameLog != (m_iDateFileNameLog != 0)){
+	if(thePrefs.m_bDateFileNameLog != (m_iDateFileNameLog != 0)){
 
 		//close log first
 		theLog.Close();
@@ -377,7 +376,7 @@ BOOL CPPgTweaks::OnApply()
 		theLog.Open();
 		theVerboseLog.Open();
 	}
-	thePrefs.DateFileNameLog = m_iDateFileNameLog;
+	thePrefs.m_bDateFileNameLog = m_iDateFileNameLog;
 	//Morph End - added by AndCycle, Date File Name Log
 
 	if (!thePrefs.log2disk && m_iLog2Disk)

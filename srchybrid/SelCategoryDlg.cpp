@@ -24,7 +24,7 @@ CSelCategoryDlg::CSelCategoryDlg(CWnd* pWnd)
 {
 	// If they have selected to use the active category as the default
 	// when adding links, then set m_Return to it.  Otherwise, use 'All' (0).
-	if (theApp.glob_prefs->UseActiveCatForLinks())
+	if (thePrefs.UseActiveCatForLinks())
 		m_Return =	theApp.emuledlg->transferwnd->GetActiveCategory();
 	else
 		m_Return = 0;
@@ -55,13 +55,13 @@ BOOL CSelCategoryDlg::OnInitDialog()
 	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(GetResString(IDS_ALL) + "/" + GetResString(IDS_CAT_UNASSIGN));
 
 	// If there are more categories, add them to the list.
-	if (theApp.glob_prefs->GetCatCount() > 1)
-		for (int i=1; i < theApp.glob_prefs->GetCatCount(); i++)
-					((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(theApp.glob_prefs->GetCategory(i)->title);
+	if (thePrefs.GetCatCount() > 1)
+		for (int i=1; i < thePrefs.GetCatCount(); i++)
+					((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(thePrefs.GetCategory(i)->title);
 
 	// Select the category that is currently visible in the transfer dialog as default, or 0 if they are
 	// not using "New Downloads Default To Active Category"
-	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->SetCurSel(theApp.glob_prefs->UseActiveCatForLinks()?theApp.emuledlg->transferwnd->GetActiveCategory():0);
+	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->SetCurSel(thePrefs.UseActiveCatForLinks()?theApp.emuledlg->transferwnd->GetActiveCategory():0);
 
 	return TRUE;
 }
@@ -70,7 +70,7 @@ void CSelCategoryDlg::OnOK()
 {
 	int	comboIndex = ((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetCurSel();
 
-	CString* catTitle = new CString(theApp.glob_prefs->GetCategory(comboIndex)->title);
+	CString* catTitle = new CString(thePrefs.GetCategory(comboIndex)->title);
 	catTitle->Trim();
 
 	CString	comboText;
@@ -81,7 +81,7 @@ void CSelCategoryDlg::OnOK()
 		m_Return = comboIndex;
 	else {
 		m_bCreatedNew = true;
-		m_Return = theApp.emuledlg->transferwnd->AddCategorie(comboText, theApp.glob_prefs->GetIncomingDir(), "","");
+		m_Return = theApp.emuledlg->transferwnd->AddCategorie(comboText, thePrefs.GetIncomingDir(), "","");
 	}
 
 	delete catTitle;

@@ -39,6 +39,8 @@ public:
 	uint32	m_dwLastChatted;
 	uint32	m_dwHasHash;
 	CString m_strName;
+
+	CUpDownClient* m_LinkedClient;
 //MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	CUpDownClient* GetLinkedClient() const { return m_LinkedClient; };
 	void SetLinkedClient(CUpDownClient* linkedClient);
@@ -58,8 +60,6 @@ public:
 private:
 	bool HasUserhash();
 	bool m_friendSlot;
-
-	CUpDownClient* m_LinkedClient;
 };
 //MORPH - Added by Yun.SF3, ZZ Upload System
 

@@ -88,9 +88,9 @@ void CFileStatistic::MergeFileStats(CFileStatistic *toMerge){
 	requested += toMerge->GetRequests();
 	accepted += toMerge->GetAccepts();
 	transferred += toMerge->GetTransferred();
-	alltimerequested += toMerge->alltimerequests();
-	alltimetransferred += toMerge->alltimetransferred();
-	alltimeaccepted += toMerge->alltimeaccepts();
+	alltimerequested += toMerge->GetAllTimeRequests();
+	alltimetransferred += toMerge->GetAllTimeTransferred();
+	alltimeaccepted += toMerge->GetAllTimeAccepts();
 	// SLUGFILLER: Spreadbars
 	if (!toMerge->spreadlist.IsEmpty()) {
 		POSITION pos = toMerge->spreadlist.GetHeadPosition();

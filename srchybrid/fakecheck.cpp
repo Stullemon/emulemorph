@@ -21,7 +21,7 @@
 #include "otherfunctions.h"
 #include "HttpDownloadDlg.h"
 #include "emuleDlg.h"
-
+#include "Preferences.h"
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;

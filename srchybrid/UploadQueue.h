@@ -17,14 +17,13 @@
 #pragma once
 #include "Loggable.h"
 
-class CPreferences;
 class CUpDownClient;
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 class CUploadQueue: public CLoggable
 {
 public:
-	CUploadQueue(CPreferences* in_prefs);
+	CUploadQueue();
 	~CUploadQueue();
 	void	Process();
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
@@ -42,7 +41,7 @@ public:
 	uint32	GetAvgRespondTime(uint8 index)	{return AvgRespondTime[index]>10 ? AvgRespondTime[index] : 1500;}
 	void	SetAvgRespondTime(uint8 index,uint32 in_AvgRespondTime)	{AvgRespondTime[index]=in_AvgRespondTime;}
 	//uint32	GetMaxVUR()	{return MaxVUR;}//[lovelace]
-	uint32	GetMaxVUR()	{return min(max(MaxVUR,(uint32)1024*app_prefs->GetMinUpload()),(uint32)1024*app_prefs->GetMaxUpload());}
+	uint32	GetMaxVUR();
 	//void	SetMaxVUR(uint32 in_MaxVUR, uint32 min, uint32 max){MaxVUR=((in_MaxVUR>max)?max:((in_MaxVUR<min)?min:in_MaxVUR));}//[lovelace]
 	void	SetMaxVUR(uint32 in_MaxVUR){MaxVUR=in_MaxVUR;}
 	//MORPH END   - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
@@ -163,7 +162,6 @@ private:
 
 	uint32	datarateave; //datarage average (since progstart) *unused*
 	uint32	estadatarate; // esta. max datarate	
-	CPreferences* app_prefs;
 	UINT_PTR h_timer;
 	uint32	successfullupcount;
 	uint32	failedupcount;

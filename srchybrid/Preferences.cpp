@@ -187,27 +187,27 @@ int		CPreferences::maxGraphDownloadRate;
 int		CPreferences::maxGraphUploadRate;
 uint8	CPreferences::beepOnError;
 uint8	CPreferences::confirmExit;
-uint16	CPreferences::downloadColumnWidths[13];
-BOOL	CPreferences::downloadColumnHidden[13];
-INT		CPreferences::downloadColumnOrder[13];
-uint16	CPreferences::uploadColumnWidths[8];
-BOOL	CPreferences::uploadColumnHidden[8];
-INT		CPreferences::uploadColumnOrder[8];
-uint16	CPreferences::queueColumnWidths[10];
-BOOL	CPreferences::queueColumnHidden[10];
-INT		CPreferences::queueColumnOrder[10];
-uint16	CPreferences::searchColumnWidths[13];
-BOOL	CPreferences::searchColumnHidden[13];
-INT		CPreferences::searchColumnOrder[13];
-uint16	CPreferences::sharedColumnWidths[12];
-BOOL	CPreferences::sharedColumnHidden[12];
-INT		CPreferences::sharedColumnOrder[12];
+uint16	CPreferences::downloadColumnWidths[16]; /*13 Official+ 3 Khaos*/
+BOOL	CPreferences::downloadColumnHidden[16]; /*13 Official+ 3 Khaos*/
+INT	CPreferences::downloadColumnOrder[16];  /*13 Official+ 3 Khaos*/
+uint16	CPreferences::uploadColumnWidths[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
+BOOL	CPreferences::uploadColumnHidden[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
+INT	CPreferences::uploadColumnOrder[8];  /*8+ 1 MOD_VERSION+1 Compression+1 Community*/
+uint16	CPreferences::queueColumnWidths[12];  /*10+1 MOD_VERSION+1 Community*/
+BOOL	CPreferences::queueColumnHidden[12];  /*10+1 MOD_VERSION+1 Community*/
+INT	CPreferences::queueColumnOrder[12];  /*10+1 MOD_VERSION+1 Community*/
+uint16	CPreferences::searchColumnWidths[14]; /*13+1 Fakecheck*/
+BOOL	CPreferences::searchColumnHidden[14]; /*13+1 Fakecheck*/
+INT	CPreferences::searchColumnOrder[14]; /*13+1 Fakecheck*/
+uint16	CPreferences::sharedColumnWidths[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
+BOOL	CPreferences::sharedColumnHidden[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
+INT	CPreferences::sharedColumnOrder[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
 uint16	CPreferences::serverColumnWidths[13];
 BOOL	CPreferences::serverColumnHidden[13];
-INT		CPreferences::serverColumnOrder[13];
-uint16	CPreferences::clientListColumnWidths[8];
-BOOL	CPreferences::clientListColumnHidden[8];
-INT		CPreferences::clientListColumnOrder[8];
+INT	CPreferences::serverColumnOrder[13];
+uint16	CPreferences::clientListColumnWidths[9]; //8+1 /*Community*/
+BOOL	CPreferences::clientListColumnHidden[9]; //8+1 /*Community*/
+INT	CPreferences::clientListColumnOrder[9]; //8+1 /*Community*/
 
 uint16	CPreferences::FilenamesListColumnWidths[2];
 BOOL	CPreferences::FilenamesListColumnHidden[2];
@@ -395,22 +395,27 @@ bool	CPreferences::m_bDisableQueueList;
 bool	CPreferences::m_bExtControls;
 bool	CPreferences::m_bTransflstRemain;
 uint8	CPreferences::versioncheckdays;
-int		CPreferences::tableSortItemDownload;
-int		CPreferences::tableSortItemUpload;
-int		CPreferences::tableSortItemQueue;
-int		CPreferences::tableSortItemSearch;
-int		CPreferences::tableSortItemShared;
-int		CPreferences::tableSortItemServer;
-int		CPreferences::tableSortItemClientList;
-int		CPreferences::tableSortItemFilenames;
-bool	CPreferences::tableSortAscendingDownload;
-bool	CPreferences::tableSortAscendingUpload;
-bool	CPreferences::tableSortAscendingQueue;
-bool	CPreferences::tableSortAscendingSearch;
-bool	CPreferences::tableSortAscendingShared;
-bool	CPreferences::tableSortAscendingServer;
-bool	CPreferences::tableSortAscendingClientList;
-bool	CPreferences::tableSortAscendingFilenames;
+// SLUGFILLER: multiSort - save multiple params
+// SLUGFILLER: DLsortFix - double, for client-only sorting
+int	CPreferences::tableSortItemDownload[32];
+BOOL	CPreferences::tableSortAscendingDownload[32];
+// SLUGFILLER: DLsortFix
+int	CPreferences::tableSortItemUpload[14];
+BOOL	CPreferences::tableSortAscendingUpload[14];
+int	CPreferences::tableSortItemQueue[12];
+BOOL	CPreferences::tableSortAscendingQueue[12];
+int	CPreferences::tableSortItemSearch[14];
+BOOL	CPreferences::tableSortAscendingSearch[14];
+int	CPreferences::tableSortItemShared[22];
+BOOL	CPreferences::tableSortAscendingShared[22];
+int	CPreferences::tableSortItemServer[13];
+BOOL	CPreferences::tableSortAscendingServer[13];
+int	CPreferences::tableSortItemClientList[9];
+BOOL	CPreferences::tableSortAscendingClientList[9];
+// SLUGFILLER: multiSort
+int	CPreferences::tableSortItemFilenames[2];
+BOOL	CPreferences::tableSortAscendingFilenames[2];
+
 bool	CPreferences::showRatesInTitle;
 char	CPreferences::TxtEditor[256];
 char	CPreferences::VideoPlayer[256];
@@ -459,7 +464,7 @@ bool	CPreferences::showCatTabInfos;
 bool	CPreferences::resumeSameCat;
 bool	CPreferences::dontRecreateGraphs;
 bool	CPreferences::autofilenamecleanup;
-int		CPreferences::allcatType;
+// khaos::kmod+ Obsolete int		CPreferences::allcatType;
 bool	CPreferences::m_bUseAutocompl;
 bool	CPreferences::m_bShowDwlPercentage;
 bool	CPreferences::m_bRemoveFinishedDownloads;
@@ -477,11 +482,130 @@ char	CPreferences::m_sToolbarBitmap[256];
 char	CPreferences::m_sToolbarBitmapFolder[256];
 char	CPreferences::m_sToolbarSettings[256];
 bool	CPreferences::m_bPreviewEnabled;
+// #ifdef MIGHTY_SUMMERTIME
+// Mighty Knife: daylight saving patch
+bool    CPreferences::m_iDaylightSavingPatch;
+// #endif
+bool	CPreferences::enableHighProcess;//MORPH - Added by IceCream, high process priority
+//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
+ bool	CPreferences::enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
+//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
+bool	CPreferences::enableDownloadInRed; //MORPH - Added by IceCream, show download in red
+bool	CPreferences::enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
+bool	CPreferences::enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
+bool	CPreferences::enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
+bool	CPreferences::isZZRatioActivated;// Added By Yun.SF3, Option for Ratio Systems
+CreditSystemSelection	CPreferences::creditSystemMode; // EastShare - Added by linekin, creditsystem integration
+EqualChanceForEachFileSelection CPreferences::equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
+bool	CPreferences::m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
+bool	CPreferences::isboostfriends;//Added by Yun.SF3, boost friends
+bool	CPreferences::isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
+bool	CPreferences::m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+uint16	CPreferences::maxconnectionsswitchborder;
+//EastShare Start- Added by Pretender, TBH-AutoBackup
+bool	CPreferences::autobackup;
+bool	CPreferences::autobackup2;
+//EastShare End - Added by Pretender, TBH-AutoBackup
+
+//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
+uint8	CPreferences::LowIdRetries;
+uint8	CPreferences::LowIdRetried;
+//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
+//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
+uint8	CPreferences::hideOS;
+uint8	CPreferences::selectiveShare;
+//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+
+bool	CPreferences::infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+bool	CPreferences::multipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
+
+//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+uint8	CPreferences::ShareOnlyTheNeed;
+//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+
+//MORPH START - Added by SiRoB, Show Permissions
+uint8	CPreferences::permissions;
+//MORPH END   - Added by SiRoB, Show Permissions
+
+//EastShare Start - PreferShareAll by AndCycle
+bool	CPreferences::shareall;	// SLUGFILLER: preferShareAll
+//EastShare End - PreferShareAll by AndCycle
+
+char	CPreferences::UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+char	CPreferences::UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
+
+bool	CPreferences::m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+bool	CPreferences::m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+bool	CPreferences::m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+int	CPreferences::m_iKnownMetDays; // EastShare - Added by TAHO, .met file control
+bool	CPreferences::m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
+
+//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
+uint32	CPreferences::m_FakesDatVersion;
+bool	CPreferences::UpdateFakeStartup;
+//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+//MORPH START added by Yun.SF3: Ipfilter.dat update
+bool	CPreferences::AutoUpdateIPFilter; //added by milobac: Ipfilter.dat update
+uint32	CPreferences::m_IPfilterVersion; //added by milobac: Ipfilter.dat update
+//MORPH END added by Yun.SF3: Ipfilter.dat update
+
+//EastShare - added by AndCycle, IP to Country
+IP2CountryNameSelection	CPreferences::m_iIP2CountryNameMode;
+bool	CPreferences::m_bIP2CountryShowFlag;
+//EastShare - added by AndCycle, IP to Country
+
+// khaos::categorymod+
+bool	CPreferences::m_bValidSrcsOnly;
+bool	CPreferences::m_bShowCatNames;
+bool	CPreferences::m_bActiveCatDefault;
+bool	CPreferences::m_bSelCatOnAdd;
+bool	CPreferences::m_bAutoSetResumeOrder;
+bool	CPreferences::m_bSmallFileDLPush;
+uint8	CPreferences::m_iStartDLInEmptyCats;
+bool	CPreferences::m_bRespectMaxSources;
+bool	CPreferences::m_bUseAutoCat;
+// khaos::categorymod-
+// khaos::kmod+
+bool	CPreferences::m_bShowA4AFDebugOutput;
+bool	CPreferences::m_bSmartA4AFSwapping;
+uint8	CPreferences::m_iAdvancedA4AFMode; // 0 = disabled, 1 = balance, 2 = stack
+bool	CPreferences::m_bUseSaveLoadSources;
+// khaos::categorymod-
+// khaos::accuratetimerem+
+uint8	CPreferences::m_iTimeRemainingMode; // 0 = both, 1 = real time, 2 = average
+// khaos::accuratetimerem-
+
+// Mighty Knife: Community Visualization, Report hashing files, Log friendlist activities
+char	CPreferences::m_sCommunityName [256];
+bool	CPreferences::m_bReportHashingFiles;
+bool	CPreferences::m_bLogFriendlistActivities;
+// [end] Mighty Knife
+
+// Mighty Knife: CRC32-Tag - not accessible in preferences dialog !
+bool	CPreferences::m_bDontAddCRCToFilename;
+char	CPreferences::m_sCRC32Prefix [256];
+char	CPreferences::m_sCRC32Suffix [256];
+// [end] Mighty Knife
+
+//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
+bool	CPreferences::m_bSUCEnabled;
+uint16	CPreferences::m_iSUCHigh;
+uint16	CPreferences::m_iSUCLow;
+uint16	CPreferences::m_iSUCPitch;
+uint16	CPreferences::m_iSUCDrift;
+bool	CPreferences::m_bSUCLog;
+//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
+
+//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 bool	CPreferences::m_bDynUpEnabled;
-int		CPreferences::m_iDynUpPingTolerance;
-int		CPreferences::m_iDynUpGoingUpDivider;
-int		CPreferences::m_iDynUpGoingDownDivider;
-int		CPreferences::m_iDynUpNumberOfPings;
+int	CPreferences::m_iDynUpPingTolerance;
+int	CPreferences::m_iDynUpGoingUpDivider;
+int	CPreferences::m_iDynUpGoingDownDivider;
+int	CPreferences::m_iDynUpNumberOfPings;
+int	CPreferences::m_iDynUpPingLimit; // EastShare - Added by TAHO, USS limit
+bool	CPreferences::m_bIsUSSLimit; // EastShare - Added by linekin, USS limit applied?
+bool	CPreferences::m_bDynUpLog;
+//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 CStringList CPreferences::shareddir_list;
 CStringList CPreferences::adresses_list;
 CString CPreferences::appdir;
@@ -810,11 +934,13 @@ bool CPreferences::IsZZRatioDoesWork(){
 		return true;
 	if (theApp.downloadqueue->IsFilesPowershared())
 		return true;
-	*/
-	if (thePrefs.IsSUCEnabled())
+	if (thePrefs.IsSUCEnabled() ||)
 		return theApp.uploadqueue->GetMaxVUR()<10240;
 	else if (thePrefs.IsDynUpEnabled())
 		return theApp.lastCommonRouteFinder->GetUpload()<10240;
+	*/
+	if (thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled())
+		return theApp.uploadqueue->GetDatarate()<10240;
 	else
 		return thePrefs.GetMaxUpload()<10;
 }
@@ -824,7 +950,7 @@ uint16 CPreferences::GetMaxDownload(){
 	//dont be a Lam3r :)
 	//MORPH START - Added by SiRoB, ZZ Upload system
 	if (IsZZRatioDoesWork())
-		return prefs->maxdownload;
+		return maxdownload;
 	//MORPH END   - Added by SiRoB, ZZ Upload system
 	uint16 maxup=(GetMaxUpload()==UNLIMITED)?GetMaxGraphUploadRate():GetMaxUpload();
 	if( maxup < 4 )
@@ -1174,19 +1300,6 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 			//	Add to our total for sent bytes...
 			theApp.UpdateSentBytes(bytes, sentToFriend); //MORPH - Added by Yun.SF3, ZZ Upload System
 
-
-			break;
-
-		case false:
-			// Downline Data
-
-			switch (uClientID){
-                // Update session client breakdown stats for received bytes...
-			if (bFromPF)				sesUpData_Partfile+=bytes;
-			else						sesUpData_File+=bytes;
-
-			//	Add to our total for sent bytes...
-			theApp.UpdateSentBytes(bytes);
 
 			break;
 
@@ -2184,67 +2297,67 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("Enabled", m_bMMEnabled);
 	ini.WriteInt("Port", m_nMMPort);
 
-	ini.WriteBool("InfiniteQueue",prefs->infiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	ini.WriteBool("MultipleInstance",prefs->multipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
+	ini.WriteBool("InfiniteQueue",infiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	ini.WriteBool("MultipleInstance",multipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
 
-	ini.WriteBool("AutoDynUpSwitching",prefs->isautodynupswitching);//MORPH - Added by Yun.SF3, Auto DynUp changing
-	ini.WriteBool("AutoPowershareNewDownloadFile",prefs->m_bisautopowersharenewdownloadfile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	ini.WriteBool("AutoDynUpSwitching",isautodynupswitching);//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteBool("AutoPowershareNewDownloadFile",m_bisautopowersharenewdownloadfile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
-	ini.WriteBool("EnableZeroFilledTest", prefs->enableZeroFilledTest);
+	ini.WriteBool("EnableZeroFilledTest", enableZeroFilledTest);
 	// Maella end
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
 	ini.WriteBool("EnableHighProcess", enableHighProcess); //MORPH - Added by IceCream, high process priority
 
-	ini.WriteBool("EnableDownloadInRed", prefs->enableDownloadInRed); //MORPH - Added by IceCream, show download in red
-	ini.WriteBool("EnableDownloadInBold", prefs->enableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
-	ini.WriteBool("EnableAntiLeecher", prefs->enableAntiLeecher); //MORPH - Added by IceCream, enable AntiLeecher
-	ini.WriteBool("EnableAntiCreditHack", prefs->enableAntiCreditHack); //MORPH - Added by IceCream, enable AntiCreditHack
-	ini.WriteInt("CreditSystemMode", prefs->creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
-	ini.WriteInt("EqualChanceForEachFileMode", prefs->equalChanceForEachFileMode);//Morph - added by AndCycle, Equal Chance For Each File
-	ini.WriteBool("ECFEFallTime", prefs->m_bECFEFallTime);//Morph - added by AndCycle, Equal Chance For Each File
-	ini.WriteBool("IsUSSLimit", prefs->m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
-	ini.WriteBool("IsBoostFriends", prefs->isboostfriends);//Added by Yun.SF3, boost friends
+	ini.WriteBool("EnableDownloadInRed", enableDownloadInRed); //MORPH - Added by IceCream, show download in red
+	ini.WriteBool("EnableDownloadInBold", enableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
+	ini.WriteBool("EnableAntiLeecher", enableAntiLeecher); //MORPH - Added by IceCream, enable AntiLeecher
+	ini.WriteBool("EnableAntiCreditHack", enableAntiCreditHack); //MORPH - Added by IceCream, enable AntiCreditHack
+	ini.WriteInt("CreditSystemMode", creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
+	ini.WriteInt("EqualChanceForEachFileMode", equalChanceForEachFileMode);//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteBool("ECFEFallTime", m_bECFEFallTime);//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteBool("IsUSSLimit", m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
+	ini.WriteBool("IsBoostFriends", isboostfriends);//Added by Yun.SF3, boost friends
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	ini.WriteInt("ReconnectOnLowIdRetries",prefs->LowIdRetries);	// SLUGFILLER: lowIdRetry
+	ini.WriteInt("ReconnectOnLowIdRetries",LowIdRetries);	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	ini.WriteInt("HideOvershares",prefs->hideOS);
-	ini.WriteBool("SelectiveShare",prefs->selectiveShare);
+	ini.WriteInt("HideOvershares",hideOS);
+	ini.WriteBool("SelectiveShare",selectiveShare);
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	ini.WriteBool("ShareOnlyTheNeed",prefs->ShareOnlyTheNeed);
+	ini.WriteBool("ShareOnlyTheNeed",ShareOnlyTheNeed);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	//MORPH START - Added by SiRoB, Show Permissions
-	ini.WriteBool("ShowSharePermissions",prefs->permissions);
+	ini.WriteBool("ShowSharePermissions",permissions);
 	//MORPH END   - Added by SiRoB, Show Permissions
 
 //MORPH START added by Yun.SF3: Ipfilter.dat update
-	ini.WriteInt("IPfilterVersion",prefs->m_IPfilterVersion); //added by milobac: Ipfilter.dat update
-	ini.WriteBool("AutoUPdateIPFilter",prefs->AutoUpdateIPFilter); //added by milobac: Ipfilter.dat update
+	ini.WriteInt("IPfilterVersion",m_IPfilterVersion); //added by milobac: Ipfilter.dat update
+	ini.WriteBool("AutoUPdateIPFilter",AutoUpdateIPFilter); //added by milobac: Ipfilter.dat update
 //MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	ini.WriteInt("FakesDatVersion",prefs->m_FakesDatVersion);
-	ini.WriteBool("UpdateFakeStartup",prefs->UpdateFakeStartup);
+	ini.WriteInt("FakesDatVersion",m_FakesDatVersion);
+	ini.WriteBool("UpdateFakeStartup",UpdateFakeStartup);
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
-	ini.WriteString("UpdateURLFakeList",prefs->UpdateURLFakeList);		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	ini.WriteString("UpdateURLIPFilter",prefs->UpdateURLIPFilter);//MORPH START added by Yun.SF3: Ipfilter.dat update
+	ini.WriteString("UpdateURLFakeList",UpdateURLFakeList);		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	ini.WriteString("UpdateURLIPFilter",UpdateURLIPFilter);//MORPH START added by Yun.SF3: Ipfilter.dat update
 
 	//EastShare Start - PreferShareAll by AndCycle
-	ini.WriteBool("ShareAll",prefs->shareall);	// SLUGFILLER: preferShareAll
+	ini.WriteBool("ShareAll",shareall);	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-	ini.WriteInt("KnownMetDays", prefs->m_iKnownMetDays);
+	ini.WriteInt("KnownMetDays", m_iKnownMetDays);
 	// EastShare END - Added by TAHO, .met file control
 
 	//EastShare - added by AndCycle, IP to Country
-	ini.WriteInt("IP2Country", prefs->m_iIP2CountryNameMode); 
-	ini.WriteBool("IP2CountryShowFlag", prefs->m_bIP2CountryShowFlag);
+	ini.WriteInt("IP2Country", m_iIP2CountryNameMode); 
+	ini.WriteBool("IP2CountryShowFlag", m_bIP2CountryShowFlag);
 	//EastShare - added by AndCycle, IP to Country
 
 	// khaos::categorymod+ Save Preferences
@@ -2280,7 +2393,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("IsPayBackFirst",m_bPayBackFirst);//EastShare - added by AndCycle, Pay Back First
 	ini.WriteBool("OnlyDownloadCompleteFiles", m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	ini.WriteBool("SaveUploadQueueWaitTime", m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	ini.WriteBool("DateFileNameLog", DateFileNameLog);//Morph - added by AndCycle, Date File Name Log
+	ini.WriteBool("DateFileNameLog", m_bDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 
 	// #ifdef MIGHTY_SUMMERTIME
 	// Mighty Knife: daylight saving patch
@@ -2634,7 +2747,7 @@ void CPreferences::LoadPreferences(){
 	m_bDAP=ini.GetBool("DAPPref",true);
 	m_bUAP=ini.GetBool("UAPPref",true);
 	indicateratings=ini.GetBool("IndicateRatings",true);
-	// khaos::kmod+ Obsolete prefs->allcatType=ini.GetInt("AllcatType",0);
+	// khaos::kmod+ Obsolete allcatType=ini.GetInt("AllcatType",0);
 	watchclipboard=ini.GetBool("WatchClipboard4ED2kFilelinks",false);
 	m_iSearchMethod=ini.GetInt("SearchMethod",0);
 	
@@ -2730,16 +2843,16 @@ void CPreferences::LoadPreferences(){
 	m_bSUCEnabled = ini.GetBool("SUCEnabled",false);
 	m_bSUCLog =  ini.GetBool("SUCLog",false);
 	m_iSUCHigh = ini.GetInt("SUCHigh",900);
-	m_iSUCHigh = min(max(prefs->m_iSUCHigh,350),1000);
+	m_iSUCHigh = min(max(m_iSUCHigh,350),1000);
 	m_iSUCLow = ini.GetInt("SUCLow",600);
-	m_iSUCLow = min(max(prefs->m_iSUCLow,350),prefs->m_iSUCHigh);
+	m_iSUCLow = min(max(m_iSUCLow,350),m_iSUCHigh);
 	m_iSUCPitch = ini.GetInt("SUCPitch",3000);
-	m_iSUCPitch = min(max(prefs->m_iSUCPitch,2500),10000);
+	m_iSUCPitch = min(max(m_iSUCPitch,2500),10000);
 	m_iSUCDrift = ini.GetInt("SUCDrift",50);
-	m_iSUCDrift = min(max(prefs->m_iSUCDrift,0),100);
+	m_iSUCDrift = min(max(m_iSUCDrift,0),100);
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	maxconnectionsswitchborder = ini.GetInt("MaxConnectionsSwitchBorder",100);//MORPH - Added by Yun.SF3, Auto DynUp changing
-	maxconnectionsswitchborder = min(max(prefs->maxconnectionsswitchborder,50),60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
+	maxconnectionsswitchborder = min(max(maxconnectionsswitchborder,50),60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
 
 	// #ifdef MIGHTY_SUMMERTIME
 	// Mighty Knife: daylight saving patch
@@ -2753,7 +2866,7 @@ void CPreferences::LoadPreferences(){
 	m_iKnownMetDays = ini.GetInt("KnownMetDays", 0);
 	// EastShare END - Added by TAHO, .met file control
 	isautodynupswitching=ini.GetBool("AutoDynUpSwitching",false);
-	DateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
+	m_bDateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
 	m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
 	m_bOnlyDownloadCompleteFiles = ini.GetBool("OnlyDownloadCompleteFiles", false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = ini.GetBool("SaveUploadQueueWaitTime", true);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
@@ -2978,7 +3091,7 @@ void CPreferences::LoadPreferences(){
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
-	if (!m_bSUCEnabled) bDynUpEnabled = ini.GetBool("DynUpEnabled", false);
+	if (!m_bSUCEnabled) m_bDynUpEnabled = ini.GetBool("DynUpEnabled", false);
 
 	m_iDynUpPingTolerance = ini.GetInt("DynUpPingTolerance", 800);
 	m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000);
@@ -3145,7 +3258,7 @@ uint16 CPreferences::GetDefaultMaxConperFive(){
 }
 
 // Barry - Provide a mechanism for all tables to store/retrieve sort order
-int CPreferences::GetColumnSortItem(Table t, int column) const	// SLUGFILLER: multiSort
+int CPreferences::GetColumnSortItem(Table t, int column)	// SLUGFILLER: multiSort
 {
 	switch(t) 
 	{
@@ -3170,7 +3283,7 @@ int CPreferences::GetColumnSortItem(Table t, int column) const	// SLUGFILLER: mu
 }
 
 // Barry - Provide a mechanism for all tables to store/retrieve sort order
-bool CPreferences::GetColumnSortAscending(Table t, int column) const	// SLUGFILLER: multiSort
+bool CPreferences::GetColumnSortAscending(Table t, int column)	// SLUGFILLER: multiSort
 {
 	switch(t) 
 	{
@@ -3195,7 +3308,7 @@ bool CPreferences::GetColumnSortAscending(Table t, int column) const	// SLUGFILL
 }
 
 // SLUGFILLER: multiSort
-int CPreferences::GetColumnSortCount(Table t) const
+int CPreferences::GetColumnSortCount(Table t)
 {
 	int i;
 	switch(t)
@@ -3523,13 +3636,13 @@ void CPreferences::SetEnableHighProcess(bool enablehigh)
 //MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 bool	CPreferences::IsSUCDoesWork()
 {
-	return prefs->minupload<prefs->maxupload && prefs->maxupload != UNLIMITED && prefs->m_bSUCEnabled;
+	return minupload<maxupload && maxupload != UNLIMITED && m_bSUCEnabled;
 }
 //MORPH END  - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 
 //MORPH START - Added by SiRoB, (SUC) & (USS)
 void	CPreferences::SetMinUpload(uint16 in)
 {
-	prefs->minupload = (in) ? in : UNLIMITED;
+	minupload = (in) ? in : UNLIMITED;
 }
 //MORPH END  - Added by SiRoB, (SUC) & (USS)

@@ -23,7 +23,6 @@
 #include "ClientDetailDialog.h"
 #include "KademliaWnd.h"
 #include "emuledlg.h"
-#include "KademliaMain.h"
 #include "friendlist.h"
 #include "MemDC.h"
 #include "KnownFile.h"
@@ -31,6 +30,10 @@
 #include "UpDownClient.h"
 #include "ClientCredits.h"
 #include "ChatWnd.h"
+#include "kademlia/kademlia/Kademlia.h"
+#include "kademlia/kademlia/prefs.h"
+#include "kademlia/net/KademliaUDPListener.h"
+
 #include "Opcodes.h" //MORPH - Added by SiRoB
 #include "PartFile.h" //MORPH - Added by SiRoB
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
@@ -63,7 +66,7 @@ void CUploadListCtrl::Init()
 	if (tooltip){
 		tooltip->ModifyStyle(0, TTS_NOPREFIX);
 		tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
-		tooltip->SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
+		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 	}
 
 	InsertColumn(0,GetResString(IDS_QL_USERNAME),LVCFMT_LEFT,150,0);
@@ -95,20 +98,20 @@ void CUploadListCtrl::Init()
 	LoadSettings(CPreferences::tableUpload);
 
 	// Barry - Use preferred sort order from preferences
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableUpload);
-	bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableUpload);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableUpload);
+	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableUpload);
 	SetSortArrow(sortItem, sortAscending);
 	// SLUGFILLER: multiSort - load multiple params
-	for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableUpload); i > 0; ) {
+	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableUpload); i > 0; ) {
 		i--;
-		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableUpload, i);
-		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableUpload, i);
+		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableUpload, i);
+		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableUpload, i);
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
 
 	// Mighty Knife: Community affiliation
-	if (theApp.glob_prefs->IsCommunityEnabled ()) ShowColumn (13);
+	if (thePrefs.IsCommunityEnabled ()) ShowColumn (13);
 	else HideColumn (13);
 	// [end] Mighty Knife
 
@@ -244,21 +247,28 @@ void CUploadListCtrl::Localize()
 
 void CUploadListCtrl::AddClient(const CUpDownClient* client)
 {
-	uint32 itemnr = GetItemCount();
-	itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,LPSTR_TEXTCALLBACK,0,0,1,(LPARAM)client);
-	RefreshClient(client);
-	theApp.emuledlg->transferwnd->UpdateListCount(1);
+	if (!theApp.emuledlg->IsRunning())
+		return;
+
+	int iItemCount = GetItemCount();
+	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,iItemCount,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)client);
+	Update(iItem);
+	theApp.emuledlg->transferwnd->UpdateListCount(1, iItemCount+1);
 }
 
 void CUploadListCtrl::RemoveClient(const CUpDownClient* client)
 {
+	if (!theApp.emuledlg->IsRunning())
+		return;
+
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
 	sint32 result = FindItem(&find);
-	if (result != (-1) )
+	if (result != -1){
 		DeleteItem(result);
-	theApp.emuledlg->transferwnd->UpdateListCount(1);
+		theApp.emuledlg->transferwnd->UpdateListCount(1);
+	}
 }
 
 void CUploadListCtrl::RefreshClient(const CUpDownClient* client)
@@ -276,7 +286,6 @@ void CUploadListCtrl::RefreshClient(const CUpDownClient* client)
 	sint16 result = FindItem(&find);
 	if(result != -1)
 		Update(result);
-	return;
 }
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
@@ -289,7 +298,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
-	if( odc && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
+	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
 		if(bCtrlFocused)
 			odc->SetBkColor(m_crHighlight);
 		else
@@ -301,8 +310,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont *pOldFont = dc.SelectObject(GetFont());
-	RECT cur_rec;
-	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	RECT cur_rec = lpDrawItemStruct->rcItem;
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
 
 	int iOldBkMode;
@@ -395,7 +403,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 						//Morph Start - added by AndCycle, Equal Chance For Each File
 						//Morph - added by AndCycle, more detail...for debug?
-						if(theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
+						if(thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
 							Sbuffer.Format("%s :%s", file->GetEqualChanceValueString(false), Sbuffer);
 						}
 						//Morph - added by AndCycle, more detail...for debug?
@@ -465,7 +473,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//if( client->GetUpPartCount() )[
 						cur_rec.bottom--;
 						cur_rec.top++;
-						client->DrawUpStatusBar(dc,&cur_rec,false,theApp.glob_prefs->UseFlatBar());
+						client->DrawUpStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
 						cur_rec.bottom++;
 						cur_rec.top--;
 					//}
@@ -586,8 +594,8 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	// Mighty Knife: Community affiliation
 	// Show/Hide community column if changed in the preferences
-	if (theApp.glob_prefs->IsCommunityEnabled () != !IsColumnHidden (13))
-		if (theApp.glob_prefs->IsCommunityEnabled ())
+	if (thePrefs.IsCommunityEnabled () != !IsColumnHidden (13))
+		if (thePrefs.IsCommunityEnabled ())
 				ShowColumn (13);
 		else HideColumn (13);
 	// [end] Mighty Knife
@@ -595,8 +603,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
-		RECT outline_rec;
-		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		RECT outline_rec = lpDrawItemStruct->rcItem;
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -632,30 +639,23 @@ void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	UINT uFlags = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
+	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
 
 	CTitleMenu ClientMenu;
 	ClientMenu.CreatePopupMenu();
 	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+	ClientMenu.SetDefaultItem(MP_DETAIL);
+	ClientMenu.AppendMenu(MF_STRING | ((client && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
 	//MORPH START - Added by SiRoB, Friend Addon
-	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
-	if (GetSelectedCount() == 1){
-		if(client->IsFriend()){
-			ClientMenu.AppendMenu(MF_STRING, MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-			ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
-			if (!client->HasLowID())
-				ClientMenu.CheckMenuItem(MP_FRIENDSLOT, ((client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) );
-			else
-				ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_GRAYED);
-		}else
-			ClientMenu.AppendMenu(MF_STRING | uFlags,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
-	}
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH END - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_MESSAGE, GetResString(IDS_SEND_MSG));
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
-	if(theApp.kademlia->GetThreadID() && !theApp.kademlia->isConnected() )
-		ClientMenu.AppendMenu(MF_STRING | uFlags,MP_BOOT, "BootStrap");
-
+	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::getPrefs()->getLastContact())
+		ClientMenu.AppendMenu(MF_STRING | ((!client || client->GetKadPort()==0) ? MF_GRAYED : MF_ENABLED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+	
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
@@ -672,27 +672,23 @@ BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 			case MP_SHOWLIST:
 				client->RequestSharedFileList();
 				break;
-			case MP_MESSAGE:{
+			case MP_MESSAGE:
 				theApp.emuledlg->chatwnd->StartSession(client);
 				break;
-			}
-			case MP_ADDFRIEND:{
-				theApp.friendlist->AddFriend(client);
+			case MP_ADDFRIEND:
+				if (theApp.friendlist->AddFriend(client))
+					Update(iSel);
 				break;
-			}
 			case MPG_ALTENTER:
 			case MP_DETAIL:{
 				CClientDetailDialog dialog(client);
 				dialog.DoModal();
 				break;
 			}
-			case MP_BOOT:{
-				if(	theApp.kademlia->GetThreadID() && client->GetKadPort())
-				{
-					theApp.kademlia->Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
-				}
+			case MP_BOOT:
+				if (client->GetKadPort())
+					Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 				break;
-			}
 			//MORPH START - Addded by SiRoB, Friend Addon
 			case MP_REMOVEFRIEND:{//LSD
 				if (client && client->IsFriend())
@@ -777,14 +773,14 @@ void CUploadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableUpload);
-	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableUpload);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableUpload);
+	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableUpload);
 	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 	// Item is column clicked
 	sortItem = pNMListView->iSubItem;
 	// Save new preferences
-	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableUpload, sortItem);
-	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableUpload, sortAscending);
+	thePrefs.SetColumnSortItem(CPreferences::tableUpload, sortItem);
+	thePrefs.SetColumnSortAscending(CPreferences::tableUpload, sortAscending);
 	// Sort table
 	SetSortArrow(sortItem, sortAscending);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
@@ -906,7 +902,11 @@ void CUploadListCtrl::ShowSelectedUserDetails()
 	CPoint p = point; 
 	ScreenToClient(&p); 
 	int it = HitTest(p); 
+    if (it == -1)
+		return;
 
+	SetItemState(-1, 0, LVIS_SELECTED);
+	SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	SetSelectionMark(it);   // display selection mark correctly! 
 	if (it == -1) return;
 

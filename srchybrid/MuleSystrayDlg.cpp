@@ -4,9 +4,9 @@
 #include "stdafx.h"
 #include "MuleSystrayDlg.h"
 #include "emule.h"
-#include "Opcodes.h"
+#include "opcodes.h"
 #include "Sockets.h"
-#include "kademliaMain.h"
+#include "kademlia/kademlia/Kademlia.h"
 #include "preferences.h"
 #include "OtherFunctions.h"
 
@@ -120,14 +120,14 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	CString buffer2;
 
 	m_hUpArrow = theApp.LoadIcon("UPLOAD");
-	m_hDownArrow = theApp.LoadIcon("SEARCHDIRECTDOWNLOAD");
+	m_hDownArrow = theApp.LoadIcon("DOWNLOAD");
 	m_hSUCIcon = theApp.LoadIcon("SUC");
 	m_ctrlUpArrow.SetIcon(m_hUpArrow);
 	m_ctrlDownArrow.SetIcon(m_hDownArrow);
 	m_ctrlMinUpIcon.SetIcon(m_hSUCIcon); 
 	
 	bool	bValidFont = false;
-	LOGFONT lfStaticFont;
+	LOGFONT lfStaticFont = {0};
 
 	p = GetDlgItem(IDC_SPEED);
 	if(p)
@@ -150,14 +150,13 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		else if (theApp.serverconnect->IsConnecting())
 			buffer = "ed2k";
 		else
-			buffer = "---";
+			buffer = "";
 
-		if(theApp.kademlia->isConnected())
-			buffer += "|KAD";
-		else if (theApp.kademlia->GetThreadID())
-			buffer += "|kad";
-		else
-			buffer = "|---";
+		if(Kademlia::CKademlia::isConnected())
+			buffer += buffer.IsEmpty()?"KAD":" | KAD";
+		else if (Kademlia::CKademlia::isRunning())
+			buffer += buffer.IsEmpty()?"kad":" | kad";
+		
 		m_ctrlSpeed.m_strText = buffer;
 
 		m_ctrlSpeed.m_bUseIcon = true;
@@ -294,13 +293,13 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		if(bValidFont)
 			m_ctrlReloadShares.m_cfFont.CreateFontIndirect(&lfStaticFont);
 	}
-	p = GetDlgItem(IDC_TRAYEXIT);
+	p = GetDlgItem(IDC_TRAY_EXIT);
 	if(p)
 	{
 		p->GetWindowRect(r);
 		ScreenToClient(r);
-		m_ctrlExit.Create(NULL, NULL, WS_CHILD|WS_VISIBLE, r, this, IDC_TRAYEXIT);
-		m_ctrlExit.m_nBtnID = IDC_TRAYEXIT;
+		m_ctrlExit.Create(NULL, NULL, WS_CHILD|WS_VISIBLE, r, this, IDC_TRAY_EXIT);
+		m_ctrlExit.m_nBtnID = IDC_TRAY_EXIT;
 		//p->GetWindowText(m_ctrlExit.m_strText);
 		m_ctrlExit.m_strText = GetResString(IDS_EXIT);
 		m_ctrlExit.m_strText.Remove('&');

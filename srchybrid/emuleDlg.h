@@ -18,9 +18,6 @@
 #include "TrayDialog.h"
 #include "MeterIcon.h"
 #include "TitleMenu.h"
-//MORPH START - Added by SiRoB, New Systray Popup from fusion
-#include "MuleSystrayDlg.h"
-//MORPH END   - Added by SiRoB, New Systray Popup from fusion
 
 namespace Kademlia {
 	class CSearch;
@@ -45,6 +42,8 @@ class CTaskbarNotifier;
 class CTransferWnd;
 struct Status;
 struct SLogItem;
+class CSplashScreen;
+class CMuleSystrayDlg;
 
 // emuleapp <-> emuleapp
 #define OP_ED2KLINK				12000
@@ -113,12 +112,21 @@ public:
 	CDialog*		activewnd;
 	uint8			status;
 	CFont			m_fontHyperText;
+	CFont			m_fontMarlett;
+
 protected:
 	HICON m_hIcon;
+
+	CSplashScreen *m_pSplashWnd;
+	DWORD m_dwSplashTime;
+	void ShowSplash();
+	void DestroySplash();
+
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
-	virtual void OnTrayRButtonDown(CPoint pt);
+	virtual void OnTrayRButtonUp(CPoint pt);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSize(UINT nType,int cx,int cy);
@@ -133,6 +141,7 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnEndSession(BOOL bEnding);
+	afx_msg LRESULT OnKickIdle(UINT nWhy, long lIdleCount);
 
 	// quick-speed changer -- based on xrmb
 	afx_msg void QuickSpeedUpload(UINT nID);
@@ -149,6 +158,7 @@ protected:
 	afx_msg LRESULT OnPartHashedOK(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam);
 	// SLUGFILLER: SafeHash
+	afx_msg LRESULT OnFileCompleted(WPARAM wParam,LPARAM lParam);
 
 	//Framegrabbing
 	afx_msg LRESULT OnFrameGrabFinished(WPARAM wParam,LPARAM lParam);
@@ -167,24 +177,6 @@ protected:
 	// VersionCheck DNS
 	afx_msg LRESULT OnVersionCheckResponse(WPARAM wParam, LPARAM lParam);
 
-	// Kademlia message
-	afx_msg LRESULT OnKademliaSearchAdd		(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaSearchRem		(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaSearchRef		(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaContactAdd	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaContactRem	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaContactRef	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaContactUpdate	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaIndexedAdd	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaIndexedRem	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaIndexedRef	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaResultFile	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaResultKeyword	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaRequestTCP	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaUpdateStatus	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaOverheadSend	(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnKademliaOverheadRecv	(WPARAM wParam, LPARAM lParam);
-
 	void OnOK() {}
 	void OnClose();
 	bool CanClose();
@@ -193,7 +185,7 @@ private:
 	bool			ready;
 	bool			startUpMinimizedChecked;
 	bool			m_bStartMinimized;
-	HICON			connicons[3];
+	HICON			connicons[9];
 	HICON			transicons[4];
 	HICON			imicons[3];
 	HICON			mytrayIcon;
@@ -208,6 +200,7 @@ private:
 	uint32			lastdownrate;
 	CImageList		imagelist;
 	CTitleMenu		trayPopup;
+	CMuleSystrayDlg* m_pSystrayDlg;
 	CMainFrameDropTarget* m_pDropTarget;
 
 	UINT_PTR m_hTimer;
@@ -222,7 +215,6 @@ private:
 	void ShowUserStateIcon();
 	void AddSpeedSelectorSys(CMenu* addToMenu);
 	int  GetRecMaxUpload();
-	int	 IsNewVersionAvailable();
 	void LoadNotifier(CString configuration); //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
 	bool notifierenabled;					  //<<-- enkeyDEV(kei-kun) -Quick disable/enable notifier-
 	void ShowToolPopup(bool toolsonly=false);
@@ -231,10 +223,6 @@ private:
 
 	char m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
 
-	//MORPH START - Added by SiRoB, New Systray Popup from fusion
-	CMuleSystrayDlg *m_pSystrayDlg;
-	//MORPH END   - Added by SiRoB, New Systray Popup from fusion
-	
     // Elandal:ThreadSafeLogging -->
     // thread safe log calls
     CCriticalSection m_queueLock;
@@ -274,24 +262,6 @@ enum EEmuleUserMsgs
 	// VC
 	WM_VERSIONCHECK_RESPONSE,
 
-    // Messages sent to main app window from within Kademlia threads
-    WM_KAD_SEARCHADD,
-    WM_KAD_SEARCHREM,
-    WM_KAD_SEARCHREF,
-    WM_KAD_CONTACTADD,
-    WM_KAD_CONTACTREM,
-    WM_KAD_CONTACTREF,
-    WM_KAD_CONTACTUPDATE,
-    WM_KAD_INDEXEDADD,
-    WM_KAD_INDEXEDREM,
-    WM_KAD_INDEXEDREF,
-    WM_KAD_RESULTFILE,
-    WM_KAD_RESULTKEYWORD,
-	WM_KAD_REQUESTTCP,
-	WM_KAD_UPDATESTATUS,
-	WM_KAD_OVERHEADSEND,
-	WM_KAD_OVERHEADRECV,
-
 	// Mighty Knife: CRC32-Tag - save rename
 	WM_CRC32_RENAMEFILE,
 	WM_CRC32_UPDATEFILE
@@ -308,50 +278,6 @@ enum EEmlueAppMsgs
 	TM_PARTHASHEDCORRUPT,
 	// SLUGFILLER: SafeHash
 	TM_FRAMEGRABFINISHED,
-	TM_FILEALLOCEXC
+	TM_FILEALLOCEXC,
+	TM_FILECOMPLETED
 };
-
-
-
-typedef struct
-{
-	uint32	searchID;
-	const Kademlia::CUInt128* pcontactID;
-	uint8	type;
-	uint32	ip;
-	uint16	tcp;
-	uint16	udp;
-	uint32	serverip;
-	uint16	serverport;
-} KADFILERESULT;
-
-typedef struct
-{
-	uint32	searchID;
-	const Kademlia::CUInt128* pfileID;
-	LPCSTR	name;
-	uint32	size;
-	LPCSTR	type;
-	uint16	numProperties;
-	va_list	args;
-} KADKEYWORDRESULT;
-
-void CALLBACK KademliaSearchAddCallback		(Kademlia::CSearch* search);
-void CALLBACK KademliaSearchRemCallback		(Kademlia::CSearch* search);
-void CALLBACK KademliaSearchRefCallback		(Kademlia::CSearch* search);
-void CALLBACK KademliaContactAddCallback	(Kademlia::CContact* contact);
-void CALLBACK KademliaContactRemCallback	(Kademlia::CContact* contact);
-void CALLBACK KademliaContactRefCallback	(Kademlia::CContact* contact);
-void CALLBACK KademliaContactUpdateCallback	(Kademlia::CContact* contact);
-void CALLBACK KademliaIndexedAddCallback	(Kademlia::CEntry* contact);
-void CALLBACK KademliaIndexedRemCallback	(Kademlia::CEntry* contact);
-void CALLBACK KademliaIndexedRefCallback	(Kademlia::CEntry* contact);
-void CALLBACK KademliaResultFileCallback	(uint32 searchID, Kademlia::CUInt128 contactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport);
-void CALLBACK KademliaResultKeywordCallback	(uint32 searchID, Kademlia::CUInt128 fileID, LPCSTR name, uint32 size, LPCSTR type, uint16 numProperties, ...);
-void CALLBACK KademliaRequestTCPCallback	(Kademlia::CContact* contact);
-void CALLBACK KademliaUpdateStatusCallback	(Status* status);
-void CALLBACK KademliaOverheadSendCallback	(uint32 size);
-void CALLBACK KademliaOverheadRecvCallback	(uint32 size);
-
-void KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport);
-void KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCSTR name, uint32 size, LPCSTR type, uint16 numProperties, va_list args);

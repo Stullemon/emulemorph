@@ -643,8 +643,9 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						delete newtag;
 						break;
 					default:{
-						// Start Changes by Slugfiller for better exception handling
-						if ((!newtag->tag.specialtag) && (newtag->tag.tagname[0] == FT_GAPSTART ||
+					    	// Start Changes by Slugfiller for better exception handling
+						if ((!newtag->tag.specialtag) &&
+							 (newtag->tag.tagname[0] == FT_GAPSTART ||
 							newtag->tag.tagname[0] == FT_GAPEND)){
 							Gap_Struct* gap;
 							uint16 gapkey = atoi(&newtag->tag.tagname[1]);
@@ -660,8 +661,9 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 							if (newtag->tag.tagname[0] == FT_GAPEND)
 								gap->end = newtag->tag.intvalue-1;
 							delete newtag;
-						} else
-						// End Changes by Slugfiller for better exception handling
+					    	// End Changes by Slugfiller for better exception handling
+					    	}
+					    	else
 						//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 						if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
 							SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
@@ -681,8 +683,8 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0) {
 							SetShareOnlyTheNeed(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
 							delete newtag;
-						//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 						} else
+						//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 							taglist.Add(newtag);
 					}
 				}
@@ -797,8 +799,6 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		}
 		// SLUGFILLER: SafeHash
 
-		theApp.knownfiles->FilterDuplicateKnownFiles(this);	// SLUGFILLER: mergeKnown - load statistics
-
 		// SLUGFILLER: SafeHash - ignore loaded hash for 1-chunk files
 		if (GetED2KPartCount() <= 1) {
 			for (int i = 0; i < hashlist.GetSize(); i++)
@@ -853,7 +853,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			if (fdate == -1){
 				if (thePrefs.GetVerbose())
 				AddDebugLogLine(false, "Failed to convert file date of %s (%s)", filestatus.m_szFullName, GetFileName());
-
+			}
 // #ifdef MIGHTY_SUMMERTIME
 			// Mighty Knife: try to correct the daylight saving bug.
 			// Very special. Never activate this in a release version !!!
@@ -1733,7 +1733,7 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 
 void CPartFile::WriteCompleteSourcesCount(CSafeMemFile* file) const
 {
-	file->WriteUint16(m_nCompleteSourcesCount);
+	file->WriteUInt16(m_nCompleteSourcesCount);
 }
 
 // -khaos--+++> These values are now cached.
@@ -1912,6 +1912,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 					}
 					break;
 				}
+				// Do nothing with this client..
 				case DS_BANNED:
 				case DS_ERROR:
 					break;	
@@ -2017,13 +2018,14 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 					/*
 					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME))
 					*/
-					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || ((dwCurTick > (cur_src->GetLastAskedTime()+FILEREASKTIME)) &&  (dwCurTick % FILEREASKTIME > (UINT32)((FILEREASKTIME / AvailableSrcCount) * (srcPosReask++ % AvailableSrcCount)))))){
+					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || ((dwCurTick > (cur_src->GetLastAskedTime()+FILEREASKTIME)) &&  (dwCurTick % FILEREASKTIME > (UINT32)((FILEREASKTIME / AvailableSrcCount) * (srcPosReask++ % AvailableSrcCount))))))
 					//MORPH END   - Changed by SiRoB, Spread Reask For Better SUC functioning and more
 					{
 						if(!cur_src->AskForDownload()) // NOTE: This may *delete* the client!!
 							break; //I left this break here just as a reminder just in case re rearange things..
 					}
 					break;
+				}
 			}
 		}
 

@@ -21,6 +21,7 @@
 #include "OtherFunctions.h"
 #include "Packets.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
+#include "preferences.h" //EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE

@@ -363,7 +363,8 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 	}
 
 	if (pMsg->message==WM_MBUTTONUP) {
-		if (downloadlistactive) downloadlistctrl.ShowSelectedFileDetails();
+		if (downloadlistactive)
+			downloadlistctrl.ShowSelectedFileDetails();
 		else {
 			switch(windowtransferstate){
 				case 2:
@@ -401,27 +402,26 @@ int CTransferWnd::GetItemUnderMouse(CListCtrl* ctrl)
 	return LB_ERR;
 }
 
-void CTransferWnd::UpdateListCount(uint8 listindex) {
-	CString buffer;
-	if (windowtransferstate!=listindex) return;
+void CTransferWnd::UpdateListCount(uint8 listindex, int iCount /*=-1*/)
+{
+	if (windowtransferstate != listindex)
+		return;
 
+	CString buffer;
 	switch (windowtransferstate) {
-		case 1: {
-					buffer.Format(" (%i)",uploadlistctrl.GetItemCount());
+		case 1:
+			buffer.Format(" (%i)", iCount == -1 ? uploadlistctrl.GetItemCount() : iCount);
 					GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS)+buffer);
-				}
 				break;
-		case 2: {
-					buffer.Format(" (%i)",queuelistctrl.GetItemCount());
+		case 2:
+			buffer.Format(" (%i)", iCount == -1 ? queuelistctrl.GetItemCount() : iCount);
 					GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_ONQUEUE)+buffer);
-				}
 				break;
-		default:{
-					buffer.Format(" (%i)",clientlistctrl.GetItemCount());
+		default:
+			buffer.Format(" (%i)", iCount == -1 ? clientlistctrl.GetItemCount() : iCount);
 					GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_CLIENTLIST)+buffer);
 				}
 	}
-}
 
 void CTransferWnd::SwitchUploadList()
 {
@@ -470,7 +470,7 @@ void CTransferWnd::SetAllIcons()
 {
 	if (icon_download)
 		VERIFY( DestroyIcon(icon_download) );
-	icon_download = theApp.LoadIcon("SearchDirectDownload", 16, 16);
+	icon_download = theApp.LoadIcon("Download", 16, 16);
 	((CStatic*)GetDlgItem(IDC_DOWNLOAD_ICO))->SetIcon(icon_download);
 	m_uplBtn.SetIcon("Upload");
 }
@@ -719,7 +719,9 @@ void CTransferWnd::OnLButtonUp(UINT nFlags, CPoint point)
 
 			m_dlTab.SetCurSel(downloadlistctrl.curTab);
 			//MORPH - Changed by SiRoB, Due to Khaos Category
-			//if (m_dlTab.GetCurSel()>0 || (thePrefs.GetAllcatType()==1 && m_dlTab.GetCurSel()==0) )
+			/*
+			if (m_dlTab.GetCurSel()>0 || (thePrefs.GetAllcatType()==1 && m_dlTab.GetCurSel()==0) )
+			*/
 			if (m_dlTab.GetCurSel()>0)
 				downloadlistctrl.ChangeCategory(m_dlTab.GetCurSel());
 			UpdateCatTabTitles();
@@ -1188,7 +1190,8 @@ void CTransferWnd::VerifyCatTabSize() {
 			AddAnchor(m_dlTab,TOP_RIGHT);
 }
 //MORPH - Removed by SiRoB, Due to Khaos Categorie
-/*CString CTransferWnd::GetCatTitle(int catid)
+/*
+CString CTransferWnd::GetCatTitle(int catid)
 {
 	switch (catid) {
 		case 0 : return GetResString(IDS_ALL);
@@ -1206,4 +1209,5 @@ void CTransferWnd::VerifyCatTabSize() {
 		case 13 : return GetResString(IDS_SEARCH_CDIMG);
 	}
 	return "?";
-}*/
+}
+*/

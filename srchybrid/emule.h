@@ -21,7 +21,7 @@
 #include "resource.h"
 #include "loggable.h"
 
-#define MAX_NICK_LENGTH 49 // max. length of nick without trailing NUL char
+#define	DEFAULT_NICK	_T("http://emule-project.net")
 
 class CSearchList;
 class CUploadQueue;
@@ -30,11 +30,9 @@ class CDownloadQueue;
 class CScheduler;
 class UploadBandwidthThrottler;
 class LastCommonRouteFinder;
-class CKademliaMain;
 class CemuleDlg;
 class CClientList;
 class CKnownFileList;
-class CPreferences;
 class CServerConnect;
 class CServerList;
 class CSharedFileList;
@@ -46,6 +44,7 @@ class CWebServer;
 class CMMServer;
 class CStatistics;
 class CAbstractFile;
+class CUpDownClient;
 class CFakecheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 class CIP2Country; //EastShare - added by AndCycle, IP to Country
@@ -62,11 +61,9 @@ public:
 	CemuleApp(LPCTSTR lpszAppName = NULL);
 	UploadBandwidthThrottler* uploadBandwidthThrottler; //MORPH - Added by Yun.SF3, ZZ Upload System
 	LastCommonRouteFinder*    lastCommonRouteFinder; //MORPH - Added by SiRoB, ZZ Upload system (USS)
-	CKademliaMain*		kademlia;
 	CemuleDlg*			emuledlg;
 	CClientList*		clientlist;
 	CKnownFileList*		knownfiles;
-	CPreferences*		glob_prefs;
 	CServerConnect*		serverconnect;
 	CServerList*		serverlist;	
 	CSharedFileList*	sharedfiles;
@@ -104,8 +101,6 @@ public:
 	UINT				m_uCurVersionShort;
 	UINT				m_uCurVersionCheck;
 	ULONGLONG			m_ullComCtrlVer;
-
-	CArray<CString,CString> webservices;
 	AppState			m_app_state; // defines application state for shutdown 
 	CMutex				hashing_mut;
 	CString*			pendinglink;
@@ -120,18 +115,21 @@ public:
 	bool		CopyTextToClipboard( CString strText );
 	CString		CopyTextFromClipboard();
 	void		OnlineSig();
-	void		UpdateReceivedBytes(int32 bytesToAdd);
-	void		UpdateSentBytes(int32 bytesToAdd, bool sentToFriend = false); //MORPH - Added by Yun.SF3, ZZ Upload System
+	void		UpdateReceivedBytes(uint32 bytesToAdd);
+	void		UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend = false); //MORPH - Added by Yun.SF3, ZZ Upload System
 	int			GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength = -1);
 	HIMAGELIST	GetSystemImageList() { return m_hSystemImageList; }
 	CSize		GetSmallSytemIconSize() { return m_sizSmallSystemIcon; }
 	bool		IsConnected();
-	uint32		GetID();
 	bool		IsFirewalled();
+	bool		DoCallback( CUpDownClient *client );
+	uint32		GetID();
 
 	// because nearly all icons we are loading are 16x16, the default size is specified as 16 and not as 32 nor LR_DEFAULTSIZE
 	HICON		LoadIcon(LPCTSTR lpszResourceName, int cx = 16, int cy = 16, UINT uFlags = LR_DEFAULTCOLOR) const;
 	HICON		LoadIcon(UINT nIDResource) const;
+	HBITMAP		LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) const;
+	HBITMAP		LoadImage(UINT nIDResource, LPCTSTR pszResourceType) const;
 	void		ApplySkin(LPCTSTR pszSkinProfile);
 
 protected:

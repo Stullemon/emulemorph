@@ -24,12 +24,14 @@
 #include "ClientList.h"
 #include "ClientUDPSocket.h"
 #include "SharedFileList.h"
+#include "KnownFileList.h"
 #include "PartFile.h"
 #include "ClientCredits.h"
 #include "ListenSocket.h"
 #include "Sockets.h"
 #include "OtherFunctions.h"
 #include "SafeFile.h"
+#include "downloadqueue.h"
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "TransferWnd.h"
@@ -113,15 +115,15 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 
 		// Also show what data is buffered (with color crBuffer) this is mostly a temporary feedback for debugging purposes. Could be removed for final.
 		uint32 total = 0;
-
-		for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
-			Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
+		for(POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos!=0; ){
+			const Requested_Block_Struct* block = m_DoneBlocks_list.GetNext(pos);
 
 			if(total + (block->EndOffset-block->StartOffset) < GetQueueSessionPayloadUp()) {
 				// block is sent
 				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
 				total += block->EndOffset-block->StartOffset;
-			} else if(total < GetQueueSessionPayloadUp()) {
+			}
+			else if (total < GetQueueSessionPayloadUp()){
 				// block partly sent, partly in buffer
 				total += block->EndOffset-block->StartOffset;
 				uint32 rest = total - GetQueueSessionPayloadUp();
@@ -129,7 +131,8 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 
     			s_UpStatusBar.FillRange(block->StartOffset, newEnd, crSending);
     			s_UpStatusBar.FillRange(newEnd, block->EndOffset, crBuffer);
-			} else {
+			}
+			else {
 				// entire block is still in buffer
 				total += block->EndOffset-block->StartOffset;
     			s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crBuffer);
@@ -140,6 +143,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 } 
 
 void CUpDownClient::SetUploadState(EUploadState news){
+	// don't add any final cleanups for US_NONE here	
 	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 	if (news!=US_UPLOADING) m_bPowerShared = GetPowerShared();
 	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
@@ -235,12 +239,12 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		fBaseValue += (float)(curTick - m_dwUploadTime > 900000)? 900000:1800000;
 		fBaseValue /= 1000;
 	}
-	if(theApp.glob_prefs->UseCreditSystem())
+	if(thePrefs.UseCreditSystem())
 	{
 		float modif = credits->GetScoreRatio(GetIP());
 		fBaseValue *= modif;
 		if(!m_bySupportSecIdent){
-			switch(theApp.glob_prefs->GetCreditSystem()){
+			switch(thePrefs.GetCreditSystem()){
 				case CS_OFFICIAL:
 				//for those unsecure client have no credit, official gives lower Score
 				case CS_PAWCIO:
@@ -259,7 +263,7 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
 	//MORPH START - Added by Yun.SF3, boost friend
-	if ((IsFriend()) && (theApp.glob_prefs->IsBoostFriends()) && (theApp.glob_prefs->UseCreditSystem()) && ((credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED) || theApp.glob_prefs->GetEnableAntiCreditHack() || ((!IsEmuleClient()) && (GetSourceExchangeVersion()==0)))) //MORPH - Added by IceCream, only boost for secured friend
+	if ((IsFriend()) && (thePrefs.IsBoostFriends()) && (thePrefs.UseCreditSystem()) && ((credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED) || thePrefs.GetEnableAntiCreditHack() || ((!IsEmuleClient()) && (GetSourceExchangeVersion()==0)))) //MORPH - Added by IceCream, only boost for secured friend
 		fBaseValue *=1.5f;
 	//MORPH END - Added by Yun.SF3, boost friend
 
@@ -289,7 +293,7 @@ double CUpDownClient::GetCombinedFilePrioAndCredit()
 	if(clientReqFile){
 	
 		//Morph Start - added by AndCycle, Equal Chance For Each File
-		if(theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
+		if(thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
 			return clientReqFile->GetEqualChanceValue();
 		}
 		//Morph End - added by AndCycle, Equal Chance For Each File
@@ -378,7 +382,7 @@ double CUpDownClient::GetEqualChanceValue() const
 
 //Morph Start - added by AndCycle, Pay Back First
 bool CUpDownClient::IsMoreUpThanDown() const{
-	return theApp.glob_prefs->IsPayBackFirst() ? credits->GetPayBackFirstStatus() : false ;
+	return thePrefs.IsPayBackFirst() ? credits->GetPayBackFirstStatus() : false ;
 }
 //Morph End - added by AndCycle, Pay Back First
 
@@ -502,14 +506,14 @@ void CUpDownClient::CreateNextBlockPackage(){
 				lockFile.m_pObject = NULL;
 			}
 
-			SetUploadFileID(currentblock->FileID);
+			SetUploadFileID(srcfile);
 
 			// check extention to decide whether to compress or not
 			CString ext=srcfile->GetFileName();ext.MakeLower();
 			int pos=ext.ReverseFind('.');
 			if (pos>-1) ext=ext.Mid(pos);
 			bool compFlag=(ext!=".zip" && ext!=".rar" && ext!=".ace" && ext!=".ogm" && ext!=".tar");//no need to try compressing tar compressed files... [Yun.SF3]
-			if (ext==".avi" && theApp.glob_prefs->GetDontCompressAvi()) compFlag=false;
+			if (ext==".avi" && thePrefs.GetDontCompressAvi()) compFlag=false;
 
 			// -khaos--+++> We're going to add bFromPF as a parameter to the calls to create packets...
 			if (m_byDataCompVer == 1 && compFlag )
@@ -520,7 +524,9 @@ void CUpDownClient::CreateNextBlockPackage(){
 			
 			// file statistic
 			//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
-			//srcfile->statistic.AddTransferred(togo);
+			/*
+			srcfile->statistic.AddTransferred(togo);
+			*/
 			srcfile->statistic.AddTransferred(currentblock->StartOffset, togo);
 			//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
 			m_addedPayloadQueueSession += togo;
@@ -530,61 +536,71 @@ void CUpDownClient::CreateNextBlockPackage(){
 			filedata = 0;
 		}
 	}
-	catch(CString error){
-		AddDebugLogLine(false,GetResString(IDS_ERR_CLIENTERRORED),GetUserName(),error.GetBuffer());
+	catch(CString error)
+	{
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false,GetResString(IDS_ERR_CLIENTERRORED),GetUserName(),error.GetBuffer());
 		theApp.uploadqueue->RemoveFromUploadQueue(this, "Client error: " + error);
-		SetUploadFileID(NULL);
 		if (filedata)
 			delete[] filedata;
 		return;
 	}
-	catch(CFileException* e){
-		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		e->GetErrorMessage(szError, ARRSIZE(szError));
-		AddDebugLogLine(false,_T("Failed to create upload package for %s - %s"),GetUserName(),szError);
-		theApp.uploadqueue->RemoveFromUploadQueue(this, ((CString)"Failed to create upload package.") + szError);
-		SetUploadFileID(NULL);
+	catch(CFileException* e)
+	{
+		if (thePrefs.GetVerbose())
+		{
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			e->GetErrorMessage(szError, ARRSIZE(szError));
+			AddDebugLogLine(false,_T("Failed to create upload package for %s - %s"),GetUserName(),szError);
+		}
+		theApp.uploadqueue->RemoveFromUploadQueue(this, ((CString)"Failed to create upload package."));
 		if (filedata)
 			delete[] filedata;
 		e->Delete();
 		return;
 	}
-//	AddDebugLogLine(false,"Debug: Packet done. Size: %i",blockpack->GetLength());
+	//if (thePrefs.GetVerbose())
+	//	AddDebugLogLine(false,"Debug: Packet done. Size: %i",blockpack->GetLength());
 	//return true;
 }
 
-void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
-	if (m_abyUpPartStatus) {
+void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqfile)
+{
+	if (m_abyUpPartStatus) 
+	{
 		delete[] m_abyUpPartStatus;
 		m_abyUpPartStatus = NULL;	// added by jicxicmic
 	}
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
-	if( size == 16 )
+	if( GetExtendedRequestsVersion() == 0 )
 		return;
-	CSafeMemFile data((BYTE*)packet,size);
-	uchar cfilehash[16];
-	data.Read(cfilehash,16);
-	CKnownFile* tempreqfile = theApp.sharedfiles->GetFileByID(cfilehash);
-	uint16 nED2KUpPartCount;
-	data.Read(&nED2KUpPartCount,2);
-	if (!nED2KUpPartCount){
+	if (data->GetLength() == 16){
+		return;
+		// to all developers: in the next version the client will be disconnected when causing this error!
+		//please fix your protocol implementation (shareaza, xmule, etc)!
+	}
+	uint16 nED2KUpPartCount = data->ReadUInt16();
+	if (!nED2KUpPartCount)
+	{
 		m_nUpPartCount = tempreqfile->GetPartCount();
 		m_abyUpPartStatus = new uint8[m_nUpPartCount];
 		memset(m_abyUpPartStatus,0,m_nUpPartCount);
 	}
-
-	else{
-		if (tempreqfile->GetED2KPartCount() != nED2KUpPartCount){
+	else
+	{
+		if (tempreqfile->GetED2KPartCount() != nED2KUpPartCount)
+		{
+			//We already checked if we are talking about the same file.. So if we get here, something really strange happened!
 			m_nUpPartCount = 0;
 			return;
 		}
 		m_nUpPartCount = tempreqfile->GetPartCount();
 		m_abyUpPartStatus = new uint8[m_nUpPartCount];
 		uint16 done = 0;
-		while (done != m_nUpPartCount){
-			uint8 toread;
-			data.Read(&toread,1);
+		while (done != m_nUpPartCount)
+		{
+			uint8 toread = data->ReadUInt8();
 			for (sint32 i = 0;i != 8;i++){
 				m_abyUpPartStatus[done] = ((toread>>i)&1)? 1:0;
 //				We may want to use this for another feature..
@@ -595,23 +611,22 @@ void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 					break;
 			}
 		}
-		if ((GetExtendedRequestsVersion() > 1) && (data.GetLength() - data.GetPosition() > 1))
+		if (GetExtendedRequestsVersion() > 1)
 		{
-			uint16 nCount;
-			data.Read(&nCount,2);
-			SetUpCompleteSourcesCount(nCount);
+			uint16 nCompleteCountLast = GetUpCompleteSourcesCount();
+			uint16 nCompleteCountNew = data->ReadUInt16();
+			SetUpCompleteSourcesCount(nCompleteCountNew);
+			if (nCompleteCountLast != nCompleteCountNew)
+		{
+				tempreqfile->UpdatePartsInfo();
+			}
 		}
 	}
-	
-	tempreqfile->NewAvailPartsInfo();
 	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
 }
 
 // -khaos--+++> Added new parameter: bool bFromPF
-//MORPH START - Modified by SiRoB, ZZ Upload system 20030818-1923
-uint64 CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
-	uint64 totalBytes = 0;
-//MORPH END   - Modified by SiRoB, ZZ Upload system 20030818-1923
+void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
 	// <-----khaos-
 	uint32 nPacketSize;
 	CMemFile memfile((BYTE*)data,togo);
@@ -628,27 +643,25 @@ uint64 CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bl
 		// <-----khaos-
 		md4cpy(&packet->pBuffer[0],GetUploadFileID());
 		uint32 statpos = (currentblock->EndOffset - togo) - nPacketSize;
-		memcpy(&packet->pBuffer[16],&statpos,4);
+		PokeUInt32(&packet->pBuffer[16], statpos);
+		
 		uint32 endpos = (currentblock->EndOffset - togo);
-		memcpy(&packet->pBuffer[20],&endpos,4);
+		PokeUInt32(&packet->pBuffer[20], endpos);
+		
 		memfile.Read(&packet->pBuffer[24],nPacketSize);
-		//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-		totalBytes += packet->GetRealPacketSize();
 
+		if (thePrefs.GetDebugClientTCPLevel() > 0){
+			DebugSend("OP__SendingPart", this, (char*)GetUploadFileID());
+			Debug("  Start=%u  End=%u  Size=%u\n", statpos, endpos, nPacketSize);
+		}
 		// put packet directly on socket
 		socket->SendPacket(packet,true,false, nPacketSize);
 		//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 	}
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-	return totalBytes;
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 }
 
 // -khaos--+++> Added new parameter: bool bFromPF
-//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
-	uint64 totalBytes = 0;
-//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
+void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
 	// <-----khaos-
 	BYTE* output = new BYTE[togo+300];
 	uLongf newsize = togo+300;
@@ -657,10 +670,9 @@ uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Bloc
 		delete[] output;
 		//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 		// -khaos--+++>  Our new boolean...
-		totalBytes = CreateStandartPackets(data,togo,currentblock,bFromPF);
+		CreateStandartPackets(data,togo,currentblock,bFromPF);
 		// <-----khaos-
-		return totalBytes;
-		//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
+		return;
 	}
 
 	// khaos::kmod+ Show Compression by Tarod
@@ -689,13 +701,14 @@ uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Bloc
 		// <-----khaos-
 		md4cpy(&packet->pBuffer[0],GetUploadFileID());
 		uint32 statpos = currentblock->StartOffset;
-		memcpy(&packet->pBuffer[16],&statpos,4);
-		memcpy(&packet->pBuffer[20],&newsize,4);
+		PokeUInt32(&packet->pBuffer[16], statpos);
+		PokeUInt32(&packet->pBuffer[20], newsize);
 		memfile.Read(&packet->pBuffer[24],nPacketSize);
-		//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-		//m_BlockSend_queue.AddTail(packet);
-		totalBytes += packet->GetRealPacketSize();
 
+		if (thePrefs.GetDebugClientTCPLevel() > 0){
+			DebugSend("OP__CompressedPart", this, (char*)GetUploadFileID());
+			Debug("  Start=%u  BlockSize=%u  Size=%u\n", statpos, newsize, nPacketSize);
+		}
 		// approximate payload size
 		uint32 payloadSize = nPacketSize*oldSize/newsize;
 
@@ -709,47 +722,45 @@ uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Bloc
 		//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 	}
 	delete[] output;
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-	return totalBytes;
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 }
 
-void CUpDownClient::SetUploadFileID(const uchar* tempreqfileid)
+void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 {
-	CKnownFile* newreqfile = NULL;
-	if( tempreqfileid )
-		newreqfile = theApp.sharedfiles->GetFileByID(tempreqfileid);
-	CKnownFile* oldreqfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	CKnownFile* oldreqfile;
+	//We use the knownfilelist because we may have unshared the file..
+	//But we always check the download list first because that person may have decided to redownload that file.
+	//Which will replace the object in the knownfilelist if completed.
+	if ((oldreqfile = theApp.downloadqueue->GetFileByID(requpfileid)) == NULL )
+		oldreqfile = theApp.knownfiles->FindKnownFileByID(requpfileid);
+
 	if(newreqfile == oldreqfile)
 		return;
 	if(newreqfile){
 		//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 		m_bPowerShared = newreqfile->GetPowerShared();
 		//MORPH END   - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-		newreqfile->AddQueuedCount();
 		newreqfile->AddUploadingClient(this);
-		md4cpy(requpfileid,tempreqfileid);
+		md4cpy(requpfileid, newreqfile->GetFileHash());
 	}
-	else{
+	else
 		md4clr(requpfileid);
-	}
-	if(oldreqfile){
-		oldreqfile->SubQueuedCount();
+
+	if (oldreqfile)
 		oldreqfile->RemoveUploadingClient(this);
-	}
 }
 
-
-void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock){
-
-	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition();pos != 0;m_DoneBlocks_list.GetNext(pos)){
-		if (reqblock->StartOffset == m_DoneBlocks_list.GetAt(pos)->StartOffset && reqblock->EndOffset == m_DoneBlocks_list.GetAt(pos)->EndOffset){
+void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
+{
+	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos != 0; ){
+		const Requested_Block_Struct* cur_reqblock = m_DoneBlocks_list.GetNext(pos);
+		if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
 			delete reqblock;
 			return;
 		}
 	}
-	for (POSITION pos = m_BlockRequests_queue.GetHeadPosition();pos != 0;m_BlockRequests_queue.GetNext(pos)){
-		if (reqblock->StartOffset == m_BlockRequests_queue.GetAt(pos)->StartOffset && reqblock->EndOffset == m_BlockRequests_queue.GetAt(pos)->EndOffset){
+	for (POSITION pos = m_BlockRequests_queue.GetHeadPosition(); pos != 0; ){
+		const Requested_Block_Struct* cur_reqblock = m_BlockRequests_queue.GetNext(pos);
+		if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
 			delete reqblock;
 			return;
 		}
@@ -777,8 +788,8 @@ uint32 CUpDownClient::SendBlockData(){
 		// -khaos--+++>
 		// Extended statistics information based on which client software and which port we sent this data to...
 		// This also updates the grand total for sent bytes, etc.  And where this data came from.  Yeesh.
-		theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, true, sentBytesCompleteFile, (IsFriend()&& GetFriendSlot()));
-		theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), true, true, sentBytesPartFile, (IsFriend()&& GetFriendSlot()));
+		thePrefs.Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, true, sentBytesCompleteFile, (IsFriend()&& GetFriendSlot()));
+		thePrefs.Add2SessionTransferData(GetClientSoft(), GetUserPort(), true, true, sentBytesPartFile, (IsFriend()&& GetFriendSlot()));
 		m_nTransferedUp += sentBytesCompleteFile + sentBytesPartFile;
 		credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP()); 
 
@@ -881,35 +892,31 @@ void CUpDownClient::SendHashsetPacket(char* forfileid){
 		throw GetResString(IDS_ERR_REQ_FNF) + _T(" (SendHashsetPacket)");
 
 	CSafeMemFile data(1024);
-	data.Write(file->GetFileHash(),16);
-	uint16 parts = file->GetHashCount();
-	data.Write(&parts,2);
-	for (int i = 0; i < parts; i++)
-		data.Write(file->GetPartHash(i),16);
+	data.WriteHash16(file->GetFileHash());
+	UINT parts = file->GetHashCount();
+	data.WriteUInt16(parts);
+	for (UINT i = 0; i < parts; i++)
+		data.WriteHash16(file->GetPartHash(i));
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		DebugSend("OP__HashSetAnswer", this, forfileid);
 	Packet* packet = new Packet(&data);
 	packet->opcode = OP_HASHSETANSWER;
 	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 	socket->SendPacket(packet,true,true);
 }
 
-void CUpDownClient::ClearUploadBlockRequests(){
+void CUpDownClient::ClearUploadBlockRequests()
+{
 	FlushSendBlocks();
-	for (POSITION pos = m_BlockRequests_queue.GetHeadPosition();pos != 0;m_BlockRequests_queue.GetNext(pos))
-		delete m_BlockRequests_queue.GetAt(pos);
+
+	for (POSITION pos = m_BlockRequests_queue.GetHeadPosition();pos != 0;)
+		delete m_BlockRequests_queue.GetNext(pos);
 	m_BlockRequests_queue.RemoveAll();
 	
-	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition();pos != 0;m_DoneBlocks_list.GetNext(pos))
-		delete m_DoneBlocks_list.GetAt(pos);
+	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition();pos != 0;)
+		delete m_DoneBlocks_list.GetNext(pos);
 	m_DoneBlocks_list.RemoveAll();
 }
-
-//MORPH START - Added by Yun.SF3, ZZ Upload System
-void CUpDownClient::ClearUploadDoneBlocks() {
-	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition();pos != 0;m_DoneBlocks_list.GetNext(pos))
-		delete m_DoneBlocks_list.GetAt(pos);
-	m_DoneBlocks_list.RemoveAll();
-}
-//MORPH END   - Added by Yun.SF3, ZZ Upload System
 
 void CUpDownClient::SendRankingInfo(){
 	if (!ExtProtocolAvailable())
@@ -918,39 +925,13 @@ void CUpDownClient::SendRankingInfo(){
 	if (!nRank)
 		return;
 	Packet* packet = new Packet(OP_QUEUERANKING,12,OP_EMULEPROT);
-	memset(packet->pBuffer,0,12);
-	memcpy(packet->pBuffer+0,&nRank,2);
+	PokeUInt16(packet->pBuffer+0, nRank);
+	memset(packet->pBuffer+2, 0, 10);
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		DebugSend("OP__QueueRank", this);
 	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 	socket->SendPacket(packet,true,true);
 }
-
-/* Name:     IsCommunity
-   Function: Test if client is community member
-   Return:   true  - if one of the community tags occur in the name of the actual client
-					 and community sharing is enabled
-			 false - otherwise
-   Remarks:  All strings will be treated case-insensitive. There can be more than one
-			 community tag in the community tag string - all these strings must be separated
-			 by "|". Spaces around community tags are trimmed.
-   Author:   Mighty Knife
-*/
-bool CUpDownClient::IsCommunity() const {
-	if (!theApp.glob_prefs->IsCommunityEnabled()) return false;
-	CString ntemp = m_pszUsername;
-	ntemp.MakeLower ();
-	CString ctemp = theApp.glob_prefs->GetCommunityName(); 
-	ctemp.MakeLower ();
-	bool isCom = false;
-// The different community tags are separated by "|", so we have to extract each
-// before testing if it's contained in the username.
-	int p=0;
-	do {
-		CString tag = ctemp.Tokenize ("|",p).Trim ();
-		if (tag != "") isCom = ntemp.Find (tag) >= 0;
-	} while ((!isCom) && (p >= 0));
-	return isCom;
-}
-// [end] Mighty Knife
 
 void CUpDownClient::SendCommentInfo(/*const*/ CKnownFile *file)
 {
@@ -958,19 +939,21 @@ void CUpDownClient::SendCommentInfo(/*const*/ CKnownFile *file)
 		return;
 	m_bCommentDirty = false;
 
-	int8 rating=file->GetFileRate();
+	uint8 rating = file->GetFileRate();
 	CString desc=file->GetFileComment();
 	if(file->GetFileRate() == 0 && desc.IsEmpty())
 		return;
 
 	CSafeMemFile data(256);
-	data.Write(&rating,sizeof(rating));
+	data.WriteUInt8(rating);
 	int length=desc.GetLength();
 	if (length>128)
 		length=128;
-	data.Write(&length,sizeof(length));
+	data.WriteUInt32(length);
 	if (length>0)
 		data.Write(desc.GetBuffer(),length);
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		DebugSend("OP__FileDesc", this, (char*)file->GetFileHash());
 	Packet *packet = new Packet(&data,OP_EMULEPROT);
 	packet->opcode = OP_FILEDESC;
 	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
@@ -979,8 +962,8 @@ void CUpDownClient::SendCommentInfo(/*const*/ CKnownFile *file)
 
 void  CUpDownClient::AddRequestCount(const uchar* fileid)
 {
-	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition();pos != 0;m_RequestedFiles_list.GetNext(pos)){
-		Requested_File_Struct* cur_struct = m_RequestedFiles_list.GetAt(pos);
+	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition(); pos != 0; ){
+		Requested_File_Struct* cur_struct = m_RequestedFiles_list.GetNext(pos);
 		if (!md4cmp(cur_struct->fileid,fileid)){
 			if (::GetTickCount() - cur_struct->lastasked < MIN_REQUESTTIME && !GetFriendSlot()){ 
 				if (GetDownloadState() != DS_DOWNLOADING)
@@ -998,9 +981,9 @@ void  CUpDownClient::AddRequestCount(const uchar* fileid)
 		}
 	}
 	Requested_File_Struct* new_struct = new Requested_File_Struct;
-	memset(new_struct,0,sizeof(Requested_File_Struct));
 	md4cpy(new_struct->fileid,fileid);
 	new_struct->lastasked = ::GetTickCount();
+	new_struct->badrequests = 0;
 	m_RequestedFiles_list.AddHead(new_struct);
 }
 
@@ -1010,8 +993,8 @@ void  CUpDownClient::UnBan(){
 	SetUploadState(US_NONE);
 	ClearWaitStartTime();
 	theApp.emuledlg->transferwnd->ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
-	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition();pos != 0;m_RequestedFiles_list.GetNext(pos)){
-		Requested_File_Struct* cur_struct = m_RequestedFiles_list.GetAt(pos);
+	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition();pos != 0;){
+		Requested_File_Struct* cur_struct = m_RequestedFiles_list.GetNext(pos);
 		cur_struct->badrequests = 0;
 		cur_struct->lastasked = 0;	
 	}
@@ -1023,13 +1006,13 @@ void CUpDownClient::Ban(){
 	theApp.clientlist->AddTrackClient(this);
 	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if ( !IsBanned() ){
-		if (theApp.glob_prefs->GetLogBannedClients())
+		if (thePrefs.GetLogBannedClients())
 			AddDebugLogLine(false,GetResString(IDS_CLIENTBLOCKED),GetUserName());
 	}
 #ifdef _DEBUG
 	else{
-		if (theApp.glob_prefs->GetLogBannedClients())
-		AddDebugLogLine(false,"Ban refreshed for %s (%s) ", GetUserName(), GetFullIP() );
+		if (thePrefs.GetLogBannedClients())
+			AddDebugLogLine(false,"Ban refreshed for %s (%s) ", GetUserName(), ipstr(GetConnectIP()));
 	}
 #endif
 	theApp.clientlist->AddBannedClient( GetIP() );
@@ -1056,18 +1039,6 @@ void CUpDownClient::BanLeecher(int log_message){
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
 
-void CUpDownClient::UDPFileReasked()
-{
-	AddAskedCount();
-	SetLastUpRequest();
-	SetLastL2HACExecution(); //<<-- enkeyDEV(th1) -L2HAC-
-	uint16 nRank = theApp.uploadqueue->GetWaitingPosition(this);
-	Packet* response = new Packet(OP_REASKACK,2,OP_EMULEPROT);
-	memcpy(response->pBuffer,&nRank,2);
-	theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
-	theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
-}
-
 // Moonlight: SUQWT - Compare linear time instead of time indexes to avoid overflow-induced false positives.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 uint32 CUpDownClient::GetWaitStartTime() const
 {
@@ -1093,7 +1064,8 @@ uint32 CUpDownClient::GetWaitStartTime() const
 	//this happens only if two clients with invalid securehash are in the queue - if at all
 			dwResult = m_dwUploadTime-1;
 
-		DEBUG_ONLY(AddDebugLogLine(false,"Warning: CUpDownClient::GetWaitStartTime() waittime Collision (%s)",GetUserName()));
+		if (thePrefs.GetVerbose())
+			DEBUG_ONLY(AddDebugLogLine(false,"Warning: CUpDownClient::GetWaitStartTime() waittime Collision (%s)",GetUserName()));
 	}
 	return dwResult;
 }
@@ -1124,3 +1096,30 @@ bool CUpDownClient::GetFriendSlot() const
 	}
 	return m_bFriendSlot;
 }
+/* Name:     IsCommunity
+   Function: Test if client is community member
+   Return:   true  - if one of the community tags occur in the name of the actual client
+					 and community sharing is enabled
+			 false - otherwise
+   Remarks:  All strings will be treated case-insensitive. There can be more than one
+			 community tag in the community tag string - all these strings must be separated
+			 by "|". Spaces around community tags are trimmed.
+   Author:   Mighty Knife
+*/
+bool CUpDownClient::IsCommunity() const {
+	if (!thePrefs.IsCommunityEnabled()) return false;
+	CString ntemp = m_pszUsername;
+	ntemp.MakeLower ();
+	CString ctemp = thePrefs.GetCommunityName(); 
+	ctemp.MakeLower ();
+	bool isCom = false;
+// The different community tags are separated by "|", so we have to extract each
+// before testing if it's contained in the username.
+	int p=0;
+	do {
+		CString tag = ctemp.Tokenize ("|",p).Trim ();
+		if (tag != "") isCom = ntemp.Find (tag) >= 0;
+	} while ((!isCom) && (p >= 0));
+	return isCom;
+}
+// [end] Mighty Knife

@@ -1,9 +1,5 @@
 #pragma once
-
-#include "preferences.h"
 #include "afxwin.h"
-
-
 
 class CPPgBackup : public CPropertyPage
 {
@@ -11,8 +7,6 @@ class CPPgBackup : public CPropertyPage
 public:
 	CPPgBackup();
 	virtual ~CPPgBackup();
-
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs;}
 
 	// Dialog Data
 	enum { IDD = IDD_PPG_BACKUP };
@@ -23,7 +17,6 @@ protected:
 		m_bModified = bChanged;
 		CPropertyPage::SetModified(bChanged);
 	}
-	CPreferences *app_prefs;
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 

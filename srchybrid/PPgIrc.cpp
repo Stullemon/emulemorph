@@ -85,7 +85,7 @@ BOOL CPPgIRC::OnInitDialog()
 }
 
 void CPPgIRC::LoadSettings(void)
-{	//What am I doing wrong? why can't I use the app_prefs->prefs like the other tabs?
+{	//What am I doing wrong? why can't I use the thePrefs.prefs like the other tabs?
 	if(thePrefs.m_bircaddtimestamp)
 		this->CheckDlgButton(IDC_IRC_TIMESTAMP,1);
 	else
@@ -133,7 +133,7 @@ void CPPgIRC::LoadSettings(void)
 
 
 BOOL CPPgIRC::OnApply()
-{   //What am I doing wrong? why can't I use the app_prefs->prefs like the other tabs?
+{   //What am I doing wrong? why can't I use the thePrefs.prefs like the other tabs?
 	if(IsDlgButtonChecked(IDC_IRC_TIMESTAMP))
 		thePrefs.m_bircaddtimestamp = true;
 	else
@@ -212,7 +212,7 @@ BOOL CPPgIRC::OnApply()
 	else{
 		thePrefs.m_iircchanneluserfilter = 0;
 	}
-//	app_prefs->Save();
+//	thePrefs.Save();
 	LoadSettings();
 	SetModified(FALSE);
 	return CPropertyPage::OnApply();

@@ -16,14 +16,19 @@
 #pragma once
 #include "Loggable.h"
 #include "MenuCmds.h"
+#include "SafeFile.h"
 
 class CSafeMemFile;
 class CSearchFile;
 class CUpDownClient;
 class CServer;
 class CPartFile;
-class CPreferences;
 class CSharedFileList;
+class CKnownFile;
+namespace Kademlia 
+{
+	class CUInt128;
+};
 
 // khaos::categorymod+
 #include "SelCategoryDlg.h"
@@ -61,7 +66,7 @@ class CDownloadQueue: public CLoggable
 	friend class CAddFileThread;
 	friend class CServerSocket;
 public:
-	CDownloadQueue(CPreferences* in_prefs,CSharedFileList* in_sharedfilelist);
+	CDownloadQueue(CSharedFileList* in_sharedfilelist);
 	~CDownloadQueue();
 	void	Process();
 	void	Init();
@@ -71,14 +76,14 @@ public:
 	void	AddFileLinkToDownload(class CED2KFileLink* pLink, bool AllocatedLink = false, bool SkipQueue = false);
 	// khaos::categorymod-
 	bool	IsFileExisting(const uchar* fileid, bool bLogWarnings = true);
-	bool	IsPartFile(void* totest);
+	bool	IsPartFile(const CKnownFile* file) const;
 	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName) const;	// SLUGFILLER: SafeHash
-	CPartFile*	GetFileByID(const uchar* filehash);
-	CPartFile*	GetFileByIndex(int index);
-	CPartFile*	GetFileByKadFileSearchID(uint32 ID );
+	CPartFile* GetFileByID(const uchar* filehash) const;
+	CPartFile* GetFileByIndex(int index) const;
+	CPartFile* GetFileByKadFileSearchID(uint32 ID) const;
 	void    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
 	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source);
-	bool	RemoveSource(CUpDownClient* toremove, bool updatewindow = true, bool bDoStatsUpdate = true); // delete later ->{ return RemoveSource(toremove,NULL,updatewindow);}
+	bool	RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate = true);
 	void	DeleteAll();
 	void	RemoveFile(CPartFile* toremove);
 	uint32	GetDatarate()			{return datarate;}
@@ -92,7 +97,7 @@ public:
 	void	AddPartFilesToShare();
 
 	// SLUGFILLER: mergeKnown - include part files in known.met
-	void	SavePartFilesToKnown(CFile* file);
+	void	SavePartFilesToKnown(CFileDataIO* file);
 	uint32	GetPartFilesCount();
 	// SLUGFILLER: mergeKnown
 
@@ -146,7 +151,6 @@ public:
 	// khaos::categorymod+	
 	void	ResetCatParts(int cat, uint8 useCat = 0);
 	// khaos::categorymod-
-	void	SavePartFiles(bool del = false);	// InterCeptor
 	void	SetCatPrio(int cat, uint8 newprio);
 	void	SetCatStatus(int cat, int newstatus);
 	void	MoveCat(uint8 from, uint8 to);
@@ -162,9 +166,9 @@ public:
 	bool 	IsInList(const CUpDownClient* client) const;
 	void	SetLastKademliaFileRequest()	{lastkademliafilerequest = ::GetTickCount();}
 	bool	DoKademliaFileRequest();
+	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint32 clientid);
+	void	ExportPartMetFilesOverview() const;
 
-	void	UpdatePNRFile(CPartFile * ppfUpdate = NULL);							//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
-	void	BuildPNRRecord(CPartFile * ppf, char * pszBuff, unsigned cchBuffMax);	//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 	bool	IsFilesPowershared(); //MORPH - Added by SiRoB, ZZ Ratio
 	// khaos::kmod+ Advanced A4AF: Brute Force
 	CPartFile* forcea4af_file;
@@ -185,7 +189,6 @@ private:
 	CTypedPtrList<CPtrList, CPartFile*> filelist;
 	CTypedPtrList<CPtrList, CPartFile*> m_localServerReqQueue;
 	CSharedFileList* sharedfilelist;
-	CPreferences*	 app_prefs;
 	uint16	filesrdy;
 	uint32	datarate;
 	

@@ -28,7 +28,6 @@ public:
     uint64 GetNumberOfSentBytesSinceLastCallAndReset();
     uint64 GetNumberOfSentBytesExcludingOverheadSinceLastCallAndReset();
     uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
-	sint32 GetRemainBytes() {return m_RemainBytes;}//Morph - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
 
     void AddToStandardList(uint32 index, CEMSocket* socket);
     void RemoveFromStandardList(CEMSocket* socket);
@@ -59,7 +58,6 @@ private:
     uint64 m_SentBytesSinceLastCallExcludingOverhead;
     uint32 m_highestNumberOfFullyActivatedSlots;
 
-	sint32 m_RemainBytes;//Morph - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
     uint32 m_allowedDataRate;
     bool doRun;
 };

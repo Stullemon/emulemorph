@@ -81,7 +81,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 	try
 	{
 		// Copy the file
-		CString tempFileName = CString(theApp.glob_prefs->GetTempDir()) + CString("\\") + CString(partFile->GetFileName()).Mid(0,5) + CString("-rec.tmp");
+		CString tempFileName = CString(thePrefs.GetTempDir()) + CString("\\") + CString(partFile->GetFileName()).Mid(0,5) + CString("-rec.tmp");
 		if (!CopyFile(partFile, filled, tempFileName))
 			return false;
 
@@ -92,7 +92,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 
 		// Open the output file
 		CString ext = CString(partFile->GetFileName()).Right(4);
-		CString outputFileName = CString(theApp.glob_prefs->GetTempDir()) + CString("\\") + CString(partFile->GetFileName()).Mid(0,5) + CString("-rec") + ext;
+		CString outputFileName = CString(thePrefs.GetTempDir()) + CString("\\") + CString(partFile->GetFileName()).Mid(0,5) + CString("-rec") + ext;
 		CFile output;
 		if (output.Open(outputFileName, CFile::modeWrite | CFile::shareExclusive | CFile::modeCreate))
 		{

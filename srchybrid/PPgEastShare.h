@@ -1,7 +1,5 @@
 #pragma once
-
-#include "preferences.h"
-#include "wizard.h"
+#include "Preferences.h"
 #include "TreeOptionsCtrlEx.h"
 // CPPgEastShare dialog
 
@@ -13,12 +11,9 @@ public:
 	CPPgEastShare();
 	virtual ~CPPgEastShare();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs;}
-
 // Dialog Data
 	enum { IDD = IDD_PPG_EASTSHARE };
 protected:
-	CPreferences *app_prefs;
 	
 	int m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 	HTREEITEM m_htiEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle

@@ -127,12 +127,12 @@ bool CServerList::Init()
 	strPath.Format(_T("%sstaticservers.dat"), thePrefs.GetConfigDir());
 	AddServersFromTextFile(strPath);
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
-	if (app_prefs->IsAutoUPdateIPFilterEnabled())
+	if (thePrefs.IsAutoUPdateIPFilterEnabled())
 	theApp.ipfilter->UpdateIPFilterURL();
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	if (app_prefs->IsUpdateFakeStartupEnabled())
+	if (thePrefs.IsUpdateFakeStartupEnabled())
 	theApp.FakeCheck->DownloadFakeList();
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 

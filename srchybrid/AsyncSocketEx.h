@@ -69,7 +69,7 @@ to tim.kosse@gmx.de
 #include "winsock.h"
 #include "loggable.h"
 
-#if defined(USE_SHARED_MFC) && (_MFC_VER==0x0700)
+#if defined(_AFXDLL) && (_MFC_VER==0x0700)
 // See also: KB article Q316312 - BUG: Mfc70.lib Does Not Export AfxGetModuleThreadState
 #define _afxSockThreadState AfxGetModuleState()->m_thread.GetDataNA()
 #else

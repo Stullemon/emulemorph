@@ -69,21 +69,21 @@ void CPPgMorph2::LoadSettings(void)
 	CString strBuffer;
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	strBuffer.Format("%d", app_prefs->GetLowIdRetries());
+	strBuffer.Format("%d", thePrefs.GetLowIdRetries());
 	GetDlgItem(IDC_LOWIDRETRY)->SetWindowText(strBuffer);
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 
 	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->SetWindowText(app_prefs->prefs->UpdateURLFakeList);
-	if(app_prefs->prefs->UpdateFakeStartup)
+	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->SetWindowText(thePrefs.UpdateURLFakeList);
+	if(thePrefs.UpdateFakeStartup)
 		CheckDlgButton(IDC_UPDATEFAKELISTSTART,1);
 	else
 		CheckDlgButton(IDC_UPDATEFAKELISTSTART,0);
 	//MORPH END - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
-	GetDlgItem(IDC_UPDATE_URL_IPFILTER)->SetWindowText(app_prefs->prefs->UpdateURLIPFilter);
-	if(app_prefs->prefs->AutoUpdateIPFilter)
+	GetDlgItem(IDC_UPDATE_URL_IPFILTER)->SetWindowText(thePrefs.UpdateURLIPFilter);
+	if(thePrefs.AutoUpdateIPFilter)
 		CheckDlgButton(IDC_AUTOUPIPFILTER,1);
 	else
 		CheckDlgButton(IDC_AUTOUPIPFILTER,0);
@@ -98,20 +98,20 @@ BOOL CPPgMorph2::OnApply()
 	if(GetDlgItem(IDC_LOWIDRETRY)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_LOWIDRETRY)->GetWindowText(buffer);
-		app_prefs->SetLowIdRetries(atoi(buffer));
+		thePrefs.SetLowIdRetries(atoi(buffer));
 	}
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 
 	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->GetWindowText(buffer);
-	strcpy(app_prefs->prefs->UpdateURLFakeList, buffer);
-	app_prefs->prefs->UpdateFakeStartup = IsDlgButtonChecked(IDC_UPDATEFAKELISTSTART);
+	strcpy(thePrefs.UpdateURLFakeList, buffer);
+	thePrefs.UpdateFakeStartup = IsDlgButtonChecked(IDC_UPDATEFAKELISTSTART);
 	//MORPH END   - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 
 	//MORPH START - Added by Yun.SF3: Ipfilter.dat update
 	GetDlgItem(IDC_UPDATE_URL_IPFILTER)->GetWindowText(buffer);
-	strcpy(app_prefs->prefs->UpdateURLIPFilter, buffer);
-	app_prefs->prefs->AutoUpdateIPFilter = IsDlgButtonChecked(IDC_AUTOUPIPFILTER);
+	strcpy(thePrefs.UpdateURLIPFilter, buffer);
+	thePrefs.AutoUpdateIPFilter = IsDlgButtonChecked(IDC_AUTOUPIPFILTER);
 	//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
 
 	LoadSettings();

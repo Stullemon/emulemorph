@@ -209,15 +209,10 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	else
 		ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_GRAYED);
 	*/
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend && cur_friend->m_LinkedClient && !cur_friend->m_LinkedClient->HasLowID())? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | ((!cur_friend->m_LinkedClient->HasLowID() && cur_friend->m_LinkedClient->GetFriendSlot())? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH START - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING,MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT));
 	//MORPH END   - Added by SiRoB, Friend Addon
-	
-	//}
-	//else
-	//	ClientMenu.EnableMenuItem(MP_FRIENDSLOT,MF_GRAYED);
-	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	//MORPH START - Added by IceCream, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka [sivka: -listing all requested files from user-]
 	ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED)); // Added by sivka
@@ -288,9 +283,9 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		//MORPH START - Added by SiRoB, Friend Addon
-		case MP_REMOVEALLFRIENDSLOT: {
+		case MP_REMOVEALLFRIENDSLOT:
 			theApp.friendlist->RemoveAllFriendSlots();	
-		}
+			break;
 		//MORPH START - Added by SiRoB, Friend Addon
 
 		//MORPH START - Added by IceCream, List Requested Files

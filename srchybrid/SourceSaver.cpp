@@ -6,7 +6,7 @@
 #include "OtherFunctions.h"
 #include "DownloadQueue.h"
 #include "updownclient.h"
-
+#include "Preferences.h"
 #define RELOADTIME	3600000 //60 minutes	
 #define RESAVETIME	 600000 //10 minutes
 

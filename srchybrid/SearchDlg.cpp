@@ -134,12 +134,13 @@ BOOL CSearchDlg::OnInitDialog()
 	}
 	else
 		GetDlgItem(IDC_DD)->ShowWindow(SW_HIDE);
-
+	//MORPH - Removed by SiRoB, IDC_CATTAB2 not used
+	/*
 	if (theApp.emuledlg->m_fontMarlett.m_hObject){
 		GetDlgItem(IDC_STATIC_DLTOof)->SetFont(&theApp.emuledlg->m_fontMarlett);
 		GetDlgItem(IDC_STATIC_DLTOof)->SetWindowText(_T("8")); // show a right-arrow
 	}
-
+	*/
 	ASSERT( (GetDlgItem(IDC_EDITSEARCHMIN)->GetStyle() & ES_NUMBER) == 0 );
 	ASSERT( (GetDlgItem(IDC_EDITSEARCHMAX)->GetStyle() & ES_NUMBER) == 0 );
 	m_ctlName.LimitText(512); // max. length of search expression
