@@ -198,10 +198,7 @@ void CCatDialog::OnBnClickedOk()
 	GetDlgItem(IDC_COMMENT)->GetWindowText(m_myCat->comment,255);
 
 	MakeFoldername(m_myCat->incomingpath);
-	if (!theApp.glob_prefs->IsShareableDirectory(m_myCat->incomingpath)){
-		_snprintf(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath), theApp.glob_prefs->GetIncomingDir());
-		MakeFoldername(m_myCat->incomingpath);
-	}
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 	if (!PathFileExists(m_myCat->incomingpath)) ::CreateDirectory(m_myCat->incomingpath,0);
 
 	if (CString(m_myCat->incomingpath).CompareNoCase(oldpath)!=0)

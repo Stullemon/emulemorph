@@ -50,6 +50,7 @@ CDownloadListCtrl::CDownloadListCtrl() {
 CDownloadListCtrl::~CDownloadListCtrl(){
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
 	if (m_A4AFMenu) VERIFY( m_A4AFMenu.DestroyMenu() );
+	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );	// xMule_MOD: showSharePermissions
 	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
 	if (m_A4AFMenuFlag) VERIFY( m_A4AFMenuFlag.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
@@ -1368,6 +1369,11 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu,(theApp.glob_prefs->UseSmartA4AFSwapping() || theApp.glob_prefs->AdvancedA4AFMode())?MF_GRAYED:MF_ENABLED);
 			//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 			
+			// xMule_MOD: showSharePermissions
+			m_PermMenu.CheckMenuItem(MP_PERMALL, ((file->GetPermissions() == PERM_ALL) ? MF_CHECKED : MF_UNCHECKED));
+			m_PermMenu.CheckMenuItem(MP_PERMFRIENDS, ((file->GetPermissions() == PERM_FRIENDS) ? MF_CHECKED : MF_UNCHECKED));
+			m_PermMenu.CheckMenuItem(MP_PERMNONE, ((file->GetPermissions() == PERM_NOONE) ? MF_CHECKED : MF_UNCHECKED));
+			// xMule_MOD: showSharePermissions
 
 			int counter;
 			m_Web.CreateMenu();
@@ -1809,6 +1815,30 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					dialog.DoModal(); 
 					break;
 				}
+				// xMule_MOD: showSharePermissions
+				case MP_PERMNONE:
+				case MP_PERMFRIENDS:
+				case MP_PERMALL: {
+					while(!selectedList.IsEmpty()) { 
+						CPartFile *file = selectedList.GetHead();
+						switch (wParam)
+						{
+							case MP_PERMNONE:
+								file->SetPermissions(PERM_NOONE);
+								break;
+							case MP_PERMFRIENDS:
+								file->SetPermissions(PERM_FRIENDS);
+								break;
+							default : // case MP_PERMALL:
+								file->SetPermissions(PERM_ALL);
+								break;
+						}
+						selectedList.RemoveHead();
+					}
+					Invalidate();
+					break;
+				}
+				// xMule_MOD: showSharePermissions
 				//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
   				case MP_FAKEREPORT:{ 
 					if(selectedCount > 1)
@@ -2478,6 +2508,7 @@ void CDownloadListCtrl::CreateMenues() {
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
 	// khaos::kmod+
 	if (m_A4AFMenu)	VERIFY( m_A4AFMenu.DestroyMenu() );
+	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );	// xMule_MOD: showSharePermissions
 	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 	if (m_A4AFMenuFlag)	VERIFY( m_A4AFMenuFlag.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
@@ -2489,11 +2520,17 @@ void CDownloadListCtrl::CreateMenues() {
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOHIGH, GetResString(IDS_PRIOHIGH));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOAUTO, GetResString(IDS_PRIOAUTO));
 
-
 	m_A4AFMenu.CreateMenu();
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_THIS, GetResString(IDS_ALL_A4AF_TO_THIS)); // sivka [Tarod]
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_OTHER, GetResString(IDS_ALL_A4AF_TO_OTHER)); // sivka
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_AUTO, GetResString(IDS_ALL_A4AF_AUTO)); // sivka [Tarod]
+
+	// xMule_MOD: showSharePermissions
+	m_PermMenu.CreateMenu();
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
+	// xMule_MOD: showSharePermissions
 
 	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 	m_A4AFMenuFlag.CreateMenu();
@@ -2533,6 +2570,7 @@ void CDownloadListCtrl::CreateMenues() {
 
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR));
+	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION));	// xMule_MOD: showSharePermissions
 
 	//MORPH - Moved by SiRoB, see on top
 	//if (theApp.glob_prefs->IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));

@@ -532,6 +532,7 @@ void CUpDownClient::ProcessHashSet(char* packet,uint32 size){
 	CSafeMemFile data((BYTE*)packet,size);
 	if (reqfile->LoadHashsetFromFile(&data,true)){
 		m_fHashsetRequesting = 0;
+		reqfile->PerformFirstHash();		// SLUGFILLER: SafeHash - Rehash
 	}
 	else{
 		reqfile->hashsetneeded = true;

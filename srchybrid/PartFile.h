@@ -68,6 +68,8 @@ struct PartFileBufferedData
 class CPartFile : public CKnownFile {
 public:
 	friend class CPartFileConvert;
+	friend class CPartHashThread;	// SLUGFILLER: SafeHash
+
 	CPartFile();
 	CPartFile(CSearchFile* searchresult);  //used when downloading a new file
 	CPartFile(CString edonkeylink);
@@ -85,7 +87,11 @@ public:
 	uint8		LoadPartFile(LPCTSTR in_directory, LPCTSTR filename,bool getsizeonly=false); //filename = *.part.met
 	bool	SavePartFile();
 	void	PartFileHashFinished(CKnownFile* result);
-	bool	HashSinglePart(uint16 partnumber); // true = ok , false = corrupted	
+	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
+	void	PartHashFinished(uint16 partnumber, bool corrupt);
+	bool	IsPartShareable(uint16 partnumber);
+	bool	IsRangeShareable(uint32 start, uint32 end);
+	// SLUGFILLER: SafeHash
 	uint64	GetRealFileSize();
 
 	void	AddGap(uint32 start, uint32 end);
@@ -211,6 +217,8 @@ public:
 	void	GetSizeToTransferAndNeededSpace(uint32& pui32SizeToTransfer, uint32& pui32NeededSpace);
 	
 	uint8*	MMCreatePartStatus();
+	
+	void	PerformFirstHash();		// SLUGFILLER: SafeHash	
 	//preview
 	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth,void* pSender);
 	void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed,void* pSender);
@@ -276,6 +284,13 @@ private:
 	CTypedPtrList<CPtrList, Gap_Struct*> gaplist;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> requestedblocks_list;
 	CArray<uint16,uint16> m_SrcpartFrequency;
+	// SLUGFILLER: SafeHash
+	CArray<bool,bool> m_PartsShareable;
+	uint16	m_PartsHashing;
+	CMutex	ICH_mut;	// ICH locks the file
+	CList<uint16,uint16>	m_ICHPartsComplete;
+	void	PharseICHResult();
+	// SLUGFILLER: SafeHash
 	float	percentcompleted;
 	CList<uint16,uint16>	corrupted_list;
 	uint16	availablePartsCount;
@@ -339,3 +354,25 @@ public:
 	bool	hashsetneeded;
 	uint32  GetCompletedSize()   {return completedsize;}
 };
+
+
+// SLUGFILLER: SafeHash
+class CPartHashThread : public CWinThread
+{
+	DECLARE_DYNCREATE(CPartHashThread)
+protected:
+	CPartHashThread()	{}
+public:
+	virtual	BOOL	InitInstance() {return true;}
+	virtual int		Run();
+	uint16	SetFirstHash(CPartFile* pOwner);
+	void	SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICHused);
+private:
+	CPartFile*				m_pOwner;
+	bool					m_ICHused;
+	CString					directory;
+	CString					filename;
+	CArray<uint16,uint16>	m_PartsToHash;
+	CArray<uchar*,uchar*>	m_DesiredHashes;
+};
+// SLUGFILLER: SafeHash

@@ -86,8 +86,8 @@ void CUploadListCtrl::Init()
 		i--;
 		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableUpload, i);
 		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableUpload, i);
-	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
-}
+		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+	}
 	// SLUGFILLER: multiSort
 }
 

@@ -174,8 +174,8 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 			i--;
 			sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableSearch, i);
 			sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableSearch, i);
-		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
-	}
+			SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+		}
 		// SLUGFILLER: multiSort
 	}
 }

@@ -69,7 +69,7 @@ void CClientListCtrl::Init()
 		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableClientList, i);
 		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableClientList, i);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
-}
+	}
 	// SLUGFILLER: multiSort
 }
 

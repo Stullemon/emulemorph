@@ -193,6 +193,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	// SLUGFILLER: SafeHash
 	ON_MESSAGE(TM_FINISHEDHASHING,OnFileHashed)
 	ON_MESSAGE(TM_HASHFAILED,OnHashFailed)
+	ON_MESSAGE(TM_PARTHASHEDOK,OnPartHashedOK)
+	ON_MESSAGE(TM_PARTHASHEDCORRUPT,OnPartHashedCorrupt)
+	// SLUGFILLER: SafeHash
 
 	// Framegrabbing
 	ON_MESSAGE(TM_FRAMEGRABFINISHED,OnFrameGrabFinished)
@@ -443,7 +446,7 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 			case 0:
 				theApp.emuledlg->status++;
 				theApp.emuledlg->ready = true;
-				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd.sharedfilesctrl);
+				// SLUGFILLER: SafeHash remove - moved down
 				theApp.emuledlg->status++;
 				break;
 			case 1:
@@ -488,14 +491,23 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 					AddLogLine(true, GetResString(IDS_MAIN_READY)+" "+GetResString(IDS_TRANSVERSION),theApp.m_strCurVersionLong); //MORPH - Added by milobac, Translation version info
 				
 
-				if(theApp.glob_prefs->DoAutoConnect())
-					theApp.emuledlg->OnBnClickedButton2();
+				// SLUGFILLER: SafeHash remove - moved down
 				theApp.emuledlg->status++;
 				break;
 			}
 			case 5:
 				break;
+			// SLUGFILLER: SafeHash - delay load shared files
+			case 6:
+				theApp.emuledlg->status++;
+				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd.sharedfilesctrl);
+				break;
+			// SLUGFILLER: SafeHash				
 			default:
+				// SLUGFILLER: SafeHash - autoconnect only after emule loaded completely
+				if(theApp.glob_prefs->DoAutoConnect())
+					theApp.emuledlg->OnBnClickedButton2();
+				// SLUGFILLER: SafeHash
 				theApp.emuledlg->StopTimer();
 		}
 	}
@@ -1150,6 +1162,20 @@ LRESULT CemuleDlg::OnFileHashed(WPARAM wParam,LPARAM lParam){
 // SLUGFILLER: SafeHash
 LRESULT CemuleDlg::OnHashFailed(WPARAM wParam,LPARAM lParam){
 	theApp.sharedfiles->HashFailed((UnknownFile_Struct*)lParam);
+	return 0;
+}
+
+LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam){
+	CPartFile* pOwner = (CPartFile*)lParam;
+	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
+		pOwner->PartHashFinished((uint16)wParam, false);
+	return 0;
+}
+
+LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam){
+	CPartFile* pOwner = (CPartFile*)lParam;
+	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
+		pOwner->PartHashFinished((uint16)wParam, true);
 	return 0;
 }
 // SLUGFILLER: SafeHash

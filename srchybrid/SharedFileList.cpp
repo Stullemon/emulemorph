@@ -170,7 +170,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory){
 		else{
 			//not in knownfilelist - start adding thread to hash file if the hashing of this file isnt already waiting
 			// SLUGFILLER: SafeHash - don't double hash, MY way
-			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !theApp.glob_prefs->IsTempFile(rstrDirectory, ff.GetFileName())){
+			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !theApp.downloadqueue->IsTempFile(rstrDirectory, ff.GetFileName()) && !theApp.glob_prefs->IsConfigFile(rstrDirectory, ff.GetFileName())){
 			UnknownFile_Struct* tohash = new UnknownFile_Struct;
 				tohash->strDirectory = rstrDirectory;
 				tohash->strName = ff.GetFileName();

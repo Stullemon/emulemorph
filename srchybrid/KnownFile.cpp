@@ -111,40 +111,6 @@ void CFileStatistic::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added
 	theApp.sharedfiles->UpdateFile(fileParent);
 }
 
-// SLUGFILLER: mergeKnown
-void CFileStatistic::Merge(CFileStatistic* other){
-	transferred += other->transferred;
-	requested += other->requested;
-	accepted += other->accepted;
-	alltimetransferred += other->alltimetransferred;
-	alltimerequested += other->alltimerequested;
-	alltimeaccepted += other->alltimeaccepted;
-	//MORPH START - Added by SiRoB, SLUGFILLER: Spreadbars
-	if (!other->spreadlist.IsEmpty()) {
-		POSITION pos = other->spreadlist.GetHeadPosition();
-		uint32 start = other->spreadlist.GetKeyAt(pos);
-		uint32 count = other->spreadlist.GetValueAt(pos);
-		other->spreadlist.GetNext(pos);
-		while (pos){
-			uint32 end = other->spreadlist.GetKeyAt(pos);
-			if (count)
-				AddBlockTransferred(start, end, count);
-			start = end;
-			count = other->spreadlist.GetValueAt(pos);
-			other->spreadlist.GetNext(pos);
-		}
-	}
-	//MORPH END - Added by SiRoB, SLUGFILLER: Spreadbars
-}
-// SLUGFILLER: mergeKnown
-
-CAbstractFile::CAbstractFile()
-{
-	md4clr(m_abyFileHash);
-	m_nFileSize = 0;
-	m_iRate = 0;
-}
-
 //MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
 void CFileStatistic::AddBlockTransferred(uint32 start, uint32 end, uint32 count){
 	if (start >= end || !count)
@@ -333,11 +299,45 @@ float CFileStatistic::GetFullSpreadCount(){
 }
 //MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
+// SLUGFILLER: mergeKnown
+void CFileStatistic::Merge(CFileStatistic* other){
+	transferred += other->transferred;
+	requested += other->requested;
+	accepted += other->accepted;
+	alltimetransferred += other->alltimetransferred;
+	alltimerequested += other->alltimerequested;
+	alltimeaccepted += other->alltimeaccepted;
+	// SLUGFILLER: Spreadbars
+	if (!other->spreadlist.IsEmpty()) {
+		POSITION pos = other->spreadlist.GetHeadPosition();
+		uint32 start = other->spreadlist.GetKeyAt(pos);
+		uint32 count = other->spreadlist.GetValueAt(pos);
+		other->spreadlist.GetNext(pos);
+		while (pos){
+			uint32 end = other->spreadlist.GetKeyAt(pos);
+			if (count)
+				AddBlockTransferred(start, end, count);
+			start = end;
+			count = other->spreadlist.GetValueAt(pos);
+			other->spreadlist.GetNext(pos);
+		}
+	}
+	// SLUGFILLER: Spreadbars
+}
+// SLUGFILLER: mergeKnown
+
+CAbstractFile::CAbstractFile()
+{
+	md4clr(m_abyFileHash);
+	m_nFileSize = 0;
+	m_iRate = 0;
+}
+
 CKnownFile::CKnownFile()
 {
 	m_iPartCount = 0;
 	m_iED2KPartCount = 0;
-	m_iED2KPartHashCount = 0;
+	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 	date = 0;
 	dateC =0;
 	if(theApp.glob_prefs->GetNewAutoUp()){
@@ -410,43 +410,43 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	cdcStatus.CreateCompatibleDC(dc);
 
 	if(!InChangedSharedStatusBar || lastSize!=iWidth || lastonlygreyrect!=onlygreyrect || lastbFlat!=bFlat){
-			InChangedSharedStatusBar = true;
+		InChangedSharedStatusBar = true;
 		lastSize=iWidth;
-			lastonlygreyrect=onlygreyrect;
-			lastbFlat=bFlat;
+		lastonlygreyrect=onlygreyrect;
+		lastbFlat=bFlat;
 		
-				m_bitmapSharedStatusBar.DeleteObject();
+		m_bitmapSharedStatusBar.DeleteObject();
 		m_bitmapSharedStatusBar.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
 		m_bitmapSharedStatusBar.SetBitmapDimension(iWidth,  iHeight); 
 		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
 			
-			COLORREF crProgress;
-			COLORREF crHave;
-			COLORREF crPending;
-			COLORREF crMissing = RGB(255, 0, 0);
+		COLORREF crProgress;
+		COLORREF crHave;
+		COLORREF crPending;
+		COLORREF crMissing = RGB(255, 0, 0);
 
-			if(bFlat) { 
-				crProgress = RGB(0, 150, 0);
-				crHave = RGB(0, 0, 0);
-				crPending = RGB(255,208,0);
-			} else { 
-				crProgress = RGB(0, 224, 0);
-				crHave = RGB(104, 104, 104);
-				crPending = RGB(255, 208, 0);
-			} 
+		if(bFlat) { 
+			crProgress = RGB(0, 150, 0);
+			crHave = RGB(0, 0, 0);
+			crPending = RGB(255,208,0);
+		} else { 
+			crProgress = RGB(0, 224, 0);
+			crHave = RGB(104, 104, 104);
+			crPending = RGB(255, 208, 0);
+		} 
 
-			s_ShareStatusBar.SetFileSize(this->GetFileSize()); 
+		s_ShareStatusBar.SetFileSize(this->GetFileSize()); 
 		s_ShareStatusBar.SetHeight(iHeight); 
 		s_ShareStatusBar.SetWidth(iWidth); 
-			s_ShareStatusBar.Fill(crMissing); 
-			COLORREF color;
-			if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
-				for (int i = 0;i < GetPartCount();i++)
-					if(m_AvailPartFrequency[i] > 0 ){
-						color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
-						s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
-					}
-			}
+		s_ShareStatusBar.Fill(crMissing); 
+		COLORREF color;
+		if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
+			for (int i = 0;i < GetPartCount();i++)
+				if(m_AvailPartFrequency[i] > 0 ){
+					color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
+					s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
+				}
+		}
 		s_ShareStatusBar.Draw(&cdcStatus, 0, 0, bFlat); 
 	}
 	else
@@ -679,12 +679,13 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	uchar* lasthash = new uchar[16];
 	md4clr(lasthash);
 	CreateHashFromFile(file, togo, lasthash);
+	hashlist.Add(lasthash);		// SLUGFILLER: SafeHash - better handling of single-part files
 	if (!hashcount){
 		md4cpy(m_abyFileHash, lasthash);
-		delete[] lasthash; // i_a: memleak 
+		// SLUGFILLER: SafeHash remove - removed delete
 	} 
 	else {
-		hashlist.Add(lasthash);
+		// SLUGFILLER: SafeHash remove - moved up
 		uchar* buffer = new uchar[hashlist.GetCount()*16];
 		for (int i = 0; i < hashlist.GetCount(); i++)
 			md4cpy(buffer+(i*16), hashlist[i]);
@@ -774,7 +775,7 @@ void CKnownFile::SetFileSize(uint32 nFileSize)
 		ASSERT(0);
 		m_iPartCount = 0;
 		m_iED2KPartCount = 0;
-		m_iED2KPartHashCount = 0;
+		// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 		return;
 	}
 
@@ -784,10 +785,7 @@ void CKnownFile::SetFileSize(uint32 nFileSize)
 	// nr. of parts to be used with OP_FILESTATUS
 	m_iED2KPartCount = nFileSize / PARTSIZE + 1;
 
-	// nr. of parts to be used with OP_HASHSETANSWER
-	m_iED2KPartHashCount = nFileSize / PARTSIZE;
-	if (m_iED2KPartHashCount != 0)
-		m_iED2KPartHashCount += 1;
+	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 }
 
 // needed for memfiles. its probably better to switch everything to CFile...
@@ -815,7 +813,7 @@ bool CKnownFile::LoadHashsetFromFile(CFile* file, bool checkhash){
 	else if (md4cmp(m_abyFileHash, checkid))
 		return false;	// wrong file?
 	else{
-		if (parts != GetED2KPartHashCount())
+		if (parts != GetED2KPartCount())		// removed unnececery hash counter
 			return false;
 	}
 	// SLUGFILLER: SafeHash
@@ -990,8 +988,17 @@ bool CKnownFile::LoadFromFile(CFile* file){
 	bool ret1 = LoadDateFromFile(file);
 	bool ret2 = LoadHashsetFromFile(file,false);
 	bool ret3 = LoadTagsFromFile(file);
-	NewAvailPartsInfo();
-	return ret1 && ret2 && ret3 && GetED2KPartHashCount()==GetHashCount();// Final hash-count verification, needs to be done after the tags are loaded.
+	if (GetED2KPartCount() <= 1) {	// ignore loaded hash for 1-chunk files
+		for (int i = 0; i < hashlist.GetSize(); i++)
+			delete[] hashlist[i];
+		hashlist.RemoveAll();
+		uchar* cur_hash = new uchar[16];
+		md4cpy(cur_hash, m_abyFileHash);
+		hashlist.Add(cur_hash);
+		ret2 = true;
+	} else if (GetED2KPartCount()!=GetHashCount())
+		ret2 = false;	// Final hash-count verification, needs to be done after the tags are loaded.
+	return (ret1 && ret2 && ret3);
 	// SLUGFILLER: SafeHash
 }
 
@@ -1116,6 +1123,7 @@ bool CKnownFile::WriteToFile(CFile* file){
 }
 
 void CKnownFile::CreateHashFromInput(FILE* file,CFile* file2, int Length, uchar* Output, uchar* in_string) { 
+	CSingleLock sLock1(&(theApp.hashing_mut), TRUE);	// SLUGFILLER: SafeHash - only one chunk-hash at a time
 	// time critial
 	bool PaddingStarted = false;
 	uint32 Hash[4];
@@ -1977,6 +1985,7 @@ void CKnownFile::UpdateClientUploadList()
 	m_iQueuedCount = m_ClientUploadList.GetCount();
 	UpdateAutoUpPriority();
 }
+
 // SLUGFILLER: hideOS
 uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client){
 	uint16 parts = GetED2KPartCount();
@@ -2007,7 +2016,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 
 	if (IsPartFile())
 		for (i = 0; i < realparts; i++)
-			if (!((CPartFile*)this)->IsComplete(i*PARTSIZE,((i+1)*PARTSIZE)-1)){	// SLUGFILLER: SafeHash
+			if (!((CPartFile*)this)->IsPartShareable(i)){	// SLUGFILLER: SafeHash
 				partsavail[i] = false;
 				usepartsavail = true;
 			}

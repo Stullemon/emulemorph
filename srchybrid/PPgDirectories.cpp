@@ -95,22 +95,13 @@ BOOL CPPgDirectories::OnApply()
 
 	CString strIncomingDir;
 	GetDlgItemText(IDC_INCFILES, strIncomingDir);
-	if (app_prefs->IsInstallationDirectory(strIncomingDir)){
-		AfxMessageBox(GetResString(IDS_WRN_INCFILE_RESERVED));
-		return FALSE;
-	}
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 	
 	CString strTempDir;
 	GetDlgItemText(IDC_TEMPFILES, strTempDir);
-	if (app_prefs->IsInstallationDirectory(strTempDir)){
-		AfxMessageBox(GetResString(IDS_WRN_TEMPFILES_RESERVED));
-		return FALSE;
-	}
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
-	if (CompareDirectories(strIncomingDir, strTempDir)==0){
-		AfxMessageBox(GetResString(IDS_WRN_INCTEMP_SAME));
-		return FALSE;
-	}
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
 	_sntprintf(app_prefs->prefs->incomingdir, ARRSIZE(app_prefs->prefs->incomingdir), _T("%s"), strIncomingDir);
 	MakeFoldername(app_prefs->prefs->incomingdir);
@@ -128,14 +119,7 @@ BOOL CPPgDirectories::OnApply()
 		app_prefs->shareddir_list.AddTail(unc);
 	}
 
-	// check shared directories for reserved folder names
-	POSITION pos = app_prefs->shareddir_list.GetHeadPosition();
-	while (pos){
-		POSITION posLast = pos;
-		const CString& rstrDir = app_prefs->shareddir_list.GetNext(pos);
-		if (app_prefs->IsInstallationDirectory(rstrDir))
-			app_prefs->shareddir_list.RemoveAt(posLast);
-	}
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
 	theApp.sharedfiles->Reload();
 

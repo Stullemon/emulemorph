@@ -137,8 +137,12 @@ protected:
 	
 	afx_msg LRESULT OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnWMData(WPARAM wParam,LPARAM lParam);
+	// SLUGFILLER: SafeHash
 	afx_msg LRESULT OnFileHashed(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnHashFailed(WPARAM wParam,LPARAM lParam);
+	afx_msg LRESULT OnPartHashedOK(WPARAM wParam,LPARAM lParam);
+	afx_msg LRESULT OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam);
+	// SLUGFILLER: SafeHash
 
 	//Framegrabbing
 	afx_msg LRESULT OnFrameGrabFinished(WPARAM wParam,LPARAM lParam);
@@ -268,6 +272,9 @@ enum EEmlueAppMsgs
 	TM_FINISHEDHASHING = WM_APP + 10,
 	// SLUGFILLER: SafeHash - new handling
 	TM_HASHFAILED,
+	TM_PARTHASHEDOK,
+	TM_PARTHASHEDCORRUPT,
+	// SLUGFILLER: SafeHash
 	TM_FRAMEGRABFINISHED
 };
 

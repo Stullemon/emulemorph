@@ -703,7 +703,13 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						CKnownFile* cur_file;
 						for (POSITION pos = theApp.sharedfiles->m_Files_map.GetStartPosition();pos != 0;){
 							theApp.sharedfiles->m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
-							list.AddTail((void*&)cur_file);
+							// xMule_MOD: showSharePermissions
+							// only show the files that you agree to show (because sometimes people would like to show
+							// most of their files but hesitate to show a few ones (for some reasons :))
+							if ( (cur_file->GetPermissions()==PERM_ALL)
+								|| ((cur_file->GetPermissions()==PERM_FRIENDS) && client->IsFriend()) )
+								list.AddTail((void*&)cur_file);
+							// xMule_MOD: showSharePermissions
 						}
 						AddLogLine(true,GetResString(IDS_REQ_SHAREDFILES),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_ACCEPTED) );
 					} else AddLogLine(true,GetResString(IDS_REQ_SHAREDFILES),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_DENIED) );
@@ -741,6 +747,8 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
                     if (theApp.glob_prefs->CanSeeShares()==0 || (theApp.glob_prefs->CanSeeShares()==1 && client->IsFriend())){
 						AddLogLine(true,GetResString(IDS_SHAREDREQ1),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_ACCEPTED) );
  
+
+						/*
 						CString strDir,strTest;
 
 						//TODO: Don't send shared directories which do not contain any files
@@ -794,6 +802,37 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
                             tempfile.Write(&cnt, 2);
                             tempfile.Write((LPCTSTR)strDir, cnt);
                         }
+						*/
+						
+						// SLUGFILLER: shareSubdir - enumerate according to shared files
+						CStringList toSend;		// String list, because it's easier and faster
+						CCKey bufKey;
+						CKnownFile* cur_file;
+						for (POSITION pos = theApp.sharedfiles->m_Files_map.GetStartPosition();pos != 0;){
+							theApp.sharedfiles->m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
+							// xMule_MOD: showSharePermissions - don't send dir names that are empty
+							// due to file browse permissions
+							if ( cur_file->GetPermissions() == PERM_NOONE 
+								|| (cur_file->GetPermissions() == PERM_FRIENDS && !client->IsFriend()) )
+								continue;
+							// xMule_MOD: showSharePermissions
+							CString path = cur_file->GetPath();
+							path.MakeLower();
+							if (toSend.Find(path) == NULL)
+								toSend.AddTail(path);
+						}
+						
+						//build packet
+						CSafeMemFile tempfile(80);
+						uint32 uDirs = toSend.GetCount();
+						tempfile.Write(&uDirs, 4);
+						for (POSITION pos = toSend.GetHeadPosition();pos != 0;toSend.GetNext(pos))
+						{
+							uint16 cnt = toSend.GetAt(pos).GetLength();
+							tempfile.Write(&cnt, 2);
+							tempfile.Write((LPCTSTR)toSend.GetAt(pos), cnt);
+						}
+						// SLUGFILLER: shareSubdir
 
 						Packet* replypacket = new Packet(&tempfile);
                         replypacket->opcode = OP_ASKSHAREDDIRSANS;
@@ -837,8 +876,14 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							CString strSharedFileDir(cur_file->GetPath());
 							PathRemoveBackslash(strSharedFileDir.GetBuffer());
 							strSharedFileDir.ReleaseBuffer();
-							if (strReqDir.CompareNoCase(strSharedFileDir) == 0)
+							// xMule_MOD: showSharePermissions
+							// only show the files that you agree to show (because sometimes people would like to show
+							// most of their files but hesitate to show a few ones (for some reasons :))
+							if ( strReqDir.CompareNoCase(strSharedFileDir) == 0 &&
+								( (cur_file->GetPermissions()==PERM_ALL)
+								|| ((cur_file->GetPermissions()==PERM_FRIENDS) && client->IsFriend()) ) )
                                 list.AddTail(cur_file);
+							// xMule_MOD: showSharePermissions
                         }
  
 						// Currently we are sending each shared directory, even if it does not contain any files.

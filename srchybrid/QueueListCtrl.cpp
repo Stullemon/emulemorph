@@ -79,8 +79,8 @@ void CQueueListCtrl::Init()
 		i--;
 		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue, i);
 		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableQueue, i);
-	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
-}
+		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+	}
 	// SLUGFILLER: multiSort
 }
 
@@ -375,7 +375,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 										ecfef.Empty();
 									}break;
 								}
-								if(file->GetPowerShared()){
+								if(file->GetPowerShared()){//keep PS file prio
 									Sbuffer.Append(" ");
 									Sbuffer.Append(ecfef);
 								}

@@ -175,8 +175,8 @@ void CSharedFilesCtrl::Init(){
 		i--;
 		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared, i);
 		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableShared, i);
-	SortItems(SortProc, sortItem + (sortAscending ? 0:20));
-}
+		SortItems(SortProc, sortItem + (sortAscending ? 0:20));
+	}
 	// SLUGFILLER: multiSort
 }
 
@@ -359,6 +359,15 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						}
 						cur_rec.left+=9; //Modified by IceCream, eMule plus rating icon
 						//MORPH END   - Added by IceCream, SLUGFILLER: showComments
+						// xMule_MOD: showSharePermissions, modified by itsonlyme
+						// display not finished files in navy, blocked files in red and friend-only files in orange
+						if (file->GetPermissions() == PERM_NOONE)
+							dc->SetTextColor((COLORREF)RGB(240,0,0));
+						else if (file->GetPermissions() == PERM_FRIENDS)
+							dc->SetTextColor((COLORREF)RGB(208,128,0));
+						else if (file->IsPartFile())
+							dc->SetTextColor((COLORREF)RGB(0,0,192));
+						// xMule_MOD: showSharePermissions
 						break;
 					}
 					case 1:
@@ -409,8 +418,21 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						break;
 					}
 					case 4:
-						buffer = GetResString(IDS_FSTATUS_PUBLIC);
-						break;
+						// xMule_MOD: showSharePermissions
+						switch (file->GetPermissions())
+						{
+							case PERM_NOONE: 
+								buffer = GetResString(IDS_HIDDEN); 
+								break;
+							case PERM_FRIENDS: 
+								buffer = GetResString(IDS_FSTATUS_FRIENDSONLY); 
+								break;
+							default: 
+								buffer = GetResString(IDS_FSTATUS_PUBLIC);
+								break;
+						}
+						// xMule_MOD: showSharePermissions
+					break;
 					case 5:
 						buffer = md4str(file->GetFileHash());
 						break;
@@ -620,10 +642,20 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_OFF, (powersharemode == 0) ? MF_CHECKED : MF_UNCHECKED);
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_ON, (powersharemode == 1) ? MF_CHECKED : MF_UNCHECKED);
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_AUTO, (powersharemode == 2) ? MF_CHECKED : MF_UNCHECKED);
+		// xMule_MOD: showSharePermissions
+		m_PermMenu.CheckMenuItem(MP_PERMALL, ((file->GetPermissions() == PERM_ALL) ? MF_CHECKED : MF_UNCHECKED));
+		m_PermMenu.CheckMenuItem(MP_PERMFRIENDS, ((file->GetPermissions() == PERM_FRIENDS) ? MF_CHECKED : MF_UNCHECKED));
+		m_PermMenu.CheckMenuItem(MP_PERMNONE, ((file->GetPermissions() == PERM_NOONE) ? MF_CHECKED : MF_UNCHECKED));
+		// xMule_MOD: showSharePermissions
 	}else{
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_OFF, MF_UNCHECKED);
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_ON, MF_UNCHECKED);
 		m_PowershareMenu.CheckMenuItem(MP_POWERSHARE_AUTO, MF_UNCHECKED);
+		// xMule_MOD: showSharePermissions
+		m_PermMenu.CheckMenuItem(MP_PERMALL, MF_UNCHECKED);
+		m_PermMenu.CheckMenuItem(MP_PERMFRIENDS,  MF_UNCHECKED);
+		m_PermMenu.CheckMenuItem(MP_PERMNONE,  MF_UNCHECKED);
+		// xMule_MOD: showSharePermissions
 	}
 	//MORPH END  - Added by SiRoB, Avoid misusing of powershare
 
@@ -634,6 +666,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SharedFilesMenu.EnableMenuItem(MP_GETED2KLINK, uFlags);
 	m_SharedFilesMenu.EnableMenuItem(MP_GETHTMLED2KLINK, uFlags);
 	m_SharedFilesMenu.EnableMenuItem(MP_GETSOURCEED2KLINK, (file && theApp.IsConnected() && !theApp.IsFirewalled()) ? MF_ENABLED : MF_GRAYED);
+
 
 	// itsonlyme: hostnameSource
 	if (file && theApp.IsConnected() && !theApp.IsFirewalled() &&
@@ -864,47 +897,36 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			}
 			//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 			//MORPH END   - Added by SiRoB, ZZ Upload System
+			// xMule_MOD: showSharePermissions
+			// with itsonlyme's sorting fix
 			case MP_PERMNONE:
-				{
-				for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
-				{
-					file = arraySelFiles[i];	// itsonlyme: selFix
-
-					if (((CPartFile*)file)->IsPartFile())
-						AddLogLine(true,GetResString(IDS_ERR_NOPRIMCHANGE));
-					else
-					{	
-						file->SetPermissions(PERM_NOONE);
-						SetItemText(iSel,4,GetResString(IDS_HIDDEN));
-					}
-				}
-				break;
-				}
 			case MP_PERMFRIENDS:
-				{
-					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
-					{
-						file = arraySelFiles[i];	// itsonlyme: selFix
-
-						if (((CPartFile*)file)->IsPartFile())
-							AddLogLine(true,GetResString(IDS_ERR_NOPRIMCHANGE));
-						else
-						{	
-							file->SetPermissions(PERM_FRIENDS);
-							SetItemText(iSel,4,GetResString(IDS_FSTATUS_FRIENDSONLY ));	
-						}
-					}
-					break;
-				}
-			case MP_PERMALL:
-				{
+			case MP_PERMALL: {
 				for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 				{
 					file = arraySelFiles[i];	// itsonlyme: selFix
-					file->SetPermissions(PERM_ALL);SetItemText(iSel,4,GetResString(IDS_FSTATUS_PUBLIC));
+					switch (wParam)
+					{
+						case MP_PERMNONE:
+							file->SetPermissions(PERM_NOONE);
+							UpdateFile(file);
+							break;
+						case MP_PERMFRIENDS:
+							file->SetPermissions(PERM_FRIENDS);
+							UpdateFile(file);
+							break;
+						default : // case MP_PERMALL:
+							file->SetPermissions(PERM_ALL);
+							UpdateFile(file);
+							break;
+					}
 				}
+				Invalidate();
 				break;
 			}
+			// xMule_MOD: showSharePermissions
+
+
 		}
 	}
 	return true;
@@ -1198,12 +1220,13 @@ void CSharedFilesCtrl::CreateMenues() {
 
 	// add permission switcher
 	m_PermMenu.CreateMenu();
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_FSTATUS_LOCKED));
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));	// xMule_MOD: showSharePermissions
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
 
 	m_SharedFilesMenu.CreatePopupMenu();
 	m_SharedFilesMenu.AddMenuTitle(GetResString(IDS_SHAREDFILES));
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION));	// xMule_MOD: showSharePermissions - done
 	// todo enable when it works
 	//m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION));
 	//MORPH START - Added by SiRoB, ZZ Upload System

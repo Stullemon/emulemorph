@@ -525,12 +525,12 @@ void CUpDownClient::CreateNextBlockPackage(bool startNextChunk){
                 currentblock->EndOffset = newEndOffset;
             }
 
-            // This can no longer be a wrapped around request, since it has been limited to
-                // a single chunk.
-				togo = currentblock->EndOffset - currentblock->StartOffset;
+			// This can no longer be a wrapped around request, since it has been limited to
+			// a single chunk.
+			togo = currentblock->EndOffset - currentblock->StartOffset;
 
-		if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsComplete(currentblock->StartOffset,currentblock->EndOffset-1))
-					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
+			if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precausion
+				throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
 
 			if (!srcfile->IsPartFile()){
 				// -khaos--+++> This is not a part file...

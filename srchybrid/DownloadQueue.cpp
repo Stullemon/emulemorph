@@ -89,20 +89,11 @@ void CDownloadQueue::AddPartFilesToShare(){
 }
 
 // SLUGFILLER: mergeKnown
-int CDownloadQueue::SavePartFilesToKnown(CFile* file)
-{
-	int iSavedFiles = 0;
-	for (POSITION pos = filelist.GetHeadPosition();pos != 0;)
-	{
-		CPartFile* cur_file = filelist.GetNext(pos);
-		// save only valid 'known' files to known.met
-		if (cur_file->GetED2KPartHashCount() == cur_file->GetHashCount())
-		{
+void CDownloadQueue::SavePartFilesToKnown(CFile* file){
+	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
+		CKnownFile* cur_file = (CKnownFile*)filelist.GetAt(pos);	// Write as known files
 			cur_file->WriteToFile(file);
-			iSavedFiles++;
 		}
-	}
-	return iSavedFiles;
 }
 
 uint32 CDownloadQueue::GetPartFilesCount(){
@@ -150,8 +141,7 @@ void CDownloadQueue::Init(){
 		if (toadd->LoadPartFile(app_prefs->GetTempDir(),ff.GetFileName().GetBuffer())){
 			count++;
 			filelist.AddTail(toadd);			// to downloadqueue
-			if (toadd->GetStatus(true) == PS_READY)
-				sharedfilelist->SafeAddKFile(toadd); // part files are always shared files
+			// SLUGFILLER: SafeHash remove - part files are shared later
 			theApp.emuledlg->transferwnd.downloadlistctrl.AddFile(toadd);// show in downloadwindow
 		}
 		else
@@ -172,8 +162,7 @@ void CDownloadQueue::Init(){
 			toadd->SavePartFile(); // resave backup
 			count++;
 			filelist.AddTail(toadd);			// to downloadqueue
-			if (toadd->GetStatus(true) == PS_READY)
-				sharedfilelist->SafeAddKFile(toadd); // part files are always shared files
+			// SLUGFILLER: SafeHash remove - part files are shared later
 			theApp.emuledlg->transferwnd.downloadlistctrl.AddFile(toadd);// show in downloadwindow
 
 			AddLogLine(false, GetResString(IDS_RECOVERED_PARTMET), toadd->GetFileName());
@@ -986,7 +975,19 @@ bool CDownloadQueue::IsTempFile(const CString& rstrDirectory, const CString& rst
 {
 	// do not share a part file from the temp directory, if there is still a corresponding entry in
 	// the download queue -- because that part file is not yet complete.
-	CString othername = rstrName + _T(".met");
+	CString othername = rstrName;
+	int extpos = othername.ReverseFind(_T('.'));
+	if (extpos == -1)
+		return false;
+	CString ext = othername.Mid(extpos);
+	if (ext.CompareNoCase(_T(".met"))) {
+		if (!ext.CompareNoCase(_T(".part")))
+			othername += _T(".met");
+		else if (!ext.CompareNoCase(PARTMET_BAK_EXT) || !ext.CompareNoCase(PARTMET_TMP_EXT))
+			othername = othername.Left(extpos);
+		else
+			return false;
+	}
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (!othername.CompareNoCase(cur_file->GetPartMetFileName()))

@@ -4,8 +4,16 @@ Changelog for eMule 0.40f26 MorphKad 0.8
 ADDED: name log file in date [AndCycle]
 ADDED: FPU/MMX/AMD/SSE memset FPU/MMX/SSE memcpy optimized (eMulePlus) [AndCycle]
 ADDED: Equal Chance For Each File [AndCycle]
-CHANGED: PartNameRecovery v2(enkeyDEV) [AndCycle]
-REMOVED: On The Fly Optimization(eWombat) [AndCycle]
+FIXED: correct clients.met version
+CHANGED: PartNameRecovery v2 (enkeyDEV.6b) [AndCycle]
+REMOVED: On The Fly Optimization (eWombat) [AndCycle]
+
+From SlugFiller-itsonlyme
+	ADDED: (xMule_MOD: showSharePermissions) [AndCycle]
+	FIXED: Fixed bug in operations on multiple selected files (itsonlyme: selFix) [AndCycle]
+	CHANGED: hideOS to current version [AndCycle]
+	CHANGED: SafeHash to current version [AndCycle]
+	CHANGED: mergeKnown to current version [AndCycle]
 
 
 

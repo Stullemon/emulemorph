@@ -95,7 +95,7 @@ bool CKnownFileList::Init()
 			CKnownFile* pRecord =  new CKnownFile();
 			if (!pRecord->LoadFromFile(&file)){
 				TRACE("*** Failed to load entry %u (name=%s  hash=%s  size=%u  parthashs=%u expected parthashs=%u) from known.met\n", i, 
-					pRecord->GetFileName(), md4str(pRecord->GetFileHash()), pRecord->GetFileSize(), pRecord->GetHashCount(), pRecord->GetED2KPartHashCount());
+					pRecord->GetFileName(), md4str(pRecord->GetFileHash()), pRecord->GetFileSize(), pRecord->GetHashCount(), pRecord->GetED2KPartCount());	// SLUGFILLER: SafeHash - removed unnececery hash counter
 				delete pRecord;
 				continue;
 			}
@@ -157,23 +157,16 @@ void CKnownFileList::Save()
 		uint8 ucHeader = MET_HEADER;
 		file.Write(&ucHeader, 1);
 
-		ULONGLONG uRecNumFilePos = file.GetPosition();
 		uint32 RecordsNumber = GetCount();
-		file.Write(&RecordsNumber, 4);
+		// SLUGFILLER: mergeKnown - add part files count
+		uint32 RecordsNumberWithPartFiles = RecordsNumber + theApp.downloadqueue->GetPartFilesCount();
+		file.Write(&RecordsNumberWithPartFiles, 4);
+		// SLUGFILLER: mergeKnown
 		
 		// save known files
 		for (uint32 i = 0; i < RecordsNumber; i++)
 			ElementAt(i)->WriteToFile(&file);
-
-		// save valid part files
-		int iSavedPartFiles = theApp.downloadqueue->SavePartFilesToKnown(&file);	// SLUGFILLER: mergeKnown - add part files
-		if (iSavedPartFiles > 0){
-			// update nr. of known.met entries
-			RecordsNumber += iSavedPartFiles;
-			file.Seek(uRecNumFilePos, SEEK_SET);
-			file.Write(&RecordsNumber, 4);
-		}
-
+		theApp.downloadqueue->SavePartFilesToKnown(&file);	// SLUGFILLER: mergeKnown - add part files
 		if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 			file.Flush(); // flush file stream buffers to disk buffers
 			if (_commit(_fileno(file.m_pStream)) != 0) // commit disk buffers to disk
@@ -240,6 +233,7 @@ bool CKnownFileList::IsKnownFile(void* pToTest){
 	}
 	return false;
 }
+
 // SLUGFILLER: mergeKnown
 void CKnownFileList::RemoveFile(CKnownFile* toremove){
 	for (int i = 0;i != this->GetCount();i++)

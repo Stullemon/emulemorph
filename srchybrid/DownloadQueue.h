@@ -86,7 +86,7 @@ public:
 	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
 	void	AddPartFilesToShare();
 	// SLUGFILLER: mergeKnown - include part files in known.met
-	int		SavePartFilesToKnown(CFile* file);
+	void	SavePartFilesToKnown(CFile* file);
 	uint32	GetPartFilesCount();
 	// SLUGFILLER: mergeKnown
 	void	AddDownload(CPartFile* newfile);

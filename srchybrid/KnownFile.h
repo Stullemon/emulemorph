@@ -165,8 +165,7 @@ public:
 	uint16	GetHashCount() const	{return hashlist.GetCount();}
 	uchar*	GetPartHash(uint16 part) const;
 
-	// nr. of part hashs according the file size wrt ED2K protocol
-	UINT	GetED2KPartHashCount() const { return m_iED2KPartHashCount; }
+	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 
 	// nr. of 9MB parts (file data)
 	__inline uint16 GetPartCount() const { return m_iPartCount; }
@@ -263,7 +262,7 @@ private:
 	bool	m_bCommentLoaded;
 	uint16	m_iPartCount;
 	uint16  m_iED2KPartCount;
-	uint16	m_iED2KPartHashCount;
+	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 	uint8	m_iUpPriority;
 	uint8	m_iPermissions;
 	bool	m_bAutoUpPriority;
