@@ -451,7 +451,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//MORPH START - Added by IceCream, SLUGFILLER: showComments
 						CKnownFile* pfile =(CKnownFile*)lpDrawItemStruct->itemData;
 						if ( thePrefs.ShowRatingIndicator() && ( !pfile->GetFileComment().IsEmpty() || pfile->GetFileRating() )){ //Modified by IceCream, eMule plus rating icon
-							POINT point= {cur_rec.left-4,cur_rec.top+2};
+							POINT point= {cur_rec.left-6,cur_rec.top};
 							int the_rating=0;
 							if (pfile->GetFileRating())
 								the_rating = pfile->GetFileRating();
