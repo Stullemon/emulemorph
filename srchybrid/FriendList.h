@@ -24,6 +24,12 @@ class CUpDownClient;
 class CFriendList: public CLoggable
 {
 public:
+//MORPH START - Added by SiRoB, Friend Addon
+friend class CClientListCtrl;
+friend class CUploadListCtrl;
+friend class CDownloadListCtrl;
+friend class CQueueListCtrl;
+//MORPH END   - Added by SiRoB, Friend Addon
 	CFriendList();
 	~CFriendList();
 

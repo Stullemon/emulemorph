@@ -17,6 +17,9 @@
 #define MP_REMOVEFRIEND			10105
 #define MP_SHOWLIST				10106
 #define MP_FRIENDSLOT			10107
+//MORPH START - Added by SiRoB, Friend Addon
+#define MP_REMOVEALLFRIENDSLOT	10108
+//MORPH END   - Added by SiRoB, Friend Addon
 
 //MORPH START - Added by SiRoB, ZZ Upload System
 #define MP_POWERSHARE_OFF       10161

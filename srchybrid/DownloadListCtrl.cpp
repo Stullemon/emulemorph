@@ -201,6 +201,11 @@ void CDownloadListCtrl::SetAllIcons()
 	m_overlayimages.SetBkColor(CLR_NONE);
 	m_overlayimages.Add(CTempIconLoader("Community"));
 	// [end] Mighty Knife
+	//MORPH START - Addded by SiRoB, Friend Addon
+	m_overlayimages.Add(CTempIconLoader("ClientFriendOvl"));
+	m_overlayimages.Add(CTempIconLoader("ClientFriendSlotOvl"));
+	//MORPH END   - Addded by SiRoB, Friend Addon
+	
 }
 
 void CDownloadListCtrl::Localize()
@@ -869,9 +874,11 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				//MORPH START - Modified by SiRoB, More client & ownCredit overlay icon
 				UINT uOvlImg = INDEXTOOVERLAYMASK(((lpUpDownClient->Credits() && lpUpDownClient->Credits()->GetCurrentIdentState(lpUpDownClient->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((lpUpDownClient->Credits() && lpUpDownClient->Credits()->GetMyScoreRatio(lpUpDownClient->GetIP()) > 1) ? 2 : 0));
 				POINT point2= {cur_rec.left,cur_rec.top+1};
+				//MORPH - Removed by SiRoB, Friend Addon
+				/*
 				if (lpUpDownClient->IsFriend())
 					m_ImageList.Draw(dc, 6, point2, ILD_NORMAL | uOvlImg);
-				else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEYHYBRID)
+				else*/ if ( lpUpDownClient->GetClientSoft() == SO_EDONKEYHYBRID)
 					m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | uOvlImg);
 				else if( lpUpDownClient->GetClientSoft() == SO_MLDONKEY)
 					m_ImageList.Draw(dc, 8, point2, ILD_NORMAL | uOvlImg);
@@ -888,7 +895,10 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				if (lpUpDownClient->IsCommunity())
 					m_overlayimages.Draw(dc,0, point2, ILD_TRANSPARENT);
 				// [end] Mighty Knife
-
+				//MORPH START - Added by SiRoB, Friend Addon
+				if (lpUpDownClient->IsFriend())
+					m_overlayimages.Draw(dc, lpUpDownClient->GetFriendSlot()?2:1,point2, ILD_TRANSPARENT);
+				//MORPH END   - Added by SiRoB, Friend Addon
 				cur_rec.left += 20;
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
@@ -1666,6 +1676,19 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
 			ClientMenu.SetDefaultItem(MP_DETAIL);
 			ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+			//MORPH START - Added by SiRoB, Friend Addon
+			const CUpDownClient* client = (CUpDownClient*)content->value;
+			if (GetSelectedCount() == 1){
+				if(client->IsFriend()){
+					ClientMenu.AppendMenu(MF_STRING, MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
+					ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+					if (!client->HasLowID())
+						ClientMenu.CheckMenuItem(MP_FRIENDSLOT, ((client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) );
+					else
+						ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_GRAYED);
+				}
+			}
+			//MORPH END - Added by SiRoB, Friend Addon
 			ClientMenu.AppendMenu(MF_STRING,MP_MESSAGE, GetResString(IDS_SEND_MSG));
 			ClientMenu.AppendMenu(MF_STRING,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
 			if(theApp.kademlia->GetThreadID() && !theApp.kademlia->isConnected() )
@@ -2275,6 +2298,40 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				case MP_SHOWLIST:
 					client->RequestSharedFileList();
 					break;
+				//MORPH START - Added by SIRoB, Friend Addon
+				//Xman friendhandling
+				case MP_FRIENDSLOT:{
+					//MORPH START - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
+					if (client){
+						bool IsAlready;
+						IsAlready = client->GetFriendSlot();
+						//theApp.friendlist->RemoveAllFriendSlots();
+						if( IsAlready ) {
+							client->SetFriendSlot(false);
+						} else {
+							client->SetFriendSlot(true);
+						}
+						//KTS+
+						for (POSITION pos = theApp.friendlist->m_listFriends.GetHeadPosition();pos != 0;theApp.friendlist->m_listFriends.GetNext(pos))
+						{
+							CFriend* cur_friend = theApp.friendlist->m_listFriends.GetAt(pos);
+							theApp.friendlist->RefreshFriend(cur_friend);
+						}
+						//KTS-
+					}
+					//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
+					break;
+				}
+				case MP_REMOVEFRIEND:{//LSD
+					if (client && client->IsFriend())
+					{					
+						theApp.friendlist->RemoveFriend(client->m_Friend);
+						this->UpdateItem(client);
+					}
+					break;
+				}
+				//Xman end
+				//MORPH END   - Added by SIRoB, Friend Addon
 				case MP_MESSAGE:
 					theApp.emuledlg->chatwnd->StartSession(client);
 					break;

@@ -31,7 +31,6 @@ public:
 	CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
             uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash);
 	~CFriend();
-
 	uchar	m_abyUserhash[16];
 	uint32	m_dwLastSeen;
 	uint32	m_dwLastUsedIP;
@@ -47,10 +46,14 @@ public:
 	void	WriteToFile(CFile* file);
 
 	static const char sm_abyNullHash[16];
-//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	void SetFriendSlot(bool newValue);
 	bool GetFriendSlot();
-//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+	//MORPH START - Added by SiRoB, Friend Addon
+	bool GetFS() const; //KTS
+	//MORPH END   - Added by SiRoB, Friend Addon
+	
 private:
 	bool HasUserhash();
 	bool m_friendSlot;

@@ -88,6 +88,11 @@ void CFriendListCtrl::SetAllIcons()
 	iml.Add(CTempIconLoader("FriendNoClient"));
 	iml.Add(CTempIconLoader("FriendWithClient"));
 	iml.Add(CTempIconLoader("FriendConnected"));
+	//MORPH START - Added by SiRoB, Friend Addon
+	iml.SetOverlayImage(iml.Add(CTempIconLoader("ClientFriendOvl")), 1);
+	iml.SetOverlayImage(iml.Add(CTempIconLoader("ClientFriendSlotOvl")), 2);
+	//MORPH END   - Added by SiRoB, Friend Addon
+
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
 	HIMAGELIST himlOld = ApplyImageList(iml.Detach());
 	if (himlOld)
@@ -163,7 +168,9 @@ void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
 			image = 2;
 		else
 			image = 1;
-		SetItem(itemnr,0,LVIF_IMAGE,0,image,0,0,0,0);
+		//MORPH START - Changed by SiRoB, Friend Addon
+		SetItem(itemnr,0,LVIF_IMAGE | LVIF_STATE,0,image,INDEXTOOVERLAYMASK(toupdate->GetFS()?2:1),LVIS_OVERLAYMASK,0,0);
+		//MORPH END   - Changed by SiRoB, Friend Addon
 	}
 	else
 		ASSERT(0);
@@ -185,7 +192,10 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	}
 
 	ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND));
-
+	//MORPH START - Added by SiRoB, Friend Addon
+	ClientMenu.AppendMenu(MF_STRING,MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT));
+	//MORPH END   - Added by SiRoB, Friend Addon
+	
 	if (iSel != -1){
 		ClientMenu.AppendMenu(MF_STRING,MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
 		ClientMenu.AppendMenu(MF_STRING,MP_MESSAGE, GetResString(IDS_SEND_MSG));
@@ -269,6 +279,12 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		}
+		//MORPH START - Added by SiRoB, Friend Addon
+		case MP_REMOVEALLFRIENDSLOT: {
+			theApp.friendlist->RemoveAllFriendSlots();	
+		}
+		//MORPH START - Added by SiRoB, Friend Addon
+
 		//MORPH START - Added by IceCream, List Requested Files
 		case MP_LIST_REQUESTED_FILES: {
 			if (cur_friend && cur_friend->GetLinkedClient())
@@ -319,6 +335,9 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 			}
 			//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
+			//MORPH START - Added by SiRoB, Friend Addon
+			RefreshFriend(cur_friend); //KTS
+			//MORPH END   - Added by SiRoB, Friend Addon
 			break;
 		}
 	}

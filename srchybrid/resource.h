@@ -2089,6 +2089,7 @@
 #define IDS_DYNUPLOAD                   3822
 #define IDS_HIDEOVERSHARES              3823
 #define IDS_SELECTIVESHARE              3824
+#define IDS_REMOVEALLFRIENDSLOT		3825
 #define IDS_BACKUP                      4001
 #define IDS_USS_MAXPING                 4002
 #define IDS_PAYBACKFIRST                4003

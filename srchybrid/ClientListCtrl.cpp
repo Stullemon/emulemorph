@@ -132,6 +132,10 @@ void CClientListCtrl::SetAllIcons()
 	m_overlayimages.SetBkColor(CLR_NONE);
 	m_overlayimages.Add(CTempIconLoader("Community"));
 	// [end] Mighty Knife
+	//MORPH START - Addded by SiRoB, Friend Addon
+	m_overlayimages.Add(CTempIconLoader("ClientFriendOvl"));
+	m_overlayimages.Add(CTempIconLoader("ClientFriendSlotOvl"));
+	//MORPH END   - Addded by SiRoB, Friend Addon
 }
 
 void CClientListCtrl::Localize()
@@ -295,9 +299,12 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			switch(iColumn){
 				case 0:{
 					uint8 image;
+					//MORPH - Removed by SiRoB, Friend Addon
+					/*
 					if (client->IsFriend())
 						image = 2;
-					else if (client->GetClientSoft() == SO_EDONKEYHYBRID)
+					
+					else*/ if (client->GetClientSoft() == SO_EDONKEYHYBRID)
 						image = 4;
 					else if (client->GetClientSoft() == SO_MLDONKEY)
 						image = 3;
@@ -317,7 +324,8 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					if (client->IsCommunity())
 						m_overlayimages.Draw(dc,0, point, ILD_NORMAL/*ILD_TRANSPARENT*/);
 					// [end] Mighty Knife
-
+					if (client->IsFriend())
+						m_overlayimages.Draw(dc,client->GetFriendSlot()?2:1, point, ILD_NORMAL);
 					//MORPH END - Modified by SiRoB, More client icon
 					if (client->GetUserName()==NULL)
 						Sbuffer.Format("(%s)", GetResString(IDS_UNKNOWN));
@@ -515,12 +523,25 @@ void CClientListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.CreatePopupMenu();
 	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+	//MORPH START - Added by SiRoB, Friend Addon
+	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
+	if (GetSelectedCount() == 1){
+		if(client->IsFriend()){
+			ClientMenu.AppendMenu(MF_STRING, MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
+			ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+			if (!client->HasLowID())
+				ClientMenu.CheckMenuItem(MP_FRIENDSLOT, ((client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) );
+			else
+				ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_GRAYED);
+		}
+		else
+			ClientMenu.AppendMenu(MF_STRING | uFlags,MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+	}
+	//MORPH END - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_MESSAGE, GetResString(IDS_SEND_MSG));
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
 	if(theApp.kademlia->GetThreadID() && !theApp.kademlia->isConnected() )
 		ClientMenu.AppendMenu(MF_STRING | uFlags,MP_BOOT, "BootStrap");
-	
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka [sivka: -listing all requested files from user-]
 	ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
@@ -565,6 +586,40 @@ BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 				}
 				break;
 			}
+			//MORPH START - Added by SIRoB, Friend Addon
+            		//Xman friendhandling
+			case MP_FRIENDSLOT:{
+				//MORPH START - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
+				if (client){
+					bool IsAlready;
+					IsAlready = client->GetFriendSlot();
+					//theApp.friendlist->RemoveAllFriendSlots();
+					if( IsAlready ) {
+						client->SetFriendSlot(false);
+					} else {
+						client->SetFriendSlot(true);
+					}
+					//KTS+
+					for (POSITION pos = theApp.friendlist->m_listFriends.GetHeadPosition();pos != 0;theApp.friendlist->m_listFriends.GetNext(pos))
+					{
+						CFriend* cur_friend = theApp.friendlist->m_listFriends.GetAt(pos);
+						theApp.friendlist->RefreshFriend(cur_friend);
+					}
+					//KTS-
+				}
+				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
+				break;
+			}
+			case MP_REMOVEFRIEND:{//LSD
+				if (client && client->IsFriend())
+				{					
+					theApp.friendlist->RemoveFriend(client->m_Friend);
+					//this->UpdateItem(client);
+				}
+				break;
+			}
+			//Xman end
+			//MORPH END   - Added by SIRoB, Friend Addon
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			case MP_LIST_REQUESTED_FILES: { // added by sivka
 				if (client != NULL)

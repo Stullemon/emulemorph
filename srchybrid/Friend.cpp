@@ -206,4 +206,12 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
 		m_LinkedClient = linkedClient;
 	}
 };
-//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System//MORPH START - Added by SiRoB, Friend Addon
+bool CFriend::GetFS() const{
+	if(m_LinkedClient != NULL) {
+		return m_LinkedClient->GetFriendSlot();
+	} else {
+		return m_friendSlot;
+	}
+}
+//MORPH END   - Added by SiRoB, Friend Addon

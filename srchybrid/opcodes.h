@@ -95,7 +95,7 @@
 #define MINWAITBEFOREOPENANOTHERSLOTMS 3000
 //MORPH END   - Added by Yun.SF3, ZZ Upload System 20030807-1911
 #define	MAX_UP_CLIENTS_ALLOWED	100		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
-#define	MIN_UP_CLIENTS_ALLOWED	2		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
+#define	MIN_UP_CLIENTS_ALLOWED	1		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define DOWNLOADTIMEOUT			SEC2MS(100)
 #define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
 #define RARE_FILE				25

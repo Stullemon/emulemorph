@@ -792,6 +792,10 @@ uint32 CUpDownClient::SendBlockData(){
 			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONAMOUNT && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
 				m_dwLastCheckedForEvictTick = curTick;
 				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
+				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+				//reset
+				m_bPowerShared = false;
+				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 			}
 
 			if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONAMOUNT > m_curSessionAmountNumber) {
