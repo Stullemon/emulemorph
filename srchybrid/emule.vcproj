@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding = "Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.00"
+	Version="7.10"
 	Name="emule"
 	ProjectGUID="{584EA69D-3443-4197-8994-364880FC1B9B}"
 	Keyword="MFCProj">
@@ -683,7 +683,10 @@
 				RelativePath="UploadQueue.cpp">
 			</File>
 			<File
-				RelativePath="WebSocket.cpp">
+				RelativePath=".\UPnPNat.cpp">
+			</File>
+			<File
+				RelativePath="URLClient.cpp">
 			</File>
 			<File
 				RelativePath="ZIPFile.cpp">
@@ -897,6 +900,9 @@
 				RelativePath="Mdump.h">
 			</File>
 			<File
+				RelativePath=".\ModName.h">
+			</File>
+			<File
 				RelativePath="Opcodes.h">
 			</File>
 			<File
@@ -1009,6 +1015,12 @@
 			</File>
 			<File
 				RelativePath="UploadQueue.h">
+			</File>
+			<File
+				RelativePath=".\UPnPNat.h">
+			</File>
+			<File
+				RelativePath="URLClient.h">
 			</File>
 			<File
 				RelativePath="Version.h">
@@ -1299,6 +1311,9 @@
 			</File>
 			<File
 				RelativePath=".\PPgEastShare.cpp">
+			</File>
+			<File
+				RelativePath=".\PPgEmulespana.cpp">
 			</File>
 			<File
 				RelativePath="PPgFiles.cpp">
@@ -1681,6 +1696,9 @@
 			</File>
 			<File
 				RelativePath=".\PPgEastShare.h">
+			</File>
+			<File
+				RelativePath=".\PPgEmulespana.h">
 			</File>
 			<File
 				RelativePath="PPgFiles.h">
@@ -2159,6 +2177,12 @@
 			</File>
 			<File
 				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
+			</File>
+			<File
+				RelativePath=".\res\mobile.ico">
+			</File>
+			<File
+				RelativePath=".\res\Morph.ico">
 			</File>
 			<File
 				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
