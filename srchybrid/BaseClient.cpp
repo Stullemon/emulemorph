@@ -313,7 +313,10 @@ void CUpDownClient::Init()
 	Crypt.isProxy = false;
 	GenerateKey(Crypt.remoteMasterKey);	// generate a key - will be done right before sending
 	for (int i=0; i<WC_KEYLENGTH; i++) Crypt.localMasterKey[i] = 0; // fill with zeroes so we can say if the key is valid
-    // MORPH END - Added by Commander, WebCache 1.2e
+    lastMultiOHCBPacketSent = 0; // Superlexx - Multi-OHCB
+	m_bWebCacheSupportsMultiOHCBs = false;
+	// yonatan http end ////////////////////////////////////////////////////////////////////////////
+	// MORPH END - Added by Commander, WebCache 1.2e
 	m_uFailedConnect = 0;
 }
 
@@ -459,7 +462,8 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29"))||
 			// EastShare END - Added by TAHO, Pretender
 			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
-			StrStrI(m_strModVersion,_T("Morph")) && StrStrI(m_strModVersion,_T("Max"))||
+			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")))||
+			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
 			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,_T("edonkey"))||
 			((GetVersion()>589) && (GetSourceExchangeVersion()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
 			)
@@ -640,8 +644,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			// MORPH START - Added by Commander, WebCache 1.2e
 			case WC_TAG_VOODOO:
 				m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
-				if( temptag.IsInt() && temptag.GetInt() == 'ARC4' )
-					m_bWebCacheSupport = true;
+				m_bWebCacheSupport = temptag.IsInt() && temptag.GetInt() == 'ARC4';
 				break;
 			case WC_TAG_FLAGS:
 				m_strNotOfficial.AppendFormat(_T(",WCF=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
@@ -649,6 +652,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				{
 					m_uWebCacheFlags = temptag.GetInt();
 					b_webcacheInfoNeeded = m_uWebCacheFlags & WC_FLAGS_INFO_NEEDED;
+					m_bWebCacheSupportsMultiOHCBs = m_uWebCacheFlags & WC_FLAGS_MULTI_OHCBS;
 				}
 				break;
 			// Superlexx webcache - moved to the multipacket
@@ -1279,10 +1283,10 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	{
 		CTag tagWebCacheVoodoo( WC_TAG_VOODOO, (uint32)'ARC4' );
 		tagWebCacheVoodoo.WriteTagToFile(data);
-		uint32 flags = WC_FLAGS_UDP | WC_FLAGS_NO_OHCBS;
+		uint32 flags = WC_FLAGS_UDP | WC_FLAGS_NO_OHCBS | WC_FLAGS_MULTI_OHCBS;
 		bool localMasterKeyNeeded = true;
 		for(int i=0; localMasterKeyNeeded && i < WC_KEYLENGTH; i++)
-			localMasterKeyNeeded = Crypt.localMasterKey[i]==0 ? true : false;
+		localMasterKeyNeeded = (Crypt.localMasterKey[i]==0);
 		if (b_webcacheInfoNeeded || m_WA_webCacheIndex == -1 || localMasterKeyNeeded)
 			flags |= WC_FLAGS_INFO_NEEDED;
 		CTag tagWebCacheFlags( WC_TAG_FLAGS, flags);
@@ -1401,10 +1405,10 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	else{
 		// ensure that all possible block requests are removed from the partfile
 		ClearDownloadBlockRequests();
-		if(GetDownloadState() == DS_CONNECTED){
+		/*if(GetDownloadState() == DS_CONNECTED){
 			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			theApp.downloadqueue->RemoveSource(this);
-	    }
+	    }*/
 	}
 
 	// we had still an AICH request pending, handle it
@@ -1494,8 +1498,16 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			Debug(_T("--- Deleted client            %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
 		return true;
 	}
-	else
-	{
+	else{
+		//MORPH START - Added by SIRoB, ReAsk state -Patch-
+		if (m_nDownloadState==DS_CONNECTED && m_nUploadState==US_ONUPLOADQUEUE)
+		{
+			if(GetRemoteQueueRank() && !IsRemoteQueueFull())
+				SetDownloadState(DS_ONQUEUE);
+		else
+				SetDownloadState(DS_NONE);
+		}
+		//MORPH END  - Added by SiRoB, ReAsk state -Patch-
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			Debug(_T("--- Disconnected client       %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
 		m_fHashsetRequesting = 0;
@@ -2866,8 +2878,11 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 	case WCDS_WAIT_CACHE_REPLY:
 		strState = _T("WC-Bug:CacheWait"); // not needed...
 		break;
-	case WCDS_DOWNLOADING:
+	case WCDS_DOWNLOADINGVIA:
 		strState = _T("Via Proxy");
+		break;
+	case WCDS_DOWNLOADINGFROM:
+		strState = _T("From Proxy");
 		break;
 	}
 	// MORPH END - Added by Commander, WebCache 1.2e
@@ -3056,11 +3071,13 @@ switch(tag->GetNameID())
 	case CT_UNKNOWNx13:
 	case CT_UNKNOWNx14:
 	case CT_UNKNOWNx16:
-	case CT_UNKNOWNx17:			strSnafuTag=apszSnafuTag[0];break;//buffer=_T("DodgeBoards");break;
+	case CT_UNKNOWNx17:
+	case CT_UNKNOWNxE6:			strSnafuTag=apszSnafuTag[0];break;//buffer=_T("DodgeBoards");break;
 	case CT_UNKNOWNx15:			strSnafuTag=apszSnafuTag[1];break;//buffer=_T("DodgeBoards & DarkMule |eVorte|X|");break;
 	case CT_UNKNOWNx22:			strSnafuTag=apszSnafuTag[2];break;//buffer=_T("DarkMule v6 |eVorte|X|");break;
 	//case CT_UNKNOWNx69:			strSnafuTag=apszSnafuTag[3];break;//buffer=_T("eMuleReactor");break;
 	case CT_UNKNOWNx79:			strSnafuTag=apszSnafuTag[4];break;//buffer=_T("Bionic");break;
+	case CT_UNKNOWNx83:			strSnafuTag=apszSnafuTag[15];break;//buffer=_T("Fusspi");break;
 	case CT_UNKNOWNx88:
 		////If its a LSD its o.k
 		if (m_strModVersion.IsEmpty() || _tcsnicmp(m_strModVersion, _T("LSD"),3)!=0)
@@ -3080,7 +3097,9 @@ switch(tag->GetNameID())
 				}
 		//	}
 		break;
-	case CT_DARK:				//STRIKE BACK				
+	case CT_DARK:				//STRIKE BACK
+	case CT_UNKNOWNx7A:
+	case CT_UNKNOWNxCA:
 			strSnafuTag=apszSnafuTag[9];break;//buffer=_T("new DarkMule");
 		break;
 	}
