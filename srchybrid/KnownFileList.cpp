@@ -85,6 +85,11 @@ bool CKnownFileList::Init()
 		}
 
 		UINT RecordsNumber = file.ReadUInt32();
+		//Morph Start - added by AndCycle, minor tweak - prime
+		if(RecordsNumber*1.5 > 1031){
+			m_Files_map.InitHashTable(getPrime(RecordsNumber*1.5));
+		}
+		//Morph End - added by AndCycle, minor tweak - prime
 		for (UINT i = 0; i < RecordsNumber; i++) {
 			pRecord = new CKnownFile();
 			if (!pRecord->LoadFromFile(&file)){

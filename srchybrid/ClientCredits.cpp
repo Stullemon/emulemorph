@@ -491,8 +491,8 @@ void CClientCreditsList::LoadList()
 			m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
 			*/
 			int iPrime = 5003;
-			if(count > 5003){
-				iPrime = getPrime(count*1.2);
+			if(count*1.5 > 5003){
+				iPrime = getPrime(count*1.5);
 			}
 			AddDebugLogLine(false, _T("m_mapClients.InitHashTable with %i"), iPrime);
 			m_mapClients.InitHashTable(iPrime);
