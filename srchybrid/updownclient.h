@@ -922,6 +922,7 @@ protected:
 	bool	m_bIsMorph; //MORPH - Added by SiRoB, Is Morph client?
 	bool	m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
 	bool    m_bNotOfficial; //MORPH - Added by SiRoB, Anti Ghost Mod
+	uint32  m_uNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag
 	////////////////////////////////////////////////////////////////////////
 	// Upload
 	//
@@ -944,7 +945,8 @@ protected:
 	uchar		requpfileid[16];
     uint32      m_slotNumber;
 	uint32		m_classID; //MORPH - Added by SiRoB, UPload Splitting Class
-	
+	uint32		m_uFailedConnect;
+
 	DWORD       m_dwLastCheckedForEvictTick;
 
 	typedef struct TransferredData {
@@ -1092,7 +1094,6 @@ private:
 
 };
 //#pragma pack()
-
 //>>> eWombat [SNAFU_V3]
 static LPCTSTR apszSnafuTag[] =
 	{
