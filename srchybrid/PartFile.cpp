@@ -4835,7 +4835,7 @@ bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 		return false;
 	if (!curCat->viewfilters.bTransferring && ((GetStatus()==PS_READY|| GetStatus()==PS_EMPTY) && GetTransferingSrcCount()>0))
 		return false;
-	if (!curCat->viewfilters.bComplete && GetStatus() == PS_COMPLETE && !IsPartFile())
+	if (!curCat->viewfilters.bComplete && GetStatus() == PS_COMPLETE)
 		return false;
 	if (!curCat->viewfilters.bCompleting && GetStatus() == PS_COMPLETING)
 		return false;

@@ -163,7 +163,8 @@ private:
 
     uint32 m_actualPayloadSize;
     uint32 m_actualPayloadSizeSent;
-
-    boolean m_bBusy; //MOPRH - Added by SiRoB, zz Upload System
-	boolean m_hasSent; //MOPRH - Added by SiRoB, zz Upload System
+	//MOPRH - Added by SiRoB, zz Upload System
+    boolean m_bBusy;
+	boolean m_hasSent;
+	//MOPRH - Added by SiRoB, zz Upload System
 };

@@ -1,7 +1,9 @@
 --------------------------------------
-Changelog for eMule 0.42g MorphXT v2.10
+Changelog for eMule 0.42g MorphXT v2.11
 --------------------------------------
-FIXED: Crash when removed a file that is uploaded to an other client [SiRoB]
+FIXED  : Crash when removed a file that is uploaded to an other client [SiRoB]
+FIXED  : See A4AF Partstatus staying in blue [SiRoB]
+FIXED  : Upload trouble due to client staying in unkown transfert [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v2.10

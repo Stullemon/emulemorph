@@ -738,12 +738,21 @@ void CUploadQueue::Process() {
 		}
 	}
 
-    POSITION ulpos = uploadinglist.GetHeadPosition();
-    // The loop that feeds the upload slots with data.
-    while (ulpos != NULL) {
-        // Get the client. Note! Also updates ulpos as a side effect.
-		CUpDownClient* cur_client = uploadinglist.GetNext(ulpos);
-		cur_client->SendBlockData();
+	POSITION pos = uploadinglist.GetHeadPosition();
+	while(pos != 0){
+		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
+		if (thePrefs.m_iDbgHeap >= 2)
+			ASSERT_VALID(cur_client);
+		//It seems chatting or friend slots can get stuck at times in upload.. This needs looked into..
+		if (!cur_client->socket)
+		{
+			RemoveFromUploadQueue(cur_client);
+			if(cur_client->Disconnected("CUploadQueue::Process")){
+				delete cur_client;
+			}
+		} else {
+			cur_client->SendBlockData();
+		}
 	}
 
 	POSITION lastpos = uploadinglist.GetTailPosition();
