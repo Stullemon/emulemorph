@@ -2450,6 +2450,14 @@
 #define IDC_CHECKCHARACTERREPLACE       5025
 #define IDC_CHECKCASESENSITIVE          5026
 #define IDC_REPLACECHARSLIST            5027
+#define IDC_SC_STATIC1                  5028
+#define IDC_SC_STATIC2                  5029
+#define IDC_SC_STATIC3                  5030
+#define IDC_SC_STATIC4                  5031
+#define IDC_MR_STATIC                   5032
+#define IDC_MR_STATIC1                  5032
+#define IDC_MR_STATIC3                  5033
+#define IDC_MR_STATIC2                  5034
 #define IDC_FRIENDS_USERHASH            5102
 #define IDC_FRIENDS_NAME                5103
 #define IDC_FRIENDS_CLIENT              5104
@@ -2481,6 +2489,40 @@
 #define IDS_AMD_ACTIVE                  5127
 #define IDS_SSE_ACTIVE                  5128
 #define IDS_OPTIMIZATIONS_DISABLED      5129
+#define IDS_FEEDNEW                     5200
+#define IDS_FEEDEDIT                    5201
+#define IDS_FEEDDELETE                  5202
+#define IDS_FEEDDELETEALL               5203
+#define IDS_FEEDBUTTON                  5204
+#define IDS_ADDNEWSFEED                 5205
+#define IDS_EDITNEWSFEED                5206
+#define IDS_FEEDURL                     5207
+#define IDS_FEEDNAME                    5208
+#define IDS_MASSRENAME1                 5300
+#define IDS_FILENAMELEFT                5301
+#define IDS_FILENAMERIGHT               5302
+#define IDS_RESETFILENAMES              5303
+#define IDS_SIMPLECLEANUP               5304
+#define IDS_INSERTTEXTCOLUMN            5305
+#define IDS_MASSRENAME2                 5306
+#define IDS_MASSRENAME3                 5307
+#define IDS_CHECKDOTTOSPACE             5400
+#define IDS_CHECKUNDERLINETOSPACE       5401
+#define IDS_CHECKCONVERTAPOSTROPHES     5402
+#define IDS_CHECKCONVERTHEX             5403
+#define IDS_CHECKSEARCHANDREPLACE       5404
+#define IDS_SC_SEARCHFOR                5405
+#define IDS_SC_REPLACEBY                5406
+#define IDS_CHECKCASESENSITIVE          5407
+#define IDS_CHECKCHARACTERREPLACE       5408
+#define IDS_REPLACECHAR                 5409
+#define IDS_REPLACECHARBY               5410
+#define IDS_SC_ADD                      5411
+#define IDS_SC_EDIT                     5412
+#define IDS_SC_DELETE                   5413
+#define IDS_SEARCHFORCHAR               5414
+#define IDS_REPLACEBYCHAR               5415
+#define IDS_SC_HEADLINE                 5416
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
@@ -2511,9 +2553,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        5011
+#define _APS_NEXT_RESOURCE_VALUE        5012
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5028
+#define _APS_NEXT_CONTROL_VALUE         5035
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

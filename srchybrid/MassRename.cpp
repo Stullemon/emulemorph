@@ -120,8 +120,25 @@ void CMassRenameDialog::OnOK() {
 void CMassRenameDialog::OnCancel() {
 }
 
+void CMassRenameDialog::Localize() {
+	GetDlgItem (IDC_MR_STATIC1)->SetWindowText (GetResString (IDS_MASSRENAME1));
+	GetDlgItem (IDC_MR_STATIC2)->SetWindowText (GetResString (IDS_MASSRENAME2));
+	GetDlgItem (IDC_MR_STATIC3)->SetWindowText (GetResString (IDS_MASSRENAME3));
+	GetDlgItem (IDC_FILENAMELEFT)->SetWindowText (GetResString (IDS_FILENAMELEFT));
+	GetDlgItem (IDC_FILENAMERIGHT)->SetWindowText (GetResString (IDS_FILENAMERIGHT));
+
+	GetDlgItem (IDC_BUTTONSTRIP)->SetWindowText (GetResString (IDS_CLEANUP));
+	GetDlgItem (IDC_SIMPLECLEANUP)->SetWindowText (GetResString (IDS_SIMPLECLEANUP));
+	GetDlgItem (IDC_INSERTTEXTCOLUMN)->SetWindowText (GetResString (IDS_INSERTTEXTCOLUMN));
+	GetDlgItem (IDC_RESETBUTTON)->SetWindowText (GetResString (IDS_RESETFILENAMES));
+	GetDlgItem (IDCANCEL)->SetWindowText (GetResString (IDS_CANCEL));
+}
+
 BOOL CMassRenameDialog::OnInitDialog() {
 	CDialog::OnInitDialog();
+
+	Localize ();
+
 	InitWindowStyles(this);
 
 	// Go through the list of files, collect all filenames to one string and

@@ -61,6 +61,7 @@ protected:
 	bool LastEditWasUndo; // Remember if the last change was an UNDO
 	CString UndoBuffer;
 	void UpdateEditMask ();
+	void Localize ();
 public:
 	// The caller of this dialog has to store pointers for all files in the
 	// following list before calling DoModal

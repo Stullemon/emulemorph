@@ -55,6 +55,25 @@ void CSimpleCleanupDialog::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 }
 
+void CSimpleCleanupDialog::Localize () {
+	SetWindowText (GetResString (IDS_SC_HEADLINE));
+	GetDlgItem (IDC_SC_STATIC1)->SetWindowText (GetResString (IDS_SC_SEARCHFOR));
+	GetDlgItem (IDC_SC_STATIC2)->SetWindowText (GetResString (IDS_SC_REPLACEBY));
+	GetDlgItem (IDC_SC_STATIC3)->SetWindowText (GetResString (IDS_REPLACECHAR));
+	GetDlgItem (IDC_SC_STATIC4)->SetWindowText (GetResString (IDS_REPLACECHARBY));
+	GetDlgItem (IDC_CHECKDOTTOSPACE)->SetWindowText (GetResString (IDS_CHECKDOTTOSPACE));
+	GetDlgItem (IDC_CHECKUNDERLINETOSPACE)->SetWindowText (GetResString (IDS_CHECKUNDERLINETOSPACE));
+	GetDlgItem (IDC_CHECKCONVERTAPOSTROPHES)->SetWindowText (GetResString (IDS_CHECKCONVERTAPOSTROPHES));
+	GetDlgItem (IDC_CHECKCONVERTHEX)->SetWindowText (GetResString (IDS_CHECKCONVERTHEX));
+	GetDlgItem (IDC_CHECKSEARCHANDREPLACE)->SetWindowText (GetResString (IDS_CHECKSEARCHANDREPLACE));
+	GetDlgItem (IDC_CHECKCASESENSITIVE)->SetWindowText (GetResString (IDS_CHECKCASESENSITIVE));
+	GetDlgItem (IDC_CHECKCHARACTERREPLACE)->SetWindowText (GetResString (IDS_CHECKCHARACTERREPLACE));
+	GetDlgItem (IDC_NEWCHARACTER)->SetWindowText (GetResString (IDS_SC_ADD));
+	GetDlgItem (IDC_BUTTONCHANGE)->SetWindowText (GetResString (IDS_SC_EDIT));
+	GetDlgItem (IDC_DELETECHARACTER)->SetWindowText (GetResString (IDS_SC_DELETE));
+	GetDlgItem (IDCANCEL)->SetWindowText (GetResString (IDS_CANCEL));
+}
+
 BOOL CSimpleCleanupDialog::OnInitDialog() {
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
@@ -64,8 +83,8 @@ BOOL CSimpleCleanupDialog::OnInitDialog() {
 	CRect R;
 	m_ReplaceListBox->GetClientRect (R);
 		
-	m_ReplaceListBox->InsertColumn (0,"Search for",0,R.Width ()/2);
-	m_ReplaceListBox->InsertColumn (1,"Replace by",0,R.Width ()/2);
+	m_ReplaceListBox->InsertColumn (0,GetResString (IDS_SEARCHFORCHAR),0,R.Width ()/2);
+	m_ReplaceListBox->InsertColumn (1,GetResString (IDS_REPLACEBYCHAR),0,R.Width ()/2);
 
 	WriteConfig ();
 

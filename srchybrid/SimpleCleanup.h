@@ -37,6 +37,8 @@ protected:
 	CString m_replaceby;
 	CString m_searchforchars;
 	CString m_replacebychars;
+
+	void Localize ();
 public:
 
 	void GetConfig (int& _options, CString& _searchfor, CString& _replaceby,

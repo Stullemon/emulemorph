@@ -1626,11 +1626,11 @@ BEGIN
     PUSHBUTTON      "OK",IDOK,265,235,50,14,BS_FLAT
     PUSHBUTTON      "Cancel",IDCANCEL,319,235,50,14,BS_FLAT
     LTEXT           "Filename mask (changes here will be done to all filenames below):",
-                    IDC_STATIC,4,4,210,8
+                    IDC_MR_STATIC1,4,4,210,8
     EDITTEXT        IDC_FILENAMEMASKEDITTEMPLATE,4,16,310,14,ES_AUTOHSCROLL
-    CONTROL         "Original filenames:",IDC_STATIC,"Static",
+    CONTROL         "Original filenames:",IDC_MR_STATIC2,"Static",
                     SS_LEFTNOWORDWRAP | WS_GROUP,196,45,60,8
-    LTEXT           "New filenames:",IDC_STATIC,4,45,50,8
+    LTEXT           "New filenames:",IDC_MR_STATIC3,4,45,50,8
     CONTROL         "Filenames left-justified",IDC_FILENAMELEFT,"Button",
                     BS_AUTORADIOBUTTON | BS_FLAT,4,32,87,10
     CONTROL         "Filenames right-justified",IDC_FILENAMERIGHT,"Button",
@@ -1675,8 +1675,8 @@ BEGIN
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,47,90,10
-    LTEXT           "Search for:",IDC_STATIC,19,61,37,8
-    LTEXT           "Replace by:",IDC_STATIC,19,76,39,8
+    LTEXT           "Search for:",IDC_SC_STATIC1,19,61,37,8
+    LTEXT           "Replace by:",IDC_SC_STATIC2,19,76,39,8
     EDITTEXT        IDC_EDITSEARCH,60,58,179,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDITREPLACEBY,60,75,179,14,ES_AUTOHSCROLL
     CONTROL         "Replace characters:",IDC_CHECKCHARACTERREPLACE,"Button",
@@ -1688,8 +1688,8 @@ BEGIN
     PUSHBUTTON      "&Change",IDC_BUTTONCHANGE,189,138,50,14
     EDITTEXT        IDC_CHARSOURCE,49,120,40,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_CHARDEST,107,120,40,14,ES_AUTOHSCROLL
-    LTEXT           "Replace",IDC_STATIC,19,121,26,8
-    LTEXT           "by",IDC_STATIC,95,122,9,8
+    LTEXT           "Replace",IDC_SC_STATIC3,19,121,26,8
+    LTEXT           "by",IDC_SC_STATIC4,95,122,9,8
     CONTROL         "",IDC_REPLACECHARSLIST,"SysListView32",LVS_REPORT | 
                     LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_BORDER | 
                     WS_TABSTOP,19,137,164,64
@@ -4679,6 +4679,57 @@ BEGIN
     IDS_AMD_ACTIVE          "AMD optimizations active"
     IDS_SSE_ACTIVE          "SSE optimizations active"
     IDS_OPTIMIZATIONS_DISABLED "Optimizations disabled"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FEEDNEW             "New..."
+    IDS_FEEDEDIT            "Edit..."
+    IDS_FEEDDELETE          "Delete"
+    IDS_FEEDDELETEALL       "Delete all"
+    IDS_FEEDBUTTON          "News feeds >"
+    IDS_ADDNEWSFEED         "Add news feeds"
+    IDS_EDITNEWSFEED        "Edit news feeds"
+    IDS_FEEDURL             "Please enter the URL of the feed source:"
+    IDS_FEEDNAME            "Please enter a name for this feed (optional):"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MASSRENAME1         "Filename mask (changes here will be done to all filenames below):"
+    IDS_FILENAMELEFT        "Filenames left-justified"
+    IDS_FILENAMERIGHT       "Filenames right-justified"
+    IDS_RESETFILENAMES      "&Reset"
+    IDS_SIMPLECLEANUP       "&Simple cleanup"
+    IDS_INSERTTEXTCOLUMN    "&Insert text column from clipboard"
+    IDS_MASSRENAME2         "Original filenames:"
+    IDS_MASSRENAME3         "New filenames:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CHECKDOTTOSPACE     "Convert ""."" to "" """
+    IDS_CHECKUNDERLINETOSPACE "Convert ""_"" to "" """
+    IDS_CHECKCONVERTAPOSTROPHES 
+                            "Convert wrong apostrophes ""´"", ""`"" to standard apostrophes "" ' """
+    IDS_CHECKCONVERTHEX     "Convert hexadecimal numbers ""%xx"" back to characters"
+    IDS_CHECKSEARCHANDREPLACE "Search and Replace:"
+    IDS_SC_SEARCHFOR        "Search for:"
+    IDS_SC_REPLACEBY        "Replace by:"
+    IDS_CHECKCASESENSITIVE  "Case sensitive search"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CHECKCHARACTERREPLACE "Replace characters:"
+    IDS_REPLACECHAR         "Replace"
+    IDS_REPLACECHARBY       "by"
+    IDS_SC_ADD              "&Add"
+    IDS_SC_EDIT             "&Edit"
+    IDS_SC_DELETE           "&Delete"
+    IDS_SEARCHFORCHAR       "Search for"
+    IDS_REPLACEBYCHAR       "Replace by"
+    IDS_SC_HEADLINE         "Simple cleanup"
 END
 
 #endif    // Englisch (USA) resources

@@ -222,11 +222,11 @@ BOOL CServerWnd::OnInitDialog()
 	// Mighty Knife: Context menu for editing news feeds
 	if (m_FeedsMenu) VERIFY (m_FeedsMenu.DestroyMenu ());
 	m_FeedsMenu.CreatePopupMenu();
-	m_FeedsMenu.AppendMenu(MF_STRING,MP_NEWFEED,"New...");
-	m_FeedsMenu.AppendMenu(MF_STRING,MP_EDITFEED,"Edit...");
-	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEFEED,"Delete");
+	m_FeedsMenu.AppendMenu(MF_STRING,MP_NEWFEED,GetResString (IDS_FEEDNEW));
+	m_FeedsMenu.AppendMenu(MF_STRING,MP_EDITFEED,GetResString (IDS_FEEDEDIT));
+	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEFEED,GetResString (IDS_FEEDDELETE));
 	m_FeedsMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
-	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEALLFEEDS,"Delete all");
+	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEALLFEEDS,GetResString (IDS_FEEDDELETEALL));
 	// [end] Mighty Knife
 
 	if (servermsgbox->m_hWnd)
@@ -386,6 +386,10 @@ void CServerWnd::Localize()
     	//MORPH START - Added by SiRoB, XML News [O²]
 		GetDlgItem(IDC_FEEDUPDATE)->SetWindowText(GetResString(IDS_SF_RELOAD)); // Added by O²: XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
+
+		// Mighty Knife: Popup-Menu for editing news feeds
+		GetDlgItem(IDC_LOGRESET)->SetWindowText(GetResString(IDS_FEEDBUTTON));
+		// [end] Mighty Knife
     
 	    TCITEM item;
 	    CString name;
@@ -1317,8 +1321,8 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 			// Show two input boxes so that the user can enter the URL
 			// and optionally a name for that feed
 			InputBox inp;
-			inp.SetLabels ("Add news feeds",
-						   "Please enter the URL of the feed source:",
+			inp.SetLabels (GetResString (IDS_ADDNEWSFEED),
+						   GetResString (IDS_FEEDURL),
 						   "");
 			inp.DoModal ();
 			CString url = inp.GetInput ();
@@ -1326,8 +1330,8 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 				// Create a 2nd Input box because the default implementation
 				// of this class does not reset the m_Cancel variable!
 				InputBox inp2;
-				inp2.SetLabels ("Add news feeds",
-							    "Please enter a name for this feed (optional):",
+				inp2.SetLabels (GetResString (IDS_ADDNEWSFEED),
+								GetResString (IDS_FEEDNAME),
 							    "");
 				inp2.DoModal ();
 				if (!inp2.WasCancelled()) {
@@ -1367,8 +1371,8 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 					}
 					// Create an input box
 					InputBox inp;
-					inp.SetLabels ("Edit news feeds",
-								"Please enter the URL of the feed source:",
+					inp.SetLabels (GetResString (IDS_EDITNEWSFEED),
+								GetResString (IDS_FEEDURL),
 								urls.GetAt (urlpos));
 					inp.DoModal ();
 					CString url = inp.GetInput ();
@@ -1376,9 +1380,9 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 					    // Create a 2nd Input box because the default implementation
 						// of this class does not reset the m_Cancel variable!
 						InputBox inp2;
-						inp2.SetLabels ("Edit news feeds",
-									"Please enter a name for this feed (optional):",
-									names.GetAt (namepos));
+						inp2.SetLabels (GetResString (IDS_EDITNEWSFEED),
+										GetResString (IDS_FEEDNAME),
+										names.GetAt (namepos));
 						inp2.DoModal ();
 						if (!inp2.WasCancelled()) {
 							CString name = inp2.GetInput ();
