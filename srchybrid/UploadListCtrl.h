@@ -53,4 +53,8 @@ protected:
 
 private:
 	CImageList	imagelist;
+
+	// Mighty Knife: Community visualization
+	CImageList m_overlayimages;
+	// [end] Mighty Knife
 };

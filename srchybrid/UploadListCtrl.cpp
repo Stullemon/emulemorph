@@ -88,6 +88,10 @@ void CUploadListCtrl::Init()
 	InsertColumn(12,GetResString(IDS_COMPRESSIONGAIN),LVCFMT_LEFT,50,12);
 	//MORPH END - Added by SiRoB, Show Compression by Tarod
 
+	// Mighty Knife: Community affiliation
+	InsertColumn(13,"Community",LVCFMT_LEFT,100,13);
+	// [end] Mighty Knife
+
 	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableUpload);
@@ -104,6 +108,12 @@ void CUploadListCtrl::Init()
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
+
+	// Mighty Knife: Community affiliation
+	if (theApp.glob_prefs->IsCommunityEnabled ()) ShowColumn (13);
+	else HideColumn (13);
+	// [end] Mighty Knife
+
 }
 
 CUploadListCtrl::~CUploadListCtrl(){
@@ -146,6 +156,13 @@ void CUploadListCtrl::SetAllIcons()
 		}
 	}
 	//Morph End - added by AndCycle, IP to Country
+
+	// Mighty Knife: Community icon
+	m_overlayimages.DeleteImageList();
+	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	m_overlayimages.SetBkColor(CLR_NONE);
+	m_overlayimages.Add(CTempIconLoader("Community"));
+	// [end] Mighty Knife
 }
 
 void CUploadListCtrl::Localize()
@@ -339,6 +356,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					else
 						imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg, 0, odc->GetBkColor());
 					//MORPH END   - Modified by SiRoB, More client & Credit overlay icon
+
+					// Mighty Knife: Community visualization
+					if (client->IsCommunity())
+						m_overlayimages.Draw(dc,0, point, ILD_TRANSPARENT);
+					// [end] Mighty Knife
 
 					Sbuffer = client->GetUserName();
 
@@ -548,6 +570,12 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer.Format("%.1f%%", client->GetCompression());
 					break;
 				//MORPH END - Added by SiRoB, Show Compression by Tarod
+
+				// Mighty Knife: Community affiliation
+				case 13:
+					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : "";
+					break;
+				// [end] Mighty Knife
 			}
 	
 			if( iColumn != 7 && iColumn != 0 )
@@ -555,6 +583,15 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
+
+	// Mighty Knife: Community affiliation
+	// Show/Hide community column if changed in the preferences
+	if (theApp.glob_prefs->IsCommunityEnabled () != !IsColumnHidden (13))
+		if (theApp.glob_prefs->IsCommunityEnabled ())
+				ShowColumn (13);
+		else HideColumn (13);
+	// [end] Mighty Knife
+
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
@@ -802,6 +839,13 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return item2->GetCompression() - item1->GetCompression();
 		//MORPH END - Added by SiRoB, Show Compression by Tarod
 		
+		// Mighty Knife: Community affiliation
+		case 13:
+			return (item1->IsCommunity() && !item2->IsCommunity()) ? -1 : 1;
+		case 113:
+			return (item1->IsCommunity() && !item2->IsCommunity()) ? 1 : -1;
+		// [end] Mighty Knife
+
 		default:
 			return 0;
 	}
