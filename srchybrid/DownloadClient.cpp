@@ -276,7 +276,7 @@ bool CUpDownClient::AskForDownload()
     SwapToAnotherFile(_T("A4AF check before tcp file reask. CUpDownClient::AskForDownload()"), true, false, false, NULL, true, true); // ZZ:DownloadManager
 	uiDLAskingCounter +=1; //SLAHAM: ADDED Last Asked Counter
 	SetDownloadState(DS_CONNECTING);
-	return TryToConnect(true); //MORPH - Changed by SiRoB, -Fix-
+	return TryToConnect();
 }
 
 bool CUpDownClient::IsSourceRequestAllowed() const

@@ -268,7 +268,6 @@ void CUpDownClient::Init()
 	m_pReqFileAICHHash = NULL;
 	m_fSupportsAICH = 0;
 	m_fAICHRequested = 0;
-	m_bPendingUploadingConnection = false; //MOPRH - Added by SiRoB,
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_strModVersion.Empty();
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
@@ -1797,7 +1796,7 @@ void CUpDownClient::ConnectionEstablished()
 	{
 		case US_CONNECTING:
 		case US_WAITCALLBACK:
-			if (theApp.uploadqueue->IsDownloading(this) || m_bPendingUploadingConnection) //MORPH - Added by SiRoB
+			if (theApp.uploadqueue->IsDownloading(this))
 			{
 				SetUploadState(US_UPLOADING);
 				if (thePrefs.GetDebugClientTCPLevel() > 0)

@@ -1038,12 +1038,7 @@ bool CUpDownClient::SendBlockData(){
 		m_lastRefreshedULDisplay = curTick;
 	}
 
-	//MORPH - Changed by SiRoB, Uploadinglist -Fix-
-	/*
 	return sentBytesCompleteFile + sentBytesPartFile;
-	*/
-	return wasRemoved;
-	//MORPH - Changed by SiRoB, Uploadinglist -Fix-
 }
 
 /**

@@ -373,12 +373,7 @@ public:
 	void			SendHashsetPacket(char* forfileid);
 	const uchar*	GetUploadFileID() const							{ return requpfileid; }
 	void			SetUploadFileID(CKnownFile* newreqfile);
-	//MORPH - Changed by SiRoB, uploadinglist -Fix-
-	/*
 	uint32			SendBlockData();
-	*/
-	bool			SendBlockData();
-	//MORPH - Changed by SiRoB, uploadinglist -Fix-
 	void			ClearUploadBlockRequests();
 	void			SendRankingInfo();
 	void			SendCommentInfo(/*const*/ CKnownFile *file);
@@ -741,7 +736,6 @@ public:
 	//MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 	void GetUploadingAndUploadedPart(uint8* abyUpPartUploadingAndUploaded, uint16 partcount);
 	//MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
-	void SetPendingUploadingConnection(bool newvalue) {m_bPendingUploadingConnection = newvalue;} //MORPH - Added by SiRoB,
 	//wistily start
 	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}
 	void  Add2UpTotalTime(uint32 length){m_nUpTotalTime += length;}
@@ -909,8 +903,7 @@ protected:
     uint32      m_slotNumber;
 	uint32		m_classID; //MORPH - Added by SiRoB, UPload Splitting Class
 	
-	bool		m_bPendingUploadingConnection; //MORPH - Added by SiRoB,
-    DWORD       m_dwLastCheckedForEvictTick;
+	DWORD       m_dwLastCheckedForEvictTick;
 
 	typedef struct TransferredData {
 		uint32	datalen;
