@@ -1485,12 +1485,12 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket){
 //Returned bool is not if the TryToConnect is successful or not..
 //false means the client was deleted!
 //true means the client was not deleted!
-//MORPH START - Added by SiRoB, Don't add client not accepted -Patch-
+//MORPH START - Changed by SiRoB, Don't add client not accepted by trytoconnect [SiRoB]
 /*
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket)
 */
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket, bool accepted)
-//MORPH START - Added by SiRoB, Don't add client not accepted -Patch-
+//MORPH END   - Changed by SiRoB, Don't add client not accepted by trytoconnect [SiRoB]
 {
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected()))
 	{

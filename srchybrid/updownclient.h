@@ -217,7 +217,13 @@ public:
 	virtual void SendCancelTransfer(Packet* packet = NULL);
 	virtual bool	IsEd2kClient() const { return true; }
 	virtual bool	Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
+	//MORPH START - Changed by SiRoB, Don't add client not accepted by trytoconnect [SiRoB]
+	/*
 	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL, bool accepted = true);
+	*/
+    virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL, bool accepted = true);
+	//MORPH END   - Changed by SiRoB, Don't add client not accepted by trytoconnect [SiRoB]
+
 	virtual bool	Connect();
 	virtual void	ConnectionEstablished();
 	virtual void	OnSocketConnected(int nErrorCode);

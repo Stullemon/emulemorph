@@ -586,16 +586,16 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	if (!newclient->socket || !newclient->socket->IsConnected())
 	{
 		newclient->SetUploadState(US_CONNECTING);
-		bool accepted = true; //MORPH - Added by SiRoB, Don't add client not accepted -Patch-
+		bool accepted = true; //MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
 		if (!newclient->TryToConnect(true,0,accepted))
 			return false;
-		//MORPH START - Added by SiRoB, Don't add client not accepted -Patch-
+		//MORPH START - Added by SiRoB, Don't add client not accepted by trytoconnect
 		if (!accepted)
 		{
 			newclient->SetUploadState(US_NONE);		
 			return false;
 		}
-		//MORPH END  - Added by SiRoB, Don't add client not accepted -Patch-
+		//MORPH END   - Added by SiRoB, Don't add client not accepted by trytoconnect
 	}
 	else
 	{

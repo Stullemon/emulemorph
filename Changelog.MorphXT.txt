@@ -1,7 +1,9 @@
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.1x
 --------------------------------------
-FIXED  : Maybe found failed upload and download cause when toomany incoming event occur [SiRoB]
+MERGED : Some merge from emulEspana arround randomport and folder icone [SiRoB]
+
+FIXED  : Don't add client not accepted by trytoconnect to avoid failed upload [SiRoB]
 
 CHANGED: USC: Global Upload Limit are now respected [SiRoB]
 CHANGED: New Morph Version Check use Officiel setting now [SiRoB]
