@@ -2170,7 +2170,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
  				case MP_COPYFEEDBACK:
 				{
 					CString feed;
-					feed.AppendFormat(GetResString(IDS_FEEDBACK_FROM), thePrefs.GetUserNick(), MOD_VERSION);
+					feed.AppendFormat(GetResString(IDS_FEEDBACK_FROM), thePrefs.GetUserNick(), theApp.m_strModLongVersion);
 					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_FILENAME), file->GetFileName());
 					feed.AppendFormat(_T(" \r\n"));
@@ -2195,7 +2195,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				{
 					CString feed;
 					feed.AppendFormat(_T("Feedback from %s "),thePrefs.GetUserNick());
-					feed.AppendFormat(_T("on [%s] \r\n"),MOD_VERSION);
+					feed.AppendFormat(_T("on [%s] \r\n"),theApp.m_strModLongVersion);
 					feed.AppendFormat(_T("File Name: %s \r\n"),file->GetFileName());
 					feed.AppendFormat(_T("File Type: %s \r\n"),file->GetFileType());
 					feed.AppendFormat(_T("Size: %i Mo\r\n"), (file->GetFileSize()/1048576));

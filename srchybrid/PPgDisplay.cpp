@@ -242,7 +242,12 @@ BOOL CPPgDisplay::OnApply()
 	if (mintotray_old != thePrefs.mintotray)
 		theApp.emuledlg->TrayMinimizeToTrayChange();
 	if (!thePrefs.ShowRatesOnTitle()) {
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		/*
 		_stprintf(buffer,_T("eMule v%s"),theApp.m_strCurVersionLong);
+		*/
+		_stprintf(buffer,_T("eMule v%s [%s]"),theApp.m_strCurVersionLong,theApp.m_strModLongVersion);
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 		theApp.emuledlg->SetWindowText(buffer);
 	}
 
