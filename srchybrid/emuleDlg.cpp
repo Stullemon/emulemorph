@@ -164,6 +164,12 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	m_pSystrayDlg = NULL;
 	m_lasticoninfo=255;
 	b_HideApp = false; //MORPH - Added by SiRoB, Toggle Show Hide window
+
+    //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
+	sourceTrayMessage = NULL;
+	sourceTrayMessageLow = NULL;
+	sourceTrayMessageGrey = NULL;
+	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 }
 
 CemuleDlg::~CemuleDlg()
@@ -184,6 +190,12 @@ CemuleDlg::~CemuleDlg()
 	if (sourceTrayIconGrey) VERIFY( ::DestroyIcon(sourceTrayIconGrey) );
 	if (sourceTrayIconLow) VERIFY( ::DestroyIcon(sourceTrayIconLow) );
 	if (usericon) VERIFY( ::DestroyIcon(usericon) );
+
+	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
+	if (sourceTrayMessage) VERIFY( ::DestroyIcon(sourceTrayMessage) );
+	if (sourceTrayMessageLow) VERIFY( ::DestroyIcon(sourceTrayMessageLow) );
+	if (sourceTrayMessageGrey) VERIFY( ::DestroyIcon(sourceTrayMessageGrey) );
+	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 
 	// already destroyed by windows?
 	//VERIFY( m_menuUploadCtrl.DestroyMenu() );
@@ -409,6 +421,13 @@ BOOL CemuleDlg::OnInitDialog()
 	sourceTrayIcon = theApp.LoadIcon(_T("TrayConnected"), 16, 16);
 	sourceTrayIconGrey = theApp.LoadIcon(_T("TrayNotConnected"), 16, 16);
 	sourceTrayIconLow = theApp.LoadIcon(_T("TrayLowID"), 16, 16);
+
+	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
+	sourceTrayMessage = theApp.LoadIcon(_T("TRAY_MESSAGE"), 16, 16);
+	sourceTrayMessageLow = theApp.LoadIcon(_T("TRAY_MESSAGE_LOW"), 16, 16);
+	sourceTrayMessageGrey = theApp.LoadIcon(_T("TRAY_MESSAGE_GREY"), 16, 16);
+	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
+
 	SetAllIcons();
 	Localize();
 
@@ -1660,6 +1679,8 @@ void CemuleDlg::RestoreWindow()
 
 void CemuleDlg::UpdateTrayIcon(int procent)
 {
+	/*
+	//Commander - Temporary removed - Start
 	// compute an id of the icon to be generated
 	uint8 m_newiconinfo=(procent>0)?(16-((procent*15/100)+1)):0;
 
@@ -1674,18 +1695,36 @@ void CemuleDlg::UpdateTrayIcon(int procent)
 		return;
 
 	m_lasticoninfo=m_newiconinfo;
+    //Commander - Temporary removed - End
+    */
 
 	// prepare it up
+    //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
+	static bool messageIcon = false;
+	if(m_iMsgIcon == 0 || !messageIcon){
+	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 	if (theApp.IsConnected()){
-		if (theApp.IsFirewalled()) {
+		if (theApp.IsFirewalled())
 			trayIcon.Init(sourceTrayIconLow,100,1,1,16,16,thePrefs.GetStatsColor(11));
-		}
-		else {
+		else 
 			trayIcon.Init(sourceTrayIcon,100,1,1,16,16,thePrefs.GetStatsColor(11));
 		}
-	}
 	else
 		trayIcon.Init(sourceTrayIconGrey,100,1,1,16,16,thePrefs.GetStatsColor(11));
+	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
+	}
+	else {
+		if (theApp.IsConnected()){
+			if (theApp.IsFirewalled())
+				trayIcon.Init(sourceTrayMessageLow,100,1,1,16,16,thePrefs.GetStatsColor(11));
+			else 
+				trayIcon.Init(sourceTrayMessage,100,1,1,16,16,thePrefs.GetStatsColor(11));
+		}
+		else
+			trayIcon.Init(sourceTrayMessageGrey,100,1,1,16,16,thePrefs.GetStatsColor(11));
+	}
+	messageIcon = !messageIcon;
+	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 
 	// load our limit and color info
 	int pLimits16[1] = {100}; // set the limits of where the bar color changes (low-high)

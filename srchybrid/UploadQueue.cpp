@@ -1168,7 +1168,13 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				sec = 0;
 				theApp.listensocket->Process();
 				theApp.OnlineSig(); // Added By Bouc7 
+
+                //Commander - Removed: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
+				// Update every second
+				/*
 				theApp.emuledlg->ShowTransferRate();
+				*/
+				//Commander - Removed: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 				
 				if (!thePrefs.TransferFullChunks())
 					theApp.uploadqueue->UpdateMaxClientScore();
@@ -1184,6 +1190,11 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 
                 theApp.emuledlg->transferwnd->UpdateListCount(1, -1);
 			}
+
+			//Commander - Moved: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
+			// Update every second
+			theApp.emuledlg->ShowTransferRate();
+			//Commander - Moved: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 
 			statsave++;
 			// 60 seconds

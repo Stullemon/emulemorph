@@ -242,6 +242,11 @@ private:
 	//MORPH - Added by SiRoB, Toggle Show Hide window
 
 	//Commander - Added: Invisible Mode [TPT] - End
+//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
+	HICON	sourceTrayMessage;
+	HICON	sourceTrayMessageLow;
+	HICON	sourceTrayMessageGrey;
+//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 };
 
 

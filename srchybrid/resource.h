@@ -2546,6 +2546,7 @@
 #define IDS_CLIENTPERCENTAGE            5009
 #define IDC_BUTTONEDIT                  5014
 #define IDC_BUTTONCHANGE                5015
+#define IDI_ICON2                       5015
 #define IDC_CHARSOURCE                  5016
 #define IDC_CHARDEST                    5017
 #define IDC_CHECKDOTTOSPACE             5018
@@ -2676,7 +2677,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        5013
+#define _APS_NEXT_RESOURCE_VALUE        5016
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         5035
 #define _APS_NEXT_SYMED_VALUE           106
