@@ -52,7 +52,7 @@
 #define MAX_RESULTS				100		// max global search results
 #define	MAX_MORE_SEARCH_REQ		5		// this gives a max. total search results of (1+5)*201 = 1206 or (1+5)*300 = 1800
 #define MAX_CLIENTCONNECTIONTRY	2
-#define CONNECTION_TIMEOUT		SEC2MS(80)	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
+#define CONNECTION_TIMEOUT		SEC2MS(40)	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
 #define	FILEREASKTIME			MIN2MS(29)	//29 mins
 #define SERVERREASKTIME			MIN2MS(15)	//15 mins - don't set this too low, it wont speed up anything, but it could kill emule or your internetconnection
 #define UDPSERVERREASKTIME		MIN2MS(30)	//30 mins
