@@ -66,6 +66,7 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_SHOWCATINFO, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWDWLPERCENT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWCLIENTPERCENTAGE, OnSettingsChange) //Commander - Added: Client Percentage
+    ON_BN_CLICKED(IDC_BANNER, OnSettingsChange) //Commander - Added: Side Banner
 	ON_BN_CLICKED(IDC_REPAINT,OnSettingsChange)
 	ON_BN_CLICKED(IDC_SELECT_HYPERTEXT_FONT, OnBnClickedSelectHypertextFont)
 	ON_BN_CLICKED(IDC_CLEARCOMPL,OnSettingsChange)
@@ -110,11 +111,18 @@ void CPPgDisplay::LoadSettings(void)
 		CheckDlgButton(IDC_DISABLEQUEUELIST,1);
 	else
 		CheckDlgButton(IDC_DISABLEQUEUELIST,0);
+    //Commander - Added: Enable/Disable Startupsound - Start
+    if(thePrefs.UseSideBanner())
+		CheckDlgButton(IDC_BANNER,1);
+	else
+		CheckDlgButton(IDC_BANNER,0);
+    //Commander - Added: Enable/Disable Startupsound - End
 
 	CheckDlgButton(IDC_SHOWCATINFO,(UINT)thePrefs.ShowCatTabInfos());
 	CheckDlgButton(IDC_REPAINT,(UINT)thePrefs.IsGraphRecreateDisabled() );
 	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)thePrefs.GetUseDwlPercentage() );
 	CheckDlgButton(IDC_SHOWCLIENTPERCENTAGE,(UINT)thePrefs.GetUseClientPercentage()); //Commander - Added: Client Percentage
+	CheckDlgButton(IDC_BANNER,(UINT)thePrefs.UseSideBanner()); //Commander - Added: Side Banner
 	CheckDlgButton(IDC_CLEARCOMPL, (uint8)thePrefs.GetRemoveFinishedDownloads());
 
 	CheckDlgButton(IDC_DISABLEHIST, (uint8)thePrefs.GetUseAutocompletion());
@@ -157,6 +165,7 @@ BOOL CPPgDisplay::OnApply()
 	thePrefs.m_bShowClientPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWCLIENTPERCENTAGE); //Commander - Added: Client Percentage
 	thePrefs.m_bRemoveFinishedDownloads=(uint8)IsDlgButtonChecked(IDC_CLEARCOMPL);
 	thePrefs.m_bUseAutocompl=(uint8)IsDlgButtonChecked(IDC_DISABLEHIST);
+    thePrefs.sidebanner = (uint8)IsDlgButtonChecked(IDC_BANNER);//Commander - Added: Side Banner
 
 	if(IsDlgButtonChecked(IDC_UPDATEQUEUE))
 		thePrefs.m_bupdatequeuelist = false;
@@ -259,6 +268,7 @@ void CPPgDisplay::Localize(void)
 		SetDlgItemText(IDC_SHOWDWLPERCENT, GetResString(IDS_SHOWDWLPERCENTAGE));
 		SetDlgItemText(IDC_SHOWCLIENTPERCENTAGE, GetResString(IDS_CLIENTPERCENTAGE)); //Commander - Added: Client Percentage
 		GetDlgItem(IDC_CLEARCOMPL)->SetWindowText(GetResString(IDS_AUTOREMOVEFD));
+        SetDlgItemText(IDC_BANNER, GetResString(IDS_BANNER)); //Commander - Added: Side Banner
 
 		GetDlgItem(IDC_RESETLABEL)->SetWindowText(GetResString(IDS_RESETLABEL));
 		GetDlgItem(IDC_RESETHIST)->SetWindowText(GetResString(IDS_PW_RESET));

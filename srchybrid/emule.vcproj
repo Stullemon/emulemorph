@@ -995,6 +995,9 @@
 				RelativePath="InputBox.cpp">
 			</File>
 			<File
+				RelativePath="KCSideBannerWnd.cpp">
+			</File>
+			<File
 				RelativePath="KademliaWnd.cpp">
 			</File>
 			<File
@@ -1381,6 +1384,9 @@
 			</File>
 			<File
 				RelativePath="InputBox.h">
+			</File>
+			<File
+				RelativePath="KCSideBannerWnd.h">
 			</File>
 			<File
 				RelativePath="KademliaWnd.h">

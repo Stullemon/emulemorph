@@ -22,6 +22,7 @@
 #include "PPgMorph2.h" //MORPH - Added by SiRoB, Morph Prefs
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 #include "PPgEastShare.h" //EastShare - Added by Pretender, TBH-AutoBackup
+#include "KCSideBannerWnd.h" //Commander - Added: Preferences Banner [TPT]
 
 class CPreferencesDlg : public CPropertySheet
 {
@@ -73,4 +74,8 @@ protected:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+protected:
+	CKCSideBannerWnd m_banner;	//Commander - Added: Preferences Banner [TPT]	
+
+
 };

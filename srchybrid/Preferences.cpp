@@ -105,6 +105,7 @@ struct Preferences_Import20a_Struct{
 	int serverColumnWidths[8];
 	uint8	splashscreen;
 	uint8   startupsound;//Commander - Added: Enable/Disable Startupsound
+	uint8   sidebanner;//Commander - Added: Side Banner
 	uint8	filterLANIPs;
 };
 #pragma pack()
@@ -143,6 +144,7 @@ struct Preferences_Import20b_Struct{
 	int serverColumnWidths[8];
 	uint8	splashscreen;
 	uint8	startupsound;//Commander - Added: Enable/Disable Startupsound
+	uint8	sidebanner;//Commander - Added: Side Banner
 	uint8	filterLANIPs;
 	uint64	totalDownloadedBytes;
 	uint64	totalUploadedBytes;
@@ -216,6 +218,7 @@ INT		CPreferences::FilenamesListColumnOrder[2];
 DWORD	CPreferences::statcolors[15];
 uint8	CPreferences::splashscreen;
 uint8	CPreferences::startupsound;//Commander - Added: Enable/Disable Startupsound
+uint8	CPreferences::sidebanner;//Commander - Added: Side Banner
 uint8	CPreferences::filterLANIPs;
 bool	CPreferences::m_bAllocLocalHostIP;
 uint8	CPreferences::onlineSig;
@@ -2009,6 +2012,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("AddServersFromClient"),addserversfromclient);
 	ini.WriteBool(_T("Splashscreen"),splashscreen);
 	ini.WriteBool(_T("Startupsound"),startupsound);//Commander - Added: Enable/Disable Startupsound
+	ini.WriteBool(_T("Sidebanner"),sidebanner);//Commander - Added: Side Banner
 	ini.WriteBool(_T("BringToFront"),bringtoforeground);
 	ini.WriteBool(_T("TransferDoubleClick"),transferDoubleclick);
 	ini.WriteBool(_T("BeepOnError"),beepOnError);
@@ -2471,13 +2475,14 @@ void CPreferences::SavePreferences()
 	ini.WriteInt("SplitterbarPositionFriend",splitterbarPositionFriend+2,"eMule");
 	ini.WriteInt("SplitterbarPositionIRC",splitterbarPositionIRC+2,"eMule");
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
-        ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
 
-        //Commander - Added: Invisible Mode [TPT] - Start
-        ini.WriteBool("InvisibleMode", m_bInvisibleMode);
+    ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
+
+    //Commander - Added: Invisible Mode [TPT] - Start
+    ini.WriteBool("InvisibleMode", m_bInvisibleMode);
 	ini.WriteInt("InvisibleModeHKKey", (int)m_cInvisibleModeHotKey);
 	ini.WriteInt("InvisibleModeHKKeyModifier", m_iInvisibleModeHotKeyModifier);
-        //Commander - Added: Invisible Mode [TPT] - End        
+    //Commander - Added: Invisible Mode [TPT] - End        
 }
 
 void CPreferences::SaveCats(){
@@ -2678,6 +2683,7 @@ void CPreferences::LoadPreferences()
 	addserversfromclient=ini.GetBool(_T("AddServersFromClient"),true);
 	splashscreen=ini.GetBool(_T("Splashscreen"),true);
 	startupsound=ini.GetBool(_T("Startupsound"),true);//Commander - Added: Enable/Disable Startupsound
+	sidebanner=ini.GetBool(_T("Sidebanner"),true);//Commander - Added: Side Banner
 	bringtoforeground=ini.GetBool(_T("BringToFront"),true);
 	transferDoubleclick=ini.GetBool(_T("TransferDoubleClick"),true);
 	beepOnError=ini.GetBool(_T("BeepOnError"),true);
@@ -2891,13 +2897,13 @@ void CPreferences::LoadPreferences()
 	// Maella end
 	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
-        //Commander - Added: Invisible Mode [TPT] - Start
-        SetInvisibleMode( ini.GetBool("InvisibleMode", false),
+    //Commander - Added: Invisible Mode [TPT] - Start
+    SetInvisibleMode( ini.GetBool("InvisibleMode", false),
 	ini.GetInt("InvisibleModeHKKeyModifier", MOD_CONTROL | MOD_SHIFT | MOD_ALT),
-        (char)ini.GetInt("InvisibleModeHKKey", (int)'E'));
-        //Commander - Added: Invisible Mode [TPT] - End
+    (char)ini.GetInt("InvisibleModeHKKey", (int)'E'));
+    //Commander - Added: Invisible Mode [TPT] - End
 
-        m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
+    m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
 	enableDownloadInRed = ini.GetBool(_T("EnableDownloadInRed"), true); //MORPH - Added by IceCream, show download in red
 	enableDownloadInBold = ini.GetBool(_T("EnableDownloadInBold"), true); //MORPH - Added by SiRoB, show download in Bold
 	enableAntiLeecher = ini.GetBool(_T("EnableAntiLeecher"), true); //MORPH - Added by IceCream, enable AntiLeecher

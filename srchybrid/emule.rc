@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -940,6 +940,8 @@ BEGIN
     LTEXT           "",IDC_PREVIEW,93,4,26,13
     CONTROL         "ShowClientPercentage",IDC_SHOWCLIENTPERCENTAGE,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,84,215,9
+    CONTROL         "Show sidebanner",IDC_BANNER,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,128,215,10
 END
 
 IDD_PPG_SECURITY DIALOGEX 0, 0, 230, 241
@@ -1937,7 +1939,6 @@ BEGIN
         VERTGUIDE, 100
         VERTGUIDE, 216
         TOPMARGIN, 7
-        BOTTOMMARGIN, 282
     END
 
     IDD_WIZARD, DIALOG
@@ -1986,7 +1987,6 @@ BEGIN
         VERTGUIDE, 106
         VERTGUIDE, 122
         TOPMARGIN, 7
-        BOTTOMMARGIN, 282
     END
 
     IDD_ADDFRIEND, DIALOG
@@ -2276,7 +2276,6 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 223
         TOPMARGIN, 7
-        BOTTOMMARGIN, 282
         HORZGUIDE, 46
     END
 
@@ -2286,7 +2285,6 @@ BEGIN
         RIGHTMARGIN, 224
         VERTGUIDE, 14
         VERTGUIDE, 216
-        BOTTOMMARGIN, 283
     END
 
     IDD_PPG_EASTSHARE, DIALOG
@@ -2294,7 +2292,6 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 223
         TOPMARGIN, 7
-        BOTTOMMARGIN, 282
         HORZGUIDE, 46
     END
 
@@ -2576,12 +2573,31 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Deutsch (Deutschland) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+#ifdef _WIN32
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_MORPH_BANNER        BITMAP                  "res\\morph_banner.bmp"
+#endif    // Deutsch (Deutschland) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4745,9 +4761,10 @@ BEGIN
     IDS_SEARCHFORCHAR       "Search for"
     IDS_REPLACEBYCHAR       "Replace by"
     IDS_SC_HEADLINE         "Simple cleanup"
+    IDS_BANNER              "Show sidebanner"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "emuledlg.h"
 #include "PreferencesDlg.h"
 
 #ifdef _DEBUG
@@ -113,6 +114,21 @@ BOOL CPreferencesDlg::OnInitDialog()
 	m_listbox.GetText(curSel,currenttext);
 	m_groupbox.SetWindowText(currenttext);
 	m_iPrevPage = curSel;
+    
+	if(thePrefs.UseSideBanner()){
+	//Commander - Added: Preferences Banner [TPT] - Start		
+	CBitmap bmp;
+	bmp.LoadBitmap(IDB_MORPH_BANNER);
+	m_banner.SetTexture((HBITMAP)bmp.Detach());	
+	m_banner.SetFillFlag(KCSB_FILL_TEXTURE);
+	m_banner.SetSize(70);
+	m_banner.SetTitle(_T(""));
+	m_banner.SetCaption(_T(""));
+	m_banner.Attach(this, KCSB_ATTACH_RIGHT);
+	//theApp.emuledlg->preferenceswnd->Localize();
+	//Commander - Added: Preferences Banner [TPT] - End
+	}
+
 	return bResult;
 }
 
@@ -271,6 +287,7 @@ void CPreferencesDlg::Localize()
 	tab->ShowWindow(SW_HIDE);
 	m_listbox.SetCurSel(GetActiveIndex());		
 	CenterWindow();
+	m_banner.UpdateSize(); //Commander - Added: Preferences Banner [TPT]	
 	Invalidate();
 	RedrawWindow();
 	dc.SelectObject(pOldFont); //restore default font object

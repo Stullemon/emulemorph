@@ -1464,6 +1464,7 @@
 #define IDC_CONV_PB_CURRENT             2187
 #define IDC_CLEARCOMPL                  2188
 #define IDC_STARTS                      2189
+#define IDC_BANNER                      2189
 #define IDC_UPDATESERVERCONNECT         2190
 #define IDC_VWIDTH                      2191
 #define IDC_QUEUECOUNT                  2192
@@ -2443,6 +2444,7 @@
 #define IDS_PW_STARTUPSOUND             5010
 #define IDC_SPLITTER_STAT_HL            5011
 #define IDC_SPLITTER_STAT_HR            5012
+#define IDB_MORPH_BANNER                5012
 #define IDC_SPLITTER_IRC                5013
 #define IDC_BUTTONEDIT                  5014
 #define IDC_BUTTONCHANGE                5015
@@ -2459,11 +2461,11 @@
 #define IDC_CHECKCASESENSITIVE          5026
 #define IDC_REPLACECHARSLIST            5027
 #define IDC_IP2COUNTRY_VERSION          5028
+#define IDC_SC_STATIC1                  5028
 #define IDC_IP2FILTER_VERSION           5029
 #define IDC_IPFILTER_VERSION            5029
-#define IDC_FAKELIST_VERSION            5030
-#define IDC_SC_STATIC1                  5028
 #define IDC_SC_STATIC2                  5029
+#define IDC_FAKELIST_VERSION            5030
 #define IDC_SC_STATIC3                  5030
 #define IDC_SC_STATIC4                  5031
 #define IDC_MR_STATIC1                  5032
@@ -2536,6 +2538,7 @@
 #define IDS_SEARCHFORCHAR               5414
 #define IDS_REPLACEBYCHAR               5415
 #define IDS_SC_HEADLINE                 5416
+#define IDS_BANNER                      5417
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
@@ -2567,7 +2570,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        5012
+#define _APS_NEXT_RESOURCE_VALUE        5013
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         5035
 #define _APS_NEXT_SYMED_VALUE           106
