@@ -1,7 +1,12 @@
 --------------------------------------
 Changelog for eMule 0.42e MorphXT v2.x
 --------------------------------------
+FIXED  : Invalide Parameter Message [SiRoB]
+FIXED  : Abnormal Know.met file growing [SiRoB]
+
 ADDED  : aux Ports support from lugdunummaster [AndCycle]
+
+CHANGED: IpFilter and FakeCheck have been changed to avoid continuous update in case it is used with an autoupdater by other mod [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42e MorphXT v2.5
