@@ -286,8 +286,9 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			}
 		}break;
 	}
+	m_fLastScoreRatio = result;
 
-	return m_fLastScoreRatio = result;
+	return result;
 	//EastShare END - Added by linekin, CreditSystem 
 
 	//Morph End - Modified by AndCycle, reduce a little CPU usage for ratio count
@@ -991,6 +992,9 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 // Moonlight: SUQWT - Save the wait times.
 void CClientCredits::SaveUploadQueueWaitTime() {
+	if ( ( GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDFAILED || GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDBADGUY || GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+		return;
+	}
 	if(m_bSaveUploadQueueWaitTime){
 		if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = GetTickCount() - m_dwUnSecureWaitTime;
 		if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = GetTickCount() - m_dwSecureWaitTime;
@@ -1004,10 +1008,14 @@ void CClientCredits::SaveUploadQueueWaitTime() {
 
 // Moonlight: SUQWT - Clear the wait times.
 void CClientCredits::ClearUploadQueueWaitTime() {
+	if ( ( GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDFAILED || GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDBADGUY || GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+		return;
+	}
 	m_pCredits->nUnSecuredWaitTime = 0;
 	m_pCredits->nSecuredWaitTime = 0;
 }
 //Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
 // Moonlight: SUQWT: Adjust to take previous wait time into account.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1023,6 +1031,7 @@ void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	m_dwWaitTimeIP = dwForIP;
 }
+
 void CClientCredits::ClearWaitStartTime(){
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
