@@ -623,6 +623,11 @@ private:
 	uint32      m_slotNumber;
 	DWORD       m_dwLastCheckedForEvictTick;
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
+	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
+
+	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+	bool	m_bPowerShared;
+	//MORPH END   - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 
 	//download
 	EDownloadState m_nDownloadState;

@@ -140,6 +140,9 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 } 
 
 void CUpDownClient::SetUploadState(EUploadState news){
+	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+	if (news!=US_UPLOADING) m_bPowerShared = GetPowerShared();
+	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 	m_nUploadState = news;
 	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 }
@@ -386,12 +389,15 @@ bool CUpDownClient::IsMoreUpThanDown() const{
 * @return true if the requested file has release priority
 */
 bool CUpDownClient::GetPowerShared() const {
-
-	if(GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
-		return theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();
+	//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+	bool bPowerShared;
+	if (GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
+		bPowerShared = theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();
 	} else {
-		return false;
+		bPowerShared = false;
 	}
+	return (m_bPowerShared && GetUploadState()==US_UPLOADING) || bPowerShared;
+	//MORPH END   - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 }
 //MORPH END - Added by Yun.SF3, ZZ Upload System
 
@@ -717,6 +723,9 @@ void CUpDownClient::SetUploadFileID(const uchar* tempreqfileid)
 	if(newreqfile == oldreqfile)
 		return;
 	if(newreqfile){
+		//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+		m_bPowerShared = newreqfile->GetPowerShared();
+		//MORPH END   - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 		newreqfile->AddQueuedCount();
 		newreqfile->AddUploadingClient(this);
 		md4cpy(requpfileid,tempreqfileid);
