@@ -22,6 +22,7 @@ FIXED: FakeCheck now worked in search windows [SiRoB]
 TWEAKED: PowerShare Limit more occurate [SiRoB]
 CHANGED: reduce HD head moving (bluecow)[AndCycle]
 ADDED: Lowid to Highid Automatic Callback(enkeyDEV)[AndCycle]
+ADDED: Partfile Name Recovery (enkeyDEV)[AndCycle]
 
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.6
