@@ -55,7 +55,6 @@
 #include "shahashset.h"
 #include "PeerCacheSocket.h"
 #include "Log.h"
-#include "ServerList.h" //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 // MORPH START - Added by Commander, WebCache 1.2e
 #include "WebCache/WebCacheSocket.h" // yonatan http
@@ -73,10 +72,6 @@ static char THIS_FILE[]=__FILE__;
 #ifndef FSCTL_SET_SPARSE
 #define FSCTL_SET_SPARSE                CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 49, METHOD_BUFFERED, FILE_SPECIAL_ACCESS)
 #endif
-
-//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-#define MAX_PREF_SERVERS	10	// itsonlyme: cacheUDPsearchResults
-//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 // Barry - use this constant for both places
 #define PROGRESS_HEIGHT 3
@@ -2752,39 +2747,6 @@ void CPartFile::AddSource(LPCTSTR pszURL, uint32 nIP)
 	if (theApp.downloadqueue->CheckAndAddSource(this, client))
 		UpdatePartsInfo();
 }
-
-//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-// itsonlyme: cacheUDPsearchResults
-CServer *CPartFile::GetNextAvailServer()
-{
-	if (m_preferredServers.IsEmpty()) 
-		return NULL;
-
-	POSITION pos = m_preferredServers.GetHeadPosition();
-	SServer aServer = m_preferredServers.GetValueAt(pos);
-	m_preferredServers.RemoveAt(pos);
-
-
-	CServer *nextServer = theApp.serverlist->GetServerByIP(aServer.m_nIP, aServer.m_nPort);
-	if (!nextServer) 
-		return NULL;
-
-	CString tracemsg;
-	tracemsg.Format(_T("GetNextAvailServer returned %s:%i server with %i sources for %s"), nextServer->GetAddress(), nextServer->GetPort(), aServer.m_uAvail, this->m_strFileName);
-	TRACE(tracemsg);
-	AddDebugLogLine(false, tracemsg);
-
-	return nextServer;
-}
-
-void CPartFile::AddAvailServer(SServer server)
-{
-	m_preferredServers.Insert(server.m_uAvail, server);
-	while (m_preferredServers.GetCount() > MAX_PREF_SERVERS)
-		m_preferredServers.RemoveAt(m_preferredServers.GetHeadPosition());
-}
-// itsonlyme: cacheUDPsearchResults
-//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 // SLUGFILLER: heapsortCompletesrc
 static void HeapSort(CArray<uint16,uint16> &count, uint32 first, uint32 last){

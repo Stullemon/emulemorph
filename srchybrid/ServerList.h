@@ -16,8 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
-class CPartFile; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
-
 class CServer;
 
 class CServerList
@@ -45,9 +43,6 @@ public:
 	CServer*	GetServerAt(uint32 pos) const { return list.GetAt(list.FindIndex(pos)); }
 	uint32		GetServerCount() const { return list.GetCount(); }
 	CServer*	GetNextServer(const CServer* lastserver) const; // slow
-	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-	CServer*	GetNextServer(const CServer* lastserver, CPartFile *file) const;	// itsonlyme: cacheUDPsearchResults
-	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 	CServer*	GetServerByAddress(LPCTSTR address, uint16 port) const;
 	CServer*	GetServerByIP(uint32 nIP) const;
 	CServer*	GetServerByIP(uint32 nIP, uint16 nPort) const;

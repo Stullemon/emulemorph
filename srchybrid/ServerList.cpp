@@ -38,7 +38,6 @@
 #include "Fakecheck.h" //MORPH - Added by SiRoB
 #include "ip2country.h" //MORPH - Added by SiRoB
 #include "SharedFileList.h" //MORPH - Added by SiRoB
-#include "PartFile.h" //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -587,22 +586,6 @@ CServer* CServerList::GetNextServer(const CServer* lastserver) const
 	else
 		return list.GetAt(pos);
 }
-
-//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-// itsonlyme: cacheUDPsearchResults
-CServer* CServerList::GetNextServer(const CServer *lastserver, CPartFile *file) const
-{
-	if (!file)
-		return GetNextServer(lastserver);
-
-	CServer *nextServer = file->GetNextAvailServer();
-	if (!nextServer) 
-		return GetNextServer(lastserver);
-	else
-		return nextServer;
-}
-// itsonlyme: cacheUDPsearchResults
-//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 CServer* CServerList::GetServerByAddress(LPCTSTR address, uint16 port) const
 {

@@ -455,33 +455,6 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 				toadd->AddServer(server);
 			}			
 			toadd->SetPreviewPossible( Sender->GetPreviewSupport() && ED2KFT_VIDEO == GetED2KFileTypeID(toadd->GetFileName()) );
-			//Morph Start - added by AndCycle, SLUGFILLER: searchCatch,itsonlyme: cacheUDPsearchResults
-			// SLUGFILLER: searchCatch
-			CPartFile *file = theApp.downloadqueue->GetFileByID(toadd->GetFileHash());
-			if (file){
-				if (toadd->GetClientID() && toadd->GetClientPort()){
-					// pre-filter sources which would be dropped in CPartFile::AddSources
-					if (CPartFile::CanAddSource(toadd->GetClientID(), toadd->GetClientPort(), toadd->GetClientServerIP(), toadd->GetClientServerPort())){
-						CSafeMemFile sources(1+4+2);
-						uint8 uSources = 1;
-						uint32 nIP = toadd->GetClientID();
-						uint16 nPort = toadd->GetClientPort();
-						sources.Write(&uSources, 1);
-						sources.Write(&nIP, 4);
-						sources.Write(&nPort, 2);
-						sources.SeekToBegin();
-						file->AddSources(&sources,toadd->GetClientServerIP(),toadd->GetClientServerPort());
-					}
-				}
-				// itsonlyme: cacheUDPsearchResults
-				CPartFile::SServer tmpServer(toadd->GetClientServerIP(), toadd->GetClientServerPort());
-				tmpServer.m_uAvail = toadd->GetIntTagValue(FT_SOURCES);
-				file->AddAvailServer(tmpServer);
-				AddDebugLogLine(false, _T("Caching server with %i sources for %s"), toadd->GetIntTagValue(FT_SOURCES), file->GetFileName());
-				// itsonlyme: cacheUDPsearchResults
-			}
-			// SLUGFILLER: searchCatch
-			//Morph End - added by AndCycle, SLUGFILLER: searchCatch,itsonlyme: cacheUDPsearchResults
 		}
 		AddToList(toadd, true);
 	}
@@ -681,33 +654,6 @@ CSearchFile* CSearchList::DetachNextFile(uint32 nSearchID) {
 
 bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 {
-	//Morph Start - added by AndCycle, SLUGFILLER: searchCatch,itsonlyme: cacheUDPsearchResults
-	// SLUGFILLER: searchCatch
-	CPartFile *file = theApp.downloadqueue->GetFileByID(toadd->GetFileHash());
-	if (file){
-		if (toadd->GetClientID() && toadd->GetClientPort()){
-			// pre-filter sources which would be dropped in CPartFile::AddSources
-			if (CPartFile::CanAddSource(toadd->GetClientID(), toadd->GetClientPort(), toadd->GetClientServerIP(), toadd->GetClientServerPort())){
-				CSafeMemFile sources(1+4+2);
-				uint8 uSources = 1;
-				uint32 nIP = toadd->GetClientID();
-				uint16 nPort = toadd->GetClientPort();
-				sources.Write(&uSources, 1);
-				sources.Write(&nIP, 4);
-				sources.Write(&nPort, 2);
-				sources.SeekToBegin();
-				file->AddSources(&sources,toadd->GetClientServerIP(),toadd->GetClientServerPort());
-			}
-		}
-		// itsonlyme: cacheUDPsearchResults
-		CPartFile::SServer tmpServer(toadd->GetClientServerIP(), toadd->GetClientServerPort());
-		tmpServer.m_uAvail = toadd->GetIntTagValue(FT_SOURCES);
-		file->AddAvailServer(tmpServer);
-		AddDebugLogLine(false, _T("Caching server with %i sources for %s"), toadd->GetIntTagValue(FT_SOURCES), file->GetFileName());
-		// itsonlyme: cacheUDPsearchResults
-	}
-	// SLUGFILLER: searchCatch
-	//Morph End - added by AndCycle, SLUGFILLER: searchCatch,itsonlyme: cacheUDPsearchResults
 	if (!bClientResponse && !m_strResultFileType.IsEmpty() && _tcscmp(m_strResultFileType, toadd->GetFileType()) != 0)
 	{
 		delete toadd;

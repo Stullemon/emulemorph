@@ -76,7 +76,6 @@ class CUpDownClient;
 enum EDownloadState;
 class CxImage;
 class CSafeMemFile;
-class CServer; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 #pragma pack(1)
 struct Requested_Block_Struct
@@ -284,27 +283,6 @@ public:
 
 	uint8*	MMCreatePartStatus();
 	
-	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-	// itsonlyme: cacheUDPsearchResults
-	struct SServer {
-		SServer() {
-			m_nIP = m_nPort = 0;
-			m_uAvail = 0;
-		}
-		SServer(uint32 nIP, UINT nPort) {
-			m_nIP = nIP;
-			m_nPort = nPort;
-			m_uAvail = 0;
-		}
-		uint32 m_nIP;
-		uint16 m_nPort;
-		UINT   m_uAvail;
-	};
-	void	AddAvailServer(SServer server);
-	CServer*	GetNextAvailServer();
-	// itsonlyme: cacheUDPsearchResults
-	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
-
 	//preview
 	virtual bool GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth,void* pSender);
 	virtual void GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
@@ -454,9 +432,6 @@ private:
 
     DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
 
-	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-	CRBMultiMap<UINT, SServer>	m_preferredServers;	// itsonlyme: cacheUDPsearchResults
-	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 	// khaos::categorymod+
 	uint16	m_catResumeOrder;
 	// khaos::categorymod-
