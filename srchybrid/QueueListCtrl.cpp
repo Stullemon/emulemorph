@@ -648,94 +648,46 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 		//MORPH START - Changed by SiRoB, ZZ Upload System
 		case 2: 
 		case 102: {
-			int result;
+			int result = 0;
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
-			if( (file1 != NULL) && (file2 != NULL))
- 				if(item1->GetPowerShared() == true && item2->GetPowerShared() == false)
- 					result = 1;
- 				else if(item1->GetPowerShared() == false && item2->GetPowerShared() == true)
- 					result = -1;
-				else if(item1->GetPowerShared() == true && item2->GetPowerShared() == true)//Morph - modified by AndCycle,  Equal Chance For Each File
-					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
-				else 
-					result = 0;
-
+			if( (file1 != NULL) && (file2 != NULL)){
+ 				//MORPH START - Added by SiRoB, Pay Back First
+				if (item1->MoreUpThanDown()) result += 2;
+				if (item2->MoreUpThanDown()) result -= 2;
+				//MORPH END   - Added by SiRoB, Pay Back First
+				if (item1->GetPowerShared()) result ++;
+ 				if (item2->GetPowerShared()) result --;
 				//Morph Start - added by AndCycle, Equal Chance For Each File
-				if(result == 0)
-					if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
-						result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());//original
-					}else{
-						switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
-
+				if (result == 0){
+					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 							case ECFEF_ACCEPTED:
-								if(file1->statistic.GetAccepts() < file2->statistic.GetAccepts()){
-									result = 1;
-								}
-								else if(file1->statistic.GetAccepts() > file2->statistic.GetAccepts()){
-									result = -1;
-								}
-								else{
-									result = 0;
-								}
+								result = file2->statistic.GetAccepts() - file1->statistic.GetAccepts();
 								break;
-
 							case ECFEF_ACCEPTED_COMPLETE:
-								if((float)file1->statistic.GetAccepts()/file1->GetPartCount() <	
-									(float)file2->statistic.GetAccepts()/file2->GetPartCount()){
-									result = 1;
-								}
-								else if((float)file1->statistic.GetAccepts()/file1->GetPartCount() >
-									(float)file2->statistic.GetAccepts()/file2->GetPartCount()){
-									result = -1;
-								}
-								else{
-									result = 0;
-								}
+								result = (float)file2->statistic.GetAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAccepts()/file1->GetPartCount();
 								break;
-
 							case ECFEF_TRANSFERRED:
-								if(file1->statistic.GetTransferred() < file2->statistic.GetTransferred()){
-									result = 1;
-								}
-								else if(file1->statistic.GetTransferred() > file2->statistic.GetTransferred()){
-									result = -1;
-								}
-								else{
-									result = 0;
-								}
+								result = file2->statistic.GetTransferred() - file1->statistic.GetTransferred();
 								break;
-
 							case ECFEF_TRANSFERRED_COMPLETE:
-								if((float)file1->statistic.GetTransferred()/file1->GetFileSize() < 
-									(float)file2->statistic.GetTransferred()/file2->GetFileSize()){
-									result = 1;
-								}
-								else if((float)file1->statistic.GetTransferred()/file1->GetFileSize() > 
-									(float)file2->statistic.GetTransferred()/file2->GetFileSize()){
-									result = -1;
-								}
-								else{
-									result = 0;
-								}
+								result = (float)file2->statistic.GetTransferred()/file2->GetFileSize() - (float)file1->statistic.GetTransferred()/file1->GetFileSize();
 								break;
-
 							default:
 								result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
-								break;
-						}
 					}
-					//Morph End - added by AndCycle, Equal Chance For Each File
+				}
+				//Morph End - added by AndCycle, Equal Chance For Each File
+			}
 			else if( file1 == NULL )
 				result = 1;
 			else
 				result = -1;
 
-			if(lParamSort == 2) {
+			if(lParamSort == 2)
 				return result;
-			} else {
+			else
 				return -result;
-			}
 		//MORPH END - Changed by SiRoB, ZZ Upload System
 		}
 		case 3: 
@@ -748,104 +700,44 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 			//return CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 		case 104: { 
 			//return CompareUnsigned(item2->GetScore(false), item1->GetScore(false));
-        		int result = 0;
-
+       		int result = 0;
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
-			if( (file1 != NULL) && (file2 != NULL))
-				//EastShare Start - added by AndCycle, PayBackFirst
-				if(item1->MoreUpThanDown() == true && item2->MoreUpThanDown() == false)
-					result = 1;
-				else if(item1->MoreUpThanDown() == false && item2->MoreUpThanDown() == true)
-					result = -1;
-                else 
-				//EastShare End - added by AndCycle, PayBackFirst
-				if(item1->GetPowerShared() == true && item2->GetPowerShared() == false)
-					result = 1;
-                else if(item1->GetPowerShared() == false && item2->GetPowerShared() == true)
-					result = -1;
-				else if(item1->GetPowerShared() == true && item2->GetPowerShared() == true)
-					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
-				else
-					result = 0;
-
+			if( (file1 != NULL) && (file2 != NULL)){
+				//MORPH START - Added by SiRoB, Pay Back First
+				if(item1->MoreUpThanDown())	result += 2;
+				if(item2->MoreUpThanDown())	result -= 2;
+                //MORPH END   - Added by SiRoB, Pay Back First
+				if(item1->GetPowerShared())	result ++;
+                if(item2->GetPowerShared())	result --;
+				//Morph Start - added by AndCycle, Equal Chance For Each File
+				if(result == 0)
+					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
+						case ECFEF_ACCEPTED:
+							result = file2->statistic.GetAccepts() - file1->statistic.GetAccepts();
+							break;
+						case ECFEF_ACCEPTED_COMPLETE:
+							result = (float)file2->statistic.GetAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAccepts()/file1->GetPartCount();
+							break;
+						case ECFEF_TRANSFERRED:
+							result = file2->statistic.GetTransferred() - file1->statistic.GetTransferred();
+							break;
+						case ECFEF_TRANSFERRED_COMPLETE:
+							result = (float)file2->statistic.GetTransferred()/file2->GetFileSize() - (float)file1->statistic.GetTransferred()/file1->GetFileSize();
+							break;
+						default:
+							result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
+					}
+				//Morph End - added by AndCycle, Equal Chance For Each File
+			}
 			else if( file1 == NULL )
 				result = 1;
 			else
 				result = -1;
-
-			if(result == 0)
-				//Morph Start - added by AndCycle, Equal Chance For Each File
-				if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
-					result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));//original
-				}else{
-					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
-
-						case ECFEF_ACCEPTED:
-							if(file1->statistic.GetAccepts() < file2->statistic.GetAccepts()){
-								result = 1;
-							}
-							else if(file1->statistic.GetAccepts() > file2->statistic.GetAccepts()){
-								result = -1;
-							}
-							else{
-								result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
-							}
-							break;
-
-						case ECFEF_ACCEPTED_COMPLETE:
-							if((float)file1->statistic.GetAccepts()/file1->GetPartCount() <	
-								(float)file2->statistic.GetAccepts()/file2->GetPartCount()){
-								result = 1;
-							}
-							else if((float)file1->statistic.GetAccepts()/file1->GetPartCount() >
-								(float)file2->statistic.GetAccepts()/file2->GetPartCount()){
-								result = -1;
-							}
-							else{
-								result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
-							}
-							break;
-
-						case ECFEF_TRANSFERRED:
-							if(file1->statistic.GetTransferred() < file2->statistic.GetTransferred()){
-								result = 1;
-							}
-							else if(file1->statistic.GetTransferred() > file2->statistic.GetTransferred()){
-								result = -1;
-							}
-							else{
-								result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
-							}
-							break;
-
-						case ECFEF_TRANSFERRED_COMPLETE:
-							if((float)file1->statistic.GetTransferred()/file1->GetFileSize() < 
-								(float)file2->statistic.GetTransferred()/file2->GetFileSize()){
-								result = 1;
-							}
-							else if((float)file1->statistic.GetTransferred()/file1->GetFileSize() > 
-								(float)file2->statistic.GetTransferred()/file2->GetFileSize()){
-								result = -1;
-							}
-							else{
-								result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
-							}
-							break;
-
-						default:
-							result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
-							break;
-					}
-				}
-				//Morph End - added by AndCycle, Equal Chance For Each File
-
-
-			if(lParamSort == 4) {
+			if(lParamSort == 4)
 				return result;
-			} else {
+			else
 				return -result;
-			}
 		}
 		//MORPH END - Changed by SiRoB, ZZ Upload System
 		case 5: 
