@@ -444,6 +444,7 @@ void CChatWnd::Localize()
 	GetDlgItem(IDC_FRIENDS_CLIENT)->SetWindowText(GetResString(IDS_CHAT_CLIENT));
 	GetDlgItem(IDC_FRIENDS_NAME)->SetWindowText(GetResString(IDS_NICKNAME));
 	GetDlgItem(IDC_FRIENDS_MSG)->SetWindowText(GetResString(IDS_INFO));
+	m_cUserInfo.SetText(GetResString(IDS_INFO));
 	GetDlgItem(IDC_FRIENDS_USERHASH)->SetWindowText(GetResString(IDS_CD_UHASH));	
 	//MORPH START - Added by SiRoB, New friend message window
 	GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(GetResString(IDS_COUNTRY) + _T(":"));

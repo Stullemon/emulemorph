@@ -210,7 +210,7 @@ BEGIN
     ICON            "",IDC_MESSAGEICON,144,4,20,20
     CONTROL         "Friends",IDC_FRIENDS_LBL,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,34,6,90,8
-    ICON            "",IDC_FRIENDSICON,21,5,21,20
+    ICON            "",IDC_FRIENDSICON,21,5,20,20
     PUSHBUTTON      "v",IDC_BTN_MENU,5,3,14,13,BS_NOTIFY | BS_FLAT
     GROUPBOX        "Info",IDC_FRIENDS_MSG,5,195,132,89
     LTEXT           "Userhash:",IDC_FRIENDS_USERHASH,10,216,61,8
@@ -1379,7 +1379,7 @@ BEGIN
     CONTROL         "Compression:",IDC_FD_COMPR,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,14,162,72,8
     CONTROL         "Static",IDC_COMPRESSION,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,162,222,8
+                    SS_NOPREFIX | WS_GROUP,92,162,87,8
     CONTROL         "Completed:",IDC_FD_X12,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,201,142,70,8
     CONTROL         "Static",IDC_COMPLSIZE,"Static",SS_LEFTNOWORDWRAP | 
