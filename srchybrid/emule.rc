@@ -1371,23 +1371,26 @@ CAPTION "Morph2"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "Update fakelist on startup",IDC_UPDATEFAKELISTSTART,
-                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,13,11,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,16,
                     196,8
-    PUSHBUTTON      "Update fakelist",IDC_UPDATEFAKES,143,28,81,14,BS_FLAT
-    EDITTEXT        IDC_UPDATE_URL_FAKELIST,13,29,128,12,ES_AUTOHSCROLL
-    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,13,20,96,8,0,
+    PUSHBUTTON      "Update fakelist",IDC_UPDATEFAKES,135,53,81,14,BS_FLAT
+    EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,202,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,13,28,203,8,0,
                     WS_EX_TRANSPARENT
-    PUSHBUTTON      "Update IPFilter.dat",IDC_UPDATEIPFURL,143,69,81,14,
+    PUSHBUTTON      "Update IPFilter.dat",IDC_UPDATEIPFURL,135,125,81,14,
                     BS_FLAT
     CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
-                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,51,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,87,
                     118,10
-    EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,70,121,12,ES_AUTOHSCROLL
-    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,60,96,8,0,
+    EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,109,202,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,101,202,8,0,
                     WS_EX_TRANSPARENT
-    EDITTEXT        IDC_LOWIDRETRY,113,100,22,12,ES_CENTER | ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_LOWIDRETRY,114,156,22,12,ES_CENTER | ES_AUTOHSCROLL | 
                     ES_NUMBER
-    LTEXT           "Low ID retries",IDC_LOWIDRETRYLABEL,17,102,92,8
+    LTEXT           "Low ID retries",IDC_LOWIDRETRYLABEL,22,159,85,8
+    GROUPBOX        "Server",IDC_STATIC,14,148,125,25,BS_FLAT
+    GROUPBOX        "File",IDC_STATIC,7,6,217,67,BS_FLAT
+    GROUPBOX        "Security",IDC_STATIC,7,76,217,69,BS_FLAT
 END
 
 
@@ -1978,6 +1981,8 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 224
+        VERTGUIDE, 14
+        VERTGUIDE, 216
         BOTTOMMARGIN, 209
     END
 END
