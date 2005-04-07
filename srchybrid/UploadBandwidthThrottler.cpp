@@ -690,16 +690,16 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(maxCounter);
 					Socket_stat* stat = NULL;
 					m_stat_list.Lookup(socket,stat);
-					if(stat->realBytesToSpend < -((sint64)ClientDataRate[classID])*100)
-						stat->realBytesToSpend = -((sint64)ClientDataRate[classID])*100;
-					else if(stat->realBytesToSpend > ClientDataRate[classID]*100)
-						stat->realBytesToSpend = ClientDataRate[classID]*100;
+					if(stat->realBytesToSpend < -((sint64)ClientDataRate[classID])*1000)
+						stat->realBytesToSpend = -((sint64)ClientDataRate[classID])*1000;
+					else if(stat->realBytesToSpend > ClientDataRate[classID])
+						stat->realBytesToSpend = ClientDataRate[classID];
 				}
 				sumofclientinclass += slotCounterClass[classID];
 				if (slotCounterClass[classID])
 					maxClientDataRate = max(maxClientDataRate,ClientDataRate[classID]);
-				if(realBytesToSpend < -((sint64)allowedDataRate)*100) {
-					sint64 newRealBytesToSpend = -((sint64)allowedDataRate)*100;
+				if(realBytesToSpend < -(((sint64)sumofclientinclass+1)*doubleSendSize)*1000) {
+					sint64 newRealBytesToSpend = -(((sint64)sumofclientinclass+1)*doubleSendSize)*1000;
 					realBytesToSpend = newRealBytesToSpend;
 					if (m_highestNumberOfFullyActivatedSlots[classID] > sumofclientinclass)
 						--m_highestNumberOfFullyActivatedSlots[classID];
