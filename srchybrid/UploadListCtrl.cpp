@@ -117,7 +117,7 @@ void CUploadListCtrl::Init()
 	// SLUGFILLER: multiSort
 
 	// Mighty Knife: Community affiliation
-	if (thePrefs.IsCommunityEnabled ()) ShowColumn (13);
+	if (thePrefs.IsCommunityEnabled ()) ;// ShowColumn (13); //Removed by SiRoB, some people may prefere disable it
 	else HideColumn (13);
 	// [end] Mighty Knife
 

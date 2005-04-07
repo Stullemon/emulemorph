@@ -94,12 +94,12 @@ void CClientListCtrl::Init()
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
-/*
+
 	// Mighty Knife: Community affiliation
-	if (thePrefs.IsCommunityEnabled ()) ShowColumn (8);
+	if (thePrefs.IsCommunityEnabled ()) ;//ShowColumn (8); //Removed by SiRoB, some people may prefere disable it
 	else HideColumn (8);
 	// [end] Mighty Knife
-*/
+
 // Commander - Added: IP2Country column - Start
 	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
 	    HideColumn (10);
