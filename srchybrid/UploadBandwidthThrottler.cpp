@@ -538,7 +538,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				m_stat_list.Lookup(socket,stat);
 				uint32 classID = stat->classID;
 				if (sumtimeSinceLastLoop>0){
-					if (ClientDataRate[classID] == 0)
+					if (stat->classID==SCHED_CLASS && stat->realBytesToSpend>0)
+						;//Do nothing
+					else if (ClientDataRate[classID] == 0)
 						stat->realBytesToSpend = _I64_MAX;
 					else if (_I64_MAX/sumtimeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*sumtimeSinceLastLoop > stat->realBytesToSpend)
 						stat->realBytesToSpend += ClientDataRate[classID]*sumtimeSinceLastLoop;
@@ -546,6 +548,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						stat->realBytesToSpend = _I64_MAX;
 				}
 			}
+			sumtimeSinceLastLoop = 0;
+
 			// Send any queued up control packets first
 			while(bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] <  (uint64)bytesToSpendClass[LAST_CLASS] && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
                 ThrottledControlSocket* socket = NULL;
@@ -595,8 +599,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				    theApp.QueueDebugLogLine(false,_T("There was a NULL socket in the UploadBandwidthThrottler Standard list (trickle)! Prevented usage. Index: %i Size: %i"), slotCounter, m_StandardOrder_list.GetSize());
            		}
         	}
-			sumtimeSinceLastLoop = 0;
-			//MORPH START - Added by SiRoB, Upload Splitting Class
 
 			uint32 lastpos = 0;
             for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
@@ -688,21 +690,21 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(maxCounter);
 					Socket_stat* stat = NULL;
 					m_stat_list.Lookup(socket,stat);
-					if(stat->realBytesToSpend < -((sint64)ClientDataRate[classID])*10000)
-						stat->realBytesToSpend = -((sint64)ClientDataRate[classID])*10000;
-					else if(stat->realBytesToSpend > 999+ClientDataRate[classID]*1000)
-						stat->realBytesToSpend = 999+ClientDataRate[classID]*1000;
+					if(stat->realBytesToSpend < -((sint64)ClientDataRate[classID])*1000)
+						stat->realBytesToSpend = -((sint64)ClientDataRate[classID])*1000;
+					else if(stat->realBytesToSpend > ClientDataRate[classID]*100)
+						stat->realBytesToSpend = ClientDataRate[classID]*100;
 				}
 				sumofclientinclass += slotCounterClass[classID];
 				if (slotCounterClass[classID])
 					maxClientDataRate = max(maxClientDataRate,ClientDataRate[classID]);
-				if(realBytesToSpend < -((sint64)allowedDataRate)*10000) {
-					sint64 newRealBytesToSpend = -((sint64)allowedDataRate)*10000;
+				if(realBytesToSpend < -((sint64)allowedDataRate)*1000) {
+					sint64 newRealBytesToSpend = -((sint64)allowedDataRate)*1000;
 					realBytesToSpend = newRealBytesToSpend;
 					if (m_highestNumberOfFullyActivatedSlots[classID] > sumofclientinclass)
 						--m_highestNumberOfFullyActivatedSlots[classID];
 				} else {
-					uint64 bandwidthSavedTolerance = 0;
+					uint64 bandwidthSavedTolerance = allowedDataRate*100;
 					if(realBytesToSpend > 0 && (uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
 						sint64 newRealBytesToSpend = 999+bandwidthSavedTolerance;
 						realBytesToSpend = newRealBytesToSpend;
