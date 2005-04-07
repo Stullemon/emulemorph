@@ -1659,7 +1659,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		case DS_CONNECTING:
 		case DS_WAITCALLBACK:
 			//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
-			if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend() || IsProxy())
+			if(GetRemoteQueueRank() && (m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend()) || IsProxy())
 			{
 				SetDownloadState(DS_ONQUEUE);
 				bDelete = false;
