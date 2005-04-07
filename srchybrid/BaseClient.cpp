@@ -1593,7 +1593,12 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			theApp.downloadqueue->RemoveSource(this);
 	    }*/
 		if(GetDownloadState() == DS_CONNECTED){
-		    // client didn't responsed to our request for some reasons (remotely banned?)
+		    //MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
+			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend() || IsProxy())
+				SetDownloadState(DS_ONQUEUE);
+			else
+			//MORPH END   - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
+			// client didn't responsed to our request for some reasons (remotely banned?)
 		    // or it just doesn't has this file, so try to swap first
             if (!SwapToAnotherFile(_T("No response from client. CUpDownClient::Disconnected()"), true, true, true, NULL, false, false)){ // ZZ:DownloadManager
 			    theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
@@ -1638,6 +1643,14 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			if (thePrefs.GetLogUlDlEvents())
 	            AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing connecting client from upload list. Reason: %s ----"), DbgGetClientInfo(), pszReason);
 		case US_WAITCALLBACK:
+			//MORPH START - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend or it's a proxy.
+			if(reqfile && !reqfile->IsPartFile() && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend() || IsProxy())
+			{
+				SetUploadState(US_NONE);
+				bDelete = false;
+				break;
+			}
+			//MORPH END   - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend or it's a proxy.
 		case US_ERROR:
 			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			bDelete = true;
@@ -1645,6 +1658,14 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	switch(m_nDownloadState){
 		case DS_CONNECTING:
 		case DS_WAITCALLBACK:
+			//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
+			if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend() || IsProxy())
+			{
+				SetDownloadState(DS_ONQUEUE);
+				bDelete = false;
+				break;
+			}
+			//MORPH END   - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
 		case DS_ERROR:
 			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			bDelete = true;
