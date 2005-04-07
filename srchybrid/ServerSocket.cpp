@@ -493,7 +493,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 
 					uint16 nPort = PeekUInt16(packet+4);
 					CUpDownClient* client = theApp.clientlist->FindClientByIP(dwIP,nPort);
-					//MORPH START - Changed by SiRoB, Lock Only When Needed
+					//MORPH START - Changed by SiRoB, Force TryToConnect for OP_CALLBACKREQUESTED
 					/*
 					if (client)
 						client->TryToConnect();
@@ -509,7 +509,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 						theApp.clientlist->AddClient(client);
 					}
 					client->TryToConnect(true);
-					//MORPH END   - Changed by SiRoB, Lock Only When Needed
+					//MORPH END   - Changed by SiRoB, Force TryToConnect for OP_CALLBACKREQUESTED
 				}
 				break;
 			}
