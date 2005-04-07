@@ -1,4 +1,17 @@
 --------------------------------------
+Changelog for eMule 0.45b MorphXT v6.x
+--------------------------------------
+ADDED  : Don't kill source if it's the only one complet source, it's a friend or a proxy [SiRoB]
+ADDED  : Don't kill client if we are the only one complet source, it's a friend or a proxy [SiRoB]
+ADDED  : Only Lock When Needed (arround ControlPacket Queueing) [SiRoB]
+ADDED  : Force TryToConnect for OP_CALLBACKREQUESTED (should avoid false setting in quarantine) [SiRoB]
+
+REMOVED: Avoid Kad consume too much CPU (changed the while by if in uploadBandWidthThrottler) [SiRoB]
+
+NOTE: Due to some change webcache should be more responsive now (proxy should not be banned anymore).
+We let the webcache system to decide to stop working himself.
+
+--------------------------------------
 Changelog for eMule 0.45b MorphXT v6.6
 --------------------------------------
 FIXED  : proper Scheduled slot order (keep older completing last and newer pre-empted first) [SiRoB]
