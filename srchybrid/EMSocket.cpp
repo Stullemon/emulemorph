@@ -518,9 +518,15 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 	//EMTrace("CEMSocket::OnSenPacked1 linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 
     sendLocker.Lock();
-
-    if (byConnected == ES_DISCONNECTED) {
+	//MORPH START - Changed by SiRoB, Lock Only When Needed
+	/*
+	if (byConnected == ES_DISCONNECTED) {
         sendLocker.Unlock();
+    */
+	bool disconnected = byConnected == ES_DISCONNECTED;
+	sendLocker.Unlock();
+    if (disconnected) {
+	//MORPH END   - Changed by SiRoB, Lock Only When Needed
         if(delpacket) {
 			delete packet;
         }
@@ -538,12 +544,20 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
         //}
 
         if (controlpacket) {
-	        controlpacket_queue.AddTail(packet);
-
-            // queue up for controlpacket
+	        sendLocker.Lock(); //MORPH - Added by SiRoB, Lock Only When Needed
+			controlpacket_queue.AddTail(packet);
+			//MORPH START - Changed by SiRoB, Lock Only When Needed
+			/*
+			// queue up for controlpacket
             theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+			*/
+			bool hassent = HasSent();
+			sendLocker.Unlock();
+			theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, hassent);
+			//MORPH END  - Added by SiRoB, Lock Only When Needed
 	    } else {
-            bool first = !((sendbuffer && !m_currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty());
+            sendLocker.Lock();//MORPH - Added by SiRoB, Lock Only When Needed
+			bool first = !((sendbuffer && !m_currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty());
             StandardPacketQueueEntry queueEntry = { actualPayloadSize, packet };
 		    standartpacket_queue.AddTail(queueEntry);
 
@@ -552,10 +566,11 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
                 lastFinishedStandard = ::GetTickCount();
                 m_bAccelerateUpload = true;	// Always accelerate first packet in a block
             }
+			sendLocker.Unlock(); //MORPH - Added by SiRoB, Lock Only When Needed
 	    }
     }
 
-    sendLocker.Unlock();
+    //sendLocker.Unlock(); //MORPH - Removed by SiRoB, Lock Only When Needed
 }
 
 uint64 CEMSocket::GetSentBytesCompleteFileSinceLastCallAndReset() {
@@ -625,12 +640,21 @@ void CEMSocket::OnSend(int nErrorCode){
     } else
 		byConnected = ES_CONNECTED;
 
-    if(m_currentPacket_is_controlpacket) {
-        // queue up for control packet
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+	//MORPH START - Changed by SiRoB, Lock Only When Needed
+	/*
+	if(m_currentPacket_is_controlpacket) {
+		// queue up for control packet
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, hassent);
+    */ 
+	bool QueueForSending = m_currentPacket_is_controlpacket;
+    bool hassent = HasSent();
+	sendLocker.Unlock();
+	if(QueueForSending) {
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, hassent);
+	//MORPH END   - Changed by SiRoB, Lock Only When Needed
     }
 
-    sendLocker.Unlock();
+    //sendLocker.Unlock(); //MORPH - Removed by SiRoB, Lock Only When Needed
 }
 
 //void CEMSocket::StoppedSendSoUpdateStats() {
@@ -842,17 +866,26 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     }
 
 
-    if(onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
-        // enter control packet send queue
+	//MORPH START - Changed by SiRoB, Lock Only When Needed
+	/*
+	if(onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
+	// enter control packet send queue
         // we might enter control packet queue several times for the same package,
         // but that costs very little overhead. Less overhead than trying to make sure
         // that we only enter the queue once.
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, hassent);
+	*/
+	bool QueueForSending = onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket);
+	bool hassent = HasSent();
+	sendLocker.Unlock();
+	if(QueueForSending) {
+	    theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, hassent);
+    //MORPH END   - Changed by SiRoB, Lock Only When Needed
     }
 
     //CleanSendLatencyList();
 
-    sendLocker.Unlock();
+    //sendLocker.Unlock(); //MORPH - Removed by SiRoB, Lock Only When Needed
 
     SocketSentBytes returnVal = { !anErrorHasOccured, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
     return returnVal;

@@ -646,10 +646,17 @@ void CClientUDPSocket::OnSend(int nErrorCode){
     sendLocker.Lock();
 	m_bWouldBlock = false;
 
-    if(!controlpacket_queue.IsEmpty()) {
+    //MORPH START - Changed by SiRoB, Lock Only When Needed
+	/*
+	if(!controlpacket_queue.IsEmpty()) {
+	*/
+	bool QueueForSending = !controlpacket_queue.IsEmpty();
+	sendLocker.Unlock();	
+	if (QueueForSending) {
+	//MORPH END  - Changed by SiRoB, Lock Only When Needed
         theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
     }
-    sendLocker.Unlock();
+	//sendLocker.Unlock(); //MORPH - Removed by SiRoB, Lock Only When Needed
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
@@ -687,10 +694,17 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
 	}
 
 // ZZ:UploadBandWithThrottler (UDP) -->
-    if(!IsBusy() && !controlpacket_queue.IsEmpty()) {
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+    //MORPH START - Changed by SiRoB, Lock Only When Needed
+	/*
+	if(!IsBusy() && !controlpacket_queue.IsEmpty()) {
+	*/
+	bool QueueForSending = !IsBusy() && !controlpacket_queue.IsEmpty();
+	sendLocker.Unlock();
+	if (QueueForSending) {
+	//MORPH END   - Changed by SiRoB, Lock Only When Needed
+	    theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
     }
-    sendLocker.Unlock();
+    //sendLocker.Unlock(); //MORPH - Removed by SiRoB, Lock Only When Needed
 
     SocketSentBytes returnVal = { true, 0, sentBytes };
     return returnVal;

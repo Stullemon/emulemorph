@@ -589,14 +589,22 @@ void CUDPSocket::OnSend(int nErrorCode){
 			DebugLogError(_T("Error: Server UDP socket: Failed to send packet - %s"), GetErrorMessage(nErrorCode, 1));
 		return;
 	}
-	m_bWouldBlock = false;
+	//m_bWouldBlock = false; //MORPH - Moved by SiRoB, moved after the lock -Fix-
 
 // ZZ:UploadBandWithThrottler (UDP) -->
     sendLocker.Lock();
-    if(!controlpacket_queue.IsEmpty()) {
+	m_bWouldBlock = false; //MORPH - Added by SiRoB, moved after the lock -Fix-
+	//MORPH START - Changed by SiRoB, Lock Only When Needed
+	/*
+	if(!controlpacket_queue.IsEmpty()) {
+	*/
+	bool QueueForSending = !controlpacket_queue.IsEmpty();
+	sendLocker.Unlock();
+	if(QueueForSending) {
+	//MORPH END   - Changed by SiRoB, Lock Only When Needed
         theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
     }
-    sendLocker.Unlock();
+    //sendLocker.Unlock(); //MORPH - Removed by SiRoB, Lock Only When Needed
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
@@ -623,11 +631,18 @@ SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint3
 	}
 
 // ZZ:UploadBandWithThrottler (UDP) -->
-    if(!IsBusy() && !controlpacket_queue.IsEmpty()) {
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+    //MORPH START - Changed by SiRoB, Lock Only When Needed
+	/*
+	if(!IsBusy() && !controlpacket_queue.IsEmpty()) {
+    */
+	bool QueueForSending = !IsBusy() && !controlpacket_queue.IsEmpty();
+	sendLocker.Unlock();
+	if(QueueForSending) {
+    //MORPH END  - Changed by SiRoB, Lock Only When Needed
+	    theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
     }
-    sendLocker.Unlock();
-
+    //sendLocker.Unlock(); //MORPH START - Removed by SiRoB, Lock Only When Needed
+    
     SocketSentBytes returnVal = { true, 0, sentBytes };
     return returnVal;
 // <-- ZZ:UploadBandWithThrottler (UDP)
