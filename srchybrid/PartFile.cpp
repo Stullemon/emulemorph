@@ -1169,7 +1169,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 				// rehash
 				// SLUGFILLER: SafeHash
 				SetStatus(PS_EMPTY);	// no need to wait for hashes with the new system
-				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 				m_PartsHashing += parthashthread->SetFirstHash(this);	// Only hashes completed parts, why hash gaps?
 				parthashthread->ResumeThread();
 				// SLUGFILLER: SafeHash
@@ -3339,7 +3339,7 @@ void CPartFile::CompleteFile(bool bIsHashingDone)
 	if (!bIsHashingDone){
 		SetStatus(PS_COMPLETING);
 		datarate = 0;
-		CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);	// SLUGFILLER: SafeHash - full speed hashing
+		CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 		if (addfilethread){
 			SetFileOp(PFOP_HASHING);
 			SetFileOpProgress(0);
@@ -4175,7 +4175,7 @@ void CPartFile::PreviewFile()
 
 	if (thePrefs.IsMoviePreviewBackup()){
 		m_bPreviewing = true;
-		CPreviewThread* pThread = (CPreviewThread*) AfxBeginThread(RUNTIME_CLASS(CPreviewThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+		CPreviewThread* pThread = (CPreviewThread*) AfxBeginThread(RUNTIME_CLASS(CPreviewThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 		pThread->SetValues(this,thePrefs.GetVideoPlayer());
 		pThread->ResumeThread();
 	}
@@ -4867,7 +4867,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 				// Is part corrupt
 				// Let's check in another thread
 				m_PartsHashing++;
-				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 				parthashthread->SetSinglePartHash(this, partNumber);
 				parthashthread->ResumeThread();
 			}
@@ -4875,7 +4875,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 			{
 				
 
-					CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+					CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 					parthashthread->SetSinglePartHash(this, partNumber, true);	// Special case, doesn't increment hashing parts, since part isn't really complete
 					parthashthread->ResumeThread();
 				}
@@ -6192,7 +6192,7 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 		// make sure that MD4 agrres to this fact too
 		// SLUGFILLER: SafeHash - In another thread
 		m_PartsHashing++;
-		CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+		CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 		parthashthread->SetSinglePartHash(this, nPart, false, true);
 		parthashthread->ResumeThread();
 		// SLUGFILLER: SafeHash
@@ -6208,7 +6208,7 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 //MORPH START - Added by SiRoB, SLUGFILLER: SafeHash
 void CPartFile::PerformFirstHash()
 {
-	CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+	CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 	m_PartsHashing += parthashthread->SetFirstHash(this);	// Only hashes completed parts, why hash gaps?
 	parthashthread->ResumeThread();
 }

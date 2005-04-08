@@ -2591,7 +2591,7 @@ bool CKnownFile::GrabImage(CString strFileName,uint8 nFramesToGrab, double dStar
 {
 	if (!IsMovie())
 		return false;
-	CFrameGrabThread* framegrabthread = (CFrameGrabThread*) AfxBeginThread(RUNTIME_CLASS(CFrameGrabThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+	CFrameGrabThread* framegrabthread = (CFrameGrabThread*) AfxBeginThread(RUNTIME_CLASS(CFrameGrabThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 	framegrabthread->SetValues(this,strFileName,nFramesToGrab,  dStartTime, bReduceColor, nMaxWidth, pSender);
 	framegrabthread->ResumeThread();
 	return true;

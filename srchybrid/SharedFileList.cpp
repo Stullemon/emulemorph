@@ -1034,7 +1034,7 @@ void CSharedFileList::HashNextFile(){
 		return;
 	UnknownFile_Struct* nextfile = waitingforhash_list.RemoveHead();
 	currentlyhashing_list.AddTail(nextfile);	// SLUGFILLER: SafeHash - keep track
-	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);	// SLUGFILLER: SafeHash - full speed hashing
+	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 	addfilethread->SetValues(this,nextfile->strDirectory,nextfile->strName);
 	addfilethread->ResumeThread();
 	// SLUGFILLER: SafeHash - nextfile deleting handled elsewhere
