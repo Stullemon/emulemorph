@@ -481,9 +481,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	        if (classID == LAST_CLASS) lastLoopTick = thisLoopTick; //MORPH - Added by SiRoB, lastLoopTick Fix
 					if(timeSinceLastLoop > sleepTime + 2000) {
 				        if (classID == LAST_CLASS)
-							theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler: Time since last loop too long. time: %ims wanted: %ims Max: %ims"), timeSinceLastLoop, sleepTime, sleepTime + 2000);
+							theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler: Time since last loop too long. time: %ums wanted: %ums Max: %ums"), timeSinceLastLoop, sleepTime, sleepTime + 2000);
         
         	            timeSinceLastLoop = sleepTime + 2000;
+						sumtimeSinceLastLoop = 0;
 						if (classID == LAST_CLASS)
 							lastLoopTick = thisLoopTick - timeSinceLastLoop;
         	        }
@@ -544,7 +545,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						stat->realBytesToSpend += ClientDataRate[classID]*sumtimeSinceLastLoop;
 					else
 						stat->realBytesToSpend = _I64_MAX;
-					if (stat->classID==SCHED_CLASS && stat->realBytesToSpend>0)
+					if (stat->classID==SCHED_CLASS && stat->realBytesToSpend>1000)
 						stat->realBytesToSpend = 1000;
 				}
 			}
