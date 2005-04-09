@@ -1,15 +1,22 @@
 --------------------------------------
-Changelog for eMule 0.45b MorphXT v6.x
+Changelog for eMule 0.45b MorphXT v6.7
 --------------------------------------
-ADDED  : Don't kill source if it's the only one complet source, it's a friend or a proxy [SiRoB]
+FIXED  : DownloadClientCtrl: Middle Mouse click on client item work properly for downloadtransfer window [SiRoB]
+FIXED  : WC: CreateMFRPacket memleak fix focused by WiZaRd [SiRoB]
+
+ADDED  : Don't kill source if it's the only one complet source, it's a friend, a proxy or not ed2kclient [SiRoB]
 ADDED  : Don't kill client if we are the only one complet source, it's a friend or a proxy [SiRoB]
 ADDED  : Only Lock When Needed (arround ControlPacket Queueing) [SiRoB]
 ADDED  : Force TryToConnect for OP_CALLBACKREQUESTED (should avoid false setting in quarantine) [SiRoB]
 
+CHANGED: Don't auto show community column (remain auto-hide capable :p) [SiRoB]
+
+TWEAKED: USC: Should be even more efficient (lowering focus effect due to different client latency) [SiRoB]
+
 REMOVED: Avoid Kad consume too much CPU (changed the while by if in uploadBandWidthThrottler) [SiRoB]
 
-NOTE: Due to some change webcache should be more responsive now (proxy should not be banned anymore).
-We let the webcache system to decide to stop working himself.
+NOTE: Due to some change webcache should be more responsive now (proxy should not be deadsourcelisted anymore).
+Webcache system decide to stop working himself.
 
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.6
