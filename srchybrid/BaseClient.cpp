@@ -1658,10 +1658,10 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	switch(m_nDownloadState){
 		case DS_CONNECTING:
 		case DS_WAITCALLBACK:
-			//MORPH START - Added by SiRoB, Don't kill source if it's a proxy
-			if(IsProxy())
+			//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
+			if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1 || IsFriend() || IsProxy() || !IsEd2kClient())
 			{
-				bDelete = false;
+				bDelete = true;
 				break;
 			}
 			//MORPH END   - Added by SiRoB, Don't kill source if it's a proxy
