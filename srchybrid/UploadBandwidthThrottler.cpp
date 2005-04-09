@@ -484,9 +484,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler: Time since last loop too long. time: %ums wanted: %ums Max: %ums"), timeSinceLastLoop, sleepTime, sleepTime + 2000);
         
         	            timeSinceLastLoop = sleepTime + 2000;
-						sumtimeSinceLastLoop = 0;
-						if (classID == LAST_CLASS)
+						if (classID == LAST_CLASS){
 							lastLoopTick = thisLoopTick - timeSinceLastLoop;
+							sumtimeSinceLastLoop = 0;
+						}
         	        }
 
         	        realBytesToSpend += allowedDataRate*timeSinceLastLoop;
