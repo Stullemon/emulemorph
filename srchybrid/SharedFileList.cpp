@@ -38,6 +38,7 @@
 #include "StringConversion.h"
 #include "ClientList.h"
 #include "Log.h"
+#include "SR13-ImportParts.h" //MORPH - Added by SiRoB, Import Parts [SR13]
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1122,6 +1123,26 @@ int CAddFileThread::Run()
 	CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
 	sLock1.Lock();
 	*/
+	//MORPH START - Added by SiRoB, Import Parts [SR13]
+	if (m_partfile && m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS){
+		SR13_ImportParts(m_partfile, m_strImport);
+		if(theApp.emuledlg && theApp.emuledlg->IsRunning() &&
+			m_partfile && m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS){
+				m_partfile->SetFileOp(PFOP_HASHING);
+			}
+		// Completing will take care of hashing in case when
+		// user imported data were enough to complete file
+		if (m_partfile->GetStatus(false) == PS_COMPLETING){
+			//sLock1.Unlock(); //SafeHash
+			CoUninitialize();
+			return 0;
+		}
+	}
+	// TODO: Test case when suposeddly correct, but actually broken verified data is
+	// completed with import and see if file recovers its started/paused state correctly
+	// after failed completion.
+	//MORPH END   - Added by SiRoB, Import Parts [SR13]
+	
 	CString strFilePath;
 	_tmakepath(strFilePath.GetBuffer(MAX_PATH), NULL, m_strDirectory, m_strFilename, NULL);
 	strFilePath.ReleaseBuffer();

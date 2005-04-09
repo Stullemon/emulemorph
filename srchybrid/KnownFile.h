@@ -336,6 +336,7 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
+
 	//MORPH START - Added by SiRoB, Show Permissions
 	// shared file view permissions (all, only friends, no one)
 	int		GetPermissions(void) const	{ return m_iPermissions; }
@@ -386,6 +387,10 @@ public:
 	//MORPH START - Added by SiRoB, copy feedback feature
 	CString GetFeedback(bool isUS = false);
 	//MORPH END   - Added by SiRoB, copy feedback feature
+	//MORPH START - Added by SiRoB, Import Parts [SR13]
+	bool	CreateHash(const uchar* pucData, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	//MORPH END   - Added by SiRoB, Import Parts [SR13]
+	
 protected:
 	//preview
 	bool	GrabImage(CString strFileName,uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
@@ -393,7 +398,10 @@ protected:
 	bool	LoadDateFromFile(CFileDataIO* file);
 	void	CreateHash(CFile* pFile, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	bool	CreateHash(FILE* fp, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	//MORPH - Removed by SiRoB, moved up in public area, Import Parts [SR13]
+	/*
 	bool	CreateHash(const uchar* pucData, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	*/
 	void	LoadComment();
 	uint16	CalcPartSpread(CArray<uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*,uchar*> hashlist;

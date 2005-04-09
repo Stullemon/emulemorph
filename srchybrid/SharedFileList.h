@@ -107,10 +107,15 @@ public:
 	virtual BOOL InitInstance();
 	virtual int		Run();
 	void	SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* partfile = NULL);
-
+	//MORPH START - Added by SiRoB, Import Parts [SR13]
+	void	SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* partfile, LPCTSTR import);
+	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 private:
 	CSharedFileList* m_pOwner;
 	CString			 m_strDirectory;
 	CString			 m_strFilename;
 	CPartFile*		 m_partfile;
+	//MORPH START - Added by SiRoB, Import Parts [SR13]
+	CString          m_strImport;
+	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 };

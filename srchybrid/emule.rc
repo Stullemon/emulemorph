@@ -4767,8 +4767,8 @@ STRINGTABLE
 BEGIN
     IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
                             "%i bad parts were imported for A/ICH. Initiating rehash."
-    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
-                            "Another import is already in progress. Please wait until it is finished."
+    IDS_SR13_IMPORTPARTS_ERR_FILETOOSMALL
+                            "File is smaller than minimal recovery block for AICH - there's no use in importing data to it."
     IDS_SR13_IMPORTPARTS_IMPORTFINISH 
                             "Import finished. %i parts were imported to %s."
 END

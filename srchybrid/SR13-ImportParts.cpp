@@ -4,6 +4,7 @@
 #include "emule.h"
 #include "emuleDlg.h"
 #include "Log.h"
+#include "Opcodes.h"
 #include "PartFile.h"
 #include "SHAHashSet.h"
 #include "SharedFileList.h"
@@ -14,6 +15,10 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+#ifndef GetFileNameorInfo
+#define GetFileNameorInfo(X)	X->GetFileName()
+#endif
+
 bool CKnownFile::SR13_ImportParts(){
 	// General idea from xmrb's CKnownFile::ImportParts()
 	// Unlike xmrb's version which scans entire file designated for import and then tries
@@ -22,15 +27,6 @@ bool CKnownFile::SR13_ImportParts(){
 	// (for example you're importing damaged version of file to recover some parts from ED2K)
 	// That way it works much faster and almost always it is what expected from this
 	// function. --Rowaa[SR13].
-	// Current threading code is done by SiRoB of Morph MOD.
-
-	// Very crude locking, will be replaced with something much better in next version.
-	static bool inprogress=false;	
-
-	if(inprogress){
-		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS));
-		return false;
-	}
 
 	if(!IsPartFile()){
 		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE));
@@ -39,62 +35,62 @@ bool CKnownFile::SR13_ImportParts(){
 
 	CPartFile* partfile=(CPartFile*)this;
 
-	uint16 partcount=GetPartCount();
-
-	if (GetHashCount() < partcount){
-		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE), GetFileNameorInfo(partfile), GetHashCount(), partcount); // do not try to import to files without hashset.
+	// Disallow files without hashset, unless it is one part long file
+	if (GetPartCount() != 1 && GetHashCount() < GetPartCount()){
+		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE), GetFileNameorInfo(partfile), GetHashCount(), GetPartCount()); // do not try to import to files without hashset.
 		return false;
 	}
 
-	CString buffer=_T("*");
-	CFileDialog dlg(true, _T("*.*"), buffer, OFN_FILEMUSTEXIST|OFN_HIDEREADONLY);
+	// Disallow very small files
+	// Maybe I make them allowed in future when I make my program insert slices in partially downloaded parts.
+	if (GetFileSize() < EMBLOCKSIZE){
+		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_FILETOOSMALL)); // do not try to import to files without hashset.
+		return false;
+	}
+
+	CFileDialog dlg(true, NULL, NULL, OFN_FILEMUSTEXIST|OFN_HIDEREADONLY);
 	if(dlg.DoModal()!=IDOK)
 		return false;
-	CString pathName=dlg.GetFileName();
+	CString pathName=dlg.GetPathName();
 
-	CImportPartsFileThread* importpartsfilethread = (CImportPartsFileThread*) AfxBeginThread(RUNTIME_CLASS(CImportPartsFileThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-	if (importpartsfilethread){
+	partfile->SetStatus(PS_EMPTY/*PS_WAITINGFORHASH*/);
+	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL, 0, CREATE_SUSPENDED);
+	if (addfilethread){
 		partfile->SetFileOp(PFOP_SR13_IMPORTPARTS);
 		partfile->SetFileOpProgress(0);
-        importpartsfilethread->SetValues(pathName,partfile,&inprogress);
-		inprogress=true;
-		importpartsfilethread->ResumeThread();
+        addfilethread->SetValues(0, partfile->GetPath(), partfile->m_hpartfile.GetFileName(), partfile, pathName);
+		addfilethread->ResumeThread();
 	}
 	return true;
 }
 
-IMPLEMENT_DYNCREATE(CImportPartsFileThread, CWinThread);
-
-CImportPartsFileThread::CImportPartsFileThread(){
-	m_partfile = NULL;
-}
-
-BOOL CImportPartsFileThread::InitInstance(){
-	InitThreadLocale();
-	return TRUE;
-}
-
-void CImportPartsFileThread::SetValues(LPCTSTR filepath, CPartFile* partfile, bool *inrogress){
-	 m_strFilePath = filepath;
+// Special case for SR13-ImportParts
+void CAddFileThread::SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* partfile, LPCTSTR import)
+{
+	 m_pOwner = pOwner;
+	 m_strDirectory = directory;
+	 m_strFilename = filename;
 	 m_partfile = partfile;
-	 bInProgress = inrogress;
+	 m_strImport = import;
 }
 
-int CImportPartsFileThread::Run(){
-	DbgSetThreadName("Importing parts to %s", m_strFilePath);
-	if ( !m_partfile || !m_strFilePath || !theApp.emuledlg->IsRunning()){
-		*bInProgress = false;
-		return 0;
-	}
+inline uint32 WriteToPartFile(CPartFile *partfile, const BYTE *data, uint32 start, uint32 end){
+	uint32 result;
+	partfile->FlushBuffer(true);
+	result=partfile->WriteToBuffer(end-start, data, start, end, NULL, NULL);
+	partfile->FlushBuffer(true);
+	return result;
+}
+
+bool SR13_ImportParts(CPartFile* partfile, CString strFilePath){
 
 	uint16 partsuccess=0;
 	uint16 badpartsuccess=0;
-	uint16 partcount=m_partfile->GetPartCount();
+	uint16 partcount=partfile->GetPartCount();
 
 	CFile f;
-	if(!f.Open(m_strFilePath, CFile::modeRead|CFile::shareDenyNone)){
-		theApp.QueueLogLineEx(LOG_STATUSBAR|LOG_ERROR, GetResString(IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE), m_strFilePath);
-		*bInProgress = false;
+	if(!f.Open(strFilePath, CFile::modeRead)){
+		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE), strFilePath);
 		return false;
 	}
 
@@ -105,26 +101,33 @@ int CImportPartsFileThread::Run(){
 	uchar hash[16];
 	CKnownFile *kfcall=new CKnownFile;
 
-	theApp.QueueLogLineEx(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTSTART), partcount+1, partcount, m_partfile->GetFileName());
+	Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTSTART), partcount+1, partcount, partfile->GetFileName());
+
+	partfile->FlushBuffer(true);
 
 	for(part=0; part<partcount; part++){
-		// File for import is shorter than partfile and we reached its end. Shouldn't
-		// happen(?), because of check at end of for block, but just in case I mess code
-		// up somewhere. --Rowaa[SR13]
+		// in case of shutdown while still importing
+		if (theApp.emuledlg==NULL || !theApp.emuledlg->IsRunning()){
+			f.Close();
+			delete partData;
+			delete kfcall;
+			return false;
+		}
+
 		if(part*PARTSIZE>fileSize)
 			break;
 
 		if (theApp.emuledlg && theApp.emuledlg->IsRunning()){
-			UINT uProgress = ((ULONGLONG)(part*PARTSIZE) * 100) / m_partfile->GetFileSize();
-			VERIFY(PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)m_partfile));
+			UINT uProgress = ((ULONGLONG)(part*PARTSIZE) * 100) / fileSize;
+			VERIFY(PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)partfile));
 		}
 
-		if(m_partfile->IsComplete(part*PARTSIZE, part*PARTSIZE+PARTSIZE-1)){
-			theApp.QueueLogLineEx(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE), part);
+		if(partfile->IsComplete(part*PARTSIZE, part*PARTSIZE+PARTSIZE-1)){
+			Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE), part);
 			continue;
 		}
 
-		f.Seek(part*PARTSIZE,CFile::begin);
+		f.Seek(part*PARTSIZE, CFile::begin);
 		partSize=f.Read(partData, PARTSIZE);
 
 		if(partSize==0)
@@ -132,22 +135,19 @@ int CImportPartsFileThread::Run(){
 
 		kfcall->CreateHash(partData, partSize, hash);
 
-		if(md4cmp(hash, m_partfile->GetPartHash(part))==0){
-			m_partfile->WriteToBuffer(partSize-1, partData, part*PARTSIZE, part*PARTSIZE+partSize-1, NULL, NULL);
-			//m_partfile->FlushBuffer(false);
-			theApp.QueueLogLineEx(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD), part);
+		if(md4cmp(hash, (partcount==1?partfile->GetFileHash():partfile->GetPartHash(part)))==0){
+			WriteToPartFile(partfile, partData, part*PARTSIZE, part*PARTSIZE+partSize-1);
+			Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD), part);
 			partsuccess++;
 		} else {
-			if(m_partfile->IsPureGap(part*PARTSIZE, part*PARTSIZE+PARTSIZE-1)){
-				m_partfile->WriteToBuffer(partSize-1, partData, part*PARTSIZE, part*PARTSIZE+partSize-1, NULL, NULL);
-				//m_partfile->FlushBuffer(false);
-				theApp.QueueLogLineEx(LOG_STATUSBAR|LOG_WARNING, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD), part);
+			if(partfile->IsPureGap(part*PARTSIZE, part*PARTSIZE+PARTSIZE-1)){
+				WriteToPartFile(partfile, partData, part*PARTSIZE, part*PARTSIZE+partSize-1);
+				LogWarning(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD), part);
 				badpartsuccess++;
 			} else {
-				theApp.QueueLogLineEx(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH), part);
+				Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH), part);
 			}
 		}
-		// If we've got less bytes than asked, that means it's end of file for import
 		if(partSize!=PARTSIZE)
 			break;
 	}
@@ -155,32 +155,38 @@ int CImportPartsFileThread::Run(){
 	f.Close();
 	delete partData;
 	delete kfcall;
-
-	Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTFINISH), partsuccess, m_partfile->GetFileName());
-
+	
+	Log(LOG_STATUSBAR, _T("Import finished. %i parts imported to %s."), partsuccess, GetFileNameorInfo(partfile));
+	
 	if(badpartsuccess>0){
-		// Just a precaution. Never know where I can mess things up...
-		LogWarning(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_BADPARTSREHASH), badpartsuccess);
-		SR13_InitiateRehash(m_partfile);
+		switch(partfile->GetAICHHashset()->GetStatus()){
+		case AICH_TRUSTED:
+		case AICH_VERIFIED:
+		case AICH_HASHSETCOMPLETE:
+			Log(LOG_STATUSBAR, _T("AICH hash available. Advanced recovery pending."));
+			break;
+		default:
+			Log(LOG_STATUSBAR, _T("No AICH hash available. You may want to import file data once again latter."));
+		}
 	}
-	*bInProgress = false;
-	return 0;
+	return true;
 }
 
 // Initiates partfile rehash
 // Copied from PartFile.cpp
 // Check periodically if it needs update
+// No longer used by ImportParts... Maybe I'll remove it in next version
 void SR13_InitiateRehash(CPartFile* partfile){
 	CString strFileInfo;
 	strFileInfo.Format(_T("%s (%s)"), partfile->GetFilePath(), partfile->GetFileName());
 	LogWarning(LOG_STATUSBAR, GetResString(IDS_ERR_REHASH), strFileInfo);
 	// rehash
-	//partfile->SetStatus(PS_WAITINGFORHASH);
+	partfile->SetStatus(PS_WAITINGFORHASH);
 	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL, 0, CREATE_SUSPENDED);
 	if (addfilethread){
 		partfile->SetFileOp(PFOP_HASHING);
 		partfile->SetFileOpProgress(0);
-		addfilethread->SetValues(theApp.sharedfiles, partfile->GetPath(), partfile->m_hpartfile.GetFileName(), partfile);
+		addfilethread->SetValues(0, partfile->GetPath(), partfile->GetFileName(), partfile);
 		addfilethread->ResumeThread();
 	}
 }
