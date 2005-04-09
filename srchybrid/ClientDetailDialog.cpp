@@ -231,9 +231,9 @@ BOOL CClientDetailPage::OnSetActive()
 		uint32 ClientIP = client->GetIP ();
 		AddInfo.Format (_T("User-ID: %u   IP: %d.%d.%d.%d:%d"),
 						client->GetUserIDHybrid (),
-						(ClientIP >> 24) & 0xFF, (ClientIP >> 16) & 0xFF,
-						(ClientIP >> 8) & 0xFF, ClientIP & 0xFF, 
-						m_client->GetUserPort ());
+						ClientIP & 0xFF, (ClientIP >> 8) & 0xFF, 
+						(ClientIP >> 16) & 0xFF, (ClientIP >> 24) & 0xFF, 
+						client->GetUserPort ());
 		CRect R (19,450,300,464);
 		m_sAdditionalInfo.Create (AddInfo,WS_CHILD|WS_VISIBLE,R,this);
 		VERIFY(m_fStdFont.CreateFont(
