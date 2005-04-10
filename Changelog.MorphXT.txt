@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.45b MorphXT v6.x
+--------------------------------------
+ADDED  : NiceHash from CB mod (need some feed back for this testing) [AndCycle]
+         relate topic http://forum.emule-project.net/index.php?showtopic=63906&hl=nicehash
+
+--------------------------------------
 Changelog for eMule 0.45b MorphXT v6.7
 --------------------------------------
 FIXED  : DownloadClientCtrl: Middle Mouse click on client item work properly for downloadtransfer window [SiRoB]

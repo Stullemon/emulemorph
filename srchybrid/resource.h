@@ -1454,6 +1454,7 @@
 #define IDS_CRASHRPT_DONE               1502
 #define IDS_CRASHRPT_AV                 1503
 #define IDS_CRASHRPT_NOTAV              1504
+#define IDS_NICEHASHWEIGHT              1505
 #define IDS_UPLOAD_COMPLETED            1510
 #define IDS_UPLOAD_PREEMPTED            1511
 #define IDS_UPLOAD_TOO_MANY_SLOTS       1512
