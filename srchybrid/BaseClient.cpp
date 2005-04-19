@@ -1644,7 +1644,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	            AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing connecting client from upload list. Reason: %s ----"), DbgGetClientInfo(), pszReason);
 		case US_WAITCALLBACK:
 			//MORPH START - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend or it's a proxy.
-			if(reqfile && !reqfile->IsPartFile() && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend() || IsProxy())
+			if(reqfile && !reqfile->IsPartFile() && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend())
 			{
 				SetUploadState(US_NONE);
 				bDelete = false;
@@ -1659,8 +1659,11 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		case DS_CONNECTING:
 		case DS_WAITCALLBACK:
 			//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
-			if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1 || IsFriend() || IsProxy() || !IsEd2kClient())
-			{
+			if(IsFriend() && HasLowID()){
+				SetDownloadState(DS_ONQUEUE);
+				bDelete = false;
+				break;
+			}else if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1 || IsFriend() || IsProxy() || !IsEd2kClient()) {
 				bDelete = true;
 				break;
 			}
