@@ -2462,7 +2462,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 			m_anStatesTemp[nCountForState]++;
 
 			// SLUGFILLER: SafeHash - Find a source for the hashset
-			if (hashsetneeded) {
+			if (hashsetneeded && cur_src->socket && cur_src->socket->IsConnected()) { //MORPH - Changed by SiRoB, To avoid false assert
 				switch (cur_src->GetDownloadState()){
 				case DS_NONEEDEDPARTS:
 				case DS_ONQUEUE:
@@ -6263,6 +6263,10 @@ void CPartFile::PartHashFinished(uint16 partnumber, bool corrupt)
 			AddDebugLogLine(DLP_VERYLOW, false, _T("Finished part %u of \"%s\""), partnumber, GetFileName());
 
 		// tell the blackbox about the verified data
+		//MORPH START - Added by SiRoB, SafeHash -Fix-
+		if (partRange > 0)
+			partRange--;
+		//MORPH END   - Added by SiRoB, SafeHash -Fix-
 		m_CorruptionBlackBox.VerifiedData((uint32)PARTSIZE * partnumber, (uint32)PARTSIZE*partnumber + partRange);
 
 		// if this part was successfully completed (although ICH is active), remove from corrupted list
