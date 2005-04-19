@@ -587,9 +587,10 @@ bool CClientUDPSocket::ProcessWebCachePacket(BYTE* packet, uint16 size, uint8 op
 						CSafeMemFile data_out(128);
 
 						if (reqfile->IsPartFile())
-							((CPartFile*)reqfile)->WritePartStatus(&data_out);
-						else
-							data_out.WriteUInt16(0);
+							((CPartFile*)reqfile)->WritePartStatus(&data_out, sender);	// SLUGFILLER: hideOS
+						else if (!reqfile->ShareOnlyTheNeed(&data_out, sender)) //wistily SOTN
+							if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
+								data_out.WriteUInt16(0);
 
 						data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
 						if (thePrefs.GetDebugClientUDPLevel() > 0)
@@ -646,17 +647,10 @@ void CClientUDPSocket::OnSend(int nErrorCode){
     sendLocker.Lock();
 	m_bWouldBlock = false;
 
-    //MORPH START - Changed by SiRoB, Lock Only When Needed
-	/*
-	if(!controlpacket_queue.IsEmpty()) {
-	*/
-	bool QueueForSending = !controlpacket_queue.IsEmpty();
-	sendLocker.Unlock();	
-	if (QueueForSending) {
-	//MORPH END  - Changed by SiRoB, Lock Only When Needed
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+    if(!controlpacket_queue.IsEmpty()) {
+	    theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
     }
-	//sendLocker.Unlock(); //MORPH - Removed by SiRoB, Lock Only When Needed
+	sendLocker.Unlock();
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
@@ -694,17 +688,10 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
 	}
 
 // ZZ:UploadBandWithThrottler (UDP) -->
-    //MORPH START - Changed by SiRoB, Lock Only When Needed
-	/*
-	if(!IsBusy() && !controlpacket_queue.IsEmpty()) {
-	*/
-	bool QueueForSending = !IsBusy() && !controlpacket_queue.IsEmpty();
-	sendLocker.Unlock();
-	if (QueueForSending) {
-	//MORPH END   - Changed by SiRoB, Lock Only When Needed
+    if(!IsBusy() && !controlpacket_queue.IsEmpty()) {
 	    theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
     }
-    //sendLocker.Unlock(); //MORPH - Removed by SiRoB, Lock Only When Needed
+    sendLocker.Unlock();
 
     SocketSentBytes returnVal = { true, 0, sentBytes };
     return returnVal;
