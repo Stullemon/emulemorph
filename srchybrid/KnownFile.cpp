@@ -2965,11 +2965,11 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 		{
 			if (m_AvailPartFrequency[i]<iMinAvailablePartFrenquency)
 				iMinAvailablePartFrenquency = m_AvailPartFrequency[i];				
-			else if (m_AvailPartFrequency[i]<iMinAvailablePartFrenquencyPrev)
+			else if (m_AvailPartFrequency[i]>iMinAvailablePartFrenquency && m_AvailPartFrequency[i]<iMinAvailablePartFrenquencyPrev)
 				iMinAvailablePartFrenquencyPrev = m_AvailPartFrequency[i];
 		}
 	}
-	if (iMinAvailablePartFrenquency == (UINT)-1)
+	if (iMinAvailablePartFrenquencyPrev == (UINT)-1)
 		return false;
 	UINT done = 0;
 	file->WriteUInt16(parts);
