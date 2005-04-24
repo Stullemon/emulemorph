@@ -621,7 +621,7 @@ void CStatisticsDlg::RepaintMeters()
 	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_CURRENT),0);
 	*/
 	Buffer.Format(_T(" (%u %s)"),thePrefs.m_iDownloadDataRateAverageTime,GetResString(IDS_SECS));
-	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_CURRENT)+thePrefs.m_iDownloadDataRateAverageTime,0);
+	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_CURRENT)+Buffer,0);
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	m_DownloadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),0);
 
@@ -634,7 +634,7 @@ void CStatisticsDlg::RepaintMeters()
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT),0);
 	*/
 	Buffer.Format(_T(" (%u %s)"),thePrefs.m_iUploadDataRateAverageTime,GetResString(IDS_SECS));
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT)+thePrefs.m_iUploadDataRateAverageTime,0);
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT)+Buffer,0);
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),0);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),1);
