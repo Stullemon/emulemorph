@@ -104,6 +104,10 @@ CPPgMorph::CPPgMorph()
 	m_htiMaxClientDataRatePowerShare = NULL;
 	m_htiMaxClientDataRate = NULL;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	m_htiDownloadDataRateAverageTime = NULL;
+	m_htiUploadDataRateAverageTime = NULL;
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 }
 
 CPPgMorph::~CPPgMorph()
@@ -193,6 +197,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiEnableDownloadInRed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_RED), m_htiDisp, m_bEnableDownloadInRed); //MORPH - Added by SiRoB, show download in Bold
 		m_htiEnableDownloadInBold = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_BOLD), m_htiDisp, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 		m_htiShowClientPercentage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CLIENTPERCENTAGE), m_htiDisp, m_bShowClientPercentage);
+		//MORPH START - Added by SiRoB, Datarate Average Time Management
+		m_htiDownloadDataRateAverageTime = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DATARATEAVERAGETIME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDisp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDownloadDataRateAverageTime, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		//MORPH END   - Added by SiRoB, Datarate Average Time Management
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		m_htiUseSLS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SLS_USESLS), m_htiDM, m_iUseSLS);
 		//MORPH END - Added by SiRoB, khaos::categorymod+
@@ -262,6 +270,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiUpDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, m_htiUM);
 		m_htiClientQueueProgressBar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CLIENTQUEUEPROGRESSBAR), m_htiUpDisplay, m_iClientQueueProgressBar); //MORPH - Added by IceCream, Enable Anti-leecher
 	    //MORPH END - Added by Commander, ClientQueueProgressBar
+		//MORPH START - Added by SiRoB, Datarate Average Time Management
+		m_htiUploadDataRateAverageTime = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DATARATEAVERAGETIME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUpDisplay);
+		m_ctrlTreeOptions.AddEditBox(m_htiUploadDataRateAverageTime, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		//MORPH END   - Added by SiRoB, Datarate Average Time Management
 
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		m_htiFriend = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_FRIENDS), iImgFriend, m_htiUM);
@@ -336,6 +348,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplayFunnyNick, m_iFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCountWCSessionStats, m_iCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiClientQueueProgressBar, m_iClientQueueProgressBar); //MORPH - Added by Commander, ClientQueueProgressBar
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiDownloadDataRateAverageTime, m_iDownloadDataRateAverageTime);//MORPH - Added by SiRoB, Upload Splitting Class
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUploadDataRateAverageTime, m_iUploadDataRateAverageTime);//MORPH - Added by SiRoB, Upload Splitting Class
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalDataRateFriend, m_iGlobalDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRateFriend, m_iMaxClientDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalDataRatePowerShare, m_iGlobalDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
@@ -403,6 +419,10 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableDownloadInRed = thePrefs.enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	m_bEnableDownloadInBold = thePrefs.m_bShowActiveDownloadsBold; //MORPH - Added by SiRoB, show download in Bold
 	m_bShowClientPercentage = thePrefs.m_bShowClientPercentage;
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	m_iDownloadDataRateAverageTime = thePrefs.m_iDownloadDataRateAverageTime;
+	m_iUploadDataRateAverageTime = thePrefs.m_iUploadDataRateAverageTime;
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	m_bEnableAntiLeecher = thePrefs.enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
 	m_iInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -502,6 +522,10 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	thePrefs.m_bShowActiveDownloadsBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	thePrefs.m_bShowClientPercentage = m_bShowClientPercentage;
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	thePrefs.m_iDownloadDataRateAverageTime = m_iDownloadDataRateAverageTime;
+	thePrefs.m_iUploadDataRateAverageTime = m_iUploadDataRateAverageTime;
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	thePrefs.enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	thePrefs.infiniteQueue = m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -630,6 +654,10 @@ void CPPgMorph::Localize(void)
 		if (m_htiDisplayFunnyNick) m_ctrlTreeOptions.SetItemText(m_htiDisplayFunnyNick, GetResString(IDS_DISPLAYFUNNYNICK));//MORPH - Added by SiRoB, Optionnal funnynick display
 		if (m_htiCountWCSessionStats) m_ctrlTreeOptions.SetItemText(m_htiCountWCSessionStats, GetResString(IDS_COUNTWCSESSIONSTATS)); //MORPH - added by Commander, Show WC Session stats 
 		if (m_htiClientQueueProgressBar) m_ctrlTreeOptions.SetItemText(m_htiClientQueueProgressBar, GetResString(IDS_CLIENTQUEUEPROGRESSBAR));//MORPH - Added by Commander, ClientQueueProgressBar
+		//MORPH START - Added by SiRoB, Datarate Average Time Management
+		if (m_htiDownloadDataRateAverageTime) m_ctrlTreeOptions.SetEditLabel(m_htiDownloadDataRateAverageTime, GetResString(IDS_DATARATEAVERAGETIME));
+		if (m_htiUploadDataRateAverageTime) m_ctrlTreeOptions.SetEditLabel(m_htiUploadDataRateAverageTime, GetResString(IDS_DATARATEAVERAGETIME));
+		//MORPH END   - Added by SiRoB, Datarate Average Time Management
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		if (m_htiGlobalDataRateFriend) m_ctrlTreeOptions.SetEditLabel(m_htiGlobalDataRateFriend, GetResString(IDS_MINDATARATEFRIEND));
 		if (m_htiMaxClientDataRateFriend) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRateFriend, GetResString(IDS_MAXCLIENTDATARATEFRIEND));
@@ -705,6 +733,10 @@ void CPPgMorph::OnDestroy()
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, enable Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, enable Anti-CreditHack
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	m_htiDownloadDataRateAverageTime = NULL;
+	m_htiUploadDataRateAverageTime = NULL;
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_htiFriend = NULL;
 	m_htiGlobalDataRateFriend = NULL;

@@ -2611,6 +2611,7 @@
 #define IDS_INVMODE_MODKEY              5123
 #define IDS_INVMODE_VKEY                5124
 #define IDS_FPU_ACTIVE                  5125
+#define IDS_DATARATEAVERAGETIME         5125
 #define IDS_MMX_ACTIVE                  5126
 #define IDS_AMD_ACTIVE                  5127
 #define IDS_SSE_ACTIVE                  5128

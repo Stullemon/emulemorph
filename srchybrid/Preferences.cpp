@@ -588,6 +588,12 @@ uint16	CPreferences::maxconnectionsswitchborder;
 bool	CPreferences::autobackup;
 bool	CPreferences::autobackup2;
 //EastShare End - Added by Pretender, TBH-AutoBackup
+
+//MORPH START - Added by SiRoB, Datarate Average Time Management
+uint16	CPreferences::m_iDownloadDataRateAverageTime;
+uint16	CPreferences::m_iUploadDataRateAverageTime;
+//MORPH END   - Added by SiRoB, Datarate Average Time Management
+
 //MORPH START - Added by SiRoB, Upload Splitting Class
 uint16	CPreferences::globaldataratefriend;
 uint16	CPreferences::globaldataratepowershare;
@@ -2782,6 +2788,12 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("EnableAntiCreditHack"), enableAntiCreditHack,_T("eMule")); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
+
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	ini.WriteInt(_T("DownloadDataRateAverageTime"),m_iDownloadDataRateAverageTime,_T("eMule"));
+	ini.WriteInt(_T("UPloadDataRateAverageTime"),m_iUploadDataRateAverageTime,_T("eMule"));
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
+
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	ini.WriteInt(_T("GlobalDataRateFriend"),globaldataratefriend,_T("eMule"));
 	ini.WriteInt(_T("GlobalDataRatePowerShare"),globaldataratepowershare,_T("eMule"));
@@ -3404,6 +3416,11 @@ void CPreferences::LoadPreferences()
 	m_bIP2CountryShowFlag = ini.GetBool(_T("IP2CountryShowFlag"), false);
 	//EastShare - added by AndCycle, IP to Country
 	
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	m_iDownloadDataRateAverageTime = ini.GetInt(_T("DownloadDataRateAverageTime"),30);
+	m_iUploadDataRateAverageTime = ini.GetInt(_T("UploadDataRateAverageTime"),30);
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
+
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),3);
 	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);

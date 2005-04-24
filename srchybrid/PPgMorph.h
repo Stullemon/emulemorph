@@ -37,6 +37,12 @@ protected:
 	int m_iFunnyNick; //MORPH - Added by SiRoB, Optionnal funnynick display
 	int m_iClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
 	int m_iCountWCSessionStats; // MORPH - Added by Commander, Show WC stats
+
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	int m_iDownloadDataRateAverageTime;
+	int m_iUploadDataRateAverageTime;
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
+	
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	int m_iGlobalDataRateFriend;
 	int m_iMaxClientDataRateFriend;
@@ -98,6 +104,12 @@ protected:
 	HTREEITEM m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	HTREEITEM m_htiCountWCSessionStats;//MORPH - Added by Commander, Show WC stats
 	HTREEITEM m_htiClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
+
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	HTREEITEM m_htiDownloadDataRateAverageTime;
+	HTREEITEM m_htiUploadDataRateAverageTime;
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
+	
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	HTREEITEM m_htiFriend;
 	HTREEITEM m_htiGlobalDataRateFriend;

@@ -622,6 +622,12 @@ public:
 	static bool	autobackup;
 	static bool	autobackup2;
 	//EastShare End - Added by Pretender, TBH-AutoBackup
+
+	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	static uint16	m_iDownloadDataRateAverageTime;
+	static uint16	m_iUploadDataRateAverageTime;
+	//MORPH END   - Added by SiRoB, Datarate Average Time Management
+
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	static uint16	globaldataratefriend;
 	static uint16	globaldataratepowershare;
