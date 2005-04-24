@@ -8,6 +8,7 @@
 #include "serverWnd.h" //MORPH - Added by SiRoB
 #include "OtherFunctions.h"
 #include "Scheduler.h" //MORPH - Added by SiRoB, Fix for Param used in scheduler
+#include "StatisticsDlg.h" //MORPH - Added by SiRoB, Datarate Average Time Management
 #include "searchDlg.h"
 #include "UserMsgs.h"
 
@@ -523,8 +524,13 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bShowActiveDownloadsBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	thePrefs.m_bShowClientPercentage = m_bShowClientPercentage;
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
+	bool updateLegend = false;
+	updateLegend = thePrefs.m_iDownloadDataRateAverageTime != m_iDownloadDataRateAverageTime;
 	thePrefs.m_iDownloadDataRateAverageTime = m_iDownloadDataRateAverageTime;
+	updateLegend |= thePrefs.m_iUploadDataRateAverageTime != m_iUploadDataRateAverageTime;
 	thePrefs.m_iUploadDataRateAverageTime = m_iUploadDataRateAverageTime;
+	if (updateLegend)
+		theApp.emuledlg->statisticswnd->RepaintMeters();
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	thePrefs.enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
