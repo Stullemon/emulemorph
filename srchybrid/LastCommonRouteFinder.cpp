@@ -38,7 +38,15 @@ LastCommonRouteFinder::LastCommonRouteFinder() {
     m_upload = _UI32_MAX;
     m_CurUpload = 1;
 
-    m_iPingToleranceMilliseconds = 200;
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	m_iGlobalDataRateFriend = 0;
+	m_iGlobalDataRatePowerShare = 0;
+	m_iMaxClientDataRateFriend = 3*1024;
+	m_iMaxClientDataRatePowerShare = 0;
+	m_iMaxClientDataRate = 0;
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
+	m_iPingToleranceMilliseconds = 200;
     m_bUseMillisecondPingTolerance = false;
     m_iNumberOfPingsForAverage = 0;
     m_pingAverage = 0;
