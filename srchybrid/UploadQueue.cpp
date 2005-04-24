@@ -71,6 +71,12 @@ CUploadQueue::CUploadQueue()
 	if (thePrefs.GetVerbose() && !h_timer)
 		AddDebugLogLine(true,_T("Failed to create 'upload queue' timer - %s"),GetErrorMessage(GetLastError()));
 	datarate = 0;
+	datarate_USS = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
+	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
+	avarage_tick_listPreviousAddedTimestamp = GetTickCount();
+	avarage_tick_listLastRemovedTimestamp = GetTickCount() - MAXAVERAGETIMEUPLOAD;
+	avarage_dr_USS_listLastRemovedTimestamp = GetTickCount() - 15 * 1000;
+	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	counter=0;
 	successfullupcount = 0;
 	failedupcount = 0;
@@ -97,6 +103,8 @@ CUploadQueue::CUploadQueue()
 	m_lastCalculatedDataRateTick = 0;
 	*/
 	m_avarage_dr_sum = 0;
+	m_avarage_dr_USS_sum = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
+	m_avarage_overhead_dr_sum = 0; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 	friendDatarate = 0;
 
 	m_dwLastResortedUploadSlots = 0;
@@ -717,7 +725,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			buffer.AppendFormat(_T("[C%i %i/%i]-"),classID,m_aiSlotCounter[classID],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]);
 		buffer.AppendFormat(_T(" Client: %s"),newclient->DbgGetClientInfo());
-		DebugLog(LOG_USC,buffer);
+		DebugLog(LOG_USC | DLP_VERYLOW,buffer);
 	}
 
 	for (uint32 classID = newclientClassID; classID < NB_SPLITTING_CLASS; classID++){
@@ -844,14 +852,12 @@ void CUploadQueue::Process() {
 	
 	CheckForHighPrioClient();
 	
-	//MORPH START - Changed vy SiRoB, cache (uint32)uploadinglist.GetCount()
 	//Morph Start - changed by AndCycle, Dont Remove Spare Trickle Slot
 	/*
 	if(::GetTickCount()-m_nLastStartUpload > SEC2MS(20) && GetEffectiveUploadListCount() > 0 && GetEffectiveUploadListCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(GetEffectiveUploadListCount()-1) == false) {
 	*/
 	if(thePrefs.DoRemoveSpareTrickleSlot() && ::GetTickCount()-m_nLastStartUpload > SEC2MS(20) && GetEffectiveUploadListCount() > 0 && GetEffectiveUploadListCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(GetEffectiveUploadListCount()-1) == false) {
 	//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
-	//MORPH END   - Changed by SiRoB, 
         // we need to close a trickle slot and put it back first on the queue
 
         POSITION lastpos = uploadinglist.GetTailPosition();
@@ -913,43 +919,65 @@ void CUploadQueue::Process() {
 	if (sentBytes>0) {
     	if (avarage_tick_list.GetCount() > 0)
 			avarage_tick_listPreviousAddedTimestamp = avarage_tick_list.GetTail();
-		else
-			avarage_tick_listPreviousAddedTimestamp = curTick;
 		// Save used bandwidth for speed calculations
 		avarage_dr_list.AddTail(sentBytes);
 		m_avarage_dr_sum += sentBytes;
+
+		/*
+		(void)theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
+		*/
+		//MORPH START - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
+		avarage_overhead_dr_list.AddTail(sentBytesOverhead);
+		m_avarage_overhead_dr_sum += sentBytesOverhead;
+		//MORPH END   - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 
 		avarage_friend_dr_list.AddTail(theStats.sessionSentBytesToFriend);
     	// Save time beetween each speed snapshot
 		avarage_tick_list.AddTail(curTick);
+		//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
+		TransferredData data = {sentBytes,curTick};
+		avarage_dr_USS_list.AddTail(data);
+		m_avarage_dr_USS_sum += sentBytes;
+		//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	}
-
+	//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
+	while(avarage_dr_USS_list.GetCount() > 1 && (curTick - avarage_dr_USS_list.GetHead().timestamp) > 15*1000){
+		avarage_dr_USS_listLastRemovedTimestamp = avarage_dr_USS_list.GetHead().timestamp;
+		m_avarage_dr_USS_sum -= avarage_dr_USS_list.RemoveHead().datalen;
+	}
+	if (avarage_dr_USS_list.GetCount() > 1)
+		datarate_USS = 1000U * (ULONGLONG)(m_avarage_dr_USS_sum-avarage_dr_USS_list.GetHead().datalen)*(curTick-15*1000-avarage_dr_USS_listLastRemovedTimestamp)/(avarage_dr_USS_list.GetHead().timestamp-avarage_dr_USS_listLastRemovedTimestamp) / (15*1000);
+	//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
+	
 	// don't save more than 5 secs of data
-	while(avarage_tick_list.GetCount() > 1 && (curTick - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
+	while(avarage_tick_list.GetCount() > 1 && (curTick - avarage_tick_list.GetHead()) >= MAXAVERAGETIMEUPLOAD){
 		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
+		m_avarage_overhead_dr_sum -= avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		avarage_friend_dr_list.RemoveHead();
-		avarage_tick_list.RemoveHead();
+		avarage_tick_listLastRemovedTimestamp =	avarage_tick_list.RemoveHead();
 	}
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
 	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
 	if (avarage_tick_list.GetCount() > 1){
-		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
-		if ((curTick - avarage_tick_list.GetTail()) > (avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp))
-			dwDuration += curTick - avarage_tick_list.GetTail() - (avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp);
-		if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
-		datarate = 1000 * (m_avarage_dr_sum-avarage_dr_list.GetHead()) / dwDuration;
-		friendDatarate = 1000 * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / dwDuration;
+		DWORD dwDuration = avarage_tick_list.GetTail() - curTick + MAXAVERAGETIMEUPLOAD;
+		DWORD dwAvgTickDuration = (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()) / (avarage_tick_list.GetCount() - 1);
+		if ((curTick - avarage_tick_list.GetTail()) > dwAvgTickDuration)
+			dwDuration += curTick - avarage_tick_list.GetTail() - dwAvgTickDuration;
+		DWORD dwTime = avarage_tick_list.GetHead()-avarage_tick_listLastRemovedTimestamp;
+		datarate = 1000U * (ULONGLONG)(m_avarage_dr_sum-avarage_dr_list.GetHead()*(curTick-MAXAVERAGETIMEUPLOAD-avarage_tick_listLastRemovedTimestamp)/ dwTime) / dwDuration;
+		datarateoverhead = 1000U * (ULONGLONG)(m_avarage_overhead_dr_sum-avarage_overhead_dr_list.GetHead()*(curTick-MAXAVERAGETIMEUPLOAD-avarage_tick_listLastRemovedTimestamp)/ dwTime) / dwDuration;
+		friendDatarate = 1000U * (ULONGLONG)(avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead());;
 	}else if (avarage_tick_list.GetCount() == 1){
-		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
-		DWORD curTick = ::GetTickCount();
+		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listLastRemovedTimestamp;
 		if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
 			dwDuration = curTick - avarage_tick_list.GetTail();
-		if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
-		datarate = 1000 * m_avarage_dr_sum / dwDuration;
+		datarate = 1000U * m_avarage_dr_sum / dwDuration;
+		datarateoverhead = 1000U * m_avarage_overhead_dr_sum / dwDuration; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		friendDatarate = 0;
 	}else {
 		datarate = 0;
+		datarateoverhead = 0; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		friendDatarate = 0;
 	}
 	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
@@ -970,8 +998,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
     if(curUploadSlots > m_MaxActiveClients+wantedNumberOfTrickles) {
         return false;
     }
-
-   	uint16 MaxSpeed;
+	uint16 MaxSpeed;
 
     if (thePrefs.IsDynUpEnabled())
         MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
@@ -1567,7 +1594,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		// ZZ:UploadSpeedSense -->
 		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
 		*/
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 5, thePrefs.IsUSSLog(), thePrefs.GetGlobalDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetGlobalDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->datarate_USS, thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 5, thePrefs.IsUSSLog(), thePrefs.GetGlobalDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetGlobalDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
 		//MOPRH END   - Modified by SiRoB, Upload Splitting Class
 
 		theApp.uploadqueue->Process();
@@ -1754,7 +1781,11 @@ uint32 CUploadQueue::GetDatarate() {
 	*/
 	return datarate;
 }
-
+//MORPH START - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
+uint32 CUploadQueue::GetDatarateOverHead() {
+	return datarateoverhead;
+}
+//MORPH END   - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 uint32 CUploadQueue::GetToNetworkDatarate() {
 	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
 	/*

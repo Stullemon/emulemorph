@@ -933,6 +933,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 				SetRemoteQueueFull(false);
 			SetRemoteQueueRank(0);
 			SetAskedCountDown(0);
+			m_AvarageDDRLastRemovedTimestamp = GetTickCount()-MAXAVERAGETIMEDOWNLOAD; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 		}
 		UpdateDisplayedInfo(true);
 	}
@@ -1452,7 +1453,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 uint32 CUpDownClient::CalculateDownloadRate(){
 		//MORPH START - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint32 cur_tick = ::GetTickCount();
-    if(m_nDownDataRateMS > 0) {
+	if(m_nDownDataRateMS > 0) {
 		if (m_AvarageDDR_list.GetCount() > 0)
 			m_AvarageDDRPreviousAddedTimestamp = m_AvarageDDR_list.GetTail().timestamp;
 		else
@@ -1462,23 +1463,23 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 		m_nSumForAvgDownDataRate += m_nDownDataRateMS;
 		m_nDownDataRateMS = 0;
     }
-	
-	while (m_AvarageDDR_list.GetCount() > 1 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
+
+	while (m_AvarageDDR_list.GetCount() > 1 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) >= MAXAVERAGETIMEDOWNLOAD) {
+		m_AvarageDDRLastRemovedTimestamp = m_AvarageDDR_list.GetHead().timestamp;	
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
-	
-	if (m_AvarageDDR_list.GetCount() > 1){
-		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
-		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp))
-			dwDuration += cur_tick - m_AvarageDDR_list.GetTail().timestamp - (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp);
-		if (dwDuration < MAXAVERAGETIMEDOWNLOAD/2) dwDuration = MAXAVERAGETIMEDOWNLOAD/2;
-		m_nDownDatarate = (1000U * (ULONGLONG)(m_nSumForAvgDownDataRate - m_AvarageDDR_list.GetHead().datalen)) / dwDuration;
-	}else if (m_AvarageDDR_list.GetCount() == 1){
-		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp;
+	}
+	if (m_AvarageDDR_list.GetCount() > 1) {
+		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - cur_tick + MAXAVERAGETIMEDOWNLOAD;
+		DWORD dwAvgTickDuration = (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp) / (m_AvarageDDR_list.GetCount() - 1);
+		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwAvgTickDuration)
+			dwDuration += cur_tick - m_AvarageDDR_list.GetTail().timestamp - dwAvgTickDuration;
+		m_nDownDatarate = (1000U * (ULONGLONG)(m_nSumForAvgDownDataRate-m_AvarageDDR_list.GetHead().datalen*(cur_tick-MAXAVERAGETIMEDOWNLOAD-m_AvarageDDRLastRemovedTimestamp)/(m_AvarageDDR_list.GetHead().timestamp-m_AvarageDDRLastRemovedTimestamp))) / dwDuration;
+	} else if (m_AvarageDDR_list.GetCount() == 1) {
+		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRLastRemovedTimestamp;
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = cur_tick - m_AvarageDDR_list.GetTail().timestamp;
-		if (dwDuration < MAXAVERAGETIMEDOWNLOAD/2) dwDuration = MAXAVERAGETIMEDOWNLOAD/2;
-		m_nDownDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgDownDataRate / dwDuration);
-	}else
+		m_nDownDatarate = 1000U * m_nSumForAvgDownDataRate / dwDuration;
+	} else
 		m_nDownDatarate = 0;
 	//MORPH END   - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 
