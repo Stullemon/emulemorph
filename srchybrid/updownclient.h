@@ -1023,6 +1023,7 @@ protected:
 	uint32		m_nSumForAvgUpDataRate;
 	CList<TransferredData> m_AvarageUDR_list;
 	DWORD		m_AvarageUDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
+	DWORD		m_AvarageUDRLastRemovedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	//////////////////////////////////////////////////////////
 	// Download data rate computation
 	//
@@ -1033,7 +1034,7 @@ protected:
 	uint32		m_nSumForAvgDownDataRate;
 	CList<TransferredData> m_AvarageDDR_list;
 	uint32		m_AvarageDDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
-	
+	uint32		m_AvarageDDRLastRemovedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	//////////////////////////////////////////////////////////
 	// GUI helpers
 	//

@@ -39,6 +39,7 @@ public:
 	void    UpdateDatarates();
 	*/
 	uint32	GetDatarate();
+	uint32	GetDatarateOverHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 	uint32  GetToNetworkDatarate();
 
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
@@ -125,13 +126,19 @@ private:
 		DWORD	timestamp;
 	};
 	CList<uint64> avarage_dr_list;
-    CList<uint64> avarage_friend_dr_list;
+	CList<uint64> avarage_overhead_dr_list; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
+	CList<TransferredData> avarage_dr_USS_list; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
+	CList<uint64> avarage_friend_dr_list;
 	CList<DWORD,DWORD> avarage_tick_list;
 	DWORD	avarage_tick_listPreviousAddedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
+	DWORD	avarage_tick_listLastRemovedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
+	DWORD	avarage_dr_USS_listLastRemovedTimestamp; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	CList<int,int> activeClients_list;
 	CList<DWORD,DWORD> activeClients_tick_list;
 	uint32	datarate;   //datarate sent to network (including friends)
-    uint32  friendDatarate; // datarate of sent to friends (included in above total)
+	uint32	datarateoverhead;   //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
+	uint32	datarate_USS; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
+	uint32  friendDatarate; // datarate of sent to friends (included in above total)
 	// By BadWolf - Accurate Speed Measurement
 
 	UINT_PTR h_timer;
@@ -158,7 +165,8 @@ private:
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	DWORD   m_lastCalculatedDataRateTick;
     uint64  m_avarage_dr_sum;
-
+	uint64  m_avarage_overhead_dr_sum; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
+    uint64  m_avarage_dr_USS_sum; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
     DWORD   m_dwLastResortedUploadSlots;
 
 	DWORD   m_dwLastCheckedForHighPrioClient;

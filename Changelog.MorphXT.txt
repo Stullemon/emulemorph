@@ -1,9 +1,18 @@
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.x
 --------------------------------------
+FIXED  : SafeHash code fix arround corruptionblackbox [SiRoB]
+
 ADDED  : NiceHash from CB mod (need some feed back for this testing) [AndCycle]
          relate topic http://forum.emule-project.net/index.php?showtopic=63906&hl=nicehash
+ADDED  : Calcul OverHead by using Upload OverHead from uploadbandwidththrottler [SiRoB]
+ADDED  : Separate average upload based on 30" for USS system (as in the official client) [SiRoB]
+ADDED  : Datarate Average Time Management (Default 30s near the official client) [SiRoB]
 
+CHANGED: ImportParts: Updated with 003 version from SR13 mod [SiRoB]
+CHANGED: USS: Minor change
+
+REMOVED: Only Lock When Needed (arround ControlPacket Queueing) [SiRoB]
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.7
 --------------------------------------
