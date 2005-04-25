@@ -1327,7 +1327,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			renumberClient->SetSlotNumber(renumberClient->GetSlotNumber()-1);
 			uploadinglist.GetPrev(renumberPosition);
 		}
-        if(client->socket) {
+        if(client->socket && client->socket->IsConnected()) { //just in case
 			if (thePrefs.GetDebugClientTCPLevel() > 0)
 			    DebugSend("OP__OutOfPartReqs", client);
 			Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
