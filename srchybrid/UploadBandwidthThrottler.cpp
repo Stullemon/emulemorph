@@ -441,6 +441,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		sint64 BytesToSpend = 0;
 		uint32 allowedDataRate = allowedDataRateClass[LAST_CLASS];
 		if (timeSinceLastLoop > 0 && allowedDataRate != _UI32_MAX ) {
+			if (realBytesToSpendClass[classID] > 0)
+					realBytesToSpendClass[classID] = 0;
 			if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[LAST_CLASS]) {
 				realBytesToSpendClass[LAST_CLASS] += allowedDataRate*timeSinceLastLoop;
 				if(_I64_MAX/1000 > allowedDataRate && realBytesToSpendClass[LAST_CLASS] > allowedDataRate*1000)
@@ -560,11 +562,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 			if (realBytesToSpendClass[classID] > 999+1000*doubleSendSize)
 				m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
-
-			if (timeSinceLastLoop == 0) {
-				if (realBytesToSpendClass[classID] > 999+1000*doubleSendSize)
-					realBytesToSpendClass[classID] = 999+1000*doubleSendSize;
-			}
 
 			m_SentBytesSinceLastCall += spentBytes;
 			spentBytes = 0;

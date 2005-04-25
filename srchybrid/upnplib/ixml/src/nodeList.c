@@ -82,7 +82,7 @@ ixmlNodeList_item( IXML_NodeList * nList,
 /*================================================================
 *   ixmlNodeList_addToNodeList
 *       Add a node to nodelist
-*       Internal to parser only.
+*       External function.
 *
 *=================================================================*/
 int

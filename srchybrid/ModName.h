@@ -19,8 +19,8 @@
 
 //MORPH START - Added by SiRoB, [itsonlyme: -modname-]
 #define MOD_VERSION_MJR		6
-#define MOD_VERSION_MIN		6
-#define MOD_VERSION_BUILD   1
+#define MOD_VERSION_MIN		7
+#define MOD_VERSION_BUILD   0
 
 // this one is sent as the mod ID
 #define	MOD_VERSION			_T("MorphXT")	// [SLUGFILLER: -modID-]

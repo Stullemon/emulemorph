@@ -1669,6 +1669,23 @@ ixmlNodeList_item(IXML_NodeList *nList,
 		    /** The index into the {\bf NodeList} to retrieve. */
                  );
 
+  /** Adds a {\bf Node} to a {\bf NodeList}
+   *
+   *  @return [int] An integer representing one of the following:
+   *    \begin{itemize}
+   *      \item {\tt IXML_SUCCESS}: The operation completed successfully.
+   *      \item {\tt IXML_FAILED}: {\bf add} is {\tt NULL}.
+   *      \item {\tt IXML_INSUFFICIENT_MEMORY}: Couldn't allocate memory.
+   *    \end{itemize}
+   */
+EXPORT_SPEC int
+ixmlNodeList_addToNodeList( IN IXML_NodeList ** nList,
+						/** The {\bf NodeList} to add the {\bf 
+							Node}. */
+                            IN IXML_Node * add
+						/** {\bf Node} to add.*/
+				);
+
   /** Returns the number of {\bf Nodes} in a {\bf NodeList}.
    *
    *  @return [unsigned long] The number of {\bf Nodes} in the {\bf NodeList}.

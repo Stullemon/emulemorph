@@ -1,5 +1,5 @@
-Linux* SDK for UPnP* Devices (libupnp)
-Version 1.2.1a
+Linux* SDK for UPnP* Devices (libupnp) (Win32 port)
+Version 1.2.1a (Win32 1.0)
 Release Notes
 
 Copyright (c) 2000-2003 Intel Corporation - All Rights Reserved.
@@ -18,6 +18,7 @@ sections:
 6.  Product Release Notes
 7.  New Features
 8.  Support and Contact Information
+9.	Win32 Changelog
 
 1) Release Contents
 -------------------------------------------
@@ -289,3 +290,17 @@ us know.
 * Other brands, names, and trademarks are the property of their respective 
 owners.
 
+9) Win32 Changelog
+-------------------------------------------
+- 1.0:
+	- Applied Kamiak UPnP SDK Patch (Win32 patch): http://www.kamiak.com/sdk.html
+		- Removed Kamiak specific code.
+		- Fixed problems with SOCKET type.
+		- Fixed constants overlapping.
+		- Fixed problem with devices running the web server on default port (80). (ctrlpoint)
+		- New method to get the local ip.
+	- Control Points listens on a random port if no port is specified in UpnpInit().
+	- Modified SOAP headers. (ctrlpoint)
+	- Added '<?xml version="1.0"?>' to every SOAP Action. (ctrlpoint)
+	- Removed "CONTENT-TYPE: text/xml" check. (ctrlpoint)
+	- Converted ixmlNodeList_addToNodeList() to external.

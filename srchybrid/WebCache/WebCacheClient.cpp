@@ -418,7 +418,8 @@ bool CWebCacheUpSocket::ProcessHttpRequest()
 		// Xchange the sockets
 		//CWebCacheUpSocket* tmp = m_client->m_pWCUpSocket;
 		m_client->m_pWCUpSocket = m_client_new->m_pWCUpSocket;
-		m_client->m_pWCUpSocket->SetClient(m_client);
+		if (m_client->m_pWCUpSocket)
+			m_client->m_pWCUpSocket->SetClient(m_client);
 		//m_client_new->m_pWCUpSocket = this;
 	}
 	m_client = m_client_new; // set the (maybe new) owner in the class variable
@@ -1346,8 +1347,10 @@ void CUpDownClient::SendResumeOHCBSendingUDP()
 Packet* CUpDownClient::CreateMFRPacket()
 {
 	CSafeMemFile* data = new CSafeMemFile();
-	if (!AttachMultiOHCBsRequest(*data))
+	if (!AttachMultiOHCBsRequest(*data)){
+		delete data; //memleak -Fix- [WiZaRd]
 		return NULL;	// we don't want anything from this client
+	}
 	Packet* toSend = new Packet(data, OP_WEBCACHEPROT, OP_MULTI_FILE_REQ);
 	delete data;
 	uint32 unpackedSize = toSend->size;
