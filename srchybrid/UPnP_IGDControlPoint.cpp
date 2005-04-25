@@ -48,6 +48,7 @@ CCriticalSection						CUPnP_IGDControlPoint::m_ActionThreadCS;
 
 CUPnP_IGDControlPoint::CUPnP_IGDControlPoint(void)
 {
+	// Initialize variables
 	m_nInstances = 0;
 	m_IGDControlPoint = NULL;
 	m_ctrlPoint = 0;
@@ -56,14 +57,17 @@ CUPnP_IGDControlPoint::CUPnP_IGDControlPoint(void)
 
 CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 {
+	//Lock devices and mappings before use it
 	m_devListLock.Lock();
 	m_MappingsLock.Lock();
 
+	//Unregister control point and finish UPnP
 	if(m_ctrlPoint){
 		UpnpUnRegisterClient(m_ctrlPoint);
 		UpnpFinish();
 	}
 
+	//Remove devices/services
 	POSITION pos = m_devices.GetHeadPosition();
 	bool found = false;
 	while(pos){
@@ -74,33 +78,40 @@ CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 	}
 	m_devices.RemoveAll();
 	m_knownServices.RemoveAll();
+
+	//Remove mappings
 	m_Mappings.RemoveAll();
 
+	//Unlock devices and mappings
 	m_MappingsLock.Unlock();
 	m_devListLock.Unlock();
 }
 
+// Initialize all UPnP thing
 bool CUPnP_IGDControlPoint::Init(){
 	if(m_bInit)
 		return true;
 
+	// Init UPnP
 	int rc;
 	rc = UpnpInit( NULL, thePrefs.GetUPnPPort() );
 	if (UPNP_E_SUCCESS != rc) {
-		AddLogLine(false, _T("UPnP: Failed initiating UPnP on port %d (%d)"), thePrefs.GetUPnPPort(), rc );
+		AddLogLine(false, _T("UPnP: Failed initiating UPnP on port %d [%s]"), thePrefs.GetUPnPPort(), GetErrDescription(rc) );
 		UpnpFinish();
 		return false;
 	}
 
+	// Check if you are in a LAN or directly connected to Internet
 	if(!IsLANIP(UpnpGetServerIpAddress())){
 		AddLogLine(false, _T("UPnP: Your IP is a public internet IP, UPnP will be disabled"));
 		UpnpFinish();
 		return false;
 	}
 
+	// Register us as a Control Point
 	rc = UpnpRegisterClient( (Upnp_FunPtr)IGD_Callback, &m_ctrlPoint, &m_ctrlPoint );
 	if (UPNP_E_SUCCESS != rc) {
-		AddLogLine(false, _T("UPnP: Failed registering control point (%d)"), rc );
+		AddLogLine(false, _T("UPnP: Failed registering control point [%s]"), GetErrDescription(rc) );
 		UpnpFinish();
 		return false;
 	}
@@ -108,7 +119,7 @@ bool CUPnP_IGDControlPoint::Init(){
 	//Starts timer thread
 	AfxBeginThread(TimerThreadFunc, this);
 
-	//Open UPnP Server Port
+	//Open UPnP Server Port on Windows Firewall
 	if(thePrefs.GetICFSupport()){
 		if (theApp.m_pFirewallOpener->OpenPort(UpnpGetServerPort(), NAT_PROTOCOL_UDP, EMULE_DEFAULTRULENAME_UPNP_UDP, true))
 			theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_S), UpnpGetServerPort());
@@ -124,6 +135,7 @@ bool CUPnP_IGDControlPoint::Init(){
 	m_bInit = true;
 	AddLogLine(false, _T("UPnP: Initiated on %s:%d, searching devices..."), GetLocalIPStr(), UpnpGetServerPort());
 
+	// Search Devices
 	// Some routers only reply to one of this SSDP searchs:
 	UpnpSearchAsync(m_ctrlPoint, 5, "upnp:rootdevice", &m_ctrlPoint);
 	UpnpSearchAsync(m_ctrlPoint, 5, "urn:schemas-upnp-org:device:InternetGatewayDevice:1", &m_ctrlPoint);
@@ -131,6 +143,7 @@ bool CUPnP_IGDControlPoint::Init(){
 	return m_bInit;
 }
 
+// Returns the port used by UPnP
 unsigned int CUPnP_IGDControlPoint::GetPort(){
 	if(!m_bInit)
 		return 0;
@@ -138,6 +151,7 @@ unsigned int CUPnP_IGDControlPoint::GetPort(){
 	return UpnpGetServerPort(  );
 }
 
+// Handles all UPnP Events
 int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, void* Cookie ){
 	USES_CONVERSION;
 
@@ -146,25 +160,27 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 		case UPNP_DISCOVERY_ADVERTISEMENT_ALIVE:
 		case UPNP_DISCOVERY_SEARCH_RESULT:
 		{
+			//New UPnP Device found
 			struct Upnp_Discovery *d_event = ( struct Upnp_Discovery * )Event;
 			IXML_Document *DescDoc = NULL;
 			int ret;
 
 			if( d_event->ErrCode != UPNP_E_SUCCESS ) {
 				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Error in Discovery Callback -- %d"), d_event->ErrCode );
+					theApp.QueueDebugLogLine(false, _T("UPnP: Error in Discovery Callback [%s]"), GetErrDescription(d_event->ErrCode) );
 			}
 
-			CString devFriendlyName, devType;
+			CString devType;
 			CString location = CA2CT(d_event->Location);
 			
+			// Download Device description
 			if( ( ret = UpnpDownloadXmlDoc( d_event->Location, &DescDoc ) ) != UPNP_E_SUCCESS ) {
 				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Error obtaining device description from %s -- error = %d"), location, ret);
+					theApp.QueueDebugLogLine(false, _T("UPnP: Error obtaining device description from %s [%s]"), location, GetErrDescription(ret));
 			}
 
 			if(DescDoc){
-				devFriendlyName = GetFirstDocumentItem(DescDoc, _T("friendlyName"));
+				//Checks if is a InternetGatewayDevice and adds it to our list
 				devType = GetFirstDocumentItem(DescDoc, _T("deviceType"));
 				if(devType.CompareNoCase(IGD_DEVICE_TYPE) == 0){
 					AddDevice(DescDoc, location, d_event->Expires);
@@ -179,16 +195,18 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 			break;
 		case UPNP_DISCOVERY_ADVERTISEMENT_BYEBYE:
 		{
+			// UPnP Device Removed
 			struct Upnp_Discovery *d_event = ( struct Upnp_Discovery * )Event;
 
 			if( d_event->ErrCode != UPNP_E_SUCCESS ) {
 				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Error in Discovery ByeBye Callback -- %d"), d_event->ErrCode );
+					theApp.QueueDebugLogLine(false, _T("UPnP: Error in Discovery ByeBye Callback [%s]"), GetErrDescription(d_event->ErrCode) );
 			}
 
 			CString devType = CA2CT(d_event->DeviceType);
 			devType.Trim();
 
+			//Checks if is a InternetGatewayDevice and removes it from our list
 			if(devType.CompareNoCase(IGD_DEVICE_TYPE) == 0){
 				RemoveDevice( CString(CA2CT(d_event->DeviceId)));
 			}
@@ -197,8 +215,10 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 		}
 		case UPNP_EVENT_RECEIVED:
 		{
+			// Event reveived
 			struct Upnp_Event *e_event = ( struct Upnp_Event * )Event;
 
+			// Parses the event
 			OnEventReceived( e_event->Sid, e_event->EventKey, e_event->ChangedVariables );
 
 			break;
@@ -207,6 +227,11 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 	return 0;
 }
 
+// Adds a port mapping to all known/future devices
+// Returns: 
+//		UNAT_OK:	If the mapping has been added to our mapping list.
+//					(Maybe not to the device, because it runs in a different thread).
+//		UNAT_ERROR: If you have not Init() the class.
 CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping){
 	if(!m_bInit)
 		return UNAT_ERROR;
@@ -215,7 +240,10 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 		mapping->externalPort = mapping->internalPort;
 	}
 
+	m_devListLock.Lock();
 	m_MappingsLock.Lock();
+
+	//Checks if we already have this mapping
 	bool found = false;
 	POSITION pos = m_Mappings.GetHeadPosition();
 	while(pos){
@@ -227,15 +255,18 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 		}
 	}
 
-	m_devListLock.Lock();
+	//Checks if we have devices
 	if(m_devices.GetCount()==0){
 		AddLogLine(false, _T("UPnP: Action \"AddPortMapping\" queued until a device is found [%s]"), mapping->description);
 		if(!found){
+			//If we do not have this mapping, add it to our list
 			m_Mappings.AddTail(*mapping);
 		}
 	}
 	else {
 		if(!found){
+			//If we do not have this mapping, add it to our list
+			//and try to add it to all known services.
 			m_Mappings.AddTail(*mapping);
 			POSITION srvpos = m_knownServices.GetHeadPosition();
 			while(srvpos){
@@ -249,6 +280,8 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 						action->srv = *srv;
 						action->mapping = *mapping;
 						action->bUpdating = false;
+						
+						// Starts thread to add the mapping
 						AfxBeginThread(ActionThreadFunc, action);
 					}
 				}
@@ -256,75 +289,81 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 		}
 	}
 
-	m_devListLock.Unlock();
 	m_MappingsLock.Unlock();
+	m_devListLock.Unlock();
 	return UNAT_OK;
 }
 
+// Removes a port mapping from all known devices
+// Returns: 
+//		UNAT_OK:	If the mapping has been removed from our mapping list.
+//					(Maybe not from the device, because it runs in a different thread).
+//		UNAT_ERROR: If you have not Init() the class.
 CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMapping(CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping, bool removeFromList){
 	if(!m_bInit)
 		return UNAT_ERROR;
 
 	m_devListLock.Lock();
-	if(m_devices.GetCount()>0){
-		if(mapping.externalPort == 0){
-			mapping.externalPort = mapping.internalPort;
-		}
+	m_MappingsLock.Lock();
+	if(mapping.externalPort == 0){
+		mapping.externalPort = mapping.internalPort;
+	}
 
-		m_MappingsLock.Lock();
-		bool found = false;
-		POSITION old_pos, pos = m_Mappings.GetHeadPosition();
-		while(pos){
-			old_pos = pos;
-			UPNPNAT_MAPPING item;
-			item = m_Mappings.GetNext(pos);
-			if(item.externalPort == mapping.externalPort){
-				POSITION srvpos = m_knownServices.GetHeadPosition();
-				while(srvpos){
-					UPNP_SERVICE *srv;
-					srv = m_knownServices.GetNext(srvpos);
-					if(srv){
-						//DeletePortMappingFromService(srv, &mapping);
-						UPNPNAT_ACTIONPARAM *action = new UPNPNAT_ACTIONPARAM;
-						if(action){
-							action->type = UPNPNAT_ACTION_DELETE;
-							action->srv = *srv;
-							action->mapping = mapping;
-							action->bUpdating = false;
-							AfxBeginThread(ActionThreadFunc, action);
-						}
+	bool found = false;
+	POSITION old_pos, pos = m_Mappings.GetHeadPosition();
+	while(pos){
+		old_pos = pos;
+		UPNPNAT_MAPPING item;
+		item = m_Mappings.GetNext(pos);
+		if(item.externalPort == mapping.externalPort){
+			POSITION srvpos = m_knownServices.GetHeadPosition();
+			while(srvpos){
+				UPNP_SERVICE *srv;
+				srv = m_knownServices.GetNext(srvpos);
+				if(srv){
+					//DeletePortMappingFromService(srv, &mapping);
+					UPNPNAT_ACTIONPARAM *action = new UPNPNAT_ACTIONPARAM;
+					if(action){
+						action->type = UPNPNAT_ACTION_DELETE;
+						action->srv = *srv;
+						action->mapping = mapping;
+						action->bUpdating = false;
+						AfxBeginThread(ActionThreadFunc, action);
 					}
 				}
-				if(removeFromList)
-					m_Mappings.RemoveAt(old_pos);
-
-				pos = NULL;
 			}
+			if(removeFromList)
+				m_Mappings.RemoveAt(old_pos);
+
+			pos = NULL;
 		}
-		m_MappingsLock.Unlock();
 	}
+	m_MappingsLock.Unlock();
 	m_devListLock.Unlock();
 	return UNAT_OK;
 }
 
+// Removes all mapping we have in our list from all known devices
 bool CUPnP_IGDControlPoint::RemoveAllMappings(){
 	m_devListLock.Lock();
+	m_MappingsLock.Lock();
+
 	if(m_devices.GetCount()>0){
 		POSITION srvpos = m_knownServices.GetHeadPosition();
 		while(srvpos){
 			UPNP_SERVICE *srv;
 			srv = m_knownServices.GetNext(srvpos);
 			if(srv){
-				m_MappingsLock.Lock();
 				POSITION map_pos = m_Mappings.GetHeadPosition();
 				while(map_pos){
 					UPNPNAT_MAPPING mapping = m_Mappings.GetNext(map_pos);
 					DeletePortMappingFromService(srv, &mapping);
 				}
-				m_MappingsLock.Unlock();
 			}
 		}
 	}
+
+	m_MappingsLock.Unlock();
 	m_devListLock.Unlock();
 
 	return true;
@@ -368,57 +407,136 @@ bool CUPnP_IGDControlPoint::UpdateAllMappings( bool bLockDeviceList, bool bUpdat
 }
 
 CString CUPnP_IGDControlPoint::GetFirstDocumentItem(IXML_Document * doc, CString item ){
-    IXML_NodeList *nodeList = NULL;
-    IXML_Node *textNode = NULL;
-    IXML_Node *tmpNode = NULL;
-
-    CString ret;
-
-    nodeList = ixmlDocument_getElementsByTagName( doc, CT2CA(item));
-
-    if( nodeList ) {
-        if( ( tmpNode = ixmlNodeList_item( nodeList, 0 ) ) ) {
-            textNode = ixmlNode_getFirstChild( tmpNode );
-            ret = CA2CT(ixmlNode_getNodeValue( textNode ));
-        }
-        ixmlNodeList_free( nodeList );
-    }
-
-	return ret;
+	return GetFirstNodeItem( (IXML_Node *)doc, item );
 }
 
-CString CUPnP_IGDControlPoint::GetFirstElementItem( IXML_Element * element, CString item )
+CString CUPnP_IGDControlPoint::GetFirstElementItem( IXML_Element * element, CString item ){
+	return GetFirstNodeItem( (IXML_Node *)element, item );
+}
+
+CString CUPnP_IGDControlPoint::GetFirstNodeItem( IXML_Node * root_node, CString item )
 {
-    IXML_NodeList *nodeList = NULL;
-    IXML_Node *textNode = NULL;
-    IXML_Node *tmpNode = NULL;
+    IXML_Node *node;
+	CString nodeVal;
+	CString node_name;
 
-    CString ret;
+	USES_CONVERSION;
 
-    nodeList = ixmlElement_getElementsByTagName( element, CT2CA(item));
+	node = root_node;
+    while( node != NULL ) {
+		if (ixmlNode_getNodeType( node ) == eELEMENT_NODE){
+			node_name = CA2CT(ixmlNode_getNodeName( node ));
+			// match name
+			if( node_name.CompareNoCase(item) == 0 ) {
+				IXML_Node *text_node = NULL;
 
-	if(nodeList){
-		tmpNode = ixmlNodeList_item( nodeList, 0);
-		if(tmpNode){
-		    textNode = ixmlNode_getFirstChild( tmpNode );
-			ret = CA2CT(ixmlNode_getNodeValue( textNode ));
+				text_node = ixmlNode_getFirstChild( node );
+				if( text_node == NULL ) {
+					return CString(_T(""));
+				}
+
+				nodeVal = CA2CT(ixmlNode_getNodeValue( text_node ));
+				return nodeVal;
+			}
+			else{
+				//Checks if we have something like "u:UPnPError" instead of "UPnPError"
+				int pos = 0;
+				pos = node_name.Find(_T(':'));
+				if (pos != -1){
+					node_name = node_name.Right(node_name.GetLength() - pos - 1);
+					if( node_name.CompareNoCase(item) == 0 ) {
+						IXML_Node *text_node = NULL;
+
+						text_node = ixmlNode_getFirstChild( node );
+						if( text_node == NULL ) {
+							return CString(_T(""));
+						}
+
+						nodeVal = CA2CT(ixmlNode_getNodeValue( text_node ));
+						return nodeVal;
+					}
+				}
+			}
 		}
-        ixmlNodeList_free( nodeList );
+
+		nodeVal = GetFirstNodeItem(ixmlNode_getFirstChild(node), item);
+		if(!nodeVal.IsEmpty())
+			return nodeVal;
+
+        // free and next node
+        node = ixmlNode_getNextSibling( node ); // next node
     }
 
-	return ret;
+	return CString(_T(""));
+}
+
+IXML_NodeList *CUPnP_IGDControlPoint::GetElementsByName(IXML_Document *doc, CString name){
+	return GetElementsByName((IXML_Node*)doc, name);
+}
+
+IXML_NodeList *CUPnP_IGDControlPoint::GetElementsByName(IXML_Element *element, CString name){
+	return GetElementsByName((IXML_Node*)element, name);
+}
+
+IXML_NodeList *CUPnP_IGDControlPoint::GetElementsByName(IXML_Node *root_node, CString name){
+	IXML_NodeList *node_list = NULL;
+	return GetElementsByName(root_node, name, &node_list);
+}
+
+IXML_NodeList *CUPnP_IGDControlPoint::GetElementsByName(IXML_Node *root_node, CString name, IXML_NodeList **nodelist){
+    IXML_Node *node;
+
+	USES_CONVERSION;
+
+	if(nodelist == NULL)
+		return NULL;
+
+	node = root_node;
+    while( node != NULL ) {
+		if (ixmlNode_getNodeType( node ) == eELEMENT_NODE){
+			CString node_name = CA2CT(ixmlNode_getNodeName( node ));
+			// match name
+			if( node_name.CompareNoCase(name) == 0 ) {
+				ixmlNodeList_addToNodeList(nodelist, node);
+			}
+			else{
+				int pos = 0;
+				pos = node_name.Find(_T(':'));
+				if (pos != -1){
+					node_name = node_name.Right(node_name.GetLength() - pos - 1);
+					if( node_name.CompareNoCase(name) == 0 ) {
+						ixmlNodeList_addToNodeList(nodelist, node);
+					}
+				}
+			}
+		}
+
+		GetElementsByName(ixmlNode_getFirstChild(node), name, nodelist);
+
+        // free and next node
+        node = ixmlNode_getNextSibling( node ); // next node
+    }
+
+	return *nodelist;
 }
 
 IXML_NodeList * CUPnP_IGDControlPoint::GetDeviceList( IXML_Document * doc ){
+	return GetDeviceList((IXML_Node*)doc);
+}
+
+IXML_NodeList * CUPnP_IGDControlPoint::GetDeviceList( IXML_Element * element ){
+	return GetDeviceList((IXML_Node*)element);
+}
+
+IXML_NodeList * CUPnP_IGDControlPoint::GetDeviceList( IXML_Node * root_node ){
     IXML_NodeList *DeviceList = NULL;
     IXML_NodeList *devlistnodelist = NULL;
     IXML_Node *devlistnode = NULL;
 
-    devlistnodelist = ixmlDocument_getElementsByTagName( doc, "deviceList" );
+    devlistnodelist = GetElementsByName( root_node, _T("deviceList") );
     if( devlistnodelist && ixmlNodeList_length( devlistnodelist ) ) {
         devlistnode = ixmlNodeList_item( devlistnodelist, 0 );
-        DeviceList =  ixmlElement_getElementsByTagName( ( IXML_Element * )
-                                              devlistnode, "device" );
+        DeviceList =  GetElementsByName( devlistnode, _T("device") );
     }
 
     if( devlistnodelist )
@@ -427,34 +545,19 @@ IXML_NodeList * CUPnP_IGDControlPoint::GetDeviceList( IXML_Document * doc ){
     return DeviceList;
 }
 
-IXML_NodeList * CUPnP_IGDControlPoint::GetDeviceListByItem( IXML_Element * element, IXML_Document * doc ){
-    IXML_NodeList *DeviceList = NULL;
-    IXML_NodeList *devlistnodelist = NULL;
-    IXML_Node *devlistnode = NULL;
-
-    devlistnodelist = ixmlElement_getElementsByTagName( ( IXML_Element * ) element, "deviceList" );
-    if( devlistnodelist && ixmlNodeList_length( devlistnodelist ) ) {
-        devlistnode = ixmlNodeList_item( devlistnodelist, 0 );
-        DeviceList =  ixmlElement_getElementsByTagName( ( IXML_Element * )
-                                              devlistnode, "device" );
-    }
-
-    if( devlistnodelist )
-        ixmlNodeList_free( devlistnodelist );
-
-    return DeviceList;
+IXML_NodeList * CUPnP_IGDControlPoint::GetServiceList( IXML_Element * element ){
+	return GetServiceList((IXML_Node*) element);
 }
 
-IXML_NodeList * CUPnP_IGDControlPoint::GetServiceListByItem( IXML_Element * element, IXML_Document * doc ){
+IXML_NodeList * CUPnP_IGDControlPoint::GetServiceList( IXML_Node * root_node ){
     IXML_NodeList *ServiceList = NULL;
     IXML_NodeList *servlistnodelist = NULL;
     IXML_Node *servlistnode = NULL;
 
-    servlistnodelist = ixmlElement_getElementsByTagName( (IXML_Element *) element, "serviceList" );
+    servlistnodelist = GetElementsByName( root_node, _T("serviceList") );
     if( servlistnodelist && ixmlNodeList_length( servlistnodelist ) ) {
         servlistnode = ixmlNodeList_item( servlistnodelist, 0 );
-        ServiceList = ixmlElement_getElementsByTagName( ( IXML_Element * )
-                                              servlistnode, "service" );
+        ServiceList = GetElementsByName( servlistnode, _T("service") );
     }
 
     if( servlistnodelist )
@@ -534,7 +637,7 @@ void CUPnP_IGDControlPoint::AddDevice( IXML_Document * doc, CString location, in
 					if(thePrefs.GetUPnPVerboseLog())
 						theApp.QueueDebugLogLine(false, _T("UPnP: Added embedded device: %s [%s]"), wandevice->FriendlyName, wandevice->DevType);
 
-					IXML_NodeList* devlist2 =  GetDeviceListByItem(dev1, doc);
+					IXML_NodeList* devlist2 = GetDeviceList(dev1);
 					int length2 = ixmlNodeList_length( devlist2 );
 					for( int n2 = 0; n2 < length2; n2++ ) {
 						IXML_Element *dev2;
@@ -551,7 +654,7 @@ void CUPnP_IGDControlPoint::AddDevice( IXML_Document * doc, CString location, in
 							if(thePrefs.GetUPnPVerboseLog())
 								theApp.QueueDebugLogLine(false, _T("UPnP: Added embedded device: %s [%s]"), wancondevice->FriendlyName, wancondevice->DevType);
 
-							IXML_NodeList* services = GetServiceListByItem(dev2, doc);
+							IXML_NodeList* services = GetServiceList(dev2);
 							int length3 = ixmlNodeList_length( services );
 							for( int n3 = 0; n3 < length3; n3++ ) {
 								IXML_Element *srv;
@@ -613,7 +716,7 @@ void CUPnP_IGDControlPoint::AddDevice( IXML_Document * doc, CString location, in
 									}
 									else{
 										if(thePrefs.GetUPnPVerboseLog())
-											theApp.QueueDebugLogLine(false, _T("UPnP: Failed to subscribe with service: %s (%d)"), service->ServiceType, subsRet);
+											theApp.QueueDebugLogLine(false, _T("UPnP: Failed to subscribe with service: %s [%s]"), service->ServiceType, GetErrDescription(subsRet));
 									}
 								}
 							}
@@ -763,17 +866,17 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 		if(fullMapping.internalClient == GetLocalIPStr()){
 			if(fullMapping.description.Left(7).MakeLower() != _T("emule (")){
 				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: The port %d is already mapped to other application (%s) [%s]"), mapping->externalPort, desc, srv->ServiceType);
+					AddLogLine(false, _T("UPnP: Couldn't add mapping: \"%s\". The port %d is already mapped to other application (\"%s\" on %s:%d). [%s]"), desc, mapping->externalPort, fullMapping.description, fullMapping.internalClient, fullMapping.internalPort, srv->ServiceType);
 				return UNAT_NOT_OWNED_PORTMAPPING;
 			}
 			else{
 				if(fullMapping.enabled == TRUE && fullMapping.leaseDuration == 0){
 					if(bIsUpdating){
 						if(thePrefs.GetUPnPVerboseLog())
-							theApp.QueueDebugLogLine(false, _T("UPnP: The port mapping \"%s\" don't needs an update [%s]"), desc, srv->ServiceType);
+							theApp.QueueDebugLogLine(false, _T("UPnP: The port mapping \"%s\" don't needs an update. [%s]"), desc, srv->ServiceType);
 					}
 					else
-						AddLogLine(false, _T("UPnP: The port mapping \"%s\" don't needs an update [%s]"), desc, srv->ServiceType);
+						AddLogLine(false, _T("UPnP: The port mapping \"%s\" don't needs an update. [%s]"), desc, srv->ServiceType);
 					//Mapping is already OK
 					return UNAT_OK;
 				}
@@ -784,7 +887,7 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 		}
 		else{
 			if(thePrefs.GetUPnPVerboseLog())
-				theApp.QueueDebugLogLine(false, _T("UPnP: The port %d is already mapped to other application (%s) [%s]"), mapping->externalPort, desc, srv->ServiceType);
+				AddLogLine(false, _T("UPnP: Couldn't add mapping: \"%s\". The port %d is already mapped to other application (\"%s\" on %s:%d). [%s]"), desc, mapping->externalPort, fullMapping.description, fullMapping.internalClient, fullMapping.internalPort, srv->ServiceType);
 			return UNAT_NOT_OWNED_PORTMAPPING;
 		}
 	}
@@ -822,7 +925,7 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 		IXML_NodeList *nodeList = NULL;
 		IXML_Node *textNode = NULL;
 		IXML_Node *tmpNode = NULL;
-		nodeList = ixmlDocument_getElementsByTagName( actionNode, "NewLeaseDuration");
+		nodeList = GetElementsByName( actionNode, _T("NewLeaseDuration"));
 
 		if( nodeList ) {
 			if( ( tmpNode = ixmlNodeList_item( nodeList, 0 ) ) ) {
@@ -838,25 +941,25 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 			Status = UNAT_OK;
 
 			if(bUpdate)
-				AddLogLine(false, _T("UPnP: Updated port mapping \"%s\" (Static) [%s]"), desc, srv->ServiceType);
+				AddLogLine(false, _T("UPnP: Updated port mapping \"%s\" (Static). [%s]"), desc, srv->ServiceType);
 			else
-				AddLogLine(false, _T("UPnP: Added port mapping \"%s\" (Static) [%s]"), desc, srv->ServiceType);
+				AddLogLine(false, _T("UPnP: Added port mapping \"%s\" (Static). [%s]"), desc, srv->ServiceType);
 		}
 		else{
 			if(bIsUpdating){
 				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Failed to add port mapping \"%s\" [%s] (%d)"), desc, srv->ServiceType, rc);
+					theApp.QueueDebugLogLine(false, _T("UPnP: Failed to add port mapping \"%s\" [%s] [%s]"), desc, srv->ServiceType, GetErrDescription(RespNode, rc));
 			}
 			else
-				AddLogLine(false, _T("UPnP: Failed to add port mapping \"%s\" [%s] (%d)"), desc, srv->ServiceType, rc);
+				AddLogLine(false, _T("UPnP: Failed to add port mapping \"%s\". [%s] [%s]"), desc, srv->ServiceType, GetErrDescription(RespNode, rc));
 		}
 	}
 	else{
 		Status = UNAT_OK;
 		if(bUpdate)
-			AddLogLine(false, _T("UPnP: Updated port mapping \"%s\" (Dynamic) [%s]"), desc, srv->ServiceType);
+			AddLogLine(false, _T("UPnP: Updated port mapping \"%s\" (Dynamic). [%s]"), desc, srv->ServiceType);
 		else
-			AddLogLine(false, _T("UPnP: Added port mapping \"%s\" (Dynamic) [%s]"), desc, srv->ServiceType);
+			AddLogLine(false, _T("UPnP: Added port mapping \"%s\" (Dynamic). [%s]"), desc, srv->ServiceType);
 	}
 
     if( RespNode )
@@ -893,7 +996,8 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMappingFr
 
 	//Check if the portmapping belong to us
 	UPNPNAT_FULLMAPPING fullMapping;
-	if(GetSpecificPortMappingEntryFromService(srv, mapping, &fullMapping, false) == UNAT_OK){
+	UPNPNAT_RETURN ret = GetSpecificPortMappingEntryFromService(srv, mapping, &fullMapping, false);
+	if( ret == UNAT_OK ){
 		if(fullMapping.internalClient == GetLocalIPStr()){
 			if(fullMapping.description.Left(7).MakeLower() != _T("emule (")){
 				return UNAT_NOT_OWNED_PORTMAPPING;
@@ -902,6 +1006,11 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMappingFr
 		else{
 			return UNAT_NOT_OWNED_PORTMAPPING;
 		}
+	}
+	else if(ret == UNAT_NOT_FOUND){
+		if(thePrefs.GetUPnPVerboseLog())
+			theApp.QueueDebugLogLine(false, _T("UPnP: Deleting port mapping \"%s\" aborted. [%s] [NoSuchEntryInArray (714)]"), desc, srv->ServiceType);
+		return UNAT_NOT_FOUND;
 	}
 
 	IXML_Document *actionNode = NULL;
@@ -918,11 +1027,11 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMappingFr
 		CT2CA(srv->ServiceType), NULL, actionNode, &RespNode);
 	if( rc != UPNP_E_SUCCESS)
 	{
-		AddLogLine(false, _T("UPnP: Failed to delete port mapping \"%s\" [%s] (%d)"), desc, srv->ServiceType, rc);
+		AddLogLine(false, _T("UPnP: Failed to delete port mapping \"%s\". [%s] [%s]"), desc, srv->ServiceType, GetErrDescription(RespNode, rc));
 	}
 	else{
 		Status = UNAT_OK;
-		AddLogLine(false, _T("UPnP: Deleted port mapping \"%s\" [%s]"), desc, srv->ServiceType);
+		AddLogLine(false, _T("UPnP: Deleted port mapping \"%s\". [%s]"), desc, srv->ServiceType);
 	}
 
     if( RespNode )
@@ -970,11 +1079,17 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::GetSpecificPortMapp
 		CT2CA(srv->ServiceType), NULL, actionNode, &RespNode);
 	if( rc != UPNP_E_SUCCESS)
 	{
-		status = UNAT_NOT_FOUND;
-		if(bLog){
-			if(thePrefs.GetUPnPVerboseLog())
-				theApp.QueueDebugLogLine(false, _T("UPnP: Failed to get specific port mapping entry \"%s\""), desc);
+		if(rc == 714){
+			//NoSuchEntryInArray
+			status = UNAT_NOT_FOUND;
 		}
+		else{
+			//Other error
+			status = UNAT_ERROR;
+		}
+
+		if(bLog && thePrefs.GetUPnPVerboseLog())
+			theApp.QueueDebugLogLine(false, _T("UPnP: Failed to get specific port mapping entry \"%s\". [%s]"), desc, GetErrDescription(RespNode, rc));
 	}
 	else{
 		fullMapping->externalPort = mapping->externalPort;
@@ -982,8 +1097,19 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::GetSpecificPortMapp
 		fullMapping->internalPort = _ttoi(GetFirstDocumentItem(RespNode, _T("NewInternalPort")));
 		fullMapping->description = GetFirstDocumentItem(RespNode, _T("NewPortMappingDescription"));
 		fullMapping->enabled = _ttoi(GetFirstDocumentItem(RespNode, _T("NewEnabled"))) == 0 ? false : true;
-		fullMapping->internalClient = GetFirstDocumentItem(RespNode, _T("NewInternalClient"));
 		fullMapping->leaseDuration = _ttoi(GetFirstDocumentItem(RespNode, _T("NewLeaseDuration")));
+
+		// WinXP returns the host name instead of the ip for the "NewInternalClient" var.
+		// Try to get the ip using the host name.
+		CString internalClient = GetFirstDocumentItem(RespNode, _T("NewInternalClient"));
+
+		LPHOSTENT lphost;
+		lphost = gethostbyname(CT2CA(internalClient));
+		if (lphost != NULL){
+			internalClient = CA2CT(inet_ntoa(*(in_addr*)lphost->h_addr_list[0]));
+		}
+
+		fullMapping->internalClient = internalClient;
 		status = UNAT_OK;
 	}
 
@@ -1097,7 +1223,7 @@ bool CUPnP_IGDControlPoint::IsServiceConnected(CUPnP_IGDControlPoint::UPNP_SERVI
 	if( rc != UPNP_E_SUCCESS)
 	{
 		if(thePrefs.GetUPnPVerboseLog())
-			theApp.QueueDebugLogLine(false, _T("UPnP: Failed to get connection status from [%s] (%d)"), srv->ServiceType, rc);
+			theApp.QueueDebugLogLine(false, _T("UPnP: Failed to get connection status from [%s] [%s])"), srv->ServiceType, GetErrDescription(RespNode, rc));
 	}
 	else{
 		CString strStatus = GetFirstDocumentItem(RespNode, _T("NewConnectionStatus"));
@@ -1126,13 +1252,13 @@ void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int evntkey, IXML_Docu
 
 		if(srv){
 			if(strcmp(srv->SubscriptionID, sid) == 0){
-				//Parse Event
+				//if(thePrefs.GetUPnPVerboseLog())
 				//	theApp.QueueDebugLogLine(false, _T("UPnP: Event received from service \"%s\" [SID=%s]"), srv->ServiceType, CA2CT(srv->SubscriptionID));
 				
 				//Parse Event
 				IXML_NodeList *properties = NULL;
 
-				properties = ixmlDocument_getElementsByTagName( changes, "e:property" );
+				properties = GetElementsByName( changes, _T("property") );
 				if(properties != NULL){
 					int length = ixmlNodeList_length( properties );
 					for( int i = 0; i < length; i++ ) {
@@ -1141,7 +1267,7 @@ void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int evntkey, IXML_Docu
 						property = ( IXML_Element * ) ixmlNodeList_item( properties, i );
 						if(property){
 							IXML_NodeList *variables = NULL;
-							variables = ixmlElement_getElementsByTagName( property, "s:ConnectionStatus" );
+							variables = GetElementsByName( property, _T("ConnectionStatus") );
 							if(variables){
 								int length2 = ixmlNodeList_length( variables );
 								if( length2 > 0 ) {
@@ -1185,4 +1311,37 @@ void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int evntkey, IXML_Docu
 
 	if(update)
 		UpdateAllMappings();
+}
+
+CString CUPnP_IGDControlPoint::GetErrDescription(int err){
+	CString errDesc;
+
+	USES_CONVERSION;
+
+	if(err < 0){
+		errDesc = CA2CT(UpnpGetErrorMessage(err));
+	}
+	else{
+		errDesc = _T("HTTP_ERROR");
+	}
+
+	errDesc.AppendFormat(_T(" (%d)"), err);
+	return errDesc;
+}
+
+CString CUPnP_IGDControlPoint::GetErrDescription(IXML_Document* errDoc, int err){
+	CString errDesc;
+	int err_n = 0;
+
+	err_n = _ttoi(GetFirstDocumentItem(errDoc, _T("errorCode")));
+	if(err_n == 0){
+		errDesc = GetErrDescription(err);
+	}
+	else{
+		errDesc = GetFirstDocumentItem(errDoc, _T("errorDescription"));
+		if(errDesc.IsEmpty())
+			errDesc = _T("Unknown Error");
+		errDesc.AppendFormat(_T(" (%d)"), err_n);
+	}
+	return errDesc;
 }

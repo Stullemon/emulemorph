@@ -67,7 +67,7 @@ public:
 			EventURL = srv.EventURL;
 			ServiceID = srv.ServiceID;
 			ServiceType = srv.ServiceType;
-			memcpy(SubscriptionID, srv.SubscriptionID, 44);
+			memcpy(SubscriptionID, srv.SubscriptionID, sizeof(Upnp_SID));
 			
 			//POSITION pos = srv.infoList.GetHeadPosition();
 			//while(pos){
@@ -104,10 +104,9 @@ public:
 
 	typedef enum{
 		UNAT_OK,						// Successfull
-		UNAT_ERROR,						// Error, use GetLastError() to get an error description
+		UNAT_ERROR,						// Unknown Error
 		UNAT_NOT_OWNED_PORTMAPPING,		// Error, you are trying to remove a port mapping not owned by this class
 		UNAT_EXTERNAL_PORT_IN_USE,		// Error, you are trying to add a port mapping with an external port in use
-		UNAT_NOT_IN_LAN,				// Error, you aren't in a LAN -> no router or firewall
 		UNAT_NOT_FOUND					// Port mapping not found
 	} UPNPNAT_RETURN;
 
@@ -182,27 +181,45 @@ private:
 	static UINT ActionThreadFunc( LPVOID pParam );
 	static CCriticalSection m_ActionThreadCS;
 
+	//Main Callback Function
 	static int				IGD_Callback( Upnp_EventType EventType, void* Event, void* Cookie );
+
+	//IXML Helpers
 	static CString			GetFirstDocumentItem(IXML_Document * doc, CString item );
 	static CString			GetFirstElementItem( IXML_Element * element, CString item );
+	static CString			GetFirstNodeItem( IXML_Node * root_node, CString item );
+	static IXML_NodeList*	GetElementsByName(IXML_Document *doc, CString name);
+	static IXML_NodeList*	GetElementsByName(IXML_Element *element, CString name);
+	static IXML_NodeList*	GetElementsByName(IXML_Node *root_node, CString name);
+	static IXML_NodeList*	GetElementsByName(IXML_Node *root_node, CString name, IXML_NodeList **nodelist);
 	static IXML_NodeList*	GetDeviceList( IXML_Document * doc );
-	static IXML_NodeList*	GetDeviceListByItem( IXML_Element * element, IXML_Document * doc );
-	static IXML_NodeList*	GetServiceListByItem( IXML_Element * element, IXML_Document * doc );
+	static IXML_NodeList*	GetDeviceList( IXML_Element * doc );
+	static IXML_NodeList*	GetDeviceList( IXML_Node * doc );
+	static IXML_NodeList*	GetServiceList( IXML_Element * element );
+	static IXML_NodeList*	GetServiceList( IXML_Node * root_node );
+
+	//Device related functions
 	static void				AddDevice( IXML_Document * doc, CString location, int expires);
 	static void				RemoveDevice( CString devID );
 	static void				RemoveDevice( UPNP_DEVICE *dev );
 	static void				CheckTimeouts();
 
+	//Service related functions
 	static UPNPNAT_RETURN	AddPortMappingToService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping, bool bIsUpdating = false);
 	static UPNPNAT_RETURN	DeletePortMappingFromService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping);
 	static UPNPNAT_RETURN	GetSpecificPortMappingEntryFromService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping, UPNPNAT_FULLMAPPING *fullMapping, bool bLog = true);
 	static bool				IsServiceConnected(UPNP_SERVICE *srv);
 	static void				OnEventReceived(Upnp_SID sid, int evntkey, IXML_Document * changes );
+	static bool				UpdateAllMappings( bool bLockDeviceList = true, bool bUpdating = true );
 
+	//Error functions
+	static CString			GetErrDescription(int err);
+	static CString			GetErrDescription(IXML_Document* errDoc, int err);
+
+	//IP
 	static CString			GetLocalIPStr();
 	static bool				IsLANIP(WORD nIP);
 	static bool				IsLANIP(char *cIP);
-	static bool				UpdateAllMappings( bool bLockDeviceList = true, bool bUpdating = true );
 };
 
 #endif //__CUPNP_IGDCONTROLPOINT_H__
