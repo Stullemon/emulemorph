@@ -256,7 +256,7 @@ BEGIN
     IDS_COPIED2CB           "In Zwischenablage kopiert: \n"
     IDS_PROCDONE            "% fertig"
     IDS_SELECTINCOMINGDIR   "Wähle einen Ordner für fertige Downloads."
-    IDS_SELECTINCOMINGDIR2  "Wähle einen Ordner für temporäre Dateien (unfertige Downloads)"
+    IDS_SELECTTEMPDIR       "Wähle einen Ordner für temporäre Dateien (unfertige Downloads)"
     IDS_DL_FILENAME         "Dateiname"
     IDS_DL_SIZE             "Größe"
     IDS_DL_TRANSF           "Übertragen"
@@ -531,7 +531,7 @@ BEGIN
     IDS_PW_INCOMING         "Eingehende Dateien"
     IDS_PW_TEMP             "Temporäre Dateien"
     IDS_PW_BROWSE           "Durchsuchen"
-    IDS_PW_SHARED           "Freigegebene Verzeichnisse"
+    IDS_PW_SHARED           "Freigegebene Verzeichnisse (Strg-drücken schließt Unterverzeichnisse ein)"
     IDS_PW_CONNECTION       "Verbindung"
     IDS_PW_DOWNC            "Download Kapazität"
     IDS_PW_DOWNL            "Download Limit"
@@ -2021,7 +2021,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_Transferred "Übertragen: %s (%s)"
+    IDS_FEEDBACK_TRANSFERRED "Übertragen: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Angefragt: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Akzeptierte Anfragen: %i (%i)"
     IDS_FEEDBACK_FROM       "Feedback von %s zu [%s]"
@@ -2219,6 +2219,7 @@ BEGIN
     IDS_MORPH_RFHA          "Datei-Hashing-Aktivität protokollieren"
     IDS_MORPH_RAIF          "Aktivitäten in Freundesliste protokollieren"
     IDS_MORPH_KSSERV        "Feste Server nicht während der Laufzeit entfernen"
+    IDS_MORPH_LOG           "Morph Log"
 END
 
 STRINGTABLE 
@@ -2334,11 +2335,12 @@ STRINGTABLE
 BEGIN
     IDS_CRC32_ABORT         "Berechnung abbrechen"
     IDS_DONTREMOVESPARETRICKLESLOT "Reserve-Trickleslots nicht entfernen"
-    IDS_MINDATARATEFRIEND   "Transferrate (Standard 0 KB/s=unlimitiert)"
-    IDS_MINDATARATEPOWERSHARE "Transferrate (Standard 0 KB/s=unlimitiert)"
+    IDS_MINDATARATEFRIEND   "Globale Transferrate (Standard 0 KB/s=unlimitiert, 1...3kB/s = keine zzRatio)"
+    IDS_MINDATARATEPOWERSHARE "Globale Transferrate (Standard 0 KB/s=unlimitiert)"
     IDS_MAXCLIENTDATARATEFRIEND "Pro Client (Standard 0 KB/s=fokussiert)"
     IDS_MAXCLIENTDATARATEPOWERSHARE "Pro Client (Standard 0 KB/s=fokussiert)"
     IDS_MAXCLIENTDATARATE   "Pro Client Transfer (Standard 0 KB/s=fokussiert)"
+    IDS_DISPLAYFUNNYNICK    "Aktiviere FunnyNick"
 END
 
 STRINGTABLE 
@@ -2349,6 +2351,7 @@ BEGIN
     IDS_RANDOMPORTS         "Zufalls-Ports"
     IDS_MINPORT             "Min Port"
     IDS_MAXPORT             "Max Port"
+    IDS_RANDOMPORTSRESETTIME "Zufalls-Ports sichere erneute Startzeit (in Sekunden)"
 END
 
 STRINGTABLE 
@@ -2477,6 +2480,10 @@ BEGIN
     IDS_SPREADBAR           "Verteilungsbalken"
     IDS_SPREADBAR_DEFAULT_CHECKBOX 
                             "Verteilungsbalken standardmäßig aktivieren"
+    IDS_UPLOAD_TOO_MANY_SLOTS "Zuviele Slots"
+    IDS_UPLOAD_COMPLETED    "Beende"
+    IDS_UPLOAD_PREEMPTED    "Früh geleert für Upload höherer Priorität"
+    IDS_CRASHRPT_NOTAV      "Crash Reporter nicht gefunden im emule Verzeichnis. Wenn du uns helfen willst unsere Mod zu debuggen, lade bitte die CrashRpt.dll"
 END
 
 STRINGTABLE 
@@ -2504,6 +2511,7 @@ BEGIN
     IDS_WC_HIDE_ADV         "einfache Einstellungen"
     IDS_WC_SUBMIT_WEB       "Diese Informationen per Webform einsenden"
     IDS_WC_SOURCES          "Webcache Quellen"
+    IDS_WC_UPDATESETTING    "Update Webcache Einstellungen automatisch"
 END
 
 STRINGTABLE 
@@ -2634,6 +2642,14 @@ BEGIN
     IDS_CAT_TOTAL           "Total"
     IDS_UP_LOWID            "%s LowID"
     IDS_UP_LOWID_DELAYED    "%s LowID delayed %s"
+    IDS_ZZRATIO             "zzRatio"
+    IDS_ZZRATIO_ENABLED     "ist aktiv"
+    IDS_ZZRATIO_DISABLED    "ist nicht aktiv"
+    IDS_ZZRATIO_CHECK1      "1/3 Ratio erreicht"
+    IDS_ZZRATIO_CHECK2      "PowerSharing unvollständige Datei"
+    IDS_ZZRATIO_CHECK3      "Nutze Freund-Uploadplatz und Globale Transferrate>3KB/s"
+    IDS_ZZRATIO_CHECK4      "Upload Limit unter 10KB/s"
+    IDS_ZZRATIO_CHECK5      "Durchschnittliche Upload unter 10KB/s"
 END
 
 STRINGTABLE 
@@ -2664,6 +2680,8 @@ BEGIN
     IDS_STORENOTES          "Speichere Notizen"
     IDS_NOTES               "Notizen"
     IDS_KADSEARCHALREADY    "Es ist gerade eine Suche in Arbeit. Bitte später nochmals versuchen."
+    IDS_CRASHRPT_DONE       "Crash Report wurde erstellt."
+    IDS_CRASHRPT_AV         "Crash Reporter ist verfügbar und läuft."
 END
 
 STRINGTABLE 
@@ -2705,9 +2723,8 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "..\version.h"
+#include "..\Version.h"
 #include "lang.rc2"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-
