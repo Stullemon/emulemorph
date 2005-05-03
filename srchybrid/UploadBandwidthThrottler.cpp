@@ -440,37 +440,39 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		sint64 BytesToSpend = 0;
 		uint32 allowedDataRate = allowedDataRateClass[LAST_CLASS];
+		bool needmoreslot = false;
 		if (timeSinceLastLoop > 0 && allowedDataRate != _UI32_MAX ) {
-			if (realBytesToSpendClass[classID] > 0)
-					realBytesToSpendClass[classID] = 0;
 			if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[LAST_CLASS]) {
+				if (realBytesToSpendClass[LAST_CLASS] > timeSinceLastLoop*doubleSendSize)
+					needmoreslot = true;
+				if (realBytesToSpendClass[LAST_CLASS] > 999)
+					realBytesToSpendClass[LAST_CLASS] = 999;
 				realBytesToSpendClass[LAST_CLASS] += allowedDataRate*timeSinceLastLoop;
-				if(_I64_MAX/1000 > allowedDataRate && realBytesToSpendClass[LAST_CLASS] > allowedDataRate*1000)
-					realBytesToSpendClass[LAST_CLASS] = allowedDataRate*1000;
 			} else {
 				realBytesToSpendClass[LAST_CLASS] = _I64_MAX;
 			}
 		}
 		BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
 
-		tempQueueLocker.Lock();
+		uint64 ControlspentBytes = 0;
+		uint64 ControlspentOverhead = 0;
+		if (timeSinceLastLoop > 0) {
+			tempQueueLocker.Lock();
 
-		// are there any sockets in m_TempControlQueue_list? Move them to normal m_ControlQueue_list;
-		while(!m_TempControlQueueFirst_list.IsEmpty()) {
-			ThrottledControlSocket* moveSocket = m_TempControlQueueFirst_list.RemoveHead();
-			m_ControlQueueFirst_list.AddTail(moveSocket);
+			// are there any sockets in m_TempControlQueue_list? Move them to normal m_ControlQueue_list;
+			while(!m_TempControlQueueFirst_list.IsEmpty()) {
+				ThrottledControlSocket* moveSocket = m_TempControlQueueFirst_list.RemoveHead();
+				m_ControlQueueFirst_list.AddTail(moveSocket);
+			}
+			while(!m_TempControlQueue_list.IsEmpty()) {
+				ThrottledControlSocket* moveSocket = m_TempControlQueue_list.RemoveHead();
+        		m_ControlQueue_list.AddTail(moveSocket);
+			}
+      		tempQueueLocker.Unlock();
 		}
-		while(!m_TempControlQueue_list.IsEmpty()) {
-			ThrottledControlSocket* moveSocket = m_TempControlQueue_list.RemoveHead();
-        	m_ControlQueue_list.AddTail(moveSocket);
-		}
-      	tempQueueLocker.Unlock();
-
-		uint64 spentBytes = 0;
-		uint64 spentOverhead = 0;
 
 		// Send any queued up control packets first
-		while(BytesToSpend > 0 &&  spentBytes < (uint64)BytesToSpend && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
+		while(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend - minFragSize && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
 			ThrottledControlSocket* socket = NULL;
 			
 			if(!m_ControlQueueFirst_list.IsEmpty()) {
@@ -480,31 +482,42 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			}
 
 			if (socket != NULL) {
-				SocketSentBytes socketSentBytes = socket->SendControlData((uint64)BytesToSpend - spentBytes, minFragSize);
+				SocketSentBytes socketSentBytes = socket->SendControlData(BytesToSpend - ControlspentBytes, minFragSize);
 				uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 				Socket_stat* stat = NULL;
 				if(m_stat_list.Lookup((ThrottledFileSocket*)socket,stat))
 					stat->realBytesToSpend -= lastSpentBytes*1000;
-				spentBytes += lastSpentBytes;
-				spentOverhead += socketSentBytes.sentBytesControlPackets;
+				ControlspentBytes += lastSpentBytes;
+				ControlspentOverhead += socketSentBytes.sentBytesControlPackets;
         	}
        	}
+		realBytesToSpendClass[LAST_CLASS] -= 1000*ControlspentBytes;
+		BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
+		m_SentBytesSinceLastCall += ControlspentBytes;
+		m_SentBytesSinceLastCallOverhead += ControlspentOverhead;
+
 		uint32 lastclientpos = 0;
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 			if(slotCounterClass[classID]) {
+				uint64 spentBytes = 0;
+				uint64 spentOverhead = 0;
 				if (allowedDataRateClass[classID])
 					allowedDataRate = allowedDataRateClass[classID];
 				else
 					allowedDataRate = allowedDataRateClass[LAST_CLASS];
 				if (timeSinceLastLoop > 0 && allowedDataRate > 0 && allowedDataRate != _UI32_MAX && classID < LAST_CLASS) {
 					if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
-       					realBytesToSpendClass[classID] += allowedDataRate*timeSinceLastLoop;
-						if(_I64_MAX/1000 > allowedDataRate && realBytesToSpendClass[classID] > allowedDataRate*1000)
-							realBytesToSpendClass[classID] = allowedDataRate*1000;
+						if (realBytesToSpendClass[classID] > timeSinceLastLoop*doubleSendSize)
+							needmoreslot = true;
+						else
+							needmoreslot = false;
+						if(realBytesToSpendClass[classID] >  999)
+							realBytesToSpendClass[classID] = 999;
+						realBytesToSpendClass[classID] += allowedDataRate*timeSinceLastLoop;
 					} else {
 						realBytesToSpendClass[classID] = _I64_MAX;
 					}
-					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS]) 
+					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
 						realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
 				} else
 					realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
@@ -527,26 +540,28 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								}
 							}
 							uint32 neededBytes = socket->GetNeededBytes(minFragSize<1000);
-							if (neededBytes > 0 && socket->GetLastCalledSend() > SEC2MS(2) && stat->realBytesToSpend > 999) {
-								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(min(neededBytes, stat->realBytesToSpend/1000), minFragSize);
+							if (neededBytes > 0 && GetTickCount()-socket->GetLastCalledSend() > SEC2MS(1) && stat->realBytesToSpend > 999) {
+								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(min(neededBytes, stat->realBytesToSpend / 1000), minFragSize);
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 								stat->realBytesToSpend -= lastSpentBytes*1000;
-								if(m_highestNumberOfFullyActivatedSlots[classID] > slotCounter+1)
-									m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
-								if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
-									m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
+								if (needmoreslot == false) {
+									if(m_highestNumberOfFullyActivatedSlots[classID] > slotCounter+1)
+										m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
+									if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
+										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
+								}
 								spentBytes += lastSpentBytes;
 								spentOverhead += socketSentBytes.sentBytesControlPackets;
-							}
-								
-							if (BytesToSpend > 0 &&  spentBytes < (uint64)BytesToSpend && stat->realBytesToSpend > 999) {
-								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(min(BytesToSpend - spentBytes, stat->realBytesToSpend/1000), doubleSendSize);
+							} else if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend && stat->realBytesToSpend > 999) {
+								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(min(BytesToSpend - spentBytes, stat->realBytesToSpend / 1000), doubleSendSize);
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 								stat->realBytesToSpend -= lastSpentBytes*1000;
-								if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
+								if (classID < SCHED_CLASS) {
+									if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
 									m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
-								if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
-									m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
+									if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
+										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
+								}
 								spentBytes += lastSpentBytes;
 								spentOverhead += socketSentBytes.sentBytesControlPackets;
 							}
@@ -557,16 +572,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					realBytesToSpendClass[classID] -= spentBytes*1000;
 
 				lastclientpos += slotCounterClass[classID];
+				realBytesToSpendClass[LAST_CLASS] -= spentBytes*1000;
+
+				if (needmoreslot && m_highestNumberOfFullyActivatedSlots[classID] < lastclientpos+1)
+					++m_highestNumberOfFullyActivatedSlots[classID];
+				m_SentBytesSinceLastCall += spentBytes;
+				m_SentBytesSinceLastCallOverhead += spentOverhead;
 			}
-			realBytesToSpendClass[LAST_CLASS] -= spentBytes*1000;
-
-			if (realBytesToSpendClass[classID] > 999+1000*doubleSendSize)
-				m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
-
-			m_SentBytesSinceLastCall += spentBytes;
-			spentBytes = 0;
-			m_SentBytesSinceLastCallOverhead += spentOverhead;
-			spentOverhead = 0;
 		}
 		sendLocker.Unlock();
     }

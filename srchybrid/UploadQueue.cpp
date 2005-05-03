@@ -97,6 +97,8 @@ CUploadQueue::CUploadQueue()
 	/*
 	m_lastCalculatedDataRateTick = 0;
 	*/
+	avarage_tick_listPreviousAddedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+
 	m_avarage_dr_sum = 0;
 	m_avarage_dr_USS_sum = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	m_avarage_overhead_dr_sum = 0; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
@@ -246,7 +248,7 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 	if(
 		(leftClient != NULL &&
 			(
-				(iSuperior = RightClientIsSuperior(leftClient, rightClient)) > 0 || //MORPH - Changed by SiRoB, Upload Splitting Class
+				(iSuperior = RightClientIsSuperior(leftClient, rightClient)) > 0 ||
 				iSuperior == 0 &&
 				( leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() || //Morph - added by AndCycle, keep full chunk transfer
 					leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
@@ -917,8 +919,7 @@ void CUploadQueue::Process() {
 	if (sentBytes>0) {
     	if (avarage_tick_list.GetCount() > 0)
 			avarage_tick_listPreviousAddedTimestamp = avarage_tick_list.GetTail();
-		else
-			avarage_tick_listPreviousAddedTimestamp = curTick;
+
     	// Save used bandwidth for speed calculations
 		avarage_dr_list.AddTail(sentBytes);
 		m_avarage_dr_sum += sentBytes;
@@ -935,22 +936,26 @@ void CUploadQueue::Process() {
 		avarage_friend_dr_list.AddTail(theStats.sessionSentBytesToFriend);
     	// Save time beetween each speed snapshot
 		avarage_tick_list.AddTail(curTick);
-		//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
-		TransferredData data = {sentBytes,curTick};
-		avarage_dr_USS_list.AddTail(data);
-		m_avarage_dr_USS_sum += sentBytes;
-		//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	}
 	//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
+	TransferredData data = {sentBytes,curTick};
+	avarage_dr_USS_list.AddTail(data);
+	m_avarage_dr_USS_sum += sentBytes;
 	while(avarage_dr_USS_list.GetCount() > 1 && (curTick - avarage_dr_USS_list.GetHead().timestamp) > 30*1000)
 		m_avarage_dr_USS_sum -= avarage_dr_USS_list.RemoveHead().datalen;
 
-	if (avarage_dr_USS_list.GetCount() > 1)
-		datarate_USS = 1000U * (m_avarage_dr_USS_sum-avarage_dr_USS_list.GetHead().datalen) / (avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_list.GetHead().timestamp);
+	if (avarage_dr_USS_list.GetCount() > 1) {
+		DWORD dwDuration = avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_list.GetHead().timestamp;
+		if (dwDuration < 880) dwDuration = 880;
+		DWORD dwAvgTickDuration = dwDuration / (avarage_dr_USS_list.GetCount() - 1);
+		if ((curTick - avarage_dr_USS_list.GetTail().timestamp) > dwAvgTickDuration)
+			dwDuration += curTick - avarage_dr_USS_list.GetTail().timestamp - dwAvgTickDuration;
+		datarate_USS = 1000U * (m_avarage_dr_USS_sum-avarage_dr_USS_list.GetHead().datalen) / dwDuration;
+	}
 	//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	
 	// don't save more than MAXAVERAGETIMEUPLOAD secs of data
-	while(avarage_tick_list.GetCount() > 1 && (curTick - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
+	while(avarage_tick_list.GetCount() > 1 && (avarage_tick_listPreviousAddedTimestamp - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
 		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 		m_avarage_overhead_dr_sum -= avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		avarage_friend_dr_list.RemoveHead();
@@ -960,6 +965,7 @@ void CUploadQueue::Process() {
 	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
 	if (avarage_tick_list.GetCount() > 1){
 		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
+		if (dwDuration < 880) dwDuration = 880;
 		DWORD dwAvgTickDuration = dwDuration / (avarage_tick_list.GetCount() - 1);
 		if ((curTick - avarage_tick_list.GetTail()) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_tick_list.GetTail() - dwAvgTickDuration;
@@ -968,6 +974,7 @@ void CUploadQueue::Process() {
 		friendDatarate = 1000U * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead());
 	}else if (avarage_tick_list.GetCount() == 1){
 		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
+		if (dwDuration < 880) dwDuration = 880;
 		if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
 			dwDuration = curTick - avarage_tick_list.GetTail();
 		datarate = 1000U * m_avarage_dr_sum / dwDuration;

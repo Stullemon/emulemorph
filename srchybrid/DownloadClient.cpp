@@ -860,7 +860,11 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		// SLUGFILLER: SafeHash
 
 		if(nNewState == DS_DOWNLOADING && socket){ //MORPH - Changed by SiRoB, WebCache
-		    socket->SetTimeOut(CONNECTION_TIMEOUT*4);
+			//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+			int buffer = 65537;
+			socket->SetSockOpt(SO_RCVBUF, &buffer , sizeof(buffer), SOL_SOCKET);
+			//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+			socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 
 		if (m_nDownloadState == DS_DOWNLOADING ){
@@ -929,6 +933,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		}
 		m_nDownloadState = nNewState;
 		if( GetDownloadState() == DS_DOWNLOADING ){
+			m_AvarageDDRPreviousAddedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 			if ( IsEmuleClient() )
 				SetRemoteQueueFull(false);
 			SetRemoteQueueRank(0);
@@ -1455,25 +1460,25 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 	if(m_nDownDataRateMS > 0) {
 		if (m_AvarageDDR_list.GetCount() > 0)
 			m_AvarageDDRPreviousAddedTimestamp = m_AvarageDDR_list.GetTail().timestamp;
-		else
-			m_AvarageDDRPreviousAddedTimestamp = cur_tick;
 		TransferredData newitem = {m_nDownDataRateMS,cur_tick};
 		m_AvarageDDR_list.AddTail(newitem);
 		m_nSumForAvgDownDataRate += m_nDownDataRateMS;
 		m_nDownDataRateMS = 0;
     }
 
-	while (m_AvarageDDR_list.GetCount() > 1 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
+	while (m_AvarageDDR_list.GetCount() > 1 && (m_AvarageDDRPreviousAddedTimestamp - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 
 	if (m_AvarageDDR_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
+		if (dwDuration < 880) dwDuration = 880;
 		DWORD dwAvgTickDuration = dwDuration / (m_AvarageDDR_list.GetCount() - 1);
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += cur_tick - m_AvarageDDR_list.GetTail().timestamp - dwAvgTickDuration;
 		m_nDownDatarate = 1000U * (m_nSumForAvgDownDataRate-m_AvarageDDR_list.GetHead().datalen) / dwDuration;
 	} else if (m_AvarageDDR_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp;
+		if (dwDuration < 880) dwDuration = 880;
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = cur_tick - m_AvarageDDR_list.GetTail().timestamp;
 		m_nDownDatarate = 1000U * m_nSumForAvgDownDataRate / dwDuration;

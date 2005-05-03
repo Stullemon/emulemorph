@@ -92,8 +92,8 @@
 // MOD Note: end
 
 //MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
-#define	MAXAVERAGETIMEUPLOAD	SEC2MS(thePrefs.m_iUploadDataRateAverageTime)
-#define	MAXAVERAGETIMEDOWNLOAD	SEC2MS(thePrefs.m_iDownloadDataRateAverageTime)
+#define	MAXAVERAGETIMEUPLOAD	thePrefs.m_iUploadDataRateAverageTime
+#define	MAXAVERAGETIMEDOWNLOAD	thePrefs.m_iDownloadDataRateAverageTime
 //MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 
 #define CONFIGFOLDER			_T("config\\")

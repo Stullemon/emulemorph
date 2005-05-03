@@ -183,9 +183,14 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 			m_nSumForAvgUpDataRate = 0;
 			m_AvarageUDR_list.RemoveAll();
 		}
-		if (eNewState == US_UPLOADING)
+		if (eNewState == US_UPLOADING) {
 			m_fSentOutOfPartReqs = 0;
-
+			m_AvarageUDRPreviousAddedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+			//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+			int buffer = 65537;
+			socket->SetSockOpt(SO_SNDBUF, &buffer , sizeof(buffer), SOL_SOCKET);
+			//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+		}
 		// don't add any final cleanups for US_NONE here	
 		m_nUploadState = eNewState;
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
@@ -1020,7 +1025,6 @@ uint32 CUpDownClient::SendBlockData(){
     	    }
     	}
     }
-
 	//MORPH START - Modified by SiRoB, Better Upload rate calcul
 	if(sentBytesCompleteFile + sentBytesPartFile > 0) {
 		// Store how much data we've Transferred this round,
@@ -1028,24 +1032,24 @@ uint32 CUpDownClient::SendBlockData(){
 		// keep sum of all values in list up to date
 		if (m_AvarageUDR_list.GetCount() > 0)
 			m_AvarageUDRPreviousAddedTimestamp = m_AvarageUDR_list.GetTail().timestamp;
-		else
-			m_AvarageUDRPreviousAddedTimestamp = curTick;
 		TransferredData newitem = {sentBytesCompleteFile + sentBytesPartFile, curTick};
 		m_AvarageUDR_list.AddTail(newitem);
 		m_nSumForAvgUpDataRate += sentBytesCompleteFile + sentBytesPartFile;
 	}
 
-	while (m_AvarageUDR_list.GetCount() > 1 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
+	while (m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDRPreviousAddedTimestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
 		m_nSumForAvgUpDataRate -= m_AvarageUDR_list.RemoveHead().datalen;
 
     if(m_AvarageUDR_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
+		if (dwDuration < 880) dwDuration = 880;
 		DWORD dwAvgTickDuration = dwDuration / (m_AvarageUDR_list.GetCount() - 1);
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += curTick - m_AvarageUDR_list.GetTail().timestamp - dwAvgTickDuration;
 		m_nUpDatarate = 1000U * (m_nSumForAvgUpDataRate - m_AvarageUDR_list.GetHead().datalen) / dwDuration;
 	}else if(m_AvarageUDR_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp;
+		if (dwDuration < 880) dwDuration = 880;
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - m_AvarageUDR_list.GetTail().timestamp;
 		m_nUpDatarate = 1000U * m_nSumForAvgUpDataRate / dwDuration;
@@ -1060,7 +1064,6 @@ uint32 CUpDownClient::SendBlockData(){
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 		m_lastRefreshedULDisplay = curTick;
 	}
-
 	return sentBytesCompleteFile + sentBytesPartFile;
 }
 
