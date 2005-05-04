@@ -451,6 +451,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			} else {
 				realBytesToSpendClass[LAST_CLASS] = _I64_MAX;
 			}
+			if(_I64_MAX/1000 > allowedDataRate && realBytesToSpendClass[LAST_CLASS] > allowedDataRate*1000)
+				realBytesToSpendClass[LAST_CLASS] = allowedDataRate*1000;
 		}
 		BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
 
