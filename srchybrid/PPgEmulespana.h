@@ -40,8 +40,8 @@ protected:
 	HTREEITEM	m_htiUPnP;
 	HTREEITEM	m_htiUPnPWeb;
 	//HTREEITEM	m_htiUPnPTryRandom;
-	BOOL		m_bUPnP;
-	BOOL		m_bUPnPWeb;
+	bool		m_bUPnP;
+	bool		m_bUPnPWeb;
 	//BOOL		m_bUPnPTryRandom;
 	// End MoNKi
 
@@ -59,9 +59,9 @@ protected:
 	HTREEITEM	m_htiICFSupport;
 	HTREEITEM	m_htiICFSupportClearAtEnd;
 	HTREEITEM	m_htiICFSupportServerUDP;
-	BOOL		m_bICFSupport;
-	BOOL		m_bICFSupportClearAtEnd;
-	BOOL		m_bICFSupportServerUDP;
+	bool		m_bICFSupport;
+	bool		m_bICFSupportClearAtEnd;
+	bool		m_bICFSupportServerUDP;
 	// End MoNKi
 	
 /*Commented by SiRoB
@@ -87,11 +87,11 @@ protected:
 	HTREEITEM	m_htiWapPass;
 	HTREEITEM	m_htiWapLowEnable;
 	HTREEITEM	m_htiWapLowPass;
-	BOOL		m_bWapEnable;
+	bool		m_bWapEnable;
 	int			m_iWapPort;
 	CString		m_sWapTemplate;
 	CString		m_sWapPass;
-	BOOL		m_bWapLowEnable;
+	bool		m_bWapLowEnable;
 	CString		m_sWapLowPass;
 	// End MoNKi
 

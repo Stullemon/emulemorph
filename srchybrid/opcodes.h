@@ -84,7 +84,7 @@
 #define	UDPSERVERPORT			4665	//default udp port
 #define UDPMAXQUEUETIME			SEC2MS(30)	//30 Seconds
 #define RSAKEYSIZE				384		//384 bits
-#define	MAX_SOURCES_FILE_SOFT	500
+#define	MAX_SOURCES_FILE_SOFT	750
 #define	MAX_SOURCES_FILE_UDP	50
 #define SESSIONMAXTRANS			(9.3*1024*1024) // 9.3 Mbytes. "Try to send complete chunks" always sends this amount of data
 #define SESSIONMAXTIME			HR2MS(1)	//1 hour
@@ -104,7 +104,7 @@
 #define	MAX_UP_CLIENTS_ALLOWED	250			// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
 #define	MIN_UP_CLIENTS_ALLOWED	2			// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define MINNUMBEROFTRICKLEUPLOADS 0			//MORPH  - Added By AndCycle, ZZUL_20050212-0200
-#define DOWNLOADTIMEOUT			SEC2MS(/*100*/200) //MORPH
+#define DOWNLOADTIMEOUT			SEC2MS(100)
 #define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
 #define RARE_FILE				50
 #define BADCLIENTBAN			4
@@ -118,7 +118,7 @@
 #define TRACKED_CLEANUP_TIME	HR2MS(1)	// 1 hour
 #define KEEPTRACK_TIME			HR2MS(2)	// 2h	//how long to keep track of clients which were once in the uploadqueue
 #define LOCALSERVERREQUESTS		20000		// only one local src request during this timespan (WHERE IS THIS USED?)
-#define DISKSPACERECHECKTIME	MIN2MS(15)	// SLUGFILLER: checkDiskspace
+#define DISKSPACERECHECKTIME	MIN2MS(15)
 #define CLIENTLIST_CLEANUP_TIME	MIN2MS(34)	// 34 min
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
@@ -186,6 +186,7 @@
 #define OP_GLOBSEARCHREQ		0x98	// <search_tree>
 #define OP_GLOBSEARCHRES		0x99	// 
 #define OP_GLOBGETSOURCES		0x9A	// <HASH 16>
+#define OP_GLOBGETSOURCES2		0x94	// <HASH 16><FILESIZE 4>
 #define OP_GLOBFOUNDSOURCES		0x9B	//
 #define OP_GLOBCALLBACKREQ		0x9C	// <IP 4><PORT 2><client_ID 4>
 #define OP_INVALID_LOWID		0x9E	// <ID 4>
@@ -292,6 +293,8 @@
 #define ST_PING					0x0C	// <uint32>
 #define ST_FAIL					0x0D	// <uint32>
 #define ST_PREFERENCE			0x0E	// <uint32>
+#define	ST_PORT					0x0F	// <uint32>
+#define	ST_IP					0x10	// <uint32>
 #define	ST_DYNIP				0x85	// <string>
 //#define ST_LASTPING			0x86	// <int> No longer used.
 #define ST_MAXUSERS				0x87	// <uint32>
@@ -362,8 +365,9 @@
 #define FT_ATACCEPTED			 0x52	// <uint32>
 #define FT_CATEGORY				 0x53	// <uint32>
 #define	FT_ATTRANSFERREDHI		 0x54	// <uint32>
+#define	 FT_MAXSOURCES			 0x55	// <uint32>
 // khaos::categorymod+
-#define FT_CATRESUMEORDER		0x55
+#define FT_CATRESUMEORDER		0x7F
 // khaos::categorymod-
 // khaos::accuratetimerem+
 #define	FT_SECONDSACTIVE		0x80
@@ -578,7 +582,7 @@
 
 #define KADEMLIA_FIREWALLED_REQ	0x50	// <TCPPORT (sender) [2]>
 #define KADEMLIA_FINDBUDDY_REQ	0x51	// <TCPPORT (sender) [2]>
-#define KADEMLIA_FINDSOURCE_REQ	0x52	// <TCPPORT (sender) [2]>
+#define KADEMLIA_CALLBACK_REQ	0x52	// <TCPPORT (sender) [2]>
 #define KADEMLIA_FIREWALLED_RES	0x58	// <IP (sender) [4]>
 #define KADEMLIA_FIREWALLED_ACK	0x59	// (null)
 #define KADEMLIA_FINDBUDDY_RES	0x5A	// <TCPPORT (sender) [2]>

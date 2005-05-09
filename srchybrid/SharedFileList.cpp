@@ -59,7 +59,9 @@ public:
 	CPublishKeyword(const CStringW& rstrKeyword)
 	{
 		m_strKeyword = rstrKeyword;
-		ASSERT( rstrKeyword.GetLength() >= 3 );
+		// min. keyword char is allowed to be < 3 in some cases (see also 'CSearchManager::getWords')
+		//ASSERT( rstrKeyword.GetLength() >= 3 );
+		ASSERT( !rstrKeyword.IsEmpty() );
 		KadGetKeywordHash(rstrKeyword, &m_nKadID);
 		SetNextPublishTime(0);
 		SetPublishedCount(0);
@@ -207,7 +209,7 @@ CPublishKeyword* CPublishKeywordList::FindKeyword(const CStringW& rstrKeyword, P
 void CPublishKeywordList::AddKeywords(CKnownFile* pFile)
 {
 	const Kademlia::WordList& wordlist = pFile->GetKadKeywords();
-	ASSERT( wordlist.size() > 0 );
+	//ASSERT( wordlist.size() > 0 );
 	Kademlia::WordList::const_iterator it;
 	for (it = wordlist.begin(); it != wordlist.end(); it++)
 	{
@@ -337,6 +339,7 @@ void CSharedFileList::FindSharedFiles()
 	if (!m_Files_map.IsEmpty())
 	*/
 	{
+		CSingleLock listlock(&m_mutWriteList);
 		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
 		// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
 		// They must not be deleted when the CRC32-Thread writes the CRC into the object !
@@ -355,7 +358,9 @@ void CSharedFileList::FindSharedFiles()
 					&& _taccess(cur_file->GetFilePath(), 0) == 0)
 				continue;
 			m_UnsharedFiles_map.SetAt(CSKey(cur_file->GetFileHash()), true);
+			listlock.Lock();
 			m_Files_map.RemoveKey(key);
+			listlock.Unlock();
 		}
 
 		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
@@ -386,6 +391,7 @@ void CSharedFileList::FindSharedFiles()
 			tempDir+=_T("\\");
 		ltempDir=tempDir;
 		ltempDir.MakeLower();
+
 		if( l_sAdded.Find( ltempDir ) ==NULL ) {
 			l_sAdded.AddHead( ltempDir );
 			AddFilesFromDirectory(tempDir);
@@ -501,7 +507,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 			if (thePrefs.GetVerbose())
 				AddDebugLogLine(false, _T("Failed to get file date of %s - %s"), ff.GetFilePath(), GetErrorMessage(GetLastError()));
 		}
-		uint32 fdate = lwtime.GetTime();
+		uint32 fdate = (UINT)lwtime.GetTime();
 		if (fdate == -1){
 			if (thePrefs.GetVerbose())
 				AddDebugLogLine(false, _T("Failed to convert file date of %s"), ff.GetFilePath());
@@ -589,7 +595,10 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 	pFile->SetLastSeen();	// okay, we see it
 	theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
 	// SLUGFILLER: mergeKnown
+	CSingleLock listlock(&m_mutWriteList);
+	listlock.Lock();	
 	m_Files_map.SetAt(key, pFile);
+	listlock.Unlock();
 	m_keywords->AddKeywords(pFile);
 
 	return true;
@@ -628,8 +637,12 @@ void CSharedFileList::RemoveFile(CKnownFile* pFile)
 {
 	output->RemoveFile(pFile);
 	m_UnsharedFiles_map.SetAt(CSKey(pFile->GetFileHash()), true);
+	CSingleLock listlock(&m_mutWriteList);
+	listlock.Lock();
 	m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
+	listlock.Unlock();
 	m_keywords->RemoveKeywords(pFile);
+
 }
 
 void CSharedFileList::Reload()
@@ -1209,7 +1222,7 @@ void CSharedFileList::Publish()
 	UINT tNow = time(NULL);
 	bool isFirewalled = theApp.IsFirewalled();
 
-	if( Kademlia::CKademlia::isConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == 2)) && GetCount() && Kademlia::CKademlia::getPublish())
+	if( Kademlia::CKademlia::isConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == Connected)) && GetCount() && Kademlia::CKademlia::getPublish())
 	{ 
 		//We are connected to Kad. We are either open or have a buddy. And Kad is ready to start publishing.
 		if( Kademlia::CKademlia::getTotalStoreKey() < KADEMLIATOTALSTOREKEY)

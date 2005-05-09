@@ -55,7 +55,7 @@ CDownloadQueue::CDownloadQueue()
 	datarate = 0;
 	cur_udpserver = 0;
 	lastfile = 0;
-	lastcheckdiskspacetime = 0;	// SLUGFILLER: checkDiskspace
+	lastcheckdiskspacetime = 0;
 	lastudpsearchtime = 0;
 	lastudpstattime = 0;
 	SetLastKademliaFileRequest();
@@ -150,7 +150,7 @@ void CDownloadQueue::Init(){
 	} else {
 		AddLogLine(false,GetResString(IDS_FOUNDPARTS),count);
 		SortByPriority();
-		CheckDiskspace();	// SLUGFILLER: checkDiskspace
+		CheckDiskspace();
 	}
 	VERIFY( m_srcwnd.CreateEx(0, AfxRegisterWndClass(0), _T("eMule Async DNS Resolve Socket Wnd #2"), WS_OVERLAPPED, 0, 0, 0, 0, NULL, NULL));
 
@@ -280,7 +280,7 @@ bool CDownloadQueue::StartNextFile(int cat, bool force){
 	    }
     }
 	if (pfile) pfile->ResumeFile();
-	return pfile; //MORPH - Added by SiRoB, Khaos Category
+	return pfile!=NULL; //MORPH - Added by SiRoB, Khaos Category
 }
 
 // This function is used for the category commands Stop Last and Pause Last.
@@ -803,19 +803,19 @@ void CDownloadQueue::AddDownload(CPartFile* newfile,bool paused) {
 	*/
 	filelist.AddTail(newfile);
 	SortByPriority();
-	CheckDiskspace();	// SLUGFILLER: checkDiskspace
+	CheckDiskspace();
 	theApp.emuledlg->transferwnd->downloadlistctrl.AddFile(newfile);
 	AddLogLine(true,GetResString(IDS_NEWDOWNLOAD),newfile->GetFileName());
 	CString msgTemp;
 	msgTemp.Format(GetResString(IDS_NEWDOWNLOAD) + _T("\n"), newfile->GetFileName());
-	theApp.emuledlg->ShowNotifier(msgTemp, TBN_DLOADADDED);
+	theApp.emuledlg->ShowNotifier(msgTemp, TBN_DOWNLOADADDED);
 	ExportPartMetFilesOverview();
 	// MORPH START - Added by Commander, WebCache 1.2e
 	thePrefs.UpdateWebcacheReleaseAllowed(); //JP webcache release
 	// MORPH END - Added by Commander, WebCache 1.2e
 }
 
-bool CDownloadQueue::IsFileExisting(const uchar* fileid, bool bLogWarnings)
+bool CDownloadQueue::IsFileExisting(const uchar* fileid, bool bLogWarnings) const
 {
 	const CKnownFile* file = theApp.sharedfiles->GetFileByID(fileid);
 	if (file){
@@ -885,8 +885,8 @@ void CDownloadQueue::Process(){
 		}
     }
 
-	if (maxDownload != UNLIMITED*1024 && datarate > 300 || thePrefs.IsZZRatioDoesWork()){
-		downspeed = (maxDownload*100)/(datarate+1);
+	if (maxDownload != UNLIMITED*1024 && datarate > 1500 || thePrefs.IsZZRatioDoesWork()){
+		downspeed = (UINT)((maxDownload*100)/(datarate+1));
 		if (downspeed < 50)
 			downspeed = 50;
 		else if (downspeed > 200)
@@ -941,7 +941,7 @@ void CDownloadQueue::Process(){
 		m_datarateMS-=avarage_dr_list.RemoveHead().datalen;
 	
 	if (avarage_dr_list.GetCount()>1){
-		datarate = m_datarateMS / avarage_dr_list.GetCount();
+		datarate = (UINT)(m_datarateMS / avarage_dr_list.GetCount());
 	} else {
 		datarate = 0;
 	}
@@ -1100,9 +1100,9 @@ bool CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
 	}
 	// filter sources which are known to be dead/useless
 	if (theApp.clientlist->m_globDeadSourceList.IsDeadSource(source) || sender->m_DeadSourceList.IsDeadSource(source)){
-		if (thePrefs.GetLogFilteredIPs())
-			AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
-			,sender->m_DeadSourceList.IsDeadSource(source)? _T("Local") : _T("Global"), sender->GetFileName(), source->DbgGetClientInfo() );
+		//if (thePrefs.GetLogFilteredIPs())
+		//	AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
+		//	,sender->m_DeadSourceList.IsDeadSource(source)? _T("Local") : _T("Global"), sender->GetFileName(), source->DbgGetClientInfo() );
 		delete source;
 		return false;
 	}
@@ -1180,9 +1180,9 @@ bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* sou
 
 	// filter sources which are known to be dead/useless
 	if ( (theApp.clientlist->m_globDeadSourceList.IsDeadSource(source) && !bIgnoreGlobDeadList) || sender->m_DeadSourceList.IsDeadSource(source)){
-		if (thePrefs.GetLogFilteredIPs())
-			AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
-			,sender->m_DeadSourceList.IsDeadSource(source)? _T("Local") : _T("Global"), sender->GetFileName(), source->DbgGetClientInfo() );
+		//if (thePrefs.GetLogFilteredIPs())
+		//	AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
+		//	,sender->m_DeadSourceList.IsDeadSource(source)? _T("Local") : _T("Global"), sender->GetFileName(), source->DbgGetClientInfo() );
 		if (doThrow)
 			throw CString(_T("found on the dead source list"));
 		return false;
@@ -1197,8 +1197,8 @@ bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* sou
 	if (!source->HasLowID()){
 		uint32 nClientIP = ntohl(source->GetUserIDHybrid());
 		if (!IsGoodIP(nClientIP)){ // check for 0-IP, localhost and LAN addresses
-			if (thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Ignored already known source with IP=%s"), ipstr(nClientIP));
+			//if (thePrefs.GetLogFilteredIPs())
+			//	AddDebugLogLine(false, _T("Ignored already known source with IP=%s"), ipstr(nClientIP));
 			if (doThrow)
 				throw CString(_T("source already known (IsGoodIP(nClientIP) is false)"));
 			return false;
@@ -1318,7 +1318,7 @@ void CDownloadQueue::RemoveFile(CPartFile* toremove)
 		}
 	}
 	SortByPriority();
-	CheckDiskspace();	// SLUGFILLER: checkDiskspace
+	CheckDiskspace();
 	ExportPartMetFilesOverview();
 }
 
@@ -1338,7 +1338,8 @@ void CDownloadQueue::DeleteAll(){
 // ----------------------------
 // 576 - 30 bytes of header (28 for UDP, 2 for "E3 9A" edonkey proto) = 546 bytes
 // 546 / 16 = 34
-#define MAX_FILES_PER_UDP_PACKET	31	// 2+16*31 = 498 ... is still less than 512 bytes!!
+#define MAX_FILES_PER_UDP_PACKET_G1	31	// 2+16*31 = 498 ... is still less than 512 bytes!!
+#define MAX_FILES_PER_UDP_PACKET_G2	25	// 2+20*25 = 502
 
 #define MAX_REQUESTS_PER_SERVER		35
 
@@ -1347,9 +1348,10 @@ int CDownloadQueue::GetMaxFilesPerUDPServerPacket() const
 	int iMaxFilesPerPacket;
 	if (cur_udpserver && cur_udpserver->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES)
 	{
+		const int nMaxFilePerUDP = ((cur_udpserver->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES2) > 0)? MAX_FILES_PER_UDP_PACKET_G2 : MAX_FILES_PER_UDP_PACKET_G1; 
 		// get max. file ids per packet
 		if (m_cRequestsSentToServer < MAX_REQUESTS_PER_SERVER)
-			iMaxFilesPerPacket = min(MAX_FILES_PER_UDP_PACKET, MAX_REQUESTS_PER_SERVER - m_cRequestsSentToServer);
+			iMaxFilesPerPacket = min(nMaxFilePerUDP, MAX_REQUESTS_PER_SERVER - m_cRequestsSentToServer);
 		else{
 			ASSERT(0);
 			iMaxFilesPerPacket = 0;
@@ -1361,20 +1363,29 @@ int CDownloadQueue::GetMaxFilesPerUDPServerPacket() const
 	return iMaxFilesPerPacket;
 }
 
-bool CDownloadQueue::SendGlobGetSourcesUDPPacket(CSafeMemFile* data)
+bool CDownloadQueue::SendGlobGetSourcesUDPPacket(CSafeMemFile* data, bool bExt2Packet)
 {
 	bool bSentPacket = false;
 
-	if (   cur_udpserver
-		&& (theApp.serverconnect->GetCurrentServer() == NULL || 
-			cur_udpserver != theApp.serverlist->GetServerByAddress(theApp.serverconnect->GetCurrentServer()->GetAddress(),theApp.serverconnect->GetCurrentServer()->GetPort())))
+	if (cur_udpserver)
 	{
-		ASSERT( data->GetLength() > 0 && data->GetLength() % 16 == 0 );
-		int iFileIDs = data->GetLength() / 16;
-		if (thePrefs.GetDebugServerUDPLevel() > 0)
-			Debug(_T(">>> Sending OP__GlobGetSources to server(#%02x) %-15s (%3u of %3u); FileIDs=%u\n"), cur_udpserver->GetUDPFlags(), cur_udpserver->GetAddress(), m_iSearchedServers + 1, theApp.serverlist->GetServerCount(), iFileIDs);
+		int iPacketSize = data->GetLength();
 		Packet packet(data);
-		packet.opcode = OP_GLOBGETSOURCES;
+		data = NULL;
+		int iFileIDs;
+		if (bExt2Packet){
+			ASSERT( iPacketSize > 0 && iPacketSize % 20 == 0 );
+			iFileIDs = (int)iPacketSize / 20;
+			packet.opcode = OP_GLOBGETSOURCES2;
+		}
+		else{
+			ASSERT( iPacketSize > 0 && iPacketSize % 16 == 0 );
+			iFileIDs = (int)iPacketSize / 16;
+			packet.opcode = OP_GLOBGETSOURCES;
+		}
+		if (thePrefs.GetDebugServerUDPLevel() > 0)
+			Debug(_T(">>> Sending %s to server %-21s (%3u of %3u); FileIDs=%u\n"), (packet.opcode == OP_GLOBGETSOURCES2) ? _T("OP__GlobGetSources2") : _T("OP__GlobGetSources1"), ipstr(cur_udpserver->GetAddress(), cur_udpserver->GetPort()), m_iSearchedServers + 1, theApp.serverlist->GetServerCount(), iFileIDs);
+
 		theStats.AddUpDataOverheadServer(packet.size);
 		theApp.serverconnect->SendUDPPacket(&packet,cur_udpserver,false);
 		
@@ -1391,20 +1402,34 @@ bool CDownloadQueue::SendNextUDPPacket()
         || !theApp.serverconnect->IsUDPSocketAvailable() 
         || !theApp.serverconnect->IsConnected())
 		return false;
-	if (!cur_udpserver){
-		if ((cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver)) == NULL){
-			TRACE("ERROR:SendNextUDPPacket() no server found\n");
+
+	CServer* pConnectedServer = theApp.serverconnect->GetCurrentServer();
+	if (pConnectedServer)
+		pConnectedServer = theApp.serverlist->GetServerByAddress(pConnectedServer->GetAddress(), pConnectedServer->GetPort());
+
+	if (!cur_udpserver)
+	{
+		while ((cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver)) != NULL) {
+			if (cur_udpserver == pConnectedServer)
+				continue;
+			if (cur_udpserver->GetFailedCount() >= thePrefs.GetDeadServerRetries())
+				continue;
+			break;
+		}
+		if (cur_udpserver == NULL) {
 			StopUDPRequests();
-		};
+			return false;
+		}
 		m_cRequestsSentToServer = 0;
 	}
 
 	// get max. file ids per packet for current server
 	int iMaxFilesPerPacket = GetMaxFilesPerUDPServerPacket();
+	bool bGetSources2Packet = (cur_udpserver->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES2) > 0;
 
 	// loop until the packet is filled or a packet was sent
 	bool bSentPacket = false;
-	CSafeMemFile dataGlobGetSources(16);
+	CSafeMemFile dataGlobGetSources(20);
 	int iFiles = 0;
 	while (iFiles < iMaxFilesPerPacket && !bSentPacket)
 	{
@@ -1435,23 +1460,25 @@ bool CDownloadQueue::SendNextUDPPacket()
 						// if there are pending requests for the current server, send them
 						if (dataGlobGetSources.GetLength() > 0)
 						{
-							if (SendGlobGetSourcesUDPPacket(&dataGlobGetSources))
+							if (SendGlobGetSourcesUDPPacket(&dataGlobGetSources, bGetSources2Packet))
 								bSentPacket = true;
 							dataGlobGetSources.SetLength(0);
 						}
 
 						// get next server to ask
-						cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver);
+						while ((cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver)) != NULL) {
+							if (cur_udpserver == pConnectedServer)
+								continue;
+							if (cur_udpserver->GetFailedCount() >= thePrefs.GetDeadServerRetries())
+								continue;
+							break;
+						}
 						m_cRequestsSentToServer = 0;
-						if (cur_udpserver == NULL)
-						{
+						if (cur_udpserver == NULL) {
 							// finished asking all servers for all files
 							if (thePrefs.GetDebugServerUDPLevel() > 0 && thePrefs.GetDebugServerSourcesLevel() > 0)
 								Debug(_T("Finished UDP search processing for all servers (%u)\n"), theApp.serverlist->GetServerCount());
-
-							lastudpsearchtime = ::GetTickCount();
-							lastfile = NULL;
-							m_iSearchedServers = 0;
+							StopUDPRequests();
 							return false; // finished (processed all file & all servers)
 						}
 						m_iSearchedServers++;
@@ -1464,6 +1491,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 
 						// get max. file ids per packet for current server
 						iMaxFilesPerPacket = GetMaxFilesPerUDPServerPacket();
+						bGetSources2Packet = (cur_udpserver->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES2) > 0;
 
 						// have selected a new server; get first file to search sources for
 						nextfile = filelist.GetHead();
@@ -1478,19 +1506,27 @@ bool CDownloadQueue::SendNextUDPPacket()
 			}
 		}
 
-		if (!bSentPacket && nextfile && nextfile->GetSourceCount() < thePrefs.GetMaxSourcePerFileUDP())
+		if (!bSentPacket && nextfile && nextfile->GetSourceCount() < nextfile->GetMaxSourcePerFileUDP())
 		{
+			if (bGetSources2Packet){
+				// GETSOURCES2 Packet (<HASH_16><SIZE_4> *)
 			dataGlobGetSources.WriteHash16(nextfile->GetFileHash());
+				dataGlobGetSources.WriteUInt32(nextfile->GetFileSize());
+			}
+			else{
+				// GETSOURCES Packet (<HASH_16> *)
+				dataGlobGetSources.WriteHash16(nextfile->GetFileHash());
+			}
 			iFiles++;
 			if (thePrefs.GetDebugServerUDPLevel() > 0 && thePrefs.GetDebugServerSourcesLevel() > 0)
-				Debug(_T(">>> Queued  OP__GlobGetSources to server(#%02x) %-15s (%3u of %3u); Buff  %u=%s\n"), cur_udpserver->GetUDPFlags(), cur_udpserver->GetAddress(), m_iSearchedServers + 1, theApp.serverlist->GetServerCount(), iFiles, DbgGetFileInfo(nextfile->GetFileHash()));
+				Debug(_T(">>> Queued  %s to server %-21s (%3u of %3u); Buff  %u=%s\n"), bGetSources2Packet ? _T("OP__GlobGetSources2") : _T("OP__GlobGetSources1"), ipstr(cur_udpserver->GetAddress(), cur_udpserver->GetPort()), m_iSearchedServers + 1, theApp.serverlist->GetServerCount(), iFiles, DbgGetFileInfo(nextfile->GetFileHash()));
 		}
 	}
 
 	ASSERT( dataGlobGetSources.GetLength() == 0 || !bSentPacket );
 
 	if (!bSentPacket && dataGlobGetSources.GetLength() > 0)
-		SendGlobGetSourcesUDPPacket(&dataGlobGetSources);
+		SendGlobGetSourcesUDPPacket(&dataGlobGetSources, bGetSources2Packet);
 
 	// send max 35 UDP request to one server per interval
 	// if we have more than 35 files, we rotate the list and use it as queue
@@ -1501,17 +1537,23 @@ bool CDownloadQueue::SendNextUDPPacket()
 
 		// move the last 35 files to the head
 		if (filelist.GetCount() >= MAX_REQUESTS_PER_SERVER){
-			for (int i = 0; i != MAX_REQUESTS_PER_SERVER; i++){
+			for (int i = 0; i != MAX_REQUESTS_PER_SERVER; i++)
 				filelist.AddHead( filelist.RemoveTail() );
-			}
 		}
 
 		// and next server
-		cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver);
+		while ((cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver)) != NULL) {
+			if (cur_udpserver == pConnectedServer)
+				continue;
+			if (cur_udpserver->GetFailedCount() >= thePrefs.GetDeadServerRetries())
+				continue;
+			break;
+		}
 		m_cRequestsSentToServer = 0;
 		if (cur_udpserver == NULL){
-			lastudpsearchtime = ::GetTickCount();
-			lastfile = NULL;
+			if (thePrefs.GetDebugServerUDPLevel() > 0 && thePrefs.GetDebugServerSourcesLevel() > 0)
+				Debug(_T("Finished UDP search processing for all servers (%u)\n"), theApp.serverlist->GetServerCount());
+			StopUDPRequests();
 			return false; // finished (processed all file & all servers)
 		}
 		m_iSearchedServers++;
@@ -1521,13 +1563,14 @@ bool CDownloadQueue::SendNextUDPPacket()
 	return true;
 }
 
-void CDownloadQueue::StopUDPRequests(){
-	cur_udpserver = 0;
+void CDownloadQueue::StopUDPRequests()
+{
+	cur_udpserver = NULL;
 	lastudpsearchtime = ::GetTickCount();
-	lastfile = 0;
+	lastfile = NULL;
+	m_iSearchedServers = 0;
 }
 
-// SLUGFILLER: checkDiskspace
 bool CDownloadQueue::CompareParts(POSITION pos1, POSITION pos2){
 	CPartFile* file1 = filelist.GetAt(pos1);
 	CPartFile* file2 = filelist.GetAt(pos2);
@@ -1679,7 +1722,6 @@ void CDownloadQueue::CheckDiskspace(bool bNotEnoughSpaceLeft)
 		}
 	}
 }
-// SLUGFILLER: checkDiskspace
 
 void CDownloadQueue::GetDownloadStats(SDownloadStats& results)
 {
@@ -1806,7 +1848,7 @@ void CDownloadQueue::RemoveAutoPrioInCat(int cat, uint8 newprio){
 	}
 
     theApp.downloadqueue->SortByPriority();
-	theApp.downloadqueue->CheckDiskspaceTimed(); // SLUGFILLER: checkDiskspace
+	theApp.downloadqueue->CheckDiskspaceTimed();
 }
 // <-- ZZ:DownloadManager
 
@@ -1862,7 +1904,7 @@ void CDownloadQueue::SetCatStatus(int cat, int newstatus)
 
     if(resort) {
 	    theApp.downloadqueue->SortByPriority();
-	    theApp.downloadqueue->CheckDiskspace(); // SLUGFILLER: checkDiskspace
+	    theApp.downloadqueue->CheckDiskspace();
     }
 }
 
@@ -1907,11 +1949,11 @@ UINT CDownloadQueue::GetDownloadingFileCount() const
 	return result;
 }
 
-uint16 CDownloadQueue::GetPausedFileCount(){
-	uint16 result = 0;
+UINT CDownloadQueue::GetPausedFileCount() const
+{
+	UINT result = 0;
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
-		CPartFile* cur_file = filelist.GetNext(pos);
-		if (cur_file->GetStatus() == PS_PAUSED)
+		if (filelist.GetNext(pos)->GetStatus() == PS_PAUSED)
 			result++;
 	}
 	return result;
@@ -2052,8 +2094,10 @@ void CDownloadQueue::ProcessLocalRequests()
 				iFiles++;
 				
 				// create request packet
-				Packet* packet = new Packet(OP_GETSOURCES,16);
-				md4cpy(packet->pBuffer,cur_file->GetFileHash());
+				CSafeMemFile smPacket;
+				smPacket.WriteHash16(cur_file->GetFileHash());
+				smPacket.WriteUInt32(cur_file->GetFileSize());
+				Packet* packet = new Packet(&smPacket, OP_EDONKEYPROT, OP_GETSOURCES);
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
 					Debug(_T(">>> Sending OP__GetSources(%2u/%2u); %s\n"), iFiles, iMaxFilesPerTcpFrame, DbgGetFileInfo(cur_file->GetFileHash()));
 				dataTcpFrame.Write(packet->GetPacket(), packet->GetRealPacketSize());
@@ -2064,12 +2108,12 @@ void CDownloadQueue::ProcessLocalRequests()
 			}
 		}
 
-		int iSize = dataTcpFrame.GetLength();
+		int iSize = (int)dataTcpFrame.GetLength();
 		if (iSize > 0)
 		{
 			// create one 'packet' which contains all buffered OP_GETSOURCES eD2K packets to be sent with one TCP frame
 			// server credits: 16*iMaxFilesPerTcpFrame+1 = 241
-			Packet* packet = new Packet(new char[iSize], dataTcpFrame.GetLength(), true, false);
+			Packet* packet = new Packet(new char[iSize], (UINT)dataTcpFrame.GetLength(), true, false);
 			dataTcpFrame.Seek(0, CFile::begin);
 			dataTcpFrame.Read(packet->GetPacket(), iSize);
 			theStats.AddUpDataOverheadServer(packet->size);
@@ -2218,7 +2262,7 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 	if( !temp )
 		return;
 	//Do we need more sources?
-	if(!(!temp->IsStopped() && thePrefs.GetMaxSourcePerFile() > temp->GetSourceCount()))
+	if(!(!temp->IsStopped() && temp->GetMaxSources() > temp->GetSourceCount()))
 		return;
 
 	uint32 ED2Kip = ntohl(ip);
@@ -2244,8 +2288,8 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 			}
 			if (!IsGoodIP(ED2Kip))
 			{
-				if (thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored source (IP=%s) received from Kademlia"), ipstr(ED2Kip));
+				//if (thePrefs.GetLogFilteredIPs())
+				//	AddDebugLogLine(false, _T("Ignored source (IP=%s) received from Kademlia"), ipstr(ED2Kip));
 				return;
 			}
 			ctemp = new CUpDownClient(temp,tcp,ip,0,0,false);

@@ -20,7 +20,7 @@ protected:
 	CLIPFORMAT m_cfHTML;
 	CLIPFORMAT m_cfShellURL;
 
-	bool IsSupportedDropData(COleDataObject* pDataObject);
+	BOOL IsSupportedDropData(COleDataObject* pDataObject);
 	HRESULT PasteHTMLDocument(IHTMLDocument2* doc, PASTEURLDATA* pPaste);
 	HRESULT PasteHTML(PASTEURLDATA* pPaste);
 	HRESULT PasteHTML(COleDataObject &data);

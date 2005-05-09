@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.2 $
+* $Revision: 1.3 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -16,13 +16,7 @@
 *	$History:$
 *
 *********************************************************************/
-#if !defined(AFX_TREEPROPSHEET_H__50695CFB_FCE4_4188_ADB4_BF05A5488E41__INCLUDED_)
-#define AFX_TREEPROPSHEET_H__50695CFB_FCE4_4188_ADB4_BF05A5488E41__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 #include "TreePropSheetPgFrame.h"
 
 /**
@@ -463,10 +457,3 @@ private:
 	/** The id of the tree view control, that shows the pages. */
 	static const UINT s_unPageTreeId;
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ fügt unmittelbar vor der vorhergehenden Zeile zusätzliche Deklarationen ein.
-
-#endif // AFX_TREEPROPSHEET_H__50695CFB_FCE4_4188_ADB4_BF05A5488E41__INCLUDED_

@@ -200,7 +200,8 @@ void CWapServer::StartServer(void)
 void CWapServer::_RemoveServer(CString sIP, int nPort)
 {
 	CServer* server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer() ,nPort);
-	if (server!=NULL) theApp.emuledlg->SendMessage(UM_WEB_REMOVE_SERVER, (WPARAM)server, NULL);
+	if (server!=NULL)
+		SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION, WEBGUIIA_SERVER_REMOVE, (LPARAM)server);
 }
 
 void CWapServer::_SetSharedFilePriority(CString hash, uint8 priority)
@@ -255,7 +256,7 @@ void CWapServer::_ConnectToServer(CString sIP, int nPort)
 {
 	CServer* server=NULL;
 	if (!sIP.IsEmpty()) server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer(),nPort);
-	theApp.emuledlg->SendMessage(UM_WEB_CONNECT_TO_SERVER, (WPARAM)server, NULL);
+	SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION, WEBGUIIA_CONNECTTOSERVER, (LPARAM)server);
 }
 
 void CWapServer::ProcessFileReq(WapThreadData Data) {
@@ -738,7 +739,10 @@ CString CWapServer::_GetServerList(WapThreadData Data)
 		}	
 		else if (sCmd == _T("disconnect") && IsSessionAdmin(Data,sSession)) 
 		{
-			theApp.emuledlg->SendMessage(UM_WEB_DISCONNECT_SERVER, NULL);
+			if (theApp.serverconnect->IsConnecting())
+				SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION, WEBGUIIA_STOPCONNECTING,NULL);
+			else
+				SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION,WEBGUIIA_DISCONNECT,1);
 		}	
 		
 		if (_ParseURL(Data.sURL, _T("showlist"))==_T("true")){
@@ -1188,7 +1192,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 		if(found_file){
 			Out += pThis->m_Templates.sTransferDownFileDetails;
 
-			CString JSfileinfo=_SpecialChars(found_file->GetInfoSummary(found_file));
+			CString JSfileinfo=_SpecialChars(found_file->GetInfoSummary());
 			JSfileinfo.Replace(_T("\n"),_T("\\n"));
 			CString sActions = found_file->getPartfileStatus() + _T("<br/>");
 			CString sED2kLink;
@@ -1277,7 +1281,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 			}else{
 				Out.Replace(_T("[ShortFileName]"), strFileName);
 			}
-			Out.Replace(_T("[FileInfo]"), _SpecialChars(found_file->GetInfoSummary(found_file)));
+			Out.Replace(_T("[FileInfo]"), _SpecialChars(found_file->GetInfoSummary()));
 
 			Out.Replace(_T("[2]"), CastItoXBytes(found_file->GetFileSize()));
 
@@ -1440,12 +1444,12 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 
 				DownloadFiles dFile;
 				dFile.sFileName = _SpecialChars(cur_file->GetFileName());
-				dFile.lFileSize = cur_file->GetFileSize();
-				dFile.lFileTransferred = cur_file->GetCompletedSize();
-				dFile.fCompleted = cur_file->GetPercentCompleted();
+				dFile.m_qwFileSize = cur_file->GetFileSize();
+				dFile.m_qwFileTransferred = cur_file->GetCompletedSize();
+				dFile.m_dblCompleted = cur_file->GetPercentCompleted();
 				dFile.lFileSpeed = cur_file->GetDatarate();
 				dFile.nFileStatus = cur_file->GetStatus();
-				dFile.sFileStatus = cur_file->getPartfileStatus();
+				dFile.sFileState = cur_file->getPartfileStatus();
 				dFile.nFilePrio = cur_file->GetDownPriority();
 				if (cur_file->IsAutoDownPriority()) dFile.nFilePrio+=10;
 				dFile.sFileHash = EncodeBase16(cur_file->GetFileHash(), 16);
@@ -1456,7 +1460,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 					dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
 				else
 					dFile.sED2kLink = CreateED2kLink(cur_file);
-				dFile.sFileInfo = _SpecialChars(cur_file->GetInfoSummary(cur_file));
+				dFile.sFileInfo = _SpecialChars(cur_file->GetInfoSummary());
 
 				if (cat>0 && cur_file->GetCategory()!=cat) continue;
 				if (cat<0) {
@@ -1493,16 +1497,16 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 						bSwap = FilesArray[i].sFileName.CompareNoCase(FilesArray[i+1].sFileName) > 0;
 						break;
 					case DOWN_SORT_SIZE:
-						bSwap = FilesArray[i].lFileSize < FilesArray[i+1].lFileSize;
+						bSwap = FilesArray[i].m_qwFileSize < FilesArray[i+1].m_qwFileSize;
 						break;
 					case DOWN_SORT_TRANSFERRED:
-						bSwap = FilesArray[i].lFileTransferred < FilesArray[i+1].lFileTransferred;
+						bSwap = FilesArray[i].m_qwFileTransferred < FilesArray[i+1].m_qwFileTransferred;
 						break;
 					case DOWN_SORT_SPEED:
 						bSwap = FilesArray[i].lFileSpeed < FilesArray[i+1].lFileSpeed;
 						break;
 					case DOWN_SORT_PROGRESS:
-							bSwap = FilesArray[i].fCompleted  < FilesArray[i+1].fCompleted ;
+							bSwap = FilesArray[i].m_dblCompleted  < FilesArray[i+1].m_dblCompleted ;
 							break;
 				}
 				if(pThis->m_Params.bDownloadSortReverse)
@@ -1541,12 +1545,12 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 		{
 			CString JSfileinfo=FilesArray[i].sFileInfo;
 			JSfileinfo.Replace(_T("\n"),_T("\\n"));
-			CString sActions = FilesArray[i].sFileStatus + _T("<br /> ");
+			CString sActions = FilesArray[i].sFileState + _T("<br /> ");
 			CString sED2kLink;
 			CString strFileSize;
 			CString strCleanFileName;
 
-			strFileSize.Format(_T("%ul"),FilesArray[i].lFileSize);
+			strFileSize.Format(_T("%ul"),FilesArray[i].m_qwFileSize);
 			strCleanFileName = _SpecialChars(FilesArray[i].sFileName);
 			strCleanFileName.Replace(_T(" "),_T("."));
 			sED2kLink.Format(_T("<anchor>[Ed2klink]<go href=\"./script.wmls#showed2k('")+ strCleanFileName  + _T("','") + strFileSize + _T("','") + FilesArray[i].sFileHash + _T("')\"/></anchor><br />"));
@@ -1626,15 +1630,15 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 			}
 			HTTPProcessData.Replace(_T("[FileInfo]"), FilesArray[i].sFileInfo);
 
-			fTotalSize += FilesArray[i].lFileSize;
+			fTotalSize += FilesArray[i].m_qwFileSize;
 
-			HTTPProcessData.Replace(_T("[2]"), CastItoXBytes(FilesArray[i].lFileSize));
+			HTTPProcessData.Replace(_T("[2]"), CastItoXBytes(FilesArray[i].m_qwFileSize));
 
-			if(FilesArray[i].lFileTransferred > 0)
+			if(FilesArray[i].m_qwFileTransferred > 0)
 			{
-				fTotalTransferred += FilesArray[i].lFileTransferred;
+				fTotalTransferred += FilesArray[i].m_qwFileTransferred;
 
-				HTTPProcessData.Replace(_T("[3]"), CastItoXBytes(FilesArray[i].lFileTransferred));
+				HTTPProcessData.Replace(_T("[3]"), CastItoXBytes(FilesArray[i].m_qwFileTransferred));
 			}
 			else{
 				HTTPProcessData.Replace(_T("[3]"), _T("-"));
@@ -1679,7 +1683,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 			HTTPProcessData.Replace(_T("[PrioVal]"), HTTPTemp);
 			HTTPProcessData.Replace(_T("[6]"), sActions);
 
-			HTTPTemp.Format(_T("%.1f%%"),FilesArray[i].fCompleted);
+			HTTPTemp.Format(_T("%.1f%%"),FilesArray[i].m_dblCompleted);
 			HTTPProcessData.Replace(_T("[FileProgress]"), HTTPTemp);
 
 			HTTPProcessData.Replace(_T("[FileHash]"),FilesArray[i].sFileHash);
@@ -1924,8 +1928,6 @@ CString CWapServer::_GetTransferQueueList(WapThreadData Data)
 	// Replace [xx]
 	CString sQueue = _T("");
 
-	float fTotalSize = 0, fTotalTransferred = 0, fTotalSpeed = 0;
-
 	int startpos=0,endpos;
 
 	if(_ParseURL(Data.sURL, _T("startpos"))!=_T(""))
@@ -2081,7 +2083,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 
 	if(_ParseURL(Data.sURL, _T("reload")) == "true")
 	{
-		theApp.emuledlg->SendMessage(UM_WEB_SHARED_FILES_RELOAD);
+		SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION,WEBGUIIA_SHARED_FILES_RELOAD,0);
 	}
 
 	CString sSharedSortRev;
@@ -2294,7 +2296,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 
 		SharedFiles dFile;
 		dFile.sFileName = _SpecialChars(cur_file->GetFileName());
-		dFile.lFileSize = cur_file->GetFileSize();
+		dFile.m_qwFileSize = cur_file->GetFileSize();
 		if (theApp.IsConnected() && !theApp.IsFirewalled()) 
 			dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
 		else
@@ -2352,7 +2354,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 				bSwap = SharedArray[i].sFileName.CompareNoCase(SharedArray[i+1].sFileName) > 0;
 				break;
 			case SHARED_SORT_SIZE:
-				bSwap = SharedArray[i].lFileSize < SharedArray[i+1].lFileSize;
+				bSwap = SharedArray[i].m_qwFileSize < SharedArray[i+1].m_qwFileSize;
 				break;
 			case SHARED_SORT_TRANSFERRED:
 				bSwap = SharedArray[i].nFileTransferred < SharedArray[i+1].nFileTransferred;
@@ -2438,7 +2440,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 		else
 			HTTPProcessData.Replace(_T("[ShortFileName]"), _SpecialChars(SharedArray[i].sFileName));
 
-		_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].lFileSize));
+		_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].m_qwFileSize));
 		HTTPProcessData.Replace(_T("[FileSize]"), CString(HTTPTempC));
 		HTTPProcessData.Replace(_T("[FileLink]"), SharedArray[i].sED2kLink);
 
@@ -3042,7 +3044,7 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 	sRefresh.Format(_T("%d"), thePrefs.GetWebPageRefresh());
 	Out.Replace(_T("[RefreshVal]"), sRefresh);
 
-	sRefresh.Format(_T("%d"), thePrefs.GetMaxSourcePerFile());
+	sRefresh.Format(_T("%d"), thePrefs.GetMaxSourcePerFileDefault());
 	Out.Replace(_T("[MaxSourcesVal]"), sRefresh);
 
 	sRefresh.Format(_T("%d"), thePrefs.GetMaxConnections());
@@ -3204,7 +3206,7 @@ bool CWapServer::_IsLoggedIn(WapThreadData Data, long lSession)
 {
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return false;
 
 	_RemoveTimeOuts(Data,lSession);
 
@@ -3233,7 +3235,7 @@ bool CWapServer::_RemoveSession(WapThreadData Data, long lSession)
 {
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return false;
 
 	// find our session
 	for(int i = 0; i < pThis->m_Params.Sessions.GetSize(); i++)
@@ -3467,7 +3469,7 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 	
 	if(_ParseURL(Data.sURL, _T("showlist")) == "true"){
 		CString sSort = _ParseURL(Data.sURL, _T("sort"));	if (sSort.GetLength()>0) pThis->m_iSearchSortby=_ttoi(sSort);
-		sSort = _ParseURL(Data.sURL, _T("sortAsc"));		if (sSort.GetLength()>0) pThis->m_bSearchAsc=_ttoi(sSort);
+		sSort = _ParseURL(Data.sURL, _T("sortAsc"));		if (sSort.GetLength()>0) pThis->m_bSearchAsc=_ttoi(sSort)!=0;
 
 		int startpos = 0;
 		bool more;
@@ -3755,8 +3757,6 @@ CString CWapServer::GetUploadFileInfo(CUpDownClient* client)
 		sRet += GetResString(IDS_REQ_UNKNOWNFILE);
 	}
 	return sRet;
-
-	return _T("");
 }
 
 void CWapServer::DrawLineInCxImage(CxImage *image,int x1, int y1, int x2, int y2, COLORREF color){
@@ -3938,10 +3938,6 @@ void CWapServer::SendGraphFile(WapThreadData Data, int file_val){
 		cImage->SetPixelColor(width-1,y,0);
 	}
 
-
-	BYTE * buffer = NULL;
-	long size = 0;
-
 	CString contenttype;
 
 	cImage->SetTransIndex(-1);
@@ -4032,7 +4028,6 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 	}
 
 	bool png=false, gif=false;
-	bool sended = false;		
 
 	png=BrowserAccept(Data,_T("image/png"));
 	gif=BrowserAccept(Data,_T("image/gif"));
@@ -4048,7 +4043,7 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 	TCHAR wbmpFile[_MAX_PATH];
 	_stprintf(wbmpFile, filename.Left(filename.ReverseFind(_T('.'))) + _T(".png"));
 
-	bool pngExist,gifExist,wbmpExist;
+	BOOL pngExist,gifExist,wbmpExist;
 	pngExist=PathFileExists(pngFile);
 	gifExist=PathFileExists(gifFile);
 	wbmpExist=PathFileExists(wbmpFile);
@@ -4058,8 +4053,6 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 	}
 
 	CxImage *cImage;
-	BYTE * buffer = NULL;
-	long size = 0;
 	CString moreContentType = _T("Last-Modified: ") + pThis->m_Params.sLastModified + _T("\r\n") + _T("ETag: ") + pThis->m_Params.sETag + _T("\r\n");
 
 	if(!(png || gif) || thePrefs.GetWapAllwaysSendBWImages()){
@@ -4317,9 +4310,6 @@ void CWapServer::SendProgressBar(WapThreadData Data, CString filehash)
 			progressImage.SetPixelColor(x,progressImage.GetHeight()-13,0);
 		}
 	}
-
-	BYTE * buffer = NULL;
-	long size = 0;
 
 	//Select the smallest file
 	progressImage.SetTransIndex(-1);

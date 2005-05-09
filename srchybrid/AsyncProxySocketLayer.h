@@ -114,10 +114,6 @@ Version history
 - 1.1 fixes all known bugs, mostly with SOCKS5 authentication
 - 1.0 initial release
 */
-
-#if !defined(AFX_ASYNCPROXYSOCKETLAYER_H__6B19D281_F1D0_4EF2_984A_31639A038AE5__INCLUDED_)
-#define AFX_ASYNCPROXYSOCKETLAYER_H__6B19D281_F1D0_4EF2_984A_31639A038AE5__INCLUDED_
-
 #pragma once
 #include "AsyncSocketExLayer.h"
 
@@ -230,6 +226,3 @@ struct t_ListenSocketCreatedStruct
 
 #define PROXYOP_CONNECT 1
 #define PROXYOP_LISTEN 2
-
-
-#endif // !defined(AFX_ASYNCPROXYSOCKETLAYER_H__6B19D281_F1D0_4EF2_984A_31639A038AE5__INCLUDED_)

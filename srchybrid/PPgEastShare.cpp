@@ -98,7 +98,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		m_htiEnableChunkDots = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ENABLE_CHUNKDOTS), TVI_ROOT, m_bEnableChunkDots);//EastShare - Added by Pretender, Option for ChunkDots
 
 		//Morph - added by AndCycle, Equal Chance For Each File
-		m_htiEnableEqualChanceForEachFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ECFEF), TVI_ROOT, m_iEnableEqualChanceForEachFile);
+		m_htiEnableEqualChanceForEachFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ECFEF), TVI_ROOT, m_bEnableEqualChanceForEachFile);
 		//Morph - added by AndCycle, Equal Chance For Each File
 
 		//EastShare Start - added by AndCycle, IP to Country
@@ -154,7 +154,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 
 	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiCreditSystem, (int &)m_iCreditSystem); //EastShare - added by linekin , CreditSystem
 
-	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnableEqualChanceForEachFile, m_iEnableEqualChanceForEachFile);//Morph - added by AndCycle, Equal Chance For Each File
+	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnableEqualChanceForEachFile, m_bEnableEqualChanceForEachFile);//Morph - added by AndCycle, Equal Chance For Each File
 
 	// EastShare START - Added by TAHO, .met flies Control
 	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiKnownMet, m_iKnownMetDays);
@@ -187,7 +187,7 @@ BOOL CPPgEastShare::OnInitDialog()
 	//EastShare End - added by AndCycle, IP to Country
 
 	m_iCreditSystem = thePrefs.GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
-	m_iEnableEqualChanceForEachFile = thePrefs.IsEqualChanceEnable();//Morph - added by AndCycle, Equal Chance For Each File
+	m_bEnableEqualChanceForEachFile = thePrefs.IsEqualChanceEnable();//Morph - added by AndCycle, Equal Chance For Each File
 
 	m_iKnownMetDays = thePrefs.GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
 	m_iNiceHashWeight = thePrefs.GetNiceHashLoadWeight();// <CB Mod : NiceHash>
@@ -241,7 +241,7 @@ BOOL CPPgEastShare::OnApply()
 	//EastShare End - added by AndCycle, IP to Country
 
 	//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	if((bool)m_bSaveUploadQueueWaitTime != thePrefs.m_bSaveUploadQueueWaitTime)	bRestartApp = true;
+	if(m_bSaveUploadQueueWaitTime != thePrefs.m_bSaveUploadQueueWaitTime)	bRestartApp = true;
 	thePrefs.m_bSaveUploadQueueWaitTime = m_bSaveUploadQueueWaitTime;
 	//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -257,7 +257,7 @@ BOOL CPPgEastShare::OnApply()
 	//MORPH END - Changed by SiRoB, reduce a little CPU usage for ratio count
 	
 	//Morph - added by AndCycle, Equal Chance For Each File
-	thePrefs.m_bEnableEqualChanceForEachFile = m_iEnableEqualChanceForEachFile;
+	thePrefs.m_bEnableEqualChanceForEachFile = m_bEnableEqualChanceForEachFile;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
 	thePrefs.SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
@@ -277,7 +277,6 @@ BOOL CPPgEastShare::OnApply()
 void CPPgEastShare::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
 	SetModified(TRUE);
-	CSliderCtrl* slider =(CSliderCtrl*)pScrollBar;
 	CString temp;
 }
 
@@ -349,7 +348,7 @@ void CPPgEastShare::OnDestroy()
 LRESULT CPPgEastShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == IDC_EASTSHARE_OPTS){
-		TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
+		//TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
 		SetModified();
 	}
 	return 0;

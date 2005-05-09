@@ -63,17 +63,17 @@ protected:
 
 public:
 	void				Init();
-    void				ExportHTML( bool onlyvisible=false );
+    void				ExportHTML();
 	bool				CopyHTML( int copyMode = MP_STATTREE_HTMLCOPYSEL );
 	CString				GetHTML( bool onlyVisible = true, HTREEITEM theItem = NULL, int theItemLevel = 0, bool firstItem = true );
-	CString				GetHTMLForExport( bool onlyVisible = true, HTREEITEM theItem = NULL, int theItemLevel = 0, bool firstItem = true );
+	CString				GetHTMLForExport(HTREEITEM theItem = NULL, int theItemLevel = 0, bool firstItem = true);
 	bool				CopyText( int copyMode = MP_STATTREE_COPYSEL );
 	CString				GetText( bool onlyVisible = true, HTREEITEM theItem = NULL, int theItemLevel = 0, bool firstItem = true );
 	CString				GetItemText( HTREEITEM theItem );
 	CString				GetItemText( HTREEITEM theItem, int getPart );
-	bool				IsBold( HTREEITEM theItem );
-	bool				IsExpanded( HTREEITEM theItem );
-	bool				CheckState( HTREEITEM hItem, UINT state );
+	BOOL				IsBold( HTREEITEM theItem );
+	BOOL				IsExpanded( HTREEITEM theItem );
+	BOOL				CheckState( HTREEITEM hItem, UINT state );
 	void				DoMenu();
 	void				DoMenu(CPoint doWhere);
 	void				DoMenu(CPoint doWhere, UINT nFlags);

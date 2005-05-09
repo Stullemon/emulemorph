@@ -92,6 +92,7 @@ int yyerror(LPCTSTR errstr);
 
 #pragma warning(disable:4065) // switch statement contains 'default' but no 'case' labels
 #pragma warning(disable:4102) // 'yyerrlab1' : unreferenced label
+#pragma warning(disable:4127) // conditional expression is constant
 
 
 
@@ -299,8 +300,8 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    46,    46,    52,    61,    70,    71,    81,    91,   101,
-     106,   112,   118,   123,   129,   134,   139,   146,   151
+       0,    45,    45,    51,    60,    69,    70,    80,    90,   100,
+     105,   111,   117,   122,   128,   133,   138,   145,   150
 };
 #endif
 

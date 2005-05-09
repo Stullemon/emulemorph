@@ -31,7 +31,6 @@ END_MESSAGE_MAP()
 
 CIrcChannelListCtrl::CIrcChannelListCtrl()
 {
-	memset(m_asc_sort, 0, sizeof m_asc_sort);
 	m_pParent = NULL;
 }
 
@@ -66,10 +65,21 @@ int CIrcChannelListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamS
 
 void CIrcChannelListCtrl::OnLvnColumnclick(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-	m_asc_sort[pNMListView->iSubItem] = !m_asc_sort[pNMListView->iSubItem];
-	SetSortArrow(pNMListView->iSubItem, m_asc_sort[pNMListView->iSubItem]);
-	SortItems(SortProc, pNMListView->iSubItem + ((m_asc_sort[pNMListView->iSubItem]) ? 0 : 10));
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+
+	if (m_sortindex != pNMLV->iSubItem)
+		m_sortorder = 1;
+	else
+		m_sortorder = !m_sortorder;
+	m_sortindex = pNMLV->iSubItem;
+
+	SetSortArrow(m_sortindex, m_sortorder);
+	SortItems(&SortProc, m_sortindex + (m_sortorder ? 0 : 10));
+
+	thePrefs.SetColumnSortItem(CPreferences::tableIrcChannels, m_sortindex);
+	thePrefs.SetColumnSortAscending(CPreferences::tableIrcChannels, m_sortorder);
+
+
 	*pResult = 0;
 }
 
@@ -193,8 +203,14 @@ void CIrcChannelListCtrl::Init()
 	InsertColumn(1, GetResString(IDS_UUSERS), LVCFMT_LEFT, 50 );
 	InsertColumn(2, GetResString(IDS_DESCRIPTION), LVCFMT_LEFT, 350 );
 
-	SortItems(SortProc, 11);
-	SetSortArrow(1, false);
+	//SortItems(SortProc, 11);
+	//SetSortArrow(1, false);
+
+	LoadSettings(CPreferences::tableIrcChannels);
+	m_sortindex = thePrefs.GetColumnSortItem(CPreferences::tableIrcChannels);
+	m_sortorder = thePrefs.GetColumnSortAscending(CPreferences::tableIrcChannels);
+	SetSortArrow(m_sortindex, m_sortorder);
+	SortItems(&SortProc, m_sortindex + ( (m_sortorder) ? 0:10) );
 }
 
 BOOL CIrcChannelListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )

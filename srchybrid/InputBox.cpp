@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "resource.h"
+#include "eMule.h"
 #include "InputBox.h"
 #include "OtherFunctions.h"
 
@@ -37,6 +38,7 @@ InputBox::InputBox(CWnd* pParent /*=NULL*/)
 {
 	m_cancel=true;
 	m_bFilenameMode=false;
+	m_icMain = NULL;
 	// khaos::categorymod+
 	isNumber=false;
 	// khaos::categorymod-
@@ -44,6 +46,8 @@ InputBox::InputBox(CWnd* pParent /*=NULL*/)
 
 InputBox::~InputBox()
 {
+	if (m_icMain)
+		VERIFY( DestroyIcon(m_icMain) );
 }
 
 void InputBox::DoDataExchange(CDataExchange* pDX)
@@ -60,6 +64,7 @@ void InputBox::OnOK()
 	else
 	//MORPH END   - Added by SiRoB, categorymod
 		GetDlgItemText(IDC_TEXT,m_return);
+	m_return.Trim();
 	CDialog::OnOK();
 }
 
@@ -85,6 +90,7 @@ BOOL InputBox::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
+	SetIcon( m_icMain = theApp.LoadIcon(_T("RENAME")),FALSE);
 
 	GetDlgItem(IDC_IBLABEL)->SetWindowText( m_label);
 	// khaos::categorymod+
@@ -102,6 +108,7 @@ BOOL InputBox::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 	SetDlgItemText(IDC_CLEANFILENAME,GetResString(IDS_CLEANUP));
 	GetDlgItem(IDC_CLEANFILENAME)->ShowWindow( m_bFilenameMode?SW_NORMAL:SW_HIDE);
+
 	return TRUE;
 }
 

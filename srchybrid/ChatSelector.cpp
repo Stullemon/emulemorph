@@ -41,7 +41,7 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-#define URLINDICATOR	_T("http:|www.|.de |.net |.com |.org |.to |.tk |.cc |.fr |ftp:")
+#define URLINDICATOR	_T("http:|www.|.de |.net |.com |.org |.to |.tk |.cc |.fr |ftp:|ed2k:")
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,9 +73,7 @@ BEGIN_MESSAGE_MAP(CChatSelector, CClosableTabCtrl)
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnTcnSelchangeChatsel)
 	ON_BN_CLICKED(IDC_CCLOSE, OnBnClickedCclose)
 	ON_BN_CLICKED(IDC_CSEND, OnBnClickedCsend)
-	//MORPH START - Added by SiRoB, keep 0.44d code
 	ON_WM_CONTEXTMENU()
-	//MORPH END   - Added by SiRoB, keep 0.44d code
 END_MESSAGE_MAP()
 
 CChatSelector::CChatSelector()
@@ -274,7 +272,7 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 	else
 	{
 		ci->notify = true;
-        if (isNewChatWindow || thePrefs.GetNotifierPopsEveryChatMsg())
+        if (isNewChatWindow || thePrefs.GetNotifierOnEveryChatMsg())
 			theApp.emuledlg->ShowNotifier(GetResString(IDS_TBN_NEWCHATMSG) + _T(" ") + CString(sender->GetUserName()) + _T(":'") + message + _T("'\n"), TBN_CHAT);
 		isNewChatWindow = false;
 	}
@@ -660,32 +658,6 @@ void CChatSelector::OnDestroy()
 	CClosableTabCtrl::OnDestroy();
 }
 
-//MORPH START - Added by SiRoB, keep 0.44d code
-void CChatSelector::OnContextMenu(CWnd* pWnd, CPoint point)
-{ 
-	const CChatItem* ci = GetCurrentChatItem();
-	if (!ci)
-		return;
-
-
-	bool  isvalidconclient=false;
-	if (ci->client &&  ci->client->HasValidHash())
-		isvalidconclient=true;
-
-	CTitleMenu ChatMenu;
-	ChatMenu.CreatePopupMenu(); 
-	ChatMenu.AddMenuTitle(GetResString(IDS_CW_MESSAGES),true);
-
-	ChatMenu.AppendMenu(MF_STRING | isvalidconclient?MF_ENABLED : MF_GRAYED, MP_DETAIL, GetResString(IDS_SHOWDETAILS),_T("CLIENTDETAILS"));
-	ChatMenu.AppendMenu(MF_STRING | (isvalidconclient && !ci->client->IsFriend() )? MF_ENABLED : MF_GRAYED , MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND),_T("ADDFRIEND"));
-	ChatMenu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE), _T("DELETE") );
-
-	ChatMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
- 	VERIFY( ChatMenu.DestroyMenu() );
-	
-}
-//MORPH END   - Added by SiRoB, keep 0.44d code
-
 BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam){ 
@@ -699,8 +671,20 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 		}
 		case MP_ADDFRIEND:{
 			const CChatItem* ci = GetCurrentChatItem();
-			if (ci && !ci->client->IsFriend() )
-				theApp.friendlist->AddFriend(ci->client);
+			if (ci ) {
+				CFriend* fr=theApp.friendlist->SearchFriend(ci->client->GetUserHash(),0,0);
+				if (!fr)
+					theApp.friendlist->AddFriend(ci->client);
+			}
+			return TRUE;
+		}
+		case MP_REMOVEFRIEND:{
+			const CChatItem* ci = GetCurrentChatItem();
+			if (ci ) {
+				CFriend* fr=theApp.friendlist->SearchFriend(ci->client->GetUserHash(),0,0);
+				if (fr)
+					theApp.friendlist->RemoveFriend(fr);
+			}
 			return TRUE;
 		}
 		case MP_REMOVE:{
@@ -711,4 +695,31 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 		}
 	}
 	return CClosableTabCtrl::OnCommand(wParam, lParam);
+}
+
+void CChatSelector::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
+{ 
+
+	const CChatItem* ci = GetCurrentChatItem();
+	if (!ci)
+		return;
+	CFriend* fr=theApp.friendlist->SearchFriend(ci->client->GetUserHash(),0,0);
+
+	CTitleMenu menu;
+	menu.CreatePopupMenu(); 
+	menu.AddMenuTitle( GetResString(IDS_CLIENT) ,true );
+
+	menu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_FD_CLOSE), _T("DELETE"));
+	menu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("CLIENTDETAILS"));
+	menu.SetDefaultItem(MP_DETAIL);
+
+	GetCurrentChatItem();
+	if (fr==NULL )
+		menu.AppendMenu(MF_STRING, MP_ADDFRIEND, GetResString(IDS_IRC_ADDTOFRIENDLIST), _T("ADDFRIEND"));
+	else
+		menu.AppendMenu(MF_STRING, MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND), _T("DELETEFRIEND"));
+	
+	m_ptCtxMenu = point;
+	ScreenToClient(&m_ptCtxMenu);
+	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }

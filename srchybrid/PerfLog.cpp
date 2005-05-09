@@ -59,9 +59,7 @@ void CPerfLog::Startup()
 	CString strDefFilePath = szAppPath;
 	strDefFilePath += _T("\\perflog.csv");
 
-	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
-	CIni ini(strIniFile, _T("PerfLog"));
+	CIni ini(thePrefs.GetConfigFile(), _T("PerfLog"));
 
 	m_eMode = (ELogMode)ini.GetInt(_T("Mode"), None);
 	if (m_eMode != None && m_eMode != OneSample && m_eMode != AllSamples)
@@ -112,8 +110,8 @@ void CPerfLog::LogSamples()
 		return;
 
 	// 'data counters' amount of transferred file data
-	UINT nCurDn = theStats.sessionReceivedBytes - m_nLastSessionRecvBytes;
-	UINT nCurUp = theStats.sessionSentBytes - m_nLastSessionSentBytes;
+	UINT nCurDn = (UINT)(theStats.sessionReceivedBytes - m_nLastSessionRecvBytes);
+	UINT nCurUp = (UINT)(theStats.sessionSentBytes - m_nLastSessionSentBytes);
 
 	// 'overhead counters' amount of total overhead
 	uint64 nDnOHTotal = theStats.GetDownDataOverheadFileRequest() + 
@@ -126,8 +124,8 @@ void CPerfLog::LogSamples()
 						theStats.GetUpDataOverheadServer() + 
 						theStats.GetUpDataOverheadKad() + 
 						theStats.GetUpDataOverheadOther();
-	UINT nCurDnOH = nDnOHTotal - m_nLastDnOH;
-	UINT nCurUpOH = nUpOHTotal - m_nLastUpOH;
+	UINT nCurDnOH = (UINT)(nDnOHTotal - m_nLastDnOH);
+	UINT nCurUpOH = (UINT)(nUpOHTotal - m_nLastUpOH);
 
 	WriteSamples(nCurDn, nCurUp, nCurDnOH, nCurUpOH);
 

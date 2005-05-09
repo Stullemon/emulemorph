@@ -1,6 +1,3 @@
-#ifndef TYPES_H
-#define TYPES_H
-
 #pragma once
 
 typedef unsigned char		uchar;
@@ -15,5 +12,3 @@ typedef	  signed int		sint32;
 
 typedef unsigned __int64	uint64;
 typedef   signed __int64	sint64;
-
-#endif

@@ -88,21 +88,17 @@ int CScheduler::LoadFromFile(){
 
 void CScheduler::SaveToFile(){
 
-	CString strName;
 	CString temp;
 	Schedule_Struct* schedule;
 
-	strName.Format(_T("%spreferences.ini"),thePrefs.GetConfigDir());
-
-	CIni ini(strName, _T("Scheduler"));
-
+	CIni ini(thePrefs.GetConfigFile(), _T("Scheduler"));
 	ini.WriteInt(_T("Count"), GetCount());
 	
 	for (uint8 i=0; i<GetCount();i++) {
 		schedule=theApp.scheduler->GetSchedule(i);
 
-		strName.Format(_T("Schedule#%i"),i);
-		ini.WriteString(_T("Title"),schedule->title,strName);
+		temp.Format(_T("Schedule#%i"),i);
+		ini.WriteString(_T("Title"),schedule->title,temp);
 		ini.WriteInt(_T("Day"),schedule->day);
 		ini.WriteInt(_T("StartTime"),schedule->time);
 		ini.WriteInt(_T("EndTime"),schedule->time2);
@@ -215,7 +211,7 @@ void CScheduler::SaveOriginals() {
 	original_download=thePrefs.GetMaxDownload();
 	original_connections=thePrefs.GetMaxConnections();
 	original_cons5s=thePrefs.GetMaxConperFive();
-	original_sources=thePrefs.GetMaxSourcePerFile();
+	original_sources=thePrefs.GetMaxSourcePerFileDefault();
 	
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
 	original_ussmaxping=thePrefs.GetDynUpPingToleranceMilliseconds();

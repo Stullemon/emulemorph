@@ -21,7 +21,6 @@
 #include "PreferencesDlg.h"
 #include "ppggeneral.h"
 #include "HttpDownloadDlg.h"
-#include "version.h"
 #include "Preferences.h"
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
@@ -204,6 +203,22 @@ BOOL CPPgGeneral::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void ModifyAllWindowStyles(CWnd* pWnd, DWORD dwRemove, DWORD dwAdd)
+{
+	CWnd* pWndChild = pWnd->GetWindow(GW_CHILD);
+	while (pWndChild)
+	{
+		ModifyAllWindowStyles(pWndChild, dwRemove, dwAdd);
+		pWndChild = pWndChild->GetNextWindow();
+	}
+
+	if (pWnd->ModifyStyleEx(dwRemove, dwAdd, SWP_FRAMECHANGED))
+	{
+		pWnd->Invalidate();
+//		pWnd->UpdateWindow();
+	}
+}
+
 BOOL CPPgGeneral::OnApply()
 {
 	//Commander - Added: Invisible Mode [TPT] - Start
@@ -229,13 +244,24 @@ BOOL CPPgGeneral::OnApply()
 	}
 	thePrefs.SetUserNick(strNick);
 
-	if (m_language.GetCurSel() != CB_ERR){
-		WORD byNewLang =  m_language.GetItemData(m_language.GetCurSel());
-		if (thePrefs.GetLanguageID() != byNewLang){
-			thePrefs.SetLanguageID(byNewLang);
-		
+	if (m_language.GetCurSel() != CB_ERR)
+	{
+		WORD wNewLang = (WORD)m_language.GetItemData(m_language.GetCurSel());
+		if (thePrefs.GetLanguageID() != wNewLang)
+		{
+			thePrefs.SetLanguageID(wNewLang);
 			thePrefs.SetLanguage();
 
+#ifdef _DEBUG
+			// Can't yet be switched on-the-fly, too much unresolved issues..
+			if (thePrefs.GetRTLWindowsLayout())
+			{
+				ModifyAllWindowStyles(theApp.emuledlg, WS_EX_LAYOUTRTL | WS_EX_RTLREADING | WS_EX_RIGHT | WS_EX_LEFTSCROLLBAR, 0);
+				ModifyAllWindowStyles(theApp.emuledlg->preferenceswnd, WS_EX_LAYOUTRTL | WS_EX_RTLREADING | WS_EX_RIGHT | WS_EX_LEFTSCROLLBAR, 0);
+				theApp.DisableRTLWindowsLayout();
+				thePrefs.m_bRTLWindowsLayout = false;
+			}
+#endif
 			theApp.emuledlg->preferenceswnd->Localize();
 			theApp.emuledlg->statisticswnd->CreateMyTree();
 			theApp.emuledlg->statisticswnd->Localize();
@@ -252,20 +278,20 @@ BOOL CPPgGeneral::OnApply()
 		}
 	}
 
-	thePrefs.startMinimized= (uint8)IsDlgButtonChecked(IDC_STARTMIN);
-	thePrefs.m_bAutoStart= (uint8)IsDlgButtonChecked(IDC_STARTWIN);
+	thePrefs.startMinimized = IsDlgButtonChecked(IDC_STARTMIN)!=0;
+	thePrefs.m_bAutoStart = IsDlgButtonChecked(IDC_STARTWIN)!=0;
 	if( thePrefs.m_bAutoStart )
 		AddAutoStart();
 	else
 		RemAutoStart();
-	thePrefs.beepOnError= (uint8)IsDlgButtonChecked(IDC_BEEPER);
-	thePrefs.confirmExit= (uint8)IsDlgButtonChecked(IDC_EXIT);
-	thePrefs.splashscreen = (uint8)IsDlgButtonChecked(IDC_SPLASHON);
-	thePrefs.startupsound = (uint8)IsDlgButtonChecked(IDC_STARTUPSOUNDON);//Commander - Added: Enable/Disable Startupsound
-	thePrefs.bringtoforeground = (uint8)IsDlgButtonChecked(IDC_BRINGTOFOREGROUND);
-	thePrefs.updatenotify = (uint8)IsDlgButtonChecked(IDC_CHECK4UPDATE);
-	thePrefs.onlineSig= (uint8)IsDlgButtonChecked(IDC_ONLINESIG);
+	thePrefs.beepOnError= IsDlgButtonChecked(IDC_BEEPER)!=0;
+	thePrefs.confirmExit= IsDlgButtonChecked(IDC_EXIT)!=0;
+	thePrefs.splashscreen = IsDlgButtonChecked(IDC_SPLASHON)!=0;
+	thePrefs.bringtoforeground = IsDlgButtonChecked(IDC_BRINGTOFOREGROUND)!=0;
+	thePrefs.updatenotify = IsDlgButtonChecked(IDC_CHECK4UPDATE)!=0;
+	thePrefs.onlineSig= IsDlgButtonChecked(IDC_ONLINESIG)!=0;
 	thePrefs.versioncheckdays = ((CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS))->GetPos();
+	thePrefs.startupsound = IsDlgButtonChecked(IDC_STARTUPSOUNDON)!=0;//Commander - Added: Enable/Disable Startupsound
 
 	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
 	LoadSettings();
@@ -302,7 +328,6 @@ void CPPgGeneral::Localize(void)
 		GetDlgItem(IDC_BEEPER)->SetWindowText(GetResString(IDS_PW_BEEP));
 		GetDlgItem(IDC_EXIT)->SetWindowText(GetResString(IDS_PW_PROMPT));
 		GetDlgItem(IDC_SPLASHON)->SetWindowText(GetResString(IDS_PW_SPLASH));
-		GetDlgItem(IDC_STARTUPSOUNDON)->SetWindowText(GetResString(IDS_PW_STARTUPSOUND));//Commander - Added: Enable/Disable Startupsound
 		GetDlgItem(IDC_BRINGTOFOREGROUND)->SetWindowText(GetResString(IDS_PW_FRONT));
 		GetDlgItem(IDC_ONLINESIG)->SetWindowText(GetResString(IDS_PREF_ONLINESIG));	
 		GetDlgItem(IDC_STARTMIN)->SetWindowText(GetResString(IDS_PREF_STARTMIN));	
@@ -312,6 +337,7 @@ void CPPgGeneral::Localize(void)
 		GetDlgItem(IDC_STARTUP)->SetWindowText(GetResString(IDS_STARTUP));
 		GetDlgItem(IDC_STARTWIN)->SetWindowText(GetResString(IDS_STARTWITHWINDOWS));
 
+		GetDlgItem(IDC_STARTUPSOUNDON)->SetWindowText(GetResString(IDS_PW_STARTUPSOUND));//Commander - Added: Enable/Disable Startupsound
 		//Commander - Added: Invisible Mode [TPT] - Start
 		// Add key modifiers to ComboBox
 		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->ResetContent();
@@ -369,7 +395,7 @@ void CPPgGeneral::OnLangChange()
 {
 #define MIRRORS_URL	_T("http://langmirror%i.emule-project.org/lang/%i%i%i%i/")
 
-	WORD byNewLang =  m_language.GetItemData(m_language.GetCurSel());
+	WORD byNewLang = (WORD)m_language.GetItemData(m_language.GetCurSel());
 	if (thePrefs.GetLanguageID() != byNewLang){
 		if	(!thePrefs.IsLanguageSupported(byNewLang, false)){
 			if (AfxMessageBox(GetResString(IDS_ASKDOWNLOADLANGCAP) + _T("\r\n\r\n") + GetResString(IDS_ASKDOWNLOADLANG), MB_ICONQUESTION | MB_YESNO) == IDYES){
@@ -377,7 +403,7 @@ void CPPgGeneral::OnLangChange()
 				// create url, use random mirror for load balancing
 				uint16 nRand = (rand()/(RAND_MAX/3))+1;
 				CString strUrl;
-				strUrl.Format(MIRRORS_URL,nRand, VERSION_MJR, VERSION_MIN, VERSION_UPDATE, VERSION_BUILD);
+				strUrl.Format(MIRRORS_URL, nRand, CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
 				strUrl += thePrefs.GetLangDLLNameByID(byNewLang);
 				// safeto
 				CString strFilename = thePrefs.GetLangDir();
@@ -441,7 +467,7 @@ BOOL CPPgGeneral::OnHelpInfo(HELPINFO* pHelpInfo)
 //Commander - Added: Invisible Mode [TPT] - Start
 void CPPgGeneral::SetBoxes()
 {	
-	bool bImode = IsDlgButtonChecked(IDC_INVISIBLE_MODE);
+	bool bImode = IsDlgButtonChecked(IDC_INVISIBLE_MODE)!=0;
 
 	GetDlgItem(IDC_INVISIBLE_MODE_SELECT_STATIC)->EnableWindow(bImode);
 	GetDlgItem(IDC_INVISIBLE_MODE_MODIFIER_STATIC)->EnableWindow(bImode);

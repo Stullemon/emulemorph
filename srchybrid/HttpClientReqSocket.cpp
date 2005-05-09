@@ -363,5 +363,4 @@ bool CHttpClientDownSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT si
 bool CHttpClientDownSocket::ProcessHttpRequest()
 {
 	throw CString(_T("Unexpected HTTP request received"));
-	return false;
 }

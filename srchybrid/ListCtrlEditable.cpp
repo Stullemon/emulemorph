@@ -8,7 +8,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-#ifndef LVN_BEGINSCROLL
+#if (_WIN32_WINNT < 0x501)
 typedef struct tagNMLVSCROLL
 {
     NMHDR   hdr;
@@ -16,9 +16,10 @@ typedef struct tagNMLVSCROLL
     int     dy;
 } NMLVSCROLL, *LPNMLVSCROLL;
 
-#define LVN_BEGINSCROLL          (LVN_FIRST-80)          
+#define LVN_BEGINSCROLL          (LVN_FIRST-80)
 #define LVN_ENDSCROLL            (LVN_FIRST-81)
 #endif
+
 
 #define MAX_COLS	2
 
@@ -385,8 +386,6 @@ void CEditableListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 
 void CEditableListCtrl::OnLvnBeginScroll(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	// This feature requires Internet Explorer 5.5 or greater.
-	// The symbol _WIN32_IE must be >= 0x0560.
 	//LPNMLVSCROLL pStateChanged = reinterpret_cast<LPNMLVSCROLL>(pNMHDR);
 	if (m_pctrlEdit)
 	{
@@ -400,8 +399,6 @@ void CEditableListCtrl::OnLvnBeginScroll(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CEditableListCtrl::OnLvnEndScroll(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	// This feature requires Internet Explorer 5.5 or greater.
-	// The symbol _WIN32_IE must be >= 0x0560.
 	//LPNMLVSCROLL pStateChanged = reinterpret_cast<LPNMLVSCROLL>(pNMHDR);
 	if (m_pctrlEdit)
 		ShowEditCtrl();

@@ -15,7 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "ResizableLib\ResizableDialog.h"
+#include "../ResizableLib\ResizableDialog.h"
 #include "ChatSelector.h"
 #include "FriendListCtrl.h"
 #include "SplitterControl.h"
@@ -60,7 +60,6 @@ protected:
 	// MORPH END   - Added by Commander, Friendlinks [emulEspaña]
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
-	afx_msg void OnStnDblclickFriendsicon();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
@@ -69,6 +68,7 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnLvnItemActivateFrlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMClickFrlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnStnDblclickFriendsicon();
 
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:

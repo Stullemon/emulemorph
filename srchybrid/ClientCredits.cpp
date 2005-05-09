@@ -23,10 +23,12 @@
 #include "SafeFile.h"
 #include "Opcodes.h"
 #include "Sockets.h"
+#pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include <crypto51/base64.h>
 #include <crypto51/osrng.h>
 #include <crypto51/files.h>
 #include <crypto51/sha.h>
+#pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "emuledlg.h"
 #include "Log.h"
 
@@ -155,7 +157,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && theApp.clientcredits->CryptoAvailable() ){
 	//MORPH END   - Changed by SIRoB, Code Optimization 
 		// bad guy - no credits for you
-		return 1;
+		return 1.0F;
 	}
 
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
@@ -167,7 +169,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 
 	//Morph Start - Modified by AndCycle, reduce a little CPU usage for ratio count
 
-	float result = 0;//everybody share one result.
+	float result = 0.0F;//everybody share one result.
     //EastShare START - Added by linekin, CreditSystem 
 	switch (thePrefs.GetCreditSystem())	{
 
@@ -200,7 +202,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 				result = 3.0f;
 				break;
 			}
-			result = 0;
+			result = 0.0F;
 			if (GetUploadedTotal()<1000000)
 				result = 10.0f * GetDownloadedTotal()/1000000.0f;
 			else
@@ -244,26 +246,26 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 		case CS_OFFICIAL:
 		default:{
 			if (GetDownloadedTotal() < 1000000){
-				result = 1;
+				result = 1.0F;
 				break;
 			}
 			if (!GetUploadedTotal())
-				result = 10;
+				result = 10.0F;
 			else
 				result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
-			float result2 = 0;
-			result2 = (float)GetDownloadedTotal()/1048576.0;
-			result2 += 2;
-			result2 = (double)sqrt((double)result2);
+			float result2 = 0.0F;
+	result2 = (float)(GetDownloadedTotal()/1048576.0);
+			result2 += 2.0F;
+	result2 = (float)sqrt(result2);
 
 			if (result > result2)
 				result = result2;
 
-			if (result < 1){
-				result = 1;
+			if (result < 1.0F){
+				result = 1.0F;
 				break;
-			}else if (result > 10){
-				result = 10;
+			}else if (result > 10.0F){
+				result = 10.0F;
 				break;
 			}
 		}break;
@@ -286,28 +288,28 @@ float CClientCredits::GetMyScoreRatio(uint32 dwForIP) const
 	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && GetCurrentIdentState(dwForIP) != IS_IDBADGUY && theApp.clientcredits->CryptoAvailable() ){
 	//MORPH END   - Changed by SIRoB, Code Optimization 
 		// bad guy - no credits for... me?
-		return 1;
+		return 1.0F;
 	}
 
 	if (GetUploadedTotal() < 1000000)
-		return 1;
-	float result = 0;
+		return 1.0F;
+	float result = 0.0F;
 	if (!GetDownloadedTotal())
-		result = 10;
+		result = 10.0F;
 	else
 		result = (float)(((double)GetUploadedTotal()*2.0)/(double)GetDownloadedTotal());
-	float result2 = 0;
-	result2 = (float)GetUploadedTotal()/1048576.0;
-	result2 += 2;
-	result2 = (double)sqrt((double)result2);
+	float result2 = 0.0F;
+	result2 = (float)(GetUploadedTotal()/1048576.0);
+	result2 += 2.0F;
+	result2 = (float)sqrt(result2);
 
 	if (result > result2)
 		result = result2;
 
-	if (result < 1)
-		return 1;
-	else if (result > 10)
-		return 10;
+	if (result < 1.0F)
+		return 1.0F;
+	else if (result > 10.0F)
+		return 10.0F;
 	return result;
 }
 //MORPH END   - Added by IceCream, VQB: ownCredits
@@ -345,7 +347,7 @@ CClientCreditsList::~CClientCreditsList()
 // Moonlight: SUQWT: Change the file import 0.30c format.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCreditsList::LoadList()
 {
-	CString strFileName = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME);
+	CString strFileName = thePrefs.GetConfigDir() + CLIENTS_MET_FILENAME;
 	const int iOpenFlags = CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite;
 	CSafeBufferedFile file;
 	CFileException fexp;
@@ -379,7 +381,7 @@ void CClientCreditsList::LoadList()
 	int	index = 0;
 	for(int curFile = 0; curFile < totalLoadFile; curFile++){
 		//check clients.met status
-		successLoadFile[curFile] = loadFile.Open(loadFileName[curFile], iOpenFlags, &fexp);
+		successLoadFile[curFile] = loadFile.Open(loadFileName[curFile], iOpenFlags, &fexp)!=0;
 		if (successLoadFile[curFile]){
 			loadFile.GetStatus(loadFileStatus[curFile]);
 			prioOrderfile[index++]=curFile;
@@ -585,7 +587,7 @@ void CClientCreditsList::SaveList()
 		AddDebugLogLine(false, _T("Saving clients credit list file \"%s\""), CLIENTS_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount();
 
-	CString name = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME);
+	CString name = thePrefs.GetConfigDir() + CLIENTS_MET_FILENAME;
 	//Morph Start - added by AndCycle, safe .met replace
 	CString origName = name, oldName = name + _T(".old");
 	name = name + _T(".new");
@@ -728,7 +730,8 @@ void CClientCreditsList::Process()
 		SaveList();
 }
 
-void CClientCredits::InitalizeIdent(){
+void CClientCredits::InitalizeIdent()
+{
 	if (m_pCredits->nKeySize == 0 ){
 		memset(m_abyPublicKey,0,80); // for debugging
 		m_nPublicKeyLen = 0;
@@ -744,7 +747,8 @@ void CClientCredits::InitalizeIdent(){
 	m_dwIdentIP = 0;
 }
 
-void CClientCredits::Verified(uint32 dwForIP){
+void CClientCredits::Verified(uint32 dwForIP)
+{
 	m_dwIdentIP = dwForIP;
 	// client was verified, copy the keyto store him if not done already
 	if (m_pCredits->nKeySize == 0){
@@ -763,7 +767,8 @@ void CClientCredits::Verified(uint32 dwForIP){
 	IdentState = IS_IDENTIFIED;
 }
 
-bool CClientCredits::SetSecureIdent(uchar* pachIdent, uint8 nIdentLen){ // verified Public key cannot change, use only if there is not public key yet
+bool CClientCredits::SetSecureIdent(const uchar* pachIdent, uint8 nIdentLen)  // verified Public key cannot change, use only if there is not public key yet
+{
 	if (MAXPUBKEYSIZE < nIdentLen || m_pCredits->nKeySize != 0 )
 		return false;
 	memcpy(m_abyPublicKey,pachIdent, nIdentLen);
@@ -772,7 +777,8 @@ bool CClientCredits::SetSecureIdent(uchar* pachIdent, uint8 nIdentLen){ // verif
 	return true;
 }
 
-EIdentState	CClientCredits::GetCurrentIdentState(uint32 dwForIP) const{
+EIdentState	CClientCredits::GetCurrentIdentState(uint32 dwForIP) const
+{
 	if (IdentState != IS_IDENTIFIED)
 		return IdentState;
 	else{
@@ -787,7 +793,8 @@ EIdentState	CClientCredits::GetCurrentIdentState(uint32 dwForIP) const{
 
 using namespace CryptoPP;
 
-void CClientCreditsList::InitalizeCrypting(){
+void CClientCreditsList::InitalizeCrypting()
+{
 	m_nMyPublicKeyLen = 0;
 	memset(m_abyMyPublicKey,0,80); // not really needed; better for debugging tho
 	m_pSignkey = NULL;
@@ -817,7 +824,7 @@ void CClientCreditsList::InitalizeCrypting(){
 		RSASSA_PKCS1v15_SHA_Verifier pubkey(*m_pSignkey);
 		ArraySink asink(m_abyMyPublicKey, 80);
 		pubkey.DEREncode(asink);
-		m_nMyPublicKeyLen = asink.TotalPutLength();
+		m_nMyPublicKeyLen = (uint8)asink.TotalPutLength();
 		asink.MessageEnd();
 	}
 	catch(...)
@@ -832,7 +839,8 @@ void CClientCreditsList::InitalizeCrypting(){
 	//Debug_CheckCrypting();
 }
 
-bool CClientCreditsList::CreateKeyPair(){
+bool CClientCreditsList::CreateKeyPair()
+{
 	try{
 		AutoSeededRandomPool rng;
 		InvertibleRSAFunction privkey;
@@ -855,7 +863,10 @@ bool CClientCreditsList::CreateKeyPair(){
 	return true;
 }
 
-uint8 CClientCreditsList::CreateSignature(CClientCredits* pTarget, uchar* pachOutput, uint8 nMaxSize, uint32 ChallengeIP, uint8 byChaIPKind, CryptoPP::RSASSA_PKCS1v15_SHA_Signer* sigkey){
+uint8 CClientCreditsList::CreateSignature(CClientCredits* pTarget, uchar* pachOutput, uint8 nMaxSize, 
+										  uint32 ChallengeIP, uint8 byChaIPKind, 
+										  CryptoPP::RSASSA_PKCS1v15_SHA_Signer* sigkey)
+{
 	// sigkey param is used for debug only
 	if (sigkey == NULL)
 		sigkey = m_pSignkey;
@@ -886,7 +897,7 @@ uint8 CClientCreditsList::CreateSignature(CClientCredits* pTarget, uchar* pachOu
 		sigkey->SignMessage(rng, abyBuffer ,keylen+4+ChIpLen , sbbSignature.begin());
 		ArraySink asink(pachOutput, nMaxSize);
 		asink.Put(sbbSignature.begin(), sbbSignature.size());
-		nResult = asink.TotalPutLength();			
+		nResult = (uint8)asink.TotalPutLength();			
 	}
 	catch(...)
 	{
@@ -896,7 +907,9 @@ uint8 CClientCreditsList::CreateSignature(CClientCredits* pTarget, uchar* pachOu
 	return nResult;
 }
 
-bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignature, uint8 nInputSize, uint32 dwForIP, uint8 byChaIPKind){
+bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, const uchar* pachSignature, uint8 nInputSize, 
+									 uint32 dwForIP, uint8 byChaIPKind)
+{
 	ASSERT( pTarget );
 	ASSERT( pachSignature );
 	if ( !CryptoAvailable() ){
@@ -960,13 +973,15 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 	return bResult;
 }
 
-bool CClientCreditsList::CryptoAvailable(){
+bool CClientCreditsList::CryptoAvailable()
+{
 	return (m_nMyPublicKeyLen > 0 && m_pSignkey != 0 && thePrefs.IsSecureIdentEnabled() );
 }
 
 
 #ifdef _DEBUG
-bool CClientCreditsList::Debug_CheckCrypting(){
+bool CClientCreditsList::Debug_CheckCrypting()
+{
 	// create random key
 	AutoSeededRandomPool rng;
 
@@ -976,7 +991,7 @@ bool CClientCreditsList::Debug_CheckCrypting(){
 	byte abyPublicKey[80];
 	ArraySink asink(abyPublicKey, 80);
 	pub.DEREncode(asink);
-	uint8 PublicKeyLen = asink.TotalPutLength();
+	uint8 PublicKeyLen = (uint8)asink.TotalPutLength();
 	asink.MessageEnd();
 	uint32 challenge = rand();
 	// create fake client which pretends to be this emule
@@ -1016,10 +1031,11 @@ bool CClientCreditsList::Debug_CheckCrypting(){
 
 //EastShare START - Modified by TAHO, modified SUQWT
 /*
-uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
+uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP)
 */
-sint64 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
+sint64 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP)
 //EastShare END - Modified by TAHO, modified SUQWT
+{
 	if (m_dwUnSecureWaitTime == 0 || m_dwSecureWaitTime == 0)
 		SetSecWaitStartTime(dwForIP);
 
@@ -1083,7 +1099,8 @@ void CClientCredits::SetSecWaitStartTime() {
 //EastShare END - Added by TAHO, modified SUQWT
 
 // Moonlight: SUQWT: Adjust to take previous wait time into account.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
+void CClientCredits::SetSecWaitStartTime(uint32 dwForIP)
+{
 	//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 		//EastShare START - Added by TAHO, modified SUQWT
@@ -1102,7 +1119,8 @@ void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	m_dwWaitTimeIP = dwForIP;
 }
 
-void CClientCredits::ClearWaitStartTime(){
+void CClientCredits::ClearWaitStartTime()
+{
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 }

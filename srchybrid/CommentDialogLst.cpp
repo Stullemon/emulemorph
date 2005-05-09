@@ -110,7 +110,7 @@ BOOL CCommentDialogLst::OnInitDialog()
 	m_lstComments.InsertColumn(1, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, 130, -1); 
 	m_lstComments.InsertColumn(2, GetResString(IDS_QL_RATING), LVCFMT_LEFT, 80, 1); 
 	m_lstComments.InsertColumn(3, GetResString(IDS_COMMENT), LVCFMT_LEFT, 340, 1); 
-	m_lstComments.InsertColumn(4, GetResString(IDS_CLIENTSOFTWARE), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientSoftware Column
+	m_lstComments.InsertColumn(4, GetResString(IDS_CD_CSOFT), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientSoftware Column
 	m_lstComments.InsertColumn(5, GetResString(IDS_COUNTRY), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientCountry Column
 
 	Localize(); 
@@ -140,6 +140,10 @@ void CCommentDialogLst::Localize(void)
 { 
 	GetDlgItem(IDC_REFRESH)->SetWindowText(GetResString(IDS_CMT_REFRESH)); 
 	GetDlgItem(IDC_SEARCHKAD)->SetWindowText(GetResString(IDS_SEARCHKAD)); 
+	if( Kademlia::CKademlia::isConnected() )
+		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_SHOW);
+	else
+		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_HIDE);
 } 
 
 void CCommentDialogLst::RefreshData()

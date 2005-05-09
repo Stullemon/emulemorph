@@ -1,10 +1,4 @@
-#ifndef __LIST_CTRL_X_H__
-#define __LIST_CTRL_X_H__
-
-#if _MSC_VER > 1000
 #pragma once
-#endif
-
 
 //////////////////////////////////////////////////////////////////////////////
 // LCX_SORT_ORDER
@@ -150,10 +144,3 @@ protected:
 	afx_msg BOOL OnHdrEndDrag(UINT, NMHDR*, LRESULT*);
 	afx_msg LRESULT OnCopy(WPARAM wParam, LPARAM lParam);
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif //!__LIST_CTRL_X_H__

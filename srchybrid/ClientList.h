@@ -47,17 +47,17 @@ public:
 	uint32							m_cBadRequest;
 };
 
+enum buddyState
+{
+	Disconnected,
+	Connecting,
+	Connected
+};
+
 // ----------------------CClientList Class---------------
 class CClientList
 {
 	friend class CClientListCtrl;
-
-	enum buddyState
-	{
-		Disconnected,
-		Connecting,
-		Connected
-	};
 
 public:
 	CClientList();
@@ -105,8 +105,7 @@ public:
 	void	IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128* buddyID);
 	void	RemoveFromKadList(CUpDownClient* torem);
 	void	AddToKadList(CUpDownClient* toadd);
-	uint8	GetBuddyStatus() {return m_bHaveBuddy;}
-	void	DoCallBack( const uchar* hashid );
+	uint8	GetBuddyStatus() {return m_nBuddyStatus;}
 	CUpDownClient* GetBuddy() {return m_pBuddy;}
 
 	bool	IsValidClient(CUpDownClient* tocheck);
@@ -140,10 +139,9 @@ private:
 	uint32	m_dwLastBannCleanUp;
 	uint32	m_dwLastTrackedCleanUp;
 	uint32 m_dwLastClientCleanUp;
-	uint8 m_bHaveBuddy;
-	CUpDownClientPtrList KadList;
-	CCriticalSection m_RequestTCPLock;
 	CUpDownClient* m_pBuddy;
+	uint8 m_nBuddyStatus;
+	CUpDownClientPtrList m_KadList;
 //EastShare Start - added by AndCycle, IP to Country
 public:
 	void ResetIP2Country();

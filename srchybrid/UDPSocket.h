@@ -49,7 +49,7 @@ class CUDPSocket : public CAsyncSocket, public ThrottledControlSocket // ZZ:Uplo
 
 public:
 	CUDPSocket();
-	~CUDPSocket();
+	virtual ~CUDPSocket();
 
 	bool	Create();
     SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
@@ -69,7 +69,7 @@ private:
 	CUDPSocketWnd m_udpwnd;
 
 	void 	SendBuffer();
-	bool	ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort);
+	bool	ProcessPacket(const BYTE* packet, UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort);
 	void	ProcessPacketError(UINT size, UINT opcode, uint32 nIP, uint16 nTCPPort, LPCTSTR pszError);
 
 	uint8*	m_sendbuffer;

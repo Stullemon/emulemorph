@@ -1,33 +1,26 @@
-#if !defined(AFX_GRADIENTSTATIC_H__3C355BA8_DB38_4E93_AF17_36426E7A83AD__INCLUDED_)
-#define AFX_GRADIENTSTATIC_H__3C355BA8_DB38_4E93_AF17_36426E7A83AD__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// GradientStatic.h : header file
-//
 
 /////////////////////////////////////////////////////////////////////////////
 // CGradientStatic window
 
 class CGradientStatic : public CStatic
 {
-	// Construction
+// Construction
 public:
 	CGradientStatic();
 
-	// Attributes
+// Attributes
 public:
 
-	// Operations
+// Operations
 public:
 
-	// Overrides
+// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CGradientStatic)
 	//}}AFX_VIRTUAL
 
-	// Implementation
+// Implementation
 public:
 	void SetFont(CFont *pFont);
 	virtual ~CGradientStatic();
@@ -61,7 +54,7 @@ protected:
 		CBitmap *pold;
 		int		cx;
 		int		cy;
-
+	
 	}m_Mem;		
 
 	//{{AFX_MSG(CGradientStatic)
@@ -76,10 +69,3 @@ private:
 	void DrawHorizontalGradient();
 	void CreateGradient(CDC *pDC, CRect *pRect);
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_GRADIENTSTATIC_H__3C355BA8_DB38_4E93_AF17_36426E7A83AD__INCLUDED_)

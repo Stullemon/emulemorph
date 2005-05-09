@@ -1,6 +1,3 @@
-#ifndef DRAWGDIX_H
-#define DRAWGDIX_H
-
 #pragma once
 
 /*******************************************************************
@@ -737,6 +734,3 @@ public:
 
 	int Old() const { return m_SavedDC; }
 };
-
-
-#endif

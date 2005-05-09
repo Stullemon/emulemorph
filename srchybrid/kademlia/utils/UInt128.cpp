@@ -30,8 +30,9 @@ there client on the eMule forum..
 
 #include "stdafx.h"
 #include "UInt128.h"
-
+#pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include <crypto51/osrng.h>
+#pragma warning(default:4516)
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

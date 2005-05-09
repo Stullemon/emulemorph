@@ -30,10 +30,10 @@ public:
 
 	CClientVersionInfo(CString strPCEncodedVersion)
 	{
-		m_nVerMajor = (uint16)CVI_IGNORED;
-		m_nVerMinor = (uint16)CVI_IGNORED;
-		m_nVerUpdate = (uint16)CVI_IGNORED;
-		m_nVerBuild = (uint16)CVI_IGNORED;
+		m_nVerMajor = (UINT)CVI_IGNORED;
+		m_nVerMinor = (UINT)CVI_IGNORED;
+		m_nVerUpdate = (UINT)CVI_IGNORED;
+		m_nVerBuild = (UINT)CVI_IGNORED;
 		m_ClientTypeMajor = SO_UNKNOWN; 
 		m_ClientTypeMinor = SO_UNKNOWN;
 
@@ -60,37 +60,37 @@ public:
 		if (strNumber.IsEmpty())
 			return;
 		else if (strNumber == _T("*"))
-			m_nVerMajor = (uint16)-1;
+			m_nVerMajor = (UINT)-1;
 		else
-			m_nVerMajor = _tstol(strNumber.GetBuffer());
+			m_nVerMajor = _tstoi(strNumber.GetBuffer());
 		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
 		if (strNumber.IsEmpty())
 			return;
 		else if (strNumber == _T("*"))
-			m_nVerMinor = (uint16)-1;
+			m_nVerMinor = (UINT)-1;
 		else
-			m_nVerMinor = _tstol(strNumber.GetBuffer());
+			m_nVerMinor = _tstoi(strNumber.GetBuffer());
 		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
 		if (strNumber.IsEmpty())
 			return;
 		else if (strNumber == _T("*"))
-			m_nVerUpdate = (uint16)-1;
+			m_nVerUpdate = (UINT)-1;
 		else
-			m_nVerUpdate = _tstol(strNumber.GetBuffer());
+			m_nVerUpdate = _tstoi(strNumber.GetBuffer());
 		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
 		if (strNumber.IsEmpty())
 			return;
 		else if (strNumber == _T("*"))
-			m_nVerBuild = (uint16)-1;
+			m_nVerBuild = (UINT)-1;
 		else
-			m_nVerBuild = _tstol(strNumber.GetBuffer());
+			m_nVerBuild = _tstoi(strNumber.GetBuffer());
 	}
 	
-	CClientVersionInfo(uint32 dwTagVersionInfo, uint16 nClientMajor)
+	CClientVersionInfo(uint32 dwTagVersionInfo, UINT nClientMajor)
 	{
-		uint16 nClientMajVersion = (dwTagVersionInfo >> 17) & 0x7f;
-		uint16 nClientMinVersion = (dwTagVersionInfo>> 10) & 0x7f;
-		uint16 nClientUpVersion  = (dwTagVersionInfo >>  7) & 0x07;
+		UINT nClientMajVersion = (dwTagVersionInfo >> 17) & 0x7f;
+		UINT nClientMinVersion = (dwTagVersionInfo>> 10) & 0x7f;
+		UINT nClientUpVersion  = (dwTagVersionInfo >>  7) & 0x07;
 		CClientVersionInfo(nClientMajVersion, nClientMinVersion, nClientUpVersion, (UINT)CVI_IGNORED, nClientMajor, SO_UNKNOWN);
 	}
 
@@ -168,10 +168,10 @@ public:
 		return c1 > c2 || c1 == c2;
 	}
 	
-	uint16 m_nVerMajor;
-	uint16 m_nVerMinor;
-	uint16 m_nVerUpdate;
-	uint16 m_nVerBuild;
-	uint16 m_ClientTypeMajor;
-	uint16 m_ClientTypeMinor; //unused atm
+	UINT m_nVerMajor;
+	UINT m_nVerMinor;
+	UINT m_nVerUpdate;
+	UINT m_nVerBuild;
+	UINT m_ClientTypeMajor;
+	UINT m_ClientTypeMinor; //unused atm
 };

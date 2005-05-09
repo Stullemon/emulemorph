@@ -2,10 +2,6 @@
 //  Author:         Klaus H. Probst [kprobst@vbbox.com]
 // 
 //--------------------------------------------------------------------------------------------
-
-#if !defined(CCustomAutoComplete_INCLUDED)
-#define CCustomAutoComplete_INCLUDED
-
 #pragma once
 #include <initguid.h>
 #include <shldisp.h>
@@ -67,5 +63,3 @@ private:
 	HRESULT EnDisable(BOOL p_fEnable);
 	int FindItem(const CString& rstr);
 };
-
-#endif // !defined(CCustomAutoComplete_INCLUDED)

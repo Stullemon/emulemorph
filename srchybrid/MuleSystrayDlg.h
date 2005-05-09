@@ -1,8 +1,4 @@
-#if !defined(AFX_INPUTBOX_H__25CB82F9_AFE9_4640_9574_3E211C6D0452__INCLUDED_)
-#define AFX_INPUTBOX_H__25CB82F9_AFE9_4640_9574_3E211C6D0452__INCLUDED_
-#if _MSC_VER > 1000
 #pragma once
-#endif 
 
 class CInputBox : public CEdit
 {
@@ -12,20 +8,9 @@ protected:
     DECLARE_MESSAGE_MAP()
 };
 
-#endif
-
-#if !defined(AFX_MULESYSTRAYDLG_H__A3BFC8BE_562C_4838_936D_C3D7CF647DA9__INCLUDED_)
-#define AFX_MULESYSTRAYDLG_H__A3BFC8BE_562C_4838_936D_C3D7CF647DA9__INCLUDED_
-
-
 #include "TrayMenuBtn.h"		// Added by ClassView
 #include "GradientStatic.h"	// Added by ClassView
 #include "resource.h"
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-// MuleSystrayDlg.h : header file
-//
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -54,7 +39,6 @@ public:
 	int		m_nMinUpSpeedTxt;
 	int		m_nDownSpeedTxt;
 	int		m_nUpSpeedTxt;
-
 	//}}AFX_DATA
 
 
@@ -106,8 +90,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_MULESYSTRAYDLG_H__A3BFC8BE_562C_4838_936D_C3D7CF647DA9__INCLUDED_)

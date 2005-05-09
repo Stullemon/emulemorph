@@ -944,7 +944,6 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	int iCompleteFileSelected = -1;
 	CString buffer; //MORPH - added, for string format temp
 	int iPowerShareLimit = -1; //MORPH - Added by SiRoB, POWERSHARE Limit
-	int	iSpreadbar = -1; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	int iHideOS = -1; //MORPH - Added by SiRoB, HIDEOS
 
 	UINT uPrioMenuItem = 0;
@@ -1425,8 +1424,8 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						UpdateFile(file);
 					}
 				}
-				else if (wParam == MPG_F2)
-					MessageBeep((UINT)-1);
+				else
+					MessageBeep(MB_OK);
 				break;
 			case MP_REMOVE:
 			case MPG_DELETE:{
@@ -1447,7 +1446,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					else{
 						// Delete
 						if (!thePrefs.GetRemoveToBin()){
-							delsucc = DeleteFile(myfile->GetFilePath());
+							delsucc = DeleteFile(myfile->GetFilePath())!=0;
 						}
 						else{
 							// delete to recycle bin :(
@@ -1471,7 +1470,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					}
 					else{
 						CString strError;
-						strError.Format(_T("Failed to delete file \"%s\"\r\n\r\n%s"), myfile->GetFilePath(), GetErrorMessage(GetLastError()));
+						strError.Format( GetResString(IDS_ERR_DELFILE) + _T("\r\n\r\n%s"), myfile->GetFilePath(), GetErrorMessage(GetLastError()));
 						AfxMessageBox(strError);
 					}
 				}

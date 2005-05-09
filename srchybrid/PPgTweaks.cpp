@@ -60,52 +60,54 @@ CPPgTweaks::CPPgTweaks()
 	m_iQueueSize = 0;
 	m_iMaxConnPerFive = 0;
 	m_iMaxHalfOpen = 0;
-	m_iAutoTakeEd2kLinks = 0;
-	m_iVerbose = 0;
-	m_iDebugSourceExchange = 0;
-	m_iLogBannedClients = 0;
-	m_iLogRatingDescReceived = 0;
-	m_iLogSecureIdent = 0;
-	m_iLogFilteredIPs = 0;
-	m_iLogFileSaving = 0;
-	m_iLogA4AF = 0; 
-	m_iLogUlDlEvents = 0;
+	m_bConditionalTCPAccept = false;
+	m_bAutoTakeEd2kLinks = false;
+	m_bVerbose = false;
+	m_bDebugSourceExchange = false;
+	m_bLogBannedClients = false;
+	m_bLogRatingDescReceived = false;
+	m_bLogSecureIdent = false;
+	m_bLogFilteredIPs = false;
+	m_bLogFileSaving = false;
+	m_bLogA4AF = false;
+	m_bLogUlDlEvents = false;
 //MORPH START - Added by SiRoB, WebCache 1.2f
-	m_iLogWebCacheEvents = 0; //JP log webcache events
-	m_iLogICHEvents = 0; //JP log ICH events
+	m_bLogWebCacheEvents = false; //JP log webcache events
+	m_bLogICHEvents = false; //JP log ICH events
 //MORPH END   - Added by SiRoB, WebCache 1.2f
-	m_iCreditSystem = 0;
-	m_iLog2Disk = 0;
-	m_iDebug2Disk = 0;
+	m_bCreditSystem = false;
+	m_bLog2Disk = false;
+	m_bDebug2Disk = false;
+	m_bDateFileNameLog = false;//Morph - added by AndCycle, Date File Name Log
 	m_iCommitFiles = 0;
-	m_iFilterLANIPs = 0;
-	m_iExtControls = 0;
+	m_bFilterLANIPs = false;
+	m_bExtControls = false;
 	m_uServerKeepAliveTimeout = 0;
-	m_iSparsePartFiles = 0;
-	m_iCheckDiskspace = 0;
+	m_bSparsePartFiles = false;
+	m_bCheckDiskspace = false;
 	m_fMinFreeDiskSpaceMB = 0.0F;
 	(void)m_sYourHostname;
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
-	m_iFirewallStartup = 0;
+	m_bFirewallStartup = false;
 	*/
 	// End emulEspaña
 	m_iLogLevel = 0;
-	m_iDisablePeerCache = 0;
-	// ZZ:UploadSpeedSense -->
-    m_iDynUpEnabled = 0;
+	m_bDisablePeerCache = false;
+    m_bDynUpEnabled = false;
     m_iDynUpMinUpload = 0;
     m_iDynUpPingTolerance = 0;
     m_iDynUpGoingUpDivider = 0;
     m_iDynUpGoingDownDivider = 0;
     m_iDynUpNumberOfPings = 0;
-	// ZZ:DownloadManager
-    m_iA4AFSaveCpu = 0; 
+    m_bA4AFSaveCpu = false;
 	m_iExtractMetaData = 0;
 
 	m_bInitializedTreeOpts = false;
+	m_htiTCPGroup = NULL;
 	m_htiMaxCon5Sec = NULL;
 	m_htiMaxHalfOpen = NULL;
+	m_htiConditionalTCPAccept = NULL;
 	m_htiAutoTakeEd2kLinks = NULL;
 	m_htiVerboseGroup = NULL;
 	m_htiVerbose = NULL;
@@ -131,9 +133,9 @@ CPPgTweaks::CPPgTweaks()
 	m_htiExtControls = NULL;
 	m_htiServerKeepAliveTimeout = NULL;
 	m_htiSparsePartFiles = NULL;
-	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
+	m_htiCheckDiskspace = NULL;
 	m_htiMinFreeDiskSpace = NULL;
-	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
+	m_htiYourHostname = NULL;
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
 	m_htiFirewallStartup = NULL;
@@ -141,7 +143,6 @@ CPPgTweaks::CPPgTweaks()
 	// End emulEspaña
 	m_htiLogLevel = NULL;
 	m_htiDisablePeerCache = NULL;
-	// ZZ:UploadSpeedSense -->
     m_htiDynUp = NULL;
 	m_htiDynUpEnabled = NULL;
     m_htiDynUpMinUpload = NULL;
@@ -153,13 +154,12 @@ CPPgTweaks::CPPgTweaks()
     m_htiDynUpGoingUpDivider = NULL;
     m_htiDynUpGoingDownDivider = NULL;
     m_htiDynUpNumberOfPings = NULL;
-    // ZZ:DownloadManager
     m_htiA4AFSaveCpu = NULL;
 	m_htiLogA4AF = NULL;
 	m_htiExtractMetaData = NULL;
 
 	// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	m_iLogUPnP = 0;
+	m_bLogUPnP = false;
 	m_htiLogUPnP = NULL;
 	// End emulEspaña
 }
@@ -177,272 +177,276 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (!m_bInitializedTreeOpts)
 	{
 		int iImgBackup = 8; // default icon
-		int iImgLog = 8; // default icon
-		// ZZ:UploadSpeedSense -->
-		int iImgDynyp = 8; // default icon
-		// ZZ:UploadSpeedSense <--
-		int iImgA4AF = 8; // default icon // ZZ:DownloadManager
-		int iImgMetaData = 8; // default icon
+		int iImgLog = 8;
+		int iImgDynyp = 8;
+		int iImgConnection = 8;
+		int iImgA4AF = 8;
+		int iImgMetaData = 8;
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
 			iImgBackup = piml->Add(CTempIconLoader(_T("Harddisk")));
 			iImgLog = piml->Add(CTempIconLoader(_T("Log")));
-            // ZZ:UploadSpeedSense -->
-			iImgDynyp = piml->Add(CTempIconLoader(_T("upload")));
-			// ZZ:UploadSpeedSense <--
-            iImgA4AF =  piml->Add(CTempIconLoader(_T("Download"))); // ZZ:DownloadManager 
-            iImgMetaData =  piml->Add(CTempIconLoader(_T("MediaInfo"))); // ZZ:DownloadManager 
+            iImgDynyp = piml->Add(CTempIconLoader(_T("upload")));
+			iImgConnection=	piml->Add(CTempIconLoader(_T("connection")));
+            iImgA4AF =		piml->Add(CTempIconLoader(_T("Download")));
+            iImgMetaData =	piml->Add(CTempIconLoader(_T("MediaInfo")));
 		}
 
-		m_htiMaxCon5Sec = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCON5SECLABEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
+		/////////////////////////////////////////////////////////////////////////////
+		// TCP/IP group
+		//
+		m_htiTCPGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_TCPIP_CONNS), iImgConnection, TVI_ROOT);
+		m_htiMaxCon5Sec = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCON5SECLABEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiTCPGroup);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxCon5Sec, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		m_htiMaxHalfOpen = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXHALFOPENCONS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
+		m_htiMaxHalfOpen = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXHALFOPENCONS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiTCPGroup);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxHalfOpen, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		m_htiAutoTakeEd2kLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTOTAKEED2KLINKS), TVI_ROOT, m_iAutoTakeEd2kLinks);
+		m_htiConditionalTCPAccept = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CONDTCPACCEPT), m_htiTCPGroup, m_bConditionalTCPAccept);
+		m_htiServerKeepAliveTimeout = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SERVERKEEPALIVETIMEOUT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiTCPGroup);
+		m_ctrlTreeOptions.AddEditBox(m_htiServerKeepAliveTimeout, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+		/////////////////////////////////////////////////////////////////////////////
+		// Miscellaneous group
+		//
+		m_htiAutoTakeEd2kLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTOTAKEED2KLINKS), TVI_ROOT, m_bAutoTakeEd2kLinks);
+		m_htiCreditSystem = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USECREDITSYSTEM), TVI_ROOT, m_bCreditSystem);
+		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiCreditSystem,false); //MORPH - Added by SiRoB, Credit System Allways Used
 		// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 		/* Moved to PPgEmulespana
-		m_htiFirewallStartup = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FO_PREF_STARTUP), TVI_ROOT, m_iFirewallStartup);
+		m_htiFirewallStartup = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FO_PREF_STARTUP), TVI_ROOT, m_bFirewallStartup);
 		*/
 		// End emulEspaña
-
-		m_htiCreditSystem = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USECREDITSYSTEM), TVI_ROOT, m_iCreditSystem);
-		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiCreditSystem,false); //MORPH - Added by SiRoB, Credit System Allways Used
-		m_htiFilterLANIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PW_FILTER), TVI_ROOT, m_iFilterLANIPs);
-		m_htiExtControls = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHOWEXTSETTINGS), TVI_ROOT, m_iExtControls);
-        m_htiA4AFSaveCpu = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SAVE_CPU), TVI_ROOT, m_iA4AFSaveCpu); // ZZ:DownloadManager
-
-		m_htiSparsePartFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SPARSEPARTFILES), TVI_ROOT, m_iSparsePartFiles);
-		m_htiCheckDiskspace = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHECKDISKSPACE), TVI_ROOT, m_iCheckDiskspace);	// SLUGFILLER: checkDiskspace
-		m_htiMinFreeDiskSpace = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINFREEDISKSPACE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiCheckDiskspace);
-		m_ctrlTreeOptions.AddEditBox(m_htiMinFreeDiskSpace, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiFilterLANIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PW_FILTER), TVI_ROOT, m_bFilterLANIPs);
+		m_htiExtControls = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHOWEXTSETTINGS), TVI_ROOT, m_bExtControls);
+        m_htiA4AFSaveCpu = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SAVE_CPU), TVI_ROOT, m_bA4AFSaveCpu); // ZZ:DownloadManager
 		m_htiYourHostname = m_ctrlTreeOptions.InsertItem(GetResString(IDS_YOURHOSTNAME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
 		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEditEx));
-		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), TVI_ROOT, m_iDisablePeerCache);
+		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), TVI_ROOT, m_bDisablePeerCache);
 
-		m_htiLog2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), TVI_ROOT, m_iLog2Disk);
-		if (thePrefs.GetEnableVerboseOptions())
-		{
-			m_htiVerboseGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_VERBOSE), iImgLog, TVI_ROOT);
-			m_htiVerbose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ENABLED), m_htiVerboseGroup, m_iVerbose);
-			m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), m_htiVerboseGroup, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
-			m_htiLogLevel = m_ctrlTreeOptions.InsertItem(GetResString(IDS_LOG_LEVEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiVerboseGroup);
-			m_ctrlTreeOptions.AddEditBox(m_htiLogLevel, RUNTIME_CLASS(CNumTreeOptionsEdit));
-			m_htiDebug2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), m_htiVerboseGroup, m_iDebug2Disk);
-			m_htiDebugSourceExchange = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG_SOURCE_EXCHANGE), m_htiVerboseGroup, m_iDebugSourceExchange);
-			m_htiLogBannedClients = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_BANNED_CLIENTS), m_htiVerboseGroup, m_iLogBannedClients);
-			m_htiLogRatingDescReceived = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_RATING_RECV), m_htiVerboseGroup, m_iLogRatingDescReceived);
-			m_htiLogSecureIdent = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_SECURE_IDENT), m_htiVerboseGroup, m_iLogSecureIdent);
-			m_htiLogFilteredIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILTERED_IPS), m_htiVerboseGroup, m_iLogFilteredIPs);
-			m_htiLogFileSaving = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILE_SAVING), m_htiVerboseGroup, m_iLogFileSaving);
-			m_htiLogA4AF = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_A4AF), m_htiVerboseGroup, m_iLogA4AF); // ZZ:DownloadManager
-			m_htiLogUlDlEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_ULDL_EVENTS), m_htiVerboseGroup, m_iLogUlDlEvents);
-			//MORPH START - Added by SiRoB, WebCache 1.2f
-			m_htiLogWebCacheEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_WCEVENTS), m_htiVerboseGroup, m_iLogWebCacheEvents); //JP log webcache events
-			m_htiLogICHEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_IACH), m_htiVerboseGroup, m_iLogICHEvents); //JP log ICH events
-			//MORPH END   - Added by SiRoB, WebCache 1.2f
-			// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
-			m_htiLogUPnP = m_ctrlTreeOptions.InsertCheckBox(_T("Log UPnP"), m_htiVerboseGroup, m_iLogUPnP);
-			// End emulEspaña
-		}
-
+		/////////////////////////////////////////////////////////////////////////////
+		// File related group
+		//
+		m_htiSparsePartFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SPARSEPARTFILES), TVI_ROOT, m_bSparsePartFiles);
+		m_htiCheckDiskspace = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHECKDISKSPACE), TVI_ROOT, m_bCheckDiskspace);
+		m_htiMinFreeDiskSpace = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINFREEDISKSPACE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiCheckDiskspace);
+		m_ctrlTreeOptions.AddEditBox(m_htiMinFreeDiskSpace, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiCommit = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_COMMITFILES), iImgBackup, TVI_ROOT);
 		m_htiCommitNever = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_NEVER), m_htiCommit, m_iCommitFiles == 0);
 		m_htiCommitOnShutdown = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_ONSHUTDOWN), m_htiCommit, m_iCommitFiles == 1);
 		m_htiCommitAlways = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_ALWAYS), m_htiCommit, m_iCommitFiles == 2);
-
-		m_htiServerKeepAliveTimeout = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SERVERKEEPALIVETIMEOUT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
-		m_ctrlTreeOptions.AddEditBox(m_htiServerKeepAliveTimeout, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
-		// ZZ:UploadSpeedSense -->
-        m_htiDynUp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP), iImgDynyp, TVI_ROOT);
-		m_htiDynUpEnabled = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DYNUPENABLED), m_htiDynUp, m_iDynUpEnabled);
-
-        m_htiDynUpMinUpload = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_MINUPLOAD), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
-		m_ctrlTreeOptions.AddEditBox(m_htiDynUpMinUpload, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
-        m_htiDynUpPingTolerance = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_PINGTOLERANCE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
-		m_ctrlTreeOptions.AddEditBox(m_htiDynUpPingTolerance, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
-        m_htiDynUpPingToleranceMilliseconds = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_PINGTOLERANCE_MS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
-        m_ctrlTreeOptions.AddEditBox(m_htiDynUpPingToleranceMilliseconds, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
-        m_htiDynUpPingToleranceGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP_RADIO_PINGTOLERANCE_HEADER), iImgDynyp, m_htiDynUp);
-        m_htiDynUpRadioPingTolerance = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DYNUP_RADIO_PINGTOLERANCE_PERCENT), m_htiDynUpPingToleranceGroup, m_iDynUpRadioPingTolerance == 0);
-        m_htiDynUpRadioPingToleranceMilliseconds = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DYNUP_RADIO_PINGTOLERANCE_MS), m_htiDynUpPingToleranceGroup, m_iDynUpRadioPingTolerance == 1);
-
-        m_htiDynUpGoingUpDivider = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_GOINGUPDIVIDER), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
-		m_ctrlTreeOptions.AddEditBox(m_htiDynUpGoingUpDivider, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
-        m_htiDynUpGoingDownDivider = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_GOINGDOWNDIVIDER), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
-		m_ctrlTreeOptions.AddEditBox(m_htiDynUpGoingDownDivider, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
-        m_htiDynUpNumberOfPings = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_NUMBEROFPINGS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
-		m_ctrlTreeOptions.AddEditBox(m_htiDynUpNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		// ZZ:UploadSpeedSense <--
-
 		m_htiExtractMetaData = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_EXTRACT_META_DATA), iImgMetaData, TVI_ROOT);
 		m_htiExtractMetaDataNever = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_NEVER), m_htiExtractMetaData, m_iExtractMetaData == 0);
 		m_htiExtractMetaDataID3Lib = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_META_DATA_ID3LIB), m_htiExtractMetaData, m_iExtractMetaData == 1);
-		m_htiExtractMetaDataMediaDet = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_META_DATA_MEDIADET), m_htiExtractMetaData, m_iExtractMetaData == 2);
+		//m_htiExtractMetaDataMediaDet = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_META_DATA_MEDIADET), m_htiExtractMetaData, m_iExtractMetaData == 2);
 
+		/////////////////////////////////////////////////////////////////////////////
+		// Logging group
+		//
+		m_htiLog2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), TVI_ROOT, m_bLog2Disk);
+		m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), TVI_ROOT, m_bDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
+		if (thePrefs.GetEnableVerboseOptions())
+		{
+			m_htiVerboseGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_VERBOSE), iImgLog, TVI_ROOT);
+			m_htiVerbose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ENABLED), m_htiVerboseGroup, m_bVerbose);
+			m_htiLogLevel = m_ctrlTreeOptions.InsertItem(GetResString(IDS_LOG_LEVEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiVerboseGroup);
+			m_ctrlTreeOptions.AddEditBox(m_htiLogLevel, RUNTIME_CLASS(CNumTreeOptionsEdit));
+			m_htiDebug2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), m_htiVerboseGroup, m_bDebug2Disk);
+			m_htiDebugSourceExchange = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG_SOURCE_EXCHANGE), m_htiVerboseGroup, m_bDebugSourceExchange);
+			m_htiLogBannedClients = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_BANNED_CLIENTS), m_htiVerboseGroup, m_bLogBannedClients);
+			m_htiLogRatingDescReceived = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_RATING_RECV), m_htiVerboseGroup, m_bLogRatingDescReceived);
+			m_htiLogSecureIdent = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_SECURE_IDENT), m_htiVerboseGroup, m_bLogSecureIdent);
+			m_htiLogFilteredIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILTERED_IPS), m_htiVerboseGroup, m_bLogFilteredIPs);
+			m_htiLogFileSaving = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILE_SAVING), m_htiVerboseGroup, m_bLogFileSaving);
+			m_htiLogA4AF = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_A4AF), m_htiVerboseGroup, m_bLogA4AF); // ZZ:DownloadManager
+			m_htiLogUlDlEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_ULDL_EVENTS), m_htiVerboseGroup, m_bLogUlDlEvents);
+			//MORPH START - Added by SiRoB, WebCache 1.2f
+			m_htiLogWebCacheEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_WCEVENTS), m_htiVerboseGroup, m_bLogWebCacheEvents); //JP log webcache events
+			m_htiLogICHEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_IACH), m_htiVerboseGroup, m_bLogICHEvents); //JP log ICH events
+			//MORPH END   - Added by SiRoB, WebCache 1.2f
+			// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
+			m_htiLogUPnP = m_ctrlTreeOptions.InsertCheckBox(_T("Log UPnP"), m_htiVerboseGroup, m_bLogUPnP);
+			// End emulEspaña
+		}
+
+		/////////////////////////////////////////////////////////////////////////////
+		// USS group
+		//
+		m_htiDynUp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP), iImgDynyp, TVI_ROOT);
+		m_htiDynUpEnabled = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DYNUPENABLED), m_htiDynUp, m_bDynUpEnabled);
+        m_htiDynUpMinUpload = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_MINUPLOAD), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpMinUpload, RUNTIME_CLASS(CNumTreeOptionsEdit));
+        m_htiDynUpPingTolerance = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_PINGTOLERANCE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpPingTolerance, RUNTIME_CLASS(CNumTreeOptionsEdit));
+        m_htiDynUpPingToleranceMilliseconds = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_PINGTOLERANCE_MS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+        m_ctrlTreeOptions.AddEditBox(m_htiDynUpPingToleranceMilliseconds, RUNTIME_CLASS(CNumTreeOptionsEdit));
+        m_htiDynUpPingToleranceGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP_RADIO_PINGTOLERANCE_HEADER), iImgDynyp, m_htiDynUp);
+        m_htiDynUpRadioPingTolerance = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DYNUP_RADIO_PINGTOLERANCE_PERCENT), m_htiDynUpPingToleranceGroup, m_iDynUpRadioPingTolerance == 0);
+        m_htiDynUpRadioPingToleranceMilliseconds = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DYNUP_RADIO_PINGTOLERANCE_MS), m_htiDynUpPingToleranceGroup, m_iDynUpRadioPingTolerance == 1);
+        m_htiDynUpGoingUpDivider = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_GOINGUPDIVIDER), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpGoingUpDivider, RUNTIME_CLASS(CNumTreeOptionsEdit));
+        m_htiDynUpGoingDownDivider = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_GOINGDOWNDIVIDER), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpGoingDownDivider, RUNTIME_CLASS(CNumTreeOptionsEdit));
+        m_htiDynUpNumberOfPings = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_NUMBEROFPINGS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+
+	    m_ctrlTreeOptions.Expand(m_htiTCPGroup, TVE_EXPAND);
 		if (m_htiVerboseGroup)
 			m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCheckDiskspace, TVE_EXPAND);
-		// ZZ:UploadSpeedSense -->
 		m_ctrlTreeOptions.Expand(m_htiDynUp, TVE_EXPAND);
         m_ctrlTreeOptions.Expand(m_htiDynUpPingToleranceGroup, TVE_EXPAND);
-		// ZZ:UploadSpeedSense <--
 		m_ctrlTreeOptions.Expand(m_htiExtractMetaData, TVE_EXPAND);
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
         m_bInitializedTreeOpts = true;
 	}
 
+	/////////////////////////////////////////////////////////////////////////////
+	// TCP/IP group
+	//
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiMaxCon5Sec, m_iMaxConnPerFive);
 	DDV_MinMaxInt(pDX, m_iMaxConnPerFive, 1, INT_MAX);
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiMaxHalfOpen, m_iMaxHalfOpen);
 	DDV_MinMaxInt(pDX, m_iMaxHalfOpen, 1, INT_MAX);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoTakeEd2kLinks, m_iAutoTakeEd2kLinks);
-	if (m_htiVerbose)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_iVerbose);
-	if (m_htiDebug2Disk)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebug2Disk, m_iDebug2Disk);
-	if (m_htiDebugSourceExchange)	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebugSourceExchange, m_iDebugSourceExchange);
-	if (m_htiLogBannedClients)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogBannedClients, m_iLogBannedClients);
-	if (m_htiLogRatingDescReceived) DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogRatingDescReceived, m_iLogRatingDescReceived);
-	if (m_htiLogSecureIdent)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogSecureIdent, m_iLogSecureIdent);
-	if (m_htiLogFilteredIPs)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFilteredIPs, m_iLogFilteredIPs);
-	if (m_htiLogFileSaving)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFileSaving, m_iLogFileSaving);
-	if (m_htiLogA4AF)			    DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogA4AF, m_iLogA4AF); // ZZ:DownloadManager
-	if (m_htiLogUlDlEvents)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogUlDlEvents, m_iLogUlDlEvents);
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	if (m_htiLogWebCacheEvents)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogWebCacheEvents, m_iLogWebCacheEvents);//jp log webcache events
-	if (m_htiLogICHEvents)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogICHEvents, m_iLogICHEvents);//JP log ICH events
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
-	// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	if (m_htiLogUPnP)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogUPnP, m_iLogUPnP);
-	// End emulEspaña
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiConditionalTCPAccept, m_bConditionalTCPAccept);
+	DDX_Text(pDX, IDC_EXT_OPTS, m_htiServerKeepAliveTimeout, m_uServerKeepAliveTimeout);
+
+	/////////////////////////////////////////////////////////////////////////////
+	// Miscellaneous group
+	//
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoTakeEd2kLinks, m_bAutoTakeEd2kLinks);
+    m_ctrlTreeOptions.SetCheckBoxEnable(m_htiAutoTakeEd2kLinks, HaveEd2kRegAccess());
 	//MORPH - Removed by SiRoB, Hot fix to show correct disabled checkbox
 	/*
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_iCreditSystem);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_bCreditSystem);
 	*/
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLog2Disk, m_iLog2Disk);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDateFileNameLog, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
-	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiCommit, m_iCommitFiles);
-	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiExtractMetaData, m_iExtractMetaData);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFilterLANIPs, m_iFilterLANIPs);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiExtControls, m_iExtControls);
-	DDX_Text(pDX, IDC_EXT_OPTS, m_htiServerKeepAliveTimeout, m_uServerKeepAliveTimeout);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiSparsePartFiles, m_iSparsePartFiles);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCheckDiskspace, m_iCheckDiskspace);	// SLUGFILLER: checkDiskspace
-	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
-	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
-	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);	// itsonlyme: hostnameSource
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFirewallStartup, m_iFirewallStartup);
-	*/
-	// End emulEspaña
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDisablePeerCache, m_iDisablePeerCache);
-
-	if (m_htiDebug2Disk)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, m_iVerbose);
-	if (m_htiDebugSourceExchange)	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_iVerbose);
-	if (m_htiLogBannedClients)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, m_iVerbose);
-	if (m_htiLogRatingDescReceived) m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, m_iVerbose);
-	if (m_htiLogSecureIdent)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, m_iVerbose);
-	if (m_htiLogFilteredIPs)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, m_iVerbose);
-	if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, m_iVerbose);
-	if (m_htiLogA4AF)               m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogA4AF, m_iVerbose); // ZZ:DownloadManager
-	if (m_htiLogUlDlEvents)         m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUlDlEvents, m_iVerbose);
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	if (m_htiLogWebCacheEvents)     m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogWebCacheEvents, m_iVerbose);//jp log webcache events
-	if (m_htiLogICHEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogICHEvents, m_iVerbose);//JP log ICH events
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
-	if (m_htiLogLevel){
-		DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiLogLevel, m_iLogLevel);
-		DDV_MinMaxInt(pDX, m_iLogLevel, 1, 5);
-	}	
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiAutoTakeEd2kLinks, HaveEd2kRegAccess());
-	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
-	/* Moved to PPgEmulespana
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFirewallStartup, m_bFirewallStartup);
 	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiFirewallStartup, thePrefs.GetWindowsVersion() == _WINVER_XP_);
 	*/
 	// End emulEspaña
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFilterLANIPs, m_bFilterLANIPs);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiExtControls, m_bExtControls);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiA4AFSaveCpu, m_bA4AFSaveCpu);
+	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDisablePeerCache, m_bDisablePeerCache);
+
+	/////////////////////////////////////////////////////////////////////////////
+	// File related group
+	//
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiSparsePartFiles, m_bSparsePartFiles);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCheckDiskspace, m_bCheckDiskspace);
+	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
+	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
+	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiCommit, m_iCommitFiles);
+	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiExtractMetaData, m_iExtractMetaData);
+
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLog2Disk, m_bLog2Disk);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDateFileNameLog, m_bDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
+	if (m_htiLogLevel){
+		DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiLogLevel, m_iLogLevel);
+		DDV_MinMaxInt(pDX, m_iLogLevel, 1, 5);
+	}
+	if (m_htiVerbose)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_bVerbose);
+	if (m_htiDebug2Disk)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebug2Disk, m_bDebug2Disk);
+	if (m_htiDebug2Disk)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, m_bVerbose);
+	if (m_htiDebugSourceExchange)	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebugSourceExchange, m_bDebugSourceExchange);
+	if (m_htiDebugSourceExchange)	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_bVerbose);
+	if (m_htiLogBannedClients)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogBannedClients, m_bLogBannedClients);
+	if (m_htiLogBannedClients)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, m_bVerbose);
+	if (m_htiLogRatingDescReceived) DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogRatingDescReceived, m_bLogRatingDescReceived);
+	if (m_htiLogRatingDescReceived) m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, m_bVerbose);
+	if (m_htiLogSecureIdent)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogSecureIdent, m_bLogSecureIdent);
+	if (m_htiLogSecureIdent)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, m_bVerbose);
+	if (m_htiLogFilteredIPs)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFilteredIPs, m_bLogFilteredIPs);
+	if (m_htiLogFilteredIPs)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, m_bVerbose);
+	if (m_htiLogFileSaving)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFileSaving, m_bLogFileSaving);
+	if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, m_bVerbose);
+    if (m_htiLogA4AF)			    DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogA4AF, m_bLogA4AF);
+	if (m_htiLogA4AF)               m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogA4AF, m_bVerbose);
+	if (m_htiLogUlDlEvents)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogUlDlEvents, m_bLogUlDlEvents);
+	if (m_htiLogUlDlEvents)         m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUlDlEvents, m_bVerbose);
+
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	if (m_htiLogWebCacheEvents)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogWebCacheEvents, m_bLogWebCacheEvents);//jp log webcache events
+	if (m_htiLogWebCacheEvents)     m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogWebCacheEvents, m_bVerbose);//jp log webcache events
+	if (m_htiLogICHEvents)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogICHEvents, m_bLogICHEvents);//JP log ICH events
+	if (m_htiLogICHEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogICHEvents, m_bVerbose);//JP log ICH events
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
+	// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
+	if (m_htiLogUPnP)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogUPnP, m_bLogUPnP);
+	if (m_htiLogUPnP)				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUPnP, m_bVerbose);
+	// End emulEspaña
 
 
-	// ZZ:UploadSpeedSense -->
-    DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDynUpEnabled, m_iDynUpEnabled);
-
+	/////////////////////////////////////////////////////////////////////////////
+	// USS group
+	//
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDynUpEnabled, m_bDynUpEnabled);
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpMinUpload, m_iDynUpMinUpload);
 	DDV_MinMaxInt(pDX, m_iDynUpMinUpload, 1, INT_MAX);
-
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpPingTolerance, m_iDynUpPingTolerance);
 	DDV_MinMaxInt(pDX, m_iDynUpPingTolerance, 100, INT_MAX);
-
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpPingToleranceMilliseconds, m_iDynUpPingToleranceMilliseconds);
 	DDV_MinMaxInt(pDX, m_iDynUpPingTolerance, 1, INT_MAX);
-
     DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiDynUpPingToleranceGroup, m_iDynUpRadioPingTolerance);
-
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpGoingUpDivider, m_iDynUpGoingUpDivider);
 	DDV_MinMaxInt(pDX, m_iDynUpGoingUpDivider, 1, INT_MAX);
-
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpGoingDownDivider, m_iDynUpGoingDownDivider);
 	DDV_MinMaxInt(pDX, m_iDynUpGoingDownDivider, 1, INT_MAX);
-
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpNumberOfPings, m_iDynUpNumberOfPings);
 	DDV_MinMaxInt(pDX, m_iDynUpNumberOfPings, 1, INT_MAX);
-	// ZZ:UploadSpeedSense <--
-
-    DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiA4AFSaveCpu, m_iA4AFSaveCpu); // ZZ:DownloadManager
 }
 
 BOOL CPPgTweaks::OnInitDialog()
 {
 	m_iMaxConnPerFive = thePrefs.GetMaxConperFive();
 	m_iMaxHalfOpen = thePrefs.GetMaxHalfConnections();
-	m_iAutoTakeEd2kLinks = HaveEd2kRegAccess() ? thePrefs.AutoTakeED2KLinks() : 0;
+	m_bConditionalTCPAccept = thePrefs.GetConditionalTCPAccept();
+	m_bAutoTakeEd2kLinks = HaveEd2kRegAccess() ? thePrefs.AutoTakeED2KLinks() : 0;
 	if (thePrefs.GetEnableVerboseOptions())
 	{
-		m_iVerbose = thePrefs.m_bVerbose;
-		m_iDebug2Disk = thePrefs.debug2disk;							// do *not* use the according 'Get...' function here!
-		m_iDebugSourceExchange = thePrefs.m_bDebugSourceExchange;		// do *not* use the according 'Get...' function here!
-		m_iLogBannedClients = thePrefs.m_bLogBannedClients;				// do *not* use the according 'Get...' function here!
-		m_iLogRatingDescReceived = thePrefs.m_bLogRatingDescReceived;	// do *not* use the according 'Get...' function here!
-		m_iLogSecureIdent = thePrefs.m_bLogSecureIdent;					// do *not* use the according 'Get...' function here!
-		m_iLogFilteredIPs = thePrefs.m_bLogFilteredIPs;					// do *not* use the according 'Get...' function here!
-		m_iLogFileSaving = thePrefs.m_bLogFileSaving;					// do *not* use the according 'Get...' function here!
-        m_iLogA4AF = thePrefs.m_bLogA4AF;                   		    // do *not* use the according 'Get...' function here! // ZZ:DownloadManager
-		m_iLogUlDlEvents = thePrefs.m_bLogUlDlEvents;
+		m_bVerbose = thePrefs.m_bVerbose;
+		m_bDebug2Disk = thePrefs.debug2disk;							// do *not* use the according 'Get...' function here!
+		m_bDebugSourceExchange = thePrefs.m_bDebugSourceExchange;		// do *not* use the according 'Get...' function here!
+		m_bLogBannedClients = thePrefs.m_bLogBannedClients;				// do *not* use the according 'Get...' function here!
+		m_bLogRatingDescReceived = thePrefs.m_bLogRatingDescReceived;	// do *not* use the according 'Get...' function here!
+		m_bLogSecureIdent = thePrefs.m_bLogSecureIdent;					// do *not* use the according 'Get...' function here!
+		m_bLogFilteredIPs = thePrefs.m_bLogFilteredIPs;					// do *not* use the according 'Get...' function here!
+		m_bLogFileSaving = thePrefs.m_bLogFileSaving;					// do *not* use the according 'Get...' function here!
+        m_bLogA4AF = thePrefs.m_bLogA4AF;                   		    // do *not* use the according 'Get...' function here! // ZZ:DownloadManager
+		m_bLogUlDlEvents = thePrefs.m_bLogUlDlEvents;
 		//MORPH START - Added by SiRoB, WebCache 1.2f
-		m_iLogWebCacheEvents = thePrefs.m_bLogWebCacheEvents;//JP log webcache events
-		m_iLogICHEvents = thePrefs.m_bLogICHEvents;//JP log ICH events
+		m_bLogWebCacheEvents = thePrefs.m_bLogWebCacheEvents;//JP log webcache events
+		m_bLogICHEvents = thePrefs.m_bLogICHEvents;//JP log ICH events
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
-		m_iLogUPnP = thePrefs.GetUPnPVerboseLog();
+		m_bLogUPnP = thePrefs.GetUPnPVerboseLog();
 		// End emulEspaña
 
 		m_iLogLevel = 5 - thePrefs.m_byLogLevel;
 	}
-	m_iLog2Disk = thePrefs.log2disk;
-	m_iDateFileNameLog = thePrefs.m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
-	m_iCreditSystem = thePrefs.m_bCreditSystem;
+	m_bLog2Disk = thePrefs.log2disk;
+	m_bDateFileNameLog = thePrefs.m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
+	m_bCreditSystem = thePrefs.m_bCreditSystem;
 	m_iCommitFiles = thePrefs.m_iCommitFiles;
 	m_iExtractMetaData = thePrefs.m_iExtractMetaData;
-	m_iFilterLANIPs = thePrefs.filterLANIPs;
-	m_iExtControls = thePrefs.m_bExtControls;
+	m_bFilterLANIPs = thePrefs.filterLANIPs;
+	m_bExtControls = thePrefs.m_bExtControls;
 	m_uServerKeepAliveTimeout = thePrefs.m_dwServerKeepAliveTimeout / 60000;
-	m_iSparsePartFiles = thePrefs.m_bSparsePartFiles;
-	m_iCheckDiskspace = thePrefs.checkDiskspace;	// SLUGFILLER: checkDiskspace
+	m_bSparsePartFiles = thePrefs.m_bSparsePartFiles;
+	m_bCheckDiskspace = thePrefs.checkDiskspace;
 	m_fMinFreeDiskSpaceMB = (float)(thePrefs.m_uMinFreeDiskSpace / (1024.0 * 1024.0));
-	m_sYourHostname = thePrefs.GetYourHostname();	// itsonlyme: hostnameSource
+	m_sYourHostname = thePrefs.GetYourHostname();
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
-	m_iFirewallStartup = ((thePrefs.GetWindowsVersion() == _WINVER_XP_) ? thePrefs.m_bOpenPortsOnStartUp : 0); 
+	m_bFirewallStartup = ((thePrefs.GetWindowsVersion() == _WINVER_XP_) ? thePrefs.m_bOpenPortsOnStartUp : 0); 
 	*/
 	// End emulEspaña
-	m_iDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
+	m_bDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
 
-	// ZZ:UploadSpeedSense -->
-    m_iDynUpEnabled = thePrefs.IsDynUpEnabled();
+	m_bDynUpEnabled = thePrefs.IsDynUpEnabled();
     m_iDynUpMinUpload = thePrefs.GetMinUpload();
     m_iDynUpPingTolerance = thePrefs.GetDynUpPingTolerance();
     m_iDynUpPingToleranceMilliseconds = thePrefs.GetDynUpPingToleranceMilliseconds();
@@ -450,9 +454,8 @@ BOOL CPPgTweaks::OnInitDialog()
     m_iDynUpGoingUpDivider = thePrefs.GetDynUpGoingUpDivider();
     m_iDynUpGoingDownDivider = thePrefs.GetDynUpGoingDownDivider();
     m_iDynUpNumberOfPings = thePrefs.GetDynUpNumberOfPings();
-	// ZZ:UploadSpeedSense <--
 
-    m_iA4AFSaveCpu = thePrefs.GetA4AFSaveCpu(); // ZZ:DownloadManager
+    m_bA4AFSaveCpu = thePrefs.GetA4AFSaveCpu();
 
     CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
@@ -500,24 +503,25 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.SetMaxConsPerFive(m_iMaxConnPerFive ? m_iMaxConnPerFive : DFLT_MAXCONPERFIVE);
 	theApp.scheduler->original_cons5s = thePrefs.GetMaxConperFive();
 	thePrefs.SetMaxHalfConnections(m_iMaxHalfOpen ? m_iMaxHalfOpen : DFLT_MAXHALFOPEN);
+	thePrefs.m_bConditionalTCPAccept = m_bConditionalTCPAccept;
 
-	if (HaveEd2kRegAccess() && thePrefs.AutoTakeED2KLinks() != (bool)m_iAutoTakeEd2kLinks)
+	if (HaveEd2kRegAccess() && thePrefs.AutoTakeED2KLinks() != m_bAutoTakeEd2kLinks)
 	{
-		thePrefs.autotakeed2klinks = m_iAutoTakeEd2kLinks;
+		thePrefs.autotakeed2klinks = m_bAutoTakeEd2kLinks;
 		if (thePrefs.AutoTakeED2KLinks())
 			Ask4RegFix(false, true);
 		else
 		RevertReg();
 	}
 
-	if (!thePrefs.log2disk && m_iLog2Disk)
+	if (!thePrefs.log2disk && m_bLog2Disk)
 		theLog.Open();
-	else if (thePrefs.log2disk && !m_iLog2Disk)
+	else if (thePrefs.log2disk && !m_bLog2Disk)
 		theLog.Close();
-	thePrefs.log2disk = m_iLog2Disk;
+	thePrefs.log2disk = m_bLog2Disk;
 
 	//Morph Start - added by AndCycle, Date File Name Log
-	if(thePrefs.m_bDateFileNameLog != (m_iDateFileNameLog != 0)){
+	if(thePrefs.m_bDateFileNameLog != (m_bDateFileNameLog != 0)){
 
 		//close log first
 		theLog.Close();
@@ -533,54 +537,54 @@ BOOL CPPgTweaks::OnApply()
 		theLog.Open();
 		theVerboseLog.Open();
 	}
-	thePrefs.m_bDateFileNameLog = m_iDateFileNameLog;
+	thePrefs.m_bDateFileNameLog = m_bDateFileNameLog;
 	//Morph End - added by AndCycle, Date File Name Log
 
 	if (thePrefs.GetEnableVerboseOptions())
 	{
-		if (!thePrefs.GetDebug2Disk() && m_iVerbose && m_iDebug2Disk)
+		if (!thePrefs.GetDebug2Disk() && m_bVerbose && m_bDebug2Disk)
 			theVerboseLog.Open();
-		else if (thePrefs.GetDebug2Disk() && (!m_iVerbose || !m_iDebug2Disk))
+		else if (thePrefs.GetDebug2Disk() && (!m_bVerbose || !m_bDebug2Disk))
 			theVerboseLog.Close();
-		thePrefs.debug2disk = m_iDebug2Disk;
+		thePrefs.debug2disk = m_bDebug2Disk;
 
-		thePrefs.m_bDebugSourceExchange = m_iDebugSourceExchange;
-		thePrefs.m_bLogBannedClients = m_iLogBannedClients;
-		thePrefs.m_bLogRatingDescReceived = m_iLogRatingDescReceived;
-		thePrefs.m_bLogSecureIdent = m_iLogSecureIdent;
-		thePrefs.m_bLogFilteredIPs = m_iLogFilteredIPs;
-		thePrefs.m_bLogFileSaving = m_iLogFileSaving;
-        thePrefs.m_bLogA4AF = m_iLogA4AF; // ZZ:DownloadManager
-		thePrefs.m_bLogUlDlEvents = m_iLogUlDlEvents;
+		thePrefs.m_bDebugSourceExchange = m_bDebugSourceExchange;
+		thePrefs.m_bLogBannedClients = m_bLogBannedClients;
+		thePrefs.m_bLogRatingDescReceived = m_bLogRatingDescReceived;
+		thePrefs.m_bLogSecureIdent = m_bLogSecureIdent;
+		thePrefs.m_bLogFilteredIPs = m_bLogFilteredIPs;
+		thePrefs.m_bLogFileSaving = m_bLogFileSaving;
+        thePrefs.m_bLogA4AF = m_bLogA4AF;
+		thePrefs.m_bLogUlDlEvents = m_bLogUlDlEvents;
 		//MORPH START - Added by SiRoB, WebCache 1.2f
-		thePrefs.m_bLogWebCacheEvents = m_iLogWebCacheEvents;//JP log webcache events
-		thePrefs.m_bLogICHEvents = m_iLogICHEvents;//JP log ICH events
+		thePrefs.m_bLogWebCacheEvents = m_bLogWebCacheEvents;//JP log webcache events
+		thePrefs.m_bLogICHEvents = m_bLogICHEvents;//JP log ICH events
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
 
 		// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
-		thePrefs.SetUPnPVerboseLog((bool)m_iLogUPnP);
+		thePrefs.SetUPnPVerboseLog(m_bLogUPnP);
 		// End emulEspaña
 
 		thePrefs.m_byLogLevel = 5 - m_iLogLevel;
 
-		thePrefs.m_bVerbose = m_iVerbose; // store after related options were stored!
+		thePrefs.m_bVerbose = m_bVerbose; // store after related options were stored!
 	}
 
-	thePrefs.m_bCreditSystem = m_iCreditSystem;
+	thePrefs.m_bCreditSystem = true/*m_bCreditSystem*/;
 	thePrefs.m_iCommitFiles = m_iCommitFiles;
 	thePrefs.m_iExtractMetaData = m_iExtractMetaData;
-	thePrefs.filterLANIPs = m_iFilterLANIPs;
+	thePrefs.filterLANIPs = m_bFilterLANIPs;
 	thePrefs.m_iFileBufferSize = m_iFileBufferSize;
 	thePrefs.m_iQueueSize = m_iQueueSize;
-	if (thePrefs.m_bExtControls != (bool)m_iExtControls) {
-		thePrefs.m_bExtControls = m_iExtControls;
+	if (thePrefs.m_bExtControls != m_bExtControls) {
+		thePrefs.m_bExtControls = m_bExtControls;
 		theApp.emuledlg->transferwnd->downloadlistctrl.CreateMenues();
 		theApp.emuledlg->searchwnd->CreateMenus();
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.CreateMenues();
 	}
 	thePrefs.m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
-	thePrefs.m_bSparsePartFiles = m_iSparsePartFiles;
-	thePrefs.checkDiskspace = m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
+	thePrefs.m_bSparsePartFiles = m_bSparsePartFiles;
+	thePrefs.checkDiskspace = m_bCheckDiskspace;
 	thePrefs.m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
 	if (thePrefs.GetYourHostname() != m_sYourHostname) {
 		thePrefs.SetYourHostname(m_sYourHostname);
@@ -588,13 +592,12 @@ BOOL CPPgTweaks::OnApply()
 	}
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
-	thePrefs.m_bOpenPortsOnStartUp = m_iFirewallStartup; 
+	thePrefs.m_bOpenPortsOnStartUp = m_bFirewallStartup; 
 	*/
 	// End emulEspaña
-	thePrefs.m_bPeerCacheEnabled = !m_iDisablePeerCache;
+	thePrefs.m_bPeerCacheEnabled = !m_bDisablePeerCache;
 
-	// ZZ:UploadSpeedSense -->
-    thePrefs.m_bDynUpEnabled = m_iDynUpEnabled;
+    thePrefs.m_bDynUpEnabled = m_bDynUpEnabled;
     thePrefs.minupload = m_iDynUpMinUpload;
     thePrefs.m_iDynUpPingTolerance = m_iDynUpPingTolerance;
     thePrefs.m_iDynUpPingToleranceMilliseconds = m_iDynUpPingToleranceMilliseconds;
@@ -602,9 +605,8 @@ BOOL CPPgTweaks::OnApply()
     thePrefs.m_iDynUpGoingUpDivider = m_iDynUpGoingUpDivider;
     thePrefs.m_iDynUpGoingDownDivider = m_iDynUpGoingDownDivider;
     thePrefs.m_iDynUpNumberOfPings = m_iDynUpNumberOfPings;
-	// ZZ:UploadSpeedSense <--
 
-    thePrefs.m_bA4AFSaveCpu = m_iA4AFSaveCpu; // ZZ:DownloadManager
+    thePrefs.m_bA4AFSaveCpu = m_bA4AFSaveCpu;
 
 	if (thePrefs.GetEnableVerboseOptions())
 	{
@@ -644,12 +646,13 @@ void CPPgTweaks::Localize(void)
 		SetWindowText(GetResString(IDS_PW_TWEAK));
 		GetDlgItem(IDC_WARNING)->SetWindowText(GetResString(IDS_TWEAKS_WARNING));
 
+		if (m_htiTCPGroup) m_ctrlTreeOptions.SetItemText(m_htiTCPGroup, GetResString(IDS_TCPIP_CONNS));
 		if (m_htiMaxCon5Sec) m_ctrlTreeOptions.SetEditLabel(m_htiMaxCon5Sec, GetResString(IDS_MAXCON5SECLABEL));
 		if (m_htiMaxHalfOpen) m_ctrlTreeOptions.SetEditLabel(m_htiMaxHalfOpen, GetResString(IDS_MAXHALFOPENCONS));
+		if (m_htiConditionalTCPAccept) m_ctrlTreeOptions.SetItemText(m_htiConditionalTCPAccept, GetResString(IDS_CONDTCPACCEPT));
 		if (m_htiAutoTakeEd2kLinks) m_ctrlTreeOptions.SetItemText(m_htiAutoTakeEd2kLinks, GetResString(IDS_AUTOTAKEED2KLINKS));
 		if (m_htiCreditSystem) m_ctrlTreeOptions.SetItemText(m_htiCreditSystem, GetResString(IDS_USECREDITSYSTEM));
 		if (m_htiLog2Disk) m_ctrlTreeOptions.SetItemText(m_htiLog2Disk, GetResString(IDS_LOG2DISK));
-
 		if (m_htiVerboseGroup) m_ctrlTreeOptions.SetItemText(m_htiVerboseGroup, GetResString(IDS_VERBOSE));
 		if (m_htiVerbose) m_ctrlTreeOptions.SetItemText(m_htiVerbose, GetResString(IDS_ENABLED));
 		if (m_htiDebug2Disk) m_ctrlTreeOptions.SetItemText(m_htiDebug2Disk, GetResString(IDS_LOG2DISK));
@@ -672,17 +675,15 @@ void CPPgTweaks::Localize(void)
 		if (m_htiCommitNever) m_ctrlTreeOptions.SetItemText(m_htiCommitNever, GetResString(IDS_NEVER));
 		if (m_htiCommitOnShutdown) m_ctrlTreeOptions.SetItemText(m_htiCommitOnShutdown, GetResString(IDS_ONSHUTDOWN));
 		if (m_htiCommitAlways) m_ctrlTreeOptions.SetItemText(m_htiCommitAlways, GetResString(IDS_ALWAYS));
-
 		if (m_htiExtractMetaData) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaData, GetResString(IDS_EXTRACT_META_DATA));
 		if (m_htiExtractMetaDataNever) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaDataNever, GetResString(IDS_NEVER));
 		if (m_htiExtractMetaDataID3Lib) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaDataID3Lib, GetResString(IDS_META_DATA_ID3LIB));
-		if (m_htiExtractMetaDataMediaDet) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaDataMediaDet, GetResString(IDS_META_DATA_MEDIADET));
-
+		//if (m_htiExtractMetaDataMediaDet) m_ctrlTreeOptions.SetItemText(m_htiExtractMetaDataMediaDet, GetResString(IDS_META_DATA_MEDIADET));
 		if (m_htiFilterLANIPs) m_ctrlTreeOptions.SetItemText(m_htiFilterLANIPs, GetResString(IDS_PW_FILTER));
 		if (m_htiExtControls) m_ctrlTreeOptions.SetItemText(m_htiExtControls, GetResString(IDS_SHOWEXTSETTINGS));
 		if (m_htiServerKeepAliveTimeout) m_ctrlTreeOptions.SetEditLabel(m_htiServerKeepAliveTimeout, GetResString(IDS_SERVERKEEPALIVETIMEOUT));
 		if (m_htiSparsePartFiles) m_ctrlTreeOptions.SetItemText(m_htiSparsePartFiles, GetResString(IDS_SPARSEPARTFILES));
-		if (m_htiCheckDiskspace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskspace, GetResString(IDS_CHECKDISKSPACE));	// SLUGFILLER: checkDiskspace
+		if (m_htiCheckDiskspace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskspace, GetResString(IDS_CHECKDISKSPACE));
 		if (m_htiMinFreeDiskSpace) m_ctrlTreeOptions.SetEditLabel(m_htiMinFreeDiskSpace, GetResString(IDS_MINFREEDISKSPACE));
 		if (m_htiYourHostname) m_ctrlTreeOptions.SetEditLabel(m_htiYourHostname, GetResString(IDS_YOURHOSTNAME));	// itsonlyme: hostnameSource
 		// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
@@ -691,19 +692,14 @@ void CPPgTweaks::Localize(void)
 		*/
 		// End emulEspaña
 		if (m_htiDisablePeerCache) m_ctrlTreeOptions.SetItemText(m_htiDisablePeerCache, GetResString(IDS_DISABLEPEERACHE));
-
-		// ZZ:UploadSpeedSense -->
-        if (m_htiDynUp) m_ctrlTreeOptions.SetItemText(m_htiDynUp, GetResString(IDS_DYNUP));
+		if (m_htiDynUp) m_ctrlTreeOptions.SetItemText(m_htiDynUp, GetResString(IDS_DYNUP));
 		if (m_htiDynUpEnabled) m_ctrlTreeOptions.SetItemText(m_htiDynUpEnabled, GetResString(IDS_DYNUPENABLED));
         if (m_htiDynUpMinUpload) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpMinUpload, GetResString(IDS_DYNUP_MINUPLOAD));
         if (m_htiDynUpPingTolerance) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpPingTolerance, GetResString(IDS_DYNUP_PINGTOLERANCE));
         if (m_htiDynUpGoingUpDivider) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpGoingUpDivider, GetResString(IDS_DYNUP_GOINGUPDIVIDER));
         if (m_htiDynUpGoingDownDivider) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpGoingDownDivider, GetResString(IDS_DYNUP_GOINGDOWNDIVIDER));
         if (m_htiDynUpNumberOfPings) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpNumberOfPings, GetResString(IDS_DYNUP_NUMBEROFPINGS));
-		// ZZ:UploadSpeedSense <--
-
-        // ZZ:DownloadManager -->
-        if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
+		if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
 
         CString temp;
 		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
@@ -718,8 +714,10 @@ void CPPgTweaks::OnDestroy()
 	m_ctrlTreeOptions.DeleteAllItems();
 	m_ctrlTreeOptions.DestroyWindow();
 	m_bInitializedTreeOpts = false;
+	m_htiTCPGroup = NULL;
 	m_htiMaxCon5Sec = NULL;
 	m_htiMaxHalfOpen = NULL;
+	m_htiConditionalTCPAccept = NULL;
 	m_htiAutoTakeEd2kLinks = NULL;
 	m_htiVerboseGroup = NULL;
 	m_htiVerbose = NULL;
@@ -729,7 +727,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiLogSecureIdent = NULL;
 	m_htiLogFilteredIPs = NULL;
 	m_htiLogFileSaving = NULL;
-    m_htiLogA4AF = NULL; // ZZ:DownloadManager
+    m_htiLogA4AF = NULL;
 	m_htiLogLevel = NULL;
 	m_htiLogUlDlEvents = NULL;
 	//MORPH START - Added by SiRoB, WebCache 1.2f
@@ -748,16 +746,15 @@ void CPPgTweaks::OnDestroy()
 	m_htiExtControls = NULL;
 	m_htiServerKeepAliveTimeout = NULL;
 	m_htiSparsePartFiles = NULL;
-	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
+	m_htiCheckDiskspace = NULL;
 	m_htiMinFreeDiskSpace = NULL;
-	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
+	m_htiYourHostname = NULL;
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
 	m_htiFirewallStartup = NULL;
 	*/
 	// End emulEspaña
 	m_htiDisablePeerCache = NULL;
-	// ZZ:UploadSpeedSense -->
     m_htiDynUp = NULL;
 	m_htiDynUpEnabled = NULL;
     m_htiDynUpMinUpload = NULL;
@@ -769,15 +766,11 @@ void CPPgTweaks::OnDestroy()
     m_htiDynUpGoingUpDivider = NULL;
     m_htiDynUpGoingDownDivider = NULL;
     m_htiDynUpNumberOfPings = NULL;
-	// ZZ:UploadSpeedSense <--
-    
-    // ZZ:DownloadManager -->
-    m_htiA4AFSaveCpu = NULL;
-    // ZZ:DownloadManager <--
-	m_htiExtractMetaData = NULL;
+	m_htiA4AFSaveCpu = NULL;
+    m_htiExtractMetaData = NULL;
 	m_htiExtractMetaDataNever = NULL;
 	m_htiExtractMetaDataID3Lib = NULL;
-	m_htiExtractMetaDataMediaDet = NULL;
+	//m_htiExtractMetaDataMediaDet = NULL;
     
     CPropertyPage::OnDestroy();
 }
@@ -799,13 +792,12 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 				if (m_htiLogSecureIdent)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, bCheck);
 				if (m_htiLogFilteredIPs)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, bCheck);
 				if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, bCheck);
-                if (m_htiLogA4AF)			    m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogA4AF, bCheck); // ZZ:DownloadManager
+                if (m_htiLogA4AF)			    m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogA4AF, bCheck);
 				if (m_htiLogUlDlEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUlDlEvents, bCheck);
 				//MORPH START - Added by SiRoB, WebCache 1.2f
 				if (m_htiLogWebCacheEvents)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogWebCacheEvents, bCheck);//jp log webcache events
 				if (m_htiLogICHEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogICHEvents, bCheck);//JP log ICH events
 				//MORPH END   - Added by SiRoB, WebCache 1.2f
-				if (m_htiDateFileNameLog)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDateFileNameLog, bCheck);//Morph - added by AndCycle, Date File Name Log
 			}
 		}
 		SetModified();

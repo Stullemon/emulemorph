@@ -15,7 +15,9 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
+#pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include <crypto51/arc4.h>
+#pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "WebCache.h"
 
 USING_NAMESPACE(CryptoPP)

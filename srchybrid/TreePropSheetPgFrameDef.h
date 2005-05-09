@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.2 $
+* $Revision: 1.3 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -16,13 +16,7 @@
 *	$History:$
 *
 *********************************************************************/
-#if !defined(AFX_PROPPAGEFRAMEDEFAULT_H__5C5B7AC9_2DF5_4E8C_8F5E_DE2CC04BBED7__INCLUDED_)
-#define AFX_PROPPAGEFRAMEDEFAULT_H__5C5B7AC9_2DF5_4E8C_8F5E_DE2CC04BBED7__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 #include "TreePropSheetPgFrame.h"
 
 /**
@@ -97,10 +91,3 @@ protected:
 	*/
 	CImageList m_Images;
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ fügt unmittelbar vor der vorhergehenden Zeile zusätzliche Deklarationen ein.
-
-#endif // AFX_PROPPAGEFRAMEDEFAULT_H__5C5B7AC9_2DF5_4E8C_8F5E_DE2CC04BBED7__INCLUDED_

@@ -15,12 +15,11 @@ extern CStringArray _astrParserErrors;
 
 void ParsedSearchExpression(const CSearchExpr* pexpr);
 int yyerror(const char* errstr);
-#ifdef _UNICODE
 int yyerror(LPCTSTR errstr);
-#endif
 
 #pragma warning(disable:4065) // switch statement contains 'default' but no 'case' labels
 #pragma warning(disable:4102) // 'yyerrlab1' : unreferenced label
+#pragma warning(disable:4127) // conditional expression is constant
 
 %}
 
@@ -177,10 +176,9 @@ int yyerror(const char* errstr)
 	return EXIT_FAILURE;
 }
 
-#ifdef _UNICODE
 int yyerror(LPCTSTR errstr)
 {
 	_astrParserErrors.Add(errstr);
 	return EXIT_FAILURE;
 }
-#endif
+

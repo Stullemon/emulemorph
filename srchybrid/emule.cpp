@@ -24,7 +24,6 @@
 #include <share.h>
 #include "secrunasuser.h" // yonatan - moved up... // MORPH - Modified by Commander, WebCache 1.2e
 #include "emule.h"
-#include "version.h"
 #include "opcodes.h"
 #include "mdump.h"
 #include "Scheduler.h"
@@ -235,15 +234,15 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 // MOD Note: Do not change this part - Merkur
 
 	// this is the "base" version number <major>.<minor>.<update>.<build>
-	m_dwProductVersionMS = MAKELONG(VERSION_MIN, VERSION_MJR);
-	m_dwProductVersionLS = MAKELONG(VERSION_BUILD, VERSION_UPDATE);
+	m_dwProductVersionMS = MAKELONG(CemuleApp::m_nVersionMin, CemuleApp::m_nVersionMjr);
+	m_dwProductVersionLS = MAKELONG(CemuleApp::m_nVersionBld, CemuleApp::m_nVersionUpd);
 
 	// create a string version (e.g. "0.30a")
-	ASSERT( VERSION_UPDATE + 'a' <= 'f' );
+	ASSERT( CemuleApp::m_nVersionUpd + 'a' <= 'f' );
 #ifdef _DEBUG
-	m_strCurVersionLong.Format(_T("%u.%u%c.%u"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD);
+	m_strCurVersionLong.Format(_T("%u.%u%c.%u"), CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
 #else
-	m_strCurVersionLong.Format(_T("%u.%u%c"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE);
+	m_strCurVersionLong.Format(_T("%u.%u%c"), CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd);
 #endif
 
 #ifdef _DEBUG
@@ -257,7 +256,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	ASSERT( m_uCurVersionShort < 0x99 );
 
 	// create the version check number
-	strTmp.Format(_T("0x%u%c"), m_dwProductVersionMS, _T('A') + VERSION_UPDATE);
+	strTmp.Format(_T("0x%u%c"), m_dwProductVersionMS, _T('A') + CemuleApp::m_nVersionUpd);
 	VERIFY( _stscanf(strTmp, _T("0x%x"), &m_uCurVersionCheck) == 1 );
 	ASSERT( m_uCurVersionCheck < 0x999 );
 // MOD Note: end
@@ -268,9 +267,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 
 	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
 	m_strModVersion = MOD_VERSION;
-	m_strModVersion.AppendFormat(_T(" %u.%u"), MOD_VERSION_MJR, MOD_VERSION_MIN);
+	m_strModVersion.AppendFormat(_T(" %u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
 	m_strModLongVersion = MOD_LONG_VERSION;
-	m_strModLongVersion.AppendFormat(_T("%u.%u"), MOD_VERSION_MJR, MOD_VERSION_MIN);
+	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	m_UPnPNat = CUPnP_IGDControlPoint::AddInstance();
@@ -315,6 +314,7 @@ BOOL CemuleApp::InitInstance()
 	TCHAR szAppDir[MAX_PATH];
 	VERIFY( GetModuleFileName(m_hInstance, szAppDir, ARRSIZE(szAppDir)) );
 	VERIFY( PathRemoveFileSpec(szAppDir) );
+	
 	TCHAR szPrefFilePath[MAX_PATH];
 	PathCombine(szPrefFilePath, szAppDir, CONFIGFOLDER _T("preferences.ini"));
 	if (m_pszProfileName)
@@ -428,22 +428,32 @@ BOOL CemuleApp::InitInstance()
 		}
 	}
 
+	if (thePrefs.GetRTLWindowsLayout())
+		EnableRTLWindowsLayout();
+
 	//MORPH START - Added by IceCream, high process priority
 	if (thePrefs.GetEnableHighProcess())
 		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	//MORPH END   - Added by IceCream, high process priority
 
 #ifdef _DEBUG
-	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), _T("%s\\%s"), thePrefs.GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
+	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), _T("%s%s"), thePrefs.GetLogDir(), APP_CRT_DEBUG_LOG_FILE);
 #endif
 	VERIFY( theLog.SetFilePath(thePrefs.GetLogDir() + _T("eMule.log")) );
 	VERIFY( theVerboseLog.SetFilePath(thePrefs.GetLogDir() + _T("eMule_Verbose.log")) );
 	theLog.SetMaxFileSize(thePrefs.GetMaxLogFileSize());
+	theLog.SetFileFormat(thePrefs.GetLogFileFormat());
 	theVerboseLog.SetMaxFileSize(thePrefs.GetMaxLogFileSize());
-	if (thePrefs.GetLog2Disk())
+	theVerboseLog.SetFileFormat(thePrefs.GetLogFileFormat());
+	if (thePrefs.GetLog2Disk()){
 		theLog.Open();
-	if (thePrefs.GetDebug2Disk())
+		theLog.Log(_T("\r\n"));
+	}
+	if (thePrefs.GetDebug2Disk()){
 		theVerboseLog.Open();
+		theVerboseLog.Log(_T("\r\n"));
+	}
+	Log(_T("Starting eMule v%s"), m_strCurVersionLong);
 
 	CemuleDlg dlg;
 	emuledlg = &dlg;
@@ -563,6 +573,8 @@ BOOL CemuleApp::InitInstance()
 	thePerfLog.Startup();
 	dlg.DoModal();
 
+	DisableRTLWindowsLayout();
+
 	// Barry - Restore old registry if required
 	if (thePrefs.AutoTakeED2KLinks())
 		RevertReg();
@@ -586,7 +598,14 @@ BOOL CemuleApp::InitInstance()
 	ClearDebugLogQueue(true);
 	ClearLogQueue(true);
 
+	AddDebugLogLine(DLP_VERYLOW, _T("%hs: returning: FALSE"), __FUNCTION__);
 	return FALSE;
+}
+
+int CemuleApp::ExitInstance()
+{
+	AddDebugLogLine(DLP_VERYLOW, _T("%hs"), __FUNCTION__);
+	return CWinApp::ExitInstance();
 }
 
 #ifdef _DEBUG
@@ -1357,7 +1376,7 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 			else
 			{
 				// WINBUG???: 'ExtractIcon' does not work well on ICO-files when using the color 
-				// scheme 'Windows-Standard (extragro?' -> always try to use 'LoadImage'!
+				// scheme 'Windows-Standard (extragroß)' -> always try to use 'LoadImage'!
 				//
 				// If the ICO file contains a 16x16 icon, 'LoadImage' will though return a 32x32 icon,
 				// if LR_DEFAULTSIZE is specified! -> always specify the requested size!
@@ -1646,7 +1665,7 @@ bool CemuleApp::IsEd2kServerLinkInClipboard()
 }
 
 // Elandal:ThreadSafeLogging -->
-void CemuleApp::QueueDebugLogLine(bool addtostatusbar, LPCTSTR line, ...)
+void CemuleApp::QueueDebugLogLine(bool bAddToStatusbar, LPCTSTR line, ...)
 {
 	if (!thePrefs.GetVerbose())
 		return;
@@ -1661,14 +1680,14 @@ void CemuleApp::QueueDebugLogLine(bool addtostatusbar, LPCTSTR line, ...)
 	va_end(argptr);
 
 	SLogItem* newItem = new SLogItem;
-	newItem->uFlags = LOG_DEBUG | LOG_STATUSBAR;
+	newItem->uFlags = LOG_DEBUG | (bAddToStatusbar ? LOG_STATUSBAR : 0);
 	newItem->line = bufferline;
 	m_QueueDebugLog.AddTail(newItem);
 
 	m_queueLock.Unlock();
 }
 
-void CemuleApp::QueueLogLine(bool addtostatusbar, LPCTSTR line,...)
+void CemuleApp::QueueLogLine(bool bAddToStatusbar, LPCTSTR line, ...)
 {
 	m_queueLock.Lock();
 
@@ -1680,7 +1699,7 @@ void CemuleApp::QueueLogLine(bool addtostatusbar, LPCTSTR line,...)
 	va_end(argptr);
 
 	SLogItem* newItem = new SLogItem;
-	newItem->uFlags = LOG_STATUSBAR;
+	newItem->uFlags = bAddToStatusbar ? LOG_STATUSBAR : 0;
 	newItem->line = bufferline;
 	m_QueueLog.AddTail(newItem);
 
@@ -1805,6 +1824,14 @@ void CemuleApp::CreateAllFonts()
 	///////////////////////////////////////////////////////////////////////////
 	// Default GUI Font (Bold)
 	//
+	// OEM_FIXED_FONT		Terminal
+	// ANSI_FIXED_FONT		Courier
+	// ANSI_VAR_FONT		MS Sans Serif
+	// SYSTEM_FONT			System
+	// DEVICE_DEFAULT_FONT	System
+	// SYSTEM_FIXED_FONT	Fixedsys
+	// DEFAULT_GUI_FONT		MS Shell Dlg
+
 	CFont* pFont = CFont::FromHandle((HFONT)GetStockObject(DEFAULT_GUI_FONT));
 	if (pFont)
 	{

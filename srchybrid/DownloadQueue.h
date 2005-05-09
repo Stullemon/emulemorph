@@ -83,11 +83,11 @@ public:
 	void	RemoveFile(CPartFile* toremove);
 	void	DeleteAll();
 
-	int		GetFileCount()						{return filelist.GetCount();}
+	int		GetFileCount() const { return filelist.GetCount(); }
 	UINT	GetDownloadingFileCount() const;
-	uint16	GetPausedFileCount();
+	UINT	GetPausedFileCount() const;
 
-	bool	IsFileExisting(const uchar* fileid, bool bLogWarnings = true);
+	bool	IsFileExisting(const uchar* fileid, bool bLogWarnings = true) const;
 	bool	IsPartFile(const CKnownFile* file) const;
 	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName) const;	// SLUGFILLER: SafeHash
 
@@ -161,7 +161,7 @@ public:
 
 	// check diskspace
 	void	SortByPriority();
-	void	CheckDiskspace(bool bNotEnoughSpaceLeft = false); // SLUGFILLER: checkDiskspace
+	void	CheckDiskspace(bool bNotEnoughSpaceLeft = false);
 	void	CheckDiskspaceTimed();
 
 	void	ExportPartMetFilesOverview() const;
@@ -188,21 +188,19 @@ protected:
 	bool	SendNextUDPPacket();
 	void	ProcessLocalRequests();
 	int		GetMaxFilesPerUDPServerPacket() const;
-	bool	SendGlobGetSourcesUDPPacket(CSafeMemFile* data);
+	bool	SendGlobGetSourcesUDPPacket(CSafeMemFile* data, bool bExt2Packet);
 
 private:
-	// SLUGFILLER: checkDiskspace
 	bool	CompareParts(POSITION pos1, POSITION pos2);
 	void	SwapParts(POSITION pos1, POSITION pos2);
 	void	HeapSort(uint16 first, uint16 last);
-	// SLUGFILLER: checkDiskspace
 	CTypedPtrList<CPtrList, CPartFile*> filelist;
 	CTypedPtrList<CPtrList, CPartFile*> m_localServerReqQueue;
 	uint16	filesrdy;
 	uint32	datarate;
 	
 	CPartFile*	lastfile;
-	uint32		lastcheckdiskspacetime;	// SLUGFILLER: checkDiskspace
+	uint32		lastcheckdiskspacetime;
 	uint32		lastudpsearchtime;
 	uint32		lastudpstattime;
 	uint8		udcounter;

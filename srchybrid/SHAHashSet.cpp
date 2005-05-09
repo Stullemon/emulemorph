@@ -41,6 +41,7 @@ static char THIS_FILE[]=__FILE__;
 #define	MINPERCENTAGE_TOTRUST		92  // how many percentage of clients most have sent the same hash to make it trustworthy
 
 CList<CAICHRequestedData> CAICHHashSet::m_liRequestedData;
+CMutex					  CAICHHashSet::m_mutKnown2File;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ///CAICHHash
@@ -324,7 +325,7 @@ bool CAICHHashTree::WriteLowestLevelHashs(CFileDataIO* fileDataOut, uint16 wHash
 			if (!bNoIdent)
 				fileDataOut->WriteUInt16(wHashIdent);
 			m_Hash.Write(fileDataOut);
-			//AddDebugLogLine(false,_T("%s"),m_Hash.GetString(), wHashIdent, this);
+			//theApp.AddDebugLogLine(false,_T("%s"),m_Hash.GetString(), wHashIdent, this);
 			return true;
 		}
 		else{
@@ -347,7 +348,7 @@ bool CAICHHashTree::LoadLowestLevelHashs(CFileDataIO* fileInput){
 	if (m_nDataSize <= m_nBaseSize){ // sanity
 		// lowest level, read hash
 		m_Hash.Read(fileInput);
-		//AddDebugLogLine(false,m_Hash.GetString());
+		//theApp.AddDebugLogLine(false,m_Hash.GetString());
 		m_bHashValid = true; 
 		return true;
 	}
@@ -484,7 +485,7 @@ bool CAICHHashSet::CreatePartRecoveryData(uint32 nPartStartPos, CFileDataIO* fil
 	m_pHashTree.FindHash(nPartStartPos, nPartSize,&nLevel);
 	uint16 nHashsToWrite = (nLevel-1) + nPartSize/EMBLOCKSIZE + ((nPartSize % EMBLOCKSIZE != 0 )? 1:0);
 	fileDataOut->WriteUInt16(nHashsToWrite);
-	uint32 nCheckFilePos = fileDataOut->GetPosition();
+	uint32 nCheckFilePos = (UINT)fileDataOut->GetPosition();
 	if (m_pHashTree.CreatePartRecoveryData(nPartStartPos, nPartSize, fileDataOut, 0)){
 		if (nHashsToWrite*(HASHSIZE+2) != fileDataOut->GetPosition() - nCheckFilePos){
 			ASSERT( false );
@@ -575,13 +576,18 @@ bool CAICHHashSet::SaveHashSet(){
 		ASSERT( false );
 		return false;
 	}
+	CSingleLock lockKnown2Met(&m_mutKnown2File, false);
+	if (!lockKnown2Met.Lock(5000)){
+		return false;
+	}
+
 	CString fullpath=thePrefs.GetConfigDir();
 	fullpath.Append(KNOWN2_MET_FILENAME);
 	CSafeFile file;
 	CFileException fexp;
-	if (!file.Open(fullpath,CFile::modeCreate|CFile::modeReadWrite|CFile::modeNoTruncate|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+	if (!file.Open(fullpath,CFile::modeCreate|CFile::modeReadWrite|CFile::modeNoTruncate|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyNone, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
-			CString strError(GetResString(IDS_FAILEDTOLOAD)+_T(" ") KNOWN2_MET_FILENAME _T(" ")+GetResString(IDS_FILE)); // Localized by FrankyFive
+			CString strError(_T("Failed to load ") KNOWN2_MET_FILENAME _T(" file"));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
 			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 				strError += _T(" - ");
@@ -596,7 +602,7 @@ bool CAICHHashSet::SaveHashSet(){
 
 		// first we check if the hashset we want to write is already stored
 		CAICHHash CurrentHash;
-		uint32 nExistingSize = file.GetLength();
+		uint32 nExistingSize = (UINT)file.GetLength();
 		uint16 nHashCount;
 		while (file.GetPosition() < nExistingSize){
 			CurrentHash.Read(&file);
@@ -636,6 +642,8 @@ bool CAICHHashSet::SaveHashSet(){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		theApp.QueueDebugLogLine(false, _T("Sucessfully saved eMuleAC Hashset, %u Hashs + 1 Masterhash written"), nHashCount);
+	    file.Flush();
+	    file.Close();
 	}
 	catch(CFileException* error){
 		if (error->m_cause == CFileException::endOfFile)
@@ -681,7 +689,7 @@ bool CAICHHashSet::LoadHashSet(){
 	try {
 		//setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 		CAICHHash CurrentHash;
-		uint32 nExistingSize = file.GetLength();
+		uint32 nExistingSize = (UINT)file.GetLength();
 		uint16 nHashCount;
 		while (file.GetPosition() < nExistingSize){
 			CurrentHash.Read(&file);
@@ -940,44 +948,44 @@ void CAICHHashSet::DbgTest(){
 	TestHashSet.SetMasterHash(GetMasterHash(), AICH_VERIFIED);
 	CSafeMemFile file;
 	for (uint64 i = 0; i+9728000 < TESTSIZE; i += 9728000){
-		VERIFY( CreatePartRecoveryData(i, &file) );
+		VERIFY( CreatePartRecoveryData((UINT)i, &file) );
 		
 		/*uint32 nRandomCorruption = (rand() * rand()) % (file.GetLength()-4);
 		file.Seek(nRandomCorruption, CFile::begin);
 		file.Write(&nRandomCorruption, 4);*/
 
 		file.SeekToBegin();
-		VERIFY( TestHashSet.ReadRecoveryData(i, &file) );
+		VERIFY( TestHashSet.ReadRecoveryData((UINT)i, &file) );
 		file.SeekToBegin();
 		TestHashSet.FreeHashSet();
 		for (uint32 j = 0; j+EMBLOCKSIZE < 9728000; j += EMBLOCKSIZE){
-			VERIFY( m_pHashTree.FindHash(i+j, EMBLOCKSIZE, &curLevel) );
+			VERIFY( m_pHashTree.FindHash((UINT)(i+j), EMBLOCKSIZE, &curLevel) );
 			//TRACE(_T("%u - %s\r\n"), cHash, m_pHashTree.FindHash(i+j, EMBLOCKSIZE, &curLevel)->m_Hash.GetString());
 			maxLevel = max(curLevel, maxLevel);
 			curLevel = 0;
 			cHash++;
 		}
-		VERIFY( m_pHashTree.FindHash(i+j, 9728000-j, &curLevel) );
+		VERIFY( m_pHashTree.FindHash((UINT)(i+j), 9728000-j, &curLevel) );
 		//TRACE(_T("%u - %s\r\n"), cHash, m_pHashTree.FindHash(i+j, 9728000-j, &curLevel)->m_Hash.GetString());
 		maxLevel = max(curLevel, maxLevel);
 		curLevel = 0;
 		cHash++;
 
 	}
-	VERIFY( CreatePartRecoveryData(i, &file) );
+	VERIFY( CreatePartRecoveryData((UINT)i, &file) );
 	file.SeekToBegin();
-	VERIFY( TestHashSet.ReadRecoveryData(i, &file) );
+	VERIFY( TestHashSet.ReadRecoveryData((UINT)i, &file) );
 	file.SeekToBegin();
 	TestHashSet.FreeHashSet();
 	for (uint64 j = 0; j+EMBLOCKSIZE < TESTSIZE-i; j += EMBLOCKSIZE){
-		VERIFY( m_pHashTree.FindHash(i+j, EMBLOCKSIZE, &curLevel) );
+		VERIFY( m_pHashTree.FindHash((UINT)(i+j), EMBLOCKSIZE, &curLevel) );
 		//TRACE(_T("%u - %s\r\n"), cHash,m_pHashTree.FindHash(i+j, EMBLOCKSIZE, &curLevel)->m_Hash.GetString());
 		maxLevel = max(curLevel, maxLevel);
 		curLevel = 0;
 		cHash++;
 	}
 	//VERIFY( m_pHashTree.FindHash(i+j, (TESTSIZE-i)-j, &curLevel) );
-	TRACE(_T("%u - %s\r\n"), cHash,m_pHashTree.FindHash(i+j, (TESTSIZE-i)-j, &curLevel)->m_Hash.GetString());
+	TRACE(_T("%u - %s\r\n"), cHash,m_pHashTree.FindHash((UINT)(i+j), (UINT)((TESTSIZE-i)-j), &curLevel)->m_Hash.GetString());
 	maxLevel = max(curLevel, maxLevel);
 #endif
 }

@@ -763,7 +763,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 	
 	if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
         // debug info, will remove this when I'm done.
-        //DebugLogError(_T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
+        //AddDebugLogLine(false, _T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
 
 		if(tempHighest > (uint32)uploadinglist.GetSize()+1) {
         	tempHighest = uploadinglist.GetSize()+1;
@@ -773,8 +773,8 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
     m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = tempHighest;
 	
 	// save 15 minutes of data about number of fully active clients
-    uint32 tempMaxRemoved = -1;
-    while(!activeClients_tick_list.IsEmpty() && !activeClients_list.IsEmpty() && curTick-activeClients_tick_list.GetHead() > 2*60*1000) {
+    uint32 tempMaxRemoved = 0;
+    while(!activeClients_tick_list.IsEmpty() && !activeClients_list.IsEmpty() && curTick-activeClients_tick_list.GetHead() > 20*1000) {
             activeClients_tick_list.RemoveHead();
 	        uint32 removed = activeClients_list.RemoveHead();
 
@@ -807,7 +807,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
             activeClients_list.GetPrev(activeClientsListPos);
 		}
 
-        if(tempMaxRemoved > m_MaxActiveClients) {
+        if(tempMaxRemoved >= m_MaxActiveClients || tempMaxActiveClients > m_MaxActiveClients) {
 			m_MaxActiveClients = tempMaxActiveClients;
         }
 
@@ -819,13 +819,14 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 }
 
 /**
- * Maintenance method for the uploading slots. It adds and removes clients to/from the
+ * Maintenance method for the uploading slots. It adds and removes clients to the
  * uploading list. It also makes sure that all the uploading slots' Sockets always have
  * enough packets in their queues, etc.
  *
  * This method is called approximately once every 100 milliseconds.
  */
 void CUploadQueue::Process() {
+
     DWORD curTick = ::GetTickCount();
 
 	UpdateActiveClientsInfo(curTick);
@@ -892,7 +893,6 @@ void CUploadQueue::Process() {
 	while(pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
-
 		if (thePrefs.m_iDbgHeap >= 2)
 			ASSERT_VALID(cur_client);
 		//It seems chatting or friend slots can get stuck at times in upload.. This needs looked into..
@@ -1309,7 +1309,7 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 		    CUpDownClient* cur_client =	waitinglist.GetNext(pos);
 			sum += cur_client->GetCombinedFilePrioAndCredit();
 		}
-		m_fAverageCombinedFilePrioAndCredit = sum/waitinglist.GetSize();
+        m_fAverageCombinedFilePrioAndCredit = (float)(sum/waitinglist.GetSize());
 	}
 
 	return m_fAverageCombinedFilePrioAndCredit;
@@ -1717,7 +1717,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				if (thePrefs.IsSchedulerEnabled())
 					theApp.scheduler->Check();
 
-                theApp.emuledlg->transferwnd->UpdateListCount(1, -1);
+                theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Uploading, -1);
 			}
 
 			//Commander - Moved: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
@@ -1771,9 +1771,10 @@ CUpDownClient* CUploadQueue::GetNextClient(const CUpDownClient* lastclient){
 	// Calculate average datarate
 	if(::GetTickCount()-m_lastCalculatedDataRateTick > 500) {
 		m_lastCalculatedDataRateTick = ::GetTickCount();
+
 		if(avarage_dr_list.GetSize() >= 2 && (avarage_tick_list.GetTail() > avarage_tick_list.GetHead())) {
-			datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
-			friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
+	        datarate = (UINT)(((m_avarage_dr_sum - avarage_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()));
+            friendDatarate = (UINT)(((avarage_friend_dr_list.GetTail() - avarage_friend_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()));
 		}
 	}
 }

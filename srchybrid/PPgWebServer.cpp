@@ -59,12 +59,14 @@ BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 	ON_EN_CHANGE(IDC_MMPASSWORDFIELD, OnDataChange)
 	ON_EN_CHANGE(IDC_TMPLPATH, OnDataChange)
 	ON_EN_CHANGE(IDC_MMPORT_FIELD, OnDataChange)
+	ON_EN_CHANGE(IDC_WSTIMEOUT, OnDataChange)
 	ON_BN_CLICKED(IDC_WSENABLED, OnEnChangeWSEnabled)
 	ON_BN_CLICKED(IDC_WSENABLEDLOW, OnEnChangeWSEnabled)
 	ON_BN_CLICKED(IDC_MMENABLED, OnEnChangeMMEnabled)
 	ON_BN_CLICKED(IDC_WSRELOADTMPL, OnReloadTemplates)
 	ON_BN_CLICKED(IDC_TMPLBROWSE, OnBnClickedTmplbrowse)
 	ON_BN_CLICKED(IDC_WS_GZIP, OnDataChange)
+	ON_BN_CLICKED(IDC_WS_ALLOWHILEVFUNC, OnDataChange)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
@@ -114,6 +116,9 @@ void CPPgWebServer::LoadSettings(void)
 
 	GetDlgItem(IDC_TMPLPATH)->SetWindowText(thePrefs.GetTemplate());
 
+	strBuffer.Format(_T("%d"), thePrefs.GetWebTimeoutMins());
+	SetDlgItemText(IDC_WSTIMEOUT,strBuffer);
+
 	if(thePrefs.GetWSIsEnabled())
 		CheckDlgButton(IDC_WSENABLED,1);
 	else
@@ -130,6 +135,7 @@ void CPPgWebServer::LoadSettings(void)
 		CheckDlgButton(IDC_MMENABLED,0);
 
 	CheckDlgButton(IDC_WS_GZIP,(thePrefs.GetWebUseGzip())?1:0 );
+	CheckDlgButton(IDC_WS_ALLOWHILEVFUNC,(thePrefs.GetWebAdminAllowedHiLevFunc())?1:0 );
 	
 	OnEnChangeMMEnabled();
 
@@ -141,6 +147,19 @@ BOOL CPPgWebServer::OnApply()
 	if(m_bModified)
 	{
 		CString sBuf;
+
+		// get and check templatefile existance...
+		GetDlgItem(IDC_TMPLPATH)->GetWindowText(sBuf);
+		if ( IsDlgButtonChecked(IDC_WSENABLED) && !PathFileExists(sBuf)) {
+			CString buffer;
+			buffer.Format(GetResString(IDS_WEB_ERR_CANTLOAD),sBuf);
+			AfxMessageBox(buffer,MB_OK);
+			return FALSE;
+		}
+		thePrefs.SetTemplate(sBuf);
+		theApp.webserver->ReloadTemplates();
+
+
 		uint16 oldPort=thePrefs.GetWSPort();
 
 		GetDlgItem(IDC_WSPASS)->GetWindowText(sBuf);
@@ -156,13 +175,15 @@ BOOL CPPgWebServer::OnApply()
 			thePrefs.SetWSPort(_tstoi(sBuf));
 			theApp.webserver->RestartServer();
 		}
-		thePrefs.SetWSIsEnabled((uint8)IsDlgButtonChecked(IDC_WSENABLED));
-		thePrefs.SetWSIsLowUserEnabled((uint8)IsDlgButtonChecked(IDC_WSENABLEDLOW));
-		thePrefs.SetWebUseGzip( (uint8)IsDlgButtonChecked(IDC_WS_GZIP));
-		theApp.webserver->StartServer();
 
-		GetDlgItem(IDC_TMPLPATH)->GetWindowText(sBuf);
-		thePrefs.SetTemplate(sBuf);
+		GetDlgItemText(IDC_WSTIMEOUT,sBuf);
+		thePrefs.m_iWebTimeoutMins=_tstoi(sBuf);
+
+		thePrefs.SetWSIsEnabled(IsDlgButtonChecked(IDC_WSENABLED)!=0);
+		thePrefs.SetWSIsLowUserEnabled(IsDlgButtonChecked(IDC_WSENABLEDLOW)!=0);
+		thePrefs.SetWebUseGzip(IsDlgButtonChecked(IDC_WS_GZIP)!=0);
+		theApp.webserver->StartServer();
+		thePrefs.m_bAllowAdminHiLevFunc= (IsDlgButtonChecked(IDC_WS_ALLOWHILEVFUNC)!=0);
 
 		// mobilemule
 		GetDlgItem(IDC_MMPORT_FIELD)->GetWindowText(sBuf);
@@ -171,7 +192,7 @@ BOOL CPPgWebServer::OnApply()
 			theApp.mmserver->StopServer();
 			theApp.mmserver->Init();
 		}
-		thePrefs.SetMMIsEnabled((uint8)IsDlgButtonChecked(IDC_MMENABLED));
+		thePrefs.SetMMIsEnabled(IsDlgButtonChecked(IDC_MMENABLED)!=0);
 		if (IsDlgButtonChecked(IDC_MMENABLED))
 			theApp.mmserver->Init();
 		else
@@ -182,6 +203,7 @@ BOOL CPPgWebServer::OnApply()
 
 		theApp.emuledlg->serverwnd->UpdateMyInfo();
 		SetModified(FALSE);
+		SetTmplButtonState();
 	}
 
 	return CPropertyPage::OnApply();
@@ -207,25 +229,35 @@ void CPPgWebServer::Localize(void)
 		GetDlgItem(IDC_WSENABLEDLOW)->SetWindowText(GetResString(IDS_ENABLED));
 
 		GetDlgItem(IDC_TEMPLATE)->SetWindowText(GetResString(IDS_WS_RELOAD_TMPL));
+		SetDlgItemText(IDC_WSTIMEOUTLABEL,GetResString(IDS_WEB_SESSIONTIMEOUT)+_T(":"));
+		SetDlgItemText(IDC_MINS,GetResString(IDS_LONGMINS) );
 
 		GetDlgItem(IDC_MMENABLED)->SetWindowText(GetResString(IDS_ENABLEMM));
 		GetDlgItem(IDC_STATIC_MOBILEMULE)->SetWindowText(GetResString(IDS_MOBILEMULE));
 		GetDlgItem(IDC_MMPASSWORD)->SetWindowText(GetResString(IDS_WS_PASS));
 		GetDlgItem(IDC_MMPORT_LBL)->SetWindowText(GetResString(IDS_PORT));
+
+		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->SetWindowText(GetResString(IDS_WEB_ALLOWHILEVFUNC));
 	}
 }
 
 void CPPgWebServer::OnEnChangeWSEnabled()
 {
-	GetDlgItem(IDC_WSPASS)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));	
-	GetDlgItem(IDC_WSPORT)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));	
-	GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
-	GetDlgItem(IDC_TMPLPATH)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
-	GetDlgItem(IDC_TMPLBROWSE)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
-	GetDlgItem(IDC_WSRELOADTMPL)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
-	GetDlgItem(IDC_WS_GZIP)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
+	UINT bIsWIEnabled=IsDlgButtonChecked(IDC_WSENABLED);
+	GetDlgItem(IDC_WSPASS)->EnableWindow(bIsWIEnabled);	
+	GetDlgItem(IDC_WSPORT)->EnableWindow(bIsWIEnabled);	
+	GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(bIsWIEnabled);
+	GetDlgItem(IDC_TMPLPATH)->EnableWindow(bIsWIEnabled);
+	GetDlgItem(IDC_TMPLBROWSE)->EnableWindow(bIsWIEnabled);
+	GetDlgItem(IDC_WS_GZIP)->EnableWindow(bIsWIEnabled);
+	GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(bIsWIEnabled);
+	GetDlgItem(IDC_WSTIMEOUT)->EnableWindow(bIsWIEnabled);
 
-	GetDlgItem(IDC_WSPASSLOW)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED) && IsDlgButtonChecked(IDC_WSENABLEDLOW));
+	GetDlgItem(IDC_WSPASSLOW)->EnableWindow(bIsWIEnabled && IsDlgButtonChecked(IDC_WSENABLEDLOW));
+	
+	//GetDlgItem(IDC_WSRELOADTMPL)->EnableWindow(bIsWIEnabled);
+	SetTmplButtonState();
+
 
 	SetModified();
 }
@@ -253,6 +285,14 @@ void CPPgWebServer::OnBnClickedTmplbrowse()
 		GetDlgItem(IDC_TMPLPATH)->SetWindowText(buffer);
 		SetModified();
 	}
+	SetTmplButtonState();
+}
+
+void CPPgWebServer::SetTmplButtonState(){
+	CString buffer;
+	GetDlgItemText(IDC_TMPLPATH,buffer);
+
+	GetDlgItem(IDC_WSRELOADTMPL)->EnableWindow( thePrefs.GetWSIsEnabled() && (buffer.CompareNoCase(thePrefs.GetTemplate())==0));
 }
 
 void CPPgWebServer::OnHelp()

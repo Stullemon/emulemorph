@@ -35,10 +35,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-#ifndef LVS_EX_LABELTIP
-#define LVS_EX_LABELTIP         0x00004000 // listview unfolds partly hidden labels if it does not have infotip text
-#endif
-
 #define	SEARCH_STRINGS_PROFILE	_T("AC_SearchStrings.dat")
 
 IMPLEMENT_DYNAMIC(CSearchParamsWnd, CDialogBar);
@@ -175,7 +171,7 @@ LRESULT CSearchParamsWnd::OnInitDialog(WPARAM wParam, LPARAM lParam)
 		m_pacSearchString = new CCustomAutoComplete();
 		m_pacSearchString->AddRef();
 		if (m_pacSearchString->Bind(m_ctlName, ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST))
-			m_pacSearchString->LoadList(thePrefs.GetConfigDir() +  _T("\\") SEARCH_STRINGS_PROFILE);
+			m_pacSearchString->LoadList(thePrefs.GetConfigDir() + SEARCH_STRINGS_PROFILE);
 		if (theApp.m_fontSymbol.m_hObject)
 		{
 			GetDlgItem(IDC_DD)->SetFont(&theApp.m_fontSymbol);
@@ -736,7 +732,7 @@ BOOL CSearchParamsWnd::SaveSearchStrings()
 {
 	if (m_pacSearchString == NULL)
 		return FALSE;
-	return m_pacSearchString->SaveList(thePrefs.GetConfigDir() + _T("\\") SEARCH_STRINGS_PROFILE);
+	return m_pacSearchString->SaveList(thePrefs.GetConfigDir() + SEARCH_STRINGS_PROFILE);
 }
 
 void CSearchParamsWnd::SaveSettings()
@@ -1009,7 +1005,7 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	pParams->ulMaxSize = ulMaxSize;
 	pParams->uAvailability = uAvailability;
 	pParams->strExtension = strExtension;
-	//pParams->bMatchKeywords = IsDlgButtonChecked(IDC_MATCH_KEYWORDS);
+	//pParams->bMatchKeywords = IsDlgButtonChecked(IDC_MATCH_KEYWORDS)!=0;
 	pParams->uComplete = uComplete;
 	pParams->strCodec = strCodec;
 	pParams->ulMinBitrate = ulMinBitrate;

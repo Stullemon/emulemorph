@@ -54,6 +54,7 @@
 static char THIS_FILE[]=__FILE__;
 #endif
 
+
 #define	SERVERMET_STRINGS_PROFILE	_T("AC_ServerMetURLs.dat")
 #define SZ_DEBUG_LOG_TITLE			GetResString(IDS_VERBOSE_TITLE)
 
@@ -63,7 +64,7 @@ IMPLEMENT_DYNAMIC(CServerWnd, CDialog)
 
 BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_ADDSERVER, OnBnClickedAddserver)
-	ON_BN_CLICKED(IDC_UPDATESERVERMETFROMURL, OnBnClickedUpdateservermetfromurl)
+	ON_BN_CLICKED(IDC_UPDATESERVERMETFROMURL, OnBnClickedUpdateServerMetFromUrl)
 	ON_BN_CLICKED(IDC_LOGRESET, OnBnClickedResetLog)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB3, OnTcnSelchangeTab3)
 	ON_NOTIFY(EN_LINK, IDC_SERVMSG, OnEnLinkServerBox)
@@ -137,13 +138,13 @@ BOOL CServerWnd::OnInitDialog()
 	CResizableDialog::OnInitDialog();
 
 	// using ES_NOHIDESEL is actually not needed, but it helps to get around a tricky window update problem!
-#define	LOG_PANE_RICHEDIT_STYTES WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_NOHIDESEL
+#define	LOG_PANE_RICHEDIT_STYLES WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_NOHIDESEL
 	CRect rect;
 
 	GetDlgItem(IDC_SERVMSG)->GetWindowRect(rect);
 	GetDlgItem(IDC_SERVMSG)->DestroyWindow();
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	if (servermsgbox->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_SERVMSG)){
+	if (servermsgbox->Create(LOG_PANE_RICHEDIT_STYLES, rect, this, IDC_SERVMSG)){
 		servermsgbox->SetProfileSkinKey(_T("ServerInfoLog"));
 		servermsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 		servermsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
@@ -171,7 +172,7 @@ BOOL CServerWnd::OnInitDialog()
 	GetDlgItem(IDC_LOGBOX)->GetWindowRect(rect);
 	GetDlgItem(IDC_LOGBOX)->DestroyWindow();
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	if (logbox->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_LOGBOX)){
+	if (logbox->Create(LOG_PANE_RICHEDIT_STYLES, rect, this, IDC_LOGBOX)){
 		logbox->SetProfileSkinKey(_T("Log"));
 		logbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 		logbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
@@ -185,7 +186,7 @@ BOOL CServerWnd::OnInitDialog()
 	GetDlgItem(IDC_DEBUG_LOG)->GetWindowRect(rect);
 	GetDlgItem(IDC_DEBUG_LOG)->DestroyWindow();
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	if (debuglog->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_DEBUG_LOG)){
+	if (debuglog->Create(LOG_PANE_RICHEDIT_STYLES, rect, this, IDC_DEBUG_LOG)){
 		debuglog->SetProfileSkinKey(_T("VerboseLog"));
 		debuglog->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 		debuglog->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
@@ -200,7 +201,7 @@ BOOL CServerWnd::OnInitDialog()
 	GetDlgItem(IDC_NEWSMSG)->GetWindowRect(rect);
 	GetDlgItem(IDC_NEWSMSG)->DestroyWindow();
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-		if (newsmsgbox->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_NEWSMSG)){
+		if (newsmsgbox->Create(LOG_PANE_RICHEDIT_STYLES, rect, this, IDC_NEWSMSG)){
 		newsmsgbox->SetProfileSkinKey(_T("NewsInfoLog"));
 		newsmsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 		newsmsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
@@ -215,7 +216,7 @@ BOOL CServerWnd::OnInitDialog()
 	GetDlgItem(IDC_MORPH_LOG)->GetWindowRect(rect);
 	GetDlgItem(IDC_MORPH_LOG)->DestroyWindow();
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	if (morphlog->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_MORPH_LOG)){
+	if (morphlog->Create(LOG_PANE_RICHEDIT_STYLES, rect, this, IDC_MORPH_LOG)){
 		morphlog->SetProfileSkinKey(_T("MorphLog"));
 		morphlog->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 		morphlog->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
@@ -270,6 +271,8 @@ BOOL CServerWnd::OnInitDialog()
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneMorphLog );
 	//MORPH END   - Added by SiRoB, Morph Log
 
+	AddAnchor(IDC_SERVLST_ICO, TOP_LEFT);
+	AddAnchor(IDC_SERVLIST_TEXT, TOP_LEFT);
 	AddAnchor(serverlistctrl, TOP_LEFT, MIDDLE_RIGHT);
 	AddAnchor(m_ctrlNewServerFrm, TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC4,TOP_RIGHT);
@@ -294,11 +297,11 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(IDC_LOGRESET, MIDDLE_RIGHT); // avoid resizing GUI glitches with the tab control by adding this control as the last one (Z-order)
 	AddAnchor(IDC_ED2KCONNECT,TOP_RIGHT);
 	AddAnchor(IDC_DD,TOP_RIGHT);
-
 	// The resizing of those log controls (rich edit controls) works 'better' when added as last anchors (?)
 	AddAnchor(*servermsgbox, MIDDLE_LEFT, BOTTOM_RIGHT);
 	AddAnchor(*logbox, MIDDLE_LEFT, BOTTOM_RIGHT);
 	AddAnchor(*debuglog, MIDDLE_LEFT, BOTTOM_RIGHT);
+
 	debug = true;
 	AddAnchor(*newsmsgbox, MIDDLE_LEFT, BOTTOM_RIGHT);//MORPH - Added by SiRoB, XML News [O²]
 	AddAnchor(*morphlog, MIDDLE_LEFT, BOTTOM_RIGHT); //MORPH - Added by SiRoB, Morph Log
@@ -362,7 +365,7 @@ BOOL CServerWnd::OnInitDialog()
 		m_pacServerMetURL = new CCustomAutoComplete();
 		m_pacServerMetURL->AddRef();
 		if (m_pacServerMetURL->Bind(::GetDlgItem(m_hWnd, IDC_SERVERMETURL), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
-			m_pacServerMetURL->LoadList(CString(thePrefs.GetConfigDir()) +  _T("\\") SERVERMET_STRINGS_PROFILE);
+			m_pacServerMetURL->LoadList(thePrefs.GetConfigDir() + SERVERMET_STRINGS_PROFILE);
 		if (theApp.m_fontSymbol.m_hObject){
 			GetDlgItem(IDC_DD)->SetFont(&theApp.m_fontSymbol);
 			GetDlgItem(IDC_DD)->SetWindowText(_T("6")); // show a down-arrow
@@ -395,8 +398,8 @@ void CServerWnd::DoDataExchange(CDataExchange* pDX)
 
 bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 {
-	if (strURL.IsEmpty() || (strURL.Find(_T("://")) == -1))	// not a valid URL
-	{
+	if (strURL.IsEmpty() || (strURL.Find(_T("://")) == -1)) {
+		// not a valid URL
 		LogError(LOG_STATUSBAR, GetResString(IDS_INVALIDURL) );
 		return false;
 	}
@@ -408,19 +411,20 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 	CString strTempFilename;
 	strTempFilename.Format(_T("%stemp-%d-server.met"), thePrefs.GetConfigDir(), ::GetTickCount());
 
+	Log(_T("Downloading server.met from %s"), strURL);
+
 	// try to download server.met
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_sURLToDownload = strURL;
 	dlgDownload.m_sFileToDownloadInto = strTempFilename;
-	if (dlgDownload.DoModal() != IDOK)
-	{
+	if (dlgDownload.DoModal() != IDOK) {
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_FAILEDDOWNLOADMET), strURL);
 		return false;
 	}
 
 	// add content of server.met to serverlist
 	serverlistctrl.Hide();
-	serverlistctrl.AddServermetToList(strTempFilename);
+	serverlistctrl.AddServerMetToList(strTempFilename);
 	serverlistctrl.Visable();
 	_tremove(strTempFilename);
 	return true;
@@ -647,23 +651,23 @@ bool CServerWnd::AddServer(uint16 nPort, CString strIP, CString strName, bool bS
 	}
 }
 
-void CServerWnd::OnBnClickedUpdateservermetfromurl()
+void CServerWnd::OnBnClickedUpdateServerMetFromUrl()
 {
-	// step1 - get url
 	CString strURL;
-	bool bDownloaded=false;
 	GetDlgItem(IDC_SERVERMETURL)->GetWindowText(strURL);
-	
-	if (strURL==_T("")){
-		if (thePrefs.adresses_list.IsEmpty()){
+	if (strURL.IsEmpty())
+	{
+		if (thePrefs.addresses_list.IsEmpty())
+		{
 			AddLogLine(true, GetResString(IDS_SRV_NOURLAV) );
-			return;
 		}
 		else
 		{
-			POSITION Pos = thePrefs.adresses_list.GetHeadPosition(); 
-			while ((!bDownloaded) && (Pos != NULL)){
-				strURL = thePrefs.adresses_list.GetNext(Pos).GetBuffer(); 
+			bool bDownloaded = false;
+			POSITION pos = thePrefs.addresses_list.GetHeadPosition();
+			while (!bDownloaded && pos != NULL)
+			{
+				strURL = thePrefs.addresses_list.GetNext(pos).GetBuffer();
 				bDownloaded=UpdateServerMetFromURL(strURL);
 			}
 		}
@@ -734,6 +738,8 @@ void CServerWnd::UpdateLogTabSelection()
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH START - Added by SiRoB, XML News [O²]
 		morphlog->ShowWindow(SW_SHOW);
+		if (morphlog->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
+			morphlog->ScrollToLastLine(true);
 		morphlog->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}else
@@ -746,6 +752,8 @@ void CServerWnd::UpdateLogTabSelection()
 		debuglog->ShowWindow(SW_HIDE);
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		newsmsgbox->ShowWindow(SW_SHOW);
+		if (newsmsgbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
+			newsmsgbox->ScrollToLastLine(true);
 		newsmsgbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}else
@@ -759,6 +767,8 @@ void CServerWnd::UpdateLogTabSelection()
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		debuglog->ShowWindow(SW_SHOW);
+		if (debuglog->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
+			debuglog->ScrollToLastLine(true);
 		debuglog->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -771,6 +781,8 @@ void CServerWnd::UpdateLogTabSelection()
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
+		if (logbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
+			logbox->ScrollToLastLine(true);
 		logbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -783,6 +795,8 @@ void CServerWnd::UpdateLogTabSelection()
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		servermsgbox->ShowWindow(SW_SHOW);
+		if (servermsgbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
+			servermsgbox->ScrollToLastLine(true);
 		servermsgbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -832,6 +846,13 @@ void CServerWnd::UpdateMyInfo()
 	m_MyInfo.Invalidate();
 }
 
+CString CServerWnd::GetMyInfoString() {
+	CString buffer;
+	m_MyInfo.GetWindowText(buffer);
+
+	return buffer;
+}
+
 BOOL CServerWnd::PreTranslateMessage(MSG* pMsg) 
 {
 	if (pMsg->message == WM_KEYDOWN){
@@ -860,7 +881,7 @@ BOOL CServerWnd::PreTranslateMessage(MSG* pMsg)
 						((CEdit*)GetDlgItem(IDC_SERVERMETURL))->SetSel(strText.GetLength(), strText.GetLength());
 					}
 				}
-				OnBnClickedUpdateservermetfromurl();
+				OnBnClickedUpdateServerMetFromUrl();
 				return TRUE;
 			}
 		}
@@ -873,7 +894,7 @@ BOOL CServerWnd::SaveServerMetStrings()
 {
 	if (m_pacServerMetURL== NULL)
 		return FALSE;
-	return m_pacServerMetURL->SaveList(CString(thePrefs.GetConfigDir()) + _T("\\") SERVERMET_STRINGS_PROFILE);
+	return m_pacServerMetURL->SaveList(thePrefs.GetConfigDir() + SERVERMET_STRINGS_PROFILE);
 }
 
 void CServerWnd::ShowNetworkInfo()

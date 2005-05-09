@@ -34,7 +34,7 @@
 ** Copyright, 2000, Samuel R. Blackburn
 **
 ** $Workfile: CBase64Coding.cpp $
-** $Revision: 1.10 $
+** $Revision: 1.11 $
 ** $Modtime: 5/12/00 3:39p $
 ** $Reuse Tracing Code: 1 $
 */
@@ -45,7 +45,7 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #define new DEBUG_NEW
-#endif // _DEBUG
+#endif
 
 #define END_OF_BASE64_ENCODED_DATA           ('=')
 #define BASE64_END_OF_BUFFER                 (0xFD)
@@ -115,7 +115,7 @@ BOOL CBase64Coding::Encode( const char * source, int len, char * destination_str
       byte_1 = source[ loop_index ];
       byte_to_add = alphabet[ ( byte_1 >> 2 ) ];
 
-      destination[ number_of_bytes_encoded ] = static_cast< TCHAR >( byte_to_add );
+      destination[ number_of_bytes_encoded ] = static_cast< char >( byte_to_add );
       number_of_bytes_encoded++;
 
       loop_index++;
@@ -228,7 +228,7 @@ BOOL CBase64Coding::Encode( const char * source, int len, char * destination_str
 
 <H1>CBase64Coding</H1>
 
-$Revision: 1.10 $<BR><HR>
+$Revision: 1.11 $<BR><HR>
 
 <H2>Description</H2>
 

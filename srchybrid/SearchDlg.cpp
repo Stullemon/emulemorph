@@ -133,7 +133,7 @@ void CSearchDlg::ResetHistory()
 	m_pwndParams->ResetHistory();
 }
 
-bool CSearchDlg::IsSearchParamsWndVisible() const
+BOOL CSearchDlg::IsSearchParamsWndVisible() const
 {
 	return m_pwndParams->IsWindowVisible();
 }

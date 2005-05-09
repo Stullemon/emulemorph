@@ -19,6 +19,7 @@
 
 class CKnownFile;
 typedef CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> CKnownFilesMap;
+typedef CMap<CSKey,const CSKey&,int,int> CancelledFilesMap;
 
 class CKnownFileList 
 {
@@ -39,12 +40,20 @@ public:
 	void	MergePartFileStats(CKnownFile* original);	// SLUGFILLER: mergeKnown - retrieve part file stats from known file
 	bool	IsKnownFile(const CKnownFile* file) const;
 	bool	IsFilePtrInList(const CKnownFile* file) const;
+
+	void	AddCancelledFileID(const uchar* hash);
+	bool	IsCancelledFileByID(const uchar* hash) const;
+
 	const CKnownFilesMap& GetKnownFiles() const { return m_Files_map; }
 
 private:
+	bool	LoadKnownFiles();
+	bool	LoadCancelledFiles();
+
 	uint16 	requested;
 	uint16 	accepted;
 	uint64 	transferred;
 	uint32 	m_nLastSaved;
 	CKnownFilesMap m_Files_map;
+	CancelledFilesMap	m_mapCancelledFiles;
 };

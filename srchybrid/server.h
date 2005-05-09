@@ -42,6 +42,9 @@ struct ServerMet_Struct {
 // Server UDP flags
 #define	SRV_UDPFLG_EXT_GETSOURCES	0x00000001
 #define	SRV_UDPFLG_EXT_GETFILES		0x00000002
+#define	SRV_UDPFLG_NEWTAGS			0x00000008
+#define	SRV_UDPFLG_UNICODE			0x00000010
+#define	SRV_UDPFLG_EXT_GETSOURCES2	0x00000020
 
 class CServer{
 public:
@@ -91,6 +94,7 @@ public:
 	void	SetMaxUsers(uint32 in_maxusers) 		{maxusers = in_maxusers;}
 
 	uint32	GetFailedCount() const					{return failedcount;}
+	void	SetFailedCount(uint32 nCount)			{failedcount = nCount;}
 	void	AddFailedCount()						{failedcount++;} 
 	void	ResetFailedCount()						{failedcount = 0;} 
 
@@ -130,7 +134,7 @@ public:
 	uint32	GetLowIDUsers() const					{return m_uLowIDUsers;}
 	void	SetLowIDUsers(uint32 uLowIDUsers)		{m_uLowIDUsers = uLowIDUsers;}
 
-	bool	GetUnicodeSupport() const				{return GetTCPFlags() & SRV_TCPFLG_UNICODE;}
+	bool	GetUnicodeSupport() const				{return (GetTCPFlags() & SRV_TCPFLG_UNICODE)!=0;}
 
 private:
 	uint32		challenge;
@@ -152,7 +156,7 @@ private:
 	uint32		ip;
 	uint16		port;
 	uint16		realport;//Morph - added by AndCycle, aux Ports, by lugdunummaster
-	uint8		staticservermember;
+	bool		staticservermember;
 	uint32		failedcount; 
 	CString		m_strVersion;
 	uint32		m_uTCPFlags;

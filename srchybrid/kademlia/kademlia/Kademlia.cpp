@@ -128,61 +128,23 @@ void CKademlia::stop()
 	m_running = false;
 
 	CSearchManager::stopAllSearches();
-	try
-	{
-		delete instance->m_udpListener;
-		instance->m_udpListener = NULL;
-	}
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CKademlia::stop(1)"));
-		ASSERT(0);
-	}
 
-	try
-	{
-		delete instance->m_routingZone;
-		instance->m_routingZone = NULL;
-	}
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CKademlia::stop(2)"));
-		ASSERT(0);
-	}
+	delete instance->m_udpListener;
+	instance->m_udpListener = NULL;
 
-	try
-	{
-		delete instance->m_indexed;
-		instance->m_indexed = NULL;
-	}
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CKademlia::stop(3)"));
-		ASSERT(0);
-	}
+	delete instance->m_routingZone;
+	instance->m_routingZone = NULL;
 
-	try
-	{
-		delete instance->m_prefs;
-		instance->m_prefs = NULL;
-	}
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CKademlia::stop(4)"));
-		ASSERT(0);
-	}
+	delete instance->m_indexed;
+	instance->m_indexed = NULL;
 
-	try
-	{
-		delete instance;
-	}
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CKademlia::stop(5)"));
-		ASSERT(0);
-	}
-	m_events.clear();
+	delete instance->m_prefs;
+	instance->m_prefs = NULL;
+
+	delete instance;
 	instance = NULL;
+
+	m_events.clear();
 }
 
 void CKademlia::process()
@@ -463,8 +425,12 @@ void KadGetKeywordHash(const CStringA& rstrKeywordA, Kademlia::CUInt128* pKadID)
 	pKadID->setValueBE(md4.GetHash());
 }
 
+CStringA KadGetKeywordBytes(const CStringW& rstrKeywordW)
+{
+	return CStringA(wc2utf8(rstrKeywordW));
+}
+
 void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* pKadID)
 {
-	CStringA strA(wc2utf8(rstrKeywordW));
-	KadGetKeywordHash(strA, pKadID);
+	KadGetKeywordHash(KadGetKeywordBytes(rstrKeywordW), pKadID);
 }

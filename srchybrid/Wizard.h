@@ -8,15 +8,15 @@ public:
 	virtual ~CConnectionWizardDlg();
 
 	enum { IDD = IDD_WIZARD };
-	int m_iOS;
-	int m_iTotalDownload;
-	int m_iBitByte;
 
 	void Localize();
 
 protected:
 	HICON m_icnWnd;
 	CListCtrl m_provider;
+	int m_iOS;
+	int m_iTotalDownload;
+	int m_iBitByte;
 
 	void SetCustomItemsActivation();
 

@@ -1,6 +1,3 @@
-#if !defined(AFX_ENBITMAP_H__1FDE0A4E_8AB4_11D6_95AD_EFA89432A428__INCLUDED_)
-#define AFX_ENBITMAP_H__1FDE0A4E_8AB4_11D6_95AD_EFA89432A428__INCLUDED_
-
 #pragma once
 
 class CEnBitmap : public CBitmap  
@@ -21,5 +18,3 @@ protected:
 	BOOL Attach(IPicture* pPicture, COLORREF crBack);
 
 };
-
-#endif // !defined(AFX_ENBITMAP_H__1FDE0A4E_8AB4_11D6_95AD_EFA89432A428__INCLUDED_)

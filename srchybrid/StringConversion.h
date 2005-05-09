@@ -59,6 +59,7 @@ __inline bool NeedUTF8String(LPCWSTR pwsz)
 
 CStringA wc2utf8(const CStringW& rwstr);
 CString OptUtf8ToStr(const CStringA& rastr);
+CString OptUtf8ToStr(LPCSTR psz, int iLen);
 CString OptUtf8ToStr(const CStringW& rwstr);
 CStringA StrToUtf8(const CString& rstr);
 CString EncodeUrlUtf8(const CString& rstr);
@@ -94,6 +95,27 @@ public:
 
 		m_iChars = AtlUnicodeToUTF8(rwstr, rwstr.GetLength(), m_psz, iBuffSize);
 		ASSERT( m_iChars > 0 || rwstr.GetLength() == 0 );
+	}
+
+	TUnicodeToUTF8(LPCWSTR pwsz, int iLength = -1)
+	{
+		if (iLength == -1)
+			iLength = wcslen(pwsz);
+		int iBuffSize;
+		int iMaxEncodedStrSize = iLength*4;
+		if (iMaxEncodedStrSize > t_nBufferLength)
+		{
+			iBuffSize = iMaxEncodedStrSize;
+			m_psz = new char[iBuffSize];
+		}
+		else
+		{
+			iBuffSize = ARRSIZE(m_acBuff);
+			m_psz = m_acBuff;
+		}
+
+		m_iChars = AtlUnicodeToUTF8(pwsz, iLength, m_psz, iBuffSize);
+		ASSERT( m_iChars > 0 || iLength == 0 );
 	}
 
 	~TUnicodeToUTF8()

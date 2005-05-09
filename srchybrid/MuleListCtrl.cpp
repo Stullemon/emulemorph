@@ -61,11 +61,6 @@ static char THIS_FILE[]=__FILE__;
 //#define MLC_ASSERT(f)	ASSERT(f)
 #define MLC_ASSERT(f)	((void)0)
 
-#ifndef HDM_SETBITMAPMARGIN
-#define HDM_SETBITMAPMARGIN	(HDM_FIRST + 20)
-#define HDM_GETBITMAPMARGIN	(HDM_FIRST + 21)
-#endif
-
 //////////////////////////////////
 // CMuleListCtrl
 
@@ -469,10 +464,10 @@ void CMuleListCtrl::SetSortArrow(int iColumn, ArrowType atType) {
 					// Use smaller bitmap margins -- this saves some pixels which may be required for 
 					// rather small column titles.
 					if (theApp.m_ullComCtrlVer >= MAKEDLLVERULL(5,8,0,0)){
-					    int iBmpMargin = pHeaderCtrl->SendMessage(HDM_GETBITMAPMARGIN);
+						int iBmpMargin = pHeaderCtrl->GetBitmapMargin();
 					    int iNewBmpMargin = GetSystemMetrics(SM_CXEDGE) + GetSystemMetrics(SM_CXEDGE)/2;
 					    if (iNewBmpMargin < iBmpMargin)
-						    pHeaderCtrl->SendMessage(HDM_SETBITMAPMARGIN, iNewBmpMargin);
+							pHeaderCtrl->SetBitmapMargin(iNewBmpMargin);
 					}
 				}
 			}
@@ -1300,7 +1295,7 @@ void CMuleListCtrl::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BO
 	CWaitCursor curHourglass;
 
 	if (iStartItem < 0) {
-		MessageBeep((UINT)-1);
+		MessageBeep(MB_OK);
 		return;
 	}
 
@@ -1337,7 +1332,7 @@ void CMuleListCtrl::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BO
 	if (bShowError)
 		AfxMessageBox(GetResString(IDS_SEARCH_NORESULT), MB_ICONINFORMATION);
 	else
-		MessageBeep((UINT)-1);
+		MessageBeep(MB_OK);
 }
 
 void CMuleListCtrl::OnFindStart()

@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.2 $
+* $Revision: 1.3 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -274,8 +274,8 @@ void CTreePropSheet::MoveChildWindows(int nDx, int nDy)
 	{
 		CRect	rect;
 		pWnd->GetWindowRect(rect);
-		rect.OffsetRect(nDx, nDy);
 		ScreenToClient(rect);
+		rect.OffsetRect(nDx, nDy);
 		pWnd->MoveWindow(rect);
 
 		pWnd = pWnd->GetNextWindow();
@@ -785,7 +785,7 @@ BOOL CTreePropSheet::OnInitDialog()
 	CRect	rectSheet;
 	GetWindowRect(rectSheet);
 	rectSheet.right+= nTreeWidth;
-	SetWindowPos(NULL, -1, -1, rectSheet.Width(), rectSheet.Height(), SWP_NOZORDER|SWP_NOMOVE);
+	SetWindowPos(NULL, 0, 0, rectSheet.Width(), rectSheet.Height(), SWP_NOZORDER | SWP_NOMOVE);
 	CenterWindow();
 
 	MoveChildWindows(nTreeWidth, 0);

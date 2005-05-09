@@ -201,14 +201,14 @@ BOOL CClientDetailPage::OnSetActive()
 			GetDlgItem(IDC_CDIDENT)->SetWindowText(_T("?"));
 		}
 
-		if (client->GetUserName()){
+		if (client->GetUserName() && client->Credits()!=NULL){
 			buffer.Format(_T("%.1f"),(float)client->GetScore(false,client->IsDownloading(),true));
 			GetDlgItem(IDC_DRATING)->SetWindowText(buffer);
 		}
 		else
 		GetDlgItem(IDC_DRATING)->SetWindowText(_T("?"));
 
-		if (client->GetUploadState() != US_NONE){
+		if (client->GetUploadState() != US_NONE && client->Credits()!=NULL){
 			if (!client->GetFriendSlot()){
 				buffer.Format(_T("%u"),client->GetScore(false,client->IsDownloading(),false));
 				GetDlgItem(IDC_DSCORE)->SetWindowText(buffer);
@@ -292,7 +292,7 @@ void CClientDetailPage::Localize()
 	GetDlgItem(IDC_STATIC30)->SetWindowText(GetResString(IDS_CD_GENERAL));
 	GetDlgItem(IDC_STATIC31)->SetWindowText(GetResString(IDS_CD_UNAME));
 	GetDlgItem(IDC_STATIC32)->SetWindowText(GetResString(IDS_CD_UHASH));
-	GetDlgItem(IDC_STATIC33)->SetWindowText(GetResString(IDS_CD_CSOFT));
+	GetDlgItem(IDC_STATIC33)->SetWindowText(GetResString(IDS_CD_CSOFT) + _T(':'));
 	GetDlgItem(IDC_STATIC35)->SetWindowText(GetResString(IDS_CD_SIP));
 	GetDlgItem(IDC_STATIC38)->SetWindowText(GetResString(IDS_CD_SNAME));
 

@@ -39,10 +39,10 @@ protected:
 	bool	PacketReceived(Packet* packet);
 
 private:
-	bool	ProcessPacket(char* packet, uint32 size, uint8 opcode);
+	bool	ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode);
 	void	SetConnectionState(sint8 newstate);
 
-	CServerConnect*	serverconnect; 
+	CServerConnect*	serverconnect;
 	sint8	connectionstate;
 	CServer* cur_server; // holds a copy of a CServer from the CServerList
 	bool	m_bIsDeleting;	// true: socket is already in deletion phase, don't destroy it in ::StopConnectionTry

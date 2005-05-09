@@ -284,11 +284,6 @@ void CListCtrlX::UpdateHdrCtrlSortBitmap(int iSortedColumn, LCX_SORT_ORDER eSort
 			hdi.mask = HDI_FORMAT;
 			pHdrCtrl->GetItem(i, &hdi);
 
-		#ifndef HDF_SORTUP
-		#define HDF_SORTUP		0x0400
-		#define HDF_SORTDOWN	0x0200
-		#endif
-
 			if (i == iSortedColumn)
 			{
 				if (m_bUseHdrCtrlSortBitmaps) {
@@ -758,7 +753,7 @@ void CListCtrlX::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL 
 	CWaitCursor curHourglass;
 
 	if (iStartItem < 0) {
-		MessageBeep((UINT)-1);
+		MessageBeep(MB_OK);
 		return;
 	}
 
@@ -795,7 +790,7 @@ void CListCtrlX::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL 
 	if (bShowError)
 		AfxMessageBox(_T("No matching entry found."), MB_ICONINFORMATION);
 	else
-		MessageBeep((UINT)-1);
+		MessageBeep(MB_OK);
 }
 
 void CListCtrlX::OnFindStart()

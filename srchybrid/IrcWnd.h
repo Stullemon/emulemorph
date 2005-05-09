@@ -1,5 +1,5 @@
 #pragma once
-#include "ResizableLib\ResizableDialog.h"
+#include "..\ResizableLib\ResizableDialog.h"
 #include "IrcNickListCtrl.h"
 #include "IrcChannelListCtrl.h"
 #include "IrcChannelTabCtrl.h"
@@ -17,6 +17,7 @@ public:
 	CIrcWnd(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CIrcWnd();
 	void Localize();
+	void SaveAllSettings();
 	bool GetLoggedIn()				
 	{
 		return m_bLoggedIn;

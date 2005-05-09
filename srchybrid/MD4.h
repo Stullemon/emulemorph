@@ -18,9 +18,6 @@
 // along with Shareaza; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
-#if !defined(AFX_MD4_H__B0429238_3786_452C_B43D_3311AE91B5DA__INCLUDED_)
-#define AFX_MD4_H__B0429238_3786_452C_B43D_3311AE91B5DA__INCLUDED_
-
 #pragma once
 
 typedef union
@@ -64,5 +61,3 @@ inline bool operator!=(const MD4& md4a, const MD4& md4b)
 {
     return memcmp( &md4a, &md4b, 16 ) != 0;
 }
-
-#endif // !defined(AFX_MD4_H__B0429238_3786_452C_B43D_3311AE91B5DA__INCLUDED_)

@@ -135,6 +135,7 @@ LONG CMiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS* pExceptionInfo)
 	// Exit the process only in release builds, so that in debug builds the exceptio is passed to a possible
 	// installed debugger
 	ExitProcess(0);
-#endif
+#else
 	return lRetValue;
+#endif
 }

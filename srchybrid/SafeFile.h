@@ -89,8 +89,8 @@ class CSafeMemFile : public CMemFile, public CFileDataIO
 public:
 	CSafeMemFile(UINT nGrowBytes = 512)
 		: CMemFile(nGrowBytes) {}
-	CSafeMemFile::CSafeMemFile(BYTE* lpBuffer, UINT nBufferSize, UINT nGrowBytes = 0)
-		: CMemFile(lpBuffer, nBufferSize, nGrowBytes) {}
+	//CSafeMemFile::CSafeMemFile(BYTE* lpBuffer, UINT nBufferSize, UINT nGrowBytes = 0)
+	//	: CMemFile(lpBuffer, nBufferSize, nGrowBytes) {}
 	CSafeMemFile::CSafeMemFile(const BYTE* lpBuffer, UINT nBufferSize)
 		: CMemFile(const_cast<BYTE*>(lpBuffer), nBufferSize, 0) {}
 

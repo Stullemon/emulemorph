@@ -340,26 +340,12 @@ uint16 CPPgWiz1Ports::GetUDPPort() {
 	uint16 udp=0;
 	CString buffer;
 
-	if (!IsDlgButtonChecked(IDC_UDPDISABLE)) {
+	if (IsDlgButtonChecked(IDC_UDPDISABLE)==0) {
 		GetDlgItem(IDC_UDP)->GetWindowText(buffer);
-		udp=_tstoi(buffer); //GetUDPPort();
+		udp = _tstoi(buffer);
 	}
 	return udp;
 }
-
-/*
-uint16 CPPgWiz1Ports::GetTCPPort() {
-	return _tstoi(m_sTCP);
-}
-
-uint16 CPPgWiz1Ports::GetUDPPort() {
-	if (IsDlgButtonChecked(IDC_UDPDISABLE)) 
-		return 0;
-	else
-		return _tstoi(m_sUDP);
-}
-*/
-
 
 void CPPgWiz1Ports::OnPortChange(uint8 tcpport) {
 	
@@ -418,8 +404,9 @@ BOOL CPPgWiz1Ports::OnInitDialog()
 	return TRUE;
 }
 
-void CPPgWiz1Ports::OnEnChangeUDPDisable() {
-	bool disabled=IsDlgButtonChecked(IDC_UDPDISABLE);
+void CPPgWiz1Ports::OnEnChangeUDPDisable()
+{
+	bool disabled = IsDlgButtonChecked(IDC_UDPDISABLE)!=0;
 	GetDlgItem(IDC_UDP)->EnableWindow(!disabled);
 	
 	if (disabled) {
@@ -730,8 +717,7 @@ BOOL FirstTimeWizard()
 #ifdef _DEBUG
 	sheet.m_psh.dwFlags |= PSH_WIZARDHASFINISH;
 #endif
-	//sheet.m_psh.dwFlags |= 0x00002000;	// PSH_WIZARD97 for (_WIN32_IE < 0x0500)
-	sheet.m_psh.dwFlags |= 0x01000000;		// PSH_WIZARD97 for (_WIN32_IE >= 0x0500)
+	sheet.m_psh.dwFlags |= PSH_WIZARD97;
 
 	CPPgWiz1Welcome	page1(IDD_WIZ1_WELCOME, GetResString(IDS_WIZ1));
 	page1.m_psp.dwFlags |= PSP_HIDEHEADER;
@@ -789,18 +775,18 @@ BOOL FirstTimeWizard()
 		page2.m_strNick = DEFAULT_NICK;
 
 	thePrefs.SetUserNick(page2.m_strNick);
-	thePrefs.SetAutoConnect(page2.m_iAutoConnectAtStart);
-	thePrefs.SetAutoStart(page2.m_iAutoStart);
+	thePrefs.SetAutoConnect(page2.m_iAutoConnectAtStart!=0);
+	thePrefs.SetAutoStart(page2.m_iAutoStart!=0);
 	if( thePrefs.GetAutoStart() )
 		AddAutoStart();
 	else
 		RemAutoStart();
-	thePrefs.SetNewAutoDown(page4.m_iDAP);
-	thePrefs.SetNewAutoUp(page4.m_iUAP);
-	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks);
-	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect);
-	thePrefs.SetNetworkKademlia(page6.m_iKademlia);
-	thePrefs.SetNetworkED2K(page6.m_iED2K);
+	thePrefs.SetNewAutoDown(page4.m_iDAP!=0);
+	thePrefs.SetNewAutoUp(page4.m_iUAP!=0);
+	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks!=0);
+	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect!=0);
+	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
+	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
 
 	// set ports
 	thePrefs.port=_tstoi(page3.m_sTCP);

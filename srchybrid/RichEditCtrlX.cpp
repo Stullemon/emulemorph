@@ -166,7 +166,7 @@ void CRichEditCtrlX::OnContextMenu(CWnd* pWnd, CPoint point)
 	// ------
 	// Select All
 
-	bool bReadOnly = (GetStyle() & ES_READONLY);
+	bool bReadOnly = (GetStyle() & ES_READONLY)!=0;
 
 	CMenu menu;
 	menu.CreatePopupMenu();

@@ -21,7 +21,9 @@
 #include "emule.h"
 #include "emuleDlg.h"
 #include "SharedFilesWnd.h"
+#pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include <crypto51/crc.h>
+#pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "log.h"
 #include "UserMsgs.h"
 #ifdef _DEBUG
@@ -60,13 +62,13 @@ void AddCRC32InputBox::OnOK()
 
 	GetDlgItem(IDC_CRC32SUFFIX)->GetWindowText (m_CRC32Suffix);
 	thePrefs.SetCRC32Suffix (m_CRC32Suffix);
-	m_DontAddCRC32 = (bool)IsDlgButtonChecked(IDC_DONTADDCRC);
+	m_DontAddCRC32 = IsDlgButtonChecked(IDC_DONTADDCRC)!=0;
 	thePrefs.SetDontAddCRCToFilename (m_DontAddCRC32);
 
-	m_CRC32ForceUppercase = (bool)IsDlgButtonChecked(IDC_CRCFORCEUPPERCASE);
+	m_CRC32ForceUppercase = IsDlgButtonChecked(IDC_CRCFORCEUPPERCASE)!=0;
 	thePrefs.SetCRC32ForceUppercase (m_CRC32ForceUppercase);
 
-	m_CRC32ForceAdding = (bool)IsDlgButtonChecked(IDC_CRCFORCEADDING);
+	m_CRC32ForceAdding = IsDlgButtonChecked(IDC_CRCFORCEADDING)!=0;
 	thePrefs.SetCRC32ForceAdding (m_CRC32ForceAdding);
 
 	CDialog::OnOK();

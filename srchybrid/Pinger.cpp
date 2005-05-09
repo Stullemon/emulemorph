@@ -92,7 +92,9 @@
 */
 
 #include "stdafx.h"
+#pragma warning(disable:4127) // conditional expression is constant
 #include <Ws2tcpip.h>       // UDPing - raw socket and TTL setting support
+#pragma warning(default:4127) // conditional expression is constant
 #include "emule.h"
 #include "TimeTick.h"
 #include "Pinger.h"

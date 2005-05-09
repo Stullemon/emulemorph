@@ -70,7 +70,6 @@ void CHTRichEditCtrl::Init(LPCTSTR pszTitle, LPCTSTR pszSkinKey)
 	SetProfileSkinKey(pszSkinKey);
 	SetTitle(pszTitle);
 
-
 	VERIFY( SendMessage(EM_SETUNDOLIMIT, 0, 0) == 0 );
 	int iMaxLogBuff = thePrefs.GetMaxLogBuff();
 	if (afxData.bWin95)
@@ -83,7 +82,8 @@ void CHTRichEditCtrl::Init(LPCTSTR pszTitle, LPCTSTR pszSkinKey)
 
 	// prevent the RE control to change the font height within single log lines (may happen with some Unicode chars)
 	DWORD dwLangOpts = SendMessage(EM_GETLANGOPTIONS);
-	SendMessage(EM_SETLANGOPTIONS, 0, dwLangOpts & ~IMF_AUTOFONT);
+	SendMessage(EM_SETLANGOPTIONS, 0, dwLangOpts & ~(IMF_AUTOFONT /*| IMF_AUTOFONTSIZEADJUST*/));
+	//SendMessage(EM_SETEDITSTYLE, SES_EMULATESYSEDIT, SES_EMULATESYSEDIT);
 }
 
 void CHTRichEditCtrl::SetProfileSkinKey(LPCTSTR pszSkinKey)
@@ -204,11 +204,11 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 #endif
 
 	// Get Edit contents dimensions and cursor position
-	long iStartChar, iEndChar;
-	GetSel(iStartChar, iEndChar);
-	long iSize = GetWindowTextLength();
+	long lStartChar, lEndChar;
+	GetSel(lStartChar, lEndChar);
+	int iSize = GetWindowTextLength();
 
-	if (iStartChar == iSize && iSize == iEndChar)
+	if (lStartChar == iSize && iSize == lEndChar)
 	{
 		// The cursor resides at the end of text
 		SCROLLINFO si;
@@ -217,7 +217,7 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 		if (m_bAutoScroll && GetScrollInfo(SB_VERT, &si) && si.nPos >= (int)(si.nMax - si.nPage + 1))
 		{
 			// Not scrolled away
-			SafeAddLine(iSize, pszMsg, iLen, iStartChar, iEndChar, bLink, cr);
+			SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr);
 			if (m_bAutoScroll && !IsWindowVisible())
 				ScrollToLastLine();
 		}
@@ -230,17 +230,17 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 				SetRedraw(FALSE);
 
 			// Remember where we are
-			int nFirstLine = !m_bAutoScroll ? GetFirstVisibleLine() : 0;
+			int iFirstLine = !m_bAutoScroll ? GetFirstVisibleLine() : 0;
 		
 			// Select at the end of text and replace the selection
 			// This is a very fast way to add text to an edit control
-			SafeAddLine(iSize, pszMsg, iLen, iStartChar, iEndChar, bLink, cr);
-			//if (m_bAutoScroll && iStartChar == iEndChar)
-			//	iStartChar = iEndChar = -1;
-			SetSel(iStartChar, iEndChar); // Restore our previous selection
+			SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr);
+			//if (m_bAutoScroll && lStartChar == lEndChar)
+			//	lStartChar = lEndChar = -1;
+			SetSel(lStartChar, lEndChar); // Restore our previous selection
 
 			if (!m_bAutoScroll)
-				LineScroll(nFirstLine - GetFirstVisibleLine());
+				LineScroll(iFirstLine - GetFirstVisibleLine());
 			else
 				ScrollToLastLine();
 
@@ -263,12 +263,18 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 			SetRedraw(FALSE);
 
 		// Remember where we are
-		//int nFirstLine = !m_bAutoScroll ? GetFirstVisibleLine() : 0;
-		POINT ptPos;
+		int iFirstLine = !m_bAutoScroll ? GetFirstVisibleLine() : 0;
+		// Very annoying problems with EM_GETSCROLLPOS/EM_SETSCROLLPOS. Depending
+		// on the amount of data in the control, the control may start to scroll up
+		// by itself(!!) -- obviously because of some internal rounding errors..
+		//
+		// Using 'LineScroll' also gives glitches (also depending on the amount of
+		// data stored in the control), but at least it doesn't start to show some 'life'
+		/*POINT ptScrollPos;
 		if (!m_bAutoScroll)
-			SendMessage(EM_GETSCROLLPOS, 0, (LPARAM)&ptPos);
+			SendMessage(EM_GETSCROLLPOS, 0, (LPARAM)&ptScrollPos);*/
 	
-		if (iStartChar != iEndChar)
+		if (lStartChar != lEndChar)
 		{
 			// If we are currently selecting some text, we have to find out
 			// if the caret is near the beginning of this block or near the end.
@@ -277,16 +283,16 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 			// a block with a length dividable by 64k.
 
 			// NOTE: This may cause a lot of terrible CRASHES within the RichEdit control when used for a RichEdit control!?
-			// To reproduce the crash: click in the RE control while it's drawing a line an start a selection!
+			// To reproduce the crash: click in the RE control while it's drawing a line and start a selection!
 			if (!m_bRichEdit){
 			    CPoint pt;
 			    ::GetCaretPos(&pt);
-			    int nCaretPos = CharFromPos(pt);
-			    if (abs((iStartChar % 0xffff - nCaretPos)) < abs((iEndChar % 0xffff - nCaretPos)))
+			    int iCaretPos = CharFromPos(pt);
+			    if (abs((lStartChar % 0xffff - iCaretPos)) < abs((lEndChar % 0xffff - iCaretPos)))
 			    {
-				    nCaretPos = iStartChar;
-				    iStartChar = iEndChar;
-				    iEndChar = nCaretPos;
+				    iCaretPos = lStartChar;
+				    lStartChar = lEndChar;
+				    lEndChar = iCaretPos;
 			    }
 		    }
 		}
@@ -295,14 +301,14 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 		
 		// Select at the end of text and replace the selection
 		// This is a very fast way to add text to an edit control
-		SafeAddLine(iSize, pszMsg, iLen, iStartChar, iEndChar, bLink, cr);
-		//if (m_bAutoScroll && iStartChar == iEndChar)
-		//	iStartChar = iEndChar = -1;
-		SetSel(iStartChar, iEndChar); // Restore our previous selection
+		SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr/*, &ptScrollPos*/);
+		//if (m_bAutoScroll && lStartChar == lEndChar)
+		//	lStartChar = lEndChar = -1;
+		SetSel(lStartChar, lEndChar); // Restore our previous selection
 
 		if (!m_bAutoScroll){
-			//LineScroll(nFirstLine - GetFirstVisibleLine());
-			SendMessage(EM_SETSCROLLPOS, 0, (LPARAM)&ptPos);
+			LineScroll(iFirstLine - GetFirstVisibleLine());
+			//SendMessage(EM_SETSCROLLPOS, 0, (LPARAM)&ptScrollPos);
 		}
 		else
 			ScrollToLastLine();
@@ -326,11 +332,19 @@ void CHTRichEditCtrl::OnEnMaxtext()
 	m_bEnErrSpace = true;
 }
 
-void CHTRichEditCtrl::ScrollToLastLine()
+void CHTRichEditCtrl::ScrollToLastLine(bool bForceLastLineAtBottom)
 {
+	if (bForceLastLineAtBottom)
+	{
+		int iFirstVisible = GetFirstVisibleLine();
+		if (iFirstVisible > 0)
+			LineScroll(-iFirstVisible);
+	}
+
 	// WM_VSCROLL does not work correctly under Win98 (or older version of comctl.dll)
 	SendMessage(WM_VSCROLL, SB_BOTTOM);
-	if (afxData.bWin95){
+	if (afxData.bWin95)
+	{
 		// older version of comctl.dll seem to need this to properly update the display
 		int iPos = GetScrollPos(SB_VERT);
 		SendMessage(WM_VSCROLL, MAKELONG(SB_THUMBPOSITION, iPos));
@@ -370,13 +384,13 @@ void CHTRichEditCtrl::AddString(int nPos, LPCTSTR pszString, bool bLink, COLORRE
 	m_bRestoreFormat = bRestoreFormat;
 }
 
-void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& iStartChar, long& iEndChar, bool bLink, COLORREF cr)
+void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& lStartChar, long& lEndChar, bool bLink, COLORREF cr)
 {
 	// EN_ERRSPACE and EN_MAXTEXT are not working for rich edit control (at least not same as for standard control),
 	// need to explicitly check the log buffer limit..
 	int iCurSize = nPos;
 	if (iCurSize + iLen >= m_iLimitText)
-{
+	{
 		bool bOldNoPaint = m_bNoPaint;
 		m_bNoPaint = true;
 		BOOL bIsVisible = IsWindowVisible();
@@ -391,12 +405,12 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& iSt
 			ReplaceSel(_T(""));
 
 			// update any possible available selection
-			iStartChar -= iLine0Len;
-			if (iStartChar < 0)
-				iStartChar = 0;
-			iEndChar -= iLine0Len;
-			if (iEndChar < 0)
-				iEndChar = 0;
+			lStartChar -= iLine0Len;
+			if (lStartChar < 0)
+				lStartChar = 0;
+			lEndChar -= iLine0Len;
+			if (lEndChar < 0)
+				lEndChar = 0;
 
 			iCurSize = GetWindowTextLength();
 		}
@@ -445,12 +459,12 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& iSt
 			ReplaceSel(_T(""));
 
 			// update any possible available selection
-			iStartChar -= iLine0Len;
-			if (iStartChar < 0)
-				iStartChar = 0;
-			iEndChar -= iLine0Len;
-			if (iEndChar < 0)
-				iEndChar = 0;
+			lStartChar -= iLine0Len;
+			if (lStartChar < 0)
+				lStartChar = 0;
+			lEndChar -= iLine0Len;
+			if (lEndChar < 0)
+				lEndChar = 0;
 
 			// add the new line again
 			nPos = GetWindowTextLength();
@@ -472,7 +486,8 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& iSt
 	}
 }
 
-void CHTRichEditCtrl::Reset(){
+void CHTRichEditCtrl::Reset()
+{
 	m_astrBuff.RemoveAll();
 	SetRedraw(FALSE);
 	SetWindowText(_T(""));
@@ -483,11 +498,11 @@ void CHTRichEditCtrl::Reset(){
 
 void CHTRichEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	long iSelStart, iSelEnd;
-	GetSel(iSelStart, iSelEnd);
+	long lSelStart, lSelEnd;
+	GetSel(lSelStart, lSelEnd);
 
 	// ugly, simulate a left click to get around the text cursor problem when right clicking.
-	if (point.x != -1 && point.y != -1 && iSelStart == iSelEnd)
+	if (point.x != -1 && point.y != -1 && lSelStart == lSelEnd)
 	{
 		CPoint ptMouse(point);
 		ScreenToClient(&ptMouse);
@@ -500,7 +515,7 @@ void CHTRichEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CTitleMenu menu;
 	menu.CreatePopupMenu();
 	menu.AddMenuTitle(GetResString(IDS_LOGENTRY));
-	menu.AppendMenu(MF_STRING | (iSelEnd > iSelStart ? MF_ENABLED : MF_GRAYED), MP_COPYSELECTED, GetResString(IDS_COPY));
+	menu.AppendMenu(MF_STRING | (lSelEnd > lSelStart ? MF_ENABLED : MF_GRAYED), MP_COPYSELECTED, GetResString(IDS_COPY));
 	menu.AppendMenu(MF_SEPARATOR);
 	menu.AppendMenu(MF_STRING | (iTextLen > 0 ? MF_ENABLED : MF_GRAYED), MP_SELECTALL, GetResString(IDS_SELECTALL));
 	menu.AppendMenu(MF_STRING | (iTextLen > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEALL , GetResString(IDS_PW_RESET));
@@ -565,7 +580,7 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 			fwrite(strText, sizeof(TCHAR), strText.GetLength(), fp);
 			if (ferror(fp)){
 				CString strError;
-				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), _tcserror(errno));
+				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
 				AfxMessageBox(strError, MB_ICONERROR);
 			}
 			else
@@ -574,24 +589,27 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 		}
 		else{
 			CString strError;
-			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), _tcserror(errno));
+			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
 			AfxMessageBox(strError, MB_ICONERROR);
 		}
 	}
 	return bResult;
 }
 
-CString CHTRichEditCtrl::GetLastLogEntry(){
+CString CHTRichEditCtrl::GetLastLogEntry()
+{
 	CString strLog;
 	int iLastLine = GetLineCount() - 2;
-	if (iLastLine >= 0){
+	if (iLastLine >= 0)
+	{
 		GetLine(iLastLine, strLog.GetBuffer(1024), 1024);
 		strLog.ReleaseBuffer();
 	}
 	return strLog;
 }
 
-CString CHTRichEditCtrl::GetAllLogEntries(){
+CString CHTRichEditCtrl::GetAllLogEntries()
+{
 	CString strLog;
 	GetWindowText(strLog);
 	return strLog;

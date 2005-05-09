@@ -22,6 +22,7 @@
 #include "Preferences.h"
 #include "MenuCmds.h"
 #include "ZipFile.h"
+#include "GZipFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -335,6 +336,7 @@ void CIPFilterDlg::OnSelectAllIPFilter()
 	m_ipfilter.SelectAllItems();
 }
 
+
 void CIPFilterDlg::OnBnClickedAppend()
 {
 	CString strFilePath;
@@ -366,6 +368,27 @@ void CIPFilterDlg::OnBnClickedAppend()
 				AfxMessageBox(strError);
 			}
 			zip.Close();
+		}
+		else
+		{
+			CGZIPFile gz;
+			if (gz.Open(strFilePath))
+			{
+				_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+				strTempUnzipFilePath.ReleaseBuffer();
+
+				// add filename and extension of uncompressed file to temporary file
+				CString strUncompressedFileName = gz.GetUncompressedFileName();
+				if (!strUncompressedFileName.IsEmpty())
+				{
+					strTempUnzipFilePath += _T('.');
+					strTempUnzipFilePath += strUncompressedFileName;
+				}
+
+				if (gz.Extract(strTempUnzipFilePath))
+					strFilePath = strTempUnzipFilePath;
+			}
+			gz.Close();
 		}
 
 		if (theApp.ipfilter->AddFromFile(strFilePath, true))

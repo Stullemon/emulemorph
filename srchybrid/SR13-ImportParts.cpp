@@ -122,7 +122,7 @@ bool SR13_ImportParts(CPartFile* partfile, CString strFilePath){
 			VERIFY(PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)partfile));
 		}
 
-		if(partfile->IsComplete(part*PARTSIZE, part*PARTSIZE+PARTSIZE-1)){
+		if(partfile->IsComplete(part*PARTSIZE, part*PARTSIZE+PARTSIZE-1, true)){
 			Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE), part);
 			continue;
 		}

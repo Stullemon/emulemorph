@@ -77,7 +77,26 @@ BOOL CListViewWalkerPropertySheet::OnInitDialog()
 			{ &m_ctlNext,  IDC_NEXT, _T("&Next"),  _T("6"), WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP }
 		};
 
-		CWnd* pctlOk = GetDlgItem(IDOK);
+		int iLeftMostButtonId = IDOK;
+		int iMax = 32767;
+		static const int _aiPropSheetButtons[] = { IDOK, IDCANCEL, ID_APPLY_NOW, IDHELP };
+		for (int i = 0; i < ARRSIZE(_aiPropSheetButtons); i++)
+		{
+			CWnd* pBtn = GetDlgItem(_aiPropSheetButtons[i]);
+			if (pBtn /*&& pBtn->IsWindowVisible()*/)
+			{
+				CRect rcBtn;
+				pBtn->GetWindowRect(&rcBtn);
+				ScreenToClient(&rcBtn);
+				if (rcBtn.left < iMax)
+				{
+					iMax = rcBtn.left;
+					iLeftMostButtonId = _aiPropSheetButtons[i];
+				}
+			}
+		}
+
+		CWnd* pctlOk = GetDlgItem(iLeftMostButtonId);
 		CRect rcOk;
 		pctlOk->GetWindowRect(&rcOk);
 		ScreenToClient(&rcOk);
@@ -135,7 +154,7 @@ void CListViewWalkerPropertySheet::OnPrev()
 	if (pObj)
 		ChangeData(pObj);
 	else
-		MessageBeep((UINT)-1);
+		MessageBeep(MB_OK);
 }
 
 void CListViewWalkerPropertySheet::OnNext()
@@ -148,7 +167,7 @@ void CListViewWalkerPropertySheet::OnNext()
 	if (pObj)
 		ChangeData(pObj);
 	else
-		MessageBeep((UINT)-1);
+		MessageBeep(MB_OK);
 }
 
 CObject* CListCtrlItemWalk::GetPrevSelectableItem()

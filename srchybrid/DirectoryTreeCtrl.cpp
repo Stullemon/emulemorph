@@ -469,7 +469,7 @@ void CDirectoryTreeCtrl::AddShare(CString strDir)
 	if (strDir.Right(1) != _T('\\'))
 		strDir += _T('\\');
 	
-	if (IsShared(strDir) || !strDir.CompareNoCase(CString(thePrefs.GetConfigDir()) ))
+	if (IsShared(strDir) || !strDir.CompareNoCase(thePrefs.GetConfigDir()))
 		return;
 
 	m_lstShared.AddTail(strDir);
@@ -531,26 +531,39 @@ void CDirectoryTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	// create the menu
 	CTitleMenu SharedMenu;
 	SharedMenu.CreatePopupMenu();
-	if (m_lstShared.GetCount() == 0)
-		SharedMenu.AddMenuTitle(GetResString(IDS_NOSHAREDFOLDERS));
-	else
-		SharedMenu.AddMenuTitle(GetResString(IDS_SHAREDFOLDERS));
+	SharedMenu.AddMenuTitle(GetResString(IDS_SHAREDFOLDERS));
+	bool bMenuIsEmpty = true;
+
+	// add all shared directories
+	int iCnt = 0;
+	for (POSITION pos = m_lstShared.GetHeadPosition(); pos != NULL; iCnt++)
+	{
+		CString strDisplayPath(m_lstShared.GetNext(pos));
+		PathRemoveBackslash(strDisplayPath.GetBuffer(strDisplayPath.GetLength()));
+		strDisplayPath.ReleaseBuffer();
+		SharedMenu.AppendMenu(MF_STRING,MP_SHAREDFOLDERS_FIRST+iCnt, GetResString(IDS_VIEW1) + strDisplayPath);
+		bMenuIsEmpty = false;
+	}
 
 	// add right clicked folder, if any
 	if (hItem)
 	{
 		m_strLastRightClicked = GetFullPath(hItem);
 		if (!IsShared(m_strLastRightClicked))
-			SharedMenu.AppendMenu(MF_STRING, MP_SHAREDFOLDERS_FIRST-1, (LPCTSTR)(GetResString(IDS_VIEW1) + m_strLastRightClicked +GetResString(IDS_VIEW2)));
+		{
+			CString strDisplayPath(m_strLastRightClicked);
+			PathRemoveBackslash(strDisplayPath.GetBuffer(strDisplayPath.GetLength()));
+			strDisplayPath.ReleaseBuffer();
+			if (!bMenuIsEmpty)
+				SharedMenu.AppendMenu(MF_SEPARATOR);
+			SharedMenu.AppendMenu(MF_STRING, MP_SHAREDFOLDERS_FIRST-1, GetResString(IDS_VIEW1) + strDisplayPath + GetResString(IDS_VIEW2));
+			bMenuIsEmpty = false;
+		}
 	}
 
-	// add all shared directories
-	int iCnt = 0;
-	for (POSITION pos = m_lstShared.GetHeadPosition(); pos != NULL; iCnt++)
-		SharedMenu.AppendMenu(MF_STRING,MP_SHAREDFOLDERS_FIRST+iCnt, (LPCTSTR)m_lstShared.GetNext(pos));
-
 	// display menu
-	SharedMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, ptMenu.x, ptMenu.y, this);
+	if (!bMenuIsEmpty)
+		SharedMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, ptMenu.x, ptMenu.y, this);
 	VERIFY( SharedMenu.DestroyMenu() );
 }
 
@@ -560,24 +573,20 @@ void CDirectoryTreeCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 	//CTreeCtrl::OnRButtonDown(nFlags, point);
 }
 
-BOOL CDirectoryTreeCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
+BOOL CDirectoryTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+{
 	if (wParam < MP_SHAREDFOLDERS_FIRST)
 	{
 		ShellExecute(NULL, _T("open"), m_strLastRightClicked, NULL, NULL, SW_SHOW);
-		return false;
 	}
-	int cnt = 0;
-	for (POSITION pos = m_lstShared.GetHeadPosition(); pos != NULL; )
+	else
 	{
-		CString str = m_lstShared.GetNext(pos);
-		if (cnt == wParam-MP_SHAREDFOLDERS_FIRST)
-		{
-			ShellExecute(NULL, _T("open"), str, NULL, NULL, SW_SHOW);
-			return true;
-		}
-		cnt++;
+		POSITION pos = m_lstShared.FindIndex(wParam - MP_SHAREDFOLDERS_FIRST);
+		if (pos)
+			ShellExecute(NULL, _T("open"), m_lstShared.GetAt(pos), NULL, NULL, SW_SHOW);
 	}
-	return true;
+
+	return TRUE;
 }
 
 void CDirectoryTreeCtrl::OnTvnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult)

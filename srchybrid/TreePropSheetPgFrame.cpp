@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.2 $
+* $Revision: 1.3 $
 * $Modtime:$
 * $Author: sirob $
 *

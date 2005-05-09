@@ -1,5 +1,5 @@
 #pragma once
-#include "ResizableLib\ResizableDialog.h"
+#include "..\ResizableLib\ResizableDialog.h"
 #include "IconStatic.h"
 #include "kademlia/routing/contact.h"
 

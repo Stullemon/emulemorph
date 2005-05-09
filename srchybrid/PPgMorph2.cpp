@@ -127,19 +127,19 @@ BOOL CPPgMorph2::OnApply()
 	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->GetWindowText(buffer);
 	_tcscpy(thePrefs.UpdateURLFakeList, buffer);
-	thePrefs.UpdateFakeStartup = IsDlgButtonChecked(IDC_UPDATEFAKELISTSTART);
+	thePrefs.UpdateFakeStartup = IsDlgButtonChecked(IDC_UPDATEFAKELISTSTART)!=0;
 	//MORPH END   - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 
 	//MORPH START - Added by Yun.SF3: Ipfilter.dat update
 	GetDlgItem(IDC_UPDATE_URL_IPFILTER)->GetWindowText(buffer);
 	_tcscpy(thePrefs.UpdateURLIPFilter, buffer);
-	thePrefs.AutoUpdateIPFilter = IsDlgButtonChecked(IDC_AUTOUPIPFILTER);
+	thePrefs.AutoUpdateIPFilter = IsDlgButtonChecked(IDC_AUTOUPIPFILTER)!=0;
 	//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
 
     //Commander - Added: IP2Country Auto-updating - Start
     GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->GetWindowText(buffer);
 	_tcscpy(thePrefs.UpdateURLIP2Country, buffer);
-	thePrefs.AutoUpdateIP2Country = IsDlgButtonChecked(IDC_AUTOUPIP2COUNTRY);
+	thePrefs.AutoUpdateIP2Country = IsDlgButtonChecked(IDC_AUTOUPIP2COUNTRY)!=0;
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start

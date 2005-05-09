@@ -91,6 +91,7 @@ struct SLanguage {
 static SLanguage _aLanguages[] =
 {
 	{LANGID_AR_AE,	_T(""),				FALSE,	_T("ar_AE"),	1256,	_T("windows-1256")},	// Arabic (UAE)
+	{LANGID_BA_BA,	_T(""),				FALSE,	_T("ba_BA"),	1252,	_T("windows-1252")},	// Basque
 	{LANGID_BG_BG,	_T("hun"),			FALSE,	_T("bg_BG"),	1251,	_T("windows-1251")},	// Bulgarian
 	{LANGID_CA_ES,	_T(""),				FALSE,	_T("ca_ES"),	1252,	_T("windows-1252")},	// Catalan
 	{LANGID_CZ_CZ,	_T("czech"),		FALSE,	_T("cz_CZ"),	1250,	_T("windows-1250")},	// Czech
@@ -112,6 +113,7 @@ static SLanguage _aLanguages[] =
 	{LANGID_LT_LT,	_T(""),				FALSE,	_T("lt_LT"),	1257,	_T("windows-1257")},	// Lithuanian
 	{LANGID_LV_LV,	_T(""),				FALSE,	_T("lv_LV"),	1257,	_T("windows-1257")},	// Latvian
 	{LANGID_NB_NO,	_T("norwegian"),	FALSE,	_T("nb_NO"),	1252,	_T("windows-1252")},	// Norwegian (Bokmal)
+	{LANGID_NN_NO,	_T("norwegian"),	FALSE,	_T("nn_NO"),	1252,	_T("windows-1252")},	// Norwegian (Nynorsk)
 	{LANGID_NL_NL,	_T("dutch"),		FALSE,	_T("nl_NL"),	1252,	_T("windows-1252")},	// Dutch (Netherlands)
 	{LANGID_PL_PL,	_T("polish"),		FALSE,	_T("pl_PL"),	1250,	_T("windows-1250")},	// Polish
 	{LANGID_PT_BR,	_T("ptb"),			FALSE,	_T("pt_BR"),	1252,	_T("windows-1252")},	// Portuguese (Brazil)
@@ -479,4 +481,47 @@ CString CPreferences::GetHtmlCharset()
 	}
 
 	return pszHtmlCharset;
+}
+
+static HHOOK s_hRTLWindowsLayoutOldCbtFilterHook = NULL;
+
+LRESULT CALLBACK RTLWindowsLayoutCbtFilterHook(int code, WPARAM wParam, LPARAM lParam)
+{
+	if (code == HCBT_CREATEWND)
+	{
+		//LPCREATESTRUCT lpcs = ((LPCBT_CREATEWND)lParam)->lpcs;
+
+		//if ((lpcs->style & WS_CHILD) == 0)
+		//	lpcs->dwExStyle |= WS_EX_LAYOUTRTL;	// doesn't seem to have any effect, but shouldn't hurt
+
+		HWND hWnd = (HWND)wParam;
+		if ((GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD) == 0) {
+			SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYOUTRTL);
+		}
+	}
+	return CallNextHookEx(s_hRTLWindowsLayoutOldCbtFilterHook, code, wParam, lParam);
+}
+
+void CemuleApp::EnableRTLWindowsLayout()
+{
+	BOOL (WINAPI *pfnSetProcessDefaultLayout)(DWORD dwFlags);
+	(FARPROC&)pfnSetProcessDefaultLayout = GetProcAddress(GetModuleHandle(_T("user32")), "SetProcessDefaultLayout");
+	if (pfnSetProcessDefaultLayout)
+		(*pfnSetProcessDefaultLayout)(LAYOUT_RTL);
+
+	s_hRTLWindowsLayoutOldCbtFilterHook = SetWindowsHookEx(WH_CBT, RTLWindowsLayoutCbtFilterHook, NULL, GetCurrentThreadId());
+}
+
+void CemuleApp::DisableRTLWindowsLayout()
+{
+	if (s_hRTLWindowsLayoutOldCbtFilterHook)
+	{
+		VERIFY( UnhookWindowsHookEx(s_hRTLWindowsLayoutOldCbtFilterHook) );
+		s_hRTLWindowsLayoutOldCbtFilterHook = NULL;
+
+		BOOL (WINAPI *pfnSetProcessDefaultLayout)(DWORD dwFlags);
+		(FARPROC&)pfnSetProcessDefaultLayout = GetProcAddress(GetModuleHandle(_T("user32")), "SetProcessDefaultLayout");
+		if (pfnSetProcessDefaultLayout)
+			(*pfnSetProcessDefaultLayout)(0);
+	}
 }

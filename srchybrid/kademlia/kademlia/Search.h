@@ -129,3 +129,5 @@ private:
 
 void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* pKadID);
 void KadGetKeywordHash(const CStringA& rstrKeywordA, Kademlia::CUInt128* pKadID);
+CStringA KadGetKeywordBytes(const CStringW& rstrKeywordW);
+

@@ -144,6 +144,16 @@ void CPPgFiles::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_WATCHCB,0);
 	
+	if(thePrefs.IsRememberingDownloadedFiles())
+		CheckDlgButton(IDC_REMEMBERDOWNLOADED,1);
+	else
+		CheckDlgButton(IDC_REMEMBERDOWNLOADED,0);
+
+	if(thePrefs.IsRememberingCancelledFiles())
+		CheckDlgButton(IDC_REMEMBERCANCELLED,1);
+	else
+		CheckDlgButton(IDC_REMEMBERCANCELLED,0);
+	
 	GetDlgItem(IDC_STARTNEXTFILECAT)->EnableWindow(IsDlgButtonChecked(IDC_STARTNEXTFILE));
 }
 
@@ -188,8 +198,6 @@ BOOL CPPgFiles::OnApply()
 	else
 		thePrefs.m_istartnextfile = 0;
 
-//	thePrefs.resumeSameCat= (uint8)IsDlgButtonChecked(IDC_STARTNEXTFILECAT);
-
 	if(IsDlgButtonChecked(IDC_FULLCHUNKTRANS))
 		thePrefs.m_btransferfullchunks = true;
 	else
@@ -201,15 +209,25 @@ BOOL CPPgFiles::OnApply()
 	else
 		thePrefs.watchclipboard = false;
 
-	thePrefs.addnewfilespaused = (uint8)IsDlgButtonChecked(IDC_ADDNEWFILESPAUSED);
-	thePrefs.autofilenamecleanup=(uint8)IsDlgButtonChecked(IDC_FNCLEANUP);
+	if(IsDlgButtonChecked(IDC_REMEMBERDOWNLOADED))
+		thePrefs.SetRememberDownloadedFiles(true);
+	else
+		thePrefs.SetRememberDownloadedFiles(false);
 
-	thePrefs.m_bUseOldTimeRemaining = !IsDlgButtonChecked(IDC_PF_TIMECALC);
+	if(IsDlgButtonChecked(IDC_REMEMBERCANCELLED))
+		thePrefs.SetRememberCancelledFiles(true);
+	else
+		thePrefs.SetRememberCancelledFiles(false);
+
+	thePrefs.addnewfilespaused = IsDlgButtonChecked(IDC_ADDNEWFILESPAUSED)!=0;
+	thePrefs.autofilenamecleanup = IsDlgButtonChecked(IDC_FNCLEANUP)!=0;
+
+	thePrefs.m_bUseOldTimeRemaining = IsDlgButtonChecked(IDC_PF_TIMECALC)==0;
 
 	GetDlgItem(IDC_VIDEOPLAYER)->GetWindowText(buffer);
 	_sntprintf(thePrefs.VideoPlayer, ARRSIZE(thePrefs.VideoPlayer), _T("%s"), buffer);
 
-	thePrefs.moviePreviewBackup = IsDlgButtonChecked(IDC_VIDEOBACKUP);
+	thePrefs.moviePreviewBackup = IsDlgButtonChecked(IDC_VIDEOBACKUP)!=0;
 
 	LoadSettings();
 
@@ -225,7 +243,7 @@ void CPPgFiles::Localize(void)
 		GetDlgItem(IDC_PF_TIMECALC)->SetWindowText(GetResString(IDS_PF_ADVANCEDCALC));
 		GetDlgItem(IDC_SEEMYSHARE_FRM)->SetWindowText(GetResString(IDS_PW_SHARE));
 		GetDlgItem(IDC_SEESHARE1)->SetWindowText(GetResString(IDS_PW_EVER));
-		GetDlgItem(IDC_SEESHARE2)->SetWindowText(GetResString(IDS_PW_FRIENDS));
+		GetDlgItem(IDC_SEESHARE2)->SetWindowText(GetResString(IDS_FSTATUS_FRIENDSONLY));
 		GetDlgItem(IDC_SEESHARE3)->SetWindowText(GetResString(IDS_PW_NOONE));
 		GetDlgItem(IDC_UAP)->SetWindowText(GetResString(IDS_PW_UAP));
 		GetDlgItem(IDC_DAP)->SetWindowText(GetResString(IDS_PW_DAP));
@@ -244,6 +262,8 @@ void CPPgFiles::Localize(void)
 		GetDlgItem(IDC_VIDEOBACKUP)->SetWindowText(GetResString(IDS_VIDEOBACKUP));		
 		GetDlgItem(IDC_STATIC_EMPTY)->SetWindowText(GetResString(IDS_STATIC_EMPTY));
 		GetDlgItem(IDC_BROWSEV)->SetWindowText(GetResString(IDS_PW_BROWSE));
+		GetDlgItem(IDC_REMEMBERDOWNLOADED)->SetWindowText(GetResString(IDS_PW_REMEMBERDOWNLOADED));
+		GetDlgItem(IDC_REMEMBERCANCELLED)->SetWindowText(GetResString(IDS_PW_REMEMBERCANCELLED));		
 	}
 }
 
@@ -297,7 +317,7 @@ void CPPgFiles::OnSettingsChange() {
 
 void CPPgFiles::OnSettingsChangeCat(uint8 index) {
 
-	bool on=IsDlgButtonChecked( index==1?IDC_STARTNEXTFILECAT:IDC_STARTNEXTFILECAT2 );
+	bool on = IsDlgButtonChecked(index==1 ? IDC_STARTNEXTFILECAT : IDC_STARTNEXTFILECAT2)!=0;
 	if (on)
 		CheckDlgButton( index==1?IDC_STARTNEXTFILECAT2:IDC_STARTNEXTFILECAT , FALSE);
 

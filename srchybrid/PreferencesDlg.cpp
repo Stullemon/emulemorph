@@ -113,6 +113,7 @@ CPreferencesDlg::CPreferencesDlg()
 	SetTreeWidth(170);
 
 	m_pPshStartPage = NULL;
+	m_bSaveIniFile = false;
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -122,12 +123,17 @@ CPreferencesDlg::~CPreferencesDlg()
 void CPreferencesDlg::OnDestroy()
 {
 	CTreePropSheet::OnDestroy();
-	thePrefs.Save();
+	if (m_bSaveIniFile)
+	{
+		thePrefs.Save();
+		m_bSaveIniFile = false;
+	}
 	m_pPshStartPage = GetPage(GetActiveIndex())->m_psp.pszTemplate;
 }
 
 BOOL CPreferencesDlg::OnInitDialog()
 {		
+	ASSERT( !m_bSaveIniFile );
 	BOOL bResult = CTreePropSheet::OnInitDialog();
 	InitWindowStyles(this);
 
@@ -253,6 +259,8 @@ BOOL CPreferencesDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		OnHelp();
 		return TRUE;
 	}
+	if (wParam == IDOK || wParam == ID_APPLY_NOW)
+		m_bSaveIniFile = true;
 	return __super::OnCommand(wParam, lParam);
 }
 

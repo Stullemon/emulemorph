@@ -21,26 +21,19 @@
 
 #include "stdafx.h"
 #include "emule.h"
-#include "DownloadClientsCtrl.h"
-#include "FileDetailDialog.h"
-#include "otherfunctions.h"
-#include "opcodes.h"
-#include "ClientDetailDialog.h"
 #include "emuledlg.h"
-#include "memdc.h"
+#include "DownloadClientsCtrl.h"
+#include "ClientDetailDialog.h"
+#include "MemDC.h"
 #include "MenuCmds.h"
 #include "FriendList.h"
 #include "TransferWnd.h"
 #include "ChatWnd.h"
-#include "updownclient.h"
+#include "UpDownClient.h"
 #include "UploadQueue.h"
 #include "ClientCredits.h"
 #include "PartFile.h"
-#include "Version.h"
 #include "Kademlia/Kademlia/Kademlia.h"
-#include "Kademlia/Kademlia/Prefs.h"
-#include "Kademlia/net/KademliaUDPListener.h"
-#include "DownloadQueue.h"
 #include "SharedFileList.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
@@ -61,6 +54,7 @@ BEGIN_MESSAGE_MAP(CDownloadClientsCtrl, CMuleListCtrl)
 	ON_WM_SYSCOLORCHANGE()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclkDownloadClientlist)
+	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
 END_MESSAGE_MAP()
 
 void CDownloadClientsCtrl::Init()
@@ -73,42 +67,43 @@ void CDownloadClientsCtrl::Init()
 
 	SetExtendedStyle(LVS_EX_FULLROWSELECT);
 
-	InsertColumn(0,	GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, 200);
-	InsertColumn(1,	GetResString(IDS_CLIENTSOFTWARE), LVCFMT_LEFT, 110); 
-	InsertColumn(2,	GetResString(IDS_FILE), LVCFMT_LEFT, 275);
+	InsertColumn(0,	GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, 165);
+	InsertColumn(1,	GetResString(IDS_CD_CSOFT), LVCFMT_LEFT, 90); 
+	InsertColumn(2,	GetResString(IDS_FILE), LVCFMT_LEFT, 235);
 	InsertColumn(3,	GetResString(IDS_DL_SPEED), LVCFMT_LEFT, 65);
-	InsertColumn(4, GetResString(IDS_AVAILABLE_PART), LVCFMT_LEFT, 170);
-	InsertColumn(5,	GetResString(IDS_TRANSDN), LVCFMT_LEFT, 130);
-	InsertColumn(6,	GetResString(IDS_TRANSUP), LVCFMT_LEFT, 130);
-	InsertColumn(7,	GetResString(IDS_DL_ULDL), LVCFMT_LEFT, 60);
-	InsertColumn(8, GetResString(IDS_LAST_ASKED), LVCFMT_LEFT, 100); //SLAHAM: ADDED Last Asked 
-	InsertColumn(9, GetResString(IDS_DOWNL_TIME), LVCFMT_LEFT, 100); //SLAHAM: ADDED Downloading Time
-	InsertColumn(10, GetResString(IDS_KNOWN_SINCE),LVCFMT_LEFT, 100); //SLAHAM: ADDED Known Since
+	InsertColumn(4, GetResString(IDS_AVAILABLEPARTS), LVCFMT_LEFT, 150);
+	InsertColumn(5,	GetResString(IDS_CL_TRANSFDOWN), LVCFMT_LEFT, 115);
+	InsertColumn(6,	GetResString(IDS_CL_TRANSFUP), LVCFMT_LEFT, 115);
+	InsertColumn(7,	GetResString(IDS_META_SRCTYPE), LVCFMT_LEFT, 60);
+	InsertColumn(8,	GetResString(IDS_DL_ULDL), LVCFMT_LEFT, 60);
+	InsertColumn(9, GetResString(IDS_LAST_ASKED), LVCFMT_LEFT, 100); //SLAHAM: ADDED Last Asked 
+	InsertColumn(10, GetResString(IDS_DOWNL_TIME), LVCFMT_LEFT, 100); //SLAHAM: ADDED Downloading Time
+	InsertColumn(11, GetResString(IDS_KNOWN_SINCE),LVCFMT_LEFT, 100); //SLAHAM: ADDED Known Since
 
 	// EastShare - Added by Pretender: IP2Country column
-	InsertColumn(11,GetResString(IDS_COUNTRY),LVCFMT_LEFT,50);
+	InsertColumn(12,GetResString(IDS_COUNTRY),LVCFMT_LEFT,50);
 	// EastShare - Added by Pretender: IP2Country column
 
 	SetAllIcons();
 	Localize();
-	LoadSettings(CPreferences::tabledownloadClients);
+	LoadSettings(CPreferences::tableDownloadClients);
 
 	// Barry - Use preferred sort order from preferences
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tabledownloadClients);
-	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tabledownloadClients);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableDownloadClients);
+	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableDownloadClients);
 	SetSortArrow(sortItem, sortAscending);
 	// SLUGFILLER: multiSort - load multiple params
-	for (int i = thePrefs.GetColumnSortCount(CPreferences::tabledownloadClients); i > 0; ) {
+	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableDownloadClients); i > 0; ) {
 		i--;
-		sortItem = thePrefs.GetColumnSortItem(CPreferences::tabledownloadClients, i);
-		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tabledownloadClients, i);
+		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableDownloadClients, i);
+		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableDownloadClients, i);
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
 	
 	//MORPH START - Added by SiRoB, IP2Country column
 	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
-		HideColumn (11);
+		HideColumn (12);
 	//MORPH END   - Added by SiRoB, IP2Country column
 }
 
@@ -121,24 +116,28 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_ImageList.DeleteImageList();
 	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	m_ImageList.SetBkColor(CLR_NONE);
-	m_ImageList.Add(CTempIconLoader(_T("ClientCompatible"))); //0
-	m_ImageList.Add(CTempIconLoader(_T("Friend"))); //1
-	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkey"))); //2
-	m_ImageList.Add(CTempIconLoader(_T("ClientMLDonkey"))); //3
-	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkeyHybrid"))); //4
-	m_ImageList.Add(CTempIconLoader(_T("ClientShareaza"))); //5
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1); //6
+	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkey")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientCompatible")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkeyPlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientCompatiblePlus")));
+	m_ImageList.Add(CTempIconLoader(_T("Friend")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientMLDonkey")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientMLDonkeyPlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkeyHybrid")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkeyHybridPlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientShareaza")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientShareazaPlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientAMule")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientAMulePlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientLPhant")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientLPhantPlus")));
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
-	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey"))); //7
-	m_ImageList.Add(CTempIconLoader(_T("Morph"))); //8
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2); //9
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3); //10
+	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey")));
+	m_ImageList.Add(CTempIconLoader(_T("Morph")));
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
-
-	m_ImageList.Add(CTempIconLoader(_T("ClientAMule"))); //11
-	m_ImageList.Add(CTempIconLoader(_T("ClientLPhant"))); //12
-
-	m_ImageList.Add(CTempIconLoader(_T("EastShare"))); //13 // SLAHAM: ADDED Is EastShare Client?
 
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
@@ -164,7 +163,7 @@ void CDownloadClientsCtrl::Localize()
 	pHeaderCtrl->SetItem(0, &hdi);
 	strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_CLIENTSOFTWARE);
+	strRes = GetResString(IDS_CD_CSOFT);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(1, &hdi);
 	strRes.ReleaseBuffer();
@@ -178,47 +177,58 @@ void CDownloadClientsCtrl::Localize()
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(3, &hdi);
 	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_AVAILABLE_PART);
+	strRes = GetResString(IDS_AVAILABLEPARTS);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(4, &hdi);
 	strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_TRANSDN);
+	strRes = GetResString(IDS_CL_TRANSFDOWN);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(5, &hdi);
 	strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_TRANSUP);
+	strRes = GetResString(IDS_CL_TRANSFUP);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(6, &hdi);
 	strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_DL_ULDL);
+	strRes = GetResString(IDS_META_SRCTYPE);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(7, &hdi);
+	strRes.ReleaseBuffer();
+
+	strRes = GetResString(IDS_DL_ULDL);
+	hdi.pszText = strRes.GetBuffer();
+	pHeaderCtrl->SetItem(8, &hdi);
 	strRes.ReleaseBuffer();
 
 	//SLAHAM: ADDED Last Asked =>
 	strRes = GetResString(IDS_LAST_ASKED);
 	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(8, &hdi);
+	pHeaderCtrl->SetItem(9, &hdi);
 	strRes.ReleaseBuffer();
 	//SLAHAM: ADDED Last Asked <=
 
 	//SLAHAM: ADDED Downloading Time =>
 	strRes = GetResString(IDS_DOWNL_TIME);
 	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(9, &hdi);
+	pHeaderCtrl->SetItem(10, &hdi);
 	strRes.ReleaseBuffer();
 	//SLAHAM: ADDED Downloading Time <=
 
 	//SLAHAM: ADDED Known Since =>
 	strRes = GetResString(IDS_KNOWN_SINCE);
 	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(10, &hdi);
+	pHeaderCtrl->SetItem(11, &hdi);
 	strRes.ReleaseBuffer();
 	//SLAHAM: ADDED Known Since <=
+
+	//MORPH START - Added by SiRoB, IP2Country column
+	strRes = GetResString(IDS_COUNTRY);
+	hdi.pszText = strRes.GetBuffer();
+	pHeaderCtrl->SetItem(12, &hdi);
+	strRes.ReleaseBuffer();
+	//MORPH END   - Added by SiRoB, IP2Country column
 }
 
 void CDownloadClientsCtrl::AddClient(CUpDownClient* client)
@@ -228,10 +238,7 @@ void CDownloadClientsCtrl::AddClient(CUpDownClient* client)
        
 	InsertItem(LVIF_TEXT|LVIF_PARAM, GetItemCount(), client->GetUserName(), 0, 0, 1, (LPARAM)client);
 	RefreshClient(client);
-	//[TPT] - TBH Transfers Window Style
-	theApp.emuledlg->transferwnd->UpdateListCount(0, GetItemCount()); 
-	theApp.emuledlg->transferwnd->UpdateDownloadClientsCount(GetItemCount());
-	//[TPT] - TBH Transfers Window Style
+	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Downloading, GetItemCount()); 
 }
 
 void CDownloadClientsCtrl::RemoveClient(CUpDownClient* client)
@@ -245,13 +252,9 @@ void CDownloadClientsCtrl::RemoveClient(CUpDownClient* client)
 	sint32 result = FindItem(&find);
 	if (result != (-1) )
 		DeleteItem(result);
-	//[TPT] - TBH Transfers Window Style
-	theApp.emuledlg->transferwnd->UpdateListCount(0, GetItemCount()); 
-	theApp.emuledlg->transferwnd->UpdateDownloadClientsCount(GetItemCount());
-	//[TPT] - TBH Transfers Window Style
+	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Downloading, GetItemCount()); 
 }
 
-// [TPT] - TransferWindow Fix
 void CDownloadClientsCtrl::RefreshClient(CUpDownClient* client)
 {
 	if( !theApp.emuledlg->IsRunning() )
@@ -289,7 +292,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
-	if( odc && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
+	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
 		if(bCtrlFocused)
 			odc->SetBkColor(m_crHighlight);
 		else
@@ -297,19 +300,27 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 	else
 		odc->SetBkColor(GetBkColor());
-
-	CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
-	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
+	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
+	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&lpDrawItemStruct->rcItem);
 	CFont *pOldFont = dc.SelectObject(GetFont());
 	//MORPH - Moved by SiRoB, Don't draw hidden Rect
 	/*
-	RECT cur_rec;
-	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	RECT cur_rec = lpDrawItemStruct->rcItem;
 	*/
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+    if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
+        dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
+    }
+
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
 
 	CString Sbuffer;	
-	CPartFile *lpPartFile = (CPartFile*)lpDrawItemStruct->itemData; //SLAHAM: ADDED Download In Bold
 	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 	int iCount = pHeaderCtrl->GetItemCount();
 	cur_rec.right = cur_rec.left - 8;
@@ -324,65 +335,77 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			{
 			//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				dc->SetTextColor(m_crWindowText);
+				switch(iColumn){
+				case 0:	{
+					uint8 image;
+					
+					//MORPH - Removed by SiRoB, Friend Addon
+					/*
+					/*if (client->IsFriend())
+						image = 4;
+					else*/ if (client->GetClientSoft() == SO_EDONKEYHYBRID){
+						image = 7;
+					}
+					else if (client->GetClientSoft() == SO_MLDONKEY){
+						image = 5;
+					}
+					else if (client->GetClientSoft() == SO_SHAREAZA){
+						image = 9;
+					}
+					else if (client->GetClientSoft() == SO_AMULE){
+						image = 11;
+					}
+					else if (client->GetClientSoft() == SO_LPHANT){
+						image = 13;
+					}
+					else if (client->ExtProtocolAvailable()){
+						image = client->IsMorph()?17:1; //MORPH START - Added by SiRoB, More client icon
+					}
+					else if (client->GetClientSoft() == SO_EDONKEY){
+						image = 15;
+					}
+					else{
+						image = 0;
+					}
 
-				switch(iColumn)
-				{
-				case 0:
-					{	
-						//MORPH START - Modified by SiRoB, More client & ownCredit overlay icon
-						UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->Credits() && client->Credits()->GetMyScoreRatio(client->GetIP()) > 1) ? 2 : 0));
+					UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->Credits() && client->Credits()->GetMyScoreRatio(client->GetIP()) > 1) ? 2 : 0));
+					POINT point = {cur_rec.left, cur_rec.top+1};
+					/*
+					m_ImageList.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
+					*/
+					m_ImageList.Draw(dc,image, point, ILD_NORMAL | uOvlImg);
+					// Mighty Knife: Community visualization
+					if (client->IsCommunity())
+						m_overlayimages.Draw(dc,0, point, ILD_TRANSPARENT);
+					// [end] Mighty Knife
+					//MORPH START - Added by SiRoB, Friend Addon
+					if (client->IsFriend())
+						m_overlayimages.Draw(dc, client->GetFriendSlot()?2:1,point, ILD_TRANSPARENT);
+					//MORPH END   - Added by SiRoB, Friend Addon
+					//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
+
+					Sbuffer = client->GetUserName();
+
+					//EastShare Start - added by AndCycle, IP to Country 
+					if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(12)){
+						cur_rec.left+=20;
 						POINT point2= {cur_rec.left,cur_rec.top+1};
+						int index = client->GetCountryFlagIndex();
+						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+					}
+					//EastShare End - added by AndCycle, IP to Country
 
-						if (client->GetClientSoft() == SO_EDONKEYHYBRID)
-							m_ImageList.Draw(dc, 4, point2, ILD_NORMAL | uOvlImg);
-						else if(client->GetClientSoft() == SO_MLDONKEY)
-							m_ImageList.Draw(dc, 3, point2, ILD_NORMAL | uOvlImg);
-						else if (client->GetClientSoft() == SO_SHAREAZA)
-							m_ImageList.Draw(dc, 5, point2, ILD_NORMAL | uOvlImg);
-						else if (client->GetClientSoft() == SO_AMULE)
-							m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | uOvlImg);
-						else if (client->GetClientSoft() == SO_LPHANT)
-							m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | uOvlImg);
-						else if (client->ExtProtocolAvailable())
-							m_ImageList.Draw(dc, client->IsMorph()?8:0, point2, ILD_NORMAL | uOvlImg);
-						else if (client->GetClientSoft() == SO_EDONKEY)
-							m_ImageList.Draw(dc, 2, point2, ILD_NORMAL | uOvlImg);
-						else
-							m_ImageList.Draw(dc, 0, point2, ILD_NORMAL | uOvlImg);
+					cur_rec.left +=20;
+					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+					cur_rec.left -=20;
 
-						// Mighty Knife: Community visualization
-						if (client->IsCommunity())
-							m_overlayimages.Draw(dc,0, point2, ILD_TRANSPARENT);
-						// [end] Mighty Knife
-						//MORPH START - Added by SiRoB, Friend Addon
-						if (client->IsFriend())
-							m_overlayimages.Draw(dc, client->GetFriendSlot()?2:1,point2, ILD_TRANSPARENT);
-						//MORPH END   - Added by SiRoB, Friend Addon
-						//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
+					//EastShare Start - added by AndCycle, IP to Country
+					if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(12)){
+						cur_rec.left-=20;
+					}
+					//EastShare End - added by AndCycle, IP to Country
 
-						POINT point = {cur_rec.left, cur_rec.top+1};
-						Sbuffer = client->GetUserName();
-
-						//EastShare Start - added by AndCycle, IP to Country 
-						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(11)){
-							cur_rec.left+=20;
-							POINT point2= {cur_rec.left,cur_rec.top+1};
-							int index = client->GetCountryFlagIndex();
-							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
-						}
-						//EastShare End - added by AndCycle, IP to Country
-
-						cur_rec.left +=20;
-						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
-						cur_rec.left -=20;
-
-						//EastShare Start - added by AndCycle, IP to Country
-						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(11)){
-							cur_rec.left-=20;
-						}
-						//EastShare End - added by AndCycle, IP to Country
-
-						break;
+					break;
 					}
 				case 1:
 					Sbuffer.Format(_T("%s"), client->GetClientSoftVer());
@@ -408,18 +431,16 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						if (thePrefs.GetUseClientPercentage() && client->GetPartStatus())
 						{
 							float percent = (float)client->GetAvailablePartCount() / (float)client->GetPartCount()* 100.0f;
-							COLORREF oldclr = dc->SetTextColor(RGB(255,255,255)); //Pretender: percentage in white
-							int iOMode = dc->SetBkMode(TRANSPARENT);
 							buffer.Format(_T("%.1f%%"), percent);
 
 							if (percent > 0.05f)
 							{
 								//Commander - Added: Draw Client Percentage xored, caching before draw - Start
-								COLORREF oldclr = dc.SetTextColor(RGB(0,0,0));
+								COLORREF oldclr = dc->SetTextColor(RGB(0,0,0));
 								int iOMode = dc.SetBkMode(TRANSPARENT);
 								buffer.Format(_T("%.1f%%"), percent);
-								CFont *pOldFont = dc.SelectObject(&theApp.emuledlg->transferwnd->downloadlistctrl.m_fontBoldSmaller);
-	#define	DrawClientPercentText		dc.DrawText(buffer, buffer.GetLength(),&cur_rec, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
+								CFont *pOldFont = dc->SelectObject(&theApp.emuledlg->transferwnd->downloadlistctrl.m_fontBoldSmaller);
+	#define	DrawClientPercentText		dc->DrawText(buffer, buffer.GetLength(),&cur_rec, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
 								cur_rec.top-=1;cur_rec.bottom-=1;
 								DrawClientPercentText;cur_rec.left+=1;cur_rec.right+=1;
 								DrawClientPercentText;cur_rec.left+=1;cur_rec.right+=1;
@@ -429,11 +450,11 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								DrawClientPercentText;cur_rec.left-=1;cur_rec.right-=1;
 								DrawClientPercentText;cur_rec.top-=1;cur_rec.bottom-=1;
 								DrawClientPercentText;cur_rec.left++;cur_rec.right++;
-								dc.SetTextColor(RGB(255,255,255));
+								dc->SetTextColor(RGB(255,255,255));
 								DrawClientPercentText;
-								dc.SelectObject(pOldFont);
-								dc.SetBkMode(iOMode);
-								dc.SetTextColor(oldclr);
+								dc->SelectObject(pOldFont);
+								dc->SetBkMode(iOMode);
+								dc->SetTextColor(oldclr);
 								//Commander - Added: Draw Client Percentage xored, caching before draw - End	
 							}
 							//SLAHAM: ADDED Client Percentage <=
@@ -444,25 +465,47 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					}	
 				case 5:
-					if(client->Credits())
-						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferredDown()), CastItoXBytes(client->credits->GetDownloadedTotal()));
+					if(client->Credits() && client->GetSessionDown() < client->credits->GetDownloadedTotal())
+						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetSessionDown()), CastItoXBytes(client->credits->GetDownloadedTotal()));
 					else
-						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferredDown()));
+						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetSessionDown()));
 					break;
 				case 6:
-					if(client->Credits())
-						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferredUp()), CastItoXBytes(client->credits->GetUploadedTotal()));
+					if(client->Credits() && client->GetSessionUp() < client->credits->GetUploadedTotal())
+						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->credits->GetUploadedTotal()));
 					else
-						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferredUp()));
+						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetSessionUp()));
 					break;
 				case 7:
+						switch(client->GetSourceFrom()){
+						case SF_SERVER:
+							Sbuffer = "eD2K Server";
+							break;
+						case SF_KADEMLIA:
+							Sbuffer = GetResString(IDS_KADEMLIA);
+							break;
+						case SF_SOURCE_EXCHANGE:
+							Sbuffer = GetResString(IDS_SE);
+							break;
+						case SF_PASSIVE:
+							Sbuffer = GetResString(IDS_PASSIVE);
+							break;
+						case SF_LINK:
+							Sbuffer = GetResString(IDS_SW_LINK);
+							break;
+						default:
+							Sbuffer = GetResString(IDS_UNKNOWN);
+							break;
+						}
+					break;
+				case 8:
 					if(client->Credits())
 						Sbuffer.Format(_T("%.1f/%.1f"),client->credits->GetScoreRatio(client->GetIP()), client->credits->GetMyScoreRatio(client->GetIP()));
 					else
 						Sbuffer.Format(_T(""));
 					break;
 					//SLAHAM: ADDED Last Asked Counter =>
-				case 8:
+				case 9:
 					if( client->GetLastAskedTime() )
 						Sbuffer.Format(_T(" %s [%u]"), CastSecondsToHM((::GetTickCount()-client->GetLastAskedTime())/1000), client->uiDLAskingCounter);
 					else
@@ -471,13 +514,13 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 					//SLAHAM: ADDED Last Asked Counter <=
 					//SLAHAM: ADDED Show Downloading Time =>
-				case 9:	
+				case 10:	
 					Sbuffer.Format(_T(" %s (%s)[%u]"), CastSecondsToHM(client->dwSessionDLTime/1000), CastSecondsToHM(client->dwTotalDLTime/1000), client->uiStartDLCount);
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DLC_DT_TEXT);
 					break;
 					//SLAHAM: ADDED Show Downloading Time <=
 					//SLAHAM: ADDED Known Since =>
-				case 10: 
+				case 11: 
 					if( client->dwThisClientIsKnownSince )
 						Sbuffer.Format(_T(" %s"), CastSecondsToHM((::GetTickCount()-client->dwThisClientIsKnownSince)/1000));
 					else
@@ -486,7 +529,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 					//SLAHAM: ADDED Known Since <=
 				// EastShare - Added by Pretender: IP2Country column
-				case 11:
+				case 12:
 						if(theApp.ip2country->ShowCountryFlag()){
 							POINT point2= {cur_rec.left,cur_rec.top+1};
 							int index = client->GetCountryFlagIndex();
@@ -502,7 +545,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				// EastShare - Added by Pretender: IP2Country column
 				}
 
-				if( iColumn != 4 && iColumn != 0 && iColumn != 3 && iColumn != 11)
+				if( iColumn != 4 && iColumn != 0 && iColumn != 3 && iColumn != 12)
 				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 			}//MORPH - Added by SiRoB, Don't draw hidden columns
 			cur_rec.left += GetColumnWidth(iColumn);
@@ -512,8 +555,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
-		RECT outline_rec;
-		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		RECT outline_rec = lpDrawItemStruct->rcItem;
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -529,27 +571,29 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
 
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
+
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
 }
-// [TPT] - TransferWindow Fix
 
 void CDownloadClientsCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int oldSortItem = thePrefs.GetColumnSortItem(CPreferences::tabledownloadClients); 
+	int oldSortItem = thePrefs.GetColumnSortItem(CPreferences::tableDownloadClients); 
 
-	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tabledownloadClients);
+	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableDownloadClients);
 	bool sortAscending = (oldSortItem != pNMListView->iSubItem) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	
 
 	// Item is column clicked
 	int sortItem = pNMListView->iSubItem; 
 
 	// Save new preferences
-	thePrefs.SetColumnSortItem(CPreferences::tabledownloadClients, sortItem);
-	thePrefs.SetColumnSortAscending(CPreferences::tabledownloadClients, sortAscending);
+	thePrefs.SetColumnSortItem(CPreferences::tableDownloadClients, sortItem);
+	thePrefs.SetColumnSortAscending(CPreferences::tableDownloadClients, sortAscending);
 	// Sort table
 	SetSortArrow(sortItem, sortAscending);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
@@ -558,33 +602,39 @@ void CDownloadClientsCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 }
 
 BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
-
-	if (GetSelectionMark() != (-1))
-	{
-		CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
-		switch (wParam)
-		{
-
-		case MP_DETAIL:{
-			CClientDetailDialog dialog(client);
-			dialog.DoModal();
-			break;
-					   }
-
-		case MP_ADDFRIEND:
-			theApp.friendlist->AddFriend(client);
-			break;
-
-		case MP_REMOVEFRIEND:{ //LSD
-			if (client && client->IsFriend()){					
-				theApp.friendlist->RemoveFriend(client->m_Friend);
-				theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(client);
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (iSel != -1){
+		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
+		switch (wParam){
+			case MP_SHOWLIST:
+				client->RequestSharedFileList();
+				break;	
+			case MP_MESSAGE:
+				theApp.emuledlg->chatwnd->StartSession(client);
+				break;
+			case MP_ADDFRIEND:
+				if (theApp.friendlist->AddFriend(client))
+					Update(iSel);
+				break;
+			case MPG_ALTENTER:
+			case MP_DETAIL:{
+				CClientDetailDialog dialog(client, this);
+				dialog.DoModal();
+				break;
 			}
-			break;
-							 }
+			case MP_BOOT:
+				if (client->GetKadPort())
+					Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+				break;
+			case MP_REMOVEFRIEND:{ //LSD
+				if (client && client->IsFriend()){					
+					theApp.friendlist->RemoveFriend(client->m_Friend);
+					theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(client);
+				}
+				break;
+			 }
 
-		case MP_FRIENDSLOT:
-			{
+			case MP_FRIENDSLOT:{
 				//MORPH START - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 				if (client){
 					bool IsAlready;
@@ -603,49 +653,12 @@ BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				break;
 			}
 
-		case MP_MESSAGE:
-			theApp.emuledlg->chatwnd->StartSession(client);
-			break;
-
-		case MP_SHOWLIST:
-			client->RequestSharedFileList();
-			break;			
-
-		case MP_LIST_REQUESTED_FILES:{
-			if (client != NULL)
-			{
-				CString fileList;
-				fileList += GetResString(IDS_LISTREQDL);
-				fileList += "\n--------------------------\n" ; 
-				if (theApp.downloadqueue->IsPartFile(client->GetRequestFile()))
-				{
-					fileList += client->GetRequestFile()->GetFileName(); 
-					for(POSITION pos = client->m_OtherRequests_list.GetHeadPosition();pos!=0;client->m_OtherRequests_list.GetNext(pos))
-					{
-						fileList += "\n" ; 
-						fileList += client->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
-					}
-					for(POSITION pos = client->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;client->m_OtherNoNeeded_list.GetNext(pos))
-					{
-						fileList += "\n" ;
-						fileList += client->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
-					}
-				}
-				else
-					fileList += GetResString(IDS_LISTREQNODL);
-				fileList += "\n\n\n";
-				fileList += GetResString(IDS_LISTREQUL);
-				fileList += "\n------------------------\n" ; 
-				CKnownFile* uploadfile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
-				if(uploadfile)
-					fileList += uploadfile->GetFileName();
-				else
-					fileList += GetResString(IDS_LISTREQNOUL);
-				AfxMessageBox(fileList,MB_OK);
-			}
-			break;
-									 }
-									 //MORPH END - Added by Yun.SF3, List Requested Files
+			//MORPH START - Added by Yun.SF3, List Requested Files
+			case MP_LIST_REQUESTED_FILES:
+				if (client != NULL)
+					client->ShowRequestedFiles(); //Changed by SiRoB
+				break;
+			//MORPH END - Added by Yun.SF3, List Requested Files
 		}
 	}
 	return true;
@@ -655,120 +668,134 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 	const CUpDownClient* item1 = (CUpDownClient*)lParam1;
 	const CUpDownClient* item2 = (CUpDownClient*)lParam2;
 	switch(lParamSort){
-	case 0: 
-		if(item2->GetUserName() == item1->GetUserName())
-			return 0;
-		else if(!item2->GetUserName())
-			return 1;
-		else if(!item1->GetUserName())
-			return -1;
-		return CompareLocaleStringNoCase(item2->GetUserName(),item1->GetUserName());
-	case 100: 
-		if(item1->GetUserName() == item2->GetUserName())
-			return 0;
-		else if(!item1->GetUserName())
-			return 1;
-		else if(!item2->GetUserName())
-			return -1;
-		return CompareLocaleStringNoCase(item1->GetUserName(),item2->GetUserName());
-	case 1:
-		if(item1->GetClientSoft() == item2->GetClientSoft())
-			if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-				return CompareOptLocaleStringNoCase(item2->GetClientSoftVer(), item1->GetClientSoftVer());
-			}
-			else {
-				return item2->GetVersion() - item1->GetVersion();
-			}
-		else
-			return item1->GetClientSoft() - item2->GetClientSoft();
-	case 101:
-		if(item1->GetClientSoft() == item2->GetClientSoft())
-			if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-				return CompareOptLocaleStringNoCase(item1->GetClientSoftVer(), item2->GetClientSoftVer());
-			}
-			else {
-				return item1->GetVersion() - item2->GetVersion();
-			}
-		else
-			return item2->GetClientSoft() - item1->GetClientSoft();
-	case 2:
-		return item2->GetRequestFile()->GetFileName().CompareNoCase(item1->GetRequestFile()->GetFileName());
-	case 102: 
-		return item1->GetRequestFile()->GetFileName().CompareNoCase(item2->GetRequestFile()->GetFileName());
-	case 3:
-		return CompareUnsigned(item2->GetDownloadDatarate(), item1->GetDownloadDatarate());
-	case 103:
-		return CompareUnsigned(item1->GetDownloadDatarate(), item2->GetDownloadDatarate());
-	case 4:
-		return CompareUnsigned(item2->GetPartCount(), item1->GetPartCount());
-	case 104: 
-		return CompareUnsigned(item1->GetPartCount(), item2->GetPartCount());
-	case 5:
-		return CompareUnsigned(item2->GetTransferredDown(), item1->GetTransferredDown());
-	case 105:
-		return CompareUnsigned(item1->GetTransferredDown(), item2->GetTransferredDown());
-	case 6:
-		return CompareUnsigned(item2->GetDatarate(), item1->GetDatarate());
-	case 106:
-		return CompareUnsigned(item1->GetDatarate(), item2->GetDatarate());
-	case 7:
-		{   
-			if (!item1->Credits()) 
-				return 1; 
-			else if (!item2->Credits())   
-				return -1; 
-			float r1=item2->credits->GetScoreRatio(item2->GetIP());
-			float r2=item1->credits->GetScoreRatio(item1->GetIP());
-			return r1==r2? 0 : r1<r2? -1 : 1;
+		case 0: 
+			if(item1->GetUserName() && item2->GetUserName())
+				return CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
+			else if(item1->GetUserName())
+				return 1;
+			else
+				return -1;
+		case 100: 
+			if(item1->GetUserName() && item2->GetUserName())
+				return CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
+			else if(item2->GetUserName())
+				return 1;
+			else
+				return -1;
+		case 1:
+			if(item1->GetClientSoft() == item2->GetClientSoft())
+				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
+					return CompareOptLocaleStringNoCase(item2->GetClientSoftVer(), item1->GetClientSoftVer());
+				}
+				else {
+					return item2->GetVersion() - item1->GetVersion();
+				}
+			else
+				return item1->GetClientSoft() - item2->GetClientSoft();
+		case 101:
+			if(item1->GetClientSoft() == item2->GetClientSoft())
+				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
+					return CompareOptLocaleStringNoCase(item1->GetClientSoftVer(), item2->GetClientSoftVer());
+				}
+				else {
+					return item1->GetVersion() - item2->GetVersion();
+				}
+			else
+				return item2->GetClientSoft() - item1->GetClientSoft();
+		case 2: {
+			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
+			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			if( (file1 != NULL) && (file2 != NULL))
+				return CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
+			else if( file1 == NULL )
+				return 1;
+			else
+				return -1;
 		}
-	case 107:
-		{   
-			if (!item2->Credits()) 
-				return 1; 
-			else if (!item1->Credits())   
-				return -1;  
-
-			float r1=item1->credits->GetScoreRatio(item1->GetIP());   
-			float r2=item2->credits->GetScoreRatio(item2->GetIP()); 
-			return r1==r2? 0 : r1<r2? -1 : 1;
+		case 102:{
+			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
+			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			if( (file1 != NULL) && (file2 != NULL))
+				return CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
+			else if( file1 == NULL )
+				return 1;
+			else
+				return -1;
 		}
+		case 3:
+			return CompareUnsigned(item2->GetDownloadDatarate(), item1->GetDownloadDatarate());
+		case 103:
+			return CompareUnsigned(item1->GetDownloadDatarate(), item2->GetDownloadDatarate());
+		case 4:
+			return CompareUnsigned(item2->GetPartCount(), item1->GetPartCount());
+		case 104: 
+			return CompareUnsigned(item1->GetPartCount(), item2->GetPartCount());
+		case 5:
+			return CompareUnsigned(item2->GetSessionDown(), item1->GetSessionDown());
+		case 105:
+			return CompareUnsigned(item1->GetSessionDown(), item2->GetSessionDown());
+		case 6:
+			return CompareUnsigned(item2->GetSessionUp(), item1->GetSessionUp());
+		case 106:
+			return CompareUnsigned(item1->GetSessionUp(), item2->GetSessionUp());
+		case 8:
+			{   
+				if (!item1->Credits()) 
+					return 1; 
+				else if (!item2->Credits())   
+					return -1; 
+				float r1=item2->credits->GetScoreRatio(item2->GetIP());
+				float r2=item1->credits->GetScoreRatio(item1->GetIP());
+				return r1==r2? 0 : r1<r2? -1 : 1;
+			}
+		case 108:
+			{   
+				if (!item2->Credits()) 
+					return 1; 
+				else if (!item1->Credits())   
+					return -1;  
+	
+				float r1=item1->credits->GetScoreRatio(item1->GetIP());   
+				float r2=item2->credits->GetScoreRatio(item2->GetIP()); 
+				return r1==r2? 0 : r1<r2? -1 : 1;
+			}
 		//SLAHAM: ADDED Last Asked =>
-	case 8: 
-		{
-			uint32 lastAskedTime1 = item2->GetLastAskedTime();
-			uint32 lastAskedTime2 = item1->GetLastAskedTime();
-			return lastAskedTime1==lastAskedTime2? 0 : lastAskedTime1<lastAskedTime2? -1 : 1;
-		}
-	case 108:
-		{
-			uint32 lastAskedTime1 = item1->GetLastAskedTime();
-			uint32 lastAskedTime2 = item2->GetLastAskedTime();
-			return lastAskedTime1==lastAskedTime2? 0 : lastAskedTime1<lastAskedTime2? -1 : 1;
-		}
+		case 9: 
+			{
+				uint32 lastAskedTime1 = item2->GetLastAskedTime();
+				uint32 lastAskedTime2 = item1->GetLastAskedTime();
+				return lastAskedTime1==lastAskedTime2? 0 : lastAskedTime1<lastAskedTime2? -1 : 1;
+			}
+		case 109:
+			{
+				uint32 lastAskedTime1 = item1->GetLastAskedTime();
+				uint32 lastAskedTime2 = item2->GetLastAskedTime();
+				return lastAskedTime1==lastAskedTime2? 0 : lastAskedTime1<lastAskedTime2? -1 : 1;
+			}
 		//SLAHAM: ADDED Last Asked <=
 		//SLAHAM: ADDED Show Downloading Time =>
-	case 9:
-		return CompareUnsigned(item2->dwSessionDLTime, item1->dwSessionDLTime);
-	case 109:
-		return CompareUnsigned(item1->dwTotalDLTime, item2->dwTotalDLTime);
+		case 10:
+			return CompareUnsigned(item2->dwSessionDLTime, item1->dwSessionDLTime);
+		case 110:
+			return CompareUnsigned(item1->dwTotalDLTime, item2->dwTotalDLTime);
 		//SLAHAM: ADDED Show Downloading Time <=
 		//SLAHAM: ADDED Known Since =>
-	case 10:
-		{
-			uint32 known1 = item2->dwThisClientIsKnownSince;
-			uint32 known2 = item1->dwThisClientIsKnownSince;
-			return known1==known2? 0 : known1<known2? -1 : 1;
-		}
-	case 110:
-		{
-			uint32 known1 = item1->dwThisClientIsKnownSince;
-			uint32 known2 = item2->dwThisClientIsKnownSince;
-			return known1==known2? 0 : known1<known2? -1 : 1;
-		}
-		//SLAHAM: ADDED Known Since <=
+		case 11:
+			{
+				uint32 known1 = item2->dwThisClientIsKnownSince;
+				uint32 known2 = item1->dwThisClientIsKnownSince;
+				return known1==known2? 0 : known1<known2? -1 : 1;
+			}
+		case 111:
+			{
+				uint32 known1 = item1->dwThisClientIsKnownSince;
+				uint32 known2 = item2->dwThisClientIsKnownSince;
+				return known1==known2? 0 : known1<known2? -1 : 1;
+			}
+			//SLAHAM: ADDED Known Since <=
 
-	// EastShare - Added by Pretender: IP2Country column
-        case 11:
+		// EastShare - Added by Pretender: IP2Country column
+        case 12:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
 				return CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))
@@ -776,7 +803,7 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			else
 				return -1;
 
-		case 111:
+		case 112:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
 				return CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
 			else if(item2->GetCountryName(true))
@@ -856,4 +883,38 @@ void CDownloadClientsCtrl::OnSysColorChange()
 	CMuleListCtrl::OnSysColorChange();
 	SetAllIcons();
 }
-//SLAHAM: ADDED/MODIFIED DownloadClientsCtrl <=
+
+void CDownloadClientsCtrl::OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	NMLVDISPINFO *pDispInfo = reinterpret_cast<NMLVDISPINFO*>(pNMHDR);
+
+	if (theApp.emuledlg->IsRunning()){
+		// Although we have an owner drawn listview control we store the text for the primary item in the listview, to be
+		// capable of quick searching those items via the keyboard. Because our listview items may change their contents,
+		// we do this via a text callback function. The listview control will send us the LVN_DISPINFO notification if
+		// it needs to know the contents of the primary item.
+		//
+		// But, the listview control sends this notification all the time, even if we do not search for an item. At least
+		// this notification is only sent for the visible items and not for all items in the list. Though, because this
+		// function is invoked *very* often, no *NOT* put any time consuming code here in.
+
+		if (pDispInfo->item.mask & LVIF_TEXT){
+			const CUpDownClient* pClient = reinterpret_cast<CUpDownClient*>(pDispInfo->item.lParam);
+			if (pClient != NULL){
+				switch (pDispInfo->item.iSubItem){
+					case 0:
+						if (pClient->GetUserName() != NULL && pDispInfo->item.cchTextMax > 0){
+							_tcsncpy(pDispInfo->item.pszText, pClient->GetUserName(), pDispInfo->item.cchTextMax);
+							pDispInfo->item.pszText[pDispInfo->item.cchTextMax-1] = _T('\0');
+						}
+						break;
+					default:
+						// shouldn't happen
+						pDispInfo->item.pszText[0] = _T('\0');
+						break;
+				}
+			}
+		}
+	}
+	*pResult = 0;
+}

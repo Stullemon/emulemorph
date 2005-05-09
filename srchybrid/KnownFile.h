@@ -34,7 +34,9 @@ class CFileDataIO;
 class CAICHHashTree;
 class CAICHHashSet;
 class CSafeMemFile;	// SLUGFILLER: hideOS
+
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
+typedef CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;
 
 class CFileStatistic
 {
@@ -164,16 +166,21 @@ public:
 	uint32 GetIntTagValue(uint8 tagname) const;
 	uint32 GetIntTagValue(LPCSTR tagname) const;
 	bool GetIntTagValue(uint8 tagname, uint32& ruValue) const;
+	void SetIntTagValue(uint8 tagname, uint32 uValue);
 	const CString& GetStrTagValue(uint8 tagname) const;
 	const CString& GetStrTagValue(LPCSTR tagname) const;
+	void SetStrTagValue(uint8 tagname, LPCTSTR);
 	CTag* GetTag(uint8 tagname, uint8 tagtype) const;
 	CTag* GetTag(LPCSTR tagname, uint8 tagtype) const;
 	CTag* GetTag(uint8 tagname) const;
 	CTag* GetTag(LPCSTR tagname) const;
+	const CArray<CTag*, CTag*>& GetTags() const { return taglist; }
 	void AddTagUnique(CTag* pTag);
-	const CArray<CTag*,CTag*>& GetTags() const { return taglist; }
+	void ClearTags();
+	void CopyTags(const CArray<CTag*, CTag*>& tags);
+
 	void AddNote(Kademlia::CEntry* pEntry);
-	const CTypedPtrList<CPtrList, Kademlia::CEntry*>& getNotes() const { return CKadEntryPtrList; }
+	const CKadEntryPtrList& getNotes() const { return m_kadNotes; }
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -189,7 +196,7 @@ protected:
 	uint8	m_uRating;
 	CString m_strFileType;
 	CArray<CTag*,CTag*> taglist;
-	CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;
+	CKadEntryPtrList m_kadNotes;
 };
 
 class CKnownFile : public CAbstractFile
@@ -198,7 +205,7 @@ class CKnownFile : public CAbstractFile
 	friend class CImportPartsFileThread; //MORPH - Added by SiRoB, ImportParts
 public:
 	CKnownFile();
-	~CKnownFile();
+	virtual ~CKnownFile();
 
 	// MORPH START - Added by Commander, WebCache 1.2e
 	bool ReleaseViaWebCache; //JP webcache release

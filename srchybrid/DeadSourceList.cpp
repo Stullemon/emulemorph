@@ -118,9 +118,9 @@ bool CDeadSourceList::IsDeadSource(const CUpDownClient* pToCheck) const{
 }
 
 void CDeadSourceList::AddDeadSource(const CUpDownClient* pToAdd){
-	if (thePrefs.GetLogFilteredIPs())
-		AddDebugLogLine(DLP_VERYLOW, false, _T("Added source to bad source list (%s) - file %s : %s")
-		, m_bGlobalList? _T("Global"):_T("Local"), (pToAdd->GetRequestFile() != NULL)? pToAdd->GetRequestFile()->GetFileName() : _T("???"), pToAdd->DbgGetClientInfo() );
+	//if (thePrefs.GetLogFilteredIPs())
+	//	AddDebugLogLine(DLP_VERYLOW, false, _T("Added source to bad source list (%s) - file %s : %s")
+	//	, m_bGlobalList? _T("Global"):_T("Local"), (pToAdd->GetRequestFile() != NULL)? pToAdd->GetRequestFile()->GetFileName() : _T("???"), pToAdd->DbgGetClientInfo() );
 
 	if(!pToAdd->HasLowID())
 		m_mapDeadSources.SetAt(CDeadSource(pToAdd->GetUserIDHybrid(), pToAdd->GetUserPort(), pToAdd->GetServerIP(), pToAdd->GetKadPort()), BLOCKTIME );
@@ -141,10 +141,23 @@ void CDeadSourceList::AddDeadSource(const CUpDownClient* pToAdd){
 		CleanUp();
 }
 
+void CDeadSourceList::RemoveDeadSource(const CUpDownClient* client)
+{
+	if (!client->HasLowID())
+		m_mapDeadSources.RemoveKey(CDeadSource(client->GetUserIDHybrid(), client->GetUserPort(), client->GetServerIP(), client->GetKadPort()));
+	else
+	{
+		if (client->GetServerIP() != 0)
+			m_mapDeadSources.RemoveKey(CDeadSource(client->GetUserIDHybrid(), client->GetUserPort(), client->GetServerIP(), 0));
+		if (client->HasValidBuddyID())
+			m_mapDeadSources.RemoveKey(CDeadSource(client->GetUserHash()));
+	}
+}
+
 void CDeadSourceList::CleanUp(){
 	m_dwLastCleanUp = ::GetTickCount();
-	if (thePrefs.GetLogFilteredIPs())
-		AddDebugLogLine(DLP_VERYLOW, false, _T("Cleaning up DeadSourceList (%s), %i clients on List..."),  m_bGlobalList ? _T("Global") : _T("Local"), m_mapDeadSources.GetCount());
+	//if (thePrefs.GetLogFilteredIPs())
+	//	AddDebugLogLine(DLP_VERYLOW, false, _T("Cleaning up DeadSourceList (%s), %i clients on List..."),  m_bGlobalList ? _T("Global") : _T("Local"), m_mapDeadSources.GetCount());
 	POSITION pos = m_mapDeadSources.GetStartPosition();
 	CDeadSource dsKey;
 	uint32 dwExpTime;
@@ -155,6 +168,6 @@ void CDeadSourceList::CleanUp(){
 			m_mapDeadSources.RemoveKey(dsKey);
 		}
 	}
-	if (thePrefs.GetLogFilteredIPs())
-		AddDebugLogLine(DLP_VERYLOW, false, _T("...done, %i clients left on list"), m_mapDeadSources.GetCount());
+	//if (thePrefs.GetLogFilteredIPs())
+	//	AddDebugLogLine(DLP_VERYLOW, false, _T("...done, %i clients left on list"), m_mapDeadSources.GetCount());
 }

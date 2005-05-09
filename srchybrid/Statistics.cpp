@@ -271,8 +271,8 @@ void CStatistics::RecordRate()
 
 	// Accurate datarate Calculation
 	uint32 stick = GetTickCount();
-	TransferredData newitemUP = {theStats.sessionSentBytes, stick};
-	TransferredData newitemDN = {theStats.sessionReceivedBytes, stick};
+	TransferredData newitemUP = {(UINT)theStats.sessionSentBytes, stick};
+	TransferredData newitemDN = {(UINT)theStats.sessionReceivedBytes, stick};
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
 	TransferredData newitemFriends = {theStats.sessionSentBytesToFriend, stick};
 	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923

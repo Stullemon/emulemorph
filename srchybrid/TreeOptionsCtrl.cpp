@@ -150,10 +150,10 @@ to maintain a single distribution point for the source code.
 #include <shlobj.h>
 #endif
 #include "TreeOptionsCtrl.h"
-
 // emulEspaña: Added by MoNKi [ MoNKi: -Pass Edit on TreeOptionsCtrl- ]
 #include "TreeOptsPrefs\PassTreeOptionsEdit.h"
 // End emulEspaña
+#pragma warning(disable:4189) // 'bSuccess' : local variable is initialized but not referenced
 
 
 //////////////// Macros / Locals /////////////////////////////////////

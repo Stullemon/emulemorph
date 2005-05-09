@@ -208,7 +208,7 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 	LPVOID pUserSID = NULL;
 	PACL pNewACL = NULL;
 	PSECURITY_DESCRIPTOR pSD = NULL;
-	bool fAPISuccess;
+	BOOL fAPISuccess;
 	
 	try {
 		// get user sid
@@ -303,10 +303,10 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 
 		if (SetNamedSecurityInfo(strDirFile.GetBuffer(), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, pNewACL, NULL) != ERROR_SUCCESS)
 			throw CString(_T("Run as unpriveleged user: Error: SetNamedSecurityInfo() failed,"));
-		fAPISuccess = true;
+		fAPISuccess = TRUE;
 	}
 	catch(CString error){
-		fAPISuccess = false;
+		fAPISuccess = FALSE;
 		theApp.QueueDebugLogLine(false, error);
 	}
 	// clean up
@@ -320,7 +320,7 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 		LocalFree(pSD);
 
 	// finished
-	return fAPISuccess;
+	return fAPISuccess!=FALSE;
 }
 
 bool CSecRunAsUser::RestartAsUser(){
@@ -330,7 +330,7 @@ bool CSecRunAsUser::RestartAsUser(){
 		return false;
 
 	ASSERT ( !m_strPassword.IsEmpty() );
-	bool bResult;
+	BOOL bResult;
 	try{
 		PROCESS_INFORMATION ProcessInfo = {0};
 		TCHAR szAppPath[MAX_PATH];
@@ -359,7 +359,7 @@ bool CSecRunAsUser::RestartAsUser(){
 	FreeAPI();
 	if (!bResult)
 		theApp.QueueDebugLogLine(false, _T("Run as unpriveleged user: Error: Failed to restart eMule as different user! Error Code: %i"),GetLastError());
-	return bResult;
+	return bResult!=FALSE;
 }
 
 CStringW CSecRunAsUser::GetCurrentUserW(){

@@ -17,8 +17,10 @@
 #include "stdafx.h"
 #include <io.h>
 #include <wininet.h>
+#include <atlutil.h>
 #include "emule.h"
 #include "emuledlg.h"
+#include "TransferWnd.h"
 #include "MiniMule.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
@@ -99,7 +101,7 @@ CMiniMule::CMiniMule(CWnd* pParent /*=NULL*/)
 	m_bResolveImages = true;
 	m_bRestoreMainWnd = false;
 	m_uAutoCloseTimer = 0;
-	m_bAutoClose = theApp.GetProfileInt(_T("eMule"), _T("MiniMuleAutoClose"), 0);
+	m_bAutoClose = theApp.GetProfileInt(_T("eMule"), _T("MiniMuleAutoClose"), 0)!=0;
 	m_uWndTransparency = theApp.GetProfileInt(_T("eMule"), _T("MiniMuleTransparency"), 0);
 	SetHostFlags(m_dwHostFlags
 		| DOCHOSTUIFLAG_DIALOG					// MSHTML does not enable selection of the text in the form
@@ -181,6 +183,29 @@ BOOL CMiniMule::CreateControlSite(COleControlContainer* pContainer, COleControlS
 	return TRUE;
 }
 
+CString CreateFilePathUrl(LPCTSTR pszFilePath, int nProtocol)
+{
+	// Create encoded version of local file path URLs, this is needed at least in cases where
+	// the directories contain special characters. like "c:\#emule#\emule.exe"
+	TCHAR szEncodedFilePath[INTERNET_MAX_URL_LENGTH];
+	DWORD dwLen = ARRSIZE(szEncodedFilePath);
+	if (nProtocol == INTERNET_SCHEME_RES)
+	{
+		VERIFY( AtlCanonicalizeUrl(CString(_T("file:///")) + pszFilePath, szEncodedFilePath, &dwLen) );
+		CString strEncodedFilePath(szEncodedFilePath);
+		// "res://" protocol has to be specified with 2 slashes ("res:///" does not work)
+		strEncodedFilePath.Replace(_T("file:///"), _T("res://"));
+		return strEncodedFilePath;
+	}
+	else
+	{
+		ASSERT( nProtocol == INTERNET_SCHEME_FILE );
+		// "file://" protocol has to be specified with 3 slashes
+		VERIFY( AtlCanonicalizeUrl(CString(_T("file:///")) + pszFilePath, szEncodedFilePath, &dwLen) );
+		return szEncodedFilePath;
+	}
+}
+
 BOOL CMiniMule::OnInitDialog()
 {
 	ASSERT( m_iInCallback == 0 );
@@ -189,10 +214,23 @@ BOOL CMiniMule::OnInitDialog()
 	{
 		if (_taccess(strHtmlFile, 0) == 0)
 		{
-			m_strCurrentUrl = _T("file://") + strHtmlFile;
+			m_strCurrentUrl = CreateFilePathUrl(strHtmlFile, INTERNET_SCHEME_FILE);
 			m_nHtmlResID = 0;
 			m_szHtmlResID = NULL;
 			m_bResolveImages = false;
+		}
+	}
+
+	if (m_strCurrentUrl.IsEmpty())
+	{
+		TCHAR szModulePath[MAX_PATH];
+		if (GetModuleFileName(AfxGetResourceHandle(), szModulePath, ARRSIZE(szModulePath)))
+		{
+			m_strCurrentUrl = CreateFilePathUrl(szModulePath, INTERNET_SCHEME_RES);
+			m_strCurrentUrl.AppendFormat(_T("/%d"), m_nHtmlResID);
+			m_nHtmlResID = 0;
+			m_szHtmlResID = NULL;
+			m_bResolveImages = true;
 		}
 	}
 
@@ -286,10 +324,49 @@ void CMiniMule::Localize()
 
 void CMiniMule::UpdateContent(UINT uUpDatarate, UINT uDownDatarate)
 {
+	if (m_bResolveImages)
+	{
+		static const LPCTSTR _apszConnectedImgs[] = 
+		{
+			_T("CONNECTEDNOTNOT.GIF"),
+			_T("CONNECTEDNOTLOW.GIF"),
+			_T("CONNECTEDNOTHIGH.GIF"),
+			_T("CONNECTEDLOWNOT.GIF"),
+			_T("CONNECTEDLOWLOW.GIF"),
+			_T("CONNECTEDLOWHIGH.GIF"),
+			_T("CONNECTEDHIGHNOT.GIF"),
+			_T("CONNECTEDHIGHLOW.GIF"),
+			_T("CONNECTEDHIGHHIGH.GIF")
+		};
+
+		UINT uIconIdx = theApp.emuledlg->GetConnectionStateIconIndex();
+		if (uIconIdx >= ARRSIZE(_apszConnectedImgs)){
+			ASSERT(0);
+			uIconIdx = 0;
+		}
+
+		TCHAR szModulePath[_MAX_PATH];
+		if (GetModuleFileName(AfxGetResourceHandle(), szModulePath, ARRSIZE(szModulePath)))
+		{
+			CString strFilePathUrl(CreateFilePathUrl(szModulePath, INTERNET_SCHEME_RES));
+			CComPtr<IHTMLImgElement> elm;
+			GetElementInterface(_T("connectedImg"), &elm);
+			if (elm) {
+				CString strResourceURL;
+				strResourceURL.Format(_T("%s/%s"), strFilePathUrl, _apszConnectedImgs[uIconIdx]);
+				elm->put_src(CComBSTR(strResourceURL));
+			}
+		}
+	}
+
 	SetElementHtml(_T("connected"), CComBSTR(theApp.IsConnected() ? GetResString(IDS_YES) : GetResString(IDS_NO)));
 	SetElementHtml(_T("upRate"), CComBSTR(theApp.emuledlg->GetUpDatarateString(uUpDatarate)));
 	SetElementHtml(_T("downRate"), CComBSTR(theApp.emuledlg->GetDownDatarateString(uDownDatarate)));
-	SetElementHtml(_T("completed"), CComBSTR(CastItoIShort(thePrefs.GetDownSessionCompletedFiles(), false, 0)));
+	int iTotal;
+	UINT uCompleted = 0;
+	if (theApp.emuledlg && theApp.emuledlg->transferwnd && theApp.emuledlg->transferwnd->downloadlistctrl.m_hWnd)
+		uCompleted = theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(0, iTotal);
+	SetElementHtml(_T("completed"), CComBSTR(CastItoIShort(uCompleted, false, 0)));
 	SetElementHtml(_T("freeSpace"), CComBSTR(CastItoXBytes(GetFreeDiskSpaceX(thePrefs.GetTempDir()), false, false)));
 }
 
@@ -348,9 +425,11 @@ void CMiniMule::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 
 	if (m_bResolveImages)
 	{
-		TCHAR szModule[_MAX_PATH];
-		if (GetModuleFileName(AfxGetResourceHandle(), szModule, ARRSIZE(szModule)))
+		TCHAR szModulePath[_MAX_PATH];
+		if (GetModuleFileName(AfxGetResourceHandle(), szModulePath, ARRSIZE(szModulePath)))
 		{
+			CString strFilePathUrl(CreateFilePathUrl(szModulePath, INTERNET_SCHEME_RES));
+
 			static const struct {
 				LPCTSTR pszImgId;
 				LPCTSTR pszResourceId;
@@ -371,7 +450,7 @@ void CMiniMule::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 				GetElementInterface(_aImg[i].pszImgId, &elm);
 				if (elm) {
 					CString strResourceURL;
-					strResourceURL.Format(_T("res://%s/%s"), szModule, _aImg[i].pszResourceId);
+					strResourceURL.Format(_T("%s/%s"), strFilePathUrl, _aImg[i].pszResourceId);
 					elm->put_src(CComBSTR(strResourceURL));
 				}
 			}
@@ -380,7 +459,7 @@ void CMiniMule::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 			GetElementInterface(_T("table"), &elm);
 			if (elm) {
 				CString strResourceURL;
-				strResourceURL.Format(_T("res://%s/%s"), szModule, _T("TABLEBACKGND.GIF"));
+				strResourceURL.Format(_T("%s/%s"), strFilePathUrl, _T("TABLEBACKGND.GIF"));
 				elm->put_background(CComBSTR(strResourceURL));
 				elm.Release();
 			}
@@ -412,6 +491,32 @@ void CMiniMule::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 		CreateAutoCloseTimer();
 }
 
+UINT GetTaskbarPos(HWND hwndTaskbar)
+{
+	if (hwndTaskbar != NULL)
+	{
+		// See also: Q179908
+		APPBARDATA abd = {0};
+	    abd.cbSize = sizeof abd;
+		abd.hWnd = hwndTaskbar;
+	    SHAppBarMessage(ABM_GETTASKBARPOS, &abd);
+
+		// SHAppBarMessage may fail to get the rectangle...
+		CRect rcAppBar(abd.rc);
+		if (rcAppBar.IsRectEmpty() || rcAppBar.IsRectNull())
+			GetWindowRect(hwndTaskbar, &abd.rc);
+
+		if (abd.rc.top == abd.rc.left && abd.rc.bottom > abd.rc.right)
+			return ABE_LEFT;
+		else if (abd.rc.top == abd.rc.left && abd.rc.bottom < abd.rc.right)
+			return ABE_TOP;
+		else if (abd.rc.top > abd.rc.left)
+			return ABE_BOTTOM;
+		return ABE_RIGHT;
+    }
+	return ABE_BOTTOM;
+}
+
 void CMiniMule::AutoSizeAndPosition(CSize sizClient)
 {
 	CSize sizDesktop(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
@@ -430,13 +535,31 @@ void CMiniMule::AutoSizeAndPosition(CSize sizClient)
 		rcWnd = rcClient;
 	}
 
-	CPoint ptWnd;
-	//TODO: Taskbar can be placed on each edge!!
-	HWND hWndTaskbar = ::FindWindow(_T("Shell_TrayWnd"), 0);
 	CRect rcTaskbar(0, sizDesktop.cy - 34, sizDesktop.cx, sizDesktop.cy);
+	HWND hWndTaskbar = ::FindWindow(_T("Shell_TrayWnd"), 0);
+	if (hWndTaskbar)
 	::GetWindowRect(hWndTaskbar, &rcTaskbar);
-	ptWnd.x = sizDesktop.cx - 8 - rcWnd.Width();
-	ptWnd.y = sizDesktop.cy - rcTaskbar.Height() - 8 - rcWnd.Height();
+	CPoint ptWnd;
+	UINT uTaskbarPos = GetTaskbarPos(hWndTaskbar);
+	switch (uTaskbarPos)
+	{
+		case ABE_TOP:
+			ptWnd.x = sizDesktop.cx - 8 - rcWnd.Width();
+			ptWnd.y = rcTaskbar.Height() + 8;
+			break;
+		case ABE_LEFT:
+			ptWnd.x = rcTaskbar.Width() + 8;
+			ptWnd.y = sizDesktop.cy - 8 - rcWnd.Height();
+			break;
+		case ABE_RIGHT:
+			ptWnd.x = sizDesktop.cx - rcTaskbar.Width() - 8 - rcWnd.Width();
+			ptWnd.y = sizDesktop.cy - 8 - rcWnd.Height();
+			break;
+		default:
+			ASSERT( uTaskbarPos == ABE_BOTTOM );
+			ptWnd.x = sizDesktop.cx - 8 - rcWnd.Width();
+			ptWnd.y = sizDesktop.cy - rcTaskbar.Height() - 8 - rcWnd.Height();
+	}
 	SetWindowPos(NULL, ptWnd.x, ptWnd.y, rcWnd.Width(), rcWnd.Height(), SWP_NOZORDER | SWP_SHOWWINDOW);
 }
 
@@ -485,7 +608,7 @@ HRESULT CMiniMule::OnRestoreMainWindow(IHTMLElement* pElement)
 			PostMessage(WM_CLOSE);
 		}
 		else
-			MessageBeep((UINT)-1);
+			MessageBeep(MB_OK);
 	}
 	return S_OK;
 }
@@ -510,7 +633,7 @@ HRESULT CMiniMule::OnOptions(IHTMLElement* pElement)
 		// showing the 'Pref' dialog will process the message queue -> timer messages will be dispatched -> kill auto close timer!
 		KillAutoCloseTimer();
 		if (theApp.emuledlg->ShowPreferences() == -1)
-			MessageBeep((UINT)-1);
+			MessageBeep(MB_OK);
 		if (GetAutoClose())
 			CreateAutoCloseTimer();
 	}

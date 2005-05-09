@@ -116,17 +116,29 @@
 #define	MP_INSTALL_SKIN			10248
 #define	MP_LARGEICONS			10249
 #define	MP_SMALLICONS			10250
+#define	MP_VIEW2_CLIENTS		10251
+#define	MP_VIEW2_DOWNLOADING	10252
+#define	MP_VIEW2_UPLOADING		10253
+#define	MP_VIEW2_ONQUEUE		10254
+#define MP_VIEW1_SPLIT_WINDOW	10255
+#define MP_VIEW1_UPLOADING		10256
+#define MP_VIEW1_DOWNLOADS		10257
+#define MP_VIEW1_ONQUEUE		10258
+#define MP_VIEW1_DOWNLOADING	10259
+#define MP_VIEW1_CLIENTS		10260
+#define MP_VIEW1_DOWNLOADCLIENT	10261 //MORPH - Added by SiRoB, DownloadClientList
+#define MP_VIEW2_DOWNLOADCLIENT	10262 //MORPH - Added by SiRoB, DownloadClientList
 
 #define MP_PRIOVERYLOW			10300
 #define MP_PRIOLOW				10301
 #define MP_PRIONORMAL			10302
 #define MP_PRIOHIGH				10303
 #define MP_PRIOVERYHIGH			10304
-#define MP_PRIOAUTO				10317
 //MORPH START - Added by SiRoB, WebCache 1.2f
 #define MP_PRIOWCRELEASE		20000 //jp webcache release
 //MORPH END   - Added by SiRoB, WebCache 1.2f
 #define MP_GETED2KLINK			10305
+#define MP_GETHTMLED2KLINK		10306
 #define MP_METINFO				10307
 //MORPH - Removed by SiRoB, See on top
 /*
@@ -141,6 +153,7 @@
 #define MP_UNBAN				10315
 #define MP_ADDTOSTATIC			10316
 #define MP_CLCOMMAND			10317
+#define MP_PRIOAUTO				10317
 #define MP_REMOVEFROMSTATIC		10318
 #define MP_VIEWFILECOMMENTS		10319
 #define MP_CAT_ADD				10321
@@ -163,7 +176,7 @@
 #define MP_A4AF_CHECK_THIS_NOW	10338 
 #define MP_GETKADSOURCELINK		10340
 #define MP_SHOWED2KLINK			10341
-#define MP_GETHTMLED2KLINK		10306
+#define MP_SETSOURCELIMIT		10342
 
 // khaos::categorymod+
 #define MP_CAT_SHOWHIDEPAUSED	10350
@@ -258,18 +271,7 @@
 #define Irc_OpCommands			10250
 //Note: reserve at least 100 ID's (Irc_ChanCommands-Irc_ChanCommands+99).
 #define Irc_ChanCommands		Irc_OpCommands+50
-/*
-#define Irc_Op					10240
-#define Irc_DeOp				10241
-#define Irc_Voice				10242
-#define Irc_DeVoice				10243
-#define Irc_HalfOp				10244
-#define Irc_DeHalfOp			10245
-#define	Irc_Owner				10254
-#define Irc_DeOwner				10255
-#define	Irc_Protect				10256
-#define Irc_DeProtect			10257
-*/
+
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 #define MP_GETFRIENDED2KLINK		15008
 #define MP_GETHTMLFRIENDED2KLINK	15009

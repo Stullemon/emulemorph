@@ -504,16 +504,15 @@ CKnownFile::CKnownFile()
 
 CKnownFile::~CKnownFile()
 {
-	for(POSITION pos = CKadEntryPtrList.GetHeadPosition(); pos != NULL; )
+	for(POSITION pos = m_kadNotes.GetHeadPosition(); pos != NULL; )
 	{
-		Kademlia::CEntry* entry = CKadEntryPtrList.GetNext(pos);
+		Kademlia::CEntry* entry = m_kadNotes.GetNext(pos);
 		delete entry;
 	}
 
 	for (int i = 0; i < hashlist.GetSize(); i++)
 		delete[] hashlist[i];
-	for (int i = 0; i < taglist.GetSize(); i++)
-		delete taglist[i];
+	ClearTags();
 	delete m_pAICHHashSet; 
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBar CPU consumption
 	m_bitmapSharedStatusBar.DeleteObject();
@@ -880,7 +879,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 		if (pvProgressParam && theApp.emuledlg && theApp.emuledlg->IsRunning()){
 			ASSERT( ((CKnownFile*)pvProgressParam)->IsKindOf(RUNTIME_CLASS(CKnownFile)) );
 			ASSERT( ((CKnownFile*)pvProgressParam)->GetFileSize() == GetFileSize() );
-			UINT uProgress = ((ULONGLONG)(GetFileSize() - togo) * 100) / GetFileSize();
+			UINT uProgress = (UINT)(((ULONGLONG)(GetFileSize() - togo) * 100) / GetFileSize());
 			ASSERT( uProgress <= 100 );
 			VERIFY( PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)pvProgressParam) );
 		}
@@ -1103,7 +1102,7 @@ void CKnownFile::SetFileSize(uint32 nFileSize)
 
 	// nr. of data parts
 	ASSERT( (uint64)(((uint64)nFileSize + (PARTSIZE - 1)) / PARTSIZE) <= (UINT)USHRT_MAX );
-	m_iPartCount = ((uint64)nFileSize + (PARTSIZE - 1)) / PARTSIZE;
+	m_iPartCount = (uint16)(((uint64)nFileSize + (PARTSIZE - 1)) / PARTSIZE);
 
 	// nr. of parts to be used with OP_FILESTATUS
 	m_iED2KPartCount = nFileSize / PARTSIZE + 1;
@@ -1258,7 +1257,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				if (newtag->IsInt())
 				{
 					uint32 hi,low;
-					low=statistic.alltimetransferred;
+					low = (UINT)statistic.alltimetransferred;
 					hi = newtag->GetInt();
 					uint64 hi2;
 					hi2=hi;
@@ -1452,7 +1451,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 	if (m_uMetaDataVer == 0)
 		RemoveMetaDataTags();
 
-	return m_nFileSize;		// SLUGFILLER: SafeHash - Must have a filesize tag
+	return m_nFileSize > 0;		// SLUGFILLER: SafeHash - Must have a filesize tag
 }
 
 bool CKnownFile::LoadDateFromFile(CFileDataIO* file){
@@ -1877,7 +1876,7 @@ void CAbstractFile::SetFileHash(const uchar* pucFileHash)
 
 bool CAbstractFile::HasNullHash() const
 {
-	return isnulmd4(m_abyFileHash);
+	return isnulmd4(m_abyFileHash)!=0;
 }
 
 uint32 CAbstractFile::GetIntTagValue(uint8 tagname) const
@@ -1912,6 +1911,19 @@ uint32 CAbstractFile::GetIntTagValue(LPCSTR tagname) const
 	return NULL;
 }
 
+void CAbstractFile::SetIntTagValue(uint8 tagname, uint32 uValue)
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		CTag* pTag = taglist[i];
+		if (pTag->GetNameID()==tagname && pTag->IsInt()){
+			pTag->SetInt(uValue);
+			return;
+		}
+	}
+	CTag* pTag = new CTag(tagname, uValue);
+	taglist.Add(pTag);
+}
+
 const CString& CAbstractFile::GetStrTagValue(uint8 tagname) const
 {
 	for (int i = 0; i < taglist.GetSize(); i++){
@@ -1932,6 +1944,19 @@ const CString& CAbstractFile::GetStrTagValue(LPCSTR tagname) const
 	}
 	static const CString _strEmpty;
 	return _strEmpty;
+}
+
+void CAbstractFile::SetStrTagValue(uint8 tagname, LPCTSTR pszValue)
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		CTag* pTag = taglist[i];
+		if (pTag->GetNameID()==tagname && pTag->IsStr()){
+			pTag->SetStr(pszValue);
+			return;
+		}
+	}
+	CTag* pTag = new CTag(tagname, pszValue);
+	taglist.Add(pTag);
 }
 
 CTag* CAbstractFile::GetTag(uint8 tagname, uint8 tagtype) const
@@ -1990,10 +2015,39 @@ void CAbstractFile::AddTagUnique(CTag* pTag)
 	taglist.Add(pTag);
 }
 
+void CAbstractFile::ClearTags()
+{
+	for (int i = 0; i < taglist.GetSize(); i++)
+		delete taglist[i];
+	taglist.RemoveAll();
+}
+
+void CAbstractFile::CopyTags(const CArray<CTag*, CTag*>& tags)
+{
+	for (int i = 0; i < tags.GetSize(); i++)
+		taglist.Add(new CTag(*tags.GetAt(i)));
+}
+
 Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 {
 	if(m_ClientUploadList.IsEmpty())
 		return NULL;
+
+	if (md4cmp(forClient->GetUploadFileID(), GetFileHash())!=0) {
+		// should never happen
+		DEBUG_ONLY( DebugLogError(_T("*** %hs - client (%s) upload file \"%s\" does not match file \"%s\""), __FUNCTION__, forClient->DbgGetClientInfo(), DbgGetFileInfo(forClient->GetUploadFileID()), GetFileName()) );
+		ASSERT(0);
+		return NULL;
+	}
+
+	// check whether client has either no download status at all or a download status which is valid for this file
+	if (   !(forClient->GetUpPartCount()==0 && forClient->GetUpPartStatus()==NULL)
+		&& !(forClient->GetUpPartCount()==GetPartCount() && forClient->GetUpPartStatus()!=NULL)) {
+		// should never happen
+		DEBUG_ONLY( DebugLogError(_T("*** %hs - part count (%u) of client (%s) does not match part count (%u) of file \"%s\""), __FUNCTION__, forClient->GetUpPartCount(), forClient->DbgGetClientInfo(), GetPartCount(), GetFileName()) );
+		ASSERT(0);
+		return NULL;
+	}
 
 	CSafeMemFile data(1024);
 	uint16 nCount = 0;
@@ -2010,14 +2064,15 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 			continue;
 
 		bool bNeeded = false;
-		uint8* rcvstatus = forClient->GetUpPartStatus();
-
+		const uint8* rcvstatus = forClient->GetUpPartStatus();
 		if( rcvstatus )
 		{
-			uint8* srcstatus = cur_src->GetUpPartStatus();
+			ASSERT( forClient->GetUpPartCount() == GetPartCount() );
+			const uint8* srcstatus = cur_src->GetUpPartStatus();
 			// MORPH - Modified by Commander, WebCache 1.2e
 			if( srcstatus && (!forClient->SupportsWebCache() && !cur_src->SupportsWebCache())) // Superlexx - IFP - if both clients do support webcache, then they have IFP and might find empty sources useful; send that source even if they both are not behind same proxy to improve found webcache-enabled source number on those clients
 			{
+				ASSERT( cur_src->GetUpPartCount() == GetPartCount() );
 				if( cur_src->GetUpPartCount() == forClient->GetUpPartCount() )
 				{
 					for (int x = 0; x < GetPartCount(); x++ )
@@ -2033,8 +2088,8 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 				else
 				{
 					// should never happen
-					if (thePrefs.GetVerbose())
-						DEBUG_ONLY(AddDebugLogLine(false,_T("*** %hs - found source (%s) with wrong partcount (%u) attached to file \"%s\" (partcount=%u)"), __FUNCTION__, cur_src->DbgGetClientInfo(), cur_src->GetUpPartCount(), GetFileName(), GetPartCount()));
+					//if (thePrefs.GetVerbose())
+						DEBUG_ONLY( DebugLogError(_T("*** %hs - found source (%s) with wrong part count (%u) attached to file \"%s\" (partcount=%u)"), __FUNCTION__, cur_src->DbgGetClientInfo(), cur_src->GetUpPartCount(), GetFileName(), GetPartCount()));
 				}
 			}
 			else
@@ -2046,13 +2101,15 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 		}
 		else
 		{
-			TRACE(_T("CKnownFile::CreateSrcInfoPacket, requesting client has no chunk status - %s"), forClient->DbgGetClientInfo());
+			ASSERT( forClient->GetUpPartCount() == 0 );
+			TRACE(_T("%hs, requesting client has no chunk status - %s"), __FUNCTION__, forClient->DbgGetClientInfo());
 			// remote client does not support upload chunk status, search sources which have at least one complete part
 			// we could even sort the list of sources by available chunks to return as much sources as possible which
 			// have the most available chunks. but this could be a noticeable performance problem.
-			uint8* srcstatus = cur_src->GetUpPartStatus();
+			const uint8* srcstatus = cur_src->GetUpPartStatus();
 			if( srcstatus )
 			{
+				ASSERT( cur_src->GetUpPartCount() == GetPartCount() );
 				for (int x = 0; x < GetPartCount(); x++ )
 				{
 					if( srcstatus[x] )
@@ -2088,10 +2145,10 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 				break;
 		}
 	}
-	TRACE(_T("CKnownFile::CreateSrcInfoPacket: Out of %u clients, %u had no valid chunk status\n\r"),m_ClientUploadList.GetCount(), cDbgNoSrc);
+	TRACE(_T("%hs: Out of %u clients, %u had no valid chunk status\n\r"), __FUNCTION__, m_ClientUploadList.GetCount(), cDbgNoSrc);
 	if (!nCount)
 		return 0;
-	data.Seek(16,0);
+	data.Seek(16, SEEK_SET);
 	data.WriteUInt16(nCount);
 
 	Packet* result = new Packet(&data, OP_EMULEPROT);
@@ -2383,7 +2440,7 @@ void CKnownFile::UpdateMetaDataTags()
 			ASSERT(0);
 		}
 	}
-	else if (thePrefs.GetExtractMetaData() > 1)
+	/*else if (thePrefs.GetExtractMetaData() > 1)
 	{
 		// starting the MediaDet object takes a noticeable amount of time.. avoid starting that object
 		// for files which are not expected to contain any Audio/Video data.
@@ -2397,7 +2454,7 @@ void CKnownFile::UpdateMetaDataTags()
 			_tcslwr(szExt);
 			if (_tcscmp(szExt, _T(".ogm"))!=0 && _tcscmp(szExt, _T(".ogg"))!=0 && _tcscmp(szExt, _T(".mkv"))!=0)
 			{
-TCHAR szFullPath[MAX_PATH];
+				TCHAR szFullPath[MAX_PATH];
 				_tmakepath(szFullPath, NULL, GetPath(), GetFileName(), NULL);
 				try{
 					CComPtr<IMediaDet> pMediaDet;
@@ -2463,7 +2520,7 @@ TCHAR szFullPath[MAX_PATH];
 													if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
 														if (mt.formattype == FORMAT_WaveFormatEx){
 															WAVEFORMATEX* wfx = (WAVEFORMATEX*)mt.pbFormat;
-															dwAudioBitRate = ((wfx->nAvgBytesPerSec * 8.0) + 500.0) / 1000.0;
+															dwAudioBitRate = (DWORD)(((wfx->nAvgBytesPerSec * 8.0) + 500.0) / 1000.0);
 														}
 													}
 
@@ -2484,11 +2541,11 @@ TCHAR szFullPath[MAX_PATH];
 								}
 							}
 
-							uint32 uLengthSec = 0.0;
+							UINT uLengthSec = 0;
 							CStringA strCodec;
 							uint32 uBitrate = 0;
 							if (fVideoStreamLengthSec > 0.0){
-								uLengthSec = fVideoStreamLengthSec;
+								uLengthSec = (UINT)fVideoStreamLengthSec;
 								if (dwVideoCodec == BI_RGB)
 									strCodec = "rgb";
 								else if (dwVideoCodec == BI_RLE8)
@@ -2505,7 +2562,7 @@ TCHAR szFullPath[MAX_PATH];
 								uBitrate = dwVideoBitRate;
 							}
 							else if (fAudioStreamLengthSec > 0.0){
-								uLengthSec = fAudioStreamLengthSec;
+								uLengthSec = (UINT)fAudioStreamLengthSec;
 								uBitrate = dwAudioBitRate;
 							}
 
@@ -2536,7 +2593,7 @@ TCHAR szFullPath[MAX_PATH];
 				}
 			}
 		}
-	}
+	}*/
 }
 
 void CKnownFile::SetPublishedED2K(bool val){
@@ -2593,16 +2650,16 @@ bool CKnownFile::PublishSrc()
 
 void CAbstractFile::AddNote(Kademlia::CEntry* pEntry)
 {
-	for(POSITION pos = CKadEntryPtrList.GetHeadPosition(); pos != NULL; )
+	for(POSITION pos = m_kadNotes.GetHeadPosition(); pos != NULL; )
 	{
-		Kademlia::CEntry* entry = CKadEntryPtrList.GetNext(pos);
-		if(entry->ip == pEntry->ip || entry->sourceID.compareTo(pEntry))
+		Kademlia::CEntry* entry = m_kadNotes.GetNext(pos);
+		if(/*entry->ip == pEntry->ip || */!entry->sourceID.compareTo(pEntry->sourceID))
 		{
 			delete pEntry;
 			return;
 		}
 	}
-	CKadEntryPtrList.AddHead(pEntry);
+	m_kadNotes.AddHead(pEntry);
 }
 
 

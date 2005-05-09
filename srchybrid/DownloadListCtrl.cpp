@@ -86,7 +86,7 @@ CDownloadListCtrl::CDownloadListCtrl()
 
 CDownloadListCtrl::~CDownloadListCtrl(){
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
-	if (m_A4AFMenu) VERIFY( m_A4AFMenu.DestroyMenu() );
+	if (m_SourcesMenu) VERIFY( m_SourcesMenu.DestroyMenu() );
 	//MORPH START - Added by AndCycle, showSharePermissions
 	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );	// xMule_MOD: showSharePermissions
 	//MORPH END   - Added by AndCycle, showSharePermissions
@@ -565,7 +565,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 		//MORPH END   - Added by IceCream, show download in red
 		//MORPH START - Added by FrankyFive, show paused files in gray
 		if(lpPartFile->GetStatus() == PS_PAUSED)
-			COLORREF oldclr = dc->SetTextColor(RGB(128,128,128));
+			dc->SetTextColor(RGB(128,128,128));
         //MORPH END   - Added by FrankyFive, show paused files in gray
 
 		switch(nColumn)
@@ -1218,7 +1218,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
             }
 // ZZ:DownloadManager <--
 
-			COLORREF crOldTxtColor; // EastShare - Moddified by TAHO, color
+			COLORREF crOldTxtColor = dc->SetTextColor((COLORREF)RGB(200,80,200));; // EastShare - Moddified by TAHO, color
 			if (lpCtrlItem->type == AVAILABLE_SOURCE){
 				switch (lpUpDownClient->GetDownloadState()) {
 					case DS_CONNECTING:
@@ -1270,9 +1270,6 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					default:
 						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(135,135,135)); 
 				}
-			}
-			else {
-				crOldTxtColor = dc->SetTextColor((COLORREF)RGB(200,80,200));
 			}
 			// EastShare END - Added by TAHO, color
 			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
@@ -1701,7 +1698,7 @@ void CDownloadListCtrl::OnItemActivate(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
-	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	int iSel = GetNextItem(-1, LVIS_SELECTED);
 	if (iSel != -1)
 	{
 		const CtrlItem_Struct* content = (CtrlItem_Struct*)GetItemData(iSel);
@@ -1720,7 +1717,6 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			int iFilesToPreview = 0;
 			int iFilesA4AFAuto = 0;
 
-			int iFilePerm = 0; //MORPH START - Added by SiRoB, showSharePermissions
 			int iFileForceA4AF = 0; //MORPH - Added by SiRoB, A4AF
 			int iFileForceAllA4AF = 0; //MORPH - Added by SiRoB, A4AF
 			int iFileForceA4AFOff = 0; //MORPH - Added by SiRoB, A4AF
@@ -1803,10 +1799,10 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_PrioMenu.CheckMenuRadioItem(MP_PRIOLOW, MP_PRIOAUTO, uPrioMenuItem, 0);
 
 			//MORPH - Added by SiRoB, khaos::kmod+ Popup menu should be disabled when advanced A4AF mode is turned off and we need to check appropriate A4AF items.
-			m_FileMenu.EnableMenuItem(MP_FORCEA4AF, thePrefs.UseSmartA4AFSwapping() && iSelectedItems == 1 && iFilesNotDone == 1? MF_ENABLED : MF_GRAYED);
-			m_FileMenu.CheckMenuItem(MP_FORCEA4AF,  iFileForceAllA4AF > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED);
+			m_SourcesMenu.EnableMenuItem(MP_FORCEA4AF, thePrefs.UseSmartA4AFSwapping() && iSelectedItems == 1 && iFilesNotDone == 1? MF_ENABLED : MF_GRAYED);
+			m_SourcesMenu.CheckMenuItem(MP_FORCEA4AF,  iFileForceAllA4AF > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED);
 			
-			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenuFlag.m_hMenu, iFilesNotDone > 0 && (thePrefs.AdvancedA4AFMode() || thePrefs.UseSmartA4AFSwapping())? MF_ENABLED : MF_GRAYED);
+			m_SourcesMenu.EnableMenuItem((UINT_PTR)m_A4AFMenuFlag.m_hMenu, iFilesNotDone > 0 && (thePrefs.AdvancedA4AFMode() || thePrefs.UseSmartA4AFSwapping())? MF_ENABLED : MF_GRAYED);
 			m_A4AFMenuFlag.ModifyMenu(MP_FORCEA4AFONFLAG, (iFileForceA4AF > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFONFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + _T(" ") : _T("")) + GetResString(IDS_A4AF_ONFLAG));
 			m_A4AFMenuFlag.ModifyMenu(MP_FORCEA4AFOFFFLAG, (iFileForceA4AFOff > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFOFFFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + _T(" ") :  _T("")) + GetResString(IDS_A4AF_OFFFLAG));
 			// khaos::kmod-
@@ -1851,12 +1847,15 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			int total;
 			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab, total) > 0 ? MF_ENABLED : MF_GRAYED);
-			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
-			m_A4AFMenu.CheckMenuItem(MP_ALL_A4AF_AUTO, (iSelectedItems == 1 && iFilesNotDone == 1 && iFilesA4AFAuto == 1) ? MF_CHECKED : MF_UNCHECKED);
-			if (thePrefs.IsExtControlsEnabled())
-				m_FileMenu.EnableMenuItem(MP_ADDSOURCE, (iSelectedItems == 1 && iFilesToStop == 1) ? MF_ENABLED : MF_GRAYED);
-			
-			m_FileMenu.EnableMenuItem(MP_SHOWED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+
+			m_FileMenu.EnableMenuItem((UINT_PTR)m_SourcesMenu.m_hMenu, (thePrefs.IsExtControlsEnabled() && iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+			if (thePrefs.IsExtControlsEnabled()) {
+				m_SourcesMenu.CheckMenuItem(MP_ALL_A4AF_AUTO, (iSelectedItems == 1 && iFilesNotDone == 1 && iFilesA4AFAuto == 1) ? MF_CHECKED : MF_UNCHECKED);
+				m_SourcesMenu.EnableMenuItem(MP_ADDSOURCE, (iSelectedItems == 1 && iFilesToStop == 1) ? MF_ENABLED : MF_GRAYED);
+				m_SourcesMenu.EnableMenuItem(MP_SETSOURCELIMIT, (iFilesNotDone == iSelectedItems) ? MF_ENABLED : MF_GRAYED);
+			}
+
+			m_FileMenu.EnableMenuItem(thePrefs.GetShowCopyEd2kLinkCmd() ? MP_GETED2KLINK : MP_SHOWED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_PASTE, theApp.IsEd2kFileLinkInClipboard() ? MF_ENABLED : MF_GRAYED);
 
 			//MORPH START - Added by SiRoB, Show Share Permissions
@@ -1992,7 +1991,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			VERIFY( ClientMenu.DestroyMenu() );
 		}
 	}
-	else{
+	else{	// nothing selected
 		int total;
 		m_FileMenu.EnableMenuItem((UINT_PTR)m_PrioMenu.m_hMenu, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_CANCEL,MF_GRAYED);
@@ -2000,6 +1999,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_FileMenu.EnableMenuItem(MP_STOP,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_RESUME,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_OPEN,MF_GRAYED);
+
 		if(thePrefs.IsExtControlsEnabled() && !thePrefs.GetPreviewPrio()) {
 			m_FileMenu.EnableMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, MF_GRAYED);
 			m_FileMenu.CheckMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, MF_UNCHECKED);
@@ -2007,10 +2007,6 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_FileMenu.EnableMenuItem(MP_FORCE,MF_GRAYED);//shadow#(onlydownloadcompletefiles)
 		//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
-		//MORPH START - Added by SiRoB, A4AF
-		m_FileMenu.EnableMenuItem(MP_FORCEA4AF, MF_GRAYED);
-		m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenuFlag.m_hMenu, MF_GRAYED);
-		//MORPH END   - Added by SiRoB, A4AF
 		//MORPH START - Added by SiRoB, ShowPermissions
 		m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, MF_GRAYED);
 		//MORPH END   - Added by SiRoB, ShowPermissions
@@ -2027,12 +2023,10 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_FileMenu.EnableMenuItem(MP_METINFO, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab,total) > 0 ? MF_ENABLED : MF_GRAYED);
-		m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, MF_GRAYED);
-		if (thePrefs.IsExtControlsEnabled())
-			m_FileMenu.EnableMenuItem(MP_ADDSOURCE, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(thePrefs.GetShowCopyEd2kLinkCmd() ? MP_GETED2KLINK : MP_SHOWED2KLINK, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_PASTE, theApp.IsEd2kFileLinkInClipboard() ? MF_ENABLED : MF_GRAYED);
 		m_FileMenu.SetDefaultItem((UINT)-1);
+		m_FileMenu.EnableMenuItem((UINT_PTR)m_SourcesMenu.m_hMenu, MF_GRAYED);
 
 		// also show the "Web Services" entry, even if its disabled and therefore not useable, it though looks a little 
 		// less confusing this way.
@@ -2060,6 +2054,8 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	}
 
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (iSel == -1)
+		iSel = GetNextItem(-1, LVIS_SELECTED);
 	if (iSel != -1)
 	{
 		const CtrlItem_Struct* content = (CtrlItem_Struct*)GetItemData(iSel);
@@ -2312,22 +2308,34 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					file->SetA4AFAuto(!file->IsA4AFAuto());
 					break;
 				case MPG_F2:
-					if (file->GetStatus() != PS_COMPLETE && file->GetStatus() != PS_COMPLETING)
-					{
-						InputBox inputbox;
-						CString title=GetResString(IDS_RENAME);
-						title.Remove(_T('&'));
-						inputbox.SetLabels(title,GetResString(IDS_DL_FILENAME),file->GetFileName());
-						inputbox.SetEditFilenameMode();
-						if (inputbox.DoModal()==IDOK && !inputbox.GetInput().IsEmpty() && IsValidEd2kString(inputbox.GetInput()))
+					if (GetAsyncKeyState(VK_CONTROL) < 0) {
+						// when ctrl is pressed -> filename cleanup
+						if (IDYES==AfxMessageBox(GetResString(IDS_MANUAL_FILENAMECLEANUP),MB_YESNO))
+							while (!selectedList.IsEmpty()){
+								CPartFile *partfile = selectedList.GetHead();
+								if (partfile->IsPartFile()) {
+									partfile->SetFileName(CleanupFilename(partfile->GetFileName()));
+								}
+								selectedList.RemoveHead();
+							}
+					} else {
+						if (file->GetStatus() != PS_COMPLETE && file->GetStatus() != PS_COMPLETING)
 						{
-							file->SetFileName(inputbox.GetInput(), true);
-							file->UpdateDisplayedInfo();
-							file->SavePartFile(); 
+							InputBox inputbox;
+							CString title=GetResString(IDS_RENAME);
+							title.Remove(_T('&'));
+							inputbox.SetLabels(title,GetResString(IDS_DL_FILENAME),file->GetFileName());
+							inputbox.SetEditFilenameMode();
+							if (inputbox.DoModal()==IDOK && !inputbox.GetInput().IsEmpty() && IsValidEd2kString(inputbox.GetInput()))
+							{
+								file->SetFileName(inputbox.GetInput(), true);
+								file->UpdateDisplayedInfo();
+								file->SavePartFile(); 
+							}
 						}
+						else
+							MessageBeep(MB_OK);
 					}
-					else
-						MessageBeep((UINT)-1);
 					break;
 				case MPG_ALTENTER:
 				case MP_METINFO:
@@ -2378,6 +2386,26 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				case MP_SHOWED2KLINK:
 					ShowFileDialog(NULL, IDD_ED2KLINK);
 					break;
+				case MP_SETSOURCELIMIT: {
+					CString temp;
+					temp.Format(_T("%u"),file->GetPrivateMaxSources());
+					InputBox inputbox;
+					CString title = GetResString(IDS_SETPFSLIMIT);
+					inputbox.SetLabels(title, GetResString(IDS_SETPFSLIMITEXPLAINED), temp );
+
+					if (inputbox.DoModal()==IDOK  )
+					{
+						temp=inputbox.GetInput();
+						uint16 newlimit=_tstoi( temp.GetBuffer() );
+						while (!selectedList.IsEmpty()){
+							CPartFile *partfile = selectedList.GetHead();
+							partfile->SetPrivateMaxSources(newlimit);
+							selectedList.RemoveHead();
+						}
+					}
+					break;
+				}
+
 				case MP_ADDSOURCE:
 				{
 					if(selectedCount > 1)
@@ -2629,7 +2657,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							client->SetFriendSlot(true);
 						}
 						theApp.friendlist->ShowFriends();
-						this->UpdateItem(client);
+						UpdateItem(client);
 					}
 					//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 					break;
@@ -2638,7 +2666,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					if (client && client->IsFriend())
 					{					
 						theApp.friendlist->RemoveFriend(client->m_Friend);
-						this->UpdateItem(client);
+						UpdateItem(client);
 					}
 					break;
 				}
@@ -2673,36 +2701,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				//MORPH START - Added by Yun.SF3, List Requested Files
 				case MP_LIST_REQUESTED_FILES: { // added by sivka
 					if (client != NULL)
-					{
-						CString fileList;
-						fileList += GetResString(IDS_LISTREQDL);
-						fileList += "\n--------------------------\n" ; 
-						if (theApp.downloadqueue->IsPartFile(client->GetRequestFile()))
-						{
-							fileList += client->GetRequestFile()->GetFileName(); 
-							for(POSITION pos = client->m_OtherRequests_list.GetHeadPosition();pos!=0;client->m_OtherRequests_list.GetNext(pos))
-							{
-								fileList += "\n" ; 
-								fileList += client->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
-							}
-							for(POSITION pos = client->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;client->m_OtherNoNeeded_list.GetNext(pos))
-							{
-								fileList += "\n" ;
-								fileList += client->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
-							}
-						}
-						else
-							fileList += GetResString(IDS_LISTREQNODL);
-						fileList += "\n\n\n";
-						fileList += GetResString(IDS_LISTREQUL);
-						fileList += "\n------------------------\n" ; 
-						CKnownFile* uploadfile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
-						if(uploadfile)
-							fileList += uploadfile->GetFileName();
-						else
-							fileList += GetResString(IDS_LISTREQNOUL);
-						AfxMessageBox(fileList,MB_OK);
-					}
+						client->ShowRequestedFiles(); //Changed by SiRoB
 					break;
 				}
 				//MORPH END - Added by Yun.SF3, List Requested Files
@@ -2824,14 +2823,17 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 	return sortMod * comp;
 }
 
-void CDownloadListCtrl::ClearCompleted(bool ignorecats){
+void CDownloadListCtrl::ClearCompleted(int incat){
+	if (incat==-2)
+		incat=curTab;
+
 	// Search for completed file(s)
 	for(ListItems::iterator it = m_ListItems.begin(); it != m_ListItems.end(); ){
 		CtrlItem_Struct* cur_item = it->second;
 		it++; // Already point to the next iterator. 
 		if(cur_item->type == FILE_TYPE){
 			CPartFile* file = reinterpret_cast<CPartFile*>(cur_item->value);
-			if(file->IsPartFile() == false && (file->CheckShowItemInGivenCat(curTab) || ignorecats) ){
+			if(file->IsPartFile() == false && (file->CheckShowItemInGivenCat(incat) || incat==-1) ){
 				if (RemoveFile(file))
 					it = m_ListItems.begin();
 			}
@@ -3023,9 +3025,9 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 	case 0: //name asc
 		if(client1->GetUserName() == client2->GetUserName())
 			return 0;
-		else if(!client1->GetUserName())
+		else if (!client1->GetUserName())	// place clients with no usernames at bottom
 			return 1;
-		else if(!client2->GetUserName())
+		else if (!client2->GetUserName())	// place clients with no usernames at bottom
 			return -1;
 		return CompareLocaleStringNoCase(client1->GetUserName(),client2->GetUserName());
 
@@ -3240,7 +3242,7 @@ void CDownloadListCtrl::OnNMDblclkDownloadlist(NMHDR *pNMHDR, LRESULT *pResult)
 								if (file->IsReadyForPreview())
 									file->PreviewFile();
 							else
-									MessageBeep((UINT)-1);
+									MessageBeep(MB_OK);
 						}
 							else
 								ShowFileDialog(file);
@@ -3261,7 +3263,7 @@ void CDownloadListCtrl::OnNMDblclkDownloadlist(NMHDR *pNMHDR, LRESULT *pResult)
 void CDownloadListCtrl::CreateMenues() {
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
 	// khaos::kmod+
-	if (m_A4AFMenu)	VERIFY( m_A4AFMenu.DestroyMenu() );
+	if (m_SourcesMenu)	VERIFY( m_SourcesMenu.DestroyMenu() );
 	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );	// xMule_MOD: showSharePermissions
 	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 	if (m_A4AFMenuFlag)	VERIFY( m_A4AFMenuFlag.DestroyMenu() );
@@ -3275,13 +3277,26 @@ void CDownloadListCtrl::CreateMenues() {
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOHIGH, GetResString(IDS_PRIOHIGH));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOAUTO, GetResString(IDS_PRIOAUTO));
 
-	m_A4AFMenu.CreateMenu();
+	m_SourcesMenu.CreateMenu();
+	m_SourcesMenu.AddMenuTitle(NULL, true);
 // ZZ:DownloadManager -->
-	//m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_THIS, GetResString(IDS_ALL_A4AF_TO_THIS)); // sivka [Tarod]
-	//m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_OTHER, GetResString(IDS_ALL_A4AF_TO_OTHER)); // sivka
+	//m_SourcesMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_THIS, GetResString(IDS_ALL_A4AF_TO_THIS)); // sivka [Tarod]
+	//m_SourcesMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_OTHER, GetResString(IDS_ALL_A4AF_TO_OTHER)); // sivka
 // <-- ZZ:DownloadManager
-	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_AUTO, GetResString(IDS_ALL_A4AF_AUTO)); // sivka [Tarod]
-	
+	m_SourcesMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_AUTO, GetResString(IDS_ALL_A4AF_AUTO)); // sivka [Tarod]
+	m_SourcesMenu.AppendMenu(MF_STRING,MP_ADDSOURCE, GetResString(IDS_ADDSRCMANUALLY), _T("FILEADDSRC"));
+	m_SourcesMenu.AppendMenu(MF_STRING,MP_SETSOURCELIMIT, GetResString(IDS_SETPFSLIMIT));
+	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
+	m_A4AFMenuFlag.CreateMenu();
+	m_A4AFMenuFlag.AddMenuTitle(NULL, true);
+	m_A4AFMenuFlag.AppendMenu(MF_STRING, MP_FORCEA4AFONFLAG, GetResString(IDS_A4AF_ONFLAG));
+	m_A4AFMenuFlag.AppendMenu(MF_STRING, MP_FORCEA4AFOFFFLAG, GetResString(IDS_A4AF_OFFFLAG));
+
+	m_SourcesMenu.AppendMenu(MF_SEPARATOR);
+	m_SourcesMenu.AppendMenu(MF_STRING, MP_FORCEA4AF, GetResString(IDS_A4AF_FORCEALL));
+	m_SourcesMenu.AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_A4AFMenuFlag.m_hMenu, GetResString(IDS_A4AF_FLAGS), _T("ADVA4AF"));
+	//MORPH END   - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
+
 	// xMule_MOD: showSharePermissions
 	m_PermMenu.CreateMenu();
 	m_PermMenu.AddMenuTitle(NULL, true);
@@ -3294,24 +3309,8 @@ void CDownloadListCtrl::CreateMenues() {
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
 	// xMule_MOD: showSharePermissions
 
-	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
-	m_A4AFMenuFlag.CreateMenu();
-	m_A4AFMenuFlag.AddMenuTitle(NULL, true);
-	m_A4AFMenuFlag.AppendMenu(MF_STRING, MP_FORCEA4AFONFLAG, GetResString(IDS_A4AF_ONFLAG));
-	m_A4AFMenuFlag.AppendMenu(MF_STRING, MP_FORCEA4AFOFFFLAG, GetResString(IDS_A4AF_OFFFLAG));
-	//MORPH END   - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
-
 	m_FileMenu.CreatePopupMenu();
 	m_FileMenu.AddMenuTitle(GetResString(IDS_DOWNLOADMENUTITLE),true);
-	if (thePrefs.IsExtControlsEnabled()){
-		// khaos::kmod+
-		m_FileMenu.AppendMenu(MF_STRING, MP_FORCEA4AF, GetResString(IDS_A4AF_FORCEALL));
-		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_A4AFMenuFlag.m_hMenu, GetResString(IDS_A4AF_FLAGS), _T("ADVA4AF"));
-		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
-		// khaos::kmod-
-		m_FileMenu.AppendMenu(MF_STRING,MP_ADDSOURCE, GetResString(IDS_ADDSRCMANUALLY), _T("FILEADDSRC"));
-		m_FileMenu.AppendMenu(MF_SEPARATOR);
-	}
 	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION), _T("FILEPERMISSION"));	// xMule_MOD: showSharePermissions
 	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_DOWNLOAD) + _T(")"), _T("FILEPRIORITY"));
 
@@ -3324,11 +3323,12 @@ void CDownloadListCtrl::CreateMenues() {
 		m_FileMenu.AppendMenu(MF_STRING,MP_FORCE, GetResString(IDS_DL_FORCE));//shadow#(onlydownloadcompletefiles)
 	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
-	m_FileMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_DL_OPEN), _T("OPENFILE") );//<--9/21/02
+
+	m_FileMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_DL_OPEN), _T("OPENFILE") );
 	if (thePrefs.IsExtControlsEnabled() && !thePrefs.GetPreviewPrio())
     	m_FileMenu.AppendMenu(MF_STRING,MP_TRY_TO_GET_PREVIEW_PARTS, GetResString(IDS_DL_TRY_TO_GET_PREVIEW_PARTS), _T("FILEDOWNLOADPREVIEWFIRST"));
 	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
-	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO), _T("FILEINFO") );//<--9/21/02
+	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO), _T("FILEINFO") );
 	m_FileMenu.AppendMenu(MF_STRING,MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL), _T("FILECOMMENTS") );
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
 	m_FileMenu.AppendMenu(MF_STRING,MP_SR13_ImportParts, GetResString(IDS_IMPORTPARTS), _T("FILEIMPORTPARTS"));
@@ -3337,12 +3337,10 @@ void CDownloadListCtrl::CreateMenues() {
 	if (thePrefs.IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR), _T("FILEMASSRENAME"));//Commander - Added: MassRename [Dragon]
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR), _T("CLEARCOMPLETE"));
-	/* See on top
-	if (thePrefs.IsExtControlsEnabled()){
-		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
-		m_FileMenu.AppendMenu(MF_STRING,MP_ADDSOURCE, GetResString(IDS_ADDSRCMANUALLY) );
-	}
-	*/
+
+//	if (thePrefs.IsExtControlsEnabled())
+		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_SourcesMenu.m_hMenu, GetResString(IDS_A4AF));
+
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	if (thePrefs.GetShowCopyEd2kLinkCmd())
 		m_FileMenu.AppendMenu(MF_STRING, MP_GETED2KLINK, GetResString(IDS_COPY), _T("ED2KLINK"));
@@ -3384,8 +3382,6 @@ CString CDownloadListCtrl::getTextList()
 	return out;
 }
 
-// khaos::categorymod+
-/*
 int CDownloadListCtrl::GetFilesCountInCurCat()
 {
 	int iCount = 0;
@@ -3404,32 +3400,9 @@ int CDownloadListCtrl::GetFilesCountInCurCat()
 
 void CDownloadListCtrl::ShowFilesCount()
 {
-	CString str;
-	str.Format(_T("%s (%u)"), GetResString(IDS_TW_DOWNLOADS), GetFilesCountInCurCat());
-	theApp.emuledlg->transferwnd->GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(str);
+	theApp.emuledlg->transferwnd->UpdateFilesCount(GetFilesCountInCurCat());
 }
-*/
-void CDownloadListCtrl::ShowFilesCount() {
-	uint16	count=0;
-	CString counter;
-	CtrlItem_Struct* cur_item;
-	uint16	totcnt=0;
 
-	for(ListItems::const_iterator it = m_ListItems.begin(); it != m_ListItems.end(); it++){
-		cur_item = it->second;
-		if (cur_item->type == FILE_TYPE){
-			CPartFile* file=(CPartFile*)cur_item->value;
-			if (file->CheckShowItemInGivenCat(curTab))
-				++count;
-			++totcnt;
-		}
-	}
-
-	if (thePrefs.GetCategory(curTab))
-		counter.Format(_T("%s: %u (%u ")+GetResString(IDS_CAT_TOTAL)+_T(" | %s)"), GetResString(IDS_TW_DOWNLOADS),count,totcnt,thePrefs.GetCategory(curTab)->viewfilters.bSuspendFilters ? GetResString(IDS_CAT_FILTERSSUSP) : GetResString(IDS_CAT_FILTERSACTIVE));
-	theApp.emuledlg->transferwnd->GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(counter);
-}
-// khaos::categorymod-
 
 void CDownloadListCtrl::ShowSelectedFileDetails()
 {
@@ -3463,24 +3436,24 @@ void CDownloadListCtrl::ShowSelectedFileDetails()
 	}
 }
 
-int CDownloadListCtrl::GetCompleteDownloads(int cat, int &total){
+int CDownloadListCtrl::GetCompleteDownloads(int cat, int& total)
+{
+	total = 0;
 	int count=0;
-	total=0;
-
-	for(ListItems::const_iterator it = m_ListItems.begin(); it != m_ListItems.end(); it++){
+	for (ListItems::const_iterator it = m_ListItems.begin(); it != m_ListItems.end(); it++)
+	{
 		const CtrlItem_Struct* cur_item = it->second;
-		if (cur_item->type == FILE_TYPE){
-			CPartFile* file = reinterpret_cast<CPartFile*>(cur_item->value);
-			
-			if ( file->CheckShowItemInGivenCat(cat)) {
-				++total;
-
+		if (cur_item->type == FILE_TYPE)
+		{
+			/*const*/ CPartFile* file = reinterpret_cast<CPartFile*>(cur_item->value);
+			if (file->CheckShowItemInGivenCat(cat))
+			{
+				total++;
 				if (file->GetStatus()==PS_COMPLETE  )
-					++count;
+					count++;
 			}
 		}
 	}
-
 	return count;
 }
 
@@ -3681,7 +3654,7 @@ void CDownloadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 			if (content->type == 1) // for downloading files
 			{
 				CPartFile* partfile = (CPartFile*)content->value;
-				info=partfile->GetInfoSummary(partfile);
+				info=partfile->GetInfoSummary();
 			}
 			else if (content->type == 3 || content->type == 2) // for sources
 			{

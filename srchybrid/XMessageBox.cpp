@@ -60,19 +60,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 // include the following two lines if compiling an MFC app
 #include "stdafx.h"
-#pragma message("    compiling for MFC")
+//#pragma message("    compiling for MFC")
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef _MFC_VER
-#include <windows.h>
-#include <stdio.h>
-#include <crtdbg.h>
-#include <tchar.h>
-#pragma message("    compiling for Win32")
-#endif
+//#ifndef _MFC_VER
+//#include <windows.h>
+//#include <stdio.h>
+//#include <crtdbg.h>
+//#include <tchar.h>
+//#pragma message("    compiling for Win32")
+//#endif
 
 #include "XMessageBox.h"
+#include "resource.h"
 //#include "XTrace.h"
 
 #pragma warning(disable : 4127)		// conditional expression is constant

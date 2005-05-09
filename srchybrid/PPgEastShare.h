@@ -15,27 +15,27 @@ public:
 	enum { IDD = IDD_PPG_EASTSHARE };
 protected:
 	
-	int m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
+	bool m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 	HTREEITEM m_htiEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 
 	CSliderCtrl m_ctlNiceHashWeight;// <CB Mod : NiceHash>
 	int	m_iNiceHashWeight;// <CB Mod : NiceHash>
 	HTREEITEM m_htiNiceHashWeight;// <CB Mod : NiceHash>
 
-	int m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	bool m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	HTREEITEM m_htiIsPayBackFirst; //EastShare - added by AndCycle, Pay Back First
 	
 	int m_iPayBackFirstLimit; //MORPH - Added by SiRoB, Pay Back First Tweak
 	HTREEITEM m_htiPayBackFirstLimit; //MORPH - Added by SiRoB, Pay Back First Tweak
 
-	int m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	bool m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	HTREEITEM m_htiOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
-	int m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	bool m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	HTREEITEM m_htiSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
 	//EastShare - Added by Pretender, Option for ChunkDots
-	int m_bEnableChunkDots;
+	bool m_bEnableChunkDots;
 	HTREEITEM m_htiEnableChunkDots;
 	//EastShare - Added by Pretender, Option for ChunkDots
 
@@ -46,7 +46,7 @@ protected:
 	HTREEITEM m_htiIP2CountryName_SHORT;
 	HTREEITEM m_htiIP2CountryName_MID;
 	HTREEITEM m_htiIP2CountryName_LONG;
-	int m_bIP2CountryShowFlag;
+	bool m_bIP2CountryShowFlag;
 	HTREEITEM m_htiIP2CountryShowFlag;
 	//EastShare - added by AndCycle, IP to Country
 
@@ -61,7 +61,7 @@ protected:
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]
 
 	//Morph - added by AndCycle, Equal Chance For Each File
-	int	m_iEnableEqualChanceForEachFile;
+	bool	m_bEnableEqualChanceForEachFile;
 	HTREEITEM m_htiEnableEqualChanceForEachFile;
 	//Morph - added by AndCycle, Equal Chance For Each File
 

@@ -4,7 +4,6 @@
 	Version="7.10"
 	Name="emule"
 	ProjectGUID="{584EA69D-3443-4197-8994-364880FC1B9B}"
-	RootNamespace="emule"
 	Keyword="MFCProj">
 	<Platforms>
 		<Platform
@@ -28,16 +27,15 @@
 				RuntimeLibrary="1"
 				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
-				TreatWChar_tAsBuiltInType="FALSE"
+				TreatWChar_tAsBuiltInType="TRUE"
 				UsePrecompiledHeader="3"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
+				WarningLevel="4"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib .\pthreads\pthreads\release\pthreadVC.lib"
+				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib .\pthreads\pthreads\release\pthreadVC.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames=""
@@ -96,17 +94,16 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
-				EnableFunctionLevelLinking="FALSE"
-				TreatWChar_tAsBuiltInType="FALSE"
+				EnableFunctionLevelLinking="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthreadVC.lib"
+				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthreadVC.lib"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
@@ -221,6 +218,9 @@
 				RelativePath="FunnyNick.cpp">
 			</File>
 			<File
+				RelativePath="GZipFile.cpp">
+			</File>
+			<File
 				RelativePath="HttpClientReqSocket.cpp">
 			</File>
 			<File
@@ -310,6 +310,9 @@
 			</File>
 			<File
 				RelativePath="MMSocket.cpp">
+			</File>
+			<File
+				RelativePath=".\ModVersion.cpp">
 			</File>
 			<File
 				RelativePath="OtherFunctions.cpp">
@@ -406,6 +409,9 @@
 				RelativePath="SelfTest.cpp">
 			</File>
 			<File
+				RelativePath="SendMail.cpp">
+			</File>
+			<File
 				RelativePath="Server.cpp">
 			</File>
 			<File
@@ -495,6 +501,9 @@
 			</File>
 			<File
 				RelativePath="URLClient.cpp">
+			</File>
+			<File
+				RelativePath="Version.cpp">
 			</File>
 			<File
 				RelativePath="WebCache\WebCache.cpp">
@@ -671,6 +680,9 @@
 				RelativePath="FunnyNick.h">
 			</File>
 			<File
+				RelativePath="GZipFile.h">
+			</File>
+			<File
 				RelativePath="HttpClientReqSocket.h">
 			</File>
 			<File
@@ -722,6 +734,9 @@
 				RelativePath=".\ModName.h">
 			</File>
 			<File
+				RelativePath=".\ModVersion.h">
+			</File>
+			<File
 				RelativePath="Opcodes.h">
 			</File>
 			<File
@@ -758,6 +773,9 @@
 				RelativePath="Preview.h">
 			</File>
 			<File
+				RelativePath="QArray.h">
+			</File>
+			<File
 				RelativePath="Quantize.h">
 			</File>
 			<File
@@ -777,6 +795,9 @@
 			</File>
 			<File
 				RelativePath="SecRunAsUser.h">
+			</File>
+			<File
+				RelativePath="SendMail.h">
 			</File>
 			<File
 				RelativePath="Server.h">
@@ -1034,6 +1055,9 @@
 				RelativePath="DirectoryTreeCtrl.cpp">
 			</File>
 			<File
+				RelativePath="DropDownButton.cpp">
+			</File>
+			<File
 				RelativePath="DropTarget.cpp">
 			</File>
 			<File
@@ -1259,6 +1283,9 @@
 				RelativePath="TaskbarNotifier.cpp">
 			</File>
 			<File
+				RelativePath=".\TextToSpeech.cpp">
+			</File>
+			<File
 				RelativePath="TitleMenu.cpp">
 			</File>
 			<File
@@ -1438,6 +1465,9 @@
 			</File>
 			<File
 				RelativePath="Drawgdix.h">
+			</File>
+			<File
+				RelativePath="DropDownButton.h">
 			</File>
 			<File
 				RelativePath="DropTarget.h">
@@ -1686,6 +1716,9 @@
 				RelativePath="TaskbarNotifier.h">
 			</File>
 			<File
+				RelativePath="TextToSpeech.h">
+			</File>
+			<File
 				RelativePath="TitleMenu.h">
 			</File>
 			<File
@@ -1921,28 +1954,58 @@
 				RelativePath="res\ConnectDrop.ico">
 			</File>
 			<File
+				RelativePath="res\Connected.gif">
+			</File>
+			<File
+				RelativePath="res\ConnectedHighHigh.gif">
+			</File>
+			<File
 				RelativePath="res\ConnectedHighHigh.ico">
+			</File>
+			<File
+				RelativePath="res\ConnectedHighLow.gif">
 			</File>
 			<File
 				RelativePath="res\ConnectedHighLow.ico">
 			</File>
 			<File
+				RelativePath="res\ConnectedHighNot.gif">
+			</File>
+			<File
 				RelativePath="res\ConnectedHighNot.ico">
+			</File>
+			<File
+				RelativePath="res\ConnectedLowHigh.gif">
 			</File>
 			<File
 				RelativePath="res\ConnectedLowHigh.ico">
 			</File>
 			<File
+				RelativePath="res\ConnectedLowLow.gif">
+			</File>
+			<File
 				RelativePath="res\ConnectedLowLow.ico">
+			</File>
+			<File
+				RelativePath="res\ConnectedLowNot.gif">
 			</File>
 			<File
 				RelativePath="res\ConnectedLowNot.ico">
 			</File>
 			<File
+				RelativePath="res\ConnectedNotHigh.gif">
+			</File>
+			<File
 				RelativePath="res\ConnectedNotHigh.ico">
 			</File>
 			<File
+				RelativePath="res\ConnectedNotLow.gif">
+			</File>
+			<File
 				RelativePath="res\ConnectedNotLow.ico">
+			</File>
+			<File
+				RelativePath="res\ConnectedNotNot.gif">
 			</File>
 			<File
 				RelativePath="res\ConnectedNotNot.ico">
@@ -1987,7 +2050,7 @@
 				RelativePath=".\res\Mod\CreditSecureOvl.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\CycleView.ico">
+				RelativePath="res\CycleView.ico">
 			</File>
 			<File
 				RelativePath="res\Delete.ico">
@@ -2005,7 +2068,13 @@
 				RelativePath="res\Display.ico">
 			</File>
 			<File
+				RelativePath="res\Download.gif">
+			</File>
+			<File
 				RelativePath="res\Download.ico">
+			</File>
+			<File
+				RelativePath="res\DownloadFiles.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\EastShare.ico">
@@ -2078,6 +2147,9 @@
 			</File>
 			<File
 				RelativePath=".\res\Mod\fileimportparts.ico">
+			</File>
+			<File
+				RelativePath="res\FileInfo.gif">
 			</File>
 			<File
 				RelativePath="res\FileInfo.ico">
@@ -2384,6 +2456,9 @@
 				RelativePath="res\Restore.ico">
 			</File>
 			<File
+				RelativePath="res\RestoreWindow.gif">
+			</File>
+			<File
 				RelativePath="res\RestoreWindow.ico">
 			</File>
 			<File
@@ -2448,6 +2523,9 @@
 			</File>
 			<File
 				RelativePath=".\res\Mod\Splash.jpg">
+			</File>
+			<File
+				RelativePath="res\SplitWindow.ico">
 			</File>
 			<File
 				RelativePath="res\Start.ico">
@@ -2558,7 +2636,7 @@
 				RelativePath="res\UserMessage.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\ViewUpload.ico">
+				RelativePath="res\ViewUpload.ico">
 			</File>
 			<File
 				RelativePath="res\Web.ico">
@@ -2621,15 +2699,6 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\res\Connected.gif">
-		</File>
-		<File
-			RelativePath=".\res\Download.gif">
-		</File>
-		<File
-			RelativePath=".\res\FileInfo.gif">
-		</File>
-		<File
 			RelativePath=".\res\FolderOpen.gif">
 		</File>
 		<File
@@ -2640,9 +2709,6 @@
 		</File>
 		<File
 			RelativePath=".\res\Preferences.gif">
-		</File>
-		<File
-			RelativePath=".\res\RestoreWindow.gif">
 		</File>
 		<File
 			RelativePath=".\res\Upload.gif">

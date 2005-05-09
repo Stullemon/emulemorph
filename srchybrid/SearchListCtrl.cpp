@@ -237,6 +237,14 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 }
 
 CSearchListCtrl::~CSearchListCtrl(){
+	POSITION pos = m_mapSortSelectionStates.GetStartPosition();
+	while (pos != NULL) {
+		int nKey;
+		CSortSelectionState* pValue;
+		m_mapSortSelectionStates.GetNextAssoc(pos, nKey, pValue);
+		delete pValue;
+	}
+	m_mapSortSelectionStates.RemoveAll();
 }
 
 void CSearchListCtrl::Localize()
@@ -396,8 +404,8 @@ void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)toupdate;
 	int index = FindItem(&find);
-	if (index != (-1)){
-
+	if (index != -1)
+	{
 		CString strBuffer;
 		uint32 nSources = toupdate->GetSourceCount();	
 		int iClients = toupdate->GetClientsCount();
@@ -408,37 +416,24 @@ void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
 		SetItemText(index,2,strBuffer);
 		SetItemText(index,3,GetCompleteSourcesDisplayString(toupdate, nSources));
 
-		uint16 maxhitsname = (uint16)-1;
-		bool change=false;
-		CString strFileName = toupdate->GetFileName();
-		// update expanded childs
-		if (toupdate->GetListIsExpanded()) {
-			for (POSITION pos = theApp.searchlist->list.GetHeadPosition(); pos != NULL; ){
+		if (toupdate->IsListExpanded())
+		{
+			for (POSITION pos = theApp.searchlist->list.GetHeadPosition(); pos != NULL; )
+			{
 				const CSearchFile* cur_file = theApp.searchlist->list.GetNext(pos);
-				if (cur_file->GetListParent()==toupdate) {
-					if (maxhitsname<cur_file->GetListChildCount()) {
-						maxhitsname=cur_file->GetListChildCount();
-						strFileName=cur_file->GetFileName();
-						change=true;
-					}
-					// i am your child, darth! but do I exist? Do I?
+				if (cur_file->GetListParent() == toupdate)
+				{
 					LVFINDINFO find;
 					find.flags = LVFI_PARAM;
 					find.lParam = (LPARAM)cur_file;
 					int index2 = FindItem(&find);
-					if (index2!=-1)
-						// yes, I see you...
+					if (index2 != -1)
 						Update(index2);
 					else
-						// no, but I create you now for display
-						InsertItem(LVIF_PARAM|LVIF_TEXT,index+1,cur_file->GetFileName(),0,0,0,(LPARAM)cur_file);
+						InsertItem(LVIF_PARAM | LVIF_TEXT, index+1, cur_file->GetFileName(), 0, 0, 0, (LPARAM)cur_file);
 				}
 			}
 		}
-
-		// set name in list to the most used filename
-		if (change)
-			SetItemText(index,0,strFileName);
 		Update(index);
 	}
 }
@@ -459,13 +454,19 @@ CString CSearchListCtrl::GetCompleteSourcesDisplayString(const CSearchFile* pFil
 	{
 		ASSERT( uSources );
 		if (uSources)
+		{
 			str.Format(_T("%u%%"), (uCompleteSources*100)/uSources);
+			if (thePrefs.IsExtControlsEnabled())
+				str.AppendFormat(_T(" (%u)"), uCompleteSources);
+		}
 		if (pbComplete)
 			*pbComplete = true;
 	}
 	else						// '= 0' ... we know it's not complete
 	{
 		str = _T("0%");
+		if (thePrefs.IsExtControlsEnabled())
+			str.AppendFormat(_T(" (0)"));
 		if (pbComplete)
 			*pbComplete = false;
 	}
@@ -486,9 +487,49 @@ void CSearchListCtrl::RemoveResult(const CSearchFile* toremove)
 
 void CSearchListCtrl::ShowResults(uint32 nResultsID)
 {
+	if (m_nResultsID != 0 && nResultsID != m_nResultsID){
+		// store the current state
+		CSortSelectionState* pCurState = new CSortSelectionState();
+		POSITION pos = GetFirstSelectedItemPosition();
+		while (pos != NULL){
+			pCurState->m_aSelectedItems.Add(GetNextSelectedItem(pos));
+		}
+		pCurState->m_nSortItem = thePrefs.GetColumnSortItem(CPreferences::tableSearch);
+		pCurState->m_bSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableSearch);
+		pCurState->m_nScrollPosition = GetTopIndex();
+		m_mapSortSelectionStates.SetAt(m_nResultsID, pCurState);
+	}
+	
 	DeleteAllItems();
-	m_nResultsID = nResultsID;
-	searchlist->ShowResults(m_nResultsID);
+	
+	// recover stored state
+	CSortSelectionState* pNewState = NULL;
+	if (nResultsID != 0 && nResultsID != m_nResultsID && m_mapSortSelectionStates.Lookup(nResultsID, pNewState)){
+		m_mapSortSelectionStates.RemoveKey(nResultsID);		
+		// sort order
+		thePrefs.SetColumnSortItem(CPreferences::tableSearch, pNewState->m_nSortItem);
+		thePrefs.SetColumnSortAscending(CPreferences::tableSearch, pNewState->m_bSortAscending);
+		SetSortArrow(pNewState->m_nSortItem, pNewState->m_bSortAscending);
+		SortItems(SortProc, pNewState->m_nSortItem + (pNewState->m_bSortAscending ? 0:100));
+		// fill in the items
+		m_nResultsID = nResultsID;
+		searchlist->ShowResults(m_nResultsID);
+		// set stored selectionstates
+		for (int i = 0; i < pNewState->m_aSelectedItems.GetCount(); i++){
+			SetItemState(pNewState->m_aSelectedItems[i], LVIS_SELECTED, LVIS_SELECTED);
+		}
+		POINT Point;
+		if (pNewState->m_nScrollPosition > 0){
+			GetItemPosition(pNewState->m_nScrollPosition-1, &Point);
+			Point.x = 0;
+			Scroll(CSize(Point));
+		}
+		delete pNewState;
+	}
+	else{
+		m_nResultsID = nResultsID;
+		searchlist->ShowResults(m_nResultsID);
+	}
 }
 
 void CSearchListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
@@ -528,13 +569,13 @@ int CSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 	int comp;
 
-	if(item1->GetListParent()==NULL && item2->GetListParent()!= NULL) {
-		if(item1 == item2->GetListParent())
+	if (item1->GetListParent()==NULL && item2->GetListParent()!=NULL){
+		if (item1 == item2->GetListParent())
 			return -1;
 		comp = Compare(item1, item2->m_list_parent, lParamSort) * sortMod;
 	}
 	else if (item2->GetListParent()==NULL && item1->GetListParent()!=NULL){
-		if(item1->m_list_parent == item2)
+		if (item1->m_list_parent == item2)
 			return 1;
 		comp = Compare(item1->GetListParent(), item2, lParamSort) * sortMod;
 	}
@@ -543,9 +584,9 @@ int CSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	}
 	else{
 		comp = Compare(item1->GetListParent(), item2->GetListParent(), lParamSort);
-		if(comp != 0)
+		if (comp != 0)
 			return sortMod * comp;
-		
+
 		if ((item1->GetListParent()==NULL && item2->GetListParent()!=NULL) || (item2->GetListParent()==NULL && item1->GetListParent()!=NULL)){
 			if (item1->GetListParent()==NULL)
 				return -1;
@@ -1079,7 +1120,7 @@ void CSearchListCtrl::ExpandCollapseItem(int iItem, int iAction)
 	if (!searchfile)
 		return;
 
-	if (!searchfile->GetListIsExpanded())
+	if (!searchfile->IsListExpanded())
 	{
 		if (iAction > COLLAPSE_ONLY)
 		{
@@ -1094,7 +1135,7 @@ void CSearchListCtrl::ExpandCollapseItem(int iItem, int iAction)
 			const CSearchFile* cur_file = theApp.searchlist->list.GetNext(pos);
 				if (cur_file->GetListParent() == searchfile)
 				{
-					searchfile->SetListIsExpanded(true);
+					searchfile->SetListExpanded(true);
 					InsertItem(LVIF_PARAM | LVIF_TEXT, iItem+1, cur_file->GetFileName(), 0, 0, 0, (LPARAM)cur_file);
 				}
 			}
@@ -1132,7 +1173,7 @@ void CSearchListCtrl::HideSources(CSearchFile* toCollapse)
 		}
 	}
 	if (pre - post == 0)
-		toCollapse->SetListIsExpanded(false);
+		toCollapse->SetListExpanded(false);
 	SetRedraw(TRUE);
 }
 
@@ -1394,7 +1435,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			dc->MoveTo(treeCenter-2,middle - 1);
 			dc->LineTo(treeCenter+3,middle - 1);
 			
-			if (!content->GetListIsExpanded())
+			if (!content->IsListExpanded())
 			{
 				dc->MoveTo(treeCenter,middle-3);
 				dc->LineTo(treeCenter,middle+2);
@@ -1456,9 +1497,16 @@ COLORREF CSearchListCtrl::GetSearchItemColor(/*const*/ CSearchFile* src)
 		src->SetKnownType(CSearchFile::Downloaded);
 		return m_crSearchResultKnown;
 	}
+	else if (theApp.knownfiles->IsCancelledFileByID(src->GetFileHash())){
+		src->SetKnownType(CSearchFile::Cancelled);
+		return m_crSearchResultCancelled;		
+	}
 
-	// unknown, show shades of a color
-	return m_crShades[ (src->GetSourceCount()-1>=AVBLYSHADECOUNT)?AVBLYSHADECOUNT-1:src->GetSourceCount()-1];
+	// unknown file -> show shades of a color
+	int srccnt = src->GetSourceCount();
+	if (srccnt > 0)
+		--srccnt;
+	return m_crShades[(srccnt >= AVBLYSHADECOUNT) ? AVBLYSHADECOUNT-1 : srccnt];
 }
 
 void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src)
@@ -1477,12 +1525,26 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*con
 				lpRect->left -= 30;
 				break;
 			case 1:			// file size
+				if (thePrefs.GetDebugSearchResultDetailLevel() >= 1) {
+					if (src->GetFileSize() != src->GetListParent()->GetFileSize()) {
+						buffer = CastItoXBytes(src->GetFileSize(), false, false);
+						COLORREF crOldTextColor = dc->SetTextColor(RGB(255, 0, 0));
+						dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
+						dc->SetTextColor(crOldTextColor);
+					}
+				}
 				break;
-			case 2:			// number of same filenames
+			case 2:			// avail (number of same filenames)
 				buffer.Format(_T("%u"), src->GetListChildCount());
 				dc->DrawText(buffer,buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
-			case 3:
+			case 3:			// complete sources
+				if (thePrefs.GetDebugSearchResultDetailLevel() >= 1) {
+					if (thePrefs.IsExtControlsEnabled()){
+						buffer = GetCompleteSourcesDisplayString(src, src->GetSourceCount());
+						dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
+					}
+				}
 				break;
 			case 4:			// file type
 				break;
@@ -1533,6 +1595,8 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*con
 					buffer = GetResString(IDS_DOWNLOADING);
 				else if (src->m_eKnown == CSearchFile::Downloaded)
 					buffer = GetResString(IDS_DOWNLOADED);
+				else if (src->m_eKnown == CSearchFile::Cancelled)
+					buffer = GetResString(IDS_CANCELLED);
 				else
 					buffer.Empty();
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
@@ -1570,17 +1634,15 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 				buffer = CastItoXBytes(src->GetFileSize(), false, false);
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
-			case 2:{		// avail
-				uint32 nSources = src->GetSourceCount();	
+			case 2:			// avail
+				buffer.Format(_T("%u"), src->GetSourceCount());
+				if (thePrefs.IsExtControlsEnabled()){
 				int iClients = src->GetClientsCount();
-				if ( thePrefs.IsExtControlsEnabled() && iClients > 0)
-					buffer.Format(_T("%u (%u)"), nSources, iClients);
-				else
-					buffer.Format(_T("%u"), nSources);
+					if (iClients > 0)
+						buffer.AppendFormat(_T(" (%u)"), iClients);
+				}
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
-
-			}
 			case 3:{		// complete sources
 				bool bComplete = false;
 				buffer = GetCompleteSourcesDisplayString(src, src->GetSourceCount(), &bComplete);
@@ -1644,6 +1706,8 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 					buffer = GetResString(IDS_DOWNLOADING);
 				else if (src->m_eKnown == CSearchFile::Downloaded)
 					buffer = GetResString(IDS_DOWNLOADED);
+				else if (src->m_eKnown == CSearchFile::Cancelled)
+					buffer = GetResString(IDS_CANCELLED);
 				else
 					buffer.Empty();
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
@@ -1685,6 +1749,7 @@ void CSearchListCtrl::SetHighlightColors()
 	m_crSearchResultDownloadStopped = RGB(255,0,0);
 	m_crSearchResultShareing		= RGB(255,0,0);
 	m_crSearchResultKnown = RGB(0,128,0);
+	m_crSearchResultCancelled		= RGB(0,128,0);
 
 	theApp.LoadSkinColor(_T("SearchResultsLvFg_Downloading"), m_crSearchResultDownloading);
 	if (!theApp.LoadSkinColor(_T("SearchResultsLvFg_DownloadStopped"), m_crSearchResultDownloadStopped))
@@ -1695,9 +1760,9 @@ void CSearchListCtrl::SetHighlightColors()
 
 	// precalculate sources shades
 	COLORREF normFGC=GetTextColor();
-	float rdelta= (GetRValue(crSearchResultAvblyBase)-GetRValue(normFGC)) / AVBLYSHADECOUNT ;
-	float gdelta= (GetGValue(crSearchResultAvblyBase)-GetGValue(normFGC)) / AVBLYSHADECOUNT ;
-	float bdelta= (GetBValue(crSearchResultAvblyBase)-GetBValue(normFGC)) / AVBLYSHADECOUNT ;
+	float rdelta = (float)((GetRValue(crSearchResultAvblyBase) - GetRValue(normFGC)) / AVBLYSHADECOUNT);
+	float gdelta = (float)((GetGValue(crSearchResultAvblyBase) - GetGValue(normFGC)) / AVBLYSHADECOUNT);
+	float bdelta = (float)((GetBValue(crSearchResultAvblyBase) - GetBValue(normFGC)) / AVBLYSHADECOUNT);
 
 	for (int shades=0;shades<AVBLYSHADECOUNT;shades++) {
 		m_crShades[shades]=RGB(	GetRValue(normFGC) + (rdelta*shades),
@@ -1725,4 +1790,13 @@ void CSearchListCtrl::OnLvnKeydown(NMHDR *pNMHDR, LRESULT *pResult)
 	if (iAction < EXPAND_COLLAPSE)
 		ExpandCollapseItem(GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED), iAction);
 	*pResult = 0;
+}
+
+void CSearchListCtrl::ClearResultViewState(uint32 nResultsID){
+	// just clean up our stored states for this search
+	CSortSelectionState* pState = NULL;
+	if (m_mapSortSelectionStates.Lookup(nResultsID, pState)){
+		m_mapSortSelectionStates.RemoveKey(nResultsID);
+		delete pState;
+	}
 }

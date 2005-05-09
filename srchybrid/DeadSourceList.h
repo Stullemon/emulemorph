@@ -62,6 +62,7 @@ public:
 	CDeadSourceList(void);
 	~CDeadSourceList(void);
 	void		AddDeadSource(const CUpDownClient* pToAdd);
+	void		RemoveDeadSource(const CUpDownClient* client);
 	bool		IsDeadSource(const CUpDownClient* pToCheck) const;
 	uint32		GetDeadSourcesCount() const { return m_mapDeadSources.GetCount(); }
 	void		Init(bool bGlobalList);

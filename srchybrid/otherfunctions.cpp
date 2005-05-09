@@ -207,9 +207,9 @@ CString CastSecondsToLngHM(LONGLONG llSeconds)
 	if (count < 60)
 		buffer.Format(_T("%I64d %s"),count,GetResString(IDS_LONGSECS)); 
 	else if (count < 3600) 
-		buffer.Format(_T("%I64d:%s %s"),count/60,LeadingZero(count-(count/60)*60),GetResString(IDS_LONGMINS));
+		buffer.Format(_T("%I64d:%s %s"), count/60, LeadingZero((UINT)(count - (count/60)*60)), GetResString(IDS_LONGMINS));
 	else if (count < 86400) 
-		buffer.Format(_T("%I64d:%s %s"),count/3600,LeadingZero((count-(count/3600)*3600)/60),GetResString(IDS_LONGHRS));
+		buffer.Format(_T("%I64d:%s %s"), count/3600, LeadingZero((UINT)((count - (count/3600)*3600)/60)), GetResString(IDS_LONGHRS));
 	else {
 		ULONGLONG cntDays = count/86400;
 		ULONGLONG cntHrs = (count - (count/86400)*86400)/3600;
@@ -947,7 +947,7 @@ extern "C" int CALLBACK BrowseCallbackProc(HWND hWnd, UINT uMsg, LPARAM /*lParam
 
 bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle, LPCTSTR pszDlgTitle)
 {
-	BOOL bResult = FALSE;
+	bool bResult = false;
 	CoInitialize(0);
 	LPMALLOC pShlMalloc;
 	if (SHGetMalloc(&pShlMalloc) == NOERROR)
@@ -969,7 +969,7 @@ bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle, LPCTSTR pszDlgTitle)
 		LPITEMIDLIST pidlBrowse;
 		if ((pidlBrowse = SHBrowseForFolder(&BrsInfo)) != NULL){
 			if (SHGetPathFromIDList(pidlBrowse, pszPath))
-				bResult = TRUE;
+				bResult = true;
 			pShlMalloc->Free(pidlBrowse);
 		}
 		pShlMalloc->Release();
@@ -1064,8 +1064,8 @@ bool strmd4(const CString& rstr, uchar* hash)
 	for (int i = 0; i < 16; i++)
 	{
 		char byte[3];
-		byte[0] = rstr[i*2+0];
-		byte[1] = rstr[i*2+1];
+		byte[0] = (char)rstr[i*2+0];
+		byte[1] = (char)rstr[i*2+1];
 		byte[2] = '\0';
 
 		UINT b;
@@ -1119,7 +1119,7 @@ CString CleanupFilename(CString filename)
 	filename.Replace(_T('+'), _T(' '));
 	filename.Replace(_T('='), _T(' '));
 
-	// replace invalid filename characters
+	// remove invalid filename characters
 	filename.Replace(_T("\\"), _T(""));
 	filename.Replace(_T("\""), _T(""));
 	filename.Replace(_T("/"), _T(""));
@@ -1130,6 +1130,7 @@ CString CleanupFilename(CString filename)
 	filename.Replace(_T(">"), _T(""));
 	filename.Replace(_T("|"), _T(""));
 
+	// remove [AD]
 	CString tempStr;
 	int pos1 = -1;
 	for (;;)
@@ -1159,17 +1160,6 @@ CString CleanupFilename(CString filename)
 			break;
 	}
 
-	// additional formatting
-	filename.Replace(_T("()"), _T(""));
-	filename.Replace(_T("  "), _T(" "));
-	filename.Replace(_T(" ."), _T("."));
-	filename.Replace(_T("( "), _T("("));
-	filename.Replace(_T(" )"), _T(")"));
-	filename.Replace(_T("()"), _T(""));
-	filename.Replace(_T("{ "), _T("{"));
-	filename.Replace(_T(" }"), _T("}"));
-	filename.Replace(_T("{}"), _T(""));
-
 	// Make leading Caps 
 	if (filename.GetLength() > 1)
 	{
@@ -1185,7 +1175,9 @@ CString CleanupFilename(CString filename)
 		{
 			if (!IsCharAlpha(filename.GetAt(ix)))
 			{
-				if (ix < filename.GetLength()-2 && _istdigit(filename.GetAt(ix+2)))
+				if (	(ix < filename.GetLength()-2 && _istdigit(filename.GetAt(ix+2))) ||
+						filename.GetAt(ix)==_T('\'')
+					)
 					continue;
 
 				tempStr = filename.GetAt(ix+1);
@@ -1194,6 +1186,19 @@ CString CleanupFilename(CString filename)
 			}
 		}
 	}
+
+	// additional formatting
+	filename.Replace(_T("()"), _T(""));
+	filename.Replace(_T("  "), _T(" "));
+	filename.Replace(_T(" ."), _T("."));
+	filename.Replace(_T("( "), _T("("));
+	filename.Replace(_T(" )"), _T(")"));
+	filename.Replace(_T("()"), _T(""));
+	filename.Replace(_T("{ "), _T("{"));
+	filename.Replace(_T(" }"), _T("}"));
+	filename.Replace(_T("{}"), _T(""));
+
+
 	filename.Trim();
 	return filename;
 }
@@ -1222,6 +1227,7 @@ struct SED2KFileType
     { _T(".med"),   ED2KFT_AUDIO },
     { _T(".mid"),   ED2KFT_AUDIO },
     { _T(".midi"),  ED2KFT_AUDIO },
+    { _T(".mka"),   ED2KFT_AUDIO },
     { _T(".mod"),   ED2KFT_AUDIO },
     { _T(".mol"),   ED2KFT_AUDIO },
     { _T(".mp1"),   ED2KFT_AUDIO },
@@ -1298,12 +1304,14 @@ struct SED2KFileType
 
     { _T(".7z"),	ED2KFT_ARCHIVE },
     { _T(".ace"),   ED2KFT_ARCHIVE },
+	{ _T(".alz"),   ED2KFT_ARCHIVE },
     { _T(".arj"),   ED2KFT_ARCHIVE },
     { _T(".bz2"),   ED2KFT_ARCHIVE },
     { _T(".cab"),   ED2KFT_ARCHIVE },
     { _T(".gz"),    ED2KFT_ARCHIVE },
     { _T(".hqx"),   ED2KFT_ARCHIVE },
     { _T(".lha"),   ED2KFT_ARCHIVE },
+    { _T(".lzh"),   ED2KFT_ARCHIVE },
     { _T(".msi"),   ED2KFT_ARCHIVE },
     { _T(".rar"),   ED2KFT_ARCHIVE },
     { _T(".sea"),   ED2KFT_ARCHIVE },
@@ -1311,6 +1319,7 @@ struct SED2KFileType
     { _T(".tar"),   ED2KFT_ARCHIVE },
     { _T(".tgz"),   ED2KFT_ARCHIVE },
     { _T(".uc2"),   ED2KFT_ARCHIVE },
+    { _T(".z"),		ED2KFT_ARCHIVE },
     { _T(".zip"),   ED2KFT_ARCHIVE },
 
     { _T(".bat"),   ED2KFT_PROGRAM },
@@ -1352,7 +1361,7 @@ struct SED2KFileType
     { _T(".wri"),   ED2KFT_DOCUMENT },
     { _T(".txt"),   ED2KFT_DOCUMENT },
     { _T(".xls"),   ED2KFT_DOCUMENT },
-    { _T(".xlt"),   ED2KFT_DOCUMENT }
+	{ _T(".xml"),   ED2KFT_DOCUMENT }
 };
 
 int __cdecl CompareE2DKFileType(const void* p1, const void* p2)
@@ -2022,7 +2031,16 @@ CString DbgGetMuleClientTCPOpcode(UINT opcode)
 		_STRVAL(OP_PEERCACHE_ANSWER),
 		_STRVAL(OP_PEERCACHE_ACK),
 		_STRVAL(OP_PUBLICIP_ANSWER),
-		_STRVAL(OP_PUBLICIP_REQ)
+		_STRVAL(OP_PUBLICIP_REQ),
+		_STRVAL(OP_PORTTEST),
+		_STRVAL(OP_CALLBACK),
+		_STRVAL(OP_BUDDYPING),
+		_STRVAL(OP_BUDDYPONG),
+		_STRVAL(OP_REASKCALLBACKTCP),
+		_STRVAL(OP_AICHANSWER),
+		_STRVAL(OP_AICHREQUEST),
+		_STRVAL(OP_AICHFILEHASHANS),
+		_STRVAL(OP_AICHFILEHASHREQ)
 	};
 
 	for (int i = 0; i < ARRSIZE(_aOpcodes); i++)
@@ -2065,39 +2083,39 @@ CString DbgGetClientTCPOpcode(UINT protocol, UINT opcode)
 	return str;
 }
 
-void DebugRecv(LPCSTR pszMsg, const CUpDownClient* client, const char* packet, uint32 nIP)
+void DebugRecv(LPCSTR pszMsg, const CUpDownClient* client, const uchar* packet, uint32 nIP)
 {
 	// 111.222.333.444 = 15 chars
 	if (client){
 		if (client != NULL && packet != NULL)
-			Debug(_T("%-24hs from %s; %s\n"), pszMsg, client->DbgGetClientInfo(true), DbgGetFileInfo((uchar*)packet));
+			Debug(_T("%-24hs from %s; %s\n"), pszMsg, client->DbgGetClientInfo(true), DbgGetFileInfo(packet));
 		else if (client != NULL && packet == NULL)
 			Debug(_T("%-24hs from %s\n"), pszMsg, client->DbgGetClientInfo(true));
 		else if (client == NULL && packet != NULL)
-			Debug(_T("%-24hs; %s\n"), pszMsg, DbgGetFileInfo((uchar*)packet));
+			Debug(_T("%-24hs; %s\n"), pszMsg, DbgGetFileInfo(packet));
 		else
 			Debug(_T("%-24hs\n"), pszMsg);
 	}
 	else{
 		if (nIP != 0 && packet != NULL)
-			Debug(_T("%-24hs from %-15s; %s\n"), pszMsg, ipstr(nIP), DbgGetFileInfo((uchar*)packet));
+			Debug(_T("%-24hs from %-15s; %s\n"), pszMsg, ipstr(nIP), DbgGetFileInfo(packet));
 		else if (nIP != 0 && packet == NULL)
 			Debug(_T("%-24hs from %-15s\n"), pszMsg, ipstr(nIP));
 		else if (nIP == 0 && packet != NULL)
-			Debug(_T("%-24hs; %s\n"), pszMsg, DbgGetFileInfo((uchar*)packet));
+			Debug(_T("%-24hs; %s\n"), pszMsg, DbgGetFileInfo(packet));
 		else
 			Debug(_T("%-24hs\n"), pszMsg);
 	}
 }
 
-void DebugSend(LPCSTR pszMsg, const CUpDownClient* client, const char* packet)
+void DebugSend(LPCSTR pszMsg, const CUpDownClient* client, const uchar* packet)
 {
 	if (client != NULL && packet != NULL)
-		Debug(_T(">>> %-20hs to   %s; %s\n"), pszMsg, client->DbgGetClientInfo(true), DbgGetFileInfo((uchar*)packet));
+		Debug(_T(">>> %-20hs to   %s; %s\n"), pszMsg, client->DbgGetClientInfo(true), DbgGetFileInfo(packet));
 	else if (client != NULL && packet == NULL)
 		Debug(_T(">>> %-20hs to   %s\n"), pszMsg, client->DbgGetClientInfo(true));
 	else if (client == NULL && packet != NULL)
-		Debug(_T(">>> %-20hs; %s\n"), pszMsg, DbgGetFileInfo((uchar*)packet));
+		Debug(_T(">>> %-20hs; %s\n"), pszMsg, DbgGetFileInfo(packet));
 	else
 		Debug(_T(">>> %-20hs\n"), pszMsg);
 }
@@ -2286,6 +2304,22 @@ CString ipstr(uint32 nIP)
 	CString strIP;
 	strIP.ReleaseBuffer(_stprintf(strIP.GetBuffer(3+1+3+1+3+1+3), _T("%u.%u.%u.%u"), pucIP[0], pucIP[1], pucIP[2], pucIP[3]));
 	return strIP;
+}
+
+CString ipstr(uint32 nIP, uint16 nPort)
+{
+	// following gives the same string as 'inet_ntoa(*(in_addr*)&nIP)' but is not restricted to ASCII strings
+	const BYTE* pucIP = (BYTE*)&nIP;
+	CString strIP;
+	strIP.ReleaseBuffer(_stprintf(strIP.GetBuffer(3+1+3+1+3+1+3+1+5), _T("%u.%u.%u.%u:%u"), pucIP[0], pucIP[1], pucIP[2], pucIP[3], nPort));
+	return strIP;
+}
+
+CString ipstr(LPCTSTR pszAddress, uint16 nPort)
+{
+	CString strIPPort;
+	strIPPort.Format(_T("%s:%u"), pszAddress, nPort);
+	return strIPPort;
 }
 
 CStringA ipstrA(uint32 nIP)
@@ -2554,7 +2588,7 @@ void TriggerPortTest(uint16 tcp, uint16 udp) {
 	CString m_sTestURL;
 
 	// do not alter the connection test, this is a manual test only. If you want to change the behaviour, use your server!
-	m_sTestURL.Format(_T("http://porttest.emule-project.net/connectiontest.php?tcpport=%i&udpport=%i&lang=%i"), tcp, udp , thePrefs.GetLanguageID() );
+	m_sTestURL.Format(PORTTESTURL, tcp, udp , thePrefs.GetLanguageID());
 
 	ShellOpenFile(m_sTestURL);
 }

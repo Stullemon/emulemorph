@@ -65,7 +65,8 @@ public:
 
 	bool IsRunning();
 	void ShowConnectionState();
-	void ShowNotifier(CString Text, int MsgType, LPCTSTR pszLink = NULL, bool ForceSoundOFF = false);
+	void ShowNotifier(LPCTSTR pszText, int iMsgType, LPCTSTR pszLink = NULL, bool bForceSoundOFF = false);
+	void SendNotificationMail(int iMsgType, LPCTSTR pszText);
 	void ShowUserCount();
 	void ShowMessageState(uint8 iconnr);
 	void SetActiveDialog(CWnd* dlg);
@@ -78,11 +79,14 @@ public:
 	void AddServerMessageLine(LPCTSTR pszText);
 	void ResetLog();
 	void ResetDebugLog();
+	void ResetServerInfo();
 	CString	GetLastLogEntry();
 	CString	GetLastDebugLogEntry();
 	CString	GetAllLogEntries();
 	CString	GetAllDebugLogEntries();
+	CString GetServerInfoText();
 	CString	GetConnectionStateString();
+	UINT GetConnectionStateIconIndex() const;
 	CString	GetTransferRateString();
 	CString	GetUpDatarateString(UINT uUpDatarate = -1);
 	CString	GetDownDatarateString(UINT uDownDatarate = -1);
@@ -193,6 +197,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnClose();
+	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType,int cx,int cy);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
@@ -233,11 +238,13 @@ protected:
 
 	afx_msg LRESULT OnAreYouEmule(WPARAM, LPARAM);
 
-	//Webserver [kuchin]
-	afx_msg LRESULT OnWebServerConnect(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnWebServerDisonnect(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnWebServerRemove(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnWebSharedFilesReload(WPARAM wParam, LPARAM lParam);
+	//Webinterface
+	afx_msg LRESULT OnWebGUIInteraction(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnWebServerClearCompleted(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnWebServerFileRename(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnWebAddDownloads(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnWebSetCatPrio(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnAddRemoveFriend(WPARAM wParam, LPARAM lParam);
 
 	// VersionCheck DNS
 	afx_msg LRESULT OnVersionCheckResponse(WPARAM wParam, LPARAM lParam);
@@ -266,7 +273,7 @@ private:
 	//MORPH - Added by SiRoB, Toggle Show Hide window
 	void	ToggleShow();
 	void	ToggleHide();
-	bool	b_TrayWasVisible;
+	BOOL	b_TrayWasVisible;
 	bool	b_HideApp;
 	//MORPH - Added by SiRoB, Toggle Show Hide window
 
@@ -297,6 +304,29 @@ enum EEMuleAppMsgs
 	TM_FILEALLOCEXC,
 	TM_FILECOMPLETED,
 	TM_FILEOPPROGRESS
+};
+
+enum EWebinterfaceOrders
+{
+	WEBGUIIA_UPDATEMYINFO = 1,
+	WEBGUIIA_WINFUNC,
+	WEBGUIIA_UPD_CATTABS,
+	WEBGUIIA_UPD_SFUPDATE,
+	WEBGUIIA_UPDATESERVER,
+	WEBGUIIA_STOPCONNECTING,
+	WEBGUIIA_CONNECTTOSERVER,
+	WEBGUIIA_DISCONNECT,
+	WEBGUIIA_SERVER_REMOVE,
+	WEBGUIIA_SHARED_FILES_RELOAD,
+	WEBGUIIA_ADD_TO_STATIC,
+	WEBGUIIA_REMOVE_FROM_STATIC,
+	WEBGUIIA_UPDATESERVERMETFROMURL,
+	WEBGUIIA_SHOWSTATISTICS,
+	WEBGUIIA_DELETEALLSEARCHES,
+	WEBGUIIA_KAD_BOOTSTRAP,
+	WEBGUIIA_KAD_START,
+	WEBGUIIA_KAD_STOP,
+	WEBGUIIA_KAD_RCFW
 };
 
 //Commander - Added: Invisible Mode [TPT] - Start

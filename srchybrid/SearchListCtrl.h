@@ -31,6 +31,14 @@ struct SearchCtrlItem_Struct{
    uint16			childcount;
 };
 
+class CSortSelectionState{
+public:
+	uint32	m_nSortItem;
+	bool	m_bSortAscending;
+	uint32	m_nScrollPosition;
+	CArray<int, int>	m_aSelectedItems;
+};
+
 class CSearchListCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
 	DECLARE_DYNAMIC(CSearchListCtrl)
@@ -46,6 +54,7 @@ public:
 	void	RemoveResult(const CSearchFile* toremove);
 	void	Localize();
 	void	ShowResults(uint32 nResultsID);
+	void	ClearResultViewState(uint32 nResultsID);
 	void	NoTabs()	{ m_nResultsID = 0; }
 
 protected:
@@ -57,7 +66,10 @@ protected:
 	COLORREF	m_crSearchResultDownloadStopped;
 	COLORREF	m_crSearchResultKnown;
 	COLORREF	m_crSearchResultShareing;
+	COLORREF	m_crSearchResultCancelled;
 	COLORREF	m_crShades[AVBLYSHADECOUNT];
+
+	CMap<int,int, CSortSelectionState*, CSortSelectionState*> 	m_mapSortSelectionStates;
 
 	COLORREF GetSearchItemColor(/*const*/ CSearchFile* src);
 	CString GetCompleteSourcesDisplayString(const CSearchFile* pFile, UINT uSources, bool* pbComplete = NULL) const;

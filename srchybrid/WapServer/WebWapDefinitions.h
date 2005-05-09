@@ -1,80 +1,152 @@
 //emulEspaña - Added by MoNKi [MoNKi: -Wap Server-]
 #pragma once
-
 #define SESSION_TIMEOUT_SECS	300	// 5 minutes session expiration
 #define SHORT_FILENAME_LENGTH	40	// Max size of file name.
 
-typedef struct { float download; float upload;  long connections; } UpDown;
+#define SESSION_TIMEOUT_SECS	300	// 5 minutes session expiration
+#define SHORT_LENGTH_MAX		60	// Max size for strings maximum
+#define SHORT_LENGTH			40	// Max size for strings
+#define SHORT_LENGTH_MIN		30	// Max size for strings minimum
 
-typedef struct { CTime startTime; long lSession; bool admin; int lastcat;} Session;
+typedef struct
+{
+	double download;
+	double upload;
+	long connections;
+} UpDown;
+
+typedef struct
+{
+	CTime	startTime;
+	long	lSession;
+	bool	admin;
+	int		lastcat;
+
+} Session;
+
+struct BadLogin {
+	uint32	datalen;
+	DWORD	timestamp;
+};
 
 typedef struct
 {
 	CString	sFileName;
-	CString	sFileStatus;
-	uint32	lFileSize;
-	uint32	lFileTransferred;
-	uint32	lFileSpeed;
-	uint16	lSourceCount;
-	uint16	lNotCurrentSourceCount;
-	uint16	lTransferringSourceCount;
-	float	fCompleted;
+	CString sFileNameJS;
+	CString	sFileType;
+	CString	sFileState;
+	int		iFileState;
+	CString sCategory;
+	uint64	m_qwFileSize;
+	uint64	m_qwFileTransferred;
+	long	lFileSpeed;
+	long	lSourceCount;
+	long	lNotCurrentSourceCount;
+	long	lTransferringSourceCount;
+	double	m_dblCompleted;
 	int		nFileStatus;
 	int		nFilePrio;
 	CString	sFileHash;
 	CString	sED2kLink;
 	CString	sFileInfo;
+	bool	bFileAutoPrio;
+	bool	bIsComplete;
+	bool	bIsPreview;
+	bool	bIsGetFLC;
+	int		iComment;
 } DownloadFiles;
 
-//emulEspaña: Modified by MoNKi [itsonlyme: -Fix: webserver uint sizes-]
-/*
 typedef struct
 {
+	bool	bIsPartFile;
+	CString	sFileState;
 	CString	sFileName;
-	uint32	lFileSize;
-	uint32	nFileTransferred;
-    uint64	nFileAllTimeTransferred;
+	CString sFileType;
+	uint64	m_qwFileSize;
+	uint64	nFileTransferred;
+	uint64	nFileAllTimeTransferred;
 	uint16	nFileRequests;
 	uint32	nFileAllTimeRequests;
 	uint16	nFileAccepts;
 	uint32	nFileAllTimeAccepts;
-	uint8	nFilePriority;
+	CString sFileCompletes;
+	double	dblFileCompletes;
+	byte	nFilePriority;
 	CString sFilePriority;
 	bool	bFileAutoPriority;
 	CString sFileHash;
 	CString	sED2kLink;
 } SharedFiles;
-*/
 
 typedef struct
 {
+	CString	sClientState;
+	CString	sUserHash;
+	CString	sActive;
+	CString sFileInfo;
+	CString sClientSoft;
+	CString	sClientExtra;
+	CString	sUserName;
 	CString	sFileName;
-	uint32	lFileSize;
-	uint64	nFileTransferred;
-    uint64	nFileAllTimeTransferred;
-	uint16	nFileRequests;
-	uint16	nFileAllTimeRequests;
-	uint16	nFileAccepts;
-	uint16	nFileAllTimeAccepts;
-	uint8	nFilePriority;
-	CString sFilePriority;
-	bool	bFileAutoPriority;
-	CString sFileHash;
-	CString	sED2kLink;
-} SharedFiles;
-//End emulEspaña
+	uint32	nTransferredDown;
+	uint32	nTransferredUp;
+	sint32	nDataRate;
+	CString	sClientNameVersion;
+} UploadUsers;
+
+typedef struct
+{
+	CString	sClientState;
+	CString	sClientStateSpecial;
+	CString	sUserHash;
+	CString sClientSoft;
+	CString sClientSoftSpecial;
+	CString	sClientExtra;
+	CString	sUserName;
+	CString	sFileName;
+	CString	sClientNameVersion;
+	uint32	nScore;
+	CString sIndex;	//SyruS CQArray-Sorting element
+} QueueUsers;
 
 typedef enum
 {
+	DOWN_SORT_STATE,
+	DOWN_SORT_TYPE,
 	DOWN_SORT_NAME,
 	DOWN_SORT_SIZE,
 	DOWN_SORT_TRANSFERRED,
 	DOWN_SORT_SPEED,
-	DOWN_SORT_PROGRESS
+	DOWN_SORT_PROGRESS,
+	DOWN_SORT_SOURCES,
+	DOWN_SORT_PRIORITY,
+	DOWN_SORT_CATEGORY,
+	DOWN_SORT_FAKECHECK
 } DownloadSort;
 
 typedef enum
 {
+	UP_SORT_CLIENT,
+	UP_SORT_USER,
+	UP_SORT_VERSION,
+	UP_SORT_FILENAME,
+	UP_SORT_TRANSFERRED,
+	UP_SORT_SPEED
+} UploadSort;
+
+typedef enum
+{
+	QU_SORT_CLIENT,
+	QU_SORT_USER,
+	QU_SORT_VERSION,
+	QU_SORT_FILENAME,
+	QU_SORT_SCORE
+} QueueSort;
+
+typedef enum
+{
+	SHARED_SORT_STATE,
+	SHARED_SORT_TYPE,
 	SHARED_SORT_NAME,
 	SHARED_SORT_SIZE,
 	SHARED_SORT_TRANSFERRED,
@@ -82,7 +154,8 @@ typedef enum
 	SHARED_SORT_REQUESTS,
 	SHARED_SORT_ALL_TIME_REQUESTS,
 	SHARED_SORT_ACCEPTS,
-    SHARED_SORT_ALL_TIME_ACCEPTS,
+	SHARED_SORT_ALL_TIME_ACCEPTS,
+	SHARED_SORT_COMPLETES,
 	SHARED_SORT_PRIORITY
 } SharedSort;
 
@@ -92,40 +165,65 @@ typedef struct
 	CString	sServerDescription;
 	int		nServerPort;
 	CString	sServerIP;
-	int		nServerUsers;
-	int		nServerMaxUsers;
-	int		nServerFiles;
+	CString sServerFullIP;
+	CString sServerState;
+	bool    bServerStatic;
+	uint32		nServerUsers;
+	uint32		nServerMaxUsers;
+	uint32		nServerFiles;
+	CString sServerPriority;
+	byte   nServerPriority;
+	int		nServerPing;
+	int		nServerFailed;
+	uint32		nServerSoftLimit;
+	uint32		nServerHardLimit;
+	CString	sServerVersion;
 } ServerEntry;
 
 typedef enum
 {
+	SERVER_SORT_STATE,
 	SERVER_SORT_NAME,
-	SERVER_SORT_DESCRIPTION,
 	SERVER_SORT_IP,
+	SERVER_SORT_DESCRIPTION,
+	SERVER_SORT_PING,
 	SERVER_SORT_USERS,
-	SERVER_SORT_FILES
+	SERVER_SORT_FILES,
+	SERVER_SORT_PRIORITY,
+	SERVER_SORT_FAILED,
+	SERVER_SORT_LIMIT,
+	SERVER_SORT_VERSION
 } ServerSort;
-
-struct BadLogin {
-	uint32	datalen;
-	DWORD	timestamp;
-};
 
 typedef struct
 {
 	uint32			nUsers;
 	DownloadSort	DownloadSort;
 	bool			bDownloadSortReverse;
+	UploadSort		UploadSort;
+	bool			bUploadSortReverse;
+	QueueSort		QueueSort;
+	bool			bQueueSortReverse;
 	ServerSort		ServerSort;
 	bool			bServerSortReverse;
 	SharedSort		SharedSort;
 	bool			bSharedSortReverse;	
 	bool			bShowUploadQueue;
+	bool			bShowUploadQueueBanned;
+	bool			bShowUploadQueueFriend;
+	bool			bShowTransferLine;//Purity: Action Buttons
+	CString			sShowTransferFile;//Purity: Action Buttons
+	bool			bShowServerLine;//Purity: Action Buttons
+	CString			sShowServerIP;//Purity: Action Buttons
+	bool			bShowSharedLine;//Purity: Action Buttons
+	CString			sShowSharedFile;//Purity: Action Buttons
 
 	CArray<UpDown>		PointsForWeb;
-	CArray<Session>	Sessions;
-	CArray<BadLogin> badlogins;	//TransferredData= IP : time
-	
-	CString sLastModified;
-	CString	sETag;
+	CArray<Session, Session>	Sessions;
+
+	CString			sLastModified;
+	CString			sETag;
+
+	CArray<BadLogin>	badlogins;	//TransferredData= IP : time
+
 } GlobalParams;

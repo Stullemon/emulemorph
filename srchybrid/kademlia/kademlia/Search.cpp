@@ -356,7 +356,7 @@ void CSearch::processResponse(uint32 fromIP, uint16 fromPort, ContactList *resul
 							ASSERT( m_searchTerms->GetLength() > 0 );
 							// the data in 'm_searchTerms' is to be sent several times. do not pass the m_searchTerms (CSafeMemFile) to 'sendPacket' as it would get detached.
 							//udpListner->sendPacket(m_searchTerms, KADEMLIA_SEARCH_REQ, from->getIPAddress(), from->getUDPPort());
-							CKademlia::getUDPListener()->sendPacket(m_searchTerms->GetBuffer(), m_searchTerms->GetLength(), KADEMLIA_SEARCH_REQ, from->getIPAddress(), from->getUDPPort());
+							CKademlia::getUDPListener()->sendPacket(m_searchTerms->GetBuffer(), (UINT)m_searchTerms->GetLength(), KADEMLIA_SEARCH_REQ, from->getIPAddress(), from->getUDPPort());
 							break;
 						}
 						case NOTES:
@@ -401,6 +401,11 @@ void CSearch::processResponse(uint32 fromIP, uint16 fromPort, ContactList *resul
 										taglist.push_back(new CTagUInt16(TAG_SERVERPORT, theApp.clientlist->GetBuddy()->GetUDPPort()));
 										taglist.push_back(new CTagStr(TAG_BUDDYHASH, CStringW(md4str(buddyID.getData()))));
 										taglist.push_back(new CTagUInt16(TAG_SOURCEPORT, thePrefs.GetPort()));
+									}
+									else
+									{
+										prepareToStop();
+										break;
 									}
 								}
 								else
@@ -513,7 +518,7 @@ void CSearch::processResponse(uint32 fromIP, uint16 fromPort, ContactList *resul
 								throw CString(_T("Kademlia.CSearch.processResponse: m_fileIDs.size() != 1"));
 							bio.WriteUInt128(&m_fileIDs.front());
 							bio.WriteUInt16(thePrefs.GetPort());
-							CKademlia::getUDPListener()->sendPacket( &bio, KADEMLIA_FINDSOURCE_REQ, from->getIPAddress(), from->getUDPPort());
+							CKademlia::getUDPListener()->sendPacket( &bio, KADEMLIA_CALLBACK_REQ, from->getIPAddress(), from->getUDPPort());
 							m_count++;
 							theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 							break;
@@ -581,7 +586,7 @@ void CSearch::processResultFile(uint32 fromIP, uint16 fromPort, const CUInt128 &
 			clientid	= tag->GetInt();
 		else if (!tag->m_name.Compare(TAG_BUDDYHASH))
 		{
-			strmd4(CStringA(tag->GetStr()), buddyhash);
+			strmd4(tag->GetStr(), buddyhash);
 			md4cpy(buddy.getDataPtr(), buddyhash);
 		}
 

@@ -79,27 +79,6 @@
 
 #define ID_XMESSAGEBOX_LAST_ID	26
 
-#define IDS_OK				9001
-#define IDS_CANCEL			9002
-#define IDS_IGNORE			9003
-#define IDS_RETRY			9004
-#define IDS_ABORT			9005
-#define IDS_HELP			9006
-#define IDS_YES				9007
-#define IDS_NO				9008
-#define IDS_CONTINUE		9009
-#define IDS_DONOTASKAGAIN	9010
-#define IDS_DONOTTELLAGAIN	9011
-#define IDS_DONOTSHOWAGAIN	9012
-#define IDS_YESTOALL		9013
-#define IDS_NOTOALL			9014
-#define IDS_TRYAGAIN		9015
-#define IDS_REPORT			9016
-#define IDS_IGNOREALL		9017
-#define IDS_SKIP			9018
-#define IDS_SKIPALL			9019
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // 
 // Report Callback Function

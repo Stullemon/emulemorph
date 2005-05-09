@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "ResizableLib\ResizableDialog.h"
+#include "..\ResizableLib\ResizableDialog.h"
 #include "SplitterControl.h"
 #include "BtnST.h"
 #include "TabCtrl.hpp"
@@ -23,13 +23,9 @@
 #include "DownloadListCtrl.h"
 #include "QueueListCtrl.h"
 #include "ClientListCtrl.h"
+#include "downloadclientsctrl.h"
+#include "DropDownButton.h"
 #include "progressctrlx.h" //Commander - Added: ClientQueueProgressBar
-#include "DownloadClientsCtrl.h" //SLAHAM: ADDED DownloadClientsCtrl
-
-class CUploadListCtrl;
-class CDownloadListCtrl;
-class CQueueListCtrl;
-class CClientListCtrl;
 
 class CTransferWnd : public CResizableDialog
 {
@@ -39,15 +35,30 @@ public:
 	CTransferWnd(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CTransferWnd();
 
-	void	ShowQueueCount(uint32 number);
-	void	UpdateListCount(uint8 listindex, int iCount = -1);
-	void	Localize();
+	enum EWnd1Icon {
+		w1iSplitWindow = 0,
+		w1iDownloadFiles,
+		w1iUploading,
+		w1iDownloading,
+		w1iOnQueue,
+		w1iClientsKnown
+	};
+
+	enum EWnd2 {
+		wnd2Downloading = 0,
+		wnd2Uploading = 1,
+		wnd2OnQueue = 2,
+		wnd2Clients = 3
+	};
+
+	void ShowQueueCount(uint32 number);
+	void UpdateListCount(EWnd2 listindex, int iCount = -1);
+	void UpdateFilesCount(int iCount);
+	void Localize();
 	void UpdateCatTabTitles(bool force=true);
-	void	UpdateDownloadClientsCount(int count); //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-	bool 	isUploadQueueVisible() { return (m_uWnd2 == 0); } //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-	bool	isDownloadListVisible() { return ((showlist == IDC_DOWNLOADLIST) || (showlist == IDC_DOWNLOADLIST+IDC_UPLOADLIST)); } //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-	void	VerifyCatTabSize(bool _forceverify=false);
+	void VerifyCatTabSize(bool _forceverify=false);
 	void SwitchUploadList();
+	void ResetTransToolbar(bool bShowToolbar, bool bResetLists = true);
 
 	// khaos::categorymod+
 	int		GetActiveCategory()			{ return m_dlTab.GetCurSel(); }
@@ -59,70 +70,42 @@ public:
 	CDownloadListCtrl	downloadlistctrl;
 	CQueueListCtrl		queuelistctrl;
 	CClientListCtrl		clientlistctrl;
-	CDownloadClientsCtrl	downloadclientsctrl; //SLAHAM: ADDED DownloadClientsCtrl
+	CDownloadClientsCtrl	downloadclientsctrl;
 	CToolTipCtrl		m_tooltipCats;
-
-	bool bQl;
-	bool bKl;
-
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-	void OnBnClickedChangeView();
-	void OnBnClickedDownUploads();
-	void OnBnClickedDownloads();
-	void OnBnClickedUploads();
-	void OnBnClickedQueue();
-	void OnBnClickedClient();
-	void OnBnClickedTransfers();
-	uint16 showlist;	
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
 
 protected:
 	CSplitterControl m_wndSplitter;
-	uint8 m_uWnd2;
+	EWnd2		m_uWnd2;
 	bool downloadlistactive;
-	CButtonST m_uplBtn;
-	TabControl m_dlTab;
-	int	rightclickindex;
-	int m_nDragIndex;
-	int m_nDropIndex;
-	int m_nLastCatTT;
-	bool m_bIsDragging;
+	CDropDownButton m_btnWnd1;
+	CDropDownButton	m_btnWnd2;
+	TabControl	m_dlTab;
+	int			rightclickindex;
+	int			m_nDragIndex;
+	int			m_nDropIndex;
+	int			m_nLastCatTT;
+	int			m_isetcatmenu;
+	bool		m_bIsDragging;
 	CImageList* m_pDragImage;
-	HICON icon_download;
-	POINT m_pLastMousePoint;
+	POINT		m_pLastMousePoint;
+	uint32		m_dwShowListIDC;
 	CProgressCtrlX queueBar; //Commander - Added: ClientQueueProgressBar
 	CFont bold;//Commander - Added: ClientQueueProgressBar
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-	CButtonST	m_btnChangeView;
-	CButtonST	m_btnDownUploads;
-	CButtonST	m_btnDownloads;
-	CButtonST	m_btnUploads;
-	CButtonST	m_btnQueue;
-	CButtonST	m_btnTransfers;
-	CButtonST	m_btnClient;
-	void ShowList(uint16 list);
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
-	//SLAHAM: ADDED Switch Lists Icons =>
-	CButtonST	m_btnULChangeView;
-	CButtonST	m_btnULUploads;
-	CButtonST	m_btnULQueue;
-	CButtonST	m_btnULTransfers;
-	CButtonST	m_btnULClients;	
-	//SLAHAM: ADDED Switch Lists Icons <=
 
-	void ShowWnd2(uint8 uList);
-	void SetWnd2(uint8 uWnd2);
-	void DoResize(int delta);
-	void UpdateSplitterRange();
-	void SetInitLayout();
-	void DoSplitResize(int delta);
-	void SetAllIcons();
-	void SetWnd2Icon();
-	void UpdateTabToolTips() {UpdateTabToolTips(-1);}
-	void UpdateTabToolTips(int tab);
-	CString GetTabStatistic(uint8 tab);
-	int GetTabUnderMouse(CPoint* point);
-	int GetItemUnderMouse(CListCtrl* ctrl);
+
+	void	ShowWnd2(EWnd2 uList);
+	void	SetWnd2(EWnd2 uWnd2);
+	void	DoResize(int delta);
+	void	UpdateSplitterRange();
+	void	DoSplitResize(int delta);
+	void	SetAllIcons();
+	void	SetWnd1Icons();
+	void	SetWnd2Icon();
+	void	UpdateTabToolTips() {UpdateTabToolTips(-1);}
+	void	UpdateTabToolTips(int tab);
+	CString	GetTabStatistic(uint8 tab);
+	int		GetTabUnderMouse(CPoint* point);
+	int		GetItemUnderMouse(CListCtrl* ctrl);
 	//MOPRH - Removed by SiRoB, Due to Khaos Cat
 	/*
 	CString GetCatTitle(int catid);
@@ -133,6 +116,9 @@ protected:
 	*/
 	void EditCatTabLabel(int index,CString newlabel);
 	void EditCatTabLabel(int index);
+	void	ShowList(uint32 dwListIDC);
+	void	ChangeDlIcon(EWnd1Icon iIcon);
+	void	OnBnClickedDownUploads(bool bReDraw = false);
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -153,6 +139,9 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg void OnDblclickDltab();
 	afx_msg void OnBnClickedQueueRefreshButton();
+	afx_msg void OnBnClickedChangeView();
+	afx_msg void OnWnd1BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnWnd2BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult);
 
 	// khaos::categorymod+
 	void		CreateCategoryMenus();

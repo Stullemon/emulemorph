@@ -10,7 +10,7 @@ public:
 	// Dialog Data
 	enum { IDD = IDD_PPG_BACKUP };
 protected:
-	bool m_bModified;
+	BOOL m_bModified;
 	void SetModified(BOOL bChanged = TRUE)
 	{
 		m_bModified = bChanged;

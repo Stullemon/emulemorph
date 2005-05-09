@@ -196,7 +196,7 @@ uint8 CFrameGrabThread::GrabFrames(){
 					// resize if needed
 					if (nMaxWidth > 0 && nMaxWidth < width){
 						float scale = (float)nMaxWidth / imgResult->GetWidth();
-						int nMaxHeigth = imgResult->GetHeight() * scale;
+						int nMaxHeigth = (int)(imgResult->GetHeight() * scale);
 						imgResult->Resample(nMaxWidth, nMaxHeigth, 0);
 					}
 					

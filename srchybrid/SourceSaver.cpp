@@ -154,7 +154,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, LPC
 void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources) 
 {
 	for (POSITION pos = sources->GetHeadPosition(); pos; sources->GetNext(pos)) {
-		if (thePrefs.GetMaxSourcePerFile() <= file->GetSourceCount())
+		if (file->GetMaxSources() <= file->GetSourceCount())
 			return;
     
 		CSourceData* cur_src = sources->GetAt(pos);

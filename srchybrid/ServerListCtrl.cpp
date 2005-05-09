@@ -247,7 +247,7 @@ void CServerListCtrl::RemoveAllDeadServers()
 	ShowWindow(SW_HIDE); 
 	for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos)) { 
 		CServer* cur_server = server_list->list.GetAt(pos); 
-		if (cur_server->GetFailedCount() >= thePrefs.GetDeadserverRetries()){
+		if (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries()){
 			// Mighty Knife: Static server handling
 			// Static servers can be prevented from being removed from the list.
 			if ((!cur_server->IsStaticMember()) || (!thePrefs.GetDontRemoveStaticServers())) {
@@ -287,131 +287,130 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		return;
 	//MORPH START - Added by SiRoB,  CountryFlag Addon
 	Update(itemnr);
-	return;
 	//MORPH START - Added by SiRoB,  CountryFlag Addon
-	const CServer* cur_srv;
-	if (theApp.serverconnect->IsConnected()
-		&& (cur_srv = theApp.serverconnect->GetCurrentServer()) != NULL
-		&& cur_srv->GetPort() == server->GetPort()
-		&& cur_srv->GetConnPort() == server->GetConnPort()//Morph - added by AndCycle, aux Ports, by lugdunummaster
-		&& _tcsicmp(cur_srv->GetAddress(), server->GetAddress()) == 0)
-		SetItemState(itemnr,LVIS_GLOW,LVIS_GLOW);
-	else
-		SetItemState(itemnr, 0, LVIS_GLOW);
+	//const CServer* cur_srv;
+	//if (theApp.serverconnect->IsConnected()
+	//	&& (cur_srv = theApp.serverconnect->GetCurrentServer()) != NULL
+	//	&& cur_srv->GetPort() == server->GetPort()
+	//	&& cur_srv->GetConnPort() == server->GetConnPort()//Morph - added by AndCycle, aux Ports, by lugdunummaster
+	//	&& _tcsicmp(cur_srv->GetAddress(), server->GetAddress()) == 0)
+	//	SetItemState(itemnr,LVIS_GLOW,LVIS_GLOW);
+	//else
+	//	SetItemState(itemnr, 0, LVIS_GLOW);
 
-	CString temp;
-	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
-	/*
-	temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
-	*/
-	if (server->GetConnPort() != server->GetPort())
-			temp.Format(_T("%s : %i/%i"), server->GetAddress(), server->GetPort(), server->GetConnPort());
-	else temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
-	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-	SetItemText(itemnr, 1, temp);
-	SetItemText(itemnr,0,server->GetListName());
-	SetItemText(itemnr,2,server->GetDescription());
+	//CString temp;
+	////Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+	///*
+	//temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
+	//*/
+	//if (server->GetConnPort() != server->GetPort())
+	//		temp.Format(_T("%s : %i/%i"), server->GetAddress(), server->GetPort(), server->GetConnPort());
+	//else temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
+	////Morph End - added by AndCycle, aux Ports, by lugdunummaster
+	//SetItemText(itemnr, 1, temp);
+	//SetItemText(itemnr,0,server->GetListName());
+	//SetItemText(itemnr,2,server->GetDescription());
 
-	// Ping
-	if(server->GetPing()){
-		temp.Format(_T("%i"), server->GetPing());
-		SetItemText(itemnr, 3, temp);
-	}
-	else
-		SetItemText(itemnr,3,_T(""));
+	//// Ping
+	//if(server->GetPing()){
+	//	temp.Format(_T("%i"), server->GetPing());
+	//	SetItemText(itemnr, 3, temp);
+	//}
+	//else
+	//	SetItemText(itemnr,3,_T(""));
 
-	// Users
-	if (server->GetUsers())
-		SetItemText(itemnr, 4, CastItoIShort(server->GetUsers()));
-	else
-		SetItemText(itemnr,4,_T(""));
+	//// Users
+	//if (server->GetUsers())
+	//	SetItemText(itemnr, 4, CastItoIShort(server->GetUsers()));
+	//else
+	//	SetItemText(itemnr,4,_T(""));
 
-	// Max Users
-	if (server->GetMaxUsers())
-		SetItemText(itemnr, 5, CastItoIShort(server->GetMaxUsers()));
-	else
-		SetItemText(itemnr,5,_T(""));
+	//// Max Users
+	//if (server->GetMaxUsers())
+	//	SetItemText(itemnr, 5, CastItoIShort(server->GetMaxUsers()));
+	//else
+	//	SetItemText(itemnr,5,_T(""));
 
-	// Files
-	if (server->GetFiles())
-		SetItemText(itemnr, 6, CastItoIShort(server->GetFiles()));
-	else
-		SetItemText(itemnr,6,_T(""));
+	//// Files
+	//if (server->GetFiles())
+	//	SetItemText(itemnr, 6, CastItoIShort(server->GetFiles()));
+	//else
+	//	SetItemText(itemnr,6,_T(""));
 
-	switch(server->GetPreferences()){
-	case SRV_PR_LOW:
-		SetItemText(itemnr, 7, GetResString(IDS_PRIOLOW));
-		break;
-	case SRV_PR_NORMAL:
-		SetItemText(itemnr, 7, GetResString(IDS_PRIONORMAL));
-		break;
-	case SRV_PR_HIGH:
-		SetItemText(itemnr, 7, GetResString(IDS_PRIOHIGH));
-		break;
-	default:
-		SetItemText(itemnr, 7, GetResString(IDS_PRIONOPREF));
-	}
-	
-	// Failed Count
-	temp.Format(_T("%i"), server->GetFailedCount());
-	SetItemText(itemnr, 8, temp);
+	//switch(server->GetPreferences()){
+	//case SRV_PR_LOW:
+	//	SetItemText(itemnr, 7, GetResString(IDS_PRIOLOW));
+	//	break;
+	//case SRV_PR_NORMAL:
+	//	SetItemText(itemnr, 7, GetResString(IDS_PRIONORMAL));
+	//	break;
+	//case SRV_PR_HIGH:
+	//	SetItemText(itemnr, 7, GetResString(IDS_PRIOHIGH));
+	//	break;
+	//default:
+	//	SetItemText(itemnr, 7, GetResString(IDS_PRIONOPREF));
+	//}
+	//
+	//// Failed Count
+	//temp.Format(_T("%i"), server->GetFailedCount());
+	//SetItemText(itemnr, 8, temp);
 
-	// Static server
-	if (server->IsStaticMember())
-		SetItemText(itemnr,9,GetResString(IDS_YES)); 
-	else
-		SetItemText(itemnr,9,GetResString(IDS_NO));
+	//// Static server
+	//if (server->IsStaticMember())
+	//	SetItemText(itemnr,9,GetResString(IDS_YES)); 
+	//else
+	//	SetItemText(itemnr,9,GetResString(IDS_NO));
 
-	// Soft Files
-	if (server->GetSoftFiles())
-		SetItemText(itemnr, 10, CastItoIShort(server->GetSoftFiles()));
-	else
-		SetItemText(itemnr,10,_T(""));
+	//// Soft Files
+	//if (server->GetSoftFiles())
+	//	SetItemText(itemnr, 10, CastItoIShort(server->GetSoftFiles()));
+	//else
+	//	SetItemText(itemnr,10,_T(""));
 
-	// Hard Files
-	if (server->GetHardFiles())
-		SetItemText(itemnr, 11, CastItoIShort(server->GetHardFiles()));
-	else
-		SetItemText(itemnr,11,_T(""));
+	//// Hard Files
+	//if (server->GetHardFiles())
+	//	SetItemText(itemnr, 11, CastItoIShort(server->GetHardFiles()));
+	//else
+	//	SetItemText(itemnr,11,_T(""));
 
-	temp = server->GetVersion();
-	if (thePrefs.GetDebugServerUDPLevel() > 0){
-		if (server->GetUDPFlags() != 0){
-			if (!temp.IsEmpty())
-				temp += _T("; ");
-			temp.AppendFormat(_T("ExtUDP=%x"), server->GetUDPFlags());
-		}
-	}
-	if (thePrefs.GetDebugServerTCPLevel() > 0){
-		if (server->GetTCPFlags() != 0){
-			if (!temp.IsEmpty())
-				temp += _T("; ");
-			temp.AppendFormat(_T("ExtTCP=%x"), server->GetTCPFlags());
-		}
-	}
-	SetItemText(itemnr,12,temp);
+	//temp = server->GetVersion();
+	//if (thePrefs.GetDebugServerUDPLevel() > 0){
+	//	if (server->GetUDPFlags() != 0){
+	//		if (!temp.IsEmpty())
+	//			temp += _T("; ");
+	//		temp.AppendFormat(_T("ExtUDP=%x"), server->GetUDPFlags());
+	//	}
+	//}
+	//if (thePrefs.GetDebugServerTCPLevel() > 0){
+	//	if (server->GetTCPFlags() != 0){
+	//		if (!temp.IsEmpty())
+	//			temp += _T("; ");
+	//		temp.AppendFormat(_T("ExtTCP=%x"), server->GetTCPFlags());
+	//	}
+	//}
+	//SetItemText(itemnr,12,temp);
 
-	// LowID Users
-	if (server->GetLowIDUsers())
-		SetItemText(itemnr, 13, CastItoIShort(server->GetLowIDUsers()));
-	else
-		SetItemText(itemnr, 13,_T(""));
+	//// LowID Users
+	//if (server->GetLowIDUsers())
+	//	SetItemText(itemnr, 13, CastItoIShort(server->GetLowIDUsers()));
+	//else
+	//	SetItemText(itemnr, 13,_T(""));
 
-	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
-	// aux Port
-	if(server->GetConnPort() != server->GetPort()){
-		temp.Format(_T("%i"), server->GetConnPort());
-		SetItemText(itemnr, 14, temp);
-	}
-	else{
-		SetItemText(itemnr,14,_T(""));
-	}
-	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-   
-	// Commander - Added: IP2Country column - Start
-	//Countryname
-	SetItemText(itemnr,15,server->GetCountryName());
-	// Commander - Added: IP2Country column - End
+	////Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+	//// aux Port
+	//if(server->GetConnPort() != server->GetPort()){
+	//	temp.Format(_T("%i"), server->GetConnPort());
+	//	SetItemText(itemnr, 14, temp);
+	//}
+	//else{
+	//	SetItemText(itemnr,14,_T(""));
+	//}
+	////Morph End - added by AndCycle, aux Ports, by lugdunummaster
+ //  
+	//// Commander - Added: IP2Country column - Start
+	////Countryname
+	//SetItemText(itemnr,15,server->GetCountryName());
+	//// Commander - Added: IP2Country column - End
 }
 
 //EastShare Start - added by AndCycle, IP to Country
@@ -582,7 +581,6 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					if (!StaticServerFileAppend(change))
 							return FALSE;
-					change->SetIsStaticMember(true);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 					return TRUE;
@@ -594,7 +592,6 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					if (!StaticServerFileRemove(change))
 							return FALSE;
-					change->SetIsStaticMember(false);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 					return TRUE;
@@ -673,14 +670,14 @@ void CServerListCtrl::OnNMLdblclk(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 
-bool CServerListCtrl::AddServermetToList(const CString& strFile)
+bool CServerListCtrl::AddServerMetToList(const CString& strFile)
 { 
-	SetRedraw(false);
-  	bool flag=server_list->AddServermetToList(strFile);
+	SetRedraw(FALSE);
+	bool bResult = server_list->AddServerMetToList(strFile, true);
 	RemoveAllDeadServers();
 	ShowServerCount();
-	SetRedraw(true);
-	return flag;
+	SetRedraw(TRUE);
+	return bResult;
 }
 
 void CServerListCtrl::OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult) 
@@ -881,8 +878,10 @@ bool CServerListCtrl::StaticServerFileAppend(CServer *server)
 	return true;
 }
 
-bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
+bool CServerListCtrl::StaticServerFileRemove(CServer *server)
 {
+	bool removed=false;
+
 	try
 	{
 		if (!server->IsStaticMember())
@@ -933,6 +932,10 @@ bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 			// Compare, if not the same server write original line to temp file
 			if (strLine.Compare(strTest) != 0)
 				_ftprintf(statictemp, buffer);
+			else {
+				server->SetIsStaticMember(false);
+				removed=true;
+			}
 		}
 
 		fclose(staticservers);
@@ -947,7 +950,7 @@ bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 		ASSERT(0);
 		return false;
 	}
-	return true;
+	return removed;
 }
 
 void CServerListCtrl::ShowServerCount()
@@ -1080,7 +1083,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					uint8 image;
 					image = 0;
 					
-					POINT point = {cur_rec.left, cur_rec.top+1};
+					//POINT point = {cur_rec.left, cur_rec.top+1};
 					Sbuffer = server->GetListName();
 
 					//CString tempStr;

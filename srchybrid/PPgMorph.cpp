@@ -123,8 +123,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	{
 		int iImgUM = 8; // default icon
 		int iImgDYNUP = 8; // default icon
-		int iImgSUC = 8; // default icon
-		int iImgUSS = 8;
 		int iImgDM = 8;
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		int iImgSCC = 8;
@@ -165,18 +163,18 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiDM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DM), iImgDM, TVI_ROOT);
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		m_htiSCC = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SCC), iImgSCC, m_htiDM);
-		m_htiShowCatNames = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SHOWCATNAME), m_htiSCC, m_iShowCatNames);
-		m_htiSelectCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SHOWSELCATDLG), m_htiSCC, m_iSelectCat);
-		m_htiUseAutoCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_USEAUTOCAT), m_htiSCC, m_iUseAutoCat);
-		m_htiUseActiveCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_USEACTIVE), m_htiSCC, m_iUseActiveCat);
-		m_htiAutoSetResOrder = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_AUTORESUMEORD), m_htiSCC, m_iAutoSetResOrder);
-		m_htiSmallFileDLPush = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SMALLFILEDLPUSH), m_htiSCC, m_iSmallFileDLPush);
+		m_htiShowCatNames = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SHOWCATNAME), m_htiSCC, m_bShowCatNames);
+		m_htiSelectCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SHOWSELCATDLG), m_htiSCC, m_bSelectCat);
+		m_htiUseAutoCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_USEAUTOCAT), m_htiSCC, m_bUseAutoCat);
+		m_htiUseActiveCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_USEACTIVE), m_htiSCC, m_bUseActiveCat);
+		m_htiAutoSetResOrder = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_AUTORESUMEORD), m_htiSCC, m_bAutoSetResOrder);
+		m_htiSmallFileDLPush = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SMALLFILEDLPUSH), m_htiSCC, m_bSmallFileDLPush);
 		m_htiResumeFileInNewCat = m_ctrlTreeOptions.InsertItem(GetResString(IDS_CAT_STARTFILESONADD), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSCC);
 		m_ctrlTreeOptions.AddEditBox(m_htiResumeFileInNewCat, RUNTIME_CLASS(CNumTreeOptionsEdit));
 
 		m_htiSAC = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SAC), iImgSAC, m_htiDM);
-		m_htiShowA4AFDebugOutput  = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SHOWDEBUG), m_htiSAC, m_iShowA4AFDebugOutput);
-		m_htiSmartA4AFSwapping = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SMARTSWAP), m_htiSAC, m_iSmartA4AFSwapping);
+		m_htiShowA4AFDebugOutput  = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SHOWDEBUG), m_htiSAC, m_bShowA4AFDebugOutput);
+		m_htiSmartA4AFSwapping = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SMARTSWAP), m_htiSAC, m_bSmartA4AFSwapping);
 		m_htiAdvA4AFMode = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DEFAULT) + _T(" ") + GetResString(IDS_A4AF_ADVMODE), iImgA4AF, m_htiSAC);
 		m_htiDisableAdvA4AF = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_A4AF_DISABLED), m_htiAdvA4AFMode, m_iAdvA4AFMode == 0);
 		m_htiBalanceSources = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_A4AF_BALANCE), m_htiAdvA4AFMode, m_iAdvA4AFMode == 1);
@@ -203,10 +201,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiDownloadDataRateAverageTime, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		//MORPH END   - Added by SiRoB, Datarate Average Time Management
 		//MORPH START - Added by SiRoB, khaos::categorymod+
-		m_htiUseSLS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SLS_USESLS), m_htiDM, m_iUseSLS);
+		m_htiUseSLS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SLS_USESLS), m_htiDM, m_bUseSLS);
 		//MORPH END - Added by SiRoB, khaos::categorymod+
 		//MORPH START - Added by SiRoB, ICS Optional
-		m_htiUseICS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ICS_USEICS), m_htiDM, m_iUseICS);
+		m_htiUseICS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ICS_USEICS), m_htiDM, m_bUseICS);
 		//MORPH END   - Added by SiRoB, ICS Optional
 
 		CString Buffer;
@@ -215,7 +213,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		
 		m_htiDynUpOFF = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DISABLED), m_htiDYNUP, m_iDynUpMode == 0);
 		m_htiDynUpSUC = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SUC), m_htiDYNUP, m_iDynUpMode == 1);
-		m_htiSUCLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SUC_LOG), m_htiDynUpSUC, m_iSUCLog);
+		m_htiSUCLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SUC_LOG), m_htiDynUpSUC, m_bSUCLog);
 		Buffer.Format(GetResString(IDS_SUC_HIGH),900);
 		m_htiSUCHigh = m_ctrlTreeOptions.InsertItem(Buffer, TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpSUC);
 		m_ctrlTreeOptions.AddEditBox(m_htiSUCHigh, RUNTIME_CLASS(CNumTreeOptionsEdit));
@@ -230,10 +228,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiSUCDrift, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		
 		m_htiDynUpUSS = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_USS), m_htiDYNUP, m_iDynUpMode == 2);
-		m_htiUSSLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_LOG), m_htiDynUpUSS, m_iUSSLog);
+		m_htiUSSLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_LOG), m_htiDynUpUSS, m_bUSSLog);
 
 		// EastShare START - Added by TAHO, USS limit
-		m_htiUSSLimit = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_USEMAXPING), m_htiDynUpUSS, m_iUSSLimit);
+		m_htiUSSLimit = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_USEMAXPING), m_htiDynUpUSS, m_bUSSLimit);
 		//Buffer.Format("Max ping value (ms): ",800); //modified by Pretender
 		Buffer.Format(GetResString(IDS_USS_MAXPING),200); //Added by Pretender
 		m_htiUSSPingLimit = m_ctrlTreeOptions.InsertItem(Buffer, TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpUSS);
@@ -269,7 +267,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 
 		//MORPH START - Added by Commander, ClientQueueProgressBar
 		m_htiUpDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, m_htiUM);
-		m_htiClientQueueProgressBar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CLIENTQUEUEPROGRESSBAR), m_htiUpDisplay, m_iClientQueueProgressBar); //MORPH - Added by IceCream, Enable Anti-leecher
+		m_htiClientQueueProgressBar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CLIENTQUEUEPROGRESSBAR), m_htiUpDisplay, m_bClientQueueProgressBar); //MORPH - Added by IceCream, Enable Anti-leecher
 	    //MORPH END - Added by Commander, ClientQueueProgressBar
 		//MORPH START - Added by SiRoB, Datarate Average Time Management
 		m_htiUploadDataRateAverageTime = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DATARATEAVERAGETIME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUpDisplay);
@@ -291,13 +289,13 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxClientDataRate, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 		
-		m_htiInfiniteQueue = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INFINITEQUEUE), m_htiUM, m_iInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-		m_htiDontRemoveSpareTrickleSlot = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DONTREMOVESPARETRICKLESLOT), m_htiUM, m_iDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-		m_htiCountWCSessionStats = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTWCSESSIONSTATS), TVI_ROOT, m_iCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
+		m_htiInfiniteQueue = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INFINITEQUEUE), m_htiUM, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+		m_htiDontRemoveSpareTrickleSlot = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DONTREMOVESPARETRICKLESLOT), m_htiUM, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+		m_htiCountWCSessionStats = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTWCSESSIONSTATS), TVI_ROOT, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 		//MORPH START - Added by IceCream, high process priority
-		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_iHighProcess);
+		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_bHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
-		m_htiDisplayFunnyNick = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISPLAYFUNNYNICK), TVI_ROOT, m_iFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
+		m_htiDisplayFunnyNick = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISPLAYFUNNYNICK), TVI_ROOT, m_bFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
 		// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 		m_htiCommunityName = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMMUNITYTAG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT);
 		m_ctrlTreeOptions.AddEditBox(m_htiCommunityName, RUNTIME_CLASS(CTreeOptionsEdit));
@@ -318,7 +316,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxConnectionsSwitchBorder, m_iMaxConnectionsSwitchBorder);//MORPH - Added by Yun.SF3, Auto DynUp changing
 	DDV_MinMaxInt(pDX, m_iMaxConnectionsSwitchBorder, 20 , 60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
 	
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSUCLog, m_iSUCLog);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSUCLog, m_bSUCLog);
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiSUCHigh, m_iSUCHigh);
 	DDV_MinMaxInt(pDX, m_iSUCHigh, 350, 1000);
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiSUCLow, m_iSUCLow);
@@ -328,8 +326,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiSUCDrift, m_iSUCDrift);
 	DDV_MinMaxInt(pDX, m_iSUCDrift, 0, 100);
 	
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLog, m_iUSSLog);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLimit, m_iUSSLimit); // EastShare - Added by TAHO, USS limit
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLog, m_bUSSLog);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLimit, m_bUSSLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingLimit, m_iUSSPingLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingTolerance, m_iUSSPingTolerance);
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSGoingUpDivider, m_iUSSGoingUpDivider);
@@ -344,11 +342,11 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowClientPercentage, m_bShowClientPercentage);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiLeecher, m_bEnableAntiLeecher); //MORPH - Added by IceCream, enable Anti-leecher
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_iInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDontRemoveSpareTrickleSlot, m_iDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplayFunnyNick, m_iFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCountWCSessionStats, m_iCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiClientQueueProgressBar, m_iClientQueueProgressBar); //MORPH - Added by Commander, ClientQueueProgressBar
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDontRemoveSpareTrickleSlot, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplayFunnyNick, m_bFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCountWCSessionStats, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiClientQueueProgressBar, m_bClientQueueProgressBar); //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiDownloadDataRateAverageTime, m_iDownloadDataRateAverageTime);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUploadDataRateAverageTime, m_iUploadDataRateAverageTime);//MORPH - Added by SiRoB, Upload Splitting Class
@@ -364,23 +362,23 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiResumeFileInNewCat, m_iResumeFileInNewCat);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowCatNames, m_iShowCatNames);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSelectCat, m_iSelectCat);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseActiveCat, m_iUseActiveCat);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiAutoSetResOrder, m_iAutoSetResOrder);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSmallFileDLPush, m_iSmallFileDLPush);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowA4AFDebugOutput, m_iShowA4AFDebugOutput);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSmartA4AFSwapping, m_iSmartA4AFSwapping);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowCatNames, m_bShowCatNames);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSelectCat, m_bSelectCat);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseActiveCat, m_bUseActiveCat);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiAutoSetResOrder, m_bAutoSetResOrder);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSmallFileDLPush, m_bSmallFileDLPush);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowA4AFDebugOutput, m_bShowA4AFDebugOutput);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSmartA4AFSwapping, m_bSmartA4AFSwapping);
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiAdvA4AFMode, m_iAdvA4AFMode);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseAutoCat, m_iUseAutoCat);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseSLS, m_iUseSLS);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseAutoCat, m_bUseAutoCat);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseSLS, m_bUseSLS);
 	// khaos::accuratetimerem+
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiTimeRemainingMode, m_iTimeRemainingMode);
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseICS, m_iUseICS);//MORPH - Added by SiRoB, ICS Optional
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseICS, m_bUseICS);//MORPH - Added by SiRoB, ICS Optional
 
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiHighProcess, m_iHighProcess); //MORPH - Added by IceCream, high process priority 
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiHighProcess, m_bHighProcess); //MORPH - Added by IceCream, high process priority 
 
 	// Mighty Knife: Report hashing files, Log friendlist activities
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiReportHashingFiles, m_bReportHashingFiles); 
@@ -404,13 +402,13 @@ BOOL CPPgMorph::OnInitDialog()
 	else
 		m_iDynUpMode = 0;
 	m_iMaxConnectionsSwitchBorder = thePrefs.maxconnectionsswitchborder;//MORPH - Added by Yun.SF3, Auto DynUp changing
-	m_iSUCLog =  thePrefs.m_bSUCLog;
+	m_bSUCLog =  thePrefs.m_bSUCLog;
 	m_iSUCHigh = thePrefs.m_iSUCHigh;
 	m_iSUCLow = thePrefs.m_iSUCLow;
 	m_iSUCPitch = thePrefs.m_iSUCPitch;
 	m_iSUCDrift = thePrefs.m_iSUCDrift;;
-	m_iUSSLog = thePrefs.m_bDynUpLog;
-	m_iUSSLimit = thePrefs.m_bDynUpUseMillisecondPingTolerance; // EastShare - Added by TAHO, USS limit
+	m_bUSSLog = thePrefs.m_bDynUpLog;
+	m_bUSSLimit = thePrefs.m_bDynUpUseMillisecondPingTolerance; // EastShare - Added by TAHO, USS limit
 	m_iUSSPingLimit = thePrefs.m_iDynUpPingToleranceMilliseconds; // EastShare - Added by TAHO, USS limit
     m_iUSSPingTolerance = thePrefs.m_iDynUpPingTolerance;
     m_iUSSGoingUpDivider = thePrefs.m_iDynUpGoingUpDivider;
@@ -426,12 +424,12 @@ BOOL CPPgMorph::OnInitDialog()
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	m_bEnableAntiLeecher = thePrefs.enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
-	m_iInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	m_iDontRemoveSpareTrickleSlot = thePrefs.m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	m_iFunnyNick = thePrefs.m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
-	m_iCountWCSessionStats = thePrefs.m_bCountWCSessionStats; //MORPH - added by Commander, Show WC Session stats
-	m_iClientQueueProgressBar = thePrefs.m_bClientQueueProgressBar;//MORPH - Added by Commander, ClientQueueProgressBar
-	m_iCountWCSessionStats	= thePrefs.m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
+	m_bInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	m_bDontRemoveSpareTrickleSlot = thePrefs.m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	m_bFunnyNick = thePrefs.m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
+	m_bCountWCSessionStats = thePrefs.m_bCountWCSessionStats; //MORPH - added by Commander, Show WC Session stats
+	m_bClientQueueProgressBar = thePrefs.m_bClientQueueProgressBar;//MORPH - Added by Commander, ClientQueueProgressBar
+	m_bCountWCSessionStats	= thePrefs.m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_iGlobalDataRateFriend = thePrefs.globaldataratefriend;
 	m_iMaxClientDataRateFriend = thePrefs.maxclientdataratefriend;
@@ -445,26 +443,26 @@ BOOL CPPgMorph::OnInitDialog()
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
-	m_iShowCatNames = thePrefs.ShowCatNameInDownList();
-	m_iSelectCat = thePrefs.SelectCatForNewDL();
-	m_iUseActiveCat = thePrefs.UseActiveCatForLinks();
-	m_iAutoSetResOrder = thePrefs.AutoSetResumeOrder();
-	m_iShowA4AFDebugOutput = thePrefs.m_bShowA4AFDebugOutput;
-	m_iSmartA4AFSwapping = thePrefs.UseSmartA4AFSwapping();
+	m_bShowCatNames = thePrefs.ShowCatNameInDownList();
+	m_bSelectCat = thePrefs.SelectCatForNewDL();
+	m_bUseActiveCat = thePrefs.UseActiveCatForLinks();
+	m_bAutoSetResOrder = thePrefs.AutoSetResumeOrder();
+	m_bShowA4AFDebugOutput = thePrefs.m_bShowA4AFDebugOutput;
+	m_bSmartA4AFSwapping = thePrefs.UseSmartA4AFSwapping();
 	m_iAdvA4AFMode = thePrefs.AdvancedA4AFMode();
-	m_iSmallFileDLPush = thePrefs.SmallFileDLPush();
+	m_bSmallFileDLPush = thePrefs.SmallFileDLPush();
 	m_iResumeFileInNewCat = thePrefs.StartDLInEmptyCats();
-	m_iUseAutoCat = thePrefs.UseAutoCat();
-	m_iUseSLS = thePrefs.UseSaveLoadSources();
+	m_bUseAutoCat = thePrefs.UseAutoCat();
+	m_bUseSLS = thePrefs.UseSaveLoadSources();
 	// khaos::accuratetimerem+
 	m_iTimeRemainingMode = thePrefs.GetTimeRemainingMode();
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	//MORPH START - Added by SiRoB, ICS Optional
-	m_iUseICS = thePrefs.UseICS();
+	m_bUseICS = thePrefs.UseICS();
 	//MORPH END   - Added by SiRoB, ICS Optional
 	//MORPH START - Added by IceCream, high process priority
-	m_iHighProcess = thePrefs.GetEnableHighProcess();
+	m_bHighProcess = thePrefs.GetEnableHighProcess();
 	//MORPH END   - Added by IceCream, high process priority
 	
 	// Mighty Knife: Report hashing files, Log friendlist activities
@@ -507,13 +505,13 @@ BOOL CPPgMorph::OnApply()
 	}
 	thePrefs.maxconnectionsswitchborder = m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	
-	thePrefs.m_bSUCLog = m_iSUCLog;
+	thePrefs.m_bSUCLog = m_bSUCLog;
 	thePrefs.m_iSUCHigh = m_iSUCHigh;
 	thePrefs.m_iSUCLow = m_iSUCLow;
 	thePrefs.m_iSUCPitch = m_iSUCPitch;
 	thePrefs.m_iSUCDrift = m_iSUCDrift;
-	thePrefs.m_bDynUpLog = m_iUSSLog;
-	thePrefs.m_bDynUpUseMillisecondPingTolerance = m_iUSSLimit; // EastShare - Added by TAHO, USS limit
+	thePrefs.m_bDynUpLog = m_bUSSLog;
+	thePrefs.m_bDynUpUseMillisecondPingTolerance = m_bUSSLimit; // EastShare - Added by TAHO, USS limit
 	thePrefs.m_iDynUpPingToleranceMilliseconds = m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     thePrefs.m_iDynUpPingTolerance = m_iUSSPingTolerance;
     thePrefs.m_iDynUpGoingUpDivider = m_iUSSGoingUpDivider;
@@ -534,11 +532,11 @@ BOOL CPPgMorph::OnApply()
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	thePrefs.enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
-	thePrefs.infiniteQueue = m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	thePrefs.m_bDontRemoveSpareTrickleSlot = m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	thePrefs.m_bFunnyNick = m_iFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
-	thePrefs.m_bClientQueueProgressBar = m_iClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
-	thePrefs.m_bCountWCSessionStats		   = m_iCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
+	thePrefs.infiniteQueue = m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	thePrefs.m_bDontRemoveSpareTrickleSlot = m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	thePrefs.m_bFunnyNick = m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
+	thePrefs.m_bClientQueueProgressBar = m_bClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
+	thePrefs.m_bCountWCSessionStats		   = m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	thePrefs.globaldataratefriend = m_iGlobalDataRateFriend;
 	thePrefs.maxclientdataratefriend = m_iMaxClientDataRateFriend;
@@ -551,27 +549,27 @@ BOOL CPPgMorph::OnApply()
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
-	thePrefs.m_bShowCatNames = m_iShowCatNames;
-	thePrefs.m_bSelCatOnAdd = m_iSelectCat;
-	thePrefs.m_bActiveCatDefault = m_iUseActiveCat;
-	thePrefs.m_bAutoSetResumeOrder = m_iAutoSetResOrder;
-	thePrefs.m_bShowA4AFDebugOutput = m_iShowA4AFDebugOutput;
-	thePrefs.m_bSmartA4AFSwapping = m_iSmartA4AFSwapping;
+	thePrefs.m_bShowCatNames = m_bShowCatNames;
+	thePrefs.m_bSelCatOnAdd = m_bSelectCat;
+	thePrefs.m_bActiveCatDefault = m_bUseActiveCat;
+	thePrefs.m_bAutoSetResumeOrder = m_bAutoSetResOrder;
+	thePrefs.m_bShowA4AFDebugOutput = m_bShowA4AFDebugOutput;
+	thePrefs.m_bSmartA4AFSwapping = m_bSmartA4AFSwapping;
 	thePrefs.m_iAdvancedA4AFMode = m_iAdvA4AFMode;
-	thePrefs.m_bSmallFileDLPush = m_iSmallFileDLPush;
+	thePrefs.m_bSmallFileDLPush = m_bSmallFileDLPush;
 	thePrefs.m_iStartDLInEmptyCats = m_iResumeFileInNewCat;
-	thePrefs.m_bUseAutoCat = m_iUseAutoCat;
-	thePrefs.m_bUseSaveLoadSources = m_iUseSLS;
+	thePrefs.m_bUseAutoCat = m_bUseAutoCat;
+	thePrefs.m_bUseSaveLoadSources = m_bUseSLS;
 	// khaos::accuratetimerem+
 	thePrefs.m_iTimeRemainingMode = m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	//MORPH START - Added by SiRoB, ICS Optional
-	thePrefs.m_bUseIntelligentChunkSelection = m_iUseICS;
+	thePrefs.m_bUseIntelligentChunkSelection = m_bUseICS;
 	//MORPH END   - Added by SiRoB, ICS Optional
 
 	//MORPH START - Added by IceCream, high process priority
-	thePrefs.SetEnableHighProcess(m_iHighProcess);
+	thePrefs.SetEnableHighProcess(m_bHighProcess);
 	//MORPH END   - Added by IceCream, high process priority
 
 	// Mighty Knife: Report hashing files, Log friendlist activities
@@ -594,7 +592,6 @@ BOOL CPPgMorph::OnApply()
 void CPPgMorph::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
 	SetModified(TRUE);
-	CSliderCtrl* slider =(CSliderCtrl*)pScrollBar;
 	CString temp;
 }
 
@@ -782,7 +779,7 @@ void CPPgMorph::OnDestroy()
 LRESULT CPPgMorph::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == IDC_MORPH_OPTS){
-		TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
+		//TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
 		//		if (bCheck && m_ctrlTreeOptions.GetCheckBox(m_htiUSSEnabled,bCheck))
 		//			if (bCheck) m_ctrlTreeOptions.SetCheckBox(m_htiUSSEnabled,false);
 		//}else if (pton->hItem == m_htiUSSEnabled){

@@ -91,6 +91,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	GetDlgItem(IDC_CURSESSION_LBL)->SetFont(&bold);
 	GetDlgItem(IDC_TOTAL_LBL)->SetFont(&bold);
 	
+	AddAnchor(IDC_FILES_ICO, TOP_LEFT);
 	AddAnchor(IDC_TRAFFIC_TEXT, TOP_LEFT);
 	AddAnchor(IDC_SFLIST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_RELOADSHAREDFILES, BOTTOM_RIGHT);
@@ -129,6 +130,7 @@ void CSharedFilesWnd::OnStnDblclickFilesIco()
 
 void CSharedFilesWnd::OnBnClickedReloadsharedfiles()
 {
+	CWaitCursor curWait;
 	Reload();
 	// MightyKnife: Save known files on reload
 	theApp.knownfiles->Save();
@@ -170,8 +172,8 @@ void CSharedFilesWnd::ShowSelectedFilesSummary()
 
 	if (iFiles != 0)
 	{
-		pop_bartrans.SetRange32(0,theApp.knownfiles->transferred/1024);
-		pop_bartrans.SetPos(uTransferred/1024);
+		pop_bartrans.SetRange32(0, (int)(theApp.knownfiles->transferred/1024));
+		pop_bartrans.SetPos((int)(uTransferred/1024));
 		pop_bartrans.SetShowPercent();			
 		SetDlgItemText(IDC_STRANSFERRED, CastItoXBytes(uTransferred, false, false));
 

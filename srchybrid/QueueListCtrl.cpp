@@ -77,7 +77,7 @@ void CQueueListCtrl::Init()
 	InsertColumn(8,GetResString(IDS_BANNED),LVCFMT_LEFT,60,8);
 	InsertColumn(9,GetResString(IDS_UPSTATUS),LVCFMT_LEFT,100,9);
 	//MORPH START - Added by SiRoB, Client Software
-	InsertColumn(10,GetResString(IDS_CLIENTSOFTWARE),LVCFMT_LEFT,100,10);
+	InsertColumn(10,GetResString(IDS_CD_CSOFT),LVCFMT_LEFT,100,10);
 	//MORPH END - Added by SiRoB, Client Software
 
 	// Mighty Knife: Community affiliation
@@ -124,15 +124,8 @@ void CQueueListCtrl::Init()
 
 CQueueListCtrl::~CQueueListCtrl()
 {
-	// Barry - Kill the timer that was created
-	try
-	{
-		if (m_hTimer)
-			::KillTimer(NULL, m_hTimer);
-	}
-	catch(...){
-		ASSERT(0);
-	}
+	if (m_hTimer)
+		VERIFY( ::KillTimer(NULL, m_hTimer) );
 }
 
 void CQueueListCtrl::OnSysColorChange()
@@ -155,9 +148,9 @@ void CQueueListCtrl::SetAllIcons()
 	imagelist.Add(CTempIconLoader(_T("ClientMLDonkey")));
 	//imagelist.Add(CTempIconLoader(_T("ClientMLDonkeyPlus")));
 	imagelist.Add(CTempIconLoader(_T("ClientEDonkeyHybrid")));
-	//imagelist.Add(CTempIconLoader("ClientEDonkeyHybridPlus")));
+	//imagelist.Add(CTempIconLoader(_T("ClientEDonkeyHybridPlus")));
 	imagelist.Add(CTempIconLoader(_T("ClientShareaza")));
-	//imagelist.Add(CTempIconLoader("ClientShareazaPlus")));
+	//imagelist.Add(CTempIconLoader(_T("ClientShareazaPlus")));
 	imagelist.Add(CTempIconLoader(_T("ClientAMule")));
 	//imagelist.Add(CTempIconLoader(_T("ClientAMulePlus")));
 	imagelist.Add(CTempIconLoader(_T("ClientLPhant")));
@@ -241,7 +234,7 @@ void CQueueListCtrl::Localize()
 		strRes.ReleaseBuffer();
 		
 		//MORPH START - Added by SiRoB, Client Software
-		strRes = GetResString(IDS_CLIENTSOFTWARE);
+		strRes = GetResString(IDS_CD_CSOFT);
 		hdi.pszText = strRes.GetBuffer();
 		pHeaderCtrl->SetItem(10, &hdi);
 		strRes.ReleaseBuffer();
@@ -280,10 +273,10 @@ void CQueueListCtrl::Localize()
 void CQueueListCtrl::AddClient(/*const*/CUpDownClient* client, bool resetclient)
 {
 	if( resetclient && client){
-			// EastShare START - Marked by TAHO, modified SUQWT
-			//client->SetWaitStartTime();
-			// EastShare END - Marked by TAHO, modified SUQWT
-			client->SetAskedCount(1);
+		// EastShare START - Marked by TAHO, modified SUQWT
+		//client->SetWaitStartTime();
+		// EastShare END - Marked by TAHO, modified SUQWT
+		client->SetAskedCount(1);
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	} else if( client ) {
 		// Clients that have been put back "first" on queue (that is, they
@@ -301,7 +294,7 @@ void CQueueListCtrl::AddClient(/*const*/CUpDownClient* client, bool resetclient)
 	int iItemCount = GetItemCount();
 	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,iItemCount,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)client);
 	Update(iItem);
-	theApp.emuledlg->transferwnd->UpdateListCount(2, iItemCount+1);
+	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2OnQueue, iItemCount+1);
 }
 
 void CQueueListCtrl::RemoveClient(const CUpDownClient* client)
@@ -315,7 +308,7 @@ void CQueueListCtrl::RemoveClient(const CUpDownClient* client)
 	sint32 result = FindItem(&find);
 	if (result != -1){
 		DeleteItem(result);
-		theApp.emuledlg->transferwnd->UpdateListCount(2);
+		theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2OnQueue);
 	}
 }
 

@@ -440,8 +440,8 @@ public:
 			TRACE("*** Unknown exception in CAsyncSocketExHelperWindow::WindowProc\n");
 			ASSERT(0);
 		}
-#endif
 		return 0;
+#endif
 	}
 
 	HWND CAsyncSocketExHelperWindow::GetHwnd()

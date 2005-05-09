@@ -38,11 +38,11 @@ public:
 	void	AddClient(CUpDownClient* client);
 	void	RemoveClient(CUpDownClient* client);
 	void	RefreshClient(CUpDownClient* client);
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct); // [TPT] - TransferWindow Fix
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	void	Hide() { ShowWindow(SW_HIDE); }
 	void	Show() { ShowWindow(SW_SHOW); }
 	void	Localize();
-	void	ShowSelectedUserDetails(); // [TPT] - UserDetails
+	void	ShowSelectedUserDetails();
 
 protected:
 	CImageList  m_ImageList;
@@ -53,13 +53,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSysColorChange();
 	afx_msg void OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnItemActivate(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnListModified(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclkDownloadClientlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);//[TPT] - New Menu Style
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int Compare(CUpDownClient* client1, CUpDownClient* client2, CPartFile* file1, CPartFile* file2, LPARAM lParamSort, int sortMod);
 };

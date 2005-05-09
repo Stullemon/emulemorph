@@ -69,7 +69,6 @@ CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 
 	//Remove devices/services
 	POSITION pos = m_devices.GetHeadPosition();
-	bool found = false;
 	while(pos){
 		UPNP_DEVICE *item;
 		item = m_devices.GetNext(pos);
@@ -309,7 +308,6 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMapping(C
 		mapping.externalPort = mapping.internalPort;
 	}
 
-	bool found = false;
 	POSITION old_pos, pos = m_Mappings.GetHeadPosition();
 	while(pos){
 		old_pos = pos;
@@ -819,15 +817,18 @@ UINT CUPnP_IGDControlPoint::TimerThreadFunc( LPVOID pParam ){
 	int sleepTime = UPNP_ADVERTISEMENT_DECREMENT * 1000;
 	double updateTimeF = UPNP_PORT_LEASETIME * 1000 * 0.8f;
 	static long int updateTime = updateTimeF;
-
-	while(1){
-		Sleep(sleepTime);
-		CheckTimeouts();
-
-		updateTime -= sleepTime;
-		if(updateTime <= 0){
-			UpdateAllMappings();
-			updateTime = updateTimeF;
+	static long int testTime = sleepTime;
+	while(m_nInstances){
+		Sleep(1000);
+		testTime-=1000;
+		if (testTime <= 0) {
+			testTime = sleepTime;
+			CheckTimeouts();
+			updateTime -= sleepTime;
+			if(updateTime <= 0) {
+				UpdateAllMappings();
+				updateTime = updateTimeF;
+			}
 		}
 	};
 
@@ -1189,7 +1190,7 @@ UINT CUPnP_IGDControlPoint::ActionThreadFunc( LPVOID pParam ){
 		if(IsServiceConnected(&(action->srv))){
 			switch(action->type){
 				case UPNPNAT_ACTION_ADD:
-					AddPortMappingToService(&(action->srv), &(action->mapping), &(action->bUpdating));
+					AddPortMappingToService(&(action->srv), &(action->mapping), action->bUpdating);
 					break;
 				case UPNPNAT_ACTION_DELETE:
 					DeletePortMappingFromService(&(action->srv), &(action->mapping));

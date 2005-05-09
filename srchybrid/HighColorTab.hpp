@@ -10,13 +10,7 @@
 // may cause.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#ifndef _HIGHCOLORTAB_HPP_INCLUDED_
-#define _HIGHCOLORTAB_HPP_INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 #include <memory>
 
@@ -136,5 +130,3 @@ namespace HighColorTab
     return UpdateImageListFull<TSheet, HighColorTab::CHighColorListCreator>( rSheet );
   };
 };
-
-#endif // _HIGHCOLORTAB_HPP_INCLUDED_

@@ -1,4 +1,3 @@
-
 //this file is part of eMule
 //Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
@@ -147,10 +146,7 @@ enum EKadState{
 	KS_QUEUED_BUDDY,
 	KS_INCOMING_BUDDY,
 	KS_CONNECTING_BUDDY,
-	KS_CONNECTED_BUDDY,
-	KS_NONE_LOWID,
-	KS_WAITCALLBACK_LOWID,
-	KS_QUEUE_LOWID
+	KS_CONNECTED_BUDDY
 };
 
 enum EClientSoftware{
@@ -268,7 +264,7 @@ public:
 	bool			ExtProtocolAvailable() const					{ return m_bEmuleProtocol; }
 	bool			SupportMultiPacket() const						{ return m_bMultiPacket; }
 	bool			SupportPeerCache() const { return m_fPeerCache; }
-	bool			IsEmuleClient() const							{ return m_byEmuleVersion; }
+	bool			IsEmuleClient() const							{ return m_byEmuleVersion!=0; }
 	uint8			GetSourceExchangeVersion() const				{ return m_bySourceExchangeVer; }
 	CClientCredits* Credits() const									{ return credits; }
 	bool			IsBanned() const;
@@ -282,22 +278,23 @@ public:
 	void			SetKadPort(uint16 nPort)						{ m_nKadPort = nPort; }
 	uint8			GetExtendedRequestsVersion() const				{ return m_byExtendedRequestsVer; }
 	void			RequestSharedFileList();
-	void			ProcessSharedFileList(char* pachPacket, uint32 nSize, LPCTSTR pszDirectory = NULL);
+	void			ProcessSharedFileList(const uchar* pachPacket, uint32 nSize, LPCTSTR pszDirectory = NULL);
+
 	void			ClearHelloProperties();
-	bool			ProcessHelloAnswer(char* pachPacket, uint32 nSize);
-	bool			ProcessHelloPacket(char* pachPacket, uint32 nSize);
+	bool			ProcessHelloAnswer(const uchar* pachPacket, uint32 nSize);
+	bool			ProcessHelloPacket(const uchar* pachPacket, uint32 nSize);
 	void			SendHelloAnswer();
 	virtual bool	SendHelloPacket();
 	void			SendMuleInfoPacket(bool bAnswer);
-	void			ProcessMuleInfoPacket(char* pachPacket, uint32 nSize);
-	void			ProcessMuleCommentPacket(char* pachPacket, uint32 nSize);
+	void			ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize);
+	void			ProcessMuleCommentPacket(const uchar* pachPacket, uint32 nSize);
 	//<<< eWombat [SNAFU_V3]
 	//MORPH - Changed by SiRoB
 	void			ProcessUnknownHelloTag(CTag *tag, CString &pszReason);
 	void			ProcessUnknownInfoTag(CTag *tag, CString &pszReason);
 	//>>> eWombat [SNAFU_V3]
-	void			ProcessEmuleQueueRank(char* packet, UINT size);
-	void			ProcessEdonkeyQueueRank(char* packet, UINT size);
+	void			ProcessEmuleQueueRank(const uchar* packet, UINT size);
+	void			ProcessEdonkeyQueueRank(const uchar* packet, UINT size);
 	void			CheckQueueRankFlood();
 	bool			Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash = false) const;
 	void			ResetFileStatusInfo();
@@ -335,18 +332,18 @@ public:
 	// secure ident
 	void			SendPublicKeyPacket();
 	void			SendSignaturePacket();
-	void			ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize);
-	void			ProcessSignaturePacket(uchar* pachPacket, uint32 nSize);
+	void			ProcessPublicKeyPacket(const uchar* pachPacket, uint32 nSize);
+	void			ProcessSignaturePacket(const uchar* pachPacket, uint32 nSize);
 	uint8			GetSecureIdentState() const						{ return m_SecureIdentState; }
 	void			SendSecIdentStatePacket();
-	void			ProcessSecIdentStatePacket(uchar* pachPacket, uint32 nSize);
+	void			ProcessSecIdentStatePacket(const uchar* pachPacket, uint32 nSize);
 	uint8			GetInfoPacketsReceived() const					{ return m_byInfopacketsReceived; }
 	void			InfoPacketsReceived();
 	// preview
 	void			SendPreviewRequest(const CAbstractFile* pForFile);
 	void			SendPreviewAnswer(const CKnownFile* pForFile, CxImage** imgFrames, uint8 nCount);
-	void			ProcessPreviewReq(char* pachPacket, uint32 nSize);
-	void			ProcessPreviewAnswer(char* pachPacket, uint32 nSize);
+	void			ProcessPreviewReq(const uchar* pachPacket, uint32 nSize);
+	void			ProcessPreviewAnswer(const uchar* pachPacket, uint32 nSize);
 	bool			GetPreviewSupport() const						{ return m_fSupportsPreview && GetViewSharedFilesSupport(); }
 	bool			GetViewSharedFilesSupport() const				{ return m_fNoViewSharedFiles==0; }
 	bool			SafeSendPacket(Packet* packet);
@@ -371,7 +368,7 @@ public:
 	void			CreateNextBlockPackage();
 	uint32			GetUpStartTimeDelay() const						{ return ::GetTickCount() - m_dwUploadTime; }
 	void 			SetUpStartTime()								{ m_dwUploadTime = ::GetTickCount(); }
-	void			SendHashsetPacket(char* forfileid);
+	void			SendHashsetPacket(const uchar* fileid);
 	const uchar*	GetUploadFileID() const							{ return requpfileid; }
 	void			SetUploadFileID(CKnownFile* newreqfile);
 	uint32			SendBlockData();
@@ -424,7 +421,7 @@ public:
 	uint16			GetUpPartCount() const							{ return m_nUpPartCount; }
 	void			DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const;
 	bool			IsUpPartAvailable(uint16 iPart) const {
-						return (iPart>=m_nUpPartCount || !m_abyUpPartStatus) ? 0 : m_abyUpPartStatus[iPart];
+						return (iPart>=m_nUpPartCount || !m_abyUpPartStatus) ? false : m_abyUpPartStatus[iPart]!=0;
 					}
 	uint8*			GetUpPartStatus() const							{ return m_abyUpPartStatus; }
     /*
@@ -467,7 +464,7 @@ public:
 	uint32			GetLastAskedTime(const CPartFile* partFile = NULL) const;
     void            SetLastAskedTime()								{ m_fileReaskTimes.SetAt(reqfile, ::GetTickCount()); }
 	bool			IsPartAvailable(uint16 iPart) const {
-						return (iPart>=m_nPartCount || !m_abyPartStatus) ? 0 : m_abyPartStatus[iPart];
+						return (iPart>=m_nPartCount || !m_abyPartStatus) ? false : m_abyPartStatus[iPart]!=0;
 					}
 	// Mighty Knife: Community visualization
 	bool			IsCommunity() const;
@@ -480,7 +477,7 @@ public:
 	uint16			GetPartCount() const							{ return m_nPartCount; }
 	uint32			GetDownloadDatarate() const						{ return m_nDownDatarate; }
 	uint16			GetRemoteQueueRank() const						{ return m_nRemoteQueueRank; }
-	void			SetRemoteQueueRank(uint16 nr);
+	void			SetRemoteQueueRank(uint16 nr, bool bUpdateDisplay = false);
 	bool			IsRemoteQueueFull() const						{ return m_bRemoteQueueFull; }
 	void			SetRemoteQueueFull(bool flag)					{ m_bRemoteQueueFull = flag; }
 	//Morph START - added by AndCycle, DiffQR
@@ -497,13 +494,13 @@ public:
 	void			SendStartupLoadReq();
 	void			ProcessFileInfo(CSafeMemFile* data, CPartFile* file);
 	void			ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPartFile* file);
-	void			ProcessHashSet(char* data, uint32 size);
+	void			ProcessHashSet(const uchar* data, uint32 size);
 	void			ProcessAcceptUpload();
 	bool			AddRequestForAnotherFile(CPartFile* file);
 	void			CreateBlockRequests(int iMaxBlocks);
 	virtual void	SendBlockRequests();
 	virtual bool	SendHttpBlockRequests();
-	virtual void	ProcessBlockPacket(char* packet, uint32 size, bool packed = false);
+	virtual void	ProcessBlockPacket(const uchar* packet, uint32 size, bool packed = false);
 	virtual void	ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize);
 	void			ClearDownloadBlockRequests();
 	void			SendOutOfPartReqsAndAddToWaitingQueue();
@@ -567,7 +564,7 @@ public:
     void			SetFileRating(uint8 uRating)				{ m_uFileRating = uRating; }
 
 	// Barry - Process zip file as it arrives, don't need to wait until end of block
-	int				unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
+	int				unzip(Pending_Block_Struct *block, const BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
 	void			UpdateDisplayedInfo(bool force = false);
 	int             GetFileListRequested() const					{ return m_iFileListRequested; }
     void            SetFileListRequested(int iFileListRequested)	{ m_iFileListRequested = iFileListRequested; }
@@ -593,8 +590,8 @@ public:
 	bool			IsSupportingAICH() const					{return m_fSupportsAICH & 0x01;}
 	void			SendAICHRequest(CPartFile* pForFile, uint16 nPart);
 	bool			IsAICHReqPending() const					{return m_fAICHRequested; }
-	void			ProcessAICHAnswer(char* packet, UINT size);
-	void			ProcessAICHRequest(char* packet, UINT size);
+	void			ProcessAICHAnswer(const uchar* packet, UINT size);
+	void			ProcessAICHRequest(const uchar* packet, UINT size);
 	void			ProcessAICHFileHash(CSafeMemFile* data, CPartFile* file);
 
 	EUtf8Str		GetUnicodeSupport() const;
@@ -604,6 +601,7 @@ public:
 
 	LPCTSTR			DbgGetDownloadState() const;
 	LPCTSTR			DbgGetUploadState() const;
+	LPCTSTR			DbgGetKadState() const;
 	CString			DbgGetClientInfo(bool bFormatIP = false) const;
 	CString			DbgGetFullClientSoftVer() const;
 	const CString&	DbgGetHelloInfo() const { return m_strHelloInfo; }
@@ -681,7 +679,7 @@ public:
 	CWebCacheUpSocket* m_pWCUpSocket;
 
 	bool SupportsWebCacheUDP() const {return (m_uWebCacheFlags & WC_FLAGS_UDP) && SupportsUDP();}
-	bool SupportsOhcbSuppression() const {return (m_uWebCacheFlags & WC_FLAGS_NO_OHCBS);}
+	bool SupportsOhcbSuppression() const {return (m_uWebCacheFlags & WC_FLAGS_NO_OHCBS)!=0;}
 	bool SupportsWebCacheProtocol() const {return SupportsOhcbSuppression();} // this is the first version that supports that
 	bool IsProxy() const {return m_bProxy;}
 	bool IsUploadingToWebCache() const;
@@ -720,7 +718,7 @@ public:
 	uint32 lastMultiOHCBPacketSent;
 	void SendOHCBsNow();
 	bool a(uint32 a) {return a <= WC_MAX_OHCBS_IN_UDP_PACKET;}
-	bool b(uint32 a, uint32 b) { return a * 100.0 / (b + 1) < 0,2; }
+	bool b(uint32 a, uint32 b) { return (a * 100.0 / (b + 1) < 0,2)!=0; }
 	bool c(uint32 a, uint32 b) { return a > 4 && (b * 100) / a < 20; }
 // MORPH END - Added by Commander, WebCache 1.2f
 
@@ -736,9 +734,9 @@ public:
 	void SetHttpSendState(int iState)								{ m_iHttpSendState = iState; }
 
 	bool SendPeerCacheFileRequest();
-	bool ProcessPeerCacheQuery(const char* packet, UINT size);
-	bool ProcessPeerCacheAnswer(const char* packet, UINT size);
-	bool ProcessPeerCacheAcknowledge(const char* packet, UINT size);
+	bool ProcessPeerCacheQuery(const uchar* packet, UINT size);
+	bool ProcessPeerCacheAnswer(const uchar* packet, UINT size);
+	bool ProcessPeerCacheAcknowledge(const uchar* packet, UINT size);
 	void OnPeerCacheDownSocketClosed(int nErrorCode);
 	bool OnPeerCacheDownSocketTimeout();
 
@@ -785,8 +783,7 @@ public:
 	// enkeyDEV: ICS
 	void	ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool readHash = false);
 	uint32	GetIncompletePartVersion()	{return m_incompletepartVer;}
-	bool	IsIncPartAvailable(uint16 iPart)	{return	( (iPart >= m_nPartCount) || (!m_abyIncPartStatus) )? 0:m_abyIncPartStatus[iPart];}
-	bool	IsPendingListEmpty()      {return m_PendingBlocks_list.IsEmpty();}
+	bool	IsIncPartAvailable(uint16 iPart)	{return	( (iPart >= m_nPartCount) || (!m_abyIncPartStatus) )? false:m_abyIncPartStatus[iPart]!=0;}
 	// <--- enkeyDEV: ICS
 	//Morph End - added by AndCycle, ICS
 
@@ -1138,7 +1135,7 @@ static LPCTSTR apszSnafuTag[] =
 	_T("[Rumata (rus)(Plus v1f)]"),							//14
 	_T("[Fusspi]"),											//15
 	_T("[donkey2002]"),										//16
-	_T("[md4]")									        //17
+	_T("[md4]")										        //17
 	};
 
 //<<< new tags from eMule 0.04x

@@ -172,7 +172,7 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 	strWCRequest.AppendFormat("\r\n");
 
 	if (thePrefs.GetDebugClientTCPLevel() > 0){
-		DebugSend("WebCache-GET (cached block)", this, (char*)reqfile->GetFileHash());
+		DebugSend("WebCache-GET (cached block)", this, reqfile->GetFileHash());
 		Debug(_T("  %hs\n"), strWCRequest);
 	}
 
@@ -193,7 +193,7 @@ bool CWebCacheProxyClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClas
 	if( !ProxyClientIsBusy() )
 		WebCachedBlockList.TryToDL();
 
-	return SINGLEProxyClient; // yonatan tmp
+	return SINGLEProxyClient!=NULL; // yonatan tmp
 }
 
 void CWebCacheProxyClient::OnWebCachedBlockDownloaded( const Requested_Block_Struct* reqblock )
@@ -219,7 +219,7 @@ bool CWebCacheProxyClient::ProxyClientIsBusy()
 				AddDebugLogLine(false, _T("WebCachedBlock without Webcachesocket deleted"));
 		}
 	}
-	return block;
+	return block!=0;
 }
 
 void CWebCacheProxyClient::DeleteBlock()

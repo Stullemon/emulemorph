@@ -282,7 +282,7 @@ BOOL CPPgWebcachesettings::OnApply()
 	}
 	
 	// set thePrefs.webcacheEnabled
-	thePrefs.webcacheEnabled = (uint8)IsDlgButtonChecked(IDC_Activatewebcachedownloads);
+	thePrefs.webcacheEnabled = IsDlgButtonChecked(IDC_Activatewebcachedownloads)!=0;
 	
 	
 	// set thePrefs.webcacheBlockLimit
@@ -297,7 +297,7 @@ BOOL CPPgWebcachesettings::OnApply()
 	}
 	
 	// set thePrefs.WebCacheExtraTimeout
-	thePrefs.SetWebCacheExtraTimeout((uint8)IsDlgButtonChecked(IDC_EXTRATIMEOUT));
+	thePrefs.SetWebCacheExtraTimeout(IsDlgButtonChecked(IDC_EXTRATIMEOUT)!=0);
 
 	// set thePrefs.WebCacheCachesLocalTraffic
 	uint8 cachestraffic;
@@ -306,10 +306,10 @@ BOOL CPPgWebcachesettings::OnApply()
 	else thePrefs.SetWebCacheCachesLocalTraffic(1);
 
 	// set thePrefs.PersistentConnectionsForProxyDownloads
-	thePrefs.PersistentConnectionsForProxyDownloads = ((uint8)IsDlgButtonChecked(IDC_PERSISTENT_PROXY_CONNS));
+	thePrefs.PersistentConnectionsForProxyDownloads = IsDlgButtonChecked(IDC_PERSISTENT_PROXY_CONNS)!=0;
 
 	// set thePrefs.WCAutoupdate
-	thePrefs.WCAutoupdate = ((uint8)IsDlgButtonChecked(IDC_UPDATE_WCSETTINGS));
+	thePrefs.WCAutoupdate = IsDlgButtonChecked(IDC_UPDATE_WCSETTINGS)!=0;
 
 	SetModified(FALSE);
 	LoadSettings();

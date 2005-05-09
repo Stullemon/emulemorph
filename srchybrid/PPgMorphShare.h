@@ -17,12 +17,12 @@ protected:
 	int m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	int	m_iSpreadbar; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	int m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	int m_iSelectiveShare;  //MORPH - Added by SiRoB, SLUGFILLER: hideOS
+	bool m_bSelectiveShare;  //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	int m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	int m_iPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
 	int m_iPermissions; //MORPH - Added by SiRoB, Show Permissions
-	int m_iPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
-	int m_iFolderIcons;
+	bool m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
+	bool m_bFolderIcons;
 	
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;

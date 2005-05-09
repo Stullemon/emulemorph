@@ -52,10 +52,10 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-#define INV_KAD_KEYWORD_CHARS	" ()[]{}<>,._-!?:\\/"
+#define INV_KAD_KEYWORD_CHARS	" ()[]{}<>,._-!?:;\\/"
 LPCSTR _aszInvKadKeywordCharsA = INV_KAD_KEYWORD_CHARS;
 LPCTSTR _aszInvKadKeywordChars = _T(INV_KAD_KEYWORD_CHARS);
-LPCWSTR _awszInvKadKeywordChars = L" ()[]{}<>,._-!?:\\/";
+LPCWSTR _awszInvKadKeywordChars = L" ()[]{}<>,._-!?:;\\/";
 
 ////////////////////////////////////////
 using namespace Kademlia;
@@ -343,35 +343,42 @@ bool CSearchManager::alreadySearchingFor(const CUInt128 &target)
 void CSearchManager::getWords(LPCTSTR str, WordList *words)
 {
 	LPCTSTR s = str;
-	int len = 0;
+	size_t nChars = 0;
+	size_t nBytes = 0;
 	CStringW word;
 	CStringW wordtemp;
-	uint32 i;
 	while (_tcslen(s) > 0)
 	{
-		len = (int)_tcscspn(s, _aszInvKadKeywordChars);
-		if (len > 2)
+		nChars = _tcscspn(s, _aszInvKadKeywordChars);
+		word = s;
+		word.Truncate(nChars);
+		// TODO: We'd need a safe way to determine if a sequence which contains only 3 chars is a real word.
+		// Currently we do this by evaluating the UTF-8 byte count. This will work well for Western locales,
+		// AS LONG AS the min. byte count is 3(!). If the byte count is once changed to 2, this will not
+		// work properly any longer because there are a lot of Western characters which need 2 bytes in UTF-8.
+		// Maybe we need to evaluate the Unicode character values itself whether the characters are located
+		// in code ranges where single characters are known to represent words.
+		nBytes = KadGetKeywordBytes(word).GetLength();
+		if (nBytes >= 3)
 		{
-			word = s;
-			word.Truncate(len);
 			KadTagStrMakeLower(word);
-			for( i = 0; i < words->size(); i++)
+			for (size_t i = 0; i < words->size(); i++)
 			{
 				wordtemp = words->front();
 				words->pop_front();
-				if(  wordtemp != word )
+				if (wordtemp != word)
 					words->push_back(wordtemp);
 			}
 			words->push_back(word);
 		}
-		if (len < (int)_tcslen(s))
-			len++;
-		s += len;
+		s += nChars;
+		if (nChars < _tcslen(s))
+			s++;
 	}
-	if(words->size() > 1 && len == 3)
-	{
+
+	// if the last word we have added, contains 3 chars (and 3 bytes), it's in almost all cases a file's extension.
+	if (words->size() > 1 && (nChars == 3 && nBytes == 3))
 		words->pop_back();
-	}
 }
 
 void CSearchManager::jumpStart(void)

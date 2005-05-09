@@ -58,7 +58,7 @@ public:
 	void SetToolTipsDelay(UINT uDelay);
 	void DeleteAllSearchListCtrlItems();
 
-	bool IsSearchParamsWndVisible() const;
+	BOOL IsSearchParamsWndVisible() const;
 	void OpenParametersWnd();
 
 protected:

@@ -16,14 +16,14 @@
 #include "KnownFileList.h"
 #include "Log.h"
 
-CWebCachedBlock::CWebCachedBlock( const char* packet, uint32 size, CUpDownClient* client, bool XpressOHCB )
+CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient* client, bool XpressOHCB )
 {
 	m_uRequestCount = 0; // what is this for?
 	m_bDownloaded = false;
 	m_bRequested = false;
 
 	md4cpy( m_UserHash, client->GetUserHash() );
-	CSafeMemFile indata((BYTE*)packet, size );
+	CSafeMemFile indata(packet, size );
 	// <Proxy-ip 4><IP 4><PORT 2><filehash 16><m_uStart 4><m_uEnd 4><remoteKey WC_KEYLENGTH>
 	m_uProxyIp = indata.ReadUInt32();
 	m_uHostIp = indata.ReadUInt32();

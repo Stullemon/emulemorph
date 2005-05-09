@@ -67,6 +67,7 @@ public:
 	bool	IsUnsharedFile(const uchar* auFileHash) const;
 	void	UpdatePartsInfo(); //MORPH - Added by SiRoB, POWERSHARE Limit
 
+	CMutex	m_mutWriteList;
 private:
 	bool	AddFile(CKnownFile* pFile);
 	void	FindSharedFiles();
@@ -83,6 +84,7 @@ private:
 	CTypedPtrList<CPtrList, UnknownFile_Struct*> currentlyhashing_list;	// SLUGFILLER: SafeHash
 	CServerConnect*		server;
 	CSharedFilesCtrl*	output;
+
 	uint32 m_lastPublishED2K;
 	bool	 m_lastPublishED2KFlag;
 	int m_currFileSrc;

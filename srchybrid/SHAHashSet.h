@@ -204,7 +204,8 @@ public:
 	void			DbgTest();
 
 	CAICHHashTree	m_pHashTree;
-	static CList<CAICHRequestedData> m_liRequestedData;
+	static CList<CAICHRequestedData>	m_liRequestedData;
+	static CMutex						m_mutKnown2File;
 private:
 	CKnownFile*		m_pOwner;
 	EAICHStatus		m_eStatus;

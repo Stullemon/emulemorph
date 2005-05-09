@@ -108,7 +108,7 @@ void CPPgServer::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_UPDATESERVERCLIENT, 0);
 
-	if(thePrefs.scorsystem)
+	if(thePrefs.m_bUseServerPriorities)
 		CheckDlgButton(IDC_SCORE,1);
 	else
 		CheckDlgButton(IDC_SCORE,0);
@@ -121,7 +121,7 @@ void CPPgServer::LoadSettings(void)
 
 BOOL CPPgServer::OnApply()
 {	
-	thePrefs.SetSafeServerConnectEnabled((uint8)IsDlgButtonChecked(IDC_SAFESERVERCONNECT));
+	thePrefs.SetSafeServerConnectEnabled(IsDlgButtonChecked(IDC_SAFESERVERCONNECT)!=0);
 
 	if(IsDlgButtonChecked(IDC_SMARTIDCHECK))
 		thePrefs.smartidcheck = true;
@@ -139,11 +139,11 @@ BOOL CPPgServer::OnApply()
 	else if (thePrefs.deadserverretries > MAX_SERVERFAILCOUNT)
 		thePrefs.deadserverretries = MAX_SERVERFAILCOUNT;
 
-	thePrefs.scorsystem = (uint8)IsDlgButtonChecked(IDC_SCORE);
-	thePrefs.autoserverlist = (uint8)IsDlgButtonChecked(IDC_AUTOSERVER);
-	thePrefs.addserversfromserver = (uint8)IsDlgButtonChecked(IDC_UPDATESERVERCONNECT);
-	thePrefs.addserversfromclient = (uint8)IsDlgButtonChecked(IDC_UPDATESERVERCLIENT);
-	thePrefs.autoconnectstaticonly = (uint8)IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY);
+	thePrefs.m_bUseServerPriorities = IsDlgButtonChecked(IDC_SCORE)!=0;
+	thePrefs.autoserverlist = IsDlgButtonChecked(IDC_AUTOSERVER)!=0;
+	thePrefs.addserversfromserver = IsDlgButtonChecked(IDC_UPDATESERVERCONNECT)!=0;
+	thePrefs.addserversfromclient = IsDlgButtonChecked(IDC_UPDATESERVERCLIENT)!=0;
+	thePrefs.autoconnectstaticonly = IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY)!=0;
 
 	LoadSettings();
 
@@ -175,7 +175,7 @@ void CPPgServer::Localize(void)
 
 void CPPgServer::OnBnClickedEditadr()
 {
-	ShellExecute(NULL, _T("open"), thePrefs.GetTxtEditor(), _T("\"") + CString(thePrefs.GetConfigDir()) + _T("adresses.dat\""), NULL, SW_SHOW); 
+	ShellExecute(NULL, _T("open"), thePrefs.GetTxtEditor(), _T("\"") + thePrefs.GetConfigDir() + _T("addresses.dat\""), NULL, SW_SHOW); 
 }
 
 void CPPgServer::OnHelp()

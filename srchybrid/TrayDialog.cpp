@@ -27,6 +27,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
+#define	NOTIFYICONDATA_V1_TIP_SIZE	64
+
 /////////////////////////////////////////////////////////////////////////////
 // CTrayDialog dialog
 
@@ -44,13 +46,12 @@ END_MESSAGE_MAP()
 CTrayDialog::CTrayDialog(UINT uIDD,CWnd* pParent /*=NULL*/)
 	: CTrayDialogBase(uIDD, pParent)
 {
-	m_nidIconData.cbSize = sizeof(NOTIFYICONDATA);
-	ASSERT( m_nidIconData.cbSize == NOTIFYICONDATA_V1_SIZE );
+	m_nidIconData.cbSize = sizeof(NOTIFYICONDATA_V1_SIZE);
 	m_nidIconData.hWnd = 0;
 	m_nidIconData.uID = 1;
 	m_nidIconData.uCallbackMessage = UM_TRAY_ICON_NOTIFY_MESSAGE;
 	m_nidIconData.hIcon = 0;
-	m_nidIconData.szTip[0] = 0;	
+	m_nidIconData.szTip[0] = _T('\0');
 	m_nidIconData.uFlags = NIF_MESSAGE;
 	m_bTrayIconVisible = FALSE;
 	m_pbMinimizeToTray = NULL;
@@ -116,9 +117,9 @@ void CTrayDialog::TraySetIcon(LPCTSTR lpszResourceName, bool bDelete)
 
 void CTrayDialog::TraySetToolTip(LPCTSTR lpszToolTip)
 {
-	ASSERT(_tcslen(lpszToolTip) > 0 && _tcslen(lpszToolTip) < 64);
-	_tcsncpy(m_nidIconData.szTip,lpszToolTip,ARRSIZE(m_nidIconData.szTip));
-	m_nidIconData.szTip[ARRSIZE(m_nidIconData.szTip)-1] = _T('\0');
+	ASSERT( _tcslen(lpszToolTip) > 0 && _tcslen(lpszToolTip) < NOTIFYICONDATA_V1_TIP_SIZE );
+	_tcsncpy(m_nidIconData.szTip, lpszToolTip, NOTIFYICONDATA_V1_TIP_SIZE);
+	m_nidIconData.szTip[NOTIFYICONDATA_V1_TIP_SIZE - 1] = _T('\0');
 	m_nidIconData.uFlags |= NIF_TIP;
 
 	Shell_NotifyIcon(NIM_MODIFY, &m_nidIconData);
@@ -293,7 +294,7 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam)
 		CTrayDialogBase::OnSysCommand(nID, lParam);
 }
 
-void CTrayDialog::TraySetMinimizeToTray(uint8* pbMinimizeToTray)
+void CTrayDialog::TraySetMinimizeToTray(bool* pbMinimizeToTray)
 {
 	m_pbMinimizeToTray = pbMinimizeToTray;
 }

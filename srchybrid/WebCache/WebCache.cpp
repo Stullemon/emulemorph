@@ -7,7 +7,9 @@
 #include "eMule.h"
 #include "WebCachedBlockList.h"
 #include <windns.h>
+#pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include <crypto51/osrng.h>
+#pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "opcodes.h"
 #include "kademlia/kademlia/Kademlia.h"
 #include "RichEditCtrlX.h"

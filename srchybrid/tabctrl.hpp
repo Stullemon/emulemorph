@@ -1,6 +1,3 @@
-#ifndef _TABCTRL_HPP
-#define _TABCTRL_HPP
-
 #pragma once
 
 class TabControl: public CTabCtrl
@@ -10,7 +7,7 @@ public:
   virtual ~TabControl();
   UINT GetLastMovementSource()	{return m_nSrcTab;}
   UINT GetLastMovementDestionation()	{return m_nDstTab;}
-  bool ReorderTab( unsigned int nSrcTab, unsigned int nDstTab );
+  BOOL ReorderTab( unsigned int nSrcTab, unsigned int nDstTab );
 
   // Overriden CTabCtrl/CWnd members
 //  virtual LRESULT WindowProc( UINT message, WPARAM wParam, LPARAM lParam );
@@ -39,7 +36,3 @@ private:
   
   DECLARE_MESSAGE_MAP()
 };
-
-#endif _TABCTRL_HPP
-
-// END TABCTRL.HPP

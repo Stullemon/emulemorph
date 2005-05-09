@@ -76,7 +76,7 @@ void CUploadListCtrl::Init()
 	InsertColumn(6,GetResString(IDS_STATUS),LVCFMT_LEFT,110,6);
 	InsertColumn(7,GetResString(IDS_UPSTATUS),LVCFMT_LEFT,100,7);
 	//MORPH START - Added by SiRoB, Client Software
-	InsertColumn(8,GetResString(IDS_CLIENTSOFTWARE),LVCFMT_LEFT,100,8);
+	InsertColumn(8,GetResString(IDS_CD_CSOFT),LVCFMT_LEFT,100,8);
 	//MORPH END - Added by SiRoB, Client Software
 	InsertColumn(9,GetResString(IDS_UPL_DL),LVCFMT_LEFT,100,9); //Total up down
 	InsertColumn(10,GetResString(IDS_CL_DOWNLSTATUS),LVCFMT_LEFT,100,10); //Yun.SF3 Remote Queue Status
@@ -225,7 +225,7 @@ void CUploadListCtrl::Localize()
 		strRes.ReleaseBuffer();
 		
 		//MORPH START - Modified by SiRoB, Client Software
-		strRes = GetResString(IDS_CLIENTSOFTWARE);
+		strRes = GetResString(IDS_CD_CSOFT);
 		hdi.pszText = strRes.GetBuffer();
 		pHeaderCtrl->SetItem(8, &hdi);
 		strRes.ReleaseBuffer();
@@ -290,7 +290,7 @@ void CUploadListCtrl::AddClient(const CUpDownClient* client)
 	int iItemCount = GetItemCount();
 	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,iItemCount,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)client);
 	Update(iItem);
-	theApp.emuledlg->transferwnd->UpdateListCount(1, iItemCount+1);
+	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Uploading, iItemCount+1);
 }
 
 void CUploadListCtrl::RemoveClient(const CUpDownClient* client)
@@ -304,7 +304,7 @@ void CUploadListCtrl::RemoveClient(const CUpDownClient* client)
 	sint32 result = FindItem(&find);
 	if (result != -1){
 		DeleteItem(result);
-		theApp.emuledlg->transferwnd->UpdateListCount(1);
+		theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Uploading);
 	}
 }
 
@@ -501,7 +501,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					case 5:
 						{//Morph - modified by AndCycle, upRemain
-							sint32 timeleft;
+							sint32 timeleft = -1;
 							uint32 UpDatarate = client->GetDatarate();
 							// Mighty Knife: Check for credits!=NULL
 							if ((UpDatarate == 0) || (client->Credits()==NULL)) timeleft = -1;
@@ -511,7 +511,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							else if(file)
 								if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/UpDatarate;
 								else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
-							Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
+							Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), (timeleft>=0)?CastSecondsToHM(timeleft):_T("?"));
 						}//Morph - modified by AndCycle, upRemain
 						break;
 					case 6:

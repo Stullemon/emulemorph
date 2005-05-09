@@ -18,7 +18,9 @@ protected:
 	friend class CIrcWnd;
 
 	CIrcWnd* m_pParent;
-	bool m_asc_sort[3];
+	
+	uint8	m_sortindex;
+	bool	m_sortorder;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

@@ -63,9 +63,9 @@ void CClientListCtrl::Init()
 	InsertColumn(2,GetResString(IDS_CL_TRANSFUP),LVCFMT_LEFT,150,2);
 	InsertColumn(3,GetResString(IDS_CL_DOWNLSTATUS),LVCFMT_LEFT,150,3);
 	InsertColumn(4,GetResString(IDS_CL_TRANSFDOWN),LVCFMT_LEFT,150,4);
-	CString coltemp;coltemp=GetResString(IDS_CD_CSOFT);coltemp.Remove(':');
-	InsertColumn(5,coltemp,LVCFMT_LEFT,150,5);
+	InsertColumn(5,GetResString(IDS_CD_CSOFT),LVCFMT_LEFT,150,5);
 	InsertColumn(6,GetResString(IDS_CONNECTED),LVCFMT_LEFT,150,6);
+	CString coltemp;
 	coltemp=GetResString(IDS_CD_UHASH);coltemp.Remove(':');
 	InsertColumn(7,coltemp,LVCFMT_LEFT,150,7);
 	
@@ -135,11 +135,6 @@ void CClientListCtrl::SetAllIcons()
 	imagelist.Add(CTempIconLoader(_T("Morph")));
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
-	//MORPH START - Added by SiRoB, More client icon & Credit ovelay icon
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);
-	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
-
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -186,7 +181,7 @@ void CClientListCtrl::Localize()
 		pHeaderCtrl->SetItem(4, &hdi);
 		strRes.ReleaseBuffer();
 
-		strRes=GetResString(IDS_CD_CSOFT);strRes.Remove(':');
+		strRes=GetResString(IDS_CD_CSOFT);
 		hdi.pszText = strRes.GetBuffer();
 		pHeaderCtrl->SetItem(5, &hdi);
 		strRes.ReleaseBuffer();
@@ -233,7 +228,7 @@ void CClientListCtrl::ShowKnownClients()
 		Update(iItem);
 		iItemCount++;
 	}
-	theApp.emuledlg->transferwnd->UpdateListCount(3, iItemCount); //SLAHAM: MODIFIED [TPT] - TBH Transfer Window Buttons
+	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Clients, iItemCount);
 }
 
 void CClientListCtrl::AddClient(const CUpDownClient* client)
@@ -246,7 +241,7 @@ void CClientListCtrl::AddClient(const CUpDownClient* client)
 	int iItemCount = GetItemCount();
 	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,iItemCount,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)client);
 	Update(iItem);
-	theApp.emuledlg->transferwnd->UpdateListCount(3, iItemCount+1); //SLAHAM: MODIFIED [TPT] - TBH Transfer Window Buttons
+	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Clients, iItemCount+1);
 }
 
 void CClientListCtrl::RemoveClient(const CUpDownClient* client)
@@ -260,7 +255,7 @@ void CClientListCtrl::RemoveClient(const CUpDownClient* client)
 	sint32 result = FindItem(&find);
 	if (result != -1){
 		DeleteItem(result);
-		theApp.emuledlg->transferwnd->UpdateListCount(3); //SLAHAM: MODIFIED [TPT] - TBH Transfer Window Buttons
+		theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Clients);
 	}
 }
 
@@ -647,21 +642,33 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
 				return CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
-			else if(item1->GetUserName())
-				return 1;
-			else
-				return -1;
+		    else if (!item1->GetUserName() && !item2->GetUserName())
+				return 0;
+			else {
+				// place clients with no usernames at bottom
+				if (!item1->GetUserName())
+					return 1;
+				else
+					return -1;
+			}
 		case 100:
 			if(item1->GetUserName() && item2->GetUserName())
 				return CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
-			else if(item2->GetUserName())
-				return 1;
-			else
-				return -1;
+		    else if (!item1->GetUserName() && !item2->GetUserName())
+				return 0;
+			else {
+				// place clients with no usernames at bottom
+				if (!item1->GetUserName())
+					return 1;
+				else
+					return -1;
+			}
+
 		case 1:
 			return item1->GetUploadState()-item2->GetUploadState();
 		case 101:
 			return item2->GetUploadState()-item1->GetUploadState();
+
 		case 2:
 			if( item1->credits && item2->credits )
 				return CompareUnsigned64(item1->credits->GetUploadedTotal(), item2->credits->GetUploadedTotal());
@@ -676,6 +683,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				return 1;
 			else
 				return -1;
+
 		case 3:
 		    if( item1->GetDownloadState() == item2->GetDownloadState() ){
 			    if( item1->IsRemoteQueueFull() && item2->IsRemoteQueueFull() )
@@ -700,6 +708,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				    return 0;
 		    }
 			return item2->GetDownloadState()-item1->GetDownloadState();
+
 		case 4:
 			if( item1->credits && item2->credits )
 				return CompareUnsigned64(item1->credits->GetDownloadedTotal(), item2->credits->GetDownloadedTotal());
@@ -750,6 +759,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				return -1;
 			else
 				return 1;
+
 		case 7:
 			return memcmp(item1->GetUserHash(), item2->GetUserHash(), 16);
 		case 107:

@@ -91,7 +91,7 @@ bool CWebCacheMFRList::IsPartAvailable(uint16 part, const byte* fileID)
 
 	for (POSITION pos = reqFiles.GetHeadPosition(); pos != NULL; reqFiles.GetNext(pos))	// file hashes loop
 		if(!md4cmp(fileID, reqFiles.GetAt(pos)->fileID))	// file hash found
-			return reqFiles.GetAt(pos)->partStatus[part];
+			return reqFiles.GetAt(pos)->partStatus[part]!=0;
 	return true;	// if the file is not found in the hash list, then the client didn't request it, so he doesn't need it
 }
 

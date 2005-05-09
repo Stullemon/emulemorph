@@ -42,18 +42,7 @@
 static char THIS_FILE[]=__FILE__;
 #endif
 
-
-// CFriendListCtrl
-
 IMPLEMENT_DYNAMIC(CFriendListCtrl, CMuleListCtrl)
-CFriendListCtrl::CFriendListCtrl()
-{
-}
-
-CFriendListCtrl::~CFriendListCtrl()
-{
-}
-
 
 BEGIN_MESSAGE_MAP(CFriendListCtrl, CMuleListCtrl)
 	ON_WM_CONTEXTMENU()
@@ -62,9 +51,13 @@ BEGIN_MESSAGE_MAP(CFriendListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnclick)
 END_MESSAGE_MAP()
 
+CFriendListCtrl::CFriendListCtrl()
+{
+}
 
-
-// CFriendListCtrl message handlers
+CFriendListCtrl::~CFriendListCtrl()
+{
+}
 
 void CFriendListCtrl::Init()
 {
@@ -262,6 +255,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				else{
 					CUpDownClient* chatclient = new CUpDownClient(0,cur_friend->m_nLastUsedPort,cur_friend->m_dwLastUsedIP,0,0,true);
 					chatclient->SetUserName(cur_friend->m_strName);
+					chatclient->SetUserHash(cur_friend->m_abyUserhash);
 					theApp.clientlist->AddClient(chatclient);
 					theApp.emuledlg->chatwnd->StartSession(chatclient);
 				}
@@ -274,7 +268,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				// auto select next item after deleted one.
 				if (iSel < GetItemCount()){
 					SetSelectionMark(iSel);
-					SetItemState(iSel, LVIS_SELECTED, LVIS_SELECTED);
+					SetItemState(iSel, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 				}
 			}
 			break;

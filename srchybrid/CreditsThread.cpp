@@ -540,6 +540,8 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("02:07:people for translating eMule"));
 	m_arCredits.Add(_T("02:07:into different languages:"));
 	m_arCredits.Add(_T("S:20"));
+	m_arCredits.Add(_T("01:06:Basque: TXiKi"));
+	m_arCredits.Add(_T("S:05"));	
 	m_arCredits.Add(_T("01:06:Breton: KAD-Korvigelloù an Drouizig"));
 	m_arCredits.Add(_T("S:05"));	
 	m_arCredits.Add(_T("01:06:Bulgarian: DapKo"));
@@ -580,7 +582,9 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Lithuanian: Daan"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Norwegian: Iznogood"));
+	m_arCredits.Add(_T("01:06:Norwegian (Bokmal): Hallvor"));
+	m_arCredits.Add(_T("S:05"));
+	m_arCredits.Add(_T("01:06:Norwegian (Nynorsk): Iznogood"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Polish: Tomasz \"TMouse\" Broniarek"));
 	m_arCredits.Add(_T("S:05"));

@@ -91,7 +91,7 @@ public:
 	void	AddSource(CPartFile* owner,CUpDownClient* source,bool notavailable);
 	void	RemoveSource(CUpDownClient* source,CPartFile* owner);
 	bool	RemoveFile(const CPartFile* toremove);
-	void	ClearCompleted(bool ignorecats=false);
+	void	ClearCompleted(int incat=-2);
 	void	ClearCompleted(const CPartFile* pFile);
 	void	SetStyle();
 	void	CreateMenues();
@@ -116,10 +116,9 @@ protected:
 	CImageList m_overlayimages;
 	// [end] Mighty Knife
 
-	CTitleMenu		m_PrioMenu;
+	CTitleMenu	m_PrioMenu;
 	CTitleMenu	m_FileMenu;
-	CMenu		m_A4AFMenu;
-	
+	CTitleMenu	m_SourcesMenu;
 	//MORPH - Removed by SiRoB, Remain time and size Columns have been splited
 	/*
 	bool		m_bRemainSort;
@@ -139,9 +138,9 @@ protected:
 	void SetAllIcons();
 	void DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
 	void DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
-	/*
+
 	int GetFilesCountInCurCat();
-	*/
+
     static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
     static int Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort);
     static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort, int sortMod);

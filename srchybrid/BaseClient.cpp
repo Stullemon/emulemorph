@@ -36,7 +36,6 @@
 #include "ClientCredits.h"
 #include "IPFilter.h"
 #include "Statistics.h"
-#include "Version.h"
 #include "Sockets.h"
 #include "DownloadQueue.h"
 #include "UploadQueue.h"
@@ -511,9 +510,9 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		}
 	}
 	*/
-	if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
+	if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))){
 		return _T("Ghost MOD");
-	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion < MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
+	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion < MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))){
 		return _T("Fake MODSTRING");
 	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
 		return _T("Fake emuleVersion");
@@ -545,17 +544,18 @@ void CUpDownClient::ClearHelloProperties()
 	m_byKadVersion = 0;
 }
 
-bool CUpDownClient::ProcessHelloPacket(char* pachPacket, uint32 nSize){
-	CSafeMemFile data((BYTE*)pachPacket,nSize);
+bool CUpDownClient::ProcessHelloPacket(const uchar* pachPacket, uint32 nSize)
+{
+	CSafeMemFile data(pachPacket, nSize);
 	data.ReadUInt8(); // read size of userhash
 	// reset all client properties; a client may not send a particular emule tag any longer
 	ClearHelloProperties();
 	return ProcessHelloTypePacket(&data);
 }
 
-bool CUpDownClient::ProcessHelloAnswer(char* pachPacket, uint32 nSize)
+bool CUpDownClient::ProcessHelloAnswer(const uchar* pachPacket, uint32 nSize)
 {
-	CSafeMemFile data((BYTE*)pachPacket,nSize);
+	CSafeMemFile data(pachPacket, nSize);
 	bool bIsMule = ProcessHelloTypePacket(&data);
 	m_bHelloAnswerPending = false;
 	return bIsMule;
@@ -660,7 +660,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				{
 					m_strModVersion = temptag.GetStr();
 					//MOPRH START - Added by SiRoB, Is Morph Client?
-					m_bIsMorph = StrStrI(m_strModVersion,_T("Morph"));
+					m_bIsMorph = StrStrI(m_strModVersion,_T("Morph"))!=0;
 					//MOPRH END   - Added by SiRoB, Is Morph Client?
 				}
 				else if (temptag.IsInt())
@@ -689,7 +689,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				{
 					m_uWebCacheFlags = temptag.GetInt();
 					b_webcacheInfoNeeded = m_uWebCacheFlags & WC_FLAGS_INFO_NEEDED;
-					m_bWebCacheSupportsMultiOHCBs = m_uWebCacheFlags & WC_FLAGS_MULTI_OHCBS;
+					m_bWebCacheSupportsMultiOHCBs = (m_uWebCacheFlags & WC_FLAGS_MULTI_OHCBS)!=0;
 				}
 				break;
 			// Superlexx webcache - moved to the multipacket
@@ -1080,12 +1080,11 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	socket->SendPacket(packet,true,true);
 }
 
-void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
+void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 {
 	bool bDbgInfo = thePrefs.GetUseDebugDevice();
 	m_strMuleInfo.Empty();
-	
-	CSafeMemFile data((BYTE*)pachPacket,nSize);
+	CSafeMemFile data(pachPacket, nSize);
 	m_byCompatibleClient = 0;
 	m_byEmuleVersion = data.ReadUInt8();
 	if (bDbgInfo)
@@ -1258,7 +1257,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 				{
 					m_strModVersion = temptag.GetStr();
 					//MOPRH START - Added by SiRoB, Is Morph Client?
-					m_bIsMorph = StrStrI(m_strModVersion,_T("Morph"));
+					m_bIsMorph = StrStrI(m_strModVersion,_T("Morph"))!=0;
 					//MOPRH END   - Added by SiRoB, Is Morph Client?
 				}
 				else if (temptag.IsInt())
@@ -1440,9 +1439,9 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	// eMule Version
 	CTag tagMuleVersion(CT_EMULE_VERSION, 
 				//(uCompatibleClientID	<< 24) |
-				(VERSION_MJR			<< 17) |
-				(VERSION_MIN			<< 10) |
-				(VERSION_UPDATE			<<  7) 
+				(CemuleApp::m_nVersionMjr	<< 17) |
+				(CemuleApp::m_nVersionMin	<< 10) |
+				(CemuleApp::m_nVersionUpd	<<  7) 
 //				(RESERVED			     ) 
 				);
 	tagMuleVersion.WriteTagToFile(data);
@@ -1496,21 +1495,22 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 //	data->WriteUInt32(dwIP); //The Hybrid added some bits here, what ARE THEY FOR?
 }
 
-void CUpDownClient::ProcessMuleCommentPacket(char* pachPacket, uint32 nSize)
+void CUpDownClient::ProcessMuleCommentPacket(const uchar* pachPacket, uint32 nSize)
 {
 	if (reqfile && reqfile->IsPartFile())
 	{
-		CSafeMemFile data((BYTE*)pachPacket, nSize);
+		CSafeMemFile data(pachPacket, nSize);
 		uint8 uRating = data.ReadUInt8();
 		if (thePrefs.GetLogRatingDescReceived() && uRating > 0)
 			AddDebugLogLine(false, GetResString(IDS_RATINGRECV), m_strClientFilename, uRating);
+		CString strComment;
 		UINT uLength = data.ReadUInt32();
 		if (uLength > 0)
 		{
 			// we have to increase the raw max. allowed file comment len because of possible UTF8 encoding.
 			if (uLength > MAXFILECOMMENTLEN*3)
 				uLength = MAXFILECOMMENTLEN*3;
-			CString strComment = data.ReadString(GetUnicodeSupport(), uLength);
+			strComment = data.ReadString(GetUnicodeSupport()!=utf8strNone, uLength);
 			if (thePrefs.GetLogRatingDescReceived() && !strComment.IsEmpty())
 				AddDebugLogLine(false, GetResString(IDS_DESCRIPTIONRECV), m_strClientFilename, strComment);
 
@@ -1534,13 +1534,12 @@ void CUpDownClient::ProcessMuleCommentPacket(char* pachPacket, uint32 nSize)
 					strFilter = thePrefs.GetCommentFilter().Tokenize(_T("|"), iPos);
 				}
 			}
-
-			if (!strComment.IsEmpty() || uRating > 0)
-			{
-				m_strFileComment = strComment;
-				m_uFileRating = uRating;
-				reqfile->UpdateFileRatingCommentAvail();
-			}
+		}
+		if (!strComment.IsEmpty() || uRating > 0)
+		{
+			m_strFileComment = strComment;
+			m_uFileRating = uRating;
+			reqfile->UpdateFileRatingCommentAvail();
 		}
 	}
 }
@@ -1552,11 +1551,10 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	//If this is a KAD client object, just delete it!
 	SetKadState(KS_NONE);
 	
-	if (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING || GetUploadState() == US_BANNED)
+	if (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING || GetUploadState() == US_BANNED) //MORPH - Changed by SiRoB
 	{
 		if (thePrefs.GetLogUlDlEvents() && GetUploadState()==US_UPLOADING && m_fSentOutOfPartReqs==0 && !theApp.uploadqueue->IsOnUploadQueue(this))
 			DebugLog(_T("Disconnected client removed from upload queue and waiting list: %s"), DbgGetClientInfo());
-
 		theApp.uploadqueue->RemoveFromUploadQueue(this, pszReason);
 	}
 
@@ -1695,7 +1693,8 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			Debug(_T("--- Deleted client            %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
 		return true;
 	}
-	else{
+	else
+	{
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			Debug(_T("--- Disconnected client       %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
 		m_fHashsetRequesting = 0;
@@ -1868,8 +1867,8 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		{
 			Packet* packet = new Packet(OP_CALLBACKREQUEST,4);
 			PokeUInt32(packet->pBuffer, m_nUserIDHybrid);
-			if (thePrefs.GetDebugServerTCPLevel() > 0)
-				DebugSend("OP__CallBackRequest", this);
+			if (thePrefs.GetDebugServerTCPLevel() > 0 || thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugSend("OP__CallbackRequest", this);
 			theStats.AddUpDataOverheadServer(packet->size);
 			theApp.serverconnect->SendPacket(packet);
 			SetDownloadState(DS_WAITCALLBACK);
@@ -1912,8 +1911,10 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 						Kademlia::CUInt128 file(reqfile->GetFileHash());
 						bio.WriteUInt128(&file);
 						bio.WriteUInt16(thePrefs.GetPort());
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0 || thePrefs.GetDebugClientUDPLevel() > 0)
+							DebugSend("KadCallbackReq", this);
 						Packet* packet = new Packet(&bio, OP_KADEMLIAHEADER);
-						packet->opcode = KADEMLIA_FINDSOURCE_REQ;
+						packet->opcode = KADEMLIA_CALLBACK_REQ;
 						theStats.AddUpDataOverheadKad(packet->size);
 						theApp.clientudp->SendPacket(packet, GetBuddyIP(), GetBuddyPort());
 						SetDownloadState(DS_WAITCALLBACKKAD);
@@ -2137,6 +2138,9 @@ void CUpDownClient::ReGetClientSoft()
 		// seen:
 		// 105010	0.50.10
 		// 10501	0.50.1
+		// 10103	1.1.3
+		// 10102	1.1.2
+		// 10100	1.1
 		// 1051		0.51.0
 		// 1002		1.0.2
 		// 1000		1.0
@@ -2150,6 +2154,11 @@ void CUpDownClient::ReGetClientSoft()
 			nClientMajVersion = uMaj - 1;
 			nClientMinVersion = (m_nClientVersion - uMaj*100000) / 100;
 			nClientUpVersion = m_nClientVersion % 100;
+		}
+		else if (m_nClientVersion >= 10100 && m_nClientVersion <= 10109){
+			nClientMajVersion = 1;
+			nClientMinVersion = 1;
+			nClientUpVersion = m_nClientVersion % 10;
 		}
 		else if (m_nClientVersion > 10000){
 			UINT uMaj = m_nClientVersion/10000;
@@ -2309,10 +2318,12 @@ void CUpDownClient::RequestSharedFileList()
 	}
 }
 
-void CUpDownClient::ProcessSharedFileList(char* pachPacket, uint32 nSize, LPCTSTR pszDirectory){
-    if (m_iFileListRequested > 0){
+void CUpDownClient::ProcessSharedFileList(const uchar* pachPacket, uint32 nSize, LPCTSTR pszDirectory)
+{
+	if (m_iFileListRequested > 0)
+	{
         m_iFileListRequested--;
-		theApp.searchlist->ProcessSearchanswer(pachPacket,nSize,this,NULL,pszDirectory);
+		theApp.searchlist->ProcessSearchAnswer(pachPacket,nSize,this,NULL,pszDirectory);
 	}
 }
 
@@ -2336,7 +2347,8 @@ void CUpDownClient::SetBuddyID(const uchar* pucBuddyID)
 	md4cpy(m_achBuddyID, pucBuddyID);
 }
 
-void CUpDownClient::SendPublicKeyPacket(){
+void CUpDownClient::SendPublicKeyPacket()
+{
 	// send our public key to the client who requested it
 	if (socket == NULL || credits == NULL || m_SecureIdentState != IS_KEYANDSIGNEEDED){
 		ASSERT ( false );
@@ -2355,7 +2367,8 @@ void CUpDownClient::SendPublicKeyPacket(){
 	m_SecureIdentState = IS_SIGNATURENEEDED;
 }
 
-void CUpDownClient::SendSignaturePacket(){
+void CUpDownClient::SendSignaturePacket()
+{
 	// signate the public key of this client and send it
 	if (socket == NULL || credits == NULL || m_SecureIdentState == 0){
 		ASSERT ( false );
@@ -2412,7 +2425,8 @@ void CUpDownClient::SendSignaturePacket(){
 	m_SecureIdentState = IS_ALLREQUESTSSEND;
 }
 
-void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
+void CUpDownClient::ProcessPublicKeyPacket(const uchar* pachPacket, uint32 nSize)
+{
 	theApp.clientlist->AddTrackClient(this);
 
 	if (socket == NULL || credits == NULL || pachPacket[0] != nSize-1
@@ -2442,7 +2456,8 @@ void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
 	}
 }
 
-void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
+void CUpDownClient::ProcessSignaturePacket(const uchar* pachPacket, uint32 nSize)
+{
 	// here we spread the good guys from the bad ones ;)
 
 	if (socket == NULL || credits == NULL || nSize == 0 || nSize > 250){
@@ -2500,7 +2515,8 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 	m_dwLastSignatureIP = GetIP(); 
 }
 
-void CUpDownClient::SendSecIdentStatePacket(){
+void CUpDownClient::SendSecIdentStatePacket()
+{
 	// check if we need public key and signature
 	uint8 nValue = 0;
 	if (credits){
@@ -2530,7 +2546,8 @@ void CUpDownClient::SendSecIdentStatePacket(){
 		ASSERT ( false );
 }
 
-void CUpDownClient::ProcessSecIdentStatePacket(uchar* pachPacket, uint32 nSize){
+void CUpDownClient::ProcessSecIdentStatePacket(const uchar* pachPacket, uint32 nSize)
+{
 	if (nSize != 5)
 		return;
 	if (!credits){
@@ -2551,7 +2568,8 @@ void CUpDownClient::ProcessSecIdentStatePacket(uchar* pachPacket, uint32 nSize){
 	credits->m_dwCryptRndChallengeFrom = PeekUInt32(pachPacket+1);
 }
 
-void CUpDownClient::InfoPacketsReceived(){
+void CUpDownClient::InfoPacketsReceived()
+{
 	// indicates that both Information Packets has been received
 	// needed for actions, which process data from both packets
 	ASSERT ( m_byInfopacketsReceived == IP_BOTH );
@@ -2616,6 +2634,8 @@ void CUpDownClient::SendPreviewRequest(const CAbstractFile* pForFile)
 {
 	if (m_fPreviewReqPending == 0){
 		m_fPreviewReqPending = 1;
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__RequestPreview", this, pForFile->GetFileHash());
 		Packet* packet = new Packet(OP_REQUESTPREVIEW,16,OP_EMULEPROT);
 		md4cpy(packet->pBuffer,pForFile->GetFileHash());
 		theStats.AddUpDataOverheadOther(packet->size);
@@ -2660,11 +2680,14 @@ void CUpDownClient::SendPreviewAnswer(const CKnownFile* pForFile, CxImage** imgF
 	}
 	Packet* packet = new Packet(&data, OP_EMULEPROT);
 	packet->opcode = OP_PREVIEWANSWER;
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		DebugSend("OP__PreviewAnswer", this, (uchar*)packet->pBuffer);
 	theStats.AddUpDataOverheadOther(packet->size);
 	SafeSendPacket(packet);
 }
 
-void CUpDownClient::ProcessPreviewReq(char* pachPacket, uint32 nSize){
+void CUpDownClient::ProcessPreviewReq(const uchar* pachPacket, uint32 nSize)
+{
 	if (nSize < 16)
 		throw GetResString(IDS_ERR_WRONGPACKAGESIZE);
 	
@@ -2672,7 +2695,7 @@ void CUpDownClient::ProcessPreviewReq(char* pachPacket, uint32 nSize){
 		return;
 	
 	m_fPreviewAnsPending = 1;
-	CKnownFile* previewFile = theApp.sharedfiles->GetFileByID((uchar*)pachPacket);
+	CKnownFile* previewFile = theApp.sharedfiles->GetFileByID(pachPacket);
 	if (previewFile == NULL){
 		SendPreviewAnswer(NULL, NULL, 0);
 	}
@@ -2681,11 +2704,12 @@ void CUpDownClient::ProcessPreviewReq(char* pachPacket, uint32 nSize){
 	}
 }
 
-void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
+void CUpDownClient::ProcessPreviewAnswer(const uchar* pachPacket, uint32 nSize)
+{
 	if (m_fPreviewReqPending == 0)
 		return;
 	m_fPreviewReqPending = 0;
-	CSafeMemFile data((BYTE*)pachPacket,nSize);
+	CSafeMemFile data(pachPacket, nSize);
 	uchar Hash[16];
 	data.ReadHash16(Hash);
 	uint8 nCount = data.ReadUInt8();
@@ -2698,6 +2722,7 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 		//already deleted
 		return;
 	}
+
 	BYTE* pBuffer = NULL;
 	try{
 	for (int i = 0; i != nCount; i++){
@@ -2720,7 +2745,6 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 		throw;
 	}
 	(new PreviewDlg())->SetFile(sfile);
-
 }
 
 // sends a packet, if needed it will establish a connection before
@@ -2845,7 +2869,7 @@ void CUpDownClient::AssertValid() const
 	CHECK_BOOL(m_bUDPPending);
 	CHECK_BOOL(m_bTransferredDownMini);
 	CHECK_BOOL(m_bUnicodeSupport);
-	ASSERT( m_nKadState >= KS_NONE && m_nKadState <= KS_QUEUE_LOWID );
+	ASSERT( m_nKadState >= KS_NONE && m_nKadState <= KS_CONNECTED_BUDDY );
 	m_AvarageDDR_list.AssertValid();
 	(void)m_nSumForAvgUpDataRate;
 	m_PendingBlocks_list.AssertValid();
@@ -2910,6 +2934,24 @@ LPCTSTR CUpDownClient::DbgGetUploadState() const
 	return apszState[GetUploadState()];
 }
 
+LPCTSTR CUpDownClient::DbgGetKadState() const
+{
+	const static LPCTSTR apszState[] =
+	{
+		_T("None"),
+		_T("FwCheckQueued"),
+		_T("FwCheckConnecting"),
+		_T("FwCheckConnected"),
+		_T("BuddyQueued"),
+		_T("BuddyIncoming"),
+		_T("BuddyConnecting"),
+		_T("BuddyConnected")
+	};
+	if (GetKadState() >= ARRSIZE(apszState))
+		return _T("*Unknown*");
+	return apszState[GetKadState()];
+}
+
 CString CUpDownClient::DbgGetFullClientSoftVer() const
 {
 	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
@@ -2927,15 +2969,34 @@ CString CUpDownClient::DbgGetClientInfo(bool bFormatIP) const
 	if (this != NULL)
 	{
 		try{
-			str.Format(
-				bFormatIP 
-				  ? _T("%-15s '%s' (%s,%s/%s)") 
-				  : _T("%s '%s' (%s,%s/%s)"),
-				ipstr(GetConnectIP()),
-				GetUserName(),
-				DbgGetFullClientSoftVer(),
-				DbgGetDownloadState(),
-				DbgGetUploadState());
+			if (HasLowID())
+			{
+				if (GetConnectIP())
+				{
+					str.Format(_T("%u@%s (%s) '%s' (%s,%s/%s/%s)"),
+						GetUserIDHybrid(), ipstr(GetServerIP()),
+						ipstr(GetConnectIP()),
+						GetUserName(),
+						DbgGetFullClientSoftVer(),
+						DbgGetDownloadState(), DbgGetUploadState(), DbgGetKadState());
+				}
+				else
+				{
+					str.Format(_T("%u@%s '%s' (%s,%s/%s/%s)"),
+						GetUserIDHybrid(), ipstr(GetServerIP()),
+						GetUserName(),
+						DbgGetFullClientSoftVer(),
+						DbgGetDownloadState(), DbgGetUploadState(), DbgGetKadState());
+				}
+			}
+			else
+			{
+				str.Format(bFormatIP ? _T("%-15s '%s' (%s,%s/%s/%s)") : _T("%s '%s' (%s,%s/%s/%s)"),
+					ipstr(GetConnectIP()),
+					GetUserName(),
+					DbgGetFullClientSoftVer(),
+					DbgGetDownloadState(), DbgGetUploadState(), DbgGetKadState());
+			}
 		}
 		catch(...){
 			str.Format(_T("%08x - Invalid client instance"), this);
@@ -3134,7 +3195,6 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 	if( m_eWebCacheUpState == WCUS_UPLOADING )
 		strState = _T("Via Proxy");
 	// MORPH START - Added by Commander, WebCache 1.2e
-
 	return strState;
 }
 

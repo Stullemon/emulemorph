@@ -30,6 +30,7 @@
 
 // DirectShow MediaDet
 #include <strmif.h>
+//#include <uuids.h>
 #define _DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
         EXTERN_C const GUID DECLSPEC_SELECTANY name \
                 = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
@@ -813,9 +814,9 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 	if (uTotalFileSize)
 		SetDlgItemText(IDC_FILESIZE, CastItoXBytes(uTotalFileSize, false, false));
 	if (ami.fVideoLengthSec)
-		SetDlgItemText(IDC_LENGTH, CastSecondsToHM(ami.fVideoLengthSec));
+		SetDlgItemText(IDC_LENGTH, CastSecondsToHM((time_t)ami.fVideoLengthSec));
 	else if (ami.fAudioLengthSec)
-		SetDlgItemText(IDC_LENGTH, CastSecondsToHM(ami.fAudioLengthSec));
+		SetDlgItemText(IDC_LENGTH, CastSecondsToHM((time_t)ami.fAudioLengthSec));
 
 	if (ami.iVideoStreams)
 	{
@@ -845,7 +846,7 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 		if (!bDiffVideoAspectRatio && ami.fVideoAspectRatio)
 		{
 			buffer.Format(_T("%.3f"), ami.fVideoAspectRatio);
-			CString strAR = GetKnownAspectRatioDisplayString(ami.fVideoAspectRatio);
+			CString strAR = GetKnownAspectRatioDisplayString((float)ami.fVideoAspectRatio);
 			if (!strAR.IsEmpty())
 				buffer.AppendFormat(_T("  (%s)"), strAR);
 			SetDlgItemText(IDC_VASPECT, buffer);
@@ -1264,7 +1265,7 @@ static BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI)
 		if (mi->fVideoLengthSec)
 		{
 			DWORD dwVideoFramesOverhead = uVideoFrames * (sizeof(WORD) + sizeof(WORD) + sizeof(DWORD));
-			mi->video.dwBitRate = ((dwMovieChunkSize - dwVideoFramesOverhead) / mi->fVideoLengthSec - mi->audio.nAvgBytesPerSec) * 8;
+			mi->video.dwBitRate = (DWORD)(((dwMovieChunkSize - dwVideoFramesOverhead) / mi->fVideoLengthSec - mi->audio.nAvgBytesPerSec) * 8);
 		}
 	}
 	else if (fccMain == mmioFOURCC('W', 'A', 'V', 'E'))
@@ -1329,7 +1330,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 		//	- The RIFF reading code will not work without the file header.
 		//
 		//	- Most (if not all) other code will also not work without the beginning of the file available.
-		if (!((CPartFile*)pFile)->IsComplete(0, 16*1024))
+		if (!((CPartFile*)pFile)->IsComplete(0, 16*1024, true))
 			return false;
 	}
 	else
@@ -1881,7 +1882,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 						}
 
 						str = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_General, 0, "PlayTime", Info_Text, Info_Name);
-						float fFileLengthSec = atoi(str) / 1000.0;
+						float fFileLengthSec = atoi(str) / 1000.0F;
 
 						str = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_General, 0, "VideoCount", Info_Text, Info_Name);
 						int iVideoStreams = atoi(str);
@@ -2050,7 +2051,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 												else
 												{
 													CString strLength;
-													SecToTimeLength(fLength, strLength);
+													SecToTimeLength((ULONG)fLength, strLength);
 													mi->strInfo << _T("   Length:\t") << strLength;
 													if (pFile->IsPartFile()){
 														mi->strInfo << _T(" (This may not reflect the final total length!)");
@@ -2125,7 +2126,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 												else
 												{
 													CString strLength;
-													SecToTimeLength(fLength, strLength);
+													SecToTimeLength((ULONG)fLength, strLength);
 													mi->strInfo << _T("   Length:\t") << strLength;
 													if (pFile->IsPartFile()){
 														mi->strInfo << _T(" (This may not reflect the final total length!)");

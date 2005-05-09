@@ -518,6 +518,7 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 	//EMTrace("CEMSocket::OnSenPacked1 linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 
     sendLocker.Lock();
+
 	if (byConnected == ES_DISCONNECTED) {
         sendLocker.Unlock();
         if(delpacket) {
@@ -538,6 +539,7 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 
         if (controlpacket) {
 	        controlpacket_queue.AddTail(packet);
+
 			// queue up for controlpacket
             theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
 	    } else {
@@ -627,6 +629,7 @@ void CEMSocket::OnSend(int nErrorCode){
 		// queue up for control packet
         theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
     }
+
     sendLocker.Unlock();
 }
 
@@ -856,7 +859,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 }
 
 uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
-    if(current % minFragSize == 0) {
+    //MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+	if (current >= 65535)
+		current = 65535-1;
+	//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+	if(current % minFragSize == 0) {
         return current;
     } else {
         return minFragSize*(current/minFragSize+1);
@@ -906,7 +913,7 @@ uint32 CEMSocket::GetNeededBytes(bool lowspeed) {
 	sendLocker.Unlock();
 
 	if (timeleft >= timetotal)
-		return sizeleft;
+		return (UINT)sizeleft;
 	timeleft = timetotal-timeleft;
 	if (timeleft*sizetotal >= timetotal*sizeleft) {
 		// don't use 'GetTimeOut' here in case the timeout value is high,
@@ -916,9 +923,9 @@ uint32 CEMSocket::GetNeededBytes(bool lowspeed) {
 	}
 	uint64 decval = timeleft*sizetotal/timetotal;
 	if (!decval)
-		return sizeleft;
+		return (UINT)sizeleft;
 	if (decval < sizeleft)
-		return sizeleft-decval+1;	// Round up
+		return (UINT)(sizeleft-decval+1);	// Round up
 	else
 		return 1;
 }
@@ -1153,3 +1160,4 @@ void CEMSocket::SetTimeOut(UINT uTimeOut)
 {
 	m_uTimeOut = uTimeOut;
 }
+

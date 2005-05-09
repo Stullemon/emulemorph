@@ -30,9 +30,6 @@
 //		21019 Somma Lombardo (VA)
 //		Italy
 //
-#ifndef _LISTBOXST_
-#define _LISTBOXST_
-
 #pragma once
 
 class CListBoxST : public CListBox
@@ -116,10 +113,3 @@ private:
 
 	DECLARE_MESSAGE_MAP()
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif

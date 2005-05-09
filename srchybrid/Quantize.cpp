@@ -203,11 +203,11 @@ BYTE CQuantizer::GetPixelIndex(long x, long y, int nbit, long effwdt, BYTE *pima
 		BYTE pos;
 		BYTE iDst= pimage[y*effwdt + (x*nbit >> 3)];
 		if (nbit==4){
-			pos = 4*(1-x%2);
+			pos = (BYTE)(4*(1-x%2));
 			iDst &= (0x0F<<pos);
 			return iDst >> pos;
 		} else if (nbit==1){
-			pos = 7-x%8;
+			pos = (BYTE)(7-x%8);
 			iDst &= (0x01<<pos);
 			return iDst >> pos;
 		}

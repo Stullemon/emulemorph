@@ -71,18 +71,19 @@ void CConnectionWizardDlg::OnBnClickedApply()
 {
 	TCHAR buffer[510];
 	int upload, download;
-	if(GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->GetWindowTextLength())
+	if (GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->GetWindowTextLength())
 	{ 
-		GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->GetWindowText(buffer,20);
+		GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->GetWindowText(buffer, 20);
 		download = _tstoi(buffer);
 	}
 	else
 	{
 		download = 0;
  	}
-	if(GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->GetWindowTextLength())
+
+	if (GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->GetWindowTextLength())
 	{ 
-		GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->GetWindowText(buffer,20);
+		GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->GetWindowText(buffer, 20);
 		upload = _tstoi(buffer);
 	}
 	else
@@ -90,112 +91,124 @@ void CConnectionWizardDlg::OnBnClickedApply()
 		upload = 0;
 	}
 
-	if(IsDlgButtonChecked(IDC_KBITS)==1) {upload/=8;download/=8;}
+	if (IsDlgButtonChecked(IDC_KBITS) == 1)
+	{
+		upload /= 8;
+		download /= 8;
+	}
 
 	thePrefs.maxGraphDownloadRate = download;
 	thePrefs.maxGraphUploadRate = upload;
 
-	if( upload > 0 && download > 0 ){
-		// Elandal: typesafe, integer math only
-		// removes warning regarding implicit cast
+	if (upload > 0 && download > 0)
+	{
 		thePrefs.maxupload = (uint16)((upload * 4L) / 5);
-		if( upload < 4 && download > upload*3 ){
+		if (upload < 4 && download > upload*3) {
 			thePrefs.maxdownload = thePrefs.maxupload * 3;
-			download = upload*3;
+			download = upload * 3;
 		}
-		if( upload < 10 && download > upload*4 ){
+
+		if (upload < 10 && download > upload*4) {
 			thePrefs.maxdownload = thePrefs.maxupload * 4;
-			download = upload*4;
+			download = upload * 4;
 		}
 		else
-			// Elandal: typesafe, integer math only
-			// removes warning regarding implicit cast
 			thePrefs.maxdownload = (uint16)((download * 9L) / 10);
 
-		theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.maxGraphUploadRate);
-		theApp.emuledlg->statisticswnd->SetARange(true,thePrefs.maxGraphDownloadRate);
+		theApp.emuledlg->statisticswnd->SetARange(false, thePrefs.maxGraphUploadRate);
+		theApp.emuledlg->statisticswnd->SetARange(true, thePrefs.maxGraphDownloadRate);
 
-		if( m_iOS == 1 )
+		if (m_iOS == 1)
 			thePrefs.maxconnections = 50;
 		else{
-		if( upload <= 7 )	
-			thePrefs.maxconnections = 80;
-		else if( upload < 12 )
-			thePrefs.maxconnections = 200;	
-		else if( upload < 25 )
-			thePrefs.maxconnections = 400;
-		else if( upload < 37 )
-			thePrefs.maxconnections = 600;
-		else
-			thePrefs.maxconnections = 800;	
-
+			if (upload <= 7)
+				thePrefs.maxconnections = 80;
+			else if (upload < 12)
+				thePrefs.maxconnections = 200;
+			else if (upload < 25)
+				thePrefs.maxconnections = 400;
+			else if (upload < 37)
+				thePrefs.maxconnections = 600;
+			else
+				thePrefs.maxconnections = 800;	
 		}
-		if( m_iOS == 1 )
+		
+		if (m_iOS == 1)
 			download = download/2;
 
-		if( download <= 7 ){
-			switch( m_iTotalDownload ){
+		if (download <= 7)
+		{
+			switch (m_iTotalDownload)
+			{
 				case 0:
 					thePrefs.maxsourceperfile = 100;
-				break;
+					break;
 				case 1:
 					thePrefs.maxsourceperfile = 60;
-				break;
+					break;
 				case 2:
 					thePrefs.maxsourceperfile = 40;
-				break;
+					break;
 			}
 		}
-		else if( download < 62 ){
-			switch( m_iTotalDownload ){
+		else if (download < 62)
+		{
+			switch (m_iTotalDownload)
+			{
 				case 0:
 					thePrefs.maxsourceperfile = 300;
-				break;
+					break;
 				case 1:
 					thePrefs.maxsourceperfile = 200;
-				break;
+					break;
 				case 2:
 					thePrefs.maxsourceperfile = 100;
-				break;
+					break;
 			}
 		}
-		else if( download < 187 ){
-			switch( m_iTotalDownload ){
+		else if (download < 187)
+		{
+			switch (m_iTotalDownload)
+			{
 				case 0:
 					thePrefs.maxsourceperfile = 500;
-				break;
+					break;
 				case 1:
 					thePrefs.maxsourceperfile = 400;
-				break;
+					break;
 				case 2:
 					thePrefs.maxsourceperfile = 350;
-				break;
+					break;
 			}
 		}
-		else if( download <= 312 ){
-			switch( m_iTotalDownload ){
+		else if (download <= 312)
+		{
+			switch (m_iTotalDownload)
+			{
 				case 0:
 					thePrefs.maxsourceperfile = 800;
-				break;
+					break;
 				case 1:
 					thePrefs.maxsourceperfile = 600;
-				break;
+					break;
 				case 2:
 					thePrefs.maxsourceperfile = 400;
-				break;
+					break;
 			}
 		}
-		else {
-			switch( m_iTotalDownload ){
-			case 0:
-				thePrefs.maxsourceperfile = 1000;
-				break;
-			case 1:
-				thePrefs.maxsourceperfile = 750;
-				break;
-			case 2:
-				thePrefs.maxsourceperfile = 500;
-				break;
+		else
+		{
+			switch (m_iTotalDownload)
+			{
+				case 0:
+					thePrefs.maxsourceperfile = 1000;
+					break;
+				case 1:
+					thePrefs.maxsourceperfile = 750;
+					break;
+				case 2:
+					thePrefs.maxsourceperfile = 500;
+					break;
 			}
 		}
 	}
@@ -235,10 +248,8 @@ void CConnectionWizardDlg::OnBnClickedWizHighdownloadRadio()
 
 void CConnectionWizardDlg::OnBnClickedWizResetButton()
 {
-	CString strBuffer;
-	strBuffer.Format(_T("%i"), 0);
-	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(strBuffer); 
-	GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(strBuffer); 
+	SetDlgItemInt(IDC_WIZ_TRUEDOWNLOAD_BOX, 0, FALSE);
+	SetDlgItemInt(IDC_WIZ_TRUEUPLOAD_BOX, 0, FALSE);
 }
 
 BOOL CConnectionWizardDlg::OnInitDialog()
@@ -248,29 +259,26 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 
 	SetIcon(m_icnWnd = theApp.LoadIcon(_T("Wizard")), FALSE);
 
-	if (::DetectWinVersion()== _WINVER_95_ || ::DetectWinVersion()==_WINVER_98_ || ::DetectWinVersion()==_WINVER_ME_){
-		CheckDlgButton(IDC_WIZ_XP_RADIO,0);
-		CheckDlgButton(IDC_WIZ_ME_RADIO,1);
+	if (::DetectWinVersion()==_WINVER_95_ || ::DetectWinVersion()==_WINVER_98_ || ::DetectWinVersion()==_WINVER_ME_){
+		CheckRadioButton(IDC_WIZ_XP_RADIO, IDC_WIZ_ME_RADIO, IDC_WIZ_ME_RADIO);
 		m_iOS = 1;
 	}
 	else{
-		CheckDlgButton(IDC_WIZ_ME_RADIO,0);
-		CheckDlgButton(IDC_WIZ_XP_RADIO,1);
+		CheckRadioButton(IDC_WIZ_XP_RADIO, IDC_WIZ_ME_RADIO, IDC_WIZ_XP_RADIO);
 		m_iOS = 0;
 	}
-	CheckDlgButton(IDC_WIZ_LOWDOWN_RADIO,1);
-	CheckDlgButton(IDC_KBITS,1);
-	CheckDlgButton(IDC_KBYTES,0);
+	CheckRadioButton(IDC_WIZ_LOWDOWN_RADIO, IDC_WIZ_HIGHDOWN_RADIO, IDC_WIZ_LOWDOWN_RADIO);
+	CheckRadioButton(IDC_KBITS, IDC_KBYTES, IDC_KBITS);
 
-	CString temp;
-	temp.Format(_T("%u"),thePrefs.maxGraphDownloadRate *8);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
-	temp.Format(_T("%u"),thePrefs.maxGraphUploadRate*8);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
+	SetDlgItemInt(IDC_WIZ_TRUEDOWNLOAD_BOX, thePrefs.maxGraphDownloadRate * 8, FALSE);
+	SetDlgItemInt(IDC_WIZ_TRUEUPLOAD_BOX, thePrefs.maxGraphUploadRate * 8, FALSE);
 
-	m_provider.InsertColumn(0,GetResString(IDS_PW_CONNECTION),LVCFMT_LEFT, 160);
-	m_provider.InsertColumn(1,GetResString(IDS_WIZ_DOWN),LVCFMT_LEFT, 85);
-	m_provider.InsertColumn(2,GetResString(IDS_WIZ_UP),LVCFMT_LEFT, 85);
+	m_provider.InsertColumn(0, GetResString(IDS_PW_CONNECTION), LVCFMT_LEFT, 150);
+	m_provider.InsertColumn(1, GetResString(IDS_WIZ_DOWN), LVCFMT_LEFT, 85);
+	m_provider.InsertColumn(2, GetResString(IDS_WIZ_UP), LVCFMT_LEFT, 85);
+	m_provider.SetExtendedStyle(m_provider.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
-	m_provider.InsertItem(0,GetResString(IDS_WIZARD_CUSTOM) );m_provider.SetItemText(0,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(0,2,GetResString(IDS_WIZARD_ENTERBELOW));
+	m_provider.InsertItem(0, GetResString(IDS_WIZARD_CUSTOM));m_provider.SetItemText(0,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(0,2,GetResString(IDS_WIZARD_ENTERBELOW));
 	m_provider.InsertItem(1,_T("56-k Modem"));m_provider.SetItemText(1,1,_T("56"));m_provider.SetItemText(1,2,_T("56"));
 	m_provider.InsertItem(2,_T("ISDN"));m_provider.SetItemText(2,1,_T("64"));m_provider.SetItemText(2,2,_T("64"));
 	m_provider.InsertItem(3,_T("ISDN 2x"));m_provider.SetItemText(3,1,_T("128"));m_provider.SetItemText(3,2,_T("128"));
@@ -300,65 +308,57 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 void CConnectionWizardDlg::OnNMClickProviders(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	SetCustomItemsActivation();
-	uint16 up,down;
-	switch (m_provider.GetSelectionMark()) {
-		case 1 : down=56;up=33; break;
-		case 2 : down=64;up=64; break;
-		case 3 : down=128;up=128; break;
-		case 4 : down=256;up=128; break;
-		case 5 : down=384;up=91; break;
-		case 6 : down=512;up=91; break;
-		case 7 : down=512;up=128; break;
-		case 8 : down=640;up=90; break;
-		case 9 : down=768;up=128; break;
-		case 10 : down=1024;up=128; break;
-		case 11 : down=2048;up=192; break;
-		case 12 : down=3072;up=384; break;
-		case 13 : down=1024;up=256; break;
-		case 14 : down=1536;up=192; break;
-		
-		case 15: down=187;up=32; break;
-		case 16: down=187;up=64; break;
-		case 17: down=1500;up=1500; break;
+
+	UINT up, down;
+	switch (m_provider.GetSelectionMark())
+	{
+		case  1: down=   56;up=   33; break;
+		case  2: down=   64;up=   64; break;
+		case  3: down=  128;up=  128; break;
+		case  4: down=  256;up=  128; break;
+		case  5: down=  384;up=   91; break;
+		case  6: down=  512;up=   91; break;
+		case  7: down=  512;up=  128; break;
+		case  8: down=  640;up=   90; break;
+		case  9: down=  768;up=  128; break;
+		case 10: down= 1024;up=  128; break;
+		case 11: down= 2048;up=  192; break;
+		case 12: down= 3072;up=  384; break;
+		case 13: down= 1024;up=  256; break;
+		case 14: down= 1536;up=  192; break;
+		case 15: down=  187;up=   32; break;
+		case 16: down=  187;up=   64; break;
+		case 17: down= 1500;up= 1500; break;
 		case 18: down=44000;up=44000; break;
-		
 		default: return;
 	}
-	CString temp;
-	temp.Format(_T("%u"),down);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
-	temp.Format(_T("%u"),up);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
-	CheckDlgButton(IDC_KBITS,1);
-	CheckDlgButton(IDC_KBYTES,0);
+	
+	SetDlgItemInt(IDC_WIZ_TRUEDOWNLOAD_BOX, down, FALSE);
+	SetDlgItemInt(IDC_WIZ_TRUEUPLOAD_BOX, up, FALSE);
+	CheckRadioButton(IDC_KBITS, IDC_KBYTES, IDC_KBITS);
 
 	*pResult = 0;
 }
 
-void CConnectionWizardDlg::Localize(void){
+void CConnectionWizardDlg::Localize()
+{
+	SetWindowText(GetResString(IDS_WIZARD));
 	GetDlgItem(IDC_WIZ_OS_FRAME)->SetWindowText(GetResString(IDS_WIZ_OS_FRAME));
+	GetDlgItem(IDC_WIZ_CONCURENTDOWN_FRAME)->SetWindowText(GetResString(IDS_CONCURDWL));
+	GetDlgItem(IDC_WIZ_HOTBUTTON_FRAME)->SetWindowText(GetResString(IDS_WIZ_CTFRAME));
 	GetDlgItem(IDC_WIZ_TRUEUPLOAD_TEXT)->SetWindowText(GetResString(IDS_WIZ_TRUEUPLOAD_TEXT));
 	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_WIZ_TRUEDOWNLOAD_TEXT));
-	GetDlgItem(IDC_WIZ_APPLY_BUTTON)->SetWindowText(GetResString(IDS_PW_APPLY));
-	GetDlgItem(IDC_WIZ_CANCEL_BUTTON)->SetWindowText(GetResString(IDS_CANCEL));
-	GetDlgItem(IDC_WIZ_HOTBUTTON_FRAME)->SetWindowText(GetResString(IDS_WIZ_CTFRAME));
-	GetDlgItem(IDC_CTINFO)->SetWindowText(GetResString(IDS_CTINFO));
-
-	GetDlgItem(IDC_CTINFO)->SetWindowText(GetResString(IDS_CTINFO));
-	GetDlgItem(IDC_CTINFO)->SetWindowText(GetResString(IDS_CTINFO));
-
 	GetDlgItem(IDC_KBITS)->SetWindowText(GetResString(IDS_KBITSSEC));
 	GetDlgItem(IDC_KBYTES)->SetWindowText(GetResString(IDS_KBYTESSEC));
-
-	GetDlgItem(IDC_WIZ_CONCURENTDOWN_FRAME)->SetWindowText(GetResString(IDS_CONCURDWL));
-	GetDlgItem(IDC_UNIT)->SetWindowText(GetResString(IDS_UNIT));
-
-	SetWindowText(GetResString(IDS_WIZARD));
+	GetDlgItem(IDC_WIZ_APPLY_BUTTON)->SetWindowText(GetResString(IDS_PW_APPLY));
+	GetDlgItem(IDC_WIZ_CANCEL_BUTTON)->SetWindowText(GetResString(IDS_CANCEL));
 }
 
-void CConnectionWizardDlg::SetCustomItemsActivation() {
-	BOOL active=(m_provider.GetSelectionMark()<1);
-
-	GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->EnableWindow(active);
-	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX )->EnableWindow(active);
-	GetDlgItem(IDC_KBITS )->EnableWindow(active);
-	GetDlgItem(IDC_KBYTES )->EnableWindow(active);
+void CConnectionWizardDlg::SetCustomItemsActivation()
+{
+	BOOL bActive = (m_provider.GetSelectionMark() < 1);
+	GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->EnableWindow(bActive);
+	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->EnableWindow(bActive);
+	GetDlgItem(IDC_KBITS)->EnableWindow(bActive);
+	GetDlgItem(IDC_KBYTES)->EnableWindow(bActive);
 }

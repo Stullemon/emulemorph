@@ -16,6 +16,20 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "KnownFile.h"
+#include "QArray.h"
+
+
+typedef struct
+{
+	CString	m_strFileName;
+	CString	m_strFileType;
+	CString	m_strFileHash;
+	CString	m_strIndex;
+	uint32	m_uFileSize;
+	uint32	m_uSourceCount;
+	uint32	m_dwCompleteSourceCount;
+} SearchFileStruct;
+
 
 class CFileDataIO;
 
@@ -32,7 +46,7 @@ public:
 				bool nKademlia = false);
 	CSearchFile(const CSearchFile* copyfrom);
 	CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFileSize, LPCTSTR pszFileName, int iFileType, int iAvailability);
-	~CSearchFile();
+	virtual ~CSearchFile();
 
 	bool	IsKademlia() const { return m_nKademlia; }
 	uint32	AddSources(uint32 count);
@@ -45,7 +59,6 @@ public:
 	uint32	GetSearchID() const { return m_nSearchID; }
 	LPCTSTR	GetFakeComment() const { return m_pszIsFake; } //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	LPCTSTR GetDirectory() const { return m_pszDirectory; }
-	const CArray<CTag*,CTag*>& GetTags() const { return taglist; }
 
 	uint32	GetClientID() const				{ return m_nClientID; }
 	void	SetClientID(uint32 nClientID)	{ m_nClientID = nClientID; }
@@ -57,13 +70,14 @@ public:
 	void	SetClientServerPort(uint16 nPort) { m_nClientServerPort = nPort; }
 	int		GetClientsCount() const			{ return ((GetClientID() && GetClientPort()) ? 1 : 0) + m_aClients.GetSize(); }
 
+	// GUI helpers
 	CSearchFile* GetListParent() const		{ return m_list_parent; }
+	void		 SetListParent(CSearchFile* parent) { m_list_parent = parent; }
 	uint16		 GetListChildCount() const	{ return m_list_childcount;}
-	bool		 GetListIsExpanded() const	{ return m_list_bExpanded;}
-	void		 SetListIsExpanded(bool in) { m_list_bExpanded=in;}
-	void		 SetListAddChildCount(int in) { m_list_childcount+=in;}
-	void		 SetListChildCount(int in) { m_list_childcount=in;}
-	void		 SetListParent(CSearchFile* in) { m_list_parent=in;}
+	void		 SetListChildCount(int cnt)	{ m_list_childcount = cnt; }
+	void		 AddListChildCount(int cnt) { m_list_childcount += cnt; }
+	bool		 IsListExpanded() const		{ return m_list_bExpanded; }
+	void		 SetListExpanded(bool val)	{ m_list_bExpanded = val; }
 
 	struct SClient {
 		SClient() {
@@ -112,6 +126,7 @@ public:
 		Shared,
 		Downloading,
 		Downloaded,
+		Cancelled,
 		Unknown
 	};
 
@@ -159,9 +174,9 @@ public:
 	~CSearchList();
 	void	Clear();
 	void	NewSearch(CSearchListCtrl* in_wnd, CStringA strResultFileType, uint32 nSearchID, bool MobilMuleSearch = false);
-	uint16	ProcessSearchanswer(char* packet, uint32 size, CUpDownClient* Sender, bool* pbMoreResultsAvailable, LPCTSTR pszDirectory = NULL);
-	uint16	ProcessSearchanswer(char* packet, uint32 size, bool bOptUTF8, uint32 nServerIP, uint16 nServerPort, bool* pbMoreResultsAvailable);
-	uint16	ProcessUDPSearchanswer(CFileDataIO& packet, bool bOptUTF8, uint32 nServerIP, uint16 nServerPort);
+	uint16	ProcessSearchAnswer(const uchar* packet, uint32 size, CUpDownClient* Sender, bool* pbMoreResultsAvailable, LPCTSTR pszDirectory = NULL);
+	uint16	ProcessSearchAnswer(const uchar* packet, uint32 size, bool bOptUTF8, uint32 nServerIP, uint16 nServerPort, bool* pbMoreResultsAvailable);
+	uint16	ProcessUDPSearchAnswer(CFileDataIO& packet, bool bOptUTF8, uint32 nServerIP, uint16 nServerPort);
 	uint16	GetResultCount() const;
 	uint16	GetResultCount(uint32 nSearchID) const;
 	void	AddResultCount(uint32 nSearchID, const uchar* hash, UINT nCount);
@@ -169,7 +184,7 @@ public:
 	void	RemoveResults(  uint32 nSearchID );
 	void	RemoveResult(CSearchFile* todel);
 	void	ShowResults(uint32 nSearchID);
-	CString GetWebList(CString linePattern,int sortby,bool asc) const;
+	void	GetWebList(CQArray<SearchFileStruct, SearchFileStruct> *SearchFileArray, int iSortBy) const;
 	void	AddFileToDownloadByHash(const uchar* hash)		{AddFileToDownloadByHash(hash,0);}
 	void	AddFileToDownloadByHash(const uchar* hash, uint8 cat);
 	bool	AddToList(CSearchFile* toadd, bool bClientResponse = false);
@@ -191,9 +206,8 @@ private:
 
 	CSearchListCtrl*	outputwnd;
 	CString m_strResultFileType;
-	uint32	m_nCurrentSearch;
+	uint32	m_nCurSearchID;
 	bool	m_MobilMuleSearch;
-
 public:
 	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	CString GetWapList(CString linePattern,int sortby,bool asc, int start, int max, bool &more) const;

@@ -258,7 +258,7 @@ BOOL CTreeOptionsCtrlEx::NotifyParent(UINT uCode, HTREEITEM hItem)
 
 void CTreeOptionsCtrlEx::OnCreateImageList()
 {
-	CDC* pDCScreen = GetDC();
+	CDC* pDCScreen = CDC::FromHandle(::GetDC(HWND_DESKTOP)); // explicitly use screen-dc, for proper RTL support
 	if (pDCScreen)
 	{
 		const int iBmpWidth = 16;
@@ -370,10 +370,12 @@ void CTreeOptionsCtrlEx::OnCreateImageList()
 					rcBmp.MoveToX(iBmpWidth*11);
 					rcCtrl.MoveToX(iCtrlLeft+iBmpWidth*11);
 					CFont font;
-					font.CreatePointFont(10, _T("Courier"));
-					CFont* pOldFont = dcMem.SelectObject(&font);
-					dcMem.TextOut(rcCtrl.left+2, rcCtrl.top, _T("I"));
-					dcMem.SelectObject(pOldFont);
+					if (font.CreatePointFont(10, _T("Courier")))
+					{
+						CFont* pOldFont = dcMem.SelectObject(&font);
+						dcMem.TextOut(rcCtrl.left+2, rcCtrl.top, _T("I"));
+						dcMem.SelectObject(pOldFont);
+					}
 					CRect rcEdge(rcBmp);
 					rcEdge.top += 1;
 					rcEdge.bottom -= 1;
@@ -399,7 +401,7 @@ void CTreeOptionsCtrlEx::OnCreateImageList()
 				}
 			}
 		}
-		ReleaseDC(pDCScreen);
+		::ReleaseDC(HWND_DESKTOP, *pDCScreen);
 	}
 }
 
@@ -433,16 +435,14 @@ void EditTextFloatFormat(CDataExchange* pDX, int nIDC, HTREEITEM hItem, void* pD
 {
 	ASSERT(pData != NULL);
 
-	pDX->PrepareEditCtrl(nIDC);
-	HWND hWndCtrl;
-	pDX->m_pDlgWnd->GetDlgItem(nIDC, &hWndCtrl);
+	HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
+	ASSERT( hWndCtrl != NULL );
 	CTreeOptionsCtrl* pCtrlTreeOptions = (CTreeOptionsCtrl*) CWnd::FromHandlePermanent(hWndCtrl);
 	ASSERT(pCtrlTreeOptions);
 	ASSERT(pCtrlTreeOptions->IsKindOf(RUNTIME_CLASS(CTreeOptionsCtrl)));
 	
 	if (pDX->m_bSaveAndValidate)
 	{
-		//::GetWindowText(hWndCtrl, szBuffer, _countof(szBuffer));
 		CString sText(pCtrlTreeOptions->GetEditText(hItem));
 		double d;
 		if (_stscanf(sText, _T("%lf"), &d) != 1)
@@ -459,7 +459,6 @@ void EditTextFloatFormat(CDataExchange* pDX, int nIDC, HTREEITEM hItem, void* pD
 	{
 		TCHAR szBuffer[400];
 		_stprintf(szBuffer, _T("%.*g"), nSizeGcvt, value);
-		//AfxSetWindowText(hWndCtrl, szBuffer);
 		pCtrlTreeOptions->SetEditText(hItem, szBuffer);
 	}
 }
@@ -482,7 +481,6 @@ void EditTextWithFormat(CDataExchange* pDX, int nIDC, HTREEITEM hItem, LPCTSTR l
 
 		pResult = va_arg( pData, void* );
 		// the following works for %d, %u, %ld, %lu
-		//::GetWindowText(hWndCtrl, szT, _countof(szT));
 		CString sText(pCtrlTreeOptions->GetEditText(hItem));
 		if (_stscanf(sText, lpszFormat, pResult) != 1)
 		{
@@ -495,7 +493,6 @@ void EditTextWithFormat(CDataExchange* pDX, int nIDC, HTREEITEM hItem, LPCTSTR l
 		TCHAR szT[64];
 		_vstprintf(szT, lpszFormat, pData);
 			// does not support floating point numbers - see dlgfloat.cpp
-		//AfxSetWindowText(hWndCtrl, szT);
 		pCtrlTreeOptions->SetEditText(hItem, szT);
 	}
 
@@ -506,7 +503,7 @@ void DDX_TreeCheck(CDataExchange* pDX, int nIDC, HTREEITEM hItem, bool& bCheck)
 {
 	BOOL biBool = bCheck;
 	DDX_TreeCheck(pDX, nIDC, hItem, biBool);
-	bCheck = (bool)biBool;
+	bCheck = biBool!=FALSE;
 }
 
 void DDX_Text(CDataExchange* pDX, int nIDC, HTREEITEM hItem, int& value)

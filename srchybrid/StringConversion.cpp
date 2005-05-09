@@ -172,6 +172,23 @@ CString OptUtf8ToStr(const CStringA& rastr)
 	return wstr;					// just return the string
 }
 
+CString OptUtf8ToStr(LPCSTR psz, int iLen)
+{
+	CStringW wstr;
+	int iMaxWideStrLen = iLen;
+	LPWSTR pwsz = wstr.GetBuffer(iMaxWideStrLen);
+	int iWideChars = utf8towc(psz, iLen, pwsz, iMaxWideStrLen);
+	if (iWideChars <= 0)
+	{
+		// invalid UTF8 string...
+		wstr.ReleaseBuffer(0);
+		wstr = psz;				// convert with local codepage
+	}
+	else
+		wstr.ReleaseBuffer(iWideChars);
+	return wstr;					// just return the string
+}
+
 CString OptUtf8ToStr(const CStringW& rwstr)
 {
 	CStringA astr;

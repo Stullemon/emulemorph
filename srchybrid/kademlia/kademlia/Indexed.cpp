@@ -104,6 +104,7 @@ void CIndexed::readFile(void)
 			if(version<2)
 			{
 				time_t savetime = load_file.readUInt32();
+				(void)savetime;
 				numLoad = load_file.readUInt32();
 				while(numLoad)
 				{
@@ -803,13 +804,14 @@ bool CIndexed::AddNotes(const CUInt128& keyID, const CUInt128& sourceID, Kademli
 
 bool CIndexed::AddLoad(const CUInt128& keyID, uint32 timet)
 {
-	Load* load;
-	if(m_Load_map.Lookup(CCKey(keyID.getData()), load))
-	{
-		ASSERT(0);
+	Load* load = NULL;
+
+	if((uint32)time(NULL)>timet)
 		return false;
-	}
-	ASSERT((uint32)time(NULL)<timet);
+
+	if(m_Load_map.Lookup(CCKey(keyID.getData()), load))
+		return false;
+
 	load = new Load();
 	load->keyID.setValue(keyID);
 	load->time = timet;
@@ -1215,18 +1217,19 @@ void CIndexed::SendValidNoteResult(const CUInt128& keyID, const CUInt128& source
 					{
 						bio.writeUInt128(currName->sourceID);
 						bio.writeTagList(currName->taglist);
-					}
-					if( count % 50 == 0 )
-					{
-						uint32 len = sizeof(packet)-bio.getAvailable();
-						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-							DebugSend("KadNotesRes", ip, port);
-						CKademlia::getUDPListener()->sendPacket(packet, len, ip, port);
-						bio.reset();
-						bio.writeByte(OP_KADEMLIAHEADER);
-						bio.writeByte(KADEMLIA_SRC_NOTES_RES);
-						bio.writeUInt128(keyID);
-						bio.writeUInt16(50);
+						count++;
+						if( count % 50 == 0 )
+						{
+							uint32 len = sizeof(packet)-bio.getAvailable();
+							if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+								DebugSend("KadNotesRes", ip, port);
+							CKademlia::getUDPListener()->sendPacket(packet, len, ip, port);
+							bio.reset();
+							bio.writeByte(OP_KADEMLIAHEADER);
+							bio.writeByte(KADEMLIA_SRC_NOTES_RES);
+							bio.writeUInt128(keyID);
+							bio.writeUInt16(50);
+						}
 					}
 				}
 			}

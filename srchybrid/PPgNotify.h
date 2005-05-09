@@ -28,6 +28,8 @@ public:
 
 protected:
 	void LoadSettings(void);
+	void UpdateControls();
+	void ApplyNotifierSoundType();
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
@@ -35,10 +37,14 @@ protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnSettingsChange() { SetModified(); }
-	afx_msg void OnBnClickedCbTbnOnchat();
-	afx_msg void OnBnClickedBtnBrowseWav();
-	afx_msg void OnBnClickedUseSound();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg void OnSettingsChange() { SetModified(); }
+	afx_msg void OnBnClickedNoSound();
+	afx_msg void OnBnClickedUseSound();
+	afx_msg void OnBnClickedUseSpeech();
+	afx_msg void OnBnClickedOnChat();
+	afx_msg void OnBnClickedBrowseAudioFile();
+	afx_msg void OnBnClickedTestNotification();
+	afx_msg void OnBnClickedCbEnablenotifications();
 };

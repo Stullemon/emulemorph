@@ -41,6 +41,7 @@ protected:
 	CString m_return;
 	bool	m_cancel;
 	bool	m_bFilenameMode;
+	HICON	m_icMain;
 	// khaos::categorymod+
 	bool	isNumber;
 	// khaos::categorymod-

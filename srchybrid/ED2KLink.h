@@ -28,6 +28,7 @@ struct SUnresolvedHostname
 	CString strURL;
 };
 
+
 class CED2KLink
 {
 public:
@@ -47,6 +48,7 @@ public:
 	virtual class CED2KServerLink* GetServerLink() =0;
 	virtual class CED2KFileLink* GetFileLink() =0;
 };
+
 
 class CED2KServerLink : public CED2KLink
 {

@@ -49,8 +49,6 @@ END_MESSAGE_MAP()
 
 CIrcNickListCtrl::CIrcNickListCtrl()
 {
-	memset(m_asc_sort, 0, sizeof m_asc_sort);
-	m_iSortIndex=1;
 	m_pParent = NULL;
 }
 
@@ -60,8 +58,15 @@ void CIrcNickListCtrl::Init()
 	InsertColumn(1,GetResString(IDS_STATUS),LVCFMT_LEFT,70);
 
 	// TODO restore settings
-	SetSortArrow(m_iSortIndex, m_asc_sort[m_iSortIndex]);
-    SortItems(SortProc, m_iSortIndex + ((m_asc_sort[m_iSortIndex]) ? 0 : 10));
+	//SetSortArrow(m_iSortIndex, m_asc_sort[m_iSortIndex]);
+ //   SortItems(SortProc, m_iSortIndex + ((m_asc_sort[m_iSortIndex]) ? 0 : 10));
+
+	LoadSettings(CPreferences::tableIrcMain);
+	m_sortindex = thePrefs.GetColumnSortItem(CPreferences::tableIrcMain);
+	m_sortorder = thePrefs.GetColumnSortAscending(CPreferences::tableIrcMain);
+	SetSortArrow(m_sortindex, m_sortorder);
+	SortItems(&SortProc, m_sortindex + ( (m_sortorder) ? 0:10) );
+
 }
 
 int CIrcNickListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
@@ -95,11 +100,20 @@ int CIrcNickListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 void CIrcNickListCtrl::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	m_asc_sort[pNMLV->iSubItem] = !m_asc_sort[pNMLV->iSubItem];
-	m_iSortIndex=pNMLV->iSubItem;
 
-	SetSortArrow(m_iSortIndex, m_asc_sort[m_iSortIndex]);
-	SortItems(SortProc, m_iSortIndex + ((m_asc_sort[m_iSortIndex]) ? 0 : 10));
+	if (m_sortindex != pNMLV->iSubItem)
+		m_sortorder = 1;
+	else
+		m_sortorder = !m_sortorder;
+	m_sortindex = pNMLV->iSubItem;
+
+	SetSortArrow(m_sortindex, m_sortorder);
+	SortItems(&SortProc, m_sortindex + (m_sortorder ? 0 : 10));
+
+	thePrefs.SetColumnSortItem(CPreferences::tableIrcMain, m_sortindex);
+	thePrefs.SetColumnSortAscending(CPreferences::tableIrcMain, m_sortorder);
+
+
 	*pResult = 0;
 }
 

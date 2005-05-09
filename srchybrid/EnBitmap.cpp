@@ -122,10 +122,8 @@ BOOL CEnBitmap::LoadImage(LPCTSTR szImagePath, COLORREF crBack)
 	
 	if (cFile.Open(szImagePath, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite, &e))
 	{
-		int nSize = cFile.GetLength();
-
+		int nSize = (int)cFile.GetLength();
 		BYTE* pBuff = new BYTE[nSize];
-		
 		if (cFile.Read(pBuff, nSize) > 0)
 		{
 			IPicture* pPicture = LoadFromBuffer(pBuff, nSize);
@@ -136,7 +134,6 @@ BOOL CEnBitmap::LoadImage(LPCTSTR szImagePath, COLORREF crBack)
 				pPicture->Release();
 			}
 		}
-		
 		delete [] pBuff;
 	}
 

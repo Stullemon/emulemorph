@@ -109,8 +109,8 @@ Packet::Packet(CMemFile* datafile, uint8 protocol, uint8 ucOpcode){
 	m_bPacked = false;
 	m_bLastSplitted = false;
 	m_bFromPF = false;
-	size = datafile->GetLength();
-	completebuffer = new char[datafile->GetLength()+10];
+	size = (UINT)datafile->GetLength();
+	completebuffer = new char[(UINT)datafile->GetLength() + 10];
 	pBuffer = completebuffer+6;
 	BYTE* tmp = datafile->Detach();
 	memcpy(pBuffer,tmp,size);
@@ -750,6 +750,17 @@ void CTag::SetInt(uint32 uVal)
 	ASSERT( IsInt() );
 	if (IsInt())
 		m_uVal = uVal;
+}
+
+void CTag::SetStr(LPCTSTR pszVal)
+{
+	ASSERT( IsStr() );
+	if (IsStr())
+	{
+		delete m_pstrVal;
+		m_pstrVal = NULL;
+		m_pstrVal = new CString(pszVal);
+	}
 }
 
 CString CTag::GetFullInfo() const

@@ -11,13 +11,8 @@
 // ORIGINAL: http://www.codeproject.com/miscctrl/colour_picker.asp
 //
 //***************************************************************************
-#ifndef COLORBUTTON_INCLUDED
-#define COLORBUTTON_INCLUDED
 #pragma once
-
-#ifndef COLOURPOPUP_INCLUDED
 #include "ColourPopup.h"
-#endif//COLOURPOPUP_INCLUDED
 
 void AFXAPI DDX_ColorButton(CDataExchange *pDX, int nIDC, COLORREF& crColour);
 
@@ -181,6 +176,3 @@ private:
 	typedef CButton _Inherited;
 
 };
-
-#endif //!COLORBUTTON_INCLUDED
-

@@ -14,7 +14,7 @@ public:
 	bool	Init(CServerList* in_list);
 	bool	AddServer(CServer* toadd,bool bAddToList = true);
 	void	RemoveServer(CServer* todel);
-	bool	AddServermetToList(const CString& strFile);
+	bool	AddServerMetToList(const CString& strFile);
 	void	RefreshServer(const CServer* server);
 	void	RefreshAllServer();//EastShare - added by AndCycle, IP to Country
 	void	RemoveAllDeadServers();
@@ -22,12 +22,12 @@ public:
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	Localize();
 	void	ShowServerCount();
+	bool	StaticServerFileAppend(CServer *server);
+	bool	StaticServerFileRemove(CServer *server);
 
 protected:
 	CServerList*	server_list;
 
-	bool StaticServerFileAppend(CServer *server);
-	bool StaticServerFileRemove(const CServer *server);
 	void SetAllIcons();
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

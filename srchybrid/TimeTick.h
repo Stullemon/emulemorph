@@ -1,17 +1,9 @@
-#if !defined(TIMETICKER_H)
-#define TIMETICKER_H
-
-// TimeTick.h : interface of the CTimeTick class
-//
 /////////////////////////////////////////////////////////////////////////////
 //
 // Copyright © 2001, Stefan Belopotocan, http://welcome.to/BeloSoft
 //
 /////////////////////////////////////////////////////////////////////////////
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 /////////////////////////////////////////////////////////////////////////////
 // CTimeTick
@@ -28,7 +20,7 @@ public:
 	// Operations
 	void Start();
 	float Tick();
-	bool  isPerformanceCounter() {return m_nPerformanceFrequency;}
+	bool  isPerformanceCounter() {return m_nPerformanceFrequency!=0;}
 
 	// Implementation
 protected:
@@ -42,5 +34,3 @@ private:
 	LARGE_INTEGER m_nTimeElapsed;
 	LARGE_INTEGER m_nTime;
 };
-
-#endif // !defined(TIMETICKER_H)

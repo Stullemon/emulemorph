@@ -98,6 +98,12 @@ CIrcWnd::~CIrcWnd()
 	delete m_pIrcMain;
 }
 
+void CIrcWnd::SaveAllSettings()
+{
+	m_nicklist.SaveSettings(CPreferences::tableIrcMain);
+	m_serverChannelList.SaveSettings(CPreferences::tableIrcChannels);
+}
+
 void CIrcWnd::OnSysColorChange()
 { 
 	CResizableDialog::OnSysColorChange();
@@ -230,9 +236,6 @@ void CIrcWnd::DoResize(int delta)
 	m_wndSplitterIRC.SetRange(rcW.left+190, rcW.left+700);
 	//initCSize(thePrefs.GetSplitterbarPositionIRC());
 
-	m_nicklist.SetColumnWidth(0,rcspl.Width()-75);
-	m_nicklist.SetColumnWidth(1,70);
-
 	Invalidate();
 	UpdateWindow();
 }
@@ -263,13 +266,7 @@ switch (message) {
     rcSpl.bottom=rcW.bottom-40;
     
     m_wndSplitterIRC.MoveWindow(rcSpl,true);
-
-	m_nicklist.SetColumnWidth(0,rctree.Width()-75);
-	m_nicklist.SetColumnWidth(1,70);
-
-
    }
-
   }
   break;
  case WM_NOTIFY:

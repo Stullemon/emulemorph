@@ -181,11 +181,11 @@ bool CMMSocket::SendPacket(CMMPacket* packet, bool bQueueFirst){
 			nLen = wsprintfA(szBuf, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: %s\r\nContent-Length: %ld\r\n\r\n",m_pOwner->GetContentType(), packet->m_pBuffer->GetLength());
 		else
 			nLen = wsprintfA(szBuf, "Content-Length: %ld\r\n\r\n", packet->m_pBuffer->GetLength());
-		m_nSendLen = nLen + packet->m_pBuffer->GetLength();
+		m_nSendLen = nLen + (UINT)packet->m_pBuffer->GetLength();
 		m_pSendBuffer =	new char[m_nSendLen];
 		memcpy(m_pSendBuffer,szBuf,nLen);
 		packet->m_pBuffer->SeekToBegin();
-		packet->m_pBuffer->Read(m_pSendBuffer+nLen,packet->m_pBuffer->GetLength()); 
+		packet->m_pBuffer->Read(m_pSendBuffer+nLen, (UINT)packet->m_pBuffer->GetLength()); 
 		
 		m_nSent = Send(m_pSendBuffer,m_nSendLen);
 		if (m_nSent == SOCKET_ERROR){

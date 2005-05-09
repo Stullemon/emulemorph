@@ -255,10 +255,10 @@ void CKademliaUDPListener::processPacket(const byte* data, uint32 lenData, uint3
 				DebugRecv("KadFindBuddyRes", ip, port);
 			processFindBuddyResponse(packetData, lenPacket, ip, port);
 			break;
-		case KADEMLIA_FINDSOURCE_REQ:
+		case KADEMLIA_CALLBACK_REQ:
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-				DebugRecv("KadFindSourceReq", ip, port);
-			processFindSourceRequest(packetData, lenPacket, ip, port);
+				DebugRecv("KadCallbackReq", ip, port);
+			processCallbackRequest(packetData, lenPacket, ip, port);
 			break;
 		default:
 		{
@@ -1363,8 +1363,8 @@ void CKademliaUDPListener::processFindBuddyResponse (const byte *packetData, uin
 	theApp.clientlist->RequestBuddy(&contact);
 }
 
-//KADEMLIA_FINDSOURCE_REQ
-void CKademliaUDPListener::processFindSourceRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
+//KADEMLIA_CALLBACK_REQ
+void CKademliaUDPListener::processCallbackRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
 {
 	// Verify packet is expected size
 	if (lenPacket < 34){
@@ -1389,12 +1389,14 @@ void CKademliaUDPListener::processFindSourceRequest (const byte *packetData, uin
 		bio2.WriteUInt32(ip);
 		bio2.WriteUInt16(tcp);
 		Packet* packet = new Packet(&bio2, OP_EMULEPROT, OP_CALLBACK);
-		if( buddy->socket )
+		if (buddy->socket) {
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0 || thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugSend("OP__Callback", buddy);
+			theStats.AddUpDataOverheadFileRequest(packet->size);
             buddy->socket->SendPacket(packet);
+		}
 		else
 			ASSERT(0);
-		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-			DebugSend("KadCallback", ip, port);
 	}
 }
 

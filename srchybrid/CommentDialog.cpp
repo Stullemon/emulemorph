@@ -182,9 +182,7 @@ void CCommentDialog::Localize(void)
 	iml.Add(CTempIconLoader(_T("Rating_Fake"), 16, 16));
 	iml.Add(CTempIconLoader(_T("Rating_Poor"), 16, 16));
 	iml.Add(CTempIconLoader(_T("Rating_Fair"), 16, 16));
-	//MORPH START - Moved by FrankyFive, Proper rating order
 	iml.Add(CTempIconLoader(_T("Rating_Good"), 16, 16));
-	//MORPH END   - Moved by FrankyFive, Proper rating order
 	iml.Add(CTempIconLoader(_T("Rating_Excellent"), 16, 16));
 	m_ratebox.SetImageList(&iml);
 	m_imlRating.DeleteImageList();

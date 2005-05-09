@@ -144,7 +144,7 @@ protected:
 	COLORREF         m_crNoHighlight;
 	COLORREF         m_crNoFocusLine;
 	NMLVCUSTOMDRAW   m_lvcd;
-	bool             m_bCustomDraw;
+	BOOL             m_bCustomDraw;
 	CImageList		 m_imlHeaderCtrl;
 	/*
 	CList<int, int>	 m_liSortHistory;

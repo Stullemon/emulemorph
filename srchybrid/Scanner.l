@@ -18,9 +18,7 @@ static char THIS_FILE[] = __FILE__;
 #define YY_NEVER_INTERACTIVE 1
 
 extern int yyerror(const char* errstr);
-#ifdef _UNICODE
 extern int yyerror(LPCTSTR errstr);
-#endif
 
 #define	ECHO				TRACE
 #define	YY_INPUT			ReadLexBuff
@@ -31,6 +29,8 @@ static void FatalLexError(yyconst char msg[]);
 
 static CStringA _strInputBuff;
 static LPCSTR _pszLexBuff;
+
+#pragma warning(disable:4127) // conditional expression is constant
 %}
 
 %option noyywrap
@@ -243,3 +243,4 @@ void LexFree()
 	_strInputBuff.Empty();
 	_pszLexBuff = NULL;
 }
+

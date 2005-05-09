@@ -22,6 +22,7 @@ typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 class CUploadQueue
 {
+
 public:
 	CUploadQueue();
 	~CUploadQueue();
@@ -89,6 +90,9 @@ public:
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	void	ReSortUploadSlots(bool force = false);
 
+	CUpDownClientPtrList	waitinglist;
+	CUpDownClientPtrList	uploadinglist;
+
 	//Morph - added by AndCycle, separate special prio compare
 	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient);
 	
@@ -117,9 +121,6 @@ private:
     CUpDownClient* FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated();
     //MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
-	CUpDownClientPtrList	waitinglist;
-	CUpDownClientPtrList	uploadinglist;
-		
 	// By BadWolf - Accurate Speed Measurement
 	typedef struct TransferredData {
 		uint32	datalen;

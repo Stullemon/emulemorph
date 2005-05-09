@@ -42,7 +42,7 @@ CServer::CServer(const ServerMet_Struct* in_data)
 	failedcount = 0; 
 	lastpinged = 0;
 	lastpingedtime = 0;
-	staticservermember=0;
+	staticservermember = false;
 	maxusers=0;
 	softfiles = 0;
 	hardfiles = 0;
@@ -73,7 +73,7 @@ CServer::CServer(uint16 in_port, LPCTSTR i_addr)
 	failedcount = 0; 
 	lastpinged = 0;
 	lastpingedtime = 0;
-	staticservermember=0;
+	staticservermember = false;
 	maxusers=0;
 	softfiles = 0;
 	hardfiles = 0;
@@ -122,8 +122,6 @@ CServer::~CServer()
 
 bool CServer::AddTagFromFile(CFileDataIO* servermet)
 {
-	if (servermet == NULL)
-		return false;
 	CTag* tag = new CTag(servermet, false);
 	switch(tag->GetNameID()){		
 	case ST_SERVERNAME:
@@ -202,26 +200,32 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 		if (tag->IsInt())
 			m_uLowIDUsers = tag->GetInt();
 		break;
+	case ST_PORT:
+		ASSERT( tag->IsInt() );
+		break;
+	case ST_IP:
+		ASSERT( tag->IsInt() );
+		break;
 	default:
-		if (tag->GetNameID()){
-			ASSERT( 0 );
-		}
-		else if (!CmpED2KTagName(tag->GetName(), "files")){
+		if (tag->GetNameID()==0 && !CmpED2KTagName(tag->GetName(), "files")){
 			ASSERT( tag->IsInt() );
 			if (tag->IsInt())
 				files = tag->GetInt();
 		}
-		else if (!CmpED2KTagName(tag->GetName(), "users")){
+		else if (tag->GetNameID()==0 && !CmpED2KTagName(tag->GetName(), "users")){
 			ASSERT( tag->IsInt() );
 			if (tag->IsInt())
 				users = tag->GetInt();
 		}
 		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
-		else if (!CmpED2KTagName(tag->GetName(),"auxportslist")){
+		else if (tag->GetNameID()==0 && !CmpED2KTagName(tag->GetName(),"auxportslist")){
 			ASSERT( tag->IsStr() );
 			if (tag->IsStr())	realport = _tstoi(tag->GetStr());
 		}
 		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
+		else{
+			TRACE(_T("***Unknown tag in server.met: %s\n"), tag->GetFullInfo());
+		}
 	}
 	delete tag;
 	return true;

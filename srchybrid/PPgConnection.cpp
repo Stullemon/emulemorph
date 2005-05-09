@@ -324,7 +324,7 @@ BOOL CPPgConnection::OnApply()
 		thePrefs.SetMaxUpload(m_ctlMaxUp.GetPos());
 
 	if( thePrefs.GetMaxGraphUploadRate() < thePrefs.GetMaxUpload() && thePrefs.GetMaxUpload()!=UNLIMITED  )
-		thePrefs.SetMaxUpload(thePrefs.GetMaxGraphUploadRate() * 0.8);
+		thePrefs.SetMaxUpload((uint16)(thePrefs.GetMaxGraphUploadRate() * 0.8));
 
 	if (thePrefs.GetMaxUpload()!=UNLIMITED)
 		m_ctlMaxUp.SetPos(thePrefs.GetMaxUpload());
@@ -335,7 +335,7 @@ BOOL CPPgConnection::OnApply()
 		thePrefs.SetMaxDownload(m_ctlMaxDown.GetPos());
 
 	if( thePrefs.GetMaxGraphDownloadRate() < thePrefs.GetMaxDownload() && thePrefs.GetMaxDownload()!=UNLIMITED )
-		thePrefs.SetMaxDownload(thePrefs.GetMaxGraphDownloadRate() * 0.8);
+		thePrefs.SetMaxDownload((uint16)(thePrefs.GetMaxGraphDownloadRate() * 0.8));
 
 	if (thePrefs.GetMaxDownload()!=UNLIMITED)
 		m_ctlMaxDown.SetPos(thePrefs.GetMaxDownload());
@@ -422,11 +422,10 @@ BOOL CPPgConnection::OnApply()
 	else
 		thePrefs.SetNetworkED2K(false);
 
-	//	if(IsDlgButtonChecked(IDC_UDPDISABLE)) thePrefs.udpport=0;
 	GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_UDPDISABLE));
 
-	thePrefs.autoconnect = (uint8)IsDlgButtonChecked(IDC_AUTOCONNECT);
-	thePrefs.reconnect = (uint8)IsDlgButtonChecked(IDC_RECONN);
+	thePrefs.autoconnect = IsDlgButtonChecked(IDC_AUTOCONNECT)!=0;
+	thePrefs.reconnect = IsDlgButtonChecked(IDC_RECONN)!=0;
 		
 	if(lastmaxgu != thePrefs.maxGraphUploadRate) 
 		theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.maxGraphUploadRate);
@@ -458,7 +457,7 @@ BOOL CPPgConnection::OnApply()
 
 	//MORPH START - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
 	bool oldUseRandom = thePrefs.GetUseRandomPorts();
-	thePrefs.SetUseRandomPorts((BOOL)IsDlgButtonChecked(IDC_RANDOMPORTS));
+	thePrefs.SetUseRandomPorts(IsDlgButtonChecked(IDC_RANDOMPORTS)!=0);
 
 	unsigned long rndValue1, rndValue2, oldRndMin, oldRndMax;
 	CString rndText;
@@ -485,7 +484,7 @@ BOOL CPPgConnection::OnApply()
 		thePrefs.SetMaxRandomPort(rndValue2);
 	}
 
-	if((bool)IsDlgButtonChecked(IDC_RANDOMPORTS) != oldUseRandom){
+	if((IsDlgButtonChecked(IDC_RANDOMPORTS)!=0) != oldUseRandom){
 		if (theApp.IsPortchangeAllowed()){
 			theApp.listensocket->Rebind();
 			theApp.clientudp->Rebind();
@@ -593,11 +592,11 @@ void CPPgConnection::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		uint32 maxdown = m_ctlMaxDown.GetPos();
 		if( maxdown < 13 && maxup*3 < maxdown)
 		{
-			m_ctlMaxUp.SetPos(ceil((double)maxdown/3));
+			m_ctlMaxUp.SetPos((int)ceil((double)maxdown/3));
 		}
 		if( maxdown < 41 && maxup*4 < maxdown)
 		{
-			m_ctlMaxUp.SetPos(ceil((double)maxdown/4));
+			m_ctlMaxUp.SetPos((int)ceil((double)maxdown/4));
 		}
 	}
 

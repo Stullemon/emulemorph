@@ -64,10 +64,10 @@ END_MESSAGE_MAP()
 
 void CPPgBackup::OnBnClickedDat()
 {
-	if ((bool)IsDlgButtonChecked(IDC_DAT)) {
+	if (IsDlgButtonChecked(IDC_DAT)!=0) {
 		GetDlgItem(IDC_BACKUPNOW)->EnableWindow(IsDlgButtonChecked(IDC_DAT));
 	} else {
-		if (!(bool)IsDlgButtonChecked(IDC_DAT) && !(bool)IsDlgButtonChecked(IDC_MET) && !(bool)IsDlgButtonChecked(IDC_INI) && !(bool)IsDlgButtonChecked(IDC_PART) && !(bool)IsDlgButtonChecked(IDC_PARTMET))
+		if (IsDlgButtonChecked(IDC_DAT)==0 && IsDlgButtonChecked(IDC_MET)==0 && IsDlgButtonChecked(IDC_INI)==0 && IsDlgButtonChecked(IDC_PART)==0 && IsDlgButtonChecked(IDC_PARTMET)==0)
 			GetDlgItem(IDC_BACKUPNOW)->EnableWindow(false);
 	}
 
@@ -75,10 +75,10 @@ void CPPgBackup::OnBnClickedDat()
 
 void CPPgBackup::OnBnClickedMet()
 {
-	if ((bool)IsDlgButtonChecked(IDC_MET)) {
+	if (IsDlgButtonChecked(IDC_MET)!=0) {
 		GetDlgItem(IDC_BACKUPNOW)->EnableWindow(IsDlgButtonChecked(IDC_MET));
 	} else {
-		if (!(bool)IsDlgButtonChecked(IDC_DAT) && !(bool)IsDlgButtonChecked(IDC_MET) && !(bool)IsDlgButtonChecked(IDC_INI) && !(bool)IsDlgButtonChecked(IDC_PART) && !(bool)IsDlgButtonChecked(IDC_PARTMET))
+		if (IsDlgButtonChecked(IDC_DAT)==0 && IsDlgButtonChecked(IDC_MET)==0 && IsDlgButtonChecked(IDC_INI)==0 && IsDlgButtonChecked(IDC_PART)==0 && IsDlgButtonChecked(IDC_PARTMET)==0)
 			GetDlgItem(IDC_BACKUPNOW)->EnableWindow(false);
 	}
 
@@ -86,10 +86,10 @@ void CPPgBackup::OnBnClickedMet()
 
 void CPPgBackup::OnBnClickedIni()
 {
-	if ((bool)IsDlgButtonChecked(IDC_INI)) {
+	if (IsDlgButtonChecked(IDC_INI)!=0) {
 		GetDlgItem(IDC_BACKUPNOW)->EnableWindow(IsDlgButtonChecked(IDC_INI));
 	} else {
-		if (!(bool)IsDlgButtonChecked(IDC_DAT) && !(bool)IsDlgButtonChecked(IDC_MET) && !(bool)IsDlgButtonChecked(IDC_INI) && !(bool)IsDlgButtonChecked(IDC_PART) && !(bool)IsDlgButtonChecked(IDC_PARTMET))
+		if (IsDlgButtonChecked(IDC_DAT)==0 && IsDlgButtonChecked(IDC_MET)==0 && IsDlgButtonChecked(IDC_INI)==0 && IsDlgButtonChecked(IDC_PART)==0 && IsDlgButtonChecked(IDC_PARTMET)==0)
 			GetDlgItem(IDC_BACKUPNOW)->EnableWindow(false);
 	}
 
@@ -97,10 +97,10 @@ void CPPgBackup::OnBnClickedIni()
 
 void CPPgBackup::OnBnClickedPart()
 {
-	if ((bool)IsDlgButtonChecked(IDC_PART)) {
+	if (IsDlgButtonChecked(IDC_PART)!=0) {
 		GetDlgItem(IDC_BACKUPNOW)->EnableWindow(IsDlgButtonChecked(IDC_PART));
 	} else {
-		if (!(bool)IsDlgButtonChecked(IDC_DAT) && !(bool)IsDlgButtonChecked(IDC_MET) && !(bool)IsDlgButtonChecked(IDC_INI) && !(bool)IsDlgButtonChecked(IDC_PART) && !(bool)IsDlgButtonChecked(IDC_PARTMET))
+		if (IsDlgButtonChecked(IDC_DAT)==0 && IsDlgButtonChecked(IDC_MET)==0 && IsDlgButtonChecked(IDC_INI)==0 && IsDlgButtonChecked(IDC_PART)==0 && IsDlgButtonChecked(IDC_PARTMET)==0)
 			GetDlgItem(IDC_BACKUPNOW)->EnableWindow(false);
 	}
 
@@ -108,10 +108,10 @@ void CPPgBackup::OnBnClickedPart()
 
 void CPPgBackup::OnBnClickedPartMet()
 {
-	if ((bool)IsDlgButtonChecked(IDC_PARTMET)) {
+	if (IsDlgButtonChecked(IDC_PARTMET)!=0) {
 		GetDlgItem(IDC_BACKUPNOW)->EnableWindow(IsDlgButtonChecked(IDC_PARTMET));
 	} else {
-		if (!(bool)IsDlgButtonChecked(IDC_DAT) && !(bool)IsDlgButtonChecked(IDC_MET) && !(bool)IsDlgButtonChecked(IDC_INI) && !(bool)IsDlgButtonChecked(IDC_PART) && !(bool)IsDlgButtonChecked(IDC_PARTMET))
+		if (IsDlgButtonChecked(IDC_DAT)==0 && IsDlgButtonChecked(IDC_MET)==0 && IsDlgButtonChecked(IDC_INI)==0 && IsDlgButtonChecked(IDC_PART)==0 && IsDlgButtonChecked(IDC_PARTMET)==0)
 			GetDlgItem(IDC_BACKUPNOW)->EnableWindow(false);
 	}
 
@@ -122,19 +122,19 @@ void CPPgBackup::OnBnClickedBackupnow()
 {
 	TCHAR buffer[200];
 	y2All = FALSE;
-	if ((bool)IsDlgButtonChecked(IDC_DAT))
+	if (IsDlgButtonChecked(IDC_DAT)!=0)
 	{
 		Backup(_T("*.dat"), true);
 		CheckDlgButton(IDC_DAT,BST_UNCHECKED);
 	}
 
-	if ((bool)IsDlgButtonChecked(IDC_MET))
+	if (IsDlgButtonChecked(IDC_MET)!=0)
 	{
 		Backup(_T("*.met"), true);
 		CheckDlgButton(IDC_MET,BST_UNCHECKED);
 	}
 
-	if ((bool)IsDlgButtonChecked(IDC_INI))
+	if (IsDlgButtonChecked(IDC_INI)!=0)
 	{
 		// Mighty Knife: Save current settings before backup
 		theApp.emuledlg->SaveSettings (false);
@@ -143,13 +143,13 @@ void CPPgBackup::OnBnClickedBackupnow()
 		CheckDlgButton(IDC_INI,BST_UNCHECKED);
 	}
 
-	if ((bool)IsDlgButtonChecked(IDC_PARTMET))
+	if (IsDlgButtonChecked(IDC_PARTMET)!=0)
 	{
 		Backup2(_T("*.part.met"));
 		CheckDlgButton(IDC_PARTMET,BST_UNCHECKED);
 	}
 
-	if ((bool)IsDlgButtonChecked(IDC_PART))
+	if (IsDlgButtonChecked(IDC_PART)!=0)
 	{
 		_stprintf(buffer,_T("Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?"));
 		if(MessageBox(buffer,_T("Are you sure?"),MB_ICONQUESTION|MB_YESNO)== IDYES)
@@ -386,10 +386,10 @@ void CPPgBackup::LoadSettings(void)
 
 BOOL CPPgBackup::OnApply()
 {
-	thePrefs.SetAutoBackup(IsDlgButtonChecked(IDC_AUTOBACKUP));
+	thePrefs.SetAutoBackup(IsDlgButtonChecked(IDC_AUTOBACKUP)!=0);
 	
 	//EastShare Start - Added by Pretender, Double Backup
-	thePrefs.SetAutoBackup2(IsDlgButtonChecked(IDC_AUTOBACKUP2)); 
+	thePrefs.SetAutoBackup2(IsDlgButtonChecked(IDC_AUTOBACKUP2)!=0); 
 
 	LoadSettings();
 	SetModified();

@@ -186,7 +186,7 @@ BOOL CPPgStats::OnApply()
 			bInvalidateGraphs = true;
 		}
 		//MORPH START - Added by SiRoB, New Graph
-		bool bSolidGraph = IsDlgButtonChecked(IDC_SOLIDGRAPH);
+		bool bSolidGraph = IsDlgButtonChecked(IDC_SOLIDGRAPH)!=0;
 		if(thePrefs.IsSolidGraph() != bSolidGraph){
 			thePrefs.m_bSolidGraph = bSolidGraph;
 			bInvalidateGraphs = true;
@@ -220,21 +220,25 @@ void CPPgStats::Localize(void)
         GetDlgItem(IDC_GRAPHOPTIONS)->SetWindowText(GetResString(IDS_GRAPHOPTIONS));
 
 		m_colors.ResetContent();
-		m_colors.AddString(GetResString(IDS_SP_BACKGROUND));
-		m_colors.AddString(GetResString(IDS_SP_GRID));
-		m_colors.AddString(GetResString(IDS_SP_DL1));
-		m_colors.AddString(GetResString(IDS_SP_DL2));
-		m_colors.AddString(GetResString(IDS_SP_DL3));
-		m_colors.AddString(GetResString(IDS_SP_UL1));
-		m_colors.AddString(GetResString(IDS_SP_UL2));
-		m_colors.AddString(GetResString(IDS_SP_UL3));
-		m_colors.AddString(GetResString(IDS_SP_ACTCON));
-		m_colors.AddString(GetResString(IDS_SP_TOTALUL));
-		m_colors.AddString(GetResString(IDS_SP_ACTUL));
-		m_colors.AddString(GetResString(IDS_SP_ICONBAR));
-		m_colors.AddString(GetResString(IDS_SP_ACTDL));
-		m_colors.AddString(GetResString(IDS_SP_ULFRIENDS));
-		m_colors.AddString(GetResString(IDS_SP_ULSLOTSNOOVERHEAD));
+		int iItem;
+		iItem = m_colors.AddString(GetResString(IDS_SP_BACKGROUND));		m_colors.SetItemData(iItem, 0);
+		iItem = m_colors.AddString(GetResString(IDS_SP_GRID));				m_colors.SetItemData(iItem, 1);
+
+		iItem = m_colors.AddString(GetResString(IDS_SP_DL3));				m_colors.SetItemData(iItem, 4);
+		iItem = m_colors.AddString(GetResString(IDS_SP_DL2));				m_colors.SetItemData(iItem, 3);
+		iItem = m_colors.AddString(GetResString(IDS_SP_DL1));				m_colors.SetItemData(iItem, 2);
+
+		iItem = m_colors.AddString(GetResString(IDS_SP_UL3));				m_colors.SetItemData(iItem, 7);
+		iItem = m_colors.AddString(GetResString(IDS_SP_UL2));				m_colors.SetItemData(iItem, 6);
+		iItem = m_colors.AddString(GetResString(IDS_SP_UL1));				m_colors.SetItemData(iItem, 5);
+		iItem = m_colors.AddString(GetResString(IDS_SP_ULSLOTSNOOVERHEAD));	m_colors.SetItemData(iItem, 14);
+		iItem = m_colors.AddString(GetResString(IDS_SP_ULFRIENDS));			m_colors.SetItemData(iItem, 13);
+
+		iItem = m_colors.AddString(GetResString(IDS_SP_ACTCON));			m_colors.SetItemData(iItem, 8);
+		iItem = m_colors.AddString(GetResString(IDS_SP_ACTUL));				m_colors.SetItemData(iItem, 10);
+		iItem = m_colors.AddString(GetResString(IDS_SP_TOTALUL));			m_colors.SetItemData(iItem, 9);
+		iItem = m_colors.AddString(GetResString(IDS_SP_ACTDL));				m_colors.SetItemData(iItem, 12);
+		iItem = m_colors.AddString(GetResString(IDS_SP_ICONBAR));			m_colors.SetItemData(iItem, 11);
 
 		m_ctlColor.CustomText = GetResString(IDS_COL_MORECOLORS);
 		m_ctlColor.DefaultText = NULL;
@@ -302,20 +306,28 @@ void CPPgStats::ShowInterval()
 void CPPgStats::OnCbnSelchangeColorselector()
 {
 	int iSel = m_colors.GetCurSel();
-	if (iSel >= 0 && iSel < m_iStatsColors)
-		m_ctlColor.SetColor(m_pdwStatsColors[iSel]);
+	if (iSel >= 0)
+	{
+		int iIndex = m_colors.GetItemData(iSel);
+		if (iIndex >= 0 && iIndex < m_iStatsColors)
+			m_ctlColor.SetColor(m_pdwStatsColors[iIndex]);
+	}
 }
 
 LONG CPPgStats::OnColorPopupSelChange(UINT lParam, LONG wParam)
 {
 	int iSel = m_colors.GetCurSel();
-	if (iSel >= 0 && iSel < m_iStatsColors)
+	if (iSel >= 0)
 	{
-		COLORREF crColor = m_ctlColor.GetColor();
-		if (crColor != m_pdwStatsColors[iSel])
+		int iIndex = m_colors.GetItemData(iSel);
+		if (iIndex >= 0 && iIndex < m_iStatsColors)
 		{
-			m_pdwStatsColors[iSel] = crColor;
-			SetModified(TRUE);
+			COLORREF crColor = m_ctlColor.GetColor();
+			if (crColor != m_pdwStatsColors[iIndex])
+			{
+				m_pdwStatsColors[iIndex] = crColor;
+				SetModified(TRUE);
+			}
 		}
 	}
 	return TRUE;

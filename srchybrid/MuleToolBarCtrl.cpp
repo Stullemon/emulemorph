@@ -39,15 +39,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-#if (_WIN32_IE < 0x0500)
-#define TBN_INITCUSTOMIZE       (TBN_FIRST - 23)
-#define    TBNRF_HIDEHELP       0x00000001
-#endif
-
-#ifndef TBSTYLE_EX_HIDECLIPPEDBUTTONS
-#define TBSTYLE_EX_HIDECLIPPEDBUTTONS       0x00000010  // don't show partially obscured buttons
-#endif
-
 #define	NUM_BUTTON_BITMAPS	14
 
 #define	EMULTB_BASEEXT		_T("eMuleToolbar.kad02")
@@ -1027,10 +1018,6 @@ void CMuleToolbarCtrl::ForceRecalcLayout()
 }
 
 #ifdef _DEBUG
-
-#ifndef TBIF_BYINDEX
-#define TBIF_BYINDEX            0x80000000
-#endif
 
 void CMuleToolbarCtrl::Dump()
 {

@@ -41,7 +41,7 @@ public:
 	void SendData(LPCSTR szText) { SendData(szText, lstrlenA(szText)); }
 	void SendContent(LPCSTR szStdResponse, const void* pContent, DWORD dwContentSize);
 	void SendContent(LPCSTR szStdResponse, const CString& rstr);
-	void SendTextContent(LPCSTR szText) { SendContent("", szText, lstrlenA(szText)); }
+	void SendReply(LPCSTR szReply);
 	void Disconnect();
 
 	void OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData, DWORD dwDataLen , in_addr inad);

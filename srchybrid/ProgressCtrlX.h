@@ -1,6 +1,3 @@
-#if !defined(AFX_PROGRESSCTRLX_H__F26E8924_D1C1_11D3_B261_00104BB13A66__INCLUDED_)
-#define AFX_PROGRESSCTRLX_H__F26E8924_D1C1_11D3_B261_00104BB13A66__INCLUDED_
-
 #pragma once
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,10 +162,3 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_PROGRESSCTRLX_H__F26E8924_D1C1_11D3_B261_00104BB13A66__INCLUDED_)

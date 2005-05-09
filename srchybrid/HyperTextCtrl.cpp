@@ -1190,7 +1190,7 @@ void CHyperTextCtrl::OnMouseMove(UINT nFlags,CPoint pt){
 	if(PtInRect(rcClient, pt) && m_iLineHeight)
 	{
 		bool bFound = false;
-		uint16 i = pt.y / m_iLineHeight;
+		UINT i = pt.y / m_iLineHeight;
 		if(i < m_VisLines.size())
 		{
 			std::vector<CVisLine>::iterator it = m_VisLines.begin() + i;
@@ -1223,7 +1223,7 @@ void CHyperTextCtrl::OnLButtonDown(UINT nFlags,CPoint pt){
 	if(PtInRect(rcClient, pt) && m_iLineHeight)
 	{
 		bool bFound = false;
-		uint16 i = pt.y / m_iLineHeight;
+		UINT i = pt.y / m_iLineHeight;
 		if(i < m_VisLines.size()){
 			std::vector<CVisLine>::iterator it = m_VisLines.begin() + i;
 			for(CVisLine::iterator jt = it->begin(); jt != it->end(); jt++)
@@ -1595,10 +1595,10 @@ void CHyperTextCtrl::UpdateVisLines(){
 
 	for(; it != m_Lines.end(); it++)
 	{
-		uint16 XPos = 2;
-		uint16 LinePos = it->Begin();
-		uint16 Offset = 0;
-		uint16 Len = 0;
+		int XPos = 2;
+		UINT LinePos = it->Begin();
+		UINT Offset = 0;
+		UINT Len = 0;
 
 		CVisLine vl;
 		CRect rcBounds;
@@ -1623,7 +1623,7 @@ void CHyperTextCtrl::UpdateVisLines(){
 				::GetTextExtentExPoint(dc, s + Offset, Len, 0, NULL, NULL, &sz);
 
 				rcBounds.left = XPos;
-				XPos+=sz.cx;
+				XPos += sz.cx;
 				rcBounds.right = XPos;
 				rcBounds.top = ypos;
 				rcBounds.bottom = ypos+m_iLineHeight;

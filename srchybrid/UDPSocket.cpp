@@ -134,8 +134,12 @@ bool CUDPSocket::Create(){
 	return false;
 }
 
-void CUDPSocket::OnReceive(int nErrorCode){
-	if (nErrorCode){
+void CUDPSocket::OnReceive(int nErrorCode)
+{
+	if (nErrorCode)
+	{
+		if (thePrefs.GetDebugServerUDPLevel() > 0)
+			Debug(_T("Error: Server UDP socket: Receive failed - %s\n"), GetErrorMessage(nErrorCode, 1));
 		if (thePrefs.GetVerbose())
 			DebugLogError(_T("Error: Server UDP socket: Receive failed - %s"), GetErrorMessage(nErrorCode, 1));
 	}
@@ -154,6 +158,12 @@ void CUDPSocket::OnReceive(int nErrorCode){
 	else
 	{
 		DWORD dwError = WSAGetLastError();
+		if (thePrefs.GetDebugServerUDPLevel() > 0) {
+			CString strServerInfo;
+			if (iSockAddrLen > 0 && sockAddr.sin_addr.S_un.S_addr != 0 && sockAddr.sin_addr.S_un.S_addr != INADDR_NONE)
+				strServerInfo.Format(_T(" from %s:%u"), ipstr(sockAddr.sin_addr), ntohs(sockAddr.sin_port)-4);
+			Debug(_T("Error: Server UDP socket: Failed to receive data%s: %s\n"), strServerInfo, GetErrorMessage(dwError, 1));
+		}
 		if (dwError == WSAECONNRESET)
 		{
 			// Depending on local and remote OS and depending on used local (remote?) router we may receive
@@ -161,41 +171,51 @@ void CUDPSocket::OnReceive(int nErrorCode){
 			// that a sent UDP packet was not received by the remote host because it was not listening on 
 			// the specified port -> no server running there.
 			//
+
+			// If we are not currently pinging this server, increase the failure counter
 			CServer* pServer = theApp.serverlist->GetServerByAddress(ipstr(sockAddr.sin_addr), ntohs(sockAddr.sin_port)-4);
-			if (pServer && pServer->GetChallenge()==0)
+			if (pServer && GetTickCount() - pServer->GetLastPinged() >= SEC2MS(30))
+			{
 				pServer->AddFailedCount();
+				theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
+			}
 		}
-		if (thePrefs.GetVerbose() && dwError != WSAECONNRESET)
+		else if (thePrefs.GetVerbose())
 		{
 			CString strServerInfo;
 			if (iSockAddrLen > 0 && sockAddr.sin_addr.S_un.S_addr != 0 && sockAddr.sin_addr.S_un.S_addr != INADDR_NONE)
-				strServerInfo.Format(_T(" from %s:%u"), ipstr(sockAddr.sin_addr), ntohs(sockAddr.sin_port));
-			DebugLogError(_T("Error: Server UDP socket, failed to receive data%s: %s"), strServerInfo, GetErrorMessage(dwError, 1));
+				strServerInfo.Format(_T(" from %s:%u"), ipstr(sockAddr.sin_addr), ntohs(sockAddr.sin_port)-4);
+			DebugLogError(_T("Error: Server UDP socket: Failed to receive data%s: %s"), strServerInfo, GetErrorMessage(dwError, 1));
 		}
 	}
 }
 
-bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort){
-	try{
+bool CUDPSocket::ProcessPacket(const BYTE* packet, UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort)
+{
+	try
+	{
 		theStats.AddDownDataOverheadServer(size);
 		CServer* update = theApp.serverlist->GetServerByAddress(ipstr(nIP), nUDPPort-4);
 		if( update ){
 			update->ResetFailedCount();
 			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
 		}
-		switch(opcode){
+
+		switch (opcode)
+		{
 			case OP_GLOBSEARCHRES:{
 				CSafeMemFile data(packet, size);
 				// process all search result packets
 				int iLeft;
-				int iPacket = 1;
+				int iDbgPacket = 1;
 				do{
 					if (thePrefs.GetDebugServerUDPLevel() > 0){
-						uint32 nClientID = *((uint32*)(packet+16));
-						uint16 nClientPort = *((uint16*)(packet+20));
-						Debug(_T("ServerUDPMessage from %s:%u - OP_GlobSearchResult(%u); %s\n"), ipstr(nIP), nUDPPort-4, iPacket++, DbgGetFileInfo((uchar*)packet), DbgGetClientID(nClientID), nClientPort);
+						if (data.GetLength() - data.GetPosition() >= 16+4+2){
+							const BYTE* pDbgPacket = data.GetBuffer() + data.GetPosition();
+							Debug(_T("ServerUDPMessage from %-21s - OP_GlobSearchResult(%u); %s\n"), ipstr(nIP, nUDPPort-4), iDbgPacket++, DbgGetFileInfo(pDbgPacket), DbgGetClientID(PeekUInt32(pDbgPacket+16)), PeekUInt16(pDbgPacket+20));
+						}
 					}
-					uint16 uResultCount = theApp.searchlist->ProcessUDPSearchanswer(data, true/*update->GetUnicodeSupport()*/, nIP, nUDPPort-4);
+					uint16 uResultCount = theApp.searchlist->ProcessUDPSearchAnswer(data, true/*update->GetUnicodeSupport()*/, nIP, nUDPPort-4);
 					theApp.emuledlg->searchwnd->AddUDPResult(uResultCount);
 
 					// check if there is another source packet
@@ -221,7 +241,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 				while (iLeft > 0);
 
 				if (iLeft > 0 && thePrefs.GetDebugServerUDPLevel() > 0){
-					Debug(_T("OP_GlobSearchResult contains %d additionl bytes\n"), iLeft);
+					Debug(_T("***NOTE: OP_GlobSearchResult contains %d additional bytes\n"), iLeft);
 					if (thePrefs.GetDebugServerUDPLevel() > 1)
 						DebugHexDump(data);
 				}
@@ -231,12 +251,12 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 				CSafeMemFile data(packet, size);
 				// process all source packets
 				int iLeft;
-				int iPacket = 1;
+				int iDbgPacket = 1;
 				do{
 					uchar fileid[16];
 					data.ReadHash16(fileid);
 					if (thePrefs.GetDebugServerUDPLevel() > 0)
-						Debug(_T("ServerUDPMessage from %s:%u - OP_GlobFoundSources(%u); %s\n"), ipstr(nIP), nUDPPort-4, iPacket++, DbgGetFileInfo(fileid));
+						Debug(_T("ServerUDPMessage from %-21s - OP_GlobFoundSources(%u); %s\n"), ipstr(nIP, nUDPPort-4), iDbgPacket++, DbgGetFileInfo(fileid));
 					if (CPartFile* file = theApp.downloadqueue->GetFileByID(fileid))
 						file->AddSources(&data, nIP, nUDPPort-4);
 					else{
@@ -268,7 +288,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 				while (iLeft > 0);
 
 				if (iLeft > 0 && thePrefs.GetDebugServerUDPLevel() > 0){
-					Debug(_T("OP_GlobFoundSources contains %d additional bytes\n"), iLeft);
+					Debug(_T("***NOTE: OP_GlobFoundSources contains %d additional bytes\n"), iLeft);
 					if (thePrefs.GetDebugServerUDPLevel() > 1)
 						DebugHexDump(data);
 				}
@@ -276,54 +296,58 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 			}
  			case OP_GLOBSERVSTATRES:{
 				if (thePrefs.GetDebugServerUDPLevel() > 0)
-					Debug(_T("ServerUDPMessage from %s:%u - OP_GlobServStatRes\n"), ipstr(nIP), nUDPPort-4);
+					Debug(_T("ServerUDPMessage from %-21s - OP_GlobServStatRes\n"), ipstr(nIP, nUDPPort-4));
 				if( size < 12 || update == NULL )
 					return true;
-#define get_uint32(p)	*((uint32*)(p))
-				uint32 challenge = get_uint32(packet);
+				uint32 challenge = PeekUInt32(packet);
 				if (challenge != update->GetChallenge()){
 					if (thePrefs.GetDebugServerUDPLevel() > 0)
 						Debug(_T("***NOTE: Received unexpected challenge %08x (waiting on packet with challenge %08x)\n"), challenge, update->GetChallenge());
 					return true;
 				}
 				update->SetChallenge(0);
-				uint32 cur_user = get_uint32(packet+4);
-				uint32 cur_files = get_uint32(packet+8);
+				uint32 cur_user = PeekUInt32(packet+4);
+				uint32 cur_files = PeekUInt32(packet+8);
 				uint32 cur_maxusers = 0;
 				uint32 cur_softfiles = 0;
 				uint32 cur_hardfiles = 0;
 				uint32 uUDPFlags = 0;
 				uint32 uLowIDUsers = 0;
 				if( size >= 16 ){
-					cur_maxusers = get_uint32(packet+12);
+					cur_maxusers = PeekUInt32(packet+12);
 				}
 				if( size >= 24 ){
-					cur_softfiles = get_uint32(packet+16);
-					cur_hardfiles = get_uint32(packet+20);
+					cur_softfiles = PeekUInt32(packet+16);
+					cur_hardfiles = PeekUInt32(packet+20);
 				}
 				if( size >= 28 ){
-					uUDPFlags = get_uint32(packet+24);
+					uUDPFlags = PeekUInt32(packet+24);
 					if (thePrefs.GetDebugServerUDPLevel() > 0){
 						CString strInfo;
-						strInfo.AppendFormat(_T(" UDP Flags=0x%08x"), uUDPFlags);
-						const DWORD dwKnownBits = SRV_UDPFLG_EXT_GETSOURCES | SRV_UDPFLG_EXT_GETFILES;
+						const DWORD dwKnownBits = SRV_UDPFLG_EXT_GETSOURCES | SRV_UDPFLG_EXT_GETFILES | SRV_UDPFLG_NEWTAGS | SRV_UDPFLG_UNICODE | SRV_UDPFLG_EXT_GETSOURCES2;
 						if (uUDPFlags & ~dwKnownBits)
-							strInfo.AppendFormat(_T("  ***UnkBits=0x%08x"), uUDPFlags & ~dwKnownBits);
+							strInfo.AppendFormat(_T("  ***UnkUDPFlags=0x%08x"), uUDPFlags & ~dwKnownBits);
 						if (uUDPFlags & SRV_UDPFLG_EXT_GETSOURCES)
 							strInfo.AppendFormat(_T("  ExtGetSources=1"));
+						if (uUDPFlags & SRV_UDPFLG_EXT_GETSOURCES2)
+							strInfo.AppendFormat(_T("  ExtGetSources2=1"));
 						if (uUDPFlags & SRV_UDPFLG_EXT_GETFILES)
 							strInfo.AppendFormat(_T("  ExtGetFiles=1"));
+						if (uUDPFlags & SRV_UDPFLG_NEWTAGS)
+							strInfo.AppendFormat(_T("  NewTags=1"));
+						if (uUDPFlags & SRV_UDPFLG_UNICODE)
+							strInfo.AppendFormat(_T("  Unicode=1"));
 						Debug(_T("%s\n"), strInfo);
 					}
 				}
 				if( size >= 32 ){
-					uLowIDUsers = get_uint32(packet+28);
-					if (thePrefs.GetDebugServerUDPLevel() > 0)
-						Debug(_T(" LowID users=%u\n"), uLowIDUsers);
+					uLowIDUsers = PeekUInt32(packet+28);
 				}
 				if (thePrefs.GetDebugServerUDPLevel() > 0){
 					if( size > 32 ){
-					    Debug(_T("***NOTE: ServerUDPMessage from %s:%u - OP_GlobServStatRes:  ***AddData: %s\n"), ipstr(nIP), nUDPPort-4, DbgGetHexDump(packet+24, size-24));
+						Debug(_T("***NOTE: OP_GlobServStatRes contains %d additional bytes\n"), size-32);
+						if (thePrefs.GetDebugServerUDPLevel() > 1)
+							DbgGetHexDump(packet+32, size-32);
 					}
 				}
 				if( update ){
@@ -344,13 +368,12 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 					update->SetLowIDUsers( uLowIDUsers );
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
 				}
-#undef get_uint32
 				break;
 			}
 
  			case OP_SERVER_DESC_RES:{
 				if (thePrefs.GetDebugServerUDPLevel() > 0)
-					Debug(_T("ServerUDPMessage from %s:%u - OP_ServerDescRes\n"), ipstr(nIP), nUDPPort-4);
+					Debug(_T("ServerUDPMessage from %-21s - OP_ServerDescRes\n"), ipstr(nIP, nUDPPort-4));
 				if (!update)
 					return true;
 
@@ -401,7 +424,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 						// but with the same IP.
 
 						if (thePrefs.GetDebugServerUDPLevel() > 0)
-							Debug(_T("***NOTE: Received unexpected new format OP_ServerDescRes from %s:%u with challenge %08x (waiting on packet with challenge %08x)\n"), ipstr(nIP), nUDPPort-4, PeekUInt32(packet), update->GetDescReqChallenge());
+							Debug(_T("***NOTE: Received unexpected new format OP_ServerDescRes from %s with challenge %08x (waiting on packet with challenge %08x)\n"), ipstr(nIP, nUDPPort-4), PeekUInt32(packet), update->GetDescReqChallenge());
 						; // ignore this packet
 					}
 				}
@@ -414,16 +437,19 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 				}
 
 				if (thePrefs.GetDebugServerUDPLevel() > 0){
-					UINT uAddData = srvinfo.GetLength() - srvinfo.GetPosition();
-					if (uAddData)
-						Debug(_T("***NOTE: ServerUDPMessage from %s:%u - OP_ServerDescRes:  ***AddData: %s\n"), ipstr(nIP), nUDPPort-4, DbgGetHexDump(packet + srvinfo.GetPosition(), uAddData));
+					int iAddData = (int)(srvinfo.GetLength() - srvinfo.GetPosition());
+					if (iAddData > 0){
+						Debug(_T("***NOTE: OP_ServerDescRes contains %d additional bytes\n"), iAddData);
+						if (thePrefs.GetDebugServerUDPLevel() > 1)
+							DebugHexDump(srvinfo);
+					}
 				}
 				theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(update);
 				break;
 			}
 			default:
 				if (thePrefs.GetDebugServerUDPLevel() > 0)
-					Debug(_T("***NOTE: ServerUDPMessage from %s:%u - Unknown packet: opcode=0x%02X  %s\n"), ipstr(nIP), nUDPPort-4, opcode, DbgGetHexDump(packet, size));
+					Debug(_T("***NOTE: ServerUDPMessage from %s - Unknown packet: opcode=0x%02X  %s\n"), ipstr(nIP, nUDPPort-4), opcode, DbgGetHexDump(packet, size));
 				return false;
 		}
 

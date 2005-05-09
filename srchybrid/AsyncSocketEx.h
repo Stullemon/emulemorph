@@ -60,11 +60,8 @@ and this copyright notice stays intact in the source files.
 If you use this class in commercial applications, please send a short message
 to tim.kosse@gmx.de
 */
-
-#if !defined(AFX_ASYNCSOCKETEX_H__AA9E4531_63B1_442F_9A71_09B2FEEDF34E__INCLUDED_)
-#define AFX_ASYNCSOCKETEX_H__AA9E4531_63B1_442F_9A71_09B2FEEDF34E__INCLUDED_
-
 #pragma once
+
 #define FD_FORCEREAD (1<<15)
 
 #if defined(_AFXDLL) && (_MFC_VER==0x0700)
@@ -288,5 +285,3 @@ protected:
 #define LAYERCALLBACK_STATECHANGE 0
 #define LAYERCALLBACK_LAYERSPECIFIC 1
 #endif //NOLAYERS
-
-#endif // !defined(AFX_ASYNCSOCKETEX_H__AA9E4531_63B1_442F_9A71_09B2FEEDF34E__INCLUDED_)

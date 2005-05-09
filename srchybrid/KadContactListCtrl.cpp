@@ -68,12 +68,10 @@ void CKadContactListCtrl::Init()
 	SetAllIcons();
 	Localize();
 
-	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
-	CIni ini(strIniFile, _T("eMule"));
+	CIni ini(thePrefs.GetConfigFile(), _T("eMule"));
 	LoadSettings(&ini, m_strLVName);
 	int iSortItem = ini.GetInt(m_strLVName + _T("SortItem"));
-	bool bSortAscending = ini.GetInt(m_strLVName + _T("SortAscending"));
+	bool bSortAscending = ini.GetBool(m_strLVName + _T("SortAscending"));
 	SetSortArrow(iSortItem, bSortAscending);
 	SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
 }
@@ -82,7 +80,7 @@ void CKadContactListCtrl::SaveAllSettings(CIni* ini)
 {
 	SaveSettings(ini, m_strLVName);
 	ini->WriteInt(m_strLVName + _T("SortItem"), GetSortItem());
-	ini->WriteInt(m_strLVName + _T("SortAscending"), GetSortAscending());
+	ini->WriteBool(m_strLVName + _T("SortAscending"), GetSortAscending());
 }
 
 void CKadContactListCtrl::OnSysColorChange()

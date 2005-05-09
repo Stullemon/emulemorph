@@ -68,6 +68,7 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_REPAINT,OnSettingsChange)
 	ON_BN_CLICKED(IDC_SELECT_HYPERTEXT_FONT, OnBnClickedSelectHypertextFont)
 	ON_BN_CLICKED(IDC_CLEARCOMPL,OnSettingsChange)
+	ON_BN_CLICKED(IDC_SHOWTRANSTOOLBAR,OnSettingsChange)
 	ON_BN_CLICKED(IDC_RESETHIST, OnBtnClickedResetHist)
 	ON_WM_HELPINFO()
 //	ON_NOTIFY(NM_CUSTOMDRAW, IDC_3DDEPTH, On3DDepth)
@@ -114,6 +115,7 @@ void CPPgDisplay::LoadSettings(void)
 	CheckDlgButton(IDC_REPAINT,(UINT)thePrefs.IsGraphRecreateDisabled() );
 	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)thePrefs.GetUseDwlPercentage() );
 	CheckDlgButton(IDC_CLEARCOMPL, (uint8)thePrefs.GetRemoveFinishedDownloads());
+	CheckDlgButton(IDC_SHOWTRANSTOOLBAR, (uint8)thePrefs.IsTransToolbarEnabled());
 
 	CheckDlgButton(IDC_DISABLEHIST, (uint8)thePrefs.GetUseAutocompletion());
 
@@ -147,15 +149,15 @@ BOOL CPPgDisplay::OnApply()
 {
 	TCHAR buffer[510];
 	
-	uint8 mintotray_old= thePrefs.mintotray;
-	thePrefs.mintotray = (uint8)IsDlgButtonChecked(IDC_MINTRAY);
-	thePrefs.transferDoubleclick= (uint8)IsDlgButtonChecked(IDC_DBLCLICK);
+	bool mintotray_old = thePrefs.mintotray;
+	thePrefs.mintotray = IsDlgButtonChecked(IDC_MINTRAY)!=0;
+	thePrefs.transferDoubleclick = IsDlgButtonChecked(IDC_DBLCLICK)!=0;
 	thePrefs.depth3D = ((CSliderCtrl*)GetDlgItem(IDC_3DDEPTH))->GetPos();
-	thePrefs.indicateratings= (uint8)IsDlgButtonChecked(IDC_INDICATERATINGS);
-	thePrefs.dontRecreateGraphs=(uint8)IsDlgButtonChecked(IDC_REPAINT);
-	thePrefs.m_bShowDwlPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWDWLPERCENT);
-	thePrefs.m_bRemoveFinishedDownloads=(uint8)IsDlgButtonChecked(IDC_CLEARCOMPL);
-	thePrefs.m_bUseAutocompl=(uint8)IsDlgButtonChecked(IDC_DISABLEHIST);
+	thePrefs.indicateratings = IsDlgButtonChecked(IDC_INDICATERATINGS)!=0;
+	thePrefs.dontRecreateGraphs = IsDlgButtonChecked(IDC_REPAINT)!=0;
+	thePrefs.m_bShowDwlPercentage = IsDlgButtonChecked(IDC_SHOWDWLPERCENT)!=0;
+	thePrefs.m_bRemoveFinishedDownloads = IsDlgButtonChecked(IDC_CLEARCOMPL)!=0;
+	thePrefs.m_bUseAutocompl = IsDlgButtonChecked(IDC_DISABLEHIST)!=0;
 
 	if(IsDlgButtonChecked(IDC_UPDATEQUEUE))
 		thePrefs.m_bupdatequeuelist = false;
@@ -169,13 +171,16 @@ BOOL CPPgDisplay::OnApply()
 
 	bool flag = thePrefs.m_bDisableKnownClientList;
 
+	bool bResetToolbar = false;
+	bResetToolbar |= (IsDlgButtonChecked(IDC_DISABLEKNOWNLIST) != 0) != thePrefs.m_bDisableKnownClientList;
 	if(IsDlgButtonChecked(IDC_DISABLEKNOWNLIST))
 		thePrefs.m_bDisableKnownClientList = true;
 	else
 		thePrefs.m_bDisableKnownClientList = false;
 
-	thePrefs.ShowCatTabInfos(IsDlgButtonChecked(IDC_SHOWCATINFO));
+	thePrefs.ShowCatTabInfos(IsDlgButtonChecked(IDC_SHOWCATINFO)!=0);
 	if (!thePrefs.ShowCatTabInfos()) theApp.emuledlg->transferwnd->UpdateCatTabTitles();
+
 
 	if( flag != thePrefs.m_bDisableKnownClientList){
 		if( !flag ){
@@ -188,6 +193,8 @@ BOOL CPPgDisplay::OnApply()
 
 	flag = thePrefs.m_bDisableQueueList;
 
+
+	bResetToolbar |= (IsDlgButtonChecked(IDC_DISABLEQUEUELIST) != 0) != thePrefs.m_bDisableQueueList;
 	if(IsDlgButtonChecked(IDC_DISABLEQUEUELIST))
 		thePrefs.m_bDisableQueueList = true;
 	else
@@ -221,6 +228,15 @@ BOOL CPPgDisplay::OnApply()
 		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
 	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
+
+	if ((IsDlgButtonChecked(IDC_SHOWTRANSTOOLBAR) != 0) != thePrefs.IsTransToolbarEnabled()){
+		thePrefs.m_bWinaTransToolbar = !thePrefs.m_bWinaTransToolbar;
+		theApp.emuledlg->transferwnd->ResetTransToolbar(thePrefs.m_bWinaTransToolbar);
+	}
+	else if ((IsDlgButtonChecked(IDC_SHOWTRANSTOOLBAR) != 0) && bResetToolbar){
+		theApp.emuledlg->transferwnd->ResetTransToolbar(thePrefs.m_bWinaTransToolbar);
+	}
+
 	LoadSettings();
 
 	if (mintotray_old != thePrefs.mintotray)
@@ -234,6 +250,7 @@ BOOL CPPgDisplay::OnApply()
 		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 		theApp.emuledlg->SetWindowText(buffer);
 	}
+
 
 	SetModified(FALSE);
 	return CPropertyPage::OnApply();
@@ -266,6 +283,8 @@ void CPPgDisplay::Localize(void)
 		GetDlgItem(IDC_RESETLABEL)->SetWindowText(GetResString(IDS_RESETLABEL));
 		GetDlgItem(IDC_RESETHIST)->SetWindowText(GetResString(IDS_PW_RESET));
 		GetDlgItem(IDC_DISABLEHIST)->SetWindowText(GetResString(IDS_ENABLED));
+
+		GetDlgItem(IDC_SHOWTRANSTOOLBAR)->SetWindowText(GetResString(IDS_PW_SHOWTRANSTOOLBAR));
 	}
 }
 

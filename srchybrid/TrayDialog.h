@@ -1,6 +1,6 @@
 #pragma once
 #include "DialogMinTrayBtn.h"
-#include "ResizableLib\ResizableDialog.h"
+#include "..\ResizableLib\ResizableDialog.h"
 
 #define	IDT_SINGLE_CLICK	100
 
@@ -12,7 +12,7 @@ protected:
 public:
 	CTrayDialog(UINT uIDD, CWnd* pParent = NULL);   // standard constructor
 
-	void TraySetMinimizeToTray(uint8* pbMinimizeToTray);
+	void TraySetMinimizeToTray(bool* pbMinimizeToTray);
 	BOOL TraySetMenu(UINT nResourceID, UINT nDefaultPos = 0);
 	BOOL TraySetMenu(HMENU hMenu, UINT nDefaultPos = 0);
 	BOOL TraySetMenu(LPCTSTR lpszMenuName, UINT nDefaultPos = 0);
@@ -35,7 +35,7 @@ public:
 	virtual void OnTrayMouseMove(CPoint pt);
 
 protected:
-	uint8* m_pbMinimizeToTray;
+	bool* m_pbMinimizeToTray;
     bool m_bCurIconDelete;
     HICON m_hPrevIconDelete;
 	bool m_bdoubleclicked;

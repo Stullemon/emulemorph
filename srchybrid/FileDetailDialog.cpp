@@ -710,11 +710,14 @@ void CFileDetailDialogName::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 
-	if (m_sortindex!=pNMLV->iSubItem) m_sortorder=1; else m_sortorder=!(bool)m_sortorder;
+	if (m_sortindex != pNMLV->iSubItem)
+		m_sortorder = 1;
+	else
+		m_sortorder = !m_sortorder;
 	m_sortindex=pNMLV->iSubItem;
 
 	m_listFileNames.SetSortArrow(m_sortindex, m_sortorder);
-	m_listFileNames.SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
+	m_listFileNames.SortItems(&CompareListNameItems, m_sortindex + (m_sortorder ? 0 : 10));
 
 	*pResult = 0;
 }
@@ -788,6 +791,7 @@ void CFileDetailDialogName::RenameFile()
 	{
 		CString strNewFileName;
 		GetDlgItem(IDC_FILENAME)->GetWindowText(strNewFileName);
+		strNewFileName.Trim();
 		if (strNewFileName.IsEmpty() || !IsValidEd2kString(strNewFileName))
 			return;
 		CPartFile* file = STATIC_DOWNCAST(CPartFile, (*m_paFiles)[0]);

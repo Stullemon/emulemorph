@@ -167,7 +167,7 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 		UpdateCatTabs();
 		if (theApp.m_fontSymbol.m_hObject){
 			GetDlgItem(IDC_CATLABEL)->SetFont(&theApp.m_fontSymbol);
-			GetDlgItem(IDC_CATLABEL)->SetWindowText(_T("8")); // show a right-arrow
+			GetDlgItem(IDC_CATLABEL)->SetWindowText(GetExStyle() & WS_EX_LAYOUTRTL ? _T("3") : _T("4")); // show a right-arrow
 		}
 
 	}

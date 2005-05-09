@@ -17,10 +17,6 @@ static char THIS_FILE[] = __FILE__;
 *
 ************************************************/
 
-#ifndef COLOR_HOTLIGHT
-#define COLOR_HOTLIGHT   26
-#endif
-
 #define INDICATOR_WIDTH  4
 #define INDICATOR_COLOR  COLOR_HOTLIGHT
 #define METHOD           DSTINVERT
@@ -338,12 +334,12 @@ bool TabControl::DrawIndicator(
 // @mfunc Reorders the tab by moving the source tab to the position of the
 //        destination tab.
 //
-bool TabControl::ReorderTab( unsigned int nSrcTab, unsigned int nDstTab )
+BOOL TabControl::ReorderTab( unsigned int nSrcTab, unsigned int nDstTab )
 {
   if( nSrcTab == nDstTab )
     return TRUE; // Return success (we didn't need to do anything
     
-  bool bOK;
+  BOOL bOK;
 
   // Remember the current selected tab
   unsigned int nSelectedTab = GetCurSel();

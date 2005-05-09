@@ -954,7 +954,7 @@ bool CUpDownClient::SendWebCacheBlockRequests()
 	strWCRequest.AppendFormat("\r\n");
 
 	if (thePrefs.GetDebugClientTCPLevel() > 0){
-		DebugSend("WebCache-GET", this, (char*)reqfile->GetFileHash());
+		DebugSend("WebCache-GET", this, reqfile->GetFileHash());
 		Debug(_T("  %hs\n"), strWCRequest);
 	}
 

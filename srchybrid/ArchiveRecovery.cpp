@@ -198,7 +198,7 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, CTypedPtrLi
 				{
 					zipInput->Seek(cdEntry->relativeOffsetOfLocalHeader, CFile::begin);
 					// Update offset
-					cdEntry->relativeOffsetOfLocalHeader = zipOutput->GetPosition();
+					cdEntry->relativeOffsetOfLocalHeader = (UINT)zipOutput->GetPosition();
 					if (!processZipEntry(zipInput, zipOutput, lenEntry, NULL))
 						deleteCD = true;
 				}
@@ -228,7 +228,7 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, CTypedPtrLi
 			while (pos != NULL)
 			{
 				fill = filled->GetNext(pos);
-				uint32 filePos = zipInput->GetPosition();
+				uint32 filePos = (UINT)zipInput->GetPosition();
 				// The file may have been positioned to the next entry in ScanForMarker() or processZipEntry()
 				if (filePos > fill->end)
 					continue;
@@ -239,18 +239,18 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, CTypedPtrLi
 				for (;;)
 				{
 					// Scan for entry marker within this filled area
-					if (!scanForZipMarker(zipInput, (uint32)ZIP_LOCAL_HEADER_MAGIC, (fill->end - zipInput->GetPosition() + 1)))
+					if (!scanForZipMarker(zipInput, (uint32)ZIP_LOCAL_HEADER_MAGIC, (UINT)(fill->end - zipInput->GetPosition() + 1)))
 						break;
 					if (zipInput->GetPosition() > fill->end)
 						break;
-					if (!processZipEntry(zipInput, zipOutput, (fill->end - zipInput->GetPosition() + 1), &centralDirectoryEntries))
+					if (!processZipEntry(zipInput, zipOutput, (UINT)(fill->end - zipInput->GetPosition() + 1), &centralDirectoryEntries))
 						break;
 				}
 			}
 		}
 
 		// Remember offset before CD entries
-		uint32 startOffset = zipOutput->GetPosition();
+		uint32 startOffset = (UINT)zipOutput->GetPosition();
 
 		// Write all central directory entries
 		fileCount = centralDirectoryEntries.GetCount();
@@ -294,14 +294,14 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, CTypedPtrLi
 			}
 
 			// Remember offset before CD entries
-			uint32 endOffset = zipOutput->GetPosition();
+			uint32 endOffset = (UINT)zipOutput->GetPosition();
 
 			// Write end of central directory
 			writeUInt32(zipOutput, ZIP_END_CD_MAGIC);
 			writeUInt16(zipOutput, 0); // Number of this disk
 			writeUInt16(zipOutput, 0); // Number of the disk with the start of the central directory
-			writeUInt16(zipOutput, fileCount);
-			writeUInt16(zipOutput, fileCount);
+			writeUInt16(zipOutput, (uint16)fileCount);
+			writeUInt16(zipOutput, (uint16)fileCount);
 			writeUInt32(zipOutput, endOffset - startOffset);
 			writeUInt32(zipOutput, startOffset);
 			writeUInt16(zipOutput, strlen(ZIP_COMMENT));
@@ -350,7 +350,7 @@ bool CArchiveRecovery::readZipCentralDirectory(CFile *zipInput, CTypedPtrList<CP
 		// Only interested in offset of first CD
 		zipInput->Seek(12, CFile::current);
 		uint32 startOffset = readUInt32(zipInput);
-		if (!IsFilled(startOffset, zipInput->GetLength(), filled))
+		if (!IsFilled(startOffset, (UINT)zipInput->GetLength(), filled))
 			return false;
 
 		// Goto first CD and start reading
@@ -415,7 +415,7 @@ bool CArchiveRecovery::processZipEntry(CFile *zipInput, CFile *zipOutput, uint32
 	try
 	{
 		// Need to know where it started
-		long startOffset = zipOutput->GetPosition();
+		long startOffset = (long)zipOutput->GetPosition();
 
 		// Entry format :
 		//  4      2 bytes  Version needed to extract
@@ -632,7 +632,7 @@ bool CArchiveRecovery::recoverRar(CFile *rarInput, CFile *rarOutput, CTypedPtrLi
 		RAR_BlockFile *block;
 		while ((block = scanForRarFileHeader(rarInput, (uint32)rarInput->GetLength())) != NULL)
 		{
-			if (IsFilled(block->offsetData, block->offsetData + block->dataLength, filled))
+			if (IsFilled((UINT)block->offsetData, (UINT)(block->offsetData + block->dataLength), filled))
 			{
 				// Don't include directories in file count
 				if ((block->HEAD_FLAGS & 0xE0) != 0xE0) 
@@ -957,22 +957,12 @@ uint32 CArchiveRecovery::readUInt32(CFile *input)
 
 uint16 CArchiveRecovery::calcUInt16(BYTE *input)
 {
-	uint16 retVal = 0;
-	try
-	{
-		retVal = (((uint16)input[1]) << 8) + ((uint16)input[0]);
-	} catch (...) {ASSERT(0);}
-	return retVal;
+	return (((uint16)input[1]) << 8) + ((uint16)input[0]);
 }
 
 uint32 CArchiveRecovery::calcUInt32(BYTE *input)
 {
-	uint32 retVal = 0;
-	try
-	{
-		retVal = (((uint32)input[3]) << 24) + (((uint32)input[2]) << 16) + (((uint32)input[1]) << 8) + ((uint32)input[0]);
-	} catch (...) {ASSERT(0);}
-	return retVal;
+	return (((uint32)input[3]) << 24) + (((uint32)input[2]) << 16) + (((uint32)input[1]) << 8) + ((uint32)input[0]);
 }
 
 void CArchiveRecovery::writeUInt16(CFile *output, uint16 val)

@@ -489,7 +489,7 @@ HRESULT CMainFrameDropTarget::PasteHDROP(COleDataObject &data)
 	return hrPasteResult;
 }
 
-bool CMainFrameDropTarget::IsSupportedDropData(COleDataObject* pDataObject)
+BOOL CMainFrameDropTarget::IsSupportedDropData(COleDataObject* pDataObject)
 {
 	BOOL bResult;
 

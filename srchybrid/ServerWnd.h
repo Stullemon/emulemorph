@@ -15,7 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "ResizableLib\ResizableDialog.h"
+#include "..\ResizableLib\ResizableDialog.h"
 #include "ServerListCtrl.h"
 #include "IconStatic.h"
 #include "RichEditCtrlX.h"
@@ -56,6 +56,7 @@ public:
 	void ResetHistory();
 	void PasteServerFromClipboard();
 	bool AddServer(uint16 uPort, CString strIP, CString strName = _T(""), bool bShowErrorMB = true);
+	CString GetMyInfoString();
 
 	//MORPH START - Added by SiRoB, XML News [O²]
 	void ListFeeds();
@@ -122,6 +123,7 @@ private:
 	CString m_strMorphNewVersion;
 	//MORPH END   - Added by SiRoB, New Version Check
 	LCID m_uLangID;
+
 protected:
 	void SetAllIcons();
 
@@ -132,7 +134,7 @@ protected:
 	
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedAddserver();
-	afx_msg void OnBnClickedUpdateservermetfromurl();
+	afx_msg void OnBnClickedUpdateServerMetFromUrl();
 	afx_msg void OnBnClickedResetLog();
 	afx_msg void OnBnConnect();
 	afx_msg void OnTcnSelchangeTab3(NMHDR *pNMHDR, LRESULT *pResult);

@@ -217,7 +217,7 @@ void CPPgScheduler::OnBnClickedApply()
 
 		//time kindof (days)
 		schedule->day=m_timesel.GetCurSel();
-		schedule->enabled=(uint8)IsDlgButtonChecked(IDC_S_ENABLE);
+		schedule->enabled=IsDlgButtonChecked(IDC_S_ENABLE)!=0;
 
 		schedule->ResetActions();
 		for (uint8 i=0;i<m_actions.GetItemCount();i++) {
@@ -465,7 +465,7 @@ void CPPgScheduler::RecheckSchedules() {
 }
 
 void CPPgScheduler::OnEnableChange() {
-	thePrefs.scheduler=IsDlgButtonChecked(IDC_ENABLE);
+	thePrefs.scheduler=IsDlgButtonChecked(IDC_ENABLE)!=0;
 	if (!thePrefs.scheduler) theApp.scheduler->RestoreOriginals();
 	
 	RecheckSchedules();
@@ -474,7 +474,7 @@ void CPPgScheduler::OnEnableChange() {
 }
 
 void CPPgScheduler::OnDisableTime2() {
-	GetDlgItem(IDC_DATETIMEPICKER2)->EnableWindow( !IsDlgButtonChecked(IDC_CHECKNOENDTIME) );
+	GetDlgItem(IDC_DATETIMEPICKER2)->EnableWindow( IsDlgButtonChecked(IDC_CHECKNOENDTIME)==0 );
 }
 
 void CPPgScheduler::OnHelp()

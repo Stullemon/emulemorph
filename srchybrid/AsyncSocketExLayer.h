@@ -61,9 +61,6 @@ If you use this class in commercial applications, please send a short message
 to tim.kosse@gmx.de
 
 */
-#if !defined(AFX_ASYNCSOCKETEXLAYER_H__90C7FDB6_F3F1_4CC0_B77B_858458A563F3__INCLUDED_)
-#define AFX_ASYNCSOCKETEXLAYER_H__90C7FDB6_F3F1_4CC0_B77B_858458A563F3__INCLUDED_
-
 #pragma once
 #include "AsyncSocketEx.h"	// Hinzugefügt von der Klassenansicht
 
@@ -159,5 +156,3 @@ private:
 		long lEvent;
 	};
 };
-
-#endif // !defined(AFX_ASYNCSOCKETEXLAYER_H__90C7FDB6_F3F1_4CC0_B77B_858458A563F3__INCLUDED_)

@@ -53,6 +53,8 @@ private:
 // Operations
 public:
 	void AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu = false);
+	void EnableIcons();
+
 	static  void	FreeAPI();
 	static	void	Init();
 

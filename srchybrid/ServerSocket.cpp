@@ -123,7 +123,7 @@ void CServerSocket::OnReceive(int nErrorCode){
 	m_dwLastTransmission = GetTickCount();
 }
 
-bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
+bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode){
 	try{
 		switch(opcode){
 			case OP_SERVERMESSAGE:{
@@ -131,14 +131,14 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 					Debug(_T("ServerMsg - OP_ServerMessage\n"));
 
 				CServer* pServer = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort()) : NULL;
-				CSafeMemFile data((const BYTE*)packet, size);
+				CSafeMemFile data(packet, size);
 				CString strMessages(data.ReadString(pServer ? pServer->GetUnicodeSupport() : false));
 
 				if (thePrefs.GetDebugServerTCPLevel() > 0){
-					UINT uAddData = data.GetLength() - data.GetPosition();
+					UINT uAddData = (UINT)(data.GetLength() - data.GetPosition());
 					if (uAddData > 0){
 						Debug(_T("*** NOTE: OP_ServerMessage: ***AddData: %u bytes\n"), uAddData);
-						DebugHexDump((uint8*)packet + data.GetPosition(), uAddData);
+						DebugHexDump(packet + data.GetPosition(), uAddData);
 					}
 				}
 
@@ -314,17 +314,17 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 				CServer* pServer = cur_srv ? theApp.serverlist->GetServerByAddress(cur_srv->GetAddress(), cur_srv->GetPort()) : NULL;
 				(void)pServer;
 				bool bMoreResultsAvailable;
-				uint16 uSearchResults = theApp.searchlist->ProcessSearchanswer(packet, size, true/*pServer ? pServer->GetUnicodeSupport() : false*/, cur_srv ? cur_srv->GetIP() : 0, cur_srv ? cur_srv->GetPort() : 0, &bMoreResultsAvailable);
+				uint16 uSearchResults = theApp.searchlist->ProcessSearchAnswer(packet, size, true/*pServer ? pServer->GetUnicodeSupport() : false*/, cur_srv ? cur_srv->GetIP() : 0, cur_srv ? cur_srv->GetPort() : 0, &bMoreResultsAvailable);
 				theApp.emuledlg->searchwnd->LocalSearchEnd(uSearchResults, bMoreResultsAvailable);
 				break;
 			}
 			case OP_FOUNDSOURCES:{
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
-					Debug(_T("ServerMsg - OP_FoundSources; Sources=%u  %s\n"), (UINT)(uchar)packet[16], DbgGetFileInfo((uchar*)packet));
+					Debug(_T("ServerMsg - OP_FoundSources; Sources=%u  %s\n"), (UINT)packet[16], DbgGetFileInfo(packet));
 				ASSERT( cur_server );
 				if (cur_server)
 				{
-					CSafeMemFile sources((BYTE*)packet,size);
+				    CSafeMemFile sources(packet, size);
 					uchar fileid[16];
 					sources.ReadHash16(fileid);
 					if (CPartFile* file = theApp.downloadqueue->GetFileByID(fileid))
@@ -351,7 +351,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 				if (thePrefs.GetDebugServerTCPLevel() > 0){
 					if (size > 8){
 						Debug(_T("*** NOTE: OP_ServerStatus: ***AddData: %u bytes\n"), size - 8);
-						DebugHexDump((uint8*)packet + 8, size - 8);
+						DebugHexDump(packet + 8, size - 8);
 					}
 				}
 				break;
@@ -368,7 +368,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 
 				CServer* pServer = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort()) : NULL;
 				CString strInfo;
-				CSafeMemFile data((BYTE*)packet, size);
+				CSafeMemFile data(packet, size);
 				
 				uint8 aucHash[16];
 				data.ReadHash16(aucHash);
@@ -407,10 +407,10 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 					strInfo += _T('\n');
 					Debug(_T("%s"), strInfo);
 
-					UINT uAddData = data.GetLength() - data.GetPosition();
+					UINT uAddData = (UINT)(data.GetLength() - data.GetPosition());
 					if (uAddData > 0){
 						Debug(_T("*** NOTE: OP_ServerIdent: ***AddData: %u bytes\n"), uAddData);
-						DebugHexDump((uint8*)packet + data.GetPosition(), uAddData);
+						DebugHexDump(packet + data.GetPosition(), uAddData);
 					}
 				}
 
@@ -434,7 +434,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
 					Debug(_T("ServerMsg - OP_ServerList\n"));
 				try{
-					CSafeMemFile servers((BYTE*)packet,size);
+					CSafeMemFile servers(packet, size);
 					UINT count = servers.ReadUInt8();
 					// check if packet is valid
 					if (1 + count*(4+2) > size)
@@ -455,10 +455,10 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 					if (addcount)
 						AddLogLine(false,GetResString(IDS_NEWSERVERS), addcount);
 					if (thePrefs.GetDebugServerTCPLevel() > 0){
-						UINT uAddData = servers.GetLength() - servers.GetPosition();
+						UINT uAddData = (UINT)(servers.GetLength() - servers.GetPosition());
 						if (uAddData > 0){
 							Debug(_T("*** NOTE: OP_ServerList: ***AddData: %u bytes\n"), uAddData);
-							DebugHexDump((uint8*)packet + servers.GetPosition(), uAddData);
+							DebugHexDump(packet + servers.GetPosition(), uAddData);
 						}
 					}
 				}
@@ -515,12 +515,12 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 			}
 			case OP_CALLBACK_FAIL:{
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
-					Debug(_T("ServerMsg - OP_Callback_Fail %s\n"), DbgGetHexDump((uint8*)packet, size));
+					Debug(_T("ServerMsg - OP_Callback_Fail %s\n"), DbgGetHexDump(packet, size));
 				break;
 			}
 			case OP_REJECT:{
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
-					Debug(_T("ServerMsg - OP_Reject %s\n"), DbgGetHexDump((uint8*)packet, size));
+					Debug(_T("ServerMsg - OP_Reject %s\n"), DbgGetHexDump(packet, size));
 				// this could happen if we send a command with the wrong protocol (e.g. sending a compressed packet to
 				// a server which does not support that protocol).
 				if (thePrefs.GetVerbose())
@@ -529,7 +529,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 			}
 			default:
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
-					Debug(_T("***NOTE: ServerMsg - Unknown message; opcode=0x%02x  %s\n"), opcode, DbgGetHexDump((uint8*)packet, size));
+					Debug(_T("***NOTE: ServerMsg - Unknown message; opcode=0x%02x  %s\n"), opcode, DbgGetHexDump(packet, size));
 				;
 		}
 
@@ -641,7 +641,7 @@ bool CServerSocket::PacketReceived(Packet* packet)
 
 		if (packet->prot == OP_EDONKEYPROT)
 		{
-			ProcessPacket(packet->pBuffer,packet->size,packet->opcode);
+			ProcessPacket((const BYTE*)packet->pBuffer, packet->size, packet->opcode);
 		}
 		else
 		{

@@ -95,7 +95,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 		m_htiHideOS = m_ctrlTreeOptions.InsertItem(GetResString(IDS_HIDEOVERSHARES), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSFM);
 		m_ctrlTreeOptions.AddEditBox(m_htiHideOS, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		m_htiSelectiveShare = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SELECTIVESHARE), m_htiHideOS, m_iSelectiveShare);
+		m_htiSelectiveShare = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SELECTIVESHARE), m_htiHideOS, m_bSelectiveShare);
 		//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 		m_htiShareOnlyTheNeed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHAREONLYTHENEED), m_htiSFM, m_iShareOnlyTheNeed);
@@ -113,7 +113,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiPowerShareLimit, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		//MORPH END   - Added by SiRoB, POWERSHARE Limit
 		//Morph Start - added by AndCyle, selective PS internal Prio
-		m_htiPowershareInternalPrio = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_INTERPRIO), m_htiPowershareMode, m_iPowershareInternalPrio);
+		m_htiPowershareInternalPrio = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_INTERPRIO), m_htiPowershareMode, m_bPowershareInternalPrio);
 		//Morph End - added by AndCyle, selective PS internal Prio
 		
 		//MORPH START - Added by SiRoB, Show Permission
@@ -127,7 +127,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		//MORPH END   - Added by SiRoB, Show Permission
 
 		m_htiDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, TVI_ROOT);
-		m_htiFolderIcons = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLDERICONS),m_htiDisplay, m_iFolderIcons);
+		m_htiFolderIcons = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLDERICONS),m_htiDisplay, m_bFolderIcons);
 
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiHideOS, TVE_EXPAND);
@@ -143,7 +143,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiHideOS, m_iHideOS);
 	DDV_MinMaxInt(pDX, m_iHideOS, 0, INT_MAX);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSelectiveShare, m_iSelectiveShare);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSelectiveShare, m_bSelectiveShare);
 	//MORPH END - Added by SiRoB, SLUGFILLER: hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShareOnlyTheNeed, m_iShareOnlyTheNeed);
@@ -156,12 +156,12 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPowershareMode, m_iPowershareMode);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//Morph Start - added by AndCyle, selective PS internal Prio
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiPowershareInternalPrio, m_iPowershareInternalPrio);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiPowershareInternalPrio, m_bPowershareInternalPrio);
 	//Morph End - added by AndCyle, selective PS internal Prio
 	//MORPH START - Added by SiRoB, Show Permission
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPermissions, m_iPermissions);
 	//MORPH END   - Added by SiRoB, Show Permission
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFolderIcons, m_iFolderIcons);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFolderIcons, m_bFolderIcons);
 }
 
 
@@ -170,12 +170,12 @@ BOOL CPPgMorphShare::OnInitDialog()
 	m_iPowershareMode = thePrefs.m_iPowershareMode;//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	m_iSpreadbar = thePrefs.GetSpreadbarSetStatus(); //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	m_iHideOS = thePrefs.hideOS; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	m_iSelectiveShare = thePrefs.selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
+	m_bSelectiveShare = thePrefs.selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iShareOnlyTheNeed = thePrefs.ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_iPowerShareLimit = thePrefs.PowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
-	m_iPowershareInternalPrio = thePrefs.m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
+	m_bPowershareInternalPrio = thePrefs.m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	m_iPermissions = thePrefs.permissions; //MORPH - Added by SiRoB, Show Permission
-	m_iFolderIcons = thePrefs.m_bShowFolderIcons;
+	m_bFolderIcons = thePrefs.m_bShowFolderIcons;
 	
 	CPropertyPage::OnInitDialog();
 	Localize();
@@ -202,20 +202,20 @@ BOOL CPPgMorphShare::OnApply()
 	thePrefs.m_iPowershareMode = m_iPowershareMode;//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	thePrefs.m_iSpreadbarSetStatus = m_iSpreadbar; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	thePrefs.hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	thePrefs.selectiveShare = m_iSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	thePrefs.ShareOnlyTheNeed = m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	thePrefs.selectiveShare = m_bSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
+	thePrefs.ShareOnlyTheNeed = m_iShareOnlyTheNeed!=0; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
 	thePrefs.PowerShareLimit = m_iPowerShareLimit;
 	theApp.sharedfiles->UpdatePartsInfo();
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
 	bool oldValue = thePrefs.m_bPowershareInternalPrio;
-	thePrefs.m_bPowershareInternalPrio = m_iPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
+	thePrefs.m_bPowershareInternalPrio = m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	if(thePrefs.m_bPowershareInternalPrio != oldValue)
 		theApp.uploadqueue->ReSortUploadSlots(true);
-	if(thePrefs.m_bShowFolderIcons != (m_iFolderIcons == 1))
+	if(thePrefs.m_bShowFolderIcons != (m_bFolderIcons == 1))
 	{
-		if(m_iFolderIcons)
+		if(m_bFolderIcons)
 		{
 			theApp.AddIncomingFolderIcon();
 			theApp.AddTempFolderIcon();
@@ -226,7 +226,7 @@ BOOL CPPgMorphShare::OnApply()
 			theApp.RemoveTempFolderIcon();
 		}
 	}
-	thePrefs.m_bShowFolderIcons = m_iFolderIcons;
+	thePrefs.m_bShowFolderIcons = m_bFolderIcons;
 	
 	//theApp.scheduler->SaveOriginals(); //Removed by SiRoB, no scheduler param in this ppg //Added by SiRoB, Fix for Param used in scheduler
 

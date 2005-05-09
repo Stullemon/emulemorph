@@ -30,6 +30,8 @@ public:
 	void AppendColoredText(LPCTSTR pszText, COLORREF cr);
 
 	CString GetText() const;
+	bool IsAutoScroll() const { return m_bAutoScroll; }
+	void ScrollToLastLine(bool bForceLastLineAtBottom = false);
 
 	void SetFont(CFont* pFont, BOOL bRedraw = TRUE);
 	CFont* GetFont() const;
@@ -59,7 +61,6 @@ protected:
 	void SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& nStartChar, long& nEndChar, bool bLink, COLORREF cr);
 	void FlushBuffer();
 	void AddString(int nPos, LPCTSTR pszString, bool bLink, COLORREF cr);
-	void ScrollToLastLine();
 
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 

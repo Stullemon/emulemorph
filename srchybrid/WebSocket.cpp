@@ -5,6 +5,7 @@
 #include "WebServer.h"
 #include "Preferences.h"
 #include "StringConversion.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -49,7 +50,8 @@ void CWebSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData
 	if (sURL.GetLength()>4 &&	// min length (for valid extentions)
 		(sURL.Right(4).MakeLower()==".gif" || sURL.Right(4).MakeLower()==".jpg" || sURL.Right(4).MakeLower()==".png" ||
 		sURL.Right(4).MakeLower()==".ico" ||sURL.Right(4).MakeLower()==".css" ||sURL.Right(3).MakeLower()==".js" ||
-		sURL.Right(4).MakeLower()==".bmp" || sURL.Right(5).MakeLower()==".jpeg") // extentions check
+		sURL.Right(4).MakeLower()==".bmp" || sURL.Right(5).MakeLower()==".jpeg"
+		)
 		&& sURL.Find("..")==-1	// dont allow leaving the emule-webserver-folder for accessing files
 		)
 			filereq=true;
@@ -220,6 +222,14 @@ void CWebSocket::SendData(const void* pData, DWORD dwDataSize)
 			}
 		}
 	}
+}
+
+void CWebSocket::SendReply(LPCSTR szReply) {
+	char szBuf[256];
+	int nLen = wsprintfA(szBuf, "%sr\n", szReply);
+	ASSERT(nLen<ARRSIZE(szBuf));
+
+	SendData(szBuf, nLen);
 }
 
 void CWebSocket::SendContent(LPCSTR szStdResponse, const void* pContent, DWORD dwContentSize)
@@ -397,78 +407,94 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 	srand(time(NULL));
 	InitThreadLocale();
 
-//	WSADATA stData;
-//	if (!WSAStartup(MAKEWORD(1, 1), &stData))
+	SOCKET hSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
+	if (INVALID_SOCKET != hSocket)
 	{
-		SOCKET hSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
-		if (INVALID_SOCKET != hSocket)
+		SOCKADDR_IN stAddr;
+		stAddr.sin_family = AF_INET;
+		stAddr.sin_port = htons(thePrefs.GetWSPort());
+		stAddr.sin_addr.S_un.S_addr = INADDR_ANY;
+
+		if (!bind(hSocket, (sockaddr*)&stAddr, sizeof(stAddr)) && !listen(hSocket, SOMAXCONN))
 		{
-			SOCKADDR_IN stAddr;
-			stAddr.sin_family = AF_INET;
-			stAddr.sin_port = htons(thePrefs.GetWSPort());
-			stAddr.sin_addr.S_un.S_addr = INADDR_ANY;
-
-			if (!bind(hSocket, (sockaddr*)&stAddr, sizeof(stAddr)) && !listen(hSocket, SOMAXCONN))
+			HANDLE hEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
+			if (hEvent)
 			{
-				HANDLE hEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
-				if (hEvent)
+				if (!WSAEventSelect(hSocket, hEvent, FD_ACCEPT))
 				{
-					if (!WSAEventSelect(hSocket, hEvent, FD_ACCEPT))
+					//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+					CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
+					BOOL UPnP = false;
+
+					mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
+					mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
+					mapping.description = "Web Interface";
+					if(thePrefs.GetUPnPNatWeb())
+						UPnP = theApp.AddUPnPNatPort(&mapping);
+					//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+
+					HANDLE pWait[] = { hEvent, s_hTerminate };
+					while (WAIT_OBJECT_0 == WaitForMultipleObjects(2, pWait, FALSE, INFINITE))
 					{
-						//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-						CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
-						BOOL UPnP = false;
-
-						mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
-						mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
-						mapping.description = "Web Interface";
-						if(thePrefs.GetUPnPNatWeb())
-							UPnP = theApp.AddUPnPNatPort(&mapping);
-						//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-
-						HANDLE pWait[] = { hEvent, s_hTerminate };
-						while (WAIT_OBJECT_0 == WaitForMultipleObjects(2, pWait, FALSE, INFINITE))
+						for (;;)
 						{
-							for (;;)
-							{
-								struct sockaddr_in their_addr;
-                                int sin_size = sizeof(struct sockaddr_in);
+							struct sockaddr_in their_addr;
+                            int sin_size = sizeof(struct sockaddr_in);
 
-								SOCKET hAccepted = accept(hSocket,(struct sockaddr *)&their_addr, &sin_size);
-								if (INVALID_SOCKET == hAccepted)
+							SOCKET hAccepted = accept(hSocket,(struct sockaddr *)&their_addr, &sin_size);
+							if (INVALID_SOCKET == hAccepted)
 									break;
 
-								if(thePrefs.GetWSIsEnabled())
+							if (thePrefs.GetAllowedRemoteAccessIPs().GetCount() > 0)
+							{
+								bool bAllowedIP = false;
+								for (int i = 0; i < thePrefs.GetAllowedRemoteAccessIPs().GetCount(); i++)
 								{
-									SocketData *pData = new SocketData;
-									pData->hSocket = hAccepted;
-									pData->pThis = pThis;
-									pData->incomingaddr=their_addr.sin_addr;
-									
-									// - do NOT use Windows API 'CreateThread' to create a thread which uses MFC/CRT -> lot of mem leaks!
-									// - 'AfxBeginThread' could be used here, but creates a little too much overhead for our needs.
-									CWinThread* pAcceptThread = new CWinThread(WebSocketAcceptedFunc, (LPVOID)pData);
-									if (!pAcceptThread->CreateThread()){
-										delete pAcceptThread;
-										pAcceptThread = NULL;
-										VERIFY( !closesocket(hSocket) );
+									if (their_addr.sin_addr.S_un.S_addr == thePrefs.GetAllowedRemoteAccessIPs()[i])
+									{
+										bAllowedIP = true;
+										break;
 									}
 								}
-								else
-									VERIFY( !closesocket(hSocket) );
+								if (!bAllowedIP) {
+									LogWarning(_T("Web Interface: Rejected connection attempt from %s"), ipstr(their_addr.sin_addr.S_un.S_addr));
+									VERIFY( !closesocket(hAccepted) );
+									break;
+								}
 							}
-						}
 
-						//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-						if(UPnP) theApp.RemoveUPnPNatPort(&mapping);
-						//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+							if(thePrefs.GetWSIsEnabled())
+							{
+								SocketData *pData = new SocketData;
+								pData->hSocket = hAccepted;
+								pData->pThis = pThis;
+								pData->incomingaddr=their_addr.sin_addr;
+									
+								// - do NOT use Windows API 'CreateThread' to create a thread which uses MFC/CRT -> lot of mem leaks!
+								// - 'AfxBeginThread' could be used here, but creates a little too much overhead for our needs.
+								CWinThread* pAcceptThread = new CWinThread(WebSocketAcceptedFunc, (LPVOID)pData);
+								if (!pAcceptThread->CreateThread())
+								{
+									delete pAcceptThread;
+									pAcceptThread = NULL;
+									VERIFY( !closesocket(hSocket) );
+								}
+							}
+							else
+								VERIFY( !closesocket(hSocket) );
+						}
 					}
-					VERIFY( CloseHandle(hEvent) );
+
+					//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+					if(UPnP) theApp.RemoveUPnPNatPort(&mapping);
+					//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 				}
+				VERIFY( CloseHandle(hEvent) );
+				hEvent = NULL;
 			}
-			VERIFY( !closesocket(hSocket) );
 		}
-//		VERIFY( !WSACleanup() );
+		VERIFY( !closesocket(hSocket) );
+		hSocket = NULL;
 	}
 
 	return 0;

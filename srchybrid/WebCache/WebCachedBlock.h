@@ -49,6 +49,6 @@ public:
 	void OnSuccessfulDownload();
 	void OnWebCacheBlockRequestSent();
 	Pending_Block_Struct* CWebCachedBlock::CreatePendingBlock();
-	CWebCachedBlock( const char* packet, uint32 size, CUpDownClient* client, bool XpressOHCB = false );
+	CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient* client, bool XpressOHCB = false );
 	~CWebCachedBlock();
 };

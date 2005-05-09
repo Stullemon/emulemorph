@@ -185,9 +185,16 @@ BOOL CPPgDirectories::OnApply()
 	// on changing incoming dir, update incoming dirs of category of the same path
 	if (testincdirchanged.CompareNoCase(thePrefs.GetIncomingDir())!=0) {
 		CString oldpath;
+		bool dontaskagain=false;
 		for (int cat=1; cat<=thePrefs.GetCatCount()-1;cat++){
 			oldpath=CString(thePrefs.GetCatPath(cat));
 			if (oldpath.Left(testincdirchanged.GetLength()).CompareNoCase(testincdirchanged)==0) {
+
+				if (!dontaskagain) {
+					dontaskagain=true;
+					if (AfxMessageBox(GetResString(IDS_UPDATECATINCOMINGDIRS),MB_YESNO)==IDNO)
+						break;
+				}
 				_sntprintf(thePrefs.GetCategory(cat)->incomingpath, ARRSIZE(thePrefs.GetCategory(cat)->incomingpath), _T("%s%s"), thePrefs.GetIncomingDir(), oldpath.Mid(testincdirchanged.GetLength()));
 			}
 		}

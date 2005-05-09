@@ -15,21 +15,19 @@ public:
 	void Localize(void);
 
 protected:
-	int m_iSoundEvents;
-	int m_iTimeStamp;
-	int m_iInfoMessage;
-	int m_iMiscMessage;
-	int m_iJoinMessage;
-	int m_iPartMessage;
-	int m_iQuitMessage;
-	int m_iEmuleProto;
-	int m_iEmuleAddFriend;
-	int m_iEmuleAllowAddFriend;
-	int m_iEmuleSendLink;
-	int m_iAcceptLinks;
-	int m_iAcceptLinksFriends;
-	int m_iHelpChannel;
-	int m_iChannelsOnConnect;
+	bool m_bTimeStamp;
+	bool m_bSoundEvents;
+	bool m_bMiscMessage;
+	bool m_bJoinMessage;
+	bool m_bPartMessage;
+	bool m_bQuitMessage;
+	bool m_bEmuleAddFriend;
+	bool m_bEmuleAllowAddFriend;
+	bool m_bEmuleSendLink;
+	bool m_bAcceptLinks;
+	bool m_bAcceptLinksFriends;
+	bool m_bHelpChannel;
+	bool m_bChannelsOnConnect;
 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;

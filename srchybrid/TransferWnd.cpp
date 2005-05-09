@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@
 #include "CatDialog.h"
 #include "InputBox.h"
 #include "UserMsgs.h"
+#include "SharedFileList.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,15 +36,45 @@
 static char THIS_FILE[]=__FILE__;
 #endif
 
+#define	WND_SPLITTER_YOFF	8
+#define	WND_SPLITTER_HEIGHT	5
+
+#define	WND1_BUTTON_XOFF	8
+#define	WND1_BUTTON_WIDTH	170
+#define	WND1_BUTTON_HEIGHT	22	// don't set the height do something different than 22 unless you know exactly what you are doing!
+#define	NUM_WINA_BUTTONS	6
+
+#define	WND2_BUTTON_XOFF	8
+#define	WND2_BUTTON_WIDTH	170
+#define	WND2_BUTTON_HEIGHT	22	// don't set the height do something different than 22 unless you know exactly what you are doing!
 
 // CTransferWnd dialog
 
 IMPLEMENT_DYNAMIC(CTransferWnd, CDialog)
+
+BEGIN_MESSAGE_MAP(CTransferWnd, CResizableDialog)
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_SYSCOLORCHANGE()
+	ON_NOTIFY(LVN_HOTTRACK, IDC_UPLOADLIST, OnHoverUploadList)
+	ON_NOTIFY(LVN_HOTTRACK, IDC_QUEUELIST, OnHoverUploadList)
+	ON_NOTIFY(LVN_HOTTRACK, IDC_DOWNLOADLIST, OnHoverDownloadList)
+	ON_NOTIFY(LVN_HOTTRACK, IDC_DOWNLOADCLIENTS, OnHoverUploadList) //MORPH - Added by SiRoB, Fix
+	ON_NOTIFY(LVN_HOTTRACK, IDC_CLIENTLIST , OnHoverUploadList)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_DLTAB, OnTcnSelchangeDltab)
+	ON_NOTIFY(LVN_BEGINDRAG, IDC_DOWNLOADLIST, OnLvnBegindrag)
+	ON_NOTIFY(LVN_KEYDOWN, IDC_DOWNLOADLIST, OnLvnKeydownDownloadlist)
+	ON_NOTIFY(NM_RCLICK, IDC_DLTAB, OnNMRclickDltab)
+	ON_NOTIFY(UM_TABMOVED, IDC_DLTAB, OnTabMovement)
+	ON_NOTIFY(TBN_DROPDOWN, IDC_DOWNLOAD_ICO, OnWnd1BtnDropDown)
+	ON_NOTIFY(TBN_DROPDOWN, IDC_UPLOAD_ICO, OnWnd2BtnDropDown)
+END_MESSAGE_MAP()
+
 CTransferWnd::CTransferWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CTransferWnd::IDD, pParent)
 {
-	icon_download = NULL;
-	m_uWnd2 = DFLT_TRANSFER_WND2;
+	m_uWnd2 = wnd2Uploading;
+	m_dwShowListIDC = 0;
 	m_pLastMousePoint.x = -1;
 	m_pLastMousePoint.y = -1;
 	m_nLastCatTT = -1;
@@ -51,8 +82,6 @@ CTransferWnd::CTransferWnd(CWnd* pParent /*=NULL*/)
 
 CTransferWnd::~CTransferWnd()
 {
-	if (icon_download)
-		VERIFY( DestroyIcon(icon_download) );
 	// khaos::categorymod+
 	VERIFY(m_mnuCatPriority.DestroyMenu());
 	VERIFY(m_mnuCatViewFilter.DestroyMenu());
@@ -60,25 +89,21 @@ CTransferWnd::~CTransferWnd()
 	// khaos::categorymod-
 }
 
-BEGIN_MESSAGE_MAP(CTransferWnd, CResizableDialog)
-	ON_NOTIFY(LVN_HOTTRACK, IDC_UPLOADLIST, OnHoverUploadList)
-	ON_NOTIFY(LVN_HOTTRACK, IDC_QUEUELIST, OnHoverUploadList)
-	ON_NOTIFY(LVN_HOTTRACK, IDC_DOWNLOADLIST, OnHoverDownloadList)
-	ON_NOTIFY(LVN_HOTTRACK, IDC_DOWNLOADCLIENTS, OnHoverUploadList) //MORPH - Added by SiRoB, Fix
-	ON_NOTIFY(LVN_HOTTRACK, IDC_CLIENTLIST , OnHoverUploadList)
-	ON_NOTIFY(TCN_SELCHANGE, IDC_DLTAB, OnTcnSelchangeDltab)
-	ON_NOTIFY(NM_RCLICK, IDC_DLTAB, OnNMRclickDltab)
-	ON_NOTIFY(LVN_BEGINDRAG, IDC_DOWNLOADLIST, OnLvnBegindrag)
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_NOTIFY(LVN_KEYDOWN, IDC_DOWNLOADLIST, OnLvnKeydownDownloadlist)
-	ON_NOTIFY(UM_TABMOVED, IDC_DLTAB, OnTabMovement)
-	ON_WM_SYSCOLORCHANGE()
-END_MESSAGE_MAP()
-
-
 BOOL CTransferWnd::OnInitDialog()
 {
+	GetDlgItem(IDC_DOWNLOAD_ICO)->DestroyWindow(); // delete the control ID place holder dummy window
+
+	CRect rc;
+	ResetTransToolbar(thePrefs.IsTransToolbarEnabled(), false);	
+	GetDlgItem(IDC_UPLOAD_ICO)->GetWindowRect(&rc);
+	ScreenToClient(&rc);
+	rc.top -= 1;
+	GetDlgItem(IDC_UPLOAD_ICO)->DestroyWindow();
+	rc.left = WND2_BUTTON_XOFF;
+	rc.right = rc.left + WND2_BUTTON_WIDTH;
+	rc.bottom = rc.top + WND2_BUTTON_HEIGHT;
+	m_btnWnd2.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP, rc, this, IDC_UPLOAD_ICO, true);
+
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
 
@@ -86,84 +111,22 @@ BOOL CTransferWnd::OnInitDialog()
 	downloadlistctrl.Init();
 	queuelistctrl.Init();
 	clientlistctrl.Init();
-	downloadclientsctrl.Init(); //SLAHAM: ADDED DownloadClientsCtrl
+	downloadclientsctrl.Init();
 
 	if (thePrefs.GetRestoreLastMainWndDlg())
-		m_uWnd2 = thePrefs.GetTransferWnd2();
-	//SLAHAM: ADDED DownloadClientsCtrl
-	bKl = !thePrefs.m_bDisableKnownClientList;
-	bQl = !thePrefs.m_bDisableQueueList;
-
-	m_uWnd2 = 1;
+		m_uWnd2 = (EWnd2)thePrefs.GetTransferWnd2();
 	ShowWnd2(m_uWnd2);
 
 	SetAllIcons();
+    Localize();
 
-    Localize(); // i_a 
-
-	m_uplBtn.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_uplBtn.SetFlat();
-	m_uplBtn.DrawFlatFocus(TRUE);
-	m_uplBtn.SetLeftAlign(true); 
-	
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-	m_btnChangeView.SetIcon(_T("ViewCycle"));	
-	m_btnChangeView.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnChangeView.SetLeftAlign(true); 
-
-	m_btnDownUploads.SetIcon(_T("ViewUpDown"));
-	m_btnDownUploads.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnDownUploads.SetLeftAlign(true);
-
-	m_btnDownloads.SetIcon(_T("ViewDownload"));
-	m_btnDownloads.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnDownloads.SetLeftAlign(true); 
-
-	m_btnUploads.SetIcon(_T("ViewUpload"));
-	m_btnUploads.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnUploads.SetLeftAlign(true); 
-
-	m_btnClient.SetIcon(_T("ViewKnownOnly"));
-	m_btnClient.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnClient.SetLeftAlign(true); 
-
-	m_btnQueue.SetIcon(_T("ViewQueueOnly"));
-	m_btnQueue.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnQueue.SetLeftAlign(true); 
-
-	m_btnTransfers.SetIcon(_T("ViewTransfersOnly"));
-	m_btnTransfers.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnTransfers.SetLeftAlign(true); 
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
-
-	//SLAHAM: ADDED Switch Lists Icons =>
-	m_btnULChangeView.SetIcon(_T("ViewCycle"));
-	m_btnULChangeView.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnULChangeView.SetLeftAlign(true);
-
-	m_btnULClients.SetIcon(_T("ViewKnownOnly"));
-	m_btnULClients.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnULClients.SetLeftAlign(true);
-
-	m_btnULQueue.SetIcon(_T("ViewQueueOnly"));
-	m_btnULQueue.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnULQueue.SetLeftAlign(true);
-
-	m_btnULTransfers.SetIcon(_T("ViewTransfersOnly"));
-	m_btnULTransfers.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnULTransfers.SetLeftAlign(true);
-
-	m_btnULUploads.SetIcon(_T("ViewUpload"));
-	m_btnULUploads.SetAlign(CButtonST::ST_ALIGN_HORIZ);
-	m_btnULUploads.SetLeftAlign(true);
-	//SLAHAM: ADDED Switch Lists Icons <=
-
+	//AddAnchor(m_btnWnd1, TOP_LEFT);
 	AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100, thePrefs.GetSplitterbarPosition() ));
 	AddAnchor(IDC_UPLOADLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_DOWNLOADCLIENTS,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT); //SLAHAM: ADDED DownloadClientsCtrl
-	AddAnchor(IDC_UPLOAD_ICO,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(m_btnWnd2, CSize(0, thePrefs.GetSplitterbarPosition()), BOTTOM_RIGHT);
+	AddAnchor(IDC_DOWNLOADCLIENTS, CSize(0, thePrefs.GetSplitterbarPosition()), BOTTOM_RIGHT);
 	AddAnchor(IDC_QUEUECOUNT,BOTTOM_LEFT);
     AddAnchor(IDC_QUEUE, BOTTOM_LEFT, BOTTOM_RIGHT); //Commander - Added: ClientQueueProgressBar
 	AddAnchor(IDC_TSTATIC1,BOTTOM_LEFT);
@@ -171,23 +134,15 @@ BOOL CTransferWnd::OnInitDialog()
 	AddAnchor(IDC_DLTAB,CSize(50,0) ,TOP_RIGHT);
 
 	// splitting functionality
-	CRect rc,rcSpl,rcDown;
-
 	GetWindowRect(rc);
 	ScreenToClient(rc);
-
-	rcSpl=rc; rcSpl.top=rc.bottom-100 ; rcSpl.bottom=rcSpl.top+5;rcSpl.left=330; //SLAHAM: MODIFIED Switch Lists Icons =>
+	CRect rcSpl;
+	rcSpl.left = 55;
+	rcSpl.right = rc.right;
+	rcSpl.top = rc.bottom - 100;
+	rcSpl.bottom = rcSpl.top + WND_SPLITTER_HEIGHT;
 	m_wndSplitter.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER);
-	//SLAHAM: ADDED Switch Lists Icons =>
-	m_btnULChangeView.ShowWindow(SW_SHOW);
-	m_btnULClients.ShowWindow(SW_SHOW);
-	m_btnULQueue.ShowWindow(SW_SHOW);
-	m_btnULTransfers.ShowWindow(SW_SHOW);
-	m_btnULUploads.ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_STATIC7)->ShowWindow(SW_SHOW);
-	//SLAHAM: ADDED Switch Lists Icons <=
-
-	OnBnClickedDownUploads(); //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons
+	OnBnClickedDownUploads(); // replaces SetInitLayout();
 	
 	//cats
 	rightclickindex=-1;
@@ -216,10 +171,10 @@ BOOL CTransferWnd::OnInitDialog()
 			curCat->viewfilters.nFromCats = 0;
 		else*/ if (curCat->viewfilters.nFromCats != 2 && ix != 0 && theApp.downloadqueue->GetCategoryFileCount(ix) != 0)
 			curCat->viewfilters.nFromCats = 2;
-
 		m_dlTab.InsertItem(ix,thePrefs.GetCategory(ix)->title );
 	}
 	// khaos::categorymod-
+	// create tooltip control for download categories
 	m_tooltipCats.Create(this, TTS_NOPREFIX);
 	m_dlTab.SetToolTips(&m_tooltipCats);
 	UpdateCatTabTitles();
@@ -251,7 +206,8 @@ BOOL CTransferWnd::OnInitDialog()
 	return true;
 }
 
-void CTransferWnd::ShowQueueCount(uint32 number){
+void CTransferWnd::ShowQueueCount(uint32 number)
+{
 	TCHAR buffer[100];
 
 	if(thePrefs.IsInfiniteQueueEnabled()){
@@ -285,82 +241,21 @@ void CTransferWnd::DoDataExchange(CDataExchange* pDX)
 	CResizableDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_UPLOADLIST, uploadlistctrl);
 	DDX_Control(pDX, IDC_DOWNLOADLIST, downloadlistctrl);
-	DDX_Control(pDX, IDC_DOWNLOADCLIENTS, downloadclientsctrl); //SLAHAM: ADDED DownloadClientsCtrl
 	DDX_Control(pDX, IDC_QUEUELIST, queuelistctrl);
 	DDX_Control(pDX, IDC_CLIENTLIST, clientlistctrl);
-	DDX_Control(pDX, IDC_UPLOAD_ICO, m_uplBtn);
+	DDX_Control(pDX, IDC_DOWNLOADCLIENTS, downloadclientsctrl);
+	DDX_Control(pDX, IDC_UPLOAD_ICO, m_btnWnd2);
 	DDX_Control(pDX, IDC_DLTAB, m_dlTab);
 	DDX_Control(pDX, IDC_QUEUE, queueBar); //Commander - Added: ClientQueueProgressBar
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-	DDX_Control(pDX, IDC_DL_CHANGEVIEW, m_btnChangeView);
-	DDX_Control(pDX, IDC_DL_DOWN_UPLOADS, m_btnDownUploads);
-	DDX_Control(pDX, IDC_DL_DOWNLOADS, m_btnDownloads);
-	DDX_Control(pDX, IDC_DL_UPLOADS, m_btnUploads);
-	DDX_Control(pDX, IDC_DL_QUEUE, m_btnQueue);
-	DDX_Control(pDX, IDC_DL_TRANSFERS, m_btnTransfers);
-	DDX_Control(pDX, IDC_DL_CLIENT, m_btnClient);
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
-
-	//SLAHAM: ADDED Switch Lists Icons =>
-	DDX_Control(pDX, IDC_UL_CHANGEVIEW, m_btnULChangeView);
-	DDX_Control(pDX, IDC_UL_UPLOADS, m_btnULUploads);
-	DDX_Control(pDX, IDC_UL_QUEUE, m_btnULQueue);
-	DDX_Control(pDX, IDC_UL_CLIENTS, m_btnULClients);
-	DDX_Control(pDX, IDC_UL_TRANSFERS, m_btnULTransfers);
-	//SLAHAM: ADDED Switch Lists Icons <=
 }
 
-//SLAHAM: REMOVED [TPT] - TBH Transfer Window Buttons
-/*
-void CTransferWnd::SetInitLayout() {
-		CRect rcDown,rcSpl,rcW;
-
-		GetWindowRect(rcW);
-		ScreenToClient(rcW);
-
-		LONG splitpos=(thePrefs.GetSplitterbarPosition()*rcW.Height())/100;
-
-	GetDlgItem(IDC_DOWNLOADLIST)->GetWindowRect(rcDown);
-		ScreenToClient(rcDown);
-		rcDown.right=rcW.right-7;
-		rcDown.bottom=splitpos-5;
-		downloadlistctrl.MoveWindow(rcDown);
-		
-	GetDlgItem(IDC_UPLOADLIST)->GetWindowRect(rcDown);
-		ScreenToClient(rcDown);
-		rcDown.right=rcW.right-7;
-		rcDown.bottom=rcW.bottom-20;
-		rcDown.top=splitpos+20;
-		uploadlistctrl.MoveWindow(rcDown);
-
-	GetDlgItem(IDC_QUEUELIST)->GetWindowRect(rcDown);
-		ScreenToClient(rcDown);
-		rcDown.right=rcW.right-7;
-		rcDown.bottom=rcW.bottom-20;
-		rcDown.top=splitpos+20;
-		queuelistctrl.MoveWindow(rcDown);
-
-	GetDlgItem(IDC_CLIENTLIST)->GetWindowRect(rcDown);
-		ScreenToClient(rcDown);
-		rcDown.right=rcW.right-7;
-		rcDown.bottom=rcW.bottom-20;
-		rcDown.top=splitpos+20;
-		clientlistctrl.MoveWindow(rcDown);
-
-		rcSpl=rcDown;
-		rcSpl.top=rcDown.bottom+4;rcSpl.bottom=rcSpl.top+7;rcSpl.left=(rcDown.right/2)-50;rcSpl.right=rcSpl.left+100;
-		m_wndSplitter.MoveWindow(rcSpl,true);
-
-		DoResize(0);
-}
-*/
 void CTransferWnd::DoResize(int delta)
 {
 	CSplitterControl::ChangeHeight(&downloadlistctrl, delta);
 	CSplitterControl::ChangeHeight(&uploadlistctrl, -delta, CW_BOTTOMALIGN);
 	CSplitterControl::ChangeHeight(&queuelistctrl, -delta, CW_BOTTOMALIGN);
 	CSplitterControl::ChangeHeight(&clientlistctrl, -delta, CW_BOTTOMALIGN);
-	CSplitterControl::ChangeHeight(&downloadclientsctrl, -delta, CW_BOTTOMALIGN); //SLAHAM: ADDED DownloadClientsCtrl
+	CSplitterControl::ChangeHeight(&downloadclientsctrl, -delta, CW_BOTTOMALIGN);
 
 	UpdateSplitterRange();
 
@@ -368,86 +263,74 @@ void CTransferWnd::DoResize(int delta)
 	UpdateWindow();
 }
 
-// setting splitter range limits
 void CTransferWnd::UpdateSplitterRange()
 {
-		CRect rcDown,rcUp,rcW,rcSpl;
+	CRect rcWnd;
+	GetWindowRect(rcWnd);
 
-		GetWindowRect(rcW);
-		ScreenToClient(rcW);
+	CRect rcDown;
+	downloadlistctrl.GetWindowRect(rcDown);
+	ScreenToClient(rcDown);
 
-	GetDlgItem(IDC_DOWNLOADLIST)->GetWindowRect(rcDown);
-		ScreenToClient(rcDown);
-
-	GetDlgItem(IDC_UPLOADLIST)->GetWindowRect(rcUp);
-		ScreenToClient(rcUp);
-
-	GetDlgItem(IDC_QUEUELIST)->GetWindowRect(rcUp);
-		ScreenToClient(rcUp);
-
-	GetDlgItem(IDC_CLIENTLIST)->GetWindowRect(rcUp);
-		ScreenToClient(rcUp);
-
-	//SLAHAM: ADDED DownloadClientsCtrl =>
-	GetDlgItem(IDC_DOWNLOADCLIENTS)->GetWindowRect(rcUp);
+	CRect rcUp;
+	downloadclientsctrl.GetWindowRect(rcUp);
 	ScreenToClient(rcUp);
-	//SLAHAM: ADDED DownloadClientsCtrl <=
 
-		// [Comment by Mighty Knife:]
-		// Calculate the percentage position of the splitter bar and save it.
-		// Make sure to subtract the 5 pixel we added to the bottom position of
-		// the downloadlist!
-		// Furthermore we add another Height/2 before dividing by Height to perform
-		// real rounding instead of just truncating - otherwise we might end up 1% too small!
-		thePrefs.SetSplitterbarPosition(((rcDown.bottom-5)*100+rcW.Height()/2)/rcW.Height());
+	// [Comment by Mighty Knife:]
+	// Calculate the percentage position of the splitter bar and save it.
+	// Make sure to subtract the 5 pixel we added to the bottom position of
+	// the downloadlist!
+	// Furthermore we add another Height/2 before dividing by Height to perform
+	// real rounding instead of just truncating - otherwise we might end up 1% too small!
+	/*
+	thePrefs.SetSplitterbarPosition((rcDown.bottom * 100) / rcWnd.Height());
+	*/
+	thePrefs.SetSplitterbarPosition(((rcDown.bottom - 5) * 100+rcWnd.Height() / 2) / rcWnd.Height());
 
-		RemoveAnchor(IDC_DOWNLOADLIST);
-		RemoveAnchor(IDC_UPLOADLIST);
-		RemoveAnchor(IDC_QUEUELIST);
-		RemoveAnchor(IDC_CLIENTLIST);
-	RemoveAnchor(IDC_DOWNLOADCLIENTS); //SLAHAM: ADDED DownloadClientsCtrl
+	RemoveAnchor(IDC_DOWNLOADLIST);
+	RemoveAnchor(IDC_UPLOADLIST);
+	RemoveAnchor(IDC_QUEUELIST);
+	RemoveAnchor(IDC_CLIENTLIST);
+	RemoveAnchor(IDC_DOWNLOADCLIENTS);
 
-		AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100,thePrefs.GetSplitterbarPosition() ));
-		AddAnchor(IDC_UPLOADLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-		AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-		AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_DOWNLOADCLIENTS,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT); //SLAHAM: ADDED DownloadClientsCtrl
+	AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100,thePrefs.GetSplitterbarPosition() ));
+	AddAnchor(IDC_UPLOADLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_DOWNLOADCLIENTS, CSize(0, thePrefs.GetSplitterbarPosition()), BOTTOM_RIGHT);
 
-		m_wndSplitter.SetRange(rcDown.top+50 , rcUp.bottom-40);
+	m_wndSplitter.SetRange(rcDown.top+50 , rcUp.bottom-40);
 }
 
 LRESULT CTransferWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
 {
-	switch (message) {
+	switch (message)
+	{
 		// arrange transferwindow layout
 		case WM_PAINT:
-			if (m_wndSplitter) {
-				CRect rcDown,rcSpl,rcW;
+			if (m_wndSplitter)
+			{
+				CRect rcWnd;
+				GetWindowRect(rcWnd);
+				if (rcWnd.Height() > 0)
+				{
+					CRect rcDown;
+					downloadlistctrl.GetWindowRect(rcDown);
+					ScreenToClient(rcDown);
 
-				GetWindowRect(rcW);
-				ScreenToClient(rcW);
-
-				GetDlgItem(IDC_DOWNLOADLIST)->GetWindowRect(rcDown);
-				ScreenToClient(rcDown);
-
-				if (rcW.Height()>0) {
 					// splitter paint update
-					rcSpl=rcDown;
-					rcSpl.top=rcDown.bottom+8;rcSpl.bottom=rcSpl.top+5;rcSpl.left=330; //SLAHAM: MODIFIED Switch Lists Icons
-					GetDlgItem(IDC_UPLOAD_ICO)->MoveWindow(10,rcSpl.top-4,170,18);
-					//SLAHAM: ADDED Switch Lists Icons =>
-					m_btnULChangeView.MoveWindow(211, rcSpl.top-4, 18, 18);
-					GetDlgItem(IDC_STATIC7)->MoveWindow(233, rcSpl.top-2, 2, 15);
-					m_btnULUploads.MoveWindow(238, rcSpl.top-4, 18, 18);
-					m_btnULQueue.MoveWindow(259, rcSpl.top-4, 18, 18);
-					m_btnULClients.MoveWindow(280, rcSpl.top-4, 18, 18);
-					m_btnULTransfers.MoveWindow(301, rcSpl.top-4, 18, 18);
-					//SLAHAM: ADDED Switch Lists Icons <=
-					m_wndSplitter.MoveWindow(rcSpl,true);
+					CRect rcSpl;
+					rcSpl.left = WND2_BUTTON_XOFF + WND2_BUTTON_WIDTH + 8;
+					rcSpl.right = rcDown.right;
+					rcSpl.top = rcDown.bottom + WND_SPLITTER_YOFF;
+					rcSpl.bottom = rcSpl.top + WND_SPLITTER_HEIGHT;
+					m_wndSplitter.MoveWindow(rcSpl, TRUE);
+					m_btnWnd2.MoveWindow(WND2_BUTTON_XOFF, rcSpl.top - (WND_SPLITTER_YOFF - 1), WND2_BUTTON_WIDTH, WND2_BUTTON_HEIGHT);
 					UpdateSplitterRange();
 				}
 			}
 			break;
+		
 		case WM_NOTIFY:
 			if (wParam == IDC_SPLITTER)
 			{	
@@ -455,29 +338,14 @@ LRESULT CTransferWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				DoResize(pHdr->delta);
 			}
 			break;
+
 		case WM_WINDOWPOSCHANGED : 
+			if (m_wndSplitter)
 			{
-				CRect rcW;
-				GetWindowRect(rcW);
-				ScreenToClient(rcW);
-
-				if (m_wndSplitter && rcW.Height()>0) Invalidate();
-				break;
-			}
-		case WM_SIZE:
-			if (m_wndSplitter) {
-				CRect rcDown,rcSpl,rcW;
-				GetWindowRect(rcW);
-				ScreenToClient(rcW);
-				if (rcW.Height()>0){
-					GetDlgItem(IDC_DOWNLOADLIST)->GetWindowRect(rcDown);
-					ScreenToClient(rcDown);
-
-					long splitpos=(thePrefs.GetSplitterbarPosition()*rcW.Height())/100;
-
-					rcSpl.right=rcDown.right;rcSpl.top=splitpos+10;rcSpl.bottom=rcSpl.top+7;rcSpl.left=(rcDown.right/2)-50;rcSpl.right=rcSpl.left+100;
-					m_wndSplitter.MoveWindow(rcSpl,true);
-				}
+				CRect rcWnd;
+				GetWindowRect(rcWnd);
+				if (rcWnd.Height() > 0)
+					Invalidate();
 			}
 			break;
 	}
@@ -488,7 +356,7 @@ LRESULT CTransferWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 // CTransferWnd message handlers
 BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->message== WM_LBUTTONDBLCLK && pMsg->hwnd== GetDlgItem(IDC_DLTAB)->m_hWnd) {
+	if (pMsg->message== WM_LBUTTONDBLCLK && pMsg->hwnd == m_dlTab.m_hWnd) {
 		OnDblclickDltab();
 		return TRUE;
 	}
@@ -510,15 +378,13 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 			}
 	}
 
-	if (pMsg->message==WM_MBUTTONUP) {
+	if (pMsg->message == WM_MBUTTONUP)
+	{
 		if (downloadlistactive)
 			downloadlistctrl.ShowSelectedFileDetails();
 		//MORPH START - Added by SiRoB, DownloadClientCtrl
-		else if (showlist != IDC_DOWNLOADLIST + IDC_UPLOADLIST)
-			switch(showlist){
-				case IDC_DOWNLOADLIST:
-					downloadlistctrl.ShowSelectedFileDetails();
-					break;
+		else if (m_dwShowListIDC != IDC_DOWNLOADLIST + IDC_UPLOADLIST)
+			switch(m_dwShowListIDC){
 				case IDC_UPLOADLIST:
 					uploadlistctrl.ShowSelectedUserDetails();
 					break;
@@ -533,22 +399,24 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 					break;
 			}
 		//MORPH END   - Added by SiRoB, DownloadClientsCtrl
-		else {
-			switch (m_uWnd2){
-				case 2:
+		else
+		{
+			switch (m_uWnd2)
+			{
+				case wnd2OnQueue:
 					queuelistctrl.ShowSelectedUserDetails();
 					break;
-				case 1:
+				case wnd2Uploading:
 					uploadlistctrl.ShowSelectedUserDetails();
 					break;
-				case 3: //MORPH - Changed by SiRoB, -Fix-
+				case wnd2Clients:
 					clientlistctrl.ShowSelectedUserDetails();
 					break;
-				//MORPH START - Added by SiRoB, DownloadClientsCtrl
-				case 0:
-					downloadclientsctrl.ShowSelectedUserDetails();
+				case wnd2Downloading:
+					downloadclientsctrl.ShowSelectedUserDetails(); //MORPH - Added by SiRoB, DownloadClientsCtrl
 					break;
-				//MORPH END   - Added by SiRoB, DownloadClientsCtrl
+				default:
+					ASSERT(0);
 			}
 		}
 		return TRUE;
@@ -575,222 +443,210 @@ int CTransferWnd::GetItemUnderMouse(CListCtrl* ctrl)
 	return LB_ERR;
 }
 
-//SLAHAM: ADDED DownloadClientsCtrl =>
-void CTransferWnd::UpdateDownloadClientsCount(int count)
+void CTransferWnd::UpdateFilesCount(int iCount)
 {
-	if (showlist == IDC_DOWNLOADCLIENTS)
+	if (m_dwShowListIDC == IDC_DOWNLOADLIST || m_dwShowListIDC == IDC_DOWNLOADLIST + IDC_UPLOADLIST)
 	{
-		CString buffer;
-		buffer.Format(_T(" (%i)"), count);
-		GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_TW_TRANSFERS)+buffer);
+		CString strBuffer;
+		strBuffer.Format(_T("%s (%u)"), GetResString(IDS_TW_DOWNLOADS), iCount);
+		m_btnWnd1.SetWindowText(strBuffer);
 	}
 }
-//SLAHAM: ADDED DownloadClientsCtrl <=
 
-void CTransferWnd::UpdateListCount(uint8 listindex, int iCount /*=-1*/)
+void CTransferWnd::UpdateListCount(EWnd2 listindex, int iCount /*=-1*/)
 {
-	if (m_uWnd2 != listindex)
-		return;
+	switch (m_dwShowListIDC)
+	{
+		case IDC_DOWNLOADLIST + IDC_UPLOADLIST: {
+			if (m_uWnd2 != listindex)
+				return;
+			CString strBuffer;
+			switch (m_uWnd2)
+			{
+				case wnd2Uploading: {
+					uint32 itemCount = iCount == -1 ? uploadlistctrl.GetItemCount() : iCount;
+					uint32 activeCount = theApp.uploadqueue->GetActiveUploadsCount();
+					if (activeCount >= itemCount)
+						strBuffer.Format(_T(" (%i)"), itemCount);
+					else
+						strBuffer.Format(_T(" (%i/%i)"), activeCount, itemCount);
+		            //Upload Speed Sens
+					strBuffer.AppendFormat(_T(" %i Max"), theApp.uploadqueue->GetActiveUploadsCountLongPerspective());
 
-	CString buffer;
-	switch (m_uWnd2){
-        case 1: {
-            uint32 itemCount = iCount == -1 ? uploadlistctrl.GetItemCount() : iCount;
-            uint32 activeCount = theApp.uploadqueue->GetActiveUploadsCount();
-            if(activeCount >= itemCount) {
-                buffer.Format(_T(" (%i)"), itemCount);
-            } else {
-                buffer.Format(_T(" (%i/%i)"), activeCount, itemCount);
+					m_btnWnd2.SetWindowText(GetResString(IDS_UPLOADING) + strBuffer);
+					break;
+				}
+				case wnd2OnQueue:
+					strBuffer.Format(_T(" (%i)"), iCount == -1 ? queuelistctrl.GetItemCount() : iCount);
+					m_btnWnd2.SetWindowText(GetResString(IDS_ONQUEUE) + strBuffer);
+					break;
+				case wnd2Clients:
+					strBuffer.Format(_T(" (%i)"), iCount == -1 ? clientlistctrl.GetItemCount() : iCount);
+					m_btnWnd2.SetWindowText(GetResString(IDS_CLIENTLIST) + strBuffer);
+					break;
+				case wnd2Downloading:
+					strBuffer.Format(_T(" (%i)"), iCount == -1 ? downloadclientsctrl.GetItemCount() : iCount);
+					m_btnWnd2.SetWindowText(GetResString(IDS_DOWNLOADING) + strBuffer);
+					break;
+				default:
+					ASSERT(0);
+			}
+			break;
+		}
+
+		case IDC_DOWNLOADLIST:
+			break;
+
+		case IDC_UPLOADLIST:
+			if (listindex == wnd2Uploading)
+			{
+				CString strBuffer;
+            	uint32 itemCount = iCount == -1 ? uploadlistctrl.GetItemCount() : iCount;
+            	uint32 activeCount = theApp.uploadqueue->GetActiveUploadsCount();
+				if (activeCount >= itemCount)
+					strBuffer.Format(_T(" (%i)"), itemCount);
+				else
+					strBuffer.Format(_T(" (%i/%i)"), activeCount, itemCount);
+				//Upload Speed Sens
+				strBuffer.AppendFormat(_T(" %i Max"), theApp.uploadqueue->GetActiveUploadsCountLongPerspective());
+				m_btnWnd1.SetWindowText(GetResString(IDS_UPLOADING) + strBuffer);
             }
-			//ZZ
-            buffer.AppendFormat(_T(" %i Max"), theApp.uploadqueue->GetActiveUploadsCountLongPerspective());
+			break;
 
-			GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS)+buffer);
+		case IDC_QUEUELIST:
+			if (listindex == wnd2OnQueue)
+			{
+				CString strBuffer;
+				strBuffer.Format(_T(" (%i)"), iCount == -1 ? queuelistctrl.GetItemCount() : iCount);
+				m_btnWnd1.SetWindowText(GetResString(IDS_ONQUEUE) + strBuffer);
+			}
 			break;
-        }
-		case 2:
-			buffer.Format(_T(" (%i)"), iCount == -1 ? queuelistctrl.GetItemCount() : iCount);
-			GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_ONQUEUE)+buffer);
+		
+		case IDC_CLIENTLIST:
+			if (listindex == wnd2Clients)
+			{
+				CString strBuffer;
+				strBuffer.Format(_T(" (%i)"), iCount == -1 ? clientlistctrl.GetItemCount() : iCount);
+				m_btnWnd1.SetWindowText(GetResString(IDS_CLIENTLIST) + strBuffer);
+        	}
 			break;
-		//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-		case 3: 
-			buffer.Format(_T(" (%i)"), iCount == -1 ? clientlistctrl.GetItemCount() : iCount);
-			GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_CLIENTLIST)+buffer);
+
+		case IDC_DOWNLOADCLIENTS:
+			if (listindex == wnd2Downloading)
+			{
+				CString strBuffer;
+				strBuffer.Format(_T(" (%i)"), iCount == -1 ? downloadclientsctrl.GetItemCount() : iCount);
+				m_btnWnd1.SetWindowText(GetResString(IDS_DOWNLOADING) + strBuffer);
+			}
 			break;
+
 		default:
-			buffer.Format(_T(" (%i)"), iCount == -1 ? downloadclientsctrl.GetItemCount() : iCount);					
-			GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_TRANSFERS)+buffer);
-		//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
+			//ASSERT(0);
+			;
 	}
 	}
 
 void CTransferWnd::SwitchUploadList()
 {
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window
-	bKl = !thePrefs.m_bDisableKnownClientList;
-	bQl = !thePrefs.m_bDisableQueueList;
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window
-	if( m_uWnd2 == 1){
-		SetWnd2(2);
+	if (m_uWnd2 == wnd2Uploading)
+	{
+		SetWnd2(wnd2OnQueue);
 		if( thePrefs.IsQueueListDisabled()){
 			SwitchUploadList();
 			return;
 		}
 		uploadlistctrl.Hide();
 		clientlistctrl.Hide();
-		downloadclientsctrl.Hide(); //SLAHAM: ADDED DownloadClientsCtrl
-		queuelistctrl.Visable();
+		downloadclientsctrl.Hide();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_ONQUEUE));
-		//SLAHAM: ADDED Switch Lists Icons =>
-		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
-		GetDlgItem(IDC_UL_CLIENTS)->EnableWindow(bKl);
-		GetDlgItem(IDC_UL_QUEUE)->EnableWindow(false);
-		GetDlgItem(IDC_UL_TRANSFERS)->EnableWindow(true);
-		GetDlgItem(IDC_UL_UPLOADS)->EnableWindow(true);
-		//SLAHAM: ADDED Switch Lists Icons <=
+		queuelistctrl.Visable();
+		m_btnWnd2.SetWindowText(GetResString(IDS_ONQUEUE));
 	}
-	else if( m_uWnd2 == 2){
-		SetWnd2(3); //SLAHAM: ADDED DownloadClientsCtrl
+	else if (m_uWnd2 == wnd2OnQueue)
+	{
+		SetWnd2(wnd2Clients);
 		if( thePrefs.IsKnownClientListDisabled()){
 			SwitchUploadList();
 			return;
 		}
 		uploadlistctrl.Hide();
 		queuelistctrl.Hide();
-		downloadclientsctrl.Hide(); //SLAHAM: ADDED DownloadClientsCtrl
+		downloadclientsctrl.Hide();
 		clientlistctrl.Visable();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_CLIENTLIST));
-		//SLAHAM: ADDED Switch Lists Icons =>
-		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
-		GetDlgItem(IDC_UL_CLIENTS)->EnableWindow(false);
-		GetDlgItem(IDC_UL_QUEUE)->EnableWindow(bQl);
-		GetDlgItem(IDC_UL_TRANSFERS)->EnableWindow(true);
-		GetDlgItem(IDC_UL_UPLOADS)->EnableWindow(true);
-		//SLAHAM: ADDED Switch Lists Icons <=
+		m_btnWnd2.SetWindowText(GetResString(IDS_CLIENTLIST));
 	}
-	//SLAHAM: ADDED DownloadClientsCtrl =>
-	else if( m_uWnd2 == 3){ 
-		SetWnd2(0);
+	else if (m_uWnd2 == wnd2Clients)
+	{
+		SetWnd2(wnd2Downloading);
 		queuelistctrl.Hide();
 		clientlistctrl.Hide();
 		uploadlistctrl.Hide();
-		downloadclientsctrl.Show(); //SLAHAM: ADDED DownloadClientsCtrl
+		downloadclientsctrl.Show();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_TRANSFERS));
-		//SLAHAM: ADDED Switch Lists Icons =>
-		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
-		GetDlgItem(IDC_UL_CLIENTS)->EnableWindow(bKl);
-		GetDlgItem(IDC_UL_QUEUE)->EnableWindow(bQl);
-		GetDlgItem(IDC_UL_TRANSFERS)->EnableWindow(false);
-		GetDlgItem(IDC_UL_UPLOADS)->EnableWindow(true);
-		//SLAHAM: ADDED Switch Lists Icons <=
+		m_btnWnd2.SetWindowText(GetResString(IDS_DOWNLOADING));
 	}
-	//SLAHAM: ADDED DownloadClientsCtrl <=
-	else{
+	else
+	{
 		queuelistctrl.Hide();
 		clientlistctrl.Hide();
-		downloadclientsctrl.Hide(); //SLAHAM: ADDED DownloadClientsCtrl
+		downloadclientsctrl.Hide();
 		uploadlistctrl.Visable();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-		SetWnd2(1);
-		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
-		//SLAHAM: ADDED Switch Lists Icons =>
-		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
-		GetDlgItem(IDC_UL_CLIENTS)->EnableWindow(bKl);
-		GetDlgItem(IDC_UL_QUEUE)->EnableWindow(bQl);
-		GetDlgItem(IDC_UL_TRANSFERS)->EnableWindow(true);
-		GetDlgItem(IDC_UL_UPLOADS)->EnableWindow(false);
-		//SLAHAM: ADDED Switch Lists Icons <=
+		SetWnd2(wnd2Uploading);
+		m_btnWnd2.SetWindowText(GetResString(IDS_UPLOADING));
 	}
 	UpdateListCount(m_uWnd2);
 	SetWnd2Icon();
 }
 
-void CTransferWnd::ShowWnd2(uint8 uWnd2)
+void CTransferWnd::ShowWnd2(EWnd2 uWnd2)
 {
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window
-	bKl = !thePrefs.m_bDisableKnownClientList;
-	bQl = !thePrefs.m_bDisableQueueList;
-	//SLAHAM: ADDED [TPT] - TBH Transfer Window
-
-	if (uWnd2 == 2 && !thePrefs.IsQueueListDisabled())
+	if (uWnd2 == wnd2OnQueue && !thePrefs.IsQueueListDisabled())
 	{
 		uploadlistctrl.Hide();
 		clientlistctrl.Hide();
-		downloadclientsctrl.Hide(); //SLAHAM: ADDED DownloadClientsCtrl
+		downloadclientsctrl.Hide();
 		queuelistctrl.Visable();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_ONQUEUE));
-		//SLAHAM: ADDED Switch Lists Icons =>
-		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
-		GetDlgItem(IDC_UL_CLIENTS)->EnableWindow(bKl);
-		GetDlgItem(IDC_UL_QUEUE)->EnableWindow(false);
-		GetDlgItem(IDC_UL_TRANSFERS)->EnableWindow(true);
-		GetDlgItem(IDC_UL_UPLOADS)->EnableWindow(true);
-		//SLAHAM: ADDED Switch Lists Icons <=
+		m_btnWnd2.SetWindowText(GetResString(IDS_ONQUEUE));
 		SetWnd2(uWnd2);
 	}
-	else if (uWnd2 == 3 && !thePrefs.IsKnownClientListDisabled()) //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons
+	else if (uWnd2 == wnd2Clients && !thePrefs.IsKnownClientListDisabled())
 	{
 		uploadlistctrl.Hide();
 		queuelistctrl.Hide();
-		downloadclientsctrl.Hide(); //SLAHAM: ADDED DownloadClientsCtrl
+		downloadclientsctrl.Hide();
 		clientlistctrl.Visable();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_CLIENTLIST));
-		//SLAHAM: ADDED Switch Lists Icons =>
-		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
-		GetDlgItem(IDC_UL_CLIENTS)->EnableWindow(false);
-		GetDlgItem(IDC_UL_QUEUE)->EnableWindow(bQl);
-		GetDlgItem(IDC_UL_TRANSFERS)->EnableWindow(true);
-		GetDlgItem(IDC_UL_UPLOADS)->EnableWindow(true);
-		//SLAHAM: ADDED Switch Lists Icons <=
+		m_btnWnd2.SetWindowText(GetResString(IDS_CLIENTLIST));
 		SetWnd2(uWnd2);
 	}
-	//SLAHAM: ADDED DownloadClientsCtrl =>
-	else if (uWnd2 == 0) 
+	else if (uWnd2 == wnd2Downloading) 
 	{
 		uploadlistctrl.Hide();
 		queuelistctrl.Hide();		
 		clientlistctrl.Hide();
 		downloadclientsctrl.Show();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_TRANSFERS));
-		//SLAHAM: ADDED Switch Lists Icons =>
-		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
-		GetDlgItem(IDC_UL_CLIENTS)->EnableWindow(bKl);
-		GetDlgItem(IDC_UL_QUEUE)->EnableWindow(bQl);
-		GetDlgItem(IDC_UL_TRANSFERS)->EnableWindow(false);
-		GetDlgItem(IDC_UL_UPLOADS)->EnableWindow(true);
-		//SLAHAM: ADDED Switch Lists Icons <=
+		m_btnWnd2.SetWindowText(GetResString(IDS_DOWNLOADING));
 		SetWnd2(uWnd2);
 	}
-	//SLAHAM: ADDED DownloadClientsCtrl <=
 	else
 	{
 		queuelistctrl.Hide();
 		clientlistctrl.Hide();
-		downloadclientsctrl.Hide(); //SLAHAM: ADDED DownloadClientsCtrl
+		downloadclientsctrl.Hide();
 		uploadlistctrl.Visable();
 		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
-		//SLAHAM: ADDED Switch Lists Icons =>
-		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
-		GetDlgItem(IDC_UL_CLIENTS)->EnableWindow(bKl);
-		GetDlgItem(IDC_UL_QUEUE)->EnableWindow(bQl);
-		GetDlgItem(IDC_UL_TRANSFERS)->EnableWindow(true);
-		GetDlgItem(IDC_UL_UPLOADS)->EnableWindow(false);
-		//SLAHAM: ADDED Switch Lists Icons <=
-		SetWnd2(1);
+		m_btnWnd2.SetWindowText(GetResString(IDS_UPLOADING));
+		SetWnd2(wnd2Uploading);
 	}
-
-	UpdateListCount(m_uWnd2); //SLAHAM: ADDED Switch Lists Icons
+	UpdateListCount(m_uWnd2);
 	SetWnd2Icon();
 }
 
-void CTransferWnd::SetWnd2(uint8 uWnd2)
+void CTransferWnd::SetWnd2(EWnd2 uWnd2)
 {
 	m_uWnd2 = uWnd2;
 	thePrefs.SetTransferWnd2(m_uWnd2);
@@ -800,49 +656,55 @@ void CTransferWnd::OnSysColorChange()
 {
 	CResizableDialog::OnSysColorChange();
 	SetAllIcons();
+	m_btnWnd1.Invalidate();
 }
 
-//SLAHAM: MODIFIED Switch Lists Icons =>
 void CTransferWnd::SetAllIcons()
 {
-	if (icon_download)
-		VERIFY( DestroyIcon(icon_download) );
-	if(showlist == IDC_DOWNLOADLIST)
-		icon_download = theApp.LoadIcon(_T("ViewDownload"), 16, 16);
-	else if(showlist == IDC_UPLOADLIST)
-		icon_download = theApp.LoadIcon(_T("ViewUpload"), 16, 16);
-	else if(showlist == IDC_QUEUELIST)
-		icon_download = theApp.LoadIcon(_T("ClientsOnQueue"), 16, 16);
-	else if(showlist == IDC_DOWNLOADCLIENTS)
-		icon_download = theApp.LoadIcon(_T("ViewTransfersOnly"), 16, 16);
-	else if(showlist == IDC_CLIENTLIST)
-		icon_download = theApp.LoadIcon(_T("ViewKnownOnly"), 16, 16);
-	else if(showlist == IDC_DOWNLOADLIST + IDC_UPLOADLIST)
-		icon_download = theApp.LoadIcon(_T("ViewDownload"), 16, 16);
-	else
-	icon_download = theApp.LoadIcon(_T("Download"), 16, 16);
-	((CStatic*)GetDlgItem(IDC_DOWNLOAD_ICO))->SetIcon(icon_download);
+	SetWnd1Icons();
 	SetWnd2Icon();
+}
+
+void CTransferWnd::SetWnd1Icons()
+{
+	CImageList iml;
+	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 1, 1);
+	iml.Add(CTempIconLoader(_T("SplitWindow")));
+	iml.Add(CTempIconLoader(_T("DownloadFiles")));
+	iml.Add(CTempIconLoader(_T("Upload")));
+	iml.Add(CTempIconLoader(_T("Download")));
+	iml.Add(CTempIconLoader(_T("ClientsOnQueue")));
+	iml.Add(CTempIconLoader(_T("ClientsKnown")));
+	CImageList* pImlOld = m_btnWnd1.SetImageList(&iml);
+	iml.Detach();
+	if (pImlOld)
+		pImlOld->DeleteImageList();
 }
 
 void CTransferWnd::SetWnd2Icon()
 {
-	//SLAHAM: MODIFIED Switch Lists Icons =>
-	if (m_uWnd2 == 2)
-		m_uplBtn.SetIcon(_T("ViewQueueOnly"));
-	else if (m_uWnd2 == 1)
-		m_uplBtn.SetIcon(_T("ViewUpload"));
-	else if (m_uWnd2 == 3)
-		m_uplBtn.SetIcon(_T("ViewKnownOnly"));
+	if (m_uWnd2 == wnd2OnQueue)
+		m_btnWnd2.SetIcon(_T("ClientsOnQueue"));
+	else if (m_uWnd2 == wnd2Uploading)
+		m_btnWnd2.SetIcon(_T("Upload"));
+	else if (m_uWnd2 == wnd2Clients)
+		m_btnWnd2.SetIcon(_T("ClientsKnown"));
+	else if (m_uWnd2 == wnd2Downloading)
+		m_btnWnd2.SetIcon(_T("Download"));
 	else
-		m_uplBtn.SetIcon(_T("ViewTransfersOnly"));
-	//SLAHAM: MODIFIED Switch Lists Icons <=
+		ASSERT(0);
 }
 
 void CTransferWnd::Localize()
 {
-	GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_TW_DOWNLOADS));
-	GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
+	m_btnWnd1.SetWindowText(GetResString(IDS_TW_DOWNLOADS));
+	m_btnWnd1.SetBtnText(MP_VIEW1_SPLIT_WINDOW, GetResString(IDS_SPLIT_WINDOW));
+	m_btnWnd1.SetBtnText(MP_VIEW1_DOWNLOADS, GetResString(IDS_TW_DOWNLOADS));
+	m_btnWnd1.SetBtnText(MP_VIEW1_UPLOADING, GetResString(IDS_UPLOADING));
+	m_btnWnd1.SetBtnText(MP_VIEW1_DOWNLOADING, GetResString(IDS_DOWNLOADING));
+	m_btnWnd1.SetBtnText(MP_VIEW1_ONQUEUE, GetResString(IDS_ONQUEUE));
+	m_btnWnd1.SetBtnText(MP_VIEW1_CLIENTS, GetResString(IDS_CLIENTLIST));
+	m_btnWnd2.SetWindowText(GetResString(IDS_UPLOADING));
 	GetDlgItem(IDC_TSTATIC1)->SetWindowText(GetResString(IDS_TW_QUEUE));
 	GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->SetWindowText(GetResString(IDS_SV_UPDATE));
 
@@ -854,7 +716,7 @@ void CTransferWnd::Localize()
 	queuelistctrl.Localize();
 	downloadlistctrl.Localize();
 	clientlistctrl.Localize();
-	downloadclientsctrl.Localize(); //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons
+	downloadclientsctrl.Localize();
 
 	UpdateListCount(m_uWnd2);
 }
@@ -868,329 +730,6 @@ void CTransferWnd::OnBnClickedQueueRefreshButton()
 		update = theApp.uploadqueue->GetNextClient(update);
 	}
 }
-
-//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-void CTransferWnd::OnBnClickedChangeView() {
-	
-	bKl = thePrefs.m_bDisableKnownClientList;
-	bQl = thePrefs.m_bDisableQueueList;
-
-	if(showlist == IDC_DOWNLOADLIST)
-		ShowList(IDC_UPLOADLIST);
-	else if(showlist == IDC_UPLOADLIST){
-		if(bQl && bKl)
-			  ShowList(IDC_DOWNLOADCLIENTS);
-		else if(bQl && !bKl)
-			ShowList(IDC_CLIENTLIST);
-		else
-			ShowList(IDC_QUEUELIST);
-	}
-	else if(showlist == IDC_QUEUELIST){
-		if(!bKl)
-			ShowList(IDC_CLIENTLIST);
-		else
-			ShowList(IDC_DOWNLOADCLIENTS);
-	}
-	else if(showlist == IDC_CLIENTLIST)
-		ShowList(IDC_DOWNLOADCLIENTS);
-	else if(showlist == IDC_DOWNLOADCLIENTS)
-		OnBnClickedDownUploads();
-	else if(showlist == IDC_UPLOADLIST+IDC_DOWNLOADLIST)
-		ShowList(IDC_DOWNLOADLIST);
-}
-//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
-
-//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-void CTransferWnd::ShowList(uint16 list) {
-	CRect rcDown,rcW;
-	CWnd* pWnd;
-	CString buffer;
-
-	GetWindowRect(rcW);
-	ScreenToClient(rcW);
-	pWnd = GetDlgItem(list);
-	pWnd->GetWindowRect(rcDown);
-	ScreenToClient(rcDown);
-	rcDown.bottom=rcW.bottom-20;
-	rcDown.top=28;
-	m_wndSplitter.DestroyWindow();
-	m_btnULChangeView.ShowWindow(SW_HIDE);
-	m_btnULClients.ShowWindow(SW_HIDE);
-	m_btnULQueue.ShowWindow(SW_HIDE);
-	m_btnULTransfers.ShowWindow(SW_HIDE);
-	m_btnULUploads.ShowWindow(SW_HIDE);
-	GetDlgItem(IDC_STATIC7)->ShowWindow(SW_HIDE);
-	RemoveAnchor(list);
-	GetDlgItem(IDC_UPLOAD_ICO)->ShowWindow(SW_HIDE);
-
-	showlist = list;
-
-	bKl = !thePrefs.m_bDisableKnownClientList;
-	bQl = !thePrefs.m_bDisableQueueList;
-
-	switch(list){
-		case IDC_DOWNLOADLIST:
-			m_dlTab.ShowWindow(SW_SHOW); //MORPH - Added by SiRoB, Show/Hide dlTab
-			downloadlistctrl.MoveWindow(rcDown);
-			uploadlistctrl.ShowWindow(SW_HIDE);
-			queuelistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_HIDE);
-			downloadlistctrl.ShowWindow(SW_SHOW);
-			downloadlistctrl.ShowFilesCount();
-			GetDlgItem(IDC_DL_DOWN_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_DOWNLOADS)->EnableWindow(false);
-			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);
-			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
-			break;
-		case IDC_UPLOADLIST:
-			m_dlTab.ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Show/Hide dlTab
-			uploadlistctrl.MoveWindow(rcDown);
-			downloadlistctrl.ShowWindow(SW_HIDE);
-			queuelistctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_HIDE);
-			uploadlistctrl.ShowWindow(SW_SHOW);
-			buffer.Format(_T(" (%i)"),uploadlistctrl.GetItemCount());
-			GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_TW_UPLOADS)+buffer);
-			GetDlgItem(IDC_DL_DOWN_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_UPLOADS)->EnableWindow(false);
-			GetDlgItem(IDC_DL_DOWNLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);			
-			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
-			break;
-		case IDC_QUEUELIST:
-			m_dlTab.ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Show/Hide dlTab
-			queuelistctrl.MoveWindow(rcDown);
-			uploadlistctrl.ShowWindow(SW_HIDE);
-			downloadlistctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_HIDE);
-			queuelistctrl.ShowWindow(SW_SHOW);
-			buffer.Format(_T(" (%i)"),queuelistctrl.GetItemCount());
-			GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_ONQUEUE)+buffer);
-			GetDlgItem(IDC_DL_DOWN_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_DOWNLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(false);
-			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_SHOW); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
-			break;
-		case IDC_DOWNLOADCLIENTS:
-			m_dlTab.ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Show/Hide dlTab
-			downloadclientsctrl.MoveWindow(rcDown);
-			uploadlistctrl.ShowWindow(SW_HIDE);
-			downloadlistctrl.ShowWindow(SW_HIDE);
-			queuelistctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_SHOW);
-			buffer.Format(_T(" (%i)"),downloadclientsctrl.GetItemCount());
-			GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_TW_TRANSFERS)+buffer);
-			GetDlgItem(IDC_DL_DOWN_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_DOWNLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);
-			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(false);
-			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
-			break;
-		case IDC_CLIENTLIST:
-			m_dlTab.ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Show/Hide dlTab
-			clientlistctrl.MoveWindow(rcDown);
-			uploadlistctrl.ShowWindow(SW_HIDE);
-			downloadlistctrl.ShowWindow(SW_HIDE);
-			queuelistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_SHOW);
-			buffer.Format(_T(" (%i)"),clientlistctrl.GetItemCount());
-			GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_CLIENTLIST)+buffer);
-			GetDlgItem(IDC_DL_DOWN_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_UPLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_DOWNLOADS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);
-			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
-			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(false);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
-			break;
-	}
-	AddAnchor(list,TOP_LEFT,BOTTOM_RIGHT);
-	SetAllIcons(); //SLAHAM: ADDED
-}
-//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
-
-//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-void CTransferWnd::OnBnClickedDownUploads() 
-{
-	m_dlTab.ShowWindow(SW_SHOW); //MORPH - Added by SiRoB, Show/Hide dlTab
-	if (showlist == IDC_DOWNLOADLIST+IDC_UPLOADLIST)
-		return;
-
-	CRect rcDown,rcUp,rcSpl,rcW;
-	CWnd* pWnd;
-
-	GetWindowRect(rcW);
-	ScreenToClient(rcW);
-
-	// [Comment by Mighty Knife:]
-	//
-	// thePrefs.GetSplitterbarPosition() retrieves the SplitterBar position.
-	// This is a percentage value (0-100%) of height of the whole window.
-	// Therefore the "splitpos" variable calculates the vertical pixel-position
-	// of the SplitterBar relative to the height of the whole window, i.e.
-	// the Transfer-window!
-
-	LONG splitpos=(thePrefs.GetSplitterbarPosition()*rcW.Height())/100;
-
-	pWnd = GetDlgItem(IDC_DOWNLOADLIST);
-	pWnd->GetWindowRect(rcDown);
-	ScreenToClient(rcDown);
-	rcDown.right=rcW.right-7;
-	rcDown.bottom=splitpos+5;
-	// [Comment by Mighty Knife:]
-	// In UpdateSplitterRange we used this downloadlist here to recalculate the
-	// percentage splitter position from the current absolute pixel position
-	// on the screen. We added 5 pixel here to the splitpos to get the bottom
-	// position of the downloadlist. So in UpdateSplitterRange we have to remember
-	// subtracting these 5 pixel again!
-	downloadlistctrl.MoveWindow(rcDown);
-
-	pWnd = GetDlgItem(IDC_UPLOADLIST);
-	pWnd->GetWindowRect(rcDown);
-	ScreenToClient(rcDown);
-	rcDown.right=rcW.right-7;
-	rcDown.bottom=rcW.bottom-20;
-	rcDown.top=splitpos+30;
-	uploadlistctrl.MoveWindow(rcDown);
-
-	pWnd = GetDlgItem(IDC_QUEUELIST);
-	pWnd->GetWindowRect(rcDown);
-	ScreenToClient(rcDown);
-	rcDown.right=rcW.right-7;
-	rcDown.bottom=rcW.bottom-20;
-	rcDown.top=splitpos+30;
-	queuelistctrl.MoveWindow(rcDown);
-
-	pWnd = GetDlgItem(IDC_CLIENTLIST);
-	pWnd->GetWindowRect(rcDown);
-	ScreenToClient(rcDown);
-	rcDown.right=rcW.right-7;
-	rcDown.bottom=rcW.bottom-20;
-	rcDown.top=splitpos+30;
-	clientlistctrl.MoveWindow(rcDown);
-
-	pWnd = GetDlgItem(IDC_DOWNLOADCLIENTS);
-	pWnd->GetWindowRect(rcDown);
-	ScreenToClient(rcDown);
-	rcDown.right=rcW.right-7;
-	rcDown.bottom=rcW.bottom-20;
-	rcDown.top=splitpos+30;
-	downloadclientsctrl.MoveWindow(rcDown);
-
-	rcSpl=rcDown;
-	rcSpl.top=rcDown.bottom+4;rcSpl.bottom=rcSpl.top+5;rcSpl.left=110;
-	if (!m_wndSplitter)
-		m_wndSplitter.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER);
-	else
-		m_wndSplitter.MoveWindow(rcSpl,true);
-
-	DoResize(0);
-
-	showlist=IDC_DOWNLOADLIST+IDC_UPLOADLIST;
-
-	downloadlistctrl.ShowFilesCount();
-	GetDlgItem(IDC_UPLOAD_ICO)->ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_STATIC7)->ShowWindow(SW_SHOW);
-	m_btnULChangeView.ShowWindow(SW_SHOW);
-	m_btnULClients.ShowWindow(SW_SHOW);
-	m_btnULQueue.ShowWindow(SW_SHOW);
-	m_btnULTransfers.ShowWindow(SW_SHOW);
-	m_btnULUploads.ShowWindow(SW_SHOW);
-
-	RemoveAnchor(IDC_DOWNLOADLIST);
-	RemoveAnchor(IDC_UPLOADLIST);
-	RemoveAnchor(IDC_QUEUELIST);
-	RemoveAnchor(IDC_DOWNLOADCLIENTS);
-	RemoveAnchor(IDC_CLIENTLIST);
-	RemoveAnchor(IDC_UPLOAD_ICO);
-
-	AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100, thePrefs.GetSplitterbarPosition() ));
-	AddAnchor(IDC_UPLOADLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_DOWNLOADCLIENTS,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_UPLOAD_ICO,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-
-	downloadlistctrl.ShowWindow(SW_SHOW);
-
-	switch (m_uWnd2)
-	{
-	case 0:
-		{
-			uploadlistctrl.ShowWindow(SW_HIDE);
-			queuelistctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_SHOW);
-			break;
-		}
-	case 1:
-		{
-			queuelistctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-			uploadlistctrl.ShowWindow(SW_SHOW);
-			break;
-		}
-	case 2:
-		{
-			uploadlistctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_SHOW);
-			queuelistctrl.ShowWindow(SW_SHOW);
-			break;
-		}	
-	case 3:
-		{
-			uploadlistctrl.ShowWindow(SW_HIDE);
-			queuelistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_SHOW);
-			break;
-		}	
-	default:
-		{
-			queuelistctrl.ShowWindow(SW_HIDE);
-			clientlistctrl.ShowWindow(SW_HIDE);
-			downloadclientsctrl.ShowWindow(SW_HIDE);
-			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE);
-			uploadlistctrl.ShowWindow(SW_SHOW);
-			m_uWnd2 = 1;
-		}
-	}
-
-	bKl = !thePrefs.m_bDisableKnownClientList;
-	bQl = !thePrefs.m_bDisableQueueList;
-
-	GetDlgItem(IDC_DL_DOWN_UPLOADS)->EnableWindow(false);
-	GetDlgItem(IDC_DL_UPLOADS)->EnableWindow(true);
-	GetDlgItem(IDC_DL_DOWNLOADS)->EnableWindow(true);
-	GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);
-	GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
-	GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
-
-	UpdateListCount(m_uWnd2);
-	SetAllIcons(); //SLAHAM: ADDED
-}
-//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
 
 void CTransferWnd::OnHoverUploadList(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -1213,16 +752,12 @@ void CTransferWnd::OnTcnSelchangeDltab(NMHDR *pNMHDR, LRESULT *pResult)
 // Ornis' download categories
 void CTransferWnd::OnNMRclickDltab(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	//MORPH - Removed by SiRoB, Khaos Category
-	/*
-	// Menu for category
-	CTitleMenu menu;
-	*/
 	POINT point;
 	::GetCursorPos(&point);
-
 	CPoint pt(point);
 	rightclickindex=GetTabUnderMouse(&pt);
+	if (rightclickindex == -1)
+		return;
 
 	// If the current category is '0'...  Well, we can't very well delete the default category, now can we...
 	// Nor can we merge it.
@@ -1290,7 +825,7 @@ void CTransferWnd::CreateCategoryMenus()
 
 	// View Filter Menu
 	m_mnuCatViewFilter.CreateMenu();
-	m_mnuCatViewFilter.AddMenuTitle(GetResString(IDS_CHANGECATVIEW),_T("SEARCHPARAMS"));
+	m_mnuCatViewFilter.AddMenuTitle(GetResString(IDS_CHANGECATVIEW));
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0, GetResString(IDS_ALL) );
 	//m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+1, GetResString(IDS_ALLOTHERS) );
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+2, GetResString(IDS_CAT_THISCAT) );
@@ -1384,7 +919,15 @@ void CTransferWnd::OnMouseMove(UINT nFlags, CPoint point)
 		ClientToScreen(&pt);        //convert to screen coordinates
 
 		m_nDropIndex=GetTabUnderMouse(&pt);
+
+		// If the current category is '0'...  Well, we can't very well delete the default category, now can we...
+		/*
+		if (m_nDropIndex>0 && thePrefs.GetCategory(m_nDropIndex)->care4all)	// not droppable
+			m_dlTab.SetCurSel(-1);
+		else
+		*/
 		m_dlTab.SetCurSel(m_nDropIndex);
+
 		m_dlTab.Invalidate();
 		
 		::GetCursorPos(&pt);
@@ -1438,37 +981,39 @@ void CTransferWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 }
 
-BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){ 
-
+BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam )
+{ 
 	// khaos::categorymod+
-	Category_Struct* curCat;
-	curCat = thePrefs.GetCategory(rightclickindex);
 	/*
-	if (wParam>=MP_CAT_SET0 && wParam<=MP_CAT_SET0+99) {
-		if (wParam==MP_CAT_SET0+17) {
+	// category filter menuitems
+	if (wParam>=MP_CAT_SET0 && wParam<=MP_CAT_SET0+99)
+	{
+		if (wParam==MP_CAT_SET0+17)
+		{
 			thePrefs.GetCategory(m_isetcatmenu)->care4all=!thePrefs.GetCategory(m_isetcatmenu)->care4all;
-		}else if (wParam==MP_CAT_SET0+19) {
-			// negate
+		}
+		else if (wParam==MP_CAT_SET0+19) // negate
+		{
 			thePrefs.SetCatFilterNeg(m_isetcatmenu, (!thePrefs.GetCatFilterNeg(m_isetcatmenu)) );
-		} else {	// set the view filter
+		}
+		else // set the view filter
+		{
 			if (wParam-MP_CAT_SET0<1)	// dont negate all filter
 				thePrefs.SetCatFilterNeg(m_isetcatmenu, false);
-
 			thePrefs.SetCatFilter(m_isetcatmenu,wParam-MP_CAT_SET0);
 			m_nLastCatTT=-1;
 		}
 
 		// set to regexp but none is set for that category?
-		if (wParam==MP_CAT_SET0+18 && thePrefs.GetCategory(m_isetcatmenu)->regexp.IsEmpty() ) {
+		if (wParam==MP_CAT_SET0+18 && thePrefs.GetCategory(m_isetcatmenu)->regexp.IsEmpty())
+		{
 			m_nLastCatTT=-1;
 			CCatDialog dialog(rightclickindex);
 			dialog.DoModal();
 
 			// still no regexp?
-			if (thePrefs.GetCategory(m_isetcatmenu)->regexp.IsEmpty()) {
+			if (thePrefs.GetCategory(m_isetcatmenu)->regexp.IsEmpty())
 				thePrefs.SetCatFilter(m_isetcatmenu,0);
-			}
-
 		}
 
 		downloadlistctrl.UpdateCurrentCategoryView();
@@ -1477,9 +1022,12 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 		return TRUE;
 	}
 	*/
+	Category_Struct* curCat;
+	curCat = thePrefs.GetCategory(rightclickindex);
 	// khaos::categorymod-
 
-	switch (wParam){ 
+	switch (wParam)
+	{
 		case MP_CAT_ADD: {
 			m_nLastCatTT=-1;
 			int newindex=AddCategory(_T("?"),thePrefs.GetIncomingDir(),_T(""),_T(""),false);
@@ -1545,6 +1093,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 		// khaos::categorymod-
 		case MP_CAT_REMOVE: {
 			m_nLastCatTT=-1;
+			bool toreload=( _tcsicmp(thePrefs.GetCatPath(rightclickindex),thePrefs.GetIncomingDir())!=0);
 			theApp.downloadqueue->ResetCatParts(rightclickindex);
 			thePrefs.RemoveCat(rightclickindex);
 			m_dlTab.DeleteItem(rightclickindex);
@@ -1552,56 +1101,45 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			downloadlistctrl.ChangeCategory(0);
 			thePrefs.SaveCats();
 			/*
-			if (thePrefs.GetCatCount()==1) thePrefs.SetAllcatType(0);
+			if (thePrefs.GetCatCount()==1)
+				thePrefs.GetCategory(0)->filter=0;
 			*/
 			theApp.emuledlg->searchwnd->UpdateCatTabs();
 			VerifyCatTabSize();
+			if (toreload)
+				theApp.sharedfiles->Reload();
 			break;
 		}
-// ZZ:DownloadManager -->
-		case MP_PRIOLOW: {
+		case MP_PRIOLOW:
             thePrefs.GetCategory(rightclickindex)->prio = PR_LOW;
-			
             thePrefs.SaveCats();
 			break;
-		}
-		case MP_PRIONORMAL: {
+		case MP_PRIONORMAL:
             thePrefs.GetCategory(rightclickindex)->prio = PR_NORMAL;
-			
             thePrefs.SaveCats();
 			break;
-		}
-		case MP_PRIOHIGH: {
+		case MP_PRIOHIGH:
             thePrefs.GetCategory(rightclickindex)->prio = PR_HIGH;
-			
-            thePrefs.SaveCats();
+			thePrefs.SaveCats();
 			break;
-		}
-// <-- ZZ:DownloadManager
 
-		case MP_PAUSE: {
+		case MP_PAUSE:
 			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_PAUSE);
 			break;
-		}
-		case MP_STOP : {
-				theApp.downloadqueue->SetCatStatus(rightclickindex,MP_STOP);
+		case MP_STOP:
+			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_STOP);
 			break;
-		}
-		case MP_CANCEL: {
+		case MP_CANCEL:
 			if (AfxMessageBox(GetResString(IDS_Q_CANCELDL),MB_ICONQUESTION|MB_YESNO) == IDYES)
 				theApp.downloadqueue->SetCatStatus(rightclickindex,MP_CANCEL);
 			break;
-		}
-		case MP_RESUME: {
+		case MP_RESUME:
 			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_RESUME);
 			break;
-		}
-		case MP_RESUMENEXT: {
+		case MP_RESUMENEXT:
 			theApp.downloadqueue->StartNextFile(rightclickindex,false);
 			break;
-		}
 
-// ZZ:DownloadManager -->
 		case MP_DOWNLOAD_ALPHABETICAL: {
             BOOL newSetting = !thePrefs.GetCategory(rightclickindex)->downloadInAlphabeticalOrder;
             thePrefs.GetCategory(rightclickindex)->downloadInAlphabeticalOrder = newSetting;
@@ -1613,7 +1151,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 
             break;
 		}
-// <-- ZZ:DownloadManager
+
 		// khaos::categorymod+
 		case MP_CAT_STOPLAST: {
 			theApp.downloadqueue->StopPauseLastFile(MP_STOP, rightclickindex);
@@ -1625,78 +1163,46 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 		}
 		// khaos::categorymod-
 
-		case IDC_UPLOAD_ICO: {
+		case IDC_UPLOAD_ICO:
 			SwitchUploadList();
 			break;
-		}
-		case IDC_QUEUE_REFRESH_BUTTON: {
+		case MP_VIEW2_UPLOADING:
+			ShowWnd2(wnd2Uploading);
+			break;
+		case MP_VIEW2_DOWNLOADING:
+			ShowWnd2(wnd2Downloading);
+			break;
+		case MP_VIEW2_ONQUEUE:
+			ShowWnd2(wnd2OnQueue);
+			break;
+		case MP_VIEW2_CLIENTS:
+			ShowWnd2(wnd2Clients);
+			break;
+		case IDC_QUEUE_REFRESH_BUTTON:
 			OnBnClickedQueueRefreshButton();
 			break;
-		}
-//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-		case IDC_DL_CHANGEVIEW: 
-			{
-				OnBnClickedChangeView();
-				break;
-			}
-		case IDC_DL_DOWN_UPLOADS: 
-			{
-				OnBnClickedDownUploads();
-				break;
-			}
-		case IDC_DL_DOWNLOADS: 
-			{
-				ShowList(IDC_DOWNLOADLIST);
-				break;
-			}
-		case IDC_DL_UPLOADS: {
-				ShowList(IDC_UPLOADLIST);
-				break;
-			}
-		case IDC_DL_QUEUE: 
-			{
-				ShowList(IDC_QUEUELIST);
-				break;
-			}
-		case IDC_DL_TRANSFERS: 
-			{
-				ShowList(IDC_DOWNLOADCLIENTS);
-				break;
-			}
-		case IDC_DL_CLIENT: 
-			{
-				ShowList(IDC_CLIENTLIST);
-				break;
-			}
-			//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
 
-			//SLAHAM: ADDED Switch Lists Icons =>
-		case IDC_UL_CHANGEVIEW: 
-			{
-				SwitchUploadList();
-				break;
-			}
-		case IDC_UL_UPLOADS: 
-			{
-				ShowWnd2(m_uWnd2 = 1);
+		case IDC_DOWNLOAD_ICO:
+			OnBnClickedChangeView();
 			break;
-			}
-		case IDC_UL_QUEUE: 
-			{
-				ShowWnd2(m_uWnd2 = 2);
-				break;
-			}
-		case IDC_UL_CLIENTS: 
-			{
-				ShowWnd2(m_uWnd2 = 3);
-				break;
-			}
-		case IDC_UL_TRANSFERS: 
-			{
-				ShowWnd2(m_uWnd2 = 0);
-				break;
-			}
-//SLAHAM: ADDED Switch Lists Icons <=
+		case MP_VIEW1_SPLIT_WINDOW:
+			OnBnClickedDownUploads();
+			break;
+		case MP_VIEW1_DOWNLOADS:
+			ShowList(IDC_DOWNLOADLIST);
+			break;
+		case MP_VIEW1_UPLOADING:
+			ShowList(IDC_UPLOADLIST);
+			break;
+		case MP_VIEW1_DOWNLOADING:
+			ShowList(IDC_DOWNLOADCLIENTS);
+			break;
+		case MP_VIEW1_ONQUEUE:
+			ShowList(IDC_QUEUELIST);
+			break;
+		case MP_VIEW1_CLIENTS:
+			ShowList(IDC_CLIENTLIST);
+			break;
 
 		// khaos::categorymod+ Handle the new view filter menu.
 		case MP_CAT_SET0+1:
@@ -1790,9 +1296,8 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 	return TRUE;
 }
 
-void CTransferWnd::UpdateCatTabTitles(bool force) {
-
-
+void CTransferWnd::UpdateCatTabTitles(bool force)
+{
 	CPoint pt;
 	::GetCursorPos(&pt);
 	if (!force && GetTabUnderMouse(&pt)!=-1)		// avoid cat tooltip jumping
@@ -1805,20 +1310,22 @@ void CTransferWnd::UpdateCatTabTitles(bool force) {
 		//MORPH END   - Changed by SiRoB, Due to Khaos Category
 }
 
-void CTransferWnd::EditCatTabLabel(int i) {
+void CTransferWnd::EditCatTabLabel(int i)
+{
 	//MORPH	- Changed by SiRoB, Khaos Category
-	//EditCatTabLabel(i,/*(i==0)? GetCatTitle( thePrefs.GetAllcatType() ):*/thePrefs.GetCategory(i)->title);
+	//	EditCatTabLabel(i,/*(i==0)? GetCatTitle( thePrefs.GetAllcatType() ):*/thePrefs.GetCategory(i)->title);
 	EditCatTabLabel(i,thePrefs.GetCategory(i)->title);
 }
 
-void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
-
+void CTransferWnd::EditCatTabLabel(int index,CString newlabel)
+{
 	TCITEM tabitem;
 	tabitem.mask = TCIF_PARAM;
 	m_dlTab.GetItem(index,&tabitem);
 	tabitem.mask = TCIF_TEXT;
 
 	newlabel.Replace(_T("&"),_T("&&"));
+
 	//MORPH - Removed by SIROB, Due to Khaos Cat
 	/*
 	if (!index)
@@ -1855,7 +1362,7 @@ void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 		}
 		CString title=newlabel;
 		theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(index,count);
-		newlabel.Format(_T("%s %i/%i"),title,dwl,count); // ZZ:DownloadManager
+		newlabel.Format(_T("%s %i/%i"),title,dwl,count);
 	}
 
 	tabitem.pszText = newlabel.LockBuffer();
@@ -1869,7 +1376,7 @@ int CTransferWnd::AddCategory(CString newtitle,CString newincoming,CString newco
 	Category_Struct* newcat=new Category_Struct;
 
 	_stprintf(newcat->title,newtitle);
-	newcat->prio=PR_NORMAL; // ZZ:DownloadManager
+	newcat->prio=PR_NORMAL;
 	// khaos::kmod+ Category Advanced A4AF Mode and Auto Cat
 	newcat->iAdvA4AFMode = 0;
 	// khaos::kmod-
@@ -1923,8 +1430,8 @@ int CTransferWnd::AddCategory(CString newtitle,CString newincoming,CString newco
 	return index;
 }
 
-int CTransferWnd::GetTabUnderMouse(CPoint* point) {
-
+int CTransferWnd::GetTabUnderMouse(CPoint* point)
+{
 		TCHITTESTINFO hitinfo;
 		CRect rect;
 		m_dlTab.GetWindowRect(&rect);
@@ -1940,7 +1447,8 @@ int CTransferWnd::GetTabUnderMouse(CPoint* point) {
 
 		if( hitinfo.flags != TCHT_NOWHERE )
 			return nTab;
-		else return -1;
+	else
+		return -1;
 }
 
 void CTransferWnd::OnLvnKeydownDownloadlist(NMHDR *pNMHDR, LRESULT *pResult)
@@ -1963,104 +1471,102 @@ void CTransferWnd::OnLvnKeydownDownloadlist(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CTransferWnd::UpdateTabToolTips(int tab)
 {
-	uint8 i;
-
-	if (tab==-1) {
-
-		for (i=0;i<m_tooltipCats.GetToolCount();i++)
+	if (tab == -1)
+	{
+		for (int i = 0; i < m_tooltipCats.GetToolCount(); i++)
 			m_tooltipCats.DelTool(&m_dlTab,i+1);
 
-		for (i = 0; i < m_dlTab.GetItemCount(); i++)
+		for (int i = 0; i < m_dlTab.GetItemCount(); i++)
 		{
 			CRect r;
 			m_dlTab.GetItemRect(i, &r);
 			VERIFY(m_tooltipCats.AddTool(&m_dlTab, GetTabStatistic(i), &r, i+1));
 		}
-	} else {
-			CRect r;
-			m_dlTab.GetItemRect(tab, &r);
-
+	}
+	else
+	{
+		CRect r;
+		m_dlTab.GetItemRect(tab, &r);
 		m_tooltipCats.DelTool(&m_dlTab,tab+1);
 		VERIFY(m_tooltipCats.AddTool(&m_dlTab, GetTabStatistic(tab), &r, tab+1));
 	}
 }
 
-CString CTransferWnd::GetTabStatistic(uint8 tab) {
-	uint16 count,dwl,err,compl,paus;
-	count=dwl=err=compl=paus=0;
+CString CTransferWnd::GetTabStatistic(uint8 tab)
+{
+	uint16 count, dwl, err, paus;
+	count = dwl = err = paus = 0;
 	float speed=0;
 	uint64 size=0;
 	uint64 trsize=0;
 	uint64 disksize=0;
-
-	CPartFile* cur_file;
-
-	for (int i=0;i<theApp.downloadqueue->GetFileCount();++i) {
-		cur_file=theApp.downloadqueue->GetFileByIndex(i);
-		if (cur_file==0) continue;
-		if (cur_file->CheckShowItemInGivenCat(tab)) {
+	for (int i = 0; i < theApp.downloadqueue->GetFileCount(); i++)
+	{
+		/*const*/ CPartFile* cur_file = theApp.downloadqueue->GetFileByIndex(i);
+		if (cur_file == 0)
+			continue;
+		if (cur_file->CheckShowItemInGivenCat(tab))
+		{
 			count++;
-			if (cur_file->GetTransferringSrcCount()>0) ++dwl;
-			speed+=cur_file->GetDatarate()/1024.0f;
+			if (cur_file->GetTransferringSrcCount() > 0)
+				dwl++;
+			speed += cur_file->GetDatarate() / 1024.0F;
 			size+=cur_file->GetFileSize();
 			trsize+=cur_file->GetCompletedSize();
 			disksize+=cur_file->GetRealFileSize();
-			if (cur_file->GetStatus()==PS_ERROR) ++err;
-			if (cur_file->GetStatus()==PS_PAUSED) ++paus;
+			if (cur_file->GetStatus() == PS_ERROR)
+				err++;
+			if (cur_file->GetStatus() == PS_PAUSED)
+				paus++;
 		}
 	}
 
 	int total;
-	compl=theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(tab,total);
+	int compl = theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(tab, total);
 
-// ZZ:DownloadManager -->
     CString prio;
-    switch(thePrefs.GetCategory(tab)->prio) {
+    switch (thePrefs.GetCategory(tab)->prio)
+	{
         case PR_LOW:
             prio = GetResString(IDS_PRIOLOW);
             break;
-
         case PR_HIGH:
             prio = GetResString(IDS_PRIOHIGH);
             break;
-
         default:
             prio = GetResString(IDS_PRIONORMAL);
             break;
     }
-// ZZ:DownloadManager <--
 
 	CString title;
-	title.Format(_T("%s: %i\n\n%s: %i\n%s: %i\n%s: %i\n%s: %i\n\n%s: %s\n\n%s: %.1f %s\n%s: %s/%s\n%s%s"), // ZZ:DownloadManager
-		
+	title.Format(_T("%s: %i\n\n%s: %i\n%s: %i\n%s: %i\n%s: %i\n\n%s: %s\n\n%s: %.1f %s\n%s: %s/%s\n%s%s"),
 		GetResString(IDS_FILES), count+compl,
 		GetResString(IDS_DOWNLOADING), dwl,
 		GetResString(IDS_PAUSED) ,paus,
 		GetResString(IDS_ERRORLIKE) ,err,
 		GetResString(IDS_DL_TRANSFCOMPL) ,compl,
-
-        GetResString(IDS_PRIORITY), prio, // ZZ:DownloadManager
-
+        GetResString(IDS_PRIORITY), prio,
 		GetResString(IDS_DL_SPEED) ,speed,GetResString(IDS_KBYTESEC),
-
-
 		GetResString(IDS_DL_SIZE),CastItoXBytes(trsize, false, false),CastItoXBytes(size, false, false),
 		GetResString(IDS_ONDISK),CastItoXBytes(disksize, false, false));
 	return title;
 }
 
 
-void CTransferWnd::OnDblclickDltab(){
+void CTransferWnd::OnDblclickDltab()
+{
 	POINT point;
 	::GetCursorPos(&point);
 	CPoint pt(point);
 	int tab=GetTabUnderMouse(&pt);
-	if (tab<1) return;
+	if (tab < 1)
+		return;
 	rightclickindex=tab;
 	OnCommand(MP_CAT_EDIT,0);
 }
 
-void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult) {
+void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult)
+{
 	UINT from=m_dlTab.GetLastMovementSource();
 	UINT to=m_dlTab.GetLastMovementDestionation();
 
@@ -2088,8 +1594,6 @@ void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult) {
 	downloadlistctrl.ChangeCategory(to);
 }
 
-// VerifyCatTabSize 
-//
 // [Comment by Mighty Knife:]
 //
 // Verify the proper positioning of the download tab's. If the
@@ -2106,45 +1610,46 @@ void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult) {
 // be done. In such a case if _forceverify==true, the resizing is
 // forced, even if the download window is not visible!
 
-void CTransferWnd::VerifyCatTabSize(bool _forceverify) {
+void CTransferWnd::VerifyCatTabSize(bool _forceverify)
+{
 	//MORPH - Added by SiRoB, Show/Hide dlTab
 	// MightyKnife: Forcing of the verification added
-	if ((downloadlistctrl.IsWindowVisible() == false) && (!_forceverify))
+	if ((m_dwShowListIDC != IDC_DOWNLOADLIST && m_dwShowListIDC != IDC_UPLOADLIST + IDC_DOWNLOADLIST) && (!_forceverify))
 		return;
 	// [end] Mighty Knife
 	//MORPH - Added by SiRoB, Show/Hide dlTab
 			
-	CRect rect;
 	int size=0;
-	int right;
-
-	for (int i=0;i<m_dlTab.GetItemCount();i++) {
+	for (int i = 0; i < m_dlTab.GetItemCount(); i++)
+	{
+		CRect rect;
 		m_dlTab.GetItemRect(i,&rect);
 		size+= rect.Width();
 	}
-	size+=20;
+	size += 4;
 
-	WINDOWPLACEMENT wpTabWinPos;
+	int right;
+	WINDOWPLACEMENT wp;
+	downloadlistctrl.GetWindowPlacement(&wp);
+	right = wp.rcNormalPosition.right;
+	m_dlTab.GetWindowPlacement(&wp);
+	if (wp.rcNormalPosition.right < 0)
+		return;
+	wp.rcNormalPosition.right = right;
 
-	downloadlistctrl.GetWindowPlacement(&wpTabWinPos);
-	right=wpTabWinPos.rcNormalPosition.right;
+	int left = wp.rcNormalPosition.right - size;
+	CRect rcBtnWnd1;
+	m_btnWnd1.GetWindowRect(rcBtnWnd1);
+	ScreenToClient(rcBtnWnd1);
+	if (left < rcBtnWnd1.right + 10)
+		left = rcBtnWnd1.right + 10;
+	wp.rcNormalPosition.left = left;
 
-	m_dlTab.GetWindowPlacement(&wpTabWinPos);
-	if (wpTabWinPos.rcNormalPosition.right<0) return;
-
-	wpTabWinPos.rcNormalPosition.right=right;
-	int left=wpTabWinPos.rcNormalPosition.right-size;
-	//MORPH START - Changed by SiRoB, Due to Khaos Categorie
-	//if (left<200) left=200;
-	//if (left<260) left=260;
-	if (left<425) left=425; //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons
-	//MORPH END   - Changed by SiRoB, Due to Khaos Categorie
-	wpTabWinPos.rcNormalPosition.left=left;
-
-			RemoveAnchor(m_dlTab);
-			m_dlTab.SetWindowPlacement(&wpTabWinPos);
-			AddAnchor(m_dlTab,TOP_RIGHT);
+	RemoveAnchor(m_dlTab);
+	m_dlTab.SetWindowPlacement(&wp);
+	AddAnchor(m_dlTab,TOP_RIGHT);
 }
+
 //MORPH - Removed by SiRoB, Due to Khaos Categorie
 /*
 CString CTransferWnd::GetCatTitle(int catid)
@@ -2158,12 +1663,339 @@ CString CTransferWnd::GetCatTitle(int catid)
 		case 5 : return GetResString(IDS_DOWNLOADING);
 		case 6 : return GetResString(IDS_ERRORLIKE);
 		case 7 : return GetResString(IDS_PAUSED);
-		case 8 : return GetResString(IDS_STOPPED);
+		case 8 : return GetResString(IDS_SEENCOMPL);
 		case 10 : return GetResString(IDS_VIDEO);
 		case 11 : return GetResString(IDS_AUDIO);
 		case 12 : return GetResString(IDS_SEARCH_ARC);
 		case 13 : return GetResString(IDS_SEARCH_CDIMG);
+		case 14 : return GetResString(IDS_SEARCH_DOC);
+		case 15 : return GetResString(IDS_SEARCH_PICS);
+		case 16 : return GetResString(IDS_SEARCH_PRG);
+//		case 18 : return GetResString(IDS_REGEXPRESSION);
 	}
 	return _T("?");
 }
 */
+
+void CTransferWnd::OnBnClickedChangeView()
+{
+	switch (m_dwShowListIDC)
+	{
+		case IDC_DOWNLOADLIST:
+		ShowList(IDC_UPLOADLIST);
+			break;
+		case IDC_UPLOADLIST:
+			  ShowList(IDC_DOWNLOADCLIENTS);
+			break;
+		case IDC_DOWNLOADCLIENTS:
+			if (!thePrefs.IsQueueListDisabled()){
+			ShowList(IDC_QUEUELIST);
+				break;
+			}
+		case IDC_QUEUELIST:
+			if (!thePrefs.IsKnownClientListDisabled()){
+			ShowList(IDC_CLIENTLIST);
+				break;
+			}
+		case IDC_CLIENTLIST:
+		OnBnClickedDownUploads();
+			break;
+		case IDC_UPLOADLIST + IDC_DOWNLOADLIST:
+		ShowList(IDC_DOWNLOADLIST);
+			break;
+	}
+}
+
+void CTransferWnd::ChangeDlIcon(EWnd1Icon iIcon)
+{
+	TBBUTTONINFO tbbi = {0};
+	tbbi.cbSize = sizeof tbbi;
+	tbbi.dwMask = TBIF_IMAGE;
+	tbbi.iImage = iIcon;
+	m_btnWnd1.SetButtonInfo(GetWindowLong(m_btnWnd1, GWL_ID), &tbbi);
+}
+
+void CTransferWnd::ShowList(uint32 dwListIDC)
+{
+	CRect rcWnd;
+	GetWindowRect(rcWnd);
+	ScreenToClient(rcWnd);
+
+	CRect rcDown;
+	GetDlgItem(dwListIDC)->GetWindowRect(rcDown);
+	ScreenToClient(rcDown);
+	rcDown.bottom = rcWnd.bottom - 20;
+	rcDown.top=28;
+	m_wndSplitter.DestroyWindow();
+	RemoveAnchor(dwListIDC);
+	m_btnWnd2.ShowWindow(SW_HIDE);
+
+	m_dwShowListIDC = dwListIDC;
+	uploadlistctrl.ShowWindow((m_dwShowListIDC == IDC_UPLOADLIST) ? SW_SHOW : SW_HIDE);
+	queuelistctrl.ShowWindow((m_dwShowListIDC == IDC_QUEUELIST) ? SW_SHOW : SW_HIDE);
+	downloadclientsctrl.ShowWindow((m_dwShowListIDC == IDC_DOWNLOADCLIENTS) ? SW_SHOW : SW_HIDE);
+	clientlistctrl.ShowWindow((m_dwShowListIDC == IDC_CLIENTLIST) ? SW_SHOW : SW_HIDE);
+	downloadlistctrl.ShowWindow((m_dwShowListIDC == IDC_DOWNLOADLIST) ? SW_SHOW : SW_HIDE);
+	m_dlTab.ShowWindow((m_dwShowListIDC == IDC_DOWNLOADLIST) ? SW_SHOW : SW_HIDE);
+
+	GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow((m_dwShowListIDC == IDC_QUEUELIST) ? SW_SHOW : SW_HIDE);
+
+	switch (dwListIDC)
+	{
+		case IDC_DOWNLOADLIST:
+			downloadlistctrl.MoveWindow(rcDown);
+			downloadlistctrl.ShowFilesCount();
+			m_btnWnd1.CheckButton(MP_VIEW1_DOWNLOADS);
+			ChangeDlIcon(w1iDownloadFiles);
+			break;
+		case IDC_UPLOADLIST:
+			uploadlistctrl.MoveWindow(rcDown);
+			UpdateListCount(wnd2Uploading);
+			m_btnWnd1.CheckButton(MP_VIEW1_UPLOADING);
+			ChangeDlIcon(w1iUploading);
+			break;
+		case IDC_QUEUELIST:
+			queuelistctrl.MoveWindow(rcDown);
+			UpdateListCount(wnd2OnQueue);
+			m_btnWnd1.CheckButton(MP_VIEW1_ONQUEUE);
+			ChangeDlIcon(w1iOnQueue);
+			break;
+		case IDC_DOWNLOADCLIENTS:
+			downloadclientsctrl.MoveWindow(rcDown);
+			UpdateListCount(wnd2Downloading);
+			m_btnWnd1.CheckButton(MP_VIEW1_DOWNLOADING);
+			ChangeDlIcon(w1iDownloading);
+			break;
+		case IDC_CLIENTLIST:
+			clientlistctrl.MoveWindow(rcDown);
+			UpdateListCount(wnd2Clients);
+			m_btnWnd1.CheckButton(MP_VIEW1_CLIENTS);
+			ChangeDlIcon(w1iClientsKnown);
+			break;
+	}
+	AddAnchor(dwListIDC, TOP_LEFT, BOTTOM_RIGHT);
+}
+
+void CTransferWnd::OnBnClickedDownUploads(bool bReDraw) 
+{
+	m_dlTab.ShowWindow(SW_SHOW);
+	if (!bReDraw && m_dwShowListIDC == IDC_DOWNLOADLIST + IDC_UPLOADLIST)
+		return;
+
+	m_btnWnd1.CheckButton(MP_VIEW1_SPLIT_WINDOW);
+	ChangeDlIcon(w1iDownloadFiles);
+
+	CRect rcWnd;
+	GetWindowRect(rcWnd);
+	ScreenToClient(rcWnd);
+
+	// [Comment by Mighty Knife:]
+	//
+	// thePrefs.GetSplitterbarPosition() retrieves the SplitterBar position.
+	// This is a percentage value (0-100%) of height of the whole window.
+	// Therefore the "splitpos" variable calculates the vertical pixel-position
+	// of the SplitterBar relative to the height of the whole window, i.e.
+	// the Transfer-window!
+	LONG splitpos = (thePrefs.GetSplitterbarPosition() * rcWnd.Height()) / 100;
+
+	CRect rcDown;
+	downloadlistctrl.GetWindowRect(rcDown);
+	ScreenToClient(rcDown);
+	rcDown.right = rcWnd.right - 7;
+	rcDown.bottom = splitpos + 5;
+
+	// [Comment by Mighty Knife:]
+	// In UpdateSplitterRange we used this downloadlist here to recalculate the
+	// percentage splitter position from the current absolute pixel position
+	// on the screen. We added 5 pixel here to the splitpos to get the bottom
+	// position of the downloadlist. So in UpdateSplitterRange we have to remember
+	// subtracting these 5 pixel again!
+	downloadlistctrl.MoveWindow(rcDown);
+
+	uploadlistctrl.GetWindowRect(rcDown);
+	ScreenToClient(rcDown);
+	rcDown.right = rcWnd.right - 7;
+	rcDown.bottom = rcWnd.bottom - 20;
+	rcDown.top = splitpos + 30;
+	uploadlistctrl.MoveWindow(rcDown);
+
+	queuelistctrl.GetWindowRect(rcDown);
+	ScreenToClient(rcDown);
+	rcDown.right = rcWnd.right - 7;
+	rcDown.bottom = rcWnd.bottom - 20;
+	rcDown.top = splitpos + 30;
+	queuelistctrl.MoveWindow(rcDown);
+
+	clientlistctrl.GetWindowRect(rcDown);
+	ScreenToClient(rcDown);
+	rcDown.right = rcWnd.right - 7;
+	rcDown.bottom = rcWnd.bottom - 20;
+	rcDown.top = splitpos + 30;
+	clientlistctrl.MoveWindow(rcDown);
+
+	downloadclientsctrl.GetWindowRect(rcDown);
+	ScreenToClient(rcDown);
+	rcDown.right = rcWnd.right - 7;
+	rcDown.bottom = rcWnd.bottom - 20;
+	rcDown.top = splitpos + 30;
+	downloadclientsctrl.MoveWindow(rcDown);
+
+	CRect rcSpl;
+	rcSpl.left = WND2_BUTTON_XOFF + WND2_BUTTON_WIDTH + 8;
+	rcSpl.right = rcDown.right;
+	rcSpl.top = splitpos + WND_SPLITTER_YOFF;
+	rcSpl.bottom = rcSpl.top + WND_SPLITTER_HEIGHT;
+	if (!m_wndSplitter)
+		m_wndSplitter.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER);
+	else
+		m_wndSplitter.MoveWindow(rcSpl, TRUE);
+	DoResize(0);
+
+	m_dwShowListIDC = IDC_DOWNLOADLIST + IDC_UPLOADLIST;
+	downloadlistctrl.ShowFilesCount();
+	m_btnWnd2.ShowWindow(SW_SHOW);
+
+	RemoveAnchor(IDC_DOWNLOADLIST);
+	RemoveAnchor(IDC_UPLOADLIST);
+	RemoveAnchor(IDC_QUEUELIST);
+	RemoveAnchor(IDC_DOWNLOADCLIENTS);
+	RemoveAnchor(IDC_CLIENTLIST);
+	RemoveAnchor(IDC_UPLOAD_ICO);
+
+	AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100, thePrefs.GetSplitterbarPosition() ));
+	AddAnchor(IDC_UPLOADLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_DOWNLOADCLIENTS,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_UPLOAD_ICO,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+
+	downloadlistctrl.ShowWindow(SW_SHOW);
+	uploadlistctrl.ShowWindow((m_uWnd2 == wnd2Uploading) ? SW_SHOW : SW_HIDE);
+	queuelistctrl.ShowWindow((m_uWnd2 == wnd2OnQueue) ? SW_SHOW : SW_HIDE);
+	downloadclientsctrl.ShowWindow((m_uWnd2 == wnd2Downloading) ? SW_SHOW : SW_HIDE);
+	clientlistctrl.ShowWindow((m_uWnd2 == wnd2Clients) ? SW_SHOW : SW_HIDE);
+
+	GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow((m_uWnd2 == wnd2OnQueue) ? SW_SHOW : SW_HIDE);
+
+	UpdateListCount(m_uWnd2);
+}
+
+void CTransferWnd::OnWnd1BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	CTitleMenu menu;
+	menu.CreatePopupMenu();
+	menu.EnableIcons();
+
+	menu.AppendMenu(MF_STRING | (m_dwShowListIDC == IDC_DOWNLOADLIST + IDC_UPLOADLIST ? MF_GRAYED : 0), MP_VIEW1_SPLIT_WINDOW, GetResString(IDS_SPLIT_WINDOW), _T("SplitWindow"));
+	menu.AppendMenu(MF_SEPARATOR);
+	menu.AppendMenu(MF_STRING | (m_dwShowListIDC == IDC_DOWNLOADLIST ? MF_GRAYED : 0), MP_VIEW1_DOWNLOADS, GetResString(IDS_TW_DOWNLOADS), _T("DownloadFiles"));
+	menu.AppendMenu(MF_STRING | (m_dwShowListIDC == IDC_UPLOADLIST ? MF_GRAYED : 0), MP_VIEW1_UPLOADING, GetResString(IDS_UPLOADING), _T("Upload"));
+	menu.AppendMenu(MF_STRING | (m_dwShowListIDC == IDC_DOWNLOADCLIENTS ? MF_GRAYED : 0), MP_VIEW1_DOWNLOADING, GetResString(IDS_DOWNLOADING), _T("Download"));
+	if (!thePrefs.IsQueueListDisabled())
+		menu.AppendMenu(MF_STRING | (m_dwShowListIDC == IDC_QUEUELIST ? MF_GRAYED : 0), MP_VIEW1_ONQUEUE, GetResString(IDS_ONQUEUE), _T("ClientsOnQueue"));
+	if (!thePrefs.IsKnownClientListDisabled())
+		menu.AppendMenu(MF_STRING | (m_dwShowListIDC == IDC_CLIENTLIST ? MF_GRAYED : 0), MP_VIEW1_CLIENTS, GetResString(IDS_CLIENTLIST), _T("ClientsKnown"));
+
+	CRect rc;
+	m_btnWnd1.GetWindowRect(&rc);
+	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, rc.left, rc.bottom, this);
+}
+
+void CTransferWnd::OnWnd2BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	CTitleMenu menu;
+	menu.CreatePopupMenu();
+	menu.EnableIcons();
+
+	menu.AppendMenu(MF_STRING | (m_uWnd2 == wnd2Uploading ? MF_GRAYED : 0), MP_VIEW2_UPLOADING, GetResString(IDS_UPLOADING), _T("Upload"));
+	menu.AppendMenu(MF_STRING | (m_uWnd2 == wnd2Downloading ? MF_GRAYED : 0), MP_VIEW2_DOWNLOADING, GetResString(IDS_DOWNLOADING), _T("Download"));
+	if (!thePrefs.IsQueueListDisabled())
+		menu.AppendMenu(MF_STRING | (m_uWnd2 == wnd2OnQueue ? MF_GRAYED : 0), MP_VIEW2_ONQUEUE, GetResString(IDS_ONQUEUE), _T("ClientsOnQueue"));
+	if (!thePrefs.IsKnownClientListDisabled())
+		menu.AppendMenu(MF_STRING | (m_uWnd2 == wnd2Clients ? MF_GRAYED : 0), MP_VIEW2_CLIENTS, GetResString(IDS_CLIENTLIST), _T("ClientsKnown"));
+
+	CRect rc;
+	m_btnWnd2.GetWindowRect(&rc);
+	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, rc.left, rc.bottom, this);
+}
+
+void CTransferWnd::ResetTransToolbar(bool bShowToolbar, bool bResetLists){
+	if (m_btnWnd1.m_hWnd){
+		RemoveAnchor(m_btnWnd1);
+		m_btnWnd1.DestroyWindow();
+	}
+	CRect rc;
+	rc.top = 5;
+	rc.left = WND1_BUTTON_XOFF;
+	rc.right = rc.left + WND1_BUTTON_WIDTH + (bShowToolbar ? NUM_WINA_BUTTONS*27 : 0);
+	rc.bottom = rc.top + WND1_BUTTON_HEIGHT;
+	m_btnWnd1.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP, rc, this, IDC_DOWNLOAD_ICO, !bShowToolbar);
+	SetWnd1Icons();
+	if (bShowToolbar)
+	{
+		m_btnWnd1.ModifyStyle(0, TBSTYLE_TOOLTIPS);
+		m_btnWnd1.SetExtendedStyle(m_btnWnd1.GetExtendedStyle() | TBSTYLE_EX_MIXEDBUTTONS);
+
+		TBBUTTONINFO tbbi = {0};
+		tbbi.cbSize = sizeof tbbi;
+		tbbi.dwMask = TBIF_SIZE | TBIF_STYLE;
+		tbbi.cx = WND1_BUTTON_WIDTH;
+		tbbi.fsStyle = BTNS_BUTTON | BTNS_SHOWTEXT;
+		m_btnWnd1.SetButtonInfo(IDC_DOWNLOAD_ICO, &tbbi);
+
+		TBBUTTON atb[NUM_WINA_BUTTONS] = {0};
+		atb[0].iBitmap = w1iSplitWindow;
+		atb[0].idCommand = MP_VIEW1_SPLIT_WINDOW;
+		atb[0].fsState = TBSTATE_ENABLED;
+		atb[0].fsStyle = BTNS_BUTTON | BTNS_CHECKGROUP | BTNS_AUTOSIZE;
+		atb[0].iString = -1;
+
+		atb[1].iBitmap = w1iDownloadFiles;
+		atb[1].idCommand = MP_VIEW1_DOWNLOADS;
+		atb[1].fsState = TBSTATE_ENABLED;
+		atb[1].fsStyle = BTNS_BUTTON | BTNS_CHECKGROUP | BTNS_AUTOSIZE;
+		atb[1].iString = -1;
+
+		atb[2].iBitmap = w1iUploading;
+		atb[2].idCommand = MP_VIEW1_UPLOADING;
+		atb[2].fsState = TBSTATE_ENABLED;
+		atb[2].fsStyle = BTNS_BUTTON | BTNS_CHECKGROUP | BTNS_AUTOSIZE;
+		atb[2].iString = -1;
+
+		atb[3].iBitmap = w1iDownloading;
+		atb[3].idCommand = MP_VIEW1_DOWNLOADING;
+		atb[3].fsState = TBSTATE_ENABLED;
+		atb[3].fsStyle = BTNS_BUTTON | BTNS_CHECKGROUP | BTNS_AUTOSIZE;
+		atb[3].iString = -1;
+
+		atb[4].iBitmap = w1iOnQueue;
+		atb[4].idCommand = MP_VIEW1_ONQUEUE;
+		atb[4].fsState = thePrefs.IsQueueListDisabled() ? 0 : TBSTATE_ENABLED;
+		atb[4].fsStyle = BTNS_BUTTON | BTNS_CHECKGROUP | BTNS_AUTOSIZE;
+		atb[4].iString = -1;
+
+		atb[5].iBitmap = w1iClientsKnown;
+		atb[5].idCommand = MP_VIEW1_CLIENTS;
+		atb[5].fsState = thePrefs.IsKnownClientListDisabled() ? 0 : TBSTATE_ENABLED;
+		atb[5].fsStyle = BTNS_BUTTON | BTNS_CHECKGROUP | BTNS_AUTOSIZE;
+		atb[5].iString = -1;
+		m_btnWnd1.AddButtons(ARRSIZE(atb), atb);
+
+		for (int i = 0; i < ARRSIZE(atb); i++)
+		{
+			tbbi.dwMask = TBIF_SIZE | TBIF_BYINDEX;
+			tbbi.cx = 4+16+4;
+			m_btnWnd1.SetButtonInfo(i + 1, &tbbi);
+		}
+
+		CSize size;
+		m_btnWnd1.GetMaxSize(&size);
+		m_btnWnd1.GetWindowRect(&rc);
+		ScreenToClient(&rc);
+		m_btnWnd1.MoveWindow(rc.left, rc.top, size.cx, rc.Height());
+	}
+	AddAnchor(m_btnWnd1, TOP_LEFT);
+	if (bResetLists){
+		OnBnClickedDownUploads(true);
+	}
+}

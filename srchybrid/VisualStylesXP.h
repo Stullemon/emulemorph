@@ -1,6 +1,3 @@
-#ifndef _VISUALSTYLE_XP_H_
-#define _VISUALSTYLE_XP_H_
-
 #pragma once
 
 #include <uxtheme.h>
@@ -245,5 +242,3 @@ private:
 };
 
 extern CVisualStylesXP g_xpStyle;
-
-#endif

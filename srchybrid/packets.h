@@ -117,6 +117,7 @@ public:
 	const BYTE* GetBlob() const		{ ASSERT(IsBlob());		return m_pData; }
 
 	void SetInt(UINT uVal);
+	void SetStr(LPCTSTR pszVal);
 	
 	CTag* CloneTag()				{ return new CTag(*this); }
 	

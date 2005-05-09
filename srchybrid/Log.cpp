@@ -22,6 +22,7 @@
 #include "OtherFunctions.h"
 #include "Preferences.h"
 #include "emuledlg.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -202,11 +203,27 @@ void AddLogTextV(UINT uFlags, EDebugLogPriority dlpPriority, LPCTSTR pszLine, va
 	
 	if (theApp.emuledlg)
 		theApp.emuledlg->AddLogText(uFlags, szLogLine);
-#ifdef _DEBUG
-	else{
+	else
+	{
 		TRACE(_T("App Log: %s\n"), szLogLine);
+
+		TCHAR szFullLogLine[1060];
+		int iLen = _sntprintf(szFullLogLine, ARRSIZE(szFullLogLine), _T("%s: %s\r\n"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()), szLogLine);
+		if (iLen >= 0)
+		{
+			if (!(uFlags & LOG_DEBUG))
+			{
+				if (thePrefs.GetLog2Disk())
+					theLog.Log(szFullLogLine, iLen);
+			}
+
+			if (thePrefs.GetVerbose() && ((uFlags & LOG_DEBUG) || thePrefs.GetFullVerbose()))
+			{
+				if (thePrefs.GetDebug2Disk())
+					theVerboseLog.Log(szFullLogLine, iLen);
+			}
+		}
 	}
-#endif
 }
 
 
@@ -221,6 +238,8 @@ CLogFile::CLogFile()
 	m_tStarted = 0;
 	m_fp = NULL;
 	m_bInOpenCall = false;
+	ASSERT( Unicode == 0 );
+	m_eFileFormat = Unicode;
 }
 
 CLogFile::~CLogFile()
@@ -271,16 +290,29 @@ void CLogFile::SetMaxFileSize(UINT uMaxFileSize)
 	m_uMaxFileSize = uMaxFileSize;
 }
 
+bool CLogFile::SetFileFormat(ELogFileFormat eFileFormat)
+{
+	if (eFileFormat != Unicode && eFileFormat != Utf8){
+		ASSERT(0);
+		return false;
+	}
+	if (m_fp != NULL)
+		return false; // can't change file format on-the-fly
+	m_eFileFormat = eFileFormat;
+	return true;
+}
+
 bool CLogFile::IsOpen() const
 {
 	return m_fp != NULL;
 }
 
-bool CLogFile::Create(LPCTSTR pszFilePath, UINT uMaxFileSize)
+bool CLogFile::Create(LPCTSTR pszFilePath, UINT uMaxFileSize, ELogFileFormat eFileFormat)
 {
 	Close();
 	m_strFilePath = pszFilePath;
 	m_uMaxFileSize = uMaxFileSize;
+	m_eFileFormat = eFileFormat;
 	return Open();
 }
 
@@ -296,8 +328,16 @@ bool CLogFile::Open()
 		m_uBytesWritten = _filelength(fileno(m_fp));
 		if (m_uBytesWritten == 0)
 		{
-			// write Unicode byte-order mark 0xFEFF
-			fputwc(0xFEFF, m_fp);
+			if (m_eFileFormat == Unicode)
+			{
+				// write Unicode byte-order mark 0xFEFF
+				fputwc(0xFEFF, m_fp);
+			}
+			else
+			{
+				ASSERT( m_eFileFormat == Utf8 );
+				; // could write UTF-8 header..
+			}
 		}
 		else if (m_uBytesWritten >= sizeof(WORD))
 		{
@@ -305,13 +345,21 @@ bool CLogFile::Open()
 			WORD wBOM;
 			if (fread(&wBOM, sizeof(wBOM), 1, m_fp) == 1)
 			{
-				if (wBOM == 0xFEFF)
+				if (wBOM == 0xFEFF && m_eFileFormat == Unicode)
 				{
 					// log file already in Unicode format
 					fseek(m_fp, 0, SEEK_END); // actually not needed because file is opened in 'Append' mode..
 				}
+				else if (wBOM != 0xFEFF && m_eFileFormat != Unicode)
+				{
+					// log file already in UTF-8 format
+					fseek(m_fp, 0, SEEK_END); // actually not needed because file is opened in 'Append' mode..
+				}
 				else
 				{
+					// log file does not have the required format, create a new one (with the req. format)
+					ASSERT( (m_eFileFormat==Unicode && wBOM!=0xFEFF) || (m_eFileFormat==Utf8 && wBOM==0xFEFF) );
+
 					ASSERT( !m_bInOpenCall );
 					if (!m_bInOpenCall) // just for safety
 					{
@@ -379,9 +427,18 @@ bool CLogFile::Log(LPCTSTR pszMsg, int iLen)
 	}
 	//Morph END - Added by SiRoB, AndCycle, Date File Name Log
 
-	// don't use 'fputs' + '_filelength' -- gives poor performance
-	size_t uToWrite = ((iLen == -1) ? _tcslen(pszMsg) : (size_t)iLen)*sizeof(TCHAR);
-	size_t uWritten = fwrite(pszMsg, 1, uToWrite, m_fp);
+	size_t uWritten;
+	if (m_eFileFormat == Unicode)
+	{
+		// don't use 'fputs' + '_filelength' -- gives poor performance
+		size_t uToWrite = ((iLen == -1) ? _tcslen(pszMsg) : (size_t)iLen)*sizeof(TCHAR);
+			uWritten = fwrite(pszMsg, 1, uToWrite, m_fp);
+	}
+	else
+	{
+		TUnicodeToUTF8<2048> utf8(pszMsg, iLen);
+		uWritten = fwrite((LPCSTR)utf8, 1, utf8.GetLength(), m_fp);
+	}
 	bool bResult = !ferror(m_fp);
 	m_uBytesWritten += uWritten;
 
@@ -397,6 +454,23 @@ bool CLogFile::Log(LPCTSTR pszMsg, int iLen)
 		fflush(m_fp);
 
 	return bResult;
+}
+
+bool CLogFile::Logf(LPCTSTR pszFmt, ...)
+{
+	if (m_fp == NULL)
+		return false;
+
+	va_list argp;
+	va_start(argp, pszFmt);
+
+	TCHAR szMsg[1024];
+	_vsntprintf(szMsg, ARRSIZE(szMsg), pszFmt, argp);
+
+	TCHAR szFullMsg[1060];
+	int iLen = _sntprintf(szFullMsg, ARRSIZE(szFullMsg), _T("%s: %s\r\n"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()), szMsg);
+	va_end(argp);
+	return Log(szFullMsg, iLen);
 }
 
 void CLogFile::StartNewLogFile()

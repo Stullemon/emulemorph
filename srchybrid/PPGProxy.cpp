@@ -74,9 +74,9 @@ BOOL CPPgProxy::OnInitDialog()
 BOOL CPPgProxy::OnApply()
 {
 	USES_CONVERSION;
-	thePrefs.SetProxyASCWOP(IsDlgButtonChecked(IDC_ASCWOP));
-	proxy.UseProxy=(IsDlgButtonChecked(IDC_ENABLEPROXY));
-	proxy.EnablePassword = ((CButton*)GetDlgItem(IDC_ENABLEAUTH))->GetCheck();
+	thePrefs.SetProxyASCWOP(IsDlgButtonChecked(IDC_ASCWOP)!=0);
+	proxy.UseProxy = (IsDlgButtonChecked(IDC_ENABLEPROXY)!=0);
+	proxy.EnablePassword = ((CButton*)GetDlgItem(IDC_ENABLEAUTH))->GetCheck()!=0;
 	proxy.type = ((CComboBox*)GetDlgItem(IDC_PROXYTYPE))->GetCurSel();
 
 	if(GetDlgItem(IDC_PROXYNAME)->GetWindowTextLength())

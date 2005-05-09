@@ -176,9 +176,9 @@ CString DbgGetClientTCPPacket(UINT protocol, UINT opcode, UINT size);
 CString DbgGetBlockInfo(const Requested_Block_Struct* block);
 CString DbgGetBlockInfo(uint32 StartOffset, uint32 EndOffset);
 CString DbgGetBlockFileInfo(const Requested_Block_Struct* block, const CPartFile* partfile);
-void DebugRecv(LPCSTR pszMsg, const CUpDownClient* client, const char* packet = NULL, uint32 nIP = 0);
+void DebugRecv(LPCSTR pszMsg, const CUpDownClient* client, const uchar* packet = NULL, uint32 nIP = 0);
 void DebugRecv(LPCSTR pszOpcode, uint32 ip, uint16 port);
-void DebugSend(LPCSTR pszMsg, const CUpDownClient* client, const char* packet = NULL);
+void DebugSend(LPCSTR pszMsg, const CUpDownClient* client, const uchar* packet = NULL);
 void DebugSend(LPCSTR pszOpcode, uint32 ip, uint16 port);
 void DebugSendF(LPCSTR pszOpcode, uint32 ip, uint16 port, LPCTSTR pszMsg, ...);
 void DebugHttpHeaders(const CStringAArray& astrHeaders);
@@ -331,6 +331,8 @@ __inline bool IsLowID(uint32 id){
 	return (id < 16777216);
 }
 CString ipstr(uint32 nIP);
+CString ipstr(uint32 nIP, uint16 nPort);
+CString ipstr(LPCTSTR pszAddress, uint16 nPort);
 CStringA ipstrA(uint32 nIP);
 __inline CString ipstr(in_addr nIP){
 	return ipstr(*(uint32*)&nIP);

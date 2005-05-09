@@ -51,7 +51,7 @@ CFriendList::~CFriendList()
 }
 
 bool CFriendList::LoadList(){
-	CString strFileName = CString(thePrefs.GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
+	CString strFileName = thePrefs.GetConfigDir() + EMFRIENDS_MET_FILENAME;
 	CSafeBufferedFile file;
 	CFileException fexp;
 	if (!file.Open(strFileName.GetBuffer(),CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
@@ -101,7 +101,7 @@ void CFriendList::SaveList(){
 		AddDebugLogLine(false, _T("Saving friends list file \"%s\""), EMFRIENDS_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount();
 
-	CString strFileName = CString(thePrefs.GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
+	CString strFileName = thePrefs.GetConfigDir() + EMFRIENDS_MET_FILENAME;
 	//Morph Start - added by AndCycle, safe .met replace
 	CString origName = strFileName, oldName = strFileName + _T(".old");
 	strFileName = strFileName + _T(".new");

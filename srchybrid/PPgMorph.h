@@ -14,29 +14,29 @@ public:
 	enum { IDD = IDD_PPG_MORPH };
 protected:
 
-	int m_iSUCLog;
-	int m_iUSSLimit; // EastShare - Added by TAHO, USS limit
+	bool m_bSUCLog;
+	bool m_bUSSLimit; // EastShare - Added by TAHO, USS limit
 	int m_iSUCHigh;
 	int m_iSUCLow;
 	int m_iSUCPitch;
 	int m_iSUCDrift;
-	int m_iUSSLog;
+	bool m_bUSSLog;
 	int m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     int m_iUSSPingTolerance;
     int m_iUSSGoingUpDivider;
     int m_iUSSGoingDownDivider;
     int m_iUSSNumberOfPings;
 	int m_iMinUpload;
-	int m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
-	int m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
-	int m_bShowClientPercentage;
-	int m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
-	int m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
-	int m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	int m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	int m_iFunnyNick; //MORPH - Added by SiRoB, Optionnal funnynick display
-	int m_iClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
-	int m_iCountWCSessionStats; // MORPH - Added by Commander, Show WC stats
+	bool m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
+	bool m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
+	bool m_bShowClientPercentage;
+	bool m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
+	bool m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
+	bool m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	bool m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	bool m_bFunnyNick; //MORPH - Added by SiRoB, Optionnal funnynick display
+	bool m_bClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
+	bool m_bCountWCSessionStats; // MORPH - Added by Commander, Show WC stats
 
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	int m_iDownloadDataRateAverageTime;
@@ -53,23 +53,23 @@ protected:
 	int	m_iDynUpMode;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	int	m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	//MORPH START - Added by SiRoB, khaos::categorymod+
-	int m_iShowCatNames;
-	int m_iSelectCat;
-	int m_iUseActiveCat;
-	int m_iAutoSetResOrder;
-	int m_iShowA4AFDebugOutput;
-	int m_iSmartA4AFSwapping;
+	bool m_bShowCatNames;
+	bool m_bSelectCat;
+	bool m_bUseActiveCat;
+	bool m_bAutoSetResOrder;
+	bool m_bShowA4AFDebugOutput;
+	bool m_bSmartA4AFSwapping;
 	int m_iAdvA4AFMode;
-	int m_iSmallFileDLPush;
+	bool m_bSmallFileDLPush;
 	int m_iResumeFileInNewCat;
-	int m_iUseAutoCat;
-	int m_iUseSLS;
+	bool m_bUseAutoCat;
+	bool m_bUseSLS;
 	// khaos::accuratetimerem+
 	int m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	int m_iUseICS; //MORPH - Added by SIRoB, ICS Optional
-	int m_iHighProcess; //MORPH - Added by IceCream, high process priority
+	bool m_bUseICS; //MORPH - Added by SIRoB, ICS Optional
+	bool m_bHighProcess; //MORPH - Added by IceCream, high process priority
 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
@@ -155,14 +155,14 @@ protected:
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 	CString   m_sCommunityName;
 	HTREEITEM m_htiCommunityName;
-	BOOL      m_bReportHashingFiles;
+	bool      m_bReportHashingFiles;
 	HTREEITEM m_htiReportHashingFiles;
-	BOOL	  m_bLogFriendlistActivities;
+	bool	  m_bLogFriendlistActivities;
 	HTREEITEM m_htiLogFriendlistActivities;
 	// [end] Mighty Knife
 
 	// Mighty Knife: Static server handling
-	BOOL	  m_bDontRemoveStaticServers;
+	bool	  m_bDontRemoveStaticServers;
 	HTREEITEM m_htiDontRemoveStaticServers;
 	// [end] Mighty Knife
 

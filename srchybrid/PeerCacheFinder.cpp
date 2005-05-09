@@ -21,9 +21,9 @@
 #include "otherfunctions.h"
 #include "Preferences.h"
 #include "md5sum.h"
-#include "version.h"
+#pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include <crypto51/rsa.h>
-#include <crypto51/integer.h>
+#pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "Log.h"
 #include "UserMsgs.h"
 
@@ -495,7 +495,7 @@ bool CPCValditeThread::Valdite(){
 	// TODO: This will work successfully only for very small files which were received completely right at the
 	// time the 'GetLength' function is called. -> Use a polling loop which reads everything up to get bytes
 	// specified in 'Content-Length' or some other appropriate limit in case 'Content-Length' is missing.
-	uint32 nIFileSize = file->GetLength();
+	uint32 nIFileSize = (UINT)file->GetLength();
 	ASSERT (nIFileSize > SIGNATURELENGTH);
 
 	if (file && nIFileSize > SIGNATURELENGTH){
@@ -640,7 +640,7 @@ bool CPCValditeThread::Valdite(){
 				strCurHeader = strHeaders.Tokenize("\r\n",nHeaderPos);
 			}
 			///////***** Own version check
-			if (!m_pOwner->IsClientPCCompatible(CClientVersionInfo(VERSION_MJR, VERSION_MIN, VERSION_UPDATE, VERSION_BUILD, SO_EMULE))){
+			if (!m_pOwner->IsClientPCCompatible(CClientVersionInfo(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld, SO_EMULE))){
 				bContentCheckFailed = true;
 				DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("PeerCache: Current Version not allowed to use this PC-Server, please update")));
 			}

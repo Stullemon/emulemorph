@@ -43,9 +43,9 @@ public:
     SocketSentBytes  SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
 
 protected:
-	bool	ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port);
+	bool	ProcessPacket(const BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port);
 	//MORPH START - Added by SiRoB, Webcache 1.2f
-	bool	ProcessWebCachePacket(BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port); //JP WEBCACHE
+	bool	ProcessWebCachePacket(const BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port); //JP WEBCACHE
 	//MORPH START - Added by SiRoB, Webcache 1.2f
 
 	virtual void	OnSend(int nErrorCode);	

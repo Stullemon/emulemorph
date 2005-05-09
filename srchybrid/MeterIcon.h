@@ -4,10 +4,6 @@
 // Written by: Anish Mistry http://am-productions.yi.org/
 /* This code is licensed under the GNU GPL.  See License.txt or (http://www.gnu.org/copyleft/gpl.html). */
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_METERICON_H__BDEBD2C3_BBC3_41B3_A502_E745FB08D90D__INCLUDED_)
-#define AFX_METERICON_H__BDEBD2C3_BBC3_41B3_A502_E745FB08D90D__INCLUDED_
-
 #pragma once
 
 class CMeterIcon  
@@ -42,5 +38,3 @@ protected:
 	HICON CreateMeterIcon(const int* pBarData);
 	COLORREF GetMeterColor(int nLevel) const;
 };
-
-#endif // !defined(AFX_METERICON_H__BDEBD2C3_BBC3_41B3_A502_E745FB08D90D__INCLUDED_)

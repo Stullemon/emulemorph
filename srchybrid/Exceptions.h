@@ -1,6 +1,3 @@
-#ifndef __DFLT_EXCEPTION_HANDLERS_H__
-#define __DFLT_EXCEPTION_HANDLERS_H__
-
 #pragma once
 
 #ifdef _DEBUG
@@ -39,7 +36,7 @@ class CMsgBoxException : public CException
 {
 	DECLARE_DYNAMIC(CMsgBoxException)
 public:
-	CMsgBoxException(LPCTSTR pszMsg, UINT uType = MB_ICONWARNING, UINT uHelpID = 0)
+	explicit CMsgBoxException(LPCTSTR pszMsg, UINT uType = MB_ICONWARNING, UINT uHelpID = 0)
 	{
 		m_strMsg = pszMsg;
 		m_uType = uType;
@@ -64,5 +61,3 @@ public:
 	CString m_strMsg;
 	bool m_bDelete;
 };
-
-#endif//!__DFLT_EXCEPTION_HANDLERS_H__

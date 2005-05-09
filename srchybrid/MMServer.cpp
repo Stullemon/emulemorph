@@ -43,11 +43,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
-#endif
-
-#ifndef EWX_FORCEIFHUNG
-#define EWX_FORCEIFHUNG     0x00000010
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -184,7 +180,7 @@ void CMMServer::ProcessStatusRequest(CMMSocket* sender, CMMPacket* packet){
 	packet->WriteShort((uint16)((thePrefs.GetMaxGraphDownloadRate()*1024)/100));
 	packet->WriteByte((uint8)theApp.downloadqueue->GetDownloadingFileCount());
 	packet->WriteByte((uint8)theApp.downloadqueue->GetPausedFileCount());
-	packet->WriteInt(theStats.sessionReceivedBytes/1048576);
+	packet->WriteInt((uint32)(theStats.sessionReceivedBytes/1048576));
 	packet->WriteShort((uint16)((theStats.GetAvgDownloadRate(0)*1024)/100));
 	if (theApp.serverconnect->IsConnected()){
 		if(theApp.serverconnect->IsLowID())
@@ -510,7 +506,7 @@ void CMMServer::SearchFinished(bool bTimeOut){
 		CMMPacket* packet = new CMMPacket(MMP_SEARCHANS);
 		packet->m_bSpecialHeader = true;
 		packet->WriteByte(MMT_OK);
-		packet->WriteByte(results);
+		packet->WriteByte((uint8)results);
 		for (int i = 0; i != results; i++){
 			CSearchFile* cur_file = theApp.searchlist->DetachNextFile(MMS_SEARCHID);
 			m_SendSearchList[i] = cur_file;
@@ -714,9 +710,9 @@ void  CMMServer::ProcessStatisticsRequest(CMMData* data, CMMSocket* sender){
 			}
 			nPos++;
 		}
-		packet->WriteInt(ROUND(nAddUp/i));
-		packet->WriteInt(ROUND(nAddDown/i));
-		packet->WriteShort(ROUND(nAddCon/i));
+		packet->WriteInt((uint32)ROUND(nAddUp/i));
+		packet->WriteInt((uint32)ROUND(nAddDown/i));
+		packet->WriteShort((uint16)ROUND(nAddCon/i));
 	}
 	ASSERT ( nPos == nRawDataSize );
 	sender->SendPacket(packet);

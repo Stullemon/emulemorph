@@ -29,11 +29,14 @@ enum SocketState
 	SS_Complete	//These are sockets that have responded with either a connection or error.
 };
 
-class CClientReqSocket : public CEMSocket{
-	DECLARE_DYNCREATE(CClientReqSocket)
+class CClientReqSocket : public CEMSocket
+{
 	friend class CListenSocket;
+	DECLARE_DYNCREATE(CClientReqSocket)
+
 public:
 	CClientReqSocket(CUpDownClient* in_client = NULL);	
+
 	void	SetClient(CUpDownClient* pClient);
 	void	Disconnect(LPCTSTR pszReason);
 	void	WaitForOnConnect();
@@ -54,27 +57,28 @@ public:
 	CUpDownClient*	client;
 
 protected:
-	virtual void Close()	{CAsyncSocketEx::Close();} // deadlake PROXYSUPPORT - changed to AsyncSocketEx
-	virtual	void OnInit();
+	virtual ~CClientReqSocket();
+	virtual void Close() { CAsyncSocketEx::Close(); }
+	void	Delete_Timed();
+
 	virtual void OnConnect(int nErrorCode);
 	void		 OnClose(int nErrorCode);
 	void		 OnSend(int nErrorCode);
 	void		 OnReceive(int nErrorCode);
 	void		 OnError(int nErrorCode);
+
 	virtual bool PacketReceived(Packet* packet);
 	int			 PacketReceivedSEH(Packet* packet);
 	bool		 PacketReceivedCppEH(Packet* packet);
 
-	void	Delete_Timed();
-	virtual ~CClientReqSocket();
-
-	bool	ProcessPacket(char* packet, uint32 size,UINT opcode);
-	bool	ProcessExtPacket(char* packet, uint32 size, UINT opcode, UINT uRawSize);
+	bool	ProcessPacket(const BYTE* packet, uint32 size,UINT opcode);
+	bool	ProcessExtPacket(const BYTE* packet, uint32 size, UINT opcode, UINT uRawSize);
 	//MORPH START - Added by SiRoB, WebCache 1.2f
-	bool	ProcessWebCachePacket(char* packet, uint32 size, UINT opcode, UINT uRawSize); // yonatan - webcache protocol packets
+	bool	ProcessWebCachePacket(const BYTE* packet, uint32 size, UINT opcode, UINT uRawSize); // yonatan - webcache protocol packets
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
-	void	PacketToDebugLogLine(LPCTSTR protocol, const char* packet, uint32 size, UINT opcode, EDebugLogPriority dlpPriority);
+	void	PacketToDebugLogLine(LPCTSTR protocol, const uchar* packet, uint32 size, UINT opcode, EDebugLogPriority dlpPriority);
 	void	SetConState(SocketState val);
+
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	void  SmartUploadControl();
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
@@ -89,9 +93,10 @@ protected:
 class CListenSocket : public CAsyncSocketEx
 {
 	friend class CClientReqSocket;
+
 public:
 	CListenSocket();
-	~CListenSocket();
+	virtual ~CListenSocket();
 
 	bool	StartListening();
 	void	StopListening();
@@ -127,7 +132,7 @@ private:
 	uint16	m_OpenSocketsInterval;
 	uint32	maxconnectionreached;
 	uint16	m_ConnectionStates[3];
-	uint16	m_nPendingConnections;
+	int		m_nPendingConnections;
 	uint32	peakconnections;
 	uint32	totalconnectionchecks;
 	float	averageconnections;

@@ -203,14 +203,14 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 					rCtrl << _T("\r\n");
 
 					rCtrl << GetResString(IDS_SHORTTAGS) << _T(": ");
-					if (srv->GetTCPFlags() & SRV_TCPFLG_NEWTAGS)
+					if ((srv->GetTCPFlags() & SRV_TCPFLG_NEWTAGS) || (srv->GetUDPFlags() & SRV_UDPFLG_NEWTAGS))
 						rCtrl << GetResString(IDS_YES);
 					else
 						rCtrl << GetResString(IDS_NO);
 					rCtrl << _T("\r\n");
 
 					rCtrl << _T("Unicode") << _T(": ");
-					if (srv->GetTCPFlags() & SRV_TCPFLG_UNICODE)
+					if ((srv->GetTCPFlags() & SRV_TCPFLG_UNICODE) || (srv->GetUDPFlags() & SRV_UDPFLG_UNICODE))
 						rCtrl << GetResString(IDS_YES);
 					else
 						rCtrl << GetResString(IDS_NO);
@@ -218,6 +218,13 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 
 					rCtrl << GetResString(IDS_SRV_UDPSR) << _T(": ");
 					if (srv->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES)
+						rCtrl << GetResString(IDS_YES);
+					else
+						rCtrl << GetResString(IDS_NO);
+					rCtrl << _T("\r\n");
+
+					rCtrl << GetResString(IDS_SRV_UDPSR) << _T(" #2: ");
+					if (srv->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES2)
 						rCtrl << GetResString(IDS_YES);
 					else
 						rCtrl << GetResString(IDS_NO);
@@ -261,13 +268,13 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		rCtrl << GetResString(IDS_BUDDY) << _T(":\t");
 		switch ( theApp.clientlist->GetBuddyStatus() )
 		{
-			case 0:
+			case Disconnected:
 				rCtrl << GetResString(IDS_BUDDYNONE);
 				break;
-			case 1:
+			case Connecting:
 				rCtrl << GetResString(IDS_CONNECTING);
 				break;
-			case 2:
+			case Connected:
 				rCtrl << GetResString(IDS_CONNECTED);
 				break;
 		}

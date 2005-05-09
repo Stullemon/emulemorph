@@ -544,11 +544,11 @@ uint32 CRoutingZone::estimateCount()
 	if( !isLeaf() )
 		return 0;
 	if( m_level < KBASE )
-		return (pow(2, m_level)*10);
+		return (UINT)(pow(2, m_level)*10);
 	CRoutingZone* curZone = m_superZone->m_superZone->m_superZone;
 
 	float modify = ((float)curZone->getNumContacts())/20.0F;
-	return (pow( 2, m_level-2))*10*(modify);
+	return (UINT)((pow( 2, m_level-2))*10*(modify));
 }
 
 void CRoutingZone::onSmallTimer(void)

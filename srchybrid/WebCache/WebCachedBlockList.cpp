@@ -166,11 +166,11 @@ while (i < GetCount())
 }*/
 
 
-bool CWebCachedBlockList::ProcessWCBlocks(char* packet, uint32 size, UINT opcode, CUpDownClient* client)
+bool CWebCachedBlockList::ProcessWCBlocks(const BYTE* packet, uint32 size, UINT opcode, CUpDownClient* client)
 {
 	if (size < WC_OHCB_PACKET_SIZE + 8)	// check the minimal packet size
 		return false;
-	CSafeMemFile indata((BYTE*)packet, size );
+	CSafeMemFile indata(packet, size );
 
 	if (!client)
 		client = theApp.clientlist->FindClientByWebCacheUploadId(indata.ReadUInt32());
