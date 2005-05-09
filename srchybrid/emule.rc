@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -404,7 +404,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Files"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-	GROUPBOX        "See my shared files/directories",IDC_SEEMYSHARE_FRM,7,7,
+    GROUPBOX        "See my shared files/directories",IDC_SEEMYSHARE_FRM,7,7,
                     215,26,BS_FLAT
     CONTROL         "Everybody",IDC_SEESHARE1,"Button",BS_AUTORADIOBUTTON | 
                     BS_FLAT | WS_GROUP | WS_TABSTOP,13,17,73,10
@@ -1278,13 +1278,13 @@ BEGIN
                     358,111,148,59
 END
 
-IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 289
+IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 273
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Client Details"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "General",IDC_STATIC30,7,1,308,74,BS_FLAT
+    GROUPBOX        "General",IDC_STATIC30,7,1,308,82,BS_FLAT
     LTEXT           "Username:",IDC_STATIC31,19,14,60,8
     CONTROL         "Static",IDC_DNAME,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,14,224,8
@@ -1304,58 +1304,58 @@ BEGIN
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8
     CONTROL         "Static",IDC_CDIDENT,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,58,106,8
-    GROUPBOX        "Transfer",IDC_STATIC40,7,81,308,71,BS_FLAT
-    LTEXT           "Currently downloading:",IDC_STATIC41,19,91,86,8
+    GROUPBOX        "Transfer",IDC_STATIC40,7,88,308,69,BS_FLAT
+    LTEXT           "Currently downloading:",IDC_STATIC41,19,98,86,8
     CONTROL         "Static",IDC_DDOWNLOADING,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,91,202,8
-    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,113,87,8
+                    SS_NOPREFIX | WS_GROUP,110,98,202,8
+    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,120,87,8
     CONTROL         "Static",IDC_DDOWN,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,113,53,8
-    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,124,86,8
+                    SS_NOPREFIX | WS_GROUP,110,120,53,8
+    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,131,86,8
     CONTROL         "Static",IDC_DAVDR,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,124,53,8
-    LTEXT           "Downloaded total:",IDC_STATIC44,19,135,83,8
+                    SS_NOPREFIX | WS_GROUP,110,131,53,8
+    LTEXT           "Downloaded total:",IDC_STATIC44,19,142,83,8
     CONTROL         "Static",IDC_DDOWNTOTAL,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,135,53,8
-    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,113,93,8
+                    SS_NOPREFIX | WS_GROUP,110,142,53,8
+    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,120,93,8
     CONTROL         "Static",IDC_DDUP,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,256,113,51,8
-    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,124,93,8
+                    SS_NOPREFIX | WS_GROUP,256,120,51,8
+    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,131,93,8
     CONTROL         "Static",IDC_DAVUR,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,256,124,50,8
-    LTEXT           "Uploaded total:",IDC_STATIC47,163,135,93,8
+                    SS_NOPREFIX | WS_GROUP,256,131,50,8
+    LTEXT           "Uploaded total:",IDC_STATIC47,163,142,93,8
     CONTROL         "Static",IDC_DUPTOTAL,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,256,135,50,8
-    GROUPBOX        "Scores",IDC_STATIC50,7,156,308,47,BS_FLAT
-    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,169,87,8
+                    SS_NOPREFIX | WS_GROUP,256,142,50,8
+    GROUPBOX        "Scores",IDC_STATIC50,7,161,308,49,BS_FLAT
+    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,174,87,8
     CONTROL         "Static",IDC_DRATIO,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,169,53,8
-    LTEXT           "Rating (total):",IDC_STATIC52,19,180,84,8
+                    SS_NOPREFIX | WS_GROUP,110,174,53,8
+    LTEXT           "Rating (total):",IDC_STATIC52,19,185,84,8
     CONTROL         "Static",IDC_DRATING,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,180,53,8
-    LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,191,91,8
+                    SS_NOPREFIX | WS_GROUP,110,185,53,8
+    LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,196,91,8
     CONTROL         "Static",IDC_DSCORE,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,191,105,8
-    LTEXT           "Currently downloading:",IDC_STATIC48,19,102,86,8
+                    SS_NOPREFIX | WS_GROUP,110,196,105,8
+    LTEXT           "Currently downloading:",IDC_STATIC48,19,109,86,8
     CONTROL         "Static",IDC_UPLOADING,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,102,202,8
+                    SS_NOPREFIX | WS_GROUP,110,109,202,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     CONTROL         "Static",IDC_CLIENTDETAIL_KADCON,"Static",
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,219,57,92,8
-	LTEXT           "Country:",IDC_DLOC2,19,69,49,8
+    LTEXT           "Country:",IDC_DLOC2,19,69,49,8
     CONTROL         "Static",IDC_DLOC,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,69,224,8
-    LTEXT           "WebCache:",IDC_STATIC56,19,229,64,10
+    LTEXT           "WebCache:",IDC_STATIC56,19,226,64,10
     CONTROL         "Static",IDC_Webcache,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,229,197,10
-    GROUPBOX        "WebCache",IDC_STATIC57,7,218,308,48
-    LTEXT           "Successful/Requested:",IDC_STATIC54,19,242,84,10
+                    SS_NOPREFIX | WS_GROUP,110,226,197,10
+    GROUPBOX        "WebCache",IDC_STATIC57,7,214,308,51
+    LTEXT           "Successful/Requested:",IDC_STATIC54,19,239,84,10
     CONTROL         "Static",IDC_WCSTATISTICS,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,242,197,8
-    LTEXT           "Is trusted OHCB sender:",IDC_STATIC55,19,255,100,10
-    CONTROL         "Static",IDC_TRUSTEDOHCBSENDER,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,255,197,8
-    ICON            "",IDC_COUNTRYFLAG,68,68,20,20,NOT WS_VISIBLE
+                    SS_NOPREFIX | WS_GROUP,110,239,197,8
+    LTEXT           "Is trusted OHCB sender:",IDC_STATIC55,19,252,100,10
+    CONTROL         "Static",IDC_TRUSTEDOHCBSENDER,"Static",
+                    SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,110,252,197,8
+    ICON            "",IDC_COUNTRYFLAG,68,68,21,20,NOT WS_VISIBLE
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -2437,18 +2437,7 @@ BEGIN
         VERTGUIDE, 215
         VERTGUIDE, 256
         TOPMARGIN, 7
-        BOTTOMMARGIN, 207
-        HORZGUIDE, 28
-        HORZGUIDE, 39
-        HORZGUIDE, 50
-        HORZGUIDE, 61
-        HORZGUIDE, 72
-        HORZGUIDE, 105
-        HORZGUIDE, 116
-        HORZGUIDE, 127
-        HORZGUIDE, 138
-        HORZGUIDE, 171
-        HORZGUIDE, 182
+        BOTTOMMARGIN, 265
     END
 
     IDD_META_DATA, DIALOG
@@ -2991,12 +2980,12 @@ OPENINCOMING.GIF        HTML                    "res\\FolderOpen.gif"
 RESTOREWINDOW.GIF       HTML                    "res\\RestoreWindow.gif"
 TABLEBACKGND.GIF        HTML                    "res\\MiniMuleBack.gif"
 PREFERENCES.GIF         HTML                    "res\\Preferences.gif"
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4837,6 +4826,10 @@ BEGIN
     IDS_PW_ENABLEEMAIL      "Enable Email Notifications"
     IDS_EMULENOTIFICATION   "eMule Notification"
     IDS_PW_SHOWTRANSTOOLBAR "Show additional toolbar on transferwindow"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CRASHRPT_DONE       "Crash report has been generated."
     IDS_CRASHRPT_AV         "CrashReporter is available and running."
 END
@@ -5668,7 +5661,6 @@ BEGIN
     IDS_HASHING_NEWFILE     "New file: '%s'"
     IDS_SUQWT_LOAD          "Load %s"
     IDS_VERBOSE_TITLE       "Verbose"
-    IDS_CAT_TOTAL           "Total"
     IDS_UP_LOWID            "%s LowID"
     IDS_UP_LOWID_DELAYED    "%s LowID delayed %s"
 END
@@ -5694,7 +5686,30 @@ BEGIN
     IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
 END
 
-#endif    // English (U.S.) resources
+STRINGTABLE 
+BEGIN
+    IDS_OK                  "OK"
+    IDS_IGNORE              "&Ignore"
+    IDS_RETRY               "&Retry"
+    IDS_HELP                "&Help"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CONTINUE            "&Continue"
+    IDS_DONOTASKAGAIN       "Don't ask me again"
+    IDS_DONOTTELLAGAIN      "Don't tell me again"
+    IDS_DONOTSHOWAGAIN      "Don't show again"
+    IDS_YESTOALL            "Y&es to All"
+    IDS_NOTOALL             "N&o to All"
+    IDS_TRYAGAIN            "&Try Again"
+    IDS_REPORT              "Re&port"
+    IDS_IGNOREALL           "I&gnore All"
+    IDS_SKIP                "&Skip"
+    IDS_SKIPALL             "S&kip All"
+END
+
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
