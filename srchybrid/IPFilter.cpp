@@ -495,7 +495,7 @@ void CIPFilter::UpdateIPFilterURL()
 
 	TCHAR szTempFilePath[_MAX_PATH];
 	_tmakepath(szTempFilePath, NULL, thePrefs.GetAppDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
-	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+	_tremove(szTempFilePath);
 
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = GetResString(IDS_IPFILTER_DLVERSION);
@@ -508,7 +508,7 @@ void CIPFilter::UpdateIPFilterURL()
 		LogError(LOG_STATUSBAR, GetResString(IDS_LOG_ERRDWN), strURL);
 		return;
 	}
-	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+	FILE* readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
 
 	char buffer[9];
 	int lenBuf = 9;
@@ -523,6 +523,7 @@ void CIPFilter::UpdateIPFilterURL()
 		CString IPFilterURL = thePrefs.GetUpdateURLIPFilter();
 
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
+		_tremove(szTempFilePath);
 
 		CHttpDownloadDlg dlgDownload;
 		dlgDownload.m_strTitle = GetResString(IDS_DWL_IPFILTERFILE);
@@ -614,14 +615,15 @@ void CIPFilter::UpdateIPFilterURL()
 			_trename(szTempFilePath, GetDefaultFilePath());
 		}
 
+		//Moved up to not retry if archive don't contain the awaited file
+		thePrefs.SetIpfilterVersion(_tstoi(sbuffer));
+		thePrefs.Save();
+
 		if(bIsZipFile && !bUnzipped){
 			return;
 		}
 
 		LoadFromDefaultFile();
-            
-		thePrefs.SetIpfilterVersion(_tstoi(sbuffer));
-		thePrefs.Save();
 	}
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update

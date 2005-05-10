@@ -169,7 +169,7 @@ void CFakecheck::DownloadFakeList()
 
 	TCHAR szTempFilePath[_MAX_PATH];
 	_tmakepath(szTempFilePath, NULL, thePrefs.GetAppDir(), DFLT_FAKECHECK_FILENAME, _T("tmp"));
-	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+	_tremove(szTempFilePath);
 
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = GetResString(IDS_DOWNFAKECHECKVER);
@@ -182,7 +182,7 @@ void CFakecheck::DownloadFakeList()
 		LogError(LOG_STATUSBAR, GetResString(IDS_LOG_ERRDWN), strURL);
 		return;
 	}
-	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+	FILE* readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
 
 	char buffer[9];
 	int lenBuf = 9;
@@ -197,6 +197,7 @@ void CFakecheck::DownloadFakeList()
 		CString FakeCheckURL = thePrefs.GetUpdateURLFakeList();
 
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_FAKECHECK_FILENAME, _T("tmp"));
+		_tremove(szTempFilePath);
 
 		CHttpDownloadDlg dlgDownload;
 		dlgDownload.m_strTitle = GetResString(IDS_DOWNFAKECHECKFILE);
