@@ -205,6 +205,7 @@ CHttpDownloadDlg::CHttpDownloadDlg(CWnd* pParent /*=NULL*/)
 	m_bAbort = FALSE;
 	m_bSafeToClose = FALSE;
 	m_pThread = NULL;
+	m_pLastModifiedTime = NULL;
 }
 
 void CHttpDownloadDlg::DoDataExchange(CDataExchange* pDX)
@@ -583,9 +584,28 @@ resend:
 			bEncodedWithGZIP = TRUE;
 	}
 
+	//MORPH START - Added by SiRoB,
+	if (m_pLastModifiedTime) {
+		SYSTEMTIME SysTime;
+		dwInfoSize = sizeof(SYSTEMTIME);
+		if (::HttpQueryInfo(m_hHttpFile, HTTP_QUERY_FLAG_SYSTEMTIME | HTTP_QUERY_LAST_MODIFIED, &SysTime, &dwInfoSize, NULL))
+		{
+			if (memcmp(m_pLastModifiedTime, &SysTime, dwInfoSize)==0) {
+				m_pLastModifiedTime = NULL;
+				//Delete the file being downloaded to if it is present
+				m_FileToWrite.Close();
+				::DeleteFile(m_sFileToDownloadInto);
+				PostMessage(WM_HTTPDOWNLOAD_THREAD_FINISHED);
+				return;
+			}
+			memcpy(m_pLastModifiedTime, &SysTime, dwInfoSize);
+		}
+	}
+	//MORPH END   - Added by SIRoB,
+
 	//Update the status control to reflect that we are getting the file information
 	SetStatus(GetResString(IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION));
-
+	
 	// Get the length of the file.
 	TCHAR szContentLength[32];
 	dwInfoSize = 32;

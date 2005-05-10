@@ -693,7 +693,6 @@ public:
 	static TCHAR UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	static TCHAR UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
 	static TCHAR UpdateURLIP2Country[256]; //Commander - Added: IP2Country auto-updating
-	static TCHAR UpdateVerURLIP2Country[256];//Commander - Added: IP2Country auto-updating
 
     //MORPH START - Added by Commander, ClientQueueProgressBar
     static bool m_bClientQueueProgressBar;
@@ -727,8 +726,8 @@ public:
 
 	//Commander - Added: IP2Country Auto-updating - Start
 	static bool		AutoUpdateIP2Country; 
-	static uint32	m_IP2CountryVersion;
-        //Commander - Added: IP2Country Auto-updating - End
+	static SYSTEMTIME	m_IP2CountryVersion;
+    //Commander - Added: IP2Country Auto-updating - End
 
 	//EastShare - added by AndCycle, IP to Country
 	static uint8	m_iIP2CountryNameMode;
@@ -1807,7 +1806,6 @@ public:
 	static	CString	GetUpdateURLFakeList()				{return CString(UpdateURLFakeList);}		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	static	CString	GetUpdateURLIPFilter()				{return CString(UpdateURLIPFilter);}//MORPH START added by Yun.SF3: Ipfilter.dat update
 	static  CString GetUpdateURLIP2Country()			{return CString(UpdateURLIP2Country);}//Commander - Added: IP2Country auto-updating
-	static  CString GetUpdateVerURLIP2Country()			{return CString(UpdateVerURLIP2Country);}//Commander - Added: IP2Country auto-updating
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	static	uint32	GetFakesDatVersion()				{return m_FakesDatVersion;}
 	static	void	SetFakesDatVersion(uint32 version)	{m_FakesDatVersion = version;} 
@@ -1819,8 +1817,8 @@ public:
 	static	void	SetIpfilterVersion(uint32 version)	{m_IPfilterVersion = version;}
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
 
-	static uint32   GetIP2CountryVersion()				{return m_IP2CountryVersion;}//Commander - Added: IP2Country auto-updating
-	static void		SetIP2CountryVersion(uint32 version){m_IP2CountryVersion = version;}//Commander - Added: IP2Country auto-updating
+	static LPSYSTEMTIME   GetIP2CountryVersion()				{return &m_IP2CountryVersion;}//Commander - Added: IP2Country auto-updating
+	static void		SetIP2CountryVersion(LPSYSTEMTIME pst){m_IP2CountryVersion = *pst;}//Commander - Added: IP2Country auto-updating
 	//EastShare - added by AndCycle, IP to Country
 	uint8	GetIP2CountryNameMode()	{return m_iIP2CountryNameMode;}
 	static bool	IsIP2CountryShowFlag()				{return m_bIP2CountryShowFlag;}

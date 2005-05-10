@@ -514,103 +514,82 @@ bool CIP2Country::ShowCountryFlag(){
 void CIP2Country::UpdateIP2CountryURL()
 {   
 	CString sbuffer;
-	CString strURL = thePrefs.GetUpdateVerURLIP2Country(); //Version URL to keep it separated
 
 	TCHAR szTempFilePath[_MAX_PATH];
-	_tmakepath(szTempFilePath, NULL, thePrefs.GetAppDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
-	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+	_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
 
 	CHttpDownloadDlg dlgDownload;
-	dlgDownload.m_strTitle = GetResString(IDS_IP2COUNTRY_VERFILE);
-	dlgDownload.m_sURLToDownload = strURL;
+	dlgDownload.m_strTitle = GetResString(IDS_IP2COUNTRY_DWNFILE);
+	dlgDownload.m_sURLToDownload = thePrefs.GetUpdateURLIP2Country();
 	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
+	SYSTEMTIME SysTime;
+	if (PathFileExists(GetDefaultFilePath()))
+		memcpy(&SysTime, thePrefs.GetIP2CountryVersion(), sizeof(SYSTEMTIME));
+	else
+		memset(&SysTime, 0, sizeof(SYSTEMTIME));
+	dlgDownload.m_pLastModifiedTime = &SysTime;
+
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		_tremove(szTempFilePath);
-		AddLogLine(true, GetResString(IDS_LOG_ERRDWN), strURL);
+		LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR6));
 		return;
 	}
-	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+    if (dlgDownload.m_pLastModifiedTime == NULL)
+		return;
 
-	char buffer[9]; //Versionformat: Ymmdd -> 20040101
-	int lenBuf = 9;
-	fgets(buffer,lenBuf,readFile);
-	sbuffer = buffer;
-	sbuffer = sbuffer.Trim();
-	fclose(readFile);
-	_tremove(szTempFilePath);
+	bool bIsZipFile = false;
+	bool bUnzipped = false;
+	CZIPFile zip;
+	if (zip.Open(szTempFilePath))
+	{
+		bIsZipFile = true;
 
-    // Compare the Version numbers
-	if ((thePrefs.GetIP2CountryVersion()< (uint32) _tstoi(sbuffer)) || !PathFileExists(GetDefaultFilePath())) {
-		
-		CString IP2CountryURL = thePrefs.GetUpdateURLIP2Country();
-		
-		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
-
-		CHttpDownloadDlg dlgDownload;
-		dlgDownload.m_strTitle = GetResString(IDS_IP2COUNTRY_DWNFILE);
-		dlgDownload.m_sURLToDownload = IP2CountryURL;
-		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
-		if (dlgDownload.DoModal() != IDOK)
+		CZIPFile::File* zfile = zip.GetFile(DFLT_IP2COUNTRY_FILENAME); // It has to be a zip-file which includes a file called: ip-to-country.csv
+		if (zfile)
 		{
-			_tremove(szTempFilePath);
-			LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR6));
-			return;
-		}
-        
-		bool bIsZipFile = false;
-		bool bUnzipped = false;
-		CZIPFile zip;
-		if (zip.Open(szTempFilePath))
-		{
-			bIsZipFile = true;
-
-			CZIPFile::File* zfile = zip.GetFile(DFLT_IP2COUNTRY_FILENAME); // It has to be a zip-file which includes a file called: ip-to-country.csv
-			if (zfile)
+			TCHAR szTempUnzipFilePath[MAX_PATH];
+			_tmakepath(szTempUnzipFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(".unzip.tmp"));
+			if (zfile->Extract(szTempUnzipFilePath))
 			{
-				TCHAR szTempUnzipFilePath[MAX_PATH];
-				_tmakepath(szTempUnzipFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(".unzip.tmp"));
-				if (zfile->Extract(szTempUnzipFilePath))
-				{
-					zip.Close();
-					zfile = NULL;
+				zip.Close();
+				zfile = NULL;
 
-					if (_tremove(GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to remove default IP to Country file \"%s\" - %s\n", GetDefaultFilePath(), _tcserror(errno));
-					if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to rename uncompressed IP to Country file \"%s\" to default IP to Country file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), _tcserror(errno));
-					if (_tremove(szTempFilePath) != 0)
-						TRACE("*** Error: Failed to remove temporary IP to Country file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
-					bUnzipped = true;
-				}
-				else
-					LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR7), szTempFilePath);
+				if (_tremove(GetDefaultFilePath()) != 0)
+					TRACE("*** Error: Failed to remove default IP to Country file \"%s\" - %s\n", GetDefaultFilePath(), _tcserror(errno));
+				if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
+					TRACE("*** Error: Failed to rename uncompressed IP to Country file \"%s\" to default IP to Country file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), _tcserror(errno));
+				if (_tremove(szTempFilePath) != 0)
+					TRACE("*** Error: Failed to remove temporary IP to Country file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
+				bUnzipped = true;
 			}
 			else
-				LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR8), szTempFilePath); //File not found inside the zip-file
-
-			zip.Close();
+				LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR7), szTempFilePath);
 		}
+		else
+			LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR8), szTempFilePath); //File not found inside the zip-file
+
+		zip.Close();
         
-		if (!bIsZipFile && !bUnzipped)
-		{
-			_tremove(GetDefaultFilePath());
-			_trename(szTempFilePath, GetDefaultFilePath());
-		}
+	}
+	if (!bIsZipFile && !bUnzipped)
+	{
+		_tremove(GetDefaultFilePath());
+		_trename(szTempFilePath, GetDefaultFilePath());
+	}
 
-		if(bIsZipFile && !bUnzipped){
-			return;
-		}
+	//Moved up to not retry if archive don't contain the awaited file
+	memcpy(thePrefs.GetIP2CountryVersion(), &SysTime, sizeof SysTime); //Commander - Added: Update version number
+	thePrefs.Save();
 
-		if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
-			theApp.ip2country->Unload();
-			AddLogLine(false,GetResString(IDS_IP2COUNTRY_UPUNLOAD));
-			theApp.ip2country->Load();
-			AddLogLine(false,GetResString(IDS_IP2COUNTRY_UPLOAD));
-		}
+	if(bIsZipFile && !bUnzipped){
+		return;
+	}
 
-		thePrefs.SetIP2CountryVersion(_tstoi(sbuffer)); //Commander - Added: Update version number
-		thePrefs.Save();
+	if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
+		theApp.ip2country->Unload();
+		AddLogLine(false,GetResString(IDS_IP2COUNTRY_UPUNLOAD));
+		theApp.ip2country->Load();
+		AddLogLine(false,GetResString(IDS_IP2COUNTRY_UPLOAD));
 	}
 }
 //Commander - Added: IP2Country auto-updating - End

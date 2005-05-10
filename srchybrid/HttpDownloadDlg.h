@@ -89,4 +89,6 @@ protected:
 	BOOL		m_bSafeToClose;
 	CFile		m_FileToWrite;
 	CWinThread*	m_pThread;
+	LPSYSTEMTIME	m_pLastModifiedTime;//MORPH - Added by SiRoB,
+	
 };
