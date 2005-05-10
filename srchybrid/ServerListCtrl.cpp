@@ -1106,10 +1106,12 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 				}
 				case 1:{
+					//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 					if (server->GetConnPort() != server->GetPort())
 			           Sbuffer.Format(_T("%s : %i/%i"), server->GetAddress(), server->GetPort(), server->GetConnPort());
 	               else 
 					Sbuffer.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
+					//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 					break;
 				}
 				case 2:{
@@ -1125,21 +1127,21 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 				case 4:{
 					if(server->GetUsers())
-						Sbuffer.Format(_T("%i"), server->GetUsers());
+						Sbuffer.Format(_T("%s"), CastItoIShort(server->GetUsers()));
 					else
 						Sbuffer = "";
 					break;
 				}
 				case 5:{
 					if(server->GetMaxUsers())
-						Sbuffer.Format(_T("%i"), server->GetMaxUsers());
+						Sbuffer.Format(_T("%s"), CastItoIShort(server->GetMaxUsers()));
 					else
 						Sbuffer = "";
 					break;
 				}
 				case 6:{
 					if(server->GetFiles())
-						Sbuffer.Format(_T("%i"), server->GetFiles());
+						Sbuffer.Format(_T("%s"), CastItoIShort(server->GetFiles()));
 					else
 						Sbuffer = "";
 					break;
@@ -1173,14 +1175,14 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 				case 10:{
 					if(server->GetSoftFiles())
-						Sbuffer.Format(_T("%i"), server->GetSoftFiles());
+						Sbuffer.Format(_T("%s"), CastItoIShort(server->GetSoftFiles()));
 					else
 						Sbuffer = "";
 					break;
 				}
 				case 11:{
 					if(server->GetHardFiles())
-						Sbuffer.Format(_T("%i"), server->GetHardFiles());
+						Sbuffer.Format(_T("%s"), CastItoIShort(server->GetHardFiles()));
 					else
 						Sbuffer = "";
 					break;
