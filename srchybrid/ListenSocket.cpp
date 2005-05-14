@@ -2362,6 +2362,10 @@ void CClientReqSocket::OnConnect(int nErrorCode)
 			    DebugLogError(_T("Client TCP socket (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
 		}
 		Disconnect(strTCPError);
+
+        /*ZZ*/if(client && (client->GetUploadState() == US_CONNECTING || client->GetUploadState() == US_UPLOADING || client->GetUploadState() == US_BANNED)) { //MORPH - Changed by SiRoB
+        /*ZZ*/    theApp.uploadqueue->RemoveFromUploadQueue(client, _T("Failed to connect: ") + strTCPError);
+        /*ZZ*/}
 	}
 	else
 	{

@@ -909,7 +909,7 @@ void CDownloadQueue::Process(){
             // as much from them. This will only be lower than friends speed if you are currently
             // uploading to a friend slot, otherwise they are the same.
 
-            uint32 secondsNeededToEvenOut = (theStats.sessionReceivedBytes/3-(theStats.sessionSentBytes-theStats.sessionSentBytesToFriend))/(theApp.uploadqueue->GetToNetworkDatarate()+1);
+            uint32 secondsNeededToEvenOut = (uint32)((theStats.sessionReceivedBytes/3-(theStats.sessionSentBytes-theStats.sessionSentBytesToFriend))/(theApp.uploadqueue->GetToNetworkDatarate()+1));
             uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
 
             if(downspeed == 0 || tempDownspeed < downspeed) {
@@ -925,8 +925,8 @@ void CDownloadQueue::Process(){
         if(theStats.sessionReceivedBytes/3 > (theStats.sessionSentBytes) &&
            datarate > 1500) {
 
-            float secondsNeededToEvenOut = (theStats.sessionReceivedBytes/3-theStats.sessionSentBytes)/(theApp.uploadqueue->GetDatarate()+1);
-            uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
+            float secondsNeededToEvenOut = (float)((theStats.sessionReceivedBytes/3-theStats.sessionSentBytes)/(theApp.uploadqueue->GetDatarate()+1));
+            uint32 tempDownspeed = max(min((uint32)(3*100/max(secondsNeededToEvenOut, 1)), 200), 30);
 
             if(friendDownspeed == 0 || tempDownspeed < friendDownspeed) {
                 friendDownspeed = tempDownspeed;
@@ -1007,10 +1007,10 @@ void CDownloadQueue::Process(){
 	CheckDiskspaceTimed();
 
 // ZZ:DownloadManager -->
-//    if((!m_dwLastA4AFtime) || (::GetTickCount() - m_dwLastA4AFtime) > 2*60*1000) {
-//        theApp.clientlist->ProcessA4AFClients();
-//        m_dwLastA4AFtime = ::GetTickCount();
-//    }
+    if((!m_dwLastA4AFtime) || (::GetTickCount() - m_dwLastA4AFtime) > 2*60*1000) {
+        theApp.clientlist->ProcessA4AFClients();
+        m_dwLastA4AFtime = ::GetTickCount();
+    }
 // <-- ZZ:DownloadManager
 }
 

@@ -1035,9 +1035,9 @@ uint32 CUpDownClient::SendBlockData(){
 		// keep sum of all values in list up to date
 		if (m_AvarageUDR_list.GetCount() > 0)
 			m_AvarageUDRPreviousAddedTimestamp = m_AvarageUDR_list.GetTail().timestamp;
-		TransferredData newitem = {sentBytesCompleteFile + sentBytesPartFile, curTick};
+		TransferredData newitem = {(UINT)(sentBytesCompleteFile + sentBytesPartFile), curTick};
 		m_AvarageUDR_list.AddTail(newitem);
-		m_nSumForAvgUpDataRate += sentBytesCompleteFile + sentBytesPartFile;
+		m_nSumForAvgUpDataRate = (UINT)(m_nSumForAvgUpDataRate + sentBytesCompleteFile + sentBytesPartFile);
 	}
 
 	while (m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDRPreviousAddedTimestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)

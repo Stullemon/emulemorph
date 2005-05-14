@@ -156,6 +156,7 @@ bool CUrlClient::SendHttpBlockRequests()
 	CreateBlockRequests(PARTSIZE / EMBLOCKSIZE);
 	if (m_PendingBlocks_list.IsEmpty()){
 		SetDownloadState(DS_NONEEDEDPARTS);
+		SwapToAnotherFile(_T("A4AF for NNP file. UrlClient::SendHttpBlockRequests()"), true, false, false, NULL, true, true);
 		return false;
 	}
 	

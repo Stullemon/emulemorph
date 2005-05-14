@@ -590,6 +590,7 @@ bool CUpDownClient::SendHttpBlockRequests()
 			SetPeerCacheDownState(PCDS_NONE);
 		}
 		SetDownloadState(DS_NONEEDEDPARTS);
+		SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendHttpBlockRequests()"), true, false, false, NULL, true, true);
 		return false;
 	}
 
