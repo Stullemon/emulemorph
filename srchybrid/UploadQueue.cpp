@@ -637,7 +637,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 
 							//AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
 							// Remove last client from ul list to make room for higher prio client
-		                    ScheduleRemovalFromUploadQueue(lastClient, GetResString(IDS_REMULHIGHERPRIO), GetResString(IDS_UPLOAD_PREEMPTED), true);
+		                    ScheduleRemovalFromUploadQueue(lastClient, _T("Ended upload to make room for higher prio client."), GetResString(IDS_UPLOAD_PREEMPTED), true);
                         } else {
                             return false;
                         }
@@ -876,7 +876,7 @@ void CUploadQueue::Process() {
             // choosen for upload again.
 
             // Remove from upload list.
-            ScheduleRemovalFromUploadQueue(lastClient, GetResString(IDS_REMULMANYSLOTS), GetResString(IDS_UPLOAD_TOO_MANY_SLOTS), true /*, true*/);
+            ScheduleRemovalFromUploadQueue(lastClient, _T("Too many upload slots opened."), GetResString(IDS_UPLOAD_TOO_MANY_SLOTS), true /*, true*/);
 		    // add to queue again.
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
             //lastClient->SendOutOfPartReqsAndAddToWaitingQueue(true);
