@@ -1583,26 +1583,16 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	else{
 		// ensure that all possible block requests are removed from the partfile
 		ClearDownloadBlockRequests();
-		//MORPH START - Changed by SiRoB, 0.43b code
-		/*if(GetDownloadState() == DS_CONNECTED){
-			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
-			theApp.downloadqueue->RemoveSource(this);
-	    }*/
 		if(GetDownloadState() == DS_CONNECTED){
 		    //MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
 			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend() || IsProxy())
 				SetDownloadState(DS_ONQUEUE);
-			else
+			else {
 			//MORPH END   - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
-			// client didn't responsed to our request for some reasons (remotely banned?)
-		    // or it just doesn't has this file, so try to swap first
-            if (!SwapToAnotherFile(_T("No response from client. CUpDownClient::Disconnected()"), true, true, true, NULL, false, false)){ // ZZ:DownloadManager
 			    theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 				theApp.downloadqueue->RemoveSource(this);
-			    //DEBUG_ONLY(AddDebugLogLine(false, "Removed %s from downloadqueue - didn't responsed to filerequests",GetUserName()));
 		    }
 	    }
-		//MORPH END   - Changed by SiRoB, 0.43b code
 	}
 
 	// we had still an AICH request pending, handle it
