@@ -1749,9 +1749,9 @@ BEGIN
     LTEXT           "File-URL for updating",IDC_URL_FOR_UPDATING_IP2COUNTRY,
                     14,171,202,8,0,WS_EX_TRANSPARENT
     GROUPBOX        "Country",IDC_MORPH2_COUNTRY,7,148,217,69,BS_FLAT
-    LTEXT           "Static",IDC_IP2COUNTRY_VERSION,14,208,65,8
-    LTEXT           "Static",IDC_IPFILTER_VERSION,14,136,65,8
-    LTEXT           "Static",IDC_FAKELIST_VERSION,14,64,66,8
+    LTEXT           "Static",IDC_IP2COUNTRY_VERSION,14,208,96,8
+    LTEXT           "Static",IDC_IPFILTER_VERSION,14,136,93,8
+    LTEXT           "Static",IDC_FAKELIST_VERSION,14,64,94,8
     PUSHBUTTON      "Reset",IDC_RESETFAKESURL,115,53,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPFURL,114,125,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPCURL,115,197,48,14,BS_FLAT
@@ -5069,9 +5069,6 @@ STRINGTABLE
 BEGIN
     IDS_LISTREQNODL         "This user is not in download queue!!!"
     IDS_LISTREQNOUL         "This user is not in waiting queue!!!"
-    IDS_CORRUPTDATASENT     "User '%s' (IP %s:%i), hash %s, client=%s added temporarily to the filtered list because corrupt data send"
-    IDS_ULENDCANTRANS       "%s: Upload session ended due canceled transfer."
-    IDS_ULENDENDTRANS       "%s: Upload session ended due ended transfer."
     IDS_LEECHERDETREM       "Leecher detected and removed from the uploadqueue."
     IDS_LEECHERPUTBACK      "Leecher put back in the waiting queue."
     IDS_TRIEDDLOTHERFILE    "%s: Upload session not allowed to start. Client tried to download another file than it was in queue for. FileID: (expected=%s, asked=%s)"
@@ -5080,9 +5077,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SUSPECTUSEOWNHASH   "Client '%s' using mod '%s' uses my hash, ip %i.%i.%i.%i:%i, suspicious actions: %i (%i in total/%i clients)!"
-    IDS_SUSPECTHAsHCHANGE   "Client '%s' using the mod '%s' changed hash, ip %i.%i.%i.%i:%i, suspicious actions: %i (%i in total/%i clients)!"
-    IDS_FINPARTNUMOFFILE    "Finished part %u of '%s'"
     IDS_COMPLETESOURCES     "Complete sources"
 END
 
@@ -5152,22 +5146,12 @@ BEGIN
     IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() failed for at least one function."
     IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() failed, err: "
     IDS_USSPINGERICMPENDERR "Error closing ICMP handle, err: "
-    IDS_REMULREASON         "%s: Removing client from upload list. Reason: %s"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_REMULSUCCESS        "Successful completion of upload."
-    IDS_REMULHIGHERPRIO     "Ended upload to make room for higher prio client."
-    IDS_REMULMANYSLOTS      "Too many upload slots opened."
-    IDS_ULSUCCESSFUL        "%s: Successful completion of upload. Amount Transferred: %s. Diff from %s: %i bytes"
-    IDS_SKTDISREASON        "Socket disconnect: "
-    IDS_SKTDISUNKREASON     "Socket disconnect. Unknown reason."
-    IDS_IPISFILTERED        "IP is filtered."
-    IDS_CNXTIMEOUT          "Connection timed out."
     IDS_UPSTOPPEDLEECHER    "Upload session not allowed to start. Client seems to be a leecher."
     IDS_IPSTOPPEDOTHFILE    "Upload session not allowed to start. Client tried to download another file than it was in queue for."
-    IDS_UPENDUSERCANC       "%s: Upload session ended due canceled transfer. %s %s:%i"
     IDS_NEWMSGFROM          "New Message from '%s' (IP:%s)"
     IDS_FILTEREDFROM        "Filtered Message from '%s' (IP:%s)"
     IDS_ERRORPROCESSING     "Error when processing packet."
@@ -5176,8 +5160,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_REMULUSERCANCEL     "Remote client canceled transfer."
-    IDS_REMULUSEREND        "Remote client ended transfer."
     IDS_DWLSESSIONENDED     "Download session ended. User: %s Reason: %s"
     IDS_BANHASHCHANGED      "Client: %s (%s), Banreason: Userhash changed"
     IDS_BANHASHCHANGEDT     "Client: %s (%s), Banreason: Userhash changed (Found in TrackedClientsList)"
