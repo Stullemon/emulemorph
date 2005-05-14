@@ -70,6 +70,17 @@ BOOL CPPgMorph2::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void SysTimeToStr(LPSYSTEMTIME st, LPTSTR str)
+{
+	TCHAR sDate[15];
+	sDate[0] = _T('\0');
+	GetDateFormat(LOCALE_USER_DEFAULT, DATE_SHORTDATE, st, NULL, sDate, 100);
+	TCHAR sTime[15];
+	sTime[0] = _T('\0');
+	GetTimeFormat(LOCALE_USER_DEFAULT, 0, st, NULL ,sTime ,100);
+	_stprintf(str, _T("%s %s"), sDate, sTime);
+}
+
 void CPPgMorph2::LoadSettings(void)
 {
 	CString strBuffer;
@@ -99,11 +110,10 @@ void CPPgMorph2::LoadSettings(void)
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
-	TCHAR sTime[100];
+	TCHAR sTime[30];
 	sTime[0] = _T('\0');
-	GetTimeFormat(LOCALE_USER_DEFAULT, LOCALE_NOUSEROVERRIDE ,thePrefs.GetIP2CountryVersion() ,0 ,sTime ,100);
+	SysTimeToStr(thePrefs.GetIP2CountryVersion(), sTime);
 	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(sTime);
-	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(strBuffer);
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
@@ -221,10 +231,10 @@ void CPPgMorph2::OnBnClickedUpdateipcurl()
 {
 	OnApply();
 	theApp.ip2country->UpdateIP2CountryURL();
-	TCHAR sTime[100];
-	sTime[0] = _T('\0');
-	GetTimeFormat(LOCALE_USER_DEFAULT, LOCALE_NOUSEROVERRIDE ,thePrefs.GetIP2CountryVersion() ,0 ,sTime ,100);
-	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(sTime);
+	TCHAR sBuffer[30];
+	sBuffer[0] = _T('\0'); 
+	SysTimeToStr(thePrefs.GetIP2CountryVersion(), sBuffer);
+	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(sBuffer);
 }
 
 //Commander - Added: IP2Country Auto-updating - End
@@ -232,9 +242,7 @@ void CPPgMorph2::OnBnClickedResetipcurl()
 {
 	CString strBuffer = _T("http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip");
 	GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->SetWindowText(strBuffer);
-	SYSTEMTIME st;
-	memset(&st, 0, sizeof(SYSTEMTIME));
-	thePrefs.SetIP2CountryVersion(&st);
+	memset(thePrefs.GetIP2CountryVersion(), 0, sizeof(SYSTEMTIME));
 	strBuffer = _T("?");
 	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(strBuffer);
 }

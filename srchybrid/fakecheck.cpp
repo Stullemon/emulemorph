@@ -64,6 +64,7 @@ int CFakecheck::LoadFromFile(){
 	CString strfakecheckfile = GetDefaultFilePath();
 	FILE* readFile = _tfsopen(strfakecheckfile, _T("r"), _SH_DENYWR);
 	if (readFile!=NULL) {
+		setvbuf(readFile, NULL, _IOFBF, 32768);
 		CString sbuffer, sbuffer2;
 		int pos;
 		uint32 Lenght;

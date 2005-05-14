@@ -135,6 +135,7 @@ bool CIP2Country::LoadFromFile(){
 	FILE* readFile = _tfsopen(ip2countryCSVfile, _T("r"), _SH_DENYWR);
 	try{
 		if (readFile != NULL) {
+			setvbuf(readFile, NULL, _IOFBF, 32768);
 			int iCount = 0;
 			int iLine = 0;
 			int iDuplicate = 0;
