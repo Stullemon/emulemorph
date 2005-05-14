@@ -197,7 +197,7 @@ BOOL CTransferWnd::OnInitDialog()
 	queueBar.SetFont(&bold);
 	queueBar.SetBkColor(GetSysColor(COLOR_WINDOW));
 	queueBar.SetShowPercent();
-	queueBar.SetGradientColors(RGB(0,255,0),RGB(255,0,0));
+	queueBar.SetGradientColors(GetSysColor(COLOR_WINDOW),GetSysColor(COLOR_WINDOW));
 	if(thePrefs.IsInfiniteQueueEnabled() || !thePrefs.ShowClientQueueProgressBar()){
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_HIDE);
 	}
@@ -230,7 +230,13 @@ void CTransferWnd::ShowQueueCount(uint32 number)
 	}
 	else{
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_SHOW);
-		queueBar.SetRange32(0, (thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200))); //Softlimit -> GetQueueSize | Hardlimit -> (GetQueueSize + (GetQueueSize/4))
+		UINT iMaxQueueSize = thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200);
+		queueBar.SetRange32(0, iMaxQueueSize); //Softlimit -> GetQueueSize | Hardlimit -> (GetQueueSize + (GetQueueSize/4))
+		if (number<=thePrefs.GetQueueSize()){
+			queueBar.SetGradientColors(RGB(0, 192, 0), RGB(255, 255, 0));
+		}else {
+			queueBar.SetGradientColors(RGB(255, 255, 0), RGB(255, 0, 0));
+		}
 		queueBar.SetPos(number);
 	}
     //Commander - Added: ClientQueueProgressBar - End
