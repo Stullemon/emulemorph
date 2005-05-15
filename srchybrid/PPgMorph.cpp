@@ -524,9 +524,9 @@ BOOL CPPgMorph::OnApply()
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	bool updateLegend = false;
 	updateLegend = thePrefs.m_iDownloadDataRateAverageTime/1000 != m_iDownloadDataRateAverageTime;
-	thePrefs.m_iDownloadDataRateAverageTime = 1000*m_iDownloadDataRateAverageTime;
+	thePrefs.m_iDownloadDataRateAverageTime = 1000*max(1, m_iDownloadDataRateAverageTime);
 	updateLegend |= thePrefs.m_iUploadDataRateAverageTime/1000 != m_iUploadDataRateAverageTime;
-	thePrefs.m_iUploadDataRateAverageTime = 1000*m_iUploadDataRateAverageTime;
+	thePrefs.m_iUploadDataRateAverageTime = 1000*max(1, m_iUploadDataRateAverageTime);
 	if (updateLegend)
 		theApp.emuledlg->statisticswnd->RepaintMeters();
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
