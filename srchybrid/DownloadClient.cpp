@@ -2025,6 +2025,7 @@ bool CUpDownClient::SwapToAnotherFile(LPCTSTR reason, bool bIgnoreNoNeeded, bool
                             AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Found toFile."));
     
 						SwapTo = cur_file;
+                		/*ZZ*/usedList = &m_OtherNoNeeded_list;
 						finalpos = pos;
 						break;
 					}
@@ -2048,6 +2049,7 @@ bool CUpDownClient::SwapToAnotherFile(LPCTSTR reason, bool bIgnoreNoNeeded, bool
 
                         SwapTo = cur_file;
                         SwapToIsNNP = true;
+                		/*ZZ*/usedList = &m_OtherNoNeeded_list;
 					    finalpos=pos;
                     } else {
                         if(printDebug)
