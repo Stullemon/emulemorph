@@ -499,9 +499,9 @@ LRESULT CPPgEmulespana::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == IDC_EXT_OPTS)
 	{
+/*Commented by SiRoB
 		TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
 
-/*Commented by SiRoB
 		// Added by MoNKi [MoNKi: -invisible mode-]
 		if (pton->hItem == m_htiInvisibleModeMod)
 		{
