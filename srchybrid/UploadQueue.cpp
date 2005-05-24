@@ -624,8 +624,6 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		if(newclient) {
             if(highPrioCheck == true) {
                 if(m_abAddClientOfThisClass[0] && newclient->IsFriend() && newclient->GetFriendSlot() || m_abAddClientOfThisClass[1] && newclient->GetPowerShared()) { //MORPH - Changed by SiRoB, Upload Splitting Class
-		            POSITION lastpos = uploadinglist.GetTailPosition();
-
                     CUpDownClient* lastClient = FindLastUnScheduledForRemovalClientInUploadList();
 
 					if(lastClient != NULL) {
@@ -903,7 +901,7 @@ void CUploadQueue::Process() {
 				delete cur_client;
 			}
 		} else {
-			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
+			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= m_iHighestNumberOfFullyActivatedSlotsSinceLastCall || ForceNewClient(true)) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
@@ -916,6 +914,8 @@ void CUploadQueue::Process() {
 		
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
+	uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
+	curTick = ::GetTickCount();
 	if (sentBytes>0) {
     	if (avarage_tick_list.GetCount() > 0)
 			avarage_tick_listPreviousAddedTimestamp = avarage_tick_list.GetTail();
@@ -928,7 +928,6 @@ void CUploadQueue::Process() {
 		(void)theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
 		*/
 		//MORPH START - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
-		uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
 		avarage_overhead_dr_list.AddTail(sentBytesOverhead);
 		m_avarage_overhead_dr_sum += sentBytesOverhead;
 		//MORPH END   - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
@@ -936,11 +935,13 @@ void CUploadQueue::Process() {
 		avarage_friend_dr_list.AddTail(theStats.sessionSentBytesToFriend);
     	// Save time beetween each speed snapshot
 		avarage_tick_list.AddTail(curTick);
+		//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
+		TransferredData data = {sentBytes,curTick};
+		avarage_dr_USS_list.AddTail(data);
+		m_avarage_dr_USS_sum += sentBytes;
+		//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	}
 	//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
-	TransferredData data = {sentBytes,curTick};
-	avarage_dr_USS_list.AddTail(data);
-	m_avarage_dr_USS_sum += sentBytes;
 	while(avarage_dr_USS_list.GetCount() > 1 && (curTick - avarage_dr_USS_list.GetHead().timestamp) > 30*1000)
 		m_avarage_dr_USS_sum -= avarage_dr_USS_list.RemoveHead().datalen;
 
@@ -1003,27 +1004,27 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
     if(curUploadSlots > m_MaxActiveClients+wantedNumberOfTrickles) {
         return false;
     }
-	uint16 MaxSpeed;
-
-    if (thePrefs.IsDynUpEnabled())
-        MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
-    else
-		MaxSpeed = thePrefs.GetMaxUpload();
-
-	if (curUploadSlots >= 4 &&
-        (
-         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB, 
-         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
-         (
-          thePrefs.GetMaxUpload() == UNLIMITED &&
-          !thePrefs.IsDynUpEnabled() &&
-          thePrefs.GetMaxGraphUploadRate() > 0 &&
-          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate())*1024/UPLOAD_CLIENT_DATARATE
-         )
-        )
-    ) // max number of clients to allow for all circumstances
-	    return false;
-
+//Removed by SiRoB this make slot open with out any limitation
+//	uint16 MaxSpeed;
+//
+//    if (thePrefs.IsDynUpEnabled())
+//        MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
+//    else
+//		MaxSpeed = thePrefs.GetMaxUpload();
+//
+//	if (curUploadSlots >= 4 &&
+//        (
+//         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB, 
+//         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
+//         (
+//          thePrefs.GetMaxUpload() == UNLIMITED &&
+//          !thePrefs.IsDynUpEnabled() &&
+//          thePrefs.GetMaxGraphUploadRate() > 0 &&
+//          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate())*1024/UPLOAD_CLIENT_DATARATE
+//         )
+//        )
+//    ) // max number of clients to allow for all circumstances
+//	    return false;
 	return true;
 }
 
@@ -1032,7 +1033,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 	/*
 	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1) && datarate < 102400 )
     */
-	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(3))
+	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(3) && simulateScheduledClosingOfSlot == false)
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		return false;
 	
@@ -1052,12 +1053,6 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 
     if(!AcceptNewClient(curUploadSlots) || !theApp.lastCommonRouteFinder->AcceptNewClient()) { // UploadSpeedSense can veto a new slot if USS enabled
 		return false;
-    }
-
-    uint32 activeSlots = m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
-
-    if(simulateScheduledClosingOfSlot) {
-        activeSlots = m_MaxActiveClientsShortTime;
     }
 
 	if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
@@ -1366,7 +1361,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 		*/
 		// [end] Mighty Knife
 
-		bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
+		(void) theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
 		// Mighty Knife: more detailed logging
 		/*
 		if (thePrefs.GetLogUlDlEvents())
@@ -1375,7 +1370,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 		// [end] Mighty Knife
 
 		//MORPH START - Added by SiRoB, due to zz upload system WebCache
-		bool wcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
+		(void) theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
 		//MORPH END   - Added by SiRoB, due to zz upload system WebCache
 
 		// Mighty Knife: more detailed logging
