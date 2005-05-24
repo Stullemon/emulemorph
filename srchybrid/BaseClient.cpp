@@ -375,6 +375,11 @@ CUpDownClient::~CUpDownClient(){
 	// MORPH END - Added by Commander, WebCache 1.2e
 	if (m_pszUsername)
 		free(m_pszUsername);
+	//FunnyNick
+	if (m_pszFunnyNick) {
+		delete[] m_pszFunnyNick;
+		m_pszFunnyNick = NULL;
+	}
 	if (m_abyPartStatus){
 		delete[] m_abyPartStatus;
 		m_abyPartStatus = NULL;
@@ -3351,7 +3356,7 @@ switch(tag->GetNameID())
 //MORPH - Added by SiRoB, most of the code from xrmb FunnyNick
 void CUpDownClient::UpdateFunnyNick()
 {
-	if(m_pszUsername != NULL && m_pszUsername != old_m_pszUsername &&
+	if(m_pszUsername == NULL || m_pszUsername != NULL && m_pszUsername != old_m_pszUsername &&
 		_tcsnicmp(m_pszUsername, _T("http://emule"),12) > 0 &&
 		_tcsnicmp(m_pszUsername, _T("http://www.emule"),16) > 0 &&
 		_tcsnicmp(m_pszUsername, _T("www.emule"),9) > 0 &&

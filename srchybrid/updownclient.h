@@ -1114,9 +1114,9 @@ private:
 	uint8*	m_abyIncPartStatus;
 	// <--- enkeyDEV: ICS
 //Morph End - added by AndCycle, ICS
+
 };
 //#pragma pack()
-
 //>>> eWombat [SNAFU_V3]
 static LPCTSTR apszSnafuTag[] =
 	{
