@@ -553,12 +553,12 @@ bool	CPreferences::m_bDontRemoveSpareTrickleSlot;//Morph - added by AndCycle, Do
 bool	CPreferences::m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 
 //MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-uint32	CPreferences::m_FakesDatVersion;
+SYSTEMTIME	CPreferences::m_FakesDatVersion;
 bool	CPreferences::UpdateFakeStartup;
 //MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 //MORPH START added by Yun.SF3: Ipfilter.dat update
 bool	CPreferences::AutoUpdateIPFilter; //added by milobac: Ipfilter.dat update
-uint32	CPreferences::m_IPfilterVersion; //added by milobac: Ipfilter.dat update
+SYSTEMTIME	CPreferences::m_IPfilterVersion; //added by milobac: Ipfilter.dat update
 //MORPH END added by Yun.SF3: Ipfilter.dat update
 
 //Commander - Added: IP2Country Auto-updating - Start
@@ -2682,8 +2682,8 @@ void CPreferences::SavePreferences()
 	//MORPH END   - Added by SiRoB, Show Permissions
 
     //MORPH START added by Yun.SF3: Ipfilter.dat update
-	ini.WriteInt(_T("IPfilterVersion"),m_IPfilterVersion,_T("eMule")); //added by milobac: Ipfilter.dat update
-	ini.WriteBool(_T("AutoUPdateIPFilter"),AutoUpdateIPFilter,_T("eMule")); //added by milobac: Ipfilter.dat update
+	ini.WriteBinary(_T("IPfilterVersion"), (LPBYTE)&m_IPfilterVersion, sizeof(m_IPfilterVersion),_T("eMule")); 
+	ini.WriteBool(_T("AutoUPdateIPFilter"),AutoUpdateIPFilter,_T("eMule"));
     //MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//Commander - Added: IP2Country Auto-updating - Start
@@ -2692,7 +2692,7 @@ void CPreferences::SavePreferences()
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	ini.WriteInt(_T("FakesDatVersion"),m_FakesDatVersion,_T("eMule"));
+	ini.WriteBinary(_T("FakesDatVersion"), (LPBYTE)&m_FakesDatVersion, sizeof(m_FakesDatVersion),_T("eMule")); 
 	ini.WriteBool(_T("UpdateFakeStartup"),UpdateFakeStartup,_T("eMule"));
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
@@ -2867,7 +2867,7 @@ void CPreferences::LoadPreferences()
 
 	if (strCurrVersion != strPrefsVersion){
 //MORPH START - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
-		if (!StrStrI(strPrefsVersion,_T("morph")))
+		if (!_tcscmp(strPrefsVersion,_T("Morph")))
 //MORPH END  - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
 			m_bFirstStart = true;
 	}
@@ -3235,13 +3235,19 @@ void CPreferences::LoadPreferences()
 	m_bEnableEqualChanceForEachFile = ini.GetBool(_T("EqualChanceForEachFile"), false);//Morph - added by AndCycle, Equal Chance For Each File
         
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
-	m_IPfilterVersion=ini.GetInt(_T("IPfilterVersion"),0); //added by milobac: Ipfilter.dat update
+	LPBYTE pst = NULL;
+	UINT usize = sizeof m_IPfilterVersion;
+	if (ini.GetBinary(_T("IPfilterVersion"), &pst, &usize) && usize == sizeof m_IPfilterVersion)
+		memcpy(&m_IPfilterVersion, pst, sizeof m_IPfilterVersion);
+	else
+		memset(&m_IPfilterVersion, 0, sizeof m_IPfilterVersion);
+	delete[] pst;
 	AutoUpdateIPFilter=ini.GetBool(_T("AutoUPdateIPFilter"),false); //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
     
     //Commander - Added: IP2Country Auto-updating - Start
-	LPBYTE pst = NULL;
-	UINT usize = sizeof m_IP2CountryVersion;
+	pst = NULL;
+	usize = sizeof m_IP2CountryVersion;
 	if (ini.GetBinary(_T("IP2CountryVersion"), &pst, &usize) && usize == sizeof m_IP2CountryVersion)
 		memcpy(&m_IP2CountryVersion, pst, sizeof m_IP2CountryVersion);
 	else
@@ -3249,6 +3255,17 @@ void CPreferences::LoadPreferences()
 	delete[] pst;
 	AutoUpdateIP2Country=ini.GetBool(_T("AutoUPdateIP2Country"),false);
     //Commander - Added: IP2Country Auto-updating - End
+
+	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
+	pst = NULL;
+	usize = sizeof m_FakesDatVersion;
+	if (ini.GetBinary(_T("FakesDatVersion"), &pst, &usize) && usize == sizeof m_FakesDatVersion)
+		memcpy(&m_FakesDatVersion, pst, sizeof m_FakesDatVersion);
+	else
+		memset(&m_FakesDatVersion, 0, sizeof m_FakesDatVersion);
+	delete[] pst;
+	UpdateFakeStartup=ini.GetBool(_T("UpdateFakeStartup"),false);
+	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 	//EastShare - added by AndCycle, IP to Country
 	m_iIP2CountryNameMode = ini.GetInt(_T("IP2Country"), IP2CountryName_DISABLE); 
@@ -3297,15 +3314,6 @@ void CPreferences::LoadPreferences()
 	m_iPowershareMode=ini.GetInt(_T("PowershareMode"),2);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	m_bPowershareInternalPrio = ini.GetBool(_T("PowershareInternalPrio"),false);//Morph - added by AndCyle, selective PS internal Prio
-	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	m_FakesDatVersion=ini.GetInt(_T("FakesDatVersion"),0);
-	UpdateFakeStartup=ini.GetBool(_T("UpdateFakeStartup"),false);
-	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
-
-	//Commander - Added: IP2Country Auto-updating - Start
-	//m_IP2CountryVersion=ini.GetBool(_T("IP2CountryVersion"),0);
-	//UpdateIP2CountryStartup=ini.GetBool(_T("UpdateIP2CountryStartup"),false);
-	//Commander - Added: IP2Country Auto-updating - End
 
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	m_bSUCEnabled = ini.GetBool(_T("SUCEnabled"),false);

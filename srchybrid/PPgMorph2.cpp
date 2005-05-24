@@ -117,12 +117,14 @@ void CPPgMorph2::LoadSettings(void)
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
-	strBuffer.Format(_T("v.%u"), thePrefs.GetFakesDatVersion());
+	sTime[0] = _T('\0');
+	SysTimeToStr(thePrefs.GetFakesDatVersion(), sTime);
 	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(strBuffer);
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
-	strBuffer.Format(_T("v.%u"), thePrefs.GetIPfilterVersion());
+	sTime[0] = _T('\0');
+	SysTimeToStr(thePrefs.GetIPfilterVersion(), sTime);
 	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
 	//Commander - Added: IP2Country Auto-updating - End
 }
@@ -192,18 +194,18 @@ void CPPgMorph2::OnBnClickedUpdatefakes()
 {
 	OnApply();
 	theApp.FakeCheck->DownloadFakeList();
-	CString strBuffer;
-	strBuffer.Format(_T("v.%u"), thePrefs.GetFakesDatVersion());
-	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(strBuffer);
+	TCHAR sBuffer[30];
+	sBuffer[0] = _T('\0'); 
+	SysTimeToStr(thePrefs.GetFakesDatVersion(), sBuffer);
+	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(sBuffer);
 }
 
 void CPPgMorph2::OnBnClickedResetfakes()
 {
 	CString strBuffer = _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.dat");
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->SetWindowText(strBuffer);
-	thePrefs.m_FakesDatVersion = 0;
-	strBuffer.Format(_T("v.%u"), thePrefs.GetFakesDatVersion());
-	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(strBuffer);
+	memset(thePrefs.GetFakesDatVersion(), 0, sizeof(SYSTEMTIME));
+	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(_T(""));
 }
 
 //MORPH START added by Yun.SF3: Ipfilter.dat update
@@ -211,9 +213,10 @@ void CPPgMorph2::OnBnClickedUpdateipfurl()
 {
 	OnApply();
 	theApp.ipfilter->UpdateIPFilterURL();
-	CString strBuffer;
-	strBuffer.Format(_T("v.%u"), thePrefs.GetIPfilterVersion());
-	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+	TCHAR sBuffer[30];
+	sBuffer[0] = _T('\0'); 
+	SysTimeToStr(thePrefs.GetIPfilterVersion(), sBuffer);
+	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(sBuffer);
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update
 
@@ -221,9 +224,8 @@ void CPPgMorph2::OnBnClickedResetipfurl()
 {
 	CString strBuffer = _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip");
 	GetDlgItem(IDC_UPDATE_URL_IPFILTER)->SetWindowText(strBuffer);
-	thePrefs.m_IPfilterVersion = 0;
-	strBuffer.Format(_T("v.%u"), thePrefs.GetIPfilterVersion());
-	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+	memset(thePrefs.GetIPfilterVersion(), 0, sizeof(SYSTEMTIME));
+	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(_T(""));
 }
 
 //Commander - Added: IP2Country Auto-updating - Start
@@ -243,6 +245,5 @@ void CPPgMorph2::OnBnClickedResetipcurl()
 	CString strBuffer = _T("http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip");
 	GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->SetWindowText(strBuffer);
 	memset(thePrefs.GetIP2CountryVersion(), 0, sizeof(SYSTEMTIME));
-	strBuffer = _T("?");
-	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(strBuffer);
+	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(_T(""));
 }

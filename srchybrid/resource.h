@@ -2715,6 +2715,7 @@
 #define IDC_QUEUEBORDER                 5507
 #define IDC_QUEUE_SOFT2                 5507
 #define IDC_QUEUE_HARD                  5507
+#define IDC_QUEUE2                      5507
 #define IDS_DONTREMOVESPARETRICKLESLOT  5508
 #define IDS_MINDATARATEFRIEND           5509
 #define IDS_MINDATARATEPOWERSHARE       5510

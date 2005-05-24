@@ -715,13 +715,13 @@ public:
 	static bool m_bDontRemoveSpareTrickleSlot;//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	static bool	m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	static uint32		m_FakesDatVersion;
+	static SYSTEMTIME		m_FakesDatVersion;
 	static bool		UpdateFakeStartup;
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	static bool		AutoUpdateIPFilter; //added by milobac: Ipfilter.dat update
-	static uint32		m_IPfilterVersion; //added by milobac: Ipfilter.dat update
+	static SYSTEMTIME		m_IPfilterVersion; //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//Commander - Added: IP2Country Auto-updating - Start
@@ -1807,18 +1807,18 @@ public:
 	static	CString	GetUpdateURLIPFilter()				{return CString(UpdateURLIPFilter);}//MORPH START added by Yun.SF3: Ipfilter.dat update
 	static  CString GetUpdateURLIP2Country()			{return CString(UpdateURLIP2Country);}//Commander - Added: IP2Country auto-updating
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	static	uint32	GetFakesDatVersion()				{return m_FakesDatVersion;}
-	static	void	SetFakesDatVersion(uint32 version)	{m_FakesDatVersion = version;} 
+	static LPSYSTEMTIME   GetFakesDatVersion()				{return &m_FakesDatVersion;}
 	static	bool	IsUpdateFakeStartupEnabled()		{ return UpdateFakeStartup; }
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
-	static	uint32	GetIPfilterVersion()				{return m_IPfilterVersion;}
-	static	void	SetIpfilterVersion(uint32 version)	{m_IPfilterVersion = version;}
+	static LPSYSTEMTIME   GetIPfilterVersion()				{return &m_IPfilterVersion;}
+	static bool	IsAutoUPdateIPFilterEnabled()		{ return AutoUpdateIPFilter; }
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
 
-	static LPSYSTEMTIME   GetIP2CountryVersion()				{return &m_IP2CountryVersion;}//Commander - Added: IP2Country auto-updating
-	static void		SetIP2CountryVersion(LPSYSTEMTIME pst){m_IP2CountryVersion = *pst;}//Commander - Added: IP2Country auto-updating
+	static LPSYSTEMTIME   GetIP2CountryVersion()	{return &m_IP2CountryVersion;}//Commander - Added: IP2Country auto-updating
+	static bool IsAutoUPdateIP2CountryEnabled()		{ return AutoUpdateIP2Country; } //Commander - Added: IP2Country Auto-updating
+
 	//EastShare - added by AndCycle, IP to Country
 	uint8	GetIP2CountryNameMode()	{return m_iIP2CountryNameMode;}
 	static bool	IsIP2CountryShowFlag()				{return m_bIP2CountryShowFlag;}
@@ -1901,8 +1901,6 @@ public:
 	static	void	SetDontRemoveStaticServers (bool _b)	  { m_bDontRemoveStaticServers = _b; }
 	// [end] Mighty Knife
 
-	static bool	IsAutoUPdateIPFilterEnabled()		{ return AutoUpdateIPFilter; } //MORPH START added by Yun.SF3: Ipfilter.dat update
-	static bool IsAutoUPdateIP2CountryEnabled()    { return AutoUpdateIP2Country; } //Commander - Added: IP2Country Auto-updating
 	static bool	IsSolidGraph()	{ return m_bSolidGraph;} //MORPH - Added by SiRoB, New Graph
 
 	// khaos::categorymod+

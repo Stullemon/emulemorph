@@ -488,142 +488,111 @@ void CIPFilter::UpdateIPFilterURL()
 {
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLIPFilter();
-	strURL.TrimRight(_T(".txt"));
-	strURL.TrimRight(_T(".dat"));
-	strURL.TrimRight(_T(".zip"));
-	strURL.Append(_T(".txt"));
-
 	TCHAR szTempFilePath[_MAX_PATH];
-	_tmakepath(szTempFilePath, NULL, thePrefs.GetAppDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
-	_tremove(szTempFilePath);
+	_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
 
 	CHttpDownloadDlg dlgDownload;
-	dlgDownload.m_strTitle = GetResString(IDS_IPFILTER_DLVERSION);
+	dlgDownload.m_strTitle = GetResString(IDS_DWL_IPFILTERFILE);
 	dlgDownload.m_sURLToDownload = strURL;
 	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
+	SYSTEMTIME SysTime;
+	if (PathFileExists(GetDefaultFilePath()))
+		memcpy(&SysTime, thePrefs.GetIPfilterVersion(), sizeof(SYSTEMTIME));
+	else
+		memset(&SysTime, 0, sizeof(SYSTEMTIME));
+	dlgDownload.m_pLastModifiedTime = &SysTime;
 
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		_tremove(szTempFilePath);
-		LogError(LOG_STATUSBAR, GetResString(IDS_LOG_ERRDWN), strURL);
+		LogError(LOG_STATUSBAR, GetResString(IDS_DWLIPFILTERFAILED));
 		return;
 	}
-	FILE* readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+	if (dlgDownload.m_pLastModifiedTime == NULL)
+		return;
 
-	char buffer[9];
-	int lenBuf = 9;
-	fgets(buffer,lenBuf,readFile);
-	sbuffer = buffer;
-	sbuffer = sbuffer.Trim();
-	fclose(readFile);
-	_tremove(szTempFilePath);
+	bool bIsZipFile = false;
+	bool bUnzipped = false;
+	CZIPFile zip;
+	if (zip.Open(szTempFilePath))
+	{
+		bIsZipFile = true;
 
-	if (thePrefs.GetIPfilterVersion()< (uint32) _tstoi(sbuffer) || !PathFileExists(GetDefaultFilePath()) || FileSize(GetDefaultFilePath()) < 10240) {
-
-		CString IPFilterURL = thePrefs.GetUpdateURLIPFilter();
-
-		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
-		_tremove(szTempFilePath);
-
-		CHttpDownloadDlg dlgDownload;
-		dlgDownload.m_strTitle = GetResString(IDS_DWL_IPFILTERFILE);
-		dlgDownload.m_sURLToDownload = IPFilterURL;
-		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
-		if (dlgDownload.DoModal() != IDOK || FileSize(szTempFilePath) < 10240)
+		CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
+		if (zfile)
 		{
-			_tremove(szTempFilePath);
-			LogError(LOG_STATUSBAR, GetResString(IDS_DWLIPFILTERFAILED));
-			return;
-		}
-
-		bool bIsZipFile = false;
-		bool bUnzipped = false;
-		CZIPFile zip;
-		if (zip.Open(szTempFilePath))
-		{
-			bIsZipFile = true;
-			CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
-			if (zfile)
+			CString strTempUnzipFilePath;
+			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+			strTempUnzipFilePath.ReleaseBuffer();
+			if (zfile->Extract(strTempUnzipFilePath))
 			{
-				CString strTempUnzipFilePath;
-				_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
-				strTempUnzipFilePath.ReleaseBuffer();
-				if (zfile->Extract(strTempUnzipFilePath))
-				{
-					zip.Close();
-					zfile = NULL;
+				zip.Close();
+				zfile = NULL;
 
-					if (_tremove(GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to remove default IP filter file \"%s\" - %s\n", theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
-					if (_trename(strTempUnzipFilePath, GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n", strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
-					if (_tremove(szTempFilePath) != 0)
-						TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
-					bUnzipped = true;
-				}
-				else
-					LogError(LOG_STATUSBAR, GetResString(IDS_ERR_IPFILTERZIPEXTR), szTempFilePath);
+				if (_tremove(GetDefaultFilePath()) != 0)
+					TRACE("*** Error: Failed to remove default IP filter file \"%s\" - %s\n", GetDefaultFilePath(), _tcserror(errno));
+				if (_trename(strTempUnzipFilePath, GetDefaultFilePath()) != 0)
+					TRACE("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n", strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
+				if (_tremove(szTempFilePath) != 0)
+					TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
+				bUnzipped = true;
 			}
 			else
-				LogError(LOG_STATUSBAR, GetResString(IDS_ERR_IPFILTERCONTENTERR), szTempFilePath);
-
-			zip.Close();
+				LogError(LOG_STATUSBAR, GetResString(IDS_ERR_IPFILTERZIPEXTR), szTempFilePath);
 		}
 		else
-		{
-			CGZIPFile gz;
-			if (gz.Open(szTempFilePath))
-			{
-				bIsZipFile = true;
+			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_IPFILTERCONTENTERR), szTempFilePath);
 
-				CString strTempUnzipFilePath;
-				_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
-				strTempUnzipFilePath.ReleaseBuffer();
-
-				// add filename and extension of uncompressed file to temporary file
-				CString strUncompressedFileName = gz.GetUncompressedFileName();
-				if (!strUncompressedFileName.IsEmpty())
-				{
-					strTempUnzipFilePath += _T('.');
-					strTempUnzipFilePath += strUncompressedFileName;
-				}
-
-				if (gz.Extract(strTempUnzipFilePath))
-				{
-					gz.Close();
-
-					if (_tremove(theApp.ipfilter->GetDefaultFilePath()) != 0)
-						TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %hs\n"), theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
-					if (_trename(strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath()) != 0)
-						TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %hs\n"), strTempUnzipFilePath, GetDefaultFilePath(), _tcserror(errno));
-					if (_tremove(szTempFilePath) != 0)
-						TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %hs\n"), szTempFilePath, strerror(errno));
-					bUnzipped = true;
-				}
-				else {
-					CString strError;
-					strError.Format(GetResString(IDS_ERR_IPFILTERZIPEXTR), szTempFilePath);
-					AfxMessageBox(strError);
-				}
-			}
-			gz.Close();
-		}
-
-		if (!bIsZipFile && !bUnzipped)
-		{
-			_tremove(GetDefaultFilePath());
-			_trename(szTempFilePath, GetDefaultFilePath());
-		}
-
-		//Moved up to not retry if archive don't contain the awaited file
-		thePrefs.SetIpfilterVersion(_tstoi(sbuffer));
-		thePrefs.Save();
-
-		if(bIsZipFile && !bUnzipped){
-			return;
-		}
-
-		LoadFromDefaultFile();
+		zip.Close();
 	}
+	else
+	{
+		CGZIPFile gz;
+		if (gz.Open(szTempFilePath))
+		{
+			bIsZipFile = true;
+
+			CString strTempUnzipFilePath;
+			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+			strTempUnzipFilePath.ReleaseBuffer();
+
+			// add filename and extension of uncompressed file to temporary file
+			CString strUncompressedFileName = gz.GetUncompressedFileName();
+			if (!strUncompressedFileName.IsEmpty())
+			{
+				strTempUnzipFilePath += _T('.');
+				strTempUnzipFilePath += strUncompressedFileName;
+			}
+
+			if (gz.Extract(strTempUnzipFilePath))
+			{
+				gz.Close();
+
+				if (_tremove(GetDefaultFilePath()) != 0)
+					TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %hs\n"), GetDefaultFilePath(), strerror(errno));
+				if (_trename(strTempUnzipFilePath, GetDefaultFilePath()) != 0)
+					TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %hs\n"), strTempUnzipFilePath, GetDefaultFilePath(), _tcserror(errno));
+				if (_tremove(szTempFilePath) != 0)
+					TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %hs\n"), szTempFilePath, strerror(errno));
+				bUnzipped = true;
+			}
+		}
+		gz.Close();
+	}
+
+	if (!bIsZipFile && !bUnzipped)
+	{
+		_tremove(GetDefaultFilePath());
+		_trename(szTempFilePath, GetDefaultFilePath());
+	}
+
+	//Moved up to not retry if archive don't contain the awaited file
+	memcpy(thePrefs.GetIPfilterVersion(), &SysTime, sizeof SysTime); //Commander - Added: Update version number
+	thePrefs.Save();
+
+	if(bIsZipFile && !bUnzipped){
+		return;
+	}
+
+	LoadFromDefaultFile();
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update

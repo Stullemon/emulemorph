@@ -130,12 +130,11 @@ static int __cdecl CmpIP2CountryByStartAddr(const void* p1, const void* p2)
 
 bool CIP2Country::LoadFromFile(){
 	DWORD startMesure = GetTickCount();
-	TCHAR* szbuffer = new TCHAR[88];
+	TCHAR* szbuffer = new TCHAR[80];
 	CString ip2countryCSVfile = GetDefaultFilePath();
 	FILE* readFile = _tfsopen(ip2countryCSVfile, _T("r"), _SH_DENYWR);
 	try{
 		if (readFile != NULL) {
-			setvbuf(readFile, NULL, _IOFBF, 32768);
 			int iCount = 0;
 			int iLine = 0;
 			int iDuplicate = 0;
@@ -144,7 +143,7 @@ bool CIP2Country::LoadFromFile(){
 			TCHAR *szIPStart,*szIPEnd,*sz2L,*sz3L,*szCountry;
 			while (!feof(readFile)) {
 				error = false;
-				if (_fgetts(szbuffer, 88,readFile)==0) break;
+				if (_fgetts(szbuffer, 80,readFile)==0) break;
 				++iLine;
 				/*
 				http://ip-to-country.webhosting.info/node/view/54
@@ -515,13 +514,13 @@ bool CIP2Country::ShowCountryFlag(){
 void CIP2Country::UpdateIP2CountryURL()
 {   
 	CString sbuffer;
-
+	CString strURL = thePrefs.GetUpdateURLIP2Country();
 	TCHAR szTempFilePath[_MAX_PATH];
 	_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
 
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = GetResString(IDS_IP2COUNTRY_DWNFILE);
-	dlgDownload.m_sURLToDownload = thePrefs.GetUpdateURLIP2Country();
+	dlgDownload.m_sURLToDownload = strURL;
 	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 	SYSTEMTIME SysTime;
 	if (PathFileExists(GetDefaultFilePath()))
@@ -532,7 +531,7 @@ void CIP2Country::UpdateIP2CountryURL()
 
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR6));
+		LogError(LOG_STATUSBAR, GetResString(IDS_LOG_ERRDWN), strURL);
 		return;
 	}
     if (dlgDownload.m_pLastModifiedTime == NULL)
@@ -548,17 +547,18 @@ void CIP2Country::UpdateIP2CountryURL()
 		CZIPFile::File* zfile = zip.GetFile(DFLT_IP2COUNTRY_FILENAME); // It has to be a zip-file which includes a file called: ip-to-country.csv
 		if (zfile)
 		{
-			TCHAR szTempUnzipFilePath[MAX_PATH];
-			_tmakepath(szTempUnzipFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(".unzip.tmp"));
-			if (zfile->Extract(szTempUnzipFilePath))
+			CString strTempUnzipFilePath;
+			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(".unzip.tmp"));
+			strTempUnzipFilePath.ReleaseBuffer();
+			if (zfile->Extract(strTempUnzipFilePath))
 			{
 				zip.Close();
 				zfile = NULL;
 
 				if (_tremove(GetDefaultFilePath()) != 0)
 					TRACE("*** Error: Failed to remove default IP to Country file \"%s\" - %s\n", GetDefaultFilePath(), _tcserror(errno));
-				if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
-					TRACE("*** Error: Failed to rename uncompressed IP to Country file \"%s\" to default IP to Country file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), _tcserror(errno));
+				if (_trename(strTempUnzipFilePath, GetDefaultFilePath()) != 0)
+					TRACE("*** Error: Failed to rename uncompressed IP to Country file \"%s\" to default IP to Country file \"%s\" - %s\n", strTempUnzipFilePath, GetDefaultFilePath(), _tcserror(errno));
 				if (_tremove(szTempFilePath) != 0)
 					TRACE("*** Error: Failed to remove temporary IP to Country file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
 				bUnzipped = true;
@@ -570,8 +570,8 @@ void CIP2Country::UpdateIP2CountryURL()
 			LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR8), szTempFilePath); //File not found inside the zip-file
 
 		zip.Close();
-        
 	}
+
 	if (!bIsZipFile && !bUnzipped)
 	{
 		_tremove(GetDefaultFilePath());
@@ -579,7 +579,7 @@ void CIP2Country::UpdateIP2CountryURL()
 	}
 
 	//Moved up to not retry if archive don't contain the awaited file
-	memcpy(thePrefs.GetIP2CountryVersion(), &SysTime, sizeof SysTime); //Commander - Added: Update version number
+	memcpy(thePrefs.GetIP2CountryVersion(), &SysTime, sizeof SysTime);
 	thePrefs.Save();
 
 	if(bIsZipFile && !bUnzipped){
