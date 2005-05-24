@@ -755,7 +755,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								break;
 						}
 						if (file->GetPermissions() < 0)
-							buffer = GetResString(IDS_DEFAULT) + _T(" (") + buffer + _T(")");
+							buffer = ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". ") + buffer;
 						// xMule_MOD: showSharePermissions
 						break;
 					}
@@ -853,13 +853,14 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//MORPH END   - Added by SiRoB, HIDEOS
 					//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 					case 19:
-						if(file->GetShareOnlyTheNeed()>=0)
+						if(file->GetShareOnlyTheNeed()>=0) {
 							if (file->GetShareOnlyTheNeed())
 								buffer.Format(_T("%i") ,file->GetShareOnlyTheNeed());
 							else
 								buffer = GetResString(IDS_DISABLED);
-						else
-							buffer = GetResString(IDS_DEFAULT);
+						} else {
+							buffer = ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". ") + GetResString((thePrefs.GetShareOnlyTheNeed()>0)?IDS_ENABLED:IDS_DISABLED);
+						}
 						break;
 					//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
