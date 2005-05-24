@@ -90,6 +90,7 @@ protected:
 	POINT		m_pLastMousePoint;
 	uint32		m_dwShowListIDC;
 	CProgressCtrlX queueBar; //Commander - Added: ClientQueueProgressBar
+	CProgressCtrlX queueBar2; //Commander - Added: ClientQueueProgressBar
 	CFont bold;//Commander - Added: ClientQueueProgressBar
 
 
