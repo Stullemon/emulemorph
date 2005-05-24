@@ -1029,6 +1029,7 @@ uint32 CUpDownClient::SendBlockData(){
     	}
     }
 	//MORPH START - Modified by SiRoB, Better Upload rate calcul
+	curTick = GetTickCount();
 	if(sentBytesCompleteFile + sentBytesPartFile > 0) {
 		// Store how much data we've Transferred this round,
 		// to be able to calculate average speed later
