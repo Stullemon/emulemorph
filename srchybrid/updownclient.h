@@ -222,7 +222,8 @@ public:
 	void			CheckFailedFileIdReqs(const uchar* aucFileHash);
 	uint32			GetUserIDHybrid() const							{ return m_nUserIDHybrid; }
 	void			SetUserIDHybrid(uint32 val)						{ m_nUserIDHybrid = val; }
-	LPCTSTR			GetUserName() const								{ return m_pszUsername; }
+	/*FunnyNick*/LPCTSTR	GetUserName() const								{ return (thePrefs.DisplayFunnyNick() && m_pszFunnyNick)?m_pszFunnyNick:m_pszUsername; }
+	/*FunnyNick*/void	UpdateFunnyNick();
 	void			SetUserName(LPCTSTR pszNewName);
 	uint32			GetIP() const									{ return m_dwUserIP; }
 	void			SetIP( uint32 val ) //Only use this when you know the real IP or when your clearing it.
@@ -870,6 +871,7 @@ protected:
 	bool	m_bIsHybrid;
 //--group to aligned int32
 	TCHAR*	m_pszUsername;
+	TCHAR*	m_pszFunnyNick; //MORPH - Added by SiRoB, FunnyNick
 	TCHAR*	old_m_pszUsername; //MORPH - Added by IceCream, Antileecher feature
 	uchar	m_achUserHash[16];
 	uint16	m_nUDPPort;
@@ -893,7 +895,7 @@ protected:
 	uint32	m_dwLastSignatureIP;
 	CString m_strClientSoftware;
 	CString	old_m_strClientSoftware; //MORPH - Added by IceCream, Antileecher feature
-	CString         m_strModVersion;
+	CString m_strModVersion;
 	uint32	m_dwLastSourceRequest;
 	uint32	m_dwLastSourceAnswer;
 	uint32	m_dwLastAskedForSources;
@@ -1112,9 +1114,9 @@ private:
 	uint8*	m_abyIncPartStatus;
 	// <--- enkeyDEV: ICS
 //Morph End - added by AndCycle, ICS
-
 };
 //#pragma pack()
+
 //>>> eWombat [SNAFU_V3]
 static LPCTSTR apszSnafuTag[] =
 	{
