@@ -134,6 +134,7 @@ void CUpDownClient::Init()
 	m_cDownAsked = 0;
 	m_nUpDatarate = 0;
 	m_pszUsername = 0;
+	m_pszFunnyNick = 0; //Added by SiRoB, Dynamic FunnyNick
 	m_nUserIDHybrid = 0;
 	m_dwServerIP = 0;
 	m_nServerPort = 0;
