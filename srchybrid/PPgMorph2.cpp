@@ -83,8 +83,6 @@ void SysTimeToStr(LPSYSTEMTIME st, LPTSTR str)
 
 void CPPgMorph2::LoadSettings(void)
 {
-	CString strBuffer;
-
 	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->SetWindowText(thePrefs.UpdateURLFakeList);
 	if(thePrefs.UpdateFakeStartup)
@@ -119,13 +117,13 @@ void CPPgMorph2::LoadSettings(void)
 	//Commander - Added: IP2Country Auto-updating - Start
 	sTime[0] = _T('\0');
 	SysTimeToStr(thePrefs.GetFakesDatVersion(), sTime);
-	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(strBuffer);
+	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(sTime);
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
 	sTime[0] = _T('\0');
 	SysTimeToStr(thePrefs.GetIPfilterVersion(), sTime);
-	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(sTime);
 	//Commander - Added: IP2Country Auto-updating - End
 }
 
