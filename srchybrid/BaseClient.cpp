@@ -3356,17 +3356,17 @@ switch(tag->GetNameID())
 //MORPH - Added by SiRoB, most of the code from xrmb FunnyNick
 void CUpDownClient::UpdateFunnyNick()
 {
-	if(m_pszUsername == NULL || m_pszUsername != NULL && m_pszUsername != old_m_pszUsername &&
-		_tcsnicmp(m_pszUsername, _T("http://emule"),12) > 0 &&
-		_tcsnicmp(m_pszUsername, _T("http://www.emule"),16) > 0 &&
-		_tcsnicmp(m_pszUsername, _T("www.emule"),9) > 0 &&
-		_tcsnicmp(m_pszUsername, _T("www.shareaza"),12) > 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule v"),7) > 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule Plus"),10) > 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule OX"),8) > 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule Plus"),10) > 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule0"),6) > 0 &&
-		_tcsicmp(m_pszUsername, _T("")) > 0)
+	if(m_pszUsername == NULL || 
+		_tcsnicmp(m_pszUsername, _T("http://emule"),12) < 0 &&
+		_tcsnicmp(m_pszUsername, _T("http://www.emule"),16) < 0 &&
+		_tcsnicmp(m_pszUsername, _T("www.emule"),9) < 0 &&
+		_tcsnicmp(m_pszUsername, _T("www.shareaza"),12) < 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule v"),7) < 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule Plus"),10) < 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule OX"),8) < 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule Plus"),10) < 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule0"),6) < 0 &&
+		_tcsicmp(m_pszUsername, _T("")) < 0)
 		return;
 	// preffix table
 const static LPCTSTR apszPreFix[] =
