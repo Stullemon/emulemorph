@@ -204,6 +204,22 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 			for (pos2 = srcstosave.GetTailPosition();pos2 != 0;srcstosave.GetPrev(pos2)){
 				CSourceData* cur_srctosave = srcstosave.GetAt(pos2);
 				// khaos::kmod+ Source Exchange Version
+				if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) &&
+					cur_srctosave->nSrcExchangeVer > cur_src->GetSourceExchangeVersion())
+				{
+					bInserted = true;
+				}
+				else if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) && 
+							cur_srctosave->nSrcExchangeVer == cur_src->GetSourceExchangeVersion() &&
+							cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
+				{
+					bInserted = true;
+				}
+				else if (file->GetAvailableSrcCount() <= (maxSourcesToSave*2) &&
+							cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
+				{
+					bInserted = true;
+				}
 				uint8* srcstatus = cur_src->GetPartStatus();
 				if (srcstatus){
 					if (cur_src->GetPartCount() == file->GetPartCount()){

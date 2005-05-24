@@ -37,11 +37,11 @@
 #include <malloc.h>
 #include <assert.h>
 
-#ifdef _WIN32
-#define EXPORT_SPEC __declspec(dllexport)
-#else
+//#ifdef _WIN32
+//#define EXPORT_SPEC __declspec(dllexport)
+//#else
 #define EXPORT_SPEC
-#endif
+//#endif
 
 typedef int BOOL;
 

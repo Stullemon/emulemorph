@@ -2,10 +2,12 @@
 Changelog for eMule 0.46a MorphXT v
 --------------------------------------
 MERGED : Ported to 0.46a version [SiRoB]
+MERGED : A4AF from latest ZZ Mod [SiRoB]
 
 FIXED  : SafeHash code fix arround corruptionblackbox [SiRoB]
 FIXED  : Official Crash fix arround Chat Context menu [SiRoB]
 FIXED  : Official Minor fix arround middle button click in the Transfert Window [SiRoB]
+FIXED  : Crash fix on category merge [SiRoB]
 
 ADDED  : NiceHash from CB mod (need some feed back for this testing) [AndCycle]
          relate topic http://forum.emule-project.net/index.php?showtopic=63906&hl=nicehash
@@ -18,6 +20,10 @@ ADDED  : Rescue CatResumeOrder (Linear Priority) due to the new official tag use
 CHANGED: ImportParts: Updated with 003 version from SR13 mod [SiRoB]
 CHANGED: USS: Minor change [SiRoB]
 CHANGED: Use the latest UPNP from emulespana mod (Big thx to MoNKi) + MemLeak fix [SiRoB]
+CHANGED: QueueBar: Added hard limit one [SiRoB]
+CHANGED: Updater: Use an other methode to see if we need to update it [SiRoB]
+CHANGED: Display the Default ShareOnlyTheNeed mode in Sharedfile window [SiRoB]
+CHANGED: FunnyNick: fully dynamic now [SiRoB]
 
 REMOVED: Only Lock When Needed (arround ControlPacket Queueing) [SiRoB]
 

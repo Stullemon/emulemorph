@@ -938,6 +938,14 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 	_stprintf(HTTPHeader, _T("%.0f"), (static_cast<double>(theApp.listensocket->GetOpenSockets())));
 	Out.Replace(_T("[CurConnection]"), HTTPHeader);
 
+	/*QueueBar*/_stprintf(HTTPHeader, _T("%.1f"), (static_cast<double>(theApp.uploadqueue->GetWaitingUserCount()))/(thePrefs.GetQueueSize()+max(thePrefs.GetQueueSize()/4, 200))*100.0); 
+	/*QueueBar*/Out.Replace(_T("[QueueValue]"), HTTPHeader);
+	/*QueueBar*/_stprintf(HTTPHeader, _T("%.0f"), (static_cast<double>(theApp.uploadqueue->GetWaitingUserCount()))); 
+	/*QueueBar*/Out.Replace(_T("[CurQueue]"), HTTPHeader);
+	/*QueueBar*/_stprintf(HTTPHeader, _T("%.0f"), (static_cast<double>(thePrefs.GetQueueSize()+max(thePrefs.GetQueueSize()/4, 200)))); 
+	/*QueueBar*/Out.Replace(_T("[MaxQueue]"), HTTPHeader);
+	/*QueueBar*/Out.Replace(_T("[Queue]"),_GetPlainResString(IDS_ONQUEUE, true));
+	
 	uint32		dwMax;
 
 	dwMax = thePrefs.GetMaxUpload();
@@ -4435,6 +4443,11 @@ CString CWebServer::_GetDownloadGraph(ThreadData Data, CString filehash)
 		}
 		Out.AppendFormat(pThis->m_Templates.sProgressbarImgs, progresscolor[lastcolor], pThis->m_Templates.iProgressbarWidth-lastindex);
 	}
+	/**/if (pPartFile != NULL) {
+	/**/	TCHAR HTTPHeader[100] = _T("");
+	/**/	_stprintf(HTTPHeader, _T("%.1f"), (static_cast<double>(pPartFile->GetPercentCompleted())));   
+	/**/	Out.Replace(_T("[FilePercentage]"), HTTPHeader);
+	/**/}
 	return Out;
 }
 

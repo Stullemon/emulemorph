@@ -3,8 +3,6 @@
 //
 
 #include <stdafx.h> 
-#pragma comment(lib, "ws2_32.lib") 
-#include <stdlib.h> // for atol function
 
 #include "emule.h"
 #include "OtherFunctions.h"
