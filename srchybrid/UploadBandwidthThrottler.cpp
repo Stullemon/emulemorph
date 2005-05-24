@@ -548,23 +548,25 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				else
 					allowedDataRate = allowedDataRateClass[LAST_CLASS];
 				//Save up to 1% of alloweddatarate
-				if (timeSinceLastLoop > 0) {
-					if(allowedDataRate > 0 && allowedDataRate != _UI32_MAX && classID < LAST_CLASS) {
-						if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
-							sint64 BandWidthTolerance = max(999, allowedDataRate>>7);
-							if (realBytesToSpendClass[classID] > BandWidthTolerance)
-								needmoreslot = true;
-							else
-								needmoreslot = false;
-							if (realBytesToSpendClass[classID] > 999)
-								realBytesToSpendClass[classID] = 999;
-							realBytesToSpendClass[classID] = allowedDataRate*timeSinceLastLoop;
-						} else {
-							realBytesToSpendClass[classID] = _I64_MAX;
-						}
-						if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
+				if(classID < LAST_CLASS) {
+					if (timeSinceLastLoop > 0) {
+						if(allowedDataRate > 0 && allowedDataRate != _UI32_MAX) {
+							if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
+								sint64 BandWidthTolerance = max(999, allowedDataRate>>7);
+								if (realBytesToSpendClass[classID] > BandWidthTolerance)
+									needmoreslot = true;
+								else
+									needmoreslot = false;
+								if (realBytesToSpendClass[classID] > 999)
+									realBytesToSpendClass[classID] = 999;
+								realBytesToSpendClass[classID] = allowedDataRate*timeSinceLastLoop;
+							} else {
+								realBytesToSpendClass[classID] = _I64_MAX;
+							}
+						} else
 							realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
-					} else
+					}
+					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
 						realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
 				}
 				BytesToSpend = realBytesToSpendClass[classID] / 1000;
