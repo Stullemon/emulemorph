@@ -58,7 +58,6 @@
 #include "ClientUDPSocket.h"
 #include "shahashset.h"
 #include "Log.h"
-#include "FunnyNick.h" //MORPH - Added by IceCream, xrmb FunnyNick
 #include "WebCache/WebCacheSocket.h" // MORPH - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
@@ -969,27 +968,9 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	else if(!strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 		BanLeecher(strBanReason);
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
-
-	
 	
 	//MORPH START - Moved by SiRoB, xrmb Funnynick START
-	if (!IsLeecher() && thePrefs.DisplayFunnyNick()){ //MORPH - Added by SiRoB, Keep Leecher name
-		if (!m_pszUsername)
-			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
-		else if((_tcsnicmp(m_pszUsername, _T("http://emule"),12)==0)
-			||(_tcsnicmp(m_pszUsername, _T("http://www.emule"),16)==0)
-			||(_tcsnicmp(m_pszUsername, _T("www.emule"),9)==0)
-			||(_tcsnicmp(m_pszUsername, _T("www.shareaza"),12)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule v"),7)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule Plus"),10)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule OX"),8)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule Plus"),10)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule0"),6)==0)
-			||(_tcsicmp(m_pszUsername, _T(""))==0)) {
-			free(m_pszUsername);
-			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
-		}
-	}
+	UpdateFunnyNick();
 	//MORPH END   - Moved by IceCream, xrmb Funnynick END
 
 	if (thePrefs.GetVerbose() && GetServerIP() == INADDR_NONE)
@@ -2276,23 +2257,7 @@ void CUpDownClient::SetUserName(LPCTSTR pszNewName)
 	}
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
 	//MORPH START - Added by IceCream, xrmb Funnynick START
-	if (!IsLeecher() && thePrefs.DisplayFunnyNick()) {//MORPH - Added by SiRoB, Keep Leecher name
-		if (!m_pszUsername)
-			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
-		else if((_tcsnicmp(m_pszUsername, _T("http://emule"),12)==0)
-			||(_tcsnicmp(m_pszUsername, _T("http://www.emule"),16)==0)
-			||(_tcsnicmp(m_pszUsername, _T("www.emule"),9)==0)
-			||(_tcsnicmp(m_pszUsername, _T("www.shareaza"),12)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule v"),7)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule Plus"),10)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule OX"),8)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule Plus"),10)==0)
-			||(_tcsnicmp(m_pszUsername, _T("eMule0"),6)==0)
-			||(_tcsicmp(m_pszUsername, _T(""))==0)) {
-				free(m_pszUsername);
-				m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
-		}
-	}
+	UpdateFunnyNick();
 	//MORPH END   - Added by IceCream, xrmb Funnynick END
 }
 
@@ -3382,3 +3347,202 @@ switch(tag->GetNameID())
 	}
 }
 //>>> eWombat [SNAFU_V3]
+
+//MORPH - Added by SiRoB, most of the code from xrmb FunnyNick
+void CUpDownClient::UpdateFunnyNick()
+{
+	if(m_pszUsername != NULL && m_pszUsername != old_m_pszUsername &&
+		_tcsnicmp(m_pszUsername, _T("http://emule"),12) > 0 &&
+		_tcsnicmp(m_pszUsername, _T("http://www.emule"),16) > 0 &&
+		_tcsnicmp(m_pszUsername, _T("www.emule"),9) > 0 &&
+		_tcsnicmp(m_pszUsername, _T("www.shareaza"),12) > 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule v"),7) > 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule Plus"),10) > 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule OX"),8) > 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule Plus"),10) > 0 &&
+		_tcsnicmp(m_pszUsername, _T("eMule0"),6) > 0 &&
+		_tcsicmp(m_pszUsername, _T("")) > 0)
+		return;
+	// preffix table
+const static LPCTSTR apszPreFix[] =
+	{
+	_T("ATX-"),			//0
+	_T("Gameboy "),
+	_T("PS/2-"),
+	_T("USB-"),
+	_T("Angry "),
+	_T("Atrocious "),
+	_T("Attractive "),
+	_T("Bad "),
+	_T("Barbarious "),
+	_T("Beautiful "),
+	_T("Black "),		//10
+	_T("Blond "),
+	_T("Blue "),
+	_T("Bright "),
+	_T("Brown "),
+	_T("Cool "),
+	_T("Cruel "),
+	_T("Cubic "),
+	_T("Cute "),
+	_T("Dance "),
+	_T("Dark "),		//20
+	_T("Dinky "),
+	_T("Drunk "),
+	_T("Dumb "),
+	_T("E"),
+	_T("Electro "),
+	_T("Elite "),
+	_T("Fast "),
+	_T("Flying "),
+	_T("Fourios "),
+	_T("Frustraded "),	//30
+	_T("Funny "),
+	_T("Furious "),
+	_T("Giant "),
+	_T("Giga "),
+	_T("Green "),
+	_T("Handsome "),
+	_T("Hard "),
+	_T("Harsh "),
+	_T("Hiphop "),
+	_T("Holy "),		//40
+	_T("Horny "),
+	_T("Hot "),
+	_T("House "),
+	_T("I"),
+	_T("Lame "),
+	_T("Leaking "),
+	_T("Lone "),
+	_T("Lovely "),
+	_T("Lucky "),
+	_T("Micro "),		//50
+	_T("Mighty "),
+	_T("Mini "),
+	_T("Nice "),
+	_T("Orange "),
+	_T("Pretty "),
+	_T("Red "),
+	_T("Sexy "),
+	_T("Slow "),
+	_T("Smooth "),
+	_T("Stinky "),		//60
+	_T("Strong "),
+	_T("Super "),
+	_T("Unholy "),
+	_T("White "),
+	_T("Wild "),
+	_T("X"),
+	_T("XBox "),
+	_T("Yellow "),
+	_T("Kentucky Fried "),
+	_T("Mc"),			//70
+	_T("Alien "),
+	_T("Bavarian "),
+	_T("Crazy "),
+	_T("Death "),
+	_T("Drunken "),
+	_T("Fat "),
+	_T("Hazardous "),
+	_T("Holy "),
+	_T("Infested "),
+	_T("Insane "),		//80
+	_T("Mutated "),
+	_T("Nasty "),
+	_T("Purple "),
+	_T("Radioactive "),
+	_T("Ugly "),
+	_T("Green "),		//86
+	};
+#define NB_PREFIX 87 
+#define MAX_PREFIXSIZE 15
+
+// suffix table
+const static LPCTSTR apszSuffix[] =
+	{
+	_T("16"),		//0
+	_T("3"),
+	_T("6"),
+	_T("7"),
+	_T("Abe"),
+	_T("Bee"),
+	_T("Bird"),
+	_T("Boy"),
+	_T("Cat"),
+	_T("Cow"),
+	_T("Crow"),		//10
+	_T("DJ"),
+	_T("Dad"),
+	_T("Deer"),
+	_T("Dog"),
+	_T("Donkey"),
+	_T("Duck"),
+	_T("Eagle"),
+	_T("Elephant"),
+	_T("Fly"),
+	_T("Fox"),		//20
+	_T("Frog"),
+	_T("Girl"),
+	_T("Girlie"),
+	_T("Guinea Pig"),
+	_T("Hasi"),
+	_T("Hawk"),
+	_T("Jackal"),
+	_T("Lizard"),
+	_T("MC"),
+	_T("Men"),		//30
+	_T("Mom"),
+	_T("Mouse"),
+	_T("Mule"),
+	_T("Pig"),
+	_T("Rabbit"),
+	_T("Rat"),
+	_T("Rhino"),
+	_T("Smurf"),
+	_T("Snail"),
+	_T("Snake"),	//40
+	_T("Star"),
+	_T("Tiger"),
+	_T("Wolf"),
+	_T("Butterfly"),
+	_T("Elk"),
+	_T("Godzilla"),
+	_T("Horse"),
+	_T("Penguin"),
+	_T("Pony"), 
+	_T("Reindeer"),	//50
+	_T("Sheep"),
+	_T("Sock Puppet"),
+	_T("Worm"),
+	_T("Bermuda")	//54
+	};
+#define NB_SUFFIX 56 
+#define MAX_SUFFIXSIZE 11
+
+	//--- if we get an id, we can generate the same random name for this user over and over... so much about randomness :) ---
+	if(m_achUserHash)
+	{
+		uint32	x=0x7d726d62; // < xrmb :)
+		uint8	a=m_achUserHash[5]  ^ m_achUserHash[7]  ^ m_achUserHash[15] ^ m_achUserHash[4];
+		uint8	b=m_achUserHash[11] ^ m_achUserHash[9]  ^ m_achUserHash[12] ^ m_achUserHash[1];
+		uint8	c=m_achUserHash[3]  ^ m_achUserHash[14] ^ m_achUserHash[6]  ^ m_achUserHash[13];
+		uint8	d=m_achUserHash[2]  ^ m_achUserHash[0]  ^ m_achUserHash[10] ^ m_achUserHash[8];
+		uint32	e=(a<<24) + (b<<16) + (c<<8) + d;
+		srand(e^x);
+	}
+
+	if (m_pszFunnyNick) {
+		delete[] m_pszFunnyNick;
+		m_pszFunnyNick = NULL;
+	}
+	// pick random suffix and prefix
+	m_pszFunnyNick = new TCHAR[13+MAX_PREFIXSIZE+MAX_SUFFIXSIZE];
+	_tcscpy(m_pszFunnyNick, _T("[FunnyNick] "));
+	_tcscat(m_pszFunnyNick, apszPreFix[rand()%NB_PREFIX]);
+	_tcscat(m_pszFunnyNick, apszSuffix[rand()%NB_SUFFIX]);
+
+	//--- make the rand random again ---
+	if(m_achUserHash)
+		srand((unsigned)time(NULL));
+}
+//MORPH END  - Added by SiRoB, most of the code from xrmb FunnyNick
