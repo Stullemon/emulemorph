@@ -125,10 +125,11 @@ BOOL CTransferWnd::OnInitDialog()
 	AddAnchor(IDC_UPLOADLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(m_btnWnd2, CSize(0, thePrefs.GetSplitterbarPosition()), BOTTOM_RIGHT);
+	AddAnchor(m_btnWnd2, CSize(0, thePrefs.GetSplitterbarPosition()));
 	AddAnchor(IDC_DOWNLOADCLIENTS, CSize(0, thePrefs.GetSplitterbarPosition()), BOTTOM_RIGHT);
 	AddAnchor(IDC_QUEUECOUNT,BOTTOM_LEFT);
-    AddAnchor(IDC_QUEUE, BOTTOM_LEFT, BOTTOM_RIGHT); //Commander - Added: ClientQueueProgressBar
+    AddAnchor(IDC_QUEUE, BOTTOM_LEFT, BOTTOM_CENTER); //Commander - Added: ClientQueueProgressBar
+	AddAnchor(IDC_QUEUE2, BOTTOM_CENTER, BOTTOM_RIGHT); //Commander - Added: ClientQueueProgressBar
 	AddAnchor(IDC_TSTATIC1,BOTTOM_LEFT);
 	AddAnchor(IDC_QUEUE_REFRESH_BUTTON, BOTTOM_RIGHT);
 	AddAnchor(IDC_DLTAB,CSize(50,0) ,TOP_RIGHT);
@@ -197,9 +198,14 @@ BOOL CTransferWnd::OnInitDialog()
 	queueBar.SetFont(&bold);
 	queueBar.SetBkColor(GetSysColor(COLOR_WINDOW));
 	queueBar.SetShowPercent();
-	queueBar.SetGradientColors(GetSysColor(COLOR_WINDOW),GetSysColor(COLOR_WINDOW));
+	queueBar.SetGradientColors(RGB(0, 224, 0), RGB(224, 224, 0));
+	queueBar2.SetFont(&bold);
+	queueBar2.SetBkColor(GetSysColor(COLOR_WINDOW));
+	queueBar2.SetShowPercent();
+	queueBar2.SetGradientColors(RGB(224, 224, 0), RGB(224, 0, 0));
 	if(thePrefs.IsInfiniteQueueEnabled() || !thePrefs.ShowClientQueueProgressBar()){
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_QUEUE2)->ShowWindow(SW_HIDE);
 	}
 	//Commander - Added: ClientQueueProgressBar - End
 
@@ -227,17 +233,21 @@ void CTransferWnd::ShowQueueCount(uint32 number)
     //Commander - Added: ClientQueueProgressBar - Start
 	if(thePrefs.IsInfiniteQueueEnabled() || !thePrefs.ShowClientQueueProgressBar()){
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_QUEUE2)->ShowWindow(SW_HIDE);
 	}
 	else{
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_QUEUE2)->ShowWindow(SW_SHOW);
 		UINT iMaxQueueSize = thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200);
-		queueBar.SetRange32(0, iMaxQueueSize); //Softlimit -> GetQueueSize | Hardlimit -> (GetQueueSize + (GetQueueSize/4))
+		queueBar.SetRange32(0, thePrefs.GetQueueSize()); //Softlimit -> GetQueueSize | Hardlimit -> (GetQueueSize + (GetQueueSize/4))
+		queueBar2.SetRange32(thePrefs.GetQueueSize()+1, iMaxQueueSize);
 		if (number<=thePrefs.GetQueueSize()){
-			queueBar.SetGradientColors(RGB(0, 192, 0), RGB(255, 255, 0));
+			queueBar.SetPos(number);
+			queueBar2.SetPos(thePrefs.GetQueueSize()+1);
 		}else {
-			queueBar.SetGradientColors(RGB(255, 255, 0), RGB(255, 0, 0));
+			queueBar.SetPos(thePrefs.GetQueueSize());
+			queueBar2.SetPos(number);
 		}
-		queueBar.SetPos(number);
 	}
     //Commander - Added: ClientQueueProgressBar - End
 }
@@ -253,6 +263,7 @@ void CTransferWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_UPLOAD_ICO, m_btnWnd2);
 	DDX_Control(pDX, IDC_DLTAB, m_dlTab);
 	DDX_Control(pDX, IDC_QUEUE, queueBar); //Commander - Added: ClientQueueProgressBar
+	DDX_Control(pDX, IDC_QUEUE2, queueBar2); //Commander - Added: ClientQueueProgressBar
 }
 
 void CTransferWnd::DoResize(int delta)
@@ -1092,6 +1103,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam )
 			thePrefs.RemoveCat(rightclickindex);
 			m_dlTab.DeleteItem(rightclickindex);
 			m_dlTab.SetCurSel(useCat);
+			downloadlistctrl.ChangeCategory(useCat);
 			theApp.emuledlg->transferwnd->downloadlistctrl.UpdateCurrentCategoryView();
 			thePrefs.SaveCats();
 			break;
@@ -1873,7 +1885,7 @@ void CTransferWnd::OnBnClickedDownUploads(bool bReDraw)
 	AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_DOWNLOADCLIENTS,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_UPLOAD_ICO,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_UPLOAD_ICO,CSize(0,thePrefs.GetSplitterbarPosition()));
 
 	downloadlistctrl.ShowWindow(SW_SHOW);
 	uploadlistctrl.ShowWindow((m_uWnd2 == wnd2Uploading) ? SW_SHOW : SW_HIDE);
