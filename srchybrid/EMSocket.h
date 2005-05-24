@@ -62,7 +62,6 @@ public:
 	virtual void RemoveAllLayers();
 
     DWORD GetLastCalledSend() { return lastCalledSend; }
-	int	GetSndBuffer(); //MORPH - Added by SiRoB, Don't send more than socket send buffer
 	
     uint64 GetSentBytesCompleteFileSinceLastCallAndReset();
     uint64 GetSentBytesPartFileSinceLastCallAndReset();
@@ -74,6 +73,7 @@ public:
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
 
     uint32	GetNeededBytes(bool lowspeed);
+	bool	IsBusy() { return m_bBusy; }; //MORPH
 
 #ifdef _DEBUG
 	// Diagnostic Support
