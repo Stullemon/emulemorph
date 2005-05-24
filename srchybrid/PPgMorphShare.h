@@ -56,7 +56,6 @@ protected:
 	HTREEITEM m_htiDisplay;
 	HTREEITEM m_htiFolderIcons;
 	
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 

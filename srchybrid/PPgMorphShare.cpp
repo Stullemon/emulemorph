@@ -236,14 +236,6 @@ BOOL CPPgMorphShare::OnApply()
 	return CPropertyPage::OnApply();
 }
 
-void CPPgMorphShare::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-{
-	SetModified(TRUE);
-	CSliderCtrl* slider =(CSliderCtrl*)pScrollBar;
-	CString temp;
-}
-
-
 void CPPgMorphShare::Localize(void)
 {	
 	if(m_hWnd)
@@ -314,7 +306,7 @@ void CPPgMorphShare::OnDestroy()
 LRESULT CPPgMorphShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == IDC_MORPH_OPTS){
-		TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
+		//TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
 		//		if (bCheck && m_ctrlTreeOptions.GetCheckBox(m_htiUSSEnabled,bCheck))
 		//			if (bCheck) m_ctrlTreeOptions.SetCheckBox(m_htiUSSEnabled,false);
 		//}else if (pton->hItem == m_htiUSSEnabled){
