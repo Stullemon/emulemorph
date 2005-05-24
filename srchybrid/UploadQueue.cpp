@@ -956,7 +956,7 @@ void CUploadQueue::Process() {
 	//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	
 	// don't save more than MAXAVERAGETIMEUPLOAD secs of data
-	while(avarage_tick_list.GetCount() > 1 && (avarage_tick_listPreviousAddedTimestamp - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
+	while(avarage_tick_list.GetCount() > 1 && (curTick - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
 		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 		m_avarage_overhead_dr_sum -= avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		avarage_friend_dr_list.RemoveHead();

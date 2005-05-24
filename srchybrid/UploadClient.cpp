@@ -1041,7 +1041,7 @@ uint32 CUpDownClient::SendBlockData(){
 		m_nSumForAvgUpDataRate = (UINT)(m_nSumForAvgUpDataRate + sentBytesCompleteFile + sentBytesPartFile);
 	}
 
-	while (m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDRPreviousAddedTimestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
+	while (m_AvarageUDR_list.GetCount() > 1 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
 		m_nSumForAvgUpDataRate -= m_AvarageUDR_list.RemoveHead().datalen;
 
     if(m_AvarageUDR_list.GetCount() > 1) {
