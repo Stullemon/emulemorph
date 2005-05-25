@@ -775,7 +775,7 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 				theApp.emuledlg->status++;
 				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd->sharedfilesctrl);
 				
-				//MORPH START - Moved by SiRoB, SafeHash originaly in OnInitDialog
+				//MORPH START - Moved by SiRoB, SafeHash fix originaly in OnInitDialog (delay load shared files)
 				// start aichsyncthread
 				AfxBeginThread(RUNTIME_CLASS(CAICHSyncThread), THREAD_PRIORITY_BELOW_NORMAL,0);
 				//MORPH END   - Moved by SiRoB, SafeHash
