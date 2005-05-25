@@ -134,7 +134,7 @@ void CUpDownClient::Init()
 	m_cDownAsked = 0;
 	m_nUpDatarate = 0;
 	m_pszUsername = 0;
-	m_pszFunnyNick = 0; //Added by SiRoB, Dynamic FunnyNick
+	m_pszFunnyNick = 0; //MORPH - Added by SiRoB, Dynamic FunnyNick
 	m_nUserIDHybrid = 0;
 	m_dwServerIP = 0;
 	m_nServerPort = 0;
@@ -376,11 +376,12 @@ CUpDownClient::~CUpDownClient(){
 	// MORPH END - Added by Commander, WebCache 1.2e
 	if (m_pszUsername)
 		free(m_pszUsername);
-	//FunnyNick
+	//MORPH START - Added by SiRoB, Dynamic FunnyNick
 	if (m_pszFunnyNick) {
 		delete[] m_pszFunnyNick;
 		m_pszFunnyNick = NULL;
 	}
+	//MORPH END  - Added by SiRoB, Dynamic FunnyNick
 	if (m_abyPartStatus){
 		delete[] m_abyPartStatus;
 		m_abyPartStatus = NULL;
@@ -975,9 +976,9 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		BanLeecher(strBanReason);
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
 	
-	//MORPH START - Moved by SiRoB, xrmb Funnynick START
+	//MORPH START - Added by SiRoB, Dynamic FunnyNick
 	UpdateFunnyNick();
-	//MORPH END   - Moved by IceCream, xrmb Funnynick END
+	//MORPH END   - Added by SiRoB, Dynamic FunnyNick
 
 	if (thePrefs.GetVerbose() && GetServerIP() == INADDR_NONE)
 		AddDebugLogLine(false, _T("Received invalid server IP %s from %s"), ipstr(GetServerIP()), DbgGetClientInfo());
@@ -2262,9 +2263,9 @@ void CUpDownClient::SetUserName(LPCTSTR pszNewName)
 			BanLeecher(pszLeecherReason);
 	}
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
-	//MORPH START - Added by IceCream, xrmb Funnynick START
+	//MORPH START - Added by SiRoB, Dynamic FunnyNick
 	UpdateFunnyNick();
-	//MORPH END   - Added by IceCream, xrmb Funnynick END
+	//MORPH END   - Added by SiRoB, Dynamic FunnyNick
 }
 
 void CUpDownClient::RequestSharedFileList()
@@ -3354,20 +3355,14 @@ switch(tag->GetNameID())
 }
 //>>> eWombat [SNAFU_V3]
 
-//MORPH - Added by SiRoB, most of the code from xrmb FunnyNick
+//MORPH START - Added by SiRoB, Dynamic FunnyNick
+//most of the code from xrmb FunnyNick
 void CUpDownClient::UpdateFunnyNick()
 {
 	if(m_pszUsername == NULL || 
-		_tcsnicmp(m_pszUsername, _T("http://emule"),12) < 0 &&
-		_tcsnicmp(m_pszUsername, _T("http://www.emule"),16) < 0 &&
-		_tcsnicmp(m_pszUsername, _T("www.emule"),9) < 0 &&
-		_tcsnicmp(m_pszUsername, _T("www.shareaza"),12) < 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule v"),7) < 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule Plus"),10) < 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule OX"),8) < 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule Plus"),10) < 0 &&
-		_tcsnicmp(m_pszUsername, _T("eMule0"),6) < 0 &&
-		_tcsicmp(m_pszUsername, _T("")) < 0)
+		_tcsnicmp(m_pszUsername, _T("http://"),8) != 0 &&
+		_tcsnicmp(m_pszUsername, _T("0."),2) != 0 &&
+		_tcsicmp(m_pszUsername, _T("")) != 0)
 		return;
 	// preffix table
 const static LPCTSTR apszPreFix[] =
@@ -3551,4 +3546,4 @@ const static LPCTSTR apszSuffix[] =
 	if(m_achUserHash)
 		srand((unsigned)time(NULL));
 }
-//MORPH END  - Added by SiRoB, most of the code from xrmb FunnyNick
+//MORPH END   - Added by SiRoB, Dynamic FunnyNick
