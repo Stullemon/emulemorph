@@ -339,13 +339,14 @@ void CSharedFileList::FindSharedFiles()
 	if (!m_Files_map.IsEmpty())
 	*/
 	{
-		CSingleLock listlock(&m_mutWriteList);
 		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
 		// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
 		// They must not be deleted when the CRC32-Thread writes the CRC into the object !
 		CSingleLock sLockCRC32 (&FileListLockMutex,true);
 		// [end] Mighty Knife
 
+		CSingleLock listlock(&m_mutWriteList);
+		
 		POSITION pos = m_Files_map.GetStartPosition();
 		while (pos)
 		{
