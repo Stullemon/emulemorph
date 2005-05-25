@@ -515,7 +515,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						if (m_stat_list.Lookup(socket, stat)) {
 							uint32 neededBytes = socket->GetNeededBytes(1000 > minFragSize);
 							if (neededBytes > 0 && GetTickCount()-socket->GetLastCalledSend() > SEC2MS(1)) {
-								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(neededBytes, minFragSize);
+								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(min(BytesToSpend - spentBytes, neededBytes), minFragSize);
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 								if (lastSpentBytes) {
 									stat->realBytesToSpend -= lastSpentBytes*1000;
@@ -578,7 +578,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if(socket != NULL) {
 						Socket_stat* stat = NULL;
 						if (m_stat_list.Lookup(socket,stat)) {
-							if (timeSinceLastLoop > 0 && socket->IsBusy() == false && stat->realBytesToSpend < 1000) {
+							if (timeSinceLastLoop > 0 && socket->IsBusy() == false) {
 								if (_I64_MAX/timeSinceLastLoop > clientAllowedDataRate && _I64_MAX-clientAllowedDataRate*timeSinceLastLoop > stat->realBytesToSpend) {
 									stat->realBytesToSpend += clientAllowedDataRate*timeSinceLastLoop;
 								} else {
@@ -599,7 +599,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									}
 									spentBytes += lastSpentBytes;
 									spentOverhead += socketSentBytes.sentBytesControlPackets;
-								}
+								}else
+									stat->realBytesToSpend = 999;
+
 							}
 						}
 					}
