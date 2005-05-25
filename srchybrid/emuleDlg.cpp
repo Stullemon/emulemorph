@@ -653,9 +653,10 @@ BOOL CemuleDlg::OnInitDialog()
 	// initalize PeerCache
 	theApp.m_pPeerCache->Init(thePrefs.GetPeerCacheLastSearch(), thePrefs.WasPeerCacheFound(), thePrefs.IsPeerCacheDownloadEnabled(), thePrefs.GetPeerCachePort());
 
-	// start aichsyncthread
+	//MORPH START - Moved by SiRoB, SafeHash fix (see StartupTimer)
+	/*// start aichsyncthread
 	AfxBeginThread(RUNTIME_CLASS(CAICHSyncThread), THREAD_PRIORITY_BELOW_NORMAL,0);
-
+	*/
 	return TRUE;
 }
 
@@ -773,6 +774,11 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 			case 6:
 				theApp.emuledlg->status++;
 				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd->sharedfilesctrl);
+				
+				//MORPH START - Moved by SiRoB, SafeHash originaly in OnInitDialog
+				// start aichsyncthread
+				AfxBeginThread(RUNTIME_CLASS(CAICHSyncThread), THREAD_PRIORITY_BELOW_NORMAL,0);
+				//MORPH END   - Moved by SiRoB, SafeHash
 				theApp.emuledlg->status++;
 				break;
 			case 7:

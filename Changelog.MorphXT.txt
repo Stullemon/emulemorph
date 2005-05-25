@@ -5,6 +5,7 @@ MERGED : Ported to 0.46a version [SiRoB]
 MERGED : A4AF from latest ZZ Mod [SiRoB]
 
 FIXED  : SafeHash code fix arround corruptionblackbox [SiRoB]
+FIXED  : SafeHash code fix arround AICHSyncThread start (delay load shared files) [SiRoB]
 FIXED  : Official Crash fix arround Chat Context menu [SiRoB]
 FIXED  : Official Minor fix arround middle button click in the Transfert Window [SiRoB]
 FIXED  : Crash fix on category merge [SiRoB]
