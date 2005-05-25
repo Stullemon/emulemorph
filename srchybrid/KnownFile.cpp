@@ -1703,22 +1703,23 @@ void CKnownFile::CreateHash(CFile* pFile, UINT Length, uchar* pMd4HashOut, CAICH
 	CAICHHashAlgo* pHashAlg = m_pAICHHashSet->GetNewHashAlgo();
 	CMD4 md4;
 
-	 // <CB Mod : NiceHash>
-	ULONGLONG timeStart, timeTemp;
-	ULONGLONG activeTime;
-	int sleepTime;
-	float loadRatio;
+	//Removed Temparory
+	// // <CB Mod : NiceHash>
+	//ULONGLONG timeStart, timeTemp;
+	//ULONGLONG activeTime;
+	//int sleepTime;
+	//float loadRatio;
 
-	int load = thePrefs.GetNiceHashLoadWeight();
-	sleepTime = 100; //ms
+	//int load = thePrefs.GetNiceHashLoadWeight();
+	//sleepTime = 100; //ms
 
-	load = 110-load;
-	if (load > 100) load = 100;
-	if (load < 10) load = 10;
-	loadRatio = (load-10)/10; // Load ratio
-	activeTime = sleepTime*loadRatio;
-	timeStart = GetCurrentTimeMilliSecs();
-	// <CB Mod : NiceHash>
+	//load = 110-load;
+	//if (load > 100) load = 100;
+	//if (load < 10) load = 10;
+	//loadRatio = (load-10)/10; // Load ratio
+	//activeTime = sleepTime*loadRatio;
+	//timeStart = GetCurrentTimeMilliSecs();
+	//// <CB Mod : NiceHash>
 
 	while (Required >= 64){
         uint32 len = Required / 64; 
@@ -1748,15 +1749,16 @@ void CKnownFile::CreateHash(CFile* pFile, UINT Length, uchar* pMd4HashOut, CAICH
 			md4.Add(X, len*64);
 		}
 		Required -= len*64;
-		// <CB Mod : NiceHash>
-		if (activeTime > 0) {
-			timeTemp = GetCurrentTimeMilliSecs();
-			if(timeTemp - timeStart >= activeTime) {
-				Sleep(sleepTime);
-				timeStart = GetCurrentTimeMilliSecs();
-			}
-		}
-		// </CB Mod : NiceHash>
+		//Removed temporary
+		//// <CB Mod : NiceHash>
+		//if (activeTime > 0) {
+		//	timeTemp = GetCurrentTimeMilliSecs();
+		//	if(timeTemp - timeStart >= activeTime) {
+		//		Sleep(sleepTime);
+		//		timeStart = GetCurrentTimeMilliSecs();
+		//	}
+		//}
+		//// </CB Mod : NiceHash>
 	}
 
 	Required = Length % 64;
@@ -2963,18 +2965,16 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 		return FALSE;
 	//MORPH START - Added by SiRoB, See chunk that we hide
 	bool revelatleastonechunk = false;
-	if (client->m_abyUpPartStatusHidden){
-		delete[] client->m_abyUpPartStatusHidden;
-		client->m_abyUpPartStatusHidden = NULL;
-	}
-	client->m_abyUpPartStatusHidden = new uint8[parts];
-	client->m_bUpPartStatusHiddenBySOTN = false;
-	memset(client->m_abyUpPartStatusHidden,0,parts);
 	for (UINT i = 0; i < parts; i++)
 		if (partspread[i] < hideOS && client->IsPartAvailable(i)==false)
 			revelatleastonechunk = true;
 	if (revelatleastonechunk==false)
 		return false;
+	if (client->m_abyUpPartStatusHidden == NULL){
+		client->m_abyUpPartStatusHidden = new uint8[parts];
+		client->m_bUpPartStatusHiddenBySOTN = false;
+		memset(client->m_abyUpPartStatusHidden,0,parts);
+	}
 	//MORPH END   - Added by SiRoB, See chunk that we hide
 
 	file->WriteUInt16(parts);
@@ -3005,17 +3005,10 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	if (((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())==0)
 		return false;
 	UINT parts = GetED2KPartCount();
-	if (client->m_abyUpPartStatusHidden){
-		delete[] client->m_abyUpPartStatusHidden;
-		client->m_abyUpPartStatusHidden = NULL;
-	}
-	client->m_bUpPartStatusHiddenBySOTN = true;
-	client->m_abyUpPartStatusHidden = new uint8[parts];
-	memset(client->m_abyUpPartStatusHidden,0,parts);
-	UINT iMinAvailablePartFrenquency = (UINT)-1;
-	UINT iMinAvailablePartFrenquencyPrev = (UINT)-1;
 	if (m_AvailPartFrequency.IsEmpty())
 		return false;
+	UINT iMinAvailablePartFrenquency = (UINT)-1;
+	UINT iMinAvailablePartFrenquencyPrev = (UINT)-1;
 	for (UINT i = 0; i < parts; i++)
 	{
 		if (!client->IsPartAvailable(i))
@@ -3028,6 +3021,11 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	}
 	if (iMinAvailablePartFrenquencyPrev == (UINT)-1)
 		return false;
+	if (client->m_abyUpPartStatusHidden == NULL){
+		client->m_bUpPartStatusHiddenBySOTN = true;
+		client->m_abyUpPartStatusHidden = new uint8[parts];
+		memset(client->m_abyUpPartStatusHidden,0,parts);
+	}
 	UINT done = 0;
 	file->WriteUInt16(parts);
 	while (done != parts){

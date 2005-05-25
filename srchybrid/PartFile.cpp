@@ -2248,6 +2248,13 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 	uint8 hideOS = HideOSInWork();
 	if (hideOS && client) {
 		uED2KPartCount = CalcPartSpread(partspread, client);
+		//MORPH START - Added by SiRoB, See chunk that we hide by HideOS feature
+		client->m_bUpPartStatusHiddenBySOTN = false;		
+		if (client->m_abyUpPartStatusHidden == NULL) {
+			client->m_abyUpPartStatusHidden = new uint8[uED2KPartCount];
+			memset(client->m_abyUpPartStatusHidden,0,uED2KPartCount);
+		}
+		//MORPH END   - Added by SiRoB, See chunk that we hide by HideOS feature
 	} else {	// simpler to set as 0 than to create another loop...
 		uED2KPartCount = GetED2KPartCount();
 		partspread.SetSize(uED2KPartCount);
@@ -2256,17 +2263,6 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 		hideOS = 1;
 	}
 	// SLUGFILLER: hideOS
-	//MORPH START - Added by SiRoB, See chunk that we hide by HideOS feature
-	if (hideOS && client){
-		if (client->m_abyUpPartStatusHidden){
-			delete[] client->m_abyUpPartStatusHidden;
-			client->m_abyUpPartStatusHidden = NULL;
-		}
-		client->m_bUpPartStatusHiddenBySOTN = false;
-		client->m_abyUpPartStatusHidden = new uint8[uED2KPartCount];
-		memset(client->m_abyUpPartStatusHidden,0,uED2KPartCount);
-	}
-	//MORPH END   - Added by SiRoB, See chunk that we hide by HideOS feature
 
 	file->WriteUInt16(uED2KPartCount);
 	UINT uPart = 0;
@@ -2278,9 +2274,8 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 				if (uPart < GetPartCount() && IsPartShareable(uPart))	// SLUGFILLER: SafeHash
 					towrite |= (1<<i);
 			//MORPH START - Added by SiRoB, See chunk that we hide
-			}else
-				if (hideOS && client)
-					client->m_abyUpPartStatusHidden[uPart] = 1;
+			}else ///if (hideOS && client) //Removed (hideOS && client) == !(partspread[uPart] < hideOS)
+				client->m_abyUpPartStatusHidden[uPart] = 1;
 			//MORPH END   - Added by SiRoB, See chunk that we hide
 			++uPart;
 			if (uPart == uED2KPartCount)
