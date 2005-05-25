@@ -25,6 +25,8 @@ CHANGED: Updater: Use an other methode to see if we need to update it [SiRoB]
 CHANGED: Display the Default ShareOnlyTheNeed mode in Sharedfile window [SiRoB]
 CHANGED: FunnyNick: fully dynamic now [SiRoB]
 
+TEAWKED: See parts hidden by HOS and SOTN have been tweaked a bit [SiRoB]
+
 REMOVED: Only Lock When Needed (arround ControlPacket Queueing) [SiRoB]
 
 --------------------------------------
