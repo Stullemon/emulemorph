@@ -1041,19 +1041,19 @@ uint32 CUpDownClient::SendBlockData(){
 		m_nSumForAvgUpDataRate = (UINT)(m_nSumForAvgUpDataRate + sentBytesCompleteFile + sentBytesPartFile);
 	}
 
-	while (m_AvarageUDR_list.GetCount() > 1 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
+	while (m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDRPreviousAddedTimestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
 		m_nSumForAvgUpDataRate -= m_AvarageUDR_list.RemoveHead().datalen;
 
     if(m_AvarageUDR_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
-		if (dwDuration < 880) dwDuration = 880;
+		if (dwDuration < 1000) dwDuration = 1000;
 		DWORD dwAvgTickDuration = dwDuration / (m_AvarageUDR_list.GetCount() - 1);
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += curTick - m_AvarageUDR_list.GetTail().timestamp - dwAvgTickDuration;
 		m_nUpDatarate = 1000U * (m_nSumForAvgUpDataRate - m_AvarageUDR_list.GetHead().datalen) / dwDuration;
 	}else if(m_AvarageUDR_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp;
-		if (dwDuration < 880) dwDuration = 880;
+		if (dwDuration < 1000) dwDuration = 1000;
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - m_AvarageUDR_list.GetTail().timestamp;
 		m_nUpDatarate = 1000U * m_nSumForAvgUpDataRate / dwDuration;

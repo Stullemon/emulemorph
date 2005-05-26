@@ -1495,19 +1495,19 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 		m_nDownDataRateMS = 0;
     }
 
-	while (m_AvarageDDR_list.GetCount() > 1 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
+	while (m_AvarageDDR_list.GetCount() > 1 && (m_AvarageDDRPreviousAddedTimestamp - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 
 	if (m_AvarageDDR_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
-		if (dwDuration < 880) dwDuration = 880;
+		if (dwDuration < 1000) dwDuration = 1000;
 		DWORD dwAvgTickDuration = dwDuration / (m_AvarageDDR_list.GetCount() - 1);
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += cur_tick - m_AvarageDDR_list.GetTail().timestamp - dwAvgTickDuration;
 		m_nDownDatarate = 1000U * (m_nSumForAvgDownDataRate-m_AvarageDDR_list.GetHead().datalen) / dwDuration;
 	} else if (m_AvarageDDR_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp;
-		if (dwDuration < 880) dwDuration = 880;
+		if (dwDuration < 1000) dwDuration = 1000;
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = cur_tick - m_AvarageDDR_list.GetTail().timestamp;
 		m_nDownDatarate = 1000U * m_nSumForAvgDownDataRate / dwDuration;
