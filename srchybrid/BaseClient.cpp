@@ -3517,7 +3517,7 @@ const static LPCTSTR apszSuffix[] =
 	_T("Worm"),
 	_T("Bermuda")	//54
 	};
-#define NB_SUFFIX 56 
+#define NB_SUFFIX 55 
 #define MAX_SUFFIXSIZE 11
 
 	//--- if we get an id, we can generate the same random name for this user over and over... so much about randomness :) ---
