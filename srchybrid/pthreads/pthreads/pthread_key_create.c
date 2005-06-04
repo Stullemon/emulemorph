@@ -8,7 +8,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -98,7 +98,7 @@ pthread_key_create (pthread_key_t * key, void (*destructor) (void *))
        *
        * The mutex will only be created when it is first locked.
        */
-      newkey->threadsLock = PTHREAD_MUTEX_INITIALIZER;
+      newkey->keyLock = PTHREAD_MUTEX_INITIALIZER;
       newkey->destructor = destructor;
     }
 

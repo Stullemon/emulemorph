@@ -8,7 +8,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -33,6 +33,8 @@
  *      if not, write to the Free Software Foundation, Inc.,
  *      59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+
+#ifndef PTW32_STATIC_LIB
 
 #include "pthread.h"
 #include "implement.h"
@@ -86,3 +88,5 @@ DllMain (HINSTANCE hinstDll, DWORD fdwReason, LPVOID lpvReserved)
   return (result);
 
 }				/* DllMain */
+
+#endif /* PTW32_STATIC_LIB */

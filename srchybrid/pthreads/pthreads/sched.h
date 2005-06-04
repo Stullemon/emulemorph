@@ -11,7 +11,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -76,10 +76,14 @@
  * do NOT define PTW32_BUILD, and then the variables/functions will
  * be imported correctly.
  */
-#ifdef PTW32_BUILD
-# define PTW32_DLLPORT __declspec (dllexport)
+#ifndef PTW32_STATIC_LIB
+#  ifdef PTW32_BUILD
+#    define PTW32_DLLPORT __declspec (dllexport)
+#  else
+#    define PTW32_DLLPORT __declspec (dllimport)
+#  endif
 #else
-# define PTW32_DLLPORT __declspec (dllimport)
+#  define PTW32_DLLPORT
 #endif
 
 /*

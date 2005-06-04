@@ -9,7 +9,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -85,7 +85,11 @@ ptw32_throw (DWORD exception)
 	  break;
 	}
 
+#if defined(PTW32_STATIC_LIB)
+
       pthread_win32_thread_detach_np ();
+
+#endif
 
 #if ! defined (__MINGW32__) || defined (__MSVCRT__) || defined (__DMC__)
       _endthreadex (exitCode);

@@ -8,7 +8,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -69,9 +69,6 @@ pthread_mutex_unlock (pthread_mutex_t * mutex)
 		{
 		  /*
 		   * Someone may be waiting on that mutex.
-		   * Pulse event on an auto-reset event will
-		   * release one waiter if possible, otherwise
-		   * it will just reset the event.
 		   */
 		  if (SetEvent (mx->event) == 0)
 		    {

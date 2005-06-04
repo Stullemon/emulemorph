@@ -1,3 +1,257 @@
+2005-05-13  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* pthread_win32_attach_detach_np.c (pthread_win32_thread_detach_np):
+	Move on-exit-only stuff from ptw32_threadDestroy() to here.
+	* ptw32_threadDestroy.c: It's purpose is now only to reclaim thread
+	resources for detached threads, or via pthread_join() or
+	pthread_detach() on joinable threads.
+	* ptw32_threadStart.c: Calling user destruct routines has moved to
+	pthread_win32_thread_detach_np(); call pthread_win32_thread_detach_np()
+	directly if statically linking, otherwise do so via dllMain; store
+	thread return value in thread struct for all cases, including
+	cancellation and exception exits; thread abnormal exits	go via
+	pthread_win32_thread_detach_np.
+	* pthread_join.c (pthread_join): Don't try to get return code from
+	Win32 thread - always get it from he thread struct.
+	* pthread_detach.c (pthread_detach): reduce extent of the thread
+	existence check since we now don't care if the Win32 thread HANDLE has
+	been closed; reclaim thread resources if the thread has exited already.
+	* ptw32_throw.c (ptw32_throw): For Win32 threads that are not implicit,
+	only Call thread cleanup if statically linking, otherwise leave it to
+	dllMain.
+	* sem_post.c (_POSIX_SEM_VALUE_MAX): Change to SEM_VALUE_MAX.
+	* sem_post_multiple.c: Likewise.
+	* sem_init.c: Likewise.
+
+2005-05-10  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* pthread_join.c (pthread_join): Add missing check for thread ID
+	reference count in thread existence test; reduce extent of the
+	existence test since we don't care if the Win32 thread HANDLE has
+	been closed.
+
+2005-05-09  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* ptw32_callUserDestroyRoutines.c: Run destructor process (i.e.
+	loop over all keys calling destructors) up to
+	PTHREAD_DESTRUCTOR_ITERATIONS times if TSD value isn't NULL yet;
+	modify assoc management.
+	* pthread_key_delete.c: Modify assoc management.
+	* ptw32_tkAssocDestroy.c: Fix error in assoc removal from chains.
+	* pthread.h
+	(_POSIX_THREAD_DESTRUCTOR_ITERATIONS): Define to value specified by
+	POSIX.
+	(_POSIX_THREAD_KEYS_MAX): Define to value specified by POSIX.
+	(PTHREAD_KEYS_MAX): Redefine [upward] to minimum required by POSIX.
+	(SEM_NSEMS_MAX): Define to implementation value.
+	(SEM_VALUE_MAX): Define to implementation value.
+	(_POSIX_SEM_NSEMS_MAX): Redefine to value specified by POSIX.
+	(_POSIX_SEM_VALUE_MAX): Redefine to value specified by POSIX.
+
+2005-05-06  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* signal.c (sigwait): Add a cancellation point to this otherwise
+	no-op.
+	* sem_init.c (sem_init): Check for and return ERANGE error.
+	* sem_post.c (sem_post): Likewise.
+	* sem_post_multiple.c (sem_post_multiple): Likewise.
+	* manual (directory): Added; see ChangeLog inside.
+
+2005-05-02  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* implement.h (struct pthread_key_t_): Change threadsLock to keyLock
+	so as not to be confused with the per thread lock 'threadlock';
+	change all references to it.
+	* implement.h (struct ThreadKeyAssoc): Remove lock; add prevKey
+	and prevThread pointers; re-implemented all routines that use this
+	struct. The effect of this is to save one handle per association,
+	which could potentially equal the number of keys multiplied by the
+	number of threads, accumulating over time - and to free the
+	association memory as soon as it is no longer referenced by either
+	the key or the thread. Previously, the handle and memory were
+	released only after BOTH key and thread no longer referenced the
+	association. That is, often no association resources were released
+	until the process itself exited. In addition, at least one race
+	condition has been removed - where two threads could attempt to
+	release the association resources simultaneously - one via
+	ptw32_callUserDestroyRoutines and the other via
+	pthread_key_delete.
+	- thanks to Richard Hughes at Aculab for discovering the problem.
+	* pthread_key_create.c: See above.
+	* pthread_key_delete.c: See above.
+	* pthread_setspecific.c: See above.
+	* ptw32_callUserDestroyRoutines.c: See above.
+	* ptw32_tkAssocCreate.c: See above.
+	* ptw32_tkAssocDestroy.c: See above.
+
+2005-04-27  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* sem_wait.c (ptw32_sem_wait_cleanup): after cancellation re-attempt
+	to acquire the semaphore to avoid a race with a late sem_post.
+	* sem_timedwait.c: Modify comments.
+
+2005-04-25  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* ptw32_relmillisecs.c: New module; converts future abstime to 
+	milliseconds relative to 'now'.
+	* pthread_mutex_timedlock.c: Use new ptw32_relmillisecs routine in
+	place of internal code; remove the NEED_SEM code - this routine is now
+	implemented for builds that define NEED_SEM (WinCE etc)
+	* sem_timedwait.c: Likewise; after timeout or cancellation,
+	re-attempt to acquire the semaphore in case one has been posted since
+	the timeout/cancel occurred. Thanks to Stefan Mueller.
+	* Makefile: Add ptw32_relmillisecs.c module; remove
+	ptw32_{in,de}crease_semaphore.c modules.
+	* GNUmakefile: Likewise.
+	* Bmakefile: Likewise.
+
+	* sem_init.c: Re-write the NEED_SEM code to be consistent with the
+	non-NEED_SEM code, but retaining use of an event in place of the w32 sema
+	for w32 systems that don't include semaphores (WinCE);
+	the NEED_SEM versions of semaphores has been broken for a long time but is
+	now fixed and supports all of the same routines as the non-NEED_SEM case.
+	* sem_destroy.c: Likewise.
+	* sem_wait.c: Likewise.
+	* sem_post.c: Likewise.
+	* sem_post_multple.c: Likewise.
+	* implement.h: Likewise.
+	* sem_timedwait.c: Likewise; this routine is now
+	implemented for builds that define NEED_SEM (WinCE etc).
+	* sem_trywait.c: Likewise.
+	* sem_getvalue.c: Likewise.
+
+	* pthread_once.c: Yet more changes, reverting closer to Gottlob Frege's
+	first design, but retaining cancellation, priority boosting, and adding
+	preservation of W32 error codes to make pthread_once transparent to
+	GetLastError.
+
+2005-04-11  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* pthread_once.c (pthread_once): Added priority boosting to
+	solve starvation problem after once_routine cancellation.
+	See notes in file.
+
+2005-04-06  Kevin Lussier <Kevin at codegreennetworks.com>
+
+	* Makefile: Added debug targets for all versions of the library.
+
+2005-04-01  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* GNUmakefile: Add target to build libpthreadGC1.a as a static link
+	library.
+	* Makefile: Likewise for pthreadGC1.lib.
+
+2005-04-01  Kevin Lussier <Kevin at codegreennetworks.com>
+
+	* sem_timedwait.c (sem_timedwait): Increase size of temp variables to
+	avoid int overflows for large timeout values.
+	* implement.h (int64_t): Include or define.
+
+2005-03-31   Dimitar Panayotov <develop at mail.bg>^M
+
+	* pthread.h: Fix conditional defines for static linking.
+	* sched.h: Liekwise.
+	* semaphore.h: Likewise.
+	* dll.c (PTW32_STATIC_LIB): Module is conditionally included
+	in the build.
+
+2005-03-16  Ross Johnson  <ross at callisto.canberra.edu.au>^M
+
+	* pthread_setcancelstate.c: Undo the last change.
+
+2005-03-16  Ross Johnson  <ross at callisto.canberra.edu.au>^M
+
+	* pthread_setcancelstate.c: Don't check for an async cancel event
+	if the library is using alertable async cancel..
+
+2005-03-14  Ross Johnson  <ross at callisto.canberra.edu.au>
+
+	* pthread_once.c (pthread_once): Downgrade interlocked operations to simple
+	memory operations where these are protected by the critical section; edit
+	comments.
+
+2005-03-13  Ross Johnson  <rpj at callisto.canberra.edu.au>
+
+	* pthread_once.c (pthread_once): Completely redesigned; a change was
+	required to the ABI (pthread_once_t_), and resulting in a version
+	compatibility index increment.
+
+	NOTES:
+	The design (based on pseudo code contributed by Gottlob Frege) avoids
+	creating a kernel object if there is no contention. See URL for details:-
+	http://sources.redhat.com/ml/pthreads-win32/2005/msg00029.html
+	This uses late initialisation similar to the technique already used for
+	pthreads-win32 mutexes and semaphores (from Alexander Terekhov).
+
+	The subsequent cancelation cleanup additions (by rpj) could not be implemented
+	without sacrificing some of the efficiency in Gottlob's design. In particular,
+	although each once_control uses it's own event to block on, a global CS is
+	required to manage it - since the event must be either re-usable or
+	re-creatable under cancelation. This is not needed in the non-cancelable
+	design because it is able to mark the event as closed (forever).
+
+	When uncontested, a CS operation is equivalent to an Interlocked operation
+	in speed. So, in the final design with cancelability, an uncontested
+	once_control operation involves a minimum of five interlocked operations
+	(including the LeaveCS operation).
+	
+	ALTERNATIVES:
+	An alternative design from Alexander Terekhov proposed using a named mutex,
+	as sketched below:-
+
+	  if (!once_control) { // May be in TLS
+	    named_mutex::guard guard(&once_control2);
+	      if (!once_control2) {
+	         <init>
+	         once_control2 = true;
+	      }
+	    once_control = true;
+	  }
+	
+	A more detailed description of this can be found here:-
+	http://groups.yahoo.com/group/boost/message/15442
+
+	[Although the definition of a suitable PTHREAD_ONCE_INIT precludes use of the
+	TLS located flag, this is not critical.]
+	
+	There are three primary concerns though:-
+	1) The [named] mutex is 'created' even in the uncontended case.
+	2) A system wide unique name must be generated.
+	3) Win32 mutexes are VERY slow even in the uncontended 	case. An uncontested
+	Win32 mutex lock operation can be 50 (or more) times slower than an
+	uncontested EnterCS operation.
+
+	Ultimately, the named mutex trick is making use of the global locks maintained
+	by the kernel.
+
+	* pthread.h (pthread_once_t_): One flag and an event HANDLE added.
+	(PTHREAD_ONCE_INIT): Additional values included.
+
+2005-03-08  Ross Johnson  <rpj at callisto.canberra.edu.au>
+
+	* pthread_once.c (pthread_once): Redesigned to elliminate potential
+	starvation problem.
+	- reported by Gottlob Frege  <gottlobfrege at gmail.com>
+
+	* ptw32_threadDestroy.c (ptw32_threadDestroy): Implicit threads were
+	not closing their Win32 thread duplicate handle.
+	- reported by Dmitrii Semii <bogolt at gmail.com>
+
+2005-01-25  Ralf Kubis  <RKubis at mc.com>
+
+	* Attempted acquisition of recursive mutex was causing waiting
+	threads to not be woken when the mutex is released.
+
+	* GNUmakefile (GCE): Generate correct version resource comments.
+
+2005-01-01  Konstantin Voronkov  <beowinkle at yahoo.com>
+
+	* pthread_mutex_lock.c (pthread_mutex_lock): The new atomic exchange
+	mutex algorithm is known to allow a thread to steal the lock off
+	FIFO waiting threads. The next waiting FIFO thread gets a spurious
+	wake-up and must attempt to re-acquire the lock. The woken thread
+	was setting itself as the mutex's owner before the re-acquisition.
+
 2004-11-22  Ross Johnson  <rpj at callisto.canberra.edu.au>
 
 	* pthread_cond_wait.c (ptw32_cond_wait_cleanup): Undo change

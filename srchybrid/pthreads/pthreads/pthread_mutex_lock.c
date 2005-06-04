@@ -8,7 +8,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -49,6 +49,10 @@ pthread_mutex_lock (pthread_mutex_t * mutex)
   /*
    * Let the system deal with invalid pointers.
    */
+  if (*mutex == NULL)
+    {
+      return EINVAL;
+    }
 
   /*
    * We do a quick check to see if we need to do more work
@@ -88,9 +92,10 @@ pthread_mutex_lock (pthread_mutex_t * mutex)
     {
       pthread_t self = pthread_self();
 
-      if ((LONG) PTW32_INTERLOCKED_EXCHANGE(
-                   (LPLONG) &mx->lock_idx,
-		   (LONG) 1) == 0)
+      if ((PTW32_INTERLOCKED_LONG) PTW32_INTERLOCKED_COMPARE_EXCHANGE(
+                   (PTW32_INTERLOCKED_LPLONG) &mx->lock_idx,
+		   (PTW32_INTERLOCKED_LONG) 1,
+		   (PTW32_INTERLOCKED_LONG) 0) == 0)
 	{
 	  mx->recursive_count = 1;
 	  mx->ownerThread = self;
@@ -114,16 +119,17 @@ pthread_mutex_lock (pthread_mutex_t * mutex)
                               (LPLONG) &mx->lock_idx,
 			      (LONG) -1) != 0)
 		{
-	          if (WAIT_OBJECT_0 == WaitForSingleObject (mx->event, INFINITE))
-	            {
-		      mx->recursive_count = 1;
-		      mx->ownerThread = self;
-	            }
-		  else
+	          if (WAIT_OBJECT_0 != WaitForSingleObject (mx->event, INFINITE))
 		    {
 	              result = EINVAL;
 		      break;
 		    }
+		}
+
+	      if (0 == result)
+		{
+		  mx->recursive_count = 1;
+		  mx->ownerThread = self;
 		}
 	    }
 	}

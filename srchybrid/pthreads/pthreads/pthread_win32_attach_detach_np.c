@@ -8,7 +8,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -34,7 +34,6 @@
  *      59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
-//#include "../QueueUserAPCEx/User/QueueUserAPCEx.h"
 #include "pthread.h"
 #include "implement.h"
 
@@ -262,15 +261,22 @@ pthread_win32_thread_detach_np ()
        */
       ptw32_thread_t * sp = (ptw32_thread_t *) pthread_getspecific (ptw32_selfThreadKey);
 
-      if (sp != NULL)
+      if (sp != NULL) // otherwise Win32 thread with no implicit POSIX handle.
 	{
+	  ptw32_callUserDestroyRoutines (sp->ptHandle);
+
+	  (void) pthread_mutex_lock (&sp->cancelLock);
+	  sp->state = PThreadStateLast;
 	  /*
-	   * Detached threads have their resources automatically
-	   * cleaned up upon exit (others must be 'joined').
+	   * If the thread is joinable at this point then it MUST be joined
+	   * or detached explicitly by the application.
 	   */
+	  (void) pthread_mutex_unlock (&sp->cancelLock);
+
 	  if (sp->detachState == PTHREAD_CREATE_DETACHED)
 	    {
 	      ptw32_threadDestroy (sp->ptHandle);
+
 	      TlsSetValue (ptw32_selfThreadKey->key, NULL);
 	    }
 	}

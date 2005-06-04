@@ -4,7 +4,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -30,6 +30,9 @@
  *      59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+#include <winver.h>
+#include "pthread.h"
+
 /*
  * Note: the correct __CLEANUP_* macro must be defined corresponding to
  * the definition used for the object file builds. This is done in the
@@ -38,9 +41,6 @@
  * If using the default (no __CLEANUP_* defined), pthread.h will define it
  * as __CLEANUP_C.
  */
-
-#include <winver.h>
-#include "pthread.h"
 
 #ifdef PTW32_RC_MSC
 #  if defined(__CLEANUP_C)
@@ -52,6 +52,8 @@
 #  elif defined(__CLEANUP_SEH)
 #    define PTW32_VERSIONINFO_NAME "pthreadVSE\0"
 #    define PTW32_VERSIONINFO_COMMENT "MS C build -- structured exception thread exiting\0"
+#  else
+#    error Resource compiler doesn't know which cleanup style you're using - see version.rc
 #  endif
 #elif defined(__GNUC__)
 #  if defined(__CLEANUP_C)
@@ -60,6 +62,8 @@
 #  elif defined(__CLEANUP_CXX)
 #    define PTW32_VERSIONINFO_NAME "pthreadGCE\0"
 #    define PTW32_VERSIONINFO_COMMENT "GNU C++ build -- C++ exception thread exiting\0"
+#  else
+#    error Resource compiler doesn't know which cleanup style you're using - see version.rc
 #  endif
 #elif defined(__BORLANDC__)
 #  if defined(__CLEANUP_C)
@@ -68,6 +72,8 @@
 #  elif defined(__CLEANUP_CXX)
 #    define PTW32_VERSIONINFO_NAME "pthreadBCE\0"
 #    define PTW32_VERSIONINFO_COMMENT "BORLAND C++ build -- C++ exception thread exiting\0"
+#  else
+#    error Resource compiler doesn't know which cleanup style you're using - see version.rc
 #  endif
 #elif defined(__WATCOMC__)
 #  if defined(__CLEANUP_C)
@@ -76,9 +82,11 @@
 #  elif defined(__CLEANUP_CXX)
 #    define PTW32_VERSIONINFO_NAME "pthreadWCE\0"
 #    define PTW32_VERSIONINFO_COMMENT "WATCOM C++ build -- C++ exception thread exiting\0"
+#  else
+#    error Resource compiler doesn't know which cleanup style you're using - see version.rc
 #  endif
 #else
-#error Resource compiler doesn't know which compiler you're using - see version.rc
+#  error Resource compiler doesn't know which compiler you're using - see version.rc
 #endif
 
 
@@ -94,7 +102,7 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Description", "POSIX Threads for Windows32 Library\0"
+            VALUE "FileDescription", "POSIX Threads for Windows32 Library\0"
             VALUE "ProductVersion", PTW32_VERSION_STRING
             VALUE "FileVersion", PTW32_VERSION_STRING
             VALUE "InternalName", PTW32_VERSIONINFO_NAME

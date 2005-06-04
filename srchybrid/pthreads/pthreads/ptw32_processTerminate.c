@@ -9,7 +9,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -99,7 +99,7 @@ ptw32_processTerminate (void)
       LeaveCriticalSection (&ptw32_thread_reuse_lock);
 
       /* 
-       * Destroy the global locks.
+       * Destroy the global locks and other objects.
        */
       DeleteCriticalSection (&ptw32_spinlock_test_init_lock);
       DeleteCriticalSection (&ptw32_rwlock_test_init_lock);

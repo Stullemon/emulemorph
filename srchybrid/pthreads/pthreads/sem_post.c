@@ -15,7 +15,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -68,41 +68,45 @@ sem_post (sem_t * sem)
       * ERRNO
       *              EINVAL          'sem' is not a valid semaphore,
       *              ENOSYS          semaphores are not supported,
+      *              ERANGE          semaphore count is too big
       *
       * ------------------------------------------------------
       */
 {
   int result = 0;
-#ifndef NEED_SEM
   sem_t s = *sem;
-#endif
 
   if (s == NULL)
     {
       result = EINVAL;
     }
-
-#ifdef NEED_SEM
-
-  else if (!ptw32_increase_semaphore (sem, 1))
-    {
-      result = EINVAL;
-    }
-
-#else /* NEED_SEM */
-
   else if ((result = pthread_mutex_lock (&s->lock)) == 0)
     {
-      if (++s->value <= 0
-	  && !ReleaseSemaphore (s->sem, 1, NULL))
+      if (s->value < SEM_VALUE_MAX)
 	{
-	  result = EINVAL;
+#ifdef NEED_SEM
+	  if (++s->value <= 0
+	      && !SetEvent(s->sem))
+	    {
+	      s->value--;
+	      result = EINVAL;
+	    }
+#else
+	  if (++s->value <= 0
+	      && !ReleaseSemaphore (s->sem, 1, NULL))
+	    {
+	      s->value--;
+	      result = EINVAL;
+	    }
+#endif /* NEED_SEM */
 	}
-      
+      else
+	{
+	  result = ERANGE;
+	}
+
       (void) pthread_mutex_unlock (&s->lock);
     }
-
-#endif /* NEED_SEM */
 
   if (result != 0)
     {

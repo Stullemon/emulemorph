@@ -8,7 +8,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -167,6 +167,8 @@ pthread_sigmask (int how, sigset_t const *set, sigset_t * oset)
 int
 sigwait (const sigset_t * set, int *sig)
 {
+  /* This routine is a cancellation point */
+  pthread_test_cancel();
 }
 
 int

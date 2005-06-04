@@ -9,7 +9,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -47,12 +47,6 @@ ptw32_threadDestroy (pthread_t thread)
 
   if (tp != NULL)
     {
-      (void) pthread_mutex_lock (&tp->cancelLock);
-      tp->state = PThreadStateLast;
-      (void) pthread_mutex_unlock (&tp->cancelLock);
-
-      ptw32_callUserDestroyRoutines (thread);
-
       /*
        * Copy thread state so that the thread can be atomically NULLed.
        */
@@ -76,15 +70,13 @@ ptw32_threadDestroy (pthread_t thread)
 #if ! defined (__MINGW32__) || defined (__MSVCRT__) || defined (__DMC__)
       /*
        * See documentation for endthread vs endthreadex.
-       * Don't close the Win32 handle of implicit POSIX threads
-       * because the process may want to call GetExitCodeThread().
        */
-      if (threadCopy.threadH != 0 && !threadCopy.implicit)
+      if (threadCopy.threadH != 0)
 	{
 	  CloseHandle (threadCopy.threadH);
 	}
 #endif
 
     }
-
 }				/* ptw32_threadDestroy */
+

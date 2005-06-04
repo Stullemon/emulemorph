@@ -15,7 +15,7 @@
  *
  *      Pthreads-win32 - POSIX Threads Library for Win32
  *      Copyright(C) 1998 John E. Bossom
- *      Copyright(C) 1999,2004 Pthreads-win32 contributors
+ *      Copyright(C) 1999,2005 Pthreads-win32 contributors
  * 
  *      Contact Email: rpj@callisto.canberra.edu.au
  * 
@@ -53,8 +53,27 @@ ptw32_sem_wait_cleanup(void * sem)
 
   if (pthread_mutex_lock (&s->lock) == 0)
     {
-      ++s->value;
-      /* Don't release the W32 sema, it should always == 0. */
+      /*
+       * If the sema is posted between us being cancelled and us locking
+       * the sema again above then we need to consume that post but cancel
+       * anyway. If we don't get the semaphore we indicate that we're no
+       * longer waiting.
+       */
+      if (!(WaitForSingleObject(s->sem, 0) == WAIT_OBJECT_0))
+	{
+	  ++s->value;
+#ifdef NEED_SEM
+	  if (s->value > 0)
+	    {
+	      s->leftToUnblock = 0;
+	    }
+#else
+	  /*
+	   * Don't release the W32 sema, it doesn't need adjustment
+	   * because it doesn't record the number of waiters.
+	   */
+#endif /* NEED_SEM */
+	}
       (void) pthread_mutex_unlock (&s->lock);
     }
 }
@@ -100,16 +119,7 @@ sem_wait (sem_t * sem)
   else
     {
 
-#ifdef NEED_SEM
-
-      result = pthreadCancelableWait (s->event);
-
-#else /* NEED_SEM */
-
-      /*
-       * sem_wait is a cancelation point and it's easy to test before
-       * modifying the sem value
-       */
+      /* Faster to test before adjusting the count */
       pthread_testcancel();
 
       if ((result = pthread_mutex_lock (&s->lock)) == 0)
@@ -120,20 +130,32 @@ sem_wait (sem_t * sem)
 
 	  if (v < 0)
 	    {
-	      /* Must wait */
 #ifdef _MSC_VER
 #pragma inline_depth(0)
 #endif
+	      /* Must wait */
 	      pthread_cleanup_push(ptw32_sem_wait_cleanup, (void *) s);
 	      result = pthreadCancelableWait (s->sem);
-	      pthread_cleanup_pop(result != 0);
+	      pthread_cleanup_pop(result);
 #ifdef _MSC_VER
 #pragma inline_depth()
 #endif
 	    }
-	}
+#ifdef NEED_SEM
+
+	  if (!result && pthread_mutex_lock (&s->lock) == 0)
+	    {
+	      if (s->leftToUnblock > 0)
+		{
+		  --s->leftToUnblock;
+		  SetEvent(s->sem);
+		}
+	      (void) pthread_mutex_unlock (&s->lock);
+	    }
 
 #endif /* NEED_SEM */
+
+	}
 
     }
 
@@ -142,12 +164,6 @@ sem_wait (sem_t * sem)
       errno = result;
       return -1;
     }
-
-#ifdef NEED_SEM
-
-  ptw32_decrease_semaphore (sem);
-
-#endif /* NEED_SEM */
 
   return 0;
 
