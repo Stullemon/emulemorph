@@ -683,7 +683,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
     sendLocker.Lock();
 
-    if (byConnected == ES_DISCONNECTED) {
+    lastCalledSend = ::GetTickCount(); //MORPH - Moved up
+
+	if (byConnected == ES_DISCONNECTED) {
         sendLocker.Unlock();
         SocketSentBytes returnVal = { false, 0, 0 };
         return returnVal;
@@ -700,8 +702,6 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
     bool bWasLongTimeSinceSend = false;// (::GetTickCount() - lastSent) > 1000; //MORPH - Changed by SiRoB, Never Send data when onlyAllowedToSendControlPacket
-
-    lastCalledSend = ::GetTickCount();
 
     bool anErrorHasOccured = false;
     uint32 sentStandardPacketBytesThisCall = 0;
@@ -859,15 +859,17 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 }
 
 uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
-    //MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
-	if (current >= 65535)
-		current = 65535-1;
-	//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+    uint32 ret;
 	if(current % minFragSize == 0) {
-        return current;
+        ret = current;
     } else {
-        return minFragSize*(current/minFragSize+1);
+        ret = minFragSize*(current/minFragSize+1);
     }
+	//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+	if (current >= 65535)
+		ret = 65535-1;
+	return ret;
+	//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 }
 
 /**
