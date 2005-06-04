@@ -463,6 +463,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("Element"))|| 
 			StrStrI(m_strModVersion,_T("§¯Å]"))||
             StrStrI(m_strModVersion,_T("00de"))|| //Commander - Added: LeecherMod
+			StrStrI(m_strModVersion,_T("00.de"))|| //Commander - Added: LeecherMod
 			StrStrI(m_strModVersion,_T("Rappi"))||//Commander - Added: LeecherMod
 			StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29"))||
 			// EastShare END - Added by TAHO, Pretender
@@ -508,6 +509,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_pszUsername,_T("pubsman"))||
 			StrStrI(m_pszUsername,_T("emule-element"))||
 			StrStrI(m_pszUsername,_T("00de.de"))|| //Commander - Added: LeecherMod
+			StrStrI(m_pszUsername,_T("OO.de"))|| //Commander - Added: LeecherMod
 			StrStrI(m_pszUsername,_T("emule")) && StrStrI(m_pszUsername,_T("booster"))
 			)
 		{
