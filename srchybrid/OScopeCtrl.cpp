@@ -738,6 +738,16 @@ void COScopeCtrl::DrawPoint()
 			oldPen = m_dcPlot.SelectObject(&m_PlotData[iTrend].penPlot);
 			
 			//Morph Start - modified by SiRoB
+			// move to the previous point
+			prevX = m_rectPlot.right - m_nShiftPixels;
+			if (m_PlotData[iTrend].nPrevY > 0) {
+				prevY = m_PlotData[iTrend].nPrevY;
+			}
+			else {
+				prevY = m_rectPlot.bottom 
+						- (long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) 
+				        * m_PlotData[iTrend].dVerticalFactor);
+			}
 			if(m_PlotData[iTrend].BarsPlot)
 			{
 				currX = m_rectPlot.right;
@@ -749,16 +759,6 @@ void COScopeCtrl::DrawPoint()
 			}
 			else
 			{
-				// move to the previous point
-				prevX = m_rectPlot.right - m_nShiftPixels;
-				if (m_PlotData[iTrend].nPrevY > 0) {
-					prevY = m_PlotData[iTrend].nPrevY;
-				}
-				else {
-				prevY = m_rectPlot.bottom 
-						- (long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) 
-						         * m_PlotData[iTrend].dVerticalFactor);
-				}
 				/*
 				if (!m_PlotData[iTrend].BarsPlot)
 				*/
