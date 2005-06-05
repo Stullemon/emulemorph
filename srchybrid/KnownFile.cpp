@@ -1703,23 +1703,22 @@ void CKnownFile::CreateHash(CFile* pFile, UINT Length, uchar* pMd4HashOut, CAICH
 	CAICHHashAlgo* pHashAlg = m_pAICHHashSet->GetNewHashAlgo();
 	CMD4 md4;
 
-	//Removed Temparory
-	// // <CB Mod : NiceHash>
-	//ULONGLONG timeStart, timeTemp;
-	//ULONGLONG activeTime;
-	//int sleepTime;
-	//float loadRatio;
+	// <CB Mod : NiceHash>
+	ULONGLONG timeStart, timeTemp;
+	ULONGLONG activeTime;
+	int sleepTime;
+	float loadRatio;
 
-	//int load = thePrefs.GetNiceHashLoadWeight();
-	//sleepTime = 100; //ms
+	int load = thePrefs.GetNiceHashLoadWeight();
+	sleepTime = 100; //ms
 
-	//load = 110-load;
-	//if (load > 100) load = 100;
-	//if (load < 10) load = 10;
-	//loadRatio = (load-10)/10; // Load ratio
-	//activeTime = sleepTime*loadRatio;
-	//timeStart = GetCurrentTimeMilliSecs();
-	//// <CB Mod : NiceHash>
+	load = 110-load;
+	if (load > 100) load = 100;
+	if (load < 10) load = 10;
+	loadRatio = (load-10)/10; // Load ratio
+	activeTime = sleepTime*loadRatio;
+	timeStart = GetCurrentTimeMilliSecs();
+	// <CB Mod : NiceHash>
 
 	while (Required >= 64){
         uint32 len = Required / 64; 
@@ -1749,16 +1748,15 @@ void CKnownFile::CreateHash(CFile* pFile, UINT Length, uchar* pMd4HashOut, CAICH
 			md4.Add(X, len*64);
 		}
 		Required -= len*64;
-		//Removed temporary
-		//// <CB Mod : NiceHash>
-		//if (activeTime > 0) {
-		//	timeTemp = GetCurrentTimeMilliSecs();
-		//	if(timeTemp - timeStart >= activeTime) {
-		//		Sleep(sleepTime);
-		//		timeStart = GetCurrentTimeMilliSecs();
-		//	}
-		//}
-		//// </CB Mod : NiceHash>
+		// <CB Mod : NiceHash>
+		if (activeTime > 0) {
+			timeTemp = GetCurrentTimeMilliSecs();
+			if(timeTemp - timeStart >= activeTime) {
+				Sleep(sleepTime);
+				timeStart = GetCurrentTimeMilliSecs();
+			}
+		}
+		// </CB Mod : NiceHash>
 	}
 
 	Required = Length % 64;
