@@ -3362,7 +3362,7 @@ switch(tag->GetNameID())
 void CUpDownClient::UpdateFunnyNick()
 {
 	if(m_pszUsername == NULL || 
-		_tcsnicmp(m_pszUsername, _T("http://"),8) != 0 &&
+		_tcsnicmp(m_pszUsername, _T("http://"),7) != 0 &&
 		_tcsnicmp(m_pszUsername, _T("0."),2) != 0 &&
 		_tcsicmp(m_pszUsername, _T("")) != 0)
 		return;
