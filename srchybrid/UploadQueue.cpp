@@ -1004,27 +1004,27 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
     if(curUploadSlots > m_MaxActiveClients+wantedNumberOfTrickles) {
         return false;
     }
-//Removed by SiRoB this make slot open with out any limitation
-//	uint16 MaxSpeed;
-//
-//    if (thePrefs.IsDynUpEnabled())
-//        MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
-//    else
-//		MaxSpeed = thePrefs.GetMaxUpload();
-//
-//	if (curUploadSlots >= 4 &&
-//        (
-//         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB, 
-//         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
-//         (
-//          thePrefs.GetMaxUpload() == UNLIMITED &&
-//          !thePrefs.IsDynUpEnabled() &&
-//          thePrefs.GetMaxGraphUploadRate() > 0 &&
-//          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate())*1024/UPLOAD_CLIENT_DATARATE
-//         )
-//        )
-//    ) // max number of clients to allow for all circumstances
-//	    return false;
+	uint16 MaxSpeed;
+
+    if (thePrefs.IsDynUpEnabled())
+        MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
+    else
+		MaxSpeed = thePrefs.GetMaxUpload();
+
+	if (curUploadSlots >= 4 &&
+		curUploadSlots == GetEffectiveUploadListCount() && //MORPH - Added by SiRoB, avoid limit when a scheduled slot is in process
+        (
+         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB, 
+         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
+         (
+          thePrefs.GetMaxUpload() == UNLIMITED &&
+          !thePrefs.IsDynUpEnabled() &&
+          thePrefs.GetMaxGraphUploadRate() > 0 &&
+          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate())*1024/UPLOAD_CLIENT_DATARATE
+         )
+        )
+    ) // max number of clients to allow for all circumstances
+	    return false;
 	return true;
 }
 
