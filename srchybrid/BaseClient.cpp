@@ -3159,6 +3159,10 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 	if( m_eWebCacheUpState == WCUS_UPLOADING )
 		strState = _T("Via Proxy");
 	// MORPH START - Added by Commander, WebCache 1.2e
+
+	if( socket &&  socket->IsBusy())
+		strState += _T(" (Busy)");
+	
 	return strState;
 }
 
