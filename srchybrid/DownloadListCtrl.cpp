@@ -1848,9 +1848,12 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			int total;
 			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab, total) > 0 ? MF_ENABLED : MF_GRAYED);
 
-			m_FileMenu.EnableMenuItem((UINT_PTR)m_SourcesMenu.m_hMenu, (thePrefs.IsExtControlsEnabled() && iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+			m_FileMenu.EnableMenuItem((UINT_PTR)m_SourcesMenu.m_hMenu, (thePrefs.IsExtControlsEnabled() /*MORPH*//*&& iSelectedItems == 1 && iFilesNotDone == 1*/) ? MF_ENABLED : MF_GRAYED);
 			if (thePrefs.IsExtControlsEnabled()) {
 				m_SourcesMenu.CheckMenuItem(MP_ALL_A4AF_AUTO, (iSelectedItems == 1 && iFilesNotDone == 1 && iFilesA4AFAuto == 1) ? MF_CHECKED : MF_UNCHECKED);
+				//MORPH START - Added by SiRoB, due to khaos A4AF
+				m_SourcesMenu.EnableMenuItem(MP_ALL_A4AF_AUTO, (iSelectedItems == 1 && iFilesToStop == 1) ? MF_ENABLED : MF_GRAYED);
+				//MORPH END   - Added by SiRoB, due to khaos A4AF				
 				m_SourcesMenu.EnableMenuItem(MP_ADDSOURCE, (iSelectedItems == 1 && iFilesToStop == 1) ? MF_ENABLED : MF_GRAYED);
 				m_SourcesMenu.EnableMenuItem(MP_SETSOURCELIMIT, (iFilesNotDone == iSelectedItems) ? MF_ENABLED : MF_GRAYED);
 			}
