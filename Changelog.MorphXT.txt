@@ -1,14 +1,16 @@
 --------------------------------------
-Changelog for eMule 0.46a MorphXT v
+Changelog for eMule 0.46a MorphXT v7.0
 --------------------------------------
 MERGED : Ported to 0.46a version [SiRoB]
-MERGED : A4AF from latest ZZ Mod [SiRoB]
+MERGED : Merged A4AF from latest ZZ Mod [SiRoB]
 
 FIXED  : SafeHash code fix arround corruptionblackbox [SiRoB]
 FIXED  : SafeHash code fix arround AICHSyncThread start (delay load shared files) [SiRoB]
 FIXED  : Official Crash fix arround Chat Context menu [SiRoB]
 FIXED  : Official Minor fix arround middle button click in the Transfert Window [SiRoB]
 FIXED  : Crash fix on category merge [SiRoB]
+FIXED  : Fix eMule process remain on shutdown by using updated pthread (v2.6) [SiRoB]
+FIXED  : zz scheduled slot: added a check in AcceptNewClient to bypass 4 slot limit [SiRoB]
 
 ADDED  : NiceHash from CB mod (need some feed back for this testing) [AndCycle]
          relate topic http://forum.emule-project.net/index.php?showtopic=63906&hl=nicehash
@@ -17,6 +19,8 @@ ADDED  : Separate average upload based on 30" for USS system (as in the official
 ADDED  : Datarate Average Time Management (Default 30s near the official client) [SiRoB]
 ADDED  : Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one [SiRoB]
 ADDED  : Rescue CatResumeOrder (Linear Priority) due to the new official tag used for SourceLimit [SiRoB]
+ADDED  : UPNPLIB: Added preprocessor definitions (UPNP_STATIC_LIB) for a proper compilation [SiRoB]
+ADDED  : Display busy state for upload client [SiRoB]
 
 CHANGED: ImportParts: Updated with 003 version from SR13 mod [SiRoB]
 CHANGED: USS: Minor change [SiRoB]
@@ -29,6 +33,11 @@ CHANGED: FunnyNick: fully dynamic now [SiRoB]
 TEAWKED: See parts hidden by HOS and SOTN have been tweaked a bit [SiRoB]
 
 REMOVED: Only Lock When Needed (arround ControlPacket Queueing) [SiRoB]
+
+NOTE:
+- Compiled with VS2003 + wspapi.h patch by NetInfinity.
+- Don't forget to use pthreadVC2.dll instead of version 1.
+- As many people don't understand the need to display live upload data rate i added a manual setting (every one schould be happy).
 
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.7
