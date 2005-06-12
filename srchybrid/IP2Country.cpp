@@ -130,7 +130,7 @@ static int __cdecl CmpIP2CountryByStartAddr(const void* p1, const void* p2)
 
 bool CIP2Country::LoadFromFile(){
 	DWORD startMesure = GetTickCount();
-	TCHAR* szbuffer = new TCHAR[80];
+	TCHAR* szbuffer = new TCHAR[512+8];
 	CString ip2countryCSVfile = GetDefaultFilePath();
 	FILE* readFile = _tfsopen(ip2countryCSVfile, _T("r"), _SH_DENYWR);
 	try{
@@ -143,7 +143,7 @@ bool CIP2Country::LoadFromFile(){
 			TCHAR *szIPStart,*szIPEnd,*sz2L,*sz3L,*szCountry;
 			while (!feof(readFile)) {
 				error = false;
-				if (_fgetts(szbuffer, 80,readFile)==0) break;
+				if (_fgetts(szbuffer, 512+8,readFile)==0) break;
 				++iLine;
 				/*
 				http://ip-to-country.webhosting.info/node/view/54
