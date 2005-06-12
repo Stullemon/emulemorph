@@ -37,11 +37,16 @@
 #include <malloc.h>
 #include <assert.h>
 
-//#ifdef _WIN32
-//#define EXPORT_SPEC __declspec(dllexport)
-//#else
+#ifndef UPNP_STATIC_LIB
+#ifdef UPNP_BUILD
+// set up declspec for dll export to make functions visible to library users
+#define EXPORT_SPEC __declspec(dllexport)
+#else
+#define EXPORT_SPEC __declspec(dllimport)
+#endif
+#else
 #define EXPORT_SPEC
-//#endif
+#endif
 
 typedef int BOOL;
 

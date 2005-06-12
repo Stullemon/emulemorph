@@ -4084,6 +4084,9 @@ UpnpRemoveAllVirtualDirs(  )
     pVirtualDirList = NULL;
 
 }
+/*
+ **************************** */
+#if EXCLUDE_WEB_SERVER == 0
 
  /**************************************************************************
  * Function: UpnpEnableWebserver 
@@ -4128,6 +4131,9 @@ UpnpEnableWebserver( IN int enable )
 
     return UPNP_E_SUCCESS;
 }
+#endif // EXCLUDE_WEB_SERVER
+/*
+ *************************** */
 
  /**************************************************************************
  * Function: UpnpIsWebserverEnabled 

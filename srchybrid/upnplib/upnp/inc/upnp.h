@@ -46,12 +46,16 @@
 #define min(a, b)   (((a)<(b))? (a):(b))
 #endif
 
-//#ifdef _WIN32
+#ifndef UPNP_STATIC_LIB
+#ifdef UPNP_BUILD
 // set up declspec for dll export to make functions visible to library users
-//#define EXPORT_SPEC __declspec(dllexport)
-//#else
+#define EXPORT_SPEC __declspec(dllexport)
+#else
+#define EXPORT_SPEC __declspec(dllimport)
+#endif
+#else
 #define EXPORT_SPEC
-//#endif
+#endif
 
 
 #ifdef _WIN32

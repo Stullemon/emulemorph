@@ -24,8 +24,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\ixml\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\inc&quot;;&quot;$(ProjectDir)\..\threadutil\inc&quot;;&quot;$(ProjectDir)\..\ixml\inc&quot;;&quot;$(ProjectDir)\..\..\pthreads\pthreads&quot;"
-				PreprocessorDefinitions="INCLUDE_CLIENT_APIS;_WIN32;WIN32"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\ixml\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\inc&quot;;&quot;$(ProjectDir)\..\threadutil\inc&quot;;&quot;$(ProjectDir)\..\ixml\inc&quot;;..\..\pthreads\pthreads"
+				PreprocessorDefinitions="UPNP_STATIC_LIB;UPNP_BUILD;INCLUDE_CLIENT_APIS;_WIN32;WIN32"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -39,9 +39,7 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies="$(ProjectDir)\..\..\pthreads\pthreads\Release\pthreadVC.lib"
-				IgnoreAllDefaultLibraries="TRUE"/>
+				Name="VCLibrarianTool"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -82,7 +80,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\ixml\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\inc&quot;;&quot;$(ProjectDir)\..\threadutil\inc&quot;;&quot;$(ProjectDir)\..\ixml\inc&quot;;&quot;$(ProjectDir)\..\..\pthreads\pthreads&quot;"
-				PreprocessorDefinitions="INCLUDE_CLIENT_APIS;_WIN32;WIN32;_DEBUG"
+				PreprocessorDefinitions="UPNP_STATIC_LIB;UPNP_BUILD;INCLUDE_CLIENT_APIS;_WIN32;WIN32;_DEBUG"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\Debug/upnpLib.pch"
@@ -97,9 +95,7 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies="$(ProjectDir)\..\..\pthreads\pthreads\Debug\pthreadVC_D.lib"
-				IgnoreAllDefaultLibraries="TRUE"/>
+				Name="VCLibrarianTool"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
