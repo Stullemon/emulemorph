@@ -102,11 +102,11 @@ BEGIN
                     WS_VISIBLE | WS_TABSTOP,5,171,500,106,WS_EX_STATICEDGE
     CONTROL         "",IDC_DLTAB,"SysTabControl32",TCS_RAGGEDRIGHT | 
                     TCS_TOOLTIPS,239,2,263,17,WS_EX_RIGHT
-    CONTROL         "",IDC_QUEUE,"msctls_progress32",0x1,184,281,199,6
+    CONTROL         "",IDC_QUEUE,"msctls_progress32",0x1,190,281,196,6
     CONTROL         "",IDC_DOWNLOADCLIENTS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | NOT 
                     WS_VISIBLE | WS_TABSTOP,5,226,500,43,WS_EX_STATICEDGE
-    CONTROL         "",IDC_QUEUE2,"msctls_progress32",0x1,385,281,49,6
+    CONTROL         "",IDC_QUEUE2,"msctls_progress32",0x1,386,281,49,6
 END
 
 IDD_SERVER DIALOGEX 0, 35, 511, 289
@@ -5311,14 +5311,11 @@ BEGIN
     IDS_INVMODE_HOTKEY      "Select the hotkey to show / hide the window"
     IDS_INVMODE_MODKEY      "Modifier Keys:"
     IDS_INVMODE_VKEY        "Key:"
-    IDS_DATARATEAVERAGETIME "Datarate average time (Default 30s)"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_LAST_ASKED          "Last Asked"
-    IDS_DOWNL_TIME          "Downloading Time"
-    IDS_KNOWN_SINCE         "Known Since"
+    IDS_FPU_ACTIVE          "FPU optimizations active"
+    IDS_MMX_ACTIVE          "MMX optimizations active"
+    IDS_AMD_ACTIVE          "AMD optimizations active"
+    IDS_SSE_ACTIVE          "SSE optimizations active"
+    IDS_OPTIMIZATIONS_DISABLED "Optimizations disabled"
 END
 
 STRINGTABLE 
@@ -5333,6 +5330,14 @@ BEGIN
     IDS_FEEDURL             "Please enter the URL of the feed source:"
     IDS_FEEDNAME            "Please enter a name for this feed (optional):"
     IDS_FEED                "News"
+    IDS_DATARATEAVERAGETIME "Datarate average time (Default 30s)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LAST_ASKED          "Last Asked"
+    IDS_DOWNL_TIME          "Downloading Time"
+    IDS_KNOWN_SINCE         "Known Since"
 END
 
 STRINGTABLE 

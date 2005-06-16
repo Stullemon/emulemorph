@@ -19,12 +19,12 @@
 
 //MORPH START - Added by SiRoB, [itsonlyme: -modname-]
 #define MOD_VERSION_MJR		7
-#define MOD_VERSION_MIN		0
+#define MOD_VERSION_MIN		1
 #define MOD_VERSION_BUILD   0
 
 // this one is sent as the mod ID
 #define	MOD_VERSION			_T("MorphXT")	// [SLUGFILLER: -modID-]
 // this one is added to eMule name every time it is displayed
-#define	MOD_LONG_VERSION	_T("MorphXT v")
+#define	MOD_VERSION_LONG	_T("MorphXT v")
 
 //MORPH END  - Added by SiRoB, [itsonlyme: -modname-]

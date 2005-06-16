@@ -598,6 +598,25 @@
 					RelativePath="IrcSocket.cpp">
 				</File>
 			</Filter>
+			<Filter
+				Name="Optimizer"
+				Filter="">
+				<File
+					RelativePath="Optimizer\cpu_info.cpp">
+				</File>
+				<File
+					RelativePath="Optimizer\cpu_info.h">
+				</File>
+				<File
+					RelativePath="Optimizer\memcpy_amd.cpp">
+				</File>
+				<File
+					RelativePath="Optimizer\memcpy_amd.h">
+				</File>
+				<File
+					RelativePath=".\Optimizer\optimize.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -724,9 +743,6 @@
 			</File>
 			<File
 				RelativePath="MMSocket.h">
-			</File>
-			<File
-				RelativePath=".\ModName.h">
 			</File>
 			<File
 				RelativePath=".\ModVersion.h">

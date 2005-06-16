@@ -1936,6 +1936,11 @@ LRESULT CemuleDlg::OnCloseMiniMule(WPARAM wParam, LPARAM lParam)
 
 void CemuleDlg::OnTrayLButtonUp(CPoint pt)
 {
+	//Xman crashfix during closing
+	if(!IsRunning())
+		return;
+	//Xman end
+
 	// Avoid reentrancy problems with main window, options dialog and mini mule window
 	if (IsPreferencesDlgOpen()) {
 		MessageBeep(MB_OK);
@@ -1963,6 +1968,11 @@ void CemuleDlg::OnTrayLButtonUp(CPoint pt)
 
 void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 {
+	//Xman crashfix during closing
+	if(!IsRunning())
+		return;
+	//Xman end
+
 	// Avoid reentrancy problems with main window, options dialog and mini mule window
 	if (IsPreferencesDlgOpen()) {
 		MessageBeep(MB_OK);

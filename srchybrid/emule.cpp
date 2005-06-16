@@ -73,9 +73,6 @@
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
 // Commander - Added: Custom incoming folder icon [emulEspaña] - End
-//MORPH START - Added by SiRoB, ModID
-#include "ModName.h"
-//MORPH END   - Added by SiRoB, ModID
 
 CLogFile theLog;
 CLogFile theVerboseLog;
@@ -266,9 +263,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	EnableHtmlHelp();
 
 	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
-	m_strModVersion = MOD_VERSION;
+	m_strModVersion = CemuleApp::m_szMVersion;
 	m_strModVersion.AppendFormat(_T(" %u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
-	m_strModLongVersion = MOD_LONG_VERSION;
+	m_strModLongVersion = CemuleApp::m_szMVersionLong;
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
@@ -458,6 +455,7 @@ BOOL CemuleApp::InitInstance()
 	CemuleDlg dlg;
 	emuledlg = &dlg;
 	m_pMainWnd = &dlg;
+	OptimizerInfo();//Commander - Added: Optimizer [ePlus]
 
 	//MORPH START - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
 	if(thePrefs.ShowFolderIcons()){
@@ -1855,6 +1853,37 @@ void CemuleApp::CreateBackwardDiagonalBrush()
 		VERIFY( m_brushBackwardDiagonal.CreateBrushIndirect(&logBrush) );
 	}
 }
+
+//Commander - Added: Optimizer [ePlus] - Start
+void CemuleApp::OptimizerInfo(void)
+{
+if (!emuledlg)
+	return;
+	AddLogLine(false,_T("********Optimizer********"));
+	USES_CONVERSION;
+	AddLogLine(false,_T("%s"),A2CT(cpu.GetExtendedProcessorName()));
+	switch (get_cpu_type())
+	{
+		case 1:
+			AddLogLine(false, GetResString(IDS_FPU_ACTIVE));
+			break;
+		case 2:
+			AddLogLine(false, GetResString(IDS_MMX_ACTIVE));
+			break;
+		case 3:
+			AddLogLine(false, GetResString(IDS_AMD_ACTIVE));
+			break;
+		case 4:
+		case 5:
+			AddLogLine(false, GetResString(IDS_SSE_ACTIVE));
+			break;
+		default:
+			AddLogLine(false, GetResString(IDS_OPTIMIZATIONS_DISABLED));
+			break;
+	}
+	AddLogLine(false,_T("********Optimizer********"));
+}
+//Commander - Added: Optimizer [ePlus] - End
 
 //MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 BOOL CemuleApp::AddUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping){
