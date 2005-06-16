@@ -561,11 +561,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							}
 						}
 						sint64 curClassByteToSpend = realBytesToSpendClass[classID] / 1000;
-						if (BytesToSpend > curClassByteToSpend) {
+						if (BytesToSpend > curClassByteToSpend)
 							BytesToSpend = curClassByteToSpend;
+						else
 							needmoreslot = needmoreslotglobal;
-						}
-					}
+					} else
+						realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
 				}
 				for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID]; slotCounter++) {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
