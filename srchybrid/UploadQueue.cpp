@@ -942,12 +942,12 @@ void CUploadQueue::Process() {
 		//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	}
 	//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
-	while(avarage_dr_USS_list.GetCount() > 1 && (avarage_tick_listPreviousAddedTimestamp - avarage_dr_USS_list.GetHead().timestamp) > 30*1000)
+	while(avarage_dr_USS_list.GetCount() > 50) //arround 5 seconds
 		m_avarage_dr_USS_sum -= avarage_dr_USS_list.RemoveHead().datalen;
 
 	if (avarage_dr_USS_list.GetCount() > 1) {
 		DWORD dwDuration = avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_list.GetHead().timestamp;
-		if (dwDuration < 1000) dwDuration = 1000;
+		if (dwDuration < 2500) dwDuration = 2500;
 		DWORD dwAvgTickDuration = dwDuration / (avarage_dr_USS_list.GetCount() - 1);
 		if ((curTick - avarage_dr_USS_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_dr_USS_list.GetTail().timestamp - dwAvgTickDuration;
@@ -956,7 +956,7 @@ void CUploadQueue::Process() {
 	//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	
 	// don't save more than MAXAVERAGETIMEUPLOAD secs of data
-	while(avarage_tick_list.GetCount() > 1 && (avarage_tick_listPreviousAddedTimestamp - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
+	while(avarage_tick_list.GetCount() > MAXAVERAGETIMEUPLOAD<<3){
 		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 		m_avarage_overhead_dr_sum -= avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		avarage_friend_dr_list.RemoveHead();
@@ -966,7 +966,7 @@ void CUploadQueue::Process() {
 	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
 	if (avarage_tick_list.GetCount() > 1){
 		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
-		if (dwDuration < 1000) dwDuration = 1000;
+		if (dwDuration < 400) dwDuration = 400;
 		DWORD dwAvgTickDuration = dwDuration / (avarage_tick_list.GetCount() - 1);
 		if ((curTick - avarage_tick_list.GetTail()) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_tick_list.GetTail() - dwAvgTickDuration;

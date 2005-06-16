@@ -890,6 +890,12 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 		delete[] m_abyUpPartStatus;
 		m_abyUpPartStatus = NULL;
 	}
+	//MORPH START - Added by SiRoB, See chunk that we hide
+	if (m_abyUpPartStatusHidden){
+		delete[] m_abyUpPartStatusHidden;
+		m_abyUpPartStatusHidden = NULL;
+	}
+	//MORPH END   - Added by SiRoB, See chunk that we hide
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
 
@@ -1041,12 +1047,12 @@ uint32 CUpDownClient::SendBlockData(){
 		m_nSumForAvgUpDataRate = (UINT)(m_nSumForAvgUpDataRate + sentBytesCompleteFile + sentBytesPartFile);
 	}
 
-	while (m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDRPreviousAddedTimestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
+	while (m_AvarageUDR_list.GetCount() > MAXAVERAGETIMEUPLOAD<<3)
 		m_nSumForAvgUpDataRate -= m_AvarageUDR_list.RemoveHead().datalen;
 
     if(m_AvarageUDR_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
-		if (dwDuration < 1000) dwDuration = 1000;
+		if (dwDuration < 400) dwDuration = 400;
 		DWORD dwAvgTickDuration = dwDuration / (m_AvarageUDR_list.GetCount() - 1);
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += curTick - m_AvarageUDR_list.GetTail().timestamp - dwAvgTickDuration;
