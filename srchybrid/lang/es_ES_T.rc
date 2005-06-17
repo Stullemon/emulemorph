@@ -602,7 +602,7 @@ STRINGTABLE
 BEGIN
     IDS_CD_UNAME            "Usuario:"
     IDS_CD_UHASH            "Hash de usuario:"
-    IDS_CD_CSOFT            "Software cliente:"
+    IDS_CD_CSOFT            "Software cliente"
     IDS_CD_UIP              "Dirección IP:"
     IDS_CD_SIP              "IP del servidor:"
     IDS_CD_VERSION          "Versión:"
@@ -650,7 +650,7 @@ BEGIN
     IDS_SCORE               "Puntuación"
     IDS_ASKED               "Pedido"
     IDS_LASTSEEN            "Última comprobación"
-    IDS_BANNED              "bloqueados"
+    IDS_BANNED              "bloqueado(s)"
     IDS_PRIOVERYHIGH        "Muy alta"
     IDS_UUSERS              "Usuarios"
     IDS_UFAILED             "Error"
@@ -690,7 +690,7 @@ BEGIN
     IDS_SF_USER             "Usuarios totales"
     IDS_SF_FILE             "Archivos totales"
     IDS_UPLOADTIME          "Subiendo"
-    IDS_LASTSEENCOMPL       "Última comprobación completa:"
+    IDS_LASTSEENCOMPL       "Última comprb. completa:"
     IDS_YES                 "Si"
     IDS_NO                  "No"
     IDS_UNBAN               "Quitar bloqueo"
@@ -857,16 +857,16 @@ STRINGTABLE
 BEGIN
     IDS_SOURCENAMES         "Nombres de Fuentes"
     IDS_PREF_STARTMIN       "Iniciar minimizado"
-    IDS_PS_TBN_IMPORTANT    "Espacio en disco insuficiente, desconexión del servidor"
+    IDS_PS_TBN_IMPORTANT    "Poco espacio en disco, desconexión del servidor"
     IDS_COLORS              "Colores"
     IDS_SP_BACKGROUND       "Fondo"
     IDS_SP_GRID             "Rejilla"
     IDS_SP_DL1              "Descarga actual"
-    IDS_SP_DL2              "Promedio Descarga/tiempo"
-    IDS_SP_DL3              "Promedio Descarga/sesión"
+    IDS_SP_DL2              "Promedio de Descarga"
+    IDS_SP_DL3              "Promedio Descarga en la sesión"
     IDS_SP_UL1              "Subida actual"
-    IDS_SP_UL2              "Promedio Subida/tiempo"
-    IDS_SP_UL3              "Promedio Subida/sesión"
+    IDS_SP_UL2              "Promedio Subida"
+    IDS_SP_UL3              "Promedio Subida en la sesión"
     IDS_SP_ACTCON           "Conexiones activas"
     IDS_SP_ACTDL            "Descargas activas"
     IDS_SP_ACTUL            "Subidas activas"
@@ -923,7 +923,7 @@ BEGIN
     IDS_FRIENDSLOT          "Establecer puesto reservado para amigo"
     IDS_FRIENDDETAIL        "(Puesto reservado para amigo)"
     IDS_ASCWOP_PROXYSUPPORT "Conectar automáticamente sin proxy"
-    IDS_UDPDISABLED         "desactivar"
+    IDS_UDPDISABLED         "Desactivar"
     IDS_CTINFO              "Selecciona tu tipo de conexión aquí:"
     IDS_WIZ_CTFRAME         "Tipo de conexión"
     IDS_CONCURDWL           "Descargas simultáneas"
@@ -1024,7 +1024,7 @@ BEGIN
     IDS_SHOWOVERHEAD        "Mostrar ancho de banda excedente"
     IDS_UPDOWNSMALL         "Subida: %.1f | Descarga: %.1f"
     IDS_EDITLIST            "Editar"
-    IDS_SP_ICONBAR          "IconTray. Barra de velocidad"
+    IDS_SP_ICONBAR          "Icono bandeja de Sistema con barra de velocidad"
     IDS_RATINGRECV          "Calificación para el archivo '%s' recibido: %i"
     IDS_DESCRIPTIONRECV     "Descripción para el archivo '%s' recibido: %s"
     IDS_WEBSERVICES         "Servicios &Web"
@@ -1046,7 +1046,7 @@ BEGIN
     IDS_VISITVERSIONCHECK   "\n\n¿Quieres visitar la página de información ahora?"
     IDS_PW_VIDEOPLAYER      "Reproductor de video"
     IDS_VIDEOBACKUP         "Crear copia de seguridad para previsualizar"
-    IDS_STATIC_EMPTY        "(en blanco=predeterminado)"
+    IDS_STATIC_EMPTY        "(En blanco = Predeterminado)"
     IDS_MYINFO              "Información propia"
     IDS_ID                  "ID"
     IDS_IDLOW               "ID baja"
@@ -1129,13 +1129,13 @@ BEGIN
     IDS_DISABLEKNOWNLIST    "Desactivar lista de clientes conocidos"
     IDS_DISABLEQUEUELIST    "Desactivar lista cola de espera"
     IDS_USECREDITSYSTEM     "Usar Sistema de créditos (Se premia a los que mas suben)"
-    IDS_FIRSTAUTODOWN       "¿Quieres que eMule controle tus prioridades de descarga?\r\rEsto permite a eMule controlar que las descargas con muchas fuentes no interfieran con las de pocas fuentes.\r\rSi has actualizado desde una versión v0.26 o inferior, todas las descargas estarán por defecto en Auto Prioridad.\rEsta opción sólo tendrá efecto en las descargas siguientes. (Por defecto Si)"
-    IDS_FIRSTAUTOUP         "¿Quieres que eMule controle tus prioridades de subida?\r\rEsto permite a eMule lanzar archivos raros, los archivos mas populares serán mas difíciles de conseguir a los otros clientes.\r\rSi has actualizado desde una versión v0.26 o inferior, todos los archivos compartidos estarán por defecto en Auto Prioridad.\rEsta opción sólo tendrá efecto para los siguientes archivos compartidos. (Por defecto Si)"
-    IDS_FIRSTCREDITSYSTEM   "¿Quieres premiar a las personas de las que descargas?\r\rEsto es normalmente conocido como Sistema de Créditos. Si la activas ayudarás en la lucha contra los que suben poco. Si te consideras un experto quizás quieras desactivarlo.\r\r(Por defecto Si)"
-    IDS_FIRSTFULLCHUNK      "¿Quieres que se suban partes completas?\r\rUsando partes completas das una buena oportunidad al cliente para completar las partes. Desactivando esto ayudas a que la cola de espera rote más rápido. Si te consideras un experto, quizás quieras activarlo.\r\r(Por defecto Si)"
-    IDS_FIRSTSAFECON        "¿Quieres que eMule al conectar utilice el Modo seguro?\r\rDesactivándolo permites a eMule conectar a los servidores un poco mas rápido, pero puedes conseguir mas conexiones con una baja ID.\r\r(Por defecto No)"
+    IDS_FIRSTAUTODOWN       "Activa ésta opción si quieres que eMule controle las prioridades de descarga.\n\nSi lo activas,  eMule se asegura que las descargas con muchas fuentes no interfieran con las que tienen pocas fuentes.\n\nÉsta opción solo afectará a futuras descargas. (Por defecto: Activado)"
+    IDS_FIRSTAUTOUP         "Activa ésta opción si quieres que eMule controle las prioridades de descarga.\n\nSi lo activas, permites a eMule subir mejor los archivos con pocas fuentes, respecto a los de muchas fuentes. Si lo desactivas eMule subirá mejor los archivos con muchas fuentes respecto a archivos que tienen pocas fuentes.\n\nÉsta opción solo afectará a futuros archivos compartidos. (Por defecto: Activado)"
+    IDS_FIRSTCREDITSYSTEM   "¿Quieres recompensar a la gente que te está subiendo?\n\nEsto se conoce comunmente como Sistema de Créditos. Si lo activas ayudas en la lucha contra los leechers (usuarios que se aprovechan de los demás y no comparten nada). Si te dedicas a lanzamientos de archivos nuevos, entonces quizás quieras desactivarlo. (Por defecto: Activado)"
+    IDS_FIRSTFULLCHUNK      "Activa ésta opción si quieres subir trozos completos.\n\nEl uso de trozos completos proporciona a un cliente mas posibilidades de completar el trozo. Si lo desactivas la cola de espera rotará mas rápidamente. Si te dedicas a lanzamientos de archivos nuevos, quizás quieras activarlo. (Por defecto: Activado)"
+    IDS_FIRSTSAFECON        "Activa ésta opcion si quieres que eMule se conecte de modo Seguro.\n\nSi lo desactivas, eMule se conectará a los Servidores un poco más rápido, pero puedes obtener mas conexiones con una ID baja. (Por defecto: Desactivado)"
     IDS_FIRSTRUNASSIST      "¿Quieres que se inicie el asistente de configuración la primera vez?"
-    IDS_FIRSTAUTOCON        "¿Quieres que eMule se conecte al inicio?\r\r(Por defecto No)"
+    IDS_FIRSTAUTOCON        "Activa esta opción si quieres que eMule se conecte al inicio. (Desactivado por defecto)"
     IDS_FIRSTCOMPLETE       "Has completado por primera vez el asistente.\r\rTodas estas configuraciones y más pueden cambiarse en el icono de Preferencias. Para mas información acude a la ayuda pulsando F1 dentro de eMule!"
 END
 
@@ -1152,7 +1152,7 @@ BEGIN
                             "PalabraClave No válida.\r\n\r\nUna expresión de búsqueda de Kad tiene el siguiente formato:\r\n\r\n\t<PalabraClave kad> [ <expresión-búsqueda-ed2k> ]\r\n\r\nLa <PalabraClave kad> no debe contener ninguno de los siguientes caracteres:\r\n\r\n\t%s"
     IDS_EDITCAT             "Editar Categoría-Propiedades"
     IDS_PW_WS               "Servidor Web"
-    IDS_ENABLED             "activado"
+    IDS_ENABLED             "Activado"
     IDS_WEB_LOGIN           "Iniciar sesión"
     IDS_WEB_ENTER_PASSWORD  "Introduce tu contraseña aquí"
     IDS_WEB_LOGIN_NOW       "Iniciar sesión ahora"
@@ -1206,8 +1206,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ALLUNASSIGNED       "todos sin asignar"
-    IDS_ACTSESSIONS         "sesiones activas"
+    IDS_ALLUNASSIGNED       "Todos sin asignar"
+    IDS_ACTSESSIONS         "Sesiones activas"
     IDS_WEBSRV              "Servidor Web"
     IDS_SW_REFETCHRES       "Resultados obtenidos"
     IDS_FILEHASH            "Archivo Hash"
@@ -1239,7 +1239,7 @@ BEGIN
     IDS_DL_RESUMENEXT       "Reanudar siguiente archivo pausado"
     IDS_DONTCHANGE          "Sin cambios"
     IDS_STARTPRIO           "Prioridad para esta categoría"
-    IDS_PREF_STARTNEXTFILECAT "misma categoría"
+    IDS_PREF_STARTNEXTFILECAT "Prefer. misma categoría"
     IDS_REPAINTGRAPHS       "No redibujar gráficos de estadísticas al cambiar de tamaño"
     IDS_SOFTFILES           "Límite de archivo bajo"
 END
@@ -1268,7 +1268,7 @@ STRINGTABLE
 BEGIN
     IDS_SHAREDREQDENIED     "Usuario %s (%u) no permite el acceso a la lista de archivos/carpetas compartidos"
     IDS_AUTOCLEANUPFN       "Limpiar nombre de archivo"
-    IDS_ONNEWDOWNLOAD       "Al iniciar..."
+    IDS_ONNEWDOWNLOAD       "Inicialmente"
     IDS_FILTERFILENAMEWORD  "Introduce las palabras a filtrar, separadas por |"
     IDS_FNFILTERTITLE       "Limpiar nombre de archivo. Editar filtro"
     IDS_CHANGECATVIEW       "Seleccionar vista de filtros"
@@ -1330,7 +1330,7 @@ BEGIN
     IDS_STATS_PROBLEMATIC   "Problemático"
     IDS_LONGHRS             "Horas"
     IDS_STATS_LARGESTFILE   "Archivo de mayor tamaño"
-    IDS_CLIENTSOFTWARE      "Software del cliente"
+    IDS_SPLIT_WINDOW        "Split Window"
     IDS_STATS_DSPF          "Archivo de partes"
     IDS_STATS_DATASOURCE    "Fuente de Datos"
     IDS_STATS_DSFILE        "Archivo completo"
@@ -1354,7 +1354,6 @@ BEGIN
     IDS_STATS_MNUTREECPYALL "Copiar todas las estadísticas"
     IDS_STATS_MNUTREEHTML   "Características HTML"
     IDS_STATS_EXPORT2HTML   "Exportar todas las estadísticas"
-    IDS_STATS_EXPORTVIS     "Exportar todas las visibles"
     IDS_STATS_MNUTREECPYVIS "Copiar todas las visibles"
     IDS_STATS_MNUTREEEXPANDALL "Expandir todas las secciones"
     IDS_STATS_MNUTREECOLLAPSEALL "Colapsar todas las secciones"
@@ -1414,7 +1413,7 @@ BEGIN
     IDS_ALL_A4AF_AUTO       "Intercambiar automáticamente todas las fuentes (A4AF) a este archivo"
     IDS_SWAP_A4AF_TO_THIS   "Intercambiar fuente (A4AF) a este archivo"
     IDS_SWAP_A4AF_TO_OTHER  "Intercambiar fuente (A4AF) a OTRO archivo"
-    IDS_A4AF                "Fuentes (A4AF)"
+    IDS_A4AF                "Fuentes"
     IDS_MOBILEMULE          "MobileMule"
     IDS_ENABLEMM            "Activar MobileMule"
     IDS_AUTOCAT_LABEL       "Auto-Asignar Categ. (formato, separado por |)"
@@ -1422,7 +1421,7 @@ BEGIN
     IDS_TREEOPTIONS_TRUE    "Verdadero"
     IDS_TREEOPTIONS_FALSE   "Falso"
     IDS_TREEOPTIONS_OK      "OK"
-    IDS_HYPERTEXT_FONT_HINT "Fuente para el Servidor-, Mensaje- y Ventana-IRC"
+    IDS_HYPERTEXT_FONT_HINT "Fuente para el Servidor, Mensaje, IRC"
 END
 
 STRINGTABLE 
@@ -1519,9 +1518,9 @@ BEGIN
     IDS_IMP_ERR_FAILED      "Error: Failed!"
     IDS_IMP_STATUSQUEUED    "En cola"
     IDS_IMP_ALRDWL          "Ya descargando"
-    IDS_IMP_ADDBTN          "&Añadir importados"
-    IDS_IMP_RETRYBTN        "&Reintentar selec."
-    IDS_IMP_REMOVEBTN       "Eli&minar selec."
+    IDS_IMP_ADDBTN          "&Añadir archivos"
+    IDS_IMP_RETRYBTN        "&Importar seleccionados"
+    IDS_IMP_REMOVEBTN       "Eli&minar seleccionados"
     IDS_IMP_SELFOLDER       "¡Por favor, elige una sola carpeta para los archivos de partes, ó, la antigua carpeta temp con todas sus subcarpetas!"
     IDS_IMP_DELSRC          "¿Quieres eliminar el archivo de partes-fuentes de las descargas importadas?"
     IDS_IMP_SIZE            "%s (Disco:%s)"
@@ -1616,7 +1615,7 @@ BEGIN
     IDS_LOG_SECURE_IDENT    "Registrar identidad segura"
     IDS_LOG_FILTERED_IPS    "Registrar IPs filtradas y/o ignoradas"
     IDS_LOG_FILE_SAVING     "Registrar al guardar archivo"
-    IDS_IPFILTERFILES       "Todos los archivos de filtros IP (*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt)|*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Archivos Peer Guardian (*.p2p;*.p2p.txt)|*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|Todos los archivos (*.*)|*.*||"
+	  IDS_IPFILTERFILES       "Todos los archivos de Filtros IP (*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz)|*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz|archivos eMule de Filtros IP (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Archivos Peer Guardian (*.p2b;*.p2p;*.p2p.txt)|*.p2b;*.p2p;*.p2p.txt|Archivos de Texto (*.txt)|*.txt|Archivos ZIP (*.zip;*.gz)|*.zip;*.gz|Todos los archivos (*.*)|*.*||"
     IDS_DELETEIPFILTERS     "¿Quieres realmente eliminar los filtros IP seleccionados?"
     IDS_TOTAL_IPFILTER_LABEL "Total de IP filtradas:"
     IDS_TOTAL_IPS_LABEL     "Total IPs:"
@@ -1687,7 +1686,7 @@ BEGIN
     IDS_A4AF_CHECK_THIS_NOW "Comprobar esta fuente ahora (debug)"
     IDS_SOURCEEXCHANGESWAP  "Intercambio de Fuentes Temporales"
     IDS_NEWMSG              "Nuevo Mensaje de '%s' (IP:%s)"
-    IDS_PREF_STARTNEXTFILECATONLY "solo en la misma categoría"
+    IDS_PREF_STARTNEXTFILECATONLY "Solo en la misma categoría"
     IDS_LOG_ULDL_EVENTS     "Registrar eventos de subida/descarga"
     IDS_PEERCACHE_ENABLED   "Tu proveedor de acceso a Internet (ISP) soporta PeerCache, cache habilitada!"
     IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Permitir a un usuario añadirte como amigo."
@@ -1706,12 +1705,12 @@ BEGIN
     IDS_NOPORTCHANGEPOSSIBLE 
                             "El cambio de puertos no es posible después de conectarse a clientes o mientras se sigue conectado a un servidor/Kad!\n\nPor favor reinicia eMule si cambias la configuración de puertos."
     IDS_NETWORK_INFO        "Información de Red"
-    IDS_SP_TOTALUL          "Número total de subidas"
+    IDS_SP_TOTALUL          "Subidas totales"
     IDS_SP_ULFRIENDS        "Puestos reservados de subida a amigos"
-    IDS_SP_ULSLOTSNOOVERHEAD "subida actual excl. excedente (Puestos reservados de SU solamente)"
+    IDS_SP_ULSLOTSNOOVERHEAD "Subida actual (excl. excedente)"
     IDS_ST_ACTIVEU_ZZ       "Subidas Activas"
-    IDS_ST_ULCURRENT        "Subida+Excedente"
-    IDS_ST_ULSLOTSNOOVERHEAD "Subida"
+    IDS_ST_ULCURRENT        "Actual"
+    IDS_ST_ULSLOTSNOOVERHEAD "Actual (excl. excedente)"
     IDS_ST_ULFRIEND         "Subida a amigo"
 END
 
@@ -1727,9 +1726,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MAXHALFOPENCONS     "Máx. Conexiones a medio abrir"
+    IDS_MAXHALFOPENCONS     "Máx. conexiones a medio abrir"
     IDS_WIZ_STARTWITHWINDOWS 
-                            "Ejecutar eMule al iniciar Windows. [Desactivado por defecto]"
+                            "Activa esta opción si quieres que eMule se inicie con Windows. (Desactivado por defecto)"
     IDS_KAD_WAITCBK         "Esperando respuesta Kad"
     IDS_KAD_TOOMANDYKADLKPS "Demasiadas búsquedas Kad"
     IDS_PCDS_CLIENTWAIT     "Espera de Cliente"
@@ -1803,7 +1802,7 @@ BEGIN
     IDS_AICH_WORKED         "AICH recuperó %s de %s de la parte %u de %s"
     IDS_TRICKLING           "En espera"
     IDS_SOURCECLIENT        "Fuente Cliente"
-    IDS_USERSIP             "IP Usuarios"
+    IDS_USERSIP             "IP Usuario"
     IDS_FEATURES            "Características"
     IDS_IRC_NEWNICK         "Seleccionar un alias IRC."
     IDS_IRC_NEWNICKDESC     "Debería ser una palabra que contenga menos de 20 caracteres (A-Z, 0-9). Esto puede cambiarse otra vez en Preferencias->Irc."
@@ -1821,11 +1820,11 @@ BEGIN
     IDS_LARGEICONS          "Iconos grandes"
     IDS_SMALLICONS          "Iconos pequeños"
     IDS_SHORTTAGS           "Etiquetas cortas"
-    IDS_THELOAD             "Cargar"
+    IDS_THELOAD             "Carga"
     IDS_PACKSENT            "Paquetes enviados"
     IDS_RESPONSES           "Respuestas"
     IDS_EXTRACT_META_DATA   "Extraer datos propios"
-    IDS_META_DATA_MEDIADET  "DirectShow (para todos los demás archivos de audio/video)"
+    IDS_META_DATA_MEDIADET  "DirectShow (para todos los archivos de audio/video)"
     IDS_META_DATA_ID3LIB    "Librería ID3 (solo para archivos de audio MPEG)"
 END
 
@@ -1833,10 +1832,10 @@ STRINGTABLE
 BEGIN
     IDS_COMCTRL32_DLL_TOOOLD 
                             "El archivo Windows Common Controls (COMCTL32.DLL) es demasiado antiguo!\r\n\r\neMule ha detectado que la versión de ""Windows Common Controls library (COMCTL32.DLL)"" es demasiado antigua para funcionar correctamente con eMule. Para asegurarse un funcionamiento perfecto de eMule recomendamos firmememente actualizarse a la última versión 5.8 de ""Windows Common Controls library (COMCTL32.DLL)"".\r\n\r\nDescarga e instala la actualización de ""Windows Common Controls library (COMCTL32.DLL)"" desde Microsoft (R) Download Center. ¿Quieres descargarlo ahora?"
-    IDS_ASREGEXPR           "Expresiones habituales"
-    IDS_STATIC_REGEXP       "Expresión habitual para la vista de filtros:"
+    IDS_ASREGEXPR           "Expresiones regulares"
+    IDS_STATIC_REGEXP       "Expresión regular para la vista de filtros:"
     IDS_CARE4ALL            "Evaluar todos los archivos"
-    IDS_REGEXPRESSION       "Expresión habitual"
+    IDS_REGEXPRESSION       "Expresión regular"
     IDS_SEARCHKAD           "Búsqueda Kad"
     IDS_DWL_IPFILTERFILE    "Descargando archivo de filtros IP"
     IDS_DWLIPFILTERFAILED   "Error al descargar filtros IP"
@@ -1847,6 +1846,50 @@ BEGIN
     IDS_STORENOTES          "Guardar Notas"
     IDS_NOTES               "Notas"
     IDS_KADSEARCHALREADY    "Otra búsqueda ya está en curso. Por favor inténtalo otra vez mas tarde!"
+
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WEB_SHUTDOWN        "Cerrar eMule"
+    IDS_WEB_REBOOT          "Reiniciar el sistema"
+    IDS_WEB_SHUTDOWNSYSTEM  "Apagar el sistema"
+    IDS_WEB_ADMINMENU       "Admin. Menu"
+    IDS_WEB_MAIN_CLOSE      "¿Quieres realmente cerrar eMule?"
+    IDS_WEB_MAIN_REBOOT     "¿Quieres realmente reiniciar el sistema?"
+    IDS_WEB_MAIN_SHUTDOWN   "¿Quieres realmente apagar el sistema?"
+    IDS_WEB_SHOW_UPLOAD_QUEUE_BANNED "Mostrar clientes bloqueados en cola espera"
+    IDS_WEB_SHOW_UPLOAD_QUEUE_FRIEND "Mostrar amigos en cola de espera"
+    IDS_WEB_SESSIONTIMEOUT  "Interrumpir sesión"
+    IDS_WEB_ALLOWHILEVFUNC  "Permitir salir a eMule, reiniciar y apagar"
+    IDS_SETPFSLIMIT         "Límite de Fuentes..."
+    IDS_SETPFSLIMITEXPLAINED 
+                            "Introduce el nuevo límite de fuentes para los archivo(s) seleccionados ! \n(ajustar a 0 para utilizar la configuración global)"
+    IDS_UPDATECATINCOMINGDIRS 
+                            "¿Quieres que se actualice ahora las subcarpetas incluídas en la antigua carpeta incoming?"
+    IDS_USESPEECH           "Notificación de mensaje hablado"
+    IDS_CONDTCPACCEPT       "Rechazar conexión rápida"
+    IDS_TCPIP_CONNS         "Conexiones TCP/IP"
+    IDS_ERR_DELFILE         "Error al borrar el archivo ""%s"""
+    IDS_MANUAL_FILENAMECLEANUP "¿Quieres limpiar los nombres de los archivos seleccionados?"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_CONFIGCORRUPT   "%s parece estar corrupto y se reemplazará"
+    IDS_UPLOADING           "Subiendo"
+    IDS_CANCELLED           "Cancelado"
+    IDS_PW_REMEMBERDOWNLOADED "Recordar archivos descargados"
+    IDS_PW_REMEMBERCANCELLED "Recordar archivos cancelados"
+    IDS_AVAILABLEPARTS      "Partes disponibles"
+    IDS_NOSOUND             "Sin sonido"
+    IDS_PW_RECEIVERADDRESS  "Dirección destinatario:"
+    IDS_PW_ENABLEEMAIL      "Activar notificaciones de correo-e"
+    IDS_EMULENOTIFICATION   "Notificación de eMule"
+    IDS_PW_EMAILNOTIFICATIONS "Notificaciones correo-e"
+    IDS_PW_SMTPSERVER       "Servidor SMTP:"
+    IDS_PW_SENDERADDRESS    "Dirección remitente:"
+    IDS_PW_SHOWTRANSTOOLBAR "Barra de herramientas adicional en ventana de transferencias"
 END
 
 STRINGTABLE 
@@ -1876,8 +1919,8 @@ STRINGTABLE
 BEGIN
     IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
                             "%i partes corruptas fueron importadas para A/ICH. Iniciando nuevo hash."
-    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
-                            "Otra importación ya está en proceso. Por favor espere a que haya terminado."
+    IDS_SR13_IMPORTPARTS_ERR_FILETOOSMALL 
+                            "El archivo es más pequeño que el mínimo de un bloque que el AICH pueda recuperar - no tiene sentido importarle esa información."
     IDS_SR13_IMPORTPARTS_IMPORTFINISH
                             "Importación finalizada. %i partes fueron importadas a %s."
 END
@@ -1939,8 +1982,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_NOTAV      "El RecopiladorDeErrores no ha sido encontrado en el directorio del emule. Si quiere ayudarnos a depurar nuestro mod, por favor descárguese el archivo CrashRpt.dll"
+    IDS_NICEHASHWEIGHT      "PesoNiceHash (HashSimpático)"
     IDS_UPLOAD_COMPLETED    "Completando"
-    IDS_UPLOAD_PREEMPTED    "A este chico lo colamos en la lista porque comparte mucho y bien."
+    IDS_UPLOAD_PREEMPTED    "Movimiento paquí movimiento payá..."
     IDS_UPLOAD_TOO_MANY_SLOTS "Demasiados slots"
 END
 
@@ -2095,9 +2139,6 @@ STRINGTABLE
 BEGIN
     IDS_LISTREQNODL         "Este usuario no está en la lista de espera de descarga!!!"
     IDS_LISTREQNOUL         "Este usuario no está en una lista de espera!!!"
-    IDS_CORRUPTDATASENT     "El Usuario '%s' (IP %s:%i), hash %s, usuario=%s ha sido añadido temporalmente a la lista de filtrados por mandar información corrupta"
-    IDS_ULENDCANTRANS       "%s: Sesión de subida terminada por cancelación de transferencia."
-    IDS_ULENDENDTRANS       "%s: Sesión de subida terminada por finalización de transferencia."
     IDS_LEECHERDETREM       "Leecher detectado y eliminado de la lista de espera de subida."
     IDS_LEECHERPUTBACK      "Leecher reestablecido a la lista de espera."
     IDS_TRIEDDLOTHERFILE    "%s: La sesión de subida no ha sido permitida porque el usuario intentaba bajarse un archivo diferente al que tenía asignado en la lista de espera. ID del archivo: (esperado=%s, pedido=%s)"
@@ -2106,9 +2147,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SUSPECTUSEOWNHASH   "El usuario '%s' usando el mod '%s' esta utilizando mi hash, ip %i.%i.%i.%i:%i, acciones sospechosas: %i (%i en total/%i usuarios)!"
-    IDS_SUSPECTHAsHCHANGE   "El usuario '%s' usando el mod '%s' cambio de hash, ip %i.%i.%i.%i:%i, acciones sospechosas: %i (%i en total/%i usuarios)!"
-    IDS_FINPARTNUMOFFILE    "Parte %u de '%s' finalizada"
     IDS_COMPLETESOURCES     "Fuentes Completadas"
 END
 
@@ -2178,22 +2216,12 @@ BEGIN
     IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() fallido para al menos una funcion."
     IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() fallido, err: "
     IDS_USSPINGERICMPENDERR "Error cerrando el manejo de ICMP, err: "
-    IDS_REMULREASON         "%s: Eliminando usuario de la lista de subida. Razón: %s"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_REMULSUCCESS        "Subida completada."
-    IDS_REMULHIGHERPRIO     "Subida terminada para hacer sitio para usuario mejor con más prioridad."
-    IDS_REMULMANYSLOTS      "Demasiados slots de subida abiertos."
-    IDS_ULSUCCESSFUL        "%s: Subida completada. Cantidad transferida: %s. Dif de %s: %i bytes"
-    IDS_SKTDISREASON        "Desconexión del Socket: "
-    IDS_SKTDISUNKREASON     "Desconexión del Socket. Razón desconocida."
-    IDS_IPISFILTERED        "IP filtrada."
-    IDS_CNXTIMEOUT          "Tiempo de espera de la conexión concluido."
     IDS_UPSTOPPEDLEECHER    "Sesión de subida no ha podido iniciarse. El usuario tiene pinta de ser un leecher."
     IDS_IPSTOPPEDOTHFILE    "Sesión de subida no ha podido iniciarse. El usuario intento bajarse un archivo que no era por el que estaba esperando en la lista de espera."
-    IDS_UPENDUSERCANC       "%s: Sesión de subida terminada por cancelación de transferencia. %s %s:%i"
     IDS_NEWMSGFROM          "Nuevo mensaje de '%s' (IP:%s)"
     IDS_FILTEREDFROM        "Mensaje filtrado de '%s' (IP:%s)"
     IDS_ERRORPROCESSING     "Error mientras se procesaba el paquete."
@@ -2202,8 +2230,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_REMULUSERCANCEL     "Usuario remoto cancelo transferencia."
-    IDS_REMULUSEREND        "Usuario remoto termino transferencia."
     IDS_DWLSESSIONENDED     "Sesión de descarga terminada. Usuario: %s Razón: %s"
     IDS_BANHASHCHANGED      "Usuario: %s (%s), Razón del baneo: hash de usuario ha cambiado"
     IDS_BANHASHCHANGEDT     "Usuario: %s (%s), Razón del baneo: hash de usuario ha cambiado (Encontrado en la lista de clientes rastreados)"
@@ -2263,7 +2289,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ADVANCED            "Avanzado"
-    IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE "Version-File-URL para actualizar"
     IDC_URL_FOR_UPDATING_IP2COUNTRY "File-URL para actualizar"
 END
 
@@ -2352,16 +2377,11 @@ BEGIN
     IDS_INVMODE_HOTKEY      "Seleccionar los hotkey para mostrar/esconder la ventana"
     IDS_INVMODE_MODKEY      "Keys Modificadores:"
     IDS_INVMODE_VKEY        "Key:"
-    IDS_FPU_ACTIVE          "Optimizaciones FPU activas"
-    IDS_MMX_ACTIVE          "Optimizaciones MMX activas"
-    IDS_AMD_ACTIVE          "Optimizaciones AMD activas"
-    IDS_SSE_ACTIVE          "Optimizaciones SSE activas"
-    IDS_OPTIMIZATIONS_DISABLED "Optimizaciones desactivadas"
+    IDS_DATARATEAVERAGETIME "Velocidad media de transmisión de datos (Por defecto 30s)"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_AVAILABLE_PART      "Trozo Disponible"
     IDS_LAST_ASKED          "Pedido por Ultima vez"
     IDS_DOWNL_TIME          "Tiempo de Descarga"
     IDS_KNOWN_SINCE         "Visto Hace"
@@ -2547,10 +2567,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_TW_TRANSFERS        "Transferencias"
     IDS_DL_ULDL             "Descarga/Subida"
-    IDS_TRANSDN             "Desc."
-    IDS_TRANSUP             "Sub."
 END
 
 STRINGTABLE 
@@ -2619,13 +2636,11 @@ BEGIN
     IDS_LOG_IPFILTER_INFO   "Líneas analizadas:%u  Encontrados rangos de IP:%u  Duplicados:%u  Combinados:%u"
     IDS_IPFILTER_SAVERR     "No pudo guardar el filtro de IP al archivo ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "No disponible"
-    IDS_IPFILTER_DLVERSION  "Descargando versión de archivo de filtro de IPs"
     IDS_LOG_ERRDWN          "Error en la descarga %s"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_DOWNFAKECHECKVER    "Descargando la versión de archivo de comprobador de Fakes"
     IDS_DOWNFAKECHECKFILE   "Descargando el comprobador de Fakes"
     IDS_FC_LOADED           "El comprobador de Fakes %i ha sido cargado correctamente"
     IDS_LOG_FC_LOADED       "Cargado comprobador de Fakes de ""%s"" en %ums"
@@ -2680,7 +2695,6 @@ BEGIN
     IDS_IP2COUNTRY_FLAGLOAD "Banderas Cargadas"
     IDS_IP2COUNTRY_FILELOAD "Archivo IP2Country descargado"
     IDS_IP2COUNTRY_FLAGUNLD "IP2Country descargado"
-    IDS_IP2COUNTRY_VERFILE  "Descargando versión de archivo IP2Country"
     IDS_IP2COUNTRY_DWNFILE  "Descargando archivo IP2Country"
     IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv descargado debido a actualización en proceso"
     IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv cargado despues de haberse actualizado con éxito"
@@ -2689,7 +2703,6 @@ BEGIN
     IDS_HASHING_NEWFILE     "Archivo nuevo: '%s'"
     IDS_SUQWT_LOAD          "Cargar %s"
     IDS_VERBOSE_TITLE       "Información Extra"
-    IDS_CAT_TOTAL           "Total"
     IDS_UP_LOWID            "%s LowID"
     IDS_UP_LOWID_DELAYED    "%s LowID retrasado %s"
 END
@@ -2713,6 +2726,29 @@ BEGIN
     IDS_ZZRATIO_CHECK3      "Usando el slot de amigo y velocidad de transmisión global>3KB/s"
     IDS_ZZRATIO_CHECK4      "Límite de Subida por debajo de 10KB/s"
     IDS_ZZRATIO_CHECK5      "Subida Media por debajo de 10KB/s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_OK                  "OK"
+    IDS_IGNORE              "&Ignorar"
+    IDS_RETRY               "&Reintentar"
+    IDS_HELP                "&Ayuda"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CONTINUE            "&Continuar"
+    IDS_DONOTASKAGAIN       "No volver a preguntar"
+    IDS_DONOTTELLAGAIN      "No volver a informar"
+    IDS_DONOTSHOWAGAIN      "No volver a mostrar"
+    IDS_YESTOALL            "&Sí a todo"
+    IDS_NOTOALL             "&No a todo"
+    IDS_TRYAGAIN            "&Volver a intentar"
+    IDS_REPORT              "In&forme"
+    IDS_IGNOREALL           "I&gnorar Todo"
+    IDS_SKIP                "&Omitir"
+    IDS_SKIPALL             "O&mitir Todo"
 END
 
 #endif    // Spanish (Castilian) resources
