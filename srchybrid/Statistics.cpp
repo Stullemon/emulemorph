@@ -383,7 +383,7 @@ void CStatistics::CompDownDatarateOverhead()
 		m_nDownDatarateOverhead = 1000U * (m_sumavgDDRO - m_AvarageDDRO_list.GetHead().datalen) / dwDuration;
 	} else if (m_AvarageDDRO_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDROPreviousAddedTimestamp;
-		if(dwDuration < 1000) dwDuration = 1000;
+		if(dwDuration < 400) dwDuration = 400;
 		if ((curTick - m_AvarageDDRO_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - m_AvarageDDRO_list.GetTail().timestamp;
 		m_nDownDatarateOverhead = 1000 * m_sumavgDDRO / dwDuration;
@@ -417,7 +417,7 @@ void CStatistics::CompUpDatarateOverhead()
 		m_nUpDatarateOverhead = 1000U * (m_sumavgUDRO - m_AvarageUDRO_list.GetHead().datalen) / dwDuration;
 	} else if (m_AvarageUDRO_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDROPreviousAddedTimestamp;
-		if(dwDuration < 1000) dwDuration = 1000;
+		if(dwDuration < 400) dwDuration = 400;
 		if ((curTick - m_AvarageUDRO_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - m_AvarageUDRO_list.GetTail().timestamp;
 		m_nUpDatarateOverhead = 1000U * m_sumavgUDRO / dwDuration;

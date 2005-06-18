@@ -1014,7 +1014,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 	if (curUploadSlots >= 4 &&
 		curUploadSlots == GetEffectiveUploadListCount() && //MORPH - Added by SiRoB, avoid limit when a scheduled slot is in process
         (
-         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB, 
+         curUploadSlots >= (datarate_USS/UPLOAD_CHECK_CLIENT_DR) || //MORPH - Removed by SiRoB, Keep An average datarate value for USS system
          curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
