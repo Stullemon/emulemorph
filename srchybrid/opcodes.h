@@ -103,7 +103,7 @@
 #define	UPLOAD_CLIENT_DATARATE	3072		// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
 #define	MAX_UP_CLIENTS_ALLOWED	250			// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
 #define	MIN_UP_CLIENTS_ALLOWED	2			// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
-#define MINNUMBEROFTRICKLEUPLOADS 0			//MORPH  - Added By AndCycle, ZZUL_20050212-0200
+#define MINNUMBEROFTRICKLEUPLOADS 1			//MORPH  - Added By AndCycle, ZZUL_20050212-0200
 #define DOWNLOADTIMEOUT			SEC2MS(170)
 #define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
 #define RARE_FILE				50
