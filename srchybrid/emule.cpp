@@ -455,7 +455,6 @@ BOOL CemuleApp::InitInstance()
 	CemuleDlg dlg;
 	emuledlg = &dlg;
 	m_pMainWnd = &dlg;
-	OptimizerInfo();//Commander - Added: Optimizer [ePlus]
 
 	//MORPH START - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
 	if(thePrefs.ShowFolderIcons()){
@@ -1853,37 +1852,6 @@ void CemuleApp::CreateBackwardDiagonalBrush()
 		VERIFY( m_brushBackwardDiagonal.CreateBrushIndirect(&logBrush) );
 	}
 }
-
-//Commander - Added: Optimizer [ePlus] - Start
-void CemuleApp::OptimizerInfo(void)
-{
-if (!emuledlg)
-	return;
-	AddLogLine(false,_T("********Optimizer********"));
-	USES_CONVERSION;
-	AddLogLine(false,_T("%s"),A2CT(cpu.GetExtendedProcessorName()));
-	switch (get_cpu_type())
-	{
-		case 1:
-			AddLogLine(false, GetResString(IDS_FPU_ACTIVE));
-			break;
-		case 2:
-			AddLogLine(false, GetResString(IDS_MMX_ACTIVE));
-			break;
-		case 3:
-			AddLogLine(false, GetResString(IDS_AMD_ACTIVE));
-			break;
-		case 4:
-		case 5:
-			AddLogLine(false, GetResString(IDS_SSE_ACTIVE));
-			break;
-		default:
-			AddLogLine(false, GetResString(IDS_OPTIMIZATIONS_DISABLED));
-			break;
-	}
-	AddLogLine(false,_T("********Optimizer********"));
-}
-//Commander - Added: Optimizer [ePlus] - End
 
 //MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 BOOL CemuleApp::AddUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping){

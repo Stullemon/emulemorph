@@ -2659,6 +2659,7 @@
 #define IDS_INVMODE_MODKEY              5123
 #define IDS_INVMODE_VKEY                5124
 #define IDS_FPU_ACTIVE                  5125
+#define IDS_DATARATEAVERAGETIME         5125
 #define IDS_MMX_ACTIVE                  5126
 #define IDS_AMD_ACTIVE                  5127
 #define IDS_SSE_ACTIVE                  5128
@@ -2673,7 +2674,6 @@
 #define IDS_FEEDURL                     5207
 #define IDS_FEEDNAME                    5208
 #define IDS_FEED                        5209
-#define IDS_DATARATEAVERAGETIME         5210
 #define IDS_MASSRENAME1                 5300
 #define IDS_FILENAMELEFT                5301
 #define IDS_FILENAMERIGHT               5302

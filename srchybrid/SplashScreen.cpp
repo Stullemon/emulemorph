@@ -120,30 +120,12 @@ void CSplashScreen::OnPaint()
 			font.CreateFontIndirect(&lf);
 			CFont* pOldFont = dc.SelectObject(&font);
 			CString strAppVersion(_T("eMule ") + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"));
-			dc.DrawText(strAppVersion, &rc, DT_LEFT | DT_NOPREFIX | DT_TOP);
-			//Commander - Added: OptimizeMode - Start
-			CString mode;
-			switch (get_cpu_type())
-			{
-			case 2:
-				mode += GetResString(IDS_MMX_ACTIVE);
-				break;
-			case 3:
-				mode += GetResString(IDS_AMD_ACTIVE);
-				break;
-			case 4:
-			case 5:
-				mode += GetResString(IDS_SSE_ACTIVE);
-				break;
-			}
-			
-			dc.DrawText( mode, &rc, DT_RIGHT | DT_NOPREFIX | DT_BOTTOM);
+			dc.DrawText(strAppVersion, &rc, DT_CENTER | DT_NOPREFIX | DT_TOP);
 			if (pOldFont)
 				dc.SelectObject(pOldFont);
 			dc.SetBkMode(iOMode);
 			dc.SetTextColor(oldclr);
 			font.DeleteObject();
-		   //Commander - Added: OptimizeMode - Start
 		}
 	}
 }

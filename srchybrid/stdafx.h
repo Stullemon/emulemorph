@@ -127,11 +127,3 @@ typedef	CStringArray CStringWArray;
 #define _TWINAPI(fname)	fname "W"
 
 extern "C" int __cdecl __ascii_stricmp(const char * dst, const char * src);
-
-//MORPH START - Added by SiRoB, Optimizer inspired from espania
-//#include <wchar.h>
-#include ".\Optimizer\Optimize.h" // Commander - Added: Optimizer [ePlus]
-#define memcpy(a, b, c)	memcpy_optimized(a, b, c)
-#define memset(a, b, c) memset_optimized(a, b, c)
-#define memzero(a, b) memzero_optimized(a, b)
-//MORPH END   - Added by SiRoB, Optimizer inspired from espania

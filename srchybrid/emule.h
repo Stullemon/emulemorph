@@ -18,7 +18,6 @@
 #ifndef __AFXWIN_H__
 	#error include 'stdafx.h' before including this file for PCH
 #endif
-#include ".\Optimizer\cpu_info.h" //Commander - Added: Optimizer [ePlus]
 #include "resource.h"
 #include "UPnP_IGDControlPoint.h" //MORPH - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 #include "WapServer/WapServer.h" //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
@@ -68,7 +67,7 @@ class CemuleApp : public CWinApp
 {
 public:
 	CemuleApp(LPCTSTR lpszAppName = NULL);
-	CPUInfo 		cpu; //Commander - Added: Optimizer [ePlus]	
+
 	// ZZ:UploadSpeedSense -->
 	UploadBandwidthThrottler* uploadBandwidthThrottler; 
 	LastCommonRouteFinder*    lastCommonRouteFinder; 
@@ -235,7 +234,6 @@ protected:
 	uint32 m_dwPublicIP;
 	bool m_bAutoStart;
 public:
-	void OptimizerInfo(void); // Commander - Added: Optimizer [ePlus]
 	// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 	void	AddIncomingFolderIcon();
 	void	RemoveIncomingFolderIcon();
