@@ -702,26 +702,10 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 				}
 			else
 				return item2->GetClientSoft() - item1->GetClientSoft();
-		case 2: {
-			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
-			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
-			if( (file1 != NULL) && (file2 != NULL))
-				return CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
-			else if( file1 == NULL )
-				return 1;
-			else
-				return -1;
-		}
-		case 102:{
-			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
-			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
-			if( (file1 != NULL) && (file2 != NULL))
-				return CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
-			else if( file1 == NULL )
-				return 1;
-			else
-				return -1;
-		}
+		case 2:
+			return item2->GetRequestFile()->GetFileName().CompareNoCase(item1->GetRequestFile()->GetFileName());
+		case 102: 
+			return item1->GetRequestFile()->GetFileName().CompareNoCase(item2->GetRequestFile()->GetFileName());
 		case 3:
 			return CompareUnsigned(item2->GetDownloadDatarate(), item1->GetDownloadDatarate());
 		case 103:
