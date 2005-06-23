@@ -975,7 +975,7 @@ void CUploadQueue::Process() {
 		friendDatarate = 1000U * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead());
 	}else if (avarage_tick_list.GetCount() == 1){
 		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
-		if (dwDuration < 1000) dwDuration = 1000;
+		if (dwDuration < 400) dwDuration = 400;
 		if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
 			dwDuration = curTick - avarage_tick_list.GetTail();
 		datarate = 1000U * m_avarage_dr_sum / dwDuration;
@@ -1014,8 +1014,8 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 	if (curUploadSlots >= 4 &&
 		curUploadSlots == GetEffectiveUploadListCount() && //MORPH - Added by SiRoB, avoid limit when a scheduled slot is in process
         (
-         curUploadSlots >= (datarate_USS/UPLOAD_CHECK_CLIENT_DR) || //MORPH - Removed by SiRoB, Keep An average datarate value for USS system
-         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
+         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB,
+         curUploadSlots >= ((uint32)MaxSpeed)/*1024/UPLOAD_CLIENT_DATARATE*/ ||
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
           !thePrefs.IsDynUpEnabled() &&
@@ -1239,7 +1239,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
 		if (reqfile)
 			reqfile->statistic.AddRequest();
-
+		
 		//Morph Start - added by AndCycle, SLUGFILLER: infiniteQueue
 		if(!thePrefs.IsInfiniteQueueEnabled()){
 			// cap the list
@@ -1424,7 +1424,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 				//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
 					requestedFile->UpdatePartsInfo();
 			}
-
+			
 		m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		// EastShare START - Marked by TAHO, modified SUQWT
