@@ -683,9 +683,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
     sendLocker.Lock();
 
-    lastCalledSend = ::GetTickCount(); //MORPH - Moved up
-
-	if (byConnected == ES_DISCONNECTED) {
+    if (byConnected == ES_DISCONNECTED) {
         sendLocker.Unlock();
         SocketSentBytes returnVal = { false, 0, 0 };
         return returnVal;
@@ -702,6 +700,8 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
     bool bWasLongTimeSinceSend = false;// (::GetTickCount() - lastSent) > 1000; //MORPH - Changed by SiRoB, Never Send data when onlyAllowedToSendControlPacket
+
+	lastCalledSend = ::GetTickCount();
 
     bool anErrorHasOccured = false;
     uint32 sentStandardPacketBytesThisCall = 0;
