@@ -306,36 +306,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		//MORPH START - Added by IceCream, List Requested Files
 		case MP_LIST_REQUESTED_FILES: {
 			if (cur_friend && cur_friend->GetLinkedClient())
-			{
-				CString fileList;
-				fileList += GetResString(IDS_LISTREQDL);
-				fileList += "\n--------------------------\n" ; 
-				if (theApp.downloadqueue->IsPartFile(cur_friend->GetLinkedClient()->GetRequestFile()))
-				{
-					fileList += cur_friend->GetLinkedClient()->GetRequestFile()->GetFileName(); 
-					for(POSITION pos = cur_friend->GetLinkedClient()->m_OtherRequests_list.GetHeadPosition();pos!=0;cur_friend->GetLinkedClient()->m_OtherRequests_list.GetNext(pos))
-					{
-						fileList += "\n" ; 
-						fileList += cur_friend->GetLinkedClient()->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
-					}
-					for(POSITION pos = cur_friend->GetLinkedClient()->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;cur_friend->GetLinkedClient()->m_OtherNoNeeded_list.GetNext(pos))
-					{
-						fileList += "\n" ;
-						fileList += cur_friend->GetLinkedClient()->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
-					}
-				}
-				else
-					fileList += GetResString(IDS_LISTREQNODL);
-				fileList += "\n\n\n";
-				fileList += GetResString(IDS_LISTREQUL);
-				fileList += "\n------------------------\n" ; 
-				CKnownFile* uploadfile = theApp.sharedfiles->GetFileByID(cur_friend->GetLinkedClient()->GetUploadFileID());
-				if(uploadfile)
-					fileList += uploadfile->GetFileName();
-				else
-					fileList += GetResString(IDS_LISTREQNOUL);
-				AfxMessageBox(fileList,MB_OK);
-			}
+				cur_friend->GetLinkedClient()->ShowRequestedFiles(); //Changed by SiRoB
 			break;
 		}
 		//MORPH END - Added by IceCream, List Requested Files
