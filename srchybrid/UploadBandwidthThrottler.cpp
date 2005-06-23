@@ -501,13 +501,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			if (slotCounterClass[classID]) {
 				uint64 spentBytes = 0;
 				uint64 spentOverhead = 0;
-				for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID] && ControlspentBytes < (uint64)BytesToSpend; slotCounter++) {
+				for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID] && ControlspentBytes > 0 && ControlspentBytes < (uint64)BytesToSpend; slotCounter++) {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 					if(socket != NULL) {
 						Socket_stat* stat = NULL;
 						if (m_stat_list.Lookup(socket, stat)) {
 							uint32 neededBytes = socket->GetNeededBytes(1000 > minFragSize);
-							if (neededBytes > 0) {
+							if (neededBytes > 0 && GetTickCount()-socket->GetLastCalledSend() > 1000) {
 								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(minFragSize, minFragSize);
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 								if (lastSpentBytes) {
