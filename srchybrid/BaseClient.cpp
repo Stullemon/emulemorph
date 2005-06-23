@@ -235,6 +235,7 @@ void CUpDownClient::Init()
 	m_fNoViewSharedFiles = 0;
 	m_bMultiPacket = 0;
 	md4clr(requpfileid);
+	requpfile = NULL; //MORPH - Added by SiRoB, Optimization m_prequpfile
 	m_nTotalUDPPackets = 0;
 	m_nFailedUDPPackets = 0;
 	m_nUrlStartPos = (UINT)-1;
@@ -470,9 +471,11 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
 			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")))||
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
-			StrStrI(m_strModVersion,_T("ACAT")) ||
+			//StrStrI(m_strModVersion,_T("ACAT")) || //Removed
+			StrStrI(m_strModVersion,_T("sivka v12e8")) && m_nClientVersion != MAKE_CLIENT_VERSION(0, 42, 4) || // added - Stulle
 			StrStrI(m_strModVersion,_T("!FREEANGEL!")) ||
 			StrStrI(m_strModVersion,_T("          ")) ||
+			StrStrI(m_strModVersion,_T("\0")) ||
 			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,_T("edonkey"))||
 			((GetVersion()>589) && (GetSourceExchangeVersion()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
 			)
