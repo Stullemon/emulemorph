@@ -66,6 +66,7 @@ public:
 	void	DeletePartFileInstances() const;
 	bool	IsUnsharedFile(const uchar* auFileHash) const;
 	void	UpdatePartsInfo(); //MORPH - Added by SiRoB, POWERSHARE Limit
+	DWORD	GetLastTimeFileMapUpdated() { return m_dwFile_map_updated; }; //MORPH - Added by SiRoB, Optimization requpfile
 
 	CMutex	m_mutWriteList;
 private:
@@ -78,6 +79,7 @@ private:
 	// SLUGFILLER: SafeHash
 
 	CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> m_Files_map;
+	DWORD m_dwFile_map_updated; //MORPH - Added by SiRoB, Optimization requpfile
 	CMap<CSKey,const CSKey&, bool, bool>			 m_UnsharedFiles_map;
 	CPublishKeywordList* m_keywords;
 	CTypedPtrList<CPtrList, UnknownFile_Struct*> waitingforhash_list;

@@ -307,6 +307,7 @@ CSharedFileList::CSharedFileList(CServerConnect* in_server)
 	server = in_server;
 	output = 0;
 	m_Files_map.InitHashTable(1031);
+	m_dwFile_map_updated = 0; //MOPRH - Added by SiRoB, Optimization requpfile
 	m_keywords = new CPublishKeywordList;
 	m_lastPublishED2K = 0;
 	m_lastPublishED2KFlag = true;
@@ -361,6 +362,7 @@ void CSharedFileList::FindSharedFiles()
 			m_UnsharedFiles_map.SetAt(CSKey(cur_file->GetFileHash()), true);
 			listlock.Lock();
 			m_Files_map.RemoveKey(key);
+			m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
 			listlock.Unlock();
 		}
 
@@ -599,6 +601,7 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 	CSingleLock listlock(&m_mutWriteList);
 	listlock.Lock();	
 	m_Files_map.SetAt(key, pFile);
+	m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
 	listlock.Unlock();
 	m_keywords->AddKeywords(pFile);
 
@@ -641,6 +644,7 @@ void CSharedFileList::RemoveFile(CKnownFile* pFile)
 	CSingleLock listlock(&m_mutWriteList);
 	listlock.Lock();
 	m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
+	m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
 	listlock.Unlock();
 	m_keywords->RemoveKeywords(pFile);
 

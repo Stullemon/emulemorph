@@ -875,7 +875,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
-
+			
 			if( (file1 != NULL) && (file2 != NULL)){
 
 				//Morph - modified by AndCycle, definitely a correct compare to show queue

@@ -89,7 +89,11 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
     }
 
 	// wistily: UpStatusFix
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	*/
+	CKnownFile* currequpfile = CheckAndGetReqUpFile();
 	uint32 filesize;
 	if (currequpfile)
 		filesize=currequpfile->GetFileSize();
@@ -210,7 +214,11 @@ double CUpDownClient::GetCombinedFilePrioAndCredit() {
 	//Morph Start - added by AndCycle, Equal Chance For Each File
 	if (thePrefs.IsEqualChanceEnable())
 	{
+		//MORPH START - Changed by SiRoB, Optimization requpfile
+		/*
 		CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+		*/
+		CKnownFile* currequpfile = CheckAndGetReqUpFile();
 		if(currequpfile)
 			return currequpfile->statistic.GetEqualChanceValue();
 	}
@@ -223,7 +231,11 @@ double CUpDownClient::GetCombinedFilePrioAndCredit() {
 * Gets the file multiplier for the file this client has requested.
 */
 int CUpDownClient::GetFilePrioAsNumber() const {
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	*/
+	CKnownFile* currequpfile = CheckAndGetReqUpFile();
 	if(!currequpfile)
 		return 0;
 
@@ -295,7 +307,11 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		ASSERT ( IsKindOf(RUNTIME_CLASS(CUrlClient)) );
 		return 0;
 	}
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	*/
+	CKnownFile* currequpfile = CheckAndGetReqUpFile();
 	if(!currequpfile)
 		return 0;
 	
@@ -380,7 +396,11 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 //Morph Start - added by AndCycle, Equal Chance For Each File
 double CUpDownClient::GetEqualChanceValue() const
 {
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
+	*/
+	CKnownFile* currentReqFile = CheckAndGetReqUpFile();
 	if(currentReqFile != NULL){
 		return currentReqFile->statistic.GetEqualChanceValue();
 	}
@@ -391,7 +411,11 @@ double CUpDownClient::GetEqualChanceValue() const
 //Morph Start - added by AndCycle, Pay Back First
 //Comment : becarefull when changing this function don't forget to change IsPBForPS() 
 bool CUpDownClient::IsMoreUpThanDown() const{
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
+	*/
+	CKnownFile* currentReqFile = CheckAndGetReqUpFile();
 	return currentReqFile && currentReqFile->IsPartFile()==false && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure();
 }
 //Morph End - added by AndCycle, Pay Back First
@@ -413,7 +437,12 @@ bool CUpDownClient::IsPBForPS() const
 {
 	//replacement for return (IsMoreUpThanDown() || GetPowerShared());
 	//<--Commun to both call
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
+	*/
+	CKnownFile* currentReqFile = CheckAndGetReqUpFile();
+	//MORPH - Changed by SiRoB, Optimization requpfile
 	if (currentReqFile == NULL)
 		return false;
 	//-->Commun to both call
@@ -431,7 +460,12 @@ bool CUpDownClient::IsPBForPS() const
 */
 bool CUpDownClient::GetPowerShared() const {
 //Comment : becarefull when changing this function don't forget to change IsPBForPS() 
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
+	*/
+	CKnownFile* currentReqFile = CheckAndGetReqUpFile();
+	//MORPH - Changed by SiRoB, Optimization requpfile
 	return currentReqFile && currentReqFile->GetPowerShared() && IsSecure();
 }
 //MORPH END - Added by Yun.SF3, ZZ Upload System
@@ -906,6 +940,11 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 	}
 	else
 		md4clr(requpfileid);
+
+	//MORPH START - Added by SiRoB, Optimization requpfile
+	requpfile = newreqfile;
+	requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
+	//MORPH END   - Added by SiRoB, Optimization requpfile
 
 	if (oldreqfile)
 		oldreqfile->RemoveUploadingClient(this);
@@ -1425,3 +1464,12 @@ void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUp
 	}
 }
 //MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
+//MORPH START - Adde by SiRoB, Optimization requpfile
+CKnownFile* CUpDownClient::CheckAndGetReqUpFile() const {
+	if (requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
+		return theApp.sharedfiles->GetFileByID(requpfileid);
+		//requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
+	}
+	return requpfile;
+}
+//MORPH END   - Adde by SiRoB, Optimization requpfile

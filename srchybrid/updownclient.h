@@ -372,6 +372,9 @@ public:
 	void			SendHashsetPacket(const uchar* fileid);
 	const uchar*	GetUploadFileID() const							{ return requpfileid; }
 	void			SetUploadFileID(CKnownFile* newreqfile);
+	//MORPH START - Added by SiRoB, Optimization requpfile
+	CKnownFile*		CheckAndGetReqUpFile() const;
+	//MORPH END   - Added by SiRoB, Optimization requpfile
 	uint32			SendBlockData();
 	void			ClearUploadBlockRequests();
 	void			SendRankingInfo();
@@ -949,7 +952,7 @@ protected:
 	////////////////////////////////////////////////////////////////////////
 	// Upload
 	//
-    int	GetFilePrioAsNumber() const;
+	int	GetFilePrioAsNumber() const;
 
 	uint32		m_nTransferredUp;
 	uint32		m_dwUploadTime;
@@ -966,6 +969,10 @@ protected:
 	uint16		m_nUpPartCount;
 	uint16		m_nUpCompleteSourcesCount;
 	uchar		requpfileid[16];
+	//MORPH START - Added by SiRoB, Optimization m_prequpfile
+	CKnownFile* requpfile;
+	DWORD		requpfileid_lasttimeupdated;
+	//MORPH END   - Added by SiRoB, Optimization m_prequpfile
     uint32      m_slotNumber;
 	uint32		m_classID; //MORPH - Added by SiRoB, UPload Splitting Class
 
