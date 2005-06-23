@@ -557,8 +557,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							}
 						}
 						sint64 curClassByteToSpend = realBytesToSpendClass[classID] / 1000;
-						if (BytesToSpend > curClassByteToSpend)
+						if (BytesToSpend > curClassByteToSpend)	{
 							BytesToSpend = curClassByteToSpend;
+							needmoreslot = false;
+						}
+							
 					}
 				}
 				for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID]; slotCounter++) {
