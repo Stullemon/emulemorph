@@ -127,9 +127,13 @@ bool SR13_ImportParts(CPartFile* partfile, CString strFilePath){
 			continue;
 		}
 
-		f.Seek(part*PARTSIZE, CFile::begin);
-		partSize=f.Read(partData, PARTSIZE);
-
+		try {
+			f.Seek(part*PARTSIZE, CFile::begin);
+            partSize=f.Read(partData, PARTSIZE);
+		} catch (...) {
+			LogWarning(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD), part);
+			continue;
+		}
 		if(partSize==0)
 			break;
 
