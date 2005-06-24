@@ -131,7 +131,10 @@ private:
 	CList<TransferredData> avarage_dr_USS_list; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	CList<uint64> avarage_friend_dr_list;
 	CList<DWORD,DWORD> avarage_tick_list;
+	DWORD	avarage_tick_listLastRemovedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	DWORD	avarage_tick_listPreviousAddedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
+	DWORD	avarage_dr_USS_listLastRemovedTimestamp;  //MORPH - Added by SiRoB, Keep An average datarate value for USS system
+	DWORD	avarage_dr_USS_listPreviousAddedTimestamp;  //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	CList<int,int> activeClients_list;
 	CList<DWORD,DWORD> activeClients_tick_list;
 	uint32	datarate;   //datarate sent to network (including friends)

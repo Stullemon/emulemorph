@@ -2649,8 +2649,8 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
 
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
-	ini.WriteInt(_T("DownloadDataRateAverageTime"),max(1,m_iDownloadDataRateAverageTime),_T("eMule"));
-	ini.WriteInt(_T("UPloadDataRateAverageTime"),max(1,m_iUploadDataRateAverageTime),_T("eMule"));
+	ini.WriteInt(_T("DownloadDataRateAverageTime"),max(1,m_iDownloadDataRateAverageTime/1000),_T("eMule"));
+	ini.WriteInt(_T("UPloadDataRateAverageTime"),max(1,m_iUploadDataRateAverageTime/1000),_T("eMule"));
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -3273,8 +3273,8 @@ void CPreferences::LoadPreferences()
 	//EastShare - added by AndCycle, IP to Country
 	
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
-	m_iDownloadDataRateAverageTime = max(1, (uint8)ini.GetInt(_T("DownloadDataRateAverageTime"),30));
-	m_iUploadDataRateAverageTime = max(1, (uint8)ini.GetInt(_T("UploadDataRateAverageTime"),30));
+	m_iDownloadDataRateAverageTime = 1000*max(1, (uint8)ini.GetInt(_T("DownloadDataRateAverageTime"),30));
+	m_iUploadDataRateAverageTime = 1000*max(1, (uint8)ini.GetInt(_T("UploadDataRateAverageTime"),30));
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class

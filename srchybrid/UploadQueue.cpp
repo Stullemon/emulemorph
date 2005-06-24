@@ -919,7 +919,8 @@ void CUploadQueue::Process() {
 	if (sentBytes>0) {
     	if (avarage_tick_list.GetCount() > 0)
 			avarage_tick_listPreviousAddedTimestamp = avarage_tick_list.GetTail();
-
+		if (avarage_dr_USS_list.GetCount() > 0)
+			avarage_dr_USS_listPreviousAddedTimestamp = avarage_dr_USS_list.GetTail().timestamp;
     	// Save used bandwidth for speed calculations
 		avarage_dr_list.AddTail(sentBytes);
 		m_avarage_dr_sum += sentBytes;
@@ -942,40 +943,42 @@ void CUploadQueue::Process() {
 		//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	}
 	//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
-	while(avarage_dr_USS_list.GetCount() > 50) //arround 5 seconds
+	while(avarage_dr_USS_list.GetCount() > 1 && (avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_list.GetHead().timestamp) > 5000){
+		avarage_dr_USS_listLastRemovedTimestamp = avarage_dr_USS_list.GetHead().timestamp;
 		m_avarage_dr_USS_sum -= avarage_dr_USS_list.RemoveHead().datalen;
+	}
 
 	if (avarage_dr_USS_list.GetCount() > 1) {
-		DWORD dwDuration = avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_list.GetHead().timestamp;
-		if (dwDuration < 2500) dwDuration = 2500;
-		DWORD dwAvgTickDuration = dwDuration / (avarage_dr_USS_list.GetCount() - 1);
+		DWORD dwDuration = avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_listLastRemovedTimestamp;
+		if (dwDuration < 1000) dwDuration = 1000;
+		DWORD dwAvgTickDuration = dwDuration / avarage_dr_USS_list.GetCount();
 		if ((curTick - avarage_dr_USS_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_dr_USS_list.GetTail().timestamp - dwAvgTickDuration;
-		datarate_USS = 1000U * (m_avarage_dr_USS_sum-avarage_dr_USS_list.GetHead().datalen) / dwDuration;
+		datarate_USS = 1000U * m_avarage_dr_USS_sum / dwDuration;
 	}
 	//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	
 	// don't save more than MAXAVERAGETIMEUPLOAD secs of data
-	while(avarage_tick_list.GetCount() > MAXAVERAGETIMEUPLOAD<<3){
+	while(avarage_tick_list.GetCount() > 1 && (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
 		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 		m_avarage_overhead_dr_sum -= avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		avarage_friend_dr_list.RemoveHead();
-		avarage_tick_list.RemoveHead();
+		avarage_tick_listLastRemovedTimestamp = avarage_tick_list.RemoveHead();
 	}
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
 	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
 	if (avarage_tick_list.GetCount() > 1){
-		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
-		if (dwDuration < 400) dwDuration = 400;
-		DWORD dwAvgTickDuration = dwDuration / (avarage_tick_list.GetCount() - 1);
+		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listLastRemovedTimestamp;
+		if (dwDuration < 1000) dwDuration = 1000;
+		DWORD dwAvgTickDuration = dwDuration / avarage_tick_list.GetCount();
 		if ((curTick - avarage_tick_list.GetTail()) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_tick_list.GetTail() - dwAvgTickDuration;
-		datarate = 1000U * (m_avarage_dr_sum-avarage_dr_list.GetHead()) / dwDuration;
-		datarateoverhead = 1000U * (m_avarage_overhead_dr_sum-avarage_overhead_dr_list.GetHead()) / dwDuration;
+		datarate = 1000U * m_avarage_dr_sum / dwDuration;
+		datarateoverhead = 1000U * m_avarage_overhead_dr_sum / dwDuration;
 		friendDatarate = 1000U * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead());
 	}else if (avarage_tick_list.GetCount() == 1){
 		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
-		if (dwDuration < 400) dwDuration = 400;
+		if (dwDuration < 1000) dwDuration = 1000;
 		if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
 			dwDuration = curTick - avarage_tick_list.GetTail();
 		datarate = 1000U * m_avarage_dr_sum / dwDuration;
@@ -1239,7 +1242,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
 		if (reqfile)
 			reqfile->statistic.AddRequest();
-		
+
 		//Morph Start - added by AndCycle, SLUGFILLER: infiniteQueue
 		if(!thePrefs.IsInfiniteQueueEnabled()){
 			// cap the list
@@ -1424,7 +1427,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 				//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
 					requestedFile->UpdatePartsInfo();
 			}
-			
+
 		m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		// EastShare START - Marked by TAHO, modified SUQWT

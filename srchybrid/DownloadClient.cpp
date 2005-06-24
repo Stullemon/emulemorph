@@ -961,7 +961,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		}
 		m_nDownloadState = nNewState;
 		if( GetDownloadState() == DS_DOWNLOADING ){
-			m_AvarageDDRPreviousAddedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+			m_AvarageDDRPreviousAddedTimestamp = m_AvarageDDR_ListLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 			if ( IsEmuleClient() )
 				SetRemoteQueueFull(false);
 			SetRemoteQueueRank(0);
@@ -1495,19 +1495,20 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 		m_nDownDataRateMS = 0;
     }
 
-	while (m_AvarageDDR_list.GetCount() > MAXAVERAGETIMEDOWNLOAD<<3)
+	while (m_AvarageDDR_list.GetCount() > 1 && (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD) {
+		m_AvarageDDR_ListLastRemovedTimestamp = m_AvarageDDR_list.GetHead().timestamp;
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
-
+	}
 	if (m_AvarageDDR_list.GetCount() > 1) {
-		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
-		if (dwDuration < 400) dwDuration = 400;
-		DWORD dwAvgTickDuration = dwDuration / (m_AvarageDDR_list.GetCount() - 1);
+		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_ListLastRemovedTimestamp;
+		if (dwDuration < 1000) dwDuration = 1000;
+		DWORD dwAvgTickDuration = dwDuration / m_AvarageDDR_list.GetCount();
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += cur_tick - m_AvarageDDR_list.GetTail().timestamp - dwAvgTickDuration;
-		m_nDownDatarate = 1000U * (m_nSumForAvgDownDataRate-m_AvarageDDR_list.GetHead().datalen) / dwDuration;
+		m_nDownDatarate = 1000U * m_nSumForAvgDownDataRate / dwDuration;
 	} else if (m_AvarageDDR_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp;
-		if (dwDuration < 400) dwDuration = 400;
+		if (dwDuration < 1000) dwDuration = 1000;
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = cur_tick - m_AvarageDDR_list.GetTail().timestamp;
 		m_nDownDatarate = 1000U * m_nSumForAvgDownDataRate / dwDuration;

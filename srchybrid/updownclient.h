@@ -969,10 +969,10 @@ protected:
 	uint16		m_nUpPartCount;
 	uint16		m_nUpCompleteSourcesCount;
 	uchar		requpfileid[16];
-	//MORPH START - Added by SiRoB, Optimization m_prequpfile
+	//MORPH START - Added by SiRoB, Optimization requpfile
 	CKnownFile* requpfile;
 	DWORD		requpfileid_lasttimeupdated;
-	//MORPH END   - Added by SiRoB, Optimization m_prequpfile
+	//MORPH END   - Added by SiRoB, Optimization requpfile
     uint32      m_slotNumber;
 	uint32		m_classID; //MORPH - Added by SiRoB, UPload Splitting Class
 
@@ -1028,6 +1028,7 @@ protected:
 	uint32		m_nUpDatarate;
 	uint32		m_nSumForAvgUpDataRate;
 	CList<TransferredData> m_AvarageUDR_list;
+	DWORD		m_AvarageUDRLastRemovedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	DWORD		m_AvarageUDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	//////////////////////////////////////////////////////////
 	// Download data rate computation
@@ -1038,6 +1039,7 @@ protected:
 	uint32		m_nDownDataRateMS;
 	uint32		m_nSumForAvgDownDataRate;
 	CList<TransferredData> m_AvarageDDR_list;
+	uint32		m_AvarageDDR_ListLastRemovedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	uint32		m_AvarageDDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	
 	//////////////////////////////////////////////////////////

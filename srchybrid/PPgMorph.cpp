@@ -419,8 +419,8 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableDownloadInBold = thePrefs.m_bShowActiveDownloadsBold; //MORPH - Added by SiRoB, show download in Bold
 	m_bShowClientPercentage = thePrefs.m_bShowClientPercentage;
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
-	m_iDownloadDataRateAverageTime = thePrefs.m_iDownloadDataRateAverageTime;
-	m_iUploadDataRateAverageTime = thePrefs.m_iUploadDataRateAverageTime;
+	m_iDownloadDataRateAverageTime = thePrefs.m_iDownloadDataRateAverageTime/1000;
+	m_iUploadDataRateAverageTime = thePrefs.m_iUploadDataRateAverageTime/1000;
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	m_bEnableAntiLeecher = thePrefs.enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
@@ -523,10 +523,10 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bShowClientPercentage = m_bShowClientPercentage;
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	bool updateLegend = false;
-	updateLegend = thePrefs.m_iDownloadDataRateAverageTime != m_iDownloadDataRateAverageTime;
-	thePrefs.m_iDownloadDataRateAverageTime = max(1, m_iDownloadDataRateAverageTime);
-	updateLegend |= thePrefs.m_iUploadDataRateAverageTime != m_iUploadDataRateAverageTime;
-	thePrefs.m_iUploadDataRateAverageTime = max(1, m_iUploadDataRateAverageTime);
+	updateLegend = thePrefs.m_iDownloadDataRateAverageTime/1000 != m_iDownloadDataRateAverageTime;
+	thePrefs.m_iDownloadDataRateAverageTime = 1000*max(1, m_iDownloadDataRateAverageTime);
+	updateLegend |= thePrefs.m_iUploadDataRateAverageTime/1000 != m_iUploadDataRateAverageTime;
+	thePrefs.m_iUploadDataRateAverageTime = 1000*max(1, m_iUploadDataRateAverageTime);
 	if (updateLegend)
 		theApp.emuledlg->statisticswnd->RepaintMeters();
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
