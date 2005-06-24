@@ -1,4 +1,23 @@
 --------------------------------------
+Changelog for eMule 0.46a MorphXT v7.x
+--------------------------------------
+FIXED  : Possible crash when using HideOS or Share Only The Need (same client request different file) [SiRoB]
+FIXED  : Crash-fix on close using systray by Xman1 [SiRoB]
+FIXED  : USC: Higher class where not properly caped [SiRoB]
+FIXED  : ImportPart: avoid crash when importing part file stored on bad sector [SiRoB]
+FIXED  : Datarate Management: display properly the average datarate when we use 1s setting [SiRoB]
+
+ADDED  : requpfile Optimization (for crazy user sharing many files :), reduce CPU usage on zz upload system based mod) [SiRoB]
+
+CHANGED: USS: changed a bit to avoid perturbation [SiRoB]
+CHANGED: Datarate Management: reviewed a bit the way to keep sample [SiRoB]
+CHANGED: Updated bad MODSTRING with fake sivka version [SiRoB]
+CHANGED: Updated bad MODSTRING with null char [SiRoB]
+CHANGED: USC: reviewved to avoid trickle slot to timeout [SiRoB]
+
+REMOVED: Removed ACAT bad MODSTRING [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.46a MorphXT v7.0
 --------------------------------------
 MERGED : Ported to 0.46a version [SiRoB]
