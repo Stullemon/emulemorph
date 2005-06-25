@@ -410,7 +410,7 @@ void CStatistics::CompUpDatarateOverhead()
 	}
 
 	while (m_AvarageUDRO_list.GetCount() > 1 && (m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD) {
-		m_AvarageUDRO_listLastRemovedTimestamp = m_AvarageUDRO_list.GetHead().datalen;
+		m_AvarageUDRO_listLastRemovedTimestamp = m_AvarageUDRO_list.GetHead().timestamp;
 		m_sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
 	}
 
@@ -423,7 +423,7 @@ void CStatistics::CompUpDatarateOverhead()
 		m_nUpDatarateOverhead = 1000U * m_sumavgUDRO / dwDuration;
 	} else if (m_AvarageUDRO_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDROPreviousAddedTimestamp;
-		if(dwDuration < 400) dwDuration = 400;
+		if(dwDuration < 1000) dwDuration = 1000;
 		if ((curTick - m_AvarageUDRO_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - m_AvarageUDRO_list.GetTail().timestamp;
 		m_nUpDatarateOverhead = 1000U * m_sumavgUDRO / dwDuration;
