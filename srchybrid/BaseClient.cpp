@@ -235,7 +235,7 @@ void CUpDownClient::Init()
 	m_fNoViewSharedFiles = 0;
 	m_bMultiPacket = 0;
 	md4clr(requpfileid);
-	requpfile = NULL; //MORPH - Added by SiRoB, Optimization m_prequpfile
+	requpfile = NULL; //MORPH - Added by SiRoB, Optimization requpfile
 	m_nTotalUDPPackets = 0;
 	m_nFailedUDPPackets = 0;
 	m_nUrlStartPos = (UINT)-1;
