@@ -421,6 +421,7 @@ void CMiniMule::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 	TRACE(_T("%hs: %s\n"), __FUNCTION__, pszUrl);
 	// If the HTML file contains 'OnLoad' scripts, the HTML DOM is fully accessible 
 	// only after 'DocumentComplete', but not after 'OnNavigateComplete'
+	m_spHtmlDoc = NULL;
 	CDHtmlDialog::OnDocumentComplete(pDisp, pszUrl);
 
 	if (m_bResolveImages)
