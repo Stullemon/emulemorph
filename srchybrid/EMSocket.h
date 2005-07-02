@@ -73,7 +73,7 @@ public:
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
 
     uint32	GetNeededBytes(bool lowspeed);
-	bool	IsBusy() { return m_bBusy; }; //MORPH
+	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Upload Splitting Class
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -137,6 +137,10 @@ private:
 	uint32	lastFinishedStandard;
     uint32 m_actualPayloadSize;
     uint32 m_actualPayloadSizeSent;
-    bool m_bBusy;
+    //MORPH - Changed by SiRoB, Upload Splitting Class
+	/*
+	bool m_bBusy;
+	*/
+	DWORD m_dwBusy;
     bool m_hasSent;
 };

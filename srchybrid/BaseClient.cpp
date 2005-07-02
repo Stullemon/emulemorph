@@ -3163,8 +3163,8 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 		strState = _T("Via Proxy");
 	// MORPH START - Added by Commander, WebCache 1.2e
 
-	if( socket &&  socket->IsBusy())
-		strState += _T(" (Busy)");
+	if( socket &&  socket->GetBusyTimeSince())
+		strState.AppendFormat(_T(" (Busy: %s)"),CastSecondsToHM((GetTickCount()-socket->GetBusyTimeSince())/1000));
 	
 	return strState;
 }

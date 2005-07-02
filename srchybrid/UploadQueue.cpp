@@ -97,7 +97,7 @@ CUploadQueue::CUploadQueue()
 	/*
 	m_lastCalculatedDataRateTick = 0;
 	*/
-	avarage_tick_listPreviousAddedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+	avarage_tick_listLastRemovedTimestamp = avarage_dr_USS_listLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 
 	m_avarage_dr_sum = 0;
 	m_avarage_dr_USS_sum = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system

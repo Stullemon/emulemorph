@@ -131,7 +131,11 @@ CEMSocket::CEMSocket(void){
     m_actualPayloadSize = 0;
     m_actualPayloadSizeSent = 0;
 
-    m_bBusy = false;
+    //MORPH - Changed by SiRoB, Upload Splitting Class
+	/*
+	m_bBusy = false;
+	*/
+	m_dwBusy = 0;
     m_hasSent = false;
 
     //int val = 0;
@@ -614,7 +618,11 @@ void CEMSocket::OnSend(int nErrorCode){
 
     sendLocker.Lock();
 
-    m_bBusy = false;
+    //MORPH - Changed by SiRoB, Upload Splitting Class
+	/*
+	m_bBusy = false;
+	*/
+	m_dwBusy = 0;
 
     // stopped sending here.
     //StoppedSendSoUpdateStats();
@@ -683,11 +691,15 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
     sendLocker.Lock();
 
+	lastCalledSend = ::GetTickCount(); //MORPH - Added by SiRoB, Upload Splitting Class
+
     if (byConnected == ES_DISCONNECTED) {
         sendLocker.Unlock();
         SocketSentBytes returnVal = { false, 0, 0 };
         return returnVal;
-    } else if (m_bBusy /*&& onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
+    //MORPH - Changed by SiRoB, Upload Splitting Class
+	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
+	} else if (m_dwBusy /*&& onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
         sendLocker.Unlock();
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
@@ -701,7 +713,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
     bool bWasLongTimeSinceSend = false;// (::GetTickCount() - lastSent) > 1000; //MORPH - Changed by SiRoB, Never Send data when onlyAllowedToSendControlPacket
 
-	lastCalledSend = ::GetTickCount();
+	//lastCalledSend = ::GetTickCount(); //MORPH - Moved by SiRoB, Upload Splitting Class
 
     bool anErrorHasOccured = false;
     uint32 sentStandardPacketBytesThisCall = 0;
@@ -787,7 +799,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 		    if (result == (uint32)SOCKET_ERROR){
 			    uint32 error = GetLastError();
 			    if (error == WSAEWOULDBLOCK){
-                    m_bBusy = true;
+                    //MORPH - Changed by SiRoB, Upload Splitting Class
+					/*
+					m_bBusy = true;
+					*/
+					m_dwBusy = GetTickCount();
 
                     //m_wasBlocked = true;
                     sendLocker.Unlock();
@@ -801,7 +817,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                 }
             } else {
                 // we managed to send some bytes. Perform bookkeeping.
-                m_bBusy = false;
+                //MORPH - Changed by SiRoB, Upload Splitting Class
+				/*
+				m_bBusy = false;
+				*/
+				m_dwBusy = 0;
                 m_hasSent = true;
 
                 sent += result;
