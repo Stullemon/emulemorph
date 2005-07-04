@@ -151,6 +151,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
 			cur_socket_stat = new Socket_stat;
 			m_stat_list.SetAt(socket,cur_socket_stat);
 			cur_socket_stat->realBytesToSpend = 1000;
+			cur_socket_stat->BusyLink = false;
 		}
 		cur_socket_stat->classID = classID;
 		if (classID==SCHED_CLASS) {
@@ -586,7 +587,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (stat->realBytesToSpend > 999) {
 								if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
 									uint32 BytesToSpendTemp = min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)spentBytes);
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, doubleSendSize);
+									stat->BusyLink = socket->GetBusyTimeSince() > 0;
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, (stat->BusyLink)?minFragSize:doubleSendSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
@@ -598,9 +600,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										}
 										spentBytes += lastSpentBytes;
 										spentOverhead += socketSentBytes.sentBytesControlPackets;
-										if (stat->realBytesToSpend > 999)
+									} else if (stat->realBytesToSpend > 999)
 											stat->realBytesToSpend = 999;
-									}
 								}
 							}
 						}
