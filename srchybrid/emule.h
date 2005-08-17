@@ -19,6 +19,7 @@
 	#error include 'stdafx.h' before including this file for PCH
 #endif
 #include "resource.h"
+#include "ReadWriteLock.h"	// SLUGFILLER: SafeHash
 #include "UPnP_IGDControlPoint.h" //MORPH - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 #include "WapServer/WapServer.h" //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
