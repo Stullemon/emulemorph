@@ -1,9 +1,26 @@
 --------------------------------------
-Changelog for eMule 0.46a MorphXT v7.x
+Changelog for eMule 0.46c MorphXT v7.x
+--------------------------------------
+MERGED : Ported to 0.46c version [SiRoB]
+
+FIXED  : Properly display the upload overhead [SiRoB]
+FIXED  : May i found the responsible for rare crash arround resume next file [SiRoB]
+
+ADDED  : Serveral const optimization [SiRoB]
+
+CHANGED: USS: use the official one now [SiRoB]
+CHANGED: Updated bad MODSTRING with the fucking ita mod [SiRoB]
+CHANGED: Updated MultiSort from SlugFiller mod [SiRoB]
+CHANGED: Updated SafeHash from SlugFiller mod [SiRoB]
+
+REMOVED: Updated bad MODSTRING with null char [SiRoB]
+
+--------------------------------------
+Changelog for eMule 0.46a MorphXT v7.1
 --------------------------------------
 FIXED  : Possible crash when using HideOS or Share Only The Need (same client request different file) [SiRoB]
 FIXED  : Crash-fix on close using systray by Xman1 [SiRoB]
-FIXED  : USC: Higher class where not properly caped [SiRoB]
+FIXED  : USC: Higher class where not properly capped [SiRoB]
 FIXED  : ImportPart: avoid crash when importing part file stored on bad sector [SiRoB]
 FIXED  : Datarate Management: display properly the average datarate when we use 1s setting [SiRoB]
 
