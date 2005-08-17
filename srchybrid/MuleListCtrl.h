@@ -193,6 +193,23 @@ private:
 			m_Params.SetAt(pos, lParam = CListCtrl::GetItemData(iPos));
 		return lParam;
 	}
+	// SLUGFILLER: multiSort
+	int MultiSortProc(LPARAM lParam1, LPARAM lParam2) {
+		for (POSITION pos = m_liSortHistory.GetHeadPosition(); pos != NULL; ) {
+			// Use sort history for layered sorting
+			int dwParamSort = m_liSortHistory.GetNext(pos);
+
+			int ret = m_SortProc(lParam1, lParam2, dwParamSort);
+			if (ret)
+				return ret;
+		}
+
+		return 0;	// Failed to sort
+	}
+	static int CALLBACK MultiSortCallback(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort) {
+		return ((CMuleListCtrl*)lParamSort)->MultiSortProc(lParam1, lParam2);
+	}
+	// SLUGFILLER: multiSort
 };
 
 void GetContextMenuPosition(CListCtrl& lv, CPoint& point);

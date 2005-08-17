@@ -763,9 +763,9 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 		case 108:
 			{   
 				if (!item2->Credits()) 
-					return 1; 
+					iResult=1; 
 				else if (!item1->Credits())   
-					return -1;  
+					iResult=-1;  
 	
 				float r1=item1->credits->GetScoreRatio(item1->GetIP());   
 				float r2=item2->credits->GetScoreRatio(item2->GetIP()); 
@@ -841,13 +841,15 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			iResult=0;
 			break;
 	}
+	// SLUGFILLER: multiSort remove - handled in parent class
+	/*
 	int dwNextSort;
 	//call secondary sortorder, if this one results in equal
 	//(Note: yes I know this call is evil OO wise, but better than changing a lot more code, while we have only one instance anyway - might be fixed later)
 	if (iResult == 0 && (dwNextSort = theApp.emuledlg->transferwnd->downloadclientsctrl.GetNextSortOrder(lParamSort)) != (-1)){
 		iResult= SortProc(lParam1, lParam2, dwNextSort);
 	}
-
+	*/
 	return iResult;
 }
 

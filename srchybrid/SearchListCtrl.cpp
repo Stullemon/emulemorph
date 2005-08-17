@@ -425,6 +425,12 @@ void CSearchListCtrl::ShowResults(uint32 nResultsID)
 		pCurState->m_nSortItem = GetSortItem();
 		pCurState->m_bSortAscending = GetSortAscending();
 		pCurState->m_nScrollPosition = GetTopIndex();
+		// SLUGFILLER: multiSort - save sort history
+		pos = m_liSortHistory.GetHeadPosition();
+		while (pos != NULL){
+			pCurState->m_liSortHistory.AddTail(m_liSortHistory.GetNext(pos));
+		}
+		// SLUGFILLER: multiSort
 		m_mapSortSelectionStates.SetAt(m_nResultsID, pCurState);
 	}
 	
@@ -439,6 +445,11 @@ void CSearchListCtrl::ShowResults(uint32 nResultsID)
 //		thePrefs.SetColumnSortItem(CPreferences::tableSearch, pNewState->m_nSortItem);
 //		thePrefs.SetColumnSortAscending(CPreferences::tableSearch, pNewState->m_bSortAscending);
 
+		// SLUGFILLER: multiSort - load sort history
+		m_liSortHistory.RemoveAll();
+		for (POSITION pos = pNewState->m_liSortHistory.GetHeadPosition(); pos != NULL; )
+			m_liSortHistory.AddTail(pNewState->m_liSortHistory.GetNext(pos));
+		// SLUGFILLER: multiSort
 		SetSortArrow(pNewState->m_nSortItem, pNewState->m_bSortAscending);
 		SortItems(SortProc, pNewState->m_nSortItem + (pNewState->m_bSortAscending ? 0:100));
 		// fill in the items
@@ -506,9 +517,10 @@ int CSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		comp = Compare(item1, item2, lParamSort) * sortMod;
 	}
 	else{
-		comp = Compare(item1->GetListParent(), item2->GetListParent(), lParamSort);
-		if (comp != 0)
-			return sortMod * comp;
+		// SLUGFILLER: DLsortFix - never compare children of different parents
+		if (item1->GetListParent() != item2->GetListParent())
+			return SortProc((LPARAM)item1->GetListParent(), (LPARAM)item2->GetListParent(), (LPARAM)orgSort);	// preserve recursion
+		// SLUGFILLER: DLsortFix
 
 		if ((item1->GetListParent()==NULL && item2->GetListParent()!=NULL) || (item2->GetListParent()==NULL && item1->GetListParent()!=NULL)){
 			if (item1->GetListParent()==NULL)
@@ -518,12 +530,11 @@ int CSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		}
 		comp = CompareChild(item1, item2, lParamSort);
 	}
-	int dwNextSort;
-	//call secondary sortorder, if this one results in equal
-	//(Note: yes I know this call is evil OO wise, but better than changing a lot more code, while we have only one instance anyway - might be fixed later)
-	if (comp == 0 && (dwNextSort = theApp.emuledlg->searchwnd->m_pwndResults->searchlistctrl.GetNextSortOrder(orgSort)) != (-1)){
-		comp= SortProc(lParam1, lParam2, dwNextSort);
-	}
+
+	// SLUGFILLER: DLsortFix - last-chance sort, detect and use
+	if (comp == 0 && orgSort != 99 && theApp.emuledlg->searchwnd->m_pwndResults->searchlistctrl.GetNextSortOrder(orgSort) == -1)
+		return SortProc(lParam1, lParam2, 99);	// Hmm, so maybe we have two last-chances, but it still doesn't warrent full support, though I may change it later
+	// SLUGFILLER: DLsortFix
 
 	return comp;
 }
@@ -624,6 +635,11 @@ int CSearchListCtrl::Compare(const CSearchFile* item1, const CSearchFile* item2,
 		case 114:
 			return -CompareOptLocaleStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
 		//Morph End - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
+		// SLUGFILLER: DLsortFix - last-chance sorting
+		case 99:
+			return ((int)item1)-((int)item2);	// We just need something that can't be duplicate with different items, ever
+		// SLUGFILLER: DLsortFix
+
 		default:
 			return 0;
 	}

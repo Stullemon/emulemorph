@@ -1314,7 +1314,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 		//JP Webcache END
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		//MORPH START - Added by SiRoB, IP2Country
-		case 16:
+		case 16: {
 			RECT cur_rec = *lpRect;
 			if(theApp.ip2country->ShowCountryFlag()){
 				POINT point3= {cur_rec.left,cur_rec.top+1};
@@ -1327,6 +1327,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				cur_rec.left-=20;
 			}
 			break;
+		}
 		//MORPH END   - Added by SiRoB, IP2Country
 		}
 	}

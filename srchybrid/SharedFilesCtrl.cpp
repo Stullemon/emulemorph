@@ -2296,10 +2296,10 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			break;
 			}
 		case 17: // SF:  Full Upload Count asc
-			return 10000*(((CKnownFile*)lParam1)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam2)->statistic.GetFullSpreadCount());
+			iResult=10000*(((CKnownFile*)lParam1)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam2)->statistic.GetFullSpreadCount());
 			break;
 		case 47: // SF:  Full Upload Count desc
-			return 10000*(((CKnownFile*)lParam2)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam1)->statistic.GetFullSpreadCount());
+			iResult=10000*(((CKnownFile*)lParam2)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam1)->statistic.GetFullSpreadCount());
 			break;
 		//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 		//MORPH START - Added by SiRoB, HIDEOS
@@ -2329,14 +2329,23 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			break;
 		case 135: //all requests desc
 			iResult=CompareUnsigned(item2->statistic.GetAllTimeRequests(), item1->statistic.GetAllTimeRequests());
+			break;
+
 		case 106: //all acc requests asc
 			iResult=CompareUnsigned(item1->statistic.GetAllTimeAccepts(), item2->statistic.GetAllTimeAccepts());
+			break;
+
 		case 136: //all acc requests desc
 			iResult=CompareUnsigned(item2->statistic.GetAllTimeAccepts(), item1->statistic.GetAllTimeAccepts());
+			break;
+
 		case 107: //all transferred asc
 			iResult=item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item1->statistic.GetAllTimeTransferred()>item2->statistic.GetAllTimeTransferred()?1:-1);
+			break;
+
 		case 137: //all transferred desc
 			iResult=item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item2->statistic.GetAllTimeTransferred()>item1->statistic.GetAllTimeTransferred()?1:-1);
+			break;
 
 		case 111:{ //kad shared asc
 			uint32 tNow = time(NULL);
@@ -2356,13 +2365,16 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			iResult=0;
 			break;
 	}
+
+	// SLUGFILLER: multiSort remove - handled in parent class
+	/*
 	int dwNextSort;
 	//call secondary sortorder, if this one results in equal
 	//(Note: yes I know this call is evil OO wise, but better than changing a lot more code, while we have only one instance anyway - might be fixed later)
 	if (iResult == 0 && (dwNextSort = theApp.emuledlg->sharedfileswnd->sharedfilesctrl.GetNextSortOrder(lParamSort)) != (-1)){
 		iResult= SortProc(lParam1, lParam2, dwNextSort);
 	}
-
+	*/
 	return iResult;
 
 }

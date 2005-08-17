@@ -68,6 +68,7 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
 	
 	m_SortProc = pfnCompare;
 	m_dwParamSort = dwParamSort;
+	UpdateSortHistory(m_dwParamSort, 0);	// SLUGFILLER: multiSort - fail-safe, ensure it's in the sort history(no inverse check)
 
 	m_bCustomDraw = false;
 	m_iCurrentSortItem = -1;
@@ -214,15 +215,19 @@ void CMuleListCtrl::SaveSettings()
 
 	ShowWindow(SW_HIDE);
 
-	int* piSortHist  = new int[MAX_SORTORDERHISTORY];
-	int i=0;
-	POSITION pos1, pos2;
-	for (pos1 = m_liSortHistory.GetHeadPosition();( pos2 = pos1 ) != NULL;)
-	{
-		m_liSortHistory.GetNext(pos1);
-		piSortHist[i++]=m_liSortHistory.GetAt(pos2)+1;
+	// SLUGFILLER: multiSort - store unlimited sorts
+	int i;
+	CString strSortHist;
+	POSITION pos = m_liSortHistory.GetTailPosition();
+	if (pos != NULL) {
+		strSortHist.Format(_T("%d"), m_liSortHistory.GetPrev(pos));
+		while (pos != NULL) {
+			strSortHist.AppendChar(_T(','));
+			strSortHist.AppendFormat(_T("%d"), m_liSortHistory.GetPrev(pos));
+		}
 	}
-	ini.SerGet(false, piSortHist, i, m_Name + _T("SortHistory"));
+	ini.WriteString(m_Name + _T("SortHistory"), strSortHist);
+	// SLUGFILLER: multiSort
 	// store additional settings
 	ini.WriteInt( m_Name + _T("TableSortItem"), GetSortItem() );
 	ini.WriteInt( m_Name + _T("TableSortAscending"), GetSortType( m_atSortArrow ));
@@ -248,7 +253,7 @@ void CMuleListCtrl::SaveSettings()
 	
 	ShowWindow(SW_SHOW);
 
-	delete[] piSortHist;
+	// SLUGFILLER: multiSort remove - unused
 	delete[] piColOrders;
 	delete[] piColWidths;
 	delete[] piColHidden;
@@ -284,14 +289,16 @@ void CMuleListCtrl::LoadSettings()
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 
 	// sort history
-	int* piSortHist  = new int[MAX_SORTORDERHISTORY];
-	ini.SerGet(true, piSortHist, MAX_SORTORDERHISTORY, m_Name + _T("SortHistory"));
-	m_liSortHistory.RemoveAll();
-	for (int i = 0; i < MAX_SORTORDERHISTORY; i++)
-		if (piSortHist[i] >0 )
-			m_liSortHistory.AddTail(piSortHist[i]-1);
-		else 
-			break;
+	// SLUGFILLER: multiSort - read unlimited sorts
+	CString strSortHist = ini.GetString(m_Name + _T("SortHistory"));
+	int nOffset = 0;
+	CString strTemp;
+	nOffset = ini.Parse(strSortHist, nOffset, strTemp);
+	while (!strTemp.IsEmpty()) {
+		UpdateSortHistory((int)_tstoi(strTemp), 0);	// avoid duplicates(cannot detect inverse, but it does half the job)
+		nOffset = ini.Parse(strSortHist, nOffset, strTemp);
+	}
+	// SLUGFILLER: multiSort
 	
 	m_iCurrentSortItem= ini.GetInt( m_Name + _T("TableSortItem"), 0);
 	m_atSortArrow= GetArrowType(ini.GetInt(m_Name +_T("TableSortAscending"), arrowUp));
@@ -335,7 +342,7 @@ void CMuleListCtrl::LoadSettings()
 	delete[] piColOrders;
 	delete[] piColWidths;
 	delete[] piColHidden;
-	delete[] piSortHist;
+	// SLUGFILLER: multiSort remove - unused
 }
 
 void CMuleListCtrl::SetColors(LPCTSTR pszLvKey) {
@@ -588,7 +595,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 	if(notFirst) {
 		int iNewIndex = iItem - 1;
 		POSITION pos = m_Params.FindIndex(iNewIndex);
-		int iResult = m_SortProc(dwpItemData, GetParamAt(pos, iNewIndex), m_dwParamSort);
+		int iResult = MultiSortProc(dwpItemData, GetParamAt(pos, iNewIndex));	// SLUGFILLER: multiSort
 		if(iResult < 0) {
 			POSITION posPrev = pos;
 			int iDist = iNewIndex / 2;
@@ -596,7 +603,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 				for(int i = 0; i < iDist; i++)
 					m_Params.GetPrev(posPrev);
 
-				if(m_SortProc(dwpItemData, GetParamAt(posPrev, iNewIndex - iDist), m_dwParamSort) < 0) {
+				if(MultiSortProc(dwpItemData, GetParamAt(posPrev, iNewIndex - iDist)) < 0) {	// SLUGFILLER: multiSort
 					iNewIndex = iNewIndex - iDist;
 					pos = posPrev;
 				} else {
@@ -606,7 +613,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 			}
 			while(--iNewIndex >= 0) {
 				m_Params.GetPrev(pos);
-				if(m_SortProc(dwpItemData, GetParamAt(pos, iNewIndex), m_dwParamSort) >= 0)
+				if(MultiSortProc(dwpItemData, GetParamAt(pos, iNewIndex)) >= 0)	// SLUGFILLER: multiSort
 					break;
 			}
 			MoveItem(iItem, iNewIndex + 1);
@@ -617,7 +624,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 	if(notLast) {
 		int iNewIndex = iItem + 1;
 		POSITION pos = m_Params.FindIndex(iNewIndex);
-		int iResult = m_SortProc(dwpItemData, GetParamAt(pos, iNewIndex), m_dwParamSort);
+		int iResult = MultiSortProc(dwpItemData, GetParamAt(pos, iNewIndex));	// SLUGFILLER: multiSort
 		if(iResult > 0) {
 			POSITION posNext = pos;
 			int iDist = (GetItemCount() - iNewIndex) / 2;
@@ -625,7 +632,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 				for(int i = 0; i < iDist; i++)
 					m_Params.GetNext(posNext);
 
-				if(m_SortProc(dwpItemData, GetParamAt(posNext, iNewIndex + iDist), m_dwParamSort) > 0) {
+				if(MultiSortProc(dwpItemData, GetParamAt(posNext, iNewIndex + iDist)) > 0) {	// SLUGFILLER: multiSort
 					iNewIndex = iNewIndex + iDist;
 					pos = posNext;
 				} else {
@@ -635,7 +642,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 			}
 			while(++iNewIndex < iItemCount) {
 				m_Params.GetNext(pos);
-				if(m_SortProc(dwpItemData, GetParamAt(pos, iNewIndex), m_dwParamSort) <= 0)
+				if(MultiSortProc(dwpItemData, GetParamAt(pos, iNewIndex)) <= 0)	// SLUGFILLER: multiSort
 					break;
 			}
 			MoveItem(iItem, iNewIndex);
@@ -835,7 +842,12 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 		//book keeping...
 
 		m_dwParamSort = (LPARAM)wParam;
+		UpdateSortHistory(m_dwParamSort, 0);	// SLUGFILLER: multiSort - fail-safe, ensure it's in the sort history(no inverse check)
 		m_SortProc = (PFNLVCOMPARE)lParam;
+		// SLUGFILLER: multiSort - hook our own callback for automatic layered sorting
+		lParam = (LPARAM)MultiSortCallback;
+		wParam = (WPARAM)this;
+		// SLUGFILLER: multiSort
 		for(POSITION pos = m_Params.GetHeadPosition(); pos != NULL; m_Params.GetNext(pos))
 			m_Params.SetAt(pos, MLC_MAGIC);
 		break;
@@ -868,7 +880,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 			if(notFirst) {
 				int iNewIndex = iItem - 1;
 				POSITION pos = m_Params.FindIndex(iNewIndex);
-				int iResult = m_SortProc(pItem->lParam, GetParamAt(pos, iNewIndex), m_dwParamSort);
+				int iResult = MultiSortProc(pItem->lParam, GetParamAt(pos, iNewIndex));	// SLUGFILLER: multiSort
 				if(iResult < 0) {
 					POSITION posPrev = pos;
 					int iDist = iNewIndex / 2;
@@ -876,7 +888,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 						for(int i = 0; i < iDist; i++)
 							m_Params.GetPrev(posPrev);
 
-						if(m_SortProc(pItem->lParam, GetParamAt(posPrev, iNewIndex - iDist), m_dwParamSort) < 0) {
+						if(MultiSortProc(pItem->lParam, GetParamAt(posPrev, iNewIndex - iDist)) < 0) {	// SLUGFILLER: multiSort
 							iNewIndex = iNewIndex - iDist;
 							pos = posPrev;
 						} else {
@@ -886,7 +898,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 					}
 					while(--iNewIndex >= 0) {
 						m_Params.GetPrev(pos);
-						if(m_SortProc(pItem->lParam, GetParamAt(pos, iNewIndex), m_dwParamSort) >= 0)
+						if(MultiSortProc(pItem->lParam, GetParamAt(pos, iNewIndex)) >= 0)	// SLUGFILLER: multiSort
 							break;
 					}
 					pItem->iItem = iNewIndex + 1;
@@ -897,7 +909,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 			if(notLast) {
 				int iNewIndex = iItem;
 				POSITION pos = m_Params.FindIndex(iNewIndex);
-				int iResult = m_SortProc(pItem->lParam, GetParamAt(pos, iNewIndex), m_dwParamSort);
+				int iResult = MultiSortProc(pItem->lParam, GetParamAt(pos, iNewIndex));	// SLUGFILLER: multiSort
 				if(iResult > 0) {
 					POSITION posNext = pos;
 					int iDist = (GetItemCount() - iNewIndex) / 2;
@@ -905,7 +917,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 						for(int i = 0; i < iDist; i++)
 							m_Params.GetNext(posNext);
 
-						if(m_SortProc(pItem->lParam, GetParamAt(posNext, iNewIndex + iDist), m_dwParamSort) > 0) {
+						if(MultiSortProc(pItem->lParam, GetParamAt(posNext, iNewIndex + iDist)) > 0) {	// SLUGFILLER: multiSort
 							iNewIndex = iNewIndex + iDist;
 							pos = posNext;
 						} else {
@@ -915,7 +927,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 					}
 					while(++iNewIndex < iItemCount) {
 						m_Params.GetNext(pos);
-						if(m_SortProc(pItem->lParam, GetParamAt(pos, iNewIndex), m_dwParamSort) <= 0)
+						if(MultiSortProc(pItem->lParam, GetParamAt(pos, iNewIndex)) <= 0)	// SLUGFILLER: multiSort
 							break;
 					}
 					pItem->iItem = iNewIndex;
@@ -1429,7 +1441,7 @@ void CMuleListCtrl::AutoSelectItem()
 }
 
 void CMuleListCtrl::UpdateSortHistory(int dwNewOrder, int dwInverseValue){
-	int dwInverse = (dwNewOrder > dwInverseValue) ? (dwNewOrder-dwInverseValue) : (dwNewOrder+dwInverseValue);
+	int dwInverse = (dwNewOrder >= dwInverseValue) ? (dwNewOrder-dwInverseValue) : (dwNewOrder+dwInverseValue);	// SLUGFILLER: multiSort - changed to >= for sort #0
 	// delete the value (or its inverse sorting value) if it appears already in the list
 	POSITION pos1, pos2;
 	for (pos1 = m_liSortHistory.GetHeadPosition();( pos2 = pos1 ) != NULL;)
@@ -1439,9 +1451,7 @@ void CMuleListCtrl::UpdateSortHistory(int dwNewOrder, int dwInverseValue){
 			m_liSortHistory.RemoveAt(pos2);
 	}
 	m_liSortHistory.AddHead(dwNewOrder);
-	// limit it to MAX_SORTORDERHISTORY entries for now, just for performance
-	if (m_liSortHistory.GetSize() > MAX_SORTORDERHISTORY)
-		m_liSortHistory.RemoveTail();
+	// SLUGFILLER: multiSort remove - do not limit, unlimited saving and loading available
 }
 
 int	CMuleListCtrl::GetNextSortOrder(int dwCurrentSortOrder) const{
