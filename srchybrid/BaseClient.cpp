@@ -471,7 +471,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29"))||
 			// EastShare END - Added by TAHO, Pretender
 			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
-			StrStrI(m_strModVersion,_T("Morph")) && IsMorph() == false ||
+			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || IsMorph() == false) ||
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
 			//StrStrI(m_strModVersion,_T("ACAT")) || //Removed
 			StrStrI(m_strModVersion,_T("sivka v12e8")) && m_nClientVersion != MAKE_CLIENT_VERSION(0, 42, 4) || // added - Stulle
