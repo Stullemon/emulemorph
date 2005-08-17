@@ -702,13 +702,17 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 
 void CSharedFileList::RemoveFile(CKnownFile* pFile)
 {
-	output->RemoveFile(pFile);
-	m_UnsharedFiles_map.SetAt(CSKey(pFile->GetFileHash()), true);
 	CSingleLock listlock(&m_mutWriteList);
 	listlock.Lock();
-	m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
-	m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
+	BOOL bResult = m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
 	listlock.Unlock();
+
+	if (bResult == TRUE){
+		output->RemoveFile(pFile);
+		m_UnsharedFiles_map.SetAt(CSKey(pFile->GetFileHash()), true);
+		m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
+	}
+
 	m_keywords->RemoveKeywords(pFile);
 
 }
@@ -1194,6 +1198,12 @@ int CAddFileThread::Run()
 	if ( !(m_pOwner || m_partfile) || m_strFilename.IsEmpty() || !theApp.emuledlg->IsRunning() )
 		return 0;
 	
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
+
 	CoInitialize(NULL);
 
 	// locking that hashing thread is needed because we may create a couple of those threads at startup when rehashing
