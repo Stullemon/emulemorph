@@ -2716,8 +2716,8 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	// Determine ascending based on whether already sorted on this column
 	int sortItem = GetSortItem();
 	bool m_oldSortAscending = GetSortAscending();
+	int userSort = (GetAsyncKeyState(VK_CONTROL) < 0) ? 64:0;	// SLUGFILLER: DLsortFix Ctrl sorts sources only
 
-	int userSort = (GetAsyncKeyState(VK_CONTROL) < 0) ? 0x4000:0;	// SLUGFILLER: DLsortFix Ctrl sorts sources only
 	//MORPH START - Removed by SiRoB, Remain time and size Columns have been splited
 	/*
 	if (sortItem==9) {
@@ -2728,7 +2728,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	bool sortAscending = (sortItem != pNMListView->iSubItem + userSort) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
 
 	// Item is column clicked
-	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix
+	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix - Ctrl sorts sources only
 	UpdateSortHistory(sortItem + (sortAscending ? 0:100), 100);
 
 	// Save new preferences
@@ -2748,7 +2748,6 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100) + adder );
 	*/
-	SetSortArrow(sortItem & 0xCFFF, sortAscending);	// SLUGFILLER: DLsortFix
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	//MORPH END  - Changed by SiRoB, Remain time and size Columns have been splited
 	*pResult = 0;
@@ -2758,8 +2757,10 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 	CtrlItem_Struct* item1 = (CtrlItem_Struct*)lParam1;
 	CtrlItem_Struct* item2 = (CtrlItem_Struct*)lParam2;
 
+	int dwOrgSort = lParamSort;
+
 	int sortMod = 1;
-	if((lParamSort & 0x3FFF) >= 100)	// SLUGFILLER: DLsortFix
+	if(lParamSort >= 100) 
 	{
 		sortMod = -1;
 		lParamSort -= 100;
@@ -2793,10 +2794,8 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 	}
 	else
 	{
-		// SLUGFILLER: DLsortFix - never compare sources of different files
 		if (item1->parent->value != item2->parent->value)
-			return sortMod * Compare((CPartFile*)(item1->parent->value), (CPartFile*)(item2->parent->value), lParamSort);
-		// SLUGFILLER: DLsortFix
+			return SortProc((LPARAM)item1->parent, (LPARAM)item2->parent, (LPARAM)dwOrgSort);	// SLUGFILLER: DLsortFix - preserve recursion
 		if (item1->type != item2->type)
 			return item1->type - item2->type;
 
@@ -2804,6 +2803,11 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 		CUpDownClient* client2 = (CUpDownClient*)item2->value;
 		comp = Compare(client1, client2, lParamSort,sortMod);
 	}
+
+	// SLUGFILLER: DLsortFix - last-chance sort, detect and use
+	if (comp == 0 && dwOrgSort != 99 && theApp.emuledlg->transferwnd->downloadlistctrl.GetNextSortOrder(dwOrgSort) == -1)
+		return SortProc(lParam1, lParam2, 99);	// Perhaps a bit hackity, but we only have one last-chance, and this beats saving it in the preferences
+	// SLUGFILLER: DLsortFix
 
 	return sortMod * comp;
 }
@@ -2869,8 +2873,8 @@ void CDownloadListCtrl::OnListModified(NMHDR *pNMHDR, LRESULT *pResult)
 
 int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort)
 {
-	// SLUGFILLER: DLsortFix
-	if (lParamSort & 0x4000)
+	// SLUGFILLER: DLsortFix - client-only sorting
+	if (lParamSort > 63)
 		return 0;
 	// SLUGFILLER: DLsortFix
 	int comp=0;
@@ -2993,10 +2997,9 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 			comp=file1->GetWebcacheSourceCount() - file2->GetWebcacheSourceCount();
 			break;
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
-		//MORPH START - Added by IceCream, SLUGFILLER: DLsortFix
-		case 0x8000:
-			comp=file1->GetPartMetFileName().CompareNoCase(file2->GetPartMetFileName());
-			break;
+		// SLUGFILLER: DLsortFix
+		case 99:	// met file name asc, only available as last-resort sort to make sure no two files are equal
+			comp=CompareLocaleStringNoCase(file1->GetFullName(), file2->GetFullName());
 		// SLUGFILLER: DLsortFix
 		default:
 			comp=0;
@@ -3006,7 +3009,7 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 
 int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient *client2, LPARAM lParamSort, int sortMod)
 {
-	lParamSort &= 0xBFFF;	// SLUGFILLER: DLsortFix
+	lParamSort &= 63;	// SLUGFILLER: DLsortFix
 	switch (lParamSort)
 	{
 	case 0: //name asc
