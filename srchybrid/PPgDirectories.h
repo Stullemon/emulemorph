@@ -34,4 +34,5 @@ protected:
 	afx_msg void OnBnClickedRemUNC();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg void OnBnClickedSeltempdiradd();
 };

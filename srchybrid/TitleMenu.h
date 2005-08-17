@@ -28,67 +28,50 @@ typedef BOOL (WINAPI* TGetMenuInfo)(
 
 class CTitleMenu : public CMenu
 {
-	typedef UINT (CALLBACK* LPFNDLLFUNC1)(HDC,CONST PTRIVERTEX,DWORD,CONST PVOID,DWORD,DWORD);
-// Construction
 public:
 	CTitleMenu();
-
-// Attributes
-protected:
-	CString m_strTitle;
-
-	LPFNDLLFUNC1 dllfunc_GradientFill;
-	HINSTANCE hinst_msimg32;
-	long clRight;
-	long clLeft;
-	long clText;
-	bool bDrawEdge;
-	bool m_bIconMenu;
-	UINT flag_edge;
-
-private:
-	static HMODULE		m_hUSER32_DLL;
-	CImageList  m_ImageList;
-	CMap<int, int, int, int> m_mapIconPos;
-// Operations
-public:
-	void AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu = false);
-	void EnableIcons();
-
-	static  void	FreeAPI();
-	static	void	Init();
-
-protected:
-	bool m_bCanDoGradientFill;
-
-	BOOL GradientFill(	HDC hdc,
-						CONST PTRIVERTEX pVertex,
-						DWORD dwNumVertex,
-						CONST PVOID pMesh,
-						DWORD dwNumMesh,
-						DWORD dwMode);
-
-	void	DrawMonoIcon(int nIconPos, CPoint nDrawPos, CDC *dc);
-	static  TSetMenuInfo SetMenuInfo;
-	static  TGetMenuInfo GetMenuInfo;
-	static	bool	LoadAPI();
-	// Implementation
-public:
-	void SetColor(long cl) {clLeft=cl;};
-	void SetGradientColor(long cl) {clRight=cl;};
-	void SetTextColor(long cl) {clText=cl;};
-	// See ::DrawEdge for flag values
-	void SetEdge(bool shown,UINT remove=0,UINT add=0) {bDrawEdge=shown; (flag_edge^=remove)|=add;};
-
-	long GetColor() {return clLeft;};
-	long GetGradientColor() {return clRight;};
-	long GetTextColor() {return clText;};
-	long GetEdge() {return flag_edge;};
-
 	virtual ~CTitleMenu();
+
+	void EnableIcons();
+	void AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu = false);
+	BOOL AppendMenu(UINT nFlags, UINT_PTR nIDNewItem = 0, LPCTSTR lpszNewItem = NULL, LPCTSTR lpszIconName = NULL);
+	BOOL InsertMenu(UINT nPosition, UINT nFlags, UINT_PTR nIDNewItem = 0, LPCTSTR lpszNewItem = NULL, LPCTSTR lpszIconName = NULL);
+
+	long GetColor() { return m_clLeft; }
+	void SetColor(long cl) { m_clLeft = cl; }
+
+	long GetGradientColor() { return m_clRight; }
+	void SetGradientColor(long cl) { m_clRight = cl; }
+
+	long GetTextColor() { return m_clText; }
+	void SetTextColor(long cl) { m_clText = cl; }
+
+	long GetEdge() { return m_uEdgeFlags; }
+	void SetEdge(bool shown, UINT remove = 0, UINT add = 0)	{ m_bDrawEdge = shown; (m_uEdgeFlags ^= remove) |= add; }
+
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMIS);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);
 
-	BOOL AppendMenu(UINT nFlags, UINT_PTR nIDNewItem = 0, LPCTSTR lpszNewItem = NULL, LPCTSTR lpszIconName = NULL);
+protected:
+	CString m_strTitle;
+	long m_clRight;
+	long m_clLeft;
+	long m_clText;
+	bool m_bDrawEdge;
+	bool m_bIconMenu;
+	UINT m_uEdgeFlags;
+	CImageList m_ImageList;
+	CMap<int, int, int, int> m_mapIconPos;
 
+	typedef UINT (WINAPI* LPFNGRADIENTFILL)(HDC, CONST PTRIVERTEX, DWORD, CONST PVOID, DWORD, DWORD);
+	LPFNGRADIENTFILL m_pfnGradientFill;
+	HINSTANCE m_hLibMsimg32;
+
+	static bool m_bInitializedAPI;
+	static bool LoadAPI();
+	static void FreeAPI();
+	static TSetMenuInfo SetMenuInfo;
+	static TGetMenuInfo GetMenuInfo;
+	void DrawMonoIcon(int nIconPos, CPoint nDrawPos, CDC *dc);
+	void SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR lpszNewItem, LPCTSTR lpszIconName);
 };

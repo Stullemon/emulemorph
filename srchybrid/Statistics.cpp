@@ -173,6 +173,8 @@ CStatistics::CStatistics()
 	m_sumavgUDRO = 0;
 	m_AvarageUDROPreviousAddedTimestamp = m_AvarageUDRO_listLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 	m_AvarageDDROPreviousAddedTimestamp = m_AvarageDDRO_listLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+
+    /*ZZ*/m_nTotalCompletedBytes = 0;
 }
 
 void CStatistics::Init()

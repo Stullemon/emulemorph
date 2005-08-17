@@ -110,10 +110,10 @@ class CPartFile : public CKnownFile
 	friend class CPartFileConvert;
 	friend class CPartHashThread;	// SLUGFILLER: SafeHash
 public:
-	CPartFile();
-	CPartFile(CSearchFile* searchresult);  //used when downloading a new file
-	CPartFile(CString edonkeylink);
-	CPartFile(class CED2KFileLink* fileLink);
+	CPartFile(uint8 cat=0);
+	CPartFile(CSearchFile* searchresult,uint8 cat=0);  //used when downloading a new file
+	CPartFile(CString edonkeylink,uint8 cat=0);
+	CPartFile(class CED2KFileLink* fileLink,uint8 cat=0);
 	virtual ~CPartFile();
 
 	bool	IsPartFile() const { return !(status == PS_COMPLETE); }
@@ -127,6 +127,7 @@ public:
 	// full path to part.met file or completed file
 	const CString& GetFullName() const { return m_fullname; }
 	void	SetFullName(CString name) { m_fullname = name; }
+	CString	GetTempPath() const;
 
 	// local file system related properties
 	bool	IsNormalFile() const { return (m_dwFileAttributes & (FILE_ATTRIBUTE_COMPRESSED | FILE_ATTRIBUTE_SPARSE_FILE)) == 0; }
@@ -142,7 +143,7 @@ public:
 	CTime	GetCrCFileDate() const { return CTime(m_tCreated); }
 	uint32	GetCrFileDate() const { return m_tCreated; }
 
-	void	InitializeFromLink(CED2KFileLink* fileLink);
+	void	InitializeFromLink(CED2KFileLink* fileLink, uint8 cat=0);
 	bool	CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam) {return false;}// not supported in this class
 	bool	LoadFromFile(FILE* file)						{return false;}
 	bool	WriteToFile(FILE* file) { return false; }
@@ -167,6 +168,7 @@ public:
 	bool	IsComplete(uint32 start, uint32 end, bool bIgnoreBufferedData) const;
 	bool	IsPureGap(uint32 start, uint32 end) const;
 	bool	IsAlreadyRequested(uint32 start, uint32 end) const;
+    bool    ShrinkToAvoidAlreadyRequested(uint32& start, uint32& end) const;
 	bool	IsCorruptedPart(uint16 partnumber) const;
 	uint32	GetTotalGapSizeInRange(uint32 uRangeStart, uint32 uRangeEnd) const;
 	uint32	GetTotalGapSizeInPart(UINT uPart) const;
@@ -247,8 +249,8 @@ public:
 	void	ResumeFile(bool resort = true);
 	void	ResumeFileInsufficient();
 
-	virtual Packet* CreateSrcInfoPacket(CUpDownClient* forClient) const;
-	void	AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion, CUpDownClient* pClient = NULL);
+	virtual Packet* CreateSrcInfoPacket(const CUpDownClient* forClient) const;
+	void	AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion, const CUpDownClient* pClient = NULL);
 
 	uint16	GetAvailablePartCount() const { return availablePartsCount; }
 	void	UpdateAvailablePartsCount();
@@ -261,19 +263,10 @@ public:
 	UINT	GetCompressionGain() const { return m_uCompressionGain; }
 	uint32	GetRecoveredPartsByICH() const { return m_uPartsSavedDueICH; }
 
-	bool	HasComment() const { return hasComment; }
-	void	SetHasComment(bool in) { hasComment = in; }
-
-	bool	HasRating() const { return hasRating; }
-	void	SetHasRating(bool in)			{hasRating=in;}
-	bool	HasBadRating() const { return hasBadRating; }
-	void	UpdateFileRatingCommentAvail();
+	virtual void	UpdateFileRatingCommentAvail();
 
 	void	AddDownloadingSource(CUpDownClient* client);
 	void	RemoveDownloadingSource(CUpDownClient* client);
-
-	bool	IsA4AFAuto() const { return m_is_A4AF_auto; }
-	void	SetA4AFAuto(bool in) { m_is_A4AF_auto = in; }
 
 	CString GetProgressString(uint16 size) const;
 	CString GetInfoSummary() const;
@@ -338,7 +331,7 @@ public:
 	CDeadSourceList	m_DeadSourceList;
 	//Morph Start - added by AndCycle, ICS
 	// enkeyDev: ICS
-	uint16* CalcDownloadingParts(CUpDownClient* client); // Pawcio for enkeyDEV: ICS
+	uint16* CalcDownloadingParts(const CUpDownClient* client); // Pawcio for enkeyDEV: ICS
 	void	WriteIncPartStatus(CSafeMemFile* file);
     void    NewSrcIncPartsInfo();
 	uint32	GetPartSizeToDownload(uint16 partNumber);
@@ -371,7 +364,7 @@ public:
 protected:
 	bool	GetNextEmptyBlockInPart(uint16 partnumber,Requested_Block_Struct* result) const;
 	void	CompleteFile(bool hashingdone);
-	void	CreatePartFile();
+	void	CreatePartFile(uint8 cat=0);
 	void	Init();
 	// khaos::kmod+ Save/Load Sources
 	CSourceSaver m_sourcesaver; //<<-- enkeyDEV(Ottavio84) -New SLS-

@@ -31,7 +31,6 @@ public:
 
 protected:
 	friend class CKademliaWnd;
-	CString m_strLVName;
 
 	bool ContactAdd(const Kademlia::CContact* contact);
 	void ContactRem(const Kademlia::CContact* contact);
@@ -41,7 +40,7 @@ protected:
 	void Localize();
 	void Hide() {ShowWindow(SW_HIDE);}
 	void Visable() {ShowWindow(SW_SHOW);}
-	void SaveAllSettings(CIni* ini);
+	void SaveAllSettings();
 	void UpdateKadContactCount();
 
 	void UpdateContact(int iItem, const Kademlia::CContact* contact, bool bLocalize = false);

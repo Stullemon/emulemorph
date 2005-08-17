@@ -32,7 +32,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -131,9 +131,9 @@ CEMSocket::CEMSocket(void){
     m_actualPayloadSize = 0;
     m_actualPayloadSizeSent = 0;
 
-    //MORPH - Changed by SiRoB, Upload Splitting Class
+    //MORPH - Changed by SiRoB, Show BusyTime
 	/*
-	m_bBusy = false;
+    m_bBusy = false;
 	*/
 	m_dwBusy = 0;
     m_hasSent = false;
@@ -523,7 +523,7 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 
     sendLocker.Lock();
 
-	if (byConnected == ES_DISCONNECTED) {
+    if (byConnected == ES_DISCONNECTED) {
         sendLocker.Unlock();
         if(delpacket) {
 			delete packet;
@@ -544,7 +544,7 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
         if (controlpacket) {
 	        controlpacket_queue.AddTail(packet);
 
-			// queue up for controlpacket
+            // queue up for controlpacket
             theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
 	    } else {
             bool first = !((sendbuffer && !m_currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty());
@@ -618,9 +618,9 @@ void CEMSocket::OnSend(int nErrorCode){
 
     sendLocker.Lock();
 
-    //MORPH - Changed by SiRoB, Upload Splitting Class
+    //MORPH - Changed by SiRoB, Show BusyTime
 	/*
-	m_bBusy = false;
+    m_bBusy = false;
 	*/
 	m_dwBusy = 0;
 
@@ -697,7 +697,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         sendLocker.Unlock();
         SocketSentBytes returnVal = { false, 0, 0 };
         return returnVal;
-    //MORPH - Changed by SiRoB, Upload Splitting Class
+    //MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
 	} else if (m_dwBusy /*&& onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
         sendLocker.Unlock();
@@ -799,9 +799,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 		    if (result == (uint32)SOCKET_ERROR){
 			    uint32 error = GetLastError();
 			    if (error == WSAEWOULDBLOCK){
-                    //MORPH - Changed by SiRoB, Upload Splitting Class
+                    //MORPH - Changed by SiRoB, Show BusyTime
 					/*
-					m_bBusy = true;
+                    m_bBusy = true;
 					*/
 					m_dwBusy = GetTickCount();
 
@@ -817,9 +817,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                 }
             } else {
                 // we managed to send some bytes. Perform bookkeeping.
-                //MORPH - Changed by SiRoB, Upload Splitting Class
+                //MORPH - Changed by SiRoB, Show BusyTime
 				/*
-				m_bBusy = false;
+                m_bBusy = false;
 				*/
 				m_dwBusy = 0;
                 m_hasSent = true;
@@ -862,13 +862,13 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     }
 
 
-	if(onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
-	// enter control packet send queue
+    if(onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
+        // enter control packet send queue
         // we might enter control packet queue several times for the same package,
         // but that costs very little overhead. Less overhead than trying to make sure
         // that we only enter the queue once.
         theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
-	}
+    }
 
     //CleanSendLatencyList();
 
@@ -899,7 +899,7 @@ uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
  */
 //MORPH - Changed by SiRoB, Scale to lowspeed
 /*
-uint32 CEMSocket::GetNeededBytes(bool lowspeed) {
+uint32 CEMSocket::GetNeededBytes() {
 */
 uint32 CEMSocket::GetNeededBytes(bool lowspeed) {
 	sendLocker.Lock();
@@ -1182,4 +1182,3 @@ void CEMSocket::SetTimeOut(UINT uTimeOut)
 {
 	m_uTimeOut = uTimeOut;
 }
-

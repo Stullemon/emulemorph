@@ -284,13 +284,6 @@ void CProgressCtrlX::DrawText(const CDrawInfo& info, const CRect &rcMax, const C
 	else if(grad == 180)  {	x = sizText.cx; y = sizText.cy; dx = 0; dy = -sizText.cy;}
 	else if(grad == 270)  {	x = sizText.cy; y = sizText.cx; dx = -sizText.cy; dy = 0;}
 	else ASSERT(0); // angle not supported
-#if 0
-	// required "math.h"
-	double pi = 3.1415926535;
-	double rad = grad*pi/180;
-	dx = sz.cy*sin(rad);
-	dy = sz.cy*cos(rad);
-#endif
 	CPoint pt = pDC->GetViewportOrg();
 	if(info.dwStyle&PBS_TIED_TEXT)
 	{

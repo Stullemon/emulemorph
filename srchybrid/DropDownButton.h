@@ -15,9 +15,9 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
+#include "ToolBarCtrlX.h"
 
-
-class CDropDownButton : public CToolBarCtrl
+class CDropDownButton : public CToolBarCtrlX
 {
 	DECLARE_DYNAMIC(CDropDownButton)
 public:
@@ -25,20 +25,17 @@ public:
 	virtual ~CDropDownButton();
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, bool bSingleDropDownBtn = true);
+	BOOL Init(bool bSingleDropDownBtn = true);
 
 	void SetWindowText(LPCTSTR pszString);
 	void SetIcon(LPCTSTR pszResourceID);
 	void ResizeToMaxWidth();
-
-	CString GetBtnText(int nID);
-	void SetBtnText(int nID, LPCTSTR pszString);
-
-	int GetBtnWidth(int nID);
-	void SetBtnWidth(int nID, int iWidth);
+	void RecalcLayout(bool bForce = false);
 
 protected:
 	bool m_bSingleDropDownBtn;
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 };

@@ -37,8 +37,8 @@ namespace Kademlia {
 ////////////////////////////////////////
 
 class CUInt128;
-class CTag;
-typedef std::list<CTag*> TagList;
+class CKadTag;
+typedef std::list<CKadTag*> TagList;
 
 class CDataIO
 {
@@ -52,7 +52,7 @@ public:
 	BYTE*		readBsob(uint8* size);
 	float		readFloat();
 	CStringW	readStringUTF8(bool bOptACP = false);
-	CTag*		readTag(bool bOptACP = false);
+	CKadTag*	readTag(bool bOptACP = false);
 	void		readTagList(TagList* taglist, bool bOptACP = false);
 
 	void		writeByte(byte val);
@@ -63,7 +63,7 @@ public:
 	void		writeHash( const BYTE* val);
 	void		writeBsob( const BYTE* val, uint8 size);
 	void		writeFloat(float val);
-	void		writeTag(const CTag* tag);
+	void		writeTag(const CKadTag* tag);
 	void		writeTag(LPCSTR name, uint8 value);
 	void		writeTag(LPCSTR name, uint16 value);
 	void		writeTag(LPCSTR name, uint32 value);

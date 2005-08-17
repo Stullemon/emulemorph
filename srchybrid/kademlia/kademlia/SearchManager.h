@@ -39,8 +39,8 @@ namespace Kademlia {
 
 class CSearch;
 class CRoutingZone;
-class CTag;
-typedef std::list<CTag*> TagList;
+class CKadTag;
+typedef std::list<CKadTag*> TagList;
 void deleteTagListEntries(TagList* taglist);
 
 // If type is unknown it will be an empty string

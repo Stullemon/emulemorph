@@ -497,6 +497,7 @@ void CSearchParamsWnd::SetAllIcons()
 	iml.Add(CTempIconLoader(_T("SearchFileType_Program"), 16, 16));
 	iml.Add(CTempIconLoader(_T("SearchFileType_Video"), 16, 16));
 	iml.Add(CTempIconLoader(_T("SearchFileType_Document"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_EmuleCollection"), 16, 16));
 	m_ctlFileType.SetImageList(&iml);
 	m_imlFileType.DeleteImageList();
 	m_imlFileType.Attach(iml.Detach());
@@ -569,6 +570,7 @@ void CSearchParamsWnd::InitFileTypesCtrl()
 	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_PRG), ED2KFTSTR_PROGRAM, 5));
 	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_VIDEO), ED2KFTSTR_VIDEO, 6));
 	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_DOC), ED2KFTSTR_DOCUMENT, 7));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_EMULECOLLECTION), ED2KFTSTR_EMULECOLLECTION, 8));
 
 	// sort list with current language locale
 	lstFileTypeCbEntries.sort();

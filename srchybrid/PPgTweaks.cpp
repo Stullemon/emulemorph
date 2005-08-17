@@ -446,7 +446,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	// End emulEspaña
 	m_bDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
 
-	m_bDynUpEnabled = thePrefs.IsDynUpEnabled();
+    m_bDynUpEnabled = thePrefs.m_bDynUpEnabled;
     m_iDynUpMinUpload = thePrefs.GetMinUpload();
     m_iDynUpPingTolerance = thePrefs.GetDynUpPingTolerance();
     m_iDynUpPingToleranceMilliseconds = thePrefs.GetDynUpPingToleranceMilliseconds();
@@ -509,7 +509,7 @@ BOOL CPPgTweaks::OnApply()
 	{
 		thePrefs.autotakeed2klinks = m_bAutoTakeEd2kLinks;
 		if (thePrefs.AutoTakeED2KLinks())
-			Ask4RegFix(false, true);
+			Ask4RegFix(false, true, false);
 		else
 		RevertReg();
 	}

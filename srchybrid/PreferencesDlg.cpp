@@ -65,7 +65,7 @@ CPreferencesDlg::CPreferencesDlg()
 	CTreePropSheet::SetPageIcon(&m_wndProxy, _T("PROXY"));
 	CTreePropSheet::SetPageIcon(&m_wndServer, _T("SERVER"));
 	CTreePropSheet::SetPageIcon(&m_wndDirectories, _T("FOLDERS"));
-	CTreePropSheet::SetPageIcon(&m_wndFiles, _T("SharedFiles"));
+	CTreePropSheet::SetPageIcon(&m_wndFiles, _T("Transfer"));
 	CTreePropSheet::SetPageIcon(&m_wndNotify, _T("NOTIFICATIONS"));
 	CTreePropSheet::SetPageIcon(&m_wndStats, _T("STATISTICS"));
 	CTreePropSheet::SetPageIcon(&m_wndIRC, _T("IRC"));

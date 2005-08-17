@@ -1,8 +1,12 @@
 #pragma once
 #include "ResizableLib/ResizablePage.h"
 #include "ComboBoxEx2.h"
+#include "CommentListCtrl.h"
 
 class CKnownFile;
+namespace Kademlia {
+	class CEntry;
+};
 
 class CCommentDialog : public CResizablePage
 {
@@ -24,19 +28,24 @@ protected:
 	bool m_bDataChanged;
 	CComboBoxEx2 m_ratebox;
 	CImageList m_imlRating;
+	CCommentListCtrl m_lstComments;
 	bool m_bMergedComment;
 	bool m_bSelf;
+	uint32 m_timer;
 
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnSetActive();
 	virtual BOOL OnApply();
+	void RefreshData(bool deleteOld = true);
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnBnClickedSearchKad(); 
 	afx_msg void OnBnClickedReset();
-	afx_msg void OnDestroy();
 	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
 	afx_msg void OnEnChangeCmtText();
 	afx_msg void OnCbnSelendokRatelist();
 	afx_msg void OnCbnSelchangeRatelist();
+	afx_msg void OnDestroy();
+	afx_msg void OnTimer(UINT nIDEvent);
 };

@@ -49,11 +49,11 @@ public:
 	CHyperLink(const CHyperLink& Src);
 
 	void Execute();
-	 bool operator < (const CHyperLink& Arg)		{return m_iEnd < Arg.m_iEnd;}
-	 uint16 Begin()									{return m_iBegin;}
-	 uint16 End()									{return m_iEnd;}
-	 uint16 Len()									{return m_iEnd - m_iBegin + 1;}
-	 CString Title()								{return m_sTitle;}
+	bool operator < (const CHyperLink& Arg) const	{return m_iEnd < Arg.m_iEnd;}
+	uint16 Begin() const							{return m_iBegin;}
+	uint16 End() const								{return m_iEnd;}
+	uint16 Len() const								{return m_iEnd - m_iBegin + 1;}
+	CString Title() const							{return m_sTitle;}
 	 void SetBegin( uint16 m_iInBegin )				{m_iBegin = m_iInBegin;}
 	 void SetEnd( uint16 m_iInEnd )					{m_iEnd = m_iInEnd;}
 
@@ -85,15 +85,16 @@ protected:
 class CKeyWord{
 	friend class CPreparedHyperText;
 public:
+	CKeyWord();
 	CKeyWord(int iBegin, uint16 iEnd, COLORREF icolor);
 
-	 bool operator < (const CKeyWord& Arg)		{return m_iEnd < Arg.m_iEnd;}
-	 uint16 Begin()									{return m_iBegin;}
-	 uint16 End()									{return m_iEnd;}
+	bool operator< (const CKeyWord& Arg) const		{return m_iEnd < Arg.m_iEnd;}
+	uint16 Begin() const							{return m_iBegin;}
+	uint16 End() const								{return m_iEnd;}
 	 void SetBegin( uint16 m_iInBegin )				{m_iBegin = m_iInBegin;}
 	 void SetEnd( uint16 m_iInEnd )					{m_iEnd = m_iInEnd;}
-	 COLORREF Color()								{return color;}
-	 uint16 Len()									{return m_iEnd - m_iBegin + 1;}
+	COLORREF Color() const							{return color;}
+	uint16 Len() const								{return m_iEnd - m_iBegin + 1;}
 protected:
 	int m_iBegin;
 	int m_iEnd;

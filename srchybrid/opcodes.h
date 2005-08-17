@@ -62,12 +62,12 @@
 #define SOURCECLIENTREASKS		MIN2MS(40)	//40 mins
 #define SOURCECLIENTREASKF		MIN2MS(5)	//5 mins
 #define KADEMLIAASKTIME			SEC2MS(1)	//1 second
-#define KADEMLIATOTALFILE		7			//Total files to search sources for.
+#define KADEMLIATOTALFILE		5			//Total files to search sources for.
 #define KADEMLIAREASKTIME		HR2MS(1)	//1 hour
 #define KADEMLIAPUBLISHTIME		SEC(2)		//2 second
 #define KADEMLIATOTALSTORENOTES	1			//Total hashes to store.
-#define KADEMLIATOTALSTORESRC	2		//Total hashes to store.
-#define KADEMLIATOTALSTOREKEY	1		//Total hashes to store.
+#define KADEMLIATOTALSTORESRC	3			//Total hashes to store.
+#define KADEMLIATOTALSTOREKEY	2			//Total hashes to store.
 #define KADEMLIAREPUBLISHTIMES	HR2S(5)		//5 hours
 #define KADEMLIAREPUBLISHTIMEN	HR2S(24)	//24 hours
 #define KADEMLIAREPUBLISHTIMEK	HR2S(24)	//24 hours
@@ -89,6 +89,8 @@
 #define SESSIONMAXTRANS			(9.3*1024*1024) // 9.3 Mbytes. "Try to send complete chunks" always sends this amount of data
 #define SESSIONMAXTIME			HR2MS(1)	//1 hour
 #define	MAXFILECOMMENTLEN		50
+#define	PARTSIZE				9728000
+#define	MAX_EMULE_FILE_SIZE		4290048000	// (4294967295/PARTSIZE)*PARTSIZE
 // MOD Note: end
 
 //MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
@@ -112,7 +114,7 @@
 #define	MAX_PURGEQUEUETIME		HR2MS(1) 
 #define PURGESOURCESWAPSTOP		MIN2MS(15)	// (15 mins), how long forbid swapping a source to a certain file (NNP,...)
 #define CONNECTION_LATENCY		22050	// latency for responces
-#define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   3000
+#define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   1000
 #define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   1000
 #define CLIENTBANTIME			HR2MS(2)	// 2h
 #define TRACKED_CLEANUP_TIME	HR2MS(1)	// 1 hour
@@ -120,6 +122,7 @@
 #define LOCALSERVERREQUESTS		20000		// only one local src request during this timespan (WHERE IS THIS USED?)
 #define DISKSPACERECHECKTIME	MIN2MS(15)
 #define CLIENTLIST_CLEANUP_TIME	MIN2MS(34)	// 34 min
+#define MAXPRIORITYCOLL_SIZE	10*1024		// max file size for collection file which are allowed to bypass the queue
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
 #define	MAXFRAGSIZE				1300
@@ -357,8 +360,11 @@
 #define FT_DL_PREVIEW            0x25
 #define  FT_KADLASTPUBLISHNOTES	 0x26	// <uint32> 
 #define FT_AICH_HASH			 0x27
+#define  FT_FILEHASH			 0x28
 #define	FT_COMPLETE_SOURCES		 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
 #define TAG_COMPLETE_SOURCES	"/x30"
+#define  FT_COLLECTIONAUTHOR	 0x31
+#define  FT_COLLECTIONAUTHORKEY  0x32
 // statistic
 #define  FT_ATTRANSFERRED		 0x50	// <uint32>
 #define FT_ATREQUESTED			 0x51	// <uint32>
@@ -415,6 +421,8 @@
 #define	TAG_MEDIA_BITRATE		"\xD4"	// <uint32>
 #define	 FT_MEDIA_CODEC			 0xD5	// <string>
 #define	TAG_MEDIA_CODEC			"\xD5"	// <string>
+#define  FT_FILECOMMENT			 0xF6	// <string>
+#define TAG_FILECOMMENT			"/xF6"	// <string>
 #define  FT_FILERATING			 0xF7	// <uint8>
 #define TAG_FILERATING			"\xF7"	// <uint8>
 
@@ -469,6 +477,7 @@
 #define	ED2KFTSTR_PROGRAM		"Pro"	// value for eD2K tag FT_FILETYPE
 #define	ED2KFTSTR_ARCHIVE		"Arc"	// eMule internal use only
 #define	ED2KFTSTR_CDIMAGE		"Iso"	// eMule internal use only
+#define ED2KFTSTR_EMULECOLLECTION	"EmuleCollection" // Value for eD2K tag FT_FILETYPE
 
 // additional media meta data tags from eDonkeyHybrid (note also the uppercase/lowercase)
 #define	FT_ED2K_MEDIA_ARTIST	"Artist"	// <string>

@@ -28,6 +28,7 @@
 class CPartFile;
 class CUpDownClient;
 class CDownloadListCtrl;
+class CToolTipCtrlX;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,12 +43,12 @@ class CtrlItem_Struct : public CObject
 public:
 	~CtrlItem_Struct() { status.DeleteObject(); }
 
-   ItemType         type;
-   CPartFile*       owner;
-   void*            value; // could be both CPartFile or CUpDownClient
-   CtrlItem_Struct* parent;
-   DWORD            dwUpdated;
-   CBitmap          status;
+	ItemType         type;
+	CPartFile*       owner;
+	void*            value; // could be both CPartFile or CUpDownClient
+	CtrlItem_Struct* parent;
+	DWORD            dwUpdated;
+	CBitmap          status;
 };
 
 
@@ -88,8 +89,8 @@ public:
 	void	UpdateItem(void* toupdate);
 	void	Init();
 	void	AddFile(CPartFile* toadd);
-	void	AddSource(CPartFile* owner,CUpDownClient* source,bool notavailable);
-	void	RemoveSource(CUpDownClient* source,CPartFile* owner);
+	void	AddSource(CPartFile* owner, CUpDownClient* source, bool notavailable);
+	void	RemoveSource(CUpDownClient* source, CPartFile* owner);
 	bool	RemoveFile(const CPartFile* toremove);
 	void	ClearCompleted(int incat=-2);
 	void	ClearCompleted(const CPartFile* pFile);
@@ -104,7 +105,7 @@ public:
 	void	ShowFile(CPartFile* tohide);
 	void	ExpandCollapseItem(int iItem, int iAction, bool bCollapseSource = false);
 	void	HideSources(CPartFile* toCollapse);
-	void	GetDisplayedFiles(CArray<CPartFile*,CPartFile*> *list);
+	void	GetDisplayedFiles(CArray<CPartFile*, CPartFile*>* list);
 	void	MoveCompletedfilesCat(uint8 from, uint8 to);
 	int		GetCompleteDownloads(int cat,int &total);
 	void	UpdateCurrentCategoryView();
@@ -132,16 +133,16 @@ protected:
     ListItems	m_ListItems;
 	CFont		m_fontBold;
 	CFont		m_fontBoldSmaller;//MORPH END   - Added by SiRoB, Draw Client Percentage
+	CToolTipCtrlX* m_tooltip;
 
 	void ShowFileDialog(CPartFile* pFile, UINT uInvokePage = 0);
 	void ShowClientDialog(CUpDownClient* pClient);
 	void SetAllIcons();
 	void DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
 	void DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
-
 	int GetFilesCountInCurCat();
 
-    static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
     static int Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort);
     static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort, int sortMod);
 

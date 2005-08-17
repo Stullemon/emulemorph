@@ -929,7 +929,8 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 		nodeList = GetElementsByName( actionNode, _T("NewLeaseDuration"));
 
 		if( nodeList ) {
-			if( ( tmpNode = ixmlNodeList_item( nodeList, 0 ) ) ) {
+			tmpNode = ixmlNodeList_item( nodeList, 0 );
+			if( tmpNode  ) {
 				textNode = ixmlNode_getFirstChild( tmpNode );
 				ixmlNode_setNodeValue( textNode , "0");
 			}

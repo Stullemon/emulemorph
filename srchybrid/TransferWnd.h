@@ -15,7 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "..\ResizableLib\ResizableDialog.h"
+#include "ResizableLib\ResizableDialog.h"
 #include "SplitterControl.h"
 #include "BtnST.h"
 #include "TabCtrl.hpp"
@@ -23,10 +23,11 @@
 #include "DownloadListCtrl.h"
 #include "QueueListCtrl.h"
 #include "ClientListCtrl.h"
-#include "downloadclientsctrl.h"
-#include "DropDownButton.h"
+#include "DownloadClientsCtrl.h"
 #include "progressctrlx.h" //Commander - Added: ClientQueueProgressBar
 
+class CDropDownButton;
+class CToolTipCtrlX;
 class CTransferWnd : public CResizableDialog
 {
 	DECLARE_DYNAMIC(CTransferWnd)
@@ -57,8 +58,13 @@ public:
 	void Localize();
 	void UpdateCatTabTitles(bool force=true);
 	void VerifyCatTabSize(bool _forceverify=false);
+	//MOPRH - Moved by SiRoB, Due to Khaos Cat moved in public area
+	/*
+	int AddCategory(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);
+	*/
 	void SwitchUploadList();
 	void ResetTransToolbar(bool bShowToolbar, bool bResetLists = true);
+	void SetToolTipsDelay(DWORD dwDelay);
 
 	// khaos::categorymod+
 	int		GetActiveCategory()			{ return m_dlTab.GetCurSel(); }
@@ -71,14 +77,13 @@ public:
 	CQueueListCtrl		queuelistctrl;
 	CClientListCtrl		clientlistctrl;
 	CDownloadClientsCtrl	downloadclientsctrl;
-	CToolTipCtrl		m_tooltipCats;
 
 protected:
 	CSplitterControl m_wndSplitter;
 	EWnd2		m_uWnd2;
 	bool downloadlistactive;
-	CDropDownButton m_btnWnd1;
-	CDropDownButton	m_btnWnd2;
+	CDropDownButton* m_btnWnd1;
+	CDropDownButton* m_btnWnd2;
 	TabControl	m_dlTab;
 	int			rightclickindex;
 	int			m_nDragIndex;
@@ -89,6 +94,7 @@ protected:
 	CImageList* m_pDragImage;
 	POINT		m_pLastMousePoint;
 	uint32		m_dwShowListIDC;
+	CToolTipCtrlX* m_tooltipCats;
 	CProgressCtrlX queueBar; //Commander - Added: ClientQueueProgressBar
 	CProgressCtrlX queueBar2; //Commander - Added: ClientQueueProgressBar
 	CFont bold;//Commander - Added: ClientQueueProgressBar
@@ -111,15 +117,11 @@ protected:
 	/*
 	CString GetCatTitle(int catid);
 	*/
-	//MOPRH - Moved by SiRoB, Due to Khaos Cat moved in public area
-	/*
-	int AddCategory(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);
-	*/
 	void EditCatTabLabel(int index,CString newlabel);
 	void EditCatTabLabel(int index);
 	void	ShowList(uint32 dwListIDC);
 	void	ChangeDlIcon(EWnd1Icon iIcon);
-	void	OnBnClickedDownUploads(bool bReDraw = false);
+	void	ShowSplitWindow(bool bReDraw = false);
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -138,11 +140,14 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLvnKeydownDownloadlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
+	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnDblclickDltab();
 	afx_msg void OnBnClickedQueueRefreshButton();
 	afx_msg void OnBnClickedChangeView();
 	afx_msg void OnWnd1BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnWnd2BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
 
 	// khaos::categorymod+
 	void		CreateCategoryMenus();

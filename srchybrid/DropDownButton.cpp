@@ -25,12 +25,11 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-#define	MAX_BTN_WIDTH_XOFF	0
+IMPLEMENT_DYNAMIC(CDropDownButton, CToolBarCtrlX)
 
-IMPLEMENT_DYNAMIC(CDropDownButton, CToolBarCtrl)
-
-BEGIN_MESSAGE_MAP(CDropDownButton, CToolBarCtrl)
+BEGIN_MESSAGE_MAP(CDropDownButton, CToolBarCtrlX)
 	ON_WM_SIZE()
+	ON_WM_SETTINGCHANGE()
 END_MESSAGE_MAP()
 
 CDropDownButton::CDropDownButton()
@@ -54,67 +53,43 @@ BOOL CDropDownButton::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, 
 			   | TBSTYLE_TRANSPARENT
 			   | 0;
 
-	if (!CToolBarCtrl::Create(dwStyle, rect, pParentWnd, nID))
+	if (!CToolBarCtrlX::Create(dwStyle, rect, pParentWnd, nID))
 		return FALSE;
+	return Init(bSingleDropDownBtn);
+}
 
-	// use the following only if the button has a very small height
-	//DWORD dwBtnSize = GetButtonSize();
-	//SetButtonSize(CSize(LOWORD(dwBtnSize), rect.bottom - rect.top));
-	//DWORD dwPadding = SendMessage(TB_GETPADDING);
-	//SendMessage(TB_SETPADDING, 0, MAKELPARAM(LOWORD(dwPadding), 3));
+BOOL CDropDownButton::Init(bool bSingleDropDownBtn)
+{
+	DeleteAllButtons();
+	m_bSingleDropDownBtn = bSingleDropDownBtn;
 
-	TBBUTTON atb[1] = {0};
-	atb[0].iBitmap = -1;
-	atb[0].idCommand = GetWindowLong(m_hWnd, GWL_ID);
-	atb[0].fsState = TBSTATE_ENABLED;
-	atb[0].fsStyle = m_bSingleDropDownBtn ? BTNS_DROPDOWN : BTNS_BUTTON;
-	atb[0].iString = -1;
-	AddButtons(1, atb);
+	// If a toolbar control was created indirectly via a dialog resource one can not
+	// add any buttons without setting an image list before. (?)
+	// So, for this to work, we have to attach an image list to the toolbar control!
+	// The image list can be empty, and it does not need to be used at all, but it has
+	// to be attached.
+	CImageList* piml = GetImageList();
+	if (piml == NULL || piml->m_hImageList == NULL)
+	{
+		CImageList iml;
+		iml.Create(16, 16, ILC_COLOR, 0, 0);
+		SetImageList(&iml);
+		iml.Detach();
+	}
 	if (m_bSingleDropDownBtn)
 	{
+		TBBUTTON atb[1] = {0};
+		atb[0].iBitmap = -1;
+		atb[0].idCommand = GetWindowLong(m_hWnd, GWL_ID);
+		atb[0].fsState = TBSTATE_ENABLED;
+		atb[0].fsStyle = m_bSingleDropDownBtn ? BTNS_DROPDOWN : BTNS_BUTTON;
+		atb[0].iString = -1;
+		VERIFY( AddButtons(1, atb) );
+
 		ResizeToMaxWidth();
 		SetExtendedStyle(TBSTYLE_EX_DRAWDDARROWS);
 	}
 	return TRUE;
-}
-
-int CDropDownButton::GetBtnWidth(int nID)
-{
-	TBBUTTONINFO tbbi = {0};
-	tbbi.cbSize = sizeof tbbi;
-	tbbi.dwMask = TBIF_SIZE;
-	(void)GetButtonInfo(nID, &tbbi);
-	return tbbi.cx;
-}
-
-void CDropDownButton::SetBtnWidth(int nID, int iWidth)
-{
-	TBBUTTONINFO tbbi = {0};
-	tbbi.cbSize = sizeof tbbi;
-	tbbi.dwMask = TBIF_SIZE;
-	tbbi.cx = iWidth;
-	SetButtonInfo(nID, &tbbi);
-}
-
-CString CDropDownButton::GetBtnText(int nID)
-{
-	TCHAR szString[512];
-	TBBUTTONINFO tbbi = {0};
-	tbbi.cbSize = sizeof tbbi;
-	tbbi.dwMask = TBIF_TEXT;
-	tbbi.pszText = szString;
-	tbbi.cchText = _countof(szString);
-	GetButtonInfo(nID, &tbbi);
-	return szString;
-}
-
-void CDropDownButton::SetBtnText(int nID, LPCTSTR pszString)
-{
-	TBBUTTONINFO tbbi = {0};
-	tbbi.cbSize = sizeof tbbi;
-	tbbi.dwMask = TBIF_TEXT;
-	tbbi.pszText = const_cast<LPTSTR>(pszString);
-	SetButtonInfo(nID, &tbbi);
 }
 
 void CDropDownButton::SetWindowText(LPCTSTR pszString)
@@ -165,15 +140,42 @@ void CDropDownButton::ResizeToMaxWidth()
 	    TBBUTTONINFO tbbi = {0};
 	    tbbi.cbSize = sizeof tbbi;
 	    tbbi.dwMask = TBIF_SIZE;
-	    tbbi.cx = rcWnd.Width() - MAX_BTN_WIDTH_XOFF;
+	    tbbi.cx = rcWnd.Width();
 	    SetButtonInfo(GetWindowLong(m_hWnd, GWL_ID), &tbbi);
 	}
 }
 
 void CDropDownButton::OnSize(UINT nType, int cx, int cy)
 {
-	CToolBarCtrl::OnSize(nType, cx, cy);
+	CToolBarCtrlX::OnSize(nType, cx, cy);
 
 	if (cx > 0 && cy > 0)
 		ResizeToMaxWidth();
+}
+
+void CDropDownButton::RecalcLayout(bool bForce)
+{
+	// If toolbar has at least one button with the button style BTNS_DROPDOWN, the
+	// entire toolbar is resized with too large height. So, remove the BTNS_DROPDOWN
+	// button style(s) and force the toolbar to resize and apply them again.
+	//
+	// TODO: Should be moved to CToolBarCtrlX
+	bool bDropDownBtn = (GetBtnStyle(GetWindowLong(m_hWnd, GWL_ID)) & BTNS_DROPDOWN) != 0;
+	if (bDropDownBtn)
+		RemoveBtnStyle(GetWindowLong(m_hWnd, GWL_ID), BTNS_DROPDOWN);
+	if (bDropDownBtn || bForce)
+	{
+		CToolBarCtrlX::RecalcLayout();
+		AddBtnStyle(GetWindowLong(m_hWnd, GWL_ID), BTNS_DROPDOWN);
+	}
+}
+
+void CDropDownButton::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
+{
+	CToolBarCtrlX::OnSettingChange(uFlags, lpszSection);
+
+	// The toolbar resizes itself when the system fonts were changed,
+	// especially when large/small system fonts were selected. Need
+	// to recalc the layout because we have a fixed control size.
+	RecalcLayout();
 }

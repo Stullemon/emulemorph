@@ -48,6 +48,7 @@ class CMiniMule;
 // emuleapp <-> emuleapp
 #define OP_ED2KLINK				12000
 #define OP_CLCOMMAND			12001
+#define OP_COLLECTION			12002
 
 #define	EMULE_HOTMENU_ACCEL		'x'
 #define	EMULSKIN_BASEEXT		_T("eMuleSkin")
@@ -71,7 +72,7 @@ public:
 	void ShowMessageState(uint8 iconnr);
 	void SetActiveDialog(CWnd* dlg);
 	void ShowTransferRate(bool forceAll=false);
-	void ShowPing();
+    void ShowPing();
 	void Localize();
 
 	// Logging
@@ -80,7 +81,7 @@ public:
 	void ResetLog();
 	void ResetDebugLog();
 	void ResetServerInfo();
-	CString	GetLastLogEntry();
+	CString GetLastLogEntry();
 	CString	GetLastDebugLogEntry();
 	CString	GetAllLogEntries();
 	CString	GetAllDebugLogEntries();
@@ -123,7 +124,7 @@ public:
 	uint8			status;
 
 protected:
-	HICON m_hIcon;
+	HICON			m_hIcon;
 	bool			ready;
 	bool			m_bStartMinimizedChecked;
 	bool			m_bStartMinimized;
@@ -163,9 +164,9 @@ protected:
 	CMiniMule* m_pMiniMule;
 	void DestroyMiniMule();
 
-	//CMap<UINT, UINT, LPCTSTR, LPCTSTR> m_mapCmdToIcon;
-	//void CreateMenuCmdIconMap();
-	//LPCTSTR GetIconFromCmdId(UINT uId);
+	CMap<UINT, UINT, LPCTSTR, LPCTSTR> m_mapTbarCmdToIcon;
+	void CreateToolbarCmdIconMap();
+	LPCTSTR GetIconFromCmdId(UINT uId);
 
 	// Startup Timer
 	UINT_PTR m_hTimer;
@@ -182,7 +183,7 @@ protected:
 	int  GetRecMaxUpload();
 	void LoadNotifier(CString configuration);
 	bool notifierenabled;
-	void ShowToolPopup(bool toolsonly=false);
+	void ShowToolPopup(bool toolsonly = false);
 	void SetAllIcons();
 	bool CanClose();
 
@@ -207,6 +208,7 @@ protected:
 	afx_msg void OnBnClickedHotmenu();
 	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
 	afx_msg void OnSysColorChange();
+	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnEndSession(BOOL bEnding);
 	afx_msg LRESULT OnKickIdle(UINT nWhy, long lIdleCount);

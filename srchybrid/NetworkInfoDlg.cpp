@@ -90,39 +90,54 @@ BOOL CNetworkInfoDlg::OnInitDialog()
 void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rcfBold, bool bFullInfo)
 {
 	CString buffer;
-	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
-	///////////////////////////////////////////////////////////////////////////
-	// Ports Info
-	///////////////////////////////////////////////////////////////////////////
-	rCtrl.SetSelectionCharFormat(rcfBold);
-	rCtrl << GetResString(IDS_PW_CLIENTPORT) << _T("\r\n");
-	rCtrl.SetSelectionCharFormat(rcfDef);
 
-	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
-	/*
-	buffer.Format(_T("TCP:\t%i"), thePrefs.thePrefs.GetPort());
-	*/
-	buffer.Format(_T("TCP:\t%i"), thePrefs.GetUPnPTCPInternal());
-	rCtrl << buffer << _T("\r\n");
-	if(thePrefs.GetUPnPTCPInternal() != 0 && (thePrefs.GetUPnPTCPInternal() != thePrefs.GetPort())){
-		buffer.Format(_T("TCP (External):\t%i"), thePrefs.GetPort());
-		rCtrl << buffer << _T("\r\n");
-	}
-	// End -UPnPNAT Support-
+	if (bFullInfo)
+	{
 
-	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
-	/*
-	buffer.Format(_T("UDP:\t%i"), thePrefs.GetUDPPort());
-	*/
-	buffer.Format(_T("UDP:\t%i"), thePrefs.GetUPnPUDPInternal());
-	rCtrl << buffer << _T("\r\n");
-	if(thePrefs.GetUPnPUDPInternal() != 0 && (thePrefs.GetUPnPUDPInternal() != thePrefs.GetUDPPort())){
-		buffer.Format(_T("UDP (External):\t%i"), thePrefs.GetUDPPort());
+		///////////////////////////////////////////////////////////////////////////
+		// Ports Info
+		///////////////////////////////////////////////////////////////////////////
+		rCtrl.SetSelectionCharFormat(rcfBold);
+		rCtrl << GetResString(IDS_PW_CLIENTPORT) << _T("\r\n");
+		rCtrl.SetSelectionCharFormat(rcfDef);
+
+		// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+		/*
+		buffer.Format(_T("TCP:\t%i"), thePrefs.GetPort());
+		*/
+		buffer.Format(_T("TCP:\t%i"), thePrefs.GetUPnPTCPInternal());
 		rCtrl << buffer << _T("\r\n");
-	}
+		if(thePrefs.GetUPnPTCPInternal() != 0 && (thePrefs.GetUPnPTCPInternal() != thePrefs.GetPort())){
+			buffer.Format(_T("TCP (External):\t%i"), thePrefs.GetPort());
+			rCtrl << buffer << _T("\r\n");
+		}
+		// End -UPnPNAT Support-
+
+		// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+		/*
+		buffer.Format(_T("UDP:\t%i"), thePrefs.GetUDPPort());
+		rCtrl << buffer << _T("\r\n\r\n");
+		*/
+		buffer.Format(_T("UDP:\t%i"), thePrefs.GetUPnPUDPInternal());
+		rCtrl << buffer << _T("\r\n");
+		if(thePrefs.GetUPnPUDPInternal() != 0 && (thePrefs.GetUPnPUDPInternal() != thePrefs.GetUDPPort())){
+			buffer.Format(_T("UDP (External):\t%i"), thePrefs.GetUDPPort());
+			rCtrl << buffer << _T("\r\n");
+		}
 	rCtrl << _T("\r\n");
-	// End -UPnPNAT Support-
-	//MORPH END - Added by SiRoB, [MoNKi: -Random Ports-]
+		// End -UPnPNAT Support-
+		//MORPH END - Added by SiRoB, [MoNKi: -Random Ports-]
+
+			///////////////////////////////////////////////////////////////////////////
+		// Hash Info
+		///////////////////////////////////////////////////////////////////////////
+		rCtrl.SetSelectionCharFormat(rcfBold);
+		rCtrl << GetResString(IDS_CD_UHASH) << _T("\r\n");
+		rCtrl.SetSelectionCharFormat(rcfDef);
+
+		buffer.Format(_T("%s"),(LPCTSTR)(md4str((uchar*)thePrefs.GetUserHash())));
+		rCtrl << buffer << _T("\r\n\r\n");
+	}
 
 	///////////////////////////////////////////////////////////////////////////
 	// ED2K
@@ -139,6 +154,18 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	else 
 		rCtrl << GetResString(IDS_DISCONNECTED);
 	rCtrl << _T("\r\n");
+
+	//I only show this in full display as the normal display is not
+	//updated at regular intervals.
+	if (bFullInfo && theApp.serverconnect->IsConnected())
+	{
+		uint32 uTotalUser = 0;
+		uint32 uTotalFile = 0;
+
+		theApp.serverlist->GetUserFileStatus(uTotalUser, uTotalFile);
+		rCtrl << GetResString(IDS_UUSERS) << _T(":\t") << GetFormatedUInt(uTotalUser) << _T("\r\n");
+		rCtrl << GetResString(IDS_PW_FILES) << _T(":\t") << GetFormatedUInt(uTotalFile) << _T("\r\n");
+	}
 
 	if (theApp.serverconnect->IsConnected()){
 		rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T(":") ;
@@ -282,10 +309,22 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 
 		if (bFullInfo)
 		{
+
+			CString sKadID;
+			Kademlia::CKademlia::getPrefs()->getKadID(&sKadID);
+			rCtrl << GetResString(IDS_CD_UHASH) << _T("\t") << sKadID << _T("\r\n");
+
+			rCtrl << GetResString(IDS_UUSERS) << _T(":\t") << GetFormatedUInt(Kademlia::CKademlia::getKademliaUsers()) << _T("\r\n");
+			rCtrl << GetResString(IDS_PW_FILES) << _T(":\t") << GetFormatedUInt(Kademlia::CKademlia::getKademliaFiles()) << _T("\r\n");
+
 			rCtrl <<  GetResString(IDS_INDEXED) << _T(":\r\n");
 			buffer.Format(GetResString(IDS_KADINFO_SRC) , Kademlia::CKademlia::getIndexed()->m_totalIndexSource);
 			rCtrl << buffer;
 			buffer.Format(GetResString(IDS_KADINFO_KEYW), Kademlia::CKademlia::getIndexed()->m_totalIndexKeyword);
+			rCtrl << buffer;
+			buffer.Format(_T("\t%s: %u\r\n"), GetResString(IDS_NOTES), Kademlia::CKademlia::getIndexed()->m_totalIndexNotes);
+			rCtrl << buffer;
+			buffer.Format(_T("\t%s: %u\r\n"), GetResString(IDS_THELOAD), Kademlia::CKademlia::getIndexed()->m_totalIndexLoad);
 			rCtrl << buffer;
 		}
 	}
@@ -350,11 +389,4 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		rCtrl << _T("URL:\t") << _T("http://") << strHostname << _T(":") << thePrefs.GetWapPort() << _T("/\r\n");
 	}
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
-
-	//MORPH START - Added by SiRoB, Mighty Knife: display complete userhash in status window
-	rCtrl << _T("\r\n");
-	buffer.Format(_T("%s"),(LPCTSTR)(md4str((uchar*)thePrefs.GetUserHash())));
-	rCtrl << GetResString(IDS_CD_UHASH) << _T("\t") << buffer.Left (16) << _T("-");
-	rCtrl << _T("\r\n\t") << buffer.Mid (16,255);
-	//MORPH END   - Added by SiRoB, [end] Mighty Knife
 }

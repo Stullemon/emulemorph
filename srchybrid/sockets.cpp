@@ -18,7 +18,6 @@
 #include "emule.h"
 #include "Sockets.h"
 #include "Opcodes.h"
-#include "SearchList.h"
 #include "UDPSocket.h"
 #include "Exceptions.h"
 #include "OtherFunctions.h"
@@ -70,7 +69,7 @@ void CServerConnect::TryAnotherConnectionrequest()
 		}
 
 		// Barry - Only auto-connect to static server option
-		if (thePrefs.AutoConnectStaticOnly())
+		if (thePrefs.GetAutoConnectToStaticServersOnly())
 		{
 			if (next_server->IsStaticMember())
                 ConnectToServer(next_server,true);
@@ -90,7 +89,7 @@ void CServerConnect::ConnectToAnyServer(uint32 startAt, bool prioSort, bool isAu
 	theApp.emuledlg->ShowConnectionState();
 
 	// Barry - Only auto-connect to static server option
-	if (thePrefs.AutoConnectStaticOnly() && isAuto)
+	if (thePrefs.GetAutoConnectToStaticServersOnly() && isAuto)
 	{
 		bool anystatic = false;
 		CServer *next_server; 
@@ -257,7 +256,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 		theApp.emuledlg->serverwnd->serverlistctrl.RemoveAllDeadServers();
 
 		// tecxx 1609 2002 - serverlist update
-		if (thePrefs.AddServersFromServer())
+		if (thePrefs.GetAddServersFromServer())
 		{
 			Packet* packet = new Packet(OP_GETSERVERLIST,0);
 			if (thePrefs.GetDebugServerTCPLevel() > 0)

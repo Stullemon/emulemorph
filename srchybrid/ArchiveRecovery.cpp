@@ -30,7 +30,31 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-// At some point it may be worth displaying messages to alert the user if there were errors, or where to find the file.
+#pragma pack(push,1)
+typedef struct {
+	BYTE	type;
+	WORD	flags;
+	WORD	size;
+} RARMAINHDR;
+#pragma pack(pop)
+
+#pragma pack(push,1)
+typedef struct {
+	BYTE	type;
+	WORD	flags;
+	WORD	size;
+	DWORD	packetSize;
+	DWORD	unpacketSize;
+	BYTE	hostOS;
+	DWORD	fileCRC;
+	DWORD	fileTime;
+	BYTE	unpVer;
+	BYTE	method;
+	WORD	nameSize;
+	DWORD	fileAttr;
+} RARFILEHDR;
+#pragma pack(pop)
+
 
 void CArchiveRecovery::recover(CPartFile *partFile, bool preview, bool bCreatePartFileCopy)
 {
@@ -77,7 +101,7 @@ UINT AFX_CDECL CArchiveRecovery::run(LPVOID lpParam)
 	InitThreadLocale();
 
 	if (!performRecovery(tp->partFile, tp->filled, tp->preview, tp->bCreatePartFileCopy))
-		theApp.QueueLogLine(true, GetResString(IDS_RECOVERY_FAILED));
+		theApp.QueueLogLine(true, _T("%s \"%s\""), GetResString(IDS_RECOVERY_FAILED), tp->partFile->GetFileName());
 
 	tp->partFile->m_bRecoveringArchive = false;
 
@@ -98,7 +122,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 		if (bCreatePartFileCopy)
 		{
 			// Copy the file
-			tempFileName = CString(thePrefs.GetTempDir()) + _T("\\") + partFile->GetFileName().Mid(0, 5) + _T("-rec.tmp");
+			tempFileName = partFile->GetTempPath() + partFile->GetFileName().Mid(0, 5) + _T("-rec.tmp");
 			if (!CopyFile(partFile, filled, tempFileName))
 				return false;
 
@@ -114,15 +138,15 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 
 		// Open the output file
 		CString ext = partFile->GetFileName().Right(4);
-		CString outputFileName = CString(thePrefs.GetTempDir()) + _T("\\") + partFile->GetFileName().Mid(0, 5) + _T("-rec") + ext;
+		CString outputFileName = partFile->GetTempPath()  + partFile->GetFileName().Mid(0, 5) + _T("-rec") + ext;
 		CFile output;
 		ULONGLONG ulTempFileSize = 0;
 		if (output.Open(outputFileName, CFile::modeWrite | CFile::shareDenyWrite | CFile::modeCreate))
 		{
 			// Process the output file
-			if (ext.CompareNoCase(_T(".zip")) == 0)
+			if (ext.CompareNoCase(_T(".zip")) == 0 || ext.CompareNoCase(_T(".cbz")) == 0)
 				success = recoverZip(&temp, &output, filled, (temp.GetLength() == partFile->GetFileSize()));
-			else if (ext.CompareNoCase(_T(".rar")) == 0)
+			else if (ext.CompareNoCase(_T(".rar")) == 0 || ext.CompareNoCase(_T(".cbr")) == 0)
 				success = recoverRar(&temp, &output, filled);
 
 			ulTempFileSize = output.GetLength();
@@ -141,7 +165,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 		if (success)
 		{
 			theApp.QueueLogLine(true, _T("%s \"%s\""), GetResString(IDS_RECOVERY_SUCCESSFUL), partFile->GetFileName());
-			theApp.QueueDebugLogLine(false, _T("Part file size: %s, temp. archive file size: %s (%.1f%%)"), CastItoXBytes(partFile->GetFileSize()), CastItoXBytes(ulTempFileSize), partFile->GetFileSize() ? (ulTempFileSize * 100.0 / partFile->GetFileSize()) : 0.0);
+			theApp.QueueDebugLogLine(false, _T("Archive recovery: Part file size: %s, temp. archive file size: %s (%.1f%%)"), CastItoXBytes(partFile->GetFileSize()), CastItoXBytes(ulTempFileSize), partFile->GetFileSize() ? (ulTempFileSize * 100.0 / partFile->GetFileSize()) : 0.0);
 
 			// Preview file if required
 			if (preview)
@@ -449,7 +473,9 @@ bool CArchiveRecovery::processZipEntry(CFile *zipInput, CFile *zipOutput, uint32
 		entry.lenExtraField			= readUInt16(zipInput);
 		
 		// Do some quick checks at this stage that data is looking ok
-		if ((entry.crc32 == 0) || (entry.lenCompressed == 0) || (entry.lenUncompressed == 0) || (entry.lenFilename == 0))
+		if ((entry.crc32 == 0) && (entry.lenCompressed == 0) && (entry.lenUncompressed == 0) && (entry.lenFilename != 0))
+			; // this is a directory entry
+		else if ((entry.crc32 == 0) || (entry.lenCompressed == 0) || (entry.lenUncompressed == 0) || (entry.lenFilename == 0))
 			return false;
 
 		// Is this entry complete
@@ -626,8 +652,85 @@ bool CArchiveRecovery::recoverRar(CFile *rarInput, CFile *rarOutput, CTypedPtrLi
 	long fileCount = 0;
 	try
 	{
-		BYTE start[] = RAR_START_OF_FILE;
-		rarOutput->Write(start, sizeof(start));
+		// Try to get file header and main header
+		//
+		bool bValidFileHeader = false;
+		bool bOldFormat = false;
+		bool bValidMainHeader = false;
+		BYTE fileHeader[7] = {0};
+		RARMAINHDR mainHeader = {0};
+		if (rarInput->Read(fileHeader, sizeof fileHeader) == sizeof fileHeader)
+		{
+			if (fileHeader[0] == 0x52) {
+				if (fileHeader[1] == 0x45 && fileHeader[2] ==0x7e && fileHeader[3] == 0x5e) {
+					bOldFormat = true;
+					bValidFileHeader = true;
+				}
+				else if (fileHeader[1] == 0x61 && fileHeader[2] == 0x72 && fileHeader[3] == 0x21 && fileHeader[4] == 0x1a && fileHeader[5] == 0x07 && fileHeader[6] == 0x00) {
+					bValidFileHeader = true;
+				}
+			}
+
+			if (bValidFileHeader && !bOldFormat)
+			{
+				WORD checkCRC;
+				if (rarInput->Read(&checkCRC, sizeof checkCRC) == sizeof checkCRC)
+				{
+					if (rarInput->Read(&mainHeader, sizeof mainHeader) == sizeof mainHeader)
+					{
+						if (mainHeader.type == 0x73)
+						{
+							DWORD crc = crc32(0, (Bytef*)&mainHeader, sizeof mainHeader);
+							for (UINT i = 0; i < sizeof(WORD) + sizeof(DWORD); i++)
+							{
+								BYTE ch;
+								if (rarInput->Read(&ch, sizeof ch) != sizeof ch)
+									break;
+								crc = crc32(crc, &ch, 1);
+							}
+							if (checkCRC == (WORD)crc)
+								bValidMainHeader = true;
+						}
+					}
+				}
+			}
+			rarInput->SeekToBegin();
+		}
+
+		static const BYTE start[] = {
+			// RAR file header
+			0x52, 0x61, 0x72, 0x21, 0x1a, 0x07, 0x00,
+
+			// main header
+			0x08, 0x1A, 		// CRC
+			0x73, 				// type
+			0x02, 0x00,			// flags
+			0x3B, 0x00,			// size
+			0x00, 0x00,			// AV
+			0x00, 0x00,			// AV
+            0x00, 0x00,			// AV
+
+			// main comment
+			0xCA, 0x44,			// CRC
+			0x75,				// type
+			0x00, 0x00,			// flags
+			0x2E, 0x00,			// size
+
+			0x12, 0x00, 0x14, 0x34, 0x2B,
+			0x4A, 0x08, 0x15, 0x48, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x01, 0x0A, 0x2B, 0xF9, 0x0E, 0xE2, 0xC1,
+			0x32, 0xFB, 0x9E, 0x04, 0x10, 0x50, 0xD7, 0xFE, 0xCD, 0x75, 0x87, 0x9C, 0x28, 0x85, 0xDF, 0xA3,
+			0x97, 0xE0 };
+
+		// If this is a 'solid' archive the chance to successfully decompress any entries gets higher,
+		// when we pass the 'solid' main header bit to the temp. archive.
+		BYTE start1[sizeof start];
+		memcpy(start1, start, sizeof start);
+		if (bValidFileHeader && bValidMainHeader && (mainHeader.flags & 0x0008/*MHD_SOLID*/)) {
+			start1[10] |= 8; /*MHD_SOLID*/
+			*((short*)&start1[7]) = crc32(0, &start1[9], 11);
+		}
+
+		rarOutput->Write(start1, sizeof(start1));
 
 		RAR_BlockFile *block;
 		while ((block = scanForRarFileHeader(rarInput, (uint32)rarInput->GetLength())) != NULL)
@@ -752,7 +855,8 @@ RAR_BlockFile *CArchiveRecovery::scanForRarFileHeader(CFile *input, uint32 avail
 		ULONGLONG searchOffset;
 		ULONGLONG foundOffset;
 		uint16 headCRC;
-		BYTE checkCRC[38];
+		BYTE checkCRC[sizeof(RARFILEHDR) + 8 + sizeof(DWORD)*2 + 512];
+		unsigned checkCRCsize = 0;
 		uint16 lenFileName;
 		BYTE *fileName;
 		uint32 crc;
@@ -776,16 +880,77 @@ RAR_BlockFile *CArchiveRecovery::scanForRarFileHeader(CFile *input, uint32 avail
 				pos = (int)(foundPos - (&chunk[0]) - 2);
 				input->Seek(pos - lenChunk, CFile::current);
 				foundOffset = input->GetPosition();
-				headCRC = readUInt16(input); // CRC of fields from HEAD_TYPE to ATTR + filename
-				input->Read(&checkCRC[0], 30);
-				// Also need filename for crc
-				lenFileName = (((uint16)checkCRC[25]) << 8) + ((uint16)checkCRC[24]);
+
+				// CRC of fields from HEAD_TYPE to ATTR + filename + ext. stuff
+				headCRC = readUInt16(input);
+
+				RARFILEHDR* hdr = (RARFILEHDR*)checkCRC;
+				input->Read(checkCRC, sizeof(*hdr));
+				checkCRCsize = sizeof(*hdr);
+
+				// get high parts of 64-bit file size fields
+				if (hdr->flags & 0x0100/*LHD_LARGE*/) {
+					input->Read(&checkCRC[checkCRCsize], sizeof(DWORD) * 2);
+					checkCRCsize += sizeof(DWORD) * 2;
+				}
+
+				// get filename
+				lenFileName = hdr->nameSize;
 				fileName = new BYTE[lenFileName];
-				if (checkCRC[2] & 0x1) // If HEAD_FLAG & 0x100
-					input->Read(&checkCRC[30], 8);
 				input->Read(fileName, lenFileName);
-				crc = crc32(0, &checkCRC[0], 30);
+
+				// get encryption params
+				unsigned saltPos = 0;
+				if (hdr->flags & 0x0400/*LHD_SALT*/) {
+					saltPos = checkCRCsize;
+					input->Read(&checkCRC[checkCRCsize], 8);
+					checkCRCsize += 8;
+				}
+
+				// get ext. file date/time
+				unsigned extTimePos = 0;
+				unsigned extTimeSize = 0;
+				if (hdr->flags & 0x1000/*LHD_EXTTIME*/)
+				{
+					try {
+						extTimePos = checkCRCsize;
+						if (checkCRCsize + sizeof(WORD) > sizeof(checkCRC))
+							throw -1;
+						input->Read(&checkCRC[checkCRCsize], sizeof(WORD));
+						unsigned short Flags = *((WORD*)&checkCRC[checkCRCsize]);
+						checkCRCsize += sizeof(WORD);
+						for (int i = 0; i < 4; i++)
+						{
+							unsigned int rmode = Flags >> (3 - i) * 4;
+							if ((rmode & 8) == 0)
+								continue;
+							if (i != 0) {
+								if (checkCRCsize + sizeof(DWORD) > sizeof(checkCRC))
+									throw -1;
+								input->Read(&checkCRC[checkCRCsize], sizeof(DWORD));
+								checkCRCsize += sizeof(DWORD);
+							}
+							int count = rmode & 3;
+							for (int j = 0; j < count; j++) {
+								if (checkCRCsize + sizeof(BYTE) > sizeof(checkCRC))
+									throw -1;
+								input->Read(&checkCRC[checkCRCsize], sizeof(BYTE));
+								checkCRCsize += sizeof(BYTE);
+							}
+						}
+						extTimeSize = checkCRCsize - extTimePos;
+					}
+					catch (int ex) {
+						(void)ex;
+						extTimePos = 0;
+						extTimeSize = 0;
+					}
+				}
+
+				crc = crc32(0, checkCRC, sizeof(*hdr));
 				crc = crc32(crc, fileName, lenFileName);
+				if (checkCRCsize > sizeof(*hdr))
+					crc = crc32(crc, &checkCRC[sizeof(*hdr)], checkCRCsize - sizeof(*hdr));
 				if ((crc & 0xFFFF) == headCRC)
 				{
 					// Found valid crc, build block and return
@@ -805,12 +970,19 @@ RAR_BlockFile *CArchiveRecovery::scanForRarFileHeader(CFile *input, uint32 avail
 					retVal->NAME_SIZE		= lenFileName;
 					retVal->ATTR			= calcUInt32(&checkCRC[26]);
 					// Optional values, present only if bit 0x100 in HEAD_FLAGS is set.
-					if ((retVal->HEAD_FLAGS & 0x100) == 0x100)
-					{
+					if ((retVal->HEAD_FLAGS & 0x100) == 0x100) {
 						retVal->HIGH_PACK_SIZE	= calcUInt32(&checkCRC[30]);
 						retVal->HIGH_UNP_SIZE	= calcUInt32(&checkCRC[34]);
 					}
 					retVal->FILE_NAME		= fileName;
+					if (saltPos != 0)
+						memcpy(retVal->SALT, &checkCRC[saltPos], sizeof retVal->SALT);
+					if (extTimePos != 0 && extTimeSize != 0) {
+						retVal->EXT_DATE = new BYTE[extTimeSize];
+						memcpy(retVal->EXT_DATE, &checkCRC[extTimePos], extTimeSize);
+						retVal->EXT_DATE_SIZE = extTimeSize;
+					}
+
 					// Run some quick checks
 					if (validateRarFileBlock(retVal))
 					{
@@ -854,7 +1026,7 @@ bool CArchiveRecovery::validateRarFileBlock(RAR_BlockFile *block)
 {
 	if (block->HEAD_TYPE != 0x74)
 		return false;
-	if (block->UNP_SIZE < block->PACK_SIZE)
+	if ((block->HEAD_FLAGS & 0x0400/*LHD_SALT*/) == 0 && block->UNP_SIZE < block->PACK_SIZE)
 		return false;
 	if (block->HOST_OS > 5)
 		return false;
@@ -898,12 +1070,14 @@ void CArchiveRecovery::writeRarBlock(CFile *input, CFile *output, RAR_BlockFile 
 		writeUInt16(output, block->NAME_SIZE);
 		writeUInt32(output, block->ATTR);
 		// Optional values, present only if bit 0x100 in HEAD_FLAGS is set.
-		if ((block->HEAD_FLAGS & 0x100) == 0x100)
-		{
+		if ((block->HEAD_FLAGS & 0x100) == 0x100) {
 			writeUInt32(output, block->HIGH_PACK_SIZE);
 			writeUInt32(output, block->HIGH_UNP_SIZE);
 		}
 		output->Write(block->FILE_NAME, block->NAME_SIZE);
+		if (block->HEAD_FLAGS & 0x0400/*LHD_SALT*/)
+			output->Write(block->SALT, sizeof block->SALT);
+		output->Write(block->EXT_DATE, block->EXT_DATE_SIZE);
 
 		// Now copy compressed data from input file
 		uint32 lenToCopy = block->dataLength;

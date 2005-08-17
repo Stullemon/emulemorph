@@ -145,9 +145,9 @@ CStringW CDataIO::readStringUTF8(bool bOptACP)
 	}
 }
 
-CTag *CDataIO::readTag(bool bOptACP)
+CKadTag *CDataIO::readTag(bool bOptACP)
 {
-	CTag *retVal = NULL;
+	CKadTag *retVal = NULL;
 	char *name = NULL;
 	byte type = 0;
 	uint16 lenName = 0;
@@ -184,20 +184,20 @@ CTag *CDataIO::readTag(bool bOptACP)
 			{
 				BYTE value[16];
 				readHash(value);
-				retVal = new CTagHash(name, value);
+				retVal = new CKadTagHash(name, value);
 				break;
 			}
 
 			case TAGTYPE_STRING:
-				retVal = new CTagStr(name, readStringUTF8(bOptACP));
+				retVal = new CKadTagStr(name, readStringUTF8(bOptACP));
 				break;
 
 			case TAGTYPE_UINT32:
-				retVal = new CTagUInt32(name, readUInt32());
+				retVal = new CKadTagUInt32(name, readUInt32());
 				break;
 
 			case TAGTYPE_FLOAT32:
-				retVal = new CTagFloat(name, readFloat());
+				retVal = new CKadTagFloat(name, readFloat());
 				break;
 
 			// NOTE: This tag data type is accepted and stored only to give us the possibility to upgrade 
@@ -209,7 +209,7 @@ CTag *CDataIO::readTag(bool bOptACP)
 				uint8 size;
 				BYTE* value = readBsob(&size);
 				try{
-					retVal = new CTagBsob(name, value, size);
+					retVal = new CKadTagBsob(name, value, size);
 				}
 				catch(CException*){
 					delete[] value;
@@ -220,11 +220,11 @@ CTag *CDataIO::readTag(bool bOptACP)
 			}
 
 			case TAGTYPE_UINT16:
-				retVal = new CTagUInt16(name, readUInt16());
+				retVal = new CKadTagUInt16(name, readUInt16());
 				break;
 
 			case TAGTYPE_UINT8:
-				retVal = new CTagUInt8(name, readUInt8());
+				retVal = new CKadTagUInt8(name, readUInt8());
 				break;
 
 			default:
@@ -248,7 +248,7 @@ void CDataIO::readTagList(TagList* taglist, bool bOptACP)
 	uint32 count = readByte();
 	for (uint32 i=0; i<count; i++)
 	{
-		CTag* tag = readTag(bOptACP);
+		CKadTag* tag = readTag(bOptACP);
 		taglist->push_back(tag);
 	}
 }
@@ -294,7 +294,7 @@ void CDataIO::writeBsob(const BYTE* value, uint8 size)
 	writeArray(value, size);
 }
 
-void CDataIO::writeTag(const CTag* tag)
+void CDataIO::writeTag(const CKadTag* tag)
 {
 	try
 	{
@@ -313,7 +313,7 @@ void CDataIO::writeTag(const CTag* tag)
 
 		writeByte(type);
 
-		const CTagNameString& name = tag->m_name;
+		const CKadTagNameString& name = tag->m_name;
 		writeUInt16(name.GetLength());
 		writeArray((LPCSTR)name, name.GetLength());
 
@@ -364,25 +364,25 @@ void CDataIO::writeTag(const CTag* tag)
 
 void CDataIO::writeTag(LPCSTR name, uint32 value)
 {
-	CTagUInt32 tag(name, value);
+	CKadTagUInt32 tag(name, value);
 	writeTag(&tag);
 }
 
 void CDataIO::writeTag(LPCSTR name, uint16 value)
 {
-	CTagUInt16 tag(name, value);
+	CKadTagUInt16 tag(name, value);
 	writeTag(&tag);
 }
 
 void CDataIO::writeTag(LPCSTR name, uint8 value)
 {
-	CTagUInt8 tag(name, value);
+	CKadTagUInt8 tag(name, value);
 	writeTag(&tag);
 }
 
 void CDataIO::writeTag(LPCSTR name, float value)
 {
-	CTagFloat tag(name, value);
+	CKadTagFloat tag(name, value);
 	writeTag(&tag);
 }
 
@@ -434,7 +434,7 @@ bool CKademlia::initUnicode(HMODULE hInst)
 	return bResult;
 }
 
-void KadTagStrMakeLower(CTagValueString& rwstr)
+void KadTagStrMakeLower(CKadTagValueString& rwstr)
 {
 	// NOTE: We can *not* use any locale dependant string functions here. All clients in the network have to
 	// use the same character mapping whereby it actually does not matter if they 'understand' the strings

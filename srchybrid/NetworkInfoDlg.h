@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ResizableLib/ResizableDialog.h"
+#include "ResizableLib/ResizableDialog.h"
 #include "RichEditCtrlX.h"
 
 // CNetworkInfoDlg dialog

@@ -45,13 +45,18 @@ public:
 	virtual ~CEMSocket();
 
 	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-    bool    HasQueues();
     bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
 	virtual bool IsRawDataMode() const { return false; }
 	void	SetDownloadLimit(uint32 limit);
 	void	DisableDownloadLimit();
 	BOOL	AsyncSelect(long lEvent);
+	//MORPH - Changed by SiRoB, Show busyTime
+	/*
+	virtual bool IsBusy() const			{return m_bBusy;}
+	*/
+	virtual bool IsBusy() const			{return m_dwBusy!=0;}
+	virtual bool HasQueues() const		{return (sendbuffer || standartpacket_queue.GetCount() > 0 || controlpacket_queue.GetCount() > 0);} // not trustworthy threaded? but it's ok if we don't get the correct result now and then
 
 	virtual UINT GetTimeOut() const;
 	virtual void SetTimeOut(UINT uTimeOut);
@@ -62,7 +67,7 @@ public:
 	virtual void RemoveAllLayers();
 
     DWORD GetLastCalledSend() { return lastCalledSend; }
-	
+
     uint64 GetSentBytesCompleteFileSinceLastCallAndReset();
     uint64 GetSentBytesPartFileSinceLastCallAndReset();
     uint64 GetSentBytesControlPacketSinceLastCallAndReset();
@@ -73,7 +78,7 @@ public:
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
 
     uint32	GetNeededBytes(bool lowspeed);
-	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Upload Splitting Class
+	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -82,7 +87,7 @@ public:
 #endif
 
 protected:
-	virtual int	OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nParam1, int nParam2);	// deadlake PROXYSUPPORT
+	virtual int	OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nParam1, int nParam2);
 	
 	virtual void	DataReceived(const BYTE* pcData, UINT uSize);
 	virtual bool	PacketReceived(Packet* packet) = 0;
@@ -93,7 +98,6 @@ protected:
 
 	uint8	byConnected;
 	UINT	m_uTimeOut;
-
 	bool	m_ProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
 
@@ -131,10 +135,10 @@ private:
     uint64 m_numberOfSentBytesPartFile;
     uint64 m_numberOfSentBytesControlPacket;
     bool m_currentPackageIsFromPartFile;
-	bool	m_bAccelerateUpload;
+	bool m_bAccelerateUpload;
     DWORD lastCalledSend;
     DWORD lastSent;
-	uint32	lastFinishedStandard;
+	uint32 lastFinishedStandard;
     uint32 m_actualPayloadSize;
     uint32 m_actualPayloadSizeSent;
     //MORPH - Changed by SiRoB, Upload Splitting Class

@@ -112,15 +112,16 @@ static SLanguage _aLanguages[] =
 	{LANGID_KO_KR,	_T("korean"),		FALSE,	_T("ko_KR"),	 949,	_T("euc-kr")},			// Korean
 	{LANGID_LT_LT,	_T(""),				FALSE,	_T("lt_LT"),	1257,	_T("windows-1257")},	// Lithuanian
 	{LANGID_LV_LV,	_T(""),				FALSE,	_T("lv_LV"),	1257,	_T("windows-1257")},	// Latvian
-	{LANGID_NB_NO,	_T("norwegian"),	FALSE,	_T("nb_NO"),	1252,	_T("windows-1252")},	// Norwegian (Bokmal)
-	{LANGID_NN_NO,	_T("norwegian"),	FALSE,	_T("nn_NO"),	1252,	_T("windows-1252")},	// Norwegian (Nynorsk)
+	{LANGID_NB_NO,	_T("nor"),			FALSE,	_T("nb_NO"),	1252,	_T("windows-1252")},	// Norwegian (Bokmal)
+	{LANGID_NN_NO,	_T("non"),			FALSE,	_T("nn_NO"),	1252,	_T("windows-1252")},	// Norwegian (Nynorsk)
 	{LANGID_NL_NL,	_T("dutch"),		FALSE,	_T("nl_NL"),	1252,	_T("windows-1252")},	// Dutch (Netherlands)
 	{LANGID_PL_PL,	_T("polish"),		FALSE,	_T("pl_PL"),	1250,	_T("windows-1250")},	// Polish
 	{LANGID_PT_BR,	_T("ptb"),			FALSE,	_T("pt_BR"),	1252,	_T("windows-1252")},	// Portuguese (Brazil)
 	{LANGID_PT_PT,	_T("ptg"),			FALSE,	_T("pt_PT"),	1252,	_T("windows-1252")},	// Portuguese (Portugal)
 	{LANGID_RO_RO,	_T(""),				FALSE,	_T("ro_RO"),	1250,	_T("windows-1250")},	// Rumänisch
 	{LANGID_RU_RU,	_T("russian"),		FALSE,	_T("ru_RU"),	1251,	_T("windows-1251")},	// Russian
-	{LANGID_SL_SI,	_T(""),				FALSE,	_T("sl_SI"),	1250,	_T("windows-1250")},	// Slovenian
+	{LANGID_SL_SI,	_T("slovak"),		FALSE,	_T("sl_SI"),	1250,	_T("windows-1250")},	// Slovenian
+	{LANGID_SQ_AL,	_T(""),				FALSE,	_T("sq_AL"),	1252,	_T("windows-1252")},	// Albanian (Albania)
 	{LANGID_SV_SE,	_T("swedish"),		FALSE,	_T("sv_SE"),	1252,	_T("windows-1252")},	// Swedish
 	{LANGID_TR_TR,	_T("turkish"),		FALSE,	_T("tr_TR"),	1254,	_T("windows-1254")},	// Turkish
 	{LANGID_ZH_CN,	_T("chs"),			FALSE,	_T("zh_CN"),	 936,	_T("gb2312")},			// Chinese (P.R.C.)
@@ -430,18 +431,18 @@ bool CheckThreadLocale()
 		CString str =
 			_T("eMule has detected that your system's codepage is not the same as eMule's current codepage. Do you want eMule to use your system's codepage for converting non-Unicode data to Unicode?\r\n")
 			_T("\r\n")
-			_T("If you want eMule to use your system's codepage for converting non-Unicode data, click 'Yes'. (This will give you more backward compatibility when reading older *.met files created with non-Unicode eMule versions.)\r\n")
+			_T("If you want eMule to use the current codepage for converting non-Unicode data, click 'Yes'. (If you are using eMule the first time or if you don't care about this issue at all, chose this option. This is recommended.)\r\n")
 			_T("\r\n")
-			_T("If you want eMule to use the current codepage for converting non-Unicode data, click 'No'. (If you are using eMule the first time or if you don't care about this issue at all, chose this option. This is recommended.)\r\n")
+			_T("If you want eMule to use your system's codepage for converting non-Unicode data, click 'No'. (This will give you more backward compatibility when reading older *.met files created with non-Unicode eMule versions.)\r\n")
 			_T("\r\n")
 			_T("If you want to cancel and create backup of all your config files or visit our forum to learn more about this issue, click 'Cancel'.\r\n");
-		int iAnswer = AfxMessageBox(str, MB_ICONSTOP | MB_YESNOCANCEL | MB_DEFBUTTON2);
+		int iAnswer = AfxMessageBox(str, MB_ICONSTOP | MB_YESNOCANCEL | MB_DEFBUTTON1);
 		if (iAnswer == IDCANCEL)
 			return false;
-		if (iAnswer == IDYES)
+		if (iAnswer == IDNO)
 			iSetSysACP = 1;
 	}
-	theApp.WriteProfileInt(_T("eMule"), _T("SetSystemACP"), iSetSysACP);
+	VERIFY( theApp.WriteProfileInt(_T("eMule"), _T("SetSystemACP"), iSetSysACP) );
 	return true;
 }
 

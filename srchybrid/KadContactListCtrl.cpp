@@ -35,7 +35,6 @@ enum ECols
 {
 	colID = 0,
 	colType,
-	colContact,
 	colDistance
 };
 
@@ -50,7 +49,7 @@ END_MESSAGE_MAP()
 CKadContactListCtrl::CKadContactListCtrl()
 {
 	SetGeneralPurposeFind(true);
-	m_strLVName = _T("ONContactListCtrl");
+	SetName(_T("ONContactListCtrl"));
 }
 
 CKadContactListCtrl::~CKadContactListCtrl()
@@ -63,24 +62,21 @@ void CKadContactListCtrl::Init()
 
 	InsertColumn(colID,GetResString(IDS_ID),LVCFMT_LEFT,100);
 	InsertColumn(colType,GetResString(IDS_TYPE) ,LVCFMT_LEFT,50);
-	InsertColumn(colContact, GetResString(IDS_KADCONTACTLAB) ,LVCFMT_LEFT,50);
 	InsertColumn(colDistance,GetResString(IDS_KADDISTANCE),LVCFMT_LEFT,50);
 	SetAllIcons();
 	Localize();
 
-	CIni ini(thePrefs.GetConfigFile(), _T("eMule"));
-	LoadSettings(&ini, m_strLVName);
-	int iSortItem = ini.GetInt(m_strLVName + _T("SortItem"));
-	bool bSortAscending = ini.GetBool(m_strLVName + _T("SortAscending"));
+	LoadSettings();
+	int iSortItem = GetSortItem();
+	bool bSortAscending = GetSortAscending();
+
 	SetSortArrow(iSortItem, bSortAscending);
 	SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
 }
 
-void CKadContactListCtrl::SaveAllSettings(CIni* ini)
+void CKadContactListCtrl::SaveAllSettings()
 {
-	SaveSettings(ini, m_strLVName);
-	ini->WriteInt(m_strLVName + _T("SortItem"), GetSortItem());
-	ini->WriteBool(m_strLVName + _T("SortAscending"), GetSortAscending());
+	SaveSettings();
 }
 
 void CKadContactListCtrl::OnSysColorChange()
@@ -95,9 +91,8 @@ void CKadContactListCtrl::SetAllIcons()
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
 	iml.Add(CTempIconLoader(_T("Contact0")));
+	iml.Add(CTempIconLoader(_T("Contact1")));
 	iml.Add(CTempIconLoader(_T("Contact2")));
-	iml.Add(CTempIconLoader(_T("Contact4")));
-	//right now we only have 3 types... But this may change in the future..
 	iml.Add(CTempIconLoader(_T("Contact3")));
 	iml.Add(CTempIconLoader(_T("Contact4")));
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
@@ -113,12 +108,13 @@ void CKadContactListCtrl::Localize()
 	hdi.mask = HDI_TEXT;
 	CString strRes;
 
-	for (int icol=0;icol< pHeaderCtrl->GetItemCount() ;icol++) {
-		switch (icol) {
-			case 0: strRes = GetResString(IDS_ID); break;
-			case 1: strRes = GetResString(IDS_TYPE); break;
-			case 2: strRes = GetResString(IDS_KADCONTACTLAB); break;
-			case 3: strRes = GetResString(IDS_KADDISTANCE); break;
+	for (int icol=0;icol< pHeaderCtrl->GetItemCount() ;icol++) 
+	{
+		switch (icol) 
+		{
+			case colID: strRes = GetResString(IDS_ID); break;
+			case colType: strRes = GetResString(IDS_TYPE); break;
+			case colDistance: strRes = GetResString(IDS_KADDISTANCE); break;
 		}
 	
 		hdi.pszText = strRes.GetBuffer();
@@ -147,12 +143,6 @@ void CKadContactListCtrl::UpdateContact(int iItem, const Kademlia::CContact* con
 
 		SetItem(iItem,0,LVIF_IMAGE,0,contact->getType()>4?4:contact->getType(),0,0,0,0);
 	}
-	
-	if(contact->madeContact())
-		id = GetResString(IDS_YES);
-	else
-		id = GetResString(IDS_NO);
-	SetItemText(iItem,colContact,id);
 }
 
 void CKadContactListCtrl::UpdateKadContactCount()
@@ -235,6 +225,7 @@ void CKadContactListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	iSortItem = pNMListView->iSubItem;
 
 	// Sort table
+	UpdateSortHistory(MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
 	SetSortArrow(iSortItem, bSortAscending);
 	SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
 
@@ -263,17 +254,14 @@ int CKadContactListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamS
 		case colType:
 			iResult = item1->getType() - item2->getType();
 			break;
-		case colContact:
-			iResult = item1->madeContact() - item2->madeContact();
-			break;
 		case colDistance:
-			{
-				Kademlia::CUInt128 distance1, distance2;
-				item1->getDistance(&distance1);
-				item2->getDistance(&distance2);
-				iResult = distance1.compareTo(distance2);
-				break;
-			}
+		{
+			Kademlia::CUInt128 distance1, distance2;
+			item1->getDistance(&distance1);
+			item2->getDistance(&distance2);
+			iResult = distance1.compareTo(distance2);
+			break;
+		}
 		default:
 			return 0;
 	}

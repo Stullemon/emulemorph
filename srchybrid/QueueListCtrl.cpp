@@ -59,6 +59,7 @@ CQueueListCtrl::CQueueListCtrl()
 
 void CQueueListCtrl::Init()
 {
+	SetName(_T("QueueListCtrl"));
 	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
 	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
 	SetImageList(&ilDummyImageList, LVSIL_SMALL);
@@ -98,19 +99,11 @@ void CQueueListCtrl::Init()
 
 	SetAllIcons();
 	Localize();
-	LoadSettings(CPreferences::tableQueue);
+	LoadSettings();
 	// Barry - Use preferred sort order from preferences
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableQueue);
-	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableQueue);
-	SetSortArrow(sortItem, sortAscending);
-	// SLUGFILLER: multiSort - load multiple params
-	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableQueue); i > 0; ) {
-		i--;
-		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableQueue, i);
-		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableQueue, i);
-		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
-	}
-	// SLUGFILLER: multiSort
+	SetSortArrow();
+	SortItems(SortProc, GetSortItem() + (GetSortAscending() ? 0:100));
+
 	// Mighty Knife: Community affiliation
 	if (thePrefs.IsCommunityEnabled ()) ;// ShowColumn (11); //Removed by SiRoB, some people may prefere disable it
 	else HideColumn (11);
@@ -344,14 +337,14 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//MORPH START - Added by SiRoB, Don't draw hidden Rect
 	RECT clientRect;
 	GetClientRect(&clientRect);
-	RECT cur_rec = lpDrawItemStruct->rcItem;
+	CRect cur_rec(lpDrawItemStruct->rcItem);
 	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
 		return;
 	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
-	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
+	if (lpDrawItemStruct->itemState & ODS_SELECTED) {
 		if(bCtrlFocused)
 			odc->SetBkColor(m_crHighlight);
 		else
@@ -360,13 +353,13 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	else
 		odc->SetBkColor(GetBkColor());
 	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
-	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
+	CMemDC dc(odc, &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	//MORPH - Moved by SiRoB, Don't draw hidden Rect
 	/*
-	RECT cur_rec = lpDrawItemStruct->rcItem;
+	CRect cur_rec(lpDrawItemStruct->rcItem);
 	*/
-	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+	COLORREF crOldTextColor = dc.SetTextColor((lpDrawItemStruct->itemState & ODS_SELECTED) ? m_crHighlightText : m_crWindowText);
 
 	int iOldBkMode;
 	if (m_crWindowTextBk == CLR_NONE){
@@ -376,13 +369,12 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	else
 		iOldBkMode = OPAQUE;
 
-	CString Sbuffer;
 	CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 	int iCount = pHeaderCtrl->GetItemCount();
 	cur_rec.right = cur_rec.left - 8;
 	cur_rec.left += 4;
-
+	CString Sbuffer;
 	for(int iCurrent = 0; iCurrent < iCount; iCurrent++){
 		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 		if( !IsColumnHidden(iColumn) ){
@@ -445,7 +437,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//EastShare End - added by AndCycle, IP to Country
 
 						cur_rec.left +=20;
-						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						dc.DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 						cur_rec.left -=20;
 
 						//EastShare Start - added by AndCycle, IP to Country
@@ -460,7 +452,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						if(file)
 							Sbuffer = file->GetFileName();
 						else
-							Sbuffer = "?";
+						Sbuffer = _T("?");
 						break;
 					case 2:
 						if(file){
@@ -625,29 +617,29 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//MORPH END   - Added by SiRoB, WebCache 1.2f
 				}
 				if( iColumn != 9 && iColumn != 0 && iColumn != 13 && iColumn != 14) //JP Webcache added Column 14
-					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+					dc.DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 			}//MORPH - Added by SiRoB, Don't draw hidden colums
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
 
 	//draw rectangle around selected item(s)
-	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
+	if (lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
 		RECT outline_rec = lpDrawItemStruct->rcItem;
 
 		outline_rec.top--;
 		outline_rec.bottom++;
-		dc->FrameRect(&outline_rec, &CBrush(GetBkColor()));
+		dc.FrameRect(&outline_rec, &CBrush(GetBkColor()));
 		outline_rec.top++;
 		outline_rec.bottom--;
 		outline_rec.left++;
 		outline_rec.right--;
 
 		if(bCtrlFocused)
-			dc->FrameRect(&outline_rec, &CBrush(m_crFocusLine));
+			dc.FrameRect(&outline_rec, &CBrush(m_crFocusLine));
 		else
-			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
+			dc.FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
 	
 	if (m_crWindowTextBk == CLR_NONE)
@@ -773,17 +765,12 @@ void CQueueListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableQueue);
-	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableQueue);
-	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
-	// Item is column clicked
-	sortItem = pNMListView->iSubItem;
-	// Save new preferences
-	thePrefs.SetColumnSortItem(CPreferences::tableQueue, sortItem);
-	thePrefs.SetColumnSortAscending(CPreferences::tableQueue, sortAscending);
+	bool sortAscending = (GetSortItem()!= pNMListView->iSubItem) ? true : !GetSortAscending();
+
 	// Sort table
-	SetSortArrow(sortItem, sortAscending);
-	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+	UpdateSortHistory(pNMListView->iSubItem + (sortAscending ? 0:100), 100);
+	SetSortArrow(pNMListView->iSubItem, sortAscending);
+	SortItems(SortProc, pNMListView->iSubItem + (sortAscending ? 0:100));
 
 	*pResult = 0;
 }
@@ -792,58 +779,62 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	const CUpDownClient* item1 = (CUpDownClient*)lParam1;
 	const CUpDownClient* item2 = (CUpDownClient*)lParam2;
+	int iResult=0;
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
-				return CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
+				iResult=CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
 			else if(item1->GetUserName())
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		case 100:
 			if(item2->GetUserName() && item1->GetUserName())
-				return CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
+				iResult=CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
 			else if(item2->GetUserName())
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		
 		case 1: {
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
-				return CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
+				iResult=CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
 			else if( file1 == NULL )
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		}
 		case 101: {
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
-				return CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
+				iResult=CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
 			else if( file1 == NULL )
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		}
 		
 		//MORPH START - Changed by SiRoB, ZZ Upload System
 		case 2: 
 		case 102: {
-			int result = 0;
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL)){
 				//only file priority
-				if (item1->GetPowerShared(file1)) result ++;
- 				if (item2->GetPowerShared(file2)) result --;
+				if (item1->GetPowerShared(file1)) ++iResult;
+ 				if (item2->GetPowerShared(file2)) --iResult;
 				//Morph Start - added by AndCycle, Equal Chance For Each File
-				if(result == 0 && (!thePrefs.IsEqualChanceEnable() || (item1->GetPowerShared(file1) && item2->GetPowerShared(file2))))
-					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
-				if (result == 0 && file1 != file2 && thePrefs.IsEqualChanceEnable()){
-					result =
+				if(iResult == 0 && (!thePrefs.IsEqualChanceEnable() || (item1->GetPowerShared(file1) && item2->GetPowerShared(file2))))
+					iResult = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
+				if (iResult == 0 && file1 != file2 && thePrefs.IsEqualChanceEnable()){
+					iResult =
 						file1->statistic.GetEqualChanceValue() < file2->statistic.GetEqualChanceValue() ? 1 :
 						file1->statistic.GetEqualChanceValue() > file2->statistic.GetEqualChanceValue() ? -1 :
 						0;
@@ -851,28 +842,27 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				//Morph End - added by AndCycle, Equal Chance For Each File
 			}
 			else if( file1 == NULL )
-				result = 1;
+				iResult = 1;
 			else
-				result = -1;
+				iResult = -1;
 
-			if(lParamSort == 2)
-				return result;
-			else
-				return -result;
+			if(lParamSort != 2)
+				iResult = -iResult;
+			break;
 		//MORPH END - Changed by SiRoB, ZZ Upload System
 		}
 		case 3: 
-			return CompareUnsigned(item1->GetScore(false,false,true), item2->GetScore(false,false,true));
+			iResult=CompareUnsigned(item1->GetScore(false,false,true), item2->GetScore(false,false,true));
+			break;
 		case 103: 
-			return CompareUnsigned(item2->GetScore(false,false,true), item1->GetScore(false,false,true));
+			iResult=CompareUnsigned(item2->GetScore(false,false,true), item1->GetScore(false,false,true));
+			break;
 
 		//MORPH START - Changed by SiRoB, ZZ Upload System
 		case 4: 
-			//return CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
+			//iResult=CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 		case 104: { 
-			//return CompareUnsigned(item2->GetScore(false), item1->GetScore(false));
-       		int result = 0;
-
+			//iResult=CompareUnsigned(item2->GetScore(false), item1->GetScore(false));
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			
@@ -882,31 +872,34 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				CUpDownClient *lClient = (CUpDownClient*)item2, *rClient = (CUpDownClient*)item1;
 
 				uint32 lScore = lClient->GetScore(false), rScore = rClient->GetScore(false);
-				result = 
+				iResult = 
 					theApp.uploadqueue->RightClientIsBetter(lClient, lScore, rClient, rScore) ? 1 :
 					theApp.uploadqueue->RightClientIsBetter(rClient, rScore, lClient, lScore) ? -1 :
 					0;
 
 			}
 			else if( file1 == NULL )
-				result = 1;
+				iResult = 1;
 			else
-				result = -1;
-			if(lParamSort == 4)
-				return result;
-			else
-				return -result;
+				iResult = -1;
+			if(lParamSort != 4)
+				iResult = -iResult;
+			break;
 		}
 		//MORPH END - Changed by SiRoB, ZZ Upload System
 		case 5: 
-			return item1->GetAskedCount() - item2->GetAskedCount();
+			iResult=item1->GetAskedCount() - item2->GetAskedCount();
+			break;
 		case 105: 
-			return item2->GetAskedCount() - item1->GetAskedCount();
+			iResult=item2->GetAskedCount() - item1->GetAskedCount();
+			break;
 		
 		case 6: 
-			return item1->GetLastUpRequest() - item2->GetLastUpRequest();
+			iResult=item1->GetLastUpRequest() - item2->GetLastUpRequest();
+			break;
 		case 106: 
-			return item2->GetLastUpRequest() - item1->GetLastUpRequest();
+			iResult=item2->GetLastUpRequest() - item1->GetLastUpRequest();
+			break;
 		
 		case 7: 
 			//EastShare START - Modified by TAHO, modified SUQWT
@@ -915,12 +908,13 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				sint64 time1 = item1->GetWaitStartTime();
 				sint64 time2 = item2->GetWaitStartTime();
 				if ( time1 == time2 ) {
-					return 0;
+					iResult = 0;
 				} else if ( time1 > time2 ) {
-					return 1;
+					iResult = 1;
 				} else {
-					return -1;
+					iResult = -1;
 				}
+				break;
 			}
 			//EastShare END - Modified by TAHO, modified SUQWT
 		case 107: 
@@ -930,84 +924,108 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				sint64 time1 = item1->GetWaitStartTime();
 				sint64 time2 = item2->GetWaitStartTime();
 				if ( time1 == time2 ) {
-					return 0;
+					iResult = 0;
 				} else if ( time1 < time2 ) {
-					return 1;
+					iResult = 1;
 				} else {
-					return -1;
+					iResult = -1;
 				}
+				break;
 			}
 			//EastShare END - Modified by TAHO, modified SUQWT
 		case 8: 
 			//MORPH - Changed by SiRoB, Code Optimization
 			/*		
-			return item1->IsBanned() - item2->IsBanned();
+			iResult=item1->IsBanned() - item2->IsBanned();
 			*/
-			return (item1->GetUploadState() == US_BANNED) - (item2->GetUploadState() == US_BANNED);
+			iResult=(item1->GetUploadState() == US_BANNED) - (item2->GetUploadState() == US_BANNED);
+			break;
 		case 108: 
 			//MORPH - Changed by SiRoB, Code Optimization
 			/*		
-			return item2->IsBanned() - item1->IsBanned();
+			iResult=item2->IsBanned() - item1->IsBanned();
 			*/
-			return (item2->GetUploadState() == US_BANNED) - (item1->GetUploadState() == US_BANNED);
-		
+			iResult=(item2->GetUploadState() == US_BANNED) - (item1->GetUploadState() == US_BANNED);
+			break;
 		case 9: 
-			return item1->GetUpPartCount()- item2->GetUpPartCount();
+			iResult=item1->GetUpPartCount()- item2->GetUpPartCount();
+			break;
 		case 109: 
-			return item2->GetUpPartCount() - item1->GetUpPartCount();
+			iResult=item2->GetUpPartCount() - item1->GetUpPartCount();
+			break;
 		//MORPH START - Modified by SiRoB, Client Software
 		case 10:
-			return item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
+			iResult=item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
+			break;
 		case 110:
-			return item1->GetClientSoftVer().CompareNoCase(item2->GetClientSoftVer());
+			iResult=item1->GetClientSoftVer().CompareNoCase(item2->GetClientSoftVer());
+			break;
 		//MORPH END - Modified by SiRoB, Client Software
 
 		// Mighty Knife: Community affiliation
 		case 11:
-			return item1->IsCommunity() - item2->IsCommunity();
+			iResult=item1->IsCommunity() - item2->IsCommunity();
+			break;
 		case 111:
-			return item2->IsCommunity() - item1->IsCommunity();
+			iResult=item2->IsCommunity() - item1->IsCommunity();
+			break;
 		// [end] Mighty Knife
 		// EastShare - Added by Pretender, Friend Tab
 		case 12:
-			return item1->IsFriend() - item2->IsFriend();
+			iResult=item1->IsFriend() - item2->IsFriend();
+			break;
 		case 112:
-			return item2->IsFriend() - item1->IsFriend();
+			iResult=item2->IsFriend() - item1->IsFriend();
+			break;
 		// EastShare - Added by Pretender, Friend Tab
                // Commander - Added: IP2Country column - Start
 		case 13:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
+				iResult=CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 
 		case 113:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
+				iResult=CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
 			else if(item2->GetCountryName(true))
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
                 // Commander - Added: IP2Country column - End
+			break;
 		//MORPH START - Add by SiRoB, WebCache 1.2f
 		//JP Webcache START 
 		case 14:
 			if (item1->SupportsWebCache() && item2->SupportsWebCache() )
-				return CompareLocaleStringNoCase(item1->GetWebCacheName(),item2->GetWebCacheName());
+				iResult=CompareLocaleStringNoCase(item1->GetWebCacheName(),item2->GetWebCacheName());
 			else
-				return item1->SupportsWebCache() - item2->SupportsWebCache();
+				iResult=item1->SupportsWebCache() - item2->SupportsWebCache();
+			break;
 		case 114:
 			if (item2->SupportsWebCache() && item1->SupportsWebCache() )
-				return CompareLocaleStringNoCase(item2->GetWebCacheName(),item1->GetWebCacheName());
+				iResult=CompareLocaleStringNoCase(item2->GetWebCacheName(),item1->GetWebCacheName());
 			else
-				return item2->SupportsWebCache() - item1->SupportsWebCache();
+				iResult=item2->SupportsWebCache() - item1->SupportsWebCache();
 		//JP Webcache END
+			break;
 		//MORPH END   - Add by SiRoB, WebCache 1.2f
 		default:
-			return 0;
+			iResult=0;
+			break;
 	}
+	int dwNextSort;
+	//call secondary sortorder, if this one results in equal
+	//(Note: yes I know this call is evil OO wise, but better than changing a lot more code, while we have only one instance anyway - might be fixed later)
+	if (iResult == 0 && (dwNextSort = theApp.emuledlg->transferwnd->queuelistctrl.GetNextSortOrder(lParamSort)) != (-1)){
+		iResult= SortProc(lParam1, lParam2, dwNextSort);
+	}
+
+	return iResult;
+
 }
 
 // Barry - Refresh the queue every 10 secs

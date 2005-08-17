@@ -188,6 +188,7 @@ BOOL COScopeCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 // For example, to have a 1:2 ratio of Y-Scale to this trend, iRatio would be 2.
 // iRatio is 1 by default (No change in scale of data for this trend)
 // This function now borrows a bit from eMule Plus v1
+//
 void COScopeCtrl::SetTrendRatio(int iTrend, unsigned int iRatio)
 {
 	ASSERT(iTrend < m_NTrends && iRatio > 0);	// iTrend must be a valid trend in this plot.

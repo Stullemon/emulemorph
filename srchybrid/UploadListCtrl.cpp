@@ -33,6 +33,7 @@
 #include "kademlia/kademlia/Kademlia.h"
 #include "kademlia/net/KademliaUDPListener.h"
 #include "UploadQueue.h"
+#include "ToolTipCtrlX.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -48,10 +49,12 @@ IMPLEMENT_DYNAMIC(CUploadListCtrl, CMuleListCtrl)
 CUploadListCtrl::CUploadListCtrl()
 	: CListCtrlItemWalk(this)
 {
+	m_tooltip = new CToolTipCtrlX;
 }
 
 void CUploadListCtrl::Init()
 {
+	SetName(_T("UploadListCtrl"));
 	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
 	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
 	SetImageList(&ilDummyImageList, LVSIL_SMALL);
@@ -62,6 +65,7 @@ void CUploadListCtrl::Init()
 
 	CToolTipCtrl* tooltip = GetToolTips();
 	if (tooltip){
+		m_tooltip->SubclassWindow(tooltip->m_hWnd);
 		tooltip->ModifyStyle(0, TTS_NOPREFIX);
 		tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
 		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
@@ -101,20 +105,11 @@ void CUploadListCtrl::Init()
 
 	SetAllIcons();
 	Localize();
-	LoadSettings(CPreferences::tableUpload);
+	LoadSettings();
 
 	// Barry - Use preferred sort order from preferences
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableUpload);
-	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableUpload);
-	SetSortArrow(sortItem, sortAscending);
-	// SLUGFILLER: multiSort - load multiple params
-	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableUpload); i > 0; ) {
-		i--;
-		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableUpload, i);
-		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableUpload, i);
-		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
-	}
-	// SLUGFILLER: multiSort
+	SetSortArrow();
+	SortItems(SortProc, GetSortItem() + (GetSortAscending() ? 0:100));
 
 	// Mighty Knife: Community affiliation
 	if (thePrefs.IsCommunityEnabled ()) ;// ShowColumn (13); //Removed by SiRoB, some people may prefere disable it
@@ -127,7 +122,9 @@ void CUploadListCtrl::Init()
 	// Commander - Added: IP2Country column - End
 }
 
-CUploadListCtrl::~CUploadListCtrl(){
+CUploadListCtrl::~CUploadListCtrl()
+{
+	delete m_tooltip;
 }
 
 void CUploadListCtrl::OnSysColorChange()
@@ -340,13 +337,13 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//MORPH START - Added by SiRoB, Don't draw hidden Rect
 	RECT clientRect;
 	GetClientRect(&clientRect);
-	RECT cur_rec = lpDrawItemStruct->rcItem;
+	CRect cur_rec(lpDrawItemStruct->rcItem);
 	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
 		return;
 	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
-	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
+	if (lpDrawItemStruct->itemState & ODS_SELECTED) {
 		if(bCtrlFocused)
 			odc->SetBkColor(m_crHighlight);
 		else
@@ -355,13 +352,13 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	else
 		odc->SetBkColor(GetBkColor());
 	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
-	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
+	CMemDC dc(odc, &lpDrawItemStruct->rcItem);
 	CFont *pOldFont = dc.SelectObject(GetFont());
 	//MORPH - Moved by SiRoB, Don't draw hidden Rect
 	/*
-	RECT cur_rec = lpDrawItemStruct->rcItem;
+	CRect cur_rec(lpDrawItemStruct->rcItem);
 	*/
-	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+	COLORREF crOldTextColor = dc.SetTextColor((lpDrawItemStruct->itemState & ODS_SELECTED) ? m_crHighlightText : m_crWindowText);
 
 	if(client->IsScheduledForRemoval()) {
 		dc.SetTextColor(RGB(255,50,50));
@@ -377,23 +374,25 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	else
 		iOldBkMode = OPAQUE;
 
-	CString Sbuffer;
 	CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 	int iCount = pHeaderCtrl->GetItemCount();
 	cur_rec.right = cur_rec.left - 8;
 	cur_rec.left += 4;
-
-	for(int iCurrent = 0; iCurrent < iCount; iCurrent++){
+	CString Sbuffer;
+	for(int iCurrent = 0; iCurrent < iCount; iCurrent++)
+	{
 		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
-		if( !IsColumnHidden(iColumn) ){
+		if (!IsColumnHidden(iColumn))
+		{
 			cur_rec.right += GetColumnWidth(iColumn);
 			//MORPH START - Added by SiRoB, Don't draw hidden columns
 			if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 			{
 			//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				UINT dcdttext = DLC_DT_TEXT; //MORPH - Added by SiRoB, Justify Text Option
-				switch(iColumn){
+				switch(iColumn)
+				{
 					case 0:{
 						//MORPH START - Modified by SiRoB, More client & Credit overlay icon
 						uint8 image;
@@ -447,7 +446,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//EastShare End - added by AndCycle, IP to Country
 
 						cur_rec.left +=20;
-						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						dc.DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 						cur_rec.left -=20;
 
 						//EastShare Start - added by AndCycle, IP to Country
@@ -655,7 +654,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					// Commander - Added: IP2Country column - End	
 				}
 				if( iColumn != 7 && iColumn != 0 && iColumn != 15)
-					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,dcdttext);
+					dc.DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,dcdttext);
 			} //MORPH - Added by SiRoB, Don't draw hidden columns
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
@@ -668,16 +667,16 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 		outline_rec.top--;
 		outline_rec.bottom++;
-		dc->FrameRect(&outline_rec, &CBrush(GetBkColor()));
+		dc.FrameRect(&outline_rec, &CBrush(GetBkColor()));
 		outline_rec.top++;
 		outline_rec.bottom--;
 		outline_rec.left++;
 		outline_rec.right--;
 
 		if(bCtrlFocused)
-			dc->FrameRect(&outline_rec, &CBrush(m_crFocusLine));
+			dc.FrameRect(&outline_rec, &CBrush(m_crFocusLine));
 		else
-			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
+			dc.FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
 
 	if (m_crWindowTextBk == CLR_NONE)
@@ -800,17 +799,12 @@ void CUploadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableUpload);
-	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableUpload);
-	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
-	// Item is column clicked
-	sortItem = pNMListView->iSubItem;
-	// Save new preferences
-	thePrefs.SetColumnSortItem(CPreferences::tableUpload, sortItem);
-	thePrefs.SetColumnSortAscending(CPreferences::tableUpload, sortAscending);
+	bool sortAscending = (GetSortItem() != pNMListView->iSubItem) ? true : !GetSortAscending();
+
 	// Sort table
-	SetSortArrow(sortItem, sortAscending);
-	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+	UpdateSortHistory(pNMListView->iSubItem + (sortAscending ? 0:100));
+	SetSortArrow(pNMListView->iSubItem, sortAscending);
+	SortItems(SortProc, pNMListView->iSubItem + (sortAscending ? 0:100));
 
 	*pResult = 0;
 }
@@ -819,135 +813,180 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	const CUpDownClient* item1 = (CUpDownClient*)lParam1;
 	const CUpDownClient* item2 = (CUpDownClient*)lParam2;
+
+	int iResult=0;
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
-				return CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
+				iResult=CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
 			else if(item1->GetUserName())
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		case 100:
 			if(item1->GetUserName() && item2->GetUserName())
-				return CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
+				iResult=CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
 			else if(item2->GetUserName())
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		case 1: {
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
-				return CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
+				iResult=CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
 			else if( file1 == NULL )
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		}
 		case 101:{
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
-				return CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
+				iResult=CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
 			else if( file1 == NULL )
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		}
 		case 2: 
-			return CompareUnsigned(item1->GetDatarate(), item2->GetDatarate());
+			iResult=CompareUnsigned(item1->GetDatarate(), item2->GetDatarate());
+			break;
 		case 102:
-			return CompareUnsigned(item2->GetDatarate(), item1->GetDatarate());
+			iResult=CompareUnsigned(item2->GetDatarate(), item1->GetDatarate());
+			break;
 
 		//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 		case 3: 
-			return CompareUnsigned(item1->GetQueueSessionUp(), item2->GetQueueSessionUp());
+			iResult=CompareUnsigned(item1->GetQueueSessionUp(), item2->GetQueueSessionUp());
+			break;
 		case 103: 
-			return CompareUnsigned(item2->GetQueueSessionUp(), item1->GetQueueSessionUp());
+			iResult=CompareUnsigned(item2->GetQueueSessionUp(), item1->GetQueueSessionUp());
+			break;
 		//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 
 		case 4: 
-			return item1->GetWaitTime() - item2->GetWaitTime();
+			iResult=item1->GetWaitTime() - item2->GetWaitTime();
+			break;
 		case 104: 
-			return item2->GetWaitTime() - item1->GetWaitTime();
+			iResult=item2->GetWaitTime() - item1->GetWaitTime();
+			break;
+
 		case 5: 
-			return item1->GetUpStartTimeDelay() - item2->GetUpStartTimeDelay();
+			iResult=item1->GetUpStartTimeDelay() - item2->GetUpStartTimeDelay();
+			break;
 		case 105: 
-			return item2->GetUpStartTimeDelay() - item1->GetUpStartTimeDelay();
+			iResult=item2->GetUpStartTimeDelay() - item1->GetUpStartTimeDelay();
+			break;
+
 		case 6: 
-			return item1->GetUploadState() - item2->GetUploadState();
+			iResult=item1->GetUploadState() - item2->GetUploadState();
+			break;
 		case 106: 
-			return item2->GetUploadState() - item1->GetUploadState();
+			iResult=item2->GetUploadState() - item1->GetUploadState();
+			break;
+
 		case 7:
-			return item1->GetUpPartCount() - item2->GetUpPartCount();
+			iResult=item1->GetUpPartCount() - item2->GetUpPartCount();
+			break;
 		case 107: 
-			return item2->GetUpPartCount() - item1->GetUpPartCount();
+			iResult=item2->GetUpPartCount() - item1->GetUpPartCount();
+			break;
 		//MORPH START - Modified by SiRoB, Client Software	
 		case 8:
-			return item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
+			iResult=item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
+			break;
 		case 108:
-			return item1->GetClientSoftVer().CompareNoCase(item2->GetClientSoftVer());
+			iResult=item1->GetClientSoftVer().CompareNoCase(item2->GetClientSoftVer());
+			break;
 		//MORPH END - Modified by SiRoB, Client Software
 		
 		//MORPH START - Added By Yun.SF3, Upload/Download
 		case 9: // UP-DL TOTAL
-			return item2->Credits()->GetUploadedTotal() - item1->Credits()->GetUploadedTotal();
+			iResult=item2->Credits()->GetUploadedTotal() - item1->Credits()->GetUploadedTotal();
+			break;
 		case 109: 
-			return item2->Credits()->GetDownloadedTotal() - item1->Credits()->GetDownloadedTotal();
+			iResult=item2->Credits()->GetDownloadedTotal() - item1->Credits()->GetDownloadedTotal();
+			break;
 		//MORPH END - Added By Yun.SF3, Upload/Download
 		
 		//MORPH START - Added by SiRoB, ZZ Upload System
 		case 11:
-			return CompareUnsigned(item1->GetSlotNumber(), item2->GetSlotNumber());
+			iResult=CompareUnsigned(item1->GetSlotNumber(), item2->GetSlotNumber());
+			break;
 		case 111:
-			return CompareUnsigned(item2->GetSlotNumber(), item1->GetSlotNumber());
+			iResult=CompareUnsigned(item2->GetSlotNumber(), item1->GetSlotNumber());
+			break;
 		//MORPH END - Added by SiRoB, ZZ Upload System 20030724-0336
 
 		//MORPH START - Added by SiRoB, Show Compression by Tarod
 		case 12:
 			if (item1->GetCompression() == item2->GetCompression())
-				return 0;
+				iResult=0;
 			else
-				return item1->GetCompression() > item2->GetCompression()?1:-1;
+				iResult=item1->GetCompression() > item2->GetCompression()?1:-1;
+			break;
 		case 112:
 			if (item1->GetCompression() == item2->GetCompression())
-				return 0;
+				iResult=0;
 			else
-				return item2->GetCompression() > item1->GetCompression()?1:-1;
+				iResult=item2->GetCompression() > item1->GetCompression()?1:-1;
+			break;
 		//MORPH END - Added by SiRoB, Show Compression by Tarod
 		
 		// Mighty Knife: Community affiliation
 		case 13:
-			return item1->IsCommunity() - item2->IsCommunity();
+			iResult=item1->IsCommunity() - item2->IsCommunity();
+			break;
 		case 113:
-			return item2->IsCommunity() - item1->IsCommunity();
+			iResult=item2->IsCommunity() - item1->IsCommunity();
+			break;
 		// [end] Mighty Knife
 		// EastShare - Added by Pretender, Friend Tab
 		case 14:
-			return item1->IsFriend() - item2->IsFriend();
+			iResult=item1->IsFriend() - item2->IsFriend();
+			break;
 		case 114:
-			return item2->IsFriend() - item1->IsFriend();
+			iResult=item2->IsFriend() - item1->IsFriend();
+			break;
 		// EastShare - Added by Pretender, Friend Tab
         // Commander - Added: IP2Country column - Start
         case 15:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
+				iResult=CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
 		
 		case 115:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
+				iResult=CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
 			else if(item2->GetCountryName(true))
-				return 1;
+				iResult=1;
 			else
-				return -1;
+				iResult=-1;
+			break;
        // Commander - Added: IP2Country column - End
 		default:
-			return 0;
+			iResult=0;
+			break;
 	}
+	int dwNextSort;
+	//call secondary sortorder, if this one results in equal
+	//(Note: yes I know this call is evil OO wise, but better than changing a lot more code, while we have only one instance anyway - might be fixed later)
+	if (iResult == 0 && (dwNextSort = theApp.emuledlg->transferwnd->uploadlistctrl.GetNextSortOrder(lParamSort)) != (-1)){
+		iResult= SortProc(lParam1, lParam2, dwNextSort);
+	}
+
+	return iResult;
+
 }
 
 void CUploadListCtrl::ShowSelectedUserDetails()

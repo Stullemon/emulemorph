@@ -56,15 +56,43 @@ public:
 	int GetAllMenuEntries(CMenu& rMenu, const CPartFile* file);
 	void RunApp(CPartFile* file, UINT uMenuID);
 
+	enum ECanPreviewRes{
+		NotHandled,
+		No,
+		Yes
+	};
+	ECanPreviewRes CanPreview(const CPartFile* file);
+	int GetPreviewApp(const CPartFile* file);
+	bool Preview(CPartFile* file);
+
 protected:
 	struct SPreviewApp
 	{
+		SPreviewApp& operator=(const SPreviewApp& rCopy)
+		{
+			strTitle = rCopy.strTitle;
+			strCommand = rCopy.strCommand;
+			strCommandArgs = rCopy.strCommandArgs;
+			astrExtensions.Copy(rCopy.astrExtensions);
+			uMinStartOfFile = rCopy.uMinStartOfFile;
+			uMinCompletedSize = rCopy.uMinCompletedSize;
+			return *this;
+		}
+
 		CString strTitle;
 		CString strCommand;
 		CString strCommandArgs;
+		CStringArray astrExtensions;
+		UINT uMinStartOfFile;
+		UINT uMinCompletedSize;
 	};
 	CArray<SPreviewApp> m_aApps;
 	time_t m_tDefAppsFileLastModified;
+	CPartFile* m_pLastCheckedPartFile;
+	SPreviewApp* m_pLastPartFileApp;
+
+	void UpdateApps();
+
 };
 
 extern CPreviewApps thePreviewApps;

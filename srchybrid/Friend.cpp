@@ -26,7 +26,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -43,7 +43,7 @@ CFriend::CFriend(void)
 	md4cpy(m_abyUserhash, sm_abyNullHash);
 	m_dwHasHash = 0;
 
-	m_friendSlot = false;
+    m_friendSlot = false;
 }
 
 //Added this to work with the IRC.. Probably a better way to do it.. But wanted this in the release..
@@ -63,7 +63,7 @@ CFriend::CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedI
 	}
 	m_strName = pszName;
 	m_LinkedClient = 0;
-	m_friendSlot = false;
+    m_friendSlot = false;
 }
 
 CFriend::CFriend(CUpDownClient* client){
@@ -72,18 +72,18 @@ CFriend::CFriend(CUpDownClient* client){
 	m_dwLastUsedIP = client->GetIP();
 	m_nLastUsedPort = client->GetUserPort();
 	m_dwLastChatted = 0;
-	m_LinkedClient = NULL;
-	m_friendSlot = false;
-	SetLinkedClient(client);
+    m_LinkedClient = NULL;
+    m_friendSlot = false;
+    SetLinkedClient(client);
 }
 
 CFriend::~CFriend(void)
 {
-	if(m_LinkedClient != NULL) {
- 	m_LinkedClient->SetFriendSlot(false);
-	m_LinkedClient->m_Friend = NULL;
-	m_LinkedClient = NULL;
-	}
+    if(m_LinkedClient != NULL) {
+        m_LinkedClient->SetFriendSlot(false);
+        m_LinkedClient->m_Friend = NULL;
+        m_LinkedClient = NULL;
+    }
 }
 
 void CFriend::LoadFromFile(CFileDataIO* file)
@@ -114,7 +114,7 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 				break;
 			}
 			//MORPH END - Added by Yun.SF3, ZZ Upload System
-		}	
+		}
 		delete newtag;
 	}
 }
@@ -156,8 +156,8 @@ bool CFriend::HasUserhash() {
     for(int counter = 0; counter < 16; counter++) {
         if(m_abyUserhash[counter] != 0) {
             return true;
-}
-}
+        }
+    }
 
     return false;
 }
@@ -179,34 +179,34 @@ bool CFriend::GetFriendSlot() const {
 }
 
 void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
-	if(linkedClient != m_LinkedClient) {
-    	if(linkedClient != NULL) {
-    	    if(m_LinkedClient == NULL) {
-    	        linkedClient->SetFriendSlot(m_friendSlot);
-    	    } else {
-    	        linkedClient->SetFriendSlot(m_LinkedClient->GetFriendSlot());
-    	    }
+    if(linkedClient != m_LinkedClient) {
+        if(linkedClient != NULL) {
+            if(m_LinkedClient == NULL) {
+                linkedClient->SetFriendSlot(m_friendSlot);
+            } else {
+                linkedClient->SetFriendSlot(m_LinkedClient->GetFriendSlot());
+            }
 
-		    m_dwLastSeen = time(NULL);
-		    m_dwLastUsedIP = linkedClient->GetIP();
-		    m_nLastUsedPort = linkedClient->GetUserPort();
-		    m_strName = linkedClient->GetUserName();
-		    md4cpy(m_abyUserhash,linkedClient->GetUserHash());
-		    m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
+            m_dwLastSeen = time(NULL);
+            m_dwLastUsedIP = linkedClient->GetIP();
+            m_nLastUsedPort = linkedClient->GetUserPort();
+            m_strName = linkedClient->GetUserName();
+            md4cpy(m_abyUserhash,linkedClient->GetUserHash());
+            m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
 
-    	    linkedClient->m_Friend = this;
-    	} else if(m_LinkedClient != NULL) {
-    	    m_friendSlot = m_LinkedClient->GetFriendSlot();
-    	}
+            linkedClient->m_Friend = this;
+        } else if(m_LinkedClient != NULL) {
+            m_friendSlot = m_LinkedClient->GetFriendSlot();
+        }
 
-		if(m_LinkedClient != NULL) {
+        if(m_LinkedClient != NULL) {
             // the old client is no longer friend, since it is no longer the linked client
-			m_LinkedClient->SetFriendSlot(false);
-			m_LinkedClient->m_Friend = NULL;
-		}
+            m_LinkedClient->SetFriendSlot(false);
+            m_LinkedClient->m_Friend = NULL;
+        }
 
-		m_LinkedClient = linkedClient;
-	}
+        m_LinkedClient = linkedClient;
+    }
 
     theApp.friendlist->RefreshFriend(this);
 }

@@ -116,7 +116,7 @@ public:
 	ULONGLONG			m_ullComCtrlVer;
 	AppState			m_app_state; // defines application state for shutdown 
 	CMutex				hashing_mut;
-	CString*			pendinglink;
+	CString*			pstrPendingLink;
 	COPYDATASTRUCT		sendstruct;
 
 	//MORPH START - Added by SiRoB, [-modname-]
@@ -158,7 +158,7 @@ public:
 	CString		CreateKadSourceLink(const CAbstractFile* f);
 
 	// clipboard (text)
-	bool		CopyTextToClipboard( CString strText );
+	bool		CopyTextToClipboard(CString strText);
 	CString		CopyTextFromClipboard();
 
 	void		OnlineSig();
@@ -188,6 +188,7 @@ public:
 	void		ApplySkin(LPCTSTR pszSkinProfile);
 	void		EnableRTLWindowsLayout();
 	void		DisableRTLWindowsLayout();
+	void		UpdateDesktopColorDepth();
 
 	bool		GetLangHelpFilePath(CString& strResult);
 	void		SetHelpFilePath(LPCTSTR pszHelpFilePath);

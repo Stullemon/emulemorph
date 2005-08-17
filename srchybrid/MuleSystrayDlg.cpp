@@ -292,6 +292,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		if(bValidFont)
 			m_ctrlDisconnect.m_cfFont.CreateFontIndirect(&lfStaticFont);
 	}
+
 	p = GetDlgItem(IDC_PREFERENCES);
 	if(p)
 	{
@@ -363,11 +364,11 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		p->EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
 	}
 	if((p = GetDlgItem(IDC_DOWNKB)) != NULL)
-		p->SetWindowText(GetResString(IDS_KBYTESEC));
+		p->SetWindowText(GetResString(IDS_KBYTESPERSEC));
 	if((p = GetDlgItem(IDC_UPKB)) != NULL)
-		p->SetWindowText(GetResString(IDS_KBYTESEC));
+		p->SetWindowText(GetResString(IDS_KBYTESPERSEC));
 	if((p = GetDlgItem(IDC_MINUPKB)) != NULL){
-		p->SetWindowText(GetResString(IDS_KBYTESEC));
+		p->SetWindowText(GetResString(IDS_KBYTESPERSEC));
 		p->EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
 	}
 	GetDlgItem(IDC_MINUPTXT)->EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
@@ -394,7 +395,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	{
 		m_ctrlSidebar.SetColors(GetSysColor(COLOR_CAPTIONTEXT), 
 			GetSysColor(COLOR_ACTIVECAPTION), 
-			GetSysColor(27));	//COLOR_GRADIENTACTIVECAPTION
+								GetSysColor(COLOR_GRADIENTACTIVECAPTION));
 	}
 
 	m_ctrlSidebar.SetHorizontal(false);

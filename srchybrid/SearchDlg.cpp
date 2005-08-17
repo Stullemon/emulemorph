@@ -92,6 +92,8 @@ int CSearchDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_pwndResults->SendMessage(WM_INITIALUPDATE);
 
 	LoadBarState(SEARCH_PARAMS_PROFILE);
+	DockParametersWnd(); // Too much bug reports about vanished search parameters window. Force to dock.
+	ShowControlBar(m_pwndParams, TRUE, TRUE);
 	Localize();
 
 	return 0;
@@ -112,7 +114,10 @@ void CSearchDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CFrameWnd::OnShowWindow(bShow, nStatus);
 	if (m_pwndParams->IsFloating())
-		ShowControlBar(m_pwndParams, bShow, TRUE);
+	{
+		//ShowControlBar(m_pwndParams, bShow, TRUE);
+		DockParametersWnd(); // Too much bug reports about vanished search parameters window. Force to dock.
+	}
 }
 
 void CSearchDlg::OnSetFocus(CWnd* pOldWnd)
@@ -125,7 +130,6 @@ void CSearchDlg::OnSetFocus(CWnd* pOldWnd)
 void CSearchDlg::SaveAllSettings()
 {
 	m_pwndParams->SaveSettings(); 
-	m_pwndResults->SaveSettings();
 }
 
 void CSearchDlg::ResetHistory()
@@ -141,6 +145,17 @@ BOOL CSearchDlg::IsSearchParamsWndVisible() const
 void CSearchDlg::OpenParametersWnd()
 {
 	ShowControlBar(m_pwndParams, TRUE, TRUE);
+}
+
+void CSearchDlg::DockParametersWnd()
+{
+	if (m_pwndParams->IsFloating())
+	{
+		UINT uMRUDockID = AFX_IDW_DOCKBAR_TOP;
+		if (m_pwndParams->m_pDockContext)
+			uMRUDockID = m_pwndParams->m_pDockContext->m_uMRUDockID;
+		DockControlBar(m_pwndParams, uMRUDockID);
+	}
 }
 
 //MORPH - Changed by SiRoB, Selective Category Support
@@ -261,4 +276,10 @@ void CSearchDlg::OnSysCommand(UINT nID, LPARAM lParam)
 		return;
 	}
 	CFrameWnd::OnSysCommand(nID, lParam);
+}
+
+void CSearchDlg::UpdateSearch(CSearchFile* pSearchFile)
+{
+	if(m_pwndResults)
+		m_pwndResults->searchlistctrl.UpdateSearch(pSearchFile);
 }

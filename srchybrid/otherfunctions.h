@@ -35,6 +35,8 @@ __inline char* nstrdup(const char* todup){
 }
 
 TCHAR *stristr(const TCHAR *str1, const TCHAR *str2);
+CString GetNextString(const CString& rstr, LPCTSTR pszTokens, int& riStart);
+CString GetNextString(const CString& rstr, TCHAR chToken, int& riStart);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,6 +86,7 @@ void HTMLParse(CString &buffer); // Added by N_OxYdE
 //
 CString URLDecode(const CString& sIn);
 CString URLEncode(const CString& sIn);
+CString EncodeURLQueryParam(const CString& rstrQuery);
 CString MakeStringEscaped(CString in);
 CString RemoveAmbersand(const CString& rstr);
 CString	StripInvalidFilenameChars(const CString& strText, bool bKeepSpaces = true);
@@ -108,16 +111,21 @@ void MakeFoldername(TCHAR* path);
 CString RemoveFileExtension(const CString& rstrFilePath);
 int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
 CString StringLimit(CString in,uint16 length);
-CString CleanupFilename(CString filename);
+CString CleanupFilename(CString filename, bool bExtension = true);
+CString ValidFilename(CString filename);
 bool ExpandEnvironmentStrings(CString& rstrStrings);
 int CompareLocaleString(LPCTSTR psz1, LPCTSTR psz2);
 int CompareLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2);
 int __cdecl CompareCStringPtrLocaleString(const void* p1, const void* p2);
 int __cdecl CompareCStringPtrLocaleStringNoCase(const void* p1, const void* p2);
 void Sort(CStringArray& astr, int (__cdecl *pfnCompare)(const void*, const void*) = CompareCStringPtrLocaleStringNoCase);
+int __cdecl CompareCStringPtrPtrLocaleString(const void* p1, const void* p2);
+int __cdecl CompareCStringPtrPtrLocaleStringNoCase(const void* p1, const void* p2);
+void Sort(CSimpleArray<const CString*>& apstr, int (__cdecl *pfnCompare)(const void*, const void*) = CompareCStringPtrPtrLocaleStringNoCase);
 void StripTrailingCollon(CString& rstr);
 bool IsUnicodeFile(LPCTSTR pszFilePath);
-
+UINT64	GetFreeTempSpace(int tempdirindex);
+int		GetPathDriveNumber(CString path);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GUI helpers
@@ -189,11 +197,14 @@ void DebugHttpHeaders(const CStringAArray& astrHeaders);
 // Win32 specifics
 //
 bool HaveEd2kRegAccess();
-bool Ask4RegFix(bool checkOnly, bool dontAsk = false); // Barry - Allow forced update without prompt
+bool Ask4RegFix(bool checkOnly, bool dontAsk = false, bool bAutoTakeCollections = false); // Barry - Allow forced update without prompt
 void BackupReg(void); // Barry - Store previous values
 void RevertReg(void); // Barry - Restore previous values
+bool DoCollectionRegFix(bool checkOnly);
 void AddAutoStart();
 void RemAutoStart();
+ULONGLONG GetModuleVersion(LPCTSTR pszFilePath);
+ULONGLONG GetModuleVersion(HMODULE hModule);
 
 int GetMaxWindowsTCPConnections();
 
@@ -208,6 +219,8 @@ int			IsRunningXPSP2();
 uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory);
 ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
 int GetAppImageListColorFlag();
+int			GetDesktopColorDepth();
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,7 +241,7 @@ __inline int md4cmp(const void* hash1, const void* hash2) {
 		     ((uint32*)hash1)[3] == ((uint32*)hash2)[3]);
 }
 
-__inline int isnulmd4(const void* hash) {
+__inline bool isnulmd4(const void* hash) {
 	return  (((uint32*)hash)[0] == 0 &&
 		     ((uint32*)hash)[1] == 0 &&
 		     ((uint32*)hash)[2] == 0 &&
@@ -311,7 +324,8 @@ enum EED2KFileType
 	ED2KFT_PROGRAM,
 	ED2KFT_DOCUMENT,
 	ED2KFT_ARCHIVE,
-	ED2KFT_CDIMAGE
+	ED2KFT_CDIMAGE,
+	ED2KFT_EMULECOLLECTION
 };
 
 CString GetFileTypeByName(LPCTSTR pszFileName);

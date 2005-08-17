@@ -58,6 +58,7 @@ private:
 	char m_aucHostnameBuffer[MAXGETHOSTSTRUCT];
 };
 
+
 class CDownloadQueue
 {
 	friend class CAddFileThread;
@@ -70,7 +71,7 @@ public:
 
 	void	Process();
 	void	Init();
-
+	
 	// add/remove entries
 	void	AddPartFilesToShare();
 	void	AddDownload(CPartFile* newfile, bool paused);
@@ -96,7 +97,7 @@ public:
 	CPartFile* GetFileByKadFileSearchID(uint32 ID) const;
 	CPartFile* GetFileByMetFileName(const CString& rstrName) const;	// SLUGFILLER: SafeHash
 
-	void    StartNextFileIfPrefs(int cat);
+    void    StartNextFileIfPrefs(int cat);
 	// khaos::categorymod+
 	bool	StartNextFile(int cat=-1,bool force=false);
 	void	StopPauseLastFile(int Mode = MP_PAUSE, int Category = -1);
@@ -108,8 +109,6 @@ public:
 	uint8	GetAutoCat(CString sFullName, ULONG nFileSize);
 	bool	ApplyFilterMask(CString sFullName, uint8 nCat);
 	// khaos::categorymod-
-
-	void	DisableAllA4AFAuto(void);
 
 	// sources
 	CUpDownClient* GetDownloadClientByIP(uint32 dwIP);
@@ -126,7 +125,7 @@ public:
 	} SDownloadStats;
 	void	GetDownloadStats(SDownloadStats& results);
 	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
-	uint32	GetDatarate()			{return datarate;}
+	uint32	GetDatarate() {return datarate;}
 
 	void	AddUDPFileReasks()								{m_nUDPFileReasks++;}
 	uint32	GetUDPFileReasks() const						{return m_nUDPFileReasks;}
@@ -152,7 +151,7 @@ public:
 	void	ResetLocalServerRequests();
 
 	// searching in Kad
-	void	SetLastKademliaFileRequest()	{lastkademliafilerequest = ::GetTickCount();}
+	void	SetLastKademliaFileRequest()				{lastkademliafilerequest = ::GetTickCount();}
 	bool	DoKademliaFileRequest();
 	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, const Kademlia::CUInt128* pkadID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint32 clientid);
 
@@ -168,6 +167,8 @@ public:
 	void	OnConnectionState(bool bConnected);
 
 	void	AddToResolved( CPartFile* pFile, SUnresolvedHostname* pUH );
+
+	CString GetOptimalTempDir(uint8 nCat, uint32 nFileSize);
 
 	CServer* cur_udpserver;
 	bool	IsFilesPowershared(); //MORPH - Added by SiRoB, ZZ Ratio

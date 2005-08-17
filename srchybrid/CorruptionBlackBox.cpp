@@ -95,7 +95,6 @@ void CCorruptionBlackBox::TransferredData(uint32 nStartPos, uint32 nEndPos, cons
 		ASSERT( false );
 		return;
 	}
-	if(!pSender) return; //MORPH - Added by SiRoB, Import Parts [SR13]
 	uint32 dwSenderIP = pSender->GetIP();
 	// we store records seperated for each part, so we don't have to search all entries everytime
 	
@@ -145,7 +144,7 @@ void CCorruptionBlackBox::TransferredData(uint32 nStartPos, uint32 nEndPos, cons
 					m_aaRecords[nPart].Add(CCBBRecord(nTmpStartPos2,nTmpEndPos2, dwOldIP));
 					// and are done then
 				}
-				AddDebugLogLine(DLP_DEFAULT, false, _T("CorruptionBlackBox: Debug: %i bytes were rewritten and records replaced with new stats (1)"), (nRelEndPos - nRelStartPos)+1);
+				DEBUG_ONLY( AddDebugLogLine(DLP_DEFAULT, false, _T("CorruptionBlackBox: Debug: %i bytes were rewritten and records replaced with new stats (1)"), (nRelEndPos - nRelStartPos)+1) );
 				return;
 			}
 			else if (m_aaRecords[nPart][i].m_nStartPos >= nRelStartPos && m_aaRecords[nPart][i].m_nStartPos <= nRelEndPos){
@@ -169,7 +168,7 @@ void CCorruptionBlackBox::TransferredData(uint32 nStartPos, uint32 nEndPos, cons
 		m_aaRecords[nPart].Add(CCBBRecord(nRelStartPos, nRelEndPos, dwSenderIP, BBR_NONE));
 	
 	if (ndbgRewritten > 0){
-		AddDebugLogLine(DLP_DEFAULT, false, _T("CorruptionBlackBox: Debug: %i bytes were rewritten and records replaced with new stats (2)"), ndbgRewritten);
+		DEBUG_ONLY( AddDebugLogLine(DLP_DEFAULT, false, _T("CorruptionBlackBox: Debug: %i bytes were rewritten and records replaced with new stats (2)"), ndbgRewritten) );
 	}
 }
 

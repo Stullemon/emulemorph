@@ -109,7 +109,7 @@ void CMuleToolbarCtrl::Init(void)
 	// add button-text:
 	TCHAR cButtonStrings[2000];
 	int lLen, lLen2;
-	m_buttoncount=0;
+	m_buttoncount = 0;
 	
 	_tcscpy(cButtonStrings, GetResString(IDS_MAIN_BTN_CONNECT));
 	lLen = _tcslen(GetResString(IDS_MAIN_BTN_CONNECT)) + 1;
@@ -183,23 +183,23 @@ void CMuleToolbarCtrl::Init(void)
 		TBButtons[i].idCommand	= IDC_TOOLBARBUTTON + i;
 		TBButtons[i].iString	= i;
 
-		switch(i)
+		switch (TBButtons[i].idCommand)
 		{
-		case 0:
-		case 9:
-		case 10:
-		case 11:
-			TBButtons[i].fsStyle = TBSTYLE_BUTTON;
-			break;
+			case TBBTN_CONNECT:
+			case TBBTN_OPTIONS:
+			case TBBTN_TOOLS:
+			case TBBTN_HELP:
+				TBButtons[i].fsStyle = TBSTYLE_BUTTON;
+				break;
 		}
 	}
 
 	// set button image indices
 	int iBitmap = 0;
-	for(int i = 0; i < m_buttoncount; i++)
+	for (int i = 0; i < m_buttoncount; i++)
 	{		
 		TBButtons[i].iBitmap = iBitmap;
-		if (i == 0) // 'Connect' button has 3 states
+		if (TBButtons[i].idCommand == TBBTN_CONNECT) // 'Connect' button has 3 states
 			iBitmap += 3;
 		else
 			iBitmap += 1;

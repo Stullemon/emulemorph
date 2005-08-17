@@ -34,6 +34,7 @@
 #include "HelpIDs.h"
 #include "NetworkInfoDlg.h"
 #include "Log.h"
+#include "UserMsgs.h"
 #include <share.h> //Morph
 
 // Mighty Knife: Popup-Menu for editing news feeds
@@ -46,6 +47,7 @@
 #define PUGAPI_VERSION_MAJOR 1
 #define PUGAPI_VERSION_MINOR 2
 #include "pugxml.h"
+#define NEWSOFFSET 23
 //MORPH END   - Added by SiRoB, XML News [O²]
 
 #ifdef _DEBUG
@@ -54,6 +56,8 @@
 static char THIS_FILE[]=__FILE__;
 #endif
 
+#define	SVWND_SPLITTER_YOFF		10
+#define	SVWND_SPLITTER_HEIGHT	5
 
 #define	SERVERMET_STRINGS_PROFILE	_T("AC_ServerMetURLs.dat")
 #define SZ_DEBUG_LOG_TITLE			GetResString(IDS_VERBOSE_TITLE)
@@ -77,6 +81,7 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_EN_CHANGE(IDC_SNAME, OnSvrTextChange)
 	ON_EN_CHANGE(IDC_SERVERMETURL, OnSvrTextChange)
 	ON_STN_DBLCLK(IDC_SERVLST_ICO, OnStnDblclickServlstIco)
+	ON_NOTIFY(UM_SPN_SIZED, IDC_SPLITTER_SERVER, OnSplitterMoved)
 	//MORPH START - Added by SiRoB, XML News [O²]
 	ON_NOTIFY(EN_LINK, IDC_NEWSMSG, OnEnLinkNewsBox)
 	ON_BN_CLICKED(IDC_FEEDUPDATE, DownloadFeed)
@@ -376,6 +381,15 @@ BOOL CServerWnd::OnInitDialog()
 
 	InitWindowStyles(this);
 
+	// splitter
+	CRect rcSpl;
+	rcSpl.left = 55;
+	rcSpl.right = 300;//rcDlgItem.right;
+	rcSpl.top = 55+NEWSOFFSET;
+	rcSpl.bottom = rcSpl.top + SVWND_SPLITTER_HEIGHT;
+	m_wndSplitter.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_SERVER);
+	InitSplitter();
+
 	//MORPH START - Added by SiRoB, XML News [O²]
 	ListFeeds(); // Added by O? XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
@@ -617,7 +631,7 @@ bool CServerWnd::AddServer(uint16 nPort, CString strIP, CString strName, bool bS
 	CServer* toadd = new CServer(nPort, strIP);
 
 	// Barry - Default all manually added servers to high priority
-	if( thePrefs.GetManualHighPrio() )
+	if (thePrefs.GetManualAddedServersHighPriority())
 		toadd->SetPreference(SRV_PR_HIGH);
 
 	if (strName.IsEmpty())
@@ -952,7 +966,6 @@ void CServerWnd::OnBnConnect()
 void CServerWnd::SaveAllSettings()
 {
 	thePrefs.SetLastLogPaneID(StatusSelector.GetCurSel());
-	serverlistctrl.SaveSettings(CPreferences::tableServer);
 	SaveServerMetStrings();
 }
 
@@ -987,6 +1000,291 @@ void CServerWnd::OnSvrTextChange()
 void CServerWnd::OnStnDblclickServlstIco()
 {
 	theApp.emuledlg->ShowPreferences(IDD_PPG_SERVER);
+}
+
+void CServerWnd::DoResize(int delta)
+{
+	CSplitterControl::ChangeHeight( GetDlgItem(IDC_SERVLIST) , delta);
+
+	CSplitterControl::ChangeHeight( GetDlgItem(IDC_TAB3) , -delta,CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight( GetDlgItem(IDC_SERVMSG) , -delta,CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(GetDlgItem(IDC_LOGBOX), -delta, CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(GetDlgItem(IDC_DEBUG_LOG), -delta, CW_BOTTOMALIGN);
+	//MORPH START - Added by SiRoB, XML News [O²]
+	CSplitterControl::ChangeHeight(GetDlgItem(IDC_NEWSMSG), -delta, CW_BOTTOMALIGN);
+	//MORPH END   - Added by SiRoB, XML News [O²]
+	//MORPH START - Added by SiRoB, Morph Log
+	CSplitterControl::ChangeHeight(GetDlgItem(IDC_MORPH_LOG), -delta, CW_BOTTOMALIGN);
+	//MORPH END   - Added by SiRoB, Morph Log
+
+	UpdateSplitterRange();
+}
+
+void CServerWnd::InitSplitter()
+{
+	CRect rcWnd;
+	GetWindowRect(rcWnd);
+	ScreenToClient(rcWnd);
+
+	m_wndSplitter.SetRange(rcWnd.top+100,rcWnd.bottom-50 - NEWSOFFSET);
+	LONG splitpos = 5+(thePrefs.GetSplitterbarPositionServer() * rcWnd.Height()) / 100;
+
+	CRect rcDlgItem;
+
+	serverlistctrl.GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.bottom=splitpos-10;
+	serverlistctrl.MoveWindow(rcDlgItem);
+
+	//MORPH START - Added by SiRoB, XML News
+	GetDlgItem(IDC_FEEDUPDATE)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.top = splitpos + 9;
+	rcDlgItem.bottom = splitpos + 30;
+	GetDlgItem(IDC_FEEDUPDATE)->MoveWindow(rcDlgItem);
+
+	GetDlgItem(IDC_FEEDCHANGE)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.top = splitpos + 9;
+	rcDlgItem.bottom = splitpos + 30;
+	GetDlgItem(IDC_FEEDCHANGE)->MoveWindow(rcDlgItem);
+
+	GetDlgItem(IDC_FEEDLIST)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.top = splitpos + 9;
+	rcDlgItem.bottom = splitpos + 30;
+	GetDlgItem(IDC_FEEDLIST)->MoveWindow(rcDlgItem);
+	//MORPH END   - Added by SiRoB, XML News
+
+	GetDlgItem(IDC_LOGRESET)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	//MORPH START - Changed by SiRoB, XML News
+	/*
+	rcDlgItem.top = splitpos + 9;
+	rcDlgItem.bottom = splitpos + 30;
+	*/
+	rcDlgItem.top = splitpos + 9 + NEWSOFFSET;
+	rcDlgItem.bottom = splitpos + 30 + NEWSOFFSET;
+	//MORPH END   - Changed by SiRoB, XML News
+	GetDlgItem(IDC_LOGRESET)->MoveWindow(rcDlgItem);
+
+	GetDlgItem(IDC_TAB3)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	//MORPH START - Changed by SiRoB, XML News
+	/*
+	rcDlgItem.top = splitpos + 10;
+	*/
+	rcDlgItem.top = splitpos + 10 + NEWSOFFSET;
+	//MORPH END   - Changed by SiRoB, XML News
+	rcDlgItem.bottom = rcWnd.bottom-5;
+	GetDlgItem(IDC_TAB3)->MoveWindow(rcDlgItem);
+
+	servermsgbox->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	//MORPH START - Changed by SiRoB, XML News
+	/*
+	rcDlgItem.top=splitpos+35;
+	*/
+	rcDlgItem.top=splitpos+35+NEWSOFFSET;
+	//MORPH END   - Changed by SiRoB, XML News
+	rcDlgItem.bottom = rcWnd.bottom-12;
+	servermsgbox->MoveWindow(rcDlgItem);
+
+	logbox->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	//MORPH START - Changed by SiRoB, XML News
+	/*
+	rcDlgItem.top=splitpos+35;
+	*/
+	rcDlgItem.top=splitpos+35+NEWSOFFSET;
+	//MORPH END   - Changed by SiRoB, XML News
+	rcDlgItem.bottom = rcWnd.bottom-12;
+	logbox->MoveWindow(rcDlgItem);
+
+	debuglog->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	//MORPH START - Changed by SiRoB, XML News
+	/*
+	rcDlgItem.top=splitpos+35;
+	*/
+	rcDlgItem.top=splitpos+35+NEWSOFFSET;
+	//MORPH END  - Changed by SiRoB, XML News
+	rcDlgItem.bottom = rcWnd.bottom-12;
+	debuglog->MoveWindow(rcDlgItem);
+
+	//MORPH START - Added by SiRoB, XML News
+	newsmsgbox->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.top=splitpos+35+NEWSOFFSET;
+	rcDlgItem.bottom = rcWnd.bottom-12;
+	newsmsgbox->MoveWindow(rcDlgItem);
+	//MORPH END   - Added by SiRoB, XML News
+	//MORPH START - Added by SiRoB, Morph Log
+	morphlog->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.top=splitpos+35+NEWSOFFSET;
+	rcDlgItem.bottom = rcWnd.bottom-12;
+	morphlog->MoveWindow(rcDlgItem);
+	//MORPH END   - Added by SiRoB, Morph Log
+
+	long right=rcDlgItem.right;
+	GetDlgItem(IDC_SPLITTER_SERVER)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.right=right;
+	GetDlgItem(IDC_SPLITTER_SERVER)->MoveWindow(rcDlgItem);
+
+	ReattachAnchors();
+}
+
+void CServerWnd::ReattachAnchors() {
+	RemoveAnchor(IDC_SERVLIST);
+	RemoveAnchor(StatusSelector);
+	RemoveAnchor(IDC_LOGRESET);
+	RemoveAnchor(*servermsgbox);
+	RemoveAnchor(*logbox);
+	RemoveAnchor(*debuglog);
+	//MORPH START - Added by SiRoB, XML News
+	RemoveAnchor(IDC_FEEDUPDATE);
+	RemoveAnchor(IDC_FEEDCHANGE);
+	RemoveAnchor(IDC_FEEDLIST);
+	//MORPH END   - Added by SiRoB, XML News
+	//MORPH START - Added by SiRoB, XML News
+	RemoveAnchor(*newsmsgbox);
+	//MORPH END   - Added by SiRoB, XML News
+	//MORPH START - Added by SiRoB, Morph Log
+	RemoveAnchor(*morphlog);
+	//MORPH END   - Added by SiRoB, Morph Log
+
+	AddAnchor(IDC_SERVLIST, TOP_LEFT, CSize(100, thePrefs.GetSplitterbarPositionServer()));
+	AddAnchor(StatusSelector, CSize(0, thePrefs.GetSplitterbarPositionServer()), BOTTOM_RIGHT);
+	//MORPH START - Added by SiRoB, XML News
+	AddAnchor(IDC_FEEDUPDATE, BOTTOM_RIGHT);
+	AddAnchor(IDC_FEEDCHANGE, BOTTOM_RIGHT);
+	AddAnchor(IDC_FEEDLIST, BOTTOM_LEFT, BOTTOM_RIGHT);
+	//MORPH END   - Added by SiRoB, XML News
+	AddAnchor(IDC_LOGRESET,  BOTTOM_RIGHT);
+	AddAnchor(*servermsgbox,  CSize(0, thePrefs.GetSplitterbarPositionServer()), BOTTOM_RIGHT);
+	AddAnchor(*logbox,  CSize(0, thePrefs.GetSplitterbarPositionServer()), BOTTOM_RIGHT);
+	AddAnchor(*debuglog,  CSize(0, thePrefs.GetSplitterbarPositionServer()), BOTTOM_RIGHT);
+	//MORPH START - Added by SiRoB, XML News
+	AddAnchor(*newsmsgbox,  CSize(0, thePrefs.GetSplitterbarPositionServer()), BOTTOM_RIGHT);
+	//MORPH END   - Added by SiRoB, XML News
+	//MORPH START - Added by SiRoB, Morph Log
+	AddAnchor(*morphlog,  CSize(0, thePrefs.GetSplitterbarPositionServer()), BOTTOM_RIGHT);
+	//MORPH END   - Added by SiRoB, Morph Log
+}
+
+void CServerWnd::UpdateSplitterRange()
+{
+	CRect rcWnd;
+	GetWindowRect(rcWnd);
+	ScreenToClient(rcWnd);
+
+	CRect rcDlgItem;
+
+	serverlistctrl.GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+
+	m_wndSplitter.SetRange(rcWnd.top+100,rcWnd.bottom-50-NEWSOFFSET);  //(rcDlgItem.top,rcDlgItem2.bottom-50);
+
+	LONG splitpos = rcDlgItem.bottom + SVWND_SPLITTER_YOFF;
+	thePrefs.SetSplitterbarPositionServer( (splitpos  * 100) / rcWnd.Height());
+
+	GetDlgItem(IDC_TAB3)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.bottom = rcWnd.bottom-5;
+	//MORPH START - Changed by SiRoB, XML News
+	/*
+	rcDlgItem.top = splitpos + 10;
+	*/
+	rcDlgItem.top = splitpos + 10 + NEWSOFFSET;
+	//MORPH END - Changed by SiRoB, XML News
+
+	GetDlgItem(IDC_TAB3)->MoveWindow(rcDlgItem);
+
+	//MORPH START - Added by SiRoB, XML News
+	GetDlgItem(IDC_FEEDUPDATE)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.top = splitpos + 9;
+	rcDlgItem.bottom = splitpos + 30;
+	GetDlgItem(IDC_FEEDUPDATE)->MoveWindow(rcDlgItem);
+	
+	GetDlgItem(IDC_FEEDCHANGE)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.top = splitpos + 9;
+	rcDlgItem.bottom = splitpos + 30;
+	GetDlgItem(IDC_FEEDCHANGE)->MoveWindow(rcDlgItem);
+
+	GetDlgItem(IDC_FEEDLIST)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	rcDlgItem.top = splitpos + 9;
+	rcDlgItem.bottom = splitpos + 30;
+	GetDlgItem(IDC_FEEDLIST)->MoveWindow(rcDlgItem);
+	//MORPH END   - Added by SiRoB, XML News
+
+	GetDlgItem(IDC_LOGRESET)->GetWindowRect(rcDlgItem);
+	ScreenToClient(rcDlgItem);
+	//MORPH - Chnaged by SiRoB, XML News
+	/*
+	rcDlgItem.top = splitpos + 9;
+	rcDlgItem.bottom = splitpos + 30;
+	*/
+	rcDlgItem.top = splitpos + 9 + NEWSOFFSET;
+	rcDlgItem.bottom = splitpos + 30 + NEWSOFFSET;
+	GetDlgItem(IDC_LOGRESET)->MoveWindow(rcDlgItem);
+
+	ReattachAnchors();
+}
+
+LRESULT CServerWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+{
+	switch (message)
+	{
+		// arrange transferwindow layout
+		case WM_PAINT:
+			if (m_wndSplitter)
+			{
+				CRect rcWnd;
+				GetWindowRect(rcWnd);
+				if (rcWnd.Height() > 0)
+				{
+					CRect rcDown;
+					serverlistctrl.GetWindowRect(rcDown);
+					ScreenToClient(rcDown);
+
+					// splitter paint update
+					CRect rcSpl;
+					rcSpl.left = 10;
+					rcSpl.right = rcDown.right;
+					rcSpl.top = rcDown.bottom + SVWND_SPLITTER_YOFF;
+					rcSpl.bottom = rcSpl.top + SVWND_SPLITTER_HEIGHT;
+					m_wndSplitter.MoveWindow(rcSpl, TRUE);
+					UpdateSplitterRange();
+				}
+			}
+			break;
+
+	}
+
+	return CResizableDialog::DefWindowProc(message, wParam, lParam);
+}
+
+void CServerWnd::OnWindowPosChanged(WINDOWPOS* lpwndpos)
+{
+	if (m_wndSplitter)
+	{
+		CRect rcWnd;
+		GetWindowRect(rcWnd);
+		if (rcWnd.Height() > 0)
+			Invalidate();
+	}
+	CResizableDialog::OnWindowPosChanged(lpwndpos);
+}
+
+void CServerWnd::OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	SPC_NMHDR* pHdr = (SPC_NMHDR*)pNMHDR;
+	DoResize(pHdr->delta);
 }
 
 //MORPH START - Added by SiRoB, XML News [O²]
@@ -1427,10 +1725,8 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 			return true;
 		} break;
         //Commander - Added: Update All Feeds at once - End
-
-		default: return CResizableDialog::OnCommand (wParam, lParam);
 	}
-	return true;
+ 	return CResizableDialog::OnCommand (wParam, lParam);
 }
 
 // Read the content of the XMLNews.dat file. The file is constructed as:

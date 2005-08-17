@@ -17,6 +17,7 @@ class CSearchDlg : public CFrameWnd
 public:
 	CSearchDlg();           // protected constructor used by dynamic creation
 	virtual ~CSearchDlg();
+	CSearchResultsWnd* m_pwndResults;
 
 	BOOL Create(CWnd* pParent);
 
@@ -60,10 +61,13 @@ public:
 
 	BOOL IsSearchParamsWndVisible() const;
 	void OpenParametersWnd();
+	void DockParametersWnd();
+
+	void UpdateSearch(CSearchFile* pSearchFile);
 
 protected:
 	CSearchParamsWnd* m_pwndParams;
-	CSearchResultsWnd* m_pwndResults;
+
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

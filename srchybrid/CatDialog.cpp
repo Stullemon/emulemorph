@@ -279,20 +279,17 @@ void CCatDialog::OnBnClickedOk()
 	OnOK();
 }
 
-
 void CCatDialog::OnBnClickedCancel()
 {
-	m_bCancelled=true;
-	
+	m_bCancelled = true;
 	OnCancel();
 }
 
 LONG CCatDialog::OnSelChange(UINT lParam, LONG wParam)
 {
-	if (lParam==CLR_DEFAULT)
-		newcolor=0;		
+	if (lParam == CLR_DEFAULT)
+		newcolor = 0;		
 	else
-		newcolor=m_ctlColor.GetColor();
-	
+		newcolor = m_ctlColor.GetColor();
 	return TRUE;
 }

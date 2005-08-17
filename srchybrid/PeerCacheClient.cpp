@@ -80,7 +80,6 @@ void CPeerCacheSocket::DetachFromClient()
 		if (GetClient()->m_pPCUpSocket == this){
 			ASSERT(0);
 			GetClient()->m_pPCUpSocket = NULL;
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this); // Superlexx - from 0.44a PC code
 		}
 	}
 }
@@ -590,7 +589,7 @@ bool CUpDownClient::SendHttpBlockRequests()
 			SetPeerCacheDownState(PCDS_NONE);
 		}
 		SetDownloadState(DS_NONEEDEDPARTS);
-		/*zz*/SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendHttpBlockRequests()"), true, false, false, NULL, true, true);
+        SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendHttpBlockRequests()"), true, false, false, NULL, true, true);
 		return false;
 	}
 

@@ -174,6 +174,9 @@ CString GetTagNameByID(UINT id)
 		case FT_MEDIA_LENGTH: return GetResString(IDS_LENGTH);
 		case FT_MEDIA_BITRATE: return GetResString(IDS_BITRATE);
 		case FT_MEDIA_CODEC: return GetResString(IDS_CODEC);
+		case FT_FILECOMMENT: return GetResString(IDS_COMMENT);
+		case FT_FILERATING: return GetResString(IDS_QL_RATING);
+		case FT_FILEHASH: return GetResString(IDS_FILEHASH);
 		case 0xFA: return GetResString(IDS_META_SERVERPORT);
 		case 0xFB: return GetResString(IDS_META_SERVERIP);
 		case 0xFC: return GetResString(IDS_META_SRCUDPPORT);
@@ -205,7 +208,7 @@ CString GetName(const CTag* pTag)
 	return strName;
 }
 
-CString GetName(const Kademlia::CTag* pTag)
+CString GetName(const Kademlia::CKadTag* pTag)
 {
 	CString strName;
 	if (pTag->m_name.GetLength() == 1)
@@ -232,12 +235,14 @@ CString GetValue(const CTag* pTag)
 	}
 	else if (pTag->IsFloat())
 		strValue.Format(_T("%f"), pTag->GetFloat());
+	else if (pTag->IsHash())
+		strValue = md4str(pTag->GetHash());
 	else
 		strValue.Format(_T("<Unknown value of type 0x%02X>"), pTag->GetType());
 	return strValue;
 }
 
-CString GetValue(const Kademlia::CTag* pTag)
+CString GetValue(const Kademlia::CKadTag* pTag)
 {
 	CString strValue;
 	if (pTag->IsStr())
@@ -263,7 +268,9 @@ CString GetValue(const Kademlia::CTag* pTag)
 CString GetType(UINT uType)
 {
 	CString strValue;
-	if (uType == 2)
+	if (uType == 1)
+		strValue = _T("Hash");
+	else if (uType == 2)
 		strValue = _T("String");
 	else if (uType == 3)
 		strValue = _T("Int32");
@@ -346,7 +353,7 @@ void CMetaDataDlg::RefreshData()
 	}
 	else if (m_taglist != NULL)
 	{
-		const Kademlia::CTag* pTag;
+		const Kademlia::CKadTag* pTag;
 		Kademlia::TagList::const_iterator it;
 		for (it = m_taglist->begin(); it != m_taglist->end(); it++)
 		{

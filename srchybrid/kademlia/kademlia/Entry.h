@@ -25,6 +25,7 @@ there client on the eMule forum..
 */
 #pragma once
 #include "../kademlia/tag.h"
+#include "../utils/UInt128.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -33,55 +34,19 @@ namespace Kademlia {
 class CEntry
 {
 public:
-	CEntry()
-	{
-		ip = 0;
-		tcpport = 0;
-		udpport = 0;
-		(void)fileName;
-		size = 0;
-		lifetime = 0;
-		source = false;
-	}
-	~CEntry()
-	{
-		TagList::const_iterator it;
-		for (it = taglist.begin(); it != taglist.end(); it++)
-			delete *it;
-	}
-	
-	uint32 GetIntTagValue(LPCSTR tagname) const
-	{
-		TagList::const_iterator it;
-		Kademlia::CTag* tag;
-		for (it = taglist.begin(); it != taglist.end(); it++)
-		{
-			tag = *it;
-			if (!tag->m_name.Compare(tagname)&& tag->IsInt())
-				return tag->GetInt();
-		}
-		return 0;
-	}
+	CEntry();
+	~CEntry();
 
-	CStringW GetStrTagValue(LPCSTR tagname) const
-	{
-		TagList::const_iterator it;
-		Kademlia::CTag* tag;
-		for (it = taglist.begin(); it != taglist.end(); it++)
-		{
-			tag = *it;
-			if (!tag->m_name.Compare(tagname)&& tag->IsStr())
-				return tag->GetStr();
-		}
-		return _T("");
-	}
+	CEntry* Copy();
+	uint32 GetIntTagValue(LPCSTR tagname) const;
+	CStringW GetStrTagValue(LPCSTR tagname) const;
 
 	uint32 ip;
 	uint16 tcpport;
 	uint16 udpport;
 	CUInt128 keyID;
 	CUInt128 sourceID;
-	CTagValueString fileName; // NOTE: this always holds the string in LOWERCASE!!!
+	CKadTagValueString fileName; // NOTE: this always holds the string in LOWERCASE!!!
 	uint32	size;
 	TagList taglist;
 	time_t lifetime;

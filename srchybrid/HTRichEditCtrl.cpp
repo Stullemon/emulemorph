@@ -26,7 +26,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -529,7 +529,7 @@ void CHTRichEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		point.y = 32;
 		ClientToScreen(&point);
 	}
-	
+
 	// Cheap workaround for the "Text cursor is showing while context menu is open" glitch. It could be solved properly 
 	// with the RE's COM interface, but because the according messages are not routed with a unique control ID, it's not 
 	// really useable (e.g. if there are more RE controls in one window). Would to envelope each RE window to get a unique ID..

@@ -32,7 +32,7 @@ struct SUnresolvedHostname
 class CED2KLink
 {
 public:
-	static CED2KLink* CreateLinkFromUrl(  const TCHAR * url);
+	static CED2KLink* CreateLinkFromUrl(const TCHAR* url);
 	virtual ~CED2KLink();
 
 	// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
@@ -42,11 +42,11 @@ public:
 	typedef enum { kServerList, kServer , kFile , kFriend, kFriendList, kInvalid } LinkType;
 	// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 
-	virtual LinkType GetKind() const =0;
+	virtual LinkType GetKind() const = 0;
 	virtual void GetLink(CString& lnk) const = 0;
-	virtual class CED2KServerListLink* GetServerListLink() =0;
-	virtual class CED2KServerLink* GetServerLink() =0;
-	virtual class CED2KFileLink* GetFileLink() =0;
+	virtual class CED2KServerListLink* GetServerListLink() = 0;
+	virtual class CED2KServerLink* GetServerLink() = 0;
+	virtual class CED2KFileLink* GetFileLink() = 0;
 };
 
 
@@ -85,17 +85,17 @@ public:
 
 	virtual LinkType GetKind() const;
 	virtual void GetLink(CString& lnk) const;
-	virtual CED2KServerListLink*	GetServerListLink();
-	virtual CED2KServerLink*		GetServerLink();
-	virtual CED2KFileLink*			GetFileLink();
+	virtual CED2KServerListLink* GetServerListLink();
+	virtual CED2KServerLink* GetServerLink();
+	virtual CED2KFileLink* GetFileLink();
 	
-	const TCHAR*		GetName() const			{ return m_name; }
-	const uchar*		GetHashKey() const		{ return m_hash;}
-	const CAICHHash&	GetAICHHash() const		{ return m_AICHHash;}
-	long	GetSize() const						{ return _tstol(m_size); }	
-	bool	HasValidSources() const				{ return (SourcesList!=NULL); }
-	bool	HasHostnameSources() const			{ return (!m_HostnameSourcesList.IsEmpty()); }
-	bool	HasValidAICHHash() const			{ return m_bAICHHashValid; }
+	const TCHAR* GetName() const			{ return m_name; }
+	const uchar* GetHashKey() const			{ return m_hash;}
+	const CAICHHash& GetAICHHash() const	{ return m_AICHHash;}
+	long GetSize() const					{ return _tstol(m_size); }	
+	bool HasValidSources() const			{ return (SourcesList != NULL); }
+	bool HasHostnameSources() const			{ return (!m_HostnameSourcesList.IsEmpty()); }
+	bool HasValidAICHHash() const			{ return m_bAICHHashValid; }
 
 	CSafeMemFile* SourcesList;
 	CSafeMemFile* m_hashset;
@@ -110,7 +110,7 @@ private:
 	CString m_size;
 	uchar	m_hash[16];
 	bool	m_bAICHHashValid;
-	CAICHHash	m_AICHHash;
+	CAICHHash m_AICHHash;
 };
 
 

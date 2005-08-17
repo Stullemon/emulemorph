@@ -22,7 +22,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -444,9 +444,9 @@ void CCreditsThread::InitText()
     //Commander - Added: MorphTeam - Start
 	m_arCredits.Add(_T("02:04:Morph Developers"));
 	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:AndCycle"));
+	m_arCredits.Add(_T("01:06:AndCycle (inactive)"));
 	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:Commander"));
+	m_arCredits.Add(_T("01:06:Commander (inactive)"));
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:IceCream (inactive)"));
 	m_arCredits.Add(_T("S:5"));
@@ -540,11 +540,17 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("02:07:people for translating eMule"));
 	m_arCredits.Add(_T("02:07:into different languages:"));
 	m_arCredits.Add(_T("S:20"));
+	
+	
+	m_arCredits.Add(_T("01:06:Arabic: Dody"));
+	m_arCredits.Add(_T("S:05"));	
+	m_arCredits.Add(_T("01:06:Albanian: Besmir"));
+	m_arCredits.Add(_T("S:05"));	
 	m_arCredits.Add(_T("01:06:Basque: TXiKi"));
 	m_arCredits.Add(_T("S:05"));	
 	m_arCredits.Add(_T("01:06:Breton: KAD-Korvigelloù an Drouizig"));
 	m_arCredits.Add(_T("S:05"));	
-	m_arCredits.Add(_T("01:06:Bulgarian: DapKo"));
+	m_arCredits.Add(_T("01:06:Bulgarian: DapKo, Dumper"));
 	m_arCredits.Add(_T("S:05"));	
 	m_arCredits.Add(_T("01:06:Catalan: LeChuck"));
 	m_arCredits.Add(_T("S:05"));
@@ -562,7 +568,7 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Finnish: Nikerabbit"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:French: Emzc, Lalrobin"));
+	m_arCredits.Add(_T("01:06:French: Motte, Emzc, Lalrobin"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Galician: Juan, Emilio R."));
 	m_arCredits.Add(_T("S:05"));
@@ -578,7 +584,7 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Korean: pooz"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Latvian: Ai"));
+	m_arCredits.Add(_T("01:06:Latvian: Zivs"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Lithuanian: Daan"));
 	m_arCredits.Add(_T("S:05"));

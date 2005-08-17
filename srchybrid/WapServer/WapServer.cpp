@@ -2578,7 +2578,7 @@ CString CWapServer::_GetGraphs(WapThreadData Data)
 	/**/ //MORPH - Don't use <1KB Increment just change this /**/ into /* to toggle :)
 	CString s1, s2,s3;
 	s1.Format(_T("%d"), thePrefs.GetMaxGraphDownloadRate() + 4);
-	s2.Format(_T("%d"), thePrefs.GetMaxGraphUploadRate() + 4);
+	s2.Format(_T("%d"), thePrefs.GetMaxGraphUploadRate(true) + 4);
 	s3.Format(_T("%d"), thePrefs.GetMaxConnections()+20);
 
 	Out.Replace(_T("[ScaleTime]"), sScale);
@@ -2955,7 +2955,7 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 		{
 			thePrefs.SetMaxUpload(_ttoi(_ParseURL(Data.sURL, _T("maxup"))));
 		}
-		uint16 lastmaxgu=thePrefs.GetMaxGraphUploadRate();
+		uint16 lastmaxgu=thePrefs.GetMaxGraphUploadRate(false);
 		uint16 lastmaxgd=thePrefs.GetMaxGraphDownloadRate();
 
 		if(_ParseURL(Data.sURL, _T("maxcapdown")) != "")
@@ -2967,8 +2967,8 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 			thePrefs.SetMaxGraphUploadRate(_ttoi(_ParseURL(Data.sURL, _T("maxcapup"))));
 		}
 
-		if(lastmaxgu != thePrefs.GetMaxGraphUploadRate()) 
-			theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.GetMaxGraphUploadRate());
+		if(lastmaxgu != thePrefs.GetMaxGraphUploadRate(false)) 
+			theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.GetMaxGraphUploadRate(false));
 		if(lastmaxgd!=thePrefs.GetMaxGraphDownloadRate())
 			theApp.emuledlg->statisticswnd->SetARange(true,thePrefs.GetMaxGraphDownloadRate());
 		/*/
@@ -3114,7 +3114,7 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 	Out.Replace(_T("[MaxUpVal]"), sT);
 	sT.Format(_T("%d"), thePrefs.GetMaxGraphDownloadRate());
 	Out.Replace(_T("[MaxCapDownVal]"), sT);
-	sT.Format(_T("%d"), thePrefs.GetMaxGraphUploadRate());
+	sT.Format(_T("%d"), thePrefs.GetMaxGraphUploadRate(false));
 	Out.Replace(_T("[MaxCapUpVal]"), sT);
 	return Out;
 }
@@ -3848,7 +3848,7 @@ void CWapServer::SendGraphFile(WapThreadData Data, int file_val){
 			scalefactor=(float)(height-2)/(thePrefs.GetMaxGraphDownloadRate() + 4);
 			break;
 		case 2:
-			scalefactor=(float)(height-2)/(thePrefs.GetMaxGraphUploadRate() + 4);
+			scalefactor=(float)(height-2)/(thePrefs.GetMaxGraphUploadRate(true) + 4);
 			break;
 		case 3:
 			scalefactor=(float)(height-2)/(thePrefs.GetMaxConnections()+20);

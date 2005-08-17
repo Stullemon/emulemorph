@@ -66,6 +66,7 @@ CStatisticsDlg::CStatisticsDlg(CWnd* pParent /*=NULL*/)
 {
 	m_oldcx=0;
 	m_oldcy=0;
+	m_TimeToolTips = NULL;
 }
 
 CStatisticsDlg::~CStatisticsDlg()
@@ -113,7 +114,7 @@ void CStatisticsDlg::SetAllIcons()
 	iml.Add(CTempIconLoader(_T("Download")));				// Transfer > Download
 	iml.Add(CTempIconLoader(_T("StatsDetail")));			// Session Sections
 	iml.Add(CTempIconLoader(_T("StatsCumulative")));		// Cumulative Sections
-	iml.Add(CTempIconLoader(_T("Tweak")));					// Records
+	iml.Add(CTempIconLoader(_T("StatsRecords")));			// Records
 	iml.Add(CTempIconLoader(_T("TransferUpDown")));			// Connection > General
 	iml.Add(CTempIconLoader(_T("StatsTime")));				// Time Section
 	iml.Add(CTempIconLoader(_T("StatsProjected")));			// Time > Averages and Projections
@@ -175,15 +176,15 @@ BOOL CStatisticsDlg::OnInitDialog()
 	ScreenToClient(rect) ;
 	m_DownloadOMeter.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_SCOPE_D);
 	SetARange(true,thePrefs.GetMaxGraphDownloadRate());
-	m_DownloadOMeter.SetYUnits(GetResString(IDS_KBYTESEC)) ;
+	m_DownloadOMeter.SetYUnits(GetResString(IDS_KBYTESPERSEC));
 	
 	// Setup upload-scope
 	GetDlgItem(IDC_SCOPE_U)->GetWindowRect(rect) ;
 	GetDlgItem(IDC_SCOPE_U)->DestroyWindow();
 	ScreenToClient(rect) ;
 	m_UploadOMeter.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_SCOPE_U);
-	SetARange(false,thePrefs.GetMaxGraphUploadRate());
-	m_UploadOMeter.SetYUnits(GetResString(IDS_KBYTESEC)) ;
+	SetARange(false, thePrefs.GetMaxGraphUploadRate(true));
+	m_UploadOMeter.SetYUnits(GetResString(IDS_KBYTESPERSEC));
 	
 	// Setup additional graph-scope
 	GetDlgItem(IDC_STATSSCOPE)->GetWindowRect(rect) ;
@@ -673,6 +674,7 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 
 	// Download
 	double m_dPlotDataDown[3];
+	//MORPH - Changed by SiRoB, i resorted the graph order to get a better drawing
 	m_dPlotDataDown[2] = theStats.GetAvgDownloadRate(AVG_SESSION);
 	m_dPlotDataDown[1] = theStats.GetAvgDownloadRate(AVG_TIME);
 	m_dPlotDataDown[0] = downloadrate;
@@ -1859,7 +1861,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				stattree.SetItemText(conn_sg[i], cbuffer);
 				i++;
 				// Active Connections
-				// JOHNTODO: Remove debug info, or if wanted, keep it and add multi lang support.
 				cbuffer.Format(_T("%s: %i (%s:%u | %s:%u | %s:%u)"),GetResString(IDS_SF_ACTIVECON),theApp.listensocket->GetActiveConnections(), GetResString(IDS_HALF), theApp.listensocket->GetTotalHalfCon(), GetResString(IDS_CONCOMPL) ,theApp.listensocket->GetTotalComp(), GetResString(IDS_STATS_PRTOTHER) ,theApp.listensocket->GetActiveConnections() - theApp.listensocket->GetTotalHalfCon() - theApp.listensocket->GetTotalComp());
 				stattree.SetItemText(conn_sg[i], cbuffer);
 				i++;
@@ -2589,32 +2590,37 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 
 
 				//--- find top 4 eMule client versions ---
-				uint32 currtop = 0;
-				uint32 lasttop = 0xFFFFFFFF;
+				uint32 currtopcnt = 0;
+				uint32 currtopver = 0;
 				uint32 totalOther = 0;
 				for(uint32 i=0; i<MAX_SUB_CLIENT_VERSIONS; i++)
 				{
 					POSITION pos=clientVersionEMule.GetStartPosition();
 					uint32 topver=0;
 					uint32 topcnt=0;
-					double topper=0;
+					double topper = 0.0;
 					while(pos)
 					{
 						uint32 ver;
 						uint32 cnt;
 						clientVersionEMule.GetNextAssoc(pos, ver, cnt);
-						//if(currtop<ver && ver<lasttop )
-						if (currtop<cnt && cnt<lasttop)
+						if (currtopcnt < cnt)
 						{
 							topper=(double)cnt/myStats[2];
 							topver=ver;
 							topcnt=cnt;
-							//currtop=ver;
-							currtop=cnt;
+							currtopcnt = cnt;
+							currtopver = ver;
+						}
+						else if (currtopcnt == cnt && currtopver < ver)
+						{
+							topver = ver;
+							currtopver = ver;
 						}
 					}
-					lasttop=currtop;
-					currtop=0;
+					currtopcnt = 0;
+					currtopver = 0;
+					clientVersionEMule.RemoveKey(topver);
 
 					if (topcnt)
 					{
@@ -2722,32 +2728,37 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				uint32 verCount = 0;
 				
 				//--- find top 4 eD Hybrid client versions ---
-				uint32 currtop = 0;
-				uint32 lasttop = 0xFFFFFFFF;
+				uint32 currtopcnt = 0;
+				uint32 currtopver = 0;
 				uint32 totalOther = 0;
 				for(uint32 i=0; i<MAX_SUB_CLIENT_VERSIONS; i++)
 				{
 					POSITION pos=clientVersionEDonkeyHybrid.GetStartPosition();
 					uint32 topver=0;
 					uint32 topcnt=0;
-					double topper=0;
+					double topper = 0.0;
 					while(pos)
 					{
 						uint32 ver;
 						uint32 cnt;
 						clientVersionEDonkeyHybrid.GetNextAssoc(pos, ver, cnt);
-						//if(currtop<ver && ver<lasttop )
-						if (currtop<cnt && cnt<lasttop)
+						if (currtopcnt < cnt)
 						{
 							topper=(double)cnt/myStats[4];
 							topver=ver;
 							topcnt=cnt;
-							//currtop=ver;
-							currtop=cnt;
+							currtopcnt = cnt;
+							currtopver = ver;
+						}
+						else if (currtopcnt == cnt && currtopver < ver)
+						{
+							topver = ver;
+							currtopver = ver;
 						}
 					}
-					lasttop=currtop;
-					currtop=0;
+					currtopcnt = 0;
+					currtopver = 0;
+					clientVersionEDonkeyHybrid.RemoveKey(topver);
 
 					if (topcnt)
 					{
@@ -2800,32 +2811,37 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				uint32 verCount = 0;
 				
 				//--- find top 4 eDonkey client versions ---
-				uint32	currtop = 0;
-				uint32	lasttop = 0xFFFFFFFF;
+				uint32 currtopcnt = 0;
+				uint32 currtopver = 0;
 				uint32	totalOther = 0;
 				for(uint32 i=0; i<MAX_SUB_CLIENT_VERSIONS; i++)
 				{
 					POSITION pos=clientVersionEDonkey.GetStartPosition();
 					uint32 topver=0;
 					uint32 topcnt=0;
-					double topper=0;
+					double topper = 0.0;
 					while(pos)
 					{
 						uint32	ver;
 						uint32	cnt;
 						clientVersionEDonkey.GetNextAssoc(pos, ver, cnt);
-						//if(currtop<ver && ver<lasttop )
-						if(currtop<cnt && cnt<lasttop )
+						if (currtopcnt < cnt)
 						{
 							topper=(double)cnt/myStats[1];
 							topver=ver;
 							topcnt=cnt;
-							//currtop=ver;
-							currtop=cnt;
+							currtopcnt = cnt;
+							currtopver = ver;
+						}
+						else if (currtopcnt == cnt && currtopver < ver)
+						{
+							topver = ver;
+							currtopver = ver;
 						}
 					}
-					lasttop=currtop;
-					currtop=0;
+					currtopcnt = 0;
+					currtopver = 0;
+					clientVersionEDonkey.RemoveKey(topver);
 
 					if (topcnt)
 					{
@@ -2878,32 +2894,37 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				uint32 verCount = 0;
 				
 				//--- find top 4 client versions ---
-				uint32	currtop = 0;
-				uint32	lasttop = 0xFFFFFFFF;
+				uint32 currtopcnt = 0;
+				uint32 currtopver = 0;
 				uint32	totalOther = 0;
 				for(uint32 i=0; i<MAX_SUB_CLIENT_VERSIONS; i++)
 				{
 					POSITION pos=clientVersionAMule.GetStartPosition();
 					uint32 topver=0;
 					uint32 topcnt=0;
-					double topper=0;
+					double topper = 0.0;
 					while(pos)
 					{
 						uint32	ver;
 						uint32	cnt;
 						clientVersionAMule.GetNextAssoc(pos, ver, cnt);
-						//if(currtop<ver && ver<lasttop )
-						if(currtop<cnt && cnt<lasttop )
+						if (currtopcnt < cnt)
 						{
 							topper=(double)cnt/myStats[10];
 							topver=ver;
 							topcnt=cnt;
-							//currtop=ver;
-							currtop=cnt;
+							currtopcnt = cnt;
+							currtopver = ver;
+						}
+						else if (currtopcnt == cnt && currtopver < ver)
+						{
+							topver = ver;
+							currtopver = ver;
 						}
 					}
-					lasttop=currtop;
-					currtop=0;
+					currtopcnt = 0;
+					currtopver = 0;
+					clientVersionAMule.RemoveKey(topver);
 
 					if (topcnt)
 					{
@@ -3119,7 +3140,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		stattree.SetItemText(h_total_size_needed, cbuffer);
 
 		CString buffer2;
-		uint64 ui64FreeBytes = GetFreeDiskSpaceX(thePrefs.GetTempDir());
+		uint64 ui64FreeBytes = GetFreeTempSpace(-1); //GetFreeDiskSpaceX(thePrefs.GetTempDir());
 		buffer2.Format(GetResString(IDS_DWTOT_FS), CastItoXBytes(ui64FreeBytes, false, false));
 
 		if (ui64TotNeededSpace > ui64FreeBytes)
@@ -3373,7 +3394,7 @@ void CStatisticsDlg::CreateMyTree()
 			hconn_su= stattree.InsertItem(GetResString(IDS_PW_CON_UPLBL),6,6,h_conn_session);		// Uploads Section (Session)
 	for(int i = 0; i<4; i++)
 		conn_su[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hconn_su);
-			hconn_sd= stattree.InsertItem(GetResString(IDS_DOWNLOAD),7,7,h_conn_session);			// Downloads Section (Session)
+	hconn_sd= stattree.InsertItem(GetResString(IDS_PW_CON_DOWNLBL),7,7,h_conn_session);			// Downloads Section (Session)
 	for(int i = 0; i<4; i++)
 		conn_sd[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hconn_sd);
 		h_conn_total= stattree.InsertItem(GetResString(IDS_STATS_CUMULATIVE),9,9,h_connection);	// Cumulative Section (Connection)
@@ -3383,7 +3404,7 @@ void CStatisticsDlg::CreateMyTree()
 			hconn_tu= stattree.InsertItem(GetResString(IDS_PW_CON_UPLBL),6,6,h_conn_total);			// Uploads (Total)
 	for(int i = 0; i<3; i++)
 		conn_tu[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hconn_tu);
-			hconn_td= stattree.InsertItem(GetResString(IDS_DOWNLOAD),7,7,h_conn_total);				// Downloads (Total)
+	hconn_td= stattree.InsertItem(GetResString(IDS_PW_CON_DOWNLBL),7,7,h_conn_total);				// Downloads (Total)
 	for(int i = 0; i<3; i++)
 		conn_td[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hconn_td);
 	h_time = stattree.InsertItem(GetResString(IDS_STATS_TIMESTATS),12,12);					// Time Statistics Section

@@ -31,7 +31,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -58,7 +58,7 @@ int CAICHSyncThread::Run()
 	// we need to keep a lock on this file while the thread is running
 	CSingleLock lockKnown2Met(&CAICHHashSet::m_mutKnown2File);
 	lockKnown2Met.Lock();
-
+	
 	// we collect all masterhashs which we find in the known2.met and store them in a list
 	CList<CAICHHash> liKnown2Hashs;
 	CString fullpath=thePrefs.GetConfigDir();
@@ -113,7 +113,7 @@ int CAICHSyncThread::Run()
 		error->Delete();
 		return false;
 	}
-
+	
 	// now we check that all files which are in the sharedfilelist have a corresponding hash in out list
 	// those how don'T are added to the hashinglist
 	CList<CAICHHash> liUsedHashs;	
@@ -216,7 +216,7 @@ int CAICHSyncThread::Run()
 	// warn the user if he just upgraded
 	if (thePrefs.IsFirstStart() && !m_liToHash.IsEmpty()){
 		LogWarning(GetResString(IDS_AICH_WARNUSER));
-	}
+	}	
 	if (!m_liToHash.IsEmpty()){
 		theApp.QueueLogLine(true, GetResString(IDS_AICH_SYNCTOTAL), m_liToHash.GetCount() );
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.SetAICHHashing(m_liToHash.GetCount());

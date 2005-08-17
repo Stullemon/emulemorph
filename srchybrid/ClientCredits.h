@@ -184,8 +184,8 @@ private:
     //Commander - Changed: SUQWT - Start
 	//EastShare START - Modified by TAHO, modified SUQWT
 	/*
-	uint32		m_dwSecureWaitTime;
-	uint32		m_dwUnSecureWaitTime;
+	uint32			m_dwSecureWaitTime;
+	uint32			m_dwUnSecureWaitTime;
 	*/
 	sint64			m_dwSecureWaitTime;
 	sint64			m_dwUnSecureWaitTime;

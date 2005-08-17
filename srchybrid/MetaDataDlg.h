@@ -4,9 +4,10 @@
 #include <list>
 
 class CAbstractFile;
-namespace Kademlia {
-class CTag;
-typedef std::list<CTag*> TagList;
+namespace Kademlia 
+{
+	class CKadTag;
+	typedef std::list<CKadTag*> TagList;
 };
 
 class CMetaDataDlg : public CResizablePage

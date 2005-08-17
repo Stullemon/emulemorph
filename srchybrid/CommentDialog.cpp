@@ -18,9 +18,14 @@
 #include "emule.h"
 #include "CommentDialog.h"
 #include "KnownFile.h"
+#include "PartFile.h"
 #include "OtherFunctions.h"
 #include "Opcodes.h"
 #include "StringConversion.h"
+#include "UpDownClient.h"
+#include "kademlia/kademlia/kademlia.h"
+#include "kademlia/kademlia/SearchManager.h"
+#include "kademlia/kademlia/Search.h"
 #include "UserMsgs.h"
 
 #ifdef _DEBUG
@@ -36,11 +41,13 @@ IMPLEMENT_DYNAMIC(CCommentDialog, CResizablePage)
 
 BEGIN_MESSAGE_MAP(CCommentDialog, CResizablePage)
 	ON_BN_CLICKED(IDC_RESET, OnBnClickedReset)
-	ON_WM_DESTROY()
 	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
 	ON_EN_CHANGE(IDC_CMT_TEXT, OnEnChangeCmtText)
 	ON_CBN_SELENDOK(IDC_RATELIST, OnCbnSelendokRatelist)
 	ON_CBN_SELCHANGE(IDC_RATELIST, OnCbnSelchangeRatelist)
+   	ON_BN_CLICKED(IDC_SEARCHKAD, OnBnClickedSearchKad) 
+	ON_WM_TIMER()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 CCommentDialog::CCommentDialog()
@@ -53,6 +60,7 @@ CCommentDialog::CCommentDialog()
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_bMergedComment = false;
 	m_bSelf = false;
+	m_timer = 0;
 }
 
 CCommentDialog::~CCommentDialog()
@@ -63,6 +71,12 @@ void CCommentDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CResizablePage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_RATELIST, m_ratebox);
+	DDX_Control(pDX, IDC_LST, m_lstComments);
+}
+
+void CCommentDialog::OnTimer(UINT nIDEvent)
+{
+	RefreshData(false);
 }
 
 BOOL CCommentDialog::OnInitDialog()
@@ -70,14 +84,22 @@ BOOL CCommentDialog::OnInitDialog()
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
 
+	AddAnchor(IDC_LST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_CMT_LQUEST, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_CMT_LAIDE, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_CMT_TEXT, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_RATEQUEST, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_RATEHELP, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_USERCOMMENTS, TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_RESET, TOP_RIGHT);
+	AddAnchor(IDC_SEARCHKAD,BOTTOM_RIGHT);
+
+	m_lstComments.Init();
 
 	Localize();
+
+	// start time for calling 'RefreshData'
+	VERIFY( (m_timer = SetTimer(301, 5000, 0)) != NULL );
 
 	return TRUE;
 }
@@ -123,6 +145,8 @@ BOOL CCommentDialog::OnSetActive()
 		m_bSelf = false;
 
 		m_bDataChanged = false;
+
+		RefreshData();
 	}
 
 	return TRUE;
@@ -175,6 +199,8 @@ void CCommentDialog::Localize(void)
 	GetDlgItem(IDC_RATEQUEST)->SetWindowText(GetResString(IDS_CMT_RATEQUEST));
 	GetDlgItem(IDC_RATEHELP)->SetWindowText(GetResString(IDS_CMT_RATEHELP));
 
+	GetDlgItem(IDC_USERCOMMENTS)->SetWindowText(GetResString(IDS_COMMENT));
+
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
@@ -198,12 +224,23 @@ void CCommentDialog::Localize(void)
 	//MORPH END   - Moved by FrankyFive, Proper rating order
 	m_ratebox.AddItem(GetResString(IDS_CMT_EXCELLENT), 5);
 	UpdateHorzExtent(m_ratebox, 16); // adjust dropped width to ensure all strings are fully visible
+
+	if( Kademlia::CKademlia::isConnected() )
+		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_SHOW);
+	else
+		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_HIDE);
+
+	RefreshData();
 }
 
 void CCommentDialog::OnDestroy()
 {
 	m_imlRating.DeleteImageList();
 	CResizablePage::OnDestroy();
+	if (m_timer){
+		KillTimer(m_timer);
+		m_timer = 0;
+	}
 }
 
 void CCommentDialog::OnEnChangeCmtText()
@@ -222,4 +259,50 @@ void CCommentDialog::OnCbnSelchangeRatelist()
 {
 	if (!m_bSelf)
 		SetModified();
+}
+
+void CCommentDialog::RefreshData(bool deleteOld)
+{ 
+	if(deleteOld)
+		m_lstComments.DeleteAllItems();
+
+    for (int i = 0; i < m_paFiles->GetSize(); i++)
+    {
+		CAbstractFile* file = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[i]);
+		if( file->IsPartFile() )
+		{
+			for (POSITION pos = ((CPartFile*)file)->srclist.GetHeadPosition(); pos != NULL; )
+			{ 
+				CUpDownClient* cur_src = ((CPartFile*)file)->srclist.GetNext(pos);
+				if (cur_src->HasFileRating() || !cur_src->GetFileComment().IsEmpty())
+					m_lstComments.AddItem(cur_src);
+			}
+		}
+	
+		const CTypedPtrList<CPtrList, Kademlia::CEntry*>& list = file->getNotes();
+		for(POSITION pos = list.GetHeadPosition(); pos != NULL; )
+		{
+			Kademlia::CEntry* entry = list.GetNext(pos);
+			m_lstComments.AddItem(entry);
+		}
+	}
+}
+
+void CCommentDialog::OnBnClickedSearchKad()
+{
+	if(Kademlia::CKademlia::isConnected())
+	{
+	    for (int i = 0; i < m_paFiles->GetSize(); i++)
+	    {
+			CAbstractFile* file = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[i]);
+			if(file)
+			{
+				Kademlia::CSearch *notes = new Kademlia::CSearch;
+				notes->setSearchTypes(Kademlia::CSearch::NOTES);
+				notes->setTargetID(Kademlia::CUInt128(file->GetFileHash()));
+				if( !Kademlia::CSearchManager::startSearch(notes) )
+					AfxMessageBox(GetResString(IDS_KADSEARCHALREADY),MB_OK | MB_ICONINFORMATION,0);
+			}
+		}
+	}
 }

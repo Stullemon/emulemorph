@@ -24,6 +24,7 @@ class CKnownFile;
 class CPublishKeywordList;
 class CSafeMemFile;
 class CServer;
+class CCollection;
 
 struct UnknownFile_Struct{
 	CString strName;
@@ -55,6 +56,7 @@ public:
 	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER SafeHash
 	void	UpdateFile(CKnownFile* toupdate);
 	void	AddFilesFromDirectory(const CString& rstrDirectory);
+	void	AddFileFromNewlyCreatedCollection(const CString& path, const CString& fileName);
 	void	HashFailed(UnknownFile_Struct* hashed);		// SLUGFILLER: SafeHash
 	void	FileHashingFinished(CKnownFile* file);
 	void	ClearED2KPublishInfo();
@@ -65,6 +67,7 @@ public:
 	void	RemoveKeywords(CKnownFile* pFile);
 	void	DeletePartFileInstances() const;
 	bool	IsUnsharedFile(const uchar* auFileHash) const;
+	void	CopySharedFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> &Files_Map);
 	void	UpdatePartsInfo(); //MORPH - Added by SiRoB, POWERSHARE Limit
 	DWORD	GetLastTimeFileMapUpdated() { return m_dwFile_map_updated; }; //MORPH - Added by SiRoB, Optimization requpfile
 

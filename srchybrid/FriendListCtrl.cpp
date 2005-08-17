@@ -62,16 +62,14 @@ CFriendListCtrl::~CFriendListCtrl()
 void CFriendListCtrl::Init()
 {
 	SetExtendedStyle(LVS_EX_FULLROWSELECT);
-	// MORPH START - Added by Commander, Friendlinks [emulEspaña]
-	ModifyStyle(LVS_SINGLESEL,0);
-	// MORPH END - Added by Commander, Friendlinks [emulEspaña]
+	SetName(_T("FriendListCtrl"));
 
 	RECT rcWindow;
 	GetWindowRect(&rcWindow);
 	InsertColumn(0, GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, rcWindow.right - rcWindow.left - 4, 0);
 	SetAllIcons();
 	theApp.friendlist->SetWindow(this);
-	SetSortArrow(0, true);
+	LoadSettings();
 }
 
 void CFriendListCtrl::OnSysColorChange()
@@ -114,7 +112,7 @@ void CFriendListCtrl::Localize()
 
 	int iItems = GetItemCount();
 	for (int i = 0; i < iItems; i++)
-	UpdateFriend(i, (CFriend*)GetItemData(i));
+		UpdateFriend(i, (CFriend*)GetItemData(i));
 }
 
 void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
@@ -135,7 +133,7 @@ void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
 	}
 	// [end] Mighty Knife
 
-	SetItemText(iItem,0,pFriend->m_strName);
+	SetItemText(iItem, 0, pFriend->m_strName.IsEmpty() ? _T('(') + GetResString(IDS_UNKNOWN) + _T(')') : pFriend->m_strName);
 
 	int iImage;
     if (!pFriend->GetLinkedClient())
@@ -215,7 +213,8 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	//MORPH START - Modified by SiRoB, Friend Slot
 	/*
 	ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT), _T("FRIENDSLOT"));
-	ClientMenu.EnableMenuItem(MP_FRIENDSLOT, (cur_friend)?MF_ENABLED : MF_GRAYED);
+
+    ClientMenu.EnableMenuItem(MP_FRIENDSLOT, (cur_friend)?MF_ENABLED : MF_GRAYED);
 	ClientMenu.CheckMenuItem(MP_FRIENDSLOT, (cur_friend && cur_friend->GetFriendSlot()) ? MF_CHECKED : MF_UNCHECKED);
 	*/
 	//MORPH END   - Modified by SiRoB, Friend Slot
@@ -236,7 +235,7 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	//MORPH END - Added by IceCream, List Requested Files	
 
 	GetPopupMenuPos(*this, point);
-	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
+	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 // MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 
@@ -314,11 +313,11 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 			if (cur_friend){
 				bool IsAlready;
-				IsAlready = cur_friend->GetFriendSlot();
+                IsAlready = cur_friend->GetFriendSlot();
 				//MORPH START - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 				//theApp.friendlist->RemoveAllFriendSlots();
 				if( !IsAlready )
-					cur_friend->SetFriendSlot(true);
+                    cur_friend->SetFriendSlot(true);
 				else
 					cur_friend->SetFriendSlot(false);
 				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System

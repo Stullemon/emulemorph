@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.2 $
+* $Revision: 1.3 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -20,6 +20,8 @@
 #include "emule.h"
 #include "TreePropSheetPgFrameDef.h"
 #include "VisualStylesXP.h"
+
+extern bool g_bLowColorDesktop;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -164,10 +166,15 @@ void CPropPageFrameDefault::DrawCaption(CDC *pDc, CRect rect, LPCTSTR lpszCaptio
 {
 	COLORREF clrLeft = GetSysColor(COLOR_ACTIVECAPTION);
 	COLORREF clrRight;
+	if (!g_bLowColorDesktop)
+	{
 	if (g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed())
 		clrRight = pDc->GetPixel(rect.right-1, rect.top); // not very smart, but for XP styles, we need the 'real' background color
 	else
 		clrRight = GetSysColor(COLOR_3DFACE);
+	}
+	else
+		clrRight = clrLeft;
 	FillGradientRectH(pDc, rect, clrLeft, clrRight);
 
 	// draw icon

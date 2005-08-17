@@ -23,6 +23,7 @@
 #include "Preferences.h"
 #include "PartFile.h"
 #include "MenuCmds.h"
+#include "opcodes.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -66,7 +67,7 @@ BOOL CPreviewThread::Run()
 	try{
 		uint32 nSize = m_pPartfile->GetFileSize();
 		CString strExtension = CString(_tcsrchr(m_pPartfile->GetFileName(), _T('.')));
-		CString strPreviewName = CString(thePrefs.GetTempDir()) + _T("\\") + m_pPartfile->GetFileName().Mid(0, 5) + _T("_preview") + strExtension;
+		CString strPreviewName = m_pPartfile->GetTempPath() + _T("\\") + m_pPartfile->GetFileName().Mid(0, 5) + _T("_preview") + strExtension;
 		bool bFullSized = true;
 		if (!strExtension.CompareNoCase(_T(".mpg")) || !strExtension.CompareNoCase(_T(".mpeg")))
 			bFullSized = false;
@@ -201,11 +202,48 @@ int CPreviewApps::ReadAllApps()
 					strCommand.Trim(_T(" \t\""));
 					if (!strCommand.IsEmpty())
 					{
+						UINT uMinCompletedSize = 0;
+						UINT uMinStartOfFile = 0;
+						CStringArray astrExtensions;
+						CString strParams = sbuffer.Tokenize(_T(";"), iPos);
+						while (!strParams.IsEmpty())
+						{
+							int iPosParam = 0;
+							CString strId = strParams.Tokenize(_T("="), iPosParam);
+							if (!strId.IsEmpty())
+							{
+								CString strValue = strParams.Tokenize(_T("="), iPosParam);
+								if (strId.CompareNoCase(_T("Ext")) == 0)
+								{
+									if (!strValue.IsEmpty())
+									{
+										if (strValue[0] != _T('.'))
+											strValue = _T('.') + strValue;
+										astrExtensions.Add(strValue);
+									}
+								}
+								else if (strId.CompareNoCase(_T("MinSize")) == 0)
+								{
+									if (!strValue.IsEmpty())
+										_stscanf(strValue, _T("%u"), &uMinCompletedSize);
+								}
+								else if (strId.CompareNoCase(_T("MinStart")) == 0)
+								{
+									if (!strValue.IsEmpty())
+										_stscanf(strValue, _T("%u"), &uMinStartOfFile);
+								}
+							}
+							strParams = sbuffer.Tokenize(_T(";"), iPos);
+						}
+
 						SPreviewApp svc;
 						svc.strTitle = strTitle;
 						svc.strCommand = strCommand;
 						svc.strCommandArgs = pszCommandArgs;
 						svc.strCommandArgs.Trim();
+						svc.astrExtensions.Append(astrExtensions);
+						svc.uMinCompletedSize = uMinCompletedSize;
+						svc.uMinStartOfFile = uMinStartOfFile;
 						m_aApps.Add(svc);
 					}
 				}
@@ -221,7 +259,7 @@ int CPreviewApps::ReadAllApps()
 	return m_aApps.GetCount();
 }
 
-int CPreviewApps::GetAllMenuEntries(CMenu& rMenu, const CPartFile* file)
+void CPreviewApps::UpdateApps()
 {
 	if (m_aApps.GetCount() == 0)
 	{
@@ -233,6 +271,11 @@ int CPreviewApps::GetAllMenuEntries(CMenu& rMenu, const CPartFile* file)
 		if (_tstat(GetDefaultAppsFile(), &st) == 0 && st.st_mtime > m_tDefAppsFileLastModified)
 			ReadAllApps();
 	}
+}
+
+int CPreviewApps::GetAllMenuEntries(CMenu& rMenu, const CPartFile* file)
+{
+	UpdateApps();
 
 	for (int i = 0; i < m_aApps.GetCount(); i++)
 	{
@@ -291,4 +334,59 @@ void CPreviewApps::RunApp(CPartFile* file, UINT uMenuID)
 	TRACE("  Args    =%s\n", strArgs);
 	TRACE("  Dir     =%s\n", strCommandDir);
 	ShellExecute(NULL, _T("open"), strCommand, strArgs, strCommandDir, SW_SHOWNORMAL);
+}
+
+int CPreviewApps::GetPreviewApp(const CPartFile* file)
+{
+	LPCTSTR pszExt = PathFindExtension(file->GetFileName());
+	if (pszExt == NULL)
+		return -1;
+
+	UpdateApps();
+
+	int iApp = -1;
+	for (int i = 0; iApp == -1 && i < m_aApps.GetCount(); i++)
+	{
+		const SPreviewApp& rApp = m_aApps.GetAt(i);
+		for (int j = 0; j < rApp.astrExtensions.GetCount(); j++)
+		{
+			if (rApp.astrExtensions.GetAt(j).CompareNoCase(pszExt) == 0) {
+				iApp = i;
+				break;
+			}
+		}
+	}
+
+	return iApp;
+}
+
+CPreviewApps::ECanPreviewRes CPreviewApps::CanPreview(const CPartFile* file)
+{
+	int iApp = GetPreviewApp(file);
+	if (iApp == -1)
+		return NotHandled;
+
+	const SPreviewApp* pApp = &m_aApps.GetAt(iApp);
+	if (pApp->uMinCompletedSize != 0)
+	{
+		if (file->GetCompletedSize() < pApp->uMinCompletedSize)
+			return No;
+	}
+
+	if (pApp->uMinStartOfFile != 0)
+	{
+		if (!file->IsComplete(0, pApp->uMinStartOfFile, false))
+			return No;
+	}
+
+	return Yes;
+}
+
+bool CPreviewApps::Preview(CPartFile* file)
+{
+	int iApp = GetPreviewApp(file);
+	if (iApp == -1)
+		return false;
+	RunApp(file, MP_PREVIEW_APP_MIN + iApp);
+	return true;
 }

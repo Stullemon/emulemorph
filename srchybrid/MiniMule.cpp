@@ -362,12 +362,15 @@ void CMiniMule::UpdateContent(UINT uUpDatarate, UINT uDownDatarate)
 	SetElementHtml(_T("connected"), CComBSTR(theApp.IsConnected() ? GetResString(IDS_YES) : GetResString(IDS_NO)));
 	SetElementHtml(_T("upRate"), CComBSTR(theApp.emuledlg->GetUpDatarateString(uUpDatarate)));
 	SetElementHtml(_T("downRate"), CComBSTR(theApp.emuledlg->GetDownDatarateString(uDownDatarate)));
-	int iTotal;
 	UINT uCompleted = 0;
-	if (theApp.emuledlg && theApp.emuledlg->transferwnd && theApp.emuledlg->transferwnd->downloadlistctrl.m_hWnd)
-		uCompleted = theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(0, iTotal);
+	if (thePrefs.GetRemoveFinishedDownloads())
+		uCompleted = thePrefs.GetDownSessionCompletedFiles();
+	else if (theApp.emuledlg && theApp.emuledlg->transferwnd && theApp.emuledlg->transferwnd->downloadlistctrl.m_hWnd) {
+	int iTotal;
+		uCompleted = theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(-1, iTotal);	 // [Ded]: -1 to get the count of all completed files in all categories
+	}
 	SetElementHtml(_T("completed"), CComBSTR(CastItoIShort(uCompleted, false, 0)));
-	SetElementHtml(_T("freeSpace"), CComBSTR(CastItoXBytes(GetFreeDiskSpaceX(thePrefs.GetTempDir()), false, false)));
+	SetElementHtml(_T("freeSpace"), CComBSTR(CastItoXBytes(GetFreeTempSpace(-1), false, false)));
 }
 
 STDMETHODIMP CMiniMule::TranslateUrl(DWORD dwTranslate, OLECHAR* pchURLIn, OLECHAR** ppchURLOut)
@@ -418,10 +421,16 @@ void CMiniMule::OnNavigateComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 
 void CMiniMule::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 {
+	if (theApp.emuledlg->m_pMiniMule == NULL){
+		// FIX ME
+		// apperently in some rare cases (high cpu load, fast double clicks) this function is called when the object is destroyed already
+		ASSERT( false );
+		return;
+	}
+
 	TRACE(_T("%hs: %s\n"), __FUNCTION__, pszUrl);
 	// If the HTML file contains 'OnLoad' scripts, the HTML DOM is fully accessible 
 	// only after 'DocumentComplete', but not after 'OnNavigateComplete'
-	m_spHtmlDoc = NULL;
 	CDHtmlDialog::OnDocumentComplete(pDisp, pszUrl);
 
 	if (m_bResolveImages)

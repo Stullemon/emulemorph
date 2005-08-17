@@ -1,5 +1,7 @@
+#pragma once
+
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002-2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -14,17 +16,37 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
 #pragma once
-#include "loggable.h"
+#include "MuleListCtrl.h"
+#include "ListCtrlItemWalk.h"
 
-struct DynDNS_Struct;
+class CAbstractFile;
+class CUpDownClient;
 
-class CDynDNS: public CLoggable
+namespace Kademlia 
 {
-public:
-	CDynDNS();
-	~CDynDNS();
+	class CEntry;
+};
 
-void    UpdateDynDNSAccount(bool accounts[]);
-void    Reset(int account);
+class CCommentListCtrl : public CMuleListCtrl, public CListCtrlItemWalk
+{
+	DECLARE_DYNAMIC(CCommentListCtrl)
+
+public:
+	CCommentListCtrl();
+	virtual ~CCommentListCtrl();
+
+	void Init();
+	void Localize();
+
+	void AddItem(CUpDownClient* client);
+	void AddItem(Kademlia::CEntry* entry);
+
+protected:
+	DECLARE_MESSAGE_MAP()
+
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 };

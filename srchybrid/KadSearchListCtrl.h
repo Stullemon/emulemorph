@@ -36,12 +36,9 @@ public:
 	void	Localize();
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
-	void	SaveAllSettings(CIni* ini);
 	void	UpdateKadSearchCount();
 
 protected:
-	CString m_strLVName;
-
 	void UpdateSearch(int iItem, const Kademlia::CSearch* search);
 	void SetAllIcons();
 

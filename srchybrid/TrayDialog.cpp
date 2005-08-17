@@ -46,7 +46,7 @@ END_MESSAGE_MAP()
 CTrayDialog::CTrayDialog(UINT uIDD,CWnd* pParent /*=NULL*/)
 	: CTrayDialogBase(uIDD, pParent)
 {
-	m_nidIconData.cbSize = sizeof(NOTIFYICONDATA_V1_SIZE);
+	m_nidIconData.cbSize = NOTIFYICONDATA_V1_SIZE;
 	m_nidIconData.hWnd = 0;
 	m_nidIconData.uID = 1;
 	m_nidIconData.uCallbackMessage = UM_TRAY_ICON_NOTIFY_MESSAGE;
@@ -81,7 +81,7 @@ void CTrayDialog::OnDestroy()
 	// shouldn't that be done before passing the message to DefWinProc?
 	if (m_nidIconData.hWnd && m_nidIconData.uID > 0 && TrayIsVisible())
 	{
-		VERIFY( Shell_NotifyIcon(NIM_DELETE,&m_nidIconData) );
+		VERIFY( Shell_NotifyIcon(NIM_DELETE, &m_nidIconData) );
 	}
 }
 
@@ -339,10 +339,10 @@ LRESULT CTrayDialog::OnTaskBarCreated(WPARAM wParam, LPARAM lParam)
 	if (m_bTrayIconVisible)
 	{
 		BOOL bResult = Shell_NotifyIcon(NIM_ADD, &m_nidIconData);
-		ASSERT( bResult );
-		return bResult;
+		if (!bResult)
+			m_bTrayIconVisible = false;
 	}
-	return 1;
+	return 0;
 }
 
 void CTrayDialog::RestoreWindow()

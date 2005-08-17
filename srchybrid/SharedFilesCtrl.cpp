@@ -19,9 +19,6 @@
 #include "emuledlg.h"
 #include "SharedFilesCtrl.h"
 #include "OtherFunctions.h"
-#include "CommentDialog.h"
-#include "FileInfoDialog.h"
-#include "MetaDataDlg.h"
 #include "ResizableLib/ResizableSheet.h"
 #include "KnownFile.h"
 #include "MapKey.h"
@@ -37,15 +34,20 @@
 #include "TransferWnd.h"
 #include "ClientList.h"
 #include "UpDownClient.h"
-#include "ED2kLinkDlg.h"
-#include "HighColorTab.hpp"
-#include "ListViewWalkerPropertySheet.h"
-#include "UserMsgs.h"
+#include "Collection.h"
+#include "CollectionCreateDialog.h"
+#include "CollectionViewDialog.h"
+#include "FileDetailDialog.h"
+#include "SharedDirsTreeCtrl.h"
+#include "SearchParams.h"
+#include "SearchDlg.h"
+#include "SearchResultsWnd.h"
 #include "uploadqueue.h" //MORPH - Added by SiRoB, 
 #include "Log.h" //MORPH
 // Mighty Knife: CRC32-Tag, Mass Rename
 #include "AddCRC32TagDialog.h"
 #include "MassRename.h"
+#include "UserMsgs.h"
 // [end] Mighty Knife
 
 #ifdef _DEBUG
@@ -53,150 +55,6 @@
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #endif
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-// CSharedFileDetailsSheet
-
-class CSharedFileDetailsSheet : public CListViewWalkerPropertySheet
-{
-	DECLARE_DYNAMIC(CSharedFileDetailsSheet)
-
-public:
-	CSharedFileDetailsSheet(CTypedPtrList<CPtrList, CKnownFile*>& aFiles, UINT uPshInvokePage = 0, CListCtrlItemWalk* pListCtrl = NULL);
-	virtual ~CSharedFileDetailsSheet();
-
-protected:
-	CFileInfoDialog m_wndMediaInfo;
-	CMetaDataDlg m_wndMetaData;
-	CED2kLinkDlg		m_wndFileLink;
-	CCommentDialog		m_wndFileComments;
-
-	UINT m_uPshInvokePage;
-	static LPCTSTR m_pPshStartPage;
-
-	void UpdateTitle();
-
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	virtual BOOL OnInitDialog();
-
-	DECLARE_MESSAGE_MAP()
-	afx_msg void OnDestroy();
-	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
-};
-
-LPCTSTR CSharedFileDetailsSheet::m_pPshStartPage;
-
-IMPLEMENT_DYNAMIC(CSharedFileDetailsSheet, CListViewWalkerPropertySheet)
-
-BEGIN_MESSAGE_MAP(CSharedFileDetailsSheet, CListViewWalkerPropertySheet)
-	ON_WM_DESTROY()
-	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
-END_MESSAGE_MAP()
-
-CSharedFileDetailsSheet::CSharedFileDetailsSheet(CTypedPtrList<CPtrList, CKnownFile*>& aFiles, UINT uPshInvokePage, CListCtrlItemWalk* pListCtrl)
-	: CListViewWalkerPropertySheet(pListCtrl)
-{
-	m_uPshInvokePage = uPshInvokePage;
-	POSITION pos = aFiles.GetHeadPosition();
-	while (pos)
-		m_aItems.Add(aFiles.GetNext(pos));
-	m_psh.dwFlags &= ~PSH_HASHELP;
-
-	m_wndMediaInfo.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndMediaInfo.m_psp.dwFlags |= PSP_USEICONID;
-	m_wndMediaInfo.m_psp.pszIcon = _T("MEDIAINFO");
-	m_wndMediaInfo.SetFiles(&m_aItems);
-	AddPage(&m_wndMediaInfo);
-
-	m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndMetaData.m_psp.dwFlags |= PSP_USEICONID;
-	m_wndMetaData.m_psp.pszIcon = _T("METADATA");
-	if (m_aItems.GetSize() == 1 && thePrefs.IsExtControlsEnabled()) {
-		m_wndMetaData.SetFiles(&m_aItems);
-		AddPage(&m_wndMetaData);
-	}
-
-	m_wndFileLink.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndFileLink.m_psp.dwFlags |= PSP_USEICONID;
-	m_wndFileLink.m_psp.pszIcon = _T("ED2KLINK");
-	m_wndFileLink.SetFiles(&m_aItems);
-	AddPage(&m_wndFileLink);
-
-	m_wndFileComments.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndFileComments.m_psp.dwFlags |= PSP_USEICONID;
-	m_wndFileComments.m_psp.pszIcon = _T("FileComments");
-	m_wndFileComments.SetFiles(&m_aItems);
-	AddPage(&m_wndFileComments);
-
-	LPCTSTR pPshStartPage = m_pPshStartPage;
-	if (m_uPshInvokePage != 0)
-		pPshStartPage = MAKEINTRESOURCE(m_uPshInvokePage);
-	for (int i = 0; i < m_pages.GetSize(); i++)
-	{
-		CPropertyPage* pPage = GetPage(i);
-		if (pPage->m_psp.pszTemplate == pPshStartPage)
-		{
-			m_psh.nStartPage = i;
-			break;
-		}
-	}
-}
-
-CSharedFileDetailsSheet::~CSharedFileDetailsSheet()
-{
-}
-
-void CSharedFileDetailsSheet::OnDestroy()
-{
-	if (m_uPshInvokePage == 0)
-		m_pPshStartPage = GetPage(GetActiveIndex())->m_psp.pszTemplate;
-	CListViewWalkerPropertySheet::OnDestroy();
-}
-
-BOOL CSharedFileDetailsSheet::OnInitDialog()
-{
-	EnableStackedTabs(FALSE);
-	BOOL bResult = CListViewWalkerPropertySheet::OnInitDialog();
-	HighColorTab::UpdateImageList(*this);
-	InitWindowStyles(this);
-	EnableSaveRestore(_T("SharedFileDetailsSheet")); // call this after(!) OnInitDialog
-	UpdateTitle();
-	return bResult;
-}
-
-LRESULT CSharedFileDetailsSheet::OnDataChanged(WPARAM, LPARAM)
-{
-	UpdateTitle();
-	return 1;
-}
-
-void CSharedFileDetailsSheet::UpdateTitle()
-{
-	if (m_aItems.GetSize() == 1)
-		SetWindowText(GetResString(IDS_DETAILS) + _T(": ") + STATIC_DOWNCAST(CKnownFile, m_aItems[0])->GetFileName());
-	else
-		SetWindowText(GetResString(IDS_DETAILS));
-}
-
-BOOL CSharedFileDetailsSheet::OnCommand(WPARAM wParam, LPARAM lParam)
-{
-	if (wParam == ID_APPLY_NOW)
-	{
-		CSharedFilesCtrl* pSharedFilesCtrl = DYNAMIC_DOWNCAST(CSharedFilesCtrl, m_pListCtrl->GetListCtrl());
-		if (pSharedFilesCtrl)
-		{
-			for (int i = 0; i < m_aItems.GetSize(); i++) {
-				// so, and why does this not(!) work while the sheet is open ??
-				pSharedFilesCtrl->UpdateFile(DYNAMIC_DOWNCAST(CKnownFile, m_aItems[i]));
-			}
-		}
-	}
-
-	return CListViewWalkerPropertySheet::OnCommand(wParam, lParam);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 // CSharedFilesCtrl
@@ -221,6 +79,7 @@ CSharedFilesCtrl::CSharedFilesCtrl()
 {
 	memset(&sortstat, 0, sizeof(sortstat));
 	nAICHHashing = 0;
+	m_pDirectoryFilter = NULL;
 }
 
 CSharedFilesCtrl::~CSharedFilesCtrl()
@@ -229,6 +88,7 @@ CSharedFilesCtrl::~CSharedFilesCtrl()
 
 void CSharedFilesCtrl::Init()
 {
+	SetName(_T("SharedFilesCtrl"));
 	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
 	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
 	SetImageList(&ilDummyImageList, LVSIL_SMALL);
@@ -275,22 +135,16 @@ void CSharedFilesCtrl::Init()
 
 	SetAllIcons();
 	CreateMenues();
-	LoadSettings(CPreferences::tableShared);
+	LoadSettings();
 
 	// Barry - Use preferred sort order from preferences
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableShared);
-	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableShared);
-	SetSortArrow(sortItem, sortAscending);
-	// SLUGFILLER: multiSort - load multiple params
-	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableShared); i > 0; ) {
-		i--;
-		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableShared, i);
-		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableShared, i);
-		// Mighty Knife: CRC32-Tag - Indexes shifted by 10
-		SortItems(SortProc, sortItem + (sortAscending ? 0:30));
-		// [end] Mighty Knife
-	}
-	// SLUGFILLER: multiSort
+	SetSortArrow();
+	// Mighty Knife: CRC32-Tag - Indexes shifted by 10
+	/*
+	SortItems(SortProc, GetSortItem() + (GetSortAscending() ? 0:20));
+	*/
+	SortItems(SortProc, GetSortItem() + (GetSortAscending() ? 0:30));
+	// [end] Mighty Knife
 }
 
 void CSharedFilesCtrl::OnSysColorChange()
@@ -308,15 +162,13 @@ void CSharedFilesCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("EMPTY")));
 	m_ImageList.Add(CTempIconLoader(_T("FileSharedServer"), 16, 16));
 	m_ImageList.Add(CTempIconLoader(_T("FileSharedKad"), 16, 16));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_NotRated")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Fake")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Poor")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Fair")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Good")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Excellent")));
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("FileCommentsOvl"))), 1);
-	m_ImageList.Add(CTempIconLoader(_T("RATING_NOTRATED")));  // 4
-	m_ImageList.Add(CTempIconLoader(_T("RATING_FAKE")));  // 5
-	m_ImageList.Add(CTempIconLoader(_T("RATING_POOR")));  // 6
-	m_ImageList.Add(CTempIconLoader(_T("RATING_GOOD")));  // 7
-	m_ImageList.Add(CTempIconLoader(_T("RATING_FAIR")));  // 8
-	m_ImageList.Add(CTempIconLoader(_T("RATING_EXCELLENT")));  // 9
-	//MORPH END   - Added & Moddified by IceCream, SLUGFILLER: showComments
-
 }
 
 void CSharedFilesCtrl::Localize()
@@ -366,7 +218,7 @@ void CSharedFilesCtrl::Localize()
 	pHeaderCtrl->SetItem(7, &hdi);
 	strRes.ReleaseBuffer();
 
-	strRes = GetResString(IDS_UPSTATUS);
+	strRes = GetResString(IDS_SHARED_STATUS);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(8, &hdi);
 	strRes.ReleaseBuffer();
@@ -445,6 +297,52 @@ void CSharedFilesCtrl::AddFile(const CKnownFile* file)
 {
 	if (!theApp.emuledlg->IsRunning())
 		return;
+	// check filter conditions if we should show this file right now
+	if (m_pDirectoryFilter != NULL){
+		CString strFilePath = file->GetPath();
+		if (strFilePath.Right(1) == "\\"){
+			strFilePath = strFilePath.Left(strFilePath.GetLength()-1);
+		}
+		switch(m_pDirectoryFilter->m_eItemType){
+			case SDI_ALL:
+				// No filter
+				break;
+			case SDI_FILESYSTEMPARENT:
+				return; // no files
+				break;
+			case SDI_NO:
+				// some shared directory
+			case SDI_CATINCOMING:
+				// Categories with special incoming dirs
+			case SDI_UNSHAREDDIRECTORY:
+				// Items from the whole filesystem tree
+				if (strFilePath.CompareNoCase(m_pDirectoryFilter->m_strFullPath) != 0)
+					return;
+				break;
+			case SDI_TEMP:
+				// only tempfiles
+				if (!file->IsPartFile())
+					return;
+				else if (m_pDirectoryFilter->m_nCatFilter != -1 && m_pDirectoryFilter->m_nCatFilter != ((CPartFile*)file)->GetCategory())
+					return;
+				break;
+			case SDI_DIRECTORY:
+				// any userselected shared dir but not incoming or temp
+				if (file->IsPartFile())
+					return;
+				if (strFilePath.CompareNoCase(thePrefs.GetIncomingDir()) == 0)
+					return;
+				break;
+			case SDI_INCOMING:
+				// Main incoming directory
+				if (strFilePath.CompareNoCase(thePrefs.GetIncomingDir()) != 0)
+					return;
+				// Hmm should we show all incoming files dirs or only those from the main incoming dir here?
+				// hard choice, will only show the main for now
+				break;
+
+		}
+	}
 	if (FindFile(file) != -1)
 		return;
 	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM, GetItemCount(), LPSTR_TEXTCALLBACK, 0, 0, 0, (LPARAM)file);
@@ -522,29 +420,28 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//MORPH START - Added by SiRoB, Don't draw hidden Rect
 	RECT clientRect;
 	GetClientRect(&clientRect);
-	RECT cur_rec = lpDrawItemStruct->rcItem;
+	CRect cur_rec(lpDrawItemStruct->rcItem);
 	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
 		return;
 	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
-	if( odc && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
+	if (lpDrawItemStruct->itemState & ODS_SELECTED) {
 		if(bCtrlFocused)
 			odc->SetBkColor(m_crHighlight);
 		else
 			odc->SetBkColor(m_crNoHighlight);
 	}
 	else
-		odc->SetBkColor(m_crWindow);
-
-	const CKnownFile* file = (CKnownFile*)lpDrawItemStruct->itemData;
-	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
+		odc->SetBkColor(GetBkColor());
+	/*const*/ CKnownFile* file = (CKnownFile*)lpDrawItemStruct->itemData;
+	CMemDC dc(odc, &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	//MORPH - Moved by SiRoB, Don't draw hidden Rect
 	/*
-	RECT cur_rec = lpDrawItemStruct->rcItem;
+	CRect cur_rec(lpDrawItemStruct->rcItem);
 	*/
-	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+	COLORREF crOldTextColor = dc.SetTextColor((lpDrawItemStruct->itemState & ODS_SELECTED) ? m_crHighlightText : m_crWindowText);
 
 	int iOldBkMode;
 	if (m_crWindowTextBk == CLR_NONE){
@@ -559,7 +456,6 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	const int iMarginX = 4;
 	cur_rec.right = cur_rec.left - iMarginX*2;
 	cur_rec.left += iMarginX;
-
 	CString buffer;
 	int iIconDrawWidth = theApp.GetSmallSytemIconSize().cx + 3;
 	for(int iCurrent = 0; iCurrent < iCount; iCurrent++){
@@ -593,27 +489,24 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 0:{
 						int iImage = theApp.GetFileTypeSystemImageIdx(file->GetFileName());
 						if (theApp.GetSystemImageList() != NULL)
-						::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc->GetSafeHdc(), cur_rec.left, cur_rec.top, ILD_NORMAL|ILD_TRANSPARENT);
-						CKnownFile* pfile =(CKnownFile*)lpDrawItemStruct->itemData;
-						if (!pfile->GetFileComment().IsEmpty() || pfile->GetFileRating())
+						::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc.GetSafeHdc(), cur_rec.left, cur_rec.top, ILD_NORMAL|ILD_TRANSPARENT);
+						if (!file->GetFileComment().IsEmpty() || file->GetFileRating())
 							m_ImageList.Draw(dc, 0, CPoint(cur_rec.left, cur_rec.top), ILD_NORMAL | ILD_TRANSPARENT | INDEXTOOVERLAYMASK(1));
-						cur_rec.left += iIconDrawWidth;
-						buffer = file->GetFileName();
-						//MORPH START - Added by IceCream, SLUGFILLER: showComments
-						if ( thePrefs.ShowRatingIndicator() ){
-							if ( !pfile->GetFileComment().IsEmpty() || pfile->GetFileRating() ){ //Modified by IceCream, eMule plus rating icon
-								POINT point= {cur_rec.left-3,cur_rec.top};
-								int the_rating=0;
-								if (pfile->GetFileRating())
-									the_rating = pfile->GetFileRating();
-								m_ImageList.Draw(dc, 4+
-									pfile->GetFileRating(), //Modified by IceCream, eMule plus rating icon
-									point,
-									ILD_NORMAL);
+						cur_rec.left += (iIconDrawWidth-3);
+
+						if (thePrefs.ShowRatingIndicator())
+						{
+							if ((file->HasComment() || file->HasRating()))
+							{
+							m_ImageList.Draw(dc, file->UserRating()+3, CPoint(cur_rec.left, cur_rec.top), ILD_NORMAL);
 							}
-							cur_rec.left+=11; //Modified by IceCream, eMule plus rating icon
+							cur_rec.left += 16;
+							iIconDrawWidth += 16;
 						}
-						//MORPH END   - Added by IceCream, SLUGFILLER: showComments
+
+						cur_rec.left += 3;
+
+						buffer = file->GetFileName();
 						break;
 					}
 					case 1:
@@ -692,21 +585,16 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						PathRemoveBackslash(buffer.GetBuffer());
 						buffer.ReleaseBuffer();
 						break;
-					case 10:{
-						if (file->m_nCompleteSourcesCountLo == 0){
-							buffer.Format(_T("< %u"), file->m_nCompleteSourcesCountHi);
-						}
-						else if (file->m_nCompleteSourcesCountLo == file->m_nCompleteSourcesCountHi)
-							buffer.Format(_T("%u"), file->m_nCompleteSourcesCountLo);
+					case 10:
+                	    //MORPH START - Changed by SiRoB, Avoid misusing of powersharing
+						if (file->m_nCompleteSourcesCountLo == file->m_nCompleteSourcesCountHi)
+							buffer.Format(_T("%u (%u)"), file->m_nCompleteSourcesCountLo, file->m_nVirtualCompleteSourcesCount);
+                	    else if (file->m_nCompleteSourcesCountLo == 0)
+							buffer.Format(_T("< %u (%u)"), file->m_nCompleteSourcesCountHi, file->m_nVirtualCompleteSourcesCount);
 						else
-							buffer.Format(_T("%u - %u"), file->m_nCompleteSourcesCountLo, file->m_nCompleteSourcesCountHi);
-						//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-						CString buffer2;
-						buffer2.Format(_T(" (%u)"),file->m_nVirtualCompleteSourcesCount);
-						buffer.Append(buffer2);
-						//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+							buffer.Format(_T("%u - %u (%u)"), file->m_nCompleteSourcesCountLo, file->m_nCompleteSourcesCountHi, file->m_nVirtualCompleteSourcesCount);
+						//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 						break;
-					}
 					case 11:{
 						CPoint pt(cur_rec.left, cur_rec.top);
 						m_ImageList.Draw(dc, file->GetPublishedED2K() ? 1 : 0, pt, ILD_NORMAL | ILD_TRANSPARENT);
@@ -884,20 +772,10 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					// [end] Mighty Knife
 				}
-				if( iColumn != 8 && iColumn!=14)
-					dc->DrawText(buffer, buffer.GetLength(),&cur_rec,uDTFlags);
-
+				if(iColumn != 8 && iColumn!=14)
+					dc.DrawText(buffer, buffer.GetLength(),&cur_rec,uDTFlags);
 				if ( iColumn == 0 )
-					//MORPH - Changed by SiRoB, for rating icon
-					// Mighty Knife: if the rating item is not shown, we mustn't
-					// subtract its size, otherwise we end up in display problems
-					// with the other columns...
-					if ( thePrefs.ShowRatingIndicator () )
-						cur_rec.left -= iIconDrawWidth + 11;
-					else
-						cur_rec.left -= iIconDrawWidth;
-					// [end] Mighty Knife
-
+					cur_rec.left -= iIconDrawWidth;
 			//MORPH - Added by SiRoB, Don't draw hidden coloms
 			}
 			//MORPH END   - Added by SiRoB, Don't draw hidden coloms
@@ -905,13 +783,13 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		}
 	}
 	ShowFilesCount();
-	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
+	if (lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
 		RECT outline_rec = lpDrawItemStruct->rcItem;
 
 		outline_rec.top--;
 		outline_rec.bottom++;
-		dc->FrameRect(&outline_rec, &CBrush(m_crWindow));
+		dc.FrameRect(&outline_rec, &CBrush(m_crWindow));
 		outline_rec.top++;
 		outline_rec.bottom--;
 		outline_rec.left++;
@@ -924,9 +802,9 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			outline_rec.bottom++;
 
 		if(bCtrlFocused)
-			dc->FrameRect(&outline_rec, &CBrush(m_crFocusLine));
+			dc.FrameRect(&outline_rec, &CBrush(m_crFocusLine));
 		else
-			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
+			dc.FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
 	
 	if (m_crWindowTextBk == CLR_NONE)
@@ -934,8 +812,6 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
 }
-
-// CSharedFilesCtrl message handlers
 
 void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
@@ -1284,14 +1160,20 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SharedFilesMenu.EnableMenuItem(MP_MASSRENAME, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	//MORPH END   - Added by SiRoB, [end] Mighty Knife
 
-	#if defined(_DEBUG)
+	m_CollectionsMenu.EnableMenuItem(MP_MODIFYCOLLECTION, ( pSingleSelFile != NULL && pSingleSelFile->m_pCollection != NULL ) ? MF_ENABLED : MF_GRAYED);
+	m_CollectionsMenu.EnableMenuItem(MP_VIEWCOLLECTION, ( pSingleSelFile != NULL && pSingleSelFile->m_pCollection != NULL ) ? MF_ENABLED : MF_GRAYED);
+	m_CollectionsMenu.EnableMenuItem(MP_SEARCHAUTHOR, ( pSingleSelFile != NULL && pSingleSelFile->m_pCollection != NULL && !pSingleSelFile->m_pCollection->GetAuthorKeyHashString().IsEmpty()) ? MF_ENABLED : MF_GRAYED);
+#if defined(_DEBUG)
+	if (thePrefs.IsExtControlsEnabled()){
 	//JOHNTODO: Not for release as we need kad lowID users in the network to see how well this work work. Also, we do not support these links yet.
 	if (iSelectedItems > 0 && theApp.IsConnected() && theApp.IsFirewalled() && theApp.clientlist->GetBuddy())
 		m_SharedFilesMenu.EnableMenuItem(MP_GETKADSOURCELINK, MF_ENABLED);
 	else
 		m_SharedFilesMenu.EnableMenuItem(MP_GETKADSOURCELINK, MF_GRAYED);
+	}
 	#endif
-	m_SharedFilesMenu.EnableMenuItem(Irc_SetSendLink, iSelectedItems == 1 && theApp.emuledlg->ircwnd->IsConnected() ? MF_ENABLED : MF_GRAYED);
+	if (thePrefs.IsExtControlsEnabled())
+		m_SharedFilesMenu.EnableMenuItem(Irc_SetSendLink, iSelectedItems == 1 && theApp.emuledlg->ircwnd->IsConnected() ? MF_ENABLED : MF_GRAYED);
 
 	//MORPH START - Added by IceCream, copy feedback feature
 	m_SharedFilesMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
@@ -1324,7 +1206,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			selectedList.AddTail((CKnownFile*)GetItemData(index));
 	}
 
-	if (selectedList.GetCount() > 0)
+	if (wParam==MP_CREATECOLLECTION || selectedList.GetCount() > 0)
 	{
 		CKnownFile* file = NULL;
 		if (selectedList.GetCount() == 1)
@@ -1441,13 +1323,13 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					if (!myfile || myfile->IsPartFile())
 						continue;
 					
-					bool delsucc = false;
+					BOOL delsucc = FALSE;
 					if (!PathFileExists(myfile->GetFilePath()))
-						delsucc = true;
+						delsucc = TRUE;
 					else{
 						// Delete
 						if (!thePrefs.GetRemoveToBin()){
-							delsucc = DeleteFile(myfile->GetFilePath())!=0;
+							delsucc = DeleteFile(myfile->GetFilePath());
 						}
 						else{
 							// delete to recycle bin :(
@@ -1487,6 +1369,61 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MP_DETAIL:
 				ShowFileDialog(selectedList);
 				break;
+			case MP_CREATECOLLECTION:
+			{
+				CCollection* pCollection = new CCollection();
+				POSITION pos = selectedList.GetHeadPosition();
+				while (pos != NULL)
+				{
+					pCollection->AddFileToCollection(selectedList.GetNext(pos),true);
+				}
+				CCollectionCreateDialog dialog;
+				dialog.SetCollection(pCollection,true);
+				dialog.DoModal();
+				//We delete this collection object because when the newly created
+				//collection file is added to the sharedfile list, it is read and verified
+				//and which creates the colleciton object that is attached to that file..
+				delete pCollection;
+				break;
+			}
+			case MP_SEARCHAUTHOR:
+			{
+				if (selectedList.GetCount() == 1 && file->m_pCollection)
+				{
+					SSearchParams* pParams = new SSearchParams;
+					pParams->strExpression = file->m_pCollection->GetCollectionAuthorKeyString();
+					pParams->eType = SearchTypeKademlia;
+					pParams->strFileType = ED2KFTSTR_EMULECOLLECTION;
+					pParams->strSpecialTitle = file->m_pCollection->m_sCollectionAuthorName;
+					if (pParams->strSpecialTitle.GetLength() > 50){
+						pParams->strSpecialTitle = pParams->strSpecialTitle.Left(50) + _T("...");
+					}
+					theApp.emuledlg->searchwnd->m_pwndResults->StartSearch(pParams);
+				}
+				break;
+			}
+			case MP_VIEWCOLLECTION:
+			{
+				if (selectedList.GetCount() == 1 && file->m_pCollection)
+				{
+					CCollectionViewDialog dialog;
+					dialog.SetCollection(file->m_pCollection);
+					dialog.DoModal();
+				}
+				break;
+			}
+			case MP_MODIFYCOLLECTION:
+			{
+				if (selectedList.GetCount() == 1 && file->m_pCollection)
+				{
+					CCollectionCreateDialog dialog;
+					CCollection* pCollection = new CCollection(file->m_pCollection);
+					dialog.SetCollection(pCollection,false);
+					dialog.DoModal();
+					delete pCollection;				
+				}
+				break;
+			}
 			case MP_SHOWED2KLINK:
 				ShowFileDialog(selectedList, IDD_ED2KLINK);
 				break;
@@ -2127,16 +2064,8 @@ void CSharedFilesCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult)
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableShared);
-	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableShared);
-	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 
-	// Item is column clicked
-	sortItem = pNMListView->iSubItem;
-
-	// Save new preferences
-	thePrefs.SetColumnSortItem(CPreferences::tableShared, sortItem);
-	thePrefs.SetColumnSortAscending(CPreferences::tableShared, sortAscending);
+	bool sortAscending = (GetSortItem() != pNMListView->iSubItem) ? true : !GetSortAscending();
 
 	// Ornis 4-way-sorting
 	int adder=0;
@@ -2157,13 +2086,17 @@ void CSharedFilesCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult)
 
 	// Sort table
 	if (adder==0)	
-		SetSortArrow(sortItem, sortAscending); 
+		SetSortArrow(pNMListView->iSubItem, sortAscending); 
 	else
-		SetSortArrow(sortItem, sortAscending ? arrowDoubleUp : arrowDoubleDown);
+		SetSortArrow(pNMListView->iSubItem, sortAscending ? arrowDoubleUp : arrowDoubleDown);
+	
+	UpdateSortHistory(pNMListView->iSubItem + adder + (sortAscending ? 0:20),20);
 	// Mighty Knife: CRC32-Tag - Indexes shifted by 10
-	SortItems(SortProc, sortItem + adder + (sortAscending ? 0:30));
+	/*
+	SortItems(SortProc, pNMListView->iSubItem + adder + (sortAscending ? 0:20));
+	*/
+	SortItems(SortProc, pNMListView->iSubItem + adder + (sortAscending ? 0:30));
 	// [end] Mighty Knife
-
 	*pResult = 0;
 }
 
@@ -2172,221 +2105,278 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 	// Mighty Knife: CRC32-Tag - Indexes shifted by 10 !
 	const CKnownFile* item1 = (CKnownFile*)lParam1;
 	const CKnownFile* item2 = (CKnownFile*)lParam2;	
+	
+	int iResult=0;
 	switch(lParamSort){
 		case 0: //filename asc
-			return CompareLocaleStringNoCase(item1->GetFileName(),item2->GetFileName());
+			iResult=CompareLocaleStringNoCase(item1->GetFileName(),item2->GetFileName());
+			break;
 		case 30: //filename desc
-			return CompareLocaleStringNoCase(item2->GetFileName(),item1->GetFileName());
+			iResult=CompareLocaleStringNoCase(item2->GetFileName(),item1->GetFileName());
+			break;
 
 		case 1: //filesize asc
-			return item1->GetFileSize()==item2->GetFileSize()?0:(item1->GetFileSize()>item2->GetFileSize()?1:-1);
+			iResult=item1->GetFileSize()==item2->GetFileSize()?0:(item1->GetFileSize()>item2->GetFileSize()?1:-1);
+			break;
 
 		case 31: //filesize desc
-			return item1->GetFileSize()==item2->GetFileSize()?0:(item2->GetFileSize()>item1->GetFileSize()?1:-1);
-
+			iResult=item1->GetFileSize()==item2->GetFileSize()?0:(item2->GetFileSize()>item1->GetFileSize()?1:-1);
+			break;
 
 		case 2: //filetype asc
-			return item1->GetFileTypeDisplayStr().Compare(item2->GetFileTypeDisplayStr());
+			iResult=item1->GetFileTypeDisplayStr().Compare(item2->GetFileTypeDisplayStr());
+			break;
 		case 32: //filetype desc
-			return item2->GetFileTypeDisplayStr().Compare(item1->GetFileTypeDisplayStr());
+			iResult=item2->GetFileTypeDisplayStr().Compare(item1->GetFileTypeDisplayStr());
+			break;
 
 		case 3: //prio asc
 			//MORPH START - Changed by SiRoB, Powerstate in prio colums
 			if (!item1->GetPowerShared() && item2->GetPowerShared())
-				return -1;			
+				iResult=-1;			
 			else if (item1->GetPowerShared() && !item2->GetPowerShared())
-				return 1;
+				iResult=1;
 			else			
 				if(item1->GetUpPriority() == PR_VERYLOW && item2->GetUpPriority() != PR_VERYLOW)
-					return -1;
+					iResult=-1;
 				else if (item1->GetUpPriority() != PR_VERYLOW && item2->GetUpPriority() == PR_VERYLOW)
-					return 1;
+					iResult=1;
 				else
-					return item1->GetUpPriority()-item2->GetUpPriority();
+					iResult=item1->GetUpPriority()-item2->GetUpPriority();
 			//MORPH END   - Changed by SiRoB, Powerstate in prio colums
+			break;
 		case 33: //prio desc
 			//MORPH START - Changed by SiRoB, Powerstate in prio colums
 			if (!item2->GetPowerShared() && item1->GetPowerShared())
-				return -1;			
+				iResult=-1;			
 			else if (item2->GetPowerShared() && !item1->GetPowerShared())
-				return 1;
+				iResult=1;
 			else		
 				if(item2->GetUpPriority() == PR_VERYLOW && item1->GetUpPriority() != PR_VERYLOW )
-					return -1;
+					iResult=-1;
 				else if (item2->GetUpPriority() != PR_VERYLOW && item1->GetUpPriority() == PR_VERYLOW)
-					return 1;
+					iResult=1;
 				else
-					return item2->GetUpPriority()-item1->GetUpPriority();
+					iResult=item2->GetUpPriority()-item1->GetUpPriority();
 			//MORPH END  - Changed by SiRoB, Powerstate in prio colums
+			break;
 		case 4: //fileID asc
-			return memcmp(item1->GetFileHash(), item2->GetFileHash(), 16);
+			iResult=memcmp(item1->GetFileHash(), item2->GetFileHash(), 16);
+			break;
 		case 34: //fileID desc
-			return memcmp(item2->GetFileHash(), item1->GetFileHash(), 16);
+			iResult=memcmp(item2->GetFileHash(), item1->GetFileHash(), 16);
+			break;
 
 		case 5: //requests asc
-			return item1->statistic.GetRequests() - item2->statistic.GetRequests();
+			iResult=item1->statistic.GetRequests() - item2->statistic.GetRequests();
+			break;
 		case 35: //requests desc
-			return item2->statistic.GetRequests() - item1->statistic.GetRequests();
+			iResult=item2->statistic.GetRequests() - item1->statistic.GetRequests();
+			break;
 		
 		case 6: //acc requests asc
-			return item1->statistic.GetAccepts() - item2->statistic.GetAccepts();
+			iResult=item1->statistic.GetAccepts() - item2->statistic.GetAccepts();
+			break;
 		case 36: //acc requests desc
-			return item2->statistic.GetAccepts() - item1->statistic.GetAccepts();
+			iResult=item2->statistic.GetAccepts() - item1->statistic.GetAccepts();
+			break;
 		
 		case 7: //all transferred asc
-			return item1->statistic.GetTransferred()==item2->statistic.GetTransferred()?0:(item1->statistic.GetTransferred()>item2->statistic.GetTransferred()?1:-1);
+			iResult=item1->statistic.GetTransferred()==item2->statistic.GetTransferred()?0:(item1->statistic.GetTransferred()>item2->statistic.GetTransferred()?1:-1);
+			break;
 		case 37: //all transferred desc
-			return item1->statistic.GetTransferred()==item2->statistic.GetTransferred()?0:(item2->statistic.GetTransferred()>item1->statistic.GetTransferred()?1:-1);
+			iResult=item1->statistic.GetTransferred()==item2->statistic.GetTransferred()?0:(item2->statistic.GetTransferred()>item1->statistic.GetTransferred()?1:-1);
+			break;
 
 		case 9: //folder asc
-			return CompareLocaleStringNoCase(item1->GetPath(),item2->GetPath());
+			iResult=CompareLocaleStringNoCase(item1->GetPath(),item2->GetPath());
+			break;
 		case 39: //folder desc
-			return CompareLocaleStringNoCase(item2->GetPath(),item1->GetPath());
+			iResult=CompareLocaleStringNoCase(item2->GetPath(),item1->GetPath());
+			break;
 
 		case 10: //complete sources asc
-			return CompareUnsigned(item1->m_nCompleteSourcesCount, item2->m_nCompleteSourcesCount);
+			iResult=CompareUnsigned(item1->m_nCompleteSourcesCount, item2->m_nCompleteSourcesCount);
+			break;
 		case 40: //complete sources desc
-			return CompareUnsigned(item2->m_nCompleteSourcesCount, item1->m_nCompleteSourcesCount);
+			iResult=CompareUnsigned(item2->m_nCompleteSourcesCount, item1->m_nCompleteSourcesCount);
+			break;
+
 		case 11: //ed2k shared asc
-			return item1->GetPublishedED2K() - item2->GetPublishedED2K();
+			iResult=item1->GetPublishedED2K() - item2->GetPublishedED2K();
+			break;
 		case 41: //ed2k shared desc
-			return item2->GetPublishedED2K() - item1->GetPublishedED2K();
+			iResult=item2->GetPublishedED2K() - item1->GetPublishedED2K();
+			break;
 
 		case 12: //permission asc
-			return item2->GetPermissions()-item1->GetPermissions();
+			iResult=item2->GetPermissions()-item1->GetPermissions();
+			break;
 		case 42: //permission desc
-			return item1->GetPermissions()-item2->GetPermissions();
+			iResult=item1->GetPermissions()-item2->GetPermissions();
+			break;
 
 		
 		//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 		//MORPH START - Added by SiRoB, ZZ Upload System
 		case 13:
 			if (!item1->GetPowerShared() && item2->GetPowerShared())
-				return -1;
+				iResult=-1;
 			else if (item1->GetPowerShared() && !item2->GetPowerShared())
-				return 1;
+				iResult=1;
 			else
 				if (item1->GetPowerSharedMode() != item2->GetPowerSharedMode())
-					return item1->GetPowerSharedMode() - item2->GetPowerSharedMode();
+					iResult=item1->GetPowerSharedMode() - item2->GetPowerSharedMode();
 				else
 					if (!item1->GetPowerShareAuthorized() && item2->GetPowerShareAuthorized())
-						return -1;
+						iResult=-1;
 					else if (item1->GetPowerShareAuthorized() && !item2->GetPowerShareAuthorized())
-						return 1;
+						iResult=1;
 					else
 						if (!item1->GetPowerShareAuto() && item2->GetPowerShareAuto())
-							return -1;
+							iResult=-1;
 						else if (item1->GetPowerShareAuto() && !item2->GetPowerShareAuto())
-							return 1;
+							iResult=1;
 						else
 							//MORPH START - Added by SiRoB, POWERSHARE Limit
 							if (!item1->GetPowerShareLimited() && item2->GetPowerShareLimited())
-								return -1;
+								iResult=-1;
 							else if (item1->GetPowerShareLimited() && !item2->GetPowerShareLimited())
-								return 1;
+								iResult=1;
 							else
 							//MORPH END   - Added by SiRoB, POWERSHARE Limit
-								return 0;
+								iResult=0;
+			break;
 		case 43:
 			if (!item2->GetPowerShared() && item1->GetPowerShared())
-				return -1;
+				iResult=-1;
 			else if (item2->GetPowerShared() && !item1->GetPowerShared())
-				return 1;
+				iResult=1;
 			else
 				if (item1->GetPowerSharedMode() != item2->GetPowerSharedMode())
-					return item2->GetPowerSharedMode() - item1->GetPowerSharedMode();
+					iResult=item2->GetPowerSharedMode() - item1->GetPowerSharedMode();
 				else
 					if (!item2->GetPowerShareAuthorized() && item1->GetPowerShareAuthorized())
-						return -1;
+						iResult=-1;
 					else if (item2->GetPowerShareAuthorized() && !item1->GetPowerShareAuthorized())
-						return 1;
+						iResult=1;
 					else
 						if (!item2->GetPowerShareAuto() && item1->GetPowerShareAuto())
-							return -1;
+							iResult=-1;
 						else if (item2->GetPowerShareAuto() && !item1->GetPowerShareAuto())
-							return 1;
+							iResult=1;
 						else
 							//MORPH START - Added by SiRoB, POWERSHARE Limit
 							if (!item2->GetPowerShareLimited() && item1->GetPowerShareLimited())
-								return -1;
+								iResult=-1;
 							else if (item2->GetPowerShareLimited() && !item1->GetPowerShareLimited())
-								return 1;
+								iResult=1;
 							else
 							//MORPH END   - Added by SiRoB, POWERSHARE Limit
-								return 0;
+								iResult=0;
 		//MORPH END - Added by SiRoB, ZZ Upload System
 		//MORPH END - Changed by SiRoB, Avoid misusing of powersharing
+			break;
 		//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
 		case 14: //spread asc
 		case 15:
-			return 10000*(((CKnownFile*)lParam1)->statistic.GetSpreadSortValue()-((CKnownFile*)lParam2)->statistic.GetSpreadSortValue());
+			iResult=10000*(((CKnownFile*)lParam1)->statistic.GetSpreadSortValue()-((CKnownFile*)lParam2)->statistic.GetSpreadSortValue());
+			break;
 		case 44: //spread desc
 		case 45:
-			return 10000*(((CKnownFile*)lParam2)->statistic.GetSpreadSortValue()-((CKnownFile*)lParam1)->statistic.GetSpreadSortValue());
+			iResult=10000*(((CKnownFile*)lParam2)->statistic.GetSpreadSortValue()-((CKnownFile*)lParam1)->statistic.GetSpreadSortValue());
+			break;
 
 		case 16: // VQB:  Simple UL asc
 		case 46: //VQB:  Simple UL desc
 			{
 				float x1 = ((float)item1->statistic.GetAllTimeTransferred())/((float)item1->GetFileSize());
 				float x2 = ((float)item2->statistic.GetAllTimeTransferred())/((float)item2->GetFileSize());
-				if (lParamSort == 16) return 10000*(x1-x2); else return 10000*(x2-x1);
+				if (lParamSort == 16) iResult=10000*(x1-x2); else iResult=10000*(x2-x1);
+			break;
 			}
 		case 17: // SF:  Full Upload Count asc
 			return 10000*(((CKnownFile*)lParam1)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam2)->statistic.GetFullSpreadCount());
+			break;
 		case 47: // SF:  Full Upload Count desc
 			return 10000*(((CKnownFile*)lParam2)->statistic.GetFullSpreadCount()-((CKnownFile*)lParam1)->statistic.GetFullSpreadCount());
+			break;
 		//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 		//MORPH START - Added by SiRoB, HIDEOS
 		case 18:
 			if (item1->GetHideOS() == item2->GetHideOS())
-				return item1->GetSelectiveChunk() - item2->GetSelectiveChunk();
+				iResult=item1->GetSelectiveChunk() - item2->GetSelectiveChunk();
 			else
-				return item1->GetHideOS() - item2->GetHideOS();
+				iResult=item1->GetHideOS() - item2->GetHideOS();
+			break;
 		case 38:
 			if (item2->GetHideOS() == item1->GetHideOS())
-				return item2->GetSelectiveChunk() - item1->GetSelectiveChunk();
+				iResult=item2->GetSelectiveChunk() - item1->GetSelectiveChunk();
 			else
-				return item2->GetHideOS() - item1->GetHideOS();
+				iResult=item2->GetHideOS() - item1->GetHideOS();
+			break;
 		//MORPH END   - Added by SiRoB, HIDEOS
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 		case 19:
-			return item1->GetShareOnlyTheNeed() - item2->GetShareOnlyTheNeed();
+			iResult=item1->GetShareOnlyTheNeed() - item2->GetShareOnlyTheNeed();
+			break;
 		case 49:
-			return item2->GetShareOnlyTheNeed() - item1->GetShareOnlyTheNeed();
+			iResult=item2->GetShareOnlyTheNeed() - item1->GetShareOnlyTheNeed();
+			break;
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 		case 105: //all requests asc
-			return CompareUnsigned(item1->statistic.GetAllTimeRequests(), item2->statistic.GetAllTimeRequests());
+			iResult=CompareUnsigned(item1->statistic.GetAllTimeRequests(), item2->statistic.GetAllTimeRequests());
+			break;
 		case 135: //all requests desc
-			return CompareUnsigned(item2->statistic.GetAllTimeRequests(), item1->statistic.GetAllTimeRequests());
+			iResult=CompareUnsigned(item2->statistic.GetAllTimeRequests(), item1->statistic.GetAllTimeRequests());
 		case 106: //all acc requests asc
-			return CompareUnsigned(item1->statistic.GetAllTimeAccepts(), item2->statistic.GetAllTimeAccepts());
+			iResult=CompareUnsigned(item1->statistic.GetAllTimeAccepts(), item2->statistic.GetAllTimeAccepts());
 		case 136: //all acc requests desc
-			return CompareUnsigned(item2->statistic.GetAllTimeAccepts(), item1->statistic.GetAllTimeAccepts());
+			iResult=CompareUnsigned(item2->statistic.GetAllTimeAccepts(), item1->statistic.GetAllTimeAccepts());
 		case 107: //all transferred asc
-			return item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item1->statistic.GetAllTimeTransferred()>item2->statistic.GetAllTimeTransferred()?1:-1);
+			iResult=item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item1->statistic.GetAllTimeTransferred()>item2->statistic.GetAllTimeTransferred()?1:-1);
 		case 137: //all transferred desc
-			return item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item2->statistic.GetAllTimeTransferred()>item1->statistic.GetAllTimeTransferred()?1:-1);
+			iResult=item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item2->statistic.GetAllTimeTransferred()>item1->statistic.GetAllTimeTransferred()?1:-1);
 
 		case 111:{ //kad shared asc
 			uint32 tNow = time(NULL);
 			int i1 = (tNow < item1->GetLastPublishTimeKadSrc()) ? 1 : 0;
 			int i2 = (tNow < item2->GetLastPublishTimeKadSrc()) ? 1 : 0;
-			return i1 - i2;
+			iResult=i1 - i2;
+			break;
 		}
 		case 141:{ //kad shared desc
 			uint32 tNow = time(NULL);
 			int i1 = (tNow < item1->GetLastPublishTimeKadSrc()) ? 1 : 0;
 			int i2 = (tNow < item2->GetLastPublishTimeKadSrc()) ? 1 : 0;
-			return i2 - i1;
+			iResult=i2 - i1;
+			break;
 		}
 		default: 
-			return 0;
+			iResult=0;
+			break;
 	}
+	int dwNextSort;
+	//call secondary sortorder, if this one results in equal
+	//(Note: yes I know this call is evil OO wise, but better than changing a lot more code, while we have only one instance anyway - might be fixed later)
+	if (iResult == 0 && (dwNextSort = theApp.emuledlg->sharedfileswnd->sharedfilesctrl.GetNextSortOrder(lParamSort)) != (-1)){
+		iResult= SortProc(lParam1, lParam2, dwNextSort);
+	}
+
+	return iResult;
+
 }
 
 void CSharedFilesCtrl::OpenFile(const CKnownFile* file)
 {
-	ShellOpenFile(file->GetFilePath(), NULL);
+	if(file->m_pCollection)
+	{
+		CCollectionViewDialog dialog;
+		dialog.SetCollection(file->m_pCollection);
+		dialog.DoModal();
+	}
+	else
+		ShellOpenFile(file->GetFilePath(), NULL);
 }
 
 void CSharedFilesCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
@@ -2397,7 +2387,7 @@ void CSharedFilesCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 		CKnownFile* file = (CKnownFile*)GetItemData(iSel);
 		if (file)
 		{
-			//MORPH Changed by SiRoB - Double click unfinished files in SharedFile window display FileDetail
+			//MORPH Changed by SiRoB - Double click uncomplet files in SharedFile window display FileDetail
 			/*
 			if (GetKeyState(VK_MENU) & 0x8000){
 			*/
@@ -2439,8 +2429,9 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH START - Added by SiRoB, CRC32-Tag
 	if (m_CRC32Menu) VERIFY( m_CRC32Menu.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, CRC32-Tag
-	
+	if (m_CollectionsMenu) VERIFY( m_CollectionsMenu.DestroyMenu() );
 	if (m_SharedFilesMenu) VERIFY( m_SharedFilesMenu.DestroyMenu() );
+
 
 	m_PrioMenu.CreateMenu();
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOVERYLOW,GetResString(IDS_PRIOVERYLOW));
@@ -2515,6 +2506,13 @@ void CSharedFilesCtrl::CreateMenues()
 	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_ABORT,GetResString(IDS_CRC32_ABORT));
 	//MORPH END   - Changed by SiRoB, [end] Mighty Knife
 
+	m_CollectionsMenu.CreateMenu();
+	m_CollectionsMenu.AddMenuTitle(NULL, true);
+	m_CollectionsMenu.AppendMenu(MF_STRING,MP_CREATECOLLECTION, GetResString(IDS_CREATECOLLECTION), _T("COLLECTION_ADD"));
+	m_CollectionsMenu.AppendMenu(MF_STRING,MP_MODIFYCOLLECTION, GetResString(IDS_MODIFYCOLLECTION), _T("COLLECTION_EDIT"));
+	m_CollectionsMenu.AppendMenu(MF_STRING,MP_VIEWCOLLECTION, GetResString(IDS_VIEWCOLLECTION), _T("COLLECTION_VIEW"));
+	m_CollectionsMenu.AppendMenu(MF_STRING,MP_SEARCHAUTHOR, GetResString(IDS_SEARCHAUTHORCOLLECTION), _T("COLLECTION_SEARCH"));
+
 	m_SharedFilesMenu.CreatePopupMenu();
 	m_SharedFilesMenu.AddMenuTitle(GetResString(IDS_SHAREDFILES), true);
 
@@ -2522,6 +2520,8 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPENFOLDER, GetResString(IDS_OPENFOLDER), _T("OPENFOLDER"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_RENAME, GetResString(IDS_RENAME) + _T("..."), _T("FILERENAME"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_DELETE), _T("DELETE"));
+	if (thePrefs.IsExtControlsEnabled())
+		m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC), _T("IRCCLIPBOARD"));
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	//MOPRH START - Added by SiRoB, Keep permission flag	
@@ -2551,13 +2551,16 @@ void CSharedFilesCtrl::CreateMenues()
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_PW_CON_UPLBL) + _T(")"), _T("FILEPRIORITY"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
+
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_CollectionsMenu.m_hMenu, GetResString(IDS_META_COLLECTION), _T("COLLECTION"));
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("FILEINFO"));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD), _T("FILECOMMENTS")); 
 	if (thePrefs.GetShowCopyEd2kLinkCmd())
-		m_SharedFilesMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_COPY), _T("ED2KLINK") );
+		m_SharedFilesMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1), _T("ED2KLINK") );
 	else
 		m_SharedFilesMenu.AppendMenu(MF_STRING,MP_SHOWED2KLINK, GetResString(IDS_DL_SHOWED2KLINK), _T("ED2KLINK") );
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD), _T("FILECOMMENTS")); 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	
 	//MORPH START - Changed by SiRoB, Mighty Knife: CRC32-Tag
@@ -2570,9 +2573,11 @@ void CSharedFilesCtrl::CreateMenues()
 	// [end] Mighty Knife
 
 #if defined(_DEBUG)
-	//JOHNTODO: Not for release as we need kad lowID users in the network to see how well this work work. Also, we do not support these links yet.
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_GETKADSOURCELINK, _T("Copy eD2K Links To Clipboard (Kad)"));
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 	
+	if (thePrefs.IsExtControlsEnabled()){
+		//JOHNTODO: Not for release as we need kad lowID users in the network to see how well this work work. Also, we do not support these links yet.
+		m_SharedFilesMenu.AppendMenu(MF_STRING,MP_GETKADSOURCELINK, _T("Copy eD2K Links To Clipboard (Kad)"));
+		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 	
+	}
 #endif
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC), _T("IRCCLIPBOARD"));
@@ -2648,7 +2653,15 @@ void CSharedFilesCtrl::ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFil
 {
 	if (aFiles.GetSize() > 0)
 	{
-		CSharedFileDetailsSheet dialog(aFiles, uPshInvokePage, this);
+		CFileDetailDialog dialog(aFiles, uPshInvokePage, this);
 		dialog.DoModal();
 	}
+}
+
+void CSharedFilesCtrl::SetDirectoryFilter(CDirectoryItem* pNewFilter, bool bRefresh){
+	if (m_pDirectoryFilter == pNewFilter)
+		return;
+	m_pDirectoryFilter = pNewFilter;
+	if (bRefresh)
+		ReloadFileList();
 }

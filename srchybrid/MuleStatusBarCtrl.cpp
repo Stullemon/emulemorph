@@ -65,6 +65,7 @@ void CMuleStatusBarCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 			break;
 
 		case SBarUsers:
+			theApp.emuledlg->serverwnd->ShowNetworkInfo();
 			break;
 		
 		case SBarUpDown:

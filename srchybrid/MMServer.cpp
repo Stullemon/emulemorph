@@ -20,13 +20,13 @@
 #include "opcodes.h"
 #include "md5sum.h"
 #include "packets.h"
+#include "searchFile.h"
 #include "searchlist.h"
 #include "Exceptions.h"
 #include "UploadQueue.h"
 #include "DownloadQueue.h"
 #include "Statistics.h"
 #include "MMSocket.h"
-#include "OtherFunctions.h"
 #include "Sockets.h"
 #include "Server.h"
 #include "PartFile.h"
@@ -175,7 +175,7 @@ void CMMServer::ProcessStatusRequest(CMMSocket* sender, CMMPacket* packet){
 		packet->WriteByte(MMP_STATUSANSWER);
 
 	packet->WriteShort((uint16)theApp.uploadqueue->GetDatarate()/100);
-	packet->WriteShort((uint16)((thePrefs.GetMaxGraphUploadRate()*1024)/100));
+	packet->WriteShort((uint16)((thePrefs.GetMaxGraphUploadRate(true)*1024)/100));
 	packet->WriteShort((uint16)theApp.downloadqueue->GetDatarate()/100);
 	packet->WriteShort((uint16)((thePrefs.GetMaxGraphDownloadRate()*1024)/100));
 	packet->WriteByte((uint8)theApp.downloadqueue->GetDownloadingFileCount());
@@ -410,6 +410,9 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 		case 5:
 			Params.strFileType = ED2KFTSTR_VIDEO;
 			break;
+		case 6:
+			Params.strFileType = ED2KFTSTR_EMULECOLLECTION;
+			break;
 		default:
 			ASSERT ( false );
 			Params.strFileType.Empty();
@@ -454,7 +457,7 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	m_byPendingCommand = MMT_SEARCH;
 	m_pPendingCommandSocket = sender;
 
-	theApp.searchlist->NewSearch(NULL, Params.strFileType, MMS_SEARCHID, true);
+	theApp.searchlist->NewSearch(NULL, Params.strFileType, MMS_SEARCHID, Params.eType, true);
 	Packet* searchpacket = new Packet(&searchdata);
 	searchpacket->opcode = OP_SEARCHREQUEST;
 	theStats.AddUpDataOverheadServer(searchpacket->size);

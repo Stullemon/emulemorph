@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -23,11 +23,18 @@
 #include "KnownFileList.h"
 #include "KnownFile.h"
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
+
+#define	SPLITTER_RANGE_MIN		100
+#define	SPLITTER_RANGE_MAX		350
+
+#define	SPLITTER_MARGIN			1
+#define	SPLITTER_WIDTH			4
 
 
 // CSharedFilesWnd dialog
@@ -40,6 +47,8 @@ BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
 	ON_NOTIFY(NM_CLICK, IDC_SFLIST, OnNMClickSflist)
 	ON_WM_SYSCOLORCHANGE()
 	ON_STN_DBLCLK(IDC_FILES_ICO, OnStnDblclickFilesIco)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_SHAREDDIRSTREE, OnTvnSelchangedShareddirstree)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 CSharedFilesWnd::CSharedFilesWnd(CWnd* pParent /*=NULL*/)
@@ -62,6 +71,7 @@ void CSharedFilesWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_POPBAR2, pop_baraccept);
 	DDX_Control(pDX, IDC_POPBAR3, pop_bartrans);
 	DDX_Control(pDX, IDC_STATISTICS, m_ctrlStatisticsFrm);
+	DDX_Control(pDX, IDC_SHAREDDIRSTREE, m_ctlSharedDirTree);
 }
 
 BOOL CSharedFilesWnd::OnInitDialog()
@@ -70,6 +80,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	InitWindowStyles(this);
 	SetAllIcons();
 	sharedfilesctrl.Init();
+	m_ctlSharedDirTree.Initalize(&sharedfilesctrl);
 	
 	pop_bar.SetGradientColors(RGB(255,255,240),RGB(255,255,0));
 	pop_bar.SetTextColor(RGB(20,70,255));
@@ -85,6 +96,32 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	m_ctrlStatisticsFrm.SetIcon(_T("StatsDetail"));
     //m_ctrlStatisticsFrm.SetFont(&bold); // should run 'SetIcon' *first* before setting bold font
     m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
+
+	CRect rc;
+	GetDlgItem(IDC_SHAREDDIRSTREE)->GetWindowRect(rc);
+	ScreenToClient(rc);
+
+	CRect rcSpl;
+	GetDlgItem(IDC_SHAREDDIRSTREE)->GetWindowRect(rcSpl);
+	ScreenToClient(rcSpl);
+
+	rcSpl.left = rcSpl.right + SPLITTER_MARGIN;
+	rcSpl.right = rcSpl.left + SPLITTER_WIDTH;
+	m_wndSplitter.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_SHAREDFILES);
+
+	int PosStatVinit = rcSpl.left;
+	int PosStatVnew = rc.left + thePrefs.GetSplitterbarPositionShared() + 2;
+
+	if (thePrefs.GetSplitterbarPositionShared() > SPLITTER_RANGE_MAX)
+		PosStatVnew = SPLITTER_RANGE_MAX;
+	else if (thePrefs.GetSplitterbarPositionShared() < SPLITTER_RANGE_MIN)
+		PosStatVnew = SPLITTER_RANGE_MIN;
+	rcSpl.left = PosStatVnew;
+	rcSpl.right = PosStatVnew + SPLITTER_WIDTH;
+	m_wndSplitter.MoveWindow(rcSpl);
+
+	DoResize(PosStatVnew - PosStatVinit);
+
     
 	Localize();
 
@@ -92,34 +129,103 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	GetDlgItem(IDC_TOTAL_LBL)->SetFont(&bold);
 	
 	AddAnchor(IDC_FILES_ICO, TOP_LEFT);
+	AddAnchor(IDC_RELOADSHAREDFILES, TOP_RIGHT);
+	AddAnchor(IDC_TOTAL_LBL, BOTTOM_RIGHT);
+	AddAnchor(IDC_SREQUESTED2,BOTTOM_RIGHT);
+	AddAnchor(IDC_FSTATIC7,BOTTOM_RIGHT);
+	AddAnchor(IDC_FSTATIC8,BOTTOM_RIGHT);
+	AddAnchor(IDC_FSTATIC9,BOTTOM_RIGHT);
+	AddAnchor(IDC_STRANSFERRED2,BOTTOM_RIGHT);
+	AddAnchor(IDC_SACCEPTED2,BOTTOM_RIGHT);
 	AddAnchor(IDC_TRAFFIC_TEXT, TOP_LEFT);
-	AddAnchor(IDC_SFLIST,TOP_LEFT,BOTTOM_RIGHT);
-	AddAnchor(IDC_RELOADSHAREDFILES, BOTTOM_RIGHT);
-	AddAnchor(IDC_STATISTICS,BOTTOM_LEFT);
-	AddAnchor(IDC_CURSESSION_LBL, BOTTOM_LEFT);
-	AddAnchor(IDC_TOTAL_LBL, BOTTOM_LEFT);
-	AddAnchor(IDC_FSTATIC4, BOTTOM_LEFT);
-	AddAnchor(IDC_SREQUESTED,BOTTOM_LEFT);
-	AddAnchor(IDC_POPBAR,BOTTOM_LEFT);
-	AddAnchor(IDC_FSTATIC7,BOTTOM_LEFT);
-	AddAnchor(IDC_SREQUESTED2,BOTTOM_LEFT);
-	AddAnchor(IDC_FSTATIC5,BOTTOM_LEFT);
-	AddAnchor(IDC_SACCEPTED,BOTTOM_LEFT);
-	AddAnchor(IDC_POPBAR2,BOTTOM_LEFT);
-	AddAnchor(IDC_FSTATIC8,BOTTOM_LEFT);
-	AddAnchor(IDC_SACCEPTED2,BOTTOM_LEFT);
-	AddAnchor(IDC_FSTATIC6,BOTTOM_LEFT);
-	AddAnchor(IDC_STRANSFERRED,BOTTOM_LEFT);
-	AddAnchor(IDC_POPBAR3,BOTTOM_LEFT);
-	AddAnchor(IDC_FSTATIC9,BOTTOM_LEFT);
-	AddAnchor(IDC_STRANSFERRED2,BOTTOM_LEFT);
+
+	
 	
 	return TRUE;
 }
 
-void CSharedFilesWnd::Reload()
+void CSharedFilesWnd::DoResize(int delta)
 {
+
+
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_SHAREDDIRSTREE), delta);
+
+	CSplitterControl::ChangePos(GetDlgItem(IDC_CURSESSION_LBL), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_FSTATIC4), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_SREQUESTED), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_FSTATIC5), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_SACCEPTED), -delta, 0);
+
+	CSplitterControl::ChangePos(GetDlgItem(IDC_FSTATIC6), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_STRANSFERRED), -delta, 0);
+
+	CSplitterControl::ChangePos(GetDlgItem(IDC_STATISTICS), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_SFLIST), -delta, 0);
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_STATISTICS), -delta);
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_SFLIST), -delta);
+	
+	CSplitterControl::ChangePos(GetDlgItem(IDC_POPBAR), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_POPBAR2), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_POPBAR3), -delta, 0);
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_POPBAR), -delta);
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_POPBAR2), -delta);
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_POPBAR3), -delta);
+
+	CRect rcW;
+	GetWindowRect(rcW);
+	ScreenToClient(rcW);
+
+	CRect rcspl;
+	GetDlgItem(IDC_SHAREDDIRSTREE)->GetClientRect(rcspl);
+
+	thePrefs.SetSplitterbarPositionShared(rcspl.right + SPLITTER_MARGIN);
+
+	RemoveAnchor(m_wndSplitter);
+	AddAnchor(m_wndSplitter, TOP_LEFT);
+
+	RemoveAnchor(IDC_SFLIST);
+	RemoveAnchor(IDC_STATISTICS);
+	RemoveAnchor(IDC_CURSESSION_LBL);
+	RemoveAnchor(IDC_FSTATIC4);
+	RemoveAnchor(IDC_SREQUESTED);
+	RemoveAnchor(IDC_POPBAR);
+	RemoveAnchor(IDC_FSTATIC5);
+	RemoveAnchor(IDC_SACCEPTED);
+	RemoveAnchor(IDC_POPBAR2);
+	RemoveAnchor(IDC_FSTATIC6);
+	RemoveAnchor(IDC_STRANSFERRED);
+	RemoveAnchor(IDC_POPBAR3);
+	RemoveAnchor(IDC_SHAREDDIRSTREE);
+
+
+	AddAnchor(IDC_SFLIST,TOP_LEFT,BOTTOM_RIGHT);
+	AddAnchor(IDC_STATISTICS,BOTTOM_LEFT, BOTTOM_RIGHT);
+	AddAnchor(IDC_CURSESSION_LBL, BOTTOM_LEFT);
+	AddAnchor(IDC_FSTATIC4, BOTTOM_LEFT);
+	AddAnchor(IDC_SREQUESTED,BOTTOM_LEFT);
+	AddAnchor(IDC_FSTATIC5,BOTTOM_LEFT);
+	AddAnchor(IDC_SACCEPTED,BOTTOM_LEFT);
+	AddAnchor(IDC_FSTATIC6,BOTTOM_LEFT);
+	AddAnchor(IDC_STRANSFERRED,BOTTOM_LEFT);
+	AddAnchor(IDC_SHAREDDIRSTREE,TOP_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_POPBAR,BOTTOM_LEFT, BOTTOM_RIGHT);
+	AddAnchor(IDC_POPBAR2,BOTTOM_LEFT, BOTTOM_RIGHT);
+	AddAnchor(IDC_POPBAR3,BOTTOM_LEFT, BOTTOM_RIGHT);
+
+	m_wndSplitter.SetRange(rcW.left+SPLITTER_RANGE_MIN, rcW.left+SPLITTER_RANGE_MAX);
+
+	Invalidate();
+	UpdateWindow();
+}
+
+
+void CSharedFilesWnd::Reload()
+{	
+	sharedfilesctrl.SetDirectoryFilter(NULL, false);
+	m_ctlSharedDirTree.Reload();
+	sharedfilesctrl.SetDirectoryFilter(m_ctlSharedDirTree.GetSelectedFilter(), false);
 	theApp.sharedfiles->Reload();
+
 	ShowSelectedFilesSummary();
 }
 
@@ -132,9 +238,6 @@ void CSharedFilesWnd::OnBnClickedReloadsharedfiles()
 {
 	CWaitCursor curWait;
 	Reload();
-	// MightyKnife: Save known files on reload
-	theApp.knownfiles->Save();
-	// [end] MightyKnife
 }
 
 void CSharedFilesWnd::OnLvnItemActivateSflist(NMHDR *pNMHDR, LRESULT *pResult)
@@ -174,15 +277,15 @@ void CSharedFilesWnd::ShowSelectedFilesSummary()
 	{
 		pop_bartrans.SetRange32(0, (int)(theApp.knownfiles->transferred/1024));
 		pop_bartrans.SetPos((int)(uTransferred/1024));
-		pop_bartrans.SetShowPercent();			
+		pop_bartrans.SetShowPercent();
 		SetDlgItemText(IDC_STRANSFERRED, CastItoXBytes(uTransferred, false, false));
 
-		pop_bar.SetRange32(0,theApp.knownfiles->requested);
+		pop_bar.SetRange32(0, theApp.knownfiles->requested);
 		pop_bar.SetPos(uRequests);
-		pop_bar.SetShowPercent();			
+		pop_bar.SetShowPercent();
 		SetDlgItemInt(IDC_SREQUESTED, uRequests, FALSE);
 
-		pop_baraccept.SetRange32(0,theApp.knownfiles->accepted);
+		pop_baraccept.SetRange32(0, theApp.knownfiles->accepted);
 		pop_baraccept.SetPos(uAccepted);
 		pop_baraccept.SetShowPercent();
 		SetDlgItemInt(IDC_SACCEPTED, uAccepted, FALSE);
@@ -269,6 +372,9 @@ void CSharedFilesWnd::SetAllIcons()
 void CSharedFilesWnd::Localize()
 {
 	sharedfilesctrl.Localize();
+	m_ctlSharedDirTree.Localize();
+	sharedfilesctrl.SetDirectoryFilter(NULL,true);
+
 	GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES));
 	GetDlgItem(IDC_RELOADSHAREDFILES)->SetWindowText(GetResString(IDS_SF_RELOAD));
 	m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
@@ -280,4 +386,70 @@ void CSharedFilesWnd::Localize()
 	GetDlgItem(IDC_FSTATIC9)->SetWindowText(GetResString(IDS_SF_TRANS));
 	GetDlgItem(IDC_FSTATIC8)->SetWindowText(GetResString(IDS_SF_ACCEPTED));
 	GetDlgItem(IDC_FSTATIC7)->SetWindowText(GetResString(IDS_SF_REQUESTS)+_T(":"));
+}
+
+void CSharedFilesWnd::OnTvnSelchangedShareddirstree(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	sharedfilesctrl.SetDirectoryFilter(m_ctlSharedDirTree.GetSelectedFilter(), !m_ctlSharedDirTree.IsCreatingTree());
+	*pResult = 0;
+}
+
+LRESULT CSharedFilesWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+{
+	switch (message)
+	{
+	case WM_PAINT:
+		if (m_wndSplitter)
+		{
+			CRect rcW;
+			GetWindowRect(rcW);
+			ScreenToClient(rcW);
+			if (rcW.Width() > 0)
+			{
+				CRect rctree;
+				GetDlgItem(IDC_SHAREDDIRSTREE)->GetWindowRect(rctree);
+				ScreenToClient(rctree);
+				CRect rcSpl;
+				rcSpl.left = rctree.right + SPLITTER_MARGIN;
+				rcSpl.right = rcSpl.left + SPLITTER_WIDTH;
+				rcSpl.top = rctree.top;
+				rcSpl.bottom = rctree.bottom;
+				m_wndSplitter.MoveWindow(rcSpl, TRUE);
+
+			}
+		}
+		break;
+
+	case WM_NOTIFY:
+		if (wParam == IDC_SPLITTER_SHAREDFILES)
+		{ 
+			SPC_NMHDR* pHdr = (SPC_NMHDR*)lParam;
+			DoResize(pHdr->delta);
+		}
+		break;
+
+	case WM_WINDOWPOSCHANGED:
+		{
+			CRect rcW;
+			GetWindowRect(rcW);
+			ScreenToClient(rcW);
+			if (m_wndSplitter && rcW.Width()>0)
+				Invalidate();
+			break;
+		}
+	case WM_SIZE:
+		if (m_wndSplitter)
+		{
+			CRect rc;
+			GetWindowRect(rc);
+			ScreenToClient(rc);
+			m_wndSplitter.SetRange(rc.left+SPLITTER_RANGE_MIN, rc.left+SPLITTER_RANGE_MAX);
+		}
+		break;
+	}
+	return CResizableDialog::DefWindowProc(message, wParam, lParam);
+}
+
+void CSharedFilesWnd::OnSize(UINT nType, int cx, int cy){
+	CResizableDialog::OnSize(nType, cx, cy);
 }

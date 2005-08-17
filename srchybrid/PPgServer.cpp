@@ -16,6 +16,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "emuleDlg.h"
+#include "ServerWnd.h"
 #include "PPgServer.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
@@ -31,20 +33,6 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CPPgServer, CPropertyPage)
 
-CPPgServer::CPPgServer()
-	: CPropertyPage(CPPgServer::IDD)
-{
-}
-
-CPPgServer::~CPPgServer()
-{
-}
-
-void CPPgServer::DoDataExchange(CDataExchange* pDX)
-{
-	CPropertyPage::DoDataExchange(pDX);
-}
-
 BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 	ON_EN_CHANGE(IDC_SERVERRETRIES, OnSettingsChange)
 	ON_BN_CLICKED(IDC_AUTOSERVER, OnSettingsChange)
@@ -59,8 +47,19 @@ BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
+CPPgServer::CPPgServer()
+	: CPropertyPage(CPPgServer::IDD)
+{
+}
 
-// CPPgServer message handlers
+CPPgServer::~CPPgServer()
+{
+}
+
+void CPPgServer::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+}
 
 BOOL CPPgServer::OnInitDialog()
 {
@@ -76,74 +75,37 @@ BOOL CPPgServer::OnInitDialog()
 
 void CPPgServer::LoadSettings(void)
 {
-	SetDlgItemInt(IDC_SERVERRETRIES, thePrefs.deadserverretries, FALSE);
-
-	if(thePrefs.IsSafeServerConnectEnabled())
-		CheckDlgButton(IDC_SAFESERVERCONNECT,1);
-	else
-		CheckDlgButton(IDC_SAFESERVERCONNECT,0);
-
-	if(thePrefs.m_bmanualhighprio)
-		CheckDlgButton(IDC_MANUALSERVERHIGHPRIO,1);
-	else
-		CheckDlgButton(IDC_MANUALSERVERHIGHPRIO,0);
-
-	if(thePrefs.GetSmartIdCheck())
-		CheckDlgButton(IDC_SMARTIDCHECK,1);
-	else
-		CheckDlgButton(IDC_SMARTIDCHECK,0);
-
-	if(thePrefs.autoserverlist)
-		CheckDlgButton(IDC_AUTOSERVER,1);
-	else
-		CheckDlgButton(IDC_AUTOSERVER,0);
-
-	if(thePrefs.addserversfromserver)
-		CheckDlgButton(IDC_UPDATESERVERCONNECT, 1);
-	else
-		CheckDlgButton(IDC_UPDATESERVERCONNECT, 0);
-	
-	if(thePrefs.addserversfromclient)
-		CheckDlgButton(IDC_UPDATESERVERCLIENT, 1);
-	else
-		CheckDlgButton(IDC_UPDATESERVERCLIENT, 0);
-
-	if(thePrefs.m_bUseServerPriorities)
-		CheckDlgButton(IDC_SCORE,1);
-	else
-		CheckDlgButton(IDC_SCORE,0);
-
-	if(thePrefs.autoconnectstaticonly)
-		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,1);
-	else
-		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,0);
+	SetDlgItemInt(IDC_SERVERRETRIES, thePrefs.m_uDeadServerRetries, FALSE);
+	CheckDlgButton(IDC_AUTOSERVER, thePrefs.m_bAutoUpdateServerList);
+	CheckDlgButton(IDC_UPDATESERVERCONNECT, thePrefs.m_bAddServersFromServer);
+	CheckDlgButton(IDC_UPDATESERVERCLIENT, thePrefs.m_bAddServersFromClients);
+	CheckDlgButton(IDC_SCORE, thePrefs.m_bUseServerPriorities);
+	CheckDlgButton(IDC_SMARTIDCHECK, thePrefs.m_bSmartServerIdCheck);
+	CheckDlgButton(IDC_SAFESERVERCONNECT, thePrefs.m_bSafeServerConnect);
+	CheckDlgButton(IDC_AUTOCONNECTSTATICONLY, thePrefs.m_bAutoConnectToStaticServersOnly);
+	CheckDlgButton(IDC_MANUALSERVERHIGHPRIO, thePrefs.m_bManualAddedServersHighPriority);
 }
 
 BOOL CPPgServer::OnApply()
-{	
-	thePrefs.SetSafeServerConnectEnabled(IsDlgButtonChecked(IDC_SAFESERVERCONNECT)!=0);
-
-	if(IsDlgButtonChecked(IDC_SMARTIDCHECK))
-		thePrefs.smartidcheck = true;
-	else
-		thePrefs.smartidcheck = false;
-
-	if(IsDlgButtonChecked(IDC_MANUALSERVERHIGHPRIO))
-		thePrefs.m_bmanualhighprio = true;
-	else
-		thePrefs.m_bmanualhighprio = false;
-
-	thePrefs.deadserverretries = GetDlgItemInt(IDC_SERVERRETRIES, NULL, FALSE);
-	if (thePrefs.deadserverretries < 1)
-		thePrefs.deadserverretries = 1;
-	else if (thePrefs.deadserverretries > MAX_SERVERFAILCOUNT)
-		thePrefs.deadserverretries = MAX_SERVERFAILCOUNT;
-
+{
+	UINT uCurDeadServerRetries = thePrefs.m_uDeadServerRetries;
+	thePrefs.m_uDeadServerRetries = GetDlgItemInt(IDC_SERVERRETRIES, NULL, FALSE);
+	if (thePrefs.m_uDeadServerRetries < 1)
+		thePrefs.m_uDeadServerRetries = 1;
+	else if (thePrefs.m_uDeadServerRetries > MAX_SERVERFAILCOUNT)
+		thePrefs.m_uDeadServerRetries = MAX_SERVERFAILCOUNT;
+	if (uCurDeadServerRetries != thePrefs.m_uDeadServerRetries) {
+		theApp.emuledlg->serverwnd->serverlistctrl.Invalidate();
+		theApp.emuledlg->serverwnd->serverlistctrl.UpdateWindow();
+	}
+	thePrefs.m_bAutoUpdateServerList = IsDlgButtonChecked(IDC_AUTOSERVER)!=0;
+	thePrefs.m_bAddServersFromServer = IsDlgButtonChecked(IDC_UPDATESERVERCONNECT)!=0;
+	thePrefs.m_bAddServersFromClients = IsDlgButtonChecked(IDC_UPDATESERVERCLIENT)!=0;
 	thePrefs.m_bUseServerPriorities = IsDlgButtonChecked(IDC_SCORE)!=0;
-	thePrefs.autoserverlist = IsDlgButtonChecked(IDC_AUTOSERVER)!=0;
-	thePrefs.addserversfromserver = IsDlgButtonChecked(IDC_UPDATESERVERCONNECT)!=0;
-	thePrefs.addserversfromclient = IsDlgButtonChecked(IDC_UPDATESERVERCLIENT)!=0;
-	thePrefs.autoconnectstaticonly = IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY)!=0;
+	thePrefs.m_bSmartServerIdCheck = IsDlgButtonChecked(IDC_SMARTIDCHECK)!=0;
+	thePrefs.SetSafeServerConnectEnabled(IsDlgButtonChecked(IDC_SAFESERVERCONNECT)!=0);
+	thePrefs.m_bAutoConnectToStaticServersOnly = IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY)!=0;
+	thePrefs.m_bManualAddedServersHighPriority = IsDlgButtonChecked(IDC_MANUALSERVERHIGHPRIO)!=0;
 
 	LoadSettings();
 
@@ -153,10 +115,9 @@ BOOL CPPgServer::OnApply()
 
 void CPPgServer::Localize(void)
 {
-	if(m_hWnd)
+	if (m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_PW_SERVER));
-		
 		GetDlgItem(IDC_REMOVEDEAD)->SetWindowText(GetResString(IDS_PW_RDEAD));
 		GetDlgItem(IDC_RETRIES_LBL)->SetWindowText(GetResString(IDS_PW_RETRIES));
 		GetDlgItem(IDC_UPDATESERVERCONNECT)->SetWindowText(GetResString(IDS_PW_USC));
@@ -167,8 +128,6 @@ void CPPgServer::Localize(void)
 		GetDlgItem(IDC_SCORE)->SetWindowText(GetResString(IDS_PW_SCORE));
 		GetDlgItem(IDC_MANUALSERVERHIGHPRIO)->SetWindowText(GetResString(IDS_MANUALSERVERHIGHPRIO));
 		GetDlgItem(IDC_EDITADR)->SetWindowText(GetResString(IDS_EDITLIST));
-		
-		// Barry
 		GetDlgItem(IDC_AUTOCONNECTSTATICONLY)->SetWindowText(GetResString(IDS_PW_AUTOCONNECTSTATICONLY));
 	}
 }

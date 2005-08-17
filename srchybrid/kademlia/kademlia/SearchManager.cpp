@@ -44,6 +44,10 @@ there client on the eMule forum..
 #include "SafeFile.h"
 #include "OtherFunctions.h"
 #include "Log.h"
+#include "emule.h"
+#include "emuledlg.h"
+#include "kademliawnd.h"
+#include "KadSearchListCtrl.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -362,13 +366,7 @@ void CSearchManager::getWords(LPCTSTR str, WordList *words)
 		if (nBytes >= 3)
 		{
 			KadTagStrMakeLower(word);
-			for (size_t i = 0; i < words->size(); i++)
-			{
-				wordtemp = words->front();
-				words->pop_front();
-				if (wordtemp != word)
-					words->push_back(wordtemp);
-			}
+			words->remove(word);
 			words->push_back(word);
 		}
 		s += nChars;
@@ -397,7 +395,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if (it->second->getCount() > SEARCHFILE_TOTAL || it->second->m_created + SEARCHFILE_LIFETIME - SEC(20) < now)
+					else if (it->second->getAnswers() >= SEARCHFILE_TOTAL || it->second->m_created + SEARCHFILE_LIFETIME - SEC(20) < now)
 					{
 						it->second->prepareToStop();
 						it++;
@@ -416,7 +414,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if (it->second->getCount() > SEARCHKEYWORD_TOTAL || it->second->m_created + SEARCHKEYWORD_LIFETIME - SEC(20) < now)
+					else if (it->second->getAnswers() >= SEARCHKEYWORD_TOTAL || it->second->m_created + SEARCHKEYWORD_LIFETIME - SEC(20) < now)
 					{
 						it->second->prepareToStop();
 						it++;
@@ -435,7 +433,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if (it->second->getCount() > SEARCHNOTES_TOTAL || it->second->m_created + SEARCHNOTES_LIFETIME - SEC(20) < now)
+					else if (it->second->getAnswers() >= SEARCHNOTES_TOTAL || it->second->m_created + SEARCHNOTES_LIFETIME - SEC(20) < now)
 					{
 						it->second->prepareToStop();
 						it++;
@@ -454,7 +452,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if (it->second->getCount() > SEARCHFINDBUDDY_TOTAL || it->second->m_created + SEARCHFINDBUDDY_LIFETIME - SEC(20) < now)
+					else if (it->second->getAnswers() >= SEARCHFINDBUDDY_TOTAL || it->second->m_created + SEARCHFINDBUDDY_LIFETIME - SEC(20) < now)
 					{
 						it->second->prepareToStop();
 						it++;
@@ -473,7 +471,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if (it->second->getCount() > SEARCHFINDSOURCE_TOTAL || it->second->m_created + SEARCHFINDSOURCE_LIFETIME - SEC(20) < now)
+					else if (it->second->getAnswers() >= SEARCHFINDSOURCE_TOTAL || it->second->m_created + SEARCHFINDSOURCE_LIFETIME - SEC(20) < now)
 					{
 						it->second->prepareToStop();
 						it++;
@@ -507,7 +505,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if ((it->second->m_created + SEARCHNODECOMP_LIFETIME < now) && (it->second->getCount() > SEARCHNODECOMP_TOTAL))
+					else if ((it->second->m_created + SEARCHNODECOMP_LIFETIME < now) && (it->second->getAnswers() >= SEARCHNODECOMP_TOTAL))
 					{
 						CKademlia::getPrefs()->setPublish(true);
 						delete it->second;
@@ -527,7 +525,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if (it->second->getCount() > SEARCHSTOREFILE_TOTAL || it->second->m_created + SEARCHSTOREFILE_LIFETIME - SEC(20) < now)
+					else if (it->second->getAnswers() >= SEARCHSTOREFILE_TOTAL || it->second->m_created + SEARCHSTOREFILE_LIFETIME - SEC(20) < now)
 					{
 						it->second->prepareToStop();
 						it++;
@@ -546,7 +544,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if (it->second->getCount() > SEARCHSTOREKEYWORD_TOTAL || it->second->m_created + SEARCHSTOREKEYWORD_LIFETIME - SEC(20)< now)
+					else if (it->second->getAnswers() >= SEARCHSTOREKEYWORD_TOTAL || it->second->m_created + SEARCHSTOREKEYWORD_LIFETIME - SEC(20)< now)
 					{
 						it->second->prepareToStop();
 						it++;
@@ -565,7 +563,7 @@ void CSearchManager::jumpStart(void)
 						delete it->second;
 						it = m_searches.erase(it);
 					}
-					else if (it->second->getCount() > SEARCHSTORENOTES_TOTAL || it->second->m_created + SEARCHSTORENOTES_LIFETIME - SEC(20)< now)
+					else if (it->second->getAnswers() >= SEARCHSTORENOTES_TOTAL || it->second->m_created + SEARCHSTORENOTES_LIFETIME - SEC(20)< now)
 					{
 						it->second->prepareToStop();
 						it++;
@@ -688,11 +686,12 @@ void CSearchManager::processPublishResult(const CUInt128 &target, const uint8 lo
 //		AddDebugLogLine(false, _T("Search either never existed or receiving late results (CSearchManager::processPublishResults)"));
 		return;
 	}
-	s->m_count++;
+	s->m_answers++;
 	if( loadResponse )
 	{
 		s->updateNodeLoad( load );
 	}
+	theApp.emuledlg->kademliawnd->searchList->SearchRef(s);
 }
 
 

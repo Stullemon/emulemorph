@@ -16,7 +16,6 @@ protected:
 	CListCtrl m_provider;
 	int m_iOS;
 	int m_iTotalDownload;
-	int m_iBitByte;
 
 	void SetCustomItemsActivation();
 

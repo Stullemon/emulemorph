@@ -50,7 +50,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -83,7 +83,7 @@ void CIrcMain::PreParseMessage( CStringA buffer )
 				rawMessage.Remove('\r');
 				ParseMessage( rawMessage );
 				if( preParseBuffer != _T("") )
-				preParseBuffer = preParseBuffer.Mid(index+1);
+					preParseBuffer = preParseBuffer.Mid(index+1);
 				index = preParseBuffer.Find('\n');
 			}
 		}
@@ -144,7 +144,7 @@ void CIrcMain::ProcessLink( CString ed2kLink )
 				pSrv->SetListName(defName.GetBuffer());
 
 				// Barry - Default all new irc servers to high priority
-				if( thePrefs.GetManualHighPrio() )
+				if (thePrefs.GetManualAddedServersHighPriority())
 					pSrv->SetPreference(SRV_PR_HIGH);
 
 				if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(pSrv,true)) 
@@ -748,7 +748,7 @@ void CIrcMain::ParseMessage( CStringA rawMessage )
 
 						}
 					}
-					int chanmodesStart = message.Find(_T("CHANMODES=")) ;
+					int chanmodesStart = message.Find(_T("CHANMODES="));
 					if( chanmodesStart != -1 )
 					{
 						int chanmodesEnd = message.Find(_T(","), chanmodesStart );

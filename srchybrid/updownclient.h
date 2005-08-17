@@ -204,6 +204,8 @@ class CUpDownClient : public CObject
 
 	friend class CUploadQueue;
 public:
+    void PrintUploadStatus();
+
 	//base
 	CUpDownClient(CClientReqSocket* sender = 0);
 	CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_userid, uint32 in_serverup, uint16 in_serverport, bool ed2kID = false);
@@ -231,7 +233,7 @@ public:
 						m_dwUserIP = val;
 						m_nConnectIP = val;
 					}
-	bool			HasLowID() const;
+	__inline bool	HasLowID() const								{ return (m_nUserIDHybrid < 16777216); }
 	uint32			GetConnectIP() const				{return m_nConnectIP;}
 	uint16			GetUserPort() const								{ return m_nUserPort; }
 	void			SetUserPort(uint16 val)							{ m_nUserPort = val; }
@@ -259,7 +261,7 @@ public:
 	const CString&	GetClientSoftVer() const						{ return m_strClientSoftware; }
 	const CString&	GetClientModVer() const							{ return m_strModVersion; }
 	const CString&	GetClientModTag() const							{ return m_strNotOfficial; }
-	void			ReGetClientSoft();
+	void			InitClientSoftwareVersion();
 	uint32			GetVersion() const								{ return m_nClientVersion; }
 	uint8			GetMuleVersion() const							{ return m_byEmuleVersion; }
 	bool			ExtProtocolAvailable() const					{ return m_bEmuleProtocol; }
@@ -389,6 +391,8 @@ public:
 	void			FlushSendBlocks(); // call this when you stop upload, or the socket might be not able to send
 	uint32			GetLastUpRequest() const						{ return m_dwLastUpRequest; }
 	void			SetLastUpRequest()								{ m_dwLastUpRequest = ::GetTickCount(); }
+	void			SetCollectionUploadSlot(bool bValue);
+	bool			HasCollectionUploadSlot() const					{ return m_bCollectionUploadSlot; }
 
 	uint32			GetSessionUp() const							{ return m_nTransferredUp - m_nCurSessionUp; }
 	void			ResetSessionUp(){
@@ -491,7 +495,7 @@ public:
 	/*
 	void			DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) const;
 	*/
-	void			DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* File, bool  bFlat) const;
+	void			DrawStatusBar(CDC* dc, LPCRECT rect, const CPartFile* File, bool  bFlat) const;
 	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 	bool			AskForDownload();
 	virtual void	SendFileRequest();
@@ -540,7 +544,7 @@ public:
 
 	uint16			GetUpCompleteSourcesCount() const				{ return m_nUpCompleteSourcesCount; }
 	//MORPH START - Added by SiRoB, Keep A4AF infos
-	uint16			GetUpCompleteSourcesCount(CPartFile* partfile) const				{ uint16 CompletSourceCount; return m_nUpCompleteSourcesCount_list.Lookup(partfile,CompletSourceCount)?CompletSourceCount:0; }
+	uint16			GetUpCompleteSourcesCount(const CPartFile* partfile) const				{ uint16 CompletSourceCount; return m_nUpCompleteSourcesCount_list.Lookup(partfile,CompletSourceCount)?CompletSourceCount:0; }
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	
 	//MORPH START - Changed by SiRoB, Keep A4AF infos
@@ -762,11 +766,11 @@ public:
 
 	//EastShare Start - Added by AndCycle, PayBackFirst
 	bool	IsMoreUpThanDown() const;
-	bool	IsMoreUpThanDown(CKnownFile* file) const; //MORPH - Added by SiRoB, Code Optimization
+	bool	IsMoreUpThanDown(const CKnownFile* file) const; //MORPH - Added by SiRoB, Code Optimization
 	//EastShare End - Added by AndCycle, PayBackFirst
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
 	bool			GetPowerShared() const;
-	bool			GetPowerShared(CKnownFile* file) const;  //MORPH - Added by SiRoB, Code Optimization
+	bool			GetPowerShared(const CKnownFile* file) const;  //MORPH - Added by SiRoB, Code Optimization
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
 	//MORPH START - Added by SiRoB, Show client Requested file
 	void			ShowRequestedFiles();
@@ -974,9 +978,10 @@ protected:
 	DWORD		requpfileid_lasttimeupdated;
 	//MORPH END   - Added by SiRoB, Optimization requpfile
     uint32      m_slotNumber;
+	bool		m_bCollectionUploadSlot;
 	uint32		m_classID; //MORPH - Added by SiRoB, UPload Splitting Class
 
-	DWORD       m_dwLastCheckedForEvictTick;
+	/*ZZ*/DWORD       m_dwLastCheckedForEvictTick;
 
 	typedef struct TransferredData {
 		uint32	datalen;
@@ -1083,9 +1088,9 @@ protected:
     void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
 
 	//MORPH START - Added by SiRoB, Keep A4AF infos
-	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_PartStatus_list;
-	CMap<CPartFile*, CPartFile*, uint16, uint16>	 m_nUpCompleteSourcesCount_list;
-	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_IncPartStatus_list; //MORPH - Added by AndCycle, ICS, Keep A4AF infos
+	CMap<const CPartFile*, const CPartFile*, uint8*, uint8*>	 m_PartStatus_list;
+	CMap<const CPartFile*, const CPartFile*, uint16, uint16>	 m_nUpCompleteSourcesCount_list;
+	CMap<const CPartFile*, const CPartFile*, uint8*, uint8*>	 m_IncPartStatus_list; //MORPH - Added by AndCycle, ICS, Keep A4AF infos
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200

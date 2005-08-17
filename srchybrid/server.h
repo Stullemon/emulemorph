@@ -38,6 +38,7 @@ struct ServerMet_Struct {
 #define	SRV_TCPFLG_COMPRESSION	0x00000001
 #define	SRV_TCPFLG_NEWTAGS			0x00000008
 #define	SRV_TCPFLG_UNICODE			0x00000010
+#define SRV_TCPFLG_RELATEDSEARCH	0x00000040
 
 // Server UDP flags
 #define	SRV_UDPFLG_EXT_GETSOURCES	0x00000001
@@ -135,6 +136,9 @@ public:
 	void	SetLowIDUsers(uint32 uLowIDUsers)		{m_uLowIDUsers = uLowIDUsers;}
 
 	bool	GetUnicodeSupport() const				{return (GetTCPFlags() & SRV_TCPFLG_UNICODE)!=0;}
+	bool	GetRelatedSearchSupport() const			{return (GetTCPFlags() & SRV_TCPFLG_RELATEDSEARCH)!=0;}
+
+	bool	IsEqual(const CServer* pServer) const;
 
 private:
 	uint32		challenge;

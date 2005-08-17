@@ -434,7 +434,7 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 				switch (m_actions.GetItemData(item)) {
 					case 1:
 					case 2:
-						prompt=GetResString(IDS_SCHED_ENTERDATARATELIMIT)+_T(" (")+GetResString(IDS_KBYTESEC)+_T(")");
+						prompt=GetResString(IDS_SCHED_ENTERDATARATELIMIT)+_T(" (")+GetResString(IDS_KBYTESPERSEC)+_T(")");
 						break;
 					default: prompt=GetResString(IDS_SCHED_ENTERVAL);
 				}

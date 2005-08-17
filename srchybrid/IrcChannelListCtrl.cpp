@@ -32,6 +32,7 @@ END_MESSAGE_MAP()
 CIrcChannelListCtrl::CIrcChannelListCtrl()
 {
 	m_pParent = NULL;
+	SetName(_T("IrcChannelListCtrl"));
 }
 
 CIrcChannelListCtrl::~CIrcChannelListCtrl()
@@ -44,6 +45,7 @@ int CIrcChannelListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamS
 {
 	ChannelList* item1 = (ChannelList*)lParam1;
 	ChannelList* item2 = (ChannelList*)lParam2;
+
 	switch(lParamSort)
 	{
 		case 0: 
@@ -51,7 +53,7 @@ int CIrcChannelListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamS
 		case 10:
 			return item2->name.CompareNoCase(item1->name);
 		case 1: 
-			return _tstoi(item1->users) - _tstoi(item2->users);
+			return  _tstoi(item1->users) - _tstoi(item2->users);
 		case 11:
 			return _tstoi(item2->users) - _tstoi(item1->users);
 		case 2: 
@@ -75,10 +77,6 @@ void CIrcChannelListCtrl::OnLvnColumnclick(NMHDR* pNMHDR, LRESULT* pResult)
 
 	SetSortArrow(m_sortindex, m_sortorder);
 	SortItems(&SortProc, m_sortindex + (m_sortorder ? 0 : 10));
-
-	thePrefs.SetColumnSortItem(CPreferences::tableIrcChannels, m_sortindex);
-	thePrefs.SetColumnSortAscending(CPreferences::tableIrcChannels, m_sortorder);
-
 
 	*pResult = 0;
 }
@@ -206,11 +204,9 @@ void CIrcChannelListCtrl::Init()
 	//SortItems(SortProc, 11);
 	//SetSortArrow(1, false);
 
-	LoadSettings(CPreferences::tableIrcChannels);
-	m_sortindex = thePrefs.GetColumnSortItem(CPreferences::tableIrcChannels);
-	m_sortorder = thePrefs.GetColumnSortAscending(CPreferences::tableIrcChannels);
-	SetSortArrow(m_sortindex, m_sortorder);
-	SortItems(&SortProc, m_sortindex + ( (m_sortorder) ? 0:10) );
+	LoadSettings();
+	SetSortArrow();
+	SortItems(&SortProc, GetSortItem() + ( (GetSortAscending()) ? 0:10) );
 }
 
 BOOL CIrcChannelListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )

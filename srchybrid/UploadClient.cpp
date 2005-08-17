@@ -224,7 +224,7 @@ double CUpDownClient::GetCombinedFilePrioAndCredit() {
 	}
 	//Morph End - added by AndCycle, Equal Chance For Each File
 
-    return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));
+	return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));
 }
 
 /**
@@ -420,7 +420,7 @@ bool CUpDownClient::IsMoreUpThanDown() const{
 }
 //Morph End - added by AndCycle, Pay Back First
 //MORPH START - Added by SiRoB, Code Optimization
-bool CUpDownClient::IsMoreUpThanDown(CKnownFile* file) const{
+bool CUpDownClient::IsMoreUpThanDown(const CKnownFile* file) const{
 	return !file->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure();
 }
 //MORPH END   - Added by SiRoB, Code Optimization
@@ -471,7 +471,7 @@ bool CUpDownClient::GetPowerShared() const {
 //MORPH END - Added by Yun.SF3, ZZ Upload System
 
 //MORPH START - Added by SiRoB, Code Optimization
-bool CUpDownClient::GetPowerShared(CKnownFile* file) const {
+bool CUpDownClient::GetPowerShared(const CKnownFile* file) const {
 	return file->GetPowerShared() && IsSecure();
 }
 //MORPH END   - Added by SiRoB, Code Optimization
@@ -1384,27 +1384,39 @@ bool CUpDownClient::GetFriendSlot() const
 	return m_bFriendSlot;
 }
 
-CClientReqSocket* CUpDownClient::GetFileUploadSocket(bool log) {
-    if(m_pPCUpSocket && (IsUploadingToPeerCache() || m_ePeerCacheUpState == PCUS_WAIT_CACHE_REPLY)) {
-        if(thePrefs.GetVerbose() && log)
+//MORPH - Changed by SiRoB, WebCache Fix
+/*
+CEMSocket* CUpDownClient::GetFileUploadSocket(bool blog = false);
+*/
+CClientReqSocket* CUpDownClient::GetFileUploadSocket(bool bLog)
+{
+    if (m_pPCUpSocket && (IsUploadingToPeerCache() || m_ePeerCacheUpState == PCUS_WAIT_CACHE_REPLY))
+	{
+        if (bLog && thePrefs.GetVerbose())
             AddDebugLogLine(false, _T("%s got peercache socket."), DbgGetClientInfo());
-
         return m_pPCUpSocket;
     }
 // MORPH START - Modified by Commander, WebCache 1.2e
-    else if(m_pWCUpSocket && IsUploadingToWebCache()) {
-        if(thePrefs.GetVerbose() && log)
+    else if(m_pWCUpSocket && IsUploadingToWebCache())
+	{
+        if (bLog && thePrefs.GetVerbose())
             AddDebugLogLine(false, _T("%s got webcache socket."), DbgGetClientInfo());
-
         return m_pWCUpSocket;
-}
+	}
 	// <-- WebCache
-	else {
-        if(thePrefs.GetVerbose() && log)
+	else
+	{
+        if (bLog && thePrefs.GetVerbose())
             AddDebugLogLine(false, _T("%s got normal socket."), DbgGetClientInfo());
         return socket;
     }
 }
+
+void CUpDownClient::SetCollectionUploadSlot(bool bValue){
+	ASSERT( !IsDownloading() || bValue == m_bCollectionUploadSlot );
+	m_bCollectionUploadSlot = bValue;
+}
+
 // MORPH END - Modified by Commander, WebCache 1.2e
 /* Name:     IsCommunity
    Function: Test if client is community member

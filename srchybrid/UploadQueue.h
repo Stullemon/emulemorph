@@ -29,7 +29,7 @@ public:
 
 	void	Process();
 	void	AddClientToQueue(CUpDownClient* client,bool bIgnoreTimelimit = false, bool addInFirstPlace = false);
-	void	ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR pszDebugReason, CString strDisplayReason, bool earlyabort = false); //MORPH - Added By AndCycle, ZZUL_20050212-0200
+	/*zz*/void	ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR pszDebugReason, CString strDisplayReason, bool earlyabort = false);
 	bool	RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason = NULL, bool updatewindow = true, bool earlyabort = false);
 	bool	RemoveFromWaitingQueue(CUpDownClient* client,bool updatewindow = true);
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
@@ -39,7 +39,11 @@ public:
 	/*
 	void    UpdateDatarates();
 	*/
+	//MORPH - Changed by SiRoB, Keep An average datarate value for USS system
+	/*
 	uint32	GetDatarate();
+	*/
+	uint32	GetDatarate(bool breel = false);
 	uint32	GetDatarateOverHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 	uint32  GetToNetworkDatarate();
 
@@ -56,7 +60,7 @@ public:
 	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
 	uint32	GetActiveUploadsCount()					{return m_MaxActiveClientsShortTime;}
 	uint32	GetActiveUploadsCountLongPerspective()					{return m_MaxActiveClients;}
-    uint32 GetEffectiveUploadListCount(); //MORPH - Added By AndCycle, ZZUL_20050212-0200
+    /*zz*/uint32 GetEffectiveUploadListCount();
 
 	POSITION GetFirstFromUploadList()				{return uploadinglist.GetHeadPosition();}
 	CUpDownClient* GetNextFromUploadList(POSITION &curpos)	{return uploadinglist.GetNext(curpos);}
@@ -100,7 +104,7 @@ protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
 	bool		AcceptNewClient();
 	bool		AcceptNewClient(uint32 curUploadSlots);
-	bool		ForceNewClient(bool simulateScheduledClosingOfSlot = false); //MORPH - Added By AndCycle, ZZUL_20050212-0200
+	/*zz*/bool		ForceNewClient(bool simulateScheduledClosingOfSlot = false);
 
 	bool		AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd = 0, bool highPrioCheck = false);
 	
@@ -113,7 +117,7 @@ private:
 
     void InsertInUploadingList(CUpDownClient* newclient);
     double GetAverageCombinedFilePrioAndCredit();
-	uint32 GetWantedNumberOfTrickleUploads(); //MORPH - Added By AndCycle, ZZUL_20050212-0200
+	/*zz*/uint32 GetWantedNumberOfTrickleUploads();
 	void CheckForHighPrioClient();
 
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200

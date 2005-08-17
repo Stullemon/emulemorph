@@ -22,6 +22,7 @@
 #include "SearchParams.h"
 #include "Packets.h"
 #include "OtherFunctions.h"
+#include "SearchFile.h"
 #include "SearchList.h"
 #include "Sockets.h"
 #include "ServerList.h"
@@ -131,6 +132,8 @@ void CSearchResultsWnd::OnInitialUpdate()
 	InitWindowStyles(this);
 	theApp.searchlist->SetOutputWnd(&searchlistctrl);
 	searchlistctrl.Init(theApp.searchlist);
+	searchlistctrl.SetName(_T("SearchListCtrl"));
+
 	SetAllIcons();
 	Localize();
 	searchprogress.SetStep(1);
@@ -406,7 +409,7 @@ CString	CSearchResultsWnd::CreateWebQuery(SSearchParams* pParams)
 	{
 	case SearchTypeFileDonkey:
 		query = _T("http://www.filedonkey.com/search.html?");
-		query += _T("pattern=") + ToQueryString(pParams->strExpression);
+		query += _T("pattern=") + EncodeURLQueryParam(pParams->strExpression);
 		if (pParams->strFileType == ED2KFTSTR_AUDIO)
 			query += _T("&media=Audio");
 		else if (pParams->strFileType == ED2KFTSTR_VIDEO)
@@ -1298,7 +1301,7 @@ bool CSearchResultsWnd::DoNewEd2kSearch(SSearchParams* pParams)
 		strResultType.Empty();
 	m_nSearchID++;
 	pParams->dwSearchID = m_nSearchID;
-	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, m_nSearchID);
+	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, m_nSearchID, pParams->eType);
 	canceld = false;
 
 	if (m_uTimerLocalServer){
@@ -1409,7 +1412,7 @@ bool CSearchResultsWnd::DoNewKadSearch(SSearchParams* pParams)
 	CStringA strResultType = pParams->strFileType;
 	if (strResultType == ED2KFTSTR_PROGRAM)
 		strResultType.Empty();
-	theApp.searchlist->NewSearch(&searchlistctrl,strResultType,pParams->dwSearchID);
+	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, pParams->dwSearchID, pParams->eType);
 	CreateNewTab(pParams);
 	return true;
 }
@@ -1431,7 +1434,7 @@ bool CSearchResultsWnd::CreateNewTab(SSearchParams* pParams)
 		pParams->strExpression = _T("-");
 	newitem.mask = TCIF_PARAM | TCIF_TEXT | TCIF_IMAGE;
 	newitem.lParam = (LPARAM)pParams;
-	CString label = pParams->strExpression + _T(" (0)");
+	CString label = (pParams->strSpecialTitle.IsEmpty() ? pParams->strExpression : pParams->strSpecialTitle)  + _T(" (0)");
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)label);
 	newitem.cchTextMax = 0;
 	if (pParams->bClientSharedFiles)
@@ -1615,21 +1618,6 @@ void CSearchResultsWnd::UpdateCatTabs() {
 	GetDlgItem(IDC_STATIC_DLTOof)->ShowWindow(flag);
 }
 
-CString	CSearchResultsWnd::ToQueryString(CString str){
-// emulEspa Ía: Modified by MoNKi [MoNKi: -Fixed UTF-8 strings on web searchs-]
-/*
-	CString sTmp = URLEncode(str);
-	sTmp.Replace(_T("%20"), _T("+"));
-	return sTmp;
- */
-	USES_CONVERSION;
-	CString sTmp = CA2CT(StrToUtf8(str));
-	sTmp = URLEncode(sTmp);
-	sTmp.Replace(_T("%20"), _T("+"));
-	return sTmp;
-// End -Fixed UTF-8 strings on web searchs-
-}
-
 void CSearchResultsWnd::ShowSearchSelector(bool visible)
 {
 	WINDOWPLACEMENT wpSearchWinPos;
@@ -1645,11 +1633,6 @@ void CSearchResultsWnd::ShowSearchSelector(bool visible)
 	searchlistctrl.SetWindowPlacement(&wpSearchWinPos);
 	AddAnchor(searchlistctrl, TOP_LEFT, BOTTOM_RIGHT);
 	GetDlgItem(IDC_CLEARALL)->ShowWindow(visible ? SW_SHOW : SW_HIDE);
-}
-
-void CSearchResultsWnd::SaveSettings()
-{
-	searchlistctrl.SaveSettings(CPreferences::tableSearch);
 }
 
 void CSearchResultsWnd::OnDestroy()

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2004-2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -23,6 +23,12 @@
 
 #define LOGON_WITH_PROFILE              0x00000001
 #define LOGON_NETCREDENTIALS_ONLY       0x00000002
+
+enum eResult{
+	RES_OK_NEED_RESTART = 0,
+	RES_OK,
+	RES_FAILED
+};
 
 typedef BOOL (WINAPI* TCreateProcessWithLogonW)(
   LPCWSTR lpUsername,                 // user's name
@@ -131,6 +137,46 @@ typedef HRESULT (WINAPI* TADsEnumerateNext) (
   ULONG* pcElementsFetched
 );
 
+typedef BOOL (WINAPI* TOpenProcessToken)(
+  HANDLE ProcessHandle,
+  DWORD DesiredAccess,
+  PHANDLE TokenHandle
+);
+
+typedef BOOL (WINAPI* TGetTokenInformation)(
+  HANDLE TokenHandle,                           
+  TOKEN_INFORMATION_CLASS TokenInformationClass, 
+  LPVOID TokenInformation,                       
+  DWORD TokenInformationLength,                  
+  PDWORD ReturnLength                            
+);
+
+typedef BOOL (WINAPI* TCreateRestrictedToken)(
+  HANDLE ExistingTokenHandle,              // handle to existing token
+  DWORD Flags,                             // privilege options
+  DWORD DisableSidCount,                   // number of deny-only SIDs
+  PSID_AND_ATTRIBUTES SidsToDisable,       // deny-only SIDs
+  DWORD DeletePrivilegeCount,              // number of privileges
+  PLUID_AND_ATTRIBUTES PrivilegesToDelete, // privileges
+  DWORD RestrictedSidCount,                // number of restricting SIDs
+  PSID_AND_ATTRIBUTES SidsToRestrict,      // list of restricting SIDs
+  PHANDLE NewTokenHandle                   // handle to new token
+);
+
+typedef BOOL (WINAPI* TCreateProcessAsUser)(
+  HANDLE hToken,                             // handle to user token
+  LPCTSTR lpApplicationName,                 // name of executable module
+  LPTSTR lpCommandLine,                      // command-line string
+  LPSECURITY_ATTRIBUTES lpProcessAttributes, // SD
+  LPSECURITY_ATTRIBUTES lpThreadAttributes,  // SD
+  BOOL bInheritHandles,                      // inheritance option
+  DWORD dwCreationFlags,                     // creation flags
+  LPVOID lpEnvironment,                      // new environment block
+  LPCTSTR lpCurrentDirectory,                // current directory name
+  LPSTARTUPINFO lpStartupInfo,               // startup information
+  LPPROCESS_INFORMATION lpProcessInformation // process information
+);
+
 
 
 typedef _com_ptr_t<_com_IIID<IADsContainer,&IID_IADsContainer>	>  IADsContainerPtr;
@@ -150,12 +196,18 @@ class CSecRunAsUser
 public:
 	CSecRunAsUser();
 	~CSecRunAsUser();
-	bool	PrepareUser();
-	bool	RestartAsUser();
-	bool	IsRunningEmuleAccount()		{return bRunningAsEmule;}
+
+	eResult	RestartSecure();
+	bool	IsRunningEmuleAccount()		{return m_bRunningAsEmule;}
+	bool	IsRunningRestricted()		{return m_bRunningRestricted;}
+	bool	IsRunningSecure()			{return m_bRunningRestricted || m_bRunningAsEmule;}
 	CStringW	GetCurrentUserW();
 
 protected:
+	eResult	PrepareUser();
+	eResult	RestartAsUser();
+	eResult	RestartAsRestricted();
+
 	bool	SetDirectoryPermissions();
 	bool	CreateEmuleUser(IADsContainerPtr pUsers);
 	CStringW	CreateRandomPW();
@@ -168,7 +220,8 @@ private:
 	CStringW m_strPassword;
 	CStringW m_strDomain;
 	CStringW m_strCurrentUser;
-	bool bRunningAsEmule;
+	bool m_bRunningAsEmule;
+	bool m_bRunningRestricted;
 	HMODULE m_hADVAPI32_DLL;
 	HMODULE m_hACTIVEDS_DLL;
 
@@ -183,6 +236,10 @@ private:
 	TAddAce AddAce;
 	TEqualSid EqualSid;
 	TGetLengthSid GetLengthSid;
+	TOpenProcessToken OpenProcessToken;
+	TGetTokenInformation GetTokenInformation;
+	TCreateRestrictedToken CreateRestrictedToken;
+	TCreateProcessAsUser CreateProcessAsUser;
 
 	TADsGetObject ADsGetObject;
 	TADsBuildEnumerator ADsBuildEnumerator;

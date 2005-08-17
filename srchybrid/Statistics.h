@@ -199,7 +199,7 @@ private:
 	static DWORD	m_AvarageUDRO_listLastRemovedTimestamp;
 	static DWORD	m_AvarageUDROPreviousAddedTimestamp;
 	//MORPH END   - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
-	uint64  m_nTotalCompletedBytes;//Morph
+	/*ZZ*/uint64  m_nTotalCompletedBytes;
 };
 
 extern CStatistics theStats;

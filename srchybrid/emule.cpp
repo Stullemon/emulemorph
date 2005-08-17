@@ -69,6 +69,7 @@
 #include "FirewallOpener.h"
 #include "StringConversion.h"
 #include "Log.h"
+#include "Collection.h"
 #include "fakecheck.h" //MORPH - Added by SiRoB
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
@@ -76,31 +77,15 @@
 
 CLogFile theLog;
 CLogFile theVerboseLog;
+bool g_bLowColorDesktop = false;
 
-/*
-//Morph Start - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
-// gnaddelwarz: crashRpt
-#include "../crashrpt/crashrpt/include/crashrptDL.h"
-HMODULE CrashRptDLL;
-BOOL WINAPI CrashCallback(LPVOID lpvState)
-{
-	if (thePrefs.GetLog2Disk())
-		AddFileDL(CrashRptDLL, _T("eMule.log"), _T("Log File"));
-	if (thePrefs.GetDebug2Disk())
-		AddFileDL(CrashRptDLL, _T("eMule_Verbose.log"), _T("Verbose Log File"));
-	AddFileDL(CrashRptDLL, _T("config\\preferences.ini"), _T("INI File"));
-	AddRegistryHiveDL(CrashRptDLL, _T("HKEY_CLASSES_ROOT\\ed2k"), _T("Registry: Classes"));
-	AddRegistryHiveDL(CrashRptDLL, _T("HKEY_CURRENT_USER\\Software\\eMule"), _T("Registry: Install location"));
-	return true;
-}
-// gnaddelwarz: crashRpt
-//Morph End   - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
-*/
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
+
+//#define USE_16COLOR_ICONS
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -245,6 +230,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 #ifdef _DEBUG
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
+#ifdef _BETA
+	m_strCurVersionLong += _T(" BETA");
+#endif
 
 	// create the protocol version number
 	CString strTmp;
@@ -312,6 +300,10 @@ BOOL CemuleApp::InitInstance()
 	VERIFY( GetModuleFileName(m_hInstance, szAppDir, ARRSIZE(szAppDir)) );
 	VERIFY( PathRemoveFileSpec(szAppDir) );
 	
+	TCHAR szConfigDir[MAX_PATH];
+	PathCombine(szConfigDir, szAppDir, CONFIGFOLDER);
+	::CreateDirectory(szConfigDir, NULL);
+	
 	TCHAR szPrefFilePath[MAX_PATH];
 	PathCombine(szPrefFilePath, szAppDir, CONFIGFOLDER _T("preferences.ini"));
 	if (m_pszProfileName)
@@ -331,7 +323,9 @@ BOOL CemuleApp::InitInstance()
 	///////////////////////////////////////////////////////////////////////////
 	// Install crash dump creation
 	//
+#ifndef _BETA
 	if (GetProfileInt(_T("eMule"), _T("CreateCrashDump"), 0))
+#endif
 		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLong, true);
 
 
@@ -344,7 +338,7 @@ BOOL CemuleApp::InitInstance()
 
 	AfxOleInit();
 
-	pendinglink = 0;
+	pstrPendingLink = NULL;
 	if (ProcessCommandline())
 		return false;
 
@@ -364,8 +358,22 @@ BOOL CemuleApp::InitInstance()
 	{
 		if (GetProfileInt(_T("eMule"), _T("CheckComctl32"), 1)) // just in case some user's can not install that package and have to survive without it..
 		{
-			if (AfxMessageBox(GetResString(IDS_COMCTRL32_DLL_TOOOLD),MB_ICONSTOP | MB_YESNO)==IDYES)
+			if (AfxMessageBox(GetResString(IDS_COMCTRL32_DLL_TOOOLD), MB_ICONSTOP | MB_YESNO) == IDYES)
 				ShellOpenFile(_T("http://www.microsoft.com/downloads/details.aspx?FamilyID=cb2cf3a2-8025-4e8f-8511-9b476a8d35d2"));
+
+			// No need to exit eMule, it will most likely work as expected but it will have some GUI glitches here and there..
+		}
+	}
+
+	DWORD dwShellMjr = 4;
+	DWORD dwShellMin = 0;
+	AtlGetShellVersion(&dwShellMjr, &dwShellMin);
+	ULONGLONG ullShellVer = MAKEDLLVERULL(dwShellMjr,dwShellMin,0,0);
+	if (ullShellVer < MAKEDLLVERULL(4,7,0,0))
+	{
+		if (GetProfileInt(_T("eMule"), _T("CheckShell32"), 1)) // just in case some user's can not install that package and have to survive without it..
+		{
+			AfxMessageBox(_T("Windows Shell library (SHELL32.DLL) is too old!\r\n\r\neMule detected a version of the \"Windows Shell library (SHELL32.DLL)\" which is too old to be properly used by eMule. To ensure full and flawless functionality of eMule we strongly recommend to update the \"Windows Shell library (SHELL32.DLL)\" to at least version 4.7.\r\n\r\nDownload and install an update of the \"Windows Shell library (SHELL32.DLL)\" at Microsoft (R) Download Center."), MB_ICONSTOP);
 
 			// No need to exit eMule, it will most likely work as expected but it will have some GUI glitches here and there..
 		}
@@ -373,15 +381,22 @@ BOOL CemuleApp::InitInstance()
 
 	m_sizSmallSystemIcon.cx = GetSystemMetrics(SM_CXSMICON);
 	m_sizSmallSystemIcon.cy = GetSystemMetrics(SM_CYSMICON);
+	UpdateDesktopColorDepth();
 
-	m_iDfltImageListColorFlags = GetAppImageListColorFlag();
-
-	// don't use 32bit color resources if not supported by commctl
-	if (m_iDfltImageListColorFlags == ILC_COLOR32 && m_ullComCtrlVer < MAKEDLLVERULL(6,0,0,0))
-		m_iDfltImageListColorFlags = ILC_COLOR16;
-	// don't use >8bit color resources with OSs with restricted memory for GDI resources
-	if (afxData.bWin95)
-		m_iDfltImageListColorFlags = ILC_COLOR8;
+	if (g_bLowColorDesktop)
+	{
+		m_iDfltImageListColorFlags = ILC_COLOR4;
+	}
+	else
+	{
+		m_iDfltImageListColorFlags = GetAppImageListColorFlag();
+		// don't use 32bit color resources if not supported by commctl
+		if (m_iDfltImageListColorFlags == ILC_COLOR32 && m_ullComCtrlVer < MAKEDLLVERULL(6,0,0,0))
+			m_iDfltImageListColorFlags = ILC_COLOR16;
+		// don't use >8bit color resources with OSs with restricted memory for GDI resources
+		if (afxData.bWin95)
+			m_iDfltImageListColorFlags = ILC_COLOR8;
+	}
 
 	CWinApp::InitInstance();
 
@@ -417,9 +432,10 @@ BOOL CemuleApp::InitInstance()
 	// check if we have to restart eMule as Secure user
 	if (thePrefs.IsRunAsUserEnabled()){
 		CSecRunAsUser rau;
-		if ( rau.PrepareUser() && rau.RestartAsUser() )
+		eResult res = rau.RestartSecure();
+		if (res == RES_OK_NEED_RESTART)
 			return FALSE; // emule restart as secure user, kill this instance
-		else if ( !rau.IsRunningEmuleAccount() ){
+		else if (res == RES_FAILED){
 			// something went wrong
 			theApp.QueueLogLine(false, GetResString(IDS_RAU_FAILED), rau.GetCurrentUserW()); 
 		}
@@ -465,9 +481,9 @@ BOOL CemuleApp::InitInstance()
 
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
-		Ask4RegFix(false, true);
+		Ask4RegFix(false, true, false);
 
-	if( thePrefs.GetAutoStart() )
+	if (thePrefs.GetAutoStart())
 		::AddAutoStart();
 	else
 		::RemAutoStart();
@@ -527,10 +543,10 @@ BOOL CemuleApp::InitInstance()
 		m_UPnPNat->Init();
 	// End emulEspaña
 
-	//MORPH START - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
+	// ZZ:UploadSpeedSense -->
     lastCommonRouteFinder = new LastCommonRouteFinder();
-	uploadBandwidthThrottler = new UploadBandwidthThrottler();
-	//MORPH END - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
+    uploadBandwidthThrottler = new UploadBandwidthThrottler();
+	// ZZ:UploadSpeedSense <--
 
 	clientlist = new CClientList();
 	friendlist = new CFriendList();
@@ -552,21 +568,7 @@ BOOL CemuleApp::InitInstance()
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
 	m_pPeerCache = new CPeerCacheFinder();
-
-	/*
-	//Morph Start - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
-	// gnaddelwarz: crashRpt
-	CrashRptDLL = GetInstanceDL();
-	CString buffer;
-	buffer.Format(GetResString(IDS_CRASHRPT_DONE));
-	if(InstallDL(CrashRptDLL, CrashCallback, NULL, buffer))
-		AddLogLine(false, GetResString(IDS_CRASHRPT_AV));
-	else {
-		AddLogLine(false, GetResString(IDS_CRASHRPT_NOTAV));
-	}
-	// gnaddelwarz: crashRpt
-	//Morph End   - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
-	*/
+	
 	thePerfLog.Startup();
 	dlg.DoModal();
 
@@ -669,7 +671,7 @@ bool CemuleApp::ProcessCommandline()
 	CString strMutextName;
 	strMutextName.Format(_T("%s:%u"), EMULE_GUID, uTcpPort);
 	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);
-
+	
 	HWND maininst = NULL;
 	bool bAlreadyRunning = false;
 	if (!bIgnoreRunningInstances){
@@ -678,28 +680,43 @@ bool CemuleApp::ProcessCommandline()
 	}
 
     if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileOpen) {
-		CString command = cmdInfo.m_strFileName;
-		if (command.Find(_T("://"))>0) {
-			sendstruct.cbData = (command.GetLength() + 1)*sizeof(TCHAR);
+		CString* command = new CString(cmdInfo.m_strFileName);
+		if (command->Find(_T("://"))>0) {
+			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
 			sendstruct.dwData = OP_ED2KLINK; 
-			sendstruct.lpData = command.GetBuffer(); 
+			sendstruct.lpData = command->GetBuffer(); 
     		if (maininst){
-      			SendMessage(maininst,WM_COPYDATA,(WPARAM)0,(LPARAM) (PCOPYDATASTRUCT) &sendstruct); 
+      			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
+				delete command;
       			return true; 
 			} 
     		else 
-      			pendinglink = new CString(command);
-		} else {
-			sendstruct.cbData = (command.GetLength() + 1)*sizeof(TCHAR);
-			sendstruct.dwData = OP_CLCOMMAND;
-			sendstruct.lpData = command.GetBuffer(); 
+      			pstrPendingLink = command;
+		}
+		else if (CCollection::HasCollectionExtention(*command)){
+			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
+			sendstruct.dwData = OP_COLLECTION; 
+			sendstruct.lpData = command->GetBuffer(); 
     		if (maininst){
-      			SendMessage(maininst,WM_COPYDATA,(WPARAM)0,(LPARAM) (PCOPYDATASTRUCT) &sendstruct); 
-      			return true; 
+      			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
+      			delete command;
+				return true; 
+			} 
+    		else 
+      			pstrPendingLink = command;
+		}
+		else {
+			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
+			sendstruct.dwData = OP_CLCOMMAND;
+			sendstruct.lpData = command->GetBuffer(); 
+    		if (maininst){
+      			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
+      			delete command;
+				return true; 
 			}
 		}
     }
-    	return (maininst || bAlreadyRunning);
+    return (maininst || bAlreadyRunning);
 }
 
 BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
@@ -770,7 +787,7 @@ CString CemuleApp::CreateKadSourceLink(const CAbstractFile* f)
 }
 
 //TODO: Move to emule-window
-bool CemuleApp::CopyTextToClipboard( CString strText )
+bool CemuleApp::CopyTextToClipboard(CString strText)
 {
 	if (strText.IsEmpty())
 		return false;
@@ -812,9 +829,9 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 		return false;
 
 	int iCopied = 0;
-	if( OpenClipboard(NULL) )
+	if (OpenClipboard(NULL))
 	{
-		if( EmptyClipboard() )
+		if (EmptyClipboard())
 		{
 			if (hGlobalT){
 				if (SetClipboardData(CF_UNICODETEXT, hGlobalT) != NULL){
@@ -856,7 +873,7 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 }
 
 //TODO: Move to emule-window
-CString CemuleApp::CopyTextFromClipboard() 
+CString CemuleApp::CopyTextFromClipboard()
 {
 	if (IsClipboardFormatAvailable(CF_UNICODETEXT))
 	{
@@ -881,22 +898,22 @@ CString CemuleApp::CopyTextFromClipboard()
 		}
 	}
 
-	if (!IsClipboardFormatAvailable(CF_TEXT)) 
-		return _T(""); 
-	if (!OpenClipboard(NULL)) 
+	if (!IsClipboardFormatAvailable(CF_TEXT))
+		return _T("");
+	if (!OpenClipboard(NULL))
 		return _T("");
 
 	CString	retstring;
 	HGLOBAL	hglb = GetClipboardData(CF_TEXT);
-	if (hglb != NULL) 
-	{ 
+	if (hglb != NULL)
+	{
 		LPCSTR lptstr = (LPCSTR)GlobalLock(hglb);
 		if (lptstr != NULL)
 		{
 			retstring = lptstr;
 			GlobalUnlock(hglb);
 		}
-	} 
+	}
 	CloseClipboard();
 
 	return retstring;
@@ -933,9 +950,9 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 
 	try
 	{
-		char buffer[20]; 
+		char buffer[20];
 		CStringA strBuff;
-		if (IsConnected()){ 
+		if (IsConnected()){
 			file.Write("1",1); 
 			file.Write("|",1);
 			if(serverconnect->IsConnected()){
@@ -1006,7 +1023,7 @@ bool CemuleApp::GetLangHelpFilePath(CString& strResult)
 		temp.Format(_T("%s\\eMule.%u.chm"), strHelpFile.Left(pos), thePrefs.GetLanguageID());
 		if (pos>0)
 			strHelpFile = temp;
-		
+
 		// if not exists, use original help (english)
 		if (!ff.FindFile(strHelpFile, 0)){
 			strHelpFile = m_pszHelpFilePath;
@@ -1156,7 +1173,7 @@ uint32 CemuleApp::GetID(){
 		ID = theApp.serverconnect->GetClientID();
 	else if ( Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::isFirewalled() )
 		ID = 1;
-	else 
+	else
 		ID = 0;
 	return ID;
 }
@@ -1175,7 +1192,7 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 			AddDebugLogLine(DLP_VERYLOW, false, _T("My public IP Address is: %s"),ipstr(dwIP));
 		else if (Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::getPrefs()->getIPAddress())
 			if(ntohl(Kademlia::CKademlia::getIPAddress()) != dwIP)
-			AddDebugLogLine(DLP_DEFAULT, false,  _T("Public IP Address reported from Kademlia (%s) differs from new found (%s)"),ipstr(ntohl(Kademlia::CKademlia::getIPAddress())),ipstr(dwIP));
+				AddDebugLogLine(DLP_DEFAULT, false,  _T("Public IP Address reported from Kademlia (%s) differs from new found (%s)"),ipstr(ntohl(Kademlia::CKademlia::getIPAddress())),ipstr(dwIP));
 		m_pPeerCache->FoundMyPublicIPAddress(dwIP);	
 	}
 	else
@@ -1197,7 +1214,7 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 
 bool CemuleApp::IsFirewalled()
 {
-	if( theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID())
+	if (theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID())
 		return false; // we have an eD2K HighID -> not firewalled
 
 	if (Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled())
@@ -1225,7 +1242,7 @@ bool CemuleApp::DoCallback( CUpDownClient *client )
 					{
 						//Both Connected - Server lowID, Kad Open - Client on same server
 						//We prevent a callback to the server as this breaks the protocol and will get you banned.
-		return false;
+						return false;
 					}
 					else
 					{
@@ -1261,7 +1278,7 @@ bool CemuleApp::DoCallback( CUpDownClient *client )
 			if( theApp.serverconnect->IsLowID() )
 			{
 				//Only Server Connected - Server LowID
-		return false;
+				return false;
 			}
 			else
 			{
@@ -1285,6 +1302,14 @@ HICON CemuleApp::LoadIcon(UINT nIDResource) const
 
 HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags) const
 {
+	// Test using of 16 color icons. If 'LR_VGACOLOR' is specified _and_ the icon resource
+	// contains a 16 color version, that 16 color version will be loaded. If there is no
+	// 16 color version available, Windows will use the next (better) color version found.
+#ifdef _DEBUG
+	if (g_bLowColorDesktop)
+		uFlags |= LR_VGACOLOR;
+#endif
+
 	HICON hIcon = NULL;
 	LPCTSTR pszSkinProfile = thePrefs.GetSkinProfile();
 	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
@@ -1331,42 +1356,55 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 
 			if (bExtractIcon)
 			{
-				HICON aIconsLarge[1] = {0};
-				HICON aIconsSmall[1] = {0};
-				int iExtractedIcons = ExtractIconEx(strFullResPath, iIconIndex, aIconsLarge, aIconsSmall, 1);
-				if (iExtractedIcons > 0) // 'iExtractedIcons' is 2(!) if we get a large and a small icon
+				if (uFlags != 0 || !(cx == cy && (cx == 16 || cx == 32)))
 				{
-					// alway try to return the icon size which was requested
-					if (cx == 16 && aIconsSmall[0] != NULL)
+					static UINT (WINAPI *_pfnPrivateExtractIcons)(LPCTSTR, int, int, int, HICON*, UINT*, UINT, UINT) = (UINT (WINAPI *)(LPCTSTR, int, int, int, HICON*, UINT*, UINT, UINT))GetProcAddress(GetModuleHandle(_T("user32")), _TWINAPI("PrivateExtractIcons"));
+					if (_pfnPrivateExtractIcons)
 					{
-						hIcon = aIconsSmall[0];
-						aIconsSmall[0] = NULL;
+						UINT uIconId;
+						(*_pfnPrivateExtractIcons)(strFullResPath, iIconIndex, cx, cy, &hIcon, &uIconId, 1, uFlags);
 					}
-					else if (cx == 32 && aIconsLarge[0] != NULL)
+				}
+
+				if (hIcon == NULL)
+				{
+					HICON aIconsLarge[1] = {0};
+					HICON aIconsSmall[1] = {0};
+					int iExtractedIcons = ExtractIconEx(strFullResPath, iIconIndex, aIconsLarge, aIconsSmall, 1);
+					if (iExtractedIcons > 0) // 'iExtractedIcons' is 2(!) if we get a large and a small icon
 					{
-						hIcon = aIconsLarge[0];
-						aIconsLarge[0] = NULL;
-					}
-					else
-					{
-						if (aIconsSmall[0] != NULL)
+						// alway try to return the icon size which was requested
+						if (cx == 16 && aIconsSmall[0] != NULL)
 						{
 							hIcon = aIconsSmall[0];
 							aIconsSmall[0] = NULL;
 						}
-						else if (aIconsLarge[0] != NULL)
+						else if (cx == 32 && aIconsLarge[0] != NULL)
 						{
 							hIcon = aIconsLarge[0];
 							aIconsLarge[0] = NULL;
 						}
-					}
+						else
+						{
+							if (aIconsSmall[0] != NULL)
+							{
+								hIcon = aIconsSmall[0];
+								aIconsSmall[0] = NULL;
+							}
+							else if (aIconsLarge[0] != NULL)
+							{
+								hIcon = aIconsLarge[0];
+								aIconsLarge[0] = NULL;
+							}
+						}
 
-					for (int i = 0; i < ARRSIZE(aIconsLarge); i++)
-					{
-						if (aIconsLarge[i] != NULL)
-							VERIFY( DestroyIcon(aIconsLarge[i]) );
-						if (aIconsSmall[i] != NULL)
-							VERIFY( DestroyIcon(aIconsSmall[i]) );
+						for (int i = 0; i < ARRSIZE(aIconsLarge); i++)
+						{
+							if (aIconsLarge[i] != NULL)
+								VERIFY( DestroyIcon(aIconsLarge[i]) );
+							if (aIconsSmall[i] != NULL)
+								VERIFY( DestroyIcon(aIconsSmall[i]) );
+						}
 					}
 				}
 			}
@@ -1536,8 +1574,8 @@ void CemuleApp::AddEd2kLinksToDownload(CString strlink, uint8 cat)
 void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
 //MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 {
-	int curPos=0;
-	CString resToken = strlink.Tokenize(_T("\t\n\r"),curPos);
+	int curPos = 0;
+	CString resToken = strlink.Tokenize(_T("\t\n\r"), curPos);
 	while (resToken != _T(""))
 	{
 		if (resToken.Right(1) != _T("/"))
@@ -1851,6 +1889,15 @@ void CemuleApp::CreateBackwardDiagonalBrush()
 		logBrush.lbColor = RGB(0, 0, 0);
 		VERIFY( m_brushBackwardDiagonal.CreateBrushIndirect(&logBrush) );
 	}
+}
+
+void CemuleApp::UpdateDesktopColorDepth()
+{
+	g_bLowColorDesktop = (GetDesktopColorDepth() <= 8);
+#ifdef _DEBUG
+	if (!g_bLowColorDesktop)
+		g_bLowColorDesktop = (GetProfileInt(_T("eMule"), _T("LowColorRes"), 0) != 0);
+#endif
 }
 
 //MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]

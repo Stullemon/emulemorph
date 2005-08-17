@@ -58,6 +58,7 @@
 #include <atlcoll.h>
 #include <afxcoll.h>
 #include <afxtempl.h>
+#include <math.h>
 
 
 #ifndef EWX_FORCEIFHUNG
@@ -94,6 +95,10 @@
 
 #ifndef HDF_SORTDOWN
 #define HDF_SORTDOWN            0x0200
+#endif
+
+#ifndef COLOR_GRADIENTACTIVECAPTION
+#define COLOR_GRADIENTACTIVECAPTION 27
 #endif
 
 

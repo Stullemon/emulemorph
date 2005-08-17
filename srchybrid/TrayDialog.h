@@ -1,6 +1,6 @@
 #pragma once
 #include "DialogMinTrayBtn.h"
-#include "..\ResizableLib\ResizableDialog.h"
+#include "ResizableLib\ResizableDialog.h"
 
 #define	IDT_SINGLE_CLICK	100
 

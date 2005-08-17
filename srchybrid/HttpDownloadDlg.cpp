@@ -605,7 +605,7 @@ resend:
 
 	//Update the status control to reflect that we are getting the file information
 	SetStatus(GetResString(IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION));
-	
+
 	// Get the length of the file.
 	TCHAR szContentLength[32];
 	dwInfoSize = 32;

@@ -15,7 +15,12 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#if _MSC_VER < 1310	// check for 'Visual Studio .NET 2002'
+#define HAVE_SAPI_H
+#endif
+#ifdef HAVE_SAPI_H
 #include <sapi.h>
+#endif
 #include "emule.h"
 #include "emuleDlg.h"
 #include "TextToSpeech.h"
@@ -27,6 +32,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
+#ifdef HAVE_SAPI_H
 ///////////////////////////////////////////////////////////////////////////////
 // CTextToSpeech
 
@@ -94,9 +100,11 @@ bool CTextToSpeech::Speak(LPCTSTR pwsz)
 CTextToSpeech theTextToSpeech;
 static bool s_bTTSDisabled = false;
 static bool s_bInitialized = false;
+#endif
 
 bool Speak(LPCTSTR pszSay)
 {
+#ifdef HAVE_SAPI_H
 	if (theApp.emuledlg == NULL || !theApp.emuledlg->IsRunning())
 		return false;
 	if (s_bTTSDisabled)
@@ -109,22 +117,30 @@ bool Speak(LPCTSTR pszSay)
 			return false;
 	}
 	return theTextToSpeech.Speak(pszSay);
+#else
+	return false;
+#endif
 }
 
 void ReleaseTTS()
 {
+#ifdef HAVE_SAPI_H
 	theTextToSpeech.ReleaseTTS();
 	s_bInitialized = false;
+#endif
 }
 
 void CloseTTS()
 {
+#ifdef HAVE_SAPI_H
 	ReleaseTTS();
 	s_bTTSDisabled = true;
+#endif
 }
 
 bool IsSpeechEngineAvailable()
 {
+#ifdef HAVE_SAPI_H
 	if (s_bTTSDisabled)
 		return false;
 
@@ -144,4 +160,7 @@ bool IsSpeechEngineAvailable()
 		}
 	}
 	return _bIsAvailable;
+#else
+	return false;
+#endif
 }

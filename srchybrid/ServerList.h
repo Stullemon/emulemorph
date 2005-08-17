@@ -28,14 +28,14 @@ public:
 	bool		Init();
 	void		Process();
 	void		Sort();
-	void		MoveServerDown(const CServer* aServer);
+	void		MoveServerDown(const CServer* pServer);
 	void		AutoUpdate();
 	bool		AddServerMetToList(const CString& rstrFile, bool bMerge);
 	void		AddServersFromTextFile(const CString& rstrFilename);
 	bool		SaveServermetToFile();
 
-	bool		AddServer(CServer* in_server);
-	void		RemoveServer(const CServer* out_server);
+	bool		AddServer(const CServer* pServer);
+	void		RemoveServer(const CServer* pServer);
 	void		RemoveAllServers();
 
 	uint32		GetServerCount() const { return list.GetCount(); }
@@ -55,7 +55,7 @@ public:
 	void		ServerStats();
 	CServer*	GetNextStatServer();
 
-	bool		IsGoodServerIP(const CServer* in_server) const;
+	bool		IsGoodServerIP(const CServer* pServer) const;
 	void		GetStatus(uint32& total, uint32& failed, uint32& user, uint32& file, uint32& lowiduser, 
 						  uint32& totaluser, uint32& totalfile, float& occ) const;
 	void		GetAvgFile(uint32& average) const;

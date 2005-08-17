@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2004-2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -31,7 +31,8 @@ static char THIS_FILE[] = __FILE__;
 
 CSecRunAsUser::CSecRunAsUser(void)
 {
-	bRunningAsEmule = false;
+	m_bRunningAsEmule = false;
+	m_bRunningRestricted = false;
 	m_hADVAPI32_DLL = 0;
 	m_hACTIVEDS_DLL = 0;
 }
@@ -41,13 +42,13 @@ CSecRunAsUser::~CSecRunAsUser(void)
 	FreeAPI();
 }
 
-bool CSecRunAsUser::PrepareUser(){
+eResult CSecRunAsUser::PrepareUser(){
 
 	USES_CONVERSION;
 	CoInitialize(NULL);
 	bool bResult = false;
 	if (!LoadAPI())
-		return false;
+		return RES_FAILED;
 
 	try{
 		IADsContainerPtr pUsers;
@@ -62,9 +63,8 @@ bool CSecRunAsUser::PrepareUser(){
 			pNTsys->get_UserName(&bstrUserName);
 			m_strCurrentUser = bstrUserName;
 
-			if (m_strCurrentUser == EMULEACCOUNTW){
-				theApp.QueueLogLine(false, GetResString(IDS_RAU_RUNNING), EMULEACCOUNT); 
-				bRunningAsEmule = true;
+			if (m_strCurrentUser == EMULEACCOUNTW){ 
+				m_bRunningAsEmule = true;
 			    throw CString(_T("Already running as eMule_Secure Account (everything is fine)"));
 			}
 			CComBSTR bstrCompName;
@@ -110,7 +110,10 @@ bool CSecRunAsUser::PrepareUser(){
 			// clean up and abort
 			theApp.QueueDebugLogLine(false, _T("Run as unpriveleged user: Exception while preparing user account: %s!"), error);
 			CoUninitialize();
-			return false;
+			if (m_bRunningAsEmule)
+				return RES_OK;
+			else
+				return RES_FAILED;
 		}
 		if (bResult || CreateEmuleUser(pUsers) ){
 			bResult = SetDirectoryPermissions();
@@ -120,14 +123,17 @@ bool CSecRunAsUser::PrepareUser(){
 		// clean up and abort
 		theApp.QueueDebugLogLine(false, _T("Run as unpriveleged user: Unexpected fatal error while preparing user account!"));
 		CoUninitialize();
-		return false;
+		return RES_FAILED;
 	}
 
 
 
 	CoUninitialize();
 	FreeAPI();
-	return bResult;
+	if (bResult)
+		return RES_OK_NEED_RESTART;
+	else
+		return RES_FAILED;
 }
 
 bool CSecRunAsUser::CreateEmuleUser(IADsContainerPtr pUsers){
@@ -180,8 +186,9 @@ bool CSecRunAsUser::SetDirectoryPermissions(){
 	bool bSucceeded = true;
 	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetAppDir(), FULLACCESS);
 	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetConfigDir(), FULLACCESS);
-	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetTempDir(), FULLACCESS);
 	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetIncomingDir(), FULLACCESS);
+	for (int i=0;i<thePrefs.GetTempDirCount();i++)
+		bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetTempDir(i), FULLACCESS);
 
 	uint16 cCats = thePrefs.GetCatCount();
 	for (int i= 0; i!= cCats; i++){
@@ -235,9 +242,10 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 			throw CString(_T("Run as unpriveleged user: Logical Error: Domainname mismatch"));
 
 		// get old ACL
-
 		PACL pOldACL = NULL;
-		if (GetNamedSecurityInfo(strDirFile.GetBuffer(), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pOldACL, NULL, &pSD) != ERROR_SUCCESS){
+		fAPISuccess = GetNamedSecurityInfo(strDirFile.GetBuffer(), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &pOldACL, NULL, &pSD);
+		strDirFile.ReleaseBuffer();
+		if (fAPISuccess != ERROR_SUCCESS){
 			throw CString(_T("Run as unpriveleged user: Error: GetNamedSecurityInfo() failed"));
 		}
 
@@ -300,8 +308,9 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 				}
 		}
 
-
-		if (SetNamedSecurityInfo(strDirFile.GetBuffer(), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, pNewACL, NULL) != ERROR_SUCCESS)
+		fAPISuccess = SetNamedSecurityInfo(strDirFile.GetBuffer(), SE_FILE_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, pNewACL, NULL);
+		strDirFile.ReleaseBuffer();
+		if (fAPISuccess != ERROR_SUCCESS)
 			throw CString(_T("Run as unpriveleged user: Error: SetNamedSecurityInfo() failed,"));
 		fAPISuccess = TRUE;
 	}
@@ -323,11 +332,13 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 	return fAPISuccess!=FALSE;
 }
 
-bool CSecRunAsUser::RestartAsUser(){
+eResult CSecRunAsUser::RestartAsUser(){
 	USES_CONVERSION;
 
+	if (m_bRunningRestricted || m_bRunningAsEmule)
+		return RES_OK;
 	if (!LoadAPI())
-		return false;
+		return RES_FAILED;
 
 	ASSERT ( !m_strPassword.IsEmpty() );
 	BOOL bResult;
@@ -349,17 +360,23 @@ bool CSecRunAsUser::RestartAsUser(){
 		
 		bResult = CreateProcessWithLogonW(EMULEACCOUNTW, m_strDomain, m_strPassword,
 			LOGON_WITH_PROFILE, NULL, (LPWSTR)T2CW(strAppName), 0, NULL, NULL, &StartInf, &ProcessInfo);
+		CloseHandle(ProcessInfo.hProcess);
+		CloseHandle(ProcessInfo.hThread);
 
 	}
 	catch(...){
 		theApp.QueueDebugLogLine(false, _T("Run as unpriveleged user: Error: Unexpected exception while loading advapi32.dll"));
 		FreeAPI();
-		return false;
+		return RES_FAILED;
 	}
 	FreeAPI();
 	if (!bResult)
 		theApp.QueueDebugLogLine(false, _T("Run as unpriveleged user: Error: Failed to restart eMule as different user! Error Code: %i"),GetLastError());
-	return bResult!=FALSE;
+	
+	if (bResult)
+		return RES_OK_NEED_RESTART;
+	else
+		return RES_FAILED;
 }
 
 CStringW CSecRunAsUser::GetCurrentUserW(){
@@ -389,7 +406,7 @@ bool CSecRunAsUser::LoadAPI(){
 	bSucceeded = bSucceeded && (CreateProcessWithLogonW = (TCreateProcessWithLogonW) GetProcAddress(m_hADVAPI32_DLL,"CreateProcessWithLogonW")) != NULL;
 	bSucceeded = bSucceeded && (GetNamedSecurityInfo = (TGetNamedSecurityInfo)GetProcAddress(m_hADVAPI32_DLL,_TWINAPI("GetNamedSecurityInfo"))) != NULL;
 	bSucceeded = bSucceeded && (SetNamedSecurityInfo = (TSetNamedSecurityInfo)GetProcAddress(m_hADVAPI32_DLL,_TWINAPI("SetNamedSecurityInfo"))) != NULL;
-	bSucceeded = bSucceeded && (AddAccessAllowedAceEx = (TAddAccessAllowedAceEx)GetProcAddress(m_hADVAPI32_DLL,"AddAccessAllowedAceEx")) != NULL;
+	bSucceeded = bSucceeded && (AddAccessAllowedAceEx = (TAddAccessAllowedAceEx)GetProcAddress(m_hADVAPI32_DLL,"AddAccessAllowedAceEx")) != NULL;	
 	// Probably these functions do not need to bel loaded dynamically, but just to be sure
 	bSucceeded = bSucceeded && (LookupAccountName = (TLookupAccountName)GetProcAddress(m_hADVAPI32_DLL,_TWINAPI("LookupAccountName"))) != NULL;
 	bSucceeded = bSucceeded && (GetAclInformation = (TGetAclInformation)GetProcAddress(m_hADVAPI32_DLL,"GetAclInformation")) != NULL;
@@ -398,7 +415,12 @@ bool CSecRunAsUser::LoadAPI(){
 	bSucceeded = bSucceeded && (AddAce = (TAddAce)GetProcAddress(m_hADVAPI32_DLL,"AddAce")) != NULL;
 	bSucceeded = bSucceeded && (EqualSid = (TEqualSid)GetProcAddress(m_hADVAPI32_DLL,"EqualSid")) != NULL;
 	bSucceeded = bSucceeded && (GetLengthSid = (TGetLengthSid)GetProcAddress(m_hADVAPI32_DLL,"GetLengthSid")) != NULL;
-	
+	// for SecureShellExecute
+	bSucceeded = bSucceeded && (OpenProcessToken = (TOpenProcessToken)GetProcAddress(m_hADVAPI32_DLL,"OpenProcessToken")) != NULL;
+	bSucceeded = bSucceeded && (GetTokenInformation = (TGetTokenInformation)GetProcAddress(m_hADVAPI32_DLL,"GetTokenInformation")) != NULL;
+	bSucceeded = bSucceeded && (CreateRestrictedToken = (TCreateRestrictedToken)GetProcAddress(m_hADVAPI32_DLL,"CreateRestrictedToken")) != NULL;
+	bSucceeded = bSucceeded && (CreateProcessAsUser = (TCreateProcessAsUser)GetProcAddress(m_hADVAPI32_DLL,_TWINAPI("CreateProcessAsUser"))) != NULL;
+
 	// activeDS.dll
 	bSucceeded = bSucceeded && (ADsGetObject = (TADsGetObject)GetProcAddress(m_hACTIVEDS_DLL,"ADsGetObject")) != NULL;
 	bSucceeded = bSucceeded && (ADsBuildEnumerator = (TADsBuildEnumerator)GetProcAddress(m_hACTIVEDS_DLL,"ADsBuildEnumerator")) != NULL;
@@ -422,4 +444,127 @@ void CSecRunAsUser::FreeAPI(){
 		m_hACTIVEDS_DLL = 0;
 	}
 
+}
+
+
+eResult CSecRunAsUser::RestartAsRestricted(){
+	if (m_bRunningRestricted || m_bRunningAsEmule)
+		return RES_OK;
+	if (!LoadAPI())
+		return RES_FAILED;
+
+	HANDLE hProcessToken = NULL;
+	HANDLE hRestrictedToken = NULL;
+	PTOKEN_USER pstructUserToken = NULL;
+
+	try{
+		// get our access token from the process
+		if(!OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY | TOKEN_READ, &hProcessToken)){
+			throw(CString(_T("Failed to retrieve access token from process")));
+		}
+		
+		// there is no easy way to check if we have already restircted token when not using the restricted sid list
+		// so just check if we set the SANDBOX_INERT flag and hope noone else did
+		// (which isunlikely tho because afaik you would only set it when using CreateRestirctedToken) :)
+		DWORD dwLen = 0;
+		DWORD dwInertFlag;
+		if (!GetTokenInformation(hProcessToken, TokenSandBoxInert, &dwInertFlag, sizeof(dwInertFlag), &dwLen)){
+			throw(CString(_T("Failed to Flag-Status from AccessToken")));
+		}
+		if (dwInertFlag != 0){
+			m_bRunningRestricted = true;
+			throw(CString(_T("Already using a restricted Token it seems (everything is fine!)")));
+		}
+
+		// get the user account SID to disable it in our new token
+		dwLen = 0;
+		while (!GetTokenInformation(hProcessToken, TokenUser, pstructUserToken, dwLen, &dwLen)){
+			if (GetLastError() == ERROR_INSUFFICIENT_BUFFER && pstructUserToken == NULL){
+				pstructUserToken = (PTOKEN_USER)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwLen);
+				continue;
+			}
+			throw(CString(_T("Failed to retrieve UserSID from AccessToken")));
+		}
+
+		// disabling our primary token would make sense from an Security POV, but this would cause file acces conflicts
+		// in the default settings (since we cannot access files we created ourself if they don't have the write flag for the group "users")
+		// so it stays enabled for now and we only reduce privileges
+
+		// create the new token
+		if(!CreateRestrictedToken(hProcessToken, DISABLE_MAX_PRIVILEGE | SANDBOX_INERT, 0 /*disabled*/, &pstructUserToken->User, 0, NULL, 0, NULL, &hRestrictedToken ) ){
+			throw(CString(_T("Failed to create Restricted Token")));
+		}
+
+		// do the starting job
+		PROCESS_INFORMATION ProcessInfo = {0};
+		TCHAR szAppPath[MAX_PATH];
+		GetModuleFileName(NULL, szAppPath, MAX_PATH);
+		CString strAppName;
+		strAppName.Format(_T("\"%s\""),szAppPath);
+		
+		STARTUPINFO StartInf = {0};
+		StartInf.cb = sizeof(StartInf);
+		StartInf.dwFlags = STARTF_USESHOWWINDOW;
+		StartInf.wShowWindow = SW_NORMAL;
+
+		// remove the current mutex, so that the restart emule can create its own without problems
+		// in the rare case CreateProcessWithLogonW fails, this will allow mult. instances, but if that function fails we have other problems anyway
+		::CloseHandle(theApp.m_hMutexOneInstance);
+		
+		if(!CreateProcessAsUser(hRestrictedToken, NULL, strAppName.GetBuffer(), NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &StartInf, &ProcessInfo) ){
+			CString e;
+			GetErrorMessage(GetLastError(), e, 0);
+			throw(CString(_T("CreateProcessAsUser failed")));
+		}
+		strAppName.ReleaseBuffer();
+		CloseHandle(ProcessInfo.hProcess);
+		CloseHandle(ProcessInfo.hThread);
+
+		// cleanup
+		HeapFree(GetProcessHeap(), 0, (LPVOID)pstructUserToken);
+		pstructUserToken = NULL;
+		CloseHandle(hRestrictedToken);
+		CloseHandle(hProcessToken);
+	}
+	catch(CString strError){
+		if (hProcessToken != NULL)
+			CloseHandle(hProcessToken);
+		if (hRestrictedToken != NULL)
+			CloseHandle(hRestrictedToken);
+		if (pstructUserToken != NULL)
+			HeapFree(GetProcessHeap(), 0, (LPVOID)pstructUserToken);
+
+
+		theApp.QueueDebugLogLine(false, _T("SecureShellExecute exception: %s!"), strError);
+		if (m_bRunningRestricted)
+			return RES_OK;
+		else
+			return RES_FAILED;
+	}
+	return RES_OK_NEED_RESTART;
+}
+
+eResult CSecRunAsUser::RestartSecure(){
+	
+	eResult res;
+	
+	if (!thePrefs.IsPreferingRestrictedOverUser()){
+		res = PrepareUser();;
+		if (res == RES_OK){
+			theApp.QueueLogLine(false, GetResString(IDS_RAU_RUNNING), EMULEACCOUNT);
+			return RES_OK;
+		}
+		else if (res == RES_OK_NEED_RESTART){
+			res = RestartAsUser();
+			if (res != RES_FAILED)
+				return res;
+		}
+	}
+
+	res = RestartAsRestricted();
+	if (res == RES_OK){
+		theApp.QueueLogLine(false, GetResString(IDS_RUNNINGRESTRICTED));
+	}
+
+	return res;
 }

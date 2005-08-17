@@ -183,8 +183,8 @@ BOOL CMassRenameDialog::OnInitDialog() {
 
 	// Create a new CEdit to replace the IDC_FILENAMEMASKEDIT edit control
 	CEdit* FNEdit = (CEdit*) GetDlgItem(IDC_FILENAMEMASKEDITTEMPLATE);
-	int Style = FNEdit->GetStyle ();
-	int ExStyle = FNEdit->GetExStyle ();
+	/*int Style = FNEdit->GetStyle ();
+	int ExStyle = FNEdit->GetExStyle ();*/
 	// Hide the old control and show the new one instead
 	FNEdit->ModifyStyle (WS_VISIBLE,0);
 	MassRenameEdit = new CMassRenameEdit;

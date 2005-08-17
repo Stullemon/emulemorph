@@ -258,6 +258,7 @@ void CED2kLinkDlg::UpdateLink()
 	m_ctrlLinkEdit.SetWindowText(strLinks);
 
 }
+
 void CED2kLinkDlg::OnBnClickedClipboard()
 {
 	CString strBuffer;
@@ -278,4 +279,11 @@ void CED2kLinkDlg::OnSettingsChange()
 		GetDlgItem(IDC_LD_PHPBBCHE)->EnableWindow(TRUE);
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
 	UpdateLink();
+}
+
+BOOL CED2kLinkDlg::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (LOWORD(wParam) == IDCANCEL)
+		return ::SendMessage(::GetParent(m_hWnd), WM_COMMAND, wParam, lParam);
+	return CResizablePage::OnCommand(wParam, lParam);
 }

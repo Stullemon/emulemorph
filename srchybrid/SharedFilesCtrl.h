@@ -25,6 +25,7 @@
 
 class CSharedFileList;
 class CKnownFile;
+class CDirectoryItem;
 
 class CSharedFilesCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
@@ -44,9 +45,11 @@ public:
 	void	ShowFilesCount();
 	void	ShowComments(CKnownFile* file);
 	void	SetAICHHashing(uint32 nVal)				{ nAICHHashing = nVal; } 
+	void	SetDirectoryFilter(CDirectoryItem* pNewFilter, bool bRefresh = true);
 
 protected:
 	CTitleMenu	m_SharedFilesMenu;
+	CTitleMenu		m_CollectionsMenu;
 	CMenu		m_PrioMenu;
 	CMenu		m_PermMenu; //MORPH START - Added by SiRoB, Keep Permission flag
 	CMenu       m_PowershareMenu; //MORPH - Added by SiRoB, ZZ Upload System
@@ -58,6 +61,7 @@ protected:
 	CMenu		m_CRC32Menu; //MORPH - Added by SiRoB, CRC32-Tag
 	bool		sortstat[4];
 	CImageList	m_ImageList;
+	CDirectoryItem*	m_pDirectoryFilter;
 	volatile uint32 nAICHHashing;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);

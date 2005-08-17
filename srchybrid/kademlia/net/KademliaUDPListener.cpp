@@ -485,7 +485,7 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, uint3
 
 	// Get required number closest to target
 	ContactMap results;
-	CKademlia::getRoutingZone()->getClosestTo(0, distance, (int)type, &results);
+	CKademlia::getRoutingZone()->getClosestTo(2, target, distance, (int)type, &results);
 	uint16 count = (uint16)results.size();
 
 	// Write response
@@ -565,7 +565,7 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, uint
 			if(::IsGoodIPPort(ntohl(ip),port))
 			{
 				routingZone->add(id, ip, port, tport, type);
-				results->push_back(new CContact(id, ip, port, tport, type, target));
+				results->push_back(new CContact(id, ip, port, tport, target));
 			}
 		}
 	}
@@ -579,12 +579,17 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, uint
 
 void CKademliaUDPListener::Free(SSearchTerm* pSearchTerms)
 {
-	if (pSearchTerms->left)
-		Free(pSearchTerms->left);
-	if (pSearchTerms->right)
-		Free(pSearchTerms->right);
-	delete pSearchTerms;
+	if(pSearchTerms)
+	{
+		if (pSearchTerms->left)
+			Free(pSearchTerms->left);
+		if (pSearchTerms->right)
+			Free(pSearchTerms->right);
+		delete pSearchTerms;
+	}
 }
+
+static CString* _pstrDbgSearchExpr;
 
 SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 {
@@ -604,7 +609,8 @@ SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio,
 		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::AND;
-			TRACE(" AND");
+			if (_pstrDbgSearchExpr)
+				_pstrDbgSearchExpr->Append(_T(" AND"));
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -622,7 +628,8 @@ SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio,
 		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::OR;
-			TRACE(" OR");
+			if (_pstrDbgSearchExpr)
+				_pstrDbgSearchExpr->Append(_T(" OR"));
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -640,7 +647,8 @@ SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio,
 		{
 			SSearchTerm* pSearchTerm = new SSearchTerm;
 			pSearchTerm->type = SSearchTerm::NAND;
-			TRACE(" NAND");
+			if (_pstrDbgSearchExpr)
+				_pstrDbgSearchExpr->Append(_T(" NOT"));
 			if ((pSearchTerm->left = CreateSearchExpressionTree(bio, iLevel)) == NULL){
 				ASSERT(0);
 				delete pSearchTerm;
@@ -661,10 +669,11 @@ SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio,
 	}
 	else if (op == 0x01) // String
 	{
-		CTagValueString str(bio.ReadStringUTF8());
+		CKadTagValueString str(bio.ReadStringUTF8());
 
 		KadTagStrMakeLower(str); // make lowercase, the search code expects lower case strings!
-		TRACE(" \"%ls\"", str);
+		if (_pstrDbgSearchExpr)
+			_pstrDbgSearchExpr->AppendFormat(_T(" \"%ls\""), str);
 
 		SSearchTerm* pSearchTerm = new SSearchTerm;
 		pSearchTerm->type = SSearchTerm::String;
@@ -672,7 +681,7 @@ SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio,
 
 		// pre-tokenize the string term
 		int iPosTok = 0;
-		CTagValueString strTok(str.Tokenize(_awszInvKadKeywordChars, iPosTok));
+		CKadTagValueString strTok(str.Tokenize(_awszInvKadKeywordChars, iPosTok));
 		while (!strTok.IsEmpty())
 		{
 			pSearchTerm->astr->Add(strTok);
@@ -684,7 +693,7 @@ SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio,
 	else if (op == 0x02) // Meta tag
 	{
 		// read tag value
-		CTagValueString strValue(bio.ReadStringUTF8());
+		CKadTagValueString strValue(bio.ReadStringUTF8());
 
 		KadTagStrMakeLower(strValue); // make lowercase, the search code expects lower case strings!
 
@@ -696,26 +705,28 @@ SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio,
 
 		SSearchTerm* pSearchTerm = new SSearchTerm;
 		pSearchTerm->type = SSearchTerm::MetaTag;
-		pSearchTerm->tag = new Kademlia::CTagStr(strTagName, strValue);
-		if (lenTagName == 1)
-			TRACE(" Tag%02x=\"%ls\"", strTagName[0], strValue);
-		else
-			TRACE(" \"%s\"=\"%ls\"", strTagName, strValue);
+		pSearchTerm->tag = new Kademlia::CKadTagStr(strTagName, strValue);
+		if (_pstrDbgSearchExpr) {
+			if (lenTagName == 1)
+				_pstrDbgSearchExpr->AppendFormat(_T(" Tag%02X=\"%ls\""), (BYTE)strTagName[0], strValue);
+			else
+				_pstrDbgSearchExpr->AppendFormat(_T(" \"%s\"=\"%ls\""), strTagName, strValue);
+		}
 		return pSearchTerm;
 	}
 	else if (op == 0x03) // Min/Max
 	{
 		static const struct {
 			SSearchTerm::ESearchTermType eSearchTermOp;
-			LPCSTR pszOp;
+			LPCTSTR pszOp;
 		} _aOps[] =
 		{
-			{ SSearchTerm::OpEqual,			"="		}, // mmop=0x00
-			{ SSearchTerm::OpGreaterEqual,	">="	}, // mmop=0x01
-			{ SSearchTerm::OpLessEqual,		"<="	}, // mmop=0x02
-			{ SSearchTerm::OpGreater,		">"		}, // mmop=0x03
-			{ SSearchTerm::OpLess,			"<"		}, // mmop=0x04
-			{ SSearchTerm::OpNotEqual,		"!="	}  // mmop=0x05
+			{ SSearchTerm::OpEqual,			_T("=")		}, // mmop=0x00
+			{ SSearchTerm::OpGreaterEqual,	_T(">=")	}, // mmop=0x01
+			{ SSearchTerm::OpLessEqual,		_T("<=")	}, // mmop=0x02
+			{ SSearchTerm::OpGreater,		_T(">")		}, // mmop=0x03
+			{ SSearchTerm::OpLess,			_T("<")		}, // mmop=0x04
+			{ SSearchTerm::OpNotEqual,		_T("!=")	}  // mmop=0x05
 		};
 
 		// read tag value
@@ -736,12 +747,14 @@ SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio,
 
 		SSearchTerm* pSearchTerm = new SSearchTerm;
 		pSearchTerm->type = _aOps[mmop].eSearchTermOp;
-		pSearchTerm->tag = new Kademlia::CTagUInt32(strTagName, uValue);
+		pSearchTerm->tag = new Kademlia::CKadTagUInt32(strTagName, uValue);
 
-		if (lenTagName == 1)
-			TRACE(" Tag%02x%s%u", (BYTE)strTagName[0], _aOps[mmop].pszOp, uValue);
-		else
-			TRACE(" \"%s\"%s%u", strTagName, _aOps[mmop].pszOp, uValue);
+		if (_pstrDbgSearchExpr) {
+			if (lenTagName == 1)
+				_pstrDbgSearchExpr->AppendFormat(_T(" Tag%02X%s%u"), (BYTE)strTagName[0], _aOps[mmop].pszOp, uValue);
+			else
+				_pstrDbgSearchExpr->AppendFormat(_T(" \"%s\"%s%u"), strTagName, _aOps[mmop].pszOp, uValue);
+		}
 
 		return pSearchTerm;
 	}
@@ -791,8 +804,15 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 
 		{
 			try
 			{
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+				_pstrDbgSearchExpr = (thePrefs.GetDebugServerSearchesLevel() > 0) ? new CString : NULL;
+#endif
 				pSearchTerms = CreateSearchExpressionTree(bio, 0);
-				TRACE("\n");
+				if (_pstrDbgSearchExpr) {
+					Debug(_T("KadSearchTerm=%s\n"), *_pstrDbgSearchExpr);
+					delete _pstrDbgSearchExpr;
+					_pstrDbgSearchExpr = NULL;
+				}
 			}
 			catch(...)
 			{
@@ -884,7 +904,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 	if( thePrefs.FilterLANIPs() && distance.get32BitChunk(0) > SEARCHTOLERANCE)
 		return;
 
-	bool bDbgInfo = thePrefs.GetDebugClientKadUDPLevel() > 0;
+	bool bDbgInfo = (thePrefs.GetDebugClientKadUDPLevel() > 0) /*|| (thePrefs.GetDebugServerSearchesLevel() > 0)*/;
 	CString strInfo;
 	uint16 count = bio.readUInt16();
 	bool flag = false;
@@ -906,15 +926,15 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 			uint32 tags = bio.readByte();
 			while(tags > 0)
 			{
-				CTag* tag = bio.readTag();
+				CKadTag* tag = bio.readTag();
 				if(tag)
 				{
 					if (!tag->m_name.Compare(TAG_SOURCETYPE) && tag->m_type == 9)
 					{
 						if( entry->source == false )
 						{
-							entry->taglist.push_back(new CTagUInt32(TAG_SOURCEIP, entry->ip));
-							entry->taglist.push_back(new CTagUInt16(TAG_SOURCEUPORT, entry->udpport));
+							entry->taglist.push_back(new CKadTagUInt32(TAG_SOURCEIP, entry->ip));
+							entry->taglist.push_back(new CKadTagUInt16(TAG_SOURCEUPORT, entry->udpport));
 						}
 						else
 						{
@@ -1379,7 +1399,8 @@ void CKademliaUDPListener::processCallbackRequest (const byte *packetData, uint3
 		CSafeMemFile bio(packetData, lenPacket);
 		CUInt128 check;
 		bio.ReadUInt128(&check);
-		CUInt128 bud(buddy->GetBuddyID());
+//		JOHNTODO: Begin filtering bad buddy ID's..
+//		CUInt128 bud(buddy->GetBuddyID());
 		CUInt128 file;
 		bio.ReadUInt128(&file);
 		uint16 tcp = bio.ReadUInt16();

@@ -49,6 +49,7 @@ END_MESSAGE_MAP()
 
 CIrcNickListCtrl::CIrcNickListCtrl()
 {
+	SetName(_T("IrcNickListCtrl"));
 	m_pParent = NULL;
 }
 
@@ -61,12 +62,9 @@ void CIrcNickListCtrl::Init()
 	//SetSortArrow(m_iSortIndex, m_asc_sort[m_iSortIndex]);
  //   SortItems(SortProc, m_iSortIndex + ((m_asc_sort[m_iSortIndex]) ? 0 : 10));
 
-	LoadSettings(CPreferences::tableIrcMain);
-	m_sortindex = thePrefs.GetColumnSortItem(CPreferences::tableIrcMain);
-	m_sortorder = thePrefs.GetColumnSortAscending(CPreferences::tableIrcMain);
-	SetSortArrow(m_sortindex, m_sortorder);
-	SortItems(&SortProc, m_sortindex + ( (m_sortorder) ? 0:10) );
-
+	LoadSettings();
+	SetSortArrow();
+	SortItems(&SortProc, GetSortItem() + ( (GetSortAscending()) ? 0:10) );
 }
 
 int CIrcNickListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
@@ -109,10 +107,6 @@ void CIrcNickListCtrl::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	SetSortArrow(m_sortindex, m_sortorder);
 	SortItems(&SortProc, m_sortindex + (m_sortorder ? 0 : 10));
-
-	thePrefs.SetColumnSortItem(CPreferences::tableIrcMain, m_sortindex);
-	thePrefs.SetColumnSortAscending(CPreferences::tableIrcMain, m_sortorder);
-
 
 	*pResult = 0;
 }

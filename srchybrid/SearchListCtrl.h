@@ -23,6 +23,7 @@
 
 class CSearchList;
 class CSearchFile;
+class CToolTipCtrlX;
 
 struct SearchCtrlItem_Struct{
    CSearchFile*		value;
@@ -56,12 +57,14 @@ public:
 	void	ShowResults(uint32 nResultsID);
 	void	ClearResultViewState(uint32 nResultsID);
 	void	NoTabs()	{ m_nResultsID = 0; }
+	void	UpdateSearch(CSearchFile* toupdate);
 
 protected:
 	uint32		m_nResultsID;
 	CTitleMenu	m_SearchFileMenu;
 	CSearchList* searchlist;
-
+	CToolTipCtrlX* m_tooltip;
+	CImageList	m_ImageList;
 	COLORREF	m_crSearchResultDownloading;
 	COLORREF	m_crSearchResultDownloadStopped;
 	COLORREF	m_crSearchResultKnown;
@@ -77,6 +80,7 @@ protected:
 	void	HideSources(CSearchFile* toCollapse);
 	void	SetStyle();
 	void	SetHighlightColors();
+	void	SetAllIcons();
 
 	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
 	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);

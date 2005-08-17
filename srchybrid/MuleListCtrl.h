@@ -22,12 +22,12 @@ public:
 	void SetName(LPCTSTR lpszName);
 
 	// Save to preferences
-	void SaveSettings(CPreferences::Table tID);
-	void SaveSettings(CIni* ini, LPCTSTR pszLVName);
+	//void SaveSettings(CPreferences::Table tID);
+	void SaveSettings();
 
 	// Load from preferences
-	void LoadSettings(CPreferences::Table tID);
-	void LoadSettings(CIni* ini, LPCTSTR pszLVName);
+	//void LoadSettings(CPreferences::Table tID);
+	void LoadSettings();
 
 	DWORD SetExtendedStyle(DWORD dwNewStyle) { return CListCtrl::SetExtendedStyle(dwNewStyle | LVS_EX_HEADERDRAGDROP); }
 
@@ -90,8 +90,11 @@ public:
 	enum ArrowType { arrowDown = IDB_DOWN, arrowUp = IDB_UP,
 		arrowDoubleDown = IDB_DOWN2X, arrowDoubleUp = IDB_UP2X };
 
+	int	GetSortType(ArrowType at);
+	ArrowType	GetArrowType(int iat);
 	// Places a sort arrow in a column
 	void SetSortArrow(int iColumn, ArrowType atType);
+	void SetSortArrow()		{SetSortArrow(m_iCurrentSortItem, m_atSortArrow); }
 
 	// Places a sort arrow in a column
 	void SetSortArrow(int iColumn, bool bAscending) {
@@ -103,15 +106,14 @@ public:
 	HIMAGELIST ApplyImageList(HIMAGELIST himl);
 
 	// General purpose listview find dialog+functions (optional)
-	void SetGeneralPurposeFind(bool bEnable) { m_bGeneralPurposeFind = bEnable; }
-	void DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL bShowError);
-	void DoFindNext(BOOL bShowError);
+	void	SetGeneralPurposeFind(bool bEnable) { m_bGeneralPurposeFind = bEnable; }
+	void	DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL bShowError);
+	void	DoFindNext(BOOL bShowError);
 
-	void AutoSelectItem();
-	/*
+	void	AutoSelectItem();
 	int		GetNextSortOrder(int dwCurrentSortOrder) const;
 	void	UpdateSortHistory(int dwNewOrder, int dwInverseValue = 100);
-	*/
+
 protected:
 	virtual void PreSubclassWindow();
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
@@ -132,23 +134,22 @@ protected:
 	// Update the colors
 	void         SetColors(LPCTSTR pszLvKey = NULL);
 
-	CString          m_Name;
-	PFNLVCOMPARE     m_SortProc;
-	CList<DWORD>     m_dwParamSort;	// SLUGFILLER: multiSort
-	COLORREF         m_crWindow;
-	COLORREF         m_crWindowText;
-	COLORREF         m_crWindowTextBk;
-	COLORREF         m_crHighlight;
-	COLORREF		 m_crGlow;
-	COLORREF         m_crFocusLine;
-	COLORREF         m_crNoHighlight;
-	COLORREF         m_crNoFocusLine;
-	NMLVCUSTOMDRAW   m_lvcd;
-	BOOL             m_bCustomDraw;
-	CImageList		 m_imlHeaderCtrl;
-	/*
-	CList<int, int>	 m_liSortHistory;
-	*/
+	CString         m_Name;
+	PFNLVCOMPARE    m_SortProc;
+	DWORD           m_dwParamSort;
+	COLORREF        m_crWindow;
+	COLORREF        m_crWindowText;
+	COLORREF        m_crWindowTextBk;
+	COLORREF        m_crHighlight;
+	COLORREF		m_crHighlightText;
+	COLORREF		m_crGlow;
+	COLORREF        m_crFocusLine;
+	COLORREF        m_crNoHighlight;
+	COLORREF        m_crNoFocusLine;
+	NMLVCUSTOMDRAW  m_lvcd;
+	BOOL            m_bCustomDraw;
+	CImageList		m_imlHeaderCtrl;
+	CList<int, int>	m_liSortHistory;
 
 	// General purpose listview find dialog+functions (optional)
 	bool m_bGeneralPurposeFind;
@@ -161,8 +162,7 @@ protected:
 	void OnFindPrev();
 
 private:
-	static int IndexToOrder(CHeaderCtrl* pHeader, int iIndex);
-
+	static int	IndexToOrder(CHeaderCtrl* pHeader, int iIndex);
 
 	struct MULE_COLUMN {
 		int iWidth;
@@ -193,25 +193,6 @@ private:
 			m_Params.SetAt(pos, lParam = CListCtrl::GetItemData(iPos));
 		return lParam;
 	}
-	// SLUGFILLER: multiSort
-	int MultiSortProc(LPARAM lParam1, LPARAM lParam2) {
-		int ret;
-		int dwParamSort;
-
-		POSITION pos = m_dwParamSort.GetHeadPosition();
-		while (pos != NULL)
-		{
-			// get layout info
-			dwParamSort = m_dwParamSort.GetNext(pos);
-
-			ret = m_SortProc(lParam1, lParam2, dwParamSort);
-			if (ret)
-				return ret;
-		}
-
-		return 0;
-	}
-	// SLUGFILLER: multiSort
 };
 
 void GetContextMenuPosition(CListCtrl& lv, CPoint& point);

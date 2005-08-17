@@ -95,22 +95,9 @@ void CSplitterControl::OnPaint()
 
 	CRect rcClient;
 	GetClientRect(rcClient);
-	
+	dc.FillSolidRect(rcClient, ::GetSysColor(COLOR_3DFACE));	
 	dc.Draw3dRect(rcClient, GetSysColor(COLOR_BTNHIGHLIGHT), GetSysColor(COLOR_BTNSHADOW));
-	rcClient.DeflateRect(1, 1, 1, 1);
-	
-	CPen pen;
-	pen.CreatePen(0, 1, RGB(200, 200, 200));
-	CPen* pOP = dc.SelectObject(&pen);
 
-	CBrush br;
-	br.CreateSolidBrush(RGB(200, 220, 220));
-	CBrush* pOB = dc.SelectObject(&br);
-	
-	dc.Rectangle(rcClient);
-
-	dc.SelectObject(pOB);
-	dc.SelectObject(pOP);
 }
 
 void CSplitterControl::OnMouseMove(UINT nFlags, CPoint point)
@@ -301,6 +288,7 @@ void CSplitterControl::ChangeHeight(CWnd *pWnd, int dy, DWORD dwFlag)
 			rcWnd.top -= dy;
 		pWnd->MoveWindow(rcWnd);
 	}
+	else ASSERT(0);
 }
 
 void CSplitterControl::ChangePos(CWnd* pWnd, int dx, int dy)

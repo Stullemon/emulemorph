@@ -355,9 +355,9 @@ private:
 	static bool		_IsLoggedIn(ThreadData Data, long lSession);
 	static void		_RemoveTimeOuts(ThreadData Data, long lSession);
 	static bool		_RemoveSession(ThreadData Data, long lSession);
-	static CString	_SpecialChars(CString str, bool noquote = false);
-	static CString	_GetPlainResString(UINT nID, bool noquote = false);
-	static void		_GetPlainResString(CString *pstrOut, UINT nID, bool noquote = false);
+	static CString	_SpecialChars(CString str, bool noquote = true);
+	static CString	_GetPlainResString(UINT nID, bool noquote = true);
+	static void		_GetPlainResString(CString *pstrOut, UINT nID, bool noquote = true);
 	static int		_GzipCompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen, int level);
 	CString			_LoadTemplate(CString sAll, CString sTemplateName);
 	static Session	GetSessionByID(ThreadData Data,long sessionID);

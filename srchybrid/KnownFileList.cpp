@@ -367,7 +367,7 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 		//Not sure of a good solution yet..
 		if (theApp.sharedfiles)
 		{
-			theApp.sharedfiles->RemoveKeywords(pFileInMap);
+			theApp.sharedfiles->RemoveFile(pFileInMap);
 			ASSERT( !theApp.sharedfiles->IsFilePtrInList(pFileInMap) );
 		}
 		//Double check to make sure this is the same file as it's possible that a two files have the same hash.
@@ -418,6 +418,20 @@ CKnownFile* CKnownFileList::FindKnownFile(LPCTSTR filename, uint32 date, uint32 
 		m_Files_map.GetNextAssoc(pos, key, cur_file);
 		if (cur_file->GetUtcFileDate() == date && cur_file->GetFileSize() == size && !_tcscmp(filename, cur_file->GetFileName()))
 				return cur_file;
+	}
+	return NULL;
+}
+
+CKnownFile* CKnownFileList::FindKnownFileByPath(const CString& sFilePath) const
+{
+	POSITION pos = m_Files_map.GetStartPosition();
+	while (pos != NULL)
+	{
+		CKnownFile* cur_file;
+		CCKey key;
+		m_Files_map.GetNextAssoc(pos, key, cur_file);
+		if (!cur_file->GetFilePath().CompareNoCase(sFilePath))
+			return cur_file;
 	}
 	return NULL;
 }
@@ -490,4 +504,18 @@ bool CKnownFileList::IsCancelledFileByID(const uchar* hash) const
 		}
 	}
 	return false;
+}
+void CKnownFileList::CopyKnownFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> &Files_Map)
+{
+	if (!m_Files_map.IsEmpty())
+	{
+		POSITION pos = m_Files_map.GetStartPosition();
+		while (pos)
+		{
+			CCKey key;
+			CKnownFile* cur_file;
+			m_Files_map.GetNextAssoc(pos, key, cur_file);
+			Files_Map.SetAt(key, cur_file);
+		}
+	}
 }

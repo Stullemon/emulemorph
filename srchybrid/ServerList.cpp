@@ -112,14 +112,14 @@ void CServerList::AutoUpdate()
 bool CServerList::Init()
 {
 	// auto update the list by using an url
-	if (thePrefs.AutoServerlist())
+	if (thePrefs.GetAutoUpdateServerList())
 		AutoUpdate();
 	
 	// Load Metfile
 	CString strPath;
 	strPath.Format(_T("%s") SERVER_MET_FILENAME, thePrefs.GetConfigDir());
 	bool bRes = AddServerMetToList(strPath, false);
-	if (thePrefs.AutoServerlist())
+	if (thePrefs.GetAutoUpdateServerList())
 	{
 		strPath.Format(_T("%sserver_met.download"), thePrefs.GetConfigDir());
 		bool bRes2 = AddServerMetToList(strPath, true);
@@ -247,32 +247,31 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 	return true;
 }
 
-bool CServerList::AddServer(CServer* in_server)
+bool CServerList::AddServer(const CServer* pServer)
 {
-	if (!IsGoodServerIP(in_server)){ // check for 0-IP, localhost and optionally for LAN addresses
+	if (!IsGoodServerIP(pServer)){ // check for 0-IP, localhost and optionally for LAN addresses
 		if (thePrefs.GetLogFilteredIPs())
-			AddDebugLogLine(false, _T("Ignored server (IP=%s)"), ipstr(in_server->GetIP()));
+			AddDebugLogLine(false, _T("Ignored server (IP=%s)"), ipstr(pServer->GetIP()));
 		return false;
 	}
 
 	if (thePrefs.FilterServerByIP()){
-		if (in_server->HasDynIP())
+		if (pServer->HasDynIP())
 			return false;
-		if (theApp.ipfilter->IsFiltered(in_server->GetIP())){
+		if (theApp.ipfilter->IsFiltered(pServer->GetIP())){
 			if (thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Ignored server (IP=%s) - IP filter (%s)"), ipstr(in_server->GetIP()), theApp.ipfilter->GetLastHit());
+				AddDebugLogLine(false, _T("Ignored server (IP=%s) - IP filter (%s)"), ipstr(pServer->GetIP()), theApp.ipfilter->GetLastHit());
 			return false;
 		}
 	}
 
-	CServer* test_server = GetServerByAddress(in_server->GetAddress(), in_server->GetPort());
+	CServer* test_server = GetServerByAddress(pServer->GetAddress(), pServer->GetPort());
 	if (test_server){
 		test_server->ResetFailedCount();
 		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( test_server );		
 		return false;
 	}
-	list.AddTail(in_server);
-
+	list.AddTail(const_cast<CServer*>(pServer));
 	return true;
 }
 
@@ -346,21 +345,21 @@ void CServerList::ServerStats()
 	}
 }
 
-bool CServerList::IsGoodServerIP(const CServer* in_server) const
+bool CServerList::IsGoodServerIP(const CServer* pServer) const
 {
-	if (in_server->HasDynIP())
+	if (pServer->HasDynIP())
 		return true;
-	return IsGoodIPPort(in_server->GetIP(), in_server->GetPort());
+	return IsGoodIPPort(pServer->GetIP(), pServer->GetPort());
 }
 
-void CServerList::RemoveServer(const CServer* out_server)
+void CServerList::RemoveServer(const CServer* pServer)
 {
 	for(POSITION pos = list.GetHeadPosition(); pos != NULL; )
 	{
 		POSITION pos2 = pos;
 		const CServer* test_server = list.GetNext(pos);
-		if (test_server == out_server){
-			if (theApp.downloadqueue->cur_udpserver == out_server)
+		if (test_server == pServer){
+			if (theApp.downloadqueue->cur_udpserver == pServer)
 				theApp.downloadqueue->cur_udpserver = NULL;
 			list.RemoveAt(pos2);
 			delservercount++;
@@ -577,7 +576,6 @@ CServer* CServerList::GetNextStatServer()
 			posIndex = list.GetHeadPosition();
 			statserverpos=0;
 		}
-
 		nextserver = list.GetAt(posIndex);
 		statserverpos++;
 		i++;

@@ -57,6 +57,7 @@ struct SSearchParams
 	CString strTitle;
 	CString strAlbum;
 	CString strArtist;
+	CString strSpecialTitle;
 	bool bMatchKeywords;
 	bool bUnicode;
 };

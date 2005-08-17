@@ -199,7 +199,10 @@ void CBarShader::Draw(CDC* dc, int iLeft, int iTop, bool bFlat) {
 			// SLUGFILLER: speedBarShader
 			rectSpan.left = rectSpan.right;
 			rectSpan.right++;
-			FillRect(dc, &rectSpan, fRed, fGreen, fBlue, bFlat);
+			if (g_bLowColorDesktop)
+				FillRect(dc, &rectSpan, color, bFlat);
+			else
+				FillRect(dc, &rectSpan, fRed, fGreen, fBlue, bFlat);
 			start += iBytesInOnePixel;
 		}
 		// SLUGFILLER: speedBarShader
@@ -223,7 +226,6 @@ void CBarShader::FillRect(CDC *dc, LPRECT rectSpan, float fRed, float fGreen,
 	if(bFlat) {
 		COLORREF color = RGB((int)(fRed + .5f), (int)(fGreen + .5f), (int)(fBlue + .5f));
 		dc->FillRect(rectSpan, &CBrush(color));
-
 	} else {
 		if (m_Modifiers == NULL || (m_used3dlevel!=thePrefs.Get3DDepth() && !m_bIsPreview) )
 			BuildModifiers();

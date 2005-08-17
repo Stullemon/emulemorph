@@ -37,7 +37,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -660,7 +660,7 @@ void CChatSelector::OnDestroy()
 
 BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 {
-	switch (wParam){ 
+	switch (wParam){
 		case MP_DETAIL:{
 			const CChatItem* ci = GetCurrentChatItem();
 			if (ci) {
@@ -671,8 +671,8 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 		}
 		case MP_ADDFRIEND:{
 			const CChatItem* ci = GetCurrentChatItem();
-			if (ci ) {
-				CFriend* fr=theApp.friendlist->SearchFriend(ci->client->GetUserHash(),0,0);
+			if (ci) {
+				CFriend* fr = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
 				if (!fr)
 					theApp.friendlist->AddFriend(ci->client);
 			}
@@ -680,8 +680,8 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 		}
 		case MP_REMOVEFRIEND:{
 			const CChatItem* ci = GetCurrentChatItem();
-			if (ci ) {
-				CFriend* fr=theApp.friendlist->SearchFriend(ci->client->GetUserHash(),0,0);
+			if (ci) {
+				CFriend* fr = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
 				if (fr)
 					theApp.friendlist->RemoveFriend(fr);
 			}
@@ -698,23 +698,22 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 }
 
 void CChatSelector::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
-{ 
-
+{
 	const CChatItem* ci = GetCurrentChatItem();
-	if (!ci)
+	if (ci == NULL)
 		return;
-	CFriend* fr=theApp.friendlist->SearchFriend(ci->client->GetUserHash(),0,0);
+	CFriend* pFriend = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
 
 	CTitleMenu menu;
-	menu.CreatePopupMenu(); 
-	menu.AddMenuTitle( GetResString(IDS_CLIENT) ,true );
+	menu.CreatePopupMenu();
+	menu.AddMenuTitle(GetResString(IDS_CLIENT), true);
 
-	menu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_FD_CLOSE), _T("DELETE"));
-	menu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("CLIENTDETAILS"));
+	menu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE), _T("DELETE"));
+	menu.AppendMenu(MF_STRING, MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("CLIENTDETAILS"));
 	menu.SetDefaultItem(MP_DETAIL);
 
 	GetCurrentChatItem();
-	if (fr==NULL )
+	if (pFriend == NULL)
 		menu.AppendMenu(MF_STRING, MP_ADDFRIEND, GetResString(IDS_IRC_ADDTOFRIENDLIST), _T("ADDFRIEND"));
 	else
 		menu.AppendMenu(MF_STRING, MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND), _T("DELETEFRIEND"));

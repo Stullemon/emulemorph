@@ -311,6 +311,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 				case OP_HELLO:
 				{
 					theStats.AddDownDataOverheadOther(size);
+
 					bool bNewClient = !client;
 					if (bNewClient)
 					{
@@ -353,12 +354,15 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						theApp.clientlist->AddClient(client);
 						client->SetCommentDirty();
 					}
+
 					theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(client);
 
 					// send a response packet with standart informations
 					if (client->GetHashType() == SO_EMULE && !bIsMuleHello)
 						client->SendMuleInfoPacket(false);
+
 					client->SendHelloAnswer();
+
 					if (client)
 						client->ConnectionEstablished();
 
@@ -370,6 +374,9 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						//	- we have received eMule-OP_HELLO (new eMule)
 						if (client->GetInfoPacketsReceived() == IP_BOTH)
 							client->InfoPacketsReceived();
+
+						if( client->GetKadPort() )
+							Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 					}
 					break;
 				}
@@ -1325,6 +1332,9 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
+					if( client->GetKadPort() )
+						Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+
 					CSafeMemFile data_in(packet, size);
 					uchar reqfilehash[16];
 					data_in.ReadHash16(reqfilehash);
@@ -1581,6 +1591,9 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						DebugRecv("OP_MultiPacketAns", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+
+					if( client->GetKadPort() )
+						Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 
 					CSafeMemFile data_in(packet, size);
 					uchar reqfilehash[16];

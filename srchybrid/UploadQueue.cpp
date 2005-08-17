@@ -47,6 +47,7 @@
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "Kademlia/Kademlia/Prefs.h"
 #include "Log.h"
+#include "collection.h"
 // WebCache ///////////////////////////////////////////////////////////////////////////////////
 #include "PartFile.h"
 
@@ -681,6 +682,11 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		return false;
 	}
 
+	if (newclient->HasCollectionUploadSlot() && directadd == NULL){
+		ASSERT( false );
+		newclient->SetCollectionUploadSlot(false);
+	}
+
     if(pszReason && thePrefs.GetLogUlDlEvents())
         AddDebugLogLine(false, _T("Adding client to upload list: %s Client: %s"), pszReason, newclient->DbgGetClientInfo());
 
@@ -706,7 +712,6 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		newclient->socket->SendPacket(packet,true);
 		newclient->SetUploadState(US_UPLOADING);
 	}
-
 	newclient->SetUpStartTime();
 	newclient->ResetSessionUp();
 	// khaos::kmod+ Show Compression by Tarod
@@ -770,7 +775,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 
     m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = tempHighest;
 	
-	// save 15 minutes of data about number of fully active clients
+    // save some data about number of fully active clients
     uint32 tempMaxRemoved = 0;
     while(!activeClients_tick_list.IsEmpty() && !activeClients_list.IsEmpty() && curTick-activeClients_tick_list.GetHead() > 20*1000) {
             activeClients_tick_list.RemoveHead();
@@ -943,7 +948,7 @@ void CUploadQueue::Process() {
 		//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	}
 	//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
-	while(avarage_dr_USS_list.GetCount() > 1 && (avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_list.GetHead().timestamp) > 5000){
+	while(avarage_dr_USS_list.GetCount() > 1 && (avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_list.GetHead().timestamp) > 30000){
 		avarage_dr_USS_listLastRemovedTimestamp = avarage_dr_USS_list.GetHead().timestamp;
 		m_avarage_dr_USS_sum -= avarage_dr_USS_list.RemoveHead().datalen;
 	}
@@ -992,7 +997,8 @@ void CUploadQueue::Process() {
 	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
 };
 
-bool CUploadQueue::AcceptNewClient(){
+bool CUploadQueue::AcceptNewClient()
+{
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
     return AcceptNewClient(curUploadSlots);
 }
@@ -1022,12 +1028,13 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
           !thePrefs.IsDynUpEnabled() &&
-          thePrefs.GetMaxGraphUploadRate() > 0 &&
-          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate())*1024/UPLOAD_CLIENT_DATARATE
+          thePrefs.GetMaxGraphUploadRate(true) > 0 &&
+          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate(false))*1024/UPLOAD_CLIENT_DATARATE
          )
         )
     ) // max number of clients to allow for all circumstances
 	    return false;
+
 	return true;
 }
 
@@ -1161,7 +1168,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
                 CUpDownClient* bestQueuedClient = FindBestClientInQueue(false);
                 if(bestQueuedClient == client) {
 					RemoveFromWaitingQueue(client, true);
-				    AddUpNextClient(_T("Adding ****lowid when reconneting."), client);
+				    AddUpNextClient(_T("Adding ****lowid when reconnecting."), client);
 				    return;
                 //} else {
                 //client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
@@ -1242,6 +1249,18 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
 		if (reqfile)
 			reqfile->statistic.AddRequest();
+
+		// emule collection will bypass the queue
+		if (reqfile != NULL && CCollection::HasCollectionExtention(reqfile->GetFileName()) && reqfile->GetFileSize() < MAXPRIORITYCOLL_SIZE
+			&& !client->IsDownloading() && client->socket != NULL && client->socket->IsConnected())
+		{
+			client->SetCollectionUploadSlot(true);
+			RemoveFromWaitingQueue(client, true);
+			AddUpNextClient(_T("Collection Priority Slot"), client);
+			return;
+		}
+		else
+			client->SetCollectionUploadSlot(false);
 
 		//Morph Start - added by AndCycle, SLUGFILLER: infiniteQueue
 		if(!thePrefs.IsInfiniteQueueEnabled()){
@@ -1416,6 +1435,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			theApp.clientlist->AddTrackClient(client); // Keep track of this client
 			client->SetUploadState(US_NONE);
 			client->ClearUploadBlockRequests();
+			client->SetCollectionUploadSlot(false);
 			//MORPH END   - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
 
 			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
@@ -1595,9 +1615,9 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		//MOPRH START - Modified by SiRoB
 		/*
 		// ZZ:UploadSpeedSense -->
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(false)*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
 		*/
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->datarate_USS, thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 5, thePrefs.IsUSSLog(), thePrefs.GetGlobalDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetGlobalDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(false)*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 5, thePrefs.IsUSSLog(), thePrefs.GetGlobalDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetGlobalDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
 		//MOPRH END   - Modified by SiRoB, Upload Splitting Class
 
 		theApp.uploadqueue->Process();
@@ -1643,7 +1663,11 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			// 2 seconds
 			if (iupdateconnstats>=2) {
 				iupdateconnstats=0;
+				//MORPH - Changed by SiRoB, Keep An average datarate value for USS system
+				/*
 				theStats.UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate()/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
+				*/
+				theStats.UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate(true)/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
 			}
 			// <-----khaos-
 
@@ -1654,7 +1678,11 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				if (igraph >= (uint32)(thePrefs.GetTrafficOMeterInterval()) ) {
 					igraph=0;
 					//theApp.emuledlg->statisticswnd->SetCurrentRate((float)(theApp.uploadqueue->Getavgupload()/theApp.uploadqueue->Getavg())/1024,(float)(theApp.uploadqueue->Getavgdownload()/theApp.uploadqueue->Getavg())/1024);
+					//MORPH - Changed by SiRoB, Keep An average datarate value for USS system
+					/*
 					theApp.emuledlg->statisticswnd->SetCurrentRate((float)(theApp.uploadqueue->GetDatarate())/1024,(float)(theApp.downloadqueue->GetDatarate())/1024);
+					*/
+					theApp.emuledlg->statisticswnd->SetCurrentRate((float)(theApp.uploadqueue->GetDatarate(true))/1024,(float)(theApp.downloadqueue->GetDatarate())/1024);
 					//theApp.uploadqueue->Zeroavg();
 				}
 			}
@@ -1669,6 +1697,10 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 					}
 				}
 			}
+			//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+			/*
+            theApp.uploadqueue->UpdateDatarates();
+			*/
 			//save rates every second
 			theStats.RecordRate();
 			// mobilemule sockets
@@ -1694,6 +1726,8 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				sec = 0;
 				theApp.listensocket->Process();
 				theApp.OnlineSig(); // Added By Bouc7 
+				theApp.emuledlg->ShowTransferRate();
+				thePrefs.EstimateMaxUploadCap(theApp.uploadqueue->GetDatarate()/1024);
 
 
                 //Commander - Removed: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
@@ -1778,12 +1812,15 @@ CUpDownClient* CUploadQueue::GetNextClient(const CUpDownClient* lastclient){
 }
 */
 
+//MORPH - Changed by SiRoB, Keep An average datarate value for USS system
+/*
 uint32 CUploadQueue::GetDatarate() {
-	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
-	/*
-	UpdateDatarates();
-	*/
-	return datarate;
+*/
+uint32 CUploadQueue::GetDatarate(bool bLive) {
+	if (bLive)
+		return datarate;
+	else
+		return datarate_USS;
 }
 //MORPH START - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 uint32 CUploadQueue::GetDatarateOverHead() {
@@ -1791,10 +1828,6 @@ uint32 CUploadQueue::GetDatarateOverHead() {
 }
 //MORPH END   - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 uint32 CUploadQueue::GetToNetworkDatarate() {
-	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
-	/*
-	UpdateDatarates();
-	*/
 	if(datarate > friendDatarate) {
 		return datarate - friendDatarate;
 	} else {

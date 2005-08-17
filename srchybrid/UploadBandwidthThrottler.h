@@ -25,7 +25,6 @@
 struct Socket_stat{
 	uint32	classID;
 	sint64	realBytesToSpend;
-	bool	BusyLink;
 };
 //MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class
 
@@ -62,6 +61,7 @@ public:
     void EndThread();
 
     void Pause(bool paused);
+    static uint32 UploadBandwidthThrottler::GetSlotLimit(uint32 currentUpSpeed);
 private:
     static UINT RunProc(LPVOID pParam);
     UINT RunInternal();
@@ -69,6 +69,8 @@ private:
     void RemoveFromAllQueues(ThrottledControlSocket* socket, bool lock); // ZZ:UploadBandWithThrottler (UDP)
 	bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket, bool resort = false); //MORPH - Changed by SiRoB & AndCycle, Upload Splitting Class
     
+    uint32 CalculateChangeDelta(uint32 numberOfConsecutiveChanges) const;
+
 	CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueueFirst_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_TempControlQueue_list; // sockets that wants to enter m_ControlQueue_list // ZZ:UploadBandWithThrottler (UDP)

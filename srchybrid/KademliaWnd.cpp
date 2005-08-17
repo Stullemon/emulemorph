@@ -72,14 +72,7 @@ CKademliaWnd::~CKademliaWnd()
 BOOL CKademliaWnd::SaveAllSettings()
 {
 	if (m_pacONBSIPs)
-		m_pacONBSIPs->SaveList(CString(thePrefs.GetConfigDir()) + _T("\\") ONBOOTSTRAP_STRINGS_PROFILE);
-
-	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
-	CIni ini(strIniFile, _T("eMule"));
-
-	m_contactListCtrl->SaveAllSettings(&ini);
-	searchList->SaveAllSettings(&ini);
+		m_pacONBSIPs->SaveList(thePrefs.GetConfigDir() + ONBOOTSTRAP_STRINGS_PROFILE);
 
 	return TRUE;
 }
@@ -90,9 +83,13 @@ BOOL CKademliaWnd::OnInitDialog()
 	InitWindowStyles(this);
 	m_contactListCtrl->Init();
 	searchList->Init();
+	SetAllIcons();
+	Localize();
 
+	AddAnchor(IDC_KADICO1, TOP_LEFT);
 	AddAnchor(IDC_CONTACTLIST,TOP_LEFT, CSize(100,50));
 	AddAnchor(IDC_KAD_HISTOGRAM,TOP_RIGHT, CSize(100,50));
+	AddAnchor(IDC_KADICO2, CSize(0,50));
 	AddAnchor(IDC_SEARCHLIST,CSize(0,50),CSize(100,100));
 	AddAnchor(IDC_KADCONTACTLAB,TOP_LEFT);
 	AddAnchor(IDC_FIREWALLCHECKBUTTON, TOP_RIGHT);
@@ -107,12 +104,6 @@ BOOL CKademliaWnd::OnInitDialog()
 	AddAnchor(IDC_RADCLIENTS, TOP_RIGHT);
 	AddAnchor(IDC_RADIP, TOP_RIGHT);
 
-	SetAllIcons();
-	
-	AddAnchor(IDC_KADICO2, CSize(0,50) );
-
-	Localize();
-
 	searchList->UpdateKadSearchCount();
 	m_contactListCtrl->UpdateKadContactCount();
 
@@ -120,7 +111,7 @@ BOOL CKademliaWnd::OnInitDialog()
 		m_pacONBSIPs = new CCustomAutoComplete();
 		m_pacONBSIPs->AddRef();
 		if (m_pacONBSIPs->Bind(::GetDlgItem(m_hWnd, IDC_BOOTSTRAPIP), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
-			m_pacONBSIPs->LoadList(CString(thePrefs.GetConfigDir()) +  _T("\\") ONBOOTSTRAP_STRINGS_PROFILE);
+			m_pacONBSIPs->LoadList(thePrefs.GetConfigDir() + ONBOOTSTRAP_STRINGS_PROFILE);
 	}
 
 	CheckDlgButton(IDC_RADCLIENTS,1);
@@ -271,13 +262,17 @@ void CKademliaWnd::UpdateControlsState()
 	strLabel.Remove(_T('&'));
 	GetDlgItem(IDC_KADCONNECT)->SetWindowText(strLabel);
 
-	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow( !Kademlia::CKademlia::isConnected() &&
-		( 
-		( IsDlgButtonChecked(IDC_RADIP)>0 && GetDlgItem(IDC_BOOTSTRAPIP)->GetWindowTextLength()>0 && GetDlgItem(IDC_BOOTSTRAPPORT)->GetWindowTextLength()>0)
-		||
-		( IsDlgButtonChecked(IDC_RADCLIENTS)>0 /* && theApp.clientlist->GetClientCount()>0*/  )
-		)
-	);
+	CString strBootstrapIP;
+	GetDlgItemText(IDC_BOOTSTRAPIP, strBootstrapIP);
+	CString strBootstrapPort;
+	GetDlgItemText(IDC_BOOTSTRAPPORT, strBootstrapPort);
+	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(
+		!Kademlia::CKademlia::isConnected()
+		&& (  (   IsDlgButtonChecked(IDC_RADIP)>0
+		       && !strBootstrapIP.IsEmpty()
+			   && (strBootstrapIP.Find(_T(':')) != -1 || !strBootstrapPort.IsEmpty())
+			  )
+		    || IsDlgButtonChecked(IDC_RADCLIENTS)>0));
 }
 
 UINT CKademliaWnd::GetContactCount() const

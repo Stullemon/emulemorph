@@ -15,11 +15,12 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "..\ResizableLib\ResizableDialog.h"
+#include "ResizableLib\ResizableDialog.h"
 #include "ServerListCtrl.h"
 #include "IconStatic.h"
 #include "RichEditCtrlX.h"
 #include "ClosableTabCtrl.h"
+#include "SplitterControl.h"
 //MORPH START - Added by SiRoB, XML News [O²]
 #include "types.h" // Added by N_OxYdE: XML News
 //MORPH END    - Added by SiRoB, XML News [O²]
@@ -91,6 +92,7 @@ public:
 	CHTRichEditCtrl* logbox;
 	CHTRichEditCtrl* debuglog;
 	CClosableTabCtrl StatusSelector;
+	CSplitterControl m_wndSplitter;
 
 	//MORPH START - Added by SiRoB, XML News [O²]
 	CHTRichEditCtrl* newsmsgbox;
@@ -108,6 +110,13 @@ public:
 	// [end] Mighty Knife
 
 private:
+	void	DoResize(int delta);
+	void	UpdateSplitterRange();
+	void	DoSplitResize(int delta);
+	void	ShowSplitWindow(bool bReDraw = false);
+	void	InitSplitter();
+	void	ReattachAnchors();
+
 	CIconStatic m_ctrlNewServerFrm;
 	CIconStatic m_ctrlUpdateServerFrm;
 	CIconStatic m_ctrlMyInfoFrm;
@@ -130,6 +139,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	
 	DECLARE_MESSAGE_MAP()
@@ -144,5 +154,7 @@ protected:
 	afx_msg void OnSvrTextChange();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnStnDblclickServlstIco();
+afx_msg void OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
 	afx_msg void OnBnClickedFeedchange();
 };

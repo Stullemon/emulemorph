@@ -435,11 +435,19 @@ TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnDraw()
 
 TEMPLATE BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnHitTest(CPoint ptScreen) const
 {
-	// adjust 'ptScreen' with possible RTL window layout
 	CRect rcWnd;
 	GetWindowRect(&rcWnd);
-	::MapWindowPoints(HWND_DESKTOP, m_hWnd, &rcWnd.TopLeft(), 2);
-	::MapWindowPoints(HWND_DESKTOP, m_hWnd, &ptScreen, 1);
+	// adjust 'ptScreen' with possible RTL window layout
+	CRect rcWndOrg(rcWnd);
+	CPoint ptScreenOrg(ptScreen);
+	if (::MapWindowPoints(HWND_DESKTOP, m_hWnd, &rcWnd.TopLeft(), 2) == 0 || 
+		::MapWindowPoints(HWND_DESKTOP, m_hWnd, &ptScreen, 1) == 0)
+	{
+		// several bug reports about not working on NT SP6 (?). in case of any problems with
+		// 'MapWindowPoints' we fall back to old code (does not work for RTL window layout though)
+		rcWnd = rcWndOrg;
+		ptScreen = ptScreenOrg;
+	}
 	ptScreen.Offset(-rcWnd.TopLeft());
 
     CRect rcBtn = MinTrayBtnGetRect();

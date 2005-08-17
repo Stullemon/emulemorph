@@ -29,7 +29,7 @@ public:
 	void	SetLabels(CString title, CString label, CString defaultStr);
 	const CString& GetInput() const { return m_return; }
 	bool	WasCancelled() const { return m_cancel;}
-	void	SetEditFilenameMode(bool isfilenamemode=true) {m_bFilenameMode=isfilenamemode;}
+	void	SetEditFilenameMode(bool isfilenamemode = true) { m_bFilenameMode = isfilenamemode; }
 	// khaos::categorymod+
 	void	SetNumber(bool isNum = false) { isNumber = isNum; }
 	const int	GetInputInt() const { return _tstoi(m_return); };

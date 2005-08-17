@@ -58,10 +58,9 @@ void CAddSourceDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RSRC, m_nSourceType);
 }
 
-void CAddSourceDlg::SetFile( CPartFile *pFile )
+void CAddSourceDlg::SetFile(CPartFile *pFile)
 {
-	if( pFile )
-		m_pFile = pFile;
+	m_pFile = pFile;
 }
 
 BOOL CAddSourceDlg::OnInitDialog()
@@ -75,6 +74,9 @@ BOOL CAddSourceDlg::OnInitDialog()
 	AddAnchor(IDC_BUTTON1, BOTTOM_RIGHT);
 	AddAnchor(IDCANCEL, BOTTOM_RIGHT);
 
+	if (m_pFile)
+		SetWindowText(m_pFile->GetFileName());
+
 	// localize
 	SetDlgItemText(IDC_BUTTON1,GetResString(IDS_ADD));
 	SetDlgItemText(IDCANCEL,GetResString(IDS_CANCEL));
@@ -87,16 +89,16 @@ BOOL CAddSourceDlg::OnInitDialog()
 	EnableSaveRestore(_T("AddSourceDlg"));
 
 	OnBnClickedRadio1();
-	if( m_pFile )
-		SetWindowText(m_pFile->GetFileName());
-	return TRUE;
+	return FALSE; // return FALSE, we changed the focus!
 }
+
 void CAddSourceDlg::OnBnClickedRadio1()
 {
 	m_nSourceType = 0;
 	GetDlgItem(IDC_EDIT2)->EnableWindow(true);
 	GetDlgItem(IDC_EDIT3)->EnableWindow(true);
 	GetDlgItem(IDC_EDIT10)->EnableWindow(false);
+	GetDlgItem(IDC_EDIT2)->SetFocus();
 }
 
 void CAddSourceDlg::OnBnClickedRadio4()
@@ -105,30 +107,45 @@ void CAddSourceDlg::OnBnClickedRadio4()
 	GetDlgItem(IDC_EDIT2)->EnableWindow(false);
 	GetDlgItem(IDC_EDIT3)->EnableWindow(false);
 	GetDlgItem(IDC_EDIT10)->EnableWindow(true);
+	GetDlgItem(IDC_EDIT10)->SetFocus();
 }
 
 void CAddSourceDlg::OnBnClickedButton1()
 {
-	if( !m_pFile )
+	if (!m_pFile)
 		return;
-	switch( m_nSourceType )
+
+	switch (m_nSourceType)
 	{
 		case 0:
 		{
-			BOOL bTranslated = FALSE;
-			uint16 port = GetDlgItemInt(IDC_EDIT3, &bTranslated, FALSE);
-			if( bTranslated == FALSE )
-				return;
-			uint32 ip;
 			CString sip;
 			GetDlgItem(IDC_EDIT2)->GetWindowText(sip);
+			if (sip.IsEmpty())
+				return;
+
+			// if the port is specified with the IP, ignore any possible specified port in the port control
+			uint16 port;
+			int iColon = sip.Find(_T(':'));
+			if (iColon != -1) {
+				port = _tstoi(sip.Mid(iColon + 1));
+				sip = sip.Left(iColon);
+			}
+			else {
+				BOOL bTranslated = FALSE;
+				port = GetDlgItemInt(IDC_EDIT3, &bTranslated, FALSE);
+				if (!bTranslated)
+					return;
+			}
+
+			uint32 ip;
 			USES_CONVERSION;
 			if ((ip = inet_addr(T2CA(sip))) == INADDR_NONE && _tcscmp(sip, _T("255.255.255.255")) != 0)
 				ip = 0;
-			if( ::IsGoodIPPort(ip, port) )
+			if (IsGoodIPPort(ip, port))
 			{
-				CUpDownClient* toadd = new CUpDownClient(m_pFile, port, ntohl(ip), 0, 0 );
-				toadd->SetSourceFrom( SF_PASSIVE );
+				CUpDownClient* toadd = new CUpDownClient(m_pFile, port, ntohl(ip), 0, 0);
+				toadd->SetSourceFrom(SF_PASSIVE);
 				theApp.downloadqueue->CheckAndAddSource(m_pFile, toadd);
 			}
 			break;

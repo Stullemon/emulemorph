@@ -268,6 +268,17 @@ void CServer::SetLastDescPingedCount(bool bReset)
 		lastdescpingedcout++;
 }
 
+bool CServer::IsEqual(const CServer* pServer) const
+{
+	if (GetPort() != pServer->GetPort())
+		return false;
+	if (HasDynIP() && pServer->HasDynIP())
+		return (GetDynIP().CompareNoCase(pServer->GetDynIP()) == 0);
+	if (HasDynIP() || pServer->HasDynIP())
+		return false;
+	return (GetIP() == pServer->GetIP());
+}
+
 //EastShare Start - added by AndCycle, IP to Country
 CString CServer::GetCountryName() const{
 	return theApp.ip2country->GetCountryNameFromRef(m_structServerCountry);

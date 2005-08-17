@@ -31,7 +31,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -282,7 +282,7 @@ void CFriendList::RemoveFriend(CFriend* todel){
 	}
 	// [end] Mighty Knife
 
-	todel->SetLinkedClient(NULL);
+    todel->SetLinkedClient(NULL);
 
 	if (m_wndOutput)
 		m_wndOutput->RemoveFriend(todel);
@@ -294,9 +294,9 @@ void CFriendList::RemoveFriend(CFriend* todel){
 }
 
 void CFriendList::RemoveAllFriendSlots(){
-	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0; ){
+	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;){
 		CFriend* cur_friend = m_listFriends.GetNext(pos);
-		cur_friend->SetFriendSlot(false);
+        cur_friend->SetFriendSlot(false);
 		//MORPH - Added by SiRoB, Friend Addon
 		RefreshFriend(cur_friend);
 		//MORPH - Added by SiRoB, Friend Addon

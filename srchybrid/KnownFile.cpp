@@ -44,8 +44,10 @@
 #include "shahashset.h"
 #include "Log.h"
 #include "MD4.h"
+#include "Collection.h"
+#include "emuledlg.h"
+#include "SharedFilesWnd.h"
 #include "UploadQueue.h"
-#include "Statistics.h"
 
 // id3lib
 #include <id3/tag.h>
@@ -82,359 +84,13 @@ typedef struct tagVIDEOINFOHEADER {
     BITMAPINFOHEADER bmiHeader;
 } VIDEOINFOHEADER;
 
-#include "emuledlg.h"
-#include "SharedFilesWnd.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
-
 
 #define	META_DATA_VER	1
-
-void CFileStatistic::MergeFileStats(CFileStatistic *toMerge)
-{
-	requested += toMerge->GetRequests();
-	accepted += toMerge->GetAccepts();
-	transferred += toMerge->GetTransferred();
-	alltimerequested += toMerge->GetAllTimeRequests();
-	alltimetransferred += toMerge->GetAllTimeTransferred();
-	alltimeaccepted += toMerge->GetAllTimeAccepts();
-
-	// SLUGFILLER: Spreadbars
-	if (!toMerge->spreadlist.IsEmpty()) {
-		POSITION pos = toMerge->spreadlist.GetHeadPosition();
-		uint32 start = toMerge->spreadlist.GetKeyAt(pos);
-		uint32 count = toMerge->spreadlist.GetValueAt(pos);
-		toMerge->spreadlist.GetNext(pos);
-		while (pos){
-			uint32 end = toMerge->spreadlist.GetKeyAt(pos);
-			if (count)
-				AddBlockTransferred(start, end, count);
-			start = end;
-			count = toMerge->spreadlist.GetValueAt(pos);
-			toMerge->spreadlist.GetNext(pos);
-		}
-	}
-	// SLUGFILLER: Spreadbars
-}
-
-void CFileStatistic::AddRequest(){
-	requested++;
-	alltimerequested++;
-	theApp.knownfiles->requested++;
-	theApp.sharedfiles->UpdateFile(fileParent);
-}
-	
-void CFileStatistic::AddAccepted(){
-	accepted++;
-	alltimeaccepted++;
-	theApp.knownfiles->accepted++;
-	theApp.sharedfiles->UpdateFile(fileParent);
-}
-	
-void CFileStatistic::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
-	transferred += bytes;
-	alltimetransferred += bytes;
-	theApp.knownfiles->transferred += bytes;
-	AddBlockTransferred(start, start+bytes+1, 1);	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
-	theApp.sharedfiles->UpdateFile(fileParent);
-	m_bInChangedEqualChanceValue = false;	//Morph - added by AndCycle, Equal Chance For Each File
-}
-
-//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
-void CFileStatistic::AddBlockTransferred(uint32 start, uint32 end, uint32 count){
-	if (start >= end || !count)
-		return;
-
-	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	if(fileParent->GetSpreadbarSetStatus() == 0 || (fileParent->GetSpreadbarSetStatus() == -1 && thePrefs.GetSpreadbarSetStatus() == 0))
-		return;
-	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	InChangedSpreadSortValue = false;
-	InChangedFullSpreadCount = false;
-	InChangedSpreadBar = false;
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	
-	if (spreadlist.IsEmpty())
-		spreadlist.SetAt(0, 0);
-
-	POSITION endpos = spreadlist.FindFirstKeyAfter(end+1);
-
-	if (endpos)
-		spreadlist.GetPrev(endpos);
-	else
-		endpos = spreadlist.GetTailPosition();
-
-	ASSERT(endpos != NULL);
-
-	uint32 endcount = spreadlist.GetValueAt(endpos);
-	endpos = spreadlist.SetAt(end, endcount);
-
-	POSITION startpos = spreadlist.FindFirstKeyAfter(start+1);
-
-	for (POSITION pos = startpos; pos != endpos; spreadlist.GetNext(pos)) {
-		spreadlist.SetValueAt(pos, spreadlist.GetValueAt(pos)+count);
-	}
-
-	spreadlist.GetPrev(startpos);
-
-	ASSERT(startpos != NULL);
-
-	uint32 startcount = spreadlist.GetValueAt(startpos)+count;
-	startpos = spreadlist.SetAt(start, startcount);
-
-	POSITION prevpos = startpos;
-	spreadlist.GetPrev(prevpos);
-	if (prevpos && spreadlist.GetValueAt(prevpos) == startcount)
-		spreadlist.RemoveAt(startpos);
-
-	prevpos = endpos;
-	spreadlist.GetPrev(prevpos);
-	if (prevpos && spreadlist.GetValueAt(prevpos) == endcount)
-		spreadlist.RemoveAt(endpos);
-}
-
-CBarShader CFileStatistic::s_SpreadBar(16);
-
-//MORPH START - Changed by SiRoB, Reduce SpreadBar CPU consumption
-void CFileStatistic::DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
-{
-	int iWidth=rect->right - rect->left;
-	if (iWidth <= 0)	return;
-	int iHeight=rect->bottom - rect->top;
-	uint32 filesize = fileParent->GetFileSize()?fileParent->GetFileSize():1;
-	if (m_bitmapSpreadBar == (HBITMAP)NULL)
-		VERIFY(m_bitmapSpreadBar.CreateBitmap(1, 1, 1, 8, NULL)); 
-	CDC cdcStatus;
-	HGDIOBJ hOldBitmap;
-	cdcStatus.CreateCompatibleDC(dc);
-
-	if(!InChangedSpreadBar || lastSize!=iWidth || lastbFlat!= bFlat){
-		InChangedSpreadBar = true;
-		lastSize=iWidth;
-		lastbFlat=bFlat;
-		m_bitmapSpreadBar.DeleteObject();
-		m_bitmapSpreadBar.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
-		m_bitmapSpreadBar.SetBitmapDimension(iWidth,  iHeight); 
-		hOldBitmap = cdcStatus.SelectObject(m_bitmapSpreadBar);
-			
-		s_SpreadBar.SetHeight(iHeight);
-		s_SpreadBar.SetWidth(iWidth);
-			
-		s_SpreadBar.SetFileSize(filesize);
-		s_SpreadBar.Fill(RGB(0, 0, 0));
-
-		for(POSITION pos = spreadlist.GetHeadPosition(); pos; ){
-			uint32 count = spreadlist.GetValueAt(pos);
-			uint32 start = spreadlist.GetKeyAt(pos);
-			spreadlist.GetNext(pos);
-			if (!pos)
-				break;
-			uint32 end = spreadlist.GetKeyAt(pos);
-			if (count)
-				s_SpreadBar.FillRange(start, end, RGB(0,
-				(232<22*count)? 0:232-22*count
-				,255));
-		}
-		s_SpreadBar.Draw(&cdcStatus, 0, 0, bFlat);
-	}
-	else
-		hOldBitmap = cdcStatus.SelectObject(m_bitmapSpreadBar);
-	dc->BitBlt(rect->left, rect->top, iWidth, iHeight, &cdcStatus, 0, 0, SRCCOPY);
-	cdcStatus.SelectObject(hOldBitmap);
-}
-//MORPH END  - Changed by SiRoB, Reduce SpreadBar CPU consumption
-
-float CFileStatistic::GetSpreadSortValue() /*const*/
-{
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	if (InChangedSpreadSortValue) return lastSpreadSortValue;
-	InChangedSpreadSortValue=true;
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	float avg, calc;
-	uint32 total = 0;
-	uint32 filesize = fileParent->GetFileSize();
-
-	if (!filesize || spreadlist.IsEmpty())
-		return 0;
-
-	POSITION pos = spreadlist.GetHeadPosition();
-	uint32 start = spreadlist.GetKeyAt(pos);
-	uint32 count = spreadlist.GetValueAt(pos);
-	spreadlist.GetNext(pos);
-	while (pos){
-		uint32 end = spreadlist.GetKeyAt(pos);
-		total += (end-start)*count;
-		start = end;
-		count = spreadlist.GetValueAt(pos);
-		spreadlist.GetNext(pos);
-	}
-
-	avg = (float)total/filesize;
-	calc = 0;
-	pos = spreadlist.GetHeadPosition();
-	start = spreadlist.GetKeyAt(pos);
-	count = spreadlist.GetValueAt(pos);
-	spreadlist.GetNext(pos);
-	while (pos){
-		uint32 end = spreadlist.GetKeyAt(pos);
-		if ((float)count > avg)
-			calc += avg*(end-start);
-		else
-			calc += count*(end-start);
-		start = end;
-		count = spreadlist.GetValueAt(pos);
-		spreadlist.GetNext(pos);
-	}
-	calc /= filesize;
-	//MORPH START - Added by SiRoB, Reduce Spread CPU consumption
-	lastSpreadSortValue = calc;
-	return calc;
-	//MORPH START - Added by SiRoB, Reduce Spread CPU consumption
-}
-
-float CFileStatistic::GetFullSpreadCount() /*const*/
-{
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	if (InChangedFullSpreadCount) return lastFullSpreadCount;
-	InChangedFullSpreadCount=true;
-	//MORPH START - Added by SiRoB, Reduce SpreedBar CPU consumption
-	float next;
-	uint32 min;
-	uint32 filesize = fileParent->GetFileSize();
-
-	if (!filesize || spreadlist.IsEmpty())
-		return 0;
-
-	POSITION pos = spreadlist.GetHeadPosition();
-	min = spreadlist.GetValueAt(pos);
-	spreadlist.GetNext(pos);
-	while (pos && spreadlist.GetKeyAt(pos) < filesize){
-		uint32 count = spreadlist.GetValueAt(pos);
-		if (min > count)
-			min = count;
-		spreadlist.GetNext(pos);
-	}
-
-	next = 0;
-	pos = spreadlist.GetHeadPosition();
-	uint32 start = spreadlist.GetKeyAt(pos);
-	uint32 count = spreadlist.GetValueAt(pos);
-	spreadlist.GetNext(pos);
-	while (pos){
-		uint32 end = spreadlist.GetKeyAt(pos);
-		if (count > min)
-			next += end-start;
-		start = end;
-		count = spreadlist.GetValueAt(pos);
-		spreadlist.GetNext(pos);
-	}
-	next /= filesize;
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	return lastFullSpreadCount = min+next;
-	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
-}
-//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
-
-//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-void CFileStatistic::ResetSpreadBar()
-{
-	spreadlist.RemoveAll();
-	spreadlist.SetAt(0, 0);
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	InChangedSpreadSortValue = false;
-	InChangedFullSpreadCount = false;
-	InChangedSpreadBar = false;
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	return;
-}
-//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-
-//Morph Start - added by AndCycle, Equal Chance For Each File
-double CFileStatistic::GetEqualChanceValue()
-{
-	if(!thePrefs.IsEqualChanceEnable()){
-		return 0;
-	}
-	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
-	else if(m_bInChangedEqualChanceValue && (lastCheckEqualChanceSemiValue+((uint32)(theApp.uploadqueue->GetAverageUpTime()+thePrefs.GetUpAvgTime())/2)) > (uint32)time(NULL)){
-		return m_dLastEqualChanceSemiValue/GetSharedTime();
-	}
-	lastCheckEqualChanceSemiValue = time(NULL);
-	m_bInChangedEqualChanceValue = true;
-	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
-
-	//smaller value means greater priority
-	m_dLastEqualChanceSemiValue = ((double)GetAllTimeTransferred()/fileParent->GetFileSize());
-
-	//weight adjustment
-	if(theApp.uploadqueue->GetSuccessfullUpCount() > 0){
-		uint32 threshold = theStats.GetAvgUploadRate(AVG_SESSION)*1024*((uint32)(theApp.uploadqueue->GetAverageUpTime()+thePrefs.GetUpAvgTime())/2);
-		if(fileParent->GetFileSize() < threshold){
-			m_dLastEqualChanceBiasValue = 1+log((double)threshold/(fileParent->GetFileSize()%threshold+1));
-			m_dLastEqualChanceSemiValue /= m_dLastEqualChanceBiasValue;
-		}
-	}
-
-	return m_dLastEqualChanceSemiValue/GetSharedTime();
-}
-
-CString CFileStatistic::GetEqualChanceValueString(bool detail){
-
-	CString tempString;
-
-	if(thePrefs.IsEqualChanceEnable())	{
-		if(m_dLastEqualChanceBiasValue != 1){
-			detail ?
-				tempString.Format(_T("%s : %.2f*%.2f = %s/%s"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, m_dLastEqualChanceBiasValue, CastItoXBytes(GetAllTimeTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
-				tempString.Format(_T("%s : %.2f*%.2f"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, m_dLastEqualChanceBiasValue) ;
-		}
-		else{
-			detail ?
-				tempString.Format(_T("%s : %.2f = %s/%s"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(GetAllTimeTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
-				tempString.Format(_T("%s : %.2f"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue) ;
-		}
-	}
-	else{
-		tempString.Empty();
-	}
-
-	return tempString;
-}
-//Morph End - added by AndCycle, Equal Chance For Each File
-
-IMPLEMENT_DYNAMIC(CAbstractFile, CObject)
-
-CAbstractFile::CAbstractFile()
-{
-	md4clr(m_abyFileHash);
-	m_nFileSize = 0;
-	m_uRating = 0;
-}
-
-#ifdef _DEBUG
-void CAbstractFile::AssertValid() const
-{
-	CObject::AssertValid();
-	(void)m_strFileName;
-	(void)m_abyFileHash[16];
-	(void)m_nFileSize;
-	(void)m_strComment;
-	(void)m_uRating;
-	(void)m_strFileType;
-	taglist.AssertValid();
-}
-
-void CAbstractFile::Dump(CDumpContext& dc) const
-{
-	CObject::Dump(dc);
-}
-#endif
 
 IMPLEMENT_DYNAMIC(CKnownFile, CAbstractFile)
 
@@ -454,7 +110,6 @@ CKnownFile::CKnownFile()
 		m_bAutoUpPriority = false;
 	}
 	statistic.fileParent = this;
-	m_bCommentLoaded = false;
 	(void)m_strComment;
 	m_PublishedED2K = false;
 	kadFileSearchID = 0;
@@ -468,6 +123,7 @@ CKnownFile::CKnownFile()
 	m_lastPublishTimeKadNotes = 0;
 	m_lastBuddyIP = 0;
 	m_pAICHHashSet = new CAICHHashSet(this);
+	m_pCollection = NULL;
 
 	//MORPH START - Added by SiRoB, Show Permission
 	m_iPermissions = -1;
@@ -504,16 +160,10 @@ CKnownFile::CKnownFile()
 
 CKnownFile::~CKnownFile()
 {
-	for(POSITION pos = m_kadNotes.GetHeadPosition(); pos != NULL; )
-	{
-		Kademlia::CEntry* entry = m_kadNotes.GetNext(pos);
-		delete entry;
-	}
-
 	for (int i = 0; i < hashlist.GetSize(); i++)
 		delete[] hashlist[i];
-	ClearTags();
-	delete m_pAICHHashSet; 
+	delete m_pAICHHashSet;
+	delete m_pCollection;
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBar CPU consumption
 	m_bitmapSharedStatusBar.DeleteObject();
 	//MORPH END   - Added by SiRoB, Reduce SharedStatusBar CPU consumption
@@ -535,7 +185,6 @@ void CKnownFile::AssertValid() const
 	hashlist.AssertValid();
 	(void)m_strDirectory;
 	(void)m_strFilePath;
-	CHECK_BOOL(m_bCommentLoaded);
 	(void)m_iPartCount;
 	(void)m_iED2KPartCount;
 	(void)m_iED2KPartHashCount;
@@ -582,32 +231,45 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 		m_bitmapSharedStatusBar.SetBitmapDimension(iWidth,  iHeight); 
 		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
 
-		const COLORREF crMissing = RGB(255, 0, 0);
-		s_ShareStatusBar.SetFileSize(GetFileSize()); 
+		s_ShareStatusBar.SetFileSize(GetFileSize());
 		s_ShareStatusBar.SetHeight(iHeight);
 		s_ShareStatusBar.SetWidth(iWidth);
-		s_ShareStatusBar.Fill(crMissing); 
-		
-		if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
-			COLORREF crProgress;
-			COLORREF crHave;
-			COLORREF crPending;
 
-			if(bFlat) { 
-				crProgress = RGB(0, 150, 0);
-				crHave = RGB(0, 0, 0);
-				crPending = RGB(255,208,0);
-			} else { 
-				crProgress = RGB(0, 224, 0);
-				crHave = RGB(104, 104, 104);
-				crPending = RGB(255, 208, 0);
-			} 
-			for (int i = 0; i < GetPartCount(); i++){
-				if(m_AvailPartFrequency[i] > 0 ){
-					COLORREF color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
-						s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
+		if(m_ClientUploadList.GetSize() > 0 || m_nCompleteSourcesCountHi > 1) {
+			// We have info about chunk frequency in the net, so we will color the chunks we have after perceived availability.
+	    	const COLORREF crMissing = RGB(255, 0, 0);
+		    s_ShareStatusBar.Fill(crMissing);
+
+			if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
+				COLORREF crProgress;
+				COLORREF crHave;
+				COLORREF crPending;
+
+				if(bFlat) { 
+					crProgress = RGB(0, 150, 0);
+					crHave = RGB(0, 0, 0);
+					crPending = RGB(255,208,0);
+				} else { 
+					crProgress = RGB(0, 224, 0);
+					crHave = RGB(104, 104, 104);
+					crPending = RGB(255, 208, 0);
+				} 
+				for (int i = 0; i < GetPartCount(); i++){
+					if(m_AvailPartFrequency[i] > 0 ){
+						COLORREF color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
+							s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
+					}
 				}
 			}
+        } else {
+        // We have no info about chunk frequency in the net, so just color the chunk we have as black.
+        COLORREF crNooneAsked;
+		if(bFlat) { 
+		    crNooneAsked = RGB(0, 0, 0);
+		} else { 
+		    crNooneAsked = RGB(104, 104, 104);
+	    }
+		s_ShareStatusBar.Fill(crNooneAsked);
 		}
 		s_ShareStatusBar.Draw(&cdcStatus, 0, 0, bFlat); 
 	}
@@ -638,6 +300,37 @@ static void HeapSort(CArray<uint16,uint16> &count, uint32 first, uint32 last){
 }
 // SLUGFILLER: heapsortCompletesrc
 
+void CKnownFile::UpdateFileRatingCommentAvail()
+{
+	bool bOldHasComment = m_bHasComment;
+	uint32 uOldUserRatings = m_uUserRating;
+
+	m_bHasComment = false;
+	uint32 uRatings = 0;
+	uint32 uUserRatings = 0;
+
+	for(POSITION pos = m_kadNotes.GetHeadPosition(); pos != NULL; )
+	{
+		Kademlia::CEntry* entry = m_kadNotes.GetNext(pos);
+		if (!m_bHasComment && !entry->GetStrTagValue(TAG_DESCRIPTION).IsEmpty())
+			m_bHasComment = true;
+		uint16 rating = entry->GetIntTagValue(TAG_FILERATING);
+		if(rating!=0)
+		{
+			uRatings++;
+			uUserRatings += rating;
+		}
+	}
+
+	if(uRatings)
+		m_uUserRating = uUserRatings / uRatings;
+	else
+		m_uUserRating = 0;
+
+	if (bOldHasComment != m_bHasComment || uOldUserRatings != m_uUserRating)
+		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
+}
+
 void CKnownFile::UpdatePartsInfo()
 {
 	// Cache part count
@@ -648,7 +341,7 @@ void CKnownFile::UpdatePartsInfo()
 	if(m_AvailPartFrequency.GetSize() < partcount)
 		m_AvailPartFrequency.SetSize(partcount);
 	for(int i = 0; i < partcount; i++)
-		m_AvailPartFrequency[i] = 1;
+		m_AvailPartFrequency[i] = 0;
 
 	CArray<uint16, uint16> count;
 	if (flag)
@@ -697,7 +390,7 @@ void CKnownFile::UpdatePartsInfo()
 				m_nCompleteSourcesCount = m_AvailPartFrequency[i];
 		}
 	
-		count.Add(m_nCompleteSourcesCount);
+		count.Add(m_nCompleteSourcesCount+1); // plus 1 since we have the file complete too
 	
 		int n = count.GetSize();
 		if (n > 0)
@@ -731,7 +424,7 @@ void CKnownFile::UpdatePartsInfo()
 				if ( count.GetAt(i) < m_nCompleteSourcesCount )
 					m_nCompleteSourcesCountLo = m_nCompleteSourcesCount;
 				else
-				m_nCompleteSourcesCountLo= count.GetAt(i);
+					m_nCompleteSourcesCountLo = count.GetAt(i);
 				m_nCompleteSourcesCount= m_nCompleteSourcesCountLo;
 				m_nCompleteSourcesCountHi= count.GetAt(j);
 				if( m_nCompleteSourcesCountHi < m_nCompleteSourcesCount )
@@ -763,7 +456,7 @@ void CKnownFile::UpdatePartsInfo()
 		if((m_AvailPartFrequency[i]) < m_nVirtualCompleteSourcesCount)
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1 && iCompleteSourcesCountInfoReceived,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount==0 && iCompleteSourcesCountInfoReceived,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
 	m_bHideOSAuthorized = true;
@@ -805,10 +498,31 @@ void Dump(const Kademlia::WordList& wordlist)
 
 void CKnownFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars)
 { 
+	CKnownFile* pFile = NULL;
+
+	// If this is called within the sharedfiles object during startup,
+	// we cannot reference it yet..
+
+	if(theApp.sharedfiles)
+		pFile = theApp.sharedfiles->GetFileByID(GetFileHash());
+
+	if (pFile && pFile == this)
+		theApp.sharedfiles->RemoveKeywords(this);
+
 	CAbstractFile::SetFileName(pszFileName, bReplaceInvalidFileSystemChars);
 
 	wordlist.clear();
-	Kademlia::CSearchManager::getWords(GetFileName(), &wordlist);
+	if(m_pCollection)
+	{
+		CString sKeyWords;
+		sKeyWords.Format(_T("%s %s"), m_pCollection->GetCollectionAuthorKeyString(), GetFileName());
+		Kademlia::CSearchManager::getWords(sKeyWords, &wordlist);
+	}
+	else
+		Kademlia::CSearchManager::getWords(GetFileName(), &wordlist);
+
+	if (pFile && pFile == this)
+		theApp.sharedfiles->AddKeywords(this);
 } 
 
 void CKnownFile::SetPath(LPCTSTR path)
@@ -850,7 +564,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 	m_AvailPartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
 		m_AvailPartFrequency[i] = 0;
-
+	
 	// create hashset
 	uint32 togo = m_nFileSize;
 	for (uint16 hashcount = 0; togo >= PARTSIZE; )
@@ -1009,9 +723,9 @@ bool CKnownFile::CreateAICHHashSetOnly()
 			return false;
 		}
 	}
-	
+
 	m_pAICHHashSet->ReCalculateHash(false);
-	if (m_pAICHHashSet->VerifyHashTree(true) )
+	if (m_pAICHHashSet->VerifyHashTree(true))
 	{
 		m_pAICHHashSet->SetStatus(AICH_HASHSETCOMPLETE);
 		if (!m_pAICHHashSet->SaveHashSet())
@@ -1023,7 +737,7 @@ bool CKnownFile::CreateAICHHashSetOnly()
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		DebugLogError(LOG_STATUSBAR, _T("Failed to calculate AICH Hashset from file %s"), GetFileName());
 	}
-	
+
 	fclose(file);
 	file = NULL;
 
@@ -1207,7 +921,7 @@ bool CKnownFile::SetHashset(const CArray<uchar*, uchar*>& aHashset)
 	}
 	return bResult;
 }
-
+ 
 bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 {
 	//MORPH START - Added by SiRoB, SLUGFILLER: Spreadbars
@@ -1498,7 +1212,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	uint32 uTagCount = 0;
 	ULONG uTagCountFilePos = (ULONG)file->GetPosition();
 	file->WriteUInt32(uTagCount);
-	
+
 	if (WriteOptED2KUTF8Tag(file, GetFileName(), FT_FILENAME))
 		uTagCount++;
 	CTag nametag(FT_FILENAME, GetFileName());
@@ -1536,7 +1250,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	CTag priotag(FT_ULPRIORITY, IsAutoUpPriority() ? PR_AUTO : m_iUpPriority);
 	priotag.WriteTagToFile(file);
 	uTagCount++;
-
+	
 	//AICH Filehash
 	if (m_pAICHHashSet->HasValidMasterHash() && (m_pAICHHashSet->GetStatus() == AICH_HASHSETCOMPLETE || m_pAICHHashSet->GetStatus() == AICH_VERIFIED)){
 		CTag aichtag(FT_AICH_HASH, m_pAICHHashSet->GetMasterHash().GetString());
@@ -1696,29 +1410,12 @@ void CKnownFile::CreateHash(CFile* pFile, UINT Length, uchar* pMd4HashOut, CAICH
 	ASSERT( pMd4HashOut != NULL || pShaHashOut != NULL );
 	CSingleLock sLock1(&(theApp.hashing_mut), TRUE);	// SLUGFILLER: SafeHash - only one chunk-hash at a time
 
-	uint32 Required = Length;
-	uchar   X[64*128];  
+	uint32  Required = Length;
+	uchar   X[64*128];
 	uint32	posCurrentEMBlock = 0;
 	uint32	nIACHPos = 0;
 	CAICHHashAlgo* pHashAlg = m_pAICHHashSet->GetNewHashAlgo();
 	CMD4 md4;
-
-	// <CB Mod : NiceHash>
-	ULONGLONG timeStart, timeTemp;
-	ULONGLONG activeTime;
-	int sleepTime;
-	float loadRatio;
-
-	int load = thePrefs.GetNiceHashLoadWeight();
-	sleepTime = 100; //ms
-
-	load = 110-load;
-	if (load > 100) load = 100;
-	if (load < 10) load = 10;
-	loadRatio = (load-10)/10; // Load ratio
-	activeTime = sleepTime*loadRatio;
-	timeStart = GetCurrentTimeMilliSecs();
-	// <CB Mod : NiceHash>
 
 	while (Required >= 64){
         uint32 len = Required / 64; 
@@ -1748,15 +1445,6 @@ void CKnownFile::CreateHash(CFile* pFile, UINT Length, uchar* pMd4HashOut, CAICH
 			md4.Add(X, len*64);
 		}
 		Required -= len*64;
-		// <CB Mod : NiceHash>
-		if (activeTime > 0) {
-			timeTemp = GetCurrentTimeMilliSecs();
-			if(timeTemp - timeStart >= activeTime) {
-				Sleep(sleepTime);
-				timeStart = GetCurrentTimeMilliSecs();
-			}
-		}
-		// </CB Mod : NiceHash>
 	}
 
 	Required = Length % 64;
@@ -1812,7 +1500,7 @@ bool CKnownFile::CreateHash(FILE* fp, UINT uSize, uchar* pucHash, CAICHHashTree*
 		ex->Delete();
 	}
 	return bResult;
-	}
+}
 
 bool CKnownFile::CreateHash(const uchar* pucData, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut) const
 {
@@ -1837,200 +1525,9 @@ uchar* CKnownFile::GetPartHash(uint16 part) const
 	return hashlist[part];
 }
 
-void CAbstractFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars, bool bAutoSetFileType)
-{ 
-	m_strFileName = pszFileName;
-	if (bReplaceInvalidFileSystemChars){
-		m_strFileName.Replace(_T('/'), _T('-'));
-		m_strFileName.Replace(_T('>'), _T('-'));
-		m_strFileName.Replace(_T('<'), _T('-'));
-		m_strFileName.Replace(_T('*'), _T('-'));
-		m_strFileName.Replace(_T(':'), _T('-'));
-		m_strFileName.Replace(_T('?'), _T('-'));
-		m_strFileName.Replace(_T('\"'), _T('-'));
-		m_strFileName.Replace(_T('\\'), _T('-'));
-		m_strFileName.Replace(_T('|'), _T('-'));
-	}
-	if (bAutoSetFileType)
-		SetFileType(GetFileTypeByName(m_strFileName));
-} 
-      
-void CAbstractFile::SetFileType(LPCTSTR pszFileType)
-{ 
-	m_strFileType = pszFileType;
-} 
-
-CString CAbstractFile::GetFileTypeDisplayStr() const
+Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 {
-	CString strFileTypeDisplayStr(GetFileTypeDisplayStrFromED2KFileType(GetFileType()));
-	if (strFileTypeDisplayStr.IsEmpty())
-		strFileTypeDisplayStr = GetFileType();
-	return strFileTypeDisplayStr;
-}
-
-
-void CAbstractFile::SetFileHash(const uchar* pucFileHash)
-{
-	md4cpy(m_abyFileHash, pucFileHash);
-}
-
-bool CAbstractFile::HasNullHash() const
-{
-	return isnulmd4(m_abyFileHash)!=0;
-}
-
-uint32 CAbstractFile::GetIntTagValue(uint8 tagname) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		const CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==tagname && pTag->IsInt())
-			return pTag->GetInt();
-	}
-	return NULL;
-}
-
-bool CAbstractFile::GetIntTagValue(uint8 tagname, uint32& ruValue) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		const CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==tagname && pTag->IsInt()){
-			ruValue = pTag->GetInt();
-			return true;
-		}
-	}
-	return false;
-}
-
-uint32 CAbstractFile::GetIntTagValue(LPCSTR tagname) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		const CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==0 && pTag->IsInt() && CmpED2KTagName(pTag->GetName(), tagname)==0)
-			return pTag->GetInt();
-	}
-	return NULL;
-}
-
-void CAbstractFile::SetIntTagValue(uint8 tagname, uint32 uValue)
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==tagname && pTag->IsInt()){
-			pTag->SetInt(uValue);
-			return;
-		}
-	}
-	CTag* pTag = new CTag(tagname, uValue);
-	taglist.Add(pTag);
-}
-
-const CString& CAbstractFile::GetStrTagValue(uint8 tagname) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		const CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==tagname && pTag->IsStr())
-			return pTag->GetStr();
-	}
-	static const CString _strEmpty;
-	return _strEmpty;
-}
-
-const CString& CAbstractFile::GetStrTagValue(LPCSTR tagname) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		const CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==0 && pTag->IsStr() && CmpED2KTagName(pTag->GetName(), tagname)==0)
-			return pTag->GetStr();
-	}
-	static const CString _strEmpty;
-	return _strEmpty;
-}
-
-void CAbstractFile::SetStrTagValue(uint8 tagname, LPCTSTR pszValue)
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==tagname && pTag->IsStr()){
-			pTag->SetStr(pszValue);
-			return;
-		}
-	}
-	CTag* pTag = new CTag(tagname, pszValue);
-	taglist.Add(pTag);
-}
-
-CTag* CAbstractFile::GetTag(uint8 tagname, uint8 tagtype) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==tagname && pTag->GetType()==tagtype)
-			return pTag;
-	}
-	return NULL;
-}
-
-CTag* CAbstractFile::GetTag(LPCSTR tagname, uint8 tagtype) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==0 && pTag->GetType()==tagtype && CmpED2KTagName(pTag->GetName(), tagname)==0)
-			return pTag;
-	}
-	return NULL;
-}
-
-CTag* CAbstractFile::GetTag(uint8 tagname) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==tagname)
-			return pTag;
-	}
-	return NULL;
-}
-
-CTag* CAbstractFile::GetTag(LPCSTR tagname) const
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		CTag* pTag = taglist[i];
-		if (pTag->GetNameID()==0 && CmpED2KTagName(pTag->GetName(), tagname)==0)
-			return pTag;
-	}
-	return NULL;
-}
-
-void CAbstractFile::AddTagUnique(CTag* pTag)
-{
-	for (int i = 0; i < taglist.GetSize(); i++){
-		const CTag* pCurTag = taglist[i];
-		if ( (   (pCurTag->GetNameID()!=0 && pCurTag->GetNameID()==pTag->GetNameID())
-			  || (pCurTag->GetName()!=NULL && pTag->GetName()!=NULL && CmpED2KTagName(pCurTag->GetName(), pTag->GetName())==0)
-			 )
-			 && pCurTag->GetType() == pTag->GetType()){
-			delete pCurTag;
-			taglist.SetAt(i, pTag);
-			return;
-		}
-	}
-	taglist.Add(pTag);
-}
-
-void CAbstractFile::ClearTags()
-{
-	for (int i = 0; i < taglist.GetSize(); i++)
-		delete taglist[i];
-	taglist.RemoveAll();
-}
-
-void CAbstractFile::CopyTags(const CArray<CTag*, CTag*>& tags)
-{
-	for (int i = 0; i < tags.GetSize(); i++)
-		taglist.Add(new CTag(*tags.GetAt(i)));
-}
-
-Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
-{
-	if(m_ClientUploadList.IsEmpty())
+	if (m_ClientUploadList.IsEmpty())
 		return NULL;
 
 	if (md4cmp(forClient->GetUploadFileID(), GetFileHash())!=0) {
@@ -2055,17 +1552,17 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 	data.WriteHash16(forClient->GetUploadFileID());
 	data.WriteUInt16(nCount);
 	uint32 cDbgNoSrc = 0;
-	for( POSITION pos = m_ClientUploadList.GetHeadPosition();pos != 0;)
+	for (POSITION pos = m_ClientUploadList.GetHeadPosition(); pos != 0; )
 	{
 		const CUpDownClient *cur_src = m_ClientUploadList.GetNext(pos);
-		if(cur_src->HasLowID() || cur_src == forClient || !(cur_src->GetUploadState() == US_UPLOADING || cur_src->GetUploadState() == US_ONUPLOADQUEUE))
+		if (cur_src->HasLowID() || cur_src == forClient || !(cur_src->GetUploadState() == US_UPLOADING || cur_src->GetUploadState() == US_ONUPLOADQUEUE))
 			continue;
 		if (!cur_src->IsEd2kClient())
 			continue;
 
 		bool bNeeded = false;
 		const uint8* rcvstatus = forClient->GetUpPartStatus();
-		if( rcvstatus )
+		if (rcvstatus)
 		{
 			ASSERT( forClient->GetUpPartCount() == GetPartCount() );
 			const uint8* srcstatus = cur_src->GetUpPartStatus();
@@ -2073,11 +1570,11 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 			if( srcstatus && (!forClient->SupportsWebCache() && !cur_src->SupportsWebCache())) // Superlexx - IFP - if both clients do support webcache, then they have IFP and might find empty sources useful; send that source even if they both are not behind same proxy to improve found webcache-enabled source number on those clients
 			{
 				ASSERT( cur_src->GetUpPartCount() == GetPartCount() );
-				if( cur_src->GetUpPartCount() == forClient->GetUpPartCount() )
+				if (cur_src->GetUpPartCount() == forClient->GetUpPartCount())
 				{
-					for (int x = 0; x < GetPartCount(); x++ )
+					for (int x = 0; x < GetPartCount(); x++)
 					{
-						if( srcstatus[x] && !rcvstatus[x] )
+						if (srcstatus[x] && !rcvstatus[x])
 						{
 							// We know the recieving client needs a chunk from this client.
 							bNeeded = true;
@@ -2107,12 +1604,12 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 			// we could even sort the list of sources by available chunks to return as much sources as possible which
 			// have the most available chunks. but this could be a noticeable performance problem.
 			const uint8* srcstatus = cur_src->GetUpPartStatus();
-			if( srcstatus )
+			if (srcstatus)
 			{
 				ASSERT( cur_src->GetUpPartCount() == GetPartCount() );
 				for (int x = 0; x < GetPartCount(); x++ )
 				{
-					if( srcstatus[x] )
+					if (srcstatus[x])
 					{
 						// this client has at least one chunk
 						bNeeded = true;
@@ -2127,11 +1624,11 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 			}
 		}
 
-		if( bNeeded )
+		if (bNeeded)
 		{
 			nCount++;
 			uint32 dwID;
-			if(forClient->GetSourceExchangeVersion() > 2)
+			if (forClient->GetSourceExchangeVersion() > 2)
 				dwID = cur_src->GetUserIDHybrid();
 			else
 				dwID = cur_src->GetIP();
@@ -2161,21 +1658,6 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 	return result;
 }
 
-void CKnownFile::LoadComment()
-{
-	CIni ini(thePrefs.GetFileCommentsFilePath(), md4str(GetFileHash()));
-	m_strComment = ini.GetStringUTF8(_T("Comment")).Left(MAXFILECOMMENTLEN);
-	m_uRating = ini.GetInt(_T("Rate"), 0);
-	m_bCommentLoaded=true;
-}    
-
-const CString& CKnownFile::GetFileComment() /*const*/
-{
-	if (!m_bCommentLoaded)
-		LoadComment();
-	return m_strComment;
-}
-
 void CKnownFile::SetFileComment(LPCTSTR pszComment)
 {
 	if (m_strComment.Compare(pszComment) != 0)
@@ -2184,17 +1666,10 @@ void CKnownFile::SetFileComment(LPCTSTR pszComment)
 		CIni ini(thePrefs.GetFileCommentsFilePath(), md4str(GetFileHash()));
 		ini.WriteStringUTF8(_T("Comment"), pszComment);
 		m_strComment = pszComment;
-   
+
 		for (POSITION pos = m_ClientUploadList.GetHeadPosition();pos != 0;)
 			m_ClientUploadList.GetNext(pos)->SetCommentDirty();
 	}
-}
-
-uint8 CKnownFile::GetFileRating() /*const*/
-{
-	if (!m_bCommentLoaded)
-		LoadComment();
-	return m_uRating;
 }
 
 void CKnownFile::SetFileRating(uint8 uRating)
@@ -2555,7 +2030,7 @@ void CKnownFile::UpdateMetaDataTags()
 								else if (dwVideoCodec == BI_BITFIELDS)
 									strCodec = "bitfields";
 								else{
-								memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
+									memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
 									strCodec.ReleaseBuffer(4);
 									strCodec.MakeLower();
 								}
@@ -2629,40 +2104,24 @@ bool CKnownFile::PublishSrc()
 	{
 		CUpDownClient* buddy = theApp.clientlist->GetBuddy();
 		if( buddy )
-	{
+		{
 			lastBuddyIP = theApp.clientlist->GetBuddy()->GetIP();
 			if( lastBuddyIP != m_lastBuddyIP )
-		{
+			{
 				SetLastPublishTimeKadSrc( (uint32)time(NULL)+KADEMLIAREPUBLISHTIMES, lastBuddyIP );
 				return true;
 			}
 		}
 		else
 			return false;
-		}
+	}
 
 	if(m_lastPublishTimeKadSrc > (uint32)time(NULL))
 		return false;
 
 	SetLastPublishTimeKadSrc((uint32)time(NULL)+KADEMLIAREPUBLISHTIMES,lastBuddyIP);
 	return true;
-	}
-
-void CAbstractFile::AddNote(Kademlia::CEntry* pEntry)
-{
-	for(POSITION pos = m_kadNotes.GetHeadPosition(); pos != NULL; )
-	{
-		Kademlia::CEntry* entry = m_kadNotes.GetNext(pos);
-		if(/*entry->ip == pEntry->ip || */!entry->sourceID.compareTo(pEntry->sourceID))
-		{
-			delete pEntry;
-			return;
-		}
-	}
-	m_kadNotes.AddHead(pEntry);
 }
-
-
 
 bool CKnownFile::IsMovie() const
 {
@@ -2686,8 +2145,8 @@ bool CKnownFile::GrabImage(CString strFileName,uint8 nFramesToGrab, double dStar
 {
 	if (!IsMovie())
 		return false;
-	CFrameGrabThread* framegrabthread = (CFrameGrabThread*) AfxBeginThread(RUNTIME_CLASS(CFrameGrabThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-	framegrabthread->SetValues(this,strFileName,nFramesToGrab,  dStartTime, bReduceColor, nMaxWidth, pSender);
+	CFrameGrabThread* framegrabthread = (CFrameGrabThread*) AfxBeginThread(RUNTIME_CLASS(CFrameGrabThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+	framegrabthread->SetValues(this, strFileName, nFramesToGrab, dStartTime, bReduceColor, nMaxWidth, pSender);
 	framegrabthread->ResumeThread();
 	return true;
 }
@@ -2713,9 +2172,7 @@ void CKnownFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, vo
 			delete imgResults[i];
 	}
 	delete[] imgResults;
-
 }
-
 //MORPH START - Added by SiRoB, Power Share
 void CKnownFile::SetPowerShared(int newValue) {
     int oldValue = m_powershared;
@@ -2748,7 +2205,7 @@ bool CKnownFile::GetPowerShared() const
 //MORPH END   - Added by SiRoB, Power Share
 
 // SLUGFILLER: hideOS
-uint16 CKnownFile::CalcPartSpread(CArray<uint32>& partspread, CUpDownClient* client)
+uint16 CKnownFile::CalcPartSpread(CArray<uint32>& partspread, const CUpDownClient* client)
 {
 	UINT parts = GetED2KPartCount();
 	UINT realparts = GetPartCount();

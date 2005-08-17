@@ -25,7 +25,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -109,12 +109,12 @@ CED2KLink::LinkType CED2KServerListLink::GetKind() const
 /////////////////////////////////////////////
 // CED2KServerLink implementation
 /////////////////////////////////////////////
-CED2KServerLink::CED2KServerLink(const TCHAR* ip,const TCHAR* port)
+CED2KServerLink::CED2KServerLink(const TCHAR* ip, const TCHAR* port)
 {
 	USES_CONVERSION;
 	m_ip = inet_addr(T2CA(ip));
-	unsigned long ul = _tcstoul(port,0,10);
-	if ( ul > 0xFFFF )
+	unsigned long ul = _tcstoul(port, 0, 10);
+	if (ul > 0xFFFF)
 		throw GetResString(IDS_ERR_BADPORT);
 	m_port = static_cast<uint16>(ul);
 	m_defaultName = _T("Server ");
@@ -139,7 +139,7 @@ CED2KServerListLink* CED2KServerLink::GetServerListLink()
 
 CED2KServerLink* CED2KServerLink::GetServerLink() 
 { 
-	return this; 
+	return this;
 }
 
 CED2KFileLink* CED2KServerLink::GetFileLink() 
@@ -184,7 +184,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 	if (_tstoi64(pszSize)<=0)
 		throw GetResString(IDS_ERR_NOTAFILELINK);
 	
-	for ( int idx = 0 ; idx < 16 ; ++idx) {
+	for (int idx = 0; idx < 16; ++idx) {
 		m_hash[idx] = FromHexDigit(*pszHash++)*16;
 		m_hash[idx] += FromHexDigit(*pszHash++);
 	}
@@ -428,47 +428,23 @@ void CED2KFileLink::GetLink(CString& lnk) const
 }
 
 CED2KServerListLink* CED2KFileLink::GetServerListLink()
-{ 
+{
 	return NULL;
 }
 
 CED2KServerLink* CED2KFileLink::GetServerLink()
-{ 
+{
 	return NULL;
 }
 
 CED2KFileLink* CED2KFileLink::GetFileLink()
-{ 
-	return this; 
+{
+	return this;
 }
 
 CED2KLink::LinkType CED2KFileLink::GetKind() const
 {
 	return kFile;
-}
-
-CString GetNextString(const CString& rstr, LPCTSTR pszTokens, int& riStart)
-{
-	CString strResult;
-	if (pszTokens != NULL && riStart != -1)
-	{
-		int iToken = rstr.Find(pszTokens, riStart);
-		if (iToken != -1)
-		{
-			int iLen = iToken - riStart;
-			if (iLen >= 0)
-			{
-				strResult = rstr.Mid(riStart, iLen);
-				riStart += iLen + 1;
-			}
-		}
-		else
-		{
-			strResult = rstr.Mid(riStart);
-			riStart = -1;
-		}
-	}
-	return strResult;
 }
 
 CED2KLink* CED2KLink::CreateLinkFromUrl(const TCHAR* uri)

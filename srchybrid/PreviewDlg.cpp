@@ -19,7 +19,7 @@
 #include "PreviewDlg.h"
 #include "CxImage/xImage.h"
 #include "OtherFunctions.h"
-#include "SearchList.h"
+#include "SearchFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

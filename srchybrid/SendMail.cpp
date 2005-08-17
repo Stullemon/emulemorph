@@ -331,7 +331,11 @@ BOOL CNotifierMailThread::InitInstance()
 				CStringA strMimeMessageA;
 				strMimeMessageA = "Content-Type: text/plain;\r\n\tformat=flowed";
 				char szCharset[ATL_MAX_ENC_CHARSET_LENGTH];
-				if (AtlMimeCharsetFromCodePage(szCharset, uCodePage, spMultiLanguage, ATL_MAX_ENC_CHARSET_LENGTH))
+#if _ATL_VER==0x0700
+				if (AtlMimeCharsetFromCodePage(szCharset, uCodePage, spMultiLanguage))
+#else
+				if (AtlMimeCharsetFromCodePage(szCharset, uCodePage, spMultiLanguage, ARRSIZE(szCharset)))
+#endif
 					strMimeMessageA.AppendFormat(";\r\n\tcharset=\"%s\"", szCharset);
 				strMimeMessageA += "\r\n";
 				strMimeMessageA += "Content-Transfer-Encoding: 8bit\r\n";

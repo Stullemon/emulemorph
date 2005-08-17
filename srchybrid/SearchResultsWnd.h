@@ -78,7 +78,6 @@ public:
 	*/
 	int	GetSelectedCat()							{return m_cattabs.GetCurSel();}
 	void	UpdateCatTabs();
-	void	SaveSettings();
 
 	virtual void OnInitialUpdate();
 
@@ -96,7 +95,6 @@ protected:
 	HICON		icon_search;
 	int			m_iSentMoreReq;
 
-	CString ToQueryString(CString str);
 	bool StartNewSearch(SSearchParams* pParams);
 	CString	CreateWebQuery(SSearchParams* pParams);
 	void ShowResults(const SSearchParams* pParams);

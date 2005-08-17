@@ -25,7 +25,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -119,11 +119,14 @@ void CAddFriend::OnAddBtn()
 		CString strBuff;
 		uint32 ip;
 		GetDlgItemText(IDC_IP, strBuff);
-		UINT u1, u2, u3, u4;
-		if (_stscanf(strBuff, _T("%u.%u.%u.%u"), &u1, &u2, &u3, &u4) != 4 || u1 > 255 || u2 > 255 || u3 > 255 || u4 > 255){
-			AfxMessageBox(GetResString(IDS_ERR_NOVALIDFRIENDINFO));
-			GetDlgItem(IDC_IP)->SetFocus();
-			return;
+		UINT u1, u2, u3, u4, uPort = 0;
+		if (_stscanf(strBuff, _T("%u.%u.%u.%u:%u"), &u1, &u2, &u3, &u4, &uPort) != 5 || u1 > 255 || u2 > 255 || u3 > 255 || u4 > 255 || uPort > 65535){
+			uPort = 0;
+			if (_stscanf(strBuff, _T("%u.%u.%u.%u"), &u1, &u2, &u3, &u4) != 4 || u1 > 255 || u2 > 255 || u3 > 255 || u4 > 255){
+				AfxMessageBox(GetResString(IDS_ERR_NOVALIDFRIENDINFO));
+				GetDlgItem(IDC_IP)->SetFocus();
+				return;
+			}
 		}
 		in_addr iaFriend;
 		iaFriend.S_un.S_un_b.s_b1 = (BYTE)u1;
@@ -132,12 +135,14 @@ void CAddFriend::OnAddBtn()
 		iaFriend.S_un.S_un_b.s_b4 = (BYTE)u4;
 		ip = iaFriend.S_un.S_addr;
 
-		UINT uPort;
-		GetDlgItemText(IDC_PORT, strBuff);
-		if (_stscanf(strBuff, _T("%u"), &uPort) != 1){
-			AfxMessageBox(GetResString(IDS_ERR_NOVALIDFRIENDINFO));
-			GetDlgItem(IDC_PORT)->SetFocus();
-			return;
+		if (uPort == 0)
+		{
+			GetDlgItemText(IDC_PORT, strBuff);
+			if (_stscanf(strBuff, _T("%u"), &uPort) != 1){
+				AfxMessageBox(GetResString(IDS_ERR_NOVALIDFRIENDINFO));
+				GetDlgItem(IDC_PORT)->SetFocus();
+				return;
+			}
 		}
 		
 		CString strUserName;

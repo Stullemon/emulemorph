@@ -313,7 +313,7 @@ BOOL CPPgGeneral::OnSetActive()
 
 void CPPgGeneral::OnBnClickedEd2kfix()
 {
-	Ask4RegFix(false);
+	Ask4RegFix(false, false, true);
 	GetDlgItem(IDC_ED2KFIX)->EnableWindow(Ask4RegFix(true));
 }
 
@@ -322,7 +322,7 @@ void CPPgGeneral::Localize(void)
 	if(m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_PW_GENERAL));
-		GetDlgItem(IDC_NICK_FRM)->SetWindowText(GetResString(IDS_PW_NICK));
+		GetDlgItem(IDC_NICK_FRM)->SetWindowText(GetResString(IDS_QL_USERNAME));
 		GetDlgItem(IDC_LANG_FRM)->SetWindowText(GetResString(IDS_PW_LANG));
 		GetDlgItem(IDC_MISC_FRM)->SetWindowText(GetResString(IDS_PW_MISC));
 		GetDlgItem(IDC_BEEPER)->SetWindowText(GetResString(IDS_PW_BEEP));

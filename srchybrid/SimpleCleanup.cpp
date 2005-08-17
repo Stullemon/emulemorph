@@ -310,7 +310,7 @@ void CSimpleCleanupDialog::OnBnClickedDeletecharacter()
 
 void CSimpleCleanupDialog::OnLvnItemchangedReplacecharslist(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	//LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 
 	POSITION pos = m_ReplaceListBox->GetFirstSelectedItemPosition ();
 	if (pos != NULL) {

@@ -215,18 +215,8 @@ BOOL CPPgDisplay::OnApply()
 	else
 		thePrefs.m_iToolDelayTime = _tstoi(buffer);
 	
-	theApp.emuledlg->transferwnd->m_tooltipCats.SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
-
+	theApp.emuledlg->transferwnd->SetToolTipsDelay(thePrefs.GetToolTipDelay()*1000);
 	theApp.emuledlg->searchwnd->SetToolTipsDelay(thePrefs.GetToolTipDelay()*1000);
-
-	CToolTipCtrl* tooltip = theApp.emuledlg->transferwnd->downloadlistctrl.GetToolTips();
-	if (tooltip)
-		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
-
-	tooltip = theApp.emuledlg->transferwnd->uploadlistctrl.GetToolTips();
-	if (tooltip)
-		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
-
 	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
 
 	if ((IsDlgButtonChecked(IDC_SHOWTRANSTOOLBAR) != 0) != thePrefs.IsTransToolbarEnabled()){
