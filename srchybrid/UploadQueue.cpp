@@ -717,7 +717,16 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	// khaos::kmod+ Show Compression by Tarod
 	newclient->ResetCompressionGain();
 	// khaos::kmod-
-		
+
+	// SLUGFILLER: hideOS
+	// If it doesn't have an up part status, there's no real way
+	// of telling if the selected chunk was completed or not, so
+	// assume it was, otherwise the client wouldn't be able to
+	// download another chunk.
+	if (!newclient->m_abyUpPartStatus)
+		newclient->m_nSelectedChunk = 0;
+	// SLUGFILLER: hideOS
+	
 	InsertInUploadingList(newclient);
 	
 	//MORPH START - Changed by SiRoB, Upload Splitting Class

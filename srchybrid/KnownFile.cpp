@@ -951,10 +951,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 					SetFileSize(newtag->GetInt());
 					m_AvailPartFrequency.SetSize(GetPartCount());
 					for (uint32 i = 0; i < GetPartCount();i++)
-						/*
 						m_AvailPartFrequency[i] = 0;
-						*/
-						m_AvailPartFrequency[i] = 1;
 				}
 				delete newtag;
 				break;
@@ -1165,7 +1162,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 	if (m_uMetaDataVer == 0)
 		RemoveMetaDataTags();
 
-	return m_nFileSize > 0;		// SLUGFILLER: SafeHash - Must have a filesize tag
+	return m_nFileSize!=0;		// SLUGFILLER: SafeHash - Must have a filesize tag
 }
 
 bool CKnownFile::LoadDateFromFile(CFileDataIO* file){

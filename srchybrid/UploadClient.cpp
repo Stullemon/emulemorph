@@ -932,6 +932,7 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 	//MORPH END   - Added by SiRoB, See chunk that we hide
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
+	m_nSelectedChunk = 0;	// SLUGFILLER: hideOS - TODO: Notify the file the chunk is free for all
 
 	if (newreqfile)
 	{

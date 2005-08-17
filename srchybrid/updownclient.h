@@ -480,7 +480,7 @@ public:
 
 	uint8*			GetPartStatus() const							{ return m_abyPartStatus; }
 	//MORPH START - Added by SiRoB, Keep A4AF infos
-	uint8*			GetPartStatus(CPartFile* partfile) const		{ uint8* thisAbyPartStatus; return m_PartStatus_list.Lookup(partfile,thisAbyPartStatus)?thisAbyPartStatus:0; }
+	uint8*			GetPartStatus(const CPartFile* partfile) const		{ uint8* thisAbyPartStatus; return m_PartStatus_list.Lookup(partfile,thisAbyPartStatus)?thisAbyPartStatus:0; }
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	uint16			GetPartCount() const							{ return m_nPartCount; }
 	uint32			GetDownloadDatarate() const						{ return m_nDownDatarate; }
@@ -655,6 +655,7 @@ public:
 	*/
 	DWORD			m_dwWouldHaveGottenUploadSlotIfNotLowIdTick;  // VQB Fix for LowID slots only on connection
 	//MORPH END   - Changed by SiRoB, ZZ LowID handling
+	uint32			m_nSelectedChunk;	// SLUGFILLER: hideOS
 
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
 	uint32 GetSlotNumber() const { return m_slotNumber; }
