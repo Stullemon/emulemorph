@@ -2740,7 +2740,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	// Sort table
 	uint8 adder=0;
 	if (sortItem!=9 || !m_bRemainSort)
-	SetSortArrow(sortItem, sortAscending);
+		SetSortArrow(sortItem, sortAscending);
 	else {
         SetSortArrow(sortItem, sortAscending?arrowDoubleUp : arrowDoubleDown);
 		adder=81;
@@ -2749,7 +2749,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100) + adder );
 	*/
-	SetSortArrow(sortItem, sortAscending);
+	SetSortArrow(pNMListView->iSubItem, sortAscending);	// SLUGFILLER: DLsortFix - Use column number, not sort param
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	//MORPH END  - Changed by SiRoB, Remain time and size Columns have been splited
 	*pResult = 0;
