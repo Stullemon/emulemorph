@@ -666,9 +666,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									if (cur_busysince > 0) {
 										bool sametime = false;
 										if (cur_busysince >= busysince) {
-											if (cur_busysince - busysince < 500)
+											if (cur_busysince - busysince < 1000)
 												sametime = true;
-										} else if (busysince - cur_busysince < 500)
+										} else if (busysince - cur_busysince < 1000)
 											sametime = true;
 										if (sametime == true) {
 											if ( i >= lastclientpos && i <= lastclientpos + slotCounterClass[classID])
@@ -710,8 +710,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			}
 			if (needmoreslot == true
 				 && m_highestNumberOfFullyActivatedSlots[classID] < lastclientpos+1
-				 && globalnumberofslotwithsamebusytime <= 2*m_highestNumberOfFullyActivatedSlots[LAST_CLASS]
-				 && numberofslotwithsamebusytime <= 2*m_highestNumberOfFullyActivatedSlots[classID])
+				 && globalnumberofslotwithsamebusytime <= 3*m_highestNumberOfFullyActivatedSlots[LAST_CLASS]
+				 && numberofslotwithsamebusytime <= 3*m_highestNumberOfFullyActivatedSlots[classID])
 				++m_highestNumberOfFullyActivatedSlots[classID];
 		}
 		sendLocker.Unlock();
