@@ -369,7 +369,12 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	else
 		iOldBkMode = OPAQUE;
 
+	//MORPH START - Adde by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
+	*/
+	CKnownFile* file = client->CheckAndGetReqUpFile();
+	//MORPH END   - Adde by SiRoB, Optimization requpfile
 	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 	int iCount = pHeaderCtrl->GetItemCount();
 	cur_rec.right = cur_rec.left - 8;
@@ -799,8 +804,15 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 		
 		case 1: {
+			//MORPH START - Adde by SiRoB, Optimization requpfile
+			/*
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			*/
+			CKnownFile* file1 = item1->CheckAndGetReqUpFile();
+			CKnownFile* file2 = item2->CheckAndGetReqUpFile();
+			//MORPH END   - Adde by SiRoB, Optimization requpfile
+			
 			if( (file1 != NULL) && (file2 != NULL))
 				iResult=CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
 			else if( file1 == NULL )
@@ -810,8 +822,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 		}
 		case 101: {
+			//MORPH START - Adde by SiRoB, Optimization requpfile
+			/*
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			*/
+			CKnownFile* file1 = item1->CheckAndGetReqUpFile();
+			CKnownFile* file2 = item2->CheckAndGetReqUpFile();
+			//MORPH END  - Adde by SiRoB, Optimization requpfile
 			if( (file1 != NULL) && (file2 != NULL))
 				iResult=CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
 			else if( file1 == NULL )
@@ -824,8 +842,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		//MORPH START - Changed by SiRoB, ZZ Upload System
 		case 2: 
 		case 102: {
+			//MORPH START - Adde by SiRoB, Optimization requpfile
+			/*
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			*/
+			CKnownFile* file1 = item1->CheckAndGetReqUpFile();
+			CKnownFile* file2 = item2->CheckAndGetReqUpFile();
+			//MORPH END   - Adde by SiRoB, Optimization requpfile
 			if( (file1 != NULL) && (file2 != NULL)){
 				//only file priority
 				if (item1->GetPowerShared(file1)) ++iResult;
@@ -863,8 +887,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			//iResult=CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 		case 104: { 
 			//iResult=CompareUnsigned(item2->GetScore(false), item1->GetScore(false));
+			//MORPH START - Adde by SiRoB, Optimization requpfile
+			/*
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			*/
+			CKnownFile* file1 = item1->CheckAndGetReqUpFile();
+			CKnownFile* file2 = item2->CheckAndGetReqUpFile();
+			//MORPH START - Adde by SiRoB, Optimization requpfile
 			
 			if( (file1 != NULL) && (file2 != NULL)){
 

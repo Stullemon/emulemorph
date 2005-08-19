@@ -374,7 +374,12 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	else
 		iOldBkMode = OPAQUE;
 
+	//MORPH START - Adde by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
+	*/
+	CKnownFile* file = client->CheckAndGetReqUpFile();
+	//MORPH END - Adde by SiRoB, Optimization requpfile
 	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 	int iCount = pHeaderCtrl->GetItemCount();
 	cur_rec.right = cur_rec.left - 8;
@@ -646,7 +651,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 							cur_rec.left+=20;
 						}
-						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						dc.DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 						if(theApp.ip2country->ShowCountryFlag()){
 							cur_rec.left-=20;
 						}
@@ -833,8 +838,14 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				iResult=-1;
 			break;
 		case 1: {
+			//MORPH START - Adde by SiRoB, Optimization requpfile
+			/*
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			*/
+			CKnownFile* file1 = item1->CheckAndGetReqUpFile();
+			CKnownFile* file2 = item2->CheckAndGetReqUpFile();
+			//MORPH END   - Adde by SiRoB, Optimization requpfile
 			if( (file1 != NULL) && (file2 != NULL))
 				iResult=CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
 			else if( file1 == NULL )
@@ -844,8 +855,14 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 		}
 		case 101:{
+			//MORPH START - Adde by SiRoB, Optimization requpfile
+			/*
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			*/
+			CKnownFile* file1 = item1->CheckAndGetReqUpFile();
+			CKnownFile* file2 = item2->CheckAndGetReqUpFile();
+			//MORPH END   - Adde by SiRoB, Optimization requpfile
 			if( (file1 != NULL) && (file2 != NULL))
 				iResult=CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
 			else if( file1 == NULL )
@@ -1082,7 +1099,12 @@ void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			CString info;
 
+			//MORPH START - Adde by SiRoB, Optimization requpfile
+			/*
 			CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
+			*/
+			CKnownFile* file = client->CheckAndGetReqUpFile();
+			//MORPH END   - Adde by SiRoB, Optimization requpfile
 			// build info text and display it
 			info.Format(GetResString(IDS_USERINFO), client->GetUserName());
 			if (file)

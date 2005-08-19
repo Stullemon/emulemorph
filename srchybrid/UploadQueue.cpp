@@ -758,7 +758,12 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
     }
 
 	// statistic
+	//MORPH START - Adde by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
+	*/
+	CKnownFile* reqfile = newclient->CheckAndGetReqUpFile();
+	//MORPH END   - Adde by SiRoB, Optimization requpfile
 	if (reqfile)
 		reqfile->statistic.AddAccepted();
 	
@@ -1152,7 +1157,12 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 
 // WebCache ////////////////////////////////////////////////////////////////////////////////////////
 // this file is shared but not a single chunk is complete, so don't enqueue the clients asking for it
+	//MORPH START - Adde by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* uploadReqfile = theApp.sharedfiles->GetFileByID(client->requpfileid);
+	*/
+	CKnownFile* uploadReqfile = client->CheckAndGetReqUpFile();
+	//MORPH END   - Adde by SiRoB, Optimization requpfile
 	if (uploadReqfile && uploadReqfile->IsPartFile() && ((CPartFile*)uploadReqfile)->GetAvailablePartCount() == 0)
 		return;
 // WebCache end/////////////////////////////////////////////////////////////////////////////////////
@@ -1255,7 +1265,12 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 
 	if(addInFirstPlace == false) {
 	    // statistic values
+		//MORPH START - Adde by SiRoB, Optimization requpfile
+		/*
 		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
+		*/
+		CKnownFile* reqfile = client->CheckAndGetReqUpFile();
+		//MORPH END   - Adde by SiRoB, Optimization requpfile
 		if (reqfile)
 			reqfile->statistic.AddRequest();
 
@@ -1447,7 +1462,12 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			client->SetCollectionUploadSlot(false);
 			//MORPH END   - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
 
+			//MORPH START - Adde by SiRoB, Optimization requpfile
+			/*
 			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
+			*/
+			CKnownFile* requestedFile = client->CheckAndGetReqUpFile();
+			//MORPH END   - Adde by SiRoB, Optimization requpfile
 			if(requestedFile != NULL) {
 			    //MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
 				if(requestedFile->IsPartFile())

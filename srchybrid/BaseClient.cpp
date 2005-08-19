@@ -3284,7 +3284,12 @@ void CUpDownClient::ShowRequestedFiles()
 	fileList += "\n\n\n";
 	fileList += GetResString(IDS_LISTREQUL);
 	fileList += "\n------------------------\n" ; 
+	//MORPH START - Adde by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* uploadfile = theApp.sharedfiles->GetFileByID((uchar*)requpfileid);
+	*/
+	CKnownFile* uploadfile = CheckAndGetReqUpFile();
+	//MORPH END   - Adde by SiRoB, Optimization requpfile
 	if(uploadfile)
 		fileList += uploadfile->GetFileName();
 	else
