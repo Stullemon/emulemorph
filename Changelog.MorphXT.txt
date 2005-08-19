@@ -7,6 +7,7 @@ FIXED  : Properly display the upload overhead [SiRoB]
 FIXED  : May i found the responsible for rare crash arround resume next file [SiRoB]
 
 ADDED  : Serveral const optimization [SiRoB]
+ADDED  : Even more requpfile Optimization (for crazy user sharing many files :), reduce CPU usage on zz upload system based mod) [SiRoB]
 
 CHANGED: USS: use the official one now [SiRoB]
 CHANGED: Updated bad MODSTRING with the fucking ita mod [SiRoB]
@@ -15,6 +16,7 @@ CHANGED: Updated SafeHash from SlugFiller mod [SiRoB]
 
 REMOVED: Updated bad MODSTRING with null char [SiRoB]
 
+TWEAKED: 
 --------------------------------------
 Changelog for eMule 0.46a MorphXT v7.1
 --------------------------------------
