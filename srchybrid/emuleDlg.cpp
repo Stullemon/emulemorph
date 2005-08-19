@@ -1891,8 +1891,7 @@ void CemuleDlg::OnClose()
 	CPartFileConvert::RemoveAllJobs();
 
 	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	theApp.m_UPnPNat->RemoveAllMappings();
-	theApp.m_UPnPNat->RemoveInstance();
+	theApp.m_UPnP_IGDControlPoint->RemoveInstance();
 	// End emulEspaña
 
     theApp.uploadBandwidthThrottler->EndThread();

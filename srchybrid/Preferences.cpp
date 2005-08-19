@@ -657,13 +657,10 @@ bool	CPreferences::enableNEWS;
 //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	bool	CPreferences::m_bUPnPNat;
 	bool	CPreferences::m_bUPnPNatWeb;
-	uint16	CPreferences::m_iUPnPTCPExternal;
-	uint16	CPreferences::m_iUPnPUDPExternal;
-	uint16	CPreferences::m_iUPnPTCPInternal;
-	uint16	CPreferences::m_iUPnPUDPInternal;
 	bool	CPreferences::m_bUPnPVerboseLog;
 	uint16	CPreferences::m_iUPnPPort;
-	//bool	CPreferences::m_bUPnPTryRandom;
+	bool	CPreferences::m_bUPnPLimitToFirstConnection;
+	bool	CPreferences::m_bUPnPClearOnClose;
 	// End MoNKi
 //MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
@@ -785,13 +782,6 @@ void CPreferences::Init()
 
 	prefsExt=new Preferences_Ext_Struct;
 	memset(prefsExt, 0, sizeof *prefsExt);
-
-	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-	m_iUPnPUDPExternal = 0;
-	m_iUPnPTCPExternal = 0;
-	m_iUPnPUDPInternal = 0;
-	m_iUPnPTCPInternal = 0;
-	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//get application start directory
 	TCHAR buffer[490];
@@ -2306,7 +2296,8 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb, _T("eMule"));
 	ini.WriteBool(_T("UPnPVerbose"), m_bUPnPVerboseLog, _T("eMule"));
 	ini.WriteInt(_T("UPnPPort"), m_iUPnPPort, _T("eMule"));
-	//ini.WriteBool(_T("UPnPNAT_TryRandom"), m_bUPnPTryRandom, _T("eMule"));
+	ini.WriteBool(_T("UPnPClearOnClose"), m_bUPnPClearOnClose, _T("eMule"));
+	ini.WriteBool(_T("UPnPLimitToFirstConnection"), m_bUPnPLimitToFirstConnection, _T("eMule"));
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
@@ -3424,7 +3415,8 @@ void CPreferences::LoadPreferences()
 	m_bUPnPNatWeb = ini.GetBool(_T("UPnPNAT_Web"), false, _T("eMule"));
 	m_bUPnPVerboseLog = ini.GetBool(_T("UPnPVerbose"), true, _T("eMule"));
 	m_iUPnPPort = ini.GetInt(_T("UPnPPort"), 0, _T("eMule"));
-	//m_bUPnPTryRandom = ini.GetBool(_T("UPnPNAT_TryRandom"), true, _T("eMule"));
+	m_bUPnPLimitToFirstConnection = ini.GetBool(_T("UPnPLimitToFirstConnection"), false, _T("eMule"));
+	m_bUPnPClearOnClose = ini.GetBool(_T("UPnPClearOnClose"), true, _T("eMule"));
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
@@ -3974,12 +3966,8 @@ uint16	CPreferences::GetPort(bool newPort, bool original, bool reset){
 
 	if(reset){
 		m_iCurrentTCPRndPort = 0;
-		m_iUPnPTCPExternal = 0; //Only for UPnP
 	}
 // End -Random Ports-
-
-	if(m_iUPnPTCPExternal != 0)
-		return m_iUPnPTCPExternal;
 
 	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
 	if (m_iCurrentTCPRndPort == 0 || newPort){
@@ -4007,16 +3995,12 @@ uint16	CPreferences::GetUDPPort(bool newPort, bool original, bool reset){
 
 	if(reset){
 		m_iCurrentUDPRndPort = 0;
-		m_iUPnPUDPExternal = 0; //Only for UPnP
 	}
 // End -Random Ports-
 
 	if(udpport == 0)
 		return 0;
 	
-	if(m_iUPnPUDPExternal != 0)
-		return m_iUPnPUDPExternal;
-
 	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
 	if (m_iCurrentUDPRndPort == 0 || newPort){
 		if(GetUseRandomPorts())

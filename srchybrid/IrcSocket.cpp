@@ -41,17 +41,14 @@ CIrcSocket::~CIrcSocket()
 {
 	RemoveAllLayers();
 
-	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	CString client;
 	UINT port;
-	CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 
-	GetSockName(client, port);
-	mapping.internalPort = mapping.externalPort = port;
-	mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
-	mapping.description = "IRC";
-	theApp.RemoveUPnPNatPort(&mapping);
-	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	theApp.m_UPnP_IGDControlPoint->DeletePortMapping(port,
+		CUPnP_IGDControlPoint::UNAT_TCP,
+		_T("IRC"));
+	// End -UPnPNAT Support-
 }
 
 BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR lpszSocketAddress)
@@ -91,16 +88,14 @@ BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR 
 	return CAsyncSocketEx::Create(nSocketPort, nSocketType, lEvent, lpszSocketAddress);
 	*/
 	if(CAsyncSocketEx::Create(nSocketPort, nSocketType, lEvent, lpszSocketAddress)){
-		if(thePrefs.GetUPnPNat()){
+		if(thePrefs.IsUPnPEnabled()){
 			CString client;
 			UINT port;
-			CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 
 			GetSockName(client, port);
-			mapping.internalPort = mapping.externalPort = port;
-			mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
-			mapping.description = "IRC";
-			theApp.AddUPnPNatPort(&mapping);
+			theApp.m_UPnP_IGDControlPoint->AddPortMapping(port,
+				CUPnP_IGDControlPoint::UNAT_TCP,
+				_T("IRC"));
 		}
 		return true;
 	}

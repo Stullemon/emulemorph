@@ -257,7 +257,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-	m_UPnPNat = CUPnP_IGDControlPoint::AddInstance();
+	m_UPnP_IGDControlPoint = CUPnP_IGDControlPoint::GetInstance();
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 }
 
@@ -539,9 +539,12 @@ BOOL CemuleApp::InitInstance()
 	}
 
 	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	if(m_UPnPNat != NULL && thePrefs.GetUPnPNat())
-		m_UPnPNat->Init();
-	// End emulEspaña
+	if(m_UPnP_IGDControlPoint != NULL && thePrefs.IsUPnPEnabled()){
+		m_UPnP_IGDControlPoint->Init(thePrefs.GetUPnPLimitToFirstConnection());
+		if(thePrefs.GetUPnPClearOnClose() /*|| thePrefs.GetUseRandomPorts()*/)
+			m_UPnP_IGDControlPoint->DeleteAllPortMappingsOnClose();
+	}
+	// End -UPnPNAT Support-
 
 	// ZZ:UploadSpeedSense -->
     lastCommonRouteFinder = new LastCommonRouteFinder();
@@ -1899,22 +1902,6 @@ void CemuleApp::UpdateDesktopColorDepth()
 		g_bLowColorDesktop = (GetProfileInt(_T("eMule"), _T("LowColorRes"), 0) != 0);
 #endif
 }
-
-//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
-BOOL CemuleApp::AddUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping){
-	if(m_UPnPNat->AddPortMapping(mapping) == CUPnP_IGDControlPoint::UNAT_OK )
-		return true;
-	else
-		return false;
-}
-
-BOOL CemuleApp::RemoveUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping){
-	if(m_UPnPNat->DeletePortMapping(*mapping) == CUPnP_IGDControlPoint::UNAT_OK )
-		return true;
-	else
-		return false;
-}
-//MORPH END   - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
 void CemuleApp::AddIncomingFolderIcon(){

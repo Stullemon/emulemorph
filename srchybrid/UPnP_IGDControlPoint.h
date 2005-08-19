@@ -39,57 +39,70 @@
 class CUPnP_IGDControlPoint
 {
 public:
-	bool Init();
+	bool Init(bool bStopAtFirstConnFound = false);
 
-	//typedef struct UPNP_INFO_VAR{
-	//	CString Name;
-	//	CString Value;
-	//};
+	//Commented for a possible future use.
+	/*
+	typedef struct UPNP_INFO_VAR{
+		CString Name;
+		CString Value;
+	};
 
-	//typedef CList<UPNP_INFO_VAR, UPNP_INFO_VAR>	UPNP_INFO_LIST;
-	//typedef CList<CString, CString>				STR_LIST;
+	typedef CList<UPNP_INFO_VAR, UPNP_INFO_VAR>	UPNP_INFO_LIST;
+	typedef CList<CString, CString>				STR_LIST;
+	*/
 
 	class UPNP_SERVICE
 	{
 	public:
-		//UPNP_INFO_LIST	infoList;
-		//STR_LIST			Vars;
+		//Commented for a possible future use.
+		/*
+		UPNP_INFO_LIST	infoList;
+		STR_LIST			Vars;
+		*/
 		CString				ServiceID;
 		CString				ServiceType;
 		CString				EventURL;
 		Upnp_SID			SubscriptionID;
 		CString				ControlURL;
-		int					Connected;	//-1 not initialized, 0 false, 1 true
+		int					Enabled;	//-1 not initialized, 0 false, 1 true
 
 		UPNP_SERVICE &operator= (UPNP_SERVICE &srv){
-			Connected = srv.Connected;
+			Enabled = srv.Enabled;
 			ControlURL = srv.ControlURL;
 			EventURL = srv.EventURL;
 			ServiceID = srv.ServiceID;
 			ServiceType = srv.ServiceType;
 			memcpy(SubscriptionID, srv.SubscriptionID, sizeof(Upnp_SID));
 			
-			//POSITION pos = srv.infoList.GetHeadPosition();
-			//while(pos){
-			//	UPNP_INFO_VAR info_org, info_copy;
-			//	info_org = srv.infoList.GetNext(pos);
-			//	info_copy.Name = info_org.Name;
-			//	info_copy.Value = info_org.Value;
-			//	infoList.AddTail(info_copy);
-			//}
+			//Commented for a possible future use.
+			/*
+			POSITION pos = srv.infoList.GetHeadPosition();
+			while(pos){
+				UPNP_INFO_VAR info_org, info_copy;
+				info_org = srv.infoList.GetNext(pos);
+				info_copy.Name = info_org.Name;
+				info_copy.Value = info_org.Value;
+				infoList.AddTail(info_copy);
+			}
 
-			//pos = srv.Vars.GetHeadPosition();
-			//while(pos){
-			//	CString var_copy;
-			//	var_copy = srv.Vars.GetNext(pos);
-			//	Vars.AddTail(var_copy);
-			//}
+			pos = srv.Vars.GetHeadPosition();
+			while(pos){
+				CString var_copy;
+				var_copy = srv.Vars.GetNext(pos);
+				Vars.AddTail(var_copy);
+			}
+			*/
+
 			return *this;
 		}
 	};
 
 	typedef struct UPNP_DEVICE{
-		//UPNP_INFO_LIST	infoList;
+		//Commented for a possible future use.
+		/*
+		UPNP_INFO_LIST	infoList;
+		*/
 	    CString			UDN;
 		CString			DescDocURL;
 		CString			FriendlyName;
@@ -120,6 +133,7 @@ public:
 		WORD externalPort;				// Port mapping external port
 		UPNPNAT_PROTOCOL protocol;		// Protocol-> TCP (UPNPNAT_PROTOCOL:UNAT_TCP) || UDP (UPNPNAT_PROTOCOL:UNAT_UDP)
 		CString description;			// Port mapping description
+		bool removeAtEnd;				// Remove port mapping on close?
 	};
 
 	typedef struct UPNPNAT_FULLMAPPING{
@@ -135,15 +149,17 @@ public:
 	typedef CList<UPNPNAT_MAPPING, UPNPNAT_MAPPING> MAPPING_LIST;
 
 	UPNPNAT_RETURN	AddPortMapping(UPNPNAT_MAPPING *mapping);
+	UPNPNAT_RETURN	AddPortMapping(WORD port, UPNPNAT_PROTOCOL protocol, CString description);
 	UPNPNAT_RETURN	DeletePortMapping(UPNPNAT_MAPPING mapping, bool removeFromList = true);
-	bool			RemoveAllMappings();
+	UPNPNAT_RETURN	DeletePortMapping(WORD port, UPNPNAT_PROTOCOL protocol, CString description, bool removeFromList = true);
+	bool			DeleteAllPortMappings();
+	void			DeleteAllPortMappingsOnClose();
 	
 	unsigned int	GetPort();
 
 	// Singleton
-	static CUPnP_IGDControlPoint *	AddInstance();
+	static CUPnP_IGDControlPoint *	GetInstance();
 	static void						RemoveInstance();
-	// End Singleton
 private:
 	typedef enum{
 		UPNPNAT_ACTION_ADD,
@@ -160,26 +176,33 @@ private:
 	// Singleton
 	CUPnP_IGDControlPoint(void);
 	~CUPnP_IGDControlPoint(void);
-	
 	static CUPnP_IGDControlPoint * m_IGDControlPoint;
-	static int m_nInstances;
-	// End Singleton
 
-	static MAPPING_LIST m_Mappings;
-	static CCriticalSection m_MappingsLock;
-
+	//ControlPoint
 	static UpnpClient_Handle m_ctrlPoint;
+
+	//Initialized?
 	static bool m_bInit;
 
-	static DEVICE_LIST m_devices;
-	static CCriticalSection m_devListLock;
+	//Stop at first WanXXConnection found?
+	static bool m_bStopAtFirstService;
 
+	//Indicate if all the mappings has to be removed on close
+	static bool m_bClearOnClose;
+
+	//Lists
+	static MAPPING_LIST m_Mappings;
+	static DEVICE_LIST m_devices;
 	static SERVICE_LIST m_knownServices;
 
-	static UINT TimerThreadFunc( LPVOID pParam );
-
-	static UINT ActionThreadFunc( LPVOID pParam );
+	//Locks
+	static CCriticalSection m_MappingsLock;
+	static CCriticalSection m_devListLock;
 	static CCriticalSection m_ActionThreadCS;
+
+	//Threads
+	static UINT TimerThreadFunc( LPVOID pParam );
+	static UINT ActionThreadFunc( LPVOID pParam );
 
 	//Main Callback Function
 	static int				IGD_Callback( Upnp_EventType EventType, void* Event, void* Cookie );
@@ -208,7 +231,7 @@ private:
 	static UPNPNAT_RETURN	AddPortMappingToService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping, bool bIsUpdating = false);
 	static UPNPNAT_RETURN	DeletePortMappingFromService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping);
 	static UPNPNAT_RETURN	GetSpecificPortMappingEntryFromService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping, UPNPNAT_FULLMAPPING *fullMapping, bool bLog = true);
-	static bool				IsServiceConnected(UPNP_SERVICE *srv);
+	static bool				IsServiceEnabled(UPNP_SERVICE *srv);
 	static void				OnEventReceived(Upnp_SID sid, int evntkey, IXML_Document * changes );
 	static bool				UpdateAllMappings( bool bLockDeviceList = true, bool bUpdating = true );
 
@@ -218,7 +241,7 @@ private:
 
 	//IP
 	static CString			GetLocalIPStr();
-	static bool				IsLANIP(WORD nIP);
+	static bool				IsLANIP(unsigned long nIP);
 	static bool				IsLANIP(char *cIP);
 };
 

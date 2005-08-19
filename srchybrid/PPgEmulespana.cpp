@@ -71,7 +71,7 @@ CPPgEmulespana::CPPgEmulespana()
 	// End MoNKi
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	m_htiUPnPRoot = NULL;
+	m_htiUPnPGroup = NULL;
 	m_htiUPnP = NULL;
 	m_htiUPnPWeb = NULL;
 	//m_htiUPnPTryRandom = NULL;
@@ -197,11 +197,10 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		if (piml){
 			iImgUPnP = piml->Add(CTempIconLoader(_T("UPNP")));
 		}
-		m_htiUPnPRoot = m_ctrlTreeOptions.InsertItem(_T("Universal Plug & Play (UPnP)"), iImgUPnP, iImgUPnP, TVI_ROOT);
-		m_htiUPnP  = m_ctrlTreeOptions.InsertCheckBox(_T("Enable UPnP on emule ports"), m_htiUPnPRoot, m_bUPnP);
-		//m_htiUPnPTryRandom = m_ctrlTreeOptions.InsertCheckBox(_T("Try with external random ports if are in use"), m_htiUPnPRoot, m_bUPnPTryRandom);
-		m_htiUPnPWeb = m_ctrlTreeOptions.InsertCheckBox(_T("Web Interface"), m_htiUPnPRoot, m_bUPnPWeb);
-		m_ctrlTreeOptions.Expand(m_htiUPnPRoot, TVE_EXPAND);
+		m_htiUPnPGroup = m_ctrlTreeOptions.InsertItem(_T("Universal Plug & Play (UPnP)"), iImgUPnP, iImgUPnP, TVI_ROOT);
+		m_htiUPnP = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLE), m_htiUPnPGroup, m_bUPnP);
+		m_htiUPnPWeb = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLEWEB), m_htiUPnPGroup, m_bUPnPWeb);
+		m_ctrlTreeOptions.Expand(m_htiUPnPGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUPnP, TVE_EXPAND);
 		// End MoNKi
 
@@ -410,13 +409,9 @@ void CPPgEmulespana::Localize()
 		// End MoNKi
 
 		// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-		m_ctrlTreeOptions.SetItemText(m_htiUPnPRoot, GetResString(IDS_UPNP));
-		CString tmpString, tmpString2;
-		tmpString.Format(GetResString(IDS_UPNPNAT), GetResString(IDS_UPNPNATEMULE));
-		m_ctrlTreeOptions.SetItemText(m_htiUPnP, tmpString);
-		tmpString.Format(GetResString(IDS_UPNPNAT), GetResString(IDS_PW_WS));
-		m_ctrlTreeOptions.SetItemText(m_htiUPnPWeb, tmpString);
-		//m_ctrlTreeOptions.SetItemText(m_htiUPnPTryRandom, GetResString(IDS_UPNPNATTRYRANDOM));		
+		if (m_htiUPnPGroup) m_ctrlTreeOptions.SetItemText(m_htiUPnPGroup, GetResString(IDS_UPNP));
+		if (m_htiUPnP) m_ctrlTreeOptions.SetItemText(m_htiUPnP, GetResString(IDS_UPNP_ENABLE));
+		if (m_htiUPnPWeb) m_ctrlTreeOptions.SetItemText(m_htiUPnPWeb, GetResString(IDS_UPNP_ENABLEWEB));
 		// End MoNKi
 
 /*Commented by SiRoB
@@ -571,7 +566,7 @@ void CPPgEmulespana::OnDestroy()
 	// End MoNKi
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	m_htiUPnPRoot = NULL;
+	m_htiUPnPGroup = NULL;
 	m_htiUPnP = NULL;
 	m_htiUPnPWeb = NULL;
 	//m_htiUPnPTryRandom = NULL;
@@ -638,15 +633,13 @@ BOOL CPPgEmulespana::OnApply()
 	// End MoNKi
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	if((BOOL)thePrefs.GetUPnPNat() != m_bUPnP ||
-		/*(BOOL)thePrefs.GetUPnPNatTryRandom() != m_bUPnPTryRandom ||*/
+	if((BOOL)thePrefs.IsUPnPEnabled() != m_bUPnP ||
 		(BOOL)thePrefs.GetUPnPNatWeb() != m_bUPnPWeb)
 	{
+		thePrefs.SetUPnPNat(m_bUPnP);
+		thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
 		bRestartApp = true;
 	}
-	thePrefs.SetUPnPNat(m_bUPnP);
-	//thePrefs.SetUPnPNatTryRandom(m_bUPnPTryRandom);
-	thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
 	// End MoNKi
 
 /*Commented by SiRoB
@@ -768,8 +761,7 @@ BOOL CPPgEmulespana::OnInitDialog()
 	// End MoNKi
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	m_bUPnP = thePrefs.GetUPnPNat();
-	//m_bUPnPTryRandom = thePrefs.GetUPnPNatTryRandom();
+	m_bUPnP = thePrefs.IsUPnPEnabled();
 	m_bUPnPWeb = thePrefs.GetUPnPNatWeb();
 	// End MoNKi
 

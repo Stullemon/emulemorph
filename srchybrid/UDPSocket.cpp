@@ -93,20 +93,17 @@ bool CUDPSocket::Create(){
 		VERIFY( m_udpwnd.CreateEx(0, AfxRegisterWndClass(0), _T("eMule Async DNS Resolve Socket Wnd #1"), WS_OVERLAPPED, 0, 0, 0, 0, NULL, NULL));
 	    m_hWndResolveMessage = m_udpwnd.m_hWnd;
 	    m_udpwnd.m_pOwner = this;
+		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
+			LogError(LOG_STATUSBAR, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
+			return false;
+		}
 
-		//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-]
-		/*
-		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
-			LogError(LOG_STATUSBAR, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
-			return false;
-		}
-		return true;
-		*/
-		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
-			LogError(LOG_STATUSBAR, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
-			return false;
-		}
-		else {
+		// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
+		// Don't add UPnP port mapping if is a random port and we don't want
+		// to clear mappings on close
+		if(thePrefs.IsUPnPEnabled() &&
+			(!(thePrefs.GetServerUDPPort()==0xFFFF && !thePrefs.GetUPnPClearOnClose())))
+		{
 			CString client;
 			UINT port;
 			GetSockName(client, port);
@@ -120,16 +117,13 @@ bool CUDPSocket::Create(){
 			}
 			//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
-			if(thePrefs.GetUPnPNat()){
-				CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
-				mapping.internalPort = mapping.externalPort = port;
-				mapping.protocol = CUPnP_IGDControlPoint::UNAT_UDP;
-				mapping.description = "Server UDP Port";
-				theApp.AddUPnPNatPort(&mapping);
-			}
-			return true;
+			theApp.m_UPnP_IGDControlPoint->AddPortMapping(port,
+				CUPnP_IGDControlPoint::UNAT_UDP,
+				_T("Server UDP Port"));
 		}
-		//MORPH END   - Changed by SiRoB, [MoNKi: -UPnPNAT Support-]
+		// End -UPnPNAT Support-
+
+		return true;
 	}
 	return false;
 }

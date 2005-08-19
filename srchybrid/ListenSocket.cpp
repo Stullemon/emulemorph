@@ -2625,13 +2625,8 @@ bool CListenSocket::Rebind()
 		return false;
 
 	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
-	if(thePrefs.GetUPnPNat()){
-		CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
-		mapping.internalPort = thePrefs.GetUPnPTCPInternal();
-		mapping.externalPort = thePrefs.GetUPnPTCPExternal();
-		mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
-		mapping.description = _T("TCP Port");
-		theApp.RemoveUPnPNatPort(&mapping);
+	if(thePrefs.IsUPnPEnabled()){
+		theApp.m_UPnP_IGDControlPoint->DeletePortMapping(m_port, CUPnP_IGDControlPoint::UNAT_TCP, _T("TCP Port"));
 	}
 	// End -UPnPNAT Support-
 	// End emulEspaña
@@ -2738,22 +2733,10 @@ bool CListenSocket::StartListening()
 				theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_F), thePrefs.GetPort());
 		}
 
-		if(thePrefs.GetUPnPNat()){
-			CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
-			
-			mapping.internalPort = mapping.externalPort = thePrefs.GetPort();
-			mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
-			mapping.description = "TCP Port";
-
-			theApp.AddUPnPNatPort(&mapping);
-
-			thePrefs.SetUPnPTCPExternal(mapping.externalPort);
-			thePrefs.SetUPnPTCPInternal(mapping.internalPort);
+		if(thePrefs.IsUPnPEnabled()){
+			theApp.m_UPnP_IGDControlPoint->AddPortMapping(m_port, CUPnP_IGDControlPoint::UNAT_TCP, _T("TCP Port"));
 		}
-		else{
-			thePrefs.SetUPnPTCPExternal(thePrefs.GetPort());
-			thePrefs.SetUPnPTCPInternal(thePrefs.GetPort());
-		}
+	
 		return true;
 	}
 	else

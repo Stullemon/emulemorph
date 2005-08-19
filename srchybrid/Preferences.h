@@ -762,13 +762,10 @@ public:
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	static bool		m_bUPnPNat;
 	static bool		m_bUPnPNatWeb;
-	static uint16	m_iUPnPTCPExternal;
-	static uint16	m_iUPnPUDPExternal;
-	static uint16	m_iUPnPTCPInternal;
-	static uint16	m_iUPnPUDPInternal;
 	static bool		m_bUPnPVerboseLog;
 	static uint16	m_iUPnPPort;
-	//static bool		m_bUPnPTryRandom;
+	static bool		m_bUPnPLimitToFirstConnection;
+	static bool		m_bUPnPClearOnClose;
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
@@ -1909,24 +1906,18 @@ protected:
 	static CString GetHomepageBaseURLForLevel(uint8 nLevel);
 public:
 	//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
-	static	bool	GetUPnPNat()						{ return m_bUPnPNat; }
+	static	bool	IsUPnPEnabled()						{ return m_bUPnPNat; }
 	static	void	SetUPnPNat(bool on)					{ m_bUPnPNat = on; }
 	static	bool	GetUPnPNatWeb()						{ return m_bUPnPNatWeb; }
 	static	void	SetUPnPNatWeb(bool on)				{ m_bUPnPNatWeb = on; }
-	static	void	SetUPnPTCPExternal(uint16 port)		{ m_iUPnPTCPExternal = port; }
-	static	uint16	GetUPnPTCPExternal()				{ return m_iUPnPTCPExternal; }
-	static	void	SetUPnPUDPExternal(uint16 port)		{ m_iUPnPUDPExternal = port; }
-	static	uint16	GetUPnPUDPExternal()				{ return m_iUPnPUDPExternal; }
-	//static	bool	GetUPnPNatTryRandom()				{ return m_bUPnPTryRandom; }
-	//static	void	SetUPnPNatTryRandom(bool on)		{ m_bUPnPTryRandom = on; }
-	static	void	SetUPnPTCPInternal(uint16 port)		{ m_iUPnPTCPInternal = port; }
-	static	uint16	GetUPnPTCPInternal()				{ return m_iUPnPTCPInternal; }
-	static	void	SetUPnPUDPInternal(uint16 port)		{ m_iUPnPUDPInternal = port; }
-	static	uint16	GetUPnPUDPInternal()				{ return m_iUPnPUDPInternal; }
 	static	void	SetUPnPVerboseLog(bool on)			{ m_bUPnPVerboseLog = on; }
 	static	bool	GetUPnPVerboseLog()					{ return m_bUPnPVerboseLog; }
-	static	void	SetUPnPPort(uint16 port)			{ m_iUPnPUDPInternal = m_iUPnPPort; }
+	static	void	SetUPnPPort(uint16 port)			{ m_iUPnPPort = port; }
 	static	uint16	GetUPnPPort()						{ return m_iUPnPPort; }
+	static	void	SetUPnPClearOnClose(bool on)		{ m_bUPnPClearOnClose = on; }
+	static	bool	GetUPnPClearOnClose()				{ return m_bUPnPClearOnClose; }
+	static	bool	SetUPnPLimitToFirstConnection(bool on)	{ m_bUPnPLimitToFirstConnection = on; }
+	static	bool	GetUPnPLimitToFirstConnection()		{ return m_bUPnPLimitToFirstConnection; }
 	//MORPH END   - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB [MoNKi: -Random Ports-]

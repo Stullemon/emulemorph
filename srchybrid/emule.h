@@ -247,9 +247,7 @@ public:
 
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 public:
-	CUPnP_IGDControlPoint *m_UPnPNat;
-	BOOL		AddUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping);
-	BOOL		RemoveUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping);
+	CUPnP_IGDControlPoint *m_UPnP_IGDControlPoint;
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]

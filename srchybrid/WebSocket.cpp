@@ -422,16 +422,16 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 			{
 				if (!WSAEventSelect(hSocket, hEvent, FD_ACCEPT))
 				{
-					//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+					// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 					CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 					BOOL UPnP = false;
 
 					mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
 					mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 					mapping.description = "Web Interface";
-					if(thePrefs.GetUPnPNatWeb())
-						UPnP = theApp.AddUPnPNatPort(&mapping);
-					//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+					if(thePrefs.IsUPnPEnabled() && thePrefs.GetUPnPNatWeb())
+						UPnP = theApp.m_UPnP_IGDControlPoint->AddPortMapping(&mapping);
+					// End -UPnPNAT Support-
 
 					HANDLE pWait[] = { hEvent, s_hTerminate };
 					while (WAIT_OBJECT_0 == WaitForMultipleObjects(2, pWait, FALSE, INFINITE))
@@ -486,7 +486,8 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 					}
 
 					//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-					if(UPnP) theApp.RemoveUPnPNatPort(&mapping);
+					if(UPnP)
+						theApp.m_UPnP_IGDControlPoint->DeletePortMapping(mapping);
 					//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 				}
 				VERIFY( CloseHandle(hEvent) );

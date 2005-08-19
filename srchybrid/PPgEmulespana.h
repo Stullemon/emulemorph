@@ -36,7 +36,7 @@ protected:
 	// End MoNKi
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	HTREEITEM	m_htiUPnPRoot;
+	HTREEITEM	m_htiUPnPGroup;
 	HTREEITEM	m_htiUPnP;
 	HTREEITEM	m_htiUPnPWeb;
 	//HTREEITEM	m_htiUPnPTryRandom;

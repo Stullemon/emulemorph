@@ -5603,10 +5603,27 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNPNAT             "Enable UPnP on %s"
-    IDS_UPNPNATEMULE        "eMule ports"
-    IDS_UPNPNATTRYRANDOM    "Try with external random ports if are in use"
-    IDS_RANDOMPORTS         "Random Ports"
+    IDS_UPNP         		"Universal Plug and Play (UPnP)"
+    IDS_UPNP_INIT   		"UPnP: Initiated on %s:%d, searching devices..."
+    IDS_UPNP_FAILEDINIT		"UPnP: Failed initiating UPnP on port %d [%s]"
+    IDS_UPNP_PUBLICIP		"UPnP: Your IP is a public internet IP, UPnP will be disabled"
+    IDS_UPNP_FAILEDREGISTER	"UPnP: Failed registering control point [%s]"
+    IDS_UPNP_ADDQUEUED		"UPnP: Action ""AddPortMapping"" queued until a device is found [%s]"
+    IDS_UPNP_NEWDEVICE		"UPnP: New compatible device found: %s"
+    IDS_UPNP_DEVICEREMOVED	"UPnP: Device removed: %s"
+    IDS_UPNP_PORTINUSE		"UPnP: Couldn't add mapping: ""%s"". The port %d is already mapped to other application (""%s"" on %s:%d). [%s]"
+    IDS_UPNP_ALREADYUPDATED "UPnP: The port mapping ""%s"" don't needs an update. [%s]"
+    IDS_UPNP_STATIC			"Static"
+    IDS_UPNP_DYNAMIC		"Dynamic"
+    IDS_UPNP_PORTUPDATED	"UPnP: Updated port mapping ""%s"" (%s). [%s]"
+    IDS_UPNP_PORTADDED		"UPnP: Added port mapping ""%s"" (%s). [%s]"
+    IDS_UPNP_ADDFAILED		"UPnP: Failed to add port mapping ""%s"" [%s] [%s]"
+    IDS_UPNP_DELETEFAILED	"UPnP: Failed to delete port mapping ""%s"". [%s] [%s]"
+    IDS_UPNP_PORTDELETED	"UPnP: Deleted port mapping ""%s"". [%s]"
+    IDS_UPNP_LOGEVENTS		"Log UPnP events"
+    IDS_UPNP_ENABLE			"Enable UPnP"
+    IDS_UPNP_ENABLEWEB		"Enable UPnP on web interface port"
+   IDS_RANDOMPORTS         "Random Ports"
     IDS_MINPORT             "Min Port"
     IDS_MAXPORT             "Max Port"
     IDS_RANDOMPORTSRESETTIME "Random ports safe restart time (in seconds)"
@@ -5813,7 +5830,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP                "Universal Plug & Play (UPnP)"
     IDS_UP_LOWID2           "%i LowID"
     IDS_UP_LOWID_AWAITED    "%i **** Awaited reconnect %s"
     IDS_IP2COUNTRY_NALONG   "Not Applicable"

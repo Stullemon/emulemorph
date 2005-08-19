@@ -786,22 +786,8 @@ bool CClientUDPSocket::Create(){
 					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_F), thePrefs.GetUDPPort());
 			}
 
-			if(thePrefs.GetUPnPNat()){
-				CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
-
-				mapping.internalPort = mapping.externalPort = thePrefs.GetUDPPort();
-				mapping.protocol = CUPnP_IGDControlPoint::UNAT_UDP;
-				mapping.description = _T("UDP Port");
-				
-				theApp.AddUPnPNatPort(&mapping);
-				
-				thePrefs.SetUPnPUDPExternal(mapping.externalPort);
-				thePrefs.SetUPnPUDPInternal(mapping.internalPort);
-			}
-			else{
-				thePrefs.SetUPnPUDPExternal(thePrefs.GetUDPPort());
-				thePrefs.SetUPnPUDPInternal(thePrefs.GetUDPPort());
-			}
+			if(thePrefs.IsUPnPEnabled())
+				theApp.m_UPnP_IGDControlPoint->AddPortMapping(m_port, CUPnP_IGDControlPoint::UNAT_UDP, _T("UDP Port"));
 		}
 	}
 
@@ -824,14 +810,9 @@ bool CClientUDPSocket::Rebind(){
 	if (!thePrefs.GetUseRandomPorts() && thePrefs.GetUDPPort(false, true)==m_port)
 		return false;
 
-	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
-	if(thePrefs.GetUPnPNat()){
-		CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
-		mapping.internalPort = thePrefs.GetUPnPUDPInternal();
-		mapping.externalPort = thePrefs.GetUPnPUDPExternal();
-		mapping.protocol = CUPnP_IGDControlPoint::UNAT_UDP;
-		mapping.description = _T("UDP Port");
-		theApp.RemoveUPnPNatPort(&mapping);
+	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
+	if(thePrefs.IsUPnPEnabled()){
+		theApp.m_UPnP_IGDControlPoint->DeletePortMapping(m_port, CUPnP_IGDControlPoint::UNAT_UDP, _T("UDP Port"));
 	}
 	// End -UPnPNAT Support-
 	// End emulEspaña

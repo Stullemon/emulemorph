@@ -263,7 +263,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 			m_htiLogICHEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_IACH), m_htiVerboseGroup, m_bLogICHEvents); //JP log ICH events
 			//MORPH END   - Added by SiRoB, WebCache 1.2f
 			// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
-			m_htiLogUPnP = m_ctrlTreeOptions.InsertCheckBox(_T("Log UPnP"), m_htiVerboseGroup, m_bLogUPnP);
+			m_htiLogUPnP = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_LOGEVENTS), m_htiVerboseGroup, m_bLogUPnP);
 			// End emulEspaña
 		}
 

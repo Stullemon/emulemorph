@@ -2936,7 +2936,6 @@
 #define IDS_CAT_TOTAL                   6269
 #define IDS_UP_LOWID                    6270
 #define IDS_UP_LOWID_DELAYED            6271
-#define IDS_UPNP                        6272
 #define IDS_UP_LOWID2                   6273
 #define IDS_UP_LOWID_AWAITED            6274
 #define IDS_IP2COUNTRY_NALONG           6275
@@ -3005,13 +3004,33 @@
 #define IDC_SPIN_MIN                    20108
 #define IDC_BTN_MENU                    20120
 #define IDS_PW_WEBCACHE                 20646
-#define IDS_UPNPNAT                     21009
-#define IDS_UPNPNATEMULE                21010
-#define IDS_UPNPNATTRYRANDOM            21011
-#define IDS_RANDOMPORTS                 21012
-#define IDS_MINPORT                     21013
-#define IDS_MAXPORT                     21014
-#define IDS_RANDOMPORTSRESETTIME        21015
+
+// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
+#define IDS_UPNP						21001
+#define IDS_UPNP_INIT   				21002
+#define IDS_UPNP_FAILEDINIT				21003
+#define IDS_UPNP_PUBLICIP				21004
+#define IDS_UPNP_FAILEDREGISTER			21005
+#define IDS_UPNP_ADDQUEUED				21006
+#define IDS_UPNP_NEWDEVICE				21007
+#define IDS_UPNP_DEVICEREMOVED			21008
+#define IDS_UPNP_PORTINUSE				21009
+#define IDS_UPNP_ALREADYUPDATED			21010
+#define IDS_UPNP_STATIC					21011
+#define IDS_UPNP_DYNAMIC				21012
+#define IDS_UPNP_PORTUPDATED			21013
+#define IDS_UPNP_PORTADDED				21014
+#define IDS_UPNP_ADDFAILED				21015
+#define IDS_UPNP_DELETEFAILED			21016
+#define IDS_UPNP_PORTDELETED			21017
+#define IDS_UPNP_LOGEVENTS				21018
+#define IDS_UPNP_ENABLE					21019
+#define IDS_UPNP_ENABLEWEB				21020
+// End -UPnPNAT Support-
+#define IDS_RANDOMPORTS                 21022
+#define IDS_MINPORT                     21023
+#define IDS_MAXPORT                     21025
+#define IDS_RANDOMPORTSRESETTIME        21026
 #define IDS_ICFSUPPORT                  21027
 #define IDS_ICFSUPPORTFIRST             21028
 #define IDS_ICF                         21029
