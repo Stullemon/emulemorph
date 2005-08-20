@@ -428,13 +428,14 @@ UINT AFX_CDECL WapSocketListeningFunc(LPVOID pThis)
 					{
 						// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 						CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
-						BOOL UPnP=false;
+						BOOL UPnP = false;
 
 						mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
 						mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 						mapping.description = "Wap Interface";
-						if(thePrefs.GetUPnPNat())
-							UPnP = theApp.AddUPnPNatPort(&mapping);
+						
+						if(thePrefs.IsUPnPEnabled())
+							UPnP = theApp.m_UPnP_IGDControlPoint->AddPortMapping(&mapping);
 						// End emulEspaña
 
 						HANDLE pWait[] = { hEvent, s_hWapTerminate };
@@ -471,7 +472,8 @@ UINT AFX_CDECL WapSocketListeningFunc(LPVOID pThis)
 						}
 						
 						// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-						if(UPnP) theApp.RemoveUPnPNatPort(&mapping);
+						if(UPnP)
+							theApp.m_UPnP_IGDControlPoint->DeletePortMapping(mapping);
 						// End emulEspaña
 					}
 					VERIFY( CloseHandle(hEvent) );
