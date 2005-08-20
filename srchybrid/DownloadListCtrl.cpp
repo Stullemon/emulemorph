@@ -203,6 +203,7 @@ void CDownloadListCtrl::Init()
 	
 	SortItems(SortProc, GetSortItem() + (GetSortAscending()? 0:100) + adder);
 	*/
+	SetSortArrow();
 	SortItems(SortProc, GetSortItem() + (GetSortAscending()? 0:100));
 	//MORPH END - Changed by SiRoB, Remain time and size Columns have been splited
 }
@@ -2726,7 +2727,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	}
 	*/
 	//MORPH END   - Removed by SiRoB, Remain time and size Columns have been splited
-	bool sortAscending = (sortItem != pNMListView->iSubItem + userSort) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
+	bool sortAscending = (sortItem != pNMListView->iSubItem/* + userSort*/) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
 
 	// Item is column clicked
 	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix - Ctrl sorts sources only
