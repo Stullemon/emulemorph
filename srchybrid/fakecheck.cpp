@@ -103,7 +103,7 @@ int CFakecheck::LoadFromFile(){
 			while (i < m_fakelist.GetCount())
 			{
 				Fakes_Struct* pCur = m_fakelist[i];
-				if ( pCur->Hash == pPrv->Hash && pCur->Lenght == pPrv->Lenght)
+				if ( memcmp(pCur->Hash, pPrv->Hash, 16) && pCur->Lenght == pPrv->Lenght)
 				{
 					if (pCur->RealTitle != pPrv->RealTitle)
 					{
