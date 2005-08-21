@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.46c MorphXT v7.x
+Changelog for eMule 0.46c MorphXT v7.2
 --------------------------------------
 MERGED : Ported to 0.46c version [SiRoB]
 
@@ -8,15 +8,17 @@ FIXED  : May i found the responsible for rare crash arround resume next file [Si
 
 ADDED  : Serveral const optimization [SiRoB]
 ADDED  : Even more requpfile Optimization (for crazy user sharing many files :), reduce CPU usage on zz upload system based mod) [SiRoB]
+- In short this avoid looking for knownfile pointer in the sharedlist. If you are sharing many many file this may reduce considerably cpu load.
+ADDED  : Some kind of stop open slot in some congestion case or when connection is lost [SiRoB]
 
 CHANGED: USS: use the official one now [SiRoB]
 CHANGED: Updated bad MODSTRING with the fucking ita mod [SiRoB]
-CHANGED: Updated MultiSort from SlugFiller mod [SiRoB]
+CHANGED: Updated MultiSort from SlugFiller mod + small change to permit both sorting with CTRL key [SiRoB]
 CHANGED: Updated SafeHash from SlugFiller mod [SiRoB]
+CHANGED: Updated UPNP Support from MoNKi patch [SiRoB]
 
 REMOVED: Updated bad MODSTRING with null char [SiRoB]
 
-TWEAKED: 
 --------------------------------------
 Changelog for eMule 0.46a MorphXT v7.1
 --------------------------------------
