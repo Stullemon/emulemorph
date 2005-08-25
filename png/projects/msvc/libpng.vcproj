@@ -3,7 +3,6 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="libpng"
-	ProjectGUID="{19CB7FC6-3D35-4203-B0DB-D67156FD8220}"
 	RootNamespace="libpng">
 	<Platforms>
 		<Platform
@@ -259,19 +258,11 @@
 			ConfigurationType="4">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
-				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				OptimizeForWindowsApplication="TRUE"
+				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..;..\..\..\zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				StringPooling="TRUE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="png.h"
@@ -295,9 +286,7 @@
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				AdditionalIncludeDirectories="..\.."/>
+				Name="VCResourceCompilerTool"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -309,8 +298,8 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug|Win32"
-			OutputDirectory=".\Win32_LIB_Debug"
-			IntermediateDirectory=".\Win32_LIB_Debug"
+			OutputDirectory="..\..\Debug"
+			IntermediateDirectory="..\..\Debug"
 			ConfigurationType="4">
 			<Tool
 				Name="VCCLCompilerTool"
@@ -328,7 +317,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/libpngd.lib"/>
+				OutputFile="..\..\Debug\png.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
