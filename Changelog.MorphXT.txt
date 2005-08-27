@@ -1,4 +1,12 @@
 --------------------------------------
+Changelog for eMule 0.46c MorphXT v7.x
+--------------------------------------
+FIXED  : (major) Definitly eradicate the systray crash related to minimul [SiRoB]
+FIXED  : (minor) Missed some code with the previous hideos update [SiRoB]
+
+REMOVED: No more ReadWrite safeHash code [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.46c MorphXT v7.2
 --------------------------------------
 MERGED : Ported to 0.46c version [SiRoB]
