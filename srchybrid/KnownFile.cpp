@@ -2202,13 +2202,13 @@ bool CKnownFile::GetPowerShared() const
 //MORPH END   - Added by SiRoB, Power Share
 
 // SLUGFILLER: hideOS
-uint16 CKnownFile::CalcPartSpread(CArray<uint32>& partspread, const CUpDownClient* client)
+uint16 CKnownFile::CalcPartSpread(CArray<uint32>& partspread, CUpDownClient* client)
 {
 	UINT parts = GetED2KPartCount();
 	UINT realparts = GetPartCount();
 	uint32 min;
-	UINT mincount;
-	UINT mincount2;
+	UINT mincount = 1;
+	UINT mincount2 = 1;
 	UINT i;
 
 	ASSERT(client != NULL);
@@ -2313,6 +2313,17 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32>& partspread, const CUpDownClien
 	uint8 hideOS = HideOSInWork();
 	ASSERT(hideOS != 0);
 
+	if (client->m_nSelectedChunk > 0 && (int)client->m_nSelectedChunk <= partspread.GetSize() && partsavail[client->m_nSelectedChunk-1]) {
+		for (i = 0; i < client->m_nSelectedChunk-1; i++)
+			partspread[i] = hideOS;
+		for (i = client->m_nSelectedChunk; i < parts; i++)
+			partspread[i] = hideOS;
+
+		return parts;
+	}
+	else
+		client->m_nSelectedChunk = 0;
+
 	bool resetSentCount = false;
 	
 	//MORPH START - Changed by SiRoB, -HotFix-
@@ -2370,6 +2381,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32>& partspread, const CUpDownClien
 	if (mincount)
 		return parts;
 	m_PartSentCount[i]++;
+	client->m_nSelectedChunk = i+1;
 	mincount = i;
 	for (i = 0; i < parts; i++) {
 		if (!partsavail[i])

@@ -240,7 +240,7 @@ protected:
 	bool	CreateHash(const uchar* pucData, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	*/
 	virtual void	UpdateFileRatingCommentAvail();
-	uint16	CalcPartSpread(CArray<uint32>& partspread, const CUpDownClient* client);	// SLUGFILLER: hideOS
+	uint16	CalcPartSpread(CArray<uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*, uchar*>	hashlist;
 	CString					m_strDirectory;
 	CString					m_strFilePath;
