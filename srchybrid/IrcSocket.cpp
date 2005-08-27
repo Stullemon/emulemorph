@@ -45,6 +45,7 @@ CIrcSocket::~CIrcSocket()
 	CString client;
 	UINT port;
 
+	GetSockName(client, port);
 	theApp.m_UPnP_IGDControlPoint->DeletePortMapping(port,
 		CUPnP_IGDControlPoint::UNAT_TCP,
 		_T("IRC"));
