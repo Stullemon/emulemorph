@@ -480,9 +480,6 @@
 				RelativePath="Quantize.cpp">
 			</File>
 			<File
-				RelativePath=".\ReadWriteLock.cpp">
-			</File>
-			<File
 				RelativePath="SafeFile.cpp">
 			</File>
 			<File
@@ -933,9 +930,6 @@
 			</File>
 			<File
 				RelativePath="Quantize.h">
-			</File>
-			<File
-				RelativePath=".\ReadWriteLock.h">
 			</File>
 			<File
 				RelativePath="Resource.h">
