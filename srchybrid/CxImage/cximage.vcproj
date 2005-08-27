@@ -101,7 +101,8 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\Debug\CxImage.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

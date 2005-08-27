@@ -41,7 +41,8 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\id3libD.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -102,7 +103,8 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\id3lib.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

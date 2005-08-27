@@ -255,7 +255,8 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\DebugUnicode\ResizableLib.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -316,7 +317,7 @@
 				Name="VCLibrarianTool"
 				OutputFile=".\ReleaseUnicode\ResizableLib.lib"
 				SuppressStartupBanner="TRUE"
-				IgnoreAllDefaultLibraries="FALSE"/>
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

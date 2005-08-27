@@ -50,7 +50,8 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\Release\cryptlib.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -98,7 +99,8 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\Debug\cryptlib.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
