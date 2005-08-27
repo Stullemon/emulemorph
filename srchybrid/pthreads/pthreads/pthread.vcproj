@@ -30,10 +30,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="$(InstDir)/pthread.pch"
-				AssemblerListingLocation="$(InstDir)/"
-				ObjectFile="$(InstDir)/"
-				ProgramDataBaseFileName="$(InstDir)/"
+				PrecompiledHeaderFile="$(OutDir)/pthread.pch"
+				AssemblerListingLocation="$(OutDir)/"
+				ObjectFile="$(OutDir)/"
+				ProgramDataBaseFileName="$(OutDir)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -42,10 +42,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
-				OutputFile=".\Release\pthreadVC2.dll"
+				OutputFile="$(OutDir)/pthreadVC2.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ImportLibrary=".\Release\pthreadVC2.lib"
+				ImportLibrary="$(OutDir)/pthreadVC2.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
