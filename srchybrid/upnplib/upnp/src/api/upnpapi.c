@@ -404,7 +404,12 @@ UpnpFinish(  )
 
     // remove all virtual dirs
     UpnpRemoveAllVirtualDirs(  );
-
+	//leuk_he
+	#ifdef _WIN32
+	#ifdef PTW32_STATIC_LIB
+	pthread_win32_thread_detach_np ();
+	#endif
+	#endif
     UpnpSdkInit = 0;
 
     return UPNP_E_SUCCESS;

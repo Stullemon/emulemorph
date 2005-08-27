@@ -413,6 +413,12 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         int retCode = 0;
         int persistent = -1;
         ThreadPool *tp = ( ThreadPool * ) arg;
+		//leuk_he
+		#ifdef _WIN32
+		#ifdef PTW32_STATIC_LIB
+		pthread_win32_thread_attach_np();
+		#endif
+		#endif
 
         assert( tp != NULL );
 
@@ -482,7 +488,12 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                     tp->totalThreads--;
                     ithread_cond_broadcast( &tp->start_and_shutdown );
                     ithread_mutex_unlock( &tp->mutex );
-
+					//leuk_he
+	                #ifdef _WIN32
+	                #ifdef PTW32_STATIC_LIB
+	                pthread_win32_thread_detach_np ();
+	                #endif
+	                #endif
                     return NULL;
                 }
 
@@ -511,7 +522,12 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                 ithread_cond_broadcast( &tp->start_and_shutdown );
 
                 ithread_mutex_unlock( &tp->mutex );
-
+				//leuk_he
+                #ifdef _WIN32
+                #ifdef PTW32_STATIC_LIB
+                pthread_win32_thread_detach_np ();
+                #endif
+                #endif
                 return NULL;
             } else {
 
@@ -740,7 +756,12 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         if( tp == NULL ) {
             return EINVAL;
         }
-
+		//leuk_he
+		#ifdef _WIN32
+		#ifdef PTW32_STATIC_LIB
+		pthread_win32_process_attach_np();
+		#endif
+		#endif
         retCode += ithread_mutex_init( &tp->mutex, NULL );
         assert( retCode == 0 );
 

@@ -23,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB;HAVE_SAPI_H;PTW32_STATIC_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -37,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib pthreads\pthreads\debug\pthreadVC2_D.lib"
+				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib pthreads\pthreads\debug\pthread.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames=""
@@ -92,7 +92,7 @@
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB;HAVE_SAPI_H;PTW32_STATIC_LIB;"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
@@ -105,7 +105,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthreadVC2.lib"
+				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthread.lib"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
@@ -161,7 +161,7 @@
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories=".,..;..\id3lib\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;HAVE_SAPI_H;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
@@ -174,7 +174,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib"
+				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthread.lib"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
