@@ -504,6 +504,16 @@ void CClientCreditsList::LoadList()
 				file.Seek(1, CFile::begin); //set filepointer behind file version byte
 			}
 
+			if (m_mapClients.GetCount() > 0) {
+				CClientCredits* cur_credit;
+				CCKey tmpkey(0);
+				POSITION pos = m_mapClients.GetStartPosition();
+				while (pos){
+					m_mapClients.GetNextAssoc(pos, tmpkey, cur_credit);
+					delete cur_credit;
+				}
+				m_mapClients.RemoveAll();
+			}
 			UINT count = file.ReadUInt32();
 			//Morph Start - added by AndCycle, minor tweak - prime
 			/*
@@ -592,12 +602,14 @@ void CClientCreditsList::LoadList()
 			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_CREDITFILEREAD), buffer);
 			}
 			error->Delete();
+			file.Close();
 		}
 		//MORPH START - Added by SiRoB, Catch oversized public key in credit.met file
 		catch(CString error)
 		{
 			if (!error.IsEmpty())
 				LogWarning(_T("%s - while loading %s"), error, strFileName);
+			file.Close();
 		}
 		//MORPH END   - Added by SiRoB, Catch oversized public key in credit.met file
 	}//MORPH - Added by SiRoB, Alternative choose .met to load
@@ -764,7 +776,7 @@ void CClientCredits::InitalizeIdent()
 		m_nPublicKeyLen = m_pCredits->nKeySize;
 		//MORPH START - Added by SiRoB, Catch oversized public key in credit.met file
 		if (m_nPublicKeyLen > MAXPUBKEYSIZE)
-			throw(_T("Public Key of one client is larger than MAXPUBKEYSIZE"));
+			throw CString(_T("Public Key of one client is larger than MAXPUBKEYSIZE"));
 		//MORPH END   - Added by SiRoB, Catch oversized public key in credit.met file
 		memcpy(m_abyPublicKey, m_pCredits->abySecureIdent, m_nPublicKeyLen);
 		IdentState = IS_IDNEEDED;
