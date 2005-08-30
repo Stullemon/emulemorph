@@ -37,6 +37,7 @@
 #include "emuledlg.h"
 #include "TransferWnd.h"
 #include "Log.h"
+#include "Collection.h"
 #include "WebCache\WebCacheSocket.h" // yonatan http // MORPH - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
@@ -593,13 +594,13 @@ void CUpDownClient::CreateNextBlockPackage(){
 				Crypt.encryptor.ProcessString(filedata, togo);
 			}
 			// MORPH END - Added by Commander, WebCache 1.2e
-			// check extention to decide whether to compress or not
+			// check extension to decide whether to compress or not
 			CString ext = srcfile->GetFileName();
 			ext.MakeLower();
 			int pos = ext.ReverseFind(_T('.'));
 			if (pos>-1)
 				ext = ext.Mid(pos);
-			bool compFlag = (ext!=_T(".zip") && ext!=_T(".rar") && ext!=_T(".ace") && ext!=_T(".ogm") && ext!=_T(".tar"));//no need to try compressing tar compressed files... [Yun.SF3]
+			bool compFlag = (ext!=_T(".zip") && ext!=_T(".cbz") && ext!=_T(".rar") && ext!=_T(".ace") && ext!=_T(".ogm") && ext!=_T(".tar"));//no need to try compressing tar compressed files... [Yun.SF3]
 			if (ext==_T(".avi") && thePrefs.GetDontCompressAvi())
 				compFlag=false;
 
@@ -959,6 +960,19 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 		delete reqblock;
         return;
     }
+
+	if(HasCollectionUploadSlot()){
+		CKnownFile* pDownloadingFile = theApp.sharedfiles->GetFileByID(reqblock->FileID);
+		if(pDownloadingFile != NULL){
+			if ( !(CCollection::HasCollectionExtention(pDownloadingFile->GetFileName()) && pDownloadingFile->GetFileSize() < MAXPRIORITYCOLL_SIZE) ){
+				AddDebugLogLine(DLP_HIGH, false, _T("UploadClient: Client tried to add req block for non collection while having a collection slot! Prevented req blocks from being added. %s"), DbgGetClientInfo());
+				delete reqblock;
+				return;
+			}
+		}
+		else
+			ASSERT( false );
+	}
 
 	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos != 0; ){
 		const Requested_Block_Struct* cur_reqblock = m_DoneBlocks_list.GetNext(pos);
