@@ -514,49 +514,65 @@ void CClientCreditsList::LoadList()
 
 			const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
 			uint32 cDeleted = 0;
+			
+			//MORPH START - Changed by SiRoB, Optimization
 			//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-			CreditStruct* newcstruct;
-			//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-
-			for (UINT i = 0; i < count; i++){
-				//Morph Start - Changed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-				/*
-				CreditStruct* newcstruct = new CreditStruct;
-				*/
-				newcstruct = new CreditStruct;
-				//Morph End   - Changed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-				
-				memset(newcstruct, 0, sizeof(CreditStruct));
-				//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-				/*
-				if (version == CREDITFILE_VERSION_29)
-					file.Read(newcstruct, sizeof(CreditStruct_29a));
-				else
-					file.Read(newcstruct, sizeof(CreditStruct));
-				*/
-				// --> Moonlight: SUQWT - import 0.30c and 30c-SUQWTv1 structures.
-				if (version == CREDITFILE_VERSION)
+			if (version == CREDITFILE_VERSION) {
+				for (UINT i = 0; i < count; i++){
+					CreditStruct* newcstruct = new CreditStruct;
 					file.Read(newcstruct, sizeof(CreditStruct_30c_SUQWTv2));
-				else if (version == CREDITFILE_VERSION_30_SUQWTv1) {
+					if (newcstruct->nLastSeen < dwExpired){
+						++cDeleted;
+						delete newcstruct;
+						continue;
+					}
+					CClientCredits* newcredits = new CClientCredits(newcstruct);
+					m_mapClients.SetAt(CCKey(newcredits->GetKey()), newcredits);
+				}		
+			} else if (version == CREDITFILE_VERSION_30) {
+				for (UINT i = 0; i < count; i++){
+					CreditStruct* newcstruct = new CreditStruct;
+					newcstruct->nSecuredWaitTime = 0;
+					newcstruct->nUnSecuredWaitTime = 0;
+					file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_30c));
+					if (newcstruct->nLastSeen < dwExpired){
+						++cDeleted;
+						delete newcstruct;
+						continue;
+					}
+					CClientCredits* newcredits = new CClientCredits(newcstruct);
+					m_mapClients.SetAt(CCKey(newcredits->GetKey()), newcredits);
+				}		
+			} else if (version == CREDITFILE_VERSION_30_SUQWTv1) {
+				for (UINT i = 0; i < count; i++){
+					CreditStruct* newcstruct = new CreditStruct;
 					file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_30c_SUQWTv1) - 8);
 					file.Read(((uint8*)newcstruct), 8);
-				}
-				else if (version == CREDITFILE_VERSION_30)
-					file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_30c));
-				else
+					if (newcstruct->nLastSeen < dwExpired){
+						++cDeleted;
+						delete newcstruct;
+						continue;
+					}
+					CClientCredits* newcredits = new CClientCredits(newcstruct);
+					m_mapClients.SetAt(CCKey(newcredits->GetKey()), newcredits);
+				}		
+			} else {
+				for (UINT i = 0; i < count; i++){
+					CreditStruct* newcstruct = new CreditStruct;
+					memset(newcstruct, 0, sizeof(CreditStruct));
 					file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_29a));
-				// <-- Moonlight: SUQWT			
-				//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-			
-				if (newcstruct->nLastSeen < dwExpired){
-					cDeleted++;
-					delete newcstruct;
-					continue;
-				}
+					if (newcstruct->nLastSeen < dwExpired){
+						cDeleted++;
+						delete newcstruct;
+						continue;
+					}
 
-				CClientCredits* newcredits = new CClientCredits(newcstruct);
-				m_mapClients.SetAt(CCKey(newcredits->GetKey()), newcredits);
+					CClientCredits* newcredits = new CClientCredits(newcstruct);
+					m_mapClients.SetAt(CCKey(newcredits->GetKey()), newcredits);
+				}
 			}
+			//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			//MORPH START - Changed by SiRoB, Optimization
 			file.Close();
 
 			if (cDeleted>0)
@@ -577,6 +593,13 @@ void CClientCreditsList::LoadList()
 			}
 			error->Delete();
 		}
+		//MORPH START - Added by SiRoB, Catch oversized public key in credit.met file
+		catch(CString error)
+		{
+			if (!error.IsEmpty())
+				LogWarning(_T("%s - while loading %s"), error, strFileName);
+		}
+		//MORPH END   - Added by SiRoB, Catch oversized public key in credit.met file
 	}//MORPH - Added by SiRoB, Alternative choose .met to load
 }
 
@@ -739,6 +762,10 @@ void CClientCredits::InitalizeIdent()
 	}
 	else{
 		m_nPublicKeyLen = m_pCredits->nKeySize;
+		//MORPH START - Added by SiRoB, Catch oversized public key in credit.met file
+		if (m_nPublicKeyLen > MAXPUBKEYSIZE)
+			throw(_T("Public Key of one client is larger than MAXPUBKEYSIZE"));
+		//MORPH END   - Added by SiRoB, Catch oversized public key in credit.met file
 		memcpy(m_abyPublicKey, m_pCredits->abySecureIdent, m_nPublicKeyLen);
 		IdentState = IS_IDNEEDED;
 	}
