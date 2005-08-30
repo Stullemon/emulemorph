@@ -1,13 +1,16 @@
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.x
 --------------------------------------
-FIXED  : (major) Definitly eradicate the systray crash related to minimul [SiRoB]
+FIXED  : (major) Definitly eradicate the systray crash related to minimule [SiRoB]
 FIXED  : (minor) Missed some code with the previous hideos update [SiRoB]
+FIXED  : (major) Missed code when merging to offical 0.46c causing unpredicable resulte [SiRoB]
 
 ADDED: Catch creditmet file loading exception for public key length greater than MAXPUBKEYSIZE [SiRoB]
 - this fix crash when a specific corruption occur in creditmet files.
 
 REMOVED: No more ReadWrite safeHash code [SiRoB]
+
+TWEAKED: May the loading of creditmet file speed up [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.2
