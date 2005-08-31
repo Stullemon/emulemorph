@@ -1010,19 +1010,15 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	ASSERT( iMaxBlocks >= 1 /*&& iMaxBlocks <= 3*/ );
 	if (m_DownloadBlocks_list.IsEmpty())
 	{
-		uint16 count;
-        if(iMaxBlocks > m_PendingBlocks_list.GetCount()) {
-            count = iMaxBlocks - m_PendingBlocks_list.GetCount();
-        } else {
-            count = 0;
-        }
-
-		Requested_Block_Struct** toadd = new Requested_Block_Struct*[count];
-		if (reqfile->GetNextRequestedBlock(this,toadd,&count)){
-			for (int i = 0; i < count; i++)
-				m_DownloadBlocks_list.AddTail(toadd[i]);
+		if(iMaxBlocks > m_PendingBlocks_list.GetCount()) {
+            uint16 count = iMaxBlocks - m_PendingBlocks_list.GetCount();
+			Requested_Block_Struct** toadd = new Requested_Block_Struct*[count];
+			if (reqfile->GetNextRequestedBlock(this,toadd,&count)){
+				for (int i = 0; i < count; i++)
+					m_DownloadBlocks_list.AddTail(toadd[i]);
+			}
+			delete[] toadd;
 		}
-		delete[] toadd;
 	}
 
 	while (m_PendingBlocks_list.GetCount() < iMaxBlocks && !m_DownloadBlocks_list.IsEmpty())
