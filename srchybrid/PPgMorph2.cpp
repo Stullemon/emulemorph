@@ -200,7 +200,7 @@ void CPPgMorph2::OnBnClickedUpdatefakes()
 
 void CPPgMorph2::OnBnClickedResetfakes()
 {
-	CString strBuffer = _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.dat");
+	CString strBuffer = _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip");
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->SetWindowText(strBuffer);
 	memset(thePrefs.GetFakesDatVersion(), 0, sizeof(SYSTEMTIME));
 	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(_T(""));
