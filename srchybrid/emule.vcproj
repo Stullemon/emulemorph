@@ -160,7 +160,7 @@
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories=".,..;..\id3lib\include"
+				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;HAVE_SAPI_H;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -2828,10 +2828,10 @@
 				RelativePath="res\Transfer.ico">
 			</File>
 			<File
-				RelativePath="res\transfers.ico">
+				RelativePath=".\res\Mod\transfers.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\transfers.ico">
+				RelativePath="res\transfers.ico">
 			</File>
 			<File
 				RelativePath="res\TransferUpDown.ico">

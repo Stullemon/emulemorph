@@ -106,7 +106,12 @@ LONG CMiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS* pExceptionInfo)
 					if (bOK)
 					{
 						// Do *NOT* localize that string (in fact, do not use MFC to load it)!
+						//MORPH START - Changed by SiRoB
+						/*
 						_sntprintf(szResult, ARRSIZE(szResult), _T("Saved dump file to \"%s\".\r\n\r\nPlease send this file together with a detailed bug report to dumps@emule-project.net !\r\n\r\nThank you for helping to improve eMule."), szDumpPath);
+						*/
+						_sntprintf(szResult, ARRSIZE(szResult), _T("Saved dump file to \"%s\".\r\n\r\nPlease provide this file together with a DETAILED bug report to some Morph dev !\r\n\r\nThank you for helping to improve eMule."), szDumpPath);
+						//MORPH END  - Changed by SiRoB
 						lRetValue = EXCEPTION_EXECUTE_HANDLER;
 					}
 					else
