@@ -137,6 +137,8 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	InsertColumn(12,GetResString(IDS_FOLDER),LVCFMT_LEFT,220);
 	InsertColumn(13,GetResString(IDS_KNOWN),LVCFMT_LEFT,50);
 	InsertColumn(14,GetResString(IDS_CHECKFAKE),LVCFMT_LEFT,220); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+
+	SetAllIcons();
 	CreateMenues();
 
 	LoadSettings();
