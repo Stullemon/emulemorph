@@ -326,7 +326,7 @@ public:
 	bool    GetPreviewPrio() const { return m_bpreviewprio; }
 	void    SetPreviewPrio(bool in) { m_bpreviewprio=in; }
 
-    static bool RightFileHasHigherPrio(CPartFile* left, CPartFile* right);
+    static bool RightFileHasHigherPrio(const CPartFile* left, const CPartFile* right);
 
 	CDeadSourceList	m_DeadSourceList;
 	//Morph Start - added by AndCycle, ICS

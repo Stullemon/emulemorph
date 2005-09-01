@@ -6161,7 +6161,7 @@ void CPartFile::SetFileOpProgress(UINT uProgress)
 	m_uFileOpProgress = uProgress;
 }
 
-bool CPartFile::RightFileHasHigherPrio(CPartFile* left, CPartFile* right) {
+bool CPartFile::RightFileHasHigherPrio(const CPartFile* left, const CPartFile* right) {
     if(!right) {
         return false;
     }
