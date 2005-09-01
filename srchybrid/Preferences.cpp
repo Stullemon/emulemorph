@@ -2673,7 +2673,7 @@ void CPreferences::LoadPreferences()
 
 	if (strCurrVersion != strPrefsVersion){
 //MORPH START - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
-		if (!_tcsicmp(strPrefsVersion,_T("Morph")))
+		if (_tcsicmp(strPrefsVersion,_T("Morph")))
 //MORPH END  - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
 			m_bFirstStart = true;
 	}
@@ -3211,7 +3211,11 @@ void CPreferences::LoadPreferences()
 	m_bDontRemoveSpareTrickleSlot = ini.GetBool(_T("DontRemoveSpareTrickleSlot"), true);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	m_bFunnyNick = ini.GetBool(_T("DisplayFunnyNick"), true);//MORPH - Added by SiRoB, Optionnal funnynick display
 	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	if (!_tcsicmp(UpdateURLFakeList, _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes"))
+		UpdateURLFakeList = _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip")
 	_stprintf(UpdateURLIPFilter,_T("%s"),ini.GetString(_T("UpdateURLIPFilter"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip")));//MORPH START added by Yun.SF3: Ipfilter.dat update
+	if (!_tcsicmp(UpdateURLIPFilter, _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter"))
+		UpdateURLIPFilter = _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip")
 	_stprintf(UpdateURLIP2Country,_T("%s"),ini.GetString(_T("UpdateURLIP2Country"),_T("http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip")));//Commander - Added: IP2Country auto-updating
 
 	// khaos::categorymod+ Load Preferences
