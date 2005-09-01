@@ -2666,16 +2666,19 @@ void CPreferences::LoadPreferences()
 
 	CString strCurrVersion, strPrefsVersion;
 
+	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
+	/*
 	strCurrVersion = theApp.m_strCurVersionLong;
+	*/
+	strCurrVersion = theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]");
+	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
+	
 	strPrefsVersion = ini.GetString(_T("AppVersion"));
 
 	m_bFirstStart = false;
 
 	if (strCurrVersion != strPrefsVersion){
-//MORPH START - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
-		if (_tcsicmp(strPrefsVersion,_T("Morph")))
-//MORPH END  - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
-			m_bFirstStart = true;
+		m_bFirstStart = true;
 	}
 
 #ifdef _DEBUG
