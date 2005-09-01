@@ -539,8 +539,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						Socket_stat* stat = NULL;
 						if (m_stat_list.Lookup(socket, stat)) {
 							uint32 neededBytes = socket->GetNeededBytes(1000 > minFragSize);
-							if (neededBytes > 0 && GetTickCount()-socket->GetLastCalledSend() >= 1000) {
-								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(neededBytes, minFragSize);
+							if (neededBytes > 0 && GetTickCount()-socket->GetLastCalledSend() > 1000) {
+								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(minFragSize, minFragSize);
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 								if (lastSpentBytes) {
 									uint64 realByteSpent = lastSpentBytes*1000;
