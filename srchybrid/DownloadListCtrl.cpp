@@ -237,8 +237,8 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("RATING_NOTRATED")));
 	m_ImageList.Add(CTempIconLoader(_T("RATING_FAKE")));
 	m_ImageList.Add(CTempIconLoader(_T("RATING_POOR")));
-	m_ImageList.Add(CTempIconLoader(_T("RATING_GOOD")));
 	m_ImageList.Add(CTempIconLoader(_T("RATING_FAIR")));
+	m_ImageList.Add(CTempIconLoader(_T("RATING_GOOD")));
 	m_ImageList.Add(CTempIconLoader(_T("RATING_EXCELLENT")));
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
