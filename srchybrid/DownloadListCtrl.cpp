@@ -2978,9 +2978,9 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 				comp=0;
 			break;
 		case 13: // Mod
-			if (file1->GetCatResumeOrder() > file2->GetCatResumeOrder())
+			if (CPartFile::RightFileHasHigherPrio(file2, file1))
 				comp=1;
-			else if (file1->GetCatResumeOrder() < file2->GetCatResumeOrder())
+			else if (CPartFile::RightFileHasHigherPrio(file1, file2))
 				comp=-1;
 			else
 				comp=0;
