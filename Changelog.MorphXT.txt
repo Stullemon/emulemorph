@@ -1,14 +1,31 @@
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.x
 --------------------------------------
-FIXED  : (major) Definitly eradicate the systray crash related to minimule [SiRoB]
-FIXED  : (minor) Missed some code with the previous hideos update [SiRoB]
+FIXED  : (major) Patched Official minimule to eradicate the systray crash [SiRoB]
+FIXED  : (major) SafeHash Patch from SlugFiller mod (Borschtsch)
+FIXED  : (minor) Mixed icon in downloadclientlist [SiRoB]
+
+--------------------------------------
+Changelog for eMule 0.46c MorphXT v7.3
+--------------------------------------
+FIXED  : (major) Patched Official minimule to eradicate the systray crash [SiRoB]
+FIXED  : (major) Patched Official CreateBlockRequests causing crash reported by leuk_he [SiRoB] 
 FIXED  : (major) Missed code when merging to offical 0.46c causing unpredicable resulte [SiRoB]
+FIXED  : (minor) Missed some code with the previous hideos update [SiRoB]
+FIXED  : (minor) wrong display rating icon in transfer window [SiRoB]
 
 ADDED: Catch creditmet file loading exception for public key length greater than MAXPUBKEYSIZE [SiRoB]
 - this fix crash when a specific corruption occur in creditmet files.
 
-REMOVED: No more ReadWrite safeHash code [SiRoB]
+CHANGED: Reviewed every lib project setting to speed up the code [SiRoB]
+CHANGED: Updated zlib to 1.2.3 version [SiRoB]
+CHANGED: USC: Reviewed the way to consume bandwidth [SiRoB]
+CHANGED: USC: Try to keep always one trickle slot [SiRoB]
+CHANGED: pthread dll have benn turned into static lib thank's to leuk_he (no need to keep pthreadvc dll) [SiRoB]
+CHANGED: Changed crash dump directive to not show the emule dump email adress [SiRoB]
+CHANGED: Fake.dat file are now available in zip format so i changed the reset setting [SiRoB]
+
+REMOVED: No more ReadWriteLock safeHash code [SiRoB]
 
 TWEAKED: May the loading of creditmet file speed up [SiRoB]
 
