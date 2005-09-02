@@ -358,6 +358,13 @@ void CSharedFileList::CopySharedFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKno
 
 void CSharedFileList::FindSharedFiles()
 {
+	// SLUGFILLER: SafeHash
+	while (!waitingforhash_list.IsEmpty()) {
+		UnknownFile_Struct* nextfile = waitingforhash_list.RemoveHead();
+		delete nextfile;
+	}
+	// SLUGFILLER: SafeHash
+
 	// SLUGFILLER: SafeHash remove - only called after the download queue is created
 	/*
 	if (!m_Files_map.IsEmpty())
@@ -679,6 +686,36 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 
 	ASSERT( !IsFilePtrInList(file) );
 	ASSERT( !theApp.knownfiles->IsFilePtrInList(file) );
+
+	// SLUGFILLER: SafeHash
+	//Borschtsch
+	bool dontadd = true;
+	for (int i = 0; i < thePrefs.GetCatCount(); i++) {
+		Category_Struct* pCatStruct = thePrefs.GetCategory(i);
+		if (pCatStruct != NULL){
+			if (CompareDirectories(pCatStruct->incomingpath, file->GetPath()))
+				continue;
+			dontadd = false;
+			break;
+		}
+	}
+	if (dontadd) {
+		for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition(); pos != 0; ) {
+			if (CompareDirectories(thePrefs.shareddir_list.GetNext(pos), file->GetPath()))
+				continue;
+			dontadd = false;
+			break;
+		}
+	}
+	if (dontadd) {
+		RemoveFromHashing(file);
+		if (!IsFilePtrInList(file) && !theApp.knownfiles->IsFilePtrInList(file))
+			delete file;
+		else
+			ASSERT(0);
+		return;
+	}
+	// SLUGFILLER: SafeHash
 
 	CKnownFile* found_file = GetFileByID(file->GetFileHash());
 	if (found_file == NULL)
