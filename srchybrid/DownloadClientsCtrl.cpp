@@ -110,19 +110,19 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_ImageList.SetBkColor(CLR_NONE);
 	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkey")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientCompatible")));
-	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkeyPlus")));
-	m_ImageList.Add(CTempIconLoader(_T("ClientCompatiblePlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkey")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientCompatible")));
 	m_ImageList.Add(CTempIconLoader(_T("Friend")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientMLDonkey")));
-	m_ImageList.Add(CTempIconLoader(_T("ClientMLDonkeyPlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientMLDonkey")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkeyHybrid")));
-	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkeyHybridPlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientEDonkeyHybrid")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientShareaza")));
-	m_ImageList.Add(CTempIconLoader(_T("ClientShareazaPlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientShareaza")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientAMule")));
-	m_ImageList.Add(CTempIconLoader(_T("ClientAMulePlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientAMule")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientLPhant")));
-	m_ImageList.Add(CTempIconLoader(_T("ClientLPhantPlus")));
+	m_ImageList.Add(CTempIconLoader(_T("ClientLPhant")));
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey")));
