@@ -4459,7 +4459,7 @@ bool CPartFile::IsReadyForPreview() const
 
 	//MORPH START - Added by SiRoB, preview music file
 	if (IsMusic())
-		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && ((GetFreeDiskSpaceX(thePrefs.GetTempPath()) + 100000000) > (2*GetFileSize())))
+		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && ((GetFreeDiskSpaceX(GetTempPath()) + 100000000) > (2*GetFileSize())))
 			return true;
 	//MORPH END   - Added by SiRoB, preview music file
 	
