@@ -4459,7 +4459,7 @@ bool CPartFile::IsReadyForPreview() const
 
 	//MORPH START - Added by SiRoB, preview music file
 	if (IsMusic())
-		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && ((GetFreeDiskSpaceX(thePrefs.GetTempDir()) + 100000000) > (2*GetFileSize())))
+		if (GetStatus() != PS_COMPLETE &&  GetStatus() != PS_COMPLETING && GetFileSize()>1024 && GetCompletedSize()>1024 && ((GetFreeDiskSpaceX(thePrefs.GetTempPath()) + 100000000) > (2*GetFileSize())))
 			return true;
 	//MORPH END   - Added by SiRoB, preview music file
 	
@@ -6478,10 +6478,19 @@ void CPartFile::PartHashFinished(uint16 partnumber, bool corrupt)
 	uint32 partRange = (partnumber < GetPartCount()-1)?PARTSIZE:(m_nFileSize % PARTSIZE);
 	if (corrupt){
 		LogWarning(LOG_STATUSBAR, GetResString(IDS_ERR_PARTCORRUPT), partnumber, GetFileName());
+		//MORPH START - Changed by SiRoB, SafeHash Fix
+		/*
 		if (partRange > 0) {
 			partRange--;
 			AddGap((uint32)PARTSIZE*partnumber, (uint32)PARTSIZE*partnumber + partRange);
 		}
+		*/
+		if (partRange > 0)
+			partRange--;
+		else
+			partRange = PARTSIZE - 1;
+		AddGap((uint32)PARTSIZE*partnumber, (uint32)PARTSIZE*partnumber + partRange);
+		//MORPH END   - Changed by SiRoB, SafeHash Fix
 
 		// add part to corrupted list, if not already there
 		if (!IsCorruptedPart(partnumber))
@@ -6500,12 +6509,21 @@ void CPartFile::PartHashFinished(uint16 partnumber, bool corrupt)
 		if (thePrefs.GetVerbose())
 			AddDebugLogLine(DLP_VERYLOW, false, _T("Finished part %u of \"%s\""), partnumber, GetFileName());
 
-		// tell the blackbox about the verified data
-		//MORPH START - Added by SiRoB, SafeHash -Fix-
+		//MORPH START - Changed by SiRoB, SafeHash Fix
+		/*
+		if (partRange > 0) {
+			partRange--;
+
+			// tell the blackbox about the verified data
+			m_CorruptionBlackBox.VerifiedData((uint32)PARTSIZE * partnumber, (uint32)PARTSIZE*partnumber + partRange);
+		}
+		*/
 		if (partRange > 0)
 			partRange--;
-		//MORPH END   - Added by SiRoB, SafeHash -Fix-
+		else
+			partRange = PARTSIZE - 1;
 		m_CorruptionBlackBox.VerifiedData((uint32)PARTSIZE * partnumber, (uint32)PARTSIZE*partnumber + partRange);
+		//MORPH END   - Added by SiRoB, SafeHash -Fix-
 
 		// if this part was successfully completed (although ICH is active), remove from corrupted list
 		POSITION posCorrupted = corrupted_list.Find(partnumber);
@@ -6545,10 +6563,19 @@ void CPartFile::PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt)
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Processing AICH Recovery data: The part (%u) got completed while recovering - but MD4 says it corrupt! Setting hashset to error state, deleting part"), partnumber);
 		// now we are fu... unhappy
 		m_pAICHHashSet->SetStatus(AICH_ERROR);
+		//MORPH START - Changed by SiRoB, SafeHash Fix
+		/*
 		if (partRange > 0) {
 			partRange--;
 			AddGap((uint32)PARTSIZE*partnumber, (uint32)PARTSIZE*partnumber + partRange);
 		}
+		*/
+		if (partRange > 0)
+			partRange--;
+		else
+			partRange = PARTSIZE - 1;
+		AddGap((uint32)PARTSIZE*partnumber, (uint32)PARTSIZE*partnumber + partRange);
+		//MORPH END   - Changed by SiRoB, SafeHash Fix
 		ASSERT( false );
 
 		// Update met file - gaps data changed
@@ -6590,12 +6617,22 @@ void CPartFile::ParseICHResult()
 		thePrefs.Add2SessionPartsSavedByICH(1);
 
 		uint32 uRecovered = GetTotalGapSizeInPart(partnumber);
+		//MORPH START - Changed by SiRoB, Fix
+		/*
 		if (partRange > 0) {
 			partRange--;
 			FillGap((uint32)PARTSIZE*partnumber, (uint32)PARTSIZE*partnumber + partRange);
 			RemoveBlockFromList((uint32)PARTSIZE*partnumber, (uint32)PARTSIZE*partnumber + partRange);
 		}
-
+		*/
+		if (partRange > 0)
+			partRange--;
+		else
+			partRange = PARTSIZE - 1;
+		FillGap((uint32)PARTSIZE*partnumber, (uint32)PARTSIZE*partnumber + partRange);
+		RemoveBlockFromList((uint32)PARTSIZE*partnumber, (uint32)PARTSIZE*partnumber + partRange);
+		//MORPH END   - Changed by SiRoB, Fix
+		
 		// tell the blackbox about the verified data
 		m_CorruptionBlackBox.VerifiedData((uint32)PARTSIZE * partnumber, (uint32)PARTSIZE*partnumber + partRange);
 
@@ -6644,7 +6681,7 @@ uint16 CPartHashThread::SetFirstHash(CPartFile* pOwner)
 	m_pOwner = pOwner;
 	m_ICHused = false;
 	m_AICHRecover = false;
-	directory = thePrefs.GetTempDir();
+	directory = pOwner->GetTempPath();
 	filename = RemoveFileExtension(pOwner->GetPartMetFileName());
 
 	if (!theApp.emuledlg->IsRunning())	// Don't start any last-minute hashing
@@ -6666,7 +6703,7 @@ void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICH
 	m_pOwner = pOwner;
 	m_ICHused = ICHused;
 	m_AICHRecover = AICHRecover;
-	directory = thePrefs.GetTempDir();
+	directory = pOwner->GetTempPath();
 	filename = RemoveFileExtension(pOwner->GetPartMetFileName());
 
 	if (!theApp.emuledlg->IsRunning())	// Don't start any last-minute hashing
