@@ -2908,7 +2908,10 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 			comp=CompareUnsigned(file1->GetDownPriority(), file2->GetDownPriority());
 			break;
 		case 8: //Status asc 
+			/*
 			comp=CompareUnsigned(file1->getPartfileStatusRang(),file2->getPartfileStatusRang());
+			*/
+			comp=CompareUnsigned(file2->getPartfileStatusRang(),file1->getPartfileStatusRang());
 			break;
 		case 9: //Remaining Time asc
 		{
