@@ -759,7 +759,7 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool re
 			throw CString(GetResString(IDS_ERR_WRONGFILEID)+ _T(" (ProcessFileIncStatus)"));	
 		}
 	}
-
+	m_nPartCount = data->ReadUInt16();
 	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 	/*
 	if (m_abyIncPartStatus) {
@@ -775,21 +775,31 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool re
 	}
 	m_abyIncPartStatus = NULL;
 	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-	if (reqfile->GetPartCount() != m_nPartCount){
-		throw GetResString(IDS_ERR_WRONGPARTNUMBER);
+	if (!m_nPartCount){
+		m_nPartCount = reqfile->GetPartCount();
+		m_abyIncPartStatus = new uint8[m_nPartCount];
+		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
+		m_IncPartStatus_list.SetAt(reqfile, m_abyIncPartStatus);
+		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
+		memset(m_abyIncPartStatus,1,m_nPartCount);
 	}
-	m_abyIncPartStatus = new uint8[m_nPartCount];
-	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-	m_IncPartStatus_list.SetAt(reqfile, m_abyIncPartStatus);
-	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-	uint16 done = 0;
-	while (done != m_nPartCount){
-		uint8 toread = data->ReadUInt8();
-		for (sint32 i = 0;i != 8;i++){
-			m_abyIncPartStatus[done] = ((toread>>i)&1)? 1:0; 	
-			done++;
-			if (done == m_nPartCount)
-				break;
+	else{
+		if (reqfile->GetPartCount() != m_nPartCount){
+			throw GetResString(IDS_ERR_WRONGPARTNUMBER);
+		}
+		m_abyIncPartStatus = new uint8[m_nPartCount];
+		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
+		m_IncPartStatus_list.SetAt(reqfile, m_abyIncPartStatus);
+		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
+		uint16 done = 0;
+		while (done != m_nPartCount){
+			uint8 toread = data->ReadUInt8();
+			for (sint32 i = 0;i != 8;i++){
+				m_abyIncPartStatus[done] = ((toread>>i)&1)? 1:0; 	
+				done++;
+				if (done == m_nPartCount)
+					break;
+			}
 		}
 	}
 

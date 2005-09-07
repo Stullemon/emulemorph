@@ -4,6 +4,9 @@ Changelog for eMule 0.46c MorphXT v7.x
 FIXED  : (major) Patched Official minimule to eradicate the systray crash [SiRoB]
 FIXED  : (major) SafeHash Patch from SlugFiller mod (Borschtsch)
 FIXED  : (minor) Mixed icon in downloadclientlist [SiRoB]
+FIXED  : (major) Rollback code arround ICS feature (reason of failed upload & download) [SiRoB]
+
+CHANGED: Turned back the right sorting of the file status column [SiRoB] 
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.3
