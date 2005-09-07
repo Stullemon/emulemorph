@@ -650,7 +650,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									if (stat->realBytesToSpend > max(999, ClientDataRate[classID]))
 										stat->realBytesToSpend = max(999, ClientDataRate[classID]);
 									DWORD busytime = GetTickCount() - socket->GetBusyTimeSince();
-									if ( busytime > 0 && busytime <= timeSinceLastLoop)
+									if ( busytime > 0 && busytime <= 150)
 										++numberofshortbusyslot;
 									else if (busytime > 3000)
 										++numberoflongbusyslot;
