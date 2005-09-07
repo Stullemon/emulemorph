@@ -50,7 +50,7 @@ bool CSourceSaver::Process(CPartFile* file, int maxSourcesToSave) // return fals
 {
 	if ((int)(::GetTickCount() - m_dwLastTimeSaved) > RESAVETIME) {
 		TCHAR szslsfilepath[_MAX_PATH];
-		_tmakepath(szslsfilepath,NULL,(CString)thePrefs.GetTempDir()+_T("\\Source Lists"), file->GetPartMetFileName(),_T(".txtsrc"));
+		_tmakepath(szslsfilepath,NULL,(CString)file->GetTempPath()+_T("\\Source Lists"), file->GetPartMetFileName(),_T(".txtsrc"));
 	
 		//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 		//if (file->GetAvailableSrcCount() > 100 && file->GetDownPriority() < PR_HIGH)
@@ -82,7 +82,7 @@ void CSourceSaver::DeleteFile(CPartFile* file)
 {
 	TCHAR szslsfilepath[_MAX_PATH];
 	// khaos::kmod+ Source Lists directory
-	_tmakepath(szslsfilepath,NULL,(CString)thePrefs.GetTempDir()+_T("\\Source Lists"), file->GetPartMetFileName(),_T(".txtsrc"));
+	_tmakepath(szslsfilepath,NULL,(CString)file->GetTempPath()+_T("\\Source Lists"), file->GetPartMetFileName(),_T(".txtsrc"));
 	if (_tremove(szslsfilepath)) if (errno != ENOENT)
 		AddLogLine(true, _T("Failed to delete 'Temp\\Source Lists\\%s.txtsrc', you will need to do this by hand."), file->GetPartMetFileName());    
 }
