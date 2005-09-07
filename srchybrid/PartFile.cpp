@@ -4466,7 +4466,7 @@ bool CPartFile::IsReadyForPreview() const
 	if (thePrefs.IsMoviePreviewBackup())
 	{
 		//MORPH - Changed by SiRoB, Authorize preview of files with 2 chunk available
-		return !( (GetStatus() != PS_READY && GetStatus() != PS_PAUSED) 
+		return !( GetStatus(true) != PS_READY 
 				|| m_bPreviewing || GetPartCount() < 2 || !IsMovie() || (GetFreeDiskSpaceX(GetTempPath()) + 100000000) < GetFileSize()
 				|| ( !IsComplete(0,PARTSIZE-1, false) || !IsComplete(PARTSIZE*(GetPartCount()-1),GetFileSize()-1, false)));
 	}
@@ -4531,8 +4531,8 @@ bool CPartFile::IsReadyForPreview() const
 			return true;
 		}
 		else{
-			return !((GetStatus() != PS_READY && GetStatus() != PS_PAUSED) 
-				    || m_bPreviewing || GetPartCount() < 2 || !IsMovie() || !IsComplete(0,PARTSIZE-1, false)); 
+			return !(GetStatus(true) != PS_READY 
+				|| m_bPreviewing || GetPartCount() < 2 || !IsMovie() || !IsComplete(0,PARTSIZE-1, false)); 
 		}
 	}
 }
@@ -6594,6 +6594,11 @@ void CPartFile::PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt)
 			SetStatus(PS_READY);
 			if (theApp.emuledlg->IsRunning())	// may be called during shutdown!
 				theApp.sharedfiles->SafeAddKFile(this);
+		}
+
+		if (!m_PartsHashing){
+			// Update met file - file fully hashed
+			SavePartFile();
 		}
 
 		if (theApp.emuledlg->IsRunning()){
