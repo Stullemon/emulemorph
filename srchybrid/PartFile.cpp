@@ -3712,6 +3712,10 @@ BOOL CPartFile::PerformFileComplete()
 
 		paused = true;
 		stopped = true;
+		//MORPH START - Addezd by SiRoB, Make the permanent handel open again
+		if (!m_hpartfile.Open(strPartfilename, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan))
+			LogError(LOG_STATUSBAR, _T("Failed to reopen partfile: %s"),strPartfilename);
+		//MORPH END   - Addezd by SiRoB, Make the permanent handel open again
 		SetStatus(PS_ERROR);
 		m_bCompletionError = true;
 		SetFileOp(PFOP_NONE);
