@@ -459,15 +459,15 @@ void CMuleListCtrl::SetSortArrow(int iColumn, ArrowType atType) {
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 
 	if(iColumn != m_iCurrentSortItem) {
-		pHeaderCtrl->GetItem(m_iCurrentSortItem, &headerItem);
+		pHeaderCtrl->GetItem(m_iCurrentSortItem & 63, &headerItem); //MORPH - Changed by SiRoB, DLsortFix: it's ok until we have not more than 28 columns
 		headerItem.fmt &= ~(HDF_IMAGE | HDF_BITMAP_ON_RIGHT);
-		pHeaderCtrl->SetItem(m_iCurrentSortItem, &headerItem);
+		pHeaderCtrl->SetItem(m_iCurrentSortItem & 63, &headerItem); //MORPH - Changed by SiRoB, DLsortFix: it's ok until we have not more than 28 columns
 		m_iCurrentSortItem = iColumn;
 		m_imlHeaderCtrl.DeleteImageList();
 	}
 
 	//place new arrow unless we were given an invalid column
-	if(iColumn >= 0 && pHeaderCtrl->GetItem(iColumn, &headerItem)) {
+	if(iColumn >= 0 && pHeaderCtrl->GetItem(iColumn & 63, &headerItem)) { //MORPH - Changed by SiRoB, DLsortFix: it's ok until we have not more than 28 columns
 		m_atSortArrow = atType;
 
 		HINSTANCE hInstRes = AfxFindResourceHandle(MAKEINTRESOURCE(m_atSortArrow), RT_BITMAP);
@@ -507,7 +507,7 @@ void CMuleListCtrl::SetSortArrow(int iColumn, ArrowType atType) {
 		headerItem.mask |= HDI_IMAGE;
 		headerItem.fmt |= HDF_IMAGE | HDF_BITMAP_ON_RIGHT;
 		headerItem.iImage = 0;
-		pHeaderCtrl->SetItem(iColumn, &headerItem);
+		pHeaderCtrl->SetItem(iColumn & 63, &headerItem); //MORPH - Changed by SiRoB, DLsortFix: it's ok until we have not more than 28 columns
 	}
 }
 
