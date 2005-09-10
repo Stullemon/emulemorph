@@ -17,14 +17,15 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
+//MORPH START - Added by SiRoB, [-modname-]
+//START - This part should not be changed in anyway
 #define MOD_VERSION_MJR		7
 #define MOD_VERSION_MIN		3
 #define MOD_VERSION_BUILD   0
-
-// this one is sent as the mod ID
-#define	MOD_VERSION			_T("MorphXT")	// [SLUGFILLER: -modID-]
-// this one is added to eMule name every time it is displayed
+#define	MOD_VERSION			_T("MorphXT")
 #define	MOD_VERSION_LONG	_T("MorphXT v")
+//END - This part should not be changed in anyway
 
-//MORPH END  - Added by SiRoB, [itsonlyme: -modname-]
+#define	MOD_MOD_VERSION		_T("") //Use this to define your version based on MorphXT mod
+
+//MORPH END  - Added by SiRoB, [-modname-]

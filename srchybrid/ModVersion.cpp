@@ -29,3 +29,4 @@ const UINT CemuleApp::m_nMVersionMin = MOD_VERSION_MIN;
 const UINT CemuleApp::m_nMVersionBld = MOD_VERSION_BUILD;
 const TCHAR CemuleApp::m_szMVersionLong[] = MOD_VERSION_LONG;
 const TCHAR CemuleApp::m_szMVersion[] = MOD_VERSION;
+const TCHAR CemuleApp::m_szMMVersion[] = MOD_MOD_VERSION;

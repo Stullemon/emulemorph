@@ -250,12 +250,16 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 
 	EnableHtmlHelp();
 
-	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
+	//MORPH START - Added by SiRoB, [-modname-]
 	m_strModVersion = CemuleApp::m_szMVersion;
 	m_strModVersion.AppendFormat(_T(" %u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
+	if (CemuleApp::m_szMMVersion[0]!=0)
+		m_strModVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	m_strModLongVersion = CemuleApp::m_szMVersionLong;
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
-	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
+	if (CemuleApp::m_szMMVersion[0]!=0)
+		m_strModLongVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
+	//MORPH END   - Added by SiRoB, [-modname-]
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	m_UPnP_IGDControlPoint = CUPnP_IGDControlPoint::GetInstance();
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]

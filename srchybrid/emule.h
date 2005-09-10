@@ -126,6 +126,7 @@ public:
 	static const UINT	m_nMVersionBld;
 	static const TCHAR	m_szMVersionLong[];
 	static const TCHAR	m_szMVersion[];
+	static const TCHAR	m_szMMVersion[];
 	CString		m_strModVersion;
 	CString		m_strModLongVersion;
 	//MORPH END   - Added by SiRoB, [-modname-]
