@@ -224,7 +224,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 
 		// EastShare START - Added by TAHO, new Credit System //Modified by Pretender
 		case CS_EASTSHARE:{
-			result = (IdentState == IS_NOTAVAILABLE) ? 80 : 100;
+			result = 100;
 			
 			result += (float)((double)GetDownloadedTotal()/174762.67 - (double)GetUploadedTotal()/524288); //Modefied by Pretender - 20040120
 			
