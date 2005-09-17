@@ -422,12 +422,6 @@ void CMiniMule::OnNavigateComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 void CMiniMule::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 {
 	CCounter cc(m_iInCallback);
-	if (theApp.emuledlg->m_pMiniMule == NULL){
-		// FIX ME
-		// apperently in some rare cases (high cpu load, fast double clicks) this function is called when the object is destroyed already
-		ASSERT( false );
-		return;
-	}
 
 	TRACE(_T("%hs: %s\n"), __FUNCTION__, pszUrl);
 	// If the HTML file contains 'OnLoad' scripts, the HTML DOM is fully accessible 
