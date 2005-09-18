@@ -759,7 +759,7 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool re
 			throw CString(GetResString(IDS_ERR_WRONGFILEID)+ _T(" (ProcessFileIncStatus)"));	
 		}
 	}
-	m_nPartCount = data->ReadUInt16();
+	uint16 nED2KPartCount = data->ReadUInt16();
 	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 	/*
 	if (m_abyIncPartStatus) {
@@ -775,7 +775,7 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool re
 	}
 	m_abyIncPartStatus = NULL;
 	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-	if (!m_nPartCount){
+	if (!nED2KPartCount){
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyIncPartStatus = new uint8[m_nPartCount];
 		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
@@ -784,7 +784,7 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool re
 		memset(m_abyIncPartStatus,1,m_nPartCount);
 	}
 	else{
-		if (reqfile->GetPartCount() != m_nPartCount){
+		if (reqfile->GetPartCount() != nED2KPartCount){
 			throw GetResString(IDS_ERR_WRONGPARTNUMBER);
 		}
 		m_abyIncPartStatus = new uint8[m_nPartCount];
