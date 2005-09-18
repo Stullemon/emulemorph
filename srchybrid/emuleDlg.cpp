@@ -350,7 +350,7 @@ BOOL CemuleDlg::OnInitDialog()
 		ShowSplash();
 
 	//Commander - Added: Startupsound - Start
-	if (thePrefs.UseStartupSound() && !m_bStartMinimized){
+	if (thePrefs.UseStartupSound()){
 		if(PathFileExists(thePrefs.GetConfigDir() + _T("startup.wav"))) 
 			PlaySound(thePrefs.GetConfigDir() + _T("startup.wav"), NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
 		else
@@ -607,6 +607,11 @@ BOOL CemuleDlg::OnInitDialog()
 			wp.showCmd = SW_SHOWNORMAL;
 		m_bStartMinimizedChecked = true;
 	}
+	//MORPH - Added by SiRoB, Invisible Mode
+	if (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart())
+		ToggleHide();
+	else
+	//MORPH - Added by SiRoB, Invisible Mode
 	SetWindowPlacement(&wp);
 
 	if (thePrefs.GetWSIsEnabled())
@@ -1922,18 +1927,15 @@ void CemuleDlg::OnClose()
 	delete theApp.webserver;		theApp.webserver = NULL;
 	delete theApp.m_pPeerCache;		theApp.m_pPeerCache = NULL;
 	delete theApp.m_pFirewallOpener;theApp.m_pFirewallOpener = NULL;
+	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
+	delete theApp.wapserver;		theApp.wapserver = NULL;
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	//EastShare Start - added by AndCycle, IP to Country
 	delete theApp.ip2country;		theApp.ip2country = NULL;
 	//EastShare End   - added by AndCycle, IP to Country
-	delete theApp.uploadBandwidthThrottler; theApp.uploadBandwidthThrottler = NULL;
-	delete theApp.lastCommonRouteFinder; theApp.lastCommonRouteFinder = NULL;
-
-	//MORPH - Added by SiRoB, More clean :|
 	delete theApp.FakeCheck;		theApp.FakeCheck = NULL;
-        
-    //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
-	delete theApp.wapserver;		theApp.wapserver = NULL;
-	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
+    delete theApp.uploadBandwidthThrottler; theApp.uploadBandwidthThrottler = NULL;
+	delete theApp.lastCommonRouteFinder; theApp.lastCommonRouteFinder = NULL;
 
 	thePrefs.Uninit();
 	theApp.m_app_state = APP_STATE_DONE;
@@ -2172,7 +2174,10 @@ void CemuleDlg::RestoreWindow()
 		preferenceswnd->BringWindowToTop();
 		return;
 	}
+	//MORPH - Changed by SiRoB, Commented due to desynchro between m_bTrayIconVisible and systray state
+	/*
 	if (TrayIsVisible())
+	*/
 		TrayHide();
 
 	DestroyMiniMule();
@@ -3536,8 +3541,7 @@ LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)
 void CemuleDlg::ToggleHide()
 {
 	b_HideApp = true;
-	b_TrayWasVisible = TrayIsVisible();
-	TrayHide();
+	b_TrayWasVisible = TrayHide();
 	ShowWindow(SW_HIDE);
 }
 void CemuleDlg::ToggleShow()
