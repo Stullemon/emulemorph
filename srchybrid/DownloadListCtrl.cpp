@@ -820,7 +820,67 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			}
 		case 13: // Resume Mod
 			{
-				buffer.Format(_T("%u"), lpPartFile->GetCatResumeOrder());
+				buffer = _T("");
+				//MORPH START - Added by SiRoB, ForcedA4AF
+				if (thePrefs.UseSmartA4AFSwapping() && lpPartFile->GetStatus() != PS_PAUSED)
+				{
+					if (lpPartFile == theApp.downloadqueue->forcea4af_file) {
+						if (buffer.IsEmpty() == false) buffer.Append(_T(", "));					
+						buffer.AppendFormat(_T("%s"), GetResString(IDS_A4AF_FORCEALL));
+					}
+					if (lpPartFile->ForceA4AFOff()) {
+						if (buffer.IsEmpty() == false) buffer.Append(_T(", "));
+						buffer.AppendFormat(_T("%s"), GetResString(IDS_A4AF_OFFFLAG));
+					}
+					if (lpPartFile->ForceAllA4AF()) {
+						if (buffer.IsEmpty() == false) buffer.Append(_T(", "));
+						buffer.AppendFormat(_T("%s"), GetResString(IDS_A4AF_ONFLAG));
+					}
+				}
+				//MORPH END   - Added by SiRoB, ForcedA4AF
+				Category_Struct* ActiveCat=thePrefs.GetCategory(theApp.emuledlg->transferwnd->GetActiveCategory());
+				Category_Struct* curCat=thePrefs.GetCategory(lpPartFile->GetCategory());
+				if (ActiveCat->viewfilters.nFromCats == 0) {
+					if (buffer.IsEmpty() == false) buffer.Append(_T(", "));
+					switch (curCat->prio) {
+						case PR_LOW:
+							buffer.AppendFormat(_T("%s"), GetResString(IDS_PRIOLOW));
+							break;
+						case PR_NORMAL:
+							buffer.AppendFormat(_T("%s"), GetResString(IDS_PRIONORMAL));
+							break;
+						case PR_HIGH:
+							buffer.AppendFormat(_T("%s"), GetResString(IDS_PRIOHIGH));
+							break;
+					}
+					//MORPH START - Added by SiRoB, Avanced A4AF
+					if (buffer.IsEmpty() == false) buffer.Append(_T(", "));
+					uint8 iA4AFMode = thePrefs.AdvancedA4AFMode();
+					if (iA4AFMode && curCat->iAdvA4AFMode)
+						iA4AFMode = curCat->iAdvA4AFMode;
+					else
+						buffer.Append(((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". "));
+					switch (iA4AFMode) {
+						case 0:
+							buffer.AppendFormat(_T("%s"), GetResString(IDS_A4AF_DISABLED));
+							break;
+						case 1:
+							buffer.AppendFormat(_T("%s"), GetResString(IDS_A4AF_BALANCE));
+							break;
+						case 2:
+							buffer.AppendFormat(_T("%s=%u: %s"), GetResString(IDS_CAT_COLORDER), lpPartFile->GetCatResumeOrder(), GetResString(IDS_A4AF_STACK));
+							break;
+					}
+
+					if (curCat->downloadInAlphabeticalOrder) {
+						if (buffer.IsEmpty() == false) buffer.Append(_T(", "));
+						buffer.AppendFormat(_T("%s"), GetResString(IDS_DOWNLOAD_ALPHABETICAL));
+					}
+				} else {
+					if (buffer.IsEmpty() == false) buffer.Append(_T(", "));
+					buffer.AppendFormat(_T("%s=%u"), GetResString(IDS_CAT_COLORDER), lpPartFile->GetCatResumeOrder());
+				}
+				//MORPH END   - Added by SiRoB, Avanced A4AF
 				dc->DrawText(buffer, buffer.GetLength(), const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
 				break;
 			}
@@ -2727,10 +2787,10 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	}
 	*/
 	//MORPH END   - Removed by SiRoB, Remain time and size Columns have been splited
-	bool sortAscending = (sortItem != pNMListView->iSubItem/* + userSort*/) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
+	bool sortAscending = (sortItem != (pNMListView->iSubItem + userSort)) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
 
 	// Item is column clicked
-	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix - Ctrl sorts sources only
+	sortItem = pNMListView->iSubItem + userSort;	//MORPH - Changed by SiRoB, DLsortFix Ctrl sorts sources only
 	UpdateSortHistory(sortItem + (sortAscending ? 0:100), 100);
 
 	// Save new preferences
@@ -2750,7 +2810,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100) + adder );
 	*/
-	SetSortArrow(pNMListView->iSubItem, sortAscending);	// SLUGFILLER: DLsortFix - Use column number, not sort param
+	SetSortArrow(sortItem, sortAscending);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	//MORPH END  - Changed by SiRoB, Remain time and size Columns have been splited
 	*pResult = 0;
@@ -2908,6 +2968,7 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 			comp=CompareUnsigned(file1->GetDownPriority(), file2->GetDownPriority());
 			break;
 		case 8: //Status asc 
+			//MORPH 
 			/*
 			comp=CompareUnsigned(file1->getPartfileStatusRang(),file2->getPartfileStatusRang());
 			*/
