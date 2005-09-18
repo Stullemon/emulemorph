@@ -462,7 +462,7 @@ bool CWebCacheUpSocket::ProcessFirstHttpGet( const char* header, UINT uSize )
 	int iSizeBody = 0;
 	ClearHttpHeaders();
 	ProcessHttpHeaderPacket(header, uSize, pBody, iSizeBody);
-	uint32 id;
+	uint32 id = 0; //WebCache Fix
 	for (int i = 0; i < m_astrHttpHeaders.GetCount(); i++)
 	{
 		const CStringA& rstrHdr = m_astrHttpHeaders.GetAt(i);
@@ -782,7 +782,12 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 		return HTTP_STATUS_FORBIDDEN;
 	}
 
+	//MORPH START -  Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* pUploadFile = theApp.sharedfiles->GetFileByID(aucUploadFileID);
+	*/
+	CKnownFile* pUploadFile = CheckAndGetReqUpFile();
+	//MORPH END   -  Changed by SiRoB, Optimization requpfile
 	if (pUploadFile == NULL){
 		DebugHttpHeaders(astrHeaders);
 		return HTTP_STATUS_NOT_FOUND;
