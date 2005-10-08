@@ -450,6 +450,10 @@ public:
 
 	void			UnscheduleForRemoval() {
 						m_bScheduledForRemoval = false;
+
+                        if(GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
+                            m_curSessionAmountNumber++;
+                        }
 					}
 
 	bool			IsScheduledForRemoval() const { return m_bScheduledForRemoval; }
@@ -645,7 +649,7 @@ public:
 	//MORPH START - Added by SiRoB, See chunk that we hide
 	uint8*			m_abyUpPartStatusHidden;
 	bool			m_bUpPartStatusHiddenBySOTN;
- 	//MORPH END   - Added by SiRoB, See chunk that we hide
+	//MORPH END   - Added by SiRoB, See chunk that we hide
 	CTypedPtrList<CPtrList, CPartFile*> m_OtherRequests_list;
 	CTypedPtrList<CPtrList, CPartFile*> m_OtherNoNeeded_list;
 	uint16			m_lastPartAsked;
@@ -781,9 +785,6 @@ public:
 	//this is used to replace all "GetPowerShared()" with "IsPBForPS()" in UploadQueue.cpp
 	bool	IsPBForPS() const;
 	//Morph End - added by AndCycle, take PayBackFirst have same class with PowerShare
-
-	//Morph - added by AndCycle, separate secure check
-	bool	IsSecure() const;
 
 	//Morph - added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue() const;
