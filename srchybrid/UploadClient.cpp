@@ -417,21 +417,14 @@ bool CUpDownClient::IsMoreUpThanDown() const{
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
 	*/
 	CKnownFile* currentReqFile = CheckAndGetReqUpFile();
-	return currentReqFile && currentReqFile->IsPartFile()==false && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure();
+	return currentReqFile && currentReqFile->IsPartFile()==false && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst();
 }
 //Morph End - added by AndCycle, Pay Back First
 //MORPH START - Added by SiRoB, Code Optimization
 bool CUpDownClient::IsMoreUpThanDown(const CKnownFile* file) const{
-	return !file->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure();
+	return !file->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst();
 }
 //MORPH END   - Added by SiRoB, Code Optimization
-
-//Morph Start - added by AndCycle, separate secure check
-bool CUpDownClient::IsSecure() const
-{
-	return credits && theApp.clientcredits->CryptoAvailable() && credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED;
-}
-//Morph End - added by AndCycle, separate secure check
 
 //MORPH START - Added by SiRoB, Code Optimization PBForPS()
 bool CUpDownClient::IsPBForPS() const
@@ -448,7 +441,7 @@ bool CUpDownClient::IsPBForPS() const
 		return false;
 	//-->Commun to both call
 	if (currentReqFile->GetPowerShared() || !currentReqFile->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst())
-		return IsSecure(); //<--Commun to both call
+		return true;
 	return false;
 }
 //MORPH END   - Added by SiRoB, Code Optimization PBForPS()
@@ -467,13 +460,13 @@ bool CUpDownClient::GetPowerShared() const {
 	*/
 	CKnownFile* currentReqFile = CheckAndGetReqUpFile();
 	//MORPH - Changed by SiRoB, Optimization requpfile
-	return currentReqFile && currentReqFile->GetPowerShared() && IsSecure();
+	return currentReqFile && currentReqFile->GetPowerShared();
 }
 //MORPH END - Added by Yun.SF3, ZZ Upload System
 
 //MORPH START - Added by SiRoB, Code Optimization
 bool CUpDownClient::GetPowerShared(const CKnownFile* file) const {
-	return file->GetPowerShared() && IsSecure();
+	return file->GetPowerShared();
 }
 //MORPH END   - Added by SiRoB, Code Optimization
 
@@ -495,7 +488,7 @@ public:
 void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
 	if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
-       m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 50*1024) { // the buffered data is large enough allready
+       m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 100*1024) { // the buffered data is large enough allready
 		return;
 	}
 
@@ -507,7 +500,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 	try{
         // Buffer new data if current buffer is less than 100 KBytes
 		while (!m_BlockRequests_queue.IsEmpty() &&
-			(m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 100*1024)) {
+			(m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 200*1024)) {
 
 			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
 			CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(currentblock->FileID);
@@ -747,7 +740,11 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			CSafeMemFile dataHttp(10240);
 			if (m_iHttpSendState == 0)
 			{
+				//MORPH - Changed by SiRoB, Optimization requpfile
+				/*
 				CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
+				*/
+				CKnownFile* srcfile = CheckAndGetReqUpFile();
 				CStringA str;
 				str.AppendFormat("HTTP/1.0 206\r\n");
 				str.AppendFormat("Content-Range: bytes %u-%u/%u\r\n", currentblock->StartOffset, currentblock->EndOffset - 1, srcfile->GetFileSize());
@@ -791,7 +788,11 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			CSafeMemFile dataHttp(10240);
 			if (m_iHttpSendState == 0) // yonatan - not sure it's wise to use this (also used by PC).
 			{
+				//MORPH - Changed by SiRoB, Optimization requpfile
+				/*
 				CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
+				*/
+				CKnownFile* srcfile = CheckAndGetReqUpFile();
 				CStringA str;
 //				str.AppendFormat("HTTP/1.1 200 OK\r\n"); // DFA
 				str.AppendFormat("HTTP/1.0 200 OK\r\n");
@@ -945,7 +946,10 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 
 	//MORPH START - Added by SiRoB, Optimization requpfile
 	requpfile = newreqfile;
-	requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
+	if (requpfile)
+		requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
+	else
+		requpfileid_lasttimeupdated = 0;
 	//MORPH END   - Added by SiRoB, Optimization requpfile
 
 	if (oldreqfile)
@@ -1050,12 +1054,12 @@ uint32 CUpDownClient::SendBlockData(){
 
         if(GetUploadState() == US_UPLOADING) {
             bool wasRemoved = false;
-            if(!IsScheduledForRemoval() && GetQueueSessionPayloadUp() > SESSIONMAXTRANS+1*1024 && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
-                m_dwLastCheckedForEvictTick = curTick;
-                wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
-            }
+            //if(!IsScheduledForRemoval() && GetQueueSessionPayloadUp() > SESSIONMAXTRANS+1*1024 && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
+            //    m_dwLastCheckedForEvictTick = curTick;
+            //    wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
+            //}
 
-            if(!IsScheduledForRemoval() && wasRemoved == false && GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
+            if(!IsScheduledForRemoval() && /*wasRemoved == false &&*/ GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
                 // Should we end this upload?
 
 				//EastShare Start - added by AndCycle, Pay Back First
@@ -1495,7 +1499,7 @@ void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUp
 //MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 //MORPH START - Adde by SiRoB, Optimization requpfile
 CKnownFile* CUpDownClient::CheckAndGetReqUpFile() const {
-	if (requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
+	if (requpfileid && requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
 		return theApp.sharedfiles->GetFileByID(requpfileid);
 		//requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
 	}
