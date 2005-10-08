@@ -152,8 +152,8 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 						uint32 nNewSize = length*10+300;
 						byte* unpack = new byte[nNewSize];
 						uLongf unpackedsize = nNewSize-2;
-						uint16 result = uncompress(unpack+2, &unpackedsize, buffer+2, length-2);
-						if (result == Z_OK)
+						int iZLibResult = uncompress(unpack+2, &unpackedsize, buffer+2, length-2);
+						if (iZLibResult == Z_OK)
 						{
 							unpack[0] = OP_WEBCACHEPROT;
 							unpack[1] = buffer[1];
@@ -162,12 +162,14 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 						else
 						{
 							delete[] unpack;
-							throw CString(_T("Failed to uncompress WebCache packet"));
+							CString strError;
+							strError.Format(_T("Failed to uncompress WebCache packet: zip error: %d (%hs)"), iZLibResult, zError(iZLibResult));
+							throw strError;
 						}
 						delete[] unpack;
 					}
 					else
-						throw CString(_T("Packet too short"));
+						throw CString(_T("Webcache protocol packet (compressed) too short"));
 					break;
 				}
 				//JP WEBCACHE START
@@ -176,7 +178,7 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 					if (length >= 2)
 						ProcessWebCachePacket(buffer+2, length-2, buffer[1], sockAddr.sin_addr.S_un.S_addr, ntohs(sockAddr.sin_port));
 					else
-						throw CString(_T("Packet too short"));
+						throw CString(_T("Webcache protocol packet too short"));
 					break;
 				}
 				//JP WEBCACHE END
@@ -357,7 +359,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, uint16 size, uint8 opco
 							((CPartFile*)reqfile)->WritePartStatus(&data_out, sender);	// SLUGFILLER: hideOS
 						else if (!reqfile->ShareOnlyTheNeed(&data_out, sender)) //wistily SOTN
 							if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
-								data_out.WriteUInt16(0);
+							data_out.WriteUInt16(0);
 					}
 					data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
 					if (thePrefs.GetDebugClientUDPLevel() > 0)
@@ -467,7 +469,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, uint16 size, uint8 opco
 				{
 					if (thePrefs.GetLogWebCacheEvents())
 					AddDebugLogLine( false, _T("Received WCBlock - UDP") );
-					CWebCachedBlock* newblock = new CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
+					CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
 				}
 			} 
 			else 
@@ -509,7 +511,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint16 size, ui
 				{
 					if (thePrefs.GetLogWebCacheEvents())
 					AddDebugLogLine( false, _T("Received WCBlock - UDP") );
-					CWebCachedBlock* newblock = new CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
+					CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
 				}
 			} 
 			else 
@@ -596,7 +598,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint16 size, ui
 							((CPartFile*)reqfile)->WritePartStatus(&data_out, sender);	// SLUGFILLER: hideOS
 						else if (!reqfile->ShareOnlyTheNeed(&data_out, sender)) //wistily SOTN
 							if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
-								data_out.WriteUInt16(0);
+							data_out.WriteUInt16(0);
 
 						data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
 						if (thePrefs.GetDebugClientUDPLevel() > 0)
