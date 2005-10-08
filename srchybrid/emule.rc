@@ -5236,8 +5236,8 @@ BEGIN
                             "Resume paused file only in the same category"
     IDS_A4AF_FORCEALL       "Get all A4AF"
     IDS_A4AF_FLAGS          "Advanced A4AF flags"
-    IDS_A4AF_ONFLAG         "Force A4AF On"
-    IDS_A4AF_OFFFLAG        "Force A4AF Off"
+    IDS_A4AF_ONFLAG         "Keep clients as A4AF"
+    IDS_A4AF_OFFFLAG        "Keep clients as source"
     IDS_INVERT              "Invert"
     IDS_COMPRESSIONGAIN     "Compressed"
 END
@@ -5596,34 +5596,38 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP         		"Universal Plug and Play (UPnP)"
-    IDS_UPNP_INIT   		"UPnP: Initiated on %s:%d, searching devices..."
-    IDS_UPNP_FAILEDINIT		"UPnP: Failed initiating UPnP on port %d [%s]"
-    IDS_UPNP_PUBLICIP		"UPnP: Your IP is a public internet IP, UPnP will be disabled"
-    IDS_UPNP_FAILEDREGISTER	"UPnP: Failed registering control point [%s]"
-    IDS_UPNP_ADDQUEUED		"UPnP: Action ""AddPortMapping"" queued until a device is found [%s]"
-    IDS_UPNP_NEWDEVICE		"UPnP: New compatible device found: %s"
-    IDS_UPNP_DEVICEREMOVED	"UPnP: Device removed: %s"
-    IDS_UPNP_PORTINUSE		"UPnP: Couldn't add mapping: ""%s"". The port %d is already mapped to other application (""%s"" on %s:%d). [%s]"
-    IDS_UPNP_ALREADYUPDATED "UPnP: The port mapping ""%s"" don't needs an update. [%s]"
-    IDS_UPNP_STATIC			"Static"
-    IDS_UPNP_DYNAMIC		"Dynamic"
-    IDS_UPNP_PORTUPDATED	"UPnP: Updated port mapping ""%s"" (%s). [%s]"
-    IDS_UPNP_PORTADDED		"UPnP: Added port mapping ""%s"" (%s). [%s]"
-    IDS_UPNP_ADDFAILED		"UPnP: Failed to add port mapping ""%s"" [%s] [%s]"
-    IDS_UPNP_DELETEFAILED	"UPnP: Failed to delete port mapping ""%s"". [%s] [%s]"
-    IDS_UPNP_PORTDELETED	"UPnP: Deleted port mapping ""%s"". [%s]"
-    IDS_UPNP_LOGEVENTS		"Log UPnP events"
-    IDS_UPNP_ENABLE			"Enable UPnP"
-    IDS_UPNP_ENABLEWEB		"Enable UPnP on web interface port"
-   IDS_RANDOMPORTS         "Random Ports"
-    IDS_MINPORT             "Min Port"
-    IDS_MAXPORT             "Max Port"
-    IDS_RANDOMPORTSRESETTIME "Random ports safe restart time (in seconds)"
+    IDS_UPNP                "Universal Plug and Play (UPnP)"
+    IDS_UPNP_INIT           "UPnP: Initiated on %s:%d, searching devices..."
+    IDS_UPNP_FAILEDINIT     "UPnP: Failed initiating UPnP on port %d [%s]"
+    IDS_UPNP_PUBLICIP       "UPnP: Your IP is a public internet IP, UPnP will be disabled"
+    IDS_UPNP_FAILEDREGISTER "UPnP: Failed registering control point [%s]"
+    IDS_UPNP_ADDQUEUED      "UPnP: Action ""AddPortMapping"" queued until a device is found [%s]"
+    IDS_UPNP_NEWDEVICE      "UPnP: New compatible device found: %s"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_UPNP_DEVICEREMOVED  "UPnP: Device removed: %s"
+    IDS_UPNP_PORTINUSE      "UPnP: Couldn't add mapping: ""%s"". The port %d is already mapped to other application (""%s"" on %s:%d). [%s]"
+    IDS_UPNP_ALREADYUPDATED "UPnP: The port mapping ""%s"" don't needs an update. [%s]"
+    IDS_UPNP_STATIC         "Static"
+    IDS_UPNP_DYNAMIC        "Dynamic"
+    IDS_UPNP_PORTUPDATED    "UPnP: Updated port mapping ""%s"" (%s). [%s]"
+    IDS_UPNP_PORTADDED      "UPnP: Added port mapping ""%s"" (%s). [%s]"
+    IDS_UPNP_ADDFAILED      "UPnP: Failed to add port mapping ""%s"" [%s] [%s]"
+    IDS_UPNP_DELETEFAILED   "UPnP: Failed to delete port mapping ""%s"". [%s] [%s]"
+    IDS_UPNP_PORTDELETED    "UPnP: Deleted port mapping ""%s"". [%s]"
+    IDS_UPNP_LOGEVENTS      "Log UPnP events"
+    IDS_UPNP_ENABLE         "Enable UPnP"
+    IDS_UPNP_ENABLEWEB      "Enable UPnP on web interface port"
+    IDS_RANDOMPORTS         "Random Ports"
+    IDS_MINPORT             "Min Port"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MAXPORT             "Max Port"
+    IDS_RANDOMPORTSRESETTIME "Random ports safe restart time (in seconds)"
     IDS_ICFSUPPORT          "Enable Windows Internet Connection Firewall (ICF) support"
     IDS_ICFSUPPORTFIRST     "eMule has detected Windows Internet Connection Firewall (ICF) running on your machine,\n\rDo you want eMule to automatically configure it? (Recomended)"
     IDS_ICF                 "Windows Internet Connection Firewall (ICF)"
