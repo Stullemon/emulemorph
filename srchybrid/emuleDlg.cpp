@@ -340,7 +340,11 @@ BOOL CemuleDlg::OnInitDialog()
 	m_bStartMinimized = thePrefs.GetStartMinimized();
 	if (!m_bStartMinimized)
 		m_bStartMinimized = theApp.DidWeAutoStart();
-
+	//MORPH - Added by SiRoB, Invisible Mode
+	if (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart())
+		m_bStartMinimized = true;
+	//MORPH - Added by SiRoB, Invisible Mode
+	
 	// temporary disable the 'startup minimized' option, otherwise no window will be shown at all
 	if (thePrefs.IsFirstStart())
 		m_bStartMinimized = false;
@@ -557,7 +561,7 @@ BOOL CemuleDlg::OnInitDialog()
 	if (m_bStartMinimized)
 	{
 		// To avoid the window flickering during startup we try to set the proper window show state right here.
-		if (*thePrefs.GetMinTrayPTR())
+		if (*thePrefs.GetMinTrayPTR() || thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart())//MORPH - Changed by SiRoB, Invisible Mode
 		{
 			// Minimize to System Tray
 			//
@@ -607,11 +611,6 @@ BOOL CemuleDlg::OnInitDialog()
 			wp.showCmd = SW_SHOWNORMAL;
 		m_bStartMinimizedChecked = true;
 	}
-	//MORPH - Added by SiRoB, Invisible Mode
-	if (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart())
-		ToggleHide();
-	else
-	//MORPH - Added by SiRoB, Invisible Mode
 	SetWindowPlacement(&wp);
 
 	if (thePrefs.GetWSIsEnabled())
@@ -1345,7 +1344,14 @@ void CemuleDlg::OnCancel()
 		if (*thePrefs.GetMinTrayPTR())
 		{
 			TrayShow();
+			//MORPH START - Added by SiRoB, Invisible Mode On Start up
+			/*
 			ShowWindow(SW_HIDE);
+			*/
+			if (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart()) {
+				ToggleHide();
+			}
+			//MORPH END   - Added by SiRoB, Invisible Mode On Start up
 		}
 		else
 		{
