@@ -388,7 +388,7 @@ int CSharedFilesCtrl::FindFile(const CKnownFile* pFile)
 void CSharedFilesCtrl::ReloadFileList()
 {
 	DeleteAllItems();
-	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+	//theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
 
 	CCKey bufKey;
 	CKnownFile* cur_file;
@@ -587,7 +587,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					case 10:
                 	    //MORPH START - Changed by SiRoB, Avoid misusing of powersharing
-						if (file->m_nCompleteSourcesCountLo == file->m_nCompleteSourcesCountHi)
+  						if (file->m_nCompleteSourcesCountLo == file->m_nCompleteSourcesCountHi)
 							buffer.Format(_T("%u (%u)"), file->m_nCompleteSourcesCountLo, file->m_nVirtualCompleteSourcesCount);
                 	    else if (file->m_nCompleteSourcesCountLo == 0)
 							buffer.Format(_T("< %u (%u)"), file->m_nCompleteSourcesCountHi, file->m_nVirtualCompleteSourcesCount);
@@ -822,7 +822,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CString buffer; //MORPH - added, for string format temp
 	int iPowerShareLimit = -1; //MORPH - Added by SiRoB, POWERSHARE Limit
 	int iHideOS = -1; //MORPH - Added by SiRoB, HIDEOS
-
+	
 	UINT uPrioMenuItem = 0;
 	UINT uPermMenuItem = 0; //MORPH - Added by SiRoB, showSharePermissions
 	UINT uPowershareMenuItem = 0; //MORPH - Added by SiRoB, Powershare
@@ -973,7 +973,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		else if (uSelectiveChunkMenuItem != uCurSelectiveChunkMenuItem)
 			uSelectiveChunkMenuItem = 0;
 		//MORPH END   - Added by SiRoB, HIDEOS
-		
+
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 		UINT uCurShareOnlyTheNeedMenuItem = 0;
 		if (pFile->GetShareOnlyTheNeed() == -1)
@@ -1059,7 +1059,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SharedFilesMenu.ModifyMenu(MP_SPREADBAR_DEFAULT, MF_STRING, MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
 	m_SharedFilesMenu.CheckMenuRadioItem(MP_SPREADBAR_DEFAULT, MP_SPREADBAR_ON, uSpreadbarMenuItem, 0);
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-
+	
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_HideOSMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SelectiveChunkMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
