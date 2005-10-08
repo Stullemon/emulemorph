@@ -206,7 +206,6 @@ void CKnownFile::Dump(CDumpContext& dc) const
 #endif
 
 CBarShader CKnownFile::s_ShareStatusBar(16);
-//MORPH START - Changed by SIRoB, Maella -Code Improvement-
 //MORPH START - Modified by SiRoB, Reduce ShareStatusBar CPU consumption
 void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) /*const*/
 { 
@@ -240,11 +239,10 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 	    	const COLORREF crMissing = RGB(255, 0, 0);
 		    s_ShareStatusBar.Fill(crMissing);
 
-			if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
+			if (!onlygreyrect) {
 				COLORREF crProgress;
 				COLORREF crHave;
 				COLORREF crPending;
-
 				if(bFlat) { 
 					crProgress = RGB(0, 150, 0);
 					crHave = RGB(0, 0, 0);
@@ -254,10 +252,21 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 					crHave = RGB(104, 104, 104);
 					crPending = RGB(255, 208, 0);
 				} 
+
+            uint32 tempCompleteSources = m_nCompleteSourcesCountLo;
+            if(tempCompleteSources > 0) {
+                tempCompleteSources--;
+            }
+
 				for (int i = 0; i < GetPartCount(); i++){
-					if(m_AvailPartFrequency[i] > 0 ){
-						COLORREF color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
-							s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
+					uint32 frequency = tempCompleteSources;
+                	if(!m_AvailPartFrequency.IsEmpty()) {
+                	    frequency = max(m_AvailPartFrequency[i], tempCompleteSources);
+	                }
+
+					if(frequency > 0 ){
+				 		COLORREF color = RGB(0, (22*(frequency-1) >= 210)? 0:210-(22*(frequency-1)), 255);
+						s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
 					}
 				}
 			}
@@ -277,8 +286,7 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
 	dc->BitBlt(rect->left, rect->top, iWidth, iHeight, &cdcStatus, 0, 0, SRCCOPY);
 	cdcStatus.SelectObject(hOldBitmap);
-} 
-//MORPH END - Changed by SiRoB, Maella -Code Improvement-
+}
 
 // SLUGFILLER: heapsortCompletesrc
 static void HeapSort(CArray<uint16,uint16> &count, uint32 first, uint32 last){
@@ -456,7 +464,7 @@ void CKnownFile::UpdatePartsInfo()
 		if((m_AvailPartFrequency[i]) < m_nVirtualCompleteSourcesCount)
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1 && iCompleteSourcesCountInfoReceived>1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount==0, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==0 && iCompleteSourcesCountInfoReceived>1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
 	m_bHideOSAuthorized = true;
@@ -1125,7 +1133,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 					else if(CmpED2KTagName(newtag->GetName(), FT_SELECTIVE_CHUNK) == 0)
 						SetSelectiveChunk(newtag->GetInt()<=1?newtag->GetInt():-1);
 					//MORPH END   - Added by SiRoB, HIDEOS
-					//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+				//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 					else if(CmpED2KTagName(newtag->GetName(), FT_SHAREONLYTHENEED) == 0)
 						SetShareOnlyTheNeed(newtag->GetInt()<=1?newtag->GetInt():-1);
 					//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -1387,18 +1395,6 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	file->Seek(0, CFile::end);
 
 	return true;
-}
-
-ULONGLONG GetCurrentTimeMilliSecs() {
-	SYSTEMTIME sysTime;
-	FILETIME fileTime;
-	ULARGE_INTEGER longTime;
-
-	GetSystemTime(&sysTime);
-	SystemTimeToFileTime(&sysTime, &fileTime);
-	longTime.QuadPart = (fileTime.dwHighDateTime<<32) | fileTime.dwLowDateTime;
-
-	return (ULONGLONG) longTime.QuadPart/10000;
 }
 
 void CKnownFile::CreateHash(CFile* pFile, UINT Length, uchar* pMd4HashOut, CAICHHashTree* pShaHashOut) const
@@ -2446,10 +2442,11 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (partspread[done] < hideOS)
+			if (partspread[done] < hideOS) {
 				towrite |= (1<<i);
 			//MORPH START - Added by SiRoB, See chunk that we hide
-			else
+				client->m_abyUpPartStatusHidden[done] = 0;
+			} else
 				client->m_abyUpPartStatusHidden[done] = 1;
 			//MORPH END   - Added by SiRoB, See chunk that we hide
 			done++;
@@ -2495,9 +2492,10 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] <= iMinAvailablePartFrenquencyPrev)
+			if (m_AvailPartFrequency[done] <= iMinAvailablePartFrenquencyPrev) {
 				towrite |= (1<<i);
-			else
+				client->m_abyUpPartStatusHidden[done] = 0;
+			} else
 				client->m_abyUpPartStatusHidden[done] = 1;
 			done++;
 			if (done == parts)
