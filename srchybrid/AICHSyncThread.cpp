@@ -241,8 +241,6 @@ int CAICHSyncThread::Run()
 				continue;
 			theApp.QueueLogLine(false, GetResString(IDS_AICH_CALCFILE), pCurFile->GetFileName());
 			if(!pCurFile->CreateAICHHashSetOnly())
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-			if(thePrefs.GetLogICHEvents()) //JP log ICH events
 				theApp.QueueDebugLogLine(false, _T("Failed to create AICH Hashset while sync. for file %s"), pCurFile->GetFileName());
 		}
 
@@ -251,8 +249,6 @@ int CAICHSyncThread::Run()
 			theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
 		sLock1.Unlock();
 	}
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-	if(thePrefs.GetLogICHEvents()) //JP log ICH events
 	theApp.QueueDebugLogLine(false, _T("AICHSyncThread finished"));
 	return 0;
 }
