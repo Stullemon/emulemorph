@@ -690,13 +690,17 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 	// SLUGFILLER: SafeHash
 	//Borschtsch
 	bool dontadd = true;
-	for (int i = 0; i < thePrefs.GetCatCount(); i++) {
-		Category_Struct* pCatStruct = thePrefs.GetCategory(i);
-		if (pCatStruct != NULL){
-			if (CompareDirectories(pCatStruct->incomingpath, file->GetPath()))
-				continue;
-			dontadd = false;
-			break;
+	if (!CompareDirectories(thePrefs.GetIncomingDir(), file->GetPath()))
+		dontadd = false;
+	if (dontadd) {
+		for (int i = 0; i < thePrefs.GetCatCount(); i++) {
+			Category_Struct* pCatStruct = thePrefs.GetCategory(i);
+			if (pCatStruct != NULL){
+				if (CompareDirectories(pCatStruct->incomingpath, file->GetPath()))
+					continue;
+				dontadd = false;
+				break;
+			}
 		}
 	}
 	if (dontadd) {
