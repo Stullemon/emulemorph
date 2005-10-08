@@ -234,10 +234,12 @@ void CClientReqSocket::Disconnect(LPCTSTR pszReason){
 		Safe_Delete();
 	else
 		if(client->Disconnected(pszReason, true)){
-			CUpDownClient* temp = client;
-			client->socket = NULL;
-			client = NULL;
-			delete temp;
+			if (client) {  //MORPH - Added by SiRoB, got a null client here
+				CUpDownClient* temp = client;
+				client->socket = NULL;
+				client = NULL;
+				delete temp;
+			}
 			Safe_Delete();
 		}
 		else{
@@ -481,7 +483,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 							((CPartFile*)reqfile)->WritePartStatus(&data, client);	// SLUGFILLER: hideOS
 						else if (!reqfile->ShareOnlyTheNeed(&data, client)) //wistily SOTN
 							if (!reqfile->HideOvershares(&data, client))	//Slugfiller: HideOS
-								data.WriteUInt16(0);
+							data.WriteUInt16(0);
 						Packet* packet = new Packet(&data);
 						packet->opcode = OP_FILESTATUS;
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -490,7 +492,8 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						SendPacket(packet,true);
 						//Morph Start - added by AndCycle, ICS
 					    // enkeyDEV: ICS - Send incomplete parts
-					    if (client->GetIncompletePartVersion() && reqfile->IsPartFile()) // netfinity: Don't send on complete files
+					    if (client->GetIncompletePartVersion() && reqfile->IsPartFile() &&  // netfinity: Don't send on complete files
+							reqfile->m_nVirtualCompleteSourcesCount <= 1) //Only send for extremly rare file
 					    {
 						    CSafeMemFile data(16+16);
 						    data.WriteHash16(reqfile->GetFileHash());
@@ -1260,7 +1263,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						// CHECK HANDSHAKE?
 						if (thePrefs.GetLogWebCacheEvents())
 						AddDebugLogLine( false, _T("Received WCBlock - TCP") );
-						CWebCachedBlock* newblock = new CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
+						new CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
 					}
 					break;
 				}
@@ -1421,7 +1424,8 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								
 								//Morph Start - added by AndCycle, ICS
 								// enkeyDev: ICS - Send incomplete parts
-								if (client->GetIncompletePartVersion() && reqfile->IsPartFile()) // netfinity: Don't send on complete files
+								if (client->GetIncompletePartVersion() && reqfile->IsPartFile() &&  // netfinity: Don't send on complete files
+									reqfile->m_nVirtualCompleteSourcesCount<=1) //Only send for extremly rare file
 					    		{
 									data_out.WriteUInt8(OP_FILEINCSTATUS);
 									if (reqfile->IsPartFile())
@@ -1648,8 +1652,8 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							}
 							// <--- enkeyDEV: ICS
 							//Morph End - added by AndCycle, ICS
-                                                        // MORPH START - Added by Commander, WebCache 1.2e
-                                                        // WebCache ////////////////////////////////////////////////////////////////////////////////////
+							// MORPH START - Added by Commander, WebCache 1.2e
+							// WebCache ////////////////////////////////////////////////////////////////////////////////////
 							// Superlexx - webcache - moved WC_TAG_WEBCACHENAME, WC_TAG_WEBCACHEID and WC_TAG_MASTERKEY here from the hello packet
 							case WC_TAG_WEBCACHENAME:
 							{
@@ -2158,12 +2162,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								sender->SetUpCompleteSourcesCount(nCompleteCountNew);
 								if (nCompleteCountLast != nCompleteCountNew)
 								{
-									//MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
-									if(reqfile->IsPartFile())
-										((CPartFile*)reqfile)->UpdatePartsInfo();
-									else
-									//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
-										reqfile->UpdatePartsInfo();
+									reqfile->UpdatePartsInfo();
 								}
 							}
 							CSafeMemFile data_out(128);
@@ -3188,7 +3187,7 @@ bool CClientReqSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, UI
 				// CHECK HANDSHAKE?
 				if (thePrefs.GetLogWebCacheEvents())
 					AddDebugLogLine( false, _T("Received WCBlock - TCP") );
-				CWebCachedBlock* newblock = new CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
+				CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
 			}
 			return true;
 		case OP_XPRESS_MULTI_HTTP_CACHED_BLOCKS:
