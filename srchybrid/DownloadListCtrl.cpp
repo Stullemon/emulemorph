@@ -2796,7 +2796,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	bool sortAscending = (sortItem != pNMListView->iSubItem + userSort) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
 
 	// Item is column clicked
-	sortItem = pNMListView->iSubItem + userSort;	//MORPH - Changed by SiRoB, DLsortFix Ctrl sorts sources only
+	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix - Ctrl sorts sources only
 	UpdateSortHistory(sortItem + (sortAscending ? 0:100), 100);
 
 	// Save new preferences

@@ -1,12 +1,30 @@
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.x
 --------------------------------------
-FIXED  : (major) Patched Official minimule to eradicate the systray crash [SiRoB]
 FIXED  : (major) SafeHash Patch from SlugFiller mod (Borschtsch)
-FIXED  : (minor) Mixed icon in downloadclientlist [SiRoB]
-FIXED  : (major) Rollback code arround ICS feature (reason of failed upload & download) [SiRoB]
+FIXED  : (minor) Mixed icon in downloadclientlist
+FIXED  : (major) Rollback code arround ICS feature
+FIXED  : (minor) Smart A4AF swaping
+FIXED  : (minor) Advanced A4AF management
+FIXED  : (minor) Shared Part column have been fixed (missed merging code from 0.46c)
 
-CHANGED: Turned back the right sorting of the file status column [SiRoB] 
+CHANGED: Turned back the right sorting of the file status column
+CHANGED: Moved back "Download In Alphabetical Order" setting in priority popup menu
+CHANGED: Reworked a bit the Anti-leecher to not ban client morph based mod
+CHANGED: Linear priority column show us all information regarding download priority
+CHNAGED: DLsortFix: 
+CHANGED: EastShare CS has been updated according to change in official
+CHANGED: Create ipfilter, fake and ip2country class first to avoid multiple hd access while hashing
+CHANGED: USC: changed the way to limit upload slot datarate to balance upload and avoid lost of bandwidth
+- so don't worry if you see datarate above limit with 1" upload avarage setting
+- in short trickel slot may take high datarate until their avarage download reach upload limit setting
+CHANGED: WC: WebCache site has been shutdown due to high load, so i removed link for autoupdate webcachesetting
+CHANGED: Every client are now equal arround PowerShare file state
+CHANGED: zz code update arround scheduled upload system
+
+ADDED  : Patch to make shareable file succefuly completed with insufficient space disk on target
+
+TWEAKED: Anti-Leecher test order by Stulle
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.3
