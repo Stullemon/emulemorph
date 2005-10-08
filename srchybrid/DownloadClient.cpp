@@ -2219,15 +2219,16 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR re
         m_fileReaskTimes.RemoveKey(reqfile);
 		//MORPH START - Changed by SiRoB, Keep A4AF infos
 		uint8* PartStatus;
-		if(m_PartStatus_list.Lookup(reqfile,PartStatus) && PartStatus){
-			delete[] PartStatus;
+		if(m_PartStatus_list.Lookup(reqfile,PartStatus)){
+			if (PartStatus)
+				delete[] PartStatus;
 			m_PartStatus_list.RemoveKey(reqfile);
 		}
-		if(m_IncPartStatus_list.Lookup(reqfile,PartStatus) && PartStatus){
-			delete[] PartStatus;
-			m_IncPartStatus_list.RemoveKey(reqfile); //ICS, Keep A4AF infos
+		if(m_IncPartStatus_list.Lookup(reqfile,PartStatus)){
+			if (PartStatus)
+				delete[] PartStatus;
+			m_IncPartStatus_list.RemoveKey(reqfile);  //ICS, Keep A4AF infos
 		}
-		m_IncPartStatus_list.RemoveKey(reqfile);
 		m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
 		//MORPH END   - Changed by SiRoB, Keep A4AF infos
 	}
