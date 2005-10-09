@@ -425,6 +425,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	uint32 numberoffullconsumedslot[NB_SPLITTING_CLASS];
 	uint32 curAllowedTrickle[NB_SPLITTING_CLASS];
 	memset(curAllowedTrickle,0,sizeof(curAllowedTrickle));
+	uint32 curAllowedSlotInNoFocusMode[NB_SPLITTING_CLASS];
+	memset(curAllowedSlotInNoFocusMode,0,sizeof(curAllowedSlotInNoFocusMode));
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	uint32 nEstiminatedLimit = 0;
 	sint32 nSlotsBusyLevel = 0;
@@ -433,40 +435,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
     while(doRun) {
         pauseEvent->Lock();
-
-		theApp.lastCommonRouteFinder->GetClassByteToSend(allowedDataRateClass,ClientDataRate);
-
-		bUploadUnlimited = thePrefs.GetMaxUpload() == UNLIMITED;
-		if (bUploadUnlimited && nUploadStartTime != 0 && ::GetTickCount()- nUploadStartTime > SEC2MS(60) ){ // upload is unlimited
-			if (theApp.uploadqueue){
-				if (nEstiminatedLimit == 0){ // no autolimit was set yet
-					if (nSlotsBusyLevel >= 250){ // sockets indicated that the BW limit has been reached
-						nEstiminatedLimit = theApp.uploadqueue->GetDatarate() - (3*ADJUSTING_STEP);
-						allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
-						nSlotsBusyLevel = -200;
-					}
-				}
-				else{
-					if (nSlotsBusyLevel > 250){
-						nEstiminatedLimit -= ADJUSTING_STEP;
-						nSlotsBusyLevel = 0;
-		
-					    }
-                        else if (nSlotsBusyLevel < (-250)){
-						nEstiminatedLimit += ADJUSTING_STEP;
-						nSlotsBusyLevel = 0;
-					}
-						allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
-				} 
-			}
-		}
-
-		uint32 minFragSize = 1300;
-        uint32 doubleSendSize = minFragSize*2; // send two packages at a time so they can share an ACK
-        if(allowedDataRateClass[LAST_CLASS] < 6*1024) {
-            minFragSize = 536;
-            doubleSendSize = minFragSize; // don't send two packages at a time at very low speeds to give them a smoother load
-        }
 
 		DWORD timeSinceLastLoop = ::GetTickCount() - lastLoopTick;
         uint32 sleepTime = 1;
@@ -478,6 +446,39 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		}
 		timeSinceLastLoop = thisLoopTick - lastLoopTick;
 		if (timeSinceLastLoop > 0) {
+			theApp.lastCommonRouteFinder->GetClassByteToSend(allowedDataRateClass,ClientDataRate);
+
+			bUploadUnlimited = thePrefs.GetMaxUpload() == UNLIMITED;
+			if (bUploadUnlimited && nUploadStartTime != 0 && ::GetTickCount()- nUploadStartTime > SEC2MS(60) ){ // upload is unlimited
+				if (theApp.uploadqueue){
+					if (nEstiminatedLimit == 0){ // no autolimit was set yet
+						if (nSlotsBusyLevel >= 250){ // sockets indicated that the BW limit has been reached
+							nEstiminatedLimit = theApp.uploadqueue->GetDatarate() - (3*ADJUSTING_STEP);
+							allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
+							nSlotsBusyLevel = -200;
+						}
+					}
+					else{
+						if (nSlotsBusyLevel > 250){
+							nEstiminatedLimit -= ADJUSTING_STEP;
+							nSlotsBusyLevel = 0;
+			
+							}
+							else if (nSlotsBusyLevel < (-250)){
+							nEstiminatedLimit += ADJUSTING_STEP;
+							nSlotsBusyLevel = 0;
+						}
+							allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
+					} 
+				}
+			}
+
+			uint32 minFragSize = 1300;
+			uint32 doubleSendSize = minFragSize*2; // send two packages at a time so they can share an ACK
+			if(allowedDataRateClass[LAST_CLASS] < 6*1024) {
+				minFragSize = 536;
+				doubleSendSize = minFragSize; // don't send two packages at a time at very low speeds to give them a smoother load
+			}
 			lastLoopTick = thisLoopTick;
 		
 			sendLocker.Lock();
@@ -541,7 +542,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						curAllowedTrickle[classID] = lastclientpos;
 					else
 						++curAllowedTrickle[classID];
-					
 					for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID] && BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
@@ -592,7 +592,15 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				uint64 spentOverhead = 0;
 				memset(numberoffullconsumedslot,0,sizeof(numberoffullconsumedslot));
 				if(slotCounterClass[classID]) {
-					for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID]; slotCounter++) {
+					if (ClientDataRate[classID] == 0 || curAllowedSlotInNoFocusMode[classID] + 1 >= slotCounterClass[classID])
+						curAllowedSlotInNoFocusMode[classID] = 0;
+					else
+						++curAllowedSlotInNoFocusMode[classID];
+					for(uint32 i = 0; i < slotCounterClass[classID]; i++) {
+						uint32 slotCounter = i + curAllowedSlotInNoFocusMode[classID];
+						if (slotCounter >= slotCounterClass[classID])
+							slotCounter -= slotCounterClass[classID];
+						slotCounter += lastclientpos;
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
@@ -612,7 +620,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->classID < SCHED_CLASS) {
 									if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
-										uint32 BytesToSpendTemp = min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)spentBytes);
+										uint32 BytesToSpendTemp = doubleSendSize;
+										if (ClientDataRate[classID]==0)
+											BytesToSpendTemp = min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)spentBytes);
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, doubleSendSize);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
