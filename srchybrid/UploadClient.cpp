@@ -417,14 +417,21 @@ bool CUpDownClient::IsMoreUpThanDown() const{
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
 	*/
 	CKnownFile* currentReqFile = CheckAndGetReqUpFile();
-	return currentReqFile && currentReqFile->IsPartFile()==false && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst();
+	return currentReqFile && currentReqFile->IsPartFile()==false && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure();
 }
 //Morph End - added by AndCycle, Pay Back First
 //MORPH START - Added by SiRoB, Code Optimization
 bool CUpDownClient::IsMoreUpThanDown(const CKnownFile* file) const{
-	return !file->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst();
+	return !file->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure();
 }
 //MORPH END   - Added by SiRoB, Code Optimization
+
+//Morph Start - added by AndCycle, separate secure check
+bool CUpDownClient::IsSecure() const
+{
+	return credits && theApp.clientcredits->CryptoAvailable() && credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED;
+}
+//Morph End - added by AndCycle, separate secure check
 
 //MORPH START - Added by SiRoB, Code Optimization PBForPS()
 bool CUpDownClient::IsPBForPS() const
@@ -440,7 +447,7 @@ bool CUpDownClient::IsPBForPS() const
 	if (currentReqFile == NULL)
 		return false;
 	//-->Commun to both call
-	if (currentReqFile->GetPowerShared() || !currentReqFile->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst())
+	if (currentReqFile->GetPowerShared() || !currentReqFile->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure())
 		return true;
 	return false;
 }

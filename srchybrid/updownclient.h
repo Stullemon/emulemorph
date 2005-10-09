@@ -786,6 +786,9 @@ public:
 	bool	IsPBForPS() const;
 	//Morph End - added by AndCycle, take PayBackFirst have same class with PowerShare
 
+	//Morph - added by AndCycle, separate secure check
+	bool	IsSecure() const;
+
 	//Morph - added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue() const;
 
