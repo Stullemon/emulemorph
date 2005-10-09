@@ -8,6 +8,13 @@
 #include "Preferences.h"
 #include "UpDownClient.h"
 #include "log.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 void CWebCacheMFRList::AddFiles(CSafeMemFile* data, CUpDownClient* client)
 {
 	if ( this->client && thePrefs.GetLogWebCacheEvents()) 
@@ -40,7 +47,7 @@ void CWebCacheMFRList::AddFiles(CSafeMemFile* data, CUpDownClient* client)
 //			if (thePrefs.GetMaxSourcePerFile() > ((CPartFile*)reqfile)->GetSourceCount()) // always add webcache-buddies
 			try
 			{
-				sourceAdded = theApp.downloadqueue->CheckAndAddKnownSource((CPartFile*)reqfile, client, false, true);
+				sourceAdded = theApp.downloadqueue->CheckAndAddKnownSource((CPartFile*)reqfile, client, true); // ignore global dead list since this client is definitely alive
 			}
 			catch (CString _reason)
 			{
@@ -86,19 +93,19 @@ CWebCacheMFRList::~CWebCacheMFRList(void)
 bool CWebCacheMFRList::IsPartAvailable(uint16 part, const byte* fileID)
 {
 	CheckExpiration();
-	if (reqFiles.IsEmpty())
-		return true;
+	//if (reqFiles.IsEmpty())
+	//	return true;
 
 	for (POSITION pos = reqFiles.GetHeadPosition(); pos != NULL; reqFiles.GetNext(pos))	// file hashes loop
 		if(!md4cmp(fileID, reqFiles.GetAt(pos)->fileID))	// file hash found
-			return reqFiles.GetAt(pos)->partStatus[part]!=0;
+			return (reqFiles.GetAt(pos)->partStatus[part] != 0);
 	return true;	// if the file is not found in the hash list, then the client didn't request it, so he doesn't need it
 }
 
 void CWebCacheMFRList::RemoveAll()
 {
-	if (reqFiles.IsEmpty())
-		return;
+	//if (reqFiles.IsEmpty())
+	//	return;
 
 	for (POSITION pos = reqFiles.GetHeadPosition(); pos; reqFiles.GetNext(pos))
 	{
@@ -110,7 +117,7 @@ void CWebCacheMFRList::RemoveAll()
 
 void CWebCacheMFRList::CheckExpiration()
 {
-	if (GetTickCount() > expirationTick)
+	if (GetTickCount() > expirationTick && !reqFiles.IsEmpty() && client->IsEd2kClient())
 	{
 		if (thePrefs.GetLogWebCacheEvents()) 
 			AddDebugLogLine(false, _T("RemoveAll on MFR list of client %s, %d file(s) removed, reason: CheckExpiration"), client->DbgGetClientInfo(), length);

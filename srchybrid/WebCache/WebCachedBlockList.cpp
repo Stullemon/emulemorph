@@ -12,6 +12,13 @@
 #include "SafeFile.h"
 #include "ClientList.h"
 #include "Log.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 #define MAX_WCBLOCKLIST_SIZE 2000
 #define MAX_TIME_TO_KEEP_OHCB_IN_LIST 60*60*1000  //this is currently only used for Stopped WC-Block-List
 
@@ -79,7 +86,7 @@ if (!SINGLEProxyClient->m_pWCDownSocket)
 	if (!SINGLEProxyClient->m_pWCDownSocket->GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen))
 		return WebCachedBlockList.RemoveHead(); // can't get the IP of the proxy return Head
 	
-	POSITION pos = GetHeadPosition();
+//	POSITION pos = GetHeadPosition();
 	int i = 0;
 	while (i < GetCount())
 	{
@@ -133,7 +140,7 @@ CStoppedWebCachedBlockList::~CStoppedWebCachedBlockList(void)
 
 void CStoppedWebCachedBlockList::CleanUp()
 {
-POSITION pos = GetHeadPosition();
+	//POSITION pos = GetHeadPosition();
 int i = 0;
 while (i < GetCount())
 {
@@ -187,12 +194,12 @@ bool CWebCachedBlockList::ProcessWCBlocks(const BYTE* packet, uint32 size, UINT 
 	uint32 blockNr = 0;
 	if (opcode == OP_XPRESS_MULTI_HTTP_CACHED_BLOCKS)
 	{
-		CWebCachedBlock* newblock = new CWebCachedBlock( packet + 8, WC_OHCB_PACKET_SIZE, client, true );
+		/*CWebCachedBlock* newblock = new */ CWebCachedBlock( packet + 8, WC_OHCB_PACKET_SIZE, client, true );
 		blockNr++;
 	}
 
 	for(; blockNr < nrOfBlocks; blockNr++)
-		CWebCachedBlock* newblock = new CWebCachedBlock( packet + 8 + blockNr * WC_OHCB_PACKET_SIZE, WC_OHCB_PACKET_SIZE, client);
+		/*CWebCachedBlock* newblock = new  */CWebCachedBlock( packet + 8 + blockNr * WC_OHCB_PACKET_SIZE, WC_OHCB_PACKET_SIZE, client);
 
 	return true;
 }

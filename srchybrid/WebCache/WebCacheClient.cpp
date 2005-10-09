@@ -288,7 +288,6 @@ bool CWebCacheDownSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT uSiz
 bool CWebCacheDownSocket::ProcessHttpRequest()
 {
 	throw CString(_T("Unexpected HTTP request received"));
-	return false;
 }
 
 
@@ -358,7 +357,6 @@ bool CWebCacheUpSocket::ProcessHttpResponse()
 bool CWebCacheUpSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT uSize)
 {
 	throw CString(_T("Unexpected HTTP body in response received"));
-	return false;
 }
 
 bool CWebCacheUpSocket::ProcessHttpRequest()
@@ -368,7 +366,7 @@ bool CWebCacheUpSocket::ProcessHttpRequest()
 
 	// DFA
 	// yonatan http - extract client from header
-	uint32 id;
+	uint32 id = 0;
 	for (int i = 0; i < m_astrHttpHeaders.GetCount(); i++)
 	{
 		const CStringA& rstrHdr = m_astrHttpHeaders.GetAt(i);
@@ -846,8 +844,6 @@ bool CUpDownClient::ProcessWebCacheUpHttpResponse(const CStringAArray& astrHeade
 	CString strError;
 	strError.Format(_T("Unexpected HTTP status code \"%u\""), uHttpStatusCode);
 	throw strError;
-
-	return false;
 }
 
 bool CUpDownClient::SendWebCacheBlockRequests()
@@ -896,7 +892,7 @@ bool CUpDownClient::SendWebCacheBlockRequests()
 		sockAddr.sin_addr.S_un.S_addr = thePrefs.WebCacheIsTransparent() ? GetIP() : ResolveWebCacheName(); // Superlexx - TPS
 		if (sockAddr.sin_addr.S_un.S_addr == 0) //webcache name could not be resolved
 			return false;
-		m_pWCDownSocket->WaitForOnConnect(); // Superlexx - from 0.44a PC code
+		m_pWCDownSocket->WaitForOnConnect();
 		m_pWCDownSocket->Connect((SOCKADDR*)&sockAddr, sizeof sockAddr);
 	}
 
@@ -1351,13 +1347,21 @@ void CUpDownClient::SendResumeOHCBSendingUDP()
 
 Packet* CUpDownClient::CreateMFRPacket()
 {
+	// TODO: WC: remove the commented block after testing
+	/*
 	CSafeMemFile* data = new CSafeMemFile();
-	if (!AttachMultiOHCBsRequest(*data)){
-		delete data; //memleak -Fix- [WiZaRd]
+	if (!AttachMultiOHCBsRequest(*data))
+	{
+		delete data;
 		return NULL;	// we don't want anything from this client
 	}
 	Packet* toSend = new Packet(data, OP_WEBCACHEPROT, OP_MULTI_FILE_REQ);
 	delete data;
+	*/
+	CSafeMemFile data;
+	if (!AttachMultiOHCBsRequest(data))
+		return NULL;	// we don't want anything from this client
+	Packet* toSend = new Packet(&data, OP_WEBCACHEPROT, OP_MULTI_FILE_REQ);
 	uint32 unpackedSize = toSend->size;
 	toSend->PackPacket();
 	if (toSend->size > unpackedSize)

@@ -7,6 +7,12 @@
 #include "Preferences.h" //jp logging
 #include "Log.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 #define THROTTLED_CHUNK_LIST_SIZE 100 
 #define THROTTLETIME	1000*60*10	// chunks are throttled for 10 minutes
 

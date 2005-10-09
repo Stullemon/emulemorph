@@ -16,6 +16,12 @@
 #include "KnownFileList.h"
 #include "Log.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient* client, bool XpressOHCB )
 {
 	m_uRequestCount = 0; // what is this for?

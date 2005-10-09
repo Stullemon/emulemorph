@@ -22,6 +22,12 @@
 #include <atlrx.h>
 #import <msxml3.dll> // Superlexx - XML-based proxy auto-detector
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 #define MAX_PROXY_CONN 5
 
 CUpDownClient* ProxyTestClient; //JP proxy configuration test
@@ -85,7 +91,7 @@ int	GetWebCacheIndex(CString webcachename){
 
 // Superlexx - Proxy AutoDetect - start ////////////////////////////////////////////////////////
 
-CString ReverseDnsLookupForWebCache(DWORD dwIP)	// taken from 0.43b PeerCache code
+CString ReverseDnsLookupForWebCache(DWORD dwIP)	// taken from the PeerCacheFinder code
 {
 	CString strHostName;
 
@@ -127,7 +133,7 @@ CString ReverseDnsLookupForWebCache(DWORD dwIP)	// taken from 0.43b PeerCache co
 			}
 			else{
 				if (thePrefs.GetVerbose())
-					theApp.QueueDebugLogLine(false, _T("ReverseDNS: Failed to get list of DNS servers - %s"), GetErrorMessage(nDnsState, 1));
+					DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("ReverseDNS: Failed to get list of DNS servers - %s"), GetErrorMessage(nDnsState, 1)));
 			}
 
 			CString strDnsQuery;
@@ -138,23 +144,28 @@ CString ReverseDnsLookupForWebCache(DWORD dwIP)	// taken from 0.43b PeerCache co
 			nDnsState = (*pfnDnsQuery)(strDnsQuery, DNS_TYPE_PTR, DNS_QUERY_BYPASS_CACHE, pDnsServers, &pDnsRecords, NULL);
 			if (nDnsState == 0)
 			{
-				if (pDnsRecords)
-					strHostName = pDnsRecords->Data.PTR.pNameHost;
-				if (pDnsRecords)
+				if (AtlIsValidAddress(pDnsRecords, sizeof(*pDnsRecords) - sizeof(pDnsRecords->Data) + sizeof(pDnsRecords->Data.PTR), FALSE))
+				{
+					if (AtlIsValidAddress(pDnsRecords->Data.PTR.pNameHost, sizeof(TCHAR), FALSE))
+						strHostName = pDnsRecords->Data.PTR.pNameHost;
 					(*pfnDnsRecordListFree)(pDnsRecords, DnsFreeRecordListDeep);
+			}
 			}
 			else{
 				if (thePrefs.GetVerbose())
-					theApp.QueueDebugLogLine(false, _T("ReverseDNS: Failed to resolve address \"%s\" - %s"), strDnsQuery, GetErrorMessage(nDnsState, 1));
+					DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("ReverseDNS: Failed to resolve address \"%s\" - %s"), strDnsQuery, GetErrorMessage(nDnsState, 1)));
 			}
 
 			delete[] (BYTE*)pDnsServers;
 		}
 		FreeLibrary(hLib);
 	}
-
 	return strHostName;
 }
+
+
+
+
 
 //jp detect webcache on startup
 void AutodetectWebcache()
@@ -278,18 +289,21 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 	case 1:	// first attempt, load data from a local file
 		if (pXMLDom->load(thePrefs.GetConfigDir() + "webcaches.xml") != VARIANT_TRUE)
 		{
-			DetectWebCache(detectedWebcache, 2); // make a second attempt, load data from the website
+			//don't try to connect to the website because it's down
+			//DetectWebCache(detectedWebcache, 2); // make a second attempt, load data from the website
 			return reaskedDNS;
 		}
 		break;
 	case 2:
 	{
-			/*if ( pXMLDom->load("http://webcache-emule.sourceforge.net/webcacheURL.php") != VARIANT_TRUE)
+			//we shouldn't get there but just to be sure...
+			//if ( pXMLDom->load((_bstr_t)(_T("http://webcache-emule.sourceforge.net/webcacheURL.php?hostName=") + shostName)) != VARIANT_TRUE)
+			if ( pXMLDom->load((_bstr_t)(_T("http://localhost/webcacheURL.php?hostName=") + shostName)) != VARIANT_TRUE)
 				throw("Your ISP was not found in the local database; loading the URL of xml data from the SF website failed.");
 			MSXML2::IXMLDOMNodePtr configURLNode = pXMLDom->selectSingleNode("/webcacheemule/configURL");
 			int result = pXMLDom->load((_bstr_t)(configURLNode->text + _T("?hostName=") + shostName));
 			configURLNode.Release();
-			if (result != VARIANT_TRUE)*/
+			if (result != VARIANT_TRUE)
 				throw("Failed loading xml data from the webcache-emule website.");			
 		}
 		break;
@@ -379,7 +393,8 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 		switch (attempt)
 	{
 		case 1:
-			DetectWebCache(detectedWebcache, 2);
+			//don't try to connect to the website because it's down
+			//DetectWebCache(detectedWebcache, 2);
 			break;
 		case 2:
 	{

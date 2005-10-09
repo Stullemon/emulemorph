@@ -9,6 +9,13 @@
 #include "TransferWnd.h"
 #include "WebCachedBlockList.h"
 #include "Log.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CWebCacheProxyClient* SINGLEProxyClient = 0;
 
 CWebCacheProxyClient::CWebCacheProxyClient(CWebCachedBlock* iBlock) : CUpDownClient()
@@ -193,7 +200,7 @@ bool CWebCacheProxyClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClas
 	if( !ProxyClientIsBusy() )
 		WebCachedBlockList.TryToDL();
 
-	return SINGLEProxyClient!=NULL; // yonatan tmp
+	return (SINGLEProxyClient != NULL); // yonatan tmp
 }
 
 void CWebCacheProxyClient::OnWebCachedBlockDownloaded( const Requested_Block_Struct* reqblock )
@@ -219,7 +226,7 @@ bool CWebCacheProxyClient::ProxyClientIsBusy()
 				AddDebugLogLine(false, _T("WebCachedBlock without Webcachesocket deleted"));
 		}
 	}
-	return block!=0;
+	return (block != NULL);
 }
 
 void CWebCacheProxyClient::DeleteBlock()
