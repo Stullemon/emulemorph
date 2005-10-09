@@ -80,12 +80,18 @@ int CFakecheck::LoadFromFile(){
 			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5)
 				continue;
 			pos=sbuffer.Find(_T(','));
-			if (pos==-1) continue;
-			sbuffer2=sbuffer.Left(pos).Trim();
+			if (pos==-1 || pos > 32)
+				continue;
+			if (pos < 32) {
+				sbuffer2=_T("00000000000000000000000000000000");
+				CString::CopyCharsOverlapped(sbuffer2.GetBuffer()+32-pos,sbuffer,pos);
+			} else
+				sbuffer2=sbuffer.Left(pos);
 			uchar Hash[16];
 			DecodeBase16(sbuffer2.GetBuffer(),sbuffer2.GetLength(),Hash,ARRSIZE(Hash));
 			int pos2=sbuffer.Find(_T(","),pos+1);
-			if (pos2==-1) continue;
+			if (pos2==-1)
+				continue;
 			Lenght=_tstoi(sbuffer.Mid(pos+1,pos2-pos-1).Trim());
 			Title=sbuffer.Mid(pos2+1,sbuffer.GetLength()-pos2-2);
 			AddFake(&Hash[0],Lenght,Title);
