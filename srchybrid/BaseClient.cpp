@@ -305,7 +305,6 @@ void CUpDownClient::Init()
 	m_uWebCacheUploadId = 0;
 	m_eWebCacheDownState = WCDS_NONE;
 	m_eWebCacheUpState = WCUS_NONE;
-	//blocksLoaded = 0; //JP blocks are counted in the WCDownSocket code now
 	b_webcacheInfoNeeded = false;
 	//JP trusted OHCB-Senders Start
 	WebCachedBlockRequests = 0;
@@ -315,7 +314,9 @@ void CUpDownClient::Init()
 	Crypt.useNewKey = true;
 	Crypt.isProxy = false;
 	GenerateKey(Crypt.remoteMasterKey);	// generate a key - will be done right before sending
-	for (int i=0; i<WC_KEYLENGTH; i++) Crypt.localMasterKey[i] = 0; // fill with zeroes so we can say if the key is valid
+	memset(Crypt.localMasterKey, 0, WC_KEYLENGTH);
+	// TODO: WC: remove this
+	//for (int i=0; i<WC_KEYLENGTH; i++) Crypt.localMasterKey[i] = 0; // fill with zeroes so we can say if the key is valid
     lastMultiOHCBPacketSent = 0; // Superlexx - Multi-OHCB
 	m_bWebCacheSupportsMultiOHCBs = false;
 	// yonatan http end ////////////////////////////////////////////////////////////////////////////
@@ -438,7 +439,19 @@ CUpDownClient::~CUpDownClient(){
 
 //MORPH START - Added by IceCream, Anti-leecher feature
 LPCTSTR CUpDownClient::TestLeecher(){
-	if (old_m_strClientSoftware != m_strClientSoftware)
+	if (IsLeecher()){
+		return _T("Allready Known");
+	}else if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))){
+		return _T("Ghost MOD");
+	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion != MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd) && theApp.m_strModVersion.GetLength() == m_strModVersion.GetLength())){
+		return _T("Fake MODSTRING");
+	}else if (!StrStrI(m_strModVersion,_T("Morph")) && IsMorph()) {
+		return _T("Hidden MODSTRING");
+	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
+		return _T("Fake emuleVersion");
+	}else if(m_clientSoft == SO_EMULE && !m_pszUsername){
+		return _T("Empty Nick");
+	}else if (old_m_strClientSoftware != m_strClientSoftware)
 	{
 		if (StrStrI(m_strModVersion,_T("Freeza"))||
 			StrStrI(m_strModVersion,_T("d-unit"))||
@@ -471,6 +484,9 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29"))||
 			// EastShare END - Added by TAHO, Pretender
 			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
+			StrStrI(m_strModVersion,_T("MorphXT+")) ||
+			StrStrI(m_strModVersion,_T("MorphXT×")) ||
+			StrStrI(m_strModVersion,_T("MørphXT")) ||
 			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("×")) || IsMorph() == false) ||
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
 			StrStrI(m_strModVersion,_T("ACAT")) && m_strModVersion.GetLength() > 4 ||
@@ -522,14 +538,6 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		}
 	}
 	*/
-	if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))){
-		return _T("Ghost MOD");
-	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion != MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd) && theApp.m_strModVersion.GetLength() == m_strModVersion.GetLength())){
-		return _T("Fake MODSTRING");
-	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
-		return _T("Fake emuleVersion");
-	}else	if (IsLeecher())
-		return _T("Allready Known");
 	return NULL;
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
@@ -674,12 +682,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_strModVersion = temptag.GetStr();
 					//MOPRH START - Added by SiRoB, Is Morph Client?
 					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
-						(m_nClientVersion < MAKE_CLIENT_VERSION(0, 44, 0)||
-						 (m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7] == 0x20 && m_strModVersion[8] >= '0' && m_strModVersion[8] <= '9' &&
-						  (m_strModVersion[9]==0 || m_strModVersion[9]==0x2E && m_strModVersion[10]>=0x30 && m_strModVersion[10] <= 0x39 &&
-						   (m_strModVersion[11]==0 || m_strModVersion[11]>=0x30 && m_strModVersion[11]<=0x39 && m_strModVersion[12]==0)
-						  )
-						 )
+						(m_nClientVersion < MAKE_CLIENT_VERSION(0, 45, 0)||
+						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39
 						)
 					   ){
 						m_bIsMorph = true;
@@ -1273,12 +1277,8 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 					m_strModVersion = temptag.GetStr();
 					//MOPRH START - Added by SiRoB, Is Morph Client?
 					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
-						(m_nClientVersion < MAKE_CLIENT_VERSION(0, 44, 0)||
-						 (m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8]>=0x30 && m_strModVersion[8]<=0x39 &&
-						  (m_strModVersion[9]==0 || m_strModVersion[9]==0x2E && m_strModVersion[10]>=0x30 && m_strModVersion[10] <= 0x39 &&
-						   (m_strModVersion[11]==0 || m_strModVersion[11]>=0x30 && m_strModVersion[11]<=0x39 && m_strModVersion[12]==0)
-						  )
-						 )
+						(m_nClientVersion < MAKE_CLIENT_VERSION(0, 45, 0)||
+						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39
 						)
 					   ){
 						m_bIsMorph = true;
@@ -1655,11 +1655,10 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			if (thePrefs.GetLogUlDlEvents())
                 AddDebugLogLine(DLP_VERYLOW, true,_T("Removing connecting client from upload list: %s Client: %s"), pszReason, DbgGetClientInfo());
 		case US_WAITCALLBACK:
-			//MORPH START - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend or it's a proxy.
+			//MORPH START - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend.
 			if(reqfile && !reqfile->IsPartFile() && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend())
 			{
-				SetUploadState(US_NONE);
-				bDelete = false;
+				bDelete = true;
 				break;
 			}
 			//MORPH END   - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend or it's a proxy.
@@ -3100,17 +3099,17 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 */		switch (m_ePeerCacheDownState)
 		{
 		case PCDS_WAIT_CLIENT_REPLY:
-			strState = _T("Peer")+GetResString(IDS_PCDS_CLIENTWAIT);
+			strState += _T(" Peer")+GetResString(IDS_PCDS_CLIENTWAIT);
 			break;
 		case PCDS_WAIT_CACHE_REPLY:
-			strState = _T("Peer")+GetResString(IDS_PCDS_CACHEWAIT);
+			strState += _T(" Peer")+GetResString(IDS_PCDS_CACHEWAIT);
 			break;
 		case PCDS_DOWNLOADING:
-			strState = _T("Peer")+GetResString(IDS_CACHE);
+			strState += _T(" Peer")+GetResString(IDS_CACHE);
 			break;
 		}
 		if (m_ePeerCacheDownState != PCDS_NONE && m_bPeerCacheDownHit)
-			strState = _T("Peer Hit");
+			strState += _T(" Peer Hit");
 /*
 	}
 */
@@ -3118,16 +3117,16 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 	switch (m_eWebCacheDownState)
 	{
 	case WCDS_WAIT_CLIENT_REPLY:
-		strState = _T("ProxyWait");
+		strState += _T(" ProxyWait");
 		break;
 	case WCDS_WAIT_CACHE_REPLY:
-		strState = _T("WC-Bug:CacheWait"); // not needed...
+		strState += _T(" WC-Bug:CacheWait"); // not needed...
 		break;
 	case WCDS_DOWNLOADINGVIA:
-		strState = _T("Via Proxy");
+		strState += _T(" Via Proxy");
 		break;
 	case WCDS_DOWNLOADINGFROM:
-		strState = _T("From Proxy");
+		strState += _T(" From Proxy");
 		break;
 	}
 	// MORPH END - Added by Commander, WebCache 1.2e
@@ -3177,10 +3176,10 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 */		switch (m_ePeerCacheUpState)
 		{
 		case PCUS_WAIT_CACHE_REPLY:
-			strState = _T("PeerCacheWait");
+			strState += _T(" PeerCacheWait");
 			break;
 		case PCUS_UPLOADING:
-			strState = _T("PeerCache");
+			strState += _T(" PeerCache");
 			break;
 		}
 		if (m_ePeerCacheUpState != PCUS_NONE && m_bPeerCacheUpHit)
@@ -3190,7 +3189,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 */
 	// MORPH START - Added by Commander, WebCache 1.2e
 	if( m_eWebCacheUpState == WCUS_UPLOADING )
-		strState = _T("Via Proxy");
+		strState += _T(" Via Proxy");
 	// MORPH START - Added by Commander, WebCache 1.2e
 
 	if( socket ) {

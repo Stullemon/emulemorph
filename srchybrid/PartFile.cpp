@@ -918,7 +918,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 							break;
 						}
 						//MORPH END   - Added by SiRoB, SpreadBars
-						if (newtag->GetNameID()==0 && (newtag->GetName()[0]==FT_GAPSTART || newtag->GetName()[0]==FT_GAPEND))
+					    if (newtag->GetNameID()==0 && (newtag->GetName()[0]==FT_GAPSTART || newtag->GetName()[0]==FT_GAPEND))
 						{
 							ASSERT( newtag->IsInt() );
 							if (newtag->IsInt())
@@ -1491,7 +1491,7 @@ bool CPartFile::SavePartFile()
 			uTagCount++;
 		}
 		//MORPH END   - Added by SiRoB, HIDEOS
-
+		
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 		if (GetShareOnlyTheNeed()>=0){
 			CTag shareonlytheneedtag(FT_SHAREONLYTHENEED, GetShareOnlyTheNeed());
@@ -2359,10 +2359,9 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 		uED2KPartCount = CalcPartSpread(partspread, client);
 		//MORPH START - Added by SiRoB, See chunk that we hide by HideOS feature
 		client->m_bUpPartStatusHiddenBySOTN = false;		
-		if (client->m_abyUpPartStatusHidden == NULL) {
+		if (client->m_abyUpPartStatusHidden == NULL)
 			client->m_abyUpPartStatusHidden = new uint8[uED2KPartCount];
-			memset(client->m_abyUpPartStatusHidden,0,uED2KPartCount);
-		}
+		memset(client->m_abyUpPartStatusHidden,0,uED2KPartCount);
 		//MORPH END   - Added by SiRoB, See chunk that we hide by HideOS feature
 	} else {	// simpler to set as 0 than to create another loop...
 		uED2KPartCount = GetED2KPartCount();
@@ -2403,7 +2402,7 @@ void CPartFile::WriteIncPartStatus(CSafeMemFile* file){
 	while (uPart != uED2KPartCount)
 	{
 		uint8 towrite = 0;
-		for (UINT i = 0;i < 8;i++)
+		for (UINT i = 0; i < 8; i++)
 		{
 			if (uPart < GetPartCount() && !IsPureGap(uPart*PARTSIZE, (uPart + 1)*PARTSIZE - 1))
 				towrite |= (1<<i);
@@ -3183,7 +3182,7 @@ void CPartFile::UpdatePartsInfo()
 		if(m_nVirtualCompleteSourcesCount > m_SrcpartFrequency[i])
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, iCompleteSourcesCountInfoReceived && (lastseencomplete!=NULL || m_nCompleteSourcesCountHi<=1) && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount<=1, iCompleteSourcesCountInfoReceived && (lastseencomplete!=NULL || m_nCompleteSourcesCountHi<=1) && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
 	SetHideOSAuthorized(m_nVirtualCompleteSourcesCount>1);
@@ -5665,7 +5664,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 		return true;
 	*count = countbackup;
 	//MORPH END   - Added by SiRoB, ICS Optional
-	
+
 	// Define and create the list of the chunks to download
 	const uint16 partCount = GetPartCount();
 	CList<Chunk> chunksList(partCount);
@@ -6175,12 +6174,13 @@ bool CPartFile::RightFileHasHigherPrio(const CPartFile* left, const CPartFile* r
 	}
 	//MORPH END   - Added by SiRoB, Avanced A4AF
 	//MORPH START - Added by SiRoB, ForcedA4AF
-	if (thePrefs.UseSmartA4AFSwapping())
+	bool btestForceA4AF = thePrefs.UseSmartA4AFSwapping();
+	if (btestForceA4AF)
 	{
 		if (right == theApp.downloadqueue->forcea4af_file)
 			return true;
-		else if (right->ForceAllA4AF())
-			return true;
+		else if (left == theApp.downloadqueue->forcea4af_file)
+			return false;
 	}
 	//MORPH END   - Added by SiRoB, ForcedA4AF
 	//MORPH START - Added by SiRoB, Avanced A4AF
@@ -6194,48 +6194,38 @@ bool CPartFile::RightFileHasHigherPrio(const CPartFile* left, const CPartFile* r
 	//MORPH END   - Added by SiRoB, Avanced A4AF
 	if(!left ||
 		//MORPH START - Added by SiRoB, ForcedA4AF
-		(
-			thePrefs.UseSmartA4AFSwapping() && left != theApp.downloadqueue->forcea4af_file
-			||
-			!thePrefs.UseSmartA4AFSwapping()
-		)
-		&&
-		(
-			!(thePrefs.UseSmartA4AFSwapping() && (right->ForceA4AFOff() || left->ForceAllA4AF())) &&
+		btestForceA4AF && (right->ForceA4AFOff() || left->ForceAllA4AF()) ||
+		(!btestForceA4AF || btestForceA4AF && !left->ForceA4AFOff()) &&
 		//MORPH END   - Added by SiRoB, ForcedA4AF
-			//MORPH START - Added by SiRoB, Stacking A4AF
+		(
+			thePrefs.GetCategory(right->GetCategory())->prio > thePrefs.GetCategory(left->GetCategory())->prio ||
+			thePrefs.GetCategory(right->GetCategory())->prio == thePrefs.GetCategory(left->GetCategory())->prio &&
 			(
-				left_iA4AFMode == 2 &&
-				right->GetCatResumeOrder() < left->GetCatResumeOrder() ||
-				(
-					right->GetCatResumeOrder() == left->GetCatResumeOrder() &&
-					left_iA4AFMode == 2 &&
-					left_iA4AFMode == right_iA4AFMode
+				//MORPH START - Added by SiRoB, Stacking A4AF
+				right_iA4AFMode == 2 && right->GetCatResumeOrder() < left->GetCatResumeOrder() ||
+				!(left_iA4AFMode == 2 && right->GetCatResumeOrder() > left->GetCatResumeOrder()) &&
+				(				
+					right_iA4AFMode == 2 && right->GetCatResumeOrder() == left->GetCatResumeOrder()
 					||
-					left_iA4AFMode != 2 &&
-					left_iA4AFMode == right_iA4AFMode
+					right_iA4AFMode != 2
 				) &&
 				//MORPH END   - Added by SiRoB, Stacking A4AF		
 				(
-					thePrefs.GetCategory(right->GetCategory())->prio > thePrefs.GetCategory(left->GetCategory())->prio ||
-					thePrefs.GetCategory(right->GetCategory())->prio == thePrefs.GetCategory(left->GetCategory())->prio &&
+					right->GetDownPriority() > left->GetDownPriority() ||
+					right->GetDownPriority() == left->GetDownPriority() &&
 					(
-						right->GetDownPriority() > left->GetDownPriority() ||
-						right->GetDownPriority() == left->GetDownPriority() &&
-						(
-							right->GetCategory() == left->GetCategory() && right->GetCategory() != 0 &&
-							(thePrefs.GetCategory(right->GetCategory())->downloadInAlphabeticalOrder && thePrefs.IsExtControlsEnabled()) && 
-							right->GetFileName() && left->GetFileName() &&
-							right->GetFileName().CompareNoCase(left->GetFileName()) < 0
-							//MORPH START - Added by SiRoB, Balancing A4AF
-							||
-							left_iA4AFMode != 0 &&
-							right->GetAvailableSrcCount() < left->GetAvailableSrcCount()
-							//MORPH END   - Added by SiRoB, Balancing A4AF
-						)
+						right->GetCategory() == left->GetCategory() && right->GetCategory() != 0 &&
+						(thePrefs.GetCategory(right->GetCategory())->downloadInAlphabeticalOrder && thePrefs.IsExtControlsEnabled()) && 
+						right->GetFileName() && left->GetFileName() &&
+						right->GetFileName().CompareNoCase(left->GetFileName()) < 0
+						//MORPH START - Added by SiRoB, Balancing A4AF
+						||
+						left_iA4AFMode != 0 &&
+						right->GetAvailableSrcCount() < left->GetAvailableSrcCount()
+						//MORPH END   - Added by SiRoB, Balancing A4AF
 					)
-				) //MORPH END   - Added by SiRoB, Stacking A4AF
-			) //MORPH - Added by SiRoB, ForcedA4AF
+				)
+			)
 		)
     ) {
         return true;
@@ -6909,7 +6899,7 @@ void CPartFile::PauseProxyDownloads()
 uchar currenthash[16];
 md4cpy(currenthash, GetFileHash());
 
-POSITION pos = WebCachedBlockList.GetHeadPosition();
+//POSITION pos = WebCachedBlockList.GetHeadPosition();
 int i = 0;
 while (i < WebCachedBlockList.GetCount())
 {
@@ -6931,7 +6921,7 @@ void CPartFile::ResumeProxyDownloads()
 uchar currenthash[16];
 md4cpy(currenthash, GetFileHash());
 
-POSITION pos = StoppedWebCachedBlockList.GetHeadPosition();
+//POSITION pos = StoppedWebCachedBlockList.GetHeadPosition();
 int i = 0;
 while (i < StoppedWebCachedBlockList.GetCount())
 {
@@ -6990,7 +6980,21 @@ for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;)
 		else if (cur_client->GetWebCacheName() != "")
 			++counterNotOur;
 	}
-}
+	}
+	//JP also count A4AF sources now we can use them
+	for (POSITION pos = A4AFsrclist.GetHeadPosition(); pos != NULL;)
+	{
+		CUpDownClient* cur_client = A4AFsrclist.GetNext(pos);
+		if (cur_client->SupportsWebCache() || cur_client->IsProxy() )
+			counter++;
+		if (cur_client->SupportsWebCache())
+		{
+			if (cur_client->IsBehindOurWebCache())
+				++counterOur;
+			else if (cur_client->GetWebCacheName() != "")
+				++counterNotOur;
+		}
+	}
 CPartFile* self = const_cast< CPartFile * >( this );
 self->WebcacheSources = counter;
 self->WebcacheSourcesOurProxy = counterOur;
@@ -7015,7 +7019,7 @@ uint32 CPartFile::GetNumberOfBlocksForThisFile()
 uchar currenthash[16];
 md4cpy(currenthash, GetFileHash());
 
-POSITION pos = WebCachedBlockList.GetHeadPosition();
+	//POSITION pos = WebCachedBlockList.GetHeadPosition();
 int counter = 0;
 int i = 0;
 while (i < WebCachedBlockList.GetCount())
