@@ -652,12 +652,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
-										if (!socket->IsBusy() || stat->classID < SCHED_CLASS) {
-											if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
-												m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
-											if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
-												m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
-										}
+										if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
+											m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
+										if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
+											m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 										spentBytes += lastSpentBytes;
 										spentOverhead += socketSentBytes.sentBytesControlPackets;
 									}
@@ -726,6 +724,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if ((m_highestNumberOfFullyActivatedSlots[classID] != 0 && GetTickCount() - LastBusySlotChangeTime > 1000 || slotCounterClass[classID] < max(4,(allowedDataRateClass[classID] / (ClientDataRate[classID]+1)))) &&
 						m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos)
 						++m_highestNumberOfFullyActivatedSlots[classID];
+					else if (slotCounterClass[SCHED_CLASS]>0 && m_highestNumberOfFullyActivatedSlots[classID] > slotCounterClass[LAST_CLASS]-slotCounterClass[SCHED_CLASS])
+						m_highestNumberOfFullyActivatedSlots[classID]=slotCounterClass[LAST_CLASS]-slotCounterClass[SCHED_CLASS];
+					
 				}
 				lastclientpos -= slotCounterClass[classID];
 			}
