@@ -7,6 +7,7 @@ FIXED  : (major) Rollback code arround ICS feature
 FIXED  : (minor) Smart A4AF swaping
 FIXED  : (minor) Advanced A4AF management
 FIXED  : (minor) Shared Part column have been fixed (missed merging code from 0.46c)
+FIXED  : (minor) Changed Share Only The Need a bit due to official change
 
 CHANGED: Turned back the right sorting of the file status column
 CHANGED: Moved back "Download In Alphabetical Order" setting in priority popup menu
