@@ -2476,7 +2476,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 		{
 			if (m_AvailPartFrequency[i]<iMinAvailablePartFrenquency)
 				iMinAvailablePartFrenquency = m_AvailPartFrequency[i];				
-			else if (m_AvailPartFrequency[i]>iMinAvailablePartFrenquency && m_AvailPartFrequency[i]<iMinAvailablePartFrenquencyPrev)
+			else if (m_AvailPartFrequency[i]==iMinAvailablePartFrenquency && m_AvailPartFrequency[i]<iMinAvailablePartFrenquencyPrev)
 				iMinAvailablePartFrenquencyPrev = m_AvailPartFrequency[i];
 		}
 	}
