@@ -3182,7 +3182,7 @@ void CPartFile::UpdatePartsInfo()
 		if(m_nVirtualCompleteSourcesCount > m_SrcpartFrequency[i])
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount<=1, iCompleteSourcesCountInfoReceived>1 && (lastseencomplete!=NULL || m_nCompleteSourcesCountLow==1) && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount<=1, iCompleteSourcesCountInfoReceived>1 && (lastseencomplete!=NULL || m_nCompleteSourcesCountLo==1) && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
 	SetHideOSAuthorized(m_nVirtualCompleteSourcesCount>1);

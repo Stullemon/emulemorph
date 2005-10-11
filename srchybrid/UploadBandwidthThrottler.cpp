@@ -666,7 +666,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								}
 								if  (stat->realBytesToSpend <= 999)
 									++numberoffullconsumedslot[classID];
-								bool bBusy = (GetTickCount() - socket->GetBusyTimeSince() < timeSinceLastLoop);
+								bool bBusy = (GetTickCount() - socket->GetBusyTimeSince() < 2*timeSinceLastLoop);
 								if (socket->IsBusy() && bBusy != stat->bOldBusy)
 									LastBusySlotChangeTime = GetTickCount();
 								stat->bOldBusy = bBusy;
@@ -711,7 +711,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					 ClientDataRate[classID] > 0 && (numberoffullconsumedslot[classID] == slotCounterClass[classID] || slotCounterClass[classID] == slotCounterClass[LAST_CLASS]) && allowedDataRateClass[classID]/(lastclientpos+1) >= ClientDataRate[classID]
 					 ||
 					 //Ensure that we always get a trikle slot when we use focused mode
-					 ClientDataRate[classID] == 0 && slotCounterClass[SCHED_CLASS] == 0 && bUploadUnlimited == false
+					 ClientDataRate[classID] == 0 && slotCounterClass[SCHED_CLASS] == 0 && bUploadUnlimited == false && GetTickCount() - LastBusySlotChangeTime > max(2*timeSinceLastLoop,120)
 					 )
 					)
 					 m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
@@ -726,7 +726,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					realBytesToSpendClass[classID] = 999;
 					if ((m_highestNumberOfFullyActivatedSlots[classID] != 0 || slotCounterClass[classID] <= ((ClientDataRate[classID]>0)?(allowedDataRateClass[classID] / ClientDataRate[classID]):0)) &&
 						m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos &&
-						GetTickCount() - LastBusySlotChangeTime > max(timeSinceLastLoop,120))
+						GetTickCount() - LastBusySlotChangeTime > max(2*timeSinceLastLoop,120))
 						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 				} else	if (slotCounterClass[SCHED_CLASS]>0 && m_highestNumberOfFullyActivatedSlots[classID] >= slotCounterClass[LAST_CLASS])
 					m_highestNumberOfFullyActivatedSlots[classID]= slotCounterClass[LAST_CLASS]-1;
