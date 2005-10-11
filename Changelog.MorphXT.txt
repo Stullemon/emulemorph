@@ -13,7 +13,6 @@ CHANGED: Turned back the right sorting of the file status column
 CHANGED: Moved back "Download In Alphabetical Order" setting in priority popup menu
 CHANGED: Reworked a bit the Anti-leecher to not ban client morph based mod
 CHANGED: Linear priority column show us all information regarding download priority
-CHNAGED: DLsortFix: 
 CHANGED: EastShare CS has been updated according to change in official
 CHANGED: Create ipfilter, fake and ip2country class first to avoid multiple hd access while hashing
 CHANGED: USC: changed the way to limit upload slot datarate to balance upload and avoid lost of bandwidth
@@ -22,6 +21,7 @@ CHANGED: USC: changed the way to limit upload slot datarate to balance upload an
 CHANGED: WC: WebCache site has been shutdown due to high load, so i removed link for autoupdate webcachesetting
 CHANGED: Every client are now equal arround PowerShare file state
 CHANGED: zz code update arround scheduled upload system
+CHANGED: Auto PowerShare trigger differently now
 
 ADDED  : Patch to make shareable file succefuly completed with insufficient space disk on target
 
