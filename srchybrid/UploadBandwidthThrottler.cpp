@@ -609,14 +609,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								//calculate client allowed data for a client (stat->realBytesToSpend)
 								if (ClientDataRate[classID] > 0) {
-									if (socket->IsBusy() == false) {
-										if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
-											stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
-										else
-											stat->realBytesToSpend = _I64_MAX;
-									}
+									if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
+										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
+									else
+										stat->realBytesToSpend = _I64_MAX;
 								} else {
-									stat->realBytesToSpend = 1000;
+									stat->realBytesToSpend = _I64_MAX;
 								}
 
 								//Try to send client allowed data for a client but not more than class allowed data
@@ -653,7 +651,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, doubleSendSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
-										stat->realBytesToSpend -= lastSpentBytes*1000;
+										if (stat->realBytesToSpend > 999)
+											stat->realBytesToSpend -= lastSpentBytes*1000;
 										if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
 											m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
 										if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
@@ -661,7 +660,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										spentBytes += lastSpentBytes;
 										spentOverhead += socketSentBytes.sentBytesControlPackets;
 										LastSentSlot[classID] = slotCounter - lastclientpos;
-									}
+									} else if (socket->IsBusy() && stat->realBytesToSpend > 999)
+										stat->realBytesToSpend = 1000;
 									
 								}
 								if  (stat->realBytesToSpend <= 999)
