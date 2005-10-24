@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.46c MorphXT v7.x
+--------------------------------------
+FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl
+
+--------------------------------------
 Changelog for eMule 0.46c MorphXT v7.4
 --------------------------------------
 FIXED  : (major) SafeHash Patch from SlugFiller mod (Borschtsch)
