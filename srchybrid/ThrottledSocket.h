@@ -28,6 +28,7 @@ public:
 	virtual uint32	GetNeededBytes(bool lowspeed) = 0;
 	//MORPH END   - Changed by SiRoB, Scale to lowspeed
 	virtual DWORD GetBusyTimeSince() = 0;
+	virtual float GetBusyRatioTime() = 0;
 };
 
 // <-- ZZ:UploadBandWithThrottler (UDP)

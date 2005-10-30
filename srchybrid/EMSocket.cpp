@@ -136,6 +136,10 @@ CEMSocket::CEMSocket(void){
     m_bBusy = false;
 	*/
 	m_dwBusy = 0;
+	m_dwBusyDelta = 1;
+	m_dwNotBusy = GetTickCount();
+	m_dwNotBusyDelta = 0;
+
     m_hasSent = false;
 
     //int val = 0;
@@ -622,8 +626,13 @@ void CEMSocket::OnSend(int nErrorCode){
 	/*
     m_bBusy = false;
 	*/
+	DWORD curTick = GetTickCount();
+	if (m_dwBusy) {
+		m_dwBusyDelta = curTick-m_dwBusy;
+		m_dwNotBusy = curTick;
+	}
 	m_dwBusy = 0;
-
+	
     // stopped sending here.
     //StoppedSendSoUpdateStats();
 
@@ -698,7 +707,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     //MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
 	} else if (m_dwBusy /*&& onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-        sendLocker.Unlock();
+	    sendLocker.Unlock();
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
     }
@@ -801,8 +810,14 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 					/*
                     m_bBusy = true;
 					*/
-					m_dwBusy = GetTickCount();
-
+					DWORD curTick = GetTickCount();
+					if (m_dwBusy == 0) {
+						m_dwNotBusyDelta = curTick-m_dwNotBusy;
+						m_dwBusy = curTick;
+					}
+					m_dwNotBusy = 0;
+					
+					
                     //m_wasBlocked = true;
                     sendLocker.Unlock();
 
@@ -819,8 +834,14 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 				/*
                 m_bBusy = false;
 				*/
+				DWORD curTick = GetTickCount();
+				if (m_dwBusy) {
+					m_dwBusyDelta = curTick-m_dwBusy;
+					m_dwNotBusy = curTick;
+				}
 				m_dwBusy = 0;
-                m_hasSent = true;
+
+				m_hasSent = true;
                 lastCalledSend = ::GetTickCount();
 
                 sent += result;
@@ -887,7 +908,7 @@ uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
 	//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 	if (current >= 65535)
 		ret = 65535-1;
-	return ret;
+		return ret;
 	//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 }
 

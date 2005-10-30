@@ -79,7 +79,7 @@ public:
 
     uint32	GetNeededBytes(bool lowspeed);
 	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
-
+	float	GetBusyRatioTime() { return (float)(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))/(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)); };
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
@@ -146,5 +146,8 @@ private:
 	bool m_bBusy;
 	*/
 	DWORD m_dwBusy;
+	DWORD m_dwBusyDelta;
+    DWORD m_dwNotBusy;
+	DWORD m_dwNotBusyDelta;
     bool m_hasSent;
 };
