@@ -2,6 +2,10 @@
 Changelog for eMule 0.46c MorphXT v7.x
 --------------------------------------
 FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl
+FIXED  : (minor) sorting item arround downloadclientctrl (by XMan)
+FIXED  : WC: Avoid  xml setting autoupdating when webcache is disable
+
+ADDED : Display BusyRatio in uploading list
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.4
