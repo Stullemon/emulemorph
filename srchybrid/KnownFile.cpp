@@ -380,7 +380,8 @@ void CKnownFile::UpdatePartsInfo()
 			uint8* m_abyUpPartUploadingAndUploaded = new uint8[partcount];
 			cur_src->GetUploadingAndUploadedPart(m_abyUpPartUploadingAndUploaded, partcount);
 			for (uint16 i = 0; i < partcount; i++)
-				m_AvailPartFrequency[i] += m_abyUpPartUploadingAndUploaded[i];
+				if (m_AvailPartFrequency[i] == 0 && m_abyUpPartUploadingAndUploaded[i]>0)
+					m_AvailPartFrequency[i] = 1;
 			delete[] m_abyUpPartUploadingAndUploaded;
 		}
 		//MORPH END    - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
@@ -461,10 +462,10 @@ void CKnownFile::UpdatePartsInfo()
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	m_nVirtualCompleteSourcesCount = (uint16)-1;
 	for (uint16 i = 0; i < partcount; i++){
-		if((m_AvailPartFrequency[i]) < m_nVirtualCompleteSourcesCount)
+		if(m_AvailPartFrequency[i] < m_nVirtualCompleteSourcesCount)
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount==0, m_nCompleteSourcesCountLo==1 && m_nVirtualCompleteSourcesCount==0 && iCompleteSourcesCountInfoReceived>GetPartCount(),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount<=5, (m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount<=1) && iCompleteSourcesCountInfoReceived>GetPartCount(),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
 	m_bHideOSAuthorized = true;

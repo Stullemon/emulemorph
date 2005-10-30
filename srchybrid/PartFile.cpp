@@ -312,9 +312,6 @@ void CPartFile::Init(){
     lastSwapForSourceExchangeTick = ::GetTickCount();
 	m_DeadSourceList.Init(false);
 
-	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	m_nVirtualCompleteSourcesCount = 0;
-	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	// khaos::categorymod+
 	m_catResumeOrder=0;
 	// khaos::categorymod-
@@ -3182,7 +3179,7 @@ void CPartFile::UpdatePartsInfo()
 		if(m_nVirtualCompleteSourcesCount > m_SrcpartFrequency[i])
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount<=1, iCompleteSourcesCountInfoReceived>GetPartCount() && (lastseencomplete!=NULL || m_nCompleteSourcesCountLo==1) && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount<=5, iCompleteSourcesCountInfoReceived>GetPartCount() && (lastseencomplete!=NULL || m_nCompleteSourcesCountLo==1) && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
 	SetHideOSAuthorized(m_nVirtualCompleteSourcesCount>1);
