@@ -5,7 +5,11 @@ FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl
 FIXED  : (minor) sorting item arround downloadclientctrl (by XMan)
 FIXED  : WC: Avoid  xml setting autoupdating when webcache is disable
 
-ADDED : Display BusyRatio in uploading list
+ADDED  : Display BusyRatio in uploading list
+
+CHANGED: PowerShare limit have been limited to 5 virtual sources
+
+TWEAKED: USS: hope this will take into account much possible case to avoid not filled bandwidth
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.4
