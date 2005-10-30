@@ -127,6 +127,9 @@ void CDownloadClientsCtrl::SetAllIcons()
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey")));
 	m_ImageList.Add(CTempIconLoader(_T("Morph")));
+	//MORPH START - Added by SiRoB, WebCache
+	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE")));
+	//MORPH END   - Added by SiRoB, WebCache
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
@@ -228,8 +231,16 @@ void CDownloadClientsCtrl::AddClient(CUpDownClient* client)
 	if(!theApp.emuledlg->IsRunning())
 		return;
        
+	//MORPH START - Changed by SiRoB, fix by XMan
+	/*
 	InsertItem(LVIF_TEXT|LVIF_PARAM, GetItemCount(), client->GetUserName(), 0, 0, 1, (LPARAM)client);
 	RefreshClient(client);
+	*/
+	int item = InsertItem(LVIF_TEXT|LVIF_PARAM, GetItemCount(), client->GetUserName(), 0, 0, 1, (LPARAM)client);
+	Update(item);
+	//RefreshClient(client);
+	//MORPH END  - Changed by SiRoB, fix by XMan
+	
 	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Downloading, GetItemCount()); 
 }
 
@@ -349,6 +360,11 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					else if (client->GetClientSoft() == SO_LPHANT){
 						image = 13;
 					}
+					//MORPH START - Added by SiRoB, WebCache
+					else if (client->GetClientSoft() == SO_WEBCACHE) {
+						image = 18;
+					}
+					//MORPH END   - Added by SiRoB, WebCache
 					else if (client->ExtProtocolAvailable()){
 						image = client->IsMorph()?17:1; //MORPH START - Added by SiRoB, More client icon
 					}
