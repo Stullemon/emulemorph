@@ -1119,14 +1119,14 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1) && datarate < 102400 )
     	return false;
 	*/
-	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1))
+	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(3))
     	return false;
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
     uint32 curUploadSlotsReal = (uint32)uploadinglist.GetCount();
 
-    if(simulateScheduledClosingOfSlot) {
+	if(simulateScheduledClosingOfSlot) {
         if(curUploadSlotsReal < 1) {
             return true;
         } else {
@@ -1141,12 +1141,12 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 		return false;
     }
 
-	if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*&& AcceptNewClient(curUploadSlots*2) +1*/ ||
+	if(curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*&& AcceptNewClient(curUploadSlots*2) +1*/ ||
 		//MORPH - Changed by SiRoB, Keep this change
 		/*
 		curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall +1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 		*/
-		curUploadSlots < curUploadSlotsReal && curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall +1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
+		curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 		return true;
 	}
 
