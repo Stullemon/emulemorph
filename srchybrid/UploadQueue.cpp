@@ -918,6 +918,8 @@ void CUploadQueue::Process() {
 				++m_aiSlotCounter[i];
 		}else
 			++m_aiSlotCounter[LAST_CLASS];
+		if (cur_client->GetUploadState() == US_CONNECTING)
+			m_nLastStartUpload = curTick;
 	}
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
 	for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
@@ -1141,12 +1143,8 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 		return false;
     }
 
-	if(curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*&& AcceptNewClient(curUploadSlots*2) +1*/ ||
-		//MORPH - Changed by SiRoB, Keep this change
-		/*
-		curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall +1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
-		*/
-		curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
+	if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*&& AcceptNewClient(curUploadSlots*2) +1 ||
+		curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall +1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)*/) {
 		return true;
 	}
 
@@ -1541,7 +1539,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 				*/
 				//wistily stop
 			}
-		} else if(earlyabort == false)
+		} else if(earlyabort == false && client->GetUploadState() != US_BANNED)
 			++failedupcount;
 
 			//MORPH START - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part

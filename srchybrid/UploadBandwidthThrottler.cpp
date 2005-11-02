@@ -547,8 +547,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket, stat)) {
-								uint32 neededBytes = socket->GetNeededBytes(1000 > minFragSize);
-								if (slotCounter == curAllowedTrickle[classID] && neededBytes && GetTickCount()-socket->GetLastCalledSend() >= 1000) {
+								uint32 neededBytes = max(socket->GetNeededBytes(1000 > minFragSize), minFragSize);
+								if (slotCounter == curAllowedTrickle[classID] && GetTickCount()-socket->GetLastCalledSend() >= 1000) {
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(neededBytes, minFragSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									uint64 realByteSpent = lastSpentBytes*1000;
@@ -609,6 +609,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								//calculate client allowed data for a client (stat->realBytesToSpend)
 								if (ClientDataRate[classID] > 0) {
+									if(stat->realBytesToSpend > ClientDataRate[classID]*1000/timeSinceLastLoop)
+										stat->realBytesToSpend = ClientDataRate[classID]*1000/timeSinceLastLoop;
 									if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
 									else
@@ -621,6 +623,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								if (stat->realBytesToSpend > 999 && stat->classID < SCHED_CLASS) {
 									if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
 										uint32 BytesToSpendTemp = min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)spentBytes);
+										BytesToSpendTemp = max(BytesToSpendTemp, doubleSendSize);
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, doubleSendSize);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
@@ -728,8 +731,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					realBytesToSpendClass[classID] = 999;
 				}
 				if (slotCounterClass[SCHED_CLASS]>0 &&
-					m_highestNumberOfFullyActivatedSlots[classID] >= lastclientpos &&
-					!(needanewslot))
+					m_highestNumberOfFullyActivatedSlots[classID] >= lastclientpos)
 					m_highestNumberOfFullyActivatedSlots[classID] = numberofslot - slotCounterClass[SCHED_CLASS];
 				lastclientpos -= slotCounterClass[classID];
 			}
