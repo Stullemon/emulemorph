@@ -3708,10 +3708,10 @@ BOOL CPartFile::PerformFileComplete()
 
 		paused = true;
 		stopped = true;
-		//MORPH START - Addezd by SiRoB, Make the permanent handel open again
+		//MORPH START - Added by SiRoB, Make the permanent handle open again
 		if (!m_hpartfile.Open(strPartfilename, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan))
 			LogError(LOG_STATUSBAR, _T("Failed to reopen partfile: %s"),strPartfilename);
-		//MORPH END   - Addezd by SiRoB, Make the permanent handel open again
+		//MORPH END   - Added by SiRoB, Make the permanent handle open again
 		SetStatus(PS_ERROR);
 		m_bCompletionError = true;
 		SetFileOp(PFOP_NONE);
@@ -5072,22 +5072,20 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 					LogError(LOG_STATUSBAR, GetResString(IDS_ERR_INCOMPLETEHASH), GetFileName());
 					hashsetneeded = true;
 					ASSERT(FALSE);	// If this fails, something was seriously wrong with the hashset loading or the check above
-			}
+				}
 
-			// Is this 9MB part complete
-			if (IsComplete(PARTSIZE * partNumber, (PARTSIZE * (partNumber + 1)) - 1, false))
-			{
-				// Is part corrupt
-				// Let's check in another thread
-				m_PartsHashing++;
-				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-				parthashthread->SetSinglePartHash(this, partNumber);
-				parthashthread->ResumeThread();
-			}
-			else if (IsCorruptedPart(partNumber) && (thePrefs.IsICHEnabled() || bForceICH))
-			{
-				
-
+				// Is this 9MB part complete
+				if (IsComplete(PARTSIZE * partNumber, (PARTSIZE * (partNumber + 1)) - 1, false))
+				{
+					// Is part corrupt
+					// Let's check in another thread
+					m_PartsHashing++;
+					CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+					parthashthread->SetSinglePartHash(this, partNumber);
+					parthashthread->ResumeThread();
+				}
+				else if (IsCorruptedPart(partNumber) && (thePrefs.IsICHEnabled() || bForceICH))
+				{
 					CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 					parthashthread->SetSinglePartHash(this, partNumber, true);	// Special case, doesn't increment hashing parts, since part isn't really complete
 					parthashthread->ResumeThread();
