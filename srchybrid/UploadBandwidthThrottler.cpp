@@ -609,12 +609,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								//calculate client allowed data for a client (stat->realBytesToSpend)
 								if (ClientDataRate[classID] > 0) {
-									if(stat->realBytesToSpend > ClientDataRate[classID]*1000/timeSinceLastLoop)
-										stat->realBytesToSpend = ClientDataRate[classID]*1000/timeSinceLastLoop;
-									if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
-										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
-									else
-										stat->realBytesToSpend = _I64_MAX;
+									if(socket->GetBusyRatioTime() == 0 || stat->realBytesToSpend <= 999) {
+										if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
+											stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
+										else
+											stat->realBytesToSpend = _I64_MAX;
+									}
 								} else {
 									stat->realBytesToSpend = _I64_MAX;
 								}
@@ -707,26 +707,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 			lastclientpos = m_StandardOrder_list.GetSize();
 			uint32 numberofslot = lastclientpos;
-			bool needanewslot = numberoffullconsumedslot>0 || SlotCurrentlyBusy == lastclientpos;
 			sint64 oldrealBytesToSpendClass = realBytesToSpendClass[LAST_CLASS];
 			
 			for (int classID = LAST_CLASS; classID >= 0; classID--) {
-				if ((m_highestNumberOfFullyActivatedSlots[classID] != 0 || slotCounterClass[classID] == 0) &&
-					(m_highestNumberOfFullyActivatedSlots[classID] == lastclientpos - slotCounterClass[SCHED_CLASS]) && // No trickle slot in that class
-					(
-					 ClientDataRate[classID] > 0 && (numberoffullconsumedslot[classID] == slotCounterClass[classID] || slotCounterClass[classID] == numberofslot) && allowedDataRateClass[classID]/(lastclientpos+1) >= ClientDataRate[classID]
-					 ||
-					 //Ensure that we always get a trikle slot when we use focused mode
-					 ClientDataRate[classID] == 0 && slotCounterClass[SCHED_CLASS] == 0 && bUploadUnlimited == false && needanewslot
-					 )
-					)
-					 m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 				if (realBytesToSpendClass[classID] > 999) {
 					if (oldrealBytesToSpendClass <= 999) { // Main bandwidth has been consumed
 						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 					} else if ((m_highestNumberOfFullyActivatedSlots[classID] != 0 || slotCounterClass[classID] <= ((ClientDataRate[classID]>0)?(allowedDataRateClass[classID] / ClientDataRate[classID]):0)) &&
-						m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos &&
-						needanewslot || lastclientpos==0)
+						m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos)
 						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 					realBytesToSpendClass[classID] = 999;
 				}
