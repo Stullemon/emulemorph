@@ -593,7 +593,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				uint64 spentOverhead = 0;
 				memset(numberoffullconsumedslot,0,sizeof(numberoffullconsumedslot));
 				if(slotCounterClass[classID]) {
-					if (ClientDataRate[classID] == 0 || LastSentSlot[classID] + 1 >= slotCounterClass[classID])
+					if (ClientDataRate[classID] == 0 || LastSentSlot[classID] + 1 >= min(slotCounterClass[classID], allowedDataRateClass[classID] / ClientDataRate[classID]))
 						LastSentSlot[classID] = 0;
 					else
 						++LastSentSlot[classID];
@@ -711,16 +711,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			
 			for (int classID = LAST_CLASS; classID >= 0; classID--) {
 				if (realBytesToSpendClass[classID] > 999) {
-					if (oldrealBytesToSpendClass <= 999) { // Main bandwidth has been consumed
-						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
-					} else if ((m_highestNumberOfFullyActivatedSlots[classID] != 0 || slotCounterClass[classID] <= ((ClientDataRate[classID]>0)?(allowedDataRateClass[classID] / ClientDataRate[classID]):0)) &&
-						m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos)
+					if (m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos)
+						++m_highestNumberOfFullyActivatedSlots[classID];
+					if (oldrealBytesToSpendClass > 999 && m_highestNumberOfFullyActivatedSlots[LAST_CLASS]>numberofslot) // Main bandwidth has not been consumed
 						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 					realBytesToSpendClass[classID] = 999;
 				}
-				if (slotCounterClass[SCHED_CLASS]>0 &&
-					m_highestNumberOfFullyActivatedSlots[classID] >= lastclientpos)
-					m_highestNumberOfFullyActivatedSlots[classID] = numberofslot - slotCounterClass[SCHED_CLASS];
 				lastclientpos -= slotCounterClass[classID];
 			}
 			sendLocker.Unlock();
