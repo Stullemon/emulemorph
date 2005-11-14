@@ -422,7 +422,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	uint32 ClientDataRate[NB_SPLITTING_CLASS];
 	sint64 realBytesToSpendClass[NB_SPLITTING_CLASS];
 	memset(realBytesToSpendClass,0,sizeof(realBytesToSpendClass));
-	uint32 numberoffullconsumedslot[NB_SPLITTING_CLASS];
 	uint32 curAllowedTrickle[NB_SPLITTING_CLASS];
 	memset(curAllowedTrickle,0,sizeof(curAllowedTrickle));
 	uint32 LastSentSlot[NB_SPLITTING_CLASS];
@@ -547,8 +546,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket, stat)) {
-								uint32 neededBytes = max(socket->GetNeededBytes(1000 > minFragSize), minFragSize);
-								if (slotCounter == curAllowedTrickle[classID] && GetTickCount()-socket->GetLastCalledSend() >= 1000) {
+								if (slotCounter == curAllowedTrickle[classID] && stat->realBytesToSpend > 999 && GetTickCount()-socket->GetLastCalledSend() >= 1000) {
+									uint32 neededBytes = max(socket->GetNeededBytes(1000 > minFragSize), minFragSize);
+									neededBytes = min(BytesToSpend - (sint64)ControlspentBytes, neededBytes);
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(neededBytes, minFragSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									uint64 realByteSpent = lastSpentBytes*1000;
@@ -573,25 +573,23 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			m_SentBytesSinceLastCallOverhead += ControlspentOverhead;
 
 			lastclientpos = 0;
-			uint32 SlotCurrentlyBusy = 0;
-			uint32 SlotHaveNotBeenBusySinceSomeTime = 0;
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 				//Calculate allowed data to spend for a class (realBytesToSpendClass)
 				BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
 				if(classID < LAST_CLASS) {
-					if(allowedDataRateClass[classID] > 0 && _I64_MAX/timeSinceLastLoop > allowedDataRateClass[classID] && _I64_MAX-allowedDataRateClass[classID]*timeSinceLastLoop > realBytesToSpendClass[classID]) {
-						realBytesToSpendClass[classID] += allowedDataRateClass[classID]*timeSinceLastLoop;
+					if(allowedDataRateClass[classID] > 0) {
+						if(_I64_MAX/timeSinceLastLoop > allowedDataRateClass[classID] && _I64_MAX-allowedDataRateClass[classID]*timeSinceLastLoop > realBytesToSpendClass[classID]) {
+							realBytesToSpendClass[classID] += allowedDataRateClass[classID]*timeSinceLastLoop;
+						} else {
+							realBytesToSpendClass[classID] = _I64_MAX;
+						}
+						BytesToSpend = min(realBytesToSpendClass[classID] / 1000,BytesToSpend);
 					} else {
 						realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
-					}
-					sint64 curClassByteToSpend = realBytesToSpendClass[classID] / 1000;
-					if (BytesToSpend > curClassByteToSpend) {
-						BytesToSpend = curClassByteToSpend;
 					}
 				}
 				uint64 spentBytes = 0;
 				uint64 spentOverhead = 0;
-				memset(numberoffullconsumedslot,0,sizeof(numberoffullconsumedslot));
 				if(slotCounterClass[classID]) {
 					if (ClientDataRate[classID] == 0 || LastSentSlot[classID] + 1 >= min(slotCounterClass[classID], allowedDataRateClass[classID] / ClientDataRate[classID]))
 						LastSentSlot[classID] = 0;
@@ -610,6 +608,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								//calculate client allowed data for a client (stat->realBytesToSpend)
 								if (ClientDataRate[classID] > 0) {
 									if(socket->GetBusyRatioTime() == 0 || stat->realBytesToSpend <= 999) {
+										if (stat->realBytesToSpend > 1000*ClientDataRate[classID])
+											stat->realBytesToSpend = 999;
 										if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
 											stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
 										else
@@ -663,15 +663,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 											LastSentSlot[classID] = slotCounter - lastclientpos;
 										}
 									}
-								}
-								if (socket->GetBusyRatioTime() > 0.001)
-									stat->dwBusy = GetTickCount();
-								if (socket->IsBusy())
-									++SlotCurrentlyBusy;
-								if (GetTickCount() - stat->dwBusy > slotCounterClass[LAST_CLASS]*1000) {
-									if (stat->realBytesToSpend <= 999)
-										++numberoffullconsumedslot[classID];
-									++SlotHaveNotBeenBusySinceSomeTime;
 								}
 							}
 						}

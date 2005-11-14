@@ -918,8 +918,6 @@ void CUploadQueue::Process() {
 				++m_aiSlotCounter[i];
 		}else
 			++m_aiSlotCounter[LAST_CLASS];
-		if (cur_client->GetUploadState() == US_CONNECTING)
-			m_nLastStartUpload = curTick;
 	}
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
 	for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
