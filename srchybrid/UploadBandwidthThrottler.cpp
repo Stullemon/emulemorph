@@ -446,7 +446,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		timeSinceLastLoop = thisLoopTick - lastLoopTick;
 		if (timeSinceLastLoop > 0) {
 			theApp.lastCommonRouteFinder->GetClassByteToSend(allowedDataRateClass,ClientDataRate);
-
 			bUploadUnlimited = thePrefs.GetMaxUpload() == UNLIMITED;
 			if (bUploadUnlimited && nUploadStartTime != 0 && ::GetTickCount()- nUploadStartTime > SEC2MS(60) ){ // upload is unlimited
 				if (theApp.uploadqueue){
@@ -583,7 +582,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						} else {
 							realBytesToSpendClass[classID] = _I64_MAX;
 						}
-						BytesToSpend = min(realBytesToSpendClass[classID] / 1000,BytesToSpend);
+						sint64 curClassByteToSpend = realBytesToSpendClass[classID] / 1000;
+						if (BytesToSpend > curClassByteToSpend || curClassByteToSpend < 0) {
+							BytesToSpend = curClassByteToSpend;
+						}
 					} else {
 						realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
 					}
@@ -607,14 +609,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								//calculate client allowed data for a client (stat->realBytesToSpend)
 								if (ClientDataRate[classID] > 0) {
-									if(socket->GetBusyRatioTime() == 0 || stat->realBytesToSpend <= 999) {
-										if (stat->realBytesToSpend > 1000*ClientDataRate[classID])
-											stat->realBytesToSpend = 999;
-										if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
-											stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
-										else
-											stat->realBytesToSpend = _I64_MAX;
-									}
+									if (stat->realBytesToSpend > 999)
+										stat->realBytesToSpend = 999;
+									if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
+										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
+									else
+										stat->realBytesToSpend = _I64_MAX;
 								} else {
 									stat->realBytesToSpend = _I64_MAX;
 								}
@@ -622,8 +622,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->classID < SCHED_CLASS) {
 									if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
-										uint32 BytesToSpendTemp = min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)spentBytes);
-										BytesToSpendTemp = max(BytesToSpendTemp, doubleSendSize);
+										uint32 BytesToSpendTemp = doubleSendSize;
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, doubleSendSize);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {

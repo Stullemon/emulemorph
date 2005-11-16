@@ -725,7 +725,8 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	{
         if(newclient->IsScheduledForRemoval()) {
             newclient->UnscheduleForRemoval();
-            m_nLastStartUpload = ::GetTickCount();
+            if (GetEffectiveUploadListCount()==uploadinglist.GetCount()) //MORPH - Added by SiRoB, Scheduled slot related 
+				m_nLastStartUpload = ::GetTickCount();
     
             MoveDownInUploadQueue(newclient);
 
@@ -803,7 +804,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		DebugLog(LOG_USC | DLP_VERYLOW,buffer);
 	}
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
-
+	
 	m_nLastStartUpload = ::GetTickCount();
 
     if(newclient->GetQueueSessionUp() > 0) {
@@ -957,8 +958,6 @@ void CUploadQueue::Process() {
 		    // add to queue again.
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
             //AddClientToQueue(lastClient,true, true);
-
-            m_nLastStartUpload = ::GetTickCount();
         }
     } else if (ForceNewClient()){
         // There's not enough open uploads. Open another one.
@@ -1437,7 +1436,8 @@ void CUploadQueue::ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR
     client->ScheduleRemovalFromUploadQueue(pszDebugReason, strDisplayReason, earlyabort);
 	MoveDownInUploadQueue(client);
 
-    m_nLastStartUpload = ::GetTickCount();
+    if(uploadinglist.GetCount()-GetEffectiveUploadListCount()==1) //MORPH - Added by SiRoB, Scheduled slot related 
+		m_nLastStartUpload = ::GetTickCount();
 }
 //MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
