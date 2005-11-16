@@ -424,8 +424,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	memset(realBytesToSpendClass,0,sizeof(realBytesToSpendClass));
 	uint32 curAllowedTrickle[NB_SPLITTING_CLASS];
 	memset(curAllowedTrickle,0,sizeof(curAllowedTrickle));
-	uint32 LastSentSlot[NB_SPLITTING_CLASS];
-	memset(LastSentSlot,0,sizeof(LastSentSlot));
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	uint32 nEstiminatedLimit = 0;
 	sint32 nSlotsBusyLevel = 0;
@@ -576,47 +574,31 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				//Calculate allowed data to spend for a class (realBytesToSpendClass)
 				BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
 				if(classID < LAST_CLASS) {
-					if(allowedDataRateClass[classID] > 0) {
-						if(_I64_MAX/timeSinceLastLoop > allowedDataRateClass[classID] && _I64_MAX-allowedDataRateClass[classID]*timeSinceLastLoop > realBytesToSpendClass[classID]) {
-							realBytesToSpendClass[classID] += allowedDataRateClass[classID]*timeSinceLastLoop;
-						} else {
-							realBytesToSpendClass[classID] = _I64_MAX;
-						}
-						sint64 curClassByteToSpend = realBytesToSpendClass[classID] / 1000;
-						if (BytesToSpend > curClassByteToSpend || curClassByteToSpend < 0) {
-							BytesToSpend = curClassByteToSpend;
-						}
+					if(allowedDataRateClass[classID] > 0 && realBytesToSpendClass[LAST_CLASS]/timeSinceLastLoop > allowedDataRateClass[classID] && realBytesToSpendClass[LAST_CLASS]-allowedDataRateClass[classID]*timeSinceLastLoop > realBytesToSpendClass[classID]) {
+						realBytesToSpendClass[classID] += allowedDataRateClass[classID]*timeSinceLastLoop;
 					} else {
 						realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
 					}
+					BytesToSpend = realBytesToSpendClass[classID] / 1000;
 				}
 				uint64 spentBytes = 0;
 				uint64 spentOverhead = 0;
 				if(slotCounterClass[classID]) {
-					if (ClientDataRate[classID] == 0 || LastSentSlot[classID] + 1 >= min(slotCounterClass[classID], allowedDataRateClass[classID] / ClientDataRate[classID]))
-						LastSentSlot[classID] = 0;
-					else
-						++LastSentSlot[classID];
-					uint32 offset = LastSentSlot[classID];
-					for(uint32 i = offset; i < slotCounterClass[classID]+offset; i++) {
-						uint32 slotCounter = i;
-						if (slotCounter + lastclientpos >= slotCounterClass[classID])
-							slotCounter -= slotCounterClass[classID];
-						slotCounter += lastclientpos;
+					for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID]; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
 								//calculate client allowed data for a client (stat->realBytesToSpend)
 								if (ClientDataRate[classID] > 0) {
-									if (stat->realBytesToSpend > 999)
+									if (socket->GetBusyRatioTime() > 0 && stat->realBytesToSpend > 999)
 										stat->realBytesToSpend = 999;
 									if  (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
 									else
-										stat->realBytesToSpend = _I64_MAX;
+										stat->realBytesToSpend = 1000*BytesToSpend;
 								} else {
-									stat->realBytesToSpend = _I64_MAX;
+									stat->realBytesToSpend = 1000*realBytesToSpendClass[LAST_CLASS];
 								}
 
 								//Try to send client allowed data for a client but not more than class allowed data
@@ -633,7 +615,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 												m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 											spentBytes += lastSpentBytes;
 											spentOverhead += socketSentBytes.sentBytesControlPackets;
-											LastSentSlot[classID] = slotCounter - lastclientpos;
 										}
 									}
 								}
@@ -659,7 +640,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 												m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 											spentBytes += lastSpentBytes;
 											spentOverhead += socketSentBytes.sentBytesControlPackets;
-											LastSentSlot[classID] = slotCounter - lastclientpos;
 										}
 									}
 								}
