@@ -3071,10 +3071,11 @@ void CPreferences::LoadPreferences()
 	m_strSkinProfileDir = ini.GetString(_T("SkinProfileDir"), appdir + _T("skins"));
 
     //Commander - Added: Invisible Mode [TPT] - Start
-    SetInvisibleMode( ini.GetBool(_T("InvisibleMode"), false),
-	ini.GetInt(_T("InvisibleModeHKKeyModifier"), MOD_CONTROL | MOD_SHIFT | MOD_ALT),
-    (char)ini.GetInt(_T("InvisibleModeHKKey"), (int)'E'));
-    //Commander - Added: Invisible Mode [TPT] - End
+    m_bInvisibleMode = ini.GetBool(_T("InvisibleMode"), false);
+	m_iInvisibleModeHotKeyModifier = ini.GetInt(_T("InvisibleModeHKKeyModifier"), MOD_CONTROL | MOD_SHIFT | MOD_ALT);
+	m_cInvisibleModeHotKey = ini.GetInt(_T("InvisibleModeHKKey"),(int)'E');
+    SetInvisibleMode(m_bInvisibleMode  ,m_iInvisibleModeHotKeyModifier ,m_cInvisibleModeHotKey );
+	//Commander - Added: Invisible Mode [TPT] - End
 
     //MORPH START - Added by Commander, ClientQueueProgressBar
 	m_bClientQueueProgressBar=ini.GetBool(_T("ClientQueueProgressBar"),false);
