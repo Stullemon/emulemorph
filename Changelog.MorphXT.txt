@@ -1,6 +1,7 @@
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.x
 --------------------------------------
+FIXED  : Load hot key for invisible mode correct from preferences
 FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl
 FIXED  : (minor) sorting item arround downloadclientctrl (by XMan)
 FIXED  : WC: Avoid  xml setting autoupdating when webcache is disable
