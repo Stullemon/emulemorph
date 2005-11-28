@@ -152,7 +152,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
 		if (!m_stat_list.Lookup(socket,cur_socket_stat)){
 			cur_socket_stat = new Socket_stat;
 			m_stat_list.SetAt(socket,cur_socket_stat);
-			cur_socket_stat->realBytesToSpend = 1000;
+			cur_socket_stat->realBytesToSpend = _I64_MAX;
 			cur_socket_stat->dwBusy = GetTickCount();
 		}
 		cur_socket_stat->classID = classID;
@@ -680,8 +680,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			sint64 oldrealBytesToSpendClass = realBytesToSpendClass[LAST_CLASS];
 			
 			for (int classID = LAST_CLASS; classID >= 0; classID--) {
-				if (realBytesToSpendClass[classID] > 999  && oldrealBytesToSpendClass > 999) {
-					m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
+				if (realBytesToSpendClass[classID] > 999)
+					if(oldrealBytesToSpendClass > 999)
+						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 					realBytesToSpendClass[classID] = 999;
 				}
 				lastclientpos -= slotCounterClass[classID];
