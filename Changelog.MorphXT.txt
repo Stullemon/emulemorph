@@ -6,6 +6,7 @@ FIXED  : (minor) Load hot key for invisible mode correct from preferences[leuk_h
 FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl [SiRoB]
 FIXED  : (minor) sorting item arround downloadclientctrl (by XMan) [SiRoB]
 FIXED  : WC: Avoid  xml setting autoupdating when webcache is disable [SiRoB]
+FIXED  : (minor) display of score ratio in icon for lovelace and Pawcio CS [Stulle]
 
 ADDED  : Display BusyRatio in uploading list [SiRoB]
 
