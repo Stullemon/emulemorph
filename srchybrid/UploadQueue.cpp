@@ -1142,8 +1142,8 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 		return false;
     }
 
-	if(curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall ||
-		curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall + 1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
+	if(curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall && curUploadSlots == (uint32)uploadinglist.GetCount() ||
+		curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 		return true;
 	}
 
