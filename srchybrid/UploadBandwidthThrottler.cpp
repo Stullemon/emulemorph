@@ -524,13 +524,15 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						if(m_stat_list.Lookup((ThrottledFileSocket*)socket,stat)) {
 							stat->realBytesToSpend -= lastSpentBytes*1000;
 							uint32 classID = (stat->classID==SCHED_CLASS)?LAST_CLASS:stat->classID;
+							if (classID < LAST_CLASS)
+								realBytesToSpendClass[classID] -= lastSpentBytes*1000;
 						}
 						ControlspentBytes += lastSpentBytes;
 						ControlspentOverhead += socketSentBytes.sentBytesControlPackets;
 					}
         		}
        		}
-					
+
 			uint32 lastclientpos = 0;
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 				if (slotCounterClass[classID]) {
@@ -554,6 +556,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
 									if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
 										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
+									if (classID < LAST_CLASS)
+										realBytesToSpendClass[classID] -= realByteSpent;
 									ControlspentBytes += lastSpentBytes;
 									ControlspentOverhead += socketSentBytes.sentBytesControlPackets;
 								}
@@ -563,9 +567,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					lastclientpos += slotCounterClass[classID];
 				}
 			}
-			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
-				realBytesToSpendClass[classID] -= 1000*ControlspentBytes;
-			}
+			realBytesToSpendClass[LAST_CLASS] -= 1000*ControlspentBytes;
 			m_SentBytesSinceLastCall += ControlspentBytes;
 			m_SentBytesSinceLastCallOverhead += ControlspentOverhead;
 
@@ -678,7 +680,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			sint64 oldrealBytesToSpendClass = realBytesToSpendClass[LAST_CLASS];
 			
 			for (int classID = LAST_CLASS; classID >= 0; classID--) {
-				if (realBytesToSpendClass[classID] > 999 && oldrealBytesToSpendClass > 999) {
+				if (realBytesToSpendClass[classID] > 999  && oldrealBytesToSpendClass > 999) {
 					m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 					realBytesToSpendClass[classID] = 999;
 				}
