@@ -31,6 +31,8 @@
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "emuledlg.h"
 #include "Log.h"
+//MORPH START - Added by Stulle, fix score display
+#include "updownclient.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
