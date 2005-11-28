@@ -680,7 +680,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			sint64 oldrealBytesToSpendClass = realBytesToSpendClass[LAST_CLASS];
 			
 			for (int classID = LAST_CLASS; classID >= 0; classID--) {
-				if (realBytesToSpendClass[classID] > 999)
+				if (realBytesToSpendClass[classID] > 999) {
 					if(oldrealBytesToSpendClass > 999)
 						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 					realBytesToSpendClass[classID] = 999;
