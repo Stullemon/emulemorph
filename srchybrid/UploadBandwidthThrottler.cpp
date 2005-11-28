@@ -632,7 +632,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								if (stat->realBytesToSpend > 999) {
 									if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
-									uint32 BytesToSpendTemp = min(stat->realBytesToSpend/1000, BytesToSpend - (sint64)spentBytes);
+										uint32 BytesToSpendTemp = min(stat->realBytesToSpend/1000, BytesToSpend - (sint64)spentBytes);
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, doubleSendSize);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {

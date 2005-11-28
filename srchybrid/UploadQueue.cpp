@@ -724,9 +724,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	if (IsDownloading(newclient))
 	{
         if(newclient->IsScheduledForRemoval()) {
-            newclient->UnscheduleForRemoval();
-            if (GetEffectiveUploadListCount()==uploadinglist.GetCount()) //MORPH - Added by SiRoB, Scheduled slot related 
-				m_nLastStartUpload = ::GetTickCount();
+			m_nLastStartUpload = ::GetTickCount();
     
             MoveDownInUploadQueue(newclient);
 
@@ -980,7 +978,11 @@ void CUploadQueue::Process() {
 				delete cur_client;
 			}
 		} else {
+			//MORPH -  Changed by SiRoB, Fix scheduled slot keep for too long time
+			/*
 			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
+			*/
+			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL /*|| cur_client->GetSlotNumber() <= GetActiveUploadsCount()*/ || ForceNewClient(true)) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
@@ -1140,8 +1142,8 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 		return false;
     }
 
-	if(curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall && ( curUploadSlots == uploadinglist.GetCount() || ::GetTickCount() - m_nLastStartUpload <= SEC2MS(10)) ||
-		curUploadSlotsReal + 1 < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
+	if(curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall ||
+		curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall + 1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 		return true;
 	}
 
@@ -1436,8 +1438,7 @@ void CUploadQueue::ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR
     client->ScheduleRemovalFromUploadQueue(pszDebugReason, strDisplayReason, earlyabort);
 	MoveDownInUploadQueue(client);
 
-    if(uploadinglist.GetCount()-GetEffectiveUploadListCount()==1) //MORPH - Added by SiRoB, Scheduled slot related 
-		m_nLastStartUpload = ::GetTickCount();
+    m_nLastStartUpload = ::GetTickCount();
 }
 //MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
