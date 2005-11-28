@@ -5,14 +5,15 @@ FIXED  : (minor) no server busy  switch to message on a busy pc during windows s
 FIXED  : (minor) Load hot key for invisible mode correct from preferences[leuk_he]
 FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl [SiRoB]
 FIXED  : (minor) sorting item arround downloadclientctrl (by XMan) [SiRoB]
-FIXED  : WC: Avoid  xml setting autoupdating when webcache is disable [SiRoB]
+FIXED  : (minor) WC: Avoid  xml setting autoupdating when webcache is disable [SiRoB]
 FIXED  : (minor) display of score ratio in icon for lovelace and Pawcio CS [Stulle]
+FIXED  : (minor) USC: High class limiter (FS, PS or PBF) are respected [SiRoB]
 
 ADDED  : Display BusyRatio in uploading list [SiRoB]
 
 CHANGED: PowerShare limit have been limited to 5 virtual sources [SiRoB]
 
-TWEAKED: USS: hope this will take into account much possible case to avoid not filled bandwidth [SiRoB]
+TWEAKED: USC: hope this will take into account much possible case to avoid not filled bandwidth [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.4
