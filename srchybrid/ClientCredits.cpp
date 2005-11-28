@@ -285,7 +285,7 @@ bool CClientCredits::GetHasScore(const CUpDownClient* client)
 	float m_fDefault;
 
 	if (thePrefs.GetCreditSystem() == CS_LOVELACE)
-		m_fDefault = 0.984290578f;
+		m_fDefault = 0.985f; // this might be a bit more than the result... who care's!?!?!
 	else if (thePrefs.GetCreditSystem() == CS_PAWCIO)
 		m_fDefault = 3.0f;
 	else
