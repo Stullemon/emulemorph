@@ -281,7 +281,7 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 
 	hr = pXMLDom.CreateInstance(__uuidof(DOMDocument30));
 	if (FAILED(hr)) 
-		throw printf("Failed to instantiate DOMDocument30 class.");
+		throw CString(_T("Failed to instantiate DOMDocument30 class."));
 
 	pXMLDom->async = VARIANT_FALSE;
 	switch (attempt)
@@ -299,16 +299,16 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 			//we shouldn't get there but just to be sure...
 			//if ( pXMLDom->load((_bstr_t)(_T("http://webcache-emule.sourceforge.net/webcacheURL.php?hostName=") + shostName)) != VARIANT_TRUE)
 			//if ( pXMLDom->load((_bstr_t)(_T("http://localhost/webcacheURL.php?hostName=") + shostName)) != VARIANT_TRUE)
-				throw("Your ISP was not found in the local database; loading the URL of xml data from the SF website failed.");
+				throw CString(_T("Your ISP was not found in the local database; loading the URL of xml data from the SF website failed."));
 			MSXML2::IXMLDOMNodePtr configURLNode = pXMLDom->selectSingleNode("/webcacheemule/configURL");
 			int result = pXMLDom->load((_bstr_t)(configURLNode->text + _T("?hostName=") + shostName));
 			configURLNode.Release();
 			if (result != VARIANT_TRUE)
-				throw("Failed loading xml data from the webcache-emule website.");			
+				throw CString(_T("Failed loading xml data from the webcache-emule website."));			
 		}
 		break;
 	default:
-		throw (_T("invalid argument"));
+		throw CString(_T("invalid argument"));
 	}
 	
 	MSXML2::IXMLDOMNodeListPtr proxies, proxyParms;
@@ -335,7 +335,7 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 
 		REParseError status = reHostName.Parse(pattern);
 		if (REPARSE_ERROR_OK != status)
-			throw (_T("bad host name"));
+			throw CString(_T("bad host name"));
 			
 		CAtlREMatchContext<> mcHostName;
 
@@ -404,7 +404,7 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 		throw message;
 	}
 		default:
-			throw (_T("invalid argument"));
+			throw CString(_T("invalid argument"));
 	}
 
 	return reaskedDNS;
