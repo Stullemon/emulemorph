@@ -416,7 +416,12 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						POINT point = {cur_rec.left, cur_rec.top+1};
 						//MORPH START - Modified by SiRoB, leecher icon
 						//imagelist.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
+						//MORPH START - Added by Stulle, fix score display
+						/*
 						UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->credits->GetScoreRatio(client->GetIP()) > 1) ? 2 : 0));
+						*/
+						UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->credits->GetHasScore(client)) ? 2 : 0));
+						//MORPH END - Added by Stulle, fix score display
 						if (client->IsLeecher())
 							imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg, 0, RGB(255,64,64));//RGB(255-GetRValue(odc->GetBkColor()),255-GetGValue(odc->GetBkColor()),255-GetBValue(odc->GetBkColor())));
 						else

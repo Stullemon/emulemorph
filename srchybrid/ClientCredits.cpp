@@ -277,6 +277,24 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 	//EastShare END - Added by linekin, CreditSystem 
 }
 
+//MORPH START - Added by Stulle, fix score display
+bool CClientCredits::GetHasScore(const CUpDownClient* client)
+{
+	uint32 dwForIP=client->GetIP();
+	float modif = GetScoreRatio(dwForIP);
+	float m_fDefault;
+
+	if (thePrefs.GetCreditSystem() == CS_LOVELACE)
+		m_fDefault = 0.984290578f;
+	else if (thePrefs.GetCreditSystem() == CS_PAWCIO)
+		m_fDefault = 3.0f;
+	else
+		m_fDefault = 1.0f;
+
+	return (modif > m_fDefault);
+}
+//MORPH END - Added by Stulle, fix score display
+
 //MORPH START - Added by IceCream, VQB: ownCredits
 float CClientCredits::GetMyScoreRatio(uint32 dwForIP) const
 {

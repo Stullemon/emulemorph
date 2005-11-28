@@ -172,6 +172,10 @@ public:
 	void	ResetCheckScoreRatio() {m_bCheckScoreRatio = true;}
 	//MORPH END   - Added by SiRoB, reduce a little CPU usage for ratio count
 
+	//MORPH START - Added by Stulle, fix score display
+	bool			GetHasScore(const CUpDownClient* client);
+	//MORPH END - Added by Stulle, fix score display
+
 protected:
 	void	Verified(uint32 dwForIP);
 	EIdentState IdentState;

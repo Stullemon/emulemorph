@@ -2374,7 +2374,12 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 			dUser.sClientExtra = _T("banned");
 		else if (cur_client->IsFriend())
 			dUser.sClientExtra = _T("friend");
+		//MORPH START - Added by Stulle, fix score display
+		/*
 		else if (cur_client->Credits()->GetScoreRatio(cur_client->GetIP()) > 1)
+		*/
+		else if (cur_client->Credits()->GetHasScore(cur_client))
+		//MORPH END - Added by Stulle, fix score display
 			dUser.sClientExtra = _T("credit");
 		else
 			dUser.sClientExtra = _T("none");
