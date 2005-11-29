@@ -479,8 +479,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		
 			sendLocker.Lock();
 		
-			uint32 allowedDataRate = allowedDataRateClass[LAST_CLASS];
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
+				uint32 allowedDataRate = allowedDataRateClass[classID];
 				if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
 					realBytesToSpendClass[classID] += allowedDataRate*timeSinceLastLoop;
 				} else {
