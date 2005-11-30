@@ -95,7 +95,6 @@ public:
 	CPartFile* GetFileByID(const uchar* filehash) const;
 	CPartFile* GetFileByIndex(int index) const;
 	CPartFile* GetFileByKadFileSearchID(uint32 ID) const;
-	CPartFile* GetFileByMetFileName(const CString& rstrName) const;	// SLUGFILLER: SafeHash
 
     void    StartNextFileIfPrefs(int cat);
 	// khaos::categorymod+

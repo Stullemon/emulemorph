@@ -92,6 +92,8 @@ void CDownloadQueue::Init(){
 	int count = 0;
 
 	for (int i=0;i<thePrefs.tempdir.GetCount();i++) {
+    	CStringList metsfound;	// SLUGFILLER: SafeHash - ensure each met is loaded once per tempdir
+
 		CString searchPath=thePrefs.GetTempDir(i);
 
 		searchPath += _T("\\*.part.met");
@@ -103,9 +105,10 @@ void CDownloadQueue::Init(){
 			if (ff.IsDirectory())
 				continue;
 			// SLUGFILLER: SafeHash - one is enough
-			if (GetFileByMetFileName(ff.GetFileName()))
+			if (metsfound.Find(CString(ff.GetFileName()).MakeLower()))
 				continue;
-			// SLUGFILLER: SafeHash
+			metsfound.AddTail(CString(ff.GetFileName()).MakeLower());
+		// SLUGFILLER: SafeHash
 			CPartFile* toadd = new CPartFile();
 			if (toadd->LoadPartFile(thePrefs.GetTempDir(i),ff.GetFileName().GetBuffer())){
 				count++;
@@ -130,8 +133,9 @@ void CDownloadQueue::Init(){
 			if (ff.IsDirectory())
 				continue;
 			// SLUGFILLER: SafeHash - one is enough
-			if (GetFileByMetFileName(RemoveFileExtension(ff.GetFileName())))
+			if (metsfound.Find(RemoveFileExtension(CString(ff.GetFileName()).MakeLower())))
 				continue;
+			metsfound.AddTail(RemoveFileExtension(CString(ff.GetFileName()).MakeLower()));
 			// SLUGFILLER: SafeHash
 			CPartFile* toadd = new CPartFile();
 			if (toadd->LoadPartFile(thePrefs.GetTempDir(i),ff.GetFileName().GetBuffer())){
@@ -1030,17 +1034,6 @@ CPartFile* CDownloadQueue::GetFileByIndex(int index) const
 	return NULL;
 }
 
-// SLUGFILLER: SafeHash
-CPartFile* CDownloadQueue::GetFileByMetFileName(const CString& rstrName) const
-{
-	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
-		CPartFile* cur_file = filelist.GetNext(pos);
-		if (!rstrName.CompareNoCase(cur_file->GetPartMetFileName()))
-			return cur_file;
-	}
-	return 0;
-}
-// SLUGFILLER: SafeHash
 
 CPartFile* CDownloadQueue::GetFileByID(const uchar* filehash) const
 {
