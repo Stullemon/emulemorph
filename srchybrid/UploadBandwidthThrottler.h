@@ -20,12 +20,12 @@
 
 //MORPH START - Added by SiRoB & AndCycle, Upload Splitting Class
 #define NB_SPLITTING_CLASS 3
-#define SCHED_CLASS NB_SPLITTING_CLASS
 #define LAST_CLASS NB_SPLITTING_CLASS-1
 struct Socket_stat{
 	uint32	classID;
 	sint64	realBytesToSpend;
 	DWORD	dwBusy;
+	bool	scheduled;
 };
 //MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class
 
@@ -51,7 +51,7 @@ public:
     /*
 	void AddToStandardList(uint32 index, ThrottledFileSocket* socket);
 	*/
-	void AddToStandardList(uint32 index, ThrottledFileSocket* socket, uint32 classID = LAST_CLASS);
+	void AddToStandardList(uint32 index, ThrottledFileSocket* socket, uint32 classID, bool scheduled);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	bool RemoveFromStandardList(ThrottledFileSocket* socket, bool resort = false); //MORPH - Changed by SiRoB & AndCycle, Upload Splitting Class
 

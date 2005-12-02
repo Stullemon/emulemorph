@@ -104,7 +104,7 @@ protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
 	bool		AcceptNewClient();
 	bool		AcceptNewClient(uint32 curUploadSlots);
-	/*zz*/bool		ForceNewClient(bool simulateScheduledClosingOfSlot = false);
+	bool		ForceNewClient();
 
 	bool		AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd = 0, bool highPrioCheck = false);
 	
