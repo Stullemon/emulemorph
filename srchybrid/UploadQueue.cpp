@@ -531,7 +531,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	while(pos != NULL && foundposition == false) {
 		CUpDownClient* uploadingClient = uploadinglist.GetAt(pos);
 
-		if(RightClientIsSuperior(newclient, uploadingClient) > 0 &&
+		if(RightClientIsSuperior(newclient, uploadingClient) >= 0 &&
 		   (uploadingClient->IsScheduledForRemoval() == false && newclient->IsScheduledForRemoval() == true ||
 		   uploadingClient->IsScheduledForRemoval() && uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && newclient->IsScheduledForRemoval() && newclient->GetScheduledUploadShouldKeepWaitingTime() == false ||
 		   uploadingClient->IsScheduledForRemoval() == newclient->IsScheduledForRemoval() &&
