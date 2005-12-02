@@ -979,7 +979,7 @@ void CUploadQueue::Process() {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
 				RemoveFromUploadQueue(cur_client, (CString)_T("Scheduled for removal: ") + cur_client->GetScheduledRemovalDebugReason(), true, keepWaitingTime);
 				AddClientToQueue(cur_client,keepWaitingTime,keepWaitingTime);
-                //m_nLastStartUpload = ::GetTickCount()-SEC2MS(9);
+                m_nLastStartUpload = ::GetTickCount()-SEC2MS(9);
 			}
 		}
 	}
