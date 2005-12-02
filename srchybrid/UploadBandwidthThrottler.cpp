@@ -474,7 +474,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 				uint32 allowedDataRate = allowedDataRateClass[classID];
-				if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
+				if(allowedDataRate > 0 && _I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
 					realBytesToSpendClass[classID] += allowedDataRate*timeSinceLastLoop;
 				} else {
 					realBytesToSpendClass[classID] = _I64_MAX;
