@@ -396,8 +396,10 @@ CUpDownClient::~CUpDownClient(){
 	}
 	//Morph Start - added by AndCycle, ICS
 	// enkeyDev: ICS
-	if (m_abyIncPartStatus)
+	if (m_abyIncPartStatus) {
 		delete[] m_abyIncPartStatus;
+		m_abyIncPartStatus = NULL;
+	}
 	// <--- enkeyDev: ICS
 	//Morph End - added by AndCycle, ICS
 	//MORPH START - Added by SiRoB, See chunk that we hide
