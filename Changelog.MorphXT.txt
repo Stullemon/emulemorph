@@ -13,6 +13,7 @@ FIXED  : (minor) USC: High class limiter (FS, PS or PBF) are respected [SiRoB]
 ADDED  : Display BusyRatio in uploading list [SiRoB]
 
 CHANGED: PowerShare limit have been limited to 5 virtual sources [SiRoB]
+CHANGED: UploadBandWidthThrottler: Limiting send buffer to DoubleSendSize to avoid createnextblockpackage to be blocked too much time [SiRoB]
 
 TWEAKED: USC: hope this will take into account much possible case to avoid not filled bandwidth [SiRoB]
 
