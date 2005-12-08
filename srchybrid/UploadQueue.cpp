@@ -1111,7 +1111,7 @@ bool CUploadQueue::ForceNewClient() {
 	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1) && datarate < 102400 )
     	return false;
 	*/
-	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1))
+	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(4))
     	return false;
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
