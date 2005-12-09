@@ -660,7 +660,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		/*
 		CUpDownClient* queueNewclient = FindBestClientInQueue(highPrioCheck == false, newclient);
 		*/
-		CUpDownClient* queueNewclient = FindBestClientInQueue(highPrioCheck == false, newclient, newclient == NULL || highPrioCheck);
+		CUpDownClient* queueNewclient = FindBestClientInQueue(highPrioCheck == false, newclient, true);
 		//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 		int superior;
@@ -1114,7 +1114,7 @@ bool CUploadQueue::ForceNewClient() {
 	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(4))
     	return false;
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
-	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
+	uint32 curUploadSlots = uploadinglist.GetCount();
 
 	if(!AcceptNewClient(curUploadSlots) || !theApp.lastCommonRouteFinder->AcceptNewClient()) { // UploadSpeedSense can veto a new slot if USS enabled
 		return false;
