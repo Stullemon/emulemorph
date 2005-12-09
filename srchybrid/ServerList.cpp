@@ -881,7 +881,7 @@ void CServerList::AddServersFromTextFile(const CString& strFilename)
 			if (srvexisting) {
 				srvexisting->SetListName(strName.GetBuffer());
 				srvexisting->SetIsStaticMember(true);
-				srvexisting->SetPreference(priority); 
+				//srvexisting->SetPreference(priority); leuk_he priority is not so static. 
 				if (theApp.emuledlg->serverwnd)
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(srvexisting);
 			}

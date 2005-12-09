@@ -1,6 +1,7 @@
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.x
 --------------------------------------
+FIXED  : (minor) Static servers do not need a static priority. [leuk_he] 
 FIXED  : Prevent forgetting identical named .met files in different tempdirs[leuk_he]
 FIXED  : (minor) no server busy  switch to message on a busy pc during windows starup[leuk_he]
 FIXED  : (minor) Load hot key for invisible mode correct from preferences[leuk_he]
