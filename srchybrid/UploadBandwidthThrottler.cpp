@@ -561,6 +561,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		m_SentBytesSinceLastCall += ControlspentBytes;
 		m_SentBytesSinceLastCallOverhead += ControlspentOverhead;
 
+		bool IsMainBytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000 > 0;
 		lastclientpos = 0;
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 			//Calculate allowed data to spend for a class (realBytesToSpendClass)
@@ -571,6 +572,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					BytesToSpend = curClassByteToSpend;
 				}
 			}
+			
 			uint64 spentBytes = 0;
 			uint64 spentOverhead = 0;
 			if(slotCounterClass[classID]) {
@@ -582,7 +584,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							//calculate client allowed data for a client (stat->realBytesToSpend)
 							if (ClientDataRate[classID] > 0) {
 								if (timeSinceLastLoop > 0) {
-									if (stat->realBytesToSpend >= 1000*doubleSendSize)
+									if (stat->realBytesToSpend > 999)
 										stat->realBytesToSpend = 999;
 									if (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
@@ -624,40 +626,35 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				
 				m_SentBytesSinceLastCall += spentBytes;
 				m_SentBytesSinceLastCallOverhead += spentOverhead;
+
+		
 			}
-			if (bUploadUnlimited){
-				int cBusy = 0;
-				for (int i = 0; i < m_StandardOrder_list.GetSize(); i++){
-					if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->IsBusy())
-						cBusy++;
+			if (IsMainBytesToSpend && realBytesToSpendClass[classID] > 999) {
+				if (m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos) {
+					if (m_SentBytesSinceLastCall > 0)
+						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
+					else
+						++m_highestNumberOfFullyActivatedSlots[classID];
 				}
-				if (m_StandardOrder_list.GetSize() > 0){
-					float fBusyPercent = ((float)cBusy/(float)m_StandardOrder_list.GetSize()) * 100;
-					if (cBusy > 2 && fBusyPercent > 75.00f && nSlotsBusyLevel < 255){
-						nSlotsBusyLevel++;
-					}
-					else if ( (cBusy <= 2 || fBusyPercent < 25.00f) && nSlotsBusyLevel > (-255)){
-						nSlotsBusyLevel--;
-					}
-					if (m_StandardOrder_list.GetSize() >= 3 && nUploadStartTime == 0)
-						nUploadStartTime = ::GetTickCount();
-				}
+				realBytesToSpendClass[classID] = 999;
 			}
 		}
-
-		if (timeSinceLastLoop > 0) {
-			lastclientpos = m_StandardOrder_list.GetSize();
-			for (int classID = LAST_CLASS; classID >= 0; classID--) {
-				if (realBytesToSpendClass[classID] >= 1000*doubleSendSize) {
-					if (m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos) {
-						if (m_SentBytesSinceLastCall > 0)
-							m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
-						else
-							++m_highestNumberOfFullyActivatedSlots[classID];
-					}
-					realBytesToSpendClass[classID] = 999;
+		if (bUploadUnlimited){
+			int cBusy = 0;
+			for (int i = 0; i < m_StandardOrder_list.GetSize(); i++){
+				if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->IsBusy())
+					cBusy++;
+			}
+			if (m_StandardOrder_list.GetSize() > 0){
+				float fBusyPercent = ((float)cBusy/(float)m_StandardOrder_list.GetSize()) * 100;
+				if (cBusy > 2 && fBusyPercent > 75.00f && nSlotsBusyLevel < 255){
+					nSlotsBusyLevel++;
 				}
-				lastclientpos -= slotCounterClass[classID];
+				else if ( (cBusy <= 2 || fBusyPercent < 25.00f) && nSlotsBusyLevel > (-255)){
+					nSlotsBusyLevel--;
+				}
+				if (m_StandardOrder_list.GetSize() >= 3 && nUploadStartTime == 0)
+					nUploadStartTime = ::GetTickCount();
 			}
 		}
 		sendLocker.Unlock();
