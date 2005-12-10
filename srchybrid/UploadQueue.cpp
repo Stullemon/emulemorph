@@ -143,13 +143,13 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 //-
-	CUpDownClient* newclient = FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated();
+	CUpDownClient* newclient = FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated(false);
 
     //MORPH START - Changed by SiRoB, Upload Splitting Class
 	/*
 	CUpDownClient* queueNewclient = FindBestClientInQueue(false);
 	*/
-	CUpDownClient* queueNewclient = FindBestClientInQueue(false, NULL, onlyCheckForRemove);
+	CUpDownClient* queueNewclient = FindBestClientInQueue(false, NULL, true);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
         if(queueNewclient &&
@@ -612,7 +612,7 @@ CUpDownClient* CUploadQueue::FindLastUnScheduledForRemovalClientInUploadList() {
     return NULL;
 }
 
-CUpDownClient* CUploadQueue::FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated() {
+CUpDownClient* CUploadQueue::FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated(bool checkforaddinuploadinglist) {
     POSITION pos = uploadinglist.GetHeadPosition();
 	while(pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
@@ -621,7 +621,8 @@ CUpDownClient* CUploadQueue::FindBestScheduledForRemovalClientInUploadListThatCa
 		//MORPH START - Changed by SiRoB, Upload Splitting Class
 		//if(cur_client->IsScheduledForRemoval() && /*&& cur_client->GetScheduledUploadShouldKeepWaitingTime()*/) {
 		if(cur_client->IsScheduledForRemoval() &&
-			(m_abAddClientOfThisClass[LAST_CLASS] && !(cur_client->IsFriend() && cur_client->GetFriendSlot()) && !cur_client->IsPBForPS() ||
+			(!checkforaddinuploadinglist ||
+			 m_abAddClientOfThisClass[LAST_CLASS] && !(cur_client->IsFriend() && cur_client->GetFriendSlot()) && !cur_client->IsPBForPS() ||
 			 m_abAddClientOfThisClass[1] && cur_client->IsPBForPS() ||
 			 m_abAddClientOfThisClass[0] && cur_client->IsFriend() && cur_client->GetFriendSlot()
 			)
@@ -657,7 +658,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	if (!directadd)
 	{
         if(!highPrioCheck) {
-            newclient = FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated();
+            newclient = FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated(true);
         }
 
 		//MORPH START - Changed by SiRoB, Upload Splitting Class

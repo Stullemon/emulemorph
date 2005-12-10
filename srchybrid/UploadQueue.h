@@ -122,8 +122,13 @@ private:
 
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
     CUpDownClient* FindLastUnScheduledForRemovalClientInUploadList();
-    CUpDownClient* FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated();
-    //MORPH END   - Added By AndCycle, ZZUL_20050212-0200
+    //MORPH START - Changed by SiRoB, Upload Splitting Class
+	/*
+	CUpDownClient* FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated(bool checkforaddinuploadinglist);
+	*/
+	CUpDownClient* FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated(bool checkforaddinuploadinglist);
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
+	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
 	// By BadWolf - Accurate Speed Measurement
 	typedef struct TransferredData {
