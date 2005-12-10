@@ -149,7 +149,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	/*
 	CUpDownClient* queueNewclient = FindBestClientInQueue(false);
 	*/
-	CUpDownClient* queueNewclient = FindBestClientInQueue(false, NULL, true);
+	CUpDownClient* queueNewclient = FindBestClientInQueue(false, NULL, onlyCheckForRemove);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
         if(queueNewclient &&
