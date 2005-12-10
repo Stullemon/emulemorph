@@ -752,9 +752,9 @@ void CServerWnd::UpdateLogTabSelection()
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH START - Added by SiRoB, XML News [O²]
 		morphlog->ShowWindow(SW_SHOW);
-		morphlog->Invalidate();
 		if (morphlog->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			morphlog->ScrollToLastLine(true);
+		morphlog->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}else
 	//MORPH END   - Added by SiRoB, Morph Log
@@ -766,9 +766,9 @@ void CServerWnd::UpdateLogTabSelection()
 		debuglog->ShowWindow(SW_HIDE);
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		newsmsgbox->ShowWindow(SW_SHOW);
-		newsmsgbox->Invalidate();
 		if (newsmsgbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			newsmsgbox->ScrollToLastLine(true);
+		newsmsgbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}else
 	//MORPH END   - Added by SiRoB, XML News
@@ -781,9 +781,9 @@ void CServerWnd::UpdateLogTabSelection()
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		debuglog->ShowWindow(SW_SHOW);
-		debuglog->Invalidate();
 		if (debuglog->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			debuglog->ScrollToLastLine(true);
+		debuglog->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
 	if (cur_sel == PaneLog)
@@ -795,9 +795,9 @@ void CServerWnd::UpdateLogTabSelection()
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
-		logbox->Invalidate();
 		if (logbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			logbox->ScrollToLastLine(true);
+		logbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
 	if (cur_sel == PaneServerInfo)
@@ -809,9 +809,9 @@ void CServerWnd::UpdateLogTabSelection()
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		servermsgbox->ShowWindow(SW_SHOW);
-		servermsgbox->Invalidate();
 		if (servermsgbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			servermsgbox->ScrollToLastLine(true);
+		servermsgbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
 }
