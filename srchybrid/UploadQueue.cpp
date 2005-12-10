@@ -197,12 +197,8 @@ void CUploadQueue::MoveDownInUploadQueue(CUpDownClient* client) {
 
 
         //MORPH START - Added by SiRoB, Upload SPlitting Class
-		uint32 classID = client->GetClassID();
-		if (classID < NB_SPLITTING_CLASS){
-			for (uint32 i = classID; i < NB_SPLITTING_CLASS; i++)
-				--m_aiSlotCounter[i];
-		}else
-			--m_aiSlotCounter[LAST_CLASS];
+		for (uint32 i = client->GetClassID(); i < NB_SPLITTING_CLASS; i++)
+			--m_aiSlotCounter[i];
 		//MORPH END - Added by SiRoB, Upload SPlitting Class
 		
 		// Remove the found Client
@@ -622,8 +618,16 @@ CUpDownClient* CUploadQueue::FindBestScheduledForRemovalClientInUploadListThatCa
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
 
-        if(cur_client->IsScheduledForRemoval() /*&& cur_client->GetScheduledUploadShouldKeepWaitingTime()*/) {
-            return cur_client;
+		//MORPH START - Changed by SiRoB, Upload Splitting Class
+		//if(cur_client->IsScheduledForRemoval() && /*&& cur_client->GetScheduledUploadShouldKeepWaitingTime()*/) {
+		if(cur_client->IsScheduledForRemoval() &&
+			(m_abAddClientOfThisClass[LAST_CLASS] && !(cur_client->IsFriend() && cur_client->GetFriendSlot()) && !cur_client->IsPBForPS() ||
+			 m_abAddClientOfThisClass[1] && cur_client->IsPBForPS() ||
+			 m_abAddClientOfThisClass[0] && cur_client->IsFriend() && cur_client->GetFriendSlot()
+			)
+		   ){
+		//MORPH END - Changed by SiRoB, Upload Splitting Class
+			return cur_client;
 		}
 	}
 
@@ -973,7 +977,7 @@ void CUploadQueue::Process() {
 			/*
 			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
 			*/
-			if(!cur_client->IsScheduledForRemoval() || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL) {
+			if(!cur_client->IsScheduledForRemoval() || !( cur_client->IsScheduledForRemoval() && ::GetTickCount()-cur_client->GetScheduledForRemovalAtTick() > SEC2MS(20)) || pos != NULL) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
