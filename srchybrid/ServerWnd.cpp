@@ -754,6 +754,7 @@ void CServerWnd::UpdateLogTabSelection()
 		morphlog->ShowWindow(SW_SHOW);
 		if (morphlog->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			morphlog->ScrollToLastLine(true);
+		morphlog->SetRedraw(); //MORPH - Added by SiRoB, Fix log scrollbar redraw
 		morphlog->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}else
@@ -768,6 +769,7 @@ void CServerWnd::UpdateLogTabSelection()
 		newsmsgbox->ShowWindow(SW_SHOW);
 		if (newsmsgbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			newsmsgbox->ScrollToLastLine(true);
+		newsmsgbox->SetRedraw(); //MORPH - Added by SiRoB, Fix log scrollbar redraw
 		newsmsgbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}else
@@ -783,6 +785,7 @@ void CServerWnd::UpdateLogTabSelection()
 		debuglog->ShowWindow(SW_SHOW);
 		if (debuglog->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			debuglog->ScrollToLastLine(true);
+		debuglog->SetRedraw(); //MORPH - Added by SiRoB, Fix log scrollbar redraw
 		debuglog->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -797,6 +800,7 @@ void CServerWnd::UpdateLogTabSelection()
 		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		if (logbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			logbox->ScrollToLastLine(true);
+		logbox->SetRedraw(); //MORPH - Added by SiRoB, Fix log scrollbar redraw
 		logbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -811,6 +815,7 @@ void CServerWnd::UpdateLogTabSelection()
 		servermsgbox->ShowWindow(SW_SHOW);
 		if (servermsgbox->IsAutoScroll() && (StatusSelector.GetItemState(cur_sel, TCIS_HIGHLIGHTED) & TCIS_HIGHLIGHTED))
 			servermsgbox->ScrollToLastLine(true);
+		servermsgbox->SetRedraw(); //MORPH - Added by SiRoB, Fix log scrollbar redraw
 		servermsgbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}

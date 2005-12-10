@@ -1,15 +1,16 @@
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.x
 --------------------------------------
-FIXED  : (minor) Static servers do not need a static priority. [leuk_he] 
-FIXED  : Prevent forgetting identical named .met files in different tempdirs[leuk_he]
-FIXED  : (minor) no server busy  switch to message on a busy pc during windows starup[leuk_he]
-FIXED  : (minor) Load hot key for invisible mode correct from preferences[leuk_he]
 FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl [SiRoB]
 FIXED  : (minor) sorting item arround downloadclientctrl (by XMan) [SiRoB]
 FIXED  : (minor) WC: Avoid  xml setting autoupdating when webcache is disable [SiRoB]
 FIXED  : (minor) display of score ratio in icon for lovelace and Pawcio CS [Stulle]
 FIXED  : (minor) USC: High class limiter (FS, PS or PBF) are respected [SiRoB]
+FIXED  : (minor) Load hot key for invisible mode correct from preferences[leuk_he]
+FIXED  : (minor) no server busy  switch to message on a busy pc during windows starup[leuk_he]
+FIXED  : Prevent forgetting identical named .met files in different tempdirs[leuk_he]
+FIXED  : (minor) Static servers do not need a static priority. [leuk_he] 
+FIXED  : (minor) Fix log scrollbar redraw [SiRoB]
 
 ADDED  : Display BusyRatio in uploading list [SiRoB]
 
