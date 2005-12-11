@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.46c MorphXT v7.6
+--------------------------------------
+FIXED  : (minor) USC open slot with unlimited datarate class [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.46c MorphXT v7.5
 --------------------------------------
 FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl [SiRoB]
