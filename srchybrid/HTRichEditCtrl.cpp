@@ -340,11 +340,13 @@ void CHTRichEditCtrl::ScrollToLastLine(bool bForceLastLineAtBottom)
 		if (iFirstVisible > 0)
 			LineScroll(-iFirstVisible);
 	}
+	//MORPH START - Added by SiRoB, Fix log scrollbar redraw
 	BOOL bIsVisible = IsWindowVisible();
 	if (bIsVisible) {
 		m_bNoPaint = true;
 		SetRedraw(FALSE);
 	}
+	//MORPH END   - Added by SiRoB, Fix log scrollbar redraw
 
 	// WM_VSCROLL does not work correctly under Win98 (or older version of comctl.dll)
 	SendMessage(WM_VSCROLL, SB_BOTTOM);
@@ -355,10 +357,12 @@ void CHTRichEditCtrl::ScrollToLastLine(bool bForceLastLineAtBottom)
 		SendMessage(WM_VSCROLL, MAKELONG(SB_THUMBPOSITION, iPos));
 		SendMessage(WM_VSCROLL, SB_ENDSCROLL);
 	}
+	//MORPH START - Added by SiRoB, Fix log scrollbar redraw
 	if (bIsVisible) {
 		m_bNoPaint = false;
 		SetRedraw();
 	}
+	//MORPH END   - Added by SiRoB, Fix log scrollbar redraw
 }
 
 void CHTRichEditCtrl::AddString(int nPos, LPCTSTR pszString, bool bLink, COLORREF cr)
