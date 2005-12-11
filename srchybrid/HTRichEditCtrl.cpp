@@ -340,10 +340,11 @@ void CHTRichEditCtrl::ScrollToLastLine(bool bForceLastLineAtBottom)
 		if (iFirstVisible > 0)
 			LineScroll(-iFirstVisible);
 	}
-
 	BOOL bIsVisible = IsWindowVisible();
-	if (bIsVisible)
-		m_bNoPaint = false;
+	if (bIsVisible) {
+		m_bNoPaint = true;
+		SetRedraw(FALSE);
+	}
 
 	// WM_VSCROLL does not work correctly under Win98 (or older version of comctl.dll)
 	SendMessage(WM_VSCROLL, SB_BOTTOM);
@@ -353,6 +354,10 @@ void CHTRichEditCtrl::ScrollToLastLine(bool bForceLastLineAtBottom)
 		int iPos = GetScrollPos(SB_VERT);
 		SendMessage(WM_VSCROLL, MAKELONG(SB_THUMBPOSITION, iPos));
 		SendMessage(WM_VSCROLL, SB_ENDSCROLL);
+	}
+	if (bIsVisible) {
+		m_bNoPaint = false;
+		SetRedraw();
 	}
 }
 
