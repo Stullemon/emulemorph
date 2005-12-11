@@ -542,12 +542,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 								uint64 realByteSpent = lastSpentBytes*1000;
 								stat->realBytesToSpend -= realByteSpent;
-								if (stat->scheduled == false) {
-									if(m_highestNumberOfFullyActivatedSlots[classID] > slotCounter+1)
-										m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
-									if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
-										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
-								}
+								if(m_highestNumberOfFullyActivatedSlots[classID] > slotCounter+1)
+									m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
+								if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
+									m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 								if (classID < LAST_CLASS)
 									realBytesToSpendClass[classID] -= realByteSpent;
 								ControlspentBytes += lastSpentBytes;
@@ -563,7 +561,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		m_SentBytesSinceLastCall += ControlspentBytes;
 		m_SentBytesSinceLastCallOverhead += ControlspentOverhead;
 
-		bool IsMainBytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000 > 0;
 		lastclientpos = 0;
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 			//Calculate allowed data to spend for a class (realBytesToSpendClass)
@@ -605,11 +602,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
-										uint32 schedoff = slotCounter+1;
-										if (stat->scheduled)
-											schedoff = slotCounterClass[classID]+1;
-										if(schedoff > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
-											m_highestNumberOfFullyActivatedSlots[classID] = schedoff;
+										if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
+											m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
 										if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
 											m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 										spentBytes += lastSpentBytes;
@@ -659,7 +653,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		
 			}
-			if (IsMainBytesToSpend && realBytesToSpendClass[classID] > 999) {
+			if (realBytesToSpendClass[LAST_CLASS] / 1000 > 0 && realBytesToSpendClass[classID] > 999) {
 				if (m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos) {
 					if (m_SentBytesSinceLastCall > 0)
 						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
