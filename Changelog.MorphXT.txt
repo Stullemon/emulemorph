@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.46c MorphXT v7.x
+Changelog for eMule 0.46c MorphXT v7.5
 --------------------------------------
 FIXED  : (minor) icon arround webcache proxyclient in downloadclientctrl [SiRoB]
 FIXED  : (minor) sorting item arround downloadclientctrl (by XMan) [SiRoB]
