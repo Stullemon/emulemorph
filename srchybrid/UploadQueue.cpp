@@ -910,12 +910,8 @@ void CUploadQueue::Process() {
 	while(pos2 != NULL){
 		// Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos2);
-		uint32 classID = cur_client->GetClassID();
-		if (classID < NB_SPLITTING_CLASS){
-			for (uint32 i = classID; i < NB_SPLITTING_CLASS; i++)
-				++m_aiSlotCounter[i];
-		}else
-			++m_aiSlotCounter[LAST_CLASS];
+		for (uint32 i = cur_client->GetClassID(); i < NB_SPLITTING_CLASS; i++)
+			++m_aiSlotCounter[i];
 	}
 	for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
 		m_abAddClientOfThisClass[i] = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]>m_aiSlotCounter[i];
@@ -1453,8 +1449,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
        	client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
 		client->UnscheduleForRemoval();
 		//MORPH START - Added by SiRoB, Upload Splitting Class
-		uint32 classID = client->GetClassID();
-		for (uint32 i = classID; i < NB_SPLITTING_CLASS; i++)
+		for (uint32 i = client->GetClassID(); i < NB_SPLITTING_CLASS; i++)
 			--m_aiSlotCounter[i];
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 		uploadinglist.RemoveAt(foundPos);

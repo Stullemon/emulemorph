@@ -605,11 +605,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
-										uint32 schedoff = 1;
+										uint32 schedoff = slotCounter+1;
 										if (stat->scheduled)
-											++schedoff;
-										if(slotCounter+schedoff > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
-											m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+schedoff;
+											schedoff = slotCounterClass[classID]+1;
+										if(schedoff > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
+											m_highestNumberOfFullyActivatedSlots[classID] = schedoff;
 										if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
 											m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 										spentBytes += lastSpentBytes;
@@ -633,7 +633,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
-										uint32 schedoff = slotCounter;
+										uint32 schedoff = slotCounter+1;
 										if (stat->scheduled)
 											schedoff = slotCounterClass[classID]+1;
 										if(schedoff > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
