@@ -1443,7 +1443,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			if (!i->first_element_by_path(_T("./author")).child(0).empty())
 			{
 				sxmlbuffer = i->first_element_by_path(_T("./author")).child(0).value();
-				newsmsgbox->AppendText(_T(" - By: ")+sxmlbuffer);
+				newsmsgbox->AppendText(_T(" - By ")+sxmlbuffer);
 			}
 			CString buffer = i->first_element_by_path(_T("./description")).child(0).value();
 			HTMLParse(buffer);
