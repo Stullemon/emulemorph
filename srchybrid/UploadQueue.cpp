@@ -149,7 +149,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	/*
 	CUpDownClient* queueNewclient = FindBestClientInQueue(false);
 	*/
-	CUpDownClient* queueNewclient = FindBestClientInQueue(false, NULL, onlyCheckForRemove);
+	CUpDownClient* queueNewclient = FindBestClientInQueue(false, NULL, false);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
         if(queueNewclient &&
@@ -722,6 +722,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	if (IsDownloading(newclient))
 	{
         if(newclient->IsScheduledForRemoval()) {
+            newclient->UnscheduleForRemoval();
 			m_nLastStartUpload = ::GetTickCount();
     
             MoveDownInUploadQueue(newclient);
