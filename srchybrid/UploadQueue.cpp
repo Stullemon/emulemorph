@@ -975,7 +975,7 @@ void CUploadQueue::Process() {
 			/*
 			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
 			*/
-			if(!cur_client->IsScheduledForRemoval() || !( cur_client->IsScheduledForRemoval() && ::GetTickCount()-cur_client->GetScheduledForRemovalAtTick() > SEC2MS(20)) || pos != NULL) {
+			if(!cur_client->IsScheduledForRemoval() || !( cur_client->IsScheduledForRemoval() && ::GetTickCount()-cur_client->GetScheduledForRemovalAtTick() > SEC2MS(20))) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
