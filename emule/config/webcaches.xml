@@ -2454,7 +2454,6 @@
     <proxyPort>8080</proxyPort>
     <ISPName>Xs4all</ISPName>
     <country>Netherlands</country>
-    <active>0</active>
   </proxies>
   <proxies>
     <hostName>*.yub.net</hostName>
