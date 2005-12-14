@@ -1,7 +1,8 @@
 --------------------------------------
 Changelog for eMule 0.46c MorphXT vx.x
 --------------------------------------
-FIXED  : (minor) Assertion for PPgMorph.cpp
+FIXED  : (minor) Assertion for PPgMorph.cpp [Stulle]
+FIXED  : (minot) feedback for other languages (transferred) [Stulle]
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.6
