@@ -546,7 +546,12 @@ HTREEITEM CTreeOptionsCtrl::InsertGroup(LPCTSTR lpszItem, int nImage, HTREEITEM 
 
 HTREEITEM CTreeOptionsCtrl::InsertCheckBox(LPCTSTR lpszItem, HTREEITEM hParent, BOOL bCheck, HTREEITEM hAfter, DWORD dwItemData)
 {
+	//MORPH START - Changed by Stulle, Assert fix for PPgMorph.cpp
+	/*
 	ASSERT((hParent == TVI_ROOT) || IsGroup(hParent) || IsCheckBox(hParent)); //The parent of a check box must be a group item or another check box
+	*/
+	ASSERT((hParent == TVI_ROOT) || IsGroup(hParent) || IsCheckBox(hParent) || IsRadioButton(hParent)); //The parent of a check box must be a group item or another check box
+	//MORPH END - Changed by Stulle, Assert fix for PPgMorph.cpp
 
 	HTREEITEM hItem = InsertItem(lpszItem, 0, 0, hParent, hAfter);
 	CTreeOptionsItemData* pItemData = new CTreeOptionsItemData;
