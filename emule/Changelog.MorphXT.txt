@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.46c MorphXT vx.x
+--------------------------------------
+FIXED  : (minor) Assertion for PPgMorph.cpp
+
+--------------------------------------
 Changelog for eMule 0.46c MorphXT v7.6
 --------------------------------------
 FIXED  : (minor) USC open slot with unlimited datarate class [SiRoB]
