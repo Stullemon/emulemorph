@@ -31,8 +31,6 @@
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "emuledlg.h"
 #include "Log.h"
-//MORPH START - Added by Stulle, fix score display
-#include "updownclient.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -280,9 +278,8 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 }
 
 //MORPH START - Added by Stulle, fix score display
-bool CClientCredits::GetHasScore(const CUpDownClient* client)
+bool CClientCredits::GetHasScore(uint32 dwForIP)
 {
-	uint32 dwForIP=client->GetIP();
 	float modif = GetScoreRatio(dwForIP);
 	float m_fDefault;
 

@@ -173,7 +173,7 @@ public:
 	//MORPH END   - Added by SiRoB, reduce a little CPU usage for ratio count
 
 	//MORPH START - Added by Stulle, fix score display
-	bool			GetHasScore(const CUpDownClient* client);
+	bool			GetHasScore(uint32 dwForIP);
 	//MORPH END - Added by Stulle, fix score display
 
 protected:

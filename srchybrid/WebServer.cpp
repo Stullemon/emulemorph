@@ -2378,7 +2378,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 		/*
 		else if (cur_client->Credits()->GetScoreRatio(cur_client->GetIP()) > 1)
 		*/
-		else if (cur_client->Credits()->GetHasScore(cur_client))
+		else if (cur_client->Credits()->GetHasScore(cur_client->GetIP()))
 		//MORPH END - Added by Stulle, fix score display
 			dUser.sClientExtra = _T("credit");
 		else
