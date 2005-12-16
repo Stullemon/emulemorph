@@ -21,6 +21,7 @@
 #include "OtherFunctions.h"
 #include "SafeFile.h"
 #include "StringConversion.h"
+#include "opcodes.h"//added for Avi3k: maxfilesize fix [cyrex2001]
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -179,7 +180,8 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 	if (_tcslen(pszHash) != 32)
 		throw GetResString(IDS_ERR_ILLFORMEDHASH);
 
-	if (_tstoi64(pszSize)>=4294967295)
+	/*if (_tstoi64(pszSize)>=4294967295)*/
+	if (_tstoi64(pszSize)>MAX_EMULE_FILE_SIZE) // Avi3k: maxfilesize fix [cyrex2001]
 		throw GetResString(IDS_ERR_TOOLARGEFILE);
 	if (_tstoi64(pszSize)<=0)
 		throw GetResString(IDS_ERR_NOTAFILELINK);

@@ -363,6 +363,7 @@ void CSearchListCtrl::UpdateSearch(CSearchFile* toupdate)
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)toupdate;
 	int index = FindItem(&find);
+	if (index != -1) // Avi3k: fix index check [cyrex2001-11.10.05]
 	{
 		Update(index);
 	}
