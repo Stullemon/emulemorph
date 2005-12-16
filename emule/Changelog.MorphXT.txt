@@ -3,6 +3,10 @@ Changelog for eMule 0.46c MorphXT vx.x
 --------------------------------------
 FIXED  : (minor) Assertion for PPgMorph.cpp [Stulle]
 FIXED  : (minot) feedback for other languages (transferred) [Stulle]
+FIXED  : (minor) Avi3k: maxfilesize fix [leuk_he]
+FIXED  : (minor) Avi3k: search index check [leuk_he]
+FIXED  : (minor) Xanatos: critical socket fix [leuk_he]
+
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.6
