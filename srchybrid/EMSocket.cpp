@@ -536,8 +536,9 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
     } else {
         if (!delpacket){
             //ASSERT ( !packet->IsSplitted() );
-            Packet* copy = new Packet(packet->opcode,packet->size);
-		    memcpy(copy->pBuffer,packet->pBuffer,packet->size);
+            //Packet* copy = new Packet(packet->opcode,packet->size);
+			Packet* copy = new Packet(packet);//bugfix by Xanatos [cyrex2001]
+		    //memcpy(copy->pBuffer,packet->pBuffer,packet->size);
 		    packet = copy;
 	    }
 
