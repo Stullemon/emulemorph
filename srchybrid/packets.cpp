@@ -77,7 +77,8 @@ Packet::Packet(char* pPacketPart, uint32 nSize, bool bLast, bool bFromPartFile){
 	m_bPacked = false;
 	m_bLastSplitted = bLast;
 	tempbuffer = 0;
-	pBuffer = 0;
+	//pBuffer = 0;
+	pBuffer = pPacketPart+6; //bugfix by Xanatos [cyrex2001]
 	completebuffer = pPacketPart;
 	size = nSize-6;
 	opcode = 0x00;
@@ -133,6 +134,28 @@ Packet::Packet(const CStringA& str, uint8 ucProtocol, uint8 ucOpcode){
 	opcode = ucOpcode;
 	prot = ucProtocol;
 }
+
+//==> bugfix by Xanatos [cyrex2001]
+Packet::Packet(Packet* tocopy)
+	{
+	m_bFromPF = tocopy->m_bFromPF;
+	m_bSplitted = tocopy->m_bSplitted;
+	m_bPacked = tocopy->m_bPacked;
+	m_bLastSplitted = tocopy->m_bLastSplitted;
+	tempbuffer = 0;
+	if(tocopy->size){
+		completebuffer = new char[tocopy->size+10];
+		pBuffer = completebuffer+6;
+		memcpy(completebuffer,tocopy->completebuffer,tocopy->size+10);
+		}else{
+			completebuffer = 0;
+			pBuffer = 0;
+			}
+	size = tocopy->size;
+	opcode = tocopy->opcode;
+	prot = tocopy->prot;
+	}
+//<== bugfix by Xanatos [cyrex2001]
 
 Packet::~Packet(){
 	if (completebuffer)

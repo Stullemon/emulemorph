@@ -30,6 +30,7 @@ public:
 	Packet(const CStringA& str, uint8 ucProtocol, uint8 ucOpcode);
 	Packet(uint8 in_opcode, uint32 in_size, uint8 protocol = OP_EDONKEYPROT, bool bFromPartFile = true);
 	Packet(char* pPacketPart,uint32 nSize,bool bLast,bool bFromPartFile = true); // only used for splitted packets!
+	Packet(Packet* tocopy);//bugfix by Xanatos [cyrex2001]
 	virtual ~Packet();
 
 	virtual char* GetHeader();
