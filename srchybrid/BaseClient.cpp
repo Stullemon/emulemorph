@@ -60,6 +60,7 @@
 #include "shahashset.h"
 #include "Log.h"
 #include "WebCache/WebCacheSocket.h" // MORPH - Added by Commander, WebCache 1.2e
+#include "MorphVersionList.h" //MORPH - Added by Stulle, Morph Leecher Detection
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -453,6 +454,10 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		return _T("Fake emuleVersion");
 	}else if(m_clientSoft == SO_EMULE && !m_pszUsername){
 		return _T("Empty Nick");
+	//MORPH START - Added by Stulle, Morph Leecher Detection
+	}else if(IsMorphLeecher()){
+		return _T("MORPH Leecher");
+	//MORPH END - Added by Stulle, Morph Leecher Detection
 	}else if (old_m_strClientSoftware != m_strClientSoftware)
 	{
 		if (StrStrI(m_strModVersion,_T("Freeza"))||
@@ -3595,3 +3600,39 @@ const static LPCTSTR apszSuffix[] =
 		srand((unsigned)time(NULL));
 }
 //MORPH END   - Added by SiRoB, Dynamic FunnyNick
+
+//MORPH START - Added by Stulle, Morph Leecher Detection
+bool CUpDownClient::IsMorphLeecher()
+{
+	if (old_m_strClientSoftware != m_strClientSoftware)
+	{
+		if (StrStrI(m_strModVersion,_T("MorphXT+")) ||
+			StrStrI(m_strModVersion,_T("MorphXT×")) ||
+			StrStrI(m_strModVersion,_T("MørphXT")) ||
+			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("×")) || IsMorph() == false)
+			)
+		{
+			old_m_strClientSoftware = m_strClientSoftware;
+			return true;
+		}
+	}
+	if (IsMorph() && theMorphVerList.GetListValid())
+	{
+		int curPos2= 0;
+		// only version number
+		CString m_strMorphVer = m_strModVersion.TrimLeft(_T("MorphXT "));
+		// set major number
+		CString strNumber = m_strMorphVer.Tokenize(_T("."),curPos2);
+		uint8 m_uMajorVer = _tstoi(strNumber.GetBuffer());
+		// set sub number
+		strNumber = m_strMorphVer.Tokenize(_T("."),curPos2);
+		uint8 m_uSubVer = _tstoi(strNumber.GetBuffer());
+
+		// sub number is too high for this major number
+		if(m_uSubVer > theMorphVerList.GetMorphSubVer(m_uMajorVer) ||
+			m_uMajorVer > theMorphVerList.GetListLength())
+			return true;
+	}
+	return false;
+}
+//MORPH END - Added by Stulle, Morph Leecher Detection

@@ -1736,7 +1736,7 @@ BEGIN
     LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
 END
 
-IDD_PPG_MORPH2 DIALOGEX 0, 0, 230, 222
+IDD_PPG_MORPH2 DIALOGEX 0, 0, 230, 257
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Morph2"
@@ -1772,6 +1772,9 @@ BEGIN
     PUSHBUTTON      "Reset",IDC_RESETFAKESURL,115,53,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPFURL,114,125,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPCURL,115,197,48,14,BS_FLAT
+    GROUPBOX        "Valid Morph List",IDC_VALID_MORPH,7,220,217,32,BS_FLAT
+    LTEXT           "Valid Morph List status",IDC_VALID_MORPH_STATUS,14,230,136,8
+    PUSHBUTTON      "Reload",IDC_VALID_MORPH_RELOAD,155,230,48,14,BS_FLAT
 END
 
 IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
@@ -5113,7 +5116,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_NOTAV      "CrashReporter not found in emule's directory. If you want to help us debug our mod, please download the CrashRpt.dll"
-    IDS_NICEHASHWEIGHT      "NiceHashWeight"
     IDS_UPLOAD_COMPLETED    "Completing"
     IDS_UPLOAD_PREEMPTED    "Pre-empted by higher prio upload"
     IDS_UPLOAD_TOO_MANY_SLOTS "Too many slots"
@@ -5876,6 +5878,10 @@ BEGIN
     IDS_ZZRATIO_CHECK3      "Using friend slot and globaldatarate>3KB/s"
     IDS_ZZRATIO_CHECK4      "Upload limit under 10KB/s"
     IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
+    IDS_RELOAD_LIST         "Valid Morph List expired! Please update it."
+    IDS_VALID_MORPH         "Valid Morph List"
+    IDS_VALID_MORPH_TRUE    "Valid Morph List up2date"
+    IDS_VALID_MORPH_FALSE   "Valid Morph List expired"
 END
 
 STRINGTABLE 

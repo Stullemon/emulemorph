@@ -29,4 +29,5 @@ public:
 	afx_msg void OnBnClickedResetipfurl();
 	afx_msg void OnBnClickedUpdateipcurl();// Commander - Added: IP2Country auto-updating
 	afx_msg void OnBnClickedResetipcurl();
+	afx_msg void OnBnClickedReloadMorphList(); //MORPH - Added by Stulle, Morph Leecher Detection
 };

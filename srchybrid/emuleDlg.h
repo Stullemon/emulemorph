@@ -153,6 +153,7 @@ protected:
 	//MORPH START - Added by SiRoB, Version check
 	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
 	//MORPH END   - Added by SiRoB, Version check
+	bool			m_bAutoUpdate; //MORPH - Added by Stulle, Morph Leecher Detection
 
 	// Splash screen
 	CSplashScreen *m_pSplashWnd;

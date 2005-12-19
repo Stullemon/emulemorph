@@ -2246,7 +2246,6 @@
 #define IDS_CRASHRPT_DONE               3102
 #define IDS_CRASHRPT_AV                 3103
 #define IDS_CRASHRPT_NOTAV              3104
-#define IDS_NICEHASHWEIGHT              3105
 #define IDS_UPLOAD_COMPLETED            3110
 #define IDS_UPLOAD_PREEMPTED            3111
 #define IDS_UPLOAD_TOO_MANY_SLOTS       3112
@@ -3070,6 +3069,13 @@
 #define IDS_MORPH_RAIF                  51542
 #define IDS_MORPH_KSSERV                51543
 #define IDS_MORPH_LOG                   51544
+#define IDS_RELOAD_LIST                 51545
+#define IDC_VALID_MORPH                 51546
+#define IDC_VALID_MORPH_STATUS          51547
+#define IDC_VALID_MORPH_RELOAD          51548
+#define IDS_VALID_MORPH                 51549
+#define IDS_VALID_MORPH_TRUE            51550
+#define IDS_VALID_MORPH_FALSE           51551
 #define IDS_WEBSERVER_LINK              51561
 
 // Next default values for new objects

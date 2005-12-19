@@ -108,6 +108,7 @@
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 #include "Friend.h"
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
+#include "MorphVersionList.h" //MORPH - Added by Stulle, Morph Leecher Detection
 
 #ifndef RBBS_USECHEVRON
 #define RBBS_USECHEVRON     0x00000200  // display drop-down button for this band if it's sized smaller than ideal width
@@ -684,9 +685,18 @@ void CemuleDlg::DoMVersioncheck(bool manual) {
 		CTime last(thePrefs.GetLastMVC());
 		time_t tLast=safe_mktime(last.GetLocalTm());
 		time_t tNow=safe_mktime(CTime::GetCurrentTime().GetLocalTm());
-		if ( (difftime(tNow,tLast) / 86400)<thePrefs.GetUpdateDays() )
+		//MORPH START - Changed by Stulle, Morph Leecher Detection
+		if(thePrefs.UpdateNotify() && (difftime(tNow,tLast) / 86400)>thePrefs.GetUpdateDays())
+			m_bAutoUpdate = true;
+		else
+			m_bAutoUpdate = false;
+		if ( (thePrefs.UpdateNotify() && (difftime(tNow,tLast) / 86400)<thePrefs.GetUpdateDays()) ||
+			(difftime(tNow,tLast) / 86400)<2 )
 			return;
 	}
+	else
+		m_bAutoUpdate = true;
+	//MORPH END - Changed by Stulle, Morph Leecher Detection
 	if (WSAAsyncGetHostByName(m_hWnd, UM_MVERSIONCHECK_RESPONSE, "morphvercheck.dyndns.info", m_acMVCDNSBuffer, sizeof(m_acMVCDNSBuffer)) == 0){
 		AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	}
@@ -822,7 +832,7 @@ void CemuleDlg::StopTimer()
 	if (thePrefs.UpdateNotify())
 		DoVersioncheck(false);
 	//MORPH START - Added by SiRoB, New Version check
-	if (thePrefs.UpdateNotify())
+//	if (thePrefs.UpdateNotify())
 		DoMVersioncheck(false);
 	//MORPH END   - Added by SiRoB, New Version check
 	if (theApp.pstrPendingLink != NULL){
@@ -3008,13 +3018,32 @@ LRESULT CemuleDlg::OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 				uint32 dwResult = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
 				uint8 abyCurVer[4] = { CemuleApp::m_nMVersionBld + 1, CemuleApp::m_nMVersionMin, CemuleApp::m_nMVersionMjr, 0};
 				dwResult &= 0x00FFFFFF;
+				//MORPH START - Added by Stulle, Morph Leecher Detection
+				uint8 iMjrVer = (dwResult >> 16);
+				uint8 iMinVer = (dwResult >> 8 );
+				AddLogLine(false,_T("Mjr: %u | Min: %u"), iMjrVer, iMinVer);
+				if( iMjrVer > theMorphVerList.GetListLength() )
+				{
+					theMorphVerList.SetListValid(false);
+					theMorphVerList.SaveList();
+					AfxMessageBox(GetResString(IDS_RELOAD_LIST));
+				}
+				else if( iMinVer > theMorphVerList.GetMorphSubVer(theMorphVerList.GetListLength()) )
+				{
+					theMorphVerList.SetMorphSubVer(iMjrVer,iMinVer);
+					theMorphVerList.SaveList();
+				}
+				//MORPH END - Added by Stulle, Morph Leecher Detection
 				if (dwResult > *(uint32*)abyCurVer){
-					thePrefs.UpdateLastMVC();
-					SetActiveWindow();
-					Log(LOG_SUCCESS|LOG_STATUSBAR,GetResString(IDS_NEWMVERSIONAVL));
-					ShowNotifier(GetResString(IDS_NEWMVERSIONAVLPOPUP), TBN_NEWMVERSION);
-					if (AfxMessageBox(GetResString(IDS_NEWMVERSIONAVL)+GetResString(IDS_VISITMVERSIONCHECK),MB_YESNO)==IDYES) {
-						ShellExecute(NULL, NULL, _T("http://emulemorph.sourceforge.net/"), NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+					if(m_bAutoUpdate)//MORPH - Added by Stulle, Morph Leecher Detection
+					{
+						thePrefs.UpdateLastMVC();
+						SetActiveWindow();
+						Log(LOG_SUCCESS|LOG_STATUSBAR,GetResString(IDS_NEWMVERSIONAVL));
+						ShowNotifier(GetResString(IDS_NEWMVERSIONAVLPOPUP), TBN_NEWMVERSION);
+						if (AfxMessageBox(GetResString(IDS_NEWMVERSIONAVL)+GetResString(IDS_VISITMVERSIONCHECK),MB_YESNO)==IDYES) {
+							ShellExecute(NULL, NULL, _T("http://emulemorph.sourceforge.net/"), NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+						}
 					}
 				}
 				else{
