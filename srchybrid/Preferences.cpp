@@ -40,6 +40,7 @@
 #include "MuleToolbarCtrl.h"
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB
 #include "friendlist.h" //MORPH - Added by SiRoB, There is one slot friend or more
+#include "MorphVersionList.h" //MORPH - Added by Stulle, Morph Leecher Detection
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -506,8 +507,6 @@ uint8	CPreferences::permissions;//MORPH - Added by SiRoB, Show Permissions
 bool	CPreferences::shareall;	// SLUGFILLER: preferShareAll
 //EastShare End - PreferShareAll by AndCycle
 
-uint8	CPreferences::m_niceHashWeight; // <CB Mod : NiceHash>
-
 bool	CPreferences::m_bEnableChunkDots;
 //EastShare - Added by Pretender, Option for ChunkDots
 
@@ -844,6 +843,7 @@ void CPreferences::Init()
 	delete[] fullpath;
 
 	LoadPreferences();
+	theMorphVerList.LoadList(); //MORPH - Added by Stulle, Morph Leecher Detection
 
 	if (!preffile){
 		SetStandartValues();
@@ -2418,7 +2418,6 @@ void CPreferences::SavePreferences()
 	//EastShare Start - PreferShareAll by AndCycle
 	ini.WriteBool(_T("ShareAll"),shareall,_T("eMule"));	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
-	ini.WriteInt(_T("NiceHashWeight"), m_niceHashWeight, _T("eMule")); // <CB Mod : NiceHash>
 	// EastShare START - Added by TAHO, .met file control
 	ini.WriteInt(_T("KnownMetDays"), m_iKnownMetDays,_T("eMule"));
 	// EastShare END - Added by TAHO, .met file control
@@ -3201,7 +3200,6 @@ void CPreferences::LoadPreferences()
 	m_iKnownMetDays = ini.GetInt(_T("KnownMetDays"), 90);
 	if (m_iKnownMetDays == 0) m_iKnownMetDays = 90;
 	// EastShare END - Added by TAHO, .met file control
-	m_niceHashWeight = ini.GetInt(_T("NiceHashWeight"), 50); // <CB Mod : NiceHash>
 	//EastShare - Added by Pretender, Option for ChunkDots
 	m_bEnableChunkDots=ini.GetBool(_T("EnableChunkDots"),true);
 	//EastShare - Added by Pretender, Option for ChunkDots

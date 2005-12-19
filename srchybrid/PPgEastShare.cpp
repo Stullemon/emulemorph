@@ -70,7 +70,6 @@ CPPgEastShare::CPPgEastShare()
 	m_htiMetControl = NULL;
 	m_htiKnownMet = NULL;
 	//EastShare END - Added by TAHO, .met control
-	m_htiNiceHashWeight = NULL;// <CB Mod : NiceHash>
 }
 
 CPPgEastShare::~CPPgEastShare()
@@ -133,9 +132,6 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiKnownMet, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		// EastShare END - Added by TAHO, .met control
 
-		m_htiNiceHashWeight = m_ctrlTreeOptions.InsertItem(GetResString(IDS_NICEHASHWEIGHT),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT); // <CB Mod : NiceHash>
-		m_ctrlTreeOptions.AddEditBox(m_htiNiceHashWeight, RUNTIME_CLASS(CNumTreeOptionsEdit)); // <CB Mod : NiceHash>
-
 		// EastShare START - Added by Pretender
 		m_ctrlTreeOptions.Expand(m_htiIP2CountryName, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCreditSystem, TVE_EXPAND);//EastShare
@@ -160,8 +156,6 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiKnownMet, m_iKnownMetDays);
 	// EastShare END - Added by TAHO, .met flies Control
 	
-	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiNiceHashWeight, m_iNiceHashWeight);// <CB Mod : NiceHash>
-
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnablePreferShareAll, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiIsPayBackFirst, m_bIsPayBackFirst);//EastShare - added by AndCycle, Pay Back First
 	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiPayBackFirstLimit, m_iPayBackFirstLimit); //MORPH - Added by SiRoB, Pay Back First Tweak
@@ -190,7 +184,6 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_bEnableEqualChanceForEachFile = thePrefs.IsEqualChanceEnable();//Morph - added by AndCycle, Equal Chance For Each File
 
 	m_iKnownMetDays = thePrefs.GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
-	m_iNiceHashWeight = thePrefs.GetNiceHashLoadWeight();// <CB Mod : NiceHash>
 	
 	CPropertyPage::OnInitDialog();
 	Localize();
@@ -261,9 +254,6 @@ BOOL CPPgEastShare::OnApply()
 	//Morph - added by AndCycle, Equal Chance For Each File
 
 	thePrefs.SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
-	if(m_iNiceHashWeight>100)	m_iNiceHashWeight = 100; // <CB Mod : NiceHash>
-	if(m_iNiceHashWeight<10)	m_iNiceHashWeight = 10; // <CB Mod : NiceHash>
-	thePrefs.m_niceHashWeight = m_iNiceHashWeight; // <CB Mod : NiceHash>
 
 	SetModified(FALSE);
 
@@ -341,8 +331,6 @@ void CPPgEastShare::OnDestroy()
 	m_htiKnownMet = NULL;
 	//EastShare END - Added by TAHO, .met control
 	
-	m_htiNiceHashWeight = NULL; // <CB Mod : NiceHash>
-
 	CPropertyPage::OnDestroy();
 }
 LRESULT CPPgEastShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)

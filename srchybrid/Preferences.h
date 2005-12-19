@@ -629,8 +629,6 @@ public:
 	static bool	shareall;	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
 
-	static uint8	m_niceHashWeight; // <CB Mod : NiceHash>
-
 	//EastShare - Added by Pretender, Option for ChunkDots
 	static bool	m_bEnableChunkDots;
 	//EastShare - Added by Pretender, Option for ChunkDots
@@ -1790,7 +1788,6 @@ public:
 	//EastShare Start - PreferShareAll by AndCycle
 	static	bool	ShareAll()			{return shareall;}	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
-	static	uint8	GetNiceHashLoadWeight()	{return m_niceHashWeight;} // <CB Mod : NiceHash>
 	//EastShare - Added by Pretender, Option for ChunkDots
 	static	bool	EnableChunkDots()			{return m_bEnableChunkDots;}
 	//EastShare - Added by Pretender, Option for ChunkDots

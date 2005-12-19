@@ -18,10 +18,6 @@ protected:
 	bool m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 	HTREEITEM m_htiEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 
-	CSliderCtrl m_ctlNiceHashWeight;// <CB Mod : NiceHash>
-	int	m_iNiceHashWeight;// <CB Mod : NiceHash>
-	HTREEITEM m_htiNiceHashWeight;// <CB Mod : NiceHash>
-
 	bool m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	HTREEITEM m_htiIsPayBackFirst; //EastShare - added by AndCycle, Pay Back First
 	
