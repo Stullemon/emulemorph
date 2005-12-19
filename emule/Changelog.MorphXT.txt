@@ -7,6 +7,12 @@ FIXED  : (minor) Avi3k: maxfilesize fix [leuk_he]
 FIXED  : (minor) Avi3k: search index check [leuk_he]
 FIXED  : (minor) Xanatos: critical socket fix [leuk_he]
 
+Added  : Morph Leecher Detection [Stulle]
+ - You need to update the Valid Morph List manually when Major version number (7.x) changes
+
+Changed: Equal Chances for Each File uses Session values now [Stulle]
+
+Removed: unused Nice Hash preferences code [Stulle]
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.6
