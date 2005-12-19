@@ -298,26 +298,25 @@ double CStatisticFile::GetEqualChanceValue()
 		return 0;
 	}
 	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
-	else if(m_bInChangedEqualChanceValue && (lastCheckEqualChanceSemiValue+((uint32)(theApp.uploadqueue->GetAverageUpTime()+thePrefs.GetUpAvgTime())/2)) > (uint32)time(NULL)){
-		return m_dLastEqualChanceSemiValue/GetSharedTime();
+	else if(m_bInChangedEqualChanceValue && (lastCheckEqualChanceSemiValue + theApp.uploadqueue->GetAverageUpTime()) > (uint32)time(NULL)){
+		return m_dLastEqualChanceSemiValue/GetSessionShareTime();
 	}
 	lastCheckEqualChanceSemiValue = time(NULL);
 	m_bInChangedEqualChanceValue = true;
 	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 
 	//smaller value means greater priority
-	m_dLastEqualChanceSemiValue = ((double)GetAllTimeTransferred()/fileParent->GetFileSize());
+	m_dLastEqualChanceSemiValue = ((double)GetTransferred()/fileParent->GetFileSize());
 
 	//weight adjustment
 	if(theApp.uploadqueue->GetSuccessfullUpCount() > 0){
-		uint32 threshold = theStats.GetAvgUploadRate(AVG_SESSION)*1024*((uint32)(theApp.uploadqueue->GetAverageUpTime()+thePrefs.GetUpAvgTime())/2);
+		uint32 threshold = theStats.GetAvgUploadRate(AVG_SESSION)*1024*theApp.uploadqueue->GetAverageUpTime();
 		if(fileParent->GetFileSize() < threshold){
 			m_dLastEqualChanceBiasValue = 1+log((double)threshold/(fileParent->GetFileSize()%threshold+1));
 			m_dLastEqualChanceSemiValue /= m_dLastEqualChanceBiasValue;
 		}
 	}
-
-	return m_dLastEqualChanceSemiValue/GetSharedTime();
+	return m_dLastEqualChanceSemiValue/GetSessionShareTime();
 }
 
 CString CStatisticFile::GetEqualChanceValueString(bool detail){
@@ -327,13 +326,13 @@ CString CStatisticFile::GetEqualChanceValueString(bool detail){
 	if(thePrefs.IsEqualChanceEnable())	{
 		if(m_dLastEqualChanceBiasValue != 1){
 			detail ?
-				tempString.Format(_T("%s : %.2f*%.2f = %s/%s"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, m_dLastEqualChanceBiasValue, CastItoXBytes(GetAllTimeTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
-				tempString.Format(_T("%s : %.2f*%.2f"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, m_dLastEqualChanceBiasValue) ;
+				tempString.Format(_T("%s : %.2f*%.2f = %s/%s"), CastSecondsToHM(GetSessionShareTime()), m_dLastEqualChanceSemiValue, m_dLastEqualChanceBiasValue, CastItoXBytes(GetTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
+				tempString.Format(_T("%s : %.2f*%.2f"), CastSecondsToHM(GetSessionShareTime()), m_dLastEqualChanceSemiValue, m_dLastEqualChanceBiasValue) ;
 		}
 		else{
 			detail ?
-				tempString.Format(_T("%s : %.2f = %s/%s"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(GetAllTimeTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
-				tempString.Format(_T("%s : %.2f"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue) ;
+				tempString.Format(_T("%s : %.2f = %s/%s"), CastSecondsToHM(GetSessionShareTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(GetTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
+				tempString.Format(_T("%s : %.2f"), CastSecondsToHM(GetSessionShareTime()), m_dLastEqualChanceSemiValue) ;
 		}
 	}
 	else{

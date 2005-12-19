@@ -666,9 +666,9 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 	_fstat(file->_file, &fileinfo);
 	m_tUtcLastModified = fileinfo.st_mtime;
 	AdjustNTFSDaylightFileTime(m_tUtcLastModified, strFilePath);
-	//Morph Start - Added by AndCycle, Equal Chance For Each File
-	statistic.SetSharedTime(0); //first time shared file
-	//Morph End - Added by AndCycle, Equal Chance For Each File
+	//Morph Start - Added by Stulle, Equal Chance For Each File
+	statistic.SetSessionShareTime();
+	//Morph End - Added by Stulle, Equal Chance For Each File
 
 	fclose(file);
 	file = NULL;
@@ -933,6 +933,7 @@ bool CKnownFile::SetHashset(const CArray<uchar*, uchar*>& aHashset)
  
 bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 {
+	statistic.SetSessionShareTime();//Morph - Added by Stulle, Equal Chance For Each File
 	//MORPH START - Added by SiRoB, SLUGFILLER: Spreadbars
 	// SLUGFILLER: Spreadbars
 	CMap<uint16,uint16,uint32,uint32> spread_start_map;
@@ -1092,15 +1093,6 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				break;
 			}
 			// SLUGFILLER: mergeKnown, for TAHO, .met file control
-			//Morph - Added by AndCycle, Equal Chance For Each File
-			case FT_ATSHARED:{
-				ASSERT( newtag->IsInt() );
-				if (newtag->IsInt())
-					statistic.SetSharedTime(newtag->GetInt());
-				delete newtag;
-				break;
-			}
-			//Morph - Added by AndCycle, Equal Chance For Each File
 			default:
 				//MORPH START - Changed by SiRoB, SLUGFILLER: Spreadbars
 				// Mighty Knife: Take care of corrupted tags !!!
@@ -1176,10 +1168,9 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 
 bool CKnownFile::LoadDateFromFile(CFileDataIO* file){
 	m_tUtcLastModified = file->ReadUInt32();
-	//Morph Start - Added by AndCycle, Equal Chance For Each File
-	//init for file exist in known
-	statistic.SetSharedTime(time(NULL) - m_tUtcLastModified);
-	//Morph End - Added by AndCycle, Equal Chance For Each File
+	//Morph Start - Added by Stulle, Equal Chance For Each File
+	statistic.SetSessionShareTime();
+	//Morph End - Added by Stulle, Equal Chance For Each File
 	return true;
 }
 
@@ -1305,12 +1296,6 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	lsctag.WriteTagToFile(file);
 	uTagCount++;
 	// SLUGFILLER: mergeKnown, for TAHO, .met file control
-
-	//Morph Start - Added by AndCycle, Equal Chance For Each File
-	CTag sharedTime(FT_ATSHARED, statistic.GetSharedTime());
-	sharedTime.WriteTagToFile(file);
-	uTagCount++;
-	//Morph End - Added by AndCycle, Equal Chance For Each File
 
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	CTag spreadBar(FT_SPREADBAR, GetSpreadbarSetStatus());
