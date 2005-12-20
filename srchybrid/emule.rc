@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1295,7 +1295,7 @@ BEGIN
                     358,111,148,59
 END
 
-IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 273
+IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 290
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Client Details"
@@ -1322,7 +1322,7 @@ BEGIN
     CONTROL         "Static",IDC_CDIDENT,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,58,106,8
     GROUPBOX        "Transfer",IDC_STATIC40,7,88,308,69,BS_FLAT
-    LTEXT           "Currently downloading:",IDC_STATIC41,19,98,86,8
+    LTEXT           "User is downloading",IDC_STATIC41,19,98,86,8
     CONTROL         "Static",IDC_DDOWNLOADING,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,98,202,8
     LTEXT           "Downloaded (this session):",IDC_STATIC42,19,120,87,8
@@ -1353,7 +1353,7 @@ BEGIN
     LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,196,91,8
     CONTROL         "Static",IDC_DSCORE,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,196,105,8
-    LTEXT           "Currently downloading:",IDC_STATIC48,19,109,86,8
+    LTEXT           "Requested for upload:",IDC_STATIC48,19,109,86,8
     CONTROL         "Static",IDC_UPLOADING,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,109,202,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
@@ -1773,7 +1773,8 @@ BEGIN
     PUSHBUTTON      "Reset",IDC_RESETIPFURL,114,125,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPCURL,115,197,48,14,BS_FLAT
     GROUPBOX        "Valid Morph List",IDC_VALID_MORPH,7,220,217,32,BS_FLAT
-    LTEXT           "Valid Morph List status",IDC_VALID_MORPH_STATUS,14,230,136,8
+    LTEXT           "Valid Morph List status",IDC_VALID_MORPH_STATUS,14,230,
+                    136,8
     PUSHBUTTON      "Reload",IDC_VALID_MORPH_RELOAD,155,230,48,14,BS_FLAT
 END
 
@@ -2455,7 +2456,7 @@ BEGIN
         VERTGUIDE, 215
         VERTGUIDE, 256
         TOPMARGIN, 7
-        BOTTOMMARGIN, 207
+        BOTTOMMARGIN, 224
         HORZGUIDE, 28
         HORZGUIDE, 39
         HORZGUIDE, 50
@@ -3008,12 +3009,12 @@ OPENINCOMING.GIF        HTML                    "res\\FolderOpen.gif"
 RESTOREWINDOW.GIF       HTML                    "res\\RestoreWindow.gif"
 TABLEBACKGND.GIF        HTML                    "res\\MiniMuleBack.gif"
 PREFERENCES.GIF         HTML                    "res\\Preferences.gif"
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Allemand (Allemagne) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -3032,12 +3033,12 @@ COLLECTION              ICON                    "res\\emuleColl.ico"
 ALLFILES                ICON                    "res\\all.ico"
 INCOMPLETE              ICON                    "res\\incomplete.ico"
 AABCOLLECTIONFILETYPE   ICON                    "res\\emuleCollectionFileType.ico"
-#endif    // Allemand (Allemagne) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -3753,7 +3754,7 @@ BEGIN
     IDS_CD_VERSION          "Client Version:"
     IDS_CD_UID              "ID:"
     IDS_CD_SNAME            "Server Name:"
-    IDS_CD_CDOWN            "Currently downloading:"
+    IDS_CD_CDOWN            "User is downloading:"
     IDS_CD_DOWN             "Downloaded (this session):"
     IDS_CD_ADOWN            "Average Downloadrate:"
     IDS_CD_TDOWN            "Downloaded total:"
@@ -4622,7 +4623,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CD_UPLOADREQ        "Requested to upload:"
+    IDS_CD_UPLOADREQ        "You Have requested:"
     IDS_SETTINGCHANGED_RESTART 
                             "For the changed settings to take effect, please restart eMule!"
     IDS_CREDITSEXPIRED      ", %i clients deleted (not seen within 5 month)"
@@ -5470,6 +5471,10 @@ BEGIN
     IDS_MORPH_RAIF          "Report activities in friendlist"
     IDS_MORPH_KSSERV        "Don't remove static servers from serverlist in runtime"
     IDS_MORPH_LOG           "Morph Log"
+    IDS_RELOAD_LIST         "Valid Morph List expired! Please update it."
+    IDS_VALID_MORPH         "Valid Morph List"
+    IDS_VALID_MORPH_TRUE    "Valid Morph List up2date"
+    IDS_VALID_MORPH_FALSE   "Valid Morph List expired"
 END
 
 STRINGTABLE 
@@ -5878,10 +5883,6 @@ BEGIN
     IDS_ZZRATIO_CHECK3      "Using friend slot and globaldatarate>3KB/s"
     IDS_ZZRATIO_CHECK4      "Upload limit under 10KB/s"
     IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
-    IDS_RELOAD_LIST         "Valid Morph List expired! Please update it."
-    IDS_VALID_MORPH         "Valid Morph List"
-    IDS_VALID_MORPH_TRUE    "Valid Morph List up2date"
-    IDS_VALID_MORPH_FALSE   "Valid Morph List expired"
 END
 
 STRINGTABLE 
@@ -5907,7 +5908,7 @@ BEGIN
     IDS_SKIPALL             "S&kip All"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
