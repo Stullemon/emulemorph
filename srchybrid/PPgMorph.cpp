@@ -57,6 +57,7 @@ CPPgMorph::CPPgMorph()
     m_htiUSSNumberOfPings = NULL;
 	m_htiMinUpload = NULL;
 	m_htiUpSecu = NULL;
+	m_htiDlSecu = NULL;
 	m_htiDisp = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
@@ -190,7 +191,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiTimeRemAverage = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_AVG), m_htiTimeRemainingMode, m_iTimeRemainingMode == 2);
 		//m_ctrlTreeOptions.Expand(m_htiTimeRemainingMode, TVE_EXPAND); // khaos::accuratetimerem+
 		// khaos::accuratetimerem-
-		m_htiDisp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, m_htiDM);
+        //		m_htiDlSecu = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SECURITY), iImgSecu, m_htiDM); leuk_he nothing under this securty icon right now
+        m_htiDisp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, m_htiDM);
 		m_htiEnableDownloadInRed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_RED), m_htiDisp, m_bEnableDownloadInRed); //MORPH - Added by SiRoB, show download in Bold
 		m_htiEnableDownloadInBold = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_BOLD), m_htiDisp, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 		m_htiShowClientPercentage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CLIENTPERCENTAGE), m_htiDisp, m_bShowClientPercentage);
@@ -725,6 +727,7 @@ void CPPgMorph::OnDestroy()
     m_htiUSSGoingDownDivider = NULL;
     m_htiUSSNumberOfPings = NULL;
 	m_htiMinUpload = NULL;
+	m_htiDlSecu = NULL;
 	m_htiDisp = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
