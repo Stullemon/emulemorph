@@ -13,6 +13,7 @@ Added  : Morph Leecher Detection [Stulle]
 Changed: Equal Chances for Each File uses Session values now [Stulle]
 
 Removed: unused Nice Hash preferences code [Stulle]
+Removed: Obsolete security icon in Morhp settings removed. [leuk_he]
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.6

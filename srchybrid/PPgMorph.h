@@ -124,7 +124,6 @@ protected:
 	HTREEITEM m_htiSCC;
 	HTREEITEM m_htiSAC;
 	HTREEITEM m_htiDisp;
-	HTREEITEM m_htiDlSecu;
 	HTREEITEM m_htiUpSecu;
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
