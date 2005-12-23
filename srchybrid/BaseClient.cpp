@@ -492,9 +492,9 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			// EastShare END - Added by TAHO, Pretender
 			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
 			StrStrI(m_strModVersion,_T("MorphXT+")) ||
-			StrStrI(m_strModVersion,_T("MorphXT×")) ||
-			StrStrI(m_strModVersion,_T("MørphXT")) ||
-			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("×")) || IsMorph() == false) ||
+			StrStrI(m_strModVersion,_T("MorphXT\xD7")) ||
+			StrStrI(m_strModVersion,_T("M\xF8phXT")) ||
+			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false) ||
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
 			StrStrI(m_strModVersion,_T("ACAT")) && m_strModVersion.GetLength() > 4 ||
 			StrStrI(m_strModVersion,_T("sivka v12e8")) && m_nClientVersion != MAKE_CLIENT_VERSION(0, 42, 4) || // added - Stulle
@@ -3607,9 +3607,9 @@ bool CUpDownClient::IsMorphLeecher()
 	if (old_m_strClientSoftware != m_strClientSoftware)
 	{
 		if (StrStrI(m_strModVersion,_T("MorphXT+")) ||
-			StrStrI(m_strModVersion,_T("MorphXT×")) ||
-			StrStrI(m_strModVersion,_T("MørphXT")) ||
-			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("×")) || IsMorph() == false)) ||
+			StrStrI(m_strModVersion,_T("MorphXT\xD7")) ||
+			StrStrI(m_strModVersion,_T("M\xF8phXT")) ||
+			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false)) ||
 			(StrStrI(m_strModVersion,_T("phXT")) && (m_strModVersion[0]==0x4D || m_strModVersion[0]==0x6D) && !IsMorph())
 			)
 		{
