@@ -330,7 +330,11 @@ BOOL CemuleApp::InitInstance()
 #ifndef _BETA
 	if (GetProfileInt(_T("eMule"), _T("CreateCrashDump"), 0))
 #endif
+		//MORPH - Changed by SiRoB, [-modname-]
+		/*
 		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLong, true);
+		*/
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"), true);
 
 
 	///////////////////////////////////////////////////////////////////////////
