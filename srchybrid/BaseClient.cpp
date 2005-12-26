@@ -322,6 +322,7 @@ void CUpDownClient::Init()
 	m_bWebCacheSupportsMultiOHCBs = false;
 	// yonatan http end ////////////////////////////////////////////////////////////////////////////
 	// MORPH END - Added by Commander, WebCache 1.2e
+	filedata = NULL; //MORPH - Added by SiRoB, ReadBlockFromFileThread
 }
 
 CUpDownClient::~CUpDownClient(){

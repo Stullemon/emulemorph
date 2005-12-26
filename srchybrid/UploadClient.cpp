@@ -498,15 +498,12 @@ void CUpDownClient::CreateNextBlockPackage(){
        m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 50*1024) { // the buffered data is large enough allready
 		return;
 	}
-
-	CFile file;
-	byte* filedata = 0;
+	//MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 	CString fullname;
 	bool bFromPF = true; // Statistic to breakdown uploaded data by complete file vs. partfile.
-	CSyncHelper lockFile;
 	try{
         // Buffer new data if current buffer is less than 100 KBytes
-		while (!m_BlockRequests_queue.IsEmpty() &&
+		while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2 &&
 			(m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 100*1024)) {
 
 			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
@@ -514,24 +511,6 @@ void CUpDownClient::CreateNextBlockPackage(){
 			if (!srcfile)
 				throw GetResString(IDS_ERR_REQ_FNF);
 
-			if (srcfile->IsPartFile() && ((CPartFile*)srcfile)->GetStatus() != PS_COMPLETE){
-				// Do not access a part file, if it is currently moved into the incoming directory.
-				// Because the moving of part file into the incoming directory may take a noticable 
-				// amount of time, we can not wait for 'm_FileCompleteMutex' and block the main thread.
-				if (!((CPartFile*)srcfile)->m_FileCompleteMutex.Lock(0)){ // just do a quick test of the mutex's state and return if it's locked.
-					return;
-				}
-				lockFile.m_pObject = &((CPartFile*)srcfile)->m_FileCompleteMutex;
-				// If it's a part file which we are uploading the file remains locked until we've read the
-				// current block. This way the file completion thread can not (try to) "move" the file into
-				// the incoming directory.
-
-				fullname = RemoveFileExtension(((CPartFile*)srcfile)->GetFullName());
-			}
-			else{
-				fullname.Format(_T("%s\\%s"),srcfile->GetPath(),srcfile->GetFileName());
-			}
-		
 			uint32 togo;
 			if (currentblock->StartOffset > currentblock->EndOffset){
 				togo = currentblock->EndOffset + (srcfile->GetFileSize() - currentblock->StartOffset);
@@ -550,38 +529,20 @@ void CUpDownClient::CreateNextBlockPackage(){
 			if( togo > EMBLOCKSIZE*3 )
 				throw GetResString(IDS_ERR_LARGEREQBLOCK);
 			
-			if (!srcfile->IsPartFile()){
-				bFromPF = false; // This is not a part file...
-				// SLUGFILLER: SafeHash - if this happens, something is wrong with our shared files list
-				if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone)) {
-					theApp.sharedfiles->Reload();
-					throw GetResString(IDS_ERR_OPEN);
-				}
-				// SLUGFILLER: SafeHash
-				file.Seek(currentblock->StartOffset,0);
-				
-				filedata = new byte[togo+500];
-				if (uint32 done = file.Read(filedata,togo) != togo){
-					file.SeekToBegin();
-					file.Read(filedata + done,togo-done);
-				}
-				file.Close();
+			if (filedata == NULL) {
+				CReadBlockFromFileThread* readblockthread = (CReadBlockFromFileThread*) AfxBeginThread(RUNTIME_CLASS(CReadBlockFromFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+				readblockthread->SetReadBlockFromFile(srcfile, currentblock->StartOffset, togo, this);
+				readblockthread->ResumeThread();
+				filedata = (byte*)-2;
+				return;
+			} else if (filedata == (byte*)-1) {
+				//An error occur
+				theApp.sharedfiles->Reload();
+				throw GetResString(IDS_ERR_OPEN);
 			}
-			else{
-				CPartFile* partfile = (CPartFile*)srcfile;
 
-				partfile->m_hpartfile.Seek(currentblock->StartOffset,0);
-				
-				filedata = new byte[togo+500];
-				if (uint32 done = partfile->m_hpartfile.Read(filedata,togo) != togo){
-					partfile->m_hpartfile.SeekToBegin();
-					partfile->m_hpartfile.Read(filedata + done,togo-done);
-				}
-			}
-			if (lockFile.m_pObject){
-				lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
-				lockFile.m_pObject = NULL;
-			}
+			if (!srcfile->IsPartFile())
+				bFromPF = false; // This is not a part file...
 
 			SetUploadFileID(srcfile);
 
@@ -1203,6 +1164,9 @@ void CUpDownClient::ClearUploadBlockRequests()
 	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition();pos != 0;)
 		delete m_DoneBlocks_list.GetNext(pos);
 	m_DoneBlocks_list.RemoveAll();
+	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
+	delete[] filedata;
+	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 }
 
 void CUpDownClient::SendRankingInfo(){
@@ -1513,3 +1477,85 @@ CKnownFile* CUpDownClient::CheckAndGetReqUpFile() const {
 	return requpfile;
 }
 //MORPH END   - Adde by SiRoB, Optimization requpfile
+
+//MORPH START - Changed by SiRoB, ReadBlockFromFileThread
+IMPLEMENT_DYNCREATE(CReadBlockFromFileThread, CWinThread)
+
+void CReadBlockFromFileThread::SetReadBlockFromFile(CKnownFile* pfile, uint32 startOffset, uint32 toread, CUpDownClient* client) {
+	srcfile = pfile;
+	StartOffset = startOffset;
+	togo = toread;
+	m_client = client;
+} 
+
+int CReadBlockFromFileThread::Run() {
+	InitThreadLocale();
+
+	CFile file;
+	byte* filedata = 0;
+	CSyncHelper lockFile;
+	try{
+		if (!srcfile->IsPartFile()){
+			CString fullname;
+			if (srcfile->IsPartFile() && ((CPartFile*)srcfile)->GetStatus() != PS_COMPLETE){
+				((CPartFile*)srcfile)->m_FileCompleteMutex.Lock();
+				lockFile.m_pObject = &((CPartFile*)srcfile)->m_FileCompleteMutex;
+				// If it's a part file which we are uploading the file remains locked until we've read the
+				// current block. This way the file completion thread can not (try to) "move" the file into
+				// the incoming directory.
+
+				fullname = RemoveFileExtension(((CPartFile*)srcfile)->GetFullName());
+			}
+			else{
+				fullname.Format(_T("%s\\%s"),srcfile->GetPath(),srcfile->GetFileName());
+			}
+		
+			if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
+				throw GetResString(IDS_ERR_OPEN);
+
+			file.Seek(StartOffset,0);
+			
+			filedata = new byte[togo+500];
+			if (uint32 done = file.Read(filedata,togo) != togo){
+				file.SeekToBegin();
+				file.Read(filedata + done,togo-done);
+			}
+			file.Close();
+		}
+		else{
+			CPartFile* partfile = (CPartFile*)srcfile;
+
+			partfile->m_hpartfile.Seek(StartOffset,0);
+			
+			filedata = new byte[togo+500];
+			if (uint32 done = partfile->m_hpartfile.Read(filedata,togo) != togo){
+				partfile->m_hpartfile.SeekToBegin();
+				partfile->m_hpartfile.Read(filedata + done,togo-done);
+			}
+		}
+		if (lockFile.m_pObject){
+			lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
+			lockFile.m_pObject = NULL;
+		}
+		PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE, (WPARAM)filedata,(LPARAM)m_client);
+	}
+	catch(CString error)
+	{
+		if (thePrefs.GetVerbose())
+			DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), m_client->GetUserName(), error);
+		PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+		delete[] filedata;
+	}
+	catch(CFileException* e)
+	{
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		e->GetErrorMessage(szError, ARRSIZE(szError));
+		if (thePrefs.GetVerbose())
+			DebugLogWarning(_T("Failed to create upload package for %s - %s"), m_client->GetUserName(), szError);
+		PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+		delete[] filedata;
+		e->Delete();
+	}
+	return 0;
+}
+//MORPH END    - Changed by SiRoB, ReadBlockFromFileThread

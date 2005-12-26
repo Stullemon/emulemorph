@@ -220,6 +220,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_PARTHASHEDOKAICHRECOVER, OnPartHashedOKAICHRecover)
 	ON_MESSAGE(TM_PARTHASHEDCORRUPTAICHRECOVER, OnPartHashedCorruptAICHRecover)
 	// SLUGFILLER: SafeHash
+	ON_MESSAGE(TM_READBLOCKFROMFILEDONE, OnReadBlockFromFileDone) //MORPH - Added by SiRoB, ReadBlockFromFileThread
 	ON_MESSAGE(TM_FRAMEGRABFINISHED, OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
 	ON_MESSAGE(TM_FILECOMPLETED, OnFileCompleted)
@@ -1742,6 +1743,18 @@ LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 	return 0;
 }
 // SLUGFILLER: SafeHash
+
+//MORPH START - Added by SiRoB, ReadBlockFromFileThread
+LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
+{
+	CUpDownClient* client = (CUpDownClient*) lParam;
+	if (theApp.uploadqueue->IsDownloading(client))	// could have been canceled
+		client->SetReadBlockFromFileBuffer((byte*)wParam);
+	else if (wParam != -1 && wParam != -2)
+		delete[] (byte*)wParam;
+	return 0;
+}
+//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 
 LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 {

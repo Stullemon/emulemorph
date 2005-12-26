@@ -851,6 +851,9 @@ public:
 	uint8	AttachMultiOHCBsRequest(CSafeMemFile &data); // Superlexx - attaches a multiple files request
 	uint8	IsPartAvailable(uint16 iPart, const byte* fileHash) {return requestedFiles.IsPartAvailable(iPart, fileHash);}
     // MORPH END - Added by Commander, WebCache 1.2e
+	//MORPH - Added by SiRoB, ReadBlockFromFileThread
+	void	SetReadBlockFromFileBuffer(byte* pdata) {filedata = pdata;};
+	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 protected:
 	int m_iHttpSendState;
 	uint32 m_uPeerCacheDownloadPushId;
@@ -996,6 +999,9 @@ protected:
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DoneBlocks_list;
 	CTypedPtrList<CPtrList, Requested_File_Struct*>	 m_RequestedFiles_list;
 
+	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
+	byte* filedata;
+	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 	//////////////////////////////////////////////////////////
 	// Download
 	//
@@ -1231,3 +1237,22 @@ static LPCTSTR apszSnafuTag[] =
 #define ET_MOD_UNKNOWNxC9		0xC9 // Bionic 0.20 Beta]
 #define ET_MOD_UNKNOWNxDA		0xDA // Rumata (rus)(Plus v1f) - leecher mod?
 //>>> eWombat [SNAFU_V3]
+
+//MORPH START - Added by SiRoB, ReadBlockFromFileThread
+class CReadBlockFromFileThread : public CWinThread
+{
+	DECLARE_DYNCREATE(CReadBlockFromFileThread)
+protected:
+	CReadBlockFromFileThread()	{}
+public:
+	virtual	BOOL	InitInstance() {return true;}
+	virtual int		Run();
+	void			SetReadBlockFromFile(CKnownFile* pfile, uint32 startOffset, uint32 togo, CUpDownClient* client);
+private:
+	uint32			StartOffset;
+	uint32			togo;
+	CUpDownClient*	m_client;
+	CKnownFile*		srcfile;
+	CSyncObject*	lockFile;
+};
+//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
