@@ -661,8 +661,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				if (m_highestNumberOfFullyActivatedSlots[classID] <= lastclientpos) {
 					if (m_SentBytesSinceLastCall > 0)
 						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
-					else
-						++m_highestNumberOfFullyActivatedSlots[classID];
 				}
 				realBytesToSpendClass[classID] = 999;
 			}
