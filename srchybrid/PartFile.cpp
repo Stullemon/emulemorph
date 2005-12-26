@@ -6736,7 +6736,16 @@ int CPartHashThread::Run()
 				length = (file.GetLength() - ((ULONGLONG)PARTSIZE*partnumber));
 				ASSERT( length <= PARTSIZE );
 			}
-			m_pOwner->CreateHash(&file, length, hashresult, NULL);
+
+			try
+			{
+				m_pOwner->CreateHash(&file, length, hashresult, NULL);
+			}
+			catch(CFileException* ex)
+			{
+				ex->Delete();
+			}
+			
 			if (!theApp.emuledlg->IsRunning())	// in case of shutdown while still hashing
 				break;
 
