@@ -53,7 +53,7 @@ bool CKnownFile::SR13_ImportParts(){
 		return false;
 	CString pathName=dlg.GetPathName();
 
-	partfile->SetStatus(PS_EMPTY/*PS_WAITINGFORHASH*/);
+	partfile->SetStatus(PS_WAITINGFORHASH);
 	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL, 0, CREATE_SUSPENDED);
 	if (addfilethread){
 		partfile->SetFileOp(PFOP_SR13_IMPORTPARTS);
