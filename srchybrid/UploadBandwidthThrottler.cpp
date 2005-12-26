@@ -587,6 +587,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								if (timeSinceLastLoop > 0) {
 									if (stat->realBytesToSpend < -1000*ClientDataRate[classID])
 										stat->realBytesToSpend = -1000*ClientDataRate[classID];
+									else if (stat->realBytesToSpend > 999)
+										stat->realBytesToSpend = 999;
 									if (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
 									else
@@ -611,8 +613,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										spentBytes += lastSpentBytes;
 										spentOverhead += socketSentBytes.sentBytesControlPackets;
 									}
-								} else if (stat->realBytesToSpend > 999)
-									stat->realBytesToSpend = 999;
+								}
 							}
 						}
 					}
@@ -640,8 +641,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										spentBytes += lastSpentBytes;
 										spentOverhead += socketSentBytes.sentBytesControlPackets;
 									}
-								} else if (stat->realBytesToSpend > 999)
-									stat->realBytesToSpend = 999;
+								}
 							}
 						}
 					}
