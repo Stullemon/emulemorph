@@ -152,7 +152,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
 		if (!m_stat_list.Lookup(socket,cur_socket_stat)){
 			cur_socket_stat = new Socket_stat;
 			m_stat_list.SetAt(socket,cur_socket_stat);
-			cur_socket_stat->realBytesToSpend = _I64_MAX;
+			cur_socket_stat->realBytesToSpend = 999;
 			cur_socket_stat->dwBusy = GetTickCount();
 		}
 		cur_socket_stat->scheduled = scheduled;
