@@ -432,7 +432,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
             Sleep(sleepTime-timeSinceLastLoop);
 		const DWORD thisLoopTick = ::GetTickCount();
         if (thisLoopTick - lastLoopTick > 2000) {
-			lastLoopTick = thisLoopTick - 2000;
+			lastLoopTick = thisLoopTick;
 		}
 		timeSinceLastLoop = thisLoopTick - lastLoopTick;
 		
@@ -585,8 +585,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							//calculate client allowed data for a client (stat->realBytesToSpend)
 							if (ClientDataRate[classID] > 0) {
 								if (timeSinceLastLoop > 0) {
-									if (stat->realBytesToSpend > 999)
-										stat->realBytesToSpend = 999;
+									if (stat->realBytesToSpend < -1000*ClientDataRate[classID])
+										stat->realBytesToSpend = -1000*ClientDataRate[classID];
 									if (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
 									else
@@ -599,8 +599,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							//Try to send client allowed data for a client but not more than class allowed data
 							if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
 								if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
-									//uint32 BytesToSpendTemp = min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)spentBytes);
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
+									uint32 BytesToSpendTemp = min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)spentBytes);
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, doubleSendSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
@@ -611,7 +611,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										spentBytes += lastSpentBytes;
 										spentOverhead += socketSentBytes.sentBytesControlPackets;
 									}
-								}
+								} else if (stat->realBytesToSpend > 999)
+									stat->realBytesToSpend = 999;
 							}
 						}
 					}
@@ -639,7 +640,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										spentBytes += lastSpentBytes;
 										spentOverhead += socketSentBytes.sentBytesControlPackets;
 									}
-								}
+								} else if (stat->realBytesToSpend > 999)
+									stat->realBytesToSpend = 999;
 							}
 						}
 					}
