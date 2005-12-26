@@ -20,8 +20,8 @@ eMule Morph (En), http://emulemorph.sourceforge.net/
 #Donkey Fakes,http://donkeyfakes.gambri.net/
 #DF - Fake Check,http://donkeyfakes.gambri.net/index.php?action=search&ed2k=&hash=#hashid
 #DF - Fake Report,http://donkeyfakes.gambri.net/report.php?link=ed2k://|file|#filename|#filesize|#hashid|/
---,--
-Jugle,http://www.jugle.net/
-Jugle - File Comments,http://www.jugle.net/?comments=#hashid
+#--,--
+#Jugle,http://www.jugle.net/
+#Jugle - File Comments,http://www.jugle.net/?comments=#hashid
 --,--
 eD2k history,http://stats.razorback2.com/ed2khistory?ed2k=#hashid
