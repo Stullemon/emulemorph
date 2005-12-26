@@ -432,7 +432,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
             Sleep(sleepTime-timeSinceLastLoop);
 		const DWORD thisLoopTick = ::GetTickCount();
         if (thisLoopTick - lastLoopTick > 2000) {
-			lastLoopTick = thisLoopTick;
+			lastLoopTick = thisLoopTick - 2000;
 		}
 		timeSinceLastLoop = thisLoopTick - lastLoopTick;
 		
@@ -536,20 +536,22 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						Socket_stat* stat = NULL;
 						if (m_stat_list.Lookup(socket, stat)) {
 							uint32 neededBytes = socket->GetNeededBytes(1000 > minFragSize);
-							if (neededBytes > 0 && stat->realBytesToSpend > 999 && GetTickCount()-socket->GetLastCalledSend() >= 1000) {
+							if (neededBytes > 0 && GetTickCount()-socket->GetLastCalledSend() > 1000) {
 								neededBytes = min(BytesToSpend - (sint64)ControlspentBytes, neededBytes);
 								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(neededBytes, minFragSize);
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
-								uint64 realByteSpent = lastSpentBytes*1000;
-								stat->realBytesToSpend -= realByteSpent;
-								if(m_highestNumberOfFullyActivatedSlots[classID] > slotCounter+1)
-									m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
-								if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
-									m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
-								if (classID < LAST_CLASS)
-									realBytesToSpendClass[classID] -= realByteSpent;
-								ControlspentBytes += lastSpentBytes;
-								ControlspentOverhead += socketSentBytes.sentBytesControlPackets;
+								if (lastSpentBytes) {
+									uint64 realByteSpent = lastSpentBytes*1000;
+									stat->realBytesToSpend -= realByteSpent;
+									if(m_highestNumberOfFullyActivatedSlots[classID] > slotCounter+1)
+										m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
+									if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
+										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
+									if (classID < LAST_CLASS)
+										realBytesToSpendClass[classID] -= realByteSpent;
+									ControlspentBytes += lastSpentBytes;
+									ControlspentOverhead += socketSentBytes.sentBytesControlPackets;
+								}
 							}
 						}
 					}
@@ -595,7 +597,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							}
 
 							//Try to send client allowed data for a client but not more than class allowed data
-							if (stat->realBytesToSpend > 999) {
+							if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
 								if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
 									//uint32 BytesToSpendTemp = min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)spentBytes);
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);

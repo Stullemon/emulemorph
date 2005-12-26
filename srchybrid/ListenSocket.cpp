@@ -1263,7 +1263,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						// CHECK HANDSHAKE?
 						if (thePrefs.GetLogWebCacheEvents())
 						AddDebugLogLine( false, _T("Received WCBlock - TCP") );
-						new CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
+						CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
 					}
 					break;
 				}
