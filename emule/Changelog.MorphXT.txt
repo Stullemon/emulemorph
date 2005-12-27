@@ -17,6 +17,8 @@ ADDED  : ReadBlockFromFileThead: make read block for uploading client no main th
 
 CHANGED: Equal Chances for Each File uses Session values now [Stulle]
 CHANGED: USC: Avoid limiting speed of client too much when switching from focused to no focused mode [SiRoB]
+CHANGED: (secutity) Backlog on WEBserver listen socket have been set to 5 [SiRoB]
+CHANGED: (secutity) Backlog on WAPserver listen socket have been set to 5 [SiRoB]
 
 REMOVED: unused Nice Hash preferences code [Stulle]
 REMOVED: Obsolete security icon in Morhp settings removed. [leuk_he]
