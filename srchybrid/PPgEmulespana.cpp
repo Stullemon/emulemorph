@@ -338,6 +338,7 @@ BEGIN_MESSAGE_MAP(CPPgEmulespana, CPropertyPage)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_TB_SKINS, OnLvnItemchangedListTbSkins)
 	// End MoNKi
 */
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 
@@ -826,6 +827,27 @@ BOOL CPPgEmulespana::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPPgEmulespana::OnHelp()
+{
+	//theApp.ShowHelp(0);
+}
+
+BOOL CPPgEmulespana::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgEmulespana::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }
 
 BOOL CPPgEmulespana::OnKillActive()

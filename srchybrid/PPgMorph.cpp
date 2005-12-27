@@ -28,7 +28,7 @@ BEGIN_MESSAGE_MAP(CPPgMorph, CPropertyPage)
 	ON_WM_HSCROLL()
     ON_WM_DESTROY()
 	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
-	ON_WM_HELPINFO() // leuk_he: disable help
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CPPgMorph::CPPgMorph()
@@ -795,8 +795,23 @@ LRESULT CPPgMorph::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-// leuk_he: no help
+void CPPgMorph::OnHelp()
+{
+	//theApp.ShowHelp(0);
+}
+
+BOOL CPPgMorph::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
 BOOL CPPgMorph::OnHelpInfo(HELPINFO* pHelpInfo)
 {
-		return TRUE;
+	OnHelp();
+	return TRUE;
 }

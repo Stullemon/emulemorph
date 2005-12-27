@@ -114,9 +114,12 @@ protected:
 
 	void ChangeTab(int nitem);
 
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 public:
 /*Commented by SiRoB

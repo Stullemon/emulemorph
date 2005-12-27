@@ -53,10 +53,8 @@ BEGIN_MESSAGE_MAP(CPPgMorph2, CPropertyPage)
 	ON_BN_CLICKED(IDC_RESETIPCURL, OnBnClickedResetipcurl)
 	ON_BN_CLICKED(IDC_AUTOUPIP2COUNTRY , OnSettingsChange)
 	//Commander - Added: IP2Country Auto-updating - End
-	ON_WM_HELPINFO() // leuk_he: disable help
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
-
-
 // CPPgMorph message handlers
 
 BOOL CPPgMorph2::OnInitDialog()
@@ -247,9 +245,23 @@ void CPPgMorph2::OnBnClickedResetipcurl()
 	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(_T(""));
 }
 
-// leuk_he: no help
-BOOL CPPgMorph2::OnHelpInfo(HELPINFO* pHelpInfo)
+void CPPgMorph2::OnHelp()
 {
-		return TRUE;
+	//theApp.ShowHelp(0);
 }
 
+BOOL CPPgMorph2::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgMorph2::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
+}

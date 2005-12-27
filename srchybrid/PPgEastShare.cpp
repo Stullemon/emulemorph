@@ -30,6 +30,7 @@ BEGIN_MESSAGE_MAP(CPPgEastShare, CPropertyPage)
 	ON_WM_HSCROLL()
     ON_WM_DESTROY()
 	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CPPgEastShare::CPPgEastShare()
@@ -340,4 +341,25 @@ LRESULT CPPgEastShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 		SetModified();
 	}
 	return 0;
+}
+
+void CPPgEastShare::OnHelp()
+{
+	//theApp.ShowHelp(0);
+}
+
+BOOL CPPgEastShare::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgEastShare::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }
