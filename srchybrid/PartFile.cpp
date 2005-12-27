@@ -6746,8 +6746,10 @@ int CPartHashThread::Run()
 				ex->Delete();
 			}
 			
-			if (!theApp.emuledlg->IsRunning())	// in case of shutdown while still hashing
+			//MORPH - Changed by SiRoB, Avoid crash at shutingdown
+			if (theApp.emuledlg==NULL || !theApp.emuledlg->IsRunning())	// in case of shutdown while still hashing
 				break;
+			//MORPH - Changed by SiRoB, Avoid crash at shutingdown
 
 			if (md4cmp(hashresult,m_DesiredHashes[i])){
 				if (m_AICHRecover)
