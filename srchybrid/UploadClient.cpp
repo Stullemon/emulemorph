@@ -587,7 +587,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 
 			m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
 			delete[] filedata;
-			filedata = 0;
+			filedata = NULL;
 		}
 	}
 	catch(CString error)
@@ -595,8 +595,10 @@ void CUpDownClient::CreateNextBlockPackage(){
 		if (thePrefs.GetVerbose())
 			DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), GetUserName(), error);
 		theApp.uploadqueue->RemoveFromUploadQueue(this, _T("Client error: ") + error);
-		if (filedata != (byte*)-2 && filedata != (byte*)-1 && filedata != NULL)
+		if (filedata != (byte*)-2 && filedata != (byte*)-1 && filedata != NULL) {
 			delete[] filedata;
+			filedata = NULL;
+		}
 		return;
 	}
 	catch(CFileException* e)
@@ -606,8 +608,10 @@ void CUpDownClient::CreateNextBlockPackage(){
 		if (thePrefs.GetVerbose())
 			DebugLogWarning(_T("Failed to create upload package for %s - %s"), GetUserName(), szError);
 		theApp.uploadqueue->RemoveFromUploadQueue(this, ((CString)_T("Failed to create upload package.")) + szError);
-		if (filedata != (byte*)-2 && filedata != (byte*)-1 && filedata != NULL)
+		if (filedata != (byte*)-2 && filedata != (byte*)-1 && filedata != NULL) {
 			delete[] filedata;
+			filedata = NULL;
+		}
 		e->Delete();
 		return;
 	}
@@ -1168,8 +1172,10 @@ void CUpDownClient::ClearUploadBlockRequests()
 		delete m_DoneBlocks_list.GetNext(pos);
 	m_DoneBlocks_list.RemoveAll();
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
-	if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+	if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL) {
 		delete[] filedata;
+		filedata = NULL;
+	}
 	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 }
 
@@ -1496,7 +1502,7 @@ int CReadBlockFromFileThread::Run() {
 	InitThreadLocale();
 
 	CFile file;
-	byte* filedata = 0;
+	byte* filedata = NULL;
 	CSyncHelper lockFile;
 	try{
 		if (!srcfile->IsPartFile()){
@@ -1544,8 +1550,10 @@ int CReadBlockFromFileThread::Run() {
 		
 		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE, (WPARAM)filedata,(LPARAM)m_client);
-		else
+		else {
 			delete[] filedata;
+			filedata = NULL;
+		}
 	}
 	catch(CString error)
 	{
@@ -1553,6 +1561,8 @@ int CReadBlockFromFileThread::Run() {
 			DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), m_client->GetUserName(), error);
 		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+		else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+			delete[] filedata;
 	}
 	catch(CFileException* e)
 	{
@@ -1562,10 +1572,10 @@ int CReadBlockFromFileThread::Run() {
 			DebugLogWarning(_T("Failed to create upload package for %s - %s"), m_client->GetUserName(), szError);
 		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+		else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+			delete[] filedata;
 		e->Delete();
 	}
-	if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
-		delete[] filedata;
 	return 0;
 }
 //MORPH END    - Changed by SiRoB, ReadBlockFromFileThread
