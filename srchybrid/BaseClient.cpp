@@ -490,6 +490,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("MorphXT+")) ||
 			StrStrI(m_strModVersion,_T("MorphXT\xD7")) ||
 			StrStrI(m_strModVersion,_T("M\xF8phXT")) ||
+			StrStrI(m_strModVersion,_T("MorphXT v7.60")) ||
 			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false) ||
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
 			StrStrI(m_strModVersion,_T("ACAT")) && m_strModVersion.GetLength() > 4 ||
