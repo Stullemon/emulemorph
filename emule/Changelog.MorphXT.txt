@@ -10,8 +10,6 @@ FIXED  : (major) Patched safehash thread hashing to avoid crash when reading on 
  - This permit to avoid just the crash, you still need to perform a scandisk to move part pointing to bad cluster
 FIXED  : (major) Patched safehash to avoid crash when we are shuting down emule [SiRoB]
 
-ADDED  : Morph Leecher Detection [Stulle]
- - You need to update the Valid Morph List manually when Major version number (7.x) changes
 ADDED  : ReadBlockFromFileThead: make read block for uploading client no main thread blocking [SiRoB]
  - It will help to avoid disturbing upload when harddisk is under heavy access.
 
