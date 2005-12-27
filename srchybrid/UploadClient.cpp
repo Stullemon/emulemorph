@@ -1168,7 +1168,8 @@ void CUpDownClient::ClearUploadBlockRequests()
 		delete m_DoneBlocks_list.GetNext(pos);
 	m_DoneBlocks_list.RemoveAll();
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
-	delete[] filedata;
+	if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+		delete[] filedata;
 	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 }
 
