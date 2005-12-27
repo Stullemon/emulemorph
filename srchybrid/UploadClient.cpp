@@ -1540,7 +1540,7 @@ int CReadBlockFromFileThread::Run() {
 		
 		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE, (WPARAM)filedata,(LPARAM)m_client);
-		} else
+		else
 			delete[] filedata;
 	}
 	catch(CString error)

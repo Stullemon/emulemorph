@@ -1707,12 +1707,20 @@ LRESULT CemuleDlg::OnFileOpProgress(WPARAM wParam, LPARAM lParam)
 // SLUGFILLER: SafeHash
 LRESULT CemuleDlg::OnHashFailed(WPARAM wParam, LPARAM lParam)
 {
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	theApp.sharedfiles->HashFailed((UnknownFile_Struct*)lParam);
 	return 0;
 }
 
 LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam)
 {
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
 		pOwner->PartHashFinished((uint16)wParam, false);
@@ -1721,6 +1729,10 @@ LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam)
 
 LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam)
 {
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
 		pOwner->PartHashFinished((uint16)wParam, true);
@@ -1729,6 +1741,10 @@ LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam)
 
 LRESULT CemuleDlg::OnPartHashedOKAICHRecover(WPARAM wParam,LPARAM lParam)
 {
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
 		pOwner->PartHashFinishedAICHRecover((uint16)wParam, false);
@@ -1737,6 +1753,10 @@ LRESULT CemuleDlg::OnPartHashedOKAICHRecover(WPARAM wParam,LPARAM lParam)
 
 LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 {
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
 		pOwner->PartHashFinishedAICHRecover((uint16)wParam, true);
@@ -1748,7 +1768,7 @@ LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 {
 	CUpDownClient* client = (CUpDownClient*) lParam;
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN && theApp.theApp.uploadqueue->IsDownloading(client))	// could have been canceled
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN && theApp.uploadqueue->IsDownloading(client))	// could have been canceled
 		client->SetReadBlockFromFileBuffer((byte*)wParam);
 	else if (wParam != -1 && wParam != -2)
 		delete[] (byte*)wParam;
@@ -1758,6 +1778,10 @@ LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 
 LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 {
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	if (lParam == 0)
 		((CPartFile*)wParam)->FlushBuffersExceptionHandler();
 	else
@@ -1767,6 +1791,10 @@ LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 
 LRESULT CemuleDlg::OnFileCompleted(WPARAM wParam, LPARAM lParam)
 {
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* partfile = (CPartFile*)lParam;
 	ASSERT( partfile != NULL );
 	if (partfile)
@@ -2899,6 +2927,11 @@ void CemuleDlg::ApplyLogFont(LPLOGFONT plf)
 }
 
 LRESULT CemuleDlg::OnFrameGrabFinished(WPARAM wParam,LPARAM lParam){
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
+	
 	CKnownFile* pOwner = (CKnownFile*)wParam;
 	FrameGrabResult_Struct* result = (FrameGrabResult_Struct*)lParam;
 	
