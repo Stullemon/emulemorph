@@ -1537,13 +1537,18 @@ int CReadBlockFromFileThread::Run() {
 			lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
 			lockFile.m_pObject = NULL;
 		}
-		PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE, (WPARAM)filedata,(LPARAM)m_client);
+		
+		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE, (WPARAM)filedata,(LPARAM)m_client);
+		} else
+			delete[] filedata;
 	}
 	catch(CString error)
 	{
 		if (thePrefs.GetVerbose())
 			DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), m_client->GetUserName(), error);
-		PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
 		delete[] filedata;
 	}
 	catch(CFileException* e)
@@ -1552,7 +1557,8 @@ int CReadBlockFromFileThread::Run() {
 		e->GetErrorMessage(szError, ARRSIZE(szError));
 		if (thePrefs.GetVerbose())
 			DebugLogWarning(_T("Failed to create upload package for %s - %s"), m_client->GetUserName(), szError);
-		PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
 		delete[] filedata;
 		e->Delete();
 	}
