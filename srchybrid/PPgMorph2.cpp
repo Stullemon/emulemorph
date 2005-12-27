@@ -10,7 +10,6 @@
 #include "Fakecheck.h"
 #include "IPFilter.h"
 #include "IP2Country.h"
-#include "MorphVersionList.h" //MORPH - Added by Stulle, Morph Leecher Detection
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,7 +53,6 @@ BEGIN_MESSAGE_MAP(CPPgMorph2, CPropertyPage)
 	ON_BN_CLICKED(IDC_RESETIPCURL, OnBnClickedResetipcurl)
 	ON_BN_CLICKED(IDC_AUTOUPIP2COUNTRY , OnSettingsChange)
 	//Commander - Added: IP2Country Auto-updating - End
-	ON_BN_CLICKED(IDC_VALID_MORPH_RELOAD, OnBnClickedReloadMorphList) //MORPH - Added by Stulle, Morph Leecher Detection
 END_MESSAGE_MAP()
 
 
@@ -187,14 +185,6 @@ void CPPgMorph2::Localize(void)
 		GetDlgItem(IDC_RESETIPCURL)->SetWindowText(GetResString(IDS_RESET));
 		//MORPH END - Added by Commander: IP2Country update
 
-		//MORPH START - Added by Stulle, Morph Leecher Detection
-		GetDlgItem(IDC_VALID_MORPH)->SetWindowText(GetResString(IDS_VALID_MORPH));
-		if(theMorphVerList.GetListValid())
-			GetDlgItem(IDC_VALID_MORPH_STATUS)->SetWindowText(GetResString(IDS_VALID_MORPH_TRUE));
-		else
-			GetDlgItem(IDC_VALID_MORPH_STATUS)->SetWindowText(GetResString(IDS_VALID_MORPH_FALSE));
-		GetDlgItem(IDC_VALID_MORPH_RELOAD)->SetWindowText(GetResString(IDS_SF_RELOAD));
-		//MORPH END - Added by Stulle, Morph Leecher Detection
 	}
 }
 
@@ -254,11 +244,4 @@ void CPPgMorph2::OnBnClickedResetipcurl()
 	GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->SetWindowText(strBuffer);
 	memset(thePrefs.GetIP2CountryVersion(), 0, sizeof(SYSTEMTIME));
 	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(_T(""));
-}//MORPH START - Added by Stulle, Morph Leecher Detection
-void CPPgMorph2::OnBnClickedReloadMorphList()
-{
-	theMorphVerList.LoadList();
-	theApp.emuledlg->DoMVersioncheck(true);
-	Localize();
 }
-//MORPH END - Added by Stulle, Morph Leecher Detection

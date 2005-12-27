@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1736,7 +1736,7 @@ BEGIN
     LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
 END
 
-IDD_PPG_MORPH2 DIALOGEX 0, 0, 230, 257
+IDD_PPG_MORPH2 DIALOGEX 0, 0, 230, 222
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Morph2"
@@ -1772,10 +1772,6 @@ BEGIN
     PUSHBUTTON      "Reset",IDC_RESETFAKESURL,115,53,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPFURL,114,125,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPCURL,115,197,48,14,BS_FLAT
-    GROUPBOX        "Valid Morph List",IDC_VALID_MORPH,7,220,217,32,BS_FLAT
-    LTEXT           "Valid Morph List status",IDC_VALID_MORPH_STATUS,14,230,
-                    136,8
-    PUSHBUTTON      "Reload",IDC_VALID_MORPH_RELOAD,155,230,48,14,BS_FLAT
 END
 
 IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
@@ -2456,7 +2452,7 @@ BEGIN
         VERTGUIDE, 215
         VERTGUIDE, 256
         TOPMARGIN, 7
-        BOTTOMMARGIN, 224
+        BOTTOMMARGIN, 207
         HORZGUIDE, 28
         HORZGUIDE, 39
         HORZGUIDE, 50
@@ -3009,12 +3005,12 @@ OPENINCOMING.GIF        HTML                    "res\\FolderOpen.gif"
 RESTOREWINDOW.GIF       HTML                    "res\\RestoreWindow.gif"
 TABLEBACKGND.GIF        HTML                    "res\\MiniMuleBack.gif"
 PREFERENCES.GIF         HTML                    "res\\Preferences.gif"
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// German (Germany) resources
+// Allemand (Allemagne) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -3033,12 +3029,12 @@ COLLECTION              ICON                    "res\\emuleColl.ico"
 ALLFILES                ICON                    "res\\all.ico"
 INCOMPLETE              ICON                    "res\\incomplete.ico"
 AABCOLLECTIONFILETYPE   ICON                    "res\\emuleCollectionFileType.ico"
-#endif    // German (Germany) resources
+#endif    // Allemand (Allemagne) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5471,10 +5467,6 @@ BEGIN
     IDS_MORPH_RAIF          "Report activities in friendlist"
     IDS_MORPH_KSSERV        "Don't remove static servers from serverlist in runtime"
     IDS_MORPH_LOG           "Morph Log"
-    IDS_RELOAD_LIST         "Valid Morph List expired! Please update it."
-    IDS_VALID_MORPH         "Valid Morph List"
-    IDS_VALID_MORPH_TRUE    "Valid Morph List up2date"
-    IDS_VALID_MORPH_FALSE   "Valid Morph List expired"
 END
 
 STRINGTABLE 
@@ -5908,7 +5900,7 @@ BEGIN
     IDS_SKIPALL             "S&kip All"
 END
 
-#endif    // English (U.S.) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

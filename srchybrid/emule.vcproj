@@ -421,9 +421,6 @@
 				RelativePath=".\ModVersion.cpp">
 			</File>
 			<File
-				RelativePath=".\MorphVersionList.cpp">
-			</File>
-			<File
 				RelativePath="OtherFunctions.cpp">
 			</File>
 			<File
@@ -891,9 +888,6 @@
 			</File>
 			<File
 				RelativePath=".\ModVersion.h">
-			</File>
-			<File
-				RelativePath=".\MorphVersionList.h">
 			</File>
 			<File
 				RelativePath="Opcodes.h">

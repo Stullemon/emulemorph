@@ -40,7 +40,6 @@
 #include "MuleToolbarCtrl.h"
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB
 #include "friendlist.h" //MORPH - Added by SiRoB, There is one slot friend or more
-#include "MorphVersionList.h" //MORPH - Added by Stulle, Morph Leecher Detection
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -843,7 +842,6 @@ void CPreferences::Init()
 	delete[] fullpath;
 
 	LoadPreferences();
-	theMorphVerList.LoadList(); //MORPH - Added by Stulle, Morph Leecher Detection
 
 	if (!preffile){
 		SetStandartValues();

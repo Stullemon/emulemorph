@@ -492,13 +492,13 @@ public:
 	CSyncObject* m_pObject;
 };
 
+//MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
 	if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
        m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 200*1024) { // the buffered data is large enough allready
 		return;
 	}
-	//MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 	CString fullname;
 	bool bFromPF = true; // Statistic to breakdown uploaded data by complete file vs. partfile.
 	try{
@@ -610,6 +610,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 		return;
 	}
 }
+//MORPH END   - Changed by SiRoB, ReadBlockFromFileThread
 
 void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqfile)
 {
