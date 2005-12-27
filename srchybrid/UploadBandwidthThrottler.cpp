@@ -584,11 +584,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						if (m_stat_list.Lookup(socket,stat)) {
 							//calculate client allowed data for a client (stat->realBytesToSpend)
 							if (ClientDataRate[classID] > 0) {
+								if (stat->realBytesToSpend < -((sint64)2000*ClientDataRate[classID]))
+									stat->realBytesToSpend = -((sint64)2000*ClientDataRate[classID]);
+								else if (stat->realBytesToSpend > 999)
+									stat->realBytesToSpend = 999;
 								if (timeSinceLastLoop > 0) {
-									if (stat->realBytesToSpend < -1000*ClientDataRate[classID])
-										stat->realBytesToSpend = -1000*ClientDataRate[classID];
-									else if (stat->realBytesToSpend > 999)
-										stat->realBytesToSpend = 999;
 									if (_I64_MAX/timeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += ClientDataRate[classID]*timeSinceLastLoop;
 									else
