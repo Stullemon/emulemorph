@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CPPgMorph, CPropertyPage)
 	ON_WM_HSCROLL()
     ON_WM_DESTROY()
 	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_WM_HELPINFO() // leuk_he: disable help
 END_MESSAGE_MAP()
 
 CPPgMorph::CPPgMorph()
@@ -792,4 +793,10 @@ LRESULT CPPgMorph::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 		SetModified();
 	}
 	return 0;
+}
+
+// leuk_he: no help
+BOOL CPPgMorph::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+		return TRUE;
 }

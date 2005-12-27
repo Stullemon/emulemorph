@@ -13,6 +13,7 @@ public:
 // Dialog Data
 	enum { IDD = IDD_PPG_MORPH2 };
 protected:
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo); // leuk_he :no help and no stack overflow. 
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	DECLARE_MESSAGE_MAP()

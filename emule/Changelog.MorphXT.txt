@@ -20,6 +20,7 @@ CHANGED: (secutity) Backlog on WAPserver listen socket have been set to 5 [SiRoB
 
 REMOVED: unused Nice Hash preferences code [Stulle]
 REMOVED: Obsolete security icon in Morhp settings removed. [leuk_he]
+REMOVED: Help from morph preferences (caused a crash) [leuk_he]
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.6

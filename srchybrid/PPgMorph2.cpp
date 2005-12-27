@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CPPgMorph2, CPropertyPage)
 	ON_BN_CLICKED(IDC_RESETIPCURL, OnBnClickedResetipcurl)
 	ON_BN_CLICKED(IDC_AUTOUPIP2COUNTRY , OnSettingsChange)
 	//Commander - Added: IP2Country Auto-updating - End
+	ON_WM_HELPINFO() // leuk_he: disable help
 END_MESSAGE_MAP()
 
 
@@ -245,3 +246,10 @@ void CPPgMorph2::OnBnClickedResetipcurl()
 	memset(thePrefs.GetIP2CountryVersion(), 0, sizeof(SYSTEMTIME));
 	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(_T(""));
 }
+
+// leuk_he: no help
+BOOL CPPgMorph2::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+		return TRUE;
+}
+
