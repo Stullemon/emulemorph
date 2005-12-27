@@ -1748,7 +1748,7 @@ LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 {
 	CUpDownClient* client = (CUpDownClient*) lParam;
-	if (theApp.uploadqueue->IsDownloading(client))	// could have been canceled
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN && theApp.theApp.uploadqueue->IsDownloading(client))	// could have been canceled
 		client->SetReadBlockFromFileBuffer((byte*)wParam);
 	else if (wParam != -1 && wParam != -2)
 		delete[] (byte*)wParam;
