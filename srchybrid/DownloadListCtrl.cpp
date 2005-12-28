@@ -2777,13 +2777,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	// SLUGFILLER: DLsortFix - extract real last sort
-	int sortItem = m_dwParamSort;
-	if (sortItem >= 100)
-		sortItem -= 100;
-	/*if (sortItem == 90)
-		sortItem = 9;
-	*/// SLUGFILLER: DLsortFix
+	int sortItem = GetSortItem();
 	bool m_oldSortAscending = GetSortAscending();
 	int userSort = (GetAsyncKeyState(VK_CONTROL) < 0) ? 64:0;	// SLUGFILLER: DLsortFix Ctrl sorts sources only
 
@@ -2797,7 +2791,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	bool sortAscending = (sortItem != pNMListView->iSubItem + userSort) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
 
 	// Item is column clicked
-	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix - Ctrl sorts sources only
+	sortItem = pNMListView->iSubItem + userSort;	//MORPH - Changed by SiRoB, DLsortFix Ctrl sorts sources only
 	UpdateSortHistory(sortItem + (sortAscending ? 0:100), 100);
 
 	// Save new preferences
@@ -2817,7 +2811,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100) + adder );
 	*/
-	SetSortArrow(pNMListView->iSubItem, sortAscending);	// SLUGFILLER: DLsortFix - Use column number, not sort param
+	SetSortArrow(sortItem, sortAscending);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	//MORPH END  - Changed by SiRoB, Remain time and size Columns have been splited
 	*pResult = 0;
