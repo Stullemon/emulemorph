@@ -28,6 +28,8 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnEnChangeActivatewebcachedownloads();
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSettingsChange()					{ SetModified(); }

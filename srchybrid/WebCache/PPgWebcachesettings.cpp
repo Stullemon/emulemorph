@@ -400,15 +400,25 @@ void CPPgWebcachesettings::OnBnClickedDetectWebCache()
 	delete detectedWebcache;
 }
 
+void CPPgWebcachesettings::OnHelp()
+{
+	//theApp.ShowHelp(0);
+}
 
 BOOL CPPgWebcachesettings::OnCommand(WPARAM wParam, LPARAM lParam)
 {
-	/*if (wParam == ID_HELP)
+	if (wParam == ID_HELP)
 	{
 		OnHelp();
 		return TRUE;
-	}*/
+	}
 	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgWebcachesettings::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }
 
 void CPPgWebcachesettings::OnBnClickedAdvancedcontrols(){
