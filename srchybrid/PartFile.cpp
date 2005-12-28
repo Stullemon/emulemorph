@@ -4998,7 +4998,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 
 			// Allocate filesize
 			if (!forcewait) {
-					m_AllocateThread= AfxBeginThread(AllocateSpaceThread, this, THREAD_PRIORITY_LOWEST, 0, CREATE_SUSPENDED);
+					m_AllocateThread= AfxBeginThread(AllocateSpaceThread, this, THREAD_PRIORITY_BELOW_NORMAL, 0, CREATE_SUSPENDED);
 				if (m_AllocateThread == NULL)
 				{
 					TRACE(_T("Failed to create alloc thread! -> allocate blocking\n"));
