@@ -446,7 +446,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		return _T("Allready Known");
 	}else if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))){
 		return _T("Ghost MOD");
-	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion != MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd) && theApp.m_strModVersion.GetLength() == m_strModVersion.GetLength())){
+	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion != MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd) && theApp.m_strModVersion.GetLength() == m_strModVersion.GetLength()) || StrStrI(m_strModVersion,_T("MorphXT")) && !IsMorph()){
 		return _T("Fake MODSTRING");
 	}else if (!StrStrI(m_strModVersion,_T("Morph")) && IsMorph()) {
 		return _T("Hidden MODSTRING");
@@ -490,10 +490,11 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("MorphXT+")) ||
 			StrStrI(m_strModVersion,_T("MorphXT\xD7")) ||
 			StrStrI(m_strModVersion,_T("M\xF8phXT")) ||
-			StrStrI(m_strModVersion,_T("MorphXT v7.60")) ||
+			StrStrI(m_strModVersion,_T("MorphXT 7.60")) ||
+			StrStrI(m_strModVersion,_T("MorphXT 7.30")) ||
 			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false) ||
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
-			StrStrI(m_strModVersion,_T("ACAT")) && m_strModVersion.GetLength() > 4 ||
+			StrStrI(m_strModVersion,_T("ACAT")) && m_strModVersion[4] != 0x00 ||
 			StrStrI(m_strModVersion,_T("sivka v12e8")) && m_nClientVersion != MAKE_CLIENT_VERSION(0, 42, 4) || // added - Stulle
 			StrStrI(m_strModVersion,_T("!FREEANGEL!")) ||
 			StrStrI(m_strModVersion,_T("          ")) ||
@@ -687,7 +688,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					//MOPRH START - Added by SiRoB, Is Morph Client?
 					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
 						(m_nClientVersion < MAKE_CLIENT_VERSION(0, 45, 0)||
-						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39
+						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
+						 ( m_strModVersion[11] == 0x00 || m_strModVersion[11] == 0x20 &&  m_strModVersion[11] != 0x00)
 						)
 					   ){
 						m_bIsMorph = true;
@@ -1282,7 +1284,9 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 					//MOPRH START - Added by SiRoB, Is Morph Client?
 					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
 						(m_nClientVersion < MAKE_CLIENT_VERSION(0, 45, 0)||
-						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39
+ 						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
+						 ( m_strModVersion[11] == 0x00 || m_strModVersion[11] == 0x20 &&  m_strModVersion[11] != 0x00)
+
 						)
 					   ){
 						m_bIsMorph = true;
