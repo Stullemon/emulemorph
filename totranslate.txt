@@ -1,3 +1,4 @@
+
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_DONE       "Crash report has been generated."
@@ -88,7 +89,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_NOTAV      "CrashReporter not found in emule's directory. If you want to help us debug our mod, please download the CrashRpt.dll"
-    IDS_NICEHASHWEIGHT      "NiceHashWeight"
     IDS_UPLOAD_COMPLETED    "Completing"
     IDS_UPLOAD_PREEMPTED    "Pre-empted by higher prio upload"
     IDS_UPLOAD_TOO_MANY_SLOTS "Too many slots"
@@ -526,7 +526,7 @@ BEGIN
     IDS_CHECKDOTTOSPACE     "Convert ""."" to "" """
     IDS_CHECKUNDERLINETOSPACE "Convert ""_"" to "" """
     IDS_CHECKCONVERTAPOSTROPHES 
-                            "Convert wrong apostrophes ""´"", ""`"" to standard apostrophes "" ' """
+                            "Convert wrong apostrophes """", ""`"" to standard apostrophes "" ' """
     IDS_CHECKCONVERTHEX     "Convert hexadecimal numbers ""%xx"" back to characters"
     IDS_CHECKSEARCHANDREPLACE "Search and Replace:"
     IDS_SC_SEARCHFOR        "Search for:"
@@ -852,3 +852,27 @@ BEGIN
     IDS_ZZRATIO_CHECK4      "Upload limit under 10KB/s"
     IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
 END
+
+STRINGTABLE 
+BEGIN
+    IDS_OK                  "OK"
+    IDS_IGNORE              "&Ignore"
+    IDS_RETRY               "&Retry"
+    IDS_HELP                "&Help"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CONTINUE            "&Continue"
+    IDS_DONOTASKAGAIN       "Don't ask me again"
+    IDS_DONOTTELLAGAIN      "Don't tell me again"
+    IDS_DONOTSHOWAGAIN      "Don't show again"
+    IDS_YESTOALL            "Y&es to All"
+    IDS_NOTOALL             "N&o to All"
+    IDS_TRYAGAIN            "&Try Again"
+    IDS_REPORT              "Re&port"
+    IDS_IGNOREALL           "I&gnore All"
+    IDS_SKIP                "&Skip"
+    IDS_SKIPALL             "S&kip All"
+END
+
