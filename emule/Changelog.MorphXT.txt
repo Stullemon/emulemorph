@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.46c MorphXT v7.x
+--------------------------------------
+FIXED : Added TMPL_FAILEDLOGIN into eMule.tmpl [leuk_he]
+
+
+--------------------------------------
 Changelog for eMule 0.46c MorphXT v7.7
 --------------------------------------
 FIXED  : (minor) Assertion for PPgMorph.cpp [Stulle]
