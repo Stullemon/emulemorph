@@ -1345,13 +1345,10 @@ void CemuleDlg::OnCancel()
 		if (*thePrefs.GetMinTrayPTR())
 		{
 			TrayShow();
-			//MORPH START - Added by SiRoB, Invisible Mode On Start up
-			/*
 			ShowWindow(SW_HIDE);
-			*/
-			if (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart()) {
+			//MORPH START - Added by SiRoB, Invisible Mode On Start up
+			if (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart() || m_bStartMinimized) {
 				ToggleHide();
-			}
 			//MORPH END   - Added by SiRoB, Invisible Mode On Start up
 		}
 		else
