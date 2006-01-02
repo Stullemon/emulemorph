@@ -2836,8 +2836,10 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(0);
 		else
 		*/
-		if ((Category_Struct*)thePrefs.GetCategory(theApp.emuledlg->transferwnd->downloadlistctrl.curTab)->viewfilters.nFromCats == 0)
-			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(theApp.emuledlg->transferwnd->downloadlistctrl.curTab);
+		uint8 curselcat = theApp.emuledlg->transferwnd->downloadlistctrl.curTab;
+		Category_Struct* cat = thePrefs.GetCategory(curselcat);
+		if (cat && cat->viewfilters.nFromCats == 0)
+			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(curselcat);
 		else
 		//MORPH END - Changed by SiRoB, Khaos Categorie
 			UpdateDisplayedInfo(true);
