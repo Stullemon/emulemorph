@@ -840,7 +840,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 				//MORPH END   - Added by SiRoB, ForcedA4AF
 				Category_Struct* ActiveCat=thePrefs.GetCategory(theApp.emuledlg->transferwnd->GetActiveCategory());
 				Category_Struct* curCat=thePrefs.GetCategory(lpPartFile->GetCategory());
-				if (ActiveCat->viewfilters.nFromCats == 0) {
+				if (curCat && ActiveCat && ActiveCat->viewfilters.nFromCats == 0) {
 					if (buffer.IsEmpty() == false) buffer.Append(_T(", "));
 					switch (curCat->prio) {
 						case PR_LOW:
