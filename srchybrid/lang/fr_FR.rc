@@ -14,7 +14,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// French (France) resources
+// Français (France) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
 #ifdef _WIN32
@@ -818,10 +818,10 @@ BEGIN
     IDS_METATAGS            "Décompte Meta Balise :"
     IDS_FILEFORMAT          "Format "
     IDS_UDPREASKS           "Réinterrogations UDP fichier"
-    IDS_DYNUP_PINGTOLERANCE_MS 			"Tolérance du ping (ms)"
-    IDS_DYNUP_RADIO_PINGTOLERANCE_HEADER 	"Méthode de tolérance pour le ping"
-    IDS_DYNUP_RADIO_PINGTOLERANCE_MS 		"Millisecondes (ms)"
-    IDS_DYNUP_RADIO_PINGTOLERANCE_PERCENT 	"Pourcentage (%)"
+    IDS_DYNUP_PINGTOLERANCE_MS "Tolérance du ping (ms)"
+    IDS_DYNUP_RADIO_PINGTOLERANCE_HEADER "Méthode de tolérance pour le ping"
+    IDS_DYNUP_RADIO_PINGTOLERANCE_MS "Millisecondes (ms)"
+    IDS_DYNUP_RADIO_PINGTOLERANCE_PERCENT "Pourcentage (%)"
 END
 
 STRINGTABLE 
@@ -876,7 +876,8 @@ BEGIN
     IDS_WEB_REMOTE_LINK_ADDED "Lien Ajouté: "
     IDS_WEB_REMOTE_LINK_NOT_ADDED "Lien non ajouté. Mauvais mot de passe."
     IDS_SOURCEEXCHANGESWAP  "Echange de source temporaire"
-    IDS_DL_TRY_TO_GET_PREVIEW_PARTS "Priorité aux parties nécessaires à l'aperçu"
+    IDS_DL_TRY_TO_GET_PREVIEW_PARTS 
+                            "Priorité aux parties nécessaires à l'aperçu"
     IDS_PR_SHORT_LOW        "[Lo]"
     IDS_IRC_KICK            "Kick"
     IDS_IRC_SLAP            "Slap"
@@ -887,21 +888,22 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FO_PREF_EXISTED    "eMule a détecté des règles existantes dans le pare-feu de Windows XP pour les ports sélectionnés, et ne les a pas modifiées. Les règles manquantes ont été ajoutées avec succès.\nVeuillez noter que les routeurs et les autres pare-feu éventuellement installés ne sont pas concernés !"
+    IDS_FO_PREF_EXISTED     "eMule a détecté des règles existantes dans le pare-feu de Windows XP pour les ports sélectionnés, et ne les a pas modifiées. Les règles manquantes ont été ajoutées avec succès.\nVeuillez noter que les routeurs et les autres pare-feu éventuellement installés ne sont pas concernés !"
     IDS_FO_PREF_FAILED      "La configuration du pare-feu XP pour les ports sélectionnés a échoué !"
-    IDS_FO_PREF_STARTUP    "Ouverture/Fermeture des ports du pare-feu XP lors du lancement/fermeture d'eMule"
-    IDS_LOG_LEVEL          "Niveau de consignation"
-    IDS_DISABLEPEERACHE    "Désactiver le téléchargement à partir du PeerCache"
+    IDS_FO_PREF_STARTUP     "Ouverture/Fermeture des ports du pare-feu XP lors du lancement/fermeture d'eMule"
+    IDS_LOG_LEVEL           "Niveau de consignation"
+    IDS_DISABLEPEERACHE     "Désactiver le téléchargement à partir du PeerCache"
     IDS_NEWMSG              "Nouveau message de '%s' (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "Uniquement dans la même catégorie"
     IDS_LOG_ULDL_EVENTS     "Consigner les évènements d'émission/réception"
     IDS_PEERCACHE_ENABLED   "Votre FAI supporte la technologie PeerCache, cache activé !"
-    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Autoriser l'utilisateur à vous ajouter à sa liste d'amis."
-    IDS_SOURCESWAPBLOCKED  "Echange bloqué"
+    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND 
+                            "Autoriser l'utilisateur à vous ajouter à sa liste d'amis."
+    IDS_SOURCESWAPBLOCKED   "Echange bloqué"
     IDS_TRICKLING           "En réserve"
     IDS_A4AF_CHECK_THIS_NOW "Vérifiez cette source maintenant (debug)"
     IDS_STATS_FRATIO        "Taux de session E:R (hors slots amis):"
-    IDS_STATS_UDATA_FRIENDS "Données envoyées aux slots amis (session): %s" 
+    IDS_STATS_UDATA_FRIENDS "Données envoyées aux slots amis (session): %s"
 END
 
 STRINGTABLE 
@@ -1068,7 +1070,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_NOVALIDFRIENDINFO "Vous devez entrer une IP et N° de port valide !"
+    IDS_ERR_NOVALIDFRIENDINFO 
+                            "Vous devez entrer une IP et N° de port valide !"
     IDS_ADD                 "Ajouter"
     IDS_RECOVERED_PARTMET   "Fichier part.met récupéré pour : %s"
     IDS_CMT_QUEST           "Commenter ce fichier (Ce texte sera vu par tous les utilisateurs)"
@@ -1420,7 +1423,8 @@ BEGIN
     IDS_WEB_MAIN_CLOSE      "Voulez-vous vraiment arrêter eMule ?"
     IDS_WEB_MAIN_REBOOT     "Confirmez-vous le redémarrage du système ?"
     IDS_WEB_MAIN_SHUTDOWN   "Confirmez-vous l'arrêt de l'ordinateur ?"
-    IDS_WEB_SHOW_UPLOAD_QUEUE_BANNED "Montrer les clients bannis en file d'attente"
+    IDS_WEB_SHOW_UPLOAD_QUEUE_BANNED 
+                            "Montrer les clients bannis en file d'attente"
     IDS_WEB_SHOW_UPLOAD_QUEUE_FRIEND "Montrer les amis en file d'attente"
     IDS_WEB_SESSIONTIMEOUT  "Délai fin de session"
     IDS_WEB_ALLOWHILEVFUNC  "Autoriser sortie d'eMule, redémarrage et arrêt ordinateur"
@@ -1432,7 +1436,8 @@ BEGIN
     IDS_USESPEECH           "Notification vocale (en anglais)"
     IDS_ERR_FAILEDTOLOAD    "Impossible de chargé %s: %s "
     IDS_TCPIP_CONNS         "Connexions TCP/IP"
-    IDS_MANUAL_FILENAMECLEANUP "Voulez-vous nettoyer le nom des fichiers sélectionnés ?"
+    IDS_MANUAL_FILENAMECLEANUP 
+                            "Voulez-vous nettoyer le nom des fichiers sélectionnés ?"
 END
 
 STRINGTABLE 
@@ -1688,7 +1693,7 @@ BEGIN
     IDS_LOG_SECURE_IDENT    "Consigner les identifications sécurisées"
     IDS_LOG_FILTERED_IPS    "Consigner les IPs filtrées et/ou ignorées"
     IDS_LOG_FILE_SAVING     "Consigner les opérations de sauvegarde de fichier"
-	  IDS_IPFILTERFILES       "Tous les fichiers de Filtres IP (*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz)|*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz|Fichiers eMule de Filtres IP (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Fichiers Peer Guardian (*.p2b;*.p2p;*.p2p.txt)|*.p2b;*.p2p;*.p2p.txt|Fichiers Texte (*.txt)|*.txt|Fichiers compressés (*.zip;*.gz)|*.zip;*.gz|Tous les fichiers (*.*)|*.*||"
+    IDS_IPFILTERFILES       "Tous les fichiers de Filtres IP (*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz)|*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz|Fichiers eMule de Filtres IP (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Fichiers Peer Guardian (*.p2b;*.p2p;*.p2p.txt)|*.p2b;*.p2p;*.p2p.txt|Fichiers Texte (*.txt)|*.txt|Fichiers compressés (*.zip;*.gz)|*.zip;*.gz|Tous les fichiers (*.*)|*.*||"
     IDS_DELETEIPFILTERS     "Voulez-vous vraiment supprimer les filtres IP sélectionnés ?"
     IDS_TOTAL_IPFILTER_LABEL "Nombre de Filtres IP :"
     IDS_TOTAL_IPS_LABEL     "Nombre d'IP :"
@@ -1703,7 +1708,7 @@ BEGIN
     IDS_IP_RULES            "Filtres IP :"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_LOG_A4AF            "Consigner les actions relatives aux A4AF"
     IDS_A4AF_SAVE_CPU       "Désactiver le contrôle des A4AF pour économiser le CPU"
@@ -1714,14 +1719,15 @@ BEGIN
                             "La création du dossier ""%s"" pour le Thème Interface eMule - %s a échoué."
     IDS_INSTALL_SKIN_FILE_ERROR 
                             "L'extraction du fichier ""%s"" à partir du Thème eMule vers le fichier local ""%s"" - %s a échoué."
-    IDS_INSTALL_SKIN_PKG_ERROR "Ce fichier n'est pas un Thème Interface eMule valide."
+    IDS_INSTALL_SKIN_PKG_ERROR 
+                            "Ce fichier n'est pas un Thème Interface eMule valide."
     IDS_NEXT_REASK          "Prochaine demande au client"
     IDS_A4AF_FILES          "Fichiers A4AF"
     IDS_FO_TEMPTCP_S        "Port %u (TCP) ouvert dans le pare-feu XP pour cette session eMule"
     IDS_FO_TEMPTCP_F        "Echec de l'ouverture du port %u (TCP) dans le pare-feu XP pour cette session eMule"
     IDS_FO_TEMPUDP_S        "Port %u (UDP) ouvert dans le pare-feu XP pour cette session eMule"
     IDS_FO_TEMPUDP_F        "Echec de l'ouverture du port %u (UDP) dans le pare-feu XP pour cette session eMule"
-    IDS_FO_PREFBUTTON      "Ouvrir ces ports dans le pare-feu XP"
+    IDS_FO_PREFBUTTON       "Ouvrir ces ports dans le pare-feu XP"
     IDS_FO_PREF_SUCCCEEDED  "L'ouverture des ports sélectionnés pour le pare-feu XP a réussi.\nAttention: les autres pare-feu ou routeurs installés ne sont pas affectés par ces changements"
 END
 
@@ -1739,7 +1745,8 @@ BEGIN
     IDS_NETWORK_INFO        "Informations réseau"
     IDS_SP_TOTALUL          "Nombre total d'émissions"
     IDS_SP_ULFRIENDS        "Accès amis (émission)"
-    IDS_SP_ULSLOTSNOOVERHEAD "Emission courante sans surplus de bande passante (accès amis uniquement)"
+    IDS_SP_ULSLOTSNOOVERHEAD 
+                            "Emission courante sans surplus de bande passante (accès amis uniquement)"
     IDS_ST_ACTIVEU_ZZ       "Emissions actives"
     IDS_ST_ULCURRENT        "Emission + surplus bande passante"
     IDS_ST_ULSLOTSNOOVERHEAD "Emission"
@@ -1850,21 +1857,21 @@ END
 STRINGTABLE 
 BEGIN
     IDS_COMCTRL32_DLL_TOOOLD 
-                           "Votre bibliothèque Windows COMCTL32.DLL est obsolète!\r\n\r\neMule a détecté une version obsolète. Pour assurer le bon fonctionnement d'eMule, nous vous recommandons vivement de mettre à jour votre version actuelle vers au minimum la version 5.8.\r\n\r\nInstallez une mise à jour de la bibliothèque COMCTL32.DLL après l'avoir téléchargée sur le Centre de Téléchargement de Microsoft ®. Voulez-vous visiter le site correspondant ?"
-    IDS_ASREGEXPR          "En tant qu'expression régulière"
-    IDS_STATIC_REGEXP      "Expression régulière pour filtre de visualisation :"
-    IDS_CARE4ALL           "Tester tous les fichiers"
-    IDS_REGEXPRESSION      "Expression régulière"
-    IDS_SEARCHKAD          "Recherche Kad"
-    IDS_DWL_IPFILTERFILE   "Téléchargement du fichier de filtres IP"
-    IDS_DWLIPFILTERFAILED  "Echec du téléchargement du fichier de filtres IP"
-    IDS_FINDBUDDY          "Trouver un relai"
+                            "Votre bibliothèque Windows COMCTL32.DLL est obsolète!\r\n\r\neMule a détecté une version obsolète. Pour assurer le bon fonctionnement d'eMule, nous vous recommandons vivement de mettre à jour votre version actuelle vers au minimum la version 5.8.\r\n\r\nInstallez une mise à jour de la bibliothèque COMCTL32.DLL après l'avoir téléchargée sur le Centre de Téléchargement de Microsoft ®. Voulez-vous visiter le site correspondant ?"
+    IDS_ASREGEXPR           "En tant qu'expression régulière"
+    IDS_STATIC_REGEXP       "Expression régulière pour filtre de visualisation :"
+    IDS_CARE4ALL            "Tester tous les fichiers"
+    IDS_REGEXPRESSION       "Expression régulière"
+    IDS_SEARCHKAD           "Recherche Kad"
+    IDS_DWL_IPFILTERFILE    "Téléchargement du fichier de filtres IP"
+    IDS_DWLIPFILTERFAILED   "Echec du téléchargement du fichier de filtres IP"
+    IDS_FINDBUDDY           "Trouver un relai"
     IDS_ERR_IPFILTERZIPEXTR "Echec d'extraction du fichier de filtres IP ""%s"".ZIP."
-    IDS_ERR_IPFILTERCONTENTERR
-                           "Le fichier de filtresIP ""%s"".ZIP contient des données inexploitables."
-    IDS_STORENOTES         "Archivage des notes"
-    IDS_NOTES              "Notes"
-    IDS_KADSEARCHALREADY   "Une recherche est actuellement en cours. Essayez ultérieurement !"
+    IDS_ERR_IPFILTERCONTENTERR 
+                            "Le fichier de filtresIP ""%s"".ZIP contient des données inexploitables."
+    IDS_STORENOTES          "Archivage des notes"
+    IDS_NOTES               "Notes"
+    IDS_KADSEARCHALREADY    "Une recherche est actuellement en cours. Essayez ultérieurement !"
     IDS_WEB_SHUTDOWN        "Arrêter eMule"
     IDS_WEB_REBOOT          "Redémarrer l'ordinateur"
 END
@@ -1926,27 +1933,27 @@ BEGIN
     IDS_USS_STATE_ERROR     "Erreur !"
 END
 
-///////////////////////////////////////// MorphXT strings ///////////////////////////////////
-
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_DONE       "Un rapport de crash a été généré."
     IDS_CRASHRPT_AV         "Le rapporteur de Crash est fonctionnel."
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
                             "Importation abandonnée: Impossible d'importer vers un fichier complet."
     IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
                             "Importation abandonnée: jeu de hash incomplet pour %s (%i hash pour %i parties)."
-    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Importation abandonnée: Impossible d'ouvrir %s."
+    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE 
+                            "Importation abandonnée: Impossible d'ouvrir %s."
     IDS_SR13_IMPORTPARTS_IMPORTSTART 
                             "Importation de %i parties (depuis 0 à %i) vers %s."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
                             "Partie %i: ignorée, dèjà complète."
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Partie %i: importée."
-    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Partie %i: importée pour restauration ICH."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD 
+                            "Partie %i: importée pour restauration ICH."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
                             "Partie %i: ignorée, ne correspond pas au bloc partiellement complet."
 END
@@ -1957,7 +1964,7 @@ BEGIN
                             "%i mauvaises parties ont été importées pour A/ICH. Lancement du re-hash."
     IDS_SR13_IMPORTPARTS_ERR_FILETOOSMALL 
                             "Fichier plus petit que le bloc de récupération minimal pour AICH - l'importation est inutile"
-    IDS_SR13_IMPORTPARTS_IMPORTFINISH
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH 
                             "Importation terminée. %i parties ont été importées vers %s."
 END
 
@@ -1972,19 +1979,20 @@ BEGIN
                             "Download WebCache désactivé: Seuls les transferts depuis les ports 21, 70, 80, 210, 443, 563 et dans l'intervalle de 1025 à 65535 emploient le cache. Utiliser un de ces ports pour activer le WebCache"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_RESET               "Mise à 0"
     IDS_SPREADBAR           "Barre de Diffusion"
     IDS_SPREADBAR_DEFAULT_CHECKBOX "Activer la Barre de Diffusion par défaut"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_ONLY_DOWNLOAD_COMPLETE_FILES
+    IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
                             "Vérifier si le fichier est complet avant de lancer le téléchargement"
     IDS_DL_FORCE            "Forcer le téléchargement"
-    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Sauvegarder le temps d'attente des clients dans la file"
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 
+                            "Sauvegarder le temps d'attente des clients dans la file"
     IDS_DATEFILENAMELOG     "Sauver les logs par date"
     IDS_ECFEF               "Sauver les logs par date"
     IDS_ALL_TIME            "Dans tous les cas"
@@ -1992,7 +2000,7 @@ BEGIN
     IDS_ANTILEECHERLOG      "[Anti-leechermods] Le client %s a été temporairement banni car il a commis une action suspicieuse"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_DOWNLOAD_IN_RED     "Montrer les fichiers en cours de téléchargement en rouge"
     IDS_UPSLOTNUMBER        "Slot #"
@@ -2003,7 +2011,7 @@ BEGIN
     IDS_SAC                 "Gestion du contrôle des A4AF (SAC)"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_POWERSHARE_ACTIVATED "Activé"
     IDS_POWERSHARE_DISABLED "Désactivé"
@@ -2015,7 +2023,7 @@ BEGIN
     IDS_SF_UPLOADED_PARTS   "Barre de diffusion (Historique des parties envoyées)"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_NOTAV      "Le rapporteur de Crash n'est pas présent dans le répertoire emule. Si vous voulez nous aider à debugger notre mod, veuillez downloader CrashRpt.dll"
     IDS_UPLOAD_COMPLETED    "S'accompli"
@@ -2023,7 +2031,7 @@ BEGIN
     IDS_UPLOAD_TOO_MANY_SLOTS "Trop de slots"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_SF_TURN_PART        "File UL (Partiel)"
     IDS_SF_TURN_SIMPLE      "File UL (Simple)"
@@ -2105,7 +2113,8 @@ BEGIN
     IDS_SUC_LOW             "Amorçage bas (Défaut %i)"
     IDS_SUC_PITCH           "Tolérance pour le calcul du Ratio (Défaut %i)"
     IDS_SUC_DRIFT           "Dérive montante (Défaut %i)"
-    IDS_SHOWSECUREDCONNECTION "Afficher les informations des clients sécurisés"
+    IDS_SHOWSECUREDCONNECTION 
+                            "Afficher les informations des clients sécurisés"
     IDS_SUC_LOG             "Montrer l'activité dans la fenêtre de débug (Verbose)"
     IDS_A4AF_SHOWDEBUG      "Montrer l'activité dans la fenêtre de débug (Verbose)"
 END
@@ -2154,7 +2163,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPDATEIPFILTER      "Mise à jour ipfilter.dat"
-    IDS_UPDATEIPFILTERONSTART "Mettre à jour la liste des IP filtrées au démarrage"
+    IDS_UPDATEIPFILTERONSTART 
+                            "Mettre à jour la liste des IP filtrées au démarrage"
     IDS_UPDATEIPFILTERERROR "Erreur lors de la mise à jour de l'ipfilter.dat"
     IDS_HTTP_IPFILTERCAPTION "Mise à jour ipfilter.dat"
     IDS_IPFILTER_PERCENTAGE "Mise à jour de l'ipfilter.dat: %s%% sur %s téléchargés"
@@ -2197,7 +2207,7 @@ BEGIN
     IDS_FEEDBACK_DOWNLOADED "Téléchargé: %s"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_FEEDBACK_TOTAL      "Nombre total de sources: %i"
     IDS_FEEDBACK_AVAILABLE  "Nombre de sources disponibles: %i"
@@ -2249,7 +2259,7 @@ BEGIN
     IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() échoué: impossible de trouver le fichier ICMP.DLL!"
     IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() échoué pour au moins un fonction."
     IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() échoué, err: "
-    IDS_USSPINGERICMPENDERR "Erreur durant la fermeture manuelle de l'ICMP , err: "    
+    IDS_USSPINGERICMPENDERR "Erreur durant la fermeture manuelle de l'ICMP , err: "
 END
 
 STRINGTABLE 
@@ -2320,7 +2330,7 @@ BEGIN
     IDS_IP2COUNTRY          "IP -> Nationalité"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_ADVANCED            "Avancé"
     IDC_URL_FOR_UPDATING_IP2COUNTRY "URL pour la mise à jour"
@@ -2489,11 +2499,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC32_ABORT         "Arrêter le calcul"
-    IDS_DONTREMOVESPARETRICKLESLOT "Ne pas renvoyer les slots de rechange en file d'attente"
+    IDS_DONTREMOVESPARETRICKLESLOT 
+                            "Ne pas renvoyer les slots de rechange en file d'attente"
     IDS_MINDATARATEFRIEND   "Débit total (défaut 0 kb/s = illimité)"
     IDS_MINDATARATEPOWERSHARE "Débit total (défaut 0 kb/s = illimité)"
     IDS_MAXCLIENTDATARATEFRIEND "Débit par client (défaut 0 kb/s = illimité)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Débit par client (défaut 0 kb/s = illimité)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE 
+                            "Débit par client (défaut 0 kb/s = illimité)"
     IDS_MAXCLIENTDATARATE   "Débit par client (défaut 0 kb/s = illimité)"
     IDS_DISPLAYFUNNYNICK    "Autorise l'affichage FunnyNick"
 END
@@ -2513,17 +2525,17 @@ STRINGTABLE
 BEGIN
     IDS_UPNP_DEVICEREMOVED  "UPnP: Périphérique retiré: %s"
     IDS_UPNP_PORTINUSE      "UPnP: Ne peut pas ajouté le mappage de port: ""%s"". Le port %d est déjà utilisé par un autre application (""%s"" sur %s:%d). [%s]"
-    IDS_UPNP_ALREADYUPDATED "UPnP: Le mappage de port ""%s"" n\'a pas besoin d'être actualisé. [%s]"
+    IDS_UPNP_ALREADYUPDATED "UPnP: Le mappage de port ""%s"" n'a pas besoin d'être actualisé. [%s]"
     IDS_UPNP_STATIC         "Statique"
     IDS_UPNP_DYNAMIC        "Dynamique"
     IDS_UPNP_PORTUPDATED    "UPnP: Mise à jour du mappage de port ""%s"" (%s). [%s]"
     IDS_UPNP_PORTADDED      "UPnP: Ajout du mappage de port ""%s"" (%s). [%s]"
-    IDS_UPNP_ADDFAILED      "UPnP: Impossible d\'ajouter le mappage de port ""%s"" [%s] [%s]"
+    IDS_UPNP_ADDFAILED      "UPnP: Impossible d'ajouter le mappage de port ""%s"" [%s] [%s]"
     IDS_UPNP_DELETEFAILED   "UPnP: Impossible de supprimer le mappage de port ""%s"". [%s] [%s]"
     IDS_UPNP_PORTDELETED    "UPnP: Suppression du mappage de port ""%s"". [%s]"
     IDS_UPNP_LOGEVENTS      "Enregistrer les évènements UPnP"
-    IDS_UPNP_ENABLE         "Activer l\'UPnP"
-    IDS_UPNP_ENABLEWEB      "Activer l\'UPnP pour le service webserveur"
+    IDS_UPNP_ENABLE         "Activer l'UPnP"
+    IDS_UPNP_ENABLEWEB      "Activer l'UPnP pour le service webserveur"
     IDS_RANDOMPORTS         "Ports aléatoires"
     IDS_MINPORT             "Port mini"
 END
@@ -2531,7 +2543,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_MAXPORT             "Port maxi"
-    IDS_RANDOMPORTSRESETTIME "Temps de libération des ports aléatoires (en secondes)"
+    IDS_RANDOMPORTSRESETTIME 
+                            "Temps de libération des ports aléatoires (en secondes)"
     IDS_ICFSUPPORT          "Activer le support du firewall de Windows (ICF)"
     IDS_ICFSUPPORTFIRST     "eMule a détecté que le firewall de Windows (ICF) est activé sur ton PC,\nVeux-tu qu'eMule le configure automatiquement ? (Recommandé)"
     IDS_ICF                 "Windows Internet Connexion Firewall (ICF)"
@@ -2595,11 +2608,13 @@ STRINGTABLE
 BEGIN
     IDS_USER_ALREADY_FRIEND "L'utilisateur ""%s"" est déjà dans ta liste d'amis"
     IDS_GETFRIENDED2KLINK   "Copier le Lien Ami dans le presse-papiers"
-    IDS_GETHTMLFRIENDED2KLINK "Copier le Lien Ami dans le presse-papiers (HTML)"
+    IDS_GETHTMLFRIENDED2KLINK 
+                            "Copier le Lien Ami dans le presse-papiers (HTML)"
     IDS_ERR_FAILEDDOWNLOADEMFRIENDS 
                             "Echec du téléchargement de la liste d'amis depuis %s"
     IDS_GETMYFRIENDED2KLINK "Copier mon Lien Ami vers le presse-papiers"
-    IDS_GETMYHTMLFRIENDED2KLINK "Copier mon Lien Ami vers le presse-papiers (HTML)"
+    IDS_GETMYHTMLFRIENDED2KLINK 
+                            "Copier mon Lien Ami vers le presse-papiers (HTML)"
     IDS_FRIENDLINKMENUTITLE "Liens Amis"
 END
 
@@ -2766,11 +2781,11 @@ BEGIN
     IDS_SCHED_BACKUP_LOG    "Sauvegarde de la copie de secours planifiée."
     IDS_SCHED_UPDATE_IPCONFIG_LOG "Mise à jour planifiée de ipfilter.dat"
     IDS_SCHED_UPDATE_FAKES_LOG "Mise à jour planifiée de fakes.dat"
-    IDS_SCHED_UPDATE_WARNING
-                             "Evitez de planifier les mises à jour trop fréquemment pour limiter le traffic réseau.\nUne mise à jour hebdomadaire devrait suffire"
+    IDS_SCHED_UPDATE_WARNING 
+                            "Evitez de planifier les mises à jour trop fréquemment pour limiter le traffic réseau.\nUne mise à jour hebdomadaire devrait suffire"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_ZZRATIO             "zzRatio"
     IDS_ZZRATIO_ENABLED     "est activé"
@@ -2805,7 +2820,7 @@ BEGIN
     IDS_SKIPALL             "P&asser tous"
 END
 
-#endif    // French (France) resources
+#endif    // Français (France) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
