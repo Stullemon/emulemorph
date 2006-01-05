@@ -454,6 +454,10 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		return _T("Fake emuleVersion");
 	}else if(m_clientSoft == SO_EMULE && !m_pszUsername){
 		return _T("Empty Nick");
+	//MORPH START - Added by Stulle, Morph Leecher Detection
+	}else if(IsMorphLeecher()){
+		return _T("MORPH Leecher");
+	//MORPH END - Added by Stulle, Morph Leecher Detection
 	}else if (old_m_strClientSoftware != m_strClientSoftware)
 	{
 		if (StrStrI(m_strModVersion,_T("Freeza"))||
@@ -487,12 +491,14 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29"))||
 			// EastShare END - Added by TAHO, Pretender
 			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
+			/*
 			StrStrI(m_strModVersion,_T("MorphXT+")) ||
 			StrStrI(m_strModVersion,_T("MorphXT\xD7")) ||
 			StrStrI(m_strModVersion,_T("M\xF8phXT")) ||
 			StrStrI(m_strModVersion,_T("MorphXT 7.60")) ||
 			StrStrI(m_strModVersion,_T("MorphXT 7.30")) ||
 			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false) ||
+			*/
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
 			StrStrI(m_strModVersion,_T("ACAT")) && m_strModVersion[4] != 0x00 ||
 			StrStrI(m_strModVersion,_T("sivka v12e8")) && m_nClientVersion != MAKE_CLIENT_VERSION(0, 42, 4) || // added - Stulle
@@ -3601,3 +3607,50 @@ const static LPCTSTR apszSuffix[] =
 		srand((unsigned)time(NULL));
 }
 //MORPH END   - Added by SiRoB, Dynamic FunnyNick
+
+//MORPH START - Added by Stulle, Morph Leecher Detection
+bool CUpDownClient::IsMorphLeecher()
+{
+
+	if (old_m_strClientSoftware != m_strClientSoftware)
+	{
+		if (StrStrI(m_strModVersion,_T("MorphXT+")) ||
+			StrStrI(m_strModVersion,_T("MorphXT\xD7")) ||
+			StrStrI(m_strModVersion,_T("M\xF8phXT")) ||
+			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false)) ||
+			(StrStrI(m_strModVersion,_T("phXT")) && (m_strModVersion[0]==0x4D || m_strModVersion[0]==0x6D) && !IsMorph())
+			)
+		{
+			old_m_strClientSoftware = m_strClientSoftware;
+			return true;
+		}
+	}
+	if (IsMorph())
+	{
+		int curPos2= 0;
+		// only version number
+		CString m_strMorphVer = m_strModVersion.TrimLeft(_T("MorphXT "));
+		// set major number
+		CString strNumber = m_strMorphVer.Tokenize(_T("."),curPos2);
+		uint8 m_uMajorVer = _tstoi(strNumber.GetBuffer());
+		// set sub number
+		strNumber = m_strMorphVer.Tokenize(_T("."),curPos2);
+		uint8 m_uMinVer = _tstoi(strNumber.GetBuffer());
+		int m_uMjrDif = theApp.emuledlg->m_uMjrVer - m_uMajorVer;
+
+		if(m_uMjrDif < 0 ||
+			(m_uMajorVer <= 2 && m_uMinVer > theApp.emuledlg->m_uMinVer[m_uMjrDif]))
+		{
+			if(!theApp.emuledlg->DoMinVersioncheck())
+				if(theApp.emuledlg->m_uMjrVer != 0 &&
+					(m_uMajorVer > theApp.emuledlg->m_uMjrVer ||
+					(m_uMajorVer <= 2 && m_uMinVer > theApp.emuledlg->m_uMinVer[m_uMjrDif])))
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+//MORPH END - Added by Stulle, Morph Leecher Detection

@@ -97,6 +97,9 @@ public:
 	//MORPH START - Added by SiRoB, New Version check
 	void DoMVersioncheck(bool manual);
 	//MORPH END   - Added by SiRoB, New Version check
+	//MORPH START - Added by Stulle, Morph Leecher Detection
+	bool DoMinVersioncheck();
+	//MORPH END   - Added by Stulle, Morph Leecher Detection
 	void ApplyHyperTextFont(LPLOGFONT pFont);
 	void ApplyLogFont(LPLOGFONT pFont);
 	void ProcessED2KLink(LPCTSTR pszData);
@@ -153,6 +156,9 @@ protected:
 	//MORPH START - Added by SiRoB, Version check
 	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
 	//MORPH END   - Added by SiRoB, Version check
+	//MORPH START - Added by Stulle, Morph Leecher Detection
+	char			m_acMinVCDNSBuffer[MAXGETHOSTSTRUCT];
+	//MORPH END   - Added by Stulle, Morph Leecher Detection
 
 	// Splash screen
 	CSplashScreen *m_pSplashWnd;
@@ -257,6 +263,9 @@ protected:
 	//MORPH - Added by SiRoB, New Version check
 	afx_msg LRESULT OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam);
 
+	//MORPH - Added by Stulle, Morph Leecher Detection
+	afx_msg	LRESULT	OnMinVersionCheckResponse(WPARAM wParam, LPARAM lParam);
+
 	// Peercache DNS
 	afx_msg LRESULT OnPeerCacheResponse(WPARAM wParam, LPARAM lParam);
 
@@ -291,6 +300,11 @@ private:
 public:
 	void SaveSettings (bool _shutdown=false);
 	// [end] Mighty Knife
+
+	//MORPH START - Added by Stulle, Morph Leecher Detection
+	uint8 m_uMjrVer;
+	uint8 m_uMinVer[3];
+	//MORPH END   - Added by Stulle, Morph Leecher Detection
 };
 
 

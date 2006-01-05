@@ -203,6 +203,8 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(UM_VERSIONCHECK_RESPONSE, OnVersionCheckResponse)
 	//MORPH - Added by SiRoB, New Version check
 	ON_MESSAGE(UM_MVERSIONCHECK_RESPONSE, OnMVersionCheckResponse)
+	//MORPH - Added by Stulle, Morph Leecher Detection
+	ON_MESSAGE(UM_MINVERSIONCHECK_RESPONSE, OnMinVersionCheckResponse)
 
 	// PeerCache DNS
 	ON_MESSAGE(UM_PEERCHACHE_RESPONSE, OnPeerCacheResponse)
@@ -280,6 +282,13 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
     //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
 	m_icoSysTrayMessage = NULL;
 	//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
+
+	//MORPH START - Added by Stulle, Morph Leecher Detection
+	m_uMjrVer = 0;
+	m_uMinVer[0] = 0;
+	m_uMinVer[1] = 0;
+	m_uMinVer[2] = 0;
+	//MORPH END   - Added by Stulle, Morph Leecher Detection
 }
 
 CemuleDlg::~CemuleDlg()
@@ -3703,3 +3712,33 @@ void CemuleDlg::SaveSettings (bool _shutdown) {
 	theApp.scheduler->SaveToFile();
 }
 // [end] Mighty Knife
+
+//MORPH START - Added by Stulle, Morph Leecher Detection
+bool CemuleDlg::DoMinVersioncheck() {
+	return(WSAAsyncGetHostByName(m_hWnd, UM_MINVERSIONCHECK_RESPONSE, "morphminvercheck.dyndns.info", m_acMinVCDNSBuffer, sizeof(m_acMinVCDNSBuffer)) == 0);
+}
+
+LRESULT CemuleDlg::OnMinVersionCheckResponse(WPARAM wParam, LPARAM lParam)
+{
+	if (WSAGETASYNCERROR(lParam) == 0)
+	{
+		int iBufLen = WSAGETASYNCBUFLEN(lParam);
+		if (iBufLen >= sizeof(HOSTENT))
+		{
+			LPHOSTENT pHost = (LPHOSTENT)m_acMinVCDNSBuffer;
+			if (pHost->h_length == 4 && pHost->h_addr_list && pHost->h_addr_list[0])
+			{
+				uint32 dwResult = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
+				for(int i = 0; i < 3; i++)
+				{
+					m_uMinVer[i] = dwResult >> (8*(i+1)) & 0xFF;
+				}
+				m_uMjrVer = dwResult;
+				return 0;
+			}
+		}
+	}
+	LogWarning(LOG_STATUSBAR,GetResString(IDS_NEWVERSIONFAILED));
+	return 0;
+}
+//MORPH END - Added by Stulle, Morph Leecher Detection

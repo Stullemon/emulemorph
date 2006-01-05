@@ -1140,6 +1140,8 @@ private:
 	// <--- enkeyDEV: ICS
 //Morph End - added by AndCycle, ICS
 
+public:
+	bool	IsMorphLeecher(); // Morph Start - added by Stulle, Morph Leecher Detection
 };
 //#pragma pack()
 //>>> eWombat [SNAFU_V3]
