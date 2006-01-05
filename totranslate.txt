@@ -526,7 +526,7 @@ BEGIN
     IDS_CHECKDOTTOSPACE     "Convert ""."" to "" """
     IDS_CHECKUNDERLINETOSPACE "Convert ""_"" to "" """
     IDS_CHECKCONVERTAPOSTROPHES 
-                            "Convert wrong apostrophes """", ""`"" to standard apostrophes "" ' """
+                            "Convert wrong apostrophes ""´"", ""`"" to standard apostrophes "" ' """
     IDS_CHECKCONVERTHEX     "Convert hexadecimal numbers ""%xx"" back to characters"
     IDS_CHECKSEARCHANDREPLACE "Search and Replace:"
     IDS_SC_SEARCHFOR        "Search for:"
