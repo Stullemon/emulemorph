@@ -362,6 +362,11 @@ void LastCommonRouteFinder::EndThread() {
 UINT AFX_CDECL LastCommonRouteFinder::RunProc(LPVOID pParam) {
 	DbgSetThreadName("LastCommonRouteFinder");
 	InitThreadLocale();
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
     LastCommonRouteFinder* lastCommonRouteFinder = (LastCommonRouteFinder*)pParam;
 
     return lastCommonRouteFinder->RunInternal();

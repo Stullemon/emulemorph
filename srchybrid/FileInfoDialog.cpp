@@ -770,6 +770,12 @@ BOOL CGetMediaInfoThread::InitInstance()
 
 int CGetMediaInfoThread::Run()
 {
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
+
 	CoInitialize(NULL);
 
 	CArray<SMediaInfo>* paMediaInfo = new CArray<SMediaInfo>;

@@ -3522,6 +3522,11 @@ UINT CPartFile::CompleteThreadProc(LPVOID pvParams)
 { 
 	DbgSetThreadName("PartFileComplete");
 	InitThreadLocale();
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
 	CPartFile* pFile = (CPartFile*)pvParams;
 	if (!pFile)
 		return (UINT)-1; 
@@ -5231,6 +5236,12 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 	DbgSetThreadName("Partfile-Allocate Space");
 	InitThreadLocale();
 
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
+
 	CPartFile* myfile=(CPartFile*)lpParam;
 	theApp.QueueDebugLogLine(false,_T("ALLOC:Start (%s) (%s)"),myfile->GetFileName(), CastItoXBytes(myfile->m_iAllocinfo, false, false) );
 
@@ -6724,6 +6735,12 @@ int CPartHashThread::Run()
 {
 	InitThreadLocale();
 
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
+
 	CFile file;
 	CSingleLock sLock(&(m_pOwner->ICH_mut)); // ICH locks the file
 	if (m_ICHused)
@@ -6748,10 +6765,8 @@ int CPartHashThread::Run()
 				ex->Delete();
 			}
 			
-			//MORPH - Changed by SiRoB, Avoid crash at shutingdown
-			if (theApp.emuledlg==NULL || !theApp.emuledlg->IsRunning())	// in case of shutdown while still hashing
+			if (!theApp.emuledlg->IsRunning())	// in case of shutdown while still hashing
 				break;
-			//MORPH - Changed by SiRoB, Avoid crash at shutingdown
 
 			if (md4cmp(hashresult,m_DesiredHashes[i])){
 				if (m_AICHRecover)

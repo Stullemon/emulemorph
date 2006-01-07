@@ -48,9 +48,6 @@ enum EUserWndMessages
 	UM_CRC32_UPDATEFILE,
 	// [end] Mighty Knife
 	//MORPH START - Added by SiRoB, Version check
-	UM_MVERSIONCHECK_RESPONSE,
+	UM_MVERSIONCHECK_RESPONSE
 	//MORPH END   - Added by SiRoB, Version check
-	//MORPH START - Added by Stulle, Morph Leecher Detection
-	UM_MINVERSIONCHECK_RESPONSE
-	//MORPH END   - Added by Stulle, Morph Leecher Detection
 };

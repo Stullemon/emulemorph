@@ -433,6 +433,12 @@ BOOL CPCValditeThread::InitInstance()
 }
 
 BOOL CPCValditeThread::Run(){
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
+
 	if (theApp.emuledlg != NULL && theApp.emuledlg->IsRunning()){
 		if (Valdite()){
 			m_pOwner->m_bValdited = true;
@@ -705,6 +711,12 @@ BOOL CPCReverseDnsThread::InitInstance()
 	ASSERT( m_hwndAsyncResult != NULL );
 	ASSERT( m_dwIP != 0 );
 	InitThreadLocale();
+
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return FALSE;
+	// SLUGFILLER: SafeHash
 
 	memset(_acDNSBuffer, 0, sizeof _acDNSBuffer);
 	CString strHostname = ReverseDnsLookup(m_dwIP);

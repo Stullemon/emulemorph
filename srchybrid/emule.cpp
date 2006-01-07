@@ -1224,7 +1224,7 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 	// jp detect Webcache on Startup START
-	if (thePrefs.IsWebCacheDownloadEnabled() && thePrefs.WCAutoupdate //Webcache Fix
+	if (thePrefs.IsWebCacheDownloadEnabled() && false && thePrefs.WCAutoupdate //Webcache Fix
 		&& m_dwPublicIP != 0 )
 	{
 		thePrefs.detectWebcacheOnStart = false;

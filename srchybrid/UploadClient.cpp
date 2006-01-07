@@ -1499,7 +1499,14 @@ void CReadBlockFromFileThread::SetReadBlockFromFile(CKnownFile* pfile, uint32 st
 } 
 
 int CReadBlockFromFileThread::Run() {
+	DbgSetThreadName("CReadBlockFromFileThread");
+	
 	InitThreadLocale();
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
 
 	CFile file;
 	byte* filedata = NULL;
