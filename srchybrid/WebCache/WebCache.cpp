@@ -298,7 +298,7 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 	{
 			//we shouldn't get there but just to be sure...
 			//if ( pXMLDom->load((_bstr_t)(_T("http://webcache-emule.sourceforge.net/webcacheURL.php?hostName=") + shostName)) != VARIANT_TRUE)
-			//if ( pXMLDom->load((_bstr_t)(_T("http://localhost/webcacheURL.php?hostName=") + shostName)) != VARIANT_TRUE)
+			if ( pXMLDom->load((_bstr_t)(_T("http://localhost/webcacheURL.php?hostName=") + shostName)) != VARIANT_TRUE)
 				throw CString(_T("Your ISP was not found in the local database; loading the URL of xml data from the SF website failed."));
 			MSXML2::IXMLDOMNodePtr configURLNode = pXMLDom->selectSingleNode("/webcacheemule/configURL");
 			int result = pXMLDom->load((_bstr_t)(configURLNode->text + _T("?hostName=") + shostName));
