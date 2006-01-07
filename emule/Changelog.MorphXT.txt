@@ -1,11 +1,12 @@
 --------------------------------------
-Changelog for eMule 0.46c MorphXT v7.x
+Changelog for eMule 0.46c MorphXT v7.8
 --------------------------------------
 FIXED : (major) Various crash arround category manipulation or file completion [SiRoB]
 FIXED : (minor) Minimize to tray when we use the autostart [SiRoB]
 
 CHANGED: Added TMPL_FAILEDLOGIN into eMule.tmpl [leuk_he]
-
+CHANGED: Put back full safe hash code from Slugfiller mod [SiRoB]
+CHANGED: Put some kind of official open slot limitation [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.7
