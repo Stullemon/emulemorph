@@ -1097,8 +1097,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRatePowerShare(),uMaxClientDataRate);
 
 	if (curUploadSlots >= 4 &&
-		curUploadSlots == GetEffectiveUploadListCount() && //MORPH - Added by SiRoB, avoid limit when a scheduled slot is in process
-        (
+		(
          /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB,
          curUploadSlots >= ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE) ||
          (
