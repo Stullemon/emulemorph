@@ -1,7 +1,10 @@
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.x
 --------------------------------------
-FIXED : Added TMPL_FAILEDLOGIN into eMule.tmpl [leuk_he]
+FIXED : (major) Various crash arround category manipulation or file completion [SiRoB]
+FIXED : (minor) Minimize to tray when we use the autostart [SiRoB]
+
+CHANGED: Added TMPL_FAILEDLOGIN into eMule.tmpl [leuk_he]
 
 
 --------------------------------------
