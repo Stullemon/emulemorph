@@ -1,5 +1,4 @@
 // by heffeque
-
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_DONE       "El informe de errores ha sido generado."
@@ -90,7 +89,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_NOTAV      "El RecopiladorDeErrores no ha sido encontrado en el directorio del emule. Si quiere ayudarnos a depurar nuestro mod, por favor descárguese el archivo CrashRpt.dll"
-    IDS_NICEHASHWEIGHT      "PesoNiceHash (HashSimpático)"
     IDS_UPLOAD_COMPLETED    "Completando"
     IDS_UPLOAD_PREEMPTED    "Movimiento paquí movimiento pallá..."
     IDS_UPLOAD_TOO_MANY_SLOTS "Demasiados slots"
@@ -853,5 +851,28 @@ BEGIN
     IDS_ZZRATIO_CHECK3      "Usando el slot de amigo y velocidad de transmisión global>3KB/s"
     IDS_ZZRATIO_CHECK4      "Límite de Subida por debajo de 10KB/s"
     IDS_ZZRATIO_CHECK5      "Subida Media por debajo de 10KB/s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_OK                  "&OK"
+    IDS_IGNORE              "&Ignorar"
+    IDS_RETRY               "&Reintentar"
+    IDS_HELP                "&Ayuda"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CONTINUE            "&Continuar"
+    IDS_DONOTASKAGAIN       "No volver a preguntar"
+    IDS_DONOTTELLAGAIN      "No volver a notificar"
+    IDS_DONOTSHOWAGAIN      "No volver a mostrar"
+    IDS_YESTOALL            "&Sí a todo"
+    IDS_NOTOALL             "&No a todo"
+    IDS_TRYAGAIN            "R&eintentar"
+    IDS_REPORT              "Noti&ficar"
+    IDS_IGNOREALL           "I&gnorar todo"
+    IDS_SKIP                "&Saltar"
+    IDS_SKIPALL             "Saltar &todo"
 END
 
