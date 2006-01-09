@@ -237,6 +237,10 @@ protected:
 
 	uint32 m_dwPublicIP;
 	bool m_bAutoStart;
+
+private:
+    UINT     m_wTimerRes;
+
 public:
 	// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 	void	AddIncomingFolderIcon();

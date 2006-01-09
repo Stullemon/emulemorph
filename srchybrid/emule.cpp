@@ -22,6 +22,7 @@
 #include <locale.h>
 #include <io.h>
 #include <share.h>
+#include <Mmsystem.h>
 #include "secrunasuser.h" // yonatan - moved up... // MORPH - Modified by Commander, WebCache 1.2e
 #include "emule.h"
 #include "opcodes.h"
@@ -565,6 +566,29 @@ BOOL CemuleApp::InitInstance()
 	}
 	// End -UPnPNAT Support-
 
+	// Highres scheduling gives better resolution for Sleep(...) calls, and timeGetTime() calls
+    m_wTimerRes = 0;
+    if(true /*thePrefs.GetHighresTimer()*/) {
+        TIMECAPS tc;
+        if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == TIMERR_NOERROR) 
+        {
+            m_wTimerRes = min(max(tc.wPeriodMin, 1), tc.wPeriodMax);
+            if(m_wTimerRes > 0) {
+                MMRESULT mmResult = timeBeginPeriod(m_wTimerRes); 
+                if(thePrefs.GetVerbose()) {
+                    if(mmResult == TIMERR_NOERROR) {
+                        theApp.QueueDebugLogLine(false,_T("Succeeded to set timer/scheduler resolution to %i ms."), m_wTimerRes);
+                    } else {
+                        theApp.QueueDebugLogLine(false,_T("Failed to set timer/scheduler resolution to %i ms."), m_wTimerRes);
+                        m_wTimerRes = 0;
+                    }
+                }
+            } else {
+                theApp.QueueDebugLogLine(false,_T("m_wTimerRes == 0. Not setting timer/scheduler resolution."));
+            }
+        }
+    }
+
 	// ZZ:UploadSpeedSense -->
     lastCommonRouteFinder = new LastCommonRouteFinder();
     uploadBandwidthThrottler = new UploadBandwidthThrottler();
@@ -626,6 +650,11 @@ BOOL CemuleApp::InitInstance()
 int CemuleApp::ExitInstance()
 {
 	AddDebugLogLine(DLP_VERYLOW, _T("%hs"), __FUNCTION__);
+
+   if(m_wTimerRes != 0) {
+        timeEndPeriod(m_wTimerRes);
+    }
+
 	return CWinApp::ExitInstance();
 }
 
