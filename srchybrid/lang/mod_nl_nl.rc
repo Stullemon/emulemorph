@@ -33,20 +33,20 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_PW_WEBCACHE         "WebCache"
+    IDS_PW_WEBCACHE      "WebCache"
 END
 
 STRINGTABLE
 BEGIN
-    IDS_WrongPortforWebcache
-                            "Webcache Download uitgeschakeld: Alleen verkeer op de poorten 21, 70, 80, 210, 443, 563 en in het bereik van 1025 tot 65535 worden gecached. Gebruik één van deze poorten om de WebCache mogelijkheid in te schakelen"
+     IDS_WrongPortforWebcache 
+                            "WebCache Download uitgeschakeld: Alleen verkeer op de poorten 21, 70, 80, 210, 443, 563 en in het bereik van 1025 tot 65535 worden gecached. Gebruik een van deze poorten om WebCache te kunnen activeren"
 END
 
 STRINGTABLE
 BEGIN
     IDS_RESET               "Reset"
     IDS_SPREADBAR           "Verspreiding-balk"
-    IDS_SPREADBAR_DEFAULT_CHECKBOX "Schakel de Verspreiding-balk standaard in"
+    IDS_SPREADBAR_DEFAULT_CHECKBOX "Activeer standaard de Verspreiding-balk"
 END
 
 STRINGTABLE
@@ -67,7 +67,7 @@ BEGIN
     IDS_DOWNLOAD_IN_RED     "Laat downloadende bestanden in rood zien"
     IDS_UPSLOTNUMBER        "Slot #"
     IDS_STATS_LEECHERCLIENTS "Leechers: %u"
-    IDS_WARNINGMORPH        "Waarschuwing:  Verander deze instellingen niet, behalve als je weet wat je doet..  Je benadeelt jezelf makkelijk.\neMule draait goed zonder één van deze instellingen aan te passen."
+    IDS_WARNINGMORPH        "Waarschuwing:  Verander deze instellingen niet, behalve als je weet wat je doet..  Je benadeelt jezelf makkelijk.\neMule draait goed zonder deze instellingen aan te passen."
     IDS_DM                  "Download Beheer"
     IDS_SCC                 "Slimme Categorie Controle (SCC)"
     IDS_SAC                 "Slimme A4AF Controle (SAC)"
@@ -99,7 +99,7 @@ BEGIN
     IDS_SF_TURN_SIMPLE      "Bestand UL (simpel)"
     IDS_SF_FULLUPLOAD       "Bestand UL (volledig)"
     IDS_UM                  "Upload beheer"
-    IDS_ANTI_LEECHER        "Schakel anti-leechers controle in"
+    IDS_ANTI_LEECHER        "Activeer anti-leechers controle"
     IDS_PROGRESS_PERCENT    "Toon percentage in voortgangbalk"
     IDS_DOWNLOAD_IN_BOLD    "Toon downloadende bestanden dikgedrukt"
     IDS_CAT_RESUMENEXT      "Hervat volgende"
@@ -132,8 +132,8 @@ BEGIN
     IDS_CAT_SC              "Bron teller"
     IDS_CAT_ASC             "Beschikbare bronnen"
     IDS_CAT_THISCAT         "Deze categorie"
-    IDS_CAT_SUSPENDFILTERS  "Schakel kijkfilters uit"
-    IDS_CAT_FROMCATSINFO    "Je moet alle bestanden in deze categorie aan andere categorieën toekennen voordat je in deze categorie alle bestanden of alle bestanden zonder categorie kunt zien!"
+    IDS_CAT_SUSPENDFILTERS  "Activeer kijkfilters"
+    IDS_CAT_FROMCATSINFO    "Je moet alle bestanden in deze categorie aan andere categorieen toekennen voordat je in deze categorie alle bestanden of alle bestanden zonder categorie kunt zien!"
     IDS_CAT_FROMCATSCAP     "Niet toegekende bestanden"
     IDS_CAT_ADVA4AF         "Geavanceerde A4AF"
     IDS_CAT_FILTERSACTIVE   "Filters actief"
@@ -157,7 +157,7 @@ BEGIN
     IDS_CAT_COLORDER        "LP"
     IDS_CAT_MNUAUTOINC      "Auto-vermeerderen geselecteerd"
     IDS_CAT_MNUSTEPTHRU     "Stap door de geselecteerde"
-    IDS_CAT_MNUALLSAME      "Stel alles op één waarde in"
+    IDS_CAT_MNUALLSAME      "Stel alles op een waarde in"
     IDS_CAT_EXPAUTOINC      "Voer een niet-negatief start nummer in:"
     IDS_CAT_EXPSTEPTHRU     "Voer een niet-negatief nummer in, Lagere waardes hervatten het eerst.\nFile:"
     IDS_CAT_EXPALLSAME      "Voer een niet-negatief nummer in, welke wordt toegepast op alle geselecteerde bestanden:"
@@ -202,11 +202,11 @@ END
 STRINGTABLE
 BEGIN
     IDS_CAT_AUTOCAT         "Geavanceerd filter masker (deler: | )"
-    IDS_CAT_USEAUTOCAT      "Voeg nieuwe downloads toe aan categoriën die gebruik maken van de kijkfilters"
+    IDS_CAT_USEAUTOCAT      "Voeg nieuwe downloads toe aan categorieen die gebruik maken van de kijkfilters"
     IDS_SLS_USESLS          "Activeer laden en bewaren van bronnen"
-    IDS_CAT_MERGE           "Voeg categoriën samen"
+    IDS_CAT_MERGE           "Voeg categorieen samen"
     IDS_CAT_GROUP           "Groep"
-     IDS_CAT_RESUMEFILEONLYINSAMECAT 
+     IDS_CAT_RESUMEFILEONLYINSAMECAT
 	                       "Resume paused file only in the same category"
    IDS_A4AF_FORCEALL       "Haal alle A4AF op"
     IDS_A4AF_FLAGS          "Geavanceerde A4AF vlaggen"
@@ -292,9 +292,9 @@ BEGIN
     IDS_USS_ENABLED         "Activeer"
     IDS_USS_LOG             "Laat activiteiten zien in debug log"
     IDS_USS_PINGTOLERANCE   "Ping tolerantie (in %%) (Standaard %i)"
-    IDS_USS_GOINGUPDIVIDER  "Going up traagheid (Standaard %i)"
-    IDS_USS_GOINGDOWNDIVIDER "Going down traagheid (Standaard %i)"
-    IDS_USS_NUMBEROFPINGS   "Max aantal pings voor gemmidelde (Standaard %i)"
+    IDS_USS_GOINGUPDIVIDER  "Verhoging snelheid vertraging (Standaard %i)"
+    IDS_USS_GOINGDOWNDIVIDER "Verlaging snelheid vertraging (Standaard %i)"
+    IDS_USS_NUMBEROFPINGS   "Max aantal pings voor gemiddelde (Standaard %i)"
     IDS_USSFINDLASTCOMMON   "UploadSpeedSense: Traceroute gestart om de laatste host te vinden."
     IDS_USSFOUNDLASTCOMMON  "UploadSpeedSense: Laatste host gevonden. LaatsteHost: %s @ TTL: %i HostToPing: %s"
     IDS_USSSTARTLOWPING     "UploadSpeedSense: Zoekt een startwaarde voor laagste ping..."
@@ -319,7 +319,7 @@ BEGIN
     IDS_USSPINGERPINGREPLY  "UploadSpeedSense: Antwoord van %s: bytes=%d tijd=%ldms TTL=%i"
     IDS_USSPINGERWSASFAI    "Pinger: WSAStartup() gefaald, err: %d\n"
     IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() gefaald: Kon ICMP.DLL niet localizeren!"
-    IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() gefaald voor minstens één functie."
+    IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() gefaald voor minstens een functie."
     IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() gefaald, err: "
     IDS_USSPINGERICMPENDERR "Fout tijden sluiten ICMP handle, err: "
     IDS_REMULREASON         "%s: Verwijder gebruiker van de uploadlijst. Reden: %s"
@@ -338,7 +338,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_DWLSESSIONENDED     "Download sessie beëindigd. Gebruiker: %s Reden: %s"
+    IDS_DWLSESSIONENDED     "Download sessie beeindigd. Gebruiker: %s Reden: %s"
     IDS_BANHASHCHANGED      "Gebruiker: %s (%s), Banreden: Gebruikershash is veranderd"
     IDS_BANHASHCHANGEDT     "Gebruiker: %s (%s), Banreden: Gebruikershash is veranderd (Gevonden in GetraceerdeGebruikersLijst)"
     IDS_BANHASHINVALID      "Gebruiker: %s (%s), Banreden: Gebruikershash ongeldig"
@@ -375,7 +375,7 @@ BEGIN
     IDS_PAYBACKFIRST        "Eerst terug betalen"
     IDS_USS_USEMAXPING      "Gebruik max ping waarde"
     IDS_CREDIT_SYSTEM       "Credits Systeem"
-    IDS_OFFICIAL_CREDIT     "Officiële Credits"
+    IDS_OFFICIAL_CREDIT     "Officieele Credits"
     IDS_LOVELACE_CREDIT     "lovelace Credits"
     IDS_RATIO_CREDIT        "Ratio Credits"
     IDS_EASTSHARE_CREDIT    "EastShare Credist"
@@ -410,11 +410,11 @@ BEGIN
     IDS_REMOVEALLFRIENDSLOT "Verwijder alle vriendensloten"
     IDS_INFINITEQUEUE       "Oneindige Wachtrij"
     IDS_PAYBACKFIRSTLIMIT   "Punten voor teweegbrengen (Standaard 10MB)"
-    IDS_ENABLE_CHUNKDOTS    "Schakel ChunkDots in voortgangsbalk in"
+    IDS_ENABLE_CHUNKDOTS    "Toon ChunkDots in voortgangsbalk"
     IDS_COMMUNITY           "Community"
     IDS_COMMUNITYTAG        "Community Tags (gescheiden door '|')"
     IDS_INVISIBLEMODE       "Onzichtbare Modus"
-    IDS_ICS_USEICS          "Gebruik Intelligente Chunk Selecttie (ICS)"
+    IDS_ICS_USEICS          "Gebruik Intelligente Chunk Selectie (ICS)"
 END
 
 STRINGTABLE
@@ -486,7 +486,7 @@ BEGIN
     IDS_INVMODE_HOTKEY      "Selecteer de hotkey voor toon / verberg dit scherm"
     IDS_INVMODE_MODKEY      "Aangepaste toetsen:"
     IDS_INVMODE_VKEY        "Toetsen:"
-    IDS_DATARATEAVERAGETIME "Datasnelheid gemiddelde tijd (Default 30s)"
+    IDS_DATARATEAVERAGETIME "Tijd Datasnelheid-gemiddelde (Standaard 30s)"
 END
 
 STRINGTABLE
@@ -570,7 +570,7 @@ BEGIN
     IDS_MAXCLIENTDATARATEFRIEND "Max client datasnelheid (0kB/s = ongelimiteerd)"
     IDS_MAXCLIENTDATARATEPOWERSHARE "Max client datasnelheid (0kB/s = ongelimiteerd)"
     IDS_MAXCLIENTDATARATE   "Max client datasnelheid (0kB/s = ongelimiteerd)"
-    IDS_DISPLAYFUNNYNICK    "Schakel FunnyNicks in"
+    IDS_DISPLAYFUNNYNICK    "Activeer FunnyNicks"
 END
 
 STRINGTABLE
@@ -597,8 +597,8 @@ BEGIN
     IDS_UPNP_DELETEFAILED   "UPnP: Verwijderen poortverbinding mislukt ""%s"". [%s] [%s]"
     IDS_UPNP_PORTDELETED    "UPnP: Verwijderede poortverbinding ""%s"". [%s]"
     IDS_UPNP_LOGEVENTS      "Log UPnP gebeurtenissen"
-    IDS_UPNP_ENABLE         "Schakel UPnP in"
-    IDS_UPNP_ENABLEWEB      "Schakel UPnP, op de web interface poort, in"
+    IDS_UPNP_ENABLE         "Activeer UPnP"
+    IDS_UPNP_ENABLEWEB      "Deactiveer UPnP op de web interface poort"
     IDS_RANDOMPORTS         "Willekeurige Poorten"
     IDS_MINPORT             "Minimaal Poortnummer"
 END
@@ -607,7 +607,7 @@ STRINGTABLE
 BEGIN
     IDS_MAXPORT             "Max Poorten"
     IDS_RANDOMPORTSRESETTIME "Willekeurige poorten berwaring herstart tijd (in seconden)"
-    IDS_ICFSUPPORT          "Schakel Windows Internet Connection Firewall (ICF) ondersteuning in"
+    IDS_ICFSUPPORT          "Activeer Windows Internet Connection Firewall (ICF) ondersteuning"
     IDS_ICFSUPPORTFIRST     "eMule heeft Windows Internet Connection Firewall (ICF) draaiend gevonden op uw machine,\n\rWilt u dat eMule het automatisch configureerd? (Recomended)"
     IDS_ICF                 "Windows Internet Connection Firewall (ICF)"
     IDS_ICF_SERVERUDP       "Voeg regels voor de ""Server UDP"" poort toe"
@@ -648,7 +648,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "Schakel DynDNS in"
+    IDS_CHECK_DYNDNS_ENABLED "Activeer DynDNS"
     IDS_STATIC_DYNDNS_USERNAME "gebruikersnaam"
     IDS_STATIC_DYNDNS_PASSWORD "Wachtwoord"
     IDS_STATIC_DYNDNS_HOSTNAME "DynDNS Hostnaam"
@@ -661,7 +661,7 @@ BEGIN
     IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv bij opstarten"
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Toon vorderingen van client wachtlijst"
-    IDS_WEBCACHE_NOSUPPORT  "niet ondersteund"
+    IDS_WEBCACHE_NOSUPPORT   "Niet ondersteund"
     IDS_STATS_SUCCESSFULLWC "Succesvolle WC-DL/WC-Aanvragen:"
     IDS_STATS_FAILEDWC      "Mislukte WC-DL/WC-Aanvragen:"
 END
@@ -692,7 +692,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_LD_ADDPHPBB         "Gebruikt phpBB URL-Tags stijl"
-    IDS_POWERSHARE_INTERPRIO "Schakel PS interne bestandsprioriteit"
+    IDS_POWERSHARE_INTERPRIO "Activeer PS interne bestandsprioriteit"
 END
 
 STRINGTABLE
@@ -705,27 +705,27 @@ BEGIN
     IDS_WEBCACHE_ISP        "ISP Proxyserver Instellingen"
     IDS_WC_PORT             "Poort"
     IDS_WC_ADDRESS          "Adres"
-    IDS_WC_CONTROLS         "Webcache Instellingen"
-    IDS_WC_ENABLE           "Schakel Webcached Downloads in"
+    IDS_WC_CONTROLS         "WebCache Instellingen"
+    IDS_WC_ENABLE           "Activeer WebCached Downloads"
 END
 
 STRINGTABLE
 BEGIN
-    IDS_WC_WRONGPORT        "Je gebruikt een TCP poort die gewoonlijk niet wordt gecached door ISP proxy-servers. Verander je TCP poorten naar 21, 70, 80, 210, 443 563  of 1025-65535 om webcache downloads te kunnen inschakelen!"
-    IDS_WC_AUTO             "Detecteer Webcache Automatisch"
+    IDS_WC_WRONGPORT        "Je gebruikt een TCP poort die gewoonlijk niet wordt gecached door ISP proxy-servers. Verander je TCP poorten naar 21, 70, 80, 210, 443 563  of 1025-65535 om WebCache downloads te kunnen inschakelen!"
+    IDS_WC_AUTO             "Detecteer WebCache Automatisch"
     IDS_WC_NRBLOCKS         "Aantal blokken om te downloaden voor herverbinden met proxy (kan het ongewild verbreken van verbinding oplossen)"
     IDS_WC_BLOCK            "180k-Blokken"
-    IDS_WC_TIMEOUT          "Extra lange timeout voor webcache verbindingen"
-    IDS_WC_LOCAL            "Deze webcache cached geen verkeer binnen dezelfde ISP"
+    IDS_WC_TIMEOUT          "Extra lange timeout voor WebCache verbindingen"
+    IDS_WC_LOCAL            "Deze WebCache cached geen verkeer binnen dezelfde ISP"
     IDS_WC_SUBMIT_EMAIL     "Leg deze instellingen per email voor"
     IDS_WC_LINK             "Link: "
     IDS_WC_PERSISTENT       "Blijvende verbindingen voor proxy downloads"
-    IDS_WC_ADVANCED         "Toon geavanceerde instellingen"
-    IDS_WC_TEST             "Test webcache configuratie. Kan mogelijk 30 seconden duren"
+    IDS_WC_ADVANCED         "Geavanc. instellingen"
+    IDS_WC_TEST             "Test WebCache configuratie. Kan mogelijk 30 seconden duren"
     IDS_WC_HIDE_ADV         "Verberg geavanceerde instellingen"
-    IDS_WC_SUBMIT_WEB       "Leg webcache info voor via webformulier"
-    IDS_WC_SOURCES          "Webcache Mogelijk"
-    IDS_WC_UPDATESETTING    "Update webcache instellingen automatisch"
+    IDS_WC_SUBMIT_WEB       "Leg WebCache info voor via webformulier"
+    IDS_WC_SOURCES          "WebCache Mogelijk"
+    IDS_WC_UPDATESETTING    "Update WebCache instellingen automatisch"
 END
 
 STRINGTABLE
