@@ -16,7 +16,11 @@ DirExistsWarning=No
 DefaultDirName={pf}\eMule
 DefaultGroupName=eMule
 AllowNoIcons=yes
+; gpl:
 LicenseFile=..\staging\license.txt
+WizardImageFile=MorphBanner.bmp
+WizardImageStretch=no
+
 ; this dir:
 OutputDir=.
 OutputBaseFilename=setup
@@ -77,11 +81,11 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; flags: unchecked
 Name: "firewall"; Description: "{cm:tasks_firewall}"; MinVersion: 0,5.01sp2
 
 [INI]
-Filename: "{app}\emule.url"; Section: "InternetShortcut"; Key: "URL"; String: "hhttp://emulemorph.sourceforge.net/"
+Filename: "{app}\emulemorphhome.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://emulemorph.sourceforge.net/"
 
 [Icons]
-Name: "{group}\eMule"; Filename: "{app}\emule.exe"
-Name: "{group}\{cm:ProgramOnTheWeb,eMule}"; Filename: "{app}\emule.url"
+Name: "{group}\eMule MorphXT"; Filename: "{app}\emule.exe" ; Comment: "eMule MorphXT"
+Name: "{group}\{cm:ProgramOnTheWeb,eMule Morph}"; Filename: "{app}\emulemorphhome.url"
 Name: "{group}\{cm:UninstallProgram,eMule}"; Filename: "{uninstallexe}"
 Name: "{userdesktop}\eMule"; Filename: "{app}\emule.exe"; Tasks: desktopicon
 
@@ -89,7 +93,7 @@ Name: "{userdesktop}\eMule"; Filename: "{app}\emule.exe"; Tasks: desktopicon
 Filename: "{app}\emule.exe"; Description: "{cm:LaunchProgram,eMule}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
-Type: files; Name: "{app}\emule.url"
+Type: files; Name: "{app}\emulemorphhome.url"
 
 [CustomMessages]
 ; This section specifies phrazes and words not specified in the ISL files
@@ -105,7 +109,7 @@ const
   NET_FW_SCOPE_ALL = 0;
   NET_FW_IP_VERSION_ANY = 2;
 var
-  Installed: Boolean;
+  //Installed: Boolean;
   FirewallFailed: string;
 
 Procedure CurStepChanged(CurStep: TSetupStep);
@@ -114,7 +118,7 @@ var
   FirewallObject: Variant;
   FirewallManager: Variant;
   FirewallProfile: Variant;
-  Reset: boolean;
+  //Reset: boolean;
 Begin
   if CurStep=ssPostInstall then begin
     if IsTaskSelected('firewall') then begin
@@ -123,7 +127,7 @@ Begin
           FirewallObject := CreateOleObject('HNetCfg.FwAuthorizedApplication');
           InstallFolder := ExpandConstant('{app}\eMule.exe');
           FirewallObject.ProcessImageFileName := InstallFolder;
-          FirewallObject.Name := 'eMule';
+          FirewallObject.Name := 'eMule MorphXT';
           FirewallObject.Scope := NET_FW_SCOPE_ALL;
           FirewallObject.IpVersion := NET_FW_IP_VERSION_ANY;
           FirewallObject.Enabled := True;
@@ -138,7 +142,7 @@ Begin
           FirewallObject := CreateOleObject('HNetCfg.FwAuthorizedApplication');
           InstallFolder := ExpandConstant('{app}\eMule.exe');
           FirewallObject.ProcessImageFileName := InstallFolder;
-          FirewallObject.Name := 'eMuke';  // lets see if the testers notice.
+          FirewallObject.Name := 'eMule MorphXT';
           FirewallObject.Scope := NET_FW_SCOPE_ALL;
           FirewallObject.IpVersion := NET_FW_IP_VERSION_ANY;
           FirewallObject.Enabled := True;
@@ -155,7 +159,7 @@ Begin
     if not IsTaskSelected('firewall') then begin
       if InstallOnThisVersion('0,5.01sp2','0,0') = irInstall then begin
         try
-          InstallFolder := ExpandConstant('{app}\Shareaza.exe');
+          InstallFolder := ExpandConstant('{app}\eMule.exe');
           FirewallManager := CreateOleObject('HNetCfg.FwMgr');
           FirewallProfile := FirewallManager.LocalPolicy.CurrentProfile;
           FirewallProfile.AuthorizedApplications.Remove(InstallFolder);
