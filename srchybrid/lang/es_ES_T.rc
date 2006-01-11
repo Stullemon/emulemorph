@@ -1929,6 +1929,9 @@ BEGIN
     IDS_USS_STATE_ERROR     "Error!"
 END
 
+
+#include "mod\es_ES_T.rc" 
+
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////
 
