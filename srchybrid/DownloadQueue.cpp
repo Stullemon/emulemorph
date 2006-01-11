@@ -81,7 +81,7 @@ void CDownloadQueue::AddPartFilesToShare()
 	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; )
 	{
 		CPartFile* cur_file = filelist.GetNext(pos);
-		if (cur_file->GetStatus(true) == PS_READY || cur_file->GetStatus(true) == PS_COMPLETING || cur_file->GetStatus(true)==PS_ERROR && cur_file->GetCompletionError()) /Attempt to deal with completing file instance removed when we make a reload file
+		if (cur_file->GetStatus(true) == PS_READY || cur_file->GetStatus(true) == PS_COMPLETING || cur_file->GetStatus(true)==PS_ERROR && cur_file->GetCompletionError()) //Attempt to deal with completing file instance removed when we make a reload file
 			theApp.sharedfiles->SafeAddKFile(cur_file, true);
 	}
 }
