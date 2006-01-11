@@ -1088,18 +1088,11 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
         MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
     else
 		MaxSpeed = thePrefs.GetMaxUpload();
-	uint32	uMaxClientDataRate = (uint32)-1;
-	if (thePrefs.GetMaxClientDataRate() && m_abAddClientOfThisClass[LAST_CLASS])
-		uMaxClientDataRate = thePrefs.GetMaxClientDataRate();
-	if (thePrefs.GetMaxClientDataRateFriend() && m_abAddClientOfThisClass[0])
-		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRate(),uMaxClientDataRate);
-	if (thePrefs.GetMaxClientDataRatePowerShare() && m_abAddClientOfThisClass[1])
-		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRatePowerShare(),uMaxClientDataRate);
 
 	if (curUploadSlots >= 4 &&
 		(
          /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB,
-         curUploadSlots >= ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE) ||
+         curUploadSlots >= ((uint32)MaxSpeed)/*1024/UPLOAD_CLIENT_DATARATE)*/ ||
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
           !thePrefs.IsDynUpEnabled() &&

@@ -78,7 +78,7 @@ public:
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
 
     uint32	GetNeededBytes(bool lowspeed);
-	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
+	DWORD	GetBusyTimeSince() { return dynLimit/*m_dwBusy*/; }; //MORPH - Added by SiRoB, Show busyTime
 	float	GetBusyRatioTime() { return (float)(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))/(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)); };
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -149,5 +149,6 @@ private:
 	DWORD m_dwBusyDelta;
     DWORD m_dwNotBusy;
 	DWORD m_dwNotBusyDelta;
+	uint32 dynLimit;
     bool m_hasSent;
 };

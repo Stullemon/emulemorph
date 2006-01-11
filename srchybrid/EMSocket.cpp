@@ -139,7 +139,7 @@ CEMSocket::CEMSocket(void){
 	m_dwBusyDelta = 1;
 	m_dwNotBusy = GetTickCount();
 	m_dwNotBusyDelta = 0;
-
+	dynLimit = 4096;
     m_hasSent = false;
 
     //int val = 0;
@@ -707,7 +707,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         return returnVal;
     //MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	} else if (m_dwBusy /*&& onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
+	} else if (m_dwBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
 	    sendLocker.Unlock();
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
@@ -907,8 +907,17 @@ uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
         ret = minFragSize*(current/minFragSize+1);
     }
 	//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
-	if (current >= 65535)
-		ret = 65535-1;
+	if ((m_dwBusy > 0 || GetBusyRatioTime() > 0.05) && dynLimit > minFragSize) {
+		dynLimit /= 2;
+		if (dynLimit < minFragSize)
+			dynLimit = minFragSize;
+	} else if (GetBusyRatioTime() < 0.01) {
+		dynLimit *= 2;
+		if (dynLimit > 65534)
+			dynLimit = 65534;
+	}
+	if (current >= dynLimit)
+		ret = dynLimit;
 		return ret;
 	//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 }
