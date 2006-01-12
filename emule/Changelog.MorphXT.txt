@@ -4,6 +4,9 @@ Changelog for eMule 0.46c MorphXT v7.8
 ADDED  : Use highres thread scheduler (1 ms resolution instead of the default 10 ms) to get better SlotFocusing from zz mod [SiRoB]
 ADDED  : USC: Don't open new slot when connection doesn't send any data [SiRoB]
 
+CHANGED: No FunnyNick for added HTTP sources [Stulle]
+CHANGED: No ZZ ratio for added HTTP sources [Stulle]
+
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.8
 --------------------------------------
