@@ -3422,6 +3422,7 @@ switch(tag->GetNameID())
 void CUpDownClient::UpdateFunnyNick()
 {
 	if(m_pszUsername == NULL || 
+		GetSourceFrom() == SF_LINK || //MORPH - Changed by Stulle, no FunnyNick for http DL
 		_tcsnicmp(m_pszUsername, _T("http://"),7) != 0 &&
 		_tcsnicmp(m_pszUsername, _T("0."),2) != 0 &&
 		_tcsicmp(m_pszUsername, _T("")) != 0)
@@ -3613,7 +3614,6 @@ const static LPCTSTR apszSuffix[] =
 //MORPH START - Added by Stulle, Morph Leecher Detection
 bool CUpDownClient::IsMorphLeecher()
 {
-
 	if (old_m_strClientSoftware != m_strClientSoftware)
 	{
 		if (StrStrI(m_strModVersion,_T("MorphXT")) && (m_strModVersion[7] == 0x2B || m_strModVersion[7] == 0xD7) ||
