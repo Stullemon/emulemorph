@@ -911,6 +911,7 @@ void CDownloadQueue::Process(){
 
     uint32 friendDownspeed = downspeed;
 	bool tempIsZZRatioInWork = false; //MORPH - Added by SiRoB, ZZ Ratio in work
+	uint32 httpDownspeed = downspeed; //MORPH - Added by Stulle, No DL limit for http traffic
 
 	if(theApp.uploadqueue->GetUploadQueueLength() > 0 && thePrefs.IsZZRatioDoesWork()) {
         // has this client downloaded more than it has uploaded this session? (friends excluded)
@@ -971,10 +972,12 @@ void CDownloadQueue::Process(){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY){
 			//MORPH STRAT - Changed by SiRoB, zz Upload System
+			//MORPH START - Changed by Stulle, No DL limit for http traffic
 			/*
 			datarateX += cur_file->Process(downspeed,udcounter);
 			*/
-			datarateX += cur_file->Process(downspeed,udcounter, friendDownspeed);
+			datarateX += cur_file->Process(downspeed,udcounter, friendDownspeed, httpDownspeed);
+			//MORPH END   - Changed by Stulle, No DL limit for http traffic
 			//MORPH END   - Changed by SiRoB, zz Upload System
 		}
 		else{
@@ -1036,7 +1039,6 @@ CPartFile* CDownloadQueue::GetFileByIndex(int index) const
 		return filelist.GetAt(pos);
 	return NULL;
 }
-
 
 CPartFile* CDownloadQueue::GetFileByID(const uchar* filehash) const
 {

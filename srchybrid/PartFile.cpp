@@ -2490,7 +2490,9 @@ void CPartFile::RemoveDownloadingSource(CUpDownClient* client){
 	}
 }
 
-uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/, uint32 friendReduceddownload)
+//MORPH START - Changed by Stulle, No DL limit for http traffic
+uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/, uint32 friendReduceddownload, uint32 httpReudcedDownload)
+//MORPH START - Changed by Stulle, No DL limit for http traffic
 {
 	if (thePrefs.m_iDbgHeap >= 2)
 		ASSERT_VALID(this);
@@ -2530,6 +2532,11 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
                     if(cur_src->IsFriend() && cur_src->GetFriendSlot()) {
                         curClientReducedDownload = friendReduceddownload;
                     }
+					//MORPH START - Changed by Stulle, No DL limit for http traffic
+					if(cur_src->GetSourceFrom() == SF_LINK) {
+						curClientReducedDownload = httpReudcedDownload;
+					}
+					//MORPH END   - Changed by Stulle, No DL limit for http traffic
 
 					if(curClientReducedDownload)
 					{
@@ -2632,6 +2639,11 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	                    if(cur_src->IsFriend() && cur_src->GetFriendSlot()) {
                     	    curClientReducedDownload = friendReduceddownload;
                     	}
+						//MORPH START - Changed by Stulle, No DL limit for http traffic
+						if(cur_src->GetSourceFrom() == SF_LINK) {
+							curClientReducedDownload = httpReudcedDownload;
+						}
+						//MORPH END   - Changed by Stulle, No DL limit for http traffic
 						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
 						{
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
