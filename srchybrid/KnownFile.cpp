@@ -465,7 +465,7 @@ void CKnownFile::UpdatePartsInfo()
 		if(m_AvailPartFrequency[i] < m_nVirtualCompleteSourcesCount)
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount<=5, (m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount<=1) && iCompleteSourcesCountInfoReceived>GetPartCount(),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCount<=1 || m_nCompleteSourcesCountHi<=GetPartCount(), m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount<=1 && iCompleteSourcesCountInfoReceived>1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
 	m_bHideOSAuthorized = true;
