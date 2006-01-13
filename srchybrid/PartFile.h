@@ -147,12 +147,12 @@ public:
 	bool	CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam) {return false;}// not supported in this class
 	bool	LoadFromFile(FILE* file)						{return false;}
 	bool	WriteToFile(FILE* file) { return false; }
-	//MORPH START - Changed by Stulle, No DL limit for http traffic
+	//MORPH START - Changed by Stulle, No zz ratio for http traffic
 	/*
 	uint32	Process(uint32 reducedownload, uint8 m_icounter, uint32 friendReduceddownload);
 	*/
 	uint32	Process(uint32 reducedownload, uint8 m_icounter, uint32 friendReduceddownload,uint32 httpReduceddownload);
-	//MORPH END   - Changed by Stulle, No DL limit for http traffic
+	//MORPH END   - Changed by Stulle, No zz ratio for http traffic
 	uint8		LoadPartFile(LPCTSTR in_directory, LPCTSTR filename,bool getsizeonly=false); //filename = *.part.met
 //	uint8	ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename , bool getsizeonly);
 
