@@ -234,12 +234,10 @@ void CClientReqSocket::Disconnect(LPCTSTR pszReason){
 		Safe_Delete();
 	else
 		if(client->Disconnected(pszReason, true)){
-			if (client) {  //MORPH - Added by SiRoB, got a null client here
-				CUpDownClient* temp = client;
-				client->socket = NULL;
-				client = NULL;
-				delete temp;
-			}
+			CUpDownClient* temp = client;
+			client->socket = NULL;
+			client = NULL;
+			delete temp;
 			Safe_Delete();
 		}
 		else{
