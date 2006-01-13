@@ -2533,7 +2533,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
                         curClientReducedDownload = friendReduceddownload;
                     }
 					//MORPH START - Changed by Stulle, No zz ratio for http traffic
-					if(cur_src->!IsEd2kClient()) {
+					if(cur_src->IsEd2kClient() == false) {
 						curClientReducedDownload = httpReudcedDownload;
 					}
 					//MORPH END   - Changed by Stulle, No zz ratio for http traffic
@@ -2640,7 +2640,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
                     	    curClientReducedDownload = friendReduceddownload;
                     	}
 						//MORPH START - Changed by Stulle, No zz ratio for http traffic
-						if(cur_src->!IsEd2kClient()) {
+						if(cur_src->IsEd2kClient() == false) {
 							curClientReducedDownload = httpReudcedDownload;
 						}
 						//MORPH END   - Changed by Stulle, No zz ratio for http traffic
