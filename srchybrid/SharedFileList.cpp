@@ -33,6 +33,7 @@
 #include "Server.h"
 #include "UpDownClient.h"
 #include "PartFile.h"
+#include "Transferwnd.h" //leuk_he added for clearing when reloading. 
 #include "emuledlg.h"
 #include "SharedFilesWnd.h"
 #include "StringConversion.h"
@@ -390,8 +391,14 @@ void CSharedFileList::FindSharedFiles()
 					&& _taccess(cur_file->GetFilePath(), 0) == 0)
 				continue;
 			m_UnsharedFiles_map.SetAt(CSKey(cur_file->GetFileHash()), true);
+
 			listlock.Lock();
+			// leuk_he clear it from download list
+			if (cur_file ->IsKindOf(RUNTIME_CLASS(CPartFile))) 
+   				theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(static_cast<CPartFile*>(cur_file));
+			// leuk_he end clear it from download list. 
 			m_Files_map.RemoveKey(key);
+
 			m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
 			listlock.Unlock();
 		}
