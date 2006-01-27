@@ -238,7 +238,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						if (size >= sizeof(LoginAnswer_Struct)+8) {
 							// aux port login : we should use the 'standard' port of this server to advertize to other clients
 							ConnPort = *((uint32*)(packet + sizeof(LoginAnswer_Struct) + 4)) ;
-							cur_server->SetPort(ConnPort) ;
+							cur_server->SetPort((uint16)ConnPort) ;
 						}
 						//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 					}
@@ -252,10 +252,10 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					if (pServer)
 						pServer->SetTCPFlags(cur_server->GetTCPFlags());
 					*/
-					CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), rport);
+					CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),(uint16) rport);
 					if (pServer) {
  						pServer->SetTCPFlags(cur_server->GetTCPFlags());
-						if (ConnPort) pServer->SetPort(ConnPort);
+						if (ConnPort) pServer->SetPort((uint16)ConnPort);
 							theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
 							theApp.emuledlg->serverwnd->UpdateMyInfo();
 					}

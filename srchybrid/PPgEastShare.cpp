@@ -214,7 +214,7 @@ BOOL CPPgEastShare::OnApply()
 
 	thePrefs.shareall = m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 	thePrefs.m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
-	thePrefs.m_iPayBackFirstLimit = m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
+	thePrefs.m_iPayBackFirstLimit = (uint8)min(m_iPayBackFirstLimit,255);//MORPH - Added by SiRoB, Pay Back First Tweak, leuk_he is a uint8, limit it.
 	thePrefs.m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	thePrefs.m_bEnableChunkDots = m_bEnableChunkDots;//EastShare - Added by Pretender, Option for ChunkDots
 

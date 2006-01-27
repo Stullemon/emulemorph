@@ -139,7 +139,7 @@ int CFakecheck::LoadFromFile(){
 	return m_fakelist.GetCount();
 }
 
-bool CFakecheck::IsFake(uchar* Hash2test, uint64 lenght){
+bool CFakecheck::IsFake(uchar* Hash2test, uint64 ){
 	if (m_fakelist.GetCount() == 0)
 		return false;
 	Fakes_Struct** ppFound = (Fakes_Struct**)bsearch(&Hash2test, m_fakelist.GetData(), m_fakelist.GetCount(), sizeof(m_fakelist[0]), CmpFakeByHash_Lenght);
