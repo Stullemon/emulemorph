@@ -2549,7 +2549,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] <= iMinAvailablePartFrenquencyPrev) {
+			if (m_AvailPartFrequency[done] < iMinAvailablePartFrenquencyPrev) {
 				towrite |= (1<<i);
 				client->m_abyUpPartStatusHidden[done] = 0;
 			} else
