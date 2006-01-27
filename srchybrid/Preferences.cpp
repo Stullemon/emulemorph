@@ -3030,7 +3030,7 @@ void CPreferences::LoadPreferences()
 	
 	_stprintf(m_sTemplateFile,L"%s",ini.GetString(L"WebTemplateFile", GetConfigDir()+L"eMule.tmpl"));
 
-	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed");
+	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed|DI-Emule|eMule FX|ZamBoR 2"); // leuk_he: add some known spammers
 	commentFilter = ini.GetStringLong(L"CommentFilter",L"http://|https://|www.");
 	commentFilter.MakeLower();
 	filenameCleanups=ini.GetStringLong(L"FilenameCleanups",L"http|www.|.com|.de|.org|.net|shared|powered|sponsored|sharelive|filedonkey|");
