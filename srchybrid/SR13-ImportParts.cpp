@@ -106,6 +106,7 @@ bool CAddFileThread::SR13_ImportParts(){
 	
 	Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTSTART), m_PartsToImport.GetSize(), strFilePath);
 
+	bool importaborted = false;
 	for (UINT i = 0; i < (UINT)m_PartsToImport.GetSize(); i++){
 		uint16 partnumber = m_PartsToImport[i];
 		if (PARTSIZE*partnumber > fileSize)
@@ -143,7 +144,8 @@ bool CAddFileThread::SR13_ImportParts(){
 				Sleep(1);
 			};
 			
-			if(partSize!=PARTSIZE || m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS) {
+			importaborted = m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS;
+			if(partSize!=PARTSIZE || importaborted) {
 				break;
 			}
 		} catch (...) {
@@ -152,7 +154,7 @@ bool CAddFileThread::SR13_ImportParts(){
 			continue;
 		}
 	}
-	if (m_partfile->GetFileOp()!= PFOP_SR13_IMPORTPARTS)
+	if (importaborted)
 		Log(LOG_STATUSBAR, _T("Import aborted. %i parts imported to %s."), partsuccess, m_strFilename);
 	else
 		Log(LOG_STATUSBAR, _T("Import finished. %i parts imported to %s."), partsuccess, m_strFilename);
