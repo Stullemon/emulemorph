@@ -757,7 +757,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 
 //Morph Start - added by AndCycle, ICS
 // enkeyDEV: ICS
-void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool readHash){
+void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , bool readHash){
 	if (readHash){
 		uchar cfilehash[16];
 		data->ReadHash16(cfilehash);

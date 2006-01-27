@@ -310,7 +310,7 @@ void CDownloadQueue::StopPauseLastFile(int Mode, int Category) {
 	CPartFile*  pfile = NULL;
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)) {
 		CPartFile* cur_file = filelist.GetAt(pos);
-		if ((cur_file->GetStatus() < 4) && (cur_file->GetCategory() == Category || Category == -1)) {
+		if ((cur_file->GetStatus() < 4) && ((int)cur_file->GetCategory() == Category || Category == -1)) {
 			if (!pfile)
 				pfile = cur_file;
 			else {
@@ -655,7 +655,7 @@ UINT CDownloadQueue::GetHighestAvailableSourceCount(int nCat)
 	for (POSITION pos = filelist.GetHeadPosition(); pos != NULL; filelist.GetNext(pos))
 	{
 		CPartFile* curFile = filelist.GetAt(pos);
-		if (nCount < curFile->GetAvailableSrcCount() && (nCat == -1 || curFile->GetCategory() == nCat))
+		if (nCount < curFile->GetAvailableSrcCount() && (nCat == -1 || (int)curFile->GetCategory() == nCat))
 			nCount = curFile->GetAvailableSrcCount();
 	}
 
@@ -1081,7 +1081,7 @@ bool CDownloadQueue::IsPartFile(const CKnownFile* file) const
 }
 
 // SLUGFILLER: SafeHash
-bool CDownloadQueue::IsTempFile(const CString& rstrDirectory, const CString& rstrName) const
+bool CDownloadQueue::IsTempFile(const CString& , const CString& rstrName) const
 {
 	// do not share a part file from the temp directory, if there is still a corresponding entry in
 	// the download queue -- because that part file is not yet complete.
