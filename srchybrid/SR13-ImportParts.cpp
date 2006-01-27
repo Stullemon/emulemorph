@@ -52,7 +52,7 @@ bool CKnownFile::SR13_ImportParts(){
 		return false;
 	CString pathName=dlg.GetPathName();
 
-	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL, 0, CREATE_SUSPENDED);
+	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_LOWEST, 0, CREATE_SUSPENDED);
 	if (addfilethread){
 		partfile->SetFileOpProgress(0);
         addfilethread->SetValues(theApp.sharedfiles, partfile->GetPath(), partfile->m_hpartfile.GetFileName(), partfile);
@@ -63,12 +63,6 @@ bool CKnownFile::SR13_ImportParts(){
 		addfilethread->ResumeThread();
 	}
 	return true;
-}
-
-inline uint32 WriteToPartFile(CPartFile *partfile, const BYTE *data, uint64 start, uint64 end){
-	uint32 result;
-	result=partfile->WriteToBuffer(end-start+1, data, start, end, NULL, NULL);
-	return result;
 }
 
 // Special case for SR13-ImportParts
@@ -102,7 +96,6 @@ bool CAddFileThread::SR13_ImportParts(){
 	}
 
 	uint64 fileSize=f.GetLength();
-	uchar *partData=new uchar[PARTSIZE];
 	uint32 partSize;
 	uchar hash[16];
 	CKnownFile *kfcall=new CKnownFile;
@@ -113,63 +106,61 @@ bool CAddFileThread::SR13_ImportParts(){
 	
 	Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTSTART), m_PartsToImport.GetSize(), strFilePath);
 
-	try {
-		for (UINT i = 0; i < (UINT)m_PartsToImport.GetSize(); i++){
-			uint16 partnumber = m_PartsToImport[i];
-			m_partfile->FlushBuffer(true);
+	for (UINT i = 0; i < (UINT)m_PartsToImport.GetSize(); i++){
+		uint16 partnumber = m_PartsToImport[i];
+		if (PARTSIZE*partnumber > fileSize)
+			break;
+		BYTE* partData=new BYTE[PARTSIZE];
+		try {
 			try {
-				if (PARTSIZE*partnumber > fileSize)
-					break;
 				f.Seek((LONGLONG)PARTSIZE*partnumber,0);
 				partSize=f.Read(partData, PARTSIZE);
 			} catch (...) {
 				LogWarning(LOG_STATUSBAR, _T("Part %i: Not accessible (You may have to run scandisk to correct a bad cluster on your harddisk)."), partnumber);
+				delete[] partData;
 				continue;
 			}
 			kfcall->CreateHash(partData, partSize, hash);
-		
 			if (md4cmp(hash,m_DesiredHashes[i])==0){
-				WriteToPartFile(m_partfile, partData, (uint64)partnumber*PARTSIZE, (uint64)partnumber*PARTSIZE+partSize-1);
+				ImportPart_Struct* importpart = new ImportPart_Struct;
+				importpart->start = (uint64)partnumber*PARTSIZE;
+				importpart->end = (uint64)partnumber*PARTSIZE+partSize-1;
+				importpart->data = partData;
+				VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_IMPORTPART,(WPARAM)importpart,(LPARAM)m_partfile) );
 				//Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD), partnumber);
-				partsuccess++;	
-			} else if(md4cmp(hash,L"\xD7\xDE\xF2\x62\xA1\x27\xCD\x79\x09\x6A\x10\x8E\x7A\x9F\xC1\x38")){
-				WriteToPartFile(m_partfile, partData, (uint64)partnumber*PARTSIZE, (uint64)partnumber*PARTSIZE+partSize-1);
-				//LogWarning(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD), partnumber);
-				badpartsuccess++;
+				partsuccess++;
 			} else {
-				//Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH), partnumber);
+				delete[] partData;
+				partData = NULL;
 			}
+
 			if (theApp.emuledlg->IsRunning()){
 				UINT uProgress = (UINT)(i * 100 / m_DesiredHashes.GetSize());
 				VERIFY( PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)m_partfile) );
-		}
-			if(partSize!=PARTSIZE || m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS)
-			break;
-		}
-		if (m_partfile->GetFileOp()!= PFOP_SR13_IMPORTPARTS)
-			Log(LOG_STATUSBAR, _T("Import aborted. %i parts imported to %s."), partsuccess, m_strFilename);
-		else
-			Log(LOG_STATUSBAR, _T("Import finished. %i parts imported to %s."), partsuccess, m_strFilename);
-		
-		if(badpartsuccess>0){
-			switch(m_partfile->GetAICHHashset()->GetStatus()){
-			case AICH_TRUSTED:
-			case AICH_VERIFIED:
-			case AICH_HASHSETCOMPLETE:
-				Log(LOG_STATUSBAR, _T("AICH hash available. Advanced recovery pending."));
-				break;
-			default:
-				Log(LOG_STATUSBAR, _T("No AICH hash available. You may want to import file data once again latter."));
 			}
+			
+			while (m_partfile->GetTotalBufferData() >= PARTSIZE || m_partfile->IsFlushThread()) {
+				Sleep(1);
+			};
+			
+			if(partSize!=PARTSIZE || m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS) {
+				break;
+			}
+		} catch (...) {
+			if (partData != NULL)
+				delete[] partData;
+			continue;
 		}
-	} catch (...) {
-		//Could occure when partfile instance has been canceled
 	}
+	if (m_partfile->GetFileOp()!= PFOP_SR13_IMPORTPARTS)
+		Log(LOG_STATUSBAR, _T("Import aborted. %i parts imported to %s."), partsuccess, m_strFilename);
+	else
+		Log(LOG_STATUSBAR, _T("Import finished. %i parts imported to %s."), partsuccess, m_strFilename);
+
 	for (UINT i = 0; i < (UINT)m_DesiredHashes.GetSize(); i++)
 		delete m_DesiredHashes[i];
 
 	f.Close();
-	delete partData;
 	delete kfcall;
 
 	return true;

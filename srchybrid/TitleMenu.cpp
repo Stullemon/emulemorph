@@ -343,3 +343,13 @@ void CTitleMenu::FreeAPI()
 	SetMenuInfo = NULL;
 	GetMenuInfo = NULL;
 }
+
+//MORPH START - Added by SiRoB, Allow changing the text and icon
+BOOL CTitleMenu::ModifyMenuAndIcon(UINT nPosition, UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR lpszNewItem, LPCTSTR lpszIconName)
+{
+	BOOL bResult = CMenu::ModifyMenu(nPosition, nFlags, nIDNewItem, lpszNewItem);
+	if (bResult)
+		SetMenuBitmap(nFlags, nIDNewItem, lpszNewItem, lpszIconName);
+	return bResult;
+}
+//MORPH END  - Added by SiRoB, Allow changing the text and icon

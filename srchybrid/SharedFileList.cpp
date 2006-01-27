@@ -1324,17 +1324,9 @@ int CAddFileThread::Run()
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
 	if (m_partfile && m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS){
 		SR13_ImportParts();
-		if(theApp.emuledlg && theApp.emuledlg->IsRunning() &&
-			m_partfile && m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS){
-				m_partfile->SetFileOp(PFOP_HASHING);
-			}
-		// Completing will take care of hashing in case when
-		// user imported data were enough to complete file
-		if (m_partfile->GetStatus(false) == PS_COMPLETING){
-			//sLock1.Unlock(); //SafeHash
-			CoUninitialize();
-			return 0;
-		}
+		//sLock1.Unlock(); //SafeHash
+		CoUninitialize();
+		return 0;
 	}
 	// TODO: Test case when suposeddly correct, but actually broken verified data is
 	// completed with import and see if file recovers its started/paused state correctly

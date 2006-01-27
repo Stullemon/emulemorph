@@ -1,12 +1,19 @@
 --------------------------------------
-Changelog for eMule 0.46c MorphXT v7.8
+Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
-FIXED  : Crash on rename from explorer if file still displayed in transer list [leuk_he]
-ADDED  : Use highres thread scheduler (1 ms resolution instead of the default 10 ms) to get better SlotFocusing from zz mod [SiRoB]
+MERGED : Ported to 0.47a version [SiRoB/Stulle]
+
+FIXED  : (major) Crash on rename from explorer if file still displayed in transer list [leuk_he]
+FIXED  : (major) No more crash du to completed file (a very very old bug in SlugFiller code) [SiRoB]
+FIXED  : (minor) When there is only A4AF source and they are removed, display information are updated [SiRoB]
+FIXED  : (minor) GUI: file detail arround webcache stat is properly displayed [Stulle]
+
 ADDED  : USC: Don't open new slot when connection doesn't send any data [SiRoB]
 
 CHANGED: No FunnyNick for added HTTP sources [Stulle]
 CHANGED: No ZZ ratio for added HTTP sources [Stulle]
+CHANGED: WC: Support +4GBytes files [SiRoB]
+CHANGED: ImportPart: Reworked to be used and stopped at anytime [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.8

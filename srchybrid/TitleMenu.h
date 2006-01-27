@@ -36,6 +36,9 @@ public:
 	void AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu = false);
 	BOOL AppendMenu(UINT nFlags, UINT_PTR nIDNewItem = 0, LPCTSTR lpszNewItem = NULL, LPCTSTR lpszIconName = NULL);
 	BOOL InsertMenu(UINT nPosition, UINT nFlags, UINT_PTR nIDNewItem = 0, LPCTSTR lpszNewItem = NULL, LPCTSTR lpszIconName = NULL);
+	//MORPH START - Added by SiRoB, Allow changing the text and icon
+	BOOL ModifyMenuAndIcon(UINT nPosition, UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR lpszNewItem, LPCTSTR lpszIconName);
+	//MORPH END   - Added by SiRoB, Allow changing the text and icon
 
 	long GetColor() { return m_clLeft; }
 	void SetColor(long cl) { m_clLeft = cl; }

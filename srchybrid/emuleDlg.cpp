@@ -102,7 +102,7 @@
 #include "TextToSpeech.h"
 #include "Collection.h"
 #include "CollectionViewDialog.h"
-
+#include "SR13-ImportParts.h"
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
@@ -221,6 +221,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	// SLUGFILLER: SafeHash
 	ON_MESSAGE(TM_READBLOCKFROMFILEDONE, OnReadBlockFromFileDone) //MORPH - Added by SiRoB, ReadBlockFromFileThread
 	ON_MESSAGE(TM_FLUSHDONE, OnFlushDone) //MORPH - Added by SiRoB, Flush Thread
+	ON_MESSAGE(TM_IMPORTPART, OnImportPart) //MORPH START - Added by SiRoB, Import Part
 	ON_MESSAGE(TM_FRAMEGRABFINISHED, OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
 	ON_MESSAGE(TM_FILECOMPLETED, OnFileCompleted)
@@ -1767,6 +1768,20 @@ LRESULT CemuleDlg::OnFlushDone(WPARAM wParam,LPARAM lParam)
 	return 0;
 }
 //MORPH END   - Added by SiRoB, Flush Thread
+//MORPH START - Added by SiRoB, Import Part
+LRESULT CemuleDlg::OnImportPart(WPARAM wParam,LPARAM lParam)
+{
+	CPartFile* partfile = (CPartFile*) lParam;
+	if (theApp.m_app_state != APP_STATE_SHUTINGDOWN && theApp.downloadqueue->IsPartFile(partfile)) {	// could have been canceled 
+		ImportPart_Struct* importpart = (ImportPart_Struct*)wParam;
+		partfile->WriteToBuffer(importpart->end-importpart->start+1, importpart->data,importpart->start, importpart->end, NULL, NULL);
+	}
+	delete[] ((ImportPart_Struct*)wParam)->data;
+	delete	(ImportPart_Struct*)wParam;
+
+	return 0;
+}
+//MORPH END   - Added by SiRoB, Import Part
 LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown

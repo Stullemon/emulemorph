@@ -312,7 +312,7 @@ void CPartFile::Init(){
     m_random_update_wait = (uint32)(rand()/(RAND_MAX/1000));
     lastSwapForSourceExchangeTick = ::GetTickCount();
 	m_DeadSourceList.Init(false);
-	m_bIsFlushThread = false;
+	m_bIsFlushThread = false; //MORPH - Added by SiRoB, Import Part
 
 	// khaos::categorymod+
 	m_catResumeOrder=0;
@@ -1516,11 +1516,6 @@ bool CPartFile::SavePartFile()
 			return false;
 	}
 
-	//MORPH START - Added by SiRoB, Import Part
-	if (GetFileOp() == PFOP_SR13_IMPORTPARTS)
-		return false;
-	//MORPH END   - Added by SiRoB, Import Part
-	
 	// search part file
 	CFileFind ff;
 	CString searchpath(RemoveFileExtension(m_fullname));
@@ -5182,8 +5177,6 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start, uint64 end, Requested_Block_Struct *block, 
 								const CUpDownClient* client)
 {
-	WriteToBufferLocker.Lock(); //MORPH - Added by SiRoB, Import Part
-	
 	ASSERT( transize > 0 );
 	ASSERT( start <= end );
 
@@ -5205,7 +5198,6 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 	{
 		if (thePrefs.GetVerbose())
 			AddDebugLogLine(false, _T("PrcBlkPkt: Already written block %s; File=%s; %s"), DbgGetBlockInfo(start, end), GetFileName(), client->DbgGetClientInfo());
-		WriteToBufferLocker.Unlock(); //MORPH - Added by SiRoB, Import Part
 		return 0;
 	}
 
@@ -5281,15 +5273,8 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 	}
 
 	if (gaplist.IsEmpty())
-	//MORPH START - Added by SiRoB, Import Part
-	{
-		if (GetFileOp() == PFOP_SR13_IMPORTPARTS)
-			SetFileOp(PFOP_NONE);
-	//MORPH END   - Added by SiRoB, Import Part
 		FlushBuffer(true);
-	}//MORPH - Added by SiRoB, Import Part
 
-	WriteToBufferLocker.Unlock(); //MORPH - Added by SiRoB, Import Part
 	// Return the length of data written to the buffer
 	return lenData;
 }
@@ -5297,11 +5282,6 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 {
 	bool bIncreasedFile=false;
-	
-	//MORPH START - Added by SiRoB, Import Part
-	if (forcewait == false && GetFileOp() == PFOP_SR13_IMPORTPARTS)
-		return;
-	//MORPH END   - Added by SiRoB, Import Part
 	
 	// SLUGFILLER: SafeHash
 	if (forcewait) {	// Last chance to grab any ICH results
@@ -6777,9 +6757,6 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart)
 		ASSERT( false );
 		return;
 	}
-	//MORPH START - Added by SiRoB, Import Part
-	if (GetFileOp() != PFOP_SR13_IMPORTPARTS)
-	//MORPH END   - Added by SiRoB, Import Part
 	FlushBuffer(true, true, true);
 	uint32 length = PARTSIZE;
 	if ((ULONGLONG)PARTSIZE*(nPart+1) > m_hpartfile.GetLength()){
