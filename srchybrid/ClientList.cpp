@@ -984,7 +984,7 @@ CUpDownClientPtrList* CClientList::XpressOHCBRecipients(uint32 maxNrOfClients, c
 	// TODO: optimize this, dependent on further protocol development
 	POSITION pos1 = newClients->GetHeadPosition();
 	while (pos1 != NULL
-		&& toReturn->GetCount() <= maxNrOfClients)
+		&& (UINT)toReturn->GetCount() <= maxNrOfClients)
 		toReturn->AddTail(newClients->GetNext(pos1));
 
 	delete newClients;
