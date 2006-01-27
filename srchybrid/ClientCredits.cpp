@@ -400,12 +400,12 @@ void CClientCreditsList::LoadList()
 	uint8 prioOrderfile[totalLoadFile];
 
 	int	index = 0;
-	for(int curFile = 0; curFile < totalLoadFile; curFile++){
+	for(int curFile = 0; curFile < totalLoadFile && (curFile < 255); curFile++){
 		//check clients.met status
 		successLoadFile[curFile] = loadFile.Open(loadFileName[curFile], iOpenFlags, &fexp)!=0;
 		if (successLoadFile[curFile]){
 			loadFile.GetStatus(loadFileStatus[curFile]);
-			prioOrderfile[index++]=curFile;
+			prioOrderfile[index++]=(uint8)curFile;
 			loadFile.Close();
 		}
 	}

@@ -600,7 +600,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 							if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
 							data_out.WriteUInt16(0);
 
-						data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
+						data_out.WriteUInt16((uint16)theApp.uploadqueue->GetWaitingPosition(sender));
 						if (thePrefs.GetDebugClientUDPLevel() > 0)
 							DebugSend("OP__ReaskAck", sender);
 						Packet* response = new Packet(&data_out, OP_EMULEPROT);

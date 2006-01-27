@@ -375,7 +375,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 		//the res Array have one element to be the STOP
 		for(int cur_pos = 0; resID[cur_pos] != 65535; cur_pos++){
 
-			CountryIDtoFlagIndex.SetAt(countryID[cur_pos], cur_pos);
+			CountryIDtoFlagIndex.SetAt(countryID[cur_pos], (uint16)cur_pos);
 
 			iconHandle = LoadIcon(_hCountryFlagDll, MAKEINTRESOURCE(resID[cur_pos]));
 			if(iconHandle == NULL) throw CString(GetResString(IDS_IP2COUNTRY_ERROR5));
