@@ -383,7 +383,7 @@ void CKCSideBannerWnd::OnPaint()
 
 /////////////////////////////////////////////////////////////////////////////
 
-BOOL CKCSideBannerWnd::OnEraseBkgnd(CDC* pDC) 
+BOOL CKCSideBannerWnd::OnEraseBkgnd(CDC* /*pDC*/) 
 {
 	return TRUE;
 }
@@ -393,7 +393,7 @@ BOOL CKCSideBannerWnd::OnEraseBkgnd(CDC* pDC)
 void CKCSideBannerWnd::DrawBackground(CDC* pDC, CRect rect)
 {
 	CBrush				nBrush, *pOldBrush = NULL;
-	CPen				nPen, *pOldPen = NULL;
+//	CPen				nPen, *pOldPen = NULL;
 
 	// Flat fill...
 	if ( m_uFillFlag & KCSB_FILL_FLAT || ( (m_colBkg == m_colBkg2) && (m_uFillFlag & KCSB_FILL_GRADIENT) ))

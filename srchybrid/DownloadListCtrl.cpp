@@ -871,8 +871,8 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 		case 15: //WebCache
 			{
 				UINT wcsc = lpPartFile->GetWebcacheSourceCount();
-				UINT wcsc_our;
-				UINT wcsc_not_our;
+				UINT wcsc_our = 0;
+				UINT wcsc_not_our = 0;
 				if(thePrefs.IsExtControlsEnabled())
 				{
 				wcsc_our = lpPartFile->GetWebcacheSourceOurProxyCount();
@@ -2581,7 +2581,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					if (inputOrder.DoModal() == IDOK)
 					{
 					int newOrder = inputOrder.GetInputInt();
-						if  (newOrder < 0 || newOrder == file->GetCatResumeOrder()) break;
+						if  (newOrder < 0 || newOrder == (int)file->GetCatResumeOrder()) break;
 
 					file->SetCatResumeOrder(newOrder);
 					Invalidate(); // Display the new category.

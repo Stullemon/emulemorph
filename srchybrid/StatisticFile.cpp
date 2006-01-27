@@ -310,7 +310,7 @@ double CStatisticFile::GetEqualChanceValue()
 
 	//weight adjustment
 	if(theApp.uploadqueue->GetSuccessfullUpCount() > 0){
-		uint32 threshold = (UINT)(theStats.GetAvgUploadRate(AVG_SESSION)*1024*theApp.uploadqueue->GetAverageUpTime());
+		uint64 threshold = (UINT)(theStats.GetAvgUploadRate(AVG_SESSION)*1024*theApp.uploadqueue->GetAverageUpTime());
 		if(fileParent->GetFileSize() < threshold){
 			m_dLastEqualChanceBiasValue = 1+log((double)threshold/((uint64)fileParent->GetFileSize()%threshold+1));
 			m_dLastEqualChanceSemiValue /= m_dLastEqualChanceBiasValue;

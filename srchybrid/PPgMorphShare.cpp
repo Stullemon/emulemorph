@@ -321,7 +321,6 @@ LRESULT CPPgMorphShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM /*lParam*/)
 	}
 	return 0;
 }
-
 void CPPgMorphShare::OnHelp()
 {
 	//theApp.ShowHelp(0);

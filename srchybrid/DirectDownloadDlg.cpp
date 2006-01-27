@@ -215,7 +215,7 @@ void CDirectDownloadDlg::OnNMClickCats(NMHDR* /*pNMHDR*/, LRESULT *pResult)
 	hitinfo.pt = pt;
 
 	// Find the destination tab...
-	unsigned int nTab = m_cattabs.HitTest( &hitinfo );
+	int nTab = m_cattabs.HitTest( &hitinfo );
 	if( hitinfo.flags != TCHT_NOWHERE )
 		if(nTab==m_cattabs.GetCurSel())
 		{

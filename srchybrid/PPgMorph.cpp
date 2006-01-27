@@ -556,13 +556,13 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bAutoSetResumeOrder = m_bAutoSetResOrder;
 	thePrefs.m_bShowA4AFDebugOutput = m_bShowA4AFDebugOutput;
 	thePrefs.m_bSmartA4AFSwapping = m_bSmartA4AFSwapping;
-	thePrefs.m_iAdvancedA4AFMode = m_iAdvA4AFMode;
+	thePrefs.m_iAdvancedA4AFMode = (uint8)m_iAdvA4AFMode;
 	thePrefs.m_bSmallFileDLPush = m_bSmallFileDLPush;
-	thePrefs.m_iStartDLInEmptyCats = m_iResumeFileInNewCat;
+	thePrefs.m_iStartDLInEmptyCats = (uint8)m_iResumeFileInNewCat;
 	thePrefs.m_bUseAutoCat = m_bUseAutoCat;
 	thePrefs.m_bUseSaveLoadSources = m_bUseSLS;
 	// khaos::accuratetimerem+
-	thePrefs.m_iTimeRemainingMode = m_iTimeRemainingMode;
+	thePrefs.m_iTimeRemainingMode = (uint8)m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	//MORPH START - Added by SiRoB, ICS Optional

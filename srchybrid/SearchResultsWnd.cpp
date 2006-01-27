@@ -584,10 +584,10 @@ void CSearchResultsWnd::DownloadSelected(bool bPaused)
 			if (thePrefs.SmallFileDLPush() && parent->GetFileSize() < (uint64)154624)
 				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, 0);
 			else if (thePrefs.AutoSetResumeOrder())
-				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat)+1);
+				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, (uint16)(theApp.downloadqueue->GetMaxCatResumeOrder(useCat)+1));
 			else
 			// khaos::categorymod-
-			theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat));
+			theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, (uint16)(theApp.downloadqueue->GetMaxCatResumeOrder(useCat)));
 
 			// update parent and all childs
 			searchlistctrl.UpdateSources(parent);
@@ -1689,7 +1689,7 @@ void CSearchResultsWnd::OnNMClickCattab2(NMHDR* /*pNMHDR*/, LRESULT *pResult)
 	hitinfo.pt = pt;
 
 	// Find the destination tab...
-	unsigned int nTab = m_cattabs.HitTest( &hitinfo );
+	int nTab = m_cattabs.HitTest( &hitinfo );
 	if( hitinfo.flags != TCHT_NOWHERE )
 		if(nTab==m_cattabs.GetCurSel())
 		{

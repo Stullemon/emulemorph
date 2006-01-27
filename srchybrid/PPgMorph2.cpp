@@ -183,7 +183,6 @@ void CPPgMorph2::Localize(void)
 		GetDlgItem(IDC_URL_FOR_UPDATING_IP2COUNTRY)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING_IP2COUNTRY));
 		GetDlgItem(IDC_RESETIPCURL)->SetWindowText(GetResString(IDS_RESET));
 		//MORPH END - Added by Commander: IP2Country update
-
 	}
 }
 

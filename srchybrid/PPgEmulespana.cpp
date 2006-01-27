@@ -625,7 +625,7 @@ BOOL CPPgEmulespana::OnApply()
 	bool bRestartApp = false;
 
 	// Added by MoNKi [MoNKi: -Random Ports-]
-	 thePrefs.SetRandomPortsSafeResetOnRestartTime(m_iRandomPortsResetTime);
+	 thePrefs.SetRandomPortsSafeResetOnRestartTime((uint16)m_iRandomPortsResetTime);
 	// End MoNKi
 
 /*Commented by SiRoB
@@ -710,7 +710,7 @@ BOOL CPPgEmulespana::OnApply()
 		theApp.wapserver->ReloadTemplates();
 	}
 	if(m_iWapPort != thePrefs.GetWapPort()){
-		thePrefs.SetWapPort(m_iWapPort);
+		thePrefs.SetWapPort((uint16)m_iWapPort);
 		theApp.wapserver->RestartServer();
 	}
 	theApp.wapserver->StartServer();

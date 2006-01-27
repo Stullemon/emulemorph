@@ -111,7 +111,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, LPC
 			continue;
 		CString strPort = strLine.Left(pos);
 		strLine = strLine.Mid(pos+1);
-		uint16 wPort = _tstoi(strPort);
+		uint16 wPort = (uint16)_tstoi(strPort);
 		if (!wPort)
 			continue;
 		// khaos::kmod+ Src Ex Ver
@@ -125,7 +125,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, LPC
 		pos = strLine.Find(',');
 		if (pos == -1)
 			continue;
-		uint8 nSrcExchangeVer = _tstoi(strLine.Left(pos));
+		uint8 nSrcExchangeVer = (uint8)_tstoi(strLine.Left(pos));
 		strLine = strLine.Mid(pos+1);
 		pos = strLine.Find(':');
 		if (pos == -1)
@@ -139,7 +139,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, LPC
 		if (pos == -1 || strLine.GetLength() < 2)
 			continue;
 		CString strserverport = strLine.Left(pos);
-		uint16 wserverport = _tstoi(strserverport);
+		uint16 wserverport = (uint16)_tstoi(strserverport);
 		if (!wserverport)
 			continue;
 		CSourceData* newsource = new CSourceData(dwID, wPort, dwserverip, wserverport, strExpiration, nSrcExchangeVer);

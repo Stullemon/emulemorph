@@ -220,7 +220,7 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 		else if (tag->GetNameID()==0 && !CmpED2KTagName(tag->GetName(),"auxportslist")){
 			ASSERT( tag->IsStr() );
-			if (tag->IsStr())	realport = _tstoi(tag->GetStr());
+			if (tag->IsStr())	realport = (uint16)_tstoi(tag->GetStr());
 		}
 		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 		else{

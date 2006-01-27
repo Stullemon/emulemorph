@@ -718,7 +718,7 @@ BOOL CSlideBar::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* 
 		CListBoxST* pListBox = GetGroupListBox(m_iSelectedGroup);
 		ASSERT_VALID(pListBox);
 
-		if (pListBox->GetDlgCtrlID() == nID)
+		if ((UINT)pListBox->GetDlgCtrlID() == nID)
 		{
 			CWnd* pOwner = GetOwner();
 			ASSERT_VALID(pOwner);
