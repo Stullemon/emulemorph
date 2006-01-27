@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -39,7 +39,6 @@ struct StandardPacketQueueEntry {
 class CEMSocket : public CAsyncSocketEx, public ThrottledFileSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 	DECLARE_DYNAMIC(CEMSocket)
-
 public:
 	CEMSocket();
 	virtual ~CEMSocket();
@@ -61,13 +60,17 @@ public:
 	virtual UINT GetTimeOut() const;
 	virtual void SetTimeOut(UINT uTimeOut);
 
-	virtual BOOL Connect(LPCTSTR lpszHostAddress, UINT nHostPort);
+	virtual BOOL Connect(LPCSTR lpszHostAddress, UINT nHostPort);
 	virtual BOOL Connect(SOCKADDR* pSockAddr, int iSockAddrLen);
+
 	void InitProxySupport();
 	virtual void RemoveAllLayers();
+	const CString GetLastProxyError() const { return m_strLastProxyError; }
+	bool GetProxyConnectFailed() const { return m_bProxyConnectFailed; }
+
+	CString GetFullErrorMessage(DWORD dwError);
 
     DWORD GetLastCalledSend() { return lastCalledSend; }
-
     uint64 GetSentBytesCompleteFileSinceLastCallAndReset();
     uint64 GetSentBytesPartFileSinceLastCallAndReset();
     uint64 GetSentBytesControlPacketSinceLastCallAndReset();
@@ -80,7 +83,6 @@ public:
     uint32	GetNeededBytes(bool lowspeed);
 	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
 	float	GetBusyRatioTime() { return (float)(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))/(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)); };
-	uint32	GetDynLimit() { return dynLimit; };
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -89,7 +91,7 @@ public:
 #endif
 
 protected:
-	virtual int	OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nParam1, int nParam2);
+	virtual int	OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nCode, WPARAM wParam, LPARAM lParam);
 	
 	virtual void	DataReceived(const BYTE* pcData, UINT uSize);
 	virtual bool	PacketReceived(Packet* packet) = 0;
@@ -97,12 +99,12 @@ protected:
 	virtual void	OnClose(int nErrorCode);
 	virtual void	OnSend(int nErrorCode);	
 	virtual void	OnReceive(int nErrorCode);
-
 	uint8	byConnected;
 	UINT	m_uTimeOut;
-	bool	m_ProxyConnectFailed;
+	bool	m_bProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
-
+	CString m_strLastProxyError;
+	CCriticalSection sendLocker; //MORPH - Added by SiRoB, moved in protected seccion
 private:
     virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket);
 	void	ClearQueues();	
@@ -132,7 +134,7 @@ private:
 	CTypedPtrList<CPtrList, Packet*> controlpacket_queue;
 	CList<StandardPacketQueueEntry> standartpacket_queue;
     bool m_currentPacket_is_controlpacket;
-    CCriticalSection sendLocker;
+//    CCriticalSection sendLocker; //MORPH - Removed by SiRoB, moved in protected seccion
     uint64 m_numberOfSentBytesCompleteFile;
     uint64 m_numberOfSentBytesPartFile;
     uint64 m_numberOfSentBytesControlPacket;
@@ -151,6 +153,5 @@ private:
 	DWORD m_dwBusyDelta;
     DWORD m_dwNotBusy;
 	DWORD m_dwNotBusyDelta;
-	uint32 dynLimit;
     bool m_hasSent;
 };

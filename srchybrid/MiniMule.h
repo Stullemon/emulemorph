@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -52,6 +52,7 @@ protected:
 	void KillAutoCloseTimer();
 
 	void AutoSizeAndPosition(CSize sizClient);
+	void RestoreMainWindow();
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
@@ -78,4 +79,5 @@ protected:
 	afx_msg void OnClose();
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
 };

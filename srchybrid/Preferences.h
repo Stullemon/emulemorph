@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -46,9 +46,9 @@ struct Preferences_Ext_Struct{
 struct ProxySettings{
 	uint16 type;
 	uint16 port;
-	TCHAR name[50];
-	CHAR user[50];
-	CHAR password[50];
+	CStringA	name;
+	CStringA	user;
+	CStringA	password;
 	bool EnablePassword;
 	bool UseProxy;
 };
@@ -57,7 +57,7 @@ struct ProxySettings{
 #pragma pack(1)
 struct CategoryViewFilter_Struct{
 	//		General View Filters
-	uint8	nFromCats;  // 0 == All; 1 == Unassigned; 2 == This Cat Only
+	UINT	nFromCats;  // 0 == All; 1 == Unassigned; 2 == This Cat Only
 	bool	bSuspendFilters;
 	//		File Type View Filters
 	bool	bVideo;
@@ -75,18 +75,18 @@ struct CategoryViewFilter_Struct{
 	bool	bCompleting;
 	bool	bSeenComplet; //MORPH - Added by SiRoB, Seen Complet filter
 	//		File Size View Filters
-	uint32	nFSizeMin;
-	uint32	nFSizeMax;
-	uint32	nRSizeMin;
-	uint32	nRSizeMax;
+	uint64	nFSizeMin;
+	uint64	nFSizeMax;
+	uint64	nRSizeMin;
+	uint64	nRSizeMax;
 	//		Time Remaining Filters
 	uint32	nTimeRemainingMin;
 	uint32	nTimeRemainingMax;
 	//		Source Count Filters
-	uint16	nSourceCountMin;
-	uint16	nSourceCountMax;
-	uint16	nAvailSourceCountMin;
-	uint16	nAvailSourceCountMax;
+	UINT	nSourceCountMin;
+	UINT	nSourceCountMax;
+	UINT	nAvailSourceCountMin;
+	UINT	nAvailSourceCountMax;
 	//		Advanced Filter Mask
 	CString	sAdvancedFilterMask;
 };
@@ -106,12 +106,11 @@ struct Category_Struct{
 	TCHAR	incomingpath[MAX_PATH];
 	TCHAR	title[64];
 	TCHAR	comment[255];
-
 	DWORD	color;
-	uint8	prio;
+	UINT	prio;
 	// khaos::kmod+ Category Advanced A4AF Mode
 	// 0 = Default, 1 = Balancing, 2 = Stacking
-	uint8	iAdvA4AFMode;
+	UINT	iAdvA4AFMode;
 	bool	bResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume file only in the same category
 	// View Filter Struct
 	CategoryViewFilter_Struct viewfilters;
@@ -142,11 +141,15 @@ public:
 	// ZZ:UploadSpeedSense <--
 	static	uint16	maxupload;
 	static	uint16	maxdownload;
+	static	LPCSTR	m_pszBindAddrA;
+	static	CStringA m_strBindAddrA;
+	static	LPCWSTR	m_pszBindAddrW;
+	static	CStringW m_strBindAddrW;
 	static	uint16	port;
 	static	uint16	udpport;
 	static	uint16	nServerUDPPort;
-	static	uint16	maxconnections;
-	static	uint16	maxhalfconnections;
+	static	UINT	maxconnections;
+	static	UINT	maxhalfconnections;
 	static	bool	m_bConditionalTCPAccept;
 	static	bool	reconnect;
 	static	bool	m_bUseServerPriorities;
@@ -160,7 +163,7 @@ public:
 	static	bool	m_bAutoConnectToStaticServersOnly; // Barry
 	static	bool	autotakeed2klinks;	   // Barry
 	static	bool	addnewfilespaused;	   // Barry
-	static	uint8	depth3D;			   // Barry
+	static	UINT	depth3D;			   // Barry
 	static	bool	m_bEnableMiniMule;
 	static	int		m_iStraightWindowStyles;
 	static	bool	m_bRTLWindowsLayout;
@@ -168,9 +171,9 @@ public:
 	static	CString	m_strSkinProfileDir;
 	static	bool	m_bAddServersFromServer;
 	static	bool	m_bAddServersFromClients;
-	static	uint16	maxsourceperfile;
-	static	uint16	trafficOMeterInterval;
-	static	uint16	statsInterval;
+	static	UINT	maxsourceperfile;
+	static	UINT	trafficOMeterInterval;
+	static	UINT	statsInterval;
 	static	uchar	userhash[16];
 	static	WINDOWPLACEMENT EmuleWindowPlacement;
 	static	int		maxGraphDownloadRate;
@@ -179,6 +182,7 @@ public:
 	static	bool	beepOnError;
 	static	bool	confirmExit;
 	static	DWORD	m_adwStatsColors[15];
+	static  bool	m_bIconflashOnNewMessage;
 
 	static	bool	splashscreen;
 	static	bool	startupsound;//Commander - Added: Enable/Disable Startupsound
@@ -313,7 +317,7 @@ public:
 	static	float	cumConnAvgUpRate;
 	static	float	cumConnMaxAvgUpRate;
 	static	float	cumConnMaxUpRate;
-	static	uint64	cumConnRunTime;
+	static	time_t	cumConnRunTime;
 	static	uint32	cumConnNumReconnects;
 	static	uint32	cumConnAvgConnections;
 	static	uint32	cumConnMaxConnLimitReached;
@@ -335,10 +339,10 @@ public:
 	static	uint64	cumSharedLargestFileSize;
 
 	// Save the date when the statistics were last reset...
-	static	__int64 stat_datetimeLastReset;
+	static	time_t	stat_datetimeLastReset;
 
 	// Save new preferences for PPgStats
-	static	uint8	statsConnectionsGraphRatio; // This will store the divisor, i.e. for 1:3 it will be 3, for 1:20 it will be 20.
+	static	UINT	statsConnectionsGraphRatio; // This will store the divisor, i.e. for 1:3 it will be 3, for 1:20 it will be 20.
 	// Save the expanded branches of the stats tree
 	static	TCHAR	statsExpandedTreeItems[256];
 
@@ -372,9 +376,9 @@ public:
 	static	UINT	m_uDeadServerRetries;
 	static	DWORD	m_dwServerKeepAliveTimeout;
 	// -khaos--+++> Changed data type to avoid overflows
-	static	uint16	statsMax;
+	static	UINT	statsMax;
 	// <-----khaos-
-	static	uint8	statsAverageMinutes;
+	static	UINT	statsAverageMinutes;
 
 	static	CString	notifierConfiguration;
 	static	bool	notifierOnDownloadFinished;
@@ -392,7 +396,7 @@ public:
 	static	TCHAR	m_sircchannamefilter[50];
 	static	bool	m_bircaddtimestamp;
 	static	bool	m_bircusechanfilter;
-	static	uint16	m_iircchanneluserfilter;
+	static	UINT	m_iircchanneluserfilter;
 	static	TCHAR	m_sircperformstring[255];
 	static	bool	m_bircuseperform;
 	static	bool	m_birclistonconnect;
@@ -420,7 +424,7 @@ public:
 	static	int		m_iLastMainWndDlgID;
 	static	bool	m_bRestoreLastLogPane;
 	static	int		m_iLastLogPaneID;
-	static	uint16	MaxConperFive;
+	static	UINT	MaxConperFive;
 	static	bool	checkDiskspace;
 	static	UINT	m_uMinFreeDiskSpace;
 	static	bool	m_bSparsePartFiles;
@@ -431,7 +435,7 @@ public:
 	static	bool	enableNEWS;
 	//MORPH END   - Added by SiRoB, XML News [O²]
 	static	bool	m_bFullVerbose;
-	static  uint8	m_byLogLevel;
+	static  int		m_byLogLevel;
 	static	bool	m_bDebugSourceExchange; // Sony April 23. 2003, button to keep source exchange msg out of verbose log
 	static	bool	m_bLogBannedClients;
 	static	bool	m_bLogRatingDescReceived;
@@ -465,7 +469,7 @@ public:
 	static	bool	m_bExtControls;
 	static	bool	m_bTransflstRemain;
 
-	static	uint8	versioncheckdays;
+	static	UINT	versioncheckdays;
 	static	bool	showRatesInTitle;
 
 	static	TCHAR	TxtEditor[256];
@@ -491,19 +495,19 @@ public:
 	static	bool	msgonlyfriends;
 	static	bool	msgsecure;
 
-	static	uint8	filterlevel;
+	static	UINT	filterlevel;
 	static	UINT	m_iFileBufferSize;
 	static	UINT	m_iQueueSize;
 	static	int		m_iCommitFiles;
 
-	static	uint16	maxmsgsessions;
+	static	UINT	maxmsgsessions;
 	static	uint32	versioncheckLastAutomatic;
 	//MORPH START - Added by SiRoB, New Version check
 	static	uint32	mversioncheckLastAutomatic;
 	//MORPH START - Added by SiRoB, New Version check
-	static	TCHAR	messageFilter[512];
+	static	CString	messageFilter;
 	static	CString	commentFilter;
-	static	TCHAR	filenameCleanups[512];
+	static	CString	filenameCleanups;
 	static	TCHAR	datetimeformat[64];
 	static	TCHAR	datetimeformat4log[64];
 	static	LOGFONT m_lfHyperText;
@@ -517,6 +521,7 @@ public:
 
 	static	int		m_iExtractMetaData;
 	static	bool	m_bAdjustNTFSDaylightFileTime;
+	static  bool    m_bAllocFull;
 
 	// Web Server [kuchin]
 	static	TCHAR	m_sWebPassword[256];
@@ -532,8 +537,6 @@ public:
 
 	static	TCHAR	m_sTemplateFile[MAX_PATH];
 	static	ProxySettings proxy; // deadlake PROXYSUPPORT
-	static	bool	m_bIsASCWOP;
-	static	bool	m_bShowProxyErrors;
 	static  bool	m_bAllowAdminHiLevFunc;
 	static	CUIntArray m_aAllowedRemoteAccessIPs;
 
@@ -546,7 +549,7 @@ public:
 	static	bool	m_bShowDwlPercentage;
 	static	bool	m_bShowClientPercentage; //Commander - Added: Client Percentage
 	static	bool	m_bRemoveFinishedDownloads;
-	static	uint16	m_iMaxChatHistory;
+	static	UINT	m_iMaxChatHistory;
 	static	bool	m_bShowActiveDownloadsBold;
 
 	static	int		m_iSearchMethod;
@@ -576,53 +579,53 @@ public:
 	static bool	enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	static bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	static bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
-	static uint8	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
+	static int	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	static bool	m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
 	static bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
-	static uint8	m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	static int	m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	static bool m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
-	static uint16	maxconnectionsswitchborder;
+	static int	maxconnectionsswitchborder;
 	//EastShare Start- Added by Pretender, TBH-AutoBackup
 	static bool	autobackup;
 	static bool	autobackup2;
 	//EastShare End - Added by Pretender, TBH-AutoBackup
 
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
-	static uint16	m_iDownloadDataRateAverageTime;
-	static uint16	m_iUploadDataRateAverageTime;
+	static int	m_iDownloadDataRateAverageTime;
+	static int	m_iUploadDataRateAverageTime;
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	static uint16	globaldataratefriend;
-	static uint16	globaldataratepowershare;
-	static uint16	maxclientdataratefriend;
-	static uint16	maxclientdataratepowershare;
-	static uint16	maxclientdatarate;
+	static int	globaldataratefriend;
+	static int	globaldataratepowershare;
+	static int	maxclientdataratefriend;
+	static int	maxclientdataratepowershare;
+	static int	maxclientdatarate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	static uint8	LowIdRetries;
-	static uint8	LowIdRetried;
+	static int	LowIdRetries;
+	static int	LowIdRetried;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	static uint8	m_iSpreadbarSetStatus;
+	static int	m_iSpreadbarSetStatus;
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	static uint8	hideOS;
+	static int	hideOS;
 	static bool	selectiveShare;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 
 	static bool	infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
-	static uint8	ShareOnlyTheNeed;
+	static int	ShareOnlyTheNeed;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	static uint8	PowerShareLimit;
+	static int	PowerShareLimit;
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	
 	//MORPH START - Added by SiRoB, Show Permissions
-	static uint8	permissions;
+	static int	permissions;
 	//MORPH END   - Added by SiRoB, Show Permissions
 	
 	//EastShare Start - PreferShareAll by AndCycle
@@ -673,7 +676,7 @@ public:
     //Commander - Added: IP2Country Auto-updating - End
 
 	//EastShare - added by AndCycle, IP to Country
-	static uint8	m_iIP2CountryNameMode;
+	static int	m_iIP2CountryNameMode;
 	static bool		m_bIP2CountryShowFlag;
 	//EastShare - added by AndCycle, IP to Country
 
@@ -729,10 +732,10 @@ public:
 
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	static bool		m_bSUCEnabled;
-	static uint16		m_iSUCHigh;
-	static uint16		m_iSUCLow;
-	static uint16		m_iSUCPitch;
-	static uint16		m_iSUCDrift;
+	static int		m_iSUCHigh;
+	static int		m_iSUCLow;
+	static int		m_iSUCPitch;
+	static int		m_iSUCDrift;
 	static bool		m_bSUCLog;
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 
@@ -757,6 +760,8 @@ public:
 
         static bool     m_bA4AFSaveCpu; // ZZ:DownloadManager
         
+        static bool     m_bHighresTimer;
+
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	static bool		m_bUPnPNat;
 	static bool		m_bUPnPNatWeb;
@@ -787,8 +792,8 @@ public:
 	static TCHAR	m_sWapTemplateFile[MAX_PATH];
 	static bool		m_bWapEnabled;
 	static uint16	m_nWapPort;
-	static uint8	m_iWapGraphWidth;
-	static uint8	m_iWapGraphHeight;
+	static int		m_iWapGraphWidth;
+	static int		m_iWapGraphHeight;
 	static bool		m_bWapFilledGraphs;
 	static int		m_iWapMaxItemsInPages;
 	static bool		m_bWapSendImages;
@@ -806,7 +811,7 @@ public:
 	static	CStringList addresses_list;
 
 	static	int		m_iDbgHeap;
-	static	uint8	m_nWebMirrorAlertLevel;
+	static	UINT	m_nWebMirrorAlertLevel;
 	static	bool	m_bRunAsUser;
 	static	bool	m_bPreferRestrictedOverUser;
 
@@ -917,8 +922,9 @@ public:
 
 	static	const CString& GetAppDir()				{return appdir;}
 	static	LPCTSTR GetIncomingDir()				{return incomingdir;}
-	static	LPCTSTR GetTempDir(uint8 id=0)			{return (LPCTSTR)tempdir.GetAt( (id<tempdir.GetCount())?id:0 );}
-	static	uint8	GetTempDirCount()				{return tempdir.GetCount();}
+	static	LPCTSTR GetTempDir(int id = 0)				{return (LPCTSTR)tempdir.GetAt((id < tempdir.GetCount()) ? id : 0);}
+	static	int		GetTempDirCount()					{return tempdir.GetCount();}
+	static	bool	CanFSHandleLargeFiles();
 	static	const CString& GetConfigDir()			{return configdir;}
 	static	LPCTSTR GetConfigFile();
 	static	const CString& GetWebServerDir()		{return m_strWebServerDir;}
@@ -945,6 +951,8 @@ public:
 	static	void	SetUserNick(LPCTSTR pszNick);
 	static	int		GetMaxUserNickLength()			{return 50;}
 
+	static	LPCSTR	GetBindAddrA()						{return m_pszBindAddrA; }
+	static	LPCWSTR	GetBindAddrW()						{return m_pszBindAddrW; }
 	//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
 	// emulEspaña: Modified by MoNKi [MoNKi: -UPnPNAT Support-]
 	/*
@@ -969,18 +977,16 @@ public:
 	static	bool	IsICHEnabled()	{return ICH;}
 	static	bool	GetAutoUpdateServerList()		{return m_bAutoUpdateServerList;}
 	static	bool	UpdateNotify()	{return updatenotify;}
-	static	bool	DoMinToTray()	{return mintotray;}
+	static	bool	GetMinToTray()						{return mintotray;}
 	static	bool	DoAutoConnect() {return autoconnect;}
 	static	void	SetAutoConnect( bool inautoconnect) {autoconnect = inautoconnect;}
 	static	bool	GetAddServersFromServer()		{return m_bAddServersFromServer;}
 	static	bool	GetAddServersFromClients()		{return m_bAddServersFromClients;}
 	static	bool*	GetMinTrayPTR() {return &mintotray;}
-	static	uint16	GetTrafficOMeterInterval() { return trafficOMeterInterval;}
-	static	void	SetTrafficOMeterInterval(uint16 in) { trafficOMeterInterval=in;}
-	static	uint16	GetStatsInterval() { return statsInterval;}
-	static	void	SetStatsInterval(uint16 in) { statsInterval=in;}
-	static	void	Add2TotalDownloaded(uint64 in) {totalDownloadedBytes+=in;}
-	static	void	Add2TotalUploaded(uint64 in) {totalUploadedBytes+=in;}
+	static	UINT	GetTrafficOMeterInterval()			{return trafficOMeterInterval;}
+	static	void	SetTrafficOMeterInterval(UINT in)	{trafficOMeterInterval=in;}
+	static	UINT	GetStatsInterval()					{return statsInterval;}
+	static	void	SetStatsInterval(UINT in)			{statsInterval=in;}
 
 	// -khaos--+++> Many, many, many, many methods.
 	static	void	SaveStats(int bBackUp = 0);
@@ -989,13 +995,6 @@ public:
 	static	bool	LoadStats(int loadBackUp = 0);
 	static	void	ResetCumulativeStatistics();
 
-	//		Functions from base code that update original cumulative stats, now obsolete. (KHAOS)
-	//void	Add2TotalDownloaded(uint64 in) {totalDownloadedBytes+=in;}
-	//void	Add2TotalUploaded(uint64 in) {totalUploadedBytes+=in;}
-	//		End functions from base code.
-
-	//		Add to, increment and replace functions.  They're all named Add2 for the sake of some kind of naming
-	//		convention.
 	static	void	Add2DownCompletedFiles()			{ cumDownCompletedFiles++; }
 	static	void	SetConnMaxAvgDownRate(float in)		{ cumConnMaxAvgDownRate = in; }
 	static	void	SetConnMaxDownRate(float in)		{ cumConnMaxDownRate = in; }
@@ -1019,7 +1018,6 @@ public:
 	static	void	Add2SavedFromCompression(uint64 in) { sesSavedFromCompression += in;}
 	static	void	Add2SessionPartsSavedByICH(int in)	{ sesPartsSavedByICH += in;}
 
-	//		Functions that return stats stuff...
 	//		Saved stats for cumulative downline overhead
 	static	uint64	GetDownOverheadTotal()			{ return cumDownOverheadTotal;}
 	static	uint64	GetDownOverheadFileReq()		{ return cumDownOverheadFileReq;}
@@ -1054,6 +1052,7 @@ public:
 	static	uint32	GetDownC_SuccessfulSessions()	{ return cumDownSuccessfulSessions;}
 	static	uint32	GetDownC_FailedSessions()		{ return cumDownFailedSessions;}
 	static	uint32	GetDownC_AvgTime()				{ return cumDownAvgTime;}
+	
 	//		Session download stats
 	static	uint32	GetDownSessionCompletedFiles()	{ return sesDownCompletedFiles;}
 	static	uint32	GetDownS_SuccessfulSessions()	{ return sesDownSuccessfulSessions;}
@@ -1083,6 +1082,7 @@ public:
 	static	uint64	GetCumUpData_AMULE()			{ return (cumUpData_AMULE +			sesUpData_AMULE );}
 	static	uint64	GetCumUpData_EMULECOMPAT()		{ return (cumUpData_EMULECOMPAT +	sesUpData_EMULECOMPAT );}
 	static	uint64	GetCumUpData_SHAREAZA()			{ return (cumUpData_SHAREAZA +			sesUpData_SHAREAZA );}
+	
 	// Session client breakdown stats for sent bytes
 	static	uint64	GetUpSessionClientData()		{ return   sesUpData_EDONKEY 
 															  +	sesUpData_EDONKEYHYBRID 
@@ -1118,7 +1118,7 @@ public:
 	// Cumulative DS breakdown stats for sent bytes...
 	static	uint64	GetUpTotalDataFile()			{ return (GetCumUpData_File() +				GetCumUpData_Partfile() );}
 	static	uint64	GetCumUpData_File()				{ return (cumUpData_File +			sesUpData_File );}
-	static	uint64	GetCumUpData_Partfile()			{ return (sesUpData_Partfile +		sesUpData_Partfile );}
+	static	uint64	GetCumUpData_Partfile()				{return (cumUpData_Partfile +		sesUpData_Partfile );}
 	// Session DS breakdown stats for sent bytes...
 	static	uint64	GetUpSessionDataFile()			{ return (sesUpData_File +			sesUpData_Partfile );}
 	static	uint64	GetUpData_File()				{ return sesUpData_File;}
@@ -1146,6 +1146,7 @@ public:
 	// MORPH START - Added by Commander, WebCache 1.2e
 	static	uint64	GetCumDownData_WEBCACHE()		{ return (cumDownData_WEBCACHE +		sesDownData_WEBCACHE);} //jp webcache statistics
 	// MORPH END - Added by Commander, WebCache 1.2e
+	
 	// Session client breakdown stats for received bytes
 	static	uint64	GetDownSessionClientData()		{ return   sesDownData_EDONKEY 
 															  + sesDownData_EDONKEYHYBRID 
@@ -1192,7 +1193,7 @@ public:
 	static	float	GetConnAvgUpRate()				{ return cumConnAvgUpRate;}
 	static	float	GetConnMaxAvgUpRate()			{ return cumConnMaxAvgUpRate;}
 	static	float	GetConnMaxUpRate()				{ return cumConnMaxUpRate;}
-	static	uint64	GetConnRunTime()				{ return cumConnRunTime;}
+	static	time_t	GetConnRunTime()					{return cumConnRunTime;}
 	static	uint32	GetConnNumReconnects()			{ return cumConnNumReconnects;}
 	static	uint32	GetConnAvgConnections()			{ return cumConnAvgConnections;}
 	static	uint32	GetConnMaxConnLimitReached()	{ return cumConnMaxConnLimitReached;}
@@ -1214,22 +1215,20 @@ public:
 	static	uint64	GetSharedLargestFileSize()		{ return cumSharedLargestFileSize;}
 
 	//		Get the long date/time when the stats were last reset
-	static	__int64 GetStatsLastResetLng()			{ return stat_datetimeLastReset;}
+	static	time_t GetStatsLastResetLng()				{return stat_datetimeLastReset;}
 	static	CString GetStatsLastResetStr(bool formatLong = true);
 	static	UINT	GetStatsSaveInterval()			{ return statsSaveInterval; }
 
 	//		Get and Set our new preferences
-	static	void	SetStatsMax(uint16 in)						{ statsMax = in; }
-	static	void	SetStatsConnectionsGraphRatio(uint8 in)		{ statsConnectionsGraphRatio = in; }
-	static	uint8	GetStatsConnectionsGraphRatio()				{ return statsConnectionsGraphRatio; }
+	static	void	SetStatsMax(UINT in)				{statsMax = in;}
+	static	void	SetStatsConnectionsGraphRatio(UINT in) {statsConnectionsGraphRatio = in;}
+	static	UINT	GetStatsConnectionsGraphRatio()		{return statsConnectionsGraphRatio;}
 	static	void	SetExpandedTreeItems(CString in)			{ _stprintf(statsExpandedTreeItems,_T("%s"),in); }
 	static	CString GetExpandedTreeItems()						{ return statsExpandedTreeItems; }
-	// <-----khaos- End Statistics Methods
 
-	//		Original Statistics Functions
 	static	uint64	GetTotalDownloaded()		{return totalDownloadedBytes;}
 	static	uint64	GetTotalUploaded()			{return totalUploadedBytes;}
-	//		End Original Statistics Functions
+
 	static	bool	IsErrorBeepEnabled()		{return beepOnError;}
 	static	bool	IsConfirmExitEnabled()		{return confirmExit;}
 	static	bool	UseSplashScreen()			{return splashscreen;}
@@ -1245,9 +1244,9 @@ public:
 
 	static	uint16	GetMaxDownload();
 	static	uint64	GetMaxDownloadInBytesPerSec(bool dynamic = false);
-	static	uint16	GetMaxConnections()			{return maxconnections;}
-	static	uint16	GetMaxHalfConnections()		{return maxhalfconnections;}
-	static	uint16	GetMaxSourcePerFileDefault(){return maxsourceperfile;}
+	static	UINT	GetMaxConnections()					{return maxconnections;}
+	static	UINT	GetMaxHalfConnections()				{return maxhalfconnections;}
+	static	UINT	GetMaxSourcePerFileDefault()		{return maxsourceperfile;}
 	static	UINT	GetDeadServerRetries()		{return m_uDeadServerRetries;}
 	static	DWORD	GetServerKeepAliveTimeout() {return m_dwServerKeepAliveTimeout;}
 	static	bool	GetConditionalTCPAccept()	{return m_bConditionalTCPAccept;}
@@ -1265,7 +1264,7 @@ public:
 
 	static	bool	IsDoubleClickEnabled()				{return transferDoubleclick;}
 	static	EViewSharedFilesAccess CanSeeShares(void) {return m_iSeeShares;}
-	static	uint8	GetToolTipDelay(void)				{return m_iToolDelayTime;}
+	static	UINT	GetToolTipDelay(void)				{return m_iToolDelayTime;}
 	static	bool	IsBringToFront()					{return bringtoforeground;}
 
 	static	UINT	GetSplitterbarPosition()			{return splitterbarPosition;}
@@ -1291,7 +1290,7 @@ public:
 	static	void	SetSplitterbarPositionShared(UINT pos) {splitterbarPositionShared=pos;}
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 	// -khaos--+++> Changed datatype to avoid overflows
-	static	uint16	GetStatsMax()						{return statsMax;}
+	static	UINT	GetStatsMax()						{return statsMax;}
 	// <-----khaos-
 	static	bool	UseFlatBar()						{return (depth3D==0);}
 	static	int		GetStraightWindowStyles()			{return m_iStraightWindowStyles;}
@@ -1302,8 +1301,8 @@ public:
 	static	const CString& GetSkinProfileDir()			{return m_strSkinProfileDir;}
 	static	void	SetSkinProfileDir(LPCTSTR pszDir)	{m_strSkinProfileDir = pszDir; }
 
-	static	uint8	GetStatsAverageMinutes()			{return statsAverageMinutes;}
-	static	void	SetStatsAverageMinutes(uint8 in)	{statsAverageMinutes=in;}
+	static	UINT	GetStatsAverageMinutes()			{return statsAverageMinutes;}
+	static	void	SetStatsAverageMinutes(UINT in)	{statsAverageMinutes=in;}
 
 	static	const CString& GetNotifierConfiguration()	{return notifierConfiguration;}
 	static	void	SetNotifierConfiguration(LPCTSTR pszConfigPath) {notifierConfiguration = pszConfigPath;}
@@ -1321,12 +1320,12 @@ public:
 	static	bool	GetRTLWindowsLayout()				{return m_bRTLWindowsLayout;}
 
 	static	CString GetIRCNick()						{return m_sircnick;}
-	static	void	SetIRCNick( TCHAR in_nick[] )		{ _tcscpy(m_sircnick,in_nick);}
+	static	void	SetIRCNick(LPCTSTR in_nick)			{_tcscpy(m_sircnick, in_nick);}
 	static	CString GetIRCServer()						{return m_sircserver;}
 	static	bool	GetIRCAddTimestamp()				{return m_bircaddtimestamp;}
 	static	CString GetIRCChanNameFilter()				{return m_sircchannamefilter;}
 	static	bool	GetIRCUseChanFilter()				{return m_bircusechanfilter;}
-	static	uint16	GetIRCChannelUserFilter()			{return m_iircchanneluserfilter;}
+	static	UINT	GetIRCChannelUserFilter()			{return m_iircchanneluserfilter;}
 	static	CString GetIrcPerformString()				{return m_sircperformstring;}
 	static	bool	GetIrcUsePerform()					{return m_bircuseperform;}
 	static	bool	GetIRCListOnConnect()				{return m_birclistonconnect;}
@@ -1389,7 +1388,7 @@ public:
 	static	bool	GetShowCopyEd2kLinkCmd()			{return m_bShowCopyEd2kLinkCmd;}
 
 	// Barry
-	static	uint16	Get3DDepth() { return depth3D;}
+	static	UINT	Get3DDepth()						{return depth3D;}
 	static	bool	AutoTakeED2KLinks() {return autotakeed2klinks;}
 	static	bool	AddNewFilesPaused() {return addnewfilespaused;}
 
@@ -1403,7 +1402,7 @@ public:
 	static	bool	SetAllStatsColors(int iCount, const DWORD* pdwColors);
 	static	void	ResetStatsColor(int index);
 
-	static	void	SetMaxConsPerFive(uint16 in)		{MaxConperFive=in;}
+	static	void	SetMaxConsPerFive(UINT in)			{MaxConperFive=in;}
 	static	LPLOGFONT GetHyperTextLogFont()				{return &m_lfHyperText;}
 	static	void	SetHyperTextFont(LPLOGFONT plf)		{m_lfHyperText = *plf;}
 	static	LPLOGFONT GetLogFont()						{return &m_lfLogText;}
@@ -1415,8 +1414,8 @@ public:
 	static	COLORREF GetLogUSCColor()					{return m_crLogUSC;}
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
-	static	uint16	GetMaxConperFive()					{return MaxConperFive;}
-	static	uint16	GetDefaultMaxConperFive();
+	static	UINT	GetMaxConperFive()					{return MaxConperFive;}
+	static	UINT	GetDefaultMaxConperFive();
 
 	static	bool	IsSafeServerConnectEnabled()		{return m_bSafeServerConnect;}
 	static	void	SetSafeServerConnectEnabled(bool in){m_bSafeServerConnect=in;}
@@ -1434,14 +1433,14 @@ public:
 	static	bool	GetSparsePartFiles()				{return m_bSparsePartFiles;}
 	static	void	SetSparsePartFiles(bool bEnable)	{m_bSparsePartFiles = bEnable;}
 
-	static	void	SetMaxUpload(uint16 in);
-	static	void	SetMaxDownload(uint16 in);
+	static	void	SetMaxUpload(UINT in);
+	static	void	SetMaxDownload(UINT in);
 
 	static	WINDOWPLACEMENT GetEmuleWindowPlacement() {return EmuleWindowPlacement; }
 	static	void	SetWindowLayout(WINDOWPLACEMENT in) {EmuleWindowPlacement=in; }
 
 	static	bool	GetAutoConnectToStaticServersOnly() {return m_bAutoConnectToStaticServersOnly;}
-	static	uint8	GetUpdateDays()			{return versioncheckdays;}
+	static	UINT	GetUpdateDays()						{return versioncheckdays;}
 	static	uint32	GetLastVC()				{return versioncheckLastAutomatic;}
 	static	void	UpdateLastVC();
 	//MORPH START - Added by SiRoB, New Version check
@@ -1449,9 +1448,9 @@ public:
 	static	void	UpdateLastMVC();
 	//MORPH END   - Added by SiRoB, New Version check
 	static	int		GetIPFilterLevel()		{ return filterlevel;}
-	static	CString GetMessageFilter()		{ return CString(messageFilter);}
+	static	const CString& GetMessageFilter()			{return messageFilter;}
 	static	const CString& GetCommentFilter(){ return commentFilter; }
-	static	CString GetFilenameCleanups()	{ return CString(filenameCleanups);}
+	static	const CString& GetFilenameCleanups()		{return filenameCleanups;}
 
 	static	bool	ShowRatesOnTitle()		{ return showRatesInTitle;}
 	static	void	LoadCats();
@@ -1470,8 +1469,8 @@ public:
 	static	void	SetCatFilterNeg(int index, bool val);
 	*/
 	static	Category_Struct* GetCategory(int index) { if (index>=0 && index<catMap.GetCount()) return catMap.GetAt(index); else return NULL;}
-	static	TCHAR*	GetCatPath(uint8 index) { return catMap.GetAt(index)->incomingpath;}
-	static	DWORD	GetCatColor(uint8 index)	{ if (index>=0 && index<catMap.GetCount()) return catMap.GetAt(index)->color; else return 0;}
+	static	TCHAR*	GetCatPath(int index)				{return catMap.GetAt(index)->incomingpath;}
+	static	DWORD	GetCatColor(int index)				{if (index>=0 && index<catMap.GetCount()) return catMap.GetAt(index)->color; else return 0;}
 
 	static	bool	GetPreviewOnIconDblClk() { return m_bPreviewOnIconDblClk; }
 	static	bool	ShowRatingIndicator()	{ return indicateratings;}
@@ -1505,16 +1504,16 @@ public:
 	static  const CUIntArray& GetAllowedRemoteAccessIPs()	{ return m_aAllowedRemoteAccessIPs; }
 	static	uint32	GetMaxWebUploadFileSizeMB()				{ return m_iWebFileUploadSizeLimitMB; }
 
-	static	void	SetMaxSourcesPerFile(uint16 in)			{ maxsourceperfile=in;}
-	static	void	SetMaxConnections(uint16 in)			{ maxconnections =in;}
-	static	void	SetMaxHalfConnections(uint16 in)		{ maxhalfconnections =in;}
+	static	void	SetMaxSourcesPerFile(UINT in)		{maxsourceperfile=in;}
+	static	void	SetMaxConnections(UINT in)			{maxconnections =in;}
+	static	void	SetMaxHalfConnections(UINT in)		{maxhalfconnections =in;}
 	static	bool	IsSchedulerEnabled()					{ return scheduler;}
 	static	void	SetSchedulerEnabled(bool in)			{ scheduler=in;}
 	static	bool	GetDontCompressAvi()					{ return dontcompressavi;}
 
 	static	bool	MsgOnlyFriends()						{ return msgonlyfriends;}
 	static	bool	MsgOnlySecure()							{ return msgsecure;}
-	static	uint16	GetMsgSessionsMax()						{ return maxmsgsessions;}
+	static	UINT	GetMsgSessionsMax()					{return maxmsgsessions;}
 	static	bool	IsSecureIdentEnabled()					{ return m_bUseSecureIdent;} // use clientcredits->CryptoAvailable() to check if crypting is really available and not this function
 	static	bool	IsAdvSpamfilterEnabled()				{ return m_bAdvancedSpamfilter;}
 	static	CString GetTemplate()							{ return CString(m_sTemplateFile);}
@@ -1533,31 +1532,15 @@ public:
 	static	void	SetMMPort(uint16 uPort)					{ m_nMMPort=uPort; }
 
 	// deadlake PROXYSUPPORT
-	static	const ProxySettings& GetProxy()					{ return proxy; }
+	static	const ProxySettings& GetProxySettings()		{return proxy;}
 	static	void	SetProxySettings(const ProxySettings& proxysettings) { proxy = proxysettings; }
-
-	//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
-	/*
-	static	uint16	GetListenPort()							{ if (m_UseProxyListenPort) return ListenPort; else return port; }
-	*/
-	static	uint16	GetListenPort()							{ if (m_UseProxyListenPort) return ListenPort; else return GetPort(); }
-	//MORPH END   - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
-
-	static	void	SetListenPort(uint16 uPort)				{ ListenPort = uPort; m_UseProxyListenPort = true; }
-	static	void	ResetListenPort()						{ ListenPort = 0; m_UseProxyListenPort = false; }
-	static	void	SetUseProxy(bool in)					{ proxy.UseProxy=in;}
-	static	bool	GetShowProxyErrors()					{ return m_bShowProxyErrors; }
-	static	void	SetShowProxyErrors(bool bEnable)		{ m_bShowProxyErrors = bEnable; }
-
-	static	bool	IsProxyASCWOP()							{ return m_bIsASCWOP;}
-	static	void	SetProxyASCWOP(bool in)					{ m_bIsASCWOP=in;}
 
 	static	bool	ShowCatTabInfos()						{ return showCatTabInfos;}
 	static	void	ShowCatTabInfos(bool in)				{ showCatTabInfos=in;}
 
 	static	bool	AutoFilenameCleanup()						{ return autofilenamecleanup;}
 	static	void	AutoFilenameCleanup(bool in)				{ autofilenamecleanup=in;}
-	static	void	SetFilenameCleanups(CString in)				{ _stprintf(filenameCleanups,_T("%s"),in);}
+	static	void	SetFilenameCleanups(CString in)		{filenameCleanups=in;}
 
 	static	bool	GetResumeSameCat()							{ return resumeSameCat;}
 	static	bool	IsGraphRecreateDisabled()					{ return dontRecreateGraphs;}
@@ -1565,7 +1548,7 @@ public:
 	static	void	SetExtControls(bool in)						{ m_bExtControls=in;}
 	static	bool	GetRemoveFinishedDownloads()				{ return m_bRemoveFinishedDownloads;}
 
-	static	uint16	GetMaxChatHistoryLines()					{ return m_iMaxChatHistory;}
+	static	UINT	GetMaxChatHistoryLines()			{return m_iMaxChatHistory;}
 	static	bool	GetUseAutocompletion()						{ return m_bUseAutocompl;}
 	static	bool	GetUseDwlPercentage()						{ return m_bShowDwlPercentage;}
 	static	void	SetUseDwlPercentage(bool in)				{ m_bShowDwlPercentage=in;}
@@ -1621,11 +1604,13 @@ public:
 
     static bool     GetA4AFSaveCpu()                            { return m_bA4AFSaveCpu; } // ZZ:DownloadManager
 
+    static bool     GetHighresTimer()                   {return m_bHighresTimer;}
+
 	static	CString	GetHomepageBaseURL()						{ return GetHomepageBaseURLForLevel(GetWebMirrorAlertLevel()); }
 	static	CString	GetVersionCheckBaseURL();					
 	static	void	SetWebMirrorAlertLevel(uint8 newValue)		{ m_nWebMirrorAlertLevel = newValue; }
 	static bool	IsDefaultNick(const CString strCheck);
-	static	uint8	GetWebMirrorAlertLevel();
+	static	UINT	GetWebMirrorAlertLevel();
 	static bool		UseSimpleTimeRemainingComputation()			{ return m_bUseOldTimeRemaining;}
 
 	static	bool	IsRunAsUserEnabled();
@@ -1652,7 +1637,7 @@ public:
 	static	bool	GetLogFilteredIPs()					{return m_bVerbose && m_bLogFilteredIPs;}
 	static	bool	GetLogFileSaving()					{return m_bVerbose && m_bLogFileSaving;}
     static	bool	GetLogA4AF()    					{return m_bVerbose && m_bLogA4AF;} // ZZ:DownloadManager
-	static	bool	GetLogUlDlEvents()					{return m_bVerbose && m_bLogUlDlEvents;} // MORPH - Added by Commander, WebCache 1.2e
+	static	bool	GetLogUlDlEvents()					{return m_bVerbose && m_bLogUlDlEvents;}
 	static	bool	GetLogWebCacheEvents()				{return m_bVerbose && m_bLogWebCacheEvents;}//JP log webcache events
 	static	bool	GetLogICHEvents()					{return m_bVerbose && m_bLogICHEvents;}//JP log ICH events
 	static	bool	GetUseDebugDevice()					{return m_bUseDebugDevice;}
@@ -1664,7 +1649,7 @@ public:
 	static	int		GetDebugClientUDPLevel()			{return m_iDebugClientUDPLevel;}
 	static	int		GetDebugClientKadUDPLevel()			{return m_iDebugClientKadUDPLevel;}
 	static	int		GetDebugSearchResultDetailLevel()	{return m_iDebugSearchResultDetailLevel;}
-	static	uint8	GetVerboseLogPriority()	{return	m_byLogLevel;} // hard coded now, will of course be selectable later
+	static	int		GetVerboseLogPriority()				{return	m_byLogLevel;}
 
 	// Firewall settings
 	static  bool	IsOpenPortsOnStartupEnabled()		{return m_bOpenPortsOnStartUp; }
@@ -1683,10 +1668,13 @@ public:
 	static	CString	GetNotifierMailReceiver()			{return m_strNotifierMailReceiver;}
 
 	static	void	SetNotifierSendMail(bool nv)		{m_bNotifierSendMail = nv;}
+	static  bool	DoFlashOnNewMessage()				{return m_bIconflashOnNewMessage;}
 	static  void	ImportOldTableSetup();
 	static  void	IniCopy(CString si, CString di);
 
 	static	void	EstimateMaxUploadCap(uint32 nCurrentUpload);
+	static  bool	GetAllocCompleteMode()				{return m_bAllocFull;}
+	static  void	SetAllocCompleteMode(bool in)		{m_bAllocFull=in;}
 
 	static	bool	IsUSSLog() {return m_bDynUpLog;} //MORPH - Added by SiRoB, ZZ Upload system (USS)
 
@@ -1706,11 +1694,11 @@ public:
 	static	bool GetEnableDownloadInRed()	{ return enableDownloadInRed; } //MORPH - Added by IceCream, show download in red
 	static	bool GetEnableAntiLeecher()		{ return enableAntiLeecher; } //MORPH - Added by IceCream, enable Anti-leecher
 	
-	static	uint8	GetCreditSystem()	{return creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
+	static	int		GetCreditSystem()	{return creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
 	static	bool	IsEqualChanceEnable()	{ return m_bEnableEqualChanceForEachFile;}	//Morph - added by AndCycle, Equal Chance For Each File
 	static	int  GetKnownMetDays()	{return m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	static	bool IsAutoDynUpSwitching()	{return isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
-	static	uint8  GetPowerShareMode()	{return m_iPowershareMode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	static	int  GetPowerShareMode()	{return m_iPowershareMode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	static	bool	IsPSinternalPrioEnable()	{return m_bPowershareInternalPrio;} //Morph - added by AndCyle, selective PS internal Prio
 	//EastShare START - Pretender, TBH-AutoBackup
 	static	bool    GetAutoBackup()	{ return autobackup;}
@@ -1718,7 +1706,7 @@ public:
 	static	void    SetAutoBackup(bool in) { autobackup = in;}
 	static	void    SetAutoBackup2(bool in) { autobackup2 = in;}
 	//EastShare END - Pretender, TBH-AutoBackup
-	static	uint16	MaxConnectionsSwitchBorder() {return maxconnectionsswitchborder;}//MORPH - Added by Yun.SF3, Auto DynUp changing
+	static	int	MaxConnectionsSwitchBorder() {return maxconnectionsswitchborder;}//MORPH - Added by Yun.SF3, Auto DynUp changing
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	static	bool	IsSUCDoesWork();
 	static	bool	IsSUCEnabled()				{return m_bSUCEnabled;}
@@ -1726,10 +1714,10 @@ public:
 	static	void	SetSUCEnabled(bool newValue){m_bSUCEnabled = newValue;}
 	//MORPH END - Added by Yun.SF3, Auto DynUp changing
 	static	bool	IsSUCLog()					{return m_bSUCLog;}
-	static	uint16	GetSUCHigh()				{return m_iSUCHigh;}
-	static	uint16	GetSUCLow()					{return m_iSUCLow;}
-	static	uint16	GetSUCDrift()				{return m_iSUCDrift;}
-	static	uint16	GetSUCPitch()				{return m_iSUCPitch;}
+	static	int		GetSUCHigh()				{return m_iSUCHigh;}
+	static	int		GetSUCLow()					{return m_iSUCLow;}
+	static	int		GetSUCDrift()				{return m_iSUCDrift;}
+	static	int		GetSUCPitch()				{return m_iSUCPitch;}
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	//MORPH START - Added by SiRoB, ZZ Ratio
 	static	uint8	IsZZRatioDoesWork();
@@ -1758,32 +1746,32 @@ public:
 	static bool IsAutoUPdateIP2CountryEnabled()		{ return AutoUpdateIP2Country; } //Commander - Added: IP2Country Auto-updating
 
 	//EastShare - added by AndCycle, IP to Country
-	uint8	GetIP2CountryNameMode()	{return m_iIP2CountryNameMode;}
+	int	GetIP2CountryNameMode()	{return m_iIP2CountryNameMode;}
 	static bool	IsIP2CountryShowFlag()				{return m_bIP2CountryShowFlag;}
 	//EastShare - added by AndCycle, IP to Country
-	static	void	SetMinUpload(uint16 in); //MORPH - Added by SiRoB, (SUC) & (USS)
+	static	void	SetMinUpload(UINT in); //MORPH - Added by SiRoB, (SUC) & (USS)
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	static	void	SetLowIdRetried()	{LowIdRetried--;}
 	static	void	ResetLowIdRetried()	{LowIdRetried = LowIdRetries;}
-	static	uint8	GetLowIdRetried()	{return LowIdRetried;}
-	static	uint8	GetLowIdRetries()	{return LowIdRetries;}
+	static	int	GetLowIdRetried()	{return LowIdRetried;}
+	static	int	GetLowIdRetries()	{return LowIdRetries;}
 	//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	static	uint8	GetSpreadbarSetStatus()	{return m_iSpreadbarSetStatus;}
+	static	int	GetSpreadbarSetStatus()	{return m_iSpreadbarSetStatus;}
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	static	uint8	GetHideOvershares()		{return hideOS;}
+	static	int	GetHideOvershares()		{return hideOS;}
 	static	bool	IsSelectiveShareEnabled()	{return selectiveShare;}
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 	static	bool	IsInfiniteQueueEnabled()		{return infiniteQueue;}	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
-	static	uint8	GetShareOnlyTheNeed()	{return ShareOnlyTheNeed;}
+	static	int	GetShareOnlyTheNeed()	{return ShareOnlyTheNeed;}
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	static	uint8	GetPowerShareLimit() {return PowerShareLimit;}
+	static	int	GetPowerShareLimit() {return PowerShareLimit;}
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Show Permissions
-	static	uint8	GetPermissions()	{return permissions;}
+	static	int	GetPermissions()	{return permissions;}
 	//MORPH END   - Added by SiRoB, Show Permissions
 	//EastShare Start - PreferShareAll by AndCycle
 	static	bool	ShareAll()			{return shareall;}	// SLUGFILLER: preferShareAll
@@ -1891,8 +1879,6 @@ protected:
 	//MORPH END   - Added by SiRoB, XML News [O²]
 	static	Preferences_Ext_Struct* prefsExt;
 	static	WORD m_wWinVer;
-	static	bool m_UseProxyListenPort;
-	static	uint16	ListenPort;
 	static	CArray<Category_Struct*,Category_Struct*> catMap;
 	
 	static void	CreateUserHash();
@@ -1900,7 +1886,7 @@ protected:
 	static int	GetRecommendedMaxConnections();
 	static void LoadPreferences();
 	static void SavePreferences();
-	static CString GetHomepageBaseURLForLevel(uint8 nLevel);
+	static CString GetHomepageBaseURLForLevel(int nLevel);
 public:
 	//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 	static	bool	IsUPnPEnabled()						{ return m_bUPnPNat; }
@@ -1947,8 +1933,8 @@ public:
 	static uint16	GetWapPort()					{ return m_nWapPort; }
 	static void		SetWapPort(uint16 uPort)		{ m_nWapPort=uPort; }
 	static const CString& GetWapServerDir() 		{return m_strWapServerDir;}
-	static uint8	GetWapGraphWidth()				{ return m_iWapGraphWidth; }
-	static uint8	GetWapGraphHeight()				{ return m_iWapGraphHeight; }
+	static int		GetWapGraphWidth()				{ return m_iWapGraphWidth; }
+	static int		GetWapGraphHeight()				{ return m_iWapGraphHeight; }
 	static void		SetWapGraphWidth(int width)		{ m_iWapGraphWidth=width; }
 	static void		SetWapGraphHeight(int height)	{ m_iWapGraphHeight=height; }
 	static bool		GetWapGraphsFilled()			{ return m_bWapFilledGraphs; }

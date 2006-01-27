@@ -36,6 +36,6 @@ protected:
 	afx_msg void OnDDClicked();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-public:
-	afx_msg void OnBnClickedRunasuser();
+	afx_msg void OnBnClickedRunAsUser();
+	afx_msg void OnDestroy();
 };

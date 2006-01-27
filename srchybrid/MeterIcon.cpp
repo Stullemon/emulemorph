@@ -33,10 +33,8 @@ CMeterIcon::CMeterIcon()
 CMeterIcon::~CMeterIcon()
 {
 	// free color list memory
-	if(m_pLimits)
-		delete []m_pLimits;
-	if(m_pColors)
-		delete []m_pColors;
+	delete[] m_pLimits;
+	delete[] m_pColors;
 }
 
 COLORREF CMeterIcon::GetMeterColor(int nLevel) const
@@ -286,14 +284,12 @@ bool CMeterIcon::SetColorLevels(const int* pLimits, const COLORREF* pColors, int
 // pLimits is an array of int that contain the upper limit for the corresponding color
 {// begin SetColorLevels
 	// free exsisting memory
-	if(m_pLimits){
-		delete []m_pLimits;
-		m_pLimits = NULL; // 'new' may throw an exception
-	}
-	if(m_pColors){
-		delete []m_pColors;
-		m_pColors = NULL; // 'new' may throw an exception
-	}
+	delete[] m_pLimits;
+	m_pLimits = NULL; // 'new' may throw an exception
+	
+	delete[] m_pColors;
+	m_pColors = NULL; // 'new' may throw an exception
+
 	// allocate new memory
 	m_pLimits = new int[nEntries];
 	m_pColors = new COLORREF[nEntries];

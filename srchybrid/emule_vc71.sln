@@ -5,13 +5,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "emule", "emule_vc71.vcproj"
 EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
-		Beta = Beta
 		Debug = Debug
 		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{584EA69D-3443-4197-8994-364880FC1B9B}.Beta.ActiveCfg = Beta|Win32
-		{584EA69D-3443-4197-8994-364880FC1B9B}.Beta.Build.0 = Beta|Win32
 		{584EA69D-3443-4197-8994-364880FC1B9B}.Debug.ActiveCfg = Debug|Win32
 		{584EA69D-3443-4197-8994-364880FC1B9B}.Debug.Build.0 = Debug|Win32
 		{584EA69D-3443-4197-8994-364880FC1B9B}.Release.ActiveCfg = Release|Win32

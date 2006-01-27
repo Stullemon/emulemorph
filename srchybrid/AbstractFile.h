@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include <list>
+#include "opcodes.h"
 
 /*
 					   CPartFile
@@ -61,13 +62,18 @@ public:
 	void SetFileHash(const uchar* pucFileHash);
 	bool HasNullHash() const;
 
-	uint32 GetFileSize() const { return m_nFileSize; }
-	virtual void SetFileSize(uint32 nFileSize) { m_nFileSize = nFileSize; }
+	EMFileSize		GetFileSize() const					{ return m_nFileSize; }
+	virtual void	SetFileSize(EMFileSize nFileSize)	{ m_nFileSize = nFileSize; }
+	bool			IsLargeFile() const					{ return m_nFileSize > (uint64)OLD_MAX_EMULE_FILE_SIZE; }
 
 	uint32 GetIntTagValue(uint8 tagname) const;
 	uint32 GetIntTagValue(LPCSTR tagname) const;
 	bool GetIntTagValue(uint8 tagname, uint32& ruValue) const;
+	uint64 GetInt64TagValue(uint8 tagname) const;
+	uint64 GetInt64TagValue(LPCSTR tagname) const;
+	bool GetInt64TagValue(uint8 tagname, uint64& ruValue) const;
 	void SetIntTagValue(uint8 tagname, uint32 uValue);
+	void SetInt64TagValue(uint8 tagname, uint64 uValue);
 	const CString& GetStrTagValue(uint8 tagname) const;
 	const CString& GetStrTagValue(LPCSTR tagname) const;
 	void SetStrTagValue(uint8 tagname, LPCTSTR);
@@ -83,12 +89,12 @@ public:
 
 	bool	HasComment() const { return m_bHasComment; }
 	void	SetHasComment(bool in) { m_bHasComment = in; }
-	uint32	UserRating() const { return m_uUserRating; }
+	UINT	UserRating() const { return m_uUserRating; }
 	bool	HasRating()	const { return m_uUserRating > 0; }
 	bool	HasBadRating()	const { return ( HasRating() && (m_uUserRating < 2)); }
-	void	SetUserRating(uint32 in) { m_uUserRating = in; }
+	void	SetUserRating(UINT in) { m_uUserRating = in; }
 	const CString& GetFileComment() /*const*/;
-	uint8	GetFileRating() /*const*/;
+	UINT	GetFileRating() /*const*/;
 	void	LoadComment();
 	virtual void	UpdateFileRatingCommentAvail() = 0;
 
@@ -104,11 +110,11 @@ public:
 protected:
 	CString m_strFileName;
 	uchar	m_abyFileHash[16];
-	uint32	m_nFileSize;
+	EMFileSize	m_nFileSize;
 	CString m_strComment;
-	uint8	m_uRating;
+	UINT	m_uRating;
 	bool	m_bCommentLoaded;
-	uint8	m_uUserRating;
+	UINT	m_uUserRating;
 	bool	m_bHasComment;
 	CString m_strFileType;
 	CArray<CTag*, CTag*> taglist;

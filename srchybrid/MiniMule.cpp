@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -71,6 +71,7 @@ BEGIN_MESSAGE_MAP(CMiniMule, CDHtmlDialog)
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
+	ON_WM_NCLBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 BEGIN_EVENTSINK_MAP(CMiniMule, CDHtmlDialog)
@@ -113,7 +114,7 @@ CMiniMule::~CMiniMule()
 {
 }
 
-STDMETHODIMP CMiniMule::GetOptionKeyPath(LPOLESTR* pchKey, DWORD dw)
+STDMETHODIMP CMiniMule::GetOptionKeyPath(LPOLESTR* /*pchKey*/, DWORD /*dw*/)
 {
 	TRACE(_T("%hs\n"), __FUNCTION__);
 
@@ -174,7 +175,7 @@ void CMiniMule::DoDataExchange(CDataExchange* pDX)
 	CDHtmlDialog::DoDataExchange(pDX);
 }
 
-BOOL CMiniMule::CreateControlSite(COleControlContainer* pContainer, COleControlSite** ppSite, UINT nID, REFCLSID clsid)
+BOOL CMiniMule::CreateControlSite(COleControlContainer* pContainer, COleControlSite** ppSite, UINT /*nID*/, REFCLSID /*clsid*/)
 {
 	CMuleBrowserControlSite *pBrowserSite = new CMuleBrowserControlSite(pContainer, this);
 	if (!pBrowserSite)
@@ -373,14 +374,15 @@ void CMiniMule::UpdateContent(UINT uUpDatarate, UINT uDownDatarate)
 	SetElementHtml(_T("freeSpace"), CComBSTR(CastItoXBytes(GetFreeTempSpace(-1), false, false)));
 }
 
-STDMETHODIMP CMiniMule::TranslateUrl(DWORD dwTranslate, OLECHAR* pchURLIn, OLECHAR** ppchURLOut)
+STDMETHODIMP CMiniMule::TranslateUrl(DWORD /*dwTranslate*/, OLECHAR* pchURLIn, OLECHAR** ppchURLOut)
 {
+	UNREFERENCED_PARAMETER(pchURLIn);
 	TRACE(_T("%hs: %ls\n"), __FUNCTION__, pchURLIn);
 	*ppchURLOut = NULL;
 	return S_FALSE;
 }
 
-void CMiniMule::_OnBeforeNavigate2(LPDISPATCH pDisp, VARIANT* URL, VARIANT* Flags, VARIANT* TargetFrameName, VARIANT* PostData, VARIANT* Headers, BOOL* Cancel)
+void CMiniMule::_OnBeforeNavigate2(LPDISPATCH pDisp, VARIANT* URL, VARIANT* /*Flags*/, VARIANT* /*TargetFrameName*/, VARIANT* /*PostData*/, VARIANT* /*Headers*/, BOOL* Cancel)
 {
 	CString strURL(V_BSTR(URL));
 	TRACE(_T("%hs: %s\n"), __FUNCTION__, strURL);
@@ -565,6 +567,7 @@ void CMiniMule::AutoSizeAndPosition(CSize sizClient)
 			ptWnd.x = sizDesktop.cx - 8 - rcWnd.Width();
 			ptWnd.y = sizDesktop.cy - rcTaskbar.Height() - 8 - rcWnd.Height();
 	}
+
 	SetWindowPos(NULL, ptWnd.x, ptWnd.y, rcWnd.Width(), rcWnd.Height(), SWP_NOZORDER | SWP_SHOWWINDOW);
 }
 
@@ -601,9 +604,8 @@ void CMiniMule::OnTimer(UINT nIDEvent)
 	CDHtmlDialog::OnTimer(nIDEvent);
 }
 
-HRESULT CMiniMule::OnRestoreMainWindow(IHTMLElement* pElement)
+void CMiniMule::RestoreMainWindow()
 {
-	CCounter cc(m_iInCallback);
 	if (theApp.emuledlg->IsRunning() && !theApp.emuledlg->IsWindowVisible())
 	{
 		if (!theApp.emuledlg->IsPreferencesDlgOpen())
@@ -615,10 +617,23 @@ HRESULT CMiniMule::OnRestoreMainWindow(IHTMLElement* pElement)
 		else
 			MessageBeep(MB_OK);
 	}
+}
+
+void CMiniMule::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
+{
+	CDHtmlDialog::OnNcLButtonDblClk(nHitTest, point);
+	if (nHitTest == HTCAPTION)
+		RestoreMainWindow();
+}
+
+HRESULT CMiniMule::OnRestoreMainWindow(IHTMLElement* /*pElement*/)
+{
+	CCounter cc(m_iInCallback);
+	RestoreMainWindow();
 	return S_OK;
 }
 
-HRESULT CMiniMule::OnOpenIncomingFolder(IHTMLElement* pElement)
+HRESULT CMiniMule::OnOpenIncomingFolder(IHTMLElement* /*pElement*/)
 {
 	CCounter cc(m_iInCallback);
 	if (theApp.emuledlg->IsRunning())
@@ -630,7 +645,7 @@ HRESULT CMiniMule::OnOpenIncomingFolder(IHTMLElement* pElement)
 	return S_OK;
 }
 
-HRESULT CMiniMule::OnOptions(IHTMLElement* pElement)
+HRESULT CMiniMule::OnOptions(IHTMLElement* /*pElement*/)
 {
 	CCounter cc(m_iInCallback);
 	if (theApp.emuledlg->IsRunning())
@@ -645,14 +660,14 @@ HRESULT CMiniMule::OnOptions(IHTMLElement* pElement)
 	return S_OK;
 }
 
-STDMETHODIMP CMiniMule::ShowContextMenu(DWORD dwID, POINT* ppt, IUnknown* pcmdtReserved, IDispatch* pdispReserved)
+STDMETHODIMP CMiniMule::ShowContextMenu(DWORD /*dwID*/, POINT* /*ppt*/, IUnknown* /*pcmdtReserved*/, IDispatch* /*pdispReserved*/)
 {
 	CCounter cc(m_iInCallback);
 	// Avoid IE context menu
 	return S_OK;	// S_OK = Host displayed its own user interface (UI). MSHTML will not attempt to display its UI.
 }
 
-STDMETHODIMP CMiniMule::TranslateAccelerator(LPMSG lpMsg, const GUID* pguidCmdGroup, DWORD nCmdID)
+STDMETHODIMP CMiniMule::TranslateAccelerator(LPMSG lpMsg, const GUID* /*pguidCmdGroup*/, DWORD /*nCmdID*/)
 {
 	CCounter cc(m_iInCallback);
 	// Allow only some basic keys

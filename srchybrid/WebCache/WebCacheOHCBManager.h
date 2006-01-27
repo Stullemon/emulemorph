@@ -35,9 +35,10 @@ public:
 		uint32 clientIP,
 		uint16 clientPort,
 		const byte* fileHash,
-		uint32 startOffset,
-		uint32 endOffset,
-		byte* key)
+		uint64 startOffset,
+		uint64 endOffset,
+		byte* key,
+		bool isLargeFile)
 	{
 		this->proxyIP = proxyIP;
 		this->clientIP = clientIP;
@@ -46,6 +47,7 @@ public:
 		this->startOffset = startOffset;
 		this->endOffset = endOffset;
 		memcpy(this->key, key, WC_KEYLENGTH);
+		this->isLargeFile = isLargeFile;
 		this->creationTime = GetTickCount();
 	}
 
@@ -62,9 +64,10 @@ public:
 	uint32 clientIP;
 	uint16 clientPort;
 	byte fileHash[16];
-	uint32 startOffset;
-	uint32 endOffset;
+	uint64 startOffset;
+	uint64 endOffset;
 	byte key[WC_KEYLENGTH];
+	bool isLargeFile;
 	uint32 creationTime;	// tick at which the block has been initially loaded via the proxy
 	CClientHashList recipients;	// list of client hashes that this OHCB has been already sent to
 };
@@ -107,9 +110,10 @@ public:
 		uint32 clientIP,
 		uint16 clientPort,
 		const byte* fileHash,
-		uint32 startOffset,
-		uint32 endOffset,
-		byte* key);
+		uint64 startOffset,
+		uint64 endOffset,
+		byte* key,
+		bool isLargeFile);
 	Packet* GetWCBlocksForClient(CUpDownClient* recipient);
 	Packet* GetWCBlocksForClient(CUpDownClient* recipient, uint32 &nrOfOHCBsInThePacket, POSITION OHCBpos);
 	bool AddRecipient(POSITION OHCBpos, CUpDownClient* client);	// adds the client to the recepient list of this OHCB

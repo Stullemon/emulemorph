@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -376,7 +376,7 @@ void CMuleToolbarCtrl::SetAllButtonsWidth()
 	}
 }
 
-void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
+void CMuleToolbarCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	if (GetKeyState(VK_CONTROL) & 0x8000)
 	{
@@ -573,12 +573,12 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = TRUE;
 }
 
-void CMuleToolbarCtrl::OnTbnQueryDelete(NMHDR *pNMHDR, LRESULT *pResult)
+void CMuleToolbarCtrl::OnTbnQueryDelete(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE;
 }
 
-void CMuleToolbarCtrl::OnTbnQueryInsert(NMHDR *pNMHDR, LRESULT *pResult)
+void CMuleToolbarCtrl::OnTbnQueryInsert(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE;
 }
@@ -603,7 +603,7 @@ void CMuleToolbarCtrl::OnTbnGetButtonInfo(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 
-void CMuleToolbarCtrl::OnTbnToolbarChange(NMHDR *pNMHDR, LRESULT *pResult)
+void CMuleToolbarCtrl::OnTbnToolbarChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	CString config;
 	for (int i = 0; i < GetButtonCount();i++)
@@ -683,7 +683,7 @@ void CMuleToolbarCtrl::ChangeToolbarBitmap(const CString& path, bool bRefresh)
 	}
 }
 
-BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
 	switch (wParam)
 	{
@@ -912,7 +912,7 @@ void CMuleToolbarCtrl::Refresh()
 	}
 }
 
-void CMuleToolbarCtrl::OnTbnReset(NMHDR *pNMHDR, LRESULT *pResult)
+void CMuleToolbarCtrl::OnTbnReset(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	// First get rid of old buttons
 	// while saving their states
@@ -964,7 +964,7 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR *pNMHDR, LRESULT *pResult)
 	AutoSize();
 }
 
-void CMuleToolbarCtrl::OnTbnInitCustomize(NMHDR *pNMHDR, LRESULT *pResult)
+void CMuleToolbarCtrl::OnTbnInitCustomize(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TBNRF_HIDEHELP;
 }

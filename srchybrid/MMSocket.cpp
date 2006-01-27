@@ -45,17 +45,12 @@ CMMSocket::CMMSocket(CMMServer* pOwner)
 
 CMMSocket::~CMMSocket(void)
 {
-	if (m_pBuf){
-		delete[] m_pBuf;
-		m_pBuf = NULL;
-	}
+	delete[] m_pBuf;
+	m_pBuf = NULL;
 	while (!m_PacketQueue.IsEmpty()){
 		delete m_PacketQueue.RemoveHead();
 	}
-	if (m_pSendBuffer){
-		delete[] m_pSendBuffer;
-		m_pSendBuffer = NULL;
-	}
+	delete[] m_pSendBuffer;
 }
 
 void CMMSocket::Close(){
@@ -66,7 +61,8 @@ void CMMSocket::Close(){
 	m_bClosed = true;
 }
 
-void CMMSocket::OnClose(int nErrorCode){
+void CMMSocket::OnClose(int /*nErrorCode*/)
+{
 	m_bClosed = true;
 	if (m_pOwner->m_pPendingCommandSocket == this){
 		m_pOwner->m_pPendingCommandSocket = NULL;
@@ -222,13 +218,15 @@ bool CMMSocket::SendPacket(CMMPacket* packet, bool bQueueFirst){
 	}
 }
 
-void CMMSocket::CheckForClosing(){
+void CMMSocket::CheckForClosing()
+{
 	if (m_nSendLen == 0 && m_PacketQueue.IsEmpty() && !m_bClosed){
 		m_dwTimedShutdown = ::GetTickCount() + 1000;
 	}
 }
 
-void CMMSocket::OnSend(int nErrorCode){
+void CMMSocket::OnSend(int /*nErrorCode*/)
+{
 	if(m_pSendBuffer != NULL){
 		uint32 res = Send(m_pSendBuffer+m_nSent,m_nSendLen-m_nSent);
 		if (res == SOCKET_ERROR){

@@ -235,7 +235,7 @@ BOOL CButtonST::PreTranslateMessage(MSG* pMsg)
 	return CButton::PreTranslateMessage(pMsg);
 } // End of PreTranslateMessage
 
-HBRUSH CButtonST::CtlColor(CDC* pDC, UINT nCtlColor) 
+HBRUSH CButtonST::CtlColor(CDC* /*pDC*/, UINT /*nCtlColor*/) 
 {
 	return (HBRUSH)::GetStockObject(NULL_BRUSH); 
 } // End of CtlColor
@@ -271,7 +271,7 @@ LRESULT CButtonST::OnSetStyle(WPARAM wParam, LPARAM lParam)
 		(wParam & ~BS_TYPEMASK) | BS_OWNERDRAW, lParam);
 } // End of OnSetStyle
 
-LRESULT CButtonST::OnSetCheck(WPARAM wParam, LPARAM lParam)
+LRESULT CButtonST::OnSetCheck(WPARAM wParam, LPARAM /*lParam*/)
 {
 	ASSERT(m_bIsCheckBox);
 
@@ -289,7 +289,7 @@ LRESULT CButtonST::OnSetCheck(WPARAM wParam, LPARAM lParam)
 	return 0;
 } // End of OnSetCheck
 
-LRESULT CButtonST::OnGetCheck(WPARAM wParam, LPARAM lParam)
+LRESULT CButtonST::OnGetCheck(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	ASSERT(m_bIsCheckBox);
 	return GetCheck();
@@ -424,7 +424,7 @@ void CButtonST::OnMouseMove(UINT nFlags, CPoint point)
 } // End of OnMouseMove
 
 // Handler for WM_MOUSELEAVE
-LRESULT CButtonST::OnMouseLeave(WPARAM wParam, LPARAM lParam)
+LRESULT CButtonST::OnMouseLeave(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	CancelHover();
 	return 0;
@@ -876,7 +876,7 @@ void CButtonST::DrawTheBitmap(CDC* pDC, BOOL bHasTitle, RECT* rpItem, CRect* rpC
 	::DeleteDC(hdcBmpMem);
 } // End of DrawTheBitmap
 
-void CButtonST::DrawTheText(CDC* pDC, LPCTSTR lpszText, RECT* rpItem, CRect* rpCaption, BOOL bIsPressed, BOOL bIsDisabled)
+void CButtonST::DrawTheText(CDC* pDC, LPCTSTR lpszText, RECT* /*rpItem*/, CRect* rpCaption, BOOL /*bIsPressed*/, BOOL /*bIsDisabled*/)
 {
 	// Draw the button's title
 	// If button is pressed then "press" title also

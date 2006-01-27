@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -51,51 +51,54 @@ public:
 
 	void	StartSearch(SSearchParams* pParams);
 	bool	SearchMore();
-	void	CancelSearch();
-	void	CancelKadSearch(UINT uSearchID);
+	void	CancelSearch(UINT uSearchID = 0);
 
 	bool	DoNewEd2kSearch(SSearchParams* pParams);
+	void	CancelEd2kSearch();
+	bool	IsLocalEd2kSearchRunning() const { return (m_uTimerLocalServer != 0); }
+	bool	IsGlobalEd2kSearchRunning() const { return (global_search_timer != 0); }
+	void	LocalEd2kSearchEnd(UINT count, bool bMoreResultsAvailable);
+	void	AddGlobalEd2kSearchResults(UINT count);
+
 	bool	DoNewKadSearch(SSearchParams* pParams);
+	void	CancelKadSearch(UINT uSearchID);
+
+	bool	CanSearchRelatedFiles() const;
+	void	SearchRelatedFiles(const CAbstractFile* file);
 
 	void	DownloadSelected();
-	void	DownloadSelected(bool paused);
+	void	DownloadSelected(bool bPaused);
 
 	bool	CanDeleteSearch(uint32 nSearchID) const;
 	bool	CanDeleteAllSearches() const;
 	void	DeleteSearch(uint32 nSearchID);
-	void	DeleteAllSearchs();
-	bool	IsLocalSearchRunning() const { return (m_uTimerLocalServer != 0); }
-	bool	IsGlobalSearchRunning() const { return (global_search_timer != 0); }
-
-	void	LocalSearchEnd(uint16 count, bool bMoreResultsAvailable);
-	void	AddUDPResult(uint16 count);
+	void	DeleteAllSearches();
 
 	bool	CreateNewTab(SSearchParams* pParams);
 	void	ShowSearchSelector(bool visible);
-	//MORPH - Changed by SiRoB, Selection Category Support
-	/*
-	uint8	GetSelectedCat()							{return m_cattabs.GetCurSel();}
-	*/
-	int	GetSelectedCat()							{return m_cattabs.GetCurSel();}
+	int		GetSelectedCat() { return m_cattabs.GetCurSel(); }
 	void	UpdateCatTabs();
 
 	virtual void OnInitialUpdate();
 
 protected:
 	Packet*		searchpacket;
+	bool		m_b64BitSearchPacket;
 	UINT_PTR	global_search_timer;
 	UINT		m_uTimerLocalServer;
 	CProgressCtrl searchprogress;
 	bool		canceld;
 	uint16		servercount;
 	bool		globsearch;
-	uint32		m_nSearchID;
+	uint32		m_nEd2kSearchID;
 	CImageList	m_imlSearchResults;
 	CTabCtrl	m_cattabs;
 	HICON		icon_search;
 	int			m_iSentMoreReq;
 
 	bool StartNewSearch(SSearchParams* pParams);
+	void SearchStarted();
+	void SearchCanceled(UINT uSearchID);
 	CString	CreateWebQuery(SSearchParams* pParams);
 	void ShowResults(const SSearchParams* pParams);
 	void SetAllIcons();
@@ -107,15 +110,15 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnNMDblclkSearchlist(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnDblClkSearchList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSelChangeTab(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg LRESULT OnCloseTab(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnDblClickTab(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDestroy();
 	afx_msg void OnSysColorChange();
 	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnBnClickedSdownload();
-	afx_msg void OnBnClickedClearall();
-	afx_msg LRESULT OnCloseTab(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnDblClickTab(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBnClickedDownloadSelected();
+	afx_msg void OnBnClickedClearAll();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnClose();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);

@@ -155,7 +155,7 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 // Superlexx - encryption - end //////////////////////////////////////////////////////////////////
 
 	CStringA strWCRequest;
-	strWCRequest.AppendFormat("GET http://%s:%u/encryptedData/%u-%u/%s.htm HTTP/1.1\r\n",
+	strWCRequest.AppendFormat("GET http://%s:%u/encryptedData/%I64u-%I64u/%s.htm HTTP/1.1\r\n",
 		ipstrA( block->m_uHostIp ), // clients' IP
 		block->m_uHostPort, // clients' port
 		m_uReqStart,		// StartOffset
@@ -194,7 +194,7 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 }
 
 // always returns false (which means to the rest of emule that client was deleted)
-bool CWebCacheProxyClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket)
+bool CWebCacheProxyClient::TryToConnect(bool /*bIgnoreMaxCon*/, CRuntimeClass* /*pClassSocket*/)
 {
 //	ASSERT( !block );
 	if( !ProxyClientIsBusy() )
@@ -203,7 +203,7 @@ bool CWebCacheProxyClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClas
 	return (SINGLEProxyClient != NULL); // yonatan tmp
 }
 
-void CWebCacheProxyClient::OnWebCachedBlockDownloaded( const Requested_Block_Struct* reqblock )
+void CWebCacheProxyClient::OnWebCachedBlockDownloaded( const Requested_Block_Struct* /*reqblock*/ )
 {
 	ASSERT( block );
 	block->OnSuccessfulDownload();

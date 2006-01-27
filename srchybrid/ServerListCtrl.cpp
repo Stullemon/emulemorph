@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -145,87 +145,71 @@ void CServerListCtrl::Localize()
 	CString strRes;
 
 	strRes = GetResString(IDS_SL_SERVERNAME);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(0, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_IP);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(1, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_DESCRIPTION);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(2, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_PING);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(3, &hdi);
-	strRes.ReleaseBuffer();
 
  	strRes = GetResString(IDS_UUSERS);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(4, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_MAXCLIENT);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(5, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_PW_FILES);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(6, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_PREFERENCE);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(7, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_UFAILED);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(8, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_STATICSERVER);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(9, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_SOFTFILES);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(10, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_HARDFILES);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(11, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_VERSION);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(12, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_IDLOW);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(13, &hdi);
-	strRes.ReleaseBuffer();
 
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	strRes = GetResString(IDS_AUXPORTS);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(14, &hdi);
-	strRes.ReleaseBuffer();
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 
 	// Commander - Added: IP2Country column - Start
 	strRes = GetResString(IDS_COUNTRY);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(15, &hdi);
-	strRes.ReleaseBuffer();
     // Commander - Added: IP2Country column - End
 
 	int iItems = GetItemCount();
@@ -334,7 +318,7 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	//else
 	//	SetItemText(itemnr,6,_T(""));
 
-	//switch(server->GetPreferences()){
+	//switch(server->GetPreference()){
 	//case SRV_PR_LOW:
 	//	SetItemText(itemnr, 7, GetResString(IDS_PRIOLOW));
 	//	break;
@@ -421,7 +405,7 @@ void CServerListCtrl::RefreshAllServer(){
 }
 //EastShare End - added by AndCycle, IP to Country
 
-void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+void CServerListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 { 
 	// get merged settings
 	bool bFirstItem = true;
@@ -436,11 +420,11 @@ void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		iStaticServers += pServer->IsStaticMember() ? 1 : 0;
 
 		UINT uCurPrioMenuItem = 0;
-		if (pServer->GetPreferences() == SRV_PR_LOW)
+		if (pServer->GetPreference() == SRV_PR_LOW)
 			uCurPrioMenuItem = MP_PRIOLOW;
-		else if (pServer->GetPreferences() == SRV_PR_NORMAL)
+		else if (pServer->GetPreference() == SRV_PR_NORMAL)
 			uCurPrioMenuItem = MP_PRIONORMAL;
-		else if (pServer->GetPreferences() == SRV_PR_HIGH)
+		else if (pServer->GetPreference() == SRV_PR_HIGH)
 			uCurPrioMenuItem = MP_PRIOHIGH;
 		else
 			ASSERT(0);
@@ -490,11 +474,13 @@ void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	VERIFY( ServerMenu.DestroyMenu() );
 }
 
-BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
+	wParam = LOWORD(wParam);
+
    if (wParam==MP_REMOVEALL)
    { 
-		if (AfxMessageBox(_T("Do you really want to remove all servers?"), MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) != IDYES)
+		if (AfxMessageBox( GetResString(IDS_REMOVEALLSERVERS) , MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) != IDYES)
 			return TRUE;
 	   if( theApp.serverconnect->IsConnecting() ){
 	       theApp.downloadqueue->StopUDPRequests(); 
@@ -528,47 +514,47 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 		  switch (wParam){ 
             case MP_CONNECTTO: 
-			{
-					if (GetSelectedCount() > 1)
-					{
-					CServer* aServer;
+			case IDA_ENTER:
+				if (GetSelectedCount() > 1)
+				{
+				CServer* aServer;
 
-					theApp.serverconnect->Disconnect();
-					POSITION pos=GetFirstSelectedItemPosition();
-					while (pos!=NULL )
-					{ 
-							item = GetNextSelectedItem(pos);
-						if (item>-1) {
-								aServer=(CServer*)GetItemData(item);
-							theApp.serverlist->MoveServerDown(aServer);
-						}
-					}
-					theApp.serverconnect->ConnectToAnyServer( theApp.serverlist->GetServerCount()-  this->GetSelectedCount(),false, false );
-					}
-					else{
-						theApp.serverconnect->ConnectToServer((CServer*)GetItemData(item));
-				}
-				theApp.emuledlg->ShowConnectionState();
-					return TRUE;
-			}			
-			case MPG_DELETE:
-            case MP_REMOVE: 
-            { 
-					SetRedraw(FALSE);
-				POSITION pos;
-					while (GetFirstSelectedItemPosition() != NULL)
+				theApp.serverconnect->Disconnect();
+				POSITION pos=GetFirstSelectedItemPosition();
+				while (pos!=NULL )
 				{ 
+					item = GetNextSelectedItem(pos);
+					if (item>-1) {
+						aServer=(CServer*)GetItemData(item);
+						theApp.serverlist->MoveServerDown(aServer);
+					}
+				}
+				theApp.serverconnect->ConnectToAnyServer( theApp.serverlist->GetServerCount()-  this->GetSelectedCount(),false, false );
+				}
+				else{
+					theApp.serverconnect->ConnectToServer((CServer*)GetItemData(item));
+			}
+			theApp.emuledlg->ShowConnectionState();
+			return TRUE;
+
+			case MP_REMOVE:
+			case MPG_DELETE:
+				{
+					SetRedraw(FALSE);
+					POSITION pos;
+					while (GetFirstSelectedItemPosition() != NULL)
+					{ 
 					pos=GetFirstSelectedItemPosition();
 						item = GetNextSelectedItem(pos);
 						server_list->RemoveServer((CServer*)GetItemData(item));
 					DeleteItem(item);
-				}
+					}
 					ShowServerCount();
 					SetRedraw(TRUE);
 					SetFocus();
 					AutoSelectItem();
 					return TRUE;
-            }
+				}
 			case MP_ADDTOSTATIC:
 				{
 				POSITION pos=GetFirstSelectedItemPosition();
@@ -591,53 +577,36 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 					return TRUE;
 			}
+
 			case MP_PRIOLOW:
-			{
-					POSITION pos = GetFirstSelectedItemPosition();
-				while( pos != NULL ){
-						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
-					change->SetPreference( SRV_PR_LOW);
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
-				}
-					return TRUE;
-			}
+				SetSelectedServersPriority(SRV_PR_LOW);
+				return TRUE;
+			
 			case MP_PRIONORMAL:
-			{
-					POSITION pos = GetFirstSelectedItemPosition();
-				while( pos != NULL ){
-						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
-					change->SetPreference( SRV_PR_NORMAL );
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
-				}
-					return TRUE;
-			}
+				SetSelectedServersPriority(SRV_PR_NORMAL);
+				return TRUE;
+			
 			case MP_PRIOHIGH:
-			{
-					POSITION pos = GetFirstSelectedItemPosition();
-				while( pos != NULL ){
-						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
-					change->SetPreference( SRV_PR_HIGH );
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
-				}
-					return TRUE;
-			}
+				SetSelectedServersPriority(SRV_PR_HIGH);
+				return TRUE;
+			
 			case MP_COPYSELECTED:
 			case MP_GETED2KLINK: 
 			{ 
 					POSITION pos = GetFirstSelectedItemPosition();
-				CString buffer, link; 
-				while( pos != NULL ){ 
+					CString buffer, link; 
+					while( pos != NULL ){ 
 						const CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 						buffer.Format(_T("ed2k://|server|%s|%d|/"), change->GetFullIP(), change->GetPort());
 						if (link.GetLength() > 0)
 							buffer = _T("\r\n") + buffer;
-					link += buffer; 
-				} 
-				theApp.CopyTextToClipboard(link); 
+						link += buffer; 
+					} 
+					theApp.CopyTextToClipboard(link); 
 					return TRUE;
-			}
+				}
 			case Irc_SetSendLink:
-			{
+				{
 					POSITION pos = GetFirstSelectedItemPosition();
 				CString buffer, link; 
 				while( pos != NULL ){ 
@@ -656,7 +625,26 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-void CServerListCtrl::OnNMLdblclk(NMHDR *pNMHDR, LRESULT *pResult)
+void CServerListCtrl::SetSelectedServersPriority(UINT uPriority)
+{
+	bool bUpdateStaticServersFile = false;
+	POSITION pos = GetFirstSelectedItemPosition();
+	while (pos != NULL)
+	{
+		CServer* pServer = (CServer*)GetItemData(GetNextSelectedItem(pos));
+		if (pServer->GetPreference() != uPriority)
+		{
+			pServer->SetPreference(uPriority);
+			if (pServer->IsStaticMember())
+				bUpdateStaticServersFile = true;
+			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
+		}
+	}
+	if (bUpdateStaticServersFile)
+		server_list->SaveStaticServers();
+}
+
+void CServerListCtrl::OnNMLdblclk(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
@@ -767,15 +755,15 @@ int CServerListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		  break;
 
 	  case 7:
-		  if (item2->GetPreferences() == item1->GetPreferences())
+		  if (item2->GetPreference() == item1->GetPreference())
 			  iResult = 0;
-		  else if (item2->GetPreferences() == SRV_PR_LOW)
+		  else if (item2->GetPreference() == SRV_PR_LOW)
 			  iResult = 1;
-		  else if (item1->GetPreferences() == SRV_PR_LOW)
+		  else if (item1->GetPreference() == SRV_PR_LOW)
 			  iResult = -1;
-		  else if (item2->GetPreferences() == SRV_PR_HIGH)
+		  else if (item2->GetPreference() == SRV_PR_HIGH)
 			  iResult = -1;
-		  else if (item1->GetPreferences() == SRV_PR_HIGH)
+		  else if (item1->GetPreference() == SRV_PR_HIGH)
 			  iResult = 1;
 		  else
 			  iResult = 0;
@@ -857,7 +845,7 @@ bool CServerListCtrl::StaticServerFileAppend(CServer *server)
 					_T("%s:%i,%i,%s\n"),
 					server->GetAddress(),
 					server->GetPort(), 
-					server->GetPreferences(),
+					server->GetPreference(),
 					server->GetListName()) != EOF) 
 		{
 			AddLogLine(false, _T("'%s:%i,%s' %s"), server->GetAddress(), server->GetPort(), server->GetListName(), GetResString(IDS_ADDED2SSF));
@@ -1172,7 +1160,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 				}
 				case 7:{
-					switch(server->GetPreferences()){
+					switch(server->GetPreference()){
 						case SRV_PR_LOW:
 							Sbuffer = GetResString(IDS_PRIOLOW);
 							break;

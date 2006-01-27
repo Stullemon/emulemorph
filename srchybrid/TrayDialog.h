@@ -13,19 +13,19 @@ public:
 	CTrayDialog(UINT uIDD, CWnd* pParent = NULL);   // standard constructor
 
 	void TraySetMinimizeToTray(bool* pbMinimizeToTray);
-	BOOL TraySetMenu(UINT nResourceID, UINT nDefaultPos = 0);
-	BOOL TraySetMenu(HMENU hMenu, UINT nDefaultPos = 0);
-	BOOL TraySetMenu(LPCTSTR lpszMenuName, UINT nDefaultPos = 0);
+	BOOL TraySetMenu(UINT nResourceID);
+	BOOL TraySetMenu(HMENU hMenu);
+	BOOL TraySetMenu(LPCTSTR lpszMenuName);
 	BOOL TrayUpdate();
 	BOOL TrayShow();
 	BOOL TrayHide();
 	void TraySetToolTip(LPCTSTR lpszToolTip);
 	void TraySetIcon(HICON hIcon, bool bDelete = false);
-	void TraySetIcon(UINT nResourceID, bool bDelete = false);
-	void TraySetIcon(LPCTSTR lpszResourceName, bool bDelete = false);
-	void TrayMinimizeToTrayChange();
+	void TraySetIcon(UINT nResourceID);
+	void TraySetIcon(LPCTSTR lpszResourceName);
 	BOOL TrayIsVisible();
 
+	virtual void TrayMinimizeToTrayChange();
 	virtual void RestoreWindow();
 	virtual void OnTrayLButtonDown(CPoint pt);
 	virtual void OnTrayLButtonUp(CPoint pt);

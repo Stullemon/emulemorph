@@ -28,8 +28,11 @@ public:
 
 	bool DoNewEd2kSearch(SSearchParams* pParams);
 	bool DoNewKadSearch(SSearchParams* pParams);
-	void CancelSearch();
+	void CancelEd2kSearch();
 	void CancelKadSearch(UINT uSearchID);
+
+	bool CanSearchRelatedFiles() const;
+	void SearchRelatedFiles(const CAbstractFile* file);
 
 	void DownloadSelected();
 	void DownloadSelected(bool paused);
@@ -37,19 +40,15 @@ public:
 	bool CanDeleteSearch(uint32 nSearchID) const;
 	bool CanDeleteAllSearches() const;
 	void DeleteSearch(uint32 nSearchID);
-	void DeleteAllSearchs();
+	void DeleteAllSearches();
 
-	void LocalSearchEnd(uint16 count, bool bMoreResultsAvailable);
-	void AddUDPResult(uint16 count);
+	void LocalEd2kSearchEnd(UINT count, bool bMoreResultsAvailable);
+	void AddGlobalEd2kSearchResults(UINT count);
 
 	bool CreateNewTab(SSearchParams* pParams);
 	void ShowSearchSelector(bool visible);
 	CClosableTabCtrl& GetSearchSelector();
 
-	//MORPH - Changed by SiRoB, Selection Category Support
-	/*
-	uint8 GetSelectedCat();
-	*/
 	int GetSelectedCat();
 	void UpdateCatTabs();
 	void SaveAllSettings();
@@ -68,6 +67,7 @@ public:
 protected:
 	CSearchParamsWnd* m_pwndParams;
 
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

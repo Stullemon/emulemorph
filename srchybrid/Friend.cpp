@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -47,7 +47,7 @@ CFriend::CFriend(void)
 }
 
 //Added this to work with the IRC.. Probably a better way to do it.. But wanted this in the release..
-CFriend::CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
+CFriend::CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint16 nLastUsedPort, 
 				 uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash){
 	m_dwLastSeen = dwLastSeen;
 	m_dwLastUsedIP = dwLastUsedIP;

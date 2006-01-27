@@ -26,6 +26,7 @@ protected:
 
 	void SortIPFilterItems();
 	void InitIPFilters();
+	static bool FindItem(const CListCtrlX& lv, int iItem, DWORD_PTR lParam);
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

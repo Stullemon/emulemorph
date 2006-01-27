@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -69,7 +69,7 @@ public:
 	void ShowNotifier(LPCTSTR pszText, int iMsgType, LPCTSTR pszLink = NULL, bool bForceSoundOFF = false);
 	void SendNotificationMail(int iMsgType, LPCTSTR pszText);
 	void ShowUserCount();
-	void ShowMessageState(uint8 iconnr);
+	void ShowMessageState(UINT iconnr);
 	void SetActiveDialog(CWnd* dlg);
 	void ShowTransferRate(bool forceAll=false);
     void ShowPing();
@@ -86,6 +86,7 @@ public:
 	CString	GetAllLogEntries();
 	CString	GetAllDebugLogEntries();
 	CString GetServerInfoText();
+
 	CString	GetConnectionStateString();
 	UINT GetConnectionStateIconIndex() const;
 	CString	GetTransferRateString();
@@ -103,7 +104,9 @@ public:
 	void SetStatusBarPartsSize();
 	int ShowPreferences(UINT uStartPageID = (UINT)-1);
 	bool IsPreferencesDlgOpen() const;
+	bool IsTrayIconToFlash()	{ return m_iMsgIcon!=0; }
 
+	virtual void TrayMinimizeToTrayChange();
 	virtual void RestoreWindow();
 	virtual void HtmlHelp(DWORD_PTR dwData, UINT nCmd = 0x000F);
 
@@ -150,6 +153,7 @@ protected:
 	CMenu			m_menuUploadCtrl;
 	CMenu			m_menuDownloadCtrl;
 	char			m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
+	bool			m_iMsgBlinkState;
 	//MORPH START - Added by SiRoB, Version check
 	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
 	//MORPH END   - Added by SiRoB, Version check
@@ -174,18 +178,23 @@ protected:
 
 	void StartConnection();
 	void CloseConnection();
+	void MinimizeWindow();
 	void PostStartupMinimized();
 	void UpdateTrayIcon(int iPercent);
 	void ShowConnectionStateIcon();
 	void ShowTransferStateIcon();
 	void ShowUserStateIcon();
-	void AddSpeedSelectorSys(CMenu* addToMenu);
+	void AddSpeedSelectorMenus(CMenu* addToMenu);
 	int  GetRecMaxUpload();
 	void LoadNotifier(CString configuration);
 	bool notifierenabled;
 	void ShowToolPopup(bool toolsonly = false);
 	void SetAllIcons();
 	bool CanClose();
+	int MapWindowToToolbarButton(CWnd* pWnd) const;
+	CWnd* MapToolbarButtonToWindow(int iButtonID) const;
+	int GetNextWindowToolbarButton(int iButtonID, int iDirection = 1) const;
+	bool IsWindowToolbarButton(int iButtonID) const;
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
@@ -234,6 +243,9 @@ protected:
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
 	afx_msg LRESULT OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam);
 	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
+	//MORPH START - Added by SiRoB, Flush Thread
+	afx_msg LRESULT OnFlushDone(WPARAM wParam,LPARAM lParam);
+	//MORPH END   - Added by SiRoB, Flush Thread
 	afx_msg LRESULT OnFileAllocExc(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileCompleted(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileOpProgress(WPARAM wParam,LPARAM lParam);
@@ -282,10 +294,7 @@ private:
 	bool	b_HideApp;
 	//MORPH - Added by SiRoB, Toggle Show Hide window
 
-	//Commander - Added: Invisible Mode [TPT] - End
-//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
-	HICON	m_icoSysTrayMessage;
-//Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
+//Commander - Added: Invisible Mode [TPT] - End
 
 	// Mighty Knife: Save settings
 public:
@@ -306,6 +315,7 @@ enum EEMuleAppMsgs
 	TM_PARTHASHEDCORRUPTAICHRECOVER,
 	// SLUGFILLER: SafeHash
 	TM_READBLOCKFROMFILEDONE, //MORPH - Added by SiRoB, ReadBlockFromFileThread
+	TM_FLUSHDONE, //MORPH - Added by SiRoB, Flush Thread
 	TM_FRAMEGRABFINISHED,
 	TM_FILEALLOCEXC,
 	TM_FILECOMPLETED,

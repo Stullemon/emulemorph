@@ -590,7 +590,7 @@ BOOL CPPgMorph::OnApply()
 	return CPropertyPage::OnApply();
 }
 
-void CPPgMorph::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void CPPgMorph::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pScrollBar*/) 
 {
 	SetModified(TRUE);
 	CString temp;
@@ -777,7 +777,7 @@ void CPPgMorph::OnDestroy()
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	CPropertyPage::OnDestroy();
 }
-LRESULT CPPgMorph::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
+LRESULT CPPgMorph::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if (wParam == IDC_MORPH_OPTS){
 		//TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
@@ -810,7 +810,7 @@ BOOL CPPgMorph::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgMorph::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgMorph::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

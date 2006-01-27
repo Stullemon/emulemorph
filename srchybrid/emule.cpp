@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -71,6 +71,8 @@
 #include "StringConversion.h"
 #include "Log.h"
 #include "Collection.h"
+#include "LangIDs.h"
+#include "HelpIDs.h"
 #include "fakecheck.h" //MORPH - Added by SiRoB
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
@@ -175,7 +177,7 @@ struct SLogItem
 void CALLBACK myErrHandler(Kademlia::CKademliaError *error)
 {
 	CString msg;
-	msg.Format(_T("\r\nError 0x%08X : %hs\r\n"), error->m_ErrorCode, error->m_ErrorDescription);
+	msg.Format(_T("\r\nError 0x%08X : %hs\r\n"), error->m_iErrorCode, error->m_szErrorDescription);
 	if(theApp.emuledlg && theApp.emuledlg->IsRunning())
 		theApp.QueueDebugLogLine(false, _T("%s"), msg);
 }
@@ -204,6 +206,9 @@ END_MESSAGE_MAP()
 CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	:CWinApp(lpszAppName)
 {
+	// This does not seem to work well with multithreading, although there is no reason why it should not.
+	//_set_sbh_threshold(768);
+
 	srand(time(NULL));
 	m_dwPublicIP = 0;
 	m_bAutoStart = false;
@@ -222,8 +227,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 
 	// create a string version (e.g. "0.30a")
 	ASSERT( CemuleApp::m_nVersionUpd + 'a' <= 'f' );
+	m_strCurVersionLongDbg.Format(_T("%u.%u%c.%u"), CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
 #ifdef _DEBUG
-	m_strCurVersionLong.Format(_T("%u.%u%c.%u"), CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
+	m_strCurVersionLong = m_strCurVersionLongDbg;
 #else
 	m_strCurVersionLong.Format(_T("%u.%u%c"), CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd);
 #endif
@@ -232,7 +238,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" BETA");
+	m_strCurVersionLong += _T(" BETA2");
 #endif
 
 	// create the protocol version number
@@ -311,8 +317,7 @@ BOOL CemuleApp::InitInstance()
 	
 	TCHAR szPrefFilePath[MAX_PATH];
 	PathCombine(szPrefFilePath, szAppDir, CONFIGFOLDER _T("preferences.ini"));
-	if (m_pszProfileName)
-		free((void*)m_pszProfileName);
+	free((void*)m_pszProfileName);
 	m_pszProfileName = _tcsdup(szPrefFilePath);
 
 
@@ -333,9 +338,9 @@ BOOL CemuleApp::InitInstance()
 #endif
 		//MORPH - Changed by SiRoB, [-modname-]
 		/*
-		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLong, true);
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg, true);
 		*/
-		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"), true);
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion + _T("]"), true);
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -403,21 +408,6 @@ BOOL CemuleApp::InitInstance()
 	m_sizSmallSystemIcon.cy = GetSystemMetrics(SM_CYSMICON);
 	UpdateDesktopColorDepth();
 
-	if (g_bLowColorDesktop)
-	{
-		m_iDfltImageListColorFlags = ILC_COLOR4;
-	}
-	else
-	{
-		m_iDfltImageListColorFlags = GetAppImageListColorFlag();
-		// don't use 32bit color resources if not supported by commctl
-		if (m_iDfltImageListColorFlags == ILC_COLOR32 && m_ullComCtrlVer < MAKEDLLVERULL(6,0,0,0))
-			m_iDfltImageListColorFlags = ILC_COLOR16;
-		// don't use >8bit color resources with OSs with restricted memory for GDI resources
-		if (afxData.bWin95)
-			m_iDfltImageListColorFlags = ILC_COLOR8;
-	}
-
 	CWinApp::InitInstance();
 
 	if (!AfxSocketInit())
@@ -436,7 +426,7 @@ BOOL CemuleApp::InitInstance()
 			AfxMessageBox(_T("Fatal Error: No Rich Edit control library found!")); // should never happen..
 	}
 
-	if (!Kademlia::CKademlia::initUnicode(AfxGetInstanceHandle())){
+	if (!Kademlia::CKademlia::InitUnicode(AfxGetInstanceHandle())){
 		AfxMessageBox(_T("Fatal Error: Failed to load Unicode character tables for Kademlia!")); // should never happen..
 		return FALSE; // DO *NOT* START !!!
 	}
@@ -735,7 +725,7 @@ bool CemuleApp::ProcessCommandline()
 		if (command->Find(_T("://"))>0) {
 			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
 			sendstruct.dwData = OP_ED2KLINK; 
-			sendstruct.lpData = command->GetBuffer(); 
+			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command); 
     		if (maininst){
       			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
 				delete command;
@@ -747,7 +737,7 @@ bool CemuleApp::ProcessCommandline()
 		else if (CCollection::HasCollectionExtention(*command)){
 			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
 			sendstruct.dwData = OP_COLLECTION; 
-			sendstruct.lpData = command->GetBuffer(); 
+			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command); 
     		if (maininst){
       			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
       			delete command;
@@ -759,7 +749,7 @@ bool CemuleApp::ProcessCommandline()
 		else {
 			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
 			sendstruct.dwData = OP_CLCOMMAND;
-			sendstruct.lpData = command->GetBuffer(); 
+			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command); 
     		if (maininst){
       			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
       			delete command;
@@ -813,7 +803,7 @@ CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 	uint32 dwID = GetID();
 
 	CString strLink;
-	strLink.Format(_T("ed2k://|file|%s|%u|%s|/|sources,%i.%i.%i.%i:%i|/"),
+	strLink.Format(_T("ed2k://|file|%s|%I64u|%s|/|sources,%i.%i.%i.%i:%i|/"),
 		EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName(), false)),
 		f->GetFileSize(),
 		EncodeBase16(f->GetFileHash(),16),
@@ -824,11 +814,11 @@ CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 CString CemuleApp::CreateKadSourceLink(const CAbstractFile* f)
 {
 	CString strLink;
-	if( Kademlia::CKademlia::isConnected() && theApp.clientlist->GetBuddy() && theApp.IsFirewalled() )
+	if( Kademlia::CKademlia::IsConnected() && theApp.clientlist->GetBuddy() && theApp.IsFirewalled() )
 	{
 		CString KadID;
-		Kademlia::CKademlia::getPrefs()->getKadID().xor(Kademlia::CUInt128(true)).toHexString(&KadID);
-		strLink.Format(_T("ed2k://|file|%s|%u|%s|/|kadsources,%s:%s|/"),
+		Kademlia::CKademlia::GetPrefs()->GetKadID().Xor(Kademlia::CUInt128(true)).ToHexString(&KadID);
+		strLink.Format(_T("ed2k://|file|%s|%I64u|%s|/|kadsources,%s:%s|/"),
 			EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName(), false)),
 			f->GetFileSize(),
 			EncodeBase16(f->GetFileHash(),16),
@@ -1102,12 +1092,7 @@ bool CemuleApp::GetLangHelpFilePath(CString& strResult)
 
 void CemuleApp::SetHelpFilePath(LPCTSTR pszHelpFilePath)
 {
-	if (m_pszHelpFilePath)
-	{
-		free((void*)m_pszHelpFilePath);
-		m_pszHelpFilePath = NULL;
-	}
-
+	free((void*)m_pszHelpFilePath);
 	m_pszHelpFilePath = _tcsdup(pszHelpFilePath);
 }
 
@@ -1128,32 +1113,58 @@ void CemuleApp::ShowHelp(UINT uTopic, UINT uCmd)
 	CString strHelpFilePath;
 	bool bResult = GetLangHelpFilePath(strHelpFilePath);
 	if (!bResult){
-		if (ShowWebHelp())
+		if (ShowWebHelp(uTopic))
 			return;
 	}
 	SetHelpFilePath(strHelpFilePath);
 	WinHelpInternal(uTopic, uCmd);
 }
 
-bool CemuleApp::ShowWebHelp(){
-	uint16 nWebLanguage;
-	switch(thePrefs.GetLanguageID()){
-		// languages for we have a onlinehelp
-		case 1031: nWebLanguage = 2; break;
-        case 1036: nWebLanguage = 13; break;
-        case 1033: nWebLanguage = 1; break;
-		case 1028: nWebLanguage = 16; break;
-        case 1034: nWebLanguage = 17; break;
-        case 1040: nWebLanguage = 18; break;
-        case 1043: nWebLanguage = 29; break;
-        case 1046: nWebLanguage = 30; break;
+bool CemuleApp::ShowWebHelp(UINT uTopic)
+{
+	UINT nWebLanguage;
+	UINT nWebTopic = 0;
+	switch (thePrefs.GetLanguageID())
+	{
+		case LANGID_DE_DE:/*German (Germany)*/			nWebLanguage =  2; break;
+		case LANGID_FR_FR:/*French (France)*/			nWebLanguage = 13; break;
+		case LANGID_ZH_TW:/*Chinese (Traditional)*/		nWebLanguage = 16; break;
+		case LANGID_ES_ES_T:/*Spanish (Castilian)*/		nWebLanguage = 17; break;
+		case LANGID_IT_IT:/*Italian (Italy)*/			nWebLanguage = 18; break;
+		case LANGID_NL_NL:/*Dutch (Netherlands)*/		nWebLanguage = 29; break;
+		case LANGID_PT_BR:/*Portuguese (Brazilian)*/	nWebLanguage = 30; break;
 		default:
-			return false;
+			/*English*/
+			nWebLanguage = 1;
+			switch (uTopic)
+			{
+				case eMule_FAQ_Preferences_General:				nWebTopic = 107; break;
+				case eMule_FAQ_Preferences_Display:				nWebTopic = 108; break;
+				case eMule_FAQ_Preferences_Connection:			nWebTopic = 109; break;
+				case eMule_FAQ_Preferences_Proxy:				nWebTopic = 110; break;
+				case eMule_FAQ_Preferences_Server:				nWebTopic = 111; break;
+				case eMule_FAQ_Preferences_Directories:			nWebTopic = 112; break;
+				case eMule_FAQ_Preferences_Files:				nWebTopic = 113; break;
+				case eMule_FAQ_Preferences_Notifications:		nWebTopic = 114; break;
+				case eMule_FAQ_Preferences_Statistics:			nWebTopic = 115; break;
+				case eMule_FAQ_Preferences_IRC:					nWebTopic = 116; break;
+				case eMule_FAQ_Preferences_Scheduler:			nWebTopic = 117; break;
+				case eMule_FAQ_Preferences_WebInterface:		nWebTopic = 118; break;
+				case eMule_FAQ_Preferences_Security:			nWebTopic = 119; break;
+				case eMule_FAQ_Preferences_Extended_Settings:	nWebTopic = 120; break;
+				case eMule_FAQ_Update_Server:					nWebTopic = 130; break;
+				case eMule_FAQ_Search:							nWebTopic = 133; break;
+				case eMule_FAQ_Friends:							nWebTopic = 141; break;
+				case eMule_FAQ_IRC_Chat:						nWebTopic = 140; break;
+			}
 	}
+
 	// onlinehelp unfortunatly doesnt supports context based help yet, since the topic IDs
 	// differ for each language, maybe improved in later versions
 	CString strHelpURL;
 	strHelpURL.Format(_T("%s/home/perl/help.cgi?l=%u"), thePrefs.GetHomepageBaseURL(), nWebLanguage); 
+	if (nWebTopic)
+		strHelpURL.AppendFormat(_T("&topic_id=%u&rm=show_topic"), nWebTopic);
 	ShellExecute(NULL, NULL, strHelpURL, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
 	return true;
 }
@@ -1209,7 +1220,7 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 
 bool CemuleApp::IsConnected()
 {
-	return (theApp.serverconnect->IsConnected() || Kademlia::CKademlia::isConnected());
+	return (theApp.serverconnect->IsConnected() || Kademlia::CKademlia::IsConnected());
 }
 
 bool CemuleApp::IsPortchangeAllowed() {
@@ -1218,11 +1229,11 @@ bool CemuleApp::IsPortchangeAllowed() {
 
 uint32 CemuleApp::GetID(){
 	uint32 ID;
-	if( Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled() )
-		ID = ntohl(Kademlia::CKademlia::getIPAddress());
+	if( Kademlia::CKademlia::IsConnected() && !Kademlia::CKademlia::IsFirewalled() )
+		ID = ntohl(Kademlia::CKademlia::GetIPAddress());
 	else if( theApp.serverconnect->IsConnected() )
 		ID = theApp.serverconnect->GetClientID();
-	else if ( Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::isFirewalled() )
+	else if ( Kademlia::CKademlia::IsConnected() && Kademlia::CKademlia::IsFirewalled() )
 		ID = 1;
 	else
 		ID = 0;
@@ -1230,8 +1241,8 @@ uint32 CemuleApp::GetID(){
 }
 
 uint32 CemuleApp::GetPublicIP() const {
-	if (m_dwPublicIP == 0 && Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::getIPAddress() )
-		return ntohl(Kademlia::CKademlia::getIPAddress());
+	if (m_dwPublicIP == 0 && Kademlia::CKademlia::IsConnected() && Kademlia::CKademlia::GetIPAddress() )
+		return ntohl(Kademlia::CKademlia::GetIPAddress());
 	return m_dwPublicIP;
 }
 
@@ -1241,9 +1252,9 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 		ASSERT ( m_pPeerCache );
 		if ( GetPublicIP() == 0)
 			AddDebugLogLine(DLP_VERYLOW, false, _T("My public IP Address is: %s"),ipstr(dwIP));
-		else if (Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::getPrefs()->getIPAddress())
-			if(ntohl(Kademlia::CKademlia::getIPAddress()) != dwIP)
-				AddDebugLogLine(DLP_DEFAULT, false,  _T("Public IP Address reported from Kademlia (%s) differs from new found (%s)"),ipstr(ntohl(Kademlia::CKademlia::getIPAddress())),ipstr(dwIP));
+		else if (Kademlia::CKademlia::IsConnected() && Kademlia::CKademlia::GetPrefs()->GetIPAddress())
+			if(ntohl(Kademlia::CKademlia::GetIPAddress()) != dwIP)
+				AddDebugLogLine(DLP_DEFAULT, false,  _T("Public IP Address reported from Kademlia (%s) differs from new found (%s)"),ipstr(ntohl(Kademlia::CKademlia::GetIPAddress())),ipstr(dwIP));
 		m_pPeerCache->FoundMyPublicIPAddress(dwIP);	
 	}
 	else
@@ -1268,7 +1279,7 @@ bool CemuleApp::IsFirewalled()
 	if (theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID())
 		return false; // we have an eD2K HighID -> not firewalled
 
-	if (Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled())
+	if (Kademlia::CKademlia::IsConnected() && !Kademlia::CKademlia::IsFirewalled())
 		return false; // we have an Kad HighID -> not firewalled
 
 	return true; // firewalled
@@ -1276,13 +1287,13 @@ bool CemuleApp::IsFirewalled()
 
 bool CemuleApp::DoCallback( CUpDownClient *client )
 {
-	if(Kademlia::CKademlia::isConnected())
+	if(Kademlia::CKademlia::IsConnected())
 	{
 		if(theApp.serverconnect->IsConnected())
 		{
 			if(theApp.serverconnect->IsLowID())
 			{
-				if(Kademlia::CKademlia::isFirewalled())
+				if(Kademlia::CKademlia::IsFirewalled())
 				{
 					//Both Connected - Both Firewalled
 					return false;
@@ -1310,7 +1321,7 @@ bool CemuleApp::DoCallback( CUpDownClient *client )
 		}
 		else
 		{
-			if(Kademlia::CKademlia::isFirewalled())
+			if(Kademlia::CKademlia::IsFirewalled())
 			{
 				//Only Kad Connected - Kad Firewalled
 				return false;
@@ -1476,7 +1487,14 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 		if (cx != LR_DEFAULTSIZE || cy != LR_DEFAULTSIZE || uFlags != LR_DEFAULTCOLOR)
 			hIcon = (HICON)::LoadImage(AfxGetResourceHandle(), lpszResourceName, IMAGE_ICON, cx, cy, uFlags);
 		if (hIcon == NULL)
+		{
+			//TODO: Either do not use that function or copy the returned icon. All the calling code is designed
+			// in a way that the icons returned by this function are to be freed with 'DestroyIcon'. But an 
+			// icon which was loaded with 'LoadIcon', is not be freed with 'DestroyIcon'.
+			// Right now, we never come here...
+			ASSERT(0);
 			hIcon = CWinApp::LoadIcon(lpszResourceName);
+		}
 	}
 	return hIcon;
 }
@@ -1606,8 +1624,9 @@ CTempIconLoader::CTempIconLoader(LPCTSTR pszResourceID, int cx, int cy, UINT uFl
 	m_hIcon = theApp.LoadIcon(pszResourceID, cx, cy, uFlags);
 }
 
-CTempIconLoader::CTempIconLoader(UINT uResourceID, int cx, int cy, UINT uFlags)
+CTempIconLoader::CTempIconLoader(UINT uResourceID, int /*cx*/, int /*cy*/, UINT uFlags)
 {
+	UNREFERENCED_PARAMETER(uFlags);
 	ASSERT( uFlags == 0 );
 	m_hIcon = theApp.LoadIcon(uResourceID);
 }
@@ -1618,12 +1637,7 @@ CTempIconLoader::~CTempIconLoader()
 		VERIFY( DestroyIcon(m_hIcon) );
 }
 
-//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
-/*
-void CemuleApp::AddEd2kLinksToDownload(CString strlink, uint8 cat)
-*/
 void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
-//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 {
 	int curPos = 0;
 	CString resToken = strlink.Tokenize(_T("\t\n\r"), curPos);
@@ -1690,25 +1704,14 @@ void CemuleApp::SearchClipboard()
 	m_bGuardClipboardPrompt = false;
 }
 
-//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
-/*
-void CemuleApp::PasteClipboard(uint8 uCategory)
-*/
-void CemuleApp::PasteClipboard(int Cat)
-//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
+void CemuleApp::PasteClipboard(int cat)
 {
 	CString strLinks = CopyTextFromClipboard();
 	strLinks.Trim();
 	if (strLinks.IsEmpty())
 		return;
 
-	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
-	/*
-	AddEd2kLinksToDownload(strLinks, uCategory);
-	*/
-	AddEd2kLinksToDownload(strLinks, Cat);
-	/**/
-	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
+	AddEd2kLinksToDownload(strLinks, cat);
 }
 
 bool CemuleApp::IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen)
@@ -1864,7 +1867,7 @@ void CemuleApp::ClearDebugLogQueue(bool bDebugPendingMsgs)
 	while(!m_QueueDebugLog.IsEmpty())
 	{
 		if (bDebugPendingMsgs)
-			TRACE("Queued dbg log msg: %s\n", m_QueueDebugLog.GetHead()->line);
+			TRACE(_T("Queued dbg log msg: %s\n"), m_QueueDebugLog.GetHead()->line);
 		delete m_QueueDebugLog.RemoveHead();
 	}
 	m_queueLock.Unlock();
@@ -1876,7 +1879,7 @@ void CemuleApp::ClearLogQueue(bool bDebugPendingMsgs)
 	while(!m_QueueLog.IsEmpty())
 	{
 		if (bDebugPendingMsgs)
-			TRACE("Queued log msg: %s\n", m_QueueLog.GetHead()->line);
+			TRACE(_T("Queued log msg: %s\n"), m_QueueLog.GetHead()->line);
 		delete m_QueueLog.RemoveHead();
 	}
 	m_queueLock.Unlock();
@@ -1949,6 +1952,24 @@ void CemuleApp::UpdateDesktopColorDepth()
 	if (!g_bLowColorDesktop)
 		g_bLowColorDesktop = (GetProfileInt(_T("eMule"), _T("LowColorRes"), 0) != 0);
 #endif
+
+	if (g_bLowColorDesktop)
+	{
+		m_iDfltImageListColorFlags = ILC_COLOR4;
+	}
+	else
+	{
+		m_iDfltImageListColorFlags = GetAppImageListColorFlag();
+		// don't use 32bit color resources if not supported by commctl
+		if (m_iDfltImageListColorFlags == ILC_COLOR32 && m_ullComCtrlVer < MAKEDLLVERULL(6,0,0,0))
+			m_iDfltImageListColorFlags = ILC_COLOR16;
+		// don't use >8bit color resources with OSs with restricted memory for GDI resources
+		if (afxData.bWin95)
+			m_iDfltImageListColorFlags = ILC_COLOR8;
+	}
+
+	// Doesn't help..
+	//m_aExtToSysImgIdx.RemoveAll();
 }
 
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start

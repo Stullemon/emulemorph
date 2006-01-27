@@ -66,7 +66,7 @@ void CMassRenameEdit::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CEdit::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-LRESULT CMassRenameEdit::OnPaste(WPARAM wParam, LPARAM lParam)
+LRESULT CMassRenameEdit::OnPaste(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	// Get the current string before edit and the selection - then default message processing
 	GetSel (Start1,End1);
@@ -74,7 +74,7 @@ LRESULT CMassRenameEdit::OnPaste(WPARAM wParam, LPARAM lParam)
 	return Default();
 }
 
-LRESULT CMassRenameEdit::OnUndo(WPARAM wParam, LPARAM lParam)
+LRESULT CMassRenameEdit::OnUndo(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	// Set Start1=End1=-5 to signal the main window that an UNDO is going on
 	Start1=End1=-5;

@@ -53,9 +53,9 @@ public:
 	void ShowLastHistoryMessage();
 	int GetMessageType();
 	void Hide();
-	BOOL SetBitmap(UINT nBitmapID,short red=-1,short green=-1,short blue=-1);
-	BOOL SetBitmap(LPCTSTR szFileName,short red=-1,short green=-1,short blue=-1);
-	BOOL SetBitmap(CBitmap* Bitmap,short red,short green,short blue);
+	BOOL SetBitmap(UINT nBitmapID, int red=-1, int green=-1, int blue=-1);
+	BOOL SetBitmap(LPCTSTR szFileName,int red=-1, int green=-1, int blue=-1);
+	BOOL SetBitmap(CBitmap* Bitmap, int red, int green, int blue);
 	void SetTextFont(LPCTSTR szFont,int nSize,int nNormalStyle,int nSelectedStyle);
 	void SetTextDefaultFont();
 	void SetTextColor(COLORREF crNormalTextColor,COLORREF crSelectedTextColor);
@@ -67,6 +67,7 @@ public:
 	void SetAutoClose(BOOL autoClose);
 
 protected:
+	CString m_strConfigFilePath;
 	CWnd *m_pWndParent;
 	CFont m_myNormalFont;
 	CFont m_mySelectedFont;
@@ -116,4 +117,5 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnSysColorChange();
 };

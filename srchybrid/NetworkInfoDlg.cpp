@@ -93,28 +93,18 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 
 	if (bFullInfo)
 	{
-
 		///////////////////////////////////////////////////////////////////////////
 		// Ports Info
 		///////////////////////////////////////////////////////////////////////////
 		rCtrl.SetSelectionCharFormat(rcfBold);
-		rCtrl << GetResString(IDS_PW_CLIENTPORT) << _T("\r\n");
+		rCtrl << GetResString(IDS_CLIENT) << _T("\r\n");
 		rCtrl.SetSelectionCharFormat(rcfDef);
 
-		buffer.Format(_T("TCP:\t%i"), thePrefs.GetPort());
-		rCtrl << buffer << _T("\r\n");
-		buffer.Format(_T("UDP:\t%i"), thePrefs.GetUDPPort());
-		rCtrl << buffer << _T("\r\n\r\n");
-
-		///////////////////////////////////////////////////////////////////////////
-		// Hash Info
-		///////////////////////////////////////////////////////////////////////////
-		rCtrl.SetSelectionCharFormat(rcfBold);
-		rCtrl << GetResString(IDS_CD_UHASH) << _T("\r\n");
-		rCtrl.SetSelectionCharFormat(rcfDef);
-
-		buffer.Format(_T("%s"),(LPCTSTR)(md4str((uchar*)thePrefs.GetUserHash())));
-		rCtrl << buffer << _T("\r\n\r\n");
+		rCtrl << GetResString(IDS_PW_NICK) << _T(":\t") << thePrefs.GetUserNick() << _T("\r\n");
+		rCtrl << GetResString(IDS_CD_UHASH) << _T("\t") << md4str((uchar*)thePrefs.GetUserHash()) << _T("\r\n");
+		rCtrl << _T("TCP-") << GetResString(IDS_PORT) << _T(":\t") << thePrefs.GetPort() << _T("\r\n");
+		rCtrl << _T("UDP-") << GetResString(IDS_PORT) << _T(":\t") << thePrefs.GetUDPPort() << _T("\r\n");
+		rCtrl << _T("\r\n");
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -221,6 +211,13 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 						rCtrl << GetResString(IDS_NO);
 					rCtrl << _T("\r\n");
 
+					rCtrl << _T("Integer type tags") << _T(": ");
+					if (srv->GetTCPFlags() & SRV_TCPFLG_TYPETAGINTEGER)
+						rCtrl << GetResString(IDS_YES);
+					else
+						rCtrl << GetResString(IDS_NO);
+					rCtrl << _T("\r\n");
+
 					rCtrl << GetResString(IDS_SRV_UDPSR) << _T(": ");
 					if (srv->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES)
 						rCtrl << GetResString(IDS_YES);
@@ -241,6 +238,13 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 					else
 						rCtrl << GetResString(IDS_NO);
 					rCtrl << _T("\r\n");
+
+					rCtrl << GetResString(IDS_SRV_LARGEFILES) << _T(": ");
+					if (srv->SupportsLargeFilesTCP() || srv->SupportsLargeFilesUDP())
+						rCtrl << GetResString(IDS_YES);
+					else
+						rCtrl << GetResString(IDS_NO);
+					rCtrl << _T("\r\n");
 				}
 			}
 		}
@@ -255,19 +259,19 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	rCtrl.SetSelectionCharFormat(rcfDef);
 	
 	rCtrl << GetResString(IDS_STATUS) << _T(":\t");
-	if(Kademlia::CKademlia::isConnected()){
-		if(Kademlia::CKademlia::isFirewalled())
+	if(Kademlia::CKademlia::IsConnected()){
+		if(Kademlia::CKademlia::IsFirewalled())
 			rCtrl << GetResString(IDS_FIREWALLED);
 		else
 			rCtrl << GetResString(IDS_KADOPEN);
 		rCtrl << _T("\r\n");
 
 		CString IP;
-		IP = ipstr(ntohl(Kademlia::CKademlia::getPrefs()->getIPAddress()));
+		IP = ipstr(ntohl(Kademlia::CKademlia::GetPrefs()->GetIPAddress()));
 		buffer.Format(_T("%s:%i"), IP, thePrefs.GetUDPPort());
 		rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T(":\t") << buffer << _T("\r\n");
 
-		buffer.Format(_T("%u"),Kademlia::CKademlia::getPrefs()->getIPAddress());
+		buffer.Format(_T("%u"),Kademlia::CKademlia::GetPrefs()->GetIPAddress());
 		rCtrl << GetResString(IDS_ID) << _T(":\t") << buffer << _T("\r\n");
 
 		rCtrl << GetResString(IDS_BUDDY) << _T(":\t");
@@ -289,24 +293,24 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		{
 
 			CString sKadID;
-			Kademlia::CKademlia::getPrefs()->getKadID(&sKadID);
+			Kademlia::CKademlia::GetPrefs()->GetKadID(&sKadID);
 			rCtrl << GetResString(IDS_CD_UHASH) << _T("\t") << sKadID << _T("\r\n");
 
-			rCtrl << GetResString(IDS_UUSERS) << _T(":\t") << GetFormatedUInt(Kademlia::CKademlia::getKademliaUsers()) << _T("\r\n");
-			rCtrl << GetResString(IDS_PW_FILES) << _T(":\t") << GetFormatedUInt(Kademlia::CKademlia::getKademliaFiles()) << _T("\r\n");
+			rCtrl << GetResString(IDS_UUSERS) << _T(":\t") << GetFormatedUInt(Kademlia::CKademlia::GetKademliaUsers()) << _T("\r\n");
+			rCtrl << GetResString(IDS_PW_FILES) << _T(":\t") << GetFormatedUInt(Kademlia::CKademlia::GetKademliaFiles()) << _T("\r\n");
 
 			rCtrl <<  GetResString(IDS_INDEXED) << _T(":\r\n");
-			buffer.Format(GetResString(IDS_KADINFO_SRC) , Kademlia::CKademlia::getIndexed()->m_totalIndexSource);
+			buffer.Format(GetResString(IDS_KADINFO_SRC) , Kademlia::CKademlia::GetIndexed()->m_uTotalIndexSource);
 			rCtrl << buffer;
-			buffer.Format(GetResString(IDS_KADINFO_KEYW), Kademlia::CKademlia::getIndexed()->m_totalIndexKeyword);
+			buffer.Format(GetResString(IDS_KADINFO_KEYW), Kademlia::CKademlia::GetIndexed()->m_uTotalIndexKeyword);
 			rCtrl << buffer;
-			buffer.Format(_T("\t%s: %u\r\n"), GetResString(IDS_NOTES), Kademlia::CKademlia::getIndexed()->m_totalIndexNotes);
+			buffer.Format(_T("\t%s: %u\r\n"), GetResString(IDS_NOTES), Kademlia::CKademlia::GetIndexed()->m_uTotalIndexNotes);
 			rCtrl << buffer;
-			buffer.Format(_T("\t%s: %u\r\n"), GetResString(IDS_THELOAD), Kademlia::CKademlia::getIndexed()->m_totalIndexLoad);
+			buffer.Format(_T("\t%s: %u\r\n"), GetResString(IDS_THELOAD), Kademlia::CKademlia::GetIndexed()->m_uTotalIndexLoad);
 			rCtrl << buffer;
 		}
 	}
-	else if (Kademlia::CKademlia::isRunning())
+	else if (Kademlia::CKademlia::IsRunning())
 		rCtrl << GetResString(IDS_CONNECTING) << _T("\r\n");
 	else
 		rCtrl << GetResString(IDS_DISCONNECTED) << _T("\r\n");
@@ -351,8 +355,8 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		if (!thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1)
 			strHostname = thePrefs.GetYourHostname();
 		else{
-			if(Kademlia::CKademlia::isConnected()){
-				strHostname = ipstr(ntohl(Kademlia::CKademlia::getPrefs()->getIPAddress()));
+			if(Kademlia::CKademlia::IsConnected()){
+				strHostname = ipstr(ntohl(Kademlia::CKademlia::GetPrefs()->GetIPAddress()));
 			}
 			else if (theApp.serverconnect->IsConnected()){
 				if (theApp.serverconnect->IsLowID())

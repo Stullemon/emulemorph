@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -59,12 +59,17 @@ Example
                     x       _X_          x 	        0000000000000110
 
 
+Version 2 of AICH also supports 32bit identifiers to support large files, check CAICHHashSet::CreatePartRecoveryData
+
+
 */
 
 #pragma once
 
 #define HASHSIZE		20
-#define KNOWN2_MET_FILENAME		_T("known2.met")
+#define KNOWN2_MET_FILENAME			_T("known2_64.met")
+#define OLD_KNOWN2_MET_FILENAME		_T("known2.met")
+#define KNOWN2_MET_VERSION			0x02
 
 enum EAICHStatus {
 	AICH_ERROR = 0,
@@ -122,27 +127,27 @@ class CAICHHashTree
 	friend class CAICHHashTree;
 	friend class CAICHHashSet;
 public:
-	CAICHHashTree(uint32 nDataSize, bool bLeftBranch, uint32 nBaseSize);
+	CAICHHashTree(uint64 nDataSize, bool bLeftBranch, uint64 nBaseSize);
 	~CAICHHashTree();
-	void			SetBlockHash(uint32 nSize, uint32 nStartPos, CAICHHashAlgo* pHashAlg);
+	void			SetBlockHash(uint64 nSize, uint64 nStartPos, CAICHHashAlgo* pHashAlg);
 	bool			ReCalculateHash(CAICHHashAlgo* hashalg, bool bDontReplace );
 	bool			VerifyHashTree(CAICHHashAlgo* hashalg, bool bDeleteBadTrees);
-	CAICHHashTree*	FindHash(uint32 nStartPos, uint32 nSize)					{uint8 buffer = 0; return FindHash(nStartPos, nSize, &buffer);}
+	CAICHHashTree*	FindHash(uint64 nStartPos, uint64 nSize)					{uint8 buffer = 0; return FindHash(nStartPos, nSize, &buffer);}
 
 protected:
-	CAICHHashTree*	FindHash(uint32 nStartPos, uint32 nSize, uint8* nLevel);
-	bool			CreatePartRecoveryData(uint32 nStartPos, uint32 nSize, CFileDataIO* fileDataOut, uint16 wHashIdent);
-	void			WriteHash(CFileDataIO* fileDataOut, uint16 wHashIdent) const;
-	bool			WriteLowestLevelHashs(CFileDataIO* fileDataOut, uint16 wHashIdent, bool bNoIdent = false) const;
+	CAICHHashTree*	FindHash(uint64 nStartPos, uint64 nSize, uint8* nLevel);
+	bool			CreatePartRecoveryData(uint64 nStartPos, uint64 nSize, CFileDataIO* fileDataOut, uint32 wHashIdent, bool b32BitIdent);
+	void			WriteHash(CFileDataIO* fileDataOut, uint32 wHashIdent, bool b32BitIdent) const;
+	bool			WriteLowestLevelHashs(CFileDataIO* fileDataOut, uint32 wHashIdent, bool bNoIdent, bool b32BitIdent) const;
 	bool			LoadLowestLevelHashs(CFileDataIO* fileInput);
-	bool			SetHash(CFileDataIO* fileInput, uint16 wHashIdent, sint8 nLevel = (-1), bool bAllowOverwrite = true);
+	bool			SetHash(CFileDataIO* fileInput, uint32 wHashIdent, sint8 nLevel = (-1), bool bAllowOverwrite = true);
 	CAICHHashTree*	m_pLeftTree;
 	CAICHHashTree*	m_pRightTree;
 
 public:
 	CAICHHash		m_Hash;
-	uint32			m_nDataSize;		// size of data which is covered by this hash
-	uint32			m_nBaseSize;		// blocksize on which the lowest hash is based on
+	uint64			m_nDataSize;		// size of data which is covered by this hash
+	uint64			m_nBaseSize;		// blocksize on which the lowest hash is based on
 	bool			m_bIsLeftBranch;	// left or right branch of the tree
 	bool			m_bHashValid;		// the hash is valid and not empty
 };
@@ -176,18 +181,18 @@ class CAICHHashSet
 public:
 	CAICHHashSet(CKnownFile*	pOwner);
 	~CAICHHashSet(void);
-	bool			CreatePartRecoveryData(uint32 nPartStartPos, CFileDataIO* fileDataOut, bool bDbgDontLoad = false);
-	bool			ReadRecoveryData(uint32 nPartStartPos, CSafeMemFile* fileDataIn);
+	bool			CreatePartRecoveryData(uint64 nPartStartPos, CFileDataIO* fileDataOut, bool bDbgDontLoad = false);
+	bool			ReadRecoveryData(uint64 nPartStartPos, CSafeMemFile* fileDataIn);
 	bool			ReCalculateHash(bool bDontReplace = false);
 	bool			VerifyHashTree(bool bDeleteBadTrees);
 	void			UntrustedHashReceived(const CAICHHash& Hash, uint32 dwFromIP);
-	bool			IsPartDataAvailable(uint32 nPartStartPos);
+	bool			IsPartDataAvailable(uint64 nPartStartPos);
 	void			SetStatus(EAICHStatus bNewValue)			{m_eStatus = bNewValue;}
 	EAICHStatus		GetStatus()	const							{return m_eStatus;}
 	void			SetOwner(CKnownFile* val)					{m_pOwner = val;}
 	
 	void			FreeHashSet();
-	void			SetFileSize(uint32 nSize);
+	void			SetFileSize(EMFileSize nSize);
 	
 	CAICHHash&		GetMasterHash()						{return m_pHashTree.m_Hash;} 
 	void			SetMasterHash(const CAICHHash& Hash, EAICHStatus eNewStatus);

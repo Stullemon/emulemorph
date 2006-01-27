@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -125,7 +125,7 @@ bool CPeerCacheSocket::ProcessHttpResponse()
 	return false;
 }
 
-bool CPeerCacheSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT size)
+bool CPeerCacheSocket::ProcessHttpResponseBody(const BYTE* /*pucData*/, UINT /*size*/)
 {
 	ASSERT(0);
 	return false;
@@ -262,18 +262,23 @@ void CPeerCacheUpSocket::OnClose(int nErrorCode)
 	}
 }
 
+#ifndef _DEBUG
+#pragma warning(disable:4702) // unreachable code
+#endif
 bool CPeerCacheUpSocket::ProcessHttpResponse()
 {
 	if (GetClient() == NULL)
 		throw CString(__FUNCTION__ " - No client attached to HTTP socket");
 
-	if (!GetClient()->ProcessPeerCacheUpHttpResponse(m_astrHttpHeaders))
-		return false;
+	GetClient()->ProcessPeerCacheUpHttpResponse(m_astrHttpHeaders);
 
 	return true;
 }
+#ifndef _DEBUG
+#pragma warning(default:4702) // unreachable code
+#endif
 
-bool CPeerCacheUpSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT uSize)
+bool CPeerCacheUpSocket::ProcessHttpResponseBody(const BYTE* /*pucData*/, UINT /*uSize*/)
 {
 	throw CString(_T("Unexpected HTTP body in response received"));
 }
@@ -346,7 +351,7 @@ bool CUpDownClient::ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHe
 		throw strError;
 	}
 
-	UINT uContentLength = 0;
+	uint64 uContentLength = 0;
 	bool bCacheHit = false;
 	bool bValidContentRange = false;
 	for (int i = 1; i < astrHeaders.GetCount(); i++)
@@ -354,7 +359,7 @@ bool CUpDownClient::ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHe
 		const CStringA& rstrHdr = astrHeaders.GetAt(i);
 		if (bExpectData && strnicmp(rstrHdr, "Content-Length:", 15) == 0)
 		{
-			uContentLength = atoi((LPCSTR)rstrHdr + 15);
+			uContentLength = _atoi64((LPCSTR)rstrHdr + 15);
 			if (uContentLength > m_uReqEnd - m_uReqStart + 1){
 				CString strError;
 				strError.Format(_T("Unexpected HTTP header field \"%hs\""), rstrHdr);
@@ -363,23 +368,23 @@ bool CUpDownClient::ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHe
 		}
 		else if (bExpectData && strnicmp(rstrHdr, "Content-Range:", 14) == 0)
 		{
-			DWORD dwStart = 0, dwEnd = 0, dwLen = 0;
-			if (sscanf((LPCSTR)rstrHdr + 14," bytes %u - %u / %u", &dwStart, &dwEnd, &dwLen) != 3){
+			uint64 ui64Start = 0, ui64End = 0, ui64Len = 0;
+			if (sscanf((LPCSTR)rstrHdr + 14," bytes %I64u - %I64u / %I64u", &ui64Start, &ui64End, &ui64Len) != 3){
 				CString strError;
 				strError.Format(_T("Unexpected HTTP header field \"%hs\""), rstrHdr);
 				throw strError;
 			}
 
-			if (dwStart > dwEnd 
-				|| dwLen != reqfile->GetFileSize()
-				|| dwStart < m_uReqStart || dwStart > m_uReqEnd 
-				|| dwEnd < m_uReqStart || dwEnd > m_uReqEnd){
+			if (ui64Start > ui64End 
+				|| ui64Len != reqfile->GetFileSize()
+				|| ui64Start < m_uReqStart || ui64Start > m_uReqEnd 
+				|| ui64End < m_uReqStart || ui64End > m_uReqEnd){
 				CString strError;
 				strError.Format(_T("Unexpected HTTP header field \"%hs\""), rstrHdr);
 				throw strError;
 			}
 			bValidContentRange = true;
-			m_nUrlStartPos = dwStart;
+			m_nUrlStartPos = ui64Start;
 		}
 		else if (strnicmp(rstrHdr, "Server:", 7) == 0)
 		{
@@ -479,8 +484,8 @@ UINT CUpDownClient::ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeade
 	}
 
 	bool bValidRange = false;
-	DWORD dwRangeStart = 0;
-	DWORD dwRangeEnd = 0;
+	uint64 ui64RangeStart = 0;
+	uint64 ui64RangeEnd = 0;
 	DWORD dwPushID = 0;
 	for (int i = 1; i < astrHeaders.GetCount(); i++)
 	{
@@ -488,16 +493,16 @@ UINT CUpDownClient::ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeade
 		if (strnicmp(rstrHdr, "Range:", 6) == 0)
 		{
 			int iParams;
-			if (   (iParams = sscanf((LPCSTR)rstrHdr+6," bytes = %u - %u", &dwRangeStart, &dwRangeEnd)) != 2
-				&& (iParams = sscanf((LPCSTR)rstrHdr+6," bytes = %u -", &dwRangeStart)) != 1){
+			if (   (iParams = sscanf((LPCSTR)rstrHdr+6," bytes = %I64u - %I64u", &ui64RangeStart, &ui64RangeEnd)) != 2
+				&& (iParams = sscanf((LPCSTR)rstrHdr+6," bytes = %I64u -", &ui64RangeStart)) != 1){
 				DebugHttpHeaders(astrHeaders);
 				TRACE("*** Unexpected HTTP %hs\n", rstrHdr);
 				return HTTP_STATUS_BAD_REQUEST;
 			}
 			if (iParams == 1)
-				dwRangeEnd = pUploadFile->GetFileSize() - 1;
+				ui64RangeEnd = pUploadFile->GetFileSize() - (uint64)1;
 
-			if (dwRangeEnd < dwRangeStart){
+			if (ui64RangeEnd < ui64RangeStart){
 				DebugHttpHeaders(astrHeaders);
 				TRACE("*** Unexpected HTTP %hs\n", rstrHdr);
 				return HTTP_STATUS_INV_RANGE;
@@ -530,8 +535,8 @@ UINT CUpDownClient::ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeade
 	SetPeerCacheUpState(PCUS_UPLOADING);
 
 	Requested_Block_Struct* reqblock = new Requested_Block_Struct;
-	reqblock->StartOffset = dwRangeStart;
-	reqblock->EndOffset = dwRangeEnd + 1;
+	reqblock->StartOffset = ui64RangeStart;
+	reqblock->EndOffset = ui64RangeEnd + 1;
 	md4cpy(reqblock->FileID, aucUploadFileID);
 	reqblock->transferred = 0;
 	AddReqBlock(reqblock);
@@ -539,7 +544,7 @@ UINT CUpDownClient::ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeade
 	return HTTP_STATUS_OK;
 }
 
-bool CUpDownClient::ProcessPeerCacheUpHttpResponse(const CStringAArray& astrHeaders)
+void CUpDownClient::ProcessPeerCacheUpHttpResponse(const CStringAArray& astrHeaders)
 {
 	ASSERT( m_ePeerCacheUpState == PCUS_WAIT_CACHE_REPLY );
 
@@ -626,13 +631,18 @@ bool CUpDownClient::SendHttpBlockRequests()
 
 	m_uReqStart = pending->block->StartOffset;
 	m_uReqEnd = pending->block->EndOffset;
-	m_nUrlStartPos = (UINT)-1;
+	m_nUrlStartPos = (uint64)-1;
 
 	CStringA strPCRequest;
 	strPCRequest.AppendFormat("GET http://%s/.ed2khash=%s HTTP/1.0\r\n", ipstrA(m_uPeerCacheRemoteIP), md4strA(reqfile->GetFileHash()));
 	strPCRequest.AppendFormat("X-ED2K-PushId: %u\r\n", m_uPeerCacheDownloadPushId);
-	strPCRequest.AppendFormat("Range: bytes=%u-%u\r\n", m_uReqStart, m_uReqEnd);
+	strPCRequest.AppendFormat("Range: bytes=%I64u-%I64u\r\n", m_uReqStart, m_uReqEnd);
+	//MORPH START - Added by SiRoB, [-modname-]
+	/*
 	strPCRequest.AppendFormat("User-Agent: eMule/%s\r\n", T2CA(theApp.m_strCurVersionLong));
+	*/
+	strPCRequest.AppendFormat("User-Agent: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
+	//MORPH END   - Added by SiRoB, [-modname-]
 	strPCRequest.AppendFormat("X-Network: eDonkey,Kademlia\r\n");
 	strPCRequest.AppendFormat("\r\n");
 
@@ -745,7 +755,7 @@ bool CUpDownClient::ProcessPeerCacheQuery(const uchar* packet, UINT size)
 		}
 		else if (tag.GetNameID() == PCTAG_CACHEPORT && tag.IsInt())
 		{
-			uCachePort = tag.GetInt();
+			uCachePort = (uint16)tag.GetInt();
 			if (bDebug)
 				strInfo.AppendFormat(_T("  CachePort=%u"), uCachePort);
 		}

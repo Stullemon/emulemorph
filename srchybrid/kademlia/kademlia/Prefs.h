@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,102 +27,82 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
+
 #pragma once
 #include "../utils/UInt128.h"
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CPrefs
+namespace Kademlia
 {
-public:
-	CPrefs();
-	~CPrefs();
+	class CPrefs
+	{
+		public:
+			CPrefs();
+			~CPrefs();
 
-	void	getKadID(CUInt128 *id) const		{id->setValue(m_clientID);}
-	void	getKadID(CString *id) const			{m_clientID.toHexString(id);}
-	void	setKadID(const CUInt128 &id)		{m_clientID = id;}
-	CUInt128 getKadID() const					{return m_clientID;}
-
-	void	getClientHash(CUInt128 *id) const	{id->setValue(m_clientHash);}
-	void	getClientHash(CString *id) const	{m_clientHash.toHexString(id);}
-	void	setClientHash(const CUInt128 &id)	{m_clientHash = id;}
-	CUInt128 getClientHash() const				{return m_clientHash;}
-
-	uint32	getIPAddress() const				{return m_ip;}
-	void	setIPAddress(uint32 val);
-
-	bool	getRecheckIP() const				{return (m_recheckip<4);}
-	void	setRecheckIP()						{m_recheckip = 0;setFirewalled();}
-	void	incRecheckIP()						{m_recheckip++;}
-
-	bool	hasHadContact() const;
-	void	setLastContact()					{m_lastContact = time(NULL);}
-	bool	hasLostConnection() const;
-	uint32	getLastContact() const				{return m_lastContact;}
-
-	bool	getFirewalled() const;
-	void	setFirewalled();
-	void	incFirewalled();
-
-	uint8	getTotalFile() const				{return m_totalFile;}
-	void	setTotalFile(uint8 val)				{m_totalFile = val;}
-
-	uint8	getTotalStoreSrc() const			{return m_totalStoreSrc;}
-	void	setTotalStoreSrc(uint8 val)			{m_totalStoreSrc = val;}
-
-	uint8	getTotalStoreKey() const			{return m_totalStoreKey;}
-	void	setTotalStoreKey(uint8 val)			{m_totalStoreKey = val;}
-
-	uint8	getTotalSource() const				{return m_totalSource;}
-	void	setTotalSource(uint8 val)			{m_totalSource = val;}
-
-	uint8	getTotalNotes() const				{return m_totalNotes;}
-	void	setTotalNotes(uint8 val)			{m_totalNotes = val;}
-
-	uint8	getTotalStoreNotes() const			{return m_totalStoreNotes;}
-	void	setTotalStoreNotes(uint8 val)		{m_totalStoreNotes = val;}
-
-	uint32	getKademliaUsers() const			{return m_kademliaUsers;}
-	void	setKademliaUsers(uint32 val)		{m_kademliaUsers = val;}
-
-	uint32	getKademliaFiles() const			{return m_kademliaFiles;}
-	void	setKademliaFiles();
-
-	bool	getPublish() const					{return m_Publish;}
-	void	setPublish(bool val)				{m_Publish = val;}
-
-	bool	getFindBuddy();
-	void	setFindBuddy(bool val = true)		{m_findBuddy = val;}
-
-private:
-	CString	m_filename;
-
-	time_t		m_lastContact;
-	CUInt128	m_clientID;
-	CUInt128	m_clientHash;
-	uint32		m_ip;
-	uint32		m_ipLast;
-	uint32		m_recheckip;
-	uint32		m_firewalled;
-	uint32		m_kademliaUsers;
-	uint32		m_kademliaFiles;
-	uint8		m_totalFile;
-	uint8		m_totalStoreSrc;
-	uint8		m_totalStoreKey;
-	uint8		m_totalSource;
-	uint8		m_totalNotes;
-	uint8		m_totalStoreNotes;
-	bool		m_Publish;
-	bool		m_findBuddy;
-	bool		m_lastFirewallState;
-
-	void init(LPCTSTR filename);
-	void reset();
-	void setDefaults();
-	void readFile();
-	void writeFile();
-};
-
-} // End namespace
+			void GetKadID(CUInt128 *puID) const;
+			void GetKadID(CString *psID) const;
+			void SetKadID(const CUInt128 &puID);
+			CUInt128 GetKadID() const;
+			void GetClientHash(CUInt128 *puID) const;
+			void GetClientHash(CString *psID) const;
+			void SetClientHash(const CUInt128 &puID);
+			CUInt128 GetClientHash() const;
+			uint32 GetIPAddress() const;
+			void SetIPAddress(uint32 uVal);
+			bool GetRecheckIP() const;
+			void SetRecheckIP();
+			void IncRecheckIP();
+			bool HasHadContact() const;
+			void SetLastContact();
+			bool HasLostConnection() const;
+			uint32 GetLastContact() const;
+			bool GetFirewalled() const;
+			void SetFirewalled();
+			void IncFirewalled();
+			uint8 GetTotalFile() const;
+			void SetTotalFile(uint8 uVal);
+			uint8 GetTotalStoreSrc() const;
+			void SetTotalStoreSrc(uint8 uVal);
+			uint8 GetTotalStoreKey() const;
+			void SetTotalStoreKey(uint8 uVal);
+			uint8 GetTotalSource() const;
+			void SetTotalSource(uint8 uVal);
+			uint8 GetTotalNotes() const;
+			void SetTotalNotes(uint8 uVal);
+			uint8 GetTotalStoreNotes() const;
+			void SetTotalStoreNotes(uint8 uVal);
+			uint32 GetKademliaUsers() const;
+			void SetKademliaUsers(uint32 uVal);
+			uint32 GetKademliaFiles() const;
+			void SetKademliaFiles();
+			bool GetPublish() const;
+			void SetPublish(bool bVal);
+			bool GetFindBuddy();
+			void SetFindBuddy(bool bVal = true);
+		private:
+			void Init(LPCTSTR szFilename);
+			void Reset();
+			void SetDefaults();
+			void ReadFile();
+			void WriteFile();
+			CString	m_sFilename;
+			time_t m_tLastContact;
+			CUInt128 m_uClientID;
+			CUInt128 m_uClientHash;
+			uint32 m_uIP;
+			uint32 m_uIPLast;
+			uint32 m_uRecheckip;
+			uint32 m_uFirewalled;
+			uint32 m_uKademliaUsers;
+			uint32 m_uKademliaFiles;
+			uint8 m_uTotalFile;
+			uint8 m_uTotalStoreSrc;
+			uint8 m_uTotalStoreKey;
+			uint8 m_uTotalSource;
+			uint8 m_uTotalNotes;
+			uint8 m_uTotalStoreNotes;
+			bool m_bPublish;
+			bool m_bFindBuddy;
+			bool m_bLastFirewallState;
+	};
+}

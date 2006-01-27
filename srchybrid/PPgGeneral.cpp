@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -44,21 +44,6 @@ static char THIS_FILE[]=__FILE__;
 
 IMPLEMENT_DYNAMIC(CPPgGeneral, CPropertyPage)
 
-CPPgGeneral::CPPgGeneral()
-	: CPropertyPage(CPPgGeneral::IDD)
-{
-}
-
-CPPgGeneral::~CPPgGeneral()
-{
-}
-
-void CPPgGeneral::DoDataExchange(CDataExchange* pDX)
-{
-	CPropertyPage::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LANGS, m_language);
-}
-
 BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_STARTMIN, OnSettingsChange)
 	ON_BN_CLICKED(IDC_STARTWIN, OnSettingsChange)
@@ -81,6 +66,21 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
+
+CPPgGeneral::CPPgGeneral()
+	: CPropertyPage(CPPgGeneral::IDD)
+{
+}
+
+CPPgGeneral::~CPPgGeneral()
+{
+}
+
+void CPPgGeneral::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LANGS, m_language);
+}
 
 void CPPgGeneral::LoadSettings(void)
 {
@@ -174,6 +174,10 @@ BOOL CPPgGeneral::OnInitDialog()
 			_tcscpy(szLang,_T("Galician") );
 		else if (ret==0 && aLanguageIDs[i]==LANGID_FR_BR )
 			_tcscpy(szLang,_T("Breton (Brezhoneg)") );
+		else if (ret==0 && aLanguageIDs[i]==LANGID_MT_MT )
+			_tcscpy(szLang,_T("Maltese") );
+		else if (ret==0 && aLanguageIDs[i]==LANGID_ES_AS )
+			_tcscpy(szLang,_T("Asturian") );
 
 		m_language.SetItemData(m_language.AddString(szLang), aLanguageIDs[i]);
 	}
@@ -227,9 +231,9 @@ BOOL CPPgGeneral::OnApply()
 	if (cur_sel>0)
 		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->GetLBText(cur_sel, sKey);
 	if (IsDlgButtonChecked(IDC_INVISIBLE_MODE) && cur_sel>0)
-		thePrefs.SetInvisibleMode(true,m_iActualKeyModifier,sKey[0]);
+		thePrefs.SetInvisibleMode(true,m_iActualKeyModifier, (char)sKey[0]);
 	else
-		thePrefs.SetInvisibleMode(false,m_iActualKeyModifier,sKey[0]);
+		thePrefs.SetInvisibleMode(false,m_iActualKeyModifier, (char)sKey[0]);
 	//Commander - Added: Invisible Mode [TPT] - End
 
 	CString strNick;
@@ -401,7 +405,7 @@ void CPPgGeneral::OnLangChange()
 			if (AfxMessageBox(GetResString(IDS_ASKDOWNLOADLANGCAP) + _T("\r\n\r\n") + GetResString(IDS_ASKDOWNLOADLANG), MB_ICONQUESTION | MB_YESNO) == IDYES){
 				// download file
 				// create url, use random mirror for load balancing
-				uint16 nRand = (rand()/(RAND_MAX/3))+1;
+				UINT nRand = (rand()/(RAND_MAX/3))+1;
 				CString strUrl;
 				strUrl.Format(MIRRORS_URL, nRand, CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
 				strUrl += thePrefs.GetLangDLLNameByID(byNewLang);
@@ -412,7 +416,7 @@ void CPPgGeneral::OnLangChange()
 				strFilename.Append(thePrefs.GetLangDLLNameByID(byNewLang));
 				// start
 				CHttpDownloadDlg dlgDownload;
-				dlgDownload.m_strTitle = _T("Downloading language file");
+				dlgDownload.m_strTitle = GetResString(IDS_DOWNLOAD_LANGFILE);
 				dlgDownload.m_sURLToDownload = strUrl;
 				dlgDownload.m_sFileToDownloadInto = strFilename;
 				if (dlgDownload.DoModal() == IDOK && thePrefs.IsLanguageSupported(byNewLang, true))
@@ -458,7 +462,7 @@ BOOL CPPgGeneral::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgGeneral::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgGeneral::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

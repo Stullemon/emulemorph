@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -62,28 +62,28 @@ public:
 		else if (strNumber == _T("*"))
 			m_nVerMajor = (UINT)-1;
 		else
-			m_nVerMajor = _tstoi(strNumber.GetBuffer());
+			m_nVerMajor = _tstoi(strNumber);
 		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
 		if (strNumber.IsEmpty())
 			return;
 		else if (strNumber == _T("*"))
 			m_nVerMinor = (UINT)-1;
 		else
-			m_nVerMinor = _tstoi(strNumber.GetBuffer());
+			m_nVerMinor = _tstoi(strNumber);
 		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
 		if (strNumber.IsEmpty())
 			return;
 		else if (strNumber == _T("*"))
 			m_nVerUpdate = (UINT)-1;
 		else
-			m_nVerUpdate = _tstoi(strNumber.GetBuffer());
+			m_nVerUpdate = _tstoi(strNumber);
 		strNumber = strVersionNumber.Tokenize(_T("."),curPos2);
 		if (strNumber.IsEmpty())
 			return;
 		else if (strNumber == _T("*"))
 			m_nVerBuild = (UINT)-1;
 		else
-			m_nVerBuild = _tstoi(strNumber.GetBuffer());
+			m_nVerBuild = _tstoi(strNumber);
 	}
 	
 	CClientVersionInfo(uint32 dwTagVersionInfo, UINT nClientMajor)

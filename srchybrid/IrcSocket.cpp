@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -14,22 +14,22 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 #include "stdafx.h"
-#include "emule.h"
-#include "IrcSocket.h"
-#include "AsyncProxySocketLayer.h"
-#include "IrcMain.h"
-#include "Preferences.h"
-#include "OtherFunctions.h"
-#include "Statistics.h"
-#include "Log.h"
+#include "emule.h" //UPNP
+#include "./IrcSocket.h"
+#include "./AsyncProxySocketLayer.h"
+#include "./IrcMain.h"
+#include "./Preferences.h"
+#include "./otherfunctions.h"
+#include "./Statistics.h"
+#include "./Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
 
 CIrcSocket::CIrcSocket(CIrcMain* pIrcMain) : CAsyncSocketEx()
 {
@@ -40,7 +40,6 @@ CIrcSocket::CIrcSocket(CIrcMain* pIrcMain) : CAsyncSocketEx()
 CIrcSocket::~CIrcSocket()
 {
 	RemoveAllLayers();
-
 	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	CString client;
 	UINT port;
@@ -52,31 +51,25 @@ CIrcSocket::~CIrcSocket()
 	// End -UPnPNAT Support-
 }
 
-BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR lpszSocketAddress)
+BOOL CIrcSocket::Create(UINT uSocketPort, int uSocketType, long lEvent, LPCSTR lpszSocketAddress)
 {
-	const ProxySettings& proxy = thePrefs.GetProxy();
+	const ProxySettings& proxy = thePrefs.GetProxySettings();
 	if (proxy.UseProxy && proxy.type != PROXYTYPE_NOPROXY)
 	{
 		m_pProxyLayer = new CAsyncProxySocketLayer;
 		switch (proxy.type)
 		{
 			case PROXYTYPE_SOCKS4:
-				m_pProxyLayer->SetProxy(PROXYTYPE_SOCKS4, proxy.name, proxy.port);
-				break;
 			case PROXYTYPE_SOCKS4A:
-				m_pProxyLayer->SetProxy(PROXYTYPE_SOCKS4A, proxy.name, proxy.port);
+				m_pProxyLayer->SetProxy(proxy.type, proxy.name, proxy.port);
 				break;
 			case PROXYTYPE_SOCKS5:
-				if (proxy.EnablePassword)
-					m_pProxyLayer->SetProxy(PROXYTYPE_SOCKS5, proxy.name, proxy.port, proxy.user, proxy.password);
-				else
-					m_pProxyLayer->SetProxy(PROXYTYPE_SOCKS5, proxy.name, proxy.port);
-				break;
+			case PROXYTYPE_HTTP10:
 			case PROXYTYPE_HTTP11:
 				if (proxy.EnablePassword)
-					m_pProxyLayer->SetProxy(PROXYTYPE_HTTP11, proxy.name, proxy.port, proxy.user, proxy.password);
+					m_pProxyLayer->SetProxy(proxy.type, proxy.name, proxy.port, proxy.user, proxy.password);
 				else
-					m_pProxyLayer->SetProxy(PROXYTYPE_HTTP11, proxy.name, proxy.port);
+					m_pProxyLayer->SetProxy(proxy.type, proxy.name, proxy.port);
 				break;
 			default:
 				ASSERT(0);
@@ -86,9 +79,9 @@ BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR 
 
 	//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-]
 	/*
-	return CAsyncSocketEx::Create(nSocketPort, nSocketType, lEvent, lpszSocketAddress);
+	return CAsyncSocketEx::Create(uSocketPort, uSocketType, lEvent, lpszSocketAddress);
 	*/
-	if(CAsyncSocketEx::Create(nSocketPort, nSocketType, lEvent, lpszSocketAddress)){
+	if(CAsyncSocketEx::Create(uSocketPort, uSocketType, lEvent, lpszSocketAddress)){
 		if(thePrefs.IsUPnPEnabled()){
 			CString client;
 			UINT port;
@@ -107,47 +100,51 @@ BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR 
 
 void CIrcSocket::Connect()
 {
-	CAsyncSocketEx::Connect(thePrefs.GetIRCServer(), 6667);
+	CAsyncSocketEx::Connect(CStringA(thePrefs.GetIRCServer()), 6667);
 }
 
-void CIrcSocket::OnReceive(int nErrorCode)
+void CIrcSocket::OnReceive(int iErrorCode)
 {
-	if (nErrorCode){
+	if (iErrorCode)
+	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(nErrorCode, 1));
+			AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(iErrorCode, 1));
 		return;
 	}
 
-	int length;
-	char buffer[1024];
+	int iLength;
+	char cBuffer[1024];
 	try
 	{
 		do
 		{
-			length = Receive(buffer, sizeof(buffer)-1);
-			if (length < 0){
+			iLength = Receive(cBuffer, sizeof(cBuffer)-1);
+			if (iLength < 0)
+			{
 				if (thePrefs.GetVerbose())
 					AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(GetLastError(), 1));
 				return;
 			}
-			if (length > 0){
-				buffer[length] = '\0';
-				theStats.AddDownDataOverheadOther(length);
-				m_pIrcMain->PreParseMessage(buffer);
+			if (iLength > 0)
+			{
+				cBuffer[iLength] = '\0';
+				theStats.AddDownDataOverheadOther(iLength);
+				m_pIrcMain->PreParseMessage(cBuffer);
 			}
 		}
-		while( length > 1022 );
+		while( iLength > 1022 );
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, _T("IRC socket: Exception in OnReceive."), GetErrorMessage(nErrorCode, 1));
+		AddDebugLogLine(false, _T("IRC socket: Exception in OnReceive."), GetErrorMessage(iErrorCode, 1));
 	}
 }
 
-void CIrcSocket::OnConnect(int nErrorCode)
+void CIrcSocket::OnConnect(int iErrorCode)
 {
-	if (nErrorCode){
-		LogError(LOG_STATUSBAR, _T("IRC socket: Failed to connect - %s"), GetErrorMessage(nErrorCode, 1));
+	if (iErrorCode)
+	{
+		LogError(LOG_STATUSBAR, _T("IRC socket: Failed to connect - %s"), GetErrorMessage(iErrorCode, 1));
 		m_pIrcMain->Disconnect();
 		return;
 	}
@@ -155,75 +152,59 @@ void CIrcSocket::OnConnect(int nErrorCode)
 	m_pIrcMain->SendLogin();
 }
 
-void CIrcSocket::OnClose(int nErrorCode)
+void CIrcSocket::OnClose(int iErrorCode)
 {
-	if (nErrorCode){
+	if (iErrorCode)
+	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("IRC socket: Failed to close - %s"), GetErrorMessage(nErrorCode, 1));
+			AddDebugLogLine(false, _T("IRC socket: Failed to close - %s"), GetErrorMessage(iErrorCode, 1));
 		return;
 	}
 	m_pIrcMain->Disconnect();
 }
 
-int CIrcSocket::SendString(CString message){
-	message += _T("\r\n");
-	CStringA strMessageA(message);
-	int size = strMessageA.GetLength();
-	theStats.AddUpDataOverheadOther(size);
-	return Send(strMessageA, size);
+int CIrcSocket::SendString(CString sMessage)
+{
+	sMessage += _T("\r\n");
+	CStringA sMessageA(sMessage);
+	int iSize = sMessageA.GetLength();
+	theStats.AddUpDataOverheadOther(iSize);
+	return Send(sMessageA, iSize);
 }
 
 void CIrcSocket::RemoveAllLayers()
 {
 	CAsyncSocketEx::RemoveAllLayers();
-	
-	if (m_pProxyLayer){
-		delete m_pProxyLayer;
-		m_pProxyLayer = NULL;
-	}
+	delete m_pProxyLayer;
+	m_pProxyLayer = NULL;
 }
 
-int CIrcSocket::OnLayerCallback(const CAsyncSocketExLayer* pLayer, int nType, int nParam1, int nParam2)
+int CIrcSocket::OnLayerCallback(const CAsyncSocketExLayer* pLayer, int nType, int nCode, WPARAM wParam, LPARAM lParam)
 {
 	if (nType == LAYERCALLBACK_LAYERSPECIFIC)
 	{
 		ASSERT( pLayer );
 		if (pLayer == m_pProxyLayer)
 		{
-			switch (nParam1)
+			switch (nCode)
 			{
-				case PROXYERROR_NOCONN:{
-					CString strError(_T("IRC socket: Can't connect to proxy server"));
-					CString strErrInf;
-					if (nParam2 && GetErrorMessage(nParam2, strErrInf))
-						strError += _T(" - ") + strErrInf;
-					LogWarning(LOG_STATUSBAR, _T("%s"), strError);
-					break;
-				}
-				case PROXYERROR_REQUESTFAILED:{
-					CString strError(_T("IRC socket: Proxy server request failed"));
-					if (nParam2){
+				case PROXYERROR_NOCONN:
+				case PROXYERROR_REQUESTFAILED: {
+					CString strError(GetProxyError(nCode));
+					if (lParam) {
 						strError += _T(" - ");
-						strError += (LPCSTR)nParam2;
+						strError += (LPCSTR)lParam;
 					}
-					LogWarning(LOG_STATUSBAR, _T("%s"), strError);
+					if (wParam) {
+						CString strErrInf;
+						if (GetErrorMessage(wParam, strErrInf, 1))
+							strError += _T(" - ") + strErrInf;
+					}
+					LogWarning(LOG_STATUSBAR, _T("IRC socket: %s"), strError);
 					break;
 				}
-				case PROXYERROR_AUTHTYPEUNKNOWN:
-					LogWarning(LOG_STATUSBAR, _T("IRC socket: Required authentification type reported by proxy server is unknown or unsupported"));
-					break;
-				case PROXYERROR_AUTHFAILED:
-					LogWarning(LOG_STATUSBAR, _T("IRC socket: Proxy server authentification failed"));
-					break;
-				case PROXYERROR_AUTHNOLOGON:
-					LogWarning(LOG_STATUSBAR, _T("IRC socket: Proxy server requires authentification"));
-					break;
-				case PROXYERROR_CANTRESOLVEHOST:
-					LogWarning(LOG_STATUSBAR, _T("IRC socket: Can't resolve host of proxy server"));
-					break;
-				default:{
-					LogWarning(LOG_STATUSBAR, _T("IRC socket: Proxy server error - %s"), GetProxyError(nParam1));
-				}
+				default:
+					LogWarning(LOG_STATUSBAR, _T("IRC socket: %s"), GetProxyError(nCode));
 			}
 		}
 	}

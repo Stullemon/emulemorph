@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -84,7 +84,7 @@ public:
 	CDownloadListCtrl();
 	virtual ~CDownloadListCtrl();
 
-	uint8	curTab;
+	UINT	curTab;
 
 	void	UpdateItem(void* toupdate);
 	void	Init();
@@ -135,7 +135,7 @@ protected:
 	CFont		m_fontBoldSmaller;//MORPH END   - Added by SiRoB, Draw Client Percentage
 	CToolTipCtrlX* m_tooltip;
 
-	void ShowFileDialog(CPartFile* pFile, UINT uInvokePage = 0);
+	void ShowFileDialog(UINT uInvokePage);
 	void ShowClientDialog(CUpDownClient* pClient);
 	void SetAllIcons();
 	void DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
@@ -144,7 +144,7 @@ protected:
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
     static int Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort);
-    static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort, int sortMod);
+    static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort);
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);

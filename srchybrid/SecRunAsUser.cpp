@@ -163,7 +163,7 @@ bool CSecRunAsUser::CreateEmuleUser(IADsContainerPtr pUsers){
 CStringW CSecRunAsUser::CreateRandomPW(){
 	CStringW strResult;
 	while (strResult.GetLength() < 10){
-		char chRnd=48 + (rand() % 74);
+		char chRnd = (char)(48 + (rand() % 74));
 		if( (chRnd > 97 && chRnd < 122) || (chRnd > 65 && chRnd < 90)
 			|| (chRnd >48 && chRnd < 57) ||(chRnd==95) ){
 				strResult.AppendChar(chRnd);
@@ -190,8 +190,8 @@ bool CSecRunAsUser::SetDirectoryPermissions(){
 	for (int i=0;i<thePrefs.GetTempDirCount();i++)
 		bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetTempDir(i), FULLACCESS);
 
-	uint16 cCats = thePrefs.GetCatCount();
-	for (int i= 0; i!= cCats; i++){
+	int cCats = thePrefs.GetCatCount();
+	for (int i = 0; i < cCats; i++){
 		if (!CString(thePrefs.GetCatPath(i)).IsEmpty())
 			bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetCatPath(i), FULLACCESS);
 	}

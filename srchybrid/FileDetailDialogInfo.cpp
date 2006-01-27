@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -58,7 +58,7 @@ CFileDetailDialogInfo::~CFileDetailDialogInfo()
 {
 }
 
-void CFileDetailDialogInfo::OnTimer(UINT nIDEvent)
+void CFileDetailDialogInfo::OnTimer(UINT /*nIDEvent*/)
 {
 	RefreshData();
 }
@@ -72,6 +72,7 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 {
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
+
 	AddAnchor(IDC_FD_X0, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_FD_X6, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_FD_X8, TOP_LEFT, TOP_RIGHT);
@@ -79,18 +80,17 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 	AddAnchor(IDC_FNAME, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_METFILE, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_FHASH, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_FSIZE, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_FD_AICHHASH, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_FSIZE, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_PARTCOUNT, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_HASHSET, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_COMPLSIZE, TOP_LEFT, TOP_RIGHT);
-    //MORPH START - Changed by SiRoB, WebCache 1.2f
-    /*
+
+	AddAnchor(IDC_SOURCECOUNT, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_DATARATE, TOP_LEFT, TOP_RIGHT);
-    */
+
 	AddAnchor(IDC_WCReq, TOP_LEFT, TOP_RIGHT); //JP
 	AddAnchor(IDC_WCDOWNL, TOP_LEFT, TOP_RIGHT); //JP
-    //MORPH END   - Changed by SiRoB, WebCache 1.2f
+
 	AddAnchor(IDC_SOURCECOUNT, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_RECOVERED, TOP_LEFT, TOP_RIGHT);
 
@@ -183,7 +183,7 @@ void CFileDetailDialogInfo::RefreshData()
 		SetDlgItemText(IDC_LASTSEENCOMPL, str);
 
 		// last receive
-		if (file->GetFileDate() != 0 && file->GetRealFileSize() > 0)
+		if (file->GetFileDate() != 0 && file->GetRealFileSize() > (uint64)0)
 		{
 			// 'Last Modified' sometimes is up to 2 seconds greater than the current time ???
 			// If it's related to the FAT32 seconds time resolution the max. failure should still be only 1 sec.
@@ -240,7 +240,7 @@ void CFileDetailDialogInfo::RefreshData()
 	uint64 uRealFileSize = 0;
 	uint64 uTransferred = 0;
 	uint64 uCorrupted = 0;
-	uint64 uRecovered = 0;
+	uint32 uRecoveredParts = 0;
 	uint64 uCompression = 0;
 	uint64 uCompleted = 0;
 	int iHashsetAvailable = 0;
@@ -252,20 +252,20 @@ void CFileDetailDialogInfo::RefreshData()
 	//MORPH START - Changed by SiRoB, WebCache
 	uint32	uWebcacherequests = 0; //JP webcache
 	uint32	uSuccessfulWebcacherequests = 0;//jp webcache
-	uint32  uWebcachedownloaded = 0;//jp webcache
+	uint64  uWebcachedownloaded = 0;//jp webcache
 	//MORPH END   - Changed by SiRoB, WebCache
 	for (int i = 0; i < m_paFiles->GetSize(); i++)
 	{
 		const CPartFile* file = STATIC_DOWNCAST(CPartFile, (*m_paFiles)[i]);
 
-		uFileSize += file->GetFileSize();
-		uRealFileSize += file->GetRealFileSize();
-		uTransferred += file->GetTransferred();
+		uFileSize += (uint64)file->GetFileSize();
+		uRealFileSize += (uint64)file->GetRealFileSize();
+		uTransferred += (uint64)file->GetTransferred();
 		uCorrupted += file->GetCorruptionLoss();
-		uRecovered += file->GetRecoveredPartsByICH();
+		uRecoveredParts += file->GetRecoveredPartsByICH();
 		uCompression += file->GetCompressionGain();
 		uDataRate += file->GetDatarate();
-		uCompleted += file->GetCompletedSize();
+		uCompleted += (uint64)file->GetCompletedSize();
 		iHashsetAvailable += (file->GetHashCount() == file->GetED2KPartCount()) ? 1 : 0;	// SLUGFILLER: SafeHash - use GetED2KPartCount
 
 		//MORPH START - Changed by SiRoB, WebCache 1.2f
@@ -283,6 +283,9 @@ void CFileDetailDialogInfo::RefreshData()
 		}
 	}
 
+	str.Format(_T("%s  (%s %s);  %s %s"), CastItoXBytes(uFileSize, false, false), GetFormatedUInt64(uFileSize), GetResString(IDS_BYTES), GetResString(IDS_ONDISK), CastItoXBytes(uRealFileSize, false, false));
+	SetDlgItemText(IDC_FSIZE, str);
+
 	if (iHashsetAvailable == 0)
 		SetDlgItemText(IDC_HASHSET, GetResString(IDS_NO));
 	else if (iHashsetAvailable == m_paFiles->GetSize())
@@ -290,22 +293,23 @@ void CFileDetailDialogInfo::RefreshData()
 	else
 		SetDlgItemText(IDC_HASHSET, _T(""));
 
-	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCompleted, false, false), uFileSize!=0 ? (uCompleted * 100.0 / uFileSize) : 0.0);
-	SetDlgItemText(IDC_COMPLSIZE, str);
+	str.Format(GetResString(IDS_SOURCESINFO), uSources, uValidSources, uNNPSources, uA4AFSources);
+	SetDlgItemText(IDC_SOURCECOUNT, str);
 
-	str.Format(_T("%s"), CastItoXBytes(uDataRate, false, true));
-	SetDlgItemText(IDC_DATARATE, str);
-
-	str.Format(_T("%s  (%s %s);  %s %s"), CastItoXBytes(uFileSize, false, false), GetFormatedUInt64(uFileSize), GetResString(IDS_BYTES), GetResString(IDS_ONDISK), CastItoXBytes(uRealFileSize, false, false));
-	SetDlgItemText(IDC_FSIZE, str);
+	SetDlgItemText(IDC_DATARATE, CastItoXBytes(uDataRate, false, true));
 
 	SetDlgItemText(IDC_TRANSFERRED, CastItoXBytes(uTransferred, false, false));
+
+	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCompleted, false, false), uFileSize!=0 ? (uCompleted * 100.0 / uFileSize) : 0.0);
+	SetDlgItemText(IDC_COMPLSIZE, str);
 
 	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCorrupted, false, false), uTransferred!=0 ? (uCorrupted * 100.0 / uTransferred) : 0.0);
 	SetDlgItemText(IDC_CORRUPTED, str);
 
-	str.Format(_T("%i "),uRecovered);
-	str.Append(GetResString(IDS_FD_PARTS));
+	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uFileSize - uCompleted, false, false), uFileSize!=0 ? ((uFileSize - uCompleted) * 100.0 / uFileSize) : 0.0);
+	SetDlgItemText(IDC_REMAINING, str);
+
+	str.Format(_T("%u %s"), uRecoveredParts, GetResString(IDS_FD_PARTS));
 	SetDlgItemText(IDC_RECOVERED, str);
 
 	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCompression, false, false), uTransferred!=0 ? (uCompression * 100.0 / uTransferred) : 0.0);
@@ -356,7 +360,7 @@ void CFileDetailDialogInfo::Localize()
 	GetDlgItem(IDC_FD_RECOV)->SetWindowText(GetResString(IDS_FD_RECOV)+_T(':'));
 	GetDlgItem(IDC_FD_COMPR)->SetWindowText(GetResString(IDS_FD_COMPR)+_T(':'));
 	GetDlgItem(IDC_FD_XAICH)->SetWindowText(GetResString(IDS_IACHHASH)+_T(':'));
-    GetDlgItem(IDC_WCDOWNL)->SetWindowText(GetResString(IDS_WCDOWNL));
+    	SetDlgItemText(IDC_REMAINING_TEXT, GetResString(IDS_DL_REMAINS)+_T(':'));
 	GetDlgItem(IDC_WC_REQ_SUCC)->SetWindowText(GetResString(IDS_WC_REQ_SUCC));
     GetDlgItem(IDC_WC_DOWNLOADED)->SetWindowText(GetResString(IDS_WC_DOWNLOADED));
 }

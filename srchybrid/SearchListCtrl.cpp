@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -44,11 +44,11 @@
 #include "ListViewWalkerPropertySheet.h"
 #include "UserMsgs.h"
 #include "ToolTipCtrlX.h"
-#include "FileDetailDialog.h"
 #include "SearchDlg.h"
 #include "SearchResultsWnd.h"
 #include "sockets.h"
 #include "server.h"
+#include "CommentDialogLst.h"
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 #ifdef _DEBUG
@@ -62,11 +62,135 @@ static char THIS_FILE[]=__FILE__;
 #define EXPAND_ONLY		1
 #define EXPAND_COLLAPSE	2
 
+
+//////////////////////////////////////////////////////////////////////////////
+// CSearchResultFileDetailSheet
+
+class CSearchResultFileDetailSheet : public CListViewWalkerPropertySheet
+{
+	DECLARE_DYNAMIC(CSearchResultFileDetailSheet)
+
+public:
+	CSearchResultFileDetailSheet(CTypedPtrList<CPtrList, CSearchFile*>& paFiles, UINT uPshInvokePage = 0, CListCtrlItemWalk* pListCtrl = NULL);
+	virtual ~CSearchResultFileDetailSheet();
+
+protected:
+	CMetaDataDlg m_wndMetaData;
+	CCommentDialogLst m_wndComments;
+
+	UINT m_uPshInvokePage;
+	static LPCTSTR m_pPshStartPage;
+
+	void UpdateTitle();
+
+	virtual BOOL OnInitDialog();
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnDestroy();
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
+};
+
+LPCTSTR CSearchResultFileDetailSheet::m_pPshStartPage;
+
+IMPLEMENT_DYNAMIC(CSearchResultFileDetailSheet, CListViewWalkerPropertySheet)
+
+BEGIN_MESSAGE_MAP(CSearchResultFileDetailSheet, CListViewWalkerPropertySheet)
+	ON_WM_DESTROY()
+	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
+END_MESSAGE_MAP()
+
+CSearchResultFileDetailSheet::CSearchResultFileDetailSheet(CTypedPtrList<CPtrList, CSearchFile*>& paFiles, UINT uPshInvokePage, CListCtrlItemWalk* pListCtrl)
+	: CListViewWalkerPropertySheet(pListCtrl)
+{
+	m_uPshInvokePage = uPshInvokePage;
+	POSITION pos = paFiles.GetHeadPosition();
+	while (pos)
+		m_aItems.Add(paFiles.GetNext(pos));
+	m_psh.dwFlags &= ~PSH_HASHELP;
+	m_psh.dwFlags |= PSH_NOAPPLYNOW;
+	
+	m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndMetaData.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndMetaData.m_psp.pszIcon = _T("METADATA");
+	if (m_aItems.GetSize() == 1 && thePrefs.IsExtControlsEnabled()) {
+		m_wndMetaData.SetFiles(&m_aItems);
+		AddPage(&m_wndMetaData);
+	}
+
+	m_wndComments.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndComments.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndComments.m_psp.pszIcon = _T("FileComments");
+	m_wndComments.SetFiles(&m_aItems);
+	AddPage(&m_wndComments);
+
+	LPCTSTR pPshStartPage = m_pPshStartPage;
+	if (m_uPshInvokePage != 0)
+		pPshStartPage = MAKEINTRESOURCE(m_uPshInvokePage);
+	for (int i = 0; i < m_pages.GetSize(); i++)
+	{
+		CPropertyPage* pPage = GetPage(i);
+		if (pPage->m_psp.pszTemplate == pPshStartPage)
+		{
+			m_psh.nStartPage = i;
+			break;
+		}
+	}
+}
+
+CSearchResultFileDetailSheet::~CSearchResultFileDetailSheet()
+{
+}
+
+void CSearchResultFileDetailSheet::OnDestroy()
+{
+	if (m_uPshInvokePage == 0)
+		m_pPshStartPage = GetPage(GetActiveIndex())->m_psp.pszTemplate;
+	CListViewWalkerPropertySheet::OnDestroy();
+}
+
+BOOL CSearchResultFileDetailSheet::OnInitDialog()
+{		
+	EnableStackedTabs(FALSE);
+	BOOL bResult = CListViewWalkerPropertySheet::OnInitDialog();
+	HighColorTab::UpdateImageList(*this);
+	InitWindowStyles(this);
+	EnableSaveRestore(_T("SearchResultFileDetailsSheet")); // call this after(!) OnInitDialog
+	UpdateTitle();
+	return bResult;
+}
+
+LRESULT CSearchResultFileDetailSheet::OnDataChanged(WPARAM, LPARAM)
+{
+	UpdateTitle();
+	return 1;
+}
+
+void CSearchResultFileDetailSheet::UpdateTitle()
+{
+	if (m_aItems.GetSize() == 1)
+		SetWindowText(GetResString(IDS_DETAILS) + _T(": ") + STATIC_DOWNCAST(CSearchFile, m_aItems[0])->GetFileName());
+	else
+		SetWindowText(GetResString(IDS_DETAILS));
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // CSearchListCtrl
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 
 IMPLEMENT_DYNAMIC(CSearchListCtrl, CMuleListCtrl)
+
+BEGIN_MESSAGE_MAP(CSearchListCtrl, CMuleListCtrl)
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
+	ON_WM_CONTEXTMENU()
+	ON_NOTIFY_REFLECT(LVN_GETINFOTIP, OnLvnGetInfoTip)
+	ON_NOTIFY_REFLECT(LVN_DELETEALLITEMS, OnLvnDeleteallitems)
+	ON_NOTIFY_REFLECT(NM_CLICK, OnClick)
+	ON_NOTIFY_REFLECT(NM_DBLCLK,OnDblClick)
+	ON_WM_KEYDOWN()
+	ON_WM_SYSCOLORCHANGE()
+	ON_NOTIFY_REFLECT(LVN_KEYDOWN, OnLvnKeydown)
+END_MESSAGE_MAP()
 
 CSearchListCtrl::CSearchListCtrl()
 	: CListCtrlItemWalk(this)
@@ -190,27 +314,12 @@ void CSearchListCtrl::Localize()
 			case 14: strRes = GetResString(IDS_CHECKFAKE); break; //MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 		}
 
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(icol, &hdi);
-		strRes.ReleaseBuffer();
 	}
 
 	CreateMenues();
 }
-
-BEGIN_MESSAGE_MAP(CSearchListCtrl, CMuleListCtrl)
-	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
-	ON_WM_CONTEXTMENU()
-	ON_NOTIFY_REFLECT(LVN_GETINFOTIP, OnLvnGetInfoTip)
-	ON_NOTIFY_REFLECT(LVN_DELETEALLITEMS, OnLvnDeleteallitems)
-	ON_NOTIFY_REFLECT(NM_CLICK, OnClick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK,OnDblClick)
-	ON_WM_KEYDOWN()
-	ON_WM_SYSCOLORCHANGE()
-	ON_NOTIFY_REFLECT(LVN_KEYDOWN, OnLvnKeydown)
-END_MESSAGE_MAP()
-
-// CSearchListCtrl message handlers
 
 void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 {
@@ -363,7 +472,7 @@ void CSearchListCtrl::UpdateSearch(CSearchFile* toupdate)
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)toupdate;
 	int index = FindItem(&find);
-	if (index != -1) // Avi3k: fix index check [cyrex2001-11.10.05]
+	if (index != -1)
 	{
 		Update(index);
 	}
@@ -374,6 +483,15 @@ CString CSearchListCtrl::GetCompleteSourcesDisplayString(const CSearchFile* pFil
 	UINT uCompleteSources = pFile->GetIntTagValue(FT_COMPLETE_SOURCES);
 	int iComplete = pFile->IsComplete(uSources, uCompleteSources);
 
+	// If we have no 'Complete' info at all but the file size is <= PARTSIZE, we though know that the file
+	// is complete (otherwise it would not be shared).
+	if (iComplete < 0 && pFile->GetFileSize() <= (uint64)PARTSIZE) {
+		iComplete = 1;
+		// If this search result is from a remote client's shared file list, we know the 'complete' count.
+		if (pFile->GetDirectory() != NULL)
+			uCompleteSources = 1;
+	}
+
 	CString str;
 	if (iComplete < 0)			// '< 0' ... unknown
 	{
@@ -383,12 +501,14 @@ CString CSearchListCtrl::GetCompleteSourcesDisplayString(const CSearchFile* pFil
 	}
 	else if (iComplete > 0)		// '> 0' ... we know it's complete
 	{
-		ASSERT( uSources );
-		if (uSources)
-		{
+		if (uSources && uCompleteSources) {
 			str.Format(_T("%u%%"), (uCompleteSources*100)/uSources);
 			if (thePrefs.IsExtControlsEnabled())
 				str.AppendFormat(_T(" (%u)"), uCompleteSources);
+		}
+		else {
+			// we know it's complete, but we don't know the degree.. (for files <= PARTSIZE in Kad searches)
+			str = GetResString(IDS_YES);
 		}
 		if (pbComplete)
 			*pbComplete = true;
@@ -564,9 +684,9 @@ int CSearchListCtrl::Compare(const CSearchFile* item1, const CSearchFile* item2,
 			return CompareLocaleStringNoCase(item2->GetFileName(),item1->GetFileName());
 
 		case 1: //size asc
-			return CompareUnsigned(item1->GetFileSize(), item2->GetFileSize());
+			return CompareUnsigned64(item1->GetFileSize(), item2->GetFileSize());
 		case 101: //size desc
-			return CompareUnsigned(item2->GetFileSize(), item1->GetFileSize());
+			return CompareUnsigned64(item2->GetFileSize(), item1->GetFileSize());
 
 		case 2: //sources asc
 			return CompareUnsigned(item1->GetIntTagValue(FT_SOURCES), item2->GetIntTagValue(FT_SOURCES));
@@ -648,7 +768,7 @@ int CSearchListCtrl::Compare(const CSearchFile* item1, const CSearchFile* item2,
 	}
 }
 
-void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+void CSearchListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	int iSelected = 0;
 	int iToDownload = 0;
@@ -678,11 +798,7 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SearchFileMenu.EnableMenuItem(MP_REMOVESELECTED, iSelected > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SearchFileMenu.EnableMenuItem(MP_REMOVE, theApp.emuledlg->searchwnd->CanDeleteSearch(m_nResultsID) ? MF_ENABLED : MF_GRAYED);
 	m_SearchFileMenu.EnableMenuItem(MP_REMOVEALL, theApp.emuledlg->searchwnd->CanDeleteAllSearches() ? MF_ENABLED : MF_GRAYED);
-	if (iSelected == 1 && theApp.serverconnect->IsConnected() && theApp.serverconnect->GetCurrentServer() != NULL && theApp.serverconnect->GetCurrentServer()->GetRelatedSearchSupport())
-		m_SearchFileMenu.EnableMenuItem(MP_SEARCHRELATED, MF_ENABLED);
-	else
-		m_SearchFileMenu.EnableMenuItem(MP_SEARCHRELATED, MF_GRAYED);
-	
+	m_SearchFileMenu.EnableMenuItem(MP_SEARCHRELATED, iSelected == 1 && theApp.emuledlg->searchwnd->CanSearchRelatedFiles() ? MF_ENABLED : MF_GRAYED);
 	UINT uInsertedMenuItem = 0;
 	if (iToPreview == 1) {
 		if (m_SearchFileMenu.InsertMenu(MP_FIND, MF_STRING | MF_ENABLED, MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("Preview")))
@@ -710,8 +826,10 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	VERIFY( WebMenu.DestroyMenu() );
 }
 
-BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
+	wParam = LOWORD(wParam);
+
 	if (wParam == MP_FIND)
 	{
 		OnFindStart();
@@ -761,12 +879,14 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					theApp.CopyTextToClipboard(clpbrd);
 				return TRUE;
 				}
-			case MP_RESUMEPAUSED:
 			case MP_RESUME:
+			case MP_RESUMEPAUSED:
+			case IDA_ENTER:
 					theApp.emuledlg->searchwnd->DownloadSelected(wParam==MP_RESUMEPAUSED);
 				return TRUE;
+			case MP_REMOVESELECTED:
 			case MPG_DELETE:
-			case MP_REMOVESELECTED:{
+			{
 					CWaitCursor curWait;
 				SetRedraw(FALSE);
 				POSITION pos = selectedList.GetHeadPosition();
@@ -780,16 +900,16 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				SetRedraw(TRUE);
 				return TRUE;
 				}
-			case MPG_ALTENTER:
 			case MP_DETAIL:
+			case MPG_ALTENTER:
 			{
-				CFileDetailDialog sheet(selectedList, 0, this);
+				CSearchResultFileDetailSheet sheet(selectedList, 0, this);
 					sheet.DoModal();
 				return TRUE;
 				}
 			case MP_CMT:
 			{
-				CFileDetailDialog sheet(selectedList, IDD_COMMENTLST, this);
+				CSearchResultFileDetailSheet sheet(selectedList, IDD_COMMENTLST, this);
 				sheet.DoModal();
 				return TRUE;
 			}
@@ -814,13 +934,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				// just a shortcut for the user typing into the searchfield "related::[filehash]"
 				if (selectedList.GetCount() == 1){
 					file = selectedList.GetHead();
-					SSearchParams* pParams = new SSearchParams;
-					pParams->strExpression = _T("related::") + md4str(file->GetFileHash());
-					pParams->strSpecialTitle = GetResString(IDS_RELATED) + _T(": ") + file->GetFileName();
-					if (pParams->strSpecialTitle.GetLength() > 50){
-						pParams->strSpecialTitle = pParams->strSpecialTitle.Left(50) + _T("...");
-					}
-					theApp.emuledlg->searchwnd->m_pwndResults->StartSearch(pParams);
+					theApp.emuledlg->searchwnd->SearchRelatedFiles(file);
 				}
 				return TRUE;
 			default:
@@ -834,7 +948,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	switch (wParam){
 		case MP_REMOVEALL:{
 			CWaitCursor curWait;
-			theApp.emuledlg->searchwnd->DeleteAllSearchs();
+			theApp.emuledlg->searchwnd->DeleteAllSearches();
 			break;
 		}
 		case MP_REMOVE:{
@@ -847,7 +961,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-void CSearchListCtrl::OnLvnDeleteallitems(NMHDR *pNMHDR, LRESULT *pResult)
+void CSearchListCtrl::OnLvnDeleteallitems(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	// To suppress subsequent LVN_DELETEITEM notification messages, return TRUE.
 	*pResult = TRUE;
@@ -879,7 +993,6 @@ void CSearchListCtrl::CreateMenues()
 	if (thePrefs.IsExtControlsEnabled())
 		m_SearchFileMenu.AppendMenu(MF_STRING, MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("FileInfo"));
 	m_SearchFileMenu.AppendMenu(MF_STRING, MP_CMT, GetResString(IDS_CMT_ADD), _T("FILECOMMENTS"));
-	m_SearchFileMenu.AppendMenu(MF_STRING, MP_SEARCHRELATED, GetResString(IDS_SEARCHRELATED), _T("KadFileSearch"));
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
 	m_SearchFileMenu.AppendMenu(MF_STRING, MP_GETED2KLINK, GetResString(IDS_DL_LINK1), _T("ED2KLink"));
 	m_SearchFileMenu.AppendMenu(MF_STRING, MP_GETHTMLED2KLINK, GetResString(IDS_DL_LINK2), _T("ED2KLink"));
@@ -889,6 +1002,7 @@ void CSearchListCtrl::CreateMenues()
 	m_SearchFileMenu.AppendMenu(MF_STRING, MP_REMOVEALL, GetResString(IDS_REMOVEALLSEARCH), _T("ClearComplete"));
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
 	m_SearchFileMenu.AppendMenu(MF_STRING, MP_FIND, GetResString(IDS_FIND), _T("Search"));
+	m_SearchFileMenu.AppendMenu(MF_STRING, MP_SEARCHRELATED, GetResString(IDS_SEARCHRELATED), _T("KadFileSearch"));
 }
 
 void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
@@ -929,7 +1043,7 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 							strTag.Format(_T("%s: %s"), GetResString(IDS_SW_NAME), tag->GetStr());
 							break;
 						case FT_FILESIZE:
-							strTag.Format(_T("%s: %s"), GetResString(IDS_DL_SIZE), CastItoXBytes(tag->GetInt(), false, false));
+							    strTag.Format(_T("%s: %s"), GetResString(IDS_DL_SIZE), CastItoXBytes(tag->GetInt64(), false, false));
 							break;
 						case FT_FILETYPE:
 							strTag.Format(_T("%s: %s"), GetResString(IDS_TYPE), tag->GetStr());
@@ -1085,7 +1199,7 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 				if (pFile)
 				{
 					iSelected++;
-					ulTotalSize += pFile->GetFileSize();
+					ulTotalSize += (uint64)pFile->GetFileSize();
 				}
 			}
 
@@ -1180,7 +1294,7 @@ void CSearchListCtrl::HideSources(CSearchFile* toCollapse)
 	SetRedraw(TRUE);
 }
 
-void CSearchListCtrl::OnClick(NMHDR *pNMHDR, LRESULT *pResult)
+void CSearchListCtrl::OnClick(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	POINT point;
 	::GetCursorPos(&point);
@@ -1193,7 +1307,7 @@ void CSearchListCtrl::OnClick(NMHDR *pNMHDR, LRESULT *pResult)
 		ExpandCollapseItem(pNMIA->iItem, EXPAND_COLLAPSE);
 }
 
-void CSearchListCtrl::OnDblClick(NMHDR *pNMHDR, LRESULT *pResult)
+void CSearchListCtrl::OnDblClick(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	POINT point;
 	::GetCursorPos(&point);
@@ -1204,9 +1318,11 @@ void CSearchListCtrl::OnDblClick(NMHDR *pNMHDR, LRESULT *pResult)
 		if (GetKeyState(VK_MENU) & 0x8000){
 			int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 			if (iSel != -1){
-				const CSearchFile* file = (CSearchFile*)GetItemData(iSel);
+				/*const*/ CSearchFile* file = (CSearchFile*)GetItemData(iSel);
 				if (file){
-					CFileDetailDialog sheet(file, 0, this);
+					CTypedPtrList<CPtrList, CSearchFile*> aFiles;
+					aFiles.AddTail(file);
+					CSearchResultFileDetailSheet sheet(aFiles, 0, this);
 					sheet.DoModal();
 				}
 			}
@@ -1237,7 +1353,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CMemDC dc(odc, &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	CRect cur_rec(lpDrawItemStruct->rcItem);
-	COLORREF crOldTextColor = dc.SetTextColor((lpDrawItemStruct->itemState & ODS_SELECTED) ? m_crHighlightText : m_crWindowText);
+	COLORREF crOldTextColor = dc.SetTextColor((!g_bLowColorDesktop || (lpDrawItemStruct->itemState & ODS_SELECTED) == 0) ? GetSearchItemColor(content) : m_crHighlightText);
 
 	int iOldBkMode;
 	if (m_crWindowTextBk == CLR_NONE){
@@ -1247,7 +1363,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	else
 		iOldBkMode = OPAQUE;
 
-	BOOL notLast = lpDrawItemStruct->itemID + 1 != GetItemCount();
+	BOOL notLast = lpDrawItemStruct->itemID + 1 != (UINT)GetItemCount();
 	BOOL notFirst = lpDrawItemStruct->itemID != 0;
 	int tree_start=0;
 	int tree_end=0;
@@ -1405,8 +1521,9 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		int middle = (cur_rec.top + cur_rec.bottom + 1) / 2;
 
 		//set up a new pen for drawing the tree
+		COLORREF crLine = (!g_bLowColorDesktop || (lpDrawItemStruct->itemState & ODS_SELECTED) == 0) ? RGB(128,128,128) : m_crHighlightText;
 		CPen pn, *oldpn;
-		pn.CreatePen(PS_SOLID, 1, RGB(128,128,128)/*m_crWindowText*/);
+		pn.CreatePen(PS_SOLID, 1, crLine);
 		oldpn = dc.SelectObject(&pn);
 
 		if(isChild)
@@ -1430,9 +1547,9 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			circle_rec.bottom = middle + 4;
 			circle_rec.left   = treeCenter - 4;
 			circle_rec.right  = treeCenter + 5;
-			dc.FrameRect(&circle_rec, &CBrush(RGB(128,128,128)/*m_crWindowText*/));
+			dc.FrameRect(&circle_rec, &CBrush(crLine));
 			CPen penBlack;
-			penBlack.CreatePen(PS_SOLID, 1, m_crWindowText);
+			penBlack.CreatePen(PS_SOLID, 1, (!g_bLowColorDesktop || (lpDrawItemStruct->itemState & ODS_SELECTED) == 0) ? m_crWindowText : m_crHighlightText);
 			CPen* pOldPen2;
 			pOldPen2 = dc.SelectObject(&penBlack);
 			dc.MoveTo(treeCenter-2,middle - 1);
@@ -1519,7 +1636,6 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*con
 	if (lpRect->left < lpRect->right)
 	{
 		CString buffer;
-		COLORREF crOldTextColor = dc->SetTextColor(GetSearchItemColor(src));
 		switch (nColumn)
 		{
 			case 0:			// file name
@@ -1618,7 +1734,6 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*con
 				break;
 			//MORPH    END - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
 		}
-		dc->SetTextColor(crOldTextColor);
 	}
 }
 
@@ -1630,7 +1745,6 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 	if (lpRect->left < lpRect->right)
 	{
 		CString buffer;
-		COLORREF crOldTextColor = dc->SetTextColor(GetSearchItemColor(src));
 		switch (nColumn)
 		{
 			case 0:			// file name
@@ -1734,7 +1848,6 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 				break;
 			//MORPH    END - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating
 		}
-		dc->SetTextColor(crOldTextColor);
 	}
 }
 

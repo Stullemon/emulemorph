@@ -19,7 +19,7 @@
 
 struct Fakes_Struct{
    uchar			Hash[16];
-   uint32			Lenght;
+   uint64			Lenght;
    CString			RealTitle;
 };
 
@@ -36,7 +36,7 @@ public:
 	void	RemoveAllFakes();
 	int		LoadFromFile();
 	CString GetLastHit() const;
-	bool	IsFake(uchar* Hash2test, uint32 lenght);
+	bool	IsFake(uchar* Hash2test, uint64 lenght);
 	void	DownloadFakeList();
 	CString GetDefaultFilePath() const;
 private:

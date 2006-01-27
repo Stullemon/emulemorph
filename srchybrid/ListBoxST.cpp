@@ -207,7 +207,7 @@ void CListBoxST::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 //		0 (Zero)
 //			Function executed successfully.
 //
-DWORD CListBoxST::OnDrawIconBackground(int nIndex, CDC* pDC, CRect* prcItem, CRect* prcIcon, BOOL bIsDisabled, BOOL bIsSelected, COLORREF crSuggestedColor)
+DWORD CListBoxST::OnDrawIconBackground(int /*nIndex*/, CDC* pDC, CRect* prcItem, CRect* prcIcon, BOOL /*bIsDisabled*/, BOOL /*bIsSelected*/, COLORREF crSuggestedColor)
 {
 	pDC->SetBkColor(crSuggestedColor);
 	pDC->FillSolidRect(prcIcon->left, prcIcon->top, prcIcon->Width(), prcItem->Height(), crSuggestedColor);
@@ -243,7 +243,7 @@ DWORD CListBoxST::OnDrawIconBackground(int nIndex, CDC* pDC, CRect* prcItem, CRe
 //		0 (Zero)
 //			Function executed successfully.
 //
-DWORD CListBoxST::OnDrawTextBackground(int nIndex, CDC* pDC, CRect* prcItem, CRect* prcText, BOOL bIsDisabled, BOOL bIsSelected, COLORREF crSuggestedColor)
+DWORD CListBoxST::OnDrawTextBackground(int /*nIndex*/, CDC* pDC, CRect* /*prcItem*/, CRect* prcText, BOOL /*bIsDisabled*/, BOOL /*bIsSelected*/, COLORREF crSuggestedColor)
 {
 	pDC->SetBkColor(crSuggestedColor);
 	pDC->FillSolidRect(prcText, crSuggestedColor);
@@ -277,7 +277,7 @@ DWORD CListBoxST::OnDrawTextBackground(int nIndex, CDC* pDC, CRect* prcItem, CRe
 //		0 (Zero)
 //			Function executed successfully.
 //
-DWORD CListBoxST::OnDrawIcon(int nIndex, CDC* pDC, CRect* prcItem, CRect* prcIcon, int nImage, BOOL bIsDisabled, BOOL bIsSelected)
+DWORD CListBoxST::OnDrawIcon(int /*nIndex*/, CDC* pDC, CRect* /*prcItem*/, CRect* prcIcon, int nImage, BOOL bIsDisabled, BOOL /*bIsSelected*/)
 {
 	HICON	hIcon = NULL;
 
@@ -364,7 +364,8 @@ void CListBoxST::DeleteItemData(int nIndex)
 	// Get pointer to associated datas (if any)
 	lpLBData = (STRUCT_LBDATA*)CListBox::GetItemDataPtr(nIndex);
 	// If datas exist
-		if (lpLBData != (LPVOID)-1L)	delete lpLBData;
+	if (lpLBData != (LPVOID)-1L)
+		delete lpLBData;
 
 	CListBox::SetItemDataPtr(nIndex, NULL);
 } // End of DeleteItemData

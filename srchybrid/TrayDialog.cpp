@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -18,6 +18,7 @@
 #include "emule.h"
 #include "TrayDialog.h"
 #include "emuledlg.h"
+#include "MenuCmds.h"
 #include "UserMsgs.h"
 
 #ifdef _DEBUG
@@ -92,10 +93,11 @@ BOOL CTrayDialog::TrayIsVisible()
 
 void CTrayDialog::TraySetIcon(HICON hIcon, bool bDelete)
 {
-	ASSERT(hIcon);
-	if (hIcon){
+	ASSERT( hIcon );
+	if (hIcon)
+	{
 		//ASSERT(m_hPrevIconDelete == NULL);
-		if (m_bCurIconDelete){
+		if (m_bCurIconDelete) {
 			ASSERT( m_nidIconData.hIcon != NULL && (m_nidIconData.uFlags & NIF_ICON) );
 			m_hPrevIconDelete = m_nidIconData.hIcon;
 		}
@@ -105,12 +107,12 @@ void CTrayDialog::TraySetIcon(HICON hIcon, bool bDelete)
 	}
 }
 
-void CTrayDialog::TraySetIcon(UINT nResourceID, bool bDelete)
+void CTrayDialog::TraySetIcon(UINT nResourceID)
 {
 	TraySetIcon(AfxGetApp()->LoadIcon(nResourceID));
 }
 
-void CTrayDialog::TraySetIcon(LPCTSTR lpszResourceName, bool bDelete)
+void CTrayDialog::TraySetIcon(LPCTSTR lpszResourceName)
 {
 	TraySetIcon(AfxGetApp()->LoadIcon(lpszResourceName));
 }
@@ -155,7 +157,7 @@ BOOL CTrayDialog::TrayUpdate()
     if (m_bTrayIconVisible)
     {
         bSuccess = Shell_NotifyIcon(NIM_MODIFY, &m_nidIconData);
-        if (!bSuccess){
+        if (!bSuccess) {
 			//ASSERT(0);
             return FALSE; // don't delete 'm_hPrevIconDelete' because it's still attached to the tray
         }
@@ -170,21 +172,21 @@ BOOL CTrayDialog::TrayUpdate()
 	return bSuccess;
 } 
 
-BOOL CTrayDialog::TraySetMenu(UINT nResourceID, UINT nDefaultPos)
+BOOL CTrayDialog::TraySetMenu(UINT nResourceID)
 {
 	BOOL bSuccess = m_mnuTrayMenu.LoadMenu(nResourceID);
 	ASSERT( bSuccess );
 	return bSuccess;
 }
 
-BOOL CTrayDialog::TraySetMenu(LPCTSTR lpszMenuName, UINT nDefaultPos)
+BOOL CTrayDialog::TraySetMenu(LPCTSTR lpszMenuName)
 {
 	BOOL bSuccess = m_mnuTrayMenu.LoadMenu(lpszMenuName);
 	ASSERT( bSuccess );
 	return bSuccess;
 }
 
-BOOL CTrayDialog::TraySetMenu(HMENU hMenu, UINT nDefaultPos)
+BOOL CTrayDialog::TraySetMenu(HMENU hMenu)
 {
 	m_mnuTrayMenu.Attach(hMenu);
 	return TRUE;
@@ -267,7 +269,7 @@ void CTrayDialog::OnTimer(UINT nIDEvent)
 {
 	if (nIDEvent == m_uSingleClickTimer)
 	{
-		OnTrayLButtonUp(CPoint(0,0));
+		OnTrayLButtonUp(CPoint(0, 0));
 		KillSingleClickTimer();
 	}
 	CDialogMinTrayBtn<CResizableDialog>::OnTimer(nIDEvent);
@@ -280,12 +282,12 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam)
 		if ((nID & 0xFFF0) == SC_MINIMIZE)
 		{
 			if (TrayShow())
-				ShowWindow(SW_HIDE);		
+				ShowWindow(SW_HIDE);
 		}
 		else
-			CTrayDialogBase::OnSysCommand(nID, lParam);	
+			CTrayDialogBase::OnSysCommand(nID, lParam);
 	}
-	else if ((nID & 0xFFF0) == SC_MINIMIZETRAY)
+	else if ((nID & 0xFFF0) == MP_MINIMIZETOTRAY)
 	{
 		if (TrayShow())
 			ShowWindow(SW_HIDE);
@@ -309,32 +311,32 @@ void CTrayDialog::TrayMinimizeToTrayChange()
 		MinTrayBtnShow();
 }
 
-void CTrayDialog::OnTrayRButtonUp(CPoint pt)
+void CTrayDialog::OnTrayRButtonUp(CPoint /*pt*/)
 {
 }
 
-void CTrayDialog::OnTrayLButtonDown(CPoint pt)
+void CTrayDialog::OnTrayLButtonDown(CPoint /*pt*/)
 {
 }
 
-void CTrayDialog::OnTrayLButtonUp(CPoint pt)
+void CTrayDialog::OnTrayLButtonUp(CPoint /*pt*/)
 {
 }
 
-void CTrayDialog::OnTrayLButtonDblClk(CPoint pt)
+void CTrayDialog::OnTrayLButtonDblClk(CPoint /*pt*/)
 {
 	m_bdoubleclicked = true;
 }
 
-void CTrayDialog::OnTrayRButtonDblClk(CPoint pt)
+void CTrayDialog::OnTrayRButtonDblClk(CPoint /*pt*/)
 {
 }
 
-void CTrayDialog::OnTrayMouseMove(CPoint pt)
+void CTrayDialog::OnTrayMouseMove(CPoint /*pt*/)
 {
 }
 
-LRESULT CTrayDialog::OnTaskBarCreated(WPARAM wParam, LPARAM lParam)
+LRESULT CTrayDialog::OnTaskBarCreated(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	if (m_bTrayIconVisible)
 	{

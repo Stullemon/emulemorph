@@ -44,9 +44,9 @@ protected:
 	CMuleListCtrl m_listFileNames;
 	bool m_bSelf;
 
-	uint32 m_timer;
-	int m_aiColWidths[2];
-	uint8	m_sortindex;
+	uint32	m_timer;
+	int		m_aiColWidths[2];
+	int		m_sortindex;
 	bool	m_sortorder;
 
 	void Localize();

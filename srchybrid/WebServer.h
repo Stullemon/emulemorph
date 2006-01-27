@@ -73,9 +73,9 @@ typedef struct
 	uint64	m_qwFileSize;
 	uint64	nFileTransferred;
 	uint64	nFileAllTimeTransferred;
-	uint16	nFileRequests;
+	UINT	nFileRequests;
 	uint32	nFileAllTimeRequests;
-	uint16	nFileAccepts;
+	UINT	nFileAccepts;
 	uint32	nFileAllTimeAccepts;
 	CString sFileCompletes;
 	double	dblFileCompletes;
@@ -98,7 +98,7 @@ typedef struct
 	CString	sFileName;
 	uint32	nTransferredDown;
 	uint32	nTransferredUp;
-	sint32	nDataRate;
+	int		nDataRate;
 	CString	sClientNameVersion;
 } UploadUsers;
 
@@ -314,7 +314,7 @@ public:
 	void RestartServer();
 	void AddStatsLine(UpDown line);
 	void ReloadTemplates();
-	uint16	GetSessionCount()	{ return m_Params.Sessions.GetCount();}
+	UINT GetSessionCount()	{ return m_Params.Sessions.GetCount();}
 	bool IsRunning()	{ return m_bServerWorking;}
 	CArray<UpDown>* GetPointsForWeb()	{return &m_Params.PointsForWeb;} // MobileMule
 protected:
@@ -353,7 +353,7 @@ private:
 	static CString	_ParseURLArray(CString URL, CString fieldname);
 	static void		_ConnectToServer(CString sIP, int nPort);
 	static bool		_IsLoggedIn(ThreadData Data, long lSession);
-	static void		_RemoveTimeOuts(ThreadData Data, long lSession);
+	static void		_RemoveTimeOuts(ThreadData Data);
 	static bool		_RemoveSession(ThreadData Data, long lSession);
 	static CString	_SpecialChars(CString str, bool noquote = true);
 	static CString	_GetPlainResString(UINT nID, bool noquote = true);

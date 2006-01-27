@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,63 +27,69 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-#pragma once
-#include "../utils/UInt128.h"
-#include "../io/ByteIO.h"
 
-class CKnownFile;
+#pragma once
+#include "../routing/Maps.h"
+
 class CSafeMemFile;
 struct SSearchTerm;
 
-
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CSearch;
-
-class CKademliaUDPListener
+namespace Kademlia
 {
-	friend class CSearch;
-
-public:
-	void bootstrap(LPCTSTR ip, uint16 port);
-	void bootstrap(uint32 ip, uint16 port);
-	void firewalledCheck(uint32 ip, uint16 port);
-	void sendMyDetails(byte opcode, uint32 ip, uint16 port);
-	void publishPacket(uint32 ip, uint16 port, const CUInt128& targetID, const CUInt128& contactID, const TagList& tags);
-	void sendNullPacket(byte opcode, uint32 ip, uint16 port);
-	virtual void processPacket(const byte* data, uint32 lenData, uint32 ip, uint16 port);
-	void sendPacket(const byte* data, uint32 lenData, uint32 destinationHost, uint16 destinationPort);
-	void sendPacket(const byte *data, uint32 lenData, byte opcode, uint32 destinationHost, uint16 destinationPort);
-	void sendPacket(CSafeMemFile* data, byte opcode, uint32 destinationHost, uint16 destinationPort);
-
-private:
-	void addContact (const byte* data, uint32 lenData, uint32 ip, uint16 port, uint16 tport = 0);
-	void addContacts(const byte* data, uint32 lenData, uint16 numContacts);
-	static SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel);
-	static void Free(SSearchTerm* pSearchTerms);
-
-	void processBootstrapRequest		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processBootstrapResponse		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processHelloRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processHelloResponse			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processKademliaRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processKademliaResponse		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processSearchRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processSearchResponse			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processPublishRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processPublishResponse			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processSearchNotesRequest		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processSearchNotesResponse		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processPublishNotesRequest		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processPublishNotesResponse	(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processFirewalledRequest		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processFirewalledResponse		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processFirewalledResponse2		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processFindBuddyRequest		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processFindBuddyResponse		(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-	void processCallbackRequest			(const byte* packetData, uint32 lenPacket, uint32 ip, uint16 port);
-};
-
-} // End namespace
+	class CKademliaUDPListener
+	{
+			friend class CSearch;
+		public:
+			void Bootstrap(LPCTSTR uIP, uint16 uUDPPort);
+			void Bootstrap(uint32 uIP, uint16 uUDPPort);
+			void FirewalledCheck(uint32 uIP, uint16 uUDPPort);
+			void SendMyDetails(byte byOpcode, uint32 uIP, uint16 uUDPPort);
+			void SendMyDetails_KADEMLIA2(byte byOpcode, uint32 uIP, uint16 uUDPPort);
+			void SendPublishSourcePacket(uint32 uIP, uint16 uUDPPort, const CUInt128& uTargetID, const CUInt128& uContactID, const TagList& tags);
+			void SendNullPacket(byte byOpcode, uint32 uIP, uint16 uUDPPort);
+			virtual void ProcessPacket(const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort);
+			void SendPacket(const byte* pbyData, uint32 uLenData, uint32 uDestinationHost, uint16 uDestinationPort);
+			void SendPacket(const byte *pbyData, uint32 uLenData, byte byOpcode, uint32 uDestinationHost, uint16 uDestinationPort);
+			void SendPacket(CSafeMemFile* pfileData, byte byOpcode, uint32 uDestinationHost, uint16 uDestinationPort);
+		private:
+			void AddContact (const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort = 0);
+			void AddContact_KADEMLIA2 (const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort);
+			void AddContacts(const byte* pbyData, uint32 uLenData, uint16 uNumContacts);
+			static SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& fileIO, int iLevel);
+			static void Free(SSearchTerm* pSearchTerms);
+			void Process_KADEMLIA_BOOTSTRAP_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_BOOTSTRAP_REQ (uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_BOOTSTRAP_RES (const byte* pbyPacketData, uint32 uLenPacket);
+			void Process_KADEMLIA2_BOOTSTRAP_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_HELLO_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_HELLO_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_HELLO_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_HELLO_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_SEARCH_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_SEARCH_KEY_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_SEARCH_SOURCE_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_SEARCH_RES (const byte* pbyPacketData, uint32 uLenPacket);
+			void Process_KADEMLIA2_SEARCH_RES (const byte* pbyPacketData, uint32 uLenPacket);
+			void Process_KADEMLIA_PUBLISH_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_PUBLISH_KEY_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_PUBLISH_SOURCE_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_PUBLISH_RES (const byte* pbyPacketData, uint32 uLenPacket);
+			void Process_KADEMLIA2_PUBLISH_RES (const byte* pbyPacketData, uint32 uLenPacket);
+			void Process_KADEMLIA_SEARCH_NOTES_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_SEARCH_NOTES_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_SEARCH_NOTES_RES (const byte* pbyPacketData, uint32 uLenPacket);
+			void Process_KADEMLIA_PUBLISH_NOTES_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_PUBLISH_NOTES_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_PUBLISH_NOTES_RES (const byte* pbyPacketData, uint32 uLenPacket);
+			void Process_KADEMLIA_FIREWALLED_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_FIREWALLED_RES (const byte* pbyPacketData, uint32 uLenPacket);
+			void Process_KADEMLIA_FIREWALLED_ACK_RES (uint32 uLenPacket);
+			void Process_KADEMLIA_FINDBUDDY_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_FINDBUDDY_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA_CALLBACK_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
+	};
+}

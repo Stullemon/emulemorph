@@ -21,9 +21,9 @@ protected:
 	CListCtrl m_list;
 	CListCtrl m_actions;
 
-	CString GetActionLabel(uint8 index);
-	CString GetDayLabel(uint8 index);
-	void LoadSchedule(uint8 index);
+	CString GetActionLabel(int index);
+	CString GetDayLabel(int index);
+	void LoadSchedule(int index);
 	void RecheckSchedules();
 	void FillScheduleList();
 

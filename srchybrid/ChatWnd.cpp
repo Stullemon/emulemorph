@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -94,7 +94,7 @@ void CChatWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_FRIENDS_MSG, m_cUserInfo);
 }
 
-void CChatWnd::OnLvnItemActivateFrlist(NMHDR *pNMHDR, LRESULT *pResult)
+void CChatWnd::OnLvnItemActivateFrlist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	int iSel = m_FriendListCtrl.GetSelectionMark();
 	if (iSel != -1) {
@@ -129,7 +129,7 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 
 		// Client
 		if (pFriend->GetLinkedClient())
-			GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->DbgGetFullClientSoftVer());
+			GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->DbgGetFullClientSoftVer()); //MORPH - Changed by SiRoB, To get full version display
 		else
 			GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(_T("?"));
 
@@ -321,6 +321,7 @@ void CChatWnd::DoResize(int delta)
 
 	m_wndSplitterchat.SetRange(rcW.left+SPLITTER_RANGE_WIDTH, rcW.left+SPLITTER_RANGE_HEIGHT);
 
+	m_FriendListCtrl.SaveSettings();
 	m_FriendListCtrl.DeleteColumn(0);
 	m_FriendListCtrl.Init();
 
@@ -394,14 +395,22 @@ void CChatWnd::StartSession(CUpDownClient* client){
 	chatselector.StartSession(client,true);
 }
 
-void CChatWnd::OnShowWindow(BOOL bShow,UINT nStatus){
+void CChatWnd::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
+{
 	if (bShow)
 		chatselector.ShowChat();
 }
 
 BOOL CChatWnd::PreTranslateMessage(MSG* pMsg) 
 {
-	if(pMsg->message == WM_KEYUP){
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		// Don't handle Ctrl+Tab in this window. It will be handled by main window.
+		if (pMsg->wParam == VK_TAB && GetAsyncKeyState(VK_CONTROL) < 0)
+			return FALSE;
+	}
+	else if (pMsg->message == WM_KEYUP)
+	{
 		if (pMsg->hwnd == GetDlgItem(IDC_LIST2)->m_hWnd)
 			OnLvnItemActivateFrlist(0,0);
 	}
@@ -448,11 +457,11 @@ void CChatWnd::Localize()
 	m_FriendListCtrl.Localize();
 }
 
-LRESULT CChatWnd::OnCloseTab(WPARAM wparam, LPARAM lparam)
+LRESULT CChatWnd::OnCloseTab(WPARAM wParam, LPARAM /*lParam*/)
 {
 	TCITEM item = {0};
 	item.mask = TCIF_PARAM;
-	if (chatselector.GetItem((int)wparam, &item))
+	if (chatselector.GetItem((int)wParam, &item))
 		chatselector.EndSession(((CChatItem*)item.lParam)->client);
 	return TRUE;
 }
@@ -479,7 +488,7 @@ void CChatWnd::OnSysColorChange()
 	SetAllIcons();
 }
 
-void CChatWnd::UpdateFriendlistCount(uint16 count) {
+void CChatWnd::UpdateFriendlistCount(UINT count) {
 	CString temp;
 	temp.Format(_T(" (%i)"),count);
 	temp=GetResString(IDS_CW_FRIENDS)+temp;
@@ -487,7 +496,7 @@ void CChatWnd::UpdateFriendlistCount(uint16 count) {
 	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(temp);
 }
 
-BOOL CChatWnd::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CChatWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	theApp.ShowHelp(eMule_FAQ_Friends);
 	return TRUE;

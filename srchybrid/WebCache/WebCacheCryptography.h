@@ -16,7 +16,11 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4100) // unreferenced formal parameter
 #include <crypto51/arc4.h>
+#pragma warning(default:4100) // unreferenced formal parameter
+#pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "WebCache.h"
 
@@ -29,9 +33,9 @@ class CWebCacheCryptography
 	public:
 		CDummyCipher(void){}
 		~CDummyCipher(void){}
-		void ProcessString(byte* inout, uint32 length) {}
-		void SetKey(byte* key, uint32 length) {}
-		void DiscardBytes(uint32 length) {}
+		void ProcessString(byte* /*inout*/, uint32 /*length*/) {}
+		void SetKey(byte* /*key*/, uint32 /*length*/) {}
+		void DiscardBytes(uint32 /*length*/) {}
 	};
 
 public:

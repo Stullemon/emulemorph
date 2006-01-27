@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -28,78 +28,62 @@ Any mod that changes anything within the Kademlia side will not be allowed to ad
 there client on the eMule forum..
 */
 #pragma once
-#include <map>
+#include "../routing/Maps.h"
 
 class CSharedFileList;
 struct Status;
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CPrefs;
-class CRoutingZone;
-class CKademliaUDPListener;
-class CKademliaError;
-class CSearch;
-class CContact;
-class CIndexed;
-class CEntry;
-
-typedef std::map<CRoutingZone*, CRoutingZone*> EventMap;
-
-#define KADEMLIA_VERSION 0.1
-
-class CKademlia
+namespace Kademlia
 {
-public:
-	static void start(void);
-	static void start(CPrefs *prefs);
-	static void stop();
- 
-	static CPrefs				*getPrefs(void);
-	static CRoutingZone			*getRoutingZone(void);
-	static CKademliaUDPListener	*getUDPListener(void);
-	static CIndexed				*getIndexed(void);
-	static bool					isRunning(void) {return m_running;}
-	static bool					isConnected(void);
-	static bool					isFirewalled(void);
-	static void					RecheckFirewalled(void);
-	static uint32				getKademliaUsers(void);
-	static uint32				getKademliaFiles(void);
-	static uint32				getTotalStoreKey(void);
-	static uint32				getTotalStoreSrc(void);
-	static uint32				getTotalStoreNotes(void);
-	static uint32				getTotalFile(void);
-	static bool					getPublish(void);
-	static uint32				getIPAddress(void);
-	static void					bootstrap(uint32 ip, uint16 port);
-	static void					bootstrap(LPCTSTR host, uint16 port);
-	static void					processPacket(const byte* data, uint32 lenData, uint32 ip, uint16 port);
+	class CPrefs;
+	class CKademliaUDPListener;
+	class CIndexed;
+	class CKademlia
+	{
+		public:
+			CKademlia();
 
-	static void addEvent(CRoutingZone *zone);
-	static void removeEvent(CRoutingZone *zone);
-	static void process();
-	static bool initUnicode(HMODULE hInst);
-
-private:
-	CKademlia() {}
-
-	static CKademlia *instance;
-	static EventMap	m_events;
-	static time_t	m_nextSearchJumpStart;
-	static time_t	m_nextSelfLookup;
-	static time_t	m_nextFirewallCheck;
-	static time_t	m_nextFindBuddy;
-	static time_t	m_statusUpdate;
-	static time_t	m_bigTimer;
-	static time_t	m_bootstrap;
-	static bool		m_running;
-
-	CPrefs					*m_prefs;
-	CRoutingZone			*m_routingZone;
-	CKademliaUDPListener	*m_udpListener;
-	CIndexed				*m_indexed;
-};
-
-} // End namespace
+			static void Start();
+			static void	Start(CPrefs *pPrefs);
+			static void	Stop();
+			static CPrefs *GetPrefs();
+			static CRoutingZone *GetRoutingZone();
+			static CKademliaUDPListener *GetUDPListener();
+			static CIndexed *GetIndexed();
+			static bool	IsRunning();
+			static bool	IsConnected();
+			static bool	IsFirewalled();
+			static void	RecheckFirewalled();
+			static uint32 GetKademliaUsers();
+			static uint32 GetKademliaFiles();
+			static uint32 GetTotalStoreKey();
+			static uint32 GetTotalStoreSrc();
+			static uint32 GetTotalStoreNotes();
+			static uint32 GetTotalFile();
+			static bool	GetPublish();
+			static uint32 GetIPAddress();
+			static void	Bootstrap(uint32 uIP, uint16 uPort);
+			static void	Bootstrap(LPCTSTR szHost, uint16 uPort);
+			static void	ProcessPacket(const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uPort);
+			static void	AddEvent(CRoutingZone *pZone);
+			static void	RemoveEvent(CRoutingZone *pZone);
+			static void	Process();
+			static bool	InitUnicode(HMODULE hInst);
+		private:
+			static CKademlia *m_pInstance;
+			static EventMap	m_mapEvents;
+			static time_t m_tNextSearchJumpStart;
+			static time_t m_tNextSelfLookup;
+			static time_t m_tNextFirewallCheck;
+			static time_t m_tNextFindBuddy;
+			static time_t m_tStatusUpdate;
+			static time_t m_tBigTimer;
+			static time_t m_tBootstrap;
+			static time_t m_tConsolidate;
+			static bool	m_bRunning;
+			CPrefs *m_pPrefs;
+			CRoutingZone *m_pRoutingZone;
+			CKademliaUDPListener *m_pUDPListener;
+			CIndexed *m_pIndexed;
+	};
+}

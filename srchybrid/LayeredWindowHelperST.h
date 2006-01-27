@@ -41,7 +41,7 @@ public:
 	LONG AddLayeredStyle(HWND hWnd);
 	LONG RemoveLayeredStyle(HWND hWnd);
 	BOOL SetLayeredWindowAttributes(HWND hWnd, COLORREF crKey, BYTE bAlpha, DWORD dwFlags);
-	BOOL SetTransparentPercentage(HWND hWnd, BYTE byPercentage);
+	BOOL SetTransparentPercentage(HWND hWnd, UINT byPercentage);
 
 	static short GetVersionI()		{return 11;}
 	static LPCTSTR GetVersionC()	{return (LPCTSTR)_T("1.1");}

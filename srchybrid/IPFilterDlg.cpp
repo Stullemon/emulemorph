@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -23,6 +23,7 @@
 #include "MenuCmds.h"
 #include "ZipFile.h"
 #include "GZipFile.h"
+#include "RarFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -85,12 +86,13 @@ CIPFilterDlg::CIPFilterDlg(CWnd* pParent /*=NULL*/)
 	m_ipfilter.m_pParent = this;
 	m_ipfilter.SetRegistryKey(PREF_INI_SECTION);
 	m_ipfilter.SetRegistryPrefix(_T("IPfilters_"));
+	m_ipfilter.m_pfnFindItem = FindItem;
+	m_ipfilter.m_lFindItemParam = (DWORD_PTR)this;
 }
 
 CIPFilterDlg::~CIPFilterDlg()
 {
-	if (m_ppIPFilterItems)
-		free(m_ppIPFilterItems);
+	free(m_ppIPFilterItems);
 	delete m_pMenuIPFilter;
 	sm_iSortColumn = m_ipfilter.GetSortColumn();
 	if (m_icoDlg)
@@ -134,7 +136,7 @@ int __cdecl CompareIPFilterItems(const void* lParam1, const void* lParam2)
 	}
 	else if (_lParamSort == IPFILTER_COL_DESC)
 	{
-		iResult = CompareLocaleStringNoCase((*((const SIPFilter**)lParam1))->desc, (*((const SIPFilter**)lParam2))->desc);
+		iResult = stricmp/*CompareLocaleStringNoCase*/((*((const SIPFilter**)lParam1))->desc, (*((const SIPFilter**)lParam2))->desc);
 	}
 	else
 	{
@@ -233,11 +235,8 @@ void CIPFilterDlg::InitIPFilters()
 	CWaitCursor curWait;
 
 	m_uIPFilterItems = 0;
-	if (m_ppIPFilterItems)
-	{
-		free(m_ppIPFilterItems);
-		m_ppIPFilterItems = NULL;
-	}
+	free(m_ppIPFilterItems);
+	m_ppIPFilterItems = NULL;
 
 	const CIPFilterArray& ipfilter = theApp.ipfilter->GetIPFilter();
 	m_uIPFilterItems = ipfilter.GetCount();
@@ -289,7 +288,8 @@ void CIPFilterDlg::OnLvnGetdispinfoIpfilter(NMHDR *pNMHDR, LRESULT *pResult)
 				break;
 			case IPFILTER_COL_DESC:
 				if (pDispInfo->item.cchTextMax > 0){
-					_tcsncpy(pDispInfo->item.pszText, m_ppIPFilterItems[pDispInfo->item.iItem]->desc, pDispInfo->item.cchTextMax);
+					USES_CONVERSION;
+					_tcsncpy(pDispInfo->item.pszText, A2T(m_ppIPFilterItems[pDispInfo->item.iItem]->desc), pDispInfo->item.cchTextMax);
 					pDispInfo->item.pszText[pDispInfo->item.cchTextMax - 1] = _T('\0');
 				}
 				break;
@@ -339,37 +339,96 @@ void CIPFilterDlg::OnSelectAllIPFilter()
 
 void CIPFilterDlg::OnBnClickedAppend()
 {
-	CString strFilePath;
-	if (DialogBrowseFile(strFilePath, GetResString(IDS_IPFILTERFILES)))
+	CString strFilePath;			  // Do NOT localize that string
+	if (DialogBrowseFile(strFilePath, _T("All IP Filter Files (*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz;*.rar)|*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz;*.rar|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2b;*.p2p;*.p2p.txt)|*.p2b;*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|ZIP Files (*.zip;*.gz)|*.zip;*.gz|RAR Files (*.rar)|*.rar|All Files (*.*)|*.*||")))
 	{
 		CWaitCursor curWait;
+
+		TCHAR szExt[_MAX_EXT];
+		_tsplitpath(strFilePath, NULL, NULL, NULL, szExt);
+		_tcslwr(szExt);
+		bool bIsArchiveFile = _tcscmp(szExt, _T(".zip"))==0 || _tcscmp(szExt, _T(".rar"))==0 || _tcscmp(szExt, _T(".gz"))==0;
+		bool bExtractedArchive = false;
+
 		CString strTempUnzipFilePath;
-		CZIPFile zip;
-		if (zip.Open(strFilePath))
+		if (_tcscmp(szExt, _T(".zip")) == 0)
 		{
-			CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
-			if (zfile)
+			CZIPFile zip;
+			if (zip.Open(strFilePath))
 			{
-				_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
-				strTempUnzipFilePath.ReleaseBuffer();
-				if (zfile->Extract(strTempUnzipFilePath))
-					strFilePath = strTempUnzipFilePath;
+				CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
+				if (zfile == NULL)
+					zfile = zip.GetFile(_T("ipfilter.dat"));
+				if (zfile)
+				{
+					_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+					strTempUnzipFilePath.ReleaseBuffer();
+					if (zfile->Extract(strTempUnzipFilePath))
+					{
+						strFilePath = strTempUnzipFilePath;
+						bExtractedArchive = true;
+					}
+					else
+					{
+						CString strError;
+						strError.Format(_T("Failed to extract IP filter file from ZIP file \"%s\"."), strFilePath);
+						AfxMessageBox(strError, MB_ICONERROR);
+					}
+				}
 				else
 				{
 					CString strError;
-					strError.Format(_T("Failed to extract IP filter file \"guarding.p2p\" from ZIP file \"%s\"."), strFilePath);
-					AfxMessageBox(strError);
+					strError.Format(_T("Failed to find IP filter file \"guarding.p2p\" or \"ipfilter.dat\" in ZIP file \"%s\"."), strFilePath);
+					AfxMessageBox(strError, MB_ICONERROR);
 				}
+				zip.Close();
 			}
 			else
 			{
 				CString strError;
-				strError.Format(_T("Failed to find IP filter file \"guarding.p2p\" in ZIP file \"%s\"."), strFilePath);
-				AfxMessageBox(strError);
+				strError.Format(_T("Failed to open file \"%s\".\r\n\r\nInvalid file format?"), strFilePath);
+				AfxMessageBox(strError, MB_ICONERROR);
 			}
-			zip.Close();
 		}
-		else
+		else if (_tcscmp(szExt, _T(".rar")) == 0)
+		{
+			CRARFile rar;
+			if (rar.Open(strFilePath))
+			{
+				CString strFile;
+				if (rar.GetNextFile(strFile)
+					&& (strFile.CompareNoCase(_T("ipfilter.dat")) == 0 || strFile.CompareNoCase(_T("guarding.p2p")) == 0))
+				{
+					_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+					strTempUnzipFilePath.ReleaseBuffer();
+					if (rar.Extract(strTempUnzipFilePath))
+					{
+						strFilePath = strTempUnzipFilePath;
+						bExtractedArchive = true;
+					}
+					else
+					{
+						CString strError;
+						strError.Format(_T("Failed to extract IP filter file from RAR file \"%s\"."), strFilePath);
+						AfxMessageBox(strError, MB_ICONERROR);
+					}
+				}
+				else
+				{
+					CString strError;
+					strError.Format(_T("Failed to find IP filter file \"guarding.p2p\" or \"ipfilter.dat\" in RAR file \"%s\"."), strFilePath);
+					AfxMessageBox(strError, MB_ICONERROR);
+				}
+				rar.Close();
+			}
+			else
+			{
+				CString strError;
+				strError.Format(_T("Failed to open file \"%s\".\r\n\r\nInvalid file format?\r\n\r\nDownload latest version of UNRAR.DLL from http://www.rarlab.com and copy UNRAR.DLL into eMule installation folder."), strFilePath);
+				AfxMessageBox(strError, MB_ICONERROR);
+			}
+		}
+		else if (_tcscmp(szExt, _T(".gz")) == 0)
 		{
 			CGZIPFile gz;
 			if (gz.Open(strFilePath))
@@ -386,19 +445,28 @@ void CIPFilterDlg::OnBnClickedAppend()
 				}
 
 				if (gz.Extract(strTempUnzipFilePath))
+				{
 					strFilePath = strTempUnzipFilePath;
+					bExtractedArchive = true;
+				}
+				gz.Close();
 			}
-			gz.Close();
+			else
+			{
+				CString strError;
+				strError.Format(_T("Failed to open file \"%s\".\r\n\r\nInvalid file format?"), strFilePath);
+				AfxMessageBox(strError, MB_ICONERROR);
+			}
 		}
 
-		if (theApp.ipfilter->AddFromFile(strFilePath, true))
+		if ((!bIsArchiveFile || bExtractedArchive) && theApp.ipfilter->AddFromFile(strFilePath, true))
 		{
 			InitIPFilters();
 			m_ipfilter.Update(-1);
 		}
 
 		if (!strTempUnzipFilePath.IsEmpty())
-			_tremove(strTempUnzipFilePath);
+			VERIFY( _tremove(strTempUnzipFilePath) == 0);
 	}
 }
 
@@ -433,12 +501,10 @@ void CIPFilterDlg::OnBnClickedDelete()
 	if (m_ipfilter.GetSelectedCount() == m_uIPFilterItems)
 	{
 		theApp.ipfilter->RemoveAllIPFilters();
+		theApp.ipfilter->SetModified();
 		m_uIPFilterItems = 0;
-		if (m_ppIPFilterItems)
-		{
-			free(m_ppIPFilterItems);
-			m_ppIPFilterItems = NULL;
-		}
+		free(m_ppIPFilterItems);
+		m_ppIPFilterItems = NULL;
 		m_ipfilter.SetItemCount(m_uIPFilterItems);
 		m_ulFilteredIPs = 0;
 	}
@@ -455,6 +521,7 @@ void CIPFilterDlg::OnBnClickedDelete()
 			    ULONG ulIPRange = pFilter->end - pFilter->start + 1;
 			    if (theApp.ipfilter->RemoveIPFilter(pFilter))
 			    {
+					theApp.ipfilter->SetModified();
 				    aItems.Add(iItem);
 				    m_ulFilteredIPs -= ulIPRange;
 			    }
@@ -477,7 +544,7 @@ void CIPFilterDlg::OnBnClickedDelete()
 	    }
 	    m_ipfilter.SetRedraw();
 	}
-	ASSERT( m_uIPFilterItems == m_ipfilter.GetItemCount() );
+	ASSERT( m_uIPFilterItems == (UINT)m_ipfilter.GetItemCount() );
 	SetDlgItemText(IDC_TOTAL_IPFILTER, GetFormatedUInt(m_ipfilter.GetItemCount()));
 	SetDlgItemText(IDC_TOTAL_IPS, GetFormatedUInt(m_ulFilteredIPs));
 }
@@ -513,8 +580,22 @@ void CIPFilterDlg::OnBnClickedSave()
 	}
 	catch(CString err)
 	{
-		AfxMessageBox(err);
+		AfxMessageBox(err, MB_ICONERROR);
 	}
+}
+
+bool CIPFilterDlg::FindItem(const CListCtrlX& lv, int iItem, DWORD_PTR lParam)
+{
+	USES_CONVERSION;
+
+	if (lv.GetFindColumn() != IPFILTER_COL_START)
+		return CListCtrlX::FindItem(lv, iItem, lParam);
+
+	const CIPFilterDlg* dlg = reinterpret_cast<CIPFilterDlg*>(lParam);
+	ASSERT_VALID(dlg);
+	u_long ip = htonl(inet_addr(T2A(lv.GetFindText())));
+	const SIPFilter* filter = dlg->m_ppIPFilterItems[iItem];
+	return (ip >= filter->start && ip <= filter->end);
 }
 
 void CIPFilterDlg::OnFind()

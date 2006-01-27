@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -19,7 +19,11 @@
 #include "kademlia/routing/contact.h"
 #include "KadContactHistogramCtrl.h"
 #include "OtherFunctions.h"
+//#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+//#pragma warning(disable:4100) // unreferenced formal parameter
 //#include <crypto51/integer.h>
+//#pragma warning(default:4100) // unreferenced formal parameter
+//#pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -63,14 +67,14 @@ void CKadContactHistogramCtrl::Localize()
 __inline UINT GetHistSlot(const Kademlia::CUInt128& KadUint128)
 {
 //	byte aucUInt128[16];
-//	KadUint128.toByteArray(aucUInt128);
+//	KadUint128.ToByteArray(aucUInt128);
 //	CryptoPP::Integer d(aucUInt128, sizeof aucUInt128);
 //	CryptoPP::Integer h;
 //	h = d >> (128 - KAD_CONTACT_HIST_NEEDED_BITS);
 //	UINT uHistSlot = h.ConvertToLong();
 
 	// same as above but quite faster
-	DWORD dwHighestWord = *(DWORD*)KadUint128.getData();
+	DWORD dwHighestWord = *(DWORD*)KadUint128.GetData();
 	UINT uHistSlot = dwHighestWord >> (128-3*32 - KAD_CONTACT_HIST_NEEDED_BITS);
 	ASSERT( uHistSlot < KAD_CONTACT_HIST_SIZE );
 	return uHistSlot;
@@ -79,7 +83,7 @@ __inline UINT GetHistSlot(const Kademlia::CUInt128& KadUint128)
 bool CKadContactHistogramCtrl::ContactAdd(const Kademlia::CContact* contact)
 {
 	Kademlia::CUInt128 distance;
-	contact->getClientID(&distance);
+	contact->GetClientID(&distance);
 	UINT uHistSlot = GetHistSlot(distance);
 	m_aHist[uHistSlot]++;
 	Invalidate();
@@ -89,7 +93,7 @@ bool CKadContactHistogramCtrl::ContactAdd(const Kademlia::CContact* contact)
 void CKadContactHistogramCtrl::ContactRem(const Kademlia::CContact* contact)
 {
 	Kademlia::CUInt128 distance;
-	contact->getClientID(&distance);
+	contact->GetClientID(&distance);
 	UINT uHistSlot = GetHistSlot(distance);
 	ASSERT( m_aHist[uHistSlot] > 0 );
 	if (m_aHist[uHistSlot] > 0)
@@ -97,10 +101,6 @@ void CKadContactHistogramCtrl::ContactRem(const Kademlia::CContact* contact)
 		m_aHist[uHistSlot]--;
 		Invalidate();
 	}
-}
-
-void CKadContactHistogramCtrl::ContactRef(const Kademlia::CContact* contact)
-{
 }
 
 void CKadContactHistogramCtrl::OnPaint()

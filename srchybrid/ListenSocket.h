@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -76,7 +76,7 @@ protected:
 	//MORPH START - Added by SiRoB, WebCache 1.2f
 	bool	ProcessWebCachePacket(const BYTE* packet, uint32 size, UINT opcode, UINT uRawSize); // yonatan - webcache protocol packets
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
-	void	PacketToDebugLogLine(LPCTSTR protocol, const uchar* packet, uint32 size, UINT opcode, EDebugLogPriority dlpPriority);
+	void	PacketToDebugLogLine(LPCTSTR protocol, const uchar* packet, uint32 size, UINT opcode);
 	void	SetConState(SocketState val);
 
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
@@ -104,7 +104,7 @@ public:
 	void	Process();
 	void	RemoveSocket(CClientReqSocket* todel);
 	void	AddSocket(CClientReqSocket* toadd);
-	uint16	GetOpenSockets()		{return socket_list.GetCount();}
+	UINT	GetOpenSockets()		{return socket_list.GetCount();}
 	void	KillAllSockets();
 	bool	TooManySockets(bool bIgnoreInterval = false);
 	uint32	GetMaxConnectionReached()	{return maxconnectionreached;}
@@ -142,6 +142,6 @@ private:
 	uint32	m_nComp;
 	//MORPH START - Added by Yun.SF3, Auto DynUp changing
 	void	SwitchSUC(bool bSetSUCOn = false);
-	uint16	per5average;
+	int	per5average;
 	//MORPH END - Added by Yun.SF3, Auto DynUp changing
 };

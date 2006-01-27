@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -20,9 +20,11 @@
 #define	EMULE_PROTOCOL			0x01
 // MOD Note: end
 #define	EDONKEYVERSION			0x3C
+#define KADEMLIA_VERSION				0x02
 #define PREFFILE_VERSION		0x14	//<<-- last change: reduced .dat, by using .ini
 #define PARTFILE_VERSION		0xe0
 #define PARTFILE_SPLITTEDVERSION		0xe1
+#define PARTFILE_VERSION_LARGEFILE		0xe2
 //Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 #define CREDITFILE_VERSION_30_DYN		0x81	// Moonlight: Dynamic Transportable CreditStruct.
 #define CREDITFILE_VERSION_30_SUQWTv2	0x80	// Moonlight: SUQWT CreditStruct v2.
@@ -74,13 +76,13 @@
 #define KADEMLIADISCONNECTDELAY	MIN2S(20)	//20 mins
 #define	KADEMLIAMAXINDEX		50000		//Total keyword indexes.
 #define	KADEMLIAMAXENTRIES		60000		//Total keyword entries.
-#define KADEMLIAMAXSOUCEPERFILE	300			//Max number of sources per file in index.
-#define KADEMLIAMAXNOTESPERFILE	50			//Max number of notes per entry in index.
+#define KADEMLIAMAXSOUCEPERFILE 1000		//Max number of sources per file in index.
+#define KADEMLIAMAXNOTESPERFILE	150			//Max number of notes per entry in index.
 
 #define ED2KREPUBLISHTIME		MIN2MS(1)	//1 min
 #define MINCOMMONPENALTY		4
 #define UDPSERVERSTATTIME		SEC2MS(5)	//5 secs
-#define UDPSERVSTATREASKTIME	HR2S(4)		//4 hours
+#define UDPSERVSTATREASKTIME	HR2S(4.5)	//4.5 hours (A random time of up to one hour is reduced during runtime after each ping)
 #define	UDPSERVERPORT			4665	//default udp port
 #define UDPMAXQUEUETIME			SEC2MS(30)	//30 Seconds
 #define RSAKEYSIZE				384		//384 bits
@@ -89,13 +91,18 @@
 #define SESSIONMAXTRANS			(9.3*1024*1024) // 9.3 Mbytes. "Try to send complete chunks" always sends this amount of data
 #define SESSIONMAXTIME			HR2MS(1)	//1 hour
 #define	MAXFILECOMMENTLEN		50
-#define	PARTSIZE				9728000
-#define	MAX_EMULE_FILE_SIZE		4290048000	// (4294967295/PARTSIZE)*PARTSIZE
+#define	PARTSIZE				9728000ui64
+#ifdef SUPPORT_LARGE_FILES
+	#define	MAX_EMULE_FILE_SIZE	0x4000000000ui64 // = 2^38 = 256GB
+#else
+	#define	MAX_EMULE_FILE_SIZE	4290048000ui64	// (4294967295/PARTSIZE)*PARTSIZE = ~4GB
+#endif
+#define OLD_MAX_EMULE_FILE_SIZE	4290048000ui64	// (4294967295/PARTSIZE)*PARTSIZE = ~4GB
 // MOD Note: end
 
 //MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
-#define	MAXAVERAGETIMEUPLOAD	thePrefs.m_iUploadDataRateAverageTime
-#define	MAXAVERAGETIMEDOWNLOAD	thePrefs.m_iDownloadDataRateAverageTime
+#define	MAXAVERAGETIMEUPLOAD	(UINT)thePrefs.m_iUploadDataRateAverageTime
+#define	MAXAVERAGETIMEDOWNLOAD	(UINT)thePrefs.m_iDownloadDataRateAverageTime
 //MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 
 #define CONFIGFOLDER			_T("config\\")
@@ -106,7 +113,7 @@
 #define	MAX_UP_CLIENTS_ALLOWED	250			// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
 #define	MIN_UP_CLIENTS_ALLOWED	2			// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define MINNUMBEROFTRICKLEUPLOADS 1			//MORPH  - Added By AndCycle, ZZUL_20050212-0200
-#define DOWNLOADTIMEOUT			SEC2MS(170)
+#define DOWNLOADTIMEOUT			SEC2MS(100)
 #define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
 #define RARE_FILE				50
 #define BADCLIENTBAN			4
@@ -142,6 +149,7 @@
 // yonatan http end ////////////////////////////////////////////////////////////////////////////
 //MORPH END   - Added by SiRoB, WebCache 1.2f
 #define	MET_HEADER				0x0E
+#define	MET_HEADER_I64TAGS		0x0F
 	
 #define UNLIMITED				0xFFFF
 
@@ -150,7 +158,8 @@
 #define PROXYTYPE_SOCKS4 1
 #define PROXYTYPE_SOCKS4A 2
 #define PROXYTYPE_SOCKS5 3
-#define PROXYTYPE_HTTP11 4
+#define PROXYTYPE_HTTP10	4
+#define PROXYTYPE_HTTP11	5
 
 // client <-> server
 #define OP_LOGINREQUEST			0x01	//<HASH 16><ID 4><PORT 2><1 Tag_set>
@@ -183,6 +192,7 @@
 #define OP_USERS_LIST           0x43    // <count 4>(<HASH 16><ID 4><PORT 2><1 Tag_set>)[count]
 
 //client <-> UDP server
+#define	OP_GLOBSEARCHREQ3		0x90	// <1 tag set><search_tree>
 #define	OP_GLOBSEARCHREQ2		0x92	// <search_tree>
 #define OP_GLOBSERVSTATREQ		0x96	// (null)
 #define	OP_GLOBSERVSTATRES		0x97	// <USER 4><FILES 4>
@@ -241,7 +251,7 @@
 // extened prot client <-> extened prot client
 #define	OP_EMULEINFO			0x01	//
 #define	OP_EMULEINFOANSWER		0x02	//
-#define OP_COMPRESSEDPART		0x40	//
+#define OP_COMPRESSEDPART		0x40	// <HASH 16><von 4><size 4><Daten len:size>
 #define OP_QUEUERANKING			0x60	// <RANG 2>
 #define OP_FILEDESC				0x61	// <len 2><NAME len>
 #define OP_REQUESTSOURCES		0x81	// <HASH 16>
@@ -269,6 +279,10 @@
 #define OP_AICHFILEHASHREQ		0x9E
 #define OP_BUDDYPING			0x9F
 #define OP_BUDDYPONG			0xA0
+#define OP_COMPRESSEDPART_I64	0xA1	// <HASH 16><von 8><size 4><Daten len:size>
+#define OP_SENDINGPART_I64		0xA2	// <HASH 16><von 8><bis 8><Daten len:(von-bis)>
+#define	OP_REQUESTPARTS_I64		0xA3	// <HASH 16><von[3] 8*3><bis[3] 8*3>
+#define OP_MULTIPACKET_EXT		0xA4		
 
 //MORPH START - Added by SiRoB, WebCache 1.2f
 // yonatan http start //////////////////////////////////////////////////////////////////////////
@@ -312,8 +326,10 @@
 //file tags
 #define FT_FILENAME				 0x01	// <string>
 #define TAG_FILENAME			"\x01"	// <string>
-#define FT_FILESIZE				 0x02	// <uint32>
+#define  FT_FILESIZE			 0x02	// <uint32> (or <uint64> when supported)
 #define TAG_FILESIZE			"\x02"	// <uint32>
+#define  FT_FILESIZE_HI			 0x3A	// <uint32>
+#define TAG_FILESIZE_HI			"\x3A"	// <uint32>
 #define FT_FILETYPE				 0x03	// <string>
 #define TAG_FILETYPE			"\x03"	// <string>
 #define FT_FILEFORMAT			 0x04	// <string>
@@ -362,7 +378,7 @@
 #define FT_AICH_HASH			 0x27
 #define  FT_FILEHASH			 0x28
 #define	FT_COMPLETE_SOURCES		 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
-#define TAG_COMPLETE_SOURCES	"/x30"
+#define TAG_COMPLETE_SOURCES	"\x30"
 #define  FT_COLLECTIONAUTHOR	 0x31
 #define  FT_COLLECTIONAUTHORKEY  0x32
 // statistic
@@ -421,11 +437,12 @@
 #define	TAG_MEDIA_BITRATE		"\xD4"	// <uint32>
 #define	 FT_MEDIA_CODEC			 0xD5	// <string>
 #define	TAG_MEDIA_CODEC			"\xD5"	// <string>
+#define TAG_USER_COUNT			"\xF4"	// <uint32>
+#define TAG_FILE_COUNT			"\xF5"	// <uint32>
 #define  FT_FILECOMMENT			 0xF6	// <string>
-#define TAG_FILECOMMENT			"/xF6"	// <string>
+#define TAG_FILECOMMENT			"\xF6"	// <string>
 #define  FT_FILERATING			 0xF7	// <uint8>
 #define TAG_FILERATING			"\xF7"	// <uint8>
-
 #define TAG_BUDDYHASH			"\xF8"	// <string>
 #define TAG_CLIENTLOWID			"\xF9"	// <uint32>
 #define TAG_SERVERPORT			"\xFA"	// <uint16>
@@ -445,6 +462,7 @@
 #define	TAGTYPE_UINT16			0x08
 #define	TAGTYPE_UINT8			0x09
 #define	TAGTYPE_BSOB			0x0A
+#define	TAGTYPE_UINT64			0x0B
 
 #define TAGTYPE_STR1			0x11
 #define TAGTYPE_STR2			0x12
@@ -499,12 +517,13 @@
 #define ED2K_SEARCH_OP_NOTEQUAL      5 // eserver 16.45+
 
 // Kad search expression comparison operators
-#define KAD_SEARCH_OP_EQUAL         0 // eMule 0.43+
-#define KAD_SEARCH_OP_GREATER_EQUAL 1 // eMule 0.40+; NOTE: this different than ED2K!
-#define KAD_SEARCH_OP_LESS_EQUAL    2 // eMule 0.40+; NOTE: this different than ED2K!
-#define KAD_SEARCH_OP_GREATER       3 // eMule 0.43+; NOTE: this different than ED2K!
-#define KAD_SEARCH_OP_LESS          4 // eMule 0.43+; NOTE: this different than ED2K!
-#define KAD_SEARCH_OP_NOTEQUAL      5 // eMule 0.43+
+// 11-Sep-2005 []: Since eMule 0.47 Kad uses same operators as ED2K
+//#define KAD_SEARCH_OP_EQUAL         0 // eMule 0.43+
+//#define KAD_SEARCH_OP_GREATER_EQUAL 1 // eMule 0.40+; NOTE: this different than ED2K!
+//#define KAD_SEARCH_OP_LESS_EQUAL    2 // eMule 0.40+; NOTE: this different than ED2K!
+//#define KAD_SEARCH_OP_GREATER       3 // eMule 0.43+; NOTE: this different than ED2K!
+//#define KAD_SEARCH_OP_LESS          4 // eMule 0.43+; NOTE: this different than ED2K!
+//#define KAD_SEARCH_OP_NOTEQUAL      5 // eMule 0.43+
 
 #define CT_NAME					0x01
 #define	CT_PORT					0x0f
@@ -528,6 +547,7 @@
 #define CT_EMULE_BUDDYUDP		0xfd
 #define CT_EMULE_MISCOPTIONS2	0xfe
 #define CT_EMULE_RESERVED13		0xff
+#define CT_SERVER_UDPSEARCH_FLAGS 0x0E
 
 // values for CT_SERVER_FLAGS (server capabilities)
 #define SRVCAP_ZLIB				0x01
@@ -535,6 +555,10 @@
 #define SRVCAP_AUXPORT			0x04
 #define SRVCAP_NEWTAGS			0x08
 #define	SRVCAP_UNICODE			0x10
+#define	SRVCAP_LARGEFILES		0x100
+
+// values for CT_SERVER_UDPSEARCH_FLAGS
+#define SRVCAP_UDP_NEWTAGS_LARGEFILES	0x01
 
 // emule tagnames
 #define ET_COMPRESSION			0x20
@@ -567,33 +591,53 @@
 
 // KADEMLIA (opcodes) (udp)
 #define KADEMLIA_BOOTSTRAP_REQ	0x00	// <PEER (sender) [25]>
+#define KADEMLIA2_BOOTSTRAP_REQ			0x01	//
+
 #define KADEMLIA_BOOTSTRAP_RES	0x08	// <CNT [2]> <PEER [25]>*(CNT)
+#define KADEMLIA2_BOOTSTRAP_RES			0x09	//
 
 #define KADEMLIA_HELLO_REQ	 	0x10	// <PEER (sender) [25]>
+#define KADEMLIA2_HELLO_REQ				0x11	//
+
 #define KADEMLIA_HELLO_RES     	0x18	// <PEER (receiver) [25]>
+#define KADEMLIA2_HELLO_RES				0x19	//
 
 #define KADEMLIA_REQ		   	0x20	// <TYPE [1]> <HASH (target) [16]> <HASH (receiver) 16>
+#define KADEMLIA2_REQ					0x21	//
+
 #define KADEMLIA_RES			0x28	// <HASH (target) [16]> <CNT> <PEER [25]>*(CNT)
+#define KADEMLIA2_RES					0x29	//
 
 #define KADEMLIA_SEARCH_REQ		0x30	// <HASH (key) [16]> <ext 0/1 [1]> <SEARCH_TREE>[ext]
 //#define UNUSED				0x31	// Old Opcode, don't use.
-#define KADEMLIA_SRC_NOTES_REQ	0x32	// <HASH (key) [16]>
+#define KADEMLIA_SEARCH_NOTES_REQ		0x32	// <HASH (key) [16]>
+#define KADEMLIA2_SEARCH_KEY_REQ		0x33	//
+#define KADEMLIA2_SEARCH_SOURCE_REQ		0x34	//
+#define KADEMLIA2_SEARCH_NOTES_REQ		0x35	//
+
 #define KADEMLIA_SEARCH_RES		0x38	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 //#define UNUSED				0x39	// Old Opcode, don't use.
-#define KADEMLIA_SRC_NOTES_RES	0x3A	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+#define KADEMLIA_SEARCH_NOTES_RES		0x3A	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+#define KADEMLIA2_SEARCH_RES			0x3B	//
 
 #define KADEMLIA_PUBLISH_REQ	0x40	// <HASH (key) [16]> <CNT1 [2]> (<HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 //#define UNUSED				0x41	// Old Opcode, don't use.
-#define KADEMLIA_PUB_NOTES_REQ	0x42	// <HASH (key) [16]> <HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+#define KADEMLIA_PUBLISH_NOTES_REQ		0x42	// <HASH (key) [16]> <HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+#define	KADEMLIA2_PUBLISH_KEY_REQ		0x43	//
+#define	KADEMLIA2_PUBLISH_SOURCE_REQ	0x44	//
+#define KADEMLIA2_PUBLISH_NOTES_REQ		0x45	//
+
 #define KADEMLIA_PUBLISH_RES	0x48	// <HASH (key) [16]>
 //#define UNUSED				0x49	// Old Opcode, don't use.
-#define KADEMLIA_PUB_NOTES_RES	0x4A	// <HASH (key) [16]>
+#define KADEMLIA_PUBLISH_NOTES_RES		0x4A	// <HASH (key) [16]>
+#define	KADEMLIA2_PUBLISH_RES			0x4B	//
 
 #define KADEMLIA_FIREWALLED_REQ	0x50	// <TCPPORT (sender) [2]>
 #define KADEMLIA_FINDBUDDY_REQ	0x51	// <TCPPORT (sender) [2]>
 #define KADEMLIA_CALLBACK_REQ	0x52	// <TCPPORT (sender) [2]>
+
 #define KADEMLIA_FIREWALLED_RES	0x58	// <IP (sender) [4]>
-#define KADEMLIA_FIREWALLED_ACK	0x59	// (null)
+#define KADEMLIA_FIREWALLED_ACK_RES		0x59	// (null)
 #define KADEMLIA_FINDBUDDY_RES	0x5A	// <TCPPORT (sender) [2]>
 
 // KADEMLIA (parameter)

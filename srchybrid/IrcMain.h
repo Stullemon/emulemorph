@@ -11,36 +11,34 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 #pragma once
 
 class CIrcWnd;
 class CIrcSocket;
-
 class CIrcMain
 {
-public:
-	CIrcMain(void);
-	~CIrcMain(void);
-	void ParseMessage( CStringA message );
-	void PreParseMessage( CStringA buffer );
-	void SendLogin();
-	void Connect();
-	void Disconnect( bool isshuttingdown = false);
-	void SetConnectStatus( bool connected );
-	void SetIRCWnd(CIrcWnd* pwndIRC)	{m_pwndIRC = pwndIRC;}
-	int SendString( CString send );
-	void ParsePerform();
-	void ProcessLink( CString ed2kLink );
-	uint32 SetVerify()					{verify = rand();
-						            	return verify;}
-
-	CString GetNick()	{return nick;}
-private:
-	CIrcSocket*	ircsocket;
-	CIrcWnd*	m_pwndIRC;
-	CStringA	preParseBuffer;
-	CString		user;
-	CString		nick;
-	CString		version;
-	uint32		verify;
+	public:
+		CIrcMain(void);
+		~CIrcMain(void);
+		void ParseMessage( CString sMessage );
+		void PreParseMessage( CStringA sBuffer );
+		void SendLogin();
+		void Connect();
+		void Disconnect( bool bIsShuttingDown = false);
+		void SetConnectStatus( bool bConnected );
+		void SetIRCWnd(CIrcWnd* pwndIRC);
+		int SendString( CString sSend );
+		void ParsePerform();
+		void ProcessLink( CString sED2KLink );
+		uint32 SetVerify();
+		CString GetNick();
+	private:
+		CIrcSocket* m_pIRCSocket;
+		CIrcWnd* m_pwndIRC;
+		CString m_sPreParseBuffer;
+		CString m_sUser;
+		CString m_sNick;
+		CString m_sVersion;
+		uint32 m_uVerify;
 };

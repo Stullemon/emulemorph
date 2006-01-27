@@ -26,17 +26,17 @@ public:
 	void Reset();
 
 	//sets new file size and resets the shader
-	void SetFileSize(uint32 fileSize);
+	void SetFileSize(EMFileSize fileSize);
 
 	//fills in a range with a certain color, new ranges overwrite old
-	void FillRange(uint32 start, uint32 end, COLORREF color);
+	void FillRange(uint64 start, uint64 end, COLORREF color);
 
 	//fills in entire range with a certain color
 	void Fill(COLORREF color);
 
 	//draws the bar
 	void Draw(CDC* dc, int iLeft, int iTop, bool bFlat);
-	void DrawPreview(CDC* dc, int iLeft, int iTop, uint8 previewLevel);		//Cax2 aqua bar
+	void DrawPreview(CDC* dc, int iLeft, int iTop, UINT previewLevel);		//Cax2 aqua bar
 
 protected:
 	void BuildModifiers();
@@ -47,11 +47,11 @@ protected:
 	int    m_iHeight;
 	double m_dPixelsPerByte;
 	double m_dBytesPerPixel;
-	uint32 m_uFileSize;
+	EMFileSize m_uFileSize;
 	bool	m_bIsPreview;
 
 private:
-	CRBMap<uint32, COLORREF> m_Spans;	// SLUGFILLER: speedBarShader
+	CRBMap<uint64, COLORREF> m_Spans;	// SLUGFILLER: speedBarShader
 	float *m_Modifiers;
-	uint16 m_used3dlevel;
+	UINT m_used3dlevel;
 };

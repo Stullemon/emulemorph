@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -29,9 +29,8 @@ there client on the eMule forum..
 */
 
 #include "stdafx.h"
-#include "IOException.h"
 #include <string.h>
-#include "../../Resource.h"
+#include "./IOException.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,17 +38,19 @@ there client on the eMule forum..
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-////////////////////////////////////////
 using namespace Kademlia;
-////////////////////////////////////////
 
-BOOL CIOException::GetErrorMessage(LPTSTR lpszError, UINT nMaxError, PUINT pnHelpContext)
+CIOException::CIOException(int iCause)
 {
-	CString msg = _T("ONLY AVAILABLE WITH EMULE INTEGRATION");
-//	CString msg = GetResString(IOEXCEPTION_ERR_BASE + m_cause);
-	_tcsncpy(lpszError, msg.GetBuffer(0), nMaxError);
-	lpszError[nMaxError-1] = 0;
+	m_iCause = iCause;
+}
+
+BOOL CIOException::GetErrorMessage(LPTSTR lpszError, UINT iMaxError, PUINT pnHelpContext)
+{
+	CString sMsg = _T("ONLY AVAILABLE WITH EMULE INTEGRATION");
+	//	CString msg = GetResString(IOEXCEPTION_ERR_BASE + m_cause);
+	_tcsncpy(lpszError, sMsg, iMaxError);
+	lpszError[iMaxError-1] = 0;
 
 	if (pnHelpContext != NULL)
 		*pnHelpContext = 0;

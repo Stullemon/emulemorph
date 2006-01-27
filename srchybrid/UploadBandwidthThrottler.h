@@ -21,6 +21,8 @@
 //MORPH START - Added by SiRoB & AndCycle, Upload Splitting Class
 #define NB_SPLITTING_CLASS 3
 #define LAST_CLASS NB_SPLITTING_CLASS-1
+#define NB_SCHED_CLASS NB_SPLITTING_CLASS
+
 struct Socket_stat{
 	uint32	classID;
 	sint64	realBytesToSpend;

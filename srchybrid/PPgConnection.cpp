@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -118,9 +118,9 @@ void CPPgConnection::OnEnChangePorts(uint8 istcpport)
 	// ports unchanged?
 	CString buffer;
 	GetDlgItem(IDC_PORT)->GetWindowText(buffer);
-	uint16 tcp = _tstoi(buffer);
+	uint16 tcp = (uint16)_tstoi(buffer);
 	GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer);
-	uint16 udp= _tstoi(buffer);
+	uint16 udp = (uint16)_tstoi(buffer);
 
 	GetDlgItem(IDC_STARTTEST)->EnableWindow( 
 		tcp==theApp.listensocket->GetConnectedPort() && 
@@ -155,12 +155,12 @@ void CPPgConnection::OnEnChangeUDPDisable()
 	if(GetDlgItem(IDC_UDPPORT)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer,20);
-		tempVal= _tstoi(buffer);
+		tempVal = (uint16)_tstoi(buffer);
 	}
 
 	if (IsDlgButtonChecked(IDC_UDPDISABLE) || (!IsDlgButtonChecked(IDC_UDPDISABLE) && tempVal == 0))
 	{
-		tempVal = _tstoi(buffer) ? _tstoi(buffer)+10 : thePrefs.port+10;
+		tempVal = (uint16)_tstoi(buffer) ? (uint16)(_tstoi(buffer)+10) : (uint16)(thePrefs.port+10);
 		if ( IsDlgButtonChecked(IDC_UDPDISABLE))
 			tempVal=0;
 		strBuffer.Format(_T("%d"), tempVal);
@@ -269,7 +269,8 @@ void CPPgConnection::LoadSettings(void)
 		else
 			CheckDlgButton(IDC_NETWORK_ED2K,0);
 
-		if (theApp.m_pFirewallOpener->DoesFWConnectionExist())
+		// don't try on XP SP2 or higher, not needed there anymore
+		if (IsRunningXPSP2() == 0 && theApp.m_pFirewallOpener->DoesFWConnectionExist())
 			GetDlgItem(IDC_OPENPORTS)->EnableWindow(true);
 		else
 			GetDlgItem(IDC_OPENPORTS)->EnableWindow(false);
@@ -328,10 +329,10 @@ BOOL CPPgConnection::OnApply()
 		if (!IsDlgButtonChecked(IDC_ULIMIT_LBL))
 		    ulSpeed = UNLIMITED;
 		else
-		    ulSpeed = m_ctlMaxUp.GetPos();
+		    ulSpeed = (uint16)m_ctlMaxUp.GetPos();
 
 	    if (thePrefs.GetMaxGraphUploadRate(true) < ulSpeed && ulSpeed != UNLIMITED)
-		    ulSpeed = ((uint16)(thePrefs.GetMaxGraphUploadRate(true) * 0.8));
+		    ulSpeed = (uint16)(thePrefs.GetMaxGraphUploadRate(true) * 0.8);
 
         if(ulSpeed > thePrefs.GetMaxUpload()) {
             // make USS go up to higher ul limit faster
@@ -358,7 +359,7 @@ BOOL CPPgConnection::OnApply()
 	if(GetDlgItem(IDC_PORT)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_PORT)->GetWindowText(buffer,20);
-		uint16 nNewPort = (_tstoi(buffer)) ? _tstoi(buffer) : DEFAULT_TCP_PORT;
+		uint16 nNewPort = ((uint16)_tstoi(buffer)) ? (uint16)_tstoi(buffer) : (uint16)DEFAULT_TCP_PORT;
 		if (nNewPort != thePrefs.port){
 			thePrefs.port = nNewPort;
 			if (theApp.IsPortchangeAllowed())
@@ -397,7 +398,7 @@ BOOL CPPgConnection::OnApply()
 	if(GetDlgItem(IDC_UDPPORT)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer,20);
-		uint16 nNewPort = (_tstoi(buffer) && !IsDlgButtonChecked(IDC_UDPDISABLE) ) ? _tstoi(buffer) : 0;
+		uint16 nNewPort = ((uint16)_tstoi(buffer) && !IsDlgButtonChecked(IDC_UDPDISABLE)) ? (uint16)_tstoi(buffer) : (uint16)0;
 		if (nNewPort != thePrefs.udpport){
 			thePrefs.udpport = nNewPort;
 			if (theApp.IsPortchangeAllowed())
@@ -447,7 +448,7 @@ BOOL CPPgConnection::OnApply()
 	if(lastmaxgd!=thePrefs.maxGraphDownloadRate)
 		theApp.emuledlg->statisticswnd->SetARange(true,thePrefs.maxGraphDownloadRate);
 
-	uint16 tempcon = thePrefs.maxconnections;
+	UINT tempcon = thePrefs.maxconnections;
 	if(GetDlgItem(IDC_MAXCON)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_MAXCON)->GetWindowText(buffer,20);
@@ -495,8 +496,8 @@ BOOL CPPgConnection::OnApply()
 	oldRndMax = thePrefs.GetMaxRandomPort();
 
 	if(rndValue1 != oldRndMin || rndValue2 != oldRndMax){
-		thePrefs.SetMinRandomPort(rndValue1);
-		thePrefs.SetMaxRandomPort(rndValue2);
+		thePrefs.SetMinRandomPort((uint16)rndValue1);
+		thePrefs.SetMaxRandomPort((uint16)rndValue2);
 	}
 
 	if((IsDlgButtonChecked(IDC_RANDOMPORTS)!=0) != oldUseRandom){
@@ -662,7 +663,7 @@ BOOL CPPgConnection::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgConnection::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgConnection::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
@@ -701,10 +702,10 @@ void CPPgConnection::OnStartPortTest()
 	CString buffer;
 
 	GetDlgItem(IDC_PORT)->GetWindowText(buffer);
-	uint16 tcp= _tstoi(buffer);
+	uint16 tcp = (uint16)_tstoi(buffer);
 
 	GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer);
-	uint16 udp= _tstoi(buffer);
+	uint16 udp = (uint16)_tstoi(buffer);
 
 	TriggerPortTest(tcp,udp);
 }

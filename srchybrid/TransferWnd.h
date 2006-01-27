@@ -110,7 +110,7 @@ protected:
 	void	SetWnd2Icon();
 	void	UpdateTabToolTips() {UpdateTabToolTips(-1);}
 	void	UpdateTabToolTips(int tab);
-	CString	GetTabStatistic(uint8 tab);
+	CString	GetTabStatistic(int tab);
 	int		GetTabUnderMouse(CPoint* point);
 	int		GetItemUnderMouse(CListCtrl* ctrl);
 	//MOPRH - Removed by SiRoB, Due to Khaos Cat

@@ -25,7 +25,6 @@ protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-
 	afx_msg void OnSetCleanupFilter();
 	afx_msg void BrowseVideoplayer();
 	afx_msg void OnSettingsChange();

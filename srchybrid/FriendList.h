@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -34,12 +34,12 @@ public:
 	void		SetWindow(CFriendListCtrl* NewWnd)	{ m_wndOutput = NewWnd; }
 	void		ShowFriends() const;
 	bool		AddFriend(CUpDownClient* toadd);
-	bool		AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
+	bool		AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint16 nLastUsedPort, 
                           uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash);
 	void		RemoveFriend(CFriend* todel);
 	void		RemoveAllFriendSlots();
 	void		Process();
-	uint16		GetCount()		{ return m_listFriends.GetCount(); }
+	int		GetCount()		{ return m_listFriends.GetCount(); }
 	bool		IsFriendSlot(); //MORPH - Added by SiRoB
 private:
 	CTypedPtrList<CPtrList, CFriend*>	m_listFriends;

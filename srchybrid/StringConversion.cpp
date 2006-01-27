@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -97,14 +97,14 @@ int utf8towc(LPCSTR pcUtf8, UINT uUtf8Size, LPWSTR pwc, UINT uWideCharSize)
             if (uWideChar < 0x10000)
             {
                 uWideCharSize--;
-                *(pwc++) = uWideChar;
+                *(pwc++) = (WCHAR)uWideChar;
             }
             else 
             {
                 uWideCharSize -= 2;
                 uWideChar -= 0x10000;
-                *(pwc++) = 0xD800 | (uWideChar >> 10);
-                *(pwc++) = 0xDC00 | (uWideChar & 0x03FF);
+                *(pwc++) = (WCHAR)(0xD800 | (uWideChar >> 10));
+                *(pwc++) = (WCHAR)(0xDC00 | (uWideChar & 0x03FF));
             }
         }
     }
@@ -249,4 +249,37 @@ CString EncodeUrlUtf8(const CString& rstr)
 			url += utf8[i];
 	}
 	return url;
+}
+
+CStringW DecodeDoubleEncodedUtf8(LPCWSTR pszFileName)
+{
+	size_t nChars = wcslen(pszFileName);
+
+	// Check if all characters are valid for UTF-8 value range
+	//
+	for (UINT i = 0; i < nChars; i++) {
+		if ((_TUCHAR)pszFileName[i] > 0xFFU)
+			return pszFileName; // string is already using Unicode character value range; return original
+	}
+
+	// Transform Unicode string to UTF-8 byte sequence
+	//
+	CStringA strA;
+	LPSTR pszA = strA.GetBuffer(nChars);
+	for (UINT i = 0; i < nChars; i++)
+		pszA[i] = (CHAR)pszFileName[i];
+	strA.ReleaseBuffer(nChars);
+
+	// Decode the string with UTF-8
+	//
+	CStringW strW;
+	LPWSTR pszW = strW.GetBuffer(nChars);
+	int iNewChars = utf8towc(strA, nChars, pszW, nChars);
+	if (iNewChars < 0) {
+		strW.ReleaseBuffer(0);
+		return pszFileName;		// conversion error (not a valid UTF-8 string); return original
+	}
+	strW.ReleaseBuffer(iNewChars);
+
+	return strW;
 }

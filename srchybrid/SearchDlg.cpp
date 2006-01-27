@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -158,10 +158,6 @@ void CSearchDlg::DockParametersWnd()
 	}
 }
 
-//MORPH - Changed by SiRoB, Selective Category Support
-/*
-uint8 CSearchDlg::GetSelectedCat()
-*/
 int CSearchDlg::GetSelectedCat()
 {
 	return m_pwndResults->GetSelectedCat();
@@ -189,14 +185,14 @@ bool CSearchDlg::CreateNewTab(SSearchParams* pParams)
 	return m_pwndResults->CreateNewTab(pParams);
 }
 
-void CSearchDlg::LocalSearchEnd(uint16 nCount, bool bMoreResultsAvailable)
+void CSearchDlg::LocalEd2kSearchEnd(UINT nCount, bool bMoreResultsAvailable)
 {
-	m_pwndResults->LocalSearchEnd(nCount, bMoreResultsAvailable);
+	m_pwndResults->LocalEd2kSearchEnd(nCount, bMoreResultsAvailable);
 }
 
-void CSearchDlg::CancelSearch()
+void CSearchDlg::CancelEd2kSearch()
 {
-	m_pwndResults->CancelSearch();
+	m_pwndResults->CancelEd2kSearch();
 }
 
 void CSearchDlg::CancelKadSearch(UINT uSearchID)
@@ -204,9 +200,9 @@ void CSearchDlg::CancelKadSearch(UINT uSearchID)
 	m_pwndResults->CancelKadSearch(uSearchID);
 }
 
-void CSearchDlg::AddUDPResult(uint16 nCount)
+void CSearchDlg::AddGlobalEd2kSearchResults(UINT nCount)
 {
-	m_pwndResults->AddUDPResult(nCount);
+	m_pwndResults->AddGlobalEd2kSearchResults(nCount);
 }
 
 void CSearchDlg::Localize()
@@ -230,9 +226,9 @@ bool CSearchDlg::DoNewEd2kSearch(SSearchParams* pParams)
 	return m_pwndResults->DoNewEd2kSearch(pParams);
 }
 
-void CSearchDlg::DeleteAllSearchs()
+void CSearchDlg::DeleteAllSearches()
 {
-	m_pwndResults->DeleteAllSearchs();
+	m_pwndResults->DeleteAllSearches();
 }
 
 bool CSearchDlg::CanDeleteSearch(uint32 nSearchID) const
@@ -282,4 +278,30 @@ void CSearchDlg::UpdateSearch(CSearchFile* pSearchFile)
 {
 	if(m_pwndResults)
 		m_pwndResults->searchlistctrl.UpdateSearch(pSearchFile);
+}
+bool CSearchDlg::CanSearchRelatedFiles() const
+{
+	return m_pwndResults->CanSearchRelatedFiles();
+}
+
+void CSearchDlg::SearchRelatedFiles(const CAbstractFile* file)
+{
+	m_pwndResults->SearchRelatedFiles(file);
+}
+
+BOOL CSearchDlg::PreTranslateMessage(MSG* pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		// Don't handle Ctrl+Tab in this window. It will be handled by main window.
+		if (pMsg->wParam == VK_TAB && GetAsyncKeyState(VK_CONTROL) < 0)
+		{
+			// UGLY: Because this window is a 'CFrameWnd' (rather than a 'CDialog' like
+			// the other eMule main windows) we can not use MFC's message routing. Need
+			// to explicitly send that message to the main window.
+			theApp.emuledlg->PostMessage(pMsg->message, pMsg->wParam, pMsg->lParam);
+			return TRUE;
+		}
+	}
+	return CFrameWnd::PreTranslateMessage(pMsg);
 }

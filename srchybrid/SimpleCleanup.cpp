@@ -308,7 +308,7 @@ void CSimpleCleanupDialog::OnBnClickedDeletecharacter()
 	} while (pos != NULL);
 }
 
-void CSimpleCleanupDialog::OnLvnItemchangedReplacecharslist(NMHDR *pNMHDR, LRESULT *pResult)
+void CSimpleCleanupDialog::OnLvnItemchangedReplacecharslist(NMHDR* /*pNMHDR*/, LRESULT *pResult)
 {
 	//LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 

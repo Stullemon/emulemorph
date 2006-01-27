@@ -32,6 +32,10 @@
 #include "hypertextctrl.h"
 #include <deque>
 
+#pragma warning(disable:4244) // conversion from <type1> to <type2>, possible loss of data
+#pragma warning(disable:4018) // signed/unsigned mismatch
+#pragma warning(disable:4100) // unreferenced formal parameter
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -606,7 +610,7 @@ void CPreparedHyperText::AppendText(const CString& sText){
 			backup.SetEnd( backup.End() - shift );
 			m_Links.pop_front();
 			m_Links.push_back( backup );
-			if( ((CHyperLink)m_Links.front()).Begin() == litest )
+			if( ((CHyperLink)m_Links.front()).Begin() == (UINT)litest )
 				flag = false;
 		}
 		flag = true;
@@ -615,7 +619,7 @@ void CPreparedHyperText::AppendText(const CString& sText){
 			CKeyWord backup( temp.Begin()-shift, temp.End()-shift, temp.Color());
 			m_KeyWords.pop_front();
 			m_KeyWords.push_back( backup );
-			if( ((CKeyWord)m_KeyWords.front()).Begin() == witest )
+			if( ((CKeyWord)m_KeyWords.front()).Begin() == (UINT)witest )
 				flag = false;
 		}
 	}
@@ -680,7 +684,7 @@ void CPreparedHyperText::AppendHyperLink(const CString& sText, const CString& sT
 			backup.SetEnd( backup.End() - shift );
 			m_Links.pop_front();
 			m_Links.push_back( backup );
-			if( ((CHyperLink)m_Links.front()).Begin() == litest )
+			if( ((CHyperLink)m_Links.front()).Begin() == (UINT)litest )
 				flag = false;
 		}
 		flag = true;
@@ -689,7 +693,7 @@ void CPreparedHyperText::AppendHyperLink(const CString& sText, const CString& sT
 			CKeyWord backup( temp.Begin()-shift, temp.End()-shift, temp.Color());
 			m_KeyWords.pop_front();
 			m_KeyWords.push_back( backup );
-			if( ((CKeyWord)m_KeyWords.front()).Begin() == witest )
+			if( ((CKeyWord)m_KeyWords.front()).Begin() == (UINT)witest )
 				flag = false;
 		}
 	}
@@ -747,7 +751,7 @@ void CPreparedHyperText::AppendHyperLink(const CString& sText, const CString& sT
 			backup.SetEnd( backup.End() - shift );
 			m_Links.pop_front();
 			m_Links.push_back( backup );
-			if( ((CHyperLink)m_Links.front()).Begin() == litest )
+			if( ((CHyperLink)m_Links.front()).Begin() == (UINT)litest )
 				flag = false;
 		}
 		flag = true;
@@ -756,7 +760,7 @@ void CPreparedHyperText::AppendHyperLink(const CString& sText, const CString& sT
 			CKeyWord backup( temp.Begin()-shift, temp.End()-shift, temp.Color());
 			m_KeyWords.pop_front();
 			m_KeyWords.push_back( backup );
-			if( ((CKeyWord)m_KeyWords.front()).Begin() == witest )
+			if( ((CKeyWord)m_KeyWords.front()).Begin() == (UINT)witest )
 				flag = false;
 		}
 	}
@@ -814,7 +818,7 @@ void CPreparedHyperText::AppendKeyWord(const CString& sText, COLORREF iColor){
 			backup.SetEnd( backup.End() - shift );
 			m_Links.pop_front();
 			m_Links.push_back( backup );
-			if( ((CHyperLink)m_Links.front()).Begin() == litest )
+			if( ((CHyperLink)m_Links.front()).Begin() == (UINT)litest )
 				flag = false;
 		}
 		flag = true;
@@ -823,7 +827,7 @@ void CPreparedHyperText::AppendKeyWord(const CString& sText, COLORREF iColor){
 			CKeyWord backup( temp.Begin()-shift, temp.End()-shift, temp.Color());
 			m_KeyWords.pop_front();
 			m_KeyWords.push_back( backup );
-			if( ((CKeyWord)m_KeyWords.front()).Begin() == witest )
+			if( ((CKeyWord)m_KeyWords.front()).Begin() == (UINT)witest )
 				flag = false;
 		}
 	}
@@ -1741,25 +1745,22 @@ void CHyperTextCtrl::SetColors() {
 	m_HoverColor = RGB(255,0,0);
 }
 
-void CHyperTextCtrl::LoadHandCursor() {
-
+void CHyperTextCtrl::LoadHandCursor() 
+{
 	CString windir; 
 	GetWindowsDirectory(windir.GetBuffer(MAX_PATH), MAX_PATH);
 	windir.ReleaseBuffer();
 	windir += _T("\\winhlp32.exe");
 	HMODULE hModule = LoadLibrary(windir);
 	ASSERT( m_LinkCursor == NULL );
-	if (hModule){
+	if (hModule)
+	{
 		HCURSOR hTempCursor = ::LoadCursor(hModule, MAKEINTRESOURCE(106));
-		if (hTempCursor){
+		if (hTempCursor)
 			m_LinkCursor = CopyCursor(hTempCursor);
-			VERIFY( DestroyCursor(hTempCursor) );
-		}
 		FreeLibrary(hModule);
 	}
 
-	if (m_LinkCursor == NULL){
-		//this shouldn't happen... but just in case
-		m_LinkCursor = LoadCursor(NULL,IDC_ARROW);
-	}
+	if (m_LinkCursor == NULL)
+		m_LinkCursor = CopyCursor(::LoadCursor(NULL,IDC_ARROW));
 }

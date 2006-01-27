@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -74,7 +74,7 @@ struct Pending_Block_Struct{
 	}
 	Requested_Block_Struct*	block;
 	struct z_stream_s*      zStream;       // Barry - Used to unzip packets
-	uint32                  totalUnzipped; // Barry - This holds the total unzipped bytes for all packets so far
+	UINT					totalUnzipped; // Barry - This holds the total unzipped bytes for all packets so far
 	UINT					fZStreamError : 1,
 							fRecovered    : 1,
 							fQueued		  : 3;
@@ -189,6 +189,25 @@ enum ESourceFrom{
 	SF_SLS				= 5 //MORPH - Added by SiRoB, Save Load Sources (SLS)
 };
 
+#ifdef _DEBUG
+	// use the 'Enums' only for debug builds, each enum costs 4 bytes (3 unused)
+#define _EClientSoftware	EClientSoftware
+#define _EChatState			EChatState
+#define _EKadState			EKadState
+#define _ESecureIdentState	ESecureIdentState
+#define _EUploadState		EUploadState
+#define _EDownloadState		EDownloadState
+#define _ESourceFrom		ESourceFrom
+#else
+#define _EClientSoftware	uint8
+#define _EChatState			uint8
+#define _EKadState			uint8
+#define _ESecureIdentState	uint8
+#define _EUploadState		uint8
+#define _EDownloadState		uint8
+#define _ESourceFrom		uint8
+#endif
+
 struct PartFileStamp {
 	CPartFile*	file;
 	DWORD		timestamp;
@@ -220,7 +239,7 @@ public:
 	virtual bool	Connect();
 	virtual void	ConnectionEstablished();
 	virtual void	OnSocketConnected(int nErrorCode);
-	bool			CheckHandshakeFinished(UINT protocol, UINT opcode) const;
+	bool			CheckHandshakeFinished() const;
 	void			CheckFailedFileIdReqs(const uchar* aucFileHash);
 	uint32			GetUserIDHybrid() const							{ return m_nUserIDHybrid; }
 	void			SetUserIDHybrid(uint32 val)						{ m_nUserIDHybrid = val; }
@@ -237,8 +256,8 @@ public:
 	uint32			GetConnectIP() const				{return m_nConnectIP;}
 	uint16			GetUserPort() const								{ return m_nUserPort; }
 	void			SetUserPort(uint16 val)							{ m_nUserPort = val; }
-	uint32			GetTransferredUp() const							{ return m_nTransferredUp; }
-	uint32			GetTransferredDown() const						{ return m_nTransferredDown; }
+	UINT			GetTransferredUp() const						{ return m_nTransferredUp; }
+	UINT			GetTransferredDown() const						{ return m_nTransferredDown; }
 	uint32			GetServerIP() const								{ return m_dwServerIP; }
 	void			SetServerIP(uint32 nIP)							{ m_dwServerIP = nIP; }
 	uint16			GetServerPort() const							{ return m_nServerPort; }
@@ -262,11 +281,13 @@ public:
 	const CString&	GetClientModVer() const							{ return m_strModVersion; }
 	const CString&	GetClientModTag() const							{ return m_strNotOfficial; }
 	void			InitClientSoftwareVersion();
-	uint32			GetVersion() const								{ return m_nClientVersion; }
+	UINT			GetVersion() const								{ return m_nClientVersion; }
 	uint8			GetMuleVersion() const							{ return m_byEmuleVersion; }
 	bool			ExtProtocolAvailable() const					{ return m_bEmuleProtocol; }
 	bool			SupportMultiPacket() const						{ return m_bMultiPacket; }
+	bool			SupportExtMultiPacket() const					{ return m_fExtMultiPacket; }
 	bool			SupportPeerCache() const { return m_fPeerCache; }
+	bool			SupportsLargeFiles() const						{ return m_fSupportsLargeFiles; }
 	bool			IsEmuleClient() const							{ return m_byEmuleVersion!=0; }
 	uint8			GetSourceExchangeVersion() const				{ return m_bySourceExchangeVer; }
 	CClientCredits* Credits() const									{ return credits; }
@@ -281,16 +302,16 @@ public:
 	void			SetKadPort(uint16 nPort)						{ m_nKadPort = nPort; }
 	uint8			GetExtendedRequestsVersion() const				{ return m_byExtendedRequestsVer; }
 	void			RequestSharedFileList();
-	void			ProcessSharedFileList(const uchar* pachPacket, uint32 nSize, LPCTSTR pszDirectory = NULL);
+	void			ProcessSharedFileList(const uchar* pachPacket, UINT nSize, LPCTSTR pszDirectory = NULL);
 
 	void			ClearHelloProperties();
-	bool			ProcessHelloAnswer(const uchar* pachPacket, uint32 nSize);
-	bool			ProcessHelloPacket(const uchar* pachPacket, uint32 nSize);
+	bool			ProcessHelloAnswer(const uchar* pachPacket, UINT nSize);
+	bool			ProcessHelloPacket(const uchar* pachPacket, UINT nSize);
 	void			SendHelloAnswer();
 	virtual bool	SendHelloPacket();
 	void			SendMuleInfoPacket(bool bAnswer);
-	void			ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize);
-	void			ProcessMuleCommentPacket(const uchar* pachPacket, uint32 nSize);
+	void			ProcessMuleInfoPacket(const uchar* pachPacket, UINT nSize);
+	void			ProcessMuleCommentPacket(const uchar* pachPacket, UINT nSize);
 	//<<< eWombat [SNAFU_V3]
 	//MORPH - Changed by SiRoB
 	void			ProcessUnknownHelloTag(CTag *tag, CString &pszReason);
@@ -335,18 +356,18 @@ public:
 	// secure ident
 	void			SendPublicKeyPacket();
 	void			SendSignaturePacket();
-	void			ProcessPublicKeyPacket(const uchar* pachPacket, uint32 nSize);
-	void			ProcessSignaturePacket(const uchar* pachPacket, uint32 nSize);
-	uint8			GetSecureIdentState() const						{ return m_SecureIdentState; }
+	void			ProcessPublicKeyPacket(const uchar* pachPacket, UINT nSize);
+	void			ProcessSignaturePacket(const uchar* pachPacket, UINT nSize);
+	uint8			GetSecureIdentState() const						{ return (uint8)m_SecureIdentState; }
 	void			SendSecIdentStatePacket();
-	void			ProcessSecIdentStatePacket(const uchar* pachPacket, uint32 nSize);
+	void			ProcessSecIdentStatePacket(const uchar* pachPacket, UINT nSize);
 	uint8			GetInfoPacketsReceived() const					{ return m_byInfopacketsReceived; }
 	void			InfoPacketsReceived();
 	// preview
 	void			SendPreviewRequest(const CAbstractFile* pForFile);
 	void			SendPreviewAnswer(const CKnownFile* pForFile, CxImage** imgFrames, uint8 nCount);
-	void			ProcessPreviewReq(const uchar* pachPacket, uint32 nSize);
-	void			ProcessPreviewAnswer(const uchar* pachPacket, uint32 nSize);
+	void			ProcessPreviewReq(const uchar* pachPacket, UINT nSize);
+	void			ProcessPreviewAnswer(const uchar* pachPacket, UINT nSize);
 	bool			GetPreviewSupport() const						{ return m_fSupportsPreview && GetViewSharedFilesSupport(); }
 	bool			GetViewSharedFilesSupport() const				{ return m_fNoViewSharedFiles==0; }
 	bool			SafeSendPacket(Packet* packet);
@@ -362,11 +383,11 @@ public:
 	//EastShare END - Modified by TAHO, modified SUQWT
 	void 			SetWaitStartTime();
 	void 			ClearWaitStartTime();
-	uint32			GetWaitTime() const								{ return m_dwUploadTime - GetWaitStartTime(); }
+	uint32			GetWaitTime() const								{ return (uint32)(m_dwUploadTime - GetWaitStartTime()); }
 	bool			IsDownloading() const							{ return (m_nUploadState == US_UPLOADING); }
 	bool			HasBlocks() const								{ return !m_BlockRequests_queue.IsEmpty(); }
-	uint32			GetDatarate() const								{ return m_nUpDatarate; }	
-	uint32			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false) const;
+	UINT			GetDatarate() const								{ return m_nUpDatarate; }	
+	UINT			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false) const;
 	void			AddReqBlock(Requested_Block_Struct* reqblock);
 	void			CreateNextBlockPackage();
 	uint32			GetUpStartTimeDelay() const						{ return ::GetTickCount() - m_dwUploadTime; }
@@ -377,7 +398,7 @@ public:
 	//MORPH START - Added by SiRoB, Optimization requpfile
 	CKnownFile*		CheckAndGetReqUpFile() const;
 	//MORPH END   - Added by SiRoB, Optimization requpfile
-	uint32			SendBlockData();
+	UINT			SendBlockData();
 	void			ClearUploadBlockRequests();
 	void			SendRankingInfo();
 	void			SendCommentInfo(/*const*/ CKnownFile *file);
@@ -385,16 +406,16 @@ public:
 	void			UnBan();
 	void			Ban(LPCTSTR pszReason = NULL);
 	void			BanLeecher(LPCTSTR pszReason = NULL); //MORPH - Added by IceCream, Anti-leecher feature
-	uint32			GetAskedCount() const							{ return m_cAsked; }
+	UINT			GetAskedCount() const							{ return m_cAsked; }
 	void			AddAskedCount()									{ m_cAsked++; }
-	void			SetAskedCount(uint32 m_cInAsked)				{ m_cAsked = m_cInAsked; }
+	void			SetAskedCount(UINT m_cInAsked)					{ m_cAsked = m_cInAsked; }
 	void			FlushSendBlocks(); // call this when you stop upload, or the socket might be not able to send
 	uint32			GetLastUpRequest() const						{ return m_dwLastUpRequest; }
 	void			SetLastUpRequest()								{ m_dwLastUpRequest = ::GetTickCount(); }
 	void			SetCollectionUploadSlot(bool bValue);
 	bool			HasCollectionUploadSlot() const					{ return m_bCollectionUploadSlot; }
 
-	uint32			GetSessionUp() const							{ return m_nTransferredUp - m_nCurSessionUp; }
+	UINT			GetSessionUp() const							{ return m_nTransferredUp - m_nCurSessionUp; }
 	void			ResetSessionUp(){
 						m_nCurSessionUp = m_nTransferredUp;
 						m_addedPayloadQueueSession = GetQueueSessionPayloadUp(); 
@@ -413,22 +434,22 @@ public:
                         m_curSessionAmountNumber = 0;
 					} 
 
-	uint32			GetSessionDown() const							{ return m_nTransferredDown - m_nCurSessionDown; }
+	UINT			GetSessionDown() const							{ return m_nTransferredDown - m_nCurSessionDown; }
 	void			ResetSessionDown() {
 						m_nCurSessionDown = m_nTransferredDown;
 					}
-	uint32			GetQueueSessionPayloadUp() const				{ return m_nCurQueueSessionPayloadUp; }
-    uint32          GetPayloadInBuffer() const						{ return m_addedPayloadQueueSession - GetQueueSessionPayloadUp(); }
+	UINT			GetQueueSessionPayloadUp() const				{ return m_nCurQueueSessionPayloadUp; }
+    UINT			GetPayloadInBuffer() const						{ return m_addedPayloadQueueSession - GetQueueSessionPayloadUp(); }
 
     uint64          GetCurrentSessionLimit() const
                     {
                         return (uint64)SESSIONMAXTRANS*(m_curSessionAmountNumber+1)+1*1024;
                     }
 
-	void			ProcessExtendedInfo(CSafeMemFile* packet, CKnownFile* tempreqfile);
+	bool			ProcessExtendedInfo(CSafeMemFile* packet, CKnownFile* tempreqfile);
 	uint16			GetUpPartCount() const							{ return m_nUpPartCount; }
 	void			DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const;
-	bool			IsUpPartAvailable(uint16 iPart) const {
+	bool			IsUpPartAvailable(UINT iPart) const {
 						return (iPart>=m_nUpPartCount || !m_abyUpPartStatus) ? false : m_abyUpPartStatus[iPart]!=0;
 					}
 	uint8*			GetUpPartStatus() const							{ return m_abyUpPartStatus; }
@@ -468,14 +489,14 @@ public:
 	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
 	//download
-	uint32			GetAskedCountDown() const						{ return m_cDownAsked; }
+	UINT			GetAskedCountDown() const						{ return m_cDownAsked; }
 	void			AddAskedCountDown()								{ m_cDownAsked++; }
-	void			SetAskedCountDown(uint32 m_cInDownAsked)		{ m_cDownAsked = m_cInDownAsked; }
+	void			SetAskedCountDown(UINT cInDownAsked)			{ m_cDownAsked = cInDownAsked; }
 	EDownloadState	GetDownloadState() const						{ return (EDownloadState)m_nDownloadState; }
 	void			SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason = _T("Unspecified"));
 	uint32			GetLastAskedTime(const CPartFile* partFile = NULL) const;
     void            SetLastAskedTime()								{ m_fileReaskTimes.SetAt(reqfile, ::GetTickCount()); }
-	bool			IsPartAvailable(uint16 iPart) const {
+	bool			IsPartAvailable(UINT iPart) const {
 						return (iPart>=m_nPartCount || !m_abyPartStatus) ? false : m_abyPartStatus[iPart]!=0;
 					}
 	// Mighty Knife: Community visualization
@@ -487,9 +508,9 @@ public:
 	uint8*			GetPartStatus(const CPartFile* partfile) const		{ uint8* thisAbyPartStatus; return m_PartStatus_list.Lookup(partfile,thisAbyPartStatus)?thisAbyPartStatus:0; }
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	uint16			GetPartCount() const							{ return m_nPartCount; }
-	uint32			GetDownloadDatarate() const						{ return m_nDownDatarate; }
-	uint16			GetRemoteQueueRank() const						{ return m_nRemoteQueueRank; }
-	void			SetRemoteQueueRank(uint16 nr, bool bUpdateDisplay = false);
+	UINT			GetDownloadDatarate() const						{ return m_nDownDatarate; }
+	UINT			GetRemoteQueueRank() const						{ return m_nRemoteQueueRank; }
+	void			SetRemoteQueueRank(UINT nr, bool bUpdateDisplay = false);
 	bool			IsRemoteQueueFull() const						{ return m_bRemoteQueueFull; }
 	void			SetRemoteQueueFull(bool flag)					{ m_bRemoteQueueFull = flag; }
 	//Morph START - added by AndCycle, DiffQR
@@ -506,18 +527,18 @@ public:
 	void			SendStartupLoadReq();
 	void			ProcessFileInfo(CSafeMemFile* data, CPartFile* file);
 	void			ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPartFile* file);
-	void			ProcessHashSet(const uchar* data, uint32 size);
+	void			ProcessHashSet(const uchar* data, UINT size);
 	void			ProcessAcceptUpload();
 	bool			AddRequestForAnotherFile(CPartFile* file);
 	void			CreateBlockRequests(int iMaxBlocks);
 	virtual void	SendBlockRequests();
 	virtual bool	SendHttpBlockRequests();
-	virtual void	ProcessBlockPacket(const uchar* packet, uint32 size, bool packed = false);
+	virtual void	ProcessBlockPacket(const uchar* packet, UINT size, bool packed, bool bI64Offsets);
 	virtual void	ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize);
 	void			ClearDownloadBlockRequests();
 	void			SendOutOfPartReqsAndAddToWaitingQueue();
-	uint32			CalculateDownloadRate();
-	UINT			GetAvailablePartCount() const;
+	UINT			CalculateDownloadRate();
+	uint16			GetAvailablePartCount() const;
 	bool			SwapToAnotherFile(LPCTSTR pszReason, bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile = NULL, bool allowSame = true, bool isAboutToAsk = false, bool debug = false); // ZZ:DownloadManager
 	void			DontSwapTo(/*const*/ CPartFile* file);
 	bool			IsSwapSuspended(const CPartFile* file, const bool allowShortReaskTime = false, const bool fileIsNNP = false) /*const*/; // ZZ:DownloadManager
@@ -533,7 +554,7 @@ public:
 
 	bool			IsValidSource() const;
 	ESourceFrom		GetSourceFrom() const							{ return (ESourceFrom)m_nSourceFrom; }
-	void			SetSourceFrom(ESourceFrom val) {m_nSourceFrom = val;}
+	void			SetSourceFrom(ESourceFrom val)					{ m_nSourceFrom = (_ESourceFrom)val; }
 
 	void			SetDownStartTime()								{ m_dwDownStartTime = ::GetTickCount(); }
 	uint32			GetDownTimeDifference(boolean clear = true)	{
@@ -544,7 +565,7 @@ public:
 	bool			GetTransferredDownMini() const					{ return m_bTransferredDownMini; }
 	void			SetTransferredDownMini()						{ m_bTransferredDownMini = true; }
 	void			InitTransferredDownMini()						{ m_bTransferredDownMini = false; }
-	uint16			GetA4AFCount() const							{ return m_OtherRequests_list.GetCount(); }
+	UINT			GetA4AFCount() const							{ return m_OtherRequests_list.GetCount(); }
 
 	uint16			GetUpCompleteSourcesCount() const				{ return m_nUpCompleteSourcesCount; }
 	//MORPH START - Added by SiRoB, Keep A4AF infos
@@ -560,11 +581,11 @@ public:
 
 	//chat
 	EChatState		GetChatState() const							{ return (EChatState)m_nChatstate; }
-	void			SetChatState(EChatState nNewS)					{ m_nChatstate = nNewS; }
+	void			SetChatState(EChatState nNewS)					{ m_nChatstate = (_EChatState)nNewS; }
 
 	//KadIPCheck
 	EKadState		GetKadState() const								{ return (EKadState)m_nKadState; }
-	void			SetKadState(EKadState nNewS)					{ m_nKadState = nNewS; }
+	void			SetKadState(EKadState nNewS)					{ m_nKadState = (_EKadState)nNewS; }
 
 	//File Comment
 	bool			HasFileComment() const						{ return !m_strFileComment.IsEmpty(); }
@@ -576,7 +597,7 @@ public:
     void			SetFileRating(uint8 uRating)				{ m_uFileRating = uRating; }
 
 	// Barry - Process zip file as it arrives, don't need to wait until end of block
-	int				unzip(Pending_Block_Struct *block, const BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
+	int				unzip(Pending_Block_Struct *block, const BYTE *zipped, UINT lenZipped, BYTE **unzipped, UINT *lenUnzipped, int iRecursion = 0);
 	void			UpdateDisplayedInfo(bool force = false);
 	int             GetFileListRequested() const					{ return m_iFileListRequested; }
     void            SetFileListRequested(int iFileListRequested)	{ m_iFileListRequested = iFileListRequested; }
@@ -589,9 +610,9 @@ public:
 	void			SetMessagesSent(uint8 nCount)					{ m_cMessagesSent = nCount; }
 	void			IncMessagesSent()								{ m_cMessagesSent++; }
 	bool			IsSpammer() const								{ return m_fIsSpammer; }
-	void			SetSpammer(bool bVal)							{ m_fIsSpammer = bVal ? 1 : 0; }
+	void			SetSpammer(bool bVal);
 	bool			GetMessageFiltered() const						{ return m_fMessageFiltered; }
-	void			SetMessageFiltered(bool bVal)					{ m_fMessageFiltered = bVal ? 1 : 0; }
+	void			SetMessageFiltered(bool bVal);
 	
 	virtual void	SetRequestFile(CPartFile* pReqFile);
 	CPartFile*		GetRequestFile() const						{return reqfile;}
@@ -661,8 +682,8 @@ public:
 	//MORPH END   - Changed by SiRoB, ZZ LowID handling
 	uint32			m_nSelectedChunk;	// SLUGFILLER: hideOS
 
-	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
-	uint32 GetSlotNumber() const { return m_slotNumber; }
+	void SetSlotNumber(UINT newValue) { m_slotNumber = newValue; }
+	UINT GetSlotNumber() const { return m_slotNumber; }
 	//MORPH START - Added by SiRoB, UPload Splitting Class
 	uint32 GetClassID() const {return m_classID;}
 	void	SetClassID(uint32 newvalue) { m_classID = newvalue;}
@@ -713,7 +734,7 @@ public:
 	bool IsWebCacheDownSocketConnected() const;
 //	uint16 blocksLoaded;	// Superlexx - block transfer limiter //JP blocks are counted in the socket code now
 	uint16 GetNumberOfClientsBehindOurWebCacheAskingForSameFile();	// what a name ;)
-	uint16 GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending); // Superlexx - COtN - it's getting better all the time...
+	UINT GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending); // Superlexx - COtN - it's getting better all the time...
 	bool WebCacheInfoNeeded() {return b_webcacheInfoNeeded;}
 	void SetWebCacheInfoNeeded(bool value) {b_webcacheInfoNeeded = value;}
 //JP trusted-OHCB-senders START
@@ -755,7 +776,7 @@ public:
 
 	bool ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHeaders);
 	bool ProcessPeerCacheDownHttpResponseBody(const BYTE* pucData, UINT uSize);
-	bool ProcessPeerCacheUpHttpResponse(const CStringAArray& astrHeaders);
+	void ProcessPeerCacheUpHttpResponse(const CStringAArray& astrHeaders);
 	UINT ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeaders);
 
 	virtual bool ProcessHttpDownResponse(const CStringAArray& astrHeaders);
@@ -869,8 +890,8 @@ protected:
 	void	Init();
 	bool	ProcessHelloTypePacket(CSafeMemFile* data);
 	void	SendHelloTypePacket(CSafeMemFile* data);
-	void	CreateStandartPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF = true);
-	void	CreatePackedPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF = true);
+	void	CreateStandartPackets(byte* data, UINT togo, Requested_Block_Struct* currentblock, bool bFromPF = true);
+	void	CreatePackedPackets(byte* data, UINT togo, Requested_Block_Struct* currentblock, bool bFromPF = true);
 	
 	uint32	m_nConnectIP;		// holds the supposed IP or (after we had a connection) the real IP
 	uint32	m_dwUserIP;			// holds 0 (real IP not yet available) or the real IP (after we had a connection)
@@ -878,7 +899,7 @@ protected:
 	uint32	m_nUserIDHybrid;
 	uint16	m_nUserPort;
 	uint16	m_nServerPort;
-	uint32	m_nClientVersion;
+	UINT	m_nClientVersion;
 //--group to aligned int32
 	uint8	m_byEmuleVersion;
 	uint8	m_byDataCompVer;
@@ -934,24 +955,13 @@ protected:
 	uint8	m_byKadVersion;
 
 	// States
-#ifdef _DEBUG
-	// use the 'Enums' only for debug builds, each enum costs 4 bytes (3 unused)
-	EClientSoftware		m_clientSoft;
-	EChatState	m_nChatstate;
-	EKadState			m_nKadState;
-	ESecureIdentState	m_SecureIdentState;
-	EUploadState		m_nUploadState;
-	EDownloadState		m_nDownloadState;
-	ESourceFrom			m_nSourceFrom;
-#else
-	uint8 m_clientSoft;
-	uint8 m_nChatstate;
-	uint8 m_nKadState;
-	uint8 m_SecureIdentState;
-	uint8 m_nUploadState;
-	uint8 m_nDownloadState;
-	uint8 m_nSourceFrom;
-#endif
+	_EClientSoftware	m_clientSoft;
+	_EChatState			m_nChatstate;
+	_EKadState			m_nKadState;
+	_ESecureIdentState	m_SecureIdentState;
+	_EUploadState		m_nUploadState;
+	_EDownloadState		m_nDownloadState;
+	_ESourceFrom		m_nSourceFrom;
 
 	CTypedPtrList<CPtrList, Packet*> m_WaitingPackets_list;
 	CList<PartFileStamp> m_DontSwap_list;
@@ -966,17 +976,17 @@ protected:
 	//
 	int	GetFilePrioAsNumber() const;
 
-	uint32		m_nTransferredUp;
+	UINT		m_nTransferredUp;
 	uint32		m_dwUploadTime;
 	uint32		m_nAvUpDatarate; //Wistily
 	uint32		m_nUpTotalTime;//wistily total lenght of this client's uploads during this session in ms
-	uint32		m_cAsked;
+	UINT		m_cAsked;
 	uint32		m_dwLastUpRequest;
-	uint32		m_nCurSessionUp;
-	uint32		m_nCurSessionDown;
+	UINT		m_nCurSessionUp;
+	UINT		m_nCurSessionDown;
     uint32      m_nCurQueueSessionUp;
-	uint32      m_nCurQueueSessionPayloadUp;
-	uint32      m_addedPayloadQueueSession;
+    UINT		m_nCurQueueSessionPayloadUp;
+    UINT		m_addedPayloadQueueSession;
     uint32      m_curSessionAmountNumber;
 	uint16		m_nUpPartCount;
 	uint16		m_nUpCompleteSourcesCount;
@@ -985,14 +995,14 @@ protected:
 	CKnownFile* requpfile;
 	DWORD		requpfileid_lasttimeupdated;
 	//MORPH END   - Added by SiRoB, Optimization requpfile
-    uint32      m_slotNumber;
+    UINT		m_slotNumber;
 	bool		m_bCollectionUploadSlot;
 	uint32		m_classID; //MORPH - Added by SiRoB, UPload Splitting Class
 
 	/*ZZ*/DWORD       m_dwLastCheckedForEvictTick;
 
 	typedef struct TransferredData {
-		uint32	datalen;
+		UINT	datalen;
 		DWORD	timestamp;
 	};
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_BlockRequests_queue;
@@ -1007,53 +1017,52 @@ protected:
 	//
 	CPartFile*	reqfile;
 	CAICHHash*  m_pReqFileAICHHash; 
-	uint32		m_cDownAsked;
+	UINT		m_cDownAsked;
 	uint8*		m_abyPartStatus;
 	CString		m_strClientFilename;
-	uint32		m_nTransferredDown;
+	UINT		m_nTransferredDown;
 	uint32		m_dwDownStartTime;
-	uint32      m_nLastBlockOffset;
+	uint64		m_nLastBlockOffset;
 	uint32		m_dwLastBlockReceived;
-	uint32		m_nTotalUDPPackets;
-	uint32		m_nFailedUDPPackets;
-	//--group to aligned int32
-	uint16		m_cShowDR;
-	uint16		m_nRemoteQueueRank;
+	UINT		m_nTotalUDPPackets;
+	UINT		m_nFailedUDPPackets;
+	UINT		m_nRemoteQueueRank;
 	//MORPH START - Added by AndCycle, DiffQR
 	int			m_iDifferenceQueueRank;
 	//MORPH END  - Added by AndCycle, DiffQR
 	//--group to aligned int32
-	uint16		m_nPartCount;
 	bool		m_bRemoteQueueFull;
 	bool		m_bCompleteSource;
+	uint16		m_nPartCount;
 	//--group to aligned int32
+	uint16		m_cShowDR;
 	bool		m_bReaskPending;
 	bool		m_bUDPPending;
 	bool		m_bTransferredDownMini;
 
 	// Download from URL
 	CStringA	m_strUrlPath;
-	UINT		m_uReqStart;
-	UINT		m_uReqEnd;
-	UINT		m_nUrlStartPos;
+	uint64		m_uReqStart;
+	uint64		m_uReqEnd;
+	uint64		m_nUrlStartPos;
 
 
 	//////////////////////////////////////////////////////////
 	// Upload data rate computation
 	//
-	uint32		m_nUpDatarate;
-	uint32		m_nSumForAvgUpDataRate;
+	UINT		m_nUpDatarate;
+	UINT		m_nSumForAvgUpDataRate;
 	CList<TransferredData> m_AvarageUDR_list;
 	DWORD		m_AvarageUDRLastRemovedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	DWORD		m_AvarageUDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	//////////////////////////////////////////////////////////
 	// Download data rate computation
 	//
-	uint32		m_nDownDatarate;
+	UINT		m_nDownDatarate;
 	uint32		m_nAvDownDatarate; //Wistily
 	uint32		m_nDownTotalTime;// wistily total lenght of this client's downloads during this session in ms
-	uint32		m_nDownDataRateMS;
-	uint32		m_nSumForAvgDownDataRate;
+	UINT		m_nDownDataRateMS;
+	UINT		m_nSumForAvgDownDataRate;
 	CList<TransferredData> m_AvarageDDR_list;
 	uint32		m_AvarageDDR_ListLastRemovedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	uint32		m_AvarageDDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
@@ -1084,7 +1093,9 @@ protected:
 		 m_fNeedOurPublicIP	  : 1, // we requested our IP from this client
 		 m_fSupportsAICH	  : 3,
 		 m_fAICHRequested     : 1,
-		 m_fSentOutOfPartReqs : 1;
+		 m_fSentOutOfPartReqs : 1,
+		 m_fSupportsLargeFiles: 1,
+		 m_fExtMultiPacket	  : 1;
 
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DownloadBlocks_list;
@@ -1247,9 +1258,9 @@ protected:
 public:
 	virtual	BOOL	InitInstance() {return true;}
 	virtual int		Run();
-	void			SetReadBlockFromFile(CKnownFile* pfile, uint32 startOffset, uint32 togo, CUpDownClient* client);
+	void			SetReadBlockFromFile(CKnownFile* pfile, uint64 startOffset, uint32 togo, CUpDownClient* client);
 private:
-	uint32			StartOffset;
+	uint64			StartOffset;
 	uint32			togo;
 	CUpDownClient*	m_client;
 	CKnownFile*		srcfile;

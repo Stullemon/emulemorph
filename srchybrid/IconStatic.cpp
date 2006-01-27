@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -79,7 +79,7 @@ void CIconStatic::SetIcon(LPCTSTR pszIconID)
 	if (rCaption.Height() < 16)
 		rCaption.bottom = rCaption.top + 16;
 	rCaption.right += 25;
-	if (rCaption.Width() > rRect.Width() - 16)
+	if (rRect.Width() >= 16 && rCaption.Width() > rRect.Width() - 16)
 		rCaption.right = rCaption.left + rRect.Width() - 16;
 
 	if (m_MemBMP.m_hObject)

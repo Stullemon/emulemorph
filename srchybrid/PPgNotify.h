@@ -27,7 +27,8 @@ public:
 	enum { IDD = IDD_PPG_NOTIFY };
 
 protected:
-	void LoadSettings(void);
+	bool m_bEnableEMail;
+
 	void UpdateControls();
 	void ApplyNotifierSoundType();
 

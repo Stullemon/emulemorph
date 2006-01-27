@@ -29,6 +29,13 @@ static char THIS_FILE[] = __FILE__;
 
 
 IMPLEMENT_DYNAMIC(PreviewDlg, CDialog)
+
+BEGIN_MESSAGE_MAP(PreviewDlg, CDialog)
+	ON_BN_CLICKED(IDC_PV_EXIT, OnBnClickedPvExit)
+	ON_BN_CLICKED(IDC_PV_NEXT, OnBnClickedPvNext)
+	ON_BN_CLICKED(IDC_PV_PRIOR, OnBnClickedPvPrior)
+END_MESSAGE_MAP()
+
 PreviewDlg::PreviewDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(PreviewDlg::IDD, pParent)
 {
@@ -49,14 +56,6 @@ void PreviewDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_PV_IMAGE, m_ImageStatic);
 }
-
-
-BEGIN_MESSAGE_MAP(PreviewDlg, CDialog)
-	ON_BN_CLICKED(IDC_PV_EXIT, OnBnClickedPvExit)
-	ON_BN_CLICKED(IDC_PV_NEXT, OnBnClickedPvNext)
-	ON_BN_CLICKED(IDC_PV_PRIOR, OnBnClickedPvPrior)
-END_MESSAGE_MAP()
-
 
 BOOL PreviewDlg::OnInitDialog()
 {
@@ -79,8 +78,9 @@ BOOL PreviewDlg::OnInitDialog()
 	return TRUE;
 }
 
-void PreviewDlg::ShowImage(sint16 nNumber){
-	uint16 nImageCount = m_pFile->GetPreviews().GetSize();
+void PreviewDlg::ShowImage(int nNumber)
+{
+	int nImageCount = m_pFile->GetPreviews().GetSize();
 	if (nImageCount == 0)
 		return;
 	else if (nImageCount <= nNumber)

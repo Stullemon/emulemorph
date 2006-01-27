@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -158,14 +158,14 @@ STDMETHODIMP_(ULONG) CMuleBrowserControlSite::XInternetSecurityManager::Release(
 	return pThis->ExternalRelease();
 }
 
-STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::SetSecuritySite(IInternetSecurityMgrSite* pSite)
+STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::SetSecuritySite(IInternetSecurityMgrSite* /*pSite*/)
 {
 	METHOD_PROLOGUE(CMuleBrowserControlSite, InternetSecurityManager);
 	TRACE(_T("%hs\n"), "SetSecuritySite");
 	return INET_E_DEFAULT_ACTION;
 }
 
-STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::GetSecuritySite(IInternetSecurityMgrSite** ppSite)
+STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::GetSecuritySite(IInternetSecurityMgrSite** /*ppSite*/)
 {
 	METHOD_PROLOGUE(CMuleBrowserControlSite, InternetSecurityManager);
 	TRACE(_T("%hs\n"), "GetSecuritySite");
@@ -177,6 +177,8 @@ STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::MapUrlToZone(
 										DWORD* pdwZone,
 										DWORD dwFlags)
 {
+	UNREFERENCED_PARAMETER(pwszUrl);
+	UNREFERENCED_PARAMETER(dwFlags);
 	METHOD_PROLOGUE(CMuleBrowserControlSite, InternetSecurityManager);
 	TRACE(_T("%hs: URL=%ls, Zone=%d, Flags=0x%x\n"), "MapUrlToZone", pwszUrl, *pdwZone, dwFlags);
 	if (pdwZone != NULL)
@@ -189,9 +191,11 @@ STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::MapUrlToZone(
 
 STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::GetSecurityId(
 										LPCWSTR pwszUrl,
-										BYTE *pbSecurityId, DWORD *pcbSecurityId, 
+										BYTE* /*pbSecurityId*/, DWORD* /*pcbSecurityId*/, 
 										DWORD dwReserved)
 {
+	UNREFERENCED_PARAMETER(pwszUrl);
+	UNREFERENCED_PARAMETER(dwReserved);
 	METHOD_PROLOGUE(CMuleBrowserControlSite, InternetSecurityManager);
 	TRACE(_T("%hs: URL=%ls, Reserved=%u\n"), "GetSecurityId", pwszUrl, dwReserved);
 	return INET_E_DEFAULT_ACTION;
@@ -200,10 +204,14 @@ STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::GetSecurityId(
 STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::ProcessUrlAction(
 										LPCWSTR pwszUrl,
 										DWORD dwAction,
-										BYTE* pPolicy, DWORD cbPolicy,
-										BYTE* pContext, DWORD cbContext,
+										BYTE* /*pPolicy*/, DWORD /*cbPolicy*/,
+										BYTE* /*pContext*/, DWORD /*cbContext*/,
 										DWORD dwFlags, DWORD dwReserved)
 {
+	UNREFERENCED_PARAMETER(pwszUrl);
+	UNREFERENCED_PARAMETER(dwAction);
+	UNREFERENCED_PARAMETER(dwFlags);
+	UNREFERENCED_PARAMETER(dwReserved);
 	METHOD_PROLOGUE(CMuleBrowserControlSite, InternetSecurityManager);
 	TRACE(_T("%hs: URL=%ls, Action=%u, Flags=0x%x, Reserved=%u\n"), "ProcessUrlAction", pwszUrl, dwAction, dwFlags, dwReserved);
 
@@ -224,11 +232,12 @@ STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::ProcessUrlAction
 
 STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::QueryCustomPolicy(
 										LPCWSTR pwszUrl,
-										REFGUID guidKey,
-										BYTE** ppPolicy, DWORD* pcbPolicy,
-										BYTE* pContext, DWORD cbContext,
-										DWORD dwReserved)
+										REFGUID /*guidKey*/,
+										BYTE** /*ppPolicy*/, DWORD* /*pcbPolicy*/,
+										BYTE* /*pContext*/, DWORD /*cbContext*/,
+										DWORD /*dwReserved*/)
 {
+	UNREFERENCED_PARAMETER(pwszUrl);
 	METHOD_PROLOGUE(CMuleBrowserControlSite, InternetSecurityManager);
 	TRACE(_T("%hs: URL=%ls\n"), "QueryCustomPolicy", pwszUrl);
 	return INET_E_DEFAULT_ACTION;
@@ -239,6 +248,9 @@ STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::SetZoneMapping(
 										LPCWSTR lpszPattern, 
 										DWORD dwFlags)
 {
+	UNREFERENCED_PARAMETER(dwZone);
+	UNREFERENCED_PARAMETER(lpszPattern);
+	UNREFERENCED_PARAMETER(dwFlags);
 	METHOD_PROLOGUE(CMuleBrowserControlSite, InternetSecurityManager);
 	TRACE(_T("%hs: Zone=%d, Pattern=%ls, Flags=0x%x\n"), "SetZoneMapping", dwZone, lpszPattern, dwFlags);
 	return INET_E_DEFAULT_ACTION;
@@ -246,9 +258,11 @@ STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::SetZoneMapping(
 
 STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::GetZoneMappings(
 										DWORD dwZone, 
-										IEnumString** ppenumString, 
+										IEnumString** /*ppenumString*/, 
 										DWORD dwFlags)
 {
+	UNREFERENCED_PARAMETER(dwZone);
+	UNREFERENCED_PARAMETER(dwFlags);
 	METHOD_PROLOGUE(CMuleBrowserControlSite, InternetSecurityManager);
 	TRACE(_T("%hs: Zone=%d, Flags=0x%s\n"), "GetZoneMappings", dwZone, dwFlags);
 	return INET_E_DEFAULT_ACTION;

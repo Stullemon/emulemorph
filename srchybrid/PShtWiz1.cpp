@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -274,7 +274,7 @@ public:
 
 	afx_msg void OnEnChangeUDP();
 	afx_msg void OnEnChangeTCP();
-	void OnPortChange(uint8 tcpport);
+	void OnPortChange();
 
 	CString m_sTestURL,m_sUDP,m_sTCP;
 	uint16 GetTCPPort();
@@ -292,7 +292,12 @@ protected:
 
 IMPLEMENT_DYNAMIC(CPPgWiz1Ports, CDlgPageWizard)
 
-
+BEGIN_MESSAGE_MAP(CPPgWiz1Ports, CDlgPageWizard)
+	ON_BN_CLICKED(IDC_STARTTEST, OnStartConTest)
+	ON_BN_CLICKED(IDC_UDPDISABLE, OnEnChangeUDPDisable)
+	ON_EN_CHANGE(IDC_TCP, OnEnChangeTCP)
+	ON_EN_CHANGE(IDC_UDP, OnEnChangeUDP)
+END_MESSAGE_MAP()
 
 CPPgWiz1Ports::CPPgWiz1Ports()
 	: CDlgPageWizard(CPPgWiz1Ports::IDD)
@@ -306,34 +311,22 @@ CPPgWiz1Ports::~CPPgWiz1Ports()
 void CPPgWiz1Ports::DoDataExchange(CDataExchange* pDX)
 {
 	CDlgPageWizard::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CPPgWiz1Ports)
 	DDX_Text(pDX, IDC_TCP, m_sTCP);
 	DDX_Text(pDX, IDC_UDP, m_sUDP);
-	//}}AFX_DATA_MAP
 }
-
-BEGIN_MESSAGE_MAP(CPPgWiz1Ports, CDlgPageWizard)
-	//{{AFX_MSG_MAP(CPPgWiz1Ports)
-	ON_BN_CLICKED(IDC_STARTTEST, OnStartConTest)
-	ON_BN_CLICKED(IDC_UDPDISABLE, OnEnChangeUDPDisable)
-	ON_EN_CHANGE(IDC_TCP, OnEnChangeTCP)
-	ON_EN_CHANGE(IDC_UDP, OnEnChangeUDP)
-
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
 
 void CPPgWiz1Ports::OnEnChangeTCP() {
-	OnPortChange(1);
+	OnPortChange();
 }
 void CPPgWiz1Ports::OnEnChangeUDP() {
-	OnPortChange(0);
+	OnPortChange();
 }
 
 uint16 CPPgWiz1Ports::GetTCPPort() {
 	CString buffer;
 
 	GetDlgItem(IDC_TCP)->GetWindowText(buffer);
-	return _tstoi(buffer);
+	return (uint16)_tstoi(buffer);
 }
 
 uint16 CPPgWiz1Ports::GetUDPPort() {
@@ -342,12 +335,12 @@ uint16 CPPgWiz1Ports::GetUDPPort() {
 
 	if (IsDlgButtonChecked(IDC_UDPDISABLE)==0) {
 		GetDlgItem(IDC_UDP)->GetWindowText(buffer);
-		udp = _tstoi(buffer);
+		udp = (uint16)_tstoi(buffer);
 	}
 	return udp;
 }
 
-void CPPgWiz1Ports::OnPortChange(uint8 tcpport) {
+void CPPgWiz1Ports::OnPortChange() {
 	
 	bool flag= (theApp.IsPortchangeAllowed() && 
 		( 
@@ -416,7 +409,7 @@ void CPPgWiz1Ports::OnEnChangeUDPDisable()
 	else
 		GetDlgItem(IDC_UDP)->SetWindowText(lastudp);
 	
-	OnPortChange(0);
+	OnPortChange();
 }
 
 
@@ -789,8 +782,8 @@ BOOL FirstTimeWizard()
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
 
 	// set ports
-	thePrefs.port=_tstoi(page3.m_sTCP);
-	thePrefs.udpport=_tstoi(page3.m_sUDP);
+	thePrefs.port=(uint16)_tstoi(page3.m_sTCP);
+	thePrefs.udpport=(uint16)_tstoi(page3.m_sUDP);
 	ASSERT( thePrefs.port!=0 && thePrefs.udpport!=10 );
 	if (thePrefs.port == 0)
 		thePrefs.port = DEFAULT_TCP_PORT;

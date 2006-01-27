@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -73,8 +73,8 @@ public:
 						  CMap<uint32, uint32, uint32, uint32>& clientVersionAMule);
 	uint32	GetClientCount()	{ return list.GetCount();}
 	//MORPH START - Slugfiller: modid
-	void	GetModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods);
-	void	ReleaseModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods);
+	void	GetModStatistics(CRBMap<uint32, CRBMap<CString, uint32>* > *clientMods);
+	void	ReleaseModStatistics(CRBMap<uint32, CRBMap<CString, uint32>* > *clientMods);
 	//MORPH END   - Slugfiller: modid
 	void	DeleteAll();
 	bool	AttachToAlreadyKnown(CUpDownClient** client, CClientReqSocket* sender);
@@ -97,7 +97,7 @@ public:
 	void	AddTrackClient(CUpDownClient* toadd);
 	bool	ComparePriorUserhash(uint32 dwIP, uint16 nPort, void* pNewHash);
 	UINT	GetClientsFromIP(uint32 dwIP) const;
-	void	TrackBadRequest(const CUpDownClient* upcClient, sint32 nIncreaseCounter);
+	void	TrackBadRequest(const CUpDownClient* upcClient, int nIncreaseCounter);
 	uint32	GetBadRequests(const CUpDownClient* upcClient) const;
 	UINT	GetTrackedCount() const		{ return m_trackedClientsList.GetCount(); }
 	void	RemoveAllTrackedClients();
@@ -126,11 +126,11 @@ public:
 // yonatan - not 2 be confused with the one in CUploadQueue!
 	CUpDownClient*	FindClientByWebCacheUploadId(const uint32 id);
 // Superlexx - OHCB manager
-	CUpDownClientPtrList* XpressOHCBRecipients(uint16 maxNrOfClients, const Requested_Block_Struct* block);
+	CUpDownClientPtrList* XpressOHCBRecipients(uint32 maxNrOfClients, const Requested_Block_Struct* block);
 	void SendOHCBs(); // sends OHCBs to every client every x minutes
 	uint32 m_dwLastSendOHCBs;
 // Superlexx - COtN - moved here from the CUpDownClient
-	uint16 GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending, uint16 maxNrOfClients);
+	UINT GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending, UINT maxNrOfClients);
 // MORPH END - Added by Commander, WebCache 1.2e
 
 protected:

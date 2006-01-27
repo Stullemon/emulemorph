@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -50,10 +50,10 @@ public:
 	CKnownFile*	GetFileByIndex(int index);
 	bool	IsFilePtrInList(const CKnownFile* file) const;
 	void	PublishNextTurn()	{ m_lastPublishED2KFlag=true;	}
-	void	CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, CServer* pServer, CUpDownClient* pClient = NULL);
+	void	CreateOfferedFilePacket(CKnownFile* cur_file, CSafeMemFile* files, CServer* pServer, CUpDownClient* pClient = NULL);
 	uint64	GetDatasize(uint64 &pbytesLargest) const;
-	uint16	GetCount()	{return m_Files_map.GetCount(); }
-	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER SafeHash
+	int		GetCount()	{return m_Files_map.GetCount(); }
+	int		GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER SafeHash
 	void	UpdateFile(CKnownFile* toupdate);
 	void	AddFilesFromDirectory(const CString& rstrDirectory);
 	void	AddFileFromNewlyCreatedCollection(const CString& path, const CString& fileName);
@@ -115,7 +115,8 @@ public:
 	virtual int		Run();
 	void	SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* partfile = NULL);
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
-	void	SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* partfile, LPCTSTR import);
+	bool	SR13_ImportParts();
+	uint16	SetPartToImport(LPCTSTR import);
 	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 private:
 	CSharedFileList* m_pOwner;
@@ -124,5 +125,7 @@ private:
 	CPartFile*		 m_partfile;
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
 	CString          m_strImport;
+	CArray<uint16,uint16>	m_PartsToImport;
+	CArray<uchar*,uchar*>	m_DesiredHashes;
 	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 };

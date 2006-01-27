@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -78,6 +78,7 @@ namespace {
 		//va_list argptr;
 		//va_start(argptr, fmt);
 		//va_end(argptr);
+		UNREFERENCED_PARAMETER(fmt);
 #endif //EMSOCKET_DEBUG
 	}
 }
@@ -94,7 +95,6 @@ CEMSocket::CEMSocket(void){
 	pendingOnReceive = false;
 
 	// Download partial header
-	// memset(pendingHeader, 0, sizeof(pendingHeader));
 	pendingHeaderSize = 0;
 
 	// Download partial packet
@@ -109,7 +109,7 @@ CEMSocket::CEMSocket(void){
 
 	// deadlake PROXYSUPPORT
 	m_pProxyLayer = NULL;
-	m_ProxyConnectFailed = false;
+	m_bProxyConnectFailed = false;
 
     //m_startSendTick = 0;
     //m_lastSendLatency = 0;
@@ -139,7 +139,6 @@ CEMSocket::CEMSocket(void){
 	m_dwBusyDelta = 1;
 	m_dwNotBusy = GetTickCount();
 	m_dwNotBusyDelta = 0;
-	dynLimit = 4096;
     m_hasSent = false;
 
     //int val = 0;
@@ -166,7 +165,7 @@ CEMSocket::~CEMSocket(){
 
 // deadlake PROXYSUPPORT
 // By Maverick: Connection initialisition is done by class itself
-BOOL CEMSocket::Connect(LPCTSTR lpszHostAddress, UINT nHostPort)
+BOOL CEMSocket::Connect(LPCSTR lpszHostAddress, UINT nHostPort)
 {
 	InitProxySupport();
 	return CAsyncSocketEx::Connect(lpszHostAddress, nHostPort);
@@ -185,9 +184,10 @@ BOOL CEMSocket::Connect(SOCKADDR* pSockAddr, int iSockAddrLen)
 
 void CEMSocket::InitProxySupport()
 {
+	m_bProxyConnectFailed = false;
+
 	// ProxyInitialisation
-	const ProxySettings& settings = thePrefs.GetProxy();
-	m_ProxyConnectFailed = false;
+	const ProxySettings& settings = thePrefs.GetProxySettings();
 	if (settings.UseProxy && settings.type != PROXYTYPE_NOPROXY)
 	{
 		Close();
@@ -196,35 +196,32 @@ void CEMSocket::InitProxySupport()
 		switch (settings.type)
 		{
 			case PROXYTYPE_SOCKS4:
-				m_pProxyLayer->SetProxy(PROXYTYPE_SOCKS4,settings.name,settings.port);
-				break;
 			case PROXYTYPE_SOCKS4A:
-				m_pProxyLayer->SetProxy(PROXYTYPE_SOCKS4A,settings.name,settings.port);
+				m_pProxyLayer->SetProxy(settings.type, settings.name, settings.port);
 				break;
 			case PROXYTYPE_SOCKS5:
-				if (settings.EnablePassword)
-					m_pProxyLayer->SetProxy(PROXYTYPE_SOCKS5,settings.name, settings.port, settings.user, settings.password);
-				else
-					m_pProxyLayer->SetProxy(PROXYTYPE_SOCKS5,settings.name,settings.port);
-				break;
+			case PROXYTYPE_HTTP10:
 			case PROXYTYPE_HTTP11:
 				if (settings.EnablePassword)
-					m_pProxyLayer->SetProxy(PROXYTYPE_HTTP11,settings.name,settings.port, settings.user, settings.password);
+					m_pProxyLayer->SetProxy(settings.type, settings.name, settings.port, settings.user, settings.password);
 				else
-					m_pProxyLayer->SetProxy(PROXYTYPE_HTTP11,settings.name,settings.port);
+					m_pProxyLayer->SetProxy(settings.type, settings.name, settings.port);
 				break;
-			default: ASSERT(FALSE);
+			default:
+				ASSERT(0);
 		}
 		AddLayer(m_pProxyLayer);
 
 		// Connection Initialisation
-		Create();
+		Create(0, SOCK_STREAM, FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE, thePrefs.GetBindAddrA());
 		AsyncSelect(FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE);
 	}
 }
 
 void CEMSocket::ClearQueues(){
 	EMTrace("CEMSocket::ClearQueues on %d",(SOCKET)this);
+
+	sendLocker.Lock();
 	for(POSITION pos = controlpacket_queue.GetHeadPosition(); pos != NULL; )
 		delete controlpacket_queue.GetNext(pos);
 	controlpacket_queue.RemoveAll();
@@ -232,6 +229,7 @@ void CEMSocket::ClearQueues(){
 	for(POSITION pos = standartpacket_queue.GetHeadPosition(); pos != NULL; )
 		delete standartpacket_queue.GetNext(pos).packet;
 	standartpacket_queue.RemoveAll();
+	sendLocker.Unlock();
 
 	// Download (pseudo) rate control	
 	downloadLimit = 0;
@@ -239,21 +237,17 @@ void CEMSocket::ClearQueues(){
 	pendingOnReceive = false;
 
 	// Download partial header
-	// memset(pendingHeader, 0, sizeof(pendingHeader));
 	pendingHeaderSize = 0;
 
 	// Download partial packet
-	if(pendingPacket != NULL){
-		delete pendingPacket;
-		pendingPacket = NULL;
-		pendingPacketSize = 0;
-	}
+	delete pendingPacket;
+	pendingPacket = NULL;
+	pendingPacketSize = 0;
 
 	// Upload control
-	if(sendbuffer != NULL){
-		delete[] sendbuffer;
-		sendbuffer = NULL;
-	}
+	delete[] sendbuffer;
+	sendbuffer = NULL;
+
 	sendblen = 0;
 	sent = 0;
 }
@@ -272,15 +266,17 @@ void CEMSocket::OnClose(int nErrorCode){
 	CAsyncSocketEx::OnClose(nErrorCode); // deadlake changed socket to PROXYSUPPORT ( AsyncSocketEx )
 	RemoveAllLayers(); // deadlake PROXYSUPPORT
 	ClearQueues();
-};
+}
 
 BOOL CEMSocket::AsyncSelect(long lEvent){
+#ifdef EMSOCKET_DEBUG
 	if (lEvent&FD_READ)
 		EMTrace("  FD_READ");
 	if (lEvent&FD_CLOSE)
 		EMTrace("  FD_CLOSE");
 	if (lEvent&FD_WRITE)
 		EMTrace("  FD_WRITE");
+#endif
 	// deadlake changed to AsyncSocketEx PROXYSUPPORT
 	if (m_SocketData.hSocket != INVALID_SOCKET)
 		return CAsyncSocketEx::AsyncSelect(lEvent);
@@ -311,7 +307,6 @@ void CEMSocket::OnReceive(int nErrorCode){
         pendingOnReceive = true;
 
         //Receive(GlobalReadBuffer + pendingHeaderSize, 0);
-
         return;
     }
 
@@ -713,13 +708,13 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         return returnVal;
     }
 
-    if(minFragSize < 1) {
+	if(minFragSize < 1) {
         minFragSize = 1;
     }
 
     maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
-    bool bWasLongTimeSinceSend = (::GetTickCount() - lastSent) > 1000;
+    bool bWasLongTimeSinceSend = (::GetTickCount() - lastSent) >= 1000;
 
     //lastCalledSend = ::GetTickCount();
 
@@ -863,7 +858,12 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
             }
 	    }
 
+        //MORPH START - Changed by SiRoB, just to be sur i got some strange thing here
+		/*
         if (sent == sendblen){
+		*/
+		if (sent && sent == sendblen){
+        //MORPH END   - Changed by SiRoB, just to be sur i got some strange thing here
             // we are done sending the current package. Delete it and set
             // sendbuffer to NULL so a new packet can be fetched.
 		    delete[] sendbuffer;
@@ -907,17 +907,11 @@ uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
         ret = minFragSize*(current/minFragSize+1);
     }
 	//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
-	if ((m_dwBusy > 0 || GetBusyRatioTime() > 0.05) && dynLimit > minFragSize) {
-		dynLimit /= 2;
-		if (dynLimit < minFragSize)
-			dynLimit = minFragSize;
-	} else if (GetBusyRatioTime() < 0.01) {
-		dynLimit *= 2;
-		if (dynLimit > 65534)
-			dynLimit = 65534;
-	}
-	if (current >= dynLimit)
-		ret = dynLimit;
+	if (ret >= 2*256*1024)
+		ret = 2*256*1024-1;
+	if (m_dwBusy)
+		return minFragSize;
+	else
 		return ret;
 	//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 }
@@ -1051,89 +1045,65 @@ int CEMSocket::Receive(void* lpBuf, int nBufLen, int nFlags)
 	return SOCKET_ERROR;
 }
 
-
-// deadlake PROXYSUPPORT ( RESETS LAYER CHAIN BY MAVERICK )
 void CEMSocket::RemoveAllLayers()
 {
 	CAsyncSocketEx::RemoveAllLayers();
-	
-	// ProxyLayer Destruction
-	if (m_pProxyLayer) 
-	{
-		delete m_pProxyLayer;
-		m_pProxyLayer = NULL;
-	}
+	delete m_pProxyLayer;
+	m_pProxyLayer = NULL;
 }
 
-int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nParam1, int nParam2)
+int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nCode, WPARAM wParam, LPARAM lParam)
 {
+	UNREFERENCED_PARAMETER(wParam);
 	ASSERT(pLayer);
 	if (nType==LAYERCALLBACK_STATECHANGE)
 	{
-		CString logline;
+		/*CString logline;
 		if (pLayer==m_pProxyLayer)
 		{
-			//logline.Format(_T("ProxyLayer changed state from %d to %d"), nParam2, nParam1);
+			//logline.Format(_T("ProxyLayer changed state from %d to %d"), wParam, nCode);
 			//AddLogLine(false,logline);
 		}else
-			//logline.Format(_T("Layer @ %d changed state from %d to %d"), pLayer, nParam2, nParam1);
-			//AddLogLine(false,logline);
+			//logline.Format(_T("Layer @ %d changed state from %d to %d"), pLayer, wParam, nCode);
+			//AddLogLine(false,logline);*/
 		return 1;
 	}
 	else if (nType==LAYERCALLBACK_LAYERSPECIFIC)
 	{
 		if (pLayer==m_pProxyLayer)
 		{
-			switch (nParam1)
+			switch (nCode)
 			{
-				// changed by deadlake -> errormessages could be ignored -> there's not a problem with the connection - 
-				// only the proxyserver handles the connections to low ( small bandwidth? )
-				case PROXYERROR_NOCONN:{
-					//TODO: This error message(s) should be outputed only during startup - otherwise we'll see a lot of
-					//them in the log window which would be of no use.
-					if (thePrefs.GetShowProxyErrors()){
-						CString strError(_T("Can't connect to proxy"));
-						CString strErrInf;
-						if (nParam2 && GetErrorMessage(nParam2, strErrInf))
-							strError += _T(" - ") + strErrInf;
-						LogWarning(false, _T("%s"), strError);
-					}
-					break;
-				}
-				case PROXYERROR_REQUESTFAILED:{
-					//TODO: This error message(s) should be outputed only during startup - otherwise we'll see a lot of
-					//them in the log window which would be of no use.
-					if (thePrefs.GetShowProxyErrors()){
-						CString strError(_T("Proxy request failed"));
-						if (nParam2){
-							strError += _T(" - ");
-							strError += (LPCSTR)nParam2;
+				case PROXYERROR_NOCONN:
+					// We failed to connect to the proxy.
+					m_bProxyConnectFailed = true;
+					/* fall through */
+				case PROXYERROR_REQUESTFAILED:
+					// We are connected to the proxy but it failed to connect to the peer.
+					if (thePrefs.GetVerbose()) {
+						m_strLastProxyError = GetProxyError(nCode);
+						if (lParam && ((LPCSTR)lParam)[0] != '\0') {
+							m_strLastProxyError += _T(" - ");
+							m_strLastProxyError += (LPCSTR)lParam;
 						}
-						LogWarning(false, _T("%s"), strError);
+						// Appending the Winsock error code is actually not needed because that error code
+						// gets reported by to the original caller anyway and will get reported eventually
+						// by calling 'GetFullErrorMessage',
+						/*if (wParam) {
+						CString strErrInf;
+							if (GetErrorMessage(wParam, strErrInf, 1))
+								m_strLastProxyError += _T(" - ") + strErrInf;
+						}*/
 					}
 					break;
-				}
-				case PROXYERROR_AUTHTYPEUNKNOWN:
-					LogWarning(false,_T("Required authtype reported by proxy server is unknown or unsupported"));
-					break;
-				case PROXYERROR_AUTHFAILED:
-					LogWarning(false,_T("Authentification failed"));
-					break;
-				case PROXYERROR_AUTHNOLOGON:
-					LogWarning(false,_T("Proxy requires authentification"));
-					break;
-				case PROXYERROR_CANTRESOLVEHOST:
-					LogWarning(false,_T("Can't resolve host of proxy"));
-					break;
-				default:{
-					LogWarning(false,_T("Proxy error - %s"), GetProxyError(nParam1));
-				}
+				default:
+					m_strLastProxyError = GetProxyError(nCode);
+					LogWarning(false, _T("Proxy-Error: %s"), m_strLastProxyError);
 			}
 		}
 	}
 	return 1;
 }
-// end deadlake
 
 /**
  * Removes all packets from the standard queue that don't have to be sent for the socket to be able to send a control packet.
@@ -1164,7 +1134,7 @@ void CEMSocket::AssertValid() const
 	const_cast<CEMSocket*>(this)->sendLocker.Lock();
 
 	ASSERT( byConnected==ES_DISCONNECTED || byConnected==ES_NOTCONNECTED || byConnected==ES_CONNECTED );
-	CHECK_BOOL(m_ProxyConnectFailed);
+	CHECK_BOOL(m_bProxyConnectFailed);
 	CHECK_PTR(m_pProxyLayer);
 	(void)downloadLimit;
 	CHECK_BOOL(downloadLimitEnable);
@@ -1211,4 +1181,29 @@ UINT CEMSocket::GetTimeOut() const
 void CEMSocket::SetTimeOut(UINT uTimeOut)
 {
 	m_uTimeOut = uTimeOut;
+}
+
+CString CEMSocket::GetFullErrorMessage(DWORD nErrorCode)
+{
+	CString strError;
+
+	// Proxy error
+	if (!GetLastProxyError().IsEmpty())
+	{
+		strError = GetLastProxyError();
+		// If we had a proxy error and the socket error is WSAECONNABORTED, we just 'aborted'
+		// the TCP connection ourself - no need to show that self-created error too.
+		if (nErrorCode == WSAECONNABORTED)
+			return strError;
+	}
+
+	// Winsock error
+	if (nErrorCode)
+	{
+		if (!strError.IsEmpty())
+			strError += _T(": ");
+		strError += GetErrorMessage(nErrorCode, 1);
+	}
+
+	return strError;
 }

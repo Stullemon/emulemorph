@@ -24,6 +24,7 @@ public:
 
 	void SetEditLabel(HTREEITEM hItem, const CString& rstrLabel);
 	void UpdateCheckBoxGroup(HTREEITEM hItem);
+	void SetImageListColorFlags(UINT uImageListColorFlags);
 
 	virtual void OnCreateImageList();
 	virtual void HandleChildControlLosingFocus();
@@ -36,8 +37,8 @@ protected:
 	virtual BOOL SetRadioButton(HTREEITEM hParent, int nIndex);
 	virtual BOOL SetRadioButton(HTREEITEM hItem);
 
-	afx_msg void OnDestroy();
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnDestroy();
 };
 
 //Dialog Data exchange support

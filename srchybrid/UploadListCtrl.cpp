@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -46,10 +46,20 @@ static char THIS_FILE[]=__FILE__;
 
 IMPLEMENT_DYNAMIC(CUploadListCtrl, CMuleListCtrl)
 
+BEGIN_MESSAGE_MAP(CUploadListCtrl, CMuleListCtrl)
+	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
+	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
+	ON_NOTIFY_REFLECT(LVN_GETINFOTIP, OnLvnGetInfoTip)
+END_MESSAGE_MAP()
+
 CUploadListCtrl::CUploadListCtrl()
 	: CListCtrlItemWalk(this)
 {
 	m_tooltip = new CToolTipCtrlX;
+	SetGeneralPurposeFind(true, false);
 }
 
 void CUploadListCtrl::Init()
@@ -182,99 +192,83 @@ void CUploadListCtrl::Localize()
 	if(pHeaderCtrl->GetItemCount() != 0) {
 		CString strRes;
 		strRes = GetResString(IDS_QL_USERNAME);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(0, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_FILE);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(1, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_DL_SPEED);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(2, &hdi);
-		strRes.ReleaseBuffer();
-
+	
 		strRes = GetResString(IDS_DL_TRANSF);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(3, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_WAITED);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(4, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_UPLOADTIME);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(5, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_STATUS);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(6, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_UPSTATUS);
-		hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(7, &hdi);
-		strRes.ReleaseBuffer();
 		
 		//MORPH START - Modified by SiRoB, Client Software
 		strRes = GetResString(IDS_CD_CSOFT);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(8, &hdi);
-		strRes.ReleaseBuffer();
 		//MORPH END - Modified by SiRoB, Client Software
 
 		//MORPH START - Modified by IceCream, Total up down
 		strRes = GetResString(IDS_UPL_DL);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(9, &hdi);
-		strRes.ReleaseBuffer();
 		//MORPH END - Modified by IceCream, Total up down
 
 		//MORPH START - Modified by IceCream, Remote Status
 		strRes = GetResString(IDS_CL_DOWNLSTATUS);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(10, &hdi);
-		strRes.ReleaseBuffer();
 		//MORPH END - Modified by IceCream, Remote Status
 
 		//MORPH START - Added by SiRoB, ZZ Missing
 		strRes = GetResString(IDS_UPSLOTNUMBER);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(11, &hdi);
-		strRes.ReleaseBuffer();
 		//MORPH END - Added by SiRoB, ZZ Missing
 
 		//MORPH START - Added by SiRoB, Show Compression by Tarod
 		strRes = GetResString(IDS_COMPRESSIONGAIN);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(12, &hdi);
-		strRes.ReleaseBuffer();
 		//MORPH END - Added by SiRoB, Show Compression by Tarod
 
 		// Mighty Knife: Community affiliation
 		strRes = GetResString(IDS_COMMUNITY);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(13, &hdi);
-		strRes.ReleaseBuffer();
 		// [end] Mighty Knife
 
 		// EastShare - Added by Pretender, Friend Tab
 		strRes = GetResString(IDS_FRIENDLIST);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(14, &hdi);
-		strRes.ReleaseBuffer();
 		// EastShare - Added by Pretender, Friend Tab
 
 		// Commander - Added: IP2Country column - Start
 		strRes = GetResString(IDS_COUNTRY);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(15, &hdi);
-		strRes.ReleaseBuffer();
 		// Commander - Added: IP2Country column - End
 	}
 }
@@ -298,7 +292,7 @@ void CUploadListCtrl::RemoveClient(const CUpDownClient* client)
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
-	sint32 result = FindItem(&find);
+	int result = FindItem(&find);
 	if (result != -1){
 		DeleteItem(result);
 		theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Uploading);
@@ -321,7 +315,7 @@ void CUploadListCtrl::RefreshClient(const CUpDownClient* client)
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
-	sint16 result = FindItem(&find);
+	int result = FindItem(&find);
 	if(result != -1)
 		Update(result);
 }
@@ -515,11 +509,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							// Mighty Knife: Check for credits!=NULL
 							if ((UpDatarate == 0) || (client->Credits()==NULL)) timeleft = -1;
 							else if(file)
-								if(client->IsMoreUpThanDown(file) && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->Credits()->GetDownloadedTotal() - client->Credits()->GetUploadedTotal())/UpDatarate;
+								if(client->IsMoreUpThanDown(file) && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (sint32)((client->Credits()->GetDownloadedTotal() - client->Credits()->GetUploadedTotal())/UpDatarate);
 							// [end] Mighty Knife
 								else if(client->GetPowerShared(file) && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
-								else if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/UpDatarate;
-								else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
+								else if (file->GetFileSize() > (uint64)SESSIONMAXTRANS)	timeleft = (sint32)((SESSIONMAXTRANS - client->GetQueueSessionUp())/UpDatarate);
+								else timeleft = (sint32)(((uint64)file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate);
 							Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), (timeleft>=0)?CastSecondsToHM(timeleft):_T("?"));
 						}//Morph - modified by AndCycle, upRemain
 						break;
@@ -695,17 +689,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	dc.SetTextColor(crOldTextColor);
 }
 
-BEGIN_MESSAGE_MAP(CUploadListCtrl, CMuleListCtrl)
-	ON_WM_CONTEXTMENU()
-	ON_WM_SYSCOLORCHANGE()
-	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
-	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
-	ON_NOTIFY_REFLECT(LVN_GETINFOTIP, OnLvnGetInfoTip)
-END_MESSAGE_MAP()
-
-// CUploadListCtrl message handlers
-void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+void CUploadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
@@ -722,8 +706,9 @@ void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	//MORPH END - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
-	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected())
+	if (Kademlia::CKademlia::IsRunning() && !Kademlia::CKademlia::IsConnected())
 		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+	ClientMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND), _T("Search"));
 	
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
@@ -733,7 +718,17 @@ void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
-BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
+BOOL CUploadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
+{
+	wParam = LOWORD(wParam);
+
+	switch (wParam)
+	{
+		case MP_FIND:
+			OnFindStart();
+			return TRUE;
+	}
+
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
 		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
@@ -748,15 +743,17 @@ BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				if (theApp.friendlist->AddFriend(client))
 					Update(iSel);
 				break;
+			case MP_DETAIL:
 			case MPG_ALTENTER:
-			case MP_DETAIL:{
+			case IDA_ENTER:
+			{
 				CClientDetailDialog dialog(client, this);
 				dialog.DoModal();
 				break;
 			}
 			case MP_BOOT:
 				if (client->GetKadPort())
-					Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 				break;
 			//MORPH START - Addded by SiRoB, Friend Addon
 			case MP_REMOVEFRIEND:{//LSD
@@ -930,10 +927,10 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		
 		//MORPH START - Added By Yun.SF3, Upload/Download
 		case 9: // UP-DL TOTAL
-			iResult=item2->Credits()->GetUploadedTotal() - item1->Credits()->GetUploadedTotal();
+			iResult=CompareUnsigned64(item2->Credits()->GetUploadedTotal(), item1->Credits()->GetUploadedTotal());
 			break;
 		case 109: 
-			iResult=item2->Credits()->GetDownloadedTotal() - item1->Credits()->GetDownloadedTotal();
+			iResult=CompareUnsigned64(item2->Credits()->GetDownloadedTotal(), item1->Credits()->GetDownloadedTotal());
 			break;
 		//MORPH END - Added By Yun.SF3, Upload/Download
 		
@@ -1035,7 +1032,7 @@ void CUploadListCtrl::ShowSelectedUserDetails()
 	}
 }
 
-void CUploadListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
+void CUploadListCtrl::OnNMDblclk(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){

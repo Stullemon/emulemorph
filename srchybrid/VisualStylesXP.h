@@ -3,6 +3,7 @@
 #include <uxtheme.h>
 #include <tmschema.h>
 
+#pragma warning(disable:4100) // unreferenced formal parameter
 class CVisualStylesXP
 {
 public:
@@ -240,5 +241,6 @@ private:
 	typedef HRESULT (__stdcall *PFNENABLETHEMING)(BOOL fEnable);
 	static HRESULT EnableThemingFail(BOOL fEnable) {return E_FAIL;}
 };
+#pragma warning(default:4100) // unreferenced formal parameter
 
 extern CVisualStylesXP g_xpStyle;

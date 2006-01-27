@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -52,8 +52,8 @@ struct ConvertJob {
 	CString filehash;
 	int     format;
 	int		state;
-	uint32	size;
-	uint32	spaceneeded;
+	uint64	size;
+	uint64	spaceneeded;
 	uint8	partmettype;
 	bool	removeSource;
 	ConvertJob() {size=0;spaceneeded=0;partmettype=PMT_UNKNOWN;removeSource=true;}
@@ -72,14 +72,14 @@ int CPartFileConvert::ScanFolderToAdd(CString folder,bool deletesource) {
 		ConvertToeMule(finder.GetFilePath(),deletesource);
 		count++;
 	}
-	/* Shareaza
+	// Shareaza
 	bWorking = finder.FindFile(folder+_T("\\*.sd"));
 	while (bWorking) {
 		bWorking=finder.FindNextFile();
 		ConvertToeMule(finder.GetFilePath(),deletesource);
 		count++;
 	}
-	*/
+
 
 	bWorking = finder.FindFile(folder+_T("\\*.*"));
 	while (bWorking) {
@@ -116,7 +116,7 @@ void CPartFileConvert::StartThread() {
 		convertPfThread=AfxBeginThread(run, NULL);
 }
 
-UINT AFX_CDECL CPartFileConvert::run(LPVOID lpParam)
+UINT AFX_CDECL CPartFileConvert::run(LPVOID /*lpParam*/)
 {
 	DbgSetThreadName("Partfile-Converter");
 	InitThreadLocale();
@@ -232,8 +232,8 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 			float stepperpart;
 			if (partfilecount>0) {
 				stepperpart=(80.0f / partfilecount );
-				if (maxindex*PARTSIZE<=pfconverting->size) pfconverting->spaceneeded=maxindex*PARTSIZE;
-					else pfconverting->spaceneeded=((pfconverting->size / PARTSIZE) * PARTSIZE)+(pfconverting->size % PARTSIZE);
+				if ((uint64)maxindex*PARTSIZE<=pfconverting->size) pfconverting->spaceneeded=(uint64)maxindex*PARTSIZE;
+					else pfconverting->spaceneeded=((uint64)(pfconverting->size / PARTSIZE) * PARTSIZE)+(pfconverting->size % PARTSIZE);
 			} else {
 				stepperpart=80.0f;
 				pfconverting->spaceneeded=0;
@@ -241,7 +241,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 			
 			UpdateGUI(pfconverting);
 
-			if (GetFreeDiskSpaceX(thePrefs.GetTempDir()) < (maxindex*PARTSIZE) ) {
+			if (GetFreeDiskSpaceX(thePrefs.GetTempDir()) < ((uint64)maxindex*PARTSIZE) ) {
 				delete file;
 				return CONV_OUTOFDISKSPACE;
 			}
@@ -270,7 +270,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 				fileindex=_tstoi(filename.Mid(pos1+1,pos2-pos1) );
 				if (fileindex==0) continue;
 
-				uint32 chunkstart=(fileindex-1) * PARTSIZE ;
+				uint32 chunkstart=(uint32)(fileindex-1) * PARTSIZE ;
 
 				// open, read data of the part-part-file into buffer, close file
 				inputfile.Open(finder.GetFilePath(),CFile::modeRead|CFile::shareDenyWrite);
@@ -671,8 +671,8 @@ void CPartFileConvertDlg::UpdateJobInfo(ConvertJob* job) {
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)job;
-	sint32 itemnr = joblist.FindItem(&find);
-	if (itemnr != (-1)) {
+	int itemnr = joblist.FindItem(&find);
+	if (itemnr != -1) {
 		joblist.SetItemText(itemnr,0, job->filename.IsEmpty()?job->folder:job->filename  );
 		joblist.SetItemText(itemnr,1, CPartFileConvert::GetReturncodeText(job->state) );
 		buffer="";
@@ -691,10 +691,9 @@ void CPartFileConvertDlg::RemoveJob(ConvertJob* job) {
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)job;
-	sint32 itemnr = joblist.FindItem(&find);
-	if (itemnr != (-1)) {
+	int itemnr = joblist.FindItem(&find);
+	if (itemnr != -1)
 		joblist.DeleteItem(itemnr);
-	}
 }
 
 void CPartFileConvertDlg::AddJob(ConvertJob* job) {

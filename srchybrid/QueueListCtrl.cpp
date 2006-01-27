@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -44,13 +44,21 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-// CQueueListCtrl
-
 IMPLEMENT_DYNAMIC(CQueueListCtrl, CMuleListCtrl)
+
+BEGIN_MESSAGE_MAP(CQueueListCtrl, CMuleListCtrl)
+	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
+	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
+END_MESSAGE_MAP()
 
 CQueueListCtrl::CQueueListCtrl()
 	: CListCtrlItemWalk(this)
 {
+	SetGeneralPurposeFind(true, false);
+
 	// Barry - Refresh the queue every 10 secs
 	VERIFY( (m_hTimer = ::SetTimer(NULL, NULL, 10000, QueueUpdateTimer)) != NULL );
 	if (thePrefs.GetVerbose() && !m_hTimer)
@@ -177,88 +185,73 @@ void CQueueListCtrl::Localize()
 		CString strRes;
 
 		strRes = GetResString(IDS_QL_USERNAME);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(0, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_FILE);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(1, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_FILEPRIO);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(2, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_QL_RATING);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(3, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_SCORE);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(4, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_ASKED);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(5, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_LASTSEEN);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(6, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_ENTERQUEUE);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(7, &hdi);
-		strRes.ReleaseBuffer();
 
 		strRes = GetResString(IDS_BANNED);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(8, &hdi);
-		strRes.ReleaseBuffer();
 		
 		strRes = GetResString(IDS_UPSTATUS);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(9, &hdi);
-		strRes.ReleaseBuffer();
 		
 		//MORPH START - Added by SiRoB, Client Software
 		strRes = GetResString(IDS_CD_CSOFT);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(10, &hdi);
-		strRes.ReleaseBuffer();
 		//MORPH END - Added by SiRoB, Client Software
 
 		// Mighty Knife: Community affiliation
 		strRes = GetResString(IDS_COMMUNITY);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(11, &hdi);
-		strRes.ReleaseBuffer();
 		// [end] Mighty Knife
 
 		// EastShare - Added by Pretender, Friend Tab
 		strRes = GetResString(IDS_FRIENDLIST);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(12, &hdi);
-		strRes.ReleaseBuffer();
 		// EastShare - Added by Pretender, Friend Tab
 
 		// Commander - Added: IP2Country column - Start
 		strRes = GetResString(IDS_COUNTRY);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(13, &hdi);
-		strRes.ReleaseBuffer();
 		// Commander - Added: IP2Country column - End
 
 		//MORPH START - Added by SiRoB, WebCache 1.2f
 		strRes = GetResString(IDS_WC_SOURCES);
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(14, &hdi);
-		strRes.ReleaseBuffer();
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
 	}
 }
@@ -267,7 +260,9 @@ void CQueueListCtrl::AddClient(/*const*/CUpDownClient* client, bool resetclient)
 {
 	if( resetclient && client){
 		// EastShare START - Marked by TAHO, modified SUQWT
-		//client->SetWaitStartTime();
+		/*
+		client->SetWaitStartTime();
+		*/
 		// EastShare END - Marked by TAHO, modified SUQWT
 		client->SetAskedCount(1);
 	//MORPH START - Added by SiRoB, ZZ Upload System
@@ -298,7 +293,7 @@ void CQueueListCtrl::RemoveClient(const CUpDownClient* client)
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
-	sint32 result = FindItem(&find);
+	int result = FindItem(&find);
 	if (result != -1){
 		DeleteItem(result);
 		theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2OnQueue);
@@ -321,7 +316,7 @@ void CQueueListCtrl::RefreshClient(const CUpDownClient* client)
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
-	sint16 result = FindItem(&find);
+	int result = FindItem(&find);
 	if(result != -1)
 		Update(result);
 }
@@ -555,7 +550,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer = CastSecondsToHM((::GetTickCount() - client->GetLastUpRequest())/1000);
 						break;
 					case 7:
-						Sbuffer = CastSecondsToHM((::GetTickCount() - client->GetWaitStartTime())/1000);
+						Sbuffer = CastSecondsToHM((::GetTickCount() - (uint32)client->GetWaitStartTime())/1000);
 						break;
 					case 8:
 						//MORPH START - Changed by SiRoB, Code Optimization
@@ -658,16 +653,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	dc.SetTextColor(crOldTextColor);
 }
 
-BEGIN_MESSAGE_MAP(CQueueListCtrl, CMuleListCtrl)
-	ON_WM_CONTEXTMENU()
-	ON_WM_SYSCOLORCHANGE()
-	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
-	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
-END_MESSAGE_MAP()
-
-// CQueueListCtrl message handlers
-void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+void CQueueListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
@@ -685,8 +671,9 @@ void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsBanned()) ? MF_ENABLED : MF_GRAYED), MP_UNBAN, GetResString(IDS_UNBAN));
-	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected())
+	if (Kademlia::CKademlia::IsRunning() && !Kademlia::CKademlia::IsConnected())
 		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+	ClientMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND), _T("Search"));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
 	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED),MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED), _T("FILEREQUESTED")); // Added by sivka
@@ -695,8 +682,17 @@ void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
-BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
+BOOL CQueueListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
+	wParam = LOWORD(wParam);
+
+	switch (wParam)
+{
+		case MP_FIND:
+			OnFindStart();
+			return TRUE;
+	}
+
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
 		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
@@ -745,15 +741,17 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 			}
 			//Xman end
 			//MORPH END  - Added by SiRoB, Friend Addon
+			case MP_DETAIL:
 			case MPG_ALTENTER:
-			case MP_DETAIL: {
+			case IDA_ENTER:
+			{
 				CClientDetailDialog dialog(client, this);
 				dialog.DoModal();
 				break;
 			}
 			case MP_BOOT:
 				if (client->GetKadPort())
-					Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 				break;
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			case MP_LIST_REQUESTED_FILES: { // added by sivka
@@ -1066,7 +1064,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 }
 
 // Barry - Refresh the queue every 10 secs
-void CALLBACK CQueueListCtrl::QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime)
+void CALLBACK CQueueListCtrl::QueueUpdateTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEvent*/, DWORD /*dwTime*/)
 {
 	// NOTE: Always handle all type of MFC exceptions in TimerProcs - otherwise we'll get mem leaks
 	try
@@ -1119,7 +1117,7 @@ void CQueueListCtrl::ShowSelectedUserDetails()
 	}
 }
 
-void CQueueListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
+void CQueueListCtrl::OnNMDblclk(NMHDR* /*pNMHDR*/, LRESULT *pResult)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {

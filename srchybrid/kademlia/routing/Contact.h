@@ -1,21 +1,21 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
-
-
+ 
+ 
 This work is based on the java implementation of the Kademlia protocol.
 Kademlia: Peer-to-peer routing based on the XOR metric
 Copyright (C) 2002  Petar Maymounkov [petar@post.harvard.edu]
@@ -36,75 +36,60 @@ there client on the eMule forum..
 #pragma once
 #include "../utils/UInt128.h"
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CRoutingZone;
-class CRoutingBin;
-
-class CContact
+namespace Kademlia
 {
-	friend class CRoutingZone;
-	friend class CRoutingBin;
+	class CContact
+	{
+			friend class CRoutingZone;
+			friend class CRoutingBin;
+		public:
+			~CContact();
+			CContact();
+			CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, uint8 uVersion);
+			CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, const CUInt128 &uTarget, uint8 uVersion);
 
-public:
-
-	~CContact();
-	CContact();
-	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort);
-	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, const CUInt128 &target);
-
-	void getClientID(CUInt128 *id) const;
-	CUInt128 getClientID() const {return m_clientID;}
-	void getClientID(CString *id) const;
-	void setClientID(const CUInt128 &clientID);
-
-	void getDistance(CUInt128 *distance) const;
-	void getDistance(CString *distance) const;
-
-	uint32 getIPAddress(void) const;
-	void getIPAddress(CString *ip) const;
-	void setIPAddress(uint32 ip);
-
-	uint16 getTCPPort(void) const;
-	void getTCPPort(CString *port) const;
-	void setTCPPort(uint16 port);
-
-	uint16 getUDPPort(void) const;
-	void getUDPPort(CString *port) const;
-	void setUDPPort(uint16 port);
-
-	byte getType(void) const;
-	void updateType();
-	void checkingType();
-
-	bool getGuiRefs(void) const { return m_guiRefs; }
-	void setGuiRefs(bool refs) { m_guiRefs = refs; }
-
-	bool inUse(void) {return (m_inUse>0);}
-	void incUse(void) {m_inUse++;}
-	void decUse(void) {if(m_inUse)m_inUse--;else ASSERT(0);}
-
-	time_t getCreatedTime() const {return m_created;}
-
-	time_t getExpireTime() const {return m_expires;}
-
-	time_t getLastTypeSet() const {return m_lastTypeSet;}
-
-private:
-	void initContact(); // Common var initialization goes here
-	CUInt128	m_clientID;
-	CUInt128	m_distance;
-	uint32		m_ip;
-	uint16		m_tcpPort;
-	uint16		m_udpPort;
-	byte		m_type;
-	bool		m_guiRefs;
-	time_t		m_lastTypeSet;
-	time_t		m_expires;
-	uint32		m_inUse;
-	time_t		m_created;
-};
-
-} // End namespace
+			void GetClientID(CUInt128 *puId) const;
+			CUInt128 GetClientID() const;
+			void GetClientID(CString *puId) const;
+			void SetClientID(const CUInt128 &uClientID);
+			void GetDistance(CUInt128 *puDistance) const;
+			void GetDistance(CString *psDistance) const;
+			CUInt128 GetDistance() const;
+			uint32 GetIPAddress() const;
+			void GetIPAddress(CString *psIp) const;
+			void SetIPAddress(uint32 uIp);
+			uint16 GetTCPPort() const;
+			void GetTCPPort(CString *psPort) const;
+			void SetTCPPort(uint16 uPort);
+			uint16 GetUDPPort() const;
+			void GetUDPPort(CString *psPort) const;
+			void SetUDPPort(uint16 sPort);
+			byte GetType() const;
+			void UpdateType();
+			void CheckingType();
+			bool GetGuiRefs() const;
+			void SetGuiRefs(bool bRefs);
+			bool InUse();
+			void IncUse();
+			void DecUse();
+			uint8 GetVersion() const;
+			void SetVersion(uint8 uVersion);
+			time_t GetCreatedTime() const;
+			time_t GetExpireTime() const;
+			time_t GetLastTypeSet() const;
+		private:
+			void InitContact(); // Common var initialization goes here
+			CUInt128 m_uClientID;
+			CUInt128 m_uDistance;
+			uint32 m_uIp;
+			uint16 m_uTcpPort;
+			uint16 m_uUdpPort;
+			byte m_byType;
+			bool m_bGuiRefs;
+			time_t m_tLastTypeSet;
+			time_t m_tExpires;
+			uint32 m_uInUse;
+			time_t m_tCreated;
+			uint8 m_uVersion;
+	};
+}

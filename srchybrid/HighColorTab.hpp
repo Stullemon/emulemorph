@@ -93,7 +93,12 @@ namespace HighColorTab
 
       if( pPage && ( pPage->m_psp.dwFlags & PSP_USEICONID ) )
       {
-        /*bSuccess &=*/ ( -1 != apILNew->Add( theApp.LoadIcon( pPage->m_psp.pszIcon, 16, 16 ) ) );
+		  HICON hIcon = theApp.LoadIcon( pPage->m_psp.pszIcon, 16, 16 );
+		  if (hIcon)
+		  {
+			/*bSuccess &=*/ ( -1 != apILNew->Add( hIcon ) );
+			DestroyIcon(hIcon);
+		  }
       }
     }
 

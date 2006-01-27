@@ -80,7 +80,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CProgressCtrlX message handlers
 
-BOOL CProgressCtrlX::OnEraseBkgnd(CDC* pDC) 
+BOOL CProgressCtrlX::OnEraseBkgnd(CDC* /*pDC*/) 
 {
 	// TODO: Add your message handler code here and/or call default
 	return TRUE; // erase in OnPaint()

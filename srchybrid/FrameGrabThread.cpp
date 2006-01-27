@@ -26,12 +26,11 @@
 #define _DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
         EXTERN_C const GUID DECLSPEC_SELECTANY name \
                 = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
-
 _DEFINE_GUID(MEDIATYPE_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 _DEFINE_GUID(MEDIATYPE_Audio, 0x73647561, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 _DEFINE_GUID(FORMAT_VideoInfo,0x05589f80, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
 _DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
-#define MMNODRV			// mmsystem: Installable driver support
+//#define MMNODRV		// mmsystem: Installable driver support
 #define MMNOSOUND		// mmsystem: Sound support
 //#define MMNOWAVE		// mmsystem: Waveform support
 #define MMNOMIDI		// mmsystem: MIDI support
@@ -40,7 +39,7 @@ _DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0
 #define MMNOTIMER		// mmsystem: Timer support
 #define MMNOJOY			// mmsystem: Joystick support
 #define MMNOMCI			// mmsystem: MCI support
-#define MMNOMMIO		// mmsystem: Multimedia file I/O support
+//#define MMNOMMIO		// mmsystem: Multimedia file I/O support
 #define MMNOMMSYSTEM	// mmsystem: General MMSYSTEM functions
 #include <qedit.h>
 typedef struct tagVIDEOINFOHEADER {
@@ -86,14 +85,14 @@ BOOL CFrameGrabThread::Run(){
 	// SLUGFILLER: SafeHash
 	imgResults = new CxImage*[nFramesToGrab];
 	FrameGrabResult_Struct* result = new FrameGrabResult_Struct;
-	result->nImagesGrabbed = GrabFrames();
+	result->nImagesGrabbed = (uint8)GrabFrames();
 	result->imgResults = imgResults;
 	result->pSender = pSender;
 	VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FRAMEGRABFINISHED, (WPARAM)pOwner,(LPARAM)result) );
 	return 0;
 }
 
-uint8 CFrameGrabThread::GrabFrames(){
+UINT CFrameGrabThread::GrabFrames(){
 	#define TIMEBETWEENFRAMES	50.0 // could be a param later, if needed
 	for (int i = 0; i!= nFramesToGrab; i++)
 		imgResults[i] = NULL;

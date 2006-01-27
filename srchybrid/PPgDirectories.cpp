@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -191,6 +191,7 @@ BOOL CPPgDirectories::OnApply()
 		for (int i=0;i<temptempfolders.GetCount();i++) {
 			CString toadd=temptempfolders.GetAt(i);
 			MakeFoldername( toadd.GetBuffer(MAX_PATH) );
+			toadd.ReleaseBuffer();
 			if (!PathFileExists(toadd))
 				CreateDirectory(toadd,NULL);
 			if (PathFileExists(toadd))
@@ -235,7 +236,6 @@ BOOL CPPgDirectories::OnApply()
 			thePrefs.shareddir_list.RemoveAt(posLast);
 	}
 	*/
-	theApp.emuledlg->sharedfileswnd->Reload();
 
 	if (testtempdirchanged)
 		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
@@ -257,6 +257,8 @@ BOOL CPPgDirectories::OnApply()
 			}
 		}
 	}
+
+	theApp.emuledlg->sharedfileswnd->Reload();
 	
 	SetModified(0);
 	return CPropertyPage::OnApply();
@@ -344,7 +346,7 @@ void CPPgDirectories::OnHelp()
 	theApp.ShowHelp(eMule_FAQ_Preferences_Directories);
 }
 
-BOOL CPPgDirectories::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgDirectories::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

@@ -3,12 +3,12 @@ This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -26,23 +26,17 @@ Any mod that changes anything within the Kademlia side will not be allowed to ad
 there client on the eMule forum..
 */
 #include "stdafx.h"
-#include "Indexed.h"
-#include "Kademlia.h"
-#include "../../OpCodes.h"
-#include "Defines.h"
-#include "Prefs.h"
-#include "../routing/RoutingZone.h"
-#include "../routing/Contact.h"
+#include "./Indexed.h"
+#include "./Kademlia.h"
+#include "./Entry.h"
+#include "./Prefs.h"
 #include "../net/KademliaUDPListener.h"
 #include "../utils/MiscUtils.h"
-#include "../utils/UInt128.h"
-#include "../../OtherFunctions.h"
-#include "../kademlia/tag.h"
-#include "../io/FileIO.h"
+#include "../io/BufferedFileIO.h"
 #include "../io/IOException.h"
-#include "emule.h"
-#include "Preferences.h"
-#include "Log.h"
+#include "../io/ByteIO.h"
+#include "../../Preferences.h"
+#include "../../Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -50,255 +44,236 @@ there client on the eMule forum..
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-////////////////////////////////////////
 using namespace Kademlia;
-////////////////////////////////////////
 
-void DebugSend(LPCTSTR pszMsg, uint32 ip, uint16 port);
+void DebugSend(LPCTSTR pszMsg, uint32 uIP, uint16 uPort);
 
-CString CIndexed::m_kfilename;
-CString CIndexed::m_sfilename;
-CString CIndexed::m_loadfilename;
+CString CIndexed::m_sKeyFileName;
+CString CIndexed::m_sSourceFileName;
+CString CIndexed::m_sLoadFileName;
 
 CIndexed::CIndexed()
 {
-	m_Keyword_map.InitHashTable(1031);
-	m_Notes_map.InitHashTable(1031);
-	m_Load_map.InitHashTable(1031);
-	m_Sources_map.InitHashTable(1031);
-	m_sfilename = CMiscUtils::getAppDir();
-	m_sfilename.Append(CONFIGFOLDER);
-	m_sfilename.Append(_T("src_index.dat"));
-	m_kfilename = CMiscUtils::getAppDir();
-	m_kfilename.Append(CONFIGFOLDER);
-	m_kfilename.Append(_T("key_index.dat"));
-	m_loadfilename = CMiscUtils::getAppDir();
-	m_loadfilename.Append(CONFIGFOLDER);
-	m_loadfilename.Append(_T("load_index.dat"));
-	m_lastClean = time(NULL) + (60*30);
-	m_totalIndexSource = 0;
-	m_totalIndexKeyword = 0;
-	m_totalIndexNotes = 0;
-	m_totalIndexLoad = 0;
-	readFile();
+	m_mapKeyword.InitHashTable(1031);
+	m_mapNotes.InitHashTable(1031);
+	m_mapLoad.InitHashTable(1031);
+	m_mapSources.InitHashTable(1031);
+	m_sSourceFileName = CMiscUtils::GetAppDir();
+	m_sSourceFileName.Append(CONFIGFOLDER);
+	m_sSourceFileName.Append(_T("src_index.dat"));
+	m_sKeyFileName = CMiscUtils::GetAppDir();
+	m_sKeyFileName.Append(CONFIGFOLDER);
+	m_sKeyFileName.Append(_T("key_index.dat"));
+	m_sLoadFileName = CMiscUtils::GetAppDir();
+	m_sLoadFileName.Append(CONFIGFOLDER);
+	m_sLoadFileName.Append(_T("load_index.dat"));
+	m_tLastClean = time(NULL) + (60*30);
+	m_uTotalIndexSource = 0;
+	m_uTotalIndexKeyword = 0;
+	m_uTotalIndexNotes = 0;
+	m_uTotalIndexLoad = 0;
+	ReadFile();
 }
 
-void CIndexed::readFile(void)
+void CIndexed::ReadFile(void)
 {
 	try
 	{
+		uint32 uTotalLoad = 0;
+		uint32 uTotalSource = 0;
+		uint32 uTotalKeyword = 0;
+		CUInt128 uKeyID, uID, uSourceID;
 
-		uint32 totalLoad = 0;
-		uint32 totalSource = 0;
-		uint32 totalKeyword = 0;
-		uint32 numKeys = 0;
-		uint32 numSource = 0;
-		uint32 numName = 0;
-		uint32 numLoad = 0;
-		uint32 tagList = 0;
-
-		CBufferedFileIO load_file;
-		if(load_file.Open(m_loadfilename, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
+		CBufferedFileIO fileLoad;
+		if(fileLoad.Open(m_sLoadFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
 		{
-			setvbuf(load_file.m_pStream, NULL, _IOFBF, 32768);
-			uint32 version = load_file.readUInt32();
-			if(version<2)
+			setvbuf(fileLoad.m_pStream, NULL, _IOFBF, 32768);
+			uint32 uVersion = fileLoad.ReadUInt32();
+			if(uVersion<2)
 			{
-				time_t savetime = load_file.readUInt32();
-				(void)savetime;
-				numLoad = load_file.readUInt32();
-				while(numLoad)
+				/*time_t tSaveTime = */fileLoad.ReadUInt32();
+				uint32 uNumLoad = fileLoad.ReadUInt32();
+				while(uNumLoad)
 				{
-					CUInt128 keyID;
-					load_file.readUInt128(&keyID);
-					if(AddLoad(keyID, load_file.readUInt32()))
-						totalLoad++;
-					numLoad--;
+					fileLoad.ReadUInt128(&uKeyID);
+					if(AddLoad(uKeyID, fileLoad.ReadUInt32()))
+						uTotalLoad++;
+					uNumLoad--;
 				}
 			}
-			load_file.Close();
+			fileLoad.Close();
 		}
-	
-		CBufferedFileIO k_file;
-		if (k_file.Open(m_kfilename, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
+
+		CBufferedFileIO fileKey;
+		if (fileKey.Open(m_sKeyFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
 		{
-			setvbuf(k_file.m_pStream, NULL, _IOFBF, 32768);
+			setvbuf(fileKey.m_pStream, NULL, _IOFBF, 32768);
 
-			uint32 version = k_file.readUInt32();
-			if( version < 2 )
+			uint32 uVersion = fileKey.ReadUInt32();
+			if( uVersion < 3 )
 			{
-				time_t savetime = k_file.readUInt32();
-				if( savetime > time(NULL) )
+				time_t tSaveTime = fileKey.ReadUInt32();
+				if( tSaveTime > time(NULL) )
 				{
-					CUInt128 id;
-
-					k_file.readUInt128(&id);
-					if( !Kademlia::CKademlia::getPrefs()->getKadID().compareTo(id) )
+					fileKey.ReadUInt128(&uID);
+					if( Kademlia::CKademlia::GetPrefs()->GetKadID() == uID )
 					{
-						numKeys = k_file.readUInt32();
-						while( numKeys )
+						uint32 uNumKeys = fileKey.ReadUInt32();
+						while( uNumKeys )
 						{
-							CUInt128 keyID;
-							k_file.readUInt128(&keyID);
-							numSource = k_file.readUInt32();
-							while( numSource )
+							fileKey.ReadUInt128(&uKeyID);
+							uint32 uNumSource = fileKey.ReadUInt32();
+							while( uNumSource )
 							{
-								CUInt128 sourceID;
-								k_file.readUInt128(&sourceID);
-								numName = k_file.readUInt32();
-								while( numName )
+								fileKey.ReadUInt128(&uSourceID);
+								uint32 uNumName = fileKey.ReadUInt32();
+								while( uNumName )
 								{
-									Kademlia::CEntry* toaddN = new Kademlia::CEntry();
-									toaddN->source = false;
-									uint32 expire = k_file.readUInt32();
-									toaddN->lifetime = expire;
-									tagList = k_file.readByte();
-									while( tagList )
+									CEntry* pToAdd = new Kademlia::CEntry();
+									pToAdd->m_bSource = false;
+									pToAdd->m_tLifetime = fileKey.ReadUInt32();
+									uint32 uTotalTags = fileKey.ReadByte();
+									while( uTotalTags )
 									{
-										CKadTag* tag = k_file.readTag();
-										if(tag)
+										CKadTag* pTag = fileKey.ReadTag();
+										if(pTag)
 										{
-											if (!tag->m_name.Compare(TAG_FILENAME))
+											if (!pTag->m_name.Compare(TAG_FILENAME))
 											{
-												toaddN->fileName = tag->GetStr();
-												KadTagStrMakeLower(toaddN->fileName); // make lowercase, the search code expects lower case strings!
+												pToAdd->m_fileName = pTag->GetStr();
+												KadTagStrMakeLower(pToAdd->m_fileName); // make lowercase, the search code expects lower case strings!
 												// NOTE: always add the 'name' tag, even if it's stored separately in 'fileName'. the tag is still needed for answering search request
-												toaddN->taglist.push_back(tag);
+												pToAdd->m_listTag.push_back(pTag);
 											}
-											else if (!tag->m_name.Compare(TAG_FILESIZE))
+											else if (!pTag->m_name.Compare(TAG_FILESIZE))
 											{
-												toaddN->size = tag->GetInt();
+												pToAdd->m_uSize = pTag->GetInt();
 												// NOTE: always add the 'size' tag, even if it's stored separately in 'size'. the tag is still needed for answering search request
-												toaddN->taglist.push_back(tag);
+												pToAdd->m_listTag.push_back(pTag);
 											}
-											else if (!tag->m_name.Compare(TAG_SOURCEIP))
+											else if (!pTag->m_name.Compare(TAG_SOURCEIP))
 											{
-												toaddN->ip = tag->GetInt();
-												toaddN->taglist.push_back(tag);
+												pToAdd->m_uIP = (uint32)pTag->GetInt();
+												pToAdd->m_listTag.push_back(pTag);
 											}
-											else if (!tag->m_name.Compare(TAG_SOURCEPORT))
+											else if (!pTag->m_name.Compare(TAG_SOURCEPORT))
 											{
-												toaddN->tcpport = tag->GetInt();
-												toaddN->taglist.push_back(tag);
+												pToAdd->m_uTCPPort = (uint16)pTag->GetInt();
+												pToAdd->m_listTag.push_back(pTag);
 											}
-											else if (!tag->m_name.Compare(TAG_SOURCEUPORT))
+											else if (!pTag->m_name.Compare(TAG_SOURCEUPORT))
 											{
-												toaddN->udpport = tag->GetInt();
-												toaddN->taglist.push_back(tag);
+												pToAdd->m_uUDPPort = (uint16)pTag->GetInt();
+												pToAdd->m_listTag.push_back(pTag);
 											}
 											else
 											{
-												toaddN->taglist.push_back(tag);
+												pToAdd->m_listTag.push_back(pTag);
 											}
 										}
-										tagList--;
+										uTotalTags--;
 									}
-									toaddN->keyID.setValue(keyID);
-									toaddN->sourceID.setValue(sourceID);
-									uint8 load = 0;
-									if(AddKeyword(keyID, sourceID, toaddN, load))
-										totalKeyword++;
+									pToAdd->m_uKeyID.SetValue(uKeyID);
+									pToAdd->m_uSourceID.SetValue(uSourceID);
+									uint8 uLoad;
+									if(AddKeyword(uKeyID, uSourceID, pToAdd, uLoad))
+										uTotalKeyword++;
 									else
-										delete toaddN;
-									numName--;
+										delete pToAdd;
+									uNumName--;
 								}
-								numSource--;
+								uNumSource--;
 							}
-							numKeys--;
+							uNumKeys--;
 						}
 					}
 				}
 			}
-			k_file.Close();
+			fileKey.Close();
 		}
 
-		CBufferedFileIO s_file;
-		if (s_file.Open(m_sfilename, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
+		CBufferedFileIO fileSource;
+		if (fileSource.Open(m_sSourceFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
 		{
-			setvbuf(s_file.m_pStream, NULL, _IOFBF, 32768);
+			setvbuf(fileSource.m_pStream, NULL, _IOFBF, 32768);
 
-			uint32 version = s_file.readUInt32();
-			if( version < 2 )
+			uint32 uVersion = fileSource.ReadUInt32();
+			if( uVersion < 3 )
 			{
-				time_t savetime = s_file.readUInt32();
-				if( savetime > time(NULL) )
+				time_t tSaveTime = fileSource.ReadUInt32();
+				if( tSaveTime > time(NULL) )
 				{
-					numKeys = s_file.readUInt32();
-					CUInt128 id;
-					while( numKeys )
+					uint32 uNumKeys = fileSource.ReadUInt32();
+					while( uNumKeys )
 					{
-						CUInt128 keyID;
-						s_file.readUInt128(&keyID);
-						numSource = s_file.readUInt32();
-						while( numSource )
+						fileSource.ReadUInt128(&uKeyID);
+						uint32 uNumSource = fileSource.ReadUInt32();
+						while( uNumSource )
 						{
-							CUInt128 sourceID;
-							s_file.readUInt128(&sourceID);
-							numName = s_file.readUInt32();
-							while( numName )
+							fileSource.ReadUInt128(&uSourceID);
+							uint32 uNumName = fileSource.ReadUInt32();
+							while( uNumName )
 							{
-								Kademlia::CEntry* toaddN = new Kademlia::CEntry();
-								toaddN->source = true;
-								uint32 test = s_file.readUInt32();
-								toaddN->lifetime = test;
-								tagList = s_file.readByte();
-								while( tagList )
+								CEntry* pToAdd = new Kademlia::CEntry();
+								pToAdd->m_bSource = true;
+								pToAdd->m_tLifetime = fileSource.ReadUInt32();
+								uint32 uTotalTags = fileSource.ReadByte();
+								while( uTotalTags )
 								{
-									CKadTag* tag = s_file.readTag();
-									if(tag)
+									CKadTag* pTag = fileSource.ReadTag();
+									if(pTag)
 									{
-										if (!tag->m_name.Compare(TAG_SOURCEIP))
+										if (!pTag->m_name.Compare(TAG_SOURCEIP))
 										{
-											toaddN->ip = tag->GetInt();
-											toaddN->taglist.push_back(tag);
+											pToAdd->m_uIP = (uint32)pTag->GetInt();
+											pToAdd->m_listTag.push_back(pTag);
 										}
-										else if (!tag->m_name.Compare(TAG_SOURCEPORT))
+										else if (!pTag->m_name.Compare(TAG_SOURCEPORT))
 										{
-											toaddN->tcpport = tag->GetInt();
-											toaddN->taglist.push_back(tag);
+											pToAdd->m_uTCPPort = (uint16)pTag->GetInt();
+											pToAdd->m_listTag.push_back(pTag);
 										}
-										else if (!tag->m_name.Compare(TAG_SOURCEUPORT))
+										else if (!pTag->m_name.Compare(TAG_SOURCEUPORT))
 										{
-											toaddN->udpport = tag->GetInt();
-											toaddN->taglist.push_back(tag);
+											pToAdd->m_uUDPPort = (uint16)pTag->GetInt();
+											pToAdd->m_listTag.push_back(pTag);
 										}
 										else
 										{
-											toaddN->taglist.push_back(tag);
+											pToAdd->m_listTag.push_back(pTag);
 										}
 									}
-									tagList--;
+									uTotalTags--;
 								}
-								toaddN->keyID.setValue(keyID);
-								toaddN->sourceID.setValue(sourceID);
-								uint8 load = 0;
-								if(AddSources(keyID, sourceID, toaddN, load))
-									totalSource++;
+								pToAdd->m_uKeyID.SetValue(uKeyID);
+								pToAdd->m_uSourceID.SetValue(uSourceID);
+								uint8 uLoad;
+								if(AddSources(uKeyID, uSourceID, pToAdd, uLoad))
+									uTotalSource++;
 								else
-									delete toaddN;
-								numName--;
+									delete pToAdd;
+								uNumName--;
 							}
-							numSource--;
+							uNumSource--;
 						}
-						numKeys--;
+						uNumKeys--;
 					}
 				}
 			}
-			s_file.Close();
+			fileSource.Close();
 
-			m_totalIndexSource = totalSource;
-			m_totalIndexKeyword = totalKeyword;
-			m_totalIndexLoad = totalLoad;
-			AddDebugLogLine( false, _T("Read %u source, %u keyword, and %u load entries"), totalSource, totalKeyword, totalLoad);
+			m_uTotalIndexSource = uTotalSource;
+			m_uTotalIndexKeyword = uTotalKeyword;
+			m_uTotalIndexLoad = uTotalLoad;
+			AddDebugLogLine( false, _T("Read %u source, %u keyword, and %u load entries"), uTotalSource, uTotalKeyword, uTotalLoad);
 		}
-	} 
+	}
 	catch ( CIOException *ioe )
 	{
-		AddDebugLogLine( false, _T("Exception in CIndexed::readFile (IO error(%i))"), ioe->m_cause);
+		AddDebugLogLine( false, _T("Exception in CIndexed::readFile (IO error(%i))"), ioe->m_iCause);
 		ioe->Delete();
 	}
-	catch (...) 
+	catch (...)
 	{
 		AddDebugLogLine(false, _T("Exception in CIndexed::readFile"));
 	}
@@ -308,254 +283,239 @@ CIndexed::~CIndexed()
 {
 	try
 	{
-		uint32 s_total = 0;
-		uint32 k_total = 0;
-		uint32 l_total = 0;
+		uint32 uTotalSource = 0;
+		uint32 uTotalKey = 0;
+		uint32 uTotalLoad = 0;
 
-		CBufferedFileIO load_file;
-		if(load_file.Open(m_loadfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
+		CBufferedFileIO fileLoad;
+		if(fileLoad.Open(m_sLoadFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
 		{
-			setvbuf(load_file.m_pStream, NULL, _IOFBF, 32768);
-			uint32 version = 1;
-			load_file.writeUInt32(version);
-			load_file.writeUInt32(time(NULL));
-			CCKey key;
-			load_file.writeUInt32(m_Load_map.GetCount());
-			POSITION pos = m_Load_map.GetStartPosition();
-			while( pos != NULL )
+			setvbuf(fileLoad.m_pStream, NULL, _IOFBF, 32768);
+			uint32 uVersion = 1;
+			fileLoad.WriteUInt32(uVersion);
+			fileLoad.WriteUInt32(time(NULL));
+			fileLoad.WriteUInt32(m_mapLoad.GetCount());
+			POSITION pos1 = m_mapLoad.GetStartPosition();
+			while( pos1 != NULL )
 			{
-				Load* load;
-				m_Load_map.GetNextAssoc( pos, key, load );
-				load_file.writeUInt128(load->keyID);
-				load_file.writeUInt32(load->time);
-				l_total++;
-				delete load;
+				Load* pLoad;
+				CCKey key1;
+				m_mapLoad.GetNextAssoc( pos1, key1, pLoad );
+				fileLoad.WriteUInt128(pLoad->uKeyID);
+				fileLoad.WriteUInt32(pLoad->uTime);
+				uTotalLoad++;
+				delete pLoad;
 			}
-			load_file.Close();
+			fileLoad.Close();
 		}
 
-		CBufferedFileIO s_file;
-		if (s_file.Open(m_sfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
+		CBufferedFileIO fileSource;
+		if (fileSource.Open(m_sSourceFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
 		{
-			setvbuf(s_file.m_pStream, NULL, _IOFBF, 32768);
-
-			uint32 version = 1;
-			s_file.writeUInt32(version);
-
-			s_file.writeUInt32(time(NULL)+KADEMLIAREPUBLISHTIMES);
-
-			CCKey key;
-			CCKey key2;
-
-			s_file.writeUInt32(m_Sources_map.GetCount());
-			POSITION pos = m_Sources_map.GetStartPosition();
-			while( pos != NULL )
+			setvbuf(fileSource.m_pStream, NULL, _IOFBF, 32768);
+			uint32 uVersion = 2;
+			fileSource.WriteUInt32(uVersion);
+			fileSource.WriteUInt32(time(NULL)+KADEMLIAREPUBLISHTIMES);
+			fileSource.WriteUInt32(m_mapSources.GetCount());
+			POSITION pos1 = m_mapSources.GetStartPosition();
+			while( pos1 != NULL )
 			{
-				SrcHash* currSrcHash;
-				m_Sources_map.GetNextAssoc( pos, key, currSrcHash );
-				s_file.writeUInt128(currSrcHash->keyID);
-
-				CKadSourcePtrList& KeyHashSrcMap = currSrcHash->m_Source_map;
-				s_file.writeUInt32(KeyHashSrcMap.GetCount());
-				POSITION pos2 = KeyHashSrcMap.GetHeadPosition();
+				CCKey key1;
+				SrcHash* pCurrSrcHash;
+				m_mapSources.GetNextAssoc( pos1, key1, pCurrSrcHash );
+				fileSource.WriteUInt128(pCurrSrcHash->uKeyID);
+				CKadSourcePtrList* keyHashSrcMap = &pCurrSrcHash->ptrlistSource;
+				fileSource.WriteUInt32(keyHashSrcMap->GetCount());
+				POSITION pos2 = keyHashSrcMap->GetHeadPosition();
 				while( pos2 != NULL )
 				{
-					Source* currSource = KeyHashSrcMap.GetNext(pos2);
-					s_file.writeUInt128(currSource->sourceID);
-
-					CKadEntryPtrList& SrcEntryList = currSource->entryList;
-					s_file.writeUInt32(SrcEntryList.GetCount());
-					for(POSITION pos5 = SrcEntryList.GetHeadPosition(); pos5 != NULL; )
+					Source* pCurrSource = keyHashSrcMap->GetNext(pos2);
+					fileSource.WriteUInt128(pCurrSource->uSourceID);
+					CKadEntryPtrList* srcEntryList = &pCurrSource->ptrlEntryList;
+					fileSource.WriteUInt32(srcEntryList->GetCount());
+					for(POSITION pos3 = srcEntryList->GetHeadPosition(); pos3 != NULL; )
 					{
-						Kademlia::CEntry* currName = SrcEntryList.GetNext(pos5);
-						s_file.writeUInt32(currName->lifetime);
-						s_file.writeTagList(currName->taglist);
-						delete currName;
-						s_total++;
+						CEntry* pCurrName = srcEntryList->GetNext(pos3);
+						fileSource.WriteUInt32(pCurrName->m_tLifetime);
+						fileSource.WriteTagList(pCurrName->m_listTag);
+						delete pCurrName;
+						uTotalSource++;
 					}
-					delete currSource;
+					delete pCurrSource;
 				}
-				delete currSrcHash;
+				delete pCurrSrcHash;
 			}
-			s_file.Close();
+			fileSource.Close();
 		}
 
-		CBufferedFileIO k_file;
-		if (k_file.Open(m_kfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
+		CBufferedFileIO fileKey;
+		if (fileKey.Open(m_sKeyFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
 		{
-			setvbuf(k_file.m_pStream, NULL, _IOFBF, 32768);
-
-			CCKey key;
-			CCKey key2;
-
-			uint32 version = 1;
-			k_file.writeUInt32(version);
-
-			k_file.writeUInt32(time(NULL)+KADEMLIAREPUBLISHTIMEK);
-
-			k_file.writeUInt128(Kademlia::CKademlia::getPrefs()->getKadID());
-
-			k_file.writeUInt32(m_Keyword_map.GetCount());
-			POSITION pos = m_Keyword_map.GetStartPosition();
-			while( pos != NULL )
+			setvbuf(fileKey.m_pStream, NULL, _IOFBF, 32768);
+			uint32 uVersion = 2;
+			fileKey.WriteUInt32(uVersion);
+			fileKey.WriteUInt32(time(NULL)+KADEMLIAREPUBLISHTIMEK);
+			fileKey.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+			fileKey.WriteUInt32(m_mapKeyword.GetCount());
+			POSITION pos1 = m_mapKeyword.GetStartPosition();
+			while( pos1 != NULL )
 			{
-				KeyHash* currKeyHash;
-				m_Keyword_map.GetNextAssoc( pos, key, currKeyHash );
-				k_file.writeUInt128(currKeyHash->keyID);
-
-				CSourceKeyMap& KeyHashSrcMap = currKeyHash->m_Source_map;
-				k_file.writeUInt32(KeyHashSrcMap.GetCount());
-				POSITION pos2 = KeyHashSrcMap.GetStartPosition();
+				CCKey key1;
+				KeyHash* pCurrKeyHash;
+				m_mapKeyword.GetNextAssoc( pos1, key1, pCurrKeyHash );
+				fileKey.WriteUInt128(pCurrKeyHash->uKeyID);
+				CSourceKeyMap* keySrcKeyMap = &pCurrKeyHash->mapSource;
+				fileKey.WriteUInt32(keySrcKeyMap->GetCount());
+				POSITION pos2 = keySrcKeyMap->GetStartPosition();
 				while( pos2 != NULL )
 				{
-					Source* currSource;
-					KeyHashSrcMap.GetNextAssoc( pos2, key2, currSource );
-					k_file.writeUInt128(currSource->sourceID);
-				
-					CKadEntryPtrList& SrcEntryList = currSource->entryList;
-					k_file.writeUInt32(SrcEntryList.GetCount());
-					for(POSITION pos5 = SrcEntryList.GetHeadPosition(); pos5 != NULL; )
+					Source* pCurrSource;
+					CCKey key2;
+					keySrcKeyMap->GetNextAssoc( pos2, key2, pCurrSource );
+					fileKey.WriteUInt128(pCurrSource->uSourceID);
+					CKadEntryPtrList* srcEntryList = &pCurrSource->ptrlEntryList;
+					fileKey.WriteUInt32(srcEntryList->GetCount());
+					for(POSITION pos3 = srcEntryList->GetHeadPosition(); pos3 != NULL; )
 					{
-						Kademlia::CEntry* currName = SrcEntryList.GetNext(pos5);
-						k_file.writeUInt32(currName->lifetime);
-						k_file.writeTagList(currName->taglist);
-						delete currName;
-						k_total++;
+						CEntry* pCurrName = srcEntryList->GetNext(pos3);
+						fileKey.WriteUInt32(pCurrName->m_tLifetime);
+						fileKey.WriteTagList(pCurrName->m_listTag);
+						delete pCurrName;
+						uTotalKey++;
 					}
-					delete currSource;
+					delete pCurrSource;
 				}
-				delete currKeyHash;
+				delete pCurrKeyHash;
 			}
-			k_file.Close();
+			fileKey.Close();
 		}
-		AddDebugLogLine( false, _T("Wrote %u source, %u keyword, and %u load entries"), s_total, k_total, l_total);
+		AddDebugLogLine( false, _T("Wrote %u source, %u keyword, and %u load entries"), uTotalSource, uTotalKey, uTotalLoad);
 
-		CCKey key;
-		CCKey key2;
-		POSITION pos = m_Notes_map.GetStartPosition();
-		while( pos != NULL )
+		POSITION pos1 = m_mapNotes.GetStartPosition();
+		while( pos1 != NULL )
 		{
-			SrcHash* currNoteHash;
-			m_Notes_map.GetNextAssoc( pos, key, currNoteHash );
-			CKadSourcePtrList& KeyHashNoteMap = currNoteHash->m_Source_map;
-			POSITION pos2 = KeyHashNoteMap.GetHeadPosition();
+			CCKey key1;
+			SrcHash* pCurrNoteHash;
+			m_mapNotes.GetNextAssoc( pos1, key1, pCurrNoteHash );
+			CKadSourcePtrList* keyHashNoteMap = &pCurrNoteHash->ptrlistSource;
+			POSITION pos2 = keyHashNoteMap->GetHeadPosition();
 			while( pos2 != NULL )
 			{
-				Source* currNote = KeyHashNoteMap.GetNext(pos2);
-				CKadEntryPtrList& NoteEntryList = currNote->entryList;
-				for(POSITION pos5 = NoteEntryList.GetHeadPosition(); pos5 != NULL; )
+				Source* pCurrNote = keyHashNoteMap->GetNext(pos2);
+				CKadEntryPtrList* noteEntryList = &pCurrNote->ptrlEntryList;
+				for(POSITION pos3 = noteEntryList->GetHeadPosition(); pos3 != NULL; )
 				{
-					Kademlia::CEntry* currName = NoteEntryList.GetNext(pos5);
-					delete currName;
+					delete noteEntryList->GetNext(pos3);
 				}
-				delete currNote;
+				delete pCurrNote;
 			}
-			delete currNoteHash;
-		} 
+			delete pCurrNoteHash;
+		}
 	}
 	catch ( CIOException *ioe )
 	{
-		AddDebugLogLine( false, _T("Exception in CIndexed::~CIndexed (IO error(%i))"), ioe->m_cause);
+		AddDebugLogLine( false, _T("Exception in CIndexed::~CIndexed (IO error(%i))"), ioe->m_iCause);
 		ioe->Delete();
 	}
-	catch (...) 
+	catch (...)
 	{
 		AddDebugLogLine(false, _T("Exception in CIndexed::~CIndexed"));
 	}
 }
 
-void CIndexed::clean(void)
+void CIndexed::Clean(void)
 {
 	try
 	{
-		if( m_lastClean > time(NULL) )
-		{
+		if( m_tLastClean > time(NULL) )
 			return;
-		}
 
-		uint32 k_Removed = 0;
-		uint32 s_Removed = 0;
-		uint32 s_Total = 0;
-		uint32 k_Total = 0;
+		uint32 uRemovedKey = 0;
+		uint32 uRemovedSource = 0;
+		uint32 uTotalSource = 0;
+		uint32 uTotalKey = 0;
 		time_t tNow = time(NULL);
 
-		POSITION pos = m_Keyword_map.GetStartPosition();
-		while( pos != NULL )
 		{
-			KeyHash* currKeyHash;
-			CCKey key;
-			m_Keyword_map.GetNextAssoc( pos, key, currKeyHash );
-			POSITION pos2 = currKeyHash->m_Source_map.GetStartPosition();
-			while( pos2 != NULL )
+			POSITION pos1 = m_mapKeyword.GetStartPosition();
+			while( pos1 != NULL )
 			{
-				Source* currSource;
-				CCKey key2;
-                currKeyHash->m_Source_map.GetNextAssoc( pos2, key2, currSource );
-				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
+				CCKey key1;
+				KeyHash* pCurrKeyHash;
+				m_mapKeyword.GetNextAssoc( pos1, key1, pCurrKeyHash );
+				POSITION pos2 = pCurrKeyHash->mapSource.GetStartPosition();
+				while( pos2 != NULL )
 				{
-					POSITION pos6 = pos5;
-					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
-					k_Total++;
-					if( !currName->source && currName->lifetime < tNow)
+					CCKey key2;
+					Source* pCurrSource;
+					pCurrKeyHash->mapSource.GetNextAssoc( pos2, key2, pCurrSource );
+					for(POSITION pos3 = pCurrSource->ptrlEntryList.GetHeadPosition(); pos3 != NULL; )
 					{
-						k_Removed++;
-						currSource->entryList.RemoveAt(pos6);
-						delete currName;
+						POSITION pos4 = pos3;
+						CEntry* pCurrName = pCurrSource->ptrlEntryList.GetNext(pos3);
+						uTotalKey++;
+						if( !pCurrName->m_bSource && pCurrName->m_tLifetime < tNow)
+						{
+							uRemovedKey++;
+							pCurrSource->ptrlEntryList.RemoveAt(pos4);
+							delete pCurrName;
+						}
+					}
+					if( pCurrSource->ptrlEntryList.IsEmpty())
+					{
+						pCurrKeyHash->mapSource.RemoveKey(key2);
+						delete pCurrSource;
 					}
 				}
-				if( currSource->entryList.IsEmpty())
+				if( pCurrKeyHash->mapSource.IsEmpty())
 				{
-					currKeyHash->m_Source_map.RemoveKey(key2);
-					delete currSource;
+					m_mapKeyword.RemoveKey(key1);
+					delete pCurrKeyHash;
 				}
 			}
-			if( currKeyHash->m_Source_map.IsEmpty())
+		}
+		{
+			POSITION pos1 = m_mapSources.GetStartPosition();
+			while( pos1 != NULL )
 			{
-				m_Keyword_map.RemoveKey(key);
-				delete currKeyHash;
+				CCKey key1;
+				SrcHash* pCurrSrcHash;
+				m_mapSources.GetNextAssoc( pos1, key1, pCurrSrcHash );
+				for(POSITION pos2 = pCurrSrcHash->ptrlistSource.GetHeadPosition(); pos2 != NULL; )
+				{
+					POSITION pos3 = pos2;
+					Source* pCurrSource = pCurrSrcHash->ptrlistSource.GetNext(pos2);
+					for(POSITION pos4 = pCurrSource->ptrlEntryList.GetHeadPosition(); pos4 != NULL; )
+					{
+						POSITION pos5 = pos4;
+						CEntry* pCurrName = pCurrSource->ptrlEntryList.GetNext(pos4);
+						uTotalSource++;
+						if( pCurrName->m_tLifetime < tNow)
+						{
+							uRemovedSource++;
+							pCurrSource->ptrlEntryList.RemoveAt(pos5);
+							delete pCurrName;
+						}
+					}
+					if( pCurrSource->ptrlEntryList.IsEmpty())
+					{
+						pCurrSrcHash->ptrlistSource.RemoveAt(pos3);
+						delete pCurrSource;
+					}
+				}
+				if( pCurrSrcHash->ptrlistSource.IsEmpty())
+				{
+					m_mapSources.RemoveKey(key1);
+					delete pCurrSrcHash;
+				}
 			}
 		}
 
-		pos = m_Sources_map.GetStartPosition();
-		while( pos != NULL )
-		{
-			SrcHash* currSrcHash;
-			CCKey key;
-			m_Sources_map.GetNextAssoc( pos, key, currSrcHash );
-			for(POSITION pos2 = currSrcHash->m_Source_map.GetHeadPosition(); pos2 != NULL; )
-			{
-				POSITION pos3 = pos2;
-				Source* currSource = currSrcHash->m_Source_map.GetNext(pos2);
-				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
-				{
-					POSITION pos6 = pos5;
-					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
-					s_Total++;
-					if( currName->lifetime < tNow)
-					{
-						s_Removed++;
-						currSource->entryList.RemoveAt(pos6);
-						delete currName;
-					}
-				}
-				if( currSource->entryList.IsEmpty())
-				{
-					currSrcHash->m_Source_map.RemoveAt(pos3);
-					delete currSource;
-				}
-			}
-			if( currSrcHash->m_Source_map.IsEmpty())
-			{
-				m_Sources_map.RemoveKey(key);
-				delete currSrcHash;
-			}
-		}
-
-		m_totalIndexSource = s_Total;
-		m_totalIndexKeyword = k_Total;
-		AddDebugLogLine( false, _T("Removed %u keyword out of %u and %u source out of %u"), k_Removed, k_Total, s_Removed, s_Total);
-		m_lastClean = time(NULL) + MIN2S(30);
-	} 
+		m_uTotalIndexSource = uTotalSource;
+		m_uTotalIndexKeyword = uTotalKey;
+		AddDebugLogLine( false, _T("Removed %u keyword out of %u and %u source out of %u"), uRemovedKey, uTotalKey, uRemovedSource, uTotalSource);
+		m_tLastClean = time(NULL) + MIN2S(30);
+	}
 	catch(...)
 	{
 		AddDebugLogLine(false, _T("Exception in CIndexed::clean"));
@@ -563,506 +523,403 @@ void CIndexed::clean(void)
 	}
 }
 
-bool CIndexed::AddKeyword(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load){
-	try
+bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad)
+{
+	if( !pEntry )
+		return false;
+
+	if( m_uTotalIndexKeyword > KADEMLIAMAXENTRIES )
 	{
-		if( !entry )
-			return false;
+		uLoad = 100;
+		return false;
+	}
 
-		if( m_totalIndexKeyword > KADEMLIAMAXENTRIES )
+	if( pEntry->m_uSize == 0 || pEntry->m_fileName.IsEmpty() || pEntry->m_listTag.size() == 0 || pEntry->m_tLifetime < time(NULL))
+		return false;
+
+	KeyHash* pCurrKeyHash;
+	if(!m_mapKeyword.Lookup(CCKey(uKeyID.GetData()), pCurrKeyHash))
+	{
+		Source* pCurrSource = new Source;
+		pCurrSource->uSourceID.SetValue(uSourceID);
+		pCurrSource->ptrlEntryList.AddHead(pEntry);
+		pCurrKeyHash = new KeyHash;
+		pCurrKeyHash->uKeyID.SetValue(uKeyID);
+		pCurrKeyHash->mapSource.SetAt(CCKey(pCurrSource->uSourceID.GetData()), pCurrSource);
+		m_mapKeyword.SetAt(CCKey(pCurrKeyHash->uKeyID.GetData()), pCurrKeyHash);
+		uLoad = 1;
+		m_uTotalIndexKeyword++;
+		return true;
+	}
+	else
+	{
+		uint32 uIndexTotal = pCurrKeyHash->mapSource.GetCount();
+		if ( uIndexTotal > KADEMLIAMAXINDEX )
 		{
-			load = 100;
+			uLoad = 100;
+			//Too many entries for this Keyword..
 			return false;
 		}
-
-		if( entry->size == 0 || entry->fileName.IsEmpty() || entry->taglist.size() == 0 || entry->lifetime < time(NULL))
-			return false;
-
-		KeyHash* currKeyHash;
-		if(!m_Keyword_map.Lookup(CCKey(keyID.getData()), currKeyHash))
+		Source* pCurrSource;
+		if(pCurrKeyHash->mapSource.Lookup(CCKey(uSourceID.GetData()), pCurrSource))
 		{
-			Source* currSource = new Source;
-			currSource->sourceID.setValue(sourceID);
-			currSource->entryList.AddHead(entry);
-			currKeyHash = new KeyHash;
-			currKeyHash->keyID.setValue(keyID);
-			currKeyHash->m_Source_map.SetAt(CCKey(currSource->sourceID.getData()), currSource);
-			m_Keyword_map.SetAt(CCKey(currKeyHash->keyID.getData()), currKeyHash);
-			load = 1;
-			m_totalIndexKeyword++;
-			return true;
-		}
-		else
-		{
-			uint32 indexTotal = currKeyHash->m_Source_map.GetCount();
-			if ( indexTotal > KADEMLIAMAXINDEX )
+			if (pCurrSource->ptrlEntryList.GetCount() > 0)
 			{
-				load = 100;
-				//Too many entries for this Keyword..
-				return false;
-			}
-			Source* currSource;
-			if(currKeyHash->m_Source_map.Lookup(CCKey(sourceID.getData()), currSource))
-			{
-				if (currSource->entryList.GetCount() > 0)
+				if( uIndexTotal > KADEMLIAMAXINDEX - 5000 )
 				{
-					if( indexTotal > KADEMLIAMAXINDEX - 5000 )
-					{
-						load = 100;
-						//We are in a hot node.. If we continued to update all the publishes
-						//while this index is full, popular files will be the only thing you index.
-						return false;
-					}
-					delete currSource->entryList.GetHead();
-					currSource->entryList.RemoveHead();
+					uLoad = 100;
+					//We are in a hot node.. If we continued to update all the publishes
+					//while this index is full, popular files will be the only thing you index.
+					return false;
 				}
-				else
-					m_totalIndexKeyword++;
-				load = (indexTotal*100)/KADEMLIAMAXINDEX;
-				currSource->entryList.AddHead(entry);
-				return true;
+				delete pCurrSource->ptrlEntryList.GetHead();
+				pCurrSource->ptrlEntryList.RemoveHead();
 			}
 			else
-			{
-				currSource = new Source;
-				currSource->sourceID.setValue(sourceID);
-				currSource->entryList.AddHead(entry);
-				currKeyHash->m_Source_map.SetAt(CCKey(currSource->sourceID.getData()), currSource);
-				m_totalIndexKeyword++;
-				load = (indexTotal*100)/KADEMLIAMAXINDEX;
-				return true;
-			}
-		}
-	}
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CIndexed::writeFile"));
-		ASSERT(0);
-	}
-	return false;
-
-}
-
-bool CIndexed::AddSources(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load)
-{
-	if( !entry )
-		return false;
-	if( entry->ip == 0 || entry->tcpport == 0 || entry->udpport == 0 || entry->taglist.size() == 0 || entry->lifetime < time(NULL))
-		return false;
-	try
-	{
-		SrcHash* currSrcHash;
-		if(!m_Sources_map.Lookup(CCKey(keyID.getData()), currSrcHash))
-		{
-			Source* currSource = new Source;
-			currSource->sourceID.setValue(sourceID);
-			currSource->entryList.AddHead(entry);
-			currSrcHash = new SrcHash;
-			currSrcHash->keyID.setValue(keyID);
-			currSrcHash->m_Source_map.AddHead(currSource);
-			m_Sources_map.SetAt(CCKey(currSrcHash->keyID.getData()), currSrcHash);
-			m_totalIndexSource++;
-			load = 1;
+				m_uTotalIndexKeyword++;
+			uLoad = (uint8)((uIndexTotal*100)/KADEMLIAMAXINDEX);
+			pCurrSource->ptrlEntryList.AddHead(pEntry);
 			return true;
 		}
 		else
 		{
-			uint32 size = currSrcHash->m_Source_map.GetSize();
-			for(POSITION pos2 = currSrcHash->m_Source_map.GetHeadPosition(); pos2 != NULL; )
+			pCurrSource = new Source;
+			pCurrSource->uSourceID.SetValue(uSourceID);
+			pCurrSource->ptrlEntryList.AddHead(pEntry);
+			pCurrKeyHash->mapSource.SetAt(CCKey(pCurrSource->uSourceID.GetData()), pCurrSource);
+			m_uTotalIndexKeyword++;
+			uLoad = (uint8)((uIndexTotal*100)/KADEMLIAMAXINDEX);
+			return true;
+		}
+	}
+}
+
+bool CIndexed::AddSources(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad)
+{
+	if( !pEntry )
+		return false;
+	if( pEntry->m_uIP == 0 || pEntry->m_uTCPPort == 0 || pEntry->m_uUDPPort == 0 || pEntry->m_listTag.size() == 0 || pEntry->m_tLifetime < time(NULL))
+		return false;
+
+	SrcHash* pCurrSrcHash;
+	if(!m_mapSources.Lookup(CCKey(uKeyID.GetData()), pCurrSrcHash))
+	{
+		Source* pCurrSource = new Source;
+		pCurrSource->uSourceID.SetValue(uSourceID);
+		pCurrSource->ptrlEntryList.AddHead(pEntry);
+		pCurrSrcHash = new SrcHash;
+		pCurrSrcHash->uKeyID.SetValue(uKeyID);
+		pCurrSrcHash->ptrlistSource.AddHead(pCurrSource);
+		m_mapSources.SetAt(CCKey(pCurrSrcHash->uKeyID.GetData()), pCurrSrcHash);
+		m_uTotalIndexSource++;
+		uLoad = 1;
+		return true;
+	}
+	else
+	{
+		uint32 uSize = pCurrSrcHash->ptrlistSource.GetSize();
+		for(POSITION pos1 = pCurrSrcHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
+		{
+			Source* pCurrSource = pCurrSrcHash->ptrlistSource.GetNext(pos1);
+			if( pCurrSource->ptrlEntryList.GetSize() )
 			{
-				Source* currSource = currSrcHash->m_Source_map.GetNext(pos2);
-				if( currSource->entryList.GetSize() )
+				CEntry* pCurrEntry = pCurrSource->ptrlEntryList.GetHead();
+				ASSERT(pCurrEntry!=NULL);
+				if( pCurrEntry->m_uIP == pEntry->m_uIP && ( pCurrEntry->m_uTCPPort == pEntry->m_uTCPPort || pCurrEntry->m_uUDPPort == pEntry->m_uUDPPort ))
 				{
-					CEntry* currEntry = currSource->entryList.GetHead();
-					ASSERT(currEntry!=NULL);
-					if( currEntry->ip == entry->ip && ( currEntry->tcpport == entry->tcpport || currEntry->udpport == entry->udpport ))
-					{
-						CEntry* currName = currSource->entryList.RemoveHead();
-						delete currName;
-						currSource->entryList.AddHead(entry);
-						load = (size*100)/KADEMLIAMAXSOUCEPERFILE;
-						return true;
-					}
-				}
-				else
-				{
-					//This should never happen!
-					currSource->entryList.AddHead(entry);
-					ASSERT(0);
-					load = (size*100)/KADEMLIAMAXSOUCEPERFILE;
-					m_totalIndexSource++;
+					delete pCurrSource->ptrlEntryList.RemoveHead();
+					pCurrSource->ptrlEntryList.AddHead(pEntry);
+					uLoad = (uint8)((uSize*100)/KADEMLIAMAXSOUCEPERFILE);
 					return true;
 				}
 			}
-			if( size > KADEMLIAMAXSOUCEPERFILE )
-			{
-				Source* currSource = currSrcHash->m_Source_map.RemoveTail();
-				ASSERT(currSource!=NULL);
-				Kademlia::CEntry* currName = currSource->entryList.RemoveTail();
-				ASSERT(currName!=NULL);
-				delete currName;
-				currSource->sourceID.setValue(sourceID);
-				currSource->entryList.AddHead(entry);
-				currSrcHash->m_Source_map.AddHead(currSource);
-				load = 100;
-				return true;
-			}
 			else
 			{
-				Source* currSource = new Source;
-				currSource->sourceID.setValue(sourceID);
-				currSource->entryList.AddHead(entry);
-				currSrcHash->m_Source_map.AddHead(currSource);
-				m_totalIndexSource++;
-				load = (size*100)/KADEMLIAMAXSOUCEPERFILE;
+				//This should never happen!
+				pCurrSource->ptrlEntryList.AddHead(pEntry);
+				ASSERT(0);
+				uLoad = (uint8)((uSize*100)/KADEMLIAMAXSOUCEPERFILE);
+				m_uTotalIndexSource++;
 				return true;
 			}
 		}
-	}
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CIndexed::AddSource"));
-	}
-	return false;
-}
-
-bool CIndexed::AddNotes(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load)
-{
-	if( !entry )
-		return false;
-	if( entry->ip == 0 || entry->taglist.size() == 0 )
-		return false;
-	try
-	{
-		SrcHash* currNoteHash;
-		if(!m_Notes_map.Lookup(CCKey(keyID.getData()), currNoteHash))
+		if( uSize > KADEMLIAMAXSOUCEPERFILE )
 		{
-			Source* currNote = new Source;
-			currNote->sourceID.setValue(sourceID);
-			currNote->entryList.AddHead(entry);
-			currNoteHash = new SrcHash;
-			currNoteHash->keyID.setValue(keyID);
-			currNoteHash->m_Source_map.AddHead(currNote);
-			m_Notes_map.SetAt(CCKey(currNoteHash->keyID.getData()), currNoteHash);
-			load = 1;
-			m_totalIndexNotes++;
+			Source* pCurrSource = pCurrSrcHash->ptrlistSource.RemoveTail();
+			delete pCurrSource->ptrlEntryList.RemoveTail();
+			pCurrSource->uSourceID.SetValue(uSourceID);
+			pCurrSource->ptrlEntryList.AddHead(pEntry);
+			pCurrSrcHash->ptrlistSource.AddHead(pCurrSource);
+			uLoad = 100;
 			return true;
 		}
 		else
 		{
-			uint32 size = currNoteHash->m_Source_map.GetSize();
-			for(POSITION pos2 = currNoteHash->m_Source_map.GetHeadPosition(); pos2 != NULL; )
+			Source* pCurrSource = new Source;
+			pCurrSource->uSourceID.SetValue(uSourceID);
+			pCurrSource->ptrlEntryList.AddHead(pEntry);
+			pCurrSrcHash->ptrlistSource.AddHead(pCurrSource);
+			m_uTotalIndexSource++;
+			uLoad = (uint8)((uSize*100)/KADEMLIAMAXSOUCEPERFILE);
+			return true;
+		}
+	}
+}
+
+bool CIndexed::AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad)
+{
+	if( !pEntry )
+		return false;
+	if( pEntry->m_uIP == 0 || pEntry->m_listTag.size() == 0 )
+		return false;
+
+	SrcHash* pCurrNoteHash;
+	if(!m_mapNotes.Lookup(CCKey(uKeyID.GetData()), pCurrNoteHash))
+	{
+		Source* pCurrNote = new Source;
+		pCurrNote->uSourceID.SetValue(uSourceID);
+		pCurrNote->ptrlEntryList.AddHead(pEntry);
+		SrcHash* pCurrNoteHash = new SrcHash;
+		pCurrNoteHash->uKeyID.SetValue(uKeyID);
+		pCurrNoteHash->ptrlistSource.AddHead(pCurrNote);
+		m_mapNotes.SetAt(CCKey(pCurrNoteHash->uKeyID.GetData()), pCurrNoteHash);
+		uLoad = 1;
+		m_uTotalIndexNotes++;
+		return true;
+	}
+	else
+	{
+		uint32 uSize = pCurrNoteHash->ptrlistSource.GetSize();
+		for(POSITION pos1 = pCurrNoteHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
+		{
+			Source* pCurrNote = pCurrNoteHash->ptrlistSource.GetNext(pos1);
+			if( pCurrNote->ptrlEntryList.GetSize() )
 			{
-				Source* currNote = currNoteHash->m_Source_map.GetNext(pos2);
-				if( currNote->entryList.GetSize() )
+				CEntry* pCurrEntry = pCurrNote->ptrlEntryList.GetHead();
+				if(pCurrEntry->m_uIP == pEntry->m_uIP || pCurrEntry->m_uSourceID == pEntry->m_uSourceID)
 				{
-					CEntry* currEntry = currNote->entryList.GetHead();
-					ASSERT(currEntry!=NULL);
-					if(currEntry->ip == entry->ip || !currEntry->sourceID.compareTo(entry->sourceID))
-					{
-						CEntry* currName = currNote->entryList.RemoveHead();
-						delete currName;
-						currNote->entryList.AddHead(entry);
-						load = (size*100)/KADEMLIAMAXNOTESPERFILE;
-						return true;
-					}
-				}
-				else
-				{
-					//This should never happen!
-					currNote->entryList.AddHead(entry);
-					ASSERT(0);
-					load = (size*100)/KADEMLIAMAXNOTESPERFILE;
-					m_totalIndexKeyword++;
+					delete pCurrNote->ptrlEntryList.RemoveHead();
+					pCurrNote->ptrlEntryList.AddHead(pEntry);
+					uLoad = (uint8)((uSize*100)/KADEMLIAMAXNOTESPERFILE);
 					return true;
 				}
 			}
-			if( size > KADEMLIAMAXNOTESPERFILE )
-			{
-				Source* currNote = currNoteHash->m_Source_map.RemoveTail();
-				ASSERT(currNote!=NULL);
-				CEntry* currName = currNote->entryList.RemoveTail();
-				ASSERT(currName!=NULL);
-				delete currName;
-				currNote->sourceID.setValue(sourceID);
-				currNote->entryList.AddHead(entry);
-				currNoteHash->m_Source_map.AddHead(currNote);
-				load = 100;
-				return true;
-			}
 			else
 			{
-				Source* currNote = new Source;
-				currNote->sourceID.setValue(sourceID);
-				currNote->entryList.AddHead(entry);
-				currNoteHash->m_Source_map.AddHead(currNote);
-				load = (size*100)/KADEMLIAMAXNOTESPERFILE;
-				m_totalIndexKeyword++;
+				//This should never happen!
+				pCurrNote->ptrlEntryList.AddHead(pEntry);
+				ASSERT(0);
+				uLoad = (uint8)((uSize*100)/KADEMLIAMAXNOTESPERFILE);
+				m_uTotalIndexKeyword++;
 				return true;
 			}
 		}
+		if( uSize > KADEMLIAMAXNOTESPERFILE )
+		{
+			Source* pCurrNote = pCurrNoteHash->ptrlistSource.RemoveTail();
+			delete pCurrNote->ptrlEntryList.RemoveTail();
+			pCurrNote->uSourceID.SetValue(uSourceID);
+			pCurrNote->ptrlEntryList.AddHead(pEntry);
+			pCurrNoteHash->ptrlistSource.AddHead(pCurrNote);
+			uLoad = 100;
+			return true;
+		}
+		else
+		{
+			Source* pCurrNote = new Source;
+			pCurrNote->uSourceID.SetValue(uSourceID);
+			pCurrNote->ptrlEntryList.AddHead(pEntry);
+			pCurrNoteHash->ptrlistSource.AddHead(pCurrNote);
+			uLoad = (uint8)((uSize*100)/KADEMLIAMAXNOTESPERFILE);
+			m_uTotalIndexKeyword++;
+			return true;
+		}
 	}
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CIndexed::AddNotes"));
-	}
-	return false;
 }
 
-bool CIndexed::AddLoad(const CUInt128& keyID, uint32 timet)
+bool CIndexed::AddLoad(const CUInt128& uKeyID, uint32 uTime)
 {
-	Load* load = NULL;
-
-	if((uint32)time(NULL)>timet)
+	//This is needed for when you restart the client.
+	if((uint32)time(NULL)>uTime)
 		return false;
 
-	if(m_Load_map.Lookup(CCKey(keyID.getData()), load))
+	Load* pLoad;
+	if(m_mapLoad.Lookup(CCKey(uKeyID.GetData()), pLoad))
 		return false;
 
-	load = new Load();
-	load->keyID.setValue(keyID);
-	load->time = timet;
-	m_Load_map.SetAt(CCKey(load->keyID.getData()), load);
-	m_totalIndexLoad++;
+	pLoad = new Load();
+	pLoad->uKeyID.SetValue(uKeyID);
+	pLoad->uTime = uTime;
+	m_mapLoad.SetAt(CCKey(pLoad->uKeyID.GetData()), pLoad);
+	m_uTotalIndexLoad++;
 	return true;
 }
 
-bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* item/*, CStringArray& astrFileNameTokens*/)
+bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* pItem)
 {
 	// boolean operators
-	if (pSearchTerm->type == SSearchTerm::AND)
-		return SearchTermsMatch(pSearchTerm->left, item/*, astrFileNameTokens*/) && SearchTermsMatch(pSearchTerm->right, item/*, astrFileNameTokens*/);
-	
-	if (pSearchTerm->type == SSearchTerm::OR)
-		return SearchTermsMatch(pSearchTerm->left, item/*, astrFileNameTokens*/) || SearchTermsMatch(pSearchTerm->right, item/*, astrFileNameTokens*/);
-	
-	if (pSearchTerm->type == SSearchTerm::NAND)
-		return SearchTermsMatch(pSearchTerm->left, item/*, astrFileNameTokens*/) && !SearchTermsMatch(pSearchTerm->right, item/*, astrFileNameTokens*/);
+	if (pSearchTerm->m_type == SSearchTerm::AND)
+		return SearchTermsMatch(pSearchTerm->m_pLeft, pItem) && SearchTermsMatch(pSearchTerm->m_pRight, pItem);
+
+	if (pSearchTerm->m_type == SSearchTerm::OR)
+		return SearchTermsMatch(pSearchTerm->m_pLeft, pItem) || SearchTermsMatch(pSearchTerm->m_pRight, pItem);
+
+	if (pSearchTerm->m_type == SSearchTerm::NOT)
+		return SearchTermsMatch(pSearchTerm->m_pLeft, pItem) && !SearchTermsMatch(pSearchTerm->m_pRight, pItem);
 
 	// word which is to be searched in the file name (and in additional meta data as done by some ed2k servers???)
-	if (pSearchTerm->type == SSearchTerm::String)
+	if (pSearchTerm->m_type == SSearchTerm::String)
 	{
-		int iStrSearchTerms = pSearchTerm->astr->GetCount();
+		int iStrSearchTerms = pSearchTerm->m_pastr->GetCount();
 		if (iStrSearchTerms == 0)
 			return false;
-#if 0
-		//TODO: Use a pre-tokenized list for better performance.
-		// tokenize the filename (very expensive) only once per search expression and only if really needed
-		if (astrFileNameTokens.GetCount() == 0)
-		{
-			int iPosTok = 0;
-			CString strTok(item->fileName.Tokenize(_aszInvKadKeywordChars, iPosTok));
-			while (!strTok.IsEmpty())
-			{
-				astrFileNameTokens.Add(strTok);
-				strTok = item->fileName.Tokenize(_aszInvKadKeywordChars, iPosTok);
-			}
-		}
-		if (astrFileNameTokens.GetCount() == 0)
-			return false;
-
-		// if there are more than one search strings specified (e.g. "aaa bbb ccc") the entire string is handled
-		// like "aaa AND bbb AND ccc". search all strings from the string search term in the tokenized list of
-		// the file name. all strings of string search term have to be found (AND)
-		for (int iSearchTerm = 0; iSearchTerm < iStrSearchTerms; iSearchTerm++)
-		{
-			bool bFoundSearchTerm = false;
-			for (int i = 0; i < astrFileNameTokens.GetCount(); i++)
-			{
-				// the file name string was already stored in lowercase
-				// the string search term was already stored in lowercase
-				if (strcmp(astrFileNameTokens.GetAt(i), pSearchTerm->astr->GetAt(iSearchTerm)) == 0)
-				{
-					bFoundSearchTerm = true;
-					break;
-				}
-			}
-			if (!bFoundSearchTerm)
-				return false;
-		}
-#else
 		// if there are more than one search strings specified (e.g. "aaa bbb ccc") the entire string is handled
 		// like "aaa AND bbb AND ccc". search all strings from the string search term in the tokenized list of
 		// the file name. all strings of string search term have to be found (AND)
 		for (int iSearchTerm = 0; iSearchTerm < iStrSearchTerms; iSearchTerm++)
 		{
 			// this will not give the same results as when tokenizing the filename string, but it is 20 times faster.
-			if (wcsstr(item->fileName, pSearchTerm->astr->GetAt(iSearchTerm)) == NULL)
+			if (wcsstr(pItem->m_fileName, pSearchTerm->m_pastr->GetAt(iSearchTerm)) == NULL)
 				return false;
 		}
-#endif
 		return true;
-
-		// search string value in all string meta tags (this includes also the filename)
-		// although this would work, I am no longer sure if it's the correct way to process the search requests..
-		/*const Kademlia::CKadTag *tag;
-		TagList::const_iterator it;
-		for (it = item->taglist.begin(); it != item->taglist.end(); it++)
-		{
-			tag = *it;
-			if (tag->m_type == 2)
-			{
-				//TODO: Use a pre-tokenized list for better performance.
-				int iPos = 0;
-				CString strTok(static_cast<const CKadTagStr *>(tag)->m_value.Tokenize(_aszInvKadKeywordChars, iPos));
-				while (!strTok.IsEmpty()){
-					if (stricmp(strTok, *(pSearchTerm->str)) == 0)
-						return true;
-					strTok = static_cast<const CKadTagStr *>(tag)->m_value.Tokenize(_aszInvKadKeywordChars, iPos);
-				}
-			}
-		}
-		return false;*/
 	}
 
-	if (pSearchTerm->type == SSearchTerm::MetaTag)
+	if (pSearchTerm->m_type == SSearchTerm::MetaTag)
 	{
-		if (pSearchTerm->tag->m_type == 2) // meta tags with string values
+		if (pSearchTerm->m_pTag->m_type == 2) // meta tags with string values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsStr() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetStr().CompareNoCase(pSearchTerm->tag->GetStr()) == 0;
+				const CKadTag* pTag = *itTagList;
+				if (pTag->IsStr() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetStr().CompareNoCase(pSearchTerm->m_pTag->GetStr()) == 0;
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::OpGreaterEqual)
+	else if (pSearchTerm->m_type == SSearchTerm::OpGreaterEqual)
 	{
-		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetInt() >= pSearchTerm->tag->GetInt();
+				const CKadTag* pTag = *itTagList;
+				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetInt() >= pSearchTerm->m_pTag->GetInt();
 			}
 		}
-		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetFloat() >= pSearchTerm->tag->GetFloat();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetFloat() >= pSearchTerm->m_pTag->GetFloat();
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::OpLessEqual)
+	else if (pSearchTerm->m_type == SSearchTerm::OpLessEqual)
 	{
-		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetInt() <= pSearchTerm->tag->GetInt();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetInt() <= pSearchTerm->m_pTag->GetInt();
 			}
 		}
-		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetFloat() <= pSearchTerm->tag->GetFloat();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetFloat() <= pSearchTerm->m_pTag->GetFloat();
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::OpGreater)
+	else if (pSearchTerm->m_type == SSearchTerm::OpGreater)
 	{
-		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetInt() > pSearchTerm->tag->GetInt();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetInt() > pSearchTerm->m_pTag->GetInt();
 			}
 		}
-		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetFloat() > pSearchTerm->tag->GetFloat();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetFloat() > pSearchTerm->m_pTag->GetFloat();
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::OpLess)
+	else if (pSearchTerm->m_type == SSearchTerm::OpLess)
 	{
-		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetInt() < pSearchTerm->tag->GetInt();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetInt() < pSearchTerm->m_pTag->GetInt();
 			}
 		}
-		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetFloat() < pSearchTerm->tag->GetFloat();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetFloat() < pSearchTerm->m_pTag->GetFloat();
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::OpEqual)
+	else if (pSearchTerm->m_type == SSearchTerm::OpEqual)
 	{
-		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetInt() == pSearchTerm->tag->GetInt();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetInt() == pSearchTerm->m_pTag->GetInt();
 			}
 		}
-		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetFloat() == pSearchTerm->tag->GetFloat();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetFloat() == pSearchTerm->m_pTag->GetFloat();
 			}
 		}
 	}
-	else if (pSearchTerm->type == SSearchTerm::OpNotEqual)
+	else if (pSearchTerm->m_type == SSearchTerm::OpNotEqual)
 	{
-		if (pSearchTerm->tag->IsInt()) // meta tags with integer values
+		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetInt() != pSearchTerm->tag->GetInt();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetInt() != pSearchTerm->m_pTag->GetInt();
 			}
 		}
-		else if (pSearchTerm->tag->IsFloat()) // meta tags with float values
+		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
 		{
-			TagList::const_iterator it;
-			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
+			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
 			{
-				const Kademlia::CKadTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
-					return tag->GetFloat() != pSearchTerm->tag->GetFloat();
+				const Kademlia::CKadTag* pTag = *itTagList;
+				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+					return pTag->GetFloat() != pSearchTerm->m_pTag->GetFloat();
 			}
 		}
 	}
@@ -1070,205 +927,280 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 	return false;
 }
 
-//bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* item)
-//{
-//	// tokenize the filename (very expensive) only once per search expression and only if really needed
-//	CStringArray astrFileNameTokens;
-//	return SearchTermsMatch(pSearchTerm, item, astrFileNameTokens);
-//}
-
-void CIndexed::SendValidKeywordResult(const CUInt128& keyID, const SSearchTerm* pSearchTerms, uint32 ip, uint16 port)
+void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, bool bKad2, uint16 uStartPosition)
 {
-	try
+	KeyHash* pCurrKeyHash;
+	if(m_mapKeyword.Lookup(CCKey(uKeyID.GetData()), pCurrKeyHash))
 	{
-		KeyHash* currKeyHash;
-		if(m_Keyword_map.Lookup(CCKey(keyID.getData()), currKeyHash))
+		byte byPacket[1024*50];
+		CByteIO byIO(byPacket,sizeof(byPacket));
+		byIO.WriteByte(OP_KADEMLIAHEADER);
+		if(bKad2)
 		{
-			byte packet[1024*50];
-			CByteIO bio(packet,sizeof(packet));
-			bio.writeByte(OP_KADEMLIAHEADER);
-			bio.writeByte(KADEMLIA_SEARCH_RES);
-			bio.writeUInt128(keyID);
-			bio.writeUInt16(50);
-			uint16 maxResults = 300;
-			uint16 count = 0;
-			POSITION pos2 = currKeyHash->m_Source_map.GetStartPosition();
-			while( pos2 != NULL )
+			byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+			byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+		}
+		else
+			byIO.WriteByte(KADEMLIA_SEARCH_RES);
+		byIO.WriteUInt128(uKeyID);
+		byIO.WriteUInt16(50);
+		uint16 uMaxResults = 300;
+		int iCount = 0-uStartPosition;
+		POSITION pos1 = pCurrKeyHash->mapSource.GetStartPosition();
+		while( pos1 != NULL )
+		{
+			CCKey key1;
+			Source* pCurrSource;
+			pCurrKeyHash->mapSource.GetNextAssoc( pos1, key1, pCurrSource );
+			for(POSITION pos2 = pCurrSource->ptrlEntryList.GetHeadPosition(); pos2 != NULL; )
 			{
-				Source* currSource;
-				CCKey key2;
-				currKeyHash->m_Source_map.GetNextAssoc( pos2, key2, currSource );
-				for(POSITION pos5 = currSource->entryList.GetHeadPosition(); pos5 != NULL; )
+				CEntry* pCurrName = pCurrSource->ptrlEntryList.GetNext(pos2);
+				if ( !pSearchTerms || SearchTermsMatch(pSearchTerms, pCurrName) )
 				{
-					Kademlia::CEntry* currName = currSource->entryList.GetNext(pos5);
-					if ( !pSearchTerms || SearchTermsMatch(pSearchTerms, currName) )
+					if( iCount < 0 )
+						iCount++;
+					else if( (uint16)iCount < uMaxResults )
 					{
-						if( count < maxResults ){
-							bio.writeUInt128(currName->sourceID);
-							bio.writeTagList(currName->taglist);
-							count++;
-							if( count % 50 == 0 )
+						if((!bOldClient || pCurrName->m_uSize <= OLD_MAX_EMULE_FILE_SIZE))
+						{
+							iCount++;
+							byIO.WriteUInt128(pCurrName->m_uSourceID);
+							byIO.WriteTagList(pCurrName->m_listTag);
+							if( iCount % 50 == 0 )
 							{
-								uint32 len = sizeof(packet)-bio.getAvailable();
-								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-									DebugSend("KadSearchRes", ip, port);
-								CKademlia::getUDPListener()->sendPacket(packet, len, ip, port);
-								bio.reset();
-								bio.writeByte(OP_KADEMLIAHEADER);
-								bio.writeByte(KADEMLIA_SEARCH_RES);
-								bio.writeUInt128(keyID);
-								bio.writeUInt16(50);
+								uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+								CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+								byIO.Reset();
+								byIO.WriteByte(OP_KADEMLIAHEADER);
+								if(bKad2)
+								{
+									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+										DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+									byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+									byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+								}
+								else
+								{
+									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+										DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
+									byIO.WriteByte(KADEMLIA_SEARCH_RES);
+								}
+								byIO.WriteUInt128(uKeyID);
+								byIO.WriteUInt16(50);
 							}
 						}
 					}
-				}
-			}
-			uint16 ccount = count % 50;
-			if( ccount )
-			{
-				uint32 len = sizeof(packet)-bio.getAvailable();
-				memcpy(packet+18, &ccount, 2);
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-					DebugSend("KadSearchRes", ip, port);
-				CKademlia::getUDPListener()->sendPacket(packet, len, ip, port);
-			}
-			clean();
-		}
-	} 
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CIndexed::SendValidKeywordResult"));
-	}
-}
-
-void CIndexed::SendValidSourceResult(const CUInt128& keyID, uint32 ip, uint16 port)
-{
-	try
-	{
-		SrcHash* currSrcHash;
-		if(m_Sources_map.Lookup(CCKey(keyID.getData()), currSrcHash))
-		{
-			byte packet[1024*50];
-			CByteIO bio(packet,sizeof(packet));
-			bio.writeByte(OP_KADEMLIAHEADER);
-			bio.writeByte(KADEMLIA_SEARCH_RES);
-			bio.writeUInt128(keyID);
-			bio.writeUInt16(50);
-			uint16 maxResults = 300;
-			uint16 count = 0;
-			for(POSITION pos2 = currSrcHash->m_Source_map.GetHeadPosition(); pos2 != NULL; )
-			{
-				Source* currSource = currSrcHash->m_Source_map.GetNext(pos2);
-				if( currSource->entryList.GetSize() )
-				{
-					Kademlia::CEntry* currName = currSource->entryList.GetHead();
-					if( count < maxResults )
+					else
 					{
-						bio.writeUInt128(currName->sourceID);
-						bio.writeTagList(currName->taglist);
-						count++;
-						if( count % 50 == 0 )
-						{
-							uint32 len = sizeof(packet)-bio.getAvailable();
-							if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-								DebugSend("KadSearchRes", ip, port);
-							CKademlia::getUDPListener()->sendPacket(packet, len, ip, port);
-							bio.reset();
-							bio.writeByte(OP_KADEMLIAHEADER);
-							bio.writeByte(KADEMLIA_SEARCH_RES);
-							bio.writeUInt128(keyID);
-							bio.writeUInt16(50);
-						}
+						pos1 = NULL;
+						break;
 					}
 				}
 			}
-			uint16 ccount = count % 50;
-			if( ccount )
-			{
-				uint32 len = sizeof(packet)-bio.getAvailable();
-				memcpy(packet+18, &ccount, 2);
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-					DebugSend("KadSearchRes", ip, port);
-				CKademlia::getUDPListener()->sendPacket(packet, len, ip, port);
-			}
-			clean();
 		}
-	} 
+		if(iCount > 0)
+		{
+			uint16 uCountLeft = (uint16)iCount % 50;
+			if( uCountLeft )
+			{
+				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+				memcpy(byPacket+18, &uCountLeft, 2);
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				{
+					if(bKad2)
+						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+					else
+						DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
+				}
+				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+			}
+		}
+	}
+	Clean();
+}
+
+void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint16 uStartPosition, uint64 uFileSize)
+{
+	SrcHash* pCurrSrcHash;
+	if(m_mapSources.Lookup(CCKey(uKeyID.GetData()), pCurrSrcHash))
+	{
+		byte byPacket[1024*50];
+		CByteIO byIO(byPacket,sizeof(byPacket));
+		byIO.WriteByte(OP_KADEMLIAHEADER);
+		if(bKad2)
+		{
+			byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+			byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+		}
+		else
+			byIO.WriteByte(KADEMLIA_SEARCH_RES);
+		byIO.WriteUInt128(uKeyID);
+		byIO.WriteUInt16(50);
+		uint16 uMaxResults = 300;
+		int iCount = 0-uStartPosition;
+		for(POSITION pos1 = pCurrSrcHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
+		{
+			Source* pCurrSource = pCurrSrcHash->ptrlistSource.GetNext(pos1);
+			if( pCurrSource->ptrlEntryList.GetSize() )
+			{
+				CEntry* pCurrName = pCurrSource->ptrlEntryList.GetHead();
+				if( iCount < 0 )
+					iCount++;
+				else if( (uint16)iCount < uMaxResults )
+				{
+					if( !uFileSize || !pCurrName->m_uSize || pCurrName->m_uSize == uFileSize )
+					{
+						byIO.WriteUInt128(pCurrName->m_uSourceID);
+						byIO.WriteTagList(pCurrName->m_listTag);
+						iCount++;
+						if( iCount % 50 == 0 )
+						{
+							uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+							CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+							byIO.Reset();
+							byIO.WriteByte(OP_KADEMLIAHEADER);
+							if(bKad2)
+							{
+								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+									DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+								byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+								byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+							}
+							else
+							{
+								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+									DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
+								byIO.WriteByte(KADEMLIA_SEARCH_RES);
+							}
+							byIO.WriteUInt128(uKeyID);
+							byIO.WriteUInt16(50);
+						}
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		if( iCount > 0 )
+		{
+			uint16 uCountLeft = (uint16)iCount % 50;
+			if( uCountLeft )
+			{
+				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+				memcpy(byPacket+18, &uCountLeft, 2);
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				{
+					if(bKad2)
+						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+					else
+						DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
+				}
+				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+			}
+		}
+	}
+	Clean();
+}
+
+void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint64 uFileSize)
+{
+	try
+	{
+		SrcHash* pCurrNoteHash;
+		if(m_mapNotes.Lookup(CCKey(uKeyID.GetData()), pCurrNoteHash))
+		{
+			byte byPacket[1024*50];
+			CByteIO byIO(byPacket,sizeof(byPacket));
+			byIO.WriteByte(OP_KADEMLIAHEADER);
+			if(bKad2)
+			{
+				byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+				byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+			}
+			else
+				byIO.WriteByte(KADEMLIA_SEARCH_NOTES_RES);
+			byIO.WriteUInt128(uKeyID);
+			if(bKad2)
+			byIO.WriteUInt16(50);
+			uint16 uMaxResults = 150;
+			uint16 uCount = 0;
+			for(POSITION pos1 = pCurrNoteHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
+			{
+				Source* pCurrNote = pCurrNoteHash->ptrlistSource.GetNext(pos1);
+				if( pCurrNote->ptrlEntryList.GetSize() )
+				{
+					CEntry* pCurrName = pCurrNote->ptrlEntryList.GetHead();
+					if( uCount < uMaxResults )
+					{
+						if( !uFileSize || !pCurrName->m_uSize || uFileSize == pCurrName->m_uSize )
+						{
+							byIO.WriteUInt128(pCurrName->m_uSourceID);
+							byIO.WriteTagList(pCurrName->m_listTag);
+							uCount++;
+							if( uCount % 50 == 0 )
+							{
+								uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+								CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+								byIO.Reset();
+								byIO.WriteByte(OP_KADEMLIAHEADER);
+								if(bKad2)
+								{
+									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+										DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+									byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+									byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+								}
+								else
+								{
+									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+										DebugSend("KADEMLIA_SEARCH_NOTES_RES", uIP, uPort);
+									byIO.WriteByte(KADEMLIA_SEARCH_NOTES_RES);
+								}
+								byIO.WriteUInt128(uKeyID);
+								byIO.WriteUInt16(50);
+							}
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			uint16 uCountLeft = uCount % 50;
+			if( uCountLeft )
+			{
+				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+				memcpy(byPacket+18, &uCountLeft, 2);
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				{
+					if(bKad2)
+						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+					else
+						DebugSend("KADEMLIA_SEARCH_NOTES_RES", uIP, uPort);
+				}
+				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+			}
+		}
+	}
 	catch(...)
 	{
 		AddDebugLogLine(false, _T("Exception in CIndexed::SendValidSourceResult"));
 	}
 }
 
-void CIndexed::SendValidNoteResult(const CUInt128& keyID, const CUInt128& sourceID, uint32 ip, uint16 port)
+bool CIndexed::SendStoreRequest(const CUInt128& uKeyID)
 {
-	try
+	Load* pLoad;
+	if(m_mapLoad.Lookup(CCKey(uKeyID.GetData()), pLoad))
 	{
-		SrcHash* currNoteHash;
-		if(m_Notes_map.Lookup(CCKey(keyID.getData()), currNoteHash))
+		if(pLoad->uTime < (uint32)time(NULL))
 		{
-			byte packet[1024*50];
-			CByteIO bio(packet,sizeof(packet));
-			bio.writeByte(OP_KADEMLIAHEADER);
-			bio.writeByte(KADEMLIA_SRC_NOTES_RES);
-			bio.writeUInt128(keyID);
-			bio.writeUInt16(50);
-			uint16 maxResults = 50;
-			uint16 count = 0;
-			for(POSITION pos2 = currNoteHash->m_Source_map.GetHeadPosition(); pos2 != NULL; )
-			{
-				Source* currNote = currNoteHash->m_Source_map.GetNext(pos2);
-				if( currNote->entryList.GetSize() )
-				{
-					Kademlia::CEntry* currName = currNote->entryList.GetHead();
-					if( count < maxResults )
-					{
-						bio.writeUInt128(currName->sourceID);
-						bio.writeTagList(currName->taglist);
-						count++;
-						if( count % 50 == 0 )
-						{
-							uint32 len = sizeof(packet)-bio.getAvailable();
-							if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-								DebugSend("KadNotesRes", ip, port);
-							CKademlia::getUDPListener()->sendPacket(packet, len, ip, port);
-							bio.reset();
-							bio.writeByte(OP_KADEMLIAHEADER);
-							bio.writeByte(KADEMLIA_SRC_NOTES_RES);
-							bio.writeUInt128(keyID);
-							bio.writeUInt16(50);
-						}
-					}
-				}
-			}
-			uint16 ccount = count % 50;
-			if( ccount )
-			{
-				uint32 len = sizeof(packet)-bio.getAvailable();
-				memcpy(packet+18, &ccount, 2);
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-					DebugSend("KadNotesRes", ip, port);
-				CKademlia::getUDPListener()->sendPacket(packet, len, ip, port);
-			}
-			//clean(); //Not needed at the moment.
-		}
-	} 
-	catch(...)
-	{
-		AddDebugLogLine(false, _T("Exception in CIndexed::SendValidSourceResult"));
-	}
-}
-
-bool CIndexed::SendStoreRequest(const CUInt128& keyID)
-{
-	Load* load;
-	if(m_Load_map.Lookup(CCKey(keyID.getData()), load))
-	{
-		if(load->time < (uint32)time(NULL))
-		{
-			m_Load_map.RemoveKey(CCKey(keyID.getData()));
-			m_totalIndexLoad--;
-			delete load;
+			m_mapLoad.RemoveKey(CCKey(uKeyID.GetData()));
+			m_uTotalIndexLoad--;
+			delete pLoad;
 			return true;
 		}
 		return false;
@@ -1276,17 +1208,22 @@ bool CIndexed::SendStoreRequest(const CUInt128& keyID)
 	return true;
 }
 
+uint32 CIndexed::GetFileKeyCount()
+{
+	return m_mapKeyword.GetCount();
+}
+
 SSearchTerm::SSearchTerm()
 {
-	type = AND;
-	tag = NULL;
-	left = NULL;
-	right = NULL;
+	m_type = AND;
+	m_pTag = NULL;
+	m_pLeft = NULL;
+	m_pRight = NULL;
 }
 
 SSearchTerm::~SSearchTerm()
 {
-	if (type == String)
-		delete astr;
-	delete tag;
+	if (m_type == String)
+		delete m_pastr;
+	delete m_pTag;
 }

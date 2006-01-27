@@ -66,7 +66,7 @@ CCollectionFile::CCollectionFile(CFileDataIO* in_data)
 	// that we are using 'wrong' file types in part files. (this has to be handled when creating the part files)
 	const CString& rstrFileType = GetStrTagValue(FT_FILETYPE);
 	SetFileName(GetStrTagValue(FT_FILENAME), false, rstrFileType.IsEmpty());
-	SetFileSize(GetIntTagValue(FT_FILESIZE));
+	SetFileSize(GetInt64TagValue(FT_FILESIZE));
 	if (!rstrFileType.IsEmpty())
 	{
 		if (_tcscmp(rstrFileType, _T(ED2KFTSTR_PROGRAM))==0)
@@ -81,7 +81,7 @@ CCollectionFile::CCollectionFile(CFileDataIO* in_data)
 			SetFileType(rstrFileType);
 	}
 
-	if(!GetFileSize() || !GetFileName().Compare(_T("")))
+	if(GetFileSize() == (uint64)0 || !GetFileName().Compare(_T("")))
 		ASSERT(0);
 }
 
@@ -90,7 +90,7 @@ CCollectionFile::CCollectionFile(CAbstractFile* pAbstractFile) : CAbstractFile(p
 	ClearTags();
 
 	taglist.Add(new CTag(FT_FILEHASH, pAbstractFile->GetFileHash()));
-	taglist.Add(new CTag(FT_FILESIZE, pAbstractFile->GetFileSize()));
+	taglist.Add(new CTag(FT_FILESIZE, pAbstractFile->GetFileSize(), true));
 	taglist.Add(new CTag(FT_FILENAME, pAbstractFile->GetFileName()));
 
 	if(!pAbstractFile->GetFileComment().IsEmpty())
@@ -126,7 +126,7 @@ bool CCollectionFile::InitFromLink(CString sLink)
 	taglist.Add(new CTag(FT_FILEHASH, pFileLink->GetHashKey()));
 	md4cpy(m_abyFileHash, pFileLink->GetHashKey());
 
-	taglist.Add(new CTag(FT_FILESIZE, pFileLink->GetSize()));
+	taglist.Add(new CTag(FT_FILESIZE, pFileLink->GetSize(), true));
 	SetFileSize(pFileLink->GetSize());
 
 	taglist.Add(new CTag(FT_FILENAME, pFileLink->GetName()));
@@ -153,31 +153,25 @@ void CCollectionFile::WriteCollectionInfo(CFileDataIO *out_data)
 
 void CCollectionFile::UpdateFileRatingCommentAvail()
 {
-//	bool bOldHasComment = m_bHasComment;
-//	uint32 uOldUserRatings = m_uUserRating;
-
 	m_bHasComment = false;
-	uint32 uRatings = 0;
-	uint32 uUserRatings = 0;
+	UINT uRatings = 0;
+	UINT uUserRatings = 0;
 
 	for(POSITION pos = m_kadNotes.GetHeadPosition(); pos != NULL; )
 	{
 		Kademlia::CEntry* entry = m_kadNotes.GetNext(pos);
 		if (!m_bHasComment && !entry->GetStrTagValue(TAG_DESCRIPTION).IsEmpty())
 			m_bHasComment = true;
-		uint16 rating = entry->GetIntTagValue(TAG_FILERATING);
-		if(rating!=0)
+		UINT rating = (UINT)entry->GetIntTagValue(TAG_FILERATING);
+		if (rating != 0)
 		{
 			uRatings++;
 			uUserRatings += rating;
 		}
 	}
 
-	if(uRatings)
+	if (uRatings)
 		m_uUserRating = uUserRatings / uRatings;
 	else
 		m_uUserRating = 0;
-
-//	if (bOldHasComment != m_bHasComment || uOldUserRatings != m_uUserRating)
-//		theApp.emuledlg->searchwnd->UpdateSearch(this);
 }

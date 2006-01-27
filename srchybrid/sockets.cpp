@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -141,7 +141,7 @@ void CServerConnect::ConnectToServer(CServer* server, bool multiconnect)
 
 	CServerSocket* newsocket = new CServerSocket(this);
 	m_lstOpenSockets.AddTail((void*&)newsocket);
-	newsocket->Create(0,SOCK_STREAM,FD_READ|FD_WRITE|FD_CLOSE|FD_CONNECT,NULL);
+	newsocket->Create(0, SOCK_STREAM, FD_READ | FD_WRITE | FD_CLOSE | FD_CONNECT, thePrefs.GetBindAddrA());
 	newsocket->ConnectToServer(server);
 	connectionattemps.SetAt(GetTickCount(), newsocket);
 }
@@ -175,12 +175,6 @@ void CServerConnect::StopConnectionTry()
 
 void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 {
-	if (thePrefs.IsProxyASCWOP())
-	{
-		thePrefs.SetUseProxy(true);
-		AddLogLine(false,GetResString(IDS_ASCWOP_PROXYSUPPORT)+GetResString(IDS_ENABLED));
-	}
-
 	if (connecting == false)
 	{
 		// we are already connected to another server
@@ -205,7 +199,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 		data.WriteUInt32(GetClientID());
 		data.WriteUInt16(thePrefs.GetPort());
 
-		uint32 tagcount = 5;
+		uint32 tagcount = 4;
 		data.WriteUInt32(tagcount);
 
 		CTag tagName(CT_NAME,thePrefs.GetUserNick());
@@ -214,16 +208,20 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 		CTag tagVersion(CT_VERSION,EDONKEYVERSION);
 		tagVersion.WriteTagToFile(&data);
 
-		CTag tagPort(CT_PORT,thePrefs.GetPort());
-		tagPort.WriteTagToFile(&data);
-
 		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 		/*
-		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS);
+#ifdef SUPPORT_LARGE_FILES
+		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS | SRVCAP_LARGEFILES | SRVCAP_UNICODE);
+#else
+		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS | SRVCAP_UNICODE);
+#endif
 		*/
-		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS | 0x00000004); // aux port compatable client
+#ifdef SUPPORT_LARGE_FILES
+		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS | SRVCAP_LARGEFILES | SRVCAP_UNICODE | SRVCAP_AUXPORT);
+#else
+		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS | SRVCAP_UNICODE | SRVCAP_AUXPORT);
+#endif
 		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-		tagFlags.SetInt(tagFlags.GetInt() | SRVCAP_UNICODE);
 		tagFlags.WriteTagToFile(&data);
 
 		// eMule Version (14-Mar-2004: requested by lugdunummaster (need for LowID clients which have no chance 
@@ -352,7 +350,7 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender){
 			if (connectedsocket) 
 				connectedsocket->Close();
 			connectedsocket = NULL;
-			theApp.emuledlg->searchwnd->CancelSearch();
+			theApp.emuledlg->searchwnd->CancelEd2kSearch();
 			// -khaos--+++> Tell our total server duration thinkymajig to update...
 			theStats.serverConnectTime = 0;
 			theStats.Add2TotalServerDuration();
@@ -396,7 +394,7 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender){
 }
 
 // 09/28/02, by zegzav
-VOID CALLBACK CServerConnect::RetryConnectTimer(HWND hWnd, UINT nMsg, UINT nId, DWORD dwTime) 
+VOID CALLBACK CServerConnect::RetryConnectTimer(HWND /*hWnd*/, UINT /*nMsg*/, UINT /*nId*/, DWORD /*dwTime*/) 
 { 
 	// NOTE: Always handle all type of MFC exceptions in TimerProcs - otherwise we'll get mem leaks
 	try
@@ -414,7 +412,11 @@ VOID CALLBACK CServerConnect::RetryConnectTimer(HWND hWnd, UINT nMsg, UINT nId, 
 
 void CServerConnect::CheckForTimeout()
 { 
-	//DWORD maxage=GetTickCount() - CONSERVTIMEOUT;	// this gives us problems when TickCount < TIMEOUT (may occure right after system start)
+	DWORD dwServerConnectTimeout = CONSERVTIMEOUT;
+	// If we are using a proxy, increase server connection timeout to default connection timeout
+	if (thePrefs.GetProxySettings().UseProxy)
+		dwServerConnectTimeout = max(dwServerConnectTimeout, CONNECTION_TIMEOUT);
+
 	DWORD dwCurTick = GetTickCount();
 	DWORD tmpkey;
 	CServerSocket* tmpsock;
@@ -428,8 +430,7 @@ void CServerConnect::CheckForTimeout()
 			return;
 		}
 
-		//if (tmpkey<=maxage) {
-		if (dwCurTick - tmpkey > CONSERVTIMEOUT){
+		if (dwCurTick - tmpkey > dwServerConnectTimeout){
 			LogWarning(GetResString(IDS_ERR_CONTIMEOUT), tmpsock->cur_server->GetListName(), tmpsock->cur_server->GetFullIP(), tmpsock->cur_server->GetPort());
 			connectionattemps.RemoveKey(tmpkey);
 			TryAnotherConnectionrequest();
@@ -545,33 +546,21 @@ bool CServerConnect::IsLocalServer(uint32 dwIP, uint16 nPort){
 	return false;
 }
 
-// wrap 'gethostname' to let compiler know it might throw an exception
-int PASCAL FAR _gethostname(OUT char FAR * name, IN int namelen) throw(...)
-{
-	return gethostname(name, namelen);
-}
-
-// wrap 'gethostbyname' to let compiler know it might throw an exception
-struct hostent FAR * PASCAL FAR _gethostbyname(IN const char FAR * name) throw(...)
-{
-	return gethostbyname(name);
-}
-
 void CServerConnect::InitLocalIP()
 {
 	m_nLocalIP = 0;
 	// Don't use 'gethostbyname(NULL)'. The winsock DLL may be replaced by a DLL from a third party
 	// which is not fully compatible to the original winsock DLL. ppl reported crash with SCORSOCK.DLL
 	// when using 'gethostbyname(NULL)'.
-	try{
+	__try{
 		char szHost[256];
-		if (_gethostname(szHost, sizeof szHost) == 0){
-			hostent* pHostEnt = _gethostbyname(szHost);
+		if (gethostname(szHost, sizeof szHost) == 0){
+			hostent* pHostEnt = gethostbyname(szHost);
 			if (pHostEnt != NULL && pHostEnt->h_length == 4 && pHostEnt->h_addr_list[0] != NULL)
 				m_nLocalIP = *((uint32*)pHostEnt->h_addr_list[0]);
 		}
 	}
-	catch(...){
+	__except(EXCEPTION_EXECUTE_HANDLER){
 		// at least two ppl reported crashs when using 'gethostbyname' with third party winsock DLLs
 		if (thePrefs.GetVerbose())
 			DebugLogError(_T("Unknown exception in CServerConnect::InitLocalIP"));

@@ -3,12 +3,12 @@ This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,108 +27,65 @@ there client on the eMule forum..
 */
 
 #pragma once
-
-#include "MapKey.h"
-#include "../../Types.h"
-#include <list>
-#include "SearchManager.h"
 #include "../routing/Maps.h"
-#include "../utils/UInt128.h"
-#include "Entry.h"
-
-typedef CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;
-
-struct Source
-{
-	Kademlia::CUInt128 sourceID;
-	CKadEntryPtrList entryList;
-};
-
-typedef CMap<CCKey,const CCKey&,Source*,Source*> CSourceKeyMap;
-
-struct KeyHash
-{
-	Kademlia::CUInt128 keyID;
-	CSourceKeyMap m_Source_map;
-};
-
-typedef CTypedPtrList<CPtrList, Source*> CKadSourcePtrList;
-
-struct SrcHash
-{
-	Kademlia::CUInt128 keyID;
-	CKadSourcePtrList m_Source_map;
-};
-
-struct Load
-{
-	Kademlia::CUInt128 keyID;
-	uint32 time;
-};
 
 struct SSearchTerm
 {
 	SSearchTerm();
 	~SSearchTerm();
-	
-	enum ESearchTermType {
-		AND,
-		OR,
-		NAND,
-		String,
-		MetaTag,
-		OpGreaterEqual,
-		OpLessEqual,
-		OpGreater,
-		OpLess,
-		OpEqual,
-		OpNotEqual
-	} type;
-	
-	Kademlia::CKadTag* tag;
-	CStringWArray* astr;
 
-	SSearchTerm* left;
-	SSearchTerm* right;
+	enum ESearchTermType
+	{
+	    AND,
+	    OR,
+	    NOT,
+	    String,
+	    MetaTag,
+	    OpGreaterEqual,
+	    OpLessEqual,
+	    OpGreater,
+	    OpLess,
+	    OpEqual,
+	    OpNotEqual
+	} m_type;
+	Kademlia::CKadTag* m_pTag;
+	CStringWArray* m_pastr;
+	SSearchTerm* m_pLeft;
+	SSearchTerm* m_pRight;
 };
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CIndexed
+namespace Kademlia
 {
 
-public:
-	CIndexed();
-	~CIndexed();
+	class CIndexed
+	{
+		public:
+			CIndexed();
+			~CIndexed();
 
-	bool AddKeyword(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load);
-	bool AddSources(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load);
-	bool AddNotes(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load);
-	bool AddLoad(const CUInt128& keyID, uint32 time);
-	uint32 GetIndexedCount() {return m_Keyword_map.GetCount();}
-	uint32 GetFileKeyCount() {return m_Keyword_map.GetCount();}
-	void SendValidKeywordResult(const CUInt128& keyID, const SSearchTerm* pSearchTerms, uint32 ip, uint16 port);
-	void SendValidSourceResult(const CUInt128& keyID, uint32 ip, uint16 port);
-	void SendValidNoteResult(const CUInt128& keyID, const CUInt128& CheckID, uint32 ip, uint16 port);
-	bool SendStoreRequest(const CUInt128& keyID);
-	uint32 m_totalIndexSource;
-	uint32 m_totalIndexKeyword;
-	uint32 m_totalIndexNotes;
-	uint32 m_totalIndexLoad;
-
-private:
-	time_t m_lastClean;
-	CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> m_Keyword_map;
-	CMap<CCKey,const CCKey&,SrcHash*,SrcHash*> m_Sources_map;
-	CMap<CCKey,const CCKey&,SrcHash*,SrcHash*> m_Notes_map;
-	CMap<CCKey,const CCKey&,Load*,Load*> m_Load_map;
-	static CString m_sfilename;
-	static CString m_kfilename;
-	static CString m_loadfilename;
-	void readFile(void);
-	void clean(void);
-};
-
-} // End namespace
+			bool AddKeyword(const CUInt128& uKeyWordID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad);
+			bool AddSources(const CUInt128& uKeyWordID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad);
+			bool AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad);
+			bool AddLoad(const CUInt128& uKeyID, uint32 uTime);
+			uint32 GetFileKeyCount();
+			void SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, bool bKad2, uint16 uStartPosition);
+			void SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint16 uStartPosition, uint64 uFileSize);
+			void SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint64 uFileSize);
+			bool SendStoreRequest(const CUInt128& uKeyID);
+			uint32 m_uTotalIndexSource;
+			uint32 m_uTotalIndexKeyword;
+			uint32 m_uTotalIndexNotes;
+			uint32 m_uTotalIndexLoad;
+		private:
+			void ReadFile(void);
+			void Clean(void);
+			time_t m_tLastClean;
+			CKeyHashMap m_mapKeyword;
+			CSrcHashMap m_mapSources;
+			CSrcHashMap m_mapNotes;
+			CLoadMap m_mapLoad;
+			static CString	m_sSourceFileName;
+			static CString	m_sKeyFileName;
+			static CString	m_sLoadFileName;
+	};
+}

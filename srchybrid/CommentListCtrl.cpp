@@ -74,7 +74,7 @@ void CCommentListCtrl::Init(void)
 	LoadSettings();
 }
 
-void CCommentListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+void CCommentListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	UINT flag = MF_STRING;
 	if (GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED) == -1)
@@ -113,9 +113,9 @@ void CCommentListCtrl::AddItem(Kademlia::CEntry* entry)
 	{
 		//Do not try to access the entry object after inserting this item.
 		//It is possible that the object is deleted.
-		int index = InsertItem(LVIF_TEXT|LVIF_PARAM,0,(LPCTSTR)"",0,0,1,(LPARAM)entry);
-		SetItemText(index, 1, entry->fileName); 
-		SetItemText(index, 2, GetRateString(entry->GetIntTagValue(TAG_FILERATING))); 
+		int index = InsertItem(LVIF_TEXT|LVIF_PARAM,0,(LPCTSTR)_T(""),0,0,1,(LPARAM)entry);
+		SetItemText(index, 1, entry->m_fileName); 
+		SetItemText(index, 2, GetRateString((UINT)entry->GetIntTagValue(TAG_FILERATING))); 
 		SetItemText(index, 3, entry->GetStrTagValue(TAG_DESCRIPTION));
 	}
 }

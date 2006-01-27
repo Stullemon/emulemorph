@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -39,6 +39,7 @@ CListViewSearchDlg::CListViewSearchDlg(CWnd* pParent /*=NULL*/)
 	m_pListView = NULL;
 	m_iSearchColumn = 0;
 	m_icnWnd = NULL;
+	m_bCanSearchInAllColumns = true;
 }
 
 CListViewSearchDlg::~CListViewSearchDlg()
@@ -76,6 +77,9 @@ BOOL CListViewSearchDlg::OnInitDialog()
 	SetDlgItemText(IDC_LISTVIEW_SEARCH_COLUMN_LBL, GetResString(IDS_SEARCH_COLUMN) + _T(':'));
 	SetDlgItemText(IDCANCEL, GetResString(IDS_CANCEL));
 
+	if (!m_bCanSearchInAllColumns)
+		m_iSearchColumn = 0;
+
 	if (m_pListView != NULL)
 	{
 		TCHAR szColTitle[256];
@@ -85,7 +89,11 @@ BOOL CListViewSearchDlg::OnInitDialog()
 		lvc.pszText = szColTitle;
 		int iCol = 0;
 		while (m_pListView->GetColumn(iCol++, &lvc))
+		{
 			m_ctlSearchCol.AddString(lvc.pszText);
+			if (!m_bCanSearchInAllColumns)
+				break;
+		}
 		if ((UINT)m_iSearchColumn >= (UINT)m_ctlSearchCol.GetCount())
 			m_iSearchColumn = 0;
 	}

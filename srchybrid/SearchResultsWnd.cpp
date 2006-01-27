@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -44,6 +44,7 @@
 #include "Exceptions.h"
 #include "StringConversion.h"
 #include "UserMsgs.h"
+#include "Log.h"
 #include "TransferWnd.h" //MORPH - Added by SiRoB, Selective Category
 
 #ifdef _DEBUG
@@ -51,7 +52,6 @@
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #endif
-
 
 extern int yyparse();
 extern int yyerror(const char* errstr);
@@ -75,18 +75,15 @@ enum ESearchResultImage
 	sriKad
 };
 
-static const LPCTSTR _apszSearchExprKeywords[] = { _T("AND"), _T("OR"), _T("NOT"), NULL };
-static const TCHAR _szSearchExprSeperators[] = _T(" ()<>=");
-
 // CSearchResultsWnd dialog
 
 IMPLEMENT_DYNCREATE(CSearchResultsWnd, CResizableFormView)
 
 BEGIN_MESSAGE_MAP(CSearchResultsWnd, CResizableFormView)
 	ON_WM_TIMER()
-	ON_BN_CLICKED(IDC_SDOWNLOAD, OnBnClickedSdownload)
-	ON_BN_CLICKED(IDC_CLEARALL, OnBnClickedClearall)
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, OnTcnSelchangeTab1)
+	ON_BN_CLICKED(IDC_SDOWNLOAD, OnBnClickedDownloadSelected)
+	ON_BN_CLICKED(IDC_CLEARALL, OnBnClickedClearAll)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, OnSelChangeTab)
 	ON_MESSAGE(UM_CLOSETAB, OnCloseTab)
 	ON_MESSAGE(UM_DBLCLICKTAB, OnDblClickTab)
 	ON_WM_DESTROY()
@@ -101,12 +98,13 @@ BEGIN_MESSAGE_MAP(CSearchResultsWnd, CResizableFormView)
 	ON_NOTIFY(NM_CLICK, IDC_CATTAB2, OnNMClickCattab2) //MORPH - Added by SiRoB, Selection category support
 END_MESSAGE_MAP()
 
-CSearchResultsWnd::CSearchResultsWnd(CWnd* pParent /*=NULL*/)
+CSearchResultsWnd::CSearchResultsWnd(CWnd* /*pParent*/)
 	: CResizableFormView(CSearchResultsWnd::IDD)
 {
-	m_nSearchID = 0x80000000;
+	m_nEd2kSearchID = 0x80000000;
 	global_search_timer = 0;
 	searchpacket = NULL;
+	m_b64BitSearchPacket = false;
 	canceld = false;
 	servercount = 0;
 	globsearch = false;
@@ -208,7 +206,7 @@ void CSearchResultsWnd::OnTimer(UINT nIDEvent)
 				VERIFY( (global_search_timer = SetTimer(TimerGlobalSearch, 750, 0)) != NULL );
 		}
 		else
-			CancelSearch();
+			CancelEd2kSearch();
 	}
 	else if (nIDEvent == global_search_timer)
 	{
@@ -240,20 +238,57 @@ void CSearchResultsWnd::OnTimer(UINT nIDEvent)
     
 			if (toask)
 			{
-				if (toask->GetUDPFlags() & SRV_UDPFLG_EXT_GETFILES)
+				if (toask->SupportsLargeFilesUDP() && (toask->GetUDPFlags() & SRV_UDPFLG_EXT_GETFILES))
+				{
+					CSafeMemFile data(50);
+					uint32 nTagCount = 1;
+					data.WriteUInt32(nTagCount);
+					CTag tagFlags(CT_SERVER_UDPSEARCH_FLAGS, SRVCAP_UDP_NEWTAGS_LARGEFILES);
+					tagFlags.WriteNewEd2kTag(&data);
+					Packet* pExtSearchPacket = new Packet(OP_GLOBSEARCHREQ3, searchpacket->size + (uint32)data.GetLength());
+					data.SeekToBegin();
+					data.Read(pExtSearchPacket->pBuffer, (uint32)data.GetLength());
+					memcpy(pExtSearchPacket->pBuffer+(uint32)data.GetLength(), searchpacket->pBuffer, searchpacket->size);
+					theStats.AddUpDataOverheadServer(pExtSearchPacket->size);
+					theApp.serverconnect->SendUDPPacket(pExtSearchPacket, toask, true);
+					if (thePrefs.GetDebugServerUDPLevel() > 0)
+						Debug(_T(">>> Sending %s  to server %-21s (%3u of %3u)\n"),  _T("OP__GlobSearchReq3"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
+
+				}
+				else if (toask->GetUDPFlags() & SRV_UDPFLG_EXT_GETFILES)
+				{
+					if (!m_b64BitSearchPacket || toask->SupportsLargeFilesUDP()){
 					searchpacket->opcode = OP_GLOBSEARCHREQ2;
+						if (thePrefs.GetDebugServerUDPLevel() > 0)
+							Debug(_T(">>> Sending %s  to server %-21s (%3u of %3u)\n"), _T("OP__GlobSearchReq2"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
+						theStats.AddUpDataOverheadServer(searchpacket->size);
+						theApp.serverconnect->SendUDPPacket(searchpacket, toask, false);
+					}
+					else{
+						if (thePrefs.GetDebugServerUDPLevel() > 0)
+							Debug(_T(">>> Skipped UDP search on server %-21s (%3u of %3u): No large file support\n"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
+					}
+				}
 				else
+				{
+					if (!m_b64BitSearchPacket || toask->SupportsLargeFilesUDP()){
 					searchpacket->opcode = OP_GLOBSEARCHREQ;
 				if (thePrefs.GetDebugServerUDPLevel() > 0)
-					Debug(_T(">>> Sending %s  to server %-21s (%3u of %3u)\n"), (searchpacket->opcode == OP_GLOBSEARCHREQ2) ? _T("OP__GlobSearchReq2") : _T("OP__GlobSearchReq1"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
+							Debug(_T(">>> Sending %s  to server %-21s (%3u of %3u)\n"), _T("OP__GlobSearchReq1"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
 				theStats.AddUpDataOverheadServer(searchpacket->size);
 			    theApp.serverconnect->SendUDPPacket(searchpacket,toask,false);
 		    }
+					else{
+						if (thePrefs.GetDebugServerUDPLevel() > 0)
+							Debug(_T(">>> Skipped UDP search on server %-21s (%3u of %3u): No large file support\n"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
+					}
+				}
+			}
 		    else
-				CancelSearch();
+				CancelEd2kSearch();
 	    }
 	    else
-			CancelSearch();
+			CancelEd2kSearch();
     }
 	else
 		ASSERT( 0 );
@@ -321,9 +356,37 @@ SSearchParams* CSearchResultsWnd::GetSearchResultsParams(UINT uSearchID) const
 	return NULL;
 }
 
-void CSearchResultsWnd::CancelSearch()
+void CSearchResultsWnd::CancelSearch(UINT uSearchID)
 {
-	SetInactiveSearchResultsIcon(m_nSearchID);
+	if (uSearchID == 0)
+	{
+		int iCurSel = searchselect.GetCurSel();
+		if (iCurSel == -1)
+			return;
+		TCITEM item;
+		item.mask = TCIF_PARAM;
+		if (searchselect.GetItem(iCurSel, &item) && item.lParam != NULL)
+			uSearchID = ((const SSearchParams*)item.lParam)->dwSearchID;
+		if (uSearchID == 0)
+			return;
+	}
+
+	SSearchParams* pParams = GetSearchResultsParams(uSearchID);
+	if (pParams == NULL)
+		return;
+
+	if (pParams->eType == SearchTypeEd2kServer || pParams->eType == SearchTypeEd2kGlobal)
+		CancelEd2kSearch();
+	else if (pParams->eType == SearchTypeKademlia)
+	{
+		Kademlia::CSearchManager::StopSearch(pParams->dwSearchID, false);
+		CancelKadSearch(pParams->dwSearchID);
+	}
+}
+
+void CSearchResultsWnd::CancelEd2kSearch()
+{
+	SetInactiveSearchResultsIcon(m_nEd2kSearchID);
 
 	canceld = true;
 
@@ -331,6 +394,7 @@ void CSearchResultsWnd::CancelSearch()
 	if (globsearch){
 		delete searchpacket;
 		searchpacket = NULL;
+		m_b64BitSearchPacket = false;
 	}
 	globsearch = false;
 	if (global_search_timer){
@@ -345,20 +409,44 @@ void CSearchResultsWnd::CancelSearch()
 		m_uTimerLocalServer = 0;
 	}
 
-	// set focus
-	CWnd* pWndFocus = GetFocus();
-	m_pwndParams->m_ctlCancel.EnableWindow(false);
-	if (pWndFocus && pWndFocus->m_hWnd == m_pwndParams->m_ctlCancel.m_hWnd)
-		m_pwndParams->m_ctlName.SetFocus();
-	m_pwndParams->m_ctlStart.EnableWindow(true);
+	SearchCanceled(m_nEd2kSearchID);
 }
 
 void CSearchResultsWnd::CancelKadSearch(UINT uSearchID)
 {
-	SetInactiveSearchResultsIcon(uSearchID);
+	SearchCanceled(uSearchID);
 }
 
-void CSearchResultsWnd::LocalSearchEnd(uint16 count, bool bMoreResultsAvailable)
+void CSearchResultsWnd::SearchStarted()
+{
+	CWnd* pWndFocus = GetFocus();
+	m_pwndParams->m_ctlStart.EnableWindow(FALSE);
+	if (pWndFocus && pWndFocus->m_hWnd  == m_pwndParams->m_ctlStart.m_hWnd)
+		m_pwndParams->m_ctlName.SetFocus();
+	m_pwndParams->m_ctlCancel.EnableWindow(TRUE);
+}
+
+void CSearchResultsWnd::SearchCanceled(UINT uSearchID)
+{
+	SetInactiveSearchResultsIcon(uSearchID);
+
+	int iCurSel = searchselect.GetCurSel();
+	if (iCurSel != -1)
+	{
+		TCITEM item;
+		item.mask = TCIF_PARAM;
+		if (searchselect.GetItem(iCurSel, &item) && item.lParam != NULL && uSearchID == ((const SSearchParams*)item.lParam)->dwSearchID)
+		{
+			CWnd* pWndFocus = GetFocus();
+			m_pwndParams->m_ctlCancel.EnableWindow(FALSE);
+			if (pWndFocus && pWndFocus->m_hWnd == m_pwndParams->m_ctlCancel.m_hWnd)
+				m_pwndParams->m_ctlName.SetFocus();
+			m_pwndParams->m_ctlStart.EnableWindow(TRUE);
+		}
+	}
+}
+
+void CSearchResultsWnd::LocalEd2kSearchEnd(UINT count, bool bMoreResultsAvailable)
 {
 	// local server has answered, kill the timeout timer
 	if (m_uTimerLocalServer){
@@ -367,38 +455,31 @@ void CSearchResultsWnd::LocalSearchEnd(uint16 count, bool bMoreResultsAvailable)
 	}
 
 	if (!canceld && count > MAX_RESULTS)
-		CancelSearch();
+		CancelEd2kSearch();
 	if (!canceld){
-		if (!globsearch){
-			SetInactiveSearchResultsIcon(m_nSearchID);
-			m_pwndParams->m_ctlStart.EnableWindow(TRUE);
-			CWnd* pWndFocus = GetFocus();
-			m_pwndParams->m_ctlCancel.EnableWindow(FALSE);
-			if (pWndFocus && pWndFocus->m_hWnd == m_pwndParams->m_ctlCancel.m_hWnd)
-				m_pwndParams->m_ctlName.SetFocus();
-		}
-		else{
+		if (!globsearch)
+			SearchCanceled(m_nEd2kSearchID);
+		else
 			VERIFY( (global_search_timer = SetTimer(TimerGlobalSearch, 750, 0)) != NULL );
-		}
 	}
 	m_pwndParams->m_ctlMore.EnableWindow(bMoreResultsAvailable && m_iSentMoreReq < MAX_MORE_SEARCH_REQ);
 }
 
-void CSearchResultsWnd::AddUDPResult(uint16 count)
+void CSearchResultsWnd::AddGlobalEd2kSearchResults(UINT count)
 {
 	if (!canceld && count > MAX_RESULTS)
-		CancelSearch();
+		CancelEd2kSearch();
 }
 
-void CSearchResultsWnd::OnBnClickedSdownload()
+void CSearchResultsWnd::OnBnClickedDownloadSelected()
 {
 	//start download(s)
 	DownloadSelected();
 }
 
-void CSearchResultsWnd::OnNMDblclkSearchlist(NMHDR *pNMHDR, LRESULT *pResult)
+void CSearchResultsWnd::OnDblClkSearchList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
-	OnBnClickedSdownload();
+	OnBnClickedDownloadSelected();
 	*pResult = 0;
 }
 
@@ -418,11 +499,11 @@ CString	CSearchResultsWnd::CreateWebQuery(SSearchParams* pParams)
 			query += _T("&media=Pro");
 		query += _T("&requestby=emule");
 
-		if (pParams->ulMinSize > 0)
-			query.AppendFormat(_T("&min_size=%u"),pParams->ulMinSize);
+		if (pParams->ullMinSize > 0)
+			query.AppendFormat(_T("&min_size=%I64u"),pParams->ullMinSize);
 		
-		if (pParams->ulMaxSize > 0)
-			query.AppendFormat(_T("&max_size=%u"),pParams->ulMaxSize);
+		if (pParams->ullMaxSize > 0)
+			query.AppendFormat(_T("&max_size=%I64u"),pParams->ullMaxSize);
 
 		break;
 	default:
@@ -495,12 +576,12 @@ void CSearchResultsWnd::DownloadSelected(bool bPaused)
 			// khaos::categorymod+ m_cattabs is obsolete.
 			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat() && useCat==-1)
 			{
-				useCat = theApp.downloadqueue->GetAutoCat(CString(parent->GetFileName()), (ULONG)parent->GetFileSize());
+				useCat = theApp.downloadqueue->GetAutoCat(CString(parent->GetFileName()), parent->GetFileSize());
 				if (!useCat && thePrefs.UseActiveCatForLinks())
 					useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
 			}
 			
-			if (thePrefs.SmallFileDLPush() && parent->GetFileSize() < 154624)
+			if (thePrefs.SmallFileDLPush() && parent->GetFileSize() < (uint64)154624)
 				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, 0);
 			else if (thePrefs.AutoSetResumeOrder())
 				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat)+1);
@@ -560,95 +641,150 @@ void CSearchResultsWnd::Localize()
 	GetDlgItem(IDC_OPEN_PARAMS_WND)->SetWindowText(GetResString(IDS_SEARCHPARAMS)+_T("..."));
 }
 
-void CSearchResultsWnd::OnBnClickedClearall()
+void CSearchResultsWnd::OnBnClickedClearAll()
 {
-	CancelSearch();
-	DeleteAllSearchs();
-
-	CWnd* pWndFocus = GetFocus();
-	m_pwndParams->m_ctlMore.EnableWindow(FALSE);
-	if (pWndFocus && pWndFocus->m_hWnd == m_pwndParams->m_ctlMore.m_hWnd)
-		m_pwndParams->m_ctlStart.SetFocus();
+	DeleteAllSearches();
 }
 
+CString DbgGetFileMetaTagName(UINT uMetaTagID)
+{
+	switch (uMetaTagID)
+	{
+		case FT_FILENAME:			return _T("@Name");
+		case FT_FILESIZE:			return _T("@Size");
+		case FT_FILESIZE_HI:		return _T("@SizeHI");
+		case FT_FILETYPE:			return _T("@Type");
+		case FT_FILEFORMAT:			return _T("@Format");
+		case FT_LASTSEENCOMPLETE:	return _T("@LastSeenComplete");
+		case FT_SOURCES:			return _T("@Sources");
+		case FT_COMPLETE_SOURCES:	return _T("@Complete");
+		case FT_MEDIA_ARTIST:		return _T("@Artist");
+		case FT_MEDIA_ALBUM:		return _T("@Album");
+		case FT_MEDIA_TITLE:		return _T("@Title");
+		case FT_MEDIA_LENGTH:		return _T("@Length");
+		case FT_MEDIA_BITRATE:		return _T("@Bitrate");
+		case FT_MEDIA_CODEC:		return _T("@Codec");
+		case FT_FILECOMMENT:		return _T("@Comment");
+		case FT_FILERATING:			return _T("@Rating");
+		case FT_FILEHASH:			return _T("@Filehash");
+	}
+
+	CString buffer;
+	buffer.Format(_T("Tag0x%02X"), uMetaTagID);
+	return buffer;
+}
+
+CString DbgGetFileMetaTagName(LPCSTR pszMetaTagID)
+{
+	if (strlen(pszMetaTagID) == 1)
+		return DbgGetFileMetaTagName(((BYTE*)pszMetaTagID)[0]);
+	CString strName;
+	strName.Format(_T("\"%hs\""), pszMetaTagID);
+	return strName;
+}
+
+CString DbgGetSearchOperatorName(UINT uOperator)
+{
+	static const LPCTSTR _aszEd2kOps[] = 
+	{
+		_T("="),
+		_T(">"),
+		_T("<"),
+		_T(">="),
+		_T("<="),
+		_T("<>"),
+	};
+
+	if (uOperator >= ARRSIZE(_aszEd2kOps)){
+		ASSERT(0);
+		return _T("*UnkOp*");
+	}
+	return _aszEd2kOps[uOperator];
+}
+
+static CStringA _strCurKadKeywordA;
 static CSearchExpr _SearchExpr;
 CStringArray _astrParserErrors;
 
-#ifdef _DEBUG
-static char _chLastChar = 0;
-static CStringA _strSearchTree;
+static TCHAR _chLastChar = 0;
+static CString _strSearchTree;
 
-bool DumpSearchTree(int& iExpr, const CSearchExpr& rSearchExpr, int iLevel)
+bool DumpSearchTree(int& iExpr, const CSearchExpr& rSearchExpr, int iLevel, bool bFlat)
 {
 	if (iExpr >= rSearchExpr.m_aExpr.GetCount())
 		return false;
-	_strSearchTree += '\n' + CString(' ', iLevel);
-	CStringA strTok = rSearchExpr.m_aExpr[iExpr++];
+	if (!bFlat)
+		_strSearchTree += _T('\n') + CString(_T(' '), iLevel);
+	const CSearchAttr& rSearchAttr = rSearchExpr.m_aExpr[iExpr++];
+	CStringA strTok = rSearchAttr.m_str;
 	if (strTok == SEARCHOPTOK_AND || strTok == SEARCHOPTOK_OR || strTok == SEARCHOPTOK_NOT)
 	{
-		//use this to dump all to one line
-		//if (_chLastChar != '(' && _chLastChar != '\0')
-		//	_strSearchTree.AppendFormat(" ");
-		_strSearchTree.AppendFormat("(%s ", strTok.Mid(1));
-		_chLastChar = '(';
-		DumpSearchTree(iExpr, rSearchExpr, iLevel + 4);
-		DumpSearchTree(iExpr, rSearchExpr, iLevel + 4);
-		_strSearchTree.AppendFormat(")");
-		_chLastChar = ')';
+		if (bFlat) {
+			if (_chLastChar != _T('(') && _chLastChar != _T('\0'))
+				_strSearchTree.AppendFormat(_T(" "));
+		}
+		_strSearchTree.AppendFormat(_T("(%hs "), strTok.Mid(1));
+		_chLastChar = _T('(');
+		DumpSearchTree(iExpr, rSearchExpr, iLevel + 4, bFlat);
+		DumpSearchTree(iExpr, rSearchExpr, iLevel + 4, bFlat);
+		_strSearchTree.AppendFormat(_T(")"));
+		_chLastChar = _T(')');
 	}
 	else
 	{
-		//use this to dump all to one line
-		//if (_chLastChar != '(' && _chLastChar != '\0')
-		//	_strSearchTree.AppendFormat(" ");
-		_strSearchTree.AppendFormat("\"%s\"", strTok);
-		_chLastChar = '\1';
+		if (bFlat) {
+			if (_chLastChar != _T('(') && _chLastChar != _T('\0'))
+				_strSearchTree.AppendFormat(_T(" "));
+		}
+		_strSearchTree += rSearchAttr.DbgGetAttr();
+		_chLastChar = _T('\1');
 	}
 	return true;
 }
 
-bool DumpSearchTree(const CSearchExpr& rSearchExpr)
+bool DumpSearchTree(const CSearchExpr& rSearchExpr, bool bFlat)
 {
-	_chLastChar = '\0';
+	_chLastChar = _T('\0');
 	int iExpr = 0;
 	int iLevel = 0;
-	return DumpSearchTree(iExpr, rSearchExpr, iLevel);
+	return DumpSearchTree(iExpr, rSearchExpr, iLevel, bFlat);
 }
-#endif//!_DEBUG
-
-static CStringA _strCurKadKeywordA;
 
 void ParsedSearchExpression(const CSearchExpr* pexpr)
 {
 	int iOpAnd = 0;
 	int iOpOr = 0;
 	int iOpNot = 0;
-	CStringA strDbg;
+	int iNonDefTags = 0;
+	//CStringA strDbg;
 	for (int i = 0; i < pexpr->m_aExpr.GetCount(); i++)
 	{
-		CStringA str(pexpr->m_aExpr[i]);
-		if (str == SEARCHOPTOK_AND)
+		const CSearchAttr& rSearchAttr = pexpr->m_aExpr[i];
+		const CStringA& rstr = rSearchAttr.m_str;
+		if (rstr == SEARCHOPTOK_AND)
 		{
 			iOpAnd++;
-			strDbg.AppendFormat("%s ", str.Mid(1));
+			//strDbg.AppendFormat("%s ", rstr.Mid(1));
 		}
-		else if (str == SEARCHOPTOK_OR)
+		else if (rstr == SEARCHOPTOK_OR)
 		{
 			iOpOr++;
-			strDbg.AppendFormat("%s ", str.Mid(1));
+			//strDbg.AppendFormat("%s ", rstr.Mid(1));
 		}
-		else if (str == SEARCHOPTOK_NOT)
+		else if (rstr == SEARCHOPTOK_NOT)
 		{
 			iOpNot++;
-			strDbg.AppendFormat("%s ", str.Mid(1));
+			//strDbg.AppendFormat("%s ", rstr.Mid(1));
 		}
 		else
 		{
-			strDbg.AppendFormat("\"%s\" ", str);
+			if (rSearchAttr.m_iTag != FT_FILENAME)
+				iNonDefTags++;
+			//strDbg += rSearchAttr.DbgGetAttr() + " ";
 		}
 	}
-	if (thePrefs.GetDebugServerSearchesLevel() > 0)
-		Debug(_T("Search Expr: %hs\n"), strDbg);
+	//if (thePrefs.GetDebugServerSearchesLevel() > 0)
+	//	Debug(_T("Search Expr: %hs\n"), strDbg);
 
 	// this limit (+ the additional operators which will be added later) has to match the limit in 'CreateSearchExpressionTree'
 	//	+1 Type (Audio, Video)
@@ -670,105 +806,47 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 
 	_SearchExpr.m_aExpr.RemoveAll();
 	// optimize search expression, if no OR nor NOT specified
-	if (iOpAnd > 0 && iOpOr == 0 && iOpNot == 0)
+	if (iOpAnd > 0 && iOpOr == 0 && iOpNot == 0 && iNonDefTags == 0)
 	{
 		CStringA strAndTerms;
 		for (int i = 0; i < pexpr->m_aExpr.GetCount(); i++)
 		{
-			if (pexpr->m_aExpr[i] != SEARCHOPTOK_AND)
+			if (pexpr->m_aExpr[i].m_str != SEARCHOPTOK_AND)
 			{
+				ASSERT( pexpr->m_aExpr[i].m_iTag == FT_FILENAME );
 				// Minor optimization: Because we added the Kad keyword to the boolean search expression,
 				// we remove it here (and only here) again because we know that the entire search expression
 				// does only contain (implicit) ANDed strings.
-				if (pexpr->m_aExpr[i] != _strCurKadKeywordA)
+				if (pexpr->m_aExpr[i].m_str != _strCurKadKeywordA)
 				{
 					if (!strAndTerms.IsEmpty())
 						strAndTerms += ' ';
-					strAndTerms += pexpr->m_aExpr[i];
+					strAndTerms += pexpr->m_aExpr[i].m_str;
 				}
 			}
 		}
 		ASSERT( _SearchExpr.m_aExpr.GetCount() == 0);
-		_SearchExpr.m_aExpr.Add(strAndTerms);
+		_SearchExpr.m_aExpr.Add(CSearchAttr(strAndTerms));
 	}
 	else
 	{
-		if (pexpr->m_aExpr.GetCount() != 1 || pexpr->m_aExpr[0] != _strCurKadKeywordA)
+		if (pexpr->m_aExpr.GetCount() != 1
+			|| !(pexpr->m_aExpr[0].m_iTag == FT_FILENAME && pexpr->m_aExpr[0].m_str == _strCurKadKeywordA))
 			_SearchExpr.m_aExpr.Append(pexpr->m_aExpr);
-	}
-
-#ifdef _DEBUG
-	if (thePrefs.GetDebugServerSearchesLevel() > 0){
-		_strSearchTree.Empty();
-		DumpSearchTree(_SearchExpr);
-		Debug(_T("Search Tree: %hs\n"), _strSearchTree);
-	}
-#endif
-}
-
-CString DbgGetMetaTagName(UINT uMetaTagID)
-{
-	extern CString GetMetaTagName(UINT uTagID);
-	return GetMetaTagName(uMetaTagID);
-}
-
-CString DbgGetMetaTagName(LPCSTR pszMetaTagID)
-{
-	extern CString GetMetaTagName(UINT uTagID);
-
-	if (strlen(pszMetaTagID) == 1)
-		return GetMetaTagName(((BYTE*)pszMetaTagID)[0]);
-	CString strName;
-	strName.Format(_T("\"%s\""), pszMetaTagID);
-	return strName;
-}
-
-CString DbgGetOperatorName(bool bEd2k, UINT uOperator)
-{
-	static const LPCTSTR _aszEd2kOps[] = 
-	{
-		_T("="),
-		_T(">"),
-		_T("<"),
-		_T(">="),
-		_T("<="),
-		_T("<>"),
-	};
-	static const LPCTSTR _aszKadOps[] = 
-	{
-		_T("="),
-		_T(">="),
-		_T("<="),
-		_T(">"),
-		_T("<"),
-		_T("<>"),
-	};
-
-	if (bEd2k)
-	{
-		if (uOperator >= ARRSIZE(_aszEd2kOps)){
-			ASSERT(0);
-			return _T("*UnkOp*");
-		}
-		return _aszEd2kOps[uOperator];
-	}
-	else
-	{
-		if (uOperator >= ARRSIZE(_aszKadOps)){
-			ASSERT(0);
-			return _T("*UnkOp*");
-		}
-		return _aszKadOps[uOperator];
 	}
 }
 
 class CSearchExprTarget
 {
 public:
-	CSearchExprTarget(CSafeMemFile* pData, EUtf8Str eStrEncode)
+	CSearchExprTarget(CSafeMemFile* pData, EUtf8Str eStrEncode, bool bSupports64Bit, bool* pbPacketUsing64Bit)
 	{
 		m_data = pData;
 		m_eStrEncode = eStrEncode;
+		m_bSupports64Bit = bSupports64Bit;
+		m_pbPacketUsing64Bit = pbPacketUsing64Bit;
+		if (m_pbPacketUsing64Bit)
+			*m_pbPacketUsing64Bit = false;
 	}
 
 	const CString& GetDebugString() const
@@ -809,8 +887,8 @@ public:
 		m_data->WriteUInt8(2);				// string parameter type
 		m_data->WriteString(rstrValue, m_eStrEncode); // string value
 		m_data->WriteUInt16(sizeof uint8);	// meta tag ID length
-		m_data->WriteUInt8(uMetaTagID);		// meta tag ID name
-		m_strDbg.AppendFormat(_T("%s=\"%s\" "), DbgGetMetaTagName(uMetaTagID), rstrValue);
+		m_data->WriteUInt8((uint8)uMetaTagID);		// meta tag ID name
+		m_strDbg.AppendFormat(_T("%s=\"%s\" "), DbgGetFileMetaTagName(uMetaTagID), rstrValue);
 	}
 
 	void WriteMetaDataSearchParamA(UINT uMetaTagID, const CStringA& rstrValueA)
@@ -818,8 +896,8 @@ public:
 		m_data->WriteUInt8(2);				// string parameter type
 		m_data->WriteString(rstrValueA);	// string value
 		m_data->WriteUInt16(sizeof uint8);	// meta tag ID length
-		m_data->WriteUInt8(uMetaTagID);		// meta tag ID name
-		m_strDbg.AppendFormat(_T("%s=\"%hs\" "), DbgGetMetaTagName(uMetaTagID), rstrValueA);
+		m_data->WriteUInt8((uint8)uMetaTagID);		// meta tag ID name
+		m_strDbg.AppendFormat(_T("%s=\"%hs\" "), DbgGetFileMetaTagName(uMetaTagID), rstrValueA);
 	}
 
 	void WriteMetaDataSearchParam(LPCSTR pszMetaTagID, const CString& rstrValue)
@@ -827,84 +905,75 @@ public:
 		m_data->WriteUInt8(2);				// string parameter type
 		m_data->WriteString(rstrValue, m_eStrEncode); // string value
 		m_data->WriteString(pszMetaTagID);	// meta tag ID
-		m_strDbg.AppendFormat(_T("%s=\"%s\" "), DbgGetMetaTagName(pszMetaTagID), rstrValue);
+		m_strDbg.AppendFormat(_T("%s=\"%s\" "), DbgGetFileMetaTagName(pszMetaTagID), rstrValue);
 	}
 
-	void WriteMetaDataSearchParam(UINT uMetaTagID, UINT uOperator, UINT uValue, bool bEd2k)
+	void WriteMetaDataSearchParam(UINT uMetaTagID, UINT uOperator, uint64 ullValue)
 	{
-		m_data->WriteUInt8(3);				// numeric parameter type
-		m_data->WriteUInt32(uValue);		// numeric value
-		m_data->WriteUInt8(uOperator);		// comparison operator
-		m_data->WriteUInt16(sizeof uint8);	// meta tag ID length
-		m_data->WriteUInt8(uMetaTagID);		// meta tag ID name
-		m_strDbg.AppendFormat(_T("%s%s%u "), DbgGetMetaTagName(uMetaTagID), DbgGetOperatorName(bEd2k, uOperator), uValue);
+		bool b64BitValue = ullValue > 0xFFFFFFFFui64;
+		if (b64BitValue && m_bSupports64Bit) {
+			if (m_pbPacketUsing64Bit)
+				*m_pbPacketUsing64Bit = true;
+			m_data->WriteUInt8(8);					// numeric parameter type (int64)
+			m_data->WriteUInt64(ullValue);			// numeric value
+	}
+		else {
+			if (b64BitValue)
+				ullValue = 0xFFFFFFFFU;
+			m_data->WriteUInt8(3);					// numeric parameter type (int32)
+			m_data->WriteUInt32((uint32)ullValue);	// numeric value
+	}
+		m_data->WriteUInt8((uint8)uOperator);	// comparison operator
+		m_data->WriteUInt16(sizeof uint8);		// meta tag ID length
+		m_data->WriteUInt8((uint8)uMetaTagID);	// meta tag ID name
+		m_strDbg.AppendFormat(_T("%s%s%I64u "), DbgGetFileMetaTagName(uMetaTagID), DbgGetSearchOperatorName(uOperator), ullValue);
 	}
 
-	void WriteMetaDataSearchParam(LPCSTR pszMetaTagID, UINT uOperator, UINT uValue, bool bEd2k)
+	void WriteMetaDataSearchParam(LPCSTR pszMetaTagID, UINT uOperator, uint64 ullValue)
 	{
-		m_data->WriteUInt8(3);				// numeric parameter type
-		m_data->WriteUInt32(uValue);		// numeric value
-		m_data->WriteUInt8(uOperator);		// comparison operator
-		m_data->WriteString(pszMetaTagID);	// meta tag ID
-		m_strDbg.AppendFormat(_T("%s%s%u "), DbgGetMetaTagName(pszMetaTagID), DbgGetOperatorName(bEd2k, uOperator), uValue);
-	}
-
-	void WriteOldMinMetaDataSearchParam(UINT uMetaTagID, UINT uValue, bool bEd2k)
-	{
-		UINT uOperator;
-		if (bEd2k){
-			uOperator = ED2K_SEARCH_OP_GREATER;
-			uValue -= 1;
+		bool b64BitValue = ullValue > 0xFFFFFFFFui64;
+		if (b64BitValue && m_bSupports64Bit) {
+			if (m_pbPacketUsing64Bit)
+				*m_pbPacketUsing64Bit = true;
+			m_data->WriteUInt8(8);					// numeric parameter type (int64)
+			m_data->WriteUInt64(ullValue);			// numeric value
 		}
-		else
-			uOperator = KAD_SEARCH_OP_GREATER_EQUAL;
-		WriteMetaDataSearchParam(uMetaTagID, uOperator, uValue, bEd2k);
+		else {
+			if (b64BitValue)
+				ullValue = 0xFFFFFFFFU;
+			m_data->WriteUInt8(3);					// numeric parameter type (int32)
+			m_data->WriteUInt32((uint32)ullValue);	// numeric value
 	}
-
-	void WriteOldMinMetaDataSearchParam(LPCSTR pszMetaTagID, UINT uValue, bool bEd2k)
-	{
-		UINT uOperator;
-		if (bEd2k){
-			uOperator = ED2K_SEARCH_OP_GREATER;
-			uValue -= 1;
-		}
-		else
-			uOperator = KAD_SEARCH_OP_GREATER_EQUAL;
-		WriteMetaDataSearchParam(pszMetaTagID, uOperator, uValue, bEd2k);
-	}
-
-	void WriteOldMaxMetaDataSearchParam(LPCSTR pszMetaTagID, UINT uValue, bool bEd2k)
-	{
-		UINT uOperator;
-		if (bEd2k){
-			uOperator = ED2K_SEARCH_OP_LESS;
-			uValue += 1;
-		}
-		else
-			uOperator = KAD_SEARCH_OP_LESS_EQUAL;
-		WriteMetaDataSearchParam(pszMetaTagID, uOperator, uValue, bEd2k);
-	}
-
-	void WriteOldMaxMetaDataSearchParam(UINT uMetaTagID, UINT uValue, bool bEd2k)
-	{
-		UINT uOperator;
-		if (bEd2k){
-			uOperator = ED2K_SEARCH_OP_LESS;
-			uValue += 1;
-		}
-		else
-			uOperator = KAD_SEARCH_OP_LESS_EQUAL;
-		WriteMetaDataSearchParam(uMetaTagID, uOperator, uValue, bEd2k);
+		m_data->WriteUInt8((uint8)uOperator);	// comparison operator
+		m_data->WriteString(pszMetaTagID);		// meta tag ID
+		m_strDbg.AppendFormat(_T("%s%s%I64u "), DbgGetFileMetaTagName(pszMetaTagID), DbgGetSearchOperatorName(uOperator), ullValue);
 	}
 
 protected:
 	CSafeMemFile* m_data;
 	CString m_strDbg;
 	EUtf8Str m_eStrEncode;
+	bool m_bSupports64Bit;
+	bool* m_pbPacketUsing64Bit;
 };
 
+static CSearchExpr _SearchExpr2;
 
-bool GetSearchPacket(CSafeMemFile* pData, SSearchParams* pParams)
+static void AddAndAttr(UINT uTag, const CString& rstr)
+{
+	_SearchExpr2.m_aExpr.InsertAt(0, CSearchAttr(uTag, StrToUtf8(rstr)));
+	if (_SearchExpr2.m_aExpr.GetCount() > 1)
+		_SearchExpr2.m_aExpr.InsertAt(0, CSearchAttr(SEARCHOPTOK_AND));
+}
+
+static void AddAndAttr(UINT uTag, UINT uOpr, uint64 ullVal)
+{
+	_SearchExpr2.m_aExpr.InsertAt(0, CSearchAttr(uTag, uOpr, ullVal));
+	if (_SearchExpr2.m_aExpr.GetCount() > 1)
+		_SearchExpr2.m_aExpr.InsertAt(0, CSearchAttr(SEARCHOPTOK_AND));
+}
+
+bool GetSearchPacket(CSafeMemFile* pData, SSearchParams* pParams, bool bTargetSupports64Bit, bool* pbPacketUsing64Bit)
 {
 	CStringA strFileType;
 	if (pParams->strFileType == ED2KFTSTR_ARCHIVE){
@@ -934,9 +1003,9 @@ bool GetSearchPacket(CSafeMemFile* pData, SSearchParams* pParams)
 	if (pParams->strBooleanExpr.IsEmpty())
 		return false;
 
-	TRACE(_T("Raw search expr:\n"));
-	TRACE(_T("%s"), pParams->strBooleanExpr);
-	TRACE(_T("  %s\n"), DbgGetHexDump((uchar*)(LPCTSTR)pParams->strBooleanExpr, pParams->strBooleanExpr.GetLength()*sizeof(TCHAR)));
+	//TRACE(_T("Raw search expr:\n"));
+	//TRACE(_T("%s"), pParams->strBooleanExpr);
+	//TRACE(_T("  %s\n"), DbgGetHexDump((uchar*)(LPCTSTR)pParams->strBooleanExpr, pParams->strBooleanExpr.GetLength()*sizeof(TCHAR)));
 	_astrParserErrors.RemoveAll();
 	_SearchExpr.m_aExpr.RemoveAll();
 	if (!pParams->strBooleanExpr.IsEmpty())
@@ -951,7 +1020,7 @@ bool GetSearchPacket(CSafeMemFile* pData, SSearchParams* pParams)
 			}
 		}
 
-	    LexInit(pParams->strBooleanExpr);
+	    LexInit(pParams->strBooleanExpr, true);
 	    int iParseResult = yyparse();
 	    LexFree();
 	    if (_astrParserErrors.GetSize() > 0)
@@ -967,250 +1036,124 @@ bool GetSearchPacket(CSafeMemFile* pData, SSearchParams* pParams)
 		    throw new CMsgBoxException(strError, MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
 	    }
 	}
-	TRACE(_T("Parsed search expr:\n"));
-	for (int i = 0; i < _SearchExpr.m_aExpr.GetCount(); i++){
-		TRACE(_T("%hs"), _SearchExpr.m_aExpr[i]);
-		TRACE(_T("  %s\n"), DbgGetHexDump((uchar*)(LPCSTR)_SearchExpr.m_aExpr[i], _SearchExpr.m_aExpr[i].GetLength()*sizeof(CHAR)));
-	}
-
-	// get total nr. of search terms
-	int iTotalTerms = 0;
-	if (!pParams->strExtension.IsEmpty())
-		iTotalTerms++;
-	if (pParams->uAvailability > 0)
-		iTotalTerms++;
-	if (pParams->ulMaxSize > 0)
-		iTotalTerms++;
-	if (pParams->ulMinSize > 0)
-		iTotalTerms++;
-	if (!strFileType.IsEmpty())
-		iTotalTerms++;
-	if (pParams->uComplete > 0)
-		iTotalTerms++;
-	if (pParams->ulMinBitrate > 0)
-		iTotalTerms++;
-	if (pParams->ulMinLength > 0)
-		iTotalTerms++;
-	if (!pParams->strCodec.IsEmpty())
-		iTotalTerms++;
-	if (!pParams->strTitle.IsEmpty())
-		iTotalTerms++;
-	if (!pParams->strAlbum.IsEmpty())
-		iTotalTerms++;
-	if (!pParams->strArtist.IsEmpty())
-		iTotalTerms++;
-	iTotalTerms += _SearchExpr.m_aExpr.GetCount();
+	//TRACE(_T("Parsed search expr:\n"));
+	//for (int i = 0; i < _SearchExpr.m_aExpr.GetCount(); i++){
+	//	TRACE(_T("%hs"), _SearchExpr.m_aExpr[i]);
+	//	TRACE(_T("  %s\n"), DbgGetHexDump((uchar*)(LPCSTR)_SearchExpr.m_aExpr[i], _SearchExpr.m_aExpr[i].GetLength()*sizeof(CHAR)));
+	//}
 
 	// create ed2k search expression
-	bool bEd2k = (pParams->eType == SearchTypeEd2kServer || pParams->eType == SearchTypeEd2kGlobal);
-	CSearchExprTarget target(pData, pParams->bUnicode ? utf8strRaw : utf8strNone);
-	int iParameterCount = 0;
-	if (_SearchExpr.m_aExpr.GetCount() <= 1)
-	{
-		// If we don't have a NOT or OR operator we use a series of AND terms which can be processed by
-		// the servers with less load (request lugdunummaster)
-		//
-		// input:      "a" AND min=1 AND max=2
-		// instead of: AND AND "a" min=1 max=2
-		// we use:     AND "a" AND min=1 max=2
+	CSearchExprTarget target(pData, pParams->bUnicode ? utf8strRaw : utf8strNone, bTargetSupports64Bit, pbPacketUsing64Bit);
 
-		if (_SearchExpr.m_aExpr.GetCount() > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteMetaDataSearchParam(OptUtf8ToStr(_SearchExpr.m_aExpr[0]));
-		}
+	_SearchExpr2.m_aExpr.RemoveAll();
 
-		if (!strFileType.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteMetaDataSearchParamA(FT_FILETYPE, strFileType);
-		}
+	if (!pParams->strExtension.IsEmpty())
+		AddAndAttr(FT_FILEFORMAT, pParams->strExtension);
 		
-		if (pParams->ulMinSize > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteOldMinMetaDataSearchParam(FT_FILESIZE, pParams->ulMinSize, bEd2k);
-		}
+	if (pParams->uAvailability > 0)
+		AddAndAttr(FT_SOURCES, ED2K_SEARCH_OP_GREATER_EQUAL, pParams->uAvailability);
 
-		if (pParams->ulMaxSize > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteOldMaxMetaDataSearchParam(FT_FILESIZE, pParams->ulMaxSize, bEd2k);
-		}
+	if (pParams->ullMaxSize > 0)
+		AddAndAttr(FT_FILESIZE, ED2K_SEARCH_OP_LESS_EQUAL, pParams->ullMaxSize);
 		
-		if (pParams->uAvailability > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteOldMinMetaDataSearchParam(FT_SOURCES, pParams->uAvailability, bEd2k);
-		}
+	if (pParams->ullMinSize > 0)
+		AddAndAttr(FT_FILESIZE, ED2K_SEARCH_OP_GREATER_EQUAL, pParams->ullMinSize);
 
-		if (!pParams->strExtension.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteMetaDataSearchParam(FT_FILEFORMAT, pParams->strExtension);
-		}
+	if (!strFileType.IsEmpty())
+		AddAndAttr(FT_FILETYPE, CString(strFileType));
 
-		if (pParams->uComplete > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteOldMinMetaDataSearchParam(FT_COMPLETE_SOURCES, pParams->uComplete, bEd2k);
-		}
+	if (pParams->uComplete > 0)
+		AddAndAttr(FT_COMPLETE_SOURCES, ED2K_SEARCH_OP_GREATER_EQUAL, pParams->uComplete);
 
-		if (pParams->ulMinBitrate > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteOldMinMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_BITRATE : TAG_MEDIA_BITRATE, pParams->ulMinBitrate, bEd2k);
-		}
+	if (pParams->ulMinBitrate > 0)
+		AddAndAttr(FT_MEDIA_BITRATE, ED2K_SEARCH_OP_GREATER_EQUAL, pParams->ulMinBitrate);
 
-		if (pParams->ulMinLength > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteOldMinMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_LENGTH : TAG_MEDIA_LENGTH, pParams->ulMinLength, bEd2k);
-		}
+	if (pParams->ulMinLength > 0)
+		AddAndAttr(FT_MEDIA_LENGTH, ED2K_SEARCH_OP_GREATER_EQUAL, pParams->ulMinLength);
 
-		if (!pParams->strCodec.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_CODEC : TAG_MEDIA_CODEC, pParams->strCodec);
-		}
+	if (!pParams->strCodec.IsEmpty())
+		AddAndAttr(FT_MEDIA_CODEC, pParams->strCodec);
 
-		if (!pParams->strTitle.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_TITLE : TAG_MEDIA_TITLE, pParams->strTitle);
-		}
+	if (!pParams->strTitle.IsEmpty())
+		AddAndAttr(FT_MEDIA_TITLE, pParams->strTitle);
 
-		if (!pParams->strAlbum.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_ALBUM : TAG_MEDIA_ALBUM, pParams->strAlbum);
-		}
+	if (!pParams->strAlbum.IsEmpty())
+		AddAndAttr(FT_MEDIA_ALBUM, pParams->strAlbum);
 
-		if (!pParams->strArtist.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-			target.WriteMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_ARTIST : TAG_MEDIA_ARTIST, pParams->strArtist);
-		}
+	if (!pParams->strArtist.IsEmpty())
+		AddAndAttr(FT_MEDIA_ARTIST, pParams->strArtist);
 
-		ASSERT( iParameterCount == iTotalTerms );
-	}
-	else
+	if (_SearchExpr2.m_aExpr.GetCount() > 0)
 	{
-		if (!pParams->strExtension.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
+		if (_SearchExpr.m_aExpr.GetCount() > 0)
+			_SearchExpr.m_aExpr.InsertAt(0, CSearchAttr(SEARCHOPTOK_AND));
+		_SearchExpr.Add(&_SearchExpr2);
 		}
 
-		if (pParams->uAvailability > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
+	if (thePrefs.GetVerbose())
+	{
+		_strSearchTree.Empty();
+		DumpSearchTree(_SearchExpr, true);
+		DebugLog(_T("Search Expr: %s"), _strSearchTree);
 		}
 	  
-		if (pParams->ulMaxSize > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-        
-		if (pParams->ulMinSize > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-        
-		if (!strFileType.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-        
-		if (pParams->uComplete > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-
-		if (pParams->ulMinBitrate > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-
-		if (pParams->ulMinLength > 0){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-
-		if (!pParams->strCodec.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-
-		if (!pParams->strTitle.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-
-		if (!pParams->strAlbum.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-
-		if (!pParams->strArtist.IsEmpty()){
-			if (++iParameterCount < iTotalTerms)
-				target.WriteBooleanAND();
-		}
-
-		ASSERT( iParameterCount + _SearchExpr.m_aExpr.GetCount() == iTotalTerms );
-
-		for (int j = 0; j < _SearchExpr.m_aExpr.GetCount(); j++)
+	for (int j = 0; j < _SearchExpr.m_aExpr.GetCount(); j++)
+	{
+		const CSearchAttr& rSearchAttr = _SearchExpr.m_aExpr[j];
+		const CStringA& rstrA = rSearchAttr.m_str;
+		if (rstrA == SEARCHOPTOK_AND)
 		{
-			CStringA strA(_SearchExpr.m_aExpr[j]);
-			if (strA == SEARCHOPTOK_AND)
 				target.WriteBooleanAND();
-			else if (strA == SEARCHOPTOK_OR)
-				target.WriteBooleanOR();
-			else if (strA == SEARCHOPTOK_NOT)
-				target.WriteBooleanNOT();
-			else
-				target.WriteMetaDataSearchParam(OptUtf8ToStr(strA));
 		}
-
-		if (!strFileType.IsEmpty())
-			target.WriteMetaDataSearchParamA(FT_FILETYPE, strFileType);
-
-		if (pParams->ulMinSize > 0)
-			target.WriteOldMinMetaDataSearchParam(FT_FILESIZE, pParams->ulMinSize, bEd2k);
-
-		if (pParams->ulMaxSize > 0)
-			target.WriteOldMaxMetaDataSearchParam(FT_FILESIZE, pParams->ulMaxSize, bEd2k);
-
-		if (pParams->uAvailability > 0)
-			target.WriteOldMinMetaDataSearchParam(FT_SOURCES, pParams->uAvailability, bEd2k);
-
-		if (!pParams->strExtension.IsEmpty())
-			target.WriteMetaDataSearchParam(FT_FILEFORMAT, pParams->strExtension);
-
-		if (pParams->uComplete > 0)
-			target.WriteOldMinMetaDataSearchParam(FT_COMPLETE_SOURCES, pParams->uComplete, bEd2k);
-
-		if (pParams->ulMinBitrate > 0)
-			target.WriteOldMinMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_BITRATE : TAG_MEDIA_BITRATE, pParams->ulMinBitrate, bEd2k);
-
-		if (pParams->ulMinLength > 0)
-			target.WriteOldMinMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_LENGTH : TAG_MEDIA_LENGTH, pParams->ulMinLength, bEd2k);
-
-		if (!pParams->strCodec.IsEmpty())
-			target.WriteMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_CODEC : TAG_MEDIA_CODEC, pParams->strCodec);
-
-		if (!pParams->strTitle.IsEmpty())
-			target.WriteMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_TITLE : TAG_MEDIA_TITLE, pParams->strTitle);
-
-		if (!pParams->strAlbum.IsEmpty())
-			target.WriteMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_ALBUM : TAG_MEDIA_ALBUM, pParams->strAlbum);
-
-		if (!pParams->strArtist.IsEmpty())
-			target.WriteMetaDataSearchParam(bEd2k ? FT_ED2K_MEDIA_ARTIST : TAG_MEDIA_ARTIST, pParams->strArtist);
+		else if (rstrA == SEARCHOPTOK_OR)
+		{
+			target.WriteBooleanOR();
+		}
+		else if (rstrA == SEARCHOPTOK_NOT)
+		{
+			target.WriteBooleanNOT();
+		}
+		else if (rSearchAttr.m_iTag == FT_FILESIZE			||
+				 rSearchAttr.m_iTag == FT_SOURCES			||
+				 rSearchAttr.m_iTag == FT_COMPLETE_SOURCES	||
+				 rSearchAttr.m_iTag == FT_FILERATING		||
+				 rSearchAttr.m_iTag == FT_MEDIA_BITRATE		||
+				 rSearchAttr.m_iTag == FT_MEDIA_LENGTH)
+		{
+			// 11-Sep-2005 []: Kad comparison operators where changed to match the ED2K operators. For backward
+			// compatibility with old Kad nodes, we map ">=val" and "<=val" to ">val-1" and "<val+1". This way,
+			// the older Kad nodes will perform a ">=val" and "<=val".
+			//
+			// TODO: This should be removed in couple of months!
+			if (rSearchAttr.m_uIntegerOperator == ED2K_SEARCH_OP_GREATER_EQUAL)
+				target.WriteMetaDataSearchParam(rSearchAttr.m_iTag, ED2K_SEARCH_OP_GREATER, rSearchAttr.m_nNum - 1);
+			else if (rSearchAttr.m_uIntegerOperator == ED2K_SEARCH_OP_LESS_EQUAL)
+				target.WriteMetaDataSearchParam(rSearchAttr.m_iTag, ED2K_SEARCH_OP_LESS, rSearchAttr.m_nNum + 1);
+			else
+				target.WriteMetaDataSearchParam(rSearchAttr.m_iTag, rSearchAttr.m_uIntegerOperator, rSearchAttr.m_nNum);
+		}
+		else if (rSearchAttr.m_iTag == FT_FILETYPE			||
+				 rSearchAttr.m_iTag == FT_FILEFORMAT		||
+				 rSearchAttr.m_iTag == FT_MEDIA_CODEC		||
+				 rSearchAttr.m_iTag == FT_MEDIA_TITLE		|| 
+				 rSearchAttr.m_iTag == FT_MEDIA_ALBUM		|| 
+				 rSearchAttr.m_iTag == FT_MEDIA_ARTIST)
+		{
+			ASSERT( rSearchAttr.m_uIntegerOperator == ED2K_SEARCH_OP_EQUAL );
+			target.WriteMetaDataSearchParam(rSearchAttr.m_iTag, OptUtf8ToStr(rSearchAttr.m_str));
+		}
+		else
+		{
+			ASSERT( rSearchAttr.m_iTag == FT_FILENAME );
+			ASSERT( rSearchAttr.m_uIntegerOperator == ED2K_SEARCH_OP_EQUAL );
+			target.WriteMetaDataSearchParam(OptUtf8ToStr(rstrA));
+		}
 	}
 
 	if (thePrefs.GetDebugServerSearchesLevel() > 0)
 		Debug(_T("Search Data: %s\n"), target.GetDebugString());
 	_SearchExpr.m_aExpr.RemoveAll();
+	_SearchExpr2.m_aExpr.RemoveAll();
 	return true;
 }
 
@@ -1243,18 +1186,13 @@ bool CSearchResultsWnd::StartNewSearch(SSearchParams* pParams)
 			return false;
 		}
 
-		CWnd* pWndFocus = GetFocus();
-		m_pwndParams->m_ctlStart.EnableWindow(FALSE);
-		if (pWndFocus && pWndFocus->m_hWnd  == m_pwndParams->m_ctlStart.m_hWnd)
-			m_pwndParams->m_ctlName.SetFocus();
-		m_pwndParams->m_ctlCancel.EnableWindow(TRUE);
-
+		SearchStarted();
 		return true;
 	}
 
 	if (eSearchType == SearchTypeKademlia)
 	{
-		if (!Kademlia::CKademlia::isRunning() || !Kademlia::CKademlia::isConnected())
+		if (!Kademlia::CKademlia::IsRunning() || !Kademlia::CKademlia::IsConnected())
 		{
 			AfxMessageBox(GetResString(IDS_ERR_NOTCONNECTEDKAD), MB_ICONWARNING);
 			delete pParams;
@@ -1277,6 +1215,7 @@ bool CSearchResultsWnd::StartNewSearch(SSearchParams* pParams)
 			return false;
 		}
 
+		SearchStarted();
 		return true;
 	}
 
@@ -1290,18 +1229,21 @@ bool CSearchResultsWnd::DoNewEd2kSearch(SSearchParams* pParams)
 	if (!theApp.serverconnect->IsConnected())
 		return false;
 
+	bool bServerSupports64Bit = theApp.serverconnect->GetCurrentServer() != NULL
+								&& (theApp.serverconnect->GetCurrentServer()->GetTCPFlags() & SRV_TCPFLG_LARGEFILES);
+	bool bPacketUsing64Bit = false;
 	CSafeMemFile data(100);
-	if (!GetSearchPacket(&data, pParams) || data.GetLength() == 0)
+	if (!GetSearchPacket(&data, pParams, bServerSupports64Bit, &bPacketUsing64Bit) || data.GetLength() == 0)
 		return false;
 
-	CancelSearch();
+	CancelEd2kSearch();
 
 	CStringA strResultType = pParams->strFileType;
 	if (strResultType == ED2KFTSTR_PROGRAM)
 		strResultType.Empty();
-	m_nSearchID++;
-	pParams->dwSearchID = m_nSearchID;
-	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, m_nSearchID, pParams->eType);
+	m_nEd2kSearchID++;
+	pParams->dwSearchID = m_nEd2kSearchID;
+	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, m_nEd2kSearchID, pParams->eType);
 	canceld = false;
 
 	if (m_uTimerLocalServer){
@@ -1334,9 +1276,11 @@ bool CSearchResultsWnd::DoNewEd2kSearch(SSearchParams* pParams)
 		if (globsearch){
 			delete searchpacket;
 			searchpacket = NULL;
+			m_b64BitSearchPacket = false;
 		}
 		searchpacket = packet;
 		searchpacket->opcode = OP_GLOBSEARCHREQ; // will be changed later when actually sending the packet!!
+		m_b64BitSearchPacket = bPacketUsing64Bit;
 		servercount = 0;
 		searchprogress.SetRange32(0, theApp.serverlist->GetServerCount() - 1);
 		globsearch = true;
@@ -1354,7 +1298,7 @@ bool CSearchResultsWnd::SearchMore()
 	if (!theApp.serverconnect->IsConnected())
 		return false;
 
-	SetActiveSearchResultsIcon(m_nSearchID);
+	SetActiveSearchResultsIcon(m_nEd2kSearchID);
 	canceld = false;
 
 	Packet* packet = new Packet();
@@ -1369,7 +1313,7 @@ bool CSearchResultsWnd::SearchMore()
 
 bool CSearchResultsWnd::DoNewKadSearch(SSearchParams* pParams)
 {
-	if (!Kademlia::CKademlia::isConnected())
+	if (!Kademlia::CKademlia::IsConnected())
 		return false;
 
 	int iPos = 0;
@@ -1382,7 +1326,7 @@ bool CSearchResultsWnd::DoNewKadSearch(SSearchParams* pParams)
 	}
 
 	CSafeMemFile data(100);
-	if (!GetSearchPacket(&data, pParams)/* || (!pParams->strBooleanExpr.IsEmpty() && data.GetLength() == 0)*/)
+	if (!GetSearchPacket(&data, pParams, true, NULL)/* || (!pParams->strBooleanExpr.IsEmpty() && data.GetLength() == 0)*/)
 		return false;
 
 	LPBYTE pSearchTermsData = NULL;
@@ -1396,7 +1340,7 @@ bool CSearchResultsWnd::DoNewKadSearch(SSearchParams* pParams)
 	Kademlia::CSearch* pSearch = NULL;
 	try
 	{
-		pSearch = Kademlia::CSearchManager::prepareFindKeywords(pParams->bUnicode, pParams->strKeyword, uSearchTermsSize, pSearchTermsData);
+		pSearch = Kademlia::CSearchManager::PrepareFindKeywords(pParams->bUnicode, pParams->strKeyword, uSearchTermsSize, pSearchTermsData);
 		delete pSearchTermsData;
 		if (!pSearch){
 			ASSERT(0);
@@ -1408,7 +1352,7 @@ bool CSearchResultsWnd::DoNewKadSearch(SSearchParams* pParams)
 		delete pSearchTermsData;
 		throw new CMsgBoxException(strException, MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
 	}
-	pParams->dwSearchID = pSearch->getSearchID();
+	pParams->dwSearchID = pSearch->GetSearchID();
 	CStringA strResultType = pParams->strFileType;
 	if (strResultType == ED2KFTSTR_PROGRAM)
 		strResultType.Empty();
@@ -1455,19 +1399,19 @@ bool CSearchResultsWnd::CreateNewTab(SSearchParams* pParams)
 	return true;
 }
 
-bool CSearchResultsWnd::CanDeleteSearch(uint32 nSearchID) const
+bool CSearchResultsWnd::CanDeleteSearch(uint32 /*nSearchID*/) const
 {
 	return (searchselect.GetItemCount() > 0);
 }
 
 void CSearchResultsWnd::DeleteSearch(uint32 nSearchID)
 {
-	Kademlia::CSearchManager::stopSearch(nSearchID, false);
+	Kademlia::CSearchManager::StopSearch(nSearchID, false);
+
 	TCITEM item;
 	item.mask = TCIF_PARAM;
 	item.lParam = -1;
-	int i;
-	for (i = 0; i != searchselect.GetItemCount();i++){
+	for (int i = 0; i < searchselect.GetItemCount(); i++) {
 		if (searchselect.GetItem(i, &item) && item.lParam != -1 && item.lParam != NULL && ((const SSearchParams*)item.lParam)->dwSearchID == nSearchID)
 			break;
 	}
@@ -1475,9 +1419,9 @@ void CSearchResultsWnd::DeleteSearch(uint32 nSearchID)
 		return;
 
 	// delete search results
-	if (!canceld && nSearchID == m_nSearchID)
-		CancelSearch();
-	if (nSearchID == m_nSearchID)
+	if (!canceld && nSearchID == m_nEd2kSearchID)
+		CancelEd2kSearch();
+	if (nSearchID == m_nEd2kSearchID)
 		m_pwndParams->m_ctlMore.EnableWindow(FALSE);
 	theApp.searchlist->RemoveResults(nSearchID);
 	
@@ -1521,14 +1465,16 @@ bool CSearchResultsWnd::CanDeleteAllSearches() const
 	return (searchselect.GetItemCount() > 0);
 }
 
-void CSearchResultsWnd::DeleteAllSearchs()
+void CSearchResultsWnd::DeleteAllSearches()
 {
+	CancelEd2kSearch();
+
 	for (int i = 0; i < searchselect.GetItemCount(); i++){
 		TCITEM item;
 		item.mask = TCIF_PARAM;
 		item.lParam = -1;
 		if (searchselect.GetItem(i, &item) && item.lParam != -1 && item.lParam != NULL){
-			Kademlia::CSearchManager::stopSearch(((const SSearchParams*)item.lParam)->dwSearchID, false);
+			Kademlia::CSearchManager::StopSearch(((const SSearchParams*)item.lParam)->dwSearchID, false);
 			delete (SSearchParams*)item.lParam;
 		}
 	}
@@ -1536,7 +1482,13 @@ void CSearchResultsWnd::DeleteAllSearchs()
 	searchlistctrl.DeleteAllItems();
 	ShowSearchSelector(false);
 	searchselect.DeleteAllItems();
+
+	CWnd* pWndFocus = GetFocus();
 	m_pwndParams->m_ctlMore.EnableWindow(FALSE);
+	m_pwndParams->m_ctlCancel.EnableWindow(FALSE);
+	m_pwndParams->m_ctlStart.EnableWindow(TRUE);
+	if (pWndFocus && (pWndFocus->m_hWnd == m_pwndParams->m_ctlMore.m_hWnd || pWndFocus->m_hWnd == m_pwndParams->m_ctlCancel.m_hWnd))
+		m_pwndParams->m_ctlStart.SetFocus();
 }
 
 void CSearchResultsWnd::ShowResults(const SSearchParams* pParams)
@@ -1545,10 +1497,23 @@ void CSearchResultsWnd::ShowResults(const SSearchParams* pParams)
 	// TODO: maybe it should be done explicitly via a context menu function or such.
 	if (GetAsyncKeyState(VK_CONTROL) < 0)
 		m_pwndParams->SetParameters(pParams);
+
+	if (pParams->eType == SearchTypeEd2kServer)
+	{
+		m_pwndParams->m_ctlCancel.EnableWindow(pParams->dwSearchID == m_nEd2kSearchID && IsLocalEd2kSearchRunning());
+	}
+	else if (pParams->eType == SearchTypeEd2kGlobal)
+	{
+		m_pwndParams->m_ctlCancel.EnableWindow(pParams->dwSearchID == m_nEd2kSearchID && (IsLocalEd2kSearchRunning() || IsGlobalEd2kSearchRunning()));
+	}
+	else if (pParams->eType == SearchTypeKademlia)
+	{
+		m_pwndParams->m_ctlCancel.EnableWindow(Kademlia::CSearchManager::IsSearching(pParams->dwSearchID));
+	}
 	searchlistctrl.ShowResults(pParams->dwSearchID);
 }
 
-void CSearchResultsWnd::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
+void CSearchResultsWnd::OnSelChangeTab(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	CWaitCursor curWait; // this may take a while
 	int cur_sel = searchselect.GetCurSel();
@@ -1564,21 +1529,21 @@ void CSearchResultsWnd::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-LRESULT CSearchResultsWnd::OnCloseTab(WPARAM wParam, LPARAM lParam)
+LRESULT CSearchResultsWnd::OnCloseTab(WPARAM wParam, LPARAM /*lParam*/)
 {
 	TCITEM item;
 	item.mask = TCIF_PARAM;
 	if (searchselect.GetItem((int)wParam, &item) && item.lParam != NULL)
 	{
 		int nSearchID = ((const SSearchParams*)item.lParam)->dwSearchID;
-		if (!canceld && nSearchID == m_nSearchID)
-			CancelSearch();
+		if (!canceld && (UINT)nSearchID == m_nEd2kSearchID)
+			CancelEd2kSearch();
 		DeleteSearch(nSearchID);
 	}
 	return TRUE;
 }
 
-LRESULT CSearchResultsWnd::OnDblClickTab(WPARAM wParam, LPARAM lParam)
+LRESULT CSearchResultsWnd::OnDblClickTab(WPARAM wParam, LPARAM /*lParam*/)
 {
 	TCITEM item;
 	item.mask = TCIF_PARAM;
@@ -1589,7 +1554,8 @@ LRESULT CSearchResultsWnd::OnDblClickTab(WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-void CSearchResultsWnd::UpdateCatTabs() {
+void CSearchResultsWnd::UpdateCatTabs()
+{
 	int oldsel=m_cattabs.GetCurSel();
 	m_cattabs.DeleteAllItems();
 	for (int ix=0;ix<thePrefs.GetCatCount();ix++){
@@ -1662,13 +1628,13 @@ void CSearchResultsWnd::OnClose()
 	//__super::OnClose();
 }
 
-BOOL CSearchResultsWnd::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CSearchResultsWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	theApp.ShowHelp(eMule_FAQ_Search);
 	return TRUE;
 }
 
-LRESULT CSearchResultsWnd::OnIdleUpdateCmdUI(WPARAM wParam, LPARAM lParam)
+LRESULT CSearchResultsWnd::OnIdleUpdateCmdUI(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	GetDlgItem(IDC_OPEN_PARAMS_WND)->ShowWindow( theApp.emuledlg->searchwnd->IsSearchParamsWndVisible() ? SW_HIDE : SW_SHOW );
 	return 0;
@@ -1692,8 +1658,25 @@ void CSearchResultsWnd::OnSysCommand(UINT nID, LPARAM lParam)
 	__super::OnSysCommand(nID, lParam);
 }
 
+bool CSearchResultsWnd::CanSearchRelatedFiles() const
+{
+	return theApp.serverconnect->IsConnected() 
+		&& theApp.serverconnect->GetCurrentServer() != NULL 
+		&& theApp.serverconnect->GetCurrentServer()->GetRelatedSearchSupport();
+}
+
+void CSearchResultsWnd::SearchRelatedFiles(const CAbstractFile* file)
+{
+	SSearchParams* pParams = new SSearchParams;
+	pParams->strExpression = _T("related::") + md4str(file->GetFileHash());
+	pParams->strSpecialTitle = GetResString(IDS_RELATED) + _T(": ") + file->GetFileName();
+	if (pParams->strSpecialTitle.GetLength() > 50)
+		pParams->strSpecialTitle = pParams->strSpecialTitle.Left(50) + _T("...");
+	StartSearch(pParams);
+}
+
 //MORPH START - Added by SiRoB, Selection category support
-void CSearchResultsWnd::OnNMClickCattab2(NMHDR *pNMHDR, LRESULT *pResult)
+void CSearchResultsWnd::OnNMClickCattab2(NMHDR* /*pNMHDR*/, LRESULT *pResult)
 {
 	POINT point;
 	::GetCursorPos(&point);

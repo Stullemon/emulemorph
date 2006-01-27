@@ -43,11 +43,8 @@
 static char THIS_FILE[]=__FILE__;
 #endif
 
+
 IMPLEMENT_DYNAMIC(CDownloadClientsCtrl, CMuleListCtrl)
-CDownloadClientsCtrl::CDownloadClientsCtrl()
-	: CListCtrlItemWalk(this)
-{
-}
 
 BEGIN_MESSAGE_MAP(CDownloadClientsCtrl, CMuleListCtrl)
 	ON_WM_CONTEXTMENU()
@@ -56,6 +53,12 @@ BEGIN_MESSAGE_MAP(CDownloadClientsCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclkDownloadClientlist)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
 END_MESSAGE_MAP()
+
+CDownloadClientsCtrl::CDownloadClientsCtrl()
+	: CListCtrlItemWalk(this)
+{
+	SetGeneralPurposeFind(true, false);
+}
 
 void CDownloadClientsCtrl::Init()
 {
@@ -154,75 +157,63 @@ void CDownloadClientsCtrl::Localize()
 	CString strRes;
 
 	strRes = GetResString(IDS_QL_USERNAME);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(0, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_CD_CSOFT);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(1, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_FILE);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(2, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_DL_SPEED);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(3, &hdi);
-	strRes.ReleaseBuffer();
+
 	strRes = GetResString(IDS_AVAILABLEPARTS);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(4, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_CL_TRANSFDOWN);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(5, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_CL_TRANSFUP);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(6, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_META_SRCTYPE);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(7, &hdi);
-	strRes.ReleaseBuffer();
 
 	strRes = GetResString(IDS_DL_ULDL);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(8, &hdi);
-	strRes.ReleaseBuffer();
 
 	//SLAHAM: ADDED Last Asked =>
 	strRes = GetResString(IDS_LAST_ASKED);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(9, &hdi);
-	strRes.ReleaseBuffer();
 	//SLAHAM: ADDED Last Asked <=
 
 	//SLAHAM: ADDED Downloading Time =>
 	strRes = GetResString(IDS_DOWNL_TIME);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(10, &hdi);
-	strRes.ReleaseBuffer();
 	//SLAHAM: ADDED Downloading Time <=
 
 	//SLAHAM: ADDED Known Since =>
 	strRes = GetResString(IDS_KNOWN_SINCE);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(11, &hdi);
-	strRes.ReleaseBuffer();
 	//SLAHAM: ADDED Known Since <=
 
 	//MORPH START - Added by SiRoB, IP2Country column
 	strRes = GetResString(IDS_COUNTRY);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(12, &hdi);
-	strRes.ReleaseBuffer();
 	//MORPH END   - Added by SiRoB, IP2Country column
 }
 
@@ -252,8 +243,8 @@ void CDownloadClientsCtrl::RemoveClient(CUpDownClient* client)
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
-	sint32 result = FindItem(&find);
-	if (result != (-1) )
+	int result = FindItem(&find);
+	if (result != -1)
 		DeleteItem(result);
 	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Downloading, GetItemCount()); 
 }
@@ -271,7 +262,7 @@ void CDownloadClientsCtrl::RefreshClient(CUpDownClient* client)
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
-	sint16 result = FindItem(&find);
+	int result = FindItem(&find);
 	if(result != -1)
 		Update(result);
 	return;
@@ -602,7 +593,17 @@ void CDownloadClientsCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	*pResult = 0;
 }
 
-BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
+BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
+{
+	wParam = LOWORD(wParam);
+
+	switch (wParam)
+	{
+		case MP_FIND:
+			OnFindStart();
+			return TRUE;
+	}
+
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
 		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
@@ -617,17 +618,20 @@ BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				if (theApp.friendlist->AddFriend(client))
 					Update(iSel);
 				break;
+			case MP_DETAIL:
 			case MPG_ALTENTER:
-			case MP_DETAIL:{
+			case IDA_ENTER:
+			{
 				CClientDetailDialog dialog(client, this);
 				dialog.DoModal();
 				break;
 			}
 			case MP_BOOT:
 				if (client->GetKadPort())
-					Kademlia::CKademlia::bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 				break;
-			case MP_REMOVEFRIEND:{ //LSD
+			//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+			case MP_REMOVEFRIEND:{
 				if (client && client->IsFriend()){					
 					theApp.friendlist->RemoveFriend(client->m_Friend);
 					theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(client);
@@ -636,7 +640,6 @@ BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 			 }
 
 			case MP_FRIENDSLOT:{
-				//MORPH START - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 				if (client){
 					bool IsAlready;
 					IsAlready = client->GetFriendSlot();
@@ -650,10 +653,9 @@ BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					theApp.friendlist->ShowFriends();
 					theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(client);
 				}
-				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 				break;
 			}
-
+			//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			case MP_LIST_REQUESTED_FILES:
 				if (client != NULL)
@@ -671,6 +673,7 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 	int iResult=0;
 	switch(lParamSort){
 		case 0: 
+		case 100:
 			if(item1->GetUserName() && item2->GetUserName())
 				iResult=CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
 			else if(item1->GetUserName())
@@ -678,15 +681,8 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			else
 				iResult=-1;
 			break;
-		case 100:
-			if(item1->GetUserName() && item2->GetUserName())
-				iResult=CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
-			else if(item2->GetUserName())
-				iResult=1;
-			else
-				iResult=-1;
-			break;
 		case 1:
+	    case 101:
 			if (item1->GetClientSoft() == item2->GetClientSoft())
 				if (item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
 					iResult=CompareOptLocaleStringNoCase(item2->GetClientSoftVer(), item1->GetClientSoftVer());
@@ -697,18 +693,9 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			else
 				iResult=item1->GetClientSoft() - item2->GetClientSoft();
 			break;
-		case 101:
-			if(item1->GetClientSoft() == item2->GetClientSoft())
-				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					iResult=CompareOptLocaleStringNoCase(item1->GetClientSoftVer(), item2->GetClientSoftVer());
-				}
-				else {
-					iResult=item1->GetVersion() - item2->GetVersion();
-				}
-			else
-				iResult=item2->GetClientSoft() - item1->GetClientSoft();
-			break;
-		case 2: {
+		case 2:
+		case 102:
+		{
 			CKnownFile* file1 = item1->GetRequestFile();
 			CKnownFile* file2 = item2->GetRequestFile();
 			if( (file1 != NULL) && (file2 != NULL))
@@ -719,48 +706,28 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 				iResult=-1;
 			break;
 		}
-		case 102:{
-			CKnownFile* file1 = item1->GetRequestFile();
-			CKnownFile* file2 = item2->GetRequestFile();
-			if( (file1 != NULL) && (file2 != NULL))
-				iResult=CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
-			else if( file1 == NULL )
-				iResult=1;
-			else
-				iResult=-1;
-			break;
-		}
 		case 3:
-			iResult=CompareUnsigned(item2->GetDownloadDatarate(), item1->GetDownloadDatarate());
-			break;
 		case 103:
 			iResult=CompareUnsigned(item1->GetDownloadDatarate(), item2->GetDownloadDatarate());
 			break;
 		case 4:
-			iResult=CompareUnsigned(item2->GetPartCount(), item1->GetPartCount());
-			break;
 		case 104: 
 			iResult=CompareUnsigned(item1->GetPartCount(), item2->GetPartCount());
 			break;
 		case 5:
-			iResult=CompareUnsigned(item2->GetSessionDown(), item1->GetSessionDown());
-			break;
 		case 105:
 			iResult=CompareUnsigned(item1->GetSessionDown(), item2->GetSessionDown());
 			break;
 		case 6:
-			iResult=CompareUnsigned(item2->GetSessionUp(), item1->GetSessionUp());
-			break;
 		case 106:
 			iResult=CompareUnsigned(item1->GetSessionUp(), item2->GetSessionUp());
 			break;
 		case 7: 
+		case 107: 
 			iResult=CompareUnsigned(item1->GetSourceFrom(), item2->GetSourceFrom());
 			break;
-		case 107: 
-			iResult=CompareUnsigned(item2->GetSourceFrom(), item1->GetSourceFrom());
-			break;
 		case 8:
+		case 108:
 			{   
 				if (!item1->Credits()) 
 					iResult=1; 
@@ -776,59 +743,28 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 					iResult=1;
 				break;
 			}
-		case 108:
-			{   
-				if (!item2->Credits()) 
-					iResult=1; 
-				else if (!item1->Credits())   
-					iResult=-1;  
-	
-				float r1=item1->credits->GetScoreRatio(item1->GetIP());   
-				float r2=item2->credits->GetScoreRatio(item2->GetIP()); 
-				if (r1==r2)
-					iResult=0;
-				else if (r1<r2)
-					iResult=-1;
-				else
-					iResult=1;
-				break;
-			}
 		//SLAHAM: ADDED Last Asked =>
 		case 9: 
+		case 109:
 			{
 				uint32 lastAskedTime1 = item2->GetLastAskedTime();
 				uint32 lastAskedTime2 = item1->GetLastAskedTime();
 				iResult=lastAskedTime1==lastAskedTime2? 0 : lastAskedTime1<lastAskedTime2? -1 : 1;
 				break;
 			}
-		case 109:
-			{
-				uint32 lastAskedTime1 = item1->GetLastAskedTime();
-				uint32 lastAskedTime2 = item2->GetLastAskedTime();
-				iResult=lastAskedTime1==lastAskedTime2? 0 : lastAskedTime1<lastAskedTime2? -1 : 1;
-				break;
-			}
 		//SLAHAM: ADDED Last Asked <=
 		//SLAHAM: ADDED Show Downloading Time =>
 		case 10:
-			iResult=CompareUnsigned(item2->dwSessionDLTime, item1->dwSessionDLTime);
-			break;
 		case 110:
-			iResult=CompareUnsigned(item1->dwTotalDLTime, item2->dwTotalDLTime);
+			iResult=CompareUnsigned(item2->dwSessionDLTime, item1->dwSessionDLTime);
 			break;
 		//SLAHAM: ADDED Show Downloading Time <=
 		//SLAHAM: ADDED Known Since =>
 		case 11:
+		case 111:
 			{
 				uint32 known1 = item2->dwThisClientIsKnownSince;
 				uint32 known2 = item1->dwThisClientIsKnownSince;
-				iResult=known1==known2? 0 : known1<known2? -1 : 1;
-				break;
-			}
-		case 111:
-			{
-				uint32 known1 = item1->dwThisClientIsKnownSince;
-				uint32 known2 = item2->dwThisClientIsKnownSince;
 				iResult=known1==known2? 0 : known1<known2? -1 : 1;
 				break;
 			}
@@ -836,17 +772,10 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 
 		// EastShare - Added by Pretender: IP2Country column
         case 12:
+		case 112:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
 				iResult=CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))
-				iResult=1;
-			else
-				iResult=-1;
-			break;
-		case 112:
-			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				iResult=CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
-			else if(item2->GetCountryName(true))
 				iResult=1;
 			else
 				iResult=-1;
@@ -857,6 +786,10 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			iResult=0;
 			break;
 	}
+
+	if (lParamSort>=100)
+    iResult*=-1;
+
 	// SLUGFILLER: multiSort remove - handled in parent class
 	/*
 	int dwNextSort;
@@ -870,7 +803,7 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 }
 
 //SLAHAM: ADDED [TPT] - New Menu Styles =>
-void CDownloadClientsCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+void CDownloadClientsCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
@@ -887,7 +820,7 @@ void CDownloadClientsCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	//MORPH END - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
-	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected())
+	if (Kademlia::CKademlia::IsRunning() && !Kademlia::CKademlia::IsConnected())
 		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
@@ -917,7 +850,8 @@ void CDownloadClientsCtrl::ShowSelectedUserDetails(){
 	}
 }
 
-void CDownloadClientsCtrl::OnNMDblclkDownloadClientlist(NMHDR *pNMHDR, LRESULT *pResult) {
+void CDownloadClientsCtrl::OnNMDblclkDownloadClientlist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {
 		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);

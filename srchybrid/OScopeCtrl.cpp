@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(COScopeCtrl, CWnd)
 	ON_WM_TIMER()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEMOVE()
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 COScopeCtrl::COScopeCtrl(int NTrends)
@@ -189,11 +190,11 @@ BOOL COScopeCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 // iRatio is 1 by default (No change in scale of data for this trend)
 // This function now borrows a bit from eMule Plus v1
 //
-void COScopeCtrl::SetTrendRatio(int iTrend, unsigned int iRatio)
+void COScopeCtrl::SetTrendRatio(int iTrend, UINT iRatio)
 {
 	ASSERT(iTrend < m_NTrends && iRatio > 0);	// iTrend must be a valid trend in this plot.
 
-	if (iRatio != m_PlotData[iTrend].iTrendRatio) {
+	if (iRatio != (UINT)m_PlotData[iTrend].iTrendRatio) {
 		double dTrendModifier = (double) m_PlotData[iTrend].iTrendRatio / iRatio;
 		m_PlotData[iTrend].iTrendRatio = iRatio;
 
@@ -948,4 +949,22 @@ void COScopeCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		float apixel = (float)shownsecs / (float)plotRect.Width();
 		pwndParent->SendMessage(UM_OSCOPEPOSITION, plotRect.Width(), (int)(mypos * apixel));
 	}
+}
+
+void COScopeCtrl::OnSysColorChange()
+{
+	if (m_pbitmapOldGrid != NULL) {
+		m_dcGrid.SelectObject(m_pbitmapOldGrid);
+		m_pbitmapOldGrid = NULL;
+	}
+	VERIFY( m_dcGrid.DeleteDC() );
+
+	if (m_pbitmapOldPlot != NULL) {
+		m_dcPlot.SelectObject(m_pbitmapOldPlot);
+		m_pbitmapOldPlot = NULL;
+	}
+	VERIFY( m_dcPlot.DeleteDC() );
+
+	CWnd::OnSysColorChange();
+	InvalidateCtrl(false);
 }

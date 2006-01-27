@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -51,7 +51,7 @@
 struct Schedule_Struct{
    CString			title;
    bool				enabled;
-   uint8			day;
+   UINT				day;
    uint32			time;
    uint32			time2;
    CString			values[16];
@@ -65,26 +65,25 @@ class CScheduler
 public:
 	CScheduler();
 	~CScheduler();
-	uint8	AddSchedule(Schedule_Struct* schedule);
 
-	void	UpdateSchedule(uint8 index,Schedule_Struct* schedule) {if (index<schedulelist.GetCount())schedulelist.SetAt(index,schedule);}
-
-	Schedule_Struct* GetSchedule(uint8 index) {if (index<schedulelist.GetCount()) return schedulelist.GetAt(index); else return NULL; }
-	void	RemoveSchedule(uint8 index);
+	int		AddSchedule(Schedule_Struct* schedule);
+	void	UpdateSchedule(int index, Schedule_Struct* schedule) { if (index<schedulelist.GetCount())schedulelist.SetAt(index,schedule);}
+	Schedule_Struct* GetSchedule(int index) {if (index<schedulelist.GetCount()) return schedulelist.GetAt(index); else return NULL; }
+	void	RemoveSchedule(int index);
 	void	RemoveAll();
 	int		LoadFromFile();
 	void	SaveToFile();
 	int		Check(bool forcecheck=false);
-	uint8	GetCount()		{ return schedulelist.GetCount();}
+	UINT	GetCount()		{ return schedulelist.GetCount();}
 	void	SaveOriginals();
 	void	RestoreOriginals();
-	void	ActivateSchedule(uint8 index,bool makedefault=false);
+	void	ActivateSchedule(int index,bool makedefault=false);
 	
 	uint16	original_upload;
 	uint16	original_download;
-	uint16	original_connections;
-	uint16	original_cons5s;
-	uint16	original_sources;
+	UINT	original_connections;
+	UINT	original_cons5s;
+	UINT	original_sources;
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
 	uint16	original_ussmaxping;
 	uint16	original_ussgoup;
@@ -94,6 +93,5 @@ public:
 
 private:
 	CArray<Schedule_Struct*,Schedule_Struct*> schedulelist;
-	uint8	m_iLastCheckedMinute;
+	int		m_iLastCheckedMinute;
 };
-

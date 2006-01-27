@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ typedef struct
 	CString	m_strFileType;
 	CString	m_strFileHash;
 	CString	m_strIndex;
-	uint32	m_uFileSize;
+	uint64	m_uFileSize;
 	uint32	m_uSourceCount;
 	uint32	m_dwCompleteSourceCount;
 } SearchFileStruct;
@@ -70,10 +70,10 @@ public:
 	void	ShowResults(uint32 nSearchID);
 	void	GetWebList(CQArray<SearchFileStruct, SearchFileStruct> *SearchFileArray, int iSortBy) const;
 	void	AddFileToDownloadByHash(const uchar* hash)		{AddFileToDownloadByHash(hash,0);}
-	void	AddFileToDownloadByHash(const uchar* hash, uint8 cat);
+	void	AddFileToDownloadByHash(const uchar* hash, int cat);
 	bool	AddToList(CSearchFile* toadd, bool bClientResponse = false);
 	CSearchFile* GetSearchFileByHash(const uchar* hash) const;
-	void	KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCTSTR name, uint32 size, LPCTSTR type, UINT numProperties, ...);
+	void	KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCTSTR name, uint64 size, LPCTSTR type, UINT numProperties, ...);
 	bool	AddNotes(Kademlia::CEntry* entry, const uchar* hash);
 
 	UINT GetFoundFiles(uint32 searchID) const {

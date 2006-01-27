@@ -8,7 +8,6 @@
 // ------------------------------------------------------------
 #pragma once
 #define HTMINTRAYBUTTON         65
-#define SC_MINIMIZETRAY         0xE000
 
 //bluecow/sony: moved out of class for VC 2003 compatiblity; zegzav: made extern for proper look (thanks)
 extern BOOL (WINAPI *_TransparentBlt)(HDC, int, int, int, int, HDC, int, int, int, int, UINT);

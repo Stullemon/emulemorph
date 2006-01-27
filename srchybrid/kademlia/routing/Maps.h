@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -31,17 +31,49 @@ there client on the eMule forum..
 #include <map>
 #include <list>
 #include <set>
+#include "../utils/UInt128.h"
+#include "../../MapKey.h"
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CUInt128;
-class CContact;
-
-typedef std::map<CUInt128, CContact*> ContactMap;
-typedef std::list<CContact*> ContactList;
-typedef std::list<CUInt128> UIntList;
-typedef std::set<CUInt128> UIntSet;
-
-} // End namespace
+namespace Kademlia
+{
+	class CContact;
+	class CSearch;
+	class CKadTag;
+	class CRoutingZone;
+	class CEntry;
+	typedef std::map<CUInt128, CContact*> ContactMap;
+	typedef std::list<CContact*> ContactList;
+	typedef std::list<CUInt128> UIntList;
+	typedef std::set
+		<CUInt128> UIntSet;
+	typedef std::list<CKadTag*> TagList;
+	typedef std::list<CStringW> WordList;
+	typedef std::map<CUInt128, CSearch*> SearchMap;
+	typedef std::map<CRoutingZone*, CRoutingZone*> EventMap;
+	typedef CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;
+	struct Source
+	{
+		CUInt128 uSourceID;
+		CKadEntryPtrList ptrlEntryList;
+	};
+	typedef CMap<CCKey,const CCKey&,Source*,Source*> CSourceKeyMap;
+	struct KeyHash
+	{
+		CUInt128 uKeyID;
+		CSourceKeyMap mapSource;
+	};
+	typedef CTypedPtrList<CPtrList, Source*> CKadSourcePtrList;
+	struct SrcHash
+	{
+		CUInt128 uKeyID;
+		CKadSourcePtrList ptrlistSource;
+	};
+	struct Load
+	{
+		CUInt128 uKeyID;
+		uint32 uTime;
+	};
+	typedef CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> CKeyHashMap;
+	typedef CMap<CCKey,const CCKey&,SrcHash*,SrcHash*> CSrcHashMap;
+	typedef CMap<CCKey,const CCKey&,Load*,Load*> CLoadMap;
+}

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -71,7 +71,7 @@ BOOL CPreviewThread::Run()
 	if (!srcFile.Open(m_pPartfile->GetFilePath(), CFile::modeRead | CFile::shareDenyNone))
 		return FALSE;
 	try{
-		uint32 nSize = m_pPartfile->GetFileSize();
+		uint64 nSize = m_pPartfile->GetFileSize();
 		CString strExtension = CString(_tcsrchr(m_pPartfile->GetFileName(), _T('.')));
 		CString strPreviewName = m_pPartfile->GetTempPath() + _T("\\") + m_pPartfile->GetFileName().Mid(0, 5) + _T("_preview") + strExtension;
 		bool bFullSized = true;
@@ -89,10 +89,10 @@ BOOL CPreviewThread::Run()
 			nRead = srcFile.Read(abyBuffer,4096);
 			destFile.Write(abyBuffer,nRead);
 		}
-		srcFile.Seek(-(PARTSIZE*2),CFile::end);
+		srcFile.Seek(-(LONGLONG)(PARTSIZE*2), CFile::end);
 		uint32 nToGo =PARTSIZE*2;
 		if (bFullSized)
-			destFile.Seek(-(PARTSIZE*2),CFile::end);
+			destFile.Seek(-(LONGLONG)(PARTSIZE*2), CFile::end);
 		do{
 			nRead = (nToGo - 4096 < 1)? nToGo:4096;
 			nToGo -= nRead;
@@ -121,12 +121,12 @@ BOOL CPreviewThread::Run()
 				path.Empty();
 			else
 				path = path.Left(pos + 1);
-			SE.lpFile = m_player.GetBuffer();
+			SE.lpFile = m_player;
 			SE.lpParameters=shortPath;
-			SE.lpDirectory=path.GetBuffer();
+			SE.lpDirectory = path;
 		}
 		else
-			SE.lpFile = strPreviewName.GetBuffer();
+			SE.lpFile = strPreviewName;
 		SE.nShow = SW_SHOW;
 		SE.cbSize = sizeof(SE);
 		ShellExecuteEx(&SE);
@@ -184,6 +184,7 @@ int CPreviewApps::ReadAllApps()
 			if (_fgetts(buffer, ARRSIZE(buffer), readFile) == NULL)
 				break;
 			sbuffer = buffer;
+			sbuffer.TrimRight(_T("\r\n\t"));
 
 			// ignore comments & too short lines
 			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5)
@@ -208,8 +209,8 @@ int CPreviewApps::ReadAllApps()
 					strCommand.Trim(_T(" \t\""));
 					if (!strCommand.IsEmpty())
 					{
-						UINT uMinCompletedSize = 0;
-						UINT uMinStartOfFile = 0;
+						uint64 ullMinCompletedSize = 0;
+						uint64 ullMinStartOfFile = 0;
 						CStringArray astrExtensions;
 						CString strParams = sbuffer.Tokenize(_T(";"), iPos);
 						while (!strParams.IsEmpty())
@@ -231,12 +232,12 @@ int CPreviewApps::ReadAllApps()
 								else if (strId.CompareNoCase(_T("MinSize")) == 0)
 								{
 									if (!strValue.IsEmpty())
-										_stscanf(strValue, _T("%u"), &uMinCompletedSize);
+										_stscanf(strValue, _T("%I64u"), &ullMinCompletedSize);
 								}
 								else if (strId.CompareNoCase(_T("MinStart")) == 0)
 								{
 									if (!strValue.IsEmpty())
-										_stscanf(strValue, _T("%u"), &uMinStartOfFile);
+										_stscanf(strValue, _T("%I64u"), &ullMinStartOfFile);
 								}
 							}
 							strParams = sbuffer.Tokenize(_T(";"), iPos);
@@ -248,8 +249,8 @@ int CPreviewApps::ReadAllApps()
 						svc.strCommandArgs = pszCommandArgs;
 						svc.strCommandArgs.Trim();
 						svc.astrExtensions.Append(astrExtensions);
-						svc.uMinCompletedSize = uMinCompletedSize;
-						svc.uMinStartOfFile = uMinStartOfFile;
+						svc.ullMinCompletedSize = ullMinCompletedSize;
+						svc.ullMinStartOfFile = ullMinStartOfFile;
 						m_aApps.Add(svc);
 					}
 				}
@@ -291,7 +292,7 @@ int CPreviewApps::GetAllMenuEntries(CMenu& rMenu, const CPartFile* file)
 		bool bEnabled = false;
 		if (file)
 		{
-			if (file->GetCompletedSize() >= 16*1024)
+			if (file->GetCompletedSize() >= (uint64)16*1024)
 				bEnabled = true;
 		}
 		rMenu.AppendMenu(MF_STRING | (bEnabled ? MF_ENABLED : MF_GRAYED), MP_PREVIEW_APP_MIN + i, rSvc.strTitle);
@@ -373,15 +374,15 @@ CPreviewApps::ECanPreviewRes CPreviewApps::CanPreview(const CPartFile* file)
 		return NotHandled;
 
 	const SPreviewApp* pApp = &m_aApps.GetAt(iApp);
-	if (pApp->uMinCompletedSize != 0)
+	if (pApp->ullMinCompletedSize != 0)
 	{
-		if (file->GetCompletedSize() < pApp->uMinCompletedSize)
+		if (file->GetCompletedSize() < pApp->ullMinCompletedSize)
 			return No;
 	}
 
-	if (pApp->uMinStartOfFile != 0)
+	if (pApp->ullMinStartOfFile != 0)
 	{
-		if (!file->IsComplete(0, pApp->uMinStartOfFile, false))
+		if (!file->IsComplete(0, pApp->ullMinStartOfFile, false))
 			return No;
 	}
 

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -18,6 +18,7 @@
 #pragma once
 
 class CKnownFile;
+class CSafeFile;
 /////////////////////////////////////////////////////////////////////////////////////////
 ///CAICHSyncThread
 class CAICHSyncThread : public CWinThread
@@ -28,6 +29,9 @@ protected:
 public:
 	virtual BOOL InitInstance();
 	virtual int	Run();
+
+protected:
+	bool ConvertToKnown2ToKnown264(CSafeFile* pTargetFile);
 
 private:
 	CTypedPtrList<CPtrList, CKnownFile*> m_liToHash;

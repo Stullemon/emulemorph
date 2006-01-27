@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.3 $
+* $Revision: 1.4 $
 * $Modtime:$
 * $Author: sirob $
 *
@@ -735,8 +735,6 @@ BOOL CTreePropSheet::OnInitDialog()
 		{
 			IMAGEINFO	ii;
 			m_DefaultImages.GetImageInfo(0, &ii);
-			if (ii.hbmImage) DeleteObject(ii.hbmImage);
-			if (ii.hbmMask) DeleteObject(ii.hbmMask);
 			m_Images.Create(ii.rcImage.right-ii.rcImage.left, ii.rcImage.bottom-ii.rcImage.top, theApp.m_iDfltImageListColorFlags|ILC_MASK, 0, 1);
 		}
 		else
@@ -988,7 +986,7 @@ void CTreePropSheet::OnPageTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResu
 }
 
 
-void CTreePropSheet::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult)
+void CTreePropSheet::OnPageTreeSelChanged(NMHDR* /*pNotifyStruct*/, LRESULT* plResult)
 {
 	*plResult = 0;
 

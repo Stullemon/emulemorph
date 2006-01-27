@@ -1,21 +1,21 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
+ 
+ 
 This work is based on the java implementation of the Kademlia protocol.
 Kademlia: Peer-to-peer routing based on the XOR metric
 Copyright (C) 2002  Petar Maymounkov [petar@post.harvard.edu]
@@ -36,10 +36,8 @@ there client on the eMule forum..
 
 #pragma once
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
+namespace Kademlia
+{
 #define SEARCHTOLERANCE				16777216
 #define K							10
 #define KBASE						4
@@ -68,5 +66,4 @@ namespace Kademlia {
 #define SEARCHNODECOMP_TOTAL		10
 #define SEARCHFINDBUDDY_TOTAL		10
 #define SEARCHFINDSOURCE_TOTAL		20
-
-} // End namespace
+}

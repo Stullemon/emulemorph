@@ -417,7 +417,7 @@ void CTransferWnd::OnWindowPosChanged(WINDOWPOS* lpwndpos)
 	CResizableDialog::OnWindowPosChanged(lpwndpos);
 }
 
-void CTransferWnd::OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult)
+void CTransferWnd::OnSplitterMoved(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	SPC_NMHDR* pHdr = (SPC_NMHDR*)pNMHDR;
 	DoResize(pHdr->delta);
@@ -425,12 +425,21 @@ void CTransferWnd::OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult)
 
 BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->message== WM_LBUTTONDBLCLK && pMsg->hwnd == m_dlTab.m_hWnd) {
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		// Don't handle Ctrl+Tab in this window. It will be handled by main window.
+		if (pMsg->wParam == VK_TAB && GetAsyncKeyState(VK_CONTROL) < 0)
+			return FALSE;
+	}
+	else if (pMsg->message == WM_LBUTTONDBLCLK)
+	{
+		if (pMsg->hwnd == m_dlTab.m_hWnd)
+		{
 		OnDblclickDltab();
 		return TRUE;
 	}
-
-	if (pMsg->message == WM_MOUSEMOVE)
+	}
+	else if (pMsg->message == WM_MOUSEMOVE)
 	{
 		POINT point;
 		::GetCursorPos(&point);
@@ -448,8 +457,7 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
-
-	if (pMsg->message == WM_MBUTTONUP)
+	else if (pMsg->message == WM_MBUTTONUP)
 	{
 		if (downloadlistactive)
 			downloadlistctrl.ShowSelectedFileDetails();
@@ -815,26 +823,26 @@ void CTransferWnd::OnBnClickedQueueRefreshButton()
 	}
 }
 
-void CTransferWnd::OnHoverUploadList(NMHDR *pNMHDR, LRESULT *pResult)
+void CTransferWnd::OnHoverUploadList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	downloadlistactive=false;
 	*pResult = 0;
 }
 
-void CTransferWnd::OnHoverDownloadList(NMHDR *pNMHDR, LRESULT *pResult)
+void CTransferWnd::OnHoverDownloadList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	downloadlistactive=true;
 	*pResult = 0;
 }
 
-void CTransferWnd::OnTcnSelchangeDltab(NMHDR *pNMHDR, LRESULT *pResult)
+void CTransferWnd::OnTcnSelchangeDltab(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	downloadlistctrl.ChangeCategory(m_dlTab.GetCurSel());
 	*pResult = 0;
 }
 
 // Ornis' download categories
-void CTransferWnd::OnNMRclickDltab(NMHDR *pNMHDR, LRESULT *pResult)
+void CTransferWnd::OnNMRclickDltab(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	POINT point;
 	::GetCursorPos(&point);
@@ -1020,9 +1028,8 @@ void CTransferWnd::OnMouseMove(UINT nFlags, CPoint point)
 	}
 }
 
-void CTransferWnd::OnLButtonUp(UINT nFlags, CPoint point)
+void CTransferWnd::OnLButtonUp(UINT /*nFlags*/, CPoint /*point*/)
 {
-
 	if (m_bIsDragging)
 	{
 		ReleaseCapture ();
@@ -1032,7 +1039,7 @@ void CTransferWnd::OnLButtonUp(UINT nFlags, CPoint point)
 		delete m_pDragImage;
 		
 		if (m_nDropIndex>-1 && (downloadlistctrl.curTab==0 ||
-				(downloadlistctrl.curTab>0 && m_nDropIndex!=downloadlistctrl.curTab) )) {
+				(downloadlistctrl.curTab > 0 && (UINT)m_nDropIndex != downloadlistctrl.curTab) )) {
 
 			CPartFile* file;
 			
@@ -1065,7 +1072,7 @@ void CTransferWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 }
 
-BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam )
+BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 { 
 	// khaos::categorymod+
 	/*
@@ -1155,7 +1162,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam )
 		}
 		// khaos::categorymod+ Merge Category
 		case MP_CAT_MERGE: {
-			uint8 useCat;
+			int useCat;
 
 			CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
 			int nResult = getCatDlg->DoModal();
@@ -1598,7 +1605,7 @@ void CTransferWnd::SetToolTipsDelay(DWORD dwDelay)
 		tooltip->SetDelayTime(TTDT_INITIAL, dwDelay);
 }
 
-CString CTransferWnd::GetTabStatistic(uint8 tab)
+CString CTransferWnd::GetTabStatistic(int tab)
 {
 	uint16 count, dwl, err, paus;
 	count = dwl = err = paus = 0;
@@ -1617,9 +1624,10 @@ CString CTransferWnd::GetTabStatistic(uint8 tab)
 			if (cur_file->GetTransferringSrcCount() > 0)
 				dwl++;
 			speed += cur_file->GetDatarate() / 1024.0F;
-			size+=cur_file->GetFileSize();
-			trsize+=cur_file->GetCompletedSize();
-			disksize+=cur_file->GetRealFileSize();
+			size += (uint64)cur_file->GetFileSize();
+			trsize += (uint64)cur_file->GetCompletedSize();
+			if (!cur_file->IsAllocating())
+			disksize += (uint64)cur_file->GetRealFileSize();
 			if (cur_file->GetStatus() == PS_ERROR)
 				err++;
 			if (cur_file->GetStatus() == PS_PAUSED)
@@ -1671,7 +1679,7 @@ void CTransferWnd::OnDblclickDltab()
 	OnCommand(MP_CAT_EDIT,0);
 }
 
-void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult)
+void CTransferWnd::OnTabMovement(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	UINT from=m_dlTab.GetLastMovementSource();
 	UINT to=m_dlTab.GetLastMovementDestionation();
@@ -1994,7 +2002,7 @@ void CTransferWnd::ShowSplitWindow(bool bReDraw)
 	UpdateListCount(m_uWnd2);
 }
 
-void CTransferWnd::OnWnd1BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult)
+void CTransferWnd::OnWnd1BtnDropDown(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	CTitleMenu menu;
 	menu.CreatePopupMenu();
@@ -2015,7 +2023,7 @@ void CTransferWnd::OnWnd1BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult)
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, rc.left, rc.bottom, this);
 }
 
-void CTransferWnd::OnWnd2BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult)
+void CTransferWnd::OnWnd2BtnDropDown(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	CTitleMenu menu;
 	menu.CreatePopupMenu();

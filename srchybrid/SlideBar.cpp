@@ -667,7 +667,7 @@ void CSlideBar::OnMouseMove(UINT nFlags, CPoint point)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // OnLButtonUp
-void CSlideBar::OnLButtonUp(UINT nFlags, CPoint point)
+void CSlideBar::OnLButtonUp(UINT /*nFlags*/, CPoint point)
 {
 	int iGroupIndex = GetGroupIndexFromPoint(point);
 
@@ -680,7 +680,7 @@ void CSlideBar::OnLButtonUp(UINT nFlags, CPoint point)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // OnLButtonDown
-void CSlideBar::OnLButtonDown(UINT nFlags, CPoint point)
+void CSlideBar::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 {
 	int iGroupIndex = GetGroupIndexFromPoint(point);
 

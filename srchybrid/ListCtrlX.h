@@ -51,11 +51,15 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport);
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlX window
 
+class CListCtrlX;
+typedef bool (*LCX_FINDITEMFN)(const CListCtrlX& lv, int iItem, DWORD_PTR lParam);
+
 class CListCtrlX : public CListCtrl
 {
 // Construction
 public:
 	CListCtrlX();
+	virtual ~CListCtrlX();
 
 // Attributes
 public:
@@ -64,6 +68,8 @@ public:
 	UINT m_uIDMenu;
 	BOOL m_bRouteMenuCmdsToMainFrame;
 	UINT m_uIDAccel;
+	LCX_FINDITEMFN m_pfnFindItem;
+	DWORD_PTR m_lFindItemParam;
 
 	void SetRegistryKey(LPCTSTR pszRegKey) { m_strRegKey = pszRegKey; }
 	void SetRegistryPrefix(LPCTSTR pszPrefix) { m_strRegPrefix = pszPrefix; }
@@ -75,7 +81,6 @@ public:
 	int GetSortColumn() const { return m_iSortColumn; }
 	void SetSortColumn(int iColumns, LCX_COLUMN_INIT* pColumns, int iSortColumn);
 	void UpdateSortColumn(int iColumns, LCX_COLUMN_INIT* pColumns);
-
 
 // Operations
 public:
@@ -100,18 +105,11 @@ public:
 	void OnFindStart();
 	void OnFindNext();
 	void OnFindPrev();
+	int GetFindColumn() const { return m_iFindColumn; }
+	const CString& GetFindText() const { return m_strFindText; }
+	bool GetFindMatchCase() const { return m_bFindMatchCase; }
+	static bool FindItem(const CListCtrlX& lv, int iItem, DWORD_PTR lParam);
 
-// Overrides
-	public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
-	virtual void PreSubclassWindow();
-
-// Implementation
-public:
-	virtual ~CListCtrlX();
-
-	// Generated message map functions
 protected:
 	CString m_strRegKey;
 	CString m_strRegPrefix;
@@ -125,11 +123,14 @@ protected:
 	CImageList m_imlHdr;
 
 	CString m_strFindText;
-	BOOL m_bFindMatchCase;
+	bool m_bFindMatchCase;
 	int m_iFindDirection;
 	int m_iFindColumn;
 	void DoFindNext(BOOL bShowError);
 	void DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL bShowError);
+
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual void PreSubclassWindow();
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);

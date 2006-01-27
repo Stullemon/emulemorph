@@ -240,7 +240,7 @@ void CSharedFilesWnd::OnBnClickedReloadsharedfiles()
 	Reload();
 }
 
-void CSharedFilesWnd::OnLvnItemActivateSflist(NMHDR *pNMHDR, LRESULT *pResult)
+void CSharedFilesWnd::OnLvnItemActivateSflist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	ShowSelectedFilesSummary();
 }
@@ -330,13 +330,21 @@ void CSharedFilesWnd::OnNMClickSflist(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg) 
+BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg)
 {
-   if(pMsg->message == WM_KEYUP){
-	   if (pMsg->hwnd == GetDlgItem(IDC_SFLIST)->m_hWnd)
-			OnLvnItemActivateSflist(0,0);
-   }
-   if (pMsg->message == WM_MBUTTONUP){
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		// Don't handle Ctrl+Tab in this window. It will be handled by main window.
+		if (pMsg->wParam == VK_TAB && GetAsyncKeyState(VK_CONTROL) < 0)
+			return FALSE;
+	}
+	else if (pMsg->message == WM_KEYUP)
+	{
+		if (pMsg->hwnd == GetDlgItem(IDC_SFLIST)->m_hWnd)
+			OnLvnItemActivateSflist(0, 0);
+	}
+	else if (pMsg->message == WM_MBUTTONUP)
+	{
 		POINT point;
 		::GetCursorPos(&point);
 		CPoint p = point; 
@@ -347,12 +355,12 @@ BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg)
 
 		sharedfilesctrl.SetItemState(-1, 0, LVIS_SELECTED);
 		sharedfilesctrl.SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-		sharedfilesctrl.SetSelectionMark(it);   // display selection mark correctly! 
+		sharedfilesctrl.SetSelectionMark(it);   // display selection mark correctly!
 		sharedfilesctrl.ShowComments((CKnownFile*)sharedfilesctrl.GetItemData(it));
 		return TRUE;
-   }
+	}
 
-   return CResizableDialog::PreTranslateMessage(pMsg);
+	return CResizableDialog::PreTranslateMessage(pMsg);
 }
 
 void CSharedFilesWnd::OnSysColorChange()
@@ -388,7 +396,7 @@ void CSharedFilesWnd::Localize()
 	GetDlgItem(IDC_FSTATIC7)->SetWindowText(GetResString(IDS_SF_REQUESTS)+_T(":"));
 }
 
-void CSharedFilesWnd::OnTvnSelchangedShareddirstree(NMHDR *pNMHDR, LRESULT *pResult)
+void CSharedFilesWnd::OnTvnSelchangedShareddirstree(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	sharedfilesctrl.SetDirectoryFilter(m_ctlSharedDirTree.GetSelectedFilter(), !m_ctlSharedDirTree.IsCreatingTree());
 	*pResult = 0;

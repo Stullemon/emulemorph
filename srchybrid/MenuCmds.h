@@ -10,7 +10,8 @@
 #define MP_EXIT					0x140
 #define	MP_ABOUTBOX				0x150
 #define MP_VERSIONCHECK			0x160
-#define MP_MVERSIONCHECK		0x170//MORPH - Added by SiRoB, New Version check
+#define MP_MINIMIZETOTRAY		0x170
+#define MP_MVERSIONCHECK		0x180//MORPH - Added by SiRoB, New Version check
 
 #define MP_MESSAGE				10102
 #define MP_DETAIL				10103
@@ -265,7 +266,7 @@
 #define	MP_PREVIEW_APP_MIN		11200	// reserve 50 entries for preview apps
 #define	MP_PREVIEW_APP_MAX		(MP_PREVIEW_APP_MIN+49)
 
-#define Irc_Version				"(SMIRCv00.68)"
+#define Irc_Version				"(SMIRCv00.69)"
 #define Irc_Join				10240
 #define Irc_Close				10241
 #define Irc_Priv				10242

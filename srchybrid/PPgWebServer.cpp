@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -36,21 +36,6 @@ static char THIS_FILE[] = __FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgWebServer, CPropertyPage)
-CPPgWebServer::CPPgWebServer()
-	: CPropertyPage(CPPgWebServer::IDD)
-{
-	bCreated = false;
-}
-
-CPPgWebServer::~CPPgWebServer()
-{
-}
-
-
-void CPPgWebServer::DoDataExchange(CDataExchange* pDX)
-{
-	CPropertyPage::DoDataExchange(pDX);
-}
 
 BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 	ON_EN_CHANGE(IDC_WSPASS, OnDataChange)
@@ -70,6 +55,20 @@ BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
+CPPgWebServer::CPPgWebServer()
+	: CPropertyPage(CPPgWebServer::IDD)
+{
+	bCreated = false;
+}
+
+CPPgWebServer::~CPPgWebServer()
+{
+}
+
+void CPPgWebServer::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+}
 
 BOOL CPPgWebServer::OnInitDialog()
 {
@@ -172,7 +171,7 @@ BOOL CPPgWebServer::OnApply()
 
 		GetDlgItem(IDC_WSPORT)->GetWindowText(sBuf);
 		if (_tstoi(sBuf)!=oldPort) {
-			thePrefs.SetWSPort(_tstoi(sBuf));
+			thePrefs.SetWSPort((uint16)_tstoi(sBuf));
 			theApp.webserver->RestartServer();
 		}
 
@@ -188,7 +187,7 @@ BOOL CPPgWebServer::OnApply()
 		// mobilemule
 		GetDlgItem(IDC_MMPORT_FIELD)->GetWindowText(sBuf);
 		if (_tstoi(sBuf)!= thePrefs.GetMMPort() ) {
-			thePrefs.SetMMPort(_tstoi(sBuf));
+			thePrefs.SetMMPort((uint16)_tstoi(sBuf));
 			theApp.mmserver->StopServer();
 			theApp.mmserver->Init();
 		}
@@ -310,7 +309,7 @@ BOOL CPPgWebServer::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgWebServer::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgWebServer::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

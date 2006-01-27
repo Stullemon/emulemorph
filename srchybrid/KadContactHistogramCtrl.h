@@ -13,7 +13,6 @@ public:
 
 	bool ContactAdd(const Kademlia::CContact* contact);
 	void ContactRem(const Kademlia::CContact* contact);
-	void ContactRef(const Kademlia::CContact* contact);
 
 protected:
 	UINT m_aHist[KAD_CONTACT_HIST_SIZE];

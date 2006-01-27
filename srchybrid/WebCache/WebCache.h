@@ -21,6 +21,7 @@
 #define WC_B64_KEYLENGTH	22			// length of base64-encoded key
 
 #define WC_OHCB_PACKET_SIZE		50		// length of an OHCB packet
+#define WC_OHCB_PACKET_SIZE_LARGE_FILE		58		// length of an OHCB packet
 #define	WC_NR_OF_XPRESS_OHCBS	8		// number of OHCBs that should be sent ASAP
 #define WC_MAX_OHCBS_IN_UDP_PACKET 10	// maximal number of OHCBs in a packet that is to be sent via UDP
 #define WC_MULTI_OHCB_SEND_TIME	MIN2MS(10) // time to pass between regular sending of MultiOHCB packets

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -152,22 +152,22 @@ BOOL CPPgStats::OnApply()
 			bInvalidateGraphs = true;
 		}
 
-		if (thePrefs.GetTrafficOMeterInterval() != m_iGraphsUpdate){
+		if (thePrefs.GetTrafficOMeterInterval() != (UINT)m_iGraphsUpdate){
 			thePrefs.SetTrafficOMeterInterval(m_iGraphsUpdate);
 			bInvalidateGraphs = true;
 		}
-		if (thePrefs.GetStatsInterval() != m_iGraphsAvgTime){
+		if (thePrefs.GetStatsInterval() != (UINT)m_iGraphsAvgTime){
 			thePrefs.SetStatsInterval(m_iGraphsAvgTime);
 			bInvalidateGraphs = true;
 		}
-		if (thePrefs.GetStatsAverageMinutes() != m_iStatsUpdate){
+		if (thePrefs.GetStatsAverageMinutes() != (UINT)m_iStatsUpdate){
 			thePrefs.SetStatsAverageMinutes(m_iStatsUpdate);
 			bInvalidateGraphs = true;
 		}
 
 		TCHAR buffer[20];
 		GetDlgItem(IDC_CGRAPHSCALE)->GetWindowText(buffer, ARRSIZE(buffer));
-		int statsMax = _tstoi(buffer);
+		UINT statsMax = _tstoi(buffer);
 		if (statsMax > thePrefs.GetMaxConnections() + 5)
 		{
 			if (thePrefs.GetStatsMax() != thePrefs.GetMaxConnections() + 5){
@@ -186,9 +186,9 @@ BOOL CPPgStats::OnApply()
 		}
 
 		int n = m_cratio.GetCurSel();
-		int iRatio = (n == 5) ? 10 : ((n == 6) ? 20 : n + 1); // Index 5 = 1:10 and 6 = 1:20
-		if (thePrefs.GetStatsConnectionsGraphRatio() != iRatio){
-			thePrefs.SetStatsConnectionsGraphRatio(iRatio); 
+		UINT uRatio = (n == 5) ? 10 : ((n == 6) ? 20 : n + 1); // Index 5 = 1:10 and 6 = 1:20
+		if (thePrefs.GetStatsConnectionsGraphRatio() != uRatio){
+			thePrefs.SetStatsConnectionsGraphRatio(uRatio); 
 			bInvalidateGraphs = true;
 		}
 		//MORPH START - Added by SiRoB, New Graph
@@ -320,7 +320,7 @@ void CPPgStats::OnCbnSelchangeColorselector()
 	}
 }
 
-LONG CPPgStats::OnColorPopupSelChange(UINT lParam, LONG wParam)
+LONG CPPgStats::OnColorPopupSelChange(UINT /*lParam*/, LONG /*wParam*/)
 {
 	int iSel = m_colors.GetCurSel();
 	if (iSel >= 0)
@@ -354,7 +354,7 @@ BOOL CPPgStats::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgStats::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgStats::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

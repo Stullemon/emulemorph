@@ -82,35 +82,34 @@ protected:
 	virtual void OnSend(int nErrorCode);
 
 	//Operations
-	virtual BOOL Accept( CAsyncSocketEx& rConnectedSocket, SOCKADDR* lpSockAddr = NULL, int* lpSockAddrLen = NULL );
+	virtual BOOL Accept(CAsyncSocketEx& rConnectedSocket, SOCKADDR* lpSockAddr = NULL, int* lpSockAddrLen = NULL);
 	virtual void Close();
-	virtual BOOL Connect(LPCTSTR lpszHostAddress, UINT nHostPort);
-	virtual BOOL Connect( const SOCKADDR* lpSockAddr, int nSockAddrLen );
+	virtual BOOL Connect(LPCSTR lpszHostAddress, UINT nHostPort);
+	virtual BOOL Connect(const SOCKADDR* lpSockAddr, int nSockAddrLen);
 	virtual BOOL Create(UINT nSocketPort = 0, int nSocketType = SOCK_STREAM,
-				long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT |
-							FD_CONNECT | FD_CLOSE,
-				LPCTSTR lpszSocketAddress = NULL );
-	virtual BOOL GetPeerName( SOCKADDR* lpSockAddr, int* lpSockAddrLen );
+						long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE,
+						LPCSTR lpszSocketAddress = NULL );
+	virtual BOOL GetPeerName(SOCKADDR* lpSockAddr, int* lpSockAddrLen);
 #ifdef _AFX
-	virtual BOOL GetPeerName( CString& rPeerAddress, UINT& rPeerPort );
+	virtual BOOL GetPeerName(CString& rPeerAddress, UINT& rPeerPort);
 #endif
-	virtual BOOL Listen( int nConnectionBacklog);
+	virtual BOOL Listen(int nConnectionBacklog);
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
 	virtual int Send(const void* lpBuf, int nBufLen, int nFlags = 0);
-	virtual BOOL ShutDown( int nHow = sends );
+	virtual BOOL ShutDown(int nHow = sends);
 	enum { receives = 0, sends = 1, both = 2 };
 
 	//Functions that will call next layer
-	BOOL ShutDownNext( int nHow = sends );
-	BOOL AcceptNext( CAsyncSocketEx& rConnectedSocket, SOCKADDR* lpSockAddr = NULL, int* lpSockAddrLen = NULL );
+	BOOL ShutDownNext(int nHow = sends);
+	BOOL AcceptNext(CAsyncSocketEx& rConnectedSocket, SOCKADDR* lpSockAddr = NULL, int* lpSockAddrLen = NULL);
 	void CloseNext();
-	BOOL ConnectNext(LPCTSTR lpszHostAddress, UINT nHostPort);
-	BOOL ConnectNext( const SOCKADDR* lpSockAddr, int nSockAddrLen );
-	BOOL CreateNext(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR lpszSocketAddress);
-	#ifdef _AFX
-		BOOL GetPeerNameNext( CString& rPeerAddress, UINT& rPeerPort );
-	#endif
-	BOOL GetPeerNameNext( SOCKADDR* lpSockAddr, int* lpSockAddrLen );
+	BOOL ConnectNext(LPCSTR lpszHostAddress, UINT nHostPort);
+	BOOL ConnectNext(const SOCKADDR* lpSockAddr, int nSockAddrLen);
+	BOOL CreateNext(UINT nSocketPort, int nSocketType, long lEvent, LPCSTR lpszSocketAddress);
+#ifdef _AFX
+	BOOL GetPeerNameNext(CString& rPeerAddress, UINT& rPeerPort);
+#endif
+	BOOL GetPeerNameNext(SOCKADDR* lpSockAddr, int* lpSockAddrLen);
 	BOOL ListenNext( int nConnectionBacklog);
 	int ReceiveNext(void *lpBuf, int nBufLen, int nFlags = 0);
 	int SendNext(const void *lpBuf, int nBufLen, int nFlags = 0);
@@ -118,10 +117,10 @@ protected:
 	CAsyncSocketEx *m_pOwnerSocket;
 
 	//Calls OnLayerCallback on owner socket
-	int DoLayerCallback(int nType, int nParam1, int nParam2);
+	int DoLayerCallback(int nType, int nCode, WPARAM wParam = 0, LPARAM lParam = 0);
 
 	int GetLayerState();
-	BOOL TriggerEvent(long lEvent, int nErrorCode, BOOL bPassThrough = FALSE );
+	BOOL TriggerEvent(long lEvent, int nErrorCode, BOOL bPassThrough = FALSE);
 
 	enum LayerState
 	{
@@ -132,7 +131,7 @@ protected:
 		connected,
 		closed,
 		aborted
-	} ;
+	};
 
 private:
 	//Layer state can't be set directly from derived classes

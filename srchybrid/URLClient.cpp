@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -112,14 +112,14 @@ bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
 	if (Url.dwUrlPathLength == 0)			// we must know the URL path on that host
 		return false;
 
-	m_strHost = szHostName;
+	m_strHostA = szHostName;
 
 	TCHAR szEncodedUrl[INTERNET_MAX_URL_LENGTH];
 	DWORD dwEncodedUrl = ARRSIZE(szEncodedUrl);
 	if (!InternetCanonicalizeUrl(szUrl, szEncodedUrl, &dwEncodedUrl, ICU_ENCODE_PERCENT))
 		return false;
 	m_strUrlPath = szEncodedUrl;
-	m_nUrlStartPos = (UINT)-1;
+	m_nUrlStartPos = (uint64)-1;
 
 	SetUserName(szUrl);
 
@@ -131,7 +131,7 @@ bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
 	ResetIP2Country(m_nConnectIP); //MORPH Added by SiRoB, IPtoCountry URLClient
 //	if (m_nConnectIP == INADDR_NONE)
 //		m_nConnectIP = 0;
-	m_nUserIDHybrid = htonl(m_nConnectIP); //MORPH - Changed by SiRoB, -Fix-
+	m_nUserIDHybrid = htonl(m_nConnectIP);
 	ASSERT( m_nUserIDHybrid != 0 );
 	m_nUserPort = Url.nPort;
 	return true;
@@ -186,9 +186,9 @@ bool CUrlClient::SendHttpBlockRequests()
 	CStringA strHttpRequest;
 	strHttpRequest.AppendFormat("GET %s HTTP/1.0\r\n", m_strUrlPath);
 	strHttpRequest.AppendFormat("Accept: */*\r\n");
-	strHttpRequest.AppendFormat("Range: bytes=%u-%u\r\n", m_uReqStart, m_uReqEnd);
+	strHttpRequest.AppendFormat("Range: bytes=%I64u-%I64u\r\n", m_uReqStart, m_uReqEnd);
 	strHttpRequest.AppendFormat("Connection: Keep-Alive\r\n");
-	strHttpRequest.AppendFormat("Host: %s\r\n", T2CA(m_strHost));
+	strHttpRequest.AppendFormat("Host: %s\r\n", m_strHostA);
 	strHttpRequest.AppendFormat("\r\n");
 
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -200,7 +200,7 @@ bool CUrlClient::SendHttpBlockRequests()
 	return true;
 }
 
-bool CUrlClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket)
+bool CUrlClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* /*pClassSocket*/)
 {
 	return CUpDownClient::TryToConnect(bIgnoreMaxCon, RUNTIME_CLASS(CHttpClientDownSocket));
 }
@@ -211,7 +211,7 @@ bool CUrlClient::Connect()
 		return CUpDownClient::Connect();
 	//Try to always tell the socket to WaitForOnConnect before you call Connect.
 	socket->WaitForOnConnect();
-	socket->Connect(m_strHost, m_nUserPort);
+	socket->Connect(m_strHostA, m_nUserPort);
 	return true;
 }
 
@@ -278,7 +278,7 @@ bool CUrlClient::ProcessHttpDownResponse(const CStringAArray& astrHeaders)
 		const CStringA& rstrHdr = astrHeaders.GetAt(i);
 		if (bExpectData && strnicmp(rstrHdr, "Content-Length:", 15) == 0)
 		{
-			UINT uContentLength = atoi((LPCSTR)rstrHdr + 15);
+			uint64 uContentLength = _atoi64((LPCSTR)rstrHdr + 15);
 			if (uContentLength != m_uReqEnd - m_uReqStart + 1){
 				if (uContentLength != reqfile->GetFileSize()){ // tolerate this case only
 					CString strError;
@@ -290,14 +290,14 @@ bool CUrlClient::ProcessHttpDownResponse(const CStringAArray& astrHeaders)
 		}
 		else if (bExpectData && strnicmp(rstrHdr, "Content-Range:", 14) == 0)
 		{
-			DWORD dwStart = 0, dwEnd = 0, dwLen = 0;
-			if (sscanf((LPCSTR)rstrHdr + 14," bytes %u - %u / %u", &dwStart, &dwEnd, &dwLen) != 3){
+			uint64 ui64Start = 0, ui64End = 0, ui64Len = 0;
+			if (sscanf((LPCSTR)rstrHdr + 14," bytes %I64u - %I64u / %I64u", &ui64Start, &ui64End, &ui64Len) != 3){
 				CString strError;
 				strError.Format(_T("Unexpected HTTP header field \"%hs\""), rstrHdr);
 				throw strError;
 			}
 
-			if (dwStart != m_uReqStart || dwEnd != m_uReqEnd || dwLen != reqfile->GetFileSize()){
+			if (ui64Start != m_uReqStart || ui64End != m_uReqEnd || ui64Len != reqfile->GetFileSize()){
 				CString strError;
 				strError.Format(_T("Unexpected HTTP header field \"%hs\""), rstrHdr);
 				throw strError;
@@ -367,16 +367,16 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 	if (reqfile->IsStopped() || (reqfile->GetStatus() != PS_READY && reqfile->GetStatus() != PS_EMPTY))
 		throw CString(_T("Failed to process HTTP data block - File not ready for receiving data"));
 
-	if (m_nUrlStartPos == -1)
+	if (m_nUrlStartPos == (uint64)-1)
 		throw CString(_T("Failed to process HTTP data block - Unexpected file data"));
 
-	uint32 nStartPos = m_nUrlStartPos;
-	uint32 nEndPos = m_nUrlStartPos + uSize;
+	uint64 nStartPos = m_nUrlStartPos;
+	uint64 nEndPos = m_nUrlStartPos + uSize;
 
 	m_nUrlStartPos += uSize;
 
 //	if (thePrefs.GetDebugClientTCPLevel() > 0)
-//		Debug("  Start=%u  End=%u  Size=%u  %s\n", nStartPos, nEndPos, size, DbgGetFileInfo(reqfile->GetFileHash()));
+//		Debug("  Start=%I64u  End=%I64u  Size=%u  %s\n", nStartPos, nEndPos, size, DbgGetFileInfo(reqfile->GetFileHash()));
 
 	if (!(GetDownloadState() == DS_DOWNLOADING || GetDownloadState() == DS_NONEEDEDPARTS))
          // MORPH START - Added by Commander, WebCache 1.2e
@@ -408,7 +408,7 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 			if (thePrefs.GetDebugClientTCPLevel() > 1) { // yonatan http - used to be > 0){
 				// NOTE: 'Left' is only accurate in case we have one(!) request block!
 				void* p = m_pPCDownSocket ? (void*)m_pPCDownSocket : (void*)socket;
-				Debug(_T("%08x  Start=%u  End=%u  Size=%u  Left=%u  %s\n"), p, nStartPos, nEndPos, uSize, cur_block->block->EndOffset - (nStartPos + uSize) + 1, DbgGetFileInfo(reqfile->GetFileHash()));
+				Debug(_T("%08x  Start=%I64u  End=%I64u  Size=%u  Left=%I64u  %s\n"), p, nStartPos, nEndPos, uSize, cur_block->block->EndOffset - (nStartPos + uSize) + 1, DbgGetFileInfo(reqfile->GetFileHash()));
 			}
 
 			// MORPH START - Added by Commander, WebCache 1.2e
@@ -470,7 +470,7 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 					{
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
 							DebugSend("More block requests", this);
-						m_nUrlStartPos = (UINT)-1;
+						m_nUrlStartPos = (uint64)-1;
 						// MORPH START - Added by Commander, WebCache 1.2e
 						if( GetWebCacheDownState() == WCDS_NONE )
 							SendHttpBlockRequests(); // original emule code
@@ -490,7 +490,7 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 	TRACE("%s - Dropping packet\n", __FUNCTION__);
 }
 
-void CUrlClient::SendCancelTransfer(Packet* packet)
+void CUrlClient::SendCancelTransfer(Packet* /*packet*/)
 {
 	if (socket)
 	{

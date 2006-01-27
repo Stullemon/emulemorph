@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -91,8 +91,20 @@ LONG CMiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS* pExceptionInfo)
 					pszFileName++;
 					*pszFileName = _T('\0');
 				}
-				_tcsncat(szDumpPath, m_szAppName, ARRSIZE(szDumpPath));
-				_tcsncat(szDumpPath, _T(".dmp"), ARRSIZE(szDumpPath));
+
+				// Replace spaces and dots in file name.
+				TCHAR szBaseName[_MAX_PATH] = {0};
+				_tcsncat(szBaseName, m_szAppName, ARRSIZE(szBaseName) - 1);
+				LPTSTR psz = szBaseName;
+				while (*psz != _T('\0')) {
+					if (*psz == _T('.'))
+						*psz = _T('-');
+					else if (*psz == _T(' '))
+						*psz = _T('_');
+					psz++;
+				}
+				_tcsncat(szDumpPath, szBaseName, ARRSIZE(szDumpPath) - 1);
+				_tcsncat(szDumpPath, _T(".dmp"), ARRSIZE(szDumpPath) - 1);
 
 				HANDLE hFile = CreateFile(szDumpPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 				if (hFile != INVALID_HANDLE_VALUE)

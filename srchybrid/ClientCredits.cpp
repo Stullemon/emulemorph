@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -24,10 +24,14 @@
 #include "Opcodes.h"
 #include "Sockets.h"
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4100) // unreferenced formal parameter
 #include <crypto51/base64.h>
 #include <crypto51/osrng.h>
 #include <crypto51/files.h>
 #include <crypto51/sha.h>
+#pragma warning(default:4100) // unreferenced formal parameter
+#pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "emuledlg.h"
 #include "Log.h"
@@ -183,7 +187,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 			result=(float)(3.0 * cl_down * cl_down - cl_up * cl_up);
 			if (fabs(result)>20000.0f) 
 				result*=20000.0f/fabs(result);
-			result=100.0f*powf((float)(1-1/(1.0f+expf(result*0.001))),6.6667f);
+			result=100.0f*powf((float)(1-1/(1.0f+expf(result*0.001f))),6.6667f);
 			if (result<0.1f) 
 				result=0.1f;
 			if (result>10.0f && IdentState == IS_NOTAVAILABLE)
@@ -536,7 +540,7 @@ void CClientCreditsList::LoadList()
 			/*
 			m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
 			*/
-			m_mapClients.InitHashTable(count*1.5 > 5003?getPrime(count*1.5):5003);
+			m_mapClients.InitHashTable((int)(count*1.5) > 5003?getPrime((int)(count*1.5)):5003);
 			//Morph End - added by AndCycle, minor tweak - prime
 
 			const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
@@ -885,10 +889,8 @@ void CClientCreditsList::InitalizeCrypting()
 	}
 	catch(...)
 	{
-		if (m_pSignkey){
-			delete m_pSignkey;
-			m_pSignkey = NULL;
-		}
+		delete m_pSignkey;
+		m_pSignkey = NULL;
 		LogError(LOG_STATUSBAR, GetResString(IDS_CRYPT_INITFAILED));
 		ASSERT(0);
 	}
@@ -1058,7 +1060,7 @@ bool CClientCreditsList::Debug_CheckCrypting()
 	newcredits->m_dwCryptRndChallengeFrom = challenge;
 	// create signature with fake priv key
 	uchar pachSignature[200];
-	memset(pachSignature,200,0);
+	memset(pachSignature,0,200);
 	uint8 sigsize = CreateSignature(newcredits,pachSignature,200,0,false, &priv);
 
 
@@ -1111,7 +1113,7 @@ sint64 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP)
 					buffer+=buffer2;
 				}
 				if (thePrefs.GetLogSecureIdent())
-					AddDebugLogLine(false,"Warning: WaitTime resetted due to Invalid Ident for Userhash %s",buffer.GetBuffer());*/
+					AddDebugLogLine(false,"Warning: WaitTime resetted due to Invalid Ident for Userhash %s", buffer);*/
 				if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 						//EastShare START - Modified by TAHO, modified SUQWT
 						//m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1134,8 +1136,8 @@ sint64 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP)
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 // Moonlight: SUQWT - Save the wait times.
 void CClientCredits::SaveUploadQueueWaitTime(int iKeepPct) {
-	if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = ((GetTickCount() - m_dwUnSecureWaitTime) / 100) * iKeepPct;
-	if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = ((GetTickCount() - m_dwSecureWaitTime) / 100) * iKeepPct;
+	if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = (uint32)((GetTickCount() - m_dwUnSecureWaitTime) / 100) * iKeepPct;
+	if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = (uint32)((GetTickCount() - m_dwSecureWaitTime) / 100) * iKeepPct;
 	// EastShare START - Marked by TAHO, modified SUQWT
 	// SetSecWaitStartTime(m_dwWaitTimeIP);
 	// EastShare END - Marked by TAHO, modified SUQWT

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include <io.h>
+#include <share.h>
 #include "emule.h"
 #include "ServerList.h"
 #include "SafeFile.h"
@@ -91,7 +92,7 @@ void CServerList::AutoUpdate()
 		CHttpDownloadDlg dlgDownload;
 		dlgDownload.m_strTitle = GetResString(IDS_HTTP_CAPTION);
 		strURLToDownload = thePrefs.addresses_list.GetNext(Pos); 
-		dlgDownload.m_sURLToDownload = strURLToDownload.GetBuffer();
+		dlgDownload.m_sURLToDownload = strURLToDownload;
 		dlgDownload.m_sFileToDownloadInto = servermetdownload;
 		if (dlgDownload.DoModal() == IDOK)
 			bDownloaded=true;
@@ -314,7 +315,7 @@ void CServerList::ServerStats()
 		ping_server->SetChallenge(uChallenge);
 		PokeUInt32(packet->pBuffer, uChallenge);
 		ping_server->SetLastPinged(GetTickCount());
-		ping_server->SetLastPingedTime(tNow);
+		ping_server->SetLastPingedTime(tNow - (rand()%HR2S(1)));
 		ping_server->AddFailedCount();
 		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(ping_server);
 		if (thePrefs.GetDebugServerUDPLevel() > 0)
@@ -483,11 +484,11 @@ void CServerList::Sort()
    for( pos1 = list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
 	   list.GetNext(pos1);
 	   CServer* cur_server = list.GetAt(pos2);
-	   if (cur_server->GetPreferences()== SRV_PR_HIGH){
+	   if (cur_server->GetPreference()== SRV_PR_HIGH){
 		   list.AddHead(cur_server);
 		   list.RemoveAt(pos2);
 	   }
-	   else if (cur_server->GetPreferences() == SRV_PR_LOW){
+	   else if (cur_server->GetPreference() == SRV_PR_LOW){
 		   list.AddTail(cur_server);
 		   list.RemoveAt(pos2);
 	   }
@@ -560,7 +561,7 @@ CServer* CServerList::GetNextSearchServer()
 		nextserver = list.GetAt(posIndex);
 		searchserverpos++;
 		i++;
-		if (searchserverpos == list.GetCount())
+		if (searchserverpos == (UINT)list.GetCount())
 			searchserverpos = 0;
 	}
 	return nextserver;
@@ -579,7 +580,7 @@ CServer* CServerList::GetNextStatServer()
 		nextserver = list.GetAt(posIndex);
 		statserverpos++;
 		i++;
-		if (statserverpos == list.GetCount())
+		if (statserverpos == (UINT)list.GetCount())
 			statserverpos = 0;
 	}
 	return nextserver;
@@ -703,8 +704,8 @@ bool CServerList::SaveServermetToFile()
 				uTagCount++;
 			}
 			
-			if (nextserver->GetPreferences() != SRV_PR_NORMAL){
-				CTag serverpref( ST_PREFERENCE, nextserver->GetPreferences() );
+			if (nextserver->GetPreference() != SRV_PR_NORMAL){
+				CTag serverpref(ST_PREFERENCE, nextserver->GetPreference());
 				serverpref.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
@@ -852,15 +853,9 @@ void CServerList::AddServersFromTextFile(const CString& strFilename)
 		if (pos == 1)
 		{
 			CString strPriority = strLine.Left(pos);
-			try
-			{
-				priority = _tstoi(strPriority.GetBuffer(0));
+			priority = _tstoi(strPriority);
 				if (priority < 0 || priority > 2)
 					priority = SRV_PR_HIGH;
-			}
-			catch (...){
-				ASSERT(0);
-			}
 			strLine = strLine.Mid(pos+1);
 		}
 	
@@ -870,16 +865,16 @@ void CServerList::AddServersFromTextFile(const CString& strFilename)
 		strName.Replace(_T("\n"), _T(""));
 
 		// create server object and add it to the list
-		CServer* nsrv = new CServer(_tstoi(strPort), strHost.GetBuffer());
-		nsrv->SetListName(strName.GetBuffer());
+		CServer* nsrv = new CServer((uint16)_tstoi(strPort), strHost);
+		nsrv->SetListName(strName);
 		nsrv->SetIsStaticMember(true);
 		nsrv->SetPreference(priority); 
 		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv, true))
 		{
 			delete nsrv;
-			CServer* srvexisting = GetServerByAddress(strHost.GetBuffer(), _tstoi(strPort));
+			CServer* srvexisting = GetServerByAddress(strHost, (uint16)_tstoi(strPort));
 			if (srvexisting) {
-				srvexisting->SetListName(strName.GetBuffer());
+				srvexisting->SetListName(strName);
 				srvexisting->SetIsStaticMember(true);
 				//srvexisting->SetPreference(priority); leuk_he priority is not so static. 
 				if (theApp.emuledlg->serverwnd)
@@ -890,6 +885,34 @@ void CServerList::AddServersFromTextFile(const CString& strFilename)
 	}
 
 	f.Close();
+}
+
+bool CServerList::SaveStaticServers()
+{
+	bool bResult = false;
+
+	FILE* fpStaticServers = _tfsopen(thePrefs.GetConfigDir() + _T("staticservers.dat"), _T("w"), _SH_DENYWR);
+	if (fpStaticServers == NULL) {
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERROR_SSF));
+		return bResult;
+	}
+
+	bResult = true;
+	POSITION pos = list.GetHeadPosition();
+	while (pos)
+	{
+		const CServer* pServer = list.GetNext(pos);
+		if (pServer->IsStaticMember())
+		{
+			if (_ftprintf(fpStaticServers, _T("%s:%i,%i,%s\n"), pServer->GetAddress(), pServer->GetPort(), pServer->GetPreference(), pServer->GetListName()) == EOF) {
+				bResult = false;
+				break;
+			}
+		}
+	}
+
+	fclose(fpStaticServers);
+	return bResult;
 }
 
 void CServerList::Process()

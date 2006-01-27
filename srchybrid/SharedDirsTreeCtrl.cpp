@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// SharedDirsTreeCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "SharedDirsTreeCtrl.h"
@@ -28,7 +24,6 @@
 #include "MenuCmds.h"
 #include "partfile.h"
 #include "webservices.h"
-#include "FileDetailDialog.h"
 #include "emuledlg.h"
 #include "TransferWnd.h"
 #include "SharedFileList.h"
@@ -82,6 +77,19 @@ HTREEITEM CDirectoryItem::FindItem(CDirectoryItem* pContentToFind) const
 
 
 IMPLEMENT_DYNAMIC(CSharedDirsTreeCtrl, CTreeCtrl)
+
+BEGIN_MESSAGE_MAP(CSharedDirsTreeCtrl, CTreeCtrl)
+	ON_WM_CONTEXTMENU()
+	ON_WM_RBUTTONDOWN()
+	ON_WM_MOUSEMOVE()
+	ON_WM_CANCELMODE()
+	ON_WM_LBUTTONUP()
+	ON_WM_SYSCOLORCHANGE()
+	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDING, OnTvnItemexpanding)
+	ON_NOTIFY_REFLECT(TVN_GETDISPINFO, OnTvnGetdispinfo)
+	ON_NOTIFY_REFLECT(TVN_BEGINDRAG, OnLvnBegindrag)
+END_MESSAGE_MAP()
+
 CSharedDirsTreeCtrl::CSharedDirsTreeCtrl()
 {
 	m_pRootDirectoryItem = NULL;
@@ -97,22 +105,6 @@ CSharedDirsTreeCtrl::~CSharedDirsTreeCtrl()
 	delete m_pRootUnsharedDirectries;
 }
 
-
-BEGIN_MESSAGE_MAP(CSharedDirsTreeCtrl, CTreeCtrl)
-	ON_WM_CONTEXTMENU()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_MOUSEMOVE()
-	ON_WM_CANCELMODE()
-	ON_WM_LBUTTONUP()
-	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDING, OnTvnItemexpanding)
-	ON_NOTIFY_REFLECT(TVN_GETDISPINFO, OnTvnGetdispinfo)
-	ON_NOTIFY_REFLECT(TVN_BEGINDRAG, OnLvnBegindrag)
-END_MESSAGE_MAP()
-
-
-
-// CSharedDirsTreeCtrl message handlers
-
 void CSharedDirsTreeCtrl::Initalize(CSharedFilesCtrl* pSharedFilesCtrl){
 	m_pSharedFilesCtrl = pSharedFilesCtrl;
 	
@@ -120,11 +112,33 @@ void CSharedDirsTreeCtrl::Initalize(CSharedFilesCtrl* pSharedFilesCtrl){
 
 	//WORD wWinVer = thePrefs.GetWindowsVersion();
 	m_bUseIcons = true;/*(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_);*/
-	
+	SetAllIcons();
+
+	COLORREF crBk = GetSysColor(COLOR_WINDOW);
+	COLORREF crFg = GetSysColor(COLOR_WINDOWTEXT);
+
+	theApp.LoadSkinColorAlt(_T("SharedDirsTvBk"), _T("DefLvBk"), crBk);
+	theApp.LoadSkinColorAlt(_T("SharedDirsTvFg"), _T("DefLvFg"), crFg);
+
+	SetBkColor(crBk);
+	SetTextColor(crFg);
+	InitalizeStandardItems();
+	FilterTreeReloadTree();
+	CreateMenues();
+}
+
+void CSharedDirsTreeCtrl::OnSysColorChange()
+{
+	CTreeCtrl::OnSysColorChange();
+	SetAllIcons();
+	CreateMenues();
+}
+
+void CSharedDirsTreeCtrl::SetAllIcons()
+{
 	CImageList iml;
 	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-
-	iml.Add(CTempIconLoader(_T("ALLFILES")));			// All Directory
+	iml.Add(CTempIconLoader(_T("ALLFILES")));		// All Directory
 	iml.Add(CTempIconLoader(_T("INCOMPLETE")));		// Temp Directory
 	iml.Add(CTempIconLoader(_T("OPENFOLDER")));		// Incoming Directory
 	iml.Add(CTempIconLoader(_T("CATEGORY")));		// Cats
@@ -143,20 +157,9 @@ void CSharedDirsTreeCtrl::Initalize(CSharedFilesCtrl* pSharedFilesCtrl){
 	}
 	iml.SetOverlayImage(iml.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 
-	SetImageList(&iml,TVSIL_NORMAL);
-	iml.Detach();
-
-	COLORREF crBk = GetSysColor(COLOR_WINDOW);
-	COLORREF crFg = GetSysColor(COLOR_WINDOWTEXT);
-
-	theApp.LoadSkinColorAlt(_T("SharedDirsTvBk"), _T("DefLvBk"), crBk);
-	theApp.LoadSkinColorAlt(_T("SharedDirsTvFg"), _T("DefLvFg"), crFg);
-
-	SetBkColor(crBk);
-	SetTextColor(crFg);
-	InitalizeStandardItems();
-	FilterTreeReloadTree();
-	CreateMenues();
+	SetImageList(&iml, TVSIL_NORMAL);
+	m_imlTree.DeleteImageList();
+	m_imlTree.Attach(iml.Detach());
 }
 
 void CSharedDirsTreeCtrl::Localize(){
@@ -384,9 +387,8 @@ void CSharedDirsTreeCtrl::CreateMenues()
 	m_ShareDirsMenu.AppendMenu(MF_STRING,MP_UNSHAREDIRSUB,GetResString(IDS_UNSHAREDIRSUB));
 }
 
-void CSharedDirsTreeCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+void CSharedDirsTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {	
-	
 	CDirectoryItem* pSelectedDir = GetSelectedFilter();
 	if (pSelectedDir != NULL && pSelectedDir->m_eItemType != SDI_UNSHAREDDIRECTORY && pSelectedDir->m_eItemType != SDI_FILESYSTEMPARENT){
 		int iSelectedItems = m_pSharedFilesCtrl->GetItemCount();
@@ -469,7 +471,7 @@ void CSharedDirsTreeCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	}
 }
 
-void CSharedDirsTreeCtrl::OnRButtonDown( UINT nFlags, CPoint point )
+void CSharedDirsTreeCtrl::OnRButtonDown(UINT /*nFlags*/, CPoint point)
 {
 	UINT uHitFlags;
 	HTREEITEM hItem = HitTest(point, &uHitFlags);
@@ -481,7 +483,7 @@ void CSharedDirsTreeCtrl::OnRButtonDown( UINT nFlags, CPoint point )
 	return;
 }
 
-BOOL CSharedDirsTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+BOOL CSharedDirsTreeCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
 	CTypedPtrList<CPtrList, CKnownFile*> selectedList;
 	int iSelectedItems = m_pSharedFilesCtrl->GetItemCount();
@@ -591,8 +593,8 @@ BOOL CSharedDirsTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MP_CMT:
 				ShowFileDialog(selectedList, IDD_COMMENT);
                 break; 
-			case MPG_ALTENTER:
 			case MP_DETAIL:
+			case MPG_ALTENTER:
 				ShowFileDialog(selectedList);
 				break;
 			case MP_SHOWED2KLINK:
@@ -656,14 +658,11 @@ BOOL CSharedDirsTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 
 void CSharedDirsTreeCtrl::ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFiles, UINT uPshInvokePage)
 {
-	if (aFiles.GetSize() > 0)
-	{
-		CFileDetailDialog dialog(aFiles, uPshInvokePage, m_pSharedFilesCtrl);
-		dialog.DoModal();
-	}
+	m_pSharedFilesCtrl->ShowFileDialog(aFiles, uPshInvokePage);
 }
 
-void CSharedDirsTreeCtrl::FileSystemTreeCreateTree(){
+void CSharedDirsTreeCtrl::FileSystemTreeCreateTree()
+{
 	TCHAR drivebuffer[500];
 	::GetLogicalDriveStrings(ARRSIZE(drivebuffer), drivebuffer); // e.g. "a:\ c:\ d:\"
 
@@ -727,8 +726,7 @@ void CSharedDirsTreeCtrl::FileSystemTreeAddChildItem(CDirectoryItem* pRoot, CStr
 	}
 	CDirectoryItem* pti = new CDirectoryItem(strDir, 0, SDI_UNSHAREDDIRECTORY);
 
-	itInsert.item.pszText = strText.GetBuffer();
-	itInsert.item.cchTextMax = strText.GetLength();
+	itInsert.item.pszText = const_cast<LPTSTR>((LPCTSTR)strText);
 	itInsert.hInsertAfter = !bTopLevel ? TVI_SORT : TVI_LAST;
 	itInsert.hParent = pRoot->m_htItem;
 	itInsert.item.mask |= TVIF_PARAM;
@@ -752,7 +750,7 @@ void CSharedDirsTreeCtrl::FileSystemTreeAddChildItem(CDirectoryItem* pRoot, CStr
 		SHFILEINFO shFinfo;
 		shFinfo.szDisplayName[0] = _T('\0');
 		if(!SHGetFileInfo(strTemp, 0, &shFinfo,	sizeof(shFinfo),
-						SHGFI_ICON | SHGFI_SMALLICON | SHGFI_DISPLAYNAME))
+						  SHGFI_ICON | SHGFI_SMALLICON | SHGFI_DISPLAYNAME))
 		{
 			TRACE(_T("Error Gettting SystemFileInfo!"));
 			itInsert.itemex.iImage = 0; // :(
@@ -760,11 +758,11 @@ void CSharedDirsTreeCtrl::FileSystemTreeAddChildItem(CDirectoryItem* pRoot, CStr
 		else
 		{
 			itInsert.itemex.iImage = AddSystemIcon(shFinfo.hIcon, shFinfo.iIcon);
+			DestroyIcon(shFinfo.hIcon);
 			if (bTopLevel && shFinfo.szDisplayName[0] != _T('\0'))
 			{
 				strText = shFinfo.szDisplayName;
-				itInsert.item.pszText = strText.GetBuffer();
-				itInsert.item.cchTextMax = strText.GetLength();
+				itInsert.item.pszText = const_cast<LPTSTR>((LPCTSTR)strText);
 			}
 		}
 
@@ -775,6 +773,7 @@ void CSharedDirsTreeCtrl::FileSystemTreeAddChildItem(CDirectoryItem* pRoot, CStr
 		}
 		else{
 			itInsert.itemex.iSelectedImage = AddSystemIcon(shFinfo.hIcon, shFinfo.iIcon);
+			DestroyIcon(shFinfo.hIcon);
 		}
 	}
 
@@ -844,14 +843,10 @@ void CSharedDirsTreeCtrl::FileSystemTreeAddSubdirectories(CDirectoryItem* pRoot)
 
 int	CSharedDirsTreeCtrl::AddSystemIcon(HICON hIcon, int nSystemListPos){
 	int nPos = 0;
-	if (m_mapSystemIncons.Lookup(nSystemListPos, nPos)){
-		DestroyIcon(hIcon);
-	}
-	else{
+	if (!m_mapSystemIcons.Lookup(nSystemListPos, nPos)){
 		nPos = GetImageList(TVSIL_NORMAL)->Add(hIcon);
-		m_mapSystemIncons.SetAt(nSystemListPos, nPos);
+		m_mapSystemIcons.SetAt(nSystemListPos, nPos);
 	}
-
 	return nPos;
 }
 

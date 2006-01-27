@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -30,26 +30,15 @@ there client on the eMule forum..
 
 #pragma once
 
-#include "DataIO.h"
+#include "./DataIO.h"
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CFileIO : public CFile, public CDataIO
+namespace Kademlia
 {
-public:
-	virtual void readArray(LPVOID lpResult, uint32 byteCount);
-	virtual void writeArray(LPCVOID lpVal, uint32 byteCount);
-	virtual UINT getAvailable() const;
-};
-
-class CBufferedFileIO : public CStdioFile, public CDataIO
-{
-public:
-	virtual void readArray(LPVOID lpResult, uint32 byteCount);
-	virtual void writeArray(LPCVOID lpVal, uint32 byteCount);
-	virtual UINT getAvailable() const;
-};
-
-} // End namespace
+	class CFileIO : public CFile, public CDataIO
+	{
+		public:
+			virtual void ReadArray(LPVOID lpResult, uint32 uByteCount);
+			virtual void WriteArray(LPCVOID lpVal, uint32 uByteCount);
+			virtual UINT GetAvailable() const;
+	};
+}

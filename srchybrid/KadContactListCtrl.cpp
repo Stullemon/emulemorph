@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -117,9 +117,8 @@ void CKadContactListCtrl::Localize()
 			case colDistance: strRes = GetResString(IDS_KADDISTANCE); break;
 		}
 	
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(icol, &hdi);
-		strRes.ReleaseBuffer();
 	}
 
 	int iItems = GetItemCount();
@@ -132,16 +131,16 @@ void CKadContactListCtrl::UpdateContact(int iItem, const Kademlia::CContact* con
 	CString id;
 	if (!bLocalize) // update the following fields only if really needed (it's quite expensive to always update them)
 	{
-		contact->getClientID(&id);
+		contact->GetClientID(&id);
 		SetItemText(iItem,colID,id);
 
-		id.Format(_T("%i"),contact->getType());
+		id.Format(_T("%i(%u)"),contact->GetType(), contact->GetVersion());
 		SetItemText(iItem,colType,id);
 
-		contact->getDistance(&id);
+		contact->GetDistance(&id);
 		SetItemText(iItem,colDistance,id);
 
-		SetItem(iItem,0,LVIF_IMAGE,0,contact->getType()>4?4:contact->getType(),0,0,0,0);
+		SetItem(iItem,0,LVIF_IMAGE,0,contact->GetType()>4?4:contact->GetType(),0,0,0,0);
 	}
 }
 
@@ -207,8 +206,9 @@ void CKadContactListCtrl::ContactRef(const Kademlia::CContact* contact)
 	catch(...){ASSERT(0);}
 }
 
-BOOL CKadContactListCtrl::OnCommand(WPARAM wParam,LPARAM lParam)
+BOOL CKadContactListCtrl::OnCommand(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
+	// ???
 	return TRUE;
 }
 
@@ -246,20 +246,20 @@ int CKadContactListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamS
 		{
 			Kademlia::CUInt128 i1;
 			Kademlia::CUInt128 i2;
-			item1->getClientID(&i1);
-			item2->getClientID(&i2);
-			iResult = i1.compareTo(i2);
+			item1->GetClientID(&i1);
+			item2->GetClientID(&i2);
+			iResult = i1.CompareTo(i2);
 			break;
 		}
 		case colType:
-			iResult = item1->getType() - item2->getType();
+			iResult = item1->GetType() - item2->GetType();
 			break;
 		case colDistance:
 		{
 			Kademlia::CUInt128 distance1, distance2;
-			item1->getDistance(&distance1);
-			item2->getDistance(&distance2);
-			iResult = distance1.compareTo(distance2);
+			item1->GetDistance(&distance1);
+			item2->GetDistance(&distance2);
+			iResult = distance1.CompareTo(distance2);
 			break;
 		}
 		default:

@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,10 +27,10 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
+
 #include "stdafx.h"
-#include "MiscUtils.h"
-#include "../kademlia/Kademlia.h"
-#include "Log.h"
+#include "./MiscUtils.h"
+#include "../../Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -38,74 +38,73 @@ there client on the eMule forum..
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-////////////////////////////////////////
 using namespace Kademlia;
-////////////////////////////////////////
 
-CString CMiscUtils::appDirectory;
+CString CMiscUtils::m_sAppDirectory;
 
-void CMiscUtils::ipAddressToString(uint32 ip, CString *string)
+void CMiscUtils::IPAddressToString(uint32 uIP, CString *pString)
 {
-	string->Format(_T("%ld.%ld.%ld.%ld"), 
-					((ip >> 24) & 0xFF), 
-					((ip >> 16) & 0xFF), 
-					((ip >>  8) & 0xFF), 
-					((ip      ) & 0xFF) );
+	pString->Format(_T("%ld.%ld.%ld.%ld"),
+	                ((uIP >> 24) & 0xFF),
+	                ((uIP >> 16) & 0xFF),
+	                ((uIP >>  8) & 0xFF),
+	                ((uIP      ) & 0xFF) );
 }
 
-LPCTSTR CMiscUtils::getAppDir(void)
+LPCTSTR CMiscUtils::GetAppDir()
 {
-	if (appDirectory.GetLength() == 0)
+	if (m_sAppDirectory.GetLength() == 0)
 	{
-		TCHAR *buffer = new TCHAR[MAX_PATH];
-		GetModuleFileName(0, buffer, MAX_PATH);
-		LPTSTR end = _tcsrchr(buffer, _T('\\')) + 1;
-		*end = _T('\0');
-		appDirectory = buffer;
-		delete [] buffer;
+		TCHAR *pcBuffer = new TCHAR[MAX_PATH];
+		GetModuleFileName(0, pcBuffer, MAX_PATH);
+		LPTSTR lpsEnd = _tcsrchr(pcBuffer, _T('\\')) + 1;
+		*lpsEnd = _T('\0');
+		m_sAppDirectory = pcBuffer;
+		delete [] pcBuffer;
 	}
-	return appDirectory;
+	return m_sAppDirectory;
 }
 
-void CMiscUtils::debugHexDump(const byte *data, uint32 lenData)
+void CMiscUtils::DebugHexDump(const byte *pbyData, uint32 uLenData)
 {
 #ifdef DEBUG
 	try
 	{
-		uint16 lenLine = 16;
-		uint32 pos = 0;
-		byte c = 0;
+		int iLenLine = 16;
+		UINT uPos = 0;
+		byte byC = 0;
 
-		while (pos < lenData)
+		while (uPos < uLenData)
 		{
-			CStringA line;
-			CStringA single;
-			line.Format("%08X ", pos);
-			lenLine = min((lenData - pos), 16);
-			for (int i=0; i<lenLine; i++)
+			CStringA sLine;
+			CStringA sSingle;
+			sLine.Format("%08X ", uPos);
+			iLenLine = min((uLenData - uPos), 16);
+			for (int i=0; i<iLenLine; i++)
 			{
-				single.Format(" %02X", data[pos+i]);
-				line += single;
+				sSingle.Format(" %02X", pbyData[uPos+i]);
+				sLine += sSingle;
 				if (i == 7)
-					line += " ";
+					sLine += " ";
 			}
-			line += CString(' ', 60 - line.GetLength());
-			for (int i=0; i<lenLine; i++)
+			sLine += CString(' ', 60 - sLine.GetLength());
+			for (int i=0; i<iLenLine; i++)
 			{
-				c = data[pos + i];
-				single.Format("%c", (((c > 31) && (c < 127)) ? c : '.'));
-				line += single;
+				byC = pbyData[uPos + i];
+				sSingle.Format("%c", (((byC > 31) && (byC < 127)) ? byC : '.'));
+				sLine += sSingle;
 			}
 			//JOHNTODO Is this method Unicode friendly?
-			AddDebugLogLine(false, _T("%s"), line);
-			pos += lenLine;
+			AddDebugLogLine(false, _T("%s"), sLine);
+			uPos += iLenLine;
 		}
-	} 
+	}
 	catch (...)
 	{
 		AddDebugLogLine(false, _T("Exception in CMiscUtils::debugHexDump\n"));
 	}
+#else
+	UNREFERENCED_PARAMETER(pbyData);
+	UNREFERENCED_PARAMETER(uLenData);
 #endif
 }
-

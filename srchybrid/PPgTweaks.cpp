@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -84,6 +84,7 @@ CPPgTweaks::CPPgTweaks()
 	m_bExtControls = false;
 	m_uServerKeepAliveTimeout = 0;
 	m_bSparsePartFiles = false;
+	m_bFullAlloc = false;
 	m_bCheckDiskspace = false;
 	m_fMinFreeDiskSpaceMB = 0.0F;
 	(void)m_sYourHostname;
@@ -133,6 +134,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiExtControls = NULL;
 	m_htiServerKeepAliveTimeout = NULL;
 	m_htiSparsePartFiles = NULL;
+	m_htiFullAlloc = NULL;
 	m_htiCheckDiskspace = NULL;
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;
@@ -226,6 +228,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		// File related group
 		//
 		m_htiSparsePartFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SPARSEPARTFILES), TVI_ROOT, m_bSparsePartFiles);
+		m_htiFullAlloc = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FULLALLOC), TVI_ROOT, m_bFullAlloc);
 		m_htiCheckDiskspace = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHECKDISKSPACE), TVI_ROOT, m_bCheckDiskspace);
 		m_htiMinFreeDiskSpace = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINFREEDISKSPACE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiCheckDiskspace);
 		m_ctrlTreeOptions.AddEditBox(m_htiMinFreeDiskSpace, RUNTIME_CLASS(CNumTreeOptionsEdit));
@@ -336,12 +339,16 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	// File related group
 	//
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiSparsePartFiles, m_bSparsePartFiles);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFullAlloc, m_bFullAlloc);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCheckDiskspace, m_bCheckDiskspace);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
 	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiCommit, m_iCommitFiles);
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiExtractMetaData, m_iExtractMetaData);
 
+	/////////////////////////////////////////////////////////////////////////////
+	// Logging group
+	//
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLog2Disk, m_bLog2Disk);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDateFileNameLog, m_bDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 	if (m_htiLogLevel){
@@ -436,6 +443,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bExtControls = thePrefs.m_bExtControls;
 	m_uServerKeepAliveTimeout = thePrefs.m_dwServerKeepAliveTimeout / 60000;
 	m_bSparsePartFiles = thePrefs.m_bSparsePartFiles;
+	m_bFullAlloc= thePrefs.m_bAllocFull;
 	m_bCheckDiskspace = thePrefs.checkDiskspace;
 	m_fMinFreeDiskSpaceMB = (float)(thePrefs.m_uMinFreeDiskSpace / (1024.0 * 1024.0));
 	m_sYourHostname = thePrefs.GetYourHostname();
@@ -457,6 +465,7 @@ BOOL CPPgTweaks::OnInitDialog()
 
     m_bA4AFSaveCpu = thePrefs.GetA4AFSaveCpu();
 
+	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
     CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 	m_ctrlTreeOptions.SetItemHeight(m_ctrlTreeOptions.GetItemHeight() + 2);
@@ -584,6 +593,7 @@ BOOL CPPgTweaks::OnApply()
 	}
 	thePrefs.m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
 	thePrefs.m_bSparsePartFiles = m_bSparsePartFiles;
+	thePrefs.m_bAllocFull= m_bFullAlloc;
 	thePrefs.checkDiskspace = m_bCheckDiskspace;
 	thePrefs.m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
 	if (thePrefs.GetYourHostname() != m_sYourHostname) {
@@ -598,7 +608,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bPeerCacheEnabled = !m_bDisablePeerCache;
 
     thePrefs.m_bDynUpEnabled = m_bDynUpEnabled;
-    thePrefs.minupload = m_iDynUpMinUpload;
+    thePrefs.minupload = (uint16)m_iDynUpMinUpload;
     thePrefs.m_iDynUpPingTolerance = m_iDynUpPingTolerance;
     thePrefs.m_iDynUpPingToleranceMilliseconds = m_iDynUpPingToleranceMilliseconds;
     thePrefs.m_bDynUpUseMillisecondPingTolerance = (m_iDynUpRadioPingTolerance == 1);
@@ -619,7 +629,7 @@ BOOL CPPgTweaks::OnApply()
 	return CPropertyPage::OnApply();
 }
 
-void CPPgTweaks::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void CPPgTweaks::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* pScrollBar) 
 {
 	if (pScrollBar->GetSafeHwnd() == m_ctlFileBuffSize.m_hWnd)
 	{
@@ -699,7 +709,8 @@ void CPPgTweaks::Localize(void)
         if (m_htiDynUpGoingUpDivider) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpGoingUpDivider, GetResString(IDS_DYNUP_GOINGUPDIVIDER));
         if (m_htiDynUpGoingDownDivider) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpGoingDownDivider, GetResString(IDS_DYNUP_GOINGDOWNDIVIDER));
         if (m_htiDynUpNumberOfPings) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpNumberOfPings, GetResString(IDS_DYNUP_NUMBEROFPINGS));
-		if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
+	if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
+        if (m_htiFullAlloc) m_ctrlTreeOptions.SetItemText(m_htiFullAlloc, GetResString(IDS_FULLALLOC));
 
         CString temp;
 		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
@@ -746,6 +757,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiExtControls = NULL;
 	m_htiServerKeepAliveTimeout = NULL;
 	m_htiSparsePartFiles = NULL;
+	m_htiFullAlloc = NULL;
 	m_htiCheckDiskspace = NULL;
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;
@@ -820,7 +832,7 @@ BOOL CPPgTweaks::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgTweaks::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgTweaks::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

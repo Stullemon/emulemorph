@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -64,6 +64,14 @@ static char THIS_FILE[] = __FILE__;
 // CMuleListCtrl
 
 IMPLEMENT_DYNAMIC(CMuleListCtrl, CListCtrl)
+
+BEGIN_MESSAGE_MAP(CMuleListCtrl, CListCtrl)
+	ON_WM_DRAWITEM()
+	ON_WM_KEYDOWN()
+	ON_WM_ERASEBKGND()
+	ON_WM_SYSCOLORCHANGE()
+END_MESSAGE_MAP()
+
 CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
 	
 	m_SortProc = pfnCompare;
@@ -87,17 +95,20 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
     m_crNoHighlight = 0;
     m_crNoFocusLine = 0;
 	m_bGeneralPurposeFind = false;
+	m_bCanSearchInAllColumns = false;
     m_bFindMatchCase = false;
     m_iFindDirection = 1;
     m_iFindColumn = 0;
+	m_hAccel = NULL;
+	m_uIDAccel = IDR_LISTVIEW;
 }
 
 CMuleListCtrl::~CMuleListCtrl() {
-	if(m_aColumns != NULL)
-		delete[] m_aColumns;
+	delete[] m_aColumns;
 }
 
-int CMuleListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort) {
+int CMuleListCtrl::SortProc(LPARAM /*lParam1*/, LPARAM /*lParam2*/, LPARAM /*lParamSort*/)
+{
 	return 0;
 }
 
@@ -112,6 +123,12 @@ void CMuleListCtrl::PreSubclassWindow()
 	SendMessage(CCM_SETUNICODEFORMAT, TRUE);
 	ModifyStyle(LVS_SINGLESEL|LVS_LIST|LVS_ICON|LVS_SMALLICON,LVS_REPORT|LVS_SINGLESEL|LVS_REPORT);
 	SetExtendedStyle(LVS_EX_HEADERDRAGDROP);
+
+	// If we want to handle the VK_RETURN key, we have to do that via accelerators!
+	if (m_uIDAccel != (UINT)-1) {
+		m_hAccel = ::LoadAccelerators(AfxGetResourceHandle(), MAKEINTRESOURCE(m_uIDAccel));
+		ASSERT(m_hAccel);
+	}
 }
 
 int CMuleListCtrl::IndexToOrder(CHeaderCtrl* pHeader, int iIndex) {
@@ -758,13 +775,10 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 
 	case WM_COMMAND:
 		//deal with menu clicks
-
 		if(wParam == MLC_IDC_UPDATE) {
 			UpdateLocation(lParam);
 			return *pResult = 1;
-
 		} else if(wParam >= MLC_IDC_MENU) {
-
 			CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 			int iCount = pHeaderCtrl->GetItemCount();
 
@@ -782,7 +796,6 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 		break;
 
 	case LVM_DELETECOLUMN:
-		//book keeping!
 		if(m_aColumns != NULL) {
 			for(int i = 0; i < m_iColumnsTracked; i++)
 				if(m_aColumns[i].bHidden)
@@ -798,11 +811,8 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 		}
 		break;
 
-	//case LVM_INSERTCOLUMN:
 	case LVM_INSERTCOLUMNA:
 	case LVM_INSERTCOLUMNW:
-		//book keeping!
-
 		if(m_aColumns != NULL) {
 			for(int i = 0; i < m_iColumnsTracked; i++)
 				if(m_aColumns[i].bHidden)
@@ -819,28 +829,26 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 		break;
 
 	case LVM_SETITEM:
-		//book keeping
 		{
 			POSITION pos = m_Params.FindIndex(((LPLVITEM)lParam)->iItem);
 			if(pos) {
 				m_Params.SetAt(pos, MLC_MAGIC);
 				PostMessage(LVM_UPDATE, ((LPLVITEM)lParam)->iItem);
 			}
-		}
 		break;
-	case LVN_KEYDOWN:{
-		break;}
+	}
+
+	case LVN_KEYDOWN:
+		break;
+
 	case LVM_SETITEMTEXT:
 		//need to check for movement
-
 		*pResult = DefWindowProc(message, wParam, lParam);
 		if(*pResult)
 			PostMessage(WM_COMMAND, MLC_IDC_UPDATE, wParam);
 		return *pResult;
 
 	case LVM_SORTITEMS:
-		//book keeping...
-
 		m_dwParamSort = (LPARAM)wParam;
 		UpdateSortHistory(m_dwParamSort, 0);	// SLUGFILLER: multiSort - fail-safe, ensure it's in the sort history(no inverse check)
 		m_SortProc = (PFNLVCOMPARE)lParam;
@@ -851,22 +859,18 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 		for(POSITION pos = m_Params.GetHeadPosition(); pos != NULL; m_Params.GetNext(pos))
 			m_Params.SetAt(pos, MLC_MAGIC);
 		break;
-	case LVM_DELETEALLITEMS:
-		//book keeping...
 
+	case LVM_DELETEALLITEMS:
 		if(!CListCtrl::OnWndMsg(message, wParam, lParam, pResult) && DefWindowProc(message, wParam, lParam)) 
 			m_Params.RemoveAll();
 		return *pResult = TRUE;
 
 	case LVM_DELETEITEM:
-		//book keeping.....
-
 		MLC_ASSERT(m_Params.GetAt(m_Params.FindIndex(wParam)) == CListCtrl::GetItemData(wParam));
 		if(!CListCtrl::OnWndMsg(message, wParam, lParam, pResult) && DefWindowProc(message, wParam, lParam))
 				m_Params.RemoveAt(m_Params.FindIndex(wParam));
 		return *pResult = TRUE;
 
-	//case LVM_INSERTITEM:
 	case LVM_INSERTITEMA:
 	case LVM_INSERTITEMW:
 		//try to fix position of inserted items
@@ -958,8 +962,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 
 	case LVM_UPDATE:
 		//better fix for old problem... normally Update(int) causes entire list to redraw
-
-		if(wParam == UpdateLocation(wParam)) { //no need to invalidate rect if item moved
+		if (wParam == (UINT)UpdateLocation(wParam)) { //no need to invalidate rect if item moved
 			RECT rcItem;
 			BOOL bResult = GetItemRect(wParam, &rcItem, LVIR_BOUNDS);
 			if(bResult)
@@ -1042,19 +1045,6 @@ BOOL CMuleListCtrl::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LR
 	DrawItem((LPDRAWITEMSTRUCT)lParam);
 	return TRUE;
 }
-
-//////////////////////////////////
-// CMuleListCtrl message map
-
-BEGIN_MESSAGE_MAP(CMuleListCtrl, CListCtrl)
-	ON_WM_DRAWITEM()
-	ON_WM_KEYDOWN()
-	ON_WM_ERASEBKGND()
-	ON_WM_SYSCOLORCHANGE()
-END_MESSAGE_MAP()
-
-//////////////////////////////////
-// CMuleListCtrl message handlers
 
 void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	//set up our flicker free drawing
@@ -1378,9 +1368,15 @@ void CMuleListCtrl::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BO
 
 void CMuleListCtrl::OnFindStart()
 {
+	if (GetItemCount() == 0) {
+		MessageBeep(MB_OK);
+		return;
+	}
+
 	CListViewSearchDlg dlg;
 	dlg.m_pListView = this;
 	dlg.m_strFindText = m_strFindText;
+	dlg.m_bCanSearchInAllColumns = m_bCanSearchInAllColumns;
 	dlg.m_iSearchColumn = m_iFindColumn;
 	if (dlg.DoModal() != IDOK || dlg.m_strFindText.IsEmpty())
 		return;
@@ -1392,6 +1388,11 @@ void CMuleListCtrl::OnFindStart()
 
 void CMuleListCtrl::OnFindNext()
 {
+	if (GetItemCount() == 0) {
+		MessageBeep(MB_OK);
+		return;
+	}
+
 	DoFindNext(FALSE/*bShowError*/);
 }
 
@@ -1407,6 +1408,11 @@ void CMuleListCtrl::DoFindNext(BOOL bShowError)
 
 void CMuleListCtrl::OnFindPrev()
 {
+	if (GetItemCount() == 0) {
+		MessageBeep(MB_OK);
+		return;
+	}
+
 	int iStartItem = GetNextItem(-1, LVNI_SELECTED | LVNI_FOCUSED);
 	if (iStartItem == -1)
 		iStartItem = 0;
@@ -1420,6 +1426,21 @@ BOOL CMuleListCtrl::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg->message == WM_SYSKEYDOWN && pMsg->wParam == VK_RETURN && GetAsyncKeyState(VK_MENU)<0) {
 		PostMessage(WM_COMMAND, MPG_ALTENTER, 0);
+		return TRUE;
+	}
+
+	if (m_hAccel != NULL)
+	{
+		if (pMsg->message >= WM_KEYFIRST && pMsg->message <= WM_KEYLAST)
+		{
+			// If we want to handle the VK_RETURN key, we have to do that via accelerators!
+			if (TranslateAccelerator(m_hWnd, m_hAccel, pMsg))
+				return TRUE;
+		}
+	}
+
+	// Catch the "Ctrl+<NumPad_Plus_Key>" shortcut. CMuleListCtrl can not handle this.
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ADD && GetAsyncKeyState(VK_CONTROL)<0) {
 		return TRUE;
 	}
 

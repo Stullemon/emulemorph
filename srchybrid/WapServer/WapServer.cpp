@@ -199,7 +199,7 @@ void CWapServer::StartServer(void)
 
 void CWapServer::_RemoveServer(CString sIP, int nPort)
 {
-	CServer* server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer() ,nPort);
+	CServer* server=theApp.serverlist->GetServerByAddress(sIP, (uint16)nPort);
 	if (server!=NULL)
 		SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION, WEBGUIIA_SERVER_REMOVE, (LPARAM)server);
 }
@@ -208,7 +208,7 @@ void CWapServer::_SetSharedFilePriority(CString hash, uint8 priority)
 {	
 	CKnownFile* cur_file;
 	uchar fileid[16];
-	if (hash.GetLength()!=32 || !DecodeBase16(hash.GetBuffer(),hash.GetLength(),fileid,ARRSIZE(fileid)))
+	if (hash.GetLength()!=32 || !DecodeBase16(hash, hash.GetLength(), fileid,ARRSIZE(fileid)))
 		return;
 
 	cur_file=theApp.sharedfiles->GetFileByID(fileid);
@@ -255,7 +255,7 @@ CString CWapServer::_SpecialChars(CString str)
 void CWapServer::_ConnectToServer(CString sIP, int nPort)
 {
 	CServer* server=NULL;
-	if (!sIP.IsEmpty()) server=theApp.serverlist->GetServerByAddress(sIP.GetBuffer(),nPort);
+	if (!sIP.IsEmpty()) server=theApp.serverlist->GetServerByAddress(sIP, (uint16)nPort);
 	SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION, WEBGUIIA_CONNECTTOSERVER, (LPARAM)server);
 }
 
@@ -686,26 +686,26 @@ CString CWapServer::_GetMain(WapThreadData Data, long lSession)
 	if (!thePrefs.GetNetworkKademlia()) {
 		buffer.Append(_GetPlainResString(IDS_DISABLED));
 	}
-	else if ( !Kademlia::CKademlia::isRunning() ) {
+	else if ( !Kademlia::CKademlia::IsRunning() ) {
 
 		buffer.Append(_GetPlainResString(IDS_DISCONNECTED));
 
 		if (IsSessionAdmin(Data,sSession)) 
 			buffer+=_T(" (<a href=\"?ses=") + sSession + _T("&amp;w=kad&amp;c=connect\">")+_GetPlainResString(IDS_MAIN_BTN_CONNECT)+_T("</a>)");
 	}
-	else if ( Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected() ) {
+	else if ( Kademlia::CKademlia::IsRunning() && !Kademlia::CKademlia::IsConnected() ) {
 
 		buffer.Append(_GetPlainResString(IDS_CONNECTING));
 
 		if (IsSessionAdmin(Data,sSession)) 
 			buffer+=_T(" (<a href=\"?ses=") + sSession + _T("&amp;w=kad&amp;c=disconnect\">")+_GetPlainResString(IDS_MAIN_BTN_DISCONNECT)+_T("</a>)");
 	}
-	else if (Kademlia::CKademlia::isFirewalled()) {
+	else if (Kademlia::CKademlia::IsFirewalled()) {
 		buffer.Append(_GetPlainResString(IDS_FIREWALLED));
 		if (IsSessionAdmin(Data,sSession)) 
 			buffer+=_T(" (<a href=\"?ses=") + sSession + _T("&amp;w=kad&amp;c=disconnect\">")+_GetPlainResString(IDS_IRC_DISCONNECT)+_T("</a>)");
 	}
-	else if (Kademlia::CKademlia::isConnected()) {
+	else if (Kademlia::CKademlia::IsConnected()) {
 		buffer.Append(_GetPlainResString(IDS_CONNECTED));
 		if (IsSessionAdmin(Data,sSession)) 
 			buffer+=_T(" (<a href=\"?ses=") + sSession + _T("&amp;w=kad&amp;c=disconnect\">")+_GetPlainResString(IDS_IRC_DISCONNECT)+_T("</a>)");
@@ -1204,12 +1204,12 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 
 			strFileName = _SpecialChars(found_file->GetFileName());
 			strFileHash = EncodeBase16(found_file->GetFileHash(), 16);
-			strFileSize.Format(_T("%ul"),found_file->GetFileSize());
+			strFileSize.Format(_T("%I64ul"),(uint64)found_file->GetFileSize());
 			
 			strCleanFileName = RemoveWMLScriptInvalidChars(found_file->GetFileName());
 			for(int pos=0; pos<strCleanFileName.GetLength(); pos++){
 				unsigned char c;
-				c = strCleanFileName.GetAt(pos);
+				c = (unsigned char)strCleanFileName.GetAt(pos);
 				if(!((c >= _T('0') && c <= _T('9')) || (c >= _T('a') && c <= _T('z')) || (c >= _T('A') && c <= _T('Z')))){
 					c = _T('.');
 				}
@@ -1285,7 +1285,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 
 			Out.Replace(_T("[2]"), CastItoXBytes(found_file->GetFileSize()));
 
-			if(found_file->GetCompletedSize() > 0)
+			if(found_file->GetCompletedSize() > (uint64)0)
 			{
 				Out.Replace(_T("[3]"), CastItoXBytes(found_file->GetCompletedSize()));
 			}
@@ -1462,7 +1462,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 					dFile.sED2kLink = CreateED2kLink(cur_file);
 				dFile.sFileInfo = _SpecialChars(cur_file->GetInfoSummary());
 
-				if (cat>0 && cur_file->GetCategory()!=cat) continue;
+				if (cat>0 && cur_file->GetCategory() != (UINT)cat) continue;
 				if (cat<0) {
 					switch (cat) {
 						case -1 : if (cur_file->GetCategory()!=0) continue; break;
@@ -2079,7 +2079,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 		pThis->m_Params.bSharedSortReverse = (_ParseURL(Data.sURL, _T("sortreverse")) == "true");
 
 	if(_ParseURL(Data.sURL, _T("hash")) != "" && _ParseURL(Data.sURL, _T("setpriority")) != "" && IsSessionAdmin(Data,sSession)) 
-		_SetSharedFilePriority(_ParseURL(Data.sURL, _T("hash")),_ttoi(_ParseURL(Data.sURL, _T("setpriority"))));
+		_SetSharedFilePriority(_ParseURL(Data.sURL, _T("hash")),(uint8)_ttoi(_ParseURL(Data.sURL, _T("setpriority"))));
 
 	if(_ParseURL(Data.sURL, _T("reload")) == "true")
 	{
@@ -2616,7 +2616,7 @@ CString CWapServer::_GetServerOptions(WapThreadData Data)
 
 	if(_ParseURL(Data.sURL, _T("addserver")) == "true")
 	{
-		CServer* nsrv = new CServer(_ttoi(_ParseURL(Data.sURL, _T("serverport"))), _ParseURL(Data.sURL, _T("serveraddr")).GetBuffer() );
+		CServer* nsrv = new CServer((uint16)_ttoi(_ParseURL(Data.sURL, _T("serverport"))), _ParseURL(Data.sURL, _T("serveraddr")));
 		nsrv->SetListName(_ParseURL(Data.sURL, _T("servername")));
 		theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv,true);
 		CString resultlog = _SpecialChars(theApp.emuledlg->GetLastLogEntry());
@@ -2955,8 +2955,8 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 		{
 			thePrefs.SetMaxUpload(_ttoi(_ParseURL(Data.sURL, _T("maxup"))));
 		}
-		uint16 lastmaxgu=thePrefs.GetMaxGraphUploadRate(false);
-		uint16 lastmaxgd=thePrefs.GetMaxGraphDownloadRate();
+		int lastmaxgu=thePrefs.GetMaxGraphUploadRate(false);
+		int lastmaxgd=thePrefs.GetMaxGraphDownloadRate();
 
 		if(_ParseURL(Data.sURL, _T("maxcapdown")) != "")
 		{
@@ -3208,7 +3208,7 @@ bool CWapServer::_IsLoggedIn(WapThreadData Data, long lSession)
 	if(pThis == NULL)
 		return false;
 
-	_RemoveTimeOuts(Data,lSession);
+	_RemoveTimeOuts(Data);
 
 	// find our session
 	// i should have used CMap there, but i like CArray more ;-)
@@ -3225,7 +3225,7 @@ bool CWapServer::_IsLoggedIn(WapThreadData Data, long lSession)
 	return false;
 }
 
-void CWapServer::_RemoveTimeOuts(WapThreadData Data, long lSession) {
+void CWapServer::_RemoveTimeOuts(WapThreadData Data) {
 	// remove expired sessions
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	pThis->UpdateSessionCount();
@@ -3270,7 +3270,7 @@ Session CWapServer::GetSessionByID(WapThreadData Data,long sessionID) {
 
 bool CWapServer::IsSessionAdmin(WapThreadData Data,CString SsessionID){
 
-	long sessionID=_ttoi64(SsessionID);
+	uint64 sessionID=_ttoi64(SsessionID);
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis != NULL) {
 		for(int i = 0; i < pThis->m_Params.Sessions.GetSize(); i++)
@@ -3382,7 +3382,7 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 
 	if (_ParseURL(Data.sURL, _T("downloads")) != "" && IsSessionAdmin(Data,sSession) ) {
 		CString downloads=_ParseURLArray(Data.sURL,_T("downloads"));
-		uint8 cat=_ttoi(_ParseURL(Data.sURL, _T("cat")));
+		int cat=_ttoi(_ParseURL(Data.sURL, _T("cat")));
 
 		CString resToken;
 		int curPos=0;
@@ -3399,7 +3399,7 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 	if(_ParseURL(Data.sURL, _T("tosearch")) != _T("") && IsSessionAdmin(Data,sSession) )
 		{
 			// perform search
-			theApp.emuledlg->searchwnd->DeleteAllSearchs();
+			theApp.emuledlg->searchwnd->DeleteAllSearches();
 
  			// get method
  			CString method=(_ParseURL(Data.sURL, _T("method")));
@@ -3419,10 +3419,10 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 			ASSERT(0);
 			pParams->strFileType.Empty();
 		}
-		pParams->ulMinSize = _tstol(_ParseURL(Data.sURL, _T("min")))*1048576;
-		pParams->ulMaxSize = _tstol(_ParseURL(Data.sURL, _T("max")))*1048576;
-		if (pParams->ulMaxSize < pParams->ulMinSize)
-			pParams->ulMaxSize = 0;
+		pParams->ullMinSize = _tstoi64(_ParseURL(Data.sURL, _T("min")))*1048576ui64;
+		pParams->ullMaxSize = _tstoi64(_ParseURL(Data.sURL, _T("max")))*1048576ui64;
+		if (pParams->ullMaxSize < pParams->ullMinSize)
+			pParams->ullMaxSize = 0;
  
 		pParams->uAvailability = (_ParseURL(Data.sURL, _T("avail"))==_T(""))?0:_tstoi(_ParseURL(Data.sURL, _T("avail")));
 		if (pParams->uAvailability > 1000000)
@@ -3819,9 +3819,9 @@ void CWapServer::DrawLineInCxImage(CxImage *image,int x1, int y1, int x2, int y2
 void CWapServer::SendGraphFile(WapThreadData Data, int file_val){
 	CxImage* cImage;
 	int pos, width, height;
-	long curval;
-	float scalefactor;
-	COLORREF color1,color2,color3,curcolor;
+	long curval = NULL;
+	float scalefactor = NULL;
+	COLORREF color1,color2,color3,curcolor = NULL;
 	bool png=false, gif=false;
 
 	CWapServer *pThis = (CWapServer *)Data.pThis;
@@ -3888,15 +3888,15 @@ void CWapServer::SendGraphFile(WapThreadData Data, int file_val){
 		{
 			switch(file_val){
 				case 1:
-					curval=(pThis->m_Params.PointsForWeb[pos].download * scalefactor);
+					curval=(long)(pThis->m_Params.PointsForWeb[pos].download * scalefactor);
 					curcolor=color1;
 					break;
 				case 2:
-					curval=(pThis->m_Params.PointsForWeb[pos].upload * scalefactor);
+					curval=(long)(pThis->m_Params.PointsForWeb[pos].upload * scalefactor);
 					curcolor=color2;
 					break;
 				case 3:
-					curval=(pThis->m_Params.PointsForWeb[pos].connections * scalefactor);
+					curval=(long)(pThis->m_Params.PointsForWeb[pos].connections * scalefactor);
 					curcolor=color3;
 					break;
 			}
@@ -3909,15 +3909,15 @@ void CWapServer::SendGraphFile(WapThreadData Data, int file_val){
 		{
 			switch(file_val){
 				case 1:
-					curval=(pThis->m_Params.PointsForWeb[pos].download * scalefactor);
+					curval=(long)(pThis->m_Params.PointsForWeb[pos].download * scalefactor);
 					curcolor=color1;
 					break;
 				case 2:
-					curval=(pThis->m_Params.PointsForWeb[pos].upload * scalefactor);
+					curval=(long)(pThis->m_Params.PointsForWeb[pos].upload * scalefactor);
 					curcolor=color2;
 					break;
 				case 3:
-					curval=(pThis->m_Params.PointsForWeb[pos].connections * scalefactor);
+					curval=(long)(pThis->m_Params.PointsForWeb[pos].connections * scalefactor);
 					curcolor=color3;
 					break;
 			}
@@ -4190,7 +4190,7 @@ void CWapServer::SendProgressBar(WapThreadData Data, CString filehash)
 	CPartFile* cur_file;
 
 	uchar fileid[16];
-	if(filehash.GetLength()!=32 || !DecodeBase16(filehash.GetBuffer(),filehash.GetLength(),fileid,ARRSIZE(fileid)))
+	if(filehash.GetLength()!=32 || !DecodeBase16(filehash, filehash.GetLength(), fileid, ARRSIZE(fileid)))
 		return;
 	
 	CxImage progressImage;
@@ -4248,7 +4248,7 @@ void CWapServer::SendProgressBar(WapThreadData Data, CString filehash)
 		if((png || gif) && !thePrefs.GetWapAllwaysSendBWImages())
 		{
 			for(int y=0;y<10;y++)
-		        progressImage.SetPixelIndex(i,y,curcolor);
+		        progressImage.SetPixelIndex(i,y,(BYTE)curcolor);
 		}
 		else
 		{
@@ -4324,8 +4324,8 @@ bool CWapServer::SendFile(WapThreadData Data, LPCTSTR szfileName, CString conten
 	CFile file;
 	if(file.Open(szfileName, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary))
 	{
-		char* buffer=new char[file.GetLength()];
-		int size=file.Read(buffer,file.GetLength());
+		char* buffer=new char[(UINT)(file.GetLength())];
+		int size=file.Read(buffer,(UINT)(file.GetLength()));
 		file.Close();
 		USES_CONVERSION;
 		Data.pSocket->SendContent(T2CA(contentType), buffer, size);
@@ -4555,31 +4555,31 @@ CString	CWapServer::_GetKadPage(WapThreadData Data)
 		CString dest=_ParseURL(Data.sURL, _T("ipport"));
 		int pos=dest.Find(_T(':'));
 		if (pos!=-1) {
-			uint16 port=_ttoi(dest.Right( dest.GetLength()-pos-1));
+			uint16 port=(uint16)_ttoi(dest.Right( dest.GetLength()-pos-1));
 			CString ip=dest.Left(pos);
-			Kademlia::CKademlia::bootstrap(ip,port);
+			Kademlia::CKademlia::Bootstrap(ip,port);
 		}
 	}
 
 	if (_ParseURL(Data.sURL, _T("c")) == "connect" && IsSessionAdmin(Data,sSession) ) {
-		Kademlia::CKademlia::start();
+		Kademlia::CKademlia::Start();
 	}
 
 	if (_ParseURL(Data.sURL, _T("c")) == "disconnect" && IsSessionAdmin(Data,sSession) ) {
-		Kademlia::CKademlia::stop();
+		Kademlia::CKademlia::Stop();
 	}
 
 	// check the condition if bootstrap is possible
-	if ( Kademlia::CKademlia::isRunning() &&  !Kademlia::CKademlia::isConnected()) {
+	if ( Kademlia::CKademlia::IsRunning() &&  !Kademlia::CKademlia::IsConnected()) {
 
 		Out.Replace(_T("[BOOTSTRAPLINE]"), pThis->m_Templates.sBootstrapLine );
 
 		// Bootstrap
 		CString bsip=_ParseURL(Data.sURL, _T("bsip"));
-		uint16 bsport=_ttoi(_ParseURL(Data.sURL, _T("bsport")));
+		uint16 bsport=(uint16)_ttoi(_ParseURL(Data.sURL, _T("bsport")));
 
 		if (!bsip.IsEmpty() && bsport>0)
-			Kademlia::CKademlia::bootstrap(bsip,bsport);
+			Kademlia::CKademlia::Bootstrap(bsip,bsport);
 	} else Out.Replace(_T("[BOOTSTRAPLINE]"), _T("") );
 
 	// Infos

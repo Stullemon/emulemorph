@@ -29,12 +29,16 @@
 #include "TransferWnd.h"
 #include "DownloadListCtrl.h"
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4100) // unreferenced formal parameter
 #include <crypto51/rsa.h>
 #include <crypto51/base64.h>
 #include <crypto51/osrng.h>
 #include <crypto51/files.h>
 #include <crypto51/sha.h>
-#pragma warning(default:4516)
+#pragma warning(default:4100) // unreferenced formal parameter
+#pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "Preferences.h"
 
 // CCollectionCreateDialog dialog
@@ -53,6 +57,19 @@ enum ECols
 };
 
 IMPLEMENT_DYNAMIC(CCollectionCreateDialog, CDialog)
+
+BEGIN_MESSAGE_MAP(CCollectionCreateDialog, CResizableDialog)
+	ON_BN_CLICKED(IDC_COLLECTIONREMOVE, OnBnClickedCollectionremove)
+	ON_BN_CLICKED(IDC_COLLECTIONADD, OnBnClickedCollectionadd)
+	ON_BN_CLICKED(IDC_CCOLL_SAVE, OnBnClickedOk)
+	ON_BN_CLICKED(IDC_CCOLL_CANCEL, OnCancel)
+	ON_BN_CLICKED(IDC_COLLECTIONVIEWSHAREBUTTON, OnBnClickedCollectionviewsharebutton)
+	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONAVAILLIST, OnNMDblclkCollectionavaillist)
+	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONLISTCTRL, OnNMDblclkCollectionlistctrl)
+	ON_EN_KILLFOCUS(IDC_COLLECTIONNAMEEDIT, OnEnKillfocusCollectionnameedit)
+	ON_BN_CLICKED(IDC_COLLECTIONCREATEFORMAT, OnBnClickedCollectioncreateformat)
+END_MESSAGE_MAP()
+
 CCollectionCreateDialog::CCollectionCreateDialog(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CCollectionCreateDialog::IDD, pParent)
 	, m_pCollection(NULL)
@@ -83,24 +100,6 @@ void CCollectionCreateDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COLLECTIONCREATESIGNCHECK, m_CollectionCreateSignNameKeyCheck);
 	DDX_Control(pDX, IDC_COLLECTIONCREATEFORMAT, m_CollectionCreateFormatCheck);
 }
-
-
-BEGIN_MESSAGE_MAP(CCollectionCreateDialog, CResizableDialog)
-	ON_BN_CLICKED(IDC_COLLECTIONREMOVE, OnBnClickedCollectionremove)
-	ON_BN_CLICKED(IDC_COLLECTIONADD, OnBnClickedCollectionadd)
-	ON_BN_CLICKED(IDC_CCOLL_SAVE, OnBnClickedOk)
-	ON_BN_CLICKED(IDC_CCOLL_CANCEL, OnCancel)
-	ON_BN_CLICKED(IDC_COLLECTIONVIEWSHAREBUTTON, OnBnClickedCollectionviewsharebutton)
-	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONAVAILLIST, OnNMDblclkCollectionavaillist)
-	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONLISTCTRL, OnNMDblclkCollectionlistctrl)
-	ON_EN_KILLFOCUS(IDC_COLLECTIONNAMEEDIT, OnEnKillfocusCollectionnameedit)
-	ON_BN_CLICKED(IDC_COLLECTIONCREATEFORMAT, OnBnClickedCollectioncreateformat)
-END_MESSAGE_MAP()
-
-
-// CCollectionCreateDialog message handlers
-
-
 
 void CCollectionCreateDialog::SetCollection(CCollection* pCollection, bool create)
 {
@@ -358,10 +357,9 @@ void CCollectionCreateDialog::OnBnClickedOk()
 			}
 		}
 		
-		if (pSignkey != NULL){
-			delete pSignkey;
-			pSignkey = NULL;
-		}
+		delete pSignkey;
+		pSignkey = NULL;
+
 		OnOK();
 	}
 }
@@ -398,13 +396,13 @@ void CCollectionCreateDialog::OnBnClickedCollectionviewsharebutton()
 		m_CollectionViewShareButton.SetWindowText(_T("   ") + GetResString(IDS_KNOWN));
 }
 
-void CCollectionCreateDialog::OnNMDblclkCollectionavaillist(NMHDR *pNMHDR, LRESULT *pResult)
+void CCollectionCreateDialog::OnNMDblclkCollectionavaillist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	AddSelectedFiles();
 	*pResult = 0;
 }
 
-void CCollectionCreateDialog::OnNMDblclkCollectionlistctrl(NMHDR *pNMHDR, LRESULT *pResult)
+void CCollectionCreateDialog::OnNMDblclkCollectionlistctrl(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	RemoveSelectedFiles();
 	*pResult = 0;

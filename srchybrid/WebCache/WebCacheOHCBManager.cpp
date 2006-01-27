@@ -36,9 +36,10 @@ POSITION CWebCacheOHCBManager::AddWCBlock(
 									  uint32 clientIP,
 									  uint16 clientPort,
 									  const byte* fileHash,
-									  uint32 startOffset,
-									  uint32 endOffset,
-									  byte* key)
+									  uint64 startOffset,
+									  uint64 endOffset,
+									  byte* key,
+									  bool isLargeFile)
 {
 	CleanupOHCBListIfNeeded();
 
@@ -49,7 +50,8 @@ POSITION CWebCacheOHCBManager::AddWCBlock(
 											fileHash,
 											startOffset,
 											endOffset,
-											key);
+											key,
+											isLargeFile);
 	managedOHCBList.AddTail(newOHCB);
 	return managedOHCBList.GetTailPosition();
 }
@@ -312,15 +314,20 @@ Packet* CWebCacheOHCBManager::GetWCBlocksForClient(CUpDownClient* recipient, uin
 		data.WriteUInt32( XpressOHCB->clientIP	);
 		data.WriteUInt16( XpressOHCB->clientPort	);
 		data.WriteHash16( XpressOHCB->fileHash	);
-		data.WriteUInt32( XpressOHCB->startOffset	);
-		data.WriteUInt32( XpressOHCB->endOffset	);
+		if (XpressOHCB->isLargeFile){
+			data.WriteUInt64( XpressOHCB->startOffset	);
+			data.WriteUInt64( XpressOHCB->endOffset	);
+		} else {
+			data.WriteUInt32( (uint32)XpressOHCB->startOffset	);
+			data.WriteUInt32( (uint32)XpressOHCB->endOffset	);
+		}
 		data.Write( XpressOHCB->key, WC_KEYLENGTH	);
 	}
 
 	for (POSITION pos = managedOHCBList.GetHeadPosition(); pos;) // OHCB search loop
 	{
 		CManagedOHCB* currentOHCB = managedOHCBList.GetNext(pos);
-		if (!recipient->IsPartAvailable(currentOHCB->startOffset / PARTSIZE, currentOHCB->fileHash))	// missing this chunk - WRONG file, TODO: write this for the requested file(s)
+		if (!recipient->IsPartAvailable((uint16)(currentOHCB->startOffset / PARTSIZE), currentOHCB->fileHash))	// missing this chunk - WRONG file, TODO: write this for the requested file(s)
 		{
 			POSITION pos2 = currentOHCB->recipients.GetHeadPosition();
 			bool alreadySent = false;
@@ -345,8 +352,13 @@ Packet* CWebCacheOHCBManager::GetWCBlocksForClient(CUpDownClient* recipient, uin
 				data.WriteUInt32( currentOHCB->clientIP	);
 				data.WriteUInt16( currentOHCB->clientPort	);
 				data.WriteHash16( currentOHCB->fileHash	);
-				data.WriteUInt32( currentOHCB->startOffset	);
-				data.WriteUInt32( currentOHCB->endOffset	);
+				if (currentOHCB->isLargeFile) {
+					data.WriteUInt64( currentOHCB->startOffset	);
+					data.WriteUInt64( currentOHCB->endOffset	);
+				} else  {
+					data.WriteUInt32( (uint32)currentOHCB->startOffset	);
+					data.WriteUInt32( (uint32)currentOHCB->endOffset	);
+				}
 				data.Write( currentOHCB->key, WC_KEYLENGTH	);
 			}
 		}

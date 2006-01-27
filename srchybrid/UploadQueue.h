@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -80,7 +80,7 @@ public:
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	
 	void	DeleteAll();
-	uint16	GetWaitingPosition(CUpDownClient* client);
+	UINT	GetWaitingPosition(CUpDownClient* client);
 
 	uint32	GetSuccessfullUpCount()					{return successfullupcount;}
 	uint32	GetFailedUpCount()						{return failedupcount;}
@@ -132,7 +132,7 @@ private:
 
 	// By BadWolf - Accurate Speed Measurement
 	typedef struct TransferredData {
-		uint32	datalen;
+		uint64	datalen;
 		DWORD	timestamp;
 	};
 	CList<uint64> avarage_dr_list;

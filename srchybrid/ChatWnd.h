@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -36,7 +36,7 @@ public:
 	enum { IDD = IDD_CHAT };
 	void StartSession(CUpDownClient* client);
 	void Localize();
-	void UpdateFriendlistCount(uint16 count);
+	void UpdateFriendlistCount(UINT count);
 
 	CFriendListCtrl m_FriendListCtrl;
 

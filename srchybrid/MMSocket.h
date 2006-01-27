@@ -28,10 +28,11 @@ public:
 	void	WriteByte(uint8 write)		{m_pBuffer->Write(&write,1);}
 	void	WriteShort(uint16 write)	{m_pBuffer->Write(&write,2);}
 	void	WriteInt(uint32 write)		{m_pBuffer->Write(&write,4);}
+	void	WriteInt64(uint64 write)	{m_pBuffer->Write(&write,8);}
 	void	WriteString(CStringA write){
-		uint8 len = (write.GetLength() > 255) ? 255 : write.GetLength();
+		uint8 len = (write.GetLength() > 255) ? (uint8)255 : (uint8)write.GetLength();
 		WriteByte(len);
-		m_pBuffer->Write(write.GetBuffer(),len);
+		m_pBuffer->Write(const_cast<LPSTR>((LPCSTR)write), len);
 	}
 	void	WriteString(CString write){
 		CStringA strA(write);
@@ -60,6 +61,11 @@ public:
 	uint32	ReadInt(){
 		uint32 buf;
 		Read(&buf,4);
+		return buf;
+	}
+	uint64	ReadInt64(){
+		uint64 buf;
+		Read(&buf,8);
 		return buf;
 	}
 	CString ReadString(){
@@ -180,5 +186,5 @@ private:
 #define MMT_PARTFILFE		0x01
 #define MMT_FINISHEDFILE	0x02
 
-#define MM_VERSION			0x09
-#define MM_STRVERSION		"0.9a"
+#define MM_VERSION			0x9B
+#define MM_STRVERSION		"0.9x"

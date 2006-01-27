@@ -26,7 +26,7 @@ class CWebCachedBlock
 {
 	friend class CWebCacheProxyClient;
 private:
-	uint32 m_uEnd;
+	uint64 m_uEnd;
 	byte remoteKey[WC_KEYLENGTH]; // Superlexx - encryption
 	uint32 m_uProxyIp;
 	uint32 m_uHostIp;
@@ -42,7 +42,7 @@ private:
 public:
 	uint32 m_uTime; //jp remove old chunks (currently only for Stopped-List)
 	uchar m_FileID[16];  //jp needs to be public to throttle the chunk or make public member functions
-	uint32 m_uStart; //jp needs to be public to throttle the chunk or make public member functions
+	uint64 m_uStart; //jp needs to be public to throttle the chunk or make public member functions
 	uint32 GetProxyIp() const;
 	bool DownloadIfPossible();
 	bool IsValid() const;

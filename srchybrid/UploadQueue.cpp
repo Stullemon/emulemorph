@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -1028,12 +1028,12 @@ void CUploadQueue::Process() {
 		DWORD dwAvgTickDuration = dwDuration / avarage_dr_USS_list.GetCount();
 		if ((curTick - avarage_dr_USS_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_dr_USS_list.GetTail().timestamp - dwAvgTickDuration;
-		datarate_USS = 1000U * m_avarage_dr_USS_sum / dwDuration;
+		datarate_USS = (UINT)(1000U * m_avarage_dr_USS_sum / dwDuration);
 	}
 	//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	
 	// don't save more than MAXAVERAGETIMEUPLOAD secs of data
-	while(avarage_tick_list.GetCount() > 1 && (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
+	while((UINT)avarage_tick_list.GetCount() > 1 && (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
 		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 		m_avarage_overhead_dr_sum -= avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		avarage_friend_dr_list.RemoveHead();
@@ -1047,16 +1047,16 @@ void CUploadQueue::Process() {
 		DWORD dwAvgTickDuration = dwDuration / avarage_tick_list.GetCount();
 		if ((curTick - avarage_tick_list.GetTail()) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_tick_list.GetTail() - dwAvgTickDuration;
-		datarate = 1000U * m_avarage_dr_sum / dwDuration;
-		datarateoverhead = 1000U * m_avarage_overhead_dr_sum / dwDuration;
-		friendDatarate = 1000U * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()+1);
+		datarate = (UINT)(1000U * m_avarage_dr_sum / dwDuration);
+		datarateoverhead = (UINT)(1000U * m_avarage_overhead_dr_sum / dwDuration);
+		friendDatarate = (UINT)(1000U * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()+1));
 	}else if (avarage_tick_list.GetCount() == 1){
 		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
 		if (dwDuration < 1000) dwDuration = 1000;
 		if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
 			dwDuration = curTick - avarage_tick_list.GetTail();
-		datarate = 1000U * m_avarage_dr_sum / dwDuration;
-		datarateoverhead = 1000U * m_avarage_overhead_dr_sum / dwDuration; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
+		datarate = (UINT)(1000U * m_avarage_dr_sum / dwDuration);
+		datarateoverhead = (UINT)(1000U * m_avarage_overhead_dr_sum / dwDuration); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		friendDatarate = 0;
 	}else {
 		datarate = 0;
@@ -1083,9 +1083,8 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
         return false;
     }
 	uint16 MaxSpeed;
-
     if (thePrefs.IsDynUpEnabled())
-        MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
+        MaxSpeed = (uint16)(theApp.lastCommonRouteFinder->GetUpload()/1024);
     else
 		MaxSpeed = thePrefs.GetMaxUpload();
 
@@ -1249,14 +1248,14 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			{
 				//cur_client has a valid secure hash, don't remove him
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),client->GetUserName() );
+					AddDebugLogLine(false, GetResString(IDS_SAMEUSERHASH), client->GetUserName(), cur_client->GetUserName(), client->GetUserName());
 				return;
 			}
 			if (client->credits != NULL && client->credits->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED)
 			{
 				//client has a valid secure hash, add him remove other one
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),cur_client->GetUserName() );
+					AddDebugLogLine(false, GetResString(IDS_SAMEUSERHASH), client->GetUserName(), cur_client->GetUserName(), cur_client->GetUserName());
 				// EastShare - Added by TAHO, modified SUQWT
 				waitinglist.GetAt(pos2)->ClearWaitStartTime();
 				// EastShare - Added by TAHO, modified SUQWT
@@ -1271,7 +1270,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			{
 				// remove both since we do not know who the bad one is
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),_T("Both") );
+					AddDebugLogLine(false, GetResString(IDS_SAMEUSERHASH), client->GetUserName() ,cur_client->GetUserName(), _T("Both"));
 				// EastShare - Added by TAHO, modified SUQWT
 				waitinglist.GetAt(pos2)->ClearWaitStartTime(); 
 				// EastShare - Added by TAHO, modified SUQWT
@@ -1317,7 +1316,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			reqfile->statistic.AddRequest();
 
 		// emule collection will bypass the queue
-		if (reqfile != NULL && CCollection::HasCollectionExtention(reqfile->GetFileName()) && reqfile->GetFileSize() < MAXPRIORITYCOLL_SIZE
+	if (reqfile != NULL && CCollection::HasCollectionExtention(reqfile->GetFileName()) && reqfile->GetFileSize() < (uint64)MAXPRIORITYCOLL_SIZE
 			&& !client->IsDownloading() && client->socket != NULL && client->socket->IsConnected())
 		{
 			client->SetCollectionUploadSlot(true);
@@ -1458,7 +1457,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
                client->SetWaitStartTime();
 		*/
 
-		bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
+		(void) theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
 
 		// Mighty Knife: more detailed logging
 		/*
@@ -1549,7 +1548,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			}
 			else if(client->GetQueueSessionUp() < SESSIONMAXTRANS)
 			{
-				int keeppct = (100 - (100 * client->GetQueueSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
+				int keeppct = (100 - (int)(100 * client->GetQueueSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
 				if (keeppct < 0)    keeppct = 0;
 				client->Credits()->SaveUploadQueueWaitTime(keeppct);
 				client->Credits()->SetSecWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
@@ -1629,7 +1628,7 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 		CKnownFile* pDownloadingFile = theApp.sharedfiles->GetFileByID(client->requpfileid);
 		if(pDownloadingFile == NULL)
 			return true;
-		if (CCollection::HasCollectionExtention(pDownloadingFile->GetFileName()) && pDownloadingFile->GetFileSize() < MAXPRIORITYCOLL_SIZE)
+		if (CCollection::HasCollectionExtention(pDownloadingFile->GetFileName()) && pDownloadingFile->GetFileSize() < (uint64)MAXPRIORITYCOLL_SIZE)
 			return false;
 		else{
 			if (thePrefs.GetLogUlDlEvents())
@@ -1676,12 +1675,12 @@ void CUploadQueue::DeleteAll(){
 	// PENDING: Remove from UploadBandwidthThrottler as well!
 }
 
-uint16 CUploadQueue::GetWaitingPosition(CUpDownClient* client)
+UINT CUploadQueue::GetWaitingPosition(CUpDownClient* client)
 {
 	if (!IsOnUploadQueue(client))
 		return 0;
 	UINT rank = 1;
-	uint32 myscore = client->GetScore(false);
+	UINT myscore = client->GetScore(false);
 	for (POSITION pos = waitinglist.GetHeadPosition(); pos != 0; ){
 		//MORPH START - Added by SiRoB, ZZ Upload System
 		/*
@@ -1695,7 +1694,7 @@ uint16 CUploadQueue::GetWaitingPosition(CUpDownClient* client)
 	return rank;
 }
 
-VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWORD dwTime)
+VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*idEvent*/, DWORD /*dwTime*/)
 {
 	// NOTE: Always handle all type of MFC exceptions in TimerProcs - otherwise we'll get mem leaks
 	try
@@ -1742,12 +1741,12 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			theApp.friendlist->Process();		// 19 minutes
 			theApp.clientlist->Process();
 			theApp.sharedfiles->Process();
-			if( Kademlia::CKademlia::isRunning() )
+			if( Kademlia::CKademlia::IsRunning() )
 			{
-				Kademlia::CKademlia::process();
-				if(Kademlia::CKademlia::getPrefs()->hasLostConnection())
+				Kademlia::CKademlia::Process();
+				if(Kademlia::CKademlia::GetPrefs()->HasLostConnection())
 				{
-					Kademlia::CKademlia::stop();
+					Kademlia::CKademlia::Stop();
 					theApp.emuledlg->ShowConnectionState();
 				}
 			}
@@ -1818,6 +1817,9 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			}
 			//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 
+			if (theApp.emuledlg->IsTrayIconToFlash())
+				theApp.emuledlg->ShowTransferRate(true);
+
 			sec++;
 			// 5 seconds
 			if (sec>=5) {
@@ -1829,7 +1831,8 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				sec = 0;
 				theApp.listensocket->Process();
 				theApp.OnlineSig(); // Added By Bouc7 
-				theApp.emuledlg->ShowTransferRate();
+				if (!theApp.emuledlg->IsTrayIconToFlash())
+					theApp.emuledlg->ShowTransferRate();
 				thePrefs.EstimateMaxUploadCap(theApp.uploadqueue->GetDatarate()/1024);
 
 

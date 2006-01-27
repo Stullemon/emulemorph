@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -29,10 +29,14 @@ there client on the eMule forum..
 */
 
 #include "stdafx.h"
-#include "UInt128.h"
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4100) // unreferenced formal parameter
 #include <crypto51/osrng.h>
-#pragma warning(default:4516)
+#pragma warning(default:4100) // unreferenced formal parameter
+#pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+#include "./UInt128.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -40,271 +44,355 @@ there client on the eMule forum..
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-////////////////////////////////////////
 using namespace Kademlia;
 using namespace CryptoPP;
-////////////////////////////////////////
 
 CUInt128::CUInt128()
 {
-	setValue((ULONG)0);
+	SetValue((ULONG)0);
 }
 
-CUInt128::CUInt128(bool fill)
+CUInt128::CUInt128(bool bFill)
 {
-	if( fill )
+	if( bFill )
 	{
-		m_data[0] = (ULONG)-1;
-		m_data[1] = (ULONG)-1;
-		m_data[2] = (ULONG)-1;
-		m_data[3] = (ULONG)-1;
+		m_uData[0] = (ULONG)-1;
+		m_uData[1] = (ULONG)-1;
+		m_uData[2] = (ULONG)-1;
+		m_uData[3] = (ULONG)-1;
 	}
 	else
-		setValue((ULONG)0);
+		SetValue((ULONG)0);
 }
 
-CUInt128::CUInt128(ULONG value)
+CUInt128::CUInt128(ULONG uValue)
 {
-	setValue(value);
+	SetValue(uValue);
 }
 
-CUInt128::CUInt128(const byte *valueBE)
+CUInt128::CUInt128(const byte *pbyValueBE)
 {
-	setValueBE(valueBE);
+	SetValueBE(pbyValueBE);
 }
 
-CUInt128::CUInt128(const CUInt128 &value, UINT numBits)
+CUInt128::CUInt128(const CUInt128 &uValue, UINT uNumBits)
 {
 	// Copy the whole ULONGs
-	UINT numULONGs = numBits / 32;
-	for (UINT i=0; i<numULONGs; i++)
-		m_data[i] = value.m_data[i];
+	UINT uNumULONGs = uNumBits / 32;
+	for (UINT iIndex=0; iIndex<uNumULONGs; iIndex++)
+		m_uData[iIndex] = uValue.m_uData[iIndex];
 
 	// Copy the remaining bits
-	for (UINT i=(32*numULONGs); i<numBits; i++)
-		setBitNumber(i, value.getBitNumber(i));
+	for (UINT iIndex=(32*uNumULONGs); iIndex<uNumBits; iIndex++)
+		SetBitNumber(iIndex, uValue.GetBitNumber(iIndex));
 
 	// Pad with random bytes (Not seeding based on time to allow multiple different ones to be created in quick succession)
-	for (UINT i=numBits; i<128; i++)
-		setBitNumber(i, (rand()%2));
+	for (UINT iIndex=uNumBits; iIndex<128; iIndex++)
+		SetBitNumber(iIndex, (rand()%2));
 }
 
-CUInt128& CUInt128::setValue(const CUInt128 &value)
+CUInt128& CUInt128::SetValue(const CUInt128 &uValue)
 {
-	m_data[0] = value.m_data[0];
-	m_data[1] = value.m_data[1];
-	m_data[2] = value.m_data[2];
-	m_data[3] = value.m_data[3];
+	m_uData[0] = uValue.m_uData[0];
+	m_uData[1] = uValue.m_uData[1];
+	m_uData[2] = uValue.m_uData[2];
+	m_uData[3] = uValue.m_uData[3];
 	return *this;
 }
 
-CUInt128& CUInt128::setValue(ULONG value)
+CUInt128& CUInt128::SetValue(ULONG uValue)
 {
-	m_data[0] = 0;
-	m_data[1] = 0;
-	m_data[2] = 0;
-	m_data[3] = value;
+	m_uData[0] = 0;
+	m_uData[1] = 0;
+	m_uData[2] = 0;
+	m_uData[3] = uValue;
 	return *this;
 }
 
-CUInt128& CUInt128::setValueBE(const byte *valueBE)
+CUInt128& CUInt128::SetValueBE(const byte *pbyValueBE)
 {
-	setValue((ULONG)0);
-	for (int i=0; i<16; i++)
-		m_data[i/4] |= ((ULONG)valueBE[i]) << (8*(3-(i%4)));
+	SetValue((ULONG)0);
+	for (int iIndex=0; iIndex<16; iIndex++)
+		m_uData[iIndex/4] |= ((ULONG)pbyValueBE[iIndex]) << (8*(3-(iIndex%4)));
 	return *this;
 }
 
-CUInt128& CUInt128::setValueRandom(void)
+CUInt128& CUInt128::SetValueRandom()
 {
 	AutoSeededRandomPool rng;
-	byte randomBytes[16];
-	rng.GenerateBlock(randomBytes, 16);
-	setValueBE( randomBytes );
+	byte byRandomBytes[16];
+	rng.GenerateBlock(byRandomBytes, 16);
+	SetValueBE( byRandomBytes );
 	return *this;
 }
 
-CUInt128& CUInt128::setValueGUID(void)
+CUInt128& CUInt128::SetValueGUID()
 {
-	setValue((ULONG)0);
+	SetValue((ULONG)0);
 	GUID guid;
 	if (CoCreateGuid(&guid) != S_OK)
 		return *this;
-	m_data[0] = guid.Data1;
-	m_data[1] = ((ULONG)guid.Data2) << 16 | guid.Data3;
-	m_data[2] = ((ULONG)guid.Data4[0]) << 24 | ((ULONG)guid.Data4[1]) << 16 | ((ULONG)guid.Data4[2]) << 8 | ((ULONG)guid.Data4[3]);
-	m_data[3] = ((ULONG)guid.Data4[4]) << 24 | ((ULONG)guid.Data4[5]) << 16 | ((ULONG)guid.Data4[6]) << 8 | ((ULONG)guid.Data4[7]);
+	m_uData[0] = guid.Data1;
+	m_uData[1] = ((ULONG)guid.Data2) << 16 | guid.Data3;
+	m_uData[2] = ((ULONG)guid.Data4[0]) << 24 | ((ULONG)guid.Data4[1]) << 16 | ((ULONG)guid.Data4[2]) << 8 | ((ULONG)guid.Data4[3]);
+	m_uData[3] = ((ULONG)guid.Data4[4]) << 24 | ((ULONG)guid.Data4[5]) << 16 | ((ULONG)guid.Data4[6]) << 8 | ((ULONG)guid.Data4[7]);
 	return *this;
 }
 
-UINT CUInt128::getBitNumber(UINT bit) const
+UINT CUInt128::GetBitNumber(UINT uBit) const
 {
-	if (bit > 127)
+	if (uBit > 127)
 		return 0;
-	int ulongNum = bit / 32;
-	int shift = 31 - (bit % 32);
-	return ((m_data[ulongNum] >> shift) & 1);
+	int iLongNum = uBit / 32;
+	int iShift = 31 - (uBit % 32);
+	return ((m_uData[iLongNum] >> iShift) & 1);
 }
 
-CUInt128& CUInt128::setBitNumber(UINT bit, UINT value) 
+CUInt128& CUInt128::SetBitNumber(UINT uBit, UINT uValue)
 {
-	int ulongNum = bit / 32;
-	int shift = 31 - (bit % 32);
-	m_data[ulongNum] |= (1 << shift);
-	if (value == 0)
-		m_data[ulongNum] ^= (1 << shift);
+	int iLongNum = uBit / 32;
+	int iShift = 31 - (uBit % 32);
+	m_uData[iLongNum] |= (1 << iShift);
+	if (uValue == 0)
+		m_uData[iLongNum] ^= (1 << iShift);
 	return *this;
 }
 
-CUInt128& CUInt128::xor(const CUInt128 &value)
+CUInt128& CUInt128::Xor(const CUInt128 &uValue)
 {
-	for (int i=0; i<4; i++)
-		m_data[i] ^= value.m_data[i];
+	for (int iIndex=0; iIndex<4; iIndex++)
+		m_uData[iIndex] ^= uValue.m_uData[iIndex];
 	return *this;
 }
 
-CUInt128& CUInt128::xorBE(const byte *valueBE)
+CUInt128& CUInt128::XorBE(const byte *pbyValueBE)
 {
-	CUInt128 temp(valueBE);
-	return xor(temp);
+	return Xor(CUInt128(pbyValueBE));
 }
 
-void CUInt128::toHexString(CString *str) const
+void CUInt128::ToHexString(CString *pstr) const
 {
-	str->SetString(_T(""));
-	CString element;
-	for (int i=0; i<4; i++)
+	pstr->SetString(_T(""));
+	CString sElement;
+	for (int iIndex=0; iIndex<4; iIndex++)
 	{
-		element.Format(_T("%08X"), m_data[i]);
-		str->Append(element);
+		sElement.Format(_T("%08X"), m_uData[iIndex]);
+		pstr->Append(sElement);
 	}
 }
 
-void CUInt128::toBinaryString(CString *str, bool trim) const
+void CUInt128::ToBinaryString(CString *pstr, bool bTrim) const
 {
-	str->SetString(_T(""));
-	CString element;
-	int b;
-	for (int i=0; i<128; i++)
+	pstr->SetString(_T(""));
+	CString sElement;
+	int iBit;
+	for (int iIndex=0; iIndex<128; iIndex++)
 	{
-		b = getBitNumber(i);
-		if ((!trim) || (b != 0))
+		iBit = GetBitNumber(iIndex);
+		if ((!bTrim) || (iBit != 0))
 		{
-			element.Format(_T("%d"), b);
-			str->Append(element);
-			trim = false;
+			sElement.Format(_T("%d"), iBit);
+			pstr->Append(sElement);
+			bTrim = false;
 		}
 	}
-	if (str->GetLength() == 0)
-		str->SetString(_T("0"));
+	if (pstr->GetLength() == 0)
+		pstr->SetString(_T("0"));
 }
 
 #if defined(_M_IX86) && (_MSC_FULL_VER > 13009037)
 #pragma intrinsic(_byteswap_ulong)
 #endif
-void CUInt128::toByteArray(byte *b) const
+void CUInt128::ToByteArray(byte *pby) const
 {
 #if defined(_M_IX86) && (_MSC_FULL_VER > 13009037)
-	((uint32*)b)[0] = _byteswap_ulong(m_data[0]);
-	((uint32*)b)[1] = _byteswap_ulong(m_data[1]);
-	((uint32*)b)[2] = _byteswap_ulong(m_data[2]);
-	((uint32*)b)[3] = _byteswap_ulong(m_data[3]);
+	((uint32*)pby)[0] = _byteswap_ulong(m_uData[0]);
+	((uint32*)pby)[1] = _byteswap_ulong(m_uData[1]);
+	((uint32*)pby)[2] = _byteswap_ulong(m_uData[2]);
+	((uint32*)pby)[3] = _byteswap_ulong(m_uData[3]);
 #else
-	for (int i=0; i<16; i++)
-		b[i] = (byte)(m_data[i/4] >> (8*(3-(i%4))));
+
+	for (int iIndex=0; iIndex<16; iIndex++)
+		pby[iIndex] = (byte)(m_uData[iIndex/4] >> (8*(3-(iIndex%4))));
 #endif
 }
 
-int CUInt128::compareTo(const CUInt128 &other) const
+int CUInt128::CompareTo(const CUInt128 &uOther) const
 {
-	for (int i=0; i<4; i++) 
+	for (int iIndex=0; iIndex<4; iIndex++)
 	{
-	    if (m_data[i] < other.m_data[i])
+		if (m_uData[iIndex] < uOther.m_uData[iIndex])
 			return -1;
-	    if (m_data[i] > other.m_data[i])
+		if (m_uData[iIndex] > uOther.m_uData[iIndex])
 			return 1;
 	}
 	return 0;
 }
 
-int CUInt128::compareTo(ULONG value) const
+int CUInt128::CompareTo(ULONG uValue) const
 {
-	if ((m_data[0] > 0) || (m_data[1] > 0) || (m_data[2] > 0) || (m_data[3] > value))
+	if ((m_uData[0] > 0) || (m_uData[1] > 0) || (m_uData[2] > 0) || (m_uData[3] > uValue))
 		return 1;
-	if (m_data[3] < value)
+	if (m_uData[3] < uValue)
 		return -1;
 	return 0;
 }
 
-CUInt128& CUInt128::add(const CUInt128 &value)
+CUInt128& CUInt128::Add(const CUInt128 &uValue)
 {
-	if (value == 0)
+	if (uValue == 0)
 		return *this;
-	__int64 sum = 0;
-	for (int i=3; i>=0; i--)
+	__int64 iSum = 0;
+	for (int iIndex=3; iIndex>=0; iIndex--)
 	{
-		sum += m_data[i];
-		sum += value.m_data[i];
-		m_data[i] = (ULONG)sum;
-		sum = sum >> 32;
+		iSum += m_uData[iIndex];
+		iSum += uValue.m_uData[iIndex];
+		m_uData[iIndex] = (ULONG)iSum;
+		iSum = iSum >> 32;
 	}
 	return *this;
 }
 
-CUInt128& CUInt128::add(ULONG value)
+CUInt128& CUInt128::Add(ULONG uValue)
 {
-	if (value == 0)
+	if (uValue == 0)
 		return *this;
-	CUInt128 temp(value);
-	add(temp);
+	Add(CUInt128(uValue));
 	return *this;
 }
 
-CUInt128& CUInt128::subtract(const CUInt128 &value)
+CUInt128& CUInt128::Subtract(const CUInt128 &uValue)
 {
-	if (value == 0)
+	if (uValue == 0)
 		return *this;
-	__int64 sum = 0;
-	for (int i=3; i>=0; i--)
+	__int64 iSum = 0;
+	for (int iIndex=3; iIndex>=0; iIndex--)
 	{
-		sum += m_data[i];
-		sum -= value.m_data[i];
-		m_data[i] = (ULONG)sum;
-		sum = sum >> 32;
+		iSum += m_uData[iIndex];
+		iSum -= uValue.m_uData[iIndex];
+		m_uData[iIndex] = (ULONG)iSum;
+		iSum = iSum >> 32;
 	}
 	return *this;
 }
 
-CUInt128& CUInt128::subtract(ULONG value)
+CUInt128& CUInt128::Subtract(ULONG uValue)
 {
-	if (value == 0)
+	if (uValue == 0)
 		return *this;
-	CUInt128 temp(value);
-	subtract(temp);
+	Subtract(CUInt128(uValue));
 	return *this;
 }
 
-CUInt128& CUInt128::shiftLeft(UINT bits)
+CUInt128& CUInt128::ShiftLeft(UINT uBits)
 {
-    if ((bits == 0) || (compareTo(0) == 0))
-        return *this;
-	if (bits > 127)
+	if ((uBits == 0) || (CompareTo(0) == 0))
+		return *this;
+	if (uBits > 127)
 	{
-		setValue((ULONG)0);
+		SetValue((ULONG)0);
 		return *this;
 	}
 
-	ULONG result[] = {0,0,0,0};
-	int indexShift = (int)bits / 32;
-	__int64 shifted = 0;
-	for (int i=3; i>=indexShift; i--)
+	ULONG uResult[] = {0,0,0,0};
+	int iIndexShift = (int)uBits / 32;
+	__int64 iShifted = 0;
+	for (int iIndex=3; iIndex>=iIndexShift; iIndex--)
 	{
-		shifted += ((__int64)m_data[i]) << (bits % 32);
-		result[i-indexShift] = (ULONG)shifted;
-		shifted = shifted >> 32;
+		iShifted += ((__int64)m_uData[iIndex]) << (uBits % 32);
+		uResult[iIndex-iIndexShift] = (ULONG)iShifted;
+		iShifted = iShifted >> 32;
 	}
-	for (int i=0; i<4; i++)
-		m_data[i] = result[i];
+	for (int iIndex=0; iIndex<4; iIndex++)
+		m_uData[iIndex] = uResult[iIndex];
 	return *this;
+}
+
+const byte* CUInt128::GetData() const
+{
+	return (byte*)m_uData;
+}
+
+byte* CUInt128::GetDataPtr() const
+{
+	return (byte*)m_uData;
+}
+
+ULONG CUInt128::Get32BitChunk(int iVal) const
+{
+	return m_uData[iVal];
+}
+
+void CUInt128::operator+  (const CUInt128 &uValue)
+{
+	Add(uValue);
+}
+void CUInt128::operator-  (const CUInt128 &uValue)
+{
+	Subtract(uValue);
+}
+void CUInt128::operator=  (const CUInt128 &uValue)
+{
+	SetValue(uValue);
+}
+bool CUInt128::operator<  (const CUInt128 &uValue) const
+{
+	return (CompareTo(uValue) <  0);
+}
+bool CUInt128::operator>  (const CUInt128 &uValue) const
+{
+	return (CompareTo(uValue) >  0);
+}
+bool CUInt128::operator<= (const CUInt128 &uValue) const
+{
+	return (CompareTo(uValue) <= 0);
+}
+bool CUInt128::operator>= (const CUInt128 &uValue) const
+{
+	return (CompareTo(uValue) >= 0);
+}
+bool CUInt128::operator== (const CUInt128 &uValue) const
+{
+	return (CompareTo(uValue) == 0);
+}
+bool CUInt128::operator!= (const CUInt128 &uValue) const
+{
+	return (CompareTo(uValue) != 0);
+}
+
+void CUInt128::operator+  (ULONG uValue)
+{
+	Add(uValue);
+}
+void CUInt128::operator-  (ULONG uValue)
+{
+	Subtract(uValue);
+}
+void CUInt128::operator=  (ULONG uValue)
+{
+	SetValue(uValue);
+}
+bool CUInt128::operator<  (ULONG uValue) const
+{
+	return (CompareTo(uValue) <  0);
+}
+bool CUInt128::operator>  (ULONG uValue) const
+{
+	return (CompareTo(uValue) >  0);
+}
+bool CUInt128::operator<= (ULONG uValue) const
+{
+	return (CompareTo(uValue) <= 0);
+}
+bool CUInt128::operator>= (ULONG uValue) const
+{
+	return (CompareTo(uValue) >= 0);
+}
+bool CUInt128::operator== (ULONG uValue) const
+{
+	return (CompareTo(uValue) == 0);
+}
+bool CUInt128::operator!= (ULONG uValue) const
+{
+	return (CompareTo(uValue) != 0);
 }

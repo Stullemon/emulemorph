@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -149,6 +149,7 @@ BOOL CPPgIRC::OnInitDialog()
 	m_bHelpChannel = thePrefs.GetIrcHelpChannel();
 	m_bChannelsOnConnect = thePrefs.GetIRCListOnConnect();
 
+	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 	((CEdit*)GetDlgItem(IDC_IRC_NICK_BOX))->SetLimitText(20);
@@ -240,7 +241,7 @@ BOOL CPPgIRC::OnApply()
 			if( input != "" )
 			{
 				theApp.emuledlg->ircwnd->SendString( (CString)_T("NICK ") + input );
-				_tcscpy(thePrefs.m_sircnick,input.GetBuffer());
+				_tcscpy(thePrefs.m_sircnick, input);
 			}
 		}
 	}
@@ -251,31 +252,19 @@ BOOL CPPgIRC::OnApply()
 		_tcscpy(thePrefs.m_sircserver,buffer);
 	}
 
-	if(GetDlgItem(IDC_IRC_NAME_BOX)->GetWindowTextLength())
-	{
-		GetDlgItem(IDC_IRC_NAME_BOX)->GetWindowText(buffer,40);
-		_tcscpy(thePrefs.m_sircchannamefilter,buffer);
-	}
+	GetDlgItem(IDC_IRC_NAME_BOX)->GetWindowText(buffer,40);
+	_tcscpy(thePrefs.m_sircchannamefilter,buffer);
 
-	if(GetDlgItem(IDC_IRC_PERFORM_BOX)->GetWindowTextLength())
-	{
-		GetDlgItem(IDC_IRC_PERFORM_BOX)->GetWindowText(buffer,250);
-		_tcscpy(thePrefs.m_sircperformstring,buffer);
-	}
-	else
-	{
-		_stprintf( buffer, _T(" ") );
-		_tcscpy(thePrefs.m_sircperformstring,buffer);
-	}
+	GetDlgItem(IDC_IRC_PERFORM_BOX)->GetWindowText(buffer,250);
+	_tcscpy(thePrefs.m_sircperformstring,buffer);
 
 	if(GetDlgItem(IDC_IRC_MINUSER_BOX)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_IRC_MINUSER_BOX)->GetWindowText(buffer,6);
 		thePrefs.m_iircchanneluserfilter = _tstoi(buffer);
 	}
-	else{
+	else
 		thePrefs.m_iircchanneluserfilter = 0;
-	}
 
 	LoadSettings();
 	SetModified(FALSE);
@@ -379,7 +368,7 @@ BOOL CPPgIRC::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgIRC::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgIRC::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

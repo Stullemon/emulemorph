@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -171,7 +171,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 		if (success)
 		{
 			theApp.QueueLogLine(true, _T("%s \"%s\""), GetResString(IDS_RECOVERY_SUCCESSFUL), partFile->GetFileName());
-			theApp.QueueDebugLogLine(false, _T("Archive recovery: Part file size: %s, temp. archive file size: %s (%.1f%%)"), CastItoXBytes(partFile->GetFileSize()), CastItoXBytes(ulTempFileSize), partFile->GetFileSize() ? (ulTempFileSize * 100.0 / partFile->GetFileSize()) : 0.0);
+			theApp.QueueDebugLogLine(false, _T("Archive recovery: Part file size: %s, temp. archive file size: %s (%.1f%%)"), CastItoXBytes(partFile->GetFileSize()), CastItoXBytes(ulTempFileSize), partFile->GetFileSize() > (uint64)0 ? (ulTempFileSize * 100.0 / (uint64)partFile->GetFileSize()) : 0.0);
 
 			// Preview file if required
 			if (preview)
@@ -180,7 +180,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 				memset(&SE,0,sizeof(SE));
 				SE.fMask = SEE_MASK_NOCLOSEPROCESS ;
 				SE.lpVerb = _T("open");
-				SE.lpFile = outputFileName.GetBuffer();
+				SE.lpFile = outputFileName;
 				SE.nShow = SW_SHOW;
 				SE.cbSize = sizeof(SE);
 				ShellExecuteEx(&SE);
@@ -334,7 +334,7 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, CTypedPtrLi
 			writeUInt16(zipOutput, (uint16)fileCount);
 			writeUInt32(zipOutput, endOffset - startOffset);
 			writeUInt32(zipOutput, startOffset);
-			writeUInt16(zipOutput, strlen(ZIP_COMMENT));
+			writeUInt16(zipOutput, (uint16)strlen(ZIP_COMMENT));
 			zipOutput->Write(ZIP_COMMENT, strlen(ZIP_COMMENT));
 
 			centralDirectoryEntries.RemoveAll();
@@ -559,7 +559,7 @@ bool CArchiveRecovery::processZipEntry(CFile *zipInput, CFile *zipOutput, uint32
 			cdEntry->lenUnompressed = entry.lenUncompressed;
 			cdEntry->lenFilename = entry.lenFilename;
 			cdEntry->lenExtraField = entry.lenExtraField;
-			cdEntry->lenComment = strlen(ZIP_COMMENT);
+			cdEntry->lenComment = (uint16)strlen(ZIP_COMMENT);
 			cdEntry->diskNumberStart = 0;
 			cdEntry->internalFileAttributes = 1;
 			cdEntry->externalFileAttributes = 0x81B60020;
@@ -733,7 +733,7 @@ bool CArchiveRecovery::recoverRar(CFile *rarInput, CFile *rarOutput, CTypedPtrLi
 		memcpy(start1, start, sizeof start);
 		if (bValidFileHeader && bValidMainHeader && (mainHeader.flags & 0x0008/*MHD_SOLID*/)) {
 			start1[10] |= 8; /*MHD_SOLID*/
-			*((short*)&start1[7]) = crc32(0, &start1[9], 11);
+			*((short*)&start1[7]) = (short)crc32(0, &start1[9], 11);
 		}
 
 		rarOutput->Write(start1, sizeof(start1));
@@ -1010,8 +1010,7 @@ RAR_BlockFile *CArchiveRecovery::scanForRarFileHeader(CFile *input, uint32 avail
 				}
 				// If not valid, return to original position, re-read and continue searching
 				delete [] fileName;
-				if (retVal != NULL)
-					delete retVal;
+				delete retVal;
 				retVal = NULL;
 				input->Seek(searchOffset, CFile::begin);
 				input->Read(chunk, lenChunk);
@@ -1148,17 +1147,17 @@ uint32 CArchiveRecovery::calcUInt32(BYTE *input)
 void CArchiveRecovery::writeUInt16(CFile *output, uint16 val)
 {
 	BYTE b[2];
-	b[0] = (val & 0x000000ff);
-	b[1] = (val & 0x0000ff00) >>  8;
+	b[0] = (BYTE)(val & 0x000000ff);
+	b[1] = (BYTE)((val & 0x0000ff00) >>  8);
 	output->Write(&b, 2);
 }
 
 void CArchiveRecovery::writeUInt32(CFile *output, uint32 val)
 {
 	BYTE b[4];
-	b[0] = (val & 0x000000ff);
-	b[1] = (val & 0x0000ff00) >>  8;
-	b[2] = (val & 0x00ff0000) >> 16;
-	b[3] = (val & 0xff000000) >> 24;
+	b[0] = (BYTE)(val & 0x000000ff);
+	b[1] = (BYTE)((val & 0x0000ff00) >>  8);
+	b[2] = (BYTE)((val & 0x00ff0000) >> 16);
+	b[3] = (BYTE)((val & 0xff000000) >> 24);
 	output->Write(&b, 4);
 }

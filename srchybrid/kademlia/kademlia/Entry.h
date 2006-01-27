@@ -23,34 +23,30 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
+
 #pragma once
-#include "../kademlia/tag.h"
-#include "../utils/UInt128.h"
+#include "./Tag.h"
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CEntry
+namespace Kademlia
 {
-public:
-	CEntry();
-	~CEntry();
+	class CEntry
+	{
+		public:
+			CEntry();
+			~CEntry();
 
-	CEntry* Copy();
-	uint32 GetIntTagValue(LPCSTR tagname) const;
-	CStringW GetStrTagValue(LPCSTR tagname) const;
-
-	uint32 ip;
-	uint16 tcpport;
-	uint16 udpport;
-	CUInt128 keyID;
-	CUInt128 sourceID;
-	CKadTagValueString fileName; // NOTE: this always holds the string in LOWERCASE!!!
-	uint32	size;
-	TagList taglist;
-	time_t lifetime;
-	bool source;
-};
-
+			CEntry* Copy();
+			uint64 GetIntTagValue(LPCSTR szTagName) const;
+			CStringW GetStrTagValue(LPCSTR szTagName) const;
+			uint32 m_uIP;
+			uint16 m_uTCPPort;
+			uint16 m_uUDPPort;
+			CUInt128 m_uKeyID;
+			CUInt128 m_uSourceID;
+			CKadTagValueString m_fileName; // NOTE: this always holds the string in LOWERCASE!!!
+			uint64 m_uSize;
+			TagList m_listTag;
+			time_t m_tLifetime;
+			bool m_bSource;
+	};
 }

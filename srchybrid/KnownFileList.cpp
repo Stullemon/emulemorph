@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -85,21 +85,22 @@ bool CKnownFileList::LoadKnownFiles(){
 	CKnownFile* pRecord = NULL;
 	try {
 		uint8 header = file.ReadUInt8();
-		if (header != MET_HEADER){
+		if (header != MET_HEADER && header != MET_HEADER_I64TAGS){
 			file.Close();
 			return false;
 		}
+		AddDebugLogLine(false, _T("Known.met file version is %u (%s support 64bit tags)"), header, (header == MET_HEADER) ? _T("doesn't") : _T("does")); 
 
 		UINT RecordsNumber = file.ReadUInt32();
 		//Morph Start - added by AndCycle, minor tweak - prime
 		if(RecordsNumber*1.5 > 2063){
-			m_Files_map.InitHashTable(getPrime(RecordsNumber*1.5));
+			m_Files_map.InitHashTable(getPrime((int)(RecordsNumber*1.5)));
 		}
 		//Morph End - added by AndCycle, minor tweak - prime
 		for (UINT i = 0; i < RecordsNumber; i++) {
 			pRecord = new CKnownFile();
 			if (!pRecord->LoadFromFile(&file)){
-				TRACE(_T("*** Failed to load entry %u (name=%s  hash=%s  size=%u  parthashs=%u expected parthashs=%u) from known.met\n"), i, 
+				TRACE(_T("*** Failed to load entry %u (name=%s  hash=%s  size=%I64u  parthashs=%u expected parthashs=%u) from known.met\n"), i, 
 					pRecord->GetFileName(), md4str(pRecord->GetFileHash()), pRecord->GetFileSize(), pRecord->GetHashCount(), pRecord->GetED2KPartCount());	// SLUGFILLER: SafeHash - removed unnececery hash counter
 				delete pRecord;
 				pRecord = NULL;
@@ -206,8 +207,9 @@ void CKnownFileList::Save()
 		setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 
 		try{
-			file.WriteUInt8(MET_HEADER);
+			file.WriteUInt8(0); // we will write the version tag later depending if any large files are on the list
 			UINT nRecordsNumber = 0;
+			bool bContainsAnyLargeFiles = false;
 			file.WriteUInt32(nRecordsNumber);
 			POSITION pos = m_Files_map.GetStartPosition();
 			// SLUGFILLER: mergeKnown, for TAHO, .met file control
@@ -227,9 +229,12 @@ void CKnownFileList::Save()
 						pFile->WriteToFile(&file);
 						nRecordsNumber++;
 					}
+					if (pFile->IsLargeFile())
+						bContainsAnyLargeFiles = true;
 				}
 			}
-			file.Seek(1, CFile::begin);
+			file.SeekToBegin();
+			file.WriteUInt8(bContainsAnyLargeFiles ? MET_HEADER_I64TAGS : MET_HEADER);
 			file.WriteUInt32(nRecordsNumber);
 
 			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
@@ -408,7 +413,7 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 	return true;
 }
 
-CKnownFile* CKnownFileList::FindKnownFile(LPCTSTR filename, uint32 date, uint32 size) const
+CKnownFile* CKnownFileList::FindKnownFile(LPCTSTR filename, uint32 date, uint64 size) const
 {
 	POSITION pos = m_Files_map.GetStartPosition();
 	while (pos != NULL)
@@ -505,6 +510,7 @@ bool CKnownFileList::IsCancelledFileByID(const uchar* hash) const
 	}
 	return false;
 }
+
 void CKnownFileList::CopyKnownFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> &Files_Map)
 {
 	if (!m_Files_map.IsEmpty())

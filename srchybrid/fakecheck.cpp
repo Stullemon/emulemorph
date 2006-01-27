@@ -56,7 +56,7 @@ static int __cdecl CmpFakeByHash_Lenght(const void* p1, const void* p2)
 	int diff = memcmp(pFake1->Hash, pFake2->Hash, 16);
 	if (diff)
 		return diff;
-	return pFake1->Lenght-pFake2->Lenght;
+	return CompareUnsigned64(pFake1->Lenght,pFake2->Lenght);
 }
 
 int CFakecheck::LoadFromFile(){
@@ -139,7 +139,7 @@ int CFakecheck::LoadFromFile(){
 	return m_fakelist.GetCount();
 }
 
-bool CFakecheck::IsFake(uchar* Hash2test, uint32 lenght){
+bool CFakecheck::IsFake(uchar* Hash2test, uint64 lenght){
 	if (m_fakelist.GetCount() == 0)
 		return false;
 	Fakes_Struct** ppFound = (Fakes_Struct**)bsearch(&Hash2test, m_fakelist.GetData(), m_fakelist.GetCount(), sizeof(m_fakelist[0]), CmpFakeByHash_Lenght);

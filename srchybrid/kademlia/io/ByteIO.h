@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -29,44 +29,24 @@ there client on the eMule forum..
 */
 
 #pragma once
+#include "./DataIO.h"
 
-#include "DataIO.h"
-
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CIOException;
-
-class CByteIO : public CDataIO
+namespace Kademlia
 {
-public:
-	CByteIO(byte* buffer, uint32 available)
+	class CByteIO : public CDataIO
 	{
-		m_bReadOnly = false; 
-		m_buffer = buffer; 
-		m_available = available; 
-		m_used = 0;
-	}
-	CByteIO(const byte* buffer, uint32 available)
-	{
-		m_bReadOnly = true; 
-		m_buffer = const_cast<byte*>(buffer);
-		m_available = available; 
-		m_used = 0;
-	}
+		public:
+			CByteIO(byte* pbyBuffer, uint32 uAvailable);
+			CByteIO(const byte* pbyBuffer, uint32 uAvailable);
 
-	void readArray(LPVOID lpResult, uint32 byteCount);
-	void writeArray(LPCVOID lpVal, uint32 byteCount);
-
-	UINT getAvailable() const { return m_available; }
-	void reset(void);
-
-private:
-	bool	m_bReadOnly;
-	byte*	m_buffer;
-	uint32	m_available;
-	uint32	m_used;
-};
-
-} // End namespace
+			void ReadArray(LPVOID lpResult, uint32 uByteCount);
+			void WriteArray(LPCVOID lpVal, uint32 uByteCount);
+			UINT GetAvailable() const;
+			void Reset();
+		private:
+			bool m_bReadOnly;
+			byte* m_pbyBuffer;
+			uint32 m_uAvailable;
+			uint32 m_uUsed;
+	};
+}

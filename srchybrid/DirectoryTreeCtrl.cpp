@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -248,8 +248,7 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 	if (hRoot != NULL && strPath.Right(1) != _T("\\"))
 		strPath += _T("\\");
 	CString strDir = strPath + strText;
-	TV_INSERTSTRUCT itInsert;
-	memset(&itInsert, 0, sizeof(itInsert));
+	TV_INSERTSTRUCT itInsert = {0};
 	
 	// START: changed by FoRcHa /////
 	WORD wWinVer = thePrefs.GetWindowsVersion();
@@ -275,8 +274,7 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 	else
 		itInsert.item.cChildren = 0;
 
-	itInsert.item.pszText = strText.GetBuffer();
-	itInsert.item.cchTextMax = strText.GetLength();
+	itInsert.item.pszText = const_cast<LPTSTR>((LPCTSTR)strText);
 	itInsert.hInsertAfter = hRoot ? TVI_SORT : TVI_LAST;
 	itInsert.hParent = hRoot;
 	
@@ -308,8 +306,7 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 				STreeItem* pti = new STreeItem;
 				pti->strPath = strText;
 				strText = shFinfo.szDisplayName;
-				itInsert.item.pszText = strText.GetBuffer();
-				itInsert.item.cchTextMax = strText.GetLength();
+				itInsert.item.pszText = const_cast<LPTSTR>((LPCTSTR)strText);
 				itInsert.item.mask |= TVIF_PARAM;
 				itInsert.item.lParam = (LPARAM)pti;
 			}
@@ -567,13 +564,13 @@ void CDirectoryTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	VERIFY( SharedMenu.DestroyMenu() );
 }
 
-void CDirectoryTreeCtrl::OnRButtonDown(UINT nFlags, CPoint point)
+void CDirectoryTreeCtrl::OnRButtonDown(UINT /*nFlags*/, CPoint /*point*/)
 {
 	// catch WM_RBUTTONDOWN and do not route it the default way.. otherwise we won't get a WM_CONTEXTMENU.
 	//CTreeCtrl::OnRButtonDown(nFlags, point);
 }
 
-BOOL CDirectoryTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+BOOL CDirectoryTreeCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if (wParam < MP_SHAREDFOLDERS_FIRST)
 	{

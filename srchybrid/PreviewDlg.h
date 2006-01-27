@@ -34,11 +34,11 @@ public:
 
 protected:
 	const CSearchFile* m_pFile;
-	uint16 m_nCurrentImage;
+	int m_nCurrentImage;
 	CStatic m_ImageStatic;
 	HICON m_icons[3];
 
-	void	ShowImage(sint16 nNumber);
+	void	ShowImage(int nNumber);
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

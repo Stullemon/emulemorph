@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -112,6 +112,7 @@ public:
 	DWORD				m_dwProductVersionMS;
 	DWORD				m_dwProductVersionLS;
 	CString				m_strCurVersionLong;
+	CString				m_strCurVersionLongDbg;
 	UINT				m_uCurVersionShort;
 	UINT				m_uCurVersionCheck;
 	ULONGLONG			m_ullComCtrlVer;
@@ -130,6 +131,8 @@ public:
 	static const TCHAR	m_szMMVersion[];
 	CString		m_strModVersion;
 	CString		m_strModLongVersion;
+	CString*	m;
+	CString*	M;
 	//MORPH END   - Added by SiRoB, [-modname-]
 	
 // Implementierung
@@ -137,17 +140,12 @@ public:
 	virtual int ExitInstance();
 
 	// ed2k link functions
-	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
-	/*
-	void		AddEd2kLinksToDownload(CString strLinks, uint8 cat);
-	*/
 	void		AddEd2kLinksToDownload(CString strLinks, int cat);
-	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 	void		SearchClipboard();
 	void		IgnoreClipboardLinks(CString strLinks) {m_strLastClipboardContents = strLinks;}
 	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 	/*
-	void		PasteClipboard(uint8 uCategory = 0);
+	void		PasteClipboard(int cat = 0);
 	*/
 	void		PasteClipboard(int Cat = -1);
 	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
@@ -196,7 +194,7 @@ public:
 	bool		GetLangHelpFilePath(CString& strResult);
 	void		SetHelpFilePath(LPCTSTR pszHelpFilePath);
 	void		ShowHelp(UINT uTopic, UINT uCmd = HELP_CONTEXT);
-	bool		ShowWebHelp();
+	bool		ShowWebHelp(UINT uTopic);
 
     // Elandal:ThreadSafeLogging -->
     // thread safe log calls

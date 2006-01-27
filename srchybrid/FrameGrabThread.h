@@ -35,7 +35,7 @@ protected:
 	CFrameGrabThread();           // protected constructor used by dynamic creation
 	virtual ~CFrameGrabThread();
 	DECLARE_MESSAGE_MAP()
-	uint8	GrabFrames();
+	UINT	GrabFrames();
 public:
 	virtual	BOOL	InitInstance();
 	virtual int		Run();

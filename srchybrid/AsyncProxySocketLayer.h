@@ -20,27 +20,30 @@ How to use?
 
 You don't have to change much in you already existing code to use
 CAsyncProxySocketLayer.
+
 To use it, create an instance of CAsyncProxySocketLayer, call SetProxy
 and attach it to a CAsyncSocketEx instance.
+
 You have to process OnLayerCallback in you CAsyncSocketEx instance as it will
 receive all layer nofications.
+
 The following notifications are sent:
 
 //Error codes
-PROXYERROR_NOERROR 0
-PROXYERROR_NOCONN 1 //Can't connect to proxy server, use GetLastError for more information
-PROXYERROR_REQUESTFAILED 2 //Request failed, can't send data
-PROXYERROR_AUTHREQUIRED 3 //Authentication required
-PROXYERROR_AUTHTYPEUNKNOWN 4 //Authtype unknown or not supported
-PROXYERROR_AUTHFAILED 5  //Authentication failed
-PROXYERROR_AUTHNOLOGON 6
-PROXYERROR_CANTRESOLVEHOST 7
+PROXYERROR_NOERROR			0
+PROXYERROR_NOCONN			1 //Can't connect to proxy server, use GetLastError for more information
+PROXYERROR_REQUESTFAILED	2 //Request failed, can't send data
+PROXYERROR_AUTHREQUIRED		3 //Authentication required
+PROXYERROR_AUTHTYPEUNKNOWN	4 //Authtype unknown or not supported
+PROXYERROR_AUTHFAILED		5 //Authentication failed
+PROXYERROR_AUTHNOLOGON		6
+PROXYERROR_CANTRESOLVEHOST	7
 
 //Status messages
-PROXYSTATUS_LISTENSOCKETCREATED 8 //Called when a listen socket was created successfully. Unlike the normal listen function,
-								//a socksified socket has to connect to the proxy to negotiate the details with the server
-								//on which the listen socket will be created
-								//The two parameters will contain the ip and port of the listen socket on the server.
+PROXYSTATUS_LISTENSOCKETCREATED 8	//Called when a listen socket was created successfully. Unlike the normal listen function,
+									//a socksified socket has to connect to the proxy to negotiate the details with the server
+									//on which the listen socket will be created
+									//The two parameters will contain the ip and port of the listen socket on the server.
 
 If you want to use CAsyncProxySocketLayer to create a listen socket, you
 have to use this overloaded function:
@@ -127,17 +130,16 @@ public:
 	CAsyncProxySocketLayer();
 	virtual ~CAsyncProxySocketLayer();
 
-
 // Überschreibungen
 public:
 	virtual void Close();
-	virtual BOOL Connect( LPCTSTR lpHostAddress, UINT nHostPort );
-	virtual BOOL Connect( const SOCKADDR* lpSockAddr, int nSockAddrLen );
-	virtual BOOL Listen( int nConnectionBacklog);
+	virtual BOOL Connect(LPCSTR lpHostAddress, UINT nHostPort);
+	virtual BOOL Connect(const SOCKADDR* lpSockAddr, int nSockAddrLen);
+	virtual BOOL Listen(int nConnectionBacklog);
 
 	void SetProxy(int nProxyType); //Only PROXYTYPE_NOPROXY
-	void SetProxy(int nProxyType, LPCTSTR pProxyHost, int ProxyPort); //May not be PROXYTYPE_NOPROXY
-	void SetProxy(int nProxyType, LPCTSTR pProxyHost, int ProxyPort, LPCSTR pProxyUser, LPCSTR pProxyPass); //Only SOCKS5 and HTTP1.1 proxies
+	void SetProxy(int nProxyType, const CStringA& strProxyHost, int ProxyPort); //May not be PROXYTYPE_NOPROXY
+	void SetProxy(int nProxyType, const CStringA& strProxyHost, int ProxyPort, const CStringA& strProxyUser, const CStringA& strProxyPass); //Only SOCKS5 and HTTP1.1 proxies
 	//Sets the proxy details.
 	//nProxyType - Type of the proxy. May be PROXYTYPE_NONE, PROXYTYPE_SOCKS4, PROXYTYPE_SOCKS5 or PROXYTYPE_HTTP11
 	//ProxyHost - The address of the proxy. Can be either IP or URL
@@ -146,68 +148,73 @@ public:
 	//ProxyPass - the password for SOCKS5 proxies
 
 	//Prepare listen
-	BOOL PrepareListen(unsigned long ip);
+	BOOL PrepareListen(ULONG ip);
 
-	int GetProxyType() const;
 	//Returns the type of the proxy
+	int GetProxyType() const;
 
 #ifdef _AFX
-	virtual BOOL GetPeerName( CString& rPeerAddress, UINT& rPeerPort );
+	virtual BOOL GetPeerName(CString& rPeerAddress, UINT& rPeerPort);
 #endif
-	virtual BOOL GetPeerName( SOCKADDR* lpSockAddr, int* lpSockAddrLen );
-
-
-	//Returns the address of the server behind the SOCKS proxy you are connected to
-
+	virtual BOOL GetPeerName(SOCKADDR* lpSockAddr, int* lpSockAddrLen);
 
 // Implementierung
 protected:
-	virtual BOOL Accept( CAsyncSocketEx& rConnectedSocket, SOCKADDR* lpSockAddr = NULL, int* lpSockAddrLen = NULL );
-	virtual void OnReceive(int nErrorCode);
-	virtual void OnConnect(int nErrorCode);
+	virtual BOOL Accept(CAsyncSocketEx& rConnectedSocket, SOCKADDR* lpSockAddr = NULL, int* lpSockAddrLen = NULL);
 	virtual int Send(const void* lpBuf, int nBufLen, int nFlags = 0);
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
+
+	//Notification event handlers
+	virtual void OnAccept(int nErrorCode);
+	virtual void OnClose(int nErrorCode);
+	virtual void OnConnect(int nErrorCode);
+	virtual void OnReceive(int nErrorCode);
+	virtual void OnSend(int nErrorCode);
 
 private:
 	void Reset();
 	void ClearBuffer();		//Clears the receive buffer
+
 	char *m_pRecvBuffer;	//The receive buffer
 	int m_nRecvBufferLen;	//Length of the RecvBuffer
 	int m_nRecvBufferPos;	//Position within the receive buffer
+
 	char *m_pStrBuffer;		//Recvbuffer needed by HTTP1.1 proxy
+	int m_iStrBuffSize;
+
 	int m_nProxyOpState;	//State of an operation
 	int m_nProxyOpID;		//Currently active operation (0 if none)
-	int m_nProxyPeerPort;	//Port of the server you are connected to, retrieve via GetPeerName
-	ULONG m_nProxyPeerIp;	//IP of the server you are connected to, retrieve via GetPeerName
+
+	u_short m_nProxyPeerPort;//Port of the server you are connected to, retrieve via GetPeerName
+	u_long m_nProxyPeerIP;	//IP of the server you are connected to, retrieve via GetPeerName
 	typedef struct
 	{
-		int nProxyType;
-		LPTSTR pProxyHost;
-		int nProxyPort;
-		LPSTR pProxyUser;
-		LPSTR pProxyPass;
-		BOOL bUseLogon;
-	} t_proxydata; //This structure will be used to hold the proxy details
-
-	t_proxydata m_ProxyData; //Structure to hold the data set by SetProxy
-	LPTSTR m_pProxyPeerHost; //The host connected to
+		int			nProxyType;
+		CStringA	strProxyHost;
+		int			nProxyPort;
+		CStringA	strProxyUser;
+		CStringA	strProxyPass;
+		BOOL		bUseLogon;
+	} t_proxydata;			//This structure will be used to hold the proxy details
+	t_proxydata m_ProxyData;//Structure to hold the data set by SetProxy
+	LPSTR m_pProxyPeerHost;//The host connected to
 };
 
 //Errorcodes
-#define PROXYERROR_NOERROR 0
-#define PROXYERROR_NOCONN 1 //Can't connect to proxy server, use GetLastError for more information
-#define PROXYERROR_REQUESTFAILED 2 //Request failed, can't send data
-#define PROXYERROR_AUTHREQUIRED 3 //Authentication required
-#define PROXYERROR_AUTHTYPEUNKNOWN 4 //Authtype unknown or not supported
-#define PROXYERROR_AUTHFAILED 5  //Authentication failed
-#define PROXYERROR_AUTHNOLOGON 6
-#define PROXYERROR_CANTRESOLVEHOST 7
+#define PROXYERROR_NOERROR			0
+#define PROXYERROR_NOCONN			1 //Can't connect to proxy server, use GetLastError for more information
+#define PROXYERROR_REQUESTFAILED	2 //Request failed, can't send data
+#define PROXYERROR_AUTHREQUIRED		3 //Authentication required
+#define PROXYERROR_AUTHTYPEUNKNOWN	4 //Authtype unknown or not supported
+#define PROXYERROR_AUTHFAILED		5 //Authentication failed
+#define PROXYERROR_AUTHNOLOGON		6
+#define PROXYERROR_CANTRESOLVEHOST	7
 
 //Status messages
-#define PROXYSTATUS_LISTENSOCKETCREATED 8 //Called when a listen socket was created successfully. Unlike the normal listen function,
-										//a socksified socket has to connect to the proxy to negotiate the details with the server
-										//on which the listen socket will be created
-										//The two parameters will contain the ip and port of the listen socket on the server.
+#define PROXYSTATUS_LISTENSOCKETCREATED 8	//Called when a listen socket was created successfully. Unlike the normal listen function,
+											//a socksified socket has to connect to the proxy to negotiate the details with the server
+											//on which the listen socket will be created
+											//The two parameters will contain the ip and port of the listen socket on the server.
 
 CString GetProxyError(UINT nError);
 
@@ -218,11 +225,12 @@ struct t_ListenSocketCreatedStruct
 };
 
 //Proxytypes
-#define PROXYTYPE_NOPROXY 0
-#define PROXYTYPE_SOCKS4 1
-#define PROXYTYPE_SOCKS4A 2
-#define PROXYTYPE_SOCKS5 3
-#define PROXYTYPE_HTTP11 4
+#define PROXYTYPE_NOPROXY	0
+#define PROXYTYPE_SOCKS4	1
+#define PROXYTYPE_SOCKS4A	2
+#define PROXYTYPE_SOCKS5	3
+#define PROXYTYPE_HTTP10	4
+#define PROXYTYPE_HTTP11	5
 
-#define PROXYOP_CONNECT 1
-#define PROXYOP_LISTEN 2
+#define PROXYOP_CONNECT	1
+#define PROXYOP_BIND	2

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -58,8 +58,8 @@ public:
 	uint32	GetLastSeen()	{ return m_dwLastSeen; }
 	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 
-	virtual bool CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam); // create date, hashset and tags from a file
-	virtual bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
+	bool CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam); // create date, hashset and tags from a file
+	bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
 	bool	WriteToFile(CFileDataIO* file);
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
 	bool	SR13_ImportParts();
@@ -71,18 +71,18 @@ public:
 	CTime	GetUtcCFileDate() const { return CTime(m_tUtcLastModified); }
 	uint32	GetUtcFileDate() const { return m_tUtcLastModified; }
 
-	virtual void SetFileSize(uint32 nFileSize);
+	virtual void SetFileSize(EMFileSize nFileSize);
 
 	// local available part hashs
-	uint16	GetHashCount() const	{return hashlist.GetCount();}
-	uchar*	GetPartHash(uint16 part) const;
+	UINT	GetHashCount() const { return hashlist.GetCount(); }
+	uchar*	GetPartHash(UINT part) const;
 	const CArray<uchar*, uchar*>& GetHashset() const { return hashlist; }
 	bool	SetHashset(const CArray<uchar*, uchar*>& aHashset);
 
 	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 	/*
 	// nr. of part hashs according the file size wrt ED2K protocol
-	UINT	GetED2KPartHashCount() const { return m_iED2KPartHashCount; }
+	uint16	GetED2KPartHashCount() const { return m_iED2KPartHashCount; }
 	*/
 
 	// nr. of 9MB parts (file data)
@@ -115,7 +115,7 @@ public:
 	// comment
 	void	SetFileComment(LPCTSTR pszComment);
 
-	void	SetFileRating(uint8 uRating);
+	void	SetFileRating(UINT uRating);
 
 	bool	GetPublishedED2K() const { return m_PublishedED2K; }
 	void	SetPublishedED2K(bool val);
@@ -162,10 +162,10 @@ public:
 	CArray<uint16, uint16> m_AvailPartFrequency;
 	CCollection* m_pCollection;
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	uint16 m_nVirtualCompleteSourcesCount;
+	UINT m_nVirtualCompleteSourcesCount;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 
-	CArray<uint16> m_PartSentCount;	// SLUGFILLER: hideOS
+	CArray<uint64> m_PartSentCount;	// SLUGFILLER: hideOS
 	bool ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client);//wistily Share only the need
 
 #ifdef _DEBUG
@@ -195,7 +195,7 @@ public:
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
 	void	SetHideOSAuthorized(bool newValue) {m_bHideOSAuthorized = newValue;}
-	uint8	HideOSInWork() const;
+	UINT	HideOSInWork() const;
 	//MORPH END   - Added by SiRoB, Avoid misusing of hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	void	SetShareOnlyTheNeed(int newValue) {m_iShareOnlyTheNeed = newValue;}
@@ -225,7 +225,7 @@ public:
 	CString GetFeedback(bool isUS = false);
 	//MORPH END   - Added by SiRoB, copy feedback feature
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
-	bool	CreateHash(const uchar* pucData, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	bool	CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 	
 protected:
@@ -233,14 +233,14 @@ protected:
 	bool	GrabImage(CString strFileName, uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	bool	LoadTagsFromFile(CFileDataIO* file);
 	bool	LoadDateFromFile(CFileDataIO* file);
-	void	CreateHash(CFile* pFile, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
-	bool	CreateHash(FILE* fp, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	void	CreateHash(CFile* pFile, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	bool	CreateHash(FILE* fp, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	//MORPH - Removed by SiRoB, moved up in public area, Import Parts [SR13]
 	/*
-	bool	CreateHash(const uchar* pucData, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	bool	CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	*/
 	virtual void	UpdateFileRatingCommentAvail();
-	uint16	CalcPartSpread(CArray<uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
+	UINT	CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*, uchar*>	hashlist;
 	CString					m_strDirectory;
 	CString					m_strFilePath;

@@ -46,7 +46,7 @@ CSourceSaver::~CSourceSaver(void)
 {
 }
 
-bool CSourceSaver::Process(CPartFile* file, int maxSourcesToSave) // return false if sources not saved
+bool CSourceSaver::Process(CPartFile* file, UINT maxSourcesToSave) // return false if sources not saved
 {
 	if ((int)(::GetTickCount() - m_dwLastTimeSaved) > RESAVETIME) {
 		TCHAR szslsfilepath[_MAX_PATH];
@@ -179,7 +179,7 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 //#define EXPIREIN		3 //Day
 #define EXPIREIN		30 //Minute
 
-void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR slsfile, int maxSourcesToSave)
+void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR slsfile, UINT maxSourcesToSave)
 {
 	SourceList srcstosave;
 	CSourceData* sourcedata;
@@ -196,7 +196,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 			srcstosave.AddHead(sourcedata);
 			continue;
 		}
-		if ((srcstosave.GetCount() < maxSourcesToSave) || (cur_src->GetAvailablePartCount() > srcstosave.GetTail()->partsavailable) || (cur_src->GetSourceExchangeVersion() > srcstosave.GetTail()->nSrcExchangeVer)) {
+		if ((UINT)srcstosave.GetCount() < maxSourcesToSave || (cur_src->GetAvailablePartCount() > srcstosave.GetTail()->partsavailable) || (cur_src->GetSourceExchangeVersion() > srcstosave.GetTail()->nSrcExchangeVer)) {
 			if (srcstosave.GetCount() == maxSourcesToSave)
 				delete srcstosave.RemoveTail();
 			ASSERT(srcstosave.GetCount() < maxSourcesToSave);

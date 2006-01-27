@@ -145,7 +145,7 @@ bool CWebCacheSocket::ProcessHttpResponse()
 	return false;
 }
 
-bool CWebCacheSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT size)
+bool CWebCacheSocket::ProcessHttpResponseBody(const BYTE* /*pucData*/, UINT /*size*/)
 {
 	ASSERT(0);
 	return false;
@@ -354,7 +354,7 @@ bool CWebCacheUpSocket::ProcessHttpResponse()
 	return true;
 }
 
-bool CWebCacheUpSocket::ProcessHttpResponseBody(const BYTE* pucData, UINT uSize)
+bool CWebCacheUpSocket::ProcessHttpResponseBody(const BYTE* /*pucData*/, UINT /*uSize*/)
 {
 	throw CString(_T("Unexpected HTTP body in response received"));
 }
@@ -611,13 +611,13 @@ bool CUpDownClient::ProcessWebCacheDownHttpResponse(const CStringAArray& astrHea
 		throw strError;
 	}
 
-	UINT uContentLength = 0;
+	uint64 uContentLength = 0;
 	for (int i = 1; i < astrHeaders.GetCount(); i++)
 	{
 		const CStringA& rstrHdr = astrHeaders.GetAt(i);
 		if (bExpectData && rstrHdr.Left( 15 ).CompareNoCase( "Content-Length:" ) == 0)
 		{
-			uContentLength = atoi((LPCSTR)rstrHdr + 15);
+			uContentLength = _atoi64((LPCSTR)rstrHdr + 15);
 			if (uContentLength > m_uReqEnd - m_uReqStart + 1){
 				CString strError;
 				strError.Format(_T("Unexpected HTTP header field \"%hs\""), rstrHdr);
@@ -680,10 +680,10 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 	}
 
     char b64_marc4_szFileHash[23]; // hm, why not 24? zero byte at the end
-	DWORD dwRangeStart = 0;
-	DWORD dwRangeEnd = 0;
+	uint64 ui64RangeStart = 0;
+	uint64 ui64RangeEnd = 0;
 // webcache url
-	if (sscanf(szUrl, "/encryptedData/%u-%u/%22s", &dwRangeStart, &dwRangeEnd, b64_marc4_szFileHash ) != 3){ // Superlexx - encryption : shorter file hash due to base64 coding, new URL format
+	if (sscanf(szUrl, "/encryptedData/%I64u-%I64u/%22s", &ui64RangeStart, &ui64RangeEnd, b64_marc4_szFileHash ) != 3){ // Superlexx - encryption : shorter file hash due to base64 coding, new URL format
 		DebugHttpHeaders(astrHeaders);
 		return HTTP_STATUS_BAD_REQUEST;
 	}
@@ -792,11 +792,11 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 	}
 	//MORPH START - Changed by SiRoB, WebCache Fix
 	/*
-	if (dwRangeEnd <= dwRangeStart){ // && dwRangeEnd-dwRangeStart <= MAX_WEBCACHE_BLOCK_SIZE ???
+	if (ui64RangeEnd <= ui64RangeStart){ // && ui64RangeEnd-ui64RangeStart <= MAX_WEBCACHE_BLOCK_SIZE ???
 	*/
-	if (dwRangeEnd > pUploadFile->GetFileSize() - 1)
-		dwRangeEnd = pUploadFile->GetFileSize() - 1;
-	if (dwRangeEnd < dwRangeStart){
+	if (ui64RangeEnd > pUploadFile->GetFileSize() - (uint64)1)
+		ui64RangeEnd = pUploadFile->GetFileSize() - (uint64)1;
+	if (ui64RangeEnd < ui64RangeStart){
 	//MORPH END - Changed by SiRoB, WebCache Fix
 		DebugHttpHeaders(astrHeaders);
 		TRACE(_T("*** Bad range in URL %s\n"), szUrl);
@@ -812,8 +812,8 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 	SetWebCacheUpState(WCUS_UPLOADING);
 
 	Requested_Block_Struct* reqblock = new Requested_Block_Struct;
-	reqblock->StartOffset = dwRangeStart;
-	reqblock->EndOffset = dwRangeEnd + 1;
+	reqblock->StartOffset = ui64RangeStart;
+	reqblock->EndOffset = ui64RangeEnd + 1;
 	md4cpy(reqblock->FileID, aucUploadFileID);
 	reqblock->transferred = 0;
 	AddReqBlock(reqblock);
@@ -925,12 +925,12 @@ bool CUpDownClient::SendWebCacheBlockRequests()
 
 	CStringA strWCRequest;
 	if (thePrefs.WebCacheIsTransparent())	// Superlexx - TPS
-		strWCRequest.AppendFormat("GET /encryptedData/%u-%u/%s.htm HTTP/1.1\r\n",
+		strWCRequest.AppendFormat("GET /encryptedData/%I64u-%I64u/%s.htm HTTP/1.1\r\n",
 			m_uReqStart,	// StartOffset
 			m_uReqEnd,		// EndOffset
 			b64_marc4_filehash );	// Superlexx - encryption - encrypted filehash
 	else
-	strWCRequest.AppendFormat("GET http://%s:%u/encryptedData/%u-%u/%s.htm HTTP/1.1\r\n",
+	strWCRequest.AppendFormat("GET http://%s:%u/encryptedData/%I64u-%I64u/%s.htm HTTP/1.1\r\n",
 		ipstrA( GetIP() ), // clients' IP
 		GetUserPort(),	// clients' port
 		m_uReqStart,	// StartOffset
@@ -1067,12 +1067,13 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 													reqfile->GetFileHash(),
 													block->StartOffset,
 													block->EndOffset,
-													Crypt.remoteKey);
+													Crypt.remoteKey,
+													reqfile->IsLargeFile());
 
 	POSITION pos = reqfile->srclist.GetHeadPosition();
 	const uchar* filehash;
 
-	uint16 part = block->StartOffset / PARTSIZE;
+	uint16 part = (uint16)(block->StartOffset / PARTSIZE);
 	uint32 nrOfSentOHCBs = 0;
 	filehash = reqfile->GetFileHash();
 
@@ -1095,9 +1096,13 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 			data.WriteUInt32( GetIP() ); // Source client IP
 			data.WriteUInt16( GetUserPort() ); // Source client port
 			data.WriteHash16( block->FileID/*reqfile->GetFileHash()*/ ); // filehash
-			data.WriteUInt32( block->StartOffset ); // start offset
-			data.WriteUInt32( block->EndOffset ); // end offset
-
+			if (reqfile->IsLargeFile()) {
+				data.WriteUInt64( block->StartOffset ); // start offset
+				data.WriteUInt64( block->EndOffset ); // end offset
+			} else {
+				data.WriteUInt32( (uint32)block->StartOffset ); // start offset
+				data.WriteUInt32( (uint32)block->EndOffset ); // end offset
+			}
 			// Superlexx - encryption : remoteKey
 			data.Write( Crypt.remoteKey, WC_KEYLENGTH );
 			// Superlexx end

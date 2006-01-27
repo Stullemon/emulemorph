@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -153,7 +153,7 @@ void CAddFriend::OnAddBtn()
 		// why did we offer an edit control for entering the userhash but did not store it?
 		;
 
-		if (!theApp.friendlist->AddFriend(NULL, 0, ip, uPort, 0, strUserName, 0)){
+		if (!theApp.friendlist->AddFriend(NULL, 0, ip, (uint16)uPort, 0, strUserName, 0)){
 			AfxMessageBox(GetResString(IDS_WRN_FRIENDDUPLIPPORT));
 			GetDlgItem(IDC_IP)->SetFocus();
 			return;

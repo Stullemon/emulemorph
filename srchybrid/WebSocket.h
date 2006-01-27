@@ -19,7 +19,7 @@ public:
 		DWORD m_dwSize;
 		CChunk* m_pNext;
 
-		~CChunk() { if (m_pData) delete[] m_pData; }
+		~CChunk() { delete[] m_pData; }
 	};
 
 	CChunk* m_pHead; // tails of what has to be sent

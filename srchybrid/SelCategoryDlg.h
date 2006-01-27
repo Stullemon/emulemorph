@@ -16,7 +16,7 @@ public:
 	afx_msg void	OnOK();
 	afx_msg void	OnCancel();
 	
-	uint8			GetInput()		{ return m_Return; }
+	int			GetInput()		{ return m_Return; }
 	bool			CreatedNewCat()	{ return m_bCreatedNew; }
 	bool			WasCancelled() { return m_cancel;} //MORPH - Added by SiRoB
 // Dialog Data
@@ -26,7 +26,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	DECLARE_MESSAGE_MAP()
 private:
-	uint8	m_Return;
+	int	m_Return;
 	bool	m_cancel; //MORPH - Added by SiRoB
 	bool	m_bCreatedNew;
 };

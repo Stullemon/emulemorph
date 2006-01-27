@@ -193,6 +193,11 @@ static int check_header(z_stream *stream, HINTERNET m_hHttpFile) {
 ///////////////////////////////// Implementation //////////////////////////////
 IMPLEMENT_DYNAMIC(CHttpDownloadDlg, CDialog);
 
+BEGIN_MESSAGE_MAP(CHttpDownloadDlg, CDialog)
+	ON_WM_DESTROY()
+	ON_WM_CLOSE()
+	ON_MESSAGE(WM_HTTPDOWNLOAD_THREAD_FINISHED, OnThreadFinished)
+END_MESSAGE_MAP()
 
 CHttpDownloadDlg::CHttpDownloadDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CHttpDownloadDlg::IDD, pParent)
@@ -220,15 +225,6 @@ void CHttpDownloadDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ANIMATE1, m_ctrlAnimate);
 	//}}AFX_DATA_MAP
 }
-
-BEGIN_MESSAGE_MAP(CHttpDownloadDlg, CDialog)
-	//{{AFX_MSG_MAP(CHttpDownloadDlg)
-	ON_WM_DESTROY()
-	ON_WM_CLOSE()
-	//}}AFX_MSG_MAP
-	ON_MESSAGE(WM_HTTPDOWNLOAD_THREAD_FINISHED, OnThreadFinished)
-END_MESSAGE_MAP()
-
 
 LRESULT CHttpDownloadDlg::OnThreadFinished(WPARAM wParam, LPARAM /*lParam*/)
 {

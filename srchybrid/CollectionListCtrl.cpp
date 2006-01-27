@@ -14,18 +14,129 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "stdafx.h"
+#include "emule.h"
 #include "CollectionListCtrl.h"
 #include "OtherFunctions.h"
 #include "AbstractFile.h"
-#include "FileDetailDialog.h"
+#include "MetaDataDlg.h"
+#include "HighColorTab.hpp"
+#include "ListViewWalkerPropertySheet.h"
+#include "UserMsgs.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #endif
+
+
+//////////////////////////////////////////////////////////////////////////////
+// CCollectionFileDetailsSheet
+
+class CCollectionFileDetailsSheet : public CListViewWalkerPropertySheet
+{
+	DECLARE_DYNAMIC(CCollectionFileDetailsSheet)
+
+public:
+	CCollectionFileDetailsSheet(CTypedPtrList<CPtrList, CAbstractFile*>& aFiles, UINT uPshInvokePage = 0, CListCtrlItemWalk* pListCtrl = NULL);
+	virtual ~CCollectionFileDetailsSheet();
+
+protected:
+	CMetaDataDlg		m_wndMetaData;
+
+	UINT m_uPshInvokePage;
+	static LPCTSTR m_pPshStartPage;
+
+	void UpdateTitle();
+
+	virtual BOOL OnInitDialog();
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnDestroy();
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
+};
+
+LPCTSTR CCollectionFileDetailsSheet::m_pPshStartPage;
+
+IMPLEMENT_DYNAMIC(CCollectionFileDetailsSheet, CListViewWalkerPropertySheet)
+
+BEGIN_MESSAGE_MAP(CCollectionFileDetailsSheet, CListViewWalkerPropertySheet)
+	ON_WM_DESTROY()
+	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
+END_MESSAGE_MAP()
+
+CCollectionFileDetailsSheet::CCollectionFileDetailsSheet(CTypedPtrList<CPtrList, CAbstractFile*>& aFiles, UINT uPshInvokePage, CListCtrlItemWalk* pListCtrl)
+	: CListViewWalkerPropertySheet(pListCtrl)
+{
+	m_uPshInvokePage = uPshInvokePage;
+	POSITION pos = aFiles.GetHeadPosition();
+	while (pos)
+		m_aItems.Add(aFiles.GetNext(pos));
+	m_psh.dwFlags &= ~PSH_HASHELP;
+
+	m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndMetaData.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndMetaData.m_psp.pszIcon = _T("METADATA");
+	if (m_aItems.GetSize() == 1 && thePrefs.IsExtControlsEnabled()) {
+		m_wndMetaData.SetFiles(&m_aItems);
+		AddPage(&m_wndMetaData);
+	}
+
+	LPCTSTR pPshStartPage = m_pPshStartPage;
+	if (m_uPshInvokePage != 0)
+		pPshStartPage = MAKEINTRESOURCE(m_uPshInvokePage);
+	for (int i = 0; i < m_pages.GetSize(); i++)
+	{
+		CPropertyPage* pPage = GetPage(i);
+		if (pPage->m_psp.pszTemplate == pPshStartPage)
+		{
+			m_psh.nStartPage = i;
+			break;
+		}
+	}
+}
+
+CCollectionFileDetailsSheet::~CCollectionFileDetailsSheet()
+{
+}
+
+void CCollectionFileDetailsSheet::OnDestroy()
+{
+	if (m_uPshInvokePage == 0)
+		m_pPshStartPage = GetPage(GetActiveIndex())->m_psp.pszTemplate;
+	CListViewWalkerPropertySheet::OnDestroy();
+}
+
+BOOL CCollectionFileDetailsSheet::OnInitDialog()
+{
+	EnableStackedTabs(FALSE);
+	BOOL bResult = CListViewWalkerPropertySheet::OnInitDialog();
+	HighColorTab::UpdateImageList(*this);
+	InitWindowStyles(this);
+	EnableSaveRestore(_T("CollectionFileDetailsSheet")); // call this after(!) OnInitDialog
+	UpdateTitle();
+	return bResult;
+}
+
+LRESULT CCollectionFileDetailsSheet::OnDataChanged(WPARAM, LPARAM)
+{
+	UpdateTitle();
+	return 1;
+}
+
+void CCollectionFileDetailsSheet::UpdateTitle()
+{
+	if (m_aItems.GetSize() == 1)
+		SetWindowText(GetResString(IDS_DETAILS) + _T(": ") + STATIC_DOWNCAST(CAbstractFile, m_aItems[0])->GetFileName());
+	else
+		SetWindowText(GetResString(IDS_DETAILS));
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// CCollectionListCtrl
 
 enum ECols
 {
@@ -144,7 +255,7 @@ void CCollectionListCtrl::RemoveFileFromList(CAbstractFile* pAbstractFile)
 		ASSERT(0);
 }
 
-void CCollectionListCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
+void CCollectionListCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	CTypedPtrList<CPtrList, CAbstractFile*> abstractFileList;
 	POSITION pos = GetFirstSelectedItemPosition();
@@ -157,7 +268,7 @@ void CCollectionListCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if(abstractFileList.GetCount() > 0)
 	{
-		CFileDetailDialog dialog(abstractFileList, 0, this);
+		CCollectionFileDetailsSheet dialog(abstractFileList, 0, this);
 		dialog.DoModal();
 	}
 	*pResult = 0;

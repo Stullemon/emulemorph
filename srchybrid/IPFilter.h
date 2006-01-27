@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -18,11 +18,18 @@
 
 struct SIPFilter
 {
-   uint32	start;
-   uint32	end;
-   UINT		level;
-   CString	desc;
-   UINT		hits;
+	SIPFilter(uint32 newStart, uint32 newEnd, UINT newLevel, const CStringA& newDesc)
+		: start(newStart),
+		  end(newEnd),
+		  level(newLevel),
+		  desc(newDesc),
+		  hits(0)
+	{ }
+	uint32		start;
+	uint32		end;
+	UINT		level;
+	CStringA	desc;
+	UINT		hits;
 };
 
 #define	DFLT_IPFILTER_FILENAME	_T("ipfilter.dat")
@@ -40,10 +47,12 @@ public:
 
 	CString GetDefaultFilePath() const;
 
-	void AddIPRange(uint32 IPfrom, uint32 IPto, UINT level, const CString& desc);
-	void AddIP(uint32 IP, UINT level, const CString& desc); //MORPH - Added by SiRoB
+	void AddIPRange(uint32 start, uint32 end, UINT level, const CStringA& rstrDesc) {
+		m_iplist.Add(new SIPFilter(start, end, level, rstrDesc));
+	}
 	void RemoveAllIPFilters();
 	bool RemoveIPFilter(const SIPFilter* pFilter);
+	void SetModified(bool bModified = true) { m_bModified = bModified; }
 
 	int AddFromFile(LPCTSTR pszFilePath, bool bShowResponse = true);
 	int LoadFromDefaultFile(bool bShowResponse = true);
@@ -51,13 +60,14 @@ public:
 
 	bool IsFiltered(uint32 IP) /*const*/;
 	bool IsFiltered(uint32 IP, UINT level) /*const*/;
-	LPCTSTR GetLastHit() const;
+	CString GetLastHit() const;
 	const CIPFilterArray& GetIPFilter() const;
 	void    UpdateIPFilterURL();//MORPH START added by Yun.SF3: Ipfilter.dat update
 private:
 	const SIPFilter* m_pLastHit;
 	CIPFilterArray m_iplist;
+	bool m_bModified;
 
-	bool ParseFilterLine1(const CString& sbuffer, uint32& ip1, uint32& ip2, UINT& level, CString& desc) const;
-	bool ParseFilterLine2(const CString& sbuffer, uint32& ip1, uint32& ip2, UINT& level, CString& desc) const;
+	bool ParseFilterLine1(const CStringA& rstrBuffer, uint32& ip1, uint32& ip2, UINT& level, CStringA& rstrDesc) const;
+	bool ParseFilterLine2(const CStringA& rstrBuffer, uint32& ip1, uint32& ip2, UINT& level, CStringA& rstrDesc) const;
 };

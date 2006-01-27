@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -30,6 +30,18 @@ static char THIS_FILE[] = __FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgProxy, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(CPPgProxy, CPropertyPage)
+	ON_BN_CLICKED(IDC_ENABLEPROXY, OnBnClickedEnableProxy)
+	ON_BN_CLICKED(IDC_ENABLEAUTH, OnBnClickedEnableAuthentication)
+	ON_CBN_SELCHANGE(IDC_PROXYTYPE, OnCbnSelChangeProxyType)
+	ON_EN_CHANGE(IDC_PROXYNAME, OnEnChangeProxyName)
+	ON_EN_CHANGE(IDC_PROXYPORT, OnEnChangeProxyPort)
+	ON_EN_CHANGE(IDC_USERNAME_A, OnEnChangeUserName)
+	ON_EN_CHANGE(IDC_PASSWORD, OnEnChangePassword)
+	ON_WM_HELPINFO()
+END_MESSAGE_MAP()
+
 CPPgProxy::CPPgProxy()
 	: CPropertyPage(CPPgProxy::IDD)
 {
@@ -44,149 +56,132 @@ void CPPgProxy::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 }
 
-
-BEGIN_MESSAGE_MAP(CPPgProxy, CPropertyPage)
-	ON_BN_CLICKED(IDC_ENABLEPROXY, OnBnClickedEnableproxy)
-	ON_BN_CLICKED(IDC_ENABLEAUTH, OnBnClickedEnableauth)
-	ON_CBN_SELCHANGE(IDC_PROXYTYPE, OnCbnSelchangeProxytype)
-	ON_EN_CHANGE(IDC_PROXYNAME, OnEnChangeProxyname)
-	ON_EN_CHANGE(IDC_PROXYPORT, OnEnChangeProxyport)
-	ON_EN_CHANGE(IDC_USERNAME_A, OnEnChangeUsername)
-	ON_EN_CHANGE(IDC_PASSWORD, OnEnChangePassword)
-	ON_BN_CLICKED(IDC_ASCWOP, OnBnClickedAscwop)
-	ON_WM_HELPINFO()
-END_MESSAGE_MAP()
-
-
 BOOL CPPgProxy::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
-	proxy = thePrefs.GetProxy();
+	proxy = thePrefs.GetProxySettings();
 	LoadSettings();
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BOOL CPPgProxy::OnApply()
 {
 	USES_CONVERSION;
-	thePrefs.SetProxyASCWOP(IsDlgButtonChecked(IDC_ASCWOP)!=0);
-	proxy.UseProxy = (IsDlgButtonChecked(IDC_ENABLEPROXY)!=0);
-	proxy.EnablePassword = ((CButton*)GetDlgItem(IDC_ENABLEAUTH))->GetCheck()!=0;
-	proxy.type = ((CComboBox*)GetDlgItem(IDC_PROXYTYPE))->GetCurSel();
 
-	if(GetDlgItem(IDC_PROXYNAME)->GetWindowTextLength())
-	{ 
-		GetDlgItem(IDC_PROXYNAME)->GetWindowText(proxy.name, ARRSIZE(proxy.name));
+	proxy.UseProxy = (IsDlgButtonChecked(IDC_ENABLEPROXY) != 0);
+	proxy.EnablePassword = ((CButton*)GetDlgItem(IDC_ENABLEAUTH))->GetCheck() != 0;
+	proxy.type = (uint16)((CComboBox*)GetDlgItem(IDC_PROXYTYPE))->GetCurSel();
+
+	if (GetDlgItem(IDC_PROXYNAME)->GetWindowTextLength()) {
+		CStringA strProxyA;
+		GetWindowTextA(*GetDlgItem(IDC_PROXYNAME), strProxyA.GetBuffer(256), 256);
+		strProxyA.ReleaseBuffer();
+		strProxyA.FreeExtra();
+		int iColon = strProxyA.Find(':');
+		if (iColon > -1) {
+			SetDlgItemTextA(m_hWnd, IDC_PROXYPORT, strProxyA.Mid(iColon + 1));
+			strProxyA = strProxyA.Left(iColon);
+		}
+		proxy.name = strProxyA;
 	}
-	else
-	{
-		proxy.name[0] = _T('\0');
+	else {
+		proxy.name.Empty();
         proxy.UseProxy = false;
 	}
 
-	if(GetDlgItem(IDC_PROXYPORT)->GetWindowTextLength())
-	{ 
+	if (GetDlgItem(IDC_PROXYPORT)->GetWindowTextLength()) {
 		TCHAR buffer[6];
-		GetDlgItem(IDC_PROXYPORT)->GetWindowText(buffer,ARRSIZE(buffer));
-		proxy.port = (_tstoi(buffer)) ? _tstoi(buffer) : 1080;
+		GetDlgItem(IDC_PROXYPORT)->GetWindowText(buffer, _countof(buffer));
+		if ((proxy.port = (uint16)_tstoi(buffer)) == 0)
+			proxy.port = 1080;
 	}
 	else
 		proxy.port = 1080;
 
-	if(GetDlgItem(IDC_USERNAME_A)->GetWindowTextLength())
-	{ 
+	if (GetDlgItem(IDC_USERNAME_A)->GetWindowTextLength()) { 
 		CString strUser;
 		GetDlgItem(IDC_USERNAME_A)->GetWindowText(strUser);
-		_snprintf(proxy.user, ARRSIZE(proxy.user), "%s", T2CA(strUser));
+		proxy.user = T2CA(strUser);
 	}
-	else
-	{
-		proxy.user[0] = '\0';
+	else {
+		proxy.user.Empty();
 		proxy.EnablePassword = false;
 	}
 
-	if(GetDlgItem(IDC_PASSWORD)->GetWindowTextLength())
-	{ 
+	if (GetDlgItem(IDC_PASSWORD)->GetWindowTextLength()) { 
 		CString strPasswd;
 		GetDlgItem(IDC_PASSWORD)->GetWindowText(strPasswd);
-		_snprintf(proxy.password, ARRSIZE(proxy.password), "%s", T2CA(strPasswd));
+		proxy.password = T2CA(strPasswd);
 	}
-	else
-	{
-		proxy.password[0] = '\0';
+	else {
+		proxy.password.Empty();
 		proxy.EnablePassword = false;
 	}
+
 	thePrefs.SetProxySettings(proxy);
 	LoadSettings();
 	return TRUE;
 }
-// CPPGProxy message handlers
 
-void CPPgProxy::OnBnClickedEnableproxy()
+void CPPgProxy::OnBnClickedEnableProxy()
 {
-	SetModified(true);
+	SetModified(TRUE);
 	CButton* btn = (CButton*) GetDlgItem(IDC_ENABLEPROXY);
-
 	GetDlgItem(IDC_ENABLEAUTH)->EnableWindow(btn->GetCheck() != 0);
 	GetDlgItem(IDC_PROXYTYPE)->EnableWindow(btn->GetCheck() != 0);
 	GetDlgItem(IDC_PROXYNAME)->EnableWindow(btn->GetCheck() != 0);
 	GetDlgItem(IDC_PROXYPORT)->EnableWindow(btn->GetCheck() != 0);
 	GetDlgItem(IDC_USERNAME_A)->EnableWindow(btn->GetCheck() != 0);
 	GetDlgItem(IDC_PASSWORD)->EnableWindow(btn->GetCheck() != 0);
-	if (btn->GetCheck() != 0) OnBnClickedEnableauth();
-	if (btn->GetCheck() != 0) OnCbnSelchangeProxytype();
-	if (btn->GetCheck() != 0) OnBnClickedAscwop();
+	if (btn->GetCheck() != 0) OnBnClickedEnableAuthentication();
+	if (btn->GetCheck() != 0) OnCbnSelChangeProxyType();
 }
 
-void CPPgProxy::OnBnClickedEnableauth()
+void CPPgProxy::OnBnClickedEnableAuthentication()
 {
-	SetModified(true);
-	CButton* btn = (CButton*) GetDlgItem(IDC_ENABLEAUTH);
-
+	SetModified(TRUE);
+	CButton* btn = (CButton*)GetDlgItem(IDC_ENABLEAUTH);
 	GetDlgItem(IDC_USERNAME_A)->EnableWindow(btn->GetCheck() != 0);
 	GetDlgItem(IDC_PASSWORD)->EnableWindow(btn->GetCheck() != 0);
 }
 
-void CPPgProxy::OnCbnSelchangeProxytype()
+void CPPgProxy::OnCbnSelChangeProxyType()
 {
-	SetModified(true);
+	SetModified(TRUE);
 	CComboBox* cbbox = (CComboBox*)GetDlgItem(IDC_PROXYTYPE);
-	if (!(cbbox->GetCurSel() == PROXYTYPE_SOCKS5 || cbbox->GetCurSel() == PROXYTYPE_HTTP11))
+	if (!(cbbox->GetCurSel() == PROXYTYPE_SOCKS5 || cbbox->GetCurSel() == PROXYTYPE_HTTP10 || cbbox->GetCurSel() == PROXYTYPE_HTTP11))
 	{
-		((CButton*)GetDlgItem(IDC_ENABLEAUTH))->SetCheck(false);
-		OnBnClickedEnableauth();
-		GetDlgItem(IDC_ENABLEAUTH)->EnableWindow(false);
+		((CButton*)GetDlgItem(IDC_ENABLEAUTH))->SetCheck(0);
+		OnBnClickedEnableAuthentication();
+		GetDlgItem(IDC_ENABLEAUTH)->EnableWindow(FALSE);
 	} 
-	else GetDlgItem(IDC_ENABLEAUTH)->EnableWindow(true);
-
-
+	else
+		GetDlgItem(IDC_ENABLEAUTH)->EnableWindow(TRUE);
 }
-
 
 void CPPgProxy::LoadSettings()
 {
 	USES_CONVERSION;
-	CheckDlgButton(IDC_ASCWOP,(thePrefs.IsProxyASCWOP() ));
 	((CButton*)GetDlgItem(IDC_ENABLEPROXY))->SetCheck(proxy.UseProxy);
 	((CButton*)GetDlgItem(IDC_ENABLEAUTH))->SetCheck(proxy.EnablePassword);
 	((CComboBox*)GetDlgItem(IDC_PROXYTYPE))->SetCurSel(proxy.type);
-	GetDlgItem(IDC_PROXYNAME)->SetWindowText(proxy.name);
+	SetWindowTextA(*GetDlgItem(IDC_PROXYNAME), proxy.name);
 	CString buffer;
-	buffer.Format(_T("%ld"),proxy.port);
+	buffer.Format(_T("%u"), proxy.port);
 	GetDlgItem(IDC_PROXYPORT)->SetWindowText(buffer);
 	GetDlgItem(IDC_USERNAME_A)->SetWindowText(A2T(proxy.user));
 	GetDlgItem(IDC_PASSWORD)->SetWindowText(A2T(proxy.password));
-	OnBnClickedEnableproxy();
+	OnBnClickedEnableProxy();
 }
 
-void CPPgProxy::Localize(void)
+void CPPgProxy::Localize()
 {
-	if(m_hWnd)
+	if (m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_PW_PROXY));
 		GetDlgItem(IDC_ENABLEPROXY)->SetWindowText(GetResString(IDS_PROXY_ENABLE));	
@@ -195,16 +190,10 @@ void CPPgProxy::Localize(void)
 		GetDlgItem(IDC_PROXYPORT_LBL)->SetWindowText(GetResString(IDS_PROXY_PORT));	
 		GetDlgItem(IDC_ENABLEAUTH)->SetWindowText(GetResString(IDS_PROXY_AUTH));	
 		GetDlgItem(IDC_USERNAME_LBL)->SetWindowText(GetResString(IDS_CD_UNAME));	
-		GetDlgItem(IDC_PASSWORD_LBL)->SetWindowText(GetResString(IDS_WS_PASS)+_T(":"));	
+		GetDlgItem(IDC_PASSWORD_LBL)->SetWindowText(GetResString(IDS_WS_PASS) + _T(":"));	
 		GetDlgItem(IDC_AUTH_LBL)->SetWindowText(GetResString(IDS_AUTH));	
 		GetDlgItem(IDC_AUTH_LBL2)->SetWindowText(GetResString(IDS_PW_GENERAL));	
-		GetDlgItem(IDC_ASCWOP)->SetWindowText(GetResString(IDS_ASCWOP_PROXYSUPPORT));
 	}
-}
-
-void CPPgProxy::OnBnClickedAscwop()
-{
-	SetModified(true);
 }
 
 void CPPgProxy::OnHelp()
@@ -222,7 +211,7 @@ BOOL CPPgProxy::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgProxy::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgProxy::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

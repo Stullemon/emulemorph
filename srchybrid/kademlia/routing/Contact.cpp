@@ -1,21 +1,21 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
+ 
+ 
 This work is based on the java implementation of the Kademlia protocol.
 Kademlia: Peer-to-peer routing based on the XOR metric
 Copyright (C) 2002  Petar Maymounkov [petar@post.harvard.edu]
@@ -35,18 +35,14 @@ there client on the eMule forum..
 */
 
 #include "stdafx.h"
-#include "Contact.h"
+#include "./Contact.h"
 #include "../kademlia/Prefs.h"
 #include "../kademlia/Kademlia.h"
 #include "../utils/MiscUtils.h"
-#include "../io/ByteIO.h"
 #include "../../OpCodes.h"
-#include "../net/KademliaUDPListener.h"
-#include "../kademlia/Defines.h"
-#include "emule.h"
-#include "emuledlg.h"
-#include "KadContactListCtrl.h"
-#include "kademliawnd.h"
+#include "../../emule.h"
+#include "../../emuledlg.h"
+#include "../../kademliawnd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,163 +50,226 @@ there client on the eMule forum..
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-////////////////////////////////////////
 using namespace Kademlia;
-////////////////////////////////////////
 
 CContact::~CContact()
 {
-	if (m_guiRefs)
+	if (m_bGuiRefs)
 		theApp.emuledlg->kademliawnd->ContactRem(this);
 }
 
 CContact::CContact()
 {
-	m_clientID = 0;
-	m_ip = 0;
-	m_udpPort = 0;
-	m_tcpPort = 0;
-	initContact();
+	m_uClientID = 0;
+	m_uIp = 0;
+	m_uUdpPort = 0;
+	m_uTcpPort = 0;
+	m_uVersion = 0;
+	InitContact();
 }
 
-CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort)
+CContact::CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, uint8 uVersion)
 {
-	m_clientID = clientID;
-	CKademlia::getPrefs()->getKadID(&m_distance);
-	m_distance.xor(clientID);
-	m_ip = ip;
-	m_udpPort = udpPort;
-	m_tcpPort = tcpPort;
-	initContact();
+	m_uClientID = uClientID;
+	CKademlia::GetPrefs()->GetKadID(&m_uDistance);
+	m_uDistance.Xor(uClientID);
+	m_uIp = uIp;
+	m_uUdpPort = uUdpPort;
+	m_uTcpPort = uTcpPort;
+	m_uVersion = uVersion;
+	InitContact();
 }
 
-CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, const CUInt128 &target)
+CContact::CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, const CUInt128 &uTarget, uint8 uVersion)
 {
-	m_clientID = clientID;
-	m_distance.setValue(target);
-	m_distance.xor(clientID);
-	m_ip = ip;
-	m_udpPort = udpPort;
-	m_tcpPort = tcpPort;
-	initContact();
+	m_uClientID = uClientID;
+	m_uDistance.SetValue(uTarget);
+	m_uDistance.Xor(uClientID);
+	m_uIp = uIp;
+	m_uUdpPort = uUdpPort;
+	m_uTcpPort = uTcpPort;
+	m_uVersion = uVersion;
+	InitContact();
 }
 
-void CContact::initContact() 
+void CContact::InitContact()
 {
-	m_type = 3;
-	m_expires = 0;
-	m_lastTypeSet = time(NULL);
-	m_guiRefs = 0;
-	m_inUse = 0;
-	m_created = time(NULL);
+	m_byType = 3;
+	m_tExpires = 0;
+	m_tLastTypeSet = time(NULL);
+	m_bGuiRefs = 0;
+	m_uInUse = 0;
+	m_tCreated = time(NULL);
 }
 
-void CContact::getClientID(CUInt128 *id) const
+void CContact::GetClientID(CUInt128 *puId) const
 {
-	id->setValue(m_clientID);
+	puId->SetValue(m_uClientID);
 }
 
-void CContact::getClientID(CString *id) const
+void CContact::GetClientID(CString *psId) const
 {
-	m_clientID.toHexString(id);
+	m_uClientID.ToHexString(psId);
 }
 
-void CContact::setClientID(const CUInt128 &clientID)
+void CContact::SetClientID(const CUInt128 &uClientID)
 {
-	m_clientID = clientID;
-	CKademlia::getPrefs()->getKadID(&m_distance);
-	m_distance.xor(clientID);
+	m_uClientID = uClientID;
+	CKademlia::GetPrefs()->GetKadID(&m_uDistance);
+	m_uDistance.Xor(uClientID);
 }
 
-void CContact::getDistance(CUInt128 *distance) const
+void CContact::GetDistance(CUInt128 *puDistance) const
 {
-	distance->setValue(m_distance);
+	puDistance->SetValue(m_uDistance);
 }
 
-void CContact::getDistance(CString *distance) const
+void CContact::GetDistance(CString *psDistance) const
 {
-	m_distance.toBinaryString(distance);
+	m_uDistance.ToBinaryString(psDistance);
 }
 
-uint32 CContact::getIPAddress(void) const
+CUInt128 CContact::GetDistance() const
 {
-	return m_ip;
+	return m_uDistance;
 }
 
-void CContact::getIPAddress(CString *ip) const
+uint32 CContact::GetIPAddress() const
 {
-	CMiscUtils::ipAddressToString(m_ip, ip);
+	return m_uIp;
 }
 
-void CContact::setIPAddress(uint32 ip)
+void CContact::GetIPAddress(CString *psIp) const
 {
-	m_ip = ip;
+	CMiscUtils::IPAddressToString(m_uIp, psIp);
 }
 
-uint16 CContact::getTCPPort(void) const
+void CContact::SetIPAddress(uint32 uIp)
 {
-	return m_tcpPort;
+	m_uIp = uIp;
 }
 
-void CContact::getTCPPort(CString *port) const
+uint16 CContact::GetTCPPort() const
 {
-	port->Format(_T("%ld"), m_tcpPort);
+	return m_uTcpPort;
 }
 
-void CContact::setTCPPort(uint16 port)
+void CContact::GetTCPPort(CString *psPort) const
 {
-	m_tcpPort = port;
+	psPort->Format(_T("%ld"), m_uTcpPort);
 }
 
-uint16 CContact::getUDPPort(void) const
+void CContact::SetTCPPort(uint16 uPort)
 {
-	return m_udpPort;
+	m_uTcpPort = uPort;
 }
 
-void CContact::getUDPPort(CString *port) const
+uint16 CContact::GetUDPPort() const
 {
-	port->Format(_T("%ld"), m_udpPort);
+	return m_uUdpPort;
 }
 
-void CContact::setUDPPort(uint16 port)
+void CContact::GetUDPPort(CString *psPort) const
 {
-	m_udpPort = port;
+	psPort->Format(_T("%ld"), m_uUdpPort);
 }
 
-byte CContact::getType(void) const
+void CContact::SetUDPPort(uint16 uPort)
 {
-	return m_type;
+	m_uUdpPort = uPort;
 }
 
-void CContact::checkingType()
+byte CContact::GetType() const
 {
-	if(time(NULL) - m_lastTypeSet < 10 || m_type == 4)
+	return m_byType;
+}
+
+void CContact::CheckingType()
+{
+	if(time(NULL) - m_tLastTypeSet < 10 || m_byType == 4)
 		return;
 
-	m_lastTypeSet = time(NULL);
+	m_tLastTypeSet = time(NULL);
 
-	m_expires = time(NULL) + MIN2S(2);
-	m_type++;
+	m_tExpires = time(NULL) + MIN2S(2);
+	m_byType++;
 	theApp.emuledlg->kademliawnd->ContactRef(this);
 }
 
-void CContact::updateType()
+void CContact::UpdateType()
 {
-	uint32 hours = (time(NULL)-m_created)/HR2S(1);
-	switch(hours)
+	uint32 uHours = (time(NULL)-m_tCreated)/HR2S(1);
+	switch(uHours)
 	{
 		case 0:
-			m_type = 2;
-			m_expires = time(NULL) + HR2S(1);
+			m_byType = 2;
+			m_tExpires = time(NULL) + HR2S(1);
 			break;
 		case 1:
-			m_type = 1;
-			m_expires = time(NULL) + HR2S(1.5);
+			m_byType = 1;
+			m_tExpires = (time_t)(time(NULL) + HR2S(1.5));
 			break;
 		default:
-			m_type = 0;
-			m_expires = time(NULL) + HR2S(2);
+			m_byType = 0;
+			m_tExpires = time(NULL) + HR2S(2);
 	}
 	theApp.emuledlg->kademliawnd->ContactRef(this);
+}
+
+CUInt128 CContact::GetClientID() const
+{
+	return m_uClientID;
+}
+
+bool CContact::GetGuiRefs() const
+{
+	return m_bGuiRefs;
+}
+
+void CContact::SetGuiRefs(bool bRefs)
+{
+	m_bGuiRefs = bRefs;
+}
+
+bool CContact::InUse()
+{
+	return (m_uInUse>0);
+}
+
+void CContact::IncUse()
+{
+	m_uInUse++;
+}
+
+void CContact::DecUse()
+{
+	if(m_uInUse)
+		m_uInUse--;
+	else
+		ASSERT(0);
+}
+
+time_t CContact::GetCreatedTime() const
+{
+	return m_tCreated;
+}
+
+time_t CContact::GetExpireTime() const
+{
+	return m_tExpires;
+}
+
+time_t CContact::GetLastTypeSet() const
+{
+	return m_tLastTypeSet;
+}
+
+uint8 CContact::GetVersion() const
+{
+	return m_uVersion;
+}
+
+void CContact::SetVersion(uint8 uVersion)
+{
+	m_uVersion = uVersion;
 }

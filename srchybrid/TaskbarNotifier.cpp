@@ -56,6 +56,7 @@ BEGIN_MESSAGE_MAP(CTaskbarNotifier, CWnd)
 	ON_WM_PAINT()
 	ON_WM_SETCURSOR()
 	ON_WM_TIMER()
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 CTaskbarNotifier::CTaskbarNotifier()
@@ -158,20 +159,28 @@ int CTaskbarNotifier::Create(CWnd *pWndParent)
 	return CreateEx(WS_EX_TOPMOST, s_szClassName, NULL, WS_POPUP, 0, 0, 0, 0, pWndParent->m_hWnd, NULL);
 }
 
+void CTaskbarNotifier::OnSysColorChange()
+{
+	CWnd::OnSysColorChange();
+	LoadConfiguration(m_strConfigFilePath);
+}
+
 BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName)
 {
-	TCHAR buffer[510];
+	TCHAR szConfigDir[MAX_PATH];
 	int nRed, nGreen, nBlue, sRed, sGreen, sBlue;
 	int rcLeft, rcTop, rcRight, rcBottom;
 	int bmpTrasparentRed, bmpTrasparentGreen, bmpTrasparentBlue;
 	int fontSize;
-	CString fontType, bmpFullPath;
+	CString fontType, bmpFullPath, strBmpFileName;
 
 	Hide();
 
+	m_strConfigFilePath = szFileName;
 	CIni ini(szFileName, _T("CONFIG"));
-	_tcscpy(buffer, szFileName);
-	LPTSTR pszFileName = _tcsrchr(buffer, _T('\\'));
+	_tcsncpy(szConfigDir, szFileName, _countof(szConfigDir));
+	szConfigDir[_countof(szConfigDir)-1] = _T('\0');
+	LPTSTR pszFileName = _tcsrchr(szConfigDir, _T('\\'));
 	if (pszFileName == NULL)
 		return FALSE;
 	*(pszFileName + 1) = _T('\0');
@@ -190,7 +199,13 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName)
 	m_dwTimeToStay = ini.GetInt(_T("TimeToStay"), 4000);
 	m_dwTimeToShow = ini.GetInt(_T("TimeToShow"), 500); 
 	m_dwTimeToHide = ini.GetInt(_T("TimeToHide"), 200);
-	bmpFullPath.Format(_T("%s\\%s"), buffer, ini.GetString(_T("bmpFileName"), _T(""))); 
+	strBmpFileName = ini.GetString(_T("bmpFileName"), _T(""));
+	if (!strBmpFileName.IsEmpty()) {
+		if (PathIsRelative(strBmpFileName))
+			bmpFullPath.Format(_T("%s%s"), szConfigDir, strBmpFileName);
+		else
+			bmpFullPath = strBmpFileName;
+	}
 
 	// get text rectangle coordinates
 	rcLeft = ini.GetInt(_T("rcTextLeft"),5);
@@ -225,16 +240,18 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName)
 	if (rcBottom<=0)  rcBottom=1;
 	SetHistoryBtnRect(CRect(rcLeft,rcTop,rcRight,rcBottom));
 
-	if (!SetBitmap(bmpFullPath, bmpTrasparentRed, bmpTrasparentGreen, bmpTrasparentBlue))
+	if (bmpFullPath.IsEmpty() || !SetBitmap(bmpFullPath, bmpTrasparentRed, bmpTrasparentGreen, bmpTrasparentBlue))
 	{
-		CEnBitmap m_imgTaskbar;
-		VERIFY (m_imgTaskbar.LoadImage(IDR_TASKBAR,_T("GIF")));
-		if (!SetBitmap(&m_imgTaskbar, bmpTrasparentRed, bmpTrasparentGreen, bmpTrasparentBlue))
-			return FALSE;
+		CEnBitmap imgTaskbar;
+		if (imgTaskbar.LoadImage(IDR_TASKBAR, _T("GIF")))
+		{
+			if (!SetBitmap(&imgTaskbar, bmpTrasparentRed, bmpTrasparentGreen, bmpTrasparentBlue))
+				return FALSE;
+		}
 	}
 
 	SetTextFont(fontType, fontSize, TN_TEXT_NORMAL,TN_TEXT_UNDERLINE);
-	SetTextColor(RGB(nRed,nGreen,nBlue), RGB(sRed,sGreen,sBlue));
+	SetTextColor(RGB(nRed, nGreen, nBlue), RGB(sRed, sGreen, sBlue));
 	return TRUE;
 }
 
@@ -323,7 +340,7 @@ void CTaskbarNotifier::SetTextFormat(UINT uTextFormat)
 	m_uTextFormat=uTextFormat;
 }
 
-BOOL CTaskbarNotifier::SetBitmap(UINT nBitmapID,short red,short green,short blue)
+BOOL CTaskbarNotifier::SetBitmap(UINT nBitmapID, int red, int green, int blue)
 {
 	m_bitmapBackground.DeleteObject();
 	if (!m_bitmapBackground.LoadBitmap(nBitmapID))
@@ -344,7 +361,7 @@ BOOL CTaskbarNotifier::SetBitmap(UINT nBitmapID,short red,short green,short blue
 	return TRUE;
 }
 
-BOOL CTaskbarNotifier::SetBitmap(CBitmap* Bitmap,short red,short green,short blue)
+BOOL CTaskbarNotifier::SetBitmap(CBitmap* Bitmap, int red, int green, int blue)
 {
 	m_bitmapBackground.DeleteObject();
 	if (!m_bitmapBackground.Attach(Bitmap->Detach()))
@@ -365,7 +382,7 @@ BOOL CTaskbarNotifier::SetBitmap(CBitmap* Bitmap,short red,short green,short blu
 	return TRUE;
 }
 
-BOOL CTaskbarNotifier::SetBitmap(LPCTSTR szFileName,short red,short green,short blue)
+BOOL CTaskbarNotifier::SetBitmap(LPCTSTR szFileName, int red, int green, int blue)
 {
 	if (szFileName==NULL || szFileName[0]==_T('\0'))
 		return FALSE;
@@ -749,13 +766,13 @@ void CTaskbarNotifier::OnLButtonUp(UINT nFlags, CPoint point)
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
-LRESULT CTaskbarNotifier::OnMouseHover(WPARAM w, LPARAM l)
+LRESULT CTaskbarNotifier::OnMouseHover(WPARAM /*wParam*/, LPARAM lParam)
 {
 	if (m_nAnimStatus == IDT_WAITING)
 		KillTimer(IDT_WAITING);
 
 	POINTS mp;
-	mp = MAKEPOINTS(l);
+	mp = MAKEPOINTS(lParam);
 	m_ptMousePosition.x = mp.x;
 	m_ptMousePosition.y = mp.y;
 
@@ -779,7 +796,7 @@ LRESULT CTaskbarNotifier::OnMouseHover(WPARAM w, LPARAM l)
 	return 0;
 }
 
-LRESULT CTaskbarNotifier::OnMouseLeave(WPARAM w, LPARAM l)
+LRESULT CTaskbarNotifier::OnMouseLeave(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	if (m_bMouseIsOver == TRUE)
 	{

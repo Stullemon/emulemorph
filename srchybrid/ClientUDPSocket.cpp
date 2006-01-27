@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -113,7 +113,7 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 							unpack[1] = buffer[1];
 							try
 							{
-								Kademlia::CKademlia::processPacket(unpack, unpackedsize+2, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port));
+								Kademlia::CKademlia::ProcessPacket(unpack, unpackedsize+2, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port));
 							}
 							catch(...)
 							{
@@ -138,7 +138,7 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 				{
 					theStats.AddDownDataOverheadKad(length);
 					if (length >= 2)
-						Kademlia::CKademlia::processPacket(buffer, length, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port));
+						Kademlia::CKademlia::ProcessPacket(buffer, length, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port));
 					else
 						throw CString(_T("Kad packet too short"));
 					break;
@@ -261,7 +261,7 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 	}
 }
 
-bool CClientUDPSocket::ProcessPacket(const BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port)
+bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode, uint32 ip, uint16 port)
 {
 	switch(opcode)
 	{
@@ -361,7 +361,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, uint16 size, uint8 opco
 							if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
 							data_out.WriteUInt16(0);
 					}
-					data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
+					data_out.WriteUInt16((uint16)(theApp.uploadqueue->GetWaitingPosition(sender)));
 					if (thePrefs.GetDebugClientUDPLevel() > 0)
 						DebugSend("OP__ReaskAck", sender);
 					Packet* response = new Packet(&data_out, OP_EMULEPROT);
@@ -493,7 +493,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, uint16 size, uint8 opco
 // MORPH START - Added by SiRoB, WebCache 1.2f
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 // WebCache START
-bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port)
+bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, uint8 opcode, uint32 ip, uint16 port)
 {
 	switch(opcode)
 	{
@@ -662,7 +662,7 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
-SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize){ // ZZ:UploadBandWithThrottler (UDP)
+SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 /*minFragSize*/){ // ZZ:UploadBandWithThrottler (UDP)
 // ZZ:UploadBandWithThrottler (UDP) -->
 	// NOTE: *** This function is invoked from a *different* thread!
     sendLocker.Lock();
@@ -737,14 +737,16 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
-bool CClientUDPSocket::Create(){
+bool CClientUDPSocket::Create()
+{
 	// emulEspaña: Modified by MoNKi [MoNKi: -UPnPNAT Support-]
 	// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
 	/*
 	bool ret=true;
 
-	if (thePrefs.GetUDPPort()) {
-		ret=CAsyncSocket::Create(thePrefs.GetUDPPort(),SOCK_DGRAM,FD_READ|FD_WRITE)!=FALSE;
+	if (thePrefs.GetUDPPort())
+	{
+		ret = CAsyncSocket::Create(thePrefs.GetUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE, thePrefs.GetBindAddrW()) != FALSE;
 		if (ret)
 			m_port=thePrefs.GetUDPPort();
 	}
@@ -769,14 +771,14 @@ bool CClientUDPSocket::Create(){
 				if((retries < (maxRetries / 2)) && ((thePrefs.GetICFSupport() && !theApp.m_pFirewallOpener->DoesRuleExist(rndPort, NAT_PROTOCOL_UDP))
 					|| !thePrefs.GetICFSupport()))
 				{
-					ret = CAsyncSocket::Create(rndPort,SOCK_DGRAM,FD_READ|FD_WRITE)!=FALSE;
+					ret = CAsyncSocket::Create(rndPort,SOCK_DGRAM,FD_READ|FD_WRITE, thePrefs.GetBindAddrW())!=FALSE;
 				}
 				else if (retries >= (maxRetries / 2))
-					ret = CAsyncSocket::Create(rndPort,SOCK_DGRAM,FD_READ|FD_WRITE)!=FALSE;
+					ret = CAsyncSocket::Create(rndPort,SOCK_DGRAM,FD_READ|FD_WRITE, thePrefs.GetBindAddrW())!=FALSE;
 			}while(!ret && retries<maxRetries);
 		}
 		else
-			ret = CAsyncSocket::Create(thePrefs.GetUDPPort(false, true),SOCK_DGRAM,FD_READ|FD_WRITE)!=FALSE;
+			ret = CAsyncSocket::Create(thePrefs.GetUDPPort(false, true),SOCK_DGRAM,FD_READ|FD_WRITE, thePrefs.GetBindAddrW())!=FALSE;
 
 		if(ret){
 			m_port=thePrefs.GetUDPPort();

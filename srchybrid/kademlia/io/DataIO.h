@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -29,50 +29,43 @@ there client on the eMule forum..
 */
 
 #pragma once
+#include "../routing/Maps.h"
 
-#include <list>
-
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CUInt128;
-class CKadTag;
-typedef std::list<CKadTag*> TagList;
-
-class CDataIO
+namespace Kademlia
 {
-public:
-	byte		readByte();
-	uint8		readUInt8();
-	uint16		readUInt16();
-	uint32		readUInt32();
-	void		readUInt128(CUInt128* value);
-	void		readHash(BYTE* value);
-	BYTE*		readBsob(uint8* size);
-	float		readFloat();
-	CStringW	readStringUTF8(bool bOptACP = false);
-	CKadTag*	readTag(bool bOptACP = false);
-	void		readTagList(TagList* taglist, bool bOptACP = false);
-
-	void		writeByte(byte val);
-	void		writeUInt8(uint8 val);
-	void		writeUInt16(uint16 val);
-	void		writeUInt32(uint32 val);
-	void		writeUInt128(const CUInt128& val);
-	void		writeHash( const BYTE* val);
-	void		writeBsob( const BYTE* val, uint8 size);
-	void		writeFloat(float val);
-	void		writeTag(const CKadTag* tag);
-	void		writeTag(LPCSTR name, uint8 value);
-	void		writeTag(LPCSTR name, uint16 value);
-	void		writeTag(LPCSTR name, uint32 value);
-	void		writeTag(LPCSTR name, float value);
-	void		writeTagList(const TagList& tagList);
-
-	virtual void readArray(LPVOID lpResult, uint32 byteCount) = 0;
-	virtual void writeArray(LPCVOID lpVal, uint32 byteCount) = 0;
-	virtual UINT getAvailable() const = 0;
-};
-
-} // End namespace
+	class CDataIO
+	{
+		public:
+			byte ReadByte();
+			uint8 ReadUInt8();
+			uint16 ReadUInt16();
+			uint32 ReadUInt32();
+			uint64 ReadUInt64();
+			void ReadUInt128(CUInt128* puValue);
+			void ReadHash(BYTE* pbyValue);
+			BYTE* ReadBsob(uint8* puSize);
+			float ReadFloat();
+			CStringW ReadStringUTF8(bool bOptACP = false);
+			CKadTag* ReadTag(bool bOptACP = false);
+			void ReadTagList(TagList* pTaglist, bool bOptACP = false);
+			void WriteByte(byte byVal);
+			void WriteUInt8(uint8 uVal);
+			void WriteUInt16(uint16 uVal);
+			void WriteUInt32(uint32 uVal);
+			void WriteUInt64(uint64 uVal);
+			void WriteUInt128(const CUInt128& uVal);
+			void WriteHash( const BYTE* pbyVal);
+			void WriteBsob( const BYTE* pbyVal, uint8 uSize);
+			void WriteFloat(float fVal);
+			void WriteTag(const CKadTag* pTag);
+			void WriteTag(LPCSTR szName, uint8 uValue);
+			void WriteTag(LPCSTR szName, uint16 uValue);
+			void WriteTag(LPCSTR szName, uint32 uValue);
+			void WriteTag(LPCSTR szName, uint64 uValue);
+			void WriteTag(LPCSTR szName, float fValue);
+			void WriteTagList(const TagList& tagList);
+			virtual void ReadArray(LPVOID lpResult, uint32 uByteCount) = 0;
+			virtual void WriteArray(LPCVOID lpVal, uint32 uByteCount) = 0;
+			virtual UINT GetAvailable() const = 0;
+	};
+}

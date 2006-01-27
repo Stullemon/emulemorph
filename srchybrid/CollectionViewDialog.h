@@ -19,7 +19,6 @@
 #include "afxcmn.h"
 #include "CollectionListCtrl.h"
 #include "ResizableLib\ResizableDialog.h"
-#include "afxwin.h"
 
 // CCollectionViewDialog dialog
 

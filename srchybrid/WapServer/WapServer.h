@@ -68,7 +68,7 @@ public:
 	void RestartServer();
 	void AddStatsLine(UpDown line);
 	void ReloadTemplates();
-	uint16	GetSessionCount()	{ return m_Params.Sessions.GetCount();}
+	UINT GetSessionCount()	{ return m_Params.Sessions.GetCount();}
 	bool IsRunning()	{ return m_bServerWorking;}
 protected:
 	static void		ProcessURL(WapThreadData);
@@ -101,7 +101,7 @@ private:
 	static CString	_ParseURLArray(CString URL, CString fieldname);
 	static void		_ConnectToServer(CString sIP, int nPort);
 	static bool		_IsLoggedIn(WapThreadData Data, long lSession);
-	static void		_RemoveTimeOuts(WapThreadData Data, long lSession);
+	static void		_RemoveTimeOuts(WapThreadData Data);
 	static bool		_RemoveSession(WapThreadData Data, long lSession);
 	static bool		_GetFileHash(CString sHash, uchar *FileHash);
 	static CString	_SpecialChars(CString str);

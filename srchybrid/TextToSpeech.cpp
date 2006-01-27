@@ -118,6 +118,7 @@ bool Speak(LPCTSTR pszSay)
 	}
 	return theTextToSpeech.Speak(pszSay);
 #else
+	UNREFERENCED_PARAMETER(pszSay);
 	return false;
 #endif
 }

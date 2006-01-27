@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -438,7 +438,7 @@ void CCreditsThread::InitText()
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 
 	m_arCredits.Add(sTmp);
-	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2005 Merkur"));
+	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2006 Merkur"));
 	m_arCredits.Add(_T("S:50"));
 
     //Commander - Added: MorphTeam - Start
@@ -588,6 +588,8 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Lithuanian: Daan"));
 	m_arCredits.Add(_T("S:05"));
+	m_arCredits.Add(_T("01:06:Maltese: Reuben"));
+	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Norwegian (Bokmal): Hallvor"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Norwegian (Nynorsk): Iznogood"));
@@ -609,6 +611,8 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("01:06:Swedish: Andre"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Turkish: Burak Y."));
+	m_arCredits.Add(_T("S:05"));
+	m_arCredits.Add(_T("01:06:Ukrainian: Kex"));
 
 	m_arCredits.Add(_T("S:50"));
 	m_arCredits.Add(_T("02:04:Part of eMule is based on Kademlia:"));

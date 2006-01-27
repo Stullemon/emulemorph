@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@
 #include "Preferences.h"
 #include "PartFile.h"
 #include "SharedFileList.h"
+#include "KnownFileList.h"
 #include "UpDownClient.h"
 #include "Opcodes.h"
 #include "WebServices.h"
@@ -32,10 +33,12 @@
 #include "emuledlg.h"
 #include "MenuCmds.h"
 #include "ZipFile.h"
+#include "RarFile.h"
 #include <atlbase.h>
 #include "StringConversion.h"
 #include "shahashset.h"
 #include "collection.h"
+#include "SafeFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -88,6 +91,12 @@ CString CastItoXBytes(uint32 count, bool isK, bool isPerSec, uint32 decimal, boo
 CString CastItoXBytes(uint64 count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
 	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
 }
+
+#ifdef _DEBUG
+CString CastItoXBytes(EMFileSize count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
+}
+#endif
 
 CString CastItoXBytes(float count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
 	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
@@ -188,55 +197,50 @@ CString CastSecondsToHM(time_t tSeconds)
 	CString buffer;
 	UINT count = tSeconds;
 	if (count < 60)
-		buffer.Format(_T("%i %s"),count,GetResString(IDS_SECS)); 
+		buffer.Format(_T("%u %s"), count, GetResString(IDS_SECS));
 	else if (count < 3600) 
-		buffer.Format(_T("%i:%s %s"),count/60,LeadingZero(count-(count/60)*60),GetResString(IDS_MINS));
+		buffer.Format(_T("%u:%02u %s"), count/60, count - (count/60)*60, GetResString(IDS_MINS));
 	else if (count < 86400) 
-		buffer.Format(_T("%i:%s %s"),count/3600,LeadingZero((count-(count/3600)*3600)/60),GetResString(IDS_HOURS));
-	else 
-		buffer.Format(_T("%i %s %i %s"),count/86400,GetResString(IDS_DAYS),(count-(count/86400)*86400)/3600,GetResString(IDS_HOURS)); 
+		buffer.Format(_T("%u:%02u %s"), count/3600, (count - (count/3600)*3600)/60, GetResString(IDS_HOURS));
+	else {
+		UINT cntDays = count/86400;
+		UINT cntHrs = (count - cntDays*86400)/3600;
+		buffer.Format(_T("%u %s %u %s"), cntDays, GetResString(IDS_DAYS), cntHrs, GetResString(IDS_HOURS));
+	}
 	return buffer;
 }
 
-CString CastSecondsToLngHM(LONGLONG llSeconds)
+CString CastSecondsToLngHM(time_t tSeconds)
 {
-	if (llSeconds == -1) // invalid or unknown time value
+	if (tSeconds == -1) // invalid or unknown time value
 		return _T("?");
 
 	CString buffer;
-	ULONGLONG count = llSeconds;
+	UINT count = tSeconds;
 	if (count < 60)
-		buffer.Format(_T("%I64d %s"),count,GetResString(IDS_LONGSECS)); 
+		buffer.Format(_T("%u %s"), count, GetResString(IDS_LONGSECS));
 	else if (count < 3600) 
-		buffer.Format(_T("%I64d:%s %s"), count/60, LeadingZero((UINT)(count - (count/60)*60)), GetResString(IDS_LONGMINS));
+		buffer.Format(_T("%u:%02u %s"), count/60, count - (count/60)*60, GetResString(IDS_LONGMINS));
 	else if (count < 86400) 
-		buffer.Format(_T("%I64d:%s %s"), count/3600, LeadingZero((UINT)((count - (count/3600)*3600)/60)), GetResString(IDS_LONGHRS));
+		buffer.Format(_T("%u:%02u %s"), count/3600, (count - (count/3600)*3600)/60, GetResString(IDS_LONGHRS));
 	else {
-		ULONGLONG cntDays = count/86400;
-		ULONGLONG cntHrs = (count - (count/86400)*86400)/3600;
+		UINT cntDays = count/86400;
+		UINT cntHrs = (count - cntDays*86400)/3600;
 		if (cntHrs)
-			buffer.Format(_T("%I64d %s %I64d:%s %s"),cntDays,GetResString(IDS_DAYS2),cntHrs,LeadingZero((uint32)(count-(cntDays*86400)-(cntHrs*3600))/60),GetResString(IDS_LONGHRS)); 
+			buffer.Format(_T("%u %s %u:%02u %s"), cntDays, GetResString(IDS_DAYS2), cntHrs, (count - (cntDays*86400) - (cntHrs*3600))/60, GetResString(IDS_LONGHRS));
 		else
-			buffer.Format(_T("%I64d %s %u %s"),cntDays,GetResString(IDS_DAYS2),(uint32)(count-(cntDays*86400)-(cntHrs*3600))/60,GetResString(IDS_LONGMINS));
+			buffer.Format(_T("%u %s %u %s"), cntDays, GetResString(IDS_DAYS2), (count - (cntDays*86400) - (cntHrs*3600))/60, GetResString(IDS_LONGMINS));
 	}
 	return buffer;
 } 
 
-CString LeadingZero(uint32 units)
+void ShellOpenFile(CString name)
 {
-	CString temp;
-	if (units < 10)
-		temp.Format(_T("0%i"), units);
-	else
-		temp.Format(_T("%i"), units);
-	return temp;
+    ShellExecute(NULL, _T("open"), name, NULL, NULL, SW_SHOW);
 }
 
-//<<--9/21/02
-void ShellOpenFile(CString name){ 
-    ShellExecute(NULL, _T("open"), name, NULL, NULL, SW_SHOW); 
-} 
-void ShellOpenFile(CString name, LPCTSTR pszVerb){ 
+void ShellOpenFile(CString name, LPCTSTR pszVerb)
+{
     ShellExecute(NULL, pszVerb, name, NULL, NULL, SW_SHOW); 
 } 
 
@@ -592,7 +596,7 @@ int IsRunningXPSP2(){
 	{
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 		if(!GetVersionEx((OSVERSIONINFO*)&osvi)) 
-			return -1;
+			return 0;
 	}
 
 	if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1){
@@ -665,7 +669,7 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 	}
 }
 
-CString GetRateString(uint16 rate)
+CString GetRateString(UINT rate)
 { 
 	switch (rate){ 
 	case 0: 
@@ -703,7 +707,7 @@ CString EncodeBase32(const unsigned char* buffer, unsigned int bufLen)
 
 		// Is the current word going to span a byte boundary?
         if (index > 3) {
-            word = (buffer[i] & (0xFF >> index));
+            word = (BYTE)(buffer[i] & (0xFF >> index));
             index = (index + 5) % 8;
             word <<= index;
             if (i < bufLen - 1)
@@ -711,7 +715,7 @@ CString EncodeBase32(const unsigned char* buffer, unsigned int bufLen)
 
             i++;
         } else {
-            word = (buffer[i] >> (8 - (index + 5))) & 0x1F;
+            word = (BYTE)((buffer[i] >> (8 - (index + 5))) & 0x1F);
             index = (index + 5) % 8;
             if (index == 0)
                i++;
@@ -967,7 +971,7 @@ bool CWebServices::RunURL(const CAbstractFile* file, UINT uMenuID)
 
 				// Add file size to the URL
 				CString temp;
-				temp.Format(_T("%u"), file->GetFileSize());
+				temp.Format(_T("%I64u"), file->GetFileSize());
 				strUrlTemplate.Replace(_T("#filesize"), temp);
 
 				// add complete filename to the url
@@ -1064,9 +1068,10 @@ void MakeFoldername(LPTSTR pszPath)
 	}
 }
 
-CString StringLimit(CString in,uint16 length){
-	if (in.GetLength()<=length || length<10) return in;
-
+CString StringLimit(CString in, UINT length)
+{
+	if ((UINT)in.GetLength() <= length || length < 10)
+		return in;
 	return (in.Left(length-8) + _T("...") + in.Right(8));
 }
 
@@ -1127,7 +1132,7 @@ bool strmd4(const char* pszHash, uchar* hash)
 		UINT b;
 		if (sscanf(byte, "%x", &b) != 1)
 			return false;
-		hash[i] = b;
+		hash[i] = (char)b;
 	}
 	return true;
 }
@@ -1147,7 +1152,7 @@ bool strmd4(const CString& rstr, uchar* hash)
 		UINT b;
 		if (sscanf(byte, "%x", &b) != 1)
 			return false;
-		hash[i] = b;
+		hash[i] = (char)b;
 	}
 	return true;
 }
@@ -1189,7 +1194,9 @@ CString CleanupFilename(CString filename, bool bExtension)
 	filename.MakeLower();
 
 	//remove substrings, defined in the preferences (.ini)
-	CString strlink = thePrefs.GetFilenameCleanups().MakeLower();
+	CString strlink = thePrefs.GetFilenameCleanups();
+	strlink.MakeLower();
+
 	int curPos = 0;
 	CString resToken = strlink.Tokenize(_T("|"), curPos);
 	while (!resToken.IsEmpty())
@@ -1488,22 +1495,38 @@ EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName)
 	return ED2KFT_ANY;
 }
 
-// Retuns the ed2k file type term which is to be used in server searches
+// Retuns the ed2k file type string ID which is to be used for publishing+searching
 LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID)
 {
 	if (iFileID == ED2KFT_AUDIO)		return ED2KFTSTR_AUDIO;
 	if (iFileID == ED2KFT_VIDEO)		return ED2KFTSTR_VIDEO;
 	if (iFileID == ED2KFT_IMAGE)		return ED2KFTSTR_IMAGE;
+	if (iFileID == ED2KFT_PROGRAM)			return ED2KFTSTR_PROGRAM;
 	if (iFileID == ED2KFT_DOCUMENT)		return ED2KFTSTR_DOCUMENT;
-	if (iFileID == ED2KFT_PROGRAM)		return ED2KFTSTR_PROGRAM;
-	// NOTE: Archives and CD-Images are published with file type "Pro"
+	// NOTE: Archives and CD-Images are published+searched with file type "Pro"
+	// NOTE: If this gets changed, the function 'GetED2KFileTypeSearchID' also needs to get updated!
 	if (iFileID == ED2KFT_ARCHIVE)		return ED2KFTSTR_PROGRAM;
 	if (iFileID == ED2KFT_CDIMAGE)		return ED2KFTSTR_PROGRAM;
 	if (iFileID == ED2KFT_EMULECOLLECTION)	return ED2KFTSTR_EMULECOLLECTION;
 	return NULL;
 }
 
-// Returns a file type which is used eMule internally only, examining the extention of the given filename
+// Retuns the ed2k file type integer ID which is to be used for publishing+searching
+EED2KFileType GetED2KFileTypeSearchID(EED2KFileType iFileID)
+{
+	if (iFileID == ED2KFT_AUDIO)			return ED2KFT_AUDIO;
+	if (iFileID == ED2KFT_VIDEO)			return ED2KFT_VIDEO;
+	if (iFileID == ED2KFT_IMAGE)			return ED2KFT_IMAGE;
+	if (iFileID == ED2KFT_PROGRAM)			return ED2KFT_PROGRAM;
+	if (iFileID == ED2KFT_DOCUMENT)			return ED2KFT_DOCUMENT;
+	// NOTE: Archives and CD-Images are published+searched with file type "Pro"
+	// NOTE: If this gets changed, the function 'GetED2KFileTypeSearchTerm' also needs to get updated!
+	if (iFileID == ED2KFT_ARCHIVE)			return ED2KFT_PROGRAM;
+	if (iFileID == ED2KFT_CDIMAGE)			return ED2KFT_PROGRAM;
+	return ED2KFT_ANY;
+}
+
+// Returns a file type which is used eMule internally only, examining the extension of the given filename
 CString GetFileTypeByName(LPCTSTR pszFileName)
 {
 	EED2KFileType iFileType = GetED2KFileTypeID(pszFileName);
@@ -1805,8 +1828,7 @@ typedef struct tagTHREADNAME_INFO
 		do // the VS debugger truncates the string to 31 characters anyway!
 		{
 			lenBuf += 128;
-			if (buffer != NULL)
-				delete [] buffer;
+			delete [] buffer;
 			buffer = new char[lenBuf];
 			lenResult = _vsnprintf(buffer, lenBuf, szThreadName, args);
 		} while (lenResult == -1);
@@ -1823,6 +1845,8 @@ typedef struct tagTHREADNAME_INFO
 		delete [] buffer;
 	}
 	__except (EXCEPTION_CONTINUE_EXECUTION) {}
+#else
+	UNREFERENCED_PARAMETER(szThreadName);
 #endif
 }
 
@@ -1969,8 +1993,8 @@ void Debug(LPCTSTR pszFmtMsg, ...)
 
 void DebugHexDump(const uint8* data, UINT lenData)
 {
-	uint16 lenLine = 16;
-	uint32 pos = 0;
+	int lenLine = 16;
+	UINT pos = 0;
 	byte c = 0;
 	while (pos < lenData)
 	{
@@ -2022,13 +2046,17 @@ void DebugHexDump(CFile& file)
 
 LPCTSTR DbgGetFileNameFromID(const uchar* hash)
 {
-	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)hash);
+	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(hash);
 	if (reqfile != NULL)
 		return reqfile->GetFileName();
 
-	CPartFile* partfile = theApp.downloadqueue->GetFileByID((uchar*)hash);
+	CPartFile* partfile = theApp.downloadqueue->GetFileByID(hash);
 	if (partfile != NULL)
 		return partfile->GetFileName();
+
+	CKnownFile* knownfile = theApp.knownfiles->FindKnownFileByID(hash);
+	if (knownfile != NULL)
+		return knownfile->GetFileName();
 
 	return NULL;
 }
@@ -2047,12 +2075,49 @@ CString DbgGetFileInfo(const uchar* hash)
 	return strInfo;
 }
 
+CString DbgGetFileStatus(UINT nPartCount, CSafeMemFile* data)
+{
+	CString strFileStatus;
+	if (nPartCount == 0)
+		strFileStatus = _T("Complete");
+	else
+	{
+		CString strPartStatus;
+		UINT nAvailableParts = 0;
+		UINT nPart = 0;
+		while (nPart < nPartCount)
+		{
+			uint8 ucPartMask;
+			try {
+				ucPartMask = data->ReadUInt8();
+			}
+			catch (CFileException* ex) {
+				ex->Delete();
+				strPartStatus = _T("*PacketException*");
+				break;
+			}
+			for (int i = 0; i < 8; i++)
+			{
+				bool bPartAvailable = (((ucPartMask >> i) & 1) != 0);
+				if (bPartAvailable)
+					nAvailableParts++;
+				strPartStatus += bPartAvailable ? _T('#') : _T('.');
+				nPart++;
+				if (nPart == nPartCount)
+					break;
+			}
+		}
+		strFileStatus.Format(_T("Parts=%u  Avail=%u  %s"), nPartCount, nAvailableParts, strPartStatus);
+	}
+	return strFileStatus;
+}
+
 CString DbgGetBlockInfo(const Requested_Block_Struct* block)
 {
 	return DbgGetBlockInfo(block->StartOffset, block->EndOffset);
 }
 
-CString DbgGetBlockInfo(uint32 StartOffset, uint32 EndOffset)
+CString DbgGetBlockInfo(uint64 StartOffset, uint64 EndOffset)
 {
 	CString strInfo;
 	strInfo.Format(_T("%u-%u (%u bytes)"), StartOffset, EndOffset, EndOffset - StartOffset + 1);
@@ -2431,7 +2496,7 @@ CString StripInvalidFilenameChars(const CString& strText, bool bKeepSpaces)
 CString CreateED2kLink(const CAbstractFile* pFile, bool bEscapeLink)
 {
 	CString strLink;
-	strLink.Format(_T("ed2k://|file|%s|%u|%s|"),
+	strLink.Format(_T("ed2k://|file|%s|%I64u|%s|"),
 		EncodeUrlUtf8(StripInvalidFilenameChars(pFile->GetFileName(), false)),
 		pFile->GetFileSize(),
 		EncodeBase16(pFile->GetFileHash(),16));
@@ -2483,11 +2548,16 @@ CString ipstr(LPCTSTR pszAddress, uint16 nPort)
 
 CStringA ipstrA(uint32 nIP)
 {
-	// following gives the same string as 'inet_ntoa(*(in_addr*)&nIP)' but is not restricted to ASCII strings
 	const BYTE* pucIP = (BYTE*)&nIP;
 	CStringA strIP;
 	strIP.ReleaseBuffer(sprintf(strIP.GetBuffer(3+1+3+1+3+1+3), "%u.%u.%u.%u", pucIP[0], pucIP[1], pucIP[2], pucIP[3]));
 	return strIP;
+}
+
+void ipstrA(CHAR* pszAddress, int iMaxAddress, uint32 nIP)
+{
+	const BYTE* pucIP = (BYTE*)&nIP;
+	_snprintf(pszAddress, iMaxAddress, "%u.%u.%u.%u", pucIP[0], pucIP[1], pucIP[2], pucIP[3]);
 }
 
 bool IsDaylightSavingTimeActive(LONG& rlDaylightBias)
@@ -2509,6 +2579,16 @@ bool IsNTFSVolume(LPCTSTR pszVolume)
 	return (_tcscmp(szFileSystemNameBuffer, _T("NTFS")) == 0);
 }
 
+bool IsFATVolume(LPCTSTR pszVolume)
+{
+	DWORD dwMaximumComponentLength = 0;
+	DWORD dwFileSystemFlags = 0;
+	TCHAR szFileSystemNameBuffer[128];
+	if (!GetVolumeInformation(pszVolume, NULL, 0, NULL, &dwMaximumComponentLength, &dwFileSystemFlags, szFileSystemNameBuffer, 128))
+		return false;
+	return (_tcsnicmp(szFileSystemNameBuffer, _T("FAT"), 3) == 0);
+}
+
 bool IsFileOnNTFSVolume(LPCTSTR pszFilePath)
 {
 	CString strRootPath(pszFilePath);
@@ -2519,6 +2599,18 @@ bool IsFileOnNTFSVolume(LPCTSTR pszFilePath)
 	PathAddBackslash(strRootPath.GetBuffer());
 	strRootPath.ReleaseBuffer();
 	return IsNTFSVolume(strRootPath);
+}
+
+bool IsFileOnFATVolume(LPCTSTR pszFilePath)
+{
+	CString strRootPath(pszFilePath);
+	BOOL bResult = PathStripToRoot(strRootPath.GetBuffer());
+	strRootPath.ReleaseBuffer();
+	if (!bResult)
+		return false;
+	PathAddBackslash(strRootPath.GetBuffer());
+	strRootPath.ReleaseBuffer();
+	return IsFATVolume(strRootPath);
 }
 
 bool IsAutoDaylightTimeSetActive()
@@ -2609,7 +2701,7 @@ uint16 GetRandomUInt16()
 	// NOTE: each spawned thread HAS to call 'srand' for itself to get real random numbers.
 	ASSERT( !(uRand0 == 41 && uRand1 == 18467) );
 
-	return uRand0 | ((uRand1 >= RAND_MAX/2) ? 0x8000 : 0x0000);
+	return (uint16)(uRand0 | ((uRand1 >= RAND_MAX/2) ? 0x8000 : 0x0000));
 #else
 #error "Implement it!"
 #endif
@@ -2670,12 +2762,24 @@ HWND ReplaceRichEditCtrl(CWnd* pwndRE, CWnd* pwndParent, CFont* pFont)
 
 void InstallSkin(LPCTSTR pszSkinPackage)
 {
+	if (thePrefs.GetSkinProfileDir().IsEmpty() || _taccess(thePrefs.GetSkinProfileDir(), 0) != 0) {
+		AfxMessageBox(GetResString(IDS_INSTALL_SKIN_NODIR), MB_ICONERROR);
+		return;
+	}
+
+	static const TCHAR _szSkinSuffix[] = _T(".") EMULSKIN_BASEEXT _T(".ini");
+
+	TCHAR szExt[_MAX_EXT];
+	_tsplitpath(pszSkinPackage, NULL, NULL, NULL, szExt);
+	_tcslwr(szExt);
+
+	if (_tcscmp(szExt, _T(".zip")) == 0)
+	{
 	CZIPFile zip;
 	if (zip.Open(pszSkinPackage))
 	{
 		// Search the "*.eMuleSkin.ini" file..
 		CZIPFile::File* zfIniFile = NULL;
-		static const TCHAR _szSkinSuffix[] = _T(".") EMULSKIN_BASEEXT _T(".ini");
 		for (int i = 0; i < zip.GetCount(); i++)
 		{
 			CZIPFile::File* zf = zip.GetFile(i);
@@ -2688,11 +2792,6 @@ void InstallSkin(LPCTSTR pszSkinPackage)
 
 		if (zfIniFile)
 		{
-			if (thePrefs.GetSkinProfileDir().IsEmpty() || _taccess(thePrefs.GetSkinProfileDir(), 0) != 0){
-				AfxMessageBox(GetResString(IDS_INSTALL_SKIN_NODIR));
-				return;
-			}
-
 			for (int i = 0; i < zip.GetCount(); i++)
 			{
 				CZIPFile::File* zf = zip.GetFile(i);
@@ -2715,7 +2814,7 @@ void InstallSkin(LPCTSTR pszSkinPackage)
 							DWORD dwError = GetLastError();
 							CString strError;
 							strError.Format(GetResString(IDS_INSTALL_SKIN_DIR_ERROR), strDstDirPath, GetErrorMessage(dwError));
-							AfxMessageBox(strError);
+								AfxMessageBox(strError, MB_ICONERROR);
 							break;
 						}
 					}
@@ -2729,7 +2828,7 @@ void InstallSkin(LPCTSTR pszSkinPackage)
 							DWORD dwError = GetLastError();
 							CString strError;
 							strError.Format(GetResString(IDS_INSTALL_SKIN_FILE_ERROR), zf->m_sName, strDstFilePath, GetErrorMessage(dwError));
-							AfxMessageBox(strError);
+								AfxMessageBox(strError, MB_ICONERROR);
 							break;
 						}
 					}
@@ -2737,9 +2836,69 @@ void InstallSkin(LPCTSTR pszSkinPackage)
 			}
 		}
 		else{
-			AfxMessageBox(GetResString(IDS_INSTALL_SKIN_PKG_ERROR));
+				AfxMessageBox(GetResString(IDS_INSTALL_SKIN_PKG_ERROR), MB_ICONERROR);
 		}
 		zip.Close();
+	}
+		else {
+			AfxMessageBox(GetResString(IDS_INSTALL_SKIN_PKG_ERROR), MB_ICONERROR);
+		}
+	}
+	else if (_tcscmp(szExt, _T(".rar")) == 0)
+	{
+		CRARFile rar;
+		if (rar.Open(pszSkinPackage))
+		{
+			bool bError = false;
+			bool bFoundSkinINIFile = false;
+			CString strFileName;
+			while (rar.GetNextFile(strFileName))
+			{
+				if (strFileName.IsEmpty()) {
+					rar.Skip();
+					continue;
+				}
+				if (strFileName[0] == _T('\\') || strFileName[0] == _T('/')) {
+					rar.Skip();
+					continue;
+				}
+				if (strFileName.Find(_T(':')) != -1) {
+					rar.Skip();
+					continue;
+				}
+				if (strFileName.Find(_T("..\\")) != -1 || strFileName.Find(_T("../")) != -1) {
+					rar.Skip();
+					continue;
+				}
+
+				if (!bFoundSkinINIFile && strFileName.Right(ARRSIZE(_szSkinSuffix)-1).CompareNoCase(_szSkinSuffix) == 0)
+					bFoundSkinINIFile = true;
+
+				// No need to care about possible available sub-directories. UnRAR.DLL cares about that automatically.
+				CString strDstFilePath;
+				PathCanonicalize(strDstFilePath.GetBuffer(MAX_PATH), thePrefs.GetSkinProfileDir() + _T('\\') + strFileName);
+				strDstFilePath.ReleaseBuffer();
+				SetLastError(0);
+				if (!rar.Extract(strDstFilePath)) {
+					DWORD dwError = GetLastError();
+					CString strError;
+					strError.Format(GetResString(IDS_INSTALL_SKIN_FILE_ERROR), strFileName, strDstFilePath, GetErrorMessage(dwError));
+					AfxMessageBox(strError, MB_ICONERROR);
+					bError = true;
+					break;
+				}
+			}
+
+			if (!bError && !bFoundSkinINIFile)
+				AfxMessageBox(GetResString(IDS_INSTALL_SKIN_PKG_ERROR), MB_ICONERROR);
+
+			rar.Close();
+		}
+		else {
+			CString strError;
+			strError.Format(_T("%s\r\n\r\nDownload latest version of UNRAR.DLL from http://www.rarlab.com and copy UNRAR.DLL into eMule installation folder."), GetResString(IDS_INSTALL_SKIN_PKG_ERROR));
+			AfxMessageBox(strError, MB_ICONERROR);
+		}
 	}
 }
 
@@ -3039,6 +3198,32 @@ bool DoCollectionRegFix(bool checkOnly)
 	return false;
 }
 
+
+bool gotostring(CFile &file, uchar *find, LONGLONG plen)
+{
+	bool found = false;
+	LONGLONG i=0;
+	LONGLONG j=0;
+	//LONGLONG plen = strlen(find);
+	LONGLONG len = file.GetLength() - file.GetPosition();
+	uchar temp;
+
+	while (!found && i < len)
+	{
+		file.Read(&temp,1);
+		if (temp == find[j])
+			j++;
+		else if(temp == find[0])
+			j=1;
+		else
+			j=0;
+		if (j==plen)
+			return true;
+		i++;
+	}
+	return false;
+}
+
 // khaos::kmod+ Functions to return a random number within a given range.
 int GetRandRange( int from, int to )
 {
@@ -3167,17 +3352,17 @@ ULONG CastXBytesToI(const CString& strExpr)
 	return ulNum * 1024U*1024U; // Default = MBytes
 }
 
-CString CastItoUIXBytes(uint32 count)
+CString CastItoUIXBytes(uint64 count)
 {
 	CString buffer;
 	if (count < 1024)
-		buffer.Format(_T("%u%s"), count, GetResString(IDS_BYTES));
+		buffer.Format(_T("%I64u%s"), count, GetResString(IDS_BYTES));
 	else if (count < 1048576)
-		buffer.Format(_T("%u%s"), (uint32)(count/1024), GetResString(IDS_KBYTES));
+		buffer.Format(_T("%I64u%s"), (uint64)(count/1024), GetResString(IDS_KBYTES));
 	else if (count < 1073741824)
-		buffer.Format(_T("%u%s"), (uint32)(count/1048576), GetResString(IDS_MBYTES));
+		buffer.Format(_T("%I64u%s"), (uint64)(count/1048576), GetResString(IDS_MBYTES));
 	else
-		buffer.Format(_T("%u%s"), (uint32)(count/1073741824), GetResString(IDS_GBYTES));
+		buffer.Format(_T("%I64u%s"), (uint64)(count/1073741824), GetResString(IDS_GBYTES));
 	return buffer;
 }
 // khaos::categorymod-
@@ -3220,10 +3405,10 @@ void HTMLParse(CString &buffer)
 //MORPH END  - Added by SiRoB, XML News [O²]
 
 //MORPH START - Added by SiRoB, Used in Fake and ipfilter updater
-long FileSize(LPCTSTR fileName){
+ULONGLONG FileSize(LPCTSTR fileName){
 	CFile file;
 	CFileException e;
-	long size=0;
+	ULONGLONG size=0;
 	
 	if(file.Open(fileName, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary, &e))
 	{

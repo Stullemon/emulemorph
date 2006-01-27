@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@
 #include "Packets.h"
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "kademlia/kademlia/search.h"
+#include "kademlia/kademlia/SearchManager.h"
 #include "kademlia/kademlia/prefs.h"
 #include "DownloadQueue.h"
 #include "Statistics.h"
@@ -61,7 +62,7 @@ public:
 	CPublishKeyword(const CStringW& rstrKeyword)
 	{
 		m_strKeyword = rstrKeyword;
-		// min. keyword char is allowed to be < 3 in some cases (see also 'CSearchManager::getWords')
+		// min. keyword char is allowed to be < 3 in some cases (see also 'CSearchManager::GetWords')
 		//ASSERT( rstrKeyword.GetLength() >= 3 );
 		ASSERT( !rstrKeyword.IsEmpty() );
 		KadGetKeywordHash(rstrKeyword, &m_nKadID);
@@ -543,19 +544,23 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 		}
 
 		CTime lwtime;
-		if (!ff.GetLastWriteTime(lwtime)){
-			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Failed to get file date of %s - %s"), ff.GetFilePath(), GetErrorMessage(GetLastError()));
+		try{
+			ff.GetLastWriteTime(lwtime);
+		}
+		catch(CException* ex){
+			ex->Delete();
 		}
 		uint32 fdate = (UINT)lwtime.GetTime();
+		if (fdate == 0)
+			fdate = (UINT)-1;
 		if (fdate == -1){
 			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Failed to convert file date of %s"), ff.GetFilePath());
+				AddDebugLogLine(false, _T("Failed to get file date of \"%s\""), ff.GetFilePath());
 		}
 		else
 			AdjustNTFSDaylightFileTime(fdate, ff.GetFilePath());
 
-		CKnownFile* toadd = theApp.knownfiles->FindKnownFile(ff.GetFileName(), fdate, (uint32)ff.GetLength());
+		CKnownFile* toadd = theApp.knownfiles->FindKnownFile(ff.GetFileName(), fdate, ff.GetLength());
 		if (toadd)
 		{
 			CCKey key(toadd->GetFileHash());
@@ -802,18 +807,21 @@ void CSharedFileList::SendListToServer(){
 	{
 		return;
 	}
+	
+	CServer* pCurServer = server->GetCurrentServer();
 	CSafeMemFile files(1024);
 	CCKey bufKey;
 	CKnownFile* cur_file,cur_file2;
 	POSITION pos,pos2;
 	CTypedPtrList<CPtrList, CKnownFile*> sortedList;
 	bool added=false;
+
 	for(pos=m_Files_map.GetStartPosition(); pos!=0;)
 	{
 		m_Files_map.GetNextAssoc(pos, bufKey, cur_file);
 		added=false;
 		//insertsort into sortedList
-		if(!cur_file->GetPublishedED2K())
+		if(!cur_file->GetPublishedED2K() && (!cur_file->IsLargeFile() || (pCurServer != NULL && pCurServer->SupportsLargeFilesTCP())))
 		{
 			for (pos2 = sortedList.GetHeadPosition();pos2 != 0 && !added;sortedList.GetNext(pos2))
 			{
@@ -830,7 +838,7 @@ void CSharedFileList::SendListToServer(){
 		}
 	}
 
-	CServer* pCurServer = server->GetCurrentServer();
+	
 	// add to packet
 	uint32 limit = pCurServer ? pCurServer->GetSoftFiles() : 0;
 	if( limit == 0 || limit > 200 )
@@ -917,7 +925,7 @@ void CSharedFileList::ClearKadSourcePublishInfo()
 	}
 }
 
-void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, 
+void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file, CSafeMemFile* files, 
 											  CServer* pServer, CUpDownClient* pClient)
 {
 	UINT uEmuleVer = (pClient && pClient->IsEmuleClient()) ? pClient->GetVersion() : 0;
@@ -969,27 +977,78 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 	}
 	files->WriteUInt32(nClientID);
 	files->WriteUInt16(nClientPort);
-	//TRACE("Publishing file: Hash=%s  ClientIP=%s  ClientPort=%u\n", md4str(cur_file->GetFileHash()), ipstr(nClientID), nClientPort);
+	//TRACE(_T("Publishing file: Hash=%s  ClientIP=%s  ClientPort=%u\n"), md4str(cur_file->GetFileHash()), ipstr(nClientID), nClientPort);
 
 	CSimpleArray<CTag*> tags;
 
 	tags.Add(new CTag(FT_FILENAME, cur_file->GetFileName()));
-	tags.Add(new CTag(FT_FILESIZE,cur_file->GetFileSize()));
 
-	// NOTE: Archives and CD-Images are published with file type "Pro"
-	CString strED2KFileType(GetED2KFileTypeSearchTerm(GetED2KFileTypeID(cur_file->GetFileName())));
-	if (!strED2KFileType.IsEmpty())
+	if (!cur_file->IsLargeFile()){
+		tags.Add(new CTag(FT_FILESIZE, (uint32)(uint64)cur_file->GetFileSize()));
+	}
+	else{
+		// we send 2*32 bit tags to servers, but a real 64 bit tag to other clients.
+		if (pServer != NULL){
+			if (!pServer->SupportsLargeFilesTCP()){
+				ASSERT( false );
+				tags.Add(new CTag(FT_FILESIZE, 0, false));
+			}
+			else{
+				tags.Add(new CTag(FT_FILESIZE, (uint32)(uint64)cur_file->GetFileSize()));
+				tags.Add(new CTag(FT_FILESIZE_HI, (uint32)((uint64)cur_file->GetFileSize() >> 32)));
+			}
+		}
+		else{
+			if (!pClient->SupportsLargeFiles()){
+				ASSERT( false );
+				tags.Add(new CTag(FT_FILESIZE, 0, false));
+			}
+			else{
+				tags.Add(new CTag(FT_FILESIZE, cur_file->GetFileSize(), true));
+			}
+		}
+	}
+
+	// eserver 17.6+ supports eMule file rating tag. There is no TCP-capabilities bit available to determine
+	// whether the server is really supporting it -- this is by intention (lug). That's why we always send it.
+	if (cur_file->GetFileRating())
+		tags.Add(new CTag(FT_FILERATING, cur_file->GetFileRating()));
+
+	// NOTE: Archives and CD-Images are published+searched with file type "Pro"
+	bool bAddedFileType = false;
+	if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_TYPETAGINTEGER)) {
+		// Send integer file type tags to newer servers
+		EED2KFileType eFileType = GetED2KFileTypeSearchID(GetED2KFileTypeID(cur_file->GetFileName()));
+		if (eFileType >= ED2KFT_AUDIO && eFileType <= ED2KFT_CDIMAGE) {
+			tags.Add(new CTag(FT_FILETYPE, (UINT)eFileType));
+			bAddedFileType = true;
+		}
+	}
+	if (!bAddedFileType) {
+		// Send string file type tags to:
+		//	- newer servers, in case there is no integer type available for the file type (e.g. emulecollection)
+		//	- older servers
+		//	- all clients
+		CString strED2KFileType(GetED2KFileTypeSearchTerm(GetED2KFileTypeID(cur_file->GetFileName())));
+		if (!strED2KFileType.IsEmpty()) {
 		tags.Add(new CTag(FT_FILETYPE,strED2KFileType));
+			bAddedFileType = true;
+		}
+	}
 
-	CString strExt;
-	int iExt = cur_file->GetFileName().ReverseFind(_T('.'));
-	if (iExt != -1){
-		strExt = cur_file->GetFileName().Mid(iExt);
-		if (!strExt.IsEmpty()){
-			strExt = strExt.Mid(1);
+	// eserver 16.4+ does not need the FT_FILEFORMAT tag at all nor does any eMule client. This tag
+	// was used for older (very old) eDonkey servers only. -> We send it only to non-eMule clients.
+	if (pServer == NULL && uEmuleVer == 0) {
+		CString strExt;
+		int iExt = cur_file->GetFileName().ReverseFind(_T('.'));
+		if (iExt != -1){
+			strExt = cur_file->GetFileName().Mid(iExt);
 			if (!strExt.IsEmpty()){
-				strExt.MakeLower();
-				tags.Add(new CTag(FT_FILEFORMAT, strExt)); // file extension without a "."
+				strExt = strExt.Mid(1);
+				if (!strExt.IsEmpty()){
+					strExt.MakeLower();
+					tags.Add(new CTag(FT_FILEFORMAT, strExt)); // file extension without a "."
+				}
 			}
 		}
 	}
@@ -1084,7 +1143,7 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 	for (int i = 0; i < tags.GetSize(); i++)
 	{
 		const CTag* pTag = tags[i];
-		//TRACE("  %s\n", pTag->GetFullInfo());
+		//TRACE(_T("  %s\n"), pTag->GetFullInfo(DbgGetFileMetaTagName));
 		if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS) || (uEmuleVer >= MAKE_CLIENT_VERSION(0,42,7)))
 			pTag->WriteNewEd2kTag(files, eStrEncode);
 		else
@@ -1107,7 +1166,7 @@ uint64 CSharedFileList::GetDatasize(uint64 &pbytesLargest) const
 	CKnownFile* cur_file;
 	for (POSITION pos = m_Files_map.GetStartPosition();pos != 0;){
 		m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
-		fsize+=cur_file->GetFileSize();
+		fsize += (uint64)cur_file->GetFileSize();
 		// -khaos--+++> If this file is bigger than all the others...well duh.
 		if (cur_file->GetFileSize() > pbytesLargest)
 			pbytesLargest = cur_file->GetFileSize();
@@ -1264,7 +1323,7 @@ int CAddFileThread::Run()
 	*/
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
 	if (m_partfile && m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS){
-		SR13_ImportParts(m_partfile, m_strImport);
+		SR13_ImportParts();
 		if(theApp.emuledlg && theApp.emuledlg->IsRunning() &&
 			m_partfile && m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS){
 				m_partfile->SetFileOp(PFOP_HASHING);
@@ -1348,10 +1407,10 @@ void CSharedFileList::Publish()
 	UINT tNow = time(NULL);
 	bool isFirewalled = theApp.IsFirewalled();
 
-	if( Kademlia::CKademlia::isConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == Connected)) && GetCount() && Kademlia::CKademlia::getPublish())
+	if( Kademlia::CKademlia::IsConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == Connected)) && GetCount() && Kademlia::CKademlia::GetPublish())
 	{ 
 		//We are connected to Kad. We are either open or have a buddy. And Kad is ready to start publishing.
-		if( Kademlia::CKademlia::getTotalStoreKey() < KADEMLIATOTALSTOREKEY)
+		if( Kademlia::CKademlia::GetTotalStoreKey() < KADEMLIATOTALSTOREKEY)
 		{
 			//We are not at the max simultaneous keyword publishes 
 			if (tNow >= m_keywords->GetNextPublishTime())
@@ -1370,14 +1429,14 @@ void CSharedFileList::Publish()
 					if (tNow >= pPubKw->GetNextPublishTime())
 					{
 						//This keyword can be published.
-						Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareLookup(Kademlia::CSearch::STOREKEYWORD, false, pPubKw->GetKadID());
+						Kademlia::CSearch* pSearch = Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::STOREKEYWORD, false, pPubKw->GetKadID());
 						if (pSearch)
 						{
 							//pSearch was created. Which means no search was already being done with this HashID.
 							//This also means that it was checked to see if network load wasn't a factor.
 
 							//This sets the filename into the search object so we can show it in the gui.
-							pSearch->setFileName(pPubKw->GetKeyword());
+							pSearch->SetFileName(pPubKw->GetKeyword());
 
 							//Add all file IDs which relate to the current keyword to be published
 							const CSimpleKnownFileArray& aFiles = pPubKw->GetReferences();
@@ -1386,13 +1445,16 @@ void CSharedFileList::Publish()
 							{
 								//Debug check to make sure things are working well.
 								ASSERT_VALID( aFiles[f] );
+								// JOHNTODO - Why is this happening.. I think it may have to do with downloading a file that is already
+								// in the known file list..
+//								ASSERT( IsFilePtrInList(aFiles[f]) );
 
 								//Only publish complete files as someone else should have the full file to publish these keywords.
 								//As a side effect, this may help reduce people finding incomplete files in the network.
-								if( !aFiles[f]->IsPartFile() )
+								if( !aFiles[f]->IsPartFile() && IsFilePtrInList(aFiles[f]))
 								{
 									count++;
-									pSearch->addFileID(Kademlia::CUInt128(aFiles[f]->GetFileHash()));
+									pSearch->AddFileID(Kademlia::CUInt128(aFiles[f]->GetFileHash()));
 									if( count > 150 )
 									{
 										//We only publish up to 150 files per keyword publish then rotate the list.
@@ -1408,7 +1470,7 @@ void CSharedFileList::Publish()
 								pSearch->PreparePacket();
 								pPubKw->SetNextPublishTime(tNow+(KADEMLIAREPUBLISHTIMEK));
 								pPubKw->IncPublishedCount();
-								Kademlia::CSearchManager::startSearch(pSearch);
+								Kademlia::CSearchManager::StartSearch(pSearch);
 							}
 							else
 							{
@@ -1422,7 +1484,7 @@ void CSharedFileList::Publish()
 			}
 		}
 		
-		if( Kademlia::CKademlia::getTotalStoreSrc() < KADEMLIATOTALSTORESRC)
+		if( Kademlia::CKademlia::GetTotalStoreSrc() < KADEMLIATOTALSTORESRC)
 		{
 			if(tNow >= m_lastPublishKadSrc)
 			{
@@ -1433,7 +1495,7 @@ void CSharedFileList::Publish()
 				{
 					if(pCurKnownFile->PublishSrc())
 					{
-						if(Kademlia::CSearchManager::prepareLookup(Kademlia::CSearch::STOREFILE, true, Kademlia::CUInt128(pCurKnownFile->GetFileHash()))==NULL)
+						if(Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::STOREFILE, true, Kademlia::CUInt128(pCurKnownFile->GetFileHash()))==NULL)
 							pCurKnownFile->SetLastPublishTimeKadSrc(0,0);
 					}	
 				}
@@ -1445,7 +1507,7 @@ void CSharedFileList::Publish()
 			}
 		}
 
-		if( Kademlia::CKademlia::getTotalStoreNotes() < KADEMLIATOTALSTORENOTES)
+		if( Kademlia::CKademlia::GetTotalStoreNotes() < KADEMLIATOTALSTORENOTES)
 		{
 			if(tNow >= m_lastPublishKadNotes)
 			{
@@ -1456,7 +1518,7 @@ void CSharedFileList::Publish()
 				{
 					if(pCurKnownFile->PublishNotes())
 					{
-						if(Kademlia::CSearchManager::prepareLookup(Kademlia::CSearch::STORENOTES, true, Kademlia::CUInt128(pCurKnownFile->GetFileHash()))==NULL)
+						if(Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::STORENOTES, true, Kademlia::CUInt128(pCurKnownFile->GetFileHash()))==NULL)
 							pCurKnownFile->SetLastPublishTimeKadNotes(0);
 					}	
 				}

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -52,9 +52,16 @@ uint32 CFileDataIO::ReadUInt32()
 	return nVal;
 }
 
+uint64 CFileDataIO::ReadUInt64()
+{
+	uint64 nVal;
+	Read(&nVal, sizeof nVal);
+	return nVal;
+}
+
 void CFileDataIO::ReadUInt128(Kademlia::CUInt128 *pVal)
 {
-	Read(pVal->getDataPtr(), 16);
+	Read(pVal->GetDataPtr(), 16);
 }
 
 void CFileDataIO::ReadHash16(uchar* pVal)
@@ -156,9 +163,14 @@ void CFileDataIO::WriteUInt32(uint32 nVal)
 	Write(&nVal, sizeof nVal);
 }
 
+void CFileDataIO::WriteUInt64(uint64 nVal)
+{
+	Write(&nVal, sizeof nVal);
+}
+
 void CFileDataIO::WriteUInt128(const Kademlia::CUInt128 *pVal)
 {
-	Write(pVal->getData(), 16);
+	Write(pVal->GetData(), 16);
 }
 
 void CFileDataIO::WriteHash16(const uchar* pVal)
@@ -168,7 +180,7 @@ void CFileDataIO::WriteHash16(const uchar* pVal)
 
 void CFileDataIO::WriteString(const CString& rstr, EUtf8Str eEncode)
 {
-#define	WRITE_STR_LEN(n)	WriteUInt16(n)
+#define	WRITE_STR_LEN(n)	WriteUInt16((uint16)(n))
 	if (eEncode == utf8strRaw)
 	{
 		CUnicodeToUTF8 utf8(rstr);
@@ -202,7 +214,7 @@ void CFileDataIO::WriteString(const CString& rstr, EUtf8Str eEncode)
 void CFileDataIO::WriteString(LPCSTR psz)
 {
 	UINT uLen = strlen(psz);
-	WriteUInt16(uLen);
+	WriteUInt16((uint16)uLen);
 	Write(psz, uLen);
 }
 
@@ -321,11 +333,20 @@ uint32 CSafeMemFile::ReadUInt32()
 	return nResult;
 }
 
+uint64 CSafeMemFile::ReadUInt64()
+{
+	if (m_nPosition + sizeof(uint64) > m_nFileSize)
+		AfxThrowFileException(CFileException::endOfFile, 0, GetFileName());
+	uint64 nResult = *((uint64*)(m_lpBuffer + m_nPosition));
+	m_nPosition += sizeof(uint64);
+	return nResult;
+}
+
 void CSafeMemFile::ReadUInt128(Kademlia::CUInt128* pVal)
 {
 	if (m_nPosition + sizeof(uint32)*4 > m_nFileSize)
 		AfxThrowFileException(CFileException::endOfFile, 0, GetFileName());
-	uint32* pUInt32Val = (uint32*)pVal->getDataPtr();
+	uint32* pUInt32Val = (uint32*)pVal->GetDataPtr();
 	const uint32* pUInt32 = (uint32*)(m_lpBuffer + m_nPosition);
 	pUInt32Val[0] = pUInt32[0];
 	pUInt32Val[1] = pUInt32[1];
@@ -375,12 +396,22 @@ void CSafeMemFile::WriteUInt32(uint32 nVal)
 		m_nFileSize = m_nPosition;
 }
 
+void CSafeMemFile::WriteUInt64(uint64 nVal)
+{
+	if (m_nPosition + sizeof(uint64) > m_nBufferSize)
+		GrowFile(m_nPosition + sizeof(uint64));
+	*((uint64*)(m_lpBuffer + m_nPosition)) = nVal;
+	m_nPosition += sizeof(uint64);
+	if (m_nPosition > m_nFileSize)
+		m_nFileSize = m_nPosition;
+}
+
 void CSafeMemFile::WriteUInt128(const Kademlia::CUInt128* pVal)
 {
 	if (m_nPosition + sizeof(uint32)*4 > m_nBufferSize)
 		GrowFile(m_nPosition + sizeof(uint32)*4);
 	uint32* pUInt32 = (uint32*)(m_lpBuffer + m_nPosition);
-	const uint32* pUInt32Val = (uint32*)pVal->getData();
+	const uint32* pUInt32Val = (uint32*)pVal->GetData();
 	pUInt32[0] = pUInt32Val[0];
 	pUInt32[1] = pUInt32Val[1];
 	pUInt32[2] = pUInt32Val[2];

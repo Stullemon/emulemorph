@@ -110,7 +110,7 @@ public:
 	void				SetColTxtTitle(COLORREF	col)					{ m_colTxtTitle = col; }
 	COLORREF			GetColTxtTitle()								{ return m_colTxtTitle; }
 	void				SetColTxtCaption(COLORREF col)					{ m_colTxtCaption = col; }
-	COLORREF			GetColTxtCaption(COLORREF col)					{ return m_colTxtCaption; }
+	COLORREF			GetColTxtCaption(COLORREF /*col*/)					{ return m_colTxtCaption; }
 	void				SetEdgeOffset(CSize szOffset)					{ m_szEdgeOffset = szOffset; }
 	CSize				GetEdgeOffset()									{ return m_szEdgeOffset; }
 	void				SetCaptionOffset(CSize szOffset)				{ m_szCaptionOffset = szOffset; }

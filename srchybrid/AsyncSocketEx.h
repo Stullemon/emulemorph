@@ -103,16 +103,14 @@ public:
 	//Creates a socket.
 	BOOL Create(UINT nSocketPort = 0, int nSocketType = SOCK_STREAM,
 				long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT |	FD_CONNECT | FD_CLOSE,
-				LPCTSTR lpszSocketAddress = NULL, BOOL bReuseAddr = FALSE );
+				LPCSTR lpszSocketAddress = NULL, BOOL bReuseAddr = FALSE);
 
 
 	//Attributes
-	//---------
+	//----------
 
 	//Attaches a socket handle to a CAsyncSocketEx object.
-	BOOL Attach( SOCKET hSocket,
-				long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT |
-				FD_CONNECT | FD_CLOSE );
+	BOOL Attach(SOCKET hSocket, long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE);
 
 	//Detaches a socket handle from a CAsyncSocketEx object.
 	SOCKET Detach( );
@@ -149,21 +147,21 @@ public:
 	BOOL AsyncSelect( long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE );
 
 	//Associates a local address with the socket.
-	BOOL Bind(UINT nSocketPort, LPCTSTR lpszSocketAddress);
+	BOOL Bind(UINT nSocketPort, LPCSTR lpszSocketAddress);
 	BOOL Bind(const SOCKADDR* lpSockAddr, int nSockAddrLen);
 
 	//Closes the socket.
 	virtual void Close();
 
 	//Establishes a connection to a peer socket.
-	virtual BOOL Connect(LPCTSTR lpszHostAddress, UINT nHostPort);
+	virtual BOOL Connect(LPCSTR lpszHostAddress, UINT nHostPort);
 	virtual BOOL Connect( const SOCKADDR* lpSockAddr, int nSockAddrLen );
 
 	//Controls the mode of the socket.
 	BOOL IOCtl( long lCommand, DWORD* lpArgument );
 
 	//Establishes a socket to listen for incoming connection requests.
-	BOOL Listen( int nConnectionBacklog = 5 );
+	BOOL Listen(int nConnectionBacklog = 5);
 
 	//Receives data from the socket.
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
@@ -275,7 +273,7 @@ protected:
 	friend CAsyncSocketExLayer;
 
 	//Called by the layers to notify application of some events
-	virtual int OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nParam1, int nParam2);
+	virtual int OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nCode, WPARAM wParam, LPARAM lParam);
 #endif //NOLAYERS
 
 	friend CAsyncSocketExHelperWindow;

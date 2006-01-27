@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@ struct Requested_Block_Struct;
 class CUpDownClient;
 class CAICHHash;
 class CPartFile;
+class CSafeMemFile;
 
 #define ROUND(x) (floor((float)x+0.5f))
 
@@ -48,6 +49,9 @@ CString CastItoXBytes(uint32 count, bool isK = false, bool isPerSec = false, uin
 CString CastItoXBytes(uint64 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
 CString CastItoXBytes(float count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
 CString CastItoXBytes(double count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
+#ifdef _DEBUG
+CString CastItoXBytes(EMFileSize count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
+#endif
 //MOPRH END   - Changed by SiRoB, Add isUS option
 CString CastItoIShort(uint16 count, bool isK = false, uint32 decimal = 2);
 CString CastItoIShort(uint32 count, bool isK = false, uint32 decimal = 2);
@@ -55,17 +59,16 @@ CString CastItoIShort(uint64 count, bool isK = false, uint32 decimal = 2);
 CString CastItoIShort(float count, bool isK = false, uint32 decimal = 2);
 CString CastItoIShort(double count, bool isK = false, uint32 decimal = 2);
 CString CastSecondsToHM(time_t seconds);
-CString	CastSecondsToLngHM(LONGLONG count);
+CString	CastSecondsToLngHM(time_t seconds);
 CString GetFormatedUInt(ULONG ulVal);
 CString GetFormatedUInt64(ULONGLONG ullVal);
 void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength);
 void SecToTimeLength(unsigned long ulSec, CStringW& rstrTimeLength);
-CString LeadingZero(uint32 units);
 bool RegularExpressionMatch(CString regexpr, CString teststring);
 // khaos::categorymod+ Takes a string and returns bytes...
 ULONG	CastXBytesToI(const CString& strExpr);
 // Takes bytes and returns a string with only integers...
-CString CastItoUIXBytes(uint32 count);
+CString CastItoUIXBytes(uint64 count);
 // khaos::categorymod-
 
 // khaos::kmod+ Random number generator using ranges.
@@ -110,7 +113,7 @@ uint32 DecodeBase32(LPCTSTR pszInput, CAICHHash& Hash);
 void MakeFoldername(TCHAR* path);
 CString RemoveFileExtension(const CString& rstrFilePath);
 int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
-CString StringLimit(CString in,uint16 length);
+CString StringLimit(CString in, UINT length);
 CString CleanupFilename(CString filename, bool bExtension = true);
 CString ValidFilename(CString filename);
 bool ExpandEnvironmentStrings(CString& rstrStrings);
@@ -138,7 +141,7 @@ BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultF
 void GetPopupMenuPos(CListCtrl& lv, CPoint& point);
 void GetPopupMenuPos(CTreeCtrl& tv, CPoint& point);
 void InitWindowStyles(CWnd* pWnd);
-CString GetRateString(uint16 rate);
+CString GetRateString(UINT rate);
 HWND GetComboBoxEditCtrl(CComboBox& cb);
 HWND ReplaceRichEditCtrl(CWnd* pwndRE, CWnd* pwndParent, CFont* pFont);
 int  FontPointSizeToLogUnits(int nPointSize);
@@ -174,6 +177,7 @@ void Debug(LPCTSTR pszFmtMsg, ...);
 void DebugHexDump(const uint8* data, UINT lenData);
 void DebugHexDump(CFile& file);
 CString DbgGetFileInfo(const uchar* hash);
+CString DbgGetFileStatus(UINT nPartCount, CSafeMemFile* data);
 LPCTSTR DbgGetHashTypeString(const uchar* hash);
 CString DbgGetClientID(uint32 nClientID);
 int GetHashType(const uchar* hash);
@@ -182,8 +186,11 @@ CString DbgGetMuleClientTCPOpcode(UINT opcode);
 CString DbgGetClientTCPOpcode(UINT protocol, UINT opcode);
 CString DbgGetClientTCPPacket(UINT protocol, UINT opcode, UINT size);
 CString DbgGetBlockInfo(const Requested_Block_Struct* block);
-CString DbgGetBlockInfo(uint32 StartOffset, uint32 EndOffset);
+CString DbgGetBlockInfo(uint64 StartOffset, uint64 EndOffset);
 CString DbgGetBlockFileInfo(const Requested_Block_Struct* block, const CPartFile* partfile);
+CString DbgGetFileMetaTagName(UINT uMetaTagID);
+CString DbgGetFileMetaTagName(LPCSTR pszMetaTagID);
+CString DbgGetSearchOperatorName(UINT uOperator);
 void DebugRecv(LPCSTR pszMsg, const CUpDownClient* client, const uchar* packet = NULL, uint32 nIP = 0);
 void DebugRecv(LPCSTR pszOpcode, uint32 ip, uint16 port);
 void DebugSend(LPCSTR pszMsg, const CUpDownClient* client, const uchar* packet = NULL);
@@ -220,6 +227,7 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory);
 ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
 int GetAppImageListColorFlag();
 int			GetDesktopColorDepth();
+bool		IsFileOnFATVolume(LPCTSTR pszFilePath);
 
 
 
@@ -317,22 +325,23 @@ __inline int CompareOptLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
 //
 enum EED2KFileType
 {
-	ED2KFT_ANY,
-	ED2KFT_AUDIO,
-	ED2KFT_VIDEO,
-	ED2KFT_IMAGE,
-	ED2KFT_PROGRAM,
-	ED2KFT_DOCUMENT,
-	ED2KFT_ARCHIVE,
-	ED2KFT_CDIMAGE,
-	ED2KFT_EMULECOLLECTION
+	ED2KFT_ANY				= 0,
+	ED2KFT_AUDIO			= 1,	// ED2K protocol value (eserver 17.6+)
+	ED2KFT_VIDEO			= 2,	// ED2K protocol value (eserver 17.6+)
+	ED2KFT_IMAGE			= 3,	// ED2K protocol value (eserver 17.6+)
+	ED2KFT_PROGRAM			= 4,	// ED2K protocol value (eserver 17.6+)
+	ED2KFT_DOCUMENT			= 5,	// ED2K protocol value (eserver 17.6+)
+	ED2KFT_ARCHIVE			= 6,	// ED2K protocol value (eserver 17.6+)
+	ED2KFT_CDIMAGE			= 7,	// ED2K protocol value (eserver 17.6+)
+	ED2KFT_EMULECOLLECTION	= 8
 };
 
 CString GetFileTypeByName(LPCTSTR pszFileName);
 CString GetFileTypeDisplayStrFromED2KFileType(LPCTSTR pszED2KFileType);
 LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID);
+EED2KFileType GetED2KFileTypeSearchID(EED2KFileType iFileID);
 EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
-
+bool gotostring(CFile &file, uchar *find, LONGLONG plen);
 
 ///////////////////////////////////////////////////////////////////////////////
 // IP/UserID
@@ -348,6 +357,7 @@ CString ipstr(uint32 nIP);
 CString ipstr(uint32 nIP, uint16 nPort);
 CString ipstr(LPCTSTR pszAddress, uint16 nPort);
 CStringA ipstrA(uint32 nIP);
+void ipstrA(CHAR* pszAddress, int iMaxAddress, uint32 nIP);
 __inline CString ipstr(in_addr nIP){
 	return ipstr(*(uint32*)&nIP);
 }
@@ -369,5 +379,5 @@ bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath);
 uint16 GetRandomUInt16();
 uint32 GetRandomUInt32();
 
-long FileSize(LPCTSTR fileName); //MORPH - Added by SiRoB, Used for Fake and ipfilter updater
+ULONGLONG FileSize(LPCTSTR fileName); //MORPH - Added by SiRoB, Used for Fake and ipfilter updater
 int getPrime(int lower_bound); //Morph - added by AndCycle, minor tweak - prime

@@ -18,7 +18,7 @@ typedef struct
 typedef struct
 {
 	CTime	startTime;
-	long	lSession;
+	uint64	lSession;
 	bool	admin;
 	int		lastcat;
 
@@ -65,9 +65,9 @@ typedef struct
 	uint64	m_qwFileSize;
 	uint64	nFileTransferred;
 	uint64	nFileAllTimeTransferred;
-	uint16	nFileRequests;
+	UINT	nFileRequests;
 	uint32	nFileAllTimeRequests;
-	uint16	nFileAccepts;
+	UINT	nFileAccepts;
 	uint32	nFileAllTimeAccepts;
 	CString sFileCompletes;
 	double	dblFileCompletes;
@@ -90,7 +90,7 @@ typedef struct
 	CString	sFileName;
 	uint32	nTransferredDown;
 	uint32	nTransferredUp;
-	sint32	nDataRate;
+	int		nDataRate;
 	CString	sClientNameVersion;
 } UploadUsers;
 

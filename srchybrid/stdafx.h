@@ -107,11 +107,8 @@
 #pragma warning(default:4127) // conditional expression is constant
 
 // when using warning level 4
-#pragma warning(disable:4100) // unreferenced formal parameter
 #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union (not worth to mess with, it's due to MIDL created code)
 #pragma warning(disable:4238) // nonstandard extension used : class rvalue used as lvalue
-#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
-#pragma warning(disable:4389) // signed/unsigned mismatch
 
 #include "types.h"
 

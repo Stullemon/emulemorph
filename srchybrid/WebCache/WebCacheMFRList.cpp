@@ -41,7 +41,8 @@ void CWebCacheMFRList::AddFiles(CSafeMemFile* data, CUpDownClient* client)
 		CString reason;
 		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(newFile->fileID);
 		if (reqfile
-			&& reqfile->IsPartFile()
+			&& reqfile->IsPartFile() 
+			&& reqfile->IsLargeFile() && client->SupportsLargeFiles()
 			&& reqfile->GetFileSize() > PARTSIZE) // TODO: check download status?
 		{
 //			if (thePrefs.GetMaxSourcePerFile() > ((CPartFile*)reqfile)->GetSourceCount()) // always add webcache-buddies

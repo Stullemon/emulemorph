@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -32,19 +32,6 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgFiles, CPropertyPage)
-CPPgFiles::CPPgFiles()
-	: CPropertyPage(CPPgFiles::IDD)
-{
-}
-
-CPPgFiles::~CPPgFiles()
-{
-}
-
-void CPPgFiles::DoDataExchange(CDataExchange* pDX)
-{
-	CPropertyPage::DoDataExchange(pDX);
-}
 
 BEGIN_MESSAGE_MAP(CPPgFiles, CPropertyPage)
 	ON_BN_CLICKED(IDC_SEESHARE1, OnSettingsChange)
@@ -64,9 +51,25 @@ BEGIN_MESSAGE_MAP(CPPgFiles, CPropertyPage)
 	ON_BN_CLICKED(IDC_FNC, OnSetCleanupFilter)
 	ON_EN_CHANGE(IDC_VIDEOPLAYER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_VIDEOBACKUP, OnSettingsChange)
+	ON_BN_CLICKED(IDC_REMEMBERDOWNLOADED, OnSettingsChange) 
+	ON_BN_CLICKED(IDC_REMEMBERCANCELLED, OnSettingsChange) 
 	ON_BN_CLICKED(IDC_BROWSEV, BrowseVideoplayer)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
+
+CPPgFiles::CPPgFiles()
+	: CPropertyPage(CPPgFiles::IDD)
+{
+}
+
+CPPgFiles::~CPPgFiles()
+{
+}
+
+void CPPgFiles::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+}
 
 BOOL CPPgFiles::OnInitDialog()
 {
@@ -303,7 +306,7 @@ BOOL CPPgFiles::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgFiles::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgFiles::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -135,9 +135,8 @@ void CKadSearchListCtrl::Localize()
 			default: strRes = _T(""); break;
 		}
 
-		hdi.pszText = strRes.GetBuffer();
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(icol, &hdi);
-		strRes.ReleaseBuffer();
 	}
 
 	int iItems = GetItemCount();
@@ -148,10 +147,10 @@ void CKadSearchListCtrl::Localize()
 void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search)
 {
 	CString id;
-	id.Format(_T("%i"), search->getSearchID());
+	id.Format(_T("%i"), search->GetSearchID());
 	SetItemText(iItem,colNum,id);
 
-	switch(search->getSearchTypes()){
+	switch(search->GetSearchTypes()){
 		case Kademlia::CSearch::FILE:
 			id = GetResString(IDS_KAD_SEARCHSRC);
 			SetItem(iItem,0,LVIF_IMAGE,0,0,0,0,0,0);
@@ -189,11 +188,11 @@ void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search
 	}
 	SetItemText(iItem,colType,id);
 
-	SetItemText(iItem,colName,search->getFileName());
+	SetItemText(iItem,colName,search->GetFileName());
 
-	if(search->getTarget() != NULL)
+	if(search->GetTarget() != NULL)
 	{
-		search->getTarget().toHexString(&id);
+		search->GetTarget().ToHexString(&id);
 		SetItemText(iItem,colKey,id);
 	}
 
@@ -202,13 +201,13 @@ void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search
 	else
 		SetItemText(iItem,colStop,GetResString(IDS_KADSTATUS_ACTIVE));
 
-	id.Format( _T("%u (%u|%u)"), search->getNodeLoad(), search->getNodeLoadResonse(), search->getNodeLoadTotal() );
+	id.Format( _T("%u (%u|%u)"), search->GetNodeLoad(), search->GetNodeLoadResonse(), search->GetNodeLoadTotal() );
 	SetItemText(iItem, colLoad, id );
 
-	id.Format( _T("%u"), search->getAnswers());
+	id.Format( _T("%u"), search->GetAnswers());
 	SetItemText(iItem, colResponses, id);
 
-	id.Format( _T("%u|%u"), search->getKadPacketSent(), search->getRequestAnswer());
+	id.Format( _T("%u|%u"), search->GetKadPacketSent(), search->GetRequestAnswer());
 	SetItemText(iItem, colPacketsSent, id );
 }
 
@@ -232,11 +231,6 @@ void CKadSearchListCtrl::SearchRem(const Kademlia::CSearch* search)
 	try
 	{
 		ASSERT( search != NULL );
-		CPartFile* temp = theApp.downloadqueue->GetFileByKadFileSearchID(search->getSearchID());
-		if(temp)
-		{
-			temp->SetKadFileSearchID(0);
-		}
 
 		LVFINDINFO find;
 		find.flags = LVFI_PARAM;
@@ -269,8 +263,10 @@ void CKadSearchListCtrl::SearchRef(const Kademlia::CSearch* search)
 	catch(...){ASSERT(0);}
 }
 
-BOOL CKadSearchListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
-	return true;
+BOOL CKadSearchListCtrl::OnCommand(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	// ???
+	return TRUE;
 }
 
 void CKadSearchListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult)
@@ -303,22 +299,22 @@ int CKadSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSo
 	switch(LOWORD(lParamSort))
 	{
 		case colNum:
-			iResult = item1->getSearchID() - item2->getSearchID();
+			iResult = item1->GetSearchID() - item2->GetSearchID();
 			break;
 		case colType:
-			iResult = item1->getSearchTypes() - item2->getSearchTypes();
+			iResult = item1->GetSearchTypes() - item2->GetSearchTypes();
 			break;
 		case colName:
-			iResult = item1->getFileName().CompareNoCase(item2->getFileName());
+			iResult = item1->GetFileName().CompareNoCase(item2->GetFileName());
 			break;
 		case colLoad:
-			iResult = item1->getNodeLoad() - item2->getNodeLoad();
+			iResult = item1->GetNodeLoad() - item2->GetNodeLoad();
 			break;
 		case colResponses:
-			iResult = item1->getAnswers() - item2->getAnswers();
+			iResult = item1->GetAnswers() - item2->GetAnswers();
 			break;
 		case colPacketsSent:
-			iResult = item1->getKadPacketSent() - item2->getKadPacketSent();
+			iResult = item1->GetKadPacketSent() - item2->GetKadPacketSent();
 			break;
 		default:
 			return 0;

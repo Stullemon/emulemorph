@@ -260,7 +260,7 @@ BOOL CPPgMorph2::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgMorph2::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgMorph2::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

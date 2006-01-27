@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -60,9 +60,7 @@ CServerSocket::CServerSocket(CServerConnect* in_serverconnect){
 }
 
 CServerSocket::~CServerSocket(){
-	if (cur_server)
-		delete cur_server;
-	cur_server = NULL;
+	delete cur_server;
 }
 
 void CServerSocket::OnConnect(int nErrorCode){
@@ -87,18 +85,18 @@ void CServerSocket::OnConnect(int nErrorCode){
 		case WSAETIMEDOUT: 	
 		case WSAEADDRINUSE:
 			if (thePrefs.GetVerbose())
-				DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
+				DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetFullErrorMessage(nErrorCode));
 			m_bIsDeleting = true;
 			SetConnectionState(CS_SERVERDEAD);
 			serverconnect->DestroySocket(this);
 			return;
 		// deadlake PROXYSUPPORT
 		case WSAECONNABORTED:
-			if (m_ProxyConnectFailed)
+			if (m_bProxyConnectFailed)
 			{
 				if (thePrefs.GetVerbose())
-					DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
-				m_ProxyConnectFailed = false;
+					DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetFullErrorMessage(nErrorCode));
+				m_bProxyConnectFailed = false;
 				m_bIsDeleting = true;
 				SetConnectionState(CS_SERVERDEAD);
 				serverconnect->DestroySocket(this);
@@ -106,7 +104,7 @@ void CServerSocket::OnConnect(int nErrorCode){
 			}
 		default:	
 			if (thePrefs.GetVerbose())
-				DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
+				DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetFullErrorMessage(nErrorCode));
 			m_bIsDeleting = true;
 			SetConnectionState(CS_FATALERROR);
 			serverconnect->DestroySocket(this);
@@ -218,7 +216,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						if (thePrefs.GetDebugServerTCPLevel() > 0){
 							CString strInfo;
 							strInfo.AppendFormat(_T("  TCP Flags=0x%08x"), dwFlags);
-							const DWORD dwKnownBits = SRV_TCPFLG_COMPRESSION | SRV_TCPFLG_NEWTAGS | SRV_TCPFLG_UNICODE;
+							const DWORD dwKnownBits = SRV_TCPFLG_COMPRESSION | SRV_TCPFLG_NEWTAGS | SRV_TCPFLG_UNICODE | SRV_TCPFLG_RELATEDSEARCH | SRV_TCPFLG_TYPETAGINTEGER | SRV_TCPFLG_LARGEFILES;
 							if (dwFlags & ~dwKnownBits)
 								strInfo.AppendFormat(_T("  ***UnkBits=0x%08x"), dwFlags & ~dwKnownBits);
 							if (dwFlags & SRV_TCPFLG_COMPRESSION)
@@ -227,6 +225,12 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 								strInfo.AppendFormat(_T("  NewTags=1"));
 							if (dwFlags & SRV_TCPFLG_UNICODE)
 								strInfo.AppendFormat(_T("  Unicode=1"));
+							if (dwFlags & SRV_TCPFLG_RELATEDSEARCH)
+								strInfo.AppendFormat(_T("  RelatedSearch=1"));
+							if (dwFlags & SRV_TCPFLG_TYPETAGINTEGER)
+								strInfo.AppendFormat(_T("  IntTypeTags=1"));
+							if (dwFlags & SRV_TCPFLG_LARGEFILES)
+								strInfo.AppendFormat(_T("  LargeFiles=1"));
 							Debug(_T("%s\n"), strInfo);
 						}
 						cur_server->SetTCPFlags(dwFlags);
@@ -314,8 +318,8 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 				CServer* pServer = cur_srv ? theApp.serverlist->GetServerByAddress(cur_srv->GetAddress(), cur_srv->GetPort()) : NULL;
 				(void)pServer;
 				bool bMoreResultsAvailable;
-				uint16 uSearchResults = theApp.searchlist->ProcessSearchAnswer(packet, size, true/*pServer ? pServer->GetUnicodeSupport() : false*/, cur_srv ? cur_srv->GetIP() : 0, cur_srv ? cur_srv->GetPort() : 0, &bMoreResultsAvailable);
-				theApp.emuledlg->searchwnd->LocalSearchEnd(uSearchResults, bMoreResultsAvailable);
+				UINT uSearchResults = theApp.searchlist->ProcessSearchAnswer(packet, size, true/*pServer ? pServer->GetUnicodeSupport() : false*/, cur_srv ? cur_srv->GetIP() : 0, cur_srv ? cur_srv->GetPort() : (uint16)0, &bMoreResultsAvailable);
+				theApp.emuledlg->searchwnd->LocalEd2kSearchEnd(uSearchResults, bMoreResultsAvailable);
 				break;
 			}
 			case OP_FOUNDSOURCES:{
@@ -585,28 +589,16 @@ void CServerSocket::ConnectToServer(CServer* server){
 	cur_server = new CServer(server);
 	Log(GetResString(IDS_CONNECTINGTO), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort());
 
-	if (thePrefs.IsProxyASCWOP() )
-	{
-		if (thePrefs.GetProxy().UseProxy == true)
-		{
-			thePrefs.SetProxyASCWOP(true);
-			thePrefs.SetUseProxy(false);
-			AddLogLine(false,GetResString(IDS_ASCWOP_PROXYSUPPORT)+GetResString(IDS_DISABLED));
-		}
-		else
-			thePrefs.SetProxyASCWOP(false);
-	}
-
 	SetConnectionState(CS_CONNECTING);
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	/*
-	if (!Connect(server->GetAddress(),server->GetPort())){
+	if (!Connect(CStringA(server->GetAddress()), server->GetPort())){
 	*/
-	if (!Connect(server->GetAddress(),server->GetConnPort())){
+	if (!Connect(CStringA(server->GetAddress()),server->GetConnPort())){
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 		DWORD dwError = GetLastError();
 		if ( dwError != WSAEWOULDBLOCK){
-			LogError(GetResString(IDS_ERR_CONNECTIONERROR), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort(), GetErrorMessage(dwError, 1));
+			LogError(GetResString(IDS_ERR_CONNECTIONERROR), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort(), GetFullErrorMessage(dwError));
 			SetConnectionState(CS_FATALERROR);
 			return;
 		}
@@ -618,7 +610,7 @@ void CServerSocket::OnError(int nErrorCode)
 {
 	SetConnectionState(CS_DISCONNECTED);
 	if (thePrefs.GetVerbose())
-		DebugLogError(GetResString(IDS_ERR_SOCKET), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort(), GetErrorMessage(nErrorCode, 1));
+		DebugLogError(GetResString(IDS_ERR_SOCKET), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort(), GetFullErrorMessage(nErrorCode));
 }
 
 bool CServerSocket::PacketReceived(Packet* packet)
@@ -659,7 +651,8 @@ bool CServerSocket::PacketReceived(Packet* packet)
 	return true;
 }
 
-void CServerSocket::OnClose(int nErrorCode){
+void CServerSocket::OnClose(int /*nErrorCode*/)
+{
 	CEMSocket::OnClose(0);
 	if (connectionstate == CS_WAITFORLOGIN){	 	
 		SetConnectionState(CS_SERVERFULL);

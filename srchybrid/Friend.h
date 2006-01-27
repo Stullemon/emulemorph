@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -29,14 +29,14 @@ class CFriend
 public:
 	CFriend();
 	CFriend(CUpDownClient* client);
-	CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
+	CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint16 nLastUsedPort, 
             uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash);
 	~CFriend();
 
 	uchar	m_abyUserhash[16];
 	uint32	m_dwLastSeen;
 	uint32	m_dwLastUsedIP;
-	uint32	m_nLastUsedPort;
+	uint16	m_nLastUsedPort;
 	uint32	m_dwLastChatted;
 	uint32	m_dwHasHash;
 	CString m_strName;

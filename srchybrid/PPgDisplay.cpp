@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -35,22 +35,6 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgDisplay, CPropertyPage)
-CPPgDisplay::CPPgDisplay()
-	: CPropertyPage(CPPgDisplay::IDD)
-{
-	m_eSelectFont = sfServer;
-}
-
-CPPgDisplay::~CPPgDisplay()
-{
-}
-
-void CPPgDisplay::DoDataExchange(CDataExchange* pDX)
-{
-	CPropertyPage::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_PREVIEW, m_3DPreview);
-}
-
 
 BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_MINTRAY, OnSettingsChange)
@@ -71,8 +55,23 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_SHOWTRANSTOOLBAR,OnSettingsChange)
 	ON_BN_CLICKED(IDC_RESETHIST, OnBtnClickedResetHist)
 	ON_WM_HELPINFO()
-//	ON_NOTIFY(NM_CUSTOMDRAW, IDC_3DDEPTH, On3DDepth)
 END_MESSAGE_MAP()
+
+CPPgDisplay::CPPgDisplay()
+	: CPropertyPage(CPPgDisplay::IDD)
+{
+	m_eSelectFont = sfServer;
+}
+
+CPPgDisplay::~CPPgDisplay()
+{
+}
+
+void CPPgDisplay::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_PREVIEW, m_3DPreview);
+}
 
 void CPPgDisplay::LoadSettings(void)
 {
@@ -389,7 +388,7 @@ BOOL CPPgDisplay::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgDisplay::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgDisplay::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
@@ -400,13 +399,3 @@ void CPPgDisplay::DrawPreview()
 	int dep=((CSliderCtrl*)GetDlgItem(IDC_3DDEPTH))->GetPos();
 	m_3DPreview.SetSliderPos( dep);
 }
-/*
-void CPPgDisplay::On3DDepth(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	DrawPreview();
-theApp.AddLogLine(true,"ding");
-
-	*pResult = 0;
-}
-*/

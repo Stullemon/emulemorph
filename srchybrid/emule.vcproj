@@ -23,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -92,7 +92,7 @@
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB;"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
@@ -161,7 +161,7 @@
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
@@ -391,6 +391,9 @@
 				RelativePath="Mdump.cpp">
 			</File>
 			<File
+				RelativePath=".\MediaInfo.cpp">
+			</File>
+			<File
 				RelativePath="MfcStaticBinaryCompatible.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -478,6 +481,9 @@
 			</File>
 			<File
 				RelativePath="Quantize.cpp">
+			</File>
+			<File
+				RelativePath="RARFile.cpp">
 			</File>
 			<File
 				RelativePath=".\ReadWriteLock.cpp">
@@ -680,6 +686,9 @@
 				Name="Kademlia"
 				Filter="">
 				<File
+					RelativePath="kademlia\io\BufferedFileIO.cpp">
+				</File>
+				<File
 					RelativePath="kademlia\io\ByteIO.cpp">
 				</File>
 				<File
@@ -803,6 +812,9 @@
 				RelativePath="DeadSourceList.h">
 			</File>
 			<File
+				RelativePath="Debug_FileSize.h">
+			</File>
+			<File
 				RelativePath="DebugHelpers.h">
 			</File>
 			<File
@@ -882,6 +894,9 @@
 			</File>
 			<File
 				RelativePath="Mdump.h">
+			</File>
+			<File
+				RelativePath=".\MediaInfo.h">
 			</File>
 			<File
 				RelativePath="MMServer.h">
@@ -1069,6 +1084,9 @@
 			<Filter
 				Name="Kademlia"
 				Filter="">
+				<File
+					RelativePath="kademlia\io\BufferedFileIO.h">
+				</File>
 				<File
 					RelativePath="kademlia\io\ByteIO.h">
 				</File>

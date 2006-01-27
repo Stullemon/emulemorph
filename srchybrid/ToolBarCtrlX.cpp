@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -91,7 +91,7 @@ void CToolBarCtrlX::SetBtnWidth(int nID, int iWidth)
 	TBBUTTONINFO tbbi = {0};
 	tbbi.cbSize = sizeof tbbi;
 	tbbi.dwMask = TBIF_SIZE;
-	tbbi.cx = iWidth;
+	tbbi.cx = (WORD)iWidth;
 	SetButtonInfo(nID, &tbbi);
 }
 

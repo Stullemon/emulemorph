@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -54,7 +54,7 @@ bool CFriendList::LoadList(){
 	CString strFileName = thePrefs.GetConfigDir() + EMFRIENDS_MET_FILENAME;
 	CSafeBufferedFile file;
 	CFileException fexp;
-	if (!file.Open(strFileName.GetBuffer(),CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+	if (!file.Open(strFileName, CFile::modeRead | CFile::osSequentialScan | CFile::typeBinary | CFile::shareDenyWrite, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(GetResString(IDS_ERR_READEMFRIENDS));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -108,7 +108,7 @@ void CFriendList::SaveList(){
 	//Morph End   - added by AndCycle, safe .met replace
 	CSafeBufferedFile file;
 	CFileException fexp;
-	if (!file.Open(strFileName.GetBuffer(),CFile::modeCreate|CFile::modeWrite|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+	if (!file.Open(strFileName, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary | CFile::shareDenyWrite, &fexp)){
 		CString strError(_T("Failed to save ") EMFRIENDS_MET_FILENAME _T(" file"));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
@@ -187,7 +187,7 @@ void CFriendList::ShowFriends() const {
 }
 
 //You can add a friend without a IP to allow the IRC to trade links with lowID users.
-bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
+bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint16 nLastUsedPort, 
 							uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash){
 	// client must have an IP (HighID) or a hash
 	// TODO: check if this can be switched to a hybridID so clients with *.*.*.0 can be added..

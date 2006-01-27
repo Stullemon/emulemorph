@@ -43,6 +43,7 @@ protected:
 	bool m_bExtControls;
 	UINT m_uServerKeepAliveTimeout;
 	bool m_bSparsePartFiles;
+	bool m_bFullAlloc;
 	bool m_bCheckDiskspace;
 	float m_fMinFreeDiskSpaceMB;
 	CString m_sYourHostname;
@@ -99,6 +100,7 @@ protected:
 	HTREEITEM m_htiExtControls;
 	HTREEITEM m_htiServerKeepAliveTimeout;
 	HTREEITEM m_htiSparsePartFiles;
+	HTREEITEM m_htiFullAlloc;
 	HTREEITEM m_htiCheckDiskspace;
 	HTREEITEM m_htiMinFreeDiskSpace;
 	HTREEITEM m_htiYourHostname;

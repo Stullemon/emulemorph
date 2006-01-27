@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -144,45 +144,45 @@ CString GetTagNameByID(UINT id)
 {
 	switch (id)
 	{
-		case FT_FILENAME: return GetResString(IDS_SW_NAME);
-		case FT_FILESIZE: return GetResString(IDS_DL_SIZE);
-		case FT_FILETYPE: return GetResString(IDS_TYPE);
-		case FT_FILEFORMAT: return GetResString(IDS_FORMAT);
-		case FT_LASTSEENCOMPLETE: return GetResString(IDS_LASTSEENCOMPL);	// 01-Nov-2004: Sent in server<->client protocol as 'Last Seen Complete'
-		case 0x06: return GetResString(IDS_META_PARTPATH);
-		case 0x07: return GetResString(IDS_META_PARTHASH);
-		case FT_TRANSFERRED: return GetResString(IDS_DL_TRANSF);
-		case FT_GAPSTART: return GetResString(IDS_META_GAPSTART);
-		case FT_GAPEND: return GetResString(IDS_META_GAPEND);
-		case 0x0B: return GetResString(IDS_DESCRIPTION);
-		case 0x0C: return GetResString(IDS_PING);
-		case 0x0D: return GetResString(IDS_FAIL);
-		case 0x0E: return GetResString(IDS_META_PREFERENCES);
-		case 0x0F: return GetResString(IDS_PORT);
-		case 0x10: return GetResString(IDS_IP);
-		case 0x11: return GetResString(IDS_META_VERSION);
-		case FT_PARTFILENAME: return GetResString(IDS_META_TEMPFILE);
-		case 0x13: return GetResString(IDS_PRIORITY);
-		case FT_STATUS: return GetResString(IDS_STATUS);
-		case FT_SOURCES: return GetResString(IDS_SEARCHAVAIL);
-		case 0x16: return GetResString(IDS_PERMISSION);
-		case 0x17: return GetResString(IDS_FD_PARTS);
-		case FT_COMPLETE_SOURCES: return GetResString(IDS_COMPLSOURCES);
-		case FT_MEDIA_ARTIST: return GetResString(IDS_ARTIST);
-		case FT_MEDIA_ALBUM: return GetResString(IDS_ALBUM);
-		case FT_MEDIA_TITLE: return GetResString(IDS_TITLE);
-		case FT_MEDIA_LENGTH: return GetResString(IDS_LENGTH);
-		case FT_MEDIA_BITRATE: return GetResString(IDS_BITRATE);
-		case FT_MEDIA_CODEC: return GetResString(IDS_CODEC);
-		case FT_FILECOMMENT: return GetResString(IDS_COMMENT);
-		case FT_FILERATING: return GetResString(IDS_QL_RATING);
-		case FT_FILEHASH: return GetResString(IDS_FILEHASH);
-		case 0xFA: return GetResString(IDS_META_SERVERPORT);
-		case 0xFB: return GetResString(IDS_META_SERVERIP);
-		case 0xFC: return GetResString(IDS_META_SRCUDPPORT);
-		case 0xFD: return GetResString(IDS_META_SRCTCPPORT);
-		case 0xFE: return GetResString(IDS_META_SRCIP);
-		case 0xFF: return GetResString(IDS_META_SRCTYPE);
+		case FT_FILENAME:			return GetResString(IDS_SW_NAME);
+		case FT_FILESIZE:			return GetResString(IDS_DL_SIZE);
+		case FT_FILETYPE:			return GetResString(IDS_TYPE);
+		case FT_FILEFORMAT:			return GetResString(IDS_FORMAT);
+		case FT_LASTSEENCOMPLETE:	return GetResString(IDS_LASTSEENCOMPL);	// 01-Nov-2004: Sent in server<->client protocol as 'Last Seen Complete'
+		case 0x06:					return GetResString(IDS_META_PARTPATH);
+		case 0x07:					return GetResString(IDS_META_PARTHASH);
+		case FT_TRANSFERRED:		return GetResString(IDS_DL_TRANSF);
+		case FT_GAPSTART:			return GetResString(IDS_META_GAPSTART);
+		case FT_GAPEND:				return GetResString(IDS_META_GAPEND);
+		case 0x0B:					return GetResString(IDS_DESCRIPTION);
+		case 0x0C:					return GetResString(IDS_PING);
+		case 0x0D:					return GetResString(IDS_FAIL);
+		case 0x0E:					return GetResString(IDS_META_PREFERENCES);
+		case 0x0F:					return GetResString(IDS_PORT);
+		case 0x10:					return GetResString(IDS_IP);
+		case 0x11:					return GetResString(IDS_META_VERSION);
+		case FT_PARTFILENAME:		return GetResString(IDS_META_TEMPFILE);
+		case 0x13:					return GetResString(IDS_PRIORITY);
+		case FT_STATUS:				return GetResString(IDS_STATUS);
+		case FT_SOURCES:			return GetResString(IDS_SEARCHAVAIL);
+		case 0x16:					return GetResString(IDS_PERMISSION);
+		case 0x17:					return GetResString(IDS_FD_PARTS);
+		case FT_COMPLETE_SOURCES:	return GetResString(IDS_COMPLSOURCES);
+		case FT_MEDIA_ARTIST:		return GetResString(IDS_ARTIST);
+		case FT_MEDIA_ALBUM:		return GetResString(IDS_ALBUM);
+		case FT_MEDIA_TITLE:		return GetResString(IDS_TITLE);
+		case FT_MEDIA_LENGTH:		return GetResString(IDS_LENGTH);
+		case FT_MEDIA_BITRATE:		return GetResString(IDS_BITRATE);
+		case FT_MEDIA_CODEC:		return GetResString(IDS_CODEC);
+		case FT_FILECOMMENT:		return GetResString(IDS_COMMENT);
+		case FT_FILERATING:			return GetResString(IDS_QL_RATING);
+		case FT_FILEHASH:			return GetResString(IDS_FILEHASH);
+		case 0xFA:					return GetResString(IDS_META_SERVERPORT);
+		case 0xFB:					return GetResString(IDS_META_SERVERIP);
+		case 0xFC:					return GetResString(IDS_META_SRCUDPPORT);
+		case 0xFD:					return GetResString(IDS_META_SRCTCPPORT);
+		case 0xFE:					return GetResString(IDS_META_SRCIP);
+		case 0xFF:					return GetResString(IDS_META_SRCTYPE);
 	}
 
 	CString buffer;
@@ -226,10 +226,12 @@ CString GetValue(const CTag* pTag)
 		strValue = pTag->GetStr();
 	else if (pTag->IsInt())
 	{
-		if (pTag->GetNameID() == 0x10 || pTag->GetNameID() >= 0xFA)
-			strValue.Format(_T("%u"), pTag->GetInt());
-		else if (pTag->GetNameID() == FT_MEDIA_LENGTH || pTag->GetNameID() == FT_LASTSEENCOMPLETE)
+		if (pTag->GetNameID() == FT_MEDIA_LENGTH || pTag->GetNameID() == FT_LASTSEENCOMPLETE)
 			SecToTimeLength(pTag->GetInt(), strValue);
+		else if (pTag->GetNameID() == FT_FILERATING)
+			strValue = GetRateString(pTag->GetInt());
+		else if (pTag->GetNameID() == 0x10 || pTag->GetNameID() >= 0xFA)
+			strValue.Format(_T("%u"), pTag->GetInt());
 		else
 			strValue = GetFormatedUInt(pTag->GetInt());
 	}
@@ -237,24 +239,28 @@ CString GetValue(const CTag* pTag)
 		strValue.Format(_T("%f"), pTag->GetFloat());
 	else if (pTag->IsHash())
 		strValue = md4str(pTag->GetHash());
+	else if (pTag->IsInt64(false))
+		strValue = GetFormatedUInt64(pTag->GetInt64());
 	else
 		strValue.Format(_T("<Unknown value of type 0x%02X>"), pTag->GetType());
 	return strValue;
 }
 
-CString GetValue(const Kademlia::CKadTag* pTag)
+CString GetValue(const Kademlia::CKadTag* pTag) // FIXME LARGE FILES
 {
 	CString strValue;
 	if (pTag->IsStr())
 		strValue = pTag->GetStr();
 	else if (pTag->IsInt())
 	{
-		if ((BYTE)pTag->m_name[0] == 0x10 || (BYTE)pTag->m_name[0] > 0xFA)
+		if (pTag->m_name.Compare(TAG_MEDIA_LENGTH) == 0)
+			SecToTimeLength((unsigned long)pTag->GetInt(), strValue);
+		else if (pTag->m_name.Compare(TAG_FILERATING) == 0)
+			strValue = GetRateString((UINT)pTag->GetInt());
+		else if ((BYTE)pTag->m_name[0] == 0x10 || (BYTE)pTag->m_name[0] >= 0xFA)
 			strValue.Format(_T("%u"), pTag->GetInt());
-		else if (pTag->m_name.Compare(TAG_MEDIA_LENGTH) == 0)
-			SecToTimeLength(pTag->GetInt(), strValue);
 		else
-			strValue = GetFormatedUInt(pTag->GetInt());
+			strValue = GetFormatedUInt((UINT)pTag->GetInt());
 	}
 	else if (pTag->m_type == 4)
 		strValue.Format(_T("%f"), pTag->GetFloat());
@@ -282,6 +288,8 @@ CString GetType(UINT uType)
 		strValue = _T("Int16");
 	else if (uType == 9)
 		strValue = _T("Int8");
+	else if (uType == 11)
+		strValue = _T("Int64");
 	else
 		strValue.Format(_T("<Unknown type 0x%02X>"), uType);
 	return strValue;

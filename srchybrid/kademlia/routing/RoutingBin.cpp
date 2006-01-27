@@ -1,21 +1,21 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
+ 
+ 
 This work is based on the java implementation of the Kademlia protocol.
 Kademlia: Peer-to-peer routing based on the XOR metric
 Copyright (C) 2002  Petar Maymounkov [petar@post.harvard.edu]
@@ -33,13 +33,12 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
+
 #include "stdafx.h"
-#include "RoutingBin.h"
-#include "Contact.h"
-#include "../kademlia/Kademlia.h"
+#include "./RoutingBin.h"
+#include "./Contact.h"
 #include "../kademlia/Defines.h"
-#include "../routing/RoutingZone.h"
-#include "Log.h"
+#include "../../Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -47,201 +46,165 @@ there client on the eMule forum..
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-////////////////////////////////////////
 using namespace Kademlia;
-////////////////////////////////////////
 
 CRoutingBin::CRoutingBin()
 {
-	m_dontDeleteContacts = false;
+	// Init delete contact flag.
+	m_bDontDeleteContacts = false;
 }
 
 CRoutingBin::~CRoutingBin()
 {
-	ContactList::const_iterator it;
 	try
 	{
-		if (!m_dontDeleteContacts)
+		if (!m_bDontDeleteContacts)
 		{
-			for (it = m_entries.begin(); it != m_entries.end(); it++)
-				delete *it;
+			// Delete all contacts
+			for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+				delete *itContactList;
 		}
-		m_entries.clear();
-	} 
-	catch (...) 
+		// Remove all contact entries.
+		m_listEntries.clear();
+	}
+	catch (...)
 	{
 		AddDebugLogLine(false, _T("Exception in ~CRoutingBin"));
 	}
 }
 
-bool CRoutingBin::add(CContact *contact)
+bool CRoutingBin::AddContact(CContact *pContact)
 {
-	ASSERT(contact != NULL);
-	bool retVal = false;
-	// If this is already in the entries list
-	CUInt128 id;
-	contact->getClientID(&id);
-	CContact *c = getContact(id);
-	if (c != NULL)
-	{
-		// Move to the end of the list
-		remove(c);
-		m_entries.push_back(c);
-		retVal = false;
-	}
-	else
+	ASSERT(pContact != NULL);
+	// Check if we already have a contact with this ID in the list.
+	CContact *pContactTest = GetContact(pContact->GetClientID());
+	if (pContactTest == NULL)
 	{
 		// If not full, add to end of list
-		if ( m_entries.size() < K)
+		if ( m_listEntries.size() < K)
 		{
-			m_entries.push_back(contact);
-			retVal = true;
-		}
-		else
-		{
-			retVal = false;
+			m_listEntries.push_back(pContact);
+			return true;
 		}
 	}
-	return retVal;
+	return false;
 }
 
-void CRoutingBin::setAlive(uint32 ip, uint16 port)
+void CRoutingBin::SetAlive(uint32 uIP, uint16 uUDPPort)
 {
-	if (m_entries.empty())
-		return;
-
-	CContact *c;
-	ContactList::iterator it;
-	for (it = m_entries.begin(); it != m_entries.end(); it++)
+	// Find contact with IP/Port
+	for (ContactList::iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
 	{
-		c = *it;
-		if ((ip == c->getIPAddress()) && (port == c->getUDPPort()))
+		CContact* pContact = *itContactList;
+		if ((uIP == pContact->GetIPAddress()) && (uUDPPort == pContact->GetUDPPort()))
 		{
-			c->updateType();
-			break;
-		}
-	}
-}
-
-void CRoutingBin::setTCPPort(uint32 ip, uint16 port, uint16 tcpPort)
-{
-	if (m_entries.empty())
-		return;
-
-	CContact *c;
-	ContactList::iterator it;
-	for (it = m_entries.begin(); it != m_entries.end(); it++)
-	{
-		c = *it;
-		if ((ip == c->getIPAddress()) && (port == c->getUDPPort()))
-		{
-			c->setTCPPort(tcpPort);
-			c->updateType();
+			// Mark contact as being alive.
+			pContact->UpdateType();
 			// Move to the end of the list
-			remove(c);
-			m_entries.push_back(c);
-			break;
+			RemoveContact(pContact);
+			m_listEntries.push_back(pContact);
+			return;
 		}
 	}
 }
 
-void CRoutingBin::remove(CContact *contact)
+void CRoutingBin::SetTCPPort(uint32 uIP, uint16 uUDPPort, uint16 uTCPPort)
 {
-	m_entries.remove(contact);
-}
-
-CContact *CRoutingBin::getContact(const CUInt128 &id) 
-{
-	CContact *retVal = NULL;
-	ContactList::const_iterator it;
-	for (it = m_entries.begin(); it != m_entries.end(); it++)
+	// Find contact with IP/Port
+	for (ContactList::iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
 	{
-		if (id == (*it)->m_clientID)
+		CContact* pContact = *itContactList;
+		if ((uIP == pContact->GetIPAddress()) && (uUDPPort == pContact->GetUDPPort()))
 		{
-			retVal = *it;
+			// Set TCPPort and mark as alive.
+			pContact->SetTCPPort(uTCPPort);
+			pContact->UpdateType();
+			// Move to the end of the list
+			RemoveContact(pContact);
+			m_listEntries.push_back(pContact);
 			break;
 		}
 	}
-	return retVal;
 }
 
-UINT CRoutingBin::getSize(void) const
+void CRoutingBin::RemoveContact(CContact *pContact)
 {
-	return (UINT)m_entries.size();
+	m_listEntries.remove(pContact);
 }
 
-UINT CRoutingBin::getRemaining(void) const
+CContact *CRoutingBin::GetContact(const CUInt128 &uID)
 {
-	return (UINT)K - m_entries.size();
-}
-
-void CRoutingBin::getEntries(ContactList *result, bool emptyFirst) 
-{
-	if (emptyFirst)
-		result->clear();
-	if (m_entries.size() > 0)
-		result->insert(result->end(), m_entries.begin(), m_entries.end());
-}
-
-CContact *CRoutingBin::getOldest(void) 
-{
-	if (m_entries.size() > 0)
-		return m_entries.front();
+	// Find contact by ID.
+	for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+	{
+		if (uID == (*itContactList)->m_uClientID)
+			return *itContactList;
+	}
 	return NULL;
 }
 
-uint32 CRoutingBin::getClosestTo(uint32 maxType, const CUInt128 &target, const CUInt128 &distance, uint32 maxRequired, ContactMap *result, bool emptyFirst, bool inUse)
+UINT CRoutingBin::GetSize() const
 {
-	if (m_entries.size() == 0)
+	return (UINT)m_listEntries.size();
+}
+
+UINT CRoutingBin::GetRemaining() const
+{
+	return (UINT)K - m_listEntries.size();
+}
+
+void CRoutingBin::GetEntries(ContactList *plistResult, bool bEmptyFirst)
+{
+	// Clear results if requested first.
+	if (bEmptyFirst)
+		plistResult->clear();
+	// Append all entries to the results.
+	if (m_listEntries.size() > 0)
+		plistResult->insert(plistResult->end(), m_listEntries.begin(), m_listEntries.end());
+}
+
+CContact *CRoutingBin::GetOldest()
+{
+	// All new/updated entries are appended to the back.
+	if (m_listEntries.size() > 0)
+		return m_listEntries.front();
+	return NULL;
+}
+
+uint32 CRoutingBin::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst, bool bInUse)
+{
+	// Empty list if requested.
+	if (bEmptyFirst)
+		pmapResult->clear();
+
+	// Return 0 since we have no entries.
+	if (m_listEntries.size() == 0)
 		return 0;
 
-	if (emptyFirst)
-		result->clear();
-
-	//Put results in sort order for target.
-	ContactList::const_iterator it;
-	for (it = m_entries.begin(); it != m_entries.end(); it++)
+	// First put results in sort order for uTarget so we can insert them correctly.
+	// We don't care about max results at this time.
+	for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
 	{
-		if((*it)->getType() <= maxType)
+		if((*itContactList)->GetType() <= uMaxType)
 		{
-			CUInt128 targetDistance((*it)->m_clientID);
-			targetDistance.xor(target);
-			(*result)[targetDistance] = *it;
-			if( inUse )
-				(*it)->incUse();
+			CUInt128 uTargetDistance((*itContactList)->m_uClientID);
+			uTargetDistance.Xor(uTarget);
+			(*pmapResult)[uTargetDistance] = *itContactList;
+			// This list will be used for an unknown time, Inc in use so it's not deleted.
+			if( bInUse )
+				(*itContactList)->IncUse();
 		}
 	}
 
-	//Remove any extra results
-	while(result->size() > maxRequired)
+	// Remove any extra results by least wanted first.
+	while(pmapResult->size() > uMaxRequired)
 	{
-		if( inUse )
-			(--result->end())->second->decUse();
-		result->erase(--result->end());
+		// Dec in use count.
+		if( bInUse )
+			(--pmapResult->end())->second->DecUse();
+		// remove from results
+		pmapResult->erase(--pmapResult->end());
 	}
-
-	return result->size();
+	// Return result count to the caller.
+	return pmapResult->size();
 }
-
-/*
-//Keep just in case needed at sometime.
-void CRoutingBin::dumpContents(void)
-{
-	CString line;
-	CString hex;
-	CString ipStr;
-	CString distance;
-	CContact *c;
-	ContactList::const_iterator it;
-	for (it = m_entries.begin(); it != m_entries.end(); it++)
-	{
-		c = *it;
-		c->m_clientID.toHexString(&hex);
-		c->getIPAddress(&ipStr);
-		c->getDistance(&distance);
-		line.Format(_T("\t%s\t%s (%ld)\tDistance: %s\r\n"), hex, ipStr, c->getUDPPort(), distance);
-		OutputDebugString(line);
-	}
-}
-*/

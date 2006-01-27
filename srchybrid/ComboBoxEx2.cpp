@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -80,8 +80,8 @@ BOOL CComboBoxEx2::PreTranslateMessage(MSG* pMsg)
 					//those casts are indeed all(!) needed to get that thing (at least!) running correctly for ANSI code pages,
 					//if that will also work for MBCS code pages has to be tested..
 					UINT uFirstChar      = (UINT)(_TUCHAR)strItem[0];
-					UINT uFirstCharLower = (UINT)(_TUCHAR)_totlower(uFirstChar);
-					UINT uTheChar        = (UINT)(_TUCHAR)_totlower((UINT)uChar);
+					UINT uFirstCharLower = (UINT)(_TUCHAR)_totlower((_TINT)(uFirstChar));
+					UINT uTheChar        = (UINT)(_TUCHAR)_totlower((_TINT)((UINT)uChar));
 					if (uFirstCharLower == uTheChar){
 						SetCurSel(i);
 						GetParent()->SendMessage(WM_COMMAND, MAKELONG((WORD)GetWindowLong(m_hWnd, GWL_ID), CBN_SELCHANGE), (LPARAM)m_hWnd);

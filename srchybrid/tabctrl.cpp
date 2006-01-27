@@ -282,7 +282,7 @@ bool TabControl::DrawIndicator(
   }
   else
   {
-    if( m_nDstTab == GetItemCount() )
+    if( m_nDstTab == (UINT)GetItemCount() )
       m_nDstTab--;
   }
 

@@ -25,14 +25,13 @@ protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnBnClickedEnableproxy();
-	afx_msg void OnBnClickedEnableauth();
-	afx_msg void OnCbnSelchangeProxytype();
-	afx_msg void OnEnChangeProxyname(){SetModified(true);}
-	afx_msg void OnEnChangeProxyport(){SetModified(true);}
-	afx_msg void OnEnChangeUsername(){SetModified(true);}
-	afx_msg void OnEnChangePassword(){SetModified(true);}
-	afx_msg void OnBnClickedAscwop();
+	afx_msg void OnBnClickedEnableProxy();
+	afx_msg void OnBnClickedEnableAuthentication();
+	afx_msg void OnCbnSelChangeProxyType();
+	afx_msg void OnEnChangeProxyName() { SetModified(TRUE); }
+	afx_msg void OnEnChangeProxyPort() { SetModified(TRUE); }
+	afx_msg void OnEnChangeUserName() { SetModified(TRUE); }
+	afx_msg void OnEnChangePassword() { SetModified(TRUE); }
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

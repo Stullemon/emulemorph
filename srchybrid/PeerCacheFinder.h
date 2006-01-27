@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -62,7 +62,7 @@ public:
 	void	DownloadAttemptFailed();
 	void	AddBannedVersion(CClientVersionInfo cviVersion);
 	void	AddAllowedVersion(CClientVersionInfo cviVersion);
-	bool	IsClientPCCompatible(uint32 dwTagVersionInfo, uint16 nClientSoft);
+	bool	IsClientPCCompatible(uint32 dwTagVersionInfo, UINT nClientSoft);
 	bool	IsClientPCCompatible(const CClientVersionInfo& cviToCheck);
 	LRESULT OnPeerCacheCheckResponse(WPARAM wParam, LPARAM lParam);
 
@@ -78,7 +78,7 @@ private:
 	uint32	m_dwPCIP;
 	uint32	m_dwMyIP;
 	CString m_strMyHostname;
-	sint32	m_posCurrentLookUp;
+	int		m_posCurrentLookUp;
 	bool	m_bValdited;
 	bool	m_bNotReSearched;
 	bool	m_bNotReValdited;

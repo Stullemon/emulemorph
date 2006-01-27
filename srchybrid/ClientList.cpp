@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -175,7 +175,7 @@ void CClientList::GetStatistics(uint32 &ruTotalClients, int stats[NUM_CLIENTLIST
 }
 
 //MOPRH START - Added by SiRoB, Slugfiller: modid
-void CClientList::GetModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods){
+void CClientList::GetModStatistics(CRBMap<uint32, CRBMap<CString, uint32>* > *clientMods){
 	if (!clientMods)
 		return;
 	clientMods->RemoveAll();
@@ -212,13 +212,13 @@ void CClientList::GetModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *cl
 	// [TPT] end
 }
 
-void CClientList::ReleaseModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods){
+void CClientList::ReleaseModStatistics(CRBMap<uint32, CRBMap<CString, uint32>* > *clientMods){
 	if (!clientMods)
 		return;
 	POSITION pos = clientMods->GetHeadPosition();
 	while(pos != NULL)
 	{
-		uint16 version;
+		uint32 version;
 		CRBMap<CString, uint32> *versionMods;
 		clientMods->GetNextAssoc(pos, version, versionMods);
 		delete versionMods;
@@ -484,7 +484,7 @@ UINT CClientList::GetClientsFromIP(uint32 dwIP) const
 	return 0;
 }
 
-void CClientList::TrackBadRequest(const CUpDownClient* upcClient, sint32 nIncreaseCounter){
+void CClientList::TrackBadRequest(const CUpDownClient* upcClient, int nIncreaseCounter){
 	CDeletedClient* pResult = NULL;
 	if (upcClient->GetIP() == 0){
 		ASSERT( false );
@@ -585,7 +585,7 @@ void CClientList::Process()
 	{
 		m_KadList.GetNext(pos1);
 		CUpDownClient* cur_client =	m_KadList.GetAt(pos2);
-		if( !Kademlia::CKademlia::isRunning() )
+		if( !Kademlia::CKademlia::IsRunning() )
 		{
 			//Clear out this list if we stop running Kad.
 			//Setting the Kad state to KS_NONE causes it to be removed in the switch below.
@@ -605,7 +605,9 @@ void CClientList::Process()
 			case KS_CONNECTED_FWCHECK:
 				//We successfully connected to the client.
 				//We now send a ack to let them know.
-				Kademlia::CKademlia::getUDPListener()->sendNullPacket(KADEMLIA_FIREWALLED_ACK, ntohl(cur_client->GetIP()), cur_client->GetKadPort());
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+					DebugSend("KADEMLIA_FIREWALLED_ACK_RES", cur_client->GetIP(), cur_client->GetKadPort());
+				Kademlia::CKademlia::GetUDPListener()->SendNullPacket(KADEMLIA_FIREWALLED_ACK_RES, ntohl(cur_client->GetIP()), cur_client->GetKadPort());
 				//We are done with this client. Set Kad status to KS_NONE and it will be removed in the next cycle.
 				cur_client->SetKadState(KS_NONE);
 				break;
@@ -684,11 +686,11 @@ void CClientList::Process()
 	{
 		if( m_nBuddyStatus != Disconnected || m_pBuddy )
 		{
-			if( Kademlia::CKademlia::isRunning() && theApp.IsFirewalled() )
+			if( Kademlia::CKademlia::IsRunning() && theApp.IsFirewalled() )
 			{
 				//We are a lowID client and we just lost our buddy.
 				//Go ahead and instantly try to find a new buddy.
-				Kademlia::CKademlia::getPrefs()->setFindBuddy();
+				Kademlia::CKademlia::GetPrefs()->SetFindBuddy();
 			}
 			m_pBuddy = NULL;
 			m_nBuddyStatus = Disconnected;
@@ -696,26 +698,21 @@ void CClientList::Process()
 		}
 	}
 
-	if ( Kademlia::CKademlia::isConnected() )
+	if ( Kademlia::CKademlia::IsConnected() )
 	{
-		if( Kademlia::CKademlia::isFirewalled() )
+		if( Kademlia::CKademlia::IsFirewalled() )
 		{
-			if( m_nBuddyStatus == Disconnected && Kademlia::CKademlia::getPrefs()->getFindBuddy() )
+			if( m_nBuddyStatus == Disconnected && Kademlia::CKademlia::GetPrefs()->GetFindBuddy() )
 			{
 				//We are a firewalled client with no buddy. We have also waited a set time 
 				//to try to avoid a false firewalled status.. So lets look for a buddy..
-				Kademlia::CSearch *findBuddy = new Kademlia::CSearch;
-				findBuddy->setSearchTypes(Kademlia::CSearch::FINDBUDDY);
-				Kademlia::CUInt128 ID(true);
-				ID.xor(Kademlia::CKademlia::getPrefs()->getKadID());
-				findBuddy->setTargetID(ID);
-				if( !Kademlia::CSearchManager::startSearch(findBuddy) )
+				if( !Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::FINDBUDDY, true, Kademlia::CUInt128(true).Xor(Kademlia::CKademlia::GetPrefs()->GetKadID())) )
 				{
 					//This search ID was already going. Most likely reason is that
 					//we found and lost our buddy very quickly and the last search hadn't
 					//had time to be removed yet. Go ahead and set this to happen again
 					//next time around.
-					Kademlia::CKademlia::getPrefs()->setFindBuddy();
+					Kademlia::CKademlia::GetPrefs()->SetFindBuddy();
 				}
 			}
 		}
@@ -778,18 +775,18 @@ bool CClientList::IsValidClient(CUpDownClient* tocheck) const
 
 void CClientList::RequestTCP(Kademlia::CContact* contact)
 {
-	uint32 nContactIP = ntohl(contact->getIPAddress());
+	uint32 nContactIP = ntohl(contact->GetIPAddress());
 	// don't connect ourself
-	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->getTCPPort())
+	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->GetTCPPort())
 		return;
 
-	CUpDownClient* pNewClient = FindClientByIP(nContactIP, contact->getTCPPort());
+	CUpDownClient* pNewClient = FindClientByIP(nContactIP, contact->GetTCPPort());
 
 	if (!pNewClient)
-		pNewClient = new CUpDownClient(0, contact->getTCPPort(), contact->getIPAddress(), 0, 0, false );
+		pNewClient = new CUpDownClient(0, contact->GetTCPPort(), contact->GetIPAddress(), 0, 0, false );
 
 	//Add client to the lists to be processed.
-	pNewClient->SetKadPort(contact->getUDPPort());
+	pNewClient->SetKadPort(contact->GetUDPPort());
 	pNewClient->SetKadState(KS_QUEUED_FWCHECK);
 	m_KadList.AddTail(pNewClient);
 	//This method checks if this is a dup already.
@@ -798,19 +795,19 @@ void CClientList::RequestTCP(Kademlia::CContact* contact)
 
 void CClientList::RequestBuddy(Kademlia::CContact* contact)
 {
-	uint32 nContactIP = ntohl(contact->getIPAddress());
+	uint32 nContactIP = ntohl(contact->GetIPAddress());
 	// don't connect ourself
-	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->getTCPPort())
+	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->GetTCPPort())
 		return;
-	CUpDownClient* pNewClient = FindClientByIP(nContactIP, contact->getTCPPort());
+	CUpDownClient* pNewClient = FindClientByIP(nContactIP, contact->GetTCPPort());
 	if (!pNewClient)
-		pNewClient = new CUpDownClient(0, contact->getTCPPort(), contact->getIPAddress(), 0, 0, false );
+		pNewClient = new CUpDownClient(0, contact->GetTCPPort(), contact->GetIPAddress(), 0, 0, false );
 
 	//Add client to the lists to be processed.
-	pNewClient->SetKadPort(contact->getUDPPort());
+	pNewClient->SetKadPort(contact->GetUDPPort());
 	pNewClient->SetKadState(KS_QUEUED_BUDDY);
 	byte ID[16];
-	contact->getClientID().toByteArray(ID);
+	contact->GetClientID().ToByteArray(ID);
 	pNewClient->SetUserHash(ID);
 	AddToKadList(pNewClient);
 	//This method checks if this is a dup already.
@@ -819,26 +816,26 @@ void CClientList::RequestBuddy(Kademlia::CContact* contact)
 
 void CClientList::IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128* buddyID )
 {
-	uint32 nContactIP = ntohl(contact->getIPAddress());
+	uint32 nContactIP = ntohl(contact->GetIPAddress());
 	//If eMule already knows this client, abort this.. It could cause conflicts.
 	//Although the odds of this happening is very small, it could still happen.
-	if (FindClientByIP(nContactIP, contact->getTCPPort()))
+	if (FindClientByIP(nContactIP, contact->GetTCPPort()))
 	{
 		return;
 	}
 
 	// don't connect ourself
-	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->getTCPPort())
+	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->GetTCPPort())
 		return;
 
 	//Add client to the lists to be processed.
-	CUpDownClient* pNewClient = new CUpDownClient(0, contact->getTCPPort(), contact->getIPAddress(), 0, 0, false );
-	pNewClient->SetKadPort(contact->getUDPPort());
+	CUpDownClient* pNewClient = new CUpDownClient(0, contact->GetTCPPort(), contact->GetIPAddress(), 0, 0, false );
+	pNewClient->SetKadPort(contact->GetUDPPort());
 	pNewClient->SetKadState(KS_INCOMING_BUDDY);
 	byte ID[16];
-	contact->getClientID().toByteArray(ID);
+	contact->GetClientID().ToByteArray(ID);
 	pNewClient->SetUserHash(ID);
-	buddyID->toByteArray(ID);
+	buddyID->ToByteArray(ID);
 	pNewClient->SetBuddyID(ID);
 	AddToKadList(pNewClient);
 	AddClient(pNewClient);
@@ -960,9 +957,9 @@ CUpDownClient*	CClientList::FindClientByWebCacheUploadId(const uint32 id)
 
 // Superlexx - OHCB manager
 // returns a list of multi-OHCB-supporting clients ( = v1.9a or newer ) that should receive this OHCB immediately
-CUpDownClientPtrList* CClientList::XpressOHCBRecipients(uint16 maxNrOfClients, const Requested_Block_Struct* block)
+CUpDownClientPtrList* CClientList::XpressOHCBRecipients(uint32 maxNrOfClients, const Requested_Block_Struct* block)
 {
-	uint16 part = block->StartOffset / PARTSIZE;
+	UINT part = (UINT)(block->StartOffset / PARTSIZE);
  	CUpDownClientPtrList* newClients = new CUpDownClientPtrList;	// supporting multi-OHCB
 
 	for (POSITION pos = list.GetHeadPosition(); pos;)
@@ -994,10 +991,10 @@ CUpDownClientPtrList* CClientList::XpressOHCBRecipients(uint16 maxNrOfClients, c
 	return toReturn;
 }
 
-uint16 CClientList::GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending, uint16 maxNrOfClients) // Superlexx - COtN
+UINT CClientList::GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending, UINT maxNrOfClients) // Superlexx - COtN
 {
-	uint16 toReturn = 0;
-	uint16 part = pending->block->StartOffset / PARTSIZE;
+	UINT toReturn = 0;
+	UINT part = (UINT)(pending->block->StartOffset / PARTSIZE);
 
 	for (POSITION pos = list.GetHeadPosition(); pos && toReturn <= maxNrOfClients; list.GetNext(pos))
 	{

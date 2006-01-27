@@ -10,8 +10,8 @@ typedef enum EOptsRows
 	orMinSize,
 	orMaxSize,
 	orAvailability,
-	orExtension,
 	orCompleteSources,
+	orExtension,
 	orCodec,
 	orBitrate,
 	orLength,
@@ -80,7 +80,9 @@ protected:
 	void SetAllIcons();
 	void InitMethodsCtrl();
 	void InitFileTypesCtrl();
-	ULONG GetSearchSize(const CString& strExpr);
+	uint64 GetSearchAttrSize(const CString& rstrExpr);
+	ULONG GetSearchAttrNumber(const CString& rstrExpr);
+	ULONG GetSearchAttrLength(const CString& rstrExpr);
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 

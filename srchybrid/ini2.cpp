@@ -177,6 +177,27 @@ CString CIni::GetString(LPCTSTR strEntry, LPCTSTR strDefault/*=NULL*/, LPCTSTR s
 	else
 		return CString(GetLPCSTR(strEntry,strSection,strDefault));
 }
+CString CIni::GetStringLong(LPCTSTR strEntry, LPCTSTR strDefault/*=NULL*/, LPCTSTR strSection/* = NULL*/)
+{
+	CString ret;
+	unsigned int maxstrlen=MAX_INI_BUFFER;
+
+	if(strSection != NULL)
+		m_strSection = strSection;
+
+	do {
+		GetPrivateProfileString(m_strSection, strEntry, (strDefault==NULL)?_T(""):strDefault, 
+			ret.GetBufferSetLength(maxstrlen), maxstrlen,m_strFileName);
+		ret.ReleaseBuffer();
+		if ((unsigned int)ret.GetLength() < maxstrlen-2)
+			break;
+
+		maxstrlen+=MAX_INI_BUFFER;
+
+	} while(maxstrlen<32767);
+
+	return ret;
+}
 
 CString CIni::GetStringUTF8(LPCTSTR strEntry, LPCTSTR strDefault/*=NULL*/, LPCTSTR strSection/* = NULL*/)
 {
@@ -249,7 +270,7 @@ CPoint CIni::GetPoint(LPCTSTR strEntry,	CPoint ptDefault, LPCTSTR strSection)
 	CString strDefault;
 	strDefault.Format(_T("(%d,%d)"),ptDefault.x, ptDefault.y);
 
-	CString strPoint = GetString(strEntry,strDefault);
+	CString strPoint = GetString(strEntry,strDefault, strSection);
 	_stscanf(strPoint,_T("(%d,%d)"), &ptReturn.x, &ptReturn.y);
 
 	return ptReturn;
@@ -263,7 +284,7 @@ CRect CIni::GetRect(LPCTSTR strEntry, CRect rectDefault, LPCTSTR strSection)
 	//old version :strDefault.Format("(%d,%d,%d,%d)",rectDefault.top,rectDefault.left,rectDefault.bottom,rectDefault.right);
 	strDefault.Format(_T("%d,%d,%d,%d"),rectDefault.left,rectDefault.top,rectDefault.right,rectDefault.bottom);
 
-	CString strRect = GetString(strEntry,strDefault);
+	CString strRect = GetString(strEntry,strDefault,strSection);
 
 	//new Version found
 	if( 4==_stscanf(strRect,_T("%d,%d,%d,%d"),&rectDefault.left,&rectDefault.top,&rectDefault.right,&rectDefault.bottom))
@@ -282,7 +303,7 @@ COLORREF CIni::GetColRef(LPCTSTR strEntry, COLORREF crDefault, LPCTSTR strSectio
 	CString strDefault;
 	strDefault.Format(_T("RGB(%hd,%hd,%hd)"),temp[0],temp[1],temp[2]);
 
-	CString strColRef = GetString(strEntry,strDefault);
+	CString strColRef = GetString(strEntry,strDefault,strSection);
 	_stscanf(strColRef,_T("RGB(%d,%d,%d)"), temp, temp+1, temp+2);
 
 	return RGB(temp[0],temp[1],temp[2]);
@@ -486,7 +507,7 @@ void		CIni::SerGet(	bool bGet,short		& n,	LPCTSTR strEntry,	LPCTSTR strSection/*
 {
    int nTemp = n;
    SerGetInt(bGet,nTemp,strEntry,strSection,nDefault);
-   n = nTemp;
+   n = (short)nTemp;
 }
 void		CIni::SerGet(	bool bGet,DWORD		& n,	LPCTSTR strEntry,	LPCTSTR strSection/*= NULL*/,	DWORD nDefault/* = 0*/)
 {
@@ -654,7 +675,7 @@ void CIni::SerGet(bool bGet, short *ar, int nCount, LPCTSTR strEntry, LPCTSTR st
 			for(int i = 0; i < nCount; i++) {
 				nOffset = Parse(strBuffer, nOffset, strTemp);
 				if(strTemp.GetLength() == 0)
-					ar[i] = Default;
+					ar[i] = (short)Default;
 				else
 					ar[i] = (short)_tstoi(strTemp);
 			}

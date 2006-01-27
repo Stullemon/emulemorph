@@ -23,7 +23,7 @@ BEGIN_MESSAGE_MAP(CInputBox, CEdit)
     ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
-void CInputBox::OnContextMenu(CWnd* pWnd, CPoint point)
+void CInputBox::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
 {
 	//Cax2 - nothing to see here!
 }
@@ -167,9 +167,9 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		else
 			buffer = _T("");
 
-		if(Kademlia::CKademlia::isConnected())
+		if(Kademlia::CKademlia::IsConnected())
 			buffer += buffer.IsEmpty()?_T("KAD"):_T(" | KAD");
-		else if (Kademlia::CKademlia::isRunning())
+		else if (Kademlia::CKademlia::IsRunning())
 			buffer += buffer.IsEmpty()?_T("kad"):_T(" | kad");
 		
 		m_ctrlSpeed.m_strText = buffer;

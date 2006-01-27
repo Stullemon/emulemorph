@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -76,6 +76,7 @@ CUDPSocket::CUDPSocket(){
 
 CUDPSocket::~CUDPSocket(){
     theApp.uploadBandwidthThrottler->RemoveFromAllQueues(this); // ZZ:UploadBandWithThrottler (UDP)
+	sendLocker.Lock(); //MORPH - Added by SiRoB, Wait before starting to free packet
 
     delete m_cur_server;
 	delete[] m_sendbuffer;
@@ -85,16 +86,19 @@ CUDPSocket::~CUDPSocket(){
 		delete[] p->packet;
 		delete p;
 	}
+	sendLocker.Unlock(); //MORPH - Added by SiRoB, Wait before starting to free packet
 	m_udpwnd.DestroyWindow();
 }
 
-bool CUDPSocket::Create(){
-	if (thePrefs.GetServerUDPPort()){
+bool CUDPSocket::Create()
+{
+	if (thePrefs.GetServerUDPPort())
+	{
 		VERIFY( m_udpwnd.CreateEx(0, AfxRegisterWndClass(0), _T("eMule Async DNS Resolve Socket Wnd #1"), WS_OVERLAPPED, 0, 0, 0, 0, NULL, NULL));
 	    m_hWndResolveMessage = m_udpwnd.m_hWnd;
 	    m_udpwnd.m_pOwner = this;
-		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
-			LogError(LOG_STATUSBAR, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
+		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE, thePrefs.GetBindAddrW())){
+			LogError(LOG_STATUSBAR, _T("Error: Server UDP socket: Failed to create server UDP socket - %s"), GetErrorMessage(GetLastError()));
 			return false;
 		}
 
@@ -209,8 +213,8 @@ bool CUDPSocket::ProcessPacket(const BYTE* packet, UINT size, UINT opcode, uint3
 							Debug(_T("ServerUDPMessage from %-21s - OP_GlobSearchResult(%u); %s\n"), ipstr(nIP, nUDPPort-4), iDbgPacket++, DbgGetFileInfo(pDbgPacket), DbgGetClientID(PeekUInt32(pDbgPacket+16)), PeekUInt16(pDbgPacket+20));
 						}
 					}
-					uint16 uResultCount = theApp.searchlist->ProcessUDPSearchAnswer(data, true/*update->GetUnicodeSupport()*/, nIP, nUDPPort-4);
-					theApp.emuledlg->searchwnd->AddUDPResult(uResultCount);
+					UINT uResultCount = theApp.searchlist->ProcessUDPSearchAnswer(data, true/*update->GetUnicodeSupport()*/, nIP, nUDPPort-4);
+					theApp.emuledlg->searchwnd->AddGlobalEd2kSearchResults(uResultCount);
 
 					// check if there is another source packet
 					iLeft = (int)(data.GetLength() - data.GetPosition());
@@ -318,7 +322,7 @@ bool CUDPSocket::ProcessPacket(const BYTE* packet, UINT size, UINT opcode, uint3
 					uUDPFlags = PeekUInt32(packet+24);
 					if (thePrefs.GetDebugServerUDPLevel() > 0){
 						CString strInfo;
-						const DWORD dwKnownBits = SRV_UDPFLG_EXT_GETSOURCES | SRV_UDPFLG_EXT_GETFILES | SRV_UDPFLG_NEWTAGS | SRV_UDPFLG_UNICODE | SRV_UDPFLG_EXT_GETSOURCES2;
+						const DWORD dwKnownBits = SRV_UDPFLG_EXT_GETSOURCES | SRV_UDPFLG_EXT_GETFILES | SRV_UDPFLG_NEWTAGS | SRV_UDPFLG_UNICODE | SRV_UDPFLG_EXT_GETSOURCES2 | SRV_UDPFLG_LARGEFILES;
 						if (uUDPFlags & ~dwKnownBits)
 							strInfo.AppendFormat(_T("  ***UnkUDPFlags=0x%08x"), uUDPFlags & ~dwKnownBits);
 						if (uUDPFlags & SRV_UDPFLG_EXT_GETSOURCES)
@@ -331,6 +335,8 @@ bool CUDPSocket::ProcessPacket(const BYTE* packet, UINT size, UINT opcode, uint3
 							strInfo.AppendFormat(_T("  NewTags=1"));
 						if (uUDPFlags & SRV_UDPFLG_UNICODE)
 							strInfo.AppendFormat(_T("  Unicode=1"));
+						if (uUDPFlags & SRV_UDPFLG_LARGEFILES)
+							strInfo.AppendFormat(_T("  LargeFiles=1"));
 						Debug(_T("%s\n"), strInfo);
 					}
 				}
@@ -535,7 +541,8 @@ void CUDPSocket::AsyncResolveDNS(LPCSTR lpszHostAddressA, UINT nHostPort)
 	}
 }
 
-void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
+void CUDPSocket::DnsLookupDone(WPARAM /*wp*/, LPARAM lp)
+{
 	m_DnsTaskHandle = NULL;
 
 	/* An asynchronous database routine completed. */
@@ -621,7 +628,7 @@ void CUDPSocket::OnSend(int nErrorCode){
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
-SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { // ZZ:UploadBandWithThrottler (UDP)
+SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 /*minFragSize*/) { // ZZ:UploadBandWithThrottler (UDP)
 // ZZ:UploadBandWithThrottler (UDP) -->
 	// NOTE: *** This function is invoked from a *different* thread!
     sendLocker.Lock();

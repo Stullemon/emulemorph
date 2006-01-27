@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -41,6 +41,19 @@ static char THIS_FILE[] = __FILE__;
 // KademliaWnd dialog
 
 IMPLEMENT_DYNAMIC(CKademliaWnd, CDialog)
+
+BEGIN_MESSAGE_MAP(CKademliaWnd, CResizableDialog)
+	ON_BN_CLICKED(IDC_BOOTSTRAPBUTTON, OnBnClickedBootstrapbutton)
+	ON_BN_CLICKED(IDC_FIREWALLCHECKBUTTON, OnBnClickedFirewallcheckbutton)
+	ON_BN_CLICKED(IDC_KADCONNECT, OnBnConnect)
+	ON_WM_SYSCOLORCHANGE()
+	ON_EN_SETFOCUS(IDC_BOOTSTRAPIP, OnEnSetfocusBootstrapip)
+	ON_EN_CHANGE(IDC_BOOTSTRAPIP, UpdateControlsState)
+	ON_EN_CHANGE(IDC_BOOTSTRAPPORT, UpdateControlsState)
+	ON_BN_CLICKED(IDC_RADCLIENTS, UpdateControlsState)
+	ON_BN_CLICKED(IDC_RADIP, UpdateControlsState)
+END_MESSAGE_MAP()
+
 CKademliaWnd::CKademliaWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CKademliaWnd::IDD, pParent)
 {
@@ -130,22 +143,17 @@ void CKademliaWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BSSTATIC, m_ctrlBootstrap);
 }
 
+BOOL CKademliaWnd::PreTranslateMessage(MSG* pMsg) 
+{
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		// Don't handle Ctrl+Tab in this window. It will be handled by main window.
+		if (pMsg->wParam == VK_TAB && GetAsyncKeyState(VK_CONTROL) < 0)
+			return FALSE;
+	}
 
-BEGIN_MESSAGE_MAP(CKademliaWnd, CResizableDialog)
-	ON_BN_CLICKED(IDC_BOOTSTRAPBUTTON, OnBnClickedBootstrapbutton)
-	ON_BN_CLICKED(IDC_FIREWALLCHECKBUTTON, OnBnClickedFirewallcheckbutton)
-	ON_BN_CLICKED(IDC_KADCONNECT, OnBnConnect)
-	ON_WM_SYSCOLORCHANGE()
-	ON_EN_SETFOCUS(IDC_BOOTSTRAPIP, OnEnSetfocusBootstrapip)
-	ON_EN_CHANGE(IDC_BOOTSTRAPIP, UpdateControlsState)
-	ON_EN_CHANGE(IDC_BOOTSTRAPPORT, UpdateControlsState)
-	ON_BN_CLICKED(IDC_RADCLIENTS, UpdateControlsState)
-	ON_BN_CLICKED(IDC_RADIP, UpdateControlsState)
-END_MESSAGE_MAP()
-
-
-///////////////////////////////////////////////////////////////////////////////
-//
+	return CResizableDialog::PreTranslateMessage(pMsg);
+}
 
 void CKademliaWnd::OnEnSetfocusBootstrapip()
 {
@@ -174,7 +182,7 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 		CString strPort;
 		GetDlgItem(IDC_BOOTSTRAPPORT)->GetWindowText(strPort);
 		strPort.Trim();
-		nPort = _ttoi(strPort);
+		nPort = (uint16)_ttoi(strPort);
 
 		// invalid IP/Port
 		if (strIP.GetLength()<7 || nPort==0)
@@ -184,13 +192,13 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 			m_pacONBSIPs->AddItem(strIP + _T(":") + strPort, 0);
 	}
 
-	if( !Kademlia::CKademlia::isRunning() )
+	if( !Kademlia::CKademlia::IsRunning() )
 	{
-		Kademlia::CKademlia::start();
+		Kademlia::CKademlia::Start();
 		theApp.emuledlg->ShowConnectionState();
 	}
 	if (!strIP.IsEmpty() && nPort)
-		Kademlia::CKademlia::bootstrap(strIP, nPort);
+		Kademlia::CKademlia::Bootstrap(strIP, nPort);
 }
 
 void CKademliaWnd::OnBnClickedFirewallcheckbutton()
@@ -200,12 +208,12 @@ void CKademliaWnd::OnBnClickedFirewallcheckbutton()
 
 void CKademliaWnd::OnBnConnect()
 {
-	if (Kademlia::CKademlia::isConnected())
-		Kademlia::CKademlia::stop();
-	else if (Kademlia::CKademlia::isRunning())
-		Kademlia::CKademlia::stop();
+	if (Kademlia::CKademlia::IsConnected())
+		Kademlia::CKademlia::Stop();
+	else if (Kademlia::CKademlia::IsRunning())
+		Kademlia::CKademlia::Stop();
 	else
-		Kademlia::CKademlia::start();
+		Kademlia::CKademlia::Start();
 	theApp.emuledlg->ShowConnectionState();
 }
 
@@ -253,9 +261,9 @@ void CKademliaWnd::Localize()
 void CKademliaWnd::UpdateControlsState()
 {
 	CString strLabel;
-	if (Kademlia::CKademlia::isConnected())
+	if (Kademlia::CKademlia::IsConnected())
 		strLabel = GetResString(IDS_MAIN_BTN_DISCONNECT);
-	else if (Kademlia::CKademlia::isRunning())
+	else if (Kademlia::CKademlia::IsRunning())
 		strLabel = GetResString(IDS_MAIN_BTN_CANCEL);
 	else
 		strLabel = GetResString(IDS_MAIN_BTN_CONNECT);
@@ -267,7 +275,7 @@ void CKademliaWnd::UpdateControlsState()
 	CString strBootstrapPort;
 	GetDlgItemText(IDC_BOOTSTRAPPORT, strBootstrapPort);
 	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(
-		!Kademlia::CKademlia::isConnected()
+		!Kademlia::CKademlia::IsConnected()
 		&& (  (   IsDlgButtonChecked(IDC_RADIP)>0
 		       && !strBootstrapIP.IsEmpty()
 			   && (strBootstrapIP.Find(_T(':')) != -1 || !strBootstrapPort.IsEmpty())
@@ -311,6 +319,5 @@ void CKademliaWnd::ContactRem(const Kademlia::CContact* contact)
 
 void CKademliaWnd::ContactRef(const Kademlia::CContact* contact)
 {
-	m_contactHistogramCtrl->ContactRef(contact);
 	m_contactListCtrl->ContactRef(contact);
 }

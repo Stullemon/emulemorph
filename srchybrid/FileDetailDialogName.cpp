@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -65,7 +65,7 @@ CFileDetailDialogName::~CFileDetailDialogName()
 {
 }
 
-void CFileDetailDialogName::OnTimer(UINT nIDEvent)
+void CFileDetailDialogName::OnTimer(UINT /*nIDEvent*/)
 {
 	RefreshData();
 }
@@ -278,13 +278,13 @@ int CALLBACK CFileDetailDialogName::CompareListNameItems(LPARAM lParam1, LPARAM 
 	return 0;
 } 
 
-void CFileDetailDialogName::OnNMDblclkList(NMHDR *pNMHDR, LRESULT *pResult)
+void CFileDetailDialogName::OnNMDblclkList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	TakeOver();
 	*pResult = 0;
 }
 
-void CFileDetailDialogName::OnNMRclickList(NMHDR *pNMHDR, LRESULT *pResult)
+void CFileDetailDialogName::OnNMRclickList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	UINT flag = MF_STRING;
 	if (m_listFileNames.GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED) == -1)

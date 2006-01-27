@@ -1,21 +1,21 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
+ 
+ 
 This work is based on the java implementation of the Kademlia protocol.
 Kademlia: Peer-to-peer routing based on the XOR metric
 Copyright (C) 2002  Petar Maymounkov [petar@post.harvard.edu]
@@ -33,45 +33,30 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
+
 #pragma once
-#include "Maps.h"
+#include "./Maps.h"
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-class CUInt128;
-class CRoutingZone;
-class CContact;
-
-class CRoutingBin
+namespace Kademlia
 {
-	friend class CRoutingZone;
-
-public:
-
-	~CRoutingBin();
-
-private:
-
-	CRoutingBin();
-	bool add(CContact *contact);
-	void setAlive(uint32 ip, uint16 port);
-	void setTCPPort(uint32 ip, uint16 port, uint16 tcpPort);
-	void remove(CContact *contact);
-	CContact *getContact(const CUInt128 &id);
-	CContact *getOldest(void);
-
-	UINT getSize() const;
-	UINT getRemaining(void) const;
-	void getEntries(ContactList *result, bool emptyFirst = true);
-	uint32 getClosestTo(uint32 maxType, const CUInt128 &target, const CUInt128 &distance, uint32 maxRequired, ContactMap *result, bool emptyFirst = true, bool setInUse = false);
-
-	// Debug purposes.
-//	void dumpContents(void);
-
-	bool m_dontDeleteContacts;
-	ContactList m_entries;
-};
-
-} // End namespace
+	class CRoutingBin
+	{
+			friend class CRoutingZone;
+		public:
+			~CRoutingBin();
+		private:
+			CRoutingBin();
+			bool AddContact(CContact *pContact);
+			void SetAlive(uint32 uIP, uint16 uUDPPort);
+			void SetTCPPort(uint32 uIP, uint16 uUDPPort, uint16 uTCPPort);
+			void RemoveContact(CContact *pContact);
+			CContact *GetContact(const CUInt128 &uID);
+			CContact *GetOldest();
+			UINT GetSize() const;
+			UINT GetRemaining() const;
+			void GetEntries(ContactList *plistResult, bool bEmptyFirst = true);
+			uint32 GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst = true, bool bSetInUse = false);
+			bool m_bDontDeleteContacts;
+			ContactList m_listEntries;
+	};
+}

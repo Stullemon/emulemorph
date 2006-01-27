@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -21,7 +21,8 @@
 #include "OtherFunctions.h"
 #include "SafeFile.h"
 #include "StringConversion.h"
-#include "opcodes.h"//added for Avi3k: maxfilesize fix [cyrex2001]
+#include "opcodes.h"
+#include "preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -180,15 +181,16 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 	if (_tcslen(pszHash) != 32)
 		throw GetResString(IDS_ERR_ILLFORMEDHASH);
 
-	/*if (_tstoi64(pszSize)>=4294967295)*/
-	if (_tstoi64(pszSize)>MAX_EMULE_FILE_SIZE) // Avi3k: maxfilesize fix [cyrex2001]
+	if (_tstoi64(pszSize) >= MAX_EMULE_FILE_SIZE)
 		throw GetResString(IDS_ERR_TOOLARGEFILE);
 	if (_tstoi64(pszSize)<=0)
 		throw GetResString(IDS_ERR_NOTAFILELINK);
+	if (_tstoi64(pszSize) >= OLD_MAX_EMULE_FILE_SIZE && !thePrefs.CanFSHandleLargeFiles())
+		throw GetResString(IDS_ERR_FSCANTHANDLEFILE);
 	
 	for (int idx = 0; idx < 16; ++idx) {
-		m_hash[idx] = FromHexDigit(*pszHash++)*16;
-		m_hash[idx] += FromHexDigit(*pszHash++);
+		m_hash[idx] = (BYTE)(FromHexDigit(*pszHash++)*16);
+		m_hash[idx] = (BYTE)(m_hash[idx] + FromHexDigit(*pszHash++));
 	}
 
 	bool bError = false;
@@ -269,7 +271,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 				break;
 
 			m_hashset->Seek(16, CFile::begin);
-			m_hashset->WriteUInt16(iPartHashs);
+			m_hashset->WriteUInt16((uint16)iPartHashs);
 			m_hashset->Seek(0, CFile::begin);
 		}
 		else if (strTok == _T("h"))
@@ -277,7 +279,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 			CString strHash = strParam.Mid(iPos + 1);
 			if (!strHash.IsEmpty())
 			{
-				if (DecodeBase32(strHash, m_AICHHash.GetRawHash(), CAICHHash::GetHashSize()) == CAICHHash::GetHashSize()){
+				if (DecodeBase32(strHash, m_AICHHash.GetRawHash(), CAICHHash::GetHashSize()) == (UINT)CAICHHash::GetHashSize()){
 					m_bAICHHashValid = true;
 					ASSERT( m_AICHHash.GetString().CompareNoCase(strHash) == 0 );
 				}
@@ -404,10 +406,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 
 CED2KFileLink::~CED2KFileLink()
 {
-	if (SourcesList){
-		delete SourcesList;
-		SourcesList=NULL;
-	}
+	delete SourcesList;
 	while (!m_HostnameSourcesList.IsEmpty())
 		delete m_HostnameSourcesList.RemoveHead();
 	delete m_hashset;

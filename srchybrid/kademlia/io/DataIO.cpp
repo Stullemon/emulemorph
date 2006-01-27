@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -28,17 +28,15 @@ Any mod that changes anything within the Kademlia side will not be allowed to ad
 there client on the eMule forum..
 */
 #include "stdafx.h"
-#include "resource.h"
-#include "DataIO.h"
+#include <atlenc.h>
+#include "./DataIO.h"
+#include "./IOException.h"
 #include "../kademlia/Kademlia.h"
 #include "../kademlia/Tag.h"
-#include "../utils/LittleEndian.h"
-#include "../utils/UInt128.h"
-#include "IOException.h"
-#include "StringConversion.h"
-#include "SafeFile.h"
-#include <atlenc.h>
-#include "Log.h"
+#include "../../resource.h"
+#include "../../StringConversion.h"
+#include "../../SafeFile.h"
+#include "../../Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,87 +44,93 @@ there client on the eMule forum..
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-////////////////////////////////////////
 using namespace Kademlia;
-////////////////////////////////////////
 
 // This may look confusing that the normal methods use le() and the LE methods don't.
 // The reason is the variables are stored in memory in little endian format already.
 
-byte CDataIO::readByte()
+byte CDataIO::ReadByte()
 {
-	byte retVal;
-	readArray(&retVal, 1);
-	return retVal;
+	byte byRetVal;
+	ReadArray(&byRetVal, 1);
+	return byRetVal;
 }
 
-uint8 CDataIO::readUInt8()
+uint8 CDataIO::ReadUInt8()
 {
-	uint8 retVal;
-	readArray(&retVal, sizeof(uint8));
-	return retVal;
+	uint8 uRetVal;
+	ReadArray(&uRetVal, sizeof(uint8));
+	return uRetVal;
 }
 
-uint16 CDataIO::readUInt16()
+uint16 CDataIO::ReadUInt16()
 {
-	uint16 retVal;
-	readArray(&retVal, sizeof(uint16));
-	return retVal;
+	uint16 uRetVal;
+	ReadArray(&uRetVal, sizeof(uint16));
+	return uRetVal;
 }
 
-uint32 CDataIO::readUInt32()
+uint32 CDataIO::ReadUInt32()
 {
-	uint32 retVal;
-	readArray(&retVal, sizeof(uint32));
-	return retVal;
+	uint32 uRetVal;
+	ReadArray(&uRetVal, sizeof(uint32));
+	return uRetVal;
 }
 
-void CDataIO::readUInt128(CUInt128* value)
+uint64 CDataIO::ReadUInt64()
 {
-	readArray(value->getDataPtr(), sizeof(uint32)*4);
+	uint64 uRetVal;
+	ReadArray(&uRetVal, sizeof(uint64));
+	return uRetVal;
 }
 
-float CDataIO::readFloat()
+void CDataIO::ReadUInt128(CUInt128* puValue)
 {
-	float retVal;
-	readArray(&retVal, sizeof(float));
-	return retVal;
+	ReadArray(puValue->GetDataPtr(), sizeof(uint32)*4);
 }
 
-void CDataIO::readHash(BYTE* value)
+float CDataIO::ReadFloat()
 {
-	readArray(value, 16);
+	float fRetVal;
+	ReadArray(&fRetVal, sizeof(float));
+	return fRetVal;
 }
 
-BYTE* CDataIO::readBsob(uint8* puSize)
+void CDataIO::ReadHash(BYTE* pbyValue)
 {
-	*puSize = readUInt8();
-	if (getAvailable() < *puSize)
+	ReadArray(pbyValue, 16);
+}
+
+BYTE* CDataIO::ReadBsob(uint8* puSize)
+{
+	*puSize = ReadUInt8();
+	if (GetAvailable() < *puSize)
 		throw new CIOException(ERR_BUFFER_TOO_SMALL);
-	BYTE* pucBsob = new BYTE[*puSize];
-	try{
-		readArray(pucBsob, *puSize);
+	BYTE* pbyBsob = new BYTE[*puSize];
+	try
+	{
+		ReadArray(pbyBsob, *puSize);
 	}
-	catch(CException*){
-		delete[] pucBsob;
+	catch(CException*)
+	{
+		delete[] pbyBsob;
 		throw;
 	}
-	return pucBsob;
+	return pbyBsob;
 }
 
-CStringW CDataIO::readStringUTF8(bool bOptACP)
+CStringW CDataIO::ReadStringUTF8(bool bOptACP)
 {
-	UINT uRawSize = readUInt16();
+	UINT uRawSize = ReadUInt16();
 	const UINT uMaxShortRawSize = SHORT_RAW_ED2K_UTF8_STR;
 	if (uRawSize <= uMaxShortRawSize)
 	{
 		char acRaw[uMaxShortRawSize];
-		readArray(acRaw, uRawSize);
+		ReadArray(acRaw, uRawSize);
 		WCHAR awc[uMaxShortRawSize];
 		int iChars = bOptACP
-					   ? utf8towc(acRaw, uRawSize, awc, ARRSIZE(awc))
-					   : ByteStreamToWideChar(acRaw, uRawSize, awc, ARRSIZE(awc));
+		             ? utf8towc(acRaw, uRawSize, awc, ARRSIZE(awc))
+		             : ByteStreamToWideChar(acRaw, uRawSize, awc, ARRSIZE(awc));
 		if (iChars >= 0)
 			return CStringW(awc, iChars);
 		return CStringW(acRaw, uRawSize); // use local codepage
@@ -134,281 +138,300 @@ CStringW CDataIO::readStringUTF8(bool bOptACP)
 	else
 	{
 		Array<char> acRaw(uRawSize);
-		readArray(acRaw, uRawSize);
+		ReadArray(acRaw, uRawSize);
 		Array<WCHAR> awc(uRawSize);
 		int iChars = bOptACP
-					   ? utf8towc(acRaw, uRawSize, awc, uRawSize)
-					   : ByteStreamToWideChar(acRaw, uRawSize, awc, uRawSize);
+		             ? utf8towc(acRaw, uRawSize, awc, uRawSize)
+		             : ByteStreamToWideChar(acRaw, uRawSize, awc, uRawSize);
 		if (iChars >= 0)
 			return CStringW(awc, iChars);
 		return CStringW(acRaw, uRawSize); // use local codepage
 	}
 }
 
-CKadTag *CDataIO::readTag(bool bOptACP)
+CKadTag *CDataIO::ReadTag(bool bOptACP)
 {
-	CKadTag *retVal = NULL;
-	char *name = NULL;
-	byte type = 0;
-	uint16 lenName = 0;
+	CKadTag *pRetVal = NULL;
+	char *pcName = NULL;
+	byte byType = 0;
+	uint16 uLenName = 0;
 	try
 	{
-		type = readByte();
-		lenName = readUInt16();
-		name = new char[lenName+1];
-		name[lenName] = 0;
-		readArray(name, lenName);
+		byType = ReadByte();
+		uLenName = ReadUInt16();
+		pcName = new char[uLenName+1];
+		pcName[uLenName] = 0;
+		ReadArray(pcName, uLenName);
 
-		switch (type)
+		switch (byType)
 		{
-			// NOTE: This tag data type is accepted and stored only to give us the possibility to upgrade 
-			// the net in some months.
-			//
-			// And still.. it doesnt't work this way without breaking backward compatibility. To properly
-			// do this without messing up the network the following would have to be done:
-			//	 -	those tag types have to be ignored by any client, otherwise those tags would also be sent (and 
-			//		that's really the problem)
-			//
-			//	 -	ignoring means, each client has to read and right throw away those tags, so those tags get
-			//		get never stored in any tag list which might be sent by that client to some other client.
-			//
-			//	 -	all calling functions have to be changed to deal with the 'nr. of tags' attribute (which was 
-			//		already parsed) correctly.. just ignoring those tags here is not enough, any taglists have to 
-			//		be built with the knowledge that the 'nr. of tags' attribute may get decreased during the tag 
-			//		reading..
-			// 
-			// If those new tags would just be stored and sent to remote clients, any malicious or just bugged
-			// client could let send a lot of nodes "corrupted" packets...
-			//
+				// NOTE: This tag data type is accepted and stored only to give us the possibility to upgrade
+				// the net in some months.
+				//
+				// And still.. it doesnt't work this way without breaking backward compatibility. To properly
+				// do this without messing up the network the following would have to be done:
+				//	 -	those tag types have to be ignored by any client, otherwise those tags would also be sent (and
+				//		that's really the problem)
+				//
+				//	 -	ignoring means, each client has to read and right throw away those tags, so those tags get
+				//		get never stored in any tag list which might be sent by that client to some other client.
+				//
+				//	 -	all calling functions have to be changed to deal with the 'nr. of tags' attribute (which was
+				//		already parsed) correctly.. just ignoring those tags here is not enough, any taglists have to
+				//		be built with the knowledge that the 'nr. of tags' attribute may get decreased during the tag
+				//		reading..
+				//
+				// If those new tags would just be stored and sent to remote clients, any malicious or just bugged
+				// client could let send a lot of nodes "corrupted" packets...
+				//
 			case TAGTYPE_HASH:
-			{
-				BYTE value[16];
-				readHash(value);
-				retVal = new CKadTagHash(name, value);
-				break;
-			}
+				{
+					BYTE byValue[16];
+					ReadHash(byValue);
+					pRetVal = new CKadTagHash(pcName, byValue);
+					break;
+				}
 
 			case TAGTYPE_STRING:
-				retVal = new CKadTagStr(name, readStringUTF8(bOptACP));
+				pRetVal = new CKadTagStr(pcName, ReadStringUTF8(bOptACP));
+				break;
+
+			case TAGTYPE_UINT64:
+				pRetVal = new CKadTagUInt64(pcName, ReadUInt64());
 				break;
 
 			case TAGTYPE_UINT32:
-				retVal = new CKadTagUInt32(name, readUInt32());
+				pRetVal = new CKadTagUInt32(pcName, ReadUInt32());
 				break;
-
-			case TAGTYPE_FLOAT32:
-				retVal = new CKadTagFloat(name, readFloat());
-				break;
-
-			// NOTE: This tag data type is accepted and stored only to give us the possibility to upgrade 
-			// the net in some months.
-			//
-			// And still.. it doesnt't work this way without breaking backward compatibility
-			case TAGTYPE_BSOB:
-			{
-				uint8 size;
-				BYTE* value = readBsob(&size);
-				try{
-					retVal = new CKadTagBsob(name, value, size);
-				}
-				catch(CException*){
-					delete[] value;
-					throw;
-				}
-				delete[] value;
-				break;
-			}
 
 			case TAGTYPE_UINT16:
-				retVal = new CKadTagUInt16(name, readUInt16());
+				pRetVal = new CKadTagUInt16(pcName, ReadUInt16());
 				break;
 
 			case TAGTYPE_UINT8:
-				retVal = new CKadTagUInt8(name, readUInt8());
+				pRetVal = new CKadTagUInt8(pcName, ReadUInt8());
 				break;
+
+			case TAGTYPE_FLOAT32:
+				pRetVal = new CKadTagFloat(pcName, ReadFloat());
+				break;
+
+				// NOTE: This tag data type is accepted and stored only to give us the possibility to upgrade
+				// the net in some months.
+				//
+				// And still.. it doesnt't work this way without breaking backward compatibility
+			case TAGTYPE_BSOB:
+				{
+					uint8 uSize;
+					BYTE* pValue = ReadBsob(&uSize);
+					try
+					{
+						pRetVal = new CKadTagBsob(pcName, pValue, uSize);
+					}
+					catch(CException*)
+					{
+						delete[] pValue;
+						throw;
+					}
+					delete[] pValue;
+					break;
+				}
 
 			default:
 				throw new CNotSupportedException;
 		}
-		delete [] name;
-		name = NULL;
+		delete [] pcName;
+		pcName = NULL;
 	}
 	catch (...)
 	{
-		DebugLogError(_T("Invalid Kad tag; type=0x%02x  lenName=%u  name=0x%02x"), type, lenName, name!=NULL ? (BYTE)name[0] : 0);
-		delete[] name;
-		delete retVal;
+		DebugLogError(_T("Invalid Kad tag; type=0x%02x  lenName=%u  name=0x%02x"), byType, uLenName, pcName!=NULL ? (BYTE)pcName[0] : 0);
+		delete[] pcName;
+		delete pRetVal;
 		throw;
 	}
-	return retVal;
+	return pRetVal;
 }
 
-void CDataIO::readTagList(TagList* taglist, bool bOptACP)
+void CDataIO::ReadTagList(TagList* pTaglist, bool bOptACP)
 {
-	uint32 count = readByte();
-	for (uint32 i=0; i<count; i++)
+	uint32 uCount = ReadByte();
+	for (uint32 i=0; i<uCount; i++)
 	{
-		CKadTag* tag = readTag(bOptACP);
-		taglist->push_back(tag);
+		CKadTag* pTag = ReadTag(bOptACP);
+		pTaglist->push_back(pTag);
 	}
 }
 
-void CDataIO::writeByte(byte val)
+void CDataIO::WriteByte(byte byVal)
 {
-	writeArray(&val, 1);
+	WriteArray(&byVal, 1);
 }
 
-void CDataIO::writeUInt8(uint8 val)
+void CDataIO::WriteUInt8(uint8 uVal)
 {
-	writeArray(&val, sizeof(uint8));
+	WriteArray(&uVal, sizeof(uint8));
 }
 
-void CDataIO::writeUInt16(uint16 val)
+void CDataIO::WriteUInt16(uint16 uVal)
 {
-	writeArray(&val, sizeof(uint16));
+	WriteArray(&uVal, sizeof(uint16));
 }
 
-void CDataIO::writeUInt32(uint32 val)
+void CDataIO::WriteUInt32(uint32 uVal)
 {
-	writeArray(&val, sizeof(uint32));
+	WriteArray(&uVal, sizeof(uint32));
 }
 
-void CDataIO::writeUInt128(const CUInt128& val)
+void CDataIO::WriteUInt64(uint64 uVal)
 {
-	writeArray(val.getData(), sizeof(uint32)*4);
+	WriteArray(&uVal, sizeof(uint64));
 }
 
-void CDataIO::writeFloat(float val)
+void CDataIO::WriteUInt128(const CUInt128& uVal)
 {
-	writeArray(&val, sizeof(float));
+	WriteArray(uVal.GetData(), sizeof(uint32)*4);
 }
 
-void CDataIO::writeHash(const BYTE* value)
+void CDataIO::WriteFloat(float fVal)
 {
-	writeArray(value, 16);
+	WriteArray(&fVal, sizeof(float));
 }
 
-void CDataIO::writeBsob(const BYTE* value, uint8 size)
+void CDataIO::WriteHash(const BYTE* pbyValue)
 {
-	writeUInt8(size);
-	writeArray(value, size);
+	WriteArray(pbyValue, 16);
 }
 
-void CDataIO::writeTag(const CKadTag* tag)
+void CDataIO::WriteBsob(const BYTE* pbyValue, uint8 uSize)
+{
+	WriteUInt8(uSize);
+	WriteArray(pbyValue, uSize);
+}
+
+void CDataIO::WriteTag(const CKadTag* pTag)
 {
 	try
 	{
-		uint8 type;
-		if (tag->m_type == 0xFE)
+		uint8 uType;
+		if (pTag->m_type == 0xFE)
 		{
-			if (tag->GetInt() <= 0xFF)
-				type = TAGTYPE_UINT8;
-			else if (tag->GetInt() <= 0xFFFF)
-				type = TAGTYPE_UINT16;
+			if (pTag->GetInt() <= 0xFF)
+				uType = TAGTYPE_UINT8;
+			else if (pTag->GetInt() <= 0xFFFF)
+				uType = TAGTYPE_UINT16;
+			else if (pTag->GetInt() <= 0xFFFFFFFF)
+				uType = TAGTYPE_UINT32;
 			else
-				type = TAGTYPE_UINT32;
+				uType = TAGTYPE_UINT64;
 		}
 		else
-			type = tag->m_type;
+			uType = pTag->m_type;
 
-		writeByte(type);
+		WriteByte(uType);
 
-		const CKadTagNameString& name = tag->m_name;
-		writeUInt16(name.GetLength());
-		writeArray((LPCSTR)name, name.GetLength());
+		const CKadTagNameString& name = pTag->m_name;
+		WriteUInt16((uint16)name.GetLength());
+		WriteArray((LPCSTR)name, name.GetLength());
 
-		switch (type)
+		switch (uType)
 		{
 			case TAGTYPE_HASH:
 				// Do NOT use this to transfer any tags for at least half a year!!
-				writeHash(tag->GetHash());
+				WriteHash(pTag->GetHash());
 				ASSERT(0);
 				break;
 			case TAGTYPE_STRING:
-			{
-				CUnicodeToUTF8 utf8(tag->GetStr());
-				writeUInt16(utf8.GetLength());
-				writeArray(utf8, utf8.GetLength());
+				{
+					CUnicodeToUTF8 utf8(pTag->GetStr());
+					WriteUInt16((uint16)utf8.GetLength());
+					WriteArray(utf8, utf8.GetLength());
+					break;
+				}
+			case TAGTYPE_UINT64:
+				WriteUInt64(pTag->GetInt());
 				break;
-			}
 			case TAGTYPE_UINT32:
-				writeUInt32(tag->GetInt());
-				break;
-			case TAGTYPE_FLOAT32:
-				writeFloat(tag->GetFloat());
-				break;
-			case TAGTYPE_BSOB:
-				// Do NOT use this to transfer any tags for at least half a year!!
-				writeBsob(tag->GetBsob(), tag->GetBsobSize());
-				ASSERT(0);
+				WriteUInt32((uint32)pTag->GetInt());
 				break;
 			case TAGTYPE_UINT16:
-				writeUInt16(tag->GetInt());
+				WriteUInt16((uint16)pTag->GetInt());
 				break;
 			case TAGTYPE_UINT8:
-				writeUInt8(tag->GetInt());
+				WriteUInt8((uint8)pTag->GetInt());
+				break;
+			case TAGTYPE_FLOAT32:
+				WriteFloat(pTag->GetFloat());
+				break;
+			case TAGTYPE_BSOB:
+				WriteBsob(pTag->GetBsob(), pTag->GetBsobSize());
 				break;
 		}
-	} 
+	}
 	catch (CIOException *ioe)
 	{
-		AddDebugLogLine( false, _T("Exception in CDataIO:writeTag (IO Error(%i))"), ioe->m_cause);
+		AddDebugLogLine( false, _T("Exception in CDataIO:writeTag (IO Error(%i))"), ioe->m_iCause);
 		throw ioe;
 	}
-	catch (...) 
+	catch (...)
 	{
 		AddDebugLogLine(false, _T("Exception in CDataIO:writeTag"));
 		throw;
 	}
 }
 
-void CDataIO::writeTag(LPCSTR name, uint32 value)
+void CDataIO::WriteTag(LPCSTR szName, uint64 uValue)
 {
-	CKadTagUInt32 tag(name, value);
-	writeTag(&tag);
+	CKadTagUInt64 tag(szName, uValue);
+	WriteTag(&tag);
 }
 
-void CDataIO::writeTag(LPCSTR name, uint16 value)
+void CDataIO::WriteTag(LPCSTR szName, uint32 uValue)
 {
-	CKadTagUInt16 tag(name, value);
-	writeTag(&tag);
+	CKadTagUInt32 tag(szName, uValue);
+	WriteTag(&tag);
 }
 
-void CDataIO::writeTag(LPCSTR name, uint8 value)
+void CDataIO::WriteTag(LPCSTR szName, uint16 uValue)
 {
-	CKadTagUInt8 tag(name, value);
-	writeTag(&tag);
+	CKadTagUInt16 tag(szName, uValue);
+	WriteTag(&tag);
 }
 
-void CDataIO::writeTag(LPCSTR name, float value)
+void CDataIO::WriteTag(LPCSTR szName, uint8 uValue)
 {
-	CKadTagFloat tag(name, value);
-	writeTag(&tag);
+	CKadTagUInt8 tag(szName, uValue);
+	WriteTag(&tag);
 }
 
-void CDataIO::writeTagList(const TagList& tagList)
+void CDataIO::WriteTag(LPCSTR szName, float uValue)
 {
-	uint32 count = (uint32)tagList.size();
-	ASSERT( count <= 0xFF );
-	writeByte(count);
-	TagList::const_iterator it;
-	for (it = tagList.begin(); it != tagList.end(); it++)
-		writeTag(*it);
+	CKadTagFloat tag(szName, uValue);
+	WriteTag(&tag);
 }
 
-namespace Kademlia {
-void deleteTagListEntries(TagList* taglist)
+void CDataIO::WriteTagList(const TagList& tagList)
 {
-	TagList::const_iterator it;
-	for (it = taglist->begin(); it != taglist->end(); it++)
-		delete *it;
-	taglist->clear();
+	uint32 uCount = (uint32)tagList.size();
+	ASSERT( uCount <= 0xFF );
+	WriteByte((uint8)uCount);
+	for (TagList::const_iterator itTagList = tagList.begin(); itTagList != tagList.end(); ++itTagList)
+		WriteTag(*itTagList);
 }
+
+namespace Kademlia
+{
+	void deleteTagListEntries(TagList* pTaglist)
+	{
+		for (TagList::const_iterator itTagList = pTaglist->begin(); itTagList != pTaglist->end(); ++itTagList)
+			delete *itTagList;
+		pTaglist->clear();
+	}
 }
 
 static WCHAR _awcLowerMap[0x10000];
 
-bool CKademlia::initUnicode(HMODULE hInst)
+bool CKademlia::InitUnicode(HMODULE hInst)
 {
 	bool bResult = false;
 	HRSRC hResInfo = FindResource(hInst, MAKEINTRESOURCE(IDR_WIDECHARLOWERMAP), _T("WIDECHARMAP"));
@@ -449,12 +472,13 @@ void KadTagStrMakeLower(CKadTagValueString& rwstr)
 	int iLen = rwstr.GetLength();
 	LPWSTR pwsz = rwstr.GetBuffer(iLen);
 	int iSize = LCMapStringW(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT),
-							 LCMAP_LOWERCASE, pwsz, -1, pwsz, iLen + 1);
+	                         LCMAP_LOWERCASE, pwsz, -1, pwsz, iLen + 1);
 	ASSERT( iSize - 1 == iLen );
 	rwstr.ReleaseBuffer(iLen);
 #else
 	// NOTE: It's very important that the Unicode->LowerCase map already was initialized!
-	if (_awcLowerMap[L'A'] != L'a'){
+	if (_awcLowerMap[L'A'] != L'a')
+	{
 		AfxMessageBox(_T("Kad Unicode lowercase character map not initialized!"));
 		exit(1);
 	}

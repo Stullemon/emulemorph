@@ -304,7 +304,7 @@ void CPPgMorphShare::OnDestroy()
 
 	CPropertyPage::OnDestroy();
 }
-LRESULT CPPgMorphShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
+LRESULT CPPgMorphShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if (wParam == IDC_MORPH_OPTS){
 		//TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
@@ -337,7 +337,7 @@ BOOL CPPgMorphShare::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgMorphShare::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgMorphShare::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

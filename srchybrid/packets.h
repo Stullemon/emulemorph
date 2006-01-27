@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -88,8 +88,8 @@ class CTag
 #endif
 {
 public:
-	CTag(LPCSTR pszName, uint32 uVal);
-	CTag(uint8 uName, uint32 uVal);
+	CTag(LPCSTR pszName, uint64 uVal, bool bInt64 = false);
+	CTag(uint8 uName, uint64 uVal, bool bInt64 = false);
 	CTag(LPCSTR pszName, LPCTSTR pszVal);
 	CTag(uint8 uName, LPCTSTR pszVal);
 	CTag(LPCSTR pszName, const CString& rstrVal);
@@ -109,8 +109,10 @@ public:
 	bool IsFloat() const			{ return m_uType == TAGTYPE_FLOAT32; }
 	bool IsHash() const				{ return m_uType == TAGTYPE_HASH; }
 	bool IsBlob() const				{ return m_uType == TAGTYPE_BLOB; }
+	bool IsInt64(bool bOrInt32 = true) const { return m_uType == TAGTYPE_UINT64 || (bOrInt32 && IsInt()); }
 	
-	UINT GetInt() const				{ ASSERT(IsInt());		return m_uVal; }
+	UINT	GetInt() const			{ ASSERT(IsInt());		return (UINT)m_uVal; }
+	uint64	GetInt64() const		{ ASSERT(IsInt64(true));return m_uVal; }
 	const CString& GetStr() const	{ ASSERT(IsStr());		return *m_pstrVal; }
 	float GetFloat() const			{ ASSERT(IsFloat());	return m_fVal; }
 	const BYTE* GetHash() const		{ ASSERT(IsHash());		return m_pData; }
@@ -118,6 +120,7 @@ public:
 	const BYTE* GetBlob() const		{ ASSERT(IsBlob());		return m_pData; }
 
 	void SetInt(UINT uVal);
+	void SetInt64(uint64 uVal);
 	void SetStr(LPCTSTR pszVal);
 	
 	CTag* CloneTag()				{ return new CTag(*this); }
@@ -125,7 +128,7 @@ public:
 	bool WriteTagToFile(CFileDataIO* file, EUtf8Str eStrEncode = utf8strNone) const;	// old eD2K tags
 	bool WriteNewEd2kTag(CFileDataIO* file, EUtf8Str eStrEncode = utf8strNone) const;	// new eD2K tags
 	
-	CString GetFullInfo() const;
+	CString GetFullInfo(CString (*pfnDbgGetFileMetaTagName)(UINT uMetaTagID) = NULL) const;
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -140,7 +143,7 @@ protected:
 	uint32	m_nBlobSize;
 	union{
 	  CString*	m_pstrVal;
-	  uint32	m_uVal;
+	  uint64	m_uVal;
 	  float		m_fVal;
 	  BYTE*		m_pData;
 	};

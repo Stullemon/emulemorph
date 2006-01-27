@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -191,33 +191,35 @@ void CPreferencesDlg::Localize()
 	m_wndEmulespana.Localize(); //MORPH - Added by SiRoB, emulEspaña preferency
 	m_wndWebcachesettings.Localize(); //MORPH - Added by SiRoB, WebCache 1.2f
 
+	int c = 0;
+
 	CTreeCtrl* pTree = GetPageTreeControl();
 	if (pTree)
 	{
-		pTree->SetItemText(GetPageTreeItem(0), RemoveAmbersand(GetResString(IDS_PW_GENERAL)));
-		pTree->SetItemText(GetPageTreeItem(1), RemoveAmbersand(GetResString(IDS_PW_DISPLAY))); 
-		pTree->SetItemText(GetPageTreeItem(2), RemoveAmbersand(GetResString(IDS_PW_CONNECTION))); 
-		pTree->SetItemText(GetPageTreeItem(3), RemoveAmbersand(GetResString(IDS_PW_PROXY))); 
-		pTree->SetItemText(GetPageTreeItem(4), RemoveAmbersand(GetResString(IDS_PW_SERVER))); 
-		pTree->SetItemText(GetPageTreeItem(5), RemoveAmbersand(GetResString(IDS_PW_DIR))); 
-		pTree->SetItemText(GetPageTreeItem(6), RemoveAmbersand(GetResString(IDS_PW_FILES))); 
-		pTree->SetItemText(GetPageTreeItem(7), RemoveAmbersand(GetResString(IDS_PW_EKDEV_OPTIONS))); 
-		pTree->SetItemText(GetPageTreeItem(8), RemoveAmbersand(GetResString(IDS_STATSSETUPINFO))); 
-		pTree->SetItemText(GetPageTreeItem(9), RemoveAmbersand(GetResString(IDS_IRC)));
-		pTree->SetItemText(GetPageTreeItem(10), RemoveAmbersand(GetResString(IDS_SECURITY))); 
-		pTree->SetItemText(GetPageTreeItem(11), RemoveAmbersand(GetResString(IDS_SCHEDULER)));
-		pTree->SetItemText(GetPageTreeItem(12), RemoveAmbersand(GetResString(IDS_PW_WS)));
-		pTree->SetItemText(GetPageTreeItem(13), RemoveAmbersand(GetResString(IDS_PW_TWEAK)));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_GENERAL)));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_DISPLAY))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_CONNECTION))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_PROXY))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_SERVER))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_DIR))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_FILES))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_EKDEV_OPTIONS))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_STATSSETUPINFO))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_IRC)));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SECURITY))); 
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SCHEDULER)));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WS)));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_TWEAK)));
 		//	MOD group
-		pTree->SetItemText(GetPageTreeItem(14), RemoveAmbersand(GetResString(IDS_BACKUP)));
-		pTree->SetItemText(GetPageTreeItem(15), RemoveAmbersand(_T("Morph")));
-		pTree->SetItemText(GetPageTreeItem(16), RemoveAmbersand(_T("Morph Share")));
-		pTree->SetItemText(GetPageTreeItem(17), RemoveAmbersand(_T("Morph Update")));
-		pTree->SetItemText(GetPageTreeItem(18), RemoveAmbersand(_T("EastShare")));
-		pTree->SetItemText(GetPageTreeItem(19), RemoveAmbersand(_T("emulEspaña")));
-		pTree->SetItemText(GetPageTreeItem(20), RemoveAmbersand(GetResString(IDS_PW_WEBCACHE)));  //MORPH - Added by SiRoB, WebCache 1.2f
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_BACKUP)));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("Morph")));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("Morph Share")));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("Morph Update")));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("EastShare")));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("emulEspaña")));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WEBCACHE)));  //MORPH - Added by SiRoB, WebCache 1.2f
 	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
-		pTree->SetItemText(GetPageTreeItem(21), _T("Debug"));
+		pTree->SetItemText(GetPageTreeItem(c++), _T("Debug"));
 	#endif
 	}
 	m_banner.UpdateSize(); //Commander - Added: Preferences Banner [TPT]	
@@ -225,8 +227,8 @@ void CPreferencesDlg::Localize()
 	CRect rectTab,rectClient;
 	pTree->GetWindowRect(rectTab);
 	GetClientRect(rectClient);
-	//MORPH END   - Added by SiRoB, Adjust tabHeigh
 	pTree->SetWindowPos(NULL,-1,-1,rectTab.Width(),rectClient.Height()-13,SWP_NOZORDER | SWP_NOMOVE);
+	//MORPH END   - Added by SiRoB, Adjust tabHeigh
 	UpdateCaption();
 }
 
@@ -264,7 +266,7 @@ BOOL CPreferencesDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPreferencesDlg::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPreferencesDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

@@ -7,6 +7,8 @@
 
 #define	CRASH_HERE()		(*((int*)NULL) = 0)
 
-#ifndef _DEBUG
-#define USE_CLIENT_TCP_CATCH_ALL_HANDLER
+#ifdef _DEBUG
+#ifndef NO_USE_CLIENT_TCP_CATCH_ALL_HANDLER
+#define NO_USE_CLIENT_TCP_CATCH_ALL_HANDLER	1
+#endif
 #endif

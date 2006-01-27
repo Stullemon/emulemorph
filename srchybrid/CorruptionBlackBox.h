@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -30,15 +30,15 @@ enum EBBRStatus{
 class CCBBRecord
 {
 public:
-	CCBBRecord(uint32 nStartPos = 0, uint32 nEndPos = 0, uint32 dwIP = 0, EBBRStatus BBRStatus = BBR_NONE);
+	CCBBRecord(uint64 nStartPos = 0, uint64 nEndPos = 0, uint32 dwIP = 0, EBBRStatus BBRStatus = BBR_NONE);
 	CCBBRecord(const CCBBRecord& cv)			{ *this = cv; }
 	CCBBRecord& operator=(const CCBBRecord& cv);
 
-	bool	Merge(uint32 nStartPos, uint32 nEndPos, uint32 dwIP, EBBRStatus BBRStatus = BBR_NONE);
-	bool	CanMerge(uint32 nStartPos, uint32 nEndPos, uint32 dwIP, EBBRStatus BBRStatus = BBR_NONE);
+	bool	Merge(uint64 nStartPos, uint64 nEndPos, uint32 dwIP, EBBRStatus BBRStatus = BBR_NONE);
+	bool	CanMerge(uint64 nStartPos, uint64 nEndPos, uint32 dwIP, EBBRStatus BBRStatus = BBR_NONE);
 
-	uint32	m_nStartPos;
-	uint32	m_nEndPos;
+	uint64	m_nStartPos;
+	uint64	m_nEndPos;
 	uint32	m_dwIP;
 	EBBRStatus 	m_BBRStatus;
 };
@@ -51,11 +51,11 @@ class CCorruptionBlackBox
 public:
 	CCorruptionBlackBox()			{}
 	~CCorruptionBlackBox()			{}
-	void	Init(uint32 nFileSize);
+	void	Init(EMFileSize nFileSize);
 	void	Free();
-	void	TransferredData(uint32 nStartPos, uint32 nEndPos, const CUpDownClient* pSender);
-	void	VerifiedData(uint32 nStartPos, uint32 nEndPos);
-	void	CorruptedData(uint32 nStartPos, uint32 nEndPos);
+	void	TransferredData(uint64 nStartPos, uint64 nEndPos, const CUpDownClient* pSender);
+	void	VerifiedData(uint64 nStartPos, uint64 nEndPos);
+	void	CorruptedData(uint64 nStartPos, uint64 nEndPos);
 
 
 private:

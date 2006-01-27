@@ -1,4 +1,4 @@
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -77,9 +77,9 @@ public:
 	void	AddDownload(CPartFile* newfile, bool paused);
 	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 	//Modified these three functions by adding and in some cases removing params.
-	void	AddSearchToDownload(CSearchFile* toadd,uint8 paused=2,uint8 cat=0, uint16 useOrder = 0);
-	void	AddSearchToDownload(CString link,uint8 paused=2, uint8 cat=0, uint16 useOrder = 0);
-	void	AddFileLinkToDownload(class CED2KFileLink* pLink, int cat=0, bool AllocatedLink = false);
+	void	AddSearchToDownload(CSearchFile* toadd, uint8 paused = 2, int cat = 0, uint16 useOrder = 0);
+	void	AddSearchToDownload(CString link,uint8 paused = 2, int cat = 0, uint16 useOrder = 0);
+	void	AddFileLinkToDownload(class CED2KFileLink* pLink, int cat = 0, bool AllocatedLink = false);
 	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 	void	RemoveFile(CPartFile* toremove);
 	void	DeleteAll();
@@ -100,13 +100,13 @@ public:
 	// khaos::categorymod+
 	bool	StartNextFile(int cat=-1,bool force=false);
 	void	StopPauseLastFile(int Mode = MP_PAUSE, int Category = -1);
-	uint16	GetMaxCatResumeOrder(uint8 iCategory = 0);
-	void	GetCategoryFileCounts(uint8 iCategory, int cntFiles[]);
-	uint16	GetCategoryFileCount(uint8 iCategory);
-	uint16	GetHighestAvailableSourceCount(int nCat = -1);
-	uint16	GetCatActiveFileCount(uint8 iCategory);
-	uint8	GetAutoCat(CString sFullName, ULONG nFileSize);
-	bool	ApplyFilterMask(CString sFullName, uint8 nCat);
+	UINT	GetMaxCatResumeOrder(UINT iCategory = 0);
+	void	GetCategoryFileCounts(UINT iCategory, int cntFiles[]);
+	UINT	GetCategoryFileCount(UINT iCategory);
+	UINT	GetHighestAvailableSourceCount(int nCat = -1);
+	UINT	GetCatActiveFileCount(UINT iCategory);
+	UINT	GetAutoCat(CString sFullName, EMFileSize nFileSize);
+	bool	ApplyFilterMask(CString sFullName, UINT nCat);
 	// khaos::categorymod-
 
 	// sources
@@ -133,12 +133,12 @@ public:
 
 	// categories
 	// khaos::categorymod+	
-	void	ResetCatParts(int cat, uint8 useCat = 0);
+	void	ResetCatParts(UINT cat, UINT useCat = 0);
 	// khaos::categorymod-
-	void	SetCatPrio(int cat, uint8 newprio);
-    void    RemoveAutoPrioInCat(int cat, uint8 newprio); // ZZ:DownloadManager
-	void	SetCatStatus(int cat, int newstatus);
-	void	MoveCat(uint8 from, uint8 to);
+	void	SetCatPrio(UINT cat, uint8 newprio);
+    void    RemoveAutoPrioInCat(UINT cat, uint8 newprio); // ZZ:DownloadManager
+	void	SetCatStatus(UINT cat, int newstatus);
+	void	MoveCat(UINT from, UINT to);
 	//MORPH START - Removed by SiRoB, Due to Khaos Categorie
 	/*
 	void	SetAutoCat(CPartFile* newfile);
@@ -152,7 +152,7 @@ public:
 	// searching in Kad
 	void	SetLastKademliaFileRequest()				{lastkademliafilerequest = ::GetTickCount();}
 	bool	DoKademliaFileRequest();
-	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, const Kademlia::CUInt128* pkadID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint32 clientid);
+	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, const Kademlia::CUInt128* pkadID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport);
 
 	// searching on global servers
 	void	StopUDPRequests();
@@ -167,7 +167,7 @@ public:
 
 	void	AddToResolved( CPartFile* pFile, SUnresolvedHostname* pUH );
 
-	CString GetOptimalTempDir(uint8 nCat, uint32 nFileSize);
+	CString GetOptimalTempDir(UINT nCat, EMFileSize nFileSize);
 
 	CServer* cur_udpserver;
 	bool	IsFilesPowershared(); //MORPH - Added by SiRoB, ZZ Ratio
@@ -187,13 +187,13 @@ public:
 protected:
 	bool	SendNextUDPPacket();
 	void	ProcessLocalRequests();
-	int		GetMaxFilesPerUDPServerPacket() const;
-	bool	SendGlobGetSourcesUDPPacket(CSafeMemFile* data, bool bExt2Packet);
+	bool	IsMaxFilesPerUDPServerPacketReached(uint32 nFiles, uint32 nIncludedLargeFiles) const;
+	bool	SendGlobGetSourcesUDPPacket(CSafeMemFile* data, bool bExt2Packet, uint32 nFiles, uint32 nIncludedLargeFiles);
 
 private:
 	bool	CompareParts(POSITION pos1, POSITION pos2);
 	void	SwapParts(POSITION pos1, POSITION pos2);
-	void	HeapSort(uint16 first, uint16 last);
+	void	HeapSort(UINT first, UINT last);
 	CTypedPtrList<CPtrList, CPartFile*> filelist;
 	CTypedPtrList<CPtrList, CPartFile*> m_localServerReqQueue;
 	uint16	filesrdy;
@@ -203,8 +203,8 @@ private:
 	uint32		lastcheckdiskspacetime;
 	uint32		lastudpsearchtime;
 	uint32		lastudpstattime;
-	uint8		udcounter;
-	uint8		m_cRequestsSentToServer;
+	UINT		udcounter;
+	UINT		m_cRequestsSentToServer;
 	uint32		m_dwNextTCPSrcReq;
 	int			m_iSearchedServers;
 	uint32		lastkademliafilerequest;

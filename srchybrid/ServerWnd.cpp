@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -163,13 +163,13 @@ BOOL CServerWnd::OnInitDialog()
 		servermsgbox->AppendText(_T("eMule v") + theApp.m_strCurVersionLong + _T("\n"));
 		*/
 		m_strMorphNewVersion = _T("eMule v") + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]");
-		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strMorphNewVersion,_T(""),false);
+		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strMorphNewVersion,_T(""));
 		servermsgbox->AppendText(_T("\n"));
 		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-] & New Version Check
 
 		// MOD Note: Do not remove this part - Merkur
 		m_strClickNewVersion = GetResString(IDS_EMULEW) + _T(" ") + GetResString(IDS_EMULEW3) + _T(" ") + GetResString(IDS_EMULEW2);
-		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strClickNewVersion,_T(""),false);
+		servermsgbox->AppendHyperLink(_T(""), _T(""), m_strClickNewVersion, _T(""));
 		// MOD Note: end
 		servermsgbox->AppendText(_T("\n\n"));
 	}
@@ -307,6 +307,10 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(*logbox, MIDDLE_LEFT, BOTTOM_RIGHT);
 	AddAnchor(*debuglog, MIDDLE_LEFT, BOTTOM_RIGHT);
 
+	// Set the tab control to the bottom of the z-order. This solves a lot of strange repainting problems with
+	// the rich edit controls (the log panes).
+	::SetWindowPos(StatusSelector, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOSIZE);
+
 	debug = true;
 	AddAnchor(*newsmsgbox, MIDDLE_LEFT, BOTTOM_RIGHT);//MORPH - Added by SiRoB, XML News [O²]
 	AddAnchor(*morphlog, MIDDLE_LEFT, BOTTOM_RIGHT); //MORPH - Added by SiRoB, Morph Log
@@ -425,10 +429,11 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 	CString strTempFilename;
 	strTempFilename.Format(_T("%stemp-%d-server.met"), thePrefs.GetConfigDir(), ::GetTickCount());
 
-	Log(_T("Downloading server.met from %s"), strURL);
 
 	// try to download server.met
+	Log(GetResString(IDS_DOWNLOADING_SERVERMET_FROM), strURL);
 	CHttpDownloadDlg dlgDownload;
+	dlgDownload.m_strTitle = GetResString(IDS_DOWNLOADING_SERVERMET);
 	dlgDownload.m_sURLToDownload = strURL;
 	dlgDownload.m_sFileToDownloadInto = strTempFilename;
 	if (dlgDownload.DoModal() != IDOK) {
@@ -541,7 +546,7 @@ void CServerWnd::OnBnClickedAddserver()
 	else
 		GetDlgItem(IDC_IPADDRESS)->GetWindowText(serveraddr);
 
-	UINT uPort = 0;
+	uint16 uPort = 0;
 	if (_tcsncmp(serveraddr, _T("ed2k://"), 7) == 0){
 		CED2KLink* pLink = NULL;
 		try{
@@ -571,7 +576,7 @@ void CServerWnd::OnBnClickedAddserver()
 		}
 
 		BOOL bTranslated = FALSE;
-		uPort = GetDlgItemInt(IDC_SPORT, &bTranslated, FALSE);
+		uPort = (uint16)GetDlgItemInt(IDC_SPORT, &bTranslated, FALSE);
 		if (!bTranslated){
 			AfxMessageBox(GetResString(IDS_SRV_PORT));
 			return;
@@ -681,7 +686,7 @@ void CServerWnd::OnBnClickedUpdateServerMetFromUrl()
 			POSITION pos = thePrefs.addresses_list.GetHeadPosition();
 			while (!bDownloaded && pos != NULL)
 			{
-				strURL = thePrefs.addresses_list.GetNext(pos).GetBuffer();
+				strURL = thePrefs.addresses_list.GetNext(pos);
 				bDownloaded=UpdateServerMetFromURL(strURL);
 			}
 		}
@@ -728,7 +733,7 @@ void CServerWnd::OnBnClickedResetLog()
 	}
 }
 
-void CServerWnd::OnTcnSelchangeTab3(NMHDR *pNMHDR, LRESULT *pResult)
+void CServerWnd::OnTcnSelchangeTab3(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	UpdateLogTabSelection();
 	*pResult = 0;
@@ -869,27 +874,34 @@ CString CServerWnd::GetMyInfoString() {
 
 BOOL CServerWnd::PreTranslateMessage(MSG* pMsg) 
 {
-	if (pMsg->message == WM_KEYDOWN){
-
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		// Don't handle Ctrl+Tab in this window. It will be handled by main window.
+		if (pMsg->wParam == VK_TAB && GetAsyncKeyState(VK_CONTROL) < 0)
+			return FALSE;
 		if (pMsg->wParam == VK_ESCAPE)
 			return FALSE;
 
-		if( m_pacServerMetURL && m_pacServerMetURL->IsBound() && ((pMsg->wParam == VK_DELETE) && (pMsg->hwnd == GetDlgItem(IDC_SERVERMETURL)->m_hWnd) && (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)) )
+		if (m_pacServerMetURL && m_pacServerMetURL->IsBound() && (pMsg->wParam == VK_DELETE && pMsg->hwnd == GetDlgItem(IDC_SERVERMETURL)->m_hWnd && (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)))
 			m_pacServerMetURL->Clear();
 
-		if (pMsg->wParam == VK_RETURN){
+		if (pMsg->wParam == VK_RETURN)
+		{
 			if (   pMsg->hwnd == GetDlgItem(IDC_IPADDRESS)->m_hWnd
 				|| pMsg->hwnd == GetDlgItem(IDC_SPORT)->m_hWnd
-				|| pMsg->hwnd == GetDlgItem(IDC_SNAME)->m_hWnd){
-
+				|| pMsg->hwnd == GetDlgItem(IDC_SNAME)->m_hWnd)
+			{
 				OnBnClickedAddserver();
 				return TRUE;
 			}
-			else if (pMsg->hwnd == GetDlgItem(IDC_SERVERMETURL)->m_hWnd){
-				if (m_pacServerMetURL && m_pacServerMetURL->IsBound() ){
+			else if (pMsg->hwnd == GetDlgItem(IDC_SERVERMETURL)->m_hWnd)
+			{
+				if (m_pacServerMetURL && m_pacServerMetURL->IsBound())
+				{
 					CString strText;
 					GetDlgItem(IDC_SERVERMETURL)->GetWindowText(strText);
-					if (!strText.IsEmpty()){
+					if (!strText.IsEmpty())
+					{
 						GetDlgItem(IDC_SERVERMETURL)->SetWindowText(_T("")); // this seems to be the only chance to let the dropdown list to disapear
 						GetDlgItem(IDC_SERVERMETURL)->SetWindowText(strText);
 						((CEdit*)GetDlgItem(IDC_SERVERMETURL))->SetSel(strText.GetLength(), strText.GetLength());
@@ -985,7 +997,7 @@ void CServerWnd::ResetHistory()
 		m_pacServerMetURL->Clear();
 }
 
-BOOL CServerWnd::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CServerWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	theApp.ShowHelp(eMule_FAQ_Update_Server);
 	return TRUE;
@@ -1004,17 +1016,16 @@ void CServerWnd::OnStnDblclickServlstIco()
 
 void CServerWnd::DoResize(int delta)
 {
-	CSplitterControl::ChangeHeight( GetDlgItem(IDC_SERVLIST) , delta);
-
-	CSplitterControl::ChangeHeight( GetDlgItem(IDC_TAB3) , -delta,CW_BOTTOMALIGN);
-	CSplitterControl::ChangeHeight( GetDlgItem(IDC_SERVMSG) , -delta,CW_BOTTOMALIGN);
-	CSplitterControl::ChangeHeight(GetDlgItem(IDC_LOGBOX), -delta, CW_BOTTOMALIGN);
-	CSplitterControl::ChangeHeight(GetDlgItem(IDC_DEBUG_LOG), -delta, CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(&serverlistctrl, delta, CW_TOPALIGN);
+	CSplitterControl::ChangeHeight(&StatusSelector, -delta, CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(servermsgbox, -delta,CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(logbox, -delta, CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(debuglog, -delta, CW_BOTTOMALIGN);
 	//MORPH START - Added by SiRoB, XML News [O²]
-	CSplitterControl::ChangeHeight(GetDlgItem(IDC_NEWSMSG), -delta, CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(newsmsgbox, -delta, CW_BOTTOMALIGN);
 	//MORPH END   - Added by SiRoB, XML News [O²]
 	//MORPH START - Added by SiRoB, Morph Log
-	CSplitterControl::ChangeHeight(GetDlgItem(IDC_MORPH_LOG), -delta, CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(morphlog, -delta, CW_BOTTOMALIGN);
 	//MORPH END   - Added by SiRoB, Morph Log
 
 	UpdateSplitterRange();
@@ -1068,7 +1079,7 @@ void CServerWnd::InitSplitter()
 	//MORPH END   - Changed by SiRoB, XML News
 	GetDlgItem(IDC_LOGRESET)->MoveWindow(rcDlgItem);
 
-	GetDlgItem(IDC_TAB3)->GetWindowRect(rcDlgItem);
+	StatusSelector.GetWindowRect(rcDlgItem);
 	ScreenToClient(rcDlgItem);
 	//MORPH START - Changed by SiRoB, XML News
 	/*
@@ -1077,7 +1088,7 @@ void CServerWnd::InitSplitter()
 	rcDlgItem.top = splitpos + 10 + NEWSOFFSET;
 	//MORPH END   - Changed by SiRoB, XML News
 	rcDlgItem.bottom = rcWnd.bottom-5;
-	GetDlgItem(IDC_TAB3)->MoveWindow(rcDlgItem);
+	StatusSelector.MoveWindow(rcDlgItem);
 
 	servermsgbox->GetWindowRect(rcDlgItem);
 	ScreenToClient(rcDlgItem);
@@ -1136,8 +1147,9 @@ void CServerWnd::InitSplitter()
 	ReattachAnchors();
 }
 
-void CServerWnd::ReattachAnchors() {
-	RemoveAnchor(IDC_SERVLIST);
+void CServerWnd::ReattachAnchors()
+{
+	RemoveAnchor(serverlistctrl);
 	RemoveAnchor(StatusSelector);
 	RemoveAnchor(IDC_LOGRESET);
 	RemoveAnchor(*servermsgbox);
@@ -1155,7 +1167,7 @@ void CServerWnd::ReattachAnchors() {
 	RemoveAnchor(*morphlog);
 	//MORPH END   - Added by SiRoB, Morph Log
 
-	AddAnchor(IDC_SERVLIST, TOP_LEFT, CSize(100, thePrefs.GetSplitterbarPositionServer()));
+	AddAnchor(serverlistctrl, TOP_LEFT, CSize(100, thePrefs.GetSplitterbarPositionServer()));
 	AddAnchor(StatusSelector, CSize(0, thePrefs.GetSplitterbarPositionServer()), BOTTOM_RIGHT);
 	//MORPH START - Added by SiRoB, XML News
 	AddAnchor(IDC_FEEDUPDATE, BOTTOM_RIGHT);
@@ -1171,6 +1183,23 @@ void CServerWnd::ReattachAnchors() {
 	//MORPH END   - Added by SiRoB, XML News
 	//MORPH START - Added by SiRoB, Morph Log
 	AddAnchor(*morphlog,  CSize(0, thePrefs.GetSplitterbarPositionServer()), BOTTOM_RIGHT);
+	//MORPH END   - Added by SiRoB, Morph Log
+
+	GetDlgItem(IDC_LOGRESET)->Invalidate();
+
+	if (servermsgbox->IsWindowVisible())
+		servermsgbox->Invalidate();
+	if (logbox->IsWindowVisible())
+		logbox->Invalidate();
+	if (debuglog->IsWindowVisible())
+		debuglog->Invalidate();
+	//MORPH START - Added by SiRoB, XML News
+	if (newsmsgbox->IsWindowVisible())
+		newsmsgbox->Invalidate();
+	//MORPH END   - Added by SiRoB, XML News
+	//MORPH START - Added by SiRoB, Morph Log
+	if (morphlog->IsWindowVisible())
+		morphlog->Invalidate();
 	//MORPH END   - Added by SiRoB, Morph Log
 }
 
@@ -1189,18 +1218,6 @@ void CServerWnd::UpdateSplitterRange()
 
 	LONG splitpos = rcDlgItem.bottom + SVWND_SPLITTER_YOFF;
 	thePrefs.SetSplitterbarPositionServer( (splitpos  * 100) / rcWnd.Height());
-
-	GetDlgItem(IDC_TAB3)->GetWindowRect(rcDlgItem);
-	ScreenToClient(rcDlgItem);
-	rcDlgItem.bottom = rcWnd.bottom-5;
-	//MORPH START - Changed by SiRoB, XML News
-	/*
-	rcDlgItem.top = splitpos + 10;
-	*/
-	rcDlgItem.top = splitpos + 10 + NEWSOFFSET;
-	//MORPH END - Changed by SiRoB, XML News
-
-	GetDlgItem(IDC_TAB3)->MoveWindow(rcDlgItem);
 
 	//MORPH START - Added by SiRoB, XML News
 	GetDlgItem(IDC_FEEDUPDATE)->GetWindowRect(rcDlgItem);
@@ -1281,7 +1298,7 @@ void CServerWnd::OnWindowPosChanged(WINDOWPOS* lpwndpos)
 	CResizableDialog::OnWindowPosChanged(lpwndpos);
 }
 
-void CServerWnd::OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult)
+void CServerWnd::OnSplitterMoved(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	SPC_NMHDR* pHdr = (SPC_NMHDR*)pNMHDR;
 	DoResize(pHdr->delta);
@@ -1438,7 +1455,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			HTMLParse(sbuffer);
 			TCHAR symbol[4] = _T("\n\x2022 ");
 			newsmsgbox->AppendText(symbol);
-			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
+			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""));
 			aXMLNames.Add(sbuffer);
 			if (!i->first_element_by_path(_T("./author")).child(0).empty())
 			{
@@ -1466,7 +1483,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 					index = buffer.Find(_T("</a>"));
 					sbuffer = buffer.Left(index);
 					aXMLNames.Add(sbuffer);
-					newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
+					newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""));
 					buffer = buffer.Mid(index+4);
 				}
 				newsmsgbox->AppendText(buffer+_T("\n"));
@@ -1521,7 +1538,7 @@ void CServerWnd::ParseNewsFile(LPCTSTR strTempFilename)
 		sbuffer = itelem.first_element_by_path(_T("./title")).child(0).value();
 		HTMLParse(sbuffer);
 		sbuffer.Replace(_T("'"),_T("`"));
-		newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
+		newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""));
 		aXMLNames.Add(sbuffer);
 		// The xmlbuffer stores the description of the newsfile itself.
 		// We pass this to ParseNewsNode to prevent this description to be

@@ -265,7 +265,7 @@ BOOL CPPgEastShare::OnApply()
 	return CPropertyPage::OnApply();
 }
 
-void CPPgEastShare::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void CPPgEastShare::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pScrollBar*/) 
 {
 	SetModified(TRUE);
 	CString temp;
@@ -334,7 +334,7 @@ void CPPgEastShare::OnDestroy()
 	
 	CPropertyPage::OnDestroy();
 }
-LRESULT CPPgEastShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
+LRESULT CPPgEastShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if (wParam == IDC_EASTSHARE_OPTS){
 		//TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
@@ -358,7 +358,7 @@ BOOL CPPgEastShare::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgEastShare::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgEastShare::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

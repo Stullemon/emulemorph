@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -142,18 +142,33 @@ BOOL CEnBitmap::LoadImage(LPCTSTR szImagePath, COLORREF crBack)
 
 IPicture* CEnBitmap::LoadFromBuffer(BYTE* pBuff, int nSize)
 {
-	HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE, nSize);
-	void* pData = GlobalLock(hGlobal);
-	memcpy(pData, pBuff, nSize);
-	GlobalUnlock(hGlobal);
-
-	IStream* pStream = NULL;
 	IPicture* pPicture = NULL;
 
-	if (CreateStreamOnHGlobal(hGlobal, TRUE, &pStream) == S_OK)
+	HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE, nSize);
+	if (hGlobal != NULL)
 	{
-		OleLoadPicture(pStream, nSize, FALSE, IID_IPicture, (LPVOID *)&pPicture);
-		pStream->Release();
+		void* pData = GlobalLock(hGlobal);
+		if (pData != NULL)
+		{
+			memcpy(pData, pBuff, nSize);
+			GlobalUnlock(hGlobal);
+
+			IStream* pStream = NULL;
+			if (CreateStreamOnHGlobal(hGlobal, TRUE/*fDeleteOnRelease*/, &pStream) == S_OK)
+			{
+				// Not sure what the 'KeepOriginalFormat' property is really used for. But if 'OleLoadPicture'
+				// is invoked with 'fRunmode=FALSE' the function always creates a temporary file which even
+				// does not get deleted when all COM pointers were released. It eventually gets deleted only
+				// when process terminated. Using 'fRunmode=TRUE' does prevent this behaviour and does not
+				// seem to have any other side effects.
+				VERIFY( OleLoadPicture(pStream, nSize, TRUE/*FALSE*/, IID_IPicture, (LPVOID*)&pPicture) == S_OK );
+				pStream->Release();
+			}
+			else
+				GlobalFree(hGlobal);
+		}
+		else
+			GlobalFree(hGlobal);
 	}
 
 	return pPicture; // caller releases

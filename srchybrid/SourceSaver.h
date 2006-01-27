@@ -10,7 +10,7 @@ public:
 	~CSourceSaver(void);
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 	//bool Process(CPartFile* file, int maxSourcesToSave=2);
-	bool Process(CPartFile* file, int maxSourcesToSave=10);
+	bool Process(CPartFile* file, UINT maxSourcesToSave=10);
 	void DeleteFile(CPartFile* file);
 
 protected:
@@ -66,7 +66,7 @@ protected:
 	typedef CTypedPtrList<CPtrList, CSourceData*> SourceList;
 
 	void LoadSourcesFromFile(CPartFile* file, SourceList* sources, LPCTSTR slsfile);
-	void SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR slsfile, int maxSourcesToSave);
+	void SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR slsfile, UINT maxSourcesToSave);
 	void AddSourcesToDownload(CPartFile* file, SourceList* sources);
 	
 	uint32	m_dwLastTimeLoaded;

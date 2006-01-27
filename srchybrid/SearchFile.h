@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -32,10 +32,9 @@ public:
 				LPCTSTR pszDirectory = NULL, 
 				bool nKademlia = false);
 	CSearchFile(const CSearchFile* copyfrom);
-	CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFileSize, LPCTSTR pszFileName, int iFileType, int iAvailability);
 	virtual ~CSearchFile();
 
-	bool	IsKademlia() const { return m_nKademlia; }
+	bool	IsKademlia() const { return m_bKademlia; }
 	uint32	AddSources(uint32 count);
 	uint32	GetSourceCount() const;
 	uint32	AddCompleteSources(uint32 count);
@@ -62,7 +61,7 @@ public:
 	// GUI helpers
 	CSearchFile* GetListParent() const		{ return m_list_parent; }
 	void		 SetListParent(CSearchFile* parent) { m_list_parent = parent; }
-	uint16		 GetListChildCount() const	{ return m_list_childcount;}
+	UINT		 GetListChildCount() const	{ return m_list_childcount; }
 	void		 SetListChildCount(int cnt)	{ m_list_childcount = cnt; }
 	void		 AddListChildCount(int cnt) { m_list_childcount += cnt; }
 	bool		 IsListExpanded() const		{ return m_list_bExpanded; }
@@ -70,9 +69,12 @@ public:
 
 	struct SClient {
 		SClient() {
-			m_nIP = m_nPort = m_nServerIP = m_nServerPort = 0;
+			m_nIP = 0;
+			m_nPort = 0;
+			m_nServerIP = 0;
+			m_nServerPort = 0;
 		}
-		SClient(uint32 nIP, UINT nPort, uint32 nServerIP, UINT nServerPort) {
+		SClient(uint32 nIP, uint16 nPort, uint32 nServerIP, uint16 nServerPort) {
 			m_nIP = nIP;
 			m_nPort = nPort;
 			m_nServerIP = nServerIP;
@@ -88,10 +90,11 @@ public:
 
 	struct SServer {
 		SServer() {
-			m_nIP = m_nPort = 0;
+			m_nIP = 0;
+			m_nPort = 0;
 			m_uAvail = 0;
 		}
-		SServer(uint32 nIP, UINT nPort) {
+		SServer(uint32 nIP, uint16 nPort) {
 			m_nIP = nIP;
 			m_nPort = nPort;
 			m_uAvail = 0;
@@ -123,7 +126,7 @@ public:
 	void SetKnownType(EKnownType eType) { m_eKnown = eType; }
 
 private:
-	bool	m_nKademlia;
+	bool	m_bKademlia;
 	uint32	m_nClientID;
 	uint16	m_nClientPort;
 	uint32	m_nSearchID;
@@ -138,7 +141,7 @@ private:
 	// GUI helpers
 	bool		 m_bPreviewPossible;
 	bool		 m_list_bExpanded;
-	uint16		 m_list_childcount;
+	UINT		m_list_childcount;
 	CSearchFile* m_list_parent;
 	EKnownType	m_eKnown;
 };

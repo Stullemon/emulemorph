@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -128,12 +128,12 @@ void CAddSourceDlg::OnBnClickedButton1()
 			uint16 port;
 			int iColon = sip.Find(_T(':'));
 			if (iColon != -1) {
-				port = _tstoi(sip.Mid(iColon + 1));
+				port = (uint16)_tstoi(sip.Mid(iColon + 1));
 				sip = sip.Left(iColon);
 			}
 			else {
 				BOOL bTranslated = FALSE;
-				port = GetDlgItemInt(IDC_EDIT3, &bTranslated, FALSE);
+				port = (uint16)GetDlgItemInt(IDC_EDIT3, &bTranslated, FALSE);
 				if (!bTranslated)
 					return;
 			}

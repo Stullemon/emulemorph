@@ -1,8 +1,12 @@
 #include "stdafx.h"
 #include "MD4.h"
 #include "SHA.h"
+#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4100) // unreferenced formal parameter
 #include <crypto51/sha.h>
 #include <crypto51/md4.h>
+#pragma warning(default:4100) // unreferenced formal parameter
+#pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 
 bool CheckHashingImplementations()
 {

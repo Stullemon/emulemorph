@@ -50,12 +50,12 @@ public:
 
 	void Execute();
 	bool operator < (const CHyperLink& Arg) const	{return m_iEnd < Arg.m_iEnd;}
-	uint16 Begin() const							{return m_iBegin;}
-	uint16 End() const								{return m_iEnd;}
-	uint16 Len() const								{return m_iEnd - m_iBegin + 1;}
+	UINT Begin() const								{return m_iBegin;}
+	UINT End() const								{return m_iEnd;}
+	UINT Len() const								{return m_iEnd - m_iBegin + 1;}
 	CString Title() const							{return m_sTitle;}
-	 void SetBegin( uint16 m_iInBegin )				{m_iBegin = m_iInBegin;}
-	 void SetEnd( uint16 m_iInEnd )					{m_iEnd = m_iInEnd;}
+	void SetBegin( uint16 m_iInBegin )				{m_iBegin = m_iInBegin;}
+	void SetEnd( uint16 m_iInEnd )					{m_iEnd = m_iInEnd;}
 
 protected:
 	int m_iBegin;
@@ -89,12 +89,12 @@ public:
 	CKeyWord(int iBegin, uint16 iEnd, COLORREF icolor);
 
 	bool operator< (const CKeyWord& Arg) const		{return m_iEnd < Arg.m_iEnd;}
-	uint16 Begin() const							{return m_iBegin;}
-	uint16 End() const								{return m_iEnd;}
-	 void SetBegin( uint16 m_iInBegin )				{m_iBegin = m_iInBegin;}
-	 void SetEnd( uint16 m_iInEnd )					{m_iEnd = m_iInEnd;}
+	UINT Begin() const								{return m_iBegin;}
+	UINT End() const								{return m_iEnd;}
+	void SetBegin( uint16 m_iInBegin )				{m_iBegin = m_iInBegin;}
+	void SetEnd( uint16 m_iInEnd )					{m_iEnd = m_iInEnd;}
 	COLORREF Color() const							{return color;}
-	uint16 Len() const								{return m_iEnd - m_iBegin + 1;}
+	UINT Len() const								{return m_iEnd - m_iBegin + 1;}
 protected:
 	int m_iBegin;
 	int m_iEnd;
@@ -141,11 +141,11 @@ public:
 	CHyperLink* m_pHyperLink;
 	CKeyWord* m_pKeyWord;
 
-	 CLinePartInfo(int iBegin, uint16 iEnd, CHyperLink* pHyperLink = NULL, CKeyWord* pKeyWord = NULL);
-	 CLinePartInfo(const CLinePartInfo& Src);
-	 uint16 Begin()							{return m_xBegin;}
-	 uint16 End()							{return m_xEnd;}
-	 uint16 Len()							{return ((m_xEnd - m_xBegin) + 1);}
+	CLinePartInfo(int iBegin, uint16 iEnd, CHyperLink* pHyperLink = NULL, CKeyWord* pKeyWord = NULL);
+	CLinePartInfo(const CLinePartInfo& Src);
+	uint16 Begin()							{return m_xBegin;}
+	uint16 End()							{return m_xEnd;}
+	uint16 Len()							{return ((m_xEnd - m_xBegin) + 1);}
 };
 
 // --------------------------------------------------------------
@@ -155,11 +155,11 @@ public:
 	int m_iBegin;
 	int m_iEnd;
 
-	 CLineInfo(int iBegin, uint16 iEnd);
-	 CLineInfo(const CLineInfo& Src);
-	 uint16 Begin()						{return m_iBegin;}
-	 uint16 End()						{return m_iEnd;}
-	 uint16 Len()						{return m_iEnd - m_iBegin + 1;}
+	CLineInfo(int iBegin, uint16 iEnd);
+	CLineInfo(const CLineInfo& Src);
+	UINT Begin()						{return m_iBegin;}
+	UINT End()							{return m_iEnd;}
+	UINT Len()							{return m_iEnd - m_iBegin + 1;}
 };
 
 // --------------------------------------------------------------
@@ -172,9 +172,9 @@ public:
 	CVisPart* m_pPrev;
 	CVisPart* m_pNext;
 
-	 CVisPart(const CLinePartInfo& LinePartInfo, const CRect& rcBounds, 
+	CVisPart(const CLinePartInfo& LinePartInfo, const CRect& rcBounds, 
 		int iRealBegin, uint16 iRealLen,CVisPart* pPrev,CVisPart* pNext);
-	 CVisPart(const CVisPart& Src);
+	CVisPart(const CVisPart& Src);
 };
 
 class CVisLine : public std::vector<CVisPart>
@@ -218,7 +218,7 @@ protected:
 
 public:
 	CHyperTextCtrl();
-	virtual BOOL PreTranslateMessage(MSG* pMsg)			{return FALSE;}
+	virtual BOOL PreTranslateMessage(MSG* /*pMsg*/)			{return FALSE;}
 	void Clear()					{m_Text->Clear();UpdateSize(true);}
 
 	//message handlers

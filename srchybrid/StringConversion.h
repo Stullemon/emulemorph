@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -65,6 +65,7 @@ CStringA StrToUtf8(const CString& rstr);
 CString EncodeUrlUtf8(const CString& rstr);
 int utf8towc(LPCSTR pcUtf8, UINT uUtf8Size, LPWSTR pwc, UINT uWideCharSize);
 int ByteStreamToWideChar(LPCSTR pcUtf8, UINT uUtf8Size, LPWSTR pwc, UINT uWideCharSize);
+CStringW DecodeDoubleEncodedUtf8(LPCWSTR pszFileName);
 
 #define	SHORT_ED2K_STR			256
 #define	SHORT_RAW_ED2K_MB_STR	(SHORT_ED2K_STR*2)

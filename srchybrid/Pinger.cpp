@@ -439,7 +439,7 @@ PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
 
     // Address is assumed to be ok
     stDestAddr.s_addr = lAddr;
-    stIPInfo.Ttl = ttl;
+    stIPInfo.Ttl = (u_char)ttl;
 
     CTimeTick m_time;
 	m_time.Tick();

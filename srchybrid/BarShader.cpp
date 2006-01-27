@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -37,7 +37,7 @@ static char THIS_FILE[] = __FILE__;
 CBarShader::CBarShader(uint32 height, uint32 width) {
 	m_iWidth = width;
 	m_iHeight = height;
-	m_uFileSize = 1;
+	m_uFileSize = (uint64)1;
 	m_Spans.SetAt(0, 0);	// SLUGFILLER: speedBarShader
 	m_Modifiers = NULL;
 	m_bIsPreview=false;
@@ -52,10 +52,8 @@ void CBarShader::Reset() {
 }
 
 void CBarShader::BuildModifiers() {
-	if(m_Modifiers != NULL){
-		delete[] m_Modifiers;
-		m_Modifiers = NULL; // 'new' may throw an exception
-	}
+	delete[] m_Modifiers;
+	m_Modifiers = NULL; // 'new' may throw an exception
 
 	if (!m_bIsPreview) 
 		m_used3dlevel=thePrefs.Get3DDepth();
@@ -80,8 +78,8 @@ void CBarShader::BuildModifiers() {
 void CBarShader::SetWidth(int width) {
 	if(m_iWidth != width) {
 		m_iWidth = width;
-		if (m_uFileSize)
-			m_dPixelsPerByte = (double)m_iWidth / m_uFileSize;
+		if (m_uFileSize > (uint64)0)
+			m_dPixelsPerByte = (double)m_iWidth / (uint64)m_uFileSize;
 		else
 			m_dPixelsPerByte = 0.0;
 		if (m_iWidth)
@@ -91,12 +89,12 @@ void CBarShader::SetWidth(int width) {
 	}
 }
 
-void CBarShader::SetFileSize(uint32 fileSize) {
+void CBarShader::SetFileSize(EMFileSize fileSize) {
 	if(m_uFileSize != fileSize) {
 		m_uFileSize = fileSize;
 
-		if (m_uFileSize)
-			m_dPixelsPerByte = (double)m_iWidth / m_uFileSize;
+		if (m_uFileSize > (uint64)0)
+			m_dPixelsPerByte = (double)m_iWidth / (uint64)m_uFileSize;
 		else
 			m_dPixelsPerByte = 0.0;
 
@@ -115,7 +113,7 @@ void CBarShader::SetHeight(int height) {
 	}
 }
 
-void CBarShader::FillRange(uint32 start, uint32 end, COLORREF color) {
+void CBarShader::FillRange(uint64 start, uint64 end, COLORREF color) {
 	if(end > m_uFileSize)
 		end = m_uFileSize;
 
@@ -163,27 +161,27 @@ void CBarShader::Draw(CDC* dc, int iLeft, int iTop, bool bFlat) {
 	rectSpan.bottom = iTop + m_iHeight;
 	rectSpan.right = iLeft;
 
-	int iBytesInOnePixel = (int)(m_dBytesPerPixel + 0.5f);
-	uint32 start = 0;//bsCurrent->start;
+	sint64 iBytesInOnePixel = (sint64)(m_dBytesPerPixel + 0.5f);
+	uint64 start = 0;//bsCurrent->start;
 	// SLUGFILLER: speedBarShader
 	COLORREF color = m_Spans.GetValueAt(pos);
 	m_Spans.GetNext(pos);
 	// SLUGFILLER: speedBarShader
 	while(pos != NULL && rectSpan.right < (iLeft + m_iWidth)) {	// SLUGFILLER: speedBarShader
-		uint32 uSpan = m_Spans.GetKeyAt(pos) - start;	// SLUGFILLER: speedBarShader
-		int iPixels = (int)(uSpan * m_dPixelsPerByte + 0.5f);
+		uint64 uSpan = m_Spans.GetKeyAt(pos) - start;	// SLUGFILLER: speedBarShader
+		sint64 iPixels = (sint64)(uSpan * m_dPixelsPerByte + 0.5f);
 		if(iPixels > 0) {
 			rectSpan.left = rectSpan.right;
-			rectSpan.right += iPixels;
+			rectSpan.right += (int)iPixels;
 			FillRect(dc, &rectSpan, color, bFlat);	// SLUGFILLER: speedBarShader
 
-			start += (int)(iPixels * m_dBytesPerPixel + 0.5f);
+			start += (uint64)(iPixels * m_dBytesPerPixel + 0.5f);
 		} else {
 			float fRed = 0;
 			float fGreen = 0;
 			float fBlue = 0;
-			uint32 iEnd = start + iBytesInOnePixel;
-			int iLast = start;
+			uint64 iEnd = start + iBytesInOnePixel;
+			uint64 iLast = start;
 			// SLUGFILLER: speedBarShader
 			do {
 				float fWeight = (float)((min(m_Spans.GetKeyAt(pos), iEnd) - iLast) * m_dPixelsPerByte);
@@ -247,7 +245,7 @@ void CBarShader::FillRect(CDC *dc, LPRECT rectSpan, float fRed, float fGreen,
 	}
 }
 
-void CBarShader::DrawPreview(CDC* dc, int iLeft, int iTop, uint8 previewLevel)		//Cax2 aqua bar
+void CBarShader::DrawPreview(CDC* dc, int iLeft, int iTop, UINT previewLevel)		//Cax2 aqua bar
 {
 	m_bIsPreview=true;
 	m_used3dlevel = previewLevel;

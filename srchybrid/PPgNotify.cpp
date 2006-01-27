@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -58,6 +58,7 @@ END_MESSAGE_MAP()
 CPPgNotify::CPPgNotify()
 	: CPropertyPage(CPPgNotify::IDD)
 {
+	m_bEnableEMail = true;
 }
 
 CPPgNotify::~CPPgNotify()
@@ -71,28 +72,13 @@ void CPPgNotify::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPPgNotify::OnInitDialog()
 {
+#if _ATL_VER >= 0x0710
+	m_bEnableEMail = (IsRunningXPSP2() > 0);
+#endif
+
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
-	LoadSettings();
-	Localize();
 
-	GetDlgItem(IDC_CB_TBN_USESPEECH)->EnableWindow(IsSpeechEngineAvailable());
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPPgNotify::UpdateControls()
-{
-	GetDlgItem(IDC_EDIT_TBN_WAVFILE)->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_USESOUND));
-	GetDlgItem(IDC_BTN_BROWSE_WAV)->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_USESOUND));
-	GetDlgItem(IDC_EDIT_SMTPSERVER)->EnableWindow(IsDlgButtonChecked(IDC_CB_ENABLENOTIFICATIONS));
-	GetDlgItem(IDC_EDIT_RECEIVER)->EnableWindow(IsDlgButtonChecked(IDC_CB_ENABLENOTIFICATIONS));
-	GetDlgItem(IDC_EDIT_SENDER)->EnableWindow(IsDlgButtonChecked(IDC_CB_ENABLENOTIFICATIONS));
-}
-
-void CPPgNotify::LoadSettings(void)
-{
 	int iBtnID;
 	if (thePrefs.notifierSoundType == ntfstSoundFile)
 		iBtnID = IDC_CB_TBN_USESOUND;
@@ -118,23 +104,51 @@ void CPPgNotify::LoadSettings(void)
 
 	SetDlgItemText(IDC_EDIT_TBN_WAVFILE, thePrefs.notifierSoundFile);
 
-	SetDlgItemText(IDC_EDIT_SMTPSERVER, thePrefs.GetNotifierMailServer());
-	SetDlgItemText(IDC_EDIT_RECEIVER, thePrefs.GetNotifierMailReceiver());
-	SetDlgItemText(IDC_EDIT_SENDER, thePrefs.GetNotifierMailSender());
-	if (thePrefs.IsNotifierSendMailEnabled()){
-		CheckDlgButton(IDC_CB_ENABLENOTIFICATIONS, BST_CHECKED);
-		GetDlgItem(IDC_EDIT_SMTPSERVER)->EnableWindow(TRUE);
-		GetDlgItem(IDC_EDIT_RECEIVER)->EnableWindow(TRUE);
-		GetDlgItem(IDC_EDIT_SENDER)->EnableWindow(TRUE);
-	}
-	else{
+	if (!m_bEnableEMail){
 		CheckDlgButton(IDC_CB_ENABLENOTIFICATIONS, BST_UNCHECKED);
+		GetDlgItem(IDC_EMAILNOT_GROUP)->EnableWindow(FALSE);
+		GetDlgItem(IDC_CB_ENABLENOTIFICATIONS)->EnableWindow(FALSE);
+		GetDlgItem(IDC_TXT_SMTPSERVER)->EnableWindow(FALSE);
+		GetDlgItem(IDC_TXT_RECEIVER)->EnableWindow(FALSE);
+		GetDlgItem(IDC_TXT_SENDER)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EDIT_SMTPSERVER)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EDIT_RECEIVER)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EDIT_SENDER)->EnableWindow(FALSE);
 	}
+	else{
+		SetDlgItemText(IDC_EDIT_SMTPSERVER, thePrefs.GetNotifierMailServer());
+		SetDlgItemText(IDC_EDIT_RECEIVER, thePrefs.GetNotifierMailReceiver());
+		SetDlgItemText(IDC_EDIT_SENDER, thePrefs.GetNotifierMailSender());
+		if (thePrefs.IsNotifierSendMailEnabled()){
+			CheckDlgButton(IDC_CB_ENABLENOTIFICATIONS, BST_CHECKED);
+			GetDlgItem(IDC_EDIT_SMTPSERVER)->EnableWindow(TRUE);
+			GetDlgItem(IDC_EDIT_RECEIVER)->EnableWindow(TRUE);
+			GetDlgItem(IDC_EDIT_SENDER)->EnableWindow(TRUE);
+		}
+		else{
+			CheckDlgButton(IDC_CB_ENABLENOTIFICATIONS, BST_UNCHECKED);
+			GetDlgItem(IDC_EDIT_SMTPSERVER)->EnableWindow(FALSE);
+			GetDlgItem(IDC_EDIT_RECEIVER)->EnableWindow(FALSE);
+			GetDlgItem(IDC_EDIT_SENDER)->EnableWindow(FALSE);
+		}
+	}
 
 	UpdateControls();
+	Localize();
+
+	GetDlgItem(IDC_CB_TBN_USESPEECH)->EnableWindow(IsSpeechEngineAvailable());
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPPgNotify::UpdateControls()
+{
+	GetDlgItem(IDC_EDIT_TBN_WAVFILE)->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_USESOUND));
+	GetDlgItem(IDC_BTN_BROWSE_WAV)->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_USESOUND));
+	GetDlgItem(IDC_EDIT_SMTPSERVER)->EnableWindow(IsDlgButtonChecked(IDC_CB_ENABLENOTIFICATIONS));
+	GetDlgItem(IDC_EDIT_RECEIVER)->EnableWindow(IsDlgButtonChecked(IDC_CB_ENABLENOTIFICATIONS));
+	GetDlgItem(IDC_EDIT_SENDER)->EnableWindow(IsDlgButtonChecked(IDC_CB_ENABLENOTIFICATIONS));
 }
 
 void CPPgNotify::Localize(void)
@@ -155,7 +169,6 @@ void CPPgNotify::Localize(void)
 		GetDlgItem(IDC_CB_TBN_ONNEWVERSION)->SetWindowText(GetResString(IDS_CB_TBN_ONNEWVERSION));
 		GetDlgItem(IDC_TBN_OPTIONS)->SetWindowText(GetResString(IDS_PW_TBN_OPTIONS));
 		GetDlgItem(IDC_CB_TBN_USESPEECH)->SetWindowText(GetResString(IDS_USESPEECH));
-
 		GetDlgItem(IDC_EMAILNOT_GROUP)->SetWindowText(GetResString(IDS_PW_EMAILNOTIFICATIONS) + _T(" (*)"));
 		GetDlgItem(IDC_TXT_SMTPSERVER)->SetWindowText(GetResString(IDS_PW_SMTPSERVER));
 		GetDlgItem(IDC_TXT_RECEIVER)->SetWindowText(GetResString(IDS_PW_RECEIVERADDRESS));
@@ -174,10 +187,12 @@ BOOL CPPgNotify::OnApply()
     thePrefs.notifierOnEveryChatMsg = IsDlgButtonChecked(IDC_CB_TBN_POP_ALWAYS)!=0;
 	thePrefs.notifierOnNewVersion = IsDlgButtonChecked(IDC_CB_TBN_ONNEWVERSION)!=0;
 
-	GetDlgItemText(IDC_EDIT_SMTPSERVER, thePrefs.m_strNotifierMailServer);
-	GetDlgItemText(IDC_EDIT_SENDER, thePrefs.m_strNotifierMailSender);
-	GetDlgItemText(IDC_EDIT_RECEIVER, thePrefs.m_strNotifierMailReceiver);
-	thePrefs.SetNotifierSendMail(IsDlgButtonChecked(IDC_CB_ENABLENOTIFICATIONS) != 0);
+	if (m_bEnableEMail){
+		GetDlgItemText(IDC_EDIT_SMTPSERVER, thePrefs.m_strNotifierMailServer);
+		GetDlgItemText(IDC_EDIT_SENDER, thePrefs.m_strNotifierMailSender);
+		GetDlgItemText(IDC_EDIT_RECEIVER, thePrefs.m_strNotifierMailReceiver);
+		thePrefs.SetNotifierSendMail(IsDlgButtonChecked(IDC_CB_ENABLENOTIFICATIONS) != 0);
+	}
 
 	ApplyNotifierSoundType();
 	if (thePrefs.notifierSoundType != ntfstSpeech)
@@ -272,7 +287,7 @@ BOOL CPPgNotify::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgNotify::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgNotify::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

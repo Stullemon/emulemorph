@@ -92,7 +92,7 @@ public:
 	const TCHAR* GetName() const			{ return m_name; }
 	const uchar* GetHashKey() const			{ return m_hash;}
 	const CAICHHash& GetAICHHash() const	{ return m_AICHHash;}
-	long GetSize() const					{ return _tstol(m_size); }	
+	EMFileSize GetSize() const				{ return (uint64)_tstoi64(m_size); }	
 	bool HasValidSources() const			{ return (SourcesList != NULL); }
 	bool HasHostnameSources() const			{ return (!m_HostnameSourcesList.IsEmpty()); }
 	bool HasValidAICHHash() const			{ return m_bAICHHashValid; }

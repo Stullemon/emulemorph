@@ -1,16 +1,16 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either
 version 2 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -27,110 +27,97 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
+
 #pragma once
-#include "SearchManager.h"
 #include "../routing/Maps.h"
-#include "../utils/UInt128.h"
-#include "../io/ByteIO.h"
 
 class CKnownFile;
 class CSafeMemFile;
 
-////////////////////////////////////////
-namespace Kademlia {
-////////////////////////////////////////
-
-typedef std::list<CKadTag*> TagList;
-void deleteTagListEntries(TagList* taglist);
-
-class CSearch
+namespace Kademlia
 {
-	friend class CSearchManager;
-
-public:
-	uint32 getSearchID() const {return m_searchID;}
-	uint32 getSearchTypes() const {return m_type;}
-	void setSearchTypes( uint32 val ) {m_type = val;}
-	void setTargetID( CUInt128 val ) {m_target = val;}
-	uint32 getAnswers() const {if(bio2 == NULL)return m_answers;else if(bio3 == NULL)return m_answers/2;else return m_answers/3;}
-	uint32 getKadPacketSent() const {return m_kadPacketSent;}
-	uint32 getRequestAnswer() const {return m_totalRequestAnswers;}
-	void StorePacket();
-	CUInt128 m_keywordPublish; //Need to make this private...
-	byte packet1[1024*50];
-	byte packet2[1024*50];
-	byte packet3[1024*50];
-	CByteIO *bio1;
-	CByteIO *bio2;
-	CByteIO *bio3;
-	const CString& getFileName(void) const { return m_fileName; }
-	void setFileName(const CString& fileName) { m_fileName = fileName; }
-	CUInt128 getTarget(void) const {return m_target;}
-	void addFileID(const CUInt128& id);
-	void PreparePacket(void);
-	void PreparePacketForTags( CByteIO* packet, CKnownFile* file );
-	bool Stoping(void) const {return m_stoping;}
-	uint32 getNodeLoad() const;
-	uint32 getNodeLoadResonse() const {return m_totalLoadResponses;}
-	uint32 getNodeLoadTotal() const {return m_totalLoad;}
-	void updateNodeLoad( uint8 load ){ m_totalLoad += load; m_totalLoadResponses++; }
-
-	enum
+	void deleteTagListEntries(TagList* plistTag);
+	class CByteIO;
+	class CSearch
 	{
-		NODE,
-		NODECOMPLETE,
-		FILE,
-		KEYWORD,
-		NOTES,
-		STOREFILE,
-		STOREKEYWORD,
-		STORENOTES,
-		FINDBUDDY,
-		FINDSOURCE
+			friend class CSearchManager;
+		public:
+			uint32 GetSearchID() const;
+			uint32 GetSearchTypes() const;
+			void SetSearchTypes( uint32 uVal );
+			void SetTargetID( CUInt128 uVal );
+			uint32 GetAnswers() const;
+			uint32 GetKadPacketSent() const;
+			uint32 GetRequestAnswer() const;
+			void StorePacket();
+			byte byPacket1[1024*50];
+			byte byPacket2[1024*50];
+			byte byPacket3[1024*50];
+			CByteIO *pbyIO1;
+			CByteIO *pbyIO2;
+			CByteIO *pbyIO3;
+			const CString& GetFileName() const;
+			void SetFileName(const CString& sFileName);
+			CUInt128 GetTarget() const;
+			void AddFileID(const CUInt128& uID);
+			void PreparePacket();
+			void PreparePacketForTags( CByteIO* pbyPacket, CKnownFile* pFile );
+			bool Stoping() const;
+			uint32 GetNodeLoad() const;
+			uint32 GetNodeLoadResonse() const;
+			uint32 GetNodeLoadTotal() const;
+			void UpdateNodeLoad( uint8 uLoad );
+			enum
+			{
+			    NODE,
+			    NODECOMPLETE,
+			    FILE,
+			    KEYWORD,
+			    NOTES,
+			    STOREFILE,
+			    STOREKEYWORD,
+			    STORENOTES,
+			    FINDBUDDY,
+			    FINDSOURCE
+		};
+
+			CSearch();
+			~CSearch();
+
+		private:
+			void Go();
+			void ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *plistResults);
+			void ProcessResult(const CUInt128 &uAnswer, TagList *listInfo);
+			void ProcessResultFile(const CUInt128 &uAnswer, TagList *listInfo);
+			void ProcessResultKeyword(const CUInt128 &uAnswer, TagList *listInfo);
+			void ProcessResultNotes(const CUInt128 &uAnswer, TagList *listInfo);
+			void JumpStart();
+			void SendFindValue(CContact* pContact);
+			void PrepareToStop();
+
+			bool m_bStoping;
+			time_t m_tCreated;
+			uint32 m_uType;
+			uint32 m_uAnswers;
+			uint32 m_uTotalRequestAnswers;
+			uint32 m_uKadPacketSent; //Used for gui reasons.. May not be needed later..
+			uint32 m_uTotalLoad;
+			uint32 m_uTotalLoadResponses;
+			uint32 m_uLastResponse;
+			uint32 m_uSearchID;
+			CUInt128 m_uTarget;
+			CSafeMemFile *m_pfileSearchTerms;
+			WordList m_listWords;
+			CString m_sFileName;
+			UIntList m_listFileIDs;
+			ContactMap m_mapPossible;
+			ContactMap m_mapTried;
+			ContactMap m_mapResponded;
+			ContactMap m_mapBest;
+			ContactList m_listDelete;
+			ContactMap m_mapInUse;
 	};
-
-	CSearch();
-	~CSearch();
-
-private:
-	void go(void);
-	void processResponse(uint32 fromIP, uint16 fromPort, ContactList *results);
-	void processResult(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
-	void processResultFile(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
-	void processResultKeyword(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
-	void processResultNotes(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
-	void jumpStart(void);
-	void sendFindValue(const CUInt128 &check, uint32 ip, uint16 port);
-	void prepareToStop(void);
-
-	bool		m_stoping;
-	time_t		m_created;
-	uint32		m_type;
-	uint32		m_answers;
-	uint32		m_totalRequestAnswers;
-	uint32		m_kadPacketSent; //Used for gui reasons.. May not be needed later..
-	uint32		m_totalLoad;
-	uint32		m_totalLoadResponses;
-	uint32		m_lastResponse;
-
-	uint32		m_searchID;
-	CUInt128	m_target;
-	CSafeMemFile *m_searchTerms;
-	WordList	m_words;
-	CString		m_fileName;
-	UIntList	m_fileIDs;
-
-	ContactMap	m_possible;
-	ContactMap	m_tried;
-	ContactMap	m_responded;
-	ContactMap	m_best;
-	ContactList	m_delete;
-	ContactMap	m_inUse;
-};
-
-} // End namespace
-
-void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* pKadID);
-void KadGetKeywordHash(const CStringA& rstrKeywordA, Kademlia::CUInt128* pKadID);
+}
+void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* puKadID);
+void KadGetKeywordHash(const CStringA& rstrKeywordA, Kademlia::CUInt128* puKadID);
 CStringA KadGetKeywordBytes(const CStringW& rstrKeywordW);
-

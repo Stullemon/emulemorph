@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -41,7 +41,14 @@ bool CGZIPFile::Open(LPCTSTR pszFilePath)
 	USES_CONVERSION;
 	m_gzFile = gzopen(T2CA(pszFilePath), "rb");
 	if (m_gzFile)
-		m_strGzFilePath = pszFilePath;
+	{
+		// Use gzip-uncompress only for real gzip-compressed files and do not let handle it also uncompressed files.
+		// This way the 'Open' function can be used to check if that file is a 'gzip' file at all.
+		if (gzdirect(m_gzFile) != 0)
+			Close();
+		else
+			m_strGzFilePath = pszFilePath;
+	}
 	return m_gzFile != 0;
 }
 

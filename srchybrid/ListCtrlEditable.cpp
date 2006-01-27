@@ -308,7 +308,7 @@ void CEditableListCtrl::ShowComboBoxCtrl()
 	m_pctrlComboBox->SetFocus();
 }
 
-void CEditableListCtrl::OnColumnclick(NMHDR* pNMHDR, LRESULT* pResult)
+void CEditableListCtrl::OnColumnclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	if (m_pctrlEdit && m_pctrlEdit->IsWindowVisible())
 		m_pctrlEdit->ShowWindow(SW_HIDE);
@@ -384,7 +384,7 @@ void CEditableListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 	CListCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-void CEditableListCtrl::OnLvnBeginScroll(NMHDR *pNMHDR, LRESULT *pResult)
+void CEditableListCtrl::OnLvnBeginScroll(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	//LPNMLVSCROLL pStateChanged = reinterpret_cast<LPNMLVSCROLL>(pNMHDR);
 	if (m_pctrlEdit)
@@ -397,7 +397,7 @@ void CEditableListCtrl::OnLvnBeginScroll(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CEditableListCtrl::OnLvnEndScroll(NMHDR *pNMHDR, LRESULT *pResult)
+void CEditableListCtrl::OnLvnEndScroll(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	//LPNMLVSCROLL pStateChanged = reinterpret_cast<LPNMLVSCROLL>(pNMHDR);
 	if (m_pctrlEdit)

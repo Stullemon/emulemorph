@@ -28,8 +28,8 @@ struct SSearchParams
 		dwSearchID = (DWORD)-1;
 		eType = SearchTypeEd2kServer;
 		bClientSharedFiles = false;
-		ulMinSize = 0;
-		ulMaxSize = 0;
+		ullMinSize = 0;
+		ullMaxSize = 0;
 		uAvailability = 0;
 		uComplete = 0;
 		ulMinBitrate = 0;
@@ -45,9 +45,9 @@ struct SSearchParams
 	ESearchType eType;
 	CStringA strFileType;
 	CString strMinSize;
-	ULONG ulMinSize;
+	uint64 ullMinSize;
 	CString strMaxSize;
-	ULONG ulMaxSize;
+	uint64 ullMaxSize;
 	UINT uAvailability;
 	CString strExtension;
 	UINT uComplete;
@@ -62,4 +62,4 @@ struct SSearchParams
 	bool bUnicode;
 };
 
-bool GetSearchPacket(CSafeMemFile* data, SSearchParams* pParams);
+bool GetSearchPacket(CSafeMemFile* data, SSearchParams* pParams, bool bTargetSupports64Bit, bool* pbPacketUsing64Bit);

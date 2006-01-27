@@ -867,9 +867,9 @@ void CUPnP_IGDControlPoint::CheckTimeouts(){
 	m_devListLock.Unlock();
 }
 
-UINT CUPnP_IGDControlPoint::TimerThreadFunc( LPVOID pParam ){
+UINT CUPnP_IGDControlPoint::TimerThreadFunc( LPVOID /*pParam*/ ){
 	int sleepTime = UPNP_ADVERTISEMENT_DECREMENT * 1000;
-	double updateTimeF = UPNP_PORT_LEASETIME * 1000 * 0.8f;
+	int updateTimeF = UPNP_PORT_LEASETIME * 800;
 	static long int updateTime = updateTimeF;
 
 	static long int testTime = sleepTime; //SiRoB

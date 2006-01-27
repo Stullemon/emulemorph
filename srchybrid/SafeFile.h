@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -45,6 +45,7 @@ public:
 	virtual uint8 ReadUInt8();
 	virtual uint16 ReadUInt16();
 	virtual uint32 ReadUInt32();
+	virtual uint64 ReadUInt64();
 	virtual void ReadUInt128(Kademlia::CUInt128 *pVal);
 	virtual void ReadHash16(uchar* pVal);
 	virtual CString ReadString(bool bOptUTF8);
@@ -54,6 +55,7 @@ public:
 	virtual void WriteUInt8(uint8 nVal);
 	virtual void WriteUInt16(uint16 nVal);
 	virtual void WriteUInt32(uint32 nVal);
+	virtual void WriteUInt64(uint64 nVal);
 	virtual void WriteUInt128(const Kademlia::CUInt128 *pVal);
 	virtual void WriteHash16(const uchar* pVal);
 	virtual void WriteString(const CString& rstr, EUtf8Str eEncode = utf8strNone);
@@ -105,12 +107,14 @@ public:
 	virtual uint8 ReadUInt8();
 	virtual uint16 ReadUInt16();
 	virtual uint32 ReadUInt32();
+	virtual uint64 ReadUInt64();
 	virtual void ReadUInt128(Kademlia::CUInt128 *pVal);
 	virtual void ReadHash16(uchar* pVal);
 
 	virtual void WriteUInt8(uint8 nVal);
 	virtual void WriteUInt16(uint16 nVal);
 	virtual void WriteUInt32(uint32 nVal);
+	virtual void WriteUInt64(uint64 nVal);
 	virtual void WriteUInt128(const Kademlia::CUInt128 *pVal);
 	virtual void WriteHash16(const uchar* pVal);
 };
@@ -154,6 +158,12 @@ __inline uint32 PeekUInt32(const void* p)
 	return *((uint32*)p);
 }
 
+__inline uint64 PeekUInt64(const void* p)
+{
+	return *((uint64*)p);
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Poke - helper functions for write-accessing memory without modifying the memory pointer
@@ -171,6 +181,11 @@ __inline void PokeUInt16(void* p, uint16 nVal)
 __inline void PokeUInt32(void* p, uint32 nVal)
 {
 	*((uint32*)p) = nVal;
+}
+
+__inline void PokeUInt64(void* p, uint64 nVal)
+{
+	*((uint64*)p) = nVal;
 }
 
 

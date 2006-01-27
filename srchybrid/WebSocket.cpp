@@ -390,8 +390,7 @@ UINT AFX_CDECL WebSocketAcceptedFunc(LPVOID pD)
 				delete stWebSocket.m_pHead;
 				stWebSocket.m_pHead = pNext;
 			}
-			if (stWebSocket.m_pBuf)
-				delete[] stWebSocket.m_pBuf;
+			delete[] stWebSocket.m_pBuf;
 		}
 		VERIFY( CloseHandle(hEvent) );
 	}
@@ -413,7 +412,10 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 		SOCKADDR_IN stAddr;
 		stAddr.sin_family = AF_INET;
 		stAddr.sin_port = htons(thePrefs.GetWSPort());
-		stAddr.sin_addr.S_un.S_addr = INADDR_ANY;
+		if (thePrefs.GetBindAddrA())
+			stAddr.sin_addr.S_un.S_addr = inet_addr(thePrefs.GetBindAddrA());
+		else
+			stAddr.sin_addr.S_un.S_addr = INADDR_ANY;
 
 		if (!bind(hSocket, (sockaddr*)&stAddr, sizeof(stAddr)) && !listen(hSocket, 5)) //SOMAXCONN is too much with winsock2
 		{

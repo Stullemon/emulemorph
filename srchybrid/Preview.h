@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -74,8 +74,8 @@ protected:
 			strCommand = rCopy.strCommand;
 			strCommandArgs = rCopy.strCommandArgs;
 			astrExtensions.Copy(rCopy.astrExtensions);
-			uMinStartOfFile = rCopy.uMinStartOfFile;
-			uMinCompletedSize = rCopy.uMinCompletedSize;
+			ullMinStartOfFile = rCopy.ullMinStartOfFile;
+			ullMinCompletedSize = rCopy.ullMinCompletedSize;
 			return *this;
 		}
 
@@ -83,8 +83,8 @@ protected:
 		CString strCommand;
 		CString strCommandArgs;
 		CStringArray astrExtensions;
-		UINT uMinStartOfFile;
-		UINT uMinCompletedSize;
+		uint64 ullMinStartOfFile;
+		uint64 ullMinCompletedSize;
 	};
 	CArray<SPreviewApp> m_aApps;
 	time_t m_tDefAppsFileLastModified;

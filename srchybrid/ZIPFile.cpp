@@ -115,7 +115,7 @@ void CZIPFile::Close()
 		m_hFile = INVALID_HANDLE_VALUE;
 	}
 	
-	if ( m_pFile != NULL ) delete [] m_pFile;
+	delete[] m_pFile;
 	m_pFile = NULL;
 	m_nFile = 0;
 }

@@ -1,6 +1,6 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002-2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@ IMPLEMENT_DYNAMIC(CAbstractFile, CObject)
 CAbstractFile::CAbstractFile()
 {
 	md4clr(m_abyFileHash);
-	m_nFileSize = 0;
+	m_nFileSize = (uint64)0;
 	m_uRating = 0;
 	m_bCommentLoaded = false;
 	m_uUserRating = 0;
@@ -87,7 +87,7 @@ void CAbstractFile::AssertValid() const
 	(void)m_strComment;
 	(void)m_uRating;
 	(void)m_strFileType;
-	(void)(m_uUserRating);
+	(void)m_uUserRating;
 	CHECK_BOOL(m_bHasComment);
 	CHECK_BOOL(m_bCommentLoaded);
 	taglist.AssertValid();
@@ -104,7 +104,7 @@ bool CAbstractFile::AddNote(Kademlia::CEntry* pEntry)
 	for(POSITION pos = m_kadNotes.GetHeadPosition(); pos != NULL; )
 	{
 		Kademlia::CEntry* entry = m_kadNotes.GetNext(pos);
-		if(!entry->sourceID.compareTo(pEntry->sourceID))
+		if(entry->m_uSourceID == pEntry->m_uSourceID)
 		{
 			ASSERT(entry != pEntry);
 			return false;
@@ -115,7 +115,7 @@ bool CAbstractFile::AddNote(Kademlia::CEntry* pEntry)
 	return true;
 }
 
-uint8 CAbstractFile::GetFileRating() /*const*/
+UINT CAbstractFile::GetFileRating() /*const*/
 {
 	if (!m_bCommentLoaded)
 		LoadComment();
@@ -230,6 +230,38 @@ bool CAbstractFile::GetIntTagValue(uint8 tagname, uint32& ruValue) const
 	return false;
 }
 
+uint64 CAbstractFile::GetInt64TagValue(LPCSTR tagname) const
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		const CTag* pTag = taglist[i];
+		if (pTag->GetNameID()==0 && pTag->IsInt64(true) && CmpED2KTagName(pTag->GetName(), tagname)==0)
+			return pTag->GetInt64();
+	}
+	return NULL;
+}
+
+uint64 CAbstractFile::GetInt64TagValue(uint8 tagname) const
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		const CTag* pTag = taglist[i];
+		if (pTag->GetNameID()==tagname && pTag->IsInt64(true))
+			return pTag->GetInt64();
+	}
+	return NULL;
+}
+
+bool CAbstractFile::GetInt64TagValue(uint8 tagname, uint64& ruValue) const
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		const CTag* pTag = taglist[i];
+		if (pTag->GetNameID()==tagname && pTag->IsInt64(true)){
+			ruValue = pTag->GetInt64();
+			return true;
+		}
+	}
+	return false;
+}
+
 uint32 CAbstractFile::GetIntTagValue(LPCSTR tagname) const
 {
 	for (int i = 0; i < taglist.GetSize(); i++){
@@ -246,6 +278,19 @@ void CAbstractFile::SetIntTagValue(uint8 tagname, uint32 uValue)
 		CTag* pTag = taglist[i];
 		if (pTag->GetNameID()==tagname && pTag->IsInt()){
 			pTag->SetInt(uValue);
+			return;
+		}
+	}
+	CTag* pTag = new CTag(tagname, uValue);
+	taglist.Add(pTag);
+}
+
+void CAbstractFile::SetInt64TagValue(uint8 tagname, uint64 uValue)
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		CTag* pTag = taglist[i];
+		if (pTag->GetNameID()==tagname && pTag->IsInt64(true)){
+			pTag->SetInt64(uValue);
 			return;
 		}
 	}

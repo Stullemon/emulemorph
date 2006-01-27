@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -189,7 +189,7 @@ void CUpDownClient::Init()
 	m_cMessagesSent = 0;
 	m_nCurSessionUp = 0;
 	m_nCurSessionDown = 0;
-    m_nCurQueueSessionUp = 0;
+	/*zz*/m_nCurQueueSessionUp = 0;
 	m_nSumForAvgDownDataRate = 0;
 	m_clientSoft=SO_UNKNOWN;
 	m_bRemoteQueueFull = false;
@@ -222,7 +222,7 @@ void CUpDownClient::Init()
 	m_dwLastSignatureIP = 0;
 	m_bySupportSecIdent = 0;
 	m_byInfopacketsReceived = IP_NONE;
-	m_lastPartAsked = 0xffff;
+	m_lastPartAsked = (uint16)-1;
 	m_nUpCompleteSourcesCount= 0;
 	m_fSupportsPreview = 0;
 	m_fPreviewReqPending = 0;
@@ -239,7 +239,7 @@ void CUpDownClient::Init()
 	requpfile = NULL; //MORPH - Added by SiRoB, Optimization requpfile
 	m_nTotalUDPPackets = 0;
 	m_nFailedUDPPackets = 0;
-	m_nUrlStartPos = (UINT)-1;
+	m_nUrlStartPos = (uint64)-1;
 	m_iHttpSendState = 0;
 	m_fPeerCache = 0;
 	m_uPeerCacheDownloadPushId = 0;
@@ -262,7 +262,6 @@ void CUpDownClient::Init()
 	m_fQueueRankPending = 0;
 	m_fUnaskQueueRankRecv = 0;
 	m_fFailedFileIdReqs = 0;
-
 	m_slotNumber = 0;
     lastSwapForSourceExchangeTick = 0;
 	m_pReqFileAICHHash = NULL;
@@ -272,7 +271,8 @@ void CUpDownClient::Init()
 	SetLastBuddyPingPongTime();
 	m_fSentOutOfPartReqs = 0;
 	m_bCollectionUploadSlot = false;
-	
+	m_fSupportsLargeFiles = 0;
+	m_fExtMultiPacket = 0;
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
 	m_bScheduledForRemoval = false;
 	m_bScheduledForRemovalWillKeepWaitingTimeIntact = false;
@@ -331,9 +331,8 @@ CUpDownClient::~CUpDownClient(){
 	}
 
 	theApp.clientlist->RemoveClient(this, _T("Destructing client object"));
-	if (m_Friend){
+	if (m_Friend)
 		m_Friend->SetLinkedClient(NULL);
-	}
 	if (socket){
 		socket->client = 0;
 		socket->Safe_Delete();
@@ -379,8 +378,8 @@ CUpDownClient::~CUpDownClient(){
 		m_pWCUpSocket->Safe_Delete();
 	}
 	// MORPH END - Added by Commander, WebCache 1.2e
-	if (m_pszUsername)
-		free(m_pszUsername);
+
+	free(m_pszUsername);
 	//MORPH START - Added by SiRoB, Dynamic FunnyNick
 	if (m_pszFunnyNick) {
 		delete[] m_pszFunnyNick;
@@ -436,8 +435,7 @@ CUpDownClient::~CUpDownClient(){
 
 	m_fileReaskTimes.RemoveAll(); // ZZ:DownloadManager (one resk timestamp for each file)
 
-	if (m_pReqFileAICHHash != NULL)
-		delete m_pReqFileAICHHash;
+	delete m_pReqFileAICHHash;
 }
 
 //MORPH START - Added by IceCream, Anti-leecher feature
@@ -573,6 +571,8 @@ void CUpDownClient::ClearHelloProperties()
 	m_uPeerCacheDownloadPushId = 0;
 	m_uPeerCacheUploadPushId = 0;
 	m_byKadVersion = 0;
+	m_fSupportsLargeFiles = 0;
+	m_fExtMultiPacket = 0;
 }
 
 bool CUpDownClient::ProcessHelloPacket(const uchar* pachPacket, uint32 nSize)
@@ -629,63 +629,74 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	m_strNotOfficial.Empty();
 	CString strBanReason = NULL;
  	//MOPRH END   - Added by SiRoB, Control Mod Tag
-	for (uint32 i = 0;i < tagcount; i++){
+	for (uint32 i = 0; i < tagcount; i++)
+	{
 		CTag temptag(data, true);
 		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
 		m_uNotOfficial ^= temptag.GetNameID(); //MOPRH - Added by SiRoB,  Control Mod Tag
-		switch (temptag.GetNameID()){
+		switch (temptag.GetNameID())
+		{
 			case CT_NAME:
+				if (temptag.IsStr()) {
+					free(m_pszUsername);
+					m_pszUsername = _tcsdup(temptag.GetStr());
+					if (bDbgInfo){
+						if (m_pszUsername){//filter username for bad chars
+							TCHAR* psz = m_pszUsername;
+							while (*psz != _T('\0')) {
+								if (*psz == _T('\n') || *psz == _T('\r'))
+									*psz = _T(' ');
+								psz++;
+							}
+						}
+						m_strHelloInfo.AppendFormat(_T("\n  Name='%s'"), m_pszUsername);
+					}
+				}
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsStr()){
+				if (!temptag.IsStr()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_NAME"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				if (m_pszUsername){
-					free(m_pszUsername);
-					m_pszUsername = NULL; // needed, in case 'nstrdup' fires an exception!!
-				}
-				m_pszUsername = _tcsdup(temptag.GetStr());
-				if (bDbgInfo){
-					if (m_pszUsername){//filter username for bad chars
-						TCHAR* psz = m_pszUsername;
-						while (*psz != _T('\0')) {
-							if (*psz == _T('\n') || *psz == _T('\r'))
-								*psz = _T(' ');
-							psz++;
-						}
-					}
-					m_strHelloInfo.AppendFormat(_T("\n  Name='%s'"), m_pszUsername);
-				}
 				break;
+
 			case CT_VERSION:
+				if (temptag.IsInt()){
+					if (bDbgInfo)
+						m_strHelloInfo.AppendFormat(_T("\n  Version=%u"), temptag.GetInt());
+					m_nClientVersion = temptag.GetInt();
+				}
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_VERSION"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				if (bDbgInfo)
-					m_strHelloInfo.AppendFormat(_T("\n  Version=%u"), temptag.GetInt());
-				m_nClientVersion = temptag.GetInt();
 				break;
+
 			case CT_PORT:
+				if (temptag.IsInt()){
+					if (bDbgInfo)
+						m_strHelloInfo.AppendFormat(_T("\n  Port=%u"), temptag.GetInt());
+					nUserPort = (uint16)temptag.GetInt();
+				}
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_PORT"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				if (bDbgInfo)
-					m_strHelloInfo.AppendFormat(_T("\n  Port=%u"), temptag.GetInt());
-				nUserPort = temptag.GetInt();
 				break;
+
 			case CT_MOD_VERSION:
 				m_strNotOfficial.AppendFormat(_T(",MID=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if (temptag.IsStr())
@@ -695,7 +706,9 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
 						( ((m_nClientVersion >> 17) & 0x7f) == 0 && ((m_nClientVersion >> 10) & 0x7f) < 45 ||
 						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
-						 ( m_strModVersion[11] == 0x00 || m_strModVersion[11] == 0x20 &&  m_strModVersion[11] != 0x00)
+						 ( m_strModVersion[11] == 0x00 || m_strModVersion[11] == 0x20 &&  m_strModVersion[12] != 0x00 || m_strModVersion[11] >= 0x30 && m_strModVersion[11] <= 0x39  && 
+						  ( m_strModVersion[12] == 0x00 || m_strModVersion[12] == 0x20 &&  m_strModVersion[13] != 0x00)
+						 )
 						)
 					   ){
 						m_bIsMorph = true;
@@ -705,22 +718,24 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				else if (temptag.IsInt())
 					m_strModVersion.Format(_T("ModID=%u"), temptag.GetInt());
 				else
-					m_strModVersion = _T("ModID=<Unknwon>");
+					m_strModVersion = _T("ModID=<Unknown>");
 				if (bDbgInfo)
 					m_strHelloInfo.AppendFormat(_T("\n  ModID=%s"), m_strModVersion);
 				CheckForGPLEvilDoer();
 				break;
+
 			// MORPH START - Added by Commander, WebCache 1.2e
 			case WC_TAG_VOODOO:
-				m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo());
+				if (temptag.IsInt()) {
+					m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo());
+					m_bWebCacheSupport = temptag.IsInt() && temptag.GetInt() == 'ARC4';
+				}
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				else {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("Suspect Hello-Tag: %s"),apszSnafuTag[3]);
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				m_bWebCacheSupport = temptag.IsInt() && temptag.GetInt() == 'ARC4';
 				break;
 			case WC_TAG_FLAGS:
 				m_strNotOfficial.AppendFormat(_T(",WCF=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
@@ -734,60 +749,64 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			// Superlexx webcache - moved to the multipacket
 			// MORPH END - Added by Commander, WebCache 1.2e
 			case CT_EMULE_UDPPORTS:
+				// 16 KAD Port
+				// 16 UDP Port
+				if (temptag.IsInt()) {
+					m_nKadPort = (uint16)(temptag.GetInt() >> 16);
+					m_nUDPPort = (uint16)temptag.GetInt();
+					if (bDbgInfo)
+						m_strHelloInfo.AppendFormat(_T("\n  KadPort=%u  UDPPort=%u"), m_nKadPort, m_nUDPPort);
+					dwEmuleTags |= 1;
+				}
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				if (!temptag.IsInt()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_EMULE_UDPPORTS"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// 16 KAD Port
-				// 16 UDP Port
-				m_nKadPort = (uint16)(temptag.GetInt() >> 16);
-				m_nUDPPort = (uint16)temptag.GetInt();
-				if (bDbgInfo)
-					m_strHelloInfo.AppendFormat(_T("\n  KadPort=%u  UDPPort=%u"), m_nKadPort, m_nUDPPort);
-				dwEmuleTags |= 1;
 				break;
+
 			case CT_EMULE_BUDDYUDP:
+				// 16 --Reserved for future use--
+				// 16 BUDDY Port
+				if (temptag.IsInt()) {
+					m_nBuddyPort = (uint16)temptag.GetInt();
+					if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  BuddyPort=%u"), m_nBuddyPort);
+				}
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				if (!temptag.IsInt()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_EMULE_BUDDYUDP"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// 16 --Reserved for future use--
-				// 16 BUDDY Port
-				m_nBuddyPort = (uint16)temptag.GetInt();
-				if (bDbgInfo)
-					m_strHelloInfo.AppendFormat(_T("\n  BuddyPort=%u"), m_nBuddyPort);
 				break;
+
 			case CT_EMULE_BUDDYIP:
+				// 32 BUDDY IP
+				if (temptag.IsInt()) {
+					m_nBuddyIP = temptag.GetInt();
+					if (bDbgInfo)
+						m_strHelloInfo.AppendFormat(_T("\n  BuddyIP=%s"), ipstr(m_nBuddyIP));
+				}
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				if (!temptag.IsInt()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_EMULE_BUDDYIP"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// 32 BUDDY IP
-				m_nBuddyIP = temptag.GetInt();
-				if (bDbgInfo)
-					m_strHelloInfo.AppendFormat(_T("\n  BuddyIP=%u"), m_nBuddyIP);
 				break;
+
 			case CT_EMULE_MISCOPTIONS1:
-				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
-					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
-						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_EMULE_MISCOPTIONS1"));
-					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
-				}
-				//MOPRH END - Added by SiRoB,  Control Mod Tag
 				//  3 AICH Version (0 = not supported)
 				//  1 Unicode
 				//  4 UDP version
@@ -800,64 +819,86 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				//	1 No 'View Shared Files' supported
 				//	1 MultiPacket
 				//  1 Preview
-				m_fSupportsAICH			= (temptag.GetInt() >> 29) & 0x07;
-				m_bUnicodeSupport		= (temptag.GetInt() >> 28) & 0x01;
-				m_byUDPVer				= (temptag.GetInt() >> 24) & 0x0f;
-				m_byDataCompVer			= (temptag.GetInt() >> 20) & 0x0f;
-				m_bySupportSecIdent		= (temptag.GetInt() >> 16) & 0x0f;
-				m_bySourceExchangeVer	= (temptag.GetInt() >> 12) & 0x0f;
-				m_byExtendedRequestsVer	= (temptag.GetInt() >>  8) & 0x0f;
-				m_byAcceptCommentVer	= (temptag.GetInt() >>  4) & 0x0f;
-				m_fPeerCache			= (temptag.GetInt() >>  3) & 0x01;
-				m_fNoViewSharedFiles	= (temptag.GetInt() >>  2) & 0x01;
-				m_bMultiPacket			= (temptag.GetInt() >>  1) & 0x01;
-				m_fSupportsPreview		= (temptag.GetInt() >>  0) & 0x01;
-				dwEmuleTags |= 2;
-				if (bDbgInfo){
-					m_strHelloInfo.AppendFormat(_T("\n  PeerCache=%u  UDPVer=%u  DataComp=%u  SecIdent=%u  SrcExchg=%u")
+				if (temptag.IsInt()) {
+					m_fSupportsAICH			= (temptag.GetInt() >> 29) & 0x07;
+					m_bUnicodeSupport		= (temptag.GetInt() >> 28) & 0x01;
+					m_byUDPVer				= (uint8)((temptag.GetInt() >> 24) & 0x0f);
+					m_byDataCompVer			= (uint8)((temptag.GetInt() >> 20) & 0x0f);
+					m_bySupportSecIdent		= (uint8)((temptag.GetInt() >> 16) & 0x0f);
+					m_bySourceExchangeVer	= (uint8)((temptag.GetInt() >> 12) & 0x0f);
+					m_byExtendedRequestsVer	= (uint8)((temptag.GetInt() >>  8) & 0x0f);
+					m_byAcceptCommentVer	= (uint8)((temptag.GetInt() >>  4) & 0x0f);
+					m_fPeerCache			= (temptag.GetInt() >>  3) & 0x01;
+					m_fNoViewSharedFiles	= (temptag.GetInt() >>  2) & 0x01;
+					m_bMultiPacket			= (temptag.GetInt() >>  1) & 0x01;
+					m_fSupportsPreview		= (temptag.GetInt() >>  0) & 0x01;
+					dwEmuleTags |= 2;
+					if (bDbgInfo){
+						m_strHelloInfo.AppendFormat(_T("\n  PeerCache=%u  UDPVer=%u  DataComp=%u  SecIdent=%u  SrcExchg=%u")
 												_T("  ExtReq=%u  Commnt=%u  Preview=%u  NoViewFiles=%u  Unicode=%u"), 
 												m_fPeerCache, m_byUDPVer, m_byDataCompVer, m_bySupportSecIdent, m_bySourceExchangeVer, 
 												m_byExtendedRequestsVer, m_byAcceptCommentVer, m_fSupportsPreview, m_fNoViewSharedFiles, m_bUnicodeSupport);
+					}
 				}
-				break;
-			case CT_EMULE_MISCOPTIONS2:
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				if (!temptag.IsInt()) {
+					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
+						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_EMULE_MISCOPTIONS1"));
+					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
+				}
+				//MOPRH END - Added by SiRoB,  Control Mod Tag
+				break;
+
+			case CT_EMULE_MISCOPTIONS2:
+				//	26 Reserved
+				//   1 Ext Multipacket (Hash+Size instead of Hash)
+				//   1 Large Files (includes support for 64bit tags)
+				//   4 Kad Version
+				if (temptag.IsInt()) {
+					m_fExtMultiPacket		= (temptag.GetInt() >>  5) & 0x01;
+					m_fSupportsLargeFiles   = (temptag.GetInt() >>  4) & 0x01;
+					m_byKadVersion			= (uint8)((temptag.GetInt() >>  0) & 0x0f);
+					dwEmuleTags |= 8;
+					if (bDbgInfo)
+						m_strHelloInfo.AppendFormat(_T("\n  KadVersion=%u, m_fSupportsLargeFiles=%u m_fExtMultiPacket=%u"), m_byKadVersion, m_fSupportsLargeFiles, m_fExtMultiPacket);
+				}
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
+				//MOPRH START - Added by SiRoB,  Control Mod Tag
+				if (!temptag.IsInt()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_EMULE_MISCOPTIONS2"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				//	28 Reserved
-				//   4 Kad Version
-				m_byKadVersion			= (temptag.GetInt() >>  0) & 0x0f;
-				dwEmuleTags |= 8;
-				if (bDbgInfo){
-					m_strHelloInfo.AppendFormat(_T("\n  KadVersion=%u"  ), m_byKadVersion );
-				}
 				break;
+
 			case CT_EMULE_VERSION:
-				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
-					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
-						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_EMULE_VERSION"));
-					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
-				}
-				//MOPRH END - Added by SiRoB,  Control Mod Tag
 				//  8 Compatible Client ID
 				//  7 Mjr Version (Doesn't really matter..)
 				//  7 Min Version (Only need 0-99)
 				//  3 Upd Version (Only need 0-5)
 				//  7 Bld Version (Only need 0-99) -- currently not used
-				m_byCompatibleClient = (temptag.GetInt() >> 24);
-				m_nClientVersion = temptag.GetInt() & 0x00ffffff;
-				m_byEmuleVersion = 0x99;
-				m_fSharedDirectories = 1;
-				dwEmuleTags |= 4;
-				if (bDbgInfo)
-					m_strHelloInfo.AppendFormat(_T("\n  ClientVer=%u.%u.%u.%u  Comptbl=%u"), (m_nClientVersion >> 17) & 0x7f, (m_nClientVersion >> 10) & 0x7f, (m_nClientVersion >> 7) & 0x07, m_nClientVersion & 0x7f, m_byCompatibleClient);
+				if (temptag.IsInt()) {
+					m_byCompatibleClient = (uint8)((temptag.GetInt() >> 24));
+					m_nClientVersion = temptag.GetInt() & 0x00ffffff;
+					m_byEmuleVersion = 0x99;
+					m_fSharedDirectories = 1;
+					dwEmuleTags |= 4;
+					if (bDbgInfo)
+						m_strHelloInfo.AppendFormat(_T("\n  ClientVer=%u.%u.%u.%u  Comptbl=%u"), (m_nClientVersion >> 17) & 0x7f, (m_nClientVersion >> 10) & 0x7f, (m_nClientVersion >> 7) & 0x07, m_nClientVersion & 0x7f, m_byCompatibleClient);
+				}
+				else if (bDbgInfo)
+					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
+				//MOPRH START - Added by SiRoB,  Control Mod Tag
+				if (!temptag.IsInt()) {
+					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
+						strBanReason.Format(_T("BadType eMuleInfo-Tag: CT_EMULE_VERSION"));
+					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
+				}
+				//MOPRH END - Added by SiRoB,  Control Mod Tag
 				break;
 			//Morph Start - added by AndCycle, ICS
 			// enkeyDEV: ICS
@@ -913,7 +954,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				m_strHelloInfo.AppendFormat(_T("\n  ***AddData: uint32=%u (0x%08x)"), test, test);
 		}
 	}
-	else if (data->GetPosition() < data->GetLength()){
+	else if (/*bDbgInfo &&*/ data->GetPosition() < data->GetLength()){
 		UINT uAddHelloDataSize = (UINT)(data->GetLength() - data->GetPosition());
 		//MOPRH - Added by SiRoB, Control Mod Tag
 		m_strNotOfficial.AppendFormat(_T(",ExtraByte=%u"),uAddHelloDataSize);
@@ -1064,7 +1105,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	}
 
 	CSafeMemFile data(128);
-	data.WriteUInt8(theApp.m_uCurVersionShort);
+	data.WriteUInt8((uint8)theApp.m_uCurVersionShort);
 	data.WriteUInt8(EMULE_PROTOCOL);
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
@@ -1155,133 +1196,167 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 	if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("  Tags=%u"), (UINT)tagcount);
 	CString strBanReason=NULL; //MORPH - Added by SiRoB, Control mod Tag
-	for (uint32 i = 0;i < tagcount; i++){
+	for (uint32 i = 0;i < tagcount; i++)
+	{
 		CTag temptag(&data, false);
 		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
 		m_uNotOfficial ^= temptag.GetNameID(); //MOPRH - Added by SiRoB,  Control Mod Tag
-		switch (temptag.GetNameID()){
+		switch (temptag.GetNameID())
+		{
 			case ET_COMPRESSION:
+				// Bits 31- 8: 0 - reserved
+				// Bits  7- 0: data compression version
+				if (temptag.IsInt()) {
+					m_byDataCompVer = (uint8)temptag.GetInt();
+					if (bDbgInfo)
+						m_strMuleInfo.AppendFormat(_T("\n  Compr=%u"), (UINT)temptag.GetInt());
+				}
+				else if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				if (!temptag.IsInt()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_COMPRESSION"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// Bits 31- 8: 0 - reserved
-				// Bits  7- 0: data compression version
-				m_byDataCompVer = temptag.GetInt();
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  Compr=%u"), (UINT)temptag.GetInt());
 				break;
+			
 			case ET_UDPPORT:
+				// Bits 31-16: 0 - reserved
+				// Bits 15- 0: UDP port
+				if (temptag.IsInt()) {
+					m_nUDPPort = (uint16)temptag.GetInt();
+					if (bDbgInfo)
+						m_strMuleInfo.AppendFormat(_T("\n  UDPPort=%u"), (UINT)temptag.GetInt());
+				}
+				else if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				if (!temptag.IsInt()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_UDPPORT"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// Bits 31-16: 0 - reserved
-				// Bits 15- 0: UDP port
-				m_nUDPPort = temptag.GetInt();
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  UDPPort=%u"), (UINT)temptag.GetInt());
 				break;
+			
 			case ET_UDPVER:
+				// Bits 31- 8: 0 - reserved
+				// Bits  7- 0: UDP protocol version
+				if (temptag.IsInt()) {
+					m_byUDPVer = (uint8)temptag.GetInt();
+					if (bDbgInfo)
+						m_strMuleInfo.AppendFormat(_T("\n  UDPVer=%u"), (UINT)temptag.GetInt());
+				}
+				else if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				if (!temptag.IsInt()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_UDPVER"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// Bits 31- 8: 0 - reserved
-				// Bits  7- 0: UDP protocol version
-				m_byUDPVer = temptag.GetInt();
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  UDPVer=%u"), (UINT)temptag.GetInt());
 				break;
+			
 			case ET_SOURCEEXCHANGE:
+				// Bits 31- 8: 0 - reserved
+				// Bits  7- 0: source exchange protocol version
+				if (temptag.IsInt()) {
+					m_bySourceExchangeVer = (uint8)temptag.GetInt();
+					if (bDbgInfo)
+						m_strMuleInfo.AppendFormat(_T("\n  SrcExch=%u"), (UINT)temptag.GetInt());
+				}
+				else if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				if (!temptag.IsInt()){
+				if (!temptag.IsInt()) {
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_SOURCEEXCHANGE"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// Bits 31- 8: 0 - reserved
-				// Bits  7- 0: source exchange protocol version
-				m_bySourceExchangeVer = temptag.GetInt();
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  SrcExch=%u"), (UINT)temptag.GetInt());
 				break;
+			
 			case ET_COMMENTS:
+				// Bits 31- 8: 0 - reserved
+				// Bits  7- 0: comments version
+				if (temptag.IsInt()) {
+					m_byAcceptCommentVer = (uint8)temptag.GetInt();
+					if (bDbgInfo)
+						m_strMuleInfo.AppendFormat(_T("\n  Commnts=%u"), (UINT)temptag.GetInt());
+				}
+				else if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_COMMENTS"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// Bits 31- 8: 0 - reserved
-				// Bits  7- 0: comments version
-				m_byAcceptCommentVer = temptag.GetInt();
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  Commnts=%u"), (UINT)temptag.GetInt());
 				break;
+			
 			case ET_EXTENDEDREQUEST:
+				// Bits 31- 8: 0 - reserved
+				// Bits  7- 0: extended requests version
+				if (temptag.IsInt()) {
+					m_byExtendedRequestsVer = (uint8)temptag.GetInt();
+					if (bDbgInfo)
+						m_strMuleInfo.AppendFormat(_T("\n  ExtReq=%u"), (UINT)temptag.GetInt());
+				}
+				else if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_EXTENDEDREQUEST"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// Bits 31- 8: 0 - reserved
-				// Bits  7- 0: extended requests version
-				m_byExtendedRequestsVer = temptag.GetInt();
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  ExtReq=%u"), (UINT)temptag.GetInt());
 				break;
+			
 			case ET_COMPATIBLECLIENT:
+				// Bits 31- 8: 0 - reserved
+				// Bits  7- 0: compatible client ID
+				if (temptag.IsInt()) {
+					m_byCompatibleClient = (uint8)temptag.GetInt();
+				if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  Comptbl=%u"), (UINT)temptag.GetInt());
+				}
+				else if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_COMPATIBLECLIENT"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// Bits 31- 8: 0 - reserved
-				// Bits  7- 0: compatible client ID
-				m_byCompatibleClient = temptag.GetInt();
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  Comptbl=%u"), (UINT)temptag.GetInt());
 				break;
+			
 			case ET_FEATURES:
+				// Bits 31- 8: 0 - reserved
+				// Bit	    7: Preview
+				// Bit   6- 0: secure identification
+				if (temptag.IsInt()) {
+					m_bySupportSecIdent = (uint8)((temptag.GetInt()) & 3);
+					m_fSupportsPreview  = (temptag.GetInt() >> 7) & 1;
+					if (bDbgInfo)
+						m_strMuleInfo.AppendFormat(_T("\n  SecIdent=%u  Preview=%u"), m_bySupportSecIdent, m_fSupportsPreview);
+				}
+				else if (bDbgInfo)
+					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_FEATURES"));
 					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
-					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				// Bits 31- 8: 0 - reserved
-				// Bit	    7: Preview
-				// Bit   6- 0: secure identification
-				m_bySupportSecIdent = (temptag.GetInt()     ) & 3;
-				m_fSupportsPreview  = (temptag.GetInt() >> 7) & 1;
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  SecIdent=%u  Preview=%u"), m_bySupportSecIdent, m_fSupportsPreview);
 				break;
+				
  			case ET_MOD_VERSION:
 				m_strNotOfficial.AppendFormat(_T(",mid=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if (temptag.IsStr())
@@ -1290,9 +1365,10 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 					//MOPRH START - Added by SiRoB, Is Morph Client?
 					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
 						( ((m_nClientVersion >> 17) & 0x7f) == 0 && ((m_nClientVersion >> 10) & 0x7f) < 45 ||
- 						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
-						 ( m_strModVersion[11] == 0x00 || m_strModVersion[11] == 0x20 &&  m_strModVersion[11] != 0x00)
-
+						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
+						 ( m_strModVersion[11] == 0x00 || m_strModVersion[11] == 0x20 &&  m_strModVersion[12] != 0x00 || m_strModVersion[11] >= 0x30 && m_strModVersion[11] <= 0x39  && 
+						  ( m_strModVersion[12] == 0x00 || m_strModVersion[12] == 0x20 &&  m_strModVersion[13] != 0x00)
+						 )
 						)
 					   ){
 						m_bIsMorph = true;
@@ -1339,7 +1415,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 		m_nUDPPort = 0;
 		m_incompletepartVer = 0;	// enkeyDEV: ICS //Morph - added by AndCycle, ICS
 	}
-	if (/*bDbgInfo &&*/ data.GetPosition() < data.GetLength()){
+	if (/*bDbgInfo &&*/ data.GetPosition() < data.GetLength()) {
 		if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("\n  ***AddData: %u bytes"), data.GetLength() - data.GetPosition());
 		//MOPRH - Added by SiRoB, Control Mod Tag
@@ -1417,7 +1493,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	// eMule UDP Ports
 	uint32 kadUDPPort = 0;
-	if(Kademlia::CKademlia::isConnected())
+	if(Kademlia::CKademlia::IsConnected())
 	{
 		kadUDPPort = thePrefs.GetUDPPort();
 	}
@@ -1469,9 +1545,14 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	tagMisOptions1.WriteTagToFile(data);
 
 	// eMule Misc. Options #2
-	const UINT uKadVersion			= 1;
+	const UINT uKadVersion			= KADEMLIA_VERSION;
+	const UINT uSupportLargeFiles	= (OLD_MAX_EMULE_FILE_SIZE < MAX_EMULE_FILE_SIZE) ? 1 : 0;
+	const UINT uExtMultiPacket		= 1;
+
 	CTag tagMisOptions2(CT_EMULE_MISCOPTIONS2, 
 //				(RESERVED				     ) 
+				(uExtMultiPacket		<<  5) |
+				(uSupportLargeFiles		<<  4) |
 				(uKadVersion			<<  0) 
 				);
 	tagMisOptions2.WriteTagToFile(data);
@@ -1623,6 +1704,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	else{
 		// ensure that all possible block requests are removed from the partfile
 		ClearDownloadBlockRequests();
+
 		if(GetDownloadState() == DS_CONNECTED){
 		    //MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
 			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend() || IsProxy())
@@ -1664,8 +1746,21 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			bDelete = false;
 	}
 
+	// Dead Soure Handling
+	//
+	// If we failed to connect to that client, it is supposed to be 'dead'. Add the IP
+	// to the 'dead sources' lists so we don't waste resources and bandwidth to connect
+	// to that client again within the next hour.
+	//
+	// But, if we were just connecting to a proxy and failed to do so, that client IP
+	// is supposed to be valid until the proxy itself tells us that the IP can not be
+	// connected to (e.g. 504 Bad Gateway)
+	//
+	bool bAddDeadSource = true;
 	switch(m_nUploadState){
 		case US_CONNECTING:
+			if (socket && socket->GetProxyConnectFailed())
+				bAddDeadSource = false;
 			if (thePrefs.GetLogUlDlEvents())
                 AddDebugLogLine(DLP_VERYLOW, true,_T("Removing connecting client from upload list: %s Client: %s"), pszReason, DbgGetClientInfo());
 		case US_WAITCALLBACK:
@@ -1677,11 +1772,16 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			}
 			//MORPH END   - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend or it's a proxy.
 		case US_ERROR:
-			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
+			if (bAddDeadSource)
+				theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			bDelete = true;
 	}
+	
+	bAddDeadSource = true;
 	switch(m_nDownloadState){
 		case DS_CONNECTING:
+			if (socket && socket->GetProxyConnectFailed())
+				bAddDeadSource = false;
 		case DS_WAITCALLBACK:
 			//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
 			if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1 || IsFriend() || IsProxy() || !IsEd2kClient())
@@ -1691,7 +1791,8 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			}
 			//MORPH END   - Added by SiRoB, Don't kill source if it's a proxy
 		case DS_ERROR:
-			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
+			if (bAddDeadSource)
+				theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			bDelete = true;
 	}
 
@@ -1845,10 +1946,10 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		if( HasValidBuddyID() && !GetBuddyIP() && !GetBuddyPort() && !theApp.serverconnect->IsLocalServer(GetServerIP(), GetServerPort()))
 		{
 			//This is a Kad firewalled source that we want to do a special callback because it has no buddyIP or buddyPort.
-			if( Kademlia::CKademlia::isConnected() )
+			if( Kademlia::CKademlia::IsConnected() )
 			{
 				//We are connect to Kad
-				if( Kademlia::CKademlia::getPrefs()->getTotalSource() > 0 || Kademlia::CSearchManager::alreadySearchingFor(Kademlia::CUInt128(GetBuddyID())))
+				if( Kademlia::CKademlia::GetPrefs()->GetTotalSource() > 0 || Kademlia::CSearchManager::AlreadySearchingFor(Kademlia::CUInt128(GetBuddyID())))
 				{
 					//There are too many source lookups already or we are already searching this key.
 					SetDownloadState(DS_TOOMANYCONNSKAD);
@@ -1917,7 +2018,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 					return true;
 				}
 				
-				if( !Kademlia::CKademlia::isConnected() )
+				if( !Kademlia::CKademlia::IsConnected() )
 				{
 					//We are not connected to Kad and this is a Kad Firewalled source..
 					theApp.downloadqueue->RemoveSource(this);
@@ -1950,10 +2051,10 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 					{
 						//Create search to find buddy.
 						Kademlia::CSearch *findSource = new Kademlia::CSearch;
-						findSource->setSearchTypes(Kademlia::CSearch::FINDSOURCE);
-						findSource->setTargetID(Kademlia::CUInt128(GetBuddyID()));
-						findSource->addFileID(Kademlia::CUInt128(reqfile->GetFileHash()));
-						if(Kademlia::CSearchManager::startSearch(findSource))
+						findSource->SetSearchTypes(Kademlia::CSearch::FINDSOURCE);
+						findSource->SetTargetID(Kademlia::CUInt128(GetBuddyID()));
+						findSource->AddFileID(Kademlia::CUInt128(reqfile->GetFileHash()));
+						if(Kademlia::CSearchManager::StartSearch(findSource))
 						{
 							//Started lookup..
 							SetDownloadState(DS_WAITCALLBACKKAD);
@@ -2099,6 +2200,7 @@ void CUpDownClient::InitClientSoftwareVersion()
 				pszSoftware = _T("aMule");
 				break;
 			case SO_SHAREAZA:
+			case 40:
 				m_clientSoft = SO_SHAREAZA;
 				pszSoftware = _T("Shareaza");
 				break;
@@ -2145,6 +2247,13 @@ void CUpDownClient::InitClientSoftwareVersion()
 				iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u%c"), pszSoftware, nClientMajVersion, nClientMinVersion, _T('a') + nClientUpVersion);
 			else if (m_clientSoft == SO_AMULE || nClientUpVersion != 0)
 				iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u.%u"), pszSoftware, nClientMajVersion, nClientMinVersion, nClientUpVersion);
+			else if (m_clientSoft == SO_LPHANT)
+			{
+				if (nClientMinVersion < 10)
+				iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.0%u"), pszSoftware, (nClientMajVersion-1), nClientMinVersion);
+			else
+					iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u"), pszSoftware, (nClientMajVersion-1), nClientMinVersion);
+			}
 			else
 				iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u"), pszSoftware, nClientMajVersion, nClientMinVersion);
 		}
@@ -2300,12 +2409,11 @@ int CUpDownClient::GetHashType() const
 
 void CUpDownClient::SetUserName(LPCTSTR pszNewName)
 {
-	if (m_pszUsername){
-		free(m_pszUsername);
-		m_pszUsername = NULL;
-	}
+	free(m_pszUsername);
 	if( pszNewName )
 		m_pszUsername = _tcsdup(pszNewName);
+	else
+		m_pszUsername = NULL;
 	//MORPH START - Added by SiRoB, Anti-leecher feature
 	if(thePrefs.GetEnableAntiLeecher())
 	{
@@ -2597,10 +2705,8 @@ void CUpDownClient::ResetFileStatusInfo()
 {
 	//MORPH START - Changed by SiRoB, Keep A4AF infos
 	/*
-	if (m_abyPartStatus){
-		delete[] m_abyPartStatus;
-		m_abyPartStatus = NULL;
-	}
+	delete[] m_abyPartStatus;
+	m_abyPartStatus = NULL;
 	*/
 	m_abyPartStatus = NULL;
 	//MORPH END   - Changed by SiRoB, Keep A4AF infos
@@ -2624,10 +2730,8 @@ void CUpDownClient::ResetFileStatusInfo()
 	m_bCompleteSource = false;
 	m_uFileRating = 0;
 	m_strFileComment.Empty();
-	if (m_pReqFileAICHHash != NULL){
-		delete m_pReqFileAICHHash;
-		m_pReqFileAICHHash = NULL;
-	}
+	delete m_pReqFileAICHHash;
+	m_pReqFileAICHHash = NULL;
 
 	//MORPH START - Added by SiRoB, HotFix Due Complete Source Feature
 	m_nUpCompleteSourcesCount = 0;
@@ -2753,8 +2857,7 @@ void CUpDownClient::ProcessPreviewAnswer(const uchar* pachPacket, uint32 nSize)
 		}
 	}
 	catch(...){
-		if (pBuffer != NULL)
-			delete[] pBuffer;
+		delete[] pBuffer;
 		throw;
 	}
 	(new PreviewDlg())->SetFile(sfile);
@@ -3015,7 +3118,7 @@ CString CUpDownClient::DbgGetClientInfo(bool bFormatIP) const
 	return str;
 }
 
-bool CUpDownClient::CheckHandshakeFinished(UINT protocol, UINT opcode) const
+bool CUpDownClient::CheckHandshakeFinished() const
 {
 	if (m_bHelloAnswerPending)
 	{
@@ -3046,7 +3149,7 @@ void CUpDownClient::CheckForGPLEvilDoer()
 	}
 }
 
-void CUpDownClient::OnSocketConnected(int nErrorCode)
+void CUpDownClient::OnSocketConnected(int /*nErrorCode*/)
 {
 }
 
@@ -3207,7 +3310,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 	// MORPH START - Added by Commander, WebCache 1.2e
 
 	if( socket != NULL && GetUploadState() != US_NONE) {
-		strState.AppendFormat(_T(" (BusyRatio: %0.2f) (buffer=%u)"), socket->GetBusyRatioTime(), socket->GetDynLimit());
+		strState.AppendFormat(_T(" (BusyRatio: %0.2f)"), socket->GetBusyRatioTime());
 		DWORD busySince = socket->GetBusyTimeSince();
 		if (busySince > 0)
 			strState.AppendFormat(_T(" (Busy: %ums)"), GetTickCount() - busySince);
@@ -3264,6 +3367,19 @@ EUtf8Str CUpDownClient::GetUnicodeSupport() const
 		return utf8strRaw;
 	return utf8strNone;
 }
+
+void CUpDownClient::SetSpammer(bool bVal){ 
+	if (bVal)
+		Ban(_T("Identified as Spammer"));
+	else if (IsBanned() && m_fIsSpammer)
+		UnBan();
+	m_fIsSpammer = bVal ? 1 : 0;
+}
+
+void  CUpDownClient::SetMessageFiltered(bool bVal)	{
+	m_fMessageFiltered = bVal ? 1 : 0;
+}
+
 //MORPH START - Added by SiRoB, ZZUL_20040904
 void CUpDownClient::SetFriendSlot(bool bNV)		
 {
@@ -3618,7 +3734,9 @@ bool CUpDownClient::IsMorphLeecher()
 	{
 		if (StrStrI(m_strModVersion,_T("MorphXT")) && (m_strModVersion[7] == 0x2B || m_strModVersion[7] == 0xD7) ||
 			StrStrI(m_strModVersion,_T("M\xF8rphXT")) ||
-			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false)) ||
+			StrStrI(m_strModVersion,_T("MorphXT 7.60")) ||
+			StrStrI(m_strModVersion,_T("MorphXT 7.30")) ||
+			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("FF")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false)) ||
 			(StrStrI(m_strModVersion,_T("phXT")) && (m_strModVersion[0]==0x4D || m_strModVersion[0]==0x6D) && !IsMorph())
 			)
 		{

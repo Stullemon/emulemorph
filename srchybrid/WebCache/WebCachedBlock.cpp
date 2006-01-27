@@ -35,23 +35,6 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 	m_uHostIp = indata.ReadUInt32();
 	m_uHostPort = indata.ReadUInt16();
 	indata.ReadHash16( m_FileID );
-	m_uStart = indata.ReadUInt32();
-	m_uEnd = indata.ReadUInt32();
-	m_uTime = GetTickCount(); //JP remove old chunks (currently only for Stopped-List)
-
-	// Superlexx - encryption
-	indata.Read( remoteKey, WC_KEYLENGTH );
-
-	// yonatan log
-	if (thePrefs.GetLogWebCacheEvents())
-	AddDebugLogLine( false, _T("CWebCachedBlock: proxy-ip=%s, host-ip=%s, host-port=%u, filehash=%s, start=%u, end=%u, key=%s16\n"),
-		ipstr(m_uProxyIp),
-		ipstr(m_uHostIp),
-		m_uHostPort,
-		md4str( m_FileID ), //not sure if this is correct, but now I can read the hash even in unicode build
-		m_uStart,
-		m_uEnd ,
-		md4str(remoteKey)); //not sure if this is correct, but now I can read the key even in unicode build
 
 	const CPartFile* file = GetFile();
 
@@ -66,6 +49,35 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 		delete this;
 		return;
 	}
+	if (file->IsLargeFile()) {
+		if (client->SupportsLargeFiles()) {
+			m_uStart = indata.ReadUInt64();
+			m_uEnd = indata.ReadUInt64();
+		} else {
+			DebugLogWarning(_T("deleting CWebCacheBlock because Client without 64bit file support requested large file; %s, File=\"%s\""), client->DbgGetClientInfo(), file->GetFileName());
+			delete this;
+			return;
+		}
+	}
+	else {
+		m_uStart = indata.ReadUInt32();
+		m_uEnd = indata.ReadUInt32();
+	}
+	m_uTime = GetTickCount(); //JP remove old chunks (currently only for Stopped-List)
+
+	// Superlexx - encryption
+	indata.Read( remoteKey, WC_KEYLENGTH );
+
+	// yonatan log
+	if (thePrefs.GetLogWebCacheEvents())
+	AddDebugLogLine( false, _T("CWebCachedBlock: proxy-ip=%s, host-ip=%s, host-port=%u, filehash=%s, start=%I64u, end=%I64u, key=%s16\n"),
+		ipstr(m_uProxyIp),
+		ipstr(m_uHostIp),
+		m_uHostPort,
+		md4str( m_FileID ), //not sure if this is correct, but now I can read the hash even in unicode build
+		m_uStart,
+		m_uEnd ,
+		md4str(remoteKey)); //not sure if this is correct, but now I can read the key even in unicode build
 
 	//JP don't accept OHCBs for stopped files
 	if( file->IsStopped() ) {
@@ -119,7 +131,7 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 	// jp Don't request chunks for which we are currently receiving proxy sources START Here because we also need to add blocks that are NotPureGaps
 		ThrottledChunk cur_ThrottledChunk;
 		md4cpy(cur_ThrottledChunk.FileID, this->m_FileID);
-		cur_ThrottledChunk.ChunkNr=this->m_uStart/PARTSIZE;
+		cur_ThrottledChunk.ChunkNr=(uint16)(this->m_uStart/PARTSIZE);
 		cur_ThrottledChunk.timestamp = GetTickCount();
 		ThrottledChunkList.AddToList(cur_ThrottledChunk); // compare this chunk to the chunks in the list and add it if it's not found
 	// jp Don't request chunks for which we are currently receiving proxy sources END

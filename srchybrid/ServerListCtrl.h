@@ -30,6 +30,7 @@ protected:
 	CServerList*	server_list;
 	CToolTipCtrlX*	m_tooltip;
 
+	void SetSelectedServersPriority(UINT uPriority);
 	void SetAllIcons();
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

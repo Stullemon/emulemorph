@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -37,7 +37,7 @@ CServer::CServer(const ServerMet_Struct* in_data)
 	_tcscpy(ipfull, ipstr(ip));
 	files = 0;
 	users = 0;
-	preferences = 0;
+	m_uPreference = 0;
 	ping = 0;
 	failedcount = 0; 
 	lastpinged = 0;
@@ -68,7 +68,7 @@ CServer::CServer(uint16 in_port, LPCTSTR i_addr)
 	_tcscpy(ipfull, ipstr(ip));
 	files = 0;
 	users = 0;
-	preferences = 0;
+	m_uPreference = 0;
 	ping = 0;
 	failedcount = 0; 
 	lastpinged = 0;
@@ -95,7 +95,7 @@ CServer::CServer(const CServer* pOld)
 	files = pOld->files;
 	users = pOld->users;
 	realport = pOld->realport;//Morph - added by AndCycle, aux Ports, by lugdunummaster
-	preferences = pOld->preferences;
+	m_uPreference = pOld->m_uPreference;
 	ping = pOld->ping;
 	failedcount = pOld->failedcount; 
 	lastpinged = pOld->lastpinged;
@@ -151,7 +151,7 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 	case ST_PREFERENCE:
 		ASSERT( tag->IsInt() );
 		if (tag->IsInt())
-			preferences = tag->GetInt();
+			m_uPreference = tag->GetInt();
 		break;
 	case ST_DYNIP:
 		ASSERT( tag->IsStr() );

@@ -8,7 +8,11 @@
 #include "WebCachedBlockList.h"
 #include <windns.h>
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4100) // unreferenced formal parameter
 #include <crypto51/osrng.h>
+#pragma warning(default:4100) // unreferenced formal parameter
+#pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "opcodes.h"
 #include "kademlia/kademlia/Kademlia.h"
@@ -241,13 +245,13 @@ void AutodetectWebcache()
 bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 {
 	using namespace MSXML2;
-	if (!theApp.GetPublicIP() && !Kademlia::CKademlia::getIPAddress())
+	if (!theApp.GetPublicIP() && !Kademlia::CKademlia::GetIPAddress())
 		throw CString(_T("No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"));
 
 // do reverse lookup
 	CString shostName;
 	bool reaskedDNS = false;
-	uint32 PublicIP = theApp.GetPublicIP() ? theApp.GetPublicIP() : ntohl(Kademlia::CKademlia::getIPAddress());
+	uint32 PublicIP = theApp.GetPublicIP() ? theApp.GetPublicIP() : ntohl(Kademlia::CKademlia::GetIPAddress());
 	bool lastLookupFailed = thePrefs.GetLastResolvedName()==_T("");
 	bool IPchangedSinceLastLookup = (PublicIP != thePrefs.GetWebCacheLastGlobalIP());
 	bool enoughTimePassedSinceLastLookup = (GetTickCount() - thePrefs.GetWebCacheLastSearch() > (uint32)WCREASKMS);

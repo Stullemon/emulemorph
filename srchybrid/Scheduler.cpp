@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -47,7 +47,9 @@ CScheduler::CScheduler(){
 CScheduler::~CScheduler(){
 	// Mighty Knife: Saving of scheduler events is now done by SaveSettings!
 	// -> much cleaner. This should be changed for the constructor, too...
-	// SaveToFile();
+	/*
+	SaveToFile();
+	*/
 	// [end] Mighty Knife
 	RemoveAll();
 }
@@ -60,8 +62,8 @@ int CScheduler::LoadFromFile(){
 	strName.Format(_T("%spreferences.ini"),thePrefs.GetConfigDir());
 	CIni ini(strName, _T("Scheduler"));
 	
-	uint8 max=ini.GetInt(_T("Count"),0);
-	uint8 count=0;
+	UINT max=ini.GetInt(_T("Count"),0);
+	UINT count=0;
 
 	while (count<max) {
 		strName.Format(_T("Schedule#%i"),count);
@@ -111,7 +113,7 @@ void CScheduler::SaveToFile(){
 	}
 }
 
-void CScheduler::RemoveSchedule(uint8 index){
+void CScheduler::RemoveSchedule(int index){
 	
 	if (index>=schedulelist.GetCount()) return;
 
@@ -126,7 +128,7 @@ void CScheduler::RemoveAll(){
 		RemoveSchedule(0);
 }
 
-uint8 CScheduler::AddSchedule(Schedule_Struct* schedule) {
+int CScheduler::AddSchedule(Schedule_Struct* schedule) {
 	schedulelist.Add(schedule);
 	return schedulelist.GetCount()-1;
 }
@@ -175,7 +177,7 @@ int CScheduler::Check(bool forcecheck){
 		}
 
 		//check time
-		uint8 h1,h2,m1,m2;
+		UINT h1,h2,m1,m2;
 		CTime t1=CTime(schedule->time);
 		CTime t2=CTime(schedule->time2);
 		h1=t1.GetHour();	h2=t2.GetHour();
@@ -236,45 +238,66 @@ void CScheduler::RestoreOriginals() {
 	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 }
 
-void CScheduler::ActivateSchedule(uint8 index,bool makedefault) {
+void CScheduler::ActivateSchedule(int index,bool makedefault) {
 	Schedule_Struct* schedule=GetSchedule(index);
 
-	for (uint8 ai=0;ai<16;ai++) {
+	for (int ai=0;ai<16;ai++) {
 		if (schedule->actions[ai]==0) break;
 		if (schedule->values[ai]=="" /* maybe ignore in some future cases...*/ ) continue;
 
 		switch (schedule->actions[ai]) {
-			case 1 : thePrefs.SetMaxUpload(_tstoi(schedule->values[ai]));
-				if (makedefault) original_upload=_tstoi(schedule->values[ai]); 
+			case 1 :
+				thePrefs.SetMaxUpload(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_upload=(uint16)_tstoi(schedule->values[ai]); 
 				break;
-			case 2 : thePrefs.SetMaxDownload(_tstoi(schedule->values[ai]));
-				if (makedefault) original_download=_tstoi(schedule->values[ai]);
+			case 2 :
+				thePrefs.SetMaxDownload(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_download=(uint16)_tstoi(schedule->values[ai]);
 				break;
-			case 3 : thePrefs.SetMaxSourcesPerFile(_tstoi(schedule->values[ai]));
-				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
+			case 3 :
+				thePrefs.SetMaxSourcesPerFile(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_sources=_tstoi(schedule->values[ai]);
 				break;
-			case 4 : thePrefs.SetMaxConsPerFive(_tstoi(schedule->values[ai]));
-				if (makedefault) original_cons5s=_tstoi(schedule->values[ai]);
+			case 4 :
+				thePrefs.SetMaxConsPerFive(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_cons5s=_tstoi(schedule->values[ai]);
 				break;
-			case 5 : thePrefs.SetMaxConnections(_tstoi(schedule->values[ai]));
-				if (makedefault) original_connections=_tstoi(schedule->values[ai]);
+			case 5 :
+				thePrefs.SetMaxConnections(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_connections=_tstoi(schedule->values[ai]);
 				break;
-			
-			case 6 : theApp.downloadqueue->SetCatStatus(_tstoi(schedule->values[ai]),MP_STOP);break;
-			case 7 : theApp.downloadqueue->SetCatStatus(_tstoi(schedule->values[ai]),MP_RESUME);break;
+			case 6 :
+				theApp.downloadqueue->SetCatStatus(_tstoi(schedule->values[ai]),MP_STOP);
+				break;
+			case 7 :
+				theApp.downloadqueue->SetCatStatus(_tstoi(schedule->values[ai]),MP_RESUME);
+				break;
 
 			//EastShare START - Added by Pretender, add USS settings in scheduler tab
-			case 8 : thePrefs.SetDynUpPingToleranceMilliseconds(_tstoi(schedule->values[ai]));
-				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
+			case 8 :
+				thePrefs.SetDynUpPingToleranceMilliseconds(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_sources=_tstoi(schedule->values[ai]);
 				break;
-			case 9 : thePrefs.SetDynUpGoingUpDivider(_tstoi(schedule->values[ai]));
-				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
+			case 9 :
+				thePrefs.SetDynUpGoingUpDivider(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_sources=_tstoi(schedule->values[ai]);
 				break;
-			case 10 : thePrefs.SetDynUpGoingDownDivider(_tstoi(schedule->values[ai]));
-				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
+			case 10 :
+				thePrefs.SetDynUpGoingDownDivider(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_sources=_tstoi(schedule->values[ai]);
 				break;
-			case 11 : thePrefs.SetMinUpload(_tstoi(schedule->values[ai]));
-				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
+			case 11 :
+				thePrefs.SetMinUpload(_tstoi(schedule->values[ai]));
+				if (makedefault)
+					original_sources=_tstoi(schedule->values[ai]);
 				break;
 			//EastShare END - Added by Pretender, add USS settings in scheduler tab
 

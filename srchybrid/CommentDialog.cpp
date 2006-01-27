@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -74,7 +74,7 @@ void CCommentDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LST, m_lstComments);
 }
 
-void CCommentDialog::OnTimer(UINT nIDEvent)
+void CCommentDialog::OnTimer(UINT /*nIDEvent*/)
 {
 	RefreshData(false);
 }
@@ -128,7 +128,7 @@ BOOL CCommentDialog::OnSetActive()
 					strComment.Empty();
 					m_bMergedComment = true;
 				}
-				if (iRating != -1 && iRating != file->GetFileRating())
+				if (iRating != -1 && (UINT)iRating != file->GetFileRating())
 					iRating = -1;
 			}
 		}
@@ -136,12 +136,7 @@ BOOL CCommentDialog::OnSetActive()
 		m_bSelf = true;
 		SetDlgItemText(IDC_CMT_TEXT, strComment);
 		((CEdit*)GetDlgItem(IDC_CMT_TEXT))->SetLimitText(MAXFILECOMMENTLEN);
-		//MORPH START - Changed by SiRoB, Proper rating order
-		/*
 		m_ratebox.SetCurSel(iRating);
-		*/
-		m_ratebox.SetCurSel((iRating==4)?3:(iRating==3)?4:iRating);
-		//MORPH END   - Changed by SiRoB, Proper rating order
 		m_bSelf = false;
 
 		m_bDataChanged = false;
@@ -178,12 +173,7 @@ BOOL CCommentDialog::OnApply()
 		    if (!strComment.IsEmpty() || !m_bMergedComment)
 			    file->SetFileComment(strComment);
 		    if (iRating != -1)
-			    //MORPH START - Changed by SiRoB, Proper rating order
-				/*
-				file->SetFileRating(iRating);
-				*/
-				file->SetFileRating((iRating==3)?4:(iRating==4)?3:iRating);
-				//MORPH END   - Changed by SiRoB, Proper rating order
+			    file->SetFileRating(iRating);
 	    }
 	}
 	return CResizablePage::OnApply();
@@ -200,6 +190,7 @@ void CCommentDialog::Localize(void)
 	GetDlgItem(IDC_RATEHELP)->SetWindowText(GetResString(IDS_CMT_RATEHELP));
 
 	GetDlgItem(IDC_USERCOMMENTS)->SetWindowText(GetResString(IDS_COMMENT));
+	GetDlgItem(IDC_SEARCHKAD)->SetWindowText(GetResString(IDS_SEARCHKAD));
 
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -219,13 +210,11 @@ void CCommentDialog::Localize(void)
 	m_ratebox.AddItem(GetResString(IDS_CMT_FAKE), 1);
 	m_ratebox.AddItem(GetResString(IDS_CMT_POOR), 2);
 	m_ratebox.AddItem(GetResString(IDS_CMT_FAIR), 3);
-	//MORPH START - Moved by FrankyFive, Proper rating order
 	m_ratebox.AddItem(GetResString(IDS_CMT_GOOD), 4);
-	//MORPH END   - Moved by FrankyFive, Proper rating order
 	m_ratebox.AddItem(GetResString(IDS_CMT_EXCELLENT), 5);
 	UpdateHorzExtent(m_ratebox, 16); // adjust dropped width to ensure all strings are fully visible
 
-	if( Kademlia::CKademlia::isConnected() )
+	if( Kademlia::CKademlia::IsConnected() )
 		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_SHOW);
 	else
 		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_HIDE);
@@ -290,17 +279,14 @@ void CCommentDialog::RefreshData(bool deleteOld)
 
 void CCommentDialog::OnBnClickedSearchKad()
 {
-	if(Kademlia::CKademlia::isConnected())
+	if(Kademlia::CKademlia::IsConnected())
 	{
 	    for (int i = 0; i < m_paFiles->GetSize(); i++)
 	    {
 			CAbstractFile* file = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[i]);
 			if(file)
 			{
-				Kademlia::CSearch *notes = new Kademlia::CSearch;
-				notes->setSearchTypes(Kademlia::CSearch::NOTES);
-				notes->setTargetID(Kademlia::CUInt128(file->GetFileHash()));
-				if( !Kademlia::CSearchManager::startSearch(notes) )
+				if( !Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::NOTES, true, Kademlia::CUInt128(file->GetFileHash())) )
 					AfxMessageBox(GetResString(IDS_KADSEARCHALREADY),MB_OK | MB_ICONINFORMATION,0);
 			}
 		}

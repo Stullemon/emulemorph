@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -22,7 +22,11 @@
 #include "Preferences.h"
 #include "md5sum.h"
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4100) // unreferenced formal parameter
 #include <crypto51/rsa.h>
+#pragma warning(default:4100) // unreferenced formal parameter
+#pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "Log.h"
 #include "UserMsgs.h"
@@ -212,7 +216,8 @@ void CPeerCacheFinder::SearchForPC(){
 	}
 }
 
-LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM wParam, LPARAM lParam){
+LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM /*wParam*/, LPARAM lParam)
+{
 	if (m_PCLUState == LUS_MYHOSTNAME){
 		if (WSAGETASYNCERROR(lParam) == 0)
 		{
@@ -337,7 +342,6 @@ CString ReverseDnsLookup(DWORD dwIP)
 				{
 					if (AtlIsValidAddress(pDnsRecords->Data.PTR.pNameHost, sizeof(TCHAR), FALSE))
 						strHostName = pDnsRecords->Data.PTR.pNameHost;
-				if (pDnsRecords) //Added by SiRoB, Pawcio fix
 					(*pfnDnsRecordListFree)(pDnsRecords, DnsFreeRecordListDeep);
 				}
 			}
@@ -386,7 +390,7 @@ void CPeerCacheFinder::AddAllowedVersion(CClientVersionInfo cviVersion){
 	liAllowedVersions.Add(cviVersion);
 }
 
-bool CPeerCacheFinder::IsClientPCCompatible(uint32 dwTagVersionInfo, uint16 nClientSoft){
+bool CPeerCacheFinder::IsClientPCCompatible(uint32 dwTagVersionInfo, UINT nClientSoft){
 	return IsClientPCCompatible(CClientVersionInfo(dwTagVersionInfo, nClientSoft));
 }
 
@@ -750,7 +754,7 @@ BOOL CPCReverseDnsThread::InitInstance()
 			strcpy(pHost->h_name, strHostnameA);
 			p += strHostnameA.GetLength() + 1;
 
-			ASSERT( p - _acDNSBuffer == uBufLen );
+			ASSERT( (UINT)(p - _acDNSBuffer) == uBufLen );
 			uError = 0;
 		}
 		else

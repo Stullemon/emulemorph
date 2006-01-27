@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -95,33 +95,33 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
 	*/
 	CKnownFile* currequpfile = CheckAndGetReqUpFile();
-	uint32 filesize;
+	EMFileSize filesize;
 	if (currequpfile)
 		filesize=currequpfile->GetFileSize();
 	else
-		filesize=PARTSIZE*m_nUpPartCount;
+		filesize = (uint64)(PARTSIZE * (uint64)m_nUpPartCount);
 	// wistily: UpStatusFix
 
-    if(filesize > 0) {
+    if(filesize > (uint64)0) {
 		s_UpStatusBar.SetFileSize(filesize); 
 		s_UpStatusBar.SetHeight(rect->bottom - rect->top); 
 		s_UpStatusBar.SetWidth(rect->right - rect->left); 
 		s_UpStatusBar.Fill(crNeither); 
 		if (!onlygreyrect && m_abyUpPartStatus && currequpfile) { 
-			uint32 i;
+			UINT i;
 			for (i = 0;i < m_nUpPartCount;i++)
 				if(m_abyUpPartStatus[i])
-					s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crBoth);
+					s_UpStatusBar.FillRange(PARTSIZE*(uint64)(i), PARTSIZE*(uint64)(i+1), crBoth);
 			//MORPH START - Added by SiRoB, See chunk that we hide
 				else if (m_abyUpPartStatusHidden)
 					if (m_abyUpPartStatusHidden[i])
-						s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),m_bUpPartStatusHiddenBySOTN?crHiddenPartBySOTN:crHiddenPartByHideOS);
+						s_UpStatusBar.FillRange(PARTSIZE*(uint64)(i), PARTSIZE*(uint64)(i+1), m_bUpPartStatusHiddenBySOTN?crHiddenPartBySOTN:crHiddenPartByHideOS);
 			//MORPH END   - Added by SiRoB, See chunk that we hide
 			for (i;i < currequpfile->GetED2KPartCount();i++)
 			//MORPH START - Added by SiRoB, See chunk that we hide
 				 if (m_abyUpPartStatusHidden)
 					if (m_abyUpPartStatusHidden[i])
-						s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),m_bUpPartStatusHiddenBySOTN?crHiddenPartBySOTN:crHiddenPartByHideOS);
+						s_UpStatusBar.FillRange(PARTSIZE*(uint64)(i), PARTSIZE*(uint64)(i+1), m_bUpPartStatusHiddenBySOTN?crHiddenPartBySOTN:crHiddenPartByHideOS);
 			//MORPH END   - Added by SiRoB, See chunk that we hide
 			
 		}
@@ -129,15 +129,15 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		if (!m_BlockRequests_queue.IsEmpty()){
 			block = m_BlockRequests_queue.GetHead();
 			if(block){
-				uint32 start = block->StartOffset/PARTSIZE;
-				s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
+			    uint32 start = (uint32)(block->StartOffset/PARTSIZE);
+			    s_UpStatusBar.FillRange((uint64)start*PARTSIZE, (uint64)(start+1)*PARTSIZE, crNextSending);
 			}
 		}
 		if (!m_DoneBlocks_list.IsEmpty()){
 			block = m_DoneBlocks_list.GetTail();
 			if(block){
-				uint32 start = block->StartOffset/PARTSIZE;
-				s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
+			    uint32 start = (uint32)(block->StartOffset/PARTSIZE);
+			    s_UpStatusBar.FillRange((uint64)start*PARTSIZE, (uint64)(start+1)*PARTSIZE, crNextSending);
 			}
 		}
 		if (!m_DoneBlocks_list.IsEmpty()){
@@ -147,29 +147,29 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			}
 
             // Also show what data is buffered (with color crBuffer)
-            uint32 total = 0;
+            uint64 total = 0;
     
 		    for(POSITION pos=m_DoneBlocks_list.GetTailPosition();pos!=0; ){
 			    Requested_Block_Struct* block = m_DoneBlocks_list.GetPrev(pos);
     
                 if(total + (block->EndOffset-block->StartOffset) <= GetQueueSessionPayloadUp()) {
                     // block is sent
-			        s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
+			        s_UpStatusBar.FillRange((uint64)block->StartOffset, (uint64)block->EndOffset, crSending);
                     total += block->EndOffset-block->StartOffset;
                 }
                 else if (total < GetQueueSessionPayloadUp()){
                     // block partly sent, partly in buffer
                     total += block->EndOffset-block->StartOffset;
-                    uint32 rest = total - GetQueueSessionPayloadUp();
-                    uint32 newEnd = block->EndOffset-rest;
+                    uint64 rest = total - GetQueueSessionPayloadUp();
+                    uint64 newEnd = (block->EndOffset-rest);
     
-    			    s_UpStatusBar.FillRange(block->StartOffset, newEnd, crSending);
-    			    s_UpStatusBar.FillRange(newEnd, block->EndOffset, crBuffer);
+    			    s_UpStatusBar.FillRange((uint64)block->StartOffset, (uint64)newEnd, crSending);
+    			    s_UpStatusBar.FillRange((uint64)newEnd, (uint64)block->EndOffset, crBuffer);
                 }
                 else{
                     // entire block is still in buffer
                     total += block->EndOffset-block->StartOffset;
-    			    s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crBuffer);
+    			    s_UpStatusBar.FillRange((uint64)block->StartOffset, (uint64)block->EndOffset, crBuffer);
                 }
 		    }
 	    }
@@ -191,13 +191,9 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 		if (eNewState == US_UPLOADING) {
 			m_fSentOutOfPartReqs = 0;
 			m_AvarageUDRPreviousAddedTimestamp = m_AvarageUDRLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
-			//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
-			int buffer = 65535;
-			socket->SetSockOpt(SO_SNDBUF, &buffer , sizeof(buffer), SOL_SOCKET);
-			//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 		}
 		// don't add any final cleanups for US_NONE here	
-		m_nUploadState = eNewState;
+		m_nUploadState = (_EUploadState)eNewState;
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 	}
 }
@@ -511,12 +507,12 @@ void CUpDownClient::CreateNextBlockPackage(){
 			if (!srcfile)
 				throw GetResString(IDS_ERR_REQ_FNF);
 
-			uint32 togo;
+			uint64 i64uTogo;
 			if (currentblock->StartOffset > currentblock->EndOffset){
-				togo = currentblock->EndOffset + (srcfile->GetFileSize() - currentblock->StartOffset);
+				i64uTogo = currentblock->EndOffset + (srcfile->GetFileSize() - currentblock->StartOffset);
 			}
 			else{
-				togo = currentblock->EndOffset - currentblock->StartOffset;
+				i64uTogo = currentblock->EndOffset - currentblock->StartOffset;
 				//MORPH START - Changed by SiRoB, SLUGFILLER: SafeHash
 				/*
 				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsComplete(currentblock->StartOffset,currentblock->EndOffset-1, true))
@@ -526,8 +522,9 @@ void CUpDownClient::CreateNextBlockPackage(){
 					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
 			}
 
-			if( togo > EMBLOCKSIZE*3 )
+			if( i64uTogo > EMBLOCKSIZE*3 )
 				throw GetResString(IDS_ERR_LARGEREQBLOCK);
+			uint32 togo = (uint32)i64uTogo;
 			
 			if (filedata == NULL) {
 				CReadBlockFromFileThread* readblockthread = (CReadBlockFromFileThread*) AfxBeginThread(RUNTIME_CLASS(CReadBlockFromFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
@@ -618,13 +615,10 @@ void CUpDownClient::CreateNextBlockPackage(){
 }
 //MORPH END   - Changed by SiRoB, ReadBlockFromFileThread
 
-void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqfile)
+bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqfile)
 {
-	if (m_abyUpPartStatus) 
-	{
-		delete[] m_abyUpPartStatus;
-		m_abyUpPartStatus = NULL;
-	}
+	delete[] m_abyUpPartStatus;
+	m_abyUpPartStatus = NULL;
 	//MORPH START - Added by SiRoB, See chunk that we hide
 	if (m_abyUpPartStatusHidden)
 	{
@@ -635,7 +629,7 @@ void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
 	if( GetExtendedRequestsVersion() == 0 )
-		return;
+		return true;
 
 	uint16 nED2KUpPartCount = data->ReadUInt16();
 	if (!nED2KUpPartCount)
@@ -650,7 +644,7 @@ void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 		{
 			//We already checked if we are talking about the same file.. So if we get here, something really strange happened!
 			m_nUpPartCount = 0;
-			return;
+			return false;
 		}
 		m_nUpPartCount = tempreqfile->GetPartCount();
 		m_abyUpPartStatus = new uint8[m_nUpPartCount];
@@ -658,17 +652,18 @@ void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 		while (done != m_nUpPartCount)
 		{
 			uint8 toread = data->ReadUInt8();
-			for (sint32 i = 0; i != 8; i++)
+			for (UINT i = 0; i != 8; i++)
 			{
 				m_abyUpPartStatus[done] = ((toread>>i)&1)? 1:0;
 //				We may want to use this for another feature..
-//				if (m_abyUpPartStatus[done] && !tempreqfile->IsComplete(done*PARTSIZE,((done+1)*PARTSIZE)-1))
+//				if (m_abyUpPartStatus[done] && !tempreqfile->IsComplete((uint64)done*PARTSIZE,((uint64)(done+1)*PARTSIZE)-1))
 //					bPartsNeeded = true;
 				done++;
 				if (done == m_nUpPartCount)
 					break;
 			}
 		}
+	}
 		if (GetExtendedRequestsVersion() > 1)
 		{
 			uint16 nCompleteCountLast = GetUpCompleteSourcesCount();
@@ -683,9 +678,9 @@ void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 				//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
 					tempreqfile->UpdatePartsInfo();
 			}
-		}
 	}
 	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
+	return true;
 }
 
 void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
@@ -701,8 +696,8 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 		ASSERT( nPacketSize );
 		togo -= nPacketSize;
 
-		uint32 statpos = (currentblock->EndOffset - togo) - nPacketSize;
-		uint32 endpos = (currentblock->EndOffset - togo);
+		uint64 statpos = (currentblock->EndOffset - togo) - nPacketSize;
+		uint64 endpos = (currentblock->EndOffset - togo);
 		if (IsUploadingToPeerCache())
 		{
 			if (m_pPCUpSocket == NULL){
@@ -722,10 +717,16 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 				CKnownFile* srcfile = CheckAndGetReqUpFile();
 				CStringA str;
 				str.AppendFormat("HTTP/1.0 206\r\n");
-				str.AppendFormat("Content-Range: bytes %u-%u/%u\r\n", currentblock->StartOffset, currentblock->EndOffset - 1, srcfile->GetFileSize());
+				str.AppendFormat("Content-Range: bytes %I64u-%I64u/%I64u\r\n", currentblock->StartOffset, currentblock->EndOffset - 1, srcfile->GetFileSize());
 				str.AppendFormat("Content-Type: application/octet-stream\r\n");
-				str.AppendFormat("Content-Length: %u\r\n", currentblock->EndOffset - currentblock->StartOffset);
+				str.AppendFormat("Content-Length: %I64u\r\n", currentblock->EndOffset - currentblock->StartOffset);
+				//---
+				//MORPH START - Added by SiRoB, [-modname-]
+				/*
 				str.AppendFormat("Server: eMule/%s\r\n", T2CA(theApp.m_strCurVersionLong));
+				*/
+				str.AppendFormat("Server: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
+				//MORPH END   - Added by SiRoB, [-modname-]
 				str.AppendFormat("\r\n");
 				dataHttp.Write((LPCSTR)str, str.GetLength());
 				theStats.AddUpDataOverheadFileRequest((UINT)dataHttp.GetLength());
@@ -741,7 +742,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 
 			if (thePrefs.GetDebugClientTCPLevel() > 1){
 				DebugSend("PeerCache-HTTP data", this, GetUploadFileID());
-				Debug(_T("  Start=%u  End=%u  Size=%u\n"), statpos, endpos, nPacketSize);
+				Debug(_T("  Start=%I64u  End=%I64u  Size=%u\n"), statpos, endpos, nPacketSize);
 			}
 
 			UINT uRawPacketSize = (UINT)dataHttp.GetLength();
@@ -767,11 +768,11 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 				/*
 				CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
 				*/
-				CKnownFile* srcfile = CheckAndGetReqUpFile();
+				//CKnownFile* srcfile = CheckAndGetReqUpFile();
 				CStringA str;
 //				str.AppendFormat("HTTP/1.1 200 OK\r\n"); // DFA
 				str.AppendFormat("HTTP/1.0 200 OK\r\n");
-				str.AppendFormat("Content-Length: %u\r\n", currentblock->EndOffset - currentblock->StartOffset);
+				str.AppendFormat("Content-Length: %I64u\r\n", currentblock->EndOffset - currentblock->StartOffset);
 				str.AppendFormat("Expires: Mon, 03 Sep 2007 01:23:45 GMT\r\n" ); // rolled-back to 1.1b code (possible bug w/soothsayers' proxy)
 				str.AppendFormat("Cache-Control: public\r\n");
 				str.AppendFormat("Cache-Control: no-transform\r\n");
@@ -784,7 +785,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 				//MORPH END   - Changed by SiRoB, ModID
 				str.AppendFormat("\r\n");
 				dataHttp.Write((LPCSTR)str, str.GetLength());
-				theStats.AddUpDataOverheadFileRequest(dataHttp.GetLength());
+				theStats.AddUpDataOverheadFileRequest((UINT)dataHttp.GetLength());
 
 				m_iHttpSendState = 1;
 				if (thePrefs.GetDebugClientTCPLevel() > 0){
@@ -797,10 +798,10 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 
 			if (thePrefs.GetDebugClientTCPLevel() > 1){
 				DebugSend("WebCache-HTTP data", this, GetUploadFileID());
-				Debug(_T("  Start=%u  End=%u  Size=%u\n"), statpos, endpos, nPacketSize);
+				Debug(_T("  Start=%I64u  End=%I64u  Size=%u\n"), statpos, endpos, nPacketSize);
 			}
 
-			UINT uRawPacketSize = dataHttp.GetLength();
+			UINT uRawPacketSize = (UINT)dataHttp.GetLength();
 			LPBYTE pRawPacketData = dataHttp.Detach();
 			CRawPacket* packet = new CRawPacket((char*)pRawPacketData, uRawPacketSize, bFromPF);
 			m_pWCUpSocket->SendPacket(packet, true, false, nPacketSize);
@@ -809,19 +810,30 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 		// MORPH END - Added by Commander, WebCache 1.2e
 		else
 		{
-			Packet* packet = new Packet(OP_SENDINGPART,nPacketSize+24, OP_EDONKEYPROT, bFromPF);
-			md4cpy(&packet->pBuffer[0],GetUploadFileID());
-			PokeUInt32(&packet->pBuffer[16], statpos);
-			PokeUInt32(&packet->pBuffer[20], endpos);
-		
-			memfile.Read(&packet->pBuffer[24],nPacketSize);
+			Packet* packet;
+			if (statpos > 0xFFFFFFFF || endpos > 0xFFFFFFFF){
+				packet = new Packet(OP_SENDINGPART_I64,nPacketSize+32, OP_EMULEPROT, bFromPF);
+				md4cpy(&packet->pBuffer[0],GetUploadFileID());
+				PokeUInt64(&packet->pBuffer[16], statpos);
+				PokeUInt64(&packet->pBuffer[24], endpos);
+				memfile.Read(&packet->pBuffer[32],nPacketSize);
+				theStats.AddUpDataOverheadFileRequest(32);
+			}
+			else{
+				packet = new Packet(OP_SENDINGPART,nPacketSize+24, OP_EDONKEYPROT, bFromPF);
+				md4cpy(&packet->pBuffer[0],GetUploadFileID());
+				PokeUInt32(&packet->pBuffer[16], (uint32)statpos);
+				PokeUInt32(&packet->pBuffer[20], (uint32)endpos);
+				memfile.Read(&packet->pBuffer[24],nPacketSize);
+				theStats.AddUpDataOverheadFileRequest(24);
+			}
 
 			if (thePrefs.GetDebugClientTCPLevel() > 0){
 				DebugSend("OP__SendingPart", this, GetUploadFileID());
-				Debug(_T("  Start=%u  End=%u  Size=%u\n"), statpos, endpos, nPacketSize);
+				Debug(_T("  Start=%I64u  End=%I64u  Size=%u\n"), statpos, endpos, nPacketSize);
 			}
 			// put packet directly on socket
-			theStats.AddUpDataOverheadFileRequest(24);
+			
 			socket->SendPacket(packet,true,false, nPacketSize);
 		}
 	}
@@ -830,7 +842,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
 	BYTE* output = new BYTE[togo+300];
 	uLongf newsize = togo+300;
-	uint16 result = compress2(output,&newsize,data,togo,9);
+	UINT result = compress2(output, &newsize, data, togo, 9);
 	if (result != Z_OK || togo <= newsize){
 		delete[] output;
 		CreateStandartPackets(data,togo,currentblock,bFromPF);
@@ -857,16 +869,26 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 			nPacketSize = togo;
 		ASSERT( nPacketSize );
 		togo -= nPacketSize;
-		Packet* packet = new Packet(OP_COMPRESSEDPART,nPacketSize+24,OP_EMULEPROT,bFromPF);
-		md4cpy(&packet->pBuffer[0],GetUploadFileID());
-		uint32 statpos = currentblock->StartOffset;
-		PokeUInt32(&packet->pBuffer[16], statpos);
-		PokeUInt32(&packet->pBuffer[20], newsize);
-		memfile.Read(&packet->pBuffer[24],nPacketSize);
+		uint64 statpos = currentblock->StartOffset;
+		Packet* packet;
+		if (currentblock->StartOffset > 0xFFFFFFFF || currentblock->EndOffset > 0xFFFFFFFF){
+			packet = new Packet(OP_COMPRESSEDPART_I64,nPacketSize+28,OP_EMULEPROT,bFromPF);
+			md4cpy(&packet->pBuffer[0],GetUploadFileID());
+			PokeUInt64(&packet->pBuffer[16], statpos);
+			PokeUInt32(&packet->pBuffer[24], newsize);
+			memfile.Read(&packet->pBuffer[28],nPacketSize);
+		}
+		else{
+			packet = new Packet(OP_COMPRESSEDPART,nPacketSize+24,OP_EMULEPROT,bFromPF);
+			md4cpy(&packet->pBuffer[0],GetUploadFileID());
+			PokeUInt32(&packet->pBuffer[16], (uint32)statpos);
+			PokeUInt32(&packet->pBuffer[20], newsize);
+			memfile.Read(&packet->pBuffer[24],nPacketSize);
+		}
 
 		if (thePrefs.GetDebugClientTCPLevel() > 0){
 			DebugSend("OP__CompressedPart", this, GetUploadFileID());
-			Debug(_T("  Start=%u  BlockSize=%u  Size=%u\n"), statpos, newsize, nPacketSize);
+			Debug(_T("  Start=%I64u  BlockSize=%u  Size=%u\n"), statpos, newsize, nPacketSize);
 		}
         // approximate payload size
 		uint32 payloadSize = nPacketSize*oldSize/newsize;
@@ -896,11 +918,8 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 		return;
 
 	// clear old status
-	if (m_abyUpPartStatus) 
-	{
-		delete[] m_abyUpPartStatus;
-		m_abyUpPartStatus = NULL;
-	}
+	delete[] m_abyUpPartStatus;
+	m_abyUpPartStatus = NULL;
 	//MORPH START - Added by SiRoB, See chunk that we hide
 	if (m_abyUpPartStatusHidden){
 		delete[] m_abyUpPartStatusHidden;
@@ -943,7 +962,7 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 	if(HasCollectionUploadSlot()){
 		CKnownFile* pDownloadingFile = theApp.sharedfiles->GetFileByID(reqblock->FileID);
 		if(pDownloadingFile != NULL){
-			if ( !(CCollection::HasCollectionExtention(pDownloadingFile->GetFileName()) && pDownloadingFile->GetFileSize() < MAXPRIORITYCOLL_SIZE) ){
+			if ( !(CCollection::HasCollectionExtention(pDownloadingFile->GetFileName()) && pDownloadingFile->GetFileSize() < (uint64)MAXPRIORITYCOLL_SIZE) ){
 				AddDebugLogLine(DLP_HIGH, false, _T("UploadClient: Client tried to add req block for non collection while having a collection slot! Prevented req blocks from being added. %s"), DbgGetClientInfo());
 				delete reqblock;
 				return;
@@ -1080,7 +1099,7 @@ uint32 CUpDownClient::SendBlockData(){
 		m_nSumForAvgUpDataRate = (UINT)(m_nSumForAvgUpDataRate + sentBytesCompleteFile + sentBytesPartFile);
 	}
 
-	while (m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD) {
+	while ((UINT)m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD) {
 		m_AvarageUDRLastRemovedTimestamp = m_AvarageUDR_list.GetHead().timestamp;
 		m_nSumForAvgUpDataRate -= m_AvarageUDR_list.RemoveHead().datalen;
 	}
@@ -1149,7 +1168,7 @@ void CUpDownClient::SendHashsetPacket(const uchar* forfileid)
 	CSafeMemFile data(1024);
 	data.WriteHash16(file->GetFileHash());
 	UINT parts = file->GetHashCount();
-	data.WriteUInt16(parts);
+	data.WriteUInt16((uint16)parts);
 	for (UINT i = 0; i < parts; i++)
 		data.WriteHash16(file->GetPartHash(i));
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -1182,11 +1201,11 @@ void CUpDownClient::ClearUploadBlockRequests()
 void CUpDownClient::SendRankingInfo(){
 	if (!ExtProtocolAvailable())
 		return;
-	uint16 nRank = theApp.uploadqueue->GetWaitingPosition(this);
+	UINT nRank = theApp.uploadqueue->GetWaitingPosition(this);
 	if (!nRank)
 		return;
 	Packet* packet = new Packet(OP_QUEUERANKING,12,OP_EMULEPROT);
-	PokeUInt16(packet->pBuffer+0, nRank);
+	PokeUInt16(packet->pBuffer+0, (uint16)nRank);
 	memset(packet->pBuffer+2, 0, 10);
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__QueueRank", this);
@@ -1200,13 +1219,13 @@ void CUpDownClient::SendCommentInfo(/*const*/ CKnownFile *file)
 		return;
 	m_bCommentDirty = false;
 
-	uint8 rating = file->GetFileRating();
+	UINT rating = file->GetFileRating();
 	const CString& desc = file->GetFileComment();
 	if (file->GetFileRating() == 0 && desc.IsEmpty())
 		return;
 
 	CSafeMemFile data(256);
-	data.WriteUInt8(rating);
+	data.WriteUInt8((uint8)rating);
 	data.WriteLongString(desc, GetUnicodeSupport());
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__FileDesc", this, file->GetFileHash());
@@ -1260,6 +1279,7 @@ void  CUpDownClient::UnBan()
 
 void CUpDownClient::Ban(LPCTSTR pszReason)
 {
+	SetChatState(MS_NONE);
 	theApp.clientlist->AddTrackClient(this);
 	// EastShare START - Modified by TAHO, modified SUQWT
 	//if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1465,14 +1485,14 @@ void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUp
 	if (!m_BlockRequests_queue.IsEmpty()){
 		block = m_BlockRequests_queue.GetHead();
 		if(block){
-			uint32 start = block->StartOffset/PARTSIZE;
+			uint32 start = (UINT)(block->StartOffset/PARTSIZE);
 			m_abyUpPartUploadingAndUploaded[start] = 1;
 		}
 	}
 	if (!m_DoneBlocks_list.IsEmpty()){
 		for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;){
 			block = m_DoneBlocks_list.GetNext(pos);
-			uint32 start = block->StartOffset/PARTSIZE;
+			uint32 start = (UINT)(block->StartOffset/PARTSIZE);
 			m_abyUpPartUploadingAndUploaded[start] = 1;
 		}
 	}
@@ -1491,7 +1511,7 @@ CKnownFile* CUpDownClient::CheckAndGetReqUpFile() const {
 //MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 IMPLEMENT_DYNCREATE(CReadBlockFromFileThread, CWinThread)
 
-void CReadBlockFromFileThread::SetReadBlockFromFile(CKnownFile* pfile, uint32 startOffset, uint32 toread, CUpDownClient* client) {
+void CReadBlockFromFileThread::SetReadBlockFromFile(CKnownFile* pfile, uint64 startOffset, uint32 toread, CUpDownClient* client) {
 	srcfile = pfile;
 	StartOffset = startOffset;
 	togo = toread;

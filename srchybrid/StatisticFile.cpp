@@ -1,6 +1,6 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002-2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -42,11 +42,11 @@ void CStatisticFile::MergeFileStats( CStatisticFile *toMerge )
 	// SLUGFILLER: Spreadbars
 	if (!toMerge->spreadlist.IsEmpty()) {
 		POSITION pos = toMerge->spreadlist.GetHeadPosition();
-		uint32 start = toMerge->spreadlist.GetKeyAt(pos);
-		uint32 count = toMerge->spreadlist.GetValueAt(pos);
+		uint64 start = toMerge->spreadlist.GetKeyAt(pos);
+		uint64 count = toMerge->spreadlist.GetValueAt(pos);
 		toMerge->spreadlist.GetNext(pos);
 		while (pos){
-			uint32 end = toMerge->spreadlist.GetKeyAt(pos);
+			uint64 end = toMerge->spreadlist.GetKeyAt(pos);
 			if (count)
 				AddBlockTransferred(start, end, count);
 			start = end;
@@ -71,7 +71,7 @@ void CStatisticFile::AddAccepted(){
 	theApp.sharedfiles->UpdateFile(fileParent);
 }
 	
-void CStatisticFile::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
+void CStatisticFile::AddTransferred(uint64 start, uint64 bytes){	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 	transferred += bytes;
 	alltimetransferred += bytes;
 	theApp.knownfiles->transferred += bytes;
@@ -81,7 +81,7 @@ void CStatisticFile::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added
 }
 
 //MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
-void CStatisticFile::AddBlockTransferred(uint32 start, uint32 end, uint32 count){
+void CStatisticFile::AddBlockTransferred(uint64 start, uint64 end, uint64 count){
 	if (start >= end || !count)
 		return;
 
@@ -108,7 +108,7 @@ void CStatisticFile::AddBlockTransferred(uint32 start, uint32 end, uint32 count)
 
 	ASSERT(endpos != NULL);
 
-	uint32 endcount = spreadlist.GetValueAt(endpos);
+	uint64 endcount = spreadlist.GetValueAt(endpos);
 	endpos = spreadlist.SetAt(end, endcount);
 
 	POSITION startpos = spreadlist.FindFirstKeyAfter(start+1);
@@ -121,7 +121,7 @@ void CStatisticFile::AddBlockTransferred(uint32 start, uint32 end, uint32 count)
 
 	ASSERT(startpos != NULL);
 
-	uint32 startcount = spreadlist.GetValueAt(startpos)+count;
+	uint64 startcount = spreadlist.GetValueAt(startpos)+count;
 	startpos = spreadlist.SetAt(start, startcount);
 
 	POSITION prevpos = startpos;
@@ -143,7 +143,7 @@ void CStatisticFile::DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 	int iWidth=rect->right - rect->left;
 	if (iWidth <= 0)	return;
 	int iHeight=rect->bottom - rect->top;
-	uint32 filesize = fileParent->GetFileSize()?fileParent->GetFileSize():1;
+	uint64 filesize = fileParent->GetFileSize()>(uint64)0?fileParent->GetFileSize():(uint64)1;
 	if (m_bitmapSpreadBar == (HBITMAP)NULL)
 		VERIFY(m_bitmapSpreadBar.CreateBitmap(1, 1, 1, 8, NULL)); 
 	CDC cdcStatus;
@@ -166,12 +166,12 @@ void CStatisticFile::DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 		s_SpreadBar.Fill(RGB(0, 0, 0));
 
 		for(POSITION pos = spreadlist.GetHeadPosition(); pos; ){
-			uint32 count = spreadlist.GetValueAt(pos);
-			uint32 start = spreadlist.GetKeyAt(pos);
+			uint64 count = spreadlist.GetValueAt(pos);
+			uint64 start = spreadlist.GetKeyAt(pos);
 			spreadlist.GetNext(pos);
 			if (!pos)
 				break;
-			uint32 end = spreadlist.GetKeyAt(pos);
+			uint64 end = spreadlist.GetKeyAt(pos);
 			if (count)
 				s_SpreadBar.FillRange(start, end, RGB(0,
 				(232<22*count)? 0:232-22*count
@@ -193,18 +193,18 @@ float CStatisticFile::GetSpreadSortValue() /*const*/
 	InChangedSpreadSortValue=true;
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
 	float avg, calc;
-	uint32 total = 0;
-	uint32 filesize = fileParent->GetFileSize();
+	uint64 total = 0;
+	uint64 filesize = fileParent->GetFileSize();
 
 	if (!filesize || spreadlist.IsEmpty())
 		return 0;
 
 	POSITION pos = spreadlist.GetHeadPosition();
-	uint32 start = spreadlist.GetKeyAt(pos);
-	uint32 count = spreadlist.GetValueAt(pos);
+	uint64 start = spreadlist.GetKeyAt(pos);
+	uint64 count = spreadlist.GetValueAt(pos);
 	spreadlist.GetNext(pos);
 	while (pos){
-		uint32 end = spreadlist.GetKeyAt(pos);
+		uint64 end = spreadlist.GetKeyAt(pos);
 		total += (end-start)*count;
 		start = end;
 		count = spreadlist.GetValueAt(pos);
@@ -218,7 +218,7 @@ float CStatisticFile::GetSpreadSortValue() /*const*/
 	count = spreadlist.GetValueAt(pos);
 	spreadlist.GetNext(pos);
 	while (pos){
-		uint32 end = spreadlist.GetKeyAt(pos);
+		uint64 end = spreadlist.GetKeyAt(pos);
 		if ((float)count > avg)
 			calc += avg*(end-start);
 		else
@@ -241,8 +241,8 @@ float CStatisticFile::GetFullSpreadCount() /*const*/
 	InChangedFullSpreadCount=true;
 	//MORPH START - Added by SiRoB, Reduce SpreedBar CPU consumption
 	float next;
-	uint32 min;
-	uint32 filesize = fileParent->GetFileSize();
+	uint64 min;
+	uint64 filesize = fileParent->GetFileSize();
 
 	if (!filesize || spreadlist.IsEmpty())
 		return 0;
@@ -251,7 +251,7 @@ float CStatisticFile::GetFullSpreadCount() /*const*/
 	min = spreadlist.GetValueAt(pos);
 	spreadlist.GetNext(pos);
 	while (pos && spreadlist.GetKeyAt(pos) < filesize){
-		uint32 count = spreadlist.GetValueAt(pos);
+		uint64 count = spreadlist.GetValueAt(pos);
 		if (min > count)
 			min = count;
 		spreadlist.GetNext(pos);
@@ -259,11 +259,11 @@ float CStatisticFile::GetFullSpreadCount() /*const*/
 
 	next = 0;
 	pos = spreadlist.GetHeadPosition();
-	uint32 start = spreadlist.GetKeyAt(pos);
-	uint32 count = spreadlist.GetValueAt(pos);
+	uint64 start = spreadlist.GetKeyAt(pos);
+	uint64 count = spreadlist.GetValueAt(pos);
 	spreadlist.GetNext(pos);
 	while (pos){
-		uint32 end = spreadlist.GetKeyAt(pos);
+		uint64 end = spreadlist.GetKeyAt(pos);
 		if (count > min)
 			next += end-start;
 		start = end;
@@ -306,13 +306,13 @@ double CStatisticFile::GetEqualChanceValue()
 	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 
 	//smaller value means greater priority
-	m_dLastEqualChanceSemiValue = ((double)GetTransferred()/fileParent->GetFileSize());
+	m_dLastEqualChanceSemiValue = ((double)GetTransferred()/(uint64)fileParent->GetFileSize());
 
 	//weight adjustment
 	if(theApp.uploadqueue->GetSuccessfullUpCount() > 0){
-		uint32 threshold = theStats.GetAvgUploadRate(AVG_SESSION)*1024*theApp.uploadqueue->GetAverageUpTime();
+		uint32 threshold = (UINT)(theStats.GetAvgUploadRate(AVG_SESSION)*1024*theApp.uploadqueue->GetAverageUpTime());
 		if(fileParent->GetFileSize() < threshold){
-			m_dLastEqualChanceBiasValue = 1+log((double)threshold/(fileParent->GetFileSize()%threshold+1));
+			m_dLastEqualChanceBiasValue = 1+log((double)threshold/((uint64)fileParent->GetFileSize()%threshold+1));
 			m_dLastEqualChanceSemiValue /= m_dLastEqualChanceBiasValue;
 		}
 	}

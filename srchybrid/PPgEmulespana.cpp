@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
 // PPgEmulespana.cpp - emulEspaña Mod: Added by Announ
 //
@@ -491,7 +491,7 @@ void CPPgEmulespana::Localize()
 	}
 }
 
-LRESULT CPPgEmulespana::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
+LRESULT CPPgEmulespana::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM /*lParam*/)
 {
 	if (wParam == IDC_EXT_OPTS)
 	{
@@ -844,7 +844,7 @@ BOOL CPPgEmulespana::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgEmulespana::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgEmulespana::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

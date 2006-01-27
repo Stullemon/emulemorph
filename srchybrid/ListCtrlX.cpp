@@ -47,6 +47,8 @@ CListCtrlX::CListCtrlX()
 	m_bFindMatchCase = FALSE;
 	m_iFindDirection = 1;
 	m_iFindColumn = 0;
+	m_pfnFindItem = FindItem;
+	m_lFindItemParam = 0;
 }
 
 CListCtrlX::~CListCtrlX()
@@ -226,8 +228,8 @@ void CListCtrlX::SetHdrImgList(UINT uResID, int cx, int cy, int iImages)
 
 void CListCtrlX::SetSortColumn(int iColumns, LCX_COLUMN_INIT* pColumns, int iSortColumn)
 {
+	UNREFERENCED_PARAMETER(iColumns);
 	ASSERT( iSortColumn < iColumns );
-	(void)iColumns;
 
 	m_iSortColumn = iSortColumn;
 	pColumns[m_iSortColumn].eSortOrder = pColumns[m_iSortColumn].eDfltSortOrder;
@@ -237,6 +239,9 @@ void CListCtrlX::SetSortColumn(int iColumns, LCX_COLUMN_INIT* pColumns, int iSor
 
 void CListCtrlX::UpdateSortColumn(int iColumns, LCX_COLUMN_INIT* pColumns)
 {
+	UNREFERENCED_PARAMETER(iColumns);
+	ASSERT( m_iSortColumn < iColumns );
+
 	UpdateHdrCtrlSortBitmap(m_iSortColumn, pColumns[m_iSortColumn].eSortOrder);
 }
 
@@ -696,7 +701,7 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 	}
 }
 
-LRESULT CListCtrlX::OnCopy(WPARAM wParam, LPARAM lParam)
+LRESULT CListCtrlX::OnCopy(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	CString strReport;
 	CreateItemReport(*this, strReport);
@@ -748,6 +753,19 @@ void SetItemFocus(CListCtrl &ctl)
 	}
 }
 
+bool CListCtrlX::FindItem(const CListCtrlX& lv, int iItem, DWORD_PTR /*lParam*/)
+{
+	CString strItemText(lv.GetItemText(iItem, lv.GetFindColumn()));
+	if (!strItemText.IsEmpty())
+	{
+		if ( lv.GetFindMatchCase()
+				? _tcsstr(strItemText, lv.GetFindText()) != NULL
+				: stristr(strItemText, lv.GetFindText()) != NULL )
+			return true;
+	}
+	return false;
+}
+
 void CListCtrlX::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL bShowError)
 {
 	CWaitCursor curHourglass;
@@ -761,24 +779,18 @@ void CListCtrlX::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL 
 	int iItem = iStartItem;
 	while ( iDirection ? iItem < iNumItems : iItem >= 0 )
 	{
-		CString strItemText(GetItemText(iItem, m_iFindColumn));
-		if (!strItemText.IsEmpty())
+		if ((*m_pfnFindItem)(*this, iItem, m_lFindItemParam))
 		{
-			if ( m_bFindMatchCase
-				   ? _tcsstr(strItemText, m_strFindText) != NULL
-				   : stristr(strItemText, m_strFindText) != NULL )
-			{
-				// Deselect all listview entries
-				DeselectAllItems();
+			// Deselect all listview entries
+			DeselectAllItems();
 
-				// Select the found listview entry
-				SetItemState(iItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-				SetSelectionMark(iItem);
-				EnsureVisible(iItem, FALSE/*bPartialOK*/);
-				SetFocus();
+			// Select the found listview entry
+			SetItemState(iItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+			SetSelectionMark(iItem);
+			EnsureVisible(iItem, FALSE/*bPartialOK*/);
+			SetFocus();
 
-				return;
-			}
+			return;
 		}
 
 		if (iDirection)

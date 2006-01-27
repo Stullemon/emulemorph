@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -110,7 +110,7 @@ void CSearchParamsWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SEARCH_UNICODE, m_ctlUnicode);
 }
 
-LRESULT CSearchParamsWnd::OnInitDialog(WPARAM wParam, LPARAM lParam)
+LRESULT CSearchParamsWnd::OnInitDialog(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	Default();
 	InitWindowStyles(this);
@@ -441,7 +441,7 @@ void CSearchParamsWnd::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-void CSearchParamsWnd::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler)
+void CSearchParamsWnd::OnUpdateCmdUI(CFrameWnd* /*pTarget*/, BOOL /*bDisableIfNoHndler*/)
 {
 	// Disable MFC's command routing by not passing the process flow to base class
 }
@@ -455,9 +455,9 @@ void CSearchParamsWnd::UpdateControls()
 		{
 			if (iMethod == SearchTypeKademlia)
 				OnEnChangeName();
-			else if (iMethod == SearchTypeEd2kServer && m_searchdlg->IsLocalSearchRunning())
+			else if (iMethod == SearchTypeEd2kServer && m_searchdlg->IsLocalEd2kSearchRunning())
 				m_ctlStart.EnableWindow(FALSE);
-			else if (iMethod == SearchTypeEd2kGlobal && m_searchdlg->IsGlobalSearchRunning())
+			else if (iMethod == SearchTypeEd2kGlobal && m_searchdlg->IsGlobalEd2kSearchRunning())
 				m_ctlStart.EnableWindow(FALSE);
 			thePrefs.SetSearchMethod(iMethod);
 		}
@@ -844,33 +844,87 @@ void CSearchParamsWnd::SetParameters(const SSearchParams* pParams)
 	}
 }
 
-ULONG CSearchParamsWnd::GetSearchSize(const CString& strExpr)
+uint64 CSearchParamsWnd::GetSearchAttrSize(const CString& rstrExpr)
 {
-	ULONG ulNum;
-	TCHAR szUnit[40];
-	int iArgs = _stscanf(strExpr, _T("%u%s"), &ulNum, szUnit);
-	if (iArgs <= 0)
-		return 0;
-	if (iArgs == 2){
-		CString strUnits(szUnit);
-		strUnits.Trim();
-		if (!strUnits.IsEmpty()){
-			if (strUnits.CompareNoCase(_T("b")) == 0 || strUnits.CompareNoCase(_T("byte")) == 0 || strUnits.CompareNoCase(_T("bytes")) == 0)
-				return ulNum * 1U; // Bytes
-			else if (strUnits.CompareNoCase(_T("k")) == 0 || strUnits.CompareNoCase(_T("kb")) == 0 || strUnits.CompareNoCase(_T("kbyte")) == 0 || strUnits.CompareNoCase(_T("kbytes")) == 0)
-				return ulNum * 1024U; // KBytes
-			else if (strUnits.CompareNoCase(_T("m")) == 0 || strUnits.CompareNoCase(_T("mb")) == 0 || strUnits.CompareNoCase(_T("mbyte")) == 0 || strUnits.CompareNoCase(_T("mbytes")) == 0)
-				return ulNum * 1024U*1024; // MBytes
-			else if (strUnits.CompareNoCase(_T("g")) == 0 || strUnits.CompareNoCase(_T("gb")) == 0 || strUnits.CompareNoCase(_T("gbyte")) == 0 || strUnits.CompareNoCase(_T("gbytes")) == 0)
-				return ulNum * 1024U*1024U*1024U; // GBytes
-			else{
-				AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_INVALIDMINMAX), MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
-				return (ULONG)-1;
-			}
-		}
-	}
+	CString strExpr(rstrExpr);
+	strExpr.Trim();
+	LPTSTR endptr = NULL;
+	double dbl = _tcstod(strExpr, &endptr);
+	if (endptr && *endptr != _T('\0'))
+	{
+		while (*endptr == _T(' '))
+			endptr++;
 
-	return ulNum * 1024U*1024U; // Default = MBytes
+		TCHAR chModifier = _totlower(*endptr);
+		if (chModifier == _T('b'))
+			return (uint64)(dbl + 0.5);
+		else if (chModifier == _T('k'))
+			return (uint64)(dbl*1024 + 0.5);
+		else if (chModifier == _T('\0') || chModifier == _T('m'))
+			;
+		else if (chModifier == _T('g'))
+			return (uint64)(dbl*1024*1024*1024 + 0.5);
+		else 
+			return (uint64)-1;
+	}
+	return (uint64)(dbl*1024*1024 + 0.5); // Default = MBytes
+}
+
+ULONG CSearchParamsWnd::GetSearchAttrNumber(const CString& rstrExpr)
+{
+	CString strExpr(rstrExpr);
+	strExpr.Trim();
+	LPTSTR endptr = NULL;
+	double dbl = _tcstod(strExpr, &endptr);
+	if (endptr && *endptr != _T('\0'))
+	{
+		while (*endptr == _T(' '))
+			endptr++;
+
+		TCHAR chModifier = _totlower(*endptr);
+		if (chModifier == _T('\0'))
+			;
+		else if (chModifier == _T('k'))
+			return (ULONG)(dbl*1000 + 0.5);
+		else if (chModifier == _T('m'))
+			return (ULONG)(dbl*1000*1000 + 0.5);
+		else if (chModifier == _T('g'))
+			return (ULONG)(dbl*1000*1000*1000 + 0.5);
+		else
+			return (ULONG)-1;
+	}
+	return (ULONG)(dbl + 0.5);
+}
+
+ULONG CSearchParamsWnd::GetSearchAttrLength(const CString& rstrExpr)
+{
+	CString strExpr(rstrExpr);
+	strExpr.Trim();
+
+	UINT hour = 0, min = 0, sec = 0;
+	if (_stscanf(strExpr, _T("%u : %u : %u"), &hour, &min, &sec) == 3)
+		return hour * 3600 + min * 60 + sec;
+	if (_stscanf(strExpr, _T("%u : %u"), &min, &sec) == 2)
+		return min * 60 + sec;
+
+	LPTSTR endptr = NULL;
+	double dbl = _tcstod(strExpr, &endptr);
+	if (endptr && *endptr != _T('\0'))
+	{
+		while (*endptr == _T(' '))
+			endptr++;
+
+		TCHAR chModifier = _totlower(*endptr);
+		if (chModifier == _T('\0') || chModifier == _T('s'))
+			;
+		else if (chModifier == _T('m'))
+			return (ULONG)(dbl*60 + 0.5);
+		else if (chModifier == _T('h'))
+			return (ULONG)(dbl*60*60 + 0.5);
+		else
+			return (ULONG)-1;
+	}
+	return (ULONG)(dbl + 0.5);
 }
 
 SSearchParams* CSearchParamsWnd::GetParameters()
@@ -903,17 +957,25 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	}
 
 	CString strMinSize = m_ctlOpts.GetItemText(orMinSize, 1);
-	ULONG ulMinSize = GetSearchSize(strMinSize);
-	if (ulMinSize == (ULONG)-1)
+	uint64 ullMinSize = GetSearchAttrSize(strMinSize);
+	if (ullMinSize == (uint64)-1) {
+		CString strError;
+		strError.Format(GetResString(IDS_SEARCH_ATTRERR), m_ctlOpts.GetItemText(orMinSize, 0));
+		AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + strError, MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
 		return NULL;
+	}
 
 	CString strMaxSize = m_ctlOpts.GetItemText(orMaxSize, 1);
-	ULONG ulMaxSize = GetSearchSize(strMaxSize);
-	if (ulMaxSize == (ULONG)-1)
+	uint64 ullMaxSize = GetSearchAttrSize(strMaxSize);
+	if (ullMaxSize == (uint64)-1) {
+		CString strError;
+		strError.Format(GetResString(IDS_SEARCH_ATTRERR), m_ctlOpts.GetItemText(orMaxSize, 0));
+		AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + strError, MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
 		return NULL;
+	}
 	
-	if (ulMaxSize < ulMinSize){
-		ulMaxSize = 0; // TODO: Create a message box for that
+	if (ullMaxSize < ullMinSize){
+		ullMaxSize = 0; // TODO: Create a message box for that
 		m_ctlOpts.SetItemText(orMaxSize, 1, _T(""));
 	}
 
@@ -933,8 +995,15 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	if ((m_ctlOpts.GetItemData(orAvailability) & 1) == 0)
 	{
 		CString strAvailability = m_ctlOpts.GetItemText(orAvailability, 1);
-		_stscanf(strAvailability, _T("%u"), &uAvailability);
-		if (uAvailability > 1000000)
+		uAvailability = GetSearchAttrNumber(strAvailability);
+		if (uAvailability == (UINT)-1)
+		{
+			CString strError;
+			strError.Format(GetResString(IDS_SEARCH_ATTRERR), m_ctlOpts.GetItemText(orAvailability, 0));
+			AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + strError, MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
+			return NULL;
+		}
+		else if (uAvailability > 1000000)
 		{
 			uAvailability = 1000000;
 			strAvailability.Format(_T("%u"), uAvailability);
@@ -946,8 +1015,15 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	if ((m_ctlOpts.GetItemData(orCompleteSources) & 1) == 0)
 	{
 		CString strComplete = m_ctlOpts.GetItemText(orCompleteSources, 1);
-		_stscanf(strComplete, _T("%u"), &uComplete);
-		if (uComplete > 1000000)
+		uComplete = GetSearchAttrNumber(strComplete);
+		if (uComplete == (UINT)-1)
+		{
+			CString strError;
+			strError.Format(GetResString(IDS_SEARCH_ATTRERR), m_ctlOpts.GetItemText(orCompleteSources, 0));
+			AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + strError, MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
+			return NULL;
+		}
+		else if (uComplete > 1000000)
 		{
 			uComplete = 1000000;
 			strComplete.Format(_T("%u"), uComplete);
@@ -964,8 +1040,15 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	if ((m_ctlOpts.GetItemData(orBitrate) & 1) == 0)
 	{
 		CString strMinBitrate = m_ctlOpts.GetItemText(orBitrate, 1);
-		_stscanf(strMinBitrate, _T("%u"), &ulMinBitrate);
-		if (ulMinBitrate > 1000000)
+		ulMinBitrate = GetSearchAttrNumber(strMinBitrate);
+		if (ulMinBitrate == (ULONG)-1)
+		{
+			CString strError;
+			strError.Format(GetResString(IDS_SEARCH_ATTRERR), m_ctlOpts.GetItemText(orBitrate, 0));
+			AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + strError, MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
+			return NULL;
+		}
+		else if (ulMinBitrate > 1000000)
 		{
 			ulMinBitrate = 1000000;
 			strMinBitrate.Format(_T("%u"), ulMinBitrate);
@@ -977,23 +1060,20 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	if ((m_ctlOpts.GetItemData(orLength) & 1) == 0)
 	{
 		CString strMinLength = m_ctlOpts.GetItemText(orLength, 1);
-		if (!strMinLength.IsEmpty())
+		ulMinLength = GetSearchAttrLength(strMinLength);
+		if (ulMinLength == (ULONG)-1)
 		{
-			UINT hour = 0, min = 0, sec = 0;
-			if (_stscanf(strMinLength, _T("%u : %u : %u"), &hour, &min, &sec) == 3)
-				ulMinLength = hour * 3600 + min * 60 + sec;
-			else if (_stscanf(strMinLength, _T("%u : %u"), &min, &sec) == 2)
-				ulMinLength = min * 60 + sec;
-			else if (_stscanf(strMinLength, _T("%u"), &sec) == 1)
-				ulMinLength = sec;
-
-			if (ulMinLength > 3600*24)
-			{
-				ulMinLength = 3600*24;
-				CString strValue;
-				SecToTimeLength(ulMinLength, strValue);
-				m_ctlOpts.SetItemText(orLength, 1, strValue);
-			}
+			CString strError;
+			strError.Format(GetResString(IDS_SEARCH_ATTRERR), m_ctlOpts.GetItemText(orLength, 0));
+			AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + strError, MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
+			return NULL;
+		}
+		else if (ulMinLength > 3600*24)
+		{
+			ulMinLength = 3600*24;
+			CString strValue;
+			SecToTimeLength(ulMinLength, strValue);
+			m_ctlOpts.SetItemText(orLength, 1, strValue);
 		}
 	}
 
@@ -1002,9 +1082,9 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	pParams->eType = (ESearchType)m_ctlMethod.GetCurSel();
 	pParams->strFileType = strFileType;
 	pParams->strMinSize = strMinSize;
-	pParams->ulMinSize = ulMinSize;
+	pParams->ullMinSize = ullMinSize;
 	pParams->strMaxSize = strMaxSize;
-	pParams->ulMaxSize = ulMaxSize;
+	pParams->ullMaxSize = ullMaxSize;
 	pParams->uAvailability = uAvailability;
 	pParams->strExtension = strExtension;
 	//pParams->bMatchKeywords = IsDlgButtonChecked(IDC_MATCH_KEYWORDS)!=0;
@@ -1032,7 +1112,7 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	return pParams;
 }
 
-BOOL CSearchParamsWnd::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CSearchParamsWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	theApp.ShowHelp(eMule_FAQ_Search);
 	return TRUE;

@@ -12,6 +12,7 @@
 #include "ResizableLib\ResizableDialog.h"
 #include "AfxBeginMsgMapTemplate.h"
 #include "OtherFunctions.h"
+#include "MenuCmds.h"
 
 #if 0
 // define this to use that source file as template
@@ -217,7 +218,7 @@ TEMPLATE void CDialogMinTrayBtn<BASE>::OnLButtonUp(UINT nFlags, CPoint point)
 
     ClientToScreen(&point);
     if (MinTrayBtnHitTest(point))
-       SendMessage(WM_SYSCOMMAND, SC_MINIMIZETRAY, MAKELONG(point.x, point.y));
+		SendMessage(WM_SYSCOMMAND, MP_MINIMIZETOTRAY, MAKELONG(point.x, point.y));
 }
 
 TEMPLATE void CDialogMinTrayBtn<BASE>::OnTimer(UINT_PTR nIDEvent)

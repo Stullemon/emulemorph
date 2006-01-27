@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -42,6 +42,7 @@
 static char THIS_FILE[]=__FILE__;
 #endif
 
+
 IMPLEMENT_DYNAMIC(CFriendListCtrl, CMuleListCtrl)
 
 BEGIN_MESSAGE_MAP(CFriendListCtrl, CMuleListCtrl)
@@ -53,6 +54,7 @@ END_MESSAGE_MAP()
 
 CFriendListCtrl::CFriendListCtrl()
 {
+	SetGeneralPurposeFind(true, false);
 }
 
 CFriendListCtrl::~CFriendListCtrl()
@@ -70,6 +72,7 @@ void CFriendListCtrl::Init()
 	SetAllIcons();
 	theApp.friendlist->SetWindow(this);
 	LoadSettings();
+	SetSortArrow();
 }
 
 void CFriendListCtrl::OnSysColorChange()
@@ -106,9 +109,8 @@ void CFriendListCtrl::Localize()
 	CString strRes;
 
 	strRes = GetResString(IDS_QL_USERNAME);
-	hdi.pszText = strRes.GetBuffer();
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(0, &hdi);
-	strRes.ReleaseBuffer();
 
 	int iItems = GetItemCount();
 	for (int i = 0; i < iItems; i++)
@@ -213,6 +215,7 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	//MORPH START - Modified by SiRoB, Friend Slot
 	/*
 	ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT), _T("FRIENDSLOT"));
+	ClientMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND), _T("Search"));
 
     ClientMenu.EnableMenuItem(MP_FRIENDSLOT, (cur_friend)?MF_ENABLED : MF_GRAYED);
 	ClientMenu.CheckMenuItem(MP_FRIENDSLOT, (cur_friend && cur_friend->GetFriendSlot()) ? MF_CHECKED : MF_UNCHECKED);
@@ -239,8 +242,10 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 }
 // MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 
-BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
+	wParam = LOWORD(wParam);
+
 	CFriend* cur_friend = NULL;
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) 
@@ -277,8 +282,9 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			dialog2.DoModal();
 			break;
 		}
-		case MPG_ALTENTER:
 		case MP_DETAIL:
+		case MPG_ALTENTER:
+		case IDA_ENTER:
 			if (cur_friend)
 				ShowFriendDetails(cur_friend);
 			break;
@@ -327,7 +333,6 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			//MORPH END   - Added by SiRoB, Friend Addon
 			break;
 		}
-
 		case MP_PASTE:
 			{
 				CString link = theApp.CopyTextFromClipboard();
@@ -397,12 +402,16 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				theApp.CopyTextToClipboard(sCompleteLink);
 		}
 		break;
+	case MP_FIND:
+		OnFindStart();
+		break;
+		
 	}
 	return true;
 }
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
-void CFriendListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
+void CFriendListCtrl::OnNMDblclk(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) 

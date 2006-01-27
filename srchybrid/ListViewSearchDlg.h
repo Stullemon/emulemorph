@@ -16,6 +16,7 @@ public:
 
 	CListCtrl* m_pListView;
 	CString m_strFindText;
+	bool m_bCanSearchInAllColumns;
 	int m_iSearchColumn;
 
 protected:

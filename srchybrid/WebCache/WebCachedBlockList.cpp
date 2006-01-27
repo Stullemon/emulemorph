@@ -188,18 +188,21 @@ bool CWebCachedBlockList::ProcessWCBlocks(const BYTE* packet, uint32 size, UINT 
 		return false;
 
 	uint32 nrOfBlocks = indata.ReadUInt32();
-	if (size != nrOfBlocks*WC_OHCB_PACKET_SIZE + 8)	// check for right packet size, 50 bytes per OHCB + 8 bytes (uploadID and the number of blocks)
-		return false;
-
+	uint32 sizeBlock = WC_OHCB_PACKET_SIZE;
+	if (size != nrOfBlocks*WC_OHCB_PACKET_SIZE + 8) {
+		if (size != nrOfBlocks*WC_OHCB_PACKET_SIZE_LARGE_FILE + 8)	// check for right packet size, 50 bytes per OHCB + 8 bytes (uploadID and the number of blocks)
+			return false;
+		sizeBlock = WC_OHCB_PACKET_SIZE_LARGE_FILE;
+	}
 	uint32 blockNr = 0;
 	if (opcode == OP_XPRESS_MULTI_HTTP_CACHED_BLOCKS)
 	{
-		/*CWebCachedBlock* newblock = new */ CWebCachedBlock( packet + 8, WC_OHCB_PACKET_SIZE, client, true );
+		/*CWebCachedBlock* newblock = new */ CWebCachedBlock( packet + 8, sizeBlock, client, true );
 		blockNr++;
 	}
 
 	for(; blockNr < nrOfBlocks; blockNr++)
-		/*CWebCachedBlock* newblock = new  */CWebCachedBlock( packet + 8 + blockNr * WC_OHCB_PACKET_SIZE, WC_OHCB_PACKET_SIZE, client);
+		/*CWebCachedBlock* newblock = new  */CWebCachedBlock( packet + 8 + blockNr * sizeBlock, sizeBlock, client);
 
 	return true;
 }

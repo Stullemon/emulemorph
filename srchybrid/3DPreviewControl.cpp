@@ -55,7 +55,7 @@ void C3DPreviewControl::OnPaint()
 	CBrush* pOldBrush = dc.SelectObject(&gdiBrush);	//eklmn: select a new brush
 	dc.FrameRect(&outline_rec, &gdiBrush);
 	dc.SelectObject(pOldBrush);						//eklmn: recover an old brush
-	s_preview.SetFileSize(32);
+	s_preview.SetFileSize((uint64)32);
 	s_preview.Fill(RGB(192,192,255)); 
 	s_preview.DrawPreview(&dc, 1, 1, m_iSliderPos); 
 }

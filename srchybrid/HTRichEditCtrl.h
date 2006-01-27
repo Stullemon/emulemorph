@@ -24,8 +24,8 @@ public:
 	CString GetAllLogEntries();
 	bool SaveLog(LPCTSTR pszDefName = NULL);
 
-	void AppendText(const CString& sText, bool bInvalidate = true);
-	void AppendHyperLink(const CString& sText, const CString& sTitle, const CString& sCommand, const CString& sDirectory, bool bInvalidate = true);
+	void AppendText(const CString& sText);
+	void AppendHyperLink(const CString& sText, const CString& sTitle, const CString& sCommand, const CString& sDirectory);
 	void AppendKeyWord(const CString& sText, COLORREF cr);
 	void AppendColoredText(LPCTSTR pszText, COLORREF cr);
 

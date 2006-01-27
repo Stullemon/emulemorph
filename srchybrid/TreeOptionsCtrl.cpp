@@ -296,8 +296,7 @@ BOOL CTreeOptionsCtrl::OnDeleteItem(NMHDR* pNMHDR, LRESULT* pResult)
 
 	//Free up the memory we had allocated in the item data (if needed)
 	CTreeOptionsItemData* pItemData = (CTreeOptionsItemData*) GetItemData(pNMTreeView->itemOld.hItem);
-	if (pItemData)
-		delete pItemData;
+	delete pItemData;
 
 	return FALSE;
 }
@@ -1065,8 +1064,7 @@ BOOL CTreeOptionsCtrl::AddComboBox(HTREEITEM hItem, CRuntimeClass* pRuntimeClass
 
 	//Delete the old item data in the item if there is one already
 	CTreeOptionsItemData* pOldItemData = (CTreeOptionsItemData*) GetItemData(hItem);
-	if (pOldItemData)
-		delete pOldItemData;
+	delete pOldItemData;
 
 	//A pointer to the runtime class is stored in the Item data which itself is an 
 	//internal structure we maintain per tree item
@@ -1640,7 +1638,7 @@ void CTreeOptionsCtrl::CreateSpinCtrl(CRuntimeClass* pRuntimeClassSpinCtrl, CRec
 		int nLower = 0;
 		int nUpper = 0;
 		m_pSpin->GetDefaultRange(nLower, nUpper);
-		m_pSpin->SetRange(nLower, nUpper);
+		m_pSpin->SetRange((short)nLower, (short)nUpper);
 
 		//set the font the edit box should use based on the font in the tree control
 		m_pSpin->SetFont(&m_Font);
@@ -1830,7 +1828,6 @@ void CTreeOptionsCtrl::MemDeleteAllItems(HTREEITEM hParent)
 			MemDeleteAllItems(GetChildItem(hItem)); 
 
 		CTreeOptionsItemData* pItem = (CTreeOptionsItemData*)CTreeCtrl::GetItemData(hItem); 
-		if (pItem) 
 			delete pItem; 
 		SetItemData(hItem, 0);  
 

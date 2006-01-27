@@ -415,7 +415,7 @@ BOOL CPPgWebcachesettings::OnCommand(WPARAM wParam, LPARAM lParam)
 	return __super::OnCommand(wParam, lParam);
 }
 
-BOOL CPPgWebcachesettings::OnHelpInfo(HELPINFO* pHelpInfo)
+BOOL CPPgWebcachesettings::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;

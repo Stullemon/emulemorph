@@ -1431,6 +1431,7 @@
 #define IDS_SMALLICONS                  1480
 #define IDR_HTML_MINIMULE               1481
 #define IDS_SHORTTAGS                   1481
+#define IDR_LISTVIEW                    1481
 #define IDS_THELOAD                     1482
 #define IDS_PACKSENT                    1483
 #define IDS_RESPONSES                   1484
@@ -1500,7 +1501,6 @@
 #define IDS_RELATED                     1548
 #define IDS_COLL_REPLACEEXISTING        1549
 #define IDS_COLL_ERR_DELETING           1550
-#define IDI_ICON1                       1550
 #define IDS_CREATECOLLECTION            1551
 #define IDS_MODIFYCOLLECTION            1552
 #define IDS_COLL_SIGN                   1553
@@ -1514,6 +1514,28 @@
 #define IDS_USS_STATE_PREPARING         1561
 #define IDS_USS_STATE_WAITING           1562
 #define IDS_USS_STATE_ERROR             1563
+#define IDS_SHAREWARNING                1564
+#define IDS_REMOVEALLSERVERS            1565
+#define IDS_SEARCH_UNKATTR              1566
+#define IDS_SEARCH_ATTRERR              1567
+#define IDS_SEARCH_MISSINGANDRIGHT      1568
+#define IDS_SEARCH_OPRERR               1569
+#define IDS_DOWNLOAD_LANGFILE           1570
+#define IDS_DOWNLOADING_SERVERMET_FROM  1571
+#define IDS_DOWNLOADING_SERVERMET       1572
+#define IDS_FULLALLOC                   1573
+#define IDS_X_SHAREAZA_IMPORT_NO_HASH   1574
+#define IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT 1575
+#define IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST 1576
+#define IDS_X_SHAREAZA_IMPORT_HASH_SET_CORRUPT 1577
+#define IDS_X_SHAREAZA_IMPORT_NO_HASH_SET 1578
+#define IDS_CONVERTINGKNOWN2MET         1579
+#define IDS_CONVERTINGKNOWN2FAILED      1580
+#define IDS_CONVERTINGKNOWN2DONE        1581
+#define IDS_ERR_MET_BAD                 1582
+#define IDS_SRV_LARGEFILES              1583
+#define IDS_ERR_FSCANTHANDLEFILE        1584
+#define IDS_NEWVERSIONAVLBETA           1585
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -1605,7 +1627,6 @@
 #define IDC_TEMPFILES                   2144
 #define IDC_WIZ_APPLY_BUTTON            2149
 #define IDC_WIZ_CANCEL_BUTTON           2153
-#define IDC_WIZ_UNKNOWN_BUTTON          2154
 #define IDC_UNCLIST                     2155
 #define IDC_PORT                        2162
 #define IDC_APPLY                       2164
@@ -1921,7 +1942,6 @@
 #define IDC_INFO2                       2589
 #define IDC_CMT_LQUEST                  2592
 #define IDC_CMT_LAIDE                   2593
-#define IDC_REFRESH                     2594
 #define IDC_RATEQUEST                   2595
 #define IDC_LST                         2596
 #define IDC_RATEHELP                    2597
@@ -2025,7 +2045,6 @@
 #define IDC_USERNAME_LBL                2695
 #define IDC_PASSWORD_LBL                2696
 #define IDC_AUTH_LBL                    2697
-#define IDC_ASCWOP                      2698
 #define IDC_LISTVIEW_SEARCH_COLUMN      2700
 #define IDC_LISTVIEW_SEARCH_TEXT        2702
 #define IDC_AUTH_LBL2                   2703
@@ -2109,7 +2128,9 @@
 #define IDC_FD_RECOV                    2795
 #define IDC_FD_COMPR                    2796
 #define IDC_UPDATEURL                   2797
+#define IDC_REMAINING                   2798
 #define IDC_DD                          2799
+#define IDC_REMAINING_TEXT              2800
 #define IDC_TRAY_EXIT                   2802
 #define IDC_DOWNKB                      2803
 #define IDC_UPKB                        2804
@@ -2224,7 +2245,6 @@
 #define IDC_COLLECTIONVIEWAUTHORKEY     2939
 #define IDC_COLLECTIONCREATESIGNCHECK   2940
 #define IDC_COLLECTIONCREATEFORMAT      2941
-#define IDC_STATIC_NAME                 2942
 #define IDC_CCOLL_STATIC_NAME           2942
 #define IDC_SPLITTER_SERVER             2943
 #define IDC_SPLITTER_SHAREDFILES        2944
@@ -2235,6 +2255,7 @@
 #define IDC_CCOLL_CANCEL                2949
 #define IDC_CCOLL_BASICOPTIONS          2950
 #define IDC_CCOLL_ADVANCEDOPTIONS       2951
+#define IDC_ALANGUAGE                   2952
 #define IDC_STATIC_PORT                 2996
 #define IDC_STATIC_CONTROLS             2997
 #define IDC_STATIC_NRBLOCKS             2998
@@ -2796,6 +2817,7 @@
 #define IDC_MORPH3_OPTS                 5700
 #define IDS_IMPORTPARTS                 5700
 #define IDS_INITIATEREHASH              5701
+#define IDS_IMPORTPARTS_STOP            5701
 #define IDS_ZZRATIO                     5750
 #define IDS_ZZRATIO_ENABLED             5751
 #define IDS_ZZRATIO_DISABLED            5752
@@ -3003,29 +3025,26 @@
 #define IDC_SPIN_MIN                    20108
 #define IDC_BTN_MENU                    20120
 #define IDS_PW_WEBCACHE                 20646
-
-// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-#define IDS_UPNP						21001
-#define IDS_UPNP_INIT   				21002
-#define IDS_UPNP_FAILEDINIT				21003
-#define IDS_UPNP_PUBLICIP				21004
-#define IDS_UPNP_FAILEDREGISTER			21005
-#define IDS_UPNP_ADDQUEUED				21006
-#define IDS_UPNP_NEWDEVICE				21007
-#define IDS_UPNP_DEVICEREMOVED			21008
-#define IDS_UPNP_PORTINUSE				21009
-#define IDS_UPNP_ALREADYUPDATED			21010
-#define IDS_UPNP_STATIC					21011
-#define IDS_UPNP_DYNAMIC				21012
-#define IDS_UPNP_PORTUPDATED			21013
-#define IDS_UPNP_PORTADDED				21014
-#define IDS_UPNP_ADDFAILED				21015
-#define IDS_UPNP_DELETEFAILED			21016
-#define IDS_UPNP_PORTDELETED			21017
-#define IDS_UPNP_LOGEVENTS				21018
-#define IDS_UPNP_ENABLE					21019
-#define IDS_UPNP_ENABLEWEB				21020
-// End -UPnPNAT Support-
+#define IDS_UPNP                        21001
+#define IDS_UPNP_INIT                   21002
+#define IDS_UPNP_FAILEDINIT             21003
+#define IDS_UPNP_PUBLICIP               21004
+#define IDS_UPNP_FAILEDREGISTER         21005
+#define IDS_UPNP_ADDQUEUED              21006
+#define IDS_UPNP_NEWDEVICE              21007
+#define IDS_UPNP_DEVICEREMOVED          21008
+#define IDS_UPNP_PORTINUSE              21009
+#define IDS_UPNP_ALREADYUPDATED         21010
+#define IDS_UPNP_STATIC                 21011
+#define IDS_UPNP_DYNAMIC                21012
+#define IDS_UPNP_PORTUPDATED            21013
+#define IDS_UPNP_PORTADDED              21014
+#define IDS_UPNP_ADDFAILED              21015
+#define IDS_UPNP_DELETEFAILED           21016
+#define IDS_UPNP_PORTDELETED            21017
+#define IDS_UPNP_LOGEVENTS              21018
+#define IDS_UPNP_ENABLE                 21019
+#define IDS_UPNP_ENABLEWEB              21020
 #define IDS_RANDOMPORTS                 21022
 #define IDS_MINPORT                     21023
 #define IDS_MAXPORT                     21025
@@ -3049,6 +3068,7 @@
 #define IDC_WCDOWNL                     27830
 #define IDC_WC_REQ_SUCC                 27970
 #define IDC_WC_DOWNLOADED               27980
+#define IDA_ENTER                       32771
 #define IDC_EDTINFO                     40125
 #define IDC_BACKUP_FILEFRAME            50501
 #define IDC_BACKUP_AUTO                 50503
@@ -3076,7 +3096,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        6208
-#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_COMMAND_VALUE         32773
 #define _APS_NEXT_CONTROL_VALUE         6202
 #define _APS_NEXT_SYMED_VALUE           106
 #endif

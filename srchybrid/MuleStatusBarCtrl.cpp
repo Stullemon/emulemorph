@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -55,7 +55,7 @@ void CMuleStatusBarCtrl::Init(void)
 	EnableToolTips();
 }
 
-void CMuleStatusBarCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
+void CMuleStatusBarCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 {
 	int iPane = GetPaneAtPosition(point);
 	switch (iPane)
@@ -161,7 +161,7 @@ int CMuleStatusBarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 }
 //MORPH START - Added by SiRoB, Show zz ratio activation reason
 static TCHAR pzToolTipText[512];
-void CMuleStatusBarCtrl::OnToolTipNotify( UINT id, NMHDR * pNotifyStruct, LRESULT * result )
+void CMuleStatusBarCtrl::OnToolTipNotify( UINT /*id*/, NMHDR * pNotifyStruct, LRESULT * /*result*/ )
 {
 	TOOLTIPTEXTW* pTI = (TOOLTIPTEXTW*)pNotifyStruct;
     _stprintf(pzToolTipText, GetPaneToolTipText( (EStatusBarPane)pNotifyStruct->idFrom ));

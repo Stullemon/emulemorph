@@ -68,7 +68,7 @@ void CStatisticsTree::Init()
 // It is necessary to disrupt whatever behavior was preventing
 // us from getting OnContextMenu to work.  This seems to be the
 // magic fix...
-void CStatisticsTree::OnRButtonDown( UINT nFlags, CPoint point )
+void CStatisticsTree::OnRButtonDown(UINT /*nFlags*/, CPoint point)
 {
 	UINT uHitFlags;
 	HTREEITEM hItem = HitTest(point, &uHitFlags);
@@ -80,7 +80,7 @@ void CStatisticsTree::OnRButtonDown( UINT nFlags, CPoint point )
 	return;
 }
 
-void CStatisticsTree::OnContextMenu( CWnd* pWnd, CPoint point )
+void CStatisticsTree::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	DoMenu(point, TPM_LEFTALIGN | TPM_RIGHTBUTTON);
 }
@@ -98,7 +98,7 @@ void CStatisticsTree::OnLButtonUp( UINT nFlags, CPoint point )
 // are executing.  This is to prevent us from saving the string a bajillion
 // times whenever these functions are called.  CollapseAll and ExpandAll
 // call GetExpandedMask() upon completion.
-void CStatisticsTree::OnItemExpanded( NMHDR* pNMHDR, LRESULT* pResult )
+void CStatisticsTree::OnItemExpanded(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	if (!m_bExpandingAll)
 		thePrefs.SetExpandedTreeItems(GetExpandedMask());
@@ -160,7 +160,7 @@ void CStatisticsTree::DoMenu(CPoint doWhere, UINT nFlags)
 }
 
 // Process context menu items...
-BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
+BOOL CStatisticsTree::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
 	switch (wParam) {
 		case MP_STATTREE_RESET:

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -73,24 +73,21 @@ void CCommentDialogLst::OnBnClickedApply()
 
 void CCommentDialogLst::OnBnClickedSearchKad()
 {
-	if(Kademlia::CKademlia::isConnected())
+	if(Kademlia::CKademlia::IsConnected())
 	{
 	    for (int i = 0; i < m_paFiles->GetSize(); i++)
 	    {
 			CAbstractFile* file = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[i]);
 			if(file)
 			{
-				Kademlia::CSearch *notes = new Kademlia::CSearch;
-				notes->setSearchTypes(Kademlia::CSearch::NOTES);
-				notes->setTargetID(Kademlia::CUInt128(file->GetFileHash()));
-				if( !Kademlia::CSearchManager::startSearch(notes) )
+				if( !Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::NOTES, true, Kademlia::CUInt128(file->GetFileHash())) )
 					AfxMessageBox(GetResString(IDS_KADSEARCHALREADY),MB_OK | MB_ICONINFORMATION,0);
 			}
 		}
 	}
 }
 
-void CCommentDialogLst::OnTimer(UINT nIDEvent)
+void CCommentDialogLst::OnTimer(UINT /*nIDEvent*/)
 {
 	RefreshData(false);
 }
@@ -143,7 +140,7 @@ void CCommentDialogLst::OnDestroy()
 void CCommentDialogLst::Localize(void)
 { 
 	GetDlgItem(IDC_SEARCHKAD)->SetWindowText(GetResString(IDS_SEARCHKAD));
-	if( Kademlia::CKademlia::isConnected() )
+	if( Kademlia::CKademlia::IsConnected() )
 		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_SHOW);
 	else
 		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_HIDE);
