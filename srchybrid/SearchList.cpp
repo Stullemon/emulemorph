@@ -704,6 +704,7 @@ CString CSearchList::GetWapList(CString linePattern,int sortby,bool asc, int sta
 				case 1: swap=CompareUnsigned64(sf1->GetFileSize(),sf2->GetFileSize());break;
 				case 2: swap=CString(sf1->GetFileHash()).CompareNoCase(CString(sf2->GetFileHash())); break;
 				case 3: swap=sf1->GetSourceCount()-sf2->GetSourceCount(); break;
+				default:swap=0; //leuk_he suppress warning
 			}
 			if (!asc) swap=0-swap;
 			if (swap<0) {inserted=true; sortarray.InsertAt(i1,sf1);break;}

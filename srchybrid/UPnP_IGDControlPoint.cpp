@@ -158,7 +158,7 @@ unsigned int CUPnP_IGDControlPoint::GetPort(){
 }
 
 // Handles all UPnP Events
-int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, void* Cookie ){
+int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, void* /*Cookie */){
 	USES_CONVERSION;
 
 	switch (EventType){
@@ -1171,7 +1171,7 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::GetSpecificPortMapp
 	else{
 		fullMapping->externalPort = mapping->externalPort;
 		fullMapping->protocol = mapping->protocol;
-		fullMapping->internalPort = _ttoi(GetFirstDocumentItem(RespNode, _T("NewInternalPort")));
+		fullMapping->internalPort =(WORD)  _ttoi(GetFirstDocumentItem(RespNode, _T("NewInternalPort")));
 		fullMapping->description = GetFirstDocumentItem(RespNode, _T("NewPortMappingDescription"));
 		fullMapping->enabled = _ttoi(GetFirstDocumentItem(RespNode, _T("NewEnabled"))) == 0 ? false : true;
 		fullMapping->leaseDuration = _ttoi(GetFirstDocumentItem(RespNode, _T("NewLeaseDuration")));
@@ -1301,7 +1301,7 @@ bool CUPnP_IGDControlPoint::IsServiceEnabled(CUPnP_IGDControlPoint::UPNP_SERVICE
 	return status;
 }
 
-void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int evntkey, IXML_Document * changes ){
+void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int /* evntkey */, IXML_Document * changes ){
 	bool update = false;
 	
 	m_devListLock.Lock();

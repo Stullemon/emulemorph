@@ -87,7 +87,7 @@ void CSourceSaver::DeleteFile(CPartFile* file)
 		AddLogLine(true, _T("Failed to delete 'Temp\\Source Lists\\%s.txtsrc', you will need to do this by hand."), file->GetPartMetFileName());    
 }
 
-void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, LPCTSTR slsfile)
+void CSourceSaver::LoadSourcesFromFile(CPartFile* , SourceList* sources, LPCTSTR slsfile)
 {
 	USES_CONVERSION;
 	CString strLine;
@@ -197,9 +197,9 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 			continue;
 		}
 		if ((UINT)srcstosave.GetCount() < maxSourcesToSave || (cur_src->GetAvailablePartCount() > srcstosave.GetTail()->partsavailable) || (cur_src->GetSourceExchangeVersion() > srcstosave.GetTail()->nSrcExchangeVer)) {
-			if (srcstosave.GetCount() == maxSourcesToSave)
+			if ((UINT)srcstosave.GetCount() == maxSourcesToSave)
 				delete srcstosave.RemoveTail();
-			ASSERT(srcstosave.GetCount() < maxSourcesToSave);
+			ASSERT((UINT)srcstosave.GetCount() < maxSourcesToSave);
 			bool bInserted = false;
 			for (pos2 = srcstosave.GetTailPosition();pos2 != 0;srcstosave.GetPrev(pos2)){
 				CSourceData* cur_srctosave = srcstosave.GetAt(pos2);
@@ -250,9 +250,9 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 	// Add previously saved sources if found sources does not reach the limit
 	for (pos = prevsources->GetHeadPosition(); pos; prevsources->GetNext(pos)) {
 		CSourceData* cur_sourcedata = prevsources->GetAt(pos);
-		if (srcstosave.GetCount() == maxSourcesToSave)
+		if ((UINT)srcstosave.GetCount() == maxSourcesToSave)
 			break;
-		ASSERT(srcstosave.GetCount() <= maxSourcesToSave);
+		ASSERT((UINT)srcstosave.GetCount() <= maxSourcesToSave);
 
 		bool bFound = false;
 		for (pos2 = srcstosave.GetHeadPosition(); pos2; srcstosave.GetNext(pos2)) {

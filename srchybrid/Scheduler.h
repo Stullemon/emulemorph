@@ -85,9 +85,9 @@ public:
 	UINT	original_cons5s;
 	UINT	original_sources;
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
-	uint16	original_ussmaxping;
-	uint16	original_ussgoup;
-	uint16	original_ussgodown;
+	int	original_ussmaxping;
+	int	original_ussgoup;
+	int	original_ussgodown;
 	uint16	original_ussminup;
 	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 
