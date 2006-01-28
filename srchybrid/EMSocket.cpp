@@ -702,7 +702,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         return returnVal;
     //MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	} else if (m_dwBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
+	} else if (byConnected == ES_CONNECTED && m_dwBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
 	    sendLocker.Unlock();
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
@@ -909,10 +909,7 @@ uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
 	//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 	if (ret >= 2*256*1024)
 		ret = 2*256*1024-1;
-	if (m_dwBusy)
-		return minFragSize;
-	else
-		return ret;
+	return ret;
 	//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 }
 
