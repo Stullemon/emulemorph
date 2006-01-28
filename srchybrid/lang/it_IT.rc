@@ -130,8 +130,8 @@ BEGIN
     IDS_ERR_BADCLIENTACTION "Un Client ha causato un errore o ha fatto qualcosa di sbagliato: %s. Client disconnesso!"
     IDS_ERR_UNKNOWNCLIENTACTION 
                             "Un Client sconosciuto ha inviato un pacchetto usando il protocollo esteso di eMule"
-    IDS_ERR_OPENMET         "Errore: Impossibile aprire il File part.met! (%s => %s) | È possibile rigenerare il file part.met utilizzando MetMedic!"
-    IDS_ERR_BADMETVERSION   "Errore: Versione del File part.met non valida! (%s => %s) | È possibile rigenerare il file part.met utilizzando MetMedic!"
+    IDS_ERR_OPENMET         "Errore: Impossibile aprire il File part.met! (%s => %s) | È possibile rigenerare il File part.met utilizzando MetMedic!"
+    IDS_ERR_BADMETVERSION   "Errore: Versione del File part.met non valida! (%s => %s) | È possibile rigenerare il File part.met utilizzando MetMedic!"
     IDS_ERR_BADGAP          "Indicazione Gap non valida nel File part.met"
 END
 
@@ -189,7 +189,7 @@ BEGIN
     IDS_ERR_INCOMPLETEHASH  "Errore: Impossibile calcolare l'Hash della parte scaricata - l'HashSet è incompleto (%s). Questo non dovrebbe MAI capitare"
     IDS_DOWNLOADING         "In Download"
     IDS_WAITING             "In Attesa"
-    IDS_HASHING             "Hashing"
+    IDS_HASHING             "In Hashing"
     IDS_COMPLETING          "In Completamento"
     IDS_COMPLETE            "Completo"
     IDS_PAUSED              "In Pausa"
@@ -208,7 +208,7 @@ BEGIN
     IDS_CONNECTTOANYSERVER  "Connettiti ad un Server"
     IDS_EXIT                "E&sci"
     IDS_CONNECTING          "Connessione in corso..."
-    IDS_FAILED              "fallito"
+    IDS_FAILED              "fallita"
     IDS_ERR_BADSERVERREPLY  "Risposta del Server all'accesso corrotta o non valida"
     IDS_NEWCLIENTID         "Il tuo nuovo ID è %u"
     IDS_NOSHAREDFOLDERS     "Non ci sono cartelle condivise"
@@ -456,8 +456,8 @@ BEGIN
     IDS_ERR_SAVEMET         "ERRORE nel salvataggio del File .part: %s (%s)"
     IDS_ERR_FOUNDCORRUPTION "È stata trovata una parte corrotta (%i) in %s"
     IDS_HASHINGDONE         "Re-Hash di %s terminato. Nessun problema riscontrato"
-    IDS_ERR_PARTCORRUPT     "La parte scaricata numero %i è corrotta :(  (%s)"
-    IDS_ICHWORKED           "I.C.H.: Recuperata parte corrotta %i (%s), Risparmiati: %s"
+    IDS_ERR_PARTCORRUPT     "La parte scaricata n°%i è corrotta :(  (%s)"
+    IDS_ICHWORKED           "I.C.H.: Recuperata parte corrotta n°%i (%s), Risparmiati: %s"
     IDS_ERR_OUTOFSPACE      "Non hai spazio a sufficienza per scaricare il File ""%s""!"
     IDS_SE                  "Scambio Fonte"
 END
@@ -547,7 +547,7 @@ BEGIN
     IDS_SF_TOTAL            "Totale"
     IDS_SF_TRANS            "Dati Inviati:"
     IDS_SF_ACCEPTED         "Upload Accettati:"
-    IDS_SF_REQUESTED        "Richieste:"
+    IDS_SF_REQUESTED        "File Richiesto:"
     IDS_ST_DOWNLOAD         "Velocità di Download"
     IDS_ST_UPLOAD           "Velocità di Upload"
     IDS_ST_CURRENT          "Corrente"
@@ -626,7 +626,7 @@ STRINGTABLE
 BEGIN
     IDS_FD_GENERAL          "Generale"
     IDS_FD_NAME             "Nome:"
-    IDS_FD_MET              "File part.met associato:"
+    IDS_FD_MET              "File part.met:"
     IDS_FD_HASH             "Hash:"
     IDS_FD_SIZE             "Dimensione:"
     IDS_FD_STATUS           "Stato File .part:"
@@ -652,12 +652,12 @@ BEGIN
     IDS_CD_VERSION          "Versione Software:"
     IDS_CD_UID              "ID:"
     IDS_CD_SNAME            "Nome Server:"
-    IDS_CD_CDOWN            "Attualmente in Download:"
+    IDS_CD_CDOWN            "L'Utente sta scaricando:"
     IDS_CD_DOWN             "Scaricati (sessione):"
-    IDS_CD_ADOWN            "Velocità Media di Download:"
+    IDS_CD_ADOWN            "Velocità Media Download:"
     IDS_CD_TDOWN            "Scaricati in Totale:"
     IDS_CD_UP               "Inviati (sessione):"
-    IDS_CD_AUP              "Velocità Media di Upload:"
+    IDS_CD_AUP              "Velocità Media Upload:"
     IDS_CD_TUP              "Inviati in Totale:"
     IDS_CD_TRANS            "Trasferimenti"
 END
@@ -1033,7 +1033,8 @@ BEGIN
     IDS_CREATESOURCELINK    "Copia Link eD2K negli appunti (con &fonti)"
     IDS_ERR_LOADSERVERMET   "Si è verificato un errore nel caricare il File ""server.met""!"
     IDS_ERR_CORRUPTCOMPRPKG "Ricevuto un pacchetto compresso corrotto da %s (errore %i)"
-    IDS_ERR_EMFRIENDSINVALID "Il File ""emfriends.met"" non è valido o è corrotto!"
+    IDS_ERR_EMFRIENDSINVALID
+                            "Il File ""emfriends.met"" non è valido o è corrotto!"
     IDS_ERR_READEMFRIENDS   "Errore sconoscito durante la lettura del File ""emfriends.met"": %s"
     IDS_ERR_KNOWNSERVERINFOREC "Ricevute delle Informazioni sul Server sconosciute!"
     IDS_ERR_TIMERCREATEFAILED "Errore Fatale: Impossibile creare un Timer"
@@ -1072,7 +1073,7 @@ BEGIN
     IDS_CMT_QUEST           "Commenta questo File! (Questo testo verrà mostrato a tutti gli utenti)"
     IDS_CMT_AIDE            "Grazie a questa funzione puoi dare un voto e/o un commento ai File condivisi nella Rete di eMule.\nSe questo è un film, puoi indicare la sua durata, la trama, la lingua... E se invece è una Fake puoi informare tutti gli altri utenti... "
     IDS_CMT_TITLE           "Comento per il File %s"
-    IDS_CMT_ADD             "Commenta questo File..."
+    IDS_CMT_ADD             "Comm&enti..."
     IDS_CMT_NONE            "Nessun Commento presente"
     IDS_CMT_READ            "Commento File:"
     IDS_CMT_NOTCONNECTED    "Non ancora connesso..."
@@ -1340,8 +1341,8 @@ BEGIN
     IDS_STATS_SHRECASIZE    "Dimensione File Media Maggiore"
     IDS_STATS_MYRUNTIME     "Tempo di Esecuzione Complessivo: %s"
     IDS_STATS_SESSION       "Sessione"
-    IDS_STATS_SRATIO        "Rapporto UL:DL Sessione:"
-    IDS_STATS_CRATIO        "Rapporto UL:DL Totale:"
+    IDS_STATS_SRATIO        "Rapporto Up:Down Sessione:"
+    IDS_STATS_CRATIO        "Rapporto Up:Down Totale:"
     IDS_SEARCH_NORESULT     "Nessun elemento trovato."
     IDS_STATS_CURRSRVDUR    "Durata Server Corrente"
     IDS_LONGSECS            "secondi"
@@ -1425,7 +1426,7 @@ BEGIN
     IDS_WEB_ALLOWHILEVFUNC  "Permetti chiusura di eMule, riavvio e arresto del sistema"
     IDS_SETPFSLIMIT         "Limite Fonti..."
     IDS_SETPFSLIMITEXPLAINED 
-                            "Inserire il nuovo Limite Fonti per i File selezionati! \n(impostalo a 0 per usare l'impostazione generale)"
+                            "Inserire il nuovo Limite Fonti per i File selezionati! \n(usare 0 per l'impostazione generale)"
     IDS_UPDATECATINCOMINGDIRS 
                             "Vuoi che le cartelle delle categorie dei File scaricati, incluse nella vecchia cartella dei File scaricati, siano ora aggiornate alla nuova posizione?"
     IDS_USESPEECH           "Messaggio di notifica parlante"
@@ -1478,7 +1479,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_VERSION             "Versione"
+    IDS_OPTIONS             "Opzioni"
     IDS_PASTE               "Incolla"
+    IDS_SEARCHAUTHORCOLLECTION "Cerca l'Autore delle Collezioni"
+    IDS_ERR_DUPL_FILES      "File condivisi doppi: ""%s"" e ""%s"""
+    IDS_USS_TRACEROUTEOFTENFAILED 
+                            "UploadSpeedSense: Traceroute fallito troppe volte. Upload SpeedSense disattivato."
+    IDS_USS_STARTING        "UploadSpeedSense: Preparazione completata. Avvio del controllo della velocità di upload. (Nei primi 60 secondi sarà nella modalità di reazione veloce)"
     IDS_A4AF                "Gestione Fonti"
     IDS_MOBILEMULE          "MobileMule"
     IDS_ENABLEMM            "Attiva il MobileMule"
@@ -1514,7 +1521,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CD_UPLOADREQ        "Upload Richiesto:"
+    IDS_CD_UPLOADREQ        "Tu hai Richiesto:"
     IDS_SETTINGCHANGED_RESTART 
                             "Riavviare eMule affinché i cambiamenti abbiano effetto!"
     IDS_CREDITSEXPIRED      ", %i Client eliminati (non sono stati contattati entro 5 mesi)"
@@ -1707,7 +1714,7 @@ BEGIN
     IDS_INSTALL_SKIN_FILE_ERROR 
                             "Tentativo di estrazione fallito del File ""%s"" dalla Skin di eMule al File ""%s"" - %s"
     IDS_INSTALL_SKIN_PKG_ERROR "Questa non è una Skin valida per eMule."
-    IDS_NEXT_REASK          "Richiesta successiva a questo Client"
+    IDS_NEXT_REASK          "Richiesta successiva"
     IDS_A4AF_FILES          "File A4AF"
     IDS_FO_TEMPTCP_S        "Porta %u (TCP) aperta sul Firewall interno di WinXP per questa sessione di eMule"
     IDS_FO_TEMPTCP_F        "Tentativo di aprire la porta %u (TCP) sul Firewall interno di WinXP fallito per questa sessione di eMule"
@@ -1776,7 +1783,7 @@ BEGIN
     IDS_META_PARTHASH       "Hash Parte"
     IDS_META_GAPSTART       "Inizio Gap"
     IDS_META_GAPEND         "Fine Gap"
-    IDS_FAIL                "Errore"
+    IDS_FAIL                "Fallito"
 END
 
 STRINGTABLE 
@@ -1811,7 +1818,7 @@ BEGIN
     IDS_AICH_SYNCTOTAL      "Trovati %i File senza un valido HashSet AICH, sarà ora avviato il Re-Hash di questi File"
     IDS_AICH_CALCFILE       "Calcolo dell'Hash AICH per il File %s in corso"
     IDS_AICH_WARNUSER       "Dalla versione 0.44a eMule usa un Hash dei File addizionale che apporta un aiuto sostanziale nel ridurre la perdita dei dati quando vengono rilevate parti corrotte. Siccome hai effettuato un aggiornamento da una versione precente, eMule ha bisogno di effettuare il Re-Hash di tutti i tuoi File Condivisi per calcolare il nuovo Hash. Questo potrebbe richiedere qualche minuto ma verrà effettuato una sola volta.  "
-    IDS_AICH_WORKED         "L'AICH ha recuperato con successo %s di %s dalla parte %u per %s"
+    IDS_AICH_WORKED         "L'AICH ha recuperato con successo %s di %s dalla parte n°%u per %s"
     IDS_SOURCECLIENT        "Fonte Client"
     IDS_USERSIP             "IP Utente"
     IDS_FEATURES            "Caratteristiche"
@@ -1878,14 +1885,16 @@ BEGIN
     IDS_PW_ENABLEEMAIL      "Attiva Notifiche e-mail"
     IDS_EMULENOTIFICATION   "Notifica eMule"
     IDS_PW_SHOWTRANSTOOLBAR "Mostra Barra Strumenti aggiuntiva nella finestra Trasferimenti"
+    IDS_SHARED_STATUS       "Parti condivise"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SHARED_STATUS       "Parti condivise"
-    IDS_INCOMING_FILES      "File in Download"
+    IDS_SEARCH_EMULECOLLECTION "Collezione"
+    IDS_INCOMING_FILES      "File completati"
     IDS_INCOMPLETE_FILES    "File incompleti"
     IDS_SHARED_DIRECTORIES  "Cartelle condivise"
+    IDS_COLLECTIONLIST      "Lista Collezione"
     IDS_SHAREDIR            "Condividi una cartella"
     IDS_SHAREDIRSUB         "Condividi anche le sottocartelle"
     IDS_UNSHAREDIR          "Togli dalla condivisione la cartella"
@@ -1894,32 +1903,59 @@ BEGIN
     IDS_ALLDIRECTORIES      "Tutte le cartelle"
     IDS_SEARCHRELATED       "Cerca File correlati"
     IDS_RELATED             "File correlati"
+    IDS_COLL_REPLACEEXISTING "Vuoi sostituire il File esistente?"
+    IDS_COLL_ERR_DELETING   "Si è verificato un errore durante l'eliminazione del File precedente. Uscire senza salvare?"
+    IDS_CREATECOLLECTION    "Crea una Collezione"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_COLLECTIONLIST      "Lista Collezione"
-    IDS_SEARCH_EMULECOLLECTION "Collezione"
-    IDS_COLL_REPLACEEXISTING "Vuoi sostituire il File esistente?"
-    IDS_COLL_ERR_DELETING   "Si è verificato un errore durante l'eliminazione del File precedente. Uscire senza salvare?"
-    IDS_CREATECOLLECTION    "Crea una Collezione"
+    IDS_MODIFYCOLLECTION    "Modifica Collezione"
     IDS_COLL_SIGN           "Segna la Collezione con Nome e Chiave"
     IDS_AUTHOR              "Autore"
     IDS_AUTHORKEY           "Chiave Autore"
     IDS_COLL_ADDINCAT       "Aggiungi i nuovi Download in una Categoria di Collezione"
-    IDS_MODIFYCOLLECTION    "Modifica Collezione"
     IDS_VIEWCOLLECTION      "Vedi Collezione"
-    IDS_COLL_TEXTFORMAT     "Salva Collezione in formato testo"
-    IDS_SEARCHAUTHORCOLLECTION "Cerca l'Autore delle Collezioni"
-    IDS_ERR_DUPL_FILES      "Files condivisi doppi: ""%s"" e ""%s"""
-    IDS_USS_TRACEROUTEOFTENFAILED 
-                            "UploadSpeedSense: Traceroute fallito troppe volte. Upload SpeedSense disattivato."
-    IDS_USS_STARTING        "UploadSpeedSense: Preparazione completata. Avvio del controllo della velocità di upload. (Nei primi 60 secondi sarà nella modalità di reazione veloce)"
+    IDS_COLL_TEXTFORMAT     "Salva la Collezione in formato testo"
+    IDS_RUNNINGRESTRICTED   "eMule è in esecuzione con privilegi limitati"
     IDS_USS_MANUALUPLOADLIMITDETECTED 
                             "UploadSpeedSense: Trovato un Limite di upload. Avviata la modalità di reazione veloce per i primi 60 secondi."
     IDS_USS_STATE_PREPARING "Preparazione..."
     IDS_USS_STATE_WAITING   "Attesa..."
     IDS_USS_STATE_ERROR     "Errore!"
+    IDS_SHAREWARNING        "(La cartella verrà condivisa!)"
+    IDS_REMOVEALLSERVERS    "Sei sicuro di voler rimuovere tutti i Server?"
+    IDS_SEARCH_UNKATTR      "Parametro di ricerca '%s' sconosciuto"
+    IDS_SEARCH_ATTRERR      "Errore di sintassi nel parametro di ricerca '%s'"
+    IDS_SEARCH_MISSINGANDRIGHT "Lato destro mancante per l'operatore AND"
+    IDS_SEARCH_OPRERR       "Errore di sintassi nell'operatore di confronto '%s'"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOAD_LANGFILE   "Download del File della lingua in corso..."
+    IDS_DOWNLOADING_SERVERMET_FROM "Download del 'server.met' da %s"
+    IDS_DOWNLOADING_SERVERMET "Download del 'server.met' in corso..."
+    IDS_FULLALLOC           "Alloca l'intera dimensione per i File .part non-Sparse"
+    IDS_X_SHAREAZA_IMPORT_NO_HASH "Hash non trovato."
+    IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "Lista Gap corrotta."
+    IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Lista Gap non trovata."
+    IDS_X_SHAREAZA_IMPORT_HASH_SET_CORRUPT "HashSet corrotto."
+    IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "HashSet non trovato."
+    IDS_CONVERTINGKNOWN2MET "Sto convertendo %s in %s per supportare i File di grosse dimensioni..."
+    IDS_CONVERTINGKNOWN2FAILED 
+                            "...impossibile convertire 'known2.met', i vecchi dati verranno ignorati"
+    IDS_CONVERTINGKNOWN2DONE "...conversione completata"
+    IDS_ERR_MET_BAD         "Errore: il File %s è corrotto, impossibile caricare i File conosciuti"
+    IDS_SRV_LARGEFILES      "Supporto per File di grosse dimensioni"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_FSCANTHANDLEFILE 
+                            "Non è possibile scaricare questo File perché il tuo Filesystem non supporta File di dimensioni maggiori di 4GB; è consigliabile la conversione in NTFS."
+    IDS_NEWVERSIONAVLBETA   "Questa versione Beta è obsoleta. Per la natura delle versioni Beta, che spesso contengono Bug, è consigliabile l'aggiornamento ad una versione stabile il prima possibile!"
 END
 
 
