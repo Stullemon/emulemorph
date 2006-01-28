@@ -1457,10 +1457,10 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
                client->SetWaitStartTime();
 		*/
 
+		(void) theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
+
 		// Mighty Knife: more detailed logging
 		/*
-		bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
-
 		if (thePrefs.GetLogUlDlEvents())
 			AddDebugLogLine(DLP_VERYLOW, true,_T("---- Main socket %ssuccessully removed from upload list."),removed ? _T("") : _T("NOT "));
 		*/
