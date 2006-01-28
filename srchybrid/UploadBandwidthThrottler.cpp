@@ -742,10 +742,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								if (ClientDataRate[classID])
 									allowedclientdatarate = min(allowedclientdatarate,ClientDataRate[classID]);
 
-								sint64 limit = -((sint64)2000*allowedclientdatarate);
+								sint64 limit = -((sint64)2000*allowedclientdatarate*1000);
 								if (stat->realBytesToSpend < limit)
 									stat->realBytesToSpend = limit;
-								limit = (sint64)2000*allowedclientdatarate;
+								limit = (sint64)2000*allowedclientdatarate*1000;
 								if (stat->realBytesToSpend > limit)
 									stat->realBytesToSpend = limit;
 								if (_I64_MAX/timeSinceLastLoop > allowedclientdatarate && _I64_MAX-allowedclientdatarate*timeSinceLastLoop > stat->realBytesToSpend)
@@ -758,7 +758,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (stat->realBytesToSpend > 999) {
 								if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
 									uint32 BytesToSpendTemp = (UINT)min(stat->realBytesToSpend / 1000, BytesToSpend - (sint64)ControlspentBytes);
-									BytesToSpendTemp = (UINT)min(BytesToSpendTemp, doubleSendSize);
+									//BytesToSpendTemp = (UINT)min(BytesToSpendTemp, doubleSendSize);
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSpendTemp, doubleSendSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
