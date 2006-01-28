@@ -9,13 +9,15 @@ FIXED  : (minor) When there is only A4AF source and they are removed, display in
 FIXED  : (minor) GUI: file detail arround webcache stat is properly displayed [Stulle]
 
 ADDED  : USC: Don't open new slot when connection doesn't send any data [SiRoB]
+ADDED  : FlushThread to write on hard disk without locking GUI [SiRoB]
 
 CHANGED: No FunnyNick for added HTTP sources [Stulle]
 CHANGED: No ZZ ratio for added HTTP sources [Stulle]
 CHANGED: WC: Support +4GBytes files [SiRoB]
 CHANGED: ImportPart: Reworked to be used and stopped at anytime [SiRoB]
-CHANGED: SOTN: Reviewed to not being seen as a complet source even if we are the only source [SiRoB]
-
+CHANGED: SOTN: Reviewed to not show us as a complet source even if we are the only source [SiRoB]
+- du to share only the need mecanisme client will always see a virtual complet source
+- share only the need still the safer and best way to always keep a file well spreaded by balancing the upload chunk
 
 --------------------------------------
 Changelog for eMule 0.46c MorphXT v7.8
