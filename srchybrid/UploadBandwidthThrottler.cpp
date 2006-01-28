@@ -614,7 +614,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			minFragSize = 536;
 			doubleSendSize = minFragSize; // don't send two packages at a time at very low speeds to give them a smoother load
 		}
-	uint32 sleepTime = 1;
+		uint32 sleepTime = 1;
         if(timeSinceLastLoop < sleepTime)
             Sleep(sleepTime-timeSinceLastLoop);
 		const DWORD thisLoopTick = timeGetTime();
@@ -689,8 +689,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						Socket_stat* stat = NULL;
 						if (m_stat_list.Lookup(socket, stat)) {
 							uint32 neededBytes = socket->GetNeededBytes(1000 > minFragSize);
-							if (stat->realBytesToSpend > 999 && neededBytes > 0 && thisLoopTick-socket->GetLastCalledSend() > 1000) {
-								neededBytes = (uint32)min(BytesToSpend - (sint64)ControlspentBytes, neededBytes);
+							if (neededBytes > 0 && stat->realBytesToSpend > 999) {
+								neededBytes = (uint32)min(BytesToSpend - (sint64)ControlspentBytes, stat->realBytesToSpend / 1000);
 								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(neededBytes, minFragSize);
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 								if (lastSpentBytes) {
@@ -742,16 +742,16 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								if (ClientDataRate[classID])
 									allowedclientdatarate = min(allowedclientdatarate,ClientDataRate[classID]);
 
-								sint64 limit = -((sint64)2000*allowedclientdatarate*1000);
+								sint64 limit = -((sint64)2000*allowedclientdatarate);
 								if (stat->realBytesToSpend < limit)
 									stat->realBytesToSpend = limit;
-								limit = (sint64)2000*allowedclientdatarate*1000;
+								limit = allowedclientdatarate;
 								if (stat->realBytesToSpend > limit)
 									stat->realBytesToSpend = limit;
 								if (_I64_MAX/timeSinceLastLoop > allowedclientdatarate && _I64_MAX-allowedclientdatarate*timeSinceLastLoop > stat->realBytesToSpend)
 									stat->realBytesToSpend += allowedclientdatarate*timeSinceLastLoop;
-									else
-										stat->realBytesToSpend = _I64_MAX;
+								else
+									stat->realBytesToSpend = _I64_MAX;
 							}
 
 							//Try to send client allowed data for a client but not more than class allowed data
@@ -789,11 +789,18 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		
 			}
-			if (timeSinceLastLoop > 0 && realBytesToSpendClass[LAST_CLASS] > 999 && realBytesToSpendClass[classID] > 999) {
+			uint32 marge;
+			if (allowedDataRateClass[classID])
+				marge = min(allowedDataRateClass[LAST_CLASS],allowedDataRateClass[classID]);
+			else
+				marge = allowedDataRateClass[LAST_CLASS];
+			if (marge < 999)
+				marge = 999;
+			if (timeSinceLastLoop > 0 && realBytesToSpendClass[LAST_CLASS] > marge && realBytesToSpendClass[classID] > marge) {
 				if (m_SentBytesSinceLastCall > 0 && m_highestNumberOfFullyActivatedSlots[classID] <  lastclientpos+1 || slotCounterClass[classID] == 0)
 					m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
-				if ((m_SentBytesSinceLastCall > 0 || slotCounterClass[classID] == 0) && realBytesToSpendClass[classID] >= 1000*doubleSendSize)
-					realBytesToSpendClass[classID] = 999;
+				if ((m_SentBytesSinceLastCall > 0 || slotCounterClass[classID] == 0) && realBytesToSpendClass[classID] > marge)
+				realBytesToSpendClass[classID] = marge;
 			}
 		}
 		sendLocker.Unlock();
