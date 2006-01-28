@@ -87,7 +87,7 @@ uint16 CAddFileThread::SetPartToImport(LPCTSTR import)
 bool CAddFileThread::SR13_ImportParts(){
 
 	uint16 partsuccess=0;
-	uint16 badpartsuccess=0;
+//	uint16 badpartsuccess=0;
 	
 	CFile f;
 	if(!f.Open(m_strImport, CFile::modeRead  | CFile::shareDenyWrite)){

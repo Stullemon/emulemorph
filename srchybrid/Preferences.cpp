@@ -2732,7 +2732,7 @@ void CPreferences::LoadPreferences()
 	minupload=(uint16)ini.GetInt(L"MinUpload", 1);
 
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
-	minupload = min(max(minupload,1),maxGraphUploadRate);
+	minupload = (uint16)min(max(minupload,1),maxGraphUploadRate);
 	//MORPH END   - Added by SiRoB, (SUC) & (USS)
 	maxupload=(uint16)ini.GetInt(L"MaxUpload",UNLIMITED);
 	if (maxupload > maxGraphUploadRate && maxupload != UNLIMITED)
@@ -2769,8 +2769,8 @@ void CPreferences::LoadPreferences()
 	sprintf(tmpWebcacheName,"%s",ini.GetString(_T("webcacheName"),_T("")));
 	webcacheName = tmpWebcacheName; // TODO: something more elegant*/
 	webcacheName = ini.GetString(_T("webcacheName"), _T(""));
-	webcachePort=ini.GetInt(_T("webcachePort"),0);
-	webcacheBlockLimit=ini.GetInt(_T("webcacheBlockLimit"));
+	webcachePort=(uint16)ini.GetInt(_T("webcachePort"),0);
+	webcacheBlockLimit=(uint16)ini.GetInt(_T("webcacheBlockLimit"));
 	webcacheExtraTimeout=ini.GetBool(_T("webcacheExtraTimeout"));
 	PersistentConnectionsForProxyDownloads=ini.GetBool(_T("PersistentConnectionsForProxyDownloads"), false);
 	WCAutoupdate=ini.GetBool(_T("WCAutoupdate"), true);
@@ -3215,17 +3215,17 @@ void CPreferences::LoadPreferences()
 	m_bSelCatOnAdd=ini.GetBool(_T("SelCatOnAdd"), true);
 	m_bAutoSetResumeOrder=ini.GetBool(_T("AutoSetResumeOrder"), true);
 	m_bSmallFileDLPush=ini.GetBool(_T("SmallFileDLPush"), true);
-	m_iStartDLInEmptyCats=ini.GetInt(_T("StartDLInEmptyCats"), 0);
+	m_iStartDLInEmptyCats=(uint8)ini.GetInt(_T("StartDLInEmptyCats"), 0);
 	m_bUseAutoCat=ini.GetBool(_T("UseAutoCat"), true);
 	// khaos::categorymod-
 	// khaos::kmod+
 	m_bUseSaveLoadSources=ini.GetBool(_T("UseSaveLoadSources"), true);
 	m_bRespectMaxSources=ini.GetBool(_T("RespectMaxSources"), true);
 	m_bSmartA4AFSwapping=ini.GetBool(_T("SmartA4AFSwapping"), true);
-	m_iAdvancedA4AFMode=ini.GetInt(_T("AdvancedA4AFMode"), 1);
+	m_iAdvancedA4AFMode=(uint8)ini.GetInt(_T("AdvancedA4AFMode"), 1);
 	m_bShowA4AFDebugOutput=ini.GetBool(_T("ShowA4AFDebugOutput"), false);
 	// khaos::accuratetimerem+
-	m_iTimeRemainingMode=ini.GetInt(_T("TimeRemainingMode"), 0);
+	m_iTimeRemainingMode=(uint8)ini.GetInt(_T("TimeRemainingMode"), 0);
 	// khaos::accuratetimerem-
 	//MORPH START - Added by SiRoB, ICS Optional
 	m_bUseIntelligentChunkSelection=ini.GetBool(_T("UseIntelligentChunkSelection"), true);
@@ -3409,20 +3409,20 @@ void CPreferences::LoadPreferences()
 	m_bUPnPNat = ini.GetBool(_T("UPnPNAT"), false, _T("eMule"));
 	m_bUPnPNatWeb = ini.GetBool(_T("UPnPNAT_Web"), false, _T("eMule"));
 	m_bUPnPVerboseLog = ini.GetBool(_T("UPnPVerbose"), true, _T("eMule"));
-	m_iUPnPPort = ini.GetInt(_T("UPnPPort"), 0, _T("eMule"));
+	m_iUPnPPort = (uint16)ini.GetInt(_T("UPnPPort"), 0, _T("eMule"));
 	m_bUPnPLimitToFirstConnection = ini.GetBool(_T("UPnPLimitToFirstConnection"), false, _T("eMule"));
 	m_bUPnPClearOnClose = ini.GetBool(_T("UPnPClearOnClose"), true, _T("eMule"));
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
 	m_bRndPorts = ini.GetBool(_T("RandomPorts"), false, _T("eMule"));
-	m_iMinRndPort = ini.GetInt(_T("MinRandomPort"), 3000, _T("eMule"));
-	m_iMaxRndPort = ini.GetInt(_T("MaxRandomPort"), 0xFFFF, _T("eMule"));
+	m_iMinRndPort = (uint16)ini.GetInt(_T("MinRandomPort"), 3000, _T("eMule"));
+	m_iMaxRndPort = (uint16)ini.GetInt(_T("MaxRandomPort"), 0xFFFF, _T("eMule"));
 	m_bRndPortsResetOnRestart = ini.GetBool(_T("RandomPortsReset"), false, _T("eMule"));
-	m_iRndPortsSafeResetOnRestartTime = ini.GetInt(_T("RandomPortsSafeResetOnRestartTime"), 0, _T("eMule"));
+	m_iRndPortsSafeResetOnRestartTime = (uint16)ini.GetInt(_T("RandomPortsSafeResetOnRestartTime"), 0, _T("eMule"));
 	
-	int iOldRndTCPPort = ini.GetInt(_T("OldTCPRandomPort"), 0, _T("eMule"));
-	int iOldRndUDPPort = ini.GetInt(_T("OldUDPRandomPort"), 0, _T("eMule"));
+	uint16 iOldRndTCPPort = (uint16)ini.GetInt(_T("OldTCPRandomPort"), 0, _T("eMule"));
+	uint16 iOldRndUDPPort = (uint16)ini.GetInt(_T("OldUDPRandomPort"), 0, _T("eMule"));
 	__time64_t iRndPortsLastRun = ini.GetUInt64(_T("RandomPortsLastRun"), 0, _T("eMule"));
 	
 	m_iCurrentTCPRndPort = 0;
@@ -3455,7 +3455,7 @@ void CPreferences::LoadPreferences()
     //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	m_bWapEnabled=ini.GetBool(_T("WapEnabled"), false, _T("WapServer"));
 	_stprintf(m_sWapTemplateFile,_T("%s"),ini.GetString(_T("WapTemplateFile"),_T("eMule_Wap.tmpl"),_T("WapServer")));
-	m_nWapPort=ini.GetInt(_T("WapPort"), 80, _T("WapServer"));
+	m_nWapPort=(uint16)ini.GetInt(_T("WapPort"), 80, _T("WapServer"));
 	m_iWapGraphWidth=ini.GetInt(_T("WapGraphWidth"), 60, _T("WapServer"));
 	m_iWapGraphHeight=ini.GetInt(_T("WapGraphHeight"), 45, _T("WapServer"));
 	m_bWapFilledGraphs=ini.GetBool(_T("WapFilledGraphs"), false, _T("WapServer"));
@@ -3941,7 +3941,7 @@ bool	CPreferences::IsSUCDoesWork()
 //MORPH START - Added by SiRoB, (SUC) & (USS)
 void	CPreferences::SetMinUpload(UINT in)
 {
-	minupload = (in) ? in : UNLIMITED;
+	minupload = (uint16)((in) ? in : UNLIMITED);
 }
 //MORPH END  - Added by SiRoB, (SUC) & (USS)
 

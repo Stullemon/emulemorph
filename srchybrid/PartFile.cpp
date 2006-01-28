@@ -5279,7 +5279,7 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 	return lenData;
 }
 
-void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
+void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 {
 	bool bIncreasedFile=false;
 	
@@ -5821,7 +5821,7 @@ void CPartFile::UpdateAutoDownPriority()
 	// Small optimization: Do not bother with all this if file is paused or stopped.
 	if( !IsAutoDownPriority() || GetStatus()==PS_PAUSED || IsStopped() )
 		return;
-	uint16 nHighestSC = theApp.downloadqueue->GetHighestAvailableSourceCount();
+	UINT nHighestSC = theApp.downloadqueue->GetHighestAvailableSourceCount();
 	if ( GetAvailableSrcCount() > (nHighestSC * .40) ) {
 		SetDownPriority( PR_LOW );
 		return;
@@ -6491,10 +6491,10 @@ bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 	Category_Struct* curCat = thePrefs.GetCategory(inCategory);
 	if (curCat == NULL)
 		return false;
-	if (curCat->viewfilters.bSuspendFilters && (GetCategory() == inCategory || curCat->viewfilters.nFromCats == 0))
+	if (curCat->viewfilters.bSuspendFilters && ((int)GetCategory() == inCategory || curCat->viewfilters.nFromCats == 0))
 		return true;
 
-	if (curCat->viewfilters.nFromCats == 2 && GetCategory() != inCategory)
+	if (curCat->viewfilters.nFromCats == 2 && (int)GetCategory() != inCategory)
 		return false;
 
 	if (!curCat->viewfilters.bVideo && IsMovie())
@@ -6617,10 +6617,10 @@ void CPartFile::SetFileOpProgress(UINT uProgress)
 	}
 	//MORPH END   - Added by SiRoB, ForcedA4AF
 	//MORPH START - Added by SiRoB, Avanced A4AF
-	uint8 right_iA4AFMode = thePrefs.AdvancedA4AFMode();
+	UINT right_iA4AFMode = thePrefs.AdvancedA4AFMode();
 	if (right_iA4AFMode && thePrefs.GetCategory(right->GetCategory())->iAdvA4AFMode)
 		right_iA4AFMode = thePrefs.GetCategory(right->GetCategory())->iAdvA4AFMode;
-	uint8 left_iA4AFMode = thePrefs.AdvancedA4AFMode();
+	UINT left_iA4AFMode = thePrefs.AdvancedA4AFMode();
 	if (left_iA4AFMode && thePrefs.GetCategory(left->GetCategory())->iAdvA4AFMode)
 		left_iA4AFMode = thePrefs.GetCategory(left->GetCategory())->iAdvA4AFMode;
 			

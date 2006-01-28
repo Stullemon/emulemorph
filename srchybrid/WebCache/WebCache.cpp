@@ -212,12 +212,12 @@ void AutodetectWebcache()
 			thePrefs.WebCacheDisabledThisSession = true;
 		}
 	thePrefs.webcacheName=detectedWebcache->webcache;
-	thePrefs.webcachePort=_tstoi(detectedWebcache->port);
-	thePrefs.SetWebCacheBlockLimit(_tstoi(detectedWebcache->blockLimit));
+	thePrefs.webcachePort=(uint16)_tstoi(detectedWebcache->port);
+	thePrefs.SetWebCacheBlockLimit((uint16)_tstoi(detectedWebcache->blockLimit));
 		thePrefs.SetWebCacheExtraTimeout(detectedWebcache->extraTimeout == _T("1") ? true : false);
 		thePrefs.SetWebCacheCachesLocalTraffic(detectedWebcache->cachesLocal == _T("1") ? true : false);
 		thePrefs.PersistentConnectionsForProxyDownloads = (detectedWebcache->persistentconns == _T("1") ? true : false);	
-		thePrefs.webcacheTrustLevel = _tstoi(detectedWebcache->trustLevel);
+		thePrefs.webcacheTrustLevel = (uint8)_tstoi(detectedWebcache->trustLevel);
 		if (thePrefs.webcacheEnabled && restart) //WC-ToDo need a modal dialogue here
 			AddDebugLogLine( false, _T("Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until eMule is restarted.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."));
 		else if (!thePrefs.webcacheEnabled && restart)
