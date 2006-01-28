@@ -1,7 +1,333 @@
 	  CHANGELOG FOR EMULE
 	http://emule-project.net
 	========================
+
+0.47a
+-----------------------
+- Jan, 25. 2006       -
+-----------------------
+Unk: Fixed a Kad bug when looking for a Buddy.. (leuk_he)
+.: Fixed a problem with corrupting known2_64.met if "Remember downloaded files" is disabled
+
+
+-----------------------
+- Jan, 24. 2006       -
+-----------------------
+.: Fixed banned client statistics [Xman1]
+.: Fixed cumulative part file data statistics [TimDzang]
+.: Fixed download list transferred data shown in completed column, if transferred column is hidden.
+.: Fixed stalling during part file allocation.
+.: Fixed rejected connections (ip filter) stats.
+
+
+0.47a BETA2
+-----------------------
+- Jan, 23. 2006       -
+-----------------------
+.: Clients which send filtered messages will now also be identified as spammers
+.: Fixed a bug with HTTP/Peercache sources (SiRob)
+.: Fixed a problem with converting known2.met - it should not rehash files anymore when updating from a prior version
+
+-----------------------
+- Jan, 21. 2006       -
+-----------------------
+Unk: Continued work with Kad2.0. Only host side funcational still
+Unk: More tweaks to Kad1.0.
+Unk: Correction to "Change in LPhant version display (Famerlor)"
+Unk: Make sure Kad config files are not read by older clients as they may contain tags they cannot read.
+
+-----------------------
+- Jan, 20. 2006       -
+-----------------------
+.: Fixed a bug which could cause problems when loading part.met files of large files (SiRob)
+.: Changed the protocol to check the hash+filesize instead only the hash on requested files
  
+
+0.47a BETA1
+-----------------------
+- Jan, 15. 2006       -
+-----------------------
+Unk: Began work on Kad2.0.. The idea is to improve the protocol and add some features.. This client will only host the new protocol, the next version will have the option to switch between Kad and Kad2.0..
+.: Completed files can now be deleted from the download window
+.: Updated MobileMule protocol for large files
+
+-----------------------
+- Jan, 14. 2006       -
+-----------------------
+.: Clients which were identified as spammers will now be banned instead of only ignoring their messages
+
+-----------------------
+- Jan, 11. 2006       -
+-----------------------
+Unk: It appears there is a rare possibility that a keyword to a known file that is not shared can attempt to be published, a check is in place to avoid it.
+
+-----------------------
+- Jan, 8. 2006       -
+-----------------------
+.: Added support for large files. The new file size limit which eMule can handle is 256GB (the old one was 4GB)
+.: The following compatibility issues for large files apply:
+	- Large files can be found, downloaded and uploaded only by clients which support it (right now eMule 0.47a and above)
+	- Collections which contain any large files can no longer be read by clients which don't support large files
+	- part.met files from large files can not be used with old eMule versions / ed2k tools
+	- If any large file is shared/known the known.met file will no longer be backward compatible to older eMule versions
+	- Known2.met will be converted to Known2_64.met which can not be read by old eMule versions
+Unk: Updated Kad to handle large files..
+    - Older clients cannot index large file keywords. This will mean getting keyword results on large files will not 
+      work well until the majority of the network updates..
+
+-----------------------
+- Dec, 30. 2005       -
+-----------------------
+.: Added "Minimize to system tray" command to system menu.
+
+-----------------------
+- Dec, 26. 2005       -
+-----------------------
+.: Fixed bug with wrong 'Download Time' reported for some paused files.
+
+-----------------------
+- Dec, 24. 2005       -
+-----------------------
+.: Fixed bug with setting the priority of a static server which was lost after a restart.
+.: Added cycling through main eMule windows with Ctrl+Tab and Shift+Ctrl+Tab respectively.
+
+-----------------------
+- Dec, 17. 2005       -
+-----------------------
+.: Fixed problem with shared files which have invalid file date [thx Kro/MorphXT]
+
+-----------------------
+- Dec, 3. 2005        -
+-----------------------
+.: Proxy support: Couple of optimizations for proxy support.
+.: Proxy support: The "Proxy/ShowErrors" preferences.ini setting has no meaning any longer because all proxy errors are now shown as part of the regular connection error messages for servers and clients.
+.: Proxy support: Fixed bug in SOCKS 5 authentication.
+.: Proxy support: Added support for HTTP/1.0 proxies which saves proxy overhead. Hint: If you have to use a HTTP proxy, HTTP/1.0 is recommended unless you must use HTTP/1.1.
+The precedence of the proxy protocol performance is as follows.
+1. SOCKS 4a (highest performance because of least overhead)
+2. SOCKS 4
+3. SOCKS 5
+4. HTTP/1.0
+5. HTTP/1.1 (lowest performance because of most overhead)
+.: Speed up for large IP-filter list loading.
+
+-----------------------
+- Nov, 30. 2005       -
+-----------------------
+zz: Option to make eMule use highres scheduling (better precision for sleeps and some timers). Currently the upload throttler takes advantage of it if enabled, which may give smoother upload performance and smoother pings while using eMule. Try it at your own risk. :) Use this preferences.ini setting in [eMule] section to activate: HighresTimer=1
+
+-----------------------
+- Nov, 26. 2005       -
+-----------------------
+.: Changed search function in IP-Filter Dialog: When searching for an IP in the "Start" column, the "range" where the specified IP is within is searched. Hint: This way one can check if a particular IP is blocked in the loaded IP filter list.
+Ornis: Importer added for incomplete (ed2k)Shareaza tempfiles [by David Xanatos]
+
+-----------------------
+- Nov, 24. 2005       -
+-----------------------
+.: Added "BindAddr=<IP>" setting to preferences.ini to bind eD2K/Kad+WebServer sockets to specified IP address.
+.: Fixed bug with "Start Minimized" and "Minimize to Systemtray".
+.: Main window can be restored from MiniMule window by double clicking on MiniMule's title bar.
+.: Enter-key can be used in listviews to invoke the default action for selected items (like "Connect to server", "Download search result", "Open completed file", ...)
+
+-----------------------
+- Nov, 20. 2005       -
+-----------------------
+Unk: Attempted to clean up all SMIRC Code.
+1) Reformatted code so all has the same format.
+2) Almost a complete rewrite in the core code which should correct the following issues.
+. A change in the default preferences caused SMIRC to not display a popup for the user to change their nick.
+. Some users could not see what they were typing..
+. Channel Modes were not handled correctly in many cases.
+. Sending new channel modes from the tab menu didn't send correct modes in most cases.
+. Sorting nicks within a channel didn't sort correctly.
+. Notices were not process correctly in some cases..
+. Ping/Pong between users didn't work.
+. Server filter option in prefs was unable to be cleared.
+
+-----------------------
+- Nov, 14. 2005       -
+-----------------------
+Unk: Attemped to clean up all Kad Code.
+1) Reformatted code so all has the same format.
+2) Removed some unused method params and vars.
+3) Tried to optimize some code.
+4) Fixed a possible issue that if you found your target on first try, you wouldn't send a request/store.
+5) Began adding comments to code for better understanding. (This will be done slowly if ever finished.)
+6) Put back keyword results sanity check.
+7) Fixed issue with Zones not being merged when contacts get low. (Help with Kry)
+8) Changed how contacts are kept alive to keep contact list fresher with less CPU
+9) Adjusted where Jumpstart is called to reduce CPU.
+10) Adjusted user count to account for firewalled users.
+
+-----------------------
+- Nov, 13. 2005       -
+-----------------------
+.: Code cleanups and performance optimizations regarding 16-bit integer usage.
+.: E-Mail notifications are disabled for non-XP-SP2 systems when built with ATL 7.1.
+.: Added "Find" command to all list views (shortcuts Ctrl+F=New search, F3=Search next, Shift+F3=Search prev.).
+
+-----------------------
+- Nov, 5. 2005        -
+-----------------------
+.: Added support for RARed IP filter files. Download UNRAR.DLL from http://www.rarlab.com and copy to emule installation folder.
+.: Added support for RARed eMule skin profiles. (As with ZIPed skin profiles, you can install downloaded RARed skin profiles right from Shared Files window by right clicking and invoking "Install eMule Skin" command.)
+Unk: Lower CPU load within Kad's Routing. (Kry, idea by lupz)
+
+-----------------------
+- Oct, 30. 2005       -
+-----------------------
+.: Fixed bug with IP Filter URL dropdown control in Security Dialog which was loosing all entries.
+.: Added verification of downloaded IP Filter files to detect files without any IP filters (e.g. dead URLs).
+.: A ZIPped IP filter file must contain one file (which holds the IP filter list) with the name "guarding.p2p" or "ipfilter.dat". All other files possible available in a ZIP file are ignored.
+
+-----------------------
+- Oct, 15. 2005       -
+-----------------------
+Ornis: option for full filesize preallocation (extended settings)
+Ornis: systray flashes with message icon on incoming new message (message, not IRC (yet)) when enabled in preferences.ini (Section "eMule" set "IconflashOnNewMessage=1")
+
+-----------------------
+- Oct, 8. 2005        -
+-----------------------
+.: Media Info File Dialog shows information about additional audio/video/subtitle streams. (Use MediaInfo DLL (http://mediainfo.sourceforge.net/) to get this support for non-AVI files).
+.: MP3 files with variable bitrates and Xing-VBR frame are report and published with the average VBR bitrate.
+
+-----------------------
+- September, 30. 2005 -
+-----------------------
+.: Added more safety to tag parsing in hello packets [thx Kry]
+
+-----------------------
+- September, 29. 2005 -
+-----------------------
+.: File detail dialog shows accumulated remaining size of multiple selected files.
+
+-----------------------
+- September, 26. 2005 -
+-----------------------
+.: Fixed bug with 'Ext' command in 'PreviewApps.dat' file.
+
+-----------------------
+- September, 25. 2005 -
+-----------------------
+.: Added file rating support for ED2K-server search results. Received ratings are shown with additional icon like in Transfers window and in 'Meta Data' details dialog.
+.: Fixed bug with double clicking on rating icon in Transfere window not always opening comment dialog page.
+.: Fixed bugs with property pages not restored correctly when using file details dialog in different main windows.
+
+-----------------------
+- September, 24. 2005 -
+-----------------------
+.: The meaning of the 'Cancel' search button was modified slightly. The 'Cancel' button now cancels any 
+active search only if the according search result list is active. This means that active Kad searches 
+can be canceled without closing the search result list window. So, to cancel any active search (regardless
+of the search type) without deleting the search results, activate the according search result list and click 'Cancel'.
+
+-----------------------
+- September, 20. 2005 -
+-----------------------
+.: Added optional floating point number support to search attributes in GUI and meta data search attributes in parser. (e.g. @size<1.23g)
+.: Size-, Availability-, Complete Sources-, Bitrate- and Length-search attributes can be specified in GUI in same way as in parser (see there).
+
+-----------------------
+- September, 19. 2005 -
+-----------------------
+.: Added new method for extracting meta data from AVI/WAV files without using DirectShow filters.
+
+-----------------------
+- September, 15. 2005 -
+-----------------------
+.: Added value checks for 'type' search tag: @type="audio"|"video"|"image"|"img"|"document"|"program"|"archive"|"iso"|"cd"
+   All type-values can be abbreviated with the first 3 characters (e.g. @type=doc is the same as @type=document)
+.: Added parsing of value for @length seach tag: 'length' can be specied as HH:MM:SS or MM:SS or as 'seconds' 
+   followed by a modifier (s=seconds(default), m=minutes, h=hours; e.g. "2m" is 2 minutes and is equal to "2:00")
+.: Added abbreviations for search tags: all search tags can be abbreviated by their first 3 characters.
+   (e.g. "@siz" is equal to "@size")
+
+-----------------------
+- September, 13. 2005 -
+-----------------------
+.: Added "exact string" search for Kad searches (quoted strings will be sent to nodes unchanged).
+   Note: Only newer Kad nodes will be able to process them correctly, older Kad nodes will not return a result.
+Ornis: Webinterface: fixed information popup for upload items
+ 
+-----------------------
+- September, 12. 2005 -
+-----------------------
+.: Added '-' as NOT shortcut to search expression (Google-style).
+   - Terms prefixed with '-' get interpreted as NOT operator (e.g. "file -avi" is equal to "file NOT avi"; also "file -@codec=wmv3" is equal to "file NOT @codec=wmv3")
+   - Strings can still contain the '-' character within the string (e.g "cool-file")
+.: Breaking changes in search expression parser:
+	- the characters '<', '>' and '=' (and also partially '@') are treated special. If they are to be used in search terms, they have to be quoted.
+	- several meta-data IDs starting with '@' or when written all in uppercase are treated special. If they are to be used in search terms, they have to be quoted.
+	- the Kad comparison operators '<', '>', '>=' and '<=' are now equal to ED2K operators. 
+	  You should not see much difference in practice. If though (e.g. when searching for bitrate), specify the value decreased by one or increased by one (depending on the comparions operator).
+	  This will vanish after more eMule clients have upgraded.
+    - all meta-data IDs used in search expressions are sent as integer tags for saving bandwidth and CPU load (for ED2K and Kad)
+    - precedence of AND and OR operator changed to get a Google-like interpretation:
+      "a b OR c d" (or "a AND b OR c AND d" respectively) does no longer evaluate to "(a AND b) OR (c AND d)" but to "a AND (b OR c) AND d" (Google-style)
+      You still can use paranthesis to force the precedence of evaluation to suite your needs.
+    - The '-' character is interpretated as NOT when seen 'outside' of a string.
+
+-----------------------
+- September, 11. 2005 -
+-----------------------
+.: Optimized search expression trees for putting less CPU load on servers and Kad nodes when evaluating the trees (less recursions).
+
+----------------------
+- September, 9. 2005 -
+----------------------
+.: Fixed problem with active Kad search indicator which was disabled too early.
+.: Added "exact string" search for ED2K searches (quoted strings will be sent to servers unchanged)
+.: Added meta-data searching to search expression parser.
+.: Reworked boolean search expression parser: implicit ANDs do no longer need to be specified (e.g. "a AND (b OR c)" can be specified as "a (b OR c)")
+
+----------------------
+- September, 4. 2005 -
+----------------------
+.: Removed sending of string file format meta tags to eserver and emule clients for saving bandwidth [thx lugdunum]
+.: Added sending of new integer file type meta tags to eserver for saving bandwidth [thx lugdunum]
+.: Available 'Complete' info is shown correctly in search results when viewing shared files of other clients.
+.: Available 'Complete' info for files with less then 9280000 bytes is shown correctly in search results for Kad searches.
+.: Added "Search Related Files" menu item to Download List context menu.
+.: Fixed, amount of transferred data for a source is no longer shown in Completed but in Transferred column in Download List.
+
+----------------------
+- August, 30. 2005   -
+----------------------
+Unk: Removed an unused tag in the loginrequest packet. (Avi-3k & Lug)
+Unk: When a very large popular server come online, it experienced ping storms every 4 hours.. Fixed (Lug)
+Unk: Store file rating to servers. (Lug) 
+Unk: We not longer send FT_FILEFORMAT tags to servers.. (Lug)
+Unk: Fixed a couple malformed strings in MIRC. (Avi-3k)
+
+----------------------
+- August, 18. 2005   -
+----------------------
+Ornis: added Maltese translation by Reuben
+Ornis: fixed graphical issues (Log-Reset button on language change, avoid minimizable log/chat windows)
+
+----------------------
+- August, 8. 2005    -
+----------------------
+Ornis: fixed a crash on systray clicking (happened on very certain click behaviour or heavily busy systems)
+
+----------------------
+- August, 1. 2005    -
+----------------------
+Ornis: added Ukrainian translation [translated by Kex]
+
+----------------------
+- July, 29. 2005     -
+----------------------
+Unk: Fix shared "Open Folder" (Avi-3k)
+Unk: Fix ClientCredit debug mode (Avi-3k)
+Unk: Fix DownloadList sort bug (Avi-3k)
+Unk: Fix bug in Ppgfiles (eMulefan83)
+Unk: Fix cursor bug (Slugfiller)
+Unk: Change in Preference localize easier add/remove preference windows (CiccioBastardo)
+Unk: Change in LPhant version display (Famerlor)
+
 
 v0.46c
 ----------------------

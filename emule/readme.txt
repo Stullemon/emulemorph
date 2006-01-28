@@ -364,7 +364,7 @@ program?
 LEGAL:
 ------
 
-eMule Copyright (C)2002-2004 Merkur (merkur-@users.sourceforge.net)
+eMule Copyright (C)2002-2005 Merkur (merkur-@users.sourceforge.net)
 
 eDonkey2000 (C)Jed McCaleb, MetaMachine (www.eDonkey2000.com)
 

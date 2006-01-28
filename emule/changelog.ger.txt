@@ -2,6 +2,308 @@
         http://emule-project.net
         ========================
 
+0.47a
+-----------------------
+- Jan, 25. 2006       -
+-----------------------
+Unk: Ein Bug bei Kud während des suchen eines Buddy wurde korrigiert [leuk_he]
+.: Ein Problem welches known2_64.met korrupiert wenn die "Merke heruntergeladene Dateien"-Funktion abgeschaltet ist wurde behoben
+
+-----------------------
+- Jan, 24. 2006       -
+-----------------------
+.: Statistik der gebannten Benutzer wurde korrigiert [Xman1]
+.: Statistik der kumulaitven übertragenen Daten wurde korrigiert [TimDzang]
+.: Die Menge der übertragenden Daten wird nun wieder in der komplett-Spalte angezeigt wenn die übertragen-Spalte nicht sichtbar ist
+.: Statistik für IP-Filter wurde korregiert
+.: Mögliches (kurzzeitiges) Einfrieren der GUI während der Allokation von Speicherplatz wurde für Part-Dateien wurde behoben
+
+
+0.47a BETA2
+-----------------------
+- Jan, 23. 2006       -
+-----------------------
+.: Clients die gefilterte Nachrichten senden wurden nun auch als Spammer erkannt
+.: Ein Bug mit HTTP/Peercache-Quellen wurde behoben (SiRob)
+.: Ein Problem beim konvertieren der known2.met wurde behoben, Datei sollten nun nicht erneut gehasht werden beim Upgrade
+
+-----------------------
+- Jan, 21. 2006       -
+-----------------------
+Unk: Arbeit an Kad2.0 fortgesetzt
+Unk: Einige kleine Verbesserungen für Kad1.0
+Unk: Korrektur der LPhant Versionsanzeige
+Unk: Kad Konfigurationsdateien werden nicht mehr von älteren eMule versionen gelesen
+
+-----------------------
+- Jan, 20. 2006       -
+-----------------------
+.: Ein Bug beim Laden der part.met Datei von großen Datein wurde behoben
+.: Das Protocol wurde geändert um den Hash und Dateigröße bei angefragten Dateien kontrollieren statt nur den Hash
+ 
+
+0.47a BETA1
+-----------------------
+- 15. Januar 2006     -
+-----------------------
+Unk: Arbeiten an Kad2.0 begonnen. Die Idee ist es, das Protokoll zu verbessern und einige neue Funktionen hinzuzufügen. Diese Version wird das neue Protokoll enthalten (aber nicht aktiv nutzen). Die nächste Version wird eine Option bereitstellen um zwischen Kad and Kad2.0 zu wechseln
+.: Komplette Dateien können jetzt auch via Kontextmenü von der Transferliste entfernt werden
+.: MobileMule Protokoll für große Dateien aktualisiert
+
+-----------------------
+- 14. Januar 2006     -
+-----------------------
+.: Clients, welche als Spammer identifiziert werden, werden jetzt gebannt anstatt nur deren Nachrichten zu ignorieren
+
+-----------------------
+- 11. Januar 2006     -
+-----------------------
+Unk: Korrektur: Vermeidung dass ein Schlüsselwort einer nicht freigegebenen Datei publiziert wird
+
+-----------------------
+-  8. Januar 2006     -
+-----------------------
+.: Unterstützung für große Dateien hinzugefügt. Die neue Obergrenze für Dateigrößen welche eMule erlaubt und verarbeitet ist jetzt 256GB (vorher 4GB)
+.: es gelten folgende Kompatibilitätseigenheiten:
+	- große Dateien können nur von Clients gefunden, heruntergeladen und hochgeladen werden die dies unterstützen (gegenwärtig nur eMule v0.47a und höher)
+	- Kollektionen mit großen Dateien können nicht mehr von Clients gelesen werden welche große Dateien nicht unterstützen
+	- part.met Dateien von großen Dateien können nicht mit alten eMuleversionen oder ed2k-Tools benutzt werden
+	- Wenn eine große Datei freigegen wird oder bekannt ist, ist die known.met nicht mehr kompatibel zu älteren eMuleversionen
+	- Known2.met wird konvertiert zu Known2_64.met welche nicht von alten eMuleversionen benutzt werden kann
+Unk: Kad aktualisiert um mit großen Dateien umgehen zu können
+    - ältere Clients können nicht Schlüsselworte großer Dateien indeziert. Das bedeutet, dass Schlüsselwort Resultate bei großen Dateien nicht gut funktioniert bis ein Großteil des Kadnetzes die neue Version benutzt.
+
+-----------------------
+- 30. Dezember 2005   -
+-----------------------
+.: "Zum Systemicon minimieren" zum Systemmenü hinzugefügt
+
+-----------------------
+- 26. Dezember 2005   -
+-----------------------
+.: Korrektur einer falschen "Download Zeit", welche für pausierte Dateien gemeldet wurden
+
+-----------------------
+- 24. Dezember 2005   -
+-----------------------
+.: Korrektur eines Fehlers in der Prioritäteneinstellung von statischen Servern, welche nach einem Neustart verloren gingen
+.: Hinzugefügt: Durchlaufen der eMule-Hauptfenster mit Strg-Tab bzw. Shift+Strg+Tab
+
+-----------------------
+- 17. Dezember 2005   -
+-----------------------
+.: Korrektur eines Problems mit freigegebenen Dateien mit ungültigem Dateidatum [thx Kro/MorphXT]
+
+-----------------------
+-  3. Dezember 2005   -
+-----------------------
+.: Proxyunterstützung: mehrere Optimierungen für die Proxyunterstützung
+.: Proxyunterstützung: Der Eintrag "Proxy/ShowErrors" in der preferences.ini  hat keine Bedeutung mehr, da alle Proxyfehler jetzt als Teil der regulären Verbindungsfehlermeldungen für Server und Clients angezeigt werden.
+.: Proxyunterstützung: Fehlerkorrektur in der SOCKS 5 Authentication.
+.: Proxyunterstützung: Unterstützung für HTTP/1.0 proxies hinzugefügt, welche Proxy overhead sparen. Tipp: Wenn du einen HTTP proxy benutzt, sollte HTTP/1.0 benutzt werden, es sei denn HTTP/1.1 muss benutzt werden.
+	Die Reihenfolge der Proxy Protokoll Performance:
+	1. SOCKS 4a (höchste Performance da geringster Overhead)
+	2. SOCKS 4
+	3. SOCKS 5
+	4. HTTP/1.0
+	5. HTTP/1.1 (geringste Performance, da am meisten Overhead)
+.: Beschleunigen des Ladens von großen IP-Filterlisten
+
+-----------------------
+- 30. November 2005   -
+-----------------------
+zz: Option, um eMule einen höher auflösenden Timer nutzen zu lassen (höhere Präzision für Sleeps und einige Timer). Nutzung auf eigenes Risiko. :)  Zum Aktivieren, trage in die preferences.ini in die Sektion "[eMule]" ein: "HighresTimer=1"
+
+-----------------------
+- 26. November 2005   -
+-----------------------
+.: Änderung der Suchfunktion im IP-Filter Dialog: Wenn nach einer IP in der "Start" Spalte gesucht wird, wird der "Bereich" gesucht in welchem die IP enthalten ist. Tipp: Auf diese Weise kann geprüft werden, ob eine gegebene IP durch die Liste geblockt wird.
+Ornis: Importer für begonnen Downloads kann nun auch (ed2k)Shareaza Tempdateien einlesen  [von David Xanatos]
+
+-----------------------
+- 24. November 2005   -
+-----------------------
+.: Hinzugefügt: "BindAddr=<IP>" Einstellung in der preferences.ini , um eD2K/Kad+WebServer Sockets an eine bestimmte IP Adresse zu binden
+.: Korrektur eines Fehlers bzgl. "minimiert Starten" und "zum Systemicon minimieren".
+.: Hauptfenster kann nun auch wiederhergestellt werden, indem auf die Titelzeile des MiniMule doppelgeklickt wird.
+.: Die "Enter"-Taste kann nun in Listen (Listviews) benutzt werden, um die Hauptaktion für die ausgewählten Einträge auszuführen.
+
+-----------------------
+- 20. November 2005   -
+-----------------------
+Unk: Bereinigung des SMIRC Codes
+1) Codeformatierung vereinheitlicht
+2) Nahezu komplettes Neuschreiben im Kerncode, um die folgenden Probleme zu beseitigen:
+. eine Änderung in den Default-Einstellungen veranlasste SMIRC nicht dazu, eine Aufforderung zum Ändern des Default-Nicks anzuzeigen
+. manche Nutzer konnten nicht sehen was sie tippen
+. Channel Modes wurden in vielen Fällen nicht korrekt gehandhabt
+. Senden von neuen Channel Modes vom Tabmenü sendete oft nicht korrekte Modes
+. Sortieren von Nicks in einem Raum funktionierte nicht richtig
+. Notices wurden manchmal nicht korrekt verarbeitet
+. Ping/Pong zwischen Nutzern funktionierte nicht
+. Serverfilter-Option in den Einstellungen konnte nicht entfernt werden
+
+-----------------------
+- 14. November 2005   -
+-----------------------
+Unk: Bereinigung des Kad Codes
+1) Codeformatierung vereinheitlicht
+2) Entfernung einiger ungenutzter Methodenparameter und -variablen.
+3) Versuch einigen Code zu optimieren
+4) Korrektur eines möglichen Problems, dass wenn das Ziel beim ersten Versuch gefunden wurde, kein Request/Store gesendet wurde
+5) Hinzufügen von Codekommentaren für besseres Verständnis (wird langsam fortgeführt wenn je beendet)
+6) Sicherheitsprüfung für Schlüsselwortresultate wieder eingefügt
+7) Korrektur eines Problems mit nicht vereinten Zonen wenn die Kontaktzahl gering wurde [Danke an Kry]
+8) geändert, wie Kontakte als aktiv geführt werden, um die Kontaktlist aktueller zu halten mit weniger CPU Last
+9) Anpassungen bei Aufrufen vom Jumpstart, um CPU Last zu verringern
+10) Anpassung in Nutzerzählung um Firewalled Nutzer mit einzubeziehen
+
+-----------------------
+- 13. November 2005   -
+-----------------------
+.: Codebereinigungen und Performanceoptimierungen bzgl. 16Bit Integer Nutzung
+.: E-Mail Benachrichtigung für nicht-XP-SP2 Systeme deaktiviert, wenn gebaut mit ATL 7.1
+.: das "Suchen"-Kommando nun zu allen Listen hinzugefügt (Tastenkürzel: Strg+F=neue Suche, F3=Weitersuchen, Shift+F3=voriges suchen)
+
+-----------------------
+-  5. November 2005   -
+-----------------------
+.: Unterstützung für geRARte IP-Filterlisten hinzugefügt. Downloade UNRAR.DLL von http://www.rarlab.com und kopiere sie in das eMule Installationsverzeichnis.
+.: Unterstützung für geRARte Skin-Profile hinhzugefügt. (wie mit geZIPten Skin-Profilen, können heruntergeladene geRARte Skin-Profile direkt von der Liste freigegebener Dateien über "Installiere eMule-Skin" im Kontextmenü angewendet werden. )
+Unk: Verringerung der CPU-Last im Routing von KAD. [Kry]
+
+-----------------------
+- 30. Oktober 2005    -
+-----------------------
+.: Korrektur eines Fehlers in der IP-Filter-Combobox im Einstellungsdialog "Sicherheit" - welche alle Einträge verlieren konnte.
+.: Hinzugefügt: Überprüfung heruntergeladener IP-Filter Dateien, um Dateien ohne IP Filter zu erkennen (zB. tote URLs).
+.: ein ZIP mit IP-Filter muss eine Datei (mit den Filtern) namens "guarding.p2p" oder "ipfilter.dat" enthalten. Alle anderen Dateien im ZIP werden ignoriert.
+
+-----------------------
+- 15. Oktober 2005    -
+-----------------------
+Ornis: Option, Tempfiles mit der Endgröße anzulegen (wenn erste Daten empfangen werden) (erweiterte Einstellungen)
+Ornis: Systray-Icon blinkt mit Nachrichten-Icon, wenn eine neue Nachricht (Nachricht, (noch) nicht IRC !) bereit liegt. Zu aktivieren in der preferences.ini (Sektion "eMule" setze "IconflashOnNewMessage=1")
+
+-----------------------
+-  8. Oktober 2005    -
+-----------------------
+.: Media Info Dialog zeigt nun auch Informationen über zusätzliche Audio/Video/Untertitel-Streams. (nutze MediaInfo DLL (http://mediainfo.sourceforge.net/) um diese Unterstützung für nicht-AVI Dateien zu erhalten).
+.: MP3 Dateien mit variabler Bitrate und Xing-VBR frame werden mit der durchschnittlichen VBR Bitrate gemeldet und veröffentlicht.
+
+----------------------- 
+- September, 30. 2005 - 
+----------------------- 
+.: Die Speicherverwaltung für kleine Blöcke wurde optimiert 
+.: Zusätzliche Sicherheitschecks beim verarbeiten von hello Paketen [thx Kry] 
+ 
+----------------------- 
+- September, 29. 2005 - 
+----------------------- 
+.: Der Dateidetail-Dialog zeigt die akkumulierte verbleibende Größe wenn mehrere Dateien selektiert sind  
+ 
+----------------------- 
+- September, 26. 2005 - 
+----------------------- 
+.: Ein Bug im 'Ext' Kommando der 'PreviewApps.dat'-Datei wurde behoben 
+ 
+----------------------- 
+- September, 25. 2005 - 
+----------------------- 
+.: Unterstützungen für ED2KServer-Dateibewertungen in den Suchergebnissen wurde hinzugefügt. Empfangene Bewertungen werden als zusätzlichen Icon wie im Downloadfenster gezeigt. 
+.: Ein Bug durch den beim Doppelklicken auf das Bewerungsicon sich nicht immer die Bewerungs-Dialogseite öffnete wurde behoben 
+.: Ein Bug mit den Eigenschaften-Seiten, die nicht immer korrekt wiederhergestellt wurden wurde behoben 
+ 
+----------------------- 
+- September, 24. 2005 - 
+----------------------- 
+.: Die Bedeutung des "Abbrechen"-Suchbuttons wurde etwas verändert: Es bricht nun nur die aktiven Suchen ab, dessen Ergebnisseite aktiv ist. 
+   Damit kann nun eine Kad-Suche abgebrochen werden ohne das Ergebnis zu löschen 
+ 
+----------------------- 
+- September, 20. 2005 - 
+----------------------- 
+.: Fließkommazahl-Unterstützung für Suchen nach Attributen in der GUI und den Metadaten wurde hinzugefügt (z.B. @size<1.23g) 
+.: Größe-, Verfügbarkeits-, Komplette Quellen-, Bitrate und Länge-Suchattribute können in der GUI-Suche genauso genutzt werden wie in der eMule-Suche (siehe dort) 
+ 
+ 
+----------------------- 
+- September, 19. 2005 - 
+----------------------- 
+.: Eine neue Methode Metadaten von AVI/WAV Dateien zu extrahieren ohne DirectShow-Filter zu nutzen wurde hinzugefügt 
+ 
+ 
+----------------------- 
+- September, 13. 2005 - 
+----------------------- 
+.: "Exakte Phrasen"-Suche für Kad-Suchen wurde hinzugefügt (z.B. "dies das" statt dies das) - nur neue Kad-Knoten können diese korrekt verarbeiten 
+Ornis: Webinterface: Eine Fehler im Informations-Popup für Uploadzeiten wurde behoben 
+  
+----------------------- 
+- September, 12. 2005 - 
+----------------------- 
+.: Die eMule-Suchfunktion wurde überarbeitet und bietet viele neue Funktionen wie z.B. "-" als nicht ("dies -das"). Eine detailierte Erklärung ist (bald) in der (Online)Hilfe zu finden
+
+-----------------------
+- 11. September 2005  -
+-----------------------
+.: Suchausdrücke Bäume wurden optimiert, um die CPU Last für Server und Kad Knoten beim Auswerten des Baumes zu verringern (weniger Rekursionen).
+
+----------------------
+-  9. September 2005  -
+----------------------
+.: Korrektur eines Problems mit dem Indikator aktiver Kad-Suchen, welcher zu früh deaktiviert wurde.
+.: Hinzugefügt: "exakter String" Suche für ED2K Suchen (Strings in Anführungszeichen werden an den Server unverändert übermittelt)
+.: Meta-Daten Suche dem Suchausdrucksparser hinzugefügt
+.: Boolean Suchausdrucksparser überarbeitet:  Implizite ANDs müssen nicht mehr angegeben werden (zB. "a AND (b OR c)" kann nun angegeben werden als "a (b OR c)")
+
+----------------------
+-  4. September 2005  -
+----------------------
+.: String file format meta Tags werden nicht mehr an eserver und eMule Clients gesendet um Bandbreite einzusparen [thx lugdunum]
+.: Senden von neuen Integer Dateitypen Metatags hinzugefügt , für eserver um Bandbreite zu sparen [thx lugdunum]
+.: verfügbare 'Komplett' Info wird nun korrekt in Suchresultaten angezeigt, wenn die Freigaben von anderen Clients abgefragt werden.
+.: verfügbare 'Komplett' Info wird nun korrekt für Dateien <9280000 bytes in den Suchergebnissen für Kad-Suchen angezeigt.
+.: "Suche zugehörige Dateien" dem Kontextmenü der Downloadliste hinzugefügt.
+.: Korrektur: Menge der übertragenen Daten für eine Quelle wird nicht länger in der "Fertiggestellt"-Spalte sondern in der "Übertragen"-Spalte angezeigt
+
+----------------------
+- 30. August 2005    -
+----------------------
+Unk: unbenutztes Tag aus dem Login-Anfrage Paket entfernt [Avi-3k & Lug]
+Unk: Korrektur: Wenn ein sehr populärer Server online kommt, erhielt er nun nicht mehr alle 4h einen großen Ping-Ansturm.  [Lug]
+Unk: Ablegen von Dateibewertungen in Servern [Lug]
+Unk: wir senden nicht mehr FT_FILEFORMAT Tabs an Server [Lug]
+Unk: Korrektur einiger falsch geformter Strings in MIRC [Avi-3k]
+
+----------------------
+- 18. August 2005    -
+----------------------
+Ornis: Übersetzung Maltese hinzugefügt [by Reuben]
+Ornis: Korrektur eines Grafikfehlers in der Serveransicht (Log-Reset-Knopf nach Sprachwechsel; verhinderte minimierbares Log und Chat-Fenster)
+
+----------------------
+-  8. August 2005    -
+----------------------
+Ornis: Korrektur eines Absturzes beim Klick aufs Systray-Icon (konnte unter seltenen Momenten auftreten, u.a. wenn der Rechner stark ausgelastet war)
+
+----------------------
+-  1. August 2005    -
+----------------------
+Ornis: Ukrainische Übersetzung hinzugefügt [von Kex]
+
+----------------------
+- 29. Juli 2005      -
+----------------------
+Unk: Korrektur: "Öffne Verzeichnis" (Avi-3k)
+Unk: Korrektur: ClientCredit debug mode (Avi-3k)
+Unk: Korrektur: DownloadListen Soriterfehler (Avi-3k)
+Unk: Korrektur eines Fehlers in Ppgfiles (eMulefan83)
+Unk: Korrektur eines Cursorfehlers (Slugfiller)
+Unk: Codeänderung in den Einstellungsfenstern für leichteres Hinzufügen/Entfernen von Einstellungsfenstern (CiccioBastardo)
+Unk: Änderung in der Anzeige von LPhant Versionen (Famerlor)
+
+
 
 v0.46c
 ----------------------
