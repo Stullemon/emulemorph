@@ -2526,19 +2526,23 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	if (m_AvailPartFrequency.IsEmpty())
 		return false;
 	UINT iMinAvailablePartFrenquency = (UINT)-1;
-	UINT iMinAvailablePartFrenquencyPrev = (UINT)-1;
+	UINT iNumberOfVirtualCompleteSourcesCountReached = 0;
 	for (UINT i = 0; i < parts; i++)
 	{
 		if (!client->IsPartAvailable(i))
 		{
 			if (m_AvailPartFrequency[i]<iMinAvailablePartFrenquency) {
-				iMinAvailablePartFrenquencyPrev = iMinAvailablePartFrenquency;
-				iMinAvailablePartFrenquency = m_AvailPartFrequency[i];
+				if (m_AvailPartFrequency[i] > m_nVirtualCompleteSourcesCount)
+					iMinAvailablePartFrenquency = m_AvailPartFrequency[i];
+				else
+					++iNumberOfVirtualCompleteSourcesCountReached;
 			}
 		}
 	}
-	if (iMinAvailablePartFrenquencyPrev == (UINT)-1)
+	if (iMinAvailablePartFrenquency == (UINT)-1)
 		return false;
+	if (iNumberOfVirtualCompleteSourcesCountReached>1)
+		iMinAvailablePartFrenquency = m_nVirtualCompleteSourcesCount;
 	if (client->m_abyUpPartStatusHidden == NULL){
 		client->m_bUpPartStatusHiddenBySOTN = true;
 		client->m_abyUpPartStatusHidden = new uint8[parts];
@@ -2549,7 +2553,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] < iMinAvailablePartFrenquencyPrev) {
+			if (m_AvailPartFrequency[done] <= iMinAvailablePartFrenquency) {
 				towrite |= (1<<i);
 				client->m_abyUpPartStatusHidden[done] = 0;
 			} else
