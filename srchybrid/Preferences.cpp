@@ -3133,7 +3133,7 @@ void CPreferences::LoadPreferences()
 	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);
 	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
 	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
-	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),3);
+	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),0);
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
