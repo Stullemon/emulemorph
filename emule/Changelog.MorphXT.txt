@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.1
+--------------------------------------
+FIXED  : (major) Weird change making some eratic opened slot [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.0
 --------------------------------------
 MERGED : Ported to 0.47a version [SiRoB/Stulle]
