@@ -1115,6 +1115,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					cur_rec.left +=20;
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 					cur_rec.left -=20;
+					cur_rec.top +=2;//Grafic Bug Fix By Aenarion[ITA] leuk_he
 
 					break;
 				}
