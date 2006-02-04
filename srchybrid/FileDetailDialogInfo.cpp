@@ -88,12 +88,11 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 	AddAnchor(IDC_SOURCECOUNT, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_DATARATE, TOP_LEFT, TOP_RIGHT);
 
-	AddAnchor(IDC_WCReq, TOP_LEFT, TOP_RIGHT); //JP
-	AddAnchor(IDC_WCDOWNL, TOP_LEFT, TOP_RIGHT); //JP
+	//AddAnchor(IDC_RECOVERED, TOP_LEFT, TOP_RIGHT);
 
-	AddAnchor(IDC_SOURCECOUNT, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_RECOVERED, TOP_LEFT, TOP_RIGHT);
-
+	//AddAnchor(IDC_WCReq, TOP_LEFT, TOP_RIGHT); //JP
+	//AddAnchor(IDC_WCDOWNL, TOP_LEFT, TOP_RIGHT); //JP
+	
 	AddAnchor(IDC_FILECREATED, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_DL_ACTIVE_TIME, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_LASTSEENCOMPL, TOP_LEFT, TOP_RIGHT);
@@ -315,14 +314,8 @@ void CFileDetailDialogInfo::RefreshData()
 	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCompression, false, false), uTransferred!=0 ? (uCompression * 100.0 / uTransferred) : 0.0);
 	SetDlgItemText(IDC_COMPRESSION, str);
 
-	str.Format(GetResString(IDS_SOURCESINFO), uSources, uValidSources, uNNPSources, uA4AFSources);
-	SetDlgItemText(IDC_SOURCECOUNT, str);
-
 	//MORPH START - Changed by SiRoB, WebCache
-	double percentSessions = 0;
-	if (uWebcacherequests != 0)
-		percentSessions = (double) 100 * uSuccessfulWebcacherequests / uWebcacherequests;
-	str.Format( _T("%u/%u (%1.1f%%)"), uSuccessfulWebcacherequests, uWebcacherequests, percentSessions );
+	str.Format(_T("%u/%u (%1.1f%%)"), uSuccessfulWebcacherequests, uWebcacherequests, uWebcacherequests != 0 ?(uSuccessfulWebcacherequests * 100.0) / uWebcacherequests:0.0);
 	SetDlgItemText(IDC_WCReq, str);
 	SetDlgItemText(IDC_WCDOWNL, CastItoXBytes(uWebcachedownloaded, false, false));
 	//MORPH END   - Changed by SiRoB, WebCache

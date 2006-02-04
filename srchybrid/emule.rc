@@ -1479,13 +1479,13 @@ BEGIN
     GROUPBOX        "Transfer",IDC_FD_X6,7,111,320,76,BS_FLAT
     GROUPBOX        "Dates",IDC_FD_X8,7,193,320,57,BS_FLAT
     CONTROL         "Static",IDC_WCReq,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,172,50,8
+                    SS_NOPREFIX | WS_GROUP,92,172,70,8
     CONTROL         "Static",IDC_WCDOWNL,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,249,172,50,8
+                    SS_NOPREFIX | WS_GROUP,249,172,74,8
     CONTROL         "WC Succ/Req:",IDC_WC_REQ_SUCC,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,172,64,8
+                    SS_LEFTNOWORDWRAP | WS_GROUP,14,172,72,8
     CONTROL         "WC-Download:",IDC_WC_DOWNLOADED,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,172,172,64,8
+                    SS_LEFTNOWORDWRAP | WS_GROUP,172,172,72,8
 END
 
 IDD_PREVIEWDIALOG DIALOGEX 0, 0, 280, 233
