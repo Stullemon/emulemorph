@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.x
+--------------------------------------
+FIXED  : (minor) Fixed glitch display arround webcache file infos detail [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.1
 --------------------------------------
 FIXED  : (major) Weird change making some eratic opened slot [SiRoB]
