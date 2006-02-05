@@ -139,7 +139,7 @@ void CSearch::Go()
 			m_mapInUse[itContactMap->first] = itContactMap->second;
 
 		ASSERT(m_mapPossible.size() == m_mapInUse.size());
-		ASSERT(m_mapPossible.size() != 50);
+		//ASSERT(m_mapPossible.size() != 50);
 
 		// Take top ALPHA_QUERY to start search with.
 		int iCount;

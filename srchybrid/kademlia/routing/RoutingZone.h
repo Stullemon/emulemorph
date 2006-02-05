@@ -68,7 +68,7 @@ namespace Kademlia
 			// Returns a list of all contacts in all leafs of this zone.
 			void GetAllEntries(ContactList *plistResult, bool bEmptyFirst = true);
 			// Returns the *maxRequired* tokens that are closest to the target within this zone's subtree.
-			uint32 GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, const CUInt128 &uDistance, uint32 uMaxRequired, ContactMap *plistResult, bool bEmptyFirst = true, bool bSetInUse = false) const;
+			void GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, const CUInt128 &uDistance, uint32 uMaxRequired, ContactMap *plistResult, bool bEmptyFirst = true, bool bSetInUse = false) const;
 			// Ideally: Returns all contacts that are in buckets of common range between us and the asker.
 			// In practice: returns the contacts from the top (2^{logBase+1}) buckets.
 			UINT GetBootstrapContacts(ContactList *plistResult, UINT uMaxRequired);

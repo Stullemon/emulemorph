@@ -344,21 +344,22 @@ CContact *CRoutingZone::GetContact(const CUInt128 &uID) const
 		return m_pSubZones[uID.GetBitNumber(m_uLevel)]->GetContact(uID);
 }
 
-uint32 CRoutingZone::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, const CUInt128 &uDistance, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst, bool bInUse) const
+void CRoutingZone::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, const CUInt128 &uDistance, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst, bool bInUse) const
 {
 	// If leaf zone, do it here
 	if (IsLeaf())
-		return m_pBin->GetClosestTo(uMaxType, uTarget, uMaxRequired, pmapResult, bEmptyFirst, bInUse);
+	{
+		m_pBin->GetClosestTo(uMaxType, uTarget, uMaxRequired, pmapResult, bEmptyFirst, bInUse);
+		return;
+	}
 
 	// otherwise, recurse in the closer-to-the-target subzone first
 	int iCloser = uDistance.GetBitNumber(m_uLevel);
-	uint32 uFound = m_pSubZones[iCloser]->GetClosestTo(uMaxType, uTarget, uDistance, uMaxRequired, pmapResult, bEmptyFirst, bInUse);
+	m_pSubZones[iCloser]->GetClosestTo(uMaxType, uTarget, uDistance, uMaxRequired, pmapResult, bEmptyFirst, bInUse);
 
 	// if still not enough tokens found, recurse in the other subzone too
-	if (uFound < uMaxRequired)
-		uFound += m_pSubZones[1-iCloser]->GetClosestTo(uMaxType, uTarget, uDistance, uMaxRequired-uFound, pmapResult, false, bInUse);
-
-	return uFound;
+	if (pmapResult->size()  < uMaxRequired)
+		m_pSubZones[1-iCloser]->GetClosestTo(uMaxType, uTarget, uDistance, uMaxRequired, pmapResult, false, bInUse);
 }
 
 void CRoutingZone::GetAllEntries(ContactList *pmapResult, bool bEmptyFirst)

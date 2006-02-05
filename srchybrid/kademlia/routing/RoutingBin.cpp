@@ -171,7 +171,7 @@ CContact *CRoutingBin::GetOldest()
 	return NULL;
 }
 
-uint32 CRoutingBin::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst, bool bInUse)
+void CRoutingBin::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst, bool bInUse)
 {
 	// Empty list if requested.
 	if (bEmptyFirst)
@@ -179,7 +179,7 @@ uint32 CRoutingBin::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint3
 
 	// Return 0 since we have no entries.
 	if (m_listEntries.size() == 0)
-		return 0;
+		return;
 
 	// First put results in sort order for uTarget so we can insert them correctly.
 	// We don't care about max results at this time.
@@ -205,6 +205,5 @@ uint32 CRoutingBin::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint3
 		// remove from results
 		pmapResult->erase(--pmapResult->end());
 	}
-	// Return result count to the caller.
-	return pmapResult->size();
+	return;
 }

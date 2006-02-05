@@ -55,7 +55,7 @@ namespace Kademlia
 			UINT GetSize() const;
 			UINT GetRemaining() const;
 			void GetEntries(ContactList *plistResult, bool bEmptyFirst = true);
-			uint32 GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst = true, bool bSetInUse = false);
+			void GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst = true, bool bSetInUse = false);
 			bool m_bDontDeleteContacts;
 			ContactList m_listEntries;
 	};
