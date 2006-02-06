@@ -30,7 +30,7 @@ public:
 	void UpdateClient(CWebCachedBlock* iBlock);
 	~CWebCacheProxyClient(void);
 	bool SendWebCacheBlockRequests();
-	virtual bool TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket = NULL);
+	/*MORPH*/virtual bool TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket = NULL, bool* filtered = NULL);
 	void OnWebCachedBlockDownloaded( const Requested_Block_Struct* reqblock );
 	bool ProxyClientIsBusy();
 	void DeleteBlock();

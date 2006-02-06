@@ -200,7 +200,7 @@ bool CUrlClient::SendHttpBlockRequests()
 	return true;
 }
 
-bool CUrlClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* /*pClassSocket*/)
+/*MORPH*/bool CUrlClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* /*pClassSocket*/, bool* /*filtered*/)
 {
 	return CUpDownClient::TryToConnect(bIgnoreMaxCon, RUNTIME_CLASS(CHttpClientDownSocket));
 }

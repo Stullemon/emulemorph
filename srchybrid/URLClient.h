@@ -34,7 +34,7 @@ public:
 	virtual void SetRequestFile(CPartFile* pReqFile);
 	virtual bool IsEd2kClient() const { return false; }
 
-	virtual bool TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket = NULL);
+	/*MORPH*/virtual bool TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket = NULL, bool* filtered = NULL);
 	virtual bool Connect();
 	virtual void OnSocketConnected(int nErrorCode);
 	virtual bool Disconnected(LPCTSTR pszReason, bool bFromSocket = false);

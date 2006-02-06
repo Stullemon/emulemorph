@@ -29,7 +29,7 @@ public:
 	CUrlClient(LPCTSTR pszUrl, CPartFile* pPartFile, uint32 nIP = 0);
 	virtual ~CUrlClient();
 
-	virtual bool TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket = NULL);
+	/*MORPH*/virtual bool TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket = NULL, bool* filtered = NULL);
 	virtual bool Disconnected(CString strReason, bool bFromSocket = false);
 	virtual bool SendHelloPacket();
 };

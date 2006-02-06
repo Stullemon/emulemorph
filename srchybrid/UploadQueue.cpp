@@ -755,14 +755,9 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	if (!newclient->socket || !newclient->socket->IsConnected())
 	{
 		newclient->SetUploadState(US_CONNECTING);
-		if (!newclient->TryToConnect(true))
+		/*MORPH*/bool filtered = false;
+		/*MORPH*/if (!newclient->TryToConnect(true, NULL, &filtered) || filtered)
 			return false;
-		if (!newclient->socket) // Pawcio: BC
-		{
-			LogWarning(false,_T("---- Trying to add new client in queue with NULL SOCKET: %s"),newclient->DbgGetClientInfo());
-			newclient->SetUploadState(US_NONE);
-			return false;
-		}
 	}
 	else
 	{
@@ -1090,8 +1085,8 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 
 	if (curUploadSlots >= 4 &&
 		(
-         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB,
-         curUploadSlots >= ((uint32)MaxSpeed)/*1024/UPLOAD_CLIENT_DATARATE)*/ ||
+         curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||
+         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
           !thePrefs.IsDynUpEnabled() &&
@@ -1958,7 +1953,7 @@ uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
  * are changed by the user, friend slot is turned on/off, etc
  */
 void CUploadQueue::ReSortUploadSlots(bool force) {
-    DWORD curtick = ::GetTickCount();
+	DWORD curtick = ::GetTickCount();
 	if(force ||  curtick - m_dwLastResortedUploadSlots >= 10*1000) {
 		m_dwLastResortedUploadSlots = curtick;
 

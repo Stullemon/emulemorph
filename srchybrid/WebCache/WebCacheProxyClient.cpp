@@ -194,7 +194,7 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 }
 
 // always returns false (which means to the rest of emule that client was deleted)
-bool CWebCacheProxyClient::TryToConnect(bool /*bIgnoreMaxCon*/, CRuntimeClass* /*pClassSocket*/)
+/*MORPH*/bool CWebCacheProxyClient::TryToConnect(bool /*bIgnoreMaxCon*/, CRuntimeClass* /*pClassSocket*/, bool* /*filtered*/)
 {
 //	ASSERT( !block );
 	if( !ProxyClientIsBusy() )
