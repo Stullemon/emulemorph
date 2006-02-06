@@ -620,7 +620,11 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 					if (thePrefs.GetDebugClientUDPLevel() > 0)
 						DebugRecv("OP_MultiFileReask", NULL, reqfilehash, ip);
 
+					//MORPH - Changed by SiRoB, infiniteQueue
+					/*
 					if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize())
+					*/
+					if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize() && !thePrefs.IsInfiniteQueueEnabled())
 					{
 						if (thePrefs.GetDebugClientUDPLevel() > 0)
 							DebugSend("OP__QueueFull", NULL);
