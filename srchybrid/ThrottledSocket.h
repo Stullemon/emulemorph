@@ -21,12 +21,7 @@ public:
     virtual DWORD GetLastCalledSend() = 0;
 	virtual bool	IsBusy() const = 0;
     virtual bool    HasQueues() const = 0;
-	//MORPH START - Changed by SiRoB, Scale to lowspeed
-	/*
 	virtual uint32	GetNeededBytes() = 0;
-	*/
-	virtual uint32	GetNeededBytes(bool lowspeed) = 0;
-	//MORPH END   - Changed by SiRoB, Scale to lowspeed
 	virtual DWORD GetBusyTimeSince() = 0;
 	virtual float GetBusyRatioTime() = 0;
 };

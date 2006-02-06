@@ -688,9 +688,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if(socket != NULL) {
 						Socket_stat* stat = NULL;
 						if (m_stat_list.Lookup(socket, stat)) {
-							uint32 neededBytes = socket->GetNeededBytes(1000 > minFragSize);
-							if (neededBytes > 0 && stat->realBytesToSpend > 999) {
-								neededBytes = (uint32)min(BytesToSpend - (sint64)ControlspentBytes, stat->realBytesToSpend / 1000);
+							uint32 neededBytes = socket->GetNeededBytes();
+							if (stat->realBytesToSpend > 999 && (neededBytes || GetTickCount()-socket->GetLastCalledSend() > 1000)) {
+								neededBytes = (uint32)min(BytesToSpend - (sint64)ControlspentBytes, neededBytes?neededBytes:minFragSize);
 								SocketSentBytes socketSentBytes = socket->SendFileAndControlData(neededBytes, minFragSize);
 								uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 								if (lastSpentBytes) {
@@ -745,9 +745,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								sint64 limit = -((sint64)2000*allowedclientdatarate);
 								if (stat->realBytesToSpend < limit)
 									stat->realBytesToSpend = limit;
-								limit = (sint64)2000*allowedclientdatarate;
+								limit = (sint64)10*allowedclientdatarate;
 								if (stat->realBytesToSpend > limit)
-									stat->realBytesToSpend = limit;
+									stat->realBytesToSpend = 999;
 								if (_I64_MAX/timeSinceLastLoop > allowedclientdatarate && _I64_MAX-allowedclientdatarate*timeSinceLastLoop > stat->realBytesToSpend)
 									stat->realBytesToSpend += allowedclientdatarate*timeSinceLastLoop;
 								else
@@ -789,18 +789,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		
 			}
-			uint32 marge;
-			if (allowedDataRateClass[classID])
-				marge = min(allowedDataRateClass[LAST_CLASS],allowedDataRateClass[classID]);
-			else
-				marge = allowedDataRateClass[LAST_CLASS];
+			uint32 marge = 10*allowedDataRateClass[LAST_CLASS]; //1% of the bandwidth during 1"
 			if (marge < 999)
 				marge = 999;
 			if (timeSinceLastLoop > 0 && realBytesToSpendClass[LAST_CLASS] > marge && realBytesToSpendClass[classID] > marge) {
 				if (m_SentBytesSinceLastCall > 0 && m_highestNumberOfFullyActivatedSlots[classID] <  lastclientpos+1 || slotCounterClass[classID] == 0)
 					m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
-				if ((m_SentBytesSinceLastCall > 0 || slotCounterClass[classID] == 0) && realBytesToSpendClass[classID] > marge)
-				realBytesToSpendClass[classID] = marge;
+				realBytesToSpendClass[classID] = 999;
 			}
 		}
 		sendLocker.Unlock();

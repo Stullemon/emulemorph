@@ -292,16 +292,29 @@ void CEMSocket::OnReceive(int nErrorCode){
 		OnError(nErrorCode);
 		return;
 	}
-	
+
+	sendLocker.Lock();
+	//MORPH - Changed by SiRoB, Show BusyTime
+	/*
+    m_bBusy = false;
+	*/
+	DWORD curTick = GetTickCount();
+	if (m_dwBusy) {
+		m_dwBusyDelta = curTick-m_dwBusy;
+		m_dwNotBusy = curTick;
+	}
+	m_dwBusy = 0;
 	// Check current connection state
 	if(byConnected == ES_DISCONNECTED){
+	    sendLocker.Unlock();
 		return;
 	}
 	else {	
 		byConnected = ES_CONNECTED; // ES_DISCONNECTED, ES_NOTCONNECTED, ES_CONNECTED
 	}
-
-    // CPU load improvement
+	sendLocker.Unlock();
+    
+	// CPU load improvement
     if(downloadLimitEnable == true && downloadLimit == 0){
         EMTrace("CEMSocket::OnReceive blocked by limit");
         pendingOnReceive = true;
@@ -637,10 +650,14 @@ void CEMSocket::OnSend(int nErrorCode){
 		return;
     } else
 		byConnected = ES_CONNECTED;
+	
 
+	/*
 	if(m_currentPacket_is_controlpacket) {
+	*/
+	if(!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket) {
 		// queue up for control packet
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, true);
     }
 
     sendLocker.Unlock();
@@ -700,9 +717,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         sendLocker.Unlock();
         SocketSentBytes returnVal = { false, 0, 0 };
         return returnVal;
-    //MORPH - Changed by SiRoB, Show BusyTime
+	//MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	} else if (byConnected == ES_CONNECTED && m_dwBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
+	} else if (m_dwBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
 	    sendLocker.Unlock();
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
@@ -763,7 +780,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
             // We found a package to send. Get the data to send from the
             // package container and dispose of the container.
             sendblen = curPacket->GetRealPacketSize();
-            sendbuffer = curPacket->DetachPacket();
+			sendbuffer = curPacket->DetachPacket();
             sent = 0;
             delete curPacket;
         }
@@ -918,11 +935,7 @@ uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
  * 
  * @author SlugFiller
  */
-//MORPH - Changed by SiRoB, Scale to lowspeed
-/*
 uint32 CEMSocket::GetNeededBytes() {
-*/
-uint32 CEMSocket::GetNeededBytes(bool lowspeed) {
 	sendLocker.Lock();
 	if (byConnected == ES_DISCONNECTED) {
 		sendLocker.Unlock();
@@ -941,9 +954,6 @@ uint32 CEMSocket::GetNeededBytes(bool lowspeed) {
 	uint32 sendgap = ::GetTickCount() - lastCalledSend;
 
 	uint64 timetotal = m_bAccelerateUpload?45000:90000;
-	//MORPH START - Added by SiRoB, 1kB/s and 0.1kB/s for lowspeed
-	if (!lowspeed) timetotal = m_bAccelerateUpload?4500:9000;
-	//MORPH END   - Added by SiRoB, 1kB/s and 0.1kB/s for lowspeed
 	uint64 timeleft = ::GetTickCount() - lastFinishedStandard;
 	uint64 sizeleft, sizetotal;
 	if (sendbuffer && !m_currentPacket_is_controlpacket) {
@@ -1204,3 +1214,15 @@ CString CEMSocket::GetFullErrorMessage(DWORD nErrorCode)
 
 	return strError;
 }
+//MORPH START - Added by SiRoB, Control How Many Packet are Queued
+#ifdef _DEBUG
+uint32  CEMSocket::GetNumberOfStandardPacketQueued()
+{
+	return standartpacket_queue.GetSize();
+}
+uint32 CEMSocket::GetNumberOfControlPacketQueued()
+{
+	return controlpacket_queue.GetSize();
+}
+#endif
+//MORPH END   - Added by SiRoB, Control How Many Packet are Queued
