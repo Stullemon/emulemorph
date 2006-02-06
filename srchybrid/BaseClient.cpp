@@ -210,7 +210,6 @@ void CUpDownClient::Init()
 	m_structUserCountry = theApp.ip2country->GetCountryFromIP(GetIP());
 	//EastShare End - added by AndCycle, IP to Country
 	m_fHashsetRequesting = 0;
-	m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
 	m_fSharedDirectories = 0;
 	m_fSentCancelTransfer = 0;
 	m_nClientVersion = 0;
@@ -1707,7 +1706,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 
 		if(GetDownloadState() == DS_CONNECTED){
 		    //MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
-			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend() || IsProxy())
+			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo <= 1  || IsFriend() || IsProxy())
 				SetDownloadState(DS_ONQUEUE);
 			else {
 			//MORPH END   - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
@@ -1765,11 +1764,8 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
                 AddDebugLogLine(DLP_VERYLOW, true,_T("Removing connecting client from upload list: %s Client: %s"), pszReason, DbgGetClientInfo());
 		case US_WAITCALLBACK:
 			//MORPH START - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend.
-			if(reqfile && !reqfile->IsPartFile() && reqfile->m_nCompleteSourcesCountLo == 1  || IsFriend())
-			{
-				bDelete = true;
-				break;
-			}
+			if(reqfile && !reqfile->IsPartFile() && reqfile->m_nCompleteSourcesCountLo <= 1  || IsFriend())
+				bAddDeadSource = false;
 			//MORPH END   - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend or it's a proxy.
 		case US_ERROR:
 			if (bAddDeadSource)
@@ -1785,10 +1781,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		case DS_WAITCALLBACK:
 			//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
 			if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1 || IsFriend() || IsProxy() || !IsEd2kClient())
-			{
-				bDelete = true;
-				break;
-			}
+				bAddDeadSource = false;
 			//MORPH END   - Added by SiRoB, Don't kill source if it's a proxy
 		case DS_ERROR:
 			if (bAddDeadSource)
@@ -1828,7 +1821,6 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			Debug(_T("--- Disconnected client       %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
 		m_fHashsetRequesting = 0;
-		m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
 		SetSentCancelTransfer(0);
 		m_bHelloAnswerPending = false;
 		m_fQueueRankPending = 0;
@@ -1867,7 +1859,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 //Returned bool is not if the TryToConnect is successful or not..
 //false means the client was deleted!
 //true means the client was not deleted!
-bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket)
+bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket, bool* filtered)
 {
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected()))
 	{
@@ -1876,6 +1868,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 			delete this;
 			return false;
 		}
+		*filtered = true;
 		return true;
 	}
 
@@ -1896,6 +1889,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
+			*filtered = true;
 			return true;
 		}
 
@@ -1909,6 +1903,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
+			*filtered = true;
 			return true;
 		}
 	}
@@ -1935,6 +1930,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 					delete this;
 					return false;
 				}
+				*filtered = true;
 			}
 			return true;
 		}
@@ -1953,6 +1949,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				{
 					//There are too many source lookups already or we are already searching this key.
 					SetDownloadState(DS_TOOMANYCONNSKAD);
+					*filtered = true;
 					return true;
 				}
 			}
@@ -1970,6 +1967,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		if (!socket->Create())
 		{
 			socket->Safe_Delete();
+			*filtered = true;
 			return true;
 		}
 	}
@@ -1990,6 +1988,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
+			*filtered = true;
 			return true;
 		}
 
@@ -2015,6 +2014,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 						delete this;
 						return false;
 					}
+					*filtered = true;
 					return true;
 				}
 				
@@ -2028,6 +2028,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 							delete this;
 							return false;
 						}
+						*filtered = true;
 						return true;
 					}
 				}
@@ -3310,6 +3311,9 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 	// MORPH START - Added by Commander, WebCache 1.2e
 
 	if( socket != NULL && GetUploadState() != US_NONE) {
+		#ifdef _DEBUG
+		strState.AppendFormat(_T(" (PacketQueued: %u/%u)"), socket->GetNumberOfStandardPacketQueued(), socket->GetNumberOfControlPacketQueued() );
+		#endif
 		strState.AppendFormat(_T(" (BusyRatio: %0.2f)"), socket->GetBusyRatioTime());
 		DWORD busySince = socket->GetBusyTimeSince();
 		if (busySince > 0)
