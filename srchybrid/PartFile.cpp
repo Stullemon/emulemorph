@@ -2934,18 +2934,6 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 			m_anStatesTemp[nCountForState]++;
 			//MORPH END   - Changed by SiRoB, Source Counts Are Cached derivated from Khaos
 
-			// SLUGFILLER: SafeHash - Find a source for the hashset
-			if (hashsetneeded && cur_src->socket && cur_src->socket->IsConnected()) { //MORPH - Changed by SiRoB, To avoid false assert
-				switch (cur_src->GetDownloadState()){
-				case DS_NONEEDEDPARTS:
-				case DS_ONQUEUE:
-					if (!cur_src->GetRequestedHashset())
-						cur_src->RequestHashset();
-					break;
-				}
-			}
-			// SLUGFILLER: SafeHash
-
 			switch (cur_src->GetDownloadState())
 			{
 				case DS_DOWNLOADING:{
@@ -3103,12 +3091,6 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 					}
 					break;
 				}
-				// SLUGFILLER: SafeHash - If the current client can't provide a hashset, it should be requested of a different client
-				case DS_REQHASHSET:
-					if (!cur_src->GetRequestedHashset() || dwCurTick - cur_src->GetRequestedHashset() > CONNECTION_TIMEOUT)	// timeout for hashset request
-						cur_src->SendStartupLoadReq();	// this will set the client's status to on-queue
-					break;
-				// SLUGFILLER: SafeHash
 			}
 		}
 		if (downloadingbefore!=(m_anStates[DS_DOWNLOADING]>0))

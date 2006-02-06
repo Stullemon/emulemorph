@@ -613,7 +613,20 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		// even if the file is <= PARTSIZE, we _may_ need the hashset for that file (if the file size == PARTSIZE)
 		if (reqfile->hashsetneeded)
 		{
-			RequestHashset();	// SLUGFILLER: SafeHash
+			if (socket)
+			{
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+					DebugSend("OP__HashSetRequest", this, reqfile->GetFileHash());
+				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
+				md4cpy(packet->pBuffer,reqfile->GetFileHash());
+				theStats.AddUpDataOverheadFileRequest(packet->size);
+				socket->SendPacket(packet,true,true);
+				SetDownloadState(DS_REQHASHSET);
+				m_fHashsetRequesting = 1;
+				reqfile->hashsetneeded = false;
+			}
+			else
+				ASSERT(0);
 		}
 		else
 		{
@@ -725,18 +738,28 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	// NOTE: This function is invoked from TCP and UDP socket!
 	if (!bUdpPacket)
 	{
-		// SLUGFILLER: SafeHash - request hashset first, check needed parts later
-		if (reqfile->hashsetneeded)
+		if (!bPartsNeeded)
 		{
-			RequestHashset();
-		}
-		else if (!bPartsNeeded)
-        {
 			SetDownloadState(DS_NONEEDEDPARTS);
             SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::ProcessFileStatus() TCP"), true, false, false, NULL, true, true);
 		}
-		// SLUGFILLER: SafeHash
-		//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
+        else if (reqfile->hashsetneeded) //If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
+		{
+			if (socket)
+			{
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+			        DebugSend("OP__HashSetRequest", this, reqfile->GetFileHash());
+				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
+				md4cpy(packet->pBuffer,reqfile->GetFileHash());
+				theStats.AddUpDataOverheadFileRequest(packet->size);
+				socket->SendPacket(packet, true, true);
+				SetDownloadState(DS_REQHASHSET);
+				m_fHashsetRequesting = 1;
+				reqfile->hashsetneeded = false;
+			}
+			else
+				ASSERT(0);
+		}
 		else
 		{
 			SendStartupLoadReq();
@@ -900,14 +923,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		    }
 		}
 
-		// SLUGFILLER: SafeHash
-		if (reqfile && m_nDownloadState == DS_REQHASHSET && nNewState != DS_REQHASHSET)
-			reqfile->hashsetneeded = false;
-		if (nNewState == DS_REQHASHSET)
-			m_dwRequestedHashset = GetTickCount();
-		// SLUGFILLER: SafeHash
-
-		if(nNewState == DS_DOWNLOADING && socket){ //MORPH - Changed by SiRoB, WebCache
+        if(nNewState == DS_DOWNLOADING && socket){
 			socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 
@@ -995,7 +1011,6 @@ void CUpDownClient::ProcessHashSet(const uchar* packet,uint32 size)
 	CSafeMemFile data(packet, size);
 	if (reqfile->LoadHashsetFromFile(&data,true)){
 		m_fHashsetRequesting = 0;
-		m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
 		reqfile->PerformFirstHash();		// SLUGFILLER: SafeHash - Rehash
 	}
 	else{
@@ -1064,7 +1079,8 @@ void CUpDownClient::SendBlockRequests()
 		if (m_PendingBlocks_list.IsEmpty())
 		{
 			SendCancelTransfer();
-			SetDownloadState(DS_ONQUEUE, _T("noNeededRequeue"));	// SLUGFILLER: noNeededRequeue
+			SetDownloadState(DS_NONEEDEDPARTS);
+			SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
 			return;
 		}
 		if (isTestFile)
@@ -1116,11 +1132,8 @@ void CUpDownClient::SendBlockRequests()
 
 	if (m_PendingBlocks_list.IsEmpty()){
 		SendCancelTransfer();
-		/*
 		SetDownloadState(DS_NONEEDEDPARTS);
 		SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
-		*/
-		SetDownloadState(DS_ONQUEUE, _T("noNeededRequeue"));	// SLUGFILLER: noNeededRequeue
 		return;
 	}
 
@@ -1835,7 +1848,6 @@ void CUpDownClient::UDPReaskForDownload()
 			}
 			if (GetUDPVersion() > 2)
 				data.WriteUInt16(reqfile->m_nCompleteSourcesCount);
-
 			if (thePrefs.GetDebugClientUDPLevel() > 0)
 			    DebugSend("OP__ReaskFilePing", this, reqfile->GetFileHash());
 			Packet* response = new Packet(&data, OP_EMULEPROT);
@@ -1872,25 +1884,6 @@ void CUpDownClient::UDPReaskForDownload()
 		}
 	}
 }
-
-// SLUGFILLER: SafeHash
-void CUpDownClient::RequestHashset(){
-	if (socket)
-	{
-		if (thePrefs.GetDebugClientTCPLevel() > 0)
-			DebugSend("OP__HashSetRequest", this, reqfile->GetFileHash());
-		Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-		md4cpy(packet->pBuffer,reqfile->GetFileHash());
-		theStats.AddUpDataOverheadFileRequest(packet->size);
-		socket->SendPacket(packet, true, true);
-		SetDownloadState(DS_REQHASHSET);
-		m_fHashsetRequesting = 1;
-		reqfile->hashsetneeded = false;
-	}
-	else
-		ASSERT(0);
-}
-// SLUGFILLER: SafeHash
 
 void CUpDownClient::UpdateDisplayedInfo(bool force)
 {
@@ -2710,10 +2703,12 @@ void CUpDownClient::ProcessAICHRequest(const uchar* packet, UINT size)
 			fileResponse.WriteHash16(pKnownFile->GetFileHash());
 			fileResponse.WriteUInt16(nPart);
 			pKnownFile->GetAICHHashset()->GetMasterHash().Write(&fileResponse);
-			if (pKnownFile->GetAICHHashset()->CreatePartRecoveryData(nPart*PARTSIZE, &fileResponse)){
+			if (pKnownFile->GetAICHHashset()->CreatePartRecoveryData((uint64)nPart*PARTSIZE, &fileResponse)){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 				if(thePrefs.GetLogICHEvents()) //JP log ICH events
 				AddDebugLogLine(DLP_HIGH, false, _T("AICH Packet Request: Sucessfully created and send recoverydata for %s to %s"), pKnownFile->GetFileName(), DbgGetClientInfo());
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+					DebugSend("OP__AichAnswer", this, pKnownFile->GetFileHash());
 				Packet* packAnswer = new Packet(&fileResponse, OP_EMULEPROT, OP_AICHANSWER);
 				theStats.AddUpDataOverheadFileRequest(packAnswer->size);
 				SafeSendPacket(packAnswer);

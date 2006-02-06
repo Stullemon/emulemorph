@@ -235,7 +235,7 @@ public:
 	virtual void SendCancelTransfer(Packet* packet = NULL);
 	virtual bool	IsEd2kClient() const { return true; }
 	virtual bool	Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
-	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL);
+	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL, bool* filtered = NULL);
 	virtual bool	Connect();
 	virtual void	ConnectionEstablished();
 	virtual void	OnSocketConnected(int nErrorCode);
@@ -548,7 +548,6 @@ public:
 	void			UDPReaskACK(uint16 nNewQR);
 	void			UDPReaskFNF();
 	void			UDPReaskForDownload();
-	void			RequestHashset();	// SLUGFILLER: SafeHash
 	bool			IsSourceRequestAllowed() const;
     bool            IsSourceRequestAllowed(CPartFile* partfile, bool sourceExchangeCheck = false) const; // ZZ:DownloadManager
 
@@ -645,13 +644,6 @@ public:
     const bool      SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file, bool ignoreSuspensions, bool SwapToIsNNPFile, bool isNNPFile, bool& wasSkippedDueToSourceExchange, bool doAgressiveSwapping = false, bool debug = false);
     const DWORD     getLastTriedToConnectTime() { return m_dwLastTriedToConnect; }
 // <-- ZZ:DownloadManager
-
-	// SLUGFILLER: SafeHash
-	const DWORD		GetRequestedHashset() const
-					{
-						return m_dwRequestedHashset;
-					}
-	// SLUGFILLER: SafeHash
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -1105,7 +1097,6 @@ protected:
     bool    DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR reason); // ZZ:DownloadManager
     CMap<CPartFile*, CPartFile*, DWORD, DWORD> m_fileReaskTimes; // ZZ:DownloadManager (one resk timestamp for each file)
     DWORD   m_dwLastTriedToConnect; // ZZ:DownloadManager (one resk timestamp for each file)
-	DWORD	m_dwRequestedHashset;	// SLUGFILLER: SafeHash
     bool    RecentlySwappedForSourceExchange() { return ::GetTickCount()-lastSwapForSourceExchangeTick < 30*1000; } // ZZ:DownloadManager
     void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
 
