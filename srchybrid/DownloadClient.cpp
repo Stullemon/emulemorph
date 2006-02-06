@@ -1801,7 +1801,8 @@ void CUpDownClient::UDPReaskForDownload()
 	
 			m_bUDPPending = true;
 			CSafeMemFile data(128);
-			data.WriteHash16(reqfile->GetFileHash());
+			//MORPH - Moved By SiRoB, Webcache Fix
+			/*data.WriteHash16(reqfile->GetFileHash());
 			if (GetUDPVersion() > 3)
 			{
 				if (reqfile->IsPartFile())
@@ -1811,6 +1812,7 @@ void CUpDownClient::UDPReaskForDownload()
 			}
 			if (GetUDPVersion() > 2)
 				data.WriteUInt16(reqfile->m_nCompleteSourcesCount);
+			*/
 // WebCache //////////////////////////////////////////////////////////////////////////////
 		if (SupportsMultiOHCBs() &&	AttachMultiOHCBsRequest(data))
 		{
@@ -1823,6 +1825,17 @@ void CUpDownClient::UDPReaskForDownload()
 		}
 		else
 		{
+			data.WriteHash16(reqfile->GetFileHash());
+			if (GetUDPVersion() > 3)
+			{
+				if (reqfile->IsPartFile())
+					((CPartFile*)reqfile)->WritePartStatus(&data);
+				else
+					data.WriteUInt16(0);
+			}
+			if (GetUDPVersion() > 2)
+				data.WriteUInt16(reqfile->m_nCompleteSourcesCount);
+
 			if (thePrefs.GetDebugClientUDPLevel() > 0)
 			    DebugSend("OP__ReaskFilePing", this, reqfile->GetFileHash());
 			Packet* response = new Packet(&data, OP_EMULEPROT);
