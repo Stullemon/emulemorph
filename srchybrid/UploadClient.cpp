@@ -1590,6 +1590,7 @@ int CReadBlockFromFileThread::Run() {
 			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
 		else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
 			delete[] filedata;
+		return 1;
 	}
 	catch(CFileException* e)
 	{
@@ -1602,6 +1603,15 @@ int CReadBlockFromFileThread::Run() {
 		else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
 			delete[] filedata;
 		e->Delete();
+		return 2;
+	}
+	catch(...)
+	{
+		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+		else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+			delete[] filedata;
+		return 3;
 	}
 	return 0;
 }
