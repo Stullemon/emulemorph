@@ -293,27 +293,14 @@ void CEMSocket::OnReceive(int nErrorCode){
 		return;
 	}
 
-	sendLocker.Lock();
-	//MORPH - Changed by SiRoB, Show BusyTime
-	/*
-    m_bBusy = false;
-	*/
-	DWORD curTick = GetTickCount();
-	if (m_dwBusy) {
-		m_dwBusyDelta = curTick-m_dwBusy;
-		m_dwNotBusy = curTick;
-	}
-	m_dwBusy = 0;
 	// Check current connection state
 	if(byConnected == ES_DISCONNECTED){
-	    sendLocker.Unlock();
 		return;
 	}
 	else {	
 		byConnected = ES_CONNECTED; // ES_DISCONNECTED, ES_NOTCONNECTED, ES_CONNECTED
 	}
-	sendLocker.Unlock();
-    
+
 	// CPU load improvement
     if(downloadLimitEnable == true && downloadLimit == 0){
         EMTrace("CEMSocket::OnReceive blocked by limit");
@@ -651,13 +638,9 @@ void CEMSocket::OnSend(int nErrorCode){
     } else
 		byConnected = ES_CONNECTED;
 	
-
-	/*
 	if(m_currentPacket_is_controlpacket) {
-	*/
-	if(!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket) {
 		// queue up for control packet
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, true);
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
     }
 
     sendLocker.Unlock();
@@ -1214,15 +1197,3 @@ CString CEMSocket::GetFullErrorMessage(DWORD nErrorCode)
 
 	return strError;
 }
-//MORPH START - Added by SiRoB, Control How Many Packet are Queued
-#ifdef _DEBUG
-uint32  CEMSocket::GetNumberOfStandardPacketQueued()
-{
-	return standartpacket_queue.GetSize();
-}
-uint32 CEMSocket::GetNumberOfControlPacketQueued()
-{
-	return controlpacket_queue.GetSize();
-}
-#endif
-//MORPH END   - Added by SiRoB, Control How Many Packet are Queued

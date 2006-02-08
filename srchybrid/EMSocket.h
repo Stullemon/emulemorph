@@ -44,7 +44,7 @@ public:
 	virtual ~CEMSocket();
 
 	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-    bool	IsConnected() const {return byConnected == ES_CONNECTED;}
+    /*MORPH*/bool	IsConnected() const {return byConnected == ES_CONNECTED || byConnected == ES_NOTCONNECTED ;}
 	uint8	GetConState() const {return byConnected;}
 	virtual bool IsRawDataMode() const { return false; }
 	void	SetDownloadLimit(uint32 limit);
@@ -83,12 +83,11 @@ public:
     uint32	GetNeededBytes();
 	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
 	float	GetBusyRatioTime() { return (float)(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))/(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)); };
+	uint32	GetBufferLenToSend() { return sendblen-sent; }; //MORPH - Added by SiRoB, Show busyTime
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
-	uint32  GetNumberOfControlPacketQueued(); //MORPH - Added by SiRoB, Control How Many Packet are Queued
-	uint32  GetNumberOfStandardPacketQueued(); //MORPH - Added by SiRoB, Control How Many Packet are Queued
 #endif
 
 protected:

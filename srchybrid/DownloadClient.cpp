@@ -1814,18 +1814,6 @@ void CUpDownClient::UDPReaskForDownload()
 	
 			m_bUDPPending = true;
 			CSafeMemFile data(128);
-			//MORPH - Moved By SiRoB, Webcache Fix
-			/*data.WriteHash16(reqfile->GetFileHash());
-			if (GetUDPVersion() > 3)
-			{
-				if (reqfile->IsPartFile())
-					((CPartFile*)reqfile)->WritePartStatus(&data);
-				else
-					data.WriteUInt16(0);
-			}
-			if (GetUDPVersion() > 2)
-				data.WriteUInt16(reqfile->m_nCompleteSourcesCount);
-			*/
 // WebCache //////////////////////////////////////////////////////////////////////////////
 		if (SupportsMultiOHCBs() &&	AttachMultiOHCBsRequest(data))
 		{
@@ -2384,9 +2372,7 @@ uint32 CUpDownClient::GetTimeUntilReask(const CPartFile* file, const bool allowS
         if(allowShortReaskTime || file == reqfile && GetDownloadState() == DS_NONE) {
             reaskTime = MIN_REQUESTTIME;
         } else if(useGivenNNP && givenNNP ||
-                  // MORPH START - Modified by Commander, WebCache 1.2e
-                  file == reqfile && GetDownloadState() == DS_NONEEDEDPARTS && !SupportsWebCache() || // Superlexx - webcache - reask webcache-enabled NNP-sources more often
-                  // MORPH END - Modified by Commander, WebCache 1.2e
+                  file == reqfile && GetDownloadState() == DS_NONEEDEDPARTS ||
                   file != reqfile && IsInNoNeededList(file)) {
             reaskTime = FILEREASKTIME*2;
         } else {
@@ -2656,7 +2642,7 @@ void CUpDownClient::ProcessAICHAnswer(const uchar* packet, UINT size)
 		if ( (pPartFile->GetAICHHashset()->GetStatus() == AICH_TRUSTED || pPartFile->GetAICHHashset()->GetStatus() == AICH_VERIFIED)
 			 && ahMasterHash == pPartFile->GetAICHHashset()->GetMasterHash())
 		{
-			if(pPartFile->GetAICHHashset()->ReadRecoveryData(request.m_nPart*PARTSIZE, &data)){
+			if(pPartFile->GetAICHHashset()->ReadRecoveryData((uint64)request.m_nPart*PARTSIZE, &data)){
 				// finally all checks passed, everythings seem to be fine
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 				if(thePrefs.GetLogICHEvents()) //JP log ICH events
