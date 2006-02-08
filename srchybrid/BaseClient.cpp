@@ -1863,12 +1863,12 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 {
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected()))
 	{
+		if (filtered) *filtered = true;
 		if(Disconnected(_T("Too many connections")))
 		{
 			delete this;
 			return false;
 		}
-		*filtered = true;
 		return true;
 	}
 
@@ -1884,12 +1884,12 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 			theStats.filteredclients++;
 			if (thePrefs.GetLogFilteredIPs())
 				AddDebugLogLine(true, GetResString(IDS_IPFILTERED), ipstr(uClientIP), theApp.ipfilter->GetLastHit());
+			if (filtered) *filtered = true;
 			if (Disconnected(_T("IPFilter")))
 			{
 				delete this;
 				return false;
 			}
-			*filtered = true;
 			return true;
 		}
 
@@ -1898,12 +1898,12 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		{
 			if (thePrefs.GetLogBannedClients())
 				AddDebugLogLine(false, _T("Refused to connect to banned client %s"), DbgGetClientInfo());
+			if (filtered) *filtered = true;
 			if (Disconnected(_T("Banned IP")))
 			{
 				delete this;
 				return false;
 			}
-			*filtered = true;
 			return true;
 		}
 	}
@@ -1930,7 +1930,6 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 					delete this;
 					return false;
 				}
-				*filtered = true;
 			}
 			return true;
 		}
@@ -1949,7 +1948,6 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				{
 					//There are too many source lookups already or we are already searching this key.
 					SetDownloadState(DS_TOOMANYCONNSKAD);
-					*filtered = true;
 					return true;
 				}
 			}
@@ -1967,7 +1965,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		if (!socket->Create())
 		{
 			socket->Safe_Delete();
-			*filtered = true;
+			if (filtered) *filtered = true;
 			return true;
 		}
 	}
@@ -1988,7 +1986,6 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
-			*filtered = true;
 			return true;
 		}
 
@@ -2014,7 +2011,6 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 						delete this;
 						return false;
 					}
-					*filtered = true;
 					return true;
 				}
 				
@@ -2028,7 +2024,6 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 							delete this;
 							return false;
 						}
-						*filtered = true;
 						return true;
 					}
 				}
@@ -3311,10 +3306,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 	// MORPH START - Added by Commander, WebCache 1.2e
 
 	if( socket != NULL && GetUploadState() != US_NONE) {
-		#ifdef _DEBUG
-		strState.AppendFormat(_T(" (PacketQueued: %u/%u)"), socket->GetNumberOfStandardPacketQueued(), socket->GetNumberOfControlPacketQueued() );
-		#endif
-		strState.AppendFormat(_T(" (BusyRatio: %0.2f)"), socket->GetBusyRatioTime());
+		//strState.AppendFormat(_T(" (LB: %u) (BR: %0.2f)"), socket->GetBufferLenToSend(), socket->GetBusyRatioTime());
 		DWORD busySince = socket->GetBusyTimeSince();
 		if (busySince > 0)
 			strState.AppendFormat(_T(" (Busy: %ums)"), GetTickCount() - busySince);
