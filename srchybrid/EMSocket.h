@@ -104,7 +104,7 @@ protected:
 	bool	m_bProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
 	CString m_strLastProxyError;
-	CCriticalSection sendLocker; //MORPH - Added by SiRoB, moved in protected seccion
+
 private:
     virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket);
 	void	ClearQueues();	
@@ -134,7 +134,7 @@ private:
 	CTypedPtrList<CPtrList, Packet*> controlpacket_queue;
 	CList<StandardPacketQueueEntry> standartpacket_queue;
     bool m_currentPacket_is_controlpacket;
-//    CCriticalSection sendLocker; //MORPH - Removed by SiRoB, moved in protected seccion
+	CCriticalSection sendLocker;
     uint64 m_numberOfSentBytesCompleteFile;
     uint64 m_numberOfSentBytesPartFile;
     uint64 m_numberOfSentBytesControlPacket;
