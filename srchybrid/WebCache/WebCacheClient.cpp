@@ -1073,7 +1073,7 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 	POSITION pos = reqfile->srclist.GetHeadPosition();
 	const uchar* filehash;
 
-	uint16 part = (uint16)(block->StartOffset / PARTSIZE);
+	UINT part = (UINT)(block->StartOffset / PARTSIZE);
 	uint32 nrOfSentOHCBs = 0;
 	filehash = reqfile->GetFileHash();
 
@@ -1374,12 +1374,12 @@ Packet* CUpDownClient::CreateMFRPacket()
 	return toSend;
 }
 
-uint8 CUpDownClient::AttachMultiOHCBsRequest(CSafeMemFile &data)
+bool CUpDownClient::AttachMultiOHCBsRequest(CSafeMemFile &data)
 {
 	if (!SupportsWebCache()
 		|| !IsBehindOurWebCache()
 		|| !SupportsMultiOHCBs())
-		return 0;
+		return false;
 	ASSERT(reqfile);
 	uint8 fileCount = 1;
 
@@ -1404,7 +1404,7 @@ uint8 CUpDownClient::AttachMultiOHCBsRequest(CSafeMemFile &data)
 	}
 	data.SeekToBegin();
 	data.WriteUInt8(fileCount);
-	return fileCount;
+	return true;
 }
 
 void CUpDownClient::SendOHCBsNow()

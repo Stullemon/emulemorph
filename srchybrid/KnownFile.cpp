@@ -2494,7 +2494,7 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	}
 	//MORPH END   - Added by SiRoB, See chunk that we hide
 
-	file->WriteUInt16(parts);
+	file->WriteUInt16((uint16)parts);
 	UINT done = 0;
 	while (done != parts){
 		uint8 towrite = 0;
@@ -2549,7 +2549,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 		memset(client->m_abyUpPartStatusHidden,0,parts);
 	}
 	UINT done = 0;
-	file->WriteUInt16(parts);
+	file->WriteUInt16((uint16)parts);
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){

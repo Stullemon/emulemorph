@@ -861,8 +861,8 @@ public:
 // Superlexx - MFR
 	CWebCacheMFRList	requestedFiles; // the files this client requested from us
 	Packet*	CreateMFRPacket();		// builds a separate MFR-packet
-	uint8	AttachMultiOHCBsRequest(CSafeMemFile &data); // Superlexx - attaches a multiple files request
-	uint8	IsPartAvailable(uint16 iPart, const byte* fileHash) {return requestedFiles.IsPartAvailable(iPart, fileHash);}
+	bool	AttachMultiOHCBsRequest(CSafeMemFile &data); // Superlexx - attaches a multiple files request
+	bool	IsPartAvailable(UINT iPart, const byte* fileHash) {return requestedFiles.IsPartAvailable(iPart, fileHash);}
     // MORPH END - Added by Commander, WebCache 1.2e
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 	void	SetReadBlockFromFileBuffer(byte* pdata) {filedata = pdata;};

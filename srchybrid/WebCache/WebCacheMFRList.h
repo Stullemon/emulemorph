@@ -20,7 +20,7 @@ public:
 	CWebCacheMFRList(void) { length = 0; client = NULL; }
 	~CWebCacheMFRList(void);
 	void AddFiles(CSafeMemFile* data, CUpDownClient* client = NULL);
-	bool IsPartAvailable(uint16 part, const byte* fileID);
+	bool IsPartAvailable(UINT part, const byte* fileID);
 	void RemoveAll();
 private:
 	void CheckExpiration(); // calls RemoveAll() if the MFR is older than WC_MAX_MFR_AGE
