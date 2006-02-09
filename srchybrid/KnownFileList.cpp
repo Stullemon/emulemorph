@@ -188,10 +188,6 @@ void CKnownFileList::Save()
 	m_nLastSaved = ::GetTickCount(); 
 	CString fullpath=thePrefs.GetConfigDir();
 	fullpath += KNOWN_MET_FILENAME;
-	//Morph Start - added by AndCycle, safe .met replace
-	CString origName = fullpath, oldName = fullpath + _T(".old");
-	fullpath = fullpath + _T(".new");
-	//Morph End   - added by AndCycle, safe .met replace
 	CSafeBufferedFile file;
 	CFileException fexp;
 	if (!file.Open(fullpath, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
@@ -243,14 +239,6 @@ void CKnownFileList::Save()
 					AfxThrowFileException(CFileException::hardIO, GetLastError(), file.GetFileName());
 			}
 			file.Close();
-
-			//Morph Start - added by AndCycle, safe .met replace
-			if(_taccess(oldName, 0) == 0)
-				CFile::Remove(oldName);
-			if(_taccess(origName, 0) == 0)
-				CFile::Rename(origName, oldName);
-			CFile::Rename(fullpath, origName);
-			//Morph End   - added by AndCycle, safe .met replace
 		}
 		catch(CFileException* error){
 			CString strError(_T("Failed to save ") KNOWN_MET_FILENAME _T(" file"));
@@ -269,10 +257,6 @@ void CKnownFileList::Save()
 		AddDebugLogLine(false, _T("Saving known files list file \"%s\""), CANCELLED_MET_FILENAME);
  	fullpath=thePrefs.GetConfigDir();
 	fullpath += CANCELLED_MET_FILENAME;
-	//MORPH Start - Added by SiRoB, safe .met replace
-	origName = fullpath, oldName = fullpath + _T(".old");
-	fullpath = fullpath + _T(".new");
-	//MORPH End   - Added by SiRoB, safe .met replace
 	if (!file.Open(fullpath, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		CString strError(_T("Failed to save ") CANCELLED_MET_FILENAME _T(" file"));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -310,14 +294,6 @@ void CKnownFileList::Save()
 					AfxThrowFileException(CFileException::hardIO, GetLastError(), file.GetFileName());
 			}
 			file.Close();
-			//MORPH START - Added by SiRoB, safe .met replace
-			if(_taccess(oldName, 0) == 0)
-				CFile::Remove(oldName);
-			if(_taccess(origName, 0) == 0)
-				CFile::Rename(origName, oldName);
-			CFile::Rename(fullpath, origName);
-			//MORPH END   - Added by SiRoB, safe .met replace
-	
 		}
 		catch(CFileException* error){
 			CString strError(_T("Failed to save ") CANCELLED_MET_FILENAME _T(" file"));

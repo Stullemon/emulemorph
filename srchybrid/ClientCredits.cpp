@@ -644,10 +644,6 @@ void CClientCreditsList::SaveList()
 	m_nLastSaved = ::GetTickCount();
 
 	CString name = thePrefs.GetConfigDir() + CLIENTS_MET_FILENAME;
-	//Morph Start - added by AndCycle, safe .met replace
-	CString origName = name, oldName = name + _T(".old");
-	name = name + _T(".new");
-	//Morph End   - added by AndCycle, safe .met replace
 	CFile file;// no buffering needed here since we swap out the entire array
 	CFileException fexp;
 	if (!file.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
@@ -707,22 +703,10 @@ void CClientCreditsList::SaveList()
 			file.Flush();
 		file.Close();
 
-		//Morph Start - added by AndCycle, safe .met replace
-		if(_taccess(oldName, 0) == 0)
-			CFile::Remove(oldName);
-		if(_taccess(origName, 0) == 0)
-			CFile::Rename(origName, oldName);
-		CFile::Rename(name, origName);
-		//Morph End   - added by AndCycle, safe .met replace
-
 		//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		if (m_bSaveUploadQueueWaitTime)
 		{
 			CString nameSUQWT = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME) + _T(".SUQWTv2.met"); 
-			//Morph Start - added by AndCycle, safe .met replace
-			CString origNameSUQWT = nameSUQWT, oldNameSUQWT = nameSUQWT + _T(".old");
-			nameSUQWT = nameSUQWT + _T(".new");
-			//Morph End   - added by AndCycle, safe .met replace
 			if (!file.Open(nameSUQWT, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 				CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 				TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -740,13 +724,6 @@ void CClientCreditsList::SaveList()
 			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
 				file.Flush();
 			file.Close();
-			//Morph Start - added by AndCycle, safe .met replace
-			if(_taccess(oldNameSUQWT, 0) == 0)
-				CFile::Remove(oldNameSUQWT);
-			if(_taccess(origNameSUQWT, 0) == 0)
-				CFile::Rename(origNameSUQWT, oldNameSUQWT);
-			CFile::Rename(nameSUQWT, origNameSUQWT);
-			//Morph End   - added by AndCycle, safe .met replace
 		}
 		//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	}
