@@ -230,7 +230,6 @@ void CClientReqSocket::OnClose(int nErrorCode){
 void CClientReqSocket::Disconnect(LPCTSTR pszReason){
 	AsyncSelect(0);
 	byConnected = ES_DISCONNECTED;
-
 	if (!client)
 		Safe_Delete();
 	else
@@ -2784,18 +2783,15 @@ bool CListenSocket::StartListening()
 	// Creating the socket with SO_REUSEADDR may solve LowID issues if emule was restarted
 	// quickly or started after a crash, but(!) it will also create another problem. If the
 	// socket is already used by some other application (e.g. a 2nd emule), we though bind
-	/*
 	// to that socket leading to the situation that 2 applications are listening at the same
 	// port!
 	//
 	//MORPH START - Modified by SiRoB, [MoNKi: -UPnPNAT Support-]
 	//MORPH START - Modified by SiRoB, [MoNKi: -Random Ports-]
-	
-	bool ret=(Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*TRUE*//*) && Listen());
-	if (ret)
-		m_port=thePrefs.GetPort();
-	return ret;
-	*/
+	//
+	//if (!Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*bReuseAddr*/))
+	//	return false;
+
 	bool ret = false;
 	WORD rndPort;
 	int retries=0;
@@ -2813,14 +2809,14 @@ bool CListenSocket::StartListening()
 			if((retries < (maxRetries / 2)) && ((thePrefs.GetICFSupport() && !theApp.m_pFirewallOpener->DoesRuleExist(rndPort, NAT_PROTOCOL_TCP))
 				|| !thePrefs.GetICFSupport()))
 			{
-				ret = Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*TRUE*/)!=0;
+				ret = Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*bReuseAddr*/)!=0;
 			}
 			else if (retries >= (maxRetries / 2))
-				ret = Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*TRUE*/)!=0;
+				ret = Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*bReuseAddr*/)!=0;
 		}while(!ret && retries<maxRetries);
 	}
 	else
-		ret = Create(thePrefs.GetPort(false, true), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*TRUE*/)!=0;
+		ret = Create(thePrefs.GetPort(false, true), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*bReuseAddr*/)!=0;
 
 	// Rejecting a connection with conditional WSAAccept and not using SO_CONDITIONAL_ACCEPT
 	// -------------------------------------------------------------------------------------
@@ -2860,6 +2856,11 @@ bool CListenSocket::StartListening()
 	//	int iOptVal = 1;
 	//	VERIFY( SetSockOpt(SO_CONDITIONAL_ACCEPT, &iOptVal, sizeof iOptVal) );
 	//}
+
+	/*
+	if (!Listen())
+		return false;
+	*/
 
 	bFirstRun = false;
 
