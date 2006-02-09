@@ -1035,7 +1035,7 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	if (m_DownloadBlocks_list.IsEmpty())
 	{
 		if(iMaxBlocks > m_PendingBlocks_list.GetCount()) {
-            uint16 count = (uint16)iMaxBlocks - m_PendingBlocks_list.GetCount();
+            uint16 count = (uint16)(iMaxBlocks - m_PendingBlocks_list.GetCount());
 			Requested_Block_Struct** toadd = new Requested_Block_Struct*[count];
 			if (reqfile->GetNextRequestedBlock(this,toadd,&count)){
 				for (UINT i = 0; i < count; i++)
