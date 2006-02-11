@@ -53,7 +53,7 @@ namespace {
 		temp[len++] = 0x0d;
 		temp[len++] = 0x0a;
 		temp[len+1] = 0;
-		HANDLE hFile = CreateFile("c:\\EMSocket.log",           // open MYFILE.TXT 
+		HANDLE hFile = CreateFile(_T("c:\\EMSocket.log"),           // open MYFILE.TXT 
                 GENERIC_WRITE,              // open for reading 
                 FILE_SHARE_READ,           // share for reading 
                 NULL,                      // no security 
@@ -135,11 +135,12 @@ CEMSocket::CEMSocket(void){
 	/*
     m_bBusy = false;
 	*/
-	m_dwBusy = 0;
+	DWORD curTick = GetTickCount();
+	m_dwNotBusy = 0;
+	m_dwNotBusyDelta = curTick-m_dwNotBusy;
+	m_dwBusy = curTick;
 	m_dwBusyDelta = 1;
-	m_dwNotBusy = GetTickCount();
-	m_dwNotBusyDelta = 0;
-    m_hasSent = false;
+	m_hasSent = false;
 
     //int val = 0;
     //SetSockOpt(SO_SNDBUF, &val, sizeof(int));
@@ -147,7 +148,7 @@ CEMSocket::CEMSocket(void){
 
 CEMSocket::~CEMSocket(){
 	EMTrace("CEMSocket::~CEMSocket() on %d",(SOCKET)this);
-
+	
     // need to be locked here to know that the other methods
     // won't be in the middle of things
     sendLocker.Lock();
@@ -297,9 +298,10 @@ void CEMSocket::OnReceive(int nErrorCode){
 	if(byConnected == ES_DISCONNECTED){
 		return;
 	}
-	else {	
+	//MORPH - Moved by SiRoB, 
+	/*else {	
 		byConnected = ES_CONNECTED; // ES_DISCONNECTED, ES_NOTCONNECTED, ES_CONNECTED
-	}
+	}*/
 
 	// CPU load improvement
     if(downloadLimitEnable == true && downloadLimit == 0){
@@ -321,6 +323,8 @@ void CEMSocket::OnReceive(int nErrorCode){
 	if(ret == SOCKET_ERROR || ret == 0){
 		return;
 	}
+
+	byConnected = ES_CONNECTED; // ES_DISCONNECTED, ES_NOTCONNECTED, ES_CONNECTED
 
 	// Bandwidth control
 	if(downloadLimitEnable == true){
@@ -615,10 +619,26 @@ void CEMSocket::OnSend(int nErrorCode){
 	}
 
 	//EMTrace("CEMSocket::OnSend linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
-
+	
     sendLocker.Lock();
+	
+    // stopped sending here.
+    //StoppedSendSoUpdateStats();
 
-    //MORPH - Changed by SiRoB, Show BusyTime
+	if (byConnected == ES_DISCONNECTED) {
+        sendLocker.Unlock();
+		return;
+    }/* else 
+		byConnected = ES_CONNECTED;
+	*/
+    /*
+	if(m_currentPacket_is_controlpacket) {
+	*/
+	if(m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()) {
+		// queue up for control packet
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+    }
+	//MORPH - Changed by SiRoB, Show BusyTime
 	/*
     m_bBusy = false;
 	*/
@@ -629,20 +649,6 @@ void CEMSocket::OnSend(int nErrorCode){
 	}
 	m_dwBusy = 0;
 	
-    // stopped sending here.
-    //StoppedSendSoUpdateStats();
-
-    if (byConnected == ES_DISCONNECTED) {
-        sendLocker.Unlock();
-		return;
-    } else
-		byConnected = ES_CONNECTED;
-	
-	if(m_currentPacket_is_controlpacket) {
-		// queue up for control packet
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
-    }
-
     sendLocker.Unlock();
 }
 
@@ -702,7 +708,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         return returnVal;
 	//MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	} else if (m_dwBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
+	} else if (m_dwBusy /*&& onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
 	    sendLocker.Unlock();
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
@@ -825,7 +831,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                     //DEBUG_ONLY( AddDebugLogLine(true,"EMSocket: An error has occured: %i", error) );
                 }
             } else {
-                // we managed to send some bytes. Perform bookkeeping.
+                ASSERT(result);
+		byConnected = ES_CONNECTED;
+				// we managed to send some bytes. Perform bookkeeping.
                 //MORPH - Changed by SiRoB, Show BusyTime
 				/*
                 m_bBusy = false;
@@ -972,14 +980,14 @@ uint32 CEMSocket::GetNeededBytes() {
 // also added trace so that we can debug after the fact ...
 int CEMSocket::Receive(void* lpBuf, int nBufLen, int nFlags)
 {
-//	EMTrace("CEMSocket::Receive on %d, maxSize=%d",(SOCKET)this,nBufLen);
+	//EMTrace("CEMSocket::Receive on %d, maxSize=%d",(SOCKET)this,nBufLen);
 	int recvRetCode = CAsyncSocketEx::Receive(lpBuf,nBufLen,nFlags); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	switch (recvRetCode) {
 	case 0:
-		//EMTrace("CEMSocket::##Received FIN on %d, maxSize=%d",(SOCKET)this,nBufLen);
+		//EMTrace("CEMSocket::##Received FIN on %d, maxSize=%d, byConnected=",(SOCKET)this,nBufLen,byConnected);
 		// FIN received on socket // Connection is being closed by peer
 		//ASSERT (false);
-		if ( 0 == AsyncSelect(FD_CLOSE|FD_WRITE) ) { // no more READ notifications ...
+		if (byConnected != ES_NOTCONNECTED && 0 == AsyncSelect(FD_CLOSE|FD_WRITE) ) { // no more READ notifications ...
 			//int waserr = GetLastError(); // oups, AsyncSelect failed !!!
 			ASSERT(false);
 		}
