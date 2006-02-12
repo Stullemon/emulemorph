@@ -325,6 +325,16 @@ void CEMSocket::OnReceive(int nErrorCode){
 	}
 
 	byConnected = ES_CONNECTED; // ES_DISCONNECTED, ES_NOTCONNECTED, ES_CONNECTED
+		//MORPH - Changed by SiRoB, Show BusyTime
+	/*
+    m_bBusy = false;
+	*/
+	DWORD curTick = GetTickCount();
+	if (m_dwBusy) {
+		m_dwBusyDelta = curTick-m_dwBusy;
+		m_dwNotBusy = curTick;
+	}
+	m_dwBusy = 0;
 
 	// Bandwidth control
 	if(downloadLimitEnable == true){
@@ -631,10 +641,7 @@ void CEMSocket::OnSend(int nErrorCode){
     }/* else 
 		byConnected = ES_CONNECTED;
 	*/
-    /*
-	if(m_currentPacket_is_controlpacket) {
-	*/
-	if(m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()) {
+    	if(m_currentPacket_is_controlpacket) {
 		// queue up for control packet
         theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
     }
@@ -708,11 +715,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         return returnVal;
 	//MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	} else if (m_dwBusy /*&& onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	    sendLocker.Unlock();
-        SocketSentBytes returnVal = { true, 0, 0 };
-        return returnVal;
-    }
+	}// else if (byConnected == ES_CONNECTED && m_dwBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
+	 //   sendLocker.Unlock();
+     //   SocketSentBytes returnVal = { true, 0, 0 };
+     //   return returnVal;
+    //}
 
 	if(minFragSize < 1) {
         minFragSize = 1;
