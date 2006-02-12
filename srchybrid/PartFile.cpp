@@ -3720,7 +3720,7 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	} // END for every chunk
 
 	if (partsDownloading)
-		delete partsDownloading; //Pawcio for enkeyDEV -ICS-
+		delete[] partsDownloading; //Pawcio for enkeyDEV -ICS-
 
 	//Pawcio for enkeyDEV -ICS-
 	if(sender->m_lastPartAsked != 0xffff && sender->IsPartAvailable(sender->m_lastPartAsked) && GetNextEmptyBlockInPart(sender->m_lastPartAsked, 0)){

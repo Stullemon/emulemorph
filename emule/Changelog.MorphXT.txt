@@ -2,6 +2,16 @@
 Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
 FIXED  : (minor) Fixed glitch display arround webcache file infos detail [SiRoB]
+FIXED  : (major) Fixed Official WebCache OP_MULTI_FILE_REASK packet build [SiRoB]
+- packet were malformed du to extrat data at begin
+FIXED  : (minor) MemLeak fix arround ICS pointed by WiZaRd [SiRoB]
+
+ADDED  : Offcial Patch for Getclosestto function by Unknown1 [SiRoB]
+
+CHANGED: TryToConnect has been changed to know when we filter some connection reducing false failed upload (banned client) [SiRoB]
+
+REMOVED: Removed SlugFiller noneededrequeue [SiRoB]
+REMOVED: Removed SlugFiller safe hash arround hashsetneeded (responsible of failed upload) [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.1
