@@ -91,7 +91,7 @@ CWebCacheMFRList::~CWebCacheMFRList(void)
 	RemoveAll();
 }
 
-bool CWebCacheMFRList::IsPartAvailable(uint16 part, const byte* fileID)
+bool CWebCacheMFRList::IsPartAvailable(UINT part, const byte* fileID)
 {
 	CheckExpiration();
 	//if (reqFiles.IsEmpty())
