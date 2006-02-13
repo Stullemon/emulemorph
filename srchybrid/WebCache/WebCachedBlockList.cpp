@@ -197,12 +197,14 @@ bool CWebCachedBlockList::ProcessWCBlocks(const BYTE* packet, uint32 size, UINT 
 	uint32 blockNr = 0;
 	if (opcode == OP_XPRESS_MULTI_HTTP_CACHED_BLOCKS)
 	{
-		/*CWebCachedBlock* newblock = new */ CWebCachedBlock( packet + 8, sizeBlock, client, true );
+		//MORPH - Changed By SiRoB, WebCache Fix
+		/*CWebCachedBlock* newblock =*/(void*) new CWebCachedBlock( packet + 8, sizeBlock, client, true );
 		blockNr++;
 	}
 
 	for(; blockNr < nrOfBlocks; blockNr++)
-		/*CWebCachedBlock* newblock = new  */CWebCachedBlock( packet + 8 + blockNr * sizeBlock, sizeBlock, client);
+		//MORPH - Changed By SiRoB, WebCache Fix
+		/*CWebCachedBlock* newblock =*/(void*) new  CWebCachedBlock( packet + 8 + blockNr * sizeBlock, sizeBlock, client);
 
 	return true;
 }
