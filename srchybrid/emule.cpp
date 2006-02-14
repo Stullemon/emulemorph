@@ -294,6 +294,44 @@ void __cdecl __AfxSocketTerm()
 #error "You are using an MFC version which may require a special version of the above function!"
 #endif
 
+//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
+BOOL InitWinsock2(WSADATA *lpwsaData) 
+{  
+_AFX_SOCK_STATE* pState = _afxSockState.GetData();
+if (pState->m_pfnSockTerm == NULL)
+	{
+	// initialize Winsock library
+	WSADATA wsaData;
+	if (lpwsaData == NULL)
+		lpwsaData = &wsaData;
+	WORD wVersionRequested = MAKEWORD(2, 2);
+	int nResult = WSAStartup(wVersionRequested, lpwsaData);
+	if (nResult != 0)
+		return FALSE;
+	if (LOBYTE(lpwsaData->wVersion) != 2 || HIBYTE(lpwsaData->wVersion) != 2)
+		{
+		WSACleanup();
+		return FALSE;
+		}
+	// setup for termination of sockets
+	pState->m_pfnSockTerm = &AfxSocketTerm;
+	}
+#ifndef _AFXDLL
+	//BLOCK: setup maps and lists specific to socket state
+	{
+	_AFX_SOCK_THREAD_STATE* pState = _afxSockThreadState;
+	if (pState->m_pmapSocketHandle == NULL)
+		pState->m_pmapSocketHandle = new CMapPtrToPtr;
+	if (pState->m_pmapDeadSockets == NULL)
+		pState->m_pmapDeadSockets = new CMapPtrToPtr;
+	if (pState->m_plistSocketNotifications == NULL)
+		pState->m_plistSocketNotifications = new CPtrList;
+	}
+#endif
+return TRUE;
+}
+//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
+
 // CemuleApp Initialisierung
 
 BOOL CemuleApp::InitInstance()
@@ -409,12 +447,18 @@ BOOL CemuleApp::InitInstance()
 	UpdateDesktopColorDepth();
 
 	CWinApp::InitInstance();
-
-	if (!AfxSocketInit())
+	//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
+	memset(&m_wsaData,0,sizeof(WSADATA));
+	if (!InitWinsock2(&m_wsaData)) // <<< eWombat first try it with winsock2
+		{
+		memset(&m_wsaData,0,sizeof(WSADATA));
+		if (!AfxSocketInit(&m_wsaData)) // <<< eWombat then try it with old winsock
 	{
 		AfxMessageBox(GetResString(IDS_SOCKETS_INIT_FAILED));
 		return FALSE;
 	}
+		}
+	//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710
 	atexit(__AfxSocketTerm);
 #else

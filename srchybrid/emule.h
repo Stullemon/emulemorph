@@ -235,7 +235,7 @@ protected:
 
 	uint32 m_dwPublicIP;
 	bool m_bAutoStart;
-
+	WSADATA				m_wsaData; //MORPH - Added by SiRoB, eWombat [WINSOCK2]
 private:
     UINT     m_wTimerRes;
 
