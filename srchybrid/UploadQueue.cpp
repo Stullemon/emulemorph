@@ -907,7 +907,7 @@ void CUploadQueue::Process() {
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos2);
 		for (uint32 i = cur_client->GetClassID(); i < NB_SPLITTING_CLASS; i++)
 			++m_aiSlotCounter[i];
-		if (cur_client->socket && cur_client->socket->GetConState() == ES_NOTCONNECTED) m_nLastStartUpload = GetTickCount();
+		if (cur_client->GetUploadState() != US_UPLOADING) m_nLastStartUpload = GetTickCount();
 	}
 	for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
 		m_abAddClientOfThisClass[i] = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]>m_aiSlotCounter[i];
@@ -1083,11 +1083,18 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
         MaxSpeed = (uint16)(theApp.lastCommonRouteFinder->GetUpload()/1024);
     else
 		MaxSpeed = thePrefs.GetMaxUpload();
+	uint32	uMaxClientDataRate = (uint32)-1;
+	if (thePrefs.GetMaxClientDataRate() && m_abAddClientOfThisClass[LAST_CLASS])
+		uMaxClientDataRate = thePrefs.GetMaxClientDataRate();
+	if (thePrefs.GetMaxClientDataRateFriend() && m_abAddClientOfThisClass[0])
+		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRate(),uMaxClientDataRate);
+	if (thePrefs.GetMaxClientDataRatePowerShare() && m_abAddClientOfThisClass[1])
+		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRatePowerShare(),uMaxClientDataRate);
 
 	if (curUploadSlots >= 4 &&
 		(
-         curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||
-         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
+         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB,
+         curUploadSlots >= ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE) ||
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
           !thePrefs.IsDynUpEnabled() &&
