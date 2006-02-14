@@ -469,7 +469,8 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 				{
 					if (thePrefs.GetLogWebCacheEvents())
 					AddDebugLogLine( false, _T("Received WCBlock - UDP") );
-					CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
+					//MORPH - Changed By SiRoB, WebCache Fix
+					(void*) new CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
 				}
 			} 
 			else 
@@ -511,7 +512,8 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 				{
 					if (thePrefs.GetLogWebCacheEvents())
 					AddDebugLogLine( false, _T("Received WCBlock - UDP") );
-					CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
+					//MORPH - Changed By SiRoB, WebCache Fix
+					(void*) new CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
 				}
 			} 
 			else 
@@ -666,7 +668,7 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
-SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 /*minFragSize*/){ // ZZ:UploadBandWithThrottler (UDP)
+SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize){ // ZZ:UploadBandWithThrottler (UDP)
 // ZZ:UploadBandWithThrottler (UDP) -->
 	// NOTE: *** This function is invoked from a *different* thread!
     sendLocker.Lock();
@@ -683,7 +685,7 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
 			memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
 
             if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort)){
-                sentBytes += cur_packet->packet->size+2; // ZZ:UploadBandWithThrottler (UDP)
+                sentBytes += cur_packet->packet->size+2 + ((cur_packet->packet->size+2/minFragSize)+1) * 20; // ZZ:UploadBandWithThrottler (UDP)
 
 				controlpacket_queue.RemoveHead();
 				delete cur_packet->packet;
