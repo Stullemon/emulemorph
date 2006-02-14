@@ -298,10 +298,9 @@ void CEMSocket::OnReceive(int nErrorCode){
 	if(byConnected == ES_DISCONNECTED){
 		return;
 	}
-	//MORPH - Moved by SiRoB, 
-	/*else {	
+	else {	
 		byConnected = ES_CONNECTED; // ES_DISCONNECTED, ES_NOTCONNECTED, ES_CONNECTED
-	}*/
+	}
 
 	// CPU load improvement
     if(downloadLimitEnable == true && downloadLimit == 0){
@@ -323,18 +322,6 @@ void CEMSocket::OnReceive(int nErrorCode){
 	if(ret == SOCKET_ERROR || ret == 0){
 		return;
 	}
-
-	byConnected = ES_CONNECTED; // ES_DISCONNECTED, ES_NOTCONNECTED, ES_CONNECTED
-		//MORPH - Changed by SiRoB, Show BusyTime
-	/*
-    m_bBusy = false;
-	*/
-	DWORD curTick = GetTickCount();
-	if (m_dwBusy) {
-		m_dwBusyDelta = curTick-m_dwBusy;
-		m_dwNotBusy = curTick;
-	}
-	m_dwBusy = 0;
 
 	// Bandwidth control
 	if(downloadLimitEnable == true){
@@ -631,31 +618,33 @@ void CEMSocket::OnSend(int nErrorCode){
 	//EMTrace("CEMSocket::OnSend linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 	
     sendLocker.Lock();
-	
+	//MORPH - Changed by SiRoB, Show BusyTime
+	/*
+	m_bBusy = false;
+	*/
+
+
     // stopped sending here.
     //StoppedSendSoUpdateStats();
 
-	if (byConnected == ES_DISCONNECTED) {
+	if (byConnected == ES_DISCONNECTED || byConnected == ES_DISCONNECTED) {
         sendLocker.Unlock();
 		return;
-    }/* else 
+    }/* else
 		byConnected = ES_CONNECTED;
 	*/
-    	if(m_currentPacket_is_controlpacket) {
-		// queue up for control packet
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+    if(m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty() && sendbuffer == NULL) {
+        // queue up for control packet
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent() || m_dwBusy);
     }
-	//MORPH - Changed by SiRoB, Show BusyTime
-	/*
-    m_bBusy = false;
-	*/
+
 	DWORD curTick = GetTickCount();
 	if (m_dwBusy) {
 		m_dwBusyDelta = curTick-m_dwBusy;
 		m_dwNotBusy = curTick;
 	}
 	m_dwBusy = 0;
-	
+
     sendLocker.Unlock();
 }
 
@@ -715,11 +704,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         return returnVal;
 	//MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	}// else if (byConnected == ES_CONNECTED && m_dwBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	 //   sendLocker.Unlock();
-     //   SocketSentBytes returnVal = { true, 0, 0 };
-     //   return returnVal;
-    //}
+	} else if (m_dwBusy && byConnected == ES_NOTCONNECTED /*&& ::GetTickCount() - lastSent < 50*/) {
+	    sendLocker.Unlock();
+        SocketSentBytes returnVal = { true, 0, 0 };
+        return returnVal;
+    }
 
 	if(minFragSize < 1) {
         minFragSize = 1;
@@ -838,10 +827,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                     //DEBUG_ONLY( AddDebugLogLine(true,"EMSocket: An error has occured: %i", error) );
                 }
             } else {
-                ASSERT(result);
-		byConnected = ES_CONNECTED;
-				// we managed to send some bytes. Perform bookkeeping.
-                //MORPH - Changed by SiRoB, Show BusyTime
+		// we managed to send some bytes. Perform bookkeeping.
+                byConnected = ES_CONNECTED;
+				//MORPH - Changed by SiRoB, Show BusyTime
 				/*
                 m_bBusy = false;
 				*/
@@ -859,16 +847,16 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
                 // Log send bytes in correct class
                 if(m_currentPacket_is_controlpacket == false) {
-                    sentStandardPacketBytesThisCall += result;
+                    sentStandardPacketBytesThisCall += result + ((result/minFragSize)+1) * 40;
 
                     if(m_currentPackageIsFromPartFile == true) {
-                        m_numberOfSentBytesPartFile += result;
+                        m_numberOfSentBytesPartFile += result + ((result/minFragSize)+1) * 40;
                     } else {
-                        m_numberOfSentBytesCompleteFile += result;
+                        m_numberOfSentBytesCompleteFile += result + ((result/minFragSize)+1) * 40;
                     }
                 } else {
-                    sentControlPacketBytesThisCall += result;
-                    m_numberOfSentBytesControlPacket += result;
+                    sentControlPacketBytesThisCall += result + ((result/minFragSize)+1) * 40;
+                    m_numberOfSentBytesControlPacket += result + ((result/minFragSize)+1) * 40;
                 }
             }
 	    }
@@ -898,12 +886,12 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     }
 
 
-    if(onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
+    if(byConnected == ES_NOTCONNECTED && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
         // enter control packet send queue
         // we might enter control packet queue several times for the same package,
         // but that costs very little overhead. Less overhead than trying to make sure
         // that we only enter the queue once.
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, true);
     }
 
     //CleanSendLatencyList();
@@ -991,10 +979,10 @@ int CEMSocket::Receive(void* lpBuf, int nBufLen, int nFlags)
 	int recvRetCode = CAsyncSocketEx::Receive(lpBuf,nBufLen,nFlags); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	switch (recvRetCode) {
 	case 0:
-		//EMTrace("CEMSocket::##Received FIN on %d, maxSize=%d, byConnected=",(SOCKET)this,nBufLen,byConnected);
+		//EMTrace("CEMSocket::##Received FIN on %d, maxSize=%d",(SOCKET)this,nBufLen);
 		// FIN received on socket // Connection is being closed by peer
 		//ASSERT (false);
-		if (byConnected != ES_NOTCONNECTED && 0 == AsyncSelect(FD_CLOSE|FD_WRITE) ) { // no more READ notifications ...
+		if (0 == AsyncSelect(FD_CLOSE|FD_WRITE) ) { // no more READ notifications ...
 			//int waserr = GetLastError(); // oups, AsyncSelect failed !!!
 			ASSERT(false);
 		}
