@@ -769,6 +769,7 @@ public:
 	static uint16	m_iUPnPPort;
 	static bool		m_bUPnPLimitToFirstConnection;
 	static bool		m_bUPnPClearOnClose;
+	static int    m_iDetectuPnP; //leuk_he autodetect in startup wizard
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
@@ -1901,6 +1902,13 @@ public:
 	static	bool	GetUPnPClearOnClose()				{ return m_bUPnPClearOnClose; }
 	static	bool	SetUPnPLimitToFirstConnection(bool on)	{ m_bUPnPLimitToFirstConnection = on; }
 	static	bool	GetUPnPLimitToFirstConnection()		{ return m_bUPnPLimitToFirstConnection; }
+	static	int  	GetUpnpDetect()					{ return m_iDetectuPnP; } //leuk_he autodetect upnp in wizard
+	static	void    SetUpnpDetect(int on)				{ m_iDetectuPnP=on; } //leuk_he autodetect upnp in wizard
+    #define UPNP_DO_AUTODETECT 2
+    #define UPNP_DETECTED 0
+    #define UPNP_NOT_DETECTED -1 
+    #define UPNP_NOT_NEEDED -10
+	
 	//MORPH END   - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB [MoNKi: -Random Ports-]
