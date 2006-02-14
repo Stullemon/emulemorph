@@ -7,6 +7,7 @@ FIXED  : (major) Fixed Official WebCache OP_MULTI_FILE_REASK packet build [SiRoB
 FIXED  : (minor) MemLeak fix arround ICS pointed by WiZaRd [SiRoB]
 
 ADDED  : Offcial Patch for Getclosestto function by Unknown1 [SiRoB]
+ADDED  : Upnp checkbox in first time run wizard. [leuk_he]
 
 CHANGED: TryToConnect has been changed to know when we filter some connection reducing false failed upload (banned client) [SiRoB]
 
