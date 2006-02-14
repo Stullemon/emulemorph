@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1181,21 +1181,25 @@ BEGIN
                     BS_FLAT | WS_TABSTOP,0,60,318,20
 END
 
+
 IDD_WIZ1_PORTS DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Connection/Ports"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    LTEXT           "What is a port...",IDC_PORTINFO,0,0,317,58
-    LTEXT           "TCP:",IDC_TCP_LABEL,0,59,60,8
-    EDITTEXT        IDC_TCP,0,69,38,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "UDP:",IDC_UDP_LABEL,58,59,60,8
-    EDITTEXT        IDC_UDP,58,69,38,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "What is a port...",IDC_PORTINFO,0,0,317,52
+    LTEXT           "TCP:",IDC_TCP_LABEL,7,67,60,8
+    EDITTEXT        IDC_TCP,7,77,38,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "UDP:",IDC_UDP_LABEL,65,67,60,8
+    EDITTEXT        IDC_UDP,65,77,38,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Check1",IDC_UDPDISABLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,100,71,98,10
-    GROUPBOX        "Connection Test",IDC_TESTFRAME,0,83,317,59,BS_FLAT
+                    WS_TABSTOP,107,79,98,10
+    GROUPBOX        "Connection Test",IDC_TESTFRAME,0,97,317,45,BS_FLAT
     LTEXT           "Description of the test...",IDC_TESTINFO,3,93,311,46
-    PUSHBUTTON      "Start test...",IDC_STARTTEST,247,68,67,14,BS_FLAT
+    PUSHBUTTON      "Start test...",IDC_STARTTEST,255,76,67,14,BS_FLAT
+    /* Morph add some room for upnp checkbox: */
+    CONTROL         "Enable uPnP on ports",IDC_ENABLE_UPNP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,55,98,10
 END
 
 IDD_WIZ1_ULDL_PRIO DIALOGEX 0, 0, 317, 143
@@ -3124,12 +3128,12 @@ BEGIN
     VK_RETURN,      IDA_ENTER,              VIRTKEY, NOINVERT
 END
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5918,7 +5922,7 @@ BEGIN
     IDS_SKIPALL             "S&kip All"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
