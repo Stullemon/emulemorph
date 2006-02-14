@@ -1293,7 +1293,8 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						// CHECK HANDSHAKE?
 						if (thePrefs.GetLogWebCacheEvents())
 						AddDebugLogLine( false, _T("Received WCBlock - TCP") );
-						CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
+						//MORPH - Changed By SiRoB, WebCache Fix
+						(void*) new CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
 					}
 					break;
 				}
@@ -3331,7 +3332,8 @@ bool CClientReqSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, UI
 				// CHECK HANDSHAKE?
 				if (thePrefs.GetLogWebCacheEvents())
 					AddDebugLogLine( false, _T("Received WCBlock - TCP") );
-				CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
+				//MORPH - Changed By SiRoB, WebCache Fix
+					(void*) new CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
 			}
 			return true;
 		case OP_XPRESS_MULTI_HTTP_CACHED_BLOCKS:
