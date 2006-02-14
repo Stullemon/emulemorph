@@ -14,11 +14,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#include "stdafx.h"
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include "stdafx.h"
 #include <locale.h>
 #include <io.h>
 #include <share.h>
@@ -593,8 +593,8 @@ BOOL CemuleApp::InitInstance()
 	}
 
 	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	if(m_UPnP_IGDControlPoint != NULL && thePrefs.IsUPnPEnabled()){
-		m_UPnP_IGDControlPoint->Init(thePrefs.GetUPnPLimitToFirstConnection());
+	if((m_UPnP_IGDControlPoint != NULL && thePrefs.IsUPnPEnabled()) || thePrefs.GetUpnpDetect()>0){  //leuk_he add startupwizard auto detect
+      m_UPnP_IGDControlPoint->Init(thePrefs.GetUPnPLimitToFirstConnection());
 		if(thePrefs.GetUPnPClearOnClose() /*|| thePrefs.GetUseRandomPorts()*/)
 			m_UPnP_IGDControlPoint->DeleteAllPortMappingsOnClose();
 	}

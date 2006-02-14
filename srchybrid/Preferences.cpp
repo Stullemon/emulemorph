@@ -637,6 +637,7 @@ bool	CPreferences::enableNEWS;
 	uint16	CPreferences::m_iUPnPPort;
 	bool	CPreferences::m_bUPnPLimitToFirstConnection;
 	bool	CPreferences::m_bUPnPClearOnClose;
+	int     CPreferences::m_iDetectuPnP; //leuk_he autodetect in startup wizard
 	// End MoNKi
 //MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
@@ -2276,6 +2277,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("UPnPPort"), m_iUPnPPort, _T("eMule"));
 	ini.WriteBool(_T("UPnPClearOnClose"), m_bUPnPClearOnClose, _T("eMule"));
 	ini.WriteBool(_T("UPnPLimitToFirstConnection"), m_bUPnPLimitToFirstConnection, _T("eMule"));
+	ini.WriteInt(_T("UPnPDetect"), m_iDetectuPnP, _T("eMule")); // 
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
@@ -3060,7 +3062,7 @@ void CPreferences::LoadPreferences()
     //Commander - Added: Invisible Mode [TPT] - Start
     m_bInvisibleMode = ini.GetBool(_T("InvisibleMode"), false);
 	m_iInvisibleModeHotKeyModifier = ini.GetInt(_T("InvisibleModeHKKeyModifier"), MOD_CONTROL | MOD_SHIFT | MOD_ALT);
-	m_cInvisibleModeHotKey = ini.GetInt(_T("InvisibleModeHKKey"),(int)'E');
+	m_cInvisibleModeHotKey = (char)ini.GetInt(_T("InvisibleModeHKKey"),(int)'E');
     SetInvisibleMode(m_bInvisibleMode  ,m_iInvisibleModeHotKeyModifier ,m_cInvisibleModeHotKey );
 	//Commander - Added: Invisible Mode [TPT] - End
 
@@ -3195,7 +3197,7 @@ void CPreferences::LoadPreferences()
 	isautodynupswitching=ini.GetBool(_T("AutoDynUpSwitching"),false);
 	m_bDateFileNameLog=ini.GetBool(_T("DateFileNameLog"), true);//Morph - added by AndCycle, Date File Name Log
 	m_bPayBackFirst=ini.GetBool(_T("IsPayBackFirst"),false);//EastShare - added by AndCycle, Pay Back First
-	m_iPayBackFirstLimit=ini.GetInt(_T("PayBackFirstLimit"),10);//MORPH - Added by SiRoB, Pay Back First Tweak
+	m_iPayBackFirstLimit=(uint8)min(ini.GetInt(_T("PayBackFirstLimit"),10),255);//MORPH - Added by SiRoB, Pay Back First Tweak
 	m_bOnlyDownloadCompleteFiles = ini.GetBool(_T("OnlyDownloadCompleteFiles"), false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), false/*true changed by sirob*/);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	m_bDontRemoveSpareTrickleSlot = ini.GetBool(_T("DontRemoveSpareTrickleSlot"), true);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
@@ -3412,6 +3414,7 @@ void CPreferences::LoadPreferences()
 	m_iUPnPPort = (uint16)ini.GetInt(_T("UPnPPort"), 0, _T("eMule"));
 	m_bUPnPLimitToFirstConnection = ini.GetBool(_T("UPnPLimitToFirstConnection"), false, _T("eMule"));
 	m_bUPnPClearOnClose = ini.GetBool(_T("UPnPClearOnClose"), true, _T("eMule"));
+    SetUpnpDetect(ini.GetInt(_T("uPnPDetect"), UPNP_DO_AUTODETECT, _T("eMule"))); //leuk_he autodetect upnp in wizard
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]

@@ -102,6 +102,8 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	if (UPNP_E_SUCCESS != rc) {
 		AddLogLine(false, GetResString(IDS_UPNP_FAILEDINIT), thePrefs.GetUPnPPort(), GetErrDescription(rc) );
 		UpnpFinish();
+		thePrefs.SetUpnpDetect(UPNP_NOT_DETECTED);//leuk_he autodetect upnp in wizard
+		
 		return false;
 	}
 
@@ -109,6 +111,7 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	if(!IsLANIP(UpnpGetServerIpAddress())){
 		AddLogLine(false, GetResString(IDS_UPNP_PUBLICIP));
 		UpnpFinish();
+		thePrefs.SetUpnpDetect(UPNP_NOT_NEEDED)	;//leuk_he autodetect upnp in wizard
 		return false;
 	}
 
@@ -117,6 +120,7 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	if (UPNP_E_SUCCESS != rc) {
 		AddLogLine(false, GetResString(IDS_UPNP_FAILEDREGISTER), GetErrDescription(rc) );
 		UpnpFinish();
+		thePrefs.SetUpnpDetect(UPNP_NOT_DETECTED);//leuk_he autodetect upnp in wizard
 		return false;
 	}
 
@@ -189,6 +193,7 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 				//Checks if is a InternetGatewayDevice and adds it to our list
 				devType = GetFirstDocumentItem(DescDoc, _T("deviceType"));
 				if(devType.CompareNoCase(IGD_DEVICE_TYPE) == 0){
+					thePrefs.SetUpnpDetect(UPNP_DETECTED);//leuk_he autodetect upnp in wizard
 					AddDevice(DescDoc, location, d_event->Expires);
 				}
 
@@ -198,6 +203,9 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 			break;
 		}
 		case UPNP_DISCOVERY_SEARCH_TIMEOUT:
+			if (thePrefs.GetUpnpDetect() != UPNP_DETECTED) {	  	 //leuk_he autodetect upnp in wizard
+				 	thePrefs.SetUpnpDetect(UPNP_NOT_DETECTED);//leuk_he autodetect upnp in wizard
+			}
 			break;
 		case UPNP_DISCOVERY_ADVERTISEMENT_BYEBYE:
 		{
