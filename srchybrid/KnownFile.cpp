@@ -2534,7 +2534,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 			if (m_AvailPartFrequency[i]<iMinAvailablePartFrenquency) {
 				if (m_AvailPartFrequency[i] > m_nVirtualCompleteSourcesCount)
 					iMinAvailablePartFrenquency = m_AvailPartFrequency[i];
-				else
+				else if (m_AvailPartFrequency[i]>0)
 					++iNumberOfVirtualCompleteSourcesCountReached;
 			}
 		}
