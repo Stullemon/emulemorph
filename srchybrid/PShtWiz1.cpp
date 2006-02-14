@@ -277,6 +277,7 @@ public:
 	void OnPortChange();
 
 	CString m_sTestURL,m_sUDP,m_sTCP;
+	int   uPnPNAT;
 	uint16 GetTCPPort();
 	uint16 GetUDPPort();
 
@@ -313,6 +314,7 @@ void CPPgWiz1Ports::DoDataExchange(CDataExchange* pDX)
 	CDlgPageWizard::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_TCP, m_sTCP);
 	DDX_Text(pDX, IDC_UDP, m_sUDP);
+	DDX_Check(pDX, IDC_ENABLE_PNP  , uPnPNAT); // leuk_he add upnp to startupwizard
 }
 
 void CPPgWiz1Ports::OnEnChangeTCP() {
@@ -358,6 +360,8 @@ void CPPgWiz1Ports::OnStartConTest() {
 	uint16 tcp=GetTCPPort();
 	uint16 udp=GetUDPPort();
 
+	thePrefs.SetUPnPNat(IsDlgButtonChecked(IDC_ENABLE_PNP)==BST_CHECKED); // add upnp to startup wizard
+
 	if (tcp==0)
 		return;
 
@@ -393,7 +397,23 @@ BOOL CPPgWiz1Ports::OnInitDialog()
 	SetDlgItemText(IDC_TESTINFO , GetResString(IDS_TESTINFO) );
 	SetDlgItemText(IDC_STARTTEST, GetResString(IDS_STARTTEST) );
 	SetDlgItemText(IDC_UDPDISABLE, GetResString(IDS_UDPDISABLED));
+// MORPH START leuk_he add upnp to startup wizard 
+	SetDlgItemText(IDC_ENABLE_PNP, GetResString(IDS_UPNP_ENABLE)); // enable upnp
 
+	switch(thePrefs.GetUpnpDetect()) {
+	    case   UPNP_DO_AUTODETECT :
+		case   UPNP_NOT_DETECTED :
+			      CheckDlgButton(IDC_ENABLE_PNP,thePrefs.IsUPnPEnabled());
+                    break; // let the user decide, disabled by def. 
+		case UPNP_DETECTED:
+			        CheckDlgButton(IDC_ENABLE_PNP,1);/* enable since a upnp device is available */
+			        break;
+		case UPNP_NOT_NEEDED :
+ 			        CheckDlgButton(IDC_ENABLE_PNP,0);// faulty upnp config: direct internt ip
+			        GetDlgItem(IDC_ENABLE_PNP)->EnableWindow(0); // disable window
+				break;
+	}
+// MORPH END leuk_he add upnp to startup wizard 
 	return TRUE;
 }
 
@@ -781,9 +801,11 @@ BOOL FirstTimeWizard()
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
 
+	thePrefs.SetUPnPNat(page3.uPnPNAT!=0); // leuk_he add upnp to startup wizard
 	// set ports
 	thePrefs.port=(uint16)_tstoi(page3.m_sTCP);
 	thePrefs.udpport=(uint16)_tstoi(page3.m_sUDP);
+	
 	ASSERT( thePrefs.port!=0 && thePrefs.udpport!=10 );
 	if (thePrefs.port == 0)
 		thePrefs.port = DEFAULT_TCP_PORT;
