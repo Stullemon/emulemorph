@@ -628,7 +628,7 @@ void CUDPSocket::OnSend(int nErrorCode){
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
-SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 /*minFragSize*/) { // ZZ:UploadBandWithThrottler (UDP)
+SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { // ZZ:UploadBandWithThrottler (UDP)
 // ZZ:UploadBandWithThrottler (UDP) -->
 	// NOTE: *** This function is invoked from a *different* thread!
     sendLocker.Lock();
@@ -641,7 +641,7 @@ SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint3
         int sendSuccess = SendTo(packet->packet, packet->size, packet->dwIP, packet->nPort);
 		if (sendSuccess >= 0){
             if(sendSuccess > 0) {
-                sentBytes += packet->size; // ZZ:UploadBandWithThrottler (UDP)
+                sentBytes += packet->size  + ((packet->size/minFragSize)+1) * 20; // ZZ:UploadBandWithThrottler (UDP)
             }
 
 			controlpacket_queue.RemoveHead();
