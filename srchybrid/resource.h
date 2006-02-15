@@ -1739,6 +1739,8 @@
 #define IDC_FILTER                      2327
 #define IDC_IRC_USECHANFILTER           2329
 #define IDC_UDPDISABLE                  2330
+#define IDC_ENABLE_PNP                  2331
+#define IDC_ENABLE_UPNP                 2331
 #define IDC_PREVIEWPRIO                 2332
 #define IDC_DISABLEKNOWNLIST            2333
 #define IDC_WIZARD_NETWORK_KADEMLIA     2334
