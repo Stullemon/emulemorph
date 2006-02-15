@@ -635,8 +635,12 @@ SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint3
 
     uint32 sentBytes = 0;
 // <-- ZZ:UploadBandWithThrottler (UDP)
+    //MORPH - Changed by SiRoB, Take into account IP+TCP Header
+    /*
     while (controlpacket_queue.GetHeadPosition() != 0 && !IsBusy() && sentBytes < maxNumberOfBytesToSend) // ZZ:UploadBandWithThrottler (UDP)
-	{
+    */
+    while (controlpacket_queue.GetHeadPosition() != 0 && !IsBusy() && sentBytes + (sentBytes/minFragSize)*20  < maxNumberOfBytesToSend) // ZZ:UploadBandWithThrottler (UDP)
+    	{
 		SServerUDPPacket* packet = controlpacket_queue.GetHead();
         int sendSuccess = SendTo(packet->packet, packet->size, packet->dwIP, packet->nPort);
 		if (sendSuccess >= 0){
@@ -656,7 +660,11 @@ SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint3
     }
     sendLocker.Unlock();
     
+    //MORPH - Changed by SiRoB, Take into account IP+TCP Header
+    /*
     SocketSentBytes returnVal = { true, 0, sentBytes };
+    */
+    SocketSentBytes returnVal = { true, 0, sentBytes + ((sentBytes/minFragSize)+((sentBytes%minFragSize)?1:0)) * 20 };
     return returnVal;
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }

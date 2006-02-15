@@ -676,7 +676,11 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
     uint32 sentBytes = 0;
 // <-- ZZ:UploadBandWithThrottler (UDP)
 
-	while (!controlpacket_queue.IsEmpty() && !IsBusy() && sentBytes < maxNumberOfBytesToSend){ // ZZ:UploadBandWithThrottler (UDP)
+	//MORPH - Changed by SiRoB, Take into account IP+TCP Header
+	/*
+        while (!controlpacket_queue.IsEmpty() && !IsBusy() && sentBytes < maxNumberOfBytesToSend){ // ZZ:UploadBandWithThrottler (UDP)
+	*/
+        while (!controlpacket_queue.IsEmpty() && !IsBusy() && sentBytes + (sentBytes/minFragSize)*20 < maxNumberOfBytesToSend){ // ZZ:UploadBandWithThrottler (UDP)
 		UDPPack* cur_packet = controlpacket_queue.GetHead();
 		if( GetTickCount() - cur_packet->dwTime < UDPMAXQUEUETIME )
 		{
@@ -685,7 +689,7 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
 			memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
 
             if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort)){
-                sentBytes += cur_packet->packet->size+2 + ((cur_packet->packet->size+2/minFragSize)+1) * 20; // ZZ:UploadBandWithThrottler (UDP)
+                sentBytes += cur_packet->packet->size+2; // ZZ:UploadBandWithThrottler (UDP)
 
 				controlpacket_queue.RemoveHead();
 				delete cur_packet->packet;
@@ -707,7 +711,11 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
     }
     sendLocker.Unlock();
 
-    SocketSentBytes returnVal = { true, 0, sentBytes };
+	//MORPH - Changed by SiRoB, Take into account IP+TCP Header
+	/*
+	SocketSentBytes returnVal = { true, 0, sentBytes };
+	*/
+        SocketSentBytes returnVal = { true, 0, sentBytes + ((sentBytes/minFragSize)+((sentBytes%minFragSize)?1:0)) * 20 };
     return returnVal;
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }

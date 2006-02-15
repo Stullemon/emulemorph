@@ -724,7 +724,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     uint32 sentStandardPacketBytesThisCall = 0;
     uint32 sentControlPacketBytesThisCall = 0;
 
+    //MORPH - Changed by SiRoB, Take into account IP+TCP Header
+    /*
     while(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
+    */
+    while(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + ((sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall)/minFragSize) * 40 < maxNumberOfBytesToSend && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
           (!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty() || sendbuffer != NULL) && // there must exist something to send
           (onlyAllowedToSendControlPacket == false || // this means we are allowed to send both types of packets, so proceed
            sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall > 0 && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) % minFragSize != 0 ||
@@ -758,7 +762,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                 ASSERT(0);
                 theApp.QueueDebugLogLine(true,_T("EMSocket: Couldn't get a new packet! There's an error in the first while condition in EMSocket::Send()"));
 
+                //MORPH - Changed by SiRoB, Take into account IP+TCP Header
+                /*
                 SocketSentBytes returnVal = { true, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
+                */
+                SocketSentBytes returnVal = { true, sentStandardPacketBytesThisCall  + ((sentStandardPacketBytesThisCall/minFragSize)+((sentStandardPacketBytesThisCall%minFragSize)?1:0)) * 40, sentControlPacketBytesThisCall + ((sentControlPacketBytesThisCall/minFragSize)+((sentControlPacketBytesThisCall%minFragSize)?1:0)) * 40};
                 return returnVal;
             }
 
@@ -774,7 +782,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         // is sent, or until we reach maximum bytes to send for this call, or until we get an error.
         // NOTE! If send would block (returns WSAEWOULDBLOCK), we will return from this method INSIDE this loop.
         while (sent < sendblen &&
+               //MORPH - Changed by SiRoB, Take into account IP+TCP Header
+               /*
                sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend &&
+               */
+               sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + ((sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall)/minFragSize) * 40 < maxNumberOfBytesToSend &&
                (
                 onlyAllowedToSendControlPacket == false || // this means we are allowed to send both types of packets, so proceed
                 m_currentPacket_is_controlpacket ||
@@ -819,7 +831,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                     //m_wasBlocked = true;
                     sendLocker.Unlock();
 
+                    //MORPH - Changed by SiRoB, Take into account IP+TCP Header
+                    /*
                     SocketSentBytes returnVal = { true, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
+                    */
+                    SocketSentBytes returnVal = { true, sentStandardPacketBytesThisCall  + ((sentStandardPacketBytesThisCall/minFragSize)+((sentStandardPacketBytesThisCall%minFragSize)?1:0)) * 40, sentControlPacketBytesThisCall + ((sentControlPacketBytesThisCall/minFragSize)+((sentControlPacketBytesThisCall%minFragSize)?1:0)) * 40};
                     return returnVal; // Send() blocked, onsend will be called when ready to send again
 			    } else{
                     // Send() gave an error
@@ -847,16 +863,16 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
                 // Log send bytes in correct class
                 if(m_currentPacket_is_controlpacket == false) {
-                    sentStandardPacketBytesThisCall += result + ((result/minFragSize)+1) * 40;
+                    sentStandardPacketBytesThisCall += result;
 
                     if(m_currentPackageIsFromPartFile == true) {
-                        m_numberOfSentBytesPartFile += result + ((result/minFragSize)+1) * 40;
+                        m_numberOfSentBytesPartFile += result;
                     } else {
-                        m_numberOfSentBytesCompleteFile += result + ((result/minFragSize)+1) * 40;
+                        m_numberOfSentBytesCompleteFile += result;
                     }
                 } else {
-                    sentControlPacketBytesThisCall += result + ((result/minFragSize)+1) * 40;
-                    m_numberOfSentBytesControlPacket += result + ((result/minFragSize)+1) * 40;
+                    sentControlPacketBytesThisCall += result;
+                    m_numberOfSentBytesControlPacket += result;
                 }
             }
 	    }
@@ -898,7 +914,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
     sendLocker.Unlock();
 
+    //MORPH - Changed by SiRoB, Take into account IP+TCP Header
+    /*
     SocketSentBytes returnVal = { !anErrorHasOccured, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
+    */
+    SocketSentBytes returnVal = { !anErrorHasOccured, sentStandardPacketBytesThisCall  + ((sentStandardPacketBytesThisCall/minFragSize)+((sentStandardPacketBytesThisCall%minFragSize)?1:0)) * 40, sentControlPacketBytesThisCall + ((sentControlPacketBytesThisCall/minFragSize)+((sentControlPacketBytesThisCall%minFragSize)?1:0)) * 40};
     return returnVal;
 }
 
