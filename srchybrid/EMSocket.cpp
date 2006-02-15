@@ -627,12 +627,12 @@ void CEMSocket::OnSend(int nErrorCode){
     // stopped sending here.
     //StoppedSendSoUpdateStats();
 
-	if (byConnected == ES_DISCONNECTED || byConnected == ES_DISCONNECTED) {
+    if (byConnected == ES_DISCONNECTED) {
         sendLocker.Unlock();
 		return;
-    }/* else
+    } else
 		byConnected = ES_CONNECTED;
-	*/
+
     if(m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty() && sendbuffer == NULL) {
         // queue up for control packet
         theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent() || m_dwBusy);
@@ -704,7 +704,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         return returnVal;
 	//MORPH - Changed by SiRoB, Show BusyTime
 	//} else if (m_bBusy && onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
-	} else if (m_dwBusy && byConnected == ES_NOTCONNECTED /*&& ::GetTickCount() - lastSent < 50*/) {
+	} else if (m_dwBusy /*&& onlyAllowedToSendControlPacket /*&& ::GetTickCount() - lastSent < 50*/) {
 	    sendLocker.Unlock();
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
@@ -844,7 +844,6 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                 }
             } else {
 		// we managed to send some bytes. Perform bookkeeping.
-                byConnected = ES_CONNECTED;
 				//MORPH - Changed by SiRoB, Show BusyTime
 				/*
                 m_bBusy = false;
@@ -902,12 +901,12 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     }
 
 
-    if(byConnected == ES_NOTCONNECTED && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
+    if(onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
         // enter control packet send queue
         // we might enter control packet queue several times for the same package,
         // but that costs very little overhead. Less overhead than trying to make sure
         // that we only enter the queue once.
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, true);
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
     }
 
     //CleanSendLatencyList();
