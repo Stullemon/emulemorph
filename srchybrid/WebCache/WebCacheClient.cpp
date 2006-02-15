@@ -1381,29 +1381,23 @@ bool CUpDownClient::AttachMultiOHCBsRequest(CSafeMemFile &data)
 		|| !SupportsMultiOHCBs())
 		return false;
 	ASSERT(reqfile);
-	uint8 fileCount = 1;
-
-	data.WriteUInt8(0); // number of requested files will be written here later
-//	byte fileHash[] = new byte[16];
-//	fileHash = reqfile->GetFileHash();
-	data.WriteHash16(reqfile->GetFileHash());
-	reqfile->WritePartStatus(&data);
+	//MORPH - Changed By SiRoB, WebCache Fix
+	uint8 fileCount = m_OtherRequests_list.GetCount()+m_OtherNoNeeded_list.GetCount();
+	if (!fileCount)
+		return false;
+	data.WriteUInt8(fileCount); // number of requested files will be written here later
 	
-	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos && (fileCount != -2); m_OtherRequests_list.GetNext(pos))
+	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos; m_OtherRequests_list.GetNext(pos))
 	{
 		data.WriteHash16(m_OtherRequests_list.GetAt(pos)->GetFileHash());
 		m_OtherRequests_list.GetAt(pos)->WritePartStatus(&data);
-		fileCount++;
 	}
 	
-	for (POSITION pos = m_OtherNoNeeded_list.GetHeadPosition(); pos && (fileCount != -1); m_OtherNoNeeded_list.GetNext(pos))
+	for (POSITION pos = m_OtherNoNeeded_list.GetHeadPosition(); pos; m_OtherNoNeeded_list.GetNext(pos))
 	{
 		data.WriteHash16(m_OtherNoNeeded_list.GetAt(pos)->GetFileHash());
 		m_OtherNoNeeded_list.GetAt(pos)->WritePartStatus(&data);
-		fileCount++;
 	}
-	data.SeekToBegin();
-	data.WriteUInt8(fileCount);
 	return true;
 }
 
