@@ -1198,7 +1198,7 @@ BEGIN
     LTEXT           "Description of the test...",IDC_TESTINFO,3,93,311,46
     PUSHBUTTON      "Start test...",IDC_STARTTEST,255,76,67,14,BS_FLAT
     /* Morph add some room for upnp checkbox: */
-    CONTROL         "Enable uPnP on ports",IDC_ENABLE_UPNP,"Button",
+    CONTROL         "Enable uPnP on ports",IDC_ENABLE_PNP,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,55,98,10
 END
 
