@@ -154,6 +154,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
 			cur_socket_stat = new Socket_stat;
 			m_stat_list.SetAt(socket,cur_socket_stat);
 			cur_socket_stat->realBytesToSpend = 999;
+			cur_socket_stat->lastsent = timeGetTime();
 		}
 		cur_socket_stat->scheduled = scheduled;
 		if (scheduled)
@@ -622,7 +623,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
             sleepTime = max((uint32)ceil((double)1000*doubleSendSize/nEstiminatedLimit), TIME_BETWEEN_UPLOAD_LOOPS);
         } else {
             // sleep for just as long as we need to get back to having one byte to send
-            sleepTime = max((uint32)ceil((double)(-realBytesToSpendClass[LAST_CLASS] + 1000)/allowedDataRateClass[LAST_CLASS]), TIME_BETWEEN_UPLOAD_LOOPS);
+            sleepTime = max((uint32)ceil((double)(-realBytesToSpendClass[LAST_CLASS] + 1000*doubleSendSize)/allowedDataRateClass[LAST_CLASS]), TIME_BETWEEN_UPLOAD_LOOPS);
         }
 		m_SentBytesSinceLastLoop = 0;
 		DWORD timeSinceLastLoop = timeGetTime() - lastLoopTick;
@@ -771,14 +772,18 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					for(uint32 slotCounter = lastclientpos+1; slotCounter < lastclientpos + slotCounterClass[classID]; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
-							for (int i = 0;i<m_SortedStandardOrder_list.GetSize();i++) {
-								ThrottledFileSocket* cur_socket = m_SortedStandardOrder_list.GetAt(i);
-								if (ClientDataRate[classID]==0 || i == m_SortedStandardOrder_list.GetSize()-1) {
-									m_SortedStandardOrder_list.Add(socket);
-									break;
-								} else if (cur_socket->GetLastCalledSend() < socket->GetLastCalledSend()){
-									m_SortedStandardOrder_list.InsertAt(i, socket);
-									break;
+							Socket_stat* stat = NULL;
+							if (m_stat_list.Lookup(socket,stat)) {
+								stat->socketpos = slotCounter;
+								for (int i = 0;i<m_SortedStandardOrder_list.GetSize();i++) {
+									ThrottledFileSocket* cur_socket = m_SortedStandardOrder_list.GetAt(i);
+									if (ClientDataRate[classID]==0 || i == m_SortedStandardOrder_list.GetSize()-1) {
+										m_SortedStandardOrder_list.Add(socket);
+										break;
+									} else if (cur_socket->GetLastCalledSend() < socket->GetLastCalledSend()){
+										m_SortedStandardOrder_list.InsertAt(i, socket);
+										break;
+									}
 								}
 							}
 						}
@@ -796,9 +801,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
-										uint32 schedoff = slotCounter+lastclientpos+1;
-										if (timeSinceLastLoop > 0 && stat->scheduled || schedoff == slotCounterClass[classID])
-											schedoff = slotCounterClass[classID]+1;
+										stat->lastsent = timeGetTime();
+										uint32 schedoff = stat->socketpos+1;
+										if (lastSpentBytes >= doubleSendSize && (stat->scheduled || schedoff == lastclientpos+slotCounterClass[classID]))
+											schedoff = lastclientpos+slotCounterClass[classID]+1;
 										if(schedoff > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
 											m_highestNumberOfFullyActivatedSlots[classID] = schedoff;
 										if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
@@ -810,8 +816,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							}
 						}
 					}
-					for(uint32 slotCounter = 0; slotCounter < m_SortedStandardOrder_list.GetSize() && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend; slotCounter++) {
-						ThrottledFileSocket* socket = m_SortedStandardOrder_list.GetAt(slotCounter);
+					for(uint32 slotCounter = 0; slotCounter < m_StandardOrder_list.GetSize() && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend; slotCounter++) {
+						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
@@ -820,9 +826,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
-										uint32 schedoff = slotCounter+lastclientpos+1;
-										if (stat->scheduled || schedoff == slotCounterClass[classID])
-											schedoff = slotCounterClass[classID]+1;
+										stat->lastsent = timeGetTime();
+										uint32 schedoff = stat->socketpos+1;
+										if (lastSpentBytes >= doubleSendSize && (stat->scheduled || schedoff == lastclientpos+slotCounterClass[classID]))
+											schedoff = lastclientpos+slotCounterClass[classID]+1;
 										if(schedoff > m_highestNumberOfFullyActivatedSlots[classID] && (lastSpentBytes >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
 											m_highestNumberOfFullyActivatedSlots[classID] = schedoff;
 										if (m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
@@ -848,7 +855,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			
 				}
 				if (realBytesToSpendClass[LAST_CLASS] > 999 && realBytesToSpendClass[classID] > 999) {
-					uint32 marge = 100*ClientDataRate[classID];
+					uint32 marge = 999;//100*ClientDataRate[classID];
 					if (marge < 999)
 						marge = 999;
 					if (m_SentBytesSinceLastCall > 0 && (realBytesToSpendClass[classID] > marge && m_highestNumberOfFullyActivatedSlots[classID] <  lastclientpos+1 || slotCounterClass[classID] == 0))
