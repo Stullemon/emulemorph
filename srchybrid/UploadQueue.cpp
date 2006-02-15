@@ -907,7 +907,7 @@ void CUploadQueue::Process() {
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos2);
 		for (uint32 i = cur_client->GetClassID(); i < NB_SPLITTING_CLASS; i++)
 			++m_aiSlotCounter[i];
-		if (cur_client->GetUploadState() != US_UPLOADING) m_nLastStartUpload = GetTickCount();
+		//if (cur_client->GetUploadState() != US_UPLOADING) m_nLastStartUpload = GetTickCount();
 	}
 	for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
 		m_abAddClientOfThisClass[i] = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]>m_aiSlotCounter[i];
