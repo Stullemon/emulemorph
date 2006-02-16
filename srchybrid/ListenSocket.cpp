@@ -2914,6 +2914,10 @@ int CALLBACK AcceptConnectionCond(LPWSABUF lpCallerId, LPWSABUF /*lpCallerData*/
 	{
 		LPSOCKADDR_IN pSockAddr = (LPSOCKADDR_IN)lpCallerId->buf;
 		ASSERT( pSockAddr->sin_addr.S_un.S_addr != 0 && pSockAddr->sin_addr.S_un.S_addr != INADDR_NONE );
+		// MORPH START - Added by SiRoB, Fake HighID
+		if (IsGoodIP(pSockAddr->sin_addr.S_un.S_addr, true))
+			thePrefs.m_bHighIdPossible = true;
+		// MORPH END   - Added by SiRoB, Fake HighID
 
 		if (theApp.ipfilter->IsFiltered(pSockAddr->sin_addr.S_un.S_addr)){
 			if (thePrefs.GetLogFilteredIPs())
