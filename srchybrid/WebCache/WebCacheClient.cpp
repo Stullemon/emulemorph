@@ -1383,7 +1383,7 @@ bool CUpDownClient::AttachMultiOHCBsRequest(CSafeMemFile &data)
 	ASSERT(reqfile);
 	//MORPH - Changed By SiRoB, WebCache Fix
 	uint8 fileCount = m_OtherRequests_list.GetCount()+m_OtherNoNeeded_list.GetCount();
-	if (!fileCount)
+	if (!fileCount && data.GetPosition() == 0)
 		return false;
 	data.WriteUInt8(fileCount); // number of requested files will be written here later
 	
