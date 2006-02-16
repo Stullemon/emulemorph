@@ -782,9 +782,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
 								stat->socketpos = slotCounter;
-								for (int i = 0;i<m_SortedStandardOrder_list.GetSize();i++) {
+								int count = m_SortedStandardOrder_list.GetSize();
+								for (int i = 0;i<count;i++) {
 									ThrottledFileSocket* cur_socket = m_SortedStandardOrder_list.GetAt(i);
-									if (ClientDataRate[classID]==0 || i == m_SortedStandardOrder_list.GetSize()-1) {
+									if (ClientDataRate[classID]==0 || i == count-1) {
 										m_SortedStandardOrder_list.Add(socket);
 										break;
 									} else if (cur_socket->GetLastCalledSend() < socket->GetLastCalledSend()){
