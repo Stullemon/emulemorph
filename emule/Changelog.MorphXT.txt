@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.x
+Changelog for eMule 0.47a MorphXT v8.2
 --------------------------------------
 FIXED  : (minor) Fixed glitch display arround webcache file infos detail [SiRoB]
 FIXED  : (major) Fixed Official WebCache OP_MULTI_FILE_REASK packet build [SiRoB]
