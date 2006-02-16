@@ -693,7 +693,11 @@ CString	CPreferences::webcacheLastResolvedName;
 uint32	CPreferences::webcacheLastGlobalIP;
 bool	CPreferences::UsesCachedTCPPort()  //jp
 {
-	if ((thePrefs.port==80) || (thePrefs.port==21) || (thePrefs.port==443) || (thePrefs.port==563) || (thePrefs.port==70) || (thePrefs.port==210) || ((thePrefs.port>=1025) && (thePrefs.port<=65535))) return true;
+	//MORPH - Changed by SiRoB,
+	/*
+	if ((thePrefs.GetPort()==80) || (thePrefs.port==21) || (thePrefs.port==443) || (thePrefs.port==563) || (thePrefs.port==70) || (thePrefs.port==210) || ((thePrefs.port>=1025) && (thePrefs.port<=65535))) return true;
+	*/
+	if ((thePrefs.GetPort()==80) || (thePrefs.GetPort()==21) || (thePrefs.GetPort()==443) || (thePrefs.GetPort()==563) || (thePrefs.GetPort()==70) || (thePrefs.GetPort()==210) || ((thePrefs.GetPort()>=1025) && (thePrefs.GetPort()<=65535))) return true;
 	else return false;
 }
 //JP proxy configuration test start
