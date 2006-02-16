@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.x
+--------------------------------------
+FIXED  : (minor) Make the Webcache Test work when we are using RandomPort feature [SiRoB]
+FIXED  : (minor) Make the WebCache Test work when we are using Fast Connection Reject option [SiRoB]
+FIXED  : (minor) Reworked a bit the fix arround MultiOHCB [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.2
 --------------------------------------
 FIXED  : (minor) Fixed glitch display arround webcache file infos detail [SiRoB]
