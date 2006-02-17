@@ -1739,8 +1739,6 @@
 #define IDC_FILTER                      2327
 #define IDC_IRC_USECHANFILTER           2329
 #define IDC_UDPDISABLE                  2330
-#define IDC_ENABLE_PNP                  2331
-#define IDC_ENABLE_UPNP                 2331
 #define IDC_PREVIEWPRIO                 2332
 #define IDC_DISABLEKNOWNLIST            2333
 #define IDC_WIZARD_NETWORK_KADEMLIA     2334
@@ -3047,6 +3045,7 @@
 #define IDS_UPNP_LOGEVENTS              21018
 #define IDS_UPNP_ENABLE                 21019
 #define IDS_UPNP_ENABLEWEB              21020
+#define IDC_ENABLE_PNP                 21021
 #define IDS_RANDOMPORTS                 21022
 #define IDS_MINPORT                     21023
 #define IDS_MAXPORT                     21025
