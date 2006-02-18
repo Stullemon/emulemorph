@@ -99,10 +99,8 @@ CUploadQueue::CUploadQueue()
 	/*
 	m_lastCalculatedDataRateTick = 0;
 	*/
-	avarage_tick_listLastRemovedTimestamp = avarage_dr_USS_listLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 
 	m_avarage_dr_sum = 0;
-	m_avarage_dr_USS_sum = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	m_avarage_overhead_dr_sum = 0; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 	friendDatarate = 0;
 
@@ -986,76 +984,46 @@ void CUploadQueue::Process() {
 	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
 	uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
 	curTick = ::GetTickCount();
-	if (sentBytes>0) {
-    	if (avarage_tick_list.GetCount() > 0)
-			avarage_tick_listPreviousAddedTimestamp = avarage_tick_list.GetTail();
-		if (avarage_dr_USS_list.GetCount() > 0)
-			avarage_dr_USS_listPreviousAddedTimestamp = avarage_dr_USS_list.GetTail().timestamp;
-    	// Save used bandwidth for speed calculations
-		avarage_dr_list.AddTail(sentBytes);
-		m_avarage_dr_sum += sentBytes;
 
-		/*
-		(void)theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
-		*/
-		//MORPH START - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
-		avarage_overhead_dr_list.AddTail(sentBytesOverhead);
-		m_avarage_overhead_dr_sum += sentBytesOverhead;
-		//MORPH END   - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
+   	// Save used bandwidth for speed calculations
+	m_avarage_dr_sum += sentBytes;
+	avarage_dr_list.AddTail(m_avarage_dr_sum);
 
-		avarage_friend_dr_list.AddTail(theStats.sessionSentBytesToFriend);
-    	// Save time beetween each speed snapshot
-		avarage_tick_list.AddTail(curTick);
-		//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
-		TransferredData data = {sentBytes,curTick};
-		avarage_dr_USS_list.AddTail(data);
-		m_avarage_dr_USS_sum += sentBytes;
-		//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
-	}
-	//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
-	while(avarage_dr_USS_list.GetCount() > 1 && (avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_list.GetHead().timestamp) > 30000){
-		avarage_dr_USS_listLastRemovedTimestamp = avarage_dr_USS_list.GetHead().timestamp;
-		m_avarage_dr_USS_sum -= avarage_dr_USS_list.RemoveHead().datalen;
-	}
+	//MORPH START - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
+	m_avarage_overhead_dr_sum += sentBytesOverhead;
+	avarage_overhead_dr_list.AddTail(m_avarage_overhead_dr_sum);
+	//MORPH END   - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 
-	if (avarage_dr_USS_list.GetCount() > 1) {
-		DWORD dwDuration = avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_listLastRemovedTimestamp;
-		if (dwDuration < 1000) dwDuration = 1000;
-		DWORD dwAvgTickDuration = dwDuration / avarage_dr_USS_list.GetCount();
-		if ((curTick - avarage_dr_USS_list.GetTail().timestamp) > dwAvgTickDuration)
-			dwDuration += curTick - avarage_dr_USS_list.GetTail().timestamp - dwAvgTickDuration;
-		datarate_USS = (UINT)(1000U * m_avarage_dr_USS_sum / dwDuration);
-	}
-	//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
-	
+	avarage_friend_dr_list.AddTail(theStats.sessionSentBytesToFriend);
+   	// Save time beetween each speed snapshot
+	avarage_tick_list.AddTail(curTick);
+
+		
 	// don't save more than MAXAVERAGETIMEUPLOAD secs of data
-	while((UINT)avarage_tick_list.GetCount() > 1 && (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
-		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
-		m_avarage_overhead_dr_sum -= avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
+	while((UINT)avarage_tick_list.GetCount() > 300){
+		avarage_dr_list.RemoveHead();
+		avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		avarage_friend_dr_list.RemoveHead();
-		avarage_tick_listLastRemovedTimestamp = avarage_tick_list.RemoveHead();
+		avarage_tick_list.RemoveHead();
 	}
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
 	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
 	if (avarage_tick_list.GetCount() > 1){
-		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listLastRemovedTimestamp;
-		if (dwDuration < 1000) dwDuration = 1000;
-		DWORD dwAvgTickDuration = dwDuration / avarage_tick_list.GetCount();
-		if ((curTick - avarage_tick_list.GetTail()) > dwAvgTickDuration)
-			dwDuration += curTick - avarage_tick_list.GetTail() - dwAvgTickDuration;
-		datarate = (UINT)(1000U * m_avarage_dr_sum / dwDuration);
-		datarateoverhead = (UINT)(1000U * m_avarage_overhead_dr_sum / dwDuration);
-		friendDatarate = (UINT)(1000U * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()+1));
-	}else if (avarage_tick_list.GetCount() == 1){
-		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
-		if (dwDuration < 1000) dwDuration = 1000;
-		if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
-			dwDuration = curTick - avarage_tick_list.GetTail();
-		datarate = (UINT)(1000U * m_avarage_dr_sum / dwDuration);
-		datarateoverhead = (UINT)(1000U * m_avarage_overhead_dr_sum / dwDuration); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
-		friendDatarate = 0;
-	}else {
+		DWORD dwDuration = avarage_tick_list.GetTail();
+		int index = avarage_tick_list.GetCount() - MAXAVERAGETIMEUPLOAD/100;
+		if (index < 0)
+			index = 0;
+		if (index < avarage_tick_list.GetCount())
+			dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetAt(avarage_tick_list.FindIndex(index));
+		if (dwDuration < 1000)
+			dwDuration = 1000;
+		datarate = (UINT)(1000U * (avarage_dr_list.GetTail()-avarage_dr_list.GetAt(avarage_dr_list.FindIndex(index))) / dwDuration);
+		datarate_USS = (UINT)(1000U * (avarage_dr_list.GetTail()-avarage_dr_list.GetAt(avarage_dr_list.FindIndex(index))) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()+1));//MORPH - Added by SiRoB, Keep An average datarate value for USS system
+		datarateoverhead = (UINT)(1000U * (avarage_overhead_dr_list.GetTail()-avarage_overhead_dr_list.GetAt(avarage_overhead_dr_list.FindIndex(index))) / dwDuration);
+		friendDatarate = (UINT)(1000U * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetAt(avarage_friend_dr_list.FindIndex(index))) / dwDuration);
+	}else{
 		datarate = 0;
+		datarate_USS = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 		datarateoverhead = 0; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		friendDatarate = 0;
 	}

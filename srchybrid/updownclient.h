@@ -1056,9 +1056,7 @@ protected:
 	UINT		m_nDownDataRateMS;
 	UINT		m_nSumForAvgDownDataRate;
 	CList<TransferredData> m_AvarageDDR_list;
-	uint32		m_AvarageDDR_ListLastRemovedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
-	uint32		m_AvarageDDRPreviousAddedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
-	
+
 	//////////////////////////////////////////////////////////
 	// GUI helpers
 	//

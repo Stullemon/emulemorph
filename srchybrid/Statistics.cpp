@@ -90,12 +90,6 @@ uint64	CStatistics::m_nUpDataOverheadOther;
 uint64	CStatistics::m_nUpDataOverheadOtherPackets;
 uint32	CStatistics::m_sumavgDDRO;
 uint32	CStatistics::m_sumavgUDRO;
-//MORPH START - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
-DWORD	CStatistics::m_AvarageDDRO_listLastRemovedTimestamp;
-DWORD	CStatistics::m_AvarageDDROPreviousAddedTimestamp;
-DWORD	CStatistics::m_AvarageUDRO_listLastRemovedTimestamp;
-DWORD	CStatistics::m_AvarageUDROPreviousAddedTimestamp;
-//MORPH END   - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 
 uint64	CStatistics::sessionReceivedBytes;
 uint64	CStatistics::sessionSentBytes;
@@ -171,8 +165,6 @@ CStatistics::CStatistics()
 	m_nUpDataOverheadOther = 0;
 	m_nUpDataOverheadOtherPackets = 0;
 	m_sumavgUDRO = 0;
-	m_AvarageUDROPreviousAddedTimestamp = m_AvarageUDRO_listLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
-	m_AvarageDDROPreviousAddedTimestamp = m_AvarageDDRO_listLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 
     /*ZZ*/m_nTotalCompletedBytes = 0;
 }
@@ -367,32 +359,25 @@ void CStatistics::CompDownDatarateOverhead()
 {
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 	DWORD curTick = GetTickCount();
-	if (m_nDownDataRateMSOverhead > 0) {
-		if (m_AvarageDDRO_list.GetCount() > 0)
-			m_AvarageDDROPreviousAddedTimestamp = m_AvarageDDRO_list.GetTail().timestamp;
-		TransferredData newitem = {m_nDownDataRateMSOverhead, curTick};
-			m_AvarageDDRO_list.AddTail(newitem);
-		m_sumavgDDRO += m_nDownDataRateMSOverhead;
-		m_nDownDataRateMSOverhead = 0;
-	}
-	while ((UINT)m_AvarageDDRO_list.GetCount() > 1 &&  (m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD) {
-		m_AvarageDDRO_listLastRemovedTimestamp = m_AvarageDDRO_list.GetHead().timestamp;
-		m_sumavgDDRO -= m_AvarageDDRO_list.RemoveHead().datalen;
+
+	m_sumavgDDRO += m_nDownDataRateMSOverhead;
+	TransferredData newitem = {m_sumavgDDRO, curTick};
+	m_AvarageDDRO_list.AddTail(newitem);
+	m_nDownDataRateMSOverhead = 0;
+
+	while ((UINT)m_AvarageDDRO_list.GetCount() > 300) {
+		m_AvarageDDRO_list.RemoveHead();
 	}
 
 	if (m_AvarageDDRO_list.GetCount() > 1) {
-		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_listLastRemovedTimestamp;
-		if(dwDuration < 1000) dwDuration = 1000;
-		DWORD dwAvgTickDuration = dwDuration / m_AvarageDDRO_list.GetCount();
-		if ((curTick - m_AvarageDDRO_list.GetTail().timestamp) > dwAvgTickDuration)
-			dwDuration += curTick - m_AvarageDDRO_list.GetTail().timestamp - dwAvgTickDuration;
-		m_nDownDatarateOverhead = 1000U * m_sumavgDDRO / dwDuration;
-	} else if (m_AvarageDDRO_list.GetCount() == 1) {
-		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDROPreviousAddedTimestamp;
-		if(dwDuration < 1000) dwDuration = 1000;
-		if ((curTick - m_AvarageDDRO_list.GetTail().timestamp) > dwDuration)
-			dwDuration = curTick - m_AvarageDDRO_list.GetTail().timestamp;
-		m_nDownDatarateOverhead = 1000 * m_sumavgDDRO / dwDuration;
+		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp;
+		int index = m_AvarageDDRO_list.GetCount()-MAXAVERAGETIMEDOWNLOAD/100;
+		if (index < 0) index = 0;
+		if(index < m_AvarageDDRO_list.GetCount())
+			dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetAt(m_AvarageDDRO_list.FindIndex(index)).timestamp;
+		if (dwDuration < 1000)
+			dwDuration = 1000;
+		m_nDownDatarateOverhead = (UINT)(1000U * (m_AvarageDDRO_list.GetTail().datalen-m_AvarageDDRO_list.GetAt(m_AvarageDDRO_list.FindIndex(index)).datalen) / dwDuration);
 	} else
 		m_nDownDatarateOverhead = 0;
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
@@ -402,33 +387,26 @@ void CStatistics::CompUpDatarateOverhead()
 {
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 	DWORD curTick = GetTickCount();
-	if (m_nUpDataRateMSOverhead > 0) {
-		if (m_AvarageUDRO_list.GetCount() > 0)
-			m_AvarageUDROPreviousAddedTimestamp = m_AvarageUDRO_list.GetTail().timestamp;
-		TransferredData newitem = {m_nUpDataRateMSOverhead, curTick};
-		m_AvarageUDRO_list.AddTail(newitem);
-		m_sumavgUDRO += m_nUpDataRateMSOverhead;
-		m_nUpDataRateMSOverhead = 0;
-	}
+	
+	m_sumavgUDRO += m_nUpDataRateMSOverhead;
+	TransferredData newitem = {m_sumavgUDRO, curTick};
+	m_AvarageUDRO_list.AddTail(newitem);
+	m_nUpDataRateMSOverhead = 0;
 
-	while ((UINT)m_AvarageUDRO_list.GetCount() > 1 && (m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD) {
-		m_AvarageUDRO_listLastRemovedTimestamp = m_AvarageUDRO_list.GetHead().timestamp;
-		m_sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
+	while ((UINT)m_AvarageUDRO_list.GetCount() > 300) {
+		m_AvarageUDRO_list.RemoveHead();
 	}
 
 	if (m_AvarageUDRO_list.GetCount() > 1) {
-		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_listLastRemovedTimestamp;
-		if(dwDuration < 1000) dwDuration = 1000;
-		DWORD dwAvgTickDuration = dwDuration / m_AvarageUDRO_list.GetCount();
-		if ((curTick - m_AvarageUDRO_list.GetTail().timestamp) > dwAvgTickDuration)
-			dwDuration += curTick - m_AvarageUDRO_list.GetTail().timestamp - dwAvgTickDuration;
-		m_nUpDatarateOverhead = 1000U * m_sumavgUDRO / dwDuration;
-	} else if (m_AvarageUDRO_list.GetCount() == 1) {
-		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDROPreviousAddedTimestamp;
-		if(dwDuration < 1000) dwDuration = 1000;
-		if ((curTick - m_AvarageUDRO_list.GetTail().timestamp) > dwDuration)
-			dwDuration = curTick - m_AvarageUDRO_list.GetTail().timestamp;
-		m_nUpDatarateOverhead = 1000U * m_sumavgUDRO / dwDuration;
+		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp;
+		int index = m_AvarageUDRO_list.GetCount()-MAXAVERAGETIMEUPLOAD/100;
+		if (index < 0)
+			index = 0;
+		if(index < m_AvarageUDRO_list.GetCount())
+			dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetAt(m_AvarageUDRO_list.FindIndex(index)).timestamp;
+		if (dwDuration < 1000)
+			dwDuration = 1000;
+		m_nUpDatarateOverhead = (UINT)(1000U * (m_AvarageUDRO_list.GetTail().datalen-m_AvarageUDRO_list.GetAt(m_AvarageUDRO_list.FindIndex(index)).datalen) / dwDuration);
 	} else
 		m_nUpDatarateOverhead = 0;
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
