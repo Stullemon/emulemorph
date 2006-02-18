@@ -3306,7 +3306,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 	// MORPH START - Added by Commander, WebCache 1.2e
 
 	if( socket != NULL && GetUploadState() != US_NONE) {
-		//strState.AppendFormat(_T(" (LB: %u) (BR: %0.2f)"), socket->GetBufferLenToSend(), socket->GetBusyRatioTime());
+		strState.AppendFormat(_T(" (BusyRatio: %0.2f)"), socket->GetBusyRatioTime());
 		DWORD busySince = socket->GetBusyTimeSince();
 		if (busySince > 0)
 			strState.AppendFormat(_T(" (Busy: %ums)"), GetTickCount() - busySince);
