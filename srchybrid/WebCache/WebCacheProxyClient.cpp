@@ -98,7 +98,7 @@ CWebCacheProxyClient::~CWebCacheProxyClient(void)
 bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 {
 	//check if we have reached the limit
-	if (thePrefs.ses_WEBCACHEREQUESTS>100 && thePrefs.ses_successfull_WCDOWNLOADS == 0) //disable webcache for this session if more than 100 blocks were tried withouth success
+	if (thePrefs.ses_WEBCACHEREQUESTS>100 && thePrefs.ses_successfull_WCDOWNLOADS == 0 && thePrefs.WebCacheDisabledThisSession == false) //disable webcache for this session if more than 100 blocks were tried withouth success
 	{
 		thePrefs.WebCacheDisabledThisSession = true;
 		AfxMessageBox(_T("Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until emule is restarted!"));
