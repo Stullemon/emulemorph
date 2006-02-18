@@ -714,7 +714,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								sint64 limit = -((sint64)2000*allowedclientdatarate);
 								if (stat->realBytesToSpend < limit)
 									stat->realBytesToSpend = limit;
-								limit = (sint64)(sint64)1000*allowedclientdatarate;
+								limit = (sint64)1000;
 								if (stat->realBytesToSpend > limit)
 									stat->realBytesToSpend = limit;
 								if (timeSinceLastLoop > 0) {
