@@ -44,7 +44,7 @@ public:
 	virtual ~CEMSocket();
 
 	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-    /*MORPH*/bool	IsConnected() const {return byConnected == ES_CONNECTED || byConnected == ES_NOTCONNECTED ;}
+    bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
 	virtual bool IsRawDataMode() const { return false; }
 	void	SetDownloadLimit(uint32 limit);
