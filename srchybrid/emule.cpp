@@ -2051,16 +2051,16 @@ void CemuleApp::RemoveIncomingFolderIcon()
 void CemuleApp::AddTempFolderIcon(){
 	CString desktopFile, exePath;
 
-	desktopFile = CString(thePrefs.GetTempDir()) + _T("\\Desktop.ini");
-	exePath = thePrefs.GetAppDir() + CString(theApp.m_pszExeName) + _T(".exe");
+  exePath = thePrefs.GetAppDir() + CString(theApp.m_pszExeName) + _T(".exe");
+  CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+  desktopIni.WriteString(_T("IconFile"),exePath);
+  desktopIni.WriteInt(_T("IconIndex"),1);
 
-	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
-
-	desktopIni.WriteString(_T("IconFile"),exePath);
-	desktopIni.WriteInt(_T("IconIndex"),1);
-
-	SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
-	PathMakeSystemFolder(thePrefs.GetTempDir());
+   for (int i=0;i<thePrefs.tempdir.GetCount();i++) { // leuk_he: multiple temp dirs
+    	 desktopFile = CString(thePrefs.GetTempDir(i)) + _T("\\Desktop.ini");
+    	 SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
+	     PathMakeSystemFolder(thePrefs.GetTempDir(i));
+   }
 }
 
 void CemuleApp::RemoveTempFolderIcon(){

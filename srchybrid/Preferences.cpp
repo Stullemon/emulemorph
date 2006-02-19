@@ -946,11 +946,13 @@ void CPreferences::Init()
 		}
 	}
 	// khaos::kmod+ Source Lists directory
-	CString sSourceListsPath = CString(GetTempDir()) + _T("\\Source Lists");
-	if (UseSaveLoadSources() && !PathFileExists(sSourceListsPath.GetBuffer()) && !::CreateDirectory(sSourceListsPath.GetBuffer(), 0)) {
-		CString strError;
-		strError.Format(_T("Failed to create source lists directory \"%s\" - %s"), sSourceListsPath, GetErrorMessage(GetLastError()));
-		AfxMessageBox(strError, MB_ICONERROR);
+	for (int i=0;i<thePrefs.tempdir.GetCount();i++) { // leuk_he: multiple temp dirs for save sources. 
+	   CString sSourceListsPath = CString(thePrefs.GetTempDir(i)) + _T("\\Source Lists");
+	   if (UseSaveLoadSources() && !PathFileExists(sSourceListsPath.GetBuffer()) && !::CreateDirectory(sSourceListsPath.GetBuffer(), 0)) {
+	  	  CString strError;
+		  strError.Format(_T("Failed to create source lists directory \"%s\" - %s"), sSourceListsPath, GetErrorMessage(GetLastError()));
+		  AfxMessageBox(strError, MB_ICONERROR);
+	   }
 	}
 	// khaos::kmod-
 
