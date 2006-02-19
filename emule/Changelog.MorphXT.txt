@@ -1,7 +1,8 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.x
+Changelog for eMule 0.47a MorphXT v8.4
 --------------------------------------
 FIXED  : (minor) Save sources for multiple tempdir & system icon mulit tempdirs [leuk_he]
+FIXED  : (major) average datarate calcul was wrong (USS & Onlinesig were affected, introduced in 8.3) [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.3
