@@ -1107,10 +1107,10 @@ uint32 CUpDownClient::SendBlockData(){
 			dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetAt(m_AvarageUDR_list.FindIndex(index)).timestamp;
 		if (dwDuration < 1000)
 			dwDuration = 1000;
-		m_nUpDatarate = (UINT)(1000U * ( m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetAt(m_AvarageUDR_list.FindIndex(index)).datalen)/ dwDuration);
+		m_nUpDatarate = (UINT)(1000U * ( m_AvarageUDR_list.GetTail().datalen - m_AvarageUDR_list.GetAt(m_AvarageUDR_list.FindIndex(index)).datalen)/ dwDuration);
 	}else
 		m_nUpDatarate = 0;
-
+	
 	//MORPH END   - Modified by SiRoB, Better Upload rate calcul
     // Check if it's time to update the display.
 	if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {
