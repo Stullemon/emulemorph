@@ -371,7 +371,7 @@ void CStatistics::CompDownDatarateOverhead()
 
 	if (m_AvarageDDRO_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp;
-		int index = m_AvarageDDRO_list.GetCount()-MAXAVERAGETIMEDOWNLOAD/100;
+		int index = m_AvarageDDRO_list.GetCount()-10*MAXAVERAGETIMEDOWNLOAD;
 		if (index < 0) index = 0;
 		if(index < m_AvarageDDRO_list.GetCount())
 			dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetAt(m_AvarageDDRO_list.FindIndex(index)).timestamp;

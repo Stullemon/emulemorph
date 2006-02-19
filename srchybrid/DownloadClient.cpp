@@ -1648,7 +1648,7 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 	}
 	if (m_AvarageDDR_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
-		int index = m_AvarageDDR_list.GetCount()-MAXAVERAGETIMEDOWNLOAD/100;
+		int index = m_AvarageDDR_list.GetCount()-10*MAXAVERAGETIMEDOWNLOAD;
 		if (index < 0)
 			index = 0;
 		if(index < m_AvarageDDR_list.GetCount())

@@ -1010,7 +1010,7 @@ void CUploadQueue::Process() {
 	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
 	if (avarage_tick_list.GetCount() > 1){
 		DWORD dwDuration = avarage_tick_list.GetTail();
-		int index = avarage_tick_list.GetCount() - MAXAVERAGETIMEUPLOAD/100;
+		int index = avarage_tick_list.GetCount() - 10*MAXAVERAGETIMEUPLOAD;
 		if (index < 0)
 			index = 0;
 		if (index < avarage_tick_list.GetCount())
