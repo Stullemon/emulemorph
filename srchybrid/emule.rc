@@ -1182,24 +1182,24 @@ BEGIN
 END
 
 
+/* leuk_he: add upnp checkbox: */
 IDD_WIZ1_PORTS DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Connection/Ports"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    LTEXT           "What is a port...",IDC_PORTINFO,0,0,317,52
-    LTEXT           "TCP:",IDC_TCP_LABEL,7,67,60,8
+    CONTROL         "Enable uPnP on ports",IDC_ENABLE_PNP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,55,98,10
     EDITTEXT        IDC_TCP,7,77,38,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "UDP:",IDC_UDP_LABEL,65,67,60,8
     EDITTEXT        IDC_UDP,65,77,38,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Check1",IDC_UDPDISABLE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,107,79,98,10
+    PUSHBUTTON      "Start test...",IDC_STARTTEST,246,76,67,14,BS_FLAT
+    LTEXT           "What is a port...",IDC_PORTINFO,0,0,317,52
+    LTEXT           "TCP:",IDC_TCP_LABEL,7,67,60,8
+    LTEXT           "UDP:",IDC_UDP_LABEL,65,67,60,8
     GROUPBOX        "Connection Test",IDC_TESTFRAME,0,97,317,45,BS_FLAT
-    LTEXT           "Description of the test...",IDC_TESTINFO,3,93,311,46
-    PUSHBUTTON      "Start test...",IDC_STARTTEST,255,76,67,14,BS_FLAT
-    /* Morph add some room for upnp checkbox: */
-    CONTROL         "Enable uPnP on ports",IDC_ENABLE_PNP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,55,98,10
+    LTEXT           "Description of the test...",IDC_TESTINFO,3,106,311,33
 END
 
 IDD_WIZ1_ULDL_PRIO DIALOGEX 0, 0, 317, 143
