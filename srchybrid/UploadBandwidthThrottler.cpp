@@ -785,11 +785,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								int count = m_SortedStandardOrder_list.GetSize();
 								for (int i = 0;i<count;i++) {
 									ThrottledFileSocket* cur_socket = m_SortedStandardOrder_list.GetAt(i);
-									if (ClientDataRate[classID]==0 || i == count-1) {
+									if (ClientDataRate[classID]==0) {
 										m_SortedStandardOrder_list.Add(socket);
 										break;
 									} else if (cur_socket->GetLastCalledSend() < socket->GetLastCalledSend()){
 										m_SortedStandardOrder_list.InsertAt(i, socket);
+										break;
+									} else if (i == count-1) {
+										m_SortedStandardOrder_list.Add(socket);
 										break;
 									}
 								}
@@ -866,7 +869,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					uint32 marge = 999;//100*ClientDataRate[classID];
 					if (marge < 999)
 						marge = 999;
-					if (m_SentBytesSinceLastCall > 0 && (realBytesToSpendClass[classID] > marge && m_highestNumberOfFullyActivatedSlots[classID] <  lastclientpos+1 || slotCounterClass[classID] == 0))
+					if (m_SentBytesSinceLastCall > 0 && realBytesToSpendClass[classID] > marge && m_highestNumberOfFullyActivatedSlots[classID] <  lastclientpos+1 || slotCounterClass[classID] == 0)
 						m_highestNumberOfFullyActivatedSlots[classID] = lastclientpos+1;
 					realBytesToSpendClass[classID] = 999;
 				}
