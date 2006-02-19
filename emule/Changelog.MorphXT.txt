@@ -6,9 +6,13 @@ FIXED  : (minor) Save sources for multiple tempdir & system icon mulit tempdirs 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.3
 --------------------------------------
-FIXED  : (minor) Make the Webcache Test work when we are using RandomPort feature [SiRoB]
-FIXED  : (minor) Make the WebCache Test work when we are using Fast Connection Reject option [SiRoB]
-FIXED  : (minor) Reworked a bit the fix arround MultiOHCB [SiRoB]
+FIXED  : (minor) WC: Make the Webcache Test work when we are using RandomPort feature [SiRoB]
+FIXED  : (minor) WC: Make the WebCache Test work when we are using Fast Connection Reject option [SiRoB]
+FIXED  : (major) WC: Reworked a bit the fix arround MultiOHCB [SiRoB]
+FIXED  : (minor) WC: Display only once msgbox "Your Proxyserver does not seem to...." [SiRoB]
+
+CHANGED: Average datarate speed as been reviewed a bit [SiRoB]
+CHANGED: Turn back official slot limiter [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.2
