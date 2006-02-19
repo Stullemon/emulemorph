@@ -1018,7 +1018,7 @@ void CUploadQueue::Process() {
 		if (dwDuration < 1000)
 			dwDuration = 1000;
 		datarate = (UINT)(1000U * (avarage_dr_list.GetTail()-avarage_dr_list.GetAt(avarage_dr_list.FindIndex(index))) / dwDuration);
-		datarate_USS = (UINT)(1000U * (avarage_dr_list.GetTail()-avarage_dr_list.GetHead()) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()+1));//MORPH - Added by SiRoB, Keep An average datarate value for USS system
+		datarate_USS = (UINT)(1000U * (avarage_dr_list.GetTail()-avarage_dr_list.GetHead()) / max(avarage_tick_list.GetTail() - avarage_tick_list.GetHead(),1000));//MORPH - Added by SiRoB, Keep An average datarate value for USS system
 		datarateoverhead = (UINT)(1000U * (avarage_overhead_dr_list.GetTail()-avarage_overhead_dr_list.GetAt(avarage_overhead_dr_list.FindIndex(index))) / dwDuration);
 		friendDatarate = (UINT)(1000U * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetAt(avarage_friend_dr_list.FindIndex(index))) / dwDuration);
 	}else{

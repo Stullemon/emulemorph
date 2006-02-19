@@ -399,7 +399,7 @@ void CStatistics::CompUpDatarateOverhead()
 
 	if (m_AvarageUDRO_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp;
-		int index = m_AvarageUDRO_list.GetCount()-MAXAVERAGETIMEUPLOAD/100;
+		int index = m_AvarageUDRO_list.GetCount()-10*MAXAVERAGETIMEUPLOAD;
 		if (index < 0)
 			index = 0;
 		if(index < m_AvarageUDRO_list.GetCount())
