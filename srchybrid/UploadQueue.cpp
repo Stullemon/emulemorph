@@ -1015,8 +1015,8 @@ void CUploadQueue::Process() {
 			index = 0;
 		if (index < avarage_tick_list.GetCount())
 			dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetAt(avarage_tick_list.FindIndex(index));
-		if (dwDuration < 1000)
-			dwDuration = 1000;
+		if (dwDuration < 500*MAXAVERAGETIMEUPLOAD)
+			dwDuration = 500*MAXAVERAGETIMEUPLOAD;
 		datarate = (UINT)(1000U * (avarage_dr_list.GetTail()-avarage_dr_list.GetAt(avarage_dr_list.FindIndex(index))) / dwDuration);
 		datarate_USS = (UINT)(1000U * (avarage_dr_list.GetTail()-avarage_dr_list.GetHead()) / max(avarage_tick_list.GetTail() - avarage_tick_list.GetHead(),1000));//MORPH - Added by SiRoB, Keep An average datarate value for USS system
 		datarateoverhead = (UINT)(1000U * (avarage_overhead_dr_list.GetTail()-avarage_overhead_dr_list.GetAt(avarage_overhead_dr_list.FindIndex(index))) / dwDuration);
@@ -1055,7 +1055,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 	if (thePrefs.GetMaxClientDataRate() && m_abAddClientOfThisClass[LAST_CLASS])
 		uMaxClientDataRate = thePrefs.GetMaxClientDataRate();
 	if (thePrefs.GetMaxClientDataRateFriend() && m_abAddClientOfThisClass[0])
-		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRate(),uMaxClientDataRate);
+		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRateFriend(),uMaxClientDataRate);
 	if (thePrefs.GetMaxClientDataRatePowerShare() && m_abAddClientOfThisClass[1])
 		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRatePowerShare(),uMaxClientDataRate);
 

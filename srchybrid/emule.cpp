@@ -1075,7 +1075,11 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 		sprintf(buffer,"%.1f",(float)downloadqueue->GetDatarate()/1024); 
 		file.Write(buffer,strlen(buffer)); 
 		file.Write("|",1); 
+		//MORPH - Changed by SiRoB, Keep An average datarate value for USS system
+		/*
 		sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate()/1024); 
+		*/
+		sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate(true)/1024); 
 		file.Write(buffer,strlen(buffer)); 
 		file.Write("|",1); 
 		itoa(uploadqueue->GetWaitingUserCount(),buffer,10); 
