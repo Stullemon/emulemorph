@@ -1523,44 +1523,32 @@ int CReadBlockFromFileThread::Run() {
 	byte* filedata = NULL;
 	CSyncHelper lockFile;
 	try{
-		if (!srcfile->IsPartFile()){
-			CString fullname;
-			if (srcfile->IsPartFile() && ((CPartFile*)srcfile)->GetStatus() != PS_COMPLETE){
-				((CPartFile*)srcfile)->m_FileCompleteMutex.Lock();
-				lockFile.m_pObject = &((CPartFile*)srcfile)->m_FileCompleteMutex;
-				// If it's a part file which we are uploading the file remains locked until we've read the
-				// current block. This way the file completion thread can not (try to) "move" the file into
-				// the incoming directory.
+		CString fullname;
+		if (srcfile->IsPartFile() && ((CPartFile*)srcfile)->GetStatus() != PS_COMPLETE){
+			((CPartFile*)srcfile)->m_FileCompleteMutex.Lock();
+			lockFile.m_pObject = &((CPartFile*)srcfile)->m_FileCompleteMutex;
+			// If it's a part file which we are uploading the file remains locked until we've read the
+			// current block. This way the file completion thread can not (try to) "move" the file into
+			// the incoming directory.
 
-				fullname = RemoveFileExtension(((CPartFile*)srcfile)->GetFullName());
-			}
-			else{
-				fullname.Format(_T("%s\\%s"),srcfile->GetPath(),srcfile->GetFileName());
-			}
-		
-			if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
-				throw GetResString(IDS_ERR_OPEN);
-
-			file.Seek(StartOffset,0);
-			
-			filedata = new byte[togo+500];
-			if (uint32 done = file.Read(filedata,togo) != togo){
-				file.SeekToBegin();
-				file.Read(filedata + done,togo-done);
-			}
-			file.Close();
+			fullname = RemoveFileExtension(((CPartFile*)srcfile)->GetFullName());
 		}
 		else{
-			CPartFile* partfile = (CPartFile*)srcfile;
-
-			partfile->m_hpartfile.Seek(StartOffset,0);
-			
-			filedata = new byte[togo+500];
-			if (uint32 done = partfile->m_hpartfile.Read(filedata,togo) != togo){
-				partfile->m_hpartfile.SeekToBegin();
-				partfile->m_hpartfile.Read(filedata + done,togo-done);
-			}
+			fullname.Format(_T("%s\\%s"),srcfile->GetPath(),srcfile->GetFileName());
 		}
+		
+		if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
+			throw GetResString(IDS_ERR_OPEN);
+
+		file.Seek(StartOffset,0);
+			
+		filedata = new byte[togo+500];
+		if (uint32 done = file.Read(filedata,togo) != togo){
+			file.SeekToBegin();
+			file.Read(filedata + done,togo-done);
+		}
+		file.Close();
+		
 		if (lockFile.m_pObject){
 			lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
 			lockFile.m_pObject = NULL;
