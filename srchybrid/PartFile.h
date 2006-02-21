@@ -232,11 +232,6 @@ public:
 	// Barry - Added as replacement for BlockReceived to buffer data before writing to disk
 	uint32	WriteToBuffer(uint64 transize, const BYTE *data, uint64 start, uint64 end, Requested_Block_Struct *block, const CUpDownClient* client);
 	void	FlushBuffer(bool forcewait=false, bool bForceICH = false, bool bNoAICH = false);
-	//MORPH START - Added by SiRoB, Flush Thread
-	void	FlushDone(FlushDone_Struct* FlushSetting);
-	void	SetFlushThread(bool state) { m_bIsFlushThread = state; };
-	bool	IsFlushThread() { return m_bIsFlushThread; };
-	//MORPH END   - Added by SiRoB, Flush Thread
 	uint64	GetTotalBufferData() {return m_nTotalBufferData;} //MORPH - Added by SiRoB, Import Part
 	// Barry - This will invert the gap list, up to caller to delete gaps when done
 	// 'Gaps' returned are really the filled areas, and guaranteed to be in order
@@ -451,8 +446,6 @@ private:
 
     DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
 	
-	bool	m_bIsFlushThread; //MORPH Added by SiRoB, Flush Thread
-
 	// khaos::categorymod+
 	UINT	m_catResumeOrder;
 	// khaos::categorymod-
@@ -543,19 +536,3 @@ private:
 	CArray<uchar*,uchar*>	m_DesiredHashes;
 };
 // SLUGFILLER: SafeHash
-
-//MORPH START - Added by SiRoB, Flush Thread
-class CPartFileFlushThread : public CWinThread
-{
-	DECLARE_DYNCREATE(CPartFileFlushThread)
-protected:
-	CPartFileFlushThread()	{}
-public:
-	virtual	BOOL	InitInstance() {return true;}
-	virtual int		Run();
-	void	SetPartFile(CPartFile* pOwner, FlushDone_Struct* changedPart);
-private:
-	CPartFile*				m_partfile;
-	FlushDone_Struct*			m_FlushSetting;
-};
-//MORPH END   - Added by SiRoB, Flush Thread
