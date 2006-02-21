@@ -75,7 +75,7 @@ void CStatisticFile::AddTransferred(uint64 start, uint64 bytes){	//MORPH - Added
 	transferred += bytes;
 	alltimetransferred += bytes;
 	theApp.knownfiles->transferred += bytes;
-	AddBlockTransferred(start, start+bytes+1, 1);	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
+	AddBlockTransferred(start, start+bytes/*FIX?+1*/, 1);	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 	theApp.sharedfiles->UpdateFile(fileParent);
 	m_bInChangedEqualChanceValue = false;	//Morph - added by AndCycle, Equal Chance For Each File
 }
