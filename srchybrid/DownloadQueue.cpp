@@ -908,7 +908,7 @@ void CDownloadQueue::Process(){
 		}
     }
 
-	if (maxDownload != UNLIMITED*1024 && datarate > 1500 || thePrefs.IsZZRatioDoesWork()){
+	if (maxDownload != UNLIMITED*1024 && datarate > 1500){
 		downspeed = (UINT)((maxDownload*100)/(datarate+1));
 		if (downspeed < 50)
 			downspeed = 50;
@@ -959,6 +959,12 @@ void CDownloadQueue::Process(){
         }
 	}
 	m_bIsZZRatioInWork = tempIsZZRatioInWork;  //MORPH - Added by SiRoB, ZZ Ratio in work
+	if (m_bIsZZRatioInWork){
+		if (downspeed < 50)
+			downspeed = 50;
+		else if (downspeed > 200)
+			downspeed = 200;
+	}	
 	//MORPH START - Removed by SiRoB, sum datarate calculated for each file
 	/*
 	while(avarage_dr_list.GetCount()>0 && (GetTickCount() - avarage_dr_list.GetHead().timestamp > 10*1000) )
