@@ -190,6 +190,7 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 		}
 		if (eNewState == US_UPLOADING) {
 			m_fSentOutOfPartReqs = 0;
+			m_AvarageUDRPreviousAddedTimestamp = m_AvarageUDRLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 		}
 		// don't add any final cleanups for US_NONE here	
 		m_nUploadState = (_EUploadState)eNewState;
@@ -1087,30 +1088,38 @@ uint32 CUpDownClient::SendBlockData(){
     }
 	//MORPH START - Modified by SiRoB, Better Upload rate calcul
 	curTick = GetTickCount();
-	// Store how much data we've Transferred this round,
-	// to be able to calculate average speed later
-	// keep sum of all values in list up to date
-	m_nSumForAvgUpDataRate = (UINT)(m_nSumForAvgUpDataRate + sentBytesCompleteFile + sentBytesPartFile);
-	TransferredData newitem = {m_nSumForAvgUpDataRate, curTick};
-	m_AvarageUDR_list.AddTail(newitem);
+	if(sentBytesCompleteFile + sentBytesPartFile > 0) {
+		// Store how much data we've Transferred this round,
+		// to be able to calculate average speed later
+		// keep sum of all values in list up to date
+		if (m_AvarageUDR_list.GetCount() > 0)
+			m_AvarageUDRPreviousAddedTimestamp = m_AvarageUDR_list.GetTail().timestamp;
+		TransferredData newitem = {(UINT)(sentBytesCompleteFile + sentBytesPartFile), curTick};
+		m_AvarageUDR_list.AddTail(newitem);
+		m_nSumForAvgUpDataRate = (UINT)(m_nSumForAvgUpDataRate + sentBytesCompleteFile + sentBytesPartFile);
+	}
 	
-	while ((UINT)m_AvarageUDR_list.GetCount() > 300) {
-		m_AvarageUDR_list.RemoveHead();
+	while ((UINT)m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD) {
+		m_AvarageUDRLastRemovedTimestamp = m_AvarageUDR_list.GetHead().timestamp;
+		m_nSumForAvgUpDataRate -= m_AvarageUDR_list.RemoveHead().datalen;
 	}
 	
     if(m_AvarageUDR_list.GetCount() > 1) {
-		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
-		int index = m_AvarageUDR_list.GetCount()-10*MAXAVERAGETIMEUPLOAD;
-		if (index < 0)
-			index = 0;
-		if (index < m_AvarageUDR_list.GetCount())
-			dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetAt(m_AvarageUDR_list.FindIndex(index)).timestamp;
-		if (dwDuration < 500*MAXAVERAGETIMEUPLOAD)
-			dwDuration = 500*MAXAVERAGETIMEUPLOAD;
-		m_nUpDatarate = (UINT)(1000U * ( m_AvarageUDR_list.GetTail().datalen - m_AvarageUDR_list.GetAt(m_AvarageUDR_list.FindIndex(index)).datalen)/ dwDuration);
-	}else
+		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRLastRemovedTimestamp;
+		if (dwDuration < 100) dwDuration = 100;
+		DWORD dwAvgTickDuration = dwDuration / m_AvarageUDR_list.GetCount();
+		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwAvgTickDuration)
+			dwDuration += curTick - m_AvarageUDR_list.GetTail().timestamp - dwAvgTickDuration;
+		m_nUpDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgUpDataRate / dwDuration);
+	}else if(m_AvarageUDR_list.GetCount() == 1) {
+		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp;
+		if (dwDuration < 100) dwDuration = 100;
+		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwDuration)
+			dwDuration = curTick - m_AvarageUDR_list.GetTail().timestamp;
+		m_nUpDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgUpDataRate / dwDuration);
+	} else {
 		m_nUpDatarate = 0;
-	
+	}
 	//MORPH END   - Modified by SiRoB, Better Upload rate calcul
     // Check if it's time to update the display.
 	if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {
