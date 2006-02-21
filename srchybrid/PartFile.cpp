@@ -5516,6 +5516,7 @@ void CPartFile::FlushDone(FlushDone_Struct* FlushSetting)
 	}
 	delete[] FlushSetting->changedPart;
 	delete	FlushSetting;
+	m_bIsFlushThread = false;
 }
 
 IMPLEMENT_DYNCREATE(CPartFileFlushThread, CWinThread)
@@ -5560,7 +5561,6 @@ int CPartFileFlushThread::Run()
 	}
 
 	VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FLUSHDONE,(WPARAM)m_FlushSetting,(LPARAM)m_partfile) );
-	m_partfile->SetFlushThread(NULL);
 	//theApp.QueueDebugLogLine(false,_T("FLUSH:End (%s)"),m_partfile->GetFileName());
 	return 0;
 }
