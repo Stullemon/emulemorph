@@ -114,14 +114,14 @@ bool CUDPSocket::Create()
 			
 			//MORPH START -, Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 			if(thePrefs.GetICFSupport() && thePrefs.GetICFSupportServerUDP()){
-				if (theApp.m_pFirewallOpener->OpenPort(port, NAT_PROTOCOL_UDP, EMULE_DEFAULTRULENAME_SERVERUDP, thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetServerUDPPort()==0xFFFF))
+				if (theApp.m_pFirewallOpener->OpenPort((uint16)port, NAT_PROTOCOL_UDP, EMULE_DEFAULTRULENAME_SERVERUDP, thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetServerUDPPort()==0xFFFF))
 					Log(GetResString(IDS_FO_TEMPUDP_S), port);
 				else
 					Log(GetResString(IDS_FO_TEMPUDP_F), port);
 			}
 			//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
-			theApp.m_UPnP_IGDControlPoint->AddPortMapping(port,
+			theApp.m_UPnP_IGDControlPoint->AddPortMapping((uint16)port,
 				CUPnP_IGDControlPoint::UNAT_UDP,
 				_T("Server UDP Port"));
 		}
