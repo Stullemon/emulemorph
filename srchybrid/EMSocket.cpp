@@ -467,21 +467,9 @@ void CEMSocket::OnReceive(int nErrorCode){
 }
 
 void CEMSocket::SetDownloadLimit(uint32 limit){	
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-	// JP added netfinity download throttler
-	// MOD BEGIN netfinity: Accumulate download limits
-	downloadLimit += limit; 
+	downloadLimit = limit;
 	downloadLimitEnable = true;	
-	if(downloadLimit > 20 * limit && downloadLimit > 4500) // Allow a maximum of 2.0 sec to accumulate or 3 * MTU
-		downloadLimit = max(20 * limit, 4500); 
-	// MOD END netfinity
 
-/*(original code)
-//	downloadLimit = limit;
-//	downloadLimitEnable = true;	
-*/
-	
-	
 	// CPU load improvement
 	if(limit > 0 && pendingOnReceive == true){
 		OnReceive(0);
