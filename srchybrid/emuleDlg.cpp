@@ -220,6 +220,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_PARTHASHEDCORRUPTAICHRECOVER, OnPartHashedCorruptAICHRecover)
 	// SLUGFILLER: SafeHash
 	ON_MESSAGE(TM_READBLOCKFROMFILEDONE, OnReadBlockFromFileDone) //MORPH - Added by SiRoB, ReadBlockFromFileThread
+	ON_MESSAGE(TM_FLUSHDONE, OnFlushDone) //MORPH - Added by SiRoB, Flush Thread
 	ON_MESSAGE(TM_IMPORTPART, OnImportPart) //MORPH START - Added by SiRoB, Import Part
 	ON_MESSAGE(TM_FRAMEGRABFINISHED, OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
@@ -1754,6 +1755,19 @@ LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 	return 0;
 }
 //MORPH END   - Added by SiRoB, ReadBlockFromFileThread
+//MORPH START - Added by SiRoB, Flush Thread
+LRESULT CemuleDlg::OnFlushDone(WPARAM wParam,LPARAM lParam)
+{
+	CPartFile* partfile = (CPartFile*) lParam;
+	if (theApp.m_app_state != APP_STATE_SHUTINGDOWN && theApp.downloadqueue->IsPartFile(partfile))	// could have been canceled
+		partfile->FlushDone((FlushDone_Struct*)wParam);
+	else {
+		delete[] ((FlushDone_Struct*)wParam)->changedPart;
+		delete	(FlushDone_Struct*)wParam;
+	}
+	return 0;
+}
+//MORPH END   - Added by SiRoB, Flush Thread
 //MORPH START - Added by SiRoB, Import Part
 LRESULT CemuleDlg::OnImportPart(WPARAM wParam,LPARAM lParam)
 {
