@@ -110,6 +110,21 @@ CPPgMorph::CPPgMorph()
 	m_htiDownloadDataRateAverageTime = NULL;
 	m_htiUploadDataRateAverageTime = NULL;
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
+	// ==> Slot Limit - Stulle
+	if (thePrefs.GetSlotLimitThree())
+		m_iSlotLimiter = 1;
+	else if (thePrefs.GetSlotLimitNumB())
+		m_iSlotLimiter = 2;
+	else
+		m_iSlotLimiter = 0;
+	m_htiSlotLimitGroup = NULL;
+	m_htiSlotLimitNone = NULL;
+	m_htiSlotLimitThree = NULL;
+	m_htiSlotLimitNumB = NULL;
+	m_htiSlotLimitNum = NULL;
+	// <== Slot Limit - Stulle
+
+
 }
 
 CPPgMorph::~CPPgMorph()
@@ -138,6 +153,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		int iImgPowerShare = 8;
 		int iImgNormal = 8;
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
+	    int iImgConTweaks = 8; // Stulle slotlimit
 		
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
@@ -159,6 +175,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 			iImgPowerShare = piml->Add(CTempIconLoader(_T("FILEPOWERSHARE")));
 			iImgNormal = piml->Add(CTempIconLoader(_T("ClientCompatible")));
 			//MORPH END   - Added by SiRoB, Upload Splitting Class
+             iImgConTweaks =  piml->Add(CTempIconLoader(_T("CONNECTION")));// ==> Slot Limit - Stulle
 		}
 		
 		m_htiDM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DM), iImgDM, TVI_ROOT);
@@ -290,6 +307,15 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxClientDataRate, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 		
+		// ==> Slot Limit - Stulle
+		m_htiSlotLimitGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SLOT_LIMIT_GROUP), iImgConTweaks, m_htiUM);
+		m_htiSlotLimitNone = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SLOT_LIMIT_NONE), m_htiSlotLimitGroup, m_iSlotLimiter == 0);
+		m_htiSlotLimitThree = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SLOT_LIMIT_THREE), m_htiSlotLimitGroup, m_iSlotLimiter == 1);
+		m_htiSlotLimitNumB = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SLOT_LIMIT_NUM_B), m_htiSlotLimitGroup, m_iSlotLimiter == 2);
+		m_htiSlotLimitNum = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SLOT_LIMIT_NUM), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSlotLimitNumB);
+		m_ctrlTreeOptions.AddEditBox(m_htiSlotLimitNum, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		// <== Slot Limit - Stulle
+
 		m_htiInfiniteQueue = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INFINITEQUEUE), m_htiUM, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 		m_htiDontRemoveSpareTrickleSlot = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DONTREMOVESPARETRICKLESLOT), m_htiUM, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 		m_htiCountWCSessionStats = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTWCSESSIONSTATS), TVI_ROOT, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
@@ -357,6 +383,12 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalDataRatePowerShare, m_iGlobalDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRatePowerShare, m_iMaxClientDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRate, m_iMaxClientDataRate);//MORPH - Added by SiRoB, Upload Splitting Class
+	// ==> Slot Limit - Stulle
+	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiSlotLimitGroup, m_iSlotLimiter);
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiSlotLimitNum, m_iSlotLimitNum);
+	DDV_MinMaxInt(pDX, m_iSlotLimitNum, 60, 256);
+	// <== Slot Limit - Stulle
+
 	// Mighty Knife: Community visualization
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiCommunityName, m_sCommunityName);
 	// [end] Mighty Knife
@@ -438,7 +470,8 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iMaxClientDataRatePowerShare = thePrefs.maxclientdataratepowershare;
 	m_iMaxClientDataRate = thePrefs.maxclientdatarate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
-	
+	m_iSlotLimitNum = thePrefs.GetSlotLimitNum(); // Slot Limit - Stulle
+
 	// Mighty Knife: Community visualization
 	m_sCommunityName = thePrefs.m_sCommunityName;
 	// [end] Mighty Knife
@@ -545,6 +578,11 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.maxclientdataratepowershare = m_iMaxClientDataRatePowerShare;
 	thePrefs.maxclientdatarate = m_iMaxClientDataRate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+	// ==> Slot Limit - Stulle
+	thePrefs.m_bSlotLimitThree = (m_iSlotLimiter == 1);
+	thePrefs.m_bSlotLimitNum = (m_iSlotLimiter == 2);
+	thePrefs.m_iSlotLimitNum = (uint8)m_iSlotLimitNum;
+    // <== Slot Limit - Stulle
 	// Mighty Knife: Community visualization
 	_stprintf (thePrefs.m_sCommunityName,_T("%s"), m_sCommunityName);
 	// [end] Mighty Knife
@@ -669,6 +707,10 @@ void CPPgMorph::Localize(void)
 		if (m_htiMaxClientDataRatePowerShare) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRatePowerShare, GetResString(IDS_MAXCLIENTDATARATEPOWERSHARE));
 		if (m_htiMaxClientDataRate) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRate, GetResString(IDS_MAXCLIENTDATARATE));
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
+		// ==> Slot Limit - Stulle
+		if (m_htiSlotLimitGroup) m_ctrlTreeOptions.SetItemText(m_htiSlotLimitGroup, GetResString(IDS_SLOT_LIMIT_GROUP));
+		if (m_htiSlotLimitNum) m_ctrlTreeOptions.SetEditLabel(m_htiSlotLimitNum, GetResString(IDS_SLOT_LIMIT_NUM));
+		// <== Slot Limit - Stulle
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		if (m_htiShowCatNames) m_ctrlTreeOptions.SetItemText(m_htiShowCatNames, GetResString(IDS_CAT_SHOWCATNAME));
 		if (m_htiSelectCat) m_ctrlTreeOptions.SetItemText(m_htiSelectCat, GetResString(IDS_CAT_SHOWSELCATDLG));
@@ -750,6 +792,13 @@ void CPPgMorph::OnDestroy()
 	m_htiMaxClientDataRatePowerShare = NULL;
 	m_htiMaxClientDataRate = NULL;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+	// ==> Slot Limit - Stulle
+	m_htiSlotLimitGroup = NULL;
+	m_htiSlotLimitNone = NULL;
+	m_htiSlotLimitThree = NULL;
+	m_htiSlotLimitNumB = NULL;
+	m_htiSlotLimitNum = NULL;
+	// <== Slot Limit - Stulle
 	m_htiSCC = NULL;
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	m_htiShowCatNames = NULL;

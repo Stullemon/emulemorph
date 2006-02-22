@@ -3091,6 +3091,14 @@
 #define IDS_MORPH_KSSERV                51543
 #define IDS_MORPH_LOG                   51544
 #define IDS_WEBSERVER_LINK              51561
+// ==> Slot Limit - Stulle
+#define IDS_SLOT_LIMIT_GROUP            60380
+#define IDS_SLOT_LIMIT_NONE             60381
+#define IDS_SLOT_LIMIT_THREE            60382
+#define IDS_SLOT_LIMIT_NUM_B            60383
+#define IDS_SLOT_LIMIT_NUM              60384
+// <== Slot Limit - Stulle
+
 
 // Next default values for new objects
 // 

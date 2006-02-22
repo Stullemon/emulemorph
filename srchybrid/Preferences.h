@@ -519,6 +519,11 @@ public:
 	static	COLORREF m_crLogUSC;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
+	// ==> Slot Limit - Stulle
+	static bool m_bSlotLimitThree;
+	static bool m_bSlotLimitNum;
+	static uint8 m_iSlotLimitNum;
+	// <== Slot Limit - Stulle
 	static	int		m_iExtractMetaData;
 	static	bool	m_bAdjustNTFSDaylightFileTime;
 	static  bool    m_bAllocFull;
@@ -1867,6 +1872,13 @@ public:
 	static	uint32	GetMaxClientDataRatePowerShare();
 	static	uint32	GetMaxClientDataRate();
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
+	// ==> Slot Limit - Stulle
+	static bool GetSlotLimitThree()		{ return m_bSlotLimitThree; }
+	static bool GetSlotLimitNumB()		{ return m_bSlotLimitNum; }
+	static uint8 GetSlotLimitNum()		{ return m_iSlotLimitNum; }
+	// <== Slot Limit - Stulle
+
 
 protected:
 	static	CString appdir;

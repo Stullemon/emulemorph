@@ -50,6 +50,10 @@ protected:
 	int m_iMaxClientDataRatePowerShare;
 	int m_iMaxClientDataRate;
 	//MORPH END  - Added by SiRoB, Upload Splitting Class
+		// ==> Slot Limit - Stulle
+	int m_iSlotLimiter;
+	int m_iSlotLimitNum;
+	// <== Slot Limit - Stulle
 	int	m_iDynUpMode;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	int	m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	//MORPH START - Added by SiRoB, khaos::categorymod+
@@ -165,6 +169,13 @@ protected:
 	bool	  m_bDontRemoveStaticServers;
 	HTREEITEM m_htiDontRemoveStaticServers;
 	// [end] Mighty Knife
+		// ==> Slot Limit - Stulle
+	HTREEITEM m_htiSlotLimitGroup;
+	HTREEITEM m_htiSlotLimitNone;
+	HTREEITEM m_htiSlotLimitThree;
+	HTREEITEM m_htiSlotLimitNumB;
+	HTREEITEM m_htiSlotLimitNum;
+	// <== Slot Limit - Stulle
 
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();

@@ -1095,7 +1095,12 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 	if (curUploadSlots >= 4 &&
 		(
          /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB,
-         curUploadSlots >= ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE) ||
+
+		 // ==> Slot Limit - Stulle
+		 (thePrefs.GetSlotLimitThree() && curUploadSlots >= ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE)) ||
+		 (thePrefs.GetSlotLimitNumB() && curUploadSlots >= min(thePrefs.GetSlotLimitNum(),60)) ||
+		 // <== Slot Limit - Stulle
+         //     curUploadSlots >= ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE) || //leuk_he by config. 
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
           !thePrefs.IsDynUpEnabled() &&

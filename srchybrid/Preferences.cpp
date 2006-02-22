@@ -436,6 +436,12 @@ bool CPreferences::m_bCountWCSessionStats;
 bool CPreferences::m_bShowFolderIcons;
 //MORPH END - Added by Commander, FolderIcons
 
+// ==> Slot Limit - Stulle
+bool	CPreferences::m_bSlotLimitThree;
+bool	CPreferences::m_bSlotLimitNum;
+uint8	CPreferences::m_iSlotLimitNum;
+// <== Slot Limit - Stulle
+
 bool	CPreferences::enableHighProcess;//MORPH - Added by IceCream, high process priority
 bool	CPreferences::enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 bool	CPreferences::enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
@@ -487,6 +493,9 @@ bool	CPreferences::shareall;	// SLUGFILLER: preferShareAll
 
 bool	CPreferences::m_bEnableChunkDots;
 //EastShare - Added by Pretender, Option for ChunkDots
+
+
+
 
 TCHAR	CPreferences::UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 TCHAR	CPreferences::UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
@@ -2221,6 +2230,12 @@ void CPreferences::SavePreferences()
 
 	ini.WriteBool(L"WinaTransToolbar", m_bWinaTransToolbar);
 
+    // ==> Slot Limit - Stulle
+	ini.WriteBool(_T("SlotLimitThree"), m_bSlotLimitThree);
+	ini.WriteBool(_T("SlotLimitNumB"), m_bSlotLimitNum);
+	ini.WriteInt(_T("SlotLimitNum"), m_iSlotLimitNum);
+	// <== Slot Limit - Stulle
+
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "Proxy"
 	//
@@ -3143,6 +3158,16 @@ void CPreferences::LoadPreferences()
 	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
 	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),0);
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+    // ==> Slot Limit - Stulle
+	m_bSlotLimitThree = ini.GetBool(_T("SlotLimitThree"),true); // default
+	if (!m_bSlotLimitThree)
+		m_bSlotLimitNum = ini.GetBool(_T("SlotLimitNumB"),false);
+	else
+		m_bSlotLimitNum = false;
+	int temp = ini.GetInt(_T("SlotLimitNum"),100);
+	m_iSlotLimitNum = (uint8)((temp >= 60 && temp <= 255) ? temp : 100);
+	// <== Slot Limit - Stulle
+
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	LowIdRetries=ini.GetInt(_T("ReconnectOnLowIdRetries"),3);	// SLUGFILLER: lowIdRetry
