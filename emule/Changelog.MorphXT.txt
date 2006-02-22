@@ -1,14 +1,19 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
-ADDED : Slotlimit from stullemule *[leuk_he]
+FIXED  : (minor) ImportParts: make it working when the file is stopped [SiRoB]
+FIXED  : (major) ReadBlockFromFileThread: don't use partfile permanent handle in thread [SiRoB]
+FIXED  : (minor) GetAvailablePartCount() by adding us as available part [SiRoB]
+FIXED  : (minor) FlushTread: ajusted to not perturbe part hashing  process [SiRoB]
 
-* There are 3 option in the slotlimiter,(1)) not limmited, Where the upload code
- decides to open ore slots as needed.  (2)Speed/3kb,if more than 4 slots, is build like the
-  official(3) a set number 60-255, for high speed uploaders that wants to limit
-   the upload slots manually.
+ADDED : Slotlimit like stullemule [leuk_he]
+- not limmited, Where the upload code decides to open ore slots as needed.
+- a set number 60-255, for high speed uploaders that wants to limit the upload slots manually.
+
+CHANGED: Roll back my nice average calcul system [SiRoB]
 
 --------------------------------------
+>>>>>>> 1.35
 Changelog for eMule 0.47a MorphXT v8.4
 --------------------------------------
 FIXED  : (minor) Save sources for multiple tempdir & system icon multi tempdirs [leuk_he]
