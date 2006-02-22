@@ -2070,12 +2070,14 @@ void CemuleApp::AddTempFolderIcon(){
 void CemuleApp::RemoveTempFolderIcon(){
 	if(!IsCustomIncomingFolderIcon()){
 		CString desktopFile;
-		desktopFile = CString(thePrefs.GetTempDir()) + _T("\\Desktop.ini");
+		for (int i=0;i<thePrefs.tempdir.GetCount();i++) { // leuk_he: multiple temp dirs
+			desktopFile = CString(thePrefs.GetTempDir(i)) + _T("\\Desktop.ini");
 
-		CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+			CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
 
-		desktopIni.DeleteKey(_T("IconFile"));
-		desktopIni.DeleteKey(_T("IconIndex"));
+			desktopIni.DeleteKey(_T("IconFile"));
+			desktopIni.DeleteKey(_T("IconIndex"));
+		}
 	}
 }
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
