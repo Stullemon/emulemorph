@@ -312,6 +312,7 @@ void CPartFile::Init(){
     m_random_update_wait = (uint32)(rand()/(RAND_MAX/1000));
     lastSwapForSourceExchangeTick = ::GetTickCount();
 	m_DeadSourceList.Init(false);
+	m_bIsFlushThread = false; //MORPH - Added by SiRoB, Import Part
 
 	// khaos::categorymod+
 	m_catResumeOrder=0;
@@ -496,9 +497,13 @@ void CPartFile::CreatePartFile(UINT cat)
 		m_dwFileAttributes = 0;
 
 	// SLUGFILLER: SafeHash - setting at the hotspot
+	//MORPH - Changed by SiRoB, Fixe ed2klink with hashset forcing hashset request
+	/*
 	if (GetED2KPartCount() > 1)
 		hashsetneeded = true;
 	else {
+	*/
+	if (GetED2KPartCount() == 0) {
 		hashsetneeded = false;
 		uchar* cur_hash = new uchar[16];
 		md4cpy(cur_hash, m_abyFileHash);
@@ -5259,7 +5264,11 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 		// SLUGFILLER: SafeHash
 	}
 
+	//MORPH - Changed by SiRoB, Import Parts
+	/*
 	if (gaplist.IsEmpty())
+	*/
+	if (gaplist.IsEmpty() || GetStatus()!=PS_READY && GetStatus()!=PS_EMPTY)
 		FlushBuffer(true);
 
 	// Return the length of data written to the buffer
@@ -5268,6 +5277,11 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 
 void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 {
+	//MORPH START - Added by SiRoB, Flush Thread
+	if (m_bIsFlushThread) {
+		return;	
+	}
+	//MORPH END   - Added by SiRoB, Flush Thread
 	bool bIncreasedFile=false;
 
 	// SLUGFILLER: SafeHash
@@ -5399,16 +5413,42 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			m_hpartfile.SetLength(m_nFileSize);
 		}
 
-		// Flush to disk
-		m_hpartfile.Flush();
+		//Creating the Thread to flush to disk
+		
+		CPartFileFlushThread* m_FlushThread = (CPartFileFlushThread*) AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+		if (m_FlushThread) {
+			m_bIsFlushThread = true;
+			FlushDone_Struct* FlushSetting = new FlushDone_Struct;
+			FlushSetting->bIncreasedFile = bIncreasedFile;
+			FlushSetting->bForceICH = bForceICH;
+			FlushSetting->changedPart = changedPart;
+			m_FlushThread->SetPartFile(this, FlushSetting);
+			m_FlushThread->ResumeThread();
+		}
+	}
+	catch (CFileException* error)
+	{
+		FlushBuffersExceptionHandler(error);	
+		delete[] changedPart;
+	}
+	catch(...)
+	{
+		FlushBuffersExceptionHandler();
+		delete[] changedPart;
+	}
+}
 
+//MORPH START - Added by SiRoB, Flush Thread
+void CPartFile::FlushDone(FlushDone_Struct* FlushSetting)
+{
 		// Check each part of the file
 	// Only if hashlist is available
 	if (hashlist.GetCount() == GetED2KPartCount()){
+		UINT partCount = GetPartCount();
 		// Check each part of the file
 		for (int partNumber = partCount-1; partNumber >= 0; partNumber--)
 		{
-			if (!changedPart[partNumber])
+			if (!FlushSetting->changedPart[partNumber])
 				continue;
 			// Any parts other than last must be full size
 			if (!GetPartHash(partNumber)) {
@@ -5427,7 +5467,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 				parthashthread->SetSinglePartHash(this, partNumber);
 				parthashthread->ResumeThread();
 			}
-			else if (IsCorruptedPart(partNumber) && (thePrefs.IsICHEnabled() || bForceICH))
+			else if (IsCorruptedPart(partNumber) && (thePrefs.IsICHEnabled() || FlushSetting->bForceICH))
 			{
 				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 				parthashthread->SetSinglePartHash(this, partNumber, true);	// Special case, doesn't increment hashing parts, since part isn't really complete
@@ -5458,7 +5498,8 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		// If useing a normal file, we could avoid the check disk space if the file was not increased.
 		// If useing a compressed or sparse file, we always have to check the space 
 		// regardless whether the file was increased in size or not.
-			if (bCheckDiskspace && ((IsNormalFile() && bIncreasedFile) || !IsNormalFile()))
+		bool bCheckDiskspace = thePrefs.IsCheckDiskspaceEnabled() && thePrefs.GetMinFreeDiskSpace() > 0;
+		if (bCheckDiskspace && ((IsNormalFile() && FlushSetting->bIncreasedFile) || !IsNormalFile()))
 		{
 			switch(GetStatus())
 			{
@@ -5485,18 +5526,57 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			}
 		}
 	}
+	delete[] FlushSetting->changedPart;
+	delete	FlushSetting;
+	SetFlushThread(NULL);
+}
+
+IMPLEMENT_DYNCREATE(CPartFileFlushThread, CWinThread)
+void CPartFileFlushThread::SetPartFile(CPartFile* partfile, FlushDone_Struct *changedPart)
+{
+	m_partfile = partfile;
+	m_FlushSetting = changedPart;
+}	
+
+int CPartFileFlushThread::Run()
+{
+	DbgSetThreadName("Partfile-Flushing");
+	InitThreadLocale();
+
+	// SLUGFILLER: SafeHash
+	CReadWriteLock lock(&theApp.m_threadlock);
+	if (!lock.ReadLock(0))
+		return 0;
+	// SLUGFILLER: SafeHash
+
+	//theApp.QueueDebugLogLine(false,_T("FLUSH:Start (%s)"),m_partfile->GetFileName()/*, CastItoXBytes(myfile->m_iAllocinfo, false, false)*/ );
+
+	try{
+		// Flush to disk
+		m_partfile->m_hpartfile.Flush();
 	}
 	catch (CFileException* error)
 	{
-		FlushBuffersExceptionHandler(error);	
+		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)m_partfile,(LPARAM)error) );
+		m_partfile->SetFlushThread(NULL);
+		delete[] m_FlushSetting->changedPart;
+		delete m_FlushSetting;
+		return 1;
 	}
 	catch(...)
 	{
-		FlushBuffersExceptionHandler();
+		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)m_partfile,0) );
+		delete[] m_FlushSetting->changedPart;
+		delete m_FlushSetting;
+		m_partfile->SetFlushThread(NULL);
+		return 2;
 	}
-	delete[] changedPart;
-}
 
+	VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FLUSHDONE,(WPARAM)m_FlushSetting,(LPARAM)m_partfile) );
+	//theApp.QueueDebugLogLine(false,_T("FLUSH:End (%s)"),m_partfile->GetFileName());
+	return 0;
+}
+//MORPH END  - Added by SiRoB, Flush Thread
 void CPartFile::FlushBuffersExceptionHandler(CFileException* error)
 {
 	if (thePrefs.IsCheckDiskspaceEnabled() && error->m_cause == CFileException::diskFull)
