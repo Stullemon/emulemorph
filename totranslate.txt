@@ -882,6 +882,6 @@ BEGIN
     IDS_SLOT_LIMIT_NONE     "No limit"
     IDS_SLOT_LIMIT_THREE    "Upload speed/3kbps"
     IDS_SLOT_LIMIT_NUM_B    "Limit to x slots"
-	IDS_SLOT_LIMIT_NUM      "Max # of slots (60-256)"
+    IDS_SLOT_LIMIT_NUM      "Max # of slots (60-256)"
 END	
 
