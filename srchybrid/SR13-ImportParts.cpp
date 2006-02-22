@@ -140,12 +140,14 @@ bool CAddFileThread::SR13_ImportParts(){
 				VERIFY( PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)m_partfile) );
 			}
 			
-			while (m_partfile->GetTotalBufferData() >= PARTSIZE) {
+			while (m_partfile->GetTotalBufferData() >= PARTSIZE || m_partfile->GetPartsHashing() || m_partfile->IsFlushThread()) {
 				Sleep(1);
 			};
 			
-			importaborted = m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS;
-			if(partSize!=PARTSIZE || importaborted) {
+			importaborted = m_partfile->GetFileOp() == PFOP_NONE;
+			if(partSize!=PARTSIZE || importaborted || m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS) {
+				if (m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS)
+					m_partfile->SetFileOp(PFOP_NONE);
 				break;
 			}
 		} catch (...) {
