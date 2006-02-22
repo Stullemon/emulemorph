@@ -511,7 +511,7 @@ BOOL CAsyncSocketEx::Create(UINT nSocketPort /*=0*/, int nSocketType /*=SOCK_STR
 		if (hSocket == INVALID_SOCKET)
 			return FALSE;
 		
-		int window_size = 256 * 1024;
+		int window_size = 64 * 1024;
 
 		setsockopt(hSocket, SOL_SOCKET, SO_SNDBUF, (char *) &window_size, sizeof(window_size) );
 		setsockopt(hSocket, SOL_SOCKET, SO_RCVBUF, (char *) &window_size, sizeof(window_size) );

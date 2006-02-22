@@ -461,7 +461,7 @@ BOOL CAsyncSocketExLayer::CreateNext(UINT nSocketPort, int nSocketType, long lEv
 		if (hSocket==INVALID_SOCKET)
 			res=FALSE;
   
-		int window_size = 256 * 1024;
+		int window_size = 64 * 1024;
 
 		setsockopt(hSocket, SOL_SOCKET, SO_SNDBUF, (char *) &window_size, sizeof(window_size) );
 		setsockopt(hSocket, SOL_SOCKET, SO_RCVBUF, (char *) &window_size, sizeof(window_size) );

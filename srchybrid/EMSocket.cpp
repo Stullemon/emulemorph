@@ -467,8 +467,20 @@ void CEMSocket::OnReceive(int nErrorCode){
 }
 
 void CEMSocket::SetDownloadLimit(uint32 limit){	
-	downloadLimit = limit;
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+	// JP added netfinity download throttler
+	// MOD BEGIN netfinity: Accumulate download limits
+	downloadLimit += limit; 
 	downloadLimitEnable = true;	
+	if(downloadLimit > 20 * limit && downloadLimit > 4500) // Allow a maximum of 2.0 sec to accumulate or 3 * MTU
+		downloadLimit = max(20 * limit, 4500); 
+	// MOD END netfinity
+
+/*(original code)
+//	downloadLimit = limit;
+//	downloadLimitEnable = true;	
+*/
+	
 
 	// CPU load improvement
 	if(limit > 0 && pendingOnReceive == true){
@@ -792,7 +804,12 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
             lastSent = ::GetTickCount();
 
-		    uint32 result = CAsyncSocketEx::Send(sendbuffer+sent,tosend); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+		    //MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+			ASSERT(tosend<65536);
+			if (tosend >= 65536/2)
+				tosend = 65536/2-1;
+			//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
+			uint32 result = CAsyncSocketEx::Send(sendbuffer+sent,tosend); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 		    if (result == (uint32)SOCKET_ERROR){
 			    uint32 error = GetLastError();
 			    if (error == WSAEWOULDBLOCK){
@@ -904,15 +921,10 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
     uint32 ret;
 	if(current % minFragSize == 0) {
-        ret = current;
+        return current;
     } else {
-        ret = minFragSize*(current/minFragSize+1);
+        return minFragSize*(current/minFragSize+1);
     }
-	//MORPH START - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
-	if (ret >= 2*256*1024)
-		ret = 2*256*1024-1;
-	return ret;
-	//MORPH END   - Added by SiRoB, Anti WSAEWOULDBLOCK ensure that socket buffer is larger than app one
 }
 
 /**
