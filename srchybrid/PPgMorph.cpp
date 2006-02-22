@@ -386,7 +386,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	// ==> Slot Limit - Stulle
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiSlotLimitGroup, m_iSlotLimiter);
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiSlotLimitNum, m_iSlotLimitNum);
-	DDV_MinMaxInt(pDX, m_iSlotLimitNum, 60, 256);
+	DDV_MinMaxInt(pDX, m_iSlotLimitNum, 60, 255);
 	// <== Slot Limit - Stulle
 
 	// Mighty Knife: Community visualization
