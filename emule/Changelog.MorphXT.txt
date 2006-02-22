@@ -1,7 +1,17 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.x
+--------------------------------------
+ADDED : Slotlimit from stullemule *[leuk_he]
+
+* There are 3 option in the slotlimiter,(1)) not limmited, Where the upload code
+ decides to open ore slots as needed.  (2)Speed/3kb,if more than 4 slots, is build like the
+  official(3) a set number 60-255, for high speed uploaders that wants to limit
+   the upload slots manually.
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.4
 --------------------------------------
-FIXED  : (minor) Save sources for multiple tempdir & system icon mulit tempdirs [leuk_he]
+FIXED  : (minor) Save sources for multiple tempdir & system icon multi tempdirs [leuk_he]
 FIXED  : (major) average datarate calcul was wrong (USS & Onlinesig were affected, introduced in 8.3) [SiRoB]
 
 --------------------------------------
