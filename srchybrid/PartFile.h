@@ -406,6 +406,7 @@ private:
 	uint64	m_uCompressionGain;
 	uint32	m_uPartsSavedDueICH;
 	uint32	datarate;
+	DWORD	LastTimeProcessCalled; //MORPH - Added by SiRoB, Occurate download limiter
 	CString	m_fullname;
 	CString	m_partmetfilename;
 	uint64	m_uTransferred;
