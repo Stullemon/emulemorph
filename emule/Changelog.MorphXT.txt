@@ -6,8 +6,8 @@ FIXED  : (major) ReadBlockFromFileThread: don't use partfile permanent handle in
 FIXED  : (minor) GetAvailablePartCount() by adding us as available part [SiRoB]
 FIXED  : (minor) FlushTread: ajusted to not perturbe part hashing  process [SiRoB]
 
-ADDED : Slotlimit like stullemule [leuk_he]
-- not limmited, Where the upload code decides to open ore slots as needed.
+ADDED : Slotlimit like StulleMule [leuk_he]
+- not limmited, Where the upload code decides to open more slots as needed.
 - a set number 60-255, for high speed uploaders that wants to limit the upload slots manually.
 
 CHANGED: Roll back my nice average calcul system [SiRoB]
