@@ -2857,7 +2857,15 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 
 					if(curClientReducedDownload)
 					{
+						//MORPH START - Changed by SiRoB, Occurate download limiter
+						/*
 						uint32 limit = curClientReducedDownload*cur_datarate/1000;
+						*/
+						DWORD duration = dwCurTick-LastTimeProcessCalled;
+						if (duration > 999) duration = 999;
+						uint32 limit = curClientReducedDownload*cur_datarate/(1000-duration);		
+						//MORPH END  - Changed by SiRoB, Occurate download limiter
+							
 						if(limit<1000 && curClientReducedDownload == 200)
 							limit +=1000;
 						else if(limit<200 && cur_datarate == 0 && curClientReducedDownload >= 100)
@@ -2962,7 +2970,15 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 						//MORPH END   - Changed by Stulle, No zz ratio for http traffic
 						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
 						{
+							//MORPH START - Changed by SiRoB, Occurate download limiter
+							/*
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
+							*/
+							DWORD duration = dwCurTick-LastTimeProcessCalled;
+							if (duration > 999) duration = 999;
+							uint32 limit = curClientReducedDownload*cur_datarate/(1000-duration);		
+							//MORPH END  - Changed by SiRoB, Occurate download limiter
+							
 							if (limit < 1000 && curClientReducedDownload == 200)
 								limit += 1000;
 							else if(limit<200 && cur_datarate == 0 && curClientReducedDownload >= 100)
@@ -3171,6 +3187,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 	}
 
+	LastTimeProcessCalled = dwCurTick; //MORPH - Added by SiRoB, Occurate download limiter
 	return datarate = datarateX;//MORPH - Changed by SiRoB,  -Fix-
 }
 
@@ -5197,6 +5214,54 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 	CSingleLock sLock(&ICH_mut,true);	// Wait for ICH result
 	ParseICHResult();	// Check result to prevent post-complete writing
 
+#if 1
+	// log transferinformation in our "blackbox"
+	m_CorruptionBlackBox.TransferredData(start, end, client);
+
+	// Create copy of data as new buffer
+	BYTE *buffer = new BYTE[lenData];
+	memcpy(buffer, data, lenData);
+
+	// Create a new buffered queue entry
+	PartFileBufferedData *item = new PartFileBufferedData;
+	item->data = buffer;
+	item->start = start;
+	item->end = end;
+	item->block = block;
+
+	// Add to the queue in the correct position (most likely the end)
+	PartFileBufferedData *queueItem;
+	bool added = false;
+	POSITION pos = m_BufferedData_list.GetTailPosition();
+	while (pos != NULL)
+	{
+		POSITION posLast = pos;
+		queueItem = m_BufferedData_list.GetPrev(pos);
+		if (item->end > queueItem->end)
+		{
+			added = true;
+			m_BufferedData_list.InsertAfter(posLast, item);
+			break;
+		}
+	}
+	if (!added)
+		m_BufferedData_list.AddHead(item);
+
+	// Increment buffer size marker
+	m_nTotalBufferData += lenData;
+
+	// Mark this small section of the file as filled
+	FillGap(item->start, item->end);
+
+	// Update the flushed mark on the requested block 
+	// The loop here is unfortunate but necessary to detect deleted blocks.
+	pos = requestedblocks_list.GetHeadPosition();
+	while (pos != NULL)
+	{	
+		if (requestedblocks_list.GetNext(pos) == item->block)
+			item->block->transferred += lenData;
+	}
+#else
 	lenData = 0;	// this one is an effective counter
 
 	// only write to gaps
@@ -5263,7 +5328,7 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 			block->transferred += lenData;
 		// SLUGFILLER: SafeHash
 	}
-
+#endif
 	//MORPH - Changed by SiRoB, Import Parts
 	/*
 	if (gaplist.IsEmpty())
@@ -5284,13 +5349,6 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 	//MORPH END   - Added by SiRoB, Flush Thread
 	bool bIncreasedFile=false;
 
-	// SLUGFILLER: SafeHash
-	if (forcewait) {	// Last chance to grab any ICH results
-		CSingleLock sLock(&ICH_mut,true);	// ICH locks the file - otherwise it may be written to while being checked
-		ParseICHResult();	// Check result from ICH
-	}
-	// SLUGFILLER: SafeHash
-	
 	m_nLastBufferFlushTime = GetTickCount();
 	if (m_BufferedData_list.IsEmpty())
 		return;
@@ -5304,6 +5362,13 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		m_iAllocinfo=0;
 	}
 
+	// SLUGFILLER: SafeHash
+	if (forcewait) {	// Last chance to grab any ICH results
+		CSingleLock sLock(&ICH_mut,true);	// ICH locks the file - otherwise it may be written to while being checked
+		ParseICHResult();	// Check result from ICH
+	}
+	// SLUGFILLER: SafeHash
+	
 	//if (thePrefs.GetVerbose())
 	//	AddDebugLogLine(false, _T("Flushing file %s - buffer size = %ld bytes (%ld queued items) transferred = %ld [time = %ld]\n"), GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), m_uTransferred, m_nLastBufferFlushTime);
 
