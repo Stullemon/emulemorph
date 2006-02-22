@@ -4878,12 +4878,12 @@ void CPartFile::UpdateAvailablePartsCount()
 				availablecounter++; 
 				break;
 			}
-			//MORPH START - Added by SiRoB, Take into accound our available part
+			//MORPH START - Added by SiRoB, Take into account our available part
 			else if (IsPartShareable(ixPart)){
 				availablecounter++; 
 				break;
 			}
-			//MORPH END   - Added by SiRoB, Take into accound our available part
+			//MORPH END   - Added by SiRoB, Take into account our available part
 		}
 	}
 	if (iPartCount == availablecounter && availablePartsCount < iPartCount)
