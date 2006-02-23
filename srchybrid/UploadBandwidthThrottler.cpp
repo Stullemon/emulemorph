@@ -799,6 +799,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									if (stat->realBytesToSpend > 999) {
 										uint32 BytesToSend = min(ClientDataRate[classID]?ClientDataRate[classID]:allowedDataRateClass[LAST_CLASS]/slotCounterClass[classID], (allowedDataRateClass[classID]?allowedDataRateClass[classID]:allowedDataRateClass[LAST_CLASS])/slotCounterClass[classID]);
 										BytesToSend = max(BytesToSend, doubleSendSize);
+										BytesToSend = min(BytesToSend, (UINT)(BytesToSpend - spentBytes));
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
