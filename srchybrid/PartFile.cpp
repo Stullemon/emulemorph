@@ -497,17 +497,15 @@ void CPartFile::CreatePartFile(UINT cat)
 		m_dwFileAttributes = 0;
 
 	// SLUGFILLER: SafeHash - setting at the hotspot
-	//MORPH - Changed by SiRoB, Fixe ed2klink with hashset forcing hashset request
-	/*
-	if (GetED2KPartCount() > 1)
-		hashsetneeded = true;
-	else {
-	*/
-	if (GetED2KPartCount() == 0) {
-		hashsetneeded = false;
-		uchar* cur_hash = new uchar[16];
-		md4cpy(cur_hash, m_abyFileHash);
-		hashlist.Add(cur_hash);
+	if (hashlist.GetCount() == 0) { //MORPH - Changed by SiRoB, Fix ed2klink with hashset
+		if (GetED2KPartCount() > 1) {
+			hashsetneeded = true;
+		} else {
+			hashsetneeded = false;
+			uchar* cur_hash = new uchar[16];
+			md4cpy(cur_hash, m_abyFileHash);
+			hashlist.Add(cur_hash);
+		}
 	}
 
 	// the important part
