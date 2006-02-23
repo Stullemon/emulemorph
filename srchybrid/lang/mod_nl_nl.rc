@@ -1,4 +1,4 @@
-﻿STRINGTABLE
+STRINGTABLE
 BEGIN
     IDS_CRASHRPT_DONE       "Crash melding is aangemaakt."
     IDS_CRASHRPT_AV         "CrashMelder is beschikbaar en draait."
@@ -887,7 +887,7 @@ BEGIN
     IDS_SLOT_LIMIT_NONE     "Onbegrensd"
     IDS_SLOT_LIMIT_THREE    "Upload snelheid/3Kbps"
     IDS_SLOT_LIMIT_NUM_B    "Begrenzen op  x sloten"
-	IDS_SLOT_LIMIT_NUM      "Max aantal  sloten (60-256)"
+	IDS_SLOT_LIMIT_NUM      "Max aantal  sloten (60-255)"
 END	
 
 

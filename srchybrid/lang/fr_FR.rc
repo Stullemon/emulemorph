@@ -2820,6 +2820,15 @@ BEGIN
     IDS_SKIPALL             "P&asser tous"
 END
 
+STRINGTABLE  
+BEGIN 
+    IDS_SLOT_LIMIT_GROUP    "Slot Limiteur" 
+    IDS_SLOT_LIMIT_NONE     "Sans limit" 
+    IDS_SLOT_LIMIT_THREE    "Vitesse d'envoi / 3ko/s" 
+    IDS_SLOT_LIMIT_NUM_B    "Limiter à x slots"  
+IDS_SLOT_LIMIT_NUM      "Nombre Maximum de slots (60-255)" 
+END
+
 #endif    // Français (France) resources
 /////////////////////////////////////////////////////////////////////////////
 
