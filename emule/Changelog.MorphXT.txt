@@ -1,17 +1,20 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.x
+Changelog for eMule 0.47a MorphXT v8.5
 --------------------------------------
 FIXED  : (minor) ImportParts: make it working when the file is stopped [SiRoB]
 FIXED  : (major) ReadBlockFromFileThread: don't use partfile permanent handle in thread [SiRoB]
 FIXED  : (minor) GetAvailablePartCount() by adding us as available part [SiRoB]
-FIXED  : (minor) FlushTread: ajusted to not perturbe part hashing  process [SiRoB]
 FIXED  : (minor) SlugFiller SafeHash code to work arround ed2klink with hashset [SiRoB]
 
 ADDED : Slotlimit like StulleMule [leuk_he]
 - not limmited, Where the upload code decides to open more slots as needed.
 - a set number 60-255, for high speed uploaders that wants to limit the upload slots manually.
+ADDED : Occurate download limiter [SiRoB]
 
 CHANGED: Roll back my nice average calcul system [SiRoB]
+
+REMOVED: Removed SlugFiller Code arround WriteToBuffer [SiRoB]
+- there is a bug but i got headache to fix it, maybe something arround gaplist.
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.4
