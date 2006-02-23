@@ -109,8 +109,10 @@ bool CAddFileThread::SR13_ImportParts(){
 	bool importaborted = false;
 	for (UINT i = 0; i < (UINT)m_PartsToImport.GetSize(); i++){
 		uint16 partnumber = m_PartsToImport[i];
-		if (PARTSIZE*partnumber > fileSize)
+		if (PARTSIZE*partnumber > fileSize) {
+			m_partfile->SetFileOp(PFOP_NONE);		
 			break;
+		}
 		BYTE* partData=new BYTE[PARTSIZE];
 		try {
 			try {
