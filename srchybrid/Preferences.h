@@ -1919,6 +1919,7 @@ public:
     #define UPNP_DO_AUTODETECT 2
     #define UPNP_DETECTED 0
     #define UPNP_NOT_DETECTED -1 
+	#define UPNP_NO_DETECTEDTION -2 
     #define UPNP_NOT_NEEDED -10
 	
 	//MORPH END   - Added by SiRoB [MoNKi: -UPnPNAT Support-]

@@ -403,6 +403,7 @@ BOOL CPPgWiz1Ports::OnInitDialog()
 	switch(thePrefs.GetUpnpDetect()) {
 	    case   UPNP_DO_AUTODETECT :
 		case   UPNP_NOT_DETECTED :
+		case   UPNP_NO_DETECTEDTION:
 			      CheckDlgButton(IDC_ENABLE_PNP,thePrefs.IsUPnPEnabled());
                     break; // let the user decide, disabled by def. 
 		case UPNP_DETECTED:
@@ -803,6 +804,7 @@ BOOL FirstTimeWizard()
 
 	thePrefs.SetUPnPNat(page3.uPnPNAT!=0); // leuk_he add upnp to startup wizard
 	// set ports
+	thePrefs.SetUpnpDetect(UPNP_NO_DETECTEDTION);// leuk_he add upnp to startup wizard no more detecion next time.
 	thePrefs.port=(uint16)_tstoi(page3.m_sTCP);
 	thePrefs.udpport=(uint16)_tstoi(page3.m_sUDP);
 	
