@@ -145,7 +145,11 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 					uEnd = file->GetFileSize();
 				else
 					uEnd = PARTSIZE*(uint64)(i+1);
+				//MORPH - Changed by SiRoB, use the shareable info faster
+				/*
 				if (file->IsComplete(PARTSIZE*(uint64)i,PARTSIZE*(uint64)(i+1)-1, false))
+				*/
+				if (file->IsPartShareable(i))
 					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crBoth);
 				else if (file == reqfile)
 				{
@@ -160,7 +164,11 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crA4AF);
 			} 
 			//MORPH - Added by IceCream --- xrmb:seeTheNeed ---
+			//MORPH - Changed by SiRoB, use the shareable info faster
+			/*
 			else if (file->IsComplete(PARTSIZE*(uint64)i,PARTSIZE*(uint64)(i+1)-1, true)){ 
+			*/
+			else if (file->IsPartShareable(i)){ 
 				if (PARTSIZE*(uint64)(i+1) > file->GetFileSize()) 
 					uEnd = file->GetFileSize(); 
 				else 
@@ -273,7 +281,11 @@ bool CUpDownClient::Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash) c
 // true = client was not deleted!
 bool CUpDownClient::AskForDownload()
 {
+	//MORPH START - Changed by SiRoB, Fix connection collision 
+	/*
 	if (theApp.listensocket->TooManySockets() && !(socket && socket->IsConnected()) )
+	*/
+	if (theApp.listensocket->TooManySockets() && !(socket && (socket->IsConnected() || socket->GetConState() == ES_NOTCONNECTED)) )
 	{
 		if (GetDownloadState() != DS_TOOMANYCONNS)
 			SetDownloadState(DS_TOOMANYCONNS);
@@ -1678,7 +1690,11 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 
 void CUpDownClient::CheckDownloadTimeout()
 {
+	//MORPH START - Changed by SiRoB, Fix connection collision 
+	/*
 	if (IsDownloadingFromPeerCache() && m_pPCDownSocket && m_pPCDownSocket->IsConnected())
+	*/
+	if (IsDownloadingFromPeerCache() && m_pPCDownSocket && (m_pPCDownSocket->IsConnected() || m_pPCDownSocket->GetConState() == ES_NOTCONNECTED))
 	{
 		ASSERT( DOWNLOADTIMEOUT < m_pPCDownSocket->GetTimeOut() );
 		if (GetTickCount() - m_dwLastBlockReceived > DOWNLOADTIMEOUT)
@@ -1692,12 +1708,16 @@ void CUpDownClient::CheckDownloadTimeout()
 		ASSERT( DOWNLOADTIMEOUT < m_pWCDownSocket->GetTimeOut() );
 		if (m_pWCDownSocket->IsConnected())
 		{
-		if (GetTickCount() - m_dwLastBlockReceived > DOWNLOADTIMEOUT)
-		{
+			if (GetTickCount() - m_dwLastBlockReceived > DOWNLOADTIMEOUT)
+			{
 				OnWebCacheDownSocketTimeout();
 			}
-		}
-        else //this shouldn't happen but aparently does maybe fixed by WebCacheDownSocket::OnConnect() function??
+		} else if (m_pWCDownSocket->GetConState() == ES_NOTCONNECTED) {
+			if (GetTickCount() - m_dwLastBlockReceived > DOWNLOADTIMEOUT)
+			{
+				OnWebCacheDownSocketTimeout();
+			}
+		} else //this shouldn't happen but aparently does maybe fixed by WebCacheDownSocket::OnConnect() function??
 		{
 			if (GetTickCount() - m_dwLastBlockReceived > DOWNLOADTIMEOUT)
 			{
@@ -1800,7 +1820,11 @@ void CUpDownClient::UDPReaskForDownload()
 		return;
 
 	if (GetUDPPort() != 0 && GetUDPVersion() != 0 && thePrefs.GetUDPPort() != 0 &&
+	//MORPH START - Changed by SiRoB, Fix connection collision 
+	/*
 		!theApp.IsFirewalled() && !(socket && socket->IsConnected()) && !thePrefs.GetProxySettings().UseProxy)
+	*/
+		!theApp.IsFirewalled() && !(socket && (socket->IsConnected() || socket->GetConState() == ES_NOTCONNECTED)) && !thePrefs.GetProxySettings().UseProxy)
 	{ 
 		if( !HasLowID() )
 		{
