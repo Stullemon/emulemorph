@@ -876,3 +876,13 @@ BEGIN
     IDS_SKIPALL             "Saltar &todo"
 END
 
+STRINGTABLE
+BEGIN
+  // ==> Slot Limit - Stulle
+   IDS_SLOT_LIMIT_GROUP    "Limitador de slots"
+   IDS_SLOT_LIMIT_NONE     "Sin límite"
+   IDS_SLOT_LIMIT_THREE    "Subida/3kbps"
+   IDS_SLOT_LIMIT_NUM_B    "Limitar a x slots"
+IDS_SLOT_LIMIT_NUM      "Máx nº de slots (60-255)"
+   // <== Slot Limit - Stulle
+END
