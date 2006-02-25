@@ -1,4 +1,14 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.x
+--------------------------------------
+FIXED  : (minor) Attempt to avoid connection Collision [SiRoB]
+FIXED  : (minor) Fixed false corrupted part report [SiRoB]
+
+ADDED  : HideOS & SOTN:  Don't upload requested hidden block [SiRoB]
+
+TWEAKED: USC: available bandwidth is spreaded differently [SiRoB] 
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.5
 --------------------------------------
 FIXED  : (minor) ImportParts: make it working when the file is stopped [SiRoB]
