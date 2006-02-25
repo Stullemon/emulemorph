@@ -5165,6 +5165,7 @@ BEGIN
     IDS_POWERSHARE_AUTO     "Auto"
     IDS_DYNUPLOAD           "Dynamic Upload"
     IDS_HIDEOVERSHARES      "Overshares before hiding chunks (0 = Disabled)"
+    IDS_ERR_HIDDENBLOCK "Asked for hidden block "
 END
 
 STRINGTABLE 

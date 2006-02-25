@@ -520,6 +520,12 @@ void CUpDownClient::CreateNextBlockPackage(){
 				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
 				//MORPH END  - Changed by SiRoB, SLUGFILLER: SafeHash
 					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
+				//MORPH START - Added by SiRoB, Anti Anti HideOS & SOTN :p 
+				if (srcfile->IsPartFile() && m_abyUpPartStatusHidden) {
+					for (UINT i = (UINT)(currentblock->StartOffset/PARTSIZE); i < (UINT)((currentblock->EndOffset-1)/PARTSIZE+1); i++)
+						if (m_abyUpPartStatusHidden[i])
+							throw GetResString(IDS_ERR_HIDDENBLOCK);
+				}//MORPH END   - Added by SiRoB, Anti Anti HideOS & SOTN :p 
 			}
 
 			if( i64uTogo > EMBLOCKSIZE*3 )

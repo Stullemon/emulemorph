@@ -2498,6 +2498,7 @@
 #define IDS_DYNUPLOAD                   3822
 #define IDS_HIDEOVERSHARES              3823
 #define IDS_SELECTIVESHARE              3824
+#define IDS_ERR_HIDDENBLOCK             3825
 #define IDS_SCHED_BACKUP                3830
 #define IDS_SCHED_UPDATE_IPCONFIG       3831
 #define IDS_SCHED_UPDATE_FAKES          3832
