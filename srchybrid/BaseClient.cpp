@@ -1861,7 +1861,11 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 //true means the client was not deleted!
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket, bool* filtered)
 {
+	//MORPH START - Changed by SiRoB, Fix connection collision 
+	/*
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected()))
+	*/
+	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && (socket->IsConnected() || socket->GetConState() == ES_NOTCONNECTED)))
 	{
 		if (filtered) *filtered = true;
 		if(Disconnected(_T("Too many connections")))
@@ -1956,6 +1960,10 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 
 	if (!socket || !socket->IsConnected())
 	{
+		//MORPH START - Changed by SiRoB, Fix connection collision 
+		if (socket && socket->GetConState() == ES_NOTCONNECTED)
+			return true;
+		//MORPH END   - Changed by SiRoB, Fix connection collision 
 		if (socket)
 			socket->Safe_Delete();
 		if (pClassSocket == NULL)
