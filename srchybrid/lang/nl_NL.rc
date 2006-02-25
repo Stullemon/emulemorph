@@ -936,7 +936,7 @@ BEGIN
     IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
                             "Ignore eMule add friend protocol messages"
     IDS_PW_FASTSRVCON       "Snel met de server verbinden"
-    IDS_SOURCELINKFAILED    "U heeft een Hoge ID nodig voor het creëeren van een geldige bronverwijzing"
+    IDS_SOURCELINKFAILED    "U heeft een Hoge ID nodig voor het cre?en van een geldige bronverwijzing"
     IDS_CREATESOURCELINK    "Kopieer ED2k link naar klembord (bron)"
     IDS_ERR_LOADSERVERMET   "Onmogelijk om het bestand server.met te laden!"
     IDS_ERR_CORRUPTCOMPRPKG "Corrupt gecomprimeerd pakket voor %s ontvangen (fout %i)"
@@ -944,7 +944,7 @@ BEGIN
                             "Het bestand emfriends.met is ongeldig of corrupt!"
     IDS_ERR_READEMFRIENDS   "Onbekende fout bij het lezen van emfriends.met: %s"
     IDS_ERR_KNOWNSERVERINFOREC "Onbekende server info ontvangen!"
-    IDS_ERR_TIMERCREATEFAILED "Fatale Fout: Kon geen Timer creëeren"
+    IDS_ERR_TIMERCREATEFAILED "Fatale Fout: Kon geen Timer cre?en"
     IDS_WIZ_DOWN            "Ontvang (kbit/s)"
     IDS_WIZ_UP              "Verzend (kbit/s)"
     IDS_SELECT_INCOMINGDIR  "Kies een map voor de ontvangen bestanden"
@@ -1040,7 +1040,7 @@ BEGIN
     IDS_VERSIONCHECK        "&Versie controle"
     IDS_VISITVERSIONCHECK   "\n\nWilt u nu de Informatiepagina bezoeken?"
     IDS_PW_VIDEOPLAYER      "Video Speler"
-    IDS_VIDEOBACKUP         "Creëer backup voor preview"
+    IDS_VIDEOBACKUP         "Cre? backup voor preview"
     IDS_STATIC_EMPTY        "(leeg=standaard)"
     IDS_MYINFO              "Mijn Informatie"
     IDS_ID                  "ID"
@@ -1056,7 +1056,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_FILECOMPLETIONTHREAD 
-                            "Fout bij creëeren thread voor bestandsafronding"
+                            "Fout bij cre?en thread voor bestandsafronding"
     IDS_FILEBUFFERSIZE      "Bestandsbuffer grootte"
     IDS_QUEUESIZE           "Wachtrij grootte"
     IDS_DAYS2               "dagen"
@@ -1130,7 +1130,7 @@ BEGIN
     IDS_FIRSTFULLCHUNK      "Activeer deze optie om volldete chunks van 9,2 MB versturen.\n\nDit geeft downloaders van u een betere kans een chunk volledig te krijgen. Dit uitzetten wisselt de upload files sneller.Speciaal aangeraden voor releasers."
     IDS_FIRSTSAFECON        "Activeer deze optie om Safe Connect naar de servers te activeren .\n\nDeactivatie resulteert in een snellere verbindingsopbouw naar de server, met iets meer risico voor onterechte low-id's. (activatie aangeraden)"
     IDS_FIRSTRUNASSIST      "Wilt u bij de eerste installatie de Instellingen-wizard gebruiken?"
-    IDS_FIRSTAUTOCON        "Activeer deze optie als eMuel direct met het netwerk moet verbinden bij het opstarten van eMule."
+    IDS_FIRSTAUTOCON        "Activeer deze optie als eMule direct met het netwerk moet verbinden bij het opstarten van eMule."
     IDS_FIRSTCOMPLETE       "U heeft de eerste keer instellingen Wizard afgerond.\r\rAl al deze instellingen kunnen veranderd worden door in het instellngen menu. "
 END
 
@@ -1227,7 +1227,7 @@ BEGIN
     IDS_WIZ1_WELCOME_TITLE  "Welkom bij eMule"
     IDS_WIZ1_WELCOME_ACTIONS 
                             "Deze wizard begeleidt u bij de eerste stappen voor de configuratie van eMule."
-    IDS_WIZ1_WELCOME_BTN_HINT "Om verder te gaan klik Next."
+    IDS_WIZ1_WELCOME_BTN_HINT "Om verder te gaan klik Next. Cancel als emule eerder is opgezet"
     IDS_WIZ1_END_TITLE      "Afronden van de Wizard"
     IDS_WIZ1                "Eerste keer eMule Runtime Wizard"
     IDS_WIZ1_END_BTN_HINT   "Om de wizard te sluiten klik op Finish."
