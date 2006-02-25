@@ -1343,7 +1343,11 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 	{
 		POSITION posLast = posCorruptedPart;
 		UINT uCorruptedPart = corrupted_list.GetNext(posCorruptedPart);
+		//MORPH - Changed by SiRoB, No need to check the buffereddata
+		/*
 		if (IsComplete((uint64)uCorruptedPart*PARTSIZE, (uint64)(uCorruptedPart+1)*PARTSIZE-1, true))
+		*/
+		if (IsComplete((uint64)uCorruptedPart*PARTSIZE, (uint64)(uCorruptedPart+1)*PARTSIZE-1, false))
 			corrupted_list.RemoveAt(posLast);
 	}
 
@@ -1431,7 +1435,11 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		else {
 			hashsetneeded = false;
 			for (UINT i = 0; i < (UINT)hashlist.GetSize(); i++){
-				if (i < GetPartCount() && IsComplete((uint64)i*PARTSIZE, (uint64)(i + 1)*PARTSIZE - 1, false/*true*/)){ //no need to check as there is nothing to check
+				//MORPH - Changed by SiRoB, No need to check the buffereddata
+				/*
+				if (i < GetPartCount() && IsComplete((uint64)i*PARTSIZE, (uint64)(i + 1)*PARTSIZE - 1, true)){
+				*/
+				if (i < GetPartCount() && IsComplete((uint64)i*PARTSIZE, (uint64)(i + 1)*PARTSIZE - 1, false)){
 					SetStatus(PS_READY);
 					break;
 				}
@@ -2366,7 +2374,11 @@ void CPartFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, boo
 				crNooneAsked = RGB(104, 104, 104);
 			} 
 			for (UINT i = 0; i < GetPartCount(); i++){
-            if(IsComplete((uint64)i*PARTSIZE,((uint64)(i+1)*PARTSIZE)-1, true)) {
+            //MORPH - Changed by SiRoB, SafeHash
+			/*
+			if(IsComplete((uint64)i*PARTSIZE,((uint64)(i+1)*PARTSIZE)-1, true)) {
+			*/
+			if(IsPartShareable(i)) {
     	            if(GetStatus() != PS_PAUSED || m_ClientUploadList.GetSize() > 0 || m_nCompleteSourcesCountHi > 0) {
     	                uint32 frequency;
     	                if(GetStatus() != PS_PAUSED && !m_SrcpartFrequency.IsEmpty()) {
@@ -5212,54 +5224,6 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 	CSingleLock sLock(&ICH_mut,true);	// Wait for ICH result
 	ParseICHResult();	// Check result to prevent post-complete writing
 
-#if 1
-	// log transferinformation in our "blackbox"
-	m_CorruptionBlackBox.TransferredData(start, end, client);
-
-	// Create copy of data as new buffer
-	BYTE *buffer = new BYTE[lenData];
-	memcpy(buffer, data, lenData);
-
-	// Create a new buffered queue entry
-	PartFileBufferedData *item = new PartFileBufferedData;
-	item->data = buffer;
-	item->start = start;
-	item->end = end;
-	item->block = block;
-
-	// Add to the queue in the correct position (most likely the end)
-	PartFileBufferedData *queueItem;
-	bool added = false;
-	POSITION pos = m_BufferedData_list.GetTailPosition();
-	while (pos != NULL)
-	{
-		POSITION posLast = pos;
-		queueItem = m_BufferedData_list.GetPrev(pos);
-		if (item->end > queueItem->end)
-		{
-			added = true;
-			m_BufferedData_list.InsertAfter(posLast, item);
-			break;
-		}
-	}
-	if (!added)
-		m_BufferedData_list.AddHead(item);
-
-	// Increment buffer size marker
-	m_nTotalBufferData += lenData;
-
-	// Mark this small section of the file as filled
-	FillGap(item->start, item->end);
-
-	// Update the flushed mark on the requested block 
-	// The loop here is unfortunate but necessary to detect deleted blocks.
-	pos = requestedblocks_list.GetHeadPosition();
-	while (pos != NULL)
-	{	
-		if (requestedblocks_list.GetNext(pos) == item->block)
-			item->block->transferred += lenData;
-	}
-#else
 	lenData = 0;	// this one is an effective counter
 
 	// only write to gaps
@@ -5326,7 +5290,7 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 			block->transferred += lenData;
 		// SLUGFILLER: SafeHash
 	}
-#endif
+
 	//MORPH - Changed by SiRoB, Import Parts
 	/*
 	if (gaplist.IsEmpty())
@@ -5521,7 +5485,11 @@ void CPartFile::FlushDone(FlushDone_Struct* FlushSetting)
 			}
 
 			// Is this 9MB part complete
-		if (IsComplete(PARTSIZE * (uint64)partNumber, (PARTSIZE * (uint64)(partNumber + 1)) - 1, false))
+			//MORPH - Changed by SiRoB, As we are using flushed data check asynchronously we need to check if all data have been written into the file buffer
+			/*
+			if (IsComplete(PARTSIZE * (uint64)partNumber, (PARTSIZE * (uint64)(partNumber + 1)) - 1, false))
+			*/
+			if (IsComplete(PARTSIZE * (uint64)partNumber, (PARTSIZE * (uint64)(partNumber + 1)) - 1, true))
 			{
 				// Is part corrupt
 				// Let's check in another thread
@@ -7181,7 +7149,11 @@ uint16 CPartHashThread::SetFirstHash(CPartFile* pOwner)
 		return 1;	// Hash next start
 
 	for (int i = 0; i < pOwner->GetPartCount(); i++)
+		//MORPH - Changed by SiRoB, Need to check buffereddata otherwise we may try to hash wrong part
+		/*
 		if (pOwner->IsComplete((uint64)i*PARTSIZE,(uint64)(i+1)*PARTSIZE-1, false)){
+		*/
+		if (pOwner->IsComplete((uint64)i*PARTSIZE,(uint64)(i+1)*PARTSIZE-1, true)){
 			uchar* cur_hash = new uchar[16];
 			md4cpy(cur_hash, pOwner->GetPartHash(i));
 
