@@ -2837,6 +2837,17 @@ BEGIN
 END
 
 
+STRINGTABLE
+BEGIN
+ // ==> Slot Limit - Stulle
+  IDS_SLOT_LIMIT_GROUP    "Limitatore Slot"
+  IDS_SLOT_LIMIT_NONE     "Non limitato"
+  IDS_SLOT_LIMIT_THREE    "Velocità Upload diviso 3kb/s"
+  IDS_SLOT_LIMIT_NUM_B    "Limitare a nº slot"
+IDS_SLOT_LIMIT_NUM      "Mass. nº di slot (60-255)"
+  // <== Slot Limit - Stulle
+END
+
 #endif    // Italian (Italy) resources
 /////////////////////////////////////////////////////////////////////////////
 
