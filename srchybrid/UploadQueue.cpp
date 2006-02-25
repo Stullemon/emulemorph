@@ -752,7 +752,8 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
         AddDebugLogLine(false, _T("Adding client to upload list: %s Client: %s"), pszReason, newclient->DbgGetClientInfo());
 
 	// tell the client that we are now ready to upload
-	if (!newclient->socket || !newclient->socket->IsConnected())
+	//MORPH START - Changed by SiRoB, Fix connection collision 
+	if (!newclient->socket || !(newclient->socket->IsConnected() || newclient->socket->GetConState() == ES_NOTCONNECTED))
 	{
 		newclient->SetUploadState(US_CONNECTING);
 		/*MORPH*/bool filtered = false;
