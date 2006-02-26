@@ -15,7 +15,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // Polish resources
-// official + morph 7.7  text from Colder.
+// official + morph 8.5  text from Colder.
 
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PLK)
@@ -583,7 +583,7 @@ BEGIN
     IDS_EM_MESSAGES         "Wiadomoœci"
     IDS_EM_STATISTIC        "Statystyka"
     IDS_EM_PREFS            "Ustawienia"
-    IDS_MB_LANGUAGEINFO     "Zosta³ wybrany domyœlny jêzyk. Mo¿esz zmieniæ to ustawienie na zak³adce ustawieñ."
+    IDS_MB_LANGUAGEINFO     "Zosta³ wybrany domyœlny jêzyk. Mo¿esz zmieniæ to ustawienie na zak³adce Ustawieñ"
 END
 
 STRINGTABLE 
@@ -1142,8 +1142,8 @@ BEGIN
     IDS_USECREDITSYSTEM     "U¿yj systemu kredytów (Nagradzaj wysy³aj¹cych dane)"
     IDS_FIRSTAUTODOWN       "W³¹cz t¹ opcje jesli checesz, aby eMule zarz¹dza³ twoimi priorytetami sci¹gania.\n\nW³¹czenie tej opcji pozwoli upewniæ siê ze pliki z du¿¹ iloœci¹ Ÿróde³ nie bêd¹ blokowac transferu plikom z ma³a iloœci¹. Opcja ta zacznie dzia³¹æ przy nastêpnych œci¹gniêciach."
     IDS_FIRSTAUTOUP         "W³¹cz t¹ opcje jesli checesz, aby eMule zarz¹dza³ twoimi priorytetami wysy³ania.\n\nW³¹czenie tej opcji spowoduje wspomaganie plików rzadkich bardziej ni¿ popularnych, wy³¹czenie jej da odwrotny rezultat. Opcja zacznie dzia³aæ przy nastêpnych udostêpnieniach"
-    IDS_FIRSTCREDITSYSTEM   "Czy chcesz nagradzaæ userów wysy³aj¹cych do ciebie?\n\nThis is commonly known as the Credit System. Turning this on will help fight against leachers. If you are a dedicated releaser, you will want to turn this off."
-    IDS_FIRSTFULLCHUNK      "W³¹cz t¹ opcje jeœli chcesz wysy³aæ pe³ne czêœci plików.\n\nW³¹czenie tej opcji zwiêksza szanse pobrania ca³ej czêsci przez u¿ytkownika. Wy³¹czenie spowoduje szybsz¹ rotacje uuserów w kolejce. Jeœli jesteœ releaserem w³¹cz to."
+    IDS_FIRSTCREDITSYSTEM   "Czy chcesz nagradzaæ userów wysy³aj¹cych do ciebie?\n\nTo jest powszechenie znane jako System Kredytowy. W³¹czenie tej opcji poprawi walke przeciwko leecherom. Jeœli jesteœ oddanym releaserem, bêdiesz chcia³ wy³¹czyæ t¹ opcje."
+    IDS_FIRSTFULLCHUNK      "W³¹cz t¹ opcje jeœli chcesz wysy³aæ pe³ne czêœci plików.\n\nW³¹czenie tej opcji zwiêksza szanse pobrania ca³ej czêsci przez u¿ytkownika. Wy³¹czenie spowoduje szybsz¹ rotacje userów w kolejce. Jeœli jesteœ releaserem w³¹cz to."
     IDS_FIRSTSAFECON        "W³¹cz tê opcjê jeœli chcesz u¿ywaæ Bezpiecznego Pod³¹czania.\n\nWy³¹czenie pozwla siê ³¹czyæ z serwerami troszkê szybciej, ale mo¿e spowodowaæ b³êdne przydzielanie LowID."
     IDS_FIRSTRUNASSIST      "Czy chesz uruchomiæ wizarda konfiguracji pocz¹tkowej?"
     IDS_FIRSTAUTOCON        "W³¹cz t¹ opcjê jeœli chcesz aby eMule ³¹czy³ siê przy starcie"
@@ -1244,7 +1244,7 @@ BEGIN
     IDS_WIZ1_WELCOME_ACTIONS "Ten kreator pomo¿e ci skonfigurowac eMule'a."
     IDS_WIZ1_WELCOME_BTN_HINT "Aby kontynuowaæ, nacisnij klawisz 'Nastepny'."
     IDS_WIZ1_END_TITLE      "Zakañczanie kreatora"
-    IDS_WIZ1                "kreator pierwszego uruchonienia eMule"
+    IDS_WIZ1                "Kreator pierwszego uruchomienia eMule"
     IDS_WIZ1_END_BTN_HINT   "Aby zakoñczyæ dzia³anie kreatora, naciœnij 'Zakoñcz'."
     IDS_WIZ1_UPLOAD_SUBTITLE "Przesy³anie pe³nych kawa³ków"
     IDS_DL_RESUMENEXT       "Podejmij nastêpny wtrzymany"
@@ -1932,6 +1932,38 @@ BEGIN
     IDS_USS_STATE_PREPARING "Przygotownie..."
     IDS_USS_STATE_WAITING   "Czekaj..."
     IDS_USS_STATE_ERROR     "B³ad!"
+    IDS_SHAREWARNING        "(Folder bêdzie udostêpniany)"
+    IDS_REMOVEALLSERVERS    "Czy jesteœ pewien, ¿e chcesz usun¹æ wszystkie serwery?"
+    IDS_SEARCH_UNKATTR      "Nieznany atrybut szukania '%s'"
+    IDS_SEARCH_ATTRERR      "B³¹d sk³adni w '%s' szukanym atrybcie"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SEARCH_MISSINGANDRIGHT "Brak lewej strony przy operatorze AND"
+    IDS_SEARCH_OPRERR       "B³¹d sk³adni w porównaniu operatora '%s'"
+    IDS_DOWNLOAD_LANGFILE   "Œci¹gnie pliku jêzykowego"
+    IDS_DOWNLOADING_SERVERMET_FROM "Œci¹ganie server.met z %s"
+    IDS_DOWNLOADING_SERVERMET "Œci¹ganie server.met..."
+    IDS_FULLALLOC           "Umieszczanie pe³nego rozmaru pliku dla nierozrastaj¹cych siê czêœci pliku"
+    IDS_X_SHAREAZA_IMPORT_NO_HASH "Hash nie znaleziony."
+    IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "Gap list uszkodzony."
+    IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Gap list nie znaleziony."
+    IDS_X_SHAREAZA_IMPORT_HASH_SET_CORRUPT "Hash set uszkodzny."
+    IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "Hash set nie znaleziony."
+    IDS_CONVERTINGKNOWN2MET "Konwertowanie %s na %s ¿eby wesprzeæ wielkie pliki..."
+    IDS_CONVERTINGKNOWN2FAILED 
+                            "...nieuda³o siê zamieniæ known2.met, ignorowanie starych zapisów"
+    IDS_CONVERTINGKNOWN2DONE "... zrobione, zamiana zakoñczona"
+    IDS_ERR_MET_BAD         "B³¹d: Plik %s jest uszkodzony, nie mo¿e za³adowaæ znanych plików"
+    IDS_SRV_LARGEFILES      "Wsparcie dla du¿ych plików"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_FSCANTHANDLEFILE 
+                            "Nie mo¿esz sci¹gaæ tego pliku, poniewa¿ twój system nie obs³uguje plików wiêkszych ni¿ 4GB, rozwa¿ przekonwertowanie dysku na NTFS"
+
 END
 
 STRINGTABLE 
