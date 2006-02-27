@@ -2,11 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 ; create by leuk_he on 10-01-2006
 ; Todo: deinstall check
-;       write languge&fw pref  to preferences.ini
+;       write fw pref  to preferences.ini
 
 [Setup]
 AppName=eMule
-AppVerName=eMule0.47a MorphXT 8.1
+AppVerName=eMule0.47a MorphXT 8.5
 AppPublisher=Morph team
 AppPublisherURL=http://emulemorph.sourceforge.net/
 AppSupportURL=http://forum.emule-project.net/index.php?showforum=28
