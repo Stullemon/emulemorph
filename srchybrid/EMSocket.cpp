@@ -919,7 +919,6 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 }
 
 uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
-    uint32 ret;
 	if(current % minFragSize == 0) {
         return current;
     } else {
