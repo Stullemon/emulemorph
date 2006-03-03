@@ -220,12 +220,6 @@
 				RelativePath="AbstractFile.cpp">
 			</File>
 			<File
-				RelativePath="AbstractFile.cpp">
-			</File>
-			<File
-				RelativePath="AICHSyncThread.cpp">
-			</File>
-			<File
 				RelativePath="AICHSyncThread.cpp">
 			</File>
 			<File
@@ -759,12 +753,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
 				RelativePath="AbstractFile.h">
-			</File>
-			<File
-				RelativePath="AbstractFile.h">
-			</File>
-			<File
-				RelativePath="AICHSyncThread.h">
 			</File>
 			<File
 				RelativePath="AICHSyncThread.h">
