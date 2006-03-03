@@ -824,7 +824,9 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , bool readHa
 	}
 	else{
 		if (reqfile->GetPartCount() != nED2KPartCount){
-			throw GetResString(IDS_ERR_WRONGPARTNUMBER);
+			CString strError;
+			strError.Format(_T("ProcessFileIncStatus - wrong part number recv=%u  expected=%u  %s"), nED2KPartCount, reqfile->GetED2KPartCount(), DbgGetFileInfo(reqfile->GetFileHash()));
+			throw strError;
 		}
 		m_abyIncPartStatus = new uint8[m_nPartCount];
 		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
