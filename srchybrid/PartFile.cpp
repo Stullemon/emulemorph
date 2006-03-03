@@ -5291,12 +5291,12 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 		// SLUGFILLER: SafeHash
 	}
 
-	//MORPH - Changed by SiRoB, Import Parts
-	/*
 	if (gaplist.IsEmpty())
-	*/
-	if (gaplist.IsEmpty() || GetStatus()!=PS_READY && GetStatus()!=PS_EMPTY)
 		FlushBuffer(true);
+	//MORPH START - Added by SiRoB, Import Parts
+	else if (gaplist.IsEmpty())
+		FlushBuffer();
+	//MORPH END   - Added by SiRoB, Import Parts
 
 	// Return the length of data written to the buffer
 	return lenData;
