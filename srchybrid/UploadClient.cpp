@@ -190,7 +190,7 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 		}
 		if (eNewState == US_UPLOADING) {
 			m_fSentOutOfPartReqs = 0;
-			m_AvarageUDRPreviousAddedTimestamp = m_AvarageUDRLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+			m_AvarageUDRLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 		}
 		// don't add any final cleanups for US_NONE here	
 		m_nUploadState = (_EUploadState)eNewState;
@@ -491,16 +491,14 @@ public:
 //MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
-	if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
-       m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 200*1024) { // the buffered data is large enough allready
+	if(m_BlockRequests_queue.IsEmpty()) {
 		return;
 	}
 	CString fullname;
 	bool bFromPF = true; // Statistic to breakdown uploaded data by complete file vs. partfile.
 	try{
         // Buffer new data if current buffer is less than 100 KBytes
-		while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2 &&
-			(m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 400*1024)) {
+		while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2) {
 
 			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
 			CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(currentblock->FileID);
@@ -539,7 +537,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 				filedata = (byte*)-2;
 				return;
 			} else if (filedata == (byte*)-1) {
-				//An error occur
+				//An error occured
 				theApp.sharedfiles->Reload();
 				throw GetResString(IDS_ERR_OPEN);
 			}
@@ -1098,14 +1096,12 @@ uint32 CUpDownClient::SendBlockData(){
 		// Store how much data we've Transferred this round,
 		// to be able to calculate average speed later
 		// keep sum of all values in list up to date
-		if (m_AvarageUDR_list.GetCount() > 0)
-			m_AvarageUDRPreviousAddedTimestamp = m_AvarageUDR_list.GetTail().timestamp;
 		TransferredData newitem = {(UINT)(sentBytesCompleteFile + sentBytesPartFile), curTick};
 		m_AvarageUDR_list.AddTail(newitem);
 		m_nSumForAvgUpDataRate = (UINT)(m_nSumForAvgUpDataRate + sentBytesCompleteFile + sentBytesPartFile);
 	}
 	
-	while ((UINT)m_AvarageUDR_list.GetCount() > 1 && (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD) {
+	while ((UINT)m_AvarageUDR_list.GetCount() > 1 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD) {
 		m_AvarageUDRLastRemovedTimestamp = m_AvarageUDR_list.GetHead().timestamp;
 		m_nSumForAvgUpDataRate -= m_AvarageUDR_list.RemoveHead().datalen;
 	}
@@ -1118,7 +1114,7 @@ uint32 CUpDownClient::SendBlockData(){
 			dwDuration += curTick - m_AvarageUDR_list.GetTail().timestamp - dwAvgTickDuration;
 		m_nUpDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgUpDataRate / dwDuration);
 	}else if(m_AvarageUDR_list.GetCount() == 1) {
-		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp;
+		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - m_AvarageUDR_list.GetTail().timestamp;
