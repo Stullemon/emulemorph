@@ -1004,7 +1004,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		}
 		m_nDownloadState = (_EDownloadState)nNewState;
 		if( GetDownloadState() == DS_DOWNLOADING ){
-			m_AvarageDDRPreviousAddedTimestamp = m_AvarageDDR_ListLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+			m_AvarageDDR_ListLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
 			if ( IsEmuleClient() )
 				SetRemoteQueueFull(false);
 			SetRemoteQueueRank(0);
@@ -1652,15 +1652,13 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 	*/
 	uint32 cur_tick = ::GetTickCount();
 	if(m_nDownDataRateMS > 0) {
-		if (m_AvarageDDR_list.GetCount() > 0)
-			m_AvarageDDRPreviousAddedTimestamp = m_AvarageDDR_list.GetTail().timestamp;
 		TransferredData newitem = {m_nDownDataRateMS,cur_tick};
 		m_AvarageDDR_list.AddTail(newitem);
 		m_nSumForAvgDownDataRate += m_nDownDataRateMS;
 		m_nDownDataRateMS = 0;
     }
 
-	while ((UINT)m_AvarageDDR_list.GetCount() > 1 && (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD) {
+	while ((UINT)m_AvarageDDR_list.GetCount() > 1 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD) {
 		m_AvarageDDR_ListLastRemovedTimestamp = m_AvarageDDR_list.GetHead().timestamp;
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 	}
@@ -1672,7 +1670,7 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 			dwDuration += cur_tick - m_AvarageDDR_list.GetTail().timestamp - dwAvgTickDuration;
 		m_nDownDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgDownDataRate / dwDuration);
 	} else if (m_AvarageDDR_list.GetCount() == 1) {
-		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDRPreviousAddedTimestamp;
+		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_ListLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = cur_tick - m_AvarageDDR_list.GetTail().timestamp;
