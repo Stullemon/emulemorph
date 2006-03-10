@@ -355,6 +355,8 @@ public:
 	// <--- enkeyDev: ICS
 	//Morph End - added by AndCycle, ICS
 
+	CArray<uint16,uint16> m_SrcpartFrequency; //MORPH - Added by SiRoB, Share Only The Need
+
 	// khaos::categorymod+
 	void	SetCatResumeOrder(UINT order)	{ m_catResumeOrder = order; SavePartFile(); }
 	UINT	GetCatResumeOrder() const				{ return m_catResumeOrder; }
@@ -423,7 +425,10 @@ private:
 	uint32	m_LastNoNeededCheck;
 	CTypedPtrList<CPtrList, Gap_Struct*> gaplist;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> requestedblocks_list;
+	//MORPH - Moved by SiRoB, moved in public area du to Share Only The Need
+	/*
 	CArray<uint16,uint16> m_SrcpartFrequency;
+	*/
 	// SLUGFILLER: SafeHash
 	CArray<bool,bool> m_PartsShareable;
 	uint16	m_PartsHashing;

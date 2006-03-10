@@ -1314,7 +1314,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	}
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
-	if(GetSpreadbarSetStatus() > 0 || GetSpreadbarSetStatus() == -1 ? thePrefs.GetSpreadbarSetStatus() > 0 : false){//MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	if(GetSpreadbarSetStatus() > 0 || (GetSpreadbarSetStatus() == -1 ? thePrefs.GetSpreadbarSetStatus() > 0 : false)){//MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 
 		char namebuffer[10];
 		char* number = &namebuffer[1];
@@ -1553,7 +1553,11 @@ Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 				{
 					for (UINT x = 0; x < GetPartCount(); x++)
 					{
-						if (srcstatus[x] && !rcvstatus[x])
+						//MORPH - Changed by SiRoB, See chunk that we hide
+						/*
+						if (srcstatus[x]== && !rcvstatus[x])
+						*/
+						if (srcstatus[x]&SC_AVAILABLE && !(rcvstatus[x]&SC_AVAILABLE))
 						{
 							// We know the recieving client needs a chunk from this client.
 							bNeeded = true;
@@ -1588,7 +1592,11 @@ Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 				ASSERT( cur_src->GetUpPartCount() == GetPartCount() );
 				for (UINT x = 0; x < GetPartCount(); x++ )
 				{
+					//MORPH - Changed by SiRoB, See chunk that we hide
+					/*
 					if (srcstatus[x])
+					*/
+					if (srcstatus[x]&SC_AVAILABLE)
 					{
 						// this client has at least one chunk
 						bNeeded = true;
@@ -1719,7 +1727,7 @@ void CKnownFile::SetUpPriority(uint8 iNewUpPriority, bool bSave)
 void CKnownFile::SetPermissions(int iNewPermissions)
 {
 	// Mighty Knife: Community visible filelist
-	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE || m_iPermissions == PERM_COMMUNITY);
+	ASSERT( m_iPermissions == -1 || m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE || m_iPermissions == PERM_COMMUNITY);
 	// [end] Mighty Knife
 	m_iPermissions = iNewPermissions;
 }
@@ -2270,10 +2278,10 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 
 	if (!parts)
 		return 0;
-
+	
 	CArray<bool, bool> partsavail;
 	bool usepartsavail = false;
-
+	
 	partspread.SetSize(parts);
 	partsavail.SetSize(parts);
 	for (i = 0; i < parts; i++) {
@@ -2281,66 +2289,106 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 		partsavail[i] = true;
 	}
 
+	//MORPH - Removed by SiRoB, Share Only The Need
+	/*
 	if(statistic.spreadlist.IsEmpty())
 		return parts;
-
-	if (IsPartFile())
+	*/
+	if (IsPartFile()) {
+		bool somethingtoshare = false;
 		for (i = 0; i < realparts; i++)
 			if (!((CPartFile*)this)->IsPartShareable(i)){	// SLUGFILLER: SafeHash
 				partsavail[i] = false;
 				usepartsavail = true;
-			}
-	if (client->m_abyUpPartStatus)
+			} else
+				somethingtoshare = true;
+		if (!somethingtoshare)
+			return parts;
+	}
+	if (client->m_abyUpPartStatus) {
+		bool somethingtoshare = false;
 		for (i = 0; i < realparts; i++)
 			if (client->IsUpPartAvailable(i)) {
 				partsavail[i] = false;
 				usepartsavail = true;
-			}
+			} else if (partsavail[i])
+				somethingtoshare = true;
+		if (!somethingtoshare)
+			return parts;
+	}
+	
 	if (parts > realparts)
 		partsavail[parts-1] = false;	// Couldn't care less if a 0-sized part wasn't spread
 
-	POSITION pos = statistic.spreadlist.GetHeadPosition();
-	uint16 last = 0;
-	uint64 count = statistic.spreadlist.GetValueAt(pos);
-	min = count;
-	statistic.spreadlist.GetNext(pos);
-	while (pos && last < parts){
-		uint64 next = statistic.spreadlist.GetKeyAt(pos);
-		if (next >= GetFileSize())
-			break;
-		next /= PARTSIZE;
-		while (last < next) {
-			partspread[last] = count;
-			last++;
-		}
-		if (last >= parts || !(statistic.spreadlist.GetKeyAt(pos) % PARTSIZE)) {
-			count = statistic.spreadlist.GetValueAt(pos);
-			if (min > count)
-				min = count;
-			statistic.spreadlist.GetNext(pos);
-			continue;
-		}
-		partspread[last] = count;
-		while (next == last) {
-			count = statistic.spreadlist.GetValueAt(pos);
-			if (min > count)
-				min = count;
-			if (partspread[last] > count)
-				partspread[last] = count;
-			statistic.spreadlist.GetNext(pos);
-			if (!pos)
-				break;
-			next = statistic.spreadlist.GetKeyAt(pos);
+	if(!statistic.spreadlist.IsEmpty()) {//MORPH - Added by SiRoB, Share Only The Need
+		POSITION pos = statistic.spreadlist.GetHeadPosition();
+		uint16 last = 0;
+		uint64 count = statistic.spreadlist.GetValueAt(pos);
+		min = count;
+		statistic.spreadlist.GetNext(pos);
+		while (pos && last < parts){
+			uint64 next = statistic.spreadlist.GetKeyAt(pos);
 			if (next >= GetFileSize())
 				break;
 			next /= PARTSIZE;
+			while (last < next) {
+				partspread[last] = count;
+				last++;
+			}
+			if (last >= parts || !(statistic.spreadlist.GetKeyAt(pos) % PARTSIZE)) {
+				count = statistic.spreadlist.GetValueAt(pos);
+				if (min > count)
+					min = count;
+				statistic.spreadlist.GetNext(pos);
+				continue;
+			}
+			partspread[last] = count;
+			while (next == last) {
+				count = statistic.spreadlist.GetValueAt(pos);
+				if (min > count)
+					min = count;
+				if (partspread[last] > count)
+					partspread[last] = count;
+				statistic.spreadlist.GetNext(pos);
+				if (!pos)
+					break;
+				next = statistic.spreadlist.GetKeyAt(pos);
+				if (next >= GetFileSize())
+					break;
+				next /= PARTSIZE;
+			}
+			last++;
 		}
-		last++;
+		while (last < parts) {
+			partspread[last] = count;
+			last++;
+		}
+	//MORPH START - Added by SiRoB, Share Only The Need
 	}
-	while (last < parts) {
-		partspread[last] = count;
-		last++;
-	}
+	if (((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())!=0) {
+		if (IsPartFile()) {
+			CPartFile* pfile = (CPartFile*)this;
+			if (pfile->m_SrcpartFrequency.IsEmpty() == false) {
+				for (i = 0; i < parts; i++)
+					if (pfile->m_SrcpartFrequency[i]>partspread[i]) {
+						partspread[i] = pfile->m_SrcpartFrequency[i];
+						if (client->m_abyUpPartStatus)
+							client->m_abyUpPartStatus[i] |= SC_HIDDENBYSOTN;
+					}
+			}
+		} else {
+			if (m_AvailPartFrequency.IsEmpty() == false) {
+				for (i = 0; i < parts; i++)
+					if (m_AvailPartFrequency[i]>partspread[i]) {
+						partspread[i] = m_AvailPartFrequency[i];
+						if (client->m_abyUpPartStatus)
+							client->m_abyUpPartStatus[i] |= SC_HIDDENBYSOTN;
+					}
+			}
+		}
+	} else if(statistic.spreadlist.IsEmpty())
+		return parts;
+	//MORPH END   - Added by SiRoB, Share Only The Need
 	if (usepartsavail) {		// Special case, ignore unshareables for min calculation
 		for (i = 0; i < parts; i++)
 			if (partsavail[i]){
@@ -2352,7 +2400,9 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 				if (min > partspread[i])
 					min = partspread[i];
 		}
-	}
+	} else if(statistic.spreadlist.IsEmpty())
+		return parts;
+
 	for (i = 0; i < parts; i++) {
 		if (partspread[i] > min)
 			partspread[i] -= min;
@@ -2360,18 +2410,25 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 			partspread[i] = 0;
 	}
 
-	if ((GetSelectiveChunk()>=0)?!GetSelectiveChunk():!thePrefs.IsSelectiveShareEnabled())
+	UINT hideOS = HideOSInWork();
+	if (!hideOS || ((GetSelectiveChunk()>=0)?!GetSelectiveChunk():!thePrefs.IsSelectiveShareEnabled()))
 		return parts;
 
-	UINT hideOS = HideOSInWork();
-	ASSERT(hideOS != 0);
-
 	if (client->m_nSelectedChunk > 0 && (int)client->m_nSelectedChunk <= partspread.GetSize() && partsavail[client->m_nSelectedChunk-1]) {
-		for (i = 0; i < client->m_nSelectedChunk-1; i++)
+		for (i = 0; i < client->m_nSelectedChunk-1; i++) {
 			partspread[i] = hideOS;
-		for (i = client->m_nSelectedChunk; i < parts; i++)
+			//MORPH START - Added by SiRoB, See Chunk that we hide
+			if (client->m_abyUpPartStatus)
+				client->m_abyUpPartStatus[i] |= SC_HIDDENBYHIDEOS;
+			//MORPH END   - Added by SiRoB, See Chunk that we hide
+		}
+		for (i = client->m_nSelectedChunk; i < parts; i++) {
 			partspread[i] = hideOS;
-
+			//MORPH START - Added by SiRoB, See Chunk that we hide
+			if (client->m_abyUpPartStatus)
+				client->m_abyUpPartStatus[i] |= SC_HIDDENBYHIDEOS;
+			//MORPH END   - Added by SiRoB, See Chunk that we hide
+		}
 		return parts;
 	}
 	else
@@ -2458,18 +2515,26 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 	*/
 	for (i = 0; i < parts; i++)
 	{	
-		if ( i != mincount && i != mincount2)
+		if ( i != mincount && i != mincount2) {
 			partspread[i] = hideOS;
+			//MORPH START - Added by SiRoB, See Chunk that we hide
+			if (client->m_abyUpPartStatus)
+				client->m_abyUpPartStatus[i] |= SC_HIDDENBYHIDEOS;
+			//MORPH END   - Added by SiRoB, See Chunk that we hide
+		}
 	}
 	return parts;
 };
 
 bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
-	UINT hideOS = HideOSInWork();
-	
-	if (!hideOS)
-		return FALSE;
 	CArray<uint64> partspread;
+	//MORPH - Added 
+	if (client->m_abyUpPartStatus == NULL) {
+		uint16 nED2kPartCount = GetED2KPartCount();
+		client->SetPartCount(nED2kPartCount);
+		client->m_abyUpPartStatus = new uint8[nED2kPartCount];
+		memset(client->m_abyUpPartStatus,0,nED2kPartCount);
+	}
 	UINT parts = CalcPartSpread(partspread, client);
 	if (!parts)
 		return FALSE;
@@ -2478,22 +2543,12 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	for (UINT i = 1; i < parts; i++)
 		if (partspread[i] > max)
 			max = partspread[i];
-	if (max < hideOS)
+	UINT hideOS = HideOSInWork();
+	UINT SOTN = ((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed());
+	if (!hideOS && SOTN)
+		hideOS = 1;
+	if (max < hideOS || !hideOS)
 		return FALSE;
-	//MORPH START - Added by SiRoB, See chunk that we hide
-	bool revelatleastonechunk = false;
-	for (UINT i = 0; i < parts; i++)
-		if (partspread[i] < hideOS && client->IsPartAvailable(i)==false)
-			revelatleastonechunk = true;
-	if (revelatleastonechunk==false)
-		return false;
-	if (client->m_abyUpPartStatusHidden == NULL){
-		client->m_abyUpPartStatusHidden = new uint8[parts];
-		client->m_bUpPartStatusHiddenBySOTN = false;
-		memset(client->m_abyUpPartStatusHidden,0,parts);
-	}
-	//MORPH END   - Added by SiRoB, See chunk that we hide
-
 	file->WriteUInt16((uint16)parts);
 	UINT done = 0;
 	while (done != parts){
@@ -2501,11 +2556,10 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 		for (UINT i = 0;i < 8;i++){
 			if (partspread[done] < hideOS) {
 				towrite |= (1<<i);
-			//MORPH START - Added by SiRoB, See chunk that we hide
-				client->m_abyUpPartStatusHidden[done] = 0;
-			} else
-				client->m_abyUpPartStatusHidden[done] = 1;
-			//MORPH END   - Added by SiRoB, See chunk that we hide
+				//MORPH START - Added by SiRoB, See Chunk that we hide
+				client->m_abyUpPartStatus[done] &= SC_AVAILABLE;
+				//MORPH END   - Added by SiRoB, See Chunk that we hide
+			}
 			done++;
 			if (done == parts)
 				break;
@@ -2515,58 +2569,6 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	return TRUE;
 }
 // SLUGFILLER: hideOS
-
-//MORPH - Changed by SiRoB, Avoid Sharing Nothing :( the return should be conditional
-//Wistily : Share only the need START (Inspired by lovelace release feature, adapted from Slugfiller hideOS code)
-bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
-{
-	if (((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())==0)
-		return false;
-	UINT parts = GetED2KPartCount();
-	if (m_AvailPartFrequency.IsEmpty())
-		return false;
-	UINT iMinAvailablePartFrenquency = (UINT)-1;
-	UINT iNumberOfVirtualCompleteSourcesCountReached = 0;
-	for (UINT i = 0; i < parts; i++)
-	{
-		if (!client->IsPartAvailable(i))
-		{
-			if (m_AvailPartFrequency[i]<iMinAvailablePartFrenquency) {
-				if (m_AvailPartFrequency[i] > m_nVirtualCompleteSourcesCount)
-					iMinAvailablePartFrenquency = m_AvailPartFrequency[i];
-				else if (m_AvailPartFrequency[i]>0)
-					++iNumberOfVirtualCompleteSourcesCountReached;
-			}
-		}
-	}
-	if (iMinAvailablePartFrenquency == (UINT)-1)
-		return false;
-	if (iNumberOfVirtualCompleteSourcesCountReached>1)
-		iMinAvailablePartFrenquency = m_nVirtualCompleteSourcesCount;
-	if (client->m_abyUpPartStatusHidden == NULL){
-		client->m_bUpPartStatusHiddenBySOTN = true;
-		client->m_abyUpPartStatusHidden = new uint8[parts];
-		memset(client->m_abyUpPartStatusHidden,0,parts);
-	}
-	UINT done = 0;
-	file->WriteUInt16((uint16)parts);
-	while (done != parts){
-		uint8 towrite = 0;
-		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] <= iMinAvailablePartFrenquency) {
-				towrite |= (1<<i);
-				client->m_abyUpPartStatusHidden[done] = 0;
-			} else
-				client->m_abyUpPartStatusHidden[done] = 1;
-			done++;
-			if (done == parts)
-				break;
-		}
-		file->WriteUInt8(towrite);
-	}
-	return true;
-}
-//Wistily : Share only the need STOP
 
 //MORPH START - Added by SiRoB, Avoid misusing of HideOS
 UINT	CKnownFile::HideOSInWork() const

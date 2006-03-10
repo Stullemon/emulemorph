@@ -503,8 +503,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						data.WriteHash16(reqfile->GetFileHash());
 						if (reqfile->IsPartFile())
 							((CPartFile*)reqfile)->WritePartStatus(&data, client);	// SLUGFILLER: hideOS
-						else if (!reqfile->ShareOnlyTheNeed(&data, client)) //wistily SOTN
-							if (!reqfile->HideOvershares(&data, client))	//Slugfiller: HideOS
+						else if (!reqfile->HideOvershares(&data, client))	//Slugfiller: HideOS
 							data.WriteUInt16(0);
 						Packet* packet = new Packet(&data);
 						packet->opcode = OP_FILESTATUS;
@@ -1487,8 +1486,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								data_out.WriteUInt8(OP_FILESTATUS);
 								if (reqfile->IsPartFile())
 									((CPartFile*)reqfile)->WritePartStatus(&data_out, client);	// SLUGFILLER: hideOS
-								else if (!reqfile->ShareOnlyTheNeed(&data_out, client)) //wistily SOTN
-									if (!reqfile->HideOvershares(&data_out, client))	//Slugfiller: HideOS
+								else if (!reqfile->HideOvershares(&data_out, client))	//Slugfiller: HideOS
 										data_out.WriteUInt16(0);
 								
 								//Morph Start - added by AndCycle, ICS
@@ -2228,8 +2226,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							{
 								if (reqfile->IsPartFile())
 									((CPartFile*)reqfile)->WritePartStatus(&data_out, sender);	// SLUGFILLER: hideOS
-								else if (!reqfile->ShareOnlyTheNeed(&data_out, sender)) //wistily SOTN
-									if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
+								else if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
 										data_out.WriteUInt16(0);
 							}
 							data_out.WriteUInt16((uint16)theApp.uploadqueue->GetWaitingPosition(sender));

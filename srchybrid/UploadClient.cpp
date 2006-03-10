@@ -62,6 +62,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	//MORPH START - Added by SiRoB, See chunk that we hide
 	COLORREF crHiddenPartBySOTN;
 	COLORREF crHiddenPartByHideOS;
+	COLORREF crHiddenPartBySOTNandHideOS;
 	//MORPH END   - Added by SiRoB, See chunk that we hide
 
     if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
@@ -74,6 +75,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		//MORPH START - Added by SiRoB, See chunk that we hide
 		crHiddenPartBySOTN = RGB(192, 96, 255);
 		crHiddenPartByHideOS = RGB(96, 192, 255);
+		crHiddenPartBySOTNandHideOS = RGB(96, 96, 255);
 		//MORPH END   - Added by SiRoB, See chunk that we hide
 
     } else {
@@ -86,6 +88,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		//MORPH START - Added by SiRoB, See chunk that we hide
 		crHiddenPartBySOTN = RGB(224, 128, 255);
 		crHiddenPartByHideOS = RGB(128, 224, 255);
+		crHiddenPartBySOTNandHideOS = RGB(128, 128, 255);
 		//MORPH END   - Added by SiRoB, See chunk that we hide
     }
 
@@ -109,20 +112,24 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		s_UpStatusBar.Fill(crNeither); 
 		if (!onlygreyrect && m_abyUpPartStatus && currequpfile) { 
 			UINT i;
-			for (i = 0;i < m_nUpPartCount;i++)
-				if(m_abyUpPartStatus[i])
-					s_UpStatusBar.FillRange(PARTSIZE*(uint64)(i), PARTSIZE*(uint64)(i+1), crBoth);
-			//MORPH START - Added by SiRoB, See chunk that we hide
-				else if (m_abyUpPartStatusHidden)
-					if (m_abyUpPartStatusHidden[i])
-						s_UpStatusBar.FillRange(PARTSIZE*(uint64)(i), PARTSIZE*(uint64)(i+1), m_bUpPartStatusHiddenBySOTN?crHiddenPartBySOTN:crHiddenPartByHideOS);
-			//MORPH END   - Added by SiRoB, See chunk that we hide
-			for (i;i < currequpfile->GetED2KPartCount();i++)
-			//MORPH START - Added by SiRoB, See chunk that we hide
-				 if (m_abyUpPartStatusHidden)
-					if (m_abyUpPartStatusHidden[i])
-						s_UpStatusBar.FillRange(PARTSIZE*(uint64)(i), PARTSIZE*(uint64)(i+1), m_bUpPartStatusHiddenBySOTN?crHiddenPartBySOTN:crHiddenPartByHideOS);
-			//MORPH END   - Added by SiRoB, See chunk that we hide
+			//MORPH START - Changed by SiRoB, See chunk that we hide
+			for (i = 0;i < currequpfile->GetED2KPartCount();i++) {
+				if (m_abyUpPartStatus[i] == 0)
+					continue;
+				COLORREF crChunk;
+				if (m_abyUpPartStatus[i]&SC_AVAILABLE)
+					crChunk = crBoth;
+				else if (m_abyUpPartStatus[i]&SC_HIDDENBYSOTN && m_abyUpPartStatus[i]&SC_HIDDENBYHIDEOS)
+					crChunk = crHiddenPartBySOTNandHideOS;
+				else if (m_abyUpPartStatus[i]&SC_HIDDENBYSOTN)
+					crChunk = crHiddenPartBySOTN;
+				else if (m_abyUpPartStatus[i]&SC_HIDDENBYHIDEOS)
+					crChunk = crHiddenPartByHideOS;
+				else 
+					crChunk = crBoth;
+				s_UpStatusBar.FillRange(PARTSIZE*(uint64)(i), PARTSIZE*(uint64)(i+1), crChunk);
+			}
+			//MORPH END   - Changed by SiRoB, See chunk that we hide
 			
 		}
 	    const Requested_Block_Struct* block;
@@ -519,9 +526,9 @@ void CUpDownClient::CreateNextBlockPackage(){
 				//MORPH END  - Changed by SiRoB, SLUGFILLER: SafeHash
 					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
 				//MORPH START - Added by SiRoB, Anti Anti HideOS & SOTN :p 
-				if (srcfile->IsPartFile() && m_abyUpPartStatusHidden) {
+				if (m_abyUpPartStatus) {
 					for (UINT i = (UINT)(currentblock->StartOffset/PARTSIZE); i < (UINT)((currentblock->EndOffset-1)/PARTSIZE+1); i++)
-						if (m_abyUpPartStatusHidden[i])
+						if (m_abyUpPartStatus[i]>SC_AVAILABLE)
 							throw GetResString(IDS_ERR_HIDDENBLOCK);
 				}//MORPH END   - Added by SiRoB, Anti Anti HideOS & SOTN :p 
 			}
@@ -623,13 +630,6 @@ bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 {
 	delete[] m_abyUpPartStatus;
 	m_abyUpPartStatus = NULL;
-	//MORPH START - Added by SiRoB, See chunk that we hide
-	if (m_abyUpPartStatusHidden)
-	{
-		delete[] m_abyUpPartStatusHidden;
-		m_abyUpPartStatusHidden = NULL;
-	}
-	//MORPH END   - Added by SiRoB, See chunk that we hide
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
 	if( GetExtendedRequestsVersion() == 0 )
@@ -924,12 +924,6 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 	// clear old status
 	delete[] m_abyUpPartStatus;
 	m_abyUpPartStatus = NULL;
-	//MORPH START - Added by SiRoB, See chunk that we hide
-	if (m_abyUpPartStatusHidden){
-		delete[] m_abyUpPartStatusHidden;
-		m_abyUpPartStatusHidden = NULL;
-	}
-	//MORPH END   - Added by SiRoB, See chunk that we hide
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
 	m_nSelectedChunk = 0;	// SLUGFILLER: hideOS - TODO: Notify the file the chunk is free for all

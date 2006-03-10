@@ -188,6 +188,13 @@ enum ESourceFrom{
 	SF_LINK				= 4,
 	SF_SLS				= 5 //MORPH - Added by SiRoB, Save Load Sources (SLS)
 };
+//MORPH START - Added by SiRoB, See chunk that we hide
+enum EChunkStatus{
+	SC_AVAILABLE		= 1,
+	SC_HIDDENBYSOTN		= 2,
+	SC_HIDDENBYHIDEOS	= 4
+};
+//MORPH END   - Added by SiRoB, See chunk that we hide
 
 #ifdef _DEBUG
 	// use the 'Enums' only for debug builds, each enum costs 4 bytes (3 unused)
@@ -450,7 +457,12 @@ public:
 	uint16			GetUpPartCount() const							{ return m_nUpPartCount; }
 	void			DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const;
 	bool			IsUpPartAvailable(UINT iPart) const {
+						//MORPH - Changed by SiRoB, See chunk that we hide
+						/*
 						return (iPart>=m_nUpPartCount || !m_abyUpPartStatus) ? false : m_abyUpPartStatus[iPart]!=0;
+						*/
+						return (iPart>=m_nUpPartCount || !m_abyUpPartStatus) ? false : m_abyUpPartStatus[iPart]&SC_AVAILABLE;
+
 					}
 	uint8*			GetUpPartStatus() const							{ return m_abyUpPartStatus; }
     /*
@@ -659,10 +671,6 @@ public:
 	uint32			notcompressed; // Add show compression
 	//MORPH END   - Added by SiRoB, Show compression
 	uint8*			m_abyUpPartStatus;
-	//MORPH START - Added by SiRoB, See chunk that we hide
-	uint8*			m_abyUpPartStatusHidden;
-	bool			m_bUpPartStatusHiddenBySOTN;
-	//MORPH END   - Added by SiRoB, See chunk that we hide
 	CTypedPtrList<CPtrList, CPartFile*> m_OtherRequests_list;
 	CTypedPtrList<CPtrList, CPartFile*> m_OtherNoNeeded_list;
 	uint16			m_lastPartAsked;
@@ -864,6 +872,7 @@ public:
 	bool	AttachMultiOHCBsRequest(CSafeMemFile &data); // Superlexx - attaches a multiple files request
 	bool	IsPartAvailable(UINT iPart, const byte* fileHash) {return requestedFiles.IsPartAvailable(iPart, fileHash);}
     // MORPH END - Added by Commander, WebCache 1.2e
+	void	SetPartCount(uint16 parts) { m_nUpPartCount = parts;}
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 	void	SetReadBlockFromFileBuffer(byte* pdata) {filedata = pdata;};
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
@@ -1062,6 +1071,7 @@ protected:
 	//
 	static CBarShader s_StatusBar;
 	static CBarShader s_UpStatusBar;
+
 	DWORD		m_lastRefreshedDLDisplay;
     DWORD		m_lastRefreshedULDisplay;
     uint32      m_random_update_wait;

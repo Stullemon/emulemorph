@@ -2677,16 +2677,20 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 {
 	// SLUGFILLER: hideOS
 	CArray<uint64> partspread;
-	UINT uED2KPartCount;
+	UINT uED2KPartCount = GetED2KPartCount();
 	UINT hideOS = HideOSInWork();
-	if (hideOS && client) {
+	UINT SOTN = ((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed());
+	if ((hideOS || SOTN) && client) {
+		//MORPH START - Added by SiRoB, See chunk that we hide
+		if (client->m_abyUpPartStatus == NULL) {
+			client->SetPartCount(uED2KPartCount);
+			client->m_abyUpPartStatus = new uint8[uED2KPartCount];
+			memset(client->m_abyUpPartStatus,0,uED2KPartCount);
+		}
+		//MORPH END   - Added by SiRoB, See chunk that we hide
 		uED2KPartCount = CalcPartSpread(partspread, client);
-		//MORPH START - Added by SiRoB, See chunk that we hide by HideOS feature
-		client->m_bUpPartStatusHiddenBySOTN = false;		
-		if (client->m_abyUpPartStatusHidden == NULL)
-			client->m_abyUpPartStatusHidden = new uint8[uED2KPartCount];
-		memset(client->m_abyUpPartStatusHidden,0,uED2KPartCount);
-		//MORPH END   - Added by SiRoB, See chunk that we hide by HideOS feature
+		if (!hideOS)
+			hideOS = 1;
 	} else {	// simpler to set as 0 than to create another loop...
 		uED2KPartCount = GetED2KPartCount();
 		partspread.SetSize(uED2KPartCount);
@@ -2703,12 +2707,15 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 		for (UINT i = 0; i < 8; i++){
 			if (partspread[uPart] < hideOS)	// SLUGFILLER: hideOS
 			{//MORPH - Added by SiRoB, See chunk that we hide
-				if (uPart < GetPartCount() && IsPartShareable(uPart))	// SLUGFILLER: SafeHash
-					towrite |= (1<<i);
-			//MORPH START - Added by SiRoB, See chunk that we hide
-			}else ///if (hideOS && client) //Removed (hideOS && client) == !(partspread[uPart] < hideOS)
-				client->m_abyUpPartStatusHidden[uPart] = 1;
-			//MORPH END   - Added by SiRoB, See chunk that we hide
+				if (uPart < GetPartCount()) {
+					if (IsPartShareable(uPart))	// SLUGFILLER: SafeHash
+						towrite |= (1<<i);
+					//MORPH START - Added by SiRoB, See chunk that we hide
+					if (client && client->m_abyUpPartStatus)
+						client->m_abyUpPartStatus[uPart] &= SC_AVAILABLE;
+					//MORPH END   - Added by SiRoB, See chunk that we hide
+				}
+			}
 			++uPart;
 			if (uPart == uED2KPartCount)
 				break;
@@ -2865,7 +2872,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 					}
 					//MORPH END   - Changed by Stulle, No zz ratio for http traffic
 
-					if(curClientReducedDownload)
+					if(curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
 					{
 						//MORPH START - Changed by SiRoB, Occurate download limiter
 						/*

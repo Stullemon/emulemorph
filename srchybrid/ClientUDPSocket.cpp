@@ -357,8 +357,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 					{
 						if (reqfile->IsPartFile())
 							((CPartFile*)reqfile)->WritePartStatus(&data_out, sender);	// SLUGFILLER: hideOS
-						else if (!reqfile->ShareOnlyTheNeed(&data_out, sender)) //wistily SOTN
-							if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
+						else if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
 							data_out.WriteUInt16(0);
 					}
 					data_out.WriteUInt16((uint16)(theApp.uploadqueue->GetWaitingPosition(sender)));
@@ -598,8 +597,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 
 						if (reqfile->IsPartFile())
 							((CPartFile*)reqfile)->WritePartStatus(&data_out, sender);	// SLUGFILLER: hideOS
-						else if (!reqfile->ShareOnlyTheNeed(&data_out, sender)) //wistily SOTN
-							if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
+						else if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
 							data_out.WriteUInt16(0);
 
 						data_out.WriteUInt16((uint16)theApp.uploadqueue->GetWaitingPosition(sender));

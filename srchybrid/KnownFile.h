@@ -166,7 +166,6 @@ public:
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 
 	CArray<uint64> m_PartSentCount;	// SLUGFILLER: hideOS
-	bool ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client);//wistily Share only the need
 
 #ifdef _DEBUG
 	// Diagnostic Support

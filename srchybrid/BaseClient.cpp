@@ -155,7 +155,6 @@ void CUpDownClient::Init()
 	m_nUpPartCount = 0;
 	m_abyPartStatus = 0;
 	m_abyUpPartStatus = 0;
-	m_abyUpPartStatusHidden = 0; //MORPH - Added by SiRoB, See chunk that we hide
 	m_nDownloadState = DS_NONE;
 	m_dwUploadTime = 0;
 	m_nTransferredDown = 0;
@@ -401,12 +400,6 @@ CUpDownClient::~CUpDownClient(){
 	}
 	// <--- enkeyDev: ICS
 	//Morph End - added by AndCycle, ICS
-	//MORPH START - Added by SiRoB, See chunk that we hide
-	if (m_abyUpPartStatusHidden){
-		delete[] m_abyUpPartStatusHidden;
-		m_abyUpPartStatusHidden = NULL;
-	}
-	//MORPH END   - Added by SiRoB, See chunk that we hide
 	ClearUploadBlockRequests();
 
 	for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;)
