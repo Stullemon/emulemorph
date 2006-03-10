@@ -4,9 +4,16 @@ Changelog for eMule 0.47a MorphXT v8.x
 FIXED  : (minor) Attempt to avoid connection Collision [SiRoB]
 FIXED  : (minor) Fixed false corrupted part report [SiRoB]
 
+CHANGED: HideOS & SOTN: They are working together [SiRoB]
+CHANGED: Average datarate calcul a bit [SiRoB]
+
 ADDED  : HideOS & SOTN:  Don't upload requested hidden block [SiRoB]
 
 TWEAKED: USC: available bandwidth is spreaded differently [SiRoB] 
+TWEAKED: Lowering memory consumption a bit by merging some data (See Chunk that we hide) [SiRoB]
+TWEAKED: ReadBlockFromFileThread:
+- get free of the upload process timer
+- this make 1.8MB/s limit rise up to ?
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.5
