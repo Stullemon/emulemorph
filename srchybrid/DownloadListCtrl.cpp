@@ -659,8 +659,16 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 					(lpPartFile->GetSrcStatisticsValue(DS_ONQUEUE) + lpPartFile->GetSrcStatisticsValue(DS_DOWNLOADING)), //MORPH - Modified by SiRoB
 					sc, lpPartFile->GetTransferringSrcCount());
 				//MORPH END   - Modified by IceCream, [sivka: -counter for A4AF in sources column-]
+				//MORPH START - Added by Stulle, Global Source Limit
+				/*
 				if (thePrefs.IsExtControlsEnabled() && lpPartFile->GetPrivateMaxSources() != 0)
 					buffer.AppendFormat(_T(" [%i]"), lpPartFile->GetPrivateMaxSources());
+				*/
+				if (thePrefs.IsUseGlobalHL())
+					buffer.AppendFormat(_T(" [%i]"), lpPartFile->GetMaxSources());
+				else if (thePrefs.IsExtControlsEnabled() && lpPartFile->GetPrivateMaxSources() != 0)
+					buffer.AppendFormat(_T(" [%i]"), lpPartFile->GetPrivateMaxSources());
+				//MORPH END   - Added by Stulle, Global Source Limit
 				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 			}
 			break;

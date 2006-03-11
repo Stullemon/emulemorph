@@ -12,6 +12,8 @@ CHANGED: SlugFiller SafeHash code changed to work arround false corrupted part r
 
 ADDED  : HideOS & SOTN:  Don't upload requested hidden block [SiRoB]
 ADDED  : Attempt to avoid connection Collision [SiRoB]
+ADDED  : Global source limit [Stulle]
+ADDED  : Source cache [Xman]
 
 TWEAKED: USC: available bandwidth is spreaded differently [SiRoB] 
 TWEAKED: Lowering memory consumption a bit by merging some data (See Chunk that we hide) [SiRoB]

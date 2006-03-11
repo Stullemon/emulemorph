@@ -886,6 +886,11 @@ public:
 	static	uint8	webcacheTrustLevel;
 	// MORPH END - Added by Commander, WebCache 1.2f
 
+	//MORPH START - Added by Stulle, Global Source Limit
+	static  UINT	m_uGlobalHL;
+	static	bool	m_bGlobalHL;
+	//MORPH END   - Added by Stulle, Global Source Limit
+
 	enum Table
 	{
 		tableDownload, 
@@ -1979,6 +1984,11 @@ public:
 	static const	CString& GetWapLowPass()			{ return m_sWapLowPassword; }
 	static void		SetWapLowPass(CString strNewPass);
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
+
+	//MORPH START - Added by Stulle, Global Source Limit
+	static UINT		GetGlobalHL()				{return m_uGlobalHL;} 
+	static bool		IsUseGlobalHL()				{return m_bGlobalHL;} 
+	//MORPH END   - Added by Stulle, Global Source Limit
 };
 
 extern CPreferences thePrefs;

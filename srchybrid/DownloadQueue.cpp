@@ -87,6 +87,14 @@ void CDownloadQueue::AddPartFilesToShare()
 }
 
 void CDownloadQueue::Init(){
+
+	//MORPH START - Added by Stulle, Global Source Limit
+	m_dwUpdateHL = ::GetTickCount();
+	m_dwUpdateHlTime = 50000; // 50 sec on startup
+	m_bPassiveMode = false;
+	m_bGlobalHLSrcReqAllowed = true;
+	//MORPH END   - Added by Stulle, Global Source Limit
+
 	// find all part files, read & hash them if needed and store into a list
 	CFileFind ff;
 	int count = 0;
@@ -859,6 +867,10 @@ bool CDownloadQueue::IsFileExisting(const uchar* fileid, bool bLogWarnings) cons
 }
 
 void CDownloadQueue::Process(){
+	//MORPH START - Added by Stulle, Global Source Limit
+	if( thePrefs.IsUseGlobalHL() && (::GetTickCount() - m_dwUpdateHL) >= m_dwUpdateHlTime )
+		SetHardLimits();
+	//MORPH END   - Added by Stulle, Global Source Limit
 	
 	ProcessLocalRequests(); // send src requests to local server
 	// WebCache ////////////////////////////////////////////////////////////////////////////////////
@@ -985,6 +997,9 @@ void CDownloadQueue::Process(){
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY){
+
+			cur_file->ProcessSourceCache(); //MORPH - Added by Stulle, Source cache [Xman]
+
 			//MORPH STRAT - Changed by SiRoB, zz Upload System
 			//MORPH START - Changed by Stulle, No zz ratio for http traffic
 			/*
@@ -2325,6 +2340,11 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 	if(!(!temp->IsStopped() && temp->GetMaxSources() > temp->GetSourceCount()))
 		return;
 
+	//MORPH START - Added by Stulle, Global Source Limit
+	if(temp->IsSrcReqOrAddAllowed() == false)
+		return;
+	//MORPH END   - Added by Stulle, Global Source Limit
+
 	uint32 ED2Kip = ntohl(ip);
 	if (theApp.ipfilter->IsFiltered(ED2Kip))
 	{
@@ -2610,3 +2630,146 @@ bool CDownloadQueue::ContainsUnstoppedFiles()
 	return returnval;
 }
 // MORPH END - Added by Commander, WebCache 1.2e
+
+//MORPH START - Added by Stulle, Global Source Limit
+/****************************\
+* Function written by Stulle *
+* Used ideas from MaxUpload  *
+\****************************/
+void CDownloadQueue::SetHardLimits()
+{
+/********************\
+* Set the variables  *
+\********************/
+
+	uint16 aCount = 0;
+	UINT countsources = 0;
+	uint16 m_uTollerance = (uint16)(thePrefs.GetGlobalHL()*.05);
+	UINT m_uSourcesDif = 0;
+	bool m_bTooMuchSrc = false;
+	bool m_bPassiveModeTemp = false;
+
+/********************\
+* Count Src & files  *
+\********************/
+
+	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
+		CPartFile* cur_file = filelist.GetNext(pos);
+		if (cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY)
+		{
+			aCount++;
+
+			 countsources += cur_file->GetSourceCount();
+
+			 // just a safety check
+			 if (cur_file->GetFileHardLimit() < cur_file->GetSourceCount())
+				 cur_file->DecrHL(); // HL = SrcCount
+		}
+	}
+
+	if (aCount == 0) // nothing to check here
+	{
+		m_bGlobalHLSrcReqAllowed = true;
+		m_dwUpdateHL = ::GetTickCount();
+		return;
+	}
+
+/********************\
+* Get Src difference *
+\********************/
+
+	if (thePrefs.GetGlobalHL() < countsources) // get pos result
+	{
+		m_uSourcesDif = countsources - thePrefs.GetGlobalHL();
+		m_bTooMuchSrc = true;
+	}
+	else
+		m_uSourcesDif = thePrefs.GetGlobalHL() - countsources;
+
+/********************\
+* Use passive mode   *
+\********************/
+
+	if(m_uSourcesDif < m_uTollerance)
+	{
+		if(m_bPassiveMode == false)
+		{
+			// First time in passive mode for this round! What we need to do now is increase
+			// the recheck time. Next we need to remember we had our first time passive mode.
+			// If we enter passive mode we add the difference to the max range to the number
+			// of current sources so we won't exceed the limit. One more var to recognize we
+			// entered the passive mode in this cycle and we are finished.
+			m_dwUpdateHlTime = 300000; // 300 sec = 5 min
+			m_bPassiveMode = true;
+			m_bPassiveModeTemp = true;
+			m_bGlobalHLSrcReqAllowed = true;
+			m_uSourcesDif = ((thePrefs.GetGlobalHL() + m_uTollerance) - countsources)/aCount;
+			AddDebugLogLine(true,_T("{GSL} Global source count is in the tolerance range! PassiveMode!"));
+		}
+		else
+		{
+			m_bGlobalHLSrcReqAllowed = true;
+			m_dwUpdateHL = ::GetTickCount();
+			return;
+		}
+	}
+
+/********************\
+* Calc HL changes    *
+\********************/
+
+	else
+	{
+		if(m_bPassiveMode == true)
+		{
+			m_dwUpdateHlTime = 50000; // 50 sec
+			m_bPassiveMode = false;
+			AddDebugLogLine(true,_T("{GSL} Global source count is not in the tolerance range! Disabled PassiveMode!"));
+		}
+		if(!m_bTooMuchSrc)
+		{
+			uint16 m_uMaxIncr = m_uTollerance/aCount;
+			m_uSourcesDif /= aCount;
+
+			if(m_uMaxIncr < m_uSourcesDif)
+				m_uSourcesDif = m_uMaxIncr;
+
+			m_bGlobalHLSrcReqAllowed = true;
+		}
+		else
+			m_bGlobalHLSrcReqAllowed = false;
+	}
+
+/********************\
+* Change Hardlimits  *
+\********************/
+
+	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
+		CPartFile* cur_file = filelist.GetNext(pos);
+		if ((cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY))
+		{
+			if(m_bPassiveModeTemp)
+				cur_file->SetPassiveHL(m_uSourcesDif);
+			else if(!m_bTooMuchSrc)
+				cur_file->IncrHL(m_uSourcesDif);
+			else
+				cur_file->DecrHL();
+		}
+	}
+
+	m_dwUpdateHL = ::GetTickCount();
+	return;
+}
+
+uint16 CDownloadQueue::GetGlobalSourceCount()
+{
+	uint16 m_uSourceCountTemp = 0;
+	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; )
+	{
+		const CPartFile* cur_file = filelist.GetNext(pos);
+
+		m_uSourceCountTemp = (uint16)(m_uSourceCountTemp + cur_file->GetSourceCount());
+	}
+	return m_uSourceCountTemp;
+}
+//MORPH END   - Added by Stulle, Global Source Limit

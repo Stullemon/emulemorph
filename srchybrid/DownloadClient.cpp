@@ -315,6 +315,18 @@ bool CUpDownClient::IsSourceRequestAllowed(CPartFile* partfile, bool sourceExcha
 	unsigned int nTimePassedClient = dwTickCount - GetLastSrcAnswerTime();
 	unsigned int nTimePassedFile   = dwTickCount - partfile->GetLastAnsweredTime();
 	bool bNeverAskedBefore = GetLastAskedForSources() == 0;
+
+	//MORPH START - Added by Stulle, Source cache [Xman]
+	// let's search for more sources a bit earlier
+	if(partfile->GetSourceCacheAmount()>1)
+		return false;
+	//MORPH END   - Added by Stulle, Source cache [Xman]
+
+	//MORPH START - Added by Stulle, Global Source Limit
+	if(partfile->IsSrcReqOrAddAllowed() == false)
+		return false;
+	//MORPH END   - Added by Stulle, Global Source Limit
+
 	UINT uSources = partfile->GetSourceCount();
     UINT uValidSources = partfile->GetValidSourcesCount();
 

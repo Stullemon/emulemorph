@@ -644,3 +644,5 @@
 #define KADEMLIA_FIND_VALUE		0x02
 #define KADEMLIA_STORE			0x04
 #define KADEMLIA_FIND_NODE		0x0B
+
+#define MAX_GSL                         8000 //MORPH - Added by Stulle, Global Source Limit

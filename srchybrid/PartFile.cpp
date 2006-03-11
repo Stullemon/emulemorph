@@ -330,6 +330,19 @@ void CPartFile::Init(){
 	InChangedSharedStatusBar = false;
 	//MORPH END   - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	m_ics_filemode = 0;	// enkeyDEV: ICS //Morph - added by AndCycle, ICS
+
+	//MORPH START - Added by Stulle, Global Source Limit
+	InitHL();
+	if(thePrefs.IsUseGlobalHL() &&
+		theApp.downloadqueue->GetPassiveMode())
+	{
+		theApp.downloadqueue->SetPassiveMode(false);
+		theApp.downloadqueue->SetUpdateHlTime(50000); // 50 sec
+		AddDebugLogLine(true,_T("{GSL} New file added! Disabled PassiveMode!"));
+	}
+	//MORPH END   - Added by Stulle, Global Source Limit
+
+	m_lastSoureCacheProcesstime = ::GetTickCount(); //MORPH - Added by Stulle, Source cache [Xman]
 }
 
 CPartFile::~CPartFile()
@@ -366,6 +379,8 @@ CPartFile::~CPartFile()
 		delete[] item->data;
 		delete item;
 	}
+
+	ClearSourceCache(); //MORPH - Added by Stulle, Source cache [Xman]
 }
 
 #ifdef _DEBUG
@@ -3136,7 +3151,12 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 		memcpy(m_anStates,m_anStatesTemp,sizeof(m_anStates));
 		//MORPH END   - Changed by SiRoB, Cached stat
 
+		//MORPH START - Modified by Stulle, Global Source Limit
+		/*
 		if( GetMaxSourcePerFileUDP() > GetSourceCount()){
+		*/
+		if( GetMaxSourcePerFileUDP() > GetSourceCount() && IsSrcReqOrAddAllowed()){
+		//MORPH END   - Modified by Stulle, Global Source Limit
 			if (theApp.downloadqueue->DoKademliaFileRequest() && (Kademlia::CKademlia::GetTotalFile() < KADEMLIATOTALFILE) && (dwCurTick > m_LastSearchTimeKad) &&  Kademlia::CKademlia::IsConnected() && theApp.IsConnected() && !stopped){ //Once we can handle lowID users in Kad, we remove the second IsConnected
 				//Kademlia
 				theApp.downloadqueue->SetLastKademliaFileRequest();
@@ -3166,6 +3186,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 		// check if we want new sources from server
 		if ( !m_bLocalSrcReqQueued && ((!m_LastSearchTime) || (dwCurTick - m_LastSearchTime) > SERVERREASKTIME) && theApp.serverconnect->IsConnected()
 			&& GetMaxSourcePerFileSoft() > GetSourceCount() && !stopped
+			&& IsSrcReqOrAddAllowed() // MORPH - Added by Stulle, Global Source Limit
 			&& (!IsLargeFile() || (theApp.serverconnect->GetCurrentServer() != NULL && theApp.serverconnect->GetCurrentServer()->SupportsLargeFilesTCP())))
 		{
 			m_bLocalSrcReqQueued = true;
@@ -3313,7 +3334,12 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 			continue;
 		}
 
+		//MORPH START - Modified by Stulle, Global Source Limit
+		/*
 		if( GetMaxSources() > this->GetSourceCount() )
+		*/
+		if( GetMaxSources() > this->GetSourceCount() && IsSrcReqOrAddAllowed() )
+		//MORPH END   - Modified by Stulle, Global Source Limit
 		{
 			debug_possiblesources++;
 			CUpDownClient* newsource = new CUpDownClient(this,port,userid,serverip,serverport,true);
@@ -3321,11 +3347,21 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 		}
 		else
 		{
+			//MORPH START - Modified by Stulle, Source cache [Xman]
+			/*
 			// since we may received multiple search source UDP results we have to "consume" all data of that packet
 			sources->Seek(((count-1)-i)*(4+2), SEEK_CUR);
 			if(GetKadFileSearchID())
 				Kademlia::CSearchManager::StopSearch(GetKadFileSearchID(), false);
 			break;
+			*/
+			AddToSourceCache(port,userid,serverip,serverport,SF_SERVER,true);
+			if(stopKadSearch==false && GetKadFileSearchID())
+			{
+				Kademlia::CSearchManager::StopSearch(GetKadFileSearchID(), false);
+				stopKadSearch=true;
+			}
+			//MORPH END   - Modified by Stulle, Source cache [Xman]
 		}
 	}
 	if ( thePrefs.GetDebugSourceExchange() )
@@ -4108,6 +4144,15 @@ BOOL CPartFile::PerformFileComplete()
 		m_sourcesaver.DeleteFile(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
 	// khaos::kmod-
 
+	//MORPH START - Added by Stulle, Global Source Limit
+	if(thePrefs.IsUseGlobalHL() && theApp.downloadqueue->GetPassiveMode())
+	{
+		theApp.downloadqueue->SetPassiveMode(false);
+		theApp.downloadqueue->SetUpdateHlTime(50000); // 50 sec
+		AddDebugLogLine(true,_T("{GSL} File completed! Disabled PassiveMode!"));
+	}
+	//MORPH END   - Added by Stulle, Global Source Limit
+
 	// remove backup files
 	CString BAKName(m_fullname);
 	BAKName.Append(PARTMET_BAK_EXT);
@@ -4147,6 +4192,8 @@ void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 	if (dwResult & FILE_COMPLETION_THREAD_SUCCESS)
 	{
 		SetStatus(PS_COMPLETE); // (set status and) update status-modification related GUI elements
+		ClearSourceCache(); //MORPH - Added by Stulle, Source cache [Xman]
+
 		if (isShared)	// SLUGFILLER: mergeKnown
 			theApp.knownfiles->SafeAddKFile(this);
 		theApp.downloadqueue->RemoveFile(this);
@@ -4280,6 +4327,17 @@ void CPartFile::DeleteFile(){
 	if (_taccess(BAKName, 0) == 0 && !::DeleteFile(BAKName))
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_DELETE) + _T(" - ") + GetErrorMessage(GetLastError()), BAKName);
 
+	//MORPH START - Added by Stulle, Global Source Limit
+	if(thePrefs.IsUseGlobalHL() && theApp.downloadqueue->GetPassiveMode())
+	{
+		theApp.downloadqueue->SetPassiveMode(false);
+		theApp.downloadqueue->SetUpdateHlTime(50000); // 50 sec
+		AddDebugLogLine(true,_T("{GSL} File deleted! Disabled PassiveMode!"));
+	}
+	//MORPH END   - Added by Stulle, Global Source Limit
+
+	ClearSourceCache(); //MORPH - Added by Stulle, Source cache [Xman]
+
 	BAKName = m_fullname;
 	BAKName.Append(PARTMET_TMP_EXT);
 	if (_taccess(BAKName, 0) == 0 && !::DeleteFile(BAKName))
@@ -4409,6 +4467,11 @@ void CPartFile::StopFile(bool bCancel, bool resort)
 	m_LastSearchTimeKad = 0;
 	m_TotalSearchesKad = 0;
 	RemoveAllSources(true);
+
+	//MORPH START - Added by Stulle, Source cache [Xman]
+	ClearSourceCache(); //only to avoid holding *maybe* not usful data in memory
+	//MORPH END   - Added by Stulle, Source cache [Xman]
+
 	paused = true;
 	stopped = true;
 	insufficient = false;
@@ -4428,6 +4491,16 @@ void CPartFile::StopFile(bool bCancel, bool resort)
 		CancelProxyDownloads();
 	thePrefs.UpdateWebcacheReleaseAllowed(); //JP webcache release
 	// MORPH END - Added by Commander, WebCache 1.2e
+
+	//MORPH START - Added by Stulle, Global Source Limit
+	if(thePrefs.IsUseGlobalHL() && theApp.downloadqueue->GetPassiveMode())
+	{
+		theApp.downloadqueue->SetPassiveMode(false);
+		theApp.downloadqueue->SetUpdateHlTime(50000); // 50 sec
+		AddDebugLogLine(true,_T("{GSL} File stopped! Disabled PassiveMode!"));
+	}
+	//MORPH END   - Added by Stulle, Global Source Limit
+
     if(resort) {
 		theApp.downloadqueue->SortByPriority();
 	    theApp.downloadqueue->CheckDiskspace();
@@ -4558,6 +4631,17 @@ void CPartFile::ResumeFile(bool resort)
 	}
 	paused = false;
 	stopped = false;
+
+	//MORPH START - Added by Stulle, Global Source Limit
+	InitHL();
+	if(thePrefs.IsUseGlobalHL() && theApp.downloadqueue->GetPassiveMode())
+	{
+		theApp.downloadqueue->SetPassiveMode(false);
+		theApp.downloadqueue->SetUpdateHlTime(50000); // 50 sec
+		AddDebugLogLine(true,_T("{GSL} New file resumed! Disabled PassiveMode!"));
+	}
+	//MORPH END   - Added by Stulle, Global Source Limit
+
 	SetActive(theApp.IsConnected());
 	// MORPH START - Added by Commander, WebCache 1.2e
 	ResumeProxyDownloads(); //JP Resume Proxy Downloads
@@ -5158,7 +5242,12 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 			}
 		}
 
+		//MORPH START - Modified by Stulle, Global Source Limit
+		/*
 		if (GetMaxSources() > GetSourceCount())
+		*/
+		if (GetMaxSources() > GetSourceCount() && IsSrcReqOrAddAllowed())
+		//MORPH END   - Modified by Stulle, Global Source Limit
 		{
 			CUpDownClient* newsource;
 			if( sourceexchangeversion == 3 )
@@ -5170,8 +5259,21 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 			newsource->SetSourceFrom(SF_SOURCE_EXCHANGE);
 			theApp.downloadqueue->CheckAndAddSource(this,newsource);
 		} 
+		//MORPH START - Modified by Stulle, Source cache [Xman]
+		/*
 		else
 			break;
+		*/
+		else
+		{
+			if(sourceexchangeversion==3)
+				AddToSourceCache(nPort,dwID,dwServerIP,nServerPort,SF_SOURCE_EXCHANGE,false,achUserHash);
+			else if(sourceexchangeversion>1)
+				AddToSourceCache(nPort,dwID,dwServerIP,nServerPort,SF_SOURCE_EXCHANGE,true,achUserHash);
+			else
+				AddToSourceCache(nPort,dwID,dwServerIP,nServerPort,SF_SOURCE_EXCHANGE,true);
+		}
+		//MORPH END   - Modified by Stulle, Source cache [Xman]
 	}
 }
 
@@ -6876,16 +6978,46 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart)
 	//AICH successfully recovered %s of %s from part %u for %s
 }
 
+//MORPH START - Modified by Stulle, Global Source Limit
+/*
 UINT CPartFile::GetMaxSources() const
 {
 	// Ignore any specified 'max sources' value if not in 'extended mode' -> don't use a parameter which was once
 	// specified in GUI but can not be seen/modified any longer..
 	return (!thePrefs.IsExtControlsEnabled() || m_uMaxSources == 0) ? thePrefs.GetMaxSourcePerFileDefault() : m_uMaxSources;
 }
+*/
+UINT CPartFile::GetMaxSources() const
+{
+	if(thePrefs.IsUseGlobalHL())
+	{
+		if(m_uFileHardLimit > 10)
+			return m_uFileHardLimit;
+		else
+			return 10;
+	}
+
+	// using a " (xx) ? yy : zz " construct uses more cpu time!
+	if (!thePrefs.IsExtControlsEnabled() || m_uMaxSources == 0)
+		return thePrefs.GetMaxSourcePerFileDefault();
+
+	return m_uMaxSources;
+}
+//MORPH END   - Modified by Stulle, Global Source Limit
 
 UINT CPartFile::GetMaxSourcePerFileSoft() const
 {
+	//MORPH START - Modified by Stulle, Source cache [Xman]
+	/*
 	UINT temp = ((UINT)GetMaxSources() * 9L) / 10;
+	*/
+	UINT temp = GetMaxSources();
+	if(temp>150)
+		temp = (UINT)(temp * 0.95f);
+	else
+		temp = (UINT)(temp * 0.90f);
+	//MORPH END - Modified by Stulle, Source cache [Xman]
+
 	if (temp > MAX_SOURCES_FILE_SOFT)
 		return MAX_SOURCES_FILE_SOFT;
 	return temp;
@@ -7520,3 +7652,99 @@ void CPartFile::AddWebCachedBlockToStats( bool IsGood, uint64 bytes )
 	}
 }
 // MORPH END  - Added by SiRoB, WebCache
+
+//MORPH START - Added by Stulle, Global Source Limit
+void CPartFile::IncrHL(UINT m_uSourcesDif)
+{
+	m_uFileHardLimit += m_uSourcesDif;
+
+	if(m_uFileHardLimit > 1000)
+		m_uFileHardLimit = 1000;
+	return;
+}
+
+void CPartFile::InitHL()
+{
+	if(((int)(thePrefs.GetGlobalHL()*.95) - (int)(theApp.downloadqueue->GetGlobalSourceCount())) > 0)
+		m_uFileHardLimit = 100;
+	else
+		m_uFileHardLimit = 10;
+	return;
+}
+
+bool CPartFile::IsSrcReqOrAddAllowed()
+{
+	// disabled GHL
+	if(thePrefs.IsUseGlobalHL() == false)
+		return true;
+
+	// GHL enabled, file active... let's check if it's allowed!
+	return (theApp.downloadqueue->GetGlobalHLSrcReqAllowed());
+}
+//MORPH END   - Added by Stulle, Global Source Limit
+
+//MORPH START - Added by Stulle, Source cache [Xman]
+void CPartFile::ClearSourceCache()
+{
+	m_sourcecache.RemoveAll();
+}
+
+void CPartFile::AddToSourceCache(uint16 nPort, uint32 dwID, uint32 dwServerIP,uint16 nServerPort, ESourceFrom sourcefrom, bool ed2kIDFlag, const uchar* achUserHash)
+{
+	PartfileSourceCache newsource;
+	newsource.nPort=nPort;
+	newsource.dwID=dwID;
+	newsource.dwServerIP=dwServerIP;
+	newsource.nServerPort=nServerPort;
+	newsource.ed2kIDFlag=ed2kIDFlag;
+	newsource.sourcefrom=sourcefrom;
+	newsource.expires=::GetTickCount() + SOURCECACHELIFETIME;
+	if(achUserHash!=NULL)
+	{
+		md4cpy(newsource.achUserHash,achUserHash);
+		newsource.withuserhash=true;
+	}
+	else
+	{
+		newsource.withuserhash=false;
+		//md4clr(newsource.achUserHash); //not needed
+	}
+
+	m_sourcecache.AddTail(newsource);
+}
+
+void CPartFile::ProcessSourceCache()
+{
+	if(m_lastSoureCacheProcesstime + SOURCECACHEPROCESSLOOP < ::GetTickCount())
+	{
+		uint32 currenttime=::GetTickCount(); //cache value
+		m_lastSoureCacheProcesstime=currenttime;
+
+		//if file is stopped clear the cache and return
+		if(stopped)
+		{
+			m_sourcecache.RemoveAll();
+			return;
+		}
+
+		while(m_sourcecache.IsEmpty()==false && m_sourcecache.GetHead().expires<currenttime)
+		{
+			m_sourcecache.RemoveHead();
+		}
+		uint32 sourcesadded=0;
+		while(m_sourcecache.IsEmpty()==false && GetMaxSources()  > this->GetSourceCount() +2 //let room for 2 passiv source
+			&& IsSrcReqOrAddAllowed())
+		{
+			PartfileSourceCache currentsource=m_sourcecache.RemoveHead();
+			CUpDownClient* newsource = new CUpDownClient(this,currentsource.nPort, currentsource.dwID,currentsource.dwServerIP,currentsource.nServerPort,currentsource.ed2kIDFlag);
+			newsource->SetSourceFrom(currentsource.sourcefrom);
+			if(currentsource.withuserhash==true)
+				newsource->SetUserHash(currentsource.achUserHash);
+			if(theApp.downloadqueue->CheckAndAddSource(this,newsource))
+				sourcesadded++;
+		}
+		if(sourcesadded>0 && thePrefs.GetDebugSourceExchange())
+			AddDebugLogLine(false,_T("-->%u sources added via sourcache. file: %s"),sourcesadded,GetFileName()); 
+	}
+}
+//MORPH END   - Added by Stulle, Source cache [Xman]

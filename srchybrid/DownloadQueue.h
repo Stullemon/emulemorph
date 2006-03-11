@@ -238,4 +238,18 @@ private:
 	//MORPH START - Added by SiRoB, ZZ Ratio in Work
 	bool	m_bIsZZRatioInWork;
 	//MORPH START - Added by SiRoB, ZZ Ratio in Work
+
+	//MORPH START - Added by Stulle, Global Source Limit
+public:
+	void SetHardLimits();
+	void SetUpdateHlTime(DWORD in){m_dwUpdateHlTime = in;}
+	bool GetPassiveMode() const {return m_bPassiveMode;}
+	void SetPassiveMode(bool in){m_bPassiveMode=in;}
+	bool GetGlobalHLSrcReqAllowed() const {return m_bGlobalHLSrcReqAllowed;}
+protected:
+	DWORD m_dwUpdateHL;
+	DWORD m_dwUpdateHlTime;
+	bool m_bPassiveMode;
+	bool m_bGlobalHLSrcReqAllowed;
+	//MORPH END   - Added by Stulle, Global Source Limit
 };

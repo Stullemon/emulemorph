@@ -106,6 +106,25 @@ struct FlushDone_Struct
 	bool	bForceICH;
 	bool*	changedPart;
 };
+
+//MORPH START - Added by Stulle, Source cache [Xman]
+enum ESourceFrom;
+struct PartfileSourceCache
+{
+	uint16			nPort;
+	uint32			dwID;
+	uint32			dwServerIP;
+	uint16			nServerPort;
+	uchar			achUserHash[16];
+	bool			withuserhash;
+	bool			ed2kIDFlag;
+	ESourceFrom		sourcefrom;
+	uint32			expires;
+};
+#define	SOURCECACHEPROCESSLOOP	MIN2MS(1)	//every one minute
+#define SOURCECACHELIFETIME		MIN2MS(30)	//expires after 30 minutes
+//MORPH END   - Added by Stulle, Source cache [Xman]
+
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 class CPartFile : public CKnownFile
@@ -529,6 +548,28 @@ private:
 	UINT GetNumberOfCurrentWebcacheConnectionsForThisFile();
 	//JP Throttle OHCB-production END
 //MORPH END   - Added by SiRoB, WebCache 1.2f
+
+	//MORPH START - Added by Stulle, Global Source Limit
+private: 
+	UINT	m_uFileHardLimit; 
+public: 
+	void	IncrHL(UINT m_uSourcesDif);
+	void	DecrHL()	{m_uFileHardLimit = GetSourceCount();}
+	void	SetPassiveHL(UINT m_uSourcesDif)	{m_uFileHardLimit = GetSourceCount() + m_uSourcesDif;};
+	UINT	GetFileHardLimit() const {return m_uFileHardLimit;}
+	void	InitHL();
+	bool	IsSrcReqOrAddAllowed();
+	//MORPH END   - Added by Stulle, Global Source Limit
+
+	//MORPH START - Added by Stulle, Source cache [Xman]
+	void	ProcessSourceCache();
+	void	AddToSourceCache(uint16 nPort, uint32 dwID, uint32 dwServerIP,uint16 nServerPort,ESourceFrom sourcefrom, bool ed2kIDFlag=false,  const uchar* achUserHash=NULL);
+	void	ClearSourceCache();
+	uint32	GetSourceCacheAmount() const { return m_sourcecache.GetCount();}
+private:
+	CList<PartfileSourceCache>	m_sourcecache;
+	uint32						m_lastSoureCacheProcesstime;
+	//MORPH END   - Added by Stulle, Source cache [Xman]
 };
 
 // SLUGFILLER: SafeHash

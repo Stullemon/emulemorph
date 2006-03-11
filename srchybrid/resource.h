@@ -3070,6 +3070,8 @@
 #define IDC_WCDOWNL                     27830
 #define IDC_WC_REQ_SUCC                 27970
 #define IDC_WC_DOWNLOADED               27980
+#define IDS_GLOBAL_HL                   28000
+#define IDS_GLOBAL_HL_LIMIT             28001
 #define IDA_ENTER                       32771
 #define IDC_EDTINFO                     40125
 #define IDC_BACKUP_FILEFRAME            50501

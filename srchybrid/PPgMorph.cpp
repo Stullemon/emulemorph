@@ -11,6 +11,8 @@
 #include "StatisticsDlg.h" //MORPH - Added by SiRoB, Datarate Average Time Management
 #include "searchDlg.h"
 #include "UserMsgs.h"
+#include "Log.h" //MORPH - Added by Stulle, Global Source Limit
+#include "DownloadQueue.h" //MORPH - Added by Stulle, Global Source Limit
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -63,6 +65,11 @@ CPPgMorph::CPPgMorph()
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
 	m_htiShowClientPercentage = NULL; //MORPH - Added by SiRoB, show download in Bold
+	//MORPH START - Added by Stulle, Global Source Limit
+	m_htiGlobalHlGroup = NULL;
+	m_htiGlobalHL = NULL;
+	m_htiGlobalHlLimit = NULL;
+	//MORPH END   - Added by Stulle, Global Source Limit
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, activate Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, activate Anti-CreditHack
 	m_htiSCC = NULL;
@@ -148,6 +155,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//MORPH END - Added by SiRoB, khaos::categorymod+
 		int iImgSecu = 8;
  		int iImgDisp = 8;
+		int iImgGlobal = 8;
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		int iImgFriend = 8;
 		int iImgPowerShare = 8;
@@ -170,6 +178,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 			//MORPH END - Added by SiRoB, khaos::categorymod+
 			iImgSecu = piml->Add(CTempIconLoader(_T("SECURITY")));
 			iImgDisp = piml->Add(CTempIconLoader(_T("DISPLAY")));
+			iImgGlobal = piml->Add(CTempIconLoader(_T("SEARCHMETHOD_GLOBAL")));
 			//MORPH START - Added by SiRoB, Upload Splitting Class
 			iImgFriend = piml->Add(CTempIconLoader(_T("FRIEND")));
 			iImgPowerShare = piml->Add(CTempIconLoader(_T("FILEPOWERSHARE")));
@@ -218,6 +227,12 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiDownloadDataRateAverageTime = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DATARATEAVERAGETIME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDisp);
 		m_ctrlTreeOptions.AddEditBox(m_htiDownloadDataRateAverageTime, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		//MORPH END   - Added by SiRoB, Datarate Average Time Management
+		//MORPH START - Added by Stulle, Global Source Limit
+		m_htiGlobalHlGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_GLOBAL_HL), iImgGlobal, m_htiDM);
+		m_htiGlobalHL = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SUC_ENABLED), m_htiGlobalHlGroup, m_bGlobalHL);
+		m_htiGlobalHlLimit = m_ctrlTreeOptions.InsertItem(GetResString(IDS_GLOBAL_HL_LIMIT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiGlobalHlGroup);
+		m_ctrlTreeOptions.AddEditBox(m_htiGlobalHlLimit, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		//MORPH END   - Added by Stulle, Global Source Limit
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		m_htiUseSLS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SLS_USESLS), m_htiDM, m_bUseSLS);
 		//MORPH END - Added by SiRoB, khaos::categorymod+
@@ -408,6 +423,11 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	// khaos::accuratetimerem+
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiTimeRemainingMode, m_iTimeRemainingMode);
 	// khaos::accuratetimerem-
+	//MORPH START - Added by Stulle, Global Source Limit
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiGlobalHL, m_bGlobalHL);
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalHlLimit, m_iGlobalHL);
+	DDV_MinMaxInt(pDX, m_iGlobalHL, 1000, MAX_GSL);
+	//MORPH END   - Added by Stulle, Global Source Limit
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseICS, m_bUseICS);//MORPH - Added by SiRoB, ICS Optional
 
@@ -455,6 +475,10 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iDownloadDataRateAverageTime = thePrefs.m_iDownloadDataRateAverageTime/1000;
 	m_iUploadDataRateAverageTime = thePrefs.m_iUploadDataRateAverageTime/1000;
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
+	//MORPH START - Added by Stulle, Global Source Limit
+	m_bGlobalHL = thePrefs.IsUseGlobalHL();
+	m_iGlobalHL = thePrefs.GetGlobalHL();
+	//MORPH END   - Added by Stulle, Global Source Limit
 	m_bEnableAntiLeecher = thePrefs.enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
 	m_bInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -564,6 +588,20 @@ BOOL CPPgMorph::OnApply()
 	if (updateLegend)
 		theApp.emuledlg->statisticswnd->RepaintMeters();
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
+	//MORPH START - Added by Stulle, Global Source Limit
+	if (thePrefs.GetGlobalHL() != (UINT)m_iGlobalHL ||
+		thePrefs.IsUseGlobalHL() != m_bGlobalHL)
+	{
+		thePrefs.m_bGlobalHL = m_bGlobalHL;
+		thePrefs.m_uGlobalHL = m_iGlobalHL;
+		if(m_bGlobalHL && theApp.downloadqueue->GetPassiveMode())
+		{
+			theApp.downloadqueue->SetPassiveMode(false);
+			theApp.downloadqueue->SetUpdateHlTime(50000); // 50 sec
+			AddDebugLogLine(true,_T("{GSL} Global Source Limit settings have changed! Disabled PassiveMode!"));
+		}
+	}
+	//MORPH END   - Added by Stulle, Global Source Limit
 	thePrefs.enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	thePrefs.infiniteQueue = m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -689,6 +727,10 @@ void CPPgMorph::Localize(void)
 		if (m_htiEnableDownloadInRed) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInRed, GetResString(IDS_DOWNLOAD_IN_RED)); //MORPH - Added by IceCream, show download in red
 		if (m_htiEnableDownloadInBold) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInBold, GetResString(IDS_DOWNLOAD_IN_BOLD)); //MORPH - Added by SiRoB, show download in Bold
 		if (m_htiShowClientPercentage) m_ctrlTreeOptions.SetItemText(m_htiShowClientPercentage, GetResString(IDS_CLIENTPERCENTAGE));
+		//MORPH START - Added by Stulle, Global Source Limit
+		if (m_htiGlobalHL) m_ctrlTreeOptions.SetItemText(m_htiGlobalHL, GetResString(IDS_GLOBAL_HL));
+		if (m_htiGlobalHlLimit) m_ctrlTreeOptions.SetEditLabel(m_htiGlobalHlLimit, GetResString(IDS_GLOBAL_HL_LIMIT));
+		//MORPH END   - Added by Stulle, Global Source Limit
 		if (m_htiEnableAntiLeecher) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiLeecher, GetResString(IDS_ANTI_LEECHER)); //MORPH - Added by IceCream, enable Anti-leecher
 		if (m_htiEnableAntiCreditHack) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiCreditHack, GetResString(IDS_ANTI_CREDITHACK)); //MORPH - Added by IceCream, enable Anti-CreditHack
 		if (m_htiInfiniteQueue) m_ctrlTreeOptions.SetItemText(m_htiInfiniteQueue, GetResString(IDS_INFINITEQUEUE));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -775,6 +817,10 @@ void CPPgMorph::OnDestroy()
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
 	m_htiShowClientPercentage = NULL;
+	//MORPH START - Added by Stulle, Global Source Limit
+	m_htiGlobalHL = NULL;
+	m_htiGlobalHlLimit = NULL;
+	//MORPH END   - Added by Stulle, Global Source Limit
 	m_htiUpSecu = NULL;
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, enable Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, enable Anti-CreditHack

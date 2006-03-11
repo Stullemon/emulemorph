@@ -30,6 +30,10 @@ protected:
 	bool m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	bool m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	bool m_bShowClientPercentage;
+	//MORPH START - Added by Stulle, Global Source Limit
+	bool m_bGlobalHL;
+	int m_iGlobalHL;
+	//MORPH END   - Added by Stulle, Global Source Limit
 	bool m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	bool m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	bool m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -101,6 +105,11 @@ protected:
 	HTREEITEM m_htiEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	HTREEITEM m_htiEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	HTREEITEM m_htiShowClientPercentage;
+	//MORPH START - Added by Stulle, Global Source Limit
+	HTREEITEM m_htiGlobalHlGroup;
+	HTREEITEM m_htiGlobalHL;
+	HTREEITEM m_htiGlobalHlLimit;
+	//MORPH END   - Added by Stulle, Global Source Limit
 	HTREEITEM m_htiEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	HTREEITEM m_htiInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue

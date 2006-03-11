@@ -431,7 +431,12 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						// no passive adding of files with only one part
 						if (reqfile->IsPartFile() && reqfile->GetFileSize() > (uint64)PARTSIZE)
 						{
+							//MORPH START - Modified by Stulle, Global Source Limit
+							/*
 							if (((CPartFile*)reqfile)->GetMaxSources() > ((CPartFile*)reqfile)->GetSourceCount())
+							*/
+							if (((CPartFile*)reqfile)->GetMaxSources() > ((CPartFile*)reqfile)->GetSourceCount() && ((CPartFile*)reqfile)->IsSrcReqOrAddAllowed())
+							//MORPH END   - Modified by Stulle, Global Source Limit
 								theApp.downloadqueue->CheckAndAddKnownSource((CPartFile*)reqfile, client, true);
 						}
 
@@ -1426,7 +1431,12 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					// no passive adding of files with only one part
 					if (reqfile->IsPartFile() && reqfile->GetFileSize() > (uint64)PARTSIZE)
 					{
+						//MORPH START - Modified by Stulle, Global Source Limit
+						/*
 						if (((CPartFile*)reqfile)->GetMaxSources() > ((CPartFile*)reqfile)->GetSourceCount())
+						*/
+						if (((CPartFile*)reqfile)->GetMaxSources() > ((CPartFile*)reqfile)->GetSourceCount() && ((CPartFile*)reqfile)->IsSrcReqOrAddAllowed())
+						//MORPH END - Modified by Stulle, Global Source Limit
 							theApp.downloadqueue->CheckAndAddKnownSource((CPartFile*)reqfile, client, true);
 					}
 

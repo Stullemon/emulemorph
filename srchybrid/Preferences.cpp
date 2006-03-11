@@ -737,6 +737,11 @@ bool	CPreferences::UpdateWebcacheReleaseAllowed()
 //JP webcache release END
 // MORPH END - Added by Commander, WebCache 1.2e
 
+//MORPH START - Added by Stulle, Global Source Limit
+UINT	CPreferences::m_uGlobalHL; 
+bool	CPreferences::m_bGlobalHL;
+//MORPH END   - Added by Stulle, Global Source Limit
+
 CPreferences::CPreferences()
 {
 #ifdef _DEBUG
@@ -2521,6 +2526,11 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("InvisibleModeHKKey"), (int)m_cInvisibleModeHotKey);
 	ini.WriteInt(_T("InvisibleModeHKKeyModifier"), m_iInvisibleModeHotKeyModifier);
     //Commander - Added: Invisible Mode [TPT] - End        
+
+	//MORPH START - Added by Stulle, Global Source Limit
+	ini.WriteBool(_T("GlobalHL"), m_bGlobalHL);
+	ini.WriteInt(_T("GlobalHLvalue"), m_uGlobalHL);
+	//MORPH END   - Added by Stulle, Global Source Limit
 }
 
 void CPreferences::ResetStatsColor(int index)
@@ -3503,6 +3513,19 @@ void CPreferences::LoadPreferences()
 	m_sWapLowPassword = ini.GetString(_T("WapPasswordLow"), _T(""), _T("WapServer"));
 	m_bWapLowEnabled = ini.GetBool(_T("WapLowEnable"), false, _T("WapServer"));
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
+
+	//MORPH START - Added by Stulle, Global Source Limit
+	m_bGlobalHL = ini.GetBool(_T("GlobalHL"), false);
+	uint32 m_uGlobalHlStandard = 3500;
+	if (maxGraphUploadRate != UNLIMITED)
+	{
+		m_uGlobalHlStandard = (uint32)(maxGraphUploadRate*0.9f);
+		m_uGlobalHlStandard = (uint32)((m_uGlobalHlStandard*400 - (m_uGlobalHlStandard-10.0f)*100)*0.65f);
+		m_uGlobalHlStandard = max(1000,min(m_uGlobalHlStandard,MAX_GSL));
+	}
+	m_uTemp = ini.GetInt(_T("GlobalHLvalue"), m_uGlobalHlStandard);
+	m_uGlobalHL = (m_uTemp >= 1000 && m_uTemp <= MAX_GSL) ? m_uTemp : m_uGlobalHlStandard;
+	//MORPH END   - Added by Stulle, Global Source Limit
 
     LoadCats();
 	SetLanguage();
