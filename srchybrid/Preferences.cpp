@@ -3515,7 +3515,7 @@ void CPreferences::LoadPreferences()
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	//MORPH START - Added by Stulle, Global Source Limit
-	m_bGlobalHL = ini.GetBool(_T("GlobalHL"), false);
+	m_bGlobalHL = ini.GetBool(_T("GlobalHL"), false, _T("eMule"));
 	uint32 m_uGlobalHlStandard = 3500;
 	if (maxGraphUploadRate != UNLIMITED)
 	{
@@ -3523,7 +3523,7 @@ void CPreferences::LoadPreferences()
 		m_uGlobalHlStandard = (uint32)((m_uGlobalHlStandard*400 - (m_uGlobalHlStandard-10.0f)*100)*0.65f);
 		m_uGlobalHlStandard = max(1000,min(m_uGlobalHlStandard,MAX_GSL));
 	}
-	m_uTemp = ini.GetInt(_T("GlobalHLvalue"), m_uGlobalHlStandard);
+	int m_uTemp = ini.GetInt(_T("GlobalHLvalue"), m_uGlobalHlStandard, _T("eMule"));
 	m_uGlobalHL = (m_uTemp >= 1000 && m_uTemp <= MAX_GSL) ? m_uTemp : m_uGlobalHlStandard;
 	//MORPH END   - Added by Stulle, Global Source Limit
 

@@ -76,7 +76,7 @@ void CConnectionWizardDlg::OnBnClickedApply()
 		thePrefs.maxdownload = UNLIMITED;
 		//MORPH START - Added by Stulle, Global Source Limit
 		thePrefs.m_uGlobalHL = 3500;
-		theApp.emuledlg->preferenceswnd->m_wndStulle.LoadSettings();
+		theApp.emuledlg->preferenceswnd->m_wndMorph.LoadSettings();
 		//MORPH END   - Added by Stulle, Global Source Limit
 		theApp.emuledlg->statisticswnd->SetARange(false, thePrefs.GetMaxGraphUploadRate(true));
 		theApp.emuledlg->statisticswnd->SetARange(true, thePrefs.maxGraphDownloadRate);
@@ -126,7 +126,7 @@ void CConnectionWizardDlg::OnBnClickedApply()
 	m_uGlobalHlStandard = (uint32)((m_uGlobalHlStandard*400 - (m_uGlobalHlStandard-10.0f)*100)*0.65f);
 	m_uGlobalHlStandard = max(1000,min(m_uGlobalHlStandard,MAX_GSL));
 	thePrefs.m_uGlobalHL = m_uGlobalHlStandard;
-	theApp.emuledlg->preferenceswnd->m_wndStulle.LoadSettings();
+	theApp.emuledlg->preferenceswnd->m_wndMorph.LoadSettings();
 	//MORPH END - Added by Stulle, Global Source Limit
 
 	if (upload > 0 && download > 0)
