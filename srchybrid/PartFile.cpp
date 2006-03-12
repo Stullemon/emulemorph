@@ -3292,6 +3292,8 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 		return;
 	}
 
+	bool stopKadSearch = false; //MORPH - Added by Stulle, Source cache [Xman]
+
 	UINT debug_lowiddropped = 0;
 	UINT debug_possiblesources = 0;
 	for (UINT i = 0; i < count; i++)
