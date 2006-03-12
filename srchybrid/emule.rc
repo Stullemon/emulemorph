@@ -5932,7 +5932,7 @@ BEGIN
    IDS_SLOT_LIMIT_NUM_B    "Limit to x slots"
    IDS_SLOT_LIMIT_NUM      "Max # of slots (60-255)"
    // <== Slot Limit - Stulle
-   IDS_GLOBAL_HL           "Enable Global HL"
+    IDS_GLOBAL_HL           "Global HL"
    IDS_GLOBAL_HL_LIMIT     "Global Hardlimit"
 END
 
