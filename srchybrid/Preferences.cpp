@@ -3523,7 +3523,7 @@ void CPreferences::LoadPreferences()
 		m_uGlobalHlStandard = (uint32)((m_uGlobalHlStandard*400 - (m_uGlobalHlStandard-10.0f)*100)*0.65f);
 		m_uGlobalHlStandard = max(1000,min(m_uGlobalHlStandard,MAX_GSL));
 	}
-	int m_uTemp = ini.GetInt(_T("GlobalHLvalue"), m_uGlobalHlStandard, _T("eMule"));
+	uint32 m_uTemp = ini.GetInt(_T("GlobalHLvalue"), m_uGlobalHlStandard);
 	m_uGlobalHL = (m_uTemp >= 1000 && m_uTemp <= MAX_GSL) ? m_uTemp : m_uGlobalHlStandard;
 	//MORPH END   - Added by Stulle, Global Source Limit
 

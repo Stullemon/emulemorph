@@ -246,8 +246,7 @@ public:
 	bool GetPassiveMode() const {return m_bPassiveMode;}
 	void SetPassiveMode(bool in){m_bPassiveMode=in;}
 	bool GetGlobalHLSrcReqAllowed() const {return m_bGlobalHLSrcReqAllowed;}
-	uint16 GetGlobalSourceCount(); // Show sources on title - Stulle
-
+	uint16 GetGlobalSourceCount();
 protected:
 	DWORD m_dwUpdateHL;
 	DWORD m_dwUpdateHlTime;
