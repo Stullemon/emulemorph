@@ -2267,7 +2267,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 {
 	UINT parts = GetED2KPartCount();
 	UINT realparts = GetPartCount();
-	uint64 min;
+	uint64 min = (uint64)-1;
 	UINT mincount = 1;
 	UINT mincount2 = 1;
 	UINT i;
@@ -2372,7 +2372,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 				for (i = 0; i < parts; i++)
 					if (pfile->m_SrcpartFrequency[i]>partspread[i]) {
 						partspread[i] = pfile->m_SrcpartFrequency[i];
-						if (client->m_abyUpPartStatus)
+						if (client->m_abyUpPartStatus && pfile->IsPartShareable(i))
 							client->m_abyUpPartStatus[i] |= SC_HIDDENBYSOTN;
 					}
 			}
