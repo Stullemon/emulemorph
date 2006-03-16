@@ -2370,16 +2370,16 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 			CPartFile* pfile = (CPartFile*)this;
 			if (pfile->m_SrcpartFrequency.IsEmpty() == false) {
 				for (i = 0; i < parts; i++)
-					if (pfile->m_SrcpartFrequency[i]>partspread[i]) {
+					if (partsavail[i] && pfile->m_SrcpartFrequency[i]>partspread[i]) {
 						partspread[i] = pfile->m_SrcpartFrequency[i];
-						if (client->m_abyUpPartStatus && pfile->IsPartShareable(i))
+						if (client->m_abyUpPartStatus)
 							client->m_abyUpPartStatus[i] |= SC_HIDDENBYSOTN;
 					}
 			}
 		} else {
 			if (m_AvailPartFrequency.IsEmpty() == false) {
 				for (i = 0; i < parts; i++)
-					if (m_AvailPartFrequency[i]>partspread[i]) {
+					if (partsavail[i] && m_AvailPartFrequency[i]>partspread[i]) {
 						partspread[i] = m_AvailPartFrequency[i];
 						if (client->m_abyUpPartStatus)
 							client->m_abyUpPartStatus[i] |= SC_HIDDENBYSOTN;
