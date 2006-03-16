@@ -63,7 +63,7 @@ uint32 ResolveWebCacheName() // returns 0 on error
 				/*
 				AfxMessageBox(msg);
 				*/
-				theApp.QueueLogLine(true,msg);
+				Log(LOG_ERROR | LOG_STATUSBAR, msg);
 				//MORPH END   - Changed by SiRoB, Avoid crash in some case
 			}
 			return 0; // can't resolve..
