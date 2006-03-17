@@ -2295,25 +2295,25 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 		return parts;
 	*/
 	if (IsPartFile()) {
-		bool somethingtoshare = false;
+		uint32 somethingtoshare = 0;
 		for (i = 0; i < realparts; i++)
 			if (!((CPartFile*)this)->IsPartShareable(i)){	// SLUGFILLER: SafeHash
 				partsavail[i] = false;
 				usepartsavail = true;
 			} else
-				somethingtoshare = true;
-		if (!somethingtoshare)
+				++somethingtoshare;
+		if (somethingtoshare<=2)
 			return parts;
 	}
 	if (client->m_abyUpPartStatus) {
-		bool somethingtoshare = false;
+		uint32 somethingtoshare = 0;
 		for (i = 0; i < realparts; i++)
 			if (client->IsUpPartAvailable(i)) {
 				partsavail[i] = false;
 				usepartsavail = true;
 			} else if (partsavail[i])
-				somethingtoshare = true;
-		if (!somethingtoshare)
+				++somethingtoshare;
+		if (somethingtoshare<=2)
 			return parts;
 	}
 	
@@ -2394,16 +2394,16 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 		return parts;
 	//MORPH END   - Added by SiRoB, Share Only The Need
 	if (usepartsavail) {		// Special case, ignore unshareables for min calculation
+		//MORPH START - Changed by SiRoB, force always to show 2 chunks
+		uint64 min2 = min = (uint6)-1;
 		for (i = 0; i < parts; i++)
 			if (partsavail[i]){
-				min = partspread[i];
-				break;
+				if (min2>partspread[i])
+					min2 = partspread[i];
+				else (min2==partspread[i])
+					min = min2;
 			}
-		for (i++; i < parts; i++){
-			if (partsavail[i])
-				if (min > partspread[i])
-					min = partspread[i];
-		}
+		//MORPH END   - Changed by SiRoB, force always to show 2 chunks
 	} else if(statistic.spreadlist.IsEmpty())
 		return parts;
 
