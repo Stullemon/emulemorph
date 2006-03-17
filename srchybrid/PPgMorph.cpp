@@ -370,7 +370,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_iSUCDrift, 0, 100);
 	
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLog, m_bUSSLog);
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSUDP, m_bUSSUSS); //MORPH - Added by SiRoB, USS UDP preferency
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSUDP, m_bUSSUDP); //MORPH - Added by SiRoB, USS UDP preferency
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLimit, m_bUSSLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingLimit, m_iUSSPingLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingTolerance, m_iUSSPingTolerance);

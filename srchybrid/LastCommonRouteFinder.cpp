@@ -392,7 +392,7 @@ UINT LastCommonRouteFinder::RunInternal() {
             uint32 lastCommonHost = 0;
             uint32 lastCommonTTL = 0;
             uint32 hostToPing = 0;
-			bool useUdp = m_bIsUDP; //MORPH - Added by SiRoB, USS with UDP preferency
+			bool useUdp = false;
 			
             hostsToTraceRoute.RemoveAll();
 
@@ -405,6 +405,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 			m_state = GetResString(IDS_USS_STATE_PREPARING);
             pingLocker.Unlock();
 			bool bIsUSSLog = m_bIsUSSLog; //MORPH - Added by SiRoB
+			bool bIsUSSUDP = m_bIsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 			// Calculate a good starting value for the upload control. If the user has entered a max upload value, we use that. Otherwise 10 KBytes/s
             int startUpload = (maxUpload != UNLIMITED*1024/*_UI32_MAX*/)?maxUpload:10*1024;
 
@@ -461,7 +462,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                         if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Pinging for TTL %i..."), ttl);
 
-						useUdp |= m_bIsUDP; //MORPH - Added by SiRoB, USS with UDP preferency
+						useUdp |= bIsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 
                         curHost = 0;
                         if(m_enabled == false) {
@@ -511,7 +512,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                                         enabled = false;
 
 									// trying other ping method
-									useUdp = !useUdp || m_bIsUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
+									useUdp = !useUdp || bIsUSSUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
                                 }
                             }
 
@@ -542,7 +543,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 									if(bIsUSSLog)
 										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown ping status! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.status);
 									pinger.PIcmpErr(pingStatus.status);
-									useUdp = !useUdp || m_bIsUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
+									useUdp = !useUdp || bIsUSSUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
                                 } else {
                                     if(pingStatus.error == IP_REQ_TIMED_OUT) {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
@@ -557,7 +558,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 											theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown pinging error! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.error);
                                         pinger.PIcmpErr(pingStatus.error);
-										useUdp = !useUdp || m_bIsUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
+										useUdp = !useUdp || bIsUSSUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
 									}
                                    }
 
@@ -700,7 +701,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
 					// trying other ping method
                     if(!pingStatus.success && !foundWorkingPingMethod) {
-						useUdp = !useUdp || m_bIsUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
+						useUdp = !useUdp || bIsUSSUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
                     }
                 }
 
@@ -800,7 +801,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                 lowestInitialPingAllowed = m_LowestInitialPingAllowed; // PENDING
                 uint32 curUpload = m_CurUpload;
 				bIsUSSLog = m_bIsUSSLog; //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-				useUdp |= m_bIsUDP; //MORPH - Added by SiRoB, USS with UDP preferency
+				useUdp |= bIsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 				bool initiateFastReactionPeriod = m_initiateFastReactionPeriod;
                 m_initiateFastReactionPeriod = false;
 				prefsLocker.Unlock();
