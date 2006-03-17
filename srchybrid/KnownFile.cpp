@@ -2395,7 +2395,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 	//MORPH END   - Added by SiRoB, Share Only The Need
 	if (usepartsavail) {		// Special case, ignore unshareables for min calculation
 		//MORPH START - Changed by SiRoB, force always to show 2 chunks
-		uint64 min2 = min = (uint6)-1;
+		uint64 min2 = min = (uint64)-1;
 		for (i = 0; i < parts; i++)
 			if (partsavail[i]){
 				if (min2>partspread[i])
