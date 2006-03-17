@@ -52,6 +52,7 @@ CPPgMorph::CPPgMorph()
 	m_htiSUCPitch = NULL;
 	m_htiSUCDrift = NULL;
 	m_htiUSSLog = NULL;
+	m_htiUSSUDP = NULL; //MORPH - Added by SiRoB, USS UDP preferency
 	m_htiUSSLimit = NULL; // EastShare - Added by TAHO , USS limit
 	m_htiUSSPingLimit = NULL; // EastShare - Added by TAHO, USS limit
     m_htiUSSPingTolerance = NULL;
@@ -262,7 +263,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		
 		m_htiDynUpUSS = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_USS), m_htiDYNUP, m_iDynUpMode == 2);
 		m_htiUSSLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_LOG), m_htiDynUpUSS, m_bUSSLog);
-
+		m_htiUSSUDP = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_UDP), m_htiDynUpUSS, m_bUSSUDP); //MORPH - Added by SiRoB, USS UDP preferency
 		// EastShare START - Added by TAHO, USS limit
 		m_htiUSSLimit = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_USEMAXPING), m_htiDynUpUSS, m_bUSSLimit);
 		//Buffer.Format("Max ping value (ms): ",800); //modified by Pretender
@@ -369,6 +370,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_iSUCDrift, 0, 100);
 	
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLog, m_bUSSLog);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSUDP, m_bUSSUSS); //MORPH - Added by SiRoB, USS UDP preferency
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLimit, m_bUSSLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingLimit, m_iUSSPingLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingTolerance, m_iUSSPingTolerance);
@@ -461,6 +463,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iSUCPitch = thePrefs.m_iSUCPitch;
 	m_iSUCDrift = thePrefs.m_iSUCDrift;;
 	m_bUSSLog = thePrefs.m_bDynUpLog;
+	m_bUSSUDP = thePrefs.m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 	m_bUSSLimit = thePrefs.m_bDynUpUseMillisecondPingTolerance; // EastShare - Added by TAHO, USS limit
 	m_iUSSPingLimit = thePrefs.m_iDynUpPingToleranceMilliseconds; // EastShare - Added by TAHO, USS limit
     m_iUSSPingTolerance = thePrefs.m_iDynUpPingTolerance;
@@ -569,6 +572,7 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_iSUCPitch = m_iSUCPitch;
 	thePrefs.m_iSUCDrift = m_iSUCDrift;
 	thePrefs.m_bDynUpLog = m_bUSSLog;
+	thePrefs.m_bUSSUDP = m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 	thePrefs.m_bDynUpUseMillisecondPingTolerance = m_bUSSLimit; // EastShare - Added by TAHO, USS limit
 	thePrefs.m_iDynUpPingToleranceMilliseconds = m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     thePrefs.m_iDynUpPingTolerance = m_iUSSPingTolerance;
@@ -707,6 +711,7 @@ void CPPgMorph::Localize(void)
 			m_ctrlTreeOptions.SetEditLabel(m_htiSUCDrift, Buffer);
 		}
 		if (m_htiUSSLog) m_ctrlTreeOptions.SetItemText(m_htiUSSLog, GetResString(IDS_USS_LOG));
+		if (m_htiUSSUDP) m_ctrlTreeOptions.SetItemText(m_htiUSSUDP, GetResString(IDS_USS_UDP));//MORPH - Added by SiRoB, USS UDP preferency
 		if (m_htiUSSPingTolerance){
 			Buffer.Format(GetResString(IDS_USS_PINGTOLERANCE),800);
 			m_ctrlTreeOptions.SetEditLabel(m_htiUSSPingTolerance, Buffer);
@@ -805,6 +810,7 @@ void CPPgMorph::OnDestroy()
 	m_htiSUCPitch = NULL;
 	m_htiSUCDrift = NULL;
 	m_htiUSSLog = NULL;
+	m_htiUSSUDP = NULL;//MORPH - Added by SiRoB, USS UDP preferency
 	m_htiUSSLimit = NULL; // EastShare - Added by TAHO, USS limit
 	m_htiUSSPingLimit = NULL;
     m_htiUSSPingTolerance = NULL;

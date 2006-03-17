@@ -424,6 +424,7 @@ bool	CPreferences::m_bDynUpUseMillisecondPingTolerance;
 //MORPH START - Added by SiRoB, USSLog
 bool	CPreferences::m_bDynUpLog;
 //MORPH END   - Added by SiRoB, USSLog
+bool	CPreferences::m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 //MORPH START - Added by Commander, ClientQueueProgressBar
 bool CPreferences::m_bClientQueueProgressBar;
 //MORPH END - Added by Commander, ClientQueueProgressBar
@@ -2518,7 +2519,7 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool(_T("USSLog"), m_bDynUpLog,_T("eMule"));
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
-
+	ini.WriteBool(_T("USSUDP"), m_bUSSUDP,_T("eMule")); //MORPH - Added by SiRoB, USS UDP preferency
     ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
 
     //Commander - Added: Invisible Mode [TPT] - Start
@@ -3319,7 +3320,7 @@ void CPreferences::LoadPreferences()
 	//MORPH START - Added by SiRoB,  USS log flag
 	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
 	//MORPH END   - Added by SiRoB,  USS log flag
-
+	m_bUSSUDP = ini.GetBool(_T("USSUDP"), true); //MORPH - Added by SiRoB, USS UDP preferency
 	m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager
     m_bHighresTimer = ini.GetBool(L"HighresTimer", false);
 	m_bRunAsUser = ini.GetBool(L"RunAsUnprivilegedUser", false);

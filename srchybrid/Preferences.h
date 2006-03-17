@@ -753,6 +753,7 @@ public:
 	static  int		m_iDynUpPingToleranceMilliseconds;
 	static  bool	m_bDynUpUseMillisecondPingTolerance;
 	static bool		m_bDynUpLog;
+	static bool		m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 
 	static bool		m_bSolidGraph; //MORPH - Added by SiRoB, New Graph
@@ -1688,6 +1689,7 @@ public:
 	static  void	SetAllocCompleteMode(bool in)		{m_bAllocFull=in;}
 
 	static	bool	IsUSSLog() {return m_bDynUpLog;} //MORPH - Added by SiRoB, ZZ Upload system (USS)
+	static	bool	IsUSSUDP() {return m_bUSSUDP;} //MORPH - Added by SiRoB, USS UDP preferency
 
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
 	static	void	SetDynUpGoingUpDivider(int in) { m_iDynUpGoingUpDivider = in; }

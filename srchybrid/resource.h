@@ -2598,6 +2598,7 @@
 #define IDS_USSPINGERICFFAIL            4829
 #define IDS_USSPINGERICMPENDERR         4830
 #define IDS_REMULREASON                 4831
+#define IDS_USS_UDP				        4832
 #define IDS_REMULSUCCESS                4833
 #define IDS_REMULHIGHERPRIO             4834
 #define IDS_REMULMANYSLOTS              4835

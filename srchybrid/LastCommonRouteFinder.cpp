@@ -222,7 +222,7 @@ bool LastCommonRouteFinder::AcceptNewClient() {
 /*
 void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed) {
 */
-void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool IsUSSLog, uint32 minDataRateFriend, uint32 maxClientDataRateFriend, uint32 minDataRatePowerShare, uint32 maxClientDataRatePowerShare, uint32 maxClientDataRate) {
+void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool IsUSSLog, bool IsUSSUDP, uint32 minDataRateFriend, uint32 maxClientDataRateFriend, uint32 minDataRatePowerShare, uint32 maxClientDataRatePowerShare, uint32 maxClientDataRate) {
 	bool sendEvent = false;
 
     prefsLocker.Lock();
@@ -270,6 +270,7 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
     m_iNumberOfPingsForAverage = pNumberOfPingsForAverage;
     m_LowestInitialPingAllowed = pLowestInitialPingAllowed;
 	m_bIsUSSLog = IsUSSLog; //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
+	m_bIsUDP = IsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 	uploadLocker.Lock();
 
     if (m_upload > maxUpload || pEnabled == false) {
@@ -391,8 +392,8 @@ UINT LastCommonRouteFinder::RunInternal() {
             uint32 lastCommonHost = 0;
             uint32 lastCommonTTL = 0;
             uint32 hostToPing = 0;
-			bool useUdp = false;
-
+			bool useUdp = m_bIsUDP; //MORPH - Added by SiRoB, USS with UDP preferency
+			
             hostsToTraceRoute.RemoveAll();
 
             pingDelays.RemoveAll();
@@ -460,7 +461,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                         if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Pinging for TTL %i..."), ttl);
 
-						useUdp = false; // PENDING: Get default value from prefs?
+						useUdp |= m_bIsUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 
                         curHost = 0;
                         if(m_enabled == false) {
@@ -510,7 +511,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                                         enabled = false;
 
 									// trying other ping method
-									useUdp = !useUdp;
+									useUdp = !useUdp || m_bIsUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
                                 }
                             }
 
@@ -541,7 +542,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 									if(bIsUSSLog)
 										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown ping status! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.status);
 									pinger.PIcmpErr(pingStatus.status);
-									useUdp = !useUdp;
+									useUdp = !useUdp || m_bIsUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
                                 } else {
                                     if(pingStatus.error == IP_REQ_TIMED_OUT) {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
@@ -556,7 +557,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 											theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown pinging error! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.error);
                                         pinger.PIcmpErr(pingStatus.error);
-										useUdp = !useUdp;
+										useUdp = !useUdp || m_bIsUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
 									}
                                    }
 
@@ -699,7 +700,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
 					// trying other ping method
                     if(!pingStatus.success && !foundWorkingPingMethod) {
-						useUdp = !useUdp;
+						useUdp = !useUdp || m_bIsUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
                     }
                 }
 
@@ -799,7 +800,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                 lowestInitialPingAllowed = m_LowestInitialPingAllowed; // PENDING
                 uint32 curUpload = m_CurUpload;
 				bIsUSSLog = m_bIsUSSLog; //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-
+				useUdp |= m_bIsUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 				bool initiateFastReactionPeriod = m_initiateFastReactionPeriod;
                 m_initiateFastReactionPeriod = false;
 				prefsLocker.Unlock();

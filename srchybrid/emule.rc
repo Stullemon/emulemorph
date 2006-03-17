@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1181,8 +1181,6 @@ BEGIN
                     BS_FLAT | WS_TABSTOP,0,60,318,20
 END
 
-
-/* leuk_he: add upnp checkbox: */
 IDD_WIZ1_PORTS DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Connection/Ports"
@@ -3128,12 +3126,12 @@ BEGIN
     VK_RETURN,      IDA_ENTER,              VIRTKEY, NOINVERT
 END
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5165,7 +5163,15 @@ BEGIN
     IDS_POWERSHARE_AUTO     "Auto"
     IDS_DYNUPLOAD           "Dynamic Upload"
     IDS_HIDEOVERSHARES      "Overshares before hiding chunks (0 = Disabled)"
-    IDS_ERR_HIDDENBLOCK "Asked for hidden block "
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SELECTIVESHARE      "Selective chunk sharing"
+    IDS_ERR_HIDDENBLOCK     "Asked for hidden block "
+    IDS_SCHED_BACKUP        "Backup CONFIG-folder"
+    IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT-file"
+    IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT-file"
 END
 
 STRINGTABLE 
@@ -5372,6 +5378,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_USS_UDP             "Force UDP ping instead of TCP"
     IDS_UPSTOPPEDLEECHER    "Upload session not allowed to start. Client seems to be a leecher."
     IDS_IPSTOPPEDOTHFILE    "Upload session not allowed to start. Client tried to download another file than it was in queue for."
     IDS_NEWMSGFROM          "New Message from '%s' (IP:%s)"
@@ -5402,14 +5409,6 @@ BEGIN
     IDS_SWITCHDYNUP         "Switching Dynamic Upload System to UploadSpeedSense"
     IDS_AUTODYNUPSWITCHING  "Automatic dynamic upload system switching"
     IDS_MAXCONNECTIONSSWITCHBORDER "Border for switching"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_SELECTIVESHARE      "Selective chunk sharing"
-    IDS_SCHED_BACKUP        "Backup CONFIG-folder"
-    IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT-file"
-    IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT-file"
 END
 
 STRINGTABLE 
@@ -5923,20 +5922,26 @@ BEGIN
     IDS_SKIPALL             "S&kip All"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-   // ==> Slot Limit - Stulle
-   IDS_SLOT_LIMIT_GROUP    "Slot Limiter"
-   IDS_SLOT_LIMIT_NONE     "No limit"
-   IDS_SLOT_LIMIT_THREE    "Upload speed/3kbps"
-   IDS_SLOT_LIMIT_NUM_B    "Limit to x slots"
-   IDS_SLOT_LIMIT_NUM      "Max # of slots (60-255)"
-   // <== Slot Limit - Stulle
-    IDS_GLOBAL_HL           "Global HL"
-   IDS_GLOBAL_HL_LIMIT     "Global Hardlimit"
+    IDS_SLOT_LIMIT_GROUP    "Slot Limiter"
+    IDS_SLOT_LIMIT_NONE     "No limit"
+    IDS_SLOT_LIMIT_THREE    "Upload speed/3kbps"
+    IDS_SLOT_LIMIT_NUM_B    "Limit to x slots"
 END
 
-#endif    // English (U.S.) resources
+STRINGTABLE 
+BEGIN
+    IDS_SLOT_LIMIT_NUM      "Max # of slots (60-255)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_GLOBAL_HL           "Global HL"
+    IDS_GLOBAL_HL_LIMIT     "Global Hardlimit"
+END
+
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
