@@ -38,6 +38,7 @@ static char THIS_FILE[] = __FILE__;
 //// CDeadSource
 
 CDeadSource::CDeadSource(uint32 dwID, uint16 nPort, uint32 dwServerIP, uint16 nKadPort){
+	ASSERT(m_dwID != 0);
 	m_dwID = dwID;
 	m_dwServerIP = dwServerIP;
 	m_nPort = nPort;
@@ -50,6 +51,7 @@ CDeadSource::CDeadSource(const uchar* paucHash){
 	m_dwServerIP = 0;
 	m_nPort = 0;
 	m_nKadPort = 0;
+	ASSERT(isnulmd4(paucHash) == 0);
 	md4cpy(m_aucHash, paucHash);
 
 }
