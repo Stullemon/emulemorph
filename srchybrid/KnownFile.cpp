@@ -2319,8 +2319,12 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 	
 	if (parts > realparts)
 		partsavail[parts-1] = false;	// Couldn't care less if a 0-sized part wasn't spread
-
-	if(!statistic.spreadlist.IsEmpty()) {//MORPH - Added by SiRoB, Share Only The Need
+	
+	//MORPH START - Added by SiRoB, Share Only The Need
+	UINT hideOS = HideOSInWork();
+	if(hideOS && !statistic.spreadlist.IsEmpty())
+	{
+	//MORPH END   - Added by SiRoB, Share Only The Need
 		POSITION pos = statistic.spreadlist.GetHeadPosition();
 		uint16 last = 0;
 		uint64 count = statistic.spreadlist.GetValueAt(pos);
@@ -2410,7 +2414,6 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 			partspread[i] = 0;
 	}
 
-	UINT hideOS = HideOSInWork();
 	if (!hideOS || ((GetSelectiveChunk()>=0)?!GetSelectiveChunk():!thePrefs.IsSelectiveShareEnabled()))
 		return parts;
 
