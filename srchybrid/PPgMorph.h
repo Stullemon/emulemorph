@@ -21,7 +21,7 @@ protected:
 	int m_iSUCPitch;
 	int m_iSUCDrift;
 	bool m_bUSSLog;
-	bool m_bUSSUSS; //MORPH - Added by SiRoB, USS UDP preferency
+	bool m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 	int m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     int m_iUSSPingTolerance;
     int m_iUSSGoingUpDivider;

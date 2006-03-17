@@ -270,7 +270,7 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
     m_iNumberOfPingsForAverage = pNumberOfPingsForAverage;
     m_LowestInitialPingAllowed = pLowestInitialPingAllowed;
 	m_bIsUSSLog = IsUSSLog; //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-	m_bIsUDP = IsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
+	m_bIsUSSUDP = IsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 	uploadLocker.Lock();
 
     if (m_upload > maxUpload || pEnabled == false) {
