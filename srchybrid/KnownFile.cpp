@@ -2400,7 +2400,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 			if (partsavail[i]){
 				if (min2>partspread[i])
 					min2 = partspread[i];
-				else (min2==partspread[i])
+				else if (min2==partspread[i])
 					min = min2;
 			}
 		//MORPH END   - Changed by SiRoB, force always to show 2 chunks
