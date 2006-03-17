@@ -106,11 +106,9 @@ bool CAddFileThread::SR13_ImportParts(){
 	
 	Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTSTART), m_PartsToImport.GetSize(), strFilePath);
 
-	bool importaborted = false;
 	for (UINT i = 0; i < (UINT)m_PartsToImport.GetSize(); i++){
 		uint16 partnumber = m_PartsToImport[i];
 		if (PARTSIZE*partnumber > fileSize) {
-			m_partfile->SetFileOp(PFOP_NONE);		
 			break;
 		}
 		BYTE* partData=new BYTE[PARTSIZE];
@@ -146,10 +144,7 @@ bool CAddFileThread::SR13_ImportParts(){
 				Sleep(1);
 			};
 			
-			importaborted = m_partfile->GetFileOp() == PFOP_NONE;
-			if(partSize!=PARTSIZE || importaborted || m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS) {
-				if (m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS)
-					m_partfile->SetFileOp(PFOP_NONE);
+			if(!theApp.emuledlg->IsRunning() || partSize!=PARTSIZE || m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS) {
 				break;
 			}
 		} catch (...) {
@@ -158,11 +153,18 @@ bool CAddFileThread::SR13_ImportParts(){
 			continue;
 		}
 	}
-	if (importaborted)
-		Log(LOG_STATUSBAR, _T("Import aborted. %i parts imported to %s."), partsuccess, m_strFilename);
-	else
-		Log(LOG_STATUSBAR, _T("Import finished. %i parts imported to %s."), partsuccess, m_strFilename);
-
+	try {
+		bool importaborted = m_partfile->GetFileOp() == PFOP_NONE || !theApp.emuledlg->IsRunning();
+		if (m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS)
+			m_partfile->SetFileOp(PFOP_NONE);
+		if (importaborted)
+			Log(LOG_STATUSBAR, _T("Import aborted. %i parts imported to %s."), partsuccess, m_strFilename);
+		else
+			Log(LOG_STATUSBAR, _T("Import finished. %i parts imported to %s."), partsuccess, m_strFilename);
+	} catch (...) {
+		//This could happen if we delete the part instance
+	}
+	
 	for (UINT i = 0; i < (UINT)m_DesiredHashes.GetSize(); i++)
 		delete m_DesiredHashes[i];
 
