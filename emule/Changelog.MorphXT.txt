@@ -1,12 +1,8 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
-/!\ WARNING /!\
-AS MANY PEOPLE DON'T UNDERSTAND WHAT THE MEANING OF "FIXED" TERM
-AND THINK THIS IS ALWAYS RELATED TO A BUG IN MORPH CODE
-WE DECIDED TO NOT PUT "FIXED" TERM UNTIL IT CONCERNES MORPH RELATED CODE
-
 FIXED  : ImportParts: Put back previous file state at the end of the import process [SiRoB]
+FIXED  : SpreadBar is now correctly saved for +4GB file [SiRoB]
 
 CHANGED: HideOS & SOTN: They are working together and always revalate 2 chunks [SiRoB]
 CHANGED: Average datarate calcul a bit [SiRoB]
