@@ -2698,7 +2698,7 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 	if ((hideOS || SOTN) && client) {
 		//MORPH START - Added by SiRoB, See chunk that we hide
 		if (client->m_abyUpPartStatus == NULL) {
-			client->SetPartCount(uED2KPartCount);
+			client->SetPartCount((uint16)uED2KPartCount);
 			client->m_abyUpPartStatus = new uint8[uED2KPartCount];
 			memset(client->m_abyUpPartStatus,0,uED2KPartCount);
 		}
@@ -2720,15 +2720,16 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 	while (uPart != uED2KPartCount){
 		uint8 towrite = 0;
 		for (UINT i = 0; i < 8; i++){
-			if (partspread[uPart] < hideOS)	// SLUGFILLER: hideOS
-			{//MORPH - Added by SiRoB, See chunk that we hide
-				if (uPart < GetPartCount()) {
-					if (IsPartShareable(uPart))	// SLUGFILLER: SafeHash
+			if (uPart < GetPartCount()) {
+				if (partspread[uPart] < hideOS)	// SLUGFILLER: hideOS
+				{//MORPH - Added by SiRoB, See chunk that we hide
+					if (IsPartShareable(uPart)) {	// SLUGFILLER: SafeHash
 						towrite |= (1<<i);
-					//MORPH START - Added by SiRoB, See chunk that we hide
-					if (client && client->m_abyUpPartStatus)
-						client->m_abyUpPartStatus[uPart] &= SC_AVAILABLE;
-					//MORPH END   - Added by SiRoB, See chunk that we hide
+						//MORPH START - Added by SiRoB, See chunk that we hide
+						if (client && client->m_abyUpPartStatus)
+							client->m_abyUpPartStatus[uPart] &= SC_AVAILABLE;
+						//MORPH END   - Added by SiRoB, See chunk that we hide
+					}
 				}
 			}
 			++uPart;
