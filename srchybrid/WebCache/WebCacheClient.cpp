@@ -229,6 +229,14 @@ if (0 != nErrorCode)
 				SINGLEProxyClient->DeleteBlock();
 			WebCachedBlockList.TryToDL();
 		}
+		//MORPH STATR - Added by SiRoB, WebCache New Resolvename
+		else {
+			SOCKADDR_IN sockAddr = {0};
+			int nSockAddrLen = sizeof(sockAddr);
+			GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);
+			m_dwIPWC = sockAddr.sin_addr.S_un.S_addr;
+		}
+		//MORPH END   - Added by SiRoB, WebCache New Resolvename
 }
 
 CHttpClientReqSocket::OnConnect(nErrorCode);
@@ -851,8 +859,10 @@ bool CUpDownClient::SendWebCacheBlockRequests()
 	//JP test if proxy is working
 	if (thePrefs.ses_PROXYREQUESTS>100 && thePrefs.ses_successfullPROXYREQUESTS == 0) //disable webcache for this session if more than 100 blocks were tried withouth success
 	{
-		thePrefs.WebCacheDisabledThisSession = true;
-		AfxMessageBox(_T("Your Proxy server is not responding to your requests. Please check your webcachesettings."));
+		if(thePrefs.WebCacheDisabledThisSession == false) {
+			thePrefs.WebCacheDisabledThisSession = true;
+			AfxMessageBox(_T("Your Proxy server is not responding to your requests. Please check your webcachesettings."));
+		}
 		return false;
 	}
 
@@ -1003,7 +1013,7 @@ void CUpDownClient::OnWebCacheDownSocketClosed(int nErrorCode)
 			WebCachedBlockList.TryToDL();
 		}
 		else			
-		SendWebCacheBlockRequests();
+		SendBlockRequests(); //MORPH START - Changed by SiRoB, WebCache Fix
 	}
 	return;
 }
@@ -1029,7 +1039,7 @@ void CUpDownClient::OnWebCacheDownSocketTimeout()
 			WebCachedBlockList.TryToDL();
 		}
 		else			
-		SendWebCacheBlockRequests();
+		 SendBlockRequests(); //MORPH - Changed by SiRoB, WebCache Fix
 	}
 	return;
 }
@@ -1061,7 +1071,11 @@ void CUpDownClient::SetWebCacheUpState(EWebCacheUpState eState)
 
 void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 {
+	//MORPH START - Changed by SiRoB, New ResolveWebcachename
+	/*
 	POSITION OHCBpos = WC_OHCBManager.AddWCBlock(	thePrefs.WebCacheIsTransparent() ? 0 : ResolveWebCacheName(),
+	*/
+	POSITION OHCBpos = WC_OHCBManager.AddWCBlock(	thePrefs.WebCacheIsTransparent() ? 0 : m_pWCDownSocket->GetIP(),
 													GetIP(),
 													GetUserPort(),
 													reqfile->GetFileHash(),
@@ -1092,7 +1106,13 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 			if (thePrefs.WebCacheIsTransparent())
 				data.WriteUInt32( 0 ); // Superlexx - TPS
 			else
+				//MORPH START - Changed by SiRoB, New ResolveWebCachename
+				/*
 				data.WriteUInt32( ResolveWebCacheName() ); // Proxy IP
+				*/
+				data.WriteUInt32( m_pWCDownSocket->GetIP() ); // Proxy IP
+				//MORPH END   - Changed by SiRoB, New ResolveWebCachename
+
 			data.WriteUInt32( GetIP() ); // Source client IP
 			data.WriteUInt16( GetUserPort() ); // Source client port
 			data.WriteHash16( block->FileID/*reqfile->GetFileHash()*/ ); // filehash
