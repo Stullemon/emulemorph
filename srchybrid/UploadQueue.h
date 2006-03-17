@@ -32,7 +32,11 @@ public:
 	/*zz*/void	ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR pszDebugReason, CString strDisplayReason, bool earlyabort = false);
 	bool	RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason = NULL, bool updatewindow = true, bool earlyabort = false);
 	bool	RemoveFromWaitingQueue(CUpDownClient* client,bool updatewindow = true);
+	//MORPH - Changed by SiRoB, Optimization
+	/*
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
+	*/
+	bool	IsOnUploadQueue(CUpDownClient* client)	const {ASSERT((client->GetUploadState() == US_ONUPLOADQUEUE) == (waitinglist.Find(client) != 0)); return (client->GetUploadState() != US_ONUPLOADQUEUE);}
 	bool	IsDownloading(CUpDownClient* client)	const {return (uploadinglist.Find(client) != 0);}
 
     //MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
