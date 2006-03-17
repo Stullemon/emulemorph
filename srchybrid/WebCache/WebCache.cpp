@@ -43,35 +43,33 @@ bool AllowProxyConnection()
 	return ProxyConnectionCount < MAX_PROXY_CONN;
 }
 
+//MORPH START - Changed by SiRoB, New ResolveWebCachename
 uint32 ResolveWebCacheName() // returns 0 on error
 {
-	static uint32 wcip = 0;
 	static bool popupFlag = false; // true if error message was already displayed once
 
-	if( wcip == 0) {
-		hostent* remoteHost;
-		remoteHost = gethostbyname(CT2CA(thePrefs.webcacheName));
-		if( !remoteHost ) {
-			if( !popupFlag) {
-				popupFlag = true; //moved up so it doesn't pop up several times if the popup isn't closed
-				CString msg;
-				msg.Format( _T( "WebCache Error - Failed to resolve HTTP proxy address:\n" ) \
-							_T( "%s\n" ) \
-							_T( "Please review your webcache settings" ), thePrefs.webcacheName );
-				//MORPH START - Changed by SiRoB, Avoid crash in some case
-				//if we want to popup a message we need to use windows sendmessage
-				/*
-				AfxMessageBox(msg);
-				*/
-				Log(LOG_ERROR | LOG_STATUSBAR, msg);
-				//MORPH END   - Changed by SiRoB, Avoid crash in some case
-			}
-			return 0; // can't resolve..
+	hostent* remoteHost;
+	remoteHost = gethostbyname(CT2CA(thePrefs.webcacheName));
+	if( !remoteHost ) {
+		if( !popupFlag) {
+			popupFlag = true; //moved up so it doesn't pop up several times if the popup isn't closed
+			CString msg;
+			msg.Format( _T( "WebCache Error - Failed to resolve HTTP proxy address:\n" ) \
+						_T( "%s\n" ) \
+						_T( "Please review your webcache settings" ), thePrefs.webcacheName );
+			//MORPH START - Changed by SiRoB, Avoid crash in some case
+			//if we want to popup a message we need to use windows sendmessage
+			/*
+			AfxMessageBox(msg);
+			*/
+			Log(LOG_ERROR | LOG_STATUSBAR, msg);
+			//MORPH END   - Changed by SiRoB, Avoid crash in some case
 		}
-		wcip = *(reinterpret_cast<uint32*>(remoteHost->h_addr_list[0]));
+		return 0; // can't resolve..
 	}
-	return wcip;
+	return *(reinterpret_cast<uint32*>(remoteHost->h_addr_list[0]));
 }
+//MORPH END   - Changed by SiRoB, New ResolveWebCachename
 
 // webmule start -- from Superlexx code
 CSimpleMap<int, CString> webcachelist;

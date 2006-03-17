@@ -66,6 +66,9 @@ public:
 	CWebCacheDownSocket(CUpDownClient* pClient = NULL);
 	uint32 blocksloaded;
 	virtual void Safe_Delete();
+//MORPH START - Added by SiRoB, New ResolveWebCachename
+	uint32 GetIP() { ASSERT(m_dwIPWC!=0); return m_dwIPWC;};
+//MORPH END   - Added by SiRoB, New ResolveWebCachename
 
 protected:
 	bool m_bProxyConnCountFlag;
@@ -78,6 +81,10 @@ protected:
 	virtual bool ProcessHttpResponse();
 	virtual bool ProcessHttpResponseBody(const BYTE* pucData, UINT size);
 	virtual bool ProcessHttpRequest();
+//MORPH START - Added by SiRoB, New ResolveWebCachename
+private:
+	uint32 m_dwIPWC;
+//MORPH END   - Added by SiRoB, New ResolveWebCachename
 };
 
 
