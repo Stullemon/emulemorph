@@ -602,7 +602,9 @@ public:
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	static int	globaldataratefriend;
+	static int	maxglobaldataratefriend;
 	static int	globaldataratepowershare;
+	static int	maxglobaldataratepowershare;
 	static int	maxclientdataratefriend;
 	static int	maxclientdataratepowershare;
 	static int	maxclientdatarate;
@@ -1874,7 +1876,9 @@ public:
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	static	uint32	GetGlobalDataRateFriend();
+	static	uint32	GetMaxGlobalDataRateFriend();
 	static	uint32	GetGlobalDataRatePowerShare();
+	static	uint32	GetMaxGlobalDataRatePowerShare();
 	static	uint32	GetMaxClientDataRateFriend();
 	static	uint32	GetMaxClientDataRatePowerShare();
 	static	uint32	GetMaxClientDataRate();

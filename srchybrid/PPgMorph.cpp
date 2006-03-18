@@ -108,9 +108,11 @@ CPPgMorph::CPPgMorph()
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_htiFriend = NULL;
 	m_htiGlobalDataRateFriend = NULL;
+	m_htiMaxGlobalDataRateFriend = NULL;
 	m_htiMaxClientDataRateFriend = NULL;
 	m_htiPowerShare = NULL;
 	m_htiGlobalDataRatePowerShare = NULL;
+	m_htiMaxGlobalDataRatePowerShare = NULL;
 	m_htiMaxClientDataRatePowerShare = NULL;
 	m_htiMaxClientDataRate = NULL;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
@@ -312,11 +314,15 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiFriend = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_FRIENDS), iImgFriend, m_htiUM);
 		m_htiGlobalDataRateFriend = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINDATARATEFRIEND), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiFriend);
 		m_ctrlTreeOptions.AddEditBox(m_htiGlobalDataRateFriend, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiMaxGlobalDataRateFriend = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXDATARATEFRIEND), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiFriend);
+		m_ctrlTreeOptions.AddEditBox(m_htiMaxGlobalDataRateFriend, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiMaxClientDataRateFriend = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCLIENTDATARATEFRIEND), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiFriend);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxClientDataRateFriend, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiPowerShare = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_POWERSHARE), iImgPowerShare, m_htiUM);
 		m_htiGlobalDataRatePowerShare = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINDATARATEPOWERSHARE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiPowerShare);
 		m_ctrlTreeOptions.AddEditBox(m_htiGlobalDataRatePowerShare, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiMaxGlobalDataRatePowerShare = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXDATARATEPOWERSHARE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiPowerShare);
+		m_ctrlTreeOptions.AddEditBox(m_htiMaxGlobalDataRatePowerShare, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiMaxClientDataRatePowerShare = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCLIENTDATARATEPOWERSHARE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiPowerShare);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxClientDataRatePowerShare, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiMaxClientDataRate = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCLIENTDATARATE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
@@ -396,8 +402,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUploadDataRateAverageTime, m_iUploadDataRateAverageTime);//MORPH - Added by SiRoB, Upload Splitting Class
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalDataRateFriend, m_iGlobalDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxGlobalDataRateFriend, m_iMaxGlobalDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRateFriend, m_iMaxClientDataRateFriend);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiGlobalDataRatePowerShare, m_iGlobalDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxGlobalDataRatePowerShare, m_iMaxGlobalDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRatePowerShare, m_iMaxClientDataRatePowerShare);//MORPH - Added by SiRoB, Upload Splitting Class
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMaxClientDataRate, m_iMaxClientDataRate);//MORPH - Added by SiRoB, Upload Splitting Class
 	// ==> Slot Limit - Stulle
@@ -492,8 +500,10 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bCountWCSessionStats	= thePrefs.m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_iGlobalDataRateFriend = thePrefs.globaldataratefriend;
+	m_iMaxGlobalDataRateFriend = thePrefs.maxglobaldataratefriend;
 	m_iMaxClientDataRateFriend = thePrefs.maxclientdataratefriend;
 	m_iGlobalDataRatePowerShare = thePrefs.globaldataratepowershare;
+	m_iMaxGlobalDataRatePowerShare = thePrefs.maxglobaldataratepowershare;
 	m_iMaxClientDataRatePowerShare = thePrefs.maxclientdataratepowershare;
 	m_iMaxClientDataRate = thePrefs.maxclientdatarate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
@@ -615,8 +625,10 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bCountWCSessionStats		   = m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	thePrefs.globaldataratefriend = m_iGlobalDataRateFriend;
+	thePrefs.maxglobaldataratefriend = m_iMaxGlobalDataRateFriend;
 	thePrefs.maxclientdataratefriend = m_iMaxClientDataRateFriend;
 	thePrefs.globaldataratepowershare = m_iGlobalDataRatePowerShare;
+	thePrefs.maxglobaldataratepowershare = m_iMaxGlobalDataRatePowerShare;
 	thePrefs.maxclientdataratepowershare = m_iMaxClientDataRatePowerShare;
 	thePrefs.maxclientdatarate = m_iMaxClientDataRate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
@@ -749,8 +761,10 @@ void CPPgMorph::Localize(void)
 		//MORPH END   - Added by SiRoB, Datarate Average Time Management
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		if (m_htiGlobalDataRateFriend) m_ctrlTreeOptions.SetEditLabel(m_htiGlobalDataRateFriend, GetResString(IDS_MINDATARATEFRIEND));
+		if (m_htiMaxGlobalDataRateFriend) m_ctrlTreeOptions.SetEditLabel(m_htiMaxGlobalDataRateFriend, GetResString(IDS_MAXDATARATEFRIEND));
 		if (m_htiMaxClientDataRateFriend) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRateFriend, GetResString(IDS_MAXCLIENTDATARATEFRIEND));
 		if (m_htiGlobalDataRatePowerShare) m_ctrlTreeOptions.SetEditLabel(m_htiGlobalDataRatePowerShare, GetResString(IDS_MINDATARATEPOWERSHARE));
+		if (m_htiMaxGlobalDataRatePowerShare) m_ctrlTreeOptions.SetEditLabel(m_htiMaxGlobalDataRatePowerShare, GetResString(IDS_MAXDATARATEPOWERSHARE));
 		if (m_htiMaxClientDataRatePowerShare) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRatePowerShare, GetResString(IDS_MAXCLIENTDATARATEPOWERSHARE));
 		if (m_htiMaxClientDataRate) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRate, GetResString(IDS_MAXCLIENTDATARATE));
 		//MORPH END   - Added by SiRoB, Upload Splitting Class

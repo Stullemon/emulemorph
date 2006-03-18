@@ -5613,6 +5613,8 @@ BEGIN
     IDS_MAXCLIENTDATARATEPOWERSHARE "Max client datarate (0kB/s = unlimited)"
     IDS_MAXCLIENTDATARATE   "Max client datarate (0kB/s = unlimited)"
     IDS_DISPLAYFUNNYNICK    "Enable FunnyNick display"
+    IDS_MAXDATARATEFRIEND   "Max Global datarate limit (%% of upload speed)"
+    IDS_MAXDATARATEPOWERSHARE "Max Global datarate limit (%% of upload speed)"
 END
 
 STRINGTABLE 

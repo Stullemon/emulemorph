@@ -465,7 +465,9 @@ int	CPreferences::m_iUploadDataRateAverageTime;
 
 //MORPH START - Added by SiRoB, Upload Splitting Class
 int	CPreferences::globaldataratefriend;
+int	CPreferences::maxglobaldataratefriend;
 int	CPreferences::globaldataratepowershare;
+int	CPreferences::maxglobaldataratepowershare;
 int	CPreferences::maxclientdataratefriend;
 int	CPreferences::maxclientdataratepowershare;
 int	CPreferences::maxclientdatarate;
@@ -1138,6 +1140,10 @@ uint32	CPreferences::GetGlobalDataRateFriend()
 {
 	return globaldataratefriend*1024;//_UI32_MAX;
 }
+uint32	CPreferences::GetMaxGlobalDataRateFriend()
+{
+	return maxglobaldataratefriend;
+}
 uint32	CPreferences::GetMaxClientDataRateFriend()
 {
 	return maxclientdataratefriend*1024;
@@ -1145,6 +1151,10 @@ uint32	CPreferences::GetMaxClientDataRateFriend()
 uint32	CPreferences::GetGlobalDataRatePowerShare()
 {
 	return globaldataratepowershare*1024;//_UI32_MAX;
+}
+uint32	CPreferences::GetMaxGlobalDataRatePowerShare()
+{
+	return maxglobaldataratepowershare;
 }
 uint32	CPreferences::GetMaxClientDataRatePowerShare()
 {
@@ -2377,6 +2387,7 @@ void CPreferences::SavePreferences()
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	ini.WriteInt(_T("GlobalDataRateFriend"),globaldataratefriend,_T("eMule"));
+	ini.WriteInt(_T("MaxGlobalDataRateFriend"),maxglobaldataratefriend,_T("eMule"));
 	ini.WriteInt(_T("GlobalDataRatePowerShare"),globaldataratepowershare,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRateFriend"),maxclientdataratefriend,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRatePowerShare"),maxclientdataratepowershare,_T("eMule"));
@@ -3164,7 +3175,9 @@ void CPreferences::LoadPreferences()
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),3);
+	maxglobaldataratefriend=ini.GetInt(_T("MaxGlobalDataRateFriend"),100);
 	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);
+	maxglobaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),100);
 	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
 	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
 	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),0);

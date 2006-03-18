@@ -50,7 +50,7 @@ public:
 	/*
 	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed);
 	*/
-	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool isUSSLog, bool isUSSUDP, uint32 minDataRateFriend, uint32 ClientDataRateFriend, uint32 minDataRatePowerShare, uint32 ClientDataRatePowerShare, uint32 ClientDataRate);
+	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool isUSSLog, bool isUSSUDP, uint32 minDataRateFriend, uint32 maxDataRateFriend, uint32 ClientDataRateFriend, uint32 minDataRatePowerShare, uint32 maxDataRatePowerShare, uint32 ClientDataRatePowerShare, uint32 ClientDataRate);
 	void InitiateFastReactionPeriod();
 
     uint32 GetUpload();
@@ -112,7 +112,9 @@ private:
 	bool m_bIsUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	uint32 m_iGlobalDataRateFriend;
+	uint32 m_iMaxGlobalDataRateFriend;
 	uint32 m_iGlobalDataRatePowerShare;
+	uint32 m_iMaxGlobalDataRatePowerShare;
 	uint32 m_iMaxClientDataRateFriend;
 	uint32 m_iMaxClientDataRatePowerShare;
 	uint32 m_iMaxClientDataRate;

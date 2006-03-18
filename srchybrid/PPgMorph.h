@@ -50,8 +50,10 @@ protected:
 	
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	int m_iGlobalDataRateFriend;
+	int m_iMaxGlobalDataRateFriend;
 	int m_iMaxClientDataRateFriend;
 	int m_iGlobalDataRatePowerShare;
+	int m_iMaxGlobalDataRatePowerShare;
 	int m_iMaxClientDataRatePowerShare;
 	int m_iMaxClientDataRate;
 	//MORPH END  - Added by SiRoB, Upload Splitting Class
@@ -128,9 +130,11 @@ protected:
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	HTREEITEM m_htiFriend;
 	HTREEITEM m_htiGlobalDataRateFriend;
+	HTREEITEM m_htiMaxGlobalDataRateFriend;
 	HTREEITEM m_htiMaxClientDataRateFriend;
 	HTREEITEM m_htiPowerShare;
 	HTREEITEM m_htiGlobalDataRatePowerShare;
+	HTREEITEM m_htiMaxGlobalDataRatePowerShare;
 	HTREEITEM m_htiMaxClientDataRatePowerShare;
 	HTREEITEM m_htiMaxClientDataRate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
