@@ -2598,7 +2598,7 @@
 #define IDS_USSPINGERICFFAIL            4829
 #define IDS_USSPINGERICMPENDERR         4830
 #define IDS_REMULREASON                 4831
-#define IDS_USS_UDP				        4832
+#define IDS_USS_UDP                     4832
 #define IDS_REMULSUCCESS                4833
 #define IDS_REMULHIGHERPRIO             4834
 #define IDS_REMULMANYSLOTS              4835
@@ -2915,6 +2915,8 @@
 #define IDS_IPFILTER_SAVERR             6219
 #define IDS_IPFILTER_NOTAVAIL           6220
 #define IDS_IPFILTER_DLVERSION          6221
+#define IDS_WC_DESACTIVATED             6221
+#define IDS_WC_REACTIVATED              6221
 #define IDS_WC_NEWPROXYIP               6222
 #define IDS_LOG_ERRDWN                  6223
 #define IDS_DOWNFAKECHECKVER            6227
@@ -3050,7 +3052,7 @@
 #define IDS_UPNP_LOGEVENTS              21018
 #define IDS_UPNP_ENABLE                 21019
 #define IDS_UPNP_ENABLEWEB              21020
-#define IDC_ENABLE_PNP                 21021
+#define IDC_ENABLE_PNP                  21021
 #define IDS_RANDOMPORTS                 21022
 #define IDS_MINPORT                     21023
 #define IDS_MAXPORT                     21025
@@ -3098,14 +3100,11 @@
 #define IDS_MORPH_KSSERV                51543
 #define IDS_MORPH_LOG                   51544
 #define IDS_WEBSERVER_LINK              51561
-// ==> Slot Limit - Stulle
 #define IDS_SLOT_LIMIT_GROUP            60380
 #define IDS_SLOT_LIMIT_NONE             60381
 #define IDS_SLOT_LIMIT_THREE            60382
 #define IDS_SLOT_LIMIT_NUM_B            60383
 #define IDS_SLOT_LIMIT_NUM              60384
-// <== Slot Limit - Stulle
-
 
 // Next default values for new objects
 // 
