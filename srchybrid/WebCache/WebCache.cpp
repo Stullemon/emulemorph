@@ -46,8 +46,9 @@ bool AllowProxyConnection()
 //MORPH START - Changed by SiRoB, New ResolveWebCachename
 uint32 ResolveWebCacheName() // returns 0 on error
 {
+	static uint32 wcip = 0;
 	static bool popupFlag = false; // true if error message was already displayed once
-
+	
 	hostent* remoteHost;
 	remoteHost = gethostbyname(CT2CA(thePrefs.webcacheName));
 	if( !remoteHost ) {
@@ -67,7 +68,13 @@ uint32 ResolveWebCacheName() // returns 0 on error
 		}
 		return 0; // can't resolve..
 	}
-	return *(reinterpret_cast<uint32*>(remoteHost->h_addr_list[0]));
+	uint32 oldip = wcip;	
+	wcip = *(reinterpret_cast<uint32*>(remoteHost->h_addr_list[0]));
+	if (wcip != oldip) {
+		thePrefs.WebCacheDisabledThisSession = false;
+		thePrefs.ses_PROXYREQUESTS = 0;
+	}
+	return wcip;
 }
 //MORPH END   - Changed by SiRoB, New ResolveWebCachename
 
