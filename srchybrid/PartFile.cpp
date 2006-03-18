@@ -1738,13 +1738,13 @@ bool CPartFile::SavePartFile()
 				uint64 end = statistic.spreadlist.GetKeyAt(pos);
 				itoa(i_sbpos,sbnumber,10);
 				sbnamebuffer[0] = FT_SPREADSTART;
-				CTag(sbnamebuffer,start).WriteTagToFile(&file);
+				CTag(sbnamebuffer,start,true).WriteTagToFile(&file);
 				uTagCount++;
 				sbnamebuffer[0] = FT_SPREADEND;
-				CTag(sbnamebuffer,end).WriteTagToFile(&file);
+				CTag(sbnamebuffer,end,true).WriteTagToFile(&file);
 				uTagCount++;
 				sbnamebuffer[0] = FT_SPREADCOUNT;
-				CTag(sbnamebuffer,count).WriteTagToFile(&file);
+				CTag(sbnamebuffer,count,true).WriteTagToFile(&file);
 				uTagCount++;
 				i_sbpos++;
 			}

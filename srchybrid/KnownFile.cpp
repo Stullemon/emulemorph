@@ -1332,11 +1332,11 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				uint64 end = statistic.spreadlist.GetKeyAt(pos);
 				itoa(i_pos,number,10);
 				namebuffer[0] = FT_SPREADSTART;
-				CTag(namebuffer,start).WriteTagToFile(file);
+				CTag(namebuffer,start,true).WriteTagToFile(file);
 				namebuffer[0] = FT_SPREADEND;
-				CTag(namebuffer,end).WriteTagToFile(file);
+				CTag(namebuffer,end,true).WriteTagToFile(file);
 				namebuffer[0] = FT_SPREADCOUNT;
-				CTag(namebuffer,count).WriteTagToFile(file);
+				CTag(namebuffer,count,true).WriteTagToFile(file);
 				uTagCount+=3;
 				i_pos++;
 			}
