@@ -2915,6 +2915,7 @@
 #define IDS_IPFILTER_SAVERR             6219
 #define IDS_IPFILTER_NOTAVAIL           6220
 #define IDS_IPFILTER_DLVERSION          6221
+#define IDS_WC_NEWPROXYIP               6222
 #define IDS_LOG_ERRDWN                  6223
 #define IDS_DOWNFAKECHECKVER            6227
 #define IDS_DOWNFAKECHECKFILE           6228

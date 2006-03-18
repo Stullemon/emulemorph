@@ -5810,6 +5810,7 @@ BEGIN
     IDS_LOG_IPFILTER_INFO   "Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"
     IDS_IPFILTER_SAVERR     "Failed to save IP filter to file ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Not available"
+    IDS_WC_NEWPROXYIP       "A new proxy ip has been detected: %s. Resetting webcache disable counter."
     IDS_LOG_ERRDWN          "Error downloading %s"
 END
 
