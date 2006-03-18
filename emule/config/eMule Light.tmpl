@@ -91,6 +91,104 @@ display: inline;
 </html>
 <--TMPL_LOGIN_END-->
 
+<-- ################################################################# -->
+<-- ############################ FAILEDLOGIN ######################## -->
+<-- ################################################################# -->
+
+<--TMPL_FAILEDLOGIN-->
+<html>
+  <meta http-equiv="content-type" content="text/html; charset=[CharSet]">
+  <head>
+    <META NAME="ROBOTS" CONTENT="NOINDEX,NOFOLLOW">
+    <title>
+       log failed [eMuleAppName] [version] - [WebControl]
+    </title>
+  </head>
+  <body background="main_bg1.gif" text=white link=white vlink=white alink=white onload="javascript:document.login.p.focus();">
+    <table align=center border=0 cellpadding=4 cellspacing=0 width="100%" height="100%">
+      <tr>
+        <td align=center valign=middle>
+
+          <table align=center border=0 cellpadding=0 cellspacing=0 width="407">
+            <tr>
+              <td style="height: 12px" background="./login_top.gif" height="12">
+              </td>
+            </tr>
+            <tr>
+              <td height="250">
+
+                <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
+                  <tr>
+                    <td width="4" background="./login_lefttop.gif">
+                      <img src="./blank1x1.gif" alt="" border="0" />
+                    </td>
+                    <td background="./login_topdown.gif" align="center">
+
+                      <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
+                        <tr>
+                          <td align="center">
+                            <a href="http://www.emule-project.net" target="_blank"><img src="logo.jpg" border="0"></a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" height="50">
+                            <font face=Tahoma style="font-size:10pt;"><b>[WebControl]</b> | [Login]</font>
+                          </td>
+                        </tr>
+                      </table>
+    
+                    </td>
+                    <td width="5" background="./login_righttop.gif">
+                      <img src="./blank1x1.gif" alt="" border="0" />
+                    </td>
+                  </tr>
+                </table>
+                
+              </td>
+            </tr>
+            <tr>
+              <td style="height: 3px" background="./login_topseperator.gif" height="3">
+              </td>
+            </tr>
+            <tr>
+              <td height="130">
+
+                <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
+                  <tr>
+                    <td width="4" background="./login_lefttop.gif">
+                      <img src="./blank1x1.gif" alt="" border="0" />
+                    </td>
+                    <td background="./login_downmain.gif" align="center">
+                      <form action="" method="POST" name="login">
+                        <font face=Tahoma style="font-size:8pt;">
+                          &nbsp;<br />
+                          <b>[BanMessage]</b><br /><br />
+                          <input type="password" name=p maxlength=12 size=37 style="border-width: 1px; border-color: black; border-style:none;" value="" disabled>
+                          <input type="hidden" name=w value="password" style="border-width: 1px; border-color: black; border-style:solid;">
+                          <br /><br /><input type=submit value="[LoginNow]" disabled><br />
+                        </font>
+                    </td>
+                    <td width="5" background="./login_righttop.gif">
+                      <img src="./blank1x1.gif" alt="" border="0" />
+                    </td>
+                  </tr>
+                </table>
+                
+              </td>
+            </tr>
+            <tr>
+              <td style="height: 12px" background="./login_bottom.gif" height="12">
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+    </form>
+  </body>
+</html>
+<--TMPL_FAILEDLOGIN_END-->
 
 
 
