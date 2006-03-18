@@ -1947,8 +1947,7 @@ BEGIN
                             "Importation abandonnée: jeu de hash incomplet pour %s (%i hash pour %i parties)."
     IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE 
                             "Importation abandonnée: Impossible d'ouvrir %s."
-    IDS_SR13_IMPORTPARTS_IMPORTSTART 
-                            "Importation de %i parties (depuis 0 à %i) vers %s."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART "Importation de %i parties vers %s."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
                             "Partie %i: ignorée, dèjà complète."
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Partie %i: importée."
@@ -2264,6 +2263,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_USS_UDP             "Forcer l'UDP pour le ping "
     IDS_UPSTOPPEDLEECHER    "Session d'Upload non autorisée à démarrer. Le client semble être un Leecher."
     IDS_IPSTOPPEDOTHFILE    "Session d'Upload non autorisée à démarrer. Le client a essayé de télécharger un fichier différent de celui pour lequel il était en file d'attente."
     IDS_NEWMSGFROM          "Nouveau message de '%s' (IP:%s)"
@@ -2656,7 +2656,7 @@ BEGIN
     IDS_WC_NRBLOCKS         "Nombre de blocs à télécharger avant reconnexions au Proxy (Peut aider lors des problèmes de déconnexion)"
     IDS_WC_BLOCK            "Blocs-180k"
     IDS_WC_TIMEOUT          "Délais de déconnexion au WebCache rallongés"
-    IDS_WC_LOCAL            "Ce n'est pas le proxy de votre FAI"
+    IDS_WC_LOCAL            "Le proxy ne met pas en cache le traffic issu du même FAI"
     IDS_WC_SUBMIT_EMAIL     "Envoyer ces paramètres par e-mail"
     IDS_WC_LINK             "Lien: "
     IDS_WC_PERSISTENT       "Connexions persistantes pour le téléchargement Proxy"
@@ -2820,13 +2820,17 @@ BEGIN
     IDS_SKIPALL             "P&asser tous"
 END
 
-STRINGTABLE  
-BEGIN 
-    IDS_SLOT_LIMIT_GROUP    "Slot Limiteur" 
-    IDS_SLOT_LIMIT_NONE     "Sans limit" 
-    IDS_SLOT_LIMIT_THREE    "Vitesse d'envoi / 3ko/s" 
-    IDS_SLOT_LIMIT_NUM_B    "Limiter à x slots"  
-IDS_SLOT_LIMIT_NUM      "Nombre Maximum de slots (60-255)" 
+STRINGTABLE 
+BEGIN
+    IDS_SLOT_LIMIT_GROUP    "Slot Limiteur"
+    IDS_SLOT_LIMIT_NONE     "Sans limit"
+    IDS_SLOT_LIMIT_THREE    "Vitesse d'envoi / 3ko/s"
+    IDS_SLOT_LIMIT_NUM_B    "Limiter à x slots"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SLOT_LIMIT_NUM      "Nombre Maximum de slots (60-255)"
 END
 
 #endif    // Français (France) resources
