@@ -467,7 +467,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 				if( thePrefs.IsWebCacheDownloadEnabled() )
 				{
 					if (thePrefs.GetLogWebCacheEvents())
-					AddDebugLogLine( false, _T("Received WCBlock - UDP") );
+					AddDebugLogLine( false, _T("Received WCBlock by UDP from client: %s"), sender->DbgGetClientInfo() );
 					//MORPH - Changed By SiRoB, WebCache Fix
 					(void*) new CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
 				}
@@ -510,7 +510,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 				if( thePrefs.IsWebCacheDownloadEnabled() )
 				{
 					if (thePrefs.GetLogWebCacheEvents())
-					AddDebugLogLine( false, _T("Received WCBlock - UDP") );
+						AddDebugLogLine( false, _T("Received WCBlock by UDP from client: %s"), sender->DbgGetClientInfo() );
 					//MORPH - Changed By SiRoB, WebCache Fix
 					(void*) new CWebCachedBlock( packet, size, sender ); // Starts DL or places block on queue
 				}
@@ -553,7 +553,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 				{
 					// CHECK HANDSHAKE?
 					if (thePrefs.GetLogWebCacheEvents())
-						AddDebugLogLine( false, _T("Received MultiWCBlocks - UDP") );
+						AddDebugLogLine( false, _T("Received MultiWCBlocks by UDP from client: %s"), sender->DbgGetClientInfo() );
 					return WebCachedBlockList.ProcessWCBlocks(packet, size, opcode, sender);
 				}
 				break;

@@ -1298,7 +1298,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					if( thePrefs.IsWebCacheDownloadEnabled() && client->SupportsWebCache() ) {
 						// CHECK HANDSHAKE?
 						if (thePrefs.GetLogWebCacheEvents())
-						AddDebugLogLine( false, _T("Received WCBlock - TCP") );
+							AddDebugLogLine( false, _T("Received WCBlock by TCP: %s"), client->DbgGetClientInfo() );
 						//MORPH - Changed By SiRoB, WebCache Fix
 						(void*) new CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
 					}
@@ -3418,7 +3418,7 @@ bool CClientReqSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, UI
 			{
 				// CHECK HANDSHAKE?
 				if (thePrefs.GetLogWebCacheEvents())
-					AddDebugLogLine( false, _T("Received WCBlock - TCP") );
+					AddDebugLogLine( false, _T("Received WCBlock by TCP from client: %s"), client->DbgGetClientInfo() );
 				//MORPH - Changed By SiRoB, WebCache Fix
 					(void*) new CWebCachedBlock( packet, size, client ); // Starts DL or places block on queue
 			}
@@ -3432,7 +3432,7 @@ bool CClientReqSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, UI
 			{
 				// CHECK HANDSHAKE?
 				if (thePrefs.GetLogWebCacheEvents())
-					AddDebugLogLine( false, _T("Received MultiWCBlocks - TCP") );
+					AddDebugLogLine( false, _T("Received MultiWCBlocks by TCP from client: %s"), client->DbgGetClientInfo() );
 				//CWebCachedBlock* newblock = new CWebCachedBlock( (char*)packet, size, client ); // Starts DL or places block on queue
 				CSafeMemFile data((BYTE*)packet,size);
 				uint32 uploadID;
