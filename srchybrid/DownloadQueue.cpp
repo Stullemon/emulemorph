@@ -882,7 +882,7 @@ void CDownloadQueue::Process(){
 		//JP we need a modeless dialogue here!!
 		//			AfxMessageBox(_T("Proxy configuration Test Failed please review your proxy-settings"));
 		//MORPH - Changed by SiRoB, New ResolveWebcachename
-		theApp.QueueLogLine(false, _T("Proxy configuration Test Failed please review your proxy-settings. Webcache downloads have been deactivated until new proxy ip is detected."));
+		theApp.QueueLogLine(false, _T("Proxy configuration Test Failed please review your proxy-settings. Webcache downloads have been deactivated until new proxy is tested."));
 	}
 	////JP Proxy configuration testing END!!! This should probably be somewhere else.
 
