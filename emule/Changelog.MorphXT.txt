@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.x
+Changelog for eMule 0.47a MorphXT v8.6
 --------------------------------------
 FIXED  : ImportParts: Put back previous file state at the end of the import process [SiRoB]
 FIXED  : SpreadBar is now correctly saved for +4GB file [SiRoB]
@@ -14,6 +14,8 @@ ADDED  : HideOS & SOTN:  Don't upload requested hidden block [SiRoB]
 ADDED  : Attempt to avoid connection Collision [SiRoB]
 ADDED  : Global source limit [Stulle]
 ADDED  : Source cache by Xman [Stulle]
+ADDED  : USS: Option to force UDP ping instead of TCP in morph preferency [SiRoB]
+ADDED  : USC: max upload datarate setting for a each class based on upload speed percentage [SiRoB]
 
 TWEAKED: USC: available bandwidth is spreaded differently [SiRoB] 
 TWEAKED: Lowering memory consumption a bit by merging some data (See Chunk that we hide) [SiRoB]
