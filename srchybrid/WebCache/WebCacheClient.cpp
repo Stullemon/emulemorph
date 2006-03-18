@@ -1012,8 +1012,8 @@ void CUpDownClient::OnWebCacheDownSocketClosed(int nErrorCode)
 				SINGLEProxyClient->DeleteBlock();
 			WebCachedBlockList.TryToDL();
 		}
-		else			
-		SendBlockRequests(); //MORPH START - Changed by SiRoB, WebCache Fix
+		else
+			SendWebCacheBlockRequests();
 	}
 	return;
 }
@@ -1038,8 +1038,8 @@ void CUpDownClient::OnWebCacheDownSocketTimeout()
 				SINGLEProxyClient->DeleteBlock();
 			WebCachedBlockList.TryToDL();
 		}
-		else			
-		 SendBlockRequests(); //MORPH - Changed by SiRoB, WebCache Fix
+		else		
+			SendWebCacheBlockRequests();
 	}
 	return;
 }
@@ -1134,7 +1134,7 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 			{	// send UDP
 				data.WriteUInt32( cur_client->m_uWebCacheDownloadId );
 				if (thePrefs.GetLogWebCacheEvents())
-					AddDebugLogLine( false, _T("WCBlock sent to client - UDP"));
+					AddDebugLogLine( false, _T("WCBlock sent to client by UDP: %s"), DbgGetClientInfo() );
 				Packet* packet = new Packet(&data);
 				if (cur_client->SupportsWebCacheProtocol())
 					packet->prot = OP_WEBCACHEPROT; //if the client supports webcacheprot use that (keep backwards compatiblity)
@@ -1161,14 +1161,14 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 				if( cur_client->socket && socket->IsConnected() )
 				{
 					if (thePrefs.GetLogWebCacheEvents())
-						AddDebugLogLine( false, _T("WCBlock sent to client - TCP") );
+						AddDebugLogLine( false, _T("WCBlock sent to client by TCP: %s"), cur_client->DbgGetClientInfo() );
 					cur_client->socket->SendPacket( packet );
 					nrOfSentOHCBs++;
 				}
 				else
 				{
 					if (thePrefs.GetLogWebCacheEvents())
-						AddDebugLogLine( false, _T("WCBlock added to list - TCP") );
+						AddDebugLogLine( false, _T("WCBlock will be sent to client at next connect by TCP: %s"), cur_client->DbgGetClientInfo() );
 					cur_client->m_WaitingPackets_list.AddTail(packet);
 				}
 				WC_OHCBManager.AddRecipient(OHCBpos, cur_client);
@@ -1440,7 +1440,7 @@ void CUpDownClient::SendOHCBsNow()
 		&& c(m_nTotalUDPPackets, m_nFailedUDPPackets)) // less than 20% of UDP reasks failed for this client
 	{	// send UDP
 		if (thePrefs.GetLogWebCacheEvents())
-			AddDebugLogLine( false, _T("multi-OHCB-packet sent to client - UDP"));
+			AddDebugLogLine( false, _T("multi-OHCB-packet sent to client by UDP: : %s"), this->DbgGetClientInfo() );
 		if (thePrefs.GetDebugClientUDPLevel() > 0)
 			DebugSend("OP__Multi_Http_Cached_Block (UDP)", this );
 		lastMultiOHCBPacketSent = now;
@@ -1454,7 +1454,7 @@ void CUpDownClient::SendOHCBsNow()
 		if( socket && socket->IsConnected() )
 		{
 			if (thePrefs.GetLogWebCacheEvents())
-				AddDebugLogLine( false, _T("Multi-WCBlock sent to client - TCP") );
+				AddDebugLogLine( false, _T("Multi-WCBlock sent to client by TCP: %s"), DbgGetClientInfo() );
 			lastMultiOHCBPacketSent = now;
 			socket->SendPacket( packet );
 		}

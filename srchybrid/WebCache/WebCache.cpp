@@ -71,6 +71,7 @@ uint32 ResolveWebCacheName() // returns 0 on error
 	uint32 oldip = wcip;	
 	wcip = *(reinterpret_cast<uint32*>(remoteHost->h_addr_list[0]));
 	if (wcip != oldip) {
+		Log(LOG_STATUSBAR, GetResString(IDS_WC_NEWPROXYIP), ipstr(wcip));
 		thePrefs.WebCacheDisabledThisSession = false;
 		thePrefs.ses_PROXYREQUESTS = 0;
 	}
@@ -224,7 +225,8 @@ void AutodetectWebcache()
 		thePrefs.PersistentConnectionsForProxyDownloads = (detectedWebcache->persistentconns == _T("1") ? true : false);	
 		thePrefs.webcacheTrustLevel = (uint8)_tstoi(detectedWebcache->trustLevel);
 		if (thePrefs.webcacheEnabled && restart) //WC-ToDo need a modal dialogue here
-			AddDebugLogLine( false, _T("Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until eMule is restarted.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."));
+			//MORPH - Changed by SiRoB, New ResolveWebcaChename
+			AddDebugLogLine( false, _T("Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until a new proxy is tested.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."));
 		else if (!thePrefs.webcacheEnabled && restart)
 		{
 			CString comment = detectedWebcache->comment;
@@ -474,11 +476,18 @@ bool PingviaProxy(CString WebCacheName, uint16 WebCachePort)
  		destIp = theApp.GetPublicIP();
  		destPort = 80;
  	} else { // regular proxy
- 		hostent* remoteHost = gethostbyname(CT2CA(WebCacheName)); //Resolve webcache name
+ 		//MORPH START - Changed by SiRoB, New ResolveWebCachename
+		/*
+		hostent* remoteHost = gethostbyname(CT2CA(WebCacheName)); //Resolve webcache name
  		if( !remoteHost ) // if failed to resolve
  			return false;
  		destIp = *(reinterpret_cast<uint32*>(remoteHost->h_addr_list[0]));
- 		destPort = WebCachePort;
+ 		*/
+		destIp = ResolveWebCacheName();
+		if(!destIp)
+			return false;
+		//MORPH END   - Changed by SiRoB, New ResolveWebCachename
+		destPort = WebCachePort;
  	}
 	
 	//create DownSocket

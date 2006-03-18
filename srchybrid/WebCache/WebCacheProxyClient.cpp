@@ -102,7 +102,8 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 	{
  		if(thePrefs.WebCacheDisabledThisSession == false) {
 			thePrefs.WebCacheDisabledThisSession = true;
-			AfxMessageBox(_T("Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until emule is restarted!"));
+			//MORPH - Changed by SiRoB, New ResolveWebCachename
+			AfxMessageBox(_T("Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until a new proxy is tested!"));
 		}
 		return false;
 	}
