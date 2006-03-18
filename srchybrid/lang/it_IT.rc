@@ -14,7 +14,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Italian (Italy) resources
+// Italien (Italie) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ITA)
 #ifdef _WIN32
@@ -69,8 +69,10 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION "Ricezione informazioni sul File in corso"
-    IDS_HTTPDOWNLOAD_FAIL_PARSE_ERROR "Si è verificato un errore durante l'analisi dell'URL: %s"
+    IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION 
+                            "Ricezione informazioni sul File in corso"
+    IDS_HTTPDOWNLOAD_FAIL_PARSE_ERROR 
+                            "Si è verificato un errore durante l'analisi dell'URL: %s"
     IDS_HTTPDOWNLOAD_GENERIC_ERROR 
                             "Si è verificato un errore nel tentativo di scaricare il File, Errore: %s"
     IDS_HTTPDOWNLOAD_FAIL_CONNECT_SERVER 
@@ -94,7 +96,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LD_ADDHTML          "Aggiungi i Tag HTML"    
+    IDS_LD_ADDHTML          "Aggiungi i Tag HTML"
     IDS_HTTP_CAPTION        "Aggiornamento della lista server in corso..."
     IDS_HTTPDOWNLOAD_TIMELEFT "%s (%s copiati)"
     IDS_LD_ADDHASHSET       "Inserisci l'HashSet completo"
@@ -125,8 +127,10 @@ BEGIN
     IDS_ERR_ILLFORMEDHASH   "Hash non conforme"
     IDS_ERR_BADED2KLINK     "Link eD2K mal formattato"
     IDS_ERR_NOSLLINK        "Il Link inserito non è un Link eD2K o Link ad un File valido"
-    IDS_ERR_WRONGPACKAGESIZE "Dimensione errata del pacchetto OP_REQUESTFILENAME"
-    IDS_ERR_WRONGHPACKAGESIZE "Dimensione errata del pacchetto OP_HASHSETREQUEST"
+    IDS_ERR_WRONGPACKAGESIZE 
+                            "Dimensione errata del pacchetto OP_REQUESTFILENAME"
+    IDS_ERR_WRONGHPACKAGESIZE 
+                            "Dimensione errata del pacchetto OP_HASHSETREQUEST"
     IDS_ERR_BADCLIENTACTION "Un Client ha causato un errore o ha fatto qualcosa di sbagliato: %s. Client disconnesso!"
     IDS_ERR_UNKNOWNCLIENTACTION 
                             "Un Client sconosciuto ha inviato un pacchetto usando il protocollo esteso di eMule"
@@ -138,7 +142,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_EMPTYADRESSESDAT_TITLE "Impossibile scaricare la Lista Server"
-    IDS_ERR_BADSERVERMETVERSION "Formato del File server.met non valido (0x%X)!"
+    IDS_ERR_BADSERVERMETVERSION 
+                            "Formato del File server.met non valido (0x%X)!"
     IDS_SERVERSFOUND        "Sono stati trovati %i Server nel File ""server.met"""
     IDS_SERVERSADDED        "%d Server aggiunti, %d saltati (già in lista/non validi)"
     IDS_ERR_BADSERVERLIST   "Errore: Il File server.met è corrotto, impossibile caricare la Lista Server"
@@ -166,7 +171,8 @@ BEGIN
     IDS_PRIONOPREF          "Nessuna Priorità"
     IDS_CONNECTTHIS         "Connettiti al Server selezionato"
     IDS_CHAT_WELCOME        "Messaggistica Istantanea\n  \nClicca con il tasto destro su un Client e seleziona 'Invia un Messaggio' per iniziare a chattare"
-    IDS_MAIN_BTN_CANCEL_TOOLTIP "Interrompi gli attuali tentativi di connessione"
+    IDS_MAIN_BTN_CANCEL_TOOLTIP 
+                            "Interrompi gli attuali tentativi di connessione"
     IDS_MAIN_BTN_CONNECT    "&Connetti"
     IDS_ERR_SAVESERVERMET2  "Impossibile salvare il server.met! Può darsi che tu debba eliminare il tuo server.met e rinominare il server.met.old in server.met!"
     IDS_NOTCONNECTED        "Non Connesso"
@@ -264,7 +270,8 @@ BEGIN
     IDS_DL_SPEED            "Velocità"
     IDS_DL_PROGRESS         "Progresso"
     IDS_DL_SOURCES          "Fonti"
-    IDS_ERR_BADSERVERLISTRECEIVED "Ricevuto un pacchetto della Lista Server non valido"
+    IDS_ERR_BADSERVERLISTRECEIVED 
+                            "Ricevuto un pacchetto della Lista Server non valido"
     IDS_STATUS              "Stato"
     IDS_DL_REMAINS          "Al Termine"
     IDS_UPDATEFROM          "Aggiorna dall'URL: (Formato: filter.dat o PeerGuardian)"
@@ -365,12 +372,12 @@ BEGIN
     IDS_CREDITFILELOADED    "File dei Client conosciuti (e dei relativi crediti) caricato: sono noti %u Client"
     IDS_CREDITFILECORRUPT   "Errore: il File dei Client conosciuti (e dei relativi crediti) è danneggiato e verrà sostituito!"
     IDS_ERR_CREDITFILEREAD  "Errore inatteso durante la lettura del File dei Client conosciuti (e dei relativi crediti): %s"
-    IDS_ERR_FAILED_CREDITSAVE "Salvataggio del File dei Client conosciuti fallito"
+    IDS_ERR_FAILED_CREDITSAVE 
+                            "Salvataggio del File dei Client conosciuti fallito"
     IDS_NOPARTSFOUND        "Non sono stati trovati File .part"
     IDS_FOUNDPARTS          "Sono stati trovati %i File .part"
     IDS_NEWDOWNLOAD         "Aggiunto ai Download ""%s"""
-    IDS_ERR_ALREADY_DOWNLOADING
-                            "Stai già scaricando il File ""%s"""
+    IDS_ERR_ALREADY_DOWNLOADING "Stai già scaricando il File ""%s"""
     IDS_ERR_ALREADY_DOWNLOADED "Il File %s è stato già scaricato"
     IDS_ERR_SERVERMET_BAD   "Errore: il File known.met è danneggiato, impossibile caricare le informazioni sui File condivisi conosciuti"
     IDS_ERR_SERVERMET_UNKNOWN 
@@ -387,7 +394,8 @@ BEGIN
     IDS_FILEBUFFERSIZE      "Dimensione Buffer per i File"
     IDS_QUEUESIZE           "Dimensione Coda"
     IDS_DAYS2               "giorni"
-    IDS_ERR_MAKEBAKCREDITFILE "Impossibile creare un Backup del File dei Client Conosciuti"
+    IDS_ERR_MAKEBAKCREDITFILE 
+                            "Impossibile creare un Backup del File dei Client Conosciuti"
     IDS_COMMENT             "Commento"
     IDS_IPFILTERED          "IP Filtrato: %s (%s)"
     IDS_DL_TRANSFCOMPL      "Completati"
@@ -791,7 +799,8 @@ BEGIN
     IDS_DENIED              "Richiesta negata"
     IDS_PW_CON_DOWNLBL      "Download"
     IDS_PW_CON_UPLBL        "Upload"
-    IDS_PW_AUTOCONNECTSTATICONLY "Connettiti automaticamente solo ai Server statici"
+    IDS_PW_AUTOCONNECTSTATICONLY 
+                            "Connettiti automaticamente solo ai Server statici"
     IDS_PW_CON_LIMITFRM     "Limiti di Traffico"
     IDS_PW_FILE_ICH         "I.C.H. attivo"
     IDS_STATS_AVGLABEL      "Durata media grafico: %i min"
@@ -833,7 +842,8 @@ BEGIN
     IDS_RECOVERY_FAILED     "Recupero Archivio: fallito."
     IDS_STARTNEXTFILE       "Scarica il successivo File in pausa al termine di un Download"
     IDS_FULLCHUNKTRANS      "Prova ad inviare a tutti delle Parti complete"
-    IDS_MANUALSERVERHIGHPRIO "Dai automaticamente Priorità ""Alta"" ai Server aggiunti"
+    IDS_MANUALSERVERHIGHPRIO 
+                            "Dai automaticamente Priorità ""Alta"" ai Server aggiunti"
     IDS_VERBOSE             "Verboso (Informazioni aggiuntive)"
     IDS_FLAT                "Piatto"
     IDS_ROUND               "Stondato"
@@ -873,7 +883,8 @@ BEGIN
     IDS_WEB_REMOTE_LINK_ADDED "Link aggiunto: "
     IDS_WEB_REMOTE_LINK_NOT_ADDED "Link non aggiunto. Password errata."
     IDS_SOURCEEXCHANGESWAP  "Cambia lo Scambio Fonti Temporaneo"
-    IDS_DL_TRY_TO_GET_PREVIEW_PARTS "Scarica prima le Parti Necessarie all'Anteprima"
+    IDS_DL_TRY_TO_GET_PREVIEW_PARTS 
+                            "Scarica prima le Parti Necessarie all'Anteprima"
     IDS_PR_SHORT_LOW        "[-]"
     IDS_IRC_KICK            "Butta fuori"
     IDS_IRC_SLAP            "Colpisci"
@@ -893,7 +904,8 @@ BEGIN
     IDS_PREF_STARTNEXTFILECATONLY "Solo nella stessa categoria"
     IDS_LOG_ULDL_EVENTS     "Mostra nel Registro gli eventi di Upload/Download"
     IDS_PEERCACHE_ENABLED   "Il tuo ISP supporta la tecnologia PeerCache, Cache dei Download abilitata!"
-    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Consenti all'utente di aggiungerti alla sua Lista degli Amici"
+    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND 
+                            "Consenti all'utente di aggiungerti alla sua Lista degli Amici"
     IDS_SOURCESWAPBLOCKED   "Scambio bloccato"
     IDS_TRICKLING           "Standby"
     IDS_A4AF_CHECK_THIS_NOW "Esamina adesso questa fonte (Debug)"
@@ -1033,10 +1045,11 @@ BEGIN
     IDS_CREATESOURCELINK    "Copia Link eD2K negli appunti (con &fonti)"
     IDS_ERR_LOADSERVERMET   "Si è verificato un errore nel caricare il File ""server.met""!"
     IDS_ERR_CORRUPTCOMPRPKG "Ricevuto un pacchetto compresso corrotto da %s (errore %i)"
-    IDS_ERR_EMFRIENDSINVALID
+    IDS_ERR_EMFRIENDSINVALID 
                             "Il File ""emfriends.met"" non è valido o è corrotto!"
     IDS_ERR_READEMFRIENDS   "Errore sconoscito durante la lettura del File ""emfriends.met"": %s"
-    IDS_ERR_KNOWNSERVERINFOREC "Ricevute delle Informazioni sul Server sconosciute!"
+    IDS_ERR_KNOWNSERVERINFOREC 
+                            "Ricevute delle Informazioni sul Server sconosciute!"
     IDS_ERR_TIMERCREATEFAILED "Errore Fatale: Impossibile creare un Timer"
     IDS_WIZ_DOWN            "Down (kBit/s)"
     IDS_WIZ_UP              "Up (kBit/s)"
@@ -1097,7 +1110,8 @@ BEGIN
     IDS_MEGA                "M"
     IDS_GIGA                "G"
     IDS_TERRA               "T"
-    IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE "Ignora i messaggi del Protocollo IRC di eMule"
+    IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE 
+                            "Ignora i messaggi del Protocollo IRC di eMule"
     IDS_SMARTLOWIDCHECK     "Controllo ID Basso alla connessione"
     IDS_SF_SRVOCC           "Occupazione Server: %.2f%%"
     IDS_3DDEP               "Stile Barra del Progresso"
@@ -1117,8 +1131,7 @@ BEGIN
     IDS_DESCRIPTIONRECV     "Descrizione per il File ricevuto ""%s"": %s"
     IDS_WEBSERVICES         "Risorse Web"
     IDS_WEBSVEDIT           "Modifica Risorse Web..."
-    IDS_IRC_EMULEPROTO_IGNORESENDLINK
-                            "Ignora i messaggi eMule di invio Link"
+    IDS_IRC_EMULEPROTO_IGNORESENDLINK "Ignora i messaggi eMule di invio Link"
     IDS_CHECK4UPDATE        "Controlla Aggiornamenti"
     IDS_STARTUP             "Avvio"
     IDS_NEWVERSIONAVL       "È disponibile una nuova versione di eMule! Per maggiori informazioni vai sul sito di eMule."
@@ -1156,7 +1169,8 @@ BEGIN
     IDS_IPFILTER            "Filtri-IP"
     IDS_EDIT                "Modifica..."
     IDS_FILTERLEVEL         "Livello filtro"
-    IDS_FILTERSERVERBYIPFILTER "Filtra anche i Server (Compresi i Server con DNS)"
+    IDS_FILTERSERVERBYIPFILTER 
+                            "Filtra anche i Server (Compresi i Server con DNS)"
     IDS_FILTERCOMMENTSLABEL "Ignora i commenti contenenti: (Separatore | )"
     IDS_CLIENTLIST          "Client Conosciuti"
     IDS_FOLDER              "Cartella"
@@ -1302,7 +1316,7 @@ BEGIN
     IDS_HM_LINKHP           "HomePage di eMule"
     IDS_HM_LINKFAQ          "F.A.Q. di eMule"
     IDS_HM_LINKVC           "Controlla versione di eMule"
-    IDS_DEBUG_SOURCE_EXCHANGE
+    IDS_DEBUG_SOURCE_EXCHANGE 
                             "Registra i messaggi dello Scambio Fonti e delle richieste/risposte delle fonti ai Server"
     IDS_SHAREDREQ1          "L'utente %s (%u) ha richiesto la lista delle tue cartelle condivise -> ""%s"""
     IDS_SHAREDREQ2          "L'utente %s (%u) ha richiesto la lista dei tuoi File codivisi in cartelle ""%s"" -> ""%s"""
@@ -1432,8 +1446,7 @@ BEGIN
     IDS_USESPEECH           "Messaggio di notifica parlante"
     IDS_ERR_FAILEDTOLOAD    "Errore nel caricare %s: %s "
     IDS_TCPIP_CONNS         "Connessioni TCP/IP"
-    IDS_MANUAL_FILENAMECLEANUP
-                            "Vuoi pulire i Nomi dei File selezionati?"
+    IDS_MANUAL_FILENAMECLEANUP "Vuoi pulire i Nomi dei File selezionati?"
 END
 
 STRINGTABLE 
@@ -1473,7 +1486,8 @@ BEGIN
     IDS_SEARCH_MISSINGNOTLEFT "Parte sinistra per l'operatore NOT mancante"
     IDS_SEARCH_EXPRERROR    "Impossibile analizzare l'espressione di ricerca"
     IDS_SEARCH_TOOCOMPLEX   "Espressione troppo complessa"
-    IDS_SEARCH_INVALIDMINMAX "Unità non valide per le dimensioni massime/minime del File"
+    IDS_SEARCH_INVALIDMINMAX 
+                            "Unità non valide per le dimensioni massime/minime del File"
 END
 
 STRINGTABLE 
@@ -1554,7 +1568,8 @@ BEGIN
     IDS_DWTOT_TSN           "Spazio Extra richiesto per i Download: %s"
     IDS_DWTOT_FS            "Spazio Libero su Disco: %s"
     IDS_NEEDFREEDISKSPACE   "%s (devi liberare %s!)"
-    IDS_SERVERKEEPALIVETIMEOUT "Intervallo Aggiornamento Connessione ai Server [min.]"
+    IDS_SERVERKEEPALIVETIMEOUT 
+                            "Intervallo Aggiornamento Connessione ai Server [min.]"
     IDS_MORE                "A&ltro"
     IDS_TOOLS               "Strumenti"
     IDS_SEARCHPARAMS        "Parametri di Ricerca"
@@ -1657,7 +1672,8 @@ BEGIN
     IDS_VIAKAD              "via Kad"
     IDS_VIASE               "via Scambio Fonte"
     IDS_SELECTTOOLBARBITMAP "Seleziona Bitmap per la Barra degli Strumenti..."
-    IDS_SELECTTOOLBARBITMAPDIR "Seleziona Cartella Bitmap per la Barra degli Strumenti..."
+    IDS_SELECTTOOLBARBITMAPDIR 
+                            "Seleziona Cartella Bitmap per la Barra degli Strumenti..."
     IDS_TOOLBARSKINS        "Skin della Barra degli Strumenti"
     IDS_NOTEXTLABELS        "Nessuna Etichetta"
 END
@@ -1702,7 +1718,7 @@ BEGIN
     IDS_IP_RULES            "Filtri IP:"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_LOG_A4AF            "Registra le azioni dell'A4AF"
     IDS_A4AF_SAVE_CPU       "Disattiva la ricerca degli A4AF per risparmiare CPU"
@@ -1754,8 +1770,7 @@ BEGIN
     IDS_CHAT_IDENT          "Identificazione:"
     IDS_CHAT_CLIENT         "Client:"
     IDS_MAXHALFOPENCONS     "N° Massimo Connessioni Parziali Aperte"
-    IDS_WIZ_STARTWITHWINDOWS 
-                            "Eseguire eMule all'Avvio di Windows?"
+    IDS_WIZ_STARTWITHWINDOWS "Eseguire eMule all'Avvio di Windows?"
     IDS_KAD_WAITCBK         "Attendi il Richiamo in Kad"
     IDS_KAD_TOOMANDYKADLKPS "Troppe Analisi in Kad"
     IDS_PCDS_CLIENTWAIT     "Attesa Client"
@@ -1927,12 +1942,12 @@ BEGIN
     IDS_REMOVEALLSERVERS    "Sei sicuro di voler rimuovere tutti i Server?"
     IDS_SEARCH_UNKATTR      "Parametro di ricerca '%s' sconosciuto"
     IDS_SEARCH_ATTRERR      "Errore di sintassi nel parametro di ricerca '%s'"
-    IDS_SEARCH_MISSINGANDRIGHT "Lato destro mancante per l'operatore AND"
-    IDS_SEARCH_OPRERR       "Errore di sintassi nell'operatore di confronto '%s'"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_SEARCH_MISSINGANDRIGHT "Lato destro mancante per l'operatore AND"
+    IDS_SEARCH_OPRERR       "Errore di sintassi nell'operatore di confronto '%s'"
     IDS_DOWNLOAD_LANGFILE   "Download del File della lingua in corso..."
     IDS_DOWNLOADING_SERVERMET_FROM "Download del 'server.met' da %s"
     IDS_DOWNLOADING_SERVERMET "Download del 'server.met' in corso..."
@@ -1950,14 +1965,12 @@ BEGIN
     IDS_SRV_LARGEFILES      "Supporto per File di grosse dimensioni"
 END
 
-
 STRINGTABLE 
 BEGIN
     IDS_ERR_FSCANTHANDLEFILE 
                             "Non è possibile scaricare questo File perché il tuo Filesystem non supporta File di dimensioni maggiori di 4GB; è consigliabile la conversione in NTFS."
     IDS_NEWVERSIONAVLBETA   "Questa versione Beta è obsoleta. Per la natura delle versioni Beta, che spesso contengono Bug, è consigliabile l'aggiornamento ad una versione stabile il prima possibile!"
 END
-
 
 STRINGTABLE 
 BEGIN
@@ -1971,13 +1984,14 @@ BEGIN
                             "Importazione cancellata: Non è possibile importare su un file completo."
     IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
                             "Importazione cancellata: hashset incompleto per %s (%i hashes per %i parti)."
-    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Importazione cancellata: Impossibile aprire %s."
-    IDS_SR13_IMPORTPARTS_IMPORTSTART 
-                            "Importazione %i parti (da 0 a %i) in %s."
+    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE 
+                            "Importazione cancellata: Impossibile aprire %s."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART "Importazione %i parti in %s."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
                             "Parte %i: saltata, già completa."
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Parte %i: importata."
-    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Parte %i: importata per gestione ICH."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD 
+                            "Parte %i: importata per gestione ICH."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
                             "Parte %i: ignorata, non corrisponde al blocco incompleto."
 END
@@ -2522,9 +2536,12 @@ BEGIN
     IDS_CRC32_ABORT         "Interrompi calcolo"
     IDS_DONTREMOVESPARETRICKLESLOT "Non rimuovere Slot in Attesa"
     IDS_MINDATARATEFRIEND   "Flusso dati globale (0KB/s = non limitato, 1...3KB/s = no zzRatio)"
-    IDS_MINDATARATEPOWERSHARE "Flusso dati globale (datarate) (0KB/s = non limitato)"
-    IDS_MAXCLIENTDATARATEFRIEND "Max. flusso dati per Client (0KB/s = non limitato)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Max. flusso dati per Client (0KB/s = non limitato)"
+    IDS_MINDATARATEPOWERSHARE 
+                            "Flusso dati globale (datarate) (0KB/s = non limitato)"
+    IDS_MAXCLIENTDATARATEFRIEND 
+                            "Max. flusso dati per Client (0KB/s = non limitato)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE 
+                            "Max. flusso dati per Client (0KB/s = non limitato)"
     IDS_MAXCLIENTDATARATE   "Max. flusso dati per Client (0KB/s = non limitato)"
     IDS_DISPLAYFUNNYNICK    "Abilita Visualizzazione 'FunnyNick'"
 END
@@ -2627,8 +2644,7 @@ BEGIN
     IDS_USER_ALREADY_FRIEND "Client ""%s"" già in lista Amici"
     IDS_GETFRIENDED2KLINK   "Copia link Amico su clipboard"
     IDS_GETHTMLFRIENDED2KLINK "Copia link Amico su clipboard (HTML)"
-    IDS_ERR_FAILEDDOWNLOADEMFRIENDS 
-                            "Impossibile scaricare lista Amici da %s"
+    IDS_ERR_FAILEDDOWNLOADEMFRIENDS "Impossibile scaricare lista Amici da %s"
     IDS_GETMYFRIENDED2KLINK "Copia link Amico su clipboard"
     IDS_GETMYHTMLFRIENDED2KLINK "Copia link Amico su clipboard (HTML)"
     IDS_FRIENDLINKMENUTITLE "Link Amici"
@@ -2795,8 +2811,10 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SCHED_BACKUP_LOG    "Iniziato Backup programmato."
-    IDS_SCHED_UPDATE_IPCONFIG_LOG "Iniziato aggiornamento programmato file IPFILTER.DAT."
-    IDS_SCHED_UPDATE_FAKES_LOG "Iniziato aggiornamento programmato file FAKES.DAT."
+    IDS_SCHED_UPDATE_IPCONFIG_LOG 
+                            "Iniziato aggiornamento programmato file IPFILTER.DAT."
+    IDS_SCHED_UPDATE_FAKES_LOG 
+                            "Iniziato aggiornamento programmato file FAKES.DAT."
     IDS_SCHED_UPDATE_WARNING 
                             "Per contenere il traffico di rete è utile non schedulare aggiornamenti automatici troppo frequenti.\r\nUn'aggiornamento settimanale dovrebbe essere più che sufficiente."
 END
@@ -2836,19 +2854,20 @@ BEGIN
     IDS_SKIPALL             "Tr&alascia Tutti"
 END
 
-
-STRINGTABLE
+STRINGTABLE 
 BEGIN
- // ==> Slot Limit - Stulle
-  IDS_SLOT_LIMIT_GROUP    "Limitatore Slot"
-  IDS_SLOT_LIMIT_NONE     "Non limitato"
-  IDS_SLOT_LIMIT_THREE    "Velocità Upload diviso 3kb/s"
-  IDS_SLOT_LIMIT_NUM_B    "Limitare a nº slot"
-IDS_SLOT_LIMIT_NUM      "Mass. nº di slot (60-255)"
-  // <== Slot Limit - Stulle
+    IDS_SLOT_LIMIT_GROUP    "Limitatore Slot"
+    IDS_SLOT_LIMIT_NONE     "Non limitato"
+    IDS_SLOT_LIMIT_THREE    "Velocità Upload diviso 3kb/s"
+    IDS_SLOT_LIMIT_NUM_B    "Limitare a nº slot"
 END
 
-#endif    // Italian (Italy) resources
+STRINGTABLE 
+BEGIN
+    IDS_SLOT_LIMIT_NUM      "Mass. nº di slot (60-255)"
+END
+
+#endif    // Italien (Italie) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -2863,3 +2882,4 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
