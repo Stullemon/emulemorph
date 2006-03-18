@@ -543,7 +543,7 @@ public:
 	void			ProcessAcceptUpload();
 	bool			AddRequestForAnotherFile(CPartFile* file);
 	void			CreateBlockRequests(int iMaxBlocks);
-	virtual void	SendBlockRequests();
+	virtual void	SendBlockRequests(bool ed2k = false); //MORPH - Changed by SiRoB, WebCache Retry by ed2k
 	virtual bool	SendHttpBlockRequests();
 	virtual void	ProcessBlockPacket(const uchar* packet, UINT size, bool packed, bool bI64Offsets);
 	virtual void	ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize);
@@ -856,6 +856,7 @@ public:
 						else
 							return _T("");
 					}
+	bool			m_bWebcacheFailedTry; //MORPH - Added by SiRoB, New ResolveWebCachename
 	bool			m_bWebCacheSupport;
 	bool			m_bWebCacheSupportsMultiOHCBs;
 	// Superlexx - webcache

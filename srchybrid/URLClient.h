@@ -40,7 +40,7 @@ public:
 	virtual bool Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
 
 	virtual bool SendHelloPacket();
-	virtual void SendBlockRequests();
+	virtual void SendBlockRequests(bool ed2k = false); //MORPH - Changed by SiRoB, WebCache Retry by ed2k
 	virtual bool SendHttpBlockRequests();
 	virtual void SendFileRequest();
 	virtual void SendCancelTransfer(Packet* packet);

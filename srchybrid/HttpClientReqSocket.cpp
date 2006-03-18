@@ -123,7 +123,6 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 				SINGLEProxyClient->DeleteBlock(); // make SingleProxyClient not busy
 			WebCachedBlockList.TryToDL(); // download next block
 		}
-		// MORPH END - Added by Commander, WebCache 1.2e
 	}
 
 	if (!bResult && !deletethis)
@@ -150,6 +149,13 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 		// In case this socket is a PeerCacheUp/Down socket, we are not disconnecting the attached CUpDownClient here
 		// PC-TODO: This needs to be cleaned up thoroughly because that client dependency is somewhat hidden in the
 		// usage of CClientReqSocket::client and CHttpClientReqSocket::GetClient.
+		//MORPH START - Changed by SiRoB, WebCache Retry by ed2k
+		if (GetClient() && GetClient()->m_pWCDownSocket) {
+			AddDebugLogLine(false, _T("WebCache failed try requesting by ed2k to client: %s"), GetClient()->DbgGetClientInfo());
+			GetClient()->SetWebCacheDownState(WCDS_NONE);
+			GetClient()->SendBlockRequests(true);
+		}
+		//MORPH END   - Changed by SiRoB, WebCache Retry by ed2k
 		Disconnect(strError);
 	}
 }

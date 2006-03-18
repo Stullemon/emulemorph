@@ -881,7 +881,8 @@ void CDownloadQueue::Process(){
 		thePrefs.WebCacheDisabledThisSession = true; //Disable webcache downloads for the current proxy settings
 		//JP we need a modeless dialogue here!!
 		//			AfxMessageBox(_T("Proxy configuration Test Failed please review your proxy-settings"));
-		theApp.QueueLogLine(false, _T("Proxy configuration Test Failed please review your proxy-settings. Webcache downloads have been deactivated until emule is restarted."));
+		//MORPH - Changed by SiRoB, New ResolveWebcachename
+		theApp.QueueLogLine(false, _T("Proxy configuration Test Failed please review your proxy-settings. Webcache downloads have been deactivated until new proxy ip is detected."));
 	}
 	////JP Proxy configuration testing END!!! This should probably be somewhere else.
 

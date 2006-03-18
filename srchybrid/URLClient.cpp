@@ -141,7 +141,7 @@ CUrlClient::~CUrlClient()
 {
 }
 
-void CUrlClient::SendBlockRequests()
+void CUrlClient::SendBlockRequests(bool /*ed2k*/)
 {
 	ASSERT(0);
 }
