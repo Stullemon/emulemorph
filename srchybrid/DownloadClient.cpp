@@ -1096,7 +1096,6 @@ void CUpDownClient::SendBlockRequests()
 	{
 		if (thePrefs.GetLogWebCacheEvents()) //JP log webcache events
 			AddDebugLogLine(false, _T("Proxy-Connections for this file: %u Allowed: %u"), reqfile->GetNumberOfCurrentWebcacheConnectionsForThisFile(), reqfile->GetMaxNumberOfWebcacheConnectionsForThisFile());
-		if (!m_PendingBlocks_list.IsEmpty()) return; //Added by SiRoB
 		// Superlexx - COtN - start
 		byte WC_TestFileHash[16] = { 0xE9, 0x05, 0x7A, 0xDC, 0x38, 0x05, 0x4A, 0xFA, 0x24, 0x81, 0x6E, 0x86, 0xBB, 0x08, 0xD2, 0x70 };
 		bool isTestFile = md4cmp(reqfile->GetFileHash(), WC_TestFileHash)==0;
