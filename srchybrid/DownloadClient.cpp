@@ -950,7 +950,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		}
 
         if(nNewState == DS_DOWNLOADING && socket){
-			m_bWebcacheFailed = false; //MORPH - Added by SiRoB, New ResolveWebCachename
+			m_bWebcacheFailedTry = false; //MORPH - Added by SiRoB, New ResolveWebCachename
 			socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 
@@ -1134,7 +1134,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 // Superlexx - COtN - end
 	//MORPH START - New ResolveWebCachename
 	if (ed2krequest)
-		m_bWebcacheFailed = true;
+		m_bWebcacheFailedTry = true;
 	//MORPH END   - New ResolveWebCachename
 	
 // MORPH END - Added by Commander, WebCache 1.2e

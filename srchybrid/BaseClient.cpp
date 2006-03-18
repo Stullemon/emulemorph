@@ -298,7 +298,7 @@ void CUpDownClient::Init()
 	m_pWCDownSocket = NULL;
 	m_pWCUpSocket = NULL;
 	m_WA_webCacheIndex = -1;
-	m_bWebcacheFailed = false;
+	m_bWebcacheFailedTry = false;
 	m_bWebCacheSupport = false;
 	m_uWebCacheDownloadId = 0;
 	m_uWebCacheUploadId = 0;
