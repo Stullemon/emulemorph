@@ -266,7 +266,8 @@ BOOL CPPgWebcachesettings::OnApply()
 		GetDlgItem(IDC_webcacheName)->GetWindowText(nNewwebcache);
 		if (thePrefs.webcacheName != nNewwebcache){
 			thePrefs.webcacheName = nNewwebcache;
-			bRestartApp = true;
+			//MORPH - Removed by SiRoB, New ResolveWebCachename
+			//bRestartApp = true;
 		}
 	}
 
