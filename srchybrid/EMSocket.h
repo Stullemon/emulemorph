@@ -80,10 +80,10 @@ public:
     virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, true); };
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
 
-    uint32	GetNeededBytes();
+    uint32	GetNeededBytes(bool lowspeed);
 	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
 	float	GetBusyRatioTime() { return (float)(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))/(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)); };
-	uint32	GetBufferLenToSend() { return sendblen-sent; }; //MORPH - Added by SiRoB, Show busyTime
+
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
@@ -104,7 +104,7 @@ protected:
 	bool	m_bProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
 	CString m_strLastProxyError;
-
+	CCriticalSection sendLocker; //MORPH - Added by SiRoB, moved in protected seccion
 private:
     virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket);
 	void	ClearQueues();	
@@ -134,7 +134,7 @@ private:
 	CTypedPtrList<CPtrList, Packet*> controlpacket_queue;
 	CList<StandardPacketQueueEntry> standartpacket_queue;
     bool m_currentPacket_is_controlpacket;
-	CCriticalSection sendLocker;
+//    CCriticalSection sendLocker; //MORPH - Removed by SiRoB, moved in protected seccion
     uint64 m_numberOfSentBytesCompleteFile;
     uint64 m_numberOfSentBytesPartFile;
     uint64 m_numberOfSentBytesControlPacket;

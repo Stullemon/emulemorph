@@ -229,7 +229,10 @@ void CClientReqSocket::OnClose(int nErrorCode){
 
 void CClientReqSocket::Disconnect(LPCTSTR pszReason){
 	AsyncSelect(0);
+	sendLocker.Lock(); //MORPH - Added by SiRoB, work arround not thread safe setting byConnected
 	byConnected = ES_DISCONNECTED;
+	sendLocker.Unlock(); //MORPH - Added by SiRoB, work arround not thread safe setting byConnected
+	
 	if (!client)
 		Safe_Delete();
 	else

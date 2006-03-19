@@ -745,7 +745,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								}
 								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend) {
 									// trickle
-					   				uint32 neededBytes = socket->GetNeededBytes();
+					   				uint32 neededBytes = socket->GetNeededBytes(1000 > minFragSize);
 	    
 									if (neededBytes > 0 && thisLoopTick-socket->GetLastCalledSend()>1000) {
 										neededBytes = (uint32)min(BytesToSpend - ControlspentBytes, neededBytes?neededBytes:1);

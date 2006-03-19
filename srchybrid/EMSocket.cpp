@@ -931,7 +931,11 @@ uint32 CEMSocket::GetNextFragSize(uint32 current, uint32 minFragSize) {
  * 
  * @author SlugFiller
  */
+//MORPH - Changed by SiRoB, Scale to lowspeed
+/*
 uint32 CEMSocket::GetNeededBytes() {
+*/
+uint32 CEMSocket::GetNeededBytes(bool lowspeed) {
 	sendLocker.Lock();
 	if (byConnected == ES_DISCONNECTED) {
 		sendLocker.Unlock();
@@ -950,6 +954,9 @@ uint32 CEMSocket::GetNeededBytes() {
 	uint32 sendgap = ::GetTickCount() - lastCalledSend;
 
 	uint64 timetotal = m_bAccelerateUpload?45000:90000;
+	//MORPH START - Added by SiRoB, 1kB/s and 0.1kB/s for lowspeed
+	if (!lowspeed) timetotal = m_bAccelerateUpload?4500:9000;
+	//MORPH END   - Added by SiRoB, 1kB/s and 0.1kB/s for lowspeed
 	uint64 timeleft = ::GetTickCount() - lastFinishedStandard;
 	uint64 sizeleft, sizetotal;
 	if (sendbuffer && !m_currentPacket_is_controlpacket) {
