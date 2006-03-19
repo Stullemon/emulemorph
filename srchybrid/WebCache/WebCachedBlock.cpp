@@ -70,7 +70,7 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 
 	// yonatan log
 	if (thePrefs.GetLogWebCacheEvents())
-	AddDebugLogLine( false, _T("CWebCachedBlock: proxy-ip=%s, host-ip=%s, host-port=%u, filehash=%s, start=%I64u, end=%I64u, key=%s16\n"),
+	AddDebugLogLine( false, _T("CWebCachedBlock: proxy-ip=%s, host-ip=%s, host-port=%u, filehash=%s, start=%I64u, end=%I64u, key=%s16"),
 		ipstr(m_uProxyIp),
 		ipstr(m_uHostIp),
 		m_uHostPort,
