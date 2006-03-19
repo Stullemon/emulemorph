@@ -1084,7 +1084,7 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 void CUpDownClient::SendBlockRequests(bool ed2krequest)
 {
 	// MORPH START - Added by Commander, WebCache 1.2e
-	if(!ed2krequest && reqfile && thePrefs.IsWebCacheDownloadEnabled()
+	if(!(ed2krequest || m_bWebcacheFailedTry)  && reqfile && thePrefs.IsWebCacheDownloadEnabled()
 		&& UsesCachedTCPPort() // uses a port that is usually cached
 		&& SupportsWebCache() // client knows webcache protocol
 		&& !HasLowID()	// has highID

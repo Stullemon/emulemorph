@@ -965,7 +965,11 @@ CUpDownClientPtrList* CClientList::XpressOHCBRecipients(uint32 maxNrOfClients, c
 	for (POSITION pos = list.GetHeadPosition(); pos;)
 	{
 		CUpDownClient* cur_client = list.GetNext(pos);
+		//MORPH - Changed by SiRoB, WebCache Fix
+		/*
 		if ( !(cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected()))
+		*/
+		if ( (!cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected()))
 			&& cur_client->SupportsMultiOHCBs()
 			&& !cur_client->IsProxy()	// client isn't a proxy
 			&& cur_client->m_bIsAcceptingOurOhcbs
