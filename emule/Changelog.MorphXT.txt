@@ -15,13 +15,13 @@ CHANGED: HideOS & SOTN: They are working together and always revalate 2 chunks [
 CHANGED: Average datarate calcul a bit [SiRoB]
 CHANGED: SlugFiller SafeHash code changed to work arround false corrupted part report with the ReadBlockFromFileThread [SiRoB]
 CHANGED: WC: In case download query failed use ed2k request instead [SiRoB]
-CHANGED: WC: ResolveWebCachename has been changed to work arround dns change
+CHANGED: WC: ResolveWebCachename has been changed to work arround dns change [SiRoB]
 
 ADDED  : HideOS & SOTN:  Don't upload requested hidden block [SiRoB]
 ADDED  : Attempt to avoid connection Collision [SiRoB]
 ADDED  : Global source limit [Stulle]
 ADDED  : Source cache by Xman [Stulle]
-ADDED  : USS: Option to force UDP ping instead of TCP in morph preferency [SiRoB]
+ADDED  : USS: Option to force UDP ping in morph preferency [SiRoB]
 ADDED  : USC: max upload datarate setting for a each class based on upload speed percentage [SiRoB]
 
 TWEAKED: USC: available bandwidth is spreaded differently [SiRoB] 
