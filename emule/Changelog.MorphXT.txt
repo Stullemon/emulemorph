@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.7
+--------------------------------------
+CHANGED: WC: Finaly working fine [SiRoB]
+
+ADDED  : Trickle datarate is now 0.1kB/s for low speed datarate (i.e <6kB/s)[SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.6
 --------------------------------------
 FIXED  : ImportParts: Put back previous file state at the end of the import process [SiRoB]
