@@ -2508,6 +2508,8 @@ BEGIN
                             "Débit par client (défaut 0 kb/s = illimité)"
     IDS_MAXCLIENTDATARATE   "Débit par client (défaut 0 kb/s = illimité)"
     IDS_DISPLAYFUNNYNICK    "Autorise l'affichage FunnyNick"
+    IDS_MAXDATARATEFRIEND   "Limite maximum (%% de la vitesse d'envoi)"
+    IDS_MAXDATARATEPOWERSHARE "Limite maximum (%% de la vitesse d'envoi)"
 END
 
 STRINGTABLE 
@@ -2706,6 +2708,8 @@ BEGIN
     IDS_LOG_IPFILTER_INFO   "Lignes analysées:%u  Plages IP trouvées:%u  Doubles:%u  Fusionnées:%u"
     IDS_IPFILTER_SAVERR     "Erreur de sauvegarde du filtre IP dans le fichier ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Non disponible"
+    IDS_WC_REACTIVATED      "Le WebCache a été réactivé."
+    IDS_WC_NEWPROXYIP       "Une nouvelle adresse IP du proxy webcache a été détecté: %s"
     IDS_LOG_ERRDWN          "Erreur de téléchargement %s"
 END
 
