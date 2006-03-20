@@ -77,6 +77,7 @@ uint32 ResolveWebCacheName() // returns 0 on error
 			Log(LOG_STATUSBAR, GetResString(IDS_WC_REACTIVATED));
 		}
 		thePrefs.ses_PROXYREQUESTS = 0;
+		thePrefs.ses_successfullPROXYREQUESTS = 0;
 	}
 	return wcip;
 }

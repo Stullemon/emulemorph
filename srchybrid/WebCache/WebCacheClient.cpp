@@ -181,6 +181,7 @@ CWebCacheDownSocket::CWebCacheDownSocket(CUpDownClient* pClient)
 	ProxyConnectionCount++; // yonatan http
 	m_bProxyConnCountFlag = false; //jp correct downsocket count
 	blocksloaded = 0; //count blocksloaded for each proxy
+	m_dwIPWC = 0; //MORPH - Added by SiRoB, New ResolveWebCachename
 	if (thePrefs.GetLogWebCacheEvents())
 	AddDebugLogLine( false, _T("new CWebCacheDownSocket: ProxyConnectionCount=%u"), ProxyConnectionCount );
 	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
@@ -894,7 +895,7 @@ bool CUpDownClient::SendWebCacheBlockRequests()
 			return false;
 		}
 	}
-
+	ASSERT(m_pWCDownSocket->GetConState() != ES_DISCONNECTED);
 	if( !m_pWCDownSocket->IsConnected() ) {
 		SOCKADDR_IN sockAddr = {0};
 		sockAddr.sin_family = AF_INET;

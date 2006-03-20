@@ -139,7 +139,7 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 		if( !DownloadIfPossible() ) {
 			XpressOHCB ? WebCachedBlockList.AddHead( this ) : WebCachedBlockList.AddTail( this );
 			if (thePrefs.GetLogWebCacheEvents())
-			AddDebugLogLine( false, _T("WebCachedBlock added to queue") );
+				AddDebugLogLine( false, _T("WebCachedBlock added to queue") );
 		}
 	} else {
 		delete this;
@@ -251,8 +251,8 @@ void CWebCachedBlock::UpdateProxyClient()
 {
 	if (!SINGLEProxyClient)
 	{
-	if (thePrefs.GetLogWebCacheEvents())	
-		AddDebugLogLine( false, _T("Creating new Proxy Client"));
+		if (thePrefs.GetLogWebCacheEvents())	
+			AddDebugLogLine( false, _T("Creating new Proxy Client"));
 		SINGLEProxyClient = new CWebCacheProxyClient(this);
 	}
 	else
