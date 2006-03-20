@@ -443,12 +443,12 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 					if (m_pWCDownSocket)
 						m_pWCDownSocket->blocksloaded++; //count downloaded blocks for this socket
 					//JP moved to CUpDownClient::SendWebCacheBlockRequests() and CWebCacheProxyClient::UpdateClient
-					if( !IsProxy() && m_pWCDownSocket)
+					if( !IsProxy() && m_pWCDownSocket) //MORPH - Changed By SiRoB, WebCache Fix
 					{
 						thePrefs.ses_successfullPROXYREQUESTS++;
 						PublishWebCachedBlock( cur_block->block );
 					} 
-					else if (IsProxy()) 
+					else if (IsProxy()) //MORPH - Changed By SiRoB, WebCache Fix
 					{
 						SINGLEProxyClient->OnWebCachedBlockDownloaded( cur_block->block );
 						// JP moved to CWebCacheProxyClient::OnWebCachedBlockDownloaded

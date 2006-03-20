@@ -7454,7 +7454,7 @@ int i = 0;
 while (i < WebCachedBlockList.GetCount())
 {
 	CWebCachedBlock* cur_block = WebCachedBlockList.GetAt(WebCachedBlockList.FindIndex(i));
-	if (md4cmp(cur_block->m_FileID, currenthash)==0)
+	if (md4cmp(cur_block->block->FileID, currenthash)==0)
 	{
 		WebCachedBlockList.RemoveAt(WebCachedBlockList.FindIndex(i));
 		delete cur_block;
@@ -7469,7 +7469,7 @@ i = 0;
 while (i < StoppedWebCachedBlockList.GetCount())
 {
 	CWebCachedBlock* cur_block = StoppedWebCachedBlockList.GetAt(StoppedWebCachedBlockList.FindIndex(i));
-	if (md4cmp(cur_block->m_FileID, currenthash)==0)
+	if (md4cmp(cur_block->block->FileID, currenthash)==0)
 	{
 		StoppedWebCachedBlockList.RemoveAt(StoppedWebCachedBlockList.FindIndex(i));
 		delete cur_block;
@@ -7504,7 +7504,7 @@ int i = 0;
 while (i < WebCachedBlockList.GetCount())
 {
 	CWebCachedBlock* cur_block = WebCachedBlockList.GetAt(WebCachedBlockList.FindIndex(i));
-	if (md4cmp(cur_block->m_FileID, currenthash)==0)
+	if (md4cmp(cur_block->block->FileID, currenthash)==0)
 	{
 		WebCachedBlockList.RemoveAt(WebCachedBlockList.FindIndex(i));
 		StoppedWebCachedBlockList.AddTail(cur_block);
@@ -7526,7 +7526,7 @@ int i = 0;
 while (i < StoppedWebCachedBlockList.GetCount())
 {
 	CWebCachedBlock* cur_block = StoppedWebCachedBlockList.GetAt(StoppedWebCachedBlockList.FindIndex(i));
-	if (md4cmp(cur_block->m_FileID, currenthash)==0)
+	if (md4cmp(cur_block->block->FileID, currenthash)==0)
 	{
 		StoppedWebCachedBlockList.RemoveAt(StoppedWebCachedBlockList.FindIndex(i));
 		WebCachedBlockList.AddTail(cur_block);
@@ -7625,7 +7625,7 @@ UINT CPartFile::GetNumberOfBlocksForThisFile()
 	while (i < (UINT)WebCachedBlockList.GetCount())
 	{
 		CWebCachedBlock* cur_block = WebCachedBlockList.GetAt(WebCachedBlockList.FindIndex(i));
-		if (md4cmp(cur_block->m_FileID, currenthash)==0)
+		if (md4cmp(cur_block->block->FileID, currenthash)==0)
 			counter++;
 		i++;
 	}
@@ -7645,6 +7645,11 @@ UINT CPartFile::GetNumberOfCurrentWebcacheConnectionsForThisFile()
 }
 
 //JP Throttle OHCB-production END
+//MORPH START - Added by SiRoB, WebCache Fix RequestedBlock
+void CPartFile::AddRequestedBlock(Requested_Block_Struct* block) {
+	requestedblocks_list.AddTail(block);
+}
+//MORPH END   - Added by SiRoB, WebCache Fix RequestedBlock
 
 void CPartFile::AddWebCachedBlockToStats( bool IsGood, uint64 bytes )
 {

@@ -230,16 +230,15 @@ if (0 != nErrorCode)
 				SINGLEProxyClient->DeleteBlock();
 			WebCachedBlockList.TryToDL();
 		}
-		//MORPH STATR - Added by SiRoB, WebCache New Resolvename
-		else {
-			SOCKADDR_IN sockAddr = {0};
-			int nSockAddrLen = sizeof(sockAddr);
-			GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);
-			m_dwIPWC = sockAddr.sin_addr.S_un.S_addr;
-		}
-		//MORPH END   - Added by SiRoB, WebCache New Resolvename
 }
-
+	//MORPH STATR - Added by SiRoB, WebCache New Resolvename
+	{
+		SOCKADDR_IN sockAddr = {0};
+		int nSockAddrLen = sizeof(sockAddr);
+		GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);
+		m_dwIPWC = sockAddr.sin_addr.S_un.S_addr;
+	}
+	//MORPH END   - Added by SiRoB, WebCache New Resolvename
 CHttpClientReqSocket::OnConnect(nErrorCode);
 }
 

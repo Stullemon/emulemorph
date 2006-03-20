@@ -258,7 +258,7 @@ public:
 	//MORPH END   - Added by SiRoB, Flush Thread
 	//MORPH - Added by SiRoB, Import Part
 	uint64	GetTotalBufferData() {return m_nTotalBufferData;}
-	uint16	GetPartsHashing() {return m_PartsHashing;}
+	int	GetPartsHashing() {return m_PartsHashing;}
 	//MORPH - Added by SiRoB, Import Part
 	// Barry - This will invert the gap list, up to caller to delete gaps when done
 	// 'Gaps' returned are really the filled areas, and guaranteed to be in order
@@ -268,6 +268,7 @@ public:
 	void	RemoveAllRequestedBlocks(void);
 	bool	RemoveBlockFromList(uint64 start, uint64 end);
 	bool	IsInRequestedBlockList(const Requested_Block_Struct* block) const;
+	void	AddRequestedBlock(Requested_Block_Struct* block);
 	void	RemoveAllSources(bool bTryToSwap);
 
 	bool	CanOpenFile() const;
@@ -450,7 +451,7 @@ private:
 	*/
 	// SLUGFILLER: SafeHash
 	CArray<bool,bool> m_PartsShareable;
-	uint16	m_PartsHashing;
+	int	m_PartsHashing;
 	CMutex	ICH_mut;	// ICH locks the file
 	CList<uint16,uint16>	m_ICHPartsComplete;
 	// SLUGFILLER: SafeHash

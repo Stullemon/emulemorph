@@ -109,7 +109,7 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 	}
 
 	ASSERT( block );
-	ASSERT(block->IsValid()); //there was a problem with this after socket timeout. Should be taken care of now, but better check anyways
+	//ASSERT(block->IsValid()); //there was a problem with this after socket timeout. Should be taken care of now, but better check anyways
 
 	USES_CONVERSION;
 	ASSERT( GetDownloadState() == DS_DOWNLOADING );
@@ -127,7 +127,7 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 			return false;
 		}
 	}
-
+	ASSERT(m_pWCDownSocket->GetConState() != ES_DISCONNECTED);
 	if( !m_pWCDownSocket->IsConnected() ) {
 		SOCKADDR_IN sockAddr = {0};
 		sockAddr.sin_family = AF_INET;
@@ -137,8 +137,8 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 		m_pWCDownSocket->Connect((SOCKADDR*)&sockAddr, sizeof sockAddr);
 	}
 
-	m_uReqStart = block->m_uStart;
-	m_uReqEnd = block->m_uEnd;
+	m_uReqStart = block->block->StartOffset;
+	m_uReqEnd = block->block->EndOffset;
 	m_nUrlStartPos = m_uReqStart;
 
 // Superlexx - encryption - start ////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 	Crypt.decryptor.SetKey(Crypt.remoteKey, WC_KEYLENGTH);
 
 	
-	const uchar* fileHash = block->m_FileID;
+	const uchar* fileHash = block->block->FileID;
 	byte marc4_fileHash[16];
 	md4cpy(marc4_fileHash, fileHash);
 		

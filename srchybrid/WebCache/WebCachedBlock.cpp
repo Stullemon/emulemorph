@@ -22,19 +22,20 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+ //MORPH START - Changed By SiRoB, WebCache Fix Requestblocks
 CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient* client, bool XpressOHCB )
 {
 	m_uRequestCount = 0; // what is this for?
 	m_bDownloaded = false;
 	m_bRequested = false;
-
+	block = new Requested_Block_Struct;
 	md4cpy( m_UserHash, client->GetUserHash() );
 	CSafeMemFile indata(packet, size );
 	// <Proxy-ip 4><IP 4><PORT 2><filehash 16><m_uStart 4><m_uEnd 4><remoteKey WC_KEYLENGTH>
 	m_uProxyIp = indata.ReadUInt32();
 	m_uHostIp = indata.ReadUInt32();
 	m_uHostPort = indata.ReadUInt16();
-	indata.ReadHash16( m_FileID );
+	indata.ReadHash16( block->FileID );
 
 	const CPartFile* file = GetFile();
 
@@ -44,15 +45,15 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 		if( knownFile && thePrefs.GetLogWebCacheEvents())
 			AddDebugLogLine( false, _T("deleting CWebCachedBlock because %s is not a PartFile\n"), knownFile->GetFileName() );
 		else if (!knownFile && thePrefs.GetLogWebCacheEvents())
-			AddDebugLogLine( false, _T("deleting CWebCachedBlock because we don't know a file with the hash: %s\n"), md4str( m_FileID ) );
+			AddDebugLogLine( false, _T("deleting CWebCachedBlock because we don't know a file with the hash: %s\n"), md4str( block->FileID ) );  //MORPH - Changed By SiRoB, WebCache Fix Requestblocks
 	
 		delete this;
 		return;
 	}
 	if (file->IsLargeFile()) {
 		if (client->SupportsLargeFiles()) {
-			m_uStart = indata.ReadUInt64();
-			m_uEnd = indata.ReadUInt64();
+			block->StartOffset = indata.ReadUInt64();
+			block->EndOffset = indata.ReadUInt64();
 		} else {
 			DebugLogWarning(_T("deleting CWebCacheBlock because Client without 64bit file support requested large file; %s, File=\"%s\""), client->DbgGetClientInfo(), file->GetFileName());
 			delete this;
@@ -60,8 +61,8 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 		}
 	}
 	else {
-		m_uStart = indata.ReadUInt32();
-		m_uEnd = indata.ReadUInt32();
+		block->StartOffset = indata.ReadUInt32();
+		block->EndOffset = indata.ReadUInt32();
 	}
 	m_uTime = GetTickCount(); //JP remove old chunks (currently only for Stopped-List)
 
@@ -74,9 +75,9 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 		ipstr(m_uProxyIp),
 		ipstr(m_uHostIp),
 		m_uHostPort,
-		md4str( m_FileID ), //not sure if this is correct, but now I can read the hash even in unicode build
-		m_uStart,
-		m_uEnd ,
+		md4str( block->FileID ), //not sure if this is correct, but now I can read the hash even in unicode build
+		block->StartOffset,
+		block->EndOffset,
 		md4str(remoteKey)); //not sure if this is correct, but now I can read the key even in unicode build
 
 	//JP don't accept OHCBs for stopped files
@@ -130,12 +131,16 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 		//JP moved here so only valid chunks get added
 	// jp Don't request chunks for which we are currently receiving proxy sources START Here because we also need to add blocks that are NotPureGaps
 		ThrottledChunk cur_ThrottledChunk;
-		md4cpy(cur_ThrottledChunk.FileID, this->m_FileID);
-		cur_ThrottledChunk.ChunkNr=(uint16)(this->m_uStart/PARTSIZE);
+		md4cpy(cur_ThrottledChunk.FileID, block->FileID);
+		cur_ThrottledChunk.ChunkNr=(uint16)(block->StartOffset/PARTSIZE);
 		cur_ThrottledChunk.timestamp = GetTickCount();
 		ThrottledChunkList.AddToList(cur_ThrottledChunk); // compare this chunk to the chunks in the list and add it if it's not found
 	// jp Don't request chunks for which we are currently receiving proxy sources END
+		//MORPH - Changed By SiRoB, WebCache Fix Requestblocks
+		/*
 		GetFile()->AddGap(m_uStart, m_uEnd);
+		*/
+		GetFile()->AddRequestedBlock(block);
 		if( !DownloadIfPossible() ) {
 			XpressOHCB ? WebCachedBlockList.AddHead( this ) : WebCachedBlockList.AddTail( this );
 			if (thePrefs.GetLogWebCacheEvents())
@@ -159,10 +164,16 @@ if( theApp.clientlist )
 			if( client )
 				client->AddWebCachedBlockToStats( m_bDownloaded );
 			if (file)
-			file->AddWebCachedBlockToStats( m_bDownloaded, m_uEnd-m_uStart  );
-	}
-	}
+			file->AddWebCachedBlockToStats( m_bDownloaded, block->EndOffset-block->StartOffset );
+		}
+		//MORPH START - Added by SiRoB, WebCache Fix PendingBlocks
+		if (file) {
+			file->RemoveBlockFromList(block->StartOffset, block->EndOffset);
+		}
+		//MORPH END   - Added by SiRoB, WebCache Fix PendingBlocks
 
+	}
+	delete block;
 	if (thePrefs.GetLogWebCacheEvents())
 	AddDebugLogLine( false, _T("CWebCachedBlock::~CWebCachedBlock(): blocks on queue: %u"), WebCachedBlockList.GetCount());
 	ASSERT( !WebCachedBlockList.Find( this ) );
@@ -170,12 +181,12 @@ if( theApp.clientlist )
 								 
 CPartFile* CWebCachedBlock::GetFile() const
 {
-	return( theApp.downloadqueue->GetFileByID( m_FileID ) );
+	return( theApp.downloadqueue->GetFileByID( block->FileID ) );
 }
 
 CKnownFile* CWebCachedBlock::GetKnownFile() const
 {
-	return( theApp.knownfiles->FindKnownFileByID( m_FileID ) );
+	return( theApp.knownfiles->FindKnownFileByID( block->FileID ) );
 }
 
 uint32 CWebCachedBlock::GetProxyIp() const
@@ -210,11 +221,15 @@ bool CWebCachedBlock::IsValid() const
 	}
 
 	return( file
-		&& m_uStart <= m_uEnd
-		&& m_uEnd <= file->GetFileSize()
+		&& block->StartOffset <= block->EndOffset
+		&& block->EndOffset <= file->GetFileSize()
 		&& client
 		&& client->IsTrustedOHCBSender()
+		//MORPH - Changed by SiRoB, WebCache Fix RequestedBlocks
+		/*
 		&& file->IsPureGap( m_uStart, m_uEnd ) );
+		*/
+		&& !file->IsAlreadyRequested( block->StartOffset, block->EndOffset ) );
 }
 
 Pending_Block_Struct* CWebCachedBlock::CreatePendingBlock()
@@ -225,10 +240,12 @@ Pending_Block_Struct* CWebCachedBlock::CreatePendingBlock()
 	result->totalUnzipped = 0;
 	result->zStream = 0;
 	result->block = new Requested_Block_Struct;
-	result->block->StartOffset = m_uStart;
-	result->block->EndOffset = m_uEnd;
+	//MORPH - Changed By SiRoB, Webcache Fix RequestBlocks
+	result->block->StartOffset = block->StartOffset;
+	result->block->EndOffset = block->EndOffset;
 	result->block->transferred = 0;
-	md4cpy( result->block->FileID, m_FileID );
+	md4cpy( result->block->FileID, block->FileID );
+	//MORPH - Changed by SiRoB, WebCache Fix RequestBlocks
 	return result;
 }
 
@@ -297,3 +314,4 @@ void CWebCachedBlock::UpdateProxyClient()
 	}
 	}
 }
+//MORPH END   - Changed By SiRoB, WebCache Fix Requestblocks
