@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.8
+--------------------------------------
+FIXED  : WC: WCBlock sent will content the proper proxy ip [SiRoB]
+
+CHANGED: WC: received WCBlock not succefully downloaded were blocking some filepart zone to be downloaded [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.7
 --------------------------------------
 CHANGED: WC: Finaly working fine [SiRoB]
