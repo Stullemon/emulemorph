@@ -2871,7 +2871,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 				ASSERT_VALID( cur_src );
 			if(cur_src && cur_src->GetDownloadState() == DS_DOWNLOADING)
 			{
-				ASSERT( cur_src->socket || cur_src->m_pWCDownSocket);
+				ASSERT( cur_src->socket || cur_src->m_pWCDownSocket || cur_src->IsProxy());
 				if (cur_src->socket || (cur_src->IsProxy() && cur_src->m_pWCDownSocket)/* || (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket)*/)
 				{
 					cur_src->CheckDownloadTimeout();
@@ -2982,7 +2982,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 			switch (cur_src->GetDownloadState())
 			{
 				case DS_DOWNLOADING:{
-                    ASSERT( cur_src->socket || cur_src->m_pWCDownSocket);
+                    ASSERT( cur_src->socket || cur_src->m_pWCDownSocket || cur_src->IsProxy());
 					// MORPH START - Changed by SiRoB, WebCache
 					/*
 					if (cur_src->socket)

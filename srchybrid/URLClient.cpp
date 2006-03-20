@@ -439,21 +439,21 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 				if (nEndPos >= cur_block->block->EndOffset)
 				{
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
-                                         // MORPH START - Added by Commander, WebCache 1.2e
+                    // MORPH START - Added by Commander, WebCache 1.2e
 					if (m_pWCDownSocket)
 						m_pWCDownSocket->blocksloaded++; //count downloaded blocks for this socket
 					//JP moved to CUpDownClient::SendWebCacheBlockRequests() and CWebCacheProxyClient::UpdateClient
-					if( !IsProxy() )
+					if( !IsProxy() && m_pWCDownSocket)
 					{
 						thePrefs.ses_successfullPROXYREQUESTS++;
 						PublishWebCachedBlock( cur_block->block );
 					} 
-					else 
+					else if (IsProxy()) 
 					{
 						SINGLEProxyClient->OnWebCachedBlockDownloaded( cur_block->block );
 						// JP moved to CWebCacheProxyClient::OnWebCachedBlockDownloaded
 					}
-                                        // MORPH END - Added by Commander, WebCache 1.2e
+                    // MORPH END - Added by Commander, WebCache 1.2e
 // WC-TODO:
 					delete cur_block->block;	//do we still need OnWebCachedBlockDownloaded with this????
 					delete cur_block;	//do we still need OnWebCachedBlockDownloaded with this????
