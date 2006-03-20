@@ -2866,8 +2866,8 @@ BEGIN
    IDS_WC_REACTIVATED      " Webcache ha sido reactivado."
    IDS_WC_NEWPROXYIP       "Una nueva IP de proxy ha sido detectada: %s."
    IDS_SLOT_LIMIT_NUM      "Máx # de slots (60-255)"
-   IDS_GLOBAL_HL           "Global HL"
-   IDS_GLOBAL_HL_LIMIT     "Global Hardlimit"
+   IDS_GLOBAL_HL           "Límite F.Global"
+   IDS_GLOBAL_HL_LIMIT     "Límite de Fuentes Global"
 END
 
 #endif    // Espagnol (Castillan) resources
