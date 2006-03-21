@@ -55,12 +55,15 @@ void CUrlClient::SetRequestFile(CPartFile* pReqFile)
 	CUpDownClient::SetRequestFile(pReqFile);
 	if (reqfile)
 	{
-		m_nPartCount = reqfile->GetPartCount();
-		m_abyPartStatus = new uint8[m_nPartCount];
-		memset(m_abyPartStatus, 1, m_nPartCount);
-		//MORPH START - Added by SiRoB, Keep A4AF infos
-		m_PartStatus_list.SetAt(reqfile,m_abyPartStatus);
-		//MORPH END   - Added by SiRoB, Keep A4AF infos
+		uint8* PartStatus;
+		if(!m_PartStatus_list.Lookup(reqfile,PartStatus)) {
+			m_nPartCount = reqfile->GetPartCount();
+			m_abyPartStatus = new uint8[m_nPartCount];
+			memset(m_abyPartStatus, 1, m_nPartCount);
+			//MORPH START - Added by SiRoB, Keep A4AF infos
+			m_PartStatus_list.SetAt(reqfile,m_abyPartStatus);
+			//MORPH END   - Added by SiRoB, Keep A4AF infos
+		}
 		m_bCompleteSource = true;
 	}
 }
