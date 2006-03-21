@@ -109,7 +109,7 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 	}
 
 	ASSERT( block );
-	//ASSERT(block->IsValid()); //there was a problem with this after socket timeout. Should be taken care of now, but better check anyways
+	ASSERT(block->IsValid()); //there was a problem with this after socket timeout. Should be taken care of now, but better check anyways
 
 	USES_CONVERSION;
 	ASSERT( GetDownloadState() == DS_DOWNLOADING );
