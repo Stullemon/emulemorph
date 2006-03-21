@@ -1153,9 +1153,9 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
         // Only trust eMule clients to be able to handle less blocks than three
-        if(GetDownloadDatarate() < 600) {
+        if(GetDownloadDatarate() < 1200) { // netfinity: Raised threshold as anything below 3kB/s suggest there is a problem
             blockCount = 1;
-        } else if(GetDownloadDatarate() < 1200) {
+        } else if(GetDownloadDatarate() < 2400) { // netfinity: Raised threshold as anything below 3kB/s suggest there is a problem
             blockCount = 2;
         }
     }
