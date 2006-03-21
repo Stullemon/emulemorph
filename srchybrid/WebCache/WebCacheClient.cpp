@@ -1130,11 +1130,11 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 			if( cur_client->SupportsWebCacheUDP()
 				&& !cur_client->HasLowID()
 				&& GetUDPPort() != 0	// thx to SiRoB
-				&& !(cur_client->socket && socket->IsConnected()))
+				&& !(cur_client->socket && cur_client->socket->IsConnected()))
 			{	// send UDP
 				data.WriteUInt32( cur_client->m_uWebCacheDownloadId );
 				if (thePrefs.GetLogWebCacheEvents())
-					AddDebugLogLine( false, _T("WCBlock sent to client by UDP: %s"), DbgGetClientInfo() );
+					AddDebugLogLine( false, _T("WCBlock sent to client by UDP: %s"), cur_client->DbgGetClientInfo() );
 				Packet* packet = new Packet(&data);
 				if (cur_client->SupportsWebCacheProtocol())
 					packet->prot = OP_WEBCACHEPROT; //if the client supports webcacheprot use that (keep backwards compatiblity)
@@ -1158,7 +1158,7 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 				theStats.AddUpDataOverheadOther(packet->size);
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					DebugSend("OP__Http_Cached_Block (TCP)", cur_client );
-				if( cur_client->socket && socket->IsConnected() )
+				if( cur_client->socket && cur_client->socket->IsConnected() )
 				{
 					if (thePrefs.GetLogWebCacheEvents())
 						AddDebugLogLine( false, _T("WCBlock sent to client by TCP: %s"), cur_client->DbgGetClientInfo() );
@@ -1190,7 +1190,7 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 			if( cur_client->SupportsWebCacheUDP()
 				&& !cur_client->HasLowID()
 				&& GetUDPPort() != 0
-				&& !(cur_client->socket && socket->IsConnected())
+				&& !(cur_client->socket && cur_client->socket->IsConnected())
 				&& nrOfOHCBsInThePacket <= WC_MAX_OHCBS_IN_UDP_PACKET
 				&& theApp.downloadqueue->GetFailedUDPFileReasks() * 100.0 / (theApp.downloadqueue->GetUDPFileReasks() + 1) < 0,2 // less than 20% of UDP reasks failed globally
 				&& cur_client->m_nTotalUDPPackets > 4 && (float)(cur_client->m_nFailedUDPPackets/cur_client->m_nTotalUDPPackets) < 0,2) // less than 20% of UDP reasks failed for this client
@@ -1206,7 +1206,7 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 			{
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					DebugSend("OP__Multi_Http_Cached_Block (TCP)", cur_client );
-				if( cur_client->socket && socket->IsConnected() )
+				if( cur_client->socket && cur_client->socket->IsConnected() )
 				{
 					if (thePrefs.GetLogWebCacheEvents())
 						AddDebugLogLine( false, _T("Multi-WCBlock (%d OHCBs, TCP) sent to client %s"), nrOfOHCBsInThePacket, cur_client->DbgGetClientInfo());
