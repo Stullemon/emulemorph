@@ -1,4 +1,12 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.x
+--------------------------------------
+ADDED  : netfinity: Fixed printing of offset and byte count (need to use 64 bit format codes) [SiRoB]
+ADDED  : netfinity: Raised threshold as anything below 3kB/s suggest there is a problem [SiRoB]
+
+CHANGED: WC: Something was wrong arround the methode choise to Publish WCBlock [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.8
 --------------------------------------
 FIXED  : WC: WCBlock sent will content the proper proxy ip [SiRoB]
