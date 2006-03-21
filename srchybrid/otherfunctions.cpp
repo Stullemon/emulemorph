@@ -2120,16 +2120,17 @@ CString DbgGetBlockInfo(const Requested_Block_Struct* block)
 CString DbgGetBlockInfo(uint64 StartOffset, uint64 EndOffset)
 {
 	CString strInfo;
-	strInfo.Format(_T("%u-%u (%u bytes)"), StartOffset, EndOffset, EndOffset - StartOffset + 1);
+	// netfinity: Fixed printing of offset and byte count (need to use 64 bit format codes)
+	strInfo.Format(_T("%I64u-%I64u (%I64u bytes)"), StartOffset, EndOffset, EndOffset - StartOffset + 1);
 
-	strInfo.AppendFormat(_T(", Part %u"), StartOffset/PARTSIZE);
+	strInfo.AppendFormat(_T(", Part %u"), (unsigned int) StartOffset/PARTSIZE);
 	if (StartOffset/PARTSIZE != EndOffset/PARTSIZE)
-		strInfo.AppendFormat(_T("-%u(**)"), EndOffset/PARTSIZE);
+		strInfo.AppendFormat(_T("-%u(**)"), (unsigned int) EndOffset/PARTSIZE);
 
-	strInfo.AppendFormat(_T(", Block %u"), StartOffset/EMBLOCKSIZE);
+	strInfo.AppendFormat(_T(", Block %u"), (unsigned int) StartOffset/EMBLOCKSIZE);
 	if (StartOffset/EMBLOCKSIZE != EndOffset/EMBLOCKSIZE)
 	{
-		strInfo.AppendFormat(_T("-%u"), EndOffset/EMBLOCKSIZE);
+		strInfo.AppendFormat(_T("-%u"), (unsigned int) EndOffset/EMBLOCKSIZE);
 		if (EndOffset/EMBLOCKSIZE - StartOffset/EMBLOCKSIZE > 1)
 			strInfo += _T("(**)");
 	}
