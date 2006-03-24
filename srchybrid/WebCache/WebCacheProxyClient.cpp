@@ -240,3 +240,34 @@ void CWebCacheProxyClient::DeleteBlock()
 		block = 0;
 	}
 }
+
+//MORPH START - Added by SiRoB, See WebCache Block 
+void CWebCacheProxyClient::SetRequestFile(CPartFile* pReqFile)
+{
+	CUpDownClient::SetRequestFile(pReqFile);
+	if (reqfile)
+	{
+		m_nPartCount = reqfile->GetPartCount();
+	}
+}
+
+void CWebCacheProxyClient::AddWebCacheBlockToPartStatus(const Requested_Block_Struct* pBlock, const CPartFile* pFile)
+{
+	uint16 PartCount = pFile->GetPartCount();
+	uint8* PartStatus;
+	if(!m_PartStatus_list.Lookup(pFile,PartStatus)) {
+		PartStatus = new uint8[PartCount];
+		memset(PartStatus, 0, PartCount);
+		m_PartStatus_list.SetAt(pFile,PartStatus);
+	}
+	++PartStatus[pBlock->StartOffset/PARTSIZE];
+}
+void CWebCacheProxyClient::RemoveWebCacheBlockToPartStatus(const Requested_Block_Struct* pBlock, const CPartFile* pFile)
+{
+	uint8* PartStatus;
+	if(m_PartStatus_list.Lookup(pFile,PartStatus)) {
+		--PartStatus[pBlock->StartOffset/PARTSIZE];
+	}
+}
+
+//MORPH END   - Added by SiRoB, See WebCache Block 

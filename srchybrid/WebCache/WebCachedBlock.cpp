@@ -147,6 +147,7 @@ CWebCachedBlock::CWebCachedBlock( const BYTE* packet, uint32 size, CUpDownClient
 			if (thePrefs.GetLogWebCacheEvents())
 				AddDebugLogLine( false, _T("WebCachedBlock added to queue") );
 		}
+		SINGLEProxyClient->AddWebCacheBlockToPartStatus(block,file);
 	} else {
 		delete this;
 	}
@@ -170,6 +171,10 @@ if( theApp.clientlist )
 		//MORPH START - Added by SiRoB, WebCache Fix PendingBlocks
 		if (file) {
 			file->RemoveBlockFromList(block->StartOffset, block->EndOffset);
+			//MORPH START - Added by SiRoB, See WebCache Block
+			if (SINGLEProxyClient)
+				SINGLEProxyClient->RemoveWebCacheBlockToPartStatus(block,file);
+			//MORPH END   - Added by SiRoB, See WebCache Block
 		}
 		//MORPH END   - Added by SiRoB, WebCache Fix PendingBlocks
 

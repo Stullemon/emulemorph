@@ -34,6 +34,12 @@ public:
 	void OnWebCachedBlockDownloaded( const Requested_Block_Struct* reqblock );
 	bool ProxyClientIsBusy();
 	void DeleteBlock();
+	//MORPH - Added by SiRoB, See WebCache BLock
+	virtual void SetRequestFile(CPartFile* pReqFile);
+	void AddWebCacheBlockToPartStatus(const Requested_Block_Struct * pBlock, const CPartFile* pFile);
+	void RemoveWebCacheBlockToPartStatus(const Requested_Block_Struct * pBlock, const CPartFile* pFile);
+	//MORPH - Added by SiRoB, See WebCache BLock
+	
 };
 
 extern CWebCacheProxyClient* SINGLEProxyClient;
