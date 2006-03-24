@@ -71,7 +71,7 @@ uint32 ResolveWebCacheName() // returns 0 on error
 	uint32 oldip = wcip;	
 	wcip = *(reinterpret_cast<uint32*>(remoteHost->h_addr_list[0]));
 	if (wcip != oldip) {
-		Log(LOG_STATUSBAR, GetResString(IDS_WC_NEWPROXYIP), ipstr(wcip));
+		//Log(LOG_STATUSBAR, GetResString(IDS_WC_NEWPROXYIP), ipstr(wcip));
 		if (thePrefs.WebCacheDisabledThisSession) {
 			thePrefs.WebCacheDisabledThisSession = false;
 			Log(LOG_STATUSBAR, GetResString(IDS_WC_REACTIVATED));
