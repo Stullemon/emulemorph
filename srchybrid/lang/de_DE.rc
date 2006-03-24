@@ -2292,6 +2292,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_USS_UDP             "Erzwinge UDP Ping statt TCP Ping"
     IDS_UPSTOPPEDLEECHER    "Start der Upload Session verweigert. Client scheint ein Leecher zu sein."
     IDS_IPSTOPPEDOTHFILE    "Start der Upload Session verweigert. Client hat versucht eine andere Datei zu laden als die in der Warteliste eingetragene."
     IDS_NEWMSGFROM          "Neue Nachricht von '%s' (IP:%s)"
@@ -2302,7 +2303,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_DWLSESSIONENDED     "Download session beendet. User: %s Grund: %s"
+    IDS_DWLSESSIONENDED     "Download Session beendet. User: %s Grund: %s"
     IDS_BANHASHCHANGED      "Client: %s (%s), Banngrund: Userhash gewechselt"
     IDS_BANHASHCHANGEDT     "Client: %s (%s), Banngrund: Userhash gewechselt (gefunden in Client-Liste)"
     IDS_BANHASHINVALID      "Client: %s (%s), Banngrund: Userhash ungültig"
@@ -2497,7 +2498,7 @@ BEGIN
     IDS_CHECKCONVERTHEX     "Konvertiere Hex-Zahlen ""%xx"" zu Buchstaben"
     IDS_CHECKSEARCHANDREPLACE "Suchen und ersetzen:"
     IDS_SC_SEARCHFOR        "Suche nach:"
-    IDS_SC_REPLACEBY        "Ersetze mit:"
+    IDS_SC_REPLACEBY        "Ersetze durch:"
     IDS_CHECKCASESENSITIVE  "Groß/klein beachten"
 END
 
@@ -2535,6 +2536,8 @@ BEGIN
     IDS_MAXCLIENTDATARATEPOWERSHARE "Pro Client (Standard 0 KB/s=fokussiert)"
     IDS_MAXCLIENTDATARATE   "Pro Client Transfer (Standard 0 KB/s=fokussiert)"
     IDS_DISPLAYFUNNYNICK    "Aktiviere FunnyNick"
+    IDS_MAXDATARATEFRIEND   "Max. globale Transferrate (%% von Uploadlimit)"
+    IDS_MAXDATARATEPOWERSHARE "Max. globale Transferrate (%% von Uploadlimit)"
 END
 
 STRINGTABLE 
@@ -2635,13 +2638,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_USER_ALREADY_FRIEND "User ""%s"" ist bereits in der Freundesliste"
-    IDS_GETFRIENDED2KLINK   "Kopiere Friend-Link in Zwischenablage"
-    IDS_GETHTMLFRIENDED2KLINK "Kopiere Friend-Link in Zwischenablage (HTML)"
+    IDS_GETFRIENDED2KLINK   "Kopiere Freund-Link in Zwischenablage"
+    IDS_GETHTMLFRIENDED2KLINK "Kopiere Freund-Link in Zwischenablage (HTML)"
     IDS_ERR_FAILEDDOWNLOADEMFRIENDS 
-                            "Download der Frien-Liste von %s fehlgeschlagen"
-    IDS_GETMYFRIENDED2KLINK "Kopiere Friend-Link in Zwischenablage"
-    IDS_GETMYHTMLFRIENDED2KLINK "Kopiere Friend-Link in Zwischenablage (HTML)"
-    IDS_FRIENDLINKMENUTITLE "FriendLinks"
+                            "Download der Freunde-Liste von %s fehlgeschlagen"
+    IDS_GETMYFRIENDED2KLINK "Kopiere Freund-Link in Zwischenablage"
+    IDS_GETMYHTMLFRIENDED2KLINK "Kopiere Freund-Link in Zwischenablage (HTML)"
+    IDS_FRIENDLINKMENUTITLE "FreundLinks"
 END
 
 STRINGTABLE 
@@ -2703,12 +2706,12 @@ END
 STRINGTABLE 
 BEGIN
     IDS_IMPORTPARTS         "Dateiteile importieren..."
-    IDS_INITIATEREHASH      "Neuen Hash erstellen..."
+    IDS_IMPORTPARTS_STOP    "Import stoppen"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_GRAPHOPTIONS        "Graph optionen"
+    IDS_GRAPHOPTIONS        "Graph Optionen"
     IDS_CRC_CALCULATED      "berechnete CRC32"
     IDS_CRC_CHECKOK         "CRC32-Prüfung ok"
     IDS_CRC_FORCEADDING     "CRC32-Tag an Dateinamen anhängen auch wenn schon eines existiert"
@@ -2732,15 +2735,17 @@ BEGIN
     IDS_LOG_IPFILTER_INFO   "Gelesene Zeilen:%u  gefundene IP-Bereiche:%u  Doppelt:%u  Hinzugefügt:%u"
     IDS_IPFILTER_SAVERR     "IP-Filter speichern fehlgeschlagen in Datei ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Nicht verfügbar"
+    IDS_WC_REACTIVATED      " Webcache wurde wieder aktiviert."
+    IDS_WC_NEWPROXYIP       "Eine neue Proxy IP wurde festgestellt: %s."
     IDS_LOG_ERRDWN          "Downloadfehler %s"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_DOWNFAKECHECKFILE   "Downloade Fake Check file"
-    IDS_FC_LOADED           "%i Fake Check Referenz geladen"
+    IDS_DOWNFAKECHECKFILE   "Fake Check Datei herunterladen"
+    IDS_FC_LOADED           "%i Fake Check Referenzen geladen"
     IDS_LOG_FC_LOADED       "Fake Check geladen von ""%s"" in %ums"
-    IDS_LOG_FC_INFO         "Fake Referenz gefunden:%u  Doppelt:%u  Hinzugefügt:%u"
+    IDS_LOG_FC_INFO         "Fake Referenzen gefunden:%u  Doppelt:%u  Hinzugefügt:%u"
     IDS_LOG_FC_ERR1         "Konnte Fake Check Datei nicht aus ZIP-Datei lesen ""%s""."
     IDS_LOG_FC_ERR2         "Geladene Fake Check Datei ""%s"" ist eine ZIP-Datei mit unerwartetem Inhalt."
     IDS_MASSRENAME_TITLE    "Mehrfach-Umbenennung"
@@ -2790,9 +2795,9 @@ BEGIN
     IDS_IP2COUNTRY_FLAGLOAD "Länderflaggen wurden geladen"
     IDS_IP2COUNTRY_FILELOAD "IP2Countryfile wurde entladen"
     IDS_IP2COUNTRY_FLAGUNLD "Länderflaggen wurden entladen"
-    IDS_IP2COUNTRY_DWNFILE  "Downloade IP2Country Datei"
-    IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv entladen wegen laufendem Update"
-    IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv geladen nach erfolgreichem Update"
+    IDS_IP2COUNTRY_DWNFILE  "IP2Country Datei wird heruntergeladen"
+    IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv wegen laufendem Update entladen"
+    IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv nach erfolgreichem Update geladen"
     IDS_HASHING_COMPLETED   "Hashen der Datei '%s' beendet."
     IDS_HASHING_COMPLETED2  "Hashen von neuen Dateien beendet."
     IDS_HASHING_NEWFILE     "Neue Datei: '%s'"
@@ -2821,7 +2826,7 @@ BEGIN
     IDS_ZZRATIO_CHECK2      "PowerSharing unvollständige Datei"
     IDS_ZZRATIO_CHECK3      "Nutze Freund-Uploadplatz und Globale Transferrate>3KB/s"
     IDS_ZZRATIO_CHECK4      "Upload Limit unter 10KB/s"
-    IDS_ZZRATIO_CHECK5      "Durchschnittliche Upload unter 10KB/s"
+    IDS_ZZRATIO_CHECK5      "Durchschnittlicher Upload unter 10KB/s"
 END
 
 STRINGTABLE 
@@ -2845,6 +2850,19 @@ BEGIN
     IDS_IGNOREALL           "I&gnore All"
     IDS_SKIP                "&Skip"
     IDS_SKIPALL             "S&kip All"
+END
+
+STRINGTABLE 
+BEGIN
+    // ==> Slot Limit - Stulle
+    IDS_SLOT_LIMIT_GROUP     "Slot Limitierung"
+    IDS_SLOT_LIMIT_NONE      "Keine Limitierung"
+    IDS_SLOT_LIMIT_THREE     "UL-Geschw./3kbps"
+    IDS_SLOT_LIMIT_NUM_B     "Limitierung auf x slots"
+    IDS_SLOT_LIMIT_NUM       "Max # von Slots (60-255)"
+    // <== Slot Limit - Stulle
+    IDS_GLOBAL_HL           "Globales Quellenlimit (GQL)"
+    IDS_GLOBAL_HL_LIMIT     "Globales Quellenlimit"
 END
 
 #endif    // Allemand (Allemagne) resources

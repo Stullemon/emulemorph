@@ -2299,6 +2299,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_USS_UDP             "Forza l'UDP ping piuttosto dell'ICMP"
     IDS_UPSTOPPEDLEECHER    "Sessione di Upload non iniziata. Il Client sembra essere un Leecher."
     IDS_IPSTOPPEDOTHFILE    "Sessione di Upload non iniziata. Il Client ha richiesto un file diverso da quello per il quale era in coda."
     IDS_NEWMSGFROM          "Nuovo Messaggio da '%s' (IP:%s)"
@@ -2544,6 +2545,8 @@ BEGIN
                             "Max. flusso dati per Client (0KB/s = non limitato)"
     IDS_MAXCLIENTDATARATE   "Max. flusso dati per Client (0KB/s = non limitato)"
     IDS_DISPLAYFUNNYNICK    "Abilita Visualizzazione 'FunnyNick'"
+    IDS_MAXDATARATEFRIEND   "Massimo limite globale della velocità di trasferimento dei dati (%% della velocità di upload)"
+    IDS_MAXDATARATEPOWERSHARE "Massimo limite globale della velocità di trasferimento dei dati (%% della velocità di upload)"
 END
 
 STRINGTABLE 
@@ -2738,6 +2741,8 @@ BEGIN
     IDS_LOG_IPFILTER_INFO   "Linee Analizzate:%u  Trovati intervalli IP:%u  Duplicati:%u  Combinati:%u"
     IDS_IPFILTER_SAVERR     "Impossibile salvare filtri IP su file ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Non disponibile"
+    IDS_WC_REACTIVATED      " Webcache has been reactivated."
+    IDS_WC_NEWPROXYIP       "E' stato rilevato un nuovo proxy ip: %s."
     IDS_LOG_ERRDWN          "Errore nel download %s"
 END
 
@@ -2865,6 +2870,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SLOT_LIMIT_NUM      "Mass. nº di slot (60-255)"
+    IDS_GLOBAL_HL           "Attiva HL Globale"
+    IDS_GLOBAL_HL_LIMIT     "Hardlimit Globale"
 END
 
 #endif    // Italien (Italie) resources
