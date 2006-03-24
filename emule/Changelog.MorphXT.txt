@@ -1,10 +1,15 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.x
+Changelog for eMule 0.47a MorphXT v8.9
 --------------------------------------
 ADDED  : netfinity: Fixed printing of offset and byte count (need to use 64 bit format codes) [SiRoB]
 ADDED  : netfinity: Raised threshold as anything below 3kB/s suggest there is a problem [SiRoB]
+ADDED  : WC: We are able to see which chunk received WCBlock to be downloaded from proxy [SiRoB]
 
-CHANGED: WC: Something was wrong arround the methode choise to Publish WCBlock [SiRoB]
+CHANGED: WC: Something was wrong arround the methode choise for Publish WCBlock [SiRoB]
+
+NOTE: sorry for those numerous update, but i don't have a proper webcache proxy hunder the hand.
+Anyway if i had not dig a bit the code this feature will have still useless for ever.
+Now every thing is ok, i finaly found why WCBlock were not properly spreaded as in the old offcial webcache client.
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.8
