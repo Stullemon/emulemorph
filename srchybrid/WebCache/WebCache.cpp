@@ -515,8 +515,8 @@ bool PingviaProxy(CString WebCacheName, uint16 WebCachePort)
 	CStringA strWCPingRequest;
 	strWCPingRequest.AppendFormat("GET http://%s:%u/encryptedData/WebCachePing.htm HTTP/1.1\r\n",
 		ipstrA( theApp.GetPublicIP() ), // our own IP
-		thePrefs.port);	// our port
-	strWCPingRequest.AppendFormat("Host: %s:%u\r\n", ipstrA( theApp.GetPublicIP() ), thePrefs.port ); // our IP and port
+		thePrefs.GetPort());	// our port
+	strWCPingRequest.AppendFormat("Host: %s:%u\r\n", ipstrA( theApp.GetPublicIP() ), thePrefs.GetPort() ); // our IP and port
 	strWCPingRequest.AppendFormat("Cache-Control: max-age=0\r\n" ); // do NOT DL this from the proxy! (timeout issue)
 	strWCPingRequest.AppendFormat("Connection: close\r\nProxy-Connection: close\r\n" ); //only needed for 1 transmission
 	//MORPH START - Changed by SiRoB, ModID
