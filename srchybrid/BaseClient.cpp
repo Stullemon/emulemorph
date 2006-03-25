@@ -1973,7 +1973,8 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 	}
 	else
 	{
-		ConnectionEstablished();
+		/*FIX*/if (CheckHandshakeFinished())
+			ConnectionEstablished();
 		return true;
 	}
 	// MOD Note: Do not change this part - Merkur
@@ -2734,6 +2735,10 @@ void CUpDownClient::ResetFileStatusInfo()
 	//MORPH START - Added by SiRoB, HotFix Due Complete Source Feature
 	m_nUpCompleteSourcesCount = 0;
 	//MORPH END   - Added by SiRoB, HotFix Due Complete Source Feature
+	//MORPH START - Added by SiRoB, Keep A4AF infos
+	m_nUpCompleteSourcesCount_list.Lookup(reqfile,m_nUpCompleteSourcesCount);
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
+
 }
 
 bool CUpDownClient::IsBanned() const
