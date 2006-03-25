@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.x
+--------------------------------------
+CHANGED: WC: reworked to make proxy configuration test working with random port [SiRoB]
+CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.9
 --------------------------------------
 ADDED  : netfinity: Fixed printing of offset and byte count (need to use 64 bit format codes) [SiRoB]
