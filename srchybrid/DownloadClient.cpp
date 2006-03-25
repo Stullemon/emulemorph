@@ -804,12 +804,12 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 
 //Morph Start - added by AndCycle, ICS
 // enkeyDEV: ICS
-void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , bool readHash){
-	if (readHash){
+void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , CPartFile* pFile){
+	if (pFile == NULL){
 		uchar cfilehash[16];
 		data->ReadHash16(cfilehash);
-		if ((!reqfile) || md4cmp(cfilehash,reqfile->GetFileHash())){
-			throw CString(GetResString(IDS_ERR_WRONGFILEID)+ _T(" (ProcessFileIncStatus)"));	
+		if ((!pFile) || md4cmp(cfilehash,pFile->GetFileHash())){
+			throw CString(GetResString(IDS_ERR_WRONGFILEID)+ _T(" (ProcessFileIncStatus)"));
 		}
 	}
 	uint16 nED2KPartCount = data->ReadUInt16();
@@ -819,38 +819,38 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , bool readHa
 	m_abyIncPartStatus = NULL;
 	*/
 	uint8* thisAbyIncPartStatus;
-	if(m_IncPartStatus_list.Lookup(reqfile, thisAbyIncPartStatus))
+	if(m_IncPartStatus_list.Lookup(pFile, thisAbyIncPartStatus))
 	{
 		delete[] thisAbyIncPartStatus;
-		m_IncPartStatus_list.RemoveKey(reqfile);
+		m_IncPartStatus_list.RemoveKey(pFile);
 	}
 	m_abyIncPartStatus = NULL;
 	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 	if (!nED2KPartCount){
-		m_nPartCount = reqfile->GetPartCount();
-		m_abyIncPartStatus = new uint8[m_nPartCount];
+		uint16 nPartCount = pFile->GetPartCount();
+		m_abyIncPartStatus = new uint8[nPartCount];
 		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-		m_IncPartStatus_list.SetAt(reqfile, m_abyIncPartStatus);
+		m_IncPartStatus_list.SetAt(pFile, m_abyIncPartStatus);
 		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-		memset(m_abyIncPartStatus,1,m_nPartCount);
+		memset(m_abyIncPartStatus,1,nPartCount);
 	}
 	else{
-		if (reqfile->GetPartCount() != nED2KPartCount){
+		if (pFile->GetPartCount() != nED2KPartCount){
 			CString strError;
-			strError.Format(_T("ProcessFileIncStatus - wrong part number recv=%u  expected=%u  %s"), nED2KPartCount, reqfile->GetED2KPartCount(), DbgGetFileInfo(reqfile->GetFileHash()));
+			strError.Format(_T("ProcessFileIncStatus - wrong part number recv=%u  expected=%u  %s"), nED2KPartCount, pFile->GetED2KPartCount(), DbgGetFileInfo(pFile->GetFileHash()));
 			throw strError;
 		}
-		m_abyIncPartStatus = new uint8[m_nPartCount];
+		m_abyIncPartStatus = new uint8[nED2KPartCount];
 		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-		m_IncPartStatus_list.SetAt(reqfile, m_abyIncPartStatus);
+		m_IncPartStatus_list.SetAt(pFile, m_abyIncPartStatus);
 		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 		UINT done = 0;
-		while (done != m_nPartCount){
+		while (done != nED2KPartCount){
 			uint8 toread = data->ReadUInt8();
 			for (UINT i = 0;i != 8;i++){
 				m_abyIncPartStatus[done] = ((toread>>i)&1)? 1:0; 	
 				done++;
-				if (done == m_nPartCount)
+				if (done == nED2KPartCount)
 					break;
 			}
 		}

@@ -1730,7 +1730,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							case OP_FILEINCSTATUS:
 							{
 								theStats.AddDownDataOverheadFileRequest(size);
-								client->ProcessFileIncStatus(&data_in,size);
+								client->ProcessFileIncStatus(&data_in,size,reqfile);
 								break;
 							}
 							// <--- enkeyDEV: ICS
@@ -2495,7 +2495,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 				{
 				    CSafeMemFile data(packet, size);
 				    theStats.AddDownDataOverheadFileRequest(size);
-				    client->ProcessFileIncStatus(&data,size,true);
+				    client->ProcessFileIncStatus(&data,size);
 				    break;
 			    }
 			    // <--- enkeyDEV: ICS

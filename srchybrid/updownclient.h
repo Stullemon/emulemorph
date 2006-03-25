@@ -815,7 +815,7 @@ public:
 
 	//Morph Start - added by AndCycle, ICS
 	// enkeyDEV: ICS
-	void	ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool readHash = false);
+	void	ProcessFileIncStatus(CSafeMemFile* data,uint32 size, CPartFile* pFile = NULL);
 	uint32	GetIncompletePartVersion()	{return m_incompletepartVer;}
 	bool	IsIncPartAvailable(uint16 iPart)	{return	( (iPart >= m_nPartCount) || (!m_abyIncPartStatus) )? false:m_abyIncPartStatus[iPart]!=0;}
 	// <--- enkeyDEV: ICS
