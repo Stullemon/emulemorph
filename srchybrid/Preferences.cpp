@@ -2389,6 +2389,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("GlobalDataRateFriend"),globaldataratefriend,_T("eMule"));
 	ini.WriteInt(_T("MaxGlobalDataRateFriend"),maxglobaldataratefriend,_T("eMule"));
 	ini.WriteInt(_T("GlobalDataRatePowerShare"),globaldataratepowershare,_T("eMule"));
+	ini.WriteInt(_T("MaxGlobalDataRatePowerShare"),globaldataratepowershare,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRateFriend"),maxclientdataratefriend,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRatePowerShare"),maxclientdataratepowershare,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRate"),maxclientdatarate,_T("eMule"));
@@ -3177,7 +3178,7 @@ void CPreferences::LoadPreferences()
 	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),3);
 	maxglobaldataratefriend=ini.GetInt(_T("MaxGlobalDataRateFriend"),100);
 	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);
-	maxglobaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),100);
+	maxglobaldataratepowershare=ini.GetInt(_T("MaxGlobalDataRatePowerShare"),100);
 	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
 	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
 	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),0);
@@ -3333,7 +3334,7 @@ void CPreferences::LoadPreferences()
 	//MORPH START - Added by SiRoB,  USS log flag
 	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
 	//MORPH END   - Added by SiRoB,  USS log flag
-	m_bUSSUDP = ini.GetBool(_T("USSUDP"), true); //MORPH - Added by SiRoB, USS UDP preferency
+	m_bUSSUDP = ini.GetBool(_T("USSUDP"), false); //MORPH - Added by SiRoB, USS UDP preferency
 	m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager
     m_bHighresTimer = ini.GetBool(L"HighresTimer", false);
 	m_bRunAsUser = ini.GetBool(L"RunAsUnprivilegedUser", false);
