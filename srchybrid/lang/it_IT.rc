@@ -2299,7 +2299,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_USS_UDP             "Forza l'UDP ping piuttosto dell'ICMP"
+    IDS_USS_UDP             "Forza l'UDP ping invece dell'ICMP"
     IDS_UPSTOPPEDLEECHER    "Sessione di Upload non iniziata. Il Client sembra essere un Leecher."
     IDS_IPSTOPPEDOTHFILE    "Sessione di Upload non iniziata. Il Client ha richiesto un file diverso da quello per il quale era in coda."
     IDS_NEWMSGFROM          "Nuovo Messaggio da '%s' (IP:%s)"
@@ -2870,6 +2870,12 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SLOT_LIMIT_NUM      "Mass. nº di slot (60-255)"
+    IDS_GLOBAL_HL           "Attiva HL Globale"
+    IDS_GLOBAL_HL_LIMIT     "Hardlimit Globale"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_GLOBAL_HL           "Attiva HL Globale"
     IDS_GLOBAL_HL_LIMIT     "Hardlimit Globale"
 END
