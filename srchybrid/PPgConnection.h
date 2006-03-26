@@ -1,6 +1,11 @@
 #pragma once
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 
+/* MORPH START leuk_he tooltipped
 class CPPgConnection : public CPropertyPage
+*/
+class CPPgConnection : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgConnection)
 

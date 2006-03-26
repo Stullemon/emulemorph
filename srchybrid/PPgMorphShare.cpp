@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "emule.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PPgMorphShare.h"
 #include "emuledlg.h"
 #include "serverWnd.h" //MORPH - Added by SiRoB
@@ -33,7 +34,8 @@ BEGIN_MESSAGE_MAP(CPPgMorphShare, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgMorphShare::CPPgMorphShare()
-	: CPropertyPage(CPPgMorphShare::IDD)
+//	: CPropertyPage(CPPgMorphShare::IDD)
+	: CPPgtooltipped(CPPgMorphShare::IDD)
 	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
 {
 	m_bInitializedTreeOpts = false;
@@ -177,8 +179,10 @@ BOOL CPPgMorphShare::OnInitDialog()
 	m_bPowershareInternalPrio = thePrefs.m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	m_iPermissions = thePrefs.permissions; //MORPH - Added by SiRoB, Show Permission
 	m_bFolderIcons = thePrefs.m_bShowFolderIcons;
-	
 	CPropertyPage::OnInitDialog();
+	//InitTooltips(); //leuk_he tooltipped
+
+	InitTooltips(&m_ctrlTreeOptions);
 	Localize();
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -244,8 +248,11 @@ void CPPgMorphShare::Localize(void)
 		GetDlgItem(IDC_WARNINGMORPH)->SetWindowText(GetResString(IDS_WARNINGMORPH));
 		CString Buffer;
 		//if (m_htiSpreadbar) m_ctrlTreeOptions.SetItemText(m_htiSpreadbar, GetResString(IDS_SPREADBAR));//MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-		if (m_htiHideOS) m_ctrlTreeOptions.SetEditLabel(m_htiHideOS, GetResString(IDS_HIDEOVERSHARES));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
+		if (m_htiHideOS) {m_ctrlTreeOptions.SetEditLabel(m_htiHideOS, GetResString(IDS_HIDEOVERSHARES));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
+		                  SetTool(m_htiHideOS,IDS_HIDEOVERSHARES); 
+		}
 		if (m_htiSelectiveShare) m_ctrlTreeOptions.SetItemText(m_htiSelectiveShare, GetResString(IDS_SELECTIVESHARE));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
+		                   SetTool(m_htiSelectiveShare,IDS_SELECTIVESHARE); 
 		if (m_htiShareOnlyTheNeed) m_ctrlTreeOptions.SetItemText(m_htiShareOnlyTheNeed, GetResString(IDS_SHAREONLYTHENEED));//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 		//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 		if (m_htiPowershareMode) m_ctrlTreeOptions.SetItemText(m_htiPowershareMode, GetResString(IDS_POWERSHARE));
@@ -269,6 +276,27 @@ void CPPgMorphShare::Localize(void)
 		// [end] Mighty Knife
 		//MORPH END   - Added by SiRoB, Show Permission
 		if (m_htiFolderIcons) m_ctrlTreeOptions.SetItemText(m_htiFolderIcons, GetResString(IDS_FOLDERICONS));
+        // MORPH START leuk_he tooltipped
+       SetTool(m_htiSFM ,IDS_SFM_TIP);
+       SetTool(m_htiSpreadbar ,IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP);
+       SetTool(m_htiHideOS ,IDS_HIDEOVERSHARES_TIP);
+	   SetTool(m_htiSelectiveShare ,IDS_SELECTIVESHARE_TIP);
+	   SetTool(m_htiShareOnlyTheNeed ,IDS_SHAREONLYTHENEED_TIP);
+		SetTool(m_htiPowershareMode ,IDS_POWERSHARE_TIP);
+		SetTool(m_htiPowershareDisabled ,IDS_POWERSHARE_DISABLED_TIP);
+		SetTool(m_htiPowershareActivated ,IDS_POWERSHARE_ACTIVATED_TIP);
+		SetTool(m_htiPowershareAuto ,IDS_POWERSHARE_AUTO_TIP);
+		SetTool(m_htiPowershareLimited ,IDS_POWERSHARE_LIMITED_TIP);
+		SetTool(m_htiPowerShareLimit ,IDS_POWERSHARE_LIMIT_TIP);
+		SetTool(m_htiPowershareInternalPrio ,IDS_POWERSHARE_INTERPRIO_TIP);
+		SetTool(m_htiPermissions ,IDS_PERMISSION_TIP);
+		SetTool(m_htiPermAll ,IDS_FSTATUS_PUBLIC_TIP);
+		SetTool(m_htiPermFriend ,IDS_FSTATUS_FRIENDSONLY_TIP);
+		SetTool(m_htiPermNone ,IDS_HIDDEN_TIP);
+		SetTool(m_htiPermCommunity ,IDS_COMMUNITY_TIP);
+		SetTool(m_htiDisplay ,IDS_PW_DISPLAY_TIP);
+		SetTool(m_htiFolderIcons ,IDS_FOLDERICON_TIP);
+        // MORPH END leuk_he tooltipped
 
 	}
 

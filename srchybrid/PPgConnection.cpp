@@ -17,6 +17,7 @@
 #include "stdafx.h"
 #include <math.h>
 #include "emule.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PPgConnection.h"
 //MORPH START - Added by SiRoB, WebCache 1.2f
 #include "WebCache\PPgWebcachesettings.h" //jp
@@ -72,8 +73,14 @@ BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 END_MESSAGE_MAP()
 
+
 CPPgConnection::CPPgConnection()
-	: CPropertyPage(CPPgConnection::IDD)
+// MORPRH START leuk_he tooltipped
+/*
+   : CPropertyPage(CPPgConnection::IDD)
+*/
+	: CPPgtooltipped(CPPgConnection::IDD)
+// MORPRH END leuk_he tooltipped
 {
 	guardian=false;
 }
@@ -183,6 +190,7 @@ BOOL CPPgConnection::OnInitDialog()
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 
 	LoadSettings();
+	InitTooltips(); // MORPH leuk_he tooltipped
 	Localize();
 
 	OnEnChangePorts(2);
@@ -576,6 +584,40 @@ void CPPgConnection::Localize(void)
 		GetDlgItem(IDC_LBL_MIN)->SetWindowText(GetResString(IDS_MINPORT));
 		GetDlgItem(IDC_LBL_MAX)->SetWindowText(GetResString(IDS_MAXPORT));
 		//MORPH END   - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
+        //MORPH START leuk_he tooltipped
+		SetTool(IDC_CAPACITIES_FRM,IDS_PW_CON_CAPFRM_TIP);
+		SetTool(IDC_DCAP_LBL,IDS_PW_CON_DOWNLBL_TIP);
+		SetTool(IDC_UCAP_LBL,IDS_PW_CON_UPLBL_TIP);
+		SetTool(IDC_LIMITS_FRM,IDS_PW_CON_LIMITFRM_TIP);
+		SetTool(IDC_DLIMIT_LBL,IDS_PW_DOWNL_TIP);
+		SetTool(IDC_ULIMIT_LBL,IDS_PW_UPL_TIP);
+		SetTool(IDC_CONNECTION_NETWORK,IDS_NETWORK_TIP);
+		SetTool(IDC_KBS2,IDS_KBYTESPERSEC2_TIP);
+		SetTool(IDC_KBS3,IDS_KBYTESPERSEC3_TIP);
+		SetTool(IDC_SHOWOVERHEAD,IDS_SHOWOVERHEAD_TIP);
+		SetTool(IDC_CLIENTPORT_FRM,IDS_PW_CLIENTPORT_TIP);
+		SetTool(IDC_MAXSRC_FRM,IDC_MAXSOURCEPERFILE_TIP );
+		SetTool(IDC_AUTOCONNECT,IDS_PW_AUTOCON_TIP);
+		SetTool(IDC_RECONN,IDS_PW_RECON_TIP);
+		SetTool(IDC_WIZARD,IDS_WIZARD_TIP);
+		SetTool(IDC_UDPDISABLE,IDS_UDPDISABLED_TIP);
+		SetTool(IDC_STARTTEST, IDS_STARTTEST_TIP) ;
+		SetTool(IDC_RANDOMPORTS,IDS_RANDOMPORTS_TIP);
+		SetTool(IDC_LBL_MIN,IDS_MINPORT_TIP);
+		SetTool(IDC_LBL_MAX,IDS_MAXPORT_TIP);
+		SetTool(IDC_DOWNLOAD_CAP,IDC_DOWNLOAD_CAP_TIP);
+		SetTool(IDC_UPLOAD_CAP,IDC_UPLOAD_CAP_TIP);
+		SetTool(IDC_MAXDOWN_SLIDER,IDS_PW_DOWNL_TIP);
+		SetTool(IDC_MAXUP_SLIDER,IDS_PW_UPL_TIP);
+		SetTool(IDC_PORT,IDC_PORT_TIP);
+		SetTool(IDC_UDPPORT,IDC_UDPPORT_TIP);
+		SetTool(IDC_MAXSOURCEPERFILE,IDC_MAXSOURCEPERFILE_TIP );
+		SetTool(IDC_MAXCON,IDC_MAXCON_TIP);
+		SetTool(IDC_MINPORT,IDS_MINPORT_TIP);
+		SetTool(IDC_MAXPORT,IDS_MAXPORT_TIP);
+		SetTool(IDC_NETWORK_KADEMLIA,IDC_NETWORK_KADEMLIA_TIP);
+		SetTool(IDC_NETWORK_ED2K,IDC_NETWORK_ED2K_TIP);
+        //MORPH END leuk_he tooltipped
 	}
 }
 

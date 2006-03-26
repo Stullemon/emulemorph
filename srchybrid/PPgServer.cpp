@@ -18,11 +18,14 @@
 #include "emule.h"
 #include "emuleDlg.h"
 #include "ServerWnd.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
+#include "PPGtooltipped.h"  //leuk_he tooltipped
 #include "PPgServer.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
 #include "HelpIDs.h"
 #include "Opcodes.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -48,7 +51,9 @@ BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgServer::CPPgServer()
-	: CPropertyPage(CPPgServer::IDD)
+	//: CPropertyPage(CPPgServer::IDD) leuk_he  tooltipped 
+: CPPgtooltipped(CPPgServer::IDD) // leuk_he  tooltipped 
+
 {
 }
 
@@ -67,6 +72,7 @@ BOOL CPPgServer::OnInitDialog()
 	InitWindowStyles(this);
 
 	LoadSettings();
+	InitTooltips(); //leuk_he tooltipped
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -129,6 +135,21 @@ void CPPgServer::Localize(void)
 		GetDlgItem(IDC_MANUALSERVERHIGHPRIO)->SetWindowText(GetResString(IDS_MANUALSERVERHIGHPRIO));
 		GetDlgItem(IDC_EDITADR)->SetWindowText(GetResString(IDS_EDITLIST));
 		GetDlgItem(IDC_AUTOCONNECTSTATICONLY)->SetWindowText(GetResString(IDS_PW_AUTOCONNECTSTATICONLY));
+        // leuk_he tooltipped start
+		SetTool(IDC_SERVERRETRIES,IDS_PW_RDEAD_TIP);
+        SetTool(IDC_REMOVEDEAD,IDS_PW_RDEAD_TIP);
+		SetTool(IDC_RETRIES_LBL,IDS_PW_RETRIES_TIP);
+		SetTool(IDC_UPDATESERVERCONNECT,IDS_PW_USC_TIP);
+		SetTool(IDC_UPDATESERVERCLIENT,IDS_PW_UCC_TIP);
+		SetTool(IDC_AUTOSERVER,IDS_PW_USS_TIP);
+		SetTool(IDC_SMARTIDCHECK,IDS_SMARTLOWIDCHECK_TIP);
+		SetTool(IDC_SAFESERVERCONNECT,IDS_PW_FASTSRVCON_TIP);
+		SetTool(IDC_SCORE,IDS_PW_SCORE_TIP);
+		SetTool(IDC_MANUALSERVERHIGHPRIO,IDS_MANUALSERVERHIGHPRIO_TIP);
+		SetTool(IDC_EDITADR,IDS_EDITLIST_TIP);
+		SetTool(IDC_AUTOCONNECTSTATICONLY,IDS_PW_AUTOCONNECTSTATICONLY_TIP);
+		//leuk_he tooltipped end
+
 	}
 }
 

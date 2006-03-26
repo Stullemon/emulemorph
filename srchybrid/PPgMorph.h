@@ -2,7 +2,12 @@
 #include "TreeOptionsCtrlEx.h"
 // CPPgMorph dialog
 
+//MORPH START leuk_he tooltipped
+/*
 class CPPgMorph : public CPropertyPage
+*/
+class CPPgMorph : public CPPgtooltipped  
+//MORPH END  leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgMorph)
 
