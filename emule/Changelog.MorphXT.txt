@@ -4,6 +4,8 @@ Changelog for eMule 0.47a MorphXT v8.x
 CHANGED: WC: reworked to make proxy configuration test working with random port [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
 
+Added: Tooltips for some preferences [leuk_he]
+
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.9
 --------------------------------------
