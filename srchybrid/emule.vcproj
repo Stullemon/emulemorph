@@ -1582,6 +1582,19 @@
 					RelativePath="IrcWnd.cpp">
 				</File>
 			</Filter>
+			<Filter
+				Name="tooltipped"
+				Filter="">
+				<File
+					RelativePath=".\ToolTips\CeXDib.cpp">
+				</File>
+				<File
+					RelativePath=".\PPGtooltipped.cpp">
+				</File>
+				<File
+					RelativePath=".\ToolTips\PPTooltip.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Interface Header"
@@ -2840,10 +2853,10 @@
 				RelativePath="res\Transfer.ico">
 			</File>
 			<File
-				RelativePath="res\transfers.ico">
+				RelativePath=".\res\Mod\transfers.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\transfers.ico">
+				RelativePath="res\transfers.ico">
 			</File>
 			<File
 				RelativePath="res\TransferUpDown.ico">
