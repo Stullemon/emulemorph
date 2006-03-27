@@ -96,7 +96,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 
 		//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-		m_htiHideOS = m_ctrlTreeOptions.InsertItem(GetResString(IDS_HIDEOVERSHARES), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSFM);
+		m_htiHideOS = m_ctrlTreeOptions.InsertItem(GetResString(IDS_HIDEOVERSHARES), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSpreadbar);
 		m_ctrlTreeOptions.AddEditBox(m_htiHideOS, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiSelectiveShare = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SELECTIVESHARE), m_htiHideOS, m_bSelectiveShare);
 		//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
@@ -133,6 +133,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		m_htiFolderIcons = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLDERICONS),m_htiDisplay, m_bFolderIcons);
 
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
+		m_ctrlTreeOptions.Expand(m_htiSpreadbar, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiHideOS, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiPermissions, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiPowershareMode, TVE_EXPAND);
