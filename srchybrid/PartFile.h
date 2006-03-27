@@ -400,7 +400,7 @@ public:
 #endif
 
 protected:
-	bool	GetNextEmptyBlockInPart(uint16 partnumber,Requested_Block_Struct* result) const;
+	bool	GetNextEmptyBlockInPart(uint16 partnumber, Requested_Block_Struct* result, uint64 bytesToRequest = EMBLOCKSIZE) const;
 	void	CompleteFile(bool hashingdone);
 	void	CreatePartFile(UINT cat = 0);
 	void	Init();

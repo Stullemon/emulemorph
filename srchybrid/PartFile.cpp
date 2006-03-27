@@ -2108,15 +2108,17 @@ bool CPartFile::ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const
             if(start < cur_block->StartOffset) {
                 end = cur_block->StartOffset - 1;
 
-                if(start == end) {
-                    return false;
-                }
+				// netfinity: Removed as it is actually a one byte request
+                //if(start == end) {
+                //    return false;
+                //}
             } else if(end > cur_block->EndOffset) {
                 start = cur_block->EndOffset + 1;
 
-                if(start == end) {
-                    return false;
-                }
+				// netfinity: Removed as it is actually a one byte request
+                //if(start == end) {
+                //    return false;
+                //}
             } else {
                 return false;
             }
@@ -2174,7 +2176,8 @@ uint64 CPartFile::GetTotalGapSizeInPart(UINT uPart) const
 	return GetTotalGapSizeInRange(uRangeStart, uRangeEnd);
 }
 
-bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struct *result) const
+// netfinity: DynamicBlockRequests - Added bytesToRequest
+bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struct *result, uint64 bytesToRequest) const
 {
 	Gap_Struct *firstGap;
 	Gap_Struct *currentGap;
@@ -2230,6 +2233,15 @@ bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struc
 			end = partEnd;
 	
 		// If this gap has not already been requested, we have found a valid entry
+		// BEGIN netfinity: DynamicBlockRequests - Reduce bytes to request
+#if !defined DONT_USE_DBR
+		bytesToRequest -= bytesToRequest % 10240; 
+		if (bytesToRequest < 10240) bytesToRequest = 10240;
+		else if (bytesToRequest > EMBLOCKSIZE) bytesToRequest = EMBLOCKSIZE;
+		if((start + bytesToRequest) <= end && (end - start) > (bytesToRequest + 3072)) // Avoid creating small fragments
+			end = start + bytesToRequest - 1;
+#endif
+		// END netfinity: DynamicBlockRequests - Reduce bytes to request
 		if (!IsAlreadyRequested(start, end))
 		{
 			// Was this block to be returned
@@ -2249,7 +2261,7 @@ bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struc
 
             bool shrinkSucceeded = ShrinkToAvoidAlreadyRequested(tempStart, tempEnd);
             if(shrinkSucceeded) {
-                AddDebugLogLine(false, _T("Shrunk interval to prevent collision with already requested block: Old interval %i-%i. New interval: %i-%i. File %s."), start, end, tempStart, tempEnd, GetFileName());
+				//AddDebugLogLine(false, _T("Shrunk interval to prevent collision with already requested block: Old interval %i-%i. New interval: %i-%i. File %s."), start, end, tempStart, tempEnd, GetFileName());
 
                 // Was this block to be returned
 			    if (result != NULL)
@@ -3690,6 +3702,32 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	// <--- WebCache: for ICS
 	//MORPH END   - Added by SiRoB, WebCache for ICS
 
+	// BEGIN netfinty: Dynamic Block Requests
+	uint64	bytesPerRequest = EMBLOCKSIZE;
+#if !defined DONT_USE_DBR
+	uint64	bytesLeftToDownload = GetFileSize() - GetCompletedSize();
+	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
+	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
+	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
+
+	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
+
+	if (bytesPerRequest > EMBLOCKSIZE)
+		bytesPerRequest = EMBLOCKSIZE;
+	else if (bytesPerRequest < 10240)
+	{
+		// Let an other client request this packet if we are close to completion and source is slow
+		// Use the true file datarate here, otherwise we might get stuck in NNP state
+		if (!requestedblocks_list.IsEmpty() && timeToFileCompletion < 30 && bytesPerRequest < 3400 && 5 * sourceDatarate < GetDatarate())
+		{
+			DebugLog(_T("No request block given as source is slow and file near completion!"));
+			return false;
+		}
+		bytesPerRequest = 10240;
+	}
+#endif
+	// BEGIN netfinty: Dynamic Block Requests
+
 	for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
 	{
 		if (sender->IsPartAvailable(part_idx) && GetNextEmptyBlockInPart(part_idx, 0))
@@ -3818,7 +3856,8 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	for (POSITION scan_chunks = chunk_list.GetHeadPosition(); scan_chunks; chunk_list.GetNext(scan_chunks))
 	{
 		sender->m_lastPartAsked = chunk_list.GetAt(scan_chunks);
-		while(GetNextEmptyBlockInPart(chunk_list.GetAt(scan_chunks),block))
+		//MORPH - Changed by SiRoB, netfinty: Dynamic Block Requests
+		while(GetNextEmptyBlockInPart(chunk_list.GetAt(scan_chunks),block,bytesPerRequest))
 		{
 			requestedblocks_list.AddTail(block);
 			newblocks[newblockcount] = block;
@@ -5406,7 +5445,7 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 	if (gaplist.IsEmpty())
 		FlushBuffer(true);
 	//MORPH START - Added by SiRoB, Import Parts
-	else if (gaplist.IsEmpty())
+	else if (GetStatus()!=PS_READY && GetStatus()!=PS_EMPTY)
 		FlushBuffer();
 	//MORPH END   - Added by SiRoB, Import Parts
 
@@ -6239,13 +6278,39 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	const uint16 partCount = GetPartCount();
 	CList<Chunk> chunksList(partCount);
 
+	// BEGIN netfinty: Dynamic Block Requests
+	uint64	bytesPerRequest = EMBLOCKSIZE;
+#if !defined DONT_USE_DBR
+	uint64	bytesLeftToDownload = GetFileSize() - GetCompletedSize();
+	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
+	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
+	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
+
+	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
+
+	if (bytesPerRequest > EMBLOCKSIZE)
+		bytesPerRequest = EMBLOCKSIZE;
+	if (bytesPerRequest < 10240 || sender->GetDownloadDatarate() == 0)
+	{
+		// Let an other client request this packet if we are close to completion and source is slow
+		// Use the true file datarate here, otherwise we might get stuck in NNP state
+		if (!requestedblocks_list.IsEmpty() && timeToFileCompletion < 30 && bytesPerRequest < 3400 && 5 * sourceDatarate < GetDatarate())
+		{
+			DebugLog(_T("No request block given as source is slow and file near completion!"));
+			return false;
+		}
+		bytesPerRequest = 10240;
+	}
+#endif
+	// BEGIN netfinty: Dynamic Block Requests
+
 	// Main loop
 	uint16 newBlockCount = 0;
 	while(newBlockCount != *count){
 		// Create a request block stucture if a chunk has been previously selected
 		if(sender->m_lastPartAsked != (uint16)-1){
 			Requested_Block_Struct* pBlock = new Requested_Block_Struct;
-			if(GetNextEmptyBlockInPart(sender->m_lastPartAsked, pBlock) == true){
+			if(GetNextEmptyBlockInPart(sender->m_lastPartAsked, pBlock, bytesPerRequest) == true){
 				// Keep a track of all pending requested blocks
 				requestedblocks_list.AddTail(pBlock);
 				// Update list of blocks to return
