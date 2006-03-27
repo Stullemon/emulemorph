@@ -1127,7 +1127,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		if( doCache ) {
 			ASSERT( GetDownloadState() == DS_DOWNLOADING );
 //		Crypt.useNewKey = true;	// Superlexx - moved this to SendWebCacheBlockRequests()
-			if (SendWebCacheBlockRequests()) //MORPH - Changed by SiRoB, Webcache Fix Allow going throw ed2k request
+			if (SendWebCacheBlockRequests()) //MORPH - Changed by SiRoB, Webcache Fix Allow going through ed2k request
 				return;
 		}
 	}
