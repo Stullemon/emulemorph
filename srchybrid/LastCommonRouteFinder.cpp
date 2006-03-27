@@ -321,14 +321,14 @@ void LastCommonRouteFinder::GetClassByteToSend(uint32* AllowedDataRate,uint32* C
     uploadLocker.Lock();
     uint32 maxlimit = min(m_upload, m_iMaxGlobalDataRateFriend*m_upload/100);
 	if (maxlimit < 1024) maxlimit = 1024;
-	if (m_iGlobalDataRateFriend < maxlimit)
+	if (m_iGlobalDataRateFriend > 0 && m_iGlobalDataRateFriend < maxlimit)
 		*AllowedDataRate = m_iGlobalDataRateFriend;
 	else 
 		*AllowedDataRate = maxlimit;
 
 	maxlimit = min(m_upload, m_iMaxGlobalDataRatePowerShare*m_upload/100);
 	if (maxlimit < 1024) maxlimit = 1024;
-	if (m_iGlobalDataRatePowerShare < maxlimit)
+	if (m_iGlobalDataRatePowerShare > 0 && m_iGlobalDataRatePowerShare < maxlimit)
 		*++AllowedDataRate = m_iGlobalDataRatePowerShare;
 	else
 		*++AllowedDataRate = maxlimit;
