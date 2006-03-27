@@ -2369,7 +2369,8 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 		}
 	//MORPH START - Added by SiRoB, Share Only The Need
 	}
-	if (((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())!=0) {
+	UINT SOTN = ((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed()); 
+	if (SOTN) {
 		if (IsPartFile()) {
 			CPartFile* pfile = (CPartFile*)this;
 			if (pfile->m_SrcpartFrequency.IsEmpty() == false) {
@@ -2390,10 +2391,10 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 					}
 			}
 		}
-	} else if(statistic.spreadlist.IsEmpty())
-		return parts;
+	}
+
 	//MORPH END   - Added by SiRoB, Share Only The Need
-	if (usepartsavail) {		// Special case, ignore unshareables for min calculation
+	if (usepartsavail && !statistic.spreadlist.IsEmpty() || SOTN) {		// Special case, ignore unshareables for min calculation
 		//MORPH START - Changed by SiRoB, force always to show 2 chunks
 		uint64 min2 = min = (uint64)-1;
 		for (i = 0; i < parts; i++)
@@ -2404,14 +2405,16 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 					min = min2;
 			}
 		//MORPH END   - Changed by SiRoB, force always to show 2 chunks
-	} else if(statistic.spreadlist.IsEmpty())
-		return parts;
+	}
 
 	for (i = 0; i < parts; i++) {
 		if (partspread[i] > min)
 			partspread[i] -= min;
-		else
+		else {
 			partspread[i] = 0;
+			if (client->m_abyUpPartStatus)
+				client->m_abyUpPartStatus[i] &= SC_AVAILABLE;
+		}
 	}
 
 	if (!hideOS || ((GetSelectiveChunk()>=0)?!GetSelectiveChunk():!thePrefs.IsSelectiveShareEnabled()))
@@ -2541,8 +2544,7 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	UINT parts = CalcPartSpread(partspread, client);
 	if (!parts)
 		return FALSE;
-	uint64 max;
-	max = partspread[0];
+	uint64 max = partspread[0];
 	for (UINT i = 1; i < parts; i++)
 		if (partspread[i] > max)
 			max = partspread[i];
