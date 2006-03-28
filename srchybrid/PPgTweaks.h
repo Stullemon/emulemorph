@@ -1,7 +1,12 @@
 #pragma once
 #include "TreeOptionsCtrlEx.h"
 
+// MORPH START leuk_he tooltipped
+/*
 class CPPgTweaks : public CPropertyPage
+*/
+class CPPgTweaks : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgTweaks)
 

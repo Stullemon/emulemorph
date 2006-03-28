@@ -17,6 +17,7 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "SearchDlg.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PPgTweaks.h"
 #include "Scheduler.h"
 #include "DownloadQueue.h"
@@ -53,8 +54,14 @@ BEGIN_MESSAGE_MAP(CPPgTweaks, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgTweaks::CPPgTweaks()
+// MORPH START leuk_he tooltipped
+/*
 	: CPropertyPage(CPPgTweaks::IDD)
-	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
+
+*/	
+	: CPPgtooltipped(CPPgTweaks::IDD)
+// MORPH END leuk_he tooltipped
+, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
 {
 	m_iFileBufferSize = 0;
 	m_iQueueSize = 0;
@@ -485,7 +492,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_ctlQueueSize.SetPos(m_iQueueSize/100);
 	m_ctlQueueSize.SetTicFreq(10);
 	m_ctlQueueSize.SetPageSize(10);
-
+    InitTooltips(&m_ctrlTreeOptions); // MORPH leuk_he tooltipped
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -717,7 +724,40 @@ void CPPgTweaks::Localize(void)
 		GetDlgItem(IDC_FILEBUFFERSIZE_STATIC)->SetWindowText(temp);
 		temp.Format(_T("%s: %s"), GetResString(IDS_QUEUESIZE), GetFormatedUInt(m_iQueueSize));
 		GetDlgItem(IDC_QUEUESIZE_STATIC)->SetWindowText(temp);
+        //MORPH START leuk_he tooltipped
+		SetTool(m_htiTCPGroup,IDS_TCPIP_CONNS_TIP);
+		SetTool(m_htiMaxCon5Sec,IDS_MAXCON5SECLABEL_TIP);
+		SetTool(m_htiMaxHalfOpen,IDS_MAXHALFOPENCONS_TIP);
+		SetTool(m_htiConditionalTCPAccept,IDS_CONDTCPACCEPT_TIP);
+		SetTool(m_htiServerKeepAliveTimeout,IDS_SERVERKEEPALIVETIMEOUT_TIP);
+		SetTool(m_htiAutoTakeEd2kLinks,IDS_AUTOTAKEED2KLINKS_TIP);
+		SetTool(m_htiCreditSystem,IDS_USECREDITSYSTEM_TIP);
+		SetTool(m_htiFilterLANIPs,IDS_PW_FILTER_TIP);
+		SetTool(m_htiExtControls,IDS_SHOWEXTSETTINGS_TIP);
+		SetTool(m_htiA4AFSaveCpu,IDS_A4AF_SAVE_CPU_TIP);
+		SetTool(m_htiYourHostname,IDS_YOURHOSTNAME_TIP);
+		SetTool(m_htiDisablePeerCache,IDS_DISABLEPEERACHE_TIP);
+		SetTool(m_htiSparsePartFiles,IDS_SPARSEPARTFILES_TIP);
+		SetTool(m_htiFullAlloc,IDS_FULLALLOC_TIP);
+		SetTool(m_htiCheckDiskspace,IDS_CHECKDISKSPACE_TIP);
+		SetTool(m_htiMinFreeDiskSpace,IDS_MINFREEDISKSPACE_TIP);
+		SetTool(m_htiCommit,IDS_COMMITFILES_TIP);
+		SetTool(m_htiCommitNever,IDS_NEVER_TIP1);
+		SetTool(m_htiCommitOnShutdown,IDS_ONSHUTDOWN_TIP);
+		SetTool(m_htiCommitAlways,IDS_ALWAYS_TIP);
+		SetTool(m_htiExtractMetaData,IDS_EXTRACT_META_DATA_TIP);
+		SetTool(m_htiExtractMetaDataNever,IDS_NEVER_TIP2);
+		SetTool(m_htiExtractMetaDataID3Lib,IDS_META_DATA_ID3LIB_TIP);
+		SetTool(m_htiLog2Disk,IDS_LOG2DISK_TIP);
+		SetTool(m_htiDateFileNameLog,IDS_DATEFILENAMELOG_TIP);
+		SetTool(m_htiVerboseGroup,IDS_VERBOSE_TIP);
+		SetTool(m_htiVerbose,IDS_ENABLED_TIP);
+		SetTool(m_htiLogLevel,IDS_LOG_LEVEL_TIP);
+        //MORPH END leuk_he tooltipped
+
 	}
+
+
 }
 
 void CPPgTweaks::OnDestroy()
