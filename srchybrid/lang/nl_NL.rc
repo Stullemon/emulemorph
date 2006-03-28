@@ -104,15 +104,15 @@ BEGIN
     IDS_FD_CORR             "Corrupted"
     IDS_HTTPDOWNLOAD_OK_TO_OVERWRITE 
                             "Het bestand '%s' bestaat al.\nWilt u het vervangen?"
-    IDS_FD_RECOV            "Recovered"
+    IDS_FD_RECOV            "Hersteld"
     IDS_HTTPDOWNLOAD_FAIL_FILE_OPEN 
                             "Er is een fout opgetreden bij het openen van het bestand voor bestandsoverdracht, Fout:%s"
     IDS_HTTPDOWNLOAD_ABORTING_TRANSFER "Overdracht afgebroken"
-    IDS_FD_COMPR            "Compression"
-    IDS_WIZARD_NETWORK      "Choose which network(s) you want to use."
+    IDS_FD_COMPR            "Compressie"
+    IDS_WIZARD_NETWORK      "Kies welk(e) netwerk(en) je wilt gebruiken."
     IDS_MAIN_READY          "eMule Versie %s klaar"
-    IDS_WIZARD_ED2K         "ED2k Settings"
-    IDS_SEL_SKIN            "Select Skin..."
+    IDS_WIZARD_ED2K         "ED2k Instellingen"
+    IDS_SEL_SKIN            "Kies Skin..."
 END
 
 STRINGTABLE 
@@ -120,7 +120,7 @@ BEGIN
     IDS_MAIN_SOCKETERROR    "Fatale fout: Kan geen socket openen voor poort %i"
     IDS_MAIN_BTN_DISCONNECT "Verbreek Ver&binding"
     IDS_MAIN_BTN_DISCONNECT_TOOLTIP 
-                            "Verbreek verbinding voor de huidige server"
+                            "Verbreek verbinding met de huidige server"
     IDS_ERR_WRONGFILEID     "Ongeldige bestandsidentificatie verzonden"
     IDS_ERR_BADHASHSET      "Corrupte of foutieve hashset ontvangen"
     IDS_ERR_BADDATABLOCK    "Corrupt of foutief bestandsdeel ontvangen"
@@ -181,7 +181,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_WRITEERROR      "Onverwachtse bestandsfout bij het schrijven van %s : %s"
+    IDS_ERR_WRITEERROR      "Onverwachtse bestandsfout bij het wegschrijven van %s : %s"
     IDS_ERR_COMPLETIONFAILED 
                             "Onverwachtse bestandsfout bij het afronden van %s. Bestand gepauseerd, herstart eMule voor een nieuwe afrondingspoging"
     IDS_ERR_DELETEFAILED    "Fout bij het verwijderen van %s, u zult dit handmatig moeten doen"
@@ -270,7 +270,7 @@ BEGIN
     IDS_ERR_BADSERVERLISTRECEIVED "Ongeldig serverlijst pakket ontvangen"
     IDS_STATUS              "Status"
     IDS_DL_REMAINS          "Nog te doen"
-    IDS_UPDATEFROM          "Update from URL: (filter.dat- or PeerGuardian-format)"
+    IDS_UPDATEFROM          "Ververst van URL: (filter.dat- or PeerGuardian-format)"
     IDS_QL_USERNAME         "Gebruikersnaam"
     IDS_ERR_PACKAGEHANDLING "Onbekende fout bij het ophalen van een pakket van de server (%s)"
     IDS_QL_RATING           "Waardering"
@@ -308,13 +308,13 @@ BEGIN
     IDS_SHAREDFILES         "Gedeelde Bestanden"
     IDS_PRIOVERYLOW         "Zeer laag"
     IDS_PRIORELEASE         "Vrijgemaakt (Release)"
-    IDS_FSTATUS_LOCKED      "Vastgezet"
-    IDS_KADALPHA            "Kademlia is still in an early development stage. We recommend to enabled it only if you are interested in testing it"
+    IDS_FSTATUS_LOCKED      "Bevroren"
+    IDS_KADALPHA            "Kadamelia is nog in vroege ontwikkelingsfase. We bevelen het alleen aan als je geinteresseerd bent in het testen ervan in testing it"
     IDS_FSTATUS_FRIENDSONLY "Alleen Vrienden"
     IDS_FSTATUS_PUBLIC      "Publiek"
-    IDS_ERR_RENAMESF        "Failed to rename\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
+    IDS_ERR_RENAMESF        "Hernoemen gefaald\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
     IDS_PRIOHIGHEST         "Hoogste"
-    IDS_AVAILABLE           "available"
+    IDS_AVAILABLE           "beschikbaar"
     IDS_ERR_NOPRIMCHANGE    "U kunt geen toestemmingen veranderen terwijl een bestand wordt overgehaald!"
     IDS_HIDDEN              "Verborgen"
 END
@@ -397,8 +397,8 @@ BEGIN
     IDS_CONNECTEDTOREQ      "Verbonden met %s (%s:%i), versturen aanlogverzoek"
     IDS_ERR_FATAL           "Fatale fout bij het maken van een verbinding. De Internet verbinding kan verbroken zijn"
     IDS_ERR_LOSTC           "Verbinding verloren met %s (%s:%i)"
-    IDS_ERR_DEAD            "%s (%s:%i) schijnt dood te zijn."
-    IDS_ERR_FULL            "%s (%s:%i) schijnt volledig bezet te zijn"
+    IDS_ERR_DEAD            "%s (%s:%i) lijkt dood te zijn."
+    IDS_ERR_FULL            "%s (%s:%i) lijkt volledig bezet te zijn"
 END
 
 STRINGTABLE 
@@ -406,9 +406,9 @@ BEGIN
     IDS_ERR_METCORRUPT      "Fout: %s (%s) is corrupt, onmogelijk het bestand te laden"
     IDS_ERR_FILEERROR       "Onverwachtse bestandsfout bij het lezen %s (%s): %s"
     IDS_ERR_FILEOPEN        "Onmogelijk om %s (%s) te openen"
-    IDS_SEL_SKINDIR         "Select Skin Directory..."
+    IDS_SEL_SKINDIR         "Kies Skin Map..."
     IDS_ERR_REHASH          "Waarschuwing: %s is mogelijk corrupt, de reeds overgehaalde bestandsdelen worden opnieuw gehashed"
-    IDS_SKIN_PROF           "Skin Profiles"
+    IDS_SKIN_PROF           "Skin Profielen"
     IDS_ERR_PART_FNF        ".part bestand niet gevonden"
     IDS_ERR_OPENMETFILE     "Onmogelijk om het bestand part.met te openen"
     IDS_KADOPEN             "Open"
@@ -418,7 +418,7 @@ BEGIN
     IDS_ERR_PARTCORRUPT     "Overgehaald bestandsdeel %i is corrupt :(  (%s)"
     IDS_ICHWORKED           "ICH: Hersteld corrupt bestandsdeel %i  (%s), Saved: %s"
     IDS_ERR_OUTOFSPACE      "U heeft onvoldoende schijfruimte om een bestand over te halen %s!"
-    IDS_SE                  "Source Exchange"
+    IDS_SE                  "Bron Uitwisseling"
 END
 
 STRINGTABLE 
@@ -591,7 +591,7 @@ BEGIN
     IDS_FD_STATUS           "Status Deelbestand:"
     IDS_FD_TRANSFER         "Overdracht"
     IDS_FD_SOURCES          "Gevonden Bronnen:"
-    IDS_FD_PARTS            "Parts:"
+    IDS_FD_PARTS            "Delen:"
     IDS_FD_TRANS            "Verstuurd:"
     IDS_FD_DATARATE         "Snelheid:"
     IDS_FD_TRANSI           "Overdracht:"
@@ -759,7 +759,7 @@ BEGIN
     IDS_STREE               "Statistiek Totaaloverzicht"
     IDS_IRC_IGNOREQUITMESSAGE "Ignore Quit info messages"
     IDS_STATSSETUPINFO      "Instellingen Statistieken"
-    IDS_IRC_SOUNDEVENTS     "Play sound events"
+    IDS_IRC_SOUNDEVENTS     "Speel Gebeurtenis Geluiden"
 END
 
 STRINGTABLE 
@@ -864,7 +864,7 @@ STRINGTABLE
 BEGIN
     IDS_SOURCENAMES         "Bron namen"
     IDS_PREF_STARTMIN       "Start geminimaliseerd"
-    IDS_PS_TBN_IMPORTANT    "Urgent: Uw schijfruimte is vol, Verbinding met de server is verloren"
+    IDS_PS_TBN_IMPORTANT    "Urgent: Uw Schijf is vol, Verbinding met de server is verloren"
     IDS_COLORS              "Kleuren"
     IDS_SP_BACKGROUND       "Achtergrond"
     IDS_SP_GRID             "Raster"
@@ -915,10 +915,10 @@ BEGIN
     IDS_CODEC               "Codec"
     IDS_BITRATE             "Bitrate"
     IDS_WIDTH               "Breedte"
-    IDS_FPS                 "Fps"
+    IDS_FPS                 "Beelden p/s"
     IDS_CHANNELS            "Kanalen"
     IDS_SAMPLERATE          "Samplerate"
-    IDS_ROUNDBITRATE        "Ronde Bitrate"
+    IDS_ROUNDBITRATE        "Afgeronde Bitrate"
 END
 
 STRINGTABLE 
@@ -945,7 +945,7 @@ STRINGTABLE
 BEGIN
     IDS_STATS_MAXDL         "Max Ontvangstratio (Sessie): %s"
     IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
-                            "Ignore eMule add friend protocol messages"
+                            "Negeer eMule toevoegen vriend protocol berichten"
     IDS_PW_FASTSRVCON       "Snel met de server verbinden"
     IDS_SOURCELINKFAILED    "U heeft een Hoge ID nodig voor het cre?en van een geldige bronverwijzing"
     IDS_CREATESOURCELINK    "Kopieer ED2k link naar klembord (bron)"
@@ -989,7 +989,7 @@ BEGIN
     IDS_ADD                 "Voeg toe"
     IDS_RECOVERED_PARTMET   "Hersteld part.met bestand voor: %s"
     IDS_CMT_QUEST           "Commentaar bij dit bestand! (de tekst is zichtbaar voor iedereeen)"
-    IDS_CMT_AIDE            "Voor een film kunt duur, verhaal, taal etc. vertellen. Voor een nep-bestand kunt u andere eMulers waarschuwen... "
+    IDS_CMT_AIDE            "Voor een film kun je duur, verhaal, taal etc. vertellen. Voor een nep-bestand kunt u andere eMulers waarschuwen... "
     IDS_CMT_TITLE           "%s bestandscommentaar"
     IDS_CMT_ADD             "Verander bestandscommentaar..."
     IDS_CMT_NONE            "Geen commentaar"
@@ -1037,11 +1037,11 @@ BEGIN
     IDS_WEBSVEDIT           "Bewerk Webservices"
     IDS_IRC_EMULEPROTO_IGNORESENDLINK 
                             "Ignore eMule send link protocol messages"
-    IDS_CHECK4UPDATE        "Controleer op nieuwe versie"
+    IDS_CHECK4UPDATE        "Kontroleer op nieuwe versie"
     IDS_STARTUP             "Opstarten"
     IDS_NEWVERSIONAVL       "Een nieuwe eMule versie is beschikbaar! Kijk op de Project Homepage voor meer informatie."
     IDS_NEWVERSIONAVLPOPUP  "Een nieuwe eMule versie is beschikbaar. Klik hier voor informatie over de nieuwe versie!"
-    IDS_NEWVERSIONFAILED    "Onmogelijk te controleren of er een nieuwe versie is."
+    IDS_NEWVERSIONFAILED    "Onmogelijk te kontroleren of er een nieuwe versie is."
 END
 
 STRINGTABLE 
@@ -1051,7 +1051,7 @@ BEGIN
     IDS_VERSIONCHECK        "&Versie controle"
     IDS_VISITVERSIONCHECK   "\n\nWilt u nu de Informatiepagina bezoeken?"
     IDS_PW_VIDEOPLAYER      "Video Speler"
-    IDS_VIDEOBACKUP         "Cre? backup voor preview"
+    IDS_VIDEOBACKUP         "Creër backup voor preview"
     IDS_STATIC_EMPTY        "(leeg=standaard)"
     IDS_MYINFO              "Mijn Informatie"
     IDS_ID                  "ID"
@@ -1067,7 +1067,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_FILECOMPLETIONTHREAD 
-                            "Fout bij cre?en thread voor bestandsafronding"
+                            "Fout bij creëren subproces voor bestandsafronding"
     IDS_FILEBUFFERSIZE      "Bestandsbuffer grootte"
     IDS_QUEUESIZE           "Wachtrij grootte"
     IDS_DAYS2               "dagen"
@@ -1075,7 +1075,7 @@ BEGIN
     IDS_COMMENT             "Commentaar"
     IDS_IPFILTERED          "Gefilterde IP: %s (%s)"
     IDS_DL_TRANSFCOMPL      "Afgerond"
-    IDS_DL_ACTIVE_TIME      "Download time"
+    IDS_DL_ACTIVE_TIME      "Download tijd"
     IDS_STATS_FILTEREDCLIENTS "Gefilterd: %i"
     IDS_FILTERLABEL         "Filter berichten bevattend: (scheidingsteken | )"
     IDS_ERR_LARGEREQBLOCK   "Gebruiker verzoekt om een te groot blok."
@@ -1158,13 +1158,13 @@ BEGIN
                             "Ongeldig kad zoekwoord.\r\n\r\nA Kad zoekexplressie heeft het volgende formaat:\r\n\r\n\t<kad-keyword> [ <ed2k-search-expression> ]\r\n\r\nhet <kad-keyword> mag niet een van de volgende karakters bevatten:\r\n\r\n\t%s"
     IDS_EDITCAT             "Bewerk Categorie-Instellingen"
     IDS_PW_WS               "Web Server"
-    IDS_ENABLED             "geactiveerd"
+    IDS_ENABLED             "geaktiveerd"
     IDS_WEB_LOGIN           "Inloggen"
     IDS_WEB_ENTER_PASSWORD  "Geef uw wachtwoord hier"
     IDS_WEB_LOGIN_NOW       "Nu inloggen"
     IDS_WEB_CONFIRM_REMOVE_SERVER 
                             "Weet u zeker dat u deze server van de lijst wilt verwijderen?"
-    IDS_WEB_CONTROL         "Web Control Panel"
+    IDS_WEB_CONTROL         "Web Controle Paneel"
     IDS_WEB_LOGOUT          "Uitloggen"
     IDS_WEB_ACTIONS         "Acties"
 END
@@ -1181,7 +1181,7 @@ BEGIN
     IDS_WEB_REFRESH_COMMENT "Tijd in seconden (nul=gedeactiveerd):"
     IDS_SV_URL              "URL"
     IDS_WS_RELOAD_TMPL      "Template"
-    IDS_SV_DEBUGLOG         "Debug Log"
+    IDS_SV_DEBUGLOG         "verbose Log"
     IDS_WS_PASS             "Wachtwoord"
     IDS_WEB_FILESETTINGS    "Bestands Instellingen"
     IDS_WS_ERR_LOADTEMPLATE "Kan de templates niet laden: vervang bestand %s met een nieuwe versie!"
@@ -1238,8 +1238,7 @@ BEGIN
     IDS_WIZ1_WELCOME_TITLE  "Welkom bij eMule"
     IDS_WIZ1_WELCOME_ACTIONS 
                             "Deze wizard begeleidt u bij de eerste stappen voor de configuratie van eMule."
-    IDS_WIZ1_WELCOME_BTN_HINT 
-                            "Om verder te gaan klik Next. Cancel als emule eerder is opgezet"
+    IDS_WIZ1_WELCOME_BTN_HINT "Om verder te gaan klik Next. Cancel als emule eerder is opgezet"
     IDS_WIZ1_END_TITLE      "Afronden van de Wizard"
     IDS_WIZ1                "Eerste keer eMule Runtime Wizard"
     IDS_WIZ1_END_BTN_HINT   "Om de wizard te sluiten klik op Finish."
@@ -1375,7 +1374,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_STATS_TIMESTATS     "Tijd Statistieken"
-    IDS_STATS_AVGANDPROJ    "Geprojecteerde Gemiddelden"
+    IDS_STATS_AVGANDPROJ    "Geextrapoleerde Gemiddelden"
     IDS_STATS_TIMESINCERESET "Tijd sinds laatste reset: %s"
     IDS_CRYPT_INITFAILED    "Fout bij initialiseren cryptokeys - Beveiligde Identificatie gedeactiveerd"
     IDS_CD_IDENT            "Identificatie:"
@@ -1402,13 +1401,13 @@ BEGIN
     IDS_SEARCH_GENERALERROR "Algemene Fout"
     IDS_SEARCH_MISSINGORRIGHT "Missend rechter gedeelte voor OR operator"
     IDS_SEARCH_MISSINGNOTRIGHT "Missend rechter gedeelte voor NOT operator"
-    IDS_SEARCH_MISSINGEXPRPARANT "Missende expressie voor '(' ')'"
+    IDS_SEARCH_MISSINGEXPRPARANT "Missende uitdrukking voor '(' ')'"
     IDS_SEARCH_MISSINGCLOSINGPARANT "Missende afsluitende ')'"
     IDS_SEARCH_MISSINGANDLEFT "Missend linker gedeelte voor AND operator"
     IDS_SEARCH_MISSINGORLEFT "Missend linker gedeelte voor OR operator"
     IDS_SEARCH_MISSINGNOTLEFT "Missend linker gedeelte voor NOT operator"
     IDS_SEARCH_EXPRERROR    "Fout bij het uitvoeren van de zoekexpressie"
-    IDS_SEARCH_TOOCOMPLEX   "Expressie is te complex"
+    IDS_SEARCH_TOOCOMPLEX   "Uitdrukking is te complex"
     IDS_SEARCH_INVALIDMINMAX 
                             "Ongeldige eenheden voor Min/Max bestandsgrootte opgegeven"
 END
@@ -1467,7 +1466,7 @@ BEGIN
     IDS_TIMEBEFORE          "(%s geleden)"
     IDS_FD_TIMEDATE         "Datums"
     IDS_FILEINFORMATION     "Informatie Bestand"
-    IDS_STATS_FREESPACE     "Free Space"
+    IDS_STATS_FREESPACE     "Vrije Ruimte"
     IDS_IRC_HELPCHANNEL     "Verbind met Hulp kanalen."
     IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-dutch"
     IDS_IRC_ACCEPTLINKSFRIENDS "Alleen van vrienden."
@@ -1620,8 +1619,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_SECURE_IDENT    "Log Beveilide identificatie"
-    IDS_LOG_FILTERED_IPS    "Log gefilterede en/of genegeerde IPs"
+    IDS_LOG_SECURE_IDENT    "Log Beveiligde identificatie"
+    IDS_LOG_FILTERED_IPS    "Log gefilterde en/of genegeerde IPs"
     IDS_LOG_FILE_SAVING     "Log bestands opslag acties"
     IDS_IPFILTERFILES       "Alle IP Filter bestanden(*ipfilter.dat;*ip.voorvoegsel;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz)|*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz|eMule IP Filter bestanden (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2b;*.p2p;*.p2p.txt)|*.p2b;*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|ZIP Files (*.zip;*.gz)|*.zip;*.gz|All Files (*.*)|*.*||"
     IDS_DELETEIPFILTERS     "Alle geselecteeerde IP filters verwijderen?"
@@ -1672,6 +1671,7 @@ BEGIN
                             "Dit is geen  geldig  eMule Skin package bestand."
     IDS_NEXT_REASK          "Volgende bevraging aan deze peer."
     IDS_A4AF_FILES          "A4AF bestanden"
+    IDS_STATS_FRATIO        "Sessie UL:DL ratio (exclusief vrienden UL ):"
     IDS_FO_TEMPTCP_S        "Poort  %u (TCP) is geopend  in de interne WinXP firewall voor deze eMule sessie"
     IDS_FO_TEMPTCP_F        "Open poort %u (TCP) mislukt in de  interne WinXP firewall voor deze eMule sessie"
     IDS_FO_TEMPUDP_S        "Port %u (UDP) geopend   de interne WinXP firewall voor deze eMule sessie"
@@ -1682,21 +1682,19 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FO_PREF_EXISTED     "eMule detecteerde bestaande regels voor de geselecteerde poorten, en deze zijn niet overschreven of vervangen. Missende regels zijn toegevoegd.\nLet op dat ander (desktop)firewalls of routers niet beinvloed zijn hierdoor!"
+    IDS_FO_PREF_EXISTED     "eMule detecteerde bestaande regels voor de geselecteerde poorten. Deze zijn niet overschreven of vervangen. Missende regels zijn toegevoegd.\nLet op dat ander (desktop)firewalls of routers niet beinvloed zijn hierdoor!"
     IDS_FO_PREF_FAILED      "Configuren van de interne  WinXP firewall mislukt voor de geselcteerde poorten!"
     IDS_FO_PREF_STARTUP     "Open/sluit poorten in de  WinXP firewall tijdens starten/verlaten eMule"
     IDS_LOG_LEVEL           "Log nivo"
     IDS_DISABLEPEERACHE     "Deactiveer downloaden van PeerCache"
+    IDS_SOURCESWAPBLOCKED   "wisselen geblokkeerd"
+    IDS_A4AF_CHECK_THIS_NOW "Controleerde deze bron nu(debug)"
     IDS_NEWMSG              "Nieuw Bericht van  '%s' (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "alleen in zelfde category"
     IDS_LOG_ULDL_EVENTS     "Log upload/download gebeurtenissen"
-    IDS_PEERCACHE_ENABLED   "ISP ondersteund de PeerCache technologie, actieveer downloads van peercache buffer!"
-    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND 
-                            "Sta gebruiker toe jou als vriend to te voegen."
-    IDS_SOURCESWAPBLOCKED   "wisselen geblockeerd"
+    IDS_PEERCACHE_ENABLED   "ISP ondersteund de PeerCache technologie, activeer downloads van peercache buffer!"
+    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Sta gebruiker toe jou als vriend toe te voegen."
     IDS_TRICKLING           "Standby"
-    IDS_A4AF_CHECK_THIS_NOW "Controleerde deze source nu(debug)"
-    IDS_STATS_FRATIO        "Sessie UL:DL ratio (exclusief vrienden UL ):"
     IDS_STATS_UDATA_FRIENDS "Uploaded data naar  vrienden  sloten (Sessie): %s"
 END
 
@@ -1705,12 +1703,12 @@ BEGIN
     IDS_IMP_ERR_BADFORMAT   "Onbekend of fout tempfile formaat."
     IDS_SEARCH_INVALIDCHAR  "Zoek uitdrukking bevat ongeldige  letter.  een '?' is ingevoerd of andere karakters die niet kunnen worden gebruikt in een eD2K network is ingevoerd."
     IDS_PORTSCON            "Poorten en verbinding"
-    IDS_PORTINFO            "eMule gebruikt 2 poorten voor communicatie met servers en andere clienten. These poorten moeten vrij zijn en beschikbaar voor clients van buiten. de TCP poort moet beschikbaar zijn voor de hoof functionalitiet van eMule. The UDP poortwordt gebruikt voor  Kad (serverloos netwerk) en om netwerkgebruik te verminderen (Overhead).\n\npoorten kunnen verander worden als er nog geen netwerk activiteitn zijn opgetreden."
+    IDS_PORTINFO            "eMule gebruikt 2 poorten voor communicatie met servers en andere clienten. Deze poorten moeten vrij zijn en beschikbaar voor externe clienten. De TCP poort moet beschikbaar zijn voor de hoofd functionalitiet van eMule. The UDP poort wordt gebruikt voor  Kad (serverloos netwerk) en om netwerkgebruik te verminderen (Overhead).\n\npoorten kunnen verander worden als er nog geen netwerk activiteitn zijn opgetreden."
     IDS_STARTTEST           "Test poorten"
     IDS_TESTINFO            "Hier kan getest worden of  de TCP and UDP poort kunnen worden benaderd van buiten. Het is aanbevolen dat deze test lukt . The TCP poort succes is het minimum!"
     IDS_CONNECTIONTEST      "Verbindings test"
     IDS_NOPORTCHANGEPOSSIBLE 
-                            "Het veranden van poorten is niet mogelijk na verbonden te zijn met  clients of als er een verbinding met een server/Kad is!\n\nHerstart eMule met de veranderde poorten instellingen."
+                            "Het veranderen van poorten is niet mogelijk na verbonden te zijn met  clients of als er een verbinding met een server/Kad is!\n\nHerstart eMule met de veranderde poorten instellingen."
     IDS_NETWORK_INFO        "Netwerk Informatie"
     IDS_SP_TOTALUL          "Totale aantal uploads"
     IDS_SP_ULFRIENDS        "Upload vriend sloten"
@@ -1779,7 +1777,7 @@ BEGIN
     IDS_PERSEC              "/s"
     IDS_LD_ED2KLINK         "ED2K Link"
     IDS_LD_COPYCLIPBOARD    "copieer naar  Clipboard"
-    IDS_LD_HOSTNAME         "gebruik hostnaam (Van uitgebriede instellingen) ipv IP bij creeren van sourcelink"
+    IDS_LD_HOSTNAME         "gebruik hostnaam (Van uitgebreide instellingen) ipv IP bij creeren van sourcelink"
     IDS_SAVEACFAILED        "AICH Hashset opslaan mislukt!"
 END
 
@@ -1812,13 +1810,13 @@ BEGIN
     IDS_SELSKINPROFILEDIR   "Selecteer skin profile folder"
     IDS_ASKDLINCOMPLETE     "Potententieel onvolledig  bestand:\r\n\r\n%s\r\n\r\nDit bestand is wordt verondersteld niet compleet te zijn en kan daarom hoogstwaarschijn niet colledig gedownlaod worden! Wilt u toch proberen dit bestand te downloaden?"
     IDS_DEADSOURCES         "Dode Bronnen"
-    IDS_LARGEICONS          "Groteo icoonen"
+    IDS_LARGEICONS          "Grote iconen"
     IDS_SMALLICONS          "Kleine iconen"
     IDS_SHORTTAGS           "Korte tags"
     IDS_THELOAD             "Load"
-    IDS_PACKSENT            "Packetten Verzonden"
-    IDS_RESPONSES           "Responses"
-    IDS_EXTRACT_META_DATA   "Extracteer meta data"
+    IDS_PACKSENT            "Pakketten Verzonden"
+    IDS_RESPONSES           "Reakties"
+    IDS_EXTRACT_META_DATA   "Extraheer meta data"
     IDS_META_DATA_MEDIADET  "DirectShow (Voor alle andere audio/video bestanden)"
     IDS_META_DATA_ID3LIB    "ID3 Library (Alleen voor mp3 bestanden)"
 END
@@ -1826,27 +1824,28 @@ END
 STRINGTABLE 
 BEGIN
     IDS_COMCTRL32_DLL_TOOOLD 
-                            "Windows Common Controls library (COMCTL32.DLL) is te oud!\r\n\r\neMule vond een versie van de""Windows Common Controls library (COMCTL32.DLL)"" Die te oud is om goed te worden gebruikdt door eMule. Om vollig en goed te functionerem zou eMule een epdate moeten krijgen met met  ""Windows Common Controls library (COMCTL32.DLL)"" versie 5.8.\r\n\r\nDownload and installeer een update van de  ""Windows Common Controls library (COMCTL32.DLL)"" op het Microsoft (R) Download Center. Wilt u de url bezoeken?"
+                            "Windows Common Controls library (COMCTL32.DLL) is te oud!\r\n\r\neMule vond een versie van de""Windows Common Controls library (COMCTL32.DLL)"" Die te oud is om goed te worden gebruikdt door eMule. Om vollig en goed te functioneren zou eMule een update moeten krijgen met  ""Windows Common Controls library (COMCTL32.DLL)"" versie 5.8.\r\n\r\nDownload and installeer een update van de  ""Windows Common Controls library (COMCTL32.DLL)"" op het Microsoft (R) Download Center. Wilt u de url bezoeken?"
     IDS_ASREGEXPR           "Als Reguliere Expressie"
-    IDS_STATIC_REGEXP       "Reguliere explressie voor filters:"
+    IDS_STATIC_REGEXP       "Reguliere expressie voor filters:"
     IDS_CARE4ALL            "Evalueer alle bestanden"
     IDS_REGEXPRESSION       "Reguliere  Expressie"
     IDS_SEARCHKAD           "Zoek door Kad"
-    IDS_DWL_IPFILTERFILE    "Downloaden IP filter bestand..."
-    IDS_DWLIPFILTERFAILED   "IP filter download mislukt"
+    IDS_DWL_IPFILTERFILE    "IP filter bestand halen..."
+    IDS_DWLIPFILTERFAILED   "IP filter.dat halen mislukt"
     IDS_FINDBUDDY           "zoek naar Buddy"
-    IDS_ERR_IPFILTERZIPEXTR "IP filter extactie van gedownloade ZIP file ""%s"" mislukt."
+    IDS_ERR_IPFILTERZIPEXTR "IP filter extractie van opgehaalde ZIP file ""%s"" mislukt."
     IDS_ERR_IPFILTERCONTENTERR 
                             "Gedownload IP filter bestand ""%s"" is een ZIP bestand onverwachte inhoud."
     IDS_STORENOTES          "Opslaan aantekeningen"
     IDS_NOTES               "Aantekeningen"
     IDS_KADSEARCHALREADY    "een andere zoekopdracht is bezig. Probeer het later nogmaals!"
-    IDS_WEB_SHUTDOWN        "Aflsuiten eMule"
-    IDS_WEB_REBOOT          "Herstart systeem"
+
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_WEB_SHUTDOWN        "Afsluiten eMule"
+    IDS_WEB_REBOOT          "Herstart systeem"
     IDS_WEB_SHUTDOWNSYSTEM  "Afsluiten systeem "
     IDS_WEB_ADMINMENU       "Admin Menu"
     IDS_WEB_MAIN_CLOSE      "eMule afsluiten?"
@@ -1860,7 +1859,7 @@ BEGIN
     IDS_SETPFSLIMITEXPLAINED 
                             "Geef de nieuwe bron limiet voor het gelecteerde bestand(en)) ! \n(0=systeem instelling)"
     IDS_UPDATECATINCOMINGDIRS 
-                            "Wilt u dat de inkomende folder in de oude inkomde filder nu worden bijgewerkt?"
+                            "Wilt u dat de categorieen in de oude ontvangst-folder nu worden bijgewerkt?"
     IDS_USESPEECH           "Spreek bericht:"
     IDS_TCPIP_CONNS         "TCP/IP connecties"
     IDS_MANUAL_FILENAMECLEANUP 
@@ -1880,15 +1879,15 @@ BEGIN
     IDS_PW_SENDERADDRESS    "verzender (van) adres:"
     IDS_AVAILABLEPARTS      "Beschikbare delen"
     IDS_NOSOUND             "Geen geluid"
-    IDS_PW_RECEIVERADDRESS  "Recipient address:"
+    IDS_PW_RECEIVERADDRESS  "Ontvangst adres:"
     IDS_PW_ENABLEEMAIL      "Activeer Email waarschuwingen"
     IDS_EMULENOTIFICATION   "eMule waarschuwingen"
-    IDS_PW_SHOWTRANSTOOLBAR "toon extra toolbar op overdrachtsscherm"
-    IDS_SHARED_STATUS       "Gedeelde delen"
+    IDS_PW_SHOWTRANSTOOLBAR "toon extra toolbar in overdrachtsscherm"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_SHARED_STATUS       "Gedeelde delen"
     IDS_SEARCH_EMULECOLLECTION "Collection"
     IDS_INCOMING_FILES      "Binnenkomde betanden"
     IDS_INCOMPLETE_FILES    "Incomplete bestanden"
@@ -1916,21 +1915,18 @@ BEGIN
     IDS_COLL_ADDINCAT       "Voeg deze downloads iun een nieuwe Categorie toe"
     IDS_VIEWCOLLECTION      "Bekijk Collection"
     IDS_COLL_TEXTFORMAT     "sla collection op in simpel tekst formaat"
-    IDS_USS_MANUALUPLOADLIMITDETECTED 
-                            "UploadSpeedSense: Verhoog upload limiet in instellingen. 60 secs in snelle reactie mode."
     IDS_USS_STATE_PREPARING "Voorbereiden..."
-    IDS_USS_STATE_WAITING   "Wachten..."
     IDS_USS_STATE_ERROR     "Fout!"
     IDS_SHAREWARNING        "(Folder wordt gedeeld!)"
     IDS_REMOVEALLSERVERS    "Wilt u alle niet statische servers verwijderen?"
     IDS_SEARCH_UNKATTR      "onbekende zoek attribuut '%s'"
     IDS_SEARCH_ATTRERR      "Spel fout in '%s' in zoek instelling"
+    IDS_SEARCH_MISSINGANDRIGHT "Missende rechterkant bij AND operator"
+    IDS_SEARCH_OPRERR       "Spel fout bij vergelijkings operator '%s'"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SEARCH_MISSINGANDRIGHT "Missinede rechterkant bij AND operator"
-    IDS_SEARCH_OPRERR       "Spel fout bij vergelijkings operator '%s'"
     IDS_DOWNLOAD_LANGFILE   "Downloading language file"
     IDS_DOWNLOADING_SERVERMET_FROM "Downloading server.met va %s"
     IDS_DOWNLOADING_SERVERMET "Downloading server.met..."
@@ -1944,7 +1940,7 @@ BEGIN
     IDS_CONVERTINGKNOWN2FAILED 
                             "...Mislukte omzetting van  known2.met, oude gegevens worden genegeerd"
     IDS_CONVERTINGKNOWN2DONE "... Klaar met omzetten."
-    IDS_ERR_MET_BAD         "Fout: het bestand  %s is ongelding, onmogelijk om bestaande kwown. bestanden te laden"
+    IDS_ERR_MET_BAD         "Fout: het bestand  %s is ongeldig, onmogelijk om bekende bestaande bestanden te laden"
     IDS_SRV_LARGEFILES      "Ondersteuning voor grote bestanden. "
 END
 
