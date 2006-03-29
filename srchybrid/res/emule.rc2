@@ -8,7 +8,7 @@
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Fügen Sie hier manuell bearbeitete Ressourcen hinzu...
+// Fgen Sie hier manuell bearbeitete Ressourcen hinzu...
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -33,7 +33,7 @@ BEGIN
     BEGIN
         BLOCK "040904B0" // Lang=US English, CharSet=Unicode
         BEGIN
-            VALUE "CompanyName", "http://www.emule-project.net"
+            VALUE "CompanyName", "http://emulemorph.sourceforge.net"
             VALUE "FileDescription", "eMule"
 #ifdef _UNICODE
             VALUE "FileVersion", SZ_VERSION_NAME " Unicode"
@@ -41,7 +41,7 @@ BEGIN
             VALUE "FileVersion", SZ_VERSION_NAME
 #endif
             VALUE "InternalName", "emule.exe"
-            VALUE "LegalCopyright", "Copyright © 2002-2006 Merkur - read license.txt for more infos"
+            VALUE "LegalCopyright", "Copyright  2002-2006 Merkur - read license.txt for more infos"
             VALUE "OriginalFilename", "emule.exe"
             VALUE "ProductName", "eMule"
 #ifdef _UNICODE
