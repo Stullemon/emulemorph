@@ -141,7 +141,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			}
 		}
 		if (!m_DoneBlocks_list.IsEmpty()){
-			block = m_DoneBlocks_list.GetTail();
+			block = m_DoneBlocks_list.GetHead(); //MORPH - Changed by SiRoB, Display fix 
 			if(block){
 			    uint32 start = (uint32)(block->StartOffset/PARTSIZE);
 			    s_UpStatusBar.FillRange((uint64)start*PARTSIZE, (uint64)(start+1)*PARTSIZE, crNextSending);
