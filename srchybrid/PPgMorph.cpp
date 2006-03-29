@@ -852,7 +852,9 @@ void CPPgMorph::Localize(void)
 		if (m_htiMaxClientDataRate) {m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRate, GetResString(IDS_MAXCLIENTDATARATE));
 									 SetTool(m_htiMaxClientDataRate,IDS_MAXCLIENTDATARATE_TIP);
 		}
-		if (m_htiMaxClientDataRatePowerShare) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRatePowerShare, GetResString(IDS_MAXCLIENTDATARATEPOWERSHARE));
+		if (m_htiMaxGlobalDataRatePowerShare){ m_ctrlTreeOptions.SetEditLabel(m_htiMaxGlobalDataRatePowerShare, GetResString(IDS_MAXDATARATEPOWERSHARE));
+		                                       SetTool(m_htiMaxGlobalDataRatePowerShare,IDS_MAXDATARATEPOWERSHARE_TIP);
+		}
 		if (m_htiMaxClientDataRate) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRate, GetResString(IDS_MAXCLIENTDATARATE));
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 		// ==> Slot Limit - Stulle
@@ -945,8 +947,8 @@ void CPPgMorph::Localize(void)
 		SetTool(m_htiGlobalHL ,IDS_SUC_ENABLED_TIP);
 		SetTool(m_htiGlobalHlLimit,IDS_GLOBAL_HL_LIMIT_TIP);
 	    SetTool(m_htiMaxGlobalDataRateFriend,IDS_MAXDATARATEFRIEND_TIP);
-        SetTool(m_htiGlobalDataRatePowerShare,IDS_MAXDATARATEPOWERSHARE_TIP);
-	
+        SetTool(m_htiGlobalDataRatePowerShare,IDS_DATARATEPOWERSHARE_TIP);
+	                                          
 	}
 
 }

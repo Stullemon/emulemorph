@@ -6062,6 +6062,7 @@ IDS_SUC_ENABLED_TIP "Enable global hardlimit instead of the sources per file."
 IDS_GLOBAL_HL_LIMIT_TIP "Value for global hard limit, \ndepends on available upload/download speed \nand latency. Normal value between 3000 and 6000."
 IDS_MAXDATARATEFRIEND_TIP   "Max Global friend datarate limit (%% of upload speed) usefule When using USS/SUC). If the\nfriend upload set exceeds this percentage, this percentage is used instead"
 IDS_MAXDATARATEPOWERSHARE_TIP "Max Global powershare datarate limit (%% of upload speed) if the powershare upload set\nexceeds this percentage, this percentage is used instead"
+IDS_DATARATEPOWERSHARE_TIP "Amount of upload speed (kb/s) that is max allowed for powershare slots."
 // ppg connection tooltips:
 IDS_PW_CON_CAPFRM_TIP "In this group you fill the capabilities of your network connection \nto the internet. These are not send to servers or peers but are used\nto draw correct statistics in the graph screen"
 IDS_PW_CON_DOWNLBL_TIP "IDS_PW_CON_DOWNLBL_TIP"
