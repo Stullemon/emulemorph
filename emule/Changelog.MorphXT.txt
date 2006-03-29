@@ -1,10 +1,17 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
-CHANGED: WC: reworked to make proxy configuration test working with random port [SiRoB]
-CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
+FIXED  : (minor) USC: Percentage setting for PowerShare Class was not taken into account (thanks to fafner) [SiRoB]
 
-Added: Tooltips for some preferences [leuk_he]
+ADDED  : netfinity: Dynamic Block Requests [SiRoB]
+ADDED  : Tooltips for some preferences [leuk_he]
+ADDED  : minor official bug fix arround upload Obtained Parts [SiRoB]
+
+CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
+CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
+CHANGED: USS: Default Forced UDP Ping has been changed to disable [SiRoB]
+CHANGED: ImportPart: we can import part into Stopped or Paused file if AICH list is available [SiRoB]
+CHANGED: ImportPart: Chunk with some data already written are also imported [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.9
