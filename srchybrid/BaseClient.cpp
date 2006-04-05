@@ -214,7 +214,7 @@ void CUpDownClient::Init()
 	m_nClientVersion = 0;
 	m_lastRefreshedDLDisplay = 0;
 	m_dwDownStartTime = 0;
-	m_nLastBlockOffset = 0;
+	m_nLastBlockOffset = (unit64)-1; //MORPH - Changed by SiRoB, Fix False Downlaoded Chunk Display 
 	m_bUnicodeSupport = false;
 	m_SecureIdentState = IS_UNAVAILABLE;
 	m_dwLastSignatureIP = 0;
@@ -1855,7 +1855,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 //true means the client was not deleted!
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket, bool* filtered)
 {
-	//MORPH START - Changed by SiRoB, Fix connection collision 
+	//MORPH - Changed by SiRoB, Fix connection collision 
 	/*
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected()))
 	*/
@@ -1955,8 +1955,10 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 	if (!socket || !socket->IsConnected())
 	{
 		//MORPH START - Changed by SiRoB, Fix connection collision 
-		if (socket && socket->GetConState() == ES_NOTCONNECTED)
+		if (socket && socket->GetConState() == ES_NOTCONNECTED) {
+			DebugLog(_T("Detected connection collision in CUpDownClient::TryToConnect() (report this if you see it thanks)"));		
 			return true;
+		}
 		//MORPH END   - Changed by SiRoB, Fix connection collision 
 		if (socket)
 			socket->Safe_Delete();
