@@ -6290,7 +6290,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 
 	if (bytesPerRequest > EMBLOCKSIZE)
 		bytesPerRequest = EMBLOCKSIZE;
-	if (bytesPerRequest < 10240 || sender->GetDownloadDatarate() == 0)
+	if (bytesPerRequest < 10240)
 	{
 		// Let an other client request this packet if we are close to completion and source is slow
 		// Use the true file datarate here, otherwise we might get stuck in NNP state
