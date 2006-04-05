@@ -145,6 +145,10 @@ public:
 	static	CStringA m_strBindAddrA;
 	static	LPCWSTR	m_pszBindAddrW;
 	static	CStringW m_strBindAddrW;
+	// MORPH START leuk_he upnp bindaddr
+	static DWORD	 m_dwUpnpBindAddr;
+	static bool      m_bBindAddrIsDhcp;
+	// MORPH End leuk_he upnp bindaddr
 	static	uint16	port;
 	static	uint16	udpport;
 	static	uint16	nServerUDPPort;
@@ -967,6 +971,15 @@ public:
 
 	static	LPCSTR	GetBindAddrA()						{return m_pszBindAddrA; }
 	static	LPCWSTR	GetBindAddrW()						{return m_pszBindAddrW; }
+    static void      SetBindAddr(CStringW bindip); // MORPH leuk_he bindaddr
+	// MORPH START leuk_he upnp bindaddr
+	static DWORD	 GetUpnpBindAddr()				{return m_dwUpnpBindAddr; }
+    static void      SetUpnpBindAddr(DWORD bindip); 
+	static void      SetUpnpBindDhcp(bool BindAddrIsDhcp) {m_bBindAddrIsDhcp=BindAddrIsDhcp;};
+	static bool      GetUpnpBindDhcp() {return m_bBindAddrIsDhcp;};
+	// MORPH End leuk_he upnp bindaddr
+
+
 	//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
 	// emulEspaña: Modified by MoNKi [MoNKi: -UPnPNAT Support-]
 	/*

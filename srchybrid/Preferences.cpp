@@ -58,6 +58,11 @@ LPCSTR	CPreferences::m_pszBindAddrA;
 CStringA CPreferences::m_strBindAddrA;
 LPCWSTR	CPreferences::m_pszBindAddrW;
 CStringW CPreferences::m_strBindAddrW;
+// MORPH START leuk_he upnp bindaddr
+DWORD	 CPreferences::m_dwUpnpBindAddr;
+bool     CPreferences::m_bBindAddrIsDhcp;
+// MORPH End leuk_he upnp bindaddr
+
 uint16	CPreferences::port;
 uint16	CPreferences::udpport;
 uint16	CPreferences::nServerUDPPort;
@@ -2035,6 +2040,11 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"UploadCapacityNew",maxGraphUploadRate);
 	ini.WriteInt(L"DeadServerRetry",m_uDeadServerRetries);
 	ini.WriteInt(L"ServerKeepAliveTimeout",m_dwServerKeepAliveTimeout);
+	ini.WriteString(L"BindAddr",m_pszBindAddrW); //MORPH leuk_he bindaddr
+	// MORPH START leuk_he upnp bindaddr
+	ini.WriteString(L"UpnpBindAddr", ipstr(htonl(GetUpnpBindAddr())));
+	ini.WriteBool(L"UpnpBindAddrDhcp",GetUpnpBindDhcp());
+    // MORPH END leuk_he upnp bindaddr
 	ini.WriteInt(L"SplitterbarPosition",splitterbarPosition+2);
 	// Mighty Knife: What's the reason for this line ?!?!?
 	// Why is 2 added here ?!?
@@ -2246,6 +2256,9 @@ void CPreferences::SavePreferences()
 
 	ini.WriteBool(L"WinaTransToolbar", m_bWinaTransToolbar);
 
+
+
+
     // ==> Slot Limit - Stulle
 	ini.WriteBool(_T("SlotLimitThree"), m_bSlotLimitThree);
 	ini.WriteBool(_T("SlotLimitNumB"), m_bSlotLimitNum);
@@ -2389,7 +2402,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("GlobalDataRateFriend"),globaldataratefriend,_T("eMule"));
 	ini.WriteInt(_T("MaxGlobalDataRateFriend"),maxglobaldataratefriend,_T("eMule"));
 	ini.WriteInt(_T("GlobalDataRatePowerShare"),globaldataratepowershare,_T("eMule"));
-	ini.WriteInt(_T("MaxGlobalDataRatePowerShare"),globaldataratepowershare,_T("eMule"));
+	ini.WriteInt(_T("MaxGlobalDataRatePowerShare"),maxglobaldataratepowershare,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRateFriend"),maxclientdataratefriend,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRatePowerShare"),maxclientdataratepowershare,_T("eMule"));
 	ini.WriteInt(_T("MaxClientDataRate"),maxclientdatarate,_T("eMule"));
@@ -2531,7 +2544,7 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool(_T("USSLog"), m_bDynUpLog,_T("eMule"));
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
-	ini.WriteBool(_T("USSUDP"), m_bUSSUDP,_T("eMule")); //MORPH - Added by SiRoB, USS UDP preferency
+	ini.WriteBool(_T("USSUDP_FORCE"), m_bUSSUDP,_T("eMule")); //MORPH - Added by SiRoB, USS UDP preferency
     ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
 
     //Commander - Added: Invisible Mode [TPT] - Start
@@ -3334,7 +3347,7 @@ void CPreferences::LoadPreferences()
 	//MORPH START - Added by SiRoB,  USS log flag
 	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
 	//MORPH END   - Added by SiRoB,  USS log flag
-	m_bUSSUDP = ini.GetBool(_T("USSUDP"), false); //MORPH - Added by SiRoB, USS UDP preferency
+	m_bUSSUDP = ini.GetBool(_T("USSUDP_FORCE"), false); //MORPH - Added by SiRoB, USS UDP preferency
 	m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager
     m_bHighresTimer = ini.GetBool(L"HighresTimer", false);
 	m_bRunAsUser = ini.GetBool(L"RunAsUnprivilegedUser", false);
@@ -4105,3 +4118,26 @@ void CPreferences::SetWapLowPass(CString strNewPass)
 	m_sWapLowPassword = MD5Sum(strNewPass).GetHash();
 }
 //MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
+
+ // MORPH START leuk_he bindaddr
+void CPreferences::SetBindAddr(CStringW bindip)
+{
+	m_strBindAddrW = bindip;
+	m_strBindAddrW.Trim();
+	m_pszBindAddrW = m_strBindAddrW.IsEmpty() ? NULL : (LPCWSTR)m_strBindAddrW;
+	m_strBindAddrA = m_strBindAddrW;
+	m_pszBindAddrA = m_strBindAddrA.IsEmpty() ? NULL : (LPCSTR)m_strBindAddrA;
+}
+ // MORPH END leuk_he bindaddr
+ // MORPH START leuk_he upnp bindaddr
+void CPreferences::SetUpnpBindAddr(DWORD bindip) {
+		if (bindip== ntohl(inet_addr(GetBindAddrA())))
+			m_dwUpnpBindAddr =0;
+		else 
+	    	m_dwUpnpBindAddr= bindip;
+	}
+	// MORPH END leuk_he upnp bindaddr
+ 
+
+
+
