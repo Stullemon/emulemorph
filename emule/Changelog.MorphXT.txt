@@ -4,12 +4,13 @@ Changelog for eMule 0.47a MorphXT v8.x
 FIXED  : (minor) USC: Percentage setting for PowerShare Class was not taken into account (thanks to fafner) [SiRoB]
 
 ADDED  : netfinity: Dynamic Block Requests [SiRoB]
-ADDED  : Tooltips for some preferences [leuk_he]
 ADDED  : minor official bug fix arround upload Obtained Parts [SiRoB]
+ADDED  : Tooltips for some preferences [leuk_he]
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
 CHANGED: USS: Default Forced UDP Ping has been changed to disable [SiRoB]
+Changed: USS: renamed uss Force udp on, (USSUDP_FORCE), you will have to reenable if you needed it before. [leuk_he]
 CHANGED: ImportPart: we can import part into Stopped or Paused file if AICH list is available [SiRoB]
 CHANGED: ImportPart: Chunk with some data already written are also imported [SiRoB]
 
@@ -419,7 +420,7 @@ CHANGED: When SUWQT is disable suwqt file is no more updated [SiRoB]
 Changelog for eMule 0.45b MorphXT v6.2
 --------------------------------------
 FIXED  : Identified a very old bug that make crash morph in particular waiting-queue configuration [SiRoB]
-FIXED  : Friend eLink minor fix from emulEspaña [SiRoB]
+FIXED  : Friend eLink minor fix from emulEspaa [SiRoB]
 FIXED  : DoubleClick on the chat window friend icon open the file preferency [SiRoB]
 FIXED  : AddSource memory exception Official Bugfix by WiZaRd [SiRoB]
 FIXED  : DownloadClientCtrl: Double click on client item is working now [SiRoB]
@@ -834,14 +835,14 @@ CHANGED: You can use HideOS only if you are the complete source [SiRoB]
 ADDED  : Recalculate CRC32. Can be used to force eMule to generate the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
 ADDED  : CRC32 Localize [SiRoB]
 ADDED  : ClientQueueProgressBar to TransferWnd [Commander/SiRoB] (Idea by Roman2k)
-ADDED  : Blinking Tray On Message Recieve from emulEspaña [Commander]
-ADDED  : ed2k FriendLink support from emulEspaña (adapted) (ed2k://|friend|Username|Userhash|/ and ed2k://|friendlist|Url of emfriends.met|/) [Commander] 
-ADDED  : WapServer from emulEspaña (adapted) [SiRoB/Commander]
-ADDED  : Customized IncomingDir icon from emulEspaña [Commander]
+ADDED  : Blinking Tray On Message Recieve from emulEspaa [Commander]
+ADDED  : ed2k FriendLink support from emulEspaa (adapted) (ed2k://|friend|Username|Userhash|/ and ed2k://|friendlist|Url of emfriends.met|/) [Commander] 
+ADDED  : WapServer from emulEspaa (adapted) [SiRoB/Commander]
+ADDED  : Customized IncomingDir icon from emulEspaa [Commander]
 ADDED  : Preferency dialog use eMule Plus Group system [SiRoB]
 ADDED  : Intelligent Chunk Selection from stormit & pawcio by enkeyDEV [AndCycle]
 ADDED  : Option to stop removing trickle client from uploading [AndCycle]
-ADDED  : Adding UPNP,RandomPort,Inproved ICF from emulEspaña [SiRoB]
+ADDED  : Adding UPNP,RandomPort,Inproved ICF from emulEspaa [SiRoB]
 ADDED  : Itsonlyme -modname- [SiRoB]
 ADDED  : Adding partial SNAFU code from eWombat [SiRoB]
 
