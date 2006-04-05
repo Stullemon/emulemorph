@@ -2367,6 +2367,9 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 			partspread[last] = count;
 			last++;
 		}
+		for (i = 0; i < parts; i++)
+			if (partspread[i] >= hideOS && client->m_abyUpPartStatus)
+				client->m_abyUpPartStatus[i] |= SC_HIDDENBYHIDEOS;
 	//MORPH START - Added by SiRoB, Share Only The Need
 	}
 	UINT SOTN = ((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed()); 
