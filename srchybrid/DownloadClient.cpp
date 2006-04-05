@@ -281,12 +281,14 @@ bool CUpDownClient::Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash) c
 // true = client was not deleted!
 bool CUpDownClient::AskForDownload()
 {
-	//MORPH START - Changed by SiRoB, Fix connection collision 
-	/*
 	if (theApp.listensocket->TooManySockets() && !(socket && socket->IsConnected()) )
-	*/
-	if (theApp.listensocket->TooManySockets() && !(socket && (socket->IsConnected() || socket->GetConState() == ES_NOTCONNECTED)) )
 	{
+		//MORPH START - Added by SiRoB, Fix connection collision 
+		if (socket && socket->GetConState() == ES_NOTCONNECTED) {
+			DebugLog(_T("Detected connection collision in CUpDownClient::AskForDownload() (report this if you see it thanks)"));
+			return true;
+		}
+		//MORPH END   - Added by SiRoB, Fix connection collision 
 		if (GetDownloadState() != DS_TOOMANYCONNS)
 			SetDownloadState(DS_TOOMANYCONNS);
 		return true;
