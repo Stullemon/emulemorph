@@ -214,7 +214,7 @@ void CUpDownClient::Init()
 	m_nClientVersion = 0;
 	m_lastRefreshedDLDisplay = 0;
 	m_dwDownStartTime = 0;
-	m_nLastBlockOffset = (unit64)-1; //MORPH - Changed by SiRoB, Fix False Downlaoded Chunk Display 
+	m_nLastBlockOffset = (uint64)-1; //MORPH - Changed by SiRoB, Fix False Downlaoded Chunk Display 
 	m_bUnicodeSupport = false;
 	m_SecureIdentState = IS_UNAVAILABLE;
 	m_dwLastSignatureIP = 0;
