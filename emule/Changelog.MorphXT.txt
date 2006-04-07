@@ -6,6 +6,8 @@ FIXED  : (minor) USC: Percentage setting for PowerShare Class was not taken into
 ADDED  : netfinity: Dynamic Block Requests [SiRoB]
 ADDED  : minor official bug fix arround upload Obtained Parts [SiRoB]
 ADDED  : Tooltips for some preferences [leuk_he]
+ADDED  : (minor) Bindaddr added to extened preferences[leuk_he]
+ADDED  : (minor) Added a Bind addres for Upnp [leuk_he]
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
