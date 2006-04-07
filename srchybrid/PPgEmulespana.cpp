@@ -212,7 +212,6 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		// MORPH START leuk_he upnp bindaddr
          m_htiUpnpBinaddr =	 m_ctrlTreeOptions.InsertItem(GetResString(IDS_UPNPBINDADDR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUPnPGroup);
 		 m_ctrlTreeOptions.AddIPAddress(m_htiUpnpBinaddr , RUNTIME_CLASS(CTreeOptionsIPAddressCtrl));
-	 //	 m_htipnpBindAddrIsDhcp= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_BINDADDRDHCP), m_htiUPnPGroup, m_bUpnpBindAddrIsDhcp);
         //MORPH END leuk_he upnp binaddr
         m_ctrlTreeOptions.Expand(m_htiUPnPGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUPnP, TVE_EXPAND);
@@ -435,7 +434,7 @@ void CPPgEmulespana::Localize()
 		if (m_htiUPnP) m_ctrlTreeOptions.SetItemText(m_htiUPnP, GetResString(IDS_UPNP_ENABLE));
 		if (m_htiUPnPWeb) m_ctrlTreeOptions.SetItemText(m_htiUPnPWeb, GetResString(IDS_UPNP_ENABLEWEB));
          //MORPH START leuk_he upnp bindaddr
-		if (m_htiUpnpBinaddr) m_ctrlTreeOptions.SetItemText(m_htiUpnpBinaddr, GetResString(IDS_UPNPBINDADDR));
+		if (m_htiUpnpBinaddr) m_ctrlTreeOptions.SetEditLabel(m_htiUpnpBinaddr, GetResString(IDS_UPNPBINDADDR));
 		//MORPH END leuk_he upnp bindaddr
 
 
