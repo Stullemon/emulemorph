@@ -98,7 +98,18 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 
 	// Init UPnP
 	int rc;
+	//MORPH START leuk_he upnp bindaddr
+    LPCSTR HostIp=NULL;
+	if (   (thePrefs.GetBindAddrA()!=NULL) 
+		&& IsLANIP((char *) thePrefs.GetBindAddrA()) )
+		HostIp=thePrefs.GetBindAddrA();
+	else if  ( thePrefs.GetUpnpBindAddr()!= 0 )
+		HostIp=strdup(ipstrA(htonl(thePrefs.GetUpnpBindAddr())));
+	rc = UpnpInit( HostIp, thePrefs.GetUPnPPort() );
+    /*
 	rc = UpnpInit( NULL, thePrefs.GetUPnPPort() );
+	*/
+	// MORPH END leuk_he upnp bindaddr 
 	if (UPNP_E_SUCCESS != rc) {
 		AddLogLine(false, GetResString(IDS_UPNP_FAILEDINIT), thePrefs.GetUPnPPort(), GetErrDescription(rc) );
 		UpnpFinish();

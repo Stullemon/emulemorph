@@ -90,6 +90,7 @@ CPPgTweaks::CPPgTweaks()
 	m_bFilterLANIPs = false;
 	m_bExtControls = false;
 	m_uServerKeepAliveTimeout = 0;
+    m_dwBindAddr = 0; // MORPH leuk_he bindaddr    	
 	m_bSparsePartFiles = false;
 	m_bFullAlloc = false;
 	m_bCheckDiskspace = false;
@@ -140,6 +141,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiFilterLANIPs = NULL;
 	m_htiExtControls = NULL;
 	m_htiServerKeepAliveTimeout = NULL;
+    m_htiBindAddr = NULL; // MORPH leuk_he bindaddr
 	m_htiSparsePartFiles = NULL;
 	m_htiFullAlloc = NULL;
 	m_htiCheckDiskspace = NULL;
@@ -212,6 +214,10 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiConditionalTCPAccept = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CONDTCPACCEPT), m_htiTCPGroup, m_bConditionalTCPAccept);
 		m_htiServerKeepAliveTimeout = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SERVERKEEPALIVETIMEOUT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiTCPGroup);
 		m_ctrlTreeOptions.AddEditBox(m_htiServerKeepAliveTimeout, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		//MORPH Start bindaddr
+		m_htiBindAddr = m_ctrlTreeOptions.InsertItem(GetResString(IDS_BINDADDR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiTCPGroup);
+		m_ctrlTreeOptions.AddIPAddress(m_htiBindAddr , RUNTIME_CLASS(CTreeOptionsIPAddressCtrl));
+		//MORPH End bindaddr
 
 		/////////////////////////////////////////////////////////////////////////////
 		// Miscellaneous group
@@ -320,6 +326,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_iMaxHalfOpen, 1, INT_MAX);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiConditionalTCPAccept, m_bConditionalTCPAccept);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiServerKeepAliveTimeout, m_uServerKeepAliveTimeout);
+	DDX_TreeIPAddress( pDX, IDC_EXT_OPTS,m_htiBindAddr  , m_dwBindAddr);
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Miscellaneous group
@@ -449,6 +456,12 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bFilterLANIPs = thePrefs.filterLANIPs;
 	m_bExtControls = thePrefs.m_bExtControls;
 	m_uServerKeepAliveTimeout = thePrefs.m_dwServerKeepAliveTimeout / 60000;
+	//MORPH START leuk_he bindaddr 
+	if (inet_addr(thePrefs.GetBindAddrA())!= INADDR_NONE)
+	     m_dwBindAddr = ntohl(inet_addr(thePrefs.GetBindAddrA())); 
+	else 
+		m_dwBindAddr = 0;
+   //MORPH END leuk_he bindaddr 
 	m_bSparsePartFiles = thePrefs.m_bSparsePartFiles;
 	m_bFullAlloc= thePrefs.m_bAllocFull;
 	m_bCheckDiskspace = thePrefs.checkDiskspace;
@@ -599,6 +612,12 @@ BOOL CPPgTweaks::OnApply()
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.CreateMenues();
 	}
 	thePrefs.m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
+	// MORPH START leuk_he bindaddr
+	if ( m_dwBindAddr == 0) //0.0.0.0
+		thePrefs.SetBindAddr(NULL);
+	else
+	    thePrefs.SetBindAddr(ipstr(ntohl(m_dwBindAddr)));
+	//MORPH END leuk_he bindaddr
 	thePrefs.m_bSparsePartFiles = m_bSparsePartFiles;
 	thePrefs.m_bAllocFull= m_bFullAlloc;
 	thePrefs.checkDiskspace = m_bCheckDiskspace;
@@ -700,6 +719,9 @@ void CPPgTweaks::Localize(void)
 		if (m_htiExtControls) m_ctrlTreeOptions.SetItemText(m_htiExtControls, GetResString(IDS_SHOWEXTSETTINGS));
 		if (m_htiServerKeepAliveTimeout) m_ctrlTreeOptions.SetEditLabel(m_htiServerKeepAliveTimeout, GetResString(IDS_SERVERKEEPALIVETIMEOUT));
 		if (m_htiSparsePartFiles) m_ctrlTreeOptions.SetItemText(m_htiSparsePartFiles, GetResString(IDS_SPARSEPARTFILES));
+		// MORPH START leuk_he bindaddr
+		if (m_htiBindAddr) m_ctrlTreeOptions.SetEditLabel(m_htiBindAddr, GetResString(IDS_BINDADDR));
+		// MORPH END leuk_he bindaddr
 		if (m_htiCheckDiskspace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskspace, GetResString(IDS_CHECKDISKSPACE));
 		if (m_htiMinFreeDiskSpace) m_ctrlTreeOptions.SetEditLabel(m_htiMinFreeDiskSpace, GetResString(IDS_MINFREEDISKSPACE));
 		if (m_htiYourHostname) m_ctrlTreeOptions.SetEditLabel(m_htiYourHostname, GetResString(IDS_YOURHOSTNAME));	// itsonlyme: hostnameSource
@@ -730,6 +752,7 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiMaxHalfOpen,IDS_MAXHALFOPENCONS_TIP);
 		SetTool(m_htiConditionalTCPAccept,IDS_CONDTCPACCEPT_TIP);
 		SetTool(m_htiServerKeepAliveTimeout,IDS_SERVERKEEPALIVETIMEOUT_TIP);
+		SetTool( m_htiBindAddr,IDS_BINDADDR_TIP);
 		SetTool(m_htiAutoTakeEd2kLinks,IDS_AUTOTAKEED2KLINKS_TIP);
 		SetTool(m_htiCreditSystem,IDS_USECREDITSYSTEM_TIP);
 		SetTool(m_htiFilterLANIPs,IDS_PW_FILTER_TIP);
@@ -796,6 +819,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiFilterLANIPs = NULL;
 	m_htiExtControls = NULL;
 	m_htiServerKeepAliveTimeout = NULL;
+	m_htiBindAddr = NULL; //MORPH leuk_he bindaddr
 	m_htiSparsePartFiles = NULL;
 	m_htiFullAlloc = NULL;
 	m_htiCheckDiskspace = NULL;

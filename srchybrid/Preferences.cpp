@@ -2329,7 +2329,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("UPnPLimitToFirstConnection"), m_bUPnPLimitToFirstConnection, _T("eMule"));
 	ini.WriteInt(_T("UPnPDetect"), m_iDetectuPnP, _T("eMule")); // 
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-
+  
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
 	ini.WriteBool(_T("RandomPorts"), m_bRndPorts, _T("eMule"));
 	ini.WriteInt(_T("MinRandomPort"), m_iMinRndPort, _T("eMule"));
@@ -2813,6 +2813,13 @@ void CPreferences::LoadPreferences()
 		else if (dwCurSP2 == 1)
 			maxhalfconnections = 9;
 	}
+  // MORPH START leuk_he upnp bindaddr
+	// abuse m_strBindAddrW will be overwriten in a sec...
+	m_strBindAddrW = ini.GetString(L"upnpBindAddr");
+	m_strBindAddrW.Trim();
+
+  	SetUpnpBindAddr(ntohl(inet_addr((LPCSTR)(CStringA)m_strBindAddrW  )));
+  // MORPH END leuk_he upnp bindaddr
 
 	m_strBindAddrW = ini.GetString(L"BindAddr");
 	m_strBindAddrW.Trim();

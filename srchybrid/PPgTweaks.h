@@ -25,6 +25,7 @@ protected:
 	int m_iMaxConnPerFive;
 	int m_iMaxHalfOpen;
 	bool m_bConditionalTCPAccept;
+	DWORD m_dwBindAddr; //MORPH leuk_he bindaddr
 	bool m_bAutoTakeEd2kLinks;
 	bool m_bVerbose;
 	bool m_bDebugSourceExchange;
@@ -68,6 +69,7 @@ protected:
     int m_iDynUpNumberOfPings;
     bool m_bA4AFSaveCpu;
 	int m_iExtractMetaData;
+	
 
 	CSliderCtrl m_ctlFileBuffSize;
 	CSliderCtrl m_ctlQueueSize;
@@ -104,6 +106,7 @@ protected:
 	HTREEITEM m_htiFilterLANIPs;
 	HTREEITEM m_htiExtControls;
 	HTREEITEM m_htiServerKeepAliveTimeout;
+	HTREEITEM  m_htiBindAddr;	//MORPH leuk_he bindaddr
 	HTREEITEM m_htiSparsePartFiles;
 	HTREEITEM m_htiFullAlloc;
 	HTREEITEM m_htiCheckDiskspace;
