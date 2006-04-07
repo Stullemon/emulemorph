@@ -798,7 +798,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							rememberedSlotCounterClass[classID] = 0;
 						}
 						uint32 slotCounter = lastclientpos;
-						if (maxCounter) rememberedSlotCounterClass[classID];
+						if (maxCounter) slotCounter += rememberedSlotCounterClass[classID];
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
