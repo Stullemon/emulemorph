@@ -1967,7 +1967,7 @@ BEGIN
     CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
                     IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,7,37,197,10
-    CONTROL         "Convert wrong apostrophes ""’"", ""`"" to standard apostrophes "" ' """,
+    CONTROL         "Convert wrong apostrophes """", ""`"" to standard apostrophes "" ' """,
                     IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
@@ -3131,7 +3131,7 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Anglais (?ats-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5572,7 +5572,7 @@ BEGIN
     IDS_CHECKDOTTOSPACE     "Convert ""."" to "" """
     IDS_CHECKUNDERLINETOSPACE "Convert ""_"" to "" """
     IDS_CHECKCONVERTAPOSTROPHES 
-                            "Convert wrong apostrophes ""´"", ""`"" to standard apostrophes "" ' """
+                            "Convert wrong apostrophes """", ""`"" to standard apostrophes "" ' """
     IDS_CHECKCONVERTHEX     "Convert hexadecimal numbers ""%xx"" back to characters"
     IDS_CHECKSEARCHANDREPLACE "Search and Replace:"
     IDS_SC_SEARCHFOR        "Search for:"
@@ -6047,7 +6047,7 @@ IDS_SCC_TIP "How to handle categories in the transfer window"
 IDS_SAC_TIP "Handing of sources that have\n multiple files (<b>A</b>sked <b>4</b> for <b>A</b>nother <a>F</a>ile)\n &Smart af4f control "
 IDS_DEFAULT_TIP "IDS_DEFAULT_TIP"
 IDS_UM_TIP "Handling of the upload:\nSlot control ,\nupload bandthwidth\nspeed sensing"
-IDS_DYNUPLOAD_TIP "Vary the upload speed automatic by deteing available bandwidth."
+IDS_DYNUPLOAD_TIP "Vary the upload speed automatic by detecing available bandwidth."
 IDS_SECURITY_TIP "Security options: Anti leecher & anti credit hack"
 IDS_PW_DISPLAY_TIP "How to display some items \nin the download window"
 IDS_PW_FRIENDS_TIP "Speed settings for friend slots.\nA user can be made a friend and then establish a\nfriend slot for a direct starting download"
@@ -6162,18 +6162,40 @@ IDS_DATEFILENAMELOG_TIP "Save log file in logs dir in format:\neMule - YYYY.MM.D
 IDS_VERBOSE_TIP "debug log settings. Meant for some debugging of the program"
 IDS_ENABLED_TIP "Show log messages in the verbose tab"
 IDS_LOG_LEVEL_TIP "1 = show most important message... 5 = show more messages."
-
 END
 
+//ppgespana
 
+STRINGTABLE 
+BEGIN
 
+LOWIDRETRIES "Number of times it is tried to reconnect to the server\nwhen you get a lowid. "
+RANDOMPORTTIME_TIP "Time in seconds that emule will not change ports\nif random ports (in connections) is set. This \nwill prevent emule from switching ports too fast after restarts"
+ICPCONN_TIP "Make a hole in the internet connections firewall"
+ENABLE_TIP "Automatically open ports in the Internet Connections Firewall\n<b>WARNING</b>:Takes  very much CPU on some configurations\nIs not required if you do not use the internet firewall or use\na thrth party firewall, or open ports in your personall firewall\nmanually"
+CLEARMAPTIP "Open ports in the personal firewall"
+ADDMPATIP "eMule listens at a random server udp port. Open this port as well in the firewall?"
+UPNP_GROUP_TIP "Detect uPnP capable routers."
+IDS_UPNP_ENABLE_TIP "Forwart ports in the router to your pc.\nYou might have to enable uPnP in the router\nYou do not need to set this setting if you \nmanully forwarded ports yourself or do not have\na router. Recommended if you use 'random ports'\n(default: autodetect)"
+IDS_UPNP_ENABLEWEB_TIP "Also forward the port that is used for the webinterface so the webinterface is reachable form the internet"
+WAP_TIP "Wireless Application Protocol (WAP) is an open international standard\nfor applications that use wireless communication (for example, Internet\naccess from a mobile phone)"
+ENABLEWAP_TIP "Enable the wap interface"
+TEMPLATE_TIP "Select the wap template that morph will use\nDefault location is in the emule\\wapserver directory (not config!)"
+WPAPORT_TIP "Port where the wap server will listen on"
+WAPPASS_TIP "Password for full access"
+GUESTWAP_TIP "GUESTWAP_TIP"
+WAPLOW1_TIP "enable guest access with limited permissions."
+WAPLOWPASS_TIP "password for guest account."
 
-
-
+IDS_BINDADDR "Bindaddr emule to interface"
+IDS_BINDADDR_TIP "If you have multiple internet connections force eMule\nto use this particular interface on the pc. You can\nonly use one internet connection with eMule. Set this\nValue to 0.0.0.0 to bind to all interfaces (default)\nYou have to restart eMule to have the full effect of\nthis setting. "
+IDS_UPNPBINDADDR "Upnp host adress to bind"
+IDS_UPNPBINDADDR_TIP "If the computer has multiple interfaces this\nis the address the ports will be forwarded to\nwith the upnp interface of the router. If a \nbinaddr is set you do not need to set this parameter"
+END
 
 // leuk_he tooltipped
 
-#endif    // Anglais (États-Unis) resources
+#endif    // Anglais (?ats-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

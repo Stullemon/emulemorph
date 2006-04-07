@@ -6,7 +6,12 @@
 */
 // Cuadro de diálogo de CPPgEmulespana
 
+// MORPH START leuk_he tooltipped
+/*
 class CPPgEmulespana : public CPropertyPage
+*/
+class CPPgEmulespana : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgEmulespana)
 
@@ -94,7 +99,11 @@ protected:
 	bool		m_bWapLowEnable;
 	CString		m_sWapLowPass;
 	// End MoNKi
-
+	// MORPH START leuk_he upnp bindaddr
+    DWORD m_dwUpnpBindAddr; 
+    HTREEITEM m_htiUpnpBinaddr ;
+	//HTREEITEM m_htipnpBindAddrIsDhcp ;
+	//MORPH END leuk_he upnp bindaddr
 /*Commented by SiRoB
 	// Added by MoNKi [MoNKi: -USS initial TTL-]
 	HTREEITEM	m_htiUSSRoot;

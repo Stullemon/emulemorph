@@ -18,6 +18,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "stdafx.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "emule.h"
 #include "PPgEmulespana.h"
 /*Commented by SiRoB
@@ -53,7 +54,11 @@
 
 IMPLEMENT_DYNAMIC(CPPgEmulespana, CPropertyPage)
 CPPgEmulespana::CPPgEmulespana()
+/* MORPH START leuk_he tooltipped
 	: CPropertyPage(CPPgEmulespana::IDD)
+*/
+	: CPPgtooltipped(CPPgEmulespana::IDD)
+// MORPH END leuk_he tooltipped
 	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)	
 {
 	m_bInitializedTreeOpts = false;
@@ -77,6 +82,10 @@ CPPgEmulespana::CPPgEmulespana()
 	//m_htiUPnPTryRandom = NULL;
 	m_bUPnP = false;
 	m_bUPnPWeb = false;
+	// MORPH START leuk_he upnp bindaddr    	
+    m_dwUpnpBindAddr = 0; 
+    m_htiUpnpBinaddr = NULL;
+	// MORPH END leuk_he upnp bindaddr    	
 	//m_bUPnPTryRandom = false;
 	// End MoNKi
 
@@ -185,7 +194,7 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		if (piml){
 			iImgICF = piml->Add(CTempIconLoader(_T("PROXY")));
 		}
-		m_htiICFSupportRoot = m_ctrlTreeOptions.InsertItem(_T("Internet Connection Firewall (ICF)"), iImgICF, iImgICF, TVI_ROOT);
+		m_htiICFSupportRoot = m_ctrlTreeOptions.InsertGroup(_T("Internet Connection Firewall (ICF)"), iImgICF,  TVI_ROOT);// leuk_he: item -> group
 		m_htiICFSupport = m_ctrlTreeOptions.InsertCheckBox(_T("Enable Windows Internet Connection Firewall (ICF) support"), m_htiICFSupportRoot, m_bICFSupport);
 		m_htiICFSupportClearAtEnd = m_ctrlTreeOptions.InsertCheckBox(_T("Clear mappings at end"), m_htiICFSupportRoot, m_bICFSupportClearAtEnd);
 		m_htiICFSupportServerUDP = m_ctrlTreeOptions.InsertCheckBox(_T("Add mapping for \"ServerUDP\" port"), m_htiICFSupportRoot, m_bICFSupportServerUDP);
@@ -197,10 +206,15 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		if (piml){
 			iImgUPnP = piml->Add(CTempIconLoader(_T("UPNP")));
 		}
-		m_htiUPnPGroup = m_ctrlTreeOptions.InsertItem(_T("Universal Plug & Play (UPnP)"), iImgUPnP, iImgUPnP, TVI_ROOT);
+		m_htiUPnPGroup = m_ctrlTreeOptions.InsertGroup(_T("Universal Plug & Play (UPnP)"), iImgUPnP,  TVI_ROOT); // leuk_he item ->group
 		m_htiUPnP = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLE), m_htiUPnPGroup, m_bUPnP);
-		m_htiUPnPWeb = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLEWEB), m_htiUPnPGroup, m_bUPnPWeb);
-		m_ctrlTreeOptions.Expand(m_htiUPnPGroup, TVE_EXPAND);
+  		m_htiUPnPWeb = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLEWEB), m_htiUPnPGroup, m_bUPnPWeb);
+		// MORPH START leuk_he upnp bindaddr
+         m_htiUpnpBinaddr =	 m_ctrlTreeOptions.InsertItem(GetResString(IDS_UPNPBINDADDR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUPnPGroup);
+		 m_ctrlTreeOptions.AddIPAddress(m_htiUpnpBinaddr , RUNTIME_CLASS(CTreeOptionsIPAddressCtrl));
+	 //	 m_htipnpBindAddrIsDhcp= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_BINDADDRDHCP), m_htiUPnPGroup, m_bUpnpBindAddrIsDhcp);
+        //MORPH END leuk_he upnp binaddr
+        m_ctrlTreeOptions.Expand(m_htiUPnPGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUPnP, TVE_EXPAND);
 		// End MoNKi
 
@@ -209,7 +223,7 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		if (piml){
 			iImgWap = piml->Add(CTempIconLoader(_T("MOBILE")));
 		}
-		m_htiWapRoot = m_ctrlTreeOptions.InsertItem(_T("Wap Interface"), iImgWap, iImgWap, TVI_ROOT);
+		m_htiWapRoot = m_ctrlTreeOptions.InsertGroup(_T("Wap Interface"), iImgWap,  TVI_ROOT); // leuk_he item -> group
 		m_htiWapEnable  = m_ctrlTreeOptions.InsertCheckBox(_T("Enable Wap Interface"), m_htiWapRoot, m_bWapEnable);
 		m_htiWapTemplate = m_ctrlTreeOptions.InsertItem(_T("Template"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
 		m_ctrlTreeOptions.AddFileEditBox(m_htiWapTemplate,RUNTIME_CLASS(CTreeOptionsEdit), RUNTIME_CLASS(CTreeOptionsBrowseButton));
@@ -222,6 +236,7 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddPassEditBox(m_htiWapLowPass, RUNTIME_CLASS(CPassTreeOptionsEdit));
 
 		m_ctrlTreeOptions.Expand(m_htiWapRoot, TVE_EXPAND);
+
 		// End MoNKi
 
 /*Commented by SiRoB
@@ -263,6 +278,12 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnP, m_bUPnP);
 	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPTryRandom, m_bUPnPTryRandom);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
+	// MORPH start leuke_he upnp bindaddr
+	DDX_TreeIPAddress(pDX, IDC_EXT_OPTS,m_htiUpnpBinaddr  , m_dwUpnpBindAddr);
+  	// MORPH end leuke_he upnp bindaddr
+    
+
 	//m_ctrlTreeOptions.SetCheckBoxEnable(m_htiUPnPTryRandom, m_bUPnP);
 	// End MoNKi
 
@@ -413,7 +434,34 @@ void CPPgEmulespana::Localize()
 		if (m_htiUPnPGroup) m_ctrlTreeOptions.SetItemText(m_htiUPnPGroup, GetResString(IDS_UPNP));
 		if (m_htiUPnP) m_ctrlTreeOptions.SetItemText(m_htiUPnP, GetResString(IDS_UPNP_ENABLE));
 		if (m_htiUPnPWeb) m_ctrlTreeOptions.SetItemText(m_htiUPnPWeb, GetResString(IDS_UPNP_ENABLEWEB));
+         //MORPH START leuk_he upnp bindaddr
+		if (m_htiUpnpBinaddr) m_ctrlTreeOptions.SetItemText(m_htiUpnpBinaddr, GetResString(IDS_UPNPBINDADDR));
+		//MORPH END leuk_he upnp bindaddr
+
+
 		// End MoNKi
+		 // MORPH START leuk_he tooltipped
+		SetTool(m_htiLowIdRetry ,LOWIDRETRIES);
+        SetTool(m_htiRandomPortsResetTime ,RANDOMPORTTIME_TIP);
+        SetTool(m_htiICFSupportRoot,ICPCONN_TIP);
+        SetTool(m_htiICFSupport, ENABLE_TIP);
+        SetTool(m_htiICFSupportClearAtEnd,CLEARMAPTIP);
+        SetTool(m_htiICFSupportServerUDP,ADDMPATIP);
+        SetTool(m_htiUPnPGroup ,UPNP_GROUP_TIP);
+        SetTool(m_htiUPnP,IDS_UPNP_ENABLE_TIP);
+        SetTool(m_htiUPnPWeb,IDS_UPNP_ENABLEWEB_TIP);
+        SetTool(m_htiUpnpBinaddr,IDS_UPNPBINDADDR_TIP);
+		//SetTool(m_htipnpBindAddrIsDhcp,IDS_BINDADDRDHCP_TIP);
+        SetTool(m_htiWapRoot,WAP_TIP);
+        SetTool(m_htiWapEnable ,ENABLEWAP_TIP);
+        SetTool(m_htiWapTemplate,TEMPLATE_TIP);
+        SetTool(m_htiWapPort,WPAPORT_TIP);
+        SetTool(m_htiWapPass,WAPPASS_TIP);
+        SetTool(m_htiWapLowEnable ,WAPLOW1_TIP);
+        SetTool(m_htiWapLowPass,WAPLOWPASS_TIP);
+
+     //MORPH END leuk_he tooltipped
+	
 
 /*Commented by SiRoB
 		// Added by MoNKi [MoNKi: -Support for High Contrast Mode-]
@@ -641,6 +689,10 @@ BOOL CPPgEmulespana::OnApply()
 		thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
 		bRestartApp = true;
 	}
+	// MORPH START leuk_he upnp bindaddr
+	thePrefs.SetUpnpBindAddr(m_dwUpnpBindAddr);// Note: read code in thePrefs..
+	// MORPH END  leuk_he upnp bindaddr
+
 	// End MoNKi
 
 /*Commented by SiRoB
@@ -765,6 +817,9 @@ BOOL CPPgEmulespana::OnInitDialog()
 	m_bUPnP = thePrefs.IsUPnPEnabled();
 	m_bUPnPWeb = thePrefs.GetUPnPNatWeb();
 	// End MoNKi
+    // MORPH START leuk_he upnp bindaddr
+	m_dwUpnpBindAddr=thePrefs.GetUpnpBindAddr();
+	// MORPH END  leuk_he upnp bindaddr
 
 /*Commented by SiRoB
 	// Added by MoNKi [MoNKi: -Support for High Contrast Mode-]
@@ -823,6 +878,7 @@ BOOL CPPgEmulespana::OnInitDialog()
 	ChangeTab(0);
 	// End MoNKi
 */
+	InitTooltips(&m_ctrlTreeOptions);
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
