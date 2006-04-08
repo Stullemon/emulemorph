@@ -794,11 +794,15 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					uint64 spentBytes = 0;
 					uint64 spentOverhead = 0;
 					for(uint32 maxCounter = 0; maxCounter < slotCounterClass[classID]; maxCounter++) {
-						if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID]) {
-							rememberedSlotCounterClass[classID] = 0;
-						}
 						uint32 slotCounter = lastclientpos;
-						if (maxCounter || ClientDataRate[classID]) slotCounter += rememberedSlotCounterClass[classID];
+						if (ClientDataRate[classID]) {
+							if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID]) {
+								rememberedSlotCounterClass[classID] = 0;
+							}
+							slotCounter += rememberedSlotCounterClass[classID];
+						}
+						else
+							slotCounter = lastclientpos+maxCounter;
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
@@ -807,8 +811,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
 									if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
 										//uint32 BytesToSend = min(ClientDataRate[classID]?ClientDataRate[classID]:allowedDataRateClass[LAST_CLASS]/slotCounterClass[classID], (allowedDataRateClass[classID]?allowedDataRateClass[classID]:allowedDataRateClass[LAST_CLASS])/slotCounterClass[classID]);
-										uint32 BytesToSend = (UINT)(BytesToSpend - spentBytes);
-										if (maxCounter)	BytesToSend = min(BytesToSend, doubleSendSize);
+										uint32 BytesToSend = min((UINT)(BytesToSpend - spentBytes), doubleSendSize);
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
@@ -824,7 +827,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								}
 							}
 						}
-						if (maxCounter) ++rememberedSlotCounterClass[classID];
+						if (ClientDataRate[classID]) ++rememberedSlotCounterClass[classID];
 					}
 					for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID]; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
