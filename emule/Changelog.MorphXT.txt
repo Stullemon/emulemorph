@@ -4,9 +4,10 @@ Changelog for eMule 0.47a MorphXT v8.x
 FIXED  : (minor) USC: Percentage setting for PowerShare Class was not taken into account (thanks to fafner) [SiRoB]
 
 ADDED  : netfinity: Dynamic Block Requests [SiRoB]
-ADDED  : minor official bug fix arround upload Obtained Parts [SiRoB]
+ADDED  : minor official bug fix arround upload Obtained Parts (this help to properly display yellow pending upload area) [SiRoB]
+ADDED  : minor official bug fix arround DownloadClient ProgressBar (this prevent false green chunk display) [SiRoB]
 ADDED  : Tooltips for some preferences [leuk_he]
-ADDED  : (minor) Bindaddr added to extened preferences[leuk_he]
+ADDED  : (minor) Bindaddr added to extened preferences [leuk_he]
 ADDED  : (minor) Added a Bind addres for Upnp [leuk_he]
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
