@@ -540,6 +540,13 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		}
 	}
 	*/
+	// MORPH START ==> Emcrypt Detection [Xman] - Stulle/leuk_he
+     if (!m_bGPLEvildoer && m_nClientVersion == MAKE_CLIENT_VERSION(0,44,3) && m_strModVersion.IsEmpty() && m_byCompatibleClient==0 && m_bUnicodeSupport==false)
+			{
+				m_bGPLEvildoer = true;
+				DebugLog(LOG_MORPH,_T("[%s]-(%s) Client %s"),_T("eMCrypt(set GPLEvildoer)"),m_strNotOfficial ,DbgGetClientInfo());
+			}
+	// MORPH END <== Emcrypt Detection [Xman] - Stulle/leuk_he
 	return NULL;
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
@@ -1048,7 +1055,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				strBanReason = _T("Anti Credit Hack");
 		if(thePrefs.GetEnableAntiLeecher()){
 			if (strBanReason.IsEmpty())
-				strBanReason = TestLeecher(); 
+				strBanReason = TestLeecher();
 			if(!strBanReason.IsEmpty())
 				BanLeecher(strBanReason);
 		}
@@ -3140,7 +3147,6 @@ void CUpDownClient::CheckForGPLEvilDoer()
 {
 	if (!m_strModVersion.IsEmpty()){
 		LPCTSTR pszModVersion = (LPCTSTR)m_strModVersion;
-
 		// skip leading spaces
 		while (*pszModVersion == _T(' '))
 			pszModVersion++;
