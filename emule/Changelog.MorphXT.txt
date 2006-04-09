@@ -3,13 +3,15 @@ Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
 FIXED  : (minor) USC: Percentage setting for PowerShare Class was not taken into account (thanks to fafner) [SiRoB]
 
-ADDED  : netfinity: Dynamic Block Requests [SiRoB]
-ADDED  : minor official bug fix arround upload Obtained Parts (this help to properly display yellow pending upload area) [SiRoB]
-ADDED  : minor official bug fix arround DownloadClient ProgressBar (this prevent false green chunk display) [SiRoB]
+ADDED  : Dynamic Block Requests by netfinity [SiRoB]
+ADDED  : minor official bug fix arround upload Obtained Parts [SiRoB]
+- this help to properly display yellow pending upload area
+ADDED  : minor official bug fix arround DownloadClient ProgressBar [SiRoB]
+- this prevent false green chunk display
 ADDED  : Tooltips for some preferences [leuk_he]
-ADDED  : (minor) Bindaddr added to extened preferences [leuk_he]
-ADDED  : (minor) Added a Bind addres for Upnp [leuk_he]
-ADDED  : (minor) emcrypt gpl violator protection by Xman [leuk_he]
+ADDED  : Bindaddr added to extened preferences [leuk_he]
+ADDED  : Added a Bind addres for Upnp [leuk_he]
+ADDED  : emcrypt gpl violator protection by Xman [leuk_he]
 
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
@@ -18,6 +20,7 @@ CHANGED: USS: Default Forced UDP Ping has been changed to disable [SiRoB]
 Changed: USS: renamed uss Force udp on, (USSUDP_FORCE), you will have to reenable if you needed it before. [leuk_he]
 CHANGED: ImportPart: we can import part into Stopped or Paused file if AICH list is available [SiRoB]
 CHANGED: ImportPart: Chunk with some data already written are also imported [SiRoB]
+CHANGED: USC: we get a proper equal bandwidth for each slot when we don't use slot focus [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.9
