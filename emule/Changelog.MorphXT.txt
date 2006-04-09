@@ -9,6 +9,8 @@ ADDED  : minor official bug fix arround DownloadClient ProgressBar (this prevent
 ADDED  : Tooltips for some preferences [leuk_he]
 ADDED  : (minor) Bindaddr added to extened preferences [leuk_he]
 ADDED  : (minor) Added a Bind addres for Upnp [leuk_he]
+ADDED  : (minor) emcrypt gpl violator protection by Xman [leuk_he]
+
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
