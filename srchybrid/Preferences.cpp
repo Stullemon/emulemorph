@@ -2893,7 +2893,7 @@ void CPreferences::LoadPreferences()
 	m_bAutoUpdateServerList = ini.GetBool(L"Serverlist", false);
 
 	mintotray=ini.GetBool(L"MinToTray",false);
-	m_bAddServersFromServer=ini.GetBool(L"AddServersFromServer",true);
+	m_bAddServersFromServer=ini.GetBool(L"AddServersFromServer",false); // MORPH leuk_he default to false to fight false servers
 	m_bAddServersFromClients=ini.GetBool(L"AddServersFromClient",false);
 	splashscreen=ini.GetBool(L"Splashscreen",true);
 	startupsound=ini.GetBool(L"Startupsound",true);//Commander - Added: Enable/Disable Startupsound
