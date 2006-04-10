@@ -56,7 +56,12 @@ BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgWebServer::CPPgWebServer()
-	: CPropertyPage(CPPgWebServer::IDD)
+// MORPH START leuk_he tooltipped
+/*
+    : CPropertyPage(CPPgWebServer::IDD)
+*/
+	: CPPgtooltipped(CPPgWebServer::IDD)
+// MORPH END leuk_he tooltipped
 {
 	bCreated = false;
 }
@@ -79,6 +84,7 @@ BOOL CPPgWebServer::OnInitDialog()
 	((CEdit*)GetDlgItem(IDC_WSPORT))->SetLimitText(6);
 
 	LoadSettings();
+	InitTooltips(); // MORPH leuk_he tooltipped
 	Localize();
 
 	OnEnChangeWSEnabled();
@@ -237,6 +243,23 @@ void CPPgWebServer::Localize(void)
 		GetDlgItem(IDC_MMPORT_LBL)->SetWindowText(GetResString(IDS_PORT));
 
 		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->SetWindowText(GetResString(IDS_WEB_ALLOWHILEVFUNC));
+		//MORPH START leuk_he tooltipped
+		SetTool(IDC_WSPASS,IDC_WSPASS_TIP);
+		SetTool(IDC_WSPASSLOW,IDC_WSPASSLOW_TIP);
+		SetTool(IDC_MMPASSWORDFIELD,IDC_MMPASSWORDFIELD_TIP);
+		SetTool(IDC_WSPORT,IDC_WSPORT_TIP);
+		SetTool(IDC_MMPORT_FIELD,IDC_MMPORT_FIELD_TIP);
+		SetTool(IDC_TMPLPATH,IDC_TMPLPATH_TIP);
+		SetTool(IDC_WSTIMEOUT,IDC_WSTIMEOUT_TIP);
+		SetTool(IDC_WSENABLED,IDC_WSENABLED_TIP);
+		SetTool(IDC_WSENABLEDLOW,IDC_WSENABLEDLOW_TIP);
+		SetTool(IDC_MMENABLED,IDC_MMENABLED_TIP);
+		SetTool(IDC_WS_GZIP,IDC_WS_GZIP_TIP);
+		SetTool(IDC_WS_ALLOWHILEVFUNC,IDC_WS_ALLOWHILEVFUNC_TIP);
+		SetTool(IDC_WSRELOADTMPL,IDC_WSRELOADTMPL_TIP);
+	    SetTool(IDC_TMPLBROWSE,IDC_TMPLBROWSE_TIP);
+		SetTool(IDC_GUIDELINK,IDC_GUIDELINK_TIP);
+		//MORPH END leuk_he tooltipped
 	}
 }
 

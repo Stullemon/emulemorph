@@ -1,7 +1,12 @@
 #pragma once
 #include "HypertextCtrl.h"
-
+// MORPH START leuk_he tooltipped
+#include "PPGtooltipped.h" 
+class CPPgWebServer : public CPPgtooltipped  
+/*
 class CPPgWebServer : public CPropertyPage
+*/
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgWebServer)
 

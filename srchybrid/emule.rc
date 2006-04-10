@@ -6167,7 +6167,7 @@ BEGIN
     LOWIDRETRIES "Number of times it is tried to reconnect to the server\nwhen you get a lowid. "
     RANDOMPORTTIME_TIP "Time in seconds that emule will not change ports\nif random ports (in connections) is set. This \nwill prevent emule from switching ports too fast after restarts"
     ICPCONN_TIP "Make a hole in the internet connections firewall"
-    ENABLE_TIP "Automatically open ports in the Internet Connections Firewall\n<b>WARNING</b>:Takes  very much CPU on some configurations\nIs not required if you do not use the internet firewall or use\na thrth party firewall, or open ports in your personall firewall\nmanually"
+ENABLE_TIP "Automatically open ports in the Internet Connections Firewall\n<b>WARNING</b>:Takes  very much CPU on some configurations\nIs not required if you do not use the internet firewall or use\na thrth party firewall, or open ports in your personal firewall\nmanually"
     CLEARMAPTIP "Open ports in the personal firewall"
     ADDMPATIP "eMule listens at a random server udp port. Open this port as well in the firewall?"
     UPNP_GROUP_TIP "Detect uPnP capable routers."
@@ -6186,6 +6186,24 @@ BEGIN
     IDS_UPNPBINDADDR "Upnp host adress to bind"
     IDS_UPNPBINDADDR_TIP "If the computer has multiple interfaces this\nis the address the ports will be forwarded to\nwith the upnp interface of the router. If a \nbinaddr is set you do not need to set this parameter"
 END
+STRINGTABLE BEGIN 
+IDC_WSPASS_TIP  "Sets the password to access the Webinterface. \nIt is important to set a proper password or \nanyone may access your eMule via the web interface.\nAn entered password is displayed as ***. There is \nno default password"
+IDC_WSPASSLOW_TIP  "Enbale the geuest account who can only watch,\nthe guest cannot alter any setting"
+IDC_MMPASSWORDFIELD_TIP  "Password for the java client access"
+IDC_WSPORT_TIP  "Port for Webinterface. Default is 4711. \nChange this to make it harder  to find your \nwebinterface. Or change it to port 80. So\nit is better reachable from some locations \nIf you have a router forward this port or\nenable uPnp"
+IDC_MMPORT_FIELD_TIP  "Port this Emule mobileinterface  will listen on.\n Most javaphones prefer port 80 (default)"
+IDC_TMPLPATH_TIP  "Template for the layout of the webinterface.\nThis template also contains the html codes."
+IDC_WSTIMEOUT_TIP  "Time in minutes before automatic logout.\nSet this to 0 to disable auto logout."
+IDC_WSENABLED_TIP  "Enable the emule webinterface.\nYou can control eMule from a webbrowser\nfrom a remote location"
+IDC_WSENABLEDLOW_TIP  "Enable the read-only guest account.\nDefault disabled."
+IDC_MMENABLED_TIP  "Enable the mobilemule.\nRemote-control your eMule with any java-enabled  mobile\nphone. Most java enabled mobile phones which have 40 KB\nfree fixed memory and about 150-200KB Heap can be used."
+IDC_WS_GZIP_TIP  "Compress the data send to the webinterface.\nAll modern browers support this but if\nyou control emule with some script you\nmight want to disable this"
+IDC_WS_ALLOWHILEVFUNC_TIP  "This the administrator login allows to quit eMule \nand shutdown or restart the computer. Useful together\nwith the Start with Windows setting in\nPreferences -> General"
+IDC_WSRELOADTMPL_TIP "Load the template again."
+IDC_TMPLBROWSE_TIP "Browse filesystem for the tmpl file that\n contains the html code for the webinterface"
+IDC_GUIDELINK_TIP "Open the mobilemule  guide in a webbrowser\nLink to http://mobil.emule-project.net/"
+END
+
 
 // leuk_he tooltipped
 
