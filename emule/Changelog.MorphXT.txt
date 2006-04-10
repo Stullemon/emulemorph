@@ -9,10 +9,10 @@ ADDED  : minor official bug fix arround upload Obtained Parts [SiRoB]
 ADDED  : minor official bug fix arround DownloadClient ProgressBar [SiRoB]
 - this prevent false green chunk display
 ADDED  : Tooltips for some preferences [leuk_he]
-ADDED  : Bindaddr added to extened preferences [leuk_he]
+ADDED  : Bindaddr added to extended preferences [leuk_he]
 ADDED  : Added a Bind addres for Upnp [leuk_he]
 ADDED  : emcrypt gpl violator protection by Xman [leuk_he]
-
+Added  : Server Icon in DownloadClientsCtrl [Stulle]
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
