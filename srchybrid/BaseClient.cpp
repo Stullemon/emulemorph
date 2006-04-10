@@ -540,13 +540,13 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		}
 	}
 	*/
-	// MORPH START ==> Emcrypt Detection [Xman] - Stulle/leuk_he
-     if (!m_bGPLEvildoer && m_nClientVersion == MAKE_CLIENT_VERSION(0,44,3) && m_strModVersion.IsEmpty() && m_byCompatibleClient==0 && m_bUnicodeSupport==false)
-			{
-				m_bGPLEvildoer = true;
-				DebugLog(LOG_MORPH,_T("[%s]-(%s) Client %s"),_T("eMCrypt(set GPLEvildoer)"),m_strNotOfficial ,DbgGetClientInfo());
-			}
-	// MORPH END <== Emcrypt Detection [Xman] - Stulle/leuk_he
+	// MORPH START - Added by leuk_he, eMCrypt Detection [Xman]
+	if (!m_bGPLEvildoer && m_nClientVersion == MAKE_CLIENT_VERSION(0,44,3) && m_strModVersion.IsEmpty() && m_byCompatibleClient==0 && m_bUnicodeSupport==false)
+	{
+		m_bGPLEvildoer = true;
+		DebugLog(LOG_MORPH,_T("[%s]-(%s) Client %s"),_T("eMCrypt(set GPLEvildoer)"),m_strNotOfficial ,DbgGetClientInfo());
+	}
+	// MORPH END   - Added by leuk_he, eMCrypt Detection [Xman]
 	return NULL;
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
