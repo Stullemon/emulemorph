@@ -1214,7 +1214,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	m_SelectiveChunkMenu.CheckMenuRadioItem(MP_SELECTIVE_CHUNK, MP_SELECTIVE_CHUNK_1, uSelectiveChunkMenuItem, 0);
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, iSelectedItems > 0 && iCompleteFileSelected ==1 ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	buffer.Format(_T(" (%s)"),thePrefs.GetShareOnlyTheNeed()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
 	m_ShareOnlyTheNeedMenu.ModifyMenu(MP_SHAREONLYTHENEED, MF_STRING, MP_SHAREONLYTHENEED, GetResString(IDS_DEFAULT) + buffer);
 	m_ShareOnlyTheNeedMenu.CheckMenuRadioItem(MP_SHAREONLYTHENEED, MP_SHAREONLYTHENEED_1, uShareOnlyTheNeedMenuItem, 0);
