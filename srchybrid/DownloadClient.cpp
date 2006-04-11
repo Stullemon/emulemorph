@@ -283,12 +283,6 @@ bool CUpDownClient::AskForDownload()
 {
 	if (theApp.listensocket->TooManySockets() && !(socket && socket->IsConnected()) )
 	{
-		//MORPH START - Added by SiRoB, Fix connection collision 
-		if (socket && socket->GetConState() == ES_NOTCONNECTED) {
-			DebugLog(_T("Detected connection collision in CUpDownClient::AskForDownload() (report this if you see it thanks)"));
-			return true;
-		}
-		//MORPH END   - Added by SiRoB, Fix connection collision 
 		if (GetDownloadState() != DS_TOOMANYCONNS)
 			SetDownloadState(DS_TOOMANYCONNS);
 		return true;
@@ -542,6 +536,15 @@ void CUpDownClient::SendStartupLoadReq()
 		return;
 	}
 	SetDownloadState(DS_ONQUEUE);
+	//MORPH START - Added by SiRoB, Fix connection collision
+	if (m_fQueueRankPending == 1 && !GetSentCancelTransfer()) {
+		if(thePrefs.GetLogUlDlEvents())
+			DebugLog(LOG_MORPH, _T("[FIX CONNECTION COLLISION] Failed download Successfully rescued client: %s"),DbgGetClientInfo());
+		ProcessAcceptUpload();
+		return;
+	}
+	//MORPH END   - Added by SiRoB, Fix connection collision
+
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__StartupLoadReq", this);
 	CSafeMemFile dataStartupLoadReq(16);
@@ -1107,9 +1110,13 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		CreateBlockRequests(1);
 		if (m_PendingBlocks_list.IsEmpty())
 		{
+			//MORPH - Changed by SiRoB, SlugFiller noneededrequeue
+			/*
 			SendCancelTransfer();
 			SetDownloadState(DS_NONEEDEDPARTS);
 			SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
+			*/
+			SetDownloadState(DS_ONQUEUE);
 			return;
 		}
 		if (isTestFile)
@@ -1165,9 +1172,13 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 
 
 	if (m_PendingBlocks_list.IsEmpty()){
+		//MORPH - Changed by SiRoB, SlugFiller noneededrequeue
+		/*
 		SendCancelTransfer();
 		SetDownloadState(DS_NONEEDEDPARTS);
 		SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
+		*/
+		SetDownloadState(DS_ONQUEUE);
 		return;
 	}
 
@@ -1840,11 +1851,7 @@ void CUpDownClient::UDPReaskForDownload()
 		return;
 
 	if (GetUDPPort() != 0 && GetUDPVersion() != 0 && thePrefs.GetUDPPort() != 0 &&
-	//MORPH START - Changed by SiRoB, Fix connection collision 
-	/*
 		!theApp.IsFirewalled() && !(socket && socket->IsConnected()) && !thePrefs.GetProxySettings().UseProxy)
-	*/
-		!theApp.IsFirewalled() && !(socket && (socket->IsConnected() || socket->GetConState() == ES_NOTCONNECTED)) && !thePrefs.GetProxySettings().UseProxy)
 	{ 
 		if( !HasLowID() )
 		{
@@ -2550,6 +2557,12 @@ void CUpDownClient::ProcessAcceptUpload()
 			}
 			//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
 		}
+		//MORPH START - Added by SiRoB, Fix collision conenction
+		else if (GetDownloadState() == DS_CONNECTED){
+			if(thePrefs.GetLogUlDlEvents())
+				DebugLog(LOG_MORPH, _T("[FIX CONNECTION COLLISION] Failed download will be rescued client: %s"),DbgGetClientInfo());
+		}
+		//MORPH END   - Added by SiRoB, Fix collision conenction
 		//MORPH START - Added by SiRoB, Debug To catch the failed up/dw reason
 		else{
 			if(thePrefs.GetLogUlDlEvents())
