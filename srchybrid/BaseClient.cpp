@@ -1457,6 +1457,7 @@ void CUpDownClient::SendHelloAnswer(){
 		DebugSend("OP__HelloAnswer", this);
 	theStats.AddUpDataOverheadOther(packet->size);
 	socket->SendPacket(packet,true);
+	m_bHelloAnswerPending = false; //MORPH - Added by SiRoB, Fix
 }
 
 void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
