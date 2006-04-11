@@ -608,7 +608,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						DebugRecv("OP_StartUpLoadReq", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadFileRequest(size);
 				
-					if (!client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode)
+					if (!client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode))
 						break;
 					if (size == 16)
 					{
