@@ -2558,17 +2558,11 @@ void CUpDownClient::ProcessAcceptUpload()
 			//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
 		}
 		//MORPH START - Added by SiRoB, Fix collision conenction
-		else if (GetDownloadState() == DS_CONNECTED){
+		else {
 			if(thePrefs.GetLogUlDlEvents())
 				DebugLog(LOG_MORPH, _T("[FIX CONNECTION COLLISION] Failed download will be rescued client: %s"),DbgGetClientInfo());
 		}
 		//MORPH END   - Added by SiRoB, Fix collision conenction
-		//MORPH START - Added by SiRoB, Debug To catch the failed up/dw reason
-		else{
-			if(thePrefs.GetLogUlDlEvents())
-				DebugLog(LOG_WARNING | DLP_VERYLOW,_T("---- %s: Accept Upload aborted: download state not OnQueue ----"),DbgGetClientInfo());
-		}
-		//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
 	}
 	else
 	{
