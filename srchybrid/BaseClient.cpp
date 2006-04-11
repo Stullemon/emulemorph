@@ -1963,7 +1963,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 	{
 		//MORPH START - Changed by SiRoB, Fix connection collision 
 		if (socket && socket->GetConState() == ES_NOTCONNECTED) {
-			DebugLog(_T("Detected connection collision in CUpDownClient::TryToConnect() (report this if you see it thanks)"));		
+			DebugLog(LOG_MORPH, _T("[FIX CONNECTION COLLISION] Already initiated socket has been preserved for client : %s"), DbgGetClientInfo());		
 			return true;
 		}
 		//MORPH END   - Changed by SiRoB, Fix connection collision 
@@ -1982,8 +1982,11 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 	}
 	else
 	{
-		/*FIX*/if (CheckHandshakeFinished())
+		//MORPH - Changed by SiRoB, Fix connection collision
+		if (CheckHandshakeFinished())
 			ConnectionEstablished();
+		else if (thePrefs.GetVerbose())
+			DebugLog(DLP_VERYLOW, _T("Handshake not finished - TryToConnect(); %s"), DbgGetClientInfo());
 		return true;
 	}
 	// MOD Note: Do not change this part - Merkur
@@ -3130,13 +3133,13 @@ CString CUpDownClient::DbgGetClientInfo(bool bFormatIP) const
 	return str;
 }
 
-bool CUpDownClient::CheckHandshakeFinished() const
+bool CUpDownClient::CheckHandshakeFinished(UINT protocol, UINT opcode) const
 {
 	if (m_bHelloAnswerPending)
 	{
 		// 24-Nov-2004 [bc]: The reason for this is that 2 clients are connecting to each other at the same..
-		//if (thePrefs.GetVerbose())
-		//	AddDebugLogLine(DLP_VERYLOW, false, _T("Handshake not finished - while processing packet: %s; %s"), DbgGetClientTCPOpcode(protocol, opcode), DbgGetClientInfo());
+		if (thePrefs.GetVerbose() && protocol != 0 && opcode != 0)
+			DebugLog(DLP_VERYLOW, _T("Handshake not finished - while processing packet: %s; %s"), DbgGetClientTCPOpcode(protocol, opcode), DbgGetClientInfo());
 		return false;
 	}
 

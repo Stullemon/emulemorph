@@ -524,12 +524,20 @@ void CUpDownClient::CreateNextBlockPackage(){
 				*/
 				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
 				//MORPH END  - Changed by SiRoB, SLUGFILLER: SafeHash
-					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
+				{
+					CString error;
+					error.Format(_T("%s: %I64u = %I64u - %I64u "), GetResString(IDS_ERR_INCOMPLETEBLOCK), i64uTogo, currentblock->EndOffset, currentblock->StartOffset);
+					throw error;
+				}
 				//MORPH START - Added by SiRoB, Anti Anti HideOS & SOTN :p 
 				if (m_abyUpPartStatus) {
 					for (UINT i = (UINT)(currentblock->StartOffset/PARTSIZE); i < (UINT)((currentblock->EndOffset-1)/PARTSIZE+1); i++)
 						if (m_abyUpPartStatus[i]>SC_AVAILABLE)
-							throw GetResString(IDS_ERR_HIDDENBLOCK);
+							{
+								CString error;
+								error.Format(_T("%s: Part %u, %I64u = %I64u - %I64u "), GetResString(IDS_ERR_HIDDENBLOCK), i, i64uTogo, currentblock->EndOffset, currentblock->StartOffset);
+								throw error;
+							}
 				}//MORPH END   - Added by SiRoB, Anti Anti HideOS & SOTN :p 
 			}
 

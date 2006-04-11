@@ -246,7 +246,7 @@ public:
 	virtual bool	Connect();
 	virtual void	ConnectionEstablished();
 	virtual void	OnSocketConnected(int nErrorCode);
-	bool			CheckHandshakeFinished() const;
+	bool			CheckHandshakeFinished(UINT protocol = 0, UINT opcode = 0) const;
 	void			CheckFailedFileIdReqs(const uchar* aucFileHash);
 	uint32			GetUserIDHybrid() const							{ return m_nUserIDHybrid; }
 	void			SetUserIDHybrid(uint32 val)						{ m_nUserIDHybrid = val; }
@@ -877,6 +877,7 @@ public:
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 	void	SetReadBlockFromFileBuffer(byte* pdata) {filedata = pdata;};
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
+	bool	IsUDPPending() {return m_bUDPPending;}
 protected:
 	int m_iHttpSendState;
 	uint32 m_uPeerCacheDownloadPushId;
