@@ -817,7 +817,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	//MORPH END   - Adde by SiRoB, Optimization requpfile
 	if (reqfile)
 		reqfile->statistic.AddAccepted();
-	
+
 	theApp.emuledlg->transferwnd->uploadlistctrl.AddClient(newclient);
 
 	return true;
@@ -1369,8 +1369,15 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			}
 		}
 		//Morph End - added by AndCycle, SLUGFILLER: infiniteQueue
+		//MORPH - Changed by SiRoB, Fix connection collision
+		/*
 		if (client->IsDownloading())
 		{
+		*/
+		if (IsDownloading(client))
+		{
+			client->SetUploadState(US_UPLOADING);
+		//MORPH - Changed by SiRoB, Fix connection collision
 			// he's already downloading and wants probably only another file
 			if (thePrefs.GetDebugClientTCPLevel() > 0)
 				DebugSend("OP__AcceptUploadReq", client);
