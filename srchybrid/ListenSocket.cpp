@@ -280,7 +280,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 				throw GetResString(IDS_ERR_NOHELLO);
 			}
 			else if (client && opcode != OP_HELLO && opcode != OP_HELLOANSWER)
-				client->CheckHandshakeFinished();
+				client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 			switch(opcode)
 			{
 				case OP_HELLOANSWER:
@@ -608,7 +608,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						DebugRecv("OP_StartUpLoadReq", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadFileRequest(size);
 				
-					if (!client->CheckHandshakeFinished())
+					if (!client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode)
 						break;
 					if (size == 16)
 					{
@@ -1375,7 +1375,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						DebugRecv("OP_MultiPacket", client, (size >= 16) ? packet : NULL);
 					}
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					if( client->GetKadPort() )
 						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
@@ -1677,7 +1677,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_MultiPacketAns", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					if( client->GetKadPort() )
 						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
@@ -1897,7 +1897,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_QueueRanking", client);
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					client->ProcessEmuleQueueRank(packet, size);
 					break;
@@ -1907,7 +1907,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_RequestSources", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadSourceExchange(uRawSize);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					if (client->GetSourceExchangeVersion() > 1)
 					{
@@ -1963,7 +1963,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_AnswerSources", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadSourceExchange(uRawSize);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					CSafeMemFile data(packet, size);
 					uchar hash[16];
@@ -1989,7 +1989,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_FileDesc", client);
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					client->ProcessMuleCommentPacket(packet,size);
 					break;
@@ -1999,7 +1999,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_RequestPreView", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadOther(uRawSize);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					if (thePrefs.CanSeeShares()==vsfaEverybody || (thePrefs.CanSeeShares()==vsfaFriends && client->IsFriend()))	
 					{
@@ -2020,7 +2020,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_PreviewAnswer", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadOther(uRawSize);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					client->ProcessPreviewAnswer(packet, size);
 					break;
@@ -2470,7 +2470,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					}
 					
 					theStats.AddDownDataOverheadFileRequest(24);
-					client->CheckHandshakeFinished();
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					if (client->GetRequestFile() && !client->GetRequestFile()->IsStopped() && (client->GetRequestFile()->GetStatus()==PS_READY || client->GetRequestFile()->GetStatus()==PS_EMPTY))
 					{
