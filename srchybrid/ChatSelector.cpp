@@ -141,7 +141,16 @@ void CChatSelector::UpdateFonts(CFont* pFont)
 
 CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 {
-	::SetFocus(m_hwndMessageBox);
+	// MORPH START raccoonI: eMule steals focus when message from new client is received - [leuk_he]
+     if (show)
+     {
+        ::SetFocus(m_hwndMessageBox);
+     }
+ 	 /*
+     ::SetFocus(m_hwndMessageBox);
+	 */
+     // MORPH END  raccoonI: eMule steals focus when message from new client is received <--
+     
 	if (GetTabByClient(client) != -1){
 		if (show){
 			SetCurSel(GetTabByClient(client));
@@ -251,6 +260,9 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 			EndSession(sender);
 		return;
 	}
+	// MORPH START leuk_he -- filtered messages not in log
+    AddLogLine(true, GetResString(IDS_NEWMSG), sender->GetUserName(), ipstr(sender->GetConnectIP())); // Avi3k:
+    // MORPH END leuk_he -- filtered messages not in log
 
 	bool isNewChatWindow = false;
 	if (!ci)

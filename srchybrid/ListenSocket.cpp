@@ -938,7 +938,12 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						length = MAX_CLIENT_MSG_LEN;
 					}
 
+					// MORPH START leuk_he -- filtered messages not in log
+					AddDebugLogLine(false, GetResString(IDS_NEWMSG), client->GetUserName(), ipstr(client->GetConnectIP()));
+					/* 
 					AddLogLine(true,GetResString(IDS_NEWMSG), client->GetUserName(), ipstr(client->GetConnectIP()));
+					*/
+					// MORPH END leuk_he -- filtered messages not in log
 
 					CString strMessage(data.ReadString(client->GetUnicodeSupport()!=utf8strNone, length));
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
