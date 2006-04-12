@@ -129,13 +129,13 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey")));
+	m_ImageList.Add(CTempIconLoader(_T("Morph")));
 	//MORPH START - Added by SiRoB, WebCache
 	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE")));
 	//MORPH END   - Added by SiRoB, WebCache
 	//MORPH START - Added by Stulle, Server Icon
 	m_ImageList.Add(CTempIconLoader(_T("Server")));
 	//MORPH END   - Added by Stulle, Server Icon
-	m_ImageList.Add(CTempIconLoader(_T("Morph")));
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
@@ -356,16 +356,16 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					}
 					//MORPH START - Added by Stulle, Server Icon
 					else if(client->GetClientSoft() == SO_URL){
-						image = 18;
+						image = 19;
 					}
 					//MORPH END   - Added by Stulle, Server Icon
 					//MORPH START - Added by SiRoB, WebCache
 					else if (client->GetClientSoft() == SO_WEBCACHE) {
-						image = 17;
+						image = 18;
 					}
 					//MORPH END   - Added by SiRoB, WebCache
 					else if (client->ExtProtocolAvailable()){
-						image = client->IsMorph()?18:1; //MORPH START - Added by SiRoB, More client icon
+						image = client->IsMorph()?17:1; //MORPH START - Added by SiRoB, More client icon
 					}
 					else if (client->GetClientSoft() == SO_EDONKEY){
 						image = 15;
