@@ -21,6 +21,8 @@ Changed: USS: renamed uss Force udp on, (USSUDP_FORCE), you will have to reenabl
 CHANGED: ImportPart: we can import part into Stopped or Paused file if AICH list is available [SiRoB]
 CHANGED: ImportPart: Chunk with some data already written are also imported [SiRoB]
 CHANGED: USC: we get a proper equal bandwidth for each slot when we don't use slot focus [SiRoB]
+CHANGED: (minor) No log messagge in log on spam. (only in verbose) [leuk_he]
+CHANGED: (minor) focus steal check on message by raccoonI [leuk_he]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.9
