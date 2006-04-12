@@ -2557,12 +2557,6 @@ void CUpDownClient::ProcessAcceptUpload()
 			}
 			//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
 		}
-		//MORPH START - Added by SiRoB, Fix collision conenction
-		else {
-			if(thePrefs.GetLogUlDlEvents())
-				DebugLog(LOG_MORPH, _T("[FIX CONNECTION COLLISION] Failed download will be rescued client: %s"),DbgGetClientInfo());
-		}
-		//MORPH END   - Added by SiRoB, Fix collision conenction
 	}
 	else
 	{
