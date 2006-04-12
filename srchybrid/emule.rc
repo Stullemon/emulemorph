@@ -6014,8 +6014,8 @@ BEGIN
     IDS_MINDATARATEFRIEND_TIP "Total uploadspeed that is spend on friend slots.\n Note that if this speed exceeds 3kb/s the 1:3 session zzratio enabled \n (R/r next to up/download)"
     IDS_MAXCLIENTDATARATEFRIEND_TIP "The max speed that is available for a single friend slot."
     IDS_MINDATARATEPOWERSHARE_TIP "The total speed that is spend on all powershare slots. (Default:all)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE_TIP "The maxs upload speed that is \navailable for 1 slot in powershared status.\nDetault=0, slotfocus, focus all powershare speed to the lowest slot number."
-    IDS_MAXCLIENTDATARATE_TIP "Max upload speed that 1 single client slot receives.\nDefault = 0, slotfocus, all speed to lowest slot number\nto complete a chunk as fast as possible. Note that this\nspeed may be exceeded for a short while to fill available\nupload capacity"
+    IDS_MAXCLIENTDATARATEPOWERSHARE_TIP "The maxs upload speed that is available for 1 slot in powershared status.\nDetault=0, slotfocus, focus all powershare speed to the lowest slot number.\nSetting a value here makes morph swtich from slotfocus to distibute bandtwidth\nmodus."
+    IDS_MAXCLIENTDATARATE_TIP "Max upload speed that 1 single normal client slot receives.\nDefault = 0, slotfocus, all speed to lowest slot number\nto complete a chunk as fast as possible. If a value is \nentered here the upload of normal slots distibutes the \nbandwitht over the slots with a targeted max of the value\n set here. Note that this speed may be exceeded for a short\nwhile to fill available\nupload capacity"
     IDS_SLOT_LIMIT_GROUP_TIP "Last resort option to limit the number of slots.\nFirst the upload speed classes are applied and\nthis is only a last resort to limit the number\nof upload slots if the speed limits cannot be\nset correct"
     IDS_SLOT_LIMIT_NONE_TIP "Do not limit the number of open slots.\nThis is the recommended setting, but the upload has to be correct\nor too many very slow slots will be opened when the set upload speed\ncannot be reached."
     IDS_SLOT_LIMIT_THREE_TIP "Limit the number of slots to the set upload speed / 3kb like the official\nclient. Does not apply until at least upload 4 slots are active (Default)"
@@ -6205,6 +6205,27 @@ BEGIN
     IDC_TMPLBROWSE_TIP "Browse filesystem for the tmpl file that\n contains the html code for the webinterface"
     IDC_GUIDELINK_TIP "Open the mobilemule  guide in a webbrowser\nLink to http://mobil.emule-project.net/"
 END
+STRINGTABLE
+BEGIN 
+	IDS_PREFER_SHARE_ALL_TIP "Connect first to servers that can handle the number\nof files (softlimit) that you are sharing.");
+	IDS_ONLY_DOWNLOAD_COMPLETE_FILES_TIP "Only start to download a file if it has been seen complete\nat least once. This  will prevent you from starting a downlaod\na file that can never complete, but might delay downloading of\na file if you ask multiple files from only one complete source"
+	IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP "Save Upload Queue Wait Time.\nBasically, SUQWT allows one to carry wait time from previous dead-end upload queue\nwaiting sessions over to the next upload queue sessions until one manages to get\n through the upload queue, somewhat like holding a spot in a waiting line by using \nyour gym bag or other article - if you're not there, the bag stays there and people\nmove around it. (in an ideal civilized world anyway). Default: enabled"
+	IDS_ENABLE_CHUNKDOTS_TIP "Show dots on the spread bar every 9.28Mb"
+	IDS_ECFEF_TIP "One queue per file/all files equal change.\nChange the priority of each file based on the\nuploaded data  and requests in this session"
+	IDS_IP2COUNTRY_TIP "Country names and flags on the client details in the \ntransfer window. You need a up to date country.csv file\n from the morph update settings to show the correct\ncountries based on the guessed location of the ip \nnumber of the peer."
+	IDS_DISABLED_TIP "No country letters. (disable country column on next startup)"
+	IDS_COUNTRYNAME_SHOWFLAG_TIP "Show country flags in the country column or at the start of the line. "
+	IDS_CREDIT_SYSTEM_TIP "What credit system to use. A credit system\nis required in morph. The priority of the\npeers in your waiting queue is based on the\ncredit system."
+	IDS_OFFICIAL_CREDIT_TIP "Start:1 Min: 1 max: 10\nRatio1 = Uploaded Total x 2 / Downloaded Total\nRatio2 = SQRT(Uploaded Total + 2 )\nBoth ratios are compared and the lower value\nis used as modifier. Some boundary conditions\n  also exist:\n 	Uploaded Total less than 1MB => Modifier = 1\n 	Downloaded Total = 0 => Modifier = 10"
+ 	IDS_LOVELACE_CREDIT_TIP "Start:1, max:100, min:0.1, ratio:1:1.5\nl-modifier=100*((1-1/(1+exp((3*{MB uploaded to us}^2-{MB downloaded from us}^2)/1000)))^6.6667)\nOnly clients using the 'SecureHash' are able to get a multiplier of 100. All others will stay at 10.\nIn contrast to the original credit system, credits are evaluated more on differences and not on\nquotients. Using the original system you have the best credit values shortly after generating a new\nuserhash. With the new credit system you get good credit values faster if you already have uploaded\nmany MB before (and did not cheat by killing the userhash). "
+	//IDS_RATIO_CREDIT_TIP "IDS_RATIO_CREDIT_TI"
+	IDS_PAWCIO_CREDIT_TIP "Start:3 min: 1 max: 100.\nratio = 3 * downloaded / uploaded - For new clients (downloaded and uploaded data less than 1MB)\nratio = 3.0 (instead of 1.0) - If you have received more than 1MB from someone but haven't given\nanything back user gets ratio = 100.0 - Small bonus for clients that have given you many MB:\n- if you get 100MB then user receive ratio = 50.0 "
+	IDS_EASTSHARE_CREDIT_TIP "Start:100 min: 10 max: 5000\nRatio = +6 per MB uploaded and -2 for downloaded\nbonux  +100 if upload 1MB+\nlow value if uploaded at least  1MB+, ratio = 50"
+	IDS_PAYBACKFIRST_TIP "Open a powershare slot to payback the client the uploaded data immediate.\nWorks only on complete files, not on partial downloaded files."
+	IDS_PAYBACKFIRSTLIMI_TIP "Amount the peer must have upload more to us\nthen we downloaded from him before PBF starts"
+	//IDS_MET_FILE_CONTROL_TIP "IDS_MET_FILE_CONTROL_TI"
+	IDS_EXPIRED_KNOWN_TIP "Clean up .met files after file \nhas not been seen for xxx days\nSaves diskspace. Applies for\nknown*.met. Never set a very\nlow value (less than 30) here"
+END		
 
 
 // leuk_he tooltipped

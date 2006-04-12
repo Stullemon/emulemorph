@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "emule.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PPgEastShare.h"
 #include "OtherFunctions.h"
 #include "UserMsgs.h"
@@ -33,8 +34,14 @@ BEGIN_MESSAGE_MAP(CPPgEastShare, CPropertyPage)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
+
 CPPgEastShare::CPPgEastShare()
-	: CPropertyPage(CPPgEastShare::IDD)
+//MORPH START  - leuk_he tooltipped
+/*
+    : CPropertyPage(CPPgEastShare::IDD)
+*/
+	: CPPgtooltipped(CPPgEastShare::IDD)
+//MORPH END - leuk_he tooltipped		
 	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
 {
 	m_bInitializedTreeOpts = false;
@@ -187,6 +194,7 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_iKnownMetDays = thePrefs.GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
 	
 	CPropertyPage::OnInitDialog();
+	InitTooltips(&m_ctrlTreeOptions);// MORPH leuk_he tooltipped.
 	Localize();
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -287,8 +295,28 @@ void CPPgEastShare::Localize(void)
 		//EastShare START - Added By TAHO, .met file control // Modified by Pretender
 		if (m_htiKnownMet) m_ctrlTreeOptions.SetEditLabel(m_htiKnownMet, (GetResString(IDS_EXPIRED_KNOWN)));
 		//EastShare END - Added By TAHO, .met file control
-
-	}
+		
+		// MORPH START - leuk_he tooltipped
+		SetTool(m_htiEnablePreferShareAll,IDS_PREFER_SHARE_ALL_TIP);
+		SetTool(m_htiOnlyDownloadCompleteFiles,IDS_ONLY_DOWNLOAD_COMPLETE_FILES_TIP);
+		SetTool(m_htiSaveUploadQueueWaitTime,IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP);
+		SetTool(m_htiEnableChunkDots,IDS_ENABLE_CHUNKDOTS_TIP);
+		SetTool(m_htiEnableEqualChanceForEachFile,IDS_ECFEF_TIP);
+		SetTool(m_htiIP2CountryName,IDS_IP2COUNTRY_TIP);
+		SetTool(m_htiIP2CountryName_DISABLE,IDS_DISABLED_TIP);
+		SetTool(m_htiIP2CountryShowFlag,IDS_COUNTRYNAME_SHOWFLAG_TIP);
+		SetTool(m_htiCreditSystem,IDS_CREDIT_SYSTEM_TIP);
+		SetTool(m_htiOfficialCredit,IDS_OFFICIAL_CREDIT_TIP);
+		SetTool(m_htiLovelaceCredit,IDS_LOVELACE_CREDIT_TIP);
+	//	SetTool(m_htiRatioCredit,IDS_RATIO_CREDIT_TIP);
+		SetTool(m_htiPawcioCredit,IDS_PAWCIO_CREDIT_TIP);
+		SetTool(m_htiESCredit,IDS_EASTSHARE_CREDIT_TIP);
+		SetTool(m_htiIsPayBackFirst,IDS_PAYBACKFIRST_TIP);
+		SetTool(m_htiPayBackFirstLimit,IDS_PAYBACKFIRSTLIMI_TIP);
+		//SetTool(m_htiMetControl,IDS_MET_FILE_CONTROL_TIP);
+		SetTool(m_htiKnownMet,IDS_EXPIRED_KNOWN_TIP);
+		// MORPH END - leuk_he tooltipped
+	}	
 
 }
 
