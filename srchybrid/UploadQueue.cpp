@@ -793,7 +793,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			buffer.AppendFormat(_T("[C%i %i/%i]-"),classID,m_aiSlotCounter[classID],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]);
 		buffer.AppendFormat(_T(" Client: %s"),newclient->DbgGetClientInfo());
-		DebugLog(LOG_USC | DLP_VERYLOW,buffer);
+		DebugLog(LOG_MORPH|LOG_USC|DLP_VERYLOW,buffer);
 	}
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	

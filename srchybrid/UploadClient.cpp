@@ -1328,7 +1328,7 @@ void CUpDownClient::BanLeecher(LPCTSTR pszReason){
 		theStats.leecherclients++;
 		m_bLeecher = true;
 		//AddDebugLogLine(false,GetResString(IDS_ANTILEECHERLOG) + _T(" (%s)"),DbgGetClientInfo(),pszReason==NULL ? _T("No Reason") : pszReason);
-		DebugLog(LOG_MORPH,_T("[%s]-(%s) Client %s"),pszReason==NULL ? _T("No Reason") : pszReason ,m_strNotOfficial ,DbgGetClientInfo());
+		DebugLog(LOG_MORPH|WARNING|DLP_VERYHIGH,_T("[%s]-(%s) Client %s"),pszReason==NULL ? _T("No Reason") : pszReason ,m_strNotOfficial ,DbgGetClientInfo());
 	}
 	theApp.clientlist->AddBannedClient( GetIP() );
 	SetUploadState(US_BANNED);
