@@ -61,7 +61,7 @@ CStatisticsDlg::CStatisticsDlg(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CStatisticsDlg::IDD, pParent)
 	, m_DownloadOMeter(3)
 	, m_Statistics(4)
-	, m_UploadOMeter(5)
+	, m_UploadOMeter(6) //MORPH - Changed by SiRoB, powershare display
 
 {
 	m_oldcx=0;
@@ -597,11 +597,12 @@ void CStatisticsDlg::RepaintMeters()
 
 	m_UploadOMeter.SetBackgroundColor(thePrefs.GetStatsColor(0)) ;
 	m_UploadOMeter.SetGridColor(thePrefs.GetStatsColor(1)) ;			// Grid
-	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(7) ,4);		// Upload session
-	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(6) ,3);		// Upload average
+	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(7) ,5);		// Upload session
+	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(6) ,4);		// Upload average
 	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(5) ,0);		// Upload current
 	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(14) ,1);		// Upload current (excl. overhead)
-	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(13) ,2);		// Upload friend slots
+	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(13) ,3);		// Upload friend slots
+	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(15) ,2);		//MORPH - Changed by SiRoB, powershare display
 
 	m_Statistics.SetBackgroundColor(thePrefs.GetStatsColor(0)) ;
 	m_Statistics.SetGridColor(thePrefs.GetStatsColor(1)) ;
@@ -624,9 +625,9 @@ void CStatisticsDlg::RepaintMeters()
 	m_DownloadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),0);
 
 	m_UploadOMeter.SetYUnits(GetResString(IDS_ST_UPLOAD));
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),4);				// Upload session
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),5);				// Upload session
 	Buffer.Format(_T(" (%u %s)"),thePrefs.GetStatsAverageMinutes(),GetResString(IDS_MINS));
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,3);			// Upload average
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,4);			// Upload average
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	/*
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT),0);			// Upload current
@@ -637,9 +638,24 @@ void CStatisticsDlg::RepaintMeters()
 	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),0);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),1);	// Upload current (excl. overhead)
 	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),1);
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND),2);			// Upload friend slots
+	//MORPH - Changed by SiRoB, Upload SPlitting Class
+	#ifdef _UNICODE
+	#define symbol _T("\x221E")
+	#else
+	#define symbol  "Inf"
+	#endif
+	Buffer.Format(_T(" (%s | %s | %u%%)"),thePrefs.GetMaxClientDataRateFriend()?CastItoXBytes(thePrefs.GetMaxClientDataRateFriend(),false,true):symbol,
+		                                thePrefs.GetGlobalDataRateFriend()?CastItoXBytes(thePrefs.GetGlobalDataRateFriend(),false,true):symbol,
+										thePrefs.GetMaxGlobalDataRateFriend());
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND)+Buffer,3);			// Upload friend slots
+	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),3);
+	Buffer.Format(_T(" (%s | %s | %u%%)"),thePrefs.GetMaxClientDataRatePowerShare()?CastItoXBytes(thePrefs.GetMaxClientDataRatePowerShare(),false,true):symbol,
+		                                thePrefs.GetGlobalDataRatePowerShare()?CastItoXBytes(thePrefs.GetGlobalDataRatePowerShare(),false,true):symbol,
+										thePrefs.GetMaxGlobalDataRatePowerShare());
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULPOWERSHARE)+Buffer,2);			// Upload powershare slots
 	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),2);
-
+	//MORPH END  - Changed by SiRoB, Upload SPlitting Class
+	
 	m_Statistics.SetYUnits(GetResString(IDS_FSTAT_CONNECTION));
 	Buffer.Format(_T("%s (1:%u)"), GetResString(IDS_ST_ACTIVEC), thePrefs.GetStatsConnectionsGraphRatio());
 	m_Statistics.SetLegendLabel(Buffer,0);
@@ -663,15 +679,17 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 	m_DownloadOMeter.AppendPoints(m_dPlotDataDown);
 	
 	// Upload
-	double m_dPlotDataUp[5];
-	m_dPlotDataUp[4] = theStats.GetAvgUploadRate(AVG_SESSION);
-	m_dPlotDataUp[3] = theStats.GetAvgUploadRate(AVG_TIME);
+	double m_dPlotDataUp[6];
+	m_dPlotDataUp[5] = theStats.GetAvgUploadRate(AVG_SESSION);
+	m_dPlotDataUp[4] = theStats.GetAvgUploadRate(AVG_TIME);
 	// current rate to network (standardPackets + controlPackets)
 	m_dPlotDataUp[0] = uploadrate;
 	// current rate (excl. overhead)
 	m_dPlotDataUp[1] = uploadrate - (float)theApp.uploadqueue->GetDatarateOverHead()/*theStats.GetUpDatarateOverhead()*/ / 1024;
 	// current rate to friends
-	m_dPlotDataUp[2] = uploadrate - (float)theApp.uploadqueue->GetToNetworkDatarate() / 1024;
+	m_dPlotDataUp[2] = (float)theApp.uploadqueue->GetDataratePowershare() / 1024;
+	// current rate to friends
+	m_dPlotDataUp[3] = uploadrate - (float)theApp.uploadqueue->GetToNetworkDatarate() / 1024;
 	m_UploadOMeter.AppendPoints(m_dPlotDataUp);
 
 	// Connections
@@ -3281,6 +3299,7 @@ void CStatisticsDlg::SetARange(bool SetDownload,int maxValue)
 		m_UploadOMeter.SetRange(0, maxValue, 2);
 		m_UploadOMeter.SetRange(0, maxValue, 3);
 		m_UploadOMeter.SetRange(0, maxValue, 4);
+		m_UploadOMeter.SetRange(0, maxValue, 5); //MORPH - Powershare Display
 	}
 }
 

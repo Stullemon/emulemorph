@@ -185,7 +185,7 @@ public:
 	static	uint32	maxGraphUploadRateEstimated;
 	static	bool	beepOnError;
 	static	bool	confirmExit;
-	static	DWORD	m_adwStatsColors[15];
+	static	DWORD	m_adwStatsColors[16]; //MORPH - Changed by SiRoB, Powershare display
 	static  bool	m_bIconflashOnNewMessage;
 
 	static	bool	splashscreen;

@@ -126,6 +126,7 @@ COLORREF GetLogLineColor(UINT eMsgType)
 	if (eMsgType == LOG_USC)
 		return thePrefs.m_crLogUSC;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
 	ASSERT( eMsgType == LOG_INFO );
 	return CLR_DEFAULT;
 }

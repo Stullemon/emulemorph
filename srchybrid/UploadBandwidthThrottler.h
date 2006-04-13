@@ -38,9 +38,13 @@ public:
     UploadBandwidthThrottler(void);
     ~UploadBandwidthThrottler(void);
 
-    uint64 GetNumberOfSentBytesSinceLastCallAndReset();
-    uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset();
-    //MORPH START - Changed by SiRoB, Upload Splitting Class
+    void GetNumberOfSentBytesSinceLastCallAndReset(uint64* SentBytes, uint64* SentBytesOverhead);
+    //MORPH - Removed by SiRoB, See above (avoid lock delay by splitting call)
+	/*
+	uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset(uint64* sentBytesOverhead);
+    */
+	
+	//MORPH START - Changed by SiRoB, Upload Splitting Class
     /*
 	uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
 	*/
@@ -89,8 +93,8 @@ private:
     CEvent* threadEndedEvent;
     CEvent* pauseEvent;
 
-    uint64 m_SentBytesSinceLastCall;
-    uint64 m_SentBytesSinceLastCallOverhead;
+    uint64 m_SentBytesSinceLastCallClass[NB_SPLITTING_CLASS];
+    uint64 m_SentBytesSinceLastCallOverheadClass[NB_SPLITTING_CLASS];
     uint32 m_highestNumberOfFullyActivatedSlots[NB_SPLITTING_CLASS];
 	uint32 slotCounterClass[NB_SPLITTING_CLASS+1];
 	bool doRun;

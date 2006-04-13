@@ -100,7 +100,7 @@ uint32	CPreferences::maxGraphUploadRateEstimated = 0;
 bool	CPreferences::beepOnError;
 bool	CPreferences::m_bIconflashOnNewMessage;
 bool	CPreferences::confirmExit;
-DWORD	CPreferences::m_adwStatsColors[15];
+DWORD	CPreferences::m_adwStatsColors[16]; //MORPH - Changed by SiRoB, Powershare display
 bool	CPreferences::splashscreen;
 bool	CPreferences::startupsound;//Commander - Added: Enable/Disable Startupsound
 bool	CPreferences::sidebanner;//Commander - Added: Side Banner
@@ -2565,7 +2565,7 @@ void CPreferences::ResetStatsColor(int index)
 	{
 		case 0 : m_adwStatsColors[0]=RGB(0,0,0);break;  //MORPH - HotFix by SiRoB & IceCream, Default Black color for BackGround
 		case 1 : m_adwStatsColors[1]=RGB(192,192,255);break;
-		case 2 : m_adwStatsColors[2]=RGB(0, 255, 0);break;
+		case 2 : m_adwStatsColors[2]=RGB(128, 255, 128);break;
 		case 3 : m_adwStatsColors[3]=RGB(0, 255, 255);break;
 		case 4 : m_adwStatsColors[4]=RGB(255, 255, 255);break;
 		case 5 : m_adwStatsColors[5]=RGB(255, 0, 0);break;
@@ -2576,8 +2576,9 @@ void CPreferences::ResetStatsColor(int index)
 		case 10 : m_adwStatsColors[10]=RGB(0, 255, 0);break;
 		case 11 : m_adwStatsColors[11]=RGB(0, 0, 0);break; //MORPH - HotFix by SiRoB & IceCream, Default Black color for SystrayBar
 		case 12 : m_adwStatsColors[12]=RGB(192,   0, 192);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 13 : m_adwStatsColors[13]=RGB(0, 0, 255);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 14 : m_adwStatsColors[14]=RGB(0, 255, 0);break;
+		case 13 : m_adwStatsColors[13]=RGB(128, 128, 255);break; //MORPH - Added by Yun.SF3, ZZ Upload System
+		case 14 : m_adwStatsColors[14]=RGB(192, 192, 0);break;
+		case 15 : m_adwStatsColors[15]=RGB(255, 0, 255);break; //MORPH - Added by SiRoB, Powershare display
 	}
 }
 

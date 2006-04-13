@@ -239,6 +239,7 @@ void CPPgStats::Localize(void)
 		iItem = m_colors.AddString(GetResString(IDS_SP_UL1));				m_colors.SetItemData(iItem, 5);
 		iItem = m_colors.AddString(GetResString(IDS_SP_ULSLOTSNOOVERHEAD));	m_colors.SetItemData(iItem, 14);
 		iItem = m_colors.AddString(GetResString(IDS_SP_ULFRIENDS));			m_colors.SetItemData(iItem, 13);
+		iItem = m_colors.AddString(GetResString(IDS_SP_ULPOWERSHARE));		m_colors.SetItemData(iItem, 15); //MORPH - Added by SiRoB, Powershare Display
 
 		iItem = m_colors.AddString(GetResString(IDS_SP_ACTCON));			m_colors.SetItemData(iItem, 8);
 		iItem = m_colors.AddString(GetResString(IDS_SP_ACTUL));				m_colors.SetItemData(iItem, 10);
