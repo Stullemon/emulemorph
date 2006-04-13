@@ -608,8 +608,6 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_iDownloadDataRateAverageTime = 1000*max(1, m_iDownloadDataRateAverageTime);
 	updateLegend |= thePrefs.m_iUploadDataRateAverageTime/1000 != m_iUploadDataRateAverageTime;
 	thePrefs.m_iUploadDataRateAverageTime = 1000*max(1, m_iUploadDataRateAverageTime);
-	if (updateLegend)
-		theApp.emuledlg->statisticswnd->RepaintMeters();
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 	//MORPH START - Added by Stulle, Global Source Limit
 	if (thePrefs.GetGlobalHL() != (UINT)m_iGlobalHL ||
@@ -633,14 +631,24 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bClientQueueProgressBar = m_bClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 	thePrefs.m_bCountWCSessionStats		   = m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
+	updateLegend |= thePrefs.globaldataratefriend != m_iGlobalDataRateFriend;
 	thePrefs.globaldataratefriend = m_iGlobalDataRateFriend;
+	updateLegend |= thePrefs.maxglobaldataratefriend != m_iMaxGlobalDataRateFriend;
 	thePrefs.maxglobaldataratefriend = m_iMaxGlobalDataRateFriend;
+	updateLegend |= thePrefs.maxclientdataratefriend != m_iMaxClientDataRateFriend;
 	thePrefs.maxclientdataratefriend = m_iMaxClientDataRateFriend;
+	updateLegend |= thePrefs.globaldataratepowershare != m_iGlobalDataRatePowerShare;
 	thePrefs.globaldataratepowershare = m_iGlobalDataRatePowerShare;
+	updateLegend |= thePrefs.maxglobaldataratepowershare != m_iMaxGlobalDataRatePowerShare;
 	thePrefs.maxglobaldataratepowershare = m_iMaxGlobalDataRatePowerShare;
+	updateLegend |= thePrefs.maxclientdataratepowershare != m_iMaxClientDataRatePowerShare;
 	thePrefs.maxclientdataratepowershare = m_iMaxClientDataRatePowerShare;
+	updateLegend |= thePrefs.maxclientdatarate != m_iMaxClientDataRate;
 	thePrefs.maxclientdatarate = m_iMaxClientDataRate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+	if (updateLegend)
+		theApp.emuledlg->statisticswnd->RepaintMeters();
+	
 	// ==> Slot Limit - Stulle
 	thePrefs.m_bSlotLimitThree = (m_iSlotLimiter == 1);
 	thePrefs.m_bSlotLimitNum = (m_iSlotLimiter == 2);
