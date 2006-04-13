@@ -1865,7 +1865,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 {
 	//MORPH START - Changed by SiRoB, Fix connection collision 
 	if (socket && socket->GetConState() == ES_NOTCONNECTED) {
-		DebugLog(LOG_MORPH|LOG_GOOD|DLP_VERYHIGH, _T("[FIX CONNECTION COLLISION] Already initiated socket has been preserved for client : %s"), DbgGetClientInfo());		
+		DebugLog(LOG_MORPH|LOG_GOOD, _T("[FIX CONNECTION COLLISION] Already initiated socket has been preserved for client : %s"), DbgGetClientInfo());		
 		return true;
 	}
 	//MORPH END   - Changed by SiRoB, Fix connection collision 
@@ -1983,7 +1983,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		if (CheckHandshakeFinished())
 			ConnectionEstablished();
 		else if (thePrefs.GetVerbose())
-			DebugLog(LOG_MORPH|LOG_GOOD|DLP_VERYHIGH, _T("[FIX CONNECTION COLLISION] Handshake not finished - TryToConnect(); %s"), DbgGetClientInfo());
+			DebugLog(LOG_MORPH|LOG_GOOD, _T("[FIX CONNECTION COLLISION] Handshake not finished - TryToConnect(); %s"), DbgGetClientInfo());
 		return true;
 	}
 	// MOD Note: Do not change this part - Merkur

@@ -543,7 +543,7 @@ void CUpDownClient::SendStartupLoadReq()
 	//MORPH START - Added by SiRoB, Fix connection collision
 	if (m_fQueueRankPending == 1 && !GetSentCancelTransfer()) {
 		if(thePrefs.GetLogUlDlEvents())
-			DebugLog(LOG_MORPH|LOG_GOOD|DLP_VERYHIGH, _T("[FIX CONNECTION COLLISION] Failed download Successfully rescued with client: %s"),DbgGetClientInfo());
+			DebugLog(LOG_MORPH|LOG_GOOD, _T("[FIX CONNECTION COLLISION] Failed download Successfully rescued with client: %s"),DbgGetClientInfo());
 		ProcessAcceptUpload();
 		return;
 	}
