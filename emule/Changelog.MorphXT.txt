@@ -12,7 +12,11 @@ ADDED  : Tooltips for some preferences [leuk_he]
 ADDED  : Bindaddr added to extended preferences [leuk_he]
 ADDED  : Added a Bind addres for Upnp [leuk_he]
 ADDED  : emcrypt gpl violator protection by Xman [leuk_he]
-Added  : Server Icon in DownloadClientsCtrl [Stulle]
+ADDED  : Fix collision connection [SiRoB]
+- you can see the activities by enabling up/down log event and check the morph log
+ADDED  : put back SlugFiller noneededrequeue [SiRoB]
+ADDED  : Server Icon in DownloadClientsCtrl [Stulle]
+
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
@@ -20,7 +24,8 @@ CHANGED: USS: Default Forced UDP Ping has been changed to disable [SiRoB]
 Changed: USS: renamed uss Force udp on, (USSUDP_FORCE), you will have to reenable if you needed it before. [leuk_he]
 CHANGED: ImportPart: we can import part into Stopped or Paused file if AICH list is available [SiRoB]
 CHANGED: ImportPart: Chunk with some data already written are also imported [SiRoB]
-CHANGED: USC: we get a proper equal bandwidth for each slot when we don't use slot focus [SiRoB]
+CHANGED: USC: proper equal bandwidth for each slot when we don't use slot focus [SiRoB]
+CHANGED: HIDEOS & SOTN: reworked a bit to properly display hidden chunk [SiRoB]
 CHANGED: (minor) No log messagge in log on spam. (only in verbose) [leuk_he]
 CHANGED: (minor) focus steal check on message by raccoonI [leuk_he]
 
