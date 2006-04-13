@@ -16,7 +16,7 @@ ADDED  : Fix collision connection [SiRoB]
 - you can see the activities by enabling up/down log event and check the morph log
 ADDED  : put back SlugFiller noneededrequeue [SiRoB]
 ADDED  : Server Icon in DownloadClientsCtrl [Stulle]
-
+ADDED  : Powershare Graph [SiRoB]
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
