@@ -1881,10 +1881,10 @@ void CUploadQueue::UpdateDatarates() {
 		m_avarage_overhead_dr_sum += sentBytesOverheadClass[LAST_CLASS];
 
 		avarage_friend_dr_list.AddTail(sentBytesClass[0]);
-   		m_avarage_friend_dr_sum += sentBytesOverheadClass[0];
+   		m_avarage_friend_dr_sum += sentBytesClass[0];
 
 		avarage_powershare_dr_list.AddTail(sentBytesClass[1]);
-   		m_avarage_powershare_dr_sum += sentBytesOverheadClass[1];
+   		m_avarage_powershare_dr_sum += sentBytesClass[1];
 
 		// Save time beetween each speed snapshot
 		avarage_tick_list.AddTail(curTick);
@@ -1976,8 +1976,12 @@ uint32 CUploadQueue::GetDatarateOverHead() {
 //MORPH END   - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 
 //MORPH START - Added by SiRoB, Upload powershare from uploadbandwidththrottler
-uint32 CUploadQueue::GetDataratePowershare() {
-	return powershareDatarate;
+uint32 CUploadQueue::GetDatarateExcludingPowershare() {
+	if(datarate > powershareDatarate) {
+		return datarate - powershareDatarate;
+	} else {
+		return 0;
+	}
 }
 //MORPH END   - Added by SiRoB, Upload powershare from uploadbandwidththrottler
 

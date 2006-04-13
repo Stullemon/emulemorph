@@ -687,7 +687,7 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 	// current rate (excl. overhead)
 	m_dPlotDataUp[1] = uploadrate - (float)theApp.uploadqueue->GetDatarateOverHead()/*theStats.GetUpDatarateOverhead()*/ / 1024;
 	// current rate to friends
-	m_dPlotDataUp[2] = (float)theApp.uploadqueue->GetDataratePowershare() / 1024;
+	m_dPlotDataUp[2] = uploadrate - (float)theApp.uploadqueue->GetDatarateExcludingPowershare() / 1024;
 	// current rate to friends
 	m_dPlotDataUp[3] = uploadrate - (float)theApp.uploadqueue->GetToNetworkDatarate() / 1024;
 	m_UploadOMeter.AppendPoints(m_dPlotDataUp);

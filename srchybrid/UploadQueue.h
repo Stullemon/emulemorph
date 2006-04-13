@@ -43,7 +43,7 @@ public:
 	*/
 	uint32	GetDatarate(bool breel = false);
 	uint32	GetDatarateOverHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
-	uint32	GetDataratePowershare(); //MORPH - Added by SiRoB, Upload powershare from uploadbandwidththrottler
+	uint32	GetDatarateExcludingPowershare(); //MORPH - Added by SiRoB, Upload powershare from uploadbandwidththrottler
 	uint32  GetToNetworkDatarate();
 
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
