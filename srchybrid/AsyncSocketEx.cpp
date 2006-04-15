@@ -510,12 +510,6 @@ BOOL CAsyncSocketEx::Create(UINT nSocketPort /*=0*/, int nSocketType /*=SOCK_STR
 		SOCKET hSocket = socket(AF_INET, nSocketType, 0);
 		if (hSocket == INVALID_SOCKET)
 			return FALSE;
-		
-		int window_size = 64 * 1024;
-
-		setsockopt(hSocket, SOL_SOCKET, SO_SNDBUF, (char *) &window_size, sizeof(window_size) );
-		setsockopt(hSocket, SOL_SOCKET, SO_RCVBUF, (char *) &window_size, sizeof(window_size) );
-
 		m_SocketData.hSocket = hSocket;
 
 		AttachHandle(hSocket);
