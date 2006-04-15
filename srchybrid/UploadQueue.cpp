@@ -647,7 +647,7 @@ uint32 CUploadQueue::GetEffectiveUploadListCount() {
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetPrev(pos);
 
-		if(cur_client->IsScheduledForRemoval()) {
+		/*MORPH*/if(cur_client->IsScheduledForRemoval()) { 
             count++;
         }
 	}
@@ -830,7 +830,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
     // Save number of active clients for statistics
     //MORPH START - Changed by SiRoB, Upload Splitting Class
-	uint32 tempHighest = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass);
+	uint32 tempHighest = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[LAST_CLASS];
 	//MORPH START - Changed by SiRoB, Upload Splitting Class
 	
 	if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
@@ -1870,7 +1870,7 @@ void CUploadQueue::UpdateDatarates() {
 	}*/
 	uint64 sentBytesClass[NB_SPLITTING_CLASS];
 	uint64 sentBytesOverheadClass[NB_SPLITTING_CLASS];
-	theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset(sentBytesClass,sentBytesOverheadClass);
+	theApp.uploadBandwidthThrottler->GetStats(sentBytesClass,sentBytesOverheadClass,m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass);
 	DWORD curTick = ::GetTickCount();
 	if (sentBytesClass[LAST_CLASS]>0) {
     	// Save used bandwidth for speed calculations
