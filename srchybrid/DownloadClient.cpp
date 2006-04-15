@@ -1729,7 +1729,7 @@ void CUpDownClient::CheckDownloadTimeout()
 	/*
 	if (IsDownloadingFromPeerCache() && m_pPCDownSocket && m_pPCDownSocket->IsConnected())
 	*/
-	if (IsDownloadingFromPeerCache() && m_pPCDownSocket && (m_pPCDownSocket->IsConnected() || m_pPCDownSocket->GetConState() == ES_NOTCONNECTED))
+	if (/*IsDownloadingFromPeerCache() &&*/ m_pPCDownSocket && (m_pPCDownSocket->IsConnected() || m_pPCDownSocket->GetConState() == ES_NOTCONNECTED))
 	{
 		ASSERT( DOWNLOADTIMEOUT < m_pPCDownSocket->GetTimeOut() );
 		if (GetTickCount() - m_dwLastBlockReceived > DOWNLOADTIMEOUT)
@@ -1738,7 +1738,7 @@ void CUpDownClient::CheckDownloadTimeout()
 		}
 	}
 // yonatan http start //////////////////////////////////////////////////////////////////////////
-        else if (IsDownloadingFromWebCache() && m_pWCDownSocket) // jp proxy stall fix removed: && m_pWCDownSocket->IsConnected())
+        else if (/*IsDownloadingFromWebCache() &&*/ m_pWCDownSocket) // jp proxy stall fix removed: && m_pWCDownSocket->IsConnected())
 	{
 		ASSERT( DOWNLOADTIMEOUT < m_pWCDownSocket->GetTimeOut() );
 		if (m_pWCDownSocket->IsConnected())
