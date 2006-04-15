@@ -28,6 +28,7 @@ CHANGED: USC: proper equal bandwidth for each slot when we don't use slot focus 
 CHANGED: HIDEOS & SOTN: reworked a bit to properly display hidden chunk [SiRoB]
 CHANGED: (minor) No log messagge in log on spam. (only in verbose) [leuk_he]
 CHANGED: (minor) focus steal check on message by raccoonI [leuk_he]
+CHANGED: update with latest zz change with some fix [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.9

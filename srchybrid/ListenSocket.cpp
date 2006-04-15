@@ -171,7 +171,7 @@ bool CClientReqSocket::CheckTimeOut()
 		if (::GetTickCount() - timeout_timer > CEMSocket::GetTimeOut()*4){
 			timeout_timer = ::GetTickCount();
 			CString str;
-			str.Format(_T("Timeout: State:%u"), m_nOnConnect);
+			/*ZZ*/str.Format(_T("Timeout: State:%u = SS_Half"), m_nOnConnect);
 			Disconnect(str);
 			return true;
 		}
@@ -201,7 +201,7 @@ bool CClientReqSocket::CheckTimeOut()
 	if (::GetTickCount() - timeout_timer > uTimeout){
 		timeout_timer = ::GetTickCount();
 		CString str;
-		str.Format(_T("Timeout: State:%u"), m_nOnConnect);
+		/*ZZ*/str.Format(_T("Timeout: State:%u (0 = SS_Other, 1 = SS_Half, 2 = SS_Complete"), m_nOnConnect);
 		Disconnect(str);
 		return true;
 	}
@@ -234,7 +234,7 @@ void CClientReqSocket::Disconnect(LPCTSTR pszReason){
 	if (!client)
 		Safe_Delete();
 	else
-		if(client->Disconnected(pszReason, true)){
+        	/*ZZ*/if(client->Disconnected(CString(_T("CClientReqSocket::Disconnect(): ")) + pszReason, true)){
 			CUpDownClient* temp = client;
 			client->socket = NULL;
 			client = NULL;
@@ -2595,12 +2595,9 @@ void CClientReqSocket::OnConnect(int nErrorCode)
 	CEMSocket::OnConnect(nErrorCode);
 	if (nErrorCode)
 	{
-	    CString strTCPError;
-		strTCPError = GetFullErrorMessage(nErrorCode); //Morph - Moved up by SiRoB
-
+	    CString strTCPError = GetErrorMessage(nErrorCode); //Morph - Moved up by SiRoB
 		if (thePrefs.GetVerbose())
 		{
-			strTCPError = GetFullErrorMessage(nErrorCode);
 		    if ((nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT) || !GetLastProxyError().IsEmpty())
 			    DebugLogError(_T("Client TCP socket (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
 		}
@@ -2778,16 +2775,26 @@ bool CClientReqSocket::Create()
 SocketSentBytes CClientReqSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend)
 {
     SocketSentBytes returnStatus = CEMSocket::SendControlData(maxNumberOfBytesToSend, overchargeMaxBytesToSend);
-    if (returnStatus.success && (returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0))
+    /*zz*/if (returnStatus.success) {
+        if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
+    } else if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
+        CString pstrReason = GetErrorMessage(returnStatus.errorThatOccured, 1);
+        theApp.QueueDebugLogLine(false,_T("CClientReqSocket::SendControlData: An error has occured: %s Client: %s"), pstrReason, DbgGetClientInfo());
+    }
     return returnStatus;
 }
 
 SocketSentBytes CClientReqSocket::SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend)
 {
     SocketSentBytes returnStatus = CEMSocket::SendFileAndControlData(maxNumberOfBytesToSend, overchargeMaxBytesToSend);
-    if (returnStatus.success && (returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0))
+    /*zz*/if (returnStatus.success) {
+        if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
+    } else if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
+        CString pstrReason = GetErrorMessage(returnStatus.errorThatOccured, 1);
+        theApp.QueueDebugLogLine(false,_T("CClientReqSocket::SendFileAndControlData: An error has occured: %s Client: %s"), pstrReason, DbgGetClientInfo());
+    }
     return returnStatus;
 }
 

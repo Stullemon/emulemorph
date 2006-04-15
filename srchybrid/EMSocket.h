@@ -70,7 +70,7 @@ public:
 
 	CString GetFullErrorMessage(DWORD dwError);
 
-    DWORD GetLastCalledSend() { return lastCalledSend; }
+	//DWORD GetLastCalledSend() { return lastCalledSend; }
     uint64 GetSentBytesCompleteFileSinceLastCallAndReset();
     uint64 GetSentBytesPartFileSinceLastCallAndReset();
     uint64 GetSentBytesControlPacketSinceLastCallAndReset();
@@ -80,8 +80,7 @@ public:
     virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, true); };
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
 
-    uint32	GetNeededBytes(bool lowspeed);
-	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
+    	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
 	float	GetBusyRatioTime() { return (float)(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))/(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)); };
 
 #ifdef _DEBUG
@@ -95,6 +94,7 @@ protected:
 	
 	virtual void	DataReceived(const BYTE* pcData, UINT uSize);
 	virtual bool	PacketReceived(Packet* packet) = 0;
+	virtual void    OnConnect(int nErrorCode);
 	virtual void	OnError(int nErrorCode) = 0;
 	virtual void	OnClose(int nErrorCode);
 	virtual void	OnSend(int nErrorCode);	
@@ -109,9 +109,11 @@ private:
     virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket);
 	void	ClearQueues();	
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
-
+	void	ReadyToSend();
     uint32 GetNextFragSize(uint32 current, uint32 minFragSize);
     bool    HasSent() { return m_hasSent; }
+
+    uint32	GetNeededBytes(const char* sendbuffer, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
 
 	// Download (pseudo) rate control	
 	uint32	downloadLimit;
@@ -127,24 +129,45 @@ private:
 	uint32  pendingPacketSize;
 
 	// Upload control
-	char*	sendbuffer;
-	uint32	sendblen;
-	uint32	sent;
 
+    // NOTE: These variables are only allowed to be accessed from the Send() method (and methods
+    //       called from Send()), which is only called from UploadBandwidthThrottler. They are
+    //       accessed WITHOUT LOCKING in that method, so it is important that they are only called
+    //       from one thread.
+	bool m_currentPacket_is_controlpacket;
+	bool m_currentPackageIsFromPartFile;
+
+	char*	sendbuffer;
+
+	uint32	sendblen;
+	uint32 m_actualPayloadSize;
+
+	uint32	sent;
+    uint32 m_actualPayloadSizeSentForThisPacket;
+
+    DWORD lastCalledSend;
+
+    bool m_bAccelerateUpload;
+	uint32 lastFinishedStandard;
+    // End Send() access only
+
+//    CCriticalSection sendLocker; //MORPH - Removed by SiRoB, moved in protected seccion
+
+    // NOTE: These variables are only allowed to be accessed when the accesser has the sendLocker lock.
 	CTypedPtrList<CPtrList, Packet*> controlpacket_queue;
 	CList<StandardPacketQueueEntry> standartpacket_queue;
-    bool m_currentPacket_is_controlpacket;
-//    CCriticalSection sendLocker; //MORPH - Removed by SiRoB, moved in protected seccion
+    // End sendLocker access only
+
+	CCriticalSection statsLocker;
+
+    // NOTE: These variables are only allowed to be accessed when the accesser has the statsLocker lock.
     uint64 m_numberOfSentBytesCompleteFile;
     uint64 m_numberOfSentBytesPartFile;
     uint64 m_numberOfSentBytesControlPacket;
-    bool m_currentPackageIsFromPartFile;
-	bool m_bAccelerateUpload;
-    DWORD lastCalledSend;
-    DWORD lastSent;
-	uint32 lastFinishedStandard;
-    uint32 m_actualPayloadSize;
+
     uint32 m_actualPayloadSizeSent;
+    // End statsLocker access only
+
     //MORPH - Changed by SiRoB, Upload Splitting Class
 	/*
 	bool m_bBusy;

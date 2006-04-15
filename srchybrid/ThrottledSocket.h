@@ -6,6 +6,7 @@ struct SocketSentBytes {
     bool    success;
 	uint32	sentBytesStandardPackets;
 	uint32	sentBytesControlPackets;
+    uint32  errorThatOccured;
 };
 
 class ThrottledControlSocket
@@ -18,15 +19,10 @@ class ThrottledFileSocket : public ThrottledControlSocket
 {
 public:
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) = 0;
-    virtual DWORD GetLastCalledSend() = 0;
+    //virtual DWORD GetLastCalledSend() = 0;
+    //virtual uint32	GetNeededBytes() = 0;
 	virtual bool	IsBusy() const = 0;
     virtual bool    HasQueues() const = 0;
-	//MORPH START - Changed by SiRoB, Scale to lowspeed
-	/*
-	virtual uint32	GetNeededBytes() = 0;
-	*/
-	virtual uint32	GetNeededBytes(bool lowspeed) = 0;
-	//MORPH END   - Changed by SiRoB, Scale to lowspeed
 	virtual DWORD GetBusyTimeSince() = 0;
 	virtual float GetBusyRatioTime() = 0;
 };

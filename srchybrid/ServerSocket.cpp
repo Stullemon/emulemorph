@@ -64,7 +64,8 @@ CServerSocket::~CServerSocket(){
 }
 
 void CServerSocket::OnConnect(int nErrorCode){
-	CAsyncSocketEx::OnConnect(nErrorCode); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+	CEMSocket::OnConnect(nErrorCode);
+	//CAsyncSocketEx::OnConnect(nErrorCode); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	switch (nErrorCode){
 		case 0:{
 			if (cur_server->HasDynIP()){
