@@ -48,9 +48,9 @@ public:
 
     //MORPH - Changed by SiRoB, Log Flag to trace or not the USS activities
 	/*
-	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed);
+	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint32 pLowestInitialPingAllowed);
 	*/
-	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool isUSSLog, bool isUSSUDP, uint32 minDataRateFriend, uint32 maxDataRateFriend, uint32 ClientDataRateFriend, uint32 minDataRatePowerShare, uint32 maxDataRatePowerShare, uint32 ClientDataRatePowerShare, uint32 ClientDataRate);
+	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint32 pLowestInitialPingAllowed, bool isUSSLog, bool isUSSUDP, uint32 minDataRateFriend, uint32 maxDataRateFriend, uint32 ClientDataRateFriend, uint32 minDataRatePowerShare, uint32 maxDataRatePowerShare, uint32 ClientDataRatePowerShare, uint32 ClientDataRate);
 	void InitiateFastReactionPeriod();
 
     uint32 GetUpload();
@@ -83,10 +83,6 @@ private:
 
 	CMap<uint32,uint32,uint32,uint32> hostsToTraceRoute;
 
-    UInt32Clist pingDelays;
-
-    uint64 pingDelaysTotal;
-
     uint32 minUpload;
     uint32 maxUpload;
     uint32 m_CurUpload;
@@ -101,7 +97,7 @@ private:
 
     uint32 m_pingAverage;
     uint32 m_lowestPing;
-    uint64 m_LowestInitialPingAllowed;
+	uint32 m_LowestInitialPingAllowed;
 
     bool m_initiateFastReactionPeriod;
 

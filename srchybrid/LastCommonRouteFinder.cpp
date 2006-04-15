@@ -55,8 +55,7 @@ LastCommonRouteFinder::LastCommonRouteFinder() {
 	m_iNumberOfPingsForAverage = 0;
 	m_pingAverage = 0;
 	m_lowestPing = 0;
-	m_LowestInitialPingAllowed = 20;
-	pingDelaysTotal = 0;
+	m_LowestInitialPingAllowed = 10; // this is overridden by the SetPrefs(...) call
 
 	m_state = _T("");
 
@@ -222,9 +221,9 @@ bool LastCommonRouteFinder::AcceptNewClient() {
 }
 //MORPH - Changed by SiRoB, Log Flag to trace or not the USS activities
 /*
-void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed) {
+void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint32 pLowestInitialPingAllowed) {
 */
-void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool IsUSSLog, bool IsUSSUDP, uint32 minDataRateFriend,uint32 maxDataRateFriend, uint32 maxClientDataRateFriend, uint32 minDataRatePowerShare, uint32 maxDataRatePowerShare, uint32 maxClientDataRatePowerShare, uint32 maxClientDataRate) {
+void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint32 pLowestInitialPingAllowed, bool IsUSSLog, bool IsUSSUDP, uint32 minDataRateFriend,uint32 maxDataRateFriend, uint32 maxClientDataRateFriend, uint32 minDataRatePowerShare, uint32 maxDataRatePowerShare, uint32 maxClientDataRatePowerShare, uint32 maxClientDataRate) {
 	bool sendEvent = false;
 
     prefsLocker.Lock();
@@ -405,8 +404,9 @@ UINT LastCommonRouteFinder::RunInternal() {
 			
             hostsToTraceRoute.RemoveAll();
 
+            UInt32Clist pingDelays;
             pingDelays.RemoveAll();
-            pingDelaysTotal = 0;
+			uint64 pingDelaysSum = 0;
 
             pingLocker.Lock();
             m_pingAverage = 0;
@@ -471,7 +471,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                         if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Pinging for TTL %i..."), ttl);
 
-						useUdp |= bIsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
+						useUdp = bIsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 
                         curHost = 0;
                         if(m_enabled == false) {
@@ -521,7 +521,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                                         enabled = false;
 
 									// trying other ping method
-									useUdp = !useUdp || bIsUSSUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
+									useUdp = !useUdp;
                                 }
                             }
 
@@ -552,7 +552,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 									if(bIsUSSLog)
 										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown ping status! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.status);
 									pinger.PIcmpErr(pingStatus.status);
-									useUdp = !useUdp || bIsUSSUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
+									useUdp = !useUdp;
                                 } else {
                                     if(pingStatus.error == IP_REQ_TIMED_OUT) {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
@@ -567,7 +567,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 											theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown pinging error! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.error);
                                         pinger.PIcmpErr(pingStatus.error);
-										useUdp = !useUdp || bIsUSSUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
+										useUdp = !useUdp;
 									}
                                    }
 
@@ -685,10 +685,10 @@ UINT LastCommonRouteFinder::RunInternal() {
 
 			// PENDING:
             prefsLocker.Lock();
-            uint64 lowestInitialPingAllowed = m_LowestInitialPingAllowed;
+			uint32 lowestInitialPingAllowed = m_LowestInitialPingAllowed;
 			prefsLocker.Unlock();
 
-            uint32 initial_ping = _I32_MAX;
+			uint32 initial_ping = _UI32_MAX;
 
             bool foundWorkingPingMethod = false;
 			// finding lowest ping
@@ -701,7 +701,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                     foundWorkingPingMethod = true;
 
 					if(pingStatus.delay > 0 && pingStatus.delay < initial_ping) {
-						initial_ping = (UINT)max(pingStatus.delay, lowestInitialPingAllowed);
+						initial_ping = (uint32)pingStatus.delay;
                     }
                 } else {
                     if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
@@ -710,7 +710,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
 					// trying other ping method
                     if(!pingStatus.success && !foundWorkingPingMethod) {
-						useUdp = !useUdp || bIsUSSUDP; //MORPH - Changed by SiRoB, USS with UDP preferency
+						useUdp = !useUdp;
                     }
                 }
 
@@ -726,15 +726,22 @@ UINT LastCommonRouteFinder::RunInternal() {
 
 			// if all pings returned 0, initial_ping will not have been changed from default value.
 			// then set initial_ping to lowestInitialPingAllowed
-			if(initial_ping == _I32_MAX)
-                initial_ping = (UINT)lowestInitialPingAllowed;
+            if(initial_ping == _UI32_MAX) {
+                initial_ping = lowestInitialPingAllowed;
+            } else if(initial_ping < lowestInitialPingAllowed) {
+                initial_ping = lowestInitialPingAllowed;
+            } else if(initial_ping % 10 == 0 && initial_ping < 30) {
+                // workaround for some OS:es where realtime measurement doesn't work, and ping times are always multiples of 10
+                initial_ping += 5;
+                lowestInitialPingAllowed = initial_ping;
+            }
 
             uint32 upload = 0;
 
             hasSucceededAtLeastOnce = true;
 
             if(doRun && enabled) {
-                if(initial_ping > lowestInitialPingAllowed) {
+                if(initial_ping != lowestInitialPingAllowed) {
 					if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 						theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Lowest ping: %i ms"), initial_ping);
                 } else {
@@ -767,6 +774,9 @@ UINT LastCommonRouteFinder::RunInternal() {
             pingLocker.Lock();
             m_state = _T("");
             pingLocker.Unlock();
+
+            sint64 integral = 0;
+            CList<sint64,sint64> oldErrors;
 
 			// There may be several reasons to start over with tracerouting again.
 			// Currently we only restart if we get an unexpected ip back from the
@@ -810,7 +820,6 @@ UINT LastCommonRouteFinder::RunInternal() {
                 lowestInitialPingAllowed = m_LowestInitialPingAllowed; // PENDING
                 uint32 curUpload = m_CurUpload;
 				bIsUSSLog = m_bIsUSSLog; //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-				useUdp |= bIsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 				bool initiateFastReactionPeriod = m_initiateFastReactionPeriod;
                 m_initiateFastReactionPeriod = false;
 				prefsLocker.Unlock();
@@ -825,18 +834,14 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                 DWORD tempTick = ::GetTickCount();
 
-				if(tempTick - initTime < SEC2MS(20)) {
+				if(tempTick - initTime < SEC2MS(1)) {
                     goingUpDivider = 1;
                     goingDownDivider = 1;
-                } else if(tempTick - initTime < SEC2MS(30)) {
-                    goingUpDivider = (UINT)(goingUpDivider * 0.25);
-                    goingDownDivider = (UINT)(goingDownDivider * 0.25);
-                } else if(tempTick - initTime < SEC2MS(40)) {
-                    goingUpDivider = (UINT)(goingUpDivider * 0.5);
-                    goingDownDivider = (UINT)(goingDownDivider * 0.5);
                 } else if(tempTick - initTime < SEC2MS(60)) {
-                    goingUpDivider = (UINT)(goingUpDivider * 0.75);
-                    goingDownDivider = (UINT)(goingDownDivider * 0.75);
+                    // slide from 1 to the target divider value over 60 seconds. (dividerNow = (maxDivider-1)/(60secs-1sec)*(currentTime-starTime)+1)
+                    goingUpDivider = (UINT)(((double)max(goingUpDivider, 1)-1)/(SEC2MS(60)-SEC2MS(1))*((tempTick-initTime)-SEC2MS(1)) + 1);
+                    goingDownDivider = (UINT)(((double)max(goingDownDivider, 1)-1)/(SEC2MS(60)-SEC2MS(1))*((tempTick-initTime)-SEC2MS(1)) + 1);
+                    //theApp.QueueDebugLogLine(false, _T("tempTick-initTime: %i, goingUpDivider: %i, goingDownDivider: %i"), tempTick-initTime, goingUpDivider, goingDownDivider);
                 } else if(tempTick - initTime < SEC2MS(61)) {
                         lastUploadReset = tempTick;
                         prefsLocker.Lock();
@@ -847,14 +852,14 @@ UINT LastCommonRouteFinder::RunInternal() {
                 goingDownDivider = max(goingDownDivider, 1);
                 goingUpDivider = max(goingUpDivider, 1);
 
-				uint32 soll_ping = (UINT)(initial_ping*pingTolerance);
+				uint32 target_ping = (UINT)(initial_ping*pingTolerance);
                 if ( useMillisecondPingTolerance ) {
-                    soll_ping = pingToleranceMilliseconds; 
+					target_ping = pingToleranceMilliseconds; 
 				}else{
-					soll_ping = (UINT)(initial_ping*pingTolerance);
+					target_ping = (UINT)(initial_ping*pingTolerance);
 				}
 
-                uint32 raw_ping = soll_ping; // this value will cause the upload speed not to change at all.
+				uint32 raw_ping = target_ping; // this value will cause the upload speed not to change at all.
 
                 bool pingFailure = false;        
                 for(uint64 pingTries = 0; doRun && enabled && (pingTries == 0 || pingFailure) && pingTries < 60; pingTries++) {
@@ -886,7 +891,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 							//theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Ping #%i successful. Continuing."), pingTries);
 						}
                     } else {
-                        raw_ping = soll_ping*3+initial_ping*3; // this value will cause the upload speed be lowered.
+						raw_ping = target_ping*3+initial_ping*3; // this value will cause the upload speed be lowered.
 
                         pingFailure = true;
 
@@ -920,15 +925,14 @@ UINT LastCommonRouteFinder::RunInternal() {
 			            initial_ping = (UINT)max(raw_ping, lowestInitialPingAllowed);
 		            }
 
-                    pingDelaysTotal += raw_ping;
+					pingDelaysSum += raw_ping;
                     pingDelays.AddTail(raw_ping);
 					while(!pingDelays.IsEmpty() && (uint32)pingDelays.GetCount() > numberOfPingsForAverage) {
                         uint32 pingDelay = pingDelays.RemoveHead();
-                        pingDelaysTotal -= pingDelay;
+						pingDelaysSum -= pingDelay;
                     }
 
-                    uint32 pingAverage = Median(pingDelays); //(pingDelaysTotal/pingDelays.GetCount());
-					int normalized_ping = pingAverage - initial_ping;
+                    uint32 pingAverage = Median(pingDelays); //(pingDelaysSum/pingDelays.GetCount());
 
                     //{
                     //    prefsLocker.Lock();
@@ -944,38 +948,80 @@ UINT LastCommonRouteFinder::RunInternal() {
                     pingLocker.Unlock();
 
 					// Calculate Waiting Time
-					sint64 hping = ((int)soll_ping) - normalized_ping;
+					sint64 error = ((int)target_ping) - (int)pingAverage;
+
+                    //theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: ----- Ping cur %3i ms. Median: %3i ms %2i values. Error: %3I64i Integral: %5I64i"), raw_ping, pingAverage, pingDelays.GetCount(), error, integral);
+
+                    // Some kind of PID-controller.
+                    // To get the same behaviour as old code, set pconst = 1.0f and the others to 0
+                    // Someone may want to expose these to prefs to enable easier experimentation with the values
+                    const float pconst = 0.5f;
+                    const float iconst = 0.5f;
+                    const float dconst = 0.0f;
+                    const uint32 numberOfOldErrors = 1000;
+
+                    //if(error < -(sint32)target_ping) {
+                    //    error = -(sint32)target_ping;
+                    //}
+
+                    sint64 lastError = error;
+                    if(!oldErrors.IsEmpty()) {
+                        lastError = oldErrors.GetTail();
+                    }
+
+                    sint64 derivate = error-lastError;
+
+                    integral += error;
+                    oldErrors.AddTail(error);
+					while(!oldErrors.IsEmpty() && (uint32)oldErrors.GetCount() > numberOfOldErrors) {
+						sint64 oldError = oldErrors.RemoveHead();
+						integral -= oldError;
+					}
+
+					// calculate the change of speed
+					sint64 ulDeltaTemp = (sint64)(pconst*error + iconst*(integral/oldErrors.GetCount()) + dconst*derivate); //*1024*10 / (sint64)(goingDownDivider*initial_ping);
             		
 					// Calculate change of upload speed
-                    if(hping < 0) {
+					if(ulDeltaTemp < 0) {
 						//Ping too high
 						acceptNewClient = false;
 
 						// lower the speed
-                        sint64 ulDiff = hping*1024*10 / (sint64)(goingDownDivider*initial_ping);
+                        sint64 ulDelta = ulDeltaTemp*1024*10 / (sint64)(goingDownDivider*initial_ping);
+
+                        uint32 newUpload;
 
 						//theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Down! Ping cur %i ms. Ave %I64i ms %i values. New Upload %i + %I64i = %I64i"), raw_ping, pingDelaysTotal/pingDelays.GetCount(), pingDelays.GetCount(), upload, ulDiff, upload+ulDiff);
 						// prevent underflow
-                        if(upload > -ulDiff) {
-							upload = (UINT)(upload + ulDiff);
+						if(upload > -ulDelta) {
+							newUpload = (UINT)(upload + ulDelta);
                         } else {
-                            upload = 0;
+							newUpload = 0;
                         }
-                    } else if(hping > 0) {
+
+                        //theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Down! Ping cur %3i ms. Median: %3i ms %2i values. Error: %3I64i Integral: %5I64i New Upload %6i + %4I64i = %6i"), raw_ping, pingAverage, pingDelays.GetCount(), error, integral, upload, ulDelta, newUpload);
+
+                        upload = newUpload;
+					} else if(ulDeltaTemp > 0) {
 						//Ping lower than max allowed
 						acceptNewClient = true;
 
 						if(curUpload+30*1024 > upload) {
 							// raise the speed
-	                        uint64 ulDiff = hping*1024*10 / (uint64)(goingUpDivider*initial_ping);
+                            uint64 ulDelta = ulDeltaTemp*1024*10 / (uint64)(goingUpDivider*initial_ping);
 
-							//theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Up! Ping cur %i ms. Ave %I64i ms %i values. New Upload %i + %I64i = %I64i"), raw_ping, pingDelaysTotal/pingDelays.GetCount(), pingDelays.GetCount(), upload, ulDiff, upload+ulDiff);
+                            uint32 newUpload;
+
 							// prevent overflow
-                        	if(_I32_MAX-upload > ulDiff) {
-								upload = (UINT)(upload + ulDiff);
+						    if(_I32_MAX-upload > ulDelta) {
+							    newUpload = (UINT)(upload + ulDelta);
                         	} else {
-                        	    upload = _I32_MAX;
+							    newUpload = _I32_MAX;
                         	}
+
+                            //theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Up!   Ping cur %3i ms. Median: %3i ms %2i values. Error: %3I64i Integral: %5I64i New Upload %6i + %4I64i = %6i"), raw_ping, pingAverage, pingDelays.GetCount(), error, integral, upload, ulDelta, newUpload);
+
+                            upload = newUpload;
                     	}
 					}
                     prefsLocker.Lock();
