@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -3126,12 +3126,12 @@ BEGIN
     VK_RETURN,      IDA_ENTER,              VIRTKEY, NOINVERT
 END
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5949,6 +5949,11 @@ END
 
 STRINGTABLE 
 BEGIN
+IDS_LOG_SERVER_FILTERED "Removed server at %s  from list '%s' :in ipfilter '%s'"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_RDEAD_TIP        "The number or retries before a server is considered\n dead and removed from the list."
     IDS_PW_RETRIES_TIP      "The number or retries before a server is considered dead and removed from the list. (default 3)"
     IDS_PW_USC_TIP          "Update the serverlist with the url that is in address.dat (edit) on startup of eMule. (default: unchecked)"
@@ -6299,7 +6304,33 @@ BEGIN
     IDS_EXPIRED_KNOWN_TIP   "Clean up .met files after file \nhas not been seen for xxx days\nSaves diskspace. Applies for\nknown*.met. Never set a very\nlow value (less than 30) here"
 END
 
-#endif    // Anglais (États-Unis) resources
+STRINGTABLE 
+BEGIN
+    IDC_FILTERSERVERBYIPFILTE_TIP 
+                            "Also apply the following filter for servers (recommended).\nIf you set this filtered servers are grayed out and removed\non connect. Disbale this setting and you can connect to\nfitlered (fake....) servers but might get a lowid"
+    IDC_STATIC_FILTERLEVE_TIP 
+                            "Level of the filter entries that are applied.\nEach entry of the ipfilter.dat has a (possible) value\nenter a value of 0 to disable the ipfilter temporary\n0 Recommended for testing opening port, or delete\nipfilter.dat to save memory) Default value 127.\nIn the meuh4567 list used by morph update\nthe following levels are available\nset to 0 for maximal sources , 254 for some paranoia"
+    IDC_RELOADFILTE_TIP     "Load the file again in memory"
+    IDC_EDITFILTE_TIP       "Edit ipfilter.dat with notepad."
+    //IDC_STATIC_UPDATEFRO_TIP                            "Update the filter file from a url.\n Either use this one or the one from\nmorph update.(not both)"
+    
+    IDC_LOADUR_TIP          "Load an ipfilter from the http link displayed here. \nyou can find blocklist at<a=""http://www.bluetack.co.uk""> http://bluetack.co.uk</a>\nmorph update provides a complete blocklist as well.\nzip & rar (unrar.dll required) is supported also\n(Only use one of these)"
+    
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_FILTE_TIP           "Messages containing these words are considered spam and\nare filtered and the client sending them are banned. Friend\nare not banned"
+    IDC_MSGONLYFRIEND_TIP   "Messages from clients not in your friendlist are not displayed"
+	IDC_MSGONLYSEC_SEC      "Only messages from clients that had a secure identification are accepted"
+	IDC_ADVSPAMFILTER_TIP   "Duplicate messages or messages that you do not answer within\na few  messages are considered spam and the client will be banned"
+
+    IDC_COMMENTFILTE_TIP    "File comments that contains these words will\nbe considered spam and will not be displayed\nin the file details"
+    IDC_SEC_MIS_TIP         "Secure identification is always enabled for morph.\nRun as secure user is only availbe on NT based(NT/2000/XP)  systems"
+    IDC_RUNASUSER_TIP       "Run emule as a restricted user. Emule will create a user\n'eMule_secure' that is only allowed to write in the\ninstallation folder, temp and incoming folders. Note:\nRunning files/preview from eMule might fail,\nassociating eMule with ed2k link is restricted.\nYour system is more secure against hacks.\n check in the taksmananager if emules run as 'eMule_secure'"
+END
+
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

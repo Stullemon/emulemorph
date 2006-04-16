@@ -17,6 +17,7 @@
 #include "stdafx.h"
 #include <share.h>
 #include "emule.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PPgSecurity.h"
 #include "OtherFunctions.h"
 #include "IPFilter.h"
@@ -62,7 +63,12 @@ BEGIN_MESSAGE_MAP(CPPgSecurity, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgSecurity::CPPgSecurity()
+//MORPH START leuk_he tooltipped
+	: CPPgtooltipped(CPPgSecurity::IDD)
+/*
 	: CPropertyPage(CPPgSecurity::IDD)
+	*/
+//MORPH END leuk_he tooltipped
 {
 	m_pacIPFilterURL = NULL;
 }
@@ -131,6 +137,7 @@ BOOL CPPgSecurity::OnInitDialog()
 	GetDlgItem(IDC_USESECIDENT)->EnableWindow(0);
 	//MORPH END   - Added by SiRoB, Allways use securedid
 	LoadSettings();
+	InitTooltips();  //MORPH leuk_he tooltipped;
 	Localize();
 
 	if (thePrefs.GetUseAutocompletion()){
@@ -222,6 +229,28 @@ void CPPgSecurity::Localize(void)
 		SetDlgItemText(IDC_LOADURL,GetResString(IDS_LOADURL));
 
 		SetDlgItemText(IDC_RUNASUSER,GetResString(IDS_RUNASUSER));
+        // MORPH START leuk_he tooltipped
+		SetTool(IDC_FILTERLEVEL,IDC_STATIC_FILTERLEVE_TIP);
+		SetTool(IDC_FILTERSERVERBYIPFILTER,IDC_FILTERSERVERBYIPFILTE_TIP);
+		SetTool(IDC_STATIC_FILTERLEVEL,IDC_STATIC_FILTERLEVE_TIP);
+		SetTool(IDC_FILTERLEVEL,IDC_STATIC_FILTERLEVE_TIP);
+		SetTool(IDC_RELOADFILTER,IDC_RELOADFILTE_TIP);
+		SetTool(IDC_EDITFILTER,IDC_EDITFILTE_TIP);
+		SetTool(IDC_STATIC_UPDATEFROM,IDC_LOADUR_TIP);
+		SetTool(IDC_UPDATEURL,IDC_LOADUR_TIP);
+		SetTool(IDC_LOADURL,IDC_LOADUR_TIP);
+		SetTool(IDC_MSG,IDC_COMMENTFILTE_TIP);
+		SetTool(IDC_COMMENTFILTER,IDC_COMMENTFILTE_TIP);
+//		SetTool(IDC_FILTERLABEL,IDC_FILTERLABE_TIP);
+		SetTool(IDC_FILTER,IDC_FILTE_TIP);
+		SetTool(IDC_MSGONLYFRIENDS,IDC_MSGONLYFRIEND_TIP);
+		SetTool(IDC_STATIC_COMMENTS,    IDC_COMMENTFILTE_TIP);
+		SetTool(IDC_FILTERCOMMENTSLABEL,IDC_COMMENTFILTE_TIP);
+		SetTool(IDC_MSGONLYSEC,IDC_MSGONLYSEC_SEC);
+		SetTool(IDC_ADVSPAMFILTER,IDC_ADVSPAMFILTER_TIP);
+		SetTool(IDC_SEC_MISC,IDC_SEC_MIS_TIP);
+		SetTool(IDC_RUNASUSER,IDC_RUNASUSER_TIP);
+		// MORPH END leuk_he tooltipped
 	}
 }
 
@@ -501,8 +530,12 @@ BOOL CPPgSecurity::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
-   
+    //MORPH START leuk_he tooltipped
+	/*
 	return CPropertyPage::PreTranslateMessage(pMsg);
+	*/
+	return CPPgtooltipped::PreTranslateMessage(pMsg);
+    //MORPH END  leuk_he tooltipped
 }
 
 void CPPgSecurity::OnEnChangeUpdateUrl()
