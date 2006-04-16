@@ -477,8 +477,9 @@ UINT AFX_CDECL UploadBandwidthThrottler::RunProc(LPVOID pParam) {
  */
 UINT UploadBandwidthThrottler::RunInternal() {
 	DWORD lastLoopTick = timeGetTime();
-	DWORD lastTickReachedBandwidth = lastLoopTick;
 	//MORPH START - Added by SiRoB, Upload Splitting Class
+	DWORD lastTickReachedBandwidthClass[NB_SPLITTING_CLASS];
+	memset(lastTickReachedBandwidthClass,lastLoopTick,sizeof(lastTickReachedBandwidthClass));
 	DWORD lastLoopTickTryTosend = lastLoopTick;
 	uint32 rememberedSlotCounterClass[NB_SPLITTING_CLASS];
 	memset(rememberedSlotCounterClass,0,sizeof(rememberedSlotCounterClass));
@@ -674,11 +675,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
 
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
-			if(thisLoopTick != lastTickReachedBandwidth && realBytesToSpendClass[classID] > 0) {
+			if(thisLoopTick != lastTickReachedBandwidthClass[classID] && realBytesToSpendClass[classID] > 0) {
 				realBytesToSpendClass[classID] = 0;
-        		    
-				if (classID == LAST_CLASS)
-					lastTickReachedBandwidth = thisLoopTick;
+        		lastTickReachedBandwidthClass[classID] = thisLoopTick;
         	}
 			uint32 allowedDataRate = allowedDataRateClass[classID];
 			if(allowedDataRate > 0 && allowedDataRate != _UI32_MAX) {
@@ -845,11 +844,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 					uint64 spentBytes = 0;
 					uint64 spentOverhead = 0;
-					if (ClientDataRate[classID])
 					for(uint32 maxCounter = 0; maxCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend; maxCounter++) {
 						if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID])
 							rememberedSlotCounterClass[classID] = 0;
-						uint32 slotCounter = lastclientpos + rememberedSlotCounterClass[classID];
+						uint32 slotCounter = lastclientpos + (ClientDataRate[classID]?rememberedSlotCounterClass[classID]:maxCounter);
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
@@ -912,17 +910,18 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			
 				}
 				
-				if (realBytesToSpendClass[LAST_CLASS] > 999) {
-				        if (realBytesToSpendClass[classID] > 999) {
-					        uint32 marge = 999;//100*ClientDataRate[classID];
-					        if (marge < 999)
-						        marge = 999;
-					        if (realBytesToSpendClass[classID] > marge && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
-						        m_highestNumberOfFullyActivatedSlotsClass[classID] = lastclientpos+1;
-				        }
+				if (realBytesToSpendClass[classID] > 999) {
+					if (realBytesToSpendClass[LAST_CLASS] > 999) {
+						uint32 marge = 999;//100*ClientDataRate[classID];
+						if (marge < 999)
+							marge = 999;
+						if (realBytesToSpendClass[classID] > marge && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
+							m_highestNumberOfFullyActivatedSlotsClass[classID] = lastclientpos+1;
+					}
 				} else {
-					lastTickReachedBandwidth = thisLoopTick;
+					lastTickReachedBandwidthClass[classID] = thisLoopTick;
 				}
+				
 				
 			}
 			sendLocker.Unlock();
