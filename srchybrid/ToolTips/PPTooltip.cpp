@@ -1929,14 +1929,14 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 	j=(long)m_dh.GetWidth();
 	for(i=0;i<j;i++){
 //		iDst[i]=64+127*(i%2);	//soft
-		iDst[i]=255*(i%2);		//hard
+		iDst[i]=(BYTE)(255*(i%2));		//hard
 	}
 
 	iDst=m_dv.GetBits();		//build the vert. dotted focus bitmap
 	j=(long)m_dv.GetHeight();
 	for(i=0;i<j;i++){
 //		*iDst=64+127*(i%2);		//soft
-		*iDst=255*(i%2);		//hard
+		*iDst=(BYTE)(255*(i%2));		//hard
 		iDst+=4;
 	}
 
