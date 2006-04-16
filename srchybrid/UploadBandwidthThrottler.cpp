@@ -917,6 +917,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							marge = 999;
 						if (realBytesToSpendClass[classID] > marge && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
 							m_highestNumberOfFullyActivatedSlotsClass[classID] = lastclientpos+1;
+					} else {
+						lastTickReachedBandwidthClass[classID] = thisLoopTick;
 					}
 				} else {
 					lastTickReachedBandwidthClass[classID] = thisLoopTick;
