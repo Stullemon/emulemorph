@@ -2919,7 +2919,7 @@ void CPreferences::LoadPreferences()
 	m_bSafeServerConnect =ini.GetBool(L"SafeServerConnect",false);
 
 	m_bTransflstRemain =ini.GetBool(L"TransflstRemainOrder",false);
-	filterserverbyip=ini.GetBool(L"FilterServersByIP",false);
+	filterserverbyip=ini.GetBool(L"FilterServersByIP",true); //MORPH leuk_he Changed default from false to true to fight fake servers
 	filterlevel=ini.GetInt(L"FilterLevel",127);
 	checkDiskspace=ini.GetBool(L"CheckDiskspace",false);
 	m_uMinFreeDiskSpace=ini.GetInt(L"MinFreeDiskSpace",20*1024*1024);
