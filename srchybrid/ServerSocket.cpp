@@ -64,8 +64,7 @@ CServerSocket::~CServerSocket(){
 }
 
 void CServerSocket::OnConnect(int nErrorCode){
-	CEMSocket::OnConnect(nErrorCode);
-	//CAsyncSocketEx::OnConnect(nErrorCode); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+	CAsyncSocketEx::OnConnect(nErrorCode); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	switch (nErrorCode){
 		case 0:{
 			if (cur_server->HasDynIP()){
@@ -587,6 +586,15 @@ void CServerSocket::ConnectToServer(CServer* server){
 		cur_server = NULL;
 	}
 
+   // MORPH START - leuke_he  ipfilter servers .
+   if(thePrefs.FilterServerByIP()&& theApp.ipfilter->IsFiltered(server->GetIP()))
+    {
+		AddLogLine(true,GetResString(IDS_LOG_SERVER_FILTERED ),ipstr(server->GetIP()), server->GetDescription(),theApp.ipfilter->GetLastHit() );
+        theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(server);
+        cur_server = NULL;
+        return;
+    }
+   // MORPH END - leuke_he  ipfilter servers .
 	cur_server = new CServer(server);
 	Log(GetResString(IDS_CONNECTINGTO), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort());
 

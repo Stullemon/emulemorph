@@ -32,6 +32,7 @@
 #include "ToolTipCtrlX.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 #include "MemDC.h"
+#include "IPFilter.h" // MORPH  - leuke_he  ipfilter servers .
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -236,7 +237,13 @@ void CServerListCtrl::RemoveAllDeadServers()
 	for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos))
 	{
 		const CServer* cur_server = server_list->list.GetAt(pos);
-		if (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries())
+		// MORPH START - leuke_he  ipfilter servers .
+		if  ( (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries())||
+		      (thePrefs.FilterServerByIP() && theApp.ipfilter->IsFiltered(cur_server->GetIP())))
+		/*
+       	if (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries())
+		*/
+		// MORPH END - leuke_he  ipfilter servers .
 		{
 			// Mighty Knife: Static server handling
 			// Static servers can be prevented from being removed from the list.
@@ -1070,7 +1077,16 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec = lpDrawItemStruct->rcItem;
-	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+    // leuke_he  ipfilter servers . 
+	COLORREF crOldTextColor ;
+	if ((server->GetFailedCount() >= thePrefs.GetDeadServerRetries()) || 
+		(thePrefs.FilterServerByIP()&& theApp.ipfilter->IsFiltered(server->GetIP())))  // Isfitlered is cpu intensive, possible optimization, but serverscreen is not drawn often anyway.
+		crOldTextColor = dc.SetTextColor(RGB(192,192,192)); //todo set color in template.
+	else if (server->GetFailedCount() >= 2)
+		crOldTextColor = dc.SetTextColor(RGB(128,128,128)); //todo set color in template.
+	else // default:  
+		crOldTextColor= dc.SetTextColor(m_crWindowText);
+	 // leuke_he  ipfilter servers . 
 
 	int iOldBkMode;
 	if (m_crWindowTextBk == CLR_NONE){
