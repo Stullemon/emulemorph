@@ -36,8 +36,8 @@ static char THIS_FILE[] = __FILE__;
 
 LastCommonRouteFinder::LastCommonRouteFinder() {
 	minUpload = 1;
-	maxUpload = UNLIMITED*1024/*_UI32_MAX*/;
-	m_upload = UNLIMITED*1024/*_UI32_MAX*/;
+	maxUpload = _UI32_MAX;
+	m_upload = _UI32_MAX;
 	m_CurUpload = 1;
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -416,7 +416,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 			bool bIsUSSLog = m_bIsUSSLog; //MORPH - Added by SiRoB
 			bool bIsUSSUDP = m_bIsUSSUDP; //MORPH - Added by SiRoB, USS with UDP preferency
 			// Calculate a good starting value for the upload control. If the user has entered a max upload value, we use that. Otherwise 10 KBytes/s
-            int startUpload = (maxUpload != UNLIMITED*1024/*_UI32_MAX*/)?maxUpload:10*1024;
+			int startUpload = (maxUpload != _UI32_MAX)?maxUpload:10*1024;
 
             bool atLeastOnePingSucceded = false;
             while(doRun && enabled && foundLastCommonHost == false) {
