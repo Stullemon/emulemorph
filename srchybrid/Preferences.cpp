@@ -2283,7 +2283,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"statsConnectionsGraphRatio", statsConnectionsGraphRatio,L"Statistics");
 	ini.WriteString(L"statsExpandedTreeItems", statsExpandedTreeItems);
 	CString buffer2;
-	for (int i=0;i<16;i++) { //MORPH - Changed by SiRoB, Powershare display
+	for (int i=0;i<GetNumStatsColors();i++) { //MORPH - Changed by SiRoB, Powershare display
 		buffer.Format(L"0x%06x",GetStatsColor(i));
 		buffer2.Format(L"StatColor%i",i);
 		ini.WriteString(buffer2,buffer,L"Statistics" );
