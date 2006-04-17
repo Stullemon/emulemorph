@@ -1114,9 +1114,13 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		CreateBlockRequests(1);
 		if (m_PendingBlocks_list.IsEmpty())
 		{
+			//MORPH - Moved by SiRoB, SendCancelTransfer if we can't find an other file to download
+			/*
 			SendCancelTransfer();
-			SetDownloadState(DS_NONEEDEDPARTS, _T(""));
-			SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
+			*/
+			SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. The file is already fully requested."));
+			if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
+				SendCancelTransfer();
 			return;
 		}
 		if (isTestFile)
@@ -1176,7 +1180,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		/*
 		SendCancelTransfer();
 		*/
-		SetDownloadState(DS_NONEEDEDPARTS);
+		SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. The file is already fully requested."));
 		if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
 			SendCancelTransfer();
 		return;
