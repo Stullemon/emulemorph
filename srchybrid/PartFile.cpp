@@ -3727,7 +3727,11 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	}
 #endif
 	// BEGIN netfinty: Dynamic Block Requests
-
+	/*Don't request too much at download start*/
+	if(sender->GetDownloadDatarate()==0 && sender->IsEmuleClient() || (sender->GetDownloadDatarate()<400 && sender->m_lastPartAsked!=(uint16)-1))
+	{
+		bytesPerRequest = 10240;
+	}
 	for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
 	{
 		if (sender->IsPartAvailable(part_idx) && GetNextEmptyBlockInPart(part_idx, 0))
@@ -6303,6 +6307,12 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	}
 #endif
 	// BEGIN netfinty: Dynamic Block Requests
+
+	/*Don't request too much at download start*/
+	if(sender->GetDownloadDatarate()==0 && sender->IsEmuleClient() || (sender->GetDownloadDatarate()<400 && sender->m_lastPartAsked!=(uint16)-1))
+	{
+		bytesPerRequest = 10240;
+	}
 
 	// Main loop
 	uint16 newBlockCount = 0;
