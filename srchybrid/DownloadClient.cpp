@@ -966,14 +966,25 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			if(socket)
 				socket->SetTimeOut(CONNECTION_TIMEOUT);
 
-			if (thePrefs.GetLogUlDlEvents()) {
-				if (pszReason == NULL) { //MORPH - Added by SiRoB, don't overhide pszReason
+			 //MORPH START - Changed by SiRoB, don't overhide pszReason
+			bool bNotFailedSession = false;
+				if (pszReason == NULL) {
+					if (thePrefs.GetLogUlDlEvents()) {
+						switch( nNewState )
+						{
+							case DS_NONEEDEDPARTS:
+								pszReason = _T("NNP. You don't need any parts from this client.");
+						}
+					}
+				} else {
 					switch( nNewState )
 					{
 						case DS_NONEEDEDPARTS:
-							pszReason = _T("NNP. You don't need any parts from this client.");
+							bNotFailedSession = true;
 					}
-				} //MORPH - Added by SiRoB, don't overhide pszReason
+				} 
+					
+					//MORPH END   - Changed by SiRoB, don't overhide pszReason
                 if(thePrefs.GetLogUlDlEvents())
                     AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Transferred: %s."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionDown(), false, false));
 			}
@@ -983,7 +994,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
 			if ( m_bTransferredDownMini && nNewState != DS_ERROR )
 				thePrefs.Add2DownSuccessfulSessions(); // Increment our counters for successful sessions (Cumulative AND Session)
-			else
+			else if (bNotFailedSession) //MORPH - Added by SiRoB, not a failed session
 				thePrefs.Add2DownFailedSessions(); // Increment our counters failed sessions (Cumulative AND Session)
 			//wistily start
 			uint32 tempDownTimeDifference= GetDownTimeDifference();

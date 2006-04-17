@@ -20,6 +20,7 @@ ADDED  : GUI: Powershare Graph [SiRoB]
 ADDED  : DBR: extended it to prevent extra download time (light BlueSonicBoy code) [SiRoB]
 - avoid download stuck with very slow source (trickle) and reserve too much block
 ADDED  : SendCancelTransfer after the A4AF swap try when we run out possible block to request [SiRoB]
+ADDED  : Don't count aborted downloading source du to noneeded part as failed [SiRoB]
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
