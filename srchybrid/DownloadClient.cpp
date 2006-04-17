@@ -814,12 +814,11 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 //Morph Start - added by AndCycle, ICS
 // enkeyDEV: ICS
 void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , CPartFile* pFile){
-	if (pFile == NULL){
-		uchar cfilehash[16];
-		data->ReadHash16(cfilehash);
-		if ((!pFile) || md4cmp(cfilehash,pFile->GetFileHash())){
-			throw CString(GetResString(IDS_ERR_WRONGFILEID)+ _T(" (ProcessFileIncStatus)"));
-		}
+	if (pFile)
+	{
+		if (reqfile==NULL)
+			throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileIncStatus; reqfile==NULL)");
+		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileIncStatus; pFile not found in downloadfile list)");
 	}
 	uint16 nED2KPartCount = data->ReadUInt16();
 	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
@@ -2531,6 +2530,21 @@ void CUpDownClient::SetRequestFile(CPartFile* pReqFile)
 {
 	if (pReqFile != reqfile || reqfile == NULL)
 		ResetFileStatusInfo();
+	//MORPH START - Changed by SiRoB, Keep A4AF infos
+	if (reqfile != reqfile && pReqFile == NULL) {
+		uint8* PartStatus;
+		if(m_PartStatus_list.Lookup(reqfile,PartStatus)){
+			delete[] PartStatus;
+			m_PartStatus_list.RemoveKey(reqfile);
+		}
+		if(m_IncPartStatus_list.Lookup(reqfile,PartStatus)){
+			delete[] PartStatus;
+			m_IncPartStatus_list.RemoveKey(reqfile);  //ICS, Keep A4AF infos
+		}
+		m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
+	}
+	//MORPH END   - Changed by SiRoB, Keep A4AF infos
+	
 	reqfile = pReqFile;
 }
 
