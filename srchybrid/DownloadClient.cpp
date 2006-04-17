@@ -543,7 +543,7 @@ void CUpDownClient::SendStartupLoadReq()
 	//MORPH START - Added by SiRoB, Fix connection collision
 	if (m_fQueueRankPending == 1 && !GetSentCancelTransfer()) {
 		if(thePrefs.GetLogUlDlEvents())
-			DebugLog(LOG_MORPH|LOG_GOOD, _T("[FIX CONNECTION COLLISION] Failed download Successfully rescued with client: %s"),DbgGetClientInfo());
+			DebugLog(LOG_MORPH|LOG_SUCCESS, _T("[FIX CONNECTION COLLISION] Failed download Successfully rescued with client: %s"),DbgGetClientInfo());
 		ProcessAcceptUpload();
 		return;
 	}
@@ -967,12 +967,13 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 				socket->SetTimeOut(CONNECTION_TIMEOUT);
 
 			if (thePrefs.GetLogUlDlEvents()) {
-				switch( nNewState )
-				{
-					case DS_NONEEDEDPARTS:
-						pszReason = _T("NNP. You don't need any parts from this client.");
-				}
-
+				if (pszReason) { //MORPH - Added by SiRoB, don't overhide pszReason
+					switch( nNewState )
+					{
+						case DS_NONEEDEDPARTS:
+							pszReason = _T("NNP. You don't need any parts from this client.");
+					}
+				} //MORPH - Added by SiRoB, don't overhide pszReason
                 if(thePrefs.GetLogUlDlEvents())
                     AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Transferred: %s."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionDown(), false, false));
 			}
@@ -1113,13 +1114,9 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		CreateBlockRequests(1);
 		if (m_PendingBlocks_list.IsEmpty())
 		{
-			//MORPH - Changed by SiRoB, SlugFiller noneededrequeue
-			/*
 			SendCancelTransfer();
-			SetDownloadState(DS_NONEEDEDPARTS);
+			SetDownloadState(DS_NONEEDEDPARTS, _T(""));
 			SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
-			*/
-			SetDownloadState(DS_ONQUEUE);
 			return;
 		}
 		if (isTestFile)
@@ -1175,13 +1172,13 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 
 
 	if (m_PendingBlocks_list.IsEmpty()){
-		//MORPH - Changed by SiRoB, SlugFiller noneededrequeue
+		//MORPH - Moved by SiRoB, SendCancelTransfer if we can't find an other file to download
 		/*
 		SendCancelTransfer();
-		SetDownloadState(DS_NONEEDEDPARTS);
-		SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
 		*/
-		SetDownloadState(DS_ONQUEUE);
+		SetDownloadState(DS_NONEEDEDPARTS);
+		if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
+			SendCancelTransfer();
 		return;
 	}
 
