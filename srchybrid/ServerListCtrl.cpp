@@ -238,11 +238,11 @@ void CServerListCtrl::RemoveAllDeadServers()
 	{
 		const CServer* cur_server = server_list->list.GetAt(pos);
 		// MORPH START - leuke_he  ipfilter servers .
-		if  ( (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries())||
-		      (thePrefs.FilterServerByIP() && theApp.ipfilter->IsFiltered(cur_server->GetIP())))
 		/*
        	if (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries())
 		*/
+		if  ( (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries())||
+		      (thePrefs.FilterServerByIP() && theApp.ipfilter->IsFiltered(cur_server->GetIP())))
 		// MORPH END - leuke_he  ipfilter servers .
 		{
 			// Mighty Knife: Static server handling
