@@ -984,7 +984,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
 	if (onlyAllowedToSendControlPacket) {
 		sendLocker.Lock();
-        if(sendbuffer != NULL || !controlpacket_queue.IsEmpty()) {
+        if(byConnected != ES_DISCONNECTED && (sendbuffer != NULL || !controlpacket_queue.IsEmpty())) {
             theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
         }
         sendLocker.Unlock();
