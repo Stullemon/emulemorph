@@ -413,8 +413,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 			CUpDownClient* sender = theApp.downloadqueue->GetDownloadClientByIP_UDP(ip, port);
 			if (thePrefs.GetDebugClientUDPLevel() > 0)
 				DebugRecv("OP_ReaskAck", sender, NULL, ip);
-			if (sender && sender->IsUDPPending()){
-				ASSERT(sender->IsUDPPending());
+			if (sender){
 				CSafeMemFile data_in(packet, size);
 				if ( sender->GetUDPVersion() > 3 )
 				{

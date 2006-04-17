@@ -877,7 +877,6 @@ public:
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 	void	SetReadBlockFromFileBuffer(byte* pdata) {filedata = pdata;};
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
-	bool	IsUDPPending() {return m_bUDPPending;}
 protected:
 	int m_iHttpSendState;
 	uint32 m_uPeerCacheDownloadPushId;
