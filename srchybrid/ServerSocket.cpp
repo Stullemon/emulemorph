@@ -511,7 +511,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					*/
 					if (client == NULL)	{
 						client = new CUpDownClient(0,nPort,dwIP,0,0,true);
-						theApp.clientlist->AddClient(client);
+						theApp.clientlist->AddClient(client, true); //MOPRH - Changed by SiRoB, Optimization
 					}
 					client->TryToConnect(true);
 					//MORPH END   - Changed by SiRoB, Force TryToConnect for OP_CALLBACKREQUESTED

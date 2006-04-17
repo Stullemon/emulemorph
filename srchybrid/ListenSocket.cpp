@@ -350,9 +350,9 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						// update the old client informations
 						bIsMuleHello = client->ProcessHelloPacket(packet,size);
 					}
-					else 
+					else if (bNewClient) //MOPRH - Changed by SiRoB, Optimization
 					{
-						theApp.clientlist->AddClient(client);
+						theApp.clientlist->AddClient(client, true); //MOPRH - Changed by SiRoB, Optimization
 						client->SetCommentDirty();
 					}
 
@@ -2145,7 +2145,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						if( callback == NULL )
 						{
 							callback = new CUpDownClient(NULL,tcp,ip,0,0);
-							theApp.clientlist->AddClient(callback);
+							theApp.clientlist->AddClient(callback, true); //MOPRH - Changed by SiRoB, Optimization
 						}
 						callback->TryToConnect(true);
 					}

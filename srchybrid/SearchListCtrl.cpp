@@ -922,7 +922,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					else{
 						CUpDownClient* newclient = new CUpDownClient(NULL, file->GetClientPort(),file->GetClientID(),file->GetClientServerIP(),file->GetClientServerPort(), true);
 						if (!theApp.clientlist->AttachToAlreadyKnown(&newclient,NULL)){
-							theApp.clientlist->AddClient(newclient);
+							theApp.clientlist->AddClient(newclient, true); //MOPRH - Changed by SiRoB, Optimization
 						}
 						newclient->SendPreviewRequest(file);
 						// add to res - later

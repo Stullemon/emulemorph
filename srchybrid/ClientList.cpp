@@ -782,15 +782,25 @@ void CClientList::RequestTCP(Kademlia::CContact* contact)
 
 	CUpDownClient* pNewClient = FindClientByIP(nContactIP, contact->GetTCPPort());
 
+	bool bNewClient = true; //MOPRH - Added by SiRoB,  Fix adding multiple clientKnown with same ip port
 	if (!pNewClient)
 		pNewClient = new CUpDownClient(0, contact->GetTCPPort(), contact->GetIPAddress(), 0, 0, false );
-
+	//MORPH START - Added by SiRoB, Fix adding multiple clientKnown with same ip port
+	else
+		bNewClient = false;
+	//MORPH END   - Added by SiRoB, Fix adding multiple clientKnown with same ip port
+	
+	
 	//Add client to the lists to be processed.
 	pNewClient->SetKadPort(contact->GetUDPPort());
 	pNewClient->SetKadState(KS_QUEUED_FWCHECK);
-	m_KadList.AddTail(pNewClient);
-	//This method checks if this is a dup already.
-	AddClient(pNewClient);
+	//MORPH START - Changed by SiRoB, Optimization & Fix
+	if (bNewClient) {
+		m_KadList.AddTail(pNewClient);
+		AddClient(pNewClient, true); 
+	} else
+		AddToKadList(pNewClient);
+	//MORPH END   - Changed by SiRoB, Optimization & Fix
 }
 
 void CClientList::RequestBuddy(Kademlia::CContact* contact)
@@ -800,18 +810,27 @@ void CClientList::RequestBuddy(Kademlia::CContact* contact)
 	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->GetTCPPort())
 		return;
 	CUpDownClient* pNewClient = FindClientByIP(nContactIP, contact->GetTCPPort());
+	bool bNewClient = true; //MOPRH - Added by SiRoB,  Fix adding multiple clientKnown with same ip port
 	if (!pNewClient)
 		pNewClient = new CUpDownClient(0, contact->GetTCPPort(), contact->GetIPAddress(), 0, 0, false );
-
+	//MORPH START - Added by SiRoB, Fix adding multiple clientKnown
+	else
+		bNewClient = false;
+	//MORPH END   - Added by SiRoB, Fix adding multiple clientKnown with same ip port
+	
 	//Add client to the lists to be processed.
 	pNewClient->SetKadPort(contact->GetUDPPort());
 	pNewClient->SetKadState(KS_QUEUED_BUDDY);
 	byte ID[16];
 	contact->GetClientID().ToByteArray(ID);
 	pNewClient->SetUserHash(ID);
-	AddToKadList(pNewClient);
-	//This method checks if this is a dup already.
-	AddClient(pNewClient);
+	//MORPH START - Added by SiRoB, Optimization
+	if (bNewClient) {
+		m_KadList.AddTail(pNewClient);
+		AddClient(pNewClient, true);
+	} else
+		AddToKadList(pNewClient);
+	//MORPH END   - Changed by SiRoB, Optimization
 }
 
 void CClientList::IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128* buddyID )
@@ -837,8 +856,13 @@ void CClientList::IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128*
 	pNewClient->SetUserHash(ID);
 	buddyID->ToByteArray(ID);
 	pNewClient->SetBuddyID(ID);
+	//MORPH - Changed by SiRoB, Optimization
+	/*
 	AddToKadList(pNewClient);
 	AddClient(pNewClient);
+	*/
+	m_KadList.AddTail(pNewClient);
+	AddClient(pNewClient, true);
 }
 
 void CClientList::RemoveFromKadList(CUpDownClient* torem){
