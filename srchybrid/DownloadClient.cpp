@@ -541,7 +541,7 @@ void CUpDownClient::SendStartupLoadReq()
 	}
 	SetDownloadState(DS_ONQUEUE);
 	//MORPH START - Added by SiRoB, Fix connection collision
-	if (m_fQueueRankPending == 1 && !GetSentCancelTransfer()) {
+	if (m_fFailedDownload == 1 && !GetSentCancelTransfer()) {
 		if(thePrefs.GetLogUlDlEvents())
 			DebugLog(LOG_MORPH|LOG_SUCCESS, _T("[FIX CONNECTION COLLISION] Failed download Successfully rescued with client: %s"),DbgGetClientInfo());
 		ProcessAcceptUpload();
@@ -967,7 +967,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 				socket->SetTimeOut(CONNECTION_TIMEOUT);
 
 			if (thePrefs.GetLogUlDlEvents()) {
-				if (pszReason) { //MORPH - Added by SiRoB, don't overhide pszReason
+				if (pszReason == NULL) { //MORPH - Added by SiRoB, don't overhide pszReason
 					switch( nNewState )
 					{
 						case DS_NONEEDEDPARTS:
@@ -977,7 +977,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
                 if(thePrefs.GetLogUlDlEvents())
                     AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Transferred: %s."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionDown(), false, false));
 			}
-
+			m_fFailedDownload = 0; //MORPH - Added by SiRoB, Fix Connection Collision
 			ResetSessionDown();
 
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
@@ -2552,6 +2552,7 @@ void CUpDownClient::SetRequestFile(CPartFile* pReqFile)
 void CUpDownClient::ProcessAcceptUpload()
 {
 	m_fQueueRankPending = 1;
+
 	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 	/*
 	if (reqfile && !reqfile->IsStopped() && (reqfile->GetStatus()==PS_READY || reqfile->GetStatus()==PS_EMPTY))
@@ -2579,6 +2580,8 @@ void CUpDownClient::ProcessAcceptUpload()
 				}
 			}
 			//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
+		} else {
+			m_fFailedDownload = 1; //MORPH - Added by SiRoB, Fix Connection Collision
 		}
 	}
 	else
