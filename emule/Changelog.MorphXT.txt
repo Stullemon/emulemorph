@@ -2,6 +2,7 @@
 Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
 FIXED  : (minor) USC: Percentage setting for PowerShare Class was not taken into account (thanks to fafner) [SiRoB]
+FIXED  : (minor) correct ipfiltering of servers based on report by bluesonicboy [leuk_he]
 
 ADDED  : DBR: Dynamic Block Requests by netfinity [SiRoB]
 ADDED  : minor official bug fix arround upload Obtained Parts [SiRoB]
@@ -17,7 +18,7 @@ ADDED  : Fix connection collision [SiRoB]
 ADDED  : GUI: Server Icon in DownloadClientsCtrl [Stulle]
 ADDED  : GUI: Powershare Graph [SiRoB]
 ADDED  : DBR: extended it to prevent extra download time (light BlueSonicBoy code) [SiRoB]
-- avoid download stuck with very slow source (trickle) and reserve too mush block
+- avoid download stuck with very slow source (trickle) and reserve too much block
 ADDED  : SendCancelTransfer after the A4AF swap try when we run out possible block to request [SiRoB]
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
@@ -32,6 +33,7 @@ CHANGED: GUI: No log messagge in log on spam. (only in verbose) [leuk_he]
 CHANGED: GUI: focus steal check on message by raccoonI [leuk_he]
 CHANGED: updated with zzUL-0060413-2149 with some fix arround EMSocket [SiRoB]
 CHANGED: USC: updated to feet zz change [SiRoB]
+CHANGED: GUI: dimmed ipfiltered servers[leuk_he]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.9
