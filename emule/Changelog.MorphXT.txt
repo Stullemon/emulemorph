@@ -3,7 +3,7 @@ Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
 FIXED  : (minor) USC: Percentage setting for PowerShare Class was not taken into account (thanks to fafner) [SiRoB]
 
-ADDED  : Dynamic Block Requests by netfinity [SiRoB]
+ADDED  : DBR: Dynamic Block Requests by netfinity [SiRoB]
 ADDED  : minor official bug fix arround upload Obtained Parts [SiRoB]
 - this help to properly display yellow pending upload area
 ADDED  : minor official bug fix arround DownloadClient ProgressBar [SiRoB]
@@ -14,9 +14,11 @@ ADDED  : Added a Bind addres for Upnp [leuk_he]
 ADDED  : emcrypt gpl violator protection by Xman [leuk_he]
 ADDED  : Fix connection collision [SiRoB]
 - you can see the activities by enabling up/down log event and check the morph log
-ADDED  : put back SlugFiller noneededrequeue [SiRoB]
 ADDED  : GUI: Server Icon in DownloadClientsCtrl [Stulle]
 ADDED  : GUI: Powershare Graph [SiRoB]
+ADDED  : DBR: extended it to prevent extra download time (light BlueSonicBoy code) [SiRoB]
+- avoid download stuck with very slow source (trickle) and reserve too mush block
+ADDED  : SendCancelTransfer after the A4AF swap try when we run out possible block to request [SiRoB]
 
 CHANGED: WC: reworked to make proxy configuration test working with random port feature [SiRoB]
 CHANGED: ICS: reworked to take into account an A4AF swaping during a ProcessFileStatus [SiRoB]
