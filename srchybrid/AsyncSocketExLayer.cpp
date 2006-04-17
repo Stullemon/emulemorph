@@ -460,13 +460,7 @@ BOOL CAsyncSocketExLayer::CreateNext(UINT nSocketPort, int nSocketType, long lEv
 		SOCKET hSocket=socket(AF_INET, nSocketType, 0);
 		if (hSocket==INVALID_SOCKET)
 			res=FALSE;
-  
-		int window_size = 64 * 1024;
-
-		setsockopt(hSocket, SOL_SOCKET, SO_SNDBUF, (char *) &window_size, sizeof(window_size) );
-		setsockopt(hSocket, SOL_SOCKET, SO_RCVBUF, (char *) &window_size, sizeof(window_size) );
-
-		m_pOwnerSocket->m_SocketData.hSocket=hSocket;
+  		m_pOwnerSocket->m_SocketData.hSocket=hSocket;
 		m_pOwnerSocket->AttachHandle(hSocket);
 		if (!m_pOwnerSocket->AsyncSelect(lEvent))
 		{
