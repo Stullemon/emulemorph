@@ -977,22 +977,22 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 		else
 			ASSERT( false );
 	}
-
-	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos != 0; ){
-		const Requested_Block_Struct* cur_reqblock = m_DoneBlocks_list.GetNext(pos);
-		if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
-			delete reqblock;
-			return;
+	if (md4cmp(reqblock->FileID, GetUploadFileID()) == 0) { //MORPH - Adde by SiRoB, Official fix
+		for (POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos != 0; ){
+			const Requested_Block_Struct* cur_reqblock = m_DoneBlocks_list.GetNext(pos);
+			if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
+				delete reqblock;
+				return;
+			}
 		}
-	}
-	for (POSITION pos = m_BlockRequests_queue.GetHeadPosition(); pos != 0; ){
-		const Requested_Block_Struct* cur_reqblock = m_BlockRequests_queue.GetNext(pos);
-		if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
-			delete reqblock;
-			return;
+		for (POSITION pos = m_BlockRequests_queue.GetHeadPosition(); pos != 0; ){
+			const Requested_Block_Struct* cur_reqblock = m_BlockRequests_queue.GetNext(pos);
+			if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
+				delete reqblock;
+				return;
+			}
 		}
-	}
-
+	} //MORPH - Adde by SiRoB, Official fix
 	m_BlockRequests_queue.AddTail(reqblock);
 }
 
