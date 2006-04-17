@@ -1666,7 +1666,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
         theApp.HandleLogQueue();
         // Elandal: ThreadSafeLogging <--
 
-		theApp.uploadqueue->UpdateDatarates();
+		theApp.uploadqueue->UpdateDatarates(); //MORPH - Moved by SiRoB
 		//MOPRH START - Modified by SiRoB
 		/*
 		// ZZ:UploadSpeedSense -->
