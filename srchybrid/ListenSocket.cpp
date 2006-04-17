@@ -2498,9 +2498,17 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 			    // enkeyDEV: ICS
 			    case OP_FILEINCSTATUS:
 				{
-				    CSafeMemFile data(packet, size);
-				    theStats.AddDownDataOverheadFileRequest(size);
-				    client->ProcessFileIncStatus(&data,size);
+				    if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_FileIncStatus", client, (size >= 16) ? packet : NULL);
+					theStats.AddDownDataOverheadFileRequest(size);
+
+					CSafeMemFile data(packet, size);
+					uchar cfilehash[16];
+					data.ReadHash16(cfilehash);
+					CPartFile* file = theApp.downloadqueue->GetFileByID(cfilehash);
+					if (file == NULL)
+						client->CheckFailedFileIdReqs(cfilehash);
+					client->ProcessFileIncStatus(&data,size,file);
 				    break;
 			    }
 			    // <--- enkeyDEV: ICS
