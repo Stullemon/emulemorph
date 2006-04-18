@@ -549,7 +549,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 				CReadBlockFromFileThread* readblockthread = (CReadBlockFromFileThread*) AfxBeginThread(RUNTIME_CLASS(CReadBlockFromFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
 				readblockthread->SetReadBlockFromFile(srcfile, currentblock->StartOffset, togo, this);
 				readblockthread->ResumeThread();
-				SetUploadFileID(srcfile); //MORPH - Moved by SiRoB, Filtered Requested Block
+				SetUploadFileID(srcfile); //MORPH - Moved by SiRoB, Fix Filtered Block Request
 				filedata = (byte*)-2;
 				return;
 			} else if (filedata == (byte*)-1) {
@@ -561,7 +561,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			if (!srcfile->IsPartFile())
 				bFromPF = false; // This is not a part file...
 
-			//MORPH - Removed by SiRoB, Filtered Requested Block
+			//MORPH - Removed by SiRoB, Fix Filtered Requested Block
 			/*
 			SetUploadFileID(srcfile);
 			*/
@@ -958,7 +958,7 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 
 	if (oldreqfile) {
 		oldreqfile->RemoveUploadingClient(this);
-		ClearUploadBlockRequests(); //MORPH - Added by SiRoB, Filtered Requested Block
+		ClearUploadBlockRequests(); //MORPH - Added by SiRoB, Fix Filtered Block Request
 	}
 }
 
