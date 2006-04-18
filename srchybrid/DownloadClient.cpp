@@ -962,32 +962,31 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 
+		bool bNotFailedSession = false;
 		if (m_nDownloadState == DS_DOWNLOADING ){
 			if(socket)
 				socket->SetTimeOut(CONNECTION_TIMEOUT);
 
 			 //MORPH START - Changed by SiRoB, don't overhide pszReason
-			bool bNotFailedSession = false;
-				if (pszReason == NULL) {
-					if (thePrefs.GetLogUlDlEvents()) {
-						switch( nNewState )
-						{
-							case DS_NONEEDEDPARTS:
-								pszReason = _T("NNP. You don't need any parts from this client.");
-						}
-					}
-				} else {
+			if (pszReason == NULL) {
+				if (thePrefs.GetLogUlDlEvents()) {
 					switch( nNewState )
 					{
 						case DS_NONEEDEDPARTS:
-							bNotFailedSession = true;
+							pszReason = _T("NNP. You don't need any parts from this client.");
 					}
-				} 
-					
-					//MORPH END   - Changed by SiRoB, don't overhide pszReason
-                if(thePrefs.GetLogUlDlEvents())
-                    AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Transferred: %s."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionDown(), false, false));
-			}
+				}
+			} else {
+				switch( nNewState )
+				{
+					case DS_NONEEDEDPARTS:
+						bNotFailedSession = true;
+				}
+			} 
+			//MORPH END   - Changed by SiRoB, don't overhide pszReason
+            if(thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Transferred: %s."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionDown(), false, false));
+			
 			m_fFailedDownload = 0; //MORPH - Added by SiRoB, Fix Connection Collision
 			ResetSessionDown();
 
