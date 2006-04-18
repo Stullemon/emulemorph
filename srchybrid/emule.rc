@@ -5979,7 +5979,7 @@ STRINGTABLE
 BEGIN
     IDS_DM_TIP              "Setting related to Download:\nCategories, download window,IntelligentChunkSelection"
     IDS_SCC_TIP             "How to handle categories in the transfer window"
-    IDS_SAC_TIP             "Handing of sources that have\n multiple files (<b>A</b>sked <b>4</b> for <b>A</b>nother <a>F</a>ile)\n &Smart af4f control "
+    IDS_SAC_TIP             "Handling of sources that have\n multiple files (<b>A</b>sked <b>4</b> for <b>A</b>nother <a>F</a>ile)\n &Smart af4f control "
     IDS_DEFAULT_TIP         "IDS_DEFAULT_TIP"
     IDS_UM_TIP              "Handling of the upload:\nSlot control ,\nupload bandthwidth\nspeed sensing"
     IDS_DYNUPLOAD_TIP       "Vary the upload speed automatic by detecing available bandwidth."
@@ -6018,7 +6018,7 @@ BEGIN
     IDS_ANTI_CREDITHACK_TIP "Prevents our credits/userhash to be stolen (default:activated)"
     IDS_INFINITEQUEUE_TIP   "Give our queue an unlimited size"
     IDS_DONTREMOVESPARETRICKLESLOT_TIP 
-                            "If Morph opens extra trickle(slow upload) slots,\nthis option will close those slots when no longer needed\nand put the users back in the queue without loosing position"
+                            "If Morph opens extra trickle(slow upload) slots,\ndisabling this option will close those slots when\nno longer needed and put the users back in the \nqueue without loosing position"
 END
 
 STRINGTABLE 
