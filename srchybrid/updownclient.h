@@ -1096,7 +1096,8 @@ protected:
 		 m_fAICHRequested     : 1,
 		 m_fSentOutOfPartReqs : 1,
 		 m_fSupportsLargeFiles: 1,
-		 m_fExtMultiPacket	  : 1;
+		 m_fExtMultiPacket	  : 1,
+		 m_fFailedDownload	  : 1; //MORPH - Added by SiRoB, Fix Connection Collision
 
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DownloadBlocks_list;
