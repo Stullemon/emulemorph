@@ -5963,7 +5963,7 @@ BEGIN
     IDS_PW_FASTSRVCON_TIP   "disabling this setting will connect to servers slightly faster but might cause some false lowid's"
     IDS_PW_SCORE_TIP        "Use the server priority to connect to high priority servers first"
     IDS_MANUALSERVERHIGHPRIO_TIP 
-                            "Give servers that are manually typed in a high priority"
+                            "Give servers that are manually added in a high priority"
     IDS_EDITLIST_TIP        "Edit the address.dat file to to update the serverlist on startup with"
     IDS_PW_AUTOCONNECTSTATICONLY_TIP 
                             "Connect to server that are set to static only. If there are no server static automatic connect will fail."
