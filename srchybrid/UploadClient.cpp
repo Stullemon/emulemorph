@@ -549,6 +549,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 				CReadBlockFromFileThread* readblockthread = (CReadBlockFromFileThread*) AfxBeginThread(RUNTIME_CLASS(CReadBlockFromFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
 				readblockthread->SetReadBlockFromFile(srcfile, currentblock->StartOffset, togo, this);
 				readblockthread->ResumeThread();
+				SetUploadFileID(srcfile); //MORPH - Moved by SiRoB, Filtered Requested Block
 				filedata = (byte*)-2;
 				return;
 			} else if (filedata == (byte*)-1) {
@@ -560,7 +561,10 @@ void CUpDownClient::CreateNextBlockPackage(){
 			if (!srcfile->IsPartFile())
 				bFromPF = false; // This is not a part file...
 
+			//MORPH - Removed by SiRoB, Filtered Requested Block
+			/*
 			SetUploadFileID(srcfile);
+			*/
 
 			// MORPH START - Added by Commander, WebCache 1.2e
 			if (IsUploadingToWebCache()) // Superlexx - encryption: encrypt here
@@ -952,8 +956,10 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 		requpfileid_lasttimeupdated = 0;
 	//MORPH END   - Added by SiRoB, Optimization requpfile
 
-	if (oldreqfile)
+	if (oldreqfile) {
 		oldreqfile->RemoveUploadingClient(this);
+		ClearUploadBlockRequests(); //MORPH - Added by SiRoB, Filtered Requested Block
+	}
 }
 
 void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
@@ -977,22 +983,22 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 		else
 			ASSERT( false );
 	}
-	if (md4cmp(reqblock->FileID, GetUploadFileID()) == 0) { //MORPH - Adde by SiRoB, Official fix
-		for (POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos != 0; ){
-			const Requested_Block_Struct* cur_reqblock = m_DoneBlocks_list.GetNext(pos);
-			if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
-				delete reqblock;
-				return;
-			}
+	
+	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos != 0; ){
+		const Requested_Block_Struct* cur_reqblock = m_DoneBlocks_list.GetNext(pos);
+		if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset && md4cmp(reqblock->FileID, GetUploadFileID()) == 0){
+			delete reqblock;
+			return;
 		}
-		for (POSITION pos = m_BlockRequests_queue.GetHeadPosition(); pos != 0; ){
-			const Requested_Block_Struct* cur_reqblock = m_BlockRequests_queue.GetNext(pos);
-			if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
-				delete reqblock;
-				return;
-			}
+	}
+	for (POSITION pos = m_BlockRequests_queue.GetHeadPosition(); pos != 0; ){
+		const Requested_Block_Struct* cur_reqblock = m_BlockRequests_queue.GetNext(pos);
+		if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
+			delete reqblock;
+			return;
 		}
-	} //MORPH - Adde by SiRoB, Official fix
+	}
+
 	m_BlockRequests_queue.AddTail(reqblock);
 }
 
