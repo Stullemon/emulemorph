@@ -2874,12 +2874,6 @@ BEGIN
     IDS_GLOBAL_HL_LIMIT     "Hardlimit Globale"
 END
 
-STRINGTABLE 
-BEGIN
-    IDS_GLOBAL_HL           "Attiva HL Globale"
-    IDS_GLOBAL_HL_LIMIT     "Hardlimit Globale"
-END
-
 #endif    // Italien (Italie) resources
 /////////////////////////////////////////////////////////////////////////////
 
