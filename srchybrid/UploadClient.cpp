@@ -561,7 +561,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			if (!srcfile->IsPartFile())
 				bFromPF = false; // This is not a part file...
 
-			//MORPH - Removed by SiRoB, Fix Filtered Requested Block
+			//MORPH - Removed by SiRoB, Fix Filtered Block Request
 			/*
 			SetUploadFileID(srcfile);
 			*/
