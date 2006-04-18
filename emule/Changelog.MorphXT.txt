@@ -1,6 +1,10 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
+
+--------------------------------------
+Changelog for eMule 0.47a MorphXT v8.10
+--------------------------------------
 FIXED  : (minor) USC: Percentage setting for PowerShare Class was not taken into account (thanks to fafner) [SiRoB]
 FIXED  : (minor) correct ipfiltering of servers based on report by bluesonicboy [leuk_he]
 
