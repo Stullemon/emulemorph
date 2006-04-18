@@ -958,7 +958,7 @@ BEGIN
     IDS_SP_DL2              "Moyenne de réception sur la durée choisie"
     IDS_SP_DL3              "Session : moyenne de réception"
     IDS_SP_UL1              "Emission courante"
-    IDS_SP_UL2              "Moyenne d'émission sur la durée choisie"
+    IDS_SP_UL2              "Emission moyenné "
     IDS_SP_UL3              "Session : moyenne d'émission"
     IDS_SP_ACTCON           "Connexions actives"
     IDS_SP_ACTDL            "Réceptions actives"
@@ -1744,13 +1744,13 @@ BEGIN
                             "Le changement de port est impossible lorsque vous êtes connecté au réseau, sur KAD ou à un client!\n\nVeuillez redémarrer eMule pour prendre en compte les changements de ports."
     IDS_NETWORK_INFO        "Informations réseau"
     IDS_SP_TOTALUL          "Nombre total d'émissions"
-    IDS_SP_ULFRIENDS        "Accès amis (émission)"
+    IDS_SP_ULFRIENDS        "Emission par slot amis"
     IDS_SP_ULSLOTSNOOVERHEAD 
-                            "Emission courante sans surplus de bande passante (accès amis uniquement)"
+                            "Emission courante (sans overhead)"
     IDS_ST_ACTIVEU_ZZ       "Emissions actives"
     IDS_ST_ULCURRENT        "Emission + surplus bande passante"
     IDS_ST_ULSLOTSNOOVERHEAD "Emission"
-    IDS_ST_ULFRIEND         "Emission vers les amis"
+    IDS_ST_ULFRIEND         "Amis"
 END
 
 STRINGTABLE 
@@ -2053,8 +2053,19 @@ BEGIN
     IDS_POWERSHARE_DISABLED_LABEL "Désactivé"
     IDS_POWERSHARE_AUTO_LABEL "Auto"
     IDS_POWERSHARE_AUTO     "Auto"
-    IDS_DYNUPLOAD           "Upload Dynamique"
+    IDS_ST_ULPOWERSHARE     "Powershare"
+    IDS_DYNUPLOAD           "Envoi Dynamique"
     IDS_HIDEOVERSHARES      "Nombre de partage(s) avant de masquer le chunk (HideOS, 0 = Désactivé)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SELECTIVESHARE      "Choix auto. du chunk à partager"
+    IDS_ERR_HIDDENBLOCK     "Demande d'un bloc caché "
+    IDS_SP_ULPOWERSHARE     "Emission par slots powershare"
+    IDS_SCHED_BACKUP        "Backup CONFIG-folder"
+    IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT-file"
+    IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT-file"
 END
 
 STRINGTABLE 
@@ -2294,14 +2305,6 @@ BEGIN
     IDS_SWITCHDYNUP         "Utiliser le système d'upload dynamique UploadSpeedSense (USS)"
     IDS_AUTODYNUPSWITCHING  "Changement automatique de système d'upload dynamique"
     IDS_MAXCONNECTIONSSWITCHBORDER "Limite maximum de connexions pour changer"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_SELECTIVESHARE      "Choix auto. du chunk à partager"
-    IDS_SCHED_BACKUP        "Backup CONFIG-folder"
-    IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT-file"
-    IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT-file"
 END
 
 STRINGTABLE 
@@ -2835,6 +2838,17 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SLOT_LIMIT_NUM      "Nombre Maximum de slots (60-255)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_GLOBAL_HL           "Global HL"
+    IDS_GLOBAL_HL_LIMIT     "Global Hardlimit"
+END
+
+STRINGTABLE 
+BEGIN
+IDS_LOG_SERVER_FILTERED "Removed server at %s  from list '%s' :in ipfilter '%s'"
 END
 
 #endif    // Français (France) resources
