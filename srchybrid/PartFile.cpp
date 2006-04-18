@@ -312,8 +312,10 @@ void CPartFile::Init(){
     m_random_update_wait = (uint32)(rand()/(RAND_MAX/1000));
     lastSwapForSourceExchangeTick = ::GetTickCount();
 	m_DeadSourceList.Init(false);
-	m_bIsFlushThread = false; //MORPH - Added by SiRoB, Import Part
-
+	//MORPH START - Added by SiRoB, Flush Thread
+	m_bIsFlushThread = false;
+	m_bNeedToFlush = false; 
+	//MORPH END   - Added by SiRoB, Flush Thread
 	// khaos::categorymod+
 	m_catResumeOrder=0;
 	// khaos::categorymod-
@@ -5461,7 +5463,9 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 {
 	//MORPH START - Added by SiRoB, Flush Thread
 	if (m_bIsFlushThread) {
-		return;	
+		if (forcewait)
+			m_bNeedToFlush = true;
+		return;
 	}
 	//MORPH END   - Added by SiRoB, Flush Thread
 	bool bIncreasedFile=false;
@@ -5600,6 +5604,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		CPartFileFlushThread* m_FlushThread = (CPartFileFlushThread*) AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 		if (m_FlushThread) {
 			m_bIsFlushThread = true;
+			m_bNeedToFlush = false;
 			FlushDone_Struct* FlushSetting = new FlushDone_Struct;
 			FlushSetting->bIncreasedFile = bIncreasedFile;
 			FlushSetting->bForceICH = bForceICH;
@@ -5715,6 +5720,8 @@ void CPartFile::FlushDone(FlushDone_Struct* FlushSetting)
 	delete[] FlushSetting->changedPart;
 	delete	FlushSetting;
 	SetFlushThread(NULL);
+	if (m_bNeedToFlush)
+		FlushBuffer(true);
 }
 
 IMPLEMENT_DYNCREATE(CPartFileFlushThread, CWinThread)

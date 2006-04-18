@@ -480,7 +480,10 @@ private:
 
     DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
 	
-	bool	m_bIsFlushThread; //MORPH Added by SiRoB, Flush Thread
+	//MORPH START - Added by SiRoB, Flush Thread
+	bool	m_bIsFlushThread;
+	bool	m_bNeedToFlush;
+	//MORPH END   - Added by SiRoB, Flush Thread
 
 	// khaos::categorymod+
 	UINT	m_catResumeOrder;
