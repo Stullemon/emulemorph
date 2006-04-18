@@ -271,6 +271,7 @@ void CUpDownClient::Init()
 	m_bCollectionUploadSlot = false;
 	m_fSupportsLargeFiles = 0;
 	m_fExtMultiPacket = 0;
+	m_fFailedDownload = 0; //MORPH - Added by SiRoB, Fix Connection Collision
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
 	m_bScheduledForRemoval = false;
 	m_bScheduledForRemovalWillKeepWaitingTimeIntact = false;
