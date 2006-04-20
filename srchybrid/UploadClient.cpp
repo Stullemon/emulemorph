@@ -1115,7 +1115,7 @@ uint32 CUpDownClient::SendBlockData(){
 	}
 	
     if(m_AvarageUDR_list.GetCount() > 1) {
-		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
+		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
 		DWORD dwAvgTickDuration = dwDuration / (m_AvarageUDR_list.GetCount()-1);
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwAvgTickDuration)

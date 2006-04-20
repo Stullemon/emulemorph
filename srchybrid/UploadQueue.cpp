@@ -1895,7 +1895,7 @@ void CUploadQueue::UpdateDatarates() {
 		//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 	}
 	//MORPH START - Added by SiRoB, Keep An average datarate value for USS system
-	while(avarage_dr_USS_list.GetCount() > 0 && (curTick - avarage_dr_USS_list.GetHead().timestamp) > 30000){
+	while(avarage_dr_USS_list.GetCount() > 1 && (curTick - avarage_dr_USS_list.GetHead().timestamp) > 30000){
 		avarage_dr_USS_listLastRemovedTimestamp = avarage_dr_USS_list.GetHead().timestamp;
 		m_avarage_dr_USS_sum -= avarage_dr_USS_list.RemoveHead().datalen;
 	}
@@ -1903,19 +1903,15 @@ void CUploadQueue::UpdateDatarates() {
 	if (avarage_dr_USS_list.GetCount() > 1) {
 		DWORD dwDuration = avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_listLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
-		/*
 		DWORD dwAvgTickDuration = dwDuration / avarage_dr_USS_list.GetCount();
 		if ((curTick - avarage_dr_USS_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_dr_USS_list.GetTail().timestamp - dwAvgTickDuration;
-		*/
 		datarate_USS = (UINT)(1000U * m_avarage_dr_USS_sum / dwDuration);
 	} else  if (avarage_dr_USS_list.GetCount() == 1){
 		DWORD dwDuration = avarage_dr_USS_list.GetTail().timestamp - avarage_dr_USS_listLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
-		/*
 		if ((curTick - avarage_dr_USS_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - avarage_dr_USS_list.GetTail().timestamp;
-		*/
 		datarate_USS = (UINT)(1000U * m_avarage_dr_USS_sum / dwDuration);
 	} else {
 		datarate_USS = 0;
@@ -1923,7 +1919,7 @@ void CUploadQueue::UpdateDatarates() {
 	//MORPH END   - Added by SiRoB, Keep An average datarate value for USS system
 		
 	// don't save more than MAXAVERAGETIMEUPLOAD secs of data
-	while((UINT)avarage_tick_list.GetCount() > 0 && (curTick - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
+	while((UINT)avarage_tick_list.GetCount() > 1 && (curTick - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
 		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 		m_avarage_overhead_dr_sum -= avarage_overhead_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 		m_avarage_friend_dr_sum -= avarage_friend_dr_list.RemoveHead(); //MORPH - Added by SiRoB, Upload Friend from uploadbandwidththrottler
@@ -1934,11 +1930,9 @@ void CUploadQueue::UpdateDatarates() {
 	if (avarage_tick_list.GetCount() > 1){
 		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
-		/*
 		DWORD dwAvgTickDuration = dwDuration / avarage_tick_list.GetCount();
 		if ((curTick - avarage_tick_list.GetTail()) > dwAvgTickDuration)
 			dwDuration += curTick - avarage_tick_list.GetTail() - dwAvgTickDuration;
-		*/
 		datarate = (UINT)(1000U * (ULONGLONG)m_avarage_dr_sum / dwDuration);
 		datarateoverhead = (UINT)(1000U * (ULONGLONG)m_avarage_overhead_dr_sum / dwDuration);
 		friendDatarate = (UINT)(1000U * (ULONGLONG)m_avarage_friend_dr_sum / dwDuration);
@@ -1946,10 +1940,8 @@ void CUploadQueue::UpdateDatarates() {
 	}else if (avarage_tick_list.GetCount() == 1){
 		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
-		/*
 		if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
 			dwDuration = curTick - avarage_tick_list.GetTail();
-		*/
 		datarate = (UINT)(1000U * (ULONGLONG)m_avarage_dr_sum / dwDuration);
 		datarateoverhead = (UINT)(1000U * m_avarage_overhead_dr_sum / dwDuration);
 		friendDatarate = (UINT)(1000U * m_avarage_friend_dr_sum / dwDuration);

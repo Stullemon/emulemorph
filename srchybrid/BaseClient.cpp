@@ -127,7 +127,7 @@ void CUpDownClient::Init()
 	//MORPH END   - Changed by SiRoB, ZZUL_20040904	
 	m_nChatstate = MS_NONE;
 	m_nKadState = KS_NONE;
-	m_cShowDR = 0;
+	//m_cShowDR = 0; //MORPH - Removed by SiRoB
 	m_nUDPPort = 0;
 	m_nKadPort = 0;
 	m_nTransferredUp = 0;
@@ -2988,7 +2988,7 @@ void CUpDownClient::AssertValid() const
 	(void)m_nDownDatarate;
 	(void)m_nDownDataRateMS;
 	(void)m_nSumForAvgDownDataRate;
-	(void)m_cShowDR;
+	//(void)m_cShowDR; //MORPH - Removed by SiRoB
 	(void)m_nRemoteQueueRank;
 	(void)m_dwLastBlockReceived;
 	(void)m_nPartCount;
