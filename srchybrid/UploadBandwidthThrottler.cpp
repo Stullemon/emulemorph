@@ -886,7 +886,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
 								if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
-									//if (stat->realBytesToSpend > 999) {
+									if (stat->realBytesToSpend > 999) {
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
@@ -904,7 +904,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 											spentBytes += lastSpentBytes;
 											spentOverhead += socketSentBytes.sentBytesControlPackets;
 										}
-									//}
+									}
 								}
 							}
 						}
