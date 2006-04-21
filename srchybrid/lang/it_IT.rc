@@ -2874,6 +2874,7 @@ BEGIN
     IDS_GLOBAL_HL_LIMIT     "Hardlimit Globale"
 END
 
+
 #endif    // Italien (Italie) resources
 /////////////////////////////////////////////////////////////////////////////
 
