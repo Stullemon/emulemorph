@@ -814,12 +814,10 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 //Morph Start - added by AndCycle, ICS
 // enkeyDEV: ICS
 void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , CPartFile* pFile){
-	if (pFile)
-	{
-		if (reqfile==NULL)
-			throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileIncStatus; reqfile==NULL)");
+	if (reqfile==NULL)
+		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileIncStatus; reqfile==NULL)");
+	if (pFile == NULL)
 		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileIncStatus; pFile not found in downloadfile list)");
-	}
 	uint16 nED2KPartCount = data->ReadUInt16();
 	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
 	/*
