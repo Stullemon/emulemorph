@@ -727,10 +727,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		uint32	statGoodSessions =				0;
 		uint32	statBadSessions =				0;
 		double	percentSessions =				0;
-		//MORPH START - Added by Commander, Show failed WC sessions
-		uint32  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS;
-		double  percentWCSessions =				0;
-		//MORPH END - Added by Commander, Show failed WC sessions
 
 		// Transfer Ratios
 		if ( theStats.sessionReceivedBytes>0 && theStats.sessionSentBytes>0 ) 
@@ -799,6 +795,10 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			uint64	DownOHTotalPackets = 0;
 			CDownloadQueue::SDownloadStats myStats;
 			theApp.downloadqueue->GetDownloadStats(myStats);
+			//MORPH START - Added by Commander, Show failed WC sessions
+			uint32  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS - myStats.a[1];
+			double  percentWCSessions =				0;
+			//MORPH END - Added by Commander, Show failed WC sessions
 			// TRANSFER -> DOWNLOADS -> SESSION SECTION
 			if (forceUpdate || stattree.IsExpanded(h_down_session)) 
 			{
