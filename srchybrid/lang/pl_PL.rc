@@ -2845,12 +2845,19 @@ BEGIN
     IDS_SLOT_LIMIT_NONE     "Bez limitów"
     IDS_SLOT_LIMIT_THREE    "Predkoœæ wysy³ania/3kbps"
     IDS_SLOT_LIMIT_NUM_B    "Limit do x slotów"
+    IDS_USS_UDP             "Wymus' ping UDP zamiast ICMP"
+    IDS_MAXDATARATEFRIEND   "Maks. pre;dkos'c' globalna (% pre;dkos'ci wysy?ania)"
+    IDS_MAXDATARATEPOWERSHARE "Maks. pre;dkos'c' globalna (% pre;dkosci wysy?ania)"
+
+    IDS_WC_REACTIVATED      " Webcache zosta? reaktywowany"
+    IDS_WC_NEWPROXYIP       "Zosta?o wykryte nowe IP proxy: %s."
+    IDS_GLOBAL_HL           "Globalny TL"
+    IDS_GLOBAL_HL_LIMIT     "Globalny Twardy Limit"
+    IDS_SLOT_LIMIT_NUM      "Maks. # slotów (60-255)"   
+   
+    
 END
 
-STRINGTABLE 
-BEGIN
-    IDS_SLOT_LIMIT_NUM      "Max # slotów (60-256)"
-END
 
 #endif    // Polonais resources
 /////////////////////////////////////////////////////////////////////////////
