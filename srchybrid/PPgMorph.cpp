@@ -705,7 +705,7 @@ void CPPgMorph::Localize(void)
 		SetTool(m_htiUM,IDS_UM_TIP);
 		SetTool(m_htiDYNUP,IDS_DYNUPLOAD_TIP);
 		SetTool(m_htiUpSecu,IDS_SECURITY_TIP);
-		SetTool(m_htiUpDisplay,IDS_PW_DISPLAY_TIP);
+		SetTool(m_htiUpDisplay,IDS_PW_DISPLAY_TIP2);
 		SetTool(m_htiFriend,IDS_PW_FRIENDS_TIP);
 		SetTool(m_htiPowerShare,IDS_POWERSHARE_TIP);
 		SetTool(m_htiSlotLimitGroup,IDS_SLOT_LIMIT_GROUP_TIP);
