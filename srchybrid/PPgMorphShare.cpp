@@ -126,6 +126,8 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		m_htiPermNone = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_HIDDEN), m_htiPermissions, m_iPermissions == 2);
 		// Mighty Knife: Community visible filelist
 		m_htiPermCommunity = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_COMMUNITY), m_htiPermissions, m_iPermissions == 3);
+		m_htiCommunityName = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMMUNITYTAG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_htiPermCommunity);
+		m_ctrlTreeOptions.AddEditBox(m_htiCommunityName, RUNTIME_CLASS(CTreeOptionsEdit));
 		// [end] Mighty Knife
 		//MORPH END   - Added by SiRoB, Show Permission
 
@@ -164,6 +166,9 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	//Morph End - added by AndCyle, selective PS internal Prio
 	//MORPH START - Added by SiRoB, Show Permission
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPermissions, m_iPermissions);
+	// Mighty Knife: Community visualization
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiCommunityName, m_sCommunityName);
+	// [end] Mighty Knife
 	//MORPH END   - Added by SiRoB, Show Permission
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFolderIcons, m_bFolderIcons);
 }
@@ -179,6 +184,9 @@ BOOL CPPgMorphShare::OnInitDialog()
 	m_iPowerShareLimit = thePrefs.PowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
 	m_bPowershareInternalPrio = thePrefs.m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	m_iPermissions = thePrefs.permissions; //MORPH - Added by SiRoB, Show Permission
+	// Mighty Knife: Community visualization
+	m_sCommunityName = thePrefs.m_sCommunityName;
+	// [end] Mighty Knife
 	m_bFolderIcons = thePrefs.m_bShowFolderIcons;
 	CPropertyPage::OnInitDialog();
 	//InitTooltips(); //leuk_he tooltipped
@@ -215,6 +223,9 @@ BOOL CPPgMorphShare::OnApply()
 	theApp.sharedfiles->UpdatePartsInfo();
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
+	// Mighty Knife: Community visualization
+	_stprintf (thePrefs.m_sCommunityName,_T("%s"), m_sCommunityName);
+	// [end] Mighty Knife
 	bool oldValue = thePrefs.m_bPowershareInternalPrio;
 	thePrefs.m_bPowershareInternalPrio = m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	if(thePrefs.m_bPowershareInternalPrio != oldValue)
@@ -295,6 +306,7 @@ void CPPgMorphShare::Localize(void)
 		SetTool(m_htiPermFriend ,IDS_FSTATUS_FRIENDSONLY_TIP);
 		SetTool(m_htiPermNone ,IDS_HIDDEN_TIP);
 		SetTool(m_htiPermCommunity ,IDS_COMMUNITY_TIP);
+		SetTool(m_htiCommunityName, IDS_COMMUNITYTAG_TIP);
 		SetTool(m_htiDisplay ,IDS_PW_DISPLAY_TIP);
 		SetTool(m_htiFolderIcons ,IDS_FOLDERICON_TIP);
         // MORPH END leuk_he tooltipped

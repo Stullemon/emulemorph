@@ -26,6 +26,9 @@ protected:
 	int m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	int m_iPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
 	int m_iPermissions; //MORPH - Added by SiRoB, Show Permissions
+	// Mighty Knife: Community visualization
+	CString   m_sCommunityName;
+	// [end] Mighty Knife
 	bool m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	bool m_bFolderIcons;
 	
@@ -56,6 +59,7 @@ protected:
 	HTREEITEM m_htiPermNone;
 	// Mighty Knife: Community visible filelist
 	HTREEITEM m_htiPermCommunity;
+	HTREEITEM m_htiCommunityName;
 	// [end] Mighty Knife
 	//MORPH END   - Added by SiRoB, Show Permission
 	HTREEITEM m_htiDisplay;

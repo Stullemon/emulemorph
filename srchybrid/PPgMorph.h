@@ -176,9 +176,7 @@ protected:
 	HTREEITEM m_htiUseICS; //MORPH - Added by SIRoB, ICS Optional
 	HTREEITEM m_htiHighProcess; //MORPH - Added by IceCream, high process priority
 
-	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-	CString   m_sCommunityName;
-	HTREEITEM m_htiCommunityName;
+	// Mighty Knife: Report hashing files, Log friendlist activities
 	bool      m_bReportHashingFiles;
 	HTREEITEM m_htiReportHashingFiles;
 	bool	  m_bLogFriendlistActivities;

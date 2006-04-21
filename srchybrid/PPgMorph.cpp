@@ -353,9 +353,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_bHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
 		m_htiDisplayFunnyNick = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISPLAYFUNNYNICK), TVI_ROOT, m_bFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
-		// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-		m_htiCommunityName = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMMUNITYTAG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT);
-		m_ctrlTreeOptions.AddEditBox(m_htiCommunityName, RUNTIME_CLASS(CTreeOptionsEdit));
+		// Mighty Knife: Report hashing files, Log friendlist activities
 		m_htiReportHashingFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MORPH_RFHA), TVI_ROOT, m_bReportHashingFiles);
 		m_htiLogFriendlistActivities = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MORPH_RAIF), TVI_ROOT, m_bLogFriendlistActivities);
 		// [end] Mighty Knife
@@ -421,10 +419,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiSlotLimitNum, m_iSlotLimitNum);
 	DDV_MinMaxInt(pDX, m_iSlotLimitNum, 60, 255);
 	// <== Slot Limit - Stulle
-
-	// Mighty Knife: Community visualization
-	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiCommunityName, m_sCommunityName);
-	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiResumeFileInNewCat, m_iResumeFileInNewCat);
@@ -516,10 +510,6 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iMaxClientDataRate = thePrefs.maxclientdatarate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	m_iSlotLimitNum = thePrefs.GetSlotLimitNum(); // Slot Limit - Stulle
-
-	// Mighty Knife: Community visualization
-	m_sCommunityName = thePrefs.m_sCommunityName;
-	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	m_bShowCatNames = thePrefs.ShowCatNameInDownList();
@@ -654,9 +644,6 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bSlotLimitNum = (m_iSlotLimiter == 2);
 	thePrefs.m_iSlotLimitNum = (uint8)m_iSlotLimitNum;
     // <== Slot Limit - Stulle
-	// Mighty Knife: Community visualization
-	_stprintf (thePrefs.m_sCommunityName,_T("%s"), m_sCommunityName);
-	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	thePrefs.m_bShowCatNames = m_bShowCatNames;
@@ -947,7 +934,6 @@ void CPPgMorph::Localize(void)
 		SetTool(m_htiSlotLimitNumB,IDS_SLOT_LIMIT_NUM_TIP);
 		SetTool(m_htiDynUpOFF ,IDS_DYNDISABLED_TIP);
 
-		SetTool(m_htiCommunityName, IDS_COMMUNITYTAG_TIP);
 		SetTool(m_htiReportHashingFiles, IDS_MORPH_RFHA_TIP);
 		SetTool(m_htiLogFriendlistActivities,IDS_MORPH_RAIF_TIP);
 		SetTool(m_htiDontRemoveStaticServers ,IDS_MORPH_KSSERV_SIP);
