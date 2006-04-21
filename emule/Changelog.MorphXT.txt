@@ -1,6 +1,11 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
+FIXED  : (minor) WC: fix the temporary wrong download session count (very old one) [SiRoB]
+FIXED  : (minor) USC: Ajusted to properly respect clientdatarate limit in all the case [SiRoB]
+
+CHANGED: SOTN: Use additional info from waiting queue for partfile.
+CHANGED: Moved community Tag visualisation from Morph to MorphShare Preferency [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.10
