@@ -6328,6 +6328,16 @@ BEGIN
     IDC_RUNASUSER_TIP       "Run emule as a restricted user. Emule will create a user\n'eMule_secure' that is only allowed to write in the\ninstallation folder, temp and incoming folders. Note:\nRunning files/preview from eMule might fail,\nassociating eMule with ed2k link is restricted.\nYour system is more secure against hacks.\ncheck in the taksmananager if emules run as 'eMule_secure'"
 END
 
+STRINGTABLE 
+BEGIN
+	IDC_ENABLEPROXY_TIP "Enable this if the only option for you to \nconnect to internet is via a proxy. This should\nalways result in a lowid (not optimal)\n<b>WARNING:</b>\nOnly enter a proxy if you are sure you have one\nand you are able to provide the correct information.\nProxies are only seldom used on home PCs and\noffer no advantage for users outside a LAN.\nHardware routers or modems are no proxies!"
+	IDC_PROXYTYPE_TIP "Set the protocol of the proxy.\nThe precedence of the proxy protocol performance is as follows.\n1. SOCKS 4a (highest performance because of least overhead)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (lowest performance because of most overhead)"
+	IDC_PROXYNAME_TIP "Hostname or ip adress of proxy"
+	IDC_PROXYPORT_TIP "port number the proxy communicates on.\nTypical 1080 for socks and 80 or 8080 for http."
+	IDC_ENABLEAUTH_TIP "Enable if you need to login into the proxy\nNot that for http only basic authentication\n(not microsoft NTLM) is supported"
+	IDC_USERNAME_A_TIP "Username at the proxy"
+	IDC_PASSWORD_TIP "Password at the proxy"
+END 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
