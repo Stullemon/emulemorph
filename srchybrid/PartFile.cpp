@@ -3465,11 +3465,11 @@ void CPartFile::UpdatePartsInfo()
 	for (POSITION pos = srclist.GetHeadPosition(); pos != 0; )
 	{
 		const CUpDownClient* cur_src = srclist.GetNext(pos);
-		if( cur_src->GetPartStatus() || cur_src->GetUpPartStatus() && cur_src->CheckAndGetReqUpFile() == this) 
+		if( cur_src->GetPartStatus()) 
 		{
 			for (UINT i = 0; i < partcount; i++)
 			{
-				if (cur_src->IsPartAvailable(i) || cur_src->IsUpPartAvailable(i))
+				if (cur_src->IsPartAvailable(i))
 					m_SrcpartFrequency[i] += 1;
 			}
 			if ( flag )
