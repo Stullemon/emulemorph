@@ -230,7 +230,7 @@ void CUpDownClient::Init()
 	m_nCurQueueSessionPayloadUp = 0; // PENDING: Is this necessary? ResetSessionUp()...
 	m_lastRefreshedULDisplay = ::GetTickCount();
 	m_bGPLEvildoer = false;
-	m_bHelloAnswerPending = true; //MORPH - Changed by SiRoB, Fix Connection Collision
+	m_byHelloPacketState = HP_NONE; //MORPH - Changed by SiRoB, Fix Connection Collision
 	m_fNoViewSharedFiles = 0;
 	m_bMultiPacket = 0;
 	md4clr(requpfileid);
@@ -582,6 +582,7 @@ bool CUpDownClient::ProcessHelloPacket(const uchar* pachPacket, uint32 nSize)
 	data.ReadUInt8(); // read size of userhash
 	// reset all client properties; a client may not send a particular emule tag any longer
 	ClearHelloProperties();
+	m_byHelloPacketState = HP_HELLO; //MORPH - Added by SiRoB, Fix Connection Collision
 	return ProcessHelloTypePacket(&data);
 }
 
@@ -589,7 +590,7 @@ bool CUpDownClient::ProcessHelloAnswer(const uchar* pachPacket, uint32 nSize)
 {
 	CSafeMemFile data(pachPacket, nSize);
 	bool bIsMule = ProcessHelloTypePacket(&data);
-	m_bHelloAnswerPending = false; //MORPH - Added by SiRoB, Fix Connection Collision
+	m_byHelloPacketState |= HP_HELLOANSWER; //MORPH - Added by SiRoB, Fix Connection Collision
 	return bIsMule;
 }
 
@@ -1095,7 +1096,7 @@ bool CUpDownClient::SendHelloPacket(){
 	socket->SendPacket(packet,true);
 	AskTime=::GetTickCount(); //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 
-	//m_bHelloAnswerPending = true; //MORPH - Removed by SiRoB, Fix Connection Collision
+	m_byHelloPacketState = HP_HELLO; //MORPH - Removed by SiRoB, Fix Connection Collision
 	return true;
 }
 
@@ -1458,7 +1459,7 @@ void CUpDownClient::SendHelloAnswer(){
 		DebugSend("OP__HelloAnswer", this);
 	theStats.AddUpDataOverheadOther(packet->size);
 	socket->SendPacket(packet,true);
-	m_bHelloAnswerPending = false; //MORPH - Added by SiRoB, Fix Connection Collision
+	m_byHelloPacketState |= HP_HELLOANSWER; //MORPH - Added by SiRoB, Fix Connection Collision
 }
 
 void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
@@ -1825,7 +1826,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			Debug(_T("--- Disconnected client       %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
 		m_fHashsetRequesting = 0;
 		SetSentCancelTransfer(0);
-		m_bHelloAnswerPending = true; //MORPH - Changed by SiRoB, Fix Connection Collision
+		m_byHelloPacketState = HP_NONE; //MORPH - Changed by SiRoB, Fix Connection Collision
 		m_fQueueRankPending = 0;
 		m_fFailedFileIdReqs = 0;
 		m_fUnaskQueueRankRecv = 0;
@@ -2094,14 +2095,17 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 			if (!Connect())
 				return false; // client was deleted!
 		}
-	} else if (CheckHandshakeFinished()) {
+	}
+	else if (CheckHandshakeFinished()) {
 		ConnectionEstablished();
 		return true;
-	} else {
+	}
+	else if (m_byHelloPacketState == HP_NONE) {
 		if (!SendHelloPacket())
 			return false; // client was deleted!
-		DebugLog(LOG_MORPH|LOG_SUCCESS, _T("[FIX CONNECTION COLLISION] Already initiated socket, SendHelloPacket() to client: %s"), DbgGetClientInfo());
-	}
+		DebugLog(LOG_MORPH|LOG_SUCCESS, _T("[FIX CONNECTION COLLISION] Already initiated socket, OP_HELLO have been sent to client: %s"), DbgGetClientInfo());
+	} else
+		DebugLog(LOG_MORPH|LOG_SUCCESS, _T("[FIX CONNECTION COLLISION] Already initiated socket, OP_HELLO already sent and waiting an OP_HELLOANSWER from client: %s"), DbgGetClientInfo()); 
 	return true;
 }
 
@@ -3139,7 +3143,7 @@ CString CUpDownClient::DbgGetClientInfo(bool bFormatIP) const
 
 bool CUpDownClient::CheckHandshakeFinished(UINT protocol, UINT opcode) const
 {
-	if (m_bHelloAnswerPending)
+	if (m_byHelloPacketState != HP_BOTH)
 	{
 		// 24-Nov-2004 [bc]: The reason for this is that 2 clients are connecting to each other at the same..
 		if (thePrefs.GetVerbose() && protocol != 0 && opcode != 0)

@@ -755,8 +755,9 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
     if(pszReason && thePrefs.GetLogUlDlEvents())
         AddDebugLogLine(false, _T("Adding client to upload list: %s Client: %s"), pszReason, newclient->DbgGetClientInfo());
 
+	//MORPH - Changed by SiRoB, Fix Connection Collision
 	// tell the client that we are now ready to upload
-	if (!newclient->socket || !newclient->socket->IsConnected())
+	if (!newclient->socket || !newclient->socket->IsConnected() || !newclient->CheckHandshakeFinished())
 	{
 		newclient->SetUploadState(US_CONNECTING);
 		/*MORPH*/bool filtered = false;
@@ -797,7 +798,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			buffer.AppendFormat(_T("[C%i %i/%i]-"),classID,m_aiSlotCounter[classID],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]);
 		buffer.AppendFormat(_T(" Client: %s"),newclient->DbgGetClientInfo());
-		DebugLog(LOG_MORPH|LOG_USC,buffer);
+		DebugLog(LOG_USC,buffer);
 	}
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	

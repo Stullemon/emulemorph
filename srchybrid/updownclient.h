@@ -180,6 +180,13 @@ enum EInfoPacketState{
 	IP_BOTH				= 3,
 };
 
+enum EHelloPacketState{
+	HP_NONE				= 0,
+	HP_HELLO			= 1,
+	HP_HELLOANSWER		= 2,
+	HP_BOTH				= 3,
+};
+
 enum ESourceFrom{
 	SF_SERVER			= 0,
 	SF_KADEMLIA			= 1,
@@ -926,7 +933,7 @@ protected:
 	bool	m_bIsML;
 //--group to aligned int32
 	bool	m_bGPLEvildoer;
-	bool	m_bHelloAnswerPending;
+	uint8	m_byHelloPacketState; //MORPH - Changed by SiRoB, Fix Connection Collision
 	uint8	m_byInfopacketsReceived;	// have we received the edonkeyprot and emuleprot packet already (see InfoPacketsReceived() )
 	uint8	m_bySupportSecIdent;
 //--group to aligned int32
