@@ -2861,8 +2861,8 @@ END
 STRINGTABLE 
 BEGIN
    IDS_USS_UDP             "Forzar ping UDP en vez de TCP"
-   IDS_MAXDATARATEFRIEND   "Límite Global (%% de subida)"
-   IDS_MAXDATARATEPOWERSHARE "Límite Global (%% de subida)"
+   IDS_MAXDATARATEFRIEND   "Límite Global (% de subida)"
+   IDS_MAXDATARATEPOWERSHARE "Límite Global (% de subida)"
    IDS_WC_REACTIVATED      " Webcache ha sido reactivado."
    IDS_WC_NEWPROXYIP       "Una nueva IP de proxy ha sido detectada: %s."
    IDS_SLOT_LIMIT_NUM      "Máx # de slots (60-255)"

@@ -2511,8 +2511,8 @@ BEGIN
                             "Débit par client (défaut 0 kb/s = illimité)"
     IDS_MAXCLIENTDATARATE   "Débit par client (défaut 0 kb/s = illimité)"
     IDS_DISPLAYFUNNYNICK    "Autorise l'affichage FunnyNick"
-    IDS_MAXDATARATEFRIEND   "Limite maximum (%% de la vitesse d'envoi)"
-    IDS_MAXDATARATEPOWERSHARE "Limite maximum (%% de la vitesse d'envoi)"
+    IDS_MAXDATARATEFRIEND   "Limite maximum (% de la vitesse d'envoi)"
+    IDS_MAXDATARATEPOWERSHARE "Limite maximum (% de la vitesse d'envoi)"
 END
 
 STRINGTABLE 

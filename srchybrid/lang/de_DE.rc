@@ -2539,8 +2539,8 @@ BEGIN
     IDS_MAXCLIENTDATARATEPOWERSHARE "Pro Client (Standard 0 KB/s=fokussiert)"
     IDS_MAXCLIENTDATARATE   "Pro Client Transfer (Standard 0 KB/s=fokussiert)"
     IDS_DISPLAYFUNNYNICK    "Aktiviere FunnyNick"
-    IDS_MAXDATARATEFRIEND   "Max. globale Transferrate (%% von Uploadlimit)"
-    IDS_MAXDATARATEPOWERSHARE "Max. globale Transferrate (%% von Uploadlimit)"
+    IDS_MAXDATARATEFRIEND   "Max. globale Transferrate (% von Uploadlimit)"
+    IDS_MAXDATARATEPOWERSHARE "Max. globale Transferrate (% von Uploadlimit)"
 END
 
 STRINGTABLE 
