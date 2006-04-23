@@ -796,7 +796,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			CDownloadQueue::SDownloadStats myStats;
 			theApp.downloadqueue->GetDownloadStats(myStats);
 			//MORPH START - Added by Commander, Show failed WC sessions
-			uint32  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS - myStats.a[1];
+			uint32  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS;
 			double  percentWCSessions =				0;
 			//MORPH END - Added by Commander, Show failed WC sessions
 			// TRANSFER -> DOWNLOADS -> SESSION SECTION
@@ -1013,15 +1013,13 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				}
 				// Set Download Sessions
 			    // MORPH START - Added by Commander, Show WC session stats
-			    if(thePrefs.CountWCSessionStats())
-				{
-				statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
+			    statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
 				statBadSessions =	thePrefs.GetDownS_FailedSessions();
-				}
-				else
+				if(!thePrefs.CountWCSessionStats())
 				{
-				statGoodSessions =	(thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]) - thePrefs.ses_successfull_WCDOWNLOADS; // Add Active Downloads
-				statBadSessions =	thePrefs.GetDownS_FailedSessions() - failedWCSessions;
+					statGoodSessions =	(thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]) - thePrefs.ses_successfull_WCDOWNLOADS; // Add Active Downloads
+					if (statBadSessions > failedWCSessions)
+						statBadSessions -=	failedWCSessions;
 				}
 			    // MORPH END - Added by Commander, Show WC session stats
 				cbuffer.Format( _T("%s: %u") , GetResString(IDS_STATS_DLSES) , statGoodSessions + statBadSessions );
