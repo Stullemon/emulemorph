@@ -5380,7 +5380,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_USS_UDP             "Force UDP ping instead of TCP"
+    IDS_USS_UDP             "Force UDP ping"
     IDS_UPSTOPPEDLEECHER    "Upload session not allowed to start. Client seems to be a leecher."
     IDS_IPSTOPPEDOTHFILE    "Upload session not allowed to start. Client tried to download another file than it was in queue for."
     IDS_NEWMSGFROM          "New Message from '%s' (IP:%s)"
@@ -6085,9 +6085,9 @@ BEGIN
     IDS_SUC_ENABLED_TIP     "Enable global hardlimit instead of the sources per file."
     IDS_GLOBAL_HL_LIMIT_TIP "Value for global hard limit, \ndepends on available upload/download speed \nand latency. Normal value between 3000 and 6000."
     IDS_MAXDATARATEFRIEND_TIP 
-                            "Max Global friend datarate limit (%% of upload speed) usefule When using USS/SUC). If the\nfriend upload set exceeds this percentage, this percentage is used instead"
+                            "Max Global friend datarate limit (% of upload speed) usefule When using USS/SUC). If the\nfriend upload set exceeds this percentage, this percentage is used instead"
     IDS_MAXDATARATEPOWERSHARE_TIP 
-                            "Max Global powershare datarate limit (%% of upload speed) if the powershare upload set\nexceeds this percentage, this percentage is used instead"
+                            "Max Global powershare datarate limit (% of upload speed) if the powershare upload set\nexceeds this percentage, this percentage is used instead"
 END
 
 STRINGTABLE 
