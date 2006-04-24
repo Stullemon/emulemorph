@@ -5,7 +5,9 @@ FIXED  : (minor) WC: fix the temporary wrong download session count (very old on
 FIXED  : (minor) USC: Ajusted to properly respect clientdatarate limit in all the case [SiRoB]
 
 CHANGED: SOTN: Use additional info from waiting queue for partfile.
-CHANGED: Moved community Tag visualisation from Morph to MorphShare Preferency [SiRoB]
+CHANGED: Moved community tag visualisation from Morph to MorphShare Preferency [SiRoB]
+
+REMOVED: (minor) WC: removed submit link from wcprefs since it is abandoned [leuk_he]
 
 TWEAKED: ICS: merged into partstatus making less resource and cpu consumption [SiRoB]
 
