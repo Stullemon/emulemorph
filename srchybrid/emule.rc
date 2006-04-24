@@ -5968,7 +5968,7 @@ BEGIN
     IDS_PW_AUTOCONNECTSTATICONLY_TIP 
                             "Connect to server that are set to static only. If there are no server static automatic connect will fail."
     IDS_MAXCONNECTIONSSWITCHBORDER_TIP 
-                            "Maximal concurrent connection to swtich between USS and SUC\nUSS is better in low connection, SUC needs several connection to determine a good average."
+                            "Maximal concurrent connection to switch between USS and SUC\nUSS is better in low connection, SUC needs several connection to determine a good average."
     IDS_SUC_TIP             "Use Smart Upload Control \nThe turnaround time to a peer is determined to find the delay\nof the line. Advantage: No overhead\nDisadvantage: requires active clients to measure speed"
     IDC_USS_TIP             "use ping to the border router at the isp that is the\nlast common router that (for 10 random peers)\nto determine the reaction speed of the local line."
     IDC_SUC_LOG_TIP         "Log in the verbose log"
@@ -6338,6 +6338,34 @@ BEGIN
 	IDC_USERNAME_A_TIP "Username at the proxy"
 	IDC_PASSWORD_TIP "Password at the proxy"
 END 
+STRINGTABLE 
+BEGIN
+	IDC_WEBCACHENAME_TIP "hostname of the proxy of your isp. Use 'transparant@yourisp' for a transparant proxy"
+	IDC_WEBCACHEPORT_TIP "port number (typically 80 or 8080)"
+	IDC_STATIC_ADDRESS_TIP "IDC_STATIC_ADDRESS_TIP"
+	IDC_STATIC_CONTROLS_TIP "IDC_STATIC_CONTROLS_TIP"
+	IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP "Activate usage of your isp webcache proxy\nIf your isp support a webcache proxy this proxy will\nbe used to cache your downloads. If more people within\nyour isp request the same data from a webcache enabled\nmod the data will be transfered via the proxy. So this\nway the peer will only have to upload the data once.\nThis will only work if the uploader uses a webcache mod,\nand more people in your isp set the same proxy.\n Note: sending to webcache can not be disabled"
+	IDC_DETECTWEBCACHE_TIP "Use the webcaches.xml in your config dir\nto lookup the proxy of your isp."
+	IDC_STATIC_BLOCKS_TIP "Amount of data that determines if the connection should be reset."
+	IDC_EXTRATIMEOUT_TIP "Wait 400 seconds instead of 130 seconds for a timeout of a 180 kb block"
+	IDC_LOCALTRAFFIC_TIP "Data within the same isp is excluded by the proxy\nand webcache will be disabled for those. loopback\ntest might fail for the same reason."
+	IDC_PERSISTENT_PROXY_CONNS_TIP "Use persistant (http 1.1) flag for proxy"
+	IDC_ADVANCEDCONTROLS_TIP "Show advanced options. "
+	IDC_TESTPROXY_TIP "Test the proxy. This option tests if the proxy is reachable\nand the proxy can reach your emule port. It does NOT test\nif the proxy does actually caches(stores) data (required!)\nrequirements:\n1. connected to server\n2. You need to have a valid public IP\n3. You need to have a real high ID\n4. Test does not work if you have too\n   many open connections (too much downloads)"
+	IDC_UPDATE_WCSETTINGS_TIP "Automatically reload webcache.xml on startup\n(<b>disabled</b> in source until someone picks up the project)"
+    IDC_MSG_WEBCACHEFAIL "Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until a new proxy is tested!"
+    IDC_MSG_WEBCACHE_NOAUTODEC "Sorry, your ISP is not in the database,\nyour ISP identifier is %s\nTo enable autodetection, please find out and submit your ISPs proxy."
+	IDC_MSG_WEBCACHE_NOIP "No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"	
+	IDC_MSG_WEBCACHE_CONFIGALT  "Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until a new proxy is tested.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."
+    IDC_MSG_WEBCACHE_NOACTIVE  "Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."
+	IDC_MSG_WEBCACHE_ERRRESOLVE "WebCache Error - Failed to resolve HTTP proxy address:\n%s\nPlease review your webcache settings" 
+	IDC_MSG_WEBCACHE_TRANSPAR "Proxy Test can not test Transparent proxies. Test Canceled!"
+	IDC_MSG_WEBCACHE_TESTRUNNING  "Performing Proxy Test! Please check the log in the serverwindow for the results!"
+    IDC_MSG_WEBCACHE_TESTERR "Proxy Test Error!"
+	IDC_MSG_WEBCACHE_ALREADYRUNNING "No New Test Started. There is already a Test in progress"
+	IDC_MSG_WEBCACHE_TESTREQ "No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"
+END 
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

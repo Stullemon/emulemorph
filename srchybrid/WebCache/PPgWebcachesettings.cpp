@@ -40,7 +40,12 @@ static char THIS_FILE[]=__FILE__;
 
 IMPLEMENT_DYNAMIC(CPPgWebcachesettings, CPropertyPage)
 CPPgWebcachesettings::CPPgWebcachesettings()
+// MORPH START leuk_he tooltipped
+/*
 	: CPropertyPage(CPPgWebcachesettings::IDD)
+*/
+    : CPPgtooltipped(CPPgWebcachesettings::IDD)
+// MORRPH END leuk_he tooltipped
 {
 	guardian=false;
 	bCreated = false;
@@ -82,6 +87,7 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 	InitWindowStyles(this);
 
 	LoadSettings();
+	InitTooltips(); //MORPH leuk_he tooltipped
 	Localize();
 
 	// create hyperlinks 	
@@ -92,6 +98,8 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 	// Superlexx - email proxy submissions are not available anymore, use the web form
 
 // Create website-proxy-submission link
+	//MORPH START leuk_he disabled since link does not work any more.....
+	/*
 	CRect rect2;
 	GetDlgItem(IDC_WEBCACHELINK2)->GetWindowRect(rect2);
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect2, 2);
@@ -110,6 +118,8 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 		m_wndSubmitWebcacheLink2.AppendText(GetResString(IDS_WC_LINK));
 		m_wndSubmitWebcacheLink2.AppendHyperLink(GetResString(IDS_WC_SUBMIT_WEB),0,URL,0,0);
 	}
+	*/
+	//MORPH END leuk_he disabled since link does not work any more.....
 
 	//JP hide advanced settings
 	if (showadvanced)
@@ -348,6 +358,24 @@ void CPPgWebcachesettings::Localize(void)
 		GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText( GetResString(IDS_WC_ADVANCED) );
 		GetDlgItem(IDC_TestProxy)->SetWindowText( GetResString(IDS_WC_TEST) );
 		GetDlgItem(IDC_UPDATE_WCSETTINGS)->SetWindowText( GetResString(IDS_WC_UPDATESETTING) );
+		// MORPH START leuk_he tooltipped
+		SetTool(IDC_webcacheName,IDC_WEBCACHENAME_TIP);
+		SetTool(IDC_webcachePort,IDC_WEBCACHEPORT_TIP);
+		SetTool(IDC_STATIC_PORT,IDC_WEBCACHEPORT_TIP );
+		SetTool(IDC_STATIC_ADDRESS,IDC_STATIC_ADDRESS_TIP);
+		SetTool(IDC_STATIC_CONTROLS,IDC_STATIC_CONTROLS_TIP);
+		SetTool(IDC_Activatewebcachedownloads,IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP);
+		SetTool(IDC_DETECTWEBCACHE,IDC_DETECTWEBCACHE_TIP);
+		SetTool(IDC_STATIC_NRBLOCKS,IDC_STATIC_NRBLOCKS_TIP);
+		SetTool(IDC_STATIC_BLOCKS,IDC_STATIC_BLOCKS_TIP);
+		SetTool(IDC_BLOCKS, IDC_STATIC_BLOCKS_TIP);;
+		SetTool(IDC_EXTRATIMEOUT,IDC_EXTRATIMEOUT_TIP);
+		SetTool(IDC_LOCALTRAFFIC,IDC_LOCALTRAFFIC_TIP);
+		SetTool(IDC_PERSISTENT_PROXY_CONNS,IDC_PERSISTENT_PROXY_CONNS_TIP);
+		SetTool(IDC_ADVANCEDCONTROLS,IDC_ADVANCEDCONTROLS_TIP);
+		SetTool(IDC_TestProxy,IDC_TESTPROXY_TIP);
+		SetTool(IDC_UPDATE_WCSETTINGS,IDC_UPDATE_WCSETTINGS_TIP );
+	    // MORPH END leuk_he tooltipped
 	}
 }
 void CPPgWebcachesettings::OnBnClickedDetectWebCache()
@@ -460,7 +488,8 @@ void CPPgWebcachesettings::OnBnClickedTestProxy()
 			GetDlgItem(IDC_webcacheName)->GetWindowText(cur_WebCacheName);
 			if (cur_WebCacheName.GetLength() > 15 && cur_WebCacheName.Left(12) == "transparent@") //doesn't work for transparent proxies
 			{
-				AfxMessageBox(_T("Proxy Test can not test Transparent proxies. Test Canceled!"));
+				AfxMessageBox(GetResString(IDC_MSG_WEBCACHE_TRANSPAR)); // leuk_he to rc.
+				// Proxy Test can not test Transparent proxies. Test Canceled!
 				return;
 			}
 			//get webcache port from IDC_webcachePort
@@ -471,14 +500,15 @@ void CPPgWebcachesettings::OnBnClickedTestProxy()
 			{
 				thePrefs.WebCachePingSendTime = ::GetTickCount();
 				thePrefs.expectingWebCachePing = true;
-				AfxMessageBox(_T("Performing Proxy Test! Please check the log in the serverwindow for the results!"));
+				AfxMessageBox(GetResString(IDC_MSG_WEBCACHE_TESTRUNNING  )); // leuk_he to rc
+				//Performing Proxy Test! Please check the log in the serverwindow for the results!
 			}
 			else
-				AfxMessageBox(_T("Proxy Test Error!"));
+				AfxMessageBox(GetResString(IDC_MSG_WEBCACHE_TESTERR)); // leuk_he to rc
 		}
 		else 
-			AfxMessageBox(_T("No New Test Started. There is already a Test in progress"));
+			AfxMessageBox(GetResString(IDC_MSG_WEBCACHE_ALREADYRUNNING));// leuk_he to rc
 	}
 	else
-		AfxMessageBox(_T("No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"));
+		AfxMessageBox(GetResString(IDC_MSG_WEBCACHE_TESTREQ));// leuk_he to rc
 }

@@ -4,7 +4,14 @@
 #pragma once
 #include "HypertextCtrl.h"
 
+// MORPH START  leuk_he tooltipped
+#include "PPGtooltipped.h" 
+
+/*
 class CPPgWebcachesettings : public CPropertyPage
+*/
+class CPPgWebcachesettings : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgWebcachesettings)
 

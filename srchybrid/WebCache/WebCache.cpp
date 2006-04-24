@@ -55,9 +55,8 @@ uint32 ResolveWebCacheName() // returns 0 on error
 		if( !popupFlag) {
 			popupFlag = true; //moved up so it doesn't pop up several times if the popup isn't closed
 			CString msg;
-			msg.Format( _T( "WebCache Error - Failed to resolve HTTP proxy address:\n" ) \
-						_T( "%s\n" ) \
-						_T( "Please review your webcache settings" ), thePrefs.webcacheName );
+			msg.Format( GetResString(IDC_MSG_WEBCACHE_ERRRESOLVE), thePrefs.webcacheName ); // leuk_he webcache translateable
+			//WebCache Error - Failed to resolve HTTP proxy address:\n"%s
 			//MORPH START - Changed by SiRoB, Avoid crash in some case
 			//if we want to popup a message we need to use windows sendmessage
 			/*
@@ -207,7 +206,8 @@ void AutodetectWebcache()
 	
 	if (detectedWebcache->active == _T("0"))
 	{
-		AddDebugLogLine(false, _T("Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."));
+		AddDebugLogLine(false,GetResString(IDC_MSG_WEBCACHE_NOACTIVE )); // leuk_he translatable
+		//Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."
 		thePrefs.webcacheEnabled = false;
 		thePrefs.WebCacheDisabledThisSession = true;
 		delete detectedWebcache;
@@ -230,7 +230,8 @@ void AutodetectWebcache()
 		thePrefs.webcacheTrustLevel = (uint8)_tstoi(detectedWebcache->trustLevel);
 		if (thePrefs.webcacheEnabled && restart) //WC-ToDo need a modal dialogue here
 			//MORPH - Changed by SiRoB, New ResolveWebcaChename
-			AddDebugLogLine( false, _T("Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until a new proxy is tested.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."));
+			AddDebugLogLine( false, GetResString(IDC_MSG_WEBCACHE_CONFIGALT)); // leuke_he translateble webcache
+		    // =Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated 
 		else if (!thePrefs.webcacheEnabled && restart)
 		{
 			CString comment = detectedWebcache->comment;
@@ -257,7 +258,8 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 {
 	using namespace MSXML2;
 	if (!theApp.GetPublicIP() && !Kademlia::CKademlia::GetIPAddress())
-		throw CString(_T("No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"));
+		throw CString(GetResString(IDC_MSG_WEBCACHE_NOIP)); //leuk_he translatable webcache
+	    //"No public IP, please connect to an ed2k-server or Kad
 
 // do reverse lookup
 	CString shostName;
@@ -414,8 +416,8 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 		case 2:
 	{
 		CString message;
-		message.Format(_T("Sorry, your ISP is not in the database,\nyour ISP identifier is %s\n"), shostName);
-		message += _T("To enable autodetection, please find out and submit your ISPs proxy.");
+		message.Format(GetResString(IDC_MSG_WEBCACHE_NOAUTODEC), shostName); // leuk_he translateable resource
+		// your ISP is not in the database,\nyour ISP identifier is %s\nplease submit your ISPs proxy.
 		throw message;
 	}
 		default:
