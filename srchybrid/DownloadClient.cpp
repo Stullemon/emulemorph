@@ -90,17 +90,14 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 
 	//MORPH START - Changed by SiRoB, Keep A4AF infos
 	uint8* thisAbyPartStatus;
-	uint8* thisIncPartStatus; //MORPH - Added by AndCycle, ICS, Keep A4AF infos
 	if(m_PartStatus_list.Lookup(file,thisAbyPartStatus) && thisAbyPartStatus)
 	{
-		int b_incPartStatus = m_IncPartStatus_list.Lookup(file,thisIncPartStatus); //MORPH - Added by AndCycle, ICS, Keep A4AF infos
 		COLORREF crBoth;
 		COLORREF crClientOnly;
 		COLORREF crPending;
 		COLORREF crNextPending;
 		COLORREF crMeOnly; //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 		COLORREF crClientPartial; // enkeyDev: ICS //Morph - added by AndCycle, ICS
-		COLORREF crA4AF; 
 		if (g_bLowColorDesktop) {
 			crBoth = RGB(0, 0, 0);
 			crClientOnly = RGB(0, 0, 255);
@@ -108,7 +105,6 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 			crNextPending = RGB(255, 255, 0);
 			crMeOnly = RGB(127,127,127); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 			crClientPartial = RGB(255,191,0); // enkeyDev: ICS //Morph - added by AndCycle, ICS
-			crA4AF = RGB(191, 100, 255);
 		} else if (bFlat) {
 			crBoth = RGB(0, 0, 0);
 			crClientOnly = RGB(0, 100, 255);
@@ -116,7 +112,6 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 			crNextPending = RGB(255, 208, 0);
 			crMeOnly = RGB(171,171,171); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 			crClientPartial = RGB(255,191,255); // enkeyDev: ICS //Morph - added by AndCycle, ICS
-			crA4AF = RGB(191, 100, 255);
 		} else {
 			crBoth = RGB(104, 104, 104);
 			crClientOnly = RGB(0, 100, 255);
@@ -124,7 +119,6 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 			crNextPending = RGB(255, 208, 0);
 			crMeOnly = RGB(172,172,172); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 			crClientPartial = RGB(255,191,255); // enkeyDev: ICS //Morph - added by AndCycle, ICS
-			crA4AF = RGB(191, 100, 255);
 		}
 
 		char* pcNextPendingBlks = NULL;
@@ -139,21 +133,14 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 		}
 
 		for (UINT i = 0; i < file->GetPartCount(); i++){
-			uint64 uEnd;
-			if (thisAbyPartStatus[i]){
-				if ( PARTSIZE*(uint64)(i+1) > file->GetFileSize())
+			if (thisAbyPartStatus[i]&SC_AVAILABLE){
+				uint64 uEnd = PARTSIZE*(uint64)(i+1);
+				if ( uEnd > file->GetFileSize())
 					uEnd = file->GetFileSize();
-				else
-					uEnd = PARTSIZE*(uint64)(i+1);
-				//MORPH - Changed by SiRoB, use the shareable info faster
-				/*
-				if (file->IsComplete(PARTSIZE*(uint64)i,PARTSIZE*(uint64)(i+1)-1, false))
-				*/
 				if (file->IsPartShareable(i))
 					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crBoth);
-				else if (file == reqfile)
-				{
-					if (m_nDownloadState == DS_DOWNLOADING && m_nLastBlockOffset >= PARTSIZE*(uint64)i && m_nLastBlockOffset < uEnd)
+				else if (m_nDownloadState == DS_DOWNLOADING && file == reqfile) {
+					if (m_nLastBlockOffset >= PARTSIZE*(uint64)i && m_nLastBlockOffset < uEnd)
 						s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crPending);
 					else if (pcNextPendingBlks != NULL && pcNextPendingBlks[i] == 'Y')
 						s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crNextPending);
@@ -161,32 +148,27 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 						s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crClientOnly);
 				}
 				else
-					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crA4AF);
+					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crClientOnly);
 			} 
 			//MORPH - Added by IceCream --- xrmb:seeTheNeed ---
 			//MORPH - Changed by SiRoB, use the shareable info faster
 			/*
 			else if (file->IsComplete(PARTSIZE*(uint64)i,PARTSIZE*(uint64)(i+1)-1, true)){ 
 			*/
-			else if (file->IsPartShareable(i)){ 
-				if (PARTSIZE*(uint64)(i+1) > file->GetFileSize()) 
+			else if (file->IsPartShareable(i)) {
+				uint64 uEnd = PARTSIZE*(uint64)(i+1);
+				if (uEnd > file->GetFileSize()) 
 					uEnd = file->GetFileSize(); 
-				else 
-					uEnd = PARTSIZE*(uint64)(i+1); 
 				s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crMeOnly);
 			}
-			//--- :xrmb ---
-			//Morph Start - added by AndCycle, ICS
-			// enkeyDev: ICS
-			else if (b_incPartStatus != 0 && thisIncPartStatus && thisIncPartStatus[i]){
-				if (PARTSIZE*(uint64)(i+1) > reqfile->GetFileSize()) 
-					uEnd = reqfile->GetFileSize(); 
-				else 
-					uEnd = PARTSIZE*(uint64)(i+1); 
+			//MORPH START - Added by SiRoB, ICS merged into parstatus
+			else if (thisAbyPartStatus[i]==SC_PARTIAL) {
+				uint64 uEnd = PARTSIZE*(uint64)(i+1);
+				if (uEnd > file->GetFileSize()) 
+					uEnd = file->GetFileSize(); 
 				s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crClientPartial);
 			}
-			// <--- enkeyDev: ICS
-			//Morph End - added by AndCycle, ICS	
+			//MORPH END   - Added by SiRoB, ICS merged into parstatus
 		}
 		delete[] pcNextPendingBlks;
 	} 
@@ -598,36 +580,13 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		//MORPH START - Added by SiRoB, Keep A4AF infos
 		m_PartStatus_list.SetAt(reqfile,m_abyPartStatus);
 		//MORPH END   - Added by SiRoB, Keep A4AF infos
-		memset(m_abyPartStatus,1,m_nPartCount);
-		m_bCompleteSource = true;
-
-		//Morph Start - added by AndCycle, ICS
-		// enkeyDev: ICS
-		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
+		//MORPH - Changed by SiRoB, ICS merged into partstatus
 		/*
-		if (m_abyIncPartStatus){
-			delete[] m_abyIncPartStatus;
-			m_abyIncPartStatus = NULL;
-		}
+		memset(m_abyPartStatus,1,m_nPartCount);
 		*/
-		uint8* thisAbyIncPartStatus;
-		if(m_IncPartStatus_list.Lookup(reqfile, thisAbyIncPartStatus))
-		{
-			delete[] thisAbyIncPartStatus;
-			m_IncPartStatus_list.RemoveKey(reqfile);
-		}
-		m_abyIncPartStatus = NULL;
-		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-		// <--- enkeyDev: ICS
-		// enkeyDev: ICS
-		m_abyIncPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-		m_IncPartStatus_list.SetAt(reqfile,m_abyIncPartStatus);
-		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-		memset(m_abyIncPartStatus,1,m_nPartCount);
-		// <--- enkeyDev: ICS
-		//Morph End - added by AndCycle, ICS
-
+		memset(m_abyPartStatus,SC_AVAILABLE,m_nPartCount);
+		m_bCompleteSource = true;
+		
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 		{
 		    int iNeeded = 0;
@@ -636,7 +595,11 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 				    iNeeded++;
 			char* psz = new char[m_nPartCount + 1];
 			for (UINT i = 0; i < m_nPartCount; i++)
+				//MORPH - Changed by SiRoB, ICS merged into partstatus
+				/*
 				psz[i] = m_abyPartStatus[i] ? '#' : '.';
+				*/
+				psz[i] = (m_abyPartStatus[i]&SC_AVAILABLE) ? '#' : '.';
 			psz[i] = '\0';
 			Debug(_T("  Parts=%u  %hs  Needed=%u\n"), m_nPartCount, psz, iNeeded);
 			delete[] psz;
@@ -666,7 +629,6 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			SendStartupLoadReq();
 		}
 		reqfile->UpdatePartsInfo();
-		reqfile->NewSrcIncPartsInfo(); // enkeyDEV: ICS //Morph - added by AndCycle, ICS
 	}
 }
 
@@ -702,8 +664,11 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		m_abyPartStatus = new uint8[m_nPartCount];
 		//MORPH START - Added by SiRoB, Keep A4AF infos
 		m_PartStatus_list.SetAt(reqfile, m_abyPartStatus);
-		//MORPH   END - Added by SiRoB, Keep A4AF infos
+		//MORPH - Changed by SiRoB, ICS merged into partstatus
+		/*
 		memset(m_abyPartStatus,1,m_nPartCount);
+		*/
+		memset(m_abyPartStatus,SC_AVAILABLE,m_nPartCount);
 		bPartsNeeded = true;
 		m_bCompleteSource = true;
 		if (bUdpPacket ? (thePrefs.GetDebugClientUDPLevel() > 0) : (thePrefs.GetDebugClientTCPLevel() > 0))
@@ -740,7 +705,11 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 			uint8 toread = data->ReadUInt8();
 			for (UINT i = 0;i != 8;i++)
 			{
+				//MORPH - Changed by SiRoB, ICS merged into partstatus
+				/*
 				m_abyPartStatus[done] = ((toread>>i)&1)? 1:0; 	
+				*/
+				m_abyPartStatus[done] = ((toread>>i)&1)? SC_AVAILABLE:0; 	
 				if (m_abyPartStatus[done])
 				{
 					if (!reqfile->IsComplete((uint64)done*PARTSIZE, ((uint64)(done+1)*PARTSIZE)-1, false)){
@@ -759,7 +728,11 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	{
 		TCHAR* psz = new TCHAR[m_nPartCount + 1];
 		for (UINT i = 0; i < m_nPartCount; i++)
-			psz[i] = m_abyPartStatus[i] ? _T('#') : _T('.');
+			//MORPH - Changed by SiRoB, ICS merged into partstatus
+			/*
+			psz[i] = m_abyPartStatus[i] ? '#' : '.';
+			*/
+			psz[i] = (m_abyPartStatus[i]&SC_AVAILABLE) ? '#' : '.';
 		psz[i] = _T('\0');
 		Debug(_T("  Parts=%u  %s  Needed=%u\n"), m_nPartCount, psz, iNeeded);
 		delete[] psz;
@@ -811,61 +784,38 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	reqfile->UpdatePartsInfo();
 }
 
-//Morph Start - added by AndCycle, ICS
-// enkeyDEV: ICS
+//MORPH START - Added by SiRoB, ICS merged into partstatus
 void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , CPartFile* pFile){
 	if (reqfile==NULL)
 		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileIncStatus; reqfile==NULL)");
 	if (pFile == NULL)
 		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileIncStatus; pFile not found in downloadfile list)");
 	uint16 nED2KPartCount = data->ReadUInt16();
-	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-	/*
-	delete[] m_abyIncPartStatus;
-	m_abyIncPartStatus = NULL;
-	*/
-	uint8* thisAbyIncPartStatus;
-	if(m_IncPartStatus_list.Lookup(pFile, thisAbyIncPartStatus))
-	{
-		delete[] thisAbyIncPartStatus;
-		m_IncPartStatus_list.RemoveKey(pFile);
-	}
-	m_abyIncPartStatus = NULL;
-	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-	if (!nED2KPartCount){
-		uint16 nPartCount = pFile->GetPartCount();
-		m_abyIncPartStatus = new uint8[nPartCount];
-		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-		m_IncPartStatus_list.SetAt(pFile, m_abyIncPartStatus);
-		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-		memset(m_abyIncPartStatus,1,nPartCount);
-	}
-	else{
+
+	if (nED2KPartCount){
 		if (pFile->GetPartCount() != nED2KPartCount){
 			CString strError;
 			strError.Format(_T("ProcessFileIncStatus - wrong part number recv=%u  expected=%u  %s"), nED2KPartCount, pFile->GetED2KPartCount(), DbgGetFileInfo(pFile->GetFileHash()));
 			throw strError;
 		}
-		m_abyIncPartStatus = new uint8[nED2KPartCount];
-		//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-		m_IncPartStatus_list.SetAt(pFile, m_abyIncPartStatus);
-		//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-		UINT done = 0;
-		while (done != nED2KPartCount){
-			uint8 toread = data->ReadUInt8();
-			for (UINT i = 0;i != 8;i++){
-				m_abyIncPartStatus[done] = ((toread>>i)&1)? 1:0; 	
-				done++;
-				if (done == nED2KPartCount)
-					break;
+		uint8* thisAbyPartStatus;
+		if (m_PartStatus_list.Lookup(pFile, thisAbyPartStatus)) {
+			UINT done = 0;
+			while (done != nED2KPartCount){
+				uint8 toread = data->ReadUInt8();
+				for (UINT i = 0;i != 8;i++){
+					if((toread>>i)&1)
+						m_abyPartStatus[done] |= SC_PARTIAL;
+					done++;
+					if (done == nED2KPartCount)
+						break;
+				}
 			}
 		}
 	}
-
 	reqfile->NewSrcIncPartsInfo();
 }
-// <--- enkeyDEV: ICS
-//Morph End - added by AndCycle, ICS
+//MORPH END  - Added By SiRoB, ICS merged into partstatus
 
 bool CUpDownClient::AddRequestForAnotherFile(CPartFile* file){
 	for (POSITION pos = m_OtherNoNeeded_list.GetHeadPosition();pos != 0;){
@@ -1019,15 +969,6 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 				//MORPH   END - Removed by SiRoB, Keep A4AF infos
 				m_abyPartStatus = NULL;
 				m_nPartCount = 0;
-				//Morph Start - added by AndCycle, ICS
-				// enkeyDEV: ICS
-				/*
-				if (m_abyIncPartStatus)
-					delete[] m_abyIncPartStatus;
-				*/
-				m_abyIncPartStatus = NULL;
-				// <--- enkeyDEV: ICS
-				//Morph End - added by AndCycle, ICS
 			}
 			if (socket && nNewState != DS_ERROR)
 				socket->DisableDownloadLimit();
@@ -1174,9 +1115,9 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
         // Only trust eMule clients to be able to handle less blocks than three
-        if(GetDownloadDatarate() < 1200) { // netfinity: Raised threshold as anything below 3kB/s suggest there is a problem
+        if(GetDownloadDatarate() < 600 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Changed by SiRoB, 
             blockCount = 1;
-        } else if(GetDownloadDatarate() < 2400) { // netfinity: Raised threshold as anything below 3kB/s suggest there is a problem
+        } else if(GetDownloadDatarate() < 1200 || 2*reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Changed by SiRoB, 
             blockCount = 2;
         }
     }
@@ -2369,10 +2310,6 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR re
 			delete[] PartStatus;
 			m_PartStatus_list.RemoveKey(reqfile);
 		}
-		if(m_IncPartStatus_list.Lookup(reqfile,PartStatus)){
-			delete[] PartStatus;
-			m_IncPartStatus_list.RemoveKey(reqfile);  //ICS, Keep A4AF infos
-		}
 		m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
 		//MORPH END   - Changed by SiRoB, Keep A4AF infos
 	}
@@ -2381,7 +2318,6 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR re
 	CPartFile* pOldRequestFile = reqfile;
 	SetRequestFile(SwapTo);	
 	pOldRequestFile->UpdatePartsInfo();
-	pOldRequestFile->NewSrcIncPartsInfo(); // enkeyDEV: ICS //Morph - added by AndCycle, ICS
 	pOldRequestFile->UpdateAvailablePartsCount();
 
 	SwapTo->srclist.AddTail(this);
@@ -2541,20 +2477,24 @@ void CUpDownClient::SetRequestFile(CPartFile* pReqFile)
 {
 	if (pReqFile != reqfile || reqfile == NULL)
 		ResetFileStatusInfo();
-	//MORPH START - Changed by SiRoB, Keep A4AF infos
-	if (reqfile != reqfile && pReqFile == NULL) {
+	//MORPH START - Added by SiRoB, Keep A4AF infos
+	if (reqfile != reqfile) {
 		uint8* PartStatus;
-		if(m_PartStatus_list.Lookup(reqfile,PartStatus)){
-			delete[] PartStatus;
-			m_PartStatus_list.RemoveKey(reqfile);
+		if (pReqFile == NULL) {
+			if(m_PartStatus_list.Lookup(reqfile,PartStatus)){
+				delete[] PartStatus;
+				m_PartStatus_list.RemoveKey(reqfile);
+			}
+			m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
+		} else {
+			if(m_PartStatus_list.Lookup(pReqFile,PartStatus)){
+				m_nPartCount = pReqFile->GetPartCount();
+				m_abyPartStatus = PartStatus;
+			}
+			m_nUpCompleteSourcesCount_list.Lookup(pReqFile, m_nUpCompleteSourcesCount);
 		}
-		if(m_IncPartStatus_list.Lookup(reqfile,PartStatus)){
-			delete[] PartStatus;
-			m_IncPartStatus_list.RemoveKey(reqfile);  //ICS, Keep A4AF infos
-		}
-		m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
 	}
-	//MORPH END   - Changed by SiRoB, Keep A4AF infos
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	
 	reqfile = pReqFile;
 }

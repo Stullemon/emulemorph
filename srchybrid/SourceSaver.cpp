@@ -231,7 +231,11 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 					if (cur_src->GetPartCount() == file->GetPartCount()){
 						// only save sources which have needed parts
 						for (int x = 0; x < file->GetPartCount(); x++){
-							if (srcstatus[x] && !file->IsPartShareable(x)){	// SLUGFILLER: SafeHash
+							//MORPH - Changed by SiRoB, ICS merged into partstatus
+							/*
+							if (srcstatus[x] && !file->IsPartShareable(x)){
+							*/
+							if ((srcstatus[x]&SC_AVAILABLE) && !file->IsPartShareable(x)){
 								bInserted = true;
 								break;
 							}

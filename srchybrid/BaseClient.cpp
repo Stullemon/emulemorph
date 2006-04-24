@@ -283,12 +283,8 @@ void CUpDownClient::Init()
 	m_uNotOfficial = 0;  //MOPRH - Added by SiRoB,  Control Mod Tag
 	m_nDownTotalTime = 0;//wistily Total download time for this client for this emule session
 	m_nUpTotalTime = 0;//wistily Total upload time for this client for this emule session
-	//Morph Start - added by AndCycle, ICS
-	// enkeyDev: ICS
-	m_abyIncPartStatus = 0;
-	m_incompletepartVer = 0;
-	// <--- enkeyDev: ICS
-	//Morph End - added by AndCycle, ICS
+
+	m_incompletepartVer = 0; //MORPH - Added By SiRoB, ICS merged into partstatus
 
     // MORPH START - Added by Commander, WebCache 1.2e
     m_bProxy = false;
@@ -348,15 +344,6 @@ CUpDownClient::~CUpDownClient(){
 		if (curPS != m_abyPartStatus)
 			delete[] curPS;
 	}
-	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-	pos = m_IncPartStatus_list.GetStartPosition();
-	while (pos)
-	{
-		m_IncPartStatus_list.GetNextAssoc(pos, curFile, curPS);
-		if (curPS != m_abyIncPartStatus)
-			delete[] curPS;
-	}
-	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
 	m_nUpCompleteSourcesCount_list.RemoveAll();
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 
@@ -394,14 +381,6 @@ CUpDownClient::~CUpDownClient(){
 		delete[] m_abyUpPartStatus;
 		m_abyUpPartStatus = NULL;
 	}
-	//Morph Start - added by AndCycle, ICS
-	// enkeyDev: ICS
-	if (m_abyIncPartStatus) {
-		delete[] m_abyIncPartStatus;
-		m_abyIncPartStatus = NULL;
-	}
-	// <--- enkeyDev: ICS
-	//Morph End - added by AndCycle, ICS
 	ClearUploadBlockRequests();
 
 	for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;)
@@ -2732,20 +2711,6 @@ void CUpDownClient::ResetFileStatusInfo()
 	m_abyPartStatus = NULL;
 	*/
 	m_abyPartStatus = NULL;
-	//MORPH END   - Changed by SiRoB, Keep A4AF infos
-	//Morph Start - added by AndCycle, ICS
-	// enkeyDev: ICS
-	//MORPH START - Added by AndCycle, ICS, Keep A4AF infos
-	/*
-	if (m_abyIncPartStatus){
-		delete[] m_abyIncPartStatus;
-		m_abyIncPartStatus = NULL;
-	}
-	*/
-	//MORPH END - Added by AndCycle, ICS, Keep A4AF infos
-	m_abyIncPartStatus = NULL;
-	// <--- enkeyDev: ICS
-	//Morph End - added by AndCycle, ICS
 	m_iDifferenceQueueRank = 0;	//Morph - added by AndCycle, DiffQR
 	m_nRemoteQueueRank = 0;
 	m_nPartCount = 0;

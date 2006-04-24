@@ -7,6 +7,8 @@ FIXED  : (minor) USC: Ajusted to properly respect clientdatarate limit in all th
 CHANGED: SOTN: Use additional info from waiting queue for partfile.
 CHANGED: Moved community Tag visualisation from Morph to MorphShare Preferency [SiRoB]
 
+TWEAKED: ICS: merged into partstatus making less resource and cpu consumption [SiRoB]
+
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.10
 --------------------------------------

@@ -687,11 +687,6 @@ bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 			SetUpCompleteSourcesCount(nCompleteCountNew);
 			if (nCompleteCountLast != nCompleteCountNew)
 		{
-				//MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
-				if(tempreqfile->IsPartFile())
-					((CPartFile*)tempreqfile)->UpdatePartsInfo();
-				else
-				//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
 					tempreqfile->UpdatePartsInfo();
 			}
 	}

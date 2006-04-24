@@ -3453,24 +3453,32 @@ void CPartFile::UpdatePartsInfo()
 	// Reset part counters
 	if ((UINT)m_SrcpartFrequency.GetSize() < partcount)
 		m_SrcpartFrequency.SetSize(partcount);
+	//MORPH START - Added by SiRoB, ICS merged into partstatus
+	if ((UINT)m_SrcIncPartFrequency.GetSize() < partcount)
+		m_SrcIncPartFrequency.SetSize(partcount);
+	//MORPH END   - Added by SiRoB, ICS merged into partstatus
 	for (UINT i = 0; i < partcount; i++)
-		m_SrcpartFrequency[i] = 0;
-	
+		m_SrcpartFrequency[i] = m_SrcIncPartFrequency[i] = 0; //MORPH - Changed by SiRoB, ICS merged into partstatus
+
 	CArray<uint16,uint16> count;
 	if (flag)
 		count.SetSize(0, srclist.GetSize());
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	UINT iCompleteSourcesCountInfoReceived = 0;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	//MORPH START - Changed by SiRoB, ICS merged into partstatus
 	for (POSITION pos = srclist.GetHeadPosition(); pos != 0; )
 	{
 		const CUpDownClient* cur_src = srclist.GetNext(pos);
-		if( cur_src->GetPartStatus()) 
+		const uint8* srcPartStatus = cur_src->GetPartStatus();
+		if(srcPartStatus) 
 		{
 			for (UINT i = 0; i < partcount; i++)
 			{
-				if (cur_src->IsPartAvailable(i))
-					m_SrcpartFrequency[i] += 1;
+				if (srcPartStatus[i]&SC_AVAILABLE)
+					++m_SrcpartFrequency[i];
+				else if (srcPartStatus[i]==SC_PARTIAL)
+					++m_SrcIncPartFrequency[i];
 			}
 			if ( flag )
 			{
@@ -3486,13 +3494,15 @@ void CPartFile::UpdatePartsInfo()
 	for (POSITION pos = A4AFsrclist.GetHeadPosition(); pos != 0; )
 	{
 		const CUpDownClient* cur_src = A4AFsrclist.GetNext(pos);
-		uint8* thisAbyPartStatus = cur_src->GetPartStatus(this);
+		const uint8* thisAbyPartStatus = cur_src->GetPartStatus(this);
 		if(thisAbyPartStatus)
 		{
 			for (UINT i = 0; i < partcount; i++)
 			{
-				if (thisAbyPartStatus[i])
+				if (thisAbyPartStatus[i]&SC_AVAILABLE)
 					++m_SrcpartFrequency[i];
+				else if (thisAbyPartStatus[i]==SC_PARTIAL)
+					++m_SrcIncPartFrequency[i];
 			}
 			if ( flag )
 			{
@@ -3504,7 +3514,8 @@ void CPartFile::UpdatePartsInfo()
 			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
 	}
-	//MORPH END - Added by SiRoB, Keep A4AF infos
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
+	//MORPH END   - Changed by SiRoB, ICS merged into partstatus
 
 	if (flag)
 	{
@@ -3619,9 +3630,15 @@ void CPartFile::NewSrcIncPartsInfo()
 
 	for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;){
 		cur_src = srclist.GetNext(pos);
-		for (UINT i = 0; i < partcount; i++){
-			if (cur_src->IsIncPartAvailable(i))
-				m_SrcIncPartFrequency[i] +=1;
+		
+		if (cur_src->GetIncompletePartVersion()) {
+			const uint8* srcstatus = cur_src->GetPartStatus();
+			if (srcstatus) {
+				for (UINT i = 0; i < partcount; i++){
+					if (srcstatus[i]==SC_PARTIAL)
+						m_SrcIncPartFrequency[i] +=1;
+				}
+			}
 		}
 	}
 	//UpdateDisplayedInfo(); // Not displayed
@@ -3707,7 +3724,25 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	// BEGIN netfinty: Dynamic Block Requests
 	uint64	bytesPerRequest = EMBLOCKSIZE;
 #if !defined DONT_USE_DBR
-	uint64	bytesLeftToDownload = GetFileSize() - GetCompletedSize();
+	//MORPH START - Changed by SiRoB, Enhanced DBR
+	/*
+	uint64 bytesLeftToDownload = GetFileSize() - GetCompletedSize();
+	*/
+	uint64	bytesLeftToDownload = 0;
+	const uint8* srcstatus = sender->GetPartStatus();
+	if (srcstatus) {
+		for(uint32 i = 0; i < GetPartCount(); i++) {
+			//MORPH - Changed by SiRoB, ICS merged into partstatus
+			/*
+			if ((srcstatus[i]&SC_AVAILABLE) && !IsComplete(PARTSIZE*(uint64)i, PARTSIZE*(uint64)(i+1)-1, false))
+			*/
+			if ((srcstatus[i]&SC_AVAILABLE) && !IsComplete(PARTSIZE*(uint64)i, PARTSIZE*(uint64)(i+1)-1, false))
+				bytesLeftToDownload += PARTSIZE;
+		}
+		bytesLeftToDownload = min(GetFileSize() - GetCompletedSize(), bytesLeftToDownload);
+	} else
+		ASSERT(0);
+	//MORPH END   - Changed by SiRoB, Enhanced DBR
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
@@ -3729,11 +3764,6 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	}
 #endif
 	// BEGIN netfinty: Dynamic Block Requests
-	/*Don't request too much at download start*/
-	if(sender->GetDownloadDatarate()==0 && sender->IsEmuleClient() || (sender->GetDownloadDatarate()<400 && sender->m_lastPartAsked!=(uint16)-1))
-	{
-		bytesPerRequest = 10240;
-	}
 	for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
 	{
 		if (sender->IsPartAvailable(part_idx) && GetNextEmptyBlockInPart(part_idx, 0))
@@ -5106,7 +5136,11 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 					ASSERT( forClient->GetPartCount() == GetPartCount() );
 					// only send sources which have needed parts for this client
 					for (UINT x = 0; x < GetPartCount(); x++){
+						//MORPH - Changed by SiRoB, ICS merged into partstatus
+						/*
 						if (srcstatus[x] && !reqstatus[x]){
+						*/
+						if ((srcstatus[x]&SC_AVAILABLE) && !(reqstatus[x]&SC_AVAILABLE)){
 							bNeeded = true;
 							break;
 						}
@@ -5115,7 +5149,11 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 				else{
 					// We know this client is valid. But don't know the part count status.. So, currently we just send them.
 					for (UINT x = 0; x < GetPartCount(); x++){
+						//MORPH - Changed by SiRoB, ICS merged into partstatus
+						/*
 						if (srcstatus[x]){
+						*/
+						if (srcstatus[x]&SC_AVAILABLE){
 							bNeeded = true;
 							break;
 						}
@@ -6292,7 +6330,26 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	// BEGIN netfinty: Dynamic Block Requests
 	uint64	bytesPerRequest = EMBLOCKSIZE;
 #if !defined DONT_USE_DBR
-	uint64	bytesLeftToDownload = GetFileSize() - GetCompletedSize();
+	//MORPH START - Changed by SiRoB, Enhanced DBR
+	/*
+	uint64 bytesLeftToDownload = GetFileSize() - GetCompletedSize();
+	*/
+	uint64	bytesLeftToDownload = 0;
+	const uint8* srcstatus = sender->GetPartStatus();
+	if (srcstatus) {
+		for(uint32 i = 0; i < GetPartCount(); i++) {
+			//MORPH - Changed by SiRoB, ICS merged into partstatus
+			/*
+			if (srcstatus[i] && !IsComplete(PARTSIZE*(uint64)i, PARTSIZE*(uint64)(i+1)-1, false))
+			*/
+			if ((srcstatus[i]&SC_AVAILABLE) && !IsComplete(PARTSIZE*(uint64)i, PARTSIZE*(uint64)(i+1)-1, false))
+				bytesLeftToDownload += PARTSIZE;
+		}
+		bytesLeftToDownload = min(GetFileSize() - GetCompletedSize(), bytesLeftToDownload);
+	} else {
+		ASSERT(0);
+	}
+	//MORPH END   - Changed by SiRoB, Enhanced DBR
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
@@ -6314,12 +6371,6 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	}
 #endif
 	// BEGIN netfinty: Dynamic Block Requests
-
-	/*Don't request too much at download start*/
-	if(sender->GetDownloadDatarate()==0 && sender->IsEmuleClient() || (sender->GetDownloadDatarate()<400 && sender->m_lastPartAsked!=(uint16)-1))
-	{
-		bytesPerRequest = 10240;
-	}
 
 	// Main loop
 	uint16 newBlockCount = 0;

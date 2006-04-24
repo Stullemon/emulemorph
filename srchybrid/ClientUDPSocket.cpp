@@ -340,16 +340,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 						sender->SetUpCompleteSourcesCount(nCompleteCountNew);
 						if (nCompleteCountLast != nCompleteCountNew)
 						{
-							//Morph Start - added by AndCycle, ICS
-							if(reqfile->IsPartFile()) //  enkeyDEV: ICS
-								((CPartFile*)reqfile)->NewSrcIncPartsInfo();
-							//Morph End - added by AndCycle, ICS
-							//MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
-							if(reqfile->IsPartFile())
-								((CPartFile*)reqfile)->UpdatePartsInfo();
-							else
-							//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
-								reqfile->UpdatePartsInfo();
+							reqfile->UpdatePartsInfo();
 						}
 					}
 					CSafeMemFile data_out(128);

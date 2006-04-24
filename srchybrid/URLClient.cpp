@@ -59,7 +59,11 @@ void CUrlClient::SetRequestFile(CPartFile* pReqFile)
 		if(!m_PartStatus_list.Lookup(reqfile,PartStatus)) {
 			m_nPartCount = reqfile->GetPartCount();
 			m_abyPartStatus = new uint8[m_nPartCount];
+			//MORPH - Changed by SiRoB, ICS merged into partstatus
+			/*
 			memset(m_abyPartStatus, 1, m_nPartCount);
+			*/
+			memset(m_abyPartStatus, SC_AVAILABLE, m_nPartCount);
 			//MORPH START - Added by SiRoB, Keep A4AF infos
 			m_PartStatus_list.SetAt(reqfile,m_abyPartStatus);
 			//MORPH END   - Added by SiRoB, Keep A4AF infos

@@ -199,7 +199,8 @@ enum ESourceFrom{
 enum EChunkStatus{
 	SC_AVAILABLE		= 1,
 	SC_HIDDENBYSOTN		= 2,
-	SC_HIDDENBYHIDEOS	= 4
+	SC_HIDDENBYHIDEOS	= 4,
+	SC_PARTIAL			= 8 //MORPH - Added By SiRoB, ICS merged into partstatus
 };
 //MORPH END   - Added by SiRoB, See chunk that we hide
 
@@ -516,7 +517,12 @@ public:
 	uint32			GetLastAskedTime(const CPartFile* partFile = NULL) const;
     void            SetLastAskedTime()								{ m_fileReaskTimes.SetAt(reqfile, ::GetTickCount()); }
 	bool			IsPartAvailable(UINT iPart) const {
-						return (iPart>=m_nPartCount || !m_abyPartStatus) ? false : m_abyPartStatus[iPart]!=0;
+						//MORPH - Changed by SiRoB, ICS merged into partstatus
+						/*
+						return (iPart>=m_nPartCount || !m_abyPartStatus) ? false : (m_abyPartStatus[iPart]!=0);
+						*/
+						return (iPart>=m_nPartCount || !m_abyPartStatus) ? false : (m_abyPartStatus[iPart]&SC_AVAILABLE);
+						//MORPH - Changed by SiRoB, ICS merged into partstatus
 					}
 	// Mighty Knife: Community visualization
 	bool			IsCommunity() const;
@@ -824,7 +830,6 @@ public:
 	// enkeyDEV: ICS
 	void	ProcessFileIncStatus(CSafeMemFile* data,uint32 size, CPartFile* pFile);
 	uint32	GetIncompletePartVersion()	{return m_incompletepartVer;}
-	bool	IsIncPartAvailable(uint16 iPart)	{return	( (iPart >= m_nPartCount) || (!m_abyIncPartStatus) )? false:m_abyIncPartStatus[iPart]!=0;}
 	// <--- enkeyDEV: ICS
 	//Morph End - added by AndCycle, ICS
 
@@ -1120,7 +1125,6 @@ protected:
 	//MORPH START - Added by SiRoB, Keep A4AF infos
 	CMap<const CPartFile*, const CPartFile*, uint8*, uint8*>	 m_PartStatus_list;
 	CMap<const CPartFile*, const CPartFile*, uint16, uint16>	 m_nUpCompleteSourcesCount_list;
-	CMap<const CPartFile*, const CPartFile*, uint8*, uint8*>	 m_IncPartStatus_list; //MORPH - Added by AndCycle, ICS, Keep A4AF infos
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
@@ -1155,7 +1159,6 @@ private:
 //Morph Start - added by AndCycle, ICS
 	// enkeyDEV: ICS
 	uint32	m_incompletepartVer;
-	uint8*	m_abyIncPartStatus;
 	// <--- enkeyDEV: ICS
 //Morph End - added by AndCycle, ICS
 

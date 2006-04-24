@@ -1301,7 +1301,6 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate)
 				if ( bDoStatsUpdate ){
 					cur_file->RemoveDownloadingSource(toremove);
 					cur_file->UpdatePartsInfo();
-					cur_file->NewSrcIncPartsInfo(); // enkeyDEV: ICS //Morph - added by AndCycle, ICS
 				}
 				break;
 			}
@@ -1326,7 +1325,6 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate)
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource(toremove,cur_file);
 			cur_file->RemoveDownloadingSource(toremove);
 			cur_file->UpdatePartsInfo();
-			cur_file->NewSrcIncPartsInfo(); //Morph - added by AndCycle, ICS
 		}
 		//MORPH END  - Change by SiRoB, fix updating stat for a4af
 	}
@@ -1343,7 +1341,6 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate)
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource(toremove,cur_file);
 			cur_file->RemoveDownloadingSource(toremove);
 			cur_file->UpdatePartsInfo();
-			cur_file->NewSrcIncPartsInfo(); //Morph - added by AndCycle, ICS
 		}
 		//MORPH END  - Change by SiRoB, fix updating stat for a4af
 	}
