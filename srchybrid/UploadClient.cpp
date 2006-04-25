@@ -1503,15 +1503,15 @@ void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUp
 	}
 }
 //MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
-//MORPH START - Adde by SiRoB, Optimization requpfile
+//MORPH START - Added by SiRoB, Optimization requpfile
 CKnownFile* CUpDownClient::CheckAndGetReqUpFile() const {
-	if (requpfile && !requpfile->IsPartFile() && requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
+	if (requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
 		return theApp.sharedfiles->GetFileByID(requpfileid);
 		//requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
 	}
 	return requpfile;
 }
-//MORPH END   - Adde by SiRoB, Optimization requpfile
+//MORPH END   - Added by SiRoB, Optimization requpfile
 
 //MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 IMPLEMENT_DYNCREATE(CReadBlockFromFileThread, CWinThread)
