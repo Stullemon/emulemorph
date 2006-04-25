@@ -191,8 +191,8 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 	// Choose best sources for the file
 	for(POSITION pos = file->srclist.GetHeadPosition();pos!=0;){
 		cur_src = file->srclist.GetNext(pos);
-		if (cur_src->GetDownloadState() != DS_ONQUEUE ||
-			cur_src->GetDownloadState() != DS_DOWNLOADING ||
+		if (cur_src->GetDownloadState() != DS_ONQUEUE &&
+			cur_src->GetDownloadState() != DS_DOWNLOADING &&
 			cur_src->GetDownloadState() != DS_NONEEDEDPARTS ||
 			cur_src->IsEd2kClient() == false ||
 			cur_src->IsProxy())
