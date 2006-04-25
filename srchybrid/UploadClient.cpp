@@ -1505,7 +1505,7 @@ void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUp
 //MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 //MORPH START - Adde by SiRoB, Optimization requpfile
 CKnownFile* CUpDownClient::CheckAndGetReqUpFile() const {
-	if (requpfileid && !requpfile->IsPartFile() && requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
+	if (requpfile && !requpfile->IsPartFile() && requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
 		return theApp.sharedfiles->GetFileByID(requpfileid);
 		//requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
 	}
