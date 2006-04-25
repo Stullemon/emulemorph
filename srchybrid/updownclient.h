@@ -564,6 +564,7 @@ public:
 	void			SendOutOfPartReqsAndAddToWaitingQueue();
 	UINT			CalculateDownloadRate();
 	uint16			GetAvailablePartCount() const;
+	uint16			GetAvailablePartCount(const CPartFile* file) const; //MORPH - Added by SiRoB, Keep A4AF infos
 	bool			SwapToAnotherFile(LPCTSTR pszReason, bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile = NULL, bool allowSame = true, bool isAboutToAsk = false, bool debug = false); // ZZ:DownloadManager
 	void			DontSwapTo(/*const*/ CPartFile* file);
 	bool			IsSwapSuspended(const CPartFile* file, const bool allowShortReaskTime = false, const bool fileIsNNP = false) /*const*/; // ZZ:DownloadManager
@@ -829,12 +830,12 @@ public:
 	//Morph Start - added by AndCycle, ICS
 	// enkeyDEV: ICS
 	void	ProcessFileIncStatus(CSafeMemFile* data,uint32 size, CPartFile* pFile);
-	uint32	GetIncompletePartVersion()	{return m_incompletepartVer;}
+	uint32	GetIncompletePartVersion() const	{return m_incompletepartVer;}
 	// <--- enkeyDEV: ICS
 	//Morph End - added by AndCycle, ICS
 
 	//MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
-	void GetUploadingAndUploadedPart(uint8* abyUpPartUploadingAndUploaded, uint16 partcount);
+	void GetUploadingAndUploadedPart(uint8* abyUpPartUploadingAndUploaded, uint16 partcount) const;
 	//MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 	//wistily start
 	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}

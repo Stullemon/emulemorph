@@ -1483,7 +1483,7 @@ uint32 CUpDownClient::GetAvUpDatarate() const
 }
 //MORPH END  - Added by SIRoB, GetAverage Upload to client
 //MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
-void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUploaded, uint16 partcount)
+void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUploaded, uint16 partcount) const
 {
 	memset(m_abyUpPartUploadingAndUploaded,0,partcount);
 	const Requested_Block_Struct* block;
@@ -1505,7 +1505,7 @@ void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUp
 //MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 //MORPH START - Adde by SiRoB, Optimization requpfile
 CKnownFile* CUpDownClient::CheckAndGetReqUpFile() const {
-	if (requpfileid && requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
+	if (requpfileid && !requpfile->IsPartFile() && requpfileid_lasttimeupdated < theApp.sharedfiles->GetLastTimeFileMapUpdated()) {
 		return theApp.sharedfiles->GetFileByID(requpfileid);
 		//requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
 	}

@@ -331,14 +331,15 @@ void CKnownFile::UpdatePartsInfo()
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	for (POSITION pos = m_ClientUploadList.GetHeadPosition(); pos != 0; )
 	{
-		CUpDownClient* cur_src = m_ClientUploadList.GetNext(pos);
+		const CUpDownClient* cur_src = m_ClientUploadList.GetNext(pos);
+		const uint8* srcstatus = cur_src->GetUpPartStatus();
 		//This could be a partfile that just completed.. Many of these clients will not have this information.
-		if(cur_src->m_abyUpPartStatus && cur_src->GetUpPartCount() == partcount )
+		if(srcstatus)
 		{
 			for (UINT i = 0; i < partcount; i++)
 			{
-				if (cur_src->IsUpPartAvailable(i))
-					m_AvailPartFrequency[i] += 1;
+				if (srcstatus[i]&SC_AVAILABLE)
+					++m_AvailPartFrequency[i];
 			}
 			if ( flag )
 				count.Add(cur_src->GetUpCompleteSourcesCount());
