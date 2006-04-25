@@ -1751,7 +1751,7 @@ uint16 CUpDownClient::GetAvailablePartCount(const CPartFile* file) const
 	UINT result = 0;
 	uint8* thisAbyPartStatus;
 	if (m_PartStatus_list.Lookup(file, thisAbyPartStatus)) {
-		for (UINT i = 0; i < m_nPartCount; i++){
+		for (UINT i = 0; i < file->GetPartCount(); i++){
 			if (thisAbyPartStatus[i]&SC_AVAILABLE)
 				result++;
 		}
