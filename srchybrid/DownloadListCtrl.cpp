@@ -1126,9 +1126,10 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 
 					//Commander - Added: Client percentage - Start
-					if (thePrefs.GetUseClientPercentage() && lpUpDownClient->GetPartStatus() && lpCtrlItem->type == AVAILABLE_SOURCE)
+					//MORPH - Changed by SiRoB, Keep A4AF info
+					if (thePrefs.GetUseClientPercentage() && lpUpDownClient->GetPartStatus((CPartFile*)lpCtrlItem->owner) /*&& lpCtrlItem->type == AVAILABLE_SOURCE*/)
 					{
-						float percent = (float)lpUpDownClient->GetAvailablePartCount() / (float)lpUpDownClient->GetPartCount()* 100.0f;
+						float percent = (float)lpUpDownClient->GetAvailablePartCount(((CPartFile*)lpCtrlItem->owner)) / (float)((CPartFile*)lpCtrlItem->owner)->GetPartCount()* 100.0f;
 						if (percent > 0.05f)
 						{
 							//Commander - Added: Draw Client Percentage xored, caching before draw - Start
