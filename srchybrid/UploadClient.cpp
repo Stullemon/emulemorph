@@ -945,10 +945,7 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 
 	//MORPH START - Added by SiRoB, Optimization requpfile
 	requpfile = newreqfile;
-	if (requpfile)
-		requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
-	else
-		requpfileid_lasttimeupdated = 0;
+	requpfileid_lasttimeupdated = theApp.sharedfiles->GetLastTimeFileMapUpdated();
 	//MORPH END   - Added by SiRoB, Optimization requpfile
 
 	if (oldreqfile) {
