@@ -3626,21 +3626,36 @@ void CPartFile::NewSrcIncPartsInfo()
 	for(UINT i = 0; i < partcount; i++)
 		m_SrcIncPartFrequency[i] = 0;
 
-	CUpDownClient* cur_src;
-
 	for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;){
-		cur_src = srclist.GetNext(pos);
+		const CUpDownClient* cur_src = srclist.GetNext(pos);
 		
 		if (cur_src->GetIncompletePartVersion()) {
 			const uint8* srcstatus = cur_src->GetPartStatus();
 			if (srcstatus) {
-				for (UINT i = 0; i < partcount; i++){
+				for (UINT i = 0; i < partcount; i++) {
 					if (srcstatus[i]==SC_PARTIAL)
 						m_SrcIncPartFrequency[i] +=1;
 				}
 			}
 		}
 	}
+	//MORPH START - Added by SiRoB, Keep A4AF infos
+	for (POSITION pos = A4AFsrclist.GetHeadPosition(); pos != 0; )
+	{
+		const CUpDownClient* cur_src = A4AFsrclist.GetNext(pos);
+		if (cur_src->GetIncompletePartVersion()) {
+			const uint8* thisAbyPartStatus = cur_src->GetPartStatus(this);
+			if(thisAbyPartStatus)
+			{
+				for (UINT i = 0; i < partcount; i++)
+				{
+					if (thisAbyPartStatus[i]==SC_PARTIAL)
+						++m_SrcIncPartFrequency[i];
+				}
+			}
+		}
+	}
+	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	//UpdateDisplayedInfo(); // Not displayed
 }
 

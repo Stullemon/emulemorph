@@ -226,7 +226,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 				{
 					bInserted = true;
 				}
-				uint8* srcstatus = cur_src->GetPartStatus();
+				const uint8* srcstatus = cur_src->GetPartStatus();
 				if (srcstatus){
 					if (cur_src->GetPartCount() == file->GetPartCount()){
 						// only save sources which have needed parts

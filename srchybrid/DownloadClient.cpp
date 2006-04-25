@@ -910,7 +910,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 
-		bool bNotFailedSession = false;
+		bool bFailedSession = true;
 		if (m_nDownloadState == DS_DOWNLOADING ){
 			if(socket)
 				socket->SetTimeOut(CONNECTION_TIMEOUT);
@@ -928,7 +928,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 				switch( nNewState )
 				{
 					case DS_NONEEDEDPARTS:
-						bNotFailedSession = true;
+						bFailedSession = false;
 				}
 			} 
 			//MORPH END   - Changed by SiRoB, don't overhide pszReason
@@ -941,7 +941,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
 			if ( m_bTransferredDownMini && nNewState != DS_ERROR )
 				thePrefs.Add2DownSuccessfulSessions(); // Increment our counters for successful sessions (Cumulative AND Session)
-			else if (bNotFailedSession) //MORPH - Added by SiRoB, not a failed session
+			else if (bFailedSession) //MORPH - Added by SiRoB, not a failed session
 				thePrefs.Add2DownFailedSessions(); // Increment our counters failed sessions (Cumulative AND Session)
 			//wistily start
 			uint32 tempDownTimeDifference= GetDownTimeDifference();
