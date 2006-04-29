@@ -918,11 +918,16 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 
 void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 {
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
 	CKnownFile* oldreqfile;
 	//We use the knownfilelist because we may have unshared the file..
 	//But we always check the download list first because that person may have decided to redownload that file.
 	//Which will replace the object in the knownfilelist if completed.
 	if ((oldreqfile = theApp.downloadqueue->GetFileByID(requpfileid)) == NULL )
+	*/
+	CKnownFile* oldreqfile = requpfile;
+	if (!theApp.downloadqueue->IsPartFile(requpfile))
 		oldreqfile = theApp.knownfiles->FindKnownFileByID(requpfileid);
 
 	if(newreqfile == oldreqfile)
