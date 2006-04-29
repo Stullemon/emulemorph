@@ -267,24 +267,9 @@ void CEMSocket::OnConnect(int nErrorCode) {
     CAsyncSocketEx::OnConnect(nErrorCode);
 	if (nErrorCode == 0)
 	{
-        sendLocker.Lock();
-		if(byConnected == ES_NOTCONNECTED) {
+		sendLocker.Lock();
+		if(byConnected == ES_NOTCONNECTED)
 			byConnected = ES_CONNECTED;
-			if(!controlpacket_queue.IsEmpty())
-				theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, true);
-		}
-
-		//MORPH - Added by SiRoB, Show BusyTime
-		/*
-		m_bBusy = false;
-		*/
-		DWORD curTick = GetTickCount();
-		if (m_dwBusy) {
-			m_dwBusyDelta = curTick-m_dwBusy;
-			m_dwNotBusy = curTick;
-		}
-		m_dwBusy = 0;
-		//MORPH - Added by SiRoB, Show BusyTime
 		sendLocker.Unlock();
 	}
     //theApp.QueueDebugLogLine(false,_T("CEMSocket::OnConnect(%i)"), nErrorCode);
@@ -678,6 +663,9 @@ void CEMSocket::OnSend(int nErrorCode){
 	m_dwBusy = 0;
 	//MORPH - Added by SiRoB, Show BusyTime
 	
+	if(signalNotBusy && (sendbuffer != NULL && m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()))
+		theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+
 	sendLocker.Unlock();
 
 	if(signalNotBusy) {
@@ -754,7 +742,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	/*
 	if(byConnected == ES_CONNECTED && (!m_dwBusy || !onlyAllowedToSendControlPacket)) {
 	*/
-	if(!m_dwBusy || !onlyAllowedToSendControlPacket) {
+	if(!m_dwBusy) {
 	    if(minFragSize < 1) {
             minFragSize = 1;
         }
@@ -978,18 +966,15 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
             sendLocker.Lock();
     }
 
+		//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
+		if (onlyAllowedToSendControlPacket) {
+			if(!m_dwBusy && (sendbuffer != NULL && m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()) ) {
+				theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+			}
+
+		}
         sendLocker.Unlock();
     }
-
-	//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
-	if (onlyAllowedToSendControlPacket) {
-		sendLocker.Lock();
-        if(byConnected != ES_DISCONNECTED && (sendbuffer != NULL || !controlpacket_queue.IsEmpty())) {
-            theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
-        }
-        sendLocker.Unlock();
-    }
-
     //MORPH - Changed by SiRoB, Take into account IP+TCP Header
     /*
     SocketSentBytes returnVal = { !anErrorHasOccured, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
