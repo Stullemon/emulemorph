@@ -1291,15 +1291,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			}
 		}
 		//Morph End - added by AndCycle, SLUGFILLER: infiniteQueue
-		//MORPH - Changed by SiRoB, Fix connection collision
-		/*
 		if (client->IsDownloading())
 		{
-		*/
-		if (IsDownloading(client))
-		{
-			client->SetUploadState(US_UPLOADING);
-		//MORPH - Changed by SiRoB, Fix connection collision
 			// he's already downloading and wants probably only another file
 			if (thePrefs.GetDebugClientTCPLevel() > 0)
 				DebugSend("OP__AcceptUploadReq", client);
@@ -1668,7 +1661,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
         // Elandal: ThreadSafeLogging <--
 
 		theApp.uploadqueue->UpdateDatarates(); //MORPH - Moved by SiRoB
-		//MOPRH START - Modified by SiRoB
+		//MOPRH START - Modified by SiRoB, Upload Splitting Class
 		/*
 		// ZZ:UploadSpeedSense -->
 		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(false)*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
