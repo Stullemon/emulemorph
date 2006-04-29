@@ -1916,6 +1916,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				}
 				if (GetUploadState() == US_CONNECTING)
 				{
+					if (filtered) *filtered = true;
 					if(Disconnected(_T("LowID->LowID and US_CONNECTING")))
 					{
 						delete this;
@@ -2075,16 +2076,14 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				return false; // client was deleted!
 		}
 	}
-	else if (CheckHandshakeFinished()) {
+	else if (CheckHandshakeFinished())
 		ConnectionEstablished();
-		return true;
-	}
-	else if (m_byHelloPacketState == HP_NONE) {
-		if (!SendHelloPacket())
-			return false; // client was deleted!
-		DebugLog(LOG_MORPH|LOG_SUCCESS, _T("[FIX CONNECTION COLLISION] Already initiated socket, OP_HELLO have been sent to client: %s"), DbgGetClientInfo());
-	} else
+	else if (m_byHelloPacketState == HP_NONE)
+		DebugLog(LOG_MORPH|LOG_SUCCESS, _T("[FIX CONNECTION COLLISION] Already initiated socket, Waiting for an OP_HELLO from client: %s"), DbgGetClientInfo());
+	else if (m_byHelloPacketState == HP_HELLO)
 		DebugLog(LOG_MORPH|LOG_SUCCESS, _T("[FIX CONNECTION COLLISION] Already initiated socket, OP_HELLO already sent and waiting an OP_HELLOANSWER from client: %s"), DbgGetClientInfo()); 
+	else if (m_byHelloPacketState == HP_HELLOANSWER)
+		DebugLog(LOG_MORPH|LOG_ERROR, _T("[FIX CONNECTION COLLISION] Already initiated socket, OP_HELLOANSWER without OP_HELLO from client: %s"), DbgGetClientInfo()); 
 	return true;
 }
 
