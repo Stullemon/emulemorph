@@ -44,7 +44,10 @@ public:
 	virtual ~CEMSocket();
 
 	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-    bool	IsConnected() const {return byConnected == ES_CONNECTED;}
+    //MORPH START - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
+	virtual void 	SendPacket(Packet* packet[], uint32 npacket, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+    //MORPH END   - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
+	bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
 	virtual bool IsRawDataMode() const { return false; }
 	void	SetDownloadLimit(uint32 limit);

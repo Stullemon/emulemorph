@@ -577,19 +577,72 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 			}
 	    } else {
             //bool first = !((sendbuffer && !m_currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty());
-            StandardPacketQueueEntry queueEntry = { actualPayloadSize, packet };
-		    standartpacket_queue.AddTail(queueEntry);
-
-            // reset timeout for the first time
-            //if (first) {
-            //    lastFinishedStandard = ::GetTickCount();
-            //    m_bAccelerateUpload = true;	// Always accelerate first packet in a block
-            //}
+			StandardPacketQueueEntry queueEntry = { actualPayloadSize, packet };
+			standartpacket_queue.AddTail(queueEntry);
+			
+			// reset timeout for the first time
+			//if (first) {
+			//    lastFinishedStandard = ::GetTickCount();
+			//    m_bAccelerateUpload = true;	// Always accelerate first packet in a block
+			//}
 	    }
     }
 
     sendLocker.Unlock();
 }
+
+//MORPH START - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
+void CEMSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, bool controlpacket, uint32 actualPayloadSize){
+	//EMTrace("CEMSocket::OnSenPacked1 linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
+
+    sendLocker.Lock();
+
+    if (byConnected == ES_DISCONNECTED) {
+        sendLocker.Unlock();
+        for (uint32 i = 0; i < npacket; i++) {
+			if(delpacket) {
+				delete packet[i];
+			}
+        }
+		return;
+    } else {
+        if (!delpacket){
+            for (uint32 i = 0; i < npacket; i++) {
+				//ASSERT ( !packet[i]->IsSplitted() );
+				//Packet* copy = new Packet(packet[i]->opcode,packet[i]->size);
+				Packet* copy = new Packet(packet[i]);//bugfix by Xanatos [cyrex2001]
+				//memcpy(copy[i]->pBuffer,packet[i]->pBuffer,packet[i]->size);
+				packet[i] = copy;
+			}
+	    }
+
+        //if(m_startSendTick > 0) {
+        //    m_lastSendLatency = ::GetTickCount() - m_startSendTick;
+        //}
+
+        if (controlpacket) {
+	        for (uint32 i = 0; i < npacket; i++) {
+				controlpacket_queue.AddTail(packet[i]);
+			}
+			if (byConnected == ES_CONNECTED) {
+				// queue up for controlpacket
+				theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
+			}
+	    } else {
+            uint32 payloadSize = actualPayloadSize/npacket;
+			while (payloadSize <= actualPayloadSize) {
+				actualPayloadSize -= payloadSize;
+				if(actualPayloadSize < payloadSize) {
+					payloadSize += actualPayloadSize;
+				}
+				StandardPacketQueueEntry queueEntry = { payloadSize, *packet++ };
+				standartpacket_queue.AddTail(queueEntry);
+			}
+		}
+    }
+    sendLocker.Unlock();
+}
+//MORPH END   - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
 
 uint64 CEMSocket::GetSentBytesCompleteFileSinceLastCallAndReset() {
     statsLocker.Lock();
@@ -742,7 +795,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	/*
 	if(byConnected == ES_CONNECTED && (!m_dwBusy || !onlyAllowedToSendControlPacket)) {
 	*/
-	if(!m_dwBusy) {
+	if(true) {
 	    if(minFragSize < 1) {
             minFragSize = 1;
         }
@@ -968,7 +1021,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
 		//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
 		if (onlyAllowedToSendControlPacket) {
-			if(!m_dwBusy && (sendbuffer != NULL && m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()) ) {
+			if(sendbuffer != NULL && m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()) {
 				theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
 			}
 
