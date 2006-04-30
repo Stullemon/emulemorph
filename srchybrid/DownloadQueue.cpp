@@ -456,7 +456,7 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 	
 	m_bBusyPurgingLinks = true;
 
-	uint8	useCat;
+	int	useCat;
 	int		addedFiles = 0;
 	bool	bCreatedNewCat = false;
 	bool	bCanceled = false; //MORPH - Added by SiRoB, WasCanceled

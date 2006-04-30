@@ -3228,7 +3228,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(0);
 		else
 		*/
-		uint8 curselcat = theApp.emuledlg->transferwnd->downloadlistctrl.curTab;
+		int curselcat = theApp.emuledlg->transferwnd->downloadlistctrl.curTab;
 		Category_Struct* cat = thePrefs.GetCategory(curselcat);
 		if (cat && cat->viewfilters.nFromCats == 0)
 			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(curselcat);
