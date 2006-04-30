@@ -248,6 +248,18 @@ BOOL CStatisticsDlg::OnInitDialog()
 
 	m_wndSplitterstat_HR.MoveWindow(rcSpl);
 
+	// MORPH START leuk_he statistic fix bluesonicboy
+        //Init. Pos. fix - Set Download Scope relative to this splitter, right and left are set
+        //                 top will always be 0. Also set Upload Scope top position bottom will be set later.
+     if(rcSpl.top) 
+		 rcDown.bottom = rcSpl.top - 1;
+     else            
+		 rcDown.bottom = 0;
+      m_DownloadOMeter.MoveWindow(rcDown);
+      rcUp.top = rcSpl.bottom + 1;
+	  // MORPH END leuk_he statistic fix bluesonicboy
+
+
 	//HL splitter
 	rcSpl.left=rcUp.left;
 	rcSpl.right=rcUp.right;
@@ -268,9 +280,24 @@ BOOL CStatisticsDlg::OnInitDialog()
 
 	m_wndSplitterstat_HL.MoveWindow(rcSpl);
 
+	//MORPH START leuk_he statistic fix bluesonicboy
+    //  Init. Pos. fix - Set Upload Scope bottom relative to this splitter, right and left are set.
+     //                                      Also set Connection Scope Top relative to this splitter; bottom, right and left are set.
+        if(rcSpl.top) rcUp.bottom = rcSpl.top - 1;
+          else            rcUp.bottom = 0;
+        if(rcUp.top > rcUp.bottom) rcUp.top = rcUp.bottom;
+        m_UploadOMeter.MoveWindow(rcUp);
+        rcStat.top = rcSpl.bottom + 1;
+        if(rcStat.top > rcStat.bottom) rcStat.top = rcStat.bottom;
+        m_Statistics.MoveWindow(rcStat);
+
 	DoResize_V(PosStatVnewX - PosStatVinitX);
+	/* statistic fix 
 	DoResize_HL(PosStatVnewY - PosStatVinitY);
 	DoResize_HR(PosStatVnewZ - PosStatVinitZ);
+	*/ 
+    //MORPH END leuk_he statistic fix bluesonicboy
+
 
 	Localize();
 	ShowStatistics(true);
@@ -3264,8 +3291,9 @@ void CStatisticsDlg::ShowInterval()
 		// CB Mod ---> Make Setters
 		m_Statistics.m_nXPartial = m_DownloadOMeter.m_nXPartial = m_UploadOMeter.m_nXPartial = shownSecs % 3600;
 		m_Statistics.m_nXGrids = m_DownloadOMeter.m_nXGrids = m_UploadOMeter.m_nXGrids = shownSecs / 3600;
-
-		if(shownSecs == 0)
+        
+		
+		if(shownSecs <= 0) // MORPH leuk_he show correct x-axis by bleusonicboy
 		{
 			m_DownloadOMeter.SetXUnits(GetResString(IDS_STOPPED)); 
 			m_UploadOMeter.SetXUnits(GetResString(IDS_STOPPED)); 
