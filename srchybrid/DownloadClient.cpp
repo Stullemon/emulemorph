@@ -1117,7 +1117,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
         // Only trust eMule clients to be able to handle less blocks than three
         if(GetDownloadDatarate() < 600 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Changed by SiRoB, 
             blockCount = 1;
-        } else if(GetDownloadDatarate() < 1200 || 2*reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Changed by SiRoB, 
+        } else if(GetDownloadDatarate() < 1200 || reqfile->GetDatarate() > 2*GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Changed by SiRoB, 
             blockCount = 2;
         }
     }
@@ -1645,7 +1645,6 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 	while ((UINT)m_AvarageDDR_list.GetCount() > 1 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD) {
 		m_AvarageDDR_ListLastRemovedTimestamp = m_AvarageDDR_list.GetHead().timestamp;
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
-		m_cShowDR = 30;
 	}
 	uint32 tempDownDatarate;
 	if (m_AvarageDDR_list.GetCount() > 1) {
