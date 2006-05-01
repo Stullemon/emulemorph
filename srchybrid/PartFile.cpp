@@ -2448,7 +2448,8 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 	//--- xrmb:confirmedDownload ---
 	COLORREF crUnconfirmed = RGB(255, 210, 0);
 	//--- :xrmb ---
-	COLORREF crDot = RGB(255, 255, 255);	//MORPH - Added by IceCream, SLUGFILLER: chunkDots
+	COLORREF crDot;	//MORPH - Added by IceCream, SLUGFILLER: chunkDots
+	COLORREF crStartedButIncomplete;
 	EPartFileStatus eVirtualState = GetStatus();
 	bool notgray = eVirtualState == PS_EMPTY || eVirtualState == PS_READY;
 
@@ -2467,13 +2468,18 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 			crHave = RGB(128, 128, 128);
 			crPending = RGB(128, 128, 0);
 		}
+        crStartedButIncomplete = RGB(128, 128, 128);
+        crDot = RGB(128, 128, 128);
 	}
 	else
 	{
-		if(bFlat)
+        if (bFlat) {
 			crProgress = RGB(0, 150, 0);
-		else
+            crDot = RGB(128, 128, 128);
+        } else {
 			crProgress = RGB(0, 224, 0);
+            crDot = RGB(255, 255, 255);
+        }
 		crProgressBk = RGB(224, 224, 224);
 		if(notgray) {
 			crMissing = RGB(255, 0, 0);
@@ -2484,6 +2490,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 				crHave = RGB(104, 104, 104);
 				crPending = RGB(255, 208, 0);
 			}
+            crStartedButIncomplete = RGB(160, 160, 160);
 		} else {
 			crMissing = RGB(191, 64, 64);
 			if(bFlat) {
@@ -2493,6 +2500,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 				crHave = RGB(116, 116, 116);
 				crPending = RGB(191, 168, 64);
 			}
+            crStartedButIncomplete = RGB(140, 140, 140);
 		}
 	}
 
@@ -2500,6 +2508,16 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 	s_ChunkBar.SetWidth(rect->right - rect->left);
 	s_ChunkBar.SetFileSize(m_nFileSize);
 	s_ChunkBar.Fill(crHave);
+
+    for(uint64 haveSlice = 0; haveSlice < GetFileSize(); haveSlice+=PARTSIZE) {
+        if(!IsComplete(haveSlice, min(haveSlice+(PARTSIZE-1), GetFileSize()), false)) {
+            if(IsAlreadyRequested(haveSlice, min(haveSlice+(PARTSIZE-1), GetFileSize()))) {
+    	        s_ChunkBar.FillRange(haveSlice, min(haveSlice+(PARTSIZE-1), GetFileSize()), crProgress);
+            } else {
+    	        s_ChunkBar.FillRange(haveSlice, min(haveSlice+(PARTSIZE-1), GetFileSize()), crStartedButIncomplete);
+            }
+        }
+    }
 
 	if (status == PS_COMPLETE || status == PS_COMPLETING)
 	{
@@ -2638,21 +2656,20 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 		uint32	wp=(uint32)(percentcompleted/100*w+0.5f);
 
 		if(!bFlat) {
-			if(thePrefs.m_bEnableChunkDots){ //EastShare - Added by Pretender, Option for ChunkDots
-				// SLUGFILLER: chunkDots
-				s_LoadBar.SetWidth(1);
-				s_LoadBar.SetFileSize((uint64)1);
-				s_LoadBar.Fill(crDot);
-				for(ULONGLONG i=completedsize+PARTSIZE-((uint64)completedsize % PARTSIZE); i<m_nFileSize; i+=PARTSIZE)
-					s_LoadBar.Draw(dc, gaprect.left+(int)((double)i*w/(uint64)m_nFileSize), gaprect.top, false);
-				// SLUGFILLER: chunkDots
-			} //EastShare - Added by Pretender, Option for ChunkDots
-
 			s_LoadBar.SetWidth(wp);
 			s_LoadBar.SetFileSize(completedsize);
 			s_LoadBar.Fill(crUnconfirmed);
 			s_LoadBar.FillRange(0, confirmedsize, crProgress);
 			s_LoadBar.Draw(dc, gaprect.left, gaprect.top, false);
+			if(thePrefs.m_bEnableChunkDots){ //EastShare - Added by Pretender, Option for ChunkDots
+				// SLUGFILLER: chunkDots
+				s_LoadBar.SetWidth(1);
+				s_LoadBar.SetFileSize((uint64)1);
+				s_LoadBar.Fill(crDot);
+				for(ULONGLONG i=PARTSIZE; i<m_nFileSize; i+=PARTSIZE)
+					s_LoadBar.Draw(dc, gaprect.left+(int)((double)i*w/(uint64)m_nFileSize), gaprect.top, false);
+				// SLUGFILLER: chunkDots
+			} //EastShare - Added by Pretender, Option for ChunkDots
 		} else {
 			gaprect.right = rect->left+wc;
 			dc->FillRect(&gaprect, &CBrush(crProgress));
@@ -2666,10 +2683,10 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 		
 			if (thePrefs.m_bEnableChunkDots){ //EastShare - Added by Pretender, Option for ChunkDots
 				// SLUGFILLER: chunkDots
-				for(uint64 i=completedsize+PARTSIZE-((uint64)completedsize % PARTSIZE); i<(uint64)m_nFileSize; i+=PARTSIZE){
+				for(uint64 i=PARTSIZE; i<(uint64)m_nFileSize; i+=PARTSIZE){
 					gaprect.left = gaprect.right = (LONG)(rect->left+(uint64)((float)i*w/(uint64)m_nFileSize));
 					gaprect.right++;
-					dc->FillRect(&gaprect, &CBrush(RGB(128,128,128)));
+					dc->FillRect(&gaprect, &CBrush(crDot));
 				}
 				// SLUGFILLER: chunkDots
 			} //EastShare - Added by Pretender, Option for ChunkDots
