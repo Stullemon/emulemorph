@@ -1664,13 +1664,9 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 		tempDownDatarate = 0;
 	//MORPH END   - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 
-	//MORPH - Changed by SiRoB,
-	/*
 	m_cShowDR++;
-	if (m_cShowDR == 30){
+	if (tempDownDatarate != m_nDownDatarate || m_cShowDR == 30) {
 		m_cShowDR = 0;
-	*/
-	if (tempDownDatarate != m_nDownDatarate) {
 		UpdateDisplayedInfo();
 		return m_nDownDatarate = tempDownDatarate;
 	}
