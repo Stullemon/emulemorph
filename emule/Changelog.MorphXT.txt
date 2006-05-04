@@ -2,12 +2,12 @@
 Changelog for eMule 0.47a MorphXT v8.x
 --------------------------------------
 FIXED  : (minor) WC: fix the temporary wrong download session count (very old bug) [SiRoB]
-FIXED  : (minor) USC: Ajusted to properly respect clientdatarate limit in all the case [SiRoB]
+FIXED  : (minor) USC: Ajusted to respect clientdatarate limit in all the cases properly [SiRoB]
 FIXED  : (minor) GUI: Statistics dialog too small (2x) by bluesonicboy [leuk_he]
 
 ADDED  : Reactivate Webcache Proxy on succefull manual test [SiRoB]
 ADDED  : DBR: Extended it to use aproximative remaining data from the source vs global remaining data [SiRoB]
-ADDED  : Addapte number of requested block (less for slowest sources) [SiRoB]
+ADDED  : Adapted number of requested block (less for slowest sources) [SiRoB]
 ADDED  : GUI: Started But Incomplete chunk visualisation from zz mod
 ADDED  : KAD: Official patch by Unknown1 [SiRoB]
 ADDED  : Send Array Packet (feature that may reduce upload perturbation) [SiRoB]
@@ -15,7 +15,7 @@ ADDED  : Socket BUffering (feature to reduce effect of high latency uploading cl
 ADDED  : Only one upload connecting client at a time when scheduled slot are available [SiRoB]
 
 CHANGED: SOTN: Use additional info from waiting queue for partfile.
-CHANGED: Moved community tag visualisation from Morph to MorphShare Preferency [SiRoB]
+CHANGED: Moved community tag visualisation from Morph to MorphShare Preferences [SiRoB]
 CHANGED: Updated Fix connection collision [SiRoB]
 CHANGED: GUI: Draw chunk dot on top [SiRoB]
 
