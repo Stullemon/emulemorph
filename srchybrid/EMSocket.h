@@ -36,6 +36,14 @@ struct StandardPacketQueueEntry {
     Packet* packet;
 };
 
+#if !defined DONT_USE_SOCKET_BUFFERING
+struct BufferedPacket {
+		UINT	endpacketpos;
+		bool	iscontrolpacket;
+		bool	isforpartfile;
+};
+#endif
+
 class CEMSocket : public CAsyncSocketEx, public ThrottledFileSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 	DECLARE_DYNAMIC(CEMSocket)
@@ -45,8 +53,10 @@ public:
 
 	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
     //MORPH START - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
+#if !defined DONT_USE_SEND_ARRAY_PACKET
 	virtual void 	SendPacket(Packet* packet[], uint32 npacket, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-    //MORPH END   - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
+#endif
+	//MORPH END   - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
 	bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
 	virtual bool IsRawDataMode() const { return false; }
@@ -107,17 +117,19 @@ protected:
 	bool	m_bProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
 	CString m_strLastProxyError;
-	CCriticalSection sendLocker; //MORPH - Added by SiRoB, moved in protected seccion
 private:
     virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket);
 	void	ClearQueues();	
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
-	void	ReadyToSend();
+
     uint32 GetNextFragSize(uint32 current, uint32 minFragSize);
     bool    HasSent() { return m_hasSent; }
 
-    uint32	GetNeededBytes(const char* sendbuffer, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
-
+#if !defined DONT_USE_SOCKET_BUFFERING
+    uint32	GetNeededBytes(const bool bcontrolpacketbuffered, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
+#else
+	uint32	GetNeededBytes(const char* sendbuffer, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
+#endif
 	// Download (pseudo) rate control	
 	uint32	downloadLimit;
 	bool	downloadLimitEnable;
@@ -137,12 +149,19 @@ private:
     //       called from Send()), which is only called from UploadBandwidthThrottler. They are
     //       accessed WITHOUT LOCKING in that method, so it is important that they are only called
     //       from one thread.
+#if !defined DONT_USE_SOCKET_BUFFERING
+	CList<BufferedPacket> m_currentPacket_is_controlpacket_list;
+#else
 	bool m_currentPacket_is_controlpacket;
 	bool m_currentPackageIsFromPartFile;
-
+#endif
+	
 	char*	sendbuffer;
 
 	uint32	sendblen;
+#if !defined DONT_USE_SOCKET_BUFFERING
+	uint32 sendblenWithoutControlPacket;
+#endif
 	uint32 m_actualPayloadSize;
 
 	uint32	sent;
@@ -154,8 +173,8 @@ private:
 	uint32 lastFinishedStandard;
     // End Send() access only
 
-//    CCriticalSection sendLocker; //MORPH - Removed by SiRoB, moved in protected seccion
-
+    CCriticalSection sendLocker;
+	
     // NOTE: These variables are only allowed to be accessed when the accesser has the sendLocker lock.
 	CTypedPtrList<CPtrList, Packet*> controlpacket_queue;
 	CList<StandardPacketQueueEntry> standartpacket_queue;
@@ -171,7 +190,8 @@ private:
     uint32 m_actualPayloadSizeSent;
     // End statsLocker access only
 
-    //MORPH - Changed by SiRoB, Upload Splitting Class
+    CCriticalSection busyLocker;
+	//MORPH - Changed by SiRoB, Upload Splitting Class
 	/*
 	bool m_bBusy;
 	*/
