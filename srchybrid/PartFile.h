@@ -254,12 +254,8 @@ public:
 	//MORPH START - Added by SiRoB, Flush Thread
 	void	FlushDone(FlushDone_Struct* FlushSetting);
 	void	SetFlushThread(bool state) { m_bIsFlushThread = state; };
-	bool	IsFlushThread() { return m_bIsFlushThread; };
 	//MORPH END   - Added by SiRoB, Flush Thread
-	//MORPH - Added by SiRoB, Import Part
-	uint64	GetTotalBufferData() {return m_nTotalBufferData;}
-	int	GetPartsHashing() {return m_PartsHashing;}
-	//MORPH - Added by SiRoB, Import Part
+
 	// Barry - This will invert the gap list, up to caller to delete gaps when done
 	// 'Gaps' returned are really the filled areas, and guaranteed to be in order
 	void	GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled) const;
@@ -482,7 +478,6 @@ private:
 	
 	//MORPH START - Added by SiRoB, Flush Thread
 	bool	m_bIsFlushThread;
-	bool	m_bNeedToFlush;
 	//MORPH END   - Added by SiRoB, Flush Thread
 
 	// khaos::categorymod+

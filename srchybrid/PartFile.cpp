@@ -314,7 +314,6 @@ void CPartFile::Init(){
 	m_DeadSourceList.Init(false);
 	//MORPH START - Added by SiRoB, Flush Thread
 	m_bIsFlushThread = false;
-	m_bNeedToFlush = false; 
 	//MORPH END   - Added by SiRoB, Flush Thread
 	// khaos::categorymod+
 	m_catResumeOrder=0;
@@ -5533,8 +5532,6 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 {
 	//MORPH START - Added by SiRoB, Flush Thread
 	if (m_bIsFlushThread) {
-		if (forcewait)
-			m_bNeedToFlush = true;
 		return;
 	}
 	//MORPH END   - Added by SiRoB, Flush Thread
@@ -5674,7 +5671,6 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		CPartFileFlushThread* m_FlushThread = (CPartFileFlushThread*) AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 		if (m_FlushThread) {
 			m_bIsFlushThread = true;
-			m_bNeedToFlush = false;
 			FlushDone_Struct* FlushSetting = new FlushDone_Struct;
 			FlushSetting->bIncreasedFile = bIncreasedFile;
 			FlushSetting->bForceICH = bForceICH;
@@ -5790,8 +5786,6 @@ void CPartFile::FlushDone(FlushDone_Struct* FlushSetting)
 	delete[] FlushSetting->changedPart;
 	delete	FlushSetting;
 	SetFlushThread(NULL);
-	if (m_bNeedToFlush)
-		FlushBuffer(true);
 }
 
 IMPLEMENT_DYNCREATE(CPartFileFlushThread, CWinThread)
@@ -5815,6 +5809,7 @@ int CPartFileFlushThread::Run()
 	//theApp.QueueDebugLogLine(false,_T("FLUSH:Start (%s)"),m_partfile->GetFileName()/*, CastItoXBytes(myfile->m_iAllocinfo, false, false)*/ );
 
 	try{
+		CSingleLock sLock1(&(theApp.hashing_mut), TRUE); //SafeHash - wait a current hashing process end before read the chunk
 		// Flush to disk
 		m_partfile->m_hpartfile.Flush();
 	}
