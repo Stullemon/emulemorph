@@ -414,18 +414,14 @@ void CStatistics::CompUpDatarateOverhead()
 		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_listLastRemovedTimestamp;
 		if(dwDuration < 100) dwDuration = 100;
 		DWORD dwAvgTickDuration = dwDuration / m_AvarageUDRO_list.GetCount();
-		/*
 		if ((curTick - m_AvarageUDRO_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += curTick - m_AvarageUDRO_list.GetTail().timestamp - dwAvgTickDuration;
-		*/
 		m_nUpDatarateOverhead = (UINT)(1000U * (ULONGLONG)m_sumavgUDRO / dwDuration);
 	} else if (m_AvarageUDRO_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_listLastRemovedTimestamp;
 		if(dwDuration < 100) dwDuration = 100;
-		/*
 		if ((curTick - m_AvarageUDRO_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - m_AvarageUDRO_list.GetTail().timestamp;
-		*/
 		m_nUpDatarateOverhead = (UINT)(1000U * (ULONGLONG)m_sumavgUDRO / dwDuration);
 	} else
 		m_nUpDatarateOverhead = 0;
