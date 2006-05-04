@@ -515,7 +515,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
             if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues()) {
                 nCanSend++;
 
-                if(m_StandardOrder_list[i]->IsBusy())
+                if(m_StandardOrder_list[i]->GetBusyTimeSince()>1000)
 					cBusy++;
             }
 		}
@@ -642,11 +642,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
             busyEvent.Lock(1);
         }
 
-		#define TIME_BETWEEN_UPLOAD_LOOPS 1
-        //uint32 TIME_BETWEEN_UPLOAD_LOOPS = 0;
-        //if(cBusy >= nCanSend) {
-        //    TIME_BETWEEN_UPLOAD_LOOPS = 1;
-        //}
+		//#define TIME_BETWEEN_UPLOAD_LOOPS 1
+        uint32 TIME_BETWEEN_UPLOAD_LOOPS = 0;
+        if(cBusy >= nCanSend) {
+            TIME_BETWEEN_UPLOAD_LOOPS = 1;
+        }
 
         uint32 sleepTime;
         if(allowedDataRateClass[LAST_CLASS] == _UI32_MAX || realBytesToSpendClass[LAST_CLASS] >= 1000 || allowedDataRateClass[LAST_CLASS] == 0 && nEstiminatedLimit == 0) {
@@ -869,8 +869,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
-									uint32 BytesToSend = min(allowedclientdatarate/5, (UINT)(BytesToSpend - spentBytes));
-									BytesToSend = max(BytesToSend, doubleSendSize);
+									uint32 BytesToSend = max(allowedclientdatarate/5, (UINT)(BytesToSpend - spentBytes));
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
@@ -935,10 +934,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				
 				if (realBytesToSpendClass[classID] > 999) {
 					if (realBytesToSpendClass[LAST_CLASS] > 999) {
-						uint32 marge = 999;//100*ClientDataRate[classID];
+						uint32 marge = 100*ClientDataRate[classID];
 						if (marge < 999)
 							marge = 999;
-						if (realBytesToSpendClass[classID] > marge && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
+						if (realBytesToSpendClass[classID] > marge && thisLoopTick-lastTickReachedBandwidthClass[classID] > 100 && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
 							m_highestNumberOfFullyActivatedSlotsClass[classID] = lastclientpos+1;
 					} else {
 						lastTickReachedBandwidthClass[classID] = thisLoopTick;
