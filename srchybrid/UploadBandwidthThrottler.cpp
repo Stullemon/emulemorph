@@ -869,7 +869,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
-									uint32 BytesToSend = max(allowedclientdatarate/5/m_StandardOrder_list.GetCount(), doubleSendSize);
+									uint32 BytesToSend = min(allowedclientdatarate, (UINT)(BytesToSpend - spentBytes));
+									BytesToSend = max(BytesToSend, doubleSendSize);
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {

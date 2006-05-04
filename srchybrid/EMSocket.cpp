@@ -812,7 +812,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
     /*
 	if(byConnected == ES_CONNECTED && (!m_dwBusy || !onlyAllowedToSendControlPacket)) {
 	*/
-	if(true) {
+	if(byConnected == ES_CONNECTED) {
 	    if(minFragSize < 1) {
             minFragSize = 1;
         }
@@ -1225,7 +1225,7 @@ uint32 CEMSocket::GetNeededBytes(const char* sendbuffer, const uint32 sendblen, 
 
 	uint32 sendgap = ::GetTickCount() - lastCalledSend;
 
-	uint64 timetotal = m_bAccelerateUpload?45000:90000;
+	uint64 timetotal = m_bAccelerateUpload?16000:32000;
 	uint64 timeleft = ::GetTickCount() - lastFinishedStandard;
 	uint64 sizeleft, sizetotal;
 #if !defined DONT_USE_SOCKET_BUFFERING
