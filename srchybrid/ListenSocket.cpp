@@ -2786,7 +2786,8 @@ SocketSentBytes CClientReqSocket::SendControlData(uint32 maxNumberOfBytesToSend,
     /*zz*/if (returnStatus.success) {
         if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
-    } else if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
+    }
+	if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
         CString pstrReason = GetErrorMessage(returnStatus.errorThatOccured, 1);
         theApp.QueueDebugLogLine(false,_T("CClientReqSocket::SendControlData: An error has occured: %s Client: %s"), pstrReason, DbgGetClientInfo());
     }
@@ -2799,7 +2800,8 @@ SocketSentBytes CClientReqSocket::SendFileAndControlData(uint32 maxNumberOfBytes
     /*zz*/if (returnStatus.success) {
         if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
-    } else if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
+    }
+	if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
         CString pstrReason = GetErrorMessage(returnStatus.errorThatOccured, 1);
         theApp.QueueDebugLogLine(false,_T("CClientReqSocket::SendFileAndControlData: An error has occured: %s Client: %s"), pstrReason, DbgGetClientInfo());
     }
@@ -2811,6 +2813,16 @@ void CClientReqSocket::SendPacket(Packet* packet, bool delpacket, bool controlpa
 	ResetTimeOutTimer();
 	CEMSocket::SendPacket(packet,delpacket,controlpacket, actualPayloadSize);
 }
+
+//MORPH START - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+void CClientReqSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, bool controlpacket, uint32 actualPayloadSize)
+{
+	ResetTimeOutTimer();
+	CEMSocket::SendPacket(packet, npacket, delpacket,controlpacket, actualPayloadSize);
+}
+#endif
+//MORPH START - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
 
 bool CListenSocket::SendPortTestReply(char result,bool disconnect)
 {
