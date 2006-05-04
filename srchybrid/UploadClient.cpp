@@ -701,6 +701,11 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 		nPacketSize = togo/(uint32)(togo/10240);
 	else
 		nPacketSize = togo;
+	uint32 npacket = 0;
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+	uint32 Size = togo;
+	Packet* apacket[EMBLOCKSIZE*3/10240];
+#endif
 	while (togo){
 		if (togo < nPacketSize*2)
 			nPacketSize = togo;
@@ -759,7 +764,11 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			UINT uRawPacketSize = (UINT)dataHttp.GetLength();
 			LPBYTE pRawPacketData = dataHttp.Detach();
 			CRawPacket* packet = new CRawPacket((char*)pRawPacketData, uRawPacketSize, bFromPF);
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+			apacket[npacket++] = packet;
+#else
 			m_pPCUpSocket->SendPacket(packet, true, false, nPacketSize);
+#endif
 			free(pRawPacketData);
 		}
 		// MORPH START - Added by Commander, WebCache 1.2e
@@ -815,7 +824,11 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			UINT uRawPacketSize = (UINT)dataHttp.GetLength();
 			LPBYTE pRawPacketData = dataHttp.Detach();
 			CRawPacket* packet = new CRawPacket((char*)pRawPacketData, uRawPacketSize, bFromPF);
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+			apacket[npacket++] = packet;
+#else
 			m_pWCUpSocket->SendPacket(packet, true, false, nPacketSize);
+#endif
 			free(pRawPacketData);
 		}
 		// MORPH END - Added by Commander, WebCache 1.2e
@@ -845,9 +858,23 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			}
 			// put packet directly on socket
 			
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+			apacket[npacket++] = packet;
+#else
 			socket->SendPacket(packet,true,false, nPacketSize);
+#endif
 		}
 	}
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+	if (npacket) {
+		if (IsUploadingToPeerCache())
+			m_pPCUpSocket->SendPacket(apacket, npacket, true, false, Size);
+		else if (IsUploadingToWebCache())
+			m_pWCUpSocket->SendPacket(apacket, npacket, true, false, Size);
+		else
+			socket->SendPacket(apacket, npacket, true, false, Size);
+	}
+#endif
 }
 
 void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
@@ -873,8 +900,12 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 	else
 		nPacketSize = togo;
 	
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+	uint32 npacket = 0;
+	Packet* apacket[EMBLOCKSIZE*3/10240];
+#else
 	uint32 totalPayloadSize = 0;
-
+#endif
 	while (togo){
 		if (togo < nPacketSize*2)
 			nPacketSize = togo;
@@ -901,7 +932,10 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 			DebugSend("OP__CompressedPart", this, GetUploadFileID());
 			Debug(_T("  Start=%I64u  BlockSize=%u  Size=%u\n"), statpos, newsize, nPacketSize);
 		}
-        // approximate payload size
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+		apacket[npacket++] = packet;
+#else
+       // approximate payload size
 		uint32 payloadSize = nPacketSize*oldSize/newsize;
 
 		if(togo == 0 && totalPayloadSize+payloadSize < oldSize) {
@@ -912,7 +946,12 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
         // put packet directly on socket
 		theStats.AddUpDataOverheadFileRequest(24);
 		socket->SendPacket(packet,true,false, payloadSize);
+#endif
 	}
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+	if (npacket)
+		socket->SendPacket(apacket, npacket, true, false, oldSize);	
+#endif
 	delete[] output;
 }
 

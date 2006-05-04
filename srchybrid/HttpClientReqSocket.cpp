@@ -76,6 +76,19 @@ void CHttpClientReqSocket::SendPacket(Packet* packet, bool delpacket, bool contr
 	CClientReqSocket::SendPacket(packet, delpacket, controlpacket, actualPayloadSize);
 }
 
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+void CHttpClientReqSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, bool controlpacket, uint32 actualPayloadSize)
+{
+	// just for safety -- never send an ed2k/emule packet via HTTP.
+	for (uint32 i = 0; i < npacket; i++) {
+		if (packet[i]->opcode != 0x00 || packet[i]->prot != 0x00){
+			ASSERT(0);
+			return;
+		}
+	}
+	CClientReqSocket::SendPacket(packet, npacket, delpacket, controlpacket, actualPayloadSize);
+}
+#endif
 void CHttpClientReqSocket::OnConnect(int nErrorCode)
 {
 	CClientReqSocket::OnConnect(nErrorCode);
