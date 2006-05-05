@@ -13,8 +13,8 @@ ADDED  : KAD: Official patch by Unknown1 [SiRoB]
 ADDED  : Send Array Packet (feature that may reduce upload perturbation) [SiRoB]
 ADDED  : Socket BUffering (feature to reduce effect of high latency uploading client) [SiRoB]
 ADDED  : Only one upload connecting client at a time when scheduled slot are available [SiRoB]
+ADDED  : WC: drop WCBlock with proxyip filtered by ipfilter [SiRoB]
 
-CHANGED: SOTN: Use additional info from waiting queue for partfile.
 CHANGED: Moved community tag visualisation from Morph to MorphShare Preferences [SiRoB]
 CHANGED: Updated Fix connection collision [SiRoB]
 CHANGED: GUI: Draw chunk dot on top [SiRoB]
