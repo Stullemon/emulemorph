@@ -1,8 +1,12 @@
 #pragma once
 
 // CPPgMorph dialog
-
+// MORPH START leuk_he tooltipped
+/*
 class CPPgMorph2 : public CPropertyPage
+*/
+class CPPgMorph2 : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgMorph2)
 

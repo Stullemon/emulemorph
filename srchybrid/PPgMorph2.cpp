@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "emule.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PPgMorph2.h"
 #include "emuleDlg.h"
 #include "OtherFunctions.h"
@@ -21,7 +22,12 @@ static char THIS_FILE[]=__FILE__;
 
 IMPLEMENT_DYNAMIC(CPPgMorph2, CPropertyPage)
 CPPgMorph2::CPPgMorph2()
+// MORPH START leuk_he tooltipped
+: CPPgtooltipped(CPPgMorph2::IDD)// leuk_he  tooltipped 
+/*
 : CPropertyPage(CPPgMorph2::IDD)
+*/
+// MORPH END leuk_he tooltipped
 {
 }
 
@@ -63,6 +69,7 @@ BOOL CPPgMorph2::OnInitDialog()
 	InitWindowStyles(this);
 
 	LoadSettings();
+	InitTooltips(); //MORPH leuk_he tolltipped
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -183,6 +190,26 @@ void CPPgMorph2::Localize(void)
 		GetDlgItem(IDC_URL_FOR_UPDATING_IP2COUNTRY)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING_IP2COUNTRY));
 		GetDlgItem(IDC_RESETIPCURL)->SetWindowText(GetResString(IDS_RESET));
 		//MORPH END - Added by Commander: IP2Country update
+        // MORPH START leuk_he tooltipped
+		//SetTool(IDC_MORPH2_FILE,IDC_MORPH2_FILE_TIP);
+		SetTool(IDC_UPDATEFAKELISTSTART,IDC_UPDATEFAKELISTSTART_TIP);
+		SetTool(IDC_UPDATEFAKES,IDC_UPDATEFAKES_TIP);
+		SetTool(IDC_URL_FOR_UPDATING,IDC_UPDATE_URL_FAKELIST_TIP );
+		SetTool(IDC_RESETFAKESURL,IDC_RESETFAKESURL_TIP);
+		SetTool(IDC_UPDATE_URL_FAKELIST,IDC_UPDATE_URL_FAKELIST_TIP);
+		//SetTool(IDC_MORPH2_SECURITY,IDC_MORPH2_SECURITY_TIP);
+		SetTool(IDC_AUTOUPIPFILTER,IDC_AUTOUPIPFILTER_TIP);
+		SetTool(IDC_UPDATEIPFURL,IDC_UPDATEIPFURL_TIP);
+		SetTool(IDC_URL_FOR_UPDATING2,IDC_UPDATE_URL_IPFILTER_TIP);
+		SetTool(IDC_RESETIPFURL,IDC_RESETIPFURL_TIP);
+		SetTool(IDC_UPDATE_URL_IPFILTER,IDC_UPDATE_URL_IPFILTER_TIP);
+		//SetTool(IDC_MORPH2_COUNTRY,IDC_MORPH2_COUNTRY_TIP);
+		SetTool(IDC_AUTOUPIP2COUNTRY,IDC_AUTOUPIP2COUNTRY_TIP);
+		SetTool(IDC_UPDATEIPCURL,IDC_UPDATEIPCURL_TIP);
+		SetTool(IDC_URL_FOR_UPDATING_IP2COUNTRY,IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP);
+		SetTool(IDC_RESETIPCURL,IDC_RESETIPCURL_TIP);
+		SetTool(IDC_UPDATE_URL_IP2COUNTRY,IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP);
+		//  MORPH END leuk_he tooltipped  
 	}
 }
 

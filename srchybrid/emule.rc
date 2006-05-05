@@ -6364,6 +6364,20 @@ BEGIN
     IDC_MSG_WEBCACHE_TESTERR "Proxy Test Error!"
 	IDC_MSG_WEBCACHE_ALREADYRUNNING "No New Test Started. There is already a Test in progress"
 	IDC_MSG_WEBCACHE_TESTREQ "No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"
+
+	IDC_UPDATEFAKELISTSTART_TIP "Try to update the list before connecting to the network"
+	//IDC_UPDATEFAKES_TIP "download & load the fakelist now if there is a newer now."
+	IDC_RESETFAKESURL_TIP "Reset the url field to the morph default:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
+	IDC_UPDATE_URL_FAKELIST_TIP "Where to fetch the fakelist. Fakelist must be in\nzip format. Morph checks if the date on the file\nis newer than the preivious download and will\nonly update if the file on the web is newer. "
+	IDC_AUTOUPIPFILTER_TIP "Try to update the list before connecting to the network"
+	IDC_UPDATEIPFURL_TIP "Download & reload the ipfilter.zip now.\nIf the ipfilter is newer than the previous download"
+	IDC_RESETIPFURL_TIP "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
+	IDC_UPDATE_URL_IPFILTER_TIP "Url where to download the ipfilter.dat (zip format)"
+	IDC_MORPH2_COUNTRY_TIP "Download the countrylist for the flags on startup"
+	IDC_UPDATEIPCURL_TIP "Downlaod the ip ranges per country to be displayed in the countryflag column"
+	IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP "Where to download the list.\n List will only be downloaded if the web version is newer than\nthe previous download"
+	IDC_RESETIPCURL_TIP "Reset the above url to\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
+	    
 END 
 
 #endif    // English (U.S.) resources
