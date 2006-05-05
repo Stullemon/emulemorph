@@ -18,6 +18,7 @@ ADDED  : WC: drop WCBlock with proxyip filtered by ipfilter [SiRoB]
 CHANGED: Moved community tag visualisation from Morph to MorphShare Preferences [SiRoB]
 CHANGED: Updated Fix connection collision [SiRoB]
 CHANGED: GUI: Draw chunk dot on top [SiRoB]
+CHANGED: FlushThread: Updated it to work arround Completing start before all buffered data was freed [SiRoB]
 
 REMOVED: WC: removed submit link from wcprefs since it is abandoned [leuk_he]
 REMOVED: netfinity: Raised threshold as anything below 3kB/s suggest there is a problem [SiRoB]
