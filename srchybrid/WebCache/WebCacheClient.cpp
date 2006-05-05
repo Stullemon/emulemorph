@@ -1056,6 +1056,12 @@ void CUpDownClient::SetWebCacheDownState(EWebCacheDownState eState)
 {
 	if (m_eWebCacheDownState != eState)
 	{
+#if !defined DONT_USE_SOCKET_BUFFERING
+		if ((eState == WCDS_DOWNLOADINGFROM || eState == WCDS_DOWNLOADINGVIA) && m_pWCDownSocket != NULL) {
+			int buffer = 512*1024;
+			m_pWCDownSocket->SetSockOpt(SO_RCVBUF, &buffer , sizeof(buffer), SOL_SOCKET);
+		}
+#endif
 		m_eWebCacheDownState = eState;
 		UpdateDisplayedInfo();
 		if( eState == WCDS_WAIT_CLIENT_REPLY ) {
@@ -1069,6 +1075,13 @@ void CUpDownClient::SetWebCacheUpState(EWebCacheUpState eState)
 {
 	if (m_eWebCacheUpState != eState)
 	{
+#if !defined DONT_USE_SOCKET_BUFFERING
+		if (eState == WCUS_UPLOADING && m_pWCUpSocket != NULL) {
+			int buffer = 512*1024;
+			m_pWCUpSocket->SetSockOpt(SO_SNDBUF, &buffer , sizeof(buffer), SOL_SOCKET);
+		}
+#endif
+
 		m_eWebCacheUpState = eState;
 
 		theApp.uploadqueue->ReSortUploadSlots(true); // Superlexx - from 0.44a PC code
