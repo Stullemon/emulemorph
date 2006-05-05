@@ -675,7 +675,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
 
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
-			if(thisLoopTick - lastTickReachedBandwidthClass[classID] > 100 && realBytesToSpendClass[classID] > 0) {
+			if(thisLoopTick - lastTickReachedBandwidthClass[classID] > 200 && realBytesToSpendClass[classID] > 0) {
 				realBytesToSpendClass[classID] = 0;
         		lastTickReachedBandwidthClass[classID] = thisLoopTick;
         	}
@@ -783,10 +783,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									if (stat->realBytesToSpend < limit)
 										stat->realBytesToSpend = limit;
 									else {
-										if (thisLoopTick - stat->lastTickReachedBandwidthLimit > 100 && stat->realBytesToSpend > 0)
+										if (thisLoopTick - stat->lastTickReachedBandwidthLimit > 200 && stat->realBytesToSpend > 0)
 											stat->realBytesToSpend = 0;
 									}
-									if (_I64_MAX/timeSinceLastLoop > allowedclientdatarate && _I64_MAX-allowedclientdatarate*timeSinceLastLoop > stat->realBytesToSpend)
+									if (ClientDataRate[classID] && _I64_MAX/timeSinceLastLoop > allowedclientdatarate && _I64_MAX-allowedclientdatarate*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += allowedclientdatarate*min(sleepTime + 2000, timeSinceLastLoop);
 									else
 										stat->realBytesToSpend = _I64_MAX;
@@ -868,10 +868,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
-									uint32 BytesToSend = max((UINT)(BytesToSpend - spentBytes), doubleSendSize);
 #if !defined DONT_USE_SOCKET_BUFFERING
+									uint32 BytesToSend = min((UINT)(BytesToSpend - spentBytes), allowedclientdatarate/5);
+									BytesToSend = max(BytesToSend, doubleSendSize);
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate/5);
 #else
+									uint32 BytesToSend = min((UINT)(BytesToSpend - spentBytes), doubleSendSize);
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 #endif
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
