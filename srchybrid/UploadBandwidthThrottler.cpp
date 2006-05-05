@@ -675,7 +675,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
 
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
-			if(thisLoopTick != lastTickReachedBandwidthClass[classID] && realBytesToSpendClass[classID] > 0) {
+			if(thisLoopTick - lastTickReachedBandwidthClass[classID] > 100 && realBytesToSpendClass[classID] > 0) {
 				realBytesToSpendClass[classID] = 0;
         		lastTickReachedBandwidthClass[classID] = thisLoopTick;
         	}
@@ -783,7 +783,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									if (stat->realBytesToSpend < limit)
 										stat->realBytesToSpend = limit;
 									else {
-										if (thisLoopTick != stat->lastTickReachedBandwidthLimit && stat->realBytesToSpend > 0)
+										if (thisLoopTick - stat->lastTickReachedBandwidthLimit > 100 && stat->realBytesToSpend > 0)
 											stat->realBytesToSpend = 0;
 									}
 									if (_I64_MAX/timeSinceLastLoop > allowedclientdatarate && _I64_MAX-allowedclientdatarate*timeSinceLastLoop > stat->realBytesToSpend)
@@ -937,10 +937,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				
 				if (realBytesToSpendClass[classID] > 999) {
 					if (realBytesToSpendClass[LAST_CLASS] > 999) {
-						uint32 marge = 100*ClientDataRate[classID];
+						uint32 marge = 999;
 						if (marge < 999)
 							marge = 999;
-						if (realBytesToSpendClass[classID] > marge && thisLoopTick-lastTickReachedBandwidthClass[classID] > 100 && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
+						if (realBytesToSpendClass[classID] > marge && thisLoopTick-lastTickReachedBandwidthClass[classID] > 200 && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
 							m_highestNumberOfFullyActivatedSlotsClass[classID] = lastclientpos+1;
 					} else {
 						lastTickReachedBandwidthClass[classID] = thisLoopTick;
