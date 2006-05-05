@@ -805,7 +805,7 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , CPartFile* 
 				uint8 toread = data->ReadUInt8();
 				for (UINT i = 0;i != 8;i++){
 					if((toread>>i)&1)
-						m_abyPartStatus[done] |= SC_PARTIAL;
+						thisAbyPartStatus[done] |= SC_PARTIAL;
 					done++;
 					if (done == nED2KPartCount)
 						break;
