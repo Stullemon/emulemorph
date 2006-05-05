@@ -92,7 +92,9 @@ public:
 
 #if !defined DONT_USE_SOCKET_BUFFERING
     virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0) { return Send(maxNumberOfBytesToSend, minFragSize, true, bufferlimit); };
+	virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0) { return Send(maxNumberOfBytesToSend, minFragSize, false, bufferlimit); };
 #else
+	virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, true); };
 	virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
 #endif
     	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
