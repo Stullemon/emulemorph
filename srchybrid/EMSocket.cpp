@@ -148,21 +148,6 @@ CEMSocket::CEMSocket(void){
 	m_dwBusy = curTick;
 	m_dwBusyDelta = 1;
 	m_hasSent = false;
-
-#if !defined DONT_USE_SOCKET_BUFFERING
-    int val = 256*1024;
-    HRESULT sndBufResult = SetSockOpt(SO_SNDBUF, &val, sizeof(int));
-    if(sndBufResult == SOCKET_ERROR) {
-        CString pstrReason = GetErrorMessage(WSAGetLastError(), 1);
-        theApp.QueueDebugLogLine(false,_T("CEMSocket::CEMSocket(): Couldn't set SO_SNDBUF: %s"), pstrReason);
-    }
-
-    HRESULT rcvBufResult = SetSockOpt(SO_RCVBUF, &val, sizeof(int));
-    if(rcvBufResult == SOCKET_ERROR) {
-        CString pstrReason = GetErrorMessage(WSAGetLastError(), 1);
-        theApp.QueueDebugLogLine(false,_T("CEMSocket::CEMSocket(): Couldn't set SO_RCVBUF: %s"), pstrReason);
-    }
-#endif
 }
 
 CEMSocket::~CEMSocket(){
@@ -790,7 +775,11 @@ void CEMSocket::OnSend(int nErrorCode){
  *
  * @return the actual number of bytes that were put on the socket.
  */
+#if !defined DONT_USE_SOCKET_BUFFERING
+SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket, uint32 bufferlimit) {
+#else
 SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket) {
+#endif
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 
     if (maxNumberOfBytesToSend == 0 && ::GetTickCount() - lastCalledSend < SEC2MS(1)) {
@@ -855,7 +844,12 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
             // If we are currently not in the progress of sending a packet, we will need to find the next one to send
 #if !defined DONT_USE_SOCKET_BUFFERING
-			if ((/*m_dwBusy == 0 || sendblen == 0 &&*/ (!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty())) && sendblen < 128*1024) {
+			if (bufferlimit>= 256*1024)
+				  bufferlimit = 256*1024-1;
+			else if (bufferlimit<minFragSize)
+				bufferlimit=minFragSize;
+				
+			if (sendblen == 0 || (!controlpacket_queue.IsEmpty() && sendblen+controlpacket_queue.GetHead()->GetRealPacketSize() < bufferlimit || !standartpacket_queue.IsEmpty() && sendblen+standartpacket_queue.GetHead().packet->GetRealPacketSize() < bufferlimit)) {
 				bool bcontrolpacket;
 #else
 			if(sendbuffer == NULL) {

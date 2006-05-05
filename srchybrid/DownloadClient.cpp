@@ -906,6 +906,10 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		}
 
         if(nNewState == DS_DOWNLOADING && socket){
+#if !defined DONT_USE_SOCKET_BUFFERING
+			int buffer = 512*1024;
+			socket->SetSockOpt(SO_RCVBUF, &buffer , sizeof(buffer), SOL_SOCKET);
+#endif
 			m_bWebcacheFailedTry = false; //MORPH - Added by SiRoB, New ResolveWebCachename
 			socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }

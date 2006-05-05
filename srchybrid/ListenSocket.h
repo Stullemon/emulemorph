@@ -53,9 +53,13 @@ public:
 	virtual void SendPacket(Packet* packet[], uint32 npacket, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
 #endif
 	//MORPH END   - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
+#if !defined DONT_USE_SOCKET_BUFFERING
+	virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend, uint32 bufferlimit = 0);
+    virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend, uint32 bufferlimit = 0);
+#else
 	virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend);
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend);
-	
+#endif
 	void	DbgAppendClientInfo(CString& str);
 	CString DbgGetClientInfo();
 

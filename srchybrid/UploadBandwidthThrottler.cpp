@@ -797,7 +797,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	    
 									//if (neededBytes > 0 && thisLoopTick-socket->GetLastSent()>1000) {
 										//neededBytes = (uint32)min(BytesToSpend - ControlspentBytes, neededBytes?neededBytes:1);
-										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
+										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, allowedclientdatarate/5);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
 											uint64 realByteSpent = lastSpentBytes*1000;
@@ -856,7 +856,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						allowedclientdatarate = min(allowedclientdatarate,allowedDataRateClass[classID]); 
 					if (ClientDataRate[classID])
 						allowedclientdatarate = min(allowedclientdatarate,ClientDataRate[classID]);
-					
 					uint64 spentBytes = 0;
 					uint64 spentOverhead = 0;
 					for(uint32 maxCounter = 0; maxCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend; maxCounter++) {
@@ -869,9 +868,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
-									uint32 BytesToSend = min(allowedclientdatarate, (UINT)(BytesToSpend - spentBytes));
-									BytesToSend = max(BytesToSend, doubleSendSize);
+									uint32 BytesToSend = max((UINT)(BytesToSpend - spentBytes), doubleSendSize);
+#if !defined DONT_USE_SOCKET_BUFFERING
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate/5);
+#else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
+#endif
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;

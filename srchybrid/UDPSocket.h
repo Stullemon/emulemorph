@@ -52,7 +52,11 @@ public:
 	virtual ~CUDPSocket();
 
 	bool	Create();
-    SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
+#if !defined DONT_USE_SOCKET_BUFFERING
+    SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0); // ZZ:UploadBandWithThrottler (UDP)
+#else
+	SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
+#endif
 	void	SendPacket(Packet* packet,CServer* host);
 	void	DnsLookupDone(WPARAM wp, LPARAM lp);
 

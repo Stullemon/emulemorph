@@ -198,6 +198,10 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 		if (eNewState == US_UPLOADING) {
 			m_fSentOutOfPartReqs = 0;
 			m_AvarageUDRLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+#if !defined DONT_USE_SOCKET_BUFFERING
+			int buffer = 512*1024;
+			socket->SetSockOpt(SO_SNDBUF, &buffer , sizeof(buffer), SOL_SOCKET);
+#endif
 		}
 		// don't add any final cleanups for US_NONE here	
 		m_nUploadState = (_EUploadState)eNewState;

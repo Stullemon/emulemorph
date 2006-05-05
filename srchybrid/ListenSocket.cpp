@@ -2780,9 +2780,15 @@ bool CClientReqSocket::Create()
 	return (CAsyncSocketEx::Create(0, SOCK_STREAM, FD_WRITE | FD_READ | FD_CLOSE | FD_CONNECT, thePrefs.GetBindAddrA()) != FALSE);
 }
 
+#if !defined DONT_USE_SOCKET_BUFFERING
+SocketSentBytes CClientReqSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend, uint32 bufferlimit)
+{
+    SocketSentBytes returnStatus = CEMSocket::SendControlData(maxNumberOfBytesToSend, overchargeMaxBytesToSend, bufferlimit);
+#else
 SocketSentBytes CClientReqSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend)
 {
     SocketSentBytes returnStatus = CEMSocket::SendControlData(maxNumberOfBytesToSend, overchargeMaxBytesToSend);
+#endif
     /*zz*/if (returnStatus.success) {
         if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
@@ -2794,10 +2800,16 @@ SocketSentBytes CClientReqSocket::SendControlData(uint32 maxNumberOfBytesToSend,
     return returnStatus;
 }
 
+#if !defined DONT_USE_SOCKET_BUFFERING
+SocketSentBytes CClientReqSocket::SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend, uint32 bufferlimit)
+{
+    SocketSentBytes returnStatus = CEMSocket::SendFileAndControlData(maxNumberOfBytesToSend, overchargeMaxBytesToSend, bufferlimit);
+#else
 SocketSentBytes CClientReqSocket::SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend)
 {
     SocketSentBytes returnStatus = CEMSocket::SendFileAndControlData(maxNumberOfBytesToSend, overchargeMaxBytesToSend);
-    /*zz*/if (returnStatus.success) {
+#endif
+	/*zz*/if (returnStatus.success) {
         if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
     }

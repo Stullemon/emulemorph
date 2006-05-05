@@ -628,7 +628,11 @@ void CUDPSocket::OnSend(int nErrorCode){
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
+#if !defined DONT_USE_SOCKET_BUFFERING
+SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit) { // ZZ:UploadBandWithThrottler (UDP)
+#else
 SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { // ZZ:UploadBandWithThrottler (UDP)
+#endif
 // ZZ:UploadBandWithThrottler (UDP) -->
 	// NOTE: *** This function is invoked from a *different* thread!
     sendLocker.Lock();
