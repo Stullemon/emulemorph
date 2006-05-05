@@ -478,6 +478,7 @@ private:
 	
 	//MORPH START - Added by SiRoB, Flush Thread
 	bool	m_bIsFlushThread;
+	bool	m_bNeedToFlush;
 	//MORPH END   - Added by SiRoB, Flush Thread
 
 	// khaos::categorymod+
