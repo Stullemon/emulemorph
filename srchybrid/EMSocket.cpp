@@ -715,6 +715,7 @@ void CEMSocket::OnSend(int nErrorCode){
 	m_bBusy = false;
 	*/
 	DWORD curTick = GetTickCount();
+	lastCalledSend = curTick;
 	busyLocker.Lock();
 	bool signalNotBusy = m_dwBusy>0;
 	if (m_dwBusy) {
@@ -849,7 +850,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 			else if (bufferlimit<minFragSize)
 				bufferlimit=minFragSize;
 				
-			if (sendblen == 0 || (!controlpacket_queue.IsEmpty() && sendblen+controlpacket_queue.GetHead()->GetRealPacketSize() < bufferlimit || !standartpacket_queue.IsEmpty() && sendblen+standartpacket_queue.GetHead().packet->GetRealPacketSize() < bufferlimit)) {
+			if (sendblen == 0 && (!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) || (!controlpacket_queue.IsEmpty() && sendblen+controlpacket_queue.GetHead()->GetRealPacketSize() < bufferlimit || !standartpacket_queue.IsEmpty() && sendblen+standartpacket_queue.GetHead().packet->GetRealPacketSize() < bufferlimit)) {
 				bool bcontrolpacket;
 #else
 			if(sendbuffer == NULL) {
