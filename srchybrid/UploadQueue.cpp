@@ -1026,7 +1026,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 
 	if (curUploadSlots >= 4 &&
 		(
-         curUploadSlots >= (datarate/min(2*uMaxClientDataRate/3,UPLOAD_CHECK_CLIENT_DR)) ||
+         thePrefs.GetSlotLimitThree()==0 && curUploadSlots >= (datarate/min(2*uMaxClientDataRate/3,UPLOAD_CHECK_CLIENT_DR)) ||
 
 		 // ==> Slot Limit - Stulle
 		 (thePrefs.GetSlotLimitThree() && curUploadSlots > ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE)) ||
