@@ -15,6 +15,7 @@
 #include "ThrottledChunkList.h" // jp Don't request chunks for which we are currently receiving proxy sources
 #include "KnownFileList.h"
 #include "Log.h"
+#include "ipfilter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
