@@ -38,7 +38,8 @@ struct StandardPacketQueueEntry {
 
 #if !defined DONT_USE_SOCKET_BUFFERING
 struct BufferedPacket {
-		UINT	endpacketpos;
+		UINT	packetsize;
+		UINT	packetpayloadsize;
 		bool	iscontrolpacket;
 		bool	isforpartfile;
 };
@@ -134,7 +135,7 @@ private:
     bool    HasSent() { return m_hasSent; }
 
 #if !defined DONT_USE_SOCKET_BUFFERING
-    uint32	GetNeededBytes(const bool bcontrolpacketbuffered, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
+    uint32	GetNeededBytes(const bool bcontrolpacketbuffered, const uint32 sendblen, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
 #else
 	uint32	GetNeededBytes(const char* sendbuffer, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
 #endif
@@ -158,23 +159,27 @@ private:
     //       accessed WITHOUT LOCKING in that method, so it is important that they are only called
     //       from one thread.
 #if !defined DONT_USE_SOCKET_BUFFERING
-	CList<BufferedPacket> m_currentPacket_is_controlpacket_list;
+	CList<BufferedPacket*> m_currentPacket_is_controlpacket_list;
 #else
 	bool m_currentPacket_is_controlpacket;
 	bool m_currentPackageIsFromPartFile;
 #endif
 	
 	char*	sendbuffer;
+#if !defined DONT_USE_SOCKET_BUFFERING
+	uint32 currentBufferSize;
+#endif
 
 	uint32	sendblen;
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 sendblenWithoutControlPacket;
-#endif
+	uint32 sendblenWithoutControlPacket; //Used to know if a controlpacket is already buffered
+#else
 	uint32 m_actualPayloadSize;
-
+#endif
 	uint32	sent;
-    uint32 m_actualPayloadSizeSentForThisPacket;
-
+#if defined DONT_USE_SOCKET_BUFFERING
+	uint32 m_actualPayloadSizeSentForThisPacket;
+#endif
     DWORD lastCalledSend;
 
     bool m_bAccelerateUpload;
