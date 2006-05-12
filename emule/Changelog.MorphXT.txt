@@ -1,9 +1,34 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.x
+Changelog for eMule 0.47a MorphXT v8.13 BETA
+--------------------------------------
+ADDED  : GUI: Upload Chunk detail Column [SiRoB]
+
+CHANGED: IP+TCP header from data transfer are now considered as overhead, you still able to compare data overhead by looking at emule statusbar [SiRoB]
+CHANGED: DSB: Rise socket buffer limit to 1MBytes (was 256kB) [SiRoB]
+CHANGED: USC: Adapted it to get benefit of DSB [SiRoB]
+
+/!\: You will notice higher and proper overhead display on graph.
+
+--------------------------------------
+Changelog for eMule 0.47a MorphXT v8.12
+--------------------------------------
+CHANGED: DSB: Activate Dynamic socket buffer (Was forced to 256kB) [SiRoB]
+
+--------------------------------------
+Changelog for eMule 0.47a MorphXT v8.11
+--------------------------------------
+FIXED  : (major) FlushThread: Crash Fix when we canceled a file and Flush thread running [SiRoB]
+FIXED  : (minor) GUI: Busy state display now the busy state of right socket (Normal, PeerCache, WebCache) [SiRoB]
+
+ADDED  : DSB: Dynamic Socket Buffering [SiRoB]
+- set socket buffer used to transfert data up to 250ms of uploadbandwidth
+ADDED  : DBR: Enhance number of requested block [SiRoB]
+
+
+--------------------------------------
+Changelog for eMule 0.47a MorphXT v8.11 BETA2
 --------------------------------------
 FIXED  : (minor) WC: fix the temporary wrong download session count (very old bug) [SiRoB]
-FIXED  : (minor) USC: Ajusted to respect clientdatarate limit in all the cases [SiRoB]
-FIXED  : (minor) GUI: Statistics dialog too small (2x) by bluesonicboy [leuk_he]
 
 ADDED  : Reactivate Webcache Proxy on succefull manual test [SiRoB]
 ADDED  : DBR: Extended it to use aproximative remaining data from the source vs global remaining data [SiRoB]
@@ -14,6 +39,7 @@ ADDED  : Send Array Packet (feature that may reduce upload perturbation) [SiRoB]
 ADDED  : Socket BUffering (feature to reduce effect of high latency uploading client) [SiRoB]
 ADDED  : Only one upload connecting client at a time when scheduled slot are available [SiRoB]
 ADDED  : WC: drop WCBlock with proxyip filtered by ipfilter [SiRoB]
+ADDED  : GUI: Official fix Statistics dialog too small (2x) by bluesonicboy [leuk_he]
 
 CHANGED: Moved community tag visualisation from Morph to MorphShare Preferences [SiRoB]
 CHANGED: Updated Fix connection collision [SiRoB]
