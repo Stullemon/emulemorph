@@ -112,7 +112,11 @@ void CUploadListCtrl::Init()
     // Commander - Added: IP2Country column - Start
 	InsertColumn(15,GetResString(IDS_COUNTRY),LVCFMT_LEFT,100,15);
     // Commander - Added: IP2Country column - End
-
+	
+	//MORPH START - Added by SiRoB, Display current uploading chunk
+	InsertColumn(16,GetResString(IDS_CHUNK),LVCFMT_LEFT,100,16);
+    //MORPH END   - Added by SiRoB, Display current uploading chunk
+		
 	SetAllIcons();
 	Localize();
 	LoadSettings();
@@ -270,6 +274,12 @@ void CUploadListCtrl::Localize()
 		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(15, &hdi);
 		// Commander - Added: IP2Country column - End
+		
+		//MORPH START - Added by SiRoB, Display current uploading chunk
+		strRes = GetResString(IDS_CHUNK);
+		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
+		pHeaderCtrl->SetItem(16, &hdi);
+		//MORPH START - Added by SiRoB, Display current uploading chunk
 	}
 }
 
@@ -655,9 +665,18 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							cur_rec.left-=20;
 						}
 						break;
-					// Commander - Added: IP2Country column - End	
+					// Commander - Added: IP2Country column - End
+					//MORPH START - Added by SiRoB, Display current uploading chunk
+					case 16:
+							cur_rec.bottom--;
+							cur_rec.top++;
+							client->DrawUpStatusBarChunk(dc,&cur_rec,false,thePrefs.UseFlatBar());
+							cur_rec.bottom++;
+							cur_rec.top--;
+						break;
+					//MORPH END   - Added by SiRoB, Display current uploading chunk
 				}
-				if( iColumn != 7 && iColumn != 0 && iColumn != 15)
+				if( iColumn != 7 && iColumn != 0 && iColumn != 15 && iColumn != 16)
 					dc.DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,dcdttext);
 			} //MORPH - Added by SiRoB, Don't draw hidden columns
 			cur_rec.left += GetColumnWidth(iColumn);

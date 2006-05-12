@@ -464,6 +464,9 @@ public:
 	bool			ProcessExtendedInfo(CSafeMemFile* packet, CKnownFile* tempreqfile);
 	uint16			GetUpPartCount() const							{ return m_nUpPartCount; }
 	void			DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const;
+//MORPH START - Added by SiRoB, Display current uploading chunk
+	void			DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const;
+//MORPH END   - Added by SiRoB, Display current uploading chunk
 	bool			IsUpPartAvailable(UINT iPart) const {
 						//MORPH - Changed by SiRoB, See chunk that we hide
 						/*
