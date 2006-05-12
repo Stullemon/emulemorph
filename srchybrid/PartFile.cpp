@@ -4732,7 +4732,7 @@ void CPartFile::ResumeFile(bool resort)
 		return;
 	if (status==PS_ERROR && m_bCompletionError){
 		ASSERT( gaplist.IsEmpty() );
-		if (gaplist.IsEmpty() && !m_nTotalBufferData) { //MORPH - Changed by SiRoB, Flush Thread
+		if (gaplist.IsEmpty() && !m_nTotalBufferData && !m_bIsFlushThread) { //MORPH - Changed by SiRoB, Flush Thread
 			// rehashing the file could probably be avoided, but better be in the safe side..
 			m_bCompletionError = false;
 			CompleteFile(false);
@@ -7311,7 +7311,7 @@ void CPartFile::PartHashFinished(UINT partnumber, bool corrupt)
 		if (theApp.emuledlg->IsRunning())	// may be called during shutdown!
 		{
 			// Is this file finished?
-			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData) //MORPH - Changed by SiRoB, Flush Thread
+			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_bIsFlushThread) //MORPH - Changed by SiRoB, Flush Thread
 				CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 		}
 	}
@@ -7367,7 +7367,7 @@ void CPartFile::PartHashFinishedAICHRecover(UINT partnumber, bool corrupt)
 
 		if (theApp.emuledlg->IsRunning()){
 			// Is this file finished?
-			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData) //MORPH - Changed by SiRoB, Flush Thread
+			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_bIsFlushThread) //MORPH - Changed by SiRoB, Flush Thread
 				CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 		}
 	}
@@ -7438,7 +7438,7 @@ void CPartFile::ParseICHResult()
 
 	if (theApp.emuledlg->IsRunning()){ // may be called during shutdown!
 		// Is this file finished?
-		if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData) //MORPH - Changed by SiRoB, Flush Thread
+		if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_bIsFlushThread) //MORPH - Changed by SiRoB, Flush Thread
 			CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 	}
 }
