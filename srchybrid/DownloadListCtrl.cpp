@@ -1891,8 +1891,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, (iSelectedItems >= 1 /*&& iFilesNotDone == 1*/) ? MF_ENABLED : MF_GRAYED);
 			
 			//MORPH START - Added by SiRoB, Import Parts [SR13]
-			m_FileMenu.EnableMenuItem(MP_SR13_ImportParts, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.ModifyMenuAndIcon(MP_SR13_ImportParts, MF_STRING, MP_SR13_ImportParts,(iFilesToImport > 0) ? GetResString(IDS_IMPORTPARTS_STOP) :GetResString(IDS_IMPORTPARTS), _T("FILEIMPORTPARTS"));
+			m_FileMenu.EnableMenuItem(MP_SR13_ImportParts, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
 			
 			//m_FileMenu.EnableMenuItem(MP_SR13_InitiateRehash, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
 			//MORPH END   - Added by SiRoB, Import Parts [SR13]
