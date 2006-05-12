@@ -95,7 +95,7 @@ private:
     uint64 m_SentBytesSinceLastCallClass[NB_SPLITTING_CLASS];
     uint64 m_SentBytesSinceLastCallOverheadClass[NB_SPLITTING_CLASS];
     uint32 m_highestNumberOfFullyActivatedSlotsClass[NB_SPLITTING_CLASS];
-	uint32 slotCounterClass[NB_SPLITTING_CLASS+1];
+	uint32 slotCounterClass[NB_SPLITTING_CLASS];
 	bool doRun;
 
     CEvent busyEvent;
