@@ -3781,9 +3781,13 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 
 	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
 
-	if (bytesPerRequest > EMBLOCKSIZE)
+	if (bytesPerRequest > EMBLOCKSIZE) {
+		*count = min(bytesPerRequest/EMBLOCKSIZE, *count); //MORPH - Added by SiRoB, Enhanced DBR
 		bytesPerRequest = EMBLOCKSIZE;
-	else if (bytesPerRequest < 10240)
+	}
+	else
+		*count = 1; //MORPH - Added by SiRoB, Enhanced DBR
+	if (bytesPerRequest < 10240)
 	{
 		// Let an other client request this packet if we are close to completion and source is slow
 		// Use the true file datarate here, otherwise we might get stuck in NNP state
@@ -6389,8 +6393,11 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 
 	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
 
-	if (bytesPerRequest > EMBLOCKSIZE)
+	if (bytesPerRequest > EMBLOCKSIZE) {
+		*count = min(bytesPerRequest/EMBLOCKSIZE, *count); //MORPH - Added by SiRoB, Enhanced DBR
 		bytesPerRequest = EMBLOCKSIZE;
+	} else
+		*count = 1; //MORPH - Added by SiRoB, Enhanced DBR
 	if (bytesPerRequest < 10240)
 	{
 		// Let an other client request this packet if we are close to completion and source is slow
