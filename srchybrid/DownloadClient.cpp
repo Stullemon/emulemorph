@@ -1021,19 +1021,19 @@ void CUpDownClient::ProcessHashSet(const uchar* packet,uint32 size)
 void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 {
 	ASSERT( iMaxBlocks >= 1 /*&& iMaxBlocks <= 3*/ );
-	if (m_DownloadBlocks_list.IsEmpty())
+//MORPH START - Changed by SiRoB, Proper number of needed requested block
+	uint16 futurePossiblePendingBlock = m_PendingBlocks_list.GetCount()+m_DownloadBlocks_list.GetCount();
+	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
-		if(iMaxBlocks > m_PendingBlocks_list.GetCount()) {
-            uint16 count = (uint16)(iMaxBlocks - m_PendingBlocks_list.GetCount());
-			Requested_Block_Struct** toadd = new Requested_Block_Struct*[count];
-			if (reqfile->GetNextRequestedBlock(this,toadd,&count)){
-				for (UINT i = 0; i < count; i++)
-					m_DownloadBlocks_list.AddTail(toadd[i]);
-			}
-			delete[] toadd;
+		uint16 neededblock = (uint16)(iMaxBlocks - futurePossiblePendingBlock);
+		Requested_Block_Struct** toadd = new Requested_Block_Struct*[neededblock];
+		if (reqfile->GetNextRequestedBlock(this,toadd,&neededblock)){
+			for (UINT i = 0; i < neededblock; i++)
+				m_DownloadBlocks_list.AddTail(toadd[i]);
 		}
+		delete[] toadd;
 	}
-
+//MORPH END  - Changed by SiRoB, Proper number of needed requested block
 	while (m_PendingBlocks_list.GetCount() < iMaxBlocks && !m_DownloadBlocks_list.IsEmpty())
 	{
 		Pending_Block_Struct* pblock = new Pending_Block_Struct;
@@ -1141,19 +1141,29 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 
 	bool bI64Offsets = false;
 	POSITION pos = m_PendingBlocks_list.GetHeadPosition();
+//MORPH START - Changed by SiRoB, Official fix to prevent sending same requested block
+	/*
 	for (uint32 i = 0; i != 3; i++){
+	*/
+	uint32 i = 0;
+	while (i != 3){
 		if (pos){
 			Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-			ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-			if (pending->block->StartOffset > 0xFFFFFFFF || pending->block->EndOffset > 0xFFFFFFFF){
-				bI64Offsets = true;
-				if (!SupportsLargeFiles()){
-					ASSERT( false );
-					SendCancelTransfer();
-					SetDownloadState(DS_ERROR);
+			if (pending->fQueued == 0) {
+				ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
+				if (pending->block->StartOffset > 0xFFFFFFFF || pending->block->EndOffset > 0xFFFFFFFF){
+					bI64Offsets = true;
+					if (!SupportsLargeFiles()){
+						ASSERT( false );
+						SendCancelTransfer();
+						SetDownloadState(DS_ERROR);
+					}
+					break;
 				}
-				break;
+				++i;
 			}
+		} else {
+			++i;
 		}
 	}
 
@@ -1164,34 +1174,56 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
 		data.WriteHash16(reqfile->GetFileHash());
 		pos = m_PendingBlocks_list.GetHeadPosition();
+		/*
 		for (uint32 i = 0; i != 3; i++){
+		*/
+		uint32 i = 0;
+		while (i != 3){
 			if (pos){
 				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-				ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-				//ASSERT( pending->zStream == NULL );
-				//ASSERT( pending->totalUnzipped == 0 );
-				pending->fZStreamError = 0;
-				pending->fRecovered = 0;
-				data.WriteUInt64(pending->block->StartOffset);
+				if (pending->fQueued == 0) {
+					ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
+					//ASSERT( pending->zStream == NULL );
+					//ASSERT( pending->totalUnzipped == 0 );
+					pending->fZStreamError = 0;
+					pending->fRecovered = 0;
+					pending->fQueued = 1;
+					data.WriteUInt64(pending->block->StartOffset);
+					++i;
+				}
 			}
-			else
+			else {
 				data.WriteUInt64(0);
+				++i;
+			}
 		}
 		pos = m_PendingBlocks_list.GetHeadPosition();
+		/*
 		for (uint32 i = 0; i != 3; i++){
+		*/
+		i = 0;
+		while (i != 3){
 			if (pos){
+				/*
 				Requested_Block_Struct* block = m_PendingBlocks_list.GetNext(pos)->block;
-				uint64 endpos = block->EndOffset+1;
-				data.WriteUInt64(endpos);
-				if (thePrefs.GetDebugClientTCPLevel() > 0){
-					CString strInfo;
-					strInfo.Format(_T("  Block request %u: "), i);
-					strInfo += DbgGetBlockInfo(block);
-					strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset, false) ? _T("Yes(NOTE:)") : _T("No"));
-					strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
-					strInfo.AppendFormat(_T(",  AlreadyReq=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
-					strInfo += _T('\n');
-					Debug(strInfo);
+				*/
+				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
+				if (pending->fQueued == 1) {
+					pending->fQueued = 2;
+					Requested_Block_Struct* block = pending->block;
+					uint64 endpos = block->EndOffset+1;
+					data.WriteUInt64(endpos);
+					if (thePrefs.GetDebugClientTCPLevel() > 0){
+						CString strInfo;
+						strInfo.Format(_T("  Block request %u: "), i);
+						strInfo += DbgGetBlockInfo(block);
+						strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset, false) ? _T("Yes(NOTE:)") : _T("No"));
+						strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+						strInfo.AppendFormat(_T(",  AlreadyReq=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+						strInfo += _T('\n');
+						Debug(strInfo);
+					}
+					++i;
 				}
 			}
 			else
@@ -1199,7 +1231,9 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 				data.WriteUInt64(0);
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					Debug(_T("  Block request %u: <empty>\n"), i);
+				++i;
 			}
+
 		}
 	}
 	else{
@@ -1208,34 +1242,56 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
 		data.WriteHash16(reqfile->GetFileHash());
 		pos = m_PendingBlocks_list.GetHeadPosition();
+		/*
 		for (uint32 i = 0; i != 3; i++){
+		*/
+		uint32 i = 0;
+		while (i != 3){
 			if (pos){
 				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-				ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-				//ASSERT( pending->zStream == NULL );
-				//ASSERT( pending->totalUnzipped == 0 );
-				pending->fZStreamError = 0;
-				pending->fRecovered = 0;
-				data.WriteUInt32((uint32)pending->block->StartOffset);
+				if (pending->fQueued == 0) {
+					ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
+					//ASSERT( pending->zStream == NULL );
+					//ASSERT( pending->totalUnzipped == 0 );
+					pending->fZStreamError = 0;
+					pending->fRecovered = 0;
+					pending->fQueued = 1;
+					data.WriteUInt32((uint32)pending->block->StartOffset);
+					++i;
+				}
 			}
-			else
+			else {
 				data.WriteUInt32(0);
+				++i;
+			}
 		}
 		pos = m_PendingBlocks_list.GetHeadPosition();
+		/*
 		for (uint32 i = 0; i != 3; i++){
+		*/
+		i = 0;
+		while (i != 3){
 			if (pos){
+				/*
 				Requested_Block_Struct* block = m_PendingBlocks_list.GetNext(pos)->block;
-				uint64 endpos = block->EndOffset+1;
-				data.WriteUInt32((uint32)endpos);
-				if (thePrefs.GetDebugClientTCPLevel() > 0){
-					CString strInfo;
-					strInfo.Format(_T("  Block request %u: "), i);
-					strInfo += DbgGetBlockInfo(block);
-					strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset, false) ? _T("Yes(NOTE:)") : _T("No"));
-					strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
-					strInfo.AppendFormat(_T(",  AlreadyReq=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
-					strInfo += _T('\n');
-					Debug(strInfo);
+				*/
+				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
+				if (pending->fQueued == 1) {
+					pending->fQueued = 2;
+					Requested_Block_Struct* block = pending->block;
+					uint64 endpos = block->EndOffset+1;
+					data.WriteUInt32((uint32)endpos);
+					if (thePrefs.GetDebugClientTCPLevel() > 0){
+						CString strInfo;
+						strInfo.Format(_T("  Block request %u: "), i);
+						strInfo += DbgGetBlockInfo(block);
+						strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset, false) ? _T("Yes(NOTE:)") : _T("No"));
+						strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+						strInfo.AppendFormat(_T(",  AlreadyReq=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+						strInfo += _T('\n');
+						Debug(strInfo);
+					}
+					++i;
 				}
 			}
 			else
@@ -1243,10 +1299,11 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 				data.WriteUInt32(0);
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					Debug(_T("  Block request %u: <empty>\n"), i);
+				++i;
 			}
 		}
 	}
-
+//MORPH END  - Changed by SiRoB, Official fix to prevent sending same requested block
 	theStats.AddUpDataOverheadFileRequest(packet->size);
 	socket->SendPacket(packet,true,true);
 }
