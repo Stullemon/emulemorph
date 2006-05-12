@@ -184,6 +184,130 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	}
 } 
 
+void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const
+{
+	COLORREF crNeither;
+	COLORREF crNextSending;
+	COLORREF crBoth;
+	COLORREF crSending;
+	COLORREF crBuffer;
+
+    if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
+       (GetUploadState() != US_UPLOADING && GetUploadState() != US_CONNECTING) ) {
+        crNeither = RGB(224, 224, 224);
+	    crNextSending = RGB(255,208,0);
+	    crBoth = bFlat ? RGB(0, 0, 0) : RGB(104, 104, 104);
+	    crSending = RGB(0, 150, 0);
+		crBuffer = RGB(255, 100, 100);
+    } else {
+        // grayed out
+        crNeither = RGB(248, 248, 248);
+	    crNextSending = RGB(255,244,191);
+	    crBoth = bFlat ? RGB(191, 191, 191) : RGB(191, 191, 191);
+	    crSending = RGB(191, 229, 191);
+		crBuffer = RGB(255, 216, 216);
+    }
+
+	// wistily: UpStatusFix
+	//MORPH - Changed by SiRoB, Optimization requpfile
+	/*
+	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	*/
+	CKnownFile* currequpfile = CheckAndGetReqUpFile();
+	EMFileSize filesize;
+	if (currequpfile)
+		filesize=currequpfile->GetFileSize();
+	else
+		filesize = (uint64)(PARTSIZE * (uint64)m_nUpPartCount);
+	// wistily: UpStatusFix
+
+	if(filesize <= (uint64)0)
+		return;
+	if (!m_BlockRequests_queue.IsEmpty() || !m_DoneBlocks_list.IsEmpty()) {
+		uint32 cur_chunk = (uint32)-1;
+		uint64 start;
+		uint64 end;
+		const Requested_Block_Struct* block;
+		if (!m_BlockRequests_queue.IsEmpty()){
+			for(POSITION pos=m_BlockRequests_queue.GetHeadPosition();pos!=0;){
+				block = m_BlockRequests_queue.GetNext(pos);
+				if (cur_chunk == (uint32)-1) {
+					cur_chunk = (uint32)(block->StartOffset/PARTSIZE);
+					start = end = cur_chunk*PARTSIZE;
+					end += PARTSIZE-1;
+					s_UpStatusBar.SetFileSize(PARTSIZE);
+					s_UpStatusBar.SetHeight(rect->bottom - rect->top); 
+					s_UpStatusBar.SetWidth(rect->right - rect->left); 
+					if (end > filesize) {
+						end = filesize;
+						s_UpStatusBar.Reset();
+						s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither);
+					} else
+						s_UpStatusBar.Fill(crNeither);
+				}
+				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end)
+					s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextSending);
+			}
+		}
+		if (!m_DoneBlocks_list.IsEmpty()){
+			block = m_DoneBlocks_list.GetHead(); //MORPH - Changed by SiRoB, Display fix 
+			if (cur_chunk == (uint32)-1) {
+				cur_chunk = (uint32)(block->StartOffset/PARTSIZE);
+				start = end = cur_chunk*PARTSIZE;
+				end += PARTSIZE-1;
+				s_UpStatusBar.SetFileSize(PARTSIZE);
+				s_UpStatusBar.SetHeight(rect->bottom - rect->top); 
+				s_UpStatusBar.SetWidth(rect->right - rect->left); 
+				if (end > filesize) {
+					end = filesize;
+					s_UpStatusBar.Reset();
+					s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither);
+				} else
+					s_UpStatusBar.Fill(crNeither);
+			}
+		}
+		
+		if (!m_DoneBlocks_list.IsEmpty() && cur_chunk != (uint32)-1){
+			// Also show what data is buffered (with color crBuffer)
+            uint64 total = 0;
+    
+		    for(POSITION pos=m_DoneBlocks_list.GetTailPosition();pos!=0; ){
+			    block = m_DoneBlocks_list.GetPrev(pos);
+				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+					if(total + (block->EndOffset-block->StartOffset) <= GetQueueSessionPayloadUp()) {
+						// block is sent
+						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crSending);
+						total += block->EndOffset-block->StartOffset;
+					}
+					else if (total < GetQueueSessionPayloadUp()){
+						// block partly sent, partly in buffer
+						total += block->EndOffset-block->StartOffset;
+						uint64 rest = total -  GetQueueSessionPayloadUp();
+						uint64 newEnd = (block->EndOffset-rest);
+						if (newEnd>=start) {
+							if (newEnd<end) {
+								s_UpStatusBar.FillRange((uint64)(block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((newEnd < end)?newEnd:end)%PARTSIZE, crSending);
+								s_UpStatusBar.FillRange((uint64)newEnd%PARTSIZE, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
+							} else {
+								s_UpStatusBar.FillRange((uint64)block->StartOffset%PARTSIZE, end%PARTSIZE, crSending);
+							}
+						} else {
+							s_UpStatusBar.FillRange((uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
+						}
+					}
+					else{
+						// entire block is still in buffer
+						total += block->EndOffset-block->StartOffset;
+						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
+					}
+				} else
+					total += block->EndOffset-block->StartOffset;
+		    }
+	    }
+   	    s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat);
+	}
+}
+
 void CUpDownClient::SetUploadState(EUploadState eNewState)
 {
 	if (eNewState != m_nUploadState)
@@ -198,10 +322,6 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 		if (eNewState == US_UPLOADING) {
 			m_fSentOutOfPartReqs = 0;
 			m_AvarageUDRLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
-#if !defined DONT_USE_SOCKET_BUFFERING
-			int buffer = 512*1024;
-			socket->SetSockOpt(SO_SNDBUF, &buffer , sizeof(buffer), SOL_SOCKET);
-#endif
 		}
 		// don't add any final cleanups for US_NONE here	
 		m_nUploadState = (_EUploadState)eNewState;
@@ -508,8 +628,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 	CString fullname;
 	bool bFromPF = true; // Statistic to breakdown uploaded data by complete file vs. partfile.
 	try{
-        // Buffer new data if current buffer is less than 100 KBytes
-		while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2) {
+        while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2) {
 
 			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
 			CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(currentblock->FileID);

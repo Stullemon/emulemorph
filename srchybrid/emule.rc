@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -3126,12 +3126,12 @@ BEGIN
     VK_RETURN,      IDA_ENTER,              VIRTKEY, NOINVERT
 END
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5120,6 +5120,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_CHUNK               "Chunk Detail"
     IDS_POWERSHARE_ACTIVATED "Activated"
     IDS_POWERSHARE_DISABLED "Disabled"
     IDS_POWERSHARE_ON_LABEL "On"
@@ -5949,7 +5950,19 @@ END
 
 STRINGTABLE 
 BEGIN
-IDS_LOG_SERVER_FILTERED "Removed server at %s  from list '%s' :in ipfilter '%s'"
+    IDC_FILTE_TIP           "Messages containing these words are considered spam and\nare filtered and the client sending them are banned. Friend\nare not banned"
+    IDC_MSGONLYFRIEND_TIP   "Messages from clients not in your friendlist are not displayed"
+    IDC_COMMENTFILTE_TIP    "File comments that contains these words will\nbe considered spam and will not be displayed\nin the file details"
+    IDC_SEC_MIS_TIP         "Secure identification is always enabled for morph.\nRun as secure user is only availbe on NT based(NT/2000/XP)  systems"
+    IDC_RUNASUSER_TIP       "Run emule as a restricted user. Emule will create a user\n'eMule_secure' that is only allowed to write in the\ninstallation folder, temp and incoming folders. Note:\nRunning files/preview from eMule might fail,\nassociating eMule with ed2k link is restricted.\nYour system is more secure against hacks.\ncheck in the taksmananager if emules run as 'eMule_secure'"
+    IDC_MSGONLYSEC_SEC      "Only messages from clients that had a secure identification are accepted"
+    IDC_ADVSPAMFILTER_TIP   "Duplicate messages or messages that you do not answer within\na few  messages are considered spam and the client will be banned"
+    IDS_LOG_SERVER_FILTERED "Removed server at %s  from list '%s' :in ipfilter '%s'"
+    IDC_ENABLEPROXY_TIP     "Enable this if the only option for you to \nconnect to internet is via a proxy. This should\nalways result in a lowid (not optimal)\n<b>WARNING:</b>\nOnly enter a proxy if you are sure you have one\nand you are able to provide the correct information.\nProxies are only seldom used on home PCs and\noffer no advantage for users outside a LAN.\nHardware routers or modems are no proxies!"
+    IDC_PROXYTYPE_TIP       "Set the protocol of the proxy.\nThe precedence of the proxy protocol performance is as follows.\n1. SOCKS 4a (highest performance because of least overhead)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (lowest performance because of most overhead)"
+    IDC_PROXYNAME_TIP       "Hostname or ip adress of proxy"
+    IDC_PROXYPORT_TIP       "port number the proxy communicates on.\nTypical 1080 for socks and 80 or 8080 for http."
+    IDC_ENABLEAUTH_TIP      "Enable if you need to login into the proxy\nNot that for http only basic authentication\n(not microsoft NTLM) is supported"
 END
 
 STRINGTABLE 
@@ -6310,77 +6323,73 @@ BEGIN
                             "Level of the filter entries that are applied.\nEach entry of the ipfilter.dat has a (possible) value\nenter a value of 0 to disable the ipfilter temporary\n0 Recommended for testing opening port, or delete\nipfilter.dat to save memory) Default value 127.\nIn the meuh4567 list used by morph update\nthe following levels are available\nset to 0 for maximal sources , 254 for some paranoia"
     IDC_RELOADFILTE_TIP     "Load the file again in memory"
     IDC_EDITFILTE_TIP       "Edit ipfilter.dat with notepad."
-    //IDC_STATIC_UPDATEFRO_TIP                            "Update the filter file from a url.\nEither use this one or the one from\nmorph update.(not both)"
-    
     IDC_LOADUR_TIP          "Load an ipfilter from the http link displayed here. \nyou can find blocklist at<a=""http://www.bluetack.co.uk""> http://bluetack.co.uk</a>\nmorph update provides a complete blocklist as well.\nzip & rar (unrar.dll required) is supported also\n(Only use one of these)"
-    
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_FILTE_TIP           "Messages containing these words are considered spam and\nare filtered and the client sending them are banned. Friend\nare not banned"
-    IDC_MSGONLYFRIEND_TIP   "Messages from clients not in your friendlist are not displayed"
-	IDC_MSGONLYSEC_SEC      "Only messages from clients that had a secure identification are accepted"
-	IDC_ADVSPAMFILTER_TIP   "Duplicate messages or messages that you do not answer within\na few  messages are considered spam and the client will be banned"
-
-    IDC_COMMENTFILTE_TIP    "File comments that contains these words will\nbe considered spam and will not be displayed\nin the file details"
-    IDC_SEC_MIS_TIP         "Secure identification is always enabled for morph.\nRun as secure user is only availbe on NT based(NT/2000/XP)  systems"
-    IDC_RUNASUSER_TIP       "Run emule as a restricted user. Emule will create a user\n'eMule_secure' that is only allowed to write in the\ninstallation folder, temp and incoming folders. Note:\nRunning files/preview from eMule might fail,\nassociating eMule with ed2k link is restricted.\nYour system is more secure against hacks.\ncheck in the taksmananager if emules run as 'eMule_secure'"
+    IDC_USERNAME_A_TIP      "Username at the proxy"
+    IDC_PASSWORD_TIP        "Password at the proxy"
+    IDC_WEBCACHENAME_TIP    "hostname of the proxy of your isp. Use 'transparant@yourisp' for a transparant proxy"
+    IDC_WEBCACHEPORT_TIP    "port number (typically 80 or 8080)"
+    IDC_STATIC_ADDRESS_TIP  "IDC_STATIC_ADDRESS_TIP"
+    IDC_STATIC_CONTROLS_TIP "IDC_STATIC_CONTROLS_TIP"
+    IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP 
+                            "Activate usage of your isp webcache proxy\nIf your isp support a webcache proxy this proxy will\nbe used to cache your downloads. If more people within\nyour isp request the same data from a webcache enabled\nmod the data will be transfered via the proxy. So this\nway the peer will only have to upload the data once.\nThis will only work if the uploader uses a webcache mod,\nand more people in your isp set the same proxy.\n Note: sending to webcache can not be disabled"
+    IDC_DETECTWEBCACHE_TIP  "Use the webcaches.xml in your config dir\nto lookup the proxy of your isp."
+    IDC_STATIC_BLOCKS_TIP   "Amount of data that determines if the connection should be reset."
+    IDC_EXTRATIMEOUT_TIP    "Wait 400 seconds instead of 130 seconds for a timeout of a 180 kb block"
+    IDC_LOCALTRAFFIC_TIP    "Data within the same isp is excluded by the proxy\nand webcache will be disabled for those. loopback\ntest might fail for the same reason."
+    IDC_PERSISTENT_PROXY_CONNS_TIP "Use persistant (http 1.1) flag for proxy"
 END
 
 STRINGTABLE 
 BEGIN
-	IDC_ENABLEPROXY_TIP "Enable this if the only option for you to \nconnect to internet is via a proxy. This should\nalways result in a lowid (not optimal)\n<b>WARNING:</b>\nOnly enter a proxy if you are sure you have one\nand you are able to provide the correct information.\nProxies are only seldom used on home PCs and\noffer no advantage for users outside a LAN.\nHardware routers or modems are no proxies!"
-	IDC_PROXYTYPE_TIP "Set the protocol of the proxy.\nThe precedence of the proxy protocol performance is as follows.\n1. SOCKS 4a (highest performance because of least overhead)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (lowest performance because of most overhead)"
-	IDC_PROXYNAME_TIP "Hostname or ip adress of proxy"
-	IDC_PROXYPORT_TIP "port number the proxy communicates on.\nTypical 1080 for socks and 80 or 8080 for http."
-	IDC_ENABLEAUTH_TIP "Enable if you need to login into the proxy\nNot that for http only basic authentication\n(not microsoft NTLM) is supported"
-	IDC_USERNAME_A_TIP "Username at the proxy"
-	IDC_PASSWORD_TIP "Password at the proxy"
-END 
-STRINGTABLE 
-BEGIN
-	IDC_WEBCACHENAME_TIP "hostname of the proxy of your isp. Use 'transparant@yourisp' for a transparant proxy"
-	IDC_WEBCACHEPORT_TIP "port number (typically 80 or 8080)"
-	IDC_STATIC_ADDRESS_TIP "IDC_STATIC_ADDRESS_TIP"
-	IDC_STATIC_CONTROLS_TIP "IDC_STATIC_CONTROLS_TIP"
-	IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP "Activate usage of your isp webcache proxy\nIf your isp support a webcache proxy this proxy will\nbe used to cache your downloads. If more people within\nyour isp request the same data from a webcache enabled\nmod the data will be transfered via the proxy. So this\nway the peer will only have to upload the data once.\nThis will only work if the uploader uses a webcache mod,\nand more people in your isp set the same proxy.\n Note: sending to webcache can not be disabled"
-	IDC_DETECTWEBCACHE_TIP "Use the webcaches.xml in your config dir\nto lookup the proxy of your isp."
-	IDC_STATIC_BLOCKS_TIP "Amount of data that determines if the connection should be reset."
-	IDC_EXTRATIMEOUT_TIP "Wait 400 seconds instead of 130 seconds for a timeout of a 180 kb block"
-	IDC_LOCALTRAFFIC_TIP "Data within the same isp is excluded by the proxy\nand webcache will be disabled for those. loopback\ntest might fail for the same reason."
-	IDC_PERSISTENT_PROXY_CONNS_TIP "Use persistant (http 1.1) flag for proxy"
-	IDC_ADVANCEDCONTROLS_TIP "Show advanced options. "
-	IDC_TESTPROXY_TIP "Test the proxy. This option tests if the proxy is reachable\nand the proxy can reach your emule port. It does NOT test\nif the proxy does actually caches(stores) data (required!)\nrequirements:\n1. connected to server\n2. You need to have a valid public IP\n3. You need to have a real high ID\n4. Test does not work if you have too\n   many open connections (too much downloads)"
-	IDC_UPDATE_WCSETTINGS_TIP "Automatically reload webcache.xml on startup\n(<b>disabled</b> in source until someone picks up the project)"
-    IDC_MSG_WEBCACHEFAIL "Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until a new proxy is tested!"
-    IDC_MSG_WEBCACHE_NOAUTODEC "Sorry, your ISP is not in the database,\nyour ISP identifier is %s\nTo enable autodetection, please find out and submit your ISPs proxy."
-	IDC_MSG_WEBCACHE_NOIP "No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"	
-	IDC_MSG_WEBCACHE_CONFIGALT  "Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until a new proxy is tested.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."
-    IDC_MSG_WEBCACHE_NOACTIVE  "Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."
-	IDC_MSG_WEBCACHE_ERRRESOLVE "WebCache Error - Failed to resolve HTTP proxy address:\n%s\nPlease review your webcache settings" 
-	IDC_MSG_WEBCACHE_TRANSPAR "Proxy Test can not test Transparent proxies. Test Canceled!"
-	IDC_MSG_WEBCACHE_TESTRUNNING  "Performing Proxy Test! Please check the log in the serverwindow for the results!"
+    IDC_ADVANCEDCONTROLS_TIP "Show advanced options. "
+    IDC_TESTPROXY_TIP       "Test the proxy. This option tests if the proxy is reachable\nand the proxy can reach your emule port. It does NOT test\nif the proxy does actually caches(stores) data (required!)\nrequirements:\n1. connected to server\n2. You need to have a valid public IP\n3. You need to have a real high ID\n4. Test does not work if you have too\n   many open connections (too much downloads)"
+    IDC_UPDATE_WCSETTINGS_TIP 
+                            "Automatically reload webcache.xml on startup\n(<b>disabled</b> in source until someone picks up the project)"
+    IDC_MSG_WEBCACHEFAIL    "Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until a new proxy is tested!"
+    IDC_MSG_WEBCACHE_NOAUTODEC 
+                            "Sorry, your ISP is not in the database,\nyour ISP identifier is %s\nTo enable autodetection, please find out and submit your ISPs proxy."
+    IDC_MSG_WEBCACHE_NOIP   "No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"
+    IDC_MSG_WEBCACHE_CONFIGALT 
+                            "Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until a new proxy is tested.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."
+    IDC_MSG_WEBCACHE_NOACTIVE 
+                            "Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."
+    IDC_MSG_WEBCACHE_ERRRESOLVE 
+                            "WebCache Error - Failed to resolve HTTP proxy address:\n%s\nPlease review your webcache settings"
+    IDC_MSG_WEBCACHE_TRANSPAR 
+                            "Proxy Test can not test Transparent proxies. Test Canceled!"
+    IDC_MSG_WEBCACHE_TESTRUNNING 
+                            "Performing Proxy Test! Please check the log in the serverwindow for the results!"
     IDC_MSG_WEBCACHE_TESTERR "Proxy Test Error!"
-	IDC_MSG_WEBCACHE_ALREADYRUNNING "No New Test Started. There is already a Test in progress"
-	IDC_MSG_WEBCACHE_TESTREQ "No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"
+    IDC_MSG_WEBCACHE_ALREADYRUNNING 
+                            "No New Test Started. There is already a Test in progress"
+    IDC_MSG_WEBCACHE_TESTREQ 
+                            "No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"
+    IDC_UPDATEFAKELISTSTART_TIP 
+                            "Try to update the list before connecting to the network"
+END
 
-	IDC_UPDATEFAKELISTSTART_TIP "Try to update the list before connecting to the network"
-	//IDC_UPDATEFAKES_TIP "download & load the fakelist now if there is a newer now."
-	IDC_RESETFAKESURL_TIP "Reset the url field to the morph default:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
-	IDC_UPDATE_URL_FAKELIST_TIP "Where to fetch the fakelist. Fakelist must be in\nzip format. Morph checks if the date on the file\nis newer than the preivious download and will\nonly update if the file on the web is newer. "
-	IDC_AUTOUPIPFILTER_TIP "Try to update the list before connecting to the network"
-	IDC_UPDATEIPFURL_TIP "Download & reload the ipfilter.zip now.\nIf the ipfilter is newer than the previous download"
-	IDC_RESETIPFURL_TIP "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
-	IDC_UPDATE_URL_IPFILTER_TIP "Url where to download the ipfilter.dat (zip format)"
-	IDC_MORPH2_COUNTRY_TIP "Download the countrylist for the flags on startup"
-	IDC_UPDATEIPCURL_TIP "Downlaod the ip ranges per country to be displayed in the countryflag column"
-	IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP "Where to download the list.\n List will only be downloaded if the web version is newer than\nthe previous download"
-	IDC_RESETIPCURL_TIP "Reset the above url to\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
-	    
-END 
+STRINGTABLE 
+BEGIN
+    IDC_RESETFAKESURL_TIP   "Reset the url field to the morph default:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
+    IDC_UPDATE_URL_FAKELIST_TIP 
+                            "Where to fetch the fakelist. Fakelist must be in\nzip format. Morph checks if the date on the file\nis newer than the preivious download and will\nonly update if the file on the web is newer. "
+    IDC_AUTOUPIPFILTER_TIP  "Try to update the list before connecting to the network"
+    IDC_UPDATEIPFURL_TIP    "Download & reload the ipfilter.zip now.\nIf the ipfilter is newer than the previous download"
+    IDC_RESETIPFURL_TIP     "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
+    IDC_UPDATE_URL_IPFILTER_TIP 
+                            "Url where to download the ipfilter.dat (zip format)"
+    IDC_MORPH2_COUNTRY_TIP  "Download the countrylist for the flags on startup"
+    IDC_UPDATEIPCURL_TIP    "Downlaod the ip ranges per country to be displayed in the countryflag column"
+    IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP 
+                            "Where to download the list.\n List will only be downloaded if the web version is newer than\nthe previous download"
+    IDC_RESETIPCURL_TIP     "Reset the above url to\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
+END
 
-#endif    // English (U.S.) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
