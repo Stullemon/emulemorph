@@ -3295,11 +3295,19 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 		strState += _T(" Via Proxy");
 	// MORPH START - Added by Commander, WebCache 1.2e
 
-	if( socket != NULL && GetUploadState() != US_NONE) {
-		strState.AppendFormat(_T(" (BusyRatio: %0.2f)"), socket->GetBusyRatioTime());
-		DWORD busySince = socket->GetBusyTimeSince();
-		if (busySince > 0)
-			strState.AppendFormat(_T(" (Busy: %ums)"), GetTickCount() - busySince);
+	if(GetUploadState() != US_NONE) {
+		CEMSocket* s = socket;
+		if (s != NULL) {
+			if (m_pPCUpSocket)
+				s = m_pPCUpSocket;
+			else if (m_pPCUpSocket)
+				s = m_pWCUpSocket;
+			if (s->GetBusyRatioTime() > 0)
+				strState.AppendFormat(_T(" (BusyRatio: %0.2f)"), s->GetBusyRatioTime());
+			DWORD busySince = s->GetBusyTimeSince();
+			if (busySince > 0)
+				strState.AppendFormat(_T(" (Busy: %ums)"), GetTickCount() - busySince);
+		}
 	}
 	return strState;
 }
