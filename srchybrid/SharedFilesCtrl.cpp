@@ -2721,9 +2721,6 @@ void CSharedFilesCtrl::CreateMenues()
 	}
 #endif
 
-	m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC), _T("IRCCLIPBOARD"));
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
-
 	//MORPH START - Added by SiRoB, copy feedback feature
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_COPYFEEDBACK, GetResString(IDS_COPYFEEDBACK), _T("COPY"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_COPYFEEDBACK_US, GetResString(IDS_COPYFEEDBACK_US), _T("COPY"));
