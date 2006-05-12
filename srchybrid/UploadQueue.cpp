@@ -906,25 +906,26 @@ void CUploadQueue::Process() {
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	memset(m_aiSlotCounter,0,sizeof(m_aiSlotCounter));
-	UINT iConnectingClient = 0;
-	bool bScheduledClient = false;
+	bool abConnectingClient[NB_SPLITTING_CLASS];
+	memset(abConnectingClient,0,sizeof(abConnectingClient));
+	bool abScheduledClient[NB_SPLITTING_CLASS];
+	memset(abScheduledClient,0,sizeof(abScheduledClient));
 	POSITION pos2 = uploadinglist.GetHeadPosition();
 	while(pos2 != NULL){
 		// Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos2);
-		for (uint32 i = cur_client->GetClassID(); i < NB_SPLITTING_CLASS; i++)
+		uint32 classID = cur_client->GetClassID();
+		for (uint32 i = classID; i < NB_SPLITTING_CLASS; i++)
 			++m_aiSlotCounter[i];
 		if (cur_client->GetUploadState() != US_UPLOADING || cur_client->GetUploadState() == US_UPLOADING && cur_client->GetSessionUp() == 0)
-			++iConnectingClient;
+			abConnectingClient[classID] = true;
 		if (cur_client->IsScheduledForRemoval())
-			bScheduledClient = true;
+			abScheduledClient[classID] = true;
 	}
-	if (iConnectingClient>0 && bScheduledClient)
-		m_nLastStartUpload = GetTickCount();
-	for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
-		m_abAddClientOfThisClass[i] = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]>m_aiSlotCounter[i];
-	
-											
+	for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++) {
+		m_abAddClientOfThisClass[i] = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]>m_aiSlotCounter[i] ||
+									  m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]==m_aiSlotCounter[i] && abConnectingClient[i] == false && abScheduledClient[i] == true;
+	}
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	
 	CheckForHighPrioClient();
