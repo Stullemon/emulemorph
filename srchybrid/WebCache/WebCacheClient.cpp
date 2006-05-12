@@ -1075,13 +1075,6 @@ void CUpDownClient::SetWebCacheUpState(EWebCacheUpState eState)
 {
 	if (m_eWebCacheUpState != eState)
 	{
-#if !defined DONT_USE_SOCKET_BUFFERING
-		if (eState == WCUS_UPLOADING && m_pWCUpSocket != NULL) {
-			int buffer = 512*1024;
-			m_pWCUpSocket->SetSockOpt(SO_SNDBUF, &buffer , sizeof(buffer), SOL_SOCKET);
-		}
-#endif
-
 		m_eWebCacheUpState = eState;
 
 		theApp.uploadqueue->ReSortUploadSlots(true); // Superlexx - from 0.44a PC code
