@@ -932,7 +932,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				
 				if (realBytesToSpendClass[classID]/250 > allowedDataRateClass[classID]) {
 					if (realBytesToSpendClass[LAST_CLASS]/250 > allowedDataRateClass[LAST_CLASS]) {
-						if (thisLoopTick != lastTickReachedBandwidthClass[classID] && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
+						if ((slotCounterClass[classID] == 0 || thisLoopTick != lastTickReachedBandwidthClass[classID]) && m_highestNumberOfFullyActivatedSlotsClass[classID] <  lastclientpos+1)
 							m_highestNumberOfFullyActivatedSlotsClass[classID] = lastclientpos+1;
 					} else {
 						lastTickReachedBandwidthClass[classID] = thisLoopTick;
