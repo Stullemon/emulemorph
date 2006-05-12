@@ -1788,7 +1788,7 @@ LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
 	CFileException* error = (CFileException*)lParam;
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN) {
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN || theApp.downloadqueue->IsPartFile((CPartFile*)wParam)) { //MORPH - Changed by SiRoB, Flush Thread
 		if (error != NULL)
 			error->Delete();
 		return FALSE;
