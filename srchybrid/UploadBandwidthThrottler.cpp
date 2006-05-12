@@ -673,7 +673,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 			uint32 allowedDataRate = allowedDataRateClass[classID];
 			if(allowedDataRate > 0 && allowedDataRate != _UI32_MAX) {
-				if(lastLoopTick != lastTickReachedBandwidthClass[classID] && realBytesToSpendClass[classID]/250 > allowedDataRate) {
+				if(/*lastLoopTick*/thisLoopTick != lastTickReachedBandwidthClass[classID] && realBytesToSpendClass[classID]/250 > allowedDataRate) {
 					realBytesToSpendClass[classID] = allowedDataRate*250;
         			lastTickReachedBandwidthClass[classID] = thisLoopTick;
         		}
@@ -773,7 +773,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket, stat)) {
 								ASSERT(stat->classID == classID);
-								if (lastLoopTickTryTosend != stat->lastTickReachedBandwidthLimit && stat->realBytesToSpend/250 > allowedclientdatarate) {
+								if (thisLoopTick/*lastLoopTickTryTosend*/ != stat->lastTickReachedBandwidthLimit && stat->realBytesToSpend/250 > allowedclientdatarate) {
 									stat->realBytesToSpend = allowedclientdatarate*250;
 									stat->lastTickReachedBandwidthLimit = thisLoopTick;
 								}
