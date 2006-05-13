@@ -793,12 +793,16 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	    
 									//if (neededBytes > 0 && thisLoopTick-socket->GetLastSent()>1000) {
 										//neededBytes = (uint32)min(BytesToSpend - ControlspentBytes, neededBytes?neededBytes:1);
+#if !defined DONT_USE_SOCKET_BUFFERING
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, allowedclientdatarate);
-										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
+#else
+										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
+#endif
+									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
 											uint64 realByteSpent = lastSpentBytes*1000;
 											stat->realBytesToSpend -= realByteSpent;
-											if(stat->realBytesToSpend <= 999)
+											if(stat->realBytesToSpend <= 250*allowedclientdatarate)
 												stat->lastTickReachedBandwidthLimit = thisLoopTick;
 											if(m_highestNumberOfFullyActivatedSlotsClass[classID] > slotCounter+1)
 												m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounter+1;
@@ -875,7 +879,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= lastSpentBytes*1000;
-										if(stat->realBytesToSpend <= 999)
+										if(stat->realBytesToSpend <= 250*allowedclientdatarate)
 											stat->lastTickReachedBandwidthLimit = thisLoopTick;
 										if(slotCounter+1 > m_highestNumberOfFullyActivatedSlotsClass[classID] && (lastSpentBytes >= doubleSendSize)) { // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
 											m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounter+1;
@@ -901,7 +905,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
 											stat->realBytesToSpend -= lastSpentBytes*1000;
-											if(stat->realBytesToSpend <= 999)
+											if(stat->realBytesToSpend <= 250*allowedclientdatarate)
 												stat->lastTickReachedBandwidthLimit = thisLoopTick;
 											if(slotCounter+1 > m_highestNumberOfFullyActivatedSlotsClass[classID] && (lastSpentBytes >= doubleSendSize)) { // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
 												m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounter+1;
