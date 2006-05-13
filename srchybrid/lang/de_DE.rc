@@ -356,7 +356,7 @@ BEGIN
     IDS_STATS_UPDATELABEL   "Update Verzögerung: %i sec"
     IDS_QUEUECOUNT          "%u (%u verbannt)"
     IDS_NICKNAME            "Spitzname: "
-    IDS_CLIENTSFILENAME     "\nDateiename beim Client: "
+    IDS_CLIENTSFILENAME     "\nDateiname beim Client: "
     IDS_ASKEDFAF            "\nAndere Datei angefordert"
     IDS_WAITED              "Wartezeit"
     IDS_ERR_LOADCREDITFILE  "Creditfile konnte nicht geladen werden, ein neues wird erstellt"
@@ -659,10 +659,10 @@ BEGIN
     IDS_CD_CDOWN            "Lädt derzeit:"
     IDS_CD_DOWN             "Downloaded (Session):"
     IDS_CD_ADOWN            "Durchsch. Download-Rate:"
-    IDS_CD_TDOWN            "Gesaugt gesamt:"
+    IDS_CD_TDOWN            "Heruntergeladen gesamt:"
     IDS_CD_UP               "Übertragen:"
     IDS_CD_AUP              "Durchsch. Upload-Rate:"
-    IDS_CD_TUP              "Übertragen gesamt:"
+    IDS_CD_TUP              "Hochgeladen gesamt:"
     IDS_CD_TRANS            "Transfer"
 END
 
@@ -714,7 +714,7 @@ BEGIN
     IDS_CLIENT              "Client"
     IDS_SERVER              "Server"
     IDS_SOURCEINFO          "Gefragt: %dx - Verfügbare Abschnitte: %d"
-    IDS_CLIENTSOURCENAME    "\nClient's Dateiename: "
+    IDS_CLIENTSOURCENAME    "\nClient's Dateiname: "
     IDS_USERINFO            "Benutzername: %s\n"
     IDS_FILESTATS_SESSION   "Dateistatistiken dieser Sitzung: %d von %d Anfragen akzeptiert, %s übertragen\n"
     IDS_FILESTATS_TOTAL     "Dateistatistiken für alle Sitzungen: %d von %d Anfragen akzeptiert, %s übertragen"
@@ -2244,10 +2244,10 @@ BEGIN
     IDS_FEEDBACK_REQUESTED  "Angefragt: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Akzeptierte Anfragen: %i (%i)"
     IDS_FEEDBACK_FROM       "Feedback von %s zu [%s]"
-    IDS_FEEDBACK_FILENAME   "Dateiename: %s"
+    IDS_FEEDBACK_FILENAME   "Dateiname: %s"
     IDS_FEEDBACK_FILETYPE   "Datei Typ: %s"
-    IDS_FEEDBACK_FILESIZE   "Größe: %i MB"
-    IDS_FEEDBACK_DOWNLOADED "Downloaded: %i MB"
+    IDS_FEEDBACK_FILESIZE   "Größe: %s"
+    IDS_FEEDBACK_DOWNLOADED "Downloaded: %s"
 END
 
 STRINGTABLE 
@@ -2255,14 +2255,14 @@ BEGIN
     IDS_FEEDBACK_TOTAL      "Alle Quellen: %i"
     IDS_FEEDBACK_AVAILABLE  "Verfügbare Quellen: %i"
     IDS_FEEDBACK_NONEEDPART "Quellen ohne benötigte Teile: %i"
-    IDS_FEEDBACK_COMPLETE   "Vollständige Quellen: %i"
+    IDS_FEEDBACK_COMPLETE   "Vollständige Quellen: %i (%i)"
     IDS_COPYFEEDBACK_US     "Kopiere Rückmeldung in Zwischenablage (en)"
     IDS_UPDATEFAKES         "Update"
     IDS_FAKECHECKUPERROR    "Fehler beim Aktualisieren der FakeCheck-Liste"
     IDS_HTTP_FAKECHECKCAPTION "Aktualisierung der Fake-Liste"
     IDS_UPDATEFAKECHECKONSTART "Aktualisiere Fake-Liste bei Programmstart"
     IDS_FAKELIST_PERCENTAGE "Aktualisierung der Fake-Liste: %1% von %2 komplett"
-    IDS_CHECKFAKE           "Fake-Überwachung"
+    IDS_CHECKFAKE           "Fake-Überprüfung"
     IDS_REMAININGSIZE       "Restgröße"
     IDS_RELOADSHARE         "Neuladen der Share-Dateien"
 END
@@ -2529,7 +2529,7 @@ BEGIN
     IDS_CRC32_CALCULATE     "Berechnen"
     IDS_CRC32_RECALCULATE   "Neuberechnen"
     IDS_CRC32               "CRC32"
-    IDS_CRC32_TAG           "Release-Tag dem Dateienamen Hinzufügen"
+    IDS_CRC32_TAG           "Release-Tag dem Dateinamen Hinzufügen"
 END
 
 STRINGTABLE 
@@ -2542,8 +2542,8 @@ BEGIN
     IDS_MAXCLIENTDATARATEPOWERSHARE "Pro Client (Standard 0 KB/s=fokussiert)"
     IDS_MAXCLIENTDATARATE   "Pro Client Transfer (Standard 0 KB/s=fokussiert)"
     IDS_DISPLAYFUNNYNICK    "Aktiviere FunnyNick"
-    IDS_MAXDATARATEFRIEND   "Max. globale Transferrate (% von Uploadlimit)"
-    IDS_MAXDATARATEPOWERSHARE "Max. globale Transferrate (% von Uploadlimit)"
+    IDS_MAXDATARATEFRIEND   "Max. globale Transferrate (%% von Uploadlimit)"
+    IDS_MAXDATARATEPOWERSHARE "Max. globale Transferrate (%% von Uploadlimit)"
 END
 
 STRINGTABLE 
@@ -2719,8 +2719,8 @@ BEGIN
     IDS_GRAPHOPTIONS        "Graph Optionen"
     IDS_CRC_CALCULATED      "berechnete CRC32"
     IDS_CRC_CHECKOK         "CRC32-Prüfung ok"
-    IDS_CRC_FORCEADDING     "CRC32-Tag an Dateienamen anhängen auch wenn schon eines existiert"
-    IDS_CRC_FORCEUPPERCASE  "Wenn Dateiename schon CRC32-Tag enthält, in Großbuchstaben ändern"
+    IDS_CRC_FORCEADDING     "CRC32-Tag an Dateinamen anhängen auch wenn schon eines existiert"
+    IDS_CRC_FORCEUPPERCASE  "Wenn Dateiname schon CRC32-Tag enthält, in Großbuchstaben ändern"
     IDS_CRC_DONTADDCRC      "CRC32/Suffix nicht hinzufügen, nur Präfix als statischen Text."
     IDS_CRC_PREFIX          "Präfix vor CRC32-Prüfsumme:"
 END
@@ -2735,7 +2735,7 @@ BEGIN
     IDS_WCDOWNL             "ohne Funktion"
     IDS_WC_REQ_SUCC         "WC Erf./Angef.:"
     IDS_WC_DOWNLOADED       "WC-Download:"
-    IDS_CRC32_TITLE         "CRC32 zum Dateienamen"
+    IDS_CRC32_TITLE         "CRC32 zum Dateinamen"
     IDS_LOG_IPFILTER_LOADED "Geladene IP-Filter von ""%s"" in %ums"
     IDS_LOG_IPFILTER_INFO   "Gelesene Zeilen:%u  gefundene IP-Bereiche:%u  Doppelt:%u  Hinzugefügt:%u"
     IDS_IPFILTER_SAVERR     "IP-Filter speichern fehlgeschlagen in Datei ""%s"" - %hs"
