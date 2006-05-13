@@ -863,10 +863,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
 								//Try to send client allowed data for a client but not more than class allowed data
-								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
+								if (stat->realBytesToSpend/250 >= allowedclientdatarate && stat->scheduled == false) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									uint32 BytesToSend = min((UINT)(stat->realBytesToSpend/1000), (UINT)(BytesToSpend - spentBytes));
-									BytesToSend = max(BytesToSend, doubleSendSize);
+									uint32 BytesToSend = max((UINT)(stat->realBytesToSpend/1000), doubleSendSize);
+									BytesToSend = min(BytesToSend, (UINT)(BytesToSpend - spentBytes));
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate);
 #else
 									uint32 BytesToSend = min((UINT)(BytesToSpend - spentBytes), doubleSendSize);
@@ -896,7 +896,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
 								if (BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend) {
-									if (stat->realBytesToSpend > 999) {
+									if (stat->realBytesToSpend/250 >= allowedclientdatarate) {
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize, allowedclientdatarate);
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {

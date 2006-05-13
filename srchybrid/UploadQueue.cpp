@@ -923,8 +923,11 @@ void CUploadQueue::Process() {
 			abScheduledClient[classID] = true;
 	}
 	for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++) {
-		m_abAddClientOfThisClass[i] = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]>m_aiSlotCounter[i] ||
-									  m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]==m_aiSlotCounter[i] && abConnectingClient[i] == false && abScheduledClient[i] == true;
+		m_abAddClientOfThisClass[i] = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]>m_aiSlotCounter[i];
+		if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]==m_aiSlotCounter[i] && abConnectingClient[i] == false && abScheduledClient[i] == true) {
+			m_abAddClientOfThisClass[i] = true;
+			m_nLastStartUpload = GetTickCount();
+		}
 	}
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	
@@ -1062,7 +1065,8 @@ bool CUploadQueue::ForceNewClient() {
 		return false;
     }
 
-	if(curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall)
+	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
+		if(m_abAddClientOfThisClass[classID])
 		return true;
 
 	//nope
