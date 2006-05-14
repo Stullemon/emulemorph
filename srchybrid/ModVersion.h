@@ -20,12 +20,12 @@
 //MORPH START - Added by SiRoB, [-modname-]
 //START - This part should not be changed in anyway
 #define MOD_VERSION_MJR		8
-#define MOD_VERSION_MIN		10
-#define MOD_VERSION_BUILD   0
+#define MOD_VERSION_MIN		13
+#define MOD_VERSION_BUILD   1
 #define	MOD_VERSION			_T("MorphXT")
 #define	MOD_VERSION_LONG	_T("MorphXT v")
 //END - This part should not be changed in anyway
 
-#define	MOD_MOD_VERSION		_T("") //Use this to define your version based on MorphXT mod
+#define	MOD_MOD_VERSION		_T("BETA") //Use this to define your version based on MorphXT mod
 
 //MORPH END  - Added by SiRoB, [-modname-]
