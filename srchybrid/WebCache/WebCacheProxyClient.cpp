@@ -9,7 +9,7 @@
 #include "TransferWnd.h"
 #include "WebCachedBlockList.h"
 #include "Log.h"
-
+#include "ipfilter.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -134,6 +134,20 @@ bool CWebCacheProxyClient::SendWebCacheBlockRequests()
 		sockAddr.sin_family = AF_INET;
 		sockAddr.sin_port = htons( (block->m_uProxyIp == 0) ? 80 : thePrefs.webcachePort ); // Superlexx - TPS
 		sockAddr.sin_addr.S_un.S_addr = (block->m_uProxyIp == 0) ? block->m_uHostIp : block->m_uProxyIp; // Superlexx - TPS
+		//MORPH START - Added by , Filter proxy ip 
+		if (theApp.ipfilter->IsFiltered(sockAddr.sin_addr.S_un.S_addr)) {
+			if (thePrefs.GetLogWebCacheEvents()) {
+				CUpDownClient* client = theApp.clientlist->FindClientByUserHash( block->m_UserHash );
+				if (client)
+					AddDebugLogLine( false, _T("Webcache stop connecting process to filtered proxy-ip: %s, from client %s"), ipstr(block->m_uProxyIp), client->DbgGetClientInfo());
+				else
+					AddDebugLogLine( false, _T("Webcache stop connecting process to filtered proxy-ip: %s"), ipstr(block->m_uProxyIp));
+			}
+			m_pWCDownSocket->Safe_Delete();
+			m_pWCDownSocket = 0;
+			return false;
+		}
+		//MORPH END   - Added by , Filter proxy ip
 		m_pWCDownSocket->WaitForOnConnect();
 		m_pWCDownSocket->Connect((SOCKADDR*)&sockAddr, sizeof sockAddr);
 	}
