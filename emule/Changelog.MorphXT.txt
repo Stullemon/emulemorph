@@ -1,6 +1,10 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA
 --------------------------------------
+ADDED: GUI dont ask me again on exit dialog. (minor)
+--------------------------------------
+Changelog for eMule 0.47a MorphXT v8.13 BETA
+--------------------------------------
 ADDED  : GUI: Downloading Chunk Detail Display in Completed column  
 ADDED  : GUI: Downloading & Uploading Chunk block limit display
 
