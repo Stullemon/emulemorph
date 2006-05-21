@@ -1,18 +1,30 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.13 BETA
+Changelog for eMule 0.47a MorphXT v8.13
 --------------------------------------
-ADDED: GUI dont ask me again on exit dialog. (minor)
---------------------------------------
-Changelog for eMule 0.47a MorphXT v8.13 BETA
---------------------------------------
+ADDED  : GUI: Dont ask me again on exit dialog. (minor)
 ADDED  : GUI: Downloading Chunk Detail Display in Completed column  
 ADDED  : GUI: Downloading & Uploading Chunk block limit display
+
+CHANGED: DSB: Wait before sending data until we have 250ms of bandwidth to send (acummulate data)
+
+REMOVED: GUI: Don't Refresh item if not needed to work arround sorting issu
+
+--------------------------------------
+Changelog for eMule 0.47a MorphXT v8.13 BETA2
+--------------------------------------
+Minor: DSB Slotfoucs and  class queue handling [leuk_he/stulle]
+
+--------------------------------------
+Changelog for eMule 0.47a MorphXT v8.13 BETA
+--------------------------------------
+ADDED  : GUI: Upload Chunk detail Column
 
 CHANGED: IP+TCP header from data transfer are now considered as overhead, you still able to compare data overhead by looking at emule statusbar [SiRoB]
 CHANGED: DSB: Rise socket buffer limit to 1MBytes (was 256kB) [SiRoB]
 CHANGED: USC: Adapted it to get benefit of DSB [SiRoB]
 
 /!\: You will notice higher and proper overhead display on graph.
+
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.12
