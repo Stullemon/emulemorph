@@ -1,7 +1,8 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA
 --------------------------------------
-ADDED  : GUI: Upload Chunk detail Column [SiRoB]
+ADDED  : GUI: Downloading Chunk Detail Display in Completed column  
+ADDED  : GUI: Downloading & Uploading Chunk block limit display
 
 CHANGED: IP+TCP header from data transfer are now considered as overhead, you still able to compare data overhead by looking at emule statusbar [SiRoB]
 CHANGED: DSB: Rise socket buffer limit to 1MBytes (was 256kB) [SiRoB]
