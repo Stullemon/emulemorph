@@ -212,3 +212,23 @@ public:
 	virtual BOOL OnKillActive();
 	afx_msg void OnSettingsChange()			{ SetModified(); }
 };
+//MORPH START leuk_he ask on exit
+
+class CAskExit : public CPPgtooltippedDialog
+{
+	DECLARE_DYNAMIC(CAskExit)
+public:
+	CAskExit();   // standard constructor
+	virtual ~CAskExit();
+	virtual BOOL  OnInitDialog() ;
+// Dialog Data
+	enum { IDD = IDD_ASKEXIT };
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedYes();
+	afx_msg void OnBnClickedCancel();
+};
+//MORPH END leuk_he ask on exit

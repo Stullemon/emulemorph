@@ -1846,8 +1846,15 @@ bool CemuleDlg::CanClose()
 {
 	if (theApp.m_app_state == APP_STATE_RUNNING && thePrefs.IsConfirmExitEnabled())
 	{
-		if (AfxMessageBox(GetResString(IDS_MAIN_EXIT), MB_YESNO | MB_DEFBUTTON2) == IDNO)
+		//MORPH START leuk_he ask on exit
+		CAskExit * ExitDlg = new CAskExit();
+		if (ExitDlg ->DoModal()!= IDYES)
+	    	return false;
+	   /*
+	    if (AfxMessageBox(GetResString(IDS_MAIN_EXIT), MB_YESNO | MB_DEFBUTTON2) == IDNO)
 			return false;
+	    */
+		//MORPH END leuk_he ask on exit 
 	}
 	return true;
 }

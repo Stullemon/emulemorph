@@ -36,3 +36,25 @@ protected:
 
 };
 
+
+class CPPgtooltippedDialog :public CDialog
+{
+public:
+	// simple construction
+	 CPPgtooltippedDialog (UINT nIDTemplate);
+
+  	virtual BOOL PreTranslateMessage(MSG* pMsg);// [TPT] - Tooltips in preferences
+	virtual void InitTooltips();
+	void SetTool(int ControlID, int RCStringID);
+// Implementation
+public:
+	virtual ~CPPgtooltippedDialog ();
+protected:
+	// private implementation data
+	CPPToolTip m_Tip;
+    CTreeOptionsCtrlEx *pm_tree; // not really  needed But makes it simpler
+
+};
+
+
+

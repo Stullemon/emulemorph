@@ -27,7 +27,6 @@
 /* This a subclass of CpropertyPage to encapsulate the TOoltip behaviour of the preferecnes window */
 
 CPPgtooltipped ::CPPgtooltipped (UINT nIDTemplate) :CPropertyPage(nIDTemplate)
-
 {
    pm_tree=NULL;
 }
@@ -84,5 +83,44 @@ void CPPgtooltipped::SetTool(HTREEITEM TreeItem, int RCStringID)
 	    {pm_tree->SetUserItemData(TreeItem,toolid);
 	    }
 	}
-
 };
+
+
+CPPgtooltippedDialog ::CPPgtooltippedDialog (UINT nIDTemplate) :CDialog(nIDTemplate)
+{
+   pm_tree=NULL;
+}
+
+
+BOOL
+CPPgtooltippedDialog ::PreTranslateMessage(MSG* pMsg)// [TPT] - Tooltips in preferences
+{
+	m_Tip.RelayEvent(pMsg);
+
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+	
+CPPgtooltippedDialog::~CPPgtooltippedDialog(){};
+
+void 
+CPPgtooltippedDialog::InitTooltips(){
+    m_Tip.Create(this);
+    COLORREF grad1=RGB(255,255,25); // YELLOW
+    COLORREF grad2=RGB(155,155,120); // NOT USED IN HGRADIENT....
+	COLORREF grad3=RGB(160,160,200); // LIGHT BLUE
+    m_Tip.SetEffectBk(CPPToolTip::PPTOOLTIP_EFFECT_HGRADIENT);
+    theApp.LoadSkinColor(_T("Tooltipgrad1"), grad1);
+    theApp.LoadSkinColor(_T("Tooltipgrad2"), grad2);
+    theApp.LoadSkinColor(_T("Tooltipgrad3"), grad3);
+   	m_Tip.SetGradientColors(grad1,grad2, grad3);
+	m_Tip.SetDelayTime(TTDT_INITIAL,thePrefs.GetToolTipDelay()*1000); /* show after 1 second default */
+	m_Tip.SetDelayTime(TTDT_AUTOPOP, 15000); /* show for 15 seconds */
+}
+
+void CPPgtooltippedDialog::SetTool(int ControlID, int RCStringID)
+{  
+	if (thePrefs.GetToolTipDelay() > 0) //disable if 0
+	   m_Tip.AddTool(GetDlgItem(ControlID), GetResString(RCStringID));
+};
+

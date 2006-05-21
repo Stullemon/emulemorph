@@ -1071,3 +1071,69 @@ BOOL CPPgMorph::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 	OnHelp();
 	return TRUE;
 }
+//MORPH START leuk_he ask on exit
+// CAskExit dialog
+
+IMPLEMENT_DYNAMIC(CAskExit, CDialog)
+CAskExit::CAskExit()
+	: CPPgtooltippedDialog(CAskExit::IDD)
+{
+}
+
+BOOL CAskExit::OnInitDialog() 
+{
+   CDialog::OnInitDialog();
+   InitTooltips();
+     // localize:
+    if(m_hWnd)
+	{
+		GetDlgItem(IDC_EXITQUESTION)->SetWindowText(GetResString(IDS_MAIN_EXIT));
+		GetDlgItem(IDC_DONTASKMEAGAINCB)->SetWindowText(GetResString(IDS_DONOTASKAGAIN));
+		GetDlgItem(IDYES)->SetWindowText(GetResString(IDS_YES));
+		GetDlgItem(IDNO)->SetWindowText(GetResString(IDS_NO));
+        SetTool (IDC_EXITQUESTION,IDC_EXITQUESTION_TIP);
+        SetTool (IDYES,IDC_EXITQUESTION_TIP);
+        SetTool (IDNO,IDC_EXITQUESTION_TIP);
+		SetTool(IDC_DONTASKMEAGAINCB,IDC_DONTASKMEAGAINCB_TIP);
+
+	}
+   if(thePrefs.confirmExit)
+		CheckDlgButton(IDC_DONTASKMEAGAINCB,0);
+	else
+		CheckDlgButton(IDC_DONTASKMEAGAINCB,1);
+   return TRUE;                     
+}
+
+
+
+CAskExit::~CAskExit()
+{
+}
+
+void CAskExit::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+}
+
+
+BEGIN_MESSAGE_MAP(CAskExit, CDialog)
+	ON_BN_CLICKED(IDYES, OnBnClickedYes)
+	ON_BN_CLICKED(IDNO, OnBnClickedCancel)
+END_MESSAGE_MAP()
+
+
+// CAskExit message handlers
+
+void CAskExit::OnBnClickedYes()
+{   thePrefs.confirmExit= (IsDlgButtonChecked(IDC_DONTASKMEAGAINCB)==0);
+	// TODO: Add your control notification handler code here
+    EndDialog(IDYES);
+}
+
+void CAskExit::OnBnClickedCancel()
+{   thePrefs.confirmExit= IsDlgButtonChecked(IDC_DONTASKMEAGAINCB)==0;
+	EndDialog(IDNO);
+}
+
+//MORPH END leuk_he ask on exit
+
