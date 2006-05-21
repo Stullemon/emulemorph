@@ -2047,6 +2047,29 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Dialog
+//
+
+IDD_ASKEXIT DIALOGEX 0, 0, 186, 95
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "eMule"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Yes",IDYES,21,66,50,14
+    PUSHBUTTON      "No",IDNO,97,66,50,14
+    LTEXT           "Do you really want to exit eMule?",IDC_EXITQUESTION,62,
+                    16,117,23,SS_CENTERIMAGE
+    ICON            "SEARCHMETHOD_FILEDONKEY",IDC_STATIC,14,16,20,20
+    CONTROL         "Do not ask me again",IDC_DONTASKMEAGAINCB,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,19,48,136,13
+END
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // DESIGNINFO
 //
 
@@ -6054,7 +6077,7 @@ BEGIN
     IDS_MAXCLIENTDATARATEPOWERSHARE_TIP 
                             "The maxs upload speed that is available for 1 slot in powershared status.\nDetault=0, slotfocus, focus all powershare speed to the lowest slot number.\nSetting a value here makes morph swtich from slotfocus to distibute bandtwidth\nmodus."
     IDS_MAXCLIENTDATARATE_TIP 
-                            "Max upload speed that 1 single normal client slot receives.\nDefault = 0, slotfocus, all speed to lowest slot number\nto complete a chunk as fast as possible. If a value is \nentered here the upload of normal slots distibutes the \nbandwitht over the slots with a targeted max of the value\nset here. Note that this speed may be exceeded for a short\nwhile to fill available\nupload capacity"
+                            "Max upload speed that 1 single normal client slot receives.\nDefault = 0, slotfocus, all speed to lowest slot number\nto complete a chunk as fast as possible. If a value is \nentered here the upload of normal slots distributes the \nbandwidth over the slots with a targeted max of the value\nset here. Note that this speed may be exceeded for a short\nwhile to fill available\nupload capacity"
     IDS_SLOT_LIMIT_GROUP_TIP 
                             "Last resort option to limit the number of slots.\nFirst the upload speed classes are applied and\nthis is only a last resort to limit the number\nof upload slots if the speed limits cannot be\nset correct"
     IDS_SLOT_LIMIT_NUM_TIP  "The upper limit of open slots is a set number. This is only useful for clients that have a high upload."
@@ -6119,8 +6142,8 @@ BEGIN
     RANDOMPORTTIME_TIP      "Time in seconds that emule will not change ports\nif random ports (in connections) is set. This \nwill prevent emule from switching ports too fast after restarts"
     ICPCONN_TIP             "Make a hole in the internet connections firewall"
     ENABLE_TIP              "Automatically open ports in the Internet Connections Firewall\n<b>WARNING</b>:Takes  very much CPU on some configurations\nIs not required if you do not use the internet firewall or use\na thirth party firewall, or open ports in your personal firewall\nmanually"
-    CLEARMAPTIP             "Open ports in the personal firewall"
-    ADDMPATIP               "eMule listens at a random server udp port. Open this port as well in the firewall?"
+    CLEARMAPTIP             "open ports in the winxp firewall when you run\nemule, and close them when you exit "
+    ADDMPATIP               "eMule listens at a (random) server udp port for server status. Open this port as well in the firewall?"
     UPNP_GROUP_TIP          "Detect uPnP capable routers."
 END
 
@@ -6387,6 +6410,31 @@ BEGIN
     IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP 
                             "Where to download the list.\n List will only be downloaded if the web version is newer than\nthe previous download"
     IDC_RESETIPCURL_TIP     "Reset the above url to\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
+
+   IDC_EXITQUESTION_TIP     "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
+   IDC_DONTASKMEAGAINCB_TIP "Check this option and eMule won't ask next time you do a shutdown of eMule\nYou can enable this option again in Options->general-> Prompt on exit"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_TRAY_TIP "eMule will not minimize to task bar\nbut to the tray if this option is checked.\nAn extra option is displayed in the windows\nbar to minimize to the tray if unchecked"
+    IDS_PW_DBLCLICK_TIP "This option toggles,\nwhether a double or single click in the download screenlist is needed to expand and show the sources"
+    IDS_PW_TOOL_TIP "If the mouse hovers on a download or  preference\na little note will appear with information on this item.\nSpecifies the delay until this tip pops up.\nThis text is is a tooltip."
+    IDS_3DDEP_TIP "The slider affects the amount of 3D shading of the Progress Bars."
+	IDS_UPDATEQUEUE_TIP "The information displayed in the queue list will be updated not as often\nwhich will save some CPU time."
+	IDS_SHOWRATEONTITLE_TIP "Displays current Down- and Upload speed in eMule's window title."
+	IDS_INDICATERATINGS_TIP "Shows the -icon (comment, positive rating)\nthe !-icon (negative rating) for downloads in the Transfers list."
+	IDS_DISABLEKNOWNLIST_TIP "eMule keeps track of all clients it connected to.\nTo save memory this list can be disabled with this option.\nTurn it off for low memory systems."
+	IDS_DISABLEQUEUELIST_TIP  "Similar to the Known Clients List the Queue List\nwill also consume system resources.\nDisable to save them."
+	IDS_SHOWCATINFO_TIP "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading) files\nand the second one (y) the total number of files for this  category."
+	IDS_REPAINTGRAPHS_TIP "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
+	IDC_SELECT_HYPERTEXT_FONT_TIP "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines  and IRC windows"
+	IDS_AUTOREMOVEFD_TIP "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
+	IDS_PW_RESET_TIP "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Reset button will clear all entries."
+	IDS_DISABLEHIST_TIP "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Enabled checkmark allows to turn off this option"
+	IDS_PW_SHOWTRANSTOOLBAR_TIP "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes\n:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queueDisplays all known clients"
+	IDC_SHOWDWLPERCENT_TIP "A %-completed value will be added for each download in its progress bar."
+
 END
 
 #endif    // Anglais (États-Unis) resources

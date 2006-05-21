@@ -58,7 +58,13 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgDisplay::CPPgDisplay()
+
+//MORPH START leuk_he tooltipped
+	: CPPgtooltipped(CPPgDisplay::IDD)
+/* tooltipped
 	: CPropertyPage(CPPgDisplay::IDD)
+*/
+//MORPH END leuk_he tooltipped
 {
 	m_eSelectFont = sfServer;
 }
@@ -138,6 +144,7 @@ BOOL CPPgDisplay::OnInitDialog()
 
 
 	LoadSettings();
+	InitTooltips(); //leuk_he tooltippedLocalize();
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -213,6 +220,9 @@ BOOL CPPgDisplay::OnApply()
 		thePrefs.m_iToolDelayTime = 32;
 	else
 		thePrefs.m_iToolDelayTime = _tstoi(buffer);
+	// MORPH START leuk_he tooltipped
+	m_Tip.SetDelayTime(TTDT_INITIAL,thePrefs.m_iToolDelayTime*1000);
+	// MORPH END leuk_he tooltipped
 	
 	theApp.emuledlg->transferwnd->SetToolTipsDelay(thePrefs.GetToolTipDelay()*1000);
 	theApp.emuledlg->searchwnd->SetToolTipsDelay(thePrefs.GetToolTipDelay()*1000);
@@ -274,6 +284,31 @@ void CPPgDisplay::Localize(void)
 		GetDlgItem(IDC_DISABLEHIST)->SetWindowText(GetResString(IDS_ENABLED));
 
 		GetDlgItem(IDC_SHOWTRANSTOOLBAR)->SetWindowText(GetResString(IDS_PW_SHOWTRANSTOOLBAR));
+        // MORPH START leuk_he tooltipped
+		SetTool(IDC_MINTRAY,IDS_PW_TRAY_TIP);
+		SetTool(IDC_DBLCLICK,IDS_PW_DBLCLICK_TIP);
+		SetTool(IDC_TOOLTIPDELAY_LBL,IDS_PW_TOOL_TIP);
+		SetTool(IDC_TOOLTIPDELAY,IDS_PW_TOOL_TIP);
+		SetTool(IDC_3DDEP,IDS_3DDEP_TIP);
+		SetTool(IDC_3DDEPTH,IDS_3DDEP_TIP);
+		SetTool(IDC_FLAT,IDS_3DDEP_TIP);
+		SetTool(IDC_ROUND,IDS_3DDEP_TIP);
+		SetTool(IDC_UPDATEQUEUE,IDS_UPDATEQUEUE_TIP);
+		SetTool(IDC_SHOWRATEONTITLE,IDS_SHOWRATEONTITLE_TIP);
+		SetTool(IDC_INDICATERATINGS,IDS_INDICATERATINGS_TIP);
+		SetTool(IDC_DISABLEKNOWNLIST,IDS_DISABLEKNOWNLIST_TIP);
+		SetTool(IDC_DISABLEQUEUELIST,IDS_DISABLEQUEUELIST_TIP);
+		SetTool(IDC_SHOWCATINFO,IDS_SHOWCATINFO_TIP);
+		SetTool(IDC_REPAINT,IDS_REPAINTGRAPHS_TIP);
+		SetTool(IDC_SELECT_HYPERTEXT_FONT,IDC_SELECT_HYPERTEXT_FONT_TIP);
+		SetTool(IDC_CLEARCOMPL,IDS_AUTOREMOVEFD_TIP);
+		SetTool(IDC_RESETLABEL,IDS_RESETLABEL_TIP);
+		SetTool(IDC_RESETHIST,IDS_PW_RESET_TIP);
+		SetTool(IDC_DISABLEHIST,IDS_DISABLEHIST_TIP);
+		SetTool(IDC_SHOWTRANSTOOLBAR,IDS_PW_SHOWTRANSTOOLBAR_TIP);
+		SetTool(IDC_SHOWDWLPERCENT,IDC_SHOWDWLPERCENT_TIP);
+        // MORPH END   leuk_he tooltipped
+
 	}
 }
 

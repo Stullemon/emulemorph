@@ -1,8 +1,13 @@
 #pragma once
 
 #include "3dpreviewcontrol.h"
-
+// MORPH START  leuk_he tooltipped
+#include "PPGtooltipped.h" 
+/*
 class CPPgDisplay : public CPropertyPage
+*/
+class CPPgDisplay : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgDisplay)
 
