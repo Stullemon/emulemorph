@@ -184,14 +184,15 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	}
 } 
 
-void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const
+//MORPH START - Display current uploading chunk
+void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrect*/, bool  bFlat) const
 {
 	COLORREF crNeither;
 	COLORREF crNextSending;
 	COLORREF crBoth;
 	COLORREF crSending;
 	COLORREF crBuffer;
-
+	COLORREF crDot;
     if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
        (GetUploadState() != US_UPLOADING && GetUploadState() != US_CONNECTING) ) {
         crNeither = RGB(224, 224, 224);
@@ -199,6 +200,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect,
 	    crBoth = bFlat ? RGB(0, 0, 0) : RGB(104, 104, 104);
 	    crSending = RGB(0, 150, 0);
 		crBuffer = RGB(255, 100, 100);
+		crDot = RGB(255, 255, 255);
     } else {
         // grayed out
         crNeither = RGB(248, 248, 248);
@@ -206,6 +208,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect,
 	    crBoth = bFlat ? RGB(191, 191, 191) : RGB(191, 191, 191);
 	    crSending = RGB(191, 229, 191);
 		crBuffer = RGB(255, 216, 216);
+		crDot = RGB(255, 255, 255);
     }
 
 	// wistily: UpStatusFix
@@ -228,9 +231,8 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect,
 		uint64 start;
 		uint64 end;
 		const Requested_Block_Struct* block;
-		if (!m_BlockRequests_queue.IsEmpty()){
-			for(POSITION pos=m_BlockRequests_queue.GetHeadPosition();pos!=0;){
-				block = m_BlockRequests_queue.GetNext(pos);
+		if (!m_DoneBlocks_list.IsEmpty()){
+			block = m_DoneBlocks_list.GetHead();
 				if (cur_chunk == (uint32)-1) {
 					cur_chunk = (uint32)(block->StartOffset/PARTSIZE);
 					start = end = cur_chunk*PARTSIZE;
@@ -245,12 +247,10 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect,
 					} else
 						s_UpStatusBar.Fill(crNeither);
 				}
-				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end)
-					s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextSending);
 			}
-		}
-		if (!m_DoneBlocks_list.IsEmpty()){
-			block = m_DoneBlocks_list.GetHead(); //MORPH - Changed by SiRoB, Display fix 
+		if (!m_BlockRequests_queue.IsEmpty()){
+			for(POSITION pos=m_BlockRequests_queue.GetHeadPosition();pos!=0;){
+				block = m_BlockRequests_queue.GetNext(pos);
 			if (cur_chunk == (uint32)-1) {
 				cur_chunk = (uint32)(block->StartOffset/PARTSIZE);
 				start = end = cur_chunk*PARTSIZE;
@@ -265,6 +265,14 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect,
 				} else
 					s_UpStatusBar.Fill(crNeither);
 			}
+				if (block->StartOffset >= start) {
+					if (block->EndOffset <= end)
+						s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, block->EndOffset%PARTSIZE, crNextSending);
+					else
+						s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crNextSending);
+				} else if (block->EndOffset <= end)
+					s_UpStatusBar.FillRange(0, block->EndOffset%PARTSIZE, crNextSending);
+			}
 		}
 		
 		if (!m_DoneBlocks_list.IsEmpty() && cur_chunk != (uint32)-1){
@@ -276,7 +284,13 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect,
 				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
 					if(total + (block->EndOffset-block->StartOffset) <= GetQueueSessionPayloadUp()) {
 						// block is sent
-						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crSending);
+						if (block->StartOffset >= start) {
+							if (block->EndOffset <= end)
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, block->EndOffset%PARTSIZE, crSending);
+							else
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crSending);
+						} else if (block->EndOffset <= end)
+							s_UpStatusBar.FillRange(0, block->EndOffset%PARTSIZE, crSending);
 						total += block->EndOffset-block->StartOffset;
 					}
 					else if (total < GetQueueSessionPayloadUp()){
@@ -285,28 +299,75 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool onlygreyrect,
 						uint64 rest = total -  GetQueueSessionPayloadUp();
 						uint64 newEnd = (block->EndOffset-rest);
 						if (newEnd>=start) {
-							if (newEnd<end) {
-								s_UpStatusBar.FillRange((uint64)(block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((newEnd < end)?newEnd:end)%PARTSIZE, crSending);
-								s_UpStatusBar.FillRange((uint64)newEnd%PARTSIZE, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
-							} else {
-								s_UpStatusBar.FillRange((uint64)block->StartOffset%PARTSIZE, end%PARTSIZE, crSending);
-							}
-						} else {
-							s_UpStatusBar.FillRange((uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
-						}
+							if (newEnd<=end) {
+								uint64 uNewEnd = newEnd%PARTSIZE;
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, uNewEnd, crSending);
+								if (block->EndOffset <= end)
+									s_UpStatusBar.FillRange(uNewEnd, block->EndOffset%PARTSIZE, crBuffer);
+								else
+									s_UpStatusBar.FillRange(uNewEnd, end%PARTSIZE, crBuffer);
+							} else 
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crSending);
+						} else if (block->EndOffset <= end)
+							s_UpStatusBar.FillRange((uint64)0, block->EndOffset%PARTSIZE, crBuffer);
 					}
 					else{
 						// entire block is still in buffer
 						total += block->EndOffset-block->StartOffset;
-						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
+						if (block->StartOffset>=start) {
+							if (block->EndOffset <= end)
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, block->EndOffset%PARTSIZE, crBuffer);
+							else
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crBuffer);
+						} else if (block->EndOffset <= end)
+							s_UpStatusBar.FillRange((uint64)0, block->EndOffset%PARTSIZE, crBuffer);
 					}
 				} else
 					total += block->EndOffset-block->StartOffset;
 		    }
 	    }
    	    s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat);
+		
+		if(thePrefs.m_bEnableChunkDots){
+			s_UpStatusBar.SetHeight(3); 
+			s_UpStatusBar.SetWidth(1); 
+			s_UpStatusBar.SetFileSize((uint64)1);
+			s_UpStatusBar.Fill(crDot);
+			uint32	w=rect->right-rect->left+1;
+			if (!m_BlockRequests_queue.IsEmpty()){
+				for(POSITION pos=m_BlockRequests_queue.GetHeadPosition();pos!=0;){
+					block = m_BlockRequests_queue.GetNext(pos);
+					if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+						if (block->StartOffset >= start) {
+							if (block->EndOffset <= end) {
+								s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+								s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+							} else
+								s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+						} else if (block->EndOffset <= end)
+							s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+					}
+				}
+			}
+			if (!m_DoneBlocks_list.IsEmpty()){
+				for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;){
+					block = m_DoneBlocks_list.GetNext(pos);
+					if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+						if (block->StartOffset >= start) {
+							if (block->EndOffset <= end) {
+								s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+								s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+							} else
+								s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+						} else if (block->EndOffset <= end)
+							s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+					}
+				}
+			}
+		}
 	}
 }
+//MORPH END   - Display current uploading chunk
 
 void CUpDownClient::SetUploadState(EUploadState eNewState)
 {

@@ -788,7 +788,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #endif
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 
-    if (maxNumberOfBytesToSend == 0 && ::GetTickCount() - lastCalledSend < SEC2MS(1)) {
+    if (maxNumberOfBytesToSend == 0 && ::GetTickCount() - lastCalledSend < SEC2MS(10)) {
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
     }
@@ -822,7 +822,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
 		maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
-        bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) > 1000;
+        bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) > 10000;
 
         sendLocker.Lock();
 
@@ -850,12 +850,13 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
             // If we are currently not in the progress of sending a packet, we will need to find the next one to send
 #if !defined DONT_USE_SOCKET_BUFFERING
-			bufferlimit = ((bufferlimit>>12)+1) << 10; //buffer 250ms
+			bufferlimit = ((bufferlimit>>10)+1) << 10; //buffer 1s
 			if (bufferlimit>= 1024*1024)
 				bufferlimit = 1024*1024-1;
 			else if (bufferlimit<minFragSize)
 				bufferlimit=minFragSize;
-			while ((sendblen == 0 || sendblen-sent < bufferlimit) && (!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty())) {
+			ASSERT(sendblen>=sent);
+			while ((!controlpacket_queue.IsEmpty() && sendblen-sent < min(maxNumberOfBytesToSend,bufferlimit)) || !standartpacket_queue.IsEmpty() && sendblen-sent < min(maxNumberOfBytesToSend,bufferlimit)) {
 				bool bcontrolpacket;
 				uint32 ipacketpayloadsize = 0;
 #else
@@ -907,11 +908,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	            // We found a package to send. Get the data to send from the
 	            // package container and dispose of the container.
 #if !defined DONT_USE_SOCKET_BUFFERING
-				if (!onlyAllowedToSendControlPacket && currentBufferSize != bufferlimit) {
-					int buffer = (int)(bufferlimit+1)<<1;
+				uint32 packetsize = curPacket->GetRealPacketSize();
+				if (!onlyAllowedToSendControlPacket) {
+					int buffer = (int)(bufferlimit+1);
 					SetSockOpt(SO_SNDBUF, &buffer , sizeof(buffer), SOL_SOCKET);
 				}
-				uint32 packetsize = curPacket->GetRealPacketSize();
 				if (sendbuffer) {
 					if (currentBufferSize < sendblen+packetsize){
 						sendblen-=sent;
@@ -920,6 +921,10 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 						memcpy(newsendbuffer, sendbuffer+sent, sendblen);
 						delete[] sendbuffer;
 						sendbuffer = newsendbuffer;
+						sent = 0;
+					} else if (sent > 0 && currentBufferSize-sent<maxNumberOfBytesToSend) {
+						sendblen-=sent;
+						memmove(sendbuffer, sendbuffer+sent, sendblen);
 						sent = 0;
 					}
 					char* packetcore = curPacket->DetachPacket();
@@ -985,7 +990,8 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 				ASSERT (tosend != 0 && tosend <= sendblen-sent);
 		    	
 				//DWORD tempStartSendTick = ::GetTickCount();
-
+				if (tosend > bufferlimit) //Don't send more than socket buffer
+					tosend = bufferlimit;
 				busyLocker.Lock();
 				uint32 result = CAsyncSocketEx::Send(sendbuffer+sent,tosend); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 				if (result == (uint32)SOCKET_ERROR){

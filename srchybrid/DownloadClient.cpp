@@ -175,6 +175,188 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 	//MORPH END   - Changed by SiRoB, Keep A4AF infos
 	s_StatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 
+//MORPH START - Added by SiRoB, Downloading Chunk Detail Display
+void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* file, bool  bFlat) const
+{ 
+	if (m_PendingBlocks_list.IsEmpty() && m_DownloadBlocks_list.IsEmpty() || file != reqfile || reqfile == NULL) 
+		return;
+	if (g_bLowColorDesktop)
+		bFlat = true;
+	COLORREF crBoth;
+	COLORREF crClientOnly;
+	COLORREF crPending;
+	COLORREF crNextPending;
+	COLORREF crNeither;
+	COLORREF crBuffer;
+	COLORREF crProgress;
+	COLORREF crDot;
+	if (g_bLowColorDesktop) {
+		crBoth = RGB(0, 0, 0);
+		crClientOnly = RGB(0, 0, 255);
+		crPending = RGB(0, 255, 0);
+		crNextPending = RGB(255, 255, 0);
+		crNeither = RGB(192, 192, 192);
+		crBuffer = RGB(255, 0, 0);
+		crProgress = RGB(0, 255, 0);
+		crDot = RGB(255, 255, 255);
+	} else if (bFlat) {
+		crBoth = RGB(0, 0, 0);
+		crClientOnly = RGB(0, 100, 255);
+		crPending = RGB(0, 150, 0);
+		crNextPending = RGB(255, 208, 0);
+		crNeither = RGB(224, 224, 224);
+		crBuffer = RGB(255, 0, 0);
+		crProgress = RGB(0, 150, 0);
+		crDot = RGB(255, 255, 255);
+	} else {
+		crBoth = RGB(104, 104, 104);
+		crClientOnly = RGB(0, 100, 255);
+		crPending = RGB(0, 150, 0);
+		crNextPending = RGB(255, 208, 0);
+		crNeither = RGB(240, 240, 240);
+		crBuffer = RGB(255, 100, 100);
+		crProgress = RGB(0, 224, 0);
+		crDot = RGB(255, 255, 255);
+	}
+
+	
+	s_StatusBar.SetHeight(rect->bottom - rect->top);
+	s_StatusBar.SetWidth(rect->right - rect->left);
+	s_StatusBar.SetFileSize(PARTSIZE); 
+	
+	UINT cur_chunk = (uint32)-1;
+	uint64 start;
+	uint64 end;
+	const Requested_Block_Struct* block;
+	//Find Sent Requested part
+	if (!m_PendingBlocks_list.IsEmpty()) {
+		block = m_PendingBlocks_list.GetHead()->block;
+		cur_chunk = (UINT)(block->StartOffset / PARTSIZE);
+		start = end = PARTSIZE*(uint64)cur_chunk;
+		end += PARTSIZE-1;
+		if ( end > file->GetFileSize()) {
+			end = file->GetFileSize();
+			s_StatusBar.Reset();
+			s_StatusBar.FillRange(0, end%PARTSIZE, crProgress);
+		} else {
+			s_StatusBar.Fill(crProgress);
+		}
+	}
+
+	//Find reserved block
+	if (!m_DownloadBlocks_list.IsEmpty()){
+		block = m_DownloadBlocks_list.GetHead();
+		if (cur_chunk == (uint32)-1) {
+			cur_chunk = (uint32)(block->StartOffset/PARTSIZE);
+			start = end = cur_chunk*PARTSIZE;
+			end += PARTSIZE-1;
+			if (end > file->GetFileSize()) {
+				end = file->GetFileSize();
+				s_StatusBar.Reset();
+				s_StatusBar.FillRange(0, end%PARTSIZE, crProgress);
+			} else
+				s_StatusBar.Fill(crProgress);
+		}
+	}
+	
+	// Draw Gap part of the chunk
+	for (POSITION pos = file->gaplist.GetHeadPosition();pos !=  0;){
+		const Gap_Struct* cur_gap = file->gaplist.GetNext(pos);
+		bool gapdone = false;
+		uint64 gapstart = cur_gap->start;
+		uint64 gapend = cur_gap->end;
+		if (gapstart >= start && gapstart <= end || gapend >= start && gapend <= end) {
+			if (gapstart>=start) {
+				if (gapend<end)
+					s_StatusBar.FillRange(gapstart%PARTSIZE, (gapend + 1)%PARTSIZE,  crClientOnly);
+				else
+					s_StatusBar.FillRange(gapstart%PARTSIZE, end%PARTSIZE,  crClientOnly);
+			} else if (gapend<end) {
+				s_StatusBar.FillRange((uint64)0, (gapend + 1)%PARTSIZE,  crClientOnly);
+			}
+		}
+	}
+	
+	/*
+	if (!m_DownloadBlocks_list.IsEmpty()){
+		for(POSITION pos=m_DownloadBlocks_list.GetHeadPosition();pos!=0;){
+			block = m_DownloadBlocks_list.GetNext(pos);
+			if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+				s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crDot);
+			}
+		}
+	}*/
+
+	if (!m_PendingBlocks_list.IsEmpty()){
+		for(POSITION pos=m_PendingBlocks_list.GetTailPosition();pos!=0; ){
+			block = m_PendingBlocks_list.GetPrev(pos)->block;
+			if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+				if(m_nLastBlockOffset < block->StartOffset) {
+					// block have not been started yet
+					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
+				}
+				else if (m_nLastBlockOffset > block->EndOffset) {
+					// block have not been started yet
+					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
+				}
+				else {
+					uint64 newEnd = m_nLastBlockOffset;
+					// block partly received or partly in buffer
+					if (newEnd>start) {
+						if (newEnd<end) {
+							s_StatusBar.FillRange((uint64)(block->StartOffset>start)?block->StartOffset%PARTSIZE:0, newEnd%PARTSIZE, crPending);
+							s_StatusBar.FillRange((uint64)newEnd%PARTSIZE, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
+						} else {
+							s_StatusBar.FillRange((uint64)(block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crPending);
+						}
+					} else {
+						s_StatusBar.FillRange((uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
+					}
+				}
+			}
+		}
+	}
+	s_StatusBar.Draw(dc, rect->left, rect->top, bFlat);
+
+	if(thePrefs.m_bEnableChunkDots){
+		s_StatusBar.SetHeight(3); 
+		s_StatusBar.SetWidth(1); 
+		s_StatusBar.SetFileSize((uint64)1);
+		s_StatusBar.Fill(crDot);
+		uint32	w=rect->right-rect->left+1;
+		if (!m_DownloadBlocks_list.IsEmpty()){
+			for(POSITION pos=m_DownloadBlocks_list.GetHeadPosition();pos!=0;){
+				block = m_DownloadBlocks_list.GetNext(pos);
+				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+					if (block->StartOffset >= start) {
+						if (block->EndOffset <= end) {
+							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+						} else
+							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+					} else if (block->EndOffset <= end)
+						s_StatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+				}
+			}
+		}
+		if (!m_PendingBlocks_list.IsEmpty()){
+			for(POSITION pos=m_PendingBlocks_list.GetHeadPosition();pos!=0;){
+				block = m_PendingBlocks_list.GetNext(pos)->block;
+				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+					if (block->StartOffset >= start) {
+						if (block->EndOffset <= end) {
+							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+						} else
+							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+					} else if (block->EndOffset <= end)
+						s_StatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+				}
+			}
+		}
+	}
+} 
+//MORPH END - Added by SiRoB, Downloading Chunk Detail Display
 
 bool CUpDownClient::Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash) const
 {

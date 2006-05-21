@@ -49,6 +49,8 @@ public:
 	CtrlItem_Struct* parent;
 	DWORD            dwUpdated;
 	CBitmap          status;
+	DWORD            dwUpdatedchunk;
+	CBitmap          statuschunk;	//MORPH - Downloading Chunk Detail Display
 };
 
 

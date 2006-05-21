@@ -494,10 +494,6 @@ void CSharedFilesCtrl::UpdateFile(const CKnownFile* file)
 {
 	if(!file || !theApp.emuledlg->IsRunning())
 		return;
-	//MORPH START - SiRoB, Don't Refresh item if not needed
-	if( theApp.emuledlg->activewnd != theApp.emuledlg->sharedfileswnd)
-		return;
-	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	int iItem = FindFile(file);
 	if (iItem != -1)
 	{

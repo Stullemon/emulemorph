@@ -387,6 +387,7 @@ void CDownloadListCtrl::AddSource(CPartFile* owner, CUpDownClient* source, bool 
     newitem->type = (notavailable) ? UNAVAILABLE_SOURCE : AVAILABLE_SOURCE;
     newitem->value = source;
 	newitem->dwUpdated = 0; 
+	newitem->dwUpdatedchunk = 0; //MORPH - Downloading Chunk Detail Display
 
 	// Update cross link to the owner
 	ListItems::const_iterator ownerIt = m_ListItems.find(owner);
@@ -408,6 +409,7 @@ void CDownloadListCtrl::AddSource(CPartFile* owner, CUpDownClient* source, bool 
 				// Update this instance with its new setting
 				cur_item->type = newitem->type;
 				cur_item->dwUpdated = 0;
+				cur_item->dwUpdatedchunk = 0; //MORPH - Downloading Chunk Detail Display
 				bFound = true;
 			}
 			else if(notavailable == false){
@@ -503,10 +505,6 @@ void CDownloadListCtrl::UpdateItem(void* toupdate)
 {
 	if (!theApp.emuledlg->IsRunning())
 		return;
-	//MORPH START - SiRoB, Don't Refresh item if not needed
-	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd  || theApp.emuledlg->transferwnd->downloadlistctrl.IsWindowVisible() == false )
-		return;
-	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	
 	// Retrieve all entries matching the source
 	std::pair<ListItems::const_iterator, ListItems::const_iterator> rangeIt = m_ListItems.equal_range(toupdate);
@@ -520,6 +518,7 @@ void CDownloadListCtrl::UpdateItem(void* toupdate)
 		int result = FindItem(&find);
 		if (result != -1){
 			updateItem->dwUpdated = 0;
+			updateItem->dwUpdatedchunk = 0; //MORPH - Downloading Chunk Detail Display
 			Update(result);
 		}
 	}
@@ -1072,6 +1071,8 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 			break;
 			//MORPH END  - Changed by SiRoB, Download/Upload
 		case 3:// completed
+			//MORPH START - Downloading Chunk Detail Display
+			/*
 			// - 'Transferred' column: Show transferred data
 			// - 'Completed' column: If 'Transferred' column is hidden, show the amount of transferred data
 			//	  in 'Completed' column. This is plain wrong (at least when receiving compressed data), but
@@ -1082,6 +1083,49 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 				}
 			}
+			*/
+			if (lpCtrlItem->type == AVAILABLE_SOURCE && lpUpDownClient->GetDownloadState() == DS_DOWNLOADING) {
+				CRect rcDraw(*lpRect);
+				rcDraw.bottom--;
+				rcDraw.top++; 
+
+				int iWidth = rcDraw.Width();
+				int iHeight = rcDraw.Height();
+				if (lpCtrlItem->statuschunk == (HBITMAP)NULL)
+					VERIFY(lpCtrlItem->statuschunk.CreateBitmap(1, 1, 1, 8, NULL)); 
+				CDC cdcStatus;
+				HGDIOBJ hOldBitmap;
+				cdcStatus.CreateCompatibleDC(dc);
+				int cx = lpCtrlItem->statuschunk.GetBitmapDimension().cx;
+				DWORD dwTicks = GetTickCount();
+				if(lpCtrlItem->dwUpdatedchunk + DLC_BARUPDATE < dwTicks || cx !=  iWidth  || !lpCtrlItem->dwUpdatedchunk) { 
+					lpCtrlItem->statuschunk.DeleteObject(); 
+					lpCtrlItem->statuschunk.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
+					lpCtrlItem->statuschunk.SetBitmapDimension(iWidth,  iHeight); 
+					hOldBitmap = cdcStatus.SelectObject(lpCtrlItem->statuschunk); 
+
+					RECT rec_status; 
+					rec_status.left = 0; 
+					rec_status.top = 0; 
+					rec_status.bottom = iHeight; 
+					rec_status.right = iWidth; 
+					//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
+					/*
+					lpUpDownClient->DrawStatusBarChunk(&cdcStatus,  &rec_status,(lpCtrlItem->type == UNAVAILABLE_SOURCE), thePrefs.UseFlatBar()); 
+					*/
+					lpUpDownClient->DrawStatusBarChunk(&cdcStatus,  &rec_status,(CPartFile*)lpCtrlItem->owner, thePrefs.UseFlatBar());
+					//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
+
+					//Commander - Added: Client percentage - Start
+					//MORPH - Changed by SiRoB, Keep A4AF info
+					lpCtrlItem->dwUpdatedchunk = dwTicks + (rand() % 128); 
+				} else 
+					hOldBitmap = cdcStatus.SelectObject(lpCtrlItem->statuschunk); 
+
+				dc->BitBlt(rcDraw.left, rcDraw.top, iWidth, iHeight,  &cdcStatus, 0, 0, SRCCOPY); 
+				cdcStatus.SelectObject(hOldBitmap);
+			}
+			//MORPH END - Downloading Chunk Detail Display
 			break;
 
 		case 4:		// speed
@@ -1656,7 +1700,9 @@ void CDownloadListCtrl::HideSources(CPartFile* toCollapse)
 		{
 			pre++;
 			item->dwUpdated = 0;
+			item->dwUpdatedchunk = 0; //MORPH - Downloading Chunk Detail Display
 			item->status.DeleteObject();
+			item->statuschunk.DeleteObject(); //MORPH - Downloading Chunk Detail Display
 			DeleteItem(i--);
 			post++;
 		}

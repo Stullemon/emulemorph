@@ -550,6 +550,11 @@ public:
 	*/
 	void			DrawStatusBar(CDC* dc, LPCRECT rect, const CPartFile* File, bool  bFlat) const;
 	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
+	
+	//MORPH START - Downloading Chunk Detail Display
+	void			DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* file, bool  bFlat) const;
+	//MORPH END   - Downloading Chunk Detail Display
+	
 	bool			AskForDownload();
 	virtual void	SendFileRequest();
 	void			SendStartupLoadReq();

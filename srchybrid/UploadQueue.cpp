@@ -597,18 +597,36 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		if (i >= classID) ++m_aiSlotCounter[i];
 		m_abAddClientOfThisClass[i] = m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]>m_aiSlotCounter[i];
 	}
-	//MORPH END - Added by SiROB, Upload SPlitting Class
+	//MORPH END - Added by SiROB, Upload Splitting Class
 
 }
 
 //MORPH START - Added By AndCycle, ZZUL_20050212-0200
+//MORPH START - Changed by , Upload Splitting Class
+/*
 CUpDownClient* CUploadQueue::FindLastUnScheduledForRemovalClientInUploadList() {
+*/
+CUpDownClient* CUploadQueue::FindLastUnScheduledForRemovalClientInUploadList(uint32 classID) {
+//MORPH END   - Changed by , Upload Splitting Class
 	POSITION pos = uploadinglist.GetTailPosition();
 	while(pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetPrev(pos);
 
+		//MORPH START - Changed by , Upload Splitting Class
+		/*
 		if(!cur_client->IsScheduledForRemoval()) {
+		*/
+		if(
+		   (
+		    m_abAddClientOfThisClass[classID] && cur_client->GetClassID() >= classID  //targeted class don't use its full bandwidth && we found a client with lower class in uploadqueue
+			||
+			m_abAddClientOfThisClass[classID] == false && cur_client->GetClassID() == classID  //targeted class use its full bandwidth && we found a client with equal class in uploadqueue
+		   )
+		   &&
+		   !cur_client->IsScheduledForRemoval()
+		  ) {
+		//MORPH END   - Changed by , Upload Splitting Class
 			return cur_client;
 		}
 	}
@@ -669,7 +687,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		/*
 		CUpDownClient* queueNewclient = FindBestClientInQueue(highPrioCheck == false, newclient);
 		*/
-		CUpDownClient* queueNewclient = FindBestClientInQueue(highPrioCheck == false, newclient, true);
+		CUpDownClient* queueNewclient = FindBestClientInQueue(highPrioCheck == false, newclient, /*true*/highPrioCheck == false);
 		//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 		int superior;
@@ -685,8 +703,11 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
         }
 		if(newclient) {
             if(highPrioCheck == true) {
-                if(m_abAddClientOfThisClass[0] && newclient->IsFriend() && newclient->GetFriendSlot() || m_abAddClientOfThisClass[1] && newclient->GetPowerShared()) { //MORPH - Changed by SiRoB, Upload Splitting Class
-                    CUpDownClient* lastClient = FindLastUnScheduledForRemovalClientInUploadList();
+                //MORPH START - Changed by , Upload Splitting Class
+				bool wanttoaddanewfriendslot = newclient->IsFriend() && newclient->GetFriendSlot();
+				if(wanttoaddanewfriendslot || newclient->GetPowerShared()) {
+					CUpDownClient* lastClient = FindLastUnScheduledForRemovalClientInUploadList(wanttoaddanewfriendslot?0:1);
+				//MORPH END   - Changed by , Upload Splitting Class
 
 					if(lastClient != NULL) {
 						if (RightClientIsSuperior(lastClient, newclient) > 0)
@@ -927,7 +948,7 @@ void CUploadQueue::Process() {
 		if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i]==m_aiSlotCounter[i] && abScheduledClient[i] == true) {
 			if (abConnectingClient[i] == false)
 				m_abAddClientOfThisClass[i] = true;
-			else
+			else if (m_abAddClientOfThisClass[i] == false)
 				m_nLastStartUpload = GetTickCount();
 		}
 	}
@@ -1068,7 +1089,7 @@ bool CUploadQueue::ForceNewClient() {
     }
 
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-		if(m_abAddClientOfThisClass[classID])
+		if(m_abAddClientOfThisClass[classID] && m_abAddClientOfThisClass[LAST_CLASS])
 			return true;
 
 	//nope

@@ -3782,7 +3782,7 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
 
 	if (bytesPerRequest > EMBLOCKSIZE) {
-		*count = min(bytesPerRequest/EMBLOCKSIZE, *count); //MORPH - Added by SiRoB, Enhanced DBR
+		*count = min((uint16)(bytesPerRequest/EMBLOCKSIZE), *count); //MORPH - Added by SiRoB, Enhanced DBR
 		bytesPerRequest = EMBLOCKSIZE;
 	}
 	else
@@ -6394,7 +6394,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
 
 	if (bytesPerRequest > EMBLOCKSIZE) {
-		*count = min(bytesPerRequest/EMBLOCKSIZE, *count); //MORPH - Added by SiRoB, Enhanced DBR
+		*count = min((uint16)(bytesPerRequest/EMBLOCKSIZE), *count); //MORPH - Added by SiRoB, Enhanced DBR
 		bytesPerRequest = EMBLOCKSIZE;
 	} else
 		*count = 1; //MORPH - Added by SiRoB, Enhanced DBR

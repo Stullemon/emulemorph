@@ -439,7 +439,9 @@ private:
 	bool	newdate;	// indicates if there was a writeaccess to the .part file
 	uint32	lastpurgetime;
 	uint32	m_LastNoNeededCheck;
+public:  //morph
 	CTypedPtrList<CPtrList, Gap_Struct*> gaplist;
+private:  //morph
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> requestedblocks_list;
 	//MORPH - Moved by SiRoB, moved in public area du to Share Only The Need
 	/*

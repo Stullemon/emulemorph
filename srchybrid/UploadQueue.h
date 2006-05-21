@@ -120,11 +120,12 @@ private:
 	void CheckForHighPrioClient();
 
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
-    CUpDownClient* FindLastUnScheduledForRemovalClientInUploadList();
     //MORPH START - Changed by SiRoB, Upload Splitting Class
 	/*
+	CUpDownClient* FindLastUnScheduledForRemovalClientInUploadList();
 	CUpDownClient* FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated(bool checkforaddinuploadinglist);
 	*/
+	CUpDownClient* FindLastUnScheduledForRemovalClientInUploadList(uint32 classID);
 	CUpDownClient* FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated(bool checkforaddinuploadinglist);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200

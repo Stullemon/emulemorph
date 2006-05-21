@@ -238,7 +238,13 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" BETA2");
+// MORPH START leuk_he mod beta version
+#ifdef BETAREL 
+	m_strCurVersionLong += BETAREL; // MOD beta version 
+#else // 
+	m_strCurVersionLong += _T(" BETA");
+#endif BETAREL
+// MORPH END leuk_he mod beta version	 
 #endif
 
 	// create the protocol version number
