@@ -64,7 +64,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	COLORREF crHiddenPartByHideOS;
 	COLORREF crHiddenPartBySOTNandHideOS;
 	//MORPH END   - Added by SiRoB, See chunk that we hide
-
+	COLORREF crProgress;
     if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
        (GetUploadState() != US_UPLOADING && GetUploadState() != US_CONNECTING) ) {
         crNeither = RGB(224, 224, 224);
@@ -77,7 +77,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		crHiddenPartByHideOS = RGB(96, 192, 255);
 		crHiddenPartBySOTNandHideOS = RGB(96, 96, 255);
 		//MORPH END   - Added by SiRoB, See chunk that we hide
-
+		crProgress = RGB(0, 224, 0);
     } else {
         // grayed out
         crNeither = RGB(248, 248, 248);
@@ -90,6 +90,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		crHiddenPartByHideOS = RGB(128, 224, 255);
 		crHiddenPartBySOTNandHideOS = RGB(128, 128, 255);
 		//MORPH END   - Added by SiRoB, See chunk that we hide
+		crProgress = RGB(191, 255, 191);
     }
 
 	// wistily: UpStatusFix
@@ -150,7 +151,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		if (!m_DoneBlocks_list.IsEmpty()){
 			for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;){
 				block = m_DoneBlocks_list.GetNext(pos);
-				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset + 1, crSending);
+				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset + 1, crProgress);
 			}
 
             // Also show what data is buffered (with color crBuffer)
@@ -159,15 +160,15 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		    for(POSITION pos=m_DoneBlocks_list.GetTailPosition();pos!=0; ){
 			    Requested_Block_Struct* block = m_DoneBlocks_list.GetPrev(pos);
     
-                if(total + (block->EndOffset-block->StartOffset) <= GetQueueSessionPayloadUp()) {
+                /*FIX*/if(total + (block->EndOffset-block->StartOffset) <= GetSessionPayloadUp()) {
                     // block is sent
-			        s_UpStatusBar.FillRange((uint64)block->StartOffset, (uint64)block->EndOffset, crSending);
+			        s_UpStatusBar.FillRange((uint64)block->StartOffset, (uint64)block->EndOffset, crProgress);
                     total += block->EndOffset-block->StartOffset;
                 }
-                else if (total < GetQueueSessionPayloadUp()){
+                /*FIX*/else if (total < GetSessionPayloadUp()){
                     // block partly sent, partly in buffer
                     total += block->EndOffset-block->StartOffset;
-                    uint64 rest = total - GetQueueSessionPayloadUp();
+                    /*FIX*/uint64 rest = total - GetSessionPayloadUp();
                     uint64 newEnd = (block->EndOffset-rest);
     
     			    s_UpStatusBar.FillRange((uint64)block->StartOffset, (uint64)newEnd, crSending);
@@ -192,6 +193,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 	COLORREF crBoth;
 	COLORREF crSending;
 	COLORREF crBuffer;
+	COLORREF crProgress;
 	COLORREF crDot;
     if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
        (GetUploadState() != US_UPLOADING && GetUploadState() != US_CONNECTING) ) {
@@ -201,6 +203,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 	    crSending = RGB(0, 150, 0);
 		crBuffer = RGB(255, 100, 100);
 		crDot = RGB(255, 255, 255);
+		crProgress = RGB(0, 224, 0);
     } else {
         // grayed out
         crNeither = RGB(248, 248, 248);
@@ -209,6 +212,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 	    crSending = RGB(191, 229, 191);
 		crBuffer = RGB(255, 216, 216);
 		crDot = RGB(255, 255, 255);
+		crProgress = RGB(191, 255, 191);
     }
 
 	// wistily: UpStatusFix
@@ -265,13 +269,9 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 				} else
 					s_UpStatusBar.Fill(crNeither);
 			}
-				if (block->StartOffset >= start) {
-					if (block->EndOffset <= end)
-						s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, block->EndOffset%PARTSIZE, crNextSending);
-					else
-						s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crNextSending);
-				} else if (block->EndOffset <= end)
-					s_UpStatusBar.FillRange(0, block->EndOffset%PARTSIZE, crNextSending);
+				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+					s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextSending);
+				}
 			}
 		}
 		
@@ -282,21 +282,21 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 		    for(POSITION pos=m_DoneBlocks_list.GetTailPosition();pos!=0; ){
 			    block = m_DoneBlocks_list.GetPrev(pos);
 				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
-					if(total + (block->EndOffset-block->StartOffset) <= GetQueueSessionPayloadUp()) {
+					if(total + (block->EndOffset-block->StartOffset) <= GetSessionPayloadUp()) {
 						// block is sent
 						if (block->StartOffset >= start) {
 							if (block->EndOffset <= end)
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, block->EndOffset%PARTSIZE, crSending);
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, block->EndOffset%PARTSIZE, crProgress);
 							else
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crSending);
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crProgress);
 						} else if (block->EndOffset <= end)
-							s_UpStatusBar.FillRange(0, block->EndOffset%PARTSIZE, crSending);
+							s_UpStatusBar.FillRange(0, block->EndOffset%PARTSIZE, crProgress);
 						total += block->EndOffset-block->StartOffset;
 					}
-					else if (total < GetQueueSessionPayloadUp()){
+					else if (total < GetSessionPayloadUp()){
 						// block partly sent, partly in buffer
 						total += block->EndOffset-block->StartOffset;
-						uint64 rest = total -  GetQueueSessionPayloadUp();
+						uint64 rest = total -  GetSessionPayloadUp();
 						uint64 newEnd = (block->EndOffset-rest);
 						if (newEnd>=start) {
 							if (newEnd<=end) {
@@ -314,13 +314,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 					else{
 						// entire block is still in buffer
 						total += block->EndOffset-block->StartOffset;
-						if (block->StartOffset>=start) {
-							if (block->EndOffset <= end)
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, block->EndOffset%PARTSIZE, crBuffer);
-							else
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crBuffer);
-						} else if (block->EndOffset <= end)
-							s_UpStatusBar.FillRange((uint64)0, block->EndOffset%PARTSIZE, crBuffer);
+						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
 					}
 				} else
 					total += block->EndOffset-block->StartOffset;
@@ -683,13 +677,16 @@ public:
 //MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
-	if(m_BlockRequests_queue.IsEmpty()) {
+    if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
+       m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 2*EMBLOCKSIZE) { // the buffered data is large enough allready
 		return;
 	}
 	CString fullname;
 	bool bFromPF = true; // Statistic to breakdown uploaded data by complete file vs. partfile.
 	try{
-        while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2) {
+	// Buffer new data if current buffer is less than 100 KBytes
+        while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2 &&
+		(m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < EMBLOCKSIZE)) {
 
 			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
 			CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(currentblock->FileID);

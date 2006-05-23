@@ -74,6 +74,7 @@
 #include "LangIDs.h"
 #include "HelpIDs.h"
 #include "fakecheck.h" //MORPH - Added by SiRoB
+#include "ModVersion.h" // Morph - leuk_he  beta release
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
 // Commander - Added: Custom incoming folder icon [emulEspaña] - End

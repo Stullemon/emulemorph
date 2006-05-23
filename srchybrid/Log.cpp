@@ -424,6 +424,9 @@ bool CLogFile::Log(LPCTSTR pszMsg, int iLen)
 		//close then open new file name
 		Close();
 		Open();
+     	if (m_fp == NULL)
+		   return false; // leuk_he extra check
+
 	}
 	//Morph END - Added by SiRoB, AndCycle, Date File Name Log
 

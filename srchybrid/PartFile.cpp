@@ -2133,6 +2133,28 @@ bool CPartFile::ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const
 	return true;
 }
 
+//MORPH - Enhanced DBR
+uint64 CPartFile::GetTotalGapSizeInCommun(const uint8* srcstatus) const
+{
+	ASSERT(srcstatus);
+	uint64 uTotalGapSizeInCommun = 0;
+	POSITION pos = gaplist.GetHeadPosition();
+	while (pos)
+	{
+		const Gap_Struct* pGap = gaplist.GetNext(pos);
+		UINT i = (UINT)(pGap->start/PARTSIZE);
+		UINT end_chunk = (UINT)(pGap->end/PARTSIZE);
+		while (i < end_chunk) {
+			if (srcstatus[i]&SC_AVAILABLE)
+				uTotalGapSizeInCommun += PARTSIZE;
+			++i;
+		}
+		uTotalGapSizeInCommun += pGap->end - pGap->start + 1;
+	}
+	return uTotalGapSizeInCommun;
+}
+//MORPH - Enhanced DBR
+
 uint64 CPartFile::GetTotalGapSizeInRange(uint64 uRangeStart, uint64 uRangeEnd) const
 {
 	ASSERT( uRangeStart <= uRangeEnd );
@@ -2474,7 +2496,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 	else
 	{
         if (bFlat) {
-			crProgress = RGB(0, 150, 0);
+			crProgress = RGB(0, 224, 0);
             crDot = RGB(128, 128, 128);
         } else {
 			crProgress = RGB(0, 224, 0);
@@ -3756,30 +3778,25 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	// BEGIN netfinty: Dynamic Block Requests
 	uint64	bytesPerRequest = EMBLOCKSIZE;
 #if !defined DONT_USE_DBR
-	//MORPH START - Changed by SiRoB, Enhanced DBR
+	//MORPH START - Enhanced DBR
 	/*
 	uint64 bytesLeftToDownload = GetFileSize() - GetCompletedSize();
 	*/
-	uint64	bytesLeftToDownload = 0;
 	const uint8* srcstatus = sender->GetPartStatus();
-	if (srcstatus) {
-		for(uint32 i = 0; i < GetPartCount(); i++) {
-			//MORPH - Changed by SiRoB, ICS merged into partstatus
-			/*
-			if ((srcstatus[i]&SC_AVAILABLE) && !IsComplete(PARTSIZE*(uint64)i, PARTSIZE*(uint64)(i+1)-1, false))
-			*/
-			if ((srcstatus[i]&SC_AVAILABLE) && !IsComplete(PARTSIZE*(uint64)i, PARTSIZE*(uint64)(i+1)-1, false))
-				bytesLeftToDownload += PARTSIZE;
-		}
-		bytesLeftToDownload = min(GetFileSize() - GetCompletedSize(), bytesLeftToDownload);
-	} else
-		ASSERT(0);
-	//MORPH END   - Changed by SiRoB, Enhanced DBR
+	uint64	bytesLeftToDownload = GetTotalGapSizeInCommun(srcstatus);
+	//MORPH END   - Enhanced DBR
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
 
 	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
+	//MORPH START - Enhanced DBR
+	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
+	if (bytesPerRequest > sourcealreadyreserveddata)
+		bytesPerRequest -= sourcealreadyreserveddata;
+	else
+		return false;
+	//MORPH END   - Enhanced DBR
 
 	if (bytesPerRequest > EMBLOCKSIZE) {
 		*count = min((uint16)(bytesPerRequest/EMBLOCKSIZE), *count); //MORPH - Added by SiRoB, Enhanced DBR
@@ -6367,31 +6384,25 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	// BEGIN netfinty: Dynamic Block Requests
 	uint64	bytesPerRequest = EMBLOCKSIZE;
 #if !defined DONT_USE_DBR
-	//MORPH START - Changed by SiRoB, Enhanced DBR
+	//MORPH START - Enhanced DBR
 	/*
 	uint64 bytesLeftToDownload = GetFileSize() - GetCompletedSize();
 	*/
-	uint64	bytesLeftToDownload = 0;
 	const uint8* srcstatus = sender->GetPartStatus();
-	if (srcstatus) {
-		for(uint32 i = 0; i < GetPartCount(); i++) {
-			//MORPH - Changed by SiRoB, ICS merged into partstatus
-			/*
-			if (srcstatus[i] && !IsComplete(PARTSIZE*(uint64)i, PARTSIZE*(uint64)(i+1)-1, false))
-			*/
-			if ((srcstatus[i]&SC_AVAILABLE) && !IsComplete(PARTSIZE*(uint64)i, PARTSIZE*(uint64)(i+1)-1, false))
-				bytesLeftToDownload += PARTSIZE;
-		}
-		bytesLeftToDownload = min(GetFileSize() - GetCompletedSize(), bytesLeftToDownload);
-	} else {
-		ASSERT(0);
-	}
-	//MORPH END   - Changed by SiRoB, Enhanced DBR
+	uint64	bytesLeftToDownload = GetTotalGapSizeInCommun(srcstatus);
+	//MORPH END   - Enhanced DBR
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
 
 	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
+	//MORPH START - Enhanced DBR
+	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
+	if (bytesPerRequest > sourcealreadyreserveddata)
+		bytesPerRequest -= sourcealreadyreserveddata;
+	else
+		return false;
+	//MORPH END   - Enhanced DBR
 
 	if (bytesPerRequest > EMBLOCKSIZE) {
 		*count = min((uint16)(bytesPerRequest/EMBLOCKSIZE), *count); //MORPH - Added by SiRoB, Enhanced DBR

@@ -188,7 +188,9 @@ void CUpDownClient::Init()
 	m_cMessagesSent = 0;
 	m_nCurSessionUp = 0;
 	m_nCurSessionDown = 0;
+	/*zz*/m_nCurSessionPayloadDown = 0;
 	/*zz*/m_nCurQueueSessionUp = 0;
+	/*FIX*/m_nCurSessionPayloadUp = 0;
 	m_nSumForAvgDownDataRate = 0;
 	m_clientSoft=SO_UNKNOWN;
 	m_bRemoteQueueFull = false;
@@ -2935,6 +2937,7 @@ void CUpDownClient::AssertValid() const
 	(void)m_cAsked;
 	(void)m_dwLastUpRequest;
 	(void)m_nCurSessionUp;
+    /*FIX*/(void)m_nCurSessionPayloadUp;
     (void)m_nCurQueueSessionPayloadUp;
     (void)m_addedPayloadQueueSession;
 	(void)m_nUpPartCount;
@@ -2951,6 +2954,7 @@ void CUpDownClient::AssertValid() const
 	(void)m_abyPartStatus;
 	(void)m_strClientFilename;
 	(void)m_nTransferredDown;
+    /*zz*/(void)m_nCurSessionPayloadDown;
 	(void)m_dwDownStartTime;
 	(void)m_nLastBlockOffset;
 	(void)m_nDownDatarate;

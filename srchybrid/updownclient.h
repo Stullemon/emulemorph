@@ -431,9 +431,11 @@ public:
 	bool			HasCollectionUploadSlot() const					{ return m_bCollectionUploadSlot; }
 
 	UINT			GetSessionUp() const							{ return m_nTransferredUp - m_nCurSessionUp; }
+/*FIX*/UINT			GetSessionPayloadUp() const						{ return GetQueueSessionPayloadUp() - m_nCurSessionPayloadUp; }
 	void			ResetSessionUp(){
 						m_nCurSessionUp = m_nTransferredUp;
 						m_addedPayloadQueueSession = GetQueueSessionPayloadUp(); 
+			   /*FIX*/m_nCurSessionPayloadUp = m_addedPayloadQueueSession;
 						//m_nCurQueueSessionPayloadUp = 0;
 					}
 
@@ -450,8 +452,10 @@ public:
 					} 
 
 	UINT			GetSessionDown() const							{ return m_nTransferredDown - m_nCurSessionDown; }
+    /*zz*/UINT            GetSessionPayloadDown() const                   { return m_nCurSessionPayloadDown; }
 	void			ResetSessionDown() {
 						m_nCurSessionDown = m_nTransferredDown;
+                        m_nCurSessionPayloadDown = 0;
 					}
 	UINT			GetQueueSessionPayloadUp() const				{ return m_nCurQueueSessionPayloadUp; }
     UINT			GetPayloadInBuffer() const						{ return m_addedPayloadQueueSession - GetQueueSessionPayloadUp(); }
@@ -563,6 +567,9 @@ public:
 	void			ProcessHashSet(const uchar* data, UINT size);
 	void			ProcessAcceptUpload();
 	bool			AddRequestForAnotherFile(CPartFile* file);
+	//MORPH START - Enhanced DBR
+	uint64			GetRemainingReservedDataToDownload();
+	//MORPH END   - Enhanced DBR
 	void			CreateBlockRequests(int iMaxBlocks);
 	virtual void	SendBlockRequests(bool ed2k = false); //MORPH - Changed by SiRoB, WebCache Retry by ed2k
 	virtual bool	SendHttpBlockRequests();
@@ -1006,6 +1013,7 @@ protected:
 	UINT		m_cAsked;
 	uint32		m_dwLastUpRequest;
 	UINT		m_nCurSessionUp;
+/*FIX*/UINT		m_nCurSessionPayloadUp;
 	UINT		m_nCurSessionDown;
     uint32      m_nCurQueueSessionUp;
     UINT		m_nCurQueueSessionPayloadUp;
@@ -1044,6 +1052,7 @@ protected:
 	uint8*		m_abyPartStatus;
 	CString		m_strClientFilename;
 	UINT		m_nTransferredDown;
+    /*zz*/UINT        m_nCurSessionPayloadDown;
 	uint32		m_dwDownStartTime;
 	uint64		m_nLastBlockOffset;
 	uint32		m_dwLastBlockReceived;

@@ -495,7 +495,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						if(client->GetSessionUp() == client->GetQueueSessionUp()) {
 							Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false));
 						} else {
-							Sbuffer.Format(_T("%s (%s=%s+%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionUp()-client->GetSessionUp()));
+							Sbuffer.Format(_T("%s=%s+%s (%s=%s+%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(client->GetSessionPayloadUp()), CastItoXBytes(client->GetQueueSessionPayloadUp()-client->GetSessionPayloadUp()), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionUp()-client->GetSessionUp()));
 						}
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 						break;

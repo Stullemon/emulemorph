@@ -197,6 +197,7 @@ public:
 	bool	IsAlreadyRequested(uint64 start, uint64 end) const;
     bool    ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const;
 	bool	IsCorruptedPart(UINT partnumber) const;
+	uint64	GetTotalGapSizeInCommun(const uint8* srcstatus) const; //MORPH - Enhanced DBR
 	uint64	GetTotalGapSizeInRange(uint64 uRangeStart, uint64 uRangeEnd) const;
 	uint64	GetTotalGapSizeInPart(UINT uPart) const;
 	void	UpdateCompletedInfos();

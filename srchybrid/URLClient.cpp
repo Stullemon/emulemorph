@@ -441,6 +441,7 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 			if (lenWritten > 0)
 			{
 				m_nTransferredDown += uSize;
+                /*zz*/m_nCurSessionPayloadDown += lenWritten;
 				SetTransferredDownMini();
 
 				if (nEndPos >= cur_block->block->EndOffset)

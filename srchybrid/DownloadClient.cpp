@@ -45,6 +45,7 @@
 #include "WebCache/WebCacheSocket.h" // yonatan http
 #include "SharedFileList.h"	// Superlexx - IFP
 // MORPH END - Added by Commander, WebCache 1.2e
+#include "WebCache/WebCachedBlockList.h"	// used for DrawStatusBar
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -101,7 +102,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 		if (g_bLowColorDesktop) {
 			crBoth = RGB(0, 0, 0);
 			crClientOnly = RGB(0, 0, 255);
-			crPending = RGB(0, 255, 0);
+			crPending = RGB(0, 191, 0);
 			crNextPending = RGB(255, 255, 0);
 			crMeOnly = RGB(127,127,127); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 			crClientPartial = RGB(255,191,0); // enkeyDev: ICS //Morph - added by AndCycle, ICS
@@ -193,9 +194,9 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 	if (g_bLowColorDesktop) {
 		crBoth = RGB(0, 0, 0);
 		crClientOnly = RGB(0, 0, 255);
-		crPending = RGB(0, 255, 0);
+		crPending = RGB(0, 191, 0);
 		crNextPending = RGB(255, 255, 0);
-		crNeither = RGB(192, 192, 192);
+		crNeither = RGB(191, 191, 191);
 		crBuffer = RGB(255, 0, 0);
 		crProgress = RGB(0, 255, 0);
 		crDot = RGB(255, 255, 255);
@@ -206,7 +207,7 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 		crNextPending = RGB(255, 208, 0);
 		crNeither = RGB(224, 224, 224);
 		crBuffer = RGB(255, 0, 0);
-		crProgress = RGB(0, 150, 0);
+		crProgress = RGB(0, 224, 0);
 		crDot = RGB(255, 255, 255);
 	} else {
 		crBoth = RGB(104, 104, 104);
@@ -259,7 +260,7 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 		}
 	}
 	
-	// Draw Gap part of the chunk
+	// Draw Gap part of the chunk in blue for normal client and none for proxy
 	for (POSITION pos = file->gaplist.GetHeadPosition();pos !=  0;){
 		const Gap_Struct* cur_gap = file->gaplist.GetNext(pos);
 		bool gapdone = false;
@@ -268,39 +269,57 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 		if (gapstart >= start && gapstart <= end || gapend >= start && gapend <= end) {
 			if (gapstart>=start) {
 				if (gapend<end)
-					s_StatusBar.FillRange(gapstart%PARTSIZE, (gapend + 1)%PARTSIZE,  crClientOnly);
+					s_StatusBar.FillRange(gapstart%PARTSIZE, (gapend + 1)%PARTSIZE,  IsProxy()?crNeither:crClientOnly);
 				else
-					s_StatusBar.FillRange(gapstart%PARTSIZE, end%PARTSIZE,  crClientOnly);
+					s_StatusBar.FillRange(gapstart%PARTSIZE, end%PARTSIZE,  IsProxy()?crNeither:crClientOnly);
 			} else if (gapend<end) {
-				s_StatusBar.FillRange((uint64)0, (gapend + 1)%PARTSIZE,  crClientOnly);
+				s_StatusBar.FillRange((uint64)0, (gapend + 1)%PARTSIZE,  IsProxy()?crNeither:crClientOnly);
 			}
 		}
 	}
 	
-	/*
+	if (IsProxy()) {
+		//Fill with blue WCblock available
+		for (POSITION pos = WebCachedBlockList.GetHeadPosition();pos !=  0;){
+			CWebCachedBlock* WCBlock = WebCachedBlockList.GetNext(pos);
+			if (md4cmp(WCBlock->block->FileID, file->GetFileHash()) == 0) {
+				block = WCBlock->block;
+				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+					s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crClientOnly);
+				}
+			}
+		}
+	}
+	
 	if (!m_DownloadBlocks_list.IsEmpty()){
+		//Fill with white Block reserved but not requested yet
 		for(POSITION pos=m_DownloadBlocks_list.GetHeadPosition();pos!=0;){
 			block = m_DownloadBlocks_list.GetNext(pos);
 			if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
 				s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crDot);
 			}
 		}
-	}*/
+	}
 
 	if (!m_PendingBlocks_list.IsEmpty()){
+		//Fill with red block part not received yet for the current recieving block
+		//Fill with darkgreen block part received for the current receiving block
+		//Fill with yellow block requested
 		for(POSITION pos=m_PendingBlocks_list.GetTailPosition();pos!=0; ){
-			block = m_PendingBlocks_list.GetPrev(pos)->block;
+			Pending_Block_Struct* Pending = m_PendingBlocks_list.GetPrev(pos);
+			block = Pending->block;
 			if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
-				if(m_nLastBlockOffset < block->StartOffset) {
+				uint64 currentpos = m_nLastBlockOffset+Pending->totalUnzipped;
+				if(currentpos < block->StartOffset) {
 					// block have not been started yet
 					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
 				}
-				else if (m_nLastBlockOffset > block->EndOffset) {
+				else if (currentpos > block->EndOffset) {
 					// block have not been started yet
 					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
 				}
 				else {
-					uint64 newEnd = m_nLastBlockOffset;
+					uint64 newEnd = currentpos;
 					// block partly received or partly in buffer
 					if (newEnd>start) {
 						if (newEnd<end) {
@@ -1119,7 +1138,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			} 
 			//MORPH END   - Changed by SiRoB, don't overhide pszReason
             if(thePrefs.GetLogUlDlEvents())
-				AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Transferred: %s."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionDown(), false, false));
+				AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Payload: %s, Transferred: %s."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionPayloadDown(), false, false), CastItoXBytes(GetSessionDown(), false, false));
 			
 			m_fFailedDownload = 0; //MORPH - Added by SiRoB, Fix Connection Collision
 			ResetSessionDown();
@@ -1200,14 +1219,29 @@ void CUpDownClient::ProcessHashSet(const uchar* packet,uint32 size)
 	SendStartupLoadReq();
 }
 
+//MORPH START - Enhanced DBR
+uint64 CUpDownClient::GetRemainingReservedDataToDownload() {
+	uint64 reserveddata = 0;
+	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != NULL;) {
+		Pending_Block_Struct* Pending = m_PendingBlocks_list.GetNext(pos);
+		Requested_Block_Struct* block = Pending->block;
+		if (m_nLastBlockOffset < block->StartOffset && block->EndOffset > m_nLastBlockOffset)
+			reserveddata += block->EndOffset - block->StartOffset + 1;
+		else
+			reserveddata += block->EndOffset - m_nLastBlockOffset - Pending->totalUnzipped;
+	}
+	return reserveddata;
+}
+//MORPH END   - Enhanced DBR
+
 void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 {
 	ASSERT( iMaxBlocks >= 1 /*&& iMaxBlocks <= 3*/ );
-//MORPH START - Changed by SiRoB, Proper number of needed requested block
+//MORPH START - Proper number of needed requested block
 	uint16 futurePossiblePendingBlock = m_PendingBlocks_list.GetCount()+m_DownloadBlocks_list.GetCount();
 	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
-		uint16 neededblock = (uint16)(iMaxBlocks - futurePossiblePendingBlock);
+		uint16 neededblock = (uint16)(iMaxBlocks - m_DownloadBlocks_list.GetCount());
 		Requested_Block_Struct** toadd = new Requested_Block_Struct*[neededblock];
 		if (reqfile->GetNextRequestedBlock(this,toadd,&neededblock)){
 			for (UINT i = 0; i < neededblock; i++)
@@ -1215,13 +1249,14 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 		}
 		delete[] toadd;
 	}
-//MORPH END  - Changed by SiRoB, Proper number of needed requested block
-	while (m_PendingBlocks_list.GetCount() < iMaxBlocks && !m_DownloadBlocks_list.IsEmpty())
+	uint8 i = 0;
+	while (!m_DownloadBlocks_list.IsEmpty() && i++ < 3)
 	{
 		Pending_Block_Struct* pblock = new Pending_Block_Struct;
 		pblock->block = m_DownloadBlocks_list.RemoveHead();
 		m_PendingBlocks_list.AddTail(pblock);
 	}
+//MORPH END  - Proper number of needed requested block
 }
 
 //MORPH - Changed by SiRoB, WebCache Retry by edk2
@@ -1582,9 +1617,13 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 	// <-----khaos-
 
 	m_nDownDataRateMS += uTransferredFileDataSize;
+	//MORPH - Avoid Credits Accumulate faker
+	/*
 	if (credits)
 		credits->AddDownloaded(uTransferredFileDataSize, GetIP());
-
+	*/
+	bool bpacketusefull = false;
+	//MORPH - Avoid Credit faker
 	// Move end back one, should be inclusive
 	nEndPos--;
 
@@ -1614,6 +1653,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 			// Handle differently depending on whether packed or not
 			if (!packed)
 			{
+				bpacketusefull = true;
 				// Write to disk (will be buffered in part file class)
 				lenWritten = reqfile->WriteToBuffer(uTransferredFileDataSize, 
 													packet + nHeaderSize,
@@ -1652,6 +1692,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 							// There is no chance to recover from this error
 						}
 						else{
+							bpacketusefull = true; //MORPH - Avoid Credit faker
 							// Write uncompressed data to file
 							lenWritten = reqfile->WriteToBuffer(uTransferredFileDataSize,
 								unzipped,
@@ -1698,6 +1739,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 			if (lenWritten > 0)
 			{
 				m_nTransferredDown += uTransferredFileDataSize;
+                /*zz*/m_nCurSessionPayloadDown += lenWritten;
 				SetTransferredDownMini();
 
 				// If finished reserved block
@@ -1719,11 +1761,19 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 					SendBlockRequests();	
 				}
 			}
+			//MORPH - Avoid Credits Accumulate faker
+			if (bpacketusefull){
+				if (credits)
+					credits->AddDownloaded(uTransferredFileDataSize, GetIP());
+			}
+			//MORPH - Avoid Credits Accumulate faker
 
 			// Stop looping and exit method
 			return;
 		}
 	}
+	if (thePrefs.GetVerbose())
+		DebugLogWarning(_T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 
 	TRACE("%s - Dropping packet\n", __FUNCTION__);
 }

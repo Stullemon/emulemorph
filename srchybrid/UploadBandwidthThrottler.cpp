@@ -678,6 +678,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
         			lastTickReachedBandwidthClass[classID] = thisLoopTick;
         		}
 				if (timeSinceLastLoop > 0) {
+					sint64 limit = -((sint64)(sleepTime + 2000)*allowedDataRate);
+					if (realBytesToSpendClass[classID] < limit)
+						realBytesToSpendClass[classID] = limit;
+									
 					if (_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
 						realBytesToSpendClass[classID] += allowedDataRate*min(sleepTime + 2000, timeSinceLastLoop);
 					} else {
@@ -840,7 +844,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						}
 					}
 		            
-					if (ClientDataRate[classID] > 0 && BytesToSpend/slotCounterClass[classID] > (ClientDataRate[classID]>>1)) {
+					if (ClientDataRate[classID] > 0 && BytesToSpend > 0 && BytesToSpend/slotCounterClass[classID] > (ClientDataRate[classID]>>1)) {
 						//we need one more slot to feet the datarate limit per slot
 						if(lastclientpos+slotCounterClass[classID]+1 > m_highestNumberOfFullyActivatedSlotsClass[classID]) {
 								m_highestNumberOfFullyActivatedSlotsClass[classID] = lastclientpos+slotCounterClass[classID]+1;
@@ -857,7 +861,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						allowedclientdatarate = min(allowedclientdatarate,ClientDataRate[classID]);
 					uint64 spentBytes = 0;
 					uint64 spentOverhead = 0;
-					for(uint32 maxCounter = 0; maxCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend && (uint64)(allowedclientdatarate>>2) <= (uint64)BytesToSpend-spentBytes; maxCounter++) {
+					for(uint32 maxCounter = 0; maxCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend; maxCounter++) {
 						if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID])
 							rememberedSlotCounterClass[classID] = 0;
 						uint32 slotCounter = lastclientpos + (ClientDataRate[classID]?rememberedSlotCounterClass[classID]:maxCounter);
@@ -868,8 +872,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									uint32 BytesToSend = max((UINT)(allowedclientdatarate>>2), doubleSendSize);
-									//BytesToSend = min(BytesToSend, (UINT)(BytesToSpend - spentBytes));
+									uint32 BytesToSend = min((UINT)(allowedclientdatarate>>2), (UINT)(stat->realBytesToSpend/1000));
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
@@ -893,14 +896,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						++rememberedSlotCounterClass[classID];
 					}
 					//send remain data to scheduled slot
-					for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID] && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend  && (uint64)(allowedclientdatarate>>2) <= (uint64)BytesToSpend-spentBytes; slotCounter++) {
+					for(uint32 slotCounter = lastclientpos; slotCounter < lastclientpos + slotCounterClass[classID] && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
 								if (stat->realBytesToSpend > 999 && stat->scheduled == true) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									uint32 BytesToSend = max((UINT)(allowedclientdatarate>>2), doubleSendSize);
+									uint32 BytesToSend = min((UINT)(allowedclientdatarate>>2), (UINT)(stat->realBytesToSpend/1000));
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(UINT(BytesToSpend - spentBytes), doubleSendSize);

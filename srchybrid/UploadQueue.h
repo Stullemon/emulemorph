@@ -59,7 +59,7 @@ public:
 	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
 	uint32	GetActiveUploadsCount()					{return m_MaxActiveClientsShortTime;}
 	uint32	GetActiveUploadsCountLongPerspective()					{return m_MaxActiveClients;}
-    /*zz*/uint32 GetEffectiveUploadListCount();
+    /*zz*/uint32 GetEffectiveUploadListCount(uint32 classID); //MORPH - Upload Splitting Class
 
 	POSITION GetFirstFromUploadList()				{return uploadinglist.GetHeadPosition();}
 	CUpDownClient* GetNextFromUploadList(POSITION &curpos)	{return uploadinglist.GetNext(curpos);}
@@ -101,8 +101,10 @@ public:
 	
 protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
-	bool		AcceptNewClient();
-	bool		AcceptNewClient(uint32 curUploadSlots);
+	//MORPH - Upload Splitting Class
+	bool		AcceptNewClient(uint32 classID);
+	bool		AcceptNewClient(uint32 curUploadSlots, uint32 classID);
+	//MORPH - Upload Splitting Class
 	bool		ForceNewClient();
 
 	bool		AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd = 0, bool highPrioCheck = false);
@@ -116,7 +118,7 @@ private:
 
     void InsertInUploadingList(CUpDownClient* newclient);
     double GetAverageCombinedFilePrioAndCredit();
-	/*zz*/uint32 GetWantedNumberOfTrickleUploads();
+	/*zz*/uint32 GetWantedNumberOfTrickleUploads(uint32 classID); //MORPH - Upload Splitting Class
 	void CheckForHighPrioClient();
 
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
