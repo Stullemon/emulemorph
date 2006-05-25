@@ -1016,42 +1016,51 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
 		return true;
 
+    uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads(classID); 
+    uint32 sumclient = 0; 
+     for (uint32 i = 0; i < classID; i++) 
+          sumclient += m_aiSlotCounter[i]; 
+     if(curUploadSlots > m_MaxActiveClientsClass[classID]-sumclient+wantedNumberOfTrickles) { 
+        return false;
+     }
+    
+	//MORPH - Upload Splitting Class
+	/*
 	uint16 MaxSpeed;
     if (thePrefs.IsDynUpEnabled())
         MaxSpeed = (uint16)(theApp.lastCommonRouteFinder->GetUpload()/1024);
     else
 		MaxSpeed = thePrefs.GetMaxUpload();
-	uint32	uMaxClientDataRate = (uint32)-1;
-	if (thePrefs.GetMaxClientDataRate() && m_abAddClientOfThisClass[LAST_CLASS])
-		uMaxClientDataRate = thePrefs.GetMaxClientDataRate();
+	*/
+	uint32 AllowedDatarate[NB_SPLITTING_CLASS];
+	uint32 AllowedClientDatarate[NB_SPLITTING_CLASS];
+	theApp.lastCommonRouteFinder->GetClassByteToSend(AllowedDatarate,AllowedClientDatarate);
+	uint32 remaindatarateforcurrentclass = datarate;
 	switch (classID) {
-		case 0:
-			if (thePrefs.GetMaxClientDataRateFriend())
-		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRateFriend(),uMaxClientDataRate);
-			break;
+		case 2:
+			if (remaindatarateforcurrentclass>powershareDatarate)
+				remaindatarateforcurrentclass -= powershareDatarate;
+			else 
+				remaindatarateforcurrentclass = 0;
 		case 1:
-			if (thePrefs.GetMaxClientDataRatePowerShare())
-		uMaxClientDataRate = min(thePrefs.GetMaxClientDataRatePowerShare(),uMaxClientDataRate);
-			break;
-	}
-	if (curUploadSlots >= 4 &&
-		(
-         thePrefs.GetSlotLimitThree()==0 && curUploadSlots >= (datarate/min(2*uMaxClientDataRate/3,UPLOAD_CHECK_CLIENT_DR)) ||
-
-		 // ==> Slot Limit - Stulle
-		 (thePrefs.GetSlotLimitThree() && curUploadSlots > ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE)) ||
-		 (thePrefs.GetSlotLimitNumB() && curUploadSlots >= thePrefs.GetSlotLimitNum()) ||
-		 // <== Slot Limit - Stulle
-         //     curUploadSlots >= ((uint32)MaxSpeed)*1024/min(uMaxClientDataRate,UPLOAD_CLIENT_DATARATE) || //leuk_he by config. 
-         (
-          thePrefs.GetMaxUpload() == UNLIMITED &&
-          !thePrefs.IsDynUpEnabled() &&
-          thePrefs.GetMaxGraphUploadRate(true) > 0 &&
-          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate(false))*1024/UPLOAD_CLIENT_DATARATE
-         )
-        )
-    ) // max number of clients to allow for all circumstances
-	    return false;
+			if (remaindatarateforcurrentclass>friendDatarate)
+				remaindatarateforcurrentclass -= friendDatarate;
+			else
+				remaindatarateforcurrentclass = 0;
+	};
+	uint32 currentclientdatarateclass = AllowedClientDatarate[classID];
+	if (currentclientdatarateclass==0)
+		currentclientdatarateclass = (uint32)-1;
+	if (
+		 thePrefs.GetSlotLimitThree() &&
+	    (
+			curUploadSlots >= (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
+			||
+			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
+		 ) ||
+		 thePrefs.GetSlotLimitNumB() && curUploadSlots >= thePrefs.GetSlotLimitNum()
+       ) // max number of clients to allow for all circumstances
+	   return false;
 
 	return true;
 }
@@ -1060,9 +1069,6 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 classID) {
 	//Get number of slot from above class and cur class
 	uint32 curUploadSlotsReal = m_aiSlotCounter[classID];
-	for (uint32 i = 0; i < classID; i++)
-		curUploadSlotsReal+=m_aiSlotCounter[i];
-	
     if(!simulateScheduledClosingOfSlot || simulateScheduledClosingOfSlot && curUploadSlotsReal > 0) {
 		//Get number of slot from above class and cur class less scheduled slot of the cur class
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount(classID);

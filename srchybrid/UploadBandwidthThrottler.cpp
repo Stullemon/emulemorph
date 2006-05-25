@@ -629,7 +629,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         if(cBusy >= nCanSend && (realBytesToSpendClass[LAST_CLASS]>>8) > allowedDataRateClass[LAST_CLASS]/*999*/ /*&& m_StandardOrder_list.GetSize() > 0*/) {
             //allowedDataRate = 0;
             //realBytesToSpend = min(realBytesToSpendClass[LAST_CLASS], 1024*1000);
-            m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS] = max(m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS], (UINT)m_StandardOrder_list.GetSize()+1);
+            //m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS] = max(m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS], (UINT)m_StandardOrder_list.GetSize()+1);
             if(nSlotsBusyLevel < 125 && bUploadUnlimited) {
                 nSlotsBusyLevel = 125;
                 if(thePrefs.GetVerbose() && lotsOfLog) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount %i loopsCount: %i (set due to all slots busy)"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
@@ -638,11 +638,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
             busyEvent.Lock(1);
         }
 
-		//#define TIME_BETWEEN_UPLOAD_LOOPS 1
+		#define TIME_BETWEEN_UPLOAD_LOOPS 1
+        /*
         uint32 TIME_BETWEEN_UPLOAD_LOOPS = 0;
         if(cBusy >= nCanSend) {
             TIME_BETWEEN_UPLOAD_LOOPS = 1;
-        }
+        }*/
 
         uint32 sleepTime;
         if(allowedDataRateClass[LAST_CLASS] == _UI32_MAX || realBytesToSpendClass[LAST_CLASS] >= 1000 || allowedDataRateClass[LAST_CLASS] == 0 && nEstiminatedLimit == 0) {
