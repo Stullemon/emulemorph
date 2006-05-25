@@ -1,5 +1,18 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.13
+Changelog for eMule 0.47a MorphXT v8.13 BETA4
+--------------------------------------
+ADDED  : WC: Chunk Detail Display
+
+CHANGED: CDD: Chunk Detail Display homogeneous color choise
+CHANGED: ReadBlockFromFileThead: Changed to only prebuffer up to 2*180kBytes
+CHANGED: USC: Reworked to handle all possible case for opening slot strategy
+CHANGED: DSB: Changed the way to accumulate data
+CHANGED: Slotlimit: upspeed/3 is now per class.
+
+TWEAKED: Enhanced DBR: Take into account remaining reserved data
+FIX:     LOG: Chrash on adding ed2k link. 
+--------------------------------------
+Changelog for eMule 0.47a MorphXT v8.13 BETA3
 --------------------------------------
 ADDED  : GUI: Dont ask me again on exit dialog. (minor)
 ADDED  : GUI: Downloading Chunk Detail Display in Completed column  
@@ -24,7 +37,6 @@ CHANGED: DSB: Rise socket buffer limit to 1MBytes (was 256kB) [SiRoB]
 CHANGED: USC: Adapted it to get benefit of DSB [SiRoB]
 
 /!\: You will notice higher and proper overhead display on graph.
-
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.12
