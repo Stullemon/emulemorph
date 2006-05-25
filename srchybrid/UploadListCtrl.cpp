@@ -362,7 +362,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	if(client->IsScheduledForRemoval()) {
 		dc.SetTextColor(RGB(255,50,50));
-	} else if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
+	} else if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount(client->GetClassID())) { //MORPH - Upload Splitting Class
         dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
     }
 

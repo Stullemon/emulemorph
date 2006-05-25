@@ -57,9 +57,11 @@ public:
 
 	int		GetWaitingUserCount()					{return waitinglist.GetCount();}
 	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
-	uint32	GetActiveUploadsCount()					{return m_MaxActiveClientsShortTime;}
-	uint32	GetActiveUploadsCountLongPerspective()					{return m_MaxActiveClients;}
-    /*zz*/uint32 GetEffectiveUploadListCount(uint32 classID); //MORPH - Upload Splitting Class
+	//MORPH START - Upload Splitting Class
+	uint32	GetActiveUploadsCount(uint32 classID = LAST_CLASS)					{return m_MaxActiveClientsShortTimeClass[classID];}
+	uint32	GetActiveUploadsCountLongPerspective(uint32 classID = LAST_CLASS)					{return m_MaxActiveClientsClass[classID];}
+    /*zz*/uint32 GetEffectiveUploadListCount(uint32 classID = LAST_CLASS);
+	//MORPH END  - Upload Splitting Class
 
 	POSITION GetFirstFromUploadList()				{return uploadinglist.GetHeadPosition();}
 	CUpDownClient* GetNextFromUploadList(POSITION &curpos)	{return uploadinglist.GetNext(curpos);}
@@ -101,11 +103,11 @@ public:
 	
 protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
-	//MORPH - Upload Splitting Class
+	//MORPH START - Upload Splitting Class
 	bool		AcceptNewClient(uint32 classID);
 	bool		AcceptNewClient(uint32 curUploadSlots, uint32 classID);
-	//MORPH - Upload Splitting Class
-	bool		ForceNewClient();
+	bool		ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 classID);
+	//MORPH END   - Upload Splitting Class
 
 	bool		AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd = 0, bool highPrioCheck = false);
 	
@@ -145,8 +147,8 @@ private:
 	CList<DWORD,DWORD> avarage_tick_list;
 	DWORD	avarage_tick_listLastRemovedTimestamp; //MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
 	DWORD	avarage_dr_USS_listLastRemovedTimestamp;  //MORPH - Added by SiRoB, Keep An average datarate value for USS system
-	CList<int,int> activeClients_list;
-	CList<DWORD,DWORD> activeClients_tick_list;
+	CList<int,int> activeClients_listClass[NB_SPLITTING_CLASS]; //MORPH - Upload Splitting Class
+	CList<DWORD,DWORD> activeClients_tick_listClass[NB_SPLITTING_CLASS];
 	uint32	datarate;   //datarate sent to network (including friends)
 	uint32	datarateoverhead;   //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 	uint32	datarate_USS; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
@@ -166,16 +168,13 @@ private:
 
     DWORD   m_dwLastCalculatedAverageCombinedFilePrioAndCredit;
     float   m_fAverageCombinedFilePrioAndCredit;
-	uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
-    //MORPH - Added by SiRoB, Upload Splitting Class
+	//MORPH START - Upload Splitting Class
 	uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[NB_SPLITTING_CLASS];
-    //MORPH - Added by SiRoB, Upload Splitting Class
-	uint32  m_MaxActiveClients;
-    uint32  m_MaxActiveClientsShortTime;
-	//MORPH START - Added by SiRoB, Upload Splitting Class
+    uint32  m_MaxActiveClientsClass[NB_SPLITTING_CLASS];
+	uint32  m_MaxActiveClientsShortTimeClass[NB_SPLITTING_CLASS];
 	bool	m_abAddClientOfThisClass[NB_SPLITTING_CLASS];
 	uint32	m_aiSlotCounter[NB_SPLITTING_CLASS];
-	//MORPH END   - Added by SiRoB, Upload Splitting Class
+	//MORPH END   - Upload Splitting Class
 	DWORD   m_lastCalculatedDataRateTick;
     uint64  m_avarage_dr_sum;
 	uint64  m_avarage_overhead_dr_sum; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler

@@ -163,7 +163,7 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 		// PC-TODO: This needs to be cleaned up thoroughly because that client dependency is somewhat hidden in the
 		// usage of CClientReqSocket::client and CHttpClientReqSocket::GetClient.
 		//MORPH START - Changed by SiRoB, WebCache Retry by ed2k
-		if (GetClient() && !GetClient()->IsProxy() && GetClient()->m_pWCDownSocket) {
+		if (client && GetClient() && !GetClient()->IsProxy() && GetClient()->m_pWCDownSocket) {
 			AddDebugLogLine(false, _T("WebCache failed try requesting by ed2k to client: %s"), GetClient()->DbgGetClientInfo());
 			GetClient()->SetWebCacheDownState(WCDS_NONE);
 			GetClient()->SendBlockRequests(true);

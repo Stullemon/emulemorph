@@ -386,6 +386,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 			WCSocket = new CWebCacheUpSocket(); // Create a new WebCache socket
 			WCSocket->Attach( s, FD_WRITE|FD_READ|FD_CLOSE );
 			if( WCSocket->ProcessFirstHttpGet( GlobalReadBuffer, ret ) ) {
+				WCSocket->SetConnected(); //MORPH - WebCache Fix, set socket connected
 				delete this;
 				return;
 			}
@@ -720,7 +721,7 @@ void CEMSocket::OnSend(int nErrorCode){
 	m_bBusy = false;
 	*/
 	DWORD curTick = GetTickCount();
-	lastCalledSend = curTick;
+	//lastCalledSend = curTick;
 	busyLocker.Lock();
 	bool signalNotBusy = m_dwBusy>0;
 	if (m_dwBusy) {

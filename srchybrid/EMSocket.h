@@ -59,6 +59,8 @@ public:
 #endif
 	//MORPH END   - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
 	bool	IsConnected() const {return byConnected == ES_CONNECTED;}
+	void	SetConnected() { byConnected = ES_CONNECTED;}//MORPH - WebChache Fix
+	
 	uint8	GetConState() const {return byConnected;}
 	virtual bool IsRawDataMode() const { return false; }
 	void	SetDownloadLimit(uint32 limit);

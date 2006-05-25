@@ -300,7 +300,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CRect cur_rec(lpDrawItemStruct->rcItem);
 	*/
 	COLORREF crOldTextColor = dc.SetTextColor((lpDrawItemStruct->itemState & ODS_SELECTED) ? m_crHighlightText : m_crWindowText);
-    if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
+	if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount(client->GetClassID())) { //MORPH - Upload Splitting Class
         dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
     }
 

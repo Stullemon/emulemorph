@@ -263,6 +263,7 @@ void CUpDownClient::Init()
 	m_fUnaskQueueRankRecv = 0;
 	m_fFailedFileIdReqs = 0;
 	m_slotNumber = 0;
+	m_classID = LAST_CLASS; //MORPH - Upload Splitting Class
     lastSwapForSourceExchangeTick = 0;
 	m_pReqFileAICHHash = NULL;
 	m_fSupportsAICH = 0;
@@ -3268,7 +3269,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 		case US_UPLOADING:
             if(IsScheduledForRemoval()) {
 				strState = GetScheduledRemovalDisplayReason();
-            } else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount()) {
+			} else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID)) {
 				strState = GetResString(IDS_TRANSFERRING);
             } else {
                 strState = GetResString(IDS_TRICKLING);
@@ -3304,7 +3305,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 		if (s != NULL) {
 			if (m_pPCUpSocket)
 				s = m_pPCUpSocket;
-			else if (m_pPCUpSocket)
+			else if (m_pWCUpSocket)
 				s = m_pWCUpSocket;
 			if (s->GetBusyRatioTime() > 0)
 				strState.AppendFormat(_T(" (BusyRatio: %0.2f)"), s->GetBusyRatioTime());

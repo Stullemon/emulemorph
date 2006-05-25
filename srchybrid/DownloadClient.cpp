@@ -1363,7 +1363,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 	for (uint32 i = 0; i != 3; i++){
 	*/
 	uint32 i = 0;
-	while (i != 3){
+	while (i != 3 && pos){
 		if (pos){
 			Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
 			if (pending->fQueued == 0) {
@@ -1383,6 +1383,9 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 			++i;
 		}
 	}
+
+	if (i == 0) //mean there is no request to do
+		return;
 
 	Packet* packet;
 	if (bI64Offsets){

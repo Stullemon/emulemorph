@@ -65,7 +65,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	COLORREF crHiddenPartBySOTNandHideOS;
 	//MORPH END   - Added by SiRoB, See chunk that we hide
 	COLORREF crProgress;
-    if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
+    if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID) || //MORPH - Upload Splitting Class
        (GetUploadState() != US_UPLOADING && GetUploadState() != US_CONNECTING) ) {
         crNeither = RGB(224, 224, 224);
 	    crNextSending = RGB(255,208,0);
@@ -195,7 +195,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 	COLORREF crBuffer;
 	COLORREF crProgress;
 	COLORREF crDot;
-    if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
+    if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID) ||
        (GetUploadState() != US_UPLOADING && GetUploadState() != US_CONNECTING) ) {
         crNeither = RGB(224, 224, 224);
 	    crNextSending = RGB(255,208,0);

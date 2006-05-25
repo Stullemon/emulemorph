@@ -6152,20 +6152,20 @@ BEGIN
     IDS_PW_CON_CAPFRM_TIP   "In this group you fill the capabilities of your network connection \nto the internet. These are not send to servers or peers but are used\nto draw correct statistics in the graph screen"
     IDS_PW_CON_LIMITFRM_TIP "In this group you set the amount of bandtwidth that eMule is \nallowed to use. The more you upload the more credit you aquire\nto pass faster through the queue of the peers"
     IDS_PW_DOWNL_TIP        "Enable a download limit. eMule will not download faster than this limit.\nNote that if you upload too slow(avg speed less than 10 kb per sec) the download speed is \nlowered to a ratio of your upload."
-    IDS_PW_UPL_TIP          "Enable a upload limit\n(disabling will eMule try to determine the optimal upload itself).\nSet this speed to 80% of your theoretical internet line speed. \nSet this speed too high and your internet connection may become\nunstable, set it too low and you will not gather the optimal credits\nto pass in the download queue of your peer. A value below 10 Kb/s will\nLimit your download with a ratio"
+    IDS_PW_UPL_TIP          "Enable a upload limit\n(when disabled, eMule will try to determine the optimal upload speed itself ).\nSet this speed to 80% of your theoretical internet line speed. \nSet this speed too high and your internet connection may become\nunstable, set it too low and you will not gather the optimal credits\nto pass in the download queue of your peer. A value below 10 Kb/s will\nLimit your download with a ratio"
     IDS_NETWORK_TIP         "Enable at least one network that eMule will use to find peers and to publish your files to the internet"
-    IDS_SHOWOVERHEAD_TIP    "Show the actual bandwidth(overhead bandthwidth) in brackets in the status bar.\nOverhead is ed2k overhead that is not used to actually transfer files but meta data\nwhat to transfer an queue positions"
+    IDS_SHOWOVERHEAD_TIP    "Show the actual bandwidth(overhead bandwidth) in brackets in the status bar.\nOverhead is ed2k overhead that is not used to actually transfer files but meta data\nlike what to transfer and queue positions and such things"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_PW_CLIENTPORT_TIP   "Setting on what ports eMule will listen to the internet"
-    IDS_PW_AUTOCON_TIP      "Connect to the ed2k/kad network "
+    IDS_PW_AUTOCON_TIP      "Automatically connect to the eD2K and/or Kad network. "
     IDS_PW_RECON_TIP        "Automatically try to reconnect to ed2k when the server connection is lost."
     IDS_WIZARD_TIP          "Show the startup wizard that is used to set your internet connection.\nRunning the wizard will update some values in this screen with fair values.\nThe complete startup wizard can be started from the tools menu"
     IDS_UDPDISABLED_TIP     "Disable UDP traffic.\nIf your internet connection (router) gets unstable from\nthe udp traffic there is an option to disable UDP. This\nwill cost more overhead but eMule wil still function."
     IDS_STARTTEST_TIP       "Start a browser that will connect to emule-project.net to test if the eMule ports are reachable\nfrom that web server. eMule might still function if the ports cannot be reached but will be slower.\nIf the connection test fails check if something is blocking inbound traffic from the internet"
-    IDS_RANDOMPORTS_TIP     "Instead of the set ports use a random port port \nbetween the ranges set. Make sure those ports are\nreachable form the internet by having a direct connection\nor use uPnP(see eMuleespana settings) to forward the ports\nin your router."
+    IDS_RANDOMPORTS_TIP     "Instead of the set ports use a random port \nbetween the ranges set. Make sure those ports are\nreachable from the internet by having a direct connection\nor use uPnP(see eMuleespana settings) to forward the ports\nin your router."
     IDS_MINPORT_TIP         "Minimal port number that is used to select a random port.\nSome providers block ports below 1024."
     IDS_MAXPORT_TIP         "Maximal port number that is used to select a random port"
     IDC_DOWNLOAD_CAP_TIP    "The theoretical maximum download speed of your internet connection.\nThis will be used to calculate the scale in the statistics screen"
@@ -6174,28 +6174,28 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_PORT_TIP            "Tcp port number that eMule uses to communicate on.\nThis can be any number between 1 and 65535 as far as not\nother active application is using the port. you can\nconnect to more clients if the port you fill is is\nreachable from the internet, indicated by a high id/green arrow\nin the status bar on the world (if correctly forwarded in a router and\nopenened in a personal firewall). Port 80 or 8080 (http) might get\nyou a small webcache boost, port 1755 is a workaround for some traffic\nshaped people, but any number will do."
-    IDC_UDPPORT_TIP         "Udp port number that eMule uses to communicate on.\nThis can be any number between 1 and 65535 as far\nas no other active application is using the port.\nIt can even be the same as tcp since it uses a different\nprotocol. Forward this port in the router/firewal for\noptimal performance"
+    IDC_PORT_TIP            "TCP port number that eMule uses to communicate on.\nThis can be any number between 1 and 65535 as far as not\nother active application is using the port. you can\nconnect to more clients if the port you fill is \nreachable from the internet, indicated by a high id/green arrow\nin the status bar on the world (if correctly forwarded in a router and\nopenened in a personal firewall). Port 80 or 8080 (http) might get\nyou a small webcache boost, port 1755 is a workaround for some traffic\nshaped people, but any number will do."
+    IDC_UDPPORT_TIP         "UDP port number that eMule uses to communicate on.\nThis can be any number between 1 and 65535 as far\nas no other active application is using the port.\nIt can even be the same as tcp since it uses a different\nprotocol. Forward this port in the router/firewal for\noptimal performance"
     IDC_MAXSOURCEPERFILE_TIP 
                             "The max sources(peers) eMule will collect for a file.\nNote that Morph also has the option in the morph settings\nto enable a global hardlimit that defines a limit for all\nfiles together instead max sources per file"
     IDC_MAXCON_TIP          "Maximum number of simultanious tcp/ip connections\nthat eMule will make. Reduce this numbers if you have\nnetwork problems, increase this number to find souces faster.\n(Also take a look at conns/5secs for sources in 'too \nmany connections' state)"
     IDC_NETWORK_KADEMLIA_TIP 
-                            "Enable the serverless kademilia network.\nThis network finds sources better for small\nfiles and is not dependant on server since \neach eMule client will be a small server.\nThis network uses the udp protocol."
+                            "Enable the serverless kademlia  network.\nThis network finds sources better for small\nfiles and is not dependant on server since \neach eMule client will be a small server.\nThis network uses the UDP protocol."
     IDC_NETWORK_ED2K_TIP    "Enable the ed2k server protocol. A lot of centralized\nservers maintain data where the files in the network can \nbe found. Make sure you connect to a good server(that returns \nproper search results). This protocol is compatible with more \nclients than kad but depends on the quality of the servers"
     IDS_QL_USERNAME_TIP     "The username that is displayed to other users.\nput your spam or [community names] here."
     IDS_PW_LANG_TIP         "Language of the interface.\neMule will download a dll and put it in the lang directory\nif you select a language that is not installed yet. dll's \nfor the morph extensions are not downloaded and should be\nput manually in the lang dir or installed there by the\nmorph installer. (this tooltip is a morph extension)"
     IDS_PW_BEEP_TIP         "Beep on errors"
-    IDS_PW_PROMPT_TIP       "Ask 'Do you really want to exit (Y/N)'when you close eMule"
+    IDS_PW_PROMPT_TIP       "Ask 'Do you really want to exit (Y/N) ?' when you try closing eMule"
     IDS_PW_SPLASH_TIP       "Show the fancy window during starting eMule."
 END
 
 STRINGTABLE 
 BEGIN
     IDS_PW_FRONT_TIP        "Keep eMule on background or bring eMule to \nthe foreground if you add a link from your browser"
-    IDS_PREF_ONLINESIG_TIP  "Write onlinesig.dat in the eMule directory\nOther applications can read this and translate\nthis to a nice banner for your forum. \n(only visible when extened->'show more controls'is  enabled)"
+    IDS_PREF_ONLINESIG_TIP  "Write onlinesig.dat in the eMule directory\nOther applications can read this and translate\nthis to a nice banner for your forum. \n(only visible when extended-> 'show more controls' is enabled)"
     IDS_PREF_STARTMIN_TIP   "When eMule start up minimize it.\nIf the invisible mode is also activated\neMule will hide on windows startup so you \nwill have to press the invisible key to\nshow eMule"
     IDS_WEBSVEDIT_TIP       "Edit the webservices.dat file to associate a menu item\non the file with a online webservice"
-    IDS_ED2KLINKFIX_TIP     "Reassociate the 'ed2k//' link format in the windows shell\nwith this application. If this fails first run\n'linkkiller.exe' and press this button again. This might fial\nif  eMule runs in secure mode"
+    IDS_ED2KLINKFIX_TIP     "Reassociate the 'ed2k//' link format in the windows shell\nwith this application. If this fails first run\n'linkkiller.exe' and press this button again. This might fail\nif eMule runs in secure mode"
     IDS_CHECK4UPDATE_TIP    "Let eMule check for new eMule and\nMorph version every xxx days"
     IDS_STARTWITHWINDOWS_TIP 
                             "Start eMule when windows starts. eMule is added to the registry at\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
