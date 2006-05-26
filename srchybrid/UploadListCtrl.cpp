@@ -837,6 +837,10 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	const CUpDownClient* item2 = (CUpDownClient*)lParam2;
 
 	int iResult=0;
+	//MORPH START - Upload Splitting Class
+	iResult=CompareUnsigned(item1->GetClassID(), item2->GetClassID());
+	if (iResult == 0)
+	//MORPH END   - Upload Splitting Class
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())

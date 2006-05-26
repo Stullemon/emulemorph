@@ -1329,6 +1329,10 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 	m_dwLastBlockReceived = ::GetTickCount();
 	if (!reqfile)
 		return;
+	//MORPH START - Don't Request more block if there is already more than one pending block
+	if (m_PendingBlocks_list.GetCount()>1)
+		return;
+	//MORPH END   - Don't Request more block if there is already 2 pending block
 
     // prevent locking of too many blocks when we are on a slow (probably standby/trickle) slot
     int blockCount = 3;

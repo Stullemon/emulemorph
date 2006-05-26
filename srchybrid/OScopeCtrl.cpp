@@ -342,6 +342,29 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	m_rectPlot.left = m_rectClient.left + 8*7+4;//(nCharacters) ;
 	m_nPlotWidth    = m_rectPlot.Width();
 	
+	//MORPH START - Dynamic axis legend reservation
+	LegendFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
+	oldFont = m_dcGrid.SelectObject(&LegendFont);
+	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
+
+	int xoffset = m_rectPlot.left + 2;
+	int yneededspace = 4;
+	for (i = 0; i < m_NTrends; i++)
+	{
+		CSize sizeLabel = m_dcGrid.GetTextExtent(m_PlotData[i].LegendLabel);
+		if (xoffset + 12 + sizeLabel.cx + 8*7 > m_rectPlot.right){
+			xoffset = m_rectPlot.left + 2;
+			yneededspace += sizeLabel.cy;
+		} else if (i == 0)
+			yneededspace += sizeLabel.cy;
+		xoffset += 12 + sizeLabel.cx + 12;
+	}
+
+	m_rectPlot.bottom = m_rectClient.bottom - yneededspace;
+	m_nPlotHeight   = m_rectPlot.Height();
+	//MORPH END   - Dynamic axis legend reservation
+	
+
 	// draw the plot rectangle
 	if (thePrefs.GetStraightWindowStyles())
 	{
@@ -471,18 +494,22 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	//		but does not work for Korean fonts.
 	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
 	//		does work for all languages which are currently supported by eMule.
+	
+	//MORPH - Font created on top
+	/*
 	LegendFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
 	oldFont = m_dcGrid.SelectObject(&LegendFont);
+	*/
 	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
 
 	int xpos = m_rectPlot.left + 2;
-	int ypos = m_rectPlot.bottom + 3;
+	int ypos = m_rectPlot.bottom + 2;
 	for (i = 0; i < m_NTrends; i++)
 	{
 		CSize sizeLabel = m_dcGrid.GetTextExtent(m_PlotData[i].LegendLabel);
-		if (xpos + 12 + sizeLabel.cx + 12 > m_rectPlot.right){
+		if (i != 0 && xpos + 12 + sizeLabel.cx + 8*7 > m_rectPlot.right){
 			xpos = m_rectPlot.left + 2;
-			ypos = m_rectPlot.bottom + sizeLabel.cy;
+			ypos += sizeLabel.cy;
 		}
 
 		if (thePrefs.GetStraightWindowStyles())
