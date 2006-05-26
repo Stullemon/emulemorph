@@ -1,16 +1,24 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.13 BETA5
+--------------------------------------
+CHANGED: USC: global code review (Slot# is now displayed per class)
+CHANGED: DBR: only request additionnal block when it remains only one block on remote client
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA4
 --------------------------------------
+FIX:     LOG: Chrash on adding ed2k link. 
+
 ADDED  : WC: Chunk Detail Display
 
 CHANGED: CDD: Chunk Detail Display homogeneous color choise
 CHANGED: ReadBlockFromFileThead: Changed to only prebuffer up to 2*180kBytes
 CHANGED: USC: Reworked to handle all possible case for opening slot strategy
 CHANGED: DSB: Changed the way to accumulate data
+CHANGED: WC: Fixed the socket transformation from clientsocketreq to webcachesocket class by preserving the connect state
 CHANGED: Slotlimit: upspeed/3 is now per class.
 
 TWEAKED: Enhanced DBR: Take into account remaining reserved data
-FIX:     LOG: Chrash on adding ed2k link. 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA3
 --------------------------------------
