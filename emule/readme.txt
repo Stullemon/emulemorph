@@ -1,5 +1,7 @@
 eMule Copyright (C)2002-2005 Merkur (merkur-@users.sourceforge.net)
 
+Note: --- Additions made for emule morph
+
 
 This program is free software; you can redistribute it and/or modify it under 
 the terms of the GNU General Public License as published by the Free Software 
@@ -24,19 +26,20 @@ Welcome to eMule, a filesharing client based on the eDonkey2000(C) network.
 
 Visit us at
  http://www.emule-project.net
+ http://emulemorph.sf.net
 and
  http://sourceforge.net/projects/emule
+ http://sourceforge.net/projects/emulemorph
 or
  the IRC chatroom, #emule on irc.emule-project.net
 
 
+Morph is a mod mased on the official client. It has all the features of offcial but we added some extra's
 
-Please remember that this is an early version, not all features are 
-implemented yet, and not everything might work as expected.
 
 Visit our forum for bugreports, feature requests, development or general 
 dicussion.
-
+http://forum.emule-project.net/index.php?showforum=28 (registration required)
 
 If you have questions or serious problems, please read the FAQ first :) It can 
 be found at www.emule-project.net. A small collection of questions is also 
@@ -73,12 +76,17 @@ INSTALLATION:
 
 -Updating from an earlier version of eMule: The best way to do this is simply 
  to download the .zip file (not the installer), and unzip the new emule.exe to 
- your old emule directory, overwriting the previous one.
+ your old emule directory, overwriting the previous one. THis works for official emule and for the morph mod. 
 
 
 
 CONFIGURATION:
 --------------
+-RUn the emule.exe 
+
+-If this is your first run RUn the wizaard, if it is a upgrade you might wnat to cancel to keep your current settings.
+
+or...
 
 -Go to the "Preferences" tab
 
@@ -125,7 +133,7 @@ yet. Sorry :) Maybe later..
 
 -"Maximum Sources per File": decide for yourself how many you want :) when you 
  set this too high, your computer might slow down drastically or even crash. 
- 500-1000 are good values for people with DSL/cable connection.
+ 500-1000 are good values for people with DSL/cable connection. In morph you can set a   global limit for all files. A value or 4000 is working for most dsl users. 
 
 -Choose the directories you want to share with other users. DO NOT SHARE YOUR 
  COMPLETE HARDDISK! Put the stuff you want to share in a seperate Folder. If 
@@ -147,7 +155,6 @@ FAQ: (for more, see http://www.emule-project.net/faq/ )
  from the .zip download.
 
 
-
 --"Why is eMule so slow? My brother/friend/whatever is downloading at 100K constantly"
 
  When you did setup eMule properly, it's all about the availibility of the 
@@ -158,11 +165,9 @@ FAQ: (for more, see http://www.emule-project.net/faq/ )
 --"Where can I get a new serverlist?"
 
  There are several lists availible. Some that I know of are:
- -http://www.thedonkeynetwork.com
- -http://ed2k.2x4u.de
- Note that those sites are not related to the eMule project, we are not 
- responsible for their content.
-
+http://ocbmaurice.dyns.net/pl/slist.pl?download
+http://ed2kmet.x24hr.com/pl/slist.pl?download/server-good.met
+http://corpo.free.fr/server.met Note that those sites are not related to the eMule project, we are not responsible for their content.
 
 
 --"What is the addresses.dat file for?"
@@ -193,7 +198,6 @@ FAQ: (for more, see http://www.emule-project.net/faq/ )
  connected to. When it's green, your ID is high. When it's orange, your ID is 
  low.
  
-
 
 --"What does high and low ID mean anyway?"
 
@@ -270,8 +274,10 @@ COMPILING THE SOURCECODE:
 -------------------------
 
 The sourcecode of eMule is availible as seperate download at:
- http://sourceforge.net/projects/emule
-You need Microsoft(C) Visual Studio .NET 2002 Service Pack 1 to compile eMule.
+ http://sourceforge.net/projects/emulemorph
+You need Microsoft(C) Visual Studio .NET 2003 to compile eMule morph
+vs2002 might work, vc2005 will surely not work without modifications to the source
+You need to have MFC/ATL installed!
 
 -Unzip the sources (with subdirs) into a new folder
 
@@ -295,6 +301,14 @@ within our distribution. You need the following libs:
 5. ResizableLib 1.3
    http://sourceforge.net/projects/resizablelib/	
 
+Or download all libs and run emule_all.vcpproj using your favrout p2p application:
+ed2k://|file|eMule047aMorphXT85_complete_compilable_Package.rar|18128572|4BD14E6F69E3B1046423932F638BEAA8|h=5NX573HANXXHWOGAD2JWUXC57GD55B6X|/
+
+read 
+http://forum.emule-project.net/index.php?showtopic=87109
+for more details
+
+
 Download and save their sourcecode one level above the eMule source code 
 folder and compile them (check the eMule-project file to learn about the 
 required foldernames, or adapt them to your needs!).
@@ -302,12 +316,6 @@ required foldernames, or adapt them to your needs!).
 
 -Open the emule.sln Visual Studio Solution
 
--If you get an error message like "wrong version of Visual C++", you have to 
-open emule.sln and emule.vcroj with an editor and change some values:
-
- emule.sln: "...Format Version 8.00" to 7.00 if you use Microsoft(C) Visual C++ .NET 2002
- emule.vcproj: Version="7.10"  to 7.00 if you use Microsoft(C) Visual C++ .NET 2002
- 
 -Select "release" or "debug" build in the solution configuration manager
 -Build the solution. That's it :)
 -If the compile was successful, the emule.exe is either in the \Debug or 
@@ -321,7 +329,6 @@ open emule.sln and emule.vcroj with an editor and change some values:
  your build, be sure to obey the GPL license. You have to include the 
  sourcecode, or make it availible for download together with the binary 
  version.
-
 
 
 
@@ -363,6 +370,7 @@ program?
 
 LEGAL:
 ------
+eMulemorph  Copyright (C)2002-2006 Morph team 
 
 eMule Copyright (C)2002-2005 Merkur (merkur-@users.sourceforge.net)
 

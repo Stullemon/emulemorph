@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.13 BETA6
+--------------------------------------
+CHANGED: USC: Use same socket buffer for all class (may reduce focus effet on faster client)
+CHANGED: USC: Slot are properly added into uploadbandwidth list
+CHANGED: USC: LowID client are now correctly added when they missed a slot
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA5
 --------------------------------------
 CHANGED: USC: global code review (Slot# is now displayed per class)
