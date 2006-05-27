@@ -190,7 +190,7 @@ void CUploadQueue::MoveDownInUploadQueue(CUpDownClient* client) {
     // first find the client in the uploadinglist
     POSITION foundPos = uploadinglist.Find(client);
 	if(foundPos != NULL) {
-        //MORPH START - Upload Splitting Class
+        //MORPH START -  Renumber slot -Fix-
 		uint32 classID = client->GetClassID();
 		POSITION renumberPosition = uploadinglist.GetTailPosition();
 		while(renumberPosition != foundPos) {
@@ -199,7 +199,7 @@ void CUploadQueue::MoveDownInUploadQueue(CUpDownClient* client) {
 			renumberClient->SetSlotNumber(renumberClient->GetSlotNumber()-1);
 			uploadinglist.GetPrev(renumberPosition);
 		}
-		//MORPH END   - Added by SiRoB, Renumber slot -Fix-
+		//MORPH END   -  Renumber slot -Fix-
 
 
         //MORPH START - Added by SiRoB, Upload Splitting Class
@@ -528,14 +528,13 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	uint32 posCounter = uploadinglist.GetCount();
 	*/
 	uint32 classID = LAST_CLASS;
-	if (newclient->IsFriend() && newclient->GetFriendSlot())
+	if (newclient->IsFriend() && newclient->GetFriendSlot()) {
 		classID = 0;
-	else if (newclient->IsPBForPS())
+	} else if (newclient->IsPBForPS())
 		classID = 1;
 	newclient->SetClassID(classID);
 	uint32 posCounter = m_aiSlotCounter[classID]; // initialize poscounter to the last class slot number
 	
-
 	//uint32 newclientScore = newclient->GetScore(false);
 
 	bool foundposition = false;
@@ -590,7 +589,10 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		/*
 		theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket());
 		*/
-		theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),classID,newclient->IsScheduledForRemoval());
+		uint32 higherclassoffset = 0;
+		for (uint32 i = 0; i < classID; i++)
+			higherclassoffset += m_aiSlotCounter[i];
+		theApp.uploadBandwidthThrottler->AddToStandardList(higherclassoffset+posCounter, newclient->GetFileUploadSocket(),classID,newclient->IsScheduledForRemoval());
 		//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	}else{
 		// Add it last
@@ -676,7 +678,7 @@ uint32 CUploadQueue::GetEffectiveUploadListCount(uint32 classID) {
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetPrev(pos);
 
-		//we need to remove all slot that are not in our desired class or are scheduledslot
+		//week need to remove all slot that are not in our desired class or are scheduledslot
 		/*MORPH*/if(cur_client->GetClassID() != classID || cur_client->IsScheduledForRemoval()) { 
             count++;
         }

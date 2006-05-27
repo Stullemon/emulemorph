@@ -797,7 +797,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									//if (neededBytes > 0 && thisLoopTick-socket->GetLastSent()>1000) {
 										//neededBytes = (uint32)min(BytesToSpend - ControlspentBytes, neededBytes?neededBytes:1);
 #if !defined DONT_USE_SOCKET_BUFFERING
-										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, allowedclientdatarate);
+										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, allowedDataRateClass[LAST_CLASS]);
 #else
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
 #endif
@@ -871,7 +871,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 #if !defined DONT_USE_SOCKET_BUFFERING
 									uint32 BytesToSend = min((UINT)(BytesToSpend-spentBytes), (UINT)(stat->realBytesToSpend/1000));
 									BytesToSend = max(BytesToSend, (UINT)(allowedclientdatarate>>2));
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate);
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedDataRateClass[LAST_CLASS]);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
 #endif
@@ -901,7 +901,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 #if !defined DONT_USE_SOCKET_BUFFERING
 									uint32 BytesToSend = min((UINT)(BytesToSpend-spentBytes), (UINT)(stat->realBytesToSpend/1000));
 									BytesToSend = max(BytesToSend, (UINT)(allowedclientdatarate>>2));
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate);
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedDataRateClass[LAST_CLASS]);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(UINT(BytesToSpend - spentBytes), doubleSendSize);
 #endif

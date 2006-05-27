@@ -337,9 +337,11 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	// as well as the number of decimal places to display
 	nCharacters = nCharacters + 4 + m_nYDecimals;  
 	
+	//MORPH START - Proper Scale
 	// adjust the plot rectangle dimensions
 	// Changed this so that the Y-Units wouldn't overlap the Y-Scale.
 	m_rectPlot.left = m_rectClient.left + 8*7+4;//(nCharacters) ;
+	m_rectPlot.right  = m_rectClient.right - 10;
 	m_nPlotWidth    = m_rectPlot.Width();
 	
 	//MORPH START - Dynamic axis legend reservation
@@ -360,10 +362,14 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		xoffset += 12 + sizeLabel.cx + 12;
 	}
 
+	m_rectPlot.top    = 10;
 	m_rectPlot.bottom = m_rectClient.bottom - yneededspace;
 	m_nPlotHeight   = m_rectPlot.Height();
 	//MORPH END   - Dynamic axis legend reservation
-	
+	// set the scaling factor for now, this can be adjusted in the SetRange functions
+	for(int iTrend = 0; iTrend < m_NTrends; iTrend ++)
+		m_PlotData[iTrend].dVerticalFactor = (double)m_nPlotHeight / m_PlotData[iTrend].dRange;
+	//MORPH END   - Proper scale
 
 	// draw the plot rectangle
 	if (thePrefs.GetStraightWindowStyles())
@@ -836,7 +842,7 @@ void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 	if (!cx && !cy)
 		return;
 
-	int iTrend;
+	//int iTrend;
 	CWnd::OnSize(nType, cx, cy);
 	
 	// NOTE: OnSize automatically gets called during the setup of the control
@@ -845,6 +851,8 @@ void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 	m_nClientHeight = m_rectClient.Height();
 	m_nClientWidth  = m_rectClient.Width();
 	
+	//MORPH - Moved every thing into the InvalidateCtrl as m_rectPlot is modifyed in
+	/*
 	// the "left" coordinate and "width" will be modified in InvalidateCtrl to be based on the width 
 	// of the y axis scaling
 	m_rectPlot.left   = 20; 
@@ -858,7 +866,7 @@ void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 	// set the scaling factor for now, this can be adjusted in the SetRange functions
 	for(iTrend = 0; iTrend < m_NTrends; iTrend ++)
 		m_PlotData[iTrend].dVerticalFactor = (double)m_nPlotHeight / m_PlotData[iTrend].dRange;
-	
+	*/
 	// destroy and recreate the grid bitmap
 	CClientDC dc(this); 
 	if(m_pbitmapOldGrid && m_bitmapGrid.GetSafeHandle() && m_dcGrid.GetSafeHdc())

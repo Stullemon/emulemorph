@@ -1,10 +1,10 @@
 // khaos::categorymod+
 #pragma once
-
+#include "PPGtooltipped.h"
 
 // CSelCategoryDlg dialog
 
-class CSelCategoryDlg : public CDialog
+class CSelCategoryDlg : public CPPgtooltippedDialog
 {
 	DECLARE_DYNAMIC(CSelCategoryDlg)
 
