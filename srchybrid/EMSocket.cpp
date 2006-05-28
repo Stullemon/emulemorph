@@ -917,15 +917,15 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 				if (sendbuffer) {
 					if (currentBufferSize < sendblen+packetsize){
 						sendblen-=sent;
+						if (currentBufferSize < sendblen+packetsize) {
 						currentBufferSize = max(sendblen+packetsize, bufferlimit);
 						char* newsendbuffer = new char[currentBufferSize];
 						memcpy(newsendbuffer, sendbuffer+sent, sendblen);
 						delete[] sendbuffer;
 						sendbuffer = newsendbuffer;
-						sent = 0;
-					} else if (sent > 0 && currentBufferSize-sent<maxNumberOfBytesToSend) {
-						sendblen-=sent;
+						} else {
 						memmove(sendbuffer, sendbuffer+sent, sendblen);
+						}
 						sent = 0;
 					}
 					char* packetcore = curPacket->DetachPacket();

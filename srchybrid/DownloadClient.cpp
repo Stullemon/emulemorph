@@ -259,7 +259,8 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 				s_StatusBar.Fill(crProgress);
 		}
 	}
-	
+	if (cur_chunk == (uint32)-1)
+		return;
 	// Draw Gap part of the chunk in blue for normal client and none for proxy
 	for (POSITION pos = file->gaplist.GetHeadPosition();pos !=  0;){
 		const Gap_Struct* cur_gap = file->gaplist.GetNext(pos);

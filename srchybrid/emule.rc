@@ -6441,8 +6441,8 @@ END
 STRINGTABLE 
 BEGIN
   IDC_DONTASKMEAGAINCBSEL_TIP "Do not pop up this category select dialog again. You can enable this again in \nOption -> Morph -> download management -> SCC -> Show the 'Select catagory' dialog"
-	IDS_CAT_SELDLGTXT_TIP "You can organize the Downloads in catagories.\nThese are the tabs in the download window.\nYou can add categories here by entering a\ncategory name or select one of the existing\ncatgories."
-	IDS_OKCANCELSEL_TIP "Select the category and press ok to \ndownlaod in the category or\npress cancel not todownload the\nfiles."
+	IDS_CAT_SELDLGTXT_TIP "You can organize the downloads in catagories.\nThese are the tabs in the download window.\nYou can add categories here by entering a\ncategory name or select one of the existing\ncatgories."
+	IDS_OKCANCELSEL_TIP "Select the category and press ok to \ndownload in the category or\npress cancel not to download the\nfile(s)."
 END	
 
 #endif    // Anglais (États-Unis) resources

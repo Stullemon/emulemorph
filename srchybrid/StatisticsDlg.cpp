@@ -723,7 +723,7 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 	CDownloadQueue::SDownloadStats myStats;
 	theApp.downloadqueue->GetDownloadStats(myStats);
 	m_dPlotDataMore[0]=theApp.listensocket->GetActiveConnections();
-	m_dPlotDataMore[1]=theApp.uploadqueue->GetUploadQueueLength()-theApp.uploadqueue->GetUploadCountClass()+theApp.uploadqueue->GetActiveUploadsCount();//MORPH - Upload SPlitting Class
+	m_dPlotDataMore[1]=theApp.uploadqueue->GetActiveUploadsCount();
 	m_dPlotDataMore[2]=theApp.uploadqueue->GetUploadQueueLength();
 	m_dPlotDataMore[3]=myStats.a[1];
 	m_Statistics.AppendPoints(m_dPlotDataMore);
@@ -1558,21 +1558,11 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				stattree.SetItemText(up_S[1], cbuffer);
 
 				// Set fully Active Uploads
-				//MORPH START - Upload Splitting Class
-				cbuffer.Format(GetResString(IDS_STATS_ACTUL_ZZ), theApp.uploadqueue->GetUploadQueueLength()-theApp.uploadqueue->GetUploadCountClass()+theApp.uploadqueue->GetActiveUploadsCount()); //theApp.uploadqueue->GetUploadQueueLength()
-				cbuffer.Append(_T(" ="));
-				for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-					cbuffer.AppendFormat(_T(" [C%i %i]"), classID, theApp.uploadqueue->GetActiveUploadsCount(classID));
-				//MORPH END   - Upload Splitting Class
+				cbuffer.Format(GetResString(IDS_STATS_ACTUL_ZZ), theApp.uploadqueue->GetActiveUploadsCount()); //theApp.uploadqueue->GetUploadQueueLength()
 				stattree.SetItemText(up_S[2], cbuffer);
 
                 // Set Set Total Uploads                
-				//MORPH START - Upload Splitting Class
 				cbuffer.Format(GetResString(IDS_STATS_TOTALUL),theApp.uploadqueue->GetUploadQueueLength());
-				cbuffer.Append(_T(" ="));
-				for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-					cbuffer.AppendFormat(_T(" [C%i %i]"), classID, theApp.uploadqueue->GetUploadCountClass(classID));
-				//MORPH END   - Upload Splitting Class
 				stattree.SetItemText(up_S[3], cbuffer);
 
 				// Set Queue Length

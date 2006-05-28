@@ -678,16 +678,15 @@ public:
 void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
     if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
-       m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 2*EMBLOCKSIZE) { // the buffered data is large enough allready
+       filedata != (byte*)-2 && //we are still waiting for a block read on disk
+	   m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > max(GetDatarate()>>2, 50*1024)) { // the buffered data is large enough already according to client datarate
 		return;
 	}
 	CString fullname;
 	bool bFromPF = true; // Statistic to breakdown uploaded data by complete file vs. partfile.
 	try{
 	// Buffer new data if current buffer is less than 100 KBytes
-        while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2 &&
-		(m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < EMBLOCKSIZE)) {
-
+        while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2) {
 			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
 			CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(currentblock->FileID);
 			if (!srcfile)

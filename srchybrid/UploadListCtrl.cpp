@@ -580,11 +580,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 11:{
 						Sbuffer.Format(_T("%i"), client->GetSlotNumber());
 						//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
-						if (client->IsFriend() && client->GetFriendSlot()){
+						if (client->GetClassID()==0){
 							Sbuffer.Append(_T(" FS"));
-						}
+						} else
 						//Morph - modified by AndCycle, take PayBackFirst have same class with PowerShare
-						if (file && client->IsPBForPS()){
+						if (file && client->GetClassID()==1){
 							if (client->IsMoreUpThanDown(file))
 							{
 								Sbuffer.Append(_T(",PBF"));
@@ -837,10 +837,6 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	const CUpDownClient* item2 = (CUpDownClient*)lParam2;
 
 	int iResult=0;
-	//MORPH START - Upload Splitting Class
-	iResult=CompareUnsigned(item1->GetClassID(), item2->GetClassID());
-	if (iResult == 0)
-	//MORPH END   - Upload Splitting Class
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
