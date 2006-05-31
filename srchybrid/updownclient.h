@@ -903,7 +903,7 @@ public:
     // MORPH END - Added by Commander, WebCache 1.2e
 	void	SetPartCount(uint16 parts) { m_nUpPartCount = parts;}
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
-	void	SetReadBlockFromFileBuffer(byte* pdata) {filedata = pdata;};
+	void	SetReadBlockFromFileBuffer(byte* pdata) {m_abyfiledata = pdata;};
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 protected:
 	int m_iHttpSendState;
@@ -1041,7 +1041,8 @@ protected:
 	CTypedPtrList<CPtrList, Requested_File_Struct*>	 m_RequestedFiles_list;
 
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
-	byte* filedata;
+	byte* m_abyfiledata;
+	uint32 m_utogo;
 	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 	//////////////////////////////////////////////////////////
 	// Download
@@ -1287,12 +1288,12 @@ protected:
 public:
 	virtual	BOOL	InitInstance() {return true;}
 	virtual int		Run();
-	void			SetReadBlockFromFile(CKnownFile* pfile, uint64 startOffset, uint32 togo, CUpDownClient* client);
+	void			SetReadBlockFromFile(LPCTSTR filepath, uint64 startOffset, uint32 togo, CUpDownClient* client, CSyncObject* lockhandle);
 private:
 	uint64			StartOffset;
 	uint32			togo;
 	CUpDownClient*	m_client;
-	CKnownFile*		srcfile;
-	CSyncObject*	lockFile;
+	CString			fullname;
+	CSyncObject*	m_lockhandle;
 };
 //MORPH END   - Added by SiRoB, ReadBlockFromFileThread

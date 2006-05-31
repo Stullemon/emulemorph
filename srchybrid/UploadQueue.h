@@ -58,7 +58,7 @@ public:
 	int		GetWaitingUserCount()					{return waitinglist.GetCount();}
 	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
 	//MORPH START - Upload Splitting Class
-	uint32	GetNumberOfSlotInAboveClass(uint32 classID) {uint32 retvalue = 0; for (uint32 i = 0; i < classID; i++) retvalue+=m_aiSlotCounter[classID]; return retvalue;}
+	uint32	GetNumberOfSlotInAboveClass(uint32 classID) {uint32 retvalue = 0; for (uint32 i = 0; i < classID; i++) retvalue+=m_aiSlotCounter[i]; return retvalue;}
 	uint32	GetActiveUploadsCount(uint32 classID = LAST_CLASS)					{return GetNumberOfSlotInAboveClass(classID)+m_MaxActiveClientsShortTimeClass[classID];}
 	uint32	GetActiveUploadsCountLongPerspective(uint32 classID = LAST_CLASS)					{return GetNumberOfSlotInAboveClass(classID)+m_MaxActiveClientsClass[classID];}
     /*zz*/uint32 GetEffectiveUploadListCount(uint32 classID = LAST_CLASS);

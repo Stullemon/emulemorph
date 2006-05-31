@@ -678,7 +678,7 @@ public:
 void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
     if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
-       filedata != (byte*)-2 && //we are still waiting for a block read on disk
+       m_abyfiledata == (byte*)-2 || //we are still waiting for a block read on disk
 	   m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > max(GetDatarate()>>2, 50*1024)) { // the buffered data is large enough already according to client datarate
 		return;
 	}
@@ -686,36 +686,57 @@ void CUpDownClient::CreateNextBlockPackage(){
 	bool bFromPF = true; // Statistic to breakdown uploaded data by complete file vs. partfile.
 	try{
 	// Buffer new data if current buffer is less than 100 KBytes
-        while (!m_BlockRequests_queue.IsEmpty() && filedata != (byte*)-2) {
-			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
-			CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(currentblock->FileID);
-			if (!srcfile)
+        while (!m_BlockRequests_queue.IsEmpty() && m_abyfiledata != (byte*)-2) {
+			if (m_abyfiledata == (byte*)-1) {
+				//An error occured
+				theApp.sharedfiles->Reload();
+				throw GetResString(IDS_ERR_OPEN);
+			}
+			POSITION pos = m_BlockRequests_queue.GetHeadPosition();
+			Requested_Block_Struct* currentblock_ReadFromDisk = m_BlockRequests_queue.GetNext(pos);
+			CKnownFile* srcfile_ReadFromDisk = theApp.sharedfiles->GetFileByID(currentblock_ReadFromDisk->FileID);
+			if (!srcfile_ReadFromDisk)
 				throw GetResString(IDS_ERR_REQ_FNF);
 
+			Requested_Block_Struct* currentBlock = currentblock_ReadFromDisk;
+			BYTE* filedata_ReadFromDisk = NULL;
+			uint32 togo_ReadFromDisk = 0;
+			if (m_abyfiledata != NULL) {
+				//A block was succefully read from disk, performe data transfer new var to let a possible read of other remaining block
+				filedata_ReadFromDisk = m_abyfiledata;
+				m_abyfiledata = NULL;
+				togo_ReadFromDisk = m_utogo;
+				if (pos) //if we have more than one block in queue get the second one
+					currentBlock = m_BlockRequests_queue.GetAt(pos);
+			}
+			if (filedata_ReadFromDisk == NULL || m_BlockRequests_queue.GetCount()>1) {
+				CKnownFile* srcFile = theApp.sharedfiles->GetFileByID(currentBlock->FileID);
+				if (!srcFile)
+					throw GetResString(IDS_ERR_REQ_FNF);
 			uint64 i64uTogo;
-			if (currentblock->StartOffset > currentblock->EndOffset){
-				i64uTogo = currentblock->EndOffset + (srcfile->GetFileSize() - currentblock->StartOffset);
+				if (currentBlock->StartOffset > currentBlock->EndOffset){
+					i64uTogo = currentBlock->EndOffset + (srcFile->GetFileSize() - currentBlock->StartOffset);
 			}
 			else{
-				i64uTogo = currentblock->EndOffset - currentblock->StartOffset;
+					i64uTogo = currentBlock->EndOffset - currentBlock->StartOffset;
 				//MORPH START - Changed by SiRoB, SLUGFILLER: SafeHash
 				/*
-				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsComplete(currentblock->StartOffset,currentblock->EndOffset-1, true))
+					if (srcFile->IsPartFile() && !((CPartFile*)srcFile)->IsComplete(currentBlock->StartOffset,currentBlock->EndOffset-1, true))
 				*/
-				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
+					if (srcFile->IsPartFile() && !((CPartFile*)srcFile)->IsRangeShareable(currentBlock->StartOffset,currentBlock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
 				//MORPH END  - Changed by SiRoB, SLUGFILLER: SafeHash
 				{
 					CString error;
-					error.Format(_T("%s: %I64u = %I64u - %I64u "), GetResString(IDS_ERR_INCOMPLETEBLOCK), i64uTogo, currentblock->EndOffset, currentblock->StartOffset);
+						error.Format(_T("%s: %I64u = %I64u - %I64u "), GetResString(IDS_ERR_INCOMPLETEBLOCK), i64uTogo, currentBlock->EndOffset, currentBlock->StartOffset);
 					throw error;
 				}
 				//MORPH START - Added by SiRoB, Anti Anti HideOS & SOTN :p 
 				if (m_abyUpPartStatus) {
-					for (UINT i = (UINT)(currentblock->StartOffset/PARTSIZE); i < (UINT)((currentblock->EndOffset-1)/PARTSIZE+1); i++)
+						for (UINT i = (UINT)(currentBlock->StartOffset/PARTSIZE); i < (UINT)((currentBlock->EndOffset-1)/PARTSIZE+1); i++)
 						if (m_abyUpPartStatus[i]>SC_AVAILABLE)
 							{
 								CString error;
-								error.Format(_T("%s: Part %u, %I64u = %I64u - %I64u "), GetResString(IDS_ERR_HIDDENBLOCK), i, i64uTogo, currentblock->EndOffset, currentblock->StartOffset);
+									error.Format(_T("%s: Part %u, %I64u = %I64u - %I64u "), GetResString(IDS_ERR_HIDDENBLOCK), i, i64uTogo, currentBlock->EndOffset, currentBlock->StartOffset);
 								throw error;
 							}
 				}//MORPH END   - Added by SiRoB, Anti Anti HideOS & SOTN :p 
@@ -725,25 +746,43 @@ void CUpDownClient::CreateNextBlockPackage(){
 				throw GetResString(IDS_ERR_LARGEREQBLOCK);
 			uint32 togo = (uint32)i64uTogo;
 			
-			if (filedata == NULL) {
-				CReadBlockFromFileThread* readblockthread = (CReadBlockFromFileThread*) AfxBeginThread(RUNTIME_CLASS(CReadBlockFromFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
-				readblockthread->SetReadBlockFromFile(srcfile, currentblock->StartOffset, togo, this);
-				readblockthread->ResumeThread();
-				SetUploadFileID(srcfile); //MORPH - Moved by SiRoB, Fix Filtered Block Request
-				filedata = (byte*)-2;
-				return;
-			} else if (filedata == (byte*)-1) {
-				//An error occured
-				theApp.sharedfiles->Reload();
-				throw GetResString(IDS_ERR_OPEN);
-			}
+				CSyncObject* lockhandle = NULL;  
+				CString fullname;
+				if (srcFile->IsPartFile() && ((CPartFile*)srcFile)->GetStatus() != PS_COMPLETE){
+					// Do not access a part file, if it is currently moved into the incoming directory.
+					// Because the moving of part file into the incoming directory may take a noticable 
+					// amount of time, we can not wait for 'm_FileCompleteMutex' and block the main thread.
+					/*if (!((CPartFile*)srcfile)->m_FileCompleteMutex.Lock(0)){ // just do a quick test of the mutex's state and return if it's locked.
+						return;
+					}
+					((CPartFile*)srcFile)->m_FileCompleteMutex.Lock();
+					lockFile.m_pObject = &((CPartFile*)srcFile)->m_FileCompleteMutex;
+					*/
+					lockhandle = &((CPartFile*)srcFile)->m_FileCompleteMutex;
+					// If it's a part file which we are uploading the file remains locked until we've read the
+					// current block. This way the file completion thread can not (try to) "move" the file into
+					// the incoming directory.
 
-			if (!srcfile->IsPartFile())
+					fullname = RemoveFileExtension(((CPartFile*)srcFile)->GetFullName());
+				}
+				else{
+					fullname.Format(_T("%s\\%s"),srcFile->GetPath(),srcFile->GetFileName());
+				}
+
+				CReadBlockFromFileThread* readblockthread = (CReadBlockFromFileThread*) AfxBeginThread(RUNTIME_CLASS(CReadBlockFromFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+				readblockthread->SetReadBlockFromFile(fullname, currentBlock->StartOffset, togo, this, lockhandle);
+				readblockthread->ResumeThread();
+				SetUploadFileID(srcFile); //MORPH - Moved by SiRoB, Fix Filtered Block Request
+				m_abyfiledata = (byte*)-2;
+				m_utogo = togo;
+			}
+			if (filedata_ReadFromDisk) {
+				if (!srcfile_ReadFromDisk->IsPartFile())
 				bFromPF = false; // This is not a part file...
 
 			//MORPH - Removed by SiRoB, Fix Filtered Block Request
 			/*
-			SetUploadFileID(srcfile);
+				SetUploadFileID(srcFile);
 			*/
 
 			// MORPH START - Added by Commander, WebCache 1.2e
@@ -752,11 +791,11 @@ void CUpDownClient::CreateNextBlockPackage(){
 				Crypt.RefreshLocalKey();
 				Crypt.encryptor.SetKey(Crypt.localKey, WC_KEYLENGTH);
 				Crypt.encryptor.DiscardBytes(16); // we must throw away 16 bytes of the key stream since they were already used once, 16 is the file hash length
-				Crypt.encryptor.ProcessString(filedata, togo);
+					Crypt.encryptor.ProcessString(filedata_ReadFromDisk, togo_ReadFromDisk);
 			}
 			// MORPH END - Added by Commander, WebCache 1.2e
 			// check extension to decide whether to compress or not
-			CString ext = srcfile->GetFileName();
+				CString ext = srcfile_ReadFromDisk->GetFileName();
 			ext.MakeLower();
 			int pos = ext.ReverseFind(_T('.'));
 			if (pos>-1)
@@ -771,23 +810,25 @@ void CUpDownClient::CreateNextBlockPackage(){
 			*/
 			if (!IsUploadingToPeerCache() && !IsUploadingToWebCache() && m_byDataCompVer == 1 && compFlag) // yonatan http
 			// MORPH END - Modified by Commander, WebCache 1.2e
-				CreatePackedPackets(filedata,togo,currentblock,bFromPF);
+					CreatePackedPackets(filedata_ReadFromDisk,togo_ReadFromDisk,currentblock_ReadFromDisk,bFromPF);
 			else
-				CreateStandartPackets(filedata,togo,currentblock,bFromPF);
+					CreateStandartPackets(filedata_ReadFromDisk,togo_ReadFromDisk,currentblock_ReadFromDisk,bFromPF);
 			// <-----khaos-
 			
 			// file statistic
 			//MORPH START - Changed by IceCream SLUGFILLER: Spreadbars
 			/*
-			srcfile->statistic.AddTransferred(togo);
+				srcfile_ReadFromDisk->statistic.AddTransferred(togo_ReadFromDisk);
 			*/
-			srcfile->statistic.AddTransferred(currentblock->StartOffset, togo);
+				srcfile_ReadFromDisk->statistic.AddTransferred(currentblock_ReadFromDisk->StartOffset, togo_ReadFromDisk);
 			//MORPH END - Changed by IceCream SLUGFILLER: Spreadbars
-			m_addedPayloadQueueSession += togo;
+				m_addedPayloadQueueSession += togo_ReadFromDisk;
 
 			m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
-			delete[] filedata;
-			filedata = NULL;
+				delete[] filedata_ReadFromDisk;
+			}
+			//now process error from nextblock to read
+
 		}
 	}
 	catch(CString error)
@@ -795,9 +836,9 @@ void CUpDownClient::CreateNextBlockPackage(){
 		if (thePrefs.GetVerbose())
 			DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), GetUserName(), error);
 		theApp.uploadqueue->RemoveFromUploadQueue(this, _T("Client error: ") + error);
-		if (filedata != (byte*)-2 && filedata != (byte*)-1 && filedata != NULL) {
-			delete[] filedata;
-			filedata = NULL;
+		if (m_abyfiledata != (byte*)-2 && m_abyfiledata != (byte*)-1 && m_abyfiledata != NULL) {
+			delete[] m_abyfiledata;
+			m_abyfiledata = NULL;
 		}
 		return;
 	}
@@ -808,9 +849,9 @@ void CUpDownClient::CreateNextBlockPackage(){
 		if (thePrefs.GetVerbose())
 			DebugLogWarning(_T("Failed to create upload package for %s - %s"), GetUserName(), szError);
 		theApp.uploadqueue->RemoveFromUploadQueue(this, ((CString)_T("Failed to create upload package.")) + szError);
-		if (filedata != (byte*)-2 && filedata != (byte*)-1 && filedata != NULL) {
-			delete[] filedata;
-			filedata = NULL;
+		if (m_abyfiledata != (byte*)-2 && m_abyfiledata != (byte*)-1 && m_abyfiledata != NULL) {
+			delete[] m_abyfiledata;
+			m_abyfiledata = NULL;
 		}
 		e->Delete();
 		return;
@@ -881,8 +922,8 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 		nPacketSize = togo/(uint32)(togo/10240);
 	else
 		nPacketSize = togo;
-	uint32 npacket = 0;
 #if !defined DONT_USE_SEND_ARRAY_PACKET
+	uint32 npacket = 0;
 	uint32 Size = togo;
 	Packet* apacket[EMBLOCKSIZE*3/10240];
 #endif
@@ -1417,9 +1458,9 @@ void CUpDownClient::ClearUploadBlockRequests()
 		delete m_DoneBlocks_list.GetNext(pos);
 	m_DoneBlocks_list.RemoveAll();
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
-	if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL) {
-		delete[] filedata;
-		filedata = NULL;
+	if (m_abyfiledata != (byte*)-1 && m_abyfiledata != (byte*)-2 && m_abyfiledata != NULL) {
+		delete[] m_abyfiledata;
+		m_abyfiledata = NULL;
 	}
 	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 }
@@ -1737,11 +1778,12 @@ CKnownFile* CUpDownClient::CheckAndGetReqUpFile() const {
 //MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 IMPLEMENT_DYNCREATE(CReadBlockFromFileThread, CWinThread)
 
-void CReadBlockFromFileThread::SetReadBlockFromFile(CKnownFile* pfile, uint64 startOffset, uint32 toread, CUpDownClient* client) {
-	srcfile = pfile;
+void CReadBlockFromFileThread::SetReadBlockFromFile(LPCTSTR filepath, uint64 startOffset, uint32 toread, CUpDownClient* client, CSyncObject* lockhandle) {
+	fullname = filepath;
 	StartOffset = startOffset;
 	togo = toread;
 	m_client = client;
+	m_lockhandle = lockhandle;
 } 
 
 int CReadBlockFromFileThread::Run() {
@@ -1758,18 +1800,9 @@ int CReadBlockFromFileThread::Run() {
 	byte* filedata = NULL;
 	CSyncHelper lockFile;
 	try{
-		CString fullname;
-		if (srcfile->IsPartFile() && ((CPartFile*)srcfile)->GetStatus() != PS_COMPLETE){
-			((CPartFile*)srcfile)->m_FileCompleteMutex.Lock();
-			lockFile.m_pObject = &((CPartFile*)srcfile)->m_FileCompleteMutex;
-			// If it's a part file which we are uploading the file remains locked until we've read the
-			// current block. This way the file completion thread can not (try to) "move" the file into
-			// the incoming directory.
-
-			fullname = RemoveFileExtension(((CPartFile*)srcfile)->GetFullName());
-		}
-		else{
-			fullname.Format(_T("%s\\%s"),srcfile->GetPath(),srcfile->GetFileName());
+		if (m_lockhandle) {
+			lockFile.m_pObject = m_lockhandle;
+			m_lockhandle->Lock();
 		}
 		
 		if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))

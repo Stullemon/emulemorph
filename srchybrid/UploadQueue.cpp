@@ -544,7 +544,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	while(pos != NULL && foundposition == false) {
 		CUpDownClient* uploadingClient = uploadinglist.GetAt(pos);
 
-		if(uploadingClient->GetClassID() > classID || //to work arround scheduled slot put at the wrong place in ps class that use sub class (internal priority)
+		if(uploadingClient->GetClassID() < classID || //to work arround scheduled slot put at the wrong place in ps class that use sub class (internal priority)
 			uploadingClient->GetClassID() == classID &&
 		   (uploadingClient->IsScheduledForRemoval() == false && newclient->IsScheduledForRemoval() == true ||
 		   uploadingClient->IsScheduledForRemoval() && uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && newclient->IsScheduledForRemoval() && newclient->GetScheduledUploadShouldKeepWaitingTime() == false ||
@@ -570,6 +570,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	    
 		while(renumberPosition != NULL) {
 			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
+
 			renumberClient->SetSlotNumber(++renumberSlotNumber);
 			renumberClient->UpdateDisplayedInfo(true);
 			uploadinglist.GetNext(renumberPosition);
@@ -789,15 +790,6 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
     if(pszReason && thePrefs.GetLogUlDlEvents())
         AddDebugLogLine(false, _T("Adding client to upload list: %s Client: %s"), pszReason, newclient->DbgGetClientInfo());
 	*/
-	if(pszReason && thePrefs.GetLogUlDlEvents()) {
-        uint32 newclientClassID = newclient->GetClassID();
-		CString buffer = _T("USC: ");
-		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
-			buffer.AppendFormat(_T("[C%i %i/%i]-"), classID, m_aiSlotCounter[classID], m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]);
-		}
-		buffer.AppendFormat(_T("Adding client to class %i: %s Client: %s"), newclientClassID, pszReason, newclient->DbgGetClientInfo());
-		DebugLog(LOG_USC, buffer);
-	}
 	//MORPH END   - Upload Splitting Class
 
 	//MORPH - Changed by SiRoB, Fix Connection Collision
@@ -834,6 +826,17 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	// SLUGFILLER: hideOS
 	
 	InsertInUploadingList(newclient);
+    //MORPH START - Upload Splitting Class
+	if(thePrefs.GetLogUlDlEvents()) {
+        uint32 newclientClassID = newclient->GetClassID();
+		CString buffer = _T("USC: ");
+		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
+			buffer.AppendFormat(_T("[C%i %i/%i]-"), classID, m_aiSlotCounter[classID], m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]);
+		}
+		buffer.AppendFormat(_T(" Added client to class %i: %s Client: %s"), newclientClassID, pszReason, newclient->DbgGetClientInfo());
+		DebugLog(LOG_USC, buffer);
+	}
+	//MORPH END   - Upload Splitting Class
 
 	m_nLastStartUpload = ::GetTickCount();
 
@@ -1405,7 +1408,6 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 		uint32 classID = client->GetClassID(); //MORPH - Upload Splitting Class
 		while(renumberPosition != foundPos) {
 			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
-			if (renumberClient->GetClassID() == classID) //MORPH - Upload Splitting Class
 			renumberClient->SetSlotNumber(renumberClient->GetSlotNumber()-1);
 			uploadinglist.GetPrev(renumberPosition);
 		}
@@ -2102,8 +2104,6 @@ void CUploadQueue::CheckForHighPrioClient() {
         }
 	}
 }
-//MORPH - Upload Splitting Class
-
 // MORPH START - Added by Commander, WebCache 1.2e
 CUpDownClient*	CUploadQueue::FindClientByWebCacheUploadId(const uint32 id) // Superlexx - webcache - can be made more efficient
 {

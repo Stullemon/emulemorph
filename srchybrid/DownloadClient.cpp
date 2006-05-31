@@ -1242,7 +1242,9 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	uint16 futurePossiblePendingBlock = m_PendingBlocks_list.GetCount()+m_DownloadBlocks_list.GetCount();
 	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
-		uint16 neededblock = (uint16)(iMaxBlocks - m_DownloadBlocks_list.GetCount());
+		uint16 neededblock = (uint16)(iMaxBlocks - futurePossiblePendingBlock);
+		if (neededblock>3)
+			neededblock = (neededblock/3)*3;
 		Requested_Block_Struct** toadd = new Requested_Block_Struct*[neededblock];
 		if (reqfile->GetNextRequestedBlock(this,toadd,&neededblock)){
 			for (UINT i = 0; i < neededblock; i++)
@@ -1250,8 +1252,7 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 		}
 		delete[] toadd;
 	}
-	uint8 i = 0;
-	while (!m_DownloadBlocks_list.IsEmpty() && i++ < 3)
+	while (!m_DownloadBlocks_list.IsEmpty())
 	{
 		Pending_Block_Struct* pblock = new Pending_Block_Struct;
 		pblock->block = m_DownloadBlocks_list.RemoveHead();
@@ -1330,10 +1331,6 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 	m_dwLastBlockReceived = ::GetTickCount();
 	if (!reqfile)
 		return;
-	//MORPH START - Don't Request more block if there is already more than one pending block
-	if (m_PendingBlocks_list.GetCount()>1)
-		return;
-	//MORPH END   - Don't Request more block if there is already 2 pending block
 
     // prevent locking of too many blocks when we are on a slow (probably standby/trickle) slot
     int blockCount = 3;
@@ -1347,6 +1344,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
             blockCount = 2;
         }
     }
+	blockCount = max(blockCount, 3*((GetDownloadDatarate()>>3)/EMBLOCKSIZE));
 	CreateBlockRequests(blockCount);
 
 
@@ -1367,9 +1365,8 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 	/*
 	for (uint32 i = 0; i != 3; i++){
 	*/
-	uint32 i = 0;
-	while (i != 3 && pos){
-		if (pos){
+	uint32 numberofblocktorequest = 0;
+	while (pos){
 			Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
 			if (pending->fQueued == 0) {
 				ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
@@ -1382,18 +1379,21 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 					}
 					break;
 				}
-				++i;
-			}
-		} else {
-			++i;
+			++numberofblocktorequest;
 		}
 	}
 
-	if (i == 0) //mean there is no request to do
+	if (numberofblocktorequest == 0) //mean there is no request to do
 		return;
 
 	Packet* packet;
+	uint32 npacket = 0;
+	const int nbpackettosend = (numberofblocktorequest+2)/3;
 	if (bI64Offsets){
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+		Packet** apacket = new Packet*[nbpackettosend];
+#endif
+		while (npacket<nbpackettosend) {
 		const int iPacketSize = 16+(3*8)+(3*8); // 64
 		packet = new Packet(OP_REQUESTPARTS_I64, iPacketSize, OP_EMULEPROT);
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
@@ -1460,8 +1460,25 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 			}
 
 		}
+			theStats.AddUpDataOverheadFileRequest(packet->size);
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+			apacket[npacket++] = packet;
+#else
+			socket->SendPacket(packet,true,true);
+#endif
+		}
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+		if (npacket) {
+			socket->SendPacket(apacket, npacket, true, true);
+		}
+		delete apacket;
+#endif
 	}
 	else{
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+		Packet** apacket = new Packet*[nbpackettosend];
+#endif
+		while (npacket<nbpackettosend) {
 		const int iPacketSize = 16+(3*4)+(3*4); // 40
 		packet = new Packet(OP_REQUESTPARTS,iPacketSize);
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
@@ -1527,10 +1544,21 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 				++i;
 			}
 		}
+			theStats.AddUpDataOverheadFileRequest(packet->size);
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+			apacket[npacket++] = packet;
+#else
+			socket->SendPacket(packet,true,true);
+#endif
+		}
+#if !defined DONT_USE_SEND_ARRAY_PACKET
+		if (npacket) {
+			socket->SendPacket(apacket, npacket, true, true);
+		}
+		delete apacket;
+#endif
 	}
 //MORPH END  - Changed by SiRoB, Official fix to prevent sending same requested block
-	theStats.AddUpDataOverheadFileRequest(packet->size);
-	socket->SendPacket(packet,true,true);
 }
 
 /* Barry - Originally this only wrote to disk when a full 180k block 

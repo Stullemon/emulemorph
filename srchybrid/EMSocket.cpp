@@ -828,7 +828,12 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         sendLocker.Lock();
 
 #if !defined DONT_USE_SOCKET_BUFFERING
-        while( sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
+        bufferlimit = ((bufferlimit>>10)+1) << 10; //buffer 1s
+		if (bufferlimit>= 1024*1024)
+			bufferlimit = 1024*1024-1;
+		else if (bufferlimit<minFragSize)
+			bufferlimit=minFragSize;
+		while( sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < min(maxNumberOfBytesToSend,bufferlimit) && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
               (sendblen/*sendbuffer*/ != NULL || !controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && // there must exist something to send
                (onlyAllowedToSendControlPacket == false || // this means we are allowed to send both types of packets, so proceed
                 sendblen/*sendbuffer*/ != NULL && m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/ == true || // We are in the progress of sending a control packet. We are always allowed to send those
@@ -851,13 +856,8 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
             // If we are currently not in the progress of sending a packet, we will need to find the next one to send
 #if !defined DONT_USE_SOCKET_BUFFERING
-			bufferlimit = ((bufferlimit>>10)+1) << 10; //buffer 1s
-			if (bufferlimit>= 1024*1024)
-				bufferlimit = 1024*1024-1;
-			else if (bufferlimit<minFragSize)
-				bufferlimit=minFragSize;
 			ASSERT(sendblen>=sent);
-			while ((!controlpacket_queue.IsEmpty() && sendblen-sent < min(maxNumberOfBytesToSend,bufferlimit)) || !standartpacket_queue.IsEmpty() && sendblen-sent < min(maxNumberOfBytesToSend,bufferlimit)) {
+			while ((!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && sendblen-sent+sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < min(maxNumberOfBytesToSend,bufferlimit)) {
 				bool bcontrolpacket;
 				uint32 ipacketpayloadsize = 0;
 #else
@@ -916,6 +916,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 				}
 				if (sendbuffer) {
 					if (currentBufferSize < sendblen+packetsize){
+						ASSERT(sendblen>=sent);
 						sendblen-=sent;
 						if (currentBufferSize < sendblen+packetsize) {
 						currentBufferSize = max(sendblen+packetsize, bufferlimit);

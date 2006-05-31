@@ -2144,12 +2144,15 @@ uint64 CPartFile::GetTotalGapSizeInCommun(const uint8* srcstatus) const
 		const Gap_Struct* pGap = gaplist.GetNext(pos);
 		UINT i = (UINT)(pGap->start/PARTSIZE);
 		UINT end_chunk = (UINT)(pGap->end/PARTSIZE);
-		while (i < end_chunk) {
-			if (srcstatus[i]&SC_AVAILABLE)
-				uTotalGapSizeInCommun += PARTSIZE;
-			++i;
-		}
 		uTotalGapSizeInCommun += pGap->end - pGap->start + 1;
+		while (i < end_chunk) {
+			if (srcstatus[i++]&SC_AVAILABLE) {
+				if (i<GetED2KPartCount())
+					uTotalGapSizeInCommun -= PARTSIZE;
+				else
+					uTotalGapSizeInCommun -= ((uint64)m_nFileSize%PARTSIZE);
+			}
+		}
 	}
 	return uTotalGapSizeInCommun;
 }
@@ -3739,42 +3742,6 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	*/
 	// Select mode: RELEASE, SPREAD or SHARE
 
-	uint16	part_idx;
-	uint16	min_src = (uint16)-1;
-
-	if (m_SrcpartFrequency.GetCount() < GetPartCount())
-		min_src = 0;
-	else
-		for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
-			if (m_SrcpartFrequency[part_idx] < min_src)
-				min_src = m_SrcpartFrequency[part_idx];
-
-	if (min_src <= CM_SPREAD_MINSRC)		m_ics_filemode = CM_RELEASE_MODE;
-	else if (min_src <= CM_SHARE_MINSRC)	m_ics_filemode = CM_SPREAD_MODE;
-	else									m_ics_filemode = CM_SHARE_MODE;
-		
-	// Chunk list ordered by preference
-
-	CList<uint16,uint16> chunk_list;
-	CList<uint32,uint32> chunk_pref;
-	uint32 c_pref;
-	uint32 complete_src;
-	uint32 incomplete_src;
-	uint32 first_last_mod;
-	uint32 size2transfer;
-	uint16* partsDownloading = CalcDownloadingParts(sender); //Pawcio for enkeyDEV -ICS-
-
-	//MORPH START - Added by SiRoB, WebCache for ICS
-	// Add up modifiers
-	// WebCache: for ICS
-	// WebCache: jp Don't request chunks for which we are currently receiving proxy sources START
-	ThrottledChunk cur_ThrottledChunk;
-	md4cpy(cur_ThrottledChunk.FileID, this->GetFileHash());
-	bool isthrottled = false;
-	// jp Don't request chunks for which we are currently receiving proxy sources START
-	// <--- WebCache: for ICS
-	//MORPH END   - Added by SiRoB, WebCache for ICS
-
 	// BEGIN netfinty: Dynamic Block Requests
 	uint64	bytesPerRequest = EMBLOCKSIZE;
 #if !defined DONT_USE_DBR
@@ -3817,6 +3784,43 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	}
 #endif
 	// BEGIN netfinty: Dynamic Block Requests
+
+	uint16	part_idx;
+	uint16	min_src = (uint16)-1;
+
+	if (m_SrcpartFrequency.GetCount() < GetPartCount())
+		min_src = 0;
+	else
+		for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
+			if (m_SrcpartFrequency[part_idx] < min_src)
+				min_src = m_SrcpartFrequency[part_idx];
+
+	if (min_src <= CM_SPREAD_MINSRC)		m_ics_filemode = CM_RELEASE_MODE;
+	else if (min_src <= CM_SHARE_MINSRC)	m_ics_filemode = CM_SPREAD_MODE;
+	else									m_ics_filemode = CM_SHARE_MODE;
+		
+	// Chunk list ordered by preference
+
+	CList<uint16,uint16> chunk_list;
+	CList<uint32,uint32> chunk_pref;
+	uint32 c_pref;
+	uint32 complete_src;
+	uint32 incomplete_src;
+	uint32 first_last_mod;
+	uint32 size2transfer;
+	uint16* partsDownloading = CalcDownloadingParts(sender); //Pawcio for enkeyDEV -ICS-
+
+	//MORPH START - Added by SiRoB, WebCache for ICS
+	// Add up modifiers
+	// WebCache: for ICS
+	// WebCache: jp Don't request chunks for which we are currently receiving proxy sources START
+	ThrottledChunk cur_ThrottledChunk;
+	md4cpy(cur_ThrottledChunk.FileID, this->GetFileHash());
+	bool isthrottled = false;
+	// jp Don't request chunks for which we are currently receiving proxy sources START
+	// <--- WebCache: for ICS
+	//MORPH END   - Added by SiRoB, WebCache for ICS
+
 	for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
 	{
 		if (sender->IsPartAvailable(part_idx) && GetNextEmptyBlockInPart(part_idx, 0))
