@@ -369,7 +369,7 @@ function filerename(session,filehash,fname)
 	var newname = prompt("[Rename]", fname);
 
 	if (newname != fname && newname != null)
-	        window.location='/?ses=' + session + '&w=transfer&op=rename&name=' + escape(newname) + '&file=' + filehash;
+	        window.location='?ses=' + session + '&w=transfer&op=rename&name=' + escape(newname) + '&file=' + filehash;
 }
 
 function servermenu(event,admin,ed2k,session,ip,port,isstatic)
@@ -2212,7 +2212,7 @@ function searchange2() {
 </table>
 <div align="center">
 <br />
-<form><input type="button" name="queue" value="[Reload]" onClick="self.location.href='/?ses=[Session]&w=shared&reload=true'"></form>
+<form><input type="button" name="queue" value="[Reload]" onClick="self.location.href='?ses=[Session]&w=shared&reload=true'"></form>
 <br />
 </div>
 <--TMPL_SHARED_LIST_END-->

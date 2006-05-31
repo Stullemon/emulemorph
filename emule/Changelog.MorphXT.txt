@@ -1,4 +1,13 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.13 BETA7
+-------------------------------------
+FIX    : Dynamic Block Request, proper number of request blocks.
+FIX    : [url=http://forum.emule-project.net/index.php?showtopic=107054]Collection double extension[/url] from CiccioBastardo
+
+CHANGED: USC: SOlve "slot explosions" from previous beta
+CHANGED: USC: Roll back the old slot counter way
+CHANGED: USC: Solved slot added and not needed 
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA6
 --------------------------------------
 CHANGED: USC: Use same socket buffer for all class (may reduce focus effet on faster client)
