@@ -134,6 +134,15 @@ void CClientListCtrl::SetAllIcons()
 	//MORPH START - Added by SiRoB, More client icon & Credit ovelay icon
 	imagelist.Add(CTempIconLoader(_T("ClientRightEdonkey")));
 	imagelist.Add(CTempIconLoader(_T("Morph")));
+	imagelist.Add(CTempIconLoader(_T("SCARANGEL")));
+	imagelist.Add(CTempIconLoader(_T("STULLE")));
+	imagelist.Add(CTempIconLoader(_T("MAXMOD")));
+	imagelist.Add(CTempIconLoader(_T("XTREME")));
+	imagelist.Add(CTempIconLoader(_T("EASTSHARE")));
+	imagelist.Add(CTempIconLoader(_T("IONIX")));
+	imagelist.Add(CTempIconLoader(_T("CYREX")));
+	imagelist.Add(CTempIconLoader(_T("NEXTEMF")));
+	imagelist.Add(CTempIconLoader(_T("NEO")));
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	// Mighty Knife: Community icon
@@ -350,7 +359,13 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							image = 8;
 						else if (client->ExtProtocolAvailable())
 						//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
-							image = (client->IsMorph())?10:1;
+						{
+							if(client->GetModClient() == MOD_NONE)
+								image = 1;
+							else
+								image = (uint8)(client->GetModClient() + 9);
+						}
+						//MORPH END   - Modified by SiRoB, More client icon & Credit overlay icon
 						else if (client->GetClientSoft() == SO_EDONKEY)
 							image = 9;
 						else

@@ -246,11 +246,20 @@ void CDownloadListCtrl::SetAllIcons()
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey"))); //21
 	m_ImageList.Add(CTempIconLoader(_T("Morph"))); //22
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2); //23
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3); //24
+	m_ImageList.Add(CTempIconLoader(_T("SCARANGEL"))); //23
+	m_ImageList.Add(CTempIconLoader(_T("STULLE"))); //24
+	m_ImageList.Add(CTempIconLoader(_T("MAXMOD"))); //25
+	m_ImageList.Add(CTempIconLoader(_T("XTREME"))); //26
+	m_ImageList.Add(CTempIconLoader(_T("EASTSHARE"))); //27
+	m_ImageList.Add(CTempIconLoader(_T("IONIX"))); //28
+	m_ImageList.Add(CTempIconLoader(_T("CYREX"))); //29
+	m_ImageList.Add(CTempIconLoader(_T("NEXTEMF"))); //30
+	m_ImageList.Add(CTempIconLoader(_T("NEO"))); //31
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2); //32
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3); //33
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
 	//MORPH START - Added by SiRoB, WebCache 1.2f
-	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE"))); // 25// jp webcacheclient icon
+	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE"))); // 34// jp webcacheclient icon
 	//MORPH END   - Added by SiRoB, WebCache 1.2
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
@@ -985,11 +994,18 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				//MORPH START - Added by SiRoB, WebCache 1.2f
 				// jp webcacheclient icon START 
 				else if (lpUpDownClient->GetClientSoft() == SO_WEBCACHE)
-					m_ImageList.Draw(dc, 25, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 34, point2, ILD_NORMAL | uOvlImg);
 				// jp webcacheclient icon END
 				//MORPH END   - Added by SiRoB, WebCache 1.2f
 				else if (lpUpDownClient->ExtProtocolAvailable())
-					m_ImageList.Draw(dc, (lpUpDownClient->IsMorph())?22:5, point2, ILD_NORMAL | uOvlImg);
+				//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
+				{
+					if(lpUpDownClient->GetModClient() == MOD_NONE)
+						m_ImageList.Draw(dc, 5, point2, ILD_NORMAL | uOvlImg);
+					else
+						m_ImageList.Draw(dc, lpUpDownClient->GetModClient()+21, point2, ILD_NORMAL | uOvlImg);
+				}
+				//MORPH END   - Modified by SiRoB, More client icon & Credit overlay icon
 				else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEY)
 						m_ImageList.Draw(dc, 21, point2, ILD_NORMAL | uOvlImg);
 				else

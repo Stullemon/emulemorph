@@ -3008,6 +3008,14 @@ CATEDIT                 ICON                    "res\\MOD\\catedit.ico"
 CATREMOVE               ICON                    "res\\MOD\\catremove.ico"
 CATMERGE                ICON                    "res\\MOD\\catmerge.ico"
 FRIENDSLOTREMOVE        ICON                    "res\\MOD\\FriendslotRemove.ico"
+STULLE                  ICON                    "res\\MOD\\iconstulle.ico"
+MAXMOD                  ICON                    "res\\MOD\\iconmax.ico"
+IONIX                   ICON                    "res\\MOD\\ionix.ico"
+CYREX                   ICON                    "res\\MOD\\Cyrex2001.ico"
+NEXTEMF                 ICON                    "res\\MOD\\nextEMF.ico"
+NEO                     ICON                    "res\\MOD\\Client-Neo.ico"
+XTREME                  ICON                    "res\\MOD\\xtreme.ico"
+SCARANGEL               ICON                    "res\\MOD\\ScarAngel.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.13
+-------------------------------------
+Added  : more mod icons
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA7
 -------------------------------------
 FIX    : Dynamic Block Request, proper number of request blocks.

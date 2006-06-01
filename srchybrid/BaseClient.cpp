@@ -176,9 +176,7 @@ void CUpDownClient::Init()
 	m_nSourceFrom = SF_SERVER;
 	m_bIsHybrid = false;
 	m_bIsML=false;
-	//MOPRH START - Added by SiRoB, Is Morph Client?
-	m_bIsMorph = false;
-	//MOPRH END   - Added by SiRoB, Is Morph Client?
+	m_uModClient = MOD_NONE; //MOPPH - Added by Stulle, Mod Icons
 	m_Friend = NULL;
 	m_uFileRating=0;
 	(void)m_strFileComment;
@@ -590,9 +588,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_strModVersion.Empty();
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
-	//MOPRH START - Added by SiRoB, Is Morph Client?
-	m_bIsMorph = false;
-	//MOPRH END   - Added by SiRoB, Is Morph Client?
+	m_uModClient = MOD_NONE; //MOPPH - Added by Stulle, Mod Icons
 	
 	data->ReadHash16(m_achUserHash);
 	if (bDbgInfo)
@@ -686,7 +682,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
-					//MOPRH START - Added by SiRoB, Is Morph Client?
+					//MOPRH START - Added by Stulle, Mod Icons
 					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
 						( ((m_nClientVersion >> 17) & 0x7f) == 0 && ((m_nClientVersion >> 10) & 0x7f) < 45 ||
 						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
@@ -695,9 +691,29 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 						 )
 						)
 					   ){
-						m_bIsMorph = true;
+						m_uModClient = MOD_MORPH;
 					}
-					//MOPRH END   - Added by SiRoB, Is Morph Client?
+					else if(StrStrI(m_strModVersion,_T("ScarAngel"))!=0)
+						m_uModClient = MOD_SCAR;
+					else if(StrStrI(m_strModVersion,_T("StulleMule"))!=0)
+						m_uModClient = MOD_STULLE;
+					else if(StrStrI(m_strModVersion,_T("MAXmod"))!=0)
+						m_uModClient = MOD_MAXMOD;
+					else if(StrStrI(m_strModVersion,_T("Xtreme"))!=0)
+						m_uModClient = MOD_XTREME;
+					else if(StrStrI(m_strModVersion,_T("EastShare"))!=0)
+						m_uModClient = MOD_EASTSHARE;
+					else if(StrStrI(m_strModVersion,_T("iONiX"))!=0)
+						m_uModClient = MOD_IONIX;
+					else if(StrStrI(m_strModVersion,_T("Cyrex2001"))!=0)
+						m_uModClient = MOD_CYREX;
+					else if(StrStrI(m_strModVersion,_T("NextEMF"))!=0)
+						m_uModClient = MOD_NEXTEMF;
+					else if(StrStrI(m_strModVersion,_T("Neo Mule"))!=0)
+						m_uModClient = MOD_NEO;
+					else
+						m_uModClient = MOD_NONE;
+					//MOPRH END   - Added by Stulle, Mod Icons
 				}
 				else if (temptag.IsInt())
 					m_strModVersion.Format(_T("ModID=%u"), temptag.GetInt());
@@ -1346,7 +1362,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
-					//MOPRH START - Added by SiRoB, Is Morph Client?
+					//MOPRH START - Added by Stulle, Mod Icons
 					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
 						( ((m_nClientVersion >> 17) & 0x7f) == 0 && ((m_nClientVersion >> 10) & 0x7f) < 45 ||
 						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
@@ -1355,9 +1371,29 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 						 )
 						)
 					   ){
-						m_bIsMorph = true;
+						m_uModClient = MOD_MORPH;
 					}
-					//MOPRH END   - Added by SiRoB, Is Morph Client?
+					else if(StrStrI(m_strModVersion,_T("ScarAngel"))!=0)
+						m_uModClient = MOD_SCAR;
+					else if(StrStrI(m_strModVersion,_T("StulleMule"))!=0)
+						m_uModClient = MOD_STULLE;
+					else if(StrStrI(m_strModVersion,_T("MAXmod"))!=0)
+						m_uModClient = MOD_MAXMOD;
+					else if(StrStrI(m_strModVersion,_T("Xtreme"))!=0)
+						m_uModClient = MOD_XTREME;
+					else if(StrStrI(m_strModVersion,_T("EastShare"))!=0)
+						m_uModClient = MOD_EASTSHARE;
+					else if(StrStrI(m_strModVersion,_T("iONiX"))!=0)
+						m_uModClient = MOD_IONIX;
+					else if(StrStrI(m_strModVersion,_T("Cyrex2001"))!=0)
+						m_uModClient = MOD_CYREX;
+					else if(StrStrI(m_strModVersion,_T("NextEMF"))!=0)
+						m_uModClient = MOD_NEXTEMF;
+					else if(StrStrI(m_strModVersion,_T("Neo Mule"))!=0)
+						m_uModClient = MOD_NEO;
+					else
+						m_uModClient = MOD_NONE;
+					//MOPRH END   - Added by Stulle, Mod Icons
 				}
 				else if (temptag.IsInt())
 					m_strModVersion.Format(_T("ModID=%u"), temptag.GetInt());

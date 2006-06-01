@@ -213,6 +213,7 @@ enum EChunkStatus{
 #define _EUploadState		EUploadState
 #define _EDownloadState		EDownloadState
 #define _ESourceFrom		ESourceFrom
+#define _EModClient			EModClient //MOPPH - Added by Stulle, Mod Icons
 #else
 #define _EClientSoftware	uint8
 #define _EChatState			uint8
@@ -221,7 +222,24 @@ enum EChunkStatus{
 #define _EUploadState		uint8
 #define _EDownloadState		uint8
 #define _ESourceFrom		uint8
+#define _EModClient			uint8 //MOPPH - Added by Stulle, Mod Icons
 #endif
+
+//MORPH START - Added by Stulle, Mod Icons
+enum EModClient{
+	MOD_NONE			= 0,
+	MOD_MORPH			= 1,
+	MOD_SCAR			= 2,
+	MOD_STULLE			= 3,
+	MOD_MAXMOD			= 4,
+	MOD_XTREME			= 5,
+	MOD_EASTSHARE		= 6,
+	MOD_IONIX			= 7,
+	MOD_CYREX			= 8,
+	MOD_NEXTEMF			= 9,
+	MOD_NEO				= 10
+};
+//MORPH END   - Added by Stulle, Mod Icons
 
 struct PartFileStamp {
 	CPartFile*	file;
@@ -815,9 +833,9 @@ public:
 	CPeerCacheUpSocket* m_pPCUpSocket;
 
 	LPCTSTR		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
-	//MORPH START - Added by SiRoB, Is Morph Client
-	bool IsMorph() const { return m_bIsMorph;}
-	//MORPH END   - Added by SiRoB, Is Morph Client
+	//MORPH START - Added by Stulle, Mod Icons
+	bool IsMorph() const		{return GetModClient() == MOD_MORPH;}
+	//MORPH START - Added by Stulle, Mod Icons
 
 	//EastShare Start - Added by AndCycle, PayBackFirst
 	bool	IsMoreUpThanDown() const;
@@ -992,12 +1010,12 @@ protected:
 	_EUploadState		m_nUploadState;
 	_EDownloadState		m_nDownloadState;
 	_ESourceFrom		m_nSourceFrom;
+	_EModClient         m_uModClient; //MORPH - Added by Stulle, Mod Icons
 
 	CTypedPtrList<CPtrList, Packet*> m_WaitingPackets_list;
 	CList<PartFileStamp> m_DontSwap_list;
 
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	bool	m_bIsMorph; //MORPH - Added by SiRoB, Is Morph client?
 	bool	m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
 	CString m_strNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag
 	uint32  m_uNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag

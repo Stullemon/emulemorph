@@ -129,13 +129,19 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey")));
-	m_ImageList.Add(CTempIconLoader(_T("Morph")));
-	//MORPH START - Added by SiRoB, WebCache
 	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE")));
-	//MORPH END   - Added by SiRoB, WebCache
-	//MORPH START - Added by Stulle, Server Icon
 	m_ImageList.Add(CTempIconLoader(_T("Server")));
-	//MORPH END   - Added by Stulle, Server Icon
+	m_ImageList.Add(CTempIconLoader(_T("Morph")));
+	m_ImageList.Add(CTempIconLoader(_T("SCARANGEL")));
+	m_ImageList.Add(CTempIconLoader(_T("STULLE")));
+	m_ImageList.Add(CTempIconLoader(_T("MAXMOD")));
+	m_ImageList.Add(CTempIconLoader(_T("XTREME")));
+	m_ImageList.Add(CTempIconLoader(_T("EASTSHARE")));
+	m_ImageList.Add(CTempIconLoader(_T("IONIX")));
+	m_ImageList.Add(CTempIconLoader(_T("CYREX")));
+	m_ImageList.Add(CTempIconLoader(_T("NEXTEMF")));
+	m_ImageList.Add(CTempIconLoader(_T("NEO")));
+
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
@@ -351,16 +357,21 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					}
 					//MORPH START - Added by Stulle, Server Icon
 					else if(client->GetClientSoft() == SO_URL){
-						image = 19;
+						image = 18;
 					}
 					//MORPH END   - Added by Stulle, Server Icon
 					//MORPH START - Added by SiRoB, WebCache
 					else if (client->GetClientSoft() == SO_WEBCACHE) {
-						image = 18;
+						image = 17;
 					}
 					//MORPH END   - Added by SiRoB, WebCache
 					else if (client->ExtProtocolAvailable()){
-						image = client->IsMorph()?17:1; //MORPH START - Added by SiRoB, More client icon
+						//MORPH START - Added by SiRoB, More client icon
+						if(client->GetModClient() == MOD_NONE)
+							image = 1;
+						else
+							image = (uint8)(client->GetModClient() + 18);
+						//MORPH END   - Added by SiRoB, More client icon
 					}
 					else if (client->GetClientSoft() == SO_EDONKEY){
 						image = 15;

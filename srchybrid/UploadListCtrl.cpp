@@ -170,6 +170,15 @@ void CUploadListCtrl::SetAllIcons()
 	//imagelist.Add(CTempIconLoader(_T("ClientLPhantPlus")));
 	imagelist.Add(CTempIconLoader(_T("ClientRightEdonkey")));
 	imagelist.Add(CTempIconLoader(_T("Morph")));
+	imagelist.Add(CTempIconLoader(_T("SCARANGEL")));
+	imagelist.Add(CTempIconLoader(_T("STULLE")));
+	imagelist.Add(CTempIconLoader(_T("MAXMOD")));
+	imagelist.Add(CTempIconLoader(_T("XTREME")));
+	imagelist.Add(CTempIconLoader(_T("EASTSHARE")));
+	imagelist.Add(CTempIconLoader(_T("IONIX")));
+	imagelist.Add(CTempIconLoader(_T("CYREX")));
+	imagelist.Add(CTempIconLoader(_T("NEXTEMF")));
+	imagelist.Add(CTempIconLoader(_T("NEO")));
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);//10
@@ -418,7 +427,14 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else if (client->GetClientSoft() == SO_EDONKEY )
 							image = 8;
 						else if (client->ExtProtocolAvailable())
-							image = (client->IsMorph())?9:1;
+						//MORPH START - Added by SiRoB, More client icon
+						{
+							if(client->GetModClient() == MOD_NONE)
+								image = 1;
+							else
+								image = (uint8)(client->GetModClient() + 8);
+						}
+						//MORPH END   - Added by SiRoB, More client icon
 						else
 							image = 0;
 
