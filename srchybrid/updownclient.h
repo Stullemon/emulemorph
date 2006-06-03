@@ -833,10 +833,7 @@ public:
 	CPeerCacheUpSocket* m_pPCUpSocket;
 
 	LPCTSTR		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
-	//MORPH START - Added by Stulle, Mod Icons
-	bool IsMorph() const		{return GetModClient() == MOD_MORPH;}
-	//MORPH START - Added by Stulle, Mod Icons
-
+	
 	//EastShare Start - Added by AndCycle, PayBackFirst
 	bool	IsMoreUpThanDown() const;
 	bool	IsMoreUpThanDown(const CKnownFile* file) const; //MORPH - Added by SiRoB, Code Optimization
@@ -1189,6 +1186,11 @@ public:
 	uint16	uiDLAskingCounter; 
 	DWORD	dwThisClientIsKnownSince;
 	//SLAHAM: ADDED Known Since/Last Asked Counter <=
+    //MORPH START - Added by Stulle, Mod Icons
+	bool IsMorph() const		{return GetModClient() == MOD_MORPH;}
+	//MORPH START - Added by Stulle, Mod Icons
+
+
 private:
 	struct	IPRange_Struct2* m_structUserCountry; //EastShare - added by AndCycle, IP to Country
 //EastShare End - added by AndCycle, IP to Country
@@ -1199,8 +1201,15 @@ private:
 	// <--- enkeyDEV: ICS
 //Morph End - added by AndCycle, ICS
 
+
+
+
 public:
 	bool	IsMorphLeecher(); // Morph Start - added by Stulle, Morph Leecher Detection
+//MORPH START - Added by Stulle, Mod Icons
+EModClient	GetModClient() const	{ return (EModClient)m_uModClient; }
+//MORPH END   - Added by Stulle, Mod Icons
+
 };
 //#pragma pack()
 //>>> eWombat [SNAFU_V3]
