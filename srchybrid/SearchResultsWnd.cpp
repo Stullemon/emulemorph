@@ -574,20 +574,26 @@ void CSearchResultsWnd::DownloadSelected(bool bPaused)
 			tempFile.SetFileName(sel_file->GetFileName());
 			tempFile.SetStrTagValue(FT_FILENAME, sel_file->GetFileName());
 			// khaos::categorymod+ m_cattabs is obsolete.
-			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat() && useCat==-1)
+			UINT fileCat = 0;
+			if (useCat==-1)
 			{
-				useCat = theApp.downloadqueue->GetAutoCat(CString(parent->GetFileName()), parent->GetFileSize());
-				if (!useCat && thePrefs.UseActiveCatForLinks())
-					useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
+				if (thePrefs.UseAutoCat())
+					fileCat = theApp.downloadqueue->GetAutoCat(CString(parent->GetFileName()), parent->GetFileSize());
+				if (!fileCat && thePrefs.UseActiveCatForLinks())
+					fileCat = theApp.emuledlg->transferwnd->GetActiveCategory();
 			}
+			 else 
+			 {
+                   fileCat = useCat;
+             }
 			
 			if (thePrefs.SmallFileDLPush() && parent->GetFileSize() < (uint64)154624)
-				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, 0);
+				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, fileCat, 0);
 			else if (thePrefs.AutoSetResumeOrder())
-				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, (uint16)(theApp.downloadqueue->GetMaxCatResumeOrder(useCat)+1));
+				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, fileCat, (uint16)(theApp.downloadqueue->GetMaxCatResumeOrder(fileCat)+1));
 			else
 			// khaos::categorymod-
-			theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, useCat, (uint16)(theApp.downloadqueue->GetMaxCatResumeOrder(useCat)));
+			theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, fileCat, (uint16)(theApp.downloadqueue->GetMaxCatResumeOrder(fileCat)));
 
 			// update parent and all childs
 			searchlistctrl.UpdateSources(parent);
