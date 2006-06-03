@@ -367,6 +367,11 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveFile((CPartFile*)pFileInMap);
 
 		delete pFileInMap;
+		//MORPH START leuk_he
+        //Xman official bugfix for redownloading already downloaded file: do share the file/
+        theApp.sharedfiles->SafeAddKFile(toadd);
+		//MORPH END leuk_he
+
 #else
 		// if the new entry is already in list, update the stats and return false, but do not delete the entry which is
 		// alreay in known file list!
