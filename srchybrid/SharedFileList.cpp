@@ -624,6 +624,26 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 	return bAdded;
 }
 
+//MORPH START leuk_he redownloading
+//Xman official bugfix for redownloading already downloaded file
+//same as above but without RemoveHashing. It isn't needed and it can crash there
+bool CSharedFileList::SafeAddKFileWithOutRemoveHasing(CKnownFile* toadd, bool bOnlyAdd)
+{
+	bool bAdded = false;
+	bAdded = AddFile(toadd);
+	if (bOnlyAdd)
+		return bAdded;
+	if (bAdded && output)
+	{
+		output->AddFile(toadd);
+		// Add history also here....
+	}
+	m_lastPublishED2KFlag = true;
+	return bAdded;
+}
+//Xman end
+//MORPH END leuk_he redownloading
+
 void CSharedFileList::RepublishFile(CKnownFile* pFile)
 {
 	CServer* pCurServer = server->GetCurrentServer();

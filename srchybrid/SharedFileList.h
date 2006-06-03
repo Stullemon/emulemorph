@@ -43,6 +43,7 @@ public:
 	void	SendListToServer();
 	void	Reload();
 	bool	SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd = false);
+	bool	SafeAddKFileWithOutRemoveHasing(CKnownFile* toadd, bool bOnlyAdd = false); //Xman official bugfix for redownloading already downloaded file 
 	void	RepublishFile(CKnownFile* pFile);
 	void	SetOutputCtrl(CSharedFilesCtrl* in_ctrl);
 	void	RemoveFile(CKnownFile* toremove);
