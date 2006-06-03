@@ -1243,8 +1243,8 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
 		uint16 neededblock = (uint16)(iMaxBlocks - futurePossiblePendingBlock);
-		if (neededblock>3)
-			neededblock = (neededblock/3)*3;
+		if (iMaxBlocks>3)
+			neededblock = (neededblock/3+1)*3;
 		Requested_Block_Struct** toadd = new Requested_Block_Struct*[neededblock];
 		if (reqfile->GetNextRequestedBlock(this,toadd,&neededblock)){
 			for (UINT i = 0; i < neededblock; i++)
@@ -1333,7 +1333,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		return;
 
     // prevent locking of too many blocks when we are on a slow (probably standby/trickle) slot
-    int blockCount = 3;
+	int blockCount = 2;
     if(IsEmuleClient() && m_byCompatibleClient==0 && reqfile->GetFileSize()-reqfile->GetCompletedSize() <= (uint64)PARTSIZE*4) {
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
@@ -1344,7 +1344,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
             blockCount = 2;
         }
     }
-	blockCount = max(blockCount, 3*((GetDownloadDatarate()>>3)/EMBLOCKSIZE));
+	blockCount = max(blockCount, GetDownloadDatarate()/EMBLOCKSIZE+2);
 	CreateBlockRequests(blockCount);
 
 
