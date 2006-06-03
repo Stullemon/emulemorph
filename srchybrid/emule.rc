@@ -3059,7 +3059,7 @@ BANNER                  JPG                     "res\\MOD\\MorphBanner.jpg"
 //
 
 IDR_TASKBAR             GIF                     "res\\taskbarNotifier.gif"
-IDR_WIZ1_WATERMARK      GIF                     "res\\mule_wiz.gif"
+IDR_WIZ1_WATERMARK      GIF                     "res\\mod\\mule_wiz_morph.gif"
 IDR_WIZ1_HEADER         GIF                     "res\\mule_wiz_hdr.gif"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -5993,7 +5993,7 @@ BEGIN
     IDS_LOG_SERVER_FILTERED "Removed server at %s  from list '%s' :in ipfilter '%s'"
     IDC_ENABLEPROXY_TIP     "Enable this if the only option for you to \nconnect to internet is via a proxy. This should\nalways result in a lowid (not optimal)\n<b>WARNING:</b>\nOnly enter a proxy if you are sure you have one\nand you are able to provide the correct information.\nProxies are only seldom used on home PCs and\noffer no advantage for users outside a LAN.\nHardware routers or modems are no proxies!"
     IDC_PROXYTYPE_TIP       "Set the protocol of the proxy.\nThe precedence of the proxy protocol performance is as follows.\n1. SOCKS 4a (highest performance because of least overhead)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (lowest performance because of most overhead)"
-    IDC_PROXYNAME_TIP       "Hostname or ip adress of proxy"
+    IDC_PROXYNAME_TIP       "Hostname or ip address of proxy"
     IDC_PROXYPORT_TIP       "port number the proxy communicates on.\nTypical 1080 for socks and 80 or 8080 for http."
     IDC_ENABLEAUTH_TIP      "Enable if you need to login into the proxy\nNot that for http only basic authentication\n(not microsoft NTLM) is supported"
 END
@@ -6218,12 +6218,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SFM_TIP             "Options about the files you share. "
-    IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP "IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP"
-    IDS_HIDEOVERSHARES_TIP  "Balance the upload of chunks within a file. \nIt is hiding chunks, which were uploaded significantly\nmore than other chunks, from downloaders. This causes\ndownloaders to request other, less shared, chunks.\nAlsways some chunks are visible "
-    IDS_SELECTIVESHARE_TIP  "Share selected chuks"
-    IDS_SHAREONLYTHENEED_TIP 
-                            "Hides chunks already gotten by queued clients. \neMule works out from what clients it has seen in \nqueue if every one is missing the same chunks it \nwill hide all chunks that at least one client has \ngot and show chunks that no one has"
-    IDS_POWERSHARE_TIP2     "Settings for powershare, \ngive absolute priority to\na file without the need\nfor unsharing other files"
+    IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP "Enable collection data for the spreadbar.\nTHis is is optimal for better releases but \ncan take some extra memeory"
+    IDS_HIDEOVERSHARES_TIP  "Balance the upload of chunks within a file. \nIt is hiding chunks, which were uploaded significantly\nmore than other chunks, from downloaders. This causes\ndownloaders to request other, less shared, chunks.\nAlways some chunks are visible "
+    IDS_SELECTIVESHARE_TIP  "You can choose to make Hide Overshare stricter by only revealing\none chunk to each user, starting with the least uploaded chunks,\nand considering the chunks that were already offered when choosing\nthe next. Hide overshares must not be disabled for this to work\n(Off by default)."
+    IDS_SHAREONLYTHENEED_TIP "Share Only the Need hides Chunks which were already\nasked by other clients on your queue. eMule analyzes\nyour upload queue if every user are asking for the\nsame chunks. if true, eMule hides the chunks which\nat least one user has already got and shows just\nthe chunks that no one has.\nTHey are purple in the spreadbar.\nThere is always one visible."
+	IDS_POWERSHARE_TIP2     "Settings for powershare, \ngive absolute priority to\na file without the need\nfor unsharing other files"
     IDS_POWERSHARE_DISABLED_TIP 
                             "No powersharing if not set on individual file."
     IDS_POWERSHARE_ACTIVATED_TIP 
@@ -6252,8 +6251,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_TCPIP_CONNS_TIP     "Tweak tcp/ip settings"
-    IDS_MAXCON5SECLABEL_TIP "This is the number of new connections eMule opens \nduring 5 seconds. (Default is 20.) If you raise\nthis value too high you will have to patch tcp/ip.sys(XPSP2)\nand your router may overload. Increasing this value\nmakes eMule connect faster to souces in \n'too many open connection' state."
-    IDS_MAXHALFOPENCONS_TIP "max number of not fully completed connections\nYou will have to increase this value together with conns/5sec"
+    IDS_MAXCON5SECLABEL_TIP "This is the number of new connections eMule MAY open\nduring 5 seconds. (Default is 20.) If you raise\nthis value you also have to raise the half open value"
+							 
+    IDS_MAXHALFOPENCONS_TIP "Max number of not fully completed connections\nYou will have to increase this value together with conns/5sec\n set this value too high you will have to patch tcp/ip.sys(XPSP2)\nand your router may overload. Increasing this value\nmakes eMule connect faster to sources in \n'too many open connection' state."
     IDS_CONDTCPACCEPT_TIP   "Fast Connection Reject uses a more efficient method to \nreject incoming TCP connection attempts of banned clients\nand/or from clients which IPs are found in IP-filter list.\nIt's using a special Winsock feature called 'SO_CONDITIONAL_ACCEPT'\nwhich leads to less TCP overhead in case the TCP connection is rejected\nBut causes more ip lookups (cpu usage) if  the client is rejected"
 END
 
@@ -6282,7 +6282,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP_ENABLE_TIP     "Forwart ports in the router to your pc.\nYou might have to enable uPnP in the router\nYou do not need to set this setting if you \nmanully forwarded ports yourself or do not have\na router. Recommended if you use 'random ports'\n(default: autodetect)"
+    IDS_UPNP_ENABLE_TIP     "Forward ports in the router to your pc.\nYou might have to enable uPnP in the router\nYou do not need to set this setting if you \nmanully forwarded ports yourself or do not have\na router. Recommended if you use 'random ports'\n(default: autodetect)"
     IDS_UPNP_ENABLEWEB_TIP  "Also forward the port that is used for the webinterface so the webinterface is reachable form the internet"
     WAP_TIP                 "Wireless Application Protocol (WAP) is an open international standard\nfor applications that use wireless communication (for example, Internet\naccess from a mobile phone)"
     ENABLEWAP_TIP           "Enable the wap interface"
@@ -6294,7 +6294,7 @@ BEGIN
     WAPLOWPASS_TIP          "password for guest account."
     IDS_BINDADDR            "Bindaddr emule to interface"
     IDS_BINDADDR_TIP        "If you have multiple internet connections force eMule\nto use this particular interface on the pc. You can\nonly use one internet connection with eMule. Set this\nValue to 0.0.0.0 to bind to all interfaces (default)\nYou have to restart eMule to have the full effect of\nthis setting. "
-    IDS_UPNPBINDADDR        "Upnp host adress to bind"
+    IDS_UPNPBINDADDR        "Upnp host address to bind"
     IDS_UPNPBINDADDR_TIP    "If the computer has multiple interfaces this\nis the address the ports will be forwarded to\nwith the upnp interface of the router. If a \nbinaddr is set you do not need to set this parameter"
 END
 
@@ -6323,11 +6323,11 @@ BEGIN
     IDS_PREFER_SHARE_ALL_TIP 
                             "Connect first to servers that can handle the number\nof files (softlimit) that you are sharing."
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES_TIP 
-                            "Only start to download a file if it has been seen complete\nat least once. This  will prevent you from starting a downlaod\na file that can never complete, but might delay downloading of\na file if you ask multiple files from only one complete source"
+                            "Only start to download a file if it has been seen complete\nat least once. This  will prevent you from starting a download\na file that can never complete, but might delay downloading of\na file if you ask multiple files from only one complete source"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP 
                             "Save Upload Queue Wait Time.\nBasically, SUQWT allows one to carry wait time from previous dead-end upload queue\nwaiting sessions over to the next upload queue sessions until one manages to get\nthrough the upload queue, somewhat like holding a spot in a waiting line by using \nyour gym bag or other article - if you're not there, the bag stays there and people\nmove around it. (in an ideal civilized world anyway). Default: enabled"
     IDS_ENABLE_CHUNKDOTS_TIP "Show dots on the spread bar every 9.28Mb"
-    IDS_ECFEF_TIP           "One queue per file/all files equal change.\nChange the priority of each file based on the\nuploaded data  and requests in this session"
+    IDS_ECFEF_TIP           "One queue per file/all files equal chance.\nChange the priority of each file based on the\nuploaded data  and requests in this session"
     IDS_IP2COUNTRY_TIP      "Country names and flags on the client details in the \ntransfer window. You need a up to date country.csv file\nfrom the morph update settings to show the correct\ncountries based on the guessed location of the ip \nnumber of the peer."
     IDS_DISABLED_TIP        "No country letters. (disable country column on next startup)"
     IDS_COUNTRYNAME_SHOWFLAG_TIP 
@@ -6351,7 +6351,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_FILTERSERVERBYIPFILTE_TIP 
-                            "Also apply the following filter for servers (recommended).\nIf you set this filtered servers are grayed out and removed\non connect. Disbale this setting and you can connect to\nfitlered (fake....) servers but might get a lowid"
+                            "Also apply the following filter for servers (recommended).\nIf you set this filtered servers are grayed out and removed\non connect. Disable this setting and you can connect to\nfitlered (fake....) servers but might get a lowid"
     IDC_STATIC_FILTERLEVE_TIP 
                             "Level of the filter entries that are applied.\nEach entry of the ipfilter.dat has a (possible) value\nenter a value of 0 to disable the ipfilter temporary\n0 Recommended for testing opening port, or delete\nipfilter.dat to save memory) Default value 127.\nIn the meuh4567 list used by morph update\nthe following levels are available\nset to 0 for maximal sources , 254 for some paranoia"
     IDC_RELOADFILTE_TIP     "Load the file again in memory"
@@ -6363,7 +6363,7 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "Username at the proxy"
     IDC_PASSWORD_TIP        "Password at the proxy"
-    IDC_WEBCACHENAME_TIP    "hostname of the proxy of your isp. Use 'transparant@yourisp' for a transparant proxy"
+    IDC_WEBCACHENAME_TIP    "hostname of the proxy of your isp. Use 'transperant@yourisp' for a transperant proxy"
     IDC_WEBCACHEPORT_TIP    "port number (typically 80 or 8080)"
     IDC_STATIC_ADDRESS_TIP  "IDC_STATIC_ADDRESS_TIP"
     IDC_STATIC_CONTROLS_TIP "IDC_STATIC_CONTROLS_TIP"
@@ -6409,14 +6409,14 @@ STRINGTABLE
 BEGIN
     IDC_RESETFAKESURL_TIP   "Reset the url field to the morph default:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
     IDC_UPDATE_URL_FAKELIST_TIP 
-                            "Where to fetch the fakelist. Fakelist must be in\nzip format. Morph checks if the date on the file\nis newer than the preivious download and will\nonly update if the file on the web is newer. "
+                            "Where to fetch the fakelist. Fakelist must be in\nzip format. Morph checks if the date on the file\nis newer than the previous download and will\nonly update if the file on the web is newer. "
     IDC_AUTOUPIPFILTER_TIP  "Try to update the list before connecting to the network"
     IDC_UPDATEIPFURL_TIP    "Download & reload the ipfilter.zip now.\nIf the ipfilter is newer than the previous download"
     IDC_RESETIPFURL_TIP     "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
     IDC_UPDATE_URL_IPFILTER_TIP 
                             "Url where to download the ipfilter.dat (zip format)"
     IDC_MORPH2_COUNTRY_TIP  "Download the countrylist for the flags on startup"
-    IDC_UPDATEIPCURL_TIP    "Downlaod the ip ranges per country to be displayed in the countryflag column"
+    IDC_UPDATEIPCURL_TIP    "Download the ip ranges per country to be displayed in the countryflag column"
     IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP 
                             "Where to download the list.\n List will only be downloaded if the web version is newer than\nthe previous download"
     IDC_RESETIPCURL_TIP     "Reset the above url to\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
