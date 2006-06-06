@@ -1,9 +1,16 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13
 -------------------------------------
+FIXED: SCC: When you add multiple file those file are now properly associated to category reguarding setting
+FIXED: MergeKnown: statistic merge from SlugFiller mod has been fixed to avoid crash
+       also fixes duplicate files
+CHANGED: DCD: Display also current download chunk number and session completed download from a client
+FIXED: Official fix arround unability to open completed file when they were renamed in the sharedfile window
 CHANGED : Some tooltip spelling thx to fabulous (pt_br translator) [leuk_he] 
-FIX     : If there is a duplicate file found share one instead of none by xman [leuk_he]
 Added   : more mod icons
+FIX     : Khaos category. Default to category 0, if all other methods fail.
+FIXED: Khaos category download manager
+- When you add multiple file those file are now properly associated to category reguarding setting
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA7
 -------------------------------------
