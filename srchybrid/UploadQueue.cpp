@@ -619,13 +619,9 @@ CUpDownClient* CUploadQueue::FindLastUnScheduledForRemovalClientInUploadList(uin
 		if(!cur_client->IsScheduledForRemoval()) {
 		*/
 		uint32 cur_classID = cur_client->GetClassID();
-		if(
-		   (
-		    m_abAddClientOfThisClass[classID] == true && m_abAddClientOfThisClass[cur_classID] == false && cur_classID >= classID  || //target class doens't use its full bandwidth, class of the current client use its full bandwidth and we found a client with lower or same class
-			m_abAddClientOfThisClass[classID] == false && cur_classID == classID //target class use its full bandwidth and we found a target class client
-		   )
+		if(cur_classID > classID //We found a client in a lower prio class
 		   &&
-		   !cur_client->IsScheduledForRemoval()
+		   !cur_client->IsScheduledForRemoval() //And cur client is not scheduled
 		  ) {
 		//MORPH END   - Changed by , Upload Splitting Class
 			return cur_client;
@@ -716,20 +712,17 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 				//MORPH END   - Changed by , Upload Splitting Class
 
 					if(lastClient != NULL) {
-						//MORPH START - Changed by , Upload Splitting Class
+						//MORPH START - Upload Splitting Class, We don't need to make the check it's done into FindLastUnScheduledForRemovalClientInUploadList
 						/*
 						if (RightClientIsSuperior(lastClient, newclient) > 0)
 						*/
-						if (wanttoaddanewfriendslot && !(lastClient->IsFriend() && lastClient->GetFriendSlot()) || //we want to add a new friend slot and lastunscheduledslot is not a friend slot
-							!lastClient->IsPBForPS()) //or we want to add a new powershare slot and lastunscheduledslot is a normal slot
-							
-						{
-
 							// Remove last client from ul list to make room for higher prio client
 		                    ScheduleRemovalFromUploadQueue(lastClient, _T("Ended upload to make room for higher prio client."), GetResString(IDS_UPLOAD_PREEMPTED), true);
+                        /*
                         } else {
                             return false;
                         }
+						*/
                     }
                 } else {
                     return false;
@@ -937,6 +930,8 @@ void CUploadQueue::Process() {
 
 	UpdateActiveClientsInfo(curTick);
 
+	CheckForHighPrioClient();
+	
 	//MORPH START - Upload Splitting Class
 	uint32 needToaddmoreslot = false;
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
@@ -979,8 +974,6 @@ void CUploadQueue::Process() {
 		}
 	}
 	
-    CheckForHighPrioClient();
-
     if (needToaddmoreslot){
         AddUpNextClient(_T("Not enough open upload slots for current ul speed"));
 	}
@@ -1098,11 +1091,11 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 					needtoaddslot = true;
 		}
 		if (!simulateScheduledClosingOfSlot) {
+			//Delay Slot open every 1 second
+			if (uploadinglist.GetCount() != 0 && ::GetTickCount() - m_nLastStartUpload < max(SEC2MS(1),SEC2MS(3)/uploadinglist.GetCount()) /* && datarate < 102400*/)
+    			needtoaddslot = false;
 			//Mark the class to be able to receive a slot or not
 			m_abAddClientOfThisClass[classID] = needtoaddslot;
-		//Delay Slot open every 1 second
-		if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1) /* && datarate < 102400*/)
-    		return false;
 		}
 		return needtoaddslot;
 	} else
@@ -2100,6 +2093,8 @@ void CUploadQueue::CheckForHighPrioClient() {
 
         bool added = true;
         while(added) {
+			for (uint32 classID = 0; classID < LAST_CLASS; classID++)
+				ForceNewClient(false, classID);
             added = AddUpNextClient(_T("High prio client (i.e. friend/powershare)."), NULL, true);
         }
 	}

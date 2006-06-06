@@ -189,7 +189,11 @@ void CDownloadListCtrl::Init()
 	lfFont.lfHeight = 11;
 	m_fontBoldSmaller.CreateFontIndirect(&lfFont);
 	//MORPH END   - Added by SiRoB, Draw Client Percentage
-
+	//MORPH START - Draw Display Chunk Detail
+	lfFont.lfWeight = FW_NORMAL;
+	m_fontSmaller.CreateFontIndirect(&lfFont);
+	//MORPH END   - Draw Display Chunk Detail
+	
 	// Barry - Use preferred sort order from preferences
 	//MORPH START - Changed by SiRoB, Remain time and size Columns have been splited
 	/*
@@ -1132,8 +1136,26 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					lpUpDownClient->DrawStatusBarChunk(&cdcStatus,  &rec_status,(CPartFile*)lpCtrlItem->owner, thePrefs.UseFlatBar());
 					//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 
-					//Commander - Added: Client percentage - Start
-					//MORPH - Changed by SiRoB, Keep A4AF info
+					COLORREF oldclr = cdcStatus.SetTextColor(RGB(0,0,0));
+					int iOMode = cdcStatus.SetBkMode(TRANSPARENT);
+					buffer.Format(_T("%i|%s"), lpUpDownClient->GetCurrentDownloadingChunk(), CastItoXBytes(lpUpDownClient->GetSessionPayloadDown(), false, false));
+					CFont *pOldFont = cdcStatus.SelectObject(&m_fontSmaller);
+#define	DrawClientPercentText		cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
+					rec_status.top-=1;rec_status.bottom-=1;
+					DrawClientPercentText;rec_status.left+=1;rec_status.right+=1;
+					DrawClientPercentText;rec_status.left+=1;rec_status.right+=1;
+					DrawClientPercentText;rec_status.top+=1;rec_status.bottom+=1;
+					DrawClientPercentText;rec_status.top+=1;rec_status.bottom+=1;
+					DrawClientPercentText;rec_status.left-=1;rec_status.right-=1;
+					DrawClientPercentText;rec_status.left-=1;rec_status.right-=1;
+					DrawClientPercentText;rec_status.top-=1;rec_status.bottom-=1;
+					DrawClientPercentText;rec_status.left++;rec_status.right++;
+					cdcStatus.SetTextColor(RGB(255,255,255));
+					DrawClientPercentText;
+					cdcStatus.SelectObject(pOldFont);
+					cdcStatus.SetBkMode(iOMode);
+					cdcStatus.SetTextColor(oldclr);
+					
 					lpCtrlItem->dwUpdatedchunk = dwTicks + (rand() % 128); 
 				} else 
 					hOldBitmap = cdcStatus.SelectObject(lpCtrlItem->statuschunk); 
@@ -1193,10 +1215,10 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 						if (percent > 0.05f)
 						{
 							//Commander - Added: Draw Client Percentage xored, caching before draw - Start
+							buffer.Format(_T("%.1f%%"), percent);
 							COLORREF oldclr = cdcStatus.SetTextColor(RGB(0,0,0));
 							int iOMode = cdcStatus.SetBkMode(TRANSPARENT);
-							buffer.Format(_T("%.1f%%"), percent);
-							CFont *pOldFont = cdcStatus.SelectObject(&m_fontBoldSmaller);
+							CFont *pOldFont = cdcStatus.SelectObject(&m_fontSmaller);
 #define	DrawClientPercentText		cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
 							rec_status.top-=1;rec_status.bottom-=1;
 							DrawClientPercentText;rec_status.left+=1;rec_status.right+=1;
@@ -1216,7 +1238,6 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 						}
 					}
 					//Commander - Added: Client percentage - End
-
 					lpCtrlItem->dwUpdated = dwTicks + (rand() % 128); 
 				} else 
 					hOldBitmap = cdcStatus.SelectObject(lpCtrlItem->status); 
@@ -2380,18 +2401,17 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 								// CString.Format+AddLogLine, because if "%"-characters are
 								// in the string they would be misinterpreted as control sequences!
 								AddLogLine(false,_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
-								theApp.sharedfiles->RemoveKeywords(file);
-								((CPartFile*) file)->SetFileName(newname); //Changed by SiRoB, change the part file name to be properly displayed after rename
-								theApp.sharedfiles->AddKeywords(file);
+								file->SetFileName(newname);
+								file->SetFilePath(newpath);
+								file->SetFullName(newpath);
 							} else {
 								// Use the "Format"-Syntax of AddLogLine here instead of
 								// CString.Format+AddLogLine, because if "%"-characters are
 								// in the string they would be misinterpreted as control sequences!
 								AddLogLine(false,_T("Successfully renamed .part file '%s' to '%s'"), file->GetFileName(), newname);
-								file->SetFileName(newname, true); 
-								((CPartFile*) file)->UpdateDisplayedInfo();
-								((CPartFile*) file)->SavePartFile(); 
-								file->UpdateDisplayedInfo();
+								file->SetFileName(newname, true);
+								file->SetFilePath(newpath);
+								file->SavePartFile(); 
 							}
 						}
 

@@ -133,6 +133,7 @@ class CPartFile : public CKnownFile
 
 	friend class CPartFileConvert;
 	friend class CPartHashThread;	// SLUGFILLER: SafeHash
+	friend class CPartFileFlushThread;	//MORPH - Flush Thread
 public:
 	CPartFile(UINT cat = 0);
 	CPartFile(CSearchFile* searchresult, UINT cat = 0);
@@ -254,7 +255,6 @@ public:
 	void	FlushBuffer(bool forcewait=false, bool bForceICH = false, bool bNoAICH = false);
 	//MORPH START - Added by SiRoB, Flush Thread
 	void	FlushDone(FlushDone_Struct* FlushSetting);
-	void	SetFlushThread(bool state) { m_bIsFlushThread = state; };
 	//MORPH END   - Added by SiRoB, Flush Thread
 
 	// Barry - This will invert the gap list, up to caller to delete gaps when done
@@ -459,6 +459,7 @@ private:  //morph
 	uint32	m_ClientSrcAnswered;
 	UINT	availablePartsCount;
 	CWinThread* m_AllocateThread;
+	CWinThread* m_FlushThread; //MORPH - Flush Thread
 	DWORD	m_lastRefreshedDLDisplay;
 	CUpDownClientPtrList m_downloadingSourceList;
 	bool	m_bDeleteAfterAlloc;

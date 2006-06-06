@@ -311,7 +311,7 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 			block = Pending->block;
 			if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
 				uint64 currentpos = m_nLastBlockOffset+Pending->totalUnzipped;
-				if(currentpos < block->StartOffset) {
+				if(currentpos <= block->StartOffset) {
 					// block have not been started yet
 					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
 				}
@@ -1243,7 +1243,7 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
 		uint16 neededblock = (uint16)(iMaxBlocks - futurePossiblePendingBlock);
-		if (iMaxBlocks>3)
+		if (iMaxBlocks>=3)
 			neededblock = (neededblock/3+1)*3;
 		Requested_Block_Struct** toadd = new Requested_Block_Struct*[neededblock];
 		if (reqfile->GetNextRequestedBlock(this,toadd,&neededblock)){
@@ -1340,8 +1340,6 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
         // Only trust eMule clients to be able to handle less blocks than three
         if(GetDownloadDatarate() < 600 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Changed by SiRoB, 
             blockCount = 1;
-        } else if(GetDownloadDatarate() < 1200 || reqfile->GetDatarate() > 2*GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Changed by SiRoB, 
-            blockCount = 2;
         }
     }
 	blockCount = max(blockCount, GetDownloadDatarate()/EMBLOCKSIZE+2);

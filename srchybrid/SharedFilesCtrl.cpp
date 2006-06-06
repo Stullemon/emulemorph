@@ -1421,13 +1421,15 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 							break;
 						}
 						
-						if (file->IsKindOf(RUNTIME_CLASS(CPartFile)))
+						if (file->IsKindOf(RUNTIME_CLASS(CPartFile))) {
 							file->SetFileName(newname);
+							((CPartFile*) file)->SetFullName(newpath); //MORPH - Official Fix
+						}
 						else
 						{
-						theApp.sharedfiles->RemoveKeywords(file);
+						//MORPH - Removed, done in SetFileName//theApp.sharedfiles->RemoveKeywords(file);
 						file->SetFileName(newname);
-						theApp.sharedfiles->AddKeywords(file);
+						//MORPH - Removed, done in SetFileName//theApp.sharedfiles->AddKeywords(file);
 						}
 						file->SetFilePath(newpath);
 						UpdateFile(file);
@@ -1993,11 +1995,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 									// CString.Format+AddLogLine, because if "%"-characters are
 									// in the string they would be misinterpreted as control sequences!
 									AddLogLine(false,_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
-									theApp.sharedfiles->RemoveKeywords(file);
 									file->SetFileName(newname);
-									theApp.sharedfiles->AddKeywords(file);
-									file->SetFilePath(newpath);
-									UpdateFile(file);
+									if (file->IsKindOf(RUNTIME_CLASS(CPartFile)))
+										((CPartFile*) file)->SetFullName(newpath);
 								} else {
 									// Use the "Format"-Syntax of AddLogLine here instead of
 									// CString.Format+AddLogLine, because if "%"-characters are
@@ -2006,8 +2006,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 									file->SetFileName(newname, true); 
 									((CPartFile*) file)->UpdateDisplayedInfo();
 									((CPartFile*) file)->SavePartFile(); 
-									UpdateFile(file);
 								}
+								file->SetFilePath(newpath);
+								UpdateFile(file);
 							}
 
 							// Next item

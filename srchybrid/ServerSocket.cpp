@@ -592,7 +592,7 @@ void CServerSocket::ConnectToServer(CServer* server){
     {
 		AddLogLine(true,GetResString(IDS_LOG_SERVER_FILTERED ),ipstr(server->GetIP()), server->GetDescription(),theApp.ipfilter->GetLastHit() );
         theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(server);
-        cur_server = NULL;
+        SetConnectionState(CS_ERROR);
         return;
     }
    // MORPH END - leuke_he  ipfilter servers .

@@ -394,10 +394,6 @@ void CSharedFileList::FindSharedFiles()
 			m_UnsharedFiles_map.SetAt(CSKey(cur_file->GetFileHash()), true);
 
 			listlock.Lock();
-			// leuk_he clear it from download list
-			if (cur_file ->IsKindOf(RUNTIME_CLASS(CPartFile))) 
-   				theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(static_cast<CPartFile*>(cur_file));
-			// leuk_he end clear it from download list. 
 			m_Files_map.RemoveKey(key);
 
 			m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
@@ -623,26 +619,6 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 	m_lastPublishED2KFlag = true;
 	return bAdded;
 }
-
-//MORPH START leuk_he redownloading
-//Xman official bugfix for redownloading already downloaded file
-//same as above but without RemoveHashing. It isn't needed and it can crash there
-bool CSharedFileList::SafeAddKFileWithOutRemoveHasing(CKnownFile* toadd, bool bOnlyAdd)
-{
-	bool bAdded = false;
-	bAdded = AddFile(toadd);
-	if (bOnlyAdd)
-		return bAdded;
-	if (bAdded && output)
-	{
-		output->AddFile(toadd);
-		// Add history also here....
-	}
-	m_lastPublishED2KFlag = true;
-	return bAdded;
-}
-//Xman end
-//MORPH END leuk_he redownloading
 
 void CSharedFileList::RepublishFile(CKnownFile* pFile)
 {

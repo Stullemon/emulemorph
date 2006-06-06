@@ -313,7 +313,7 @@ void CPartFile::Init(){
     lastSwapForSourceExchangeTick = ::GetTickCount();
 	m_DeadSourceList.Init(false);
 	//MORPH START - Added by SiRoB, Flush Thread
-	m_bIsFlushThread = false;
+	m_FlushThread = NULL;
 	m_bNeedToFlush = false; 
 	//MORPH END   - Added by SiRoB, Flush Thread
 	// khaos::categorymod+
@@ -358,8 +358,17 @@ CPartFile::~CPartFile()
 				TerminateThread(hThread, 100);
 		}
 
-		if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE)
+//MORPH START - Flush Thread
+		if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE) {
 			FlushBuffer(true);
+			if (m_FlushThread != NULL){
+				HANDLE hThread = m_FlushThread->m_hThread;
+				// 2 minutes to let the thread finish
+				if (WaitForSingleObject(hThread, 120000) == WAIT_TIMEOUT)
+					TerminateThread(hThread, 100);
+			}
+		}
+//MORPH END - Flush Thread
 	}
 	catch(CFileException* e){
 		e->Delete();
@@ -2144,9 +2153,10 @@ uint64 CPartFile::GetTotalGapSizeInCommun(const uint8* srcstatus) const
 		const Gap_Struct* pGap = gaplist.GetNext(pos);
 		UINT i = (UINT)(pGap->start/PARTSIZE);
 		UINT end_chunk = (UINT)(pGap->end/PARTSIZE);
-		uTotalGapSizeInCommun += pGap->end - pGap->start + 1;
+		if (srcstatus[i++]&SC_AVAILABLE)
+			uTotalGapSizeInCommun += pGap->end - pGap->start + 1;
 		while (i < end_chunk) {
-			if (srcstatus[i++]&SC_AVAILABLE) {
+			if (srcstatus[i++]&SC_AVAILABLE == 0) {
 				if (i<GetED2KPartCount())
 					uTotalGapSizeInCommun -= PARTSIZE;
 				else
@@ -4757,7 +4767,7 @@ void CPartFile::ResumeFile(bool resort)
 		return;
 	if (status==PS_ERROR && m_bCompletionError){
 		ASSERT( gaplist.IsEmpty() );
-		if (gaplist.IsEmpty() && !m_nTotalBufferData && !m_bIsFlushThread) { //MORPH - Changed by SiRoB, Flush Thread
+		if (gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushThread) { //MORPH - Changed by SiRoB, Flush Thread
 			// rehashing the file could probably be avoided, but better be in the safe side..
 			m_bCompletionError = false;
 			CompleteFile(false);
@@ -5557,7 +5567,7 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 {
 	//MORPH START - Added by SiRoB, Flush Thread
-	if (m_bIsFlushThread) {
+	if (m_FlushThread) {
 		if (forcewait)
 			m_bNeedToFlush = true;
 		return;
@@ -5696,16 +5706,16 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 
 		//Creating the Thread to flush to disk
 		
-		CPartFileFlushThread* m_FlushThread = (CPartFileFlushThread*) AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+		CPartFileFlushThread* m_Thread = (CPartFileFlushThread*) AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+		m_FlushThread = m_Thread;
 		if (m_FlushThread) {
-			m_bIsFlushThread = true;
 			m_bNeedToFlush = false;
 			FlushDone_Struct* FlushSetting = new FlushDone_Struct;
 			FlushSetting->bIncreasedFile = bIncreasedFile;
 			FlushSetting->bForceICH = bForceICH;
 			FlushSetting->changedPart = changedPart;
-			m_FlushThread->SetPartFile(this, FlushSetting);
-			m_FlushThread->ResumeThread();
+			m_Thread->SetPartFile(this, FlushSetting);
+			m_Thread->ResumeThread();
 		}
 	}
 	catch (CFileException* error)
@@ -5814,7 +5824,6 @@ void CPartFile::FlushDone(FlushDone_Struct* FlushSetting)
 	}
 	delete[] FlushSetting->changedPart;
 	delete	FlushSetting;
-	SetFlushThread(NULL);
 	if (m_bNeedToFlush)
 		FlushBuffer(true);
 }
@@ -5847,9 +5856,9 @@ int CPartFileFlushThread::Run()
 	catch (CFileException* error)
 	{
 		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)m_partfile,(LPARAM)error) );
-		m_partfile->SetFlushThread(NULL);
 		delete[] m_FlushSetting->changedPart;
 		delete m_FlushSetting;
+		m_partfile->m_FlushThread = NULL;
 		return 1;
 	}
 	catch(...)
@@ -5857,10 +5866,11 @@ int CPartFileFlushThread::Run()
 		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)m_partfile,0) );
 		delete[] m_FlushSetting->changedPart;
 		delete m_FlushSetting;
-		m_partfile->SetFlushThread(NULL);
+		m_partfile->m_FlushThread = NULL;
 		return 2;
 	}
 
+	m_partfile->m_FlushThread = NULL;
 	VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FLUSHDONE,(WPARAM)m_FlushSetting,(LPARAM)m_partfile) );
 	//theApp.QueueDebugLogLine(false,_T("FLUSH:End (%s)"),m_partfile->GetFileName());
 	return 0;
@@ -7333,7 +7343,7 @@ void CPartFile::PartHashFinished(UINT partnumber, bool corrupt)
 		if (theApp.emuledlg->IsRunning())	// may be called during shutdown!
 		{
 			// Is this file finished?
-			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_bIsFlushThread) //MORPH - Changed by SiRoB, Flush Thread
+			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushThread) //MORPH - Changed by SiRoB, Flush Thread
 				CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 		}
 	}
@@ -7389,7 +7399,7 @@ void CPartFile::PartHashFinishedAICHRecover(UINT partnumber, bool corrupt)
 
 		if (theApp.emuledlg->IsRunning()){
 			// Is this file finished?
-			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_bIsFlushThread) //MORPH - Changed by SiRoB, Flush Thread
+			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushThread) //MORPH - Changed by SiRoB, Flush Thread
 				CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 		}
 	}
@@ -7460,7 +7470,7 @@ void CPartFile::ParseICHResult()
 
 	if (theApp.emuledlg->IsRunning()){ // may be called during shutdown!
 		// Is this file finished?
-		if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_bIsFlushThread) //MORPH - Changed by SiRoB, Flush Thread
+		if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushThread) //MORPH - Changed by SiRoB, Flush Thread
 			CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 	}
 }

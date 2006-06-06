@@ -575,6 +575,7 @@ public:
 	
 	//MORPH START - Downloading Chunk Detail Display
 	void			DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* file, bool  bFlat) const;
+	UINT			GetCurrentDownloadingChunk() { return (UINT)(m_nLastBlockOffset/PARTSIZE);}
 	//MORPH END   - Downloading Chunk Detail Display
 	
 	bool			AskForDownload();

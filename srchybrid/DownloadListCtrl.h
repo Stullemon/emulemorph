@@ -134,7 +134,8 @@ protected:
 	typedef std::multimap<void*, CtrlItem_Struct*> ListItems;
     ListItems	m_ListItems;
 	CFont		m_fontBold;
-	CFont		m_fontBoldSmaller;//MORPH END   - Added by SiRoB, Draw Client Percentage
+	CFont		m_fontSmaller;//MORPH - Draw Display Chunk Detail
+	CFont		m_fontBoldSmaller;//MORPH - Added by SiRoB, Draw Client Percentage
 	CToolTipCtrlX* m_tooltip;
 
 	void ShowFileDialog(UINT uInvokePage);
