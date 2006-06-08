@@ -1,16 +1,25 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13
 -------------------------------------
-FIXED: SCC: When you add multiple file those file are now properly associated to category reguarding setting
 FIXED: MergeKnown: statistic merge from SlugFiller mod has been fixed to avoid crash
-       also fixes duplicate files
-CHANGED: DCD: Display also current download chunk number and session completed download from a client
-FIXED: Official fix arround unability to open completed file when they were renamed in the sharedfile window
-CHANGED : Some tooltip spelling thx to fabulous (pt_br translator) [leuk_he] 
-Added   : more mod icons
-FIX     : Khaos category. Default to category 0, if all other methods fail.
-FIXED: Khaos category download manager
+- also fixes duplicate files
+
+FIXED: SCC: Khaos Category management
 - When you add multiple file those file are now properly associated to category reguarding setting
+- Default to category 0, if all other methods don't match.
+FIXED: GUI: Official fix arround unability to open completed file when they were renamed in the sharedfile window
+FIXED: GUI: Wrong sorting arround sharedfile window
+
+ADDED: GUI: more mod icons [Stulle]
+ADDED: GUI: Extra infos in Client Tooltip
+
+CHANGED: DCD: Display also current download chunk number and session completed download from a client
+CHANGED : Some tooltip spelling thx to fabulous (pt_br translator) [leuk_he] 
+CHANGED: USC: Should now respect higher class number of slot and reduce as much as possible open slot
+CHANGED: WAP: Removed some uneeded code
+CHANGED: FlushThread: Reviewed to work arround not flushed data at shutdown
+CHANGED: ReadBlockFromFileThread: Reviewed to be able to read data from disk and prepare block requested at the same time
+
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA7
 -------------------------------------
@@ -20,6 +29,7 @@ CHANGED: USC: SOlve "slot explosions" from previous beta
 CHANGED: USC: Roll back the old slot counter way
 CHANGED: USC: Solved slot added and not needed 
 CHANGED  : Dynamic Block Request, number of requested blocks.
+
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA6
 --------------------------------------

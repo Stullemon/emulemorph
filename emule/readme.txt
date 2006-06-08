@@ -1,4 +1,6 @@
 eMule Copyright (C)2002-2005 Merkur (merkur-@users.sourceforge.net)
+eMule morph Copyright (C)2002-2006 morph team
+
 
 Note: --- Additions made for emule morph
 
@@ -17,7 +19,6 @@ You should have received a copy of the GNU General Public License along with
 this program; if not, write to the Free Software Foundation, Inc., 675 Mass 
 Ave, Cambridge, MA 02139, USA.
 
-
 -------------------------------------------------------------------------------
 
 
@@ -26,7 +27,7 @@ Welcome to eMule, a filesharing client based on the eDonkey2000(C) network.
 
 Visit us at
  http://www.emule-project.net
- http://emulemorph.sf.net
+ http://emulemorph.sourceforge.net
 and
  http://sourceforge.net/projects/emule
  http://sourceforge.net/projects/emulemorph
@@ -34,7 +35,7 @@ or
  the IRC chatroom, #emule on irc.emule-project.net
 
 
-Morph is a mod mased on the official client. It has all the features of offcial but we added some extra's
+Morph is a mod based on the official client. It has all the features of offcial but we added some extra's
 
 
 Visit our forum for bugreports, feature requests, development or general 
@@ -285,21 +286,25 @@ Since eMule v0.29b the separate download and compilation of additional
 libraries is required. These libs are 3rd party and therefore - as usual - not 
 within our distribution. You need the following libs:
 
-1. Crypto++ v5.1
-	http://www.eskimo.com/~weidai/cryptlib.html
 
-2. zlib v1.2.2
-	http://www.gzip.org/zlib/
+----- Libs (active):
+040721 crypto521 cryptopp521.zip    5.2.1 http://www.eskimo.com/~weidai/cryptlib.html
+030301 id3lib  id3lib-3.8.3.zip   3.8.3 http://sourceforge.net/projects/id3lib
+060423 png  lpng1210.zip    1.2.10 http://www.libpng.org/pub/png/libpng.html
+021018 ResizableLib ResizableLib_1_3.zip   1.3 http://sourceforge.net/projects/resizablelib
+050718 zlib  zlib123.zip    1.2.3 http://www.gzip.org/zlib
+041017 CxImage  cximage599c_lite.zip   5.99c http://sourceforge.net/projects/cximage
+050604 Pthreads pthreads-w32-2-7-0-release.tar.gz 2.7.0 http://sources.redhat.com/pthreads-win32/index.html
+060305 upnplib  libupnp-1.3.1.tar.gz   1.3.1 http://upnp.sourceforge.net
 
-3. id3lib v3.8.3
-	http://sourceforge.net/projects/id3lib/
+----- Libs (old):
+050803 CrashRpt CrashRpt.v3.0.2.5.zip   3.0.2.5 http://www3.sympatico.ca/grant.mcdorman
+060407 ZipArchive ziparchive.v2.4.10.zip   2.4.10 http://www.artpol-software.com/index_zip.html
 
-4. (for MobileMule only!)
+(for MobileMule only!)
 	DirectX SDK
-	pnglib: http://www.libpng.org/pub/png/libpng.html
+Micorsoft speech api (5.1?)(or just remove "HAVE_SAPI_H" from the preprocessor definitions)
 
-5. ResizableLib 1.3
-   http://sourceforge.net/projects/resizablelib/	
 
 Or download all libs and run emule_all.vcpproj using your favrout p2p application:
 ed2k://|file|eMule047aMorphXT85_complete_compilable_Package.rar|18128572|4BD14E6F69E3B1046423932F638BEAA8|h=5NX573HANXXHWOGAD2JWUXC57GD55B6X|/
@@ -344,8 +349,6 @@ The eMule staff would like to thank the following (no particular order)
 -many people who sent us code parts, useful bug reports and useful suggestions :)
 
 
-
-
 STAFF:
 ------
 
@@ -367,6 +370,14 @@ program?
 -Mr. Ozon, Sony, Myxin - Tester (retired)
 
 
+--- MORPHxt team:
+stulle 
+leuk_he 
+sirob (Retired because of french davsi law)
+Morpheus (founder, retired)
+And all the other team members listed at:
+http://sourceforge.net/project/memberlist.php?group_id=72158
+     
 
 LEGAL:
 ------
