@@ -73,7 +73,7 @@ uint16 CAddFileThread::SetPartToImport(LPCTSTR import)
 	}
 	m_strImport = import;
 
-	for (int i = 0; i < m_partfile->GetPartCount(); i++)
+	for (uint16 i = 0; i < m_partfile->GetPartCount(); i++)
 		if (!m_partfile->IsComplete((uint64)i*PARTSIZE,(uint64)(i+1)*PARTSIZE-1,false)){
 			uchar* cur_hash = new uchar[16];
 			md4cpy(cur_hash, m_partfile->GetPartHash(i));

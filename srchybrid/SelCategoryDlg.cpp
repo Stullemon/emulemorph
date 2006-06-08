@@ -19,7 +19,7 @@ static char THIS_FILE[]=__FILE__;
 
 IMPLEMENT_DYNAMIC(CSelCategoryDlg, CDialog)
 
-CSelCategoryDlg::CSelCategoryDlg(CWnd* pWnd)
+CSelCategoryDlg::CSelCategoryDlg(CWnd* /*pWnd*/)
     :CPPgtooltippedDialog(CSelCategoryDlg::IDD)
 {
 	// If they have selected to use the active category as the default

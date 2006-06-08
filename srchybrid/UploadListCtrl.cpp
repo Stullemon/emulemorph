@@ -1140,6 +1140,10 @@ void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 			//MORPH END   - Adde by SiRoB, Optimization requpfile
 			// build info text and display it
 			info.Format(GetResString(IDS_USERINFO), client->GetUserName());
+			//MORPH START - Extra User Infos
+			info += GetResString(IDS_CD_CSOFT) + _T(": ") + client->GetClientSoftVer() + _T("\n");
+			info += GetResString(IDS_COUNTRY) + _T(": ") + client->GetCountryName(true) + _T("\n");
+			//MORPH END   - Extra User Infos
 			if (file)
 			{
 				info += GetResString(IDS_SF_REQUESTED) + _T(" ") + CString(file->GetFileName()) + _T("\n");

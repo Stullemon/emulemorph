@@ -1138,20 +1138,43 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 
 					COLORREF oldclr = cdcStatus.SetTextColor(RGB(0,0,0));
 					int iOMode = cdcStatus.SetBkMode(TRANSPARENT);
-					buffer.Format(_T("%i|%s"), lpUpDownClient->GetCurrentDownloadingChunk(), CastItoXBytes(lpUpDownClient->GetSessionPayloadDown(), false, false));
+					if (lpUpDownClient->GetCurrentDownloadingChunk()==(UINT)-1) {
+						if (lpUpDownClient->m_lastPartAsked==(uint16)-1)
+							buffer = _T("?");
+						else
+							buffer.Format(_T("%u"), lpUpDownClient->m_lastPartAsked);
+					} else
+						buffer.Format(_T("%u"), lpUpDownClient->GetCurrentDownloadingChunk());
 					CFont *pOldFont = cdcStatus.SelectObject(&m_fontSmaller);
-#define	DrawClientPercentText		cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
+#define	DrawClientPercentTextLeft		cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, DLC_DT_TEXT)
 					rec_status.top-=1;rec_status.bottom-=1;
-					DrawClientPercentText;rec_status.left+=1;rec_status.right+=1;
-					DrawClientPercentText;rec_status.left+=1;rec_status.right+=1;
-					DrawClientPercentText;rec_status.top+=1;rec_status.bottom+=1;
-					DrawClientPercentText;rec_status.top+=1;rec_status.bottom+=1;
-					DrawClientPercentText;rec_status.left-=1;rec_status.right-=1;
-					DrawClientPercentText;rec_status.left-=1;rec_status.right-=1;
-					DrawClientPercentText;rec_status.top-=1;rec_status.bottom-=1;
-					DrawClientPercentText;rec_status.left++;rec_status.right++;
+					rec_status.left+=1;rec_status.right-=3;
+					DrawClientPercentTextLeft;rec_status.left+=1;rec_status.right+=1;
+					DrawClientPercentTextLeft;rec_status.left+=1;rec_status.right+=1;
+					DrawClientPercentTextLeft;rec_status.top+=1;rec_status.bottom+=1;
+					DrawClientPercentTextLeft;rec_status.top+=1;rec_status.bottom+=1;
+					DrawClientPercentTextLeft;rec_status.left-=1;rec_status.right-=1;
+					DrawClientPercentTextLeft;rec_status.left-=1;rec_status.right-=1;
+					DrawClientPercentTextLeft;rec_status.top-=1;rec_status.bottom-=1;
+					DrawClientPercentTextLeft;rec_status.left++;rec_status.right++;
 					cdcStatus.SetTextColor(RGB(255,255,255));
-					DrawClientPercentText;
+					DrawClientPercentTextLeft;
+					
+					cdcStatus.SetTextColor(RGB(0,0,0));
+					buffer.Format(_T("%s"), CastItoXBytes(lpUpDownClient->GetSessionPayloadDown(), false, false));
+#define	DrawClientPercentTextRight		cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, DLC_DT_TEXT | DT_RIGHT)
+					rec_status.top-=1;rec_status.bottom-=1;
+					DrawClientPercentTextRight;rec_status.left+=1;rec_status.right+=1;
+					DrawClientPercentTextRight;rec_status.left+=1;rec_status.right+=1;
+					DrawClientPercentTextRight;rec_status.top+=1;rec_status.bottom+=1;
+					DrawClientPercentTextRight;rec_status.top+=1;rec_status.bottom+=1;
+					DrawClientPercentTextRight;rec_status.left-=1;rec_status.right-=1;
+					DrawClientPercentTextRight;rec_status.left-=1;rec_status.right-=1;
+					DrawClientPercentTextRight;rec_status.top-=1;rec_status.bottom-=1;
+					DrawClientPercentTextRight;rec_status.left++;rec_status.right++;
+					cdcStatus.SetTextColor(RGB(255,255,255));
+					DrawClientPercentTextRight;
+
 					cdcStatus.SelectObject(pOldFont);
 					cdcStatus.SetBkMode(iOMode);
 					cdcStatus.SetTextColor(oldclr);
@@ -3220,8 +3243,12 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 		return CompareUnsigned64(client2->Credits()->GetDownloadedTotal(), client1->Credits()->GetDownloadedTotal());
 		//MORPH END - Added By SiRoB, Download/Upload
 	case 3://completed asc
+		//MORPH START - Display Chunk Detail
+		/*
 		return CompareUnsigned(client1->GetTransferredDown(), client2->GetTransferredDown());
-
+		*/
+		return CompareUnsigned(client1->GetSessionPayloadDown(), client2->GetSessionPayloadDown());
+		//MORPH END - Display Chunk Detail
 	case 4: //speed asc
 		return CompareUnsigned(client1->GetDownloadDatarate(), client2->GetDownloadDatarate());
 
@@ -3855,9 +3882,17 @@ void CDownloadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 					in_addr server;
 					server.S_un.S_addr = client->GetServerIP();
 					info.Format(GetResString(IDS_USERINFO)
+								//MORPH START - Extra User Infos
+								+ GetResString(IDS_CD_CSOFT) + _T(": %s\n")
+								+ GetResString(IDS_COUNTRY) + _T(": %s\n")
+								//MORPH END   - Extra User Infos
 								+ GetResString(IDS_SERVER) + _T(":%s:%u\n\n")
 								+ GetResString(IDS_NEXT_REASK) + _T(":%s"),
 								client->GetUserName() ? client->GetUserName() : _T("?"),
+								//MORPH START - Extra User Infos
+								client->GetClientSoftVer(),
+								client->GetCountryName(true),
+								//MORPH END   - Extra User Infos
 								ipstr(server), client->GetServerPort(),
 								CastSecondsToHM(client->GetTimeUntilReask(client->GetRequestFile()) / 1000));
 					if (thePrefs.IsExtControlsEnabled())

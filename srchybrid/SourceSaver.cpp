@@ -230,7 +230,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 				if (srcstatus){
 					if (cur_src->GetPartCount() == file->GetPartCount()){
 						// only save sources which have needed parts
-						for (int x = 0; x < file->GetPartCount(); x++){
+						for (uint16 x = 0; x < file->GetPartCount(); x++){
 							//MORPH - Changed by SiRoB, ICS merged into partstatus
 							/*
 							if (srcstatus[x] && !file->IsPartShareable(x)){

@@ -235,7 +235,10 @@ BOOL CStatisticsDlg::OnInitDialog()
 	rcSpl.bottom=rcSpl.top+4; 
 	m_wndSplitterstat_HR.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HR);
 
+	/* statistic fix 
+	/*
 	int PosStatVinitZ = rcSpl.top;
+	*/
 	int PosStatVnewZ = thePrefs.GetSplitterbarPositionStat_HR()*rcW.Height()/100;
 	int maxZ = rcW.bottom-14;
 	int minZ = 0;
@@ -249,8 +252,8 @@ BOOL CStatisticsDlg::OnInitDialog()
 	m_wndSplitterstat_HR.MoveWindow(rcSpl);
 
 	// MORPH START leuk_he statistic fix bluesonicboy
-        //Init. Pos. fix - Set Download Scope relative to this splitter, right and left are set
-        //                 top will always be 0. Also set Upload Scope top position bottom will be set later.
+    //   Init. Pos. fix - Set Download Scope relative to this splitter, right and left are set
+    //   top will always be 0. Also set Upload Scope top position bottom will be set later.
      if(rcSpl.top) 
 		 rcDown.bottom = rcSpl.top - 1;
      else            
@@ -267,8 +270,12 @@ BOOL CStatisticsDlg::OnInitDialog()
 	rcSpl.bottom=rcSpl.top+4;
 	m_wndSplitterstat_HL.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HL);
 
+	/* statistic fix 
+	/*
 	int PosStatVinitY = rcSpl.top;
+	*/
 	int PosStatVnewY = thePrefs.GetSplitterbarPositionStat_HL()*rcW.Height()/100;
+	
 	int maxY = rcW.bottom-9;
 	int minY = 10;
 	if (thePrefs.GetSplitterbarPositionStat_HL() > 90)

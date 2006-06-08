@@ -182,9 +182,9 @@ public:
 	bool	SavePartFile();
 	void	PartFileHashFinished(CKnownFile* result);
 	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
-	void	PartHashFinished(UINT partnumber, bool corrupt);
-	void	PartHashFinishedAICHRecover(UINT partnumber, bool corrupt);
-	bool	IsPartShareable(UINT partnumber) const;
+	void	PartHashFinished(uint16 partnumber, bool corrupt);
+	void	PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt);
+	bool	IsPartShareable(uint16 partnumber) const;
 	bool	IsRangeShareable(uint64 start, uint64 end) const;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
 
@@ -585,7 +585,7 @@ protected:
 public:
 	virtual	BOOL	InitInstance() {return true;}
 	virtual int		Run();
-	uint16	SetFirstHash(CPartFile* pOwner);
+	int	SetFirstHash(CPartFile* pOwner);
 	void	SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICHused = false, bool AICHRecover = false);
 private:
 	CPartFile*				m_pOwner;

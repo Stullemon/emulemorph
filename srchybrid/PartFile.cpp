@@ -2151,12 +2151,12 @@ uint64 CPartFile::GetTotalGapSizeInCommun(const uint8* srcstatus) const
 	while (pos)
 	{
 		const Gap_Struct* pGap = gaplist.GetNext(pos);
-		UINT i = (UINT)(pGap->start/PARTSIZE);
-		UINT end_chunk = (UINT)(pGap->end/PARTSIZE);
+		uint16 i = (uint16)(pGap->start/PARTSIZE);
+		uint16 end_chunk = (uint16)(pGap->end/PARTSIZE);
 		if (srcstatus[i++]&SC_AVAILABLE)
 			uTotalGapSizeInCommun += pGap->end - pGap->start + 1;
 		while (i < end_chunk) {
-			if (srcstatus[i++]&SC_AVAILABLE == 0) {
+			if ((srcstatus[i++]&SC_AVAILABLE) == 0) {
 				if (i<GetED2KPartCount())
 					uTotalGapSizeInCommun -= PARTSIZE;
 				else
@@ -2437,7 +2437,7 @@ void CPartFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, boo
 				crPending = RGB(255, 208, 0);
 				crNooneAsked = RGB(104, 104, 104);
 			} 
-			for (UINT i = 0; i < GetPartCount(); i++){
+			for (uint16 i = 0; i < GetPartCount(); i++){
             //MORPH - Changed by SiRoB, SafeHash
 			/*
 			if(IsComplete((uint64)i*PARTSIZE,((uint64)(i+1)*PARTSIZE)-1, true)) {
@@ -2782,10 +2782,10 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 	// SLUGFILLER: hideOS
 
 	file->WriteUInt16((uint16)uED2KPartCount);
-	UINT uPart = 0;
+	uint16 uPart = 0;
 	while (uPart != uED2KPartCount){
 		uint8 towrite = 0;
-		for (UINT i = 0; i < 8; i++){
+		for (uint8 i = 0; i < 8; i++){
 			if (uPart < GetPartCount()) {
 				if (partspread[uPart] < hideOS)	// SLUGFILLER: hideOS
 				{//MORPH - Added by SiRoB, See chunk that we hide
@@ -5140,7 +5140,7 @@ void CPartFile::UpdateAvailablePartsCount()
 {
 	UINT availablecounter = 0;
 	UINT iPartCount = GetPartCount();
-	for (UINT ixPart = 0; ixPart < iPartCount; ixPart++){
+	for (uint16 ixPart = 0; ixPart < iPartCount; ixPart++){
 		for(POSITION pos = srclist.GetHeadPosition(); pos; ){
 			if (srclist.GetNext(pos)->IsPartAvailable(ixPart)){
 				availablecounter++; 
@@ -5760,13 +5760,13 @@ void CPartFile::FlushDone(FlushDone_Struct* FlushSetting)
 				// Let's check in another thread
 				m_PartsHashing++;
 				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-				parthashthread->SetSinglePartHash(this, partNumber);
+				parthashthread->SetSinglePartHash(this, (uint16)partNumber);
 				parthashthread->ResumeThread();
 			}
 			else if (IsCorruptedPart(partNumber) && (thePrefs.IsICHEnabled() || FlushSetting->bForceICH))
 			{
 				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-				parthashthread->SetSinglePartHash(this, partNumber, true);	// Special case, doesn't increment hashing parts, since part isn't really complete
+				parthashthread->SetSinglePartHash(this, (uint16)partNumber, true);	// Special case, doesn't increment hashing parts, since part isn't really complete
 				parthashthread->ResumeThread();
 			}
 		}
@@ -7245,7 +7245,7 @@ void CPartFile::PerformFirstHash()
 	parthashthread->ResumeThread();
 }
 
-bool CPartFile::IsPartShareable(UINT partnumber) const
+bool CPartFile::IsPartShareable(uint16 partnumber) const
 {
 	if (partnumber < GetPartCount())
 		return m_PartsShareable[partnumber];
@@ -7264,7 +7264,7 @@ bool CPartFile::IsRangeShareable(uint64 start, uint64 end) const
 			return false;
 	return true;
 }
-void CPartFile::PartHashFinished(UINT partnumber, bool corrupt)
+void CPartFile::PartHashFinished(uint16 partnumber, bool corrupt)
 {
 	if (partnumber >= GetPartCount())
 		return;
@@ -7349,7 +7349,7 @@ void CPartFile::PartHashFinished(UINT partnumber, bool corrupt)
 	}
 }
 
-void CPartFile::PartHashFinishedAICHRecover(UINT partnumber, bool corrupt)
+void CPartFile::PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt)
 {
 	if (partnumber >= GetPartCount())
 		return;
@@ -7477,7 +7477,7 @@ void CPartFile::ParseICHResult()
 
 IMPLEMENT_DYNCREATE(CPartHashThread, CWinThread)
 
-uint16 CPartHashThread::SetFirstHash(CPartFile* pOwner)
+int CPartHashThread::SetFirstHash(CPartFile* pOwner)
 {
 	m_pOwner = pOwner;
 	m_ICHused = false;
@@ -7488,7 +7488,7 @@ uint16 CPartHashThread::SetFirstHash(CPartFile* pOwner)
 	if (!theApp.emuledlg->IsRunning())	// Don't start any last-minute hashing
 		return 1;	// Hash next start
 
-	for (int i = 0; i < pOwner->GetPartCount(); i++)
+	for (uint16 i = 0; i < pOwner->GetPartCount(); i++)
 		//MORPH - Changed by SiRoB, Need to check buffereddata otherwise we may try to hash wrong part
 		/*
 		if (pOwner->IsComplete((uint64)i*PARTSIZE,(uint64)(i+1)*PARTSIZE-1, false)){
@@ -7762,15 +7762,15 @@ return WebcacheSourcesNotOurProxy;
 void CPartFile::CountWebcacheSources() const
 {
 const_cast< CPartFile * >( this )->LastWebcacheSourceCountTime = ::GetTickCount();
-UINT counter = 0;
-UINT counterOur = 0;
-UINT counterNotOur = 0;
+	uint16 counter = 0;
+	uint16 counterOur = 0;
+	uint16 counterNotOur = 0;
 
 for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;)
 {
 		CUpDownClient* cur_client = srclist.GetNext(pos);
 		if (cur_client->SupportsWebCache() || cur_client->IsProxy() )
-			counter++;
+			++counter;
 	if (cur_client->SupportsWebCache())
 	{
 		if (cur_client->IsBehindOurWebCache())
@@ -7784,7 +7784,7 @@ for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;)
 	{
 		CUpDownClient* cur_client = A4AFsrclist.GetNext(pos);
 		if (cur_client->SupportsWebCache() || cur_client->IsProxy() )
-			counter++;
+			++counter;
 		if (cur_client->SupportsWebCache())
 		{
 			if (cur_client->IsBehindOurWebCache())

@@ -408,7 +408,7 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 *
 * @return address of the highest ranking client.
 */
-CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient, bool checkforaddinuploadinglist) //MORPH - Changed by SiRoB, Upload Splitting Class
+CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet, CUpDownClient* /*lowIdClientMustBeInSameOrBetterClassAsThisClient*/, bool checkforaddinuploadinglist) //MORPH - Changed by SiRoB, Upload Splitting Class
 {
 	POSITION toadd = 0;
 	POSITION toaddlow = 0;
@@ -1092,7 +1092,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 		}
 		if (!simulateScheduledClosingOfSlot) {
 			//Delay Slot open every 1 second
-			if (uploadinglist.GetCount() != 0 && ::GetTickCount() - m_nLastStartUpload < max(SEC2MS(1),SEC2MS(3)/uploadinglist.GetCount()) /* && datarate < 102400*/)
+			if (uploadinglist.GetCount() != 0 && ::GetTickCount() - m_nLastStartUpload < max(SEC2MS(1),(UINT)(SEC2MS(3)/uploadinglist.GetCount())) /* && datarate < 102400*/)
     			needtoaddslot = false;
 			//Mark the class to be able to receive a slot or not
 			m_abAddClientOfThisClass[classID] = needtoaddslot;

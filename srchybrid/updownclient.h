@@ -575,7 +575,7 @@ public:
 	
 	//MORPH START - Downloading Chunk Detail Display
 	void			DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* file, bool  bFlat) const;
-	UINT			GetCurrentDownloadingChunk() { return (UINT)(m_nLastBlockOffset/PARTSIZE);}
+	UINT			GetCurrentDownloadingChunk() { return (m_nLastBlockOffset!=(uint64)-1)?(UINT)(m_nLastBlockOffset/PARTSIZE):(UINT)-1;}
 	//MORPH END   - Downloading Chunk Detail Display
 	
 	bool			AskForDownload();
@@ -866,7 +866,7 @@ public:
 	//Morph End - added by AndCycle, ICS
 
 	//MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
-	void GetUploadingAndUploadedPart(uint8* abyUpPartUploadingAndUploaded, uint16 partcount) const;
+	void GetUploadingAndUploadedPart(uint8* abyUpPartUploadingAndUploaded, uint32 partcount) const;
 	//MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 	//wistily start
 	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}

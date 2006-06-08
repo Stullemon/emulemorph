@@ -232,8 +232,8 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 		return;
 	if (!m_BlockRequests_queue.IsEmpty() || !m_DoneBlocks_list.IsEmpty()) {
 		uint32 cur_chunk = (uint32)-1;
-		uint64 start;
-		uint64 end;
+		uint64 start = (uint64)-1;
+		uint64 end = (uint64)-1;
 		const Requested_Block_Struct* block;
 		if (!m_DoneBlocks_list.IsEmpty()){
 			block = m_DoneBlocks_list.GetHead();
@@ -269,8 +269,8 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 				} else
 					s_UpStatusBar.Fill(crNeither);
 			}
-				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
-					s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextSending);
+				if (block->StartOffset <= end && block->EndOffset >= start) {
+					s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crNextSending);
 				}
 			}
 		}
@@ -281,16 +281,10 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
     
 		    for(POSITION pos=m_DoneBlocks_list.GetTailPosition();pos!=0; ){
 			    block = m_DoneBlocks_list.GetPrev(pos);
-				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+				if (block->StartOffset <= end && block->EndOffset >= start) {
 					if(total + (block->EndOffset-block->StartOffset) <= GetSessionPayloadUp()) {
 						// block is sent
-						if (block->StartOffset >= start) {
-							if (block->EndOffset <= end)
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, block->EndOffset%PARTSIZE, crProgress);
-							else
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crProgress);
-						} else if (block->EndOffset <= end)
-							s_UpStatusBar.FillRange(0, block->EndOffset%PARTSIZE, crProgress);
+						s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crProgress);
 						total += block->EndOffset-block->StartOffset;
 					}
 					else if (total < GetSessionPayloadUp()){
@@ -331,7 +325,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 			if (!m_BlockRequests_queue.IsEmpty()){
 				for(POSITION pos=m_BlockRequests_queue.GetHeadPosition();pos!=0;){
 					block = m_BlockRequests_queue.GetNext(pos);
-					if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+					if (block->StartOffset <= end && block->EndOffset >= start) {
 						if (block->StartOffset >= start) {
 							if (block->EndOffset <= end) {
 								s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
@@ -346,7 +340,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 			if (!m_DoneBlocks_list.IsEmpty()){
 				for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;){
 					block = m_DoneBlocks_list.GetNext(pos);
-					if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+					if (block->StartOffset <= end && block->EndOffset >= start) {
 						if (block->StartOffset >= start) {
 							if (block->EndOffset <= end) {
 								s_UpStatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
@@ -1745,7 +1739,7 @@ uint32 CUpDownClient::GetAvUpDatarate() const
 }
 //MORPH END  - Added by SIRoB, GetAverage Upload to client
 //MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
-void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUploaded, uint16 partcount) const
+void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUploaded, uint32 partcount) const
 {
 	memset(m_abyUpPartUploadingAndUploaded,0,partcount);
 	const Requested_Block_Struct* block;

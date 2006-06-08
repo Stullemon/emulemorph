@@ -659,7 +659,7 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 
 
 #if !defined DONT_USE_SOCKET_BUFFERING
-SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit){ // ZZ:UploadBandWithThrottler (UDP)
+SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 /*minFragSize*/, uint32 /*bufferlimit*/){ // ZZ:UploadBandWithThrottler (UDP)
 #else
 SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize){ // ZZ:UploadBandWithThrottler (UDP)
 #endif

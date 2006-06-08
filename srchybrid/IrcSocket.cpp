@@ -45,7 +45,7 @@ CIrcSocket::~CIrcSocket()
 	UINT port;
 
 	GetSockName(client, port);
-	theApp.m_UPnP_IGDControlPoint->DeletePortMapping(port,
+	theApp.m_UPnP_IGDControlPoint->DeletePortMapping((uint16)port,
 		CUPnP_IGDControlPoint::UNAT_TCP,
 		_T("IRC"));
 	// End -UPnPNAT Support-
@@ -87,7 +87,7 @@ BOOL CIrcSocket::Create(UINT uSocketPort, int uSocketType, long lEvent, LPCSTR l
 			UINT port;
 
 			GetSockName(client, port);
-			theApp.m_UPnP_IGDControlPoint->AddPortMapping(port,
+			theApp.m_UPnP_IGDControlPoint->AddPortMapping((uint16)port,
 				CUPnP_IGDControlPoint::UNAT_TCP,
 				_T("IRC"));
 		}

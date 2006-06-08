@@ -1703,7 +1703,7 @@ LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam)
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
-		pOwner->PartHashFinished((UINT)wParam, false);
+		pOwner->PartHashFinished((uint16)wParam, false);
 	return 0;
 }
 
@@ -1715,7 +1715,7 @@ LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam)
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
-		pOwner->PartHashFinished((UINT)wParam, true);
+		pOwner->PartHashFinished((uint16)wParam, true);
 	return 0;
 }
 
@@ -1727,7 +1727,7 @@ LRESULT CemuleDlg::OnPartHashedOKAICHRecover(WPARAM wParam,LPARAM lParam)
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
-		pOwner->PartHashFinishedAICHRecover((UINT)wParam, false);
+		pOwner->PartHashFinishedAICHRecover((uint16)wParam, false);
 	return 0;
 }
 
@@ -1739,7 +1739,7 @@ LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
-		pOwner->PartHashFinishedAICHRecover((UINT)wParam, true);
+		pOwner->PartHashFinishedAICHRecover((uint16)wParam, true);
 	return 0;
 }
 // SLUGFILLER: SafeHash

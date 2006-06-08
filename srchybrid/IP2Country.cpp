@@ -182,7 +182,7 @@ bool CIP2Country::LoadFromFile(){
 				++szbuffer;
 				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ )
 					if ( (*szbuffer >= (TCHAR)L'A') && (*szbuffer <= (TCHAR)L'Z') )
-						*szbuffer -= L'A' - L'a';
+						*szbuffer -= (TCHAR)(L'A' - L'a');
 					else if (*szbuffer == (TCHAR)L' ')
 						++szbuffer;
 				*szbuffer= '\0';

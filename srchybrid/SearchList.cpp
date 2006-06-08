@@ -724,7 +724,7 @@ CString CSearchList::GetWapList(CString linePattern,int sortby,bool asc, int sta
 		if (start<0) start=0;
 	}
 
-	for (uint16 i=start;i<endpos;++i) {
+	for (int i=start;i<endpos;++i) {
 		const CSearchFile* sf = sortarray.GetAt(i);
 
 		// colorize

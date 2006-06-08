@@ -133,7 +133,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 			}
 		}
 
-		for (UINT i = 0; i < file->GetPartCount(); i++){
+		for (uint16 i = 0; i < file->GetPartCount(); i++){
 			if (thisAbyPartStatus[i]&SC_AVAILABLE){
 				uint64 uEnd = PARTSIZE*(uint64)(i+1);
 				if ( uEnd > file->GetFileSize())
@@ -226,8 +226,8 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 	s_StatusBar.SetFileSize(PARTSIZE); 
 	
 	UINT cur_chunk = (uint32)-1;
-	uint64 start;
-	uint64 end;
+	uint64 start = (uint64)-1;
+	uint64 end = (uint64)-1;
 	const Requested_Block_Struct* block;
 	//Find Sent Requested part
 	if (!m_PendingBlocks_list.IsEmpty()) {
@@ -264,18 +264,10 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 	// Draw Gap part of the chunk in blue for normal client and none for proxy
 	for (POSITION pos = file->gaplist.GetHeadPosition();pos !=  0;){
 		const Gap_Struct* cur_gap = file->gaplist.GetNext(pos);
-		bool gapdone = false;
 		uint64 gapstart = cur_gap->start;
 		uint64 gapend = cur_gap->end;
 		if (gapstart >= start && gapstart <= end || gapend >= start && gapend <= end) {
-			if (gapstart>=start) {
-				if (gapend<end)
-					s_StatusBar.FillRange(gapstart%PARTSIZE, (gapend + 1)%PARTSIZE,  IsProxy()?crNeither:crClientOnly);
-				else
-					s_StatusBar.FillRange(gapstart%PARTSIZE, end%PARTSIZE,  IsProxy()?crNeither:crClientOnly);
-			} else if (gapend<end) {
-				s_StatusBar.FillRange((uint64)0, (gapend + 1)%PARTSIZE,  IsProxy()?crNeither:crClientOnly);
-			}
+			s_StatusBar.FillRange((gapstart>start)?gapstart%PARTSIZE:(uint64)0, ((gapend<end)?(gapend+1):end)%PARTSIZE,  IsProxy()?crNeither:crClientOnly);
 		}
 	}
 	
@@ -285,8 +277,8 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 			CWebCachedBlock* WCBlock = WebCachedBlockList.GetNext(pos);
 			if (md4cmp(WCBlock->block->FileID, file->GetFileHash()) == 0) {
 				block = WCBlock->block;
-				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
-					s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crClientOnly);
+				if (block->StartOffset <= end && block->EndOffset >= start) {
+					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crClientOnly);
 				}
 			}
 		}
@@ -296,8 +288,8 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 		//Fill with white Block reserved but not requested yet
 		for(POSITION pos=m_DownloadBlocks_list.GetHeadPosition();pos!=0;){
 			block = m_DownloadBlocks_list.GetNext(pos);
-			if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
-				s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crDot);
+			if (block->StartOffset <= end && block->EndOffset >= start) {
+				s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crDot);
 			}
 		}
 	}
@@ -309,15 +301,15 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 		for(POSITION pos=m_PendingBlocks_list.GetTailPosition();pos!=0; ){
 			Pending_Block_Struct* Pending = m_PendingBlocks_list.GetPrev(pos);
 			block = Pending->block;
-			if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+			if (block->StartOffset <= end && block->EndOffset >= start) {
 				uint64 currentpos = m_nLastBlockOffset+Pending->totalUnzipped;
 				if(currentpos <= block->StartOffset) {
 					// block have not been started yet
-					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
+					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crNextPending);
 				}
 				else if (currentpos > block->EndOffset) {
 					// block have not been started yet
-					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
+					s_StatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crNextPending);
 				}
 				else {
 					uint64 newEnd = currentpos;
@@ -325,12 +317,12 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 					if (newEnd>start) {
 						if (newEnd<end) {
 							s_StatusBar.FillRange((uint64)(block->StartOffset>start)?block->StartOffset%PARTSIZE:0, newEnd%PARTSIZE, crPending);
-							s_StatusBar.FillRange((uint64)newEnd%PARTSIZE, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
+							s_StatusBar.FillRange((uint64)newEnd%PARTSIZE, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crBuffer);
 						} else {
-							s_StatusBar.FillRange((uint64)(block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crPending);
+							s_StatusBar.FillRange((uint64)(block->StartOffset>start)?block->StartOffset%PARTSIZE:0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crPending);
 						}
 					} else {
-						s_StatusBar.FillRange((uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crNextPending);
+						s_StatusBar.FillRange((uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crNextPending);
 					}
 				}
 			}
@@ -347,7 +339,7 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 		if (!m_DownloadBlocks_list.IsEmpty()){
 			for(POSITION pos=m_DownloadBlocks_list.GetHeadPosition();pos!=0;){
 				block = m_DownloadBlocks_list.GetNext(pos);
-				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+				if (block->StartOffset <= end && block->EndOffset >= start) {
 					if (block->StartOffset >= start) {
 						if (block->EndOffset <= end) {
 							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
@@ -362,7 +354,7 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 		if (!m_PendingBlocks_list.IsEmpty()){
 			for(POSITION pos=m_PendingBlocks_list.GetHeadPosition();pos!=0;){
 				block = m_PendingBlocks_list.GetNext(pos)->block;
-				if (block->StartOffset >= start && block->StartOffset <= end || block->EndOffset >= start && block->EndOffset <= end) {
+				if (block->StartOffset <= end && block->EndOffset >= start) {
 					if (block->StartOffset >= start) {
 						if (block->EndOffset <= end) {
 							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
@@ -905,13 +897,13 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		while (done != m_nPartCount)
 		{
 			uint8 toread = data->ReadUInt8();
-			for (UINT i = 0;i != 8;i++)
+			for (uint8 i = 0;i != 8;i++)
 			{
 				//MORPH - Changed by SiRoB, ICS merged into partstatus
 				/*
 				m_abyPartStatus[done] = ((toread>>i)&1)? 1:0; 	
 				*/
-				m_abyPartStatus[done] = ((toread>>i)&1)? SC_AVAILABLE:0; 	
+				m_abyPartStatus[done] = (uint8)(((toread>>i)&1)? SC_AVAILABLE:0); 	
 				if (m_abyPartStatus[done])
 				{
 					if (!reqfile->IsComplete((uint64)done*PARTSIZE, ((uint64)(done+1)*PARTSIZE)-1, false)){
@@ -1239,7 +1231,7 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 {
 	ASSERT( iMaxBlocks >= 1 /*&& iMaxBlocks <= 3*/ );
 //MORPH START - Proper number of needed requested block
-	uint16 futurePossiblePendingBlock = m_PendingBlocks_list.GetCount()+m_DownloadBlocks_list.GetCount();
+	uint16 futurePossiblePendingBlock = (uint16)(m_PendingBlocks_list.GetCount()+m_DownloadBlocks_list.GetCount());
 	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
 		uint16 neededblock = (uint16)(iMaxBlocks - futurePossiblePendingBlock);
@@ -1299,8 +1291,8 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 			doCache = true;
 		else
 		{
-			Pending_Block_Struct* pending = m_PendingBlocks_list.GetHead();
 #ifndef _DEBUG
+			Pending_Block_Struct* pending = m_PendingBlocks_list.GetHead();
 			//JP take successrate into account when deciding to do webcache download (rounded down)
 			// Superlexx: modified this to actually work ;)
 			uint32 minOHCBRecipients = (thePrefs.ses_WEBCACHEREQUESTS > 50 && thePrefs.ses_successfull_WCDOWNLOADS > 0) ? thePrefs.ses_WEBCACHEREQUESTS / thePrefs.ses_successfull_WCDOWNLOADS : 1;
@@ -1338,11 +1330,11 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
         // Only trust eMule clients to be able to handle less blocks than three
-        if(GetDownloadDatarate() < 600 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Changed by SiRoB, 
+        if(GetDownloadDatarate() < 600 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Enhanced DBR 
             blockCount = 1;
         }
     }
-	blockCount = max(blockCount, GetDownloadDatarate()/EMBLOCKSIZE+2);
+	blockCount = max(blockCount, (int)(GetDownloadDatarate()/EMBLOCKSIZE+2));
 	CreateBlockRequests(blockCount);
 
 
@@ -1386,7 +1378,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 
 	Packet* packet;
 	uint32 npacket = 0;
-	const int nbpackettosend = (numberofblocktorequest+2)/3;
+	const UINT nbpackettosend = (numberofblocktorequest+2)/3;
 	if (bI64Offsets){
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];

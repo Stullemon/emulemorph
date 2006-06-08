@@ -2215,11 +2215,12 @@ void CSharedFilesCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult)
 	else
 		SetSortArrow(pNMListView->iSubItem, sortAscending ? arrowDoubleUp : arrowDoubleDown);
 	
-	UpdateSortHistory(pNMListView->iSubItem + adder + (sortAscending ? 0:20),20);
 	// Mighty Knife: CRC32-Tag - Indexes shifted by 10
 	/*
+	UpdateSortHistory(pNMListView->iSubItem + adder + (sortAscending ? 0:20),20);
 	SortItems(SortProc, pNMListView->iSubItem + adder + (sortAscending ? 0:20));
 	*/
+	UpdateSortHistory(pNMListView->iSubItem + adder + (sortAscending ? 0:30),30);
 	SortItems(SortProc, pNMListView->iSubItem + adder + (sortAscending ? 0:30));
 	// [end] Mighty Knife
 	*pResult = 0;
