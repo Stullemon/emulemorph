@@ -1189,7 +1189,7 @@ public:
 	//SLAHAM: ADDED Known Since/Last Asked Counter <=
     //MORPH START - Added by Stulle, Mod Icons
 	bool IsMorph() const		{return GetModClient() == MOD_MORPH;}
-	//MORPH START - Added by Stulle, Mod Icons
+	//MORPH END   - Added by Stulle, Mod Icons
 
 
 private:
