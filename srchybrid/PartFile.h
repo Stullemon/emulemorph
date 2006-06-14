@@ -198,7 +198,10 @@ public:
 	bool	IsAlreadyRequested(uint64 start, uint64 end) const;
     bool    ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const;
 	bool	IsCorruptedPart(UINT partnumber) const;
-	uint64	GetTotalGapSizeInCommun(const uint8* srcstatus) const; //MORPH - Enhanced DBR
+	//MORPH START - Enhanced DBR
+	uint64	GetRemainingAvailableData(const uint8* srcstatus) const;
+	uint64	GetRemainingAvailableData(const CUpDownClient* sender) const;
+	//MORPH END   - Enhanced DBR
 	uint64	GetTotalGapSizeInRange(uint64 uRangeStart, uint64 uRangeEnd) const;
 	uint64	GetTotalGapSizeInPart(UINT uPart) const;
 	void	UpdateCompletedInfos();
@@ -254,7 +257,7 @@ public:
 	uint32	WriteToBuffer(uint64 transize, const BYTE *data, uint64 start, uint64 end, Requested_Block_Struct *block, const CUpDownClient* client);
 	void	FlushBuffer(bool forcewait=false, bool bForceICH = false, bool bNoAICH = false);
 	//MORPH START - Added by SiRoB, Flush Thread
-	void	FlushDone(FlushDone_Struct* FlushSetting);
+	void	FlushDone();
 	//MORPH END   - Added by SiRoB, Flush Thread
 
 	// Barry - This will invert the gap list, up to caller to delete gaps when done
@@ -481,8 +484,7 @@ private:  //morph
     DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
 	
 	//MORPH START - Added by SiRoB, Flush Thread
-	bool	m_bIsFlushThread;
-	bool	m_bNeedToFlush;
+	FlushDone_Struct* m_FlushSetting;
 	//MORPH END   - Added by SiRoB, Flush Thread
 
 	// khaos::categorymod+
@@ -606,9 +608,8 @@ protected:
 public:
 	virtual	BOOL	InitInstance() {return true;}
 	virtual int		Run();
-	void	SetPartFile(CPartFile* pOwner, FlushDone_Struct* changedPart);
+	void	SetPartFile(CPartFile* pOwner);
 private:
 	CPartFile*				m_partfile;
-	FlushDone_Struct*			m_FlushSetting;
 };
 //MORPH END   - Added by SiRoB, Flush Thread

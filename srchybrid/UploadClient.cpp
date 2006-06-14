@@ -672,8 +672,9 @@ public:
 void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
     if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
-       m_abyfiledata == (byte*)-2 || //we are still waiting for a block read on disk
-	   m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > max(GetDatarate()>>2, 50*1024)) { // the buffered data is large enough already according to client datarate
+       m_abyfiledata == (byte*)-2 || //we are still waiting for a block read from disk
+	   m_abyfiledata != (byte*)-1 && //Make sur we don't have something to do
+	   m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > max(GetDatarate(), EMBLOCKSIZE)) { // the buffered data is large enough already according to client datarate
 		return;
 	}
 	CString fullname;

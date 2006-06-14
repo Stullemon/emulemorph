@@ -147,7 +147,12 @@ protected:
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
     static int Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort);
-    static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort);
+    //MORPH START - Keep A4AF Infos
+	/*
+	static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort);
+	*/
+	static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort, const CPartFile* file);
+	//MORPH END   - A4AF Infos
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);

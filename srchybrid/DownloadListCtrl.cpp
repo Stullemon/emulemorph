@@ -881,7 +881,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 					buffer.Format(_T("%s"), CastItoXBytes(remains, false, false));
 
 				}
-				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
+				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 			}
 			break;
 		// khaos::accuratetimerem-
@@ -1185,6 +1185,9 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 
 				dc->BitBlt(rcDraw.left, rcDraw.top, iWidth, iHeight,  &cdcStatus, 0, 0, SRCCOPY); 
 				cdcStatus.SelectObject(hOldBitmap);
+			} else if (lpUpDownClient->GetSessionPayloadDown()){
+				buffer.Format(_T("%s"), CastItoXBytes(lpUpDownClient->GetSessionPayloadDown(), false, false));
+				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 			}
 			//MORPH END - Downloading Chunk Detail Display
 			break;
@@ -1436,7 +1439,11 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 		case 13:	// linear priority
 			break;
 		case 14:	// remaining size
+			//MORPH START - Remaining Client Available Data
+			buffer.Format( _T("%s"), CastItoXBytes(lpUpDownClient->GetRemainingAvailableData((CPartFile*)lpCtrlItem->owner), false, false));
+			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 			break;
+			//MORPH END   - Remaining Client Available Data
 		//MORPH START - Added by SiRoB, WebCache 1.2f
 		//JP Webcache START
 		case 15: {
@@ -3007,7 +3014,7 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 
 		CUpDownClient* client1 = (CUpDownClient*)item1->value;
 		CUpDownClient* client2 = (CUpDownClient*)item2->value;
-		comp = Compare(client1, client2, lParamSort);
+		comp = Compare(client1, client2, lParamSort, item1->owner);
 	}
 
 	// SLUGFILLER: DLsortFix - last-chance sort, detect and use
@@ -3217,7 +3224,11 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 	return comp;
 }
 
+//MORPH - Keep A4AF Infos
+/*
 int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient *client2, LPARAM lParamSort)
+*/
+int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient *client2, LPARAM lParamSort, const CPartFile* pfile)
 {
 	lParamSort &= 63;	// SLUGFILLER: DLsortFix
 	switch (lParamSort)
@@ -3253,7 +3264,12 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 		return CompareUnsigned(client1->GetDownloadDatarate(), client2->GetDownloadDatarate());
 
 	case 5: //progress asc
+		//MORPH - Keep A4AF Infos
+		/*
 		return CompareUnsigned(client1->GetAvailablePartCount(), client2->GetAvailablePartCount());
+		*/
+		return CompareUnsigned(client1->GetAvailablePartCount(pfile), client2->GetAvailablePartCount(pfile));
+		//MORPH - Keep A4AF Infos
 
 	case 6:
  //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
@@ -3387,6 +3403,10 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			return known1==known2? 0 : known1<known2? -1 : 1;
 		}
 	//SLAHAM: ADDED Known Since <=
+	//MORPH START - Remaining Available Data
+	case 14: //Remain Size
+		return CompareUnsigned64(client1->GetRemainingAvailableData(pfile), client2->GetRemainingAvailableData(pfile));
+	//MORPH END   - Remaining Available Data
 	//MORPH START - Added by SiRoB, WebCache 1.2f
 	//JP Webcache START 
 	case 15:

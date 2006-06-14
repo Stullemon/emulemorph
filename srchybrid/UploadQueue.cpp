@@ -1899,6 +1899,10 @@ void CUploadQueue::UpdateDatarates() {
 	uint64 sentBytesClass[NB_SPLITTING_CLASS];
 	uint64 sentBytesOverheadClass[NB_SPLITTING_CLASS];
 	theApp.uploadBandwidthThrottler->GetStats(sentBytesClass,sentBytesOverheadClass,m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass);
+	//DEBUG: only 2 active PS slots:
+	//m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[1]=min(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[1],2);
+	//END DEBUG
+
 	DWORD curTick = ::GetTickCount();
 	if (sentBytesClass[LAST_CLASS]>0) {
     	// Save used bandwidth for speed calculations

@@ -1762,11 +1762,7 @@ LRESULT CemuleDlg::OnFlushDone(WPARAM wParam,LPARAM lParam)
 {
 	CPartFile* partfile = (CPartFile*) lParam;
 	if (theApp.m_app_state != APP_STATE_SHUTINGDOWN && theApp.downloadqueue->IsPartFile(partfile))	// could have been canceled
-		partfile->FlushDone((FlushDone_Struct*)wParam);
-	else {
-		delete[] ((FlushDone_Struct*)wParam)->changedPart;
-		delete	(FlushDone_Struct*)wParam;
-	}
+		partfile->FlushDone();
 	return 0;
 }
 //MORPH END   - Added by SiRoB, Flush Thread
@@ -1788,7 +1784,7 @@ LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
 	CFileException* error = (CFileException*)lParam;
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN || theApp.downloadqueue->IsPartFile((CPartFile*)wParam)) { //MORPH - Changed by SiRoB, Flush Thread
+	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN || !theApp.downloadqueue->IsPartFile((CPartFile*)wParam)) { //MORPH - Flush Thread
 		if (error != NULL)
 			error->Delete();
 		return FALSE;

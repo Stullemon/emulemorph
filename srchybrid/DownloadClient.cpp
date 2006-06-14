@@ -1100,10 +1100,6 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		}
 
         if(nNewState == DS_DOWNLOADING && socket){
-#if !defined DONT_USE_SOCKET_BUFFERING
-			int buffer = 512*1024;
-			socket->SetSockOpt(SO_RCVBUF, &buffer , sizeof(buffer), SOL_SOCKET);
-#endif
 			m_bWebcacheFailedTry = false; //MORPH - Added by SiRoB, New ResolveWebCachename
 			socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
@@ -1213,7 +1209,7 @@ void CUpDownClient::ProcessHashSet(const uchar* packet,uint32 size)
 }
 
 //MORPH START - Enhanced DBR
-uint64 CUpDownClient::GetRemainingReservedDataToDownload() {
+uint64 CUpDownClient::GetRemainingReservedDataToDownload() const {
 	uint64 reserveddata = 0;
 	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != NULL;) {
 		Pending_Block_Struct* Pending = m_PendingBlocks_list.GetNext(pos);
@@ -1225,6 +1221,12 @@ uint64 CUpDownClient::GetRemainingReservedDataToDownload() {
 	}
 	return reserveddata;
 }
+uint64	CUpDownClient::GetRemainingAvailableData(const CPartFile* file) const{
+	uint8* thisAbyPartStatus;
+	if (m_PartStatus_list.Lookup(file, thisAbyPartStatus))
+		return file->GetRemainingAvailableData(thisAbyPartStatus);
+	return 0;
+}
 //MORPH END   - Enhanced DBR
 
 void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
@@ -1234,9 +1236,7 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	uint16 futurePossiblePendingBlock = (uint16)(m_PendingBlocks_list.GetCount()+m_DownloadBlocks_list.GetCount());
 	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
-		uint16 neededblock = (uint16)(iMaxBlocks - futurePossiblePendingBlock);
-		if (iMaxBlocks>=3)
-			neededblock = (neededblock/3+1)*3;
+		uint16 neededblock = (uint16)(iMaxBlocks - m_DownloadBlocks_list.GetCount());
 		Requested_Block_Struct** toadd = new Requested_Block_Struct*[neededblock];
 		if (reqfile->GetNextRequestedBlock(this,toadd,&neededblock)){
 			for (UINT i = 0; i < neededblock; i++)
@@ -1282,9 +1282,10 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 			/*
 			SendCancelTransfer();
 			*/
-			SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. The file is already fully requested."));
-			if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
+			if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true)) {
+				SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. Client don't have any block for us or file is already fully requested."));
 				SendCancelTransfer();
+			}
 			return;
 		}
 		if (isTestFile)
@@ -1334,18 +1335,21 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
             blockCount = 1;
         }
     }
-	blockCount = max(blockCount, (int)(GetDownloadDatarate()/EMBLOCKSIZE+2));
+	if ((GetDownloadDatarate()/EMBLOCKSIZE+2) >= 3) 
+		blockCount = 3;
 	CreateBlockRequests(blockCount);
 
 
 	if (m_PendingBlocks_list.IsEmpty()){
 		//MORPH - Moved by SiRoB, SendCancelTransfer if we can't find an other file to download
 		/*
+		SetDownloadState(DS_NONEEDEDPARTS);
 		SendCancelTransfer();
 		*/
-		SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. The file is already fully requested."));
-		if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
+		if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true)) {
+			SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. Client don't have any block for us or file is already fully requested."));
 			SendCancelTransfer();
+		}
 		return;
 	}
 
@@ -1965,29 +1969,26 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 		m_AvarageDDR_ListLastRemovedTimestamp = m_AvarageDDR_list.GetHead().timestamp;
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 	}
-	uint32 tempDownDatarate;
 	if (m_AvarageDDR_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_ListLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
 		DWORD dwAvgTickDuration = dwDuration / m_AvarageDDR_list.GetCount();
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwAvgTickDuration)
 			dwDuration += cur_tick - m_AvarageDDR_list.GetTail().timestamp - dwAvgTickDuration;
-		tempDownDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgDownDataRate / dwDuration);
+		m_nDownDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgDownDataRate / dwDuration);
 	} else if (m_AvarageDDR_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_ListLastRemovedTimestamp;
 		if (dwDuration < 100) dwDuration = 100;
 		if ((cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = cur_tick - m_AvarageDDR_list.GetTail().timestamp;
-		tempDownDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgDownDataRate / dwDuration);
+		m_nDownDatarate = (UINT)(1000U * (ULONGLONG)m_nSumForAvgDownDataRate / dwDuration);
 	} else
-		tempDownDatarate = 0;
+		m_nDownDatarate = 0;
 	//MORPH END   - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 
-	m_cShowDR++;
-	if (tempDownDatarate != m_nDownDatarate || m_cShowDR == 30) {
+	if (++m_cShowDR == 30) {
 		m_cShowDR = 0;
 		UpdateDisplayedInfo();
-		return m_nDownDatarate = tempDownDatarate;
 	}
 	return m_nDownDatarate;
 }
