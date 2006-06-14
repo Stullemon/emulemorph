@@ -61,6 +61,7 @@ there client on the eMule forum..
 #include "../../kademliawnd.h"
 #include "../../SafeFile.h"
 #include "../../Log.h"
+#include "../../ipfilter.h" // MORPH ipfilter kad
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -201,18 +202,27 @@ void CRoutingZone::ReadFile()
 					else
 						byType = file.ReadUInt8();
 					// IP Appears valid
-					if( byType < 4)
-					{
-						// This was not a dead contact, Inc counter if add was successful
-						if( Add(uID, uIP, uUDPPort, uTCPPort, uContactVersion) )
-							uValidContacts++;
+					if( byType < 4){
+						//MORPH START leuk_he ipfilter kad
+						if ( ::theApp.ipfilter->IsFiltered(ntohl(uIP))) 
+						{
+							if (::thePrefs.GetLogFilteredIPs())
+								AddDebugLogLine(false, _T("Ignored kad contact(IP=%s)--read known.dat -- - IP filter (%s)") , ipstr(ntohl(uIP)), ::theApp.ipfilter->GetLastHit());
+						}
+						else
+							//MORPH END leuk_he ipfilter kad
+						{
+							// This was not a dead contact, Inc counter if add was successful
+							if( Add(uID, uIP, uUDPPort, uTCPPort, uContactVersion) )
+								uValidContacts++;
+						}
 					}
 					uNumContacts--;
+					}
+					AddLogLine( false, GetResString(IDS_KADCONTACTSREAD), uValidContacts);
 				}
-				AddLogLine( false, GetResString(IDS_KADCONTACTSREAD), uValidContacts);
+				file.Close();
 			}
-			file.Close();
-		}
 	}
 	catch (CFileException* e)
 	{
@@ -281,15 +291,26 @@ bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 
 	if(::IsGoodIPPort(ntohl(uIP), uUDPPort))
 	{
 		if(uID != uMe)
-		{
+		{   //MORPH START leuk_he ipfilter kad
+			/*	if (! ::theApp.ipfilter->IsFiltered(ntohl(uIP))) 
+			{ */
+			//MORPH END leuk_he ipfilter kad
 			// JOHNTODO -- How do these end up leaking at times?
 			CContact* pContact = new CContact(uID, uIP, uUDPPort, uTCPPort, uVersion);
 			if(Add(pContact))
 				return true;
 			delete pContact;
 		}
+		//MORPH START leuk_he ipfilter kad
+		/*			else
+		{
+		if (::thePrefs.GetLogFilteredIPs())
+		AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) routingzone ADD- IP filter (%s)"), ipstr(ntohl(uIP)), ::theApp.ipfilter->GetLastHit());
+		return false;
+		} */
+		//MORPH END leuk_he ipfilter kad
 	}
-	return false;
+return false;
 }
 
 bool CRoutingZone::Add(CContact* pContact)

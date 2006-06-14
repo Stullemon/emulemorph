@@ -3738,7 +3738,7 @@ CString CWapServer::GetUploadFileInfo(CUpDownClient* client)
 	CString sRet;
 
 	// build info text and display it
-	sRet.Format(GetResString(IDS_USERINFO), client->GetUserName(), client->GetUserIDHybrid());
+	sRet.Format(GetResString(IDS_USERINFO), client->GetUserName());
 	if (client->GetRequestFile())
 	{
 		sRet += GetResString(IDS_SF_REQUESTED) + client->GetRequestFile()->GetFileName() + _T("\n");
