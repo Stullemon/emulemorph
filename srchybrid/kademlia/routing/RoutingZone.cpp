@@ -295,24 +295,13 @@ bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 
 	if(::IsGoodIPPort(ntohl(uIP), uUDPPort))
 	{
 		if(uID != uMe)
-		{   //MORPH START leuk_he ipfilter kad
-			/*	if (! ::theApp.ipfilter->IsFiltered(ntohl(uIP))) 
-			{ */
-			//MORPH END leuk_he ipfilter kad
+		{  
 			// JOHNTODO -- How do these end up leaking at times?
 			CContact* pContact = new CContact(uID, uIP, uUDPPort, uTCPPort, uVersion);
 			if(Add(pContact))
 				return true;
 			delete pContact;
 		}
-		//MORPH START leuk_he ipfilter kad
-		/*			else
-		{
-		if (::thePrefs.GetLogFilteredIPs())
-		AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) routingzone ADD- IP filter (%s)"), ipstr(ntohl(uIP)), ::theApp.ipfilter->GetLastHit());
-		return false;
-		} */
-		//MORPH END leuk_he ipfilter kad
 	}
 return false;
 }
