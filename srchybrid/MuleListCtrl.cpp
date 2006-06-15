@@ -36,7 +36,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+static char THIS_FILE[] = __FILE__; 
 #endif
 
 #define MAX_SORTORDERHISTORY 4
@@ -957,7 +957,22 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 		break;
 
 	case WM_DESTROY:
-		SaveSettings();
+        // MORPH START leuk_he temp workarround to prevent a chrash on shutdown.
+		// Crash on beta's
+        #ifndef BETAREL 
+		try
+		{
+        #endif
+		// orginal line:
+	     SaveSettings();
+		 #ifndef BETAREL 
+		}
+		catch(...)
+		{
+			//nope should not happen. Just silent... 
+		}
+        #endif
+		// MORPH ENDT leuk_he temp workarround to prevent a chrash on shutdown.
 		break;
 
 	case LVM_UPDATE:

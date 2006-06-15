@@ -18,7 +18,7 @@
 #include "BarShader.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
-// MORPH START - Added by Commander, WebCache 1.2e
+// MORPH START - Added by Commander, WebCache 1.2e 
 #include "Preferences.h"
 #include "WebCache/WebCache.h"
 #include "WebCache/WebCacheCryptography.h"
@@ -473,7 +473,7 @@ public:
     /*zz*/UINT            GetSessionPayloadDown() const                   { return m_nCurSessionPayloadDown; }
 	void			ResetSessionDown() {
 						m_nCurSessionDown = m_nTransferredDown;
-                        m_nCurSessionPayloadDown = 0;
+                        //m_nCurSessionPayloadDown = 0;
 					}
 	UINT			GetQueueSessionPayloadUp() const				{ return m_nCurQueueSessionPayloadUp; }
     UINT			GetPayloadInBuffer() const						{ return m_addedPayloadQueueSession - GetQueueSessionPayloadUp(); }
@@ -587,7 +587,8 @@ public:
 	void			ProcessAcceptUpload();
 	bool			AddRequestForAnotherFile(CPartFile* file);
 	//MORPH START - Enhanced DBR
-	uint64			GetRemainingReservedDataToDownload();
+	uint64			GetRemainingReservedDataToDownload() const;
+	uint64			GetRemainingAvailableData(const CPartFile* file) const;
 	//MORPH END   - Enhanced DBR
 	void			CreateBlockRequests(int iMaxBlocks);
 	virtual void	SendBlockRequests(bool ed2k = false); //MORPH - Changed by SiRoB, WebCache Retry by ed2k
@@ -1189,7 +1190,7 @@ public:
 	//SLAHAM: ADDED Known Since/Last Asked Counter <=
     //MORPH START - Added by Stulle, Mod Icons
 	bool IsMorph() const		{return GetModClient() == MOD_MORPH;}
-	//MORPH END   - Added by Stulle, Mod Icons
+	//MORPH START - Added by Stulle, Mod Icons
 
 
 private:
