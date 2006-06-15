@@ -64,6 +64,7 @@ extern LPCWSTR _awszInvKadKeywordChars;
 using namespace Kademlia;
 
 //MORPH START leuk_he ipfilter kad
+#if 0
 int iskadfiltered(uint32 ip,LPCSTR from ){
 	if ( ::theApp.ipfilter->IsFiltered(ntohl(ip))){ 
 		if (::thePrefs.GetLogFilteredIPs()) {
@@ -73,6 +74,8 @@ int iskadfiltered(uint32 ip,LPCSTR from ){
 	}
 	return 0;
 }
+#endif
+//MORPH END leuk_he ipfilter kad
 // Used by Kad1.0 and Kad 2.0
 void CKademliaUDPListener::Bootstrap(LPCTSTR szHost, uint16 uUDPPort)
 {
@@ -193,12 +196,6 @@ void CKademliaUDPListener::SendPublishSourcePacket(uint32 uIP, uint16 uUDPPort, 
 
 void CKademliaUDPListener::ProcessPacket(const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort)
 {
-        //MORPH START leuk_he ipfilter kad
-/*    			if (iskadfiltered(uIP,__FUNCTION__) )
-	     		{
-					return;
-				}*/
-		    	//MORPH END leuk_he ipfilter kad
 	//Update connection state only when it changes.
 	bool bCurCon = CKademlia::GetPrefs()->HasHadContact();
 	CKademlia::GetPrefs()->SetLastContact();
@@ -813,12 +810,16 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 			if(::IsGoodIPPort(ntohl(uIPResult),uUDPPortResult))
 			{
 		        //MORPH START leuk_he ipfilter kad
+		        #if 0 
     			if (!iskadfiltered(uIPResult,__FUNCTION__) )
 	     		{
+	     		#endif	
 		    	//MORPH END leuk_he ipfilter kad
 				pRoutingZone->Add(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, 0);
 				pResults->push_back(new CContact(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uTarget, 0));
+				#if 0 
   				} // MORPH ipfilter
+  				#endif
 			}
 		}
 	}
@@ -872,12 +873,16 @@ void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uin
 			if(::IsGoodIPPort(ntohl(uIPResult),uUDPPortResult))
 			{
 				//MORPH START leuk_he ipfilter kad
+				#if 0 
 				if (!iskadfiltered(uIPResult ,__FUNCTION__)) 
 			     {
+			    #endif
 					//MORPH END leuk_he ipfilter kad
 					pRoutingZone->Add(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uVersion);
 					pResults->push_back(new CContact(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uTarget, uVersion));
+			#if 0 		
 				} // he luke...
+			#endif
 			}
 		}
 	}
@@ -1895,7 +1900,7 @@ void CKademliaUDPListener::Process_KADEMLIA_PUBLISH_NOTES_REQ (const byte *pbyPa
 	CUInt128 uDistance(CKademlia::GetPrefs()->GetKadID());
 	uDistance.Xor(uTarget);
 
-	// Shouldn't LAN IPs already be filtered? ==> abuse this setting to disable searchtoleance. 
+	// Shouldn't LAN IPs already be filtered? ==> this setting to disable searchtoleance. 
 	if( thePrefs.FilterLANIPs() && uDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
 		return;
 
@@ -2076,12 +2081,6 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_REQ (const byte *pbyPacke
 		throw strError;
 	}
 
-     //MORPH START leuk_he ipfilter kad
-/*	if (iskadfiltered(uIP,__FUNCTION__)){ 
-	   return; // return or throw? 
-    } */
-   //MORPH END leuk_he ipfilter kad
-
 	CSafeMemFile fileIO(pbyPacketData, uLenPacket);
 	uint16 uTCPPort = fileIO.ReadUInt16();
 
@@ -2152,12 +2151,6 @@ void CKademliaUDPListener::Process_KADEMLIA_FINDBUDDY_REQ (const byte *pbyPacket
 		//We are firewalled but somehow we still got this packet.. Don't send a response..
 		return;
 
-  //MORPH START leuk_he ipfilter kad
-/*	if (iskadfiltered(uIP,__FUNCTION__)){ 
-    	return; // return or throw?
-    } */
-   //MORPH END leuk_he ipfilter kad
-
 	CSafeMemFile fileIO(pbyPacketData, uLenPacket);
 	CUInt128 BuddyID;
 	fileIO.ReadUInt128(&BuddyID);
@@ -2193,6 +2186,7 @@ void CKademliaUDPListener::Process_KADEMLIA_FINDBUDDY_RES (const byte *pbyPacket
 		throw strError;
 	}
 
+
 	CSafeMemFile fileIO(pbyPacketData, uLenPacket);
 	CUInt128 uCheck;
 	fileIO.ReadUInt128(&uCheck);
@@ -2222,19 +2216,6 @@ void CKademliaUDPListener::Process_KADEMLIA_CALLBACK_REQ (const byte *pbyPacketD
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
-
-    //MORPH START leuk_he ipfilter kad
-	/*if ( ::theApp.ipfilter->IsFiltered(ntohl(uIP))){ 
-	     		if (::thePrefs.GetLogFilteredIPs()) {
-			    	   AddDebugLogLine(false, _T("Ignored kad contact(IP=%s)--find callbacj REQ-- - IP filter (%s)") , ipstr(ntohl(uIP)), ::theApp.ipfilter->GetLastHit());
-					   }
-	return; // return or throw? 
-    } */
-   //MORPH END leuk_he ipfilter kad
-
-
-
-
 
 	CUpDownClient* pBuddy = theApp.clientlist->GetBuddy();
 	if( pBuddy != NULL )
@@ -2267,8 +2248,6 @@ void CKademliaUDPListener::Process_KADEMLIA_CALLBACK_REQ (const byte *pbyPacketD
 
 void CKademliaUDPListener::SendPacket(const byte *pbyData, uint32 uLenData, uint32 uDestinationHost, uint16 uDestinationPort)
 {
-
-   
 	//This is temp.. The entire Kad code will be rewritten using CMemFile and send a Packet object directly.
 	Packet* pPacket = new Packet(OP_KADEMLIAHEADER);
 	pPacket->opcode = pbyData[1];
@@ -2296,16 +2275,6 @@ void CKademliaUDPListener::SendPacket(const byte *pbyData, uint32 uLenData, byte
 
 void CKademliaUDPListener::SendPacket(CSafeMemFile *pbyData, byte byOpcode, uint32 uDestinationHost, uint16 uDestinationPort)
 {
-     //MORPH START leuk_he ipfilter kad
-	if ( ::theApp.ipfilter->IsFiltered(ntohl(uDestinationHost))){ 
-	     		if (::thePrefs.GetLogFilteredIPs()) {
-			    	   AddDebugLogLine(false, _T("Ignored kad contact(IP=%s)--SEND2.0 OOPS-- - IP filter (%s)") , ipstr(ntohl(uDestinationHost)), ::theApp.ipfilter->GetLastHit());
-					   }
-	return; // return or throw?
-    }
-   //MORPH END leuk_he ipfilter kad
-
-
 	Packet* pPacket = new Packet(pbyData, OP_KADEMLIAHEADER);
 	pPacket->opcode = byOpcode;
 	if( pPacket->size > 200 )

@@ -202,21 +202,25 @@ void CRoutingZone::ReadFile()
 					else
 						byType = file.ReadUInt8();
 					// IP Appears valid
-					if( byType < 4){
-						//MORPH START leuk_he ipfilter kad
+					if( byType < 4)
+					    {
+						#if 0
 						if ( ::theApp.ipfilter->IsFiltered(ntohl(uIP))) 
 						{
 							if (::thePrefs.GetLogFilteredIPs())
 								AddDebugLogLine(false, _T("Ignored kad contact(IP=%s)--read known.dat -- - IP filter (%s)") , ipstr(ntohl(uIP)), ::theApp.ipfilter->GetLastHit());
 						}
 						else
-							//MORPH END leuk_he ipfilter kad
 						{
+						#endif
+   					    //MORPH END leuk_he ipfilter kad
 							// This was not a dead contact, Inc counter if add was successful
 							if( Add(uID, uIP, uUDPPort, uTCPPort, uContactVersion) )
 								uValidContacts++;
 						}
+					#if 0 
 					}
+					#endif 
 					uNumContacts--;
 					}
 					AddLogLine( false, GetResString(IDS_KADCONTACTSREAD), uValidContacts);
