@@ -736,11 +736,16 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 bool CemuleApp::ProcessCommandline()
 {
 	bool bIgnoreRunningInstances = (GetProfileInt(_T("eMule"), _T("IgnoreInstances"), 0) != 0);
+   bool bExitParam=false;
 
 	for (int i = 1; i < __argc; i++){
 		LPCTSTR pszParam = __targv[i];
 		if (pszParam[0] == _T('-') || pszParam[0] == _T('/')){
 			pszParam++;
+		// MORPH START prevent startup on "emule exit" dos command
+		}
+		//MORPH END prevent startup on "emule exit" dos command
+
 #ifdef _DEBUG
 			if (_tcscmp(pszParam, _T("assertfile")) == 0)
 				_CrtSetReportHook(CrtDebugReportCB);
@@ -750,7 +755,13 @@ bool CemuleApp::ProcessCommandline()
 
 			if (_tcscmp(pszParam, _T("AutoStart")) == 0)
 				m_bAutoStart = true;
+			// MORPH START prevent startup on "emule exit" dos command
+			if (_tcscmp(pszParam, _T("exit")) == 0)
+				bExitParam = true;
+		/*	remove
 		}
+		*/
+	// MORPH END prevent startup on "emule exit" dos command
 	}
 
 	CCommandLineInfo cmdInfo;
@@ -806,6 +817,10 @@ bool CemuleApp::ProcessCommandline()
       			delete command;
 				return true; 
 			}
+			// MORPH START prevent startup on "emule exit" dos command
+			else if (bExitParam)
+				  return true;
+		  // MORPH  END prevent startup on "emule exit"
 		}
     }
     return (maininst || bAlreadyRunning);
