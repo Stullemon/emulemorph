@@ -80,10 +80,10 @@ BEGIN
     IDS_HTTPDOWNLOAD_INVALID_HTTP_RESPONSE 
                             "Falha ao receber uma resposta de HTTP válida do servidor"
     IDS_HTTPDOWNLOAD_ERROR_READFILE 
-                            "Um erro ocorreu enquanto tentou-se dar download no arquivo, Erro:%s"
+                            "Um erro ocorreu ao baixar o arquivo, Erro:%s"
     IDS_HTTPDOWNLOAD_PERCENTAGE 
                             "Atualizando lista de servidores: %s%% de %s concluído"
-    IDS_HTTPDOWNLOAD_RETREIVEING_FILE "Recuperando o arquivo"
+    IDS_HTTPDOWNLOAD_RETREIVEING_FILE "Baixando arquivo"
     IDS_HTTPDOWNLOAD_OF     "%s de %s"
     IDS_FILELINK            "Link do Arquivo"
     IDS_LD_BASICOPT         "Opções Básicas"
@@ -197,7 +197,7 @@ BEGIN
     IDS_COMPLETE            "Completo"
     IDS_PAUSED              "Pausado"
     IDS_ERRORLIKE           "Erro"
-    IDS_ASSIGNED2K          "eMule não esta associado para links eD2k. Você quer associar os links eD2k para o eMule agora? (recomendado)"
+    IDS_ASSIGNED2K          "O eMule não esta associado para links eD2k. Você quer associar os links eD2k para o eMule agora? (recomendado)"
     IDS_ERR_EMPTYADRESSESDAT 
                             "Não há uma lista de endereços de servidores no arquivo 'adresses.dat'. Por favor coloque uma lista de servidorest válida nesse arquivo para auto-atualizar sua lista de servidores"
 END
@@ -210,8 +210,8 @@ BEGIN
     IDS_MAIN_POPUP_RESTORE  "Restaurar"
     IDS_CONNECTTOANYSERVER  "Conectar a qualquer servidor"
     IDS_EXIT                "&Sair"
-    IDS_CONNECTING          "Conectando"
-    IDS_FAILED              "Falhou"
+    IDS_CONNECTING          "Conectando...."
+    IDS_FAILED              "Falhou!"
     IDS_ERR_BADSERVERREPLY  "Resposta de login corrompida ou inválida recebida do servidor"
     IDS_NEWCLIENTID         "Sua nova ID é %u"
     IDS_NOSHAREDFOLDERS     "Nenhuma pasta compartilhada"
@@ -980,7 +980,7 @@ BEGIN
     IDS_WIZ_OS_FRAME        "Sistema Operacional"
     IDS_WIZ_CONCURENTDOWN_FRAME 
                             "Quantos downloads você geralmente faz de uma só vez??"
-    IDS_HASHINGFILE         "Fazendo Hash de arquivo:"
+    IDS_HASHINGFILE         "Fazendo Hash do arquivo:"
     IDS_WIZ_CUSTOM_FRAME    "Se você testou a velocidade da sua conexão, coloque os resultados aqui."
     IDS_WIZ_HOTBUTTON_FRAME "Botões de Pré-ajuste"
     IDS_WIZ_TRUEUPLOAD_TEXT "Largura da banda de Upload"
@@ -1309,7 +1309,7 @@ BEGIN
     IDS_HM_LINKHP           "Homepage do eMule"
     IDS_HM_LINKFAQ          "FAQ do eMule"
     IDS_HM_LINKVC           "Verificador de versão eMule"
-    IDS_DEBUG_SOURCE_EXCHANGE "Exibir fonte de troca de mensagens"
+    IDS_DEBUG_SOURCE_EXCHANGE "Registrar mensagens de troca de fontes"
     IDS_SHAREDREQ1          "O Usuário %s (%u) solicitou sua lista de diretórios compartilhados -> %s"
     IDS_SHAREDREQ2          "O Usuário %s (%u) solicitou sua lista de arquivos compartilhados para o diretório '%s' -> %s"
     IDS_SHAREDANSW          "O Usuário %s (%u) compartilha o diretório '%s'"
@@ -2287,9 +2287,9 @@ BEGIN
     IDS_USSPINGFAILED       "UploadSpeedSense: Ping #%i falhou. Motivo a seguir"
     IDS_USSNEWTRACEROUTE    "UploadSpeedSense: topologia da Rede mudou. TTL: %i Ip esperado: %s Ip Recebido: %s novo roteamento a fazer."
     IDS_USSPINGNUMCONTINUE  "UploadSpeedSense: Ping #%i teve sucesso. Continuando."
-    IDS_USSNEWLOWEST        "UploadSpeedSense: Novo ping mais baixo: %i ms. Antigo: %i ms"
-    IDS_USSPINGFAILDIS      "UploadSpeedSense: Muitas Falha de Ping. Desativando USS."
-    IDS_USSPINGERPINGREPLY  "UploadSpeedSense: resposta de %s: bytes=%d tempo=%ldms TTL=%i"
+    IDS_USSNEWLOWEST        "UploadSpeedSense: Novo ping menor: %i ms. Antigo: %i ms"
+    IDS_USSPINGFAILDIS      "UploadSpeedSense: Muitas Falhas de Ping. Desativando USS."
+    IDS_USSPINGERPINGREPLY  "UploadSpeedSense: Resposta de %s: bytes=%d tempo=%ldms TTL=%i"
     IDS_USSPINGERWSASFAI    "Pinger: WSAStartup() falhou, erro: %d\n"
     IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() falhou: Impossível localizar ICMP.DLL!"
     IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() falhou por pelo menos uma função."
@@ -2681,7 +2681,7 @@ BEGIN
     IDS_WC_NRBLOCKS         "Números de blocos para baixar antes de reconectar ao proxy (pode ajudar a resolver desconexões)"
     IDS_WC_BLOCK            "Blocos de 180k"
     IDS_WC_TIMEOUT          "Duração extra longa para conexões WebCache"
-    IDS_WC_LOCAL            "Esse WebCache não faz cache de tráfego dentro do mesmo provedor"
+    IDS_WC_LOCAL            "WebCache não faz cache de dados do mesmo ISP"
     IDS_WC_SUBMIT_EMAIL     "Enviar essas configurações via email"
     IDS_WC_LINK             "Link: "
     IDS_WC_PERSISTENT       "Conexões persistentes para downloads via proxy"
@@ -2794,8 +2794,8 @@ BEGIN
     IDS_IP2COUNTRY_DWNFILE  "Baixando arquivo IP2Country"
     IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv descarregado por causa de uma atualização em progresso"
     IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv carregado depois de uma atualização bem sucedida"
-    IDS_HASHING_COMPLETED   "'hashing' do arquivo '%s' completa."
-    IDS_HASHING_COMPLETED2  "'hashing' de arquivos novos completa."
+    IDS_HASHING_COMPLETED   "Hashing do arquivo '%s' completo."
+    IDS_HASHING_COMPLETED2  "Hashing dos arquivos novos completo."
     IDS_HASHING_NEWFILE     "Arquivo novo: '%s'"
     IDS_SUQWT_LOAD          "Carregar %s"
     IDS_VERBOSE_TITLE       "Detalhes"
@@ -3227,9 +3227,9 @@ BEGIN
     IDS_PAWCIO_CREDIT_TIP   "Avaliação começa com 3, Mínimo: 1, Máximo: 100.\ntaxa = 3 * baixado / enviado\n\n- Para novos clientes (down/up menor que 1MB), a taxa é 3 invés de 1.\n- Se você recebeu mais que 1MB de alguém mas não enviou nada em troca,\n  o usuário ganha taxa=100 (um pequeno Bonus para quem lhe enviou muita coisa)\n- Se você receber 100MB, o usuário ganha taxa=50 "
     IDS_EASTSHARE_CREDIT_TIP 
                             "Avaliação começa com 100, Mínimo: 10, Máximo: 5000\nTaxa = +6 por MB enviado e -2 para MB baixado\n\nBonus +100 se enviou mais que 1MB.\nA avaliação não fica abaixo de 50 se nós recebemos pelo menos 1MB do usuário."
-    IDS_PAYBACKFIRST_TIP    "Abre imediatamente um slot de PowerShare para Payback (pagar em retorno)\nos dados enviados por ele para nós.\nSó funciona em arquivos completos, não em parcialmente baixados."
+    IDS_PAYBACKFIRST_TIP    "Abre imediatamente um slot de PowerShare para Payback/pagar em retorno\nos dados enviados pelo usuário para você.\nSó funciona com arquivos completos."
     IDS_PAYBACKFIRSTLIMI_TIP 
-                            "Quantidade de dados que o usuário deve ter enviado\na nós além da quantidade que enviamos a ele."
+                            "Quantidade de dados que o usuário deve ter enviado\nà você acima da quantidade que você enviou à ele."
     IDS_EXPIRED_KNOWN_TIP   "Limpar os arquivo .met depois de um\narquivo não ser visto por xxx dias.\nSalva espaço em disco. Aplica-se para\nknown*.met. Nunca defina um valor baixo\naqui. (menor que 30)"
 END
 
@@ -3257,7 +3257,7 @@ BEGIN
     IDC_DETECTWEBCACHE_TIP  "Usa o webcaches.xml na sua pasta 'config'\npara procurar por proxy no seu provedor."
     IDC_STATIC_BLOCKS_TIP   "Quantidade de dados que determina se a conexão deve ser resetada."
     IDC_EXTRATIMEOUT_TIP    "Espera 400 segundos invés de 130 para esgotar\no tempo de envio de um bloco de 180kb"
-    IDC_LOCALTRAFFIC_TIP    "Dados do mesmo provedor é excluído do proxy\ne o Webcache será desligado para esses. teste de loopback\npode falhar por alguma razão."
+    IDC_LOCALTRAFFIC_TIP    "Alguns provedores possuem proxies que não fazem cache de dados\ninternos (dados trafegando de um usuário do provedor para outro\ndo mesmo provedor). Com essa opção ligada, o eMule desligará o\ndownload via Webcache para esses casos."
     IDC_PERSISTENT_PROXY_CONNS_TIP "Usa flag de download persistente (http 1.1) no proxy"
 END
 
