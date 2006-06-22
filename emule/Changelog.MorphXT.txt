@@ -9,12 +9,14 @@ FIXED: SCC: Khaos Category management
 - Default to category 0, if all other methods don't match.
 FIXED: GUI: Official fix arround unability to open completed file when they were renamed in the sharedfile window
 FIXED: GUI: Wrong sorting arround sharedfile window
+FIXED: Command line: Do not start after "emule exit" and emule was not running.
 
 ADDED: GUI: more mod icons [Stulle]
 ADDED: GUI: Extra infos in Client Tooltip
+ADDED: GUI: Remaining Available Data from a client in Remaining Size column of Transfer windows
 
 CHANGED: DCD: Display also current download chunk number and session completed download from a client
-CHANGED : Some tooltip spelling thx to fabulous (pt_br translator) [leuk_he] 
+CHANGED: Some tooltip spelling thx to fabulous (pt_br translator) [leuk_he] 
 CHANGED: USC: Should now respect higher class number of slot and reduce as much as possible open slot
 CHANGED: WAP: Removed some uneeded code
 CHANGED: FlushThread: Reviewed to work arround not flushed data at shutdown
