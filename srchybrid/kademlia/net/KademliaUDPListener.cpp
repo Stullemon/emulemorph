@@ -64,7 +64,7 @@ extern LPCWSTR _awszInvKadKeywordChars;
 using namespace Kademlia;
 
 //MORPH START leuk_he ipfilter kad
-#if 0
+//#if 0
 int iskadfiltered(uint32 ip,LPCSTR from ){
 	if ( ::theApp.ipfilter->IsFiltered(ntohl(ip))){ 
 		if (::thePrefs.GetLogFilteredIPs()) {
@@ -74,7 +74,7 @@ int iskadfiltered(uint32 ip,LPCSTR from ){
 	}
 	return 0;
 }
-#endif
+//#endif
 //MORPH END leuk_he ipfilter kad
 // Used by Kad1.0 and Kad 2.0
 void CKademliaUDPListener::Bootstrap(LPCTSTR szHost, uint16 uUDPPort)
@@ -810,16 +810,16 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 			if(::IsGoodIPPort(ntohl(uIPResult),uUDPPortResult))
 			{
 		        //MORPH START leuk_he ipfilter kad
-		        #if 0 
+		       // #if 0 
     			if (!iskadfiltered(uIPResult,__FUNCTION__) )
 	     		{
-	     		#endif	
+	     		//#endif	
 		    	//MORPH END leuk_he ipfilter kad
 				pRoutingZone->Add(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, 0);
 				pResults->push_back(new CContact(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uTarget, 0));
-				#if 0 
+				//#if 0 
   				} // MORPH ipfilter
-  				#endif
+  				//#endif
 			}
 		}
 	}
@@ -873,16 +873,16 @@ void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uin
 			if(::IsGoodIPPort(ntohl(uIPResult),uUDPPortResult))
 			{
 				//MORPH START leuk_he ipfilter kad
-				#if 0 
+				//#if 0 
 				if (!iskadfiltered(uIPResult ,__FUNCTION__)) 
 			     {
-			    #endif
+			    //#endif
 					//MORPH END leuk_he ipfilter kad
 					pRoutingZone->Add(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uVersion);
 					pResults->push_back(new CContact(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uTarget, uVersion));
-			#if 0 		
+			//#if 0 		
 				} // he luke...
-			#endif
+			//#endif
 			}
 		}
 	}
