@@ -19,6 +19,7 @@
 #include "DebugHelpers.h"
 #endif
 #include "emule.h"
+#include <Mmsystem.h>
 #include "emsocket.h"
 #include "AsyncProxySocketLayer.h"
 #include "Packets.h"
@@ -149,6 +150,15 @@ CEMSocket::CEMSocket(void){
 	m_dwBusy = curTick;
 	m_dwBusyDelta = 1;
 	m_hasSent = false;
+#if !defined DONT_USE_SOCKET_BUFFERING
+	m_uCurrentSendBufferSize = 8192;
+	m_uCurrentRecvBufferSize = 8192;
+	m_dwlastOnSendTick = 0;
+	m_dwRTT = timeGetTime();
+	m_dwRTTo = 0;
+	m_bRTTAvailable = false;
+	m_bRTToAvailable = false;
+#endif
 }
 
 CEMSocket::~CEMSocket(){
@@ -173,6 +183,9 @@ CEMSocket::~CEMSocket(){
 // By Maverick: Connection initialisition is done by class itself
 BOOL CEMSocket::Connect(LPCSTR lpszHostAddress, UINT nHostPort)
 {
+#if !defined DONT_USE_SOCKET_BUFFERING
+	m_dwRTT = timeGetTime();
+#endif
 	InitProxySupport();
 	return CAsyncSocketEx::Connect(lpszHostAddress, nHostPort);
 }
@@ -183,6 +196,9 @@ BOOL CEMSocket::Connect(LPCSTR lpszHostAddress, UINT nHostPort)
 //BOOL CEMSocket::Connect(LPCTSTR lpszHostAddress, UINT nHostPort)
 BOOL CEMSocket::Connect(SOCKADDR* pSockAddr, int iSockAddrLen)
 {
+#if !defined DONT_USE_SOCKET_BUFFERING
+	m_dwRTT = timeGetTime();
+#endif
 	InitProxySupport();
 	return CAsyncSocketEx::Connect(pSockAddr, iSockAddrLen);
 }
@@ -266,7 +282,11 @@ void CEMSocket::ClearQueues(){
 }
 
 void CEMSocket::OnConnect(int nErrorCode) {
-    CAsyncSocketEx::OnConnect(nErrorCode);
+#if !defined DONT_USE_SOCKET_BUFFERING
+    m_dwRTT = timeGetTime() - m_dwRTT;
+	m_bRTTAvailable = true;
+#endif
+	CAsyncSocketEx::OnConnect(nErrorCode);
 	if (nErrorCode == 0)
 	{
 		sendLocker.Lock();
@@ -309,6 +329,10 @@ BOOL CEMSocket::AsyncSelect(long lEvent){
 }
 
 void CEMSocket::OnReceive(int nErrorCode){
+	if (!m_bRTTAvailable) {
+		m_dwRTT = timeGetTime() - m_dwRTT;
+		m_bRTTAvailable = true;
+	}
 	// the 2 meg size was taken from another place
 	static char GlobalReadBuffer[2000000];
 
@@ -329,7 +353,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 
 	}
     sendLocker.Unlock();
-	
+
 	// CPU load improvement
     if(downloadLimitEnable == true && downloadLimit == 0){
         EMTrace("CEMSocket::OnReceive blocked by limit");
@@ -350,6 +374,21 @@ void CEMSocket::OnReceive(int nErrorCode){
 	if(ret == SOCKET_ERROR || ret == 0){
 		return;
 	}
+#if !defined DONT_USE_SOCKET_BUFFERING
+	uint32 recvbufferlimit = m_uCurrentRecvBufferSize;
+	if (ret<(recvbufferlimit<<1)) {
+		if (ret<m_uCurrentRecvBufferSize && m_uCurrentRecvBufferSize > 5840) {
+			recvbufferlimit >>= 1;
+		}
+	} else if (m_uCurrentRecvBufferSize < 1024*1024) {
+		recvbufferlimit <<= 1; 
+	}
+	if (recvbufferlimit!=m_uCurrentRecvBufferSize) {
+		m_uCurrentRecvBufferSize = recvbufferlimit;
+		SetSockOpt(SO_RCVBUF, &recvbufferlimit, sizeof(recvbufferlimit), SOL_SOCKET);
+		EMTrace("CEMSocket::OnReceive ret=%u, SO_RCVBUF=%u", ret, recvbufferlimit);
+	}
+#endif
 
 	// Bandwidth control
 	if(downloadLimitEnable == true){
@@ -700,7 +739,14 @@ void CEMSocket::OnSend(int nErrorCode){
 		OnError(nErrorCode);
 		return;
 	}
-
+	DWORD curTick = GetTickCount();
+#if !defined DONT_USE_SOCKET_BUFFERING
+	if (m_dwlastOnSendTick != 0) {
+		m_dwRTTo = (m_dwRTTo + curTick - m_dwlastOnSendTick)>>1;
+		m_bRTToAvailable = true;
+	}
+	m_dwlastOnSendTick = curTick;
+#endif
 	sendLocker.Lock();
 	if(byConnected == ES_DISCONNECTED){
         sendLocker.Unlock();
@@ -720,8 +766,6 @@ void CEMSocket::OnSend(int nErrorCode){
 	/*
 	m_bBusy = false;
 	*/
-	DWORD curTick = GetTickCount();
-	//lastCalledSend = curTick;
 	busyLocker.Lock();
 	bool signalNotBusy = m_dwBusy>0;
 	if (m_dwBusy) {
@@ -789,7 +833,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #endif
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 
-    if (maxNumberOfBytesToSend == 0 && ::GetTickCount() - lastCalledSend < SEC2MS(10)) {
+    if (maxNumberOfBytesToSend == 0 && ::GetTickCount() - lastCalledSend < SEC2MS(1)) {
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
     }
@@ -819,21 +863,34 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #else
             maxNumberOfBytesToSend = GetNeededBytes(sendbuffer, sendblen, sent, m_currentPacket_is_controlpacket, lastCalledSend);
 #endif
-        }
+		}
 
 		maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
-        bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) > 10000;
-
-        sendLocker.Lock();
+        bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) > 1000;
 
 #if !defined DONT_USE_SOCKET_BUFFERING
-        bufferlimit = ((bufferlimit>>10)+1) << 10; //buffer 1s
-		if (bufferlimit>= 1024*1024)
-			bufferlimit = 1024*1024-1;
-		else if (bufferlimit<minFragSize)
-			bufferlimit=minFragSize;
-		while( sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < min(maxNumberOfBytesToSend,bufferlimit) && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
+		if (bufferlimit!=0 || onlyAllowedToSendControlPacket) { 
+			uint32 sendbufferlimit = 32;
+			if (m_bRTToAvailable) {
+				sendbufferlimit = min(max(m_dwRTTo,m_dwRTT),1000)*(bufferlimit+m_uCurrentSendBufferSize)/2000;
+				if (sendbufferlimit < 5840) {
+					sendbufferlimit = 5840;
+				} else	if (sendbufferlimit >= 1024*1024) {
+					sendbufferlimit = 1024*1024;
+				}
+			}
+			if (m_uCurrentSendBufferSize!=sendbufferlimit) {
+				m_uCurrentSendBufferSize = sendbufferlimit;
+				SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
+				EMTrace("CEMSocket::Send SO_SNDBUF=%u", sendbufferlimit);
+			}
+		}
+#endif
+		sendLocker.Lock();
+	
+#if !defined DONT_USE_SOCKET_BUFFERING
+        while( sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < min(maxNumberOfBytesToSend, m_uCurrentSendBufferSize) && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
               (sendblen/*sendbuffer*/ != NULL || !controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && // there must exist something to send
                (onlyAllowedToSendControlPacket == false || // this means we are allowed to send both types of packets, so proceed
                 sendblen/*sendbuffer*/ != NULL && m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/ == true || // We are in the progress of sending a control packet. We are always allowed to send those
@@ -857,7 +914,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
             // If we are currently not in the progress of sending a packet, we will need to find the next one to send
 #if !defined DONT_USE_SOCKET_BUFFERING
 			ASSERT(sendblen>=sent);
-			while ((!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && sendblen-sent+sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < min(maxNumberOfBytesToSend,bufferlimit)) {
+			while ((!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && sendblen-sent+sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < min(maxNumberOfBytesToSend, m_uCurrentSendBufferSize)) {
 				bool bcontrolpacket;
 				uint32 ipacketpayloadsize = 0;
 #else
@@ -910,22 +967,18 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	            // package container and dispose of the container.
 #if !defined DONT_USE_SOCKET_BUFFERING
 				uint32 packetsize = curPacket->GetRealPacketSize();
-				if (!onlyAllowedToSendControlPacket) {
-					int buffer = (int)(bufferlimit+1);
-					SetSockOpt(SO_SNDBUF, &buffer , sizeof(buffer), SOL_SOCKET);
-				}
 				if (sendbuffer) {
-					if (currentBufferSize < sendblen+packetsize){
+					if (sent > (currentBufferSize>>1) || currentBufferSize < sendblen+packetsize){
 						ASSERT(sendblen>=sent);
 						sendblen-=sent;
 						if (currentBufferSize < sendblen+packetsize) {
-						currentBufferSize = max(sendblen+packetsize, bufferlimit);
-						char* newsendbuffer = new char[currentBufferSize];
-						memcpy(newsendbuffer, sendbuffer+sent, sendblen);
-						delete[] sendbuffer;
-						sendbuffer = newsendbuffer;
+							currentBufferSize = max(sendblen+packetsize, m_uCurrentSendBufferSize);
+							char* newsendbuffer = new char[currentBufferSize];
+							memcpy(newsendbuffer, sendbuffer+sent, sendblen);
+							delete[] sendbuffer;
+							sendbuffer = newsendbuffer;
 						} else {
-						memmove(sendbuffer, sendbuffer+sent, sendblen);
+							memmove(sendbuffer, sendbuffer+sent, sendblen);
 						}
 						sent = 0;
 					}
@@ -992,8 +1045,8 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 				ASSERT (tosend != 0 && tosend <= sendblen-sent);
 		    	
 				//DWORD tempStartSendTick = ::GetTickCount();
-				if (tosend > bufferlimit) //Don't send more than socket buffer
-					tosend = bufferlimit;
+				if (tosend > m_uCurrentSendBufferSize) //Don't send more than socket buffer
+					tosend = m_uCurrentSendBufferSize-1;
 				busyLocker.Lock();
 				uint32 result = CAsyncSocketEx::Send(sendbuffer+sent,tosend); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 				if (result == (uint32)SOCKET_ERROR){

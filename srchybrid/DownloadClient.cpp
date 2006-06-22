@@ -1236,7 +1236,9 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	uint16 futurePossiblePendingBlock = (uint16)(m_PendingBlocks_list.GetCount()+m_DownloadBlocks_list.GetCount());
 	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
-		uint16 neededblock = (uint16)(iMaxBlocks - m_DownloadBlocks_list.GetCount());
+		uint16 neededblock = (uint16)(iMaxBlocks - futurePossiblePendingBlock);
+		if (iMaxBlocks > 3)
+			neededblock = (neededblock/3+1)*3;
 		Requested_Block_Struct** toadd = new Requested_Block_Struct*[neededblock];
 		if (reqfile->GetNextRequestedBlock(this,toadd,&neededblock)){
 			for (UINT i = 0; i < neededblock; i++)
@@ -1327,16 +1329,15 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 
     // prevent locking of too many blocks when we are on a slow (probably standby/trickle) slot
 	int blockCount = 2;
-    if(IsEmuleClient() && m_byCompatibleClient==0 && reqfile->GetFileSize()-reqfile->GetCompletedSize() <= (uint64)PARTSIZE*4) {
+    //if(IsEmuleClient() && m_byCompatibleClient==0 && reqfile->GetFileSize()-reqfile->GetCompletedSize() <= (uint64)PARTSIZE*4) {
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
         // Only trust eMule clients to be able to handle less blocks than three
-        if(GetDownloadDatarate() < 600 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Enhanced DBR 
+        if(GetDownloadDatarate() < 1200 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Enhanced DBR 
             blockCount = 1;
         }
-    }
-	if ((GetDownloadDatarate()/EMBLOCKSIZE+2) >= 3) 
-		blockCount = 3;
+    //}
+	blockCount = max(blockCount, (GetDownloadDatarate()/EMBLOCKSIZE+2));
 	CreateBlockRequests(blockCount);
 
 

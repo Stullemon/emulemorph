@@ -1084,9 +1084,9 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 			*/
 			if(lpUpDownClient->Credits() && (lpUpDownClient->Credits()->GetUploadedTotal() || lpUpDownClient->Credits()->GetDownloadedTotal())){
 				buffer.Format( _T("%s/%s"),
-				CastItoXBytes(lpUpDownClient->Credits()->GetDownloadedTotal(), false, false),
-				CastItoXBytes(lpUpDownClient->Credits()->GetUploadedTotal(), false, false));
-				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
+				CastItoXBytes(lpUpDownClient->Credits()->GetUploadedTotal(), false, false),
+				CastItoXBytes(lpUpDownClient->Credits()->GetDownloadedTotal(), false, false));
+				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 			}
 			break;
 			//MORPH END  - Changed by SiRoB, Download/Upload

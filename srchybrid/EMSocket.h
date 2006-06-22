@@ -102,7 +102,12 @@ public:
 #endif
     	DWORD	GetBusyTimeSince() { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
 	float	GetBusyRatioTime() { return (float)(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))/(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)); };
-
+#if !defined DONT_USE_SOCKET_BUFFERING
+		uint32	GetSendBufferSize() { return m_uCurrentSendBufferSize; }; //MORPH - 
+		uint32	GetRecvBufferSize() { return m_uCurrentRecvBufferSize; }; //MORPH - 
+		DWORD	GetRTT() { return m_bRTTAvailable?m_dwRTT:(DWORD)-1; }; //MORPH - 
+		DWORD	GetRTTo() { return m_bRTToAvailable?m_dwRTTo:(DWORD)-1; }; //MORPH - 
+#endif
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
@@ -169,7 +174,14 @@ private:
 	
 	char*	sendbuffer;
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 currentBufferSize;
+	DWORD	m_dwlastOnSendTick;
+	DWORD	m_dwRTTo;
+	bool	m_bRTToAvailable;
+	DWORD	m_dwRTT;
+	bool	m_bRTTAvailable;
+	uint32	m_uCurrentRecvBufferSize;
+	uint32	m_uCurrentSendBufferSize;
+	uint32	currentBufferSize;
 #endif
 
 	uint32	sendblen;

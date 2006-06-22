@@ -1037,6 +1037,13 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
     else
 		MaxSpeed = thePrefs.GetMaxUpload();
 	*/
+	uint32    TotalSlots=0;
+     for (uint32 cID = 0; cID < NB_SPLITTING_CLASS; cID++) {
+	    if (cID == classID )
+			TotalSlots +=curUploadSlots;
+		else 
+			TotalSlots += GetEffectiveUploadListCount(cID);
+	 }
 	uint32 AllowedDatarate[NB_SPLITTING_CLASS];
 	uint32 AllowedClientDatarate[NB_SPLITTING_CLASS];
 	theApp.lastCommonRouteFinder->GetClassByteToSend(AllowedDatarate,AllowedClientDatarate);
@@ -1061,7 +1068,14 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	    (
 			curUploadSlots >= (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
 			||
-			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
+			curUploadSlots >= (AllowedDatarate[classID]
+			     /min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
+			||
+			TotalSlots > 
+			    (
+				  datarate/
+				  min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)
+				 ) // limit if slots go to differnt class after opening
 		 ) ||
 		 thePrefs.GetSlotLimitNumB() && curUploadSlots >= thePrefs.GetSlotLimitNum()
        ) // max number of clients to allow for all circumstances

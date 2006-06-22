@@ -969,6 +969,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 		}
 		catch(...)
 		{
+			ASSERT(false);
 			//nope should not happen. Just silent... 
 		}
         #endif

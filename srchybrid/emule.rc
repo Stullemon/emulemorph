@@ -4356,7 +4356,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_WEB_BADLOGINATTEMPT "Web interface: Failed login attempt"
-    IDS_ERR_TOOLARGEFILE    "File larger than the supported size of the edonkey protocol (>=4GB)"
+    IDS_ERR_TOOLARGEFILE    "File larger than the supported size of the edonkey protocol (>=256GB)"
     IDS_MSGONLYFRIENDS      "Accept from friends only"
     IDS_MSGONLYSEC          "Accept from valid clients only"
     IDS_DAY_MO_SA           "Mon-Sat"

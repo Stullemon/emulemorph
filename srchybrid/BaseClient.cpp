@@ -127,7 +127,7 @@ void CUpDownClient::Init()
 	//MORPH END   - Changed by SiRoB, ZZUL_20040904	
 	m_nChatstate = MS_NONE;
 	m_nKadState = KS_NONE;
-	//m_cShowDR = 0; //MORPH - Removed by SiRoB
+	m_cShowDR = 0;
 	m_nUDPPort = 0;
 	m_nKadPort = 0;
 	m_nTransferredUp = 0;
@@ -1015,6 +1015,20 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		Ban();
 	}
 
+	// MORPH START  always call setLinked_client
+	CFriend*	new_friend ;
+    if ((new_friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
+		// Link the friend to that client
+		m_Friend=new_friend;
+		m_Friend->SetLinkedClient(this);
+	}
+	else{
+		// avoid that an unwanted client instance keeps a friend slot
+		SetFriendSlot(false);
+		m_Friend->SetLinkedClient(NULL);
+        m_Friend=NULL;//is newfriend
+	}
+/*  original officila code:always call setLinke_client
 	if ((m_Friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
 		// Link the friend to that client
 		m_Friend->SetLinkedClient(this);
@@ -1023,6 +1037,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		// avoid that an unwanted client instance keeps a friend slot
 		SetFriendSlot(false);
 	}
+*/
+	// MORPH END  always call setLinke_client
 
 	// check for known major gpl breaker
 	CString strBuffer = m_pszUsername;
@@ -2997,7 +3013,7 @@ void CUpDownClient::AssertValid() const
 	(void)m_nDownDatarate;
 	(void)m_nDownDataRateMS;
 	(void)m_nSumForAvgDownDataRate;
-	//(void)m_cShowDR; //MORPH - Removed by SiRoB
+	(void)m_cShowDR;
 	(void)m_nRemoteQueueRank;
 	(void)m_dwLastBlockReceived;
 	(void)m_nPartCount;
@@ -3274,6 +3290,21 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 		break;
 	}
 	// MORPH END - Added by Commander, WebCache 1.2e
+#if !defined DONT_USE_SOCKET_BUFFERING
+	CEMSocket* s = socket;
+	if (s != NULL) {
+		if (m_pPCDownSocket)
+			s = m_pPCDownSocket;
+		else if (m_pWCDownSocket)
+			s = m_pWCDownSocket;
+		strState.AppendFormat(_T(",BUF:%u"), socket->GetRecvBufferSize());
+		DWORD RTT = s->GetRTT();
+		if (RTT)
+			strState.AppendFormat(_T(",RTT:%ims"), RTT);
+		else
+			strState.Append(_T(",RTT:?"));
+	}
+#endif
 	return strState;
 }
 
@@ -3343,11 +3374,23 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 				s = m_pPCUpSocket;
 			else if (m_pWCUpSocket)
 				s = m_pWCUpSocket;
-			if (s->GetBusyRatioTime() > 0)
-				strState.AppendFormat(_T(" (BusyRatio: %0.2f)"), s->GetBusyRatioTime());
+			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
+			DWORD RTT = s->GetRTT();
+			if (RTT!=(DWORD)-1)
+				strState.AppendFormat(_T(",RTT:%ims"), RTT);
+			else
+				strState.Append(_T(",RTT:?"));
+			DWORD RTTo = s->GetRTTo();
+			if (RTTo!=(DWORD)-1)
+				strState.AppendFormat(_T(",RTTo:%ims"), RTTo);
+			else
+				strState.Append(_T(",RTTo:?"));
+
 			DWORD busySince = s->GetBusyTimeSince();
+			if (s->GetBusyRatioTime() > 0)
+				strState.AppendFormat(_T(",BR: %0.2f"), s->GetBusyRatioTime());
 			if (busySince > 0)
-				strState.AppendFormat(_T(" (Busy: %ums)"), GetTickCount() - busySince);
+				strState.AppendFormat(_T(",BT:%ums"), GetTickCount() - busySince);
 		}
 	}
 	return strState;
