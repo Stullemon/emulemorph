@@ -1844,7 +1844,7 @@ CUpDownClient* CDownloadQueue::GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUD
 		CPartFile* cur_file = filelist.GetNext(pos);
 		for (POSITION pos2 = cur_file->srclist.GetHeadPosition();pos2 != 0;){
 			CUpDownClient* cur_client = cur_file->srclist.GetNext(pos2);
-			if (dwIP == cur_client->GetIP() && nUDPPort == cur_client->GetUDPPort()){
+			if (dwIP == cur_client->GetIP() && (nUDPPort == cur_client->GetUDPPort() || cur_client->HasLowID() && cur_client->IsUDPPending())){ //MORPH - NAPT Tempory Fix
 				return cur_client;
 			}
 		}

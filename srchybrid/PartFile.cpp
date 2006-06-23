@@ -1738,6 +1738,10 @@ bool CPartFile::SavePartFile()
 				statistic.spreadlist.GetNext(pos);
 				ASSERT(pos != NULL);	// Last value should always be 0
 				uint64 end = statistic.spreadlist.GetKeyAt(pos);
+				//MORPH - Smooth sample
+				if (end - start < PARTSIZE)
+					continue;
+				//MORPH - Smooth sample
 				itoa(i_sbpos,sbnumber,10);
 				sbnamebuffer[0] = FT_SPREADSTART;
 				CTag(sbnamebuffer,start,true).WriteTagToFile(&file);
@@ -1761,6 +1765,10 @@ bool CPartFile::SavePartFile()
 				statistic.spreadlist.GetNext(pos);
 				ASSERT(pos != NULL);	// Last value should always be 0
 				uint32 end = (uint32)statistic.spreadlist.GetKeyAt(pos);
+				//MORPH - Smooth sample
+				if (end - start < PARTSIZE)
+					continue;
+				//MORPH - Smooth sample
 				itoa(i_sbpos,sbnumber,10);
 				sbnamebuffer[0] = FT_SPREADSTART;
 				CTag(sbnamebuffer,start).WriteTagToFile(&file);

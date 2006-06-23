@@ -606,6 +606,7 @@ public:
     uint32          GetTimeUntilReask() const;
     uint32          GetTimeUntilReask(const CPartFile* file) const;
     uint32			GetTimeUntilReask(const CPartFile* file, const bool allowShortReaskTime, const bool useGivenNNP = false, const bool givenNNP = false) const;
+	bool			IsUDPPending() {return m_bUDPPending;} //MORPH - NAPT Tempory Fix
 	void			UDPReaskACK(uint16 nNewQR);
 	void			UDPReaskFNF();
 	void			UDPReaskForDownload();

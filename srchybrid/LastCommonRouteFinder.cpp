@@ -235,7 +235,9 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
     }
 
 	if(pMaxUpload != 0) {
-        maxUpload = pMaxUpload;
+        if (pMaxUpload == 1024*UNLIMITED)
+			pMaxUpload = _UI32_MAX;
+		maxUpload = pMaxUpload;
         if(maxUpload < minUpload) {
             minUpload = maxUpload;
         }

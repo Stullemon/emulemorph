@@ -1331,6 +1331,10 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				statistic.spreadlist.GetNext(pos);
 				ASSERT(pos != NULL);	// Last value should always be 0
 				uint64 end = statistic.spreadlist.GetKeyAt(pos);
+				//MORPH - Smooth sample
+				if (end - start < PARTSIZE)
+					continue;
+				//MORPH - Smooth sample
 				itoa(i_pos,number,10);
 				namebuffer[0] = FT_SPREADSTART;
 				CTag(namebuffer,start,true).WriteTagToFile(file);
@@ -1352,6 +1356,8 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				statistic.spreadlist.GetNext(pos);
 				ASSERT(pos != NULL);	// Last value should always be 0
 				uint32 end = (uint32)statistic.spreadlist.GetKeyAt(pos);
+				if (end - start < PARTSIZE)
+					continue;
 				itoa(i_pos,number,10);
 				namebuffer[0] = FT_SPREADSTART;
 				CTag(namebuffer,start).WriteTagToFile(file);

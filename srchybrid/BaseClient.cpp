@@ -3298,11 +3298,13 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 		else if (m_pWCDownSocket)
 			s = m_pWCDownSocket;
 		strState.AppendFormat(_T(",BUF:%u"), socket->GetRecvBufferSize());
+#ifdef  BETAREL
 		DWORD RTT = s->GetRTT();
 		if (RTT)
 			strState.AppendFormat(_T(",RTT:%ims"), RTT);
 		else
 			strState.Append(_T(",RTT:?"));
+#endif 
 	}
 #endif
 	return strState;
@@ -3375,6 +3377,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 			else if (m_pWCUpSocket)
 				s = m_pWCUpSocket;
 			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
+            #ifdef BETAREL
 			DWORD RTT = s->GetRTT();
 			if (RTT!=(DWORD)-1)
 				strState.AppendFormat(_T(",RTT:%ims"), RTT);
@@ -3385,6 +3388,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 				strState.AppendFormat(_T(",RTTo:%ims"), RTTo);
 			else
 				strState.Append(_T(",RTTo:?"));
+			#endif BETAREL
 
 			DWORD busySince = s->GetBusyTimeSince();
 			if (s->GetBusyRatioTime() > 0)

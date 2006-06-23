@@ -266,7 +266,7 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 		const Gap_Struct* cur_gap = file->gaplist.GetNext(pos);
 		uint64 gapstart = cur_gap->start;
 		uint64 gapend = cur_gap->end;
-		if (gapstart >= start && gapstart <= end || gapend >= start && gapend <= end) {
+		if (gapstart <= end && gapend >= start) {
 			s_StatusBar.FillRange((gapstart>start)?gapstart%PARTSIZE:(uint64)0, ((gapend<end)?(gapend+1):end)%PARTSIZE,  IsProxy()?crNeither:crClientOnly);
 		}
 	}

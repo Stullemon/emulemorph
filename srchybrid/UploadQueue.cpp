@@ -1037,13 +1037,6 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
     else
 		MaxSpeed = thePrefs.GetMaxUpload();
 	*/
-	uint32    TotalSlots=0;
-     for (uint32 cID = 0; cID < NB_SPLITTING_CLASS; cID++) {
-	    if (cID == classID )
-			TotalSlots +=curUploadSlots;
-		else 
-			TotalSlots += GetEffectiveUploadListCount(cID);
-	 }
 	uint32 AllowedDatarate[NB_SPLITTING_CLASS];
 	uint32 AllowedClientDatarate[NB_SPLITTING_CLASS];
 	theApp.lastCommonRouteFinder->GetClassByteToSend(AllowedDatarate,AllowedClientDatarate);
@@ -1068,14 +1061,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	    (
 			curUploadSlots >= (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
 			||
-			curUploadSlots >= (AllowedDatarate[classID]
-			     /min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
-			||
-			TotalSlots > 
-			    (
-				  datarate/
-				  min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)
-				 ) // limit if slots go to differnt class after opening
+			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
 		 ) ||
 		 thePrefs.GetSlotLimitNumB() && curUploadSlots >= thePrefs.GetSlotLimitNum()
        ) // max number of clients to allow for all circumstances
@@ -1714,7 +1700,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 		// ZZ:UploadSpeedSense -->
 		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(false)*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
 		*/
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(false)*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 5, thePrefs.IsUSSLog(), thePrefs.IsUSSUDP(), thePrefs.GetGlobalDataRateFriend(), thePrefs.GetMaxGlobalDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetGlobalDataRatePowerShare(), thePrefs.GetMaxGlobalDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(true)*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 5, thePrefs.IsUSSLog(), thePrefs.IsUSSUDP(), thePrefs.GetGlobalDataRateFriend(), thePrefs.GetMaxGlobalDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetGlobalDataRatePowerShare(), thePrefs.GetMaxGlobalDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
 		//MOPRH END   - Modified by SiRoB, Upload Splitting Class
 
 		theApp.uploadqueue->Process();
