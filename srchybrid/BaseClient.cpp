@@ -1025,8 +1025,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	else{
 		// avoid that an unwanted client instance keeps a friend slot
 		SetFriendSlot(false);
-		m_Friend->SetLinkedClient(NULL);
-        m_Friend=NULL;//is newfriend
+		if (m_Friend) m_Friend->SetLinkedClient(NULL); // morph, does this help agianst chrashing due to friend slots?
+		m_Friend=NULL;//is newfriend
 	}
 /*  original officila code:always call setLinke_client
 	if ((m_Friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
