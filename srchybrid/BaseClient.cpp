@@ -60,6 +60,7 @@
 #include "shahashset.h"
 #include "Log.h"
 #include "WebCache/WebCacheSocket.h" // MORPH - Added by Commander, WebCache 1.2e
+#include "modversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -3297,8 +3298,8 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 			s = m_pPCDownSocket;
 		else if (m_pWCDownSocket)
 			s = m_pWCDownSocket;
-		strState.AppendFormat(_T(",BUF:%u"), socket->GetRecvBufferSize());
 #ifdef  BETAREL
+		strState.AppendFormat(_T(",BUF:%u"), socket->GetRecvBufferSize());
 		DWORD RTT = s->GetRTT();
 		if (RTT)
 			strState.AppendFormat(_T(",RTT:%ims"), RTT);
@@ -3376,8 +3377,9 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 				s = m_pPCUpSocket;
 			else if (m_pWCUpSocket)
 				s = m_pWCUpSocket;
-			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
             #ifdef BETAREL
+			// extra info not required in release
+			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
 			DWORD RTT = s->GetRTT();
 			if (RTT!=(DWORD)-1)
 				strState.AppendFormat(_T(",RTT:%ims"), RTT);
@@ -3392,9 +3394,9 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 
 			DWORD busySince = s->GetBusyTimeSince();
 			if (s->GetBusyRatioTime() > 0)
-				strState.AppendFormat(_T(",BR: %0.2f"), s->GetBusyRatioTime());
+				strState.AppendFormat(_T(",BusyRat: %0.2f"), s->GetBusyRatioTime());
 			if (busySince > 0)
-				strState.AppendFormat(_T(",BT:%ums"), GetTickCount() - busySince);
+				strState.AppendFormat(_T(",BusyTime:%ums"), GetTickCount() - busySince);
 		}
 	}
 	return strState;

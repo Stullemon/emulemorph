@@ -25,7 +25,7 @@
 #define	MOD_VERSION			_T("MorphXT")
 #define	MOD_VERSION_LONG	_T("MorphXT v")
 //END - This part should not be changed in anyway
-//#define BETAREL              _T("BETA8_")
+#define BETAREL              _T("BETA9")
 
 #define	MOD_MOD_VERSION		_T("") //Use this to define your version based on MorphXT mod
 

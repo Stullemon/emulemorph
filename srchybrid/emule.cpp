@@ -385,7 +385,12 @@ BOOL CemuleApp::InitInstance()
 		/*
 		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg, true);
 		*/
-		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion /*+ BETAREL*/ +_T("]"), true);
+        #ifdef BETAREL
+        #define DUMPSTR BETAREL
+        #else
+        #define DUMPSTR T("")
+        #endif
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion + DUMPSTR +_T("]"), true);
 
 
 	///////////////////////////////////////////////////////////////////////////

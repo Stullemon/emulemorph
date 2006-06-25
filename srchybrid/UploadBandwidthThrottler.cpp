@@ -490,7 +490,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
     uint32 loopsCount = 0;
 
     bool estimateChangedLog = false;
-    bool lotsOfLog = false;
+
+    bool lotsOfLog = false; 
 
     while(doRun) {
         pauseEvent->Lock();
@@ -684,7 +685,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 				}
 			} else {
-				realBytesToSpendClass[classID] = 1000;
+				realBytesToSpendClass[classID] = (classID<LAST_CLASS)?_I64_MAX:1000;
 			}
 		}
 			
@@ -769,7 +770,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									else
 										stat->realBytesToSpend = _I64_MAX;
 								}
-								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend) {
+								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend && stat->realBytesToSpend > 999) {
 #if !defined DONT_USE_SOCKET_BUFFERING
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, allowedDataRateClass[LAST_CLASS]);
 #else
@@ -803,6 +804,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			numberofclientinhigherclass = 0;
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 				if(slotCounterClass[classID]) {
+					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
+						BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
+					else
 					BytesToSpend = realBytesToSpendClass[classID] / 1000;
 					uint64 spentBytes = 0;
 					uint64 spentOverhead = 0;
