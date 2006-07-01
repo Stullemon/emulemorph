@@ -17,6 +17,10 @@ public:
 #else
 	virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) = 0;
 #endif
+	/*
+	virtual DWORD GetBusyTimeSince() const = 0;
+	virtual float GetBusyRatioTime() const = 0;
+	*/
 };
 
 class ThrottledFileSocket : public ThrottledControlSocket
@@ -31,8 +35,8 @@ public:
     //virtual uint32	GetNeededBytes() = 0;
 	virtual bool	IsBusy() const = 0;
     virtual bool    HasQueues() const = 0;
-	virtual DWORD GetBusyTimeSince() = 0;
-	virtual float GetBusyRatioTime() = 0;
+	virtual DWORD GetBusyTimeSince() const = 0;
+	virtual float GetBusyRatioTime() const = 0;
 };
 
 // <-- ZZ:UploadBandWithThrottler (UDP)

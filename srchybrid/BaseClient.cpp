@@ -169,7 +169,10 @@ void CUpDownClient::Init()
 	m_byAcceptCommentVer = 0;
 	m_byExtendedRequestsVer = 0;
 	m_nRemoteQueueRank = 0;
-	m_iDifferenceQueueRank = 0;	//Morph - added by AndCycle, DiffQR
+	//MORPH - RemoteQueueRank Estimated Time
+	m_nRemoteQueueRankPrev = 0;
+	m_dwRemoteQueueRankEstimatedTime = 0;
+	//MORPH - RemoteQueueRank Estimated Time
 	m_dwLastSourceRequest = 0;
 	m_dwLastSourceAnswer = 0;
 	m_dwLastAskedForSources = 0;
@@ -2766,7 +2769,6 @@ void CUpDownClient::ResetFileStatusInfo()
 	m_abyPartStatus = NULL;
 	*/
 	m_abyPartStatus = NULL;
-	m_iDifferenceQueueRank = 0;	//Morph - added by AndCycle, DiffQR
 	m_nRemoteQueueRank = 0;
 	m_nPartCount = 0;
 	m_strClientFilename.Empty();
@@ -3218,10 +3220,17 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 			// EastShare START - Modified by TAHO, moved and moddified from Priority column
 			//strState = GetResString(IDS_ONQUEUE);
 			{
-				if ( GetRemoteQueueRank()){
-					//Morph - modified by AndCycle, DiffQR
-					strState.Format(_T("QR: %u (%i)"), GetRemoteQueueRank(), GetDiffQR());
-					//Morph - modified by AndCycle, DiffQR
+				if (GetRemoteQueueRank()){
+					//MORPH - RemoteQueueRank Estimated Time
+					strState.Format(_T("QR: %u"), GetRemoteQueueRank());
+					DWORD estimatedTime = GetRemoteQueueRankEstimatedTime();
+					if (estimatedTime) {
+						if (estimatedTime == (DWORD)-1)
+							strState.AppendFormat(_T(" (+)"));
+						else if (estimatedTime>GetTickCount())
+							strState.AppendFormat(_T(" (%s)"), CastSecondsToHM((estimatedTime-GetTickCount())/1000));
+					}
+					//MORPH - RemoteQueueRank Estimated Time
 				}
 				else{
 				strState = GetResString(IDS_ONQUEUE);
@@ -3300,11 +3309,6 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 			s = m_pWCDownSocket;
 #ifdef  BETAREL
 		strState.AppendFormat(_T(",BUF:%u"), socket->GetRecvBufferSize());
-		DWORD RTT = s->GetRTT();
-		if (RTT)
-			strState.AppendFormat(_T(",RTT:%ims"), RTT);
-		else
-			strState.Append(_T(",RTT:?"));
 #endif 
 	}
 #endif
@@ -3380,16 +3384,6 @@ CString CUpDownClient::GetUploadStateDisplayString() const
             #ifdef BETAREL
 			// extra info not required in release
 			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
-			DWORD RTT = s->GetRTT();
-			if (RTT!=(DWORD)-1)
-				strState.AppendFormat(_T(",RTT:%ims"), RTT);
-			else
-				strState.Append(_T(",RTT:?"));
-			DWORD RTTo = s->GetRTTo();
-			if (RTTo!=(DWORD)-1)
-				strState.AppendFormat(_T(",RTTo:%ims"), RTTo);
-			else
-				strState.Append(_T(",RTTo:?"));
 			#endif BETAREL
 
 			DWORD busySince = s->GetBusyTimeSince();

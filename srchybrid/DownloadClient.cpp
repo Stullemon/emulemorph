@@ -1388,15 +1388,17 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
+		pos = m_PendingBlocks_list.GetHeadPosition();
 		while (npacket<nbpackettosend) {
 		const int iPacketSize = 16+(3*8)+(3*8); // 64
 		packet = new Packet(OP_REQUESTPARTS_I64, iPacketSize, OP_EMULEPROT);
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
 		data.WriteHash16(reqfile->GetFileHash());
-		pos = m_PendingBlocks_list.GetHeadPosition();
 		/*
+		pos = m_PendingBlocks_list.GetHeadPosition();
 		for (uint32 i = 0; i != 3; i++){
 		*/
+		POSITION initialpos = pos;
 		uint32 i = 0;
 		while (i != 3){
 			if (pos){
@@ -1417,7 +1419,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 				++i;
 			}
 		}
-		pos = m_PendingBlocks_list.GetHeadPosition();
+		pos = initialpos;
 		/*
 		for (uint32 i = 0; i != 3; i++){
 		*/
@@ -1473,15 +1475,17 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
+		pos = m_PendingBlocks_list.GetHeadPosition();
 		while (npacket<nbpackettosend) {
 		const int iPacketSize = 16+(3*4)+(3*4); // 40
 		packet = new Packet(OP_REQUESTPARTS,iPacketSize);
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
 		data.WriteHash16(reqfile->GetFileHash());
-		pos = m_PendingBlocks_list.GetHeadPosition();
 		/*
+		pos = m_PendingBlocks_list.GetHeadPosition();
 		for (uint32 i = 0; i != 3; i++){
 		*/
+		POSITION initalpos = pos;
 		uint32 i = 0;
 		while (i != 3){
 			if (pos){
@@ -1502,7 +1506,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 				++i;
 			}
 		}
-		pos = m_PendingBlocks_list.GetHeadPosition();
+		pos = initalpos;
 		/*
 		for (uint32 i = 0; i != 3; i++){
 		*/
@@ -1804,7 +1808,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 		}
 	}
 	if (thePrefs.GetVerbose())
-		DebugLogWarning(_T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+		DebugLogWarning(LOG_MORPH, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 
 	TRACE("%s - Dropping packet\n", __FUNCTION__);
 }
@@ -2077,15 +2081,20 @@ uint16 CUpDownClient::GetAvailablePartCount(const CPartFile* file) const
 //MORPH END   - Added by SiRoB, Keep A4AF infos
 void CUpDownClient::SetRemoteQueueRank(UINT nr, bool bUpdateDisplay)
 {
-
-	//Morph - added by AndCycle, DiffQR
-	if(nr == 0){
-		m_iDifferenceQueueRank = 0;
+	//MORPH - RemoteQueueRank Estimated Time
+	if (nr) {
+		DWORD	curTick = GetTickCount();
+		if (m_nRemoteQueueRankPrev) {
+			if (m_nRemoteQueueRankPrev>nr) {
+				m_dwRemoteQueueRankEstimatedTime = curTick+(curTick-m_dwRemoteQueueRankLastUpdate)*nr/((int)m_nRemoteQueueRankPrev-nr);
+			} else if (m_nRemoteQueueRankPrev < nr) {
+				m_dwRemoteQueueRankEstimatedTime = (DWORD)-1;
+			}
 	}
-	else if(m_nRemoteQueueRank){
-		m_iDifferenceQueueRank = (nr-m_nRemoteQueueRank);
+		m_nRemoteQueueRankPrev = nr;
+		m_dwRemoteQueueRankLastUpdate = curTick;
 	}
-	//Morph - added by AndCycle, DiffQR
+	//MORPH - RemoteQueueRank Estimated Time
 
 	m_nRemoteQueueRank = nr;
 	UpdateDisplayedInfo(bUpdateDisplay);

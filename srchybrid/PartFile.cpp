@@ -1537,6 +1537,10 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 
 bool CPartFile::SavePartFile()
 {
+	//MORPH - Flush Thread, no need to savepartfile now will be done when flushDone complet
+	if (m_FlushSetting)
+		return false;
+	//MORPH - Flush Thread, no need to savepartfile now will be done when flushDone complet
 	switch (status){
 		case PS_WAITINGFORHASH:
 		case PS_HASHING:
@@ -1724,10 +1728,12 @@ bool CPartFile::SavePartFile()
 		}
 
 		// SLUGFILLER: Spreadbars
+		if(GetSpreadbarSetStatus() > 0 || (GetSpreadbarSetStatus() == -1 ? thePrefs.GetSpreadbarSetStatus() > 0 : false)){//MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 		char sbnamebuffer[10];
 		char* sbnumber = &sbnamebuffer[1];
 		UINT i_sbpos = 0;
 		if (IsLargeFile()) {
+				uint64 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
 			for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; ){
 				uint64 count = statistic.spreadlist.GetValueAt(pos);
 				if (!count) {
@@ -1739,7 +1745,7 @@ bool CPartFile::SavePartFile()
 				ASSERT(pos != NULL);	// Last value should always be 0
 				uint64 end = statistic.spreadlist.GetKeyAt(pos);
 				//MORPH - Smooth sample
-				if (end - start < PARTSIZE)
+					if (end - start < EMBLOCKSIZE && count > hideOS)
 					continue;
 				//MORPH - Smooth sample
 				itoa(i_sbpos,sbnumber,10);
@@ -1755,6 +1761,7 @@ bool CPartFile::SavePartFile()
 				i_sbpos++;
 			}
 		} else {
+				uint32 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
 			for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; ){
 				uint32 count = (uint32)statistic.spreadlist.GetValueAt(pos);
 				if (!count) {
@@ -1766,7 +1773,7 @@ bool CPartFile::SavePartFile()
 				ASSERT(pos != NULL);	// Last value should always be 0
 				uint32 end = (uint32)statistic.spreadlist.GetKeyAt(pos);
 				//MORPH - Smooth sample
-				if (end - start < PARTSIZE)
+					if (end - start < EMBLOCKSIZE && count > hideOS)
 					continue;
 				//MORPH - Smooth sample
 				itoa(i_sbpos,sbnumber,10);
@@ -1782,6 +1789,7 @@ bool CPartFile::SavePartFile()
 				i_sbpos++;
 			}
 		}
+		}//MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 		// SLUGFILLER: Spreadbars
 
 		// currupt part infos
@@ -5638,11 +5646,6 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 				AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 		}
 
-		// SLUGFILLER: SafeHash
-		CSingleLock sLock(&ICH_mut,true);	// ICH locks the file - otherwise it may be written to while being checked
-		ParseICHResult();	// Check result from ICH
-		// SLUGFILLER: SafeHash
-
 		// Ensure file is big enough to write data to (the last item will be the furthest from the start)
 		PartFileBufferedData *item = m_BufferedData_list.GetTail();
 		if (m_hpartfile.GetLength() <= item->end)
@@ -5825,7 +5828,7 @@ void CPartFile::FlushDone()
 	// SLUGFILLER: SafeHash
 
 	// Update met file
-	SavePartFile();
+	//SavePartFile(); //MORPH - Flush Thread Moved Down
 
 	if (theApp.emuledlg->IsRunning()) // may be called during shutdown!
 	{
@@ -5871,6 +5874,8 @@ void CPartFile::FlushDone()
 	delete[] m_FlushSetting->changedPart;
 	delete	m_FlushSetting;
 	m_FlushSetting = NULL;
+	// Update met file
+	SavePartFile();
 }
 
 IMPLEMENT_DYNCREATE(CPartFileFlushThread, CWinThread)
@@ -5882,7 +5887,7 @@ void CPartFileFlushThread::SetPartFile(CPartFile* partfile)
 int CPartFileFlushThread::Run()
 {
 	DbgSetThreadName("Partfile-Flushing");
-	InitThreadLocale();
+	//InitThreadLocale(); //Performance killer
 
 	// SLUGFILLER: SafeHash
 	CReadWriteLock lock(&theApp.m_threadlock);
@@ -7576,7 +7581,7 @@ void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICH
 
 int CPartHashThread::Run()
 {
-	InitThreadLocale();
+	//InitThreadLocale(); //Performance killer
 
 	// SLUGFILLER: SafeHash
 	CReadWriteLock lock(&theApp.m_threadlock);
@@ -7589,6 +7594,7 @@ int CPartHashThread::Run()
 	if (m_ICHused)
 		sLock.Lock();
 	if (file.Open(directory+_T("\\")+filename,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone)){
+		BYTE* partData=new BYTE[PARTSIZE]; //MORPH - Optimization
 		for (UINT i = 0; i < (UINT)m_PartsToHash.GetSize(); i++){
 			uint16 partnumber = m_PartsToHash[i];
 			uchar hashresult[16];
@@ -7602,7 +7608,13 @@ int CPartHashThread::Run()
 			//MORPH - Changed by SiRoB, avoid crash if the file has been canceled
 			try
 			{
+				//MORPH - Optimization
+				/*
 				m_pOwner->CreateHash(&file, length, hashresult, NULL);
+				*/
+				CSingleLock sLock1(&(theApp.hashing_mut), TRUE);	//only one chunk-hash at a time
+				file.Read(partData, length);
+				m_pOwner->CreateHash(partData, length, hashresult, NULL);
 				if (!theApp.emuledlg->IsRunning())	// in case of shutdown while still hashing
 					break;
 			}
@@ -7629,6 +7641,7 @@ int CPartHashThread::Run()
 					PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDOK,partnumber,(LPARAM)m_pOwner);
 			}
 		}
+		delete[] partData;
 		file.Close();
 	}
 	for (UINT i = 0; i < (UINT)m_DesiredHashes.GetSize(); i++)

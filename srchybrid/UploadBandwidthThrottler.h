@@ -27,6 +27,7 @@ struct Socket_stat{
 	uint32	classID;
 	sint64	realBytesToSpend;
 	DWORD	lastTickReachedBandwidthLimit;
+	DWORD	dwLastBusySince;
 	bool	scheduled;
 };
 //MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class
@@ -63,6 +64,7 @@ public:
     void EndThread();
 
     void Pause(bool paused);
+
     static uint32 UploadBandwidthThrottler::GetSlotLimit(uint32 currentUpSpeed);
 
     void SignalNoLongerBusy();

@@ -563,9 +563,9 @@ public:
 	void			SetRemoteQueueRank(UINT nr, bool bUpdateDisplay = false);
 	bool			IsRemoteQueueFull() const						{ return m_bRemoteQueueFull; }
 	void			SetRemoteQueueFull(bool flag)					{ m_bRemoteQueueFull = flag; }
-	//Morph START - added by AndCycle, DiffQR
-	int				GetDiffQR()	const				{return m_iDifferenceQueueRank;}
-	//Morph END   - added by AndCycle, DiffQR
+	//MORPH - Remote Queue Rank Estimated time
+	int				GetRemoteQueueRankEstimatedTime()	const				{return m_dwRemoteQueueRankEstimatedTime;}
+	//MORPH - Remote Queue Rank Estimated time
 	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
 	/*
 	void			DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) const;
@@ -1078,9 +1078,11 @@ protected:
 	UINT		m_nTotalUDPPackets;
 	UINT		m_nFailedUDPPackets;
 	UINT		m_nRemoteQueueRank;
-	//MORPH START - Added by AndCycle, DiffQR
-	int			m_iDifferenceQueueRank;
-	//MORPH END  - Added by AndCycle, DiffQR
+	//MORPH - RemoteQueueRank Estimated Time
+	DWORD		m_dwRemoteQueueRankEstimatedTime;
+	DWORD		m_dwRemoteQueueRankLastUpdate;
+	UINT		m_nRemoteQueueRankPrev;
+	//MORPH - RemoteQueueRank Estimated Time
 	//--group to aligned int32
 	bool		m_bRemoteQueueFull;
 	bool		m_bCompleteSource;

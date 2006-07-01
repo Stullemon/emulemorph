@@ -1321,6 +1321,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 		char* number = &namebuffer[1];
 		UINT i_pos = 0;
 		if (IsLargeFile()) {
+			uint64 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
 			for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; ){
 				uint64 count = statistic.spreadlist.GetValueAt(pos);
 				if (!count) {
@@ -1332,7 +1333,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				ASSERT(pos != NULL);	// Last value should always be 0
 				uint64 end = statistic.spreadlist.GetKeyAt(pos);
 				//MORPH - Smooth sample
-				if (end - start < PARTSIZE)
+				if (end - start < EMBLOCKSIZE && count > hideOS)
 					continue;
 				//MORPH - Smooth sample
 				itoa(i_pos,number,10);
@@ -1346,6 +1347,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				i_pos++;
 			}
 		} else {
+			uint32 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
 			for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; ){
 				uint32 count = (uint32)statistic.spreadlist.GetValueAt(pos);
 				if (!count) {
@@ -1356,8 +1358,10 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				statistic.spreadlist.GetNext(pos);
 				ASSERT(pos != NULL);	// Last value should always be 0
 				uint32 end = (uint32)statistic.spreadlist.GetKeyAt(pos);
-				if (end - start < PARTSIZE)
+				//MORPH - Smooth sample
+				if (end - start < EMBLOCKSIZE && count > hideOS)
 					continue;
+				//MORPH - Smooth sample
 				itoa(i_pos,number,10);
 				namebuffer[0] = FT_SPREADSTART;
 				CTag(namebuffer,start).WriteTagToFile(file);

@@ -671,7 +671,7 @@ public:
 //MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
-    if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
+    if(m_BlockRequests_queue.IsEmpty() || // There is no new blocks requested
        m_abyfiledata == (byte*)-2 || //we are still waiting for a block read from disk
 	   m_abyfiledata != (byte*)-1 && //Make sur we don't have something to do
 	   m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > max(GetDatarate()>>2, 50*1024)) { // the buffered data is large enough already according to client datarate
@@ -795,7 +795,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			int pos = ext.ReverseFind(_T('.'));
 			if (pos>-1)
 				ext = ext.Mid(pos);
-			bool compFlag = (ext!=_T(".zip") && ext!=_T(".cbz") && ext!=_T(".rar") && ext!=_T(".ace") && ext!=_T(".ogm") && ext!=_T(".tar"));//no need to try compressing tar compressed files... [Yun.SF3]
+				bool compFlag = GetDatarate()<EMBLOCKSIZE && (ext!=_T(".zip") && ext!=_T(".cbz") && ext!=_T(".rar") && ext!=_T(".ace") && ext!=_T(".ogm") && ext!=_T(".tar"));//no need to try compressing tar compressed files... [Yun.SF3]
 			if (ext==_T(".avi") && thePrefs.GetDontCompressAvi())
 				compFlag=false;
 
@@ -913,10 +913,20 @@ bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
 	uint32 nPacketSize;
 	CMemFile memfile((BYTE*)data,togo);
+#if !defined DONT_USE_SOCKET_BUFFERING
+	uint32 splittingsize = 10240;
+	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache()) 
+		splittingsize *= (GetDatarate()/EMBLOCKSIZE)+1;
+	if (togo > splittingsize) 
+		nPacketSize = togo/(uint32)(togo/splittingsize);
+	else
+		nPacketSize = togo;
+#else
 	if (togo > 10240) 
 		nPacketSize = togo/(uint32)(togo/10240);
 	else
 		nPacketSize = togo;
+#endif
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 	uint32 npacket = 0;
 	uint32 Size = togo;
@@ -1784,7 +1794,7 @@ void CReadBlockFromFileThread::SetReadBlockFromFile(LPCTSTR filepath, uint64 sta
 int CReadBlockFromFileThread::Run() {
 	DbgSetThreadName("CReadBlockFromFileThread");
 	
-	InitThreadLocale();
+	//InitThreadLocale(); //Performance killer
 	// SLUGFILLER: SafeHash
 	CReadWriteLock lock(&theApp.m_threadlock);
 	if (!lock.ReadLock(0))

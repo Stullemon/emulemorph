@@ -106,12 +106,12 @@ bool CAddFileThread::SR13_ImportParts(){
 	
 	Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTSTART), m_PartsToImport.GetSize(), strFilePath);
 
+	BYTE* partData=new BYTE[PARTSIZE];
 	for (UINT i = 0; i < (UINT)m_PartsToImport.GetSize(); i++){
 		uint16 partnumber = m_PartsToImport[i];
 		if (PARTSIZE*partnumber > fileSize) {
 			break;
 		}
-		BYTE* partData=new BYTE[PARTSIZE];
 		try {
 			try {
 				CSingleLock sLock1(&(theApp.hashing_mut), TRUE);	//SafeHash - wait a current hashing process end before read the chunk
@@ -150,6 +150,7 @@ bool CAddFileThread::SR13_ImportParts(){
 			continue;
 		}
 	}
+	delete[] partData;
 	try {
 		bool importaborted = m_partfile->GetFileOp() == PFOP_NONE || !theApp.emuledlg->IsRunning();
 		if (m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS)
