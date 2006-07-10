@@ -468,6 +468,8 @@ void CSearchListCtrl::UpdateSearch(CSearchFile* toupdate)
 {
 	if (!toupdate || !theApp.emuledlg->IsRunning())
 		return;
+	//MORPH START - UpdateItemThread
+	/*
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)toupdate;
@@ -476,6 +478,9 @@ void CSearchListCtrl::UpdateSearch(CSearchFile* toupdate)
 	{
 		Update(index);
 	}
+	*/
+	m_updatethread->AddItemToUpdate((LPARAM)toupdate);
+	//MORPH END - UpdateItemThread
 }
 
 CString CSearchListCtrl::GetCompleteSourcesDisplayString(const CSearchFile* pFile, UINT uSources, bool* pbComplete) const

@@ -6,6 +6,34 @@ class CIni;
 
 ///////////////////////////////////////////////////////////////////////////////
 // CMuleListCtrl
+//MORPH START - UpdateItemThread
+struct update_info_struct{
+	DWORD	  dwUpdate;
+	DWORD	  dwWillUpdate;
+};
+class CUpdateItemThread : public CWinThread
+{
+	DECLARE_DYNCREATE(CUpdateItemThread)
+protected:
+	CUpdateItemThread();
+	~CUpdateItemThread();
+public:
+	virtual	BOOL	InitInstance() {return true;}
+	virtual int		Run();
+	void	EndThread();
+	void	SetListCtrl(CListCtrl* listctrl);
+	void	AddItemToUpdate(LPARAM item);
+private:
+	CListCtrl* m_listctrl;
+	CList<LPARAM>	queueditem;
+	CMap<LPARAM, LPARAM, update_info_struct*, update_info_struct*> ListItems;
+	CCriticalSection	listitemlocker;
+	CCriticalSection	queueditemlocker;
+	CEvent	newitemEvent;
+	CEvent*	threadEndedEvent;
+	bool	doRun;
+};
+//MORPH END   - UpdateItemThread
 
 class CMuleListCtrl : public CListCtrl
 {
@@ -163,7 +191,7 @@ protected:
 	void OnFindStart();
 	void OnFindNext();
 	void OnFindPrev();
-
+	CUpdateItemThread* m_updatethread; //MORPH - UpdateItemThread
 private:
 	static int	IndexToOrder(CHeaderCtrl* pHeader, int iIndex);
 

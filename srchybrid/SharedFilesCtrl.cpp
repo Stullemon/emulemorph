@@ -489,7 +489,8 @@ void CSharedFilesCtrl::RemoveFile(const CKnownFile* file)
 		ShowFilesCount();
 	}
 }
-
+//MORPH START- UpdateItemThread
+/*
 void CSharedFilesCtrl::UpdateFile(const CKnownFile* file)
 {
 	if(!file || !theApp.emuledlg->IsRunning())
@@ -502,7 +503,15 @@ void CSharedFilesCtrl::UpdateFile(const CKnownFile* file)
 			theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
 	}
 }
-
+*/
+void CSharedFilesCtrl::UpdateFile(const CKnownFile* file)
+{
+	if(!file || !theApp.emuledlg->IsRunning())
+		return;
+	m_updatethread->AddItemToUpdate((LPARAM)file);
+	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+}
+//MORPH END - UpdateItemThread
 int CSharedFilesCtrl::FindFile(const CKnownFile* pFile)
 {
 	LVFINDINFO find;

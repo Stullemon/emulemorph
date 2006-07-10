@@ -250,6 +250,28 @@ struct PartFileStamp {
 	((UINT)(mjr)*100U*10U*100U + (UINT)(min)*100U*10U + (UINT)(upd)*100U)
 
 //#pragma pack(2)
+//MORPH START - Added by SiRoB, ReadBlockFromFileThread
+class CReadBlockFromFileThread : public CWinThread
+{
+	DECLARE_DYNCREATE(CReadBlockFromFileThread)
+protected:
+	CReadBlockFromFileThread() {}
+public:
+	virtual	BOOL	InitInstance() {return true;}
+	virtual int		Run();
+	void			SetReadBlockFromFile(LPCTSTR filepath, uint64 startOffset, uint32 togo, CUpDownClient* client, CSyncObject* lockhandle);
+	void			StopReadBlock();
+private:
+	uint64			StartOffset;
+	uint32			togo;
+	CUpDownClient*	m_client;
+	CString			fullname;
+	CSyncObject*	m_lockhandle;
+	CEvent			pauseEvent;
+	bool			doRun;
+};
+//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
+
 class CUpDownClient : public CObject
 {
 	DECLARE_DYNAMIC(CUpDownClient)
@@ -1061,6 +1083,7 @@ protected:
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
 	byte* m_abyfiledata;
 	uint32 m_utogo;
+	CReadBlockFromFileThread* m_readblockthread;
 	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 	//////////////////////////////////////////////////////////
 	// Download
@@ -1310,22 +1333,3 @@ static LPCTSTR apszSnafuTag[] =
 #define ET_MOD_UNKNOWNxC9		0xC9 // Bionic 0.20 Beta]
 #define ET_MOD_UNKNOWNxDA		0xDA // Rumata (rus)(Plus v1f) - leecher mod?
 //>>> eWombat [SNAFU_V3]
-
-//MORPH START - Added by SiRoB, ReadBlockFromFileThread
-class CReadBlockFromFileThread : public CWinThread
-{
-	DECLARE_DYNCREATE(CReadBlockFromFileThread)
-protected:
-	CReadBlockFromFileThread()	{}
-public:
-	virtual	BOOL	InitInstance() {return true;}
-	virtual int		Run();
-	void			SetReadBlockFromFile(LPCTSTR filepath, uint64 startOffset, uint32 togo, CUpDownClient* client, CSyncObject* lockhandle);
-private:
-	uint64			StartOffset;
-	uint32			togo;
-	CUpDownClient*	m_client;
-	CString			fullname;
-	CSyncObject*	m_lockhandle;
-};
-//MORPH END   - Added by SiRoB, ReadBlockFromFileThread

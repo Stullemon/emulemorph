@@ -120,7 +120,7 @@ enum EIdentState{
 };
 //EastShare Start - added by AndCycle, creditsystem integration
 enum CreditSystemSelection {
-	//becareful the sort order for the damn radio button in PPgEastShare.cpp
+	//becareful the sort order for the damn radio button in PPgEastShare.cpp and the check on creditSystemMode in preferences.cpp
 	CS_OFFICIAL = 0,	
 	CS_LOVELACE,
 //	CS_RATIO,

@@ -273,13 +273,17 @@ void CClientListCtrl::RefreshClient(const CUpDownClient* client)
 	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || theApp.emuledlg->transferwnd->clientlistctrl.IsWindowVisible() == false )
 		return;
 	//MORPH END   - SiRoB, Don't Refresh item if not needed
-	
+	//MORPH START- UpdateItemThread
+	/*
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
 	int result = FindItem(&find);
-	if (result != -1)
+	if(result != -1)
 		Update(result);
+	*/
+	m_updatethread->AddItemToUpdate((LPARAM)client);
+	//MORPH END - UpdateItemThread
 }
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)

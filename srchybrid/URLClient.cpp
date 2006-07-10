@@ -181,7 +181,12 @@ bool CUrlClient::SendHttpBlockRequests()
 		else
 		{
 			bMergeBlocks = false;
+			//MORPH START -Optimization
+			/*
 			reqfile->RemoveBlockFromList(pending->block->StartOffset, pending->block->EndOffset);
+			*/
+			reqfile->RemoveBlockFromList(pending->block);
+			//MORPH EMD START -Optimization
 			delete pending->block;
 			delete pending;
 			m_PendingBlocks_list.RemoveAt(posLast);
@@ -446,7 +451,12 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 
 				if (nEndPos >= cur_block->block->EndOffset)
 				{
+					//MORPH START- Optimization
+					/*
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+					*/
+					reqfile->RemoveBlockFromList(cur_block->block);
+					//MORPH END - Optimization
                     // MORPH START - Added by Commander, WebCache 1.2e
 					if (m_pWCDownSocket)
 						m_pWCDownSocket->blocksloaded++; //count downloaded blocks for this socket

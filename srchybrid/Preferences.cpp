@@ -3149,7 +3149,9 @@ void CPreferences::LoadPreferences()
 	enableAntiLeecher = ini.GetBool(_T("EnableAntiLeecher"), true); //MORPH - Added by IceCream, enable AntiLeecher
 	enableAntiCreditHack = ini.GetBool(_T("EnableAntiCreditHack"), true); //MORPH - Added by IceCream, enable AntiCreditHack
 	enableHighProcess = ini.GetBool(_T("EnableHighProcess"), false); //MORPH - Added by IceCream, high process priority
-	creditSystemMode = ini.GetInt(_T("CreditSystemMode"), 0/*Officiel*/); // EastShare - Added by linekin, ES CreditSystem
+	creditSystemMode = ini.GetInt(_T("CreditSystemMode"), 0/*Official*/); // EastShare - Added by linekin, ES CreditSystem
+	if (    (creditSystemMode <0 )  || (creditSystemMode >3)) // MORPH leuk_he only valid credit systems in morph
+       creditSystemMode =0;  // MORPH leuk_he only valid credit systems in morph 
 	m_bEnableEqualChanceForEachFile = ini.GetBool(_T("EqualChanceForEachFile"), false);//Morph - added by AndCycle, Equal Chance For Each File
         
 	//MORPH START added by Yun.SF3: Ipfilter.dat update

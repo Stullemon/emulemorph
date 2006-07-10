@@ -276,6 +276,8 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	if (!server || !theApp.emuledlg->IsRunning())
 		return;
 
+	//MORPH START- UpdateItemThread
+	/*
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)server;
@@ -285,6 +287,9 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	//MORPH START - Added by SiRoB,  CountryFlag Addon
 	Update(itemnr);
 	//MORPH START - Added by SiRoB,  CountryFlag Addon
+	*/
+	m_updatethread->AddItemToUpdate((LPARAM)server);
+	//MORPH END - UpdateItemThread
 
 	//CString temp;
 	////Morph Start - added by AndCycle, aux Ports, by lugdunummaster

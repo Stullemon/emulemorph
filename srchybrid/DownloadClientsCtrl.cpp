@@ -263,13 +263,17 @@ void CDownloadClientsCtrl::RefreshClient(CUpDownClient* client)
 	if( !theApp.emuledlg->IsRunning() )
 		return;
 	
+	//MORPH START - UpdateItemThread
+	/*
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
 	int result = FindItem(&find);
 	if(result != -1)
 		Update(result);
-	return;
+	*/
+	m_updatethread->AddItemToUpdate((LPARAM)client);
+	//MORPH END - UpdateItemThread
 }
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)

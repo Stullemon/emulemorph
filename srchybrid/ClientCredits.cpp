@@ -173,7 +173,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 
 	//Morph Start - Modified by AndCycle, reduce a little CPU usage for ratio count
 
-	float result = 0.0F;//everybody share one result.
+	double result = 0.0;//everybody share one result. leuk_he:doublw to prevent underflow in CS_LOVELACE.
     //EastShare START - Added by linekin, CreditSystem 
 	switch (thePrefs.GetCreditSystem())	{
 
@@ -186,12 +186,12 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 			cl_down = GetDownloadedTotal()/(double)1048576;
 			result=(float)(3.0 * cl_down * cl_down - cl_up * cl_up);
 			if (fabs(result)>20000.0f) 
-				result*=20000.0f/fabs(result);
-			result=100.0f*powf((float)(1-1/(1.0f+expf(result*0.001f))),6.6667f);
-			if (result<0.1f) 
-				result=0.1f;
-			if (result>10.0f && IdentState == IS_NOTAVAILABLE)
-				result=10.0f;
+				result*=20000.0/fabs(result);
+			result=100.0*pow((1-1/(1.0f+exp(result*0.001))),6.6667);
+			if (result<0.1) 
+				result=0.1;
+			if (result>10.0 && IdentState == IS_NOTAVAILABLE)
+				result=10.0;
 			// end new creditsystem by [lovelace]
 		}break;
 
@@ -275,7 +275,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 		}break;
 	}
 
-	return m_fLastScoreRatio = result;
+	return m_fLastScoreRatio = (float)result;
 	//EastShare END - Added by linekin, CreditSystem 
 
 	//EastShare END - Added by linekin, CreditSystem 

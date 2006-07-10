@@ -524,6 +524,8 @@ void CDownloadListCtrl::UpdateItem(void* toupdate)
 	for(ListItems::const_iterator it = rangeIt.first; it != rangeIt.second; it++){
 		CtrlItem_Struct* updateItem  = it->second;
 
+		//MORPH START - UpdateItemThread
+		/*
 		// Find entry in CListCtrl and update object
  		LVFINDINFO find;
 		find.flags = LVFI_PARAM;
@@ -534,6 +536,11 @@ void CDownloadListCtrl::UpdateItem(void* toupdate)
 			updateItem->dwUpdatedchunk = 0; //MORPH - Downloading Chunk Detail Display
 			Update(result);
 		}
+		*/
+		updateItem->dwUpdated = 0;
+		updateItem->dwUpdatedchunk = 0; //MORPH - Downloading Chunk Detail Display
+		m_updatethread->AddItemToUpdate((LPARAM)updateItem);
+		//MORPH END - UpdateItemThread
 	}
 }
 

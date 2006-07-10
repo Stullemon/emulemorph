@@ -205,7 +205,7 @@ public:
 	uint64	GetTotalGapSizeInRange(uint64 uRangeStart, uint64 uRangeEnd) const;
 	uint64	GetTotalGapSizeInPart(UINT uPart) const;
 	void	UpdateCompletedInfos();
-	void	UpdateCompletedInfos(uint64 uTotalGaps);
+	//void	UpdateCompletedInfos(uint64 uTotalGaps); //MORPH - Optimization, completedsize
 	virtual void	UpdatePartsInfo();
 
 	bool	GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count) /*const*/;
@@ -267,6 +267,7 @@ public:
 	// Barry - Added to prevent list containing deleted blocks on shutdown
 	void	RemoveAllRequestedBlocks(void);
 	bool	RemoveBlockFromList(uint64 start, uint64 end);
+	bool	RemoveBlockFromList(const Requested_Block_Struct* block); //MORPH - Optimization
 	bool	IsInRequestedBlockList(const Requested_Block_Struct* block) const;
 	void	AddRequestedBlock(Requested_Block_Struct* block);
 	void	RemoveAllSources(bool bTryToSwap);
@@ -423,6 +424,7 @@ private:
 	//MORPH START - Added by SiRoB, Cached stat
 	UINT	m_anStatesTemp[STATES_COUNT];
 	//MORPH END   - Added by SiRoB, Cached stat
+	uint64	m_uTotalGaps; //MORPH - Optimization, completedsize
 	EMFileSize  completedsize;
 	uint64	m_uCorruptionLoss;
 	uint64	m_uCompressionGain;

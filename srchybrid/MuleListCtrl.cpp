@@ -101,10 +101,16 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
     m_iFindColumn = 0;
 	m_hAccel = NULL;
 	m_uIDAccel = IDR_LISTVIEW;
+	//MORPH START - UpdateItemThread
+	m_updatethread = (CUpdateItemThread*) AfxBeginThread(RUNTIME_CLASS(CUpdateItemThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+	m_updatethread->ResumeThread();
+	m_updatethread->SetListCtrl(this);
+	//MORPH END   - UpdateItemThread
 }
 
 CMuleListCtrl::~CMuleListCtrl() {
 	delete[] m_aColumns;
+	m_updatethread->EndThread(); //MORPH - UpdateItemThread
 }
 
 int CMuleListCtrl::SortProc(LPARAM /*lParam1*/, LPARAM /*lParam2*/, LPARAM /*lParamSort*/)
@@ -1507,3 +1513,98 @@ int	CMuleListCtrl::GetNextSortOrder(int dwCurrentSortOrder) const{
 //	ASSERT( false );
 	return -1;
 }
+
+//MORPH START - UpdateItemThread
+IMPLEMENT_DYNCREATE(CUpdateItemThread, CWinThread)
+void CUpdateItemThread::SetListCtrl(CListCtrl* listctrl) {
+	m_listctrl = listctrl;
+}
+void CUpdateItemThread::AddItemToUpdate(LPARAM item) {
+	queueditemlocker.Lock();
+	queueditem.AddTail(item);
+	queueditemlocker.Unlock();
+	newitemEvent.SetEvent();
+}
+
+CUpdateItemThread::CUpdateItemThread() {
+	threadEndedEvent = new CEvent(0, 1);
+	doRun = true;
+}
+void CUpdateItemThread::EndThread() {
+	doRun = false;
+	newitemEvent.SetEvent();
+}
+
+CUpdateItemThread::~CUpdateItemThread() {
+	// wait for the thread to signal that it has stopped looping.
+    threadEndedEvent->Lock();
+	delete threadEndedEvent;
+}
+
+int CUpdateItemThread::Run() {
+	DbgSetThreadName("CUpdateItemThread");
+	
+	InitThreadLocale();
+	
+	newitemEvent.Lock();
+	while(doRun) {
+		queueditemlocker.Lock();
+		DWORD dwUpdate = GetTickCount();
+		while (queueditem.GetCount()) {
+			LPARAM item = queueditem.RemoveHead();
+			update_info_struct* update_info;
+			if (ListItems.Lookup(item, update_info)) {
+				update_info->dwWillUpdate = dwUpdate;
+			} else {
+				update_info = new update_info_struct;
+				update_info->dwUpdate = 0;
+				update_info->dwWillUpdate = dwUpdate;
+				ListItems.SetAt(item, update_info);
+			}
+		}
+		queueditemlocker.Unlock();
+
+		DWORD wecanwait = (DWORD)-1;
+		POSITION pos = ListItems.GetStartPosition();
+		LPARAM item;
+		update_info_struct* update_info;
+		while (pos != NULL)
+		{
+			ListItems.GetNextAssoc( pos, item, update_info );
+			if (update_info->dwUpdate < update_info->dwWillUpdate) {
+				LVFINDINFO find;
+				find.flags = LVFI_PARAM;
+				find.lParam = (LPARAM)item;
+				int found = m_listctrl->FindItem(&find);
+				if (found != -1)
+					m_listctrl->Update(found);
+				update_info->dwUpdate = GetTickCount()+1000;
+				wecanwait = min(wecanwait,1000);
+			} else if (GetTickCount()-update_info->dwWillUpdate <= 1000) {
+				wecanwait = min(wecanwait,GetTickCount()-update_info->dwUpdate);
+			} else {
+				ListItems.RemoveKey(item);
+				delete update_info;
+			}
+		}
+		if(doRun) {
+			if (ListItems.GetCount() == 0)
+				newitemEvent.Lock();
+			else
+				newitemEvent.Lock(wecanwait);
+		}
+	}
+
+	POSITION pos = ListItems.GetStartPosition();
+	LPARAM item;
+	update_info_struct* update_info;
+	while (pos != NULL)
+	{
+		ListItems.GetNextAssoc( pos, item, update_info );
+		delete update_info;
+	}
+	ListItems.RemoveAll();
+	threadEndedEvent->SetEvent();
+	return 0;
+}
+//MORPH END    - UpdateItemThread
