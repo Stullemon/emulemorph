@@ -73,7 +73,8 @@ void UploadBandwidthThrottler::GetStats(uint64* SentBytes, uint64* SentBytesOver
 		m_SentBytesSinceLastCallClass[i] = 0;
 		*(SentBytesOverhead++) = m_SentBytesSinceLastCallOverheadClass[i];
 		m_SentBytesSinceLastCallOverheadClass[i] = 0;
-		*(HighestNumberOfFullyActivatedSlotsSinceLastCallClass++) = m_highestNumberOfFullyActivatedSlotsClass[i];
+		//*(HighestNumberOfFullyActivatedSlotsSinceLastCallClass++) = m_highestNumberOfFullyActivatedSlotsClass[i];
+		*(HighestNumberOfFullyActivatedSlotsSinceLastCallClass++) = max(m_highestNumberOfFullyActivatedSlotsClass[i],1);
 		m_highestNumberOfFullyActivatedSlotsClass[i] = (UINT)0;
 	}
 
@@ -501,7 +502,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
         uint32 nCanSend = 0;
 
         sendLocker.Lock();
+        /*
         for (int i = 0; i < m_StandardOrder_list.GetSize() && (i < 3 || (UINT)i < GetSlotLimit(theApp.uploadqueue->GetDatarate())); i++){
+        */
+		for (int i = m_StandardOrder_list.GetSize()/2; i < m_StandardOrder_list.GetSize() && (i < 3 || (UINT)i < GetSlotLimit(theApp.uploadqueue->GetDatarate())); i++){
             if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues()) {
                 nCanSend++;
 				
@@ -564,9 +568,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
                                 numberOfConsecutiveDownChanges = 0;
                             }
                             numberOfConsecutiveDownChanges++;
-                            uint32 changeDelta = CalculateChangeDelta(numberOfConsecutiveDownChanges)/3;
+                            uint32 changeDelta = CalculateChangeDelta(numberOfConsecutiveDownChanges);
 
                             // Don't lower speed below 1 KBytes/s
+							// leuk_he don't move below minupload
                             if(nEstiminatedLimit < changeDelta + 1024*thePrefs.minupload) {
                                 if(nEstiminatedLimit > 1024*thePrefs.minupload) {
                                     changeDelta = nEstiminatedLimit - 1024*thePrefs.minupload;
@@ -574,7 +579,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
                                     changeDelta = 0;
                                 }
                             }
-                            ASSERT(nEstiminatedLimit >= changeDelta + 1024);
+                            ASSERT(nEstiminatedLimit >= changeDelta + 1024*thePrefs.minupload);
     						nEstiminatedLimit -= changeDelta;
 
                             if(thePrefs.GetVerbose() && estimateChangedLog) theApp.QueueDebugLogLine(false,_T("Throttler: REDUCED limit #%i with %i bytes to: %0.5f changesCount: %i loopsCount: %i"), numberOfConsecutiveDownChanges, changeDelta, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
@@ -627,7 +632,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
         if(cBusy >= nCanSend && realBytesToSpendClass[LAST_CLASS] > 999 /*&& m_StandardOrder_list.GetSize() > 0*/) {
             //allowedDataRate = 0;
-            //realBytesToSpendClass[LAST_CLASS] = min(realBytesToSpendClass[LAST_CLASS], 1024*1000);
+            realBytesToSpendClass[LAST_CLASS] = min(realBytesToSpendClass[LAST_CLASS], 1024*1000);
             //m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS] = max(m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS], (UINT)m_StandardOrder_list.GetSize()+1);
             if(nSlotsBusyLevel < 125 && bUploadUnlimited) {
                 nSlotsBusyLevel = 125;
@@ -676,7 +681,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			if(allowedDataRate > 0 && allowedDataRate != _UI32_MAX) {
 				if (timeSinceLastLoop > 0) {
 					if (realBytesToSpendClass[classID] > 999) {
-						m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
+						// lh m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
 						realBytesToSpendClass[classID] = 999;
 					}
 					sint64 limit = -((sint64)(sleepTime + 2000)*allowedDataRate);
@@ -692,8 +697,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			} else {
 				if (timeSinceLastLoop > 0) {
 					if (realBytesToSpendClass[classID] > 999)
-						m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-					realBytesToSpendClass[classID] = _I64_MAX;
+					  m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
+					  realBytesToSpendClass[classID] = _I64_MAX;
 				}
 			}
 		}
