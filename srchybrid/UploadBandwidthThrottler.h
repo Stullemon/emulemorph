@@ -26,7 +26,6 @@
 struct Socket_stat{
 	uint32	classID;
 	sint64	realBytesToSpend;
-	DWORD	lastTickReachedBandwidthLimit;
 	DWORD	dwLastBusySince;
 	bool	scheduled;
 };
@@ -65,7 +64,7 @@ public:
 
     void Pause(bool paused);
 
-    static uint32 UploadBandwidthThrottler::GetSlotLimit(uint32 currentUpSpeed);
+	static uint32 UploadBandwidthThrottler::GetSlotLimit(uint32 currentUpSpeed);
 
     void SignalNoLongerBusy();
 private:

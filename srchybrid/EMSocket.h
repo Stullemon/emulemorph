@@ -140,7 +140,7 @@ private:
     bool    HasSent() { return m_hasSent; }
 
 #if !defined DONT_USE_SOCKET_BUFFERING
-    uint32	GetNeededBytes(const bool bcontrolpacketbuffered, const uint32 sendblen, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
+    uint32	GetNeededBytes(const bool bcontrolpacketbuffered, const uint32 sendblen, const uint32 sendblenWithoutControlPacket, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
 #else
 	uint32	GetNeededBytes(const char* sendbuffer, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
 #endif

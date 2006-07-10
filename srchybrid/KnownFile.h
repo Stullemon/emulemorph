@@ -239,7 +239,9 @@ protected:
 	bool	CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	*/
 	virtual void	UpdateFileRatingCommentAvail();
-	UINT	CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
+	//MORPH START - Revisited , we only get static Client PartCount now
+	void	CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
+	//MORPH END   - Revisited , we only get static Client PartCount now
 	CArray<uchar*, uchar*>	hashlist;
 	CString					m_strDirectory;
 	CString					m_strFilePath;

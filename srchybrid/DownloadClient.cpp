@@ -987,7 +987,7 @@ void CUpDownClient::ProcessFileIncStatus(CSafeMemFile* data,uint32 , CPartFile* 
 	uint16 nED2KPartCount = data->ReadUInt16();
 
 	if (nED2KPartCount){
-		if (pFile->GetPartCount() != nED2KPartCount){
+		if (pFile->GetED2KPartCount() != nED2KPartCount){
 			CString strError;
 			strError.Format(_T("ProcessFileIncStatus - wrong part number recv=%u  expected=%u  %s"), nED2KPartCount, pFile->GetED2KPartCount(), DbgGetFileInfo(pFile->GetFileHash()));
 			throw strError;
@@ -1031,7 +1031,11 @@ void CUpDownClient::ClearDownloadBlockRequests()
 	for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;){
 		Requested_Block_Struct* cur_block = m_DownloadBlocks_list.GetNext(pos);
 		if (reqfile){
+			//MORPH - Optimization
+			/*
 			reqfile->RemoveBlockFromList(cur_block->StartOffset,cur_block->EndOffset);
+			*/
+			reqfile->RemoveBlockFromList(cur_block);
 		}
 		delete cur_block;
 	}
@@ -1040,7 +1044,11 @@ void CUpDownClient::ClearDownloadBlockRequests()
 	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition();pos != 0;){
 		Pending_Block_Struct *pending = m_PendingBlocks_list.GetNext(pos);
 		if (reqfile){
+			//MORPH - Optimization
+			/*
 			reqfile->RemoveBlockFromList(pending->block->StartOffset, pending->block->EndOffset);
+			*/
+			reqfile->RemoveBlockFromList(pending->block);
 		}
 
 		delete pending->block;
@@ -1284,10 +1292,9 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 			/*
 			SendCancelTransfer();
 			*/
-			if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true)) {
-				SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. Client don't have any block for us or file is already fully requested."));
+			SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. Client don't have any block for us or file is already fully requested."));
+			if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
 				SendCancelTransfer();
-			}
 			return;
 		}
 		if (isTestFile)
@@ -1347,10 +1354,9 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		SetDownloadState(DS_NONEEDEDPARTS);
 		SendCancelTransfer();
 		*/
-		if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true)) {
-			SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. Client don't have any block for us or file is already fully requested."));
+		SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. Client don't have any block for us or file is already fully requested."));
+		if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
 			SendCancelTransfer();
-		}
 		return;
 	}
 
@@ -1674,7 +1680,11 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 			if (cur_block->fZStreamError){
 				if (thePrefs.GetVerbose())
 					AddDebugLogLine(false, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because of errornous zstream state for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+				//MORPH - Optimization
+				/*
 				reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+				*/
+				reqfile->RemoveBlockFromList(cur_block->block);
 				return;
 			}
 
@@ -1723,7 +1733,11 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 						if (nStartPos > cur_block->block->EndOffset || nEndPos > cur_block->block->EndOffset){
 							if (thePrefs.GetVerbose())
 								DebugLogError(_T("PrcBlkPkt: ") + GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
+							//MORPH - Optimization
+							/*
 							reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+							*/
+							reqfile->RemoveBlockFromList(cur_block->block);
 							// There is no chance to recover from this error
 						}
 						else{
@@ -1751,8 +1765,11 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 						}
 						DebugLogError(_T("PrcBlkPkt: ") + GetResString(IDS_ERR_CORRUPTCOMPRPKG) + strZipError, reqfile->GetFileName(), result);
 					}
+					//MORPH - Optimization
+					/*
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
-
+					*/
+					reqfile->RemoveBlockFromList(cur_block->block);
 					// If we had an zstream error, there is no chance that we could recover from it nor that we
 					// could use the current zstream (which is in error state) any longer.
 					if (cur_block->zStream){
@@ -1780,7 +1797,11 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 				// If finished reserved block
 				if (nEndPos == cur_block->block->EndOffset)
 				{
+					//MORPH - Optimization
+					/*
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+					*/
+					reqfile->RemoveBlockFromList(cur_block->block);
 					delete cur_block->block;
 					// Not always allocated
 					if (cur_block->zStream){
@@ -1808,7 +1829,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 		}
 	}
 	if (thePrefs.GetVerbose())
-		DebugLogWarning(LOG_MORPH, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+		DebugLogError(LOG_MORPH, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 
 	TRACE("%s - Dropping packet\n", __FUNCTION__);
 }
@@ -2090,7 +2111,7 @@ void CUpDownClient::SetRemoteQueueRank(UINT nr, bool bUpdateDisplay)
 			} else if (m_nRemoteQueueRankPrev < nr) {
 				m_dwRemoteQueueRankEstimatedTime = (DWORD)-1;
 			}
-	}
+		}
 		m_nRemoteQueueRankPrev = nr;
 		m_dwRemoteQueueRankLastUpdate = curTick;
 	}

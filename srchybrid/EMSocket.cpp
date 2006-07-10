@@ -850,17 +850,17 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #if !defined DONT_USE_SOCKET_BUFFERING
 		if (!onlyAllowedToSendControlPacket && bufferlimit != 0 && bufferlimit != _UI32_MAX) {
 			uint32 sendbufferlimit = bufferlimit;
-				if (sendbufferlimit > 1024*1024)
-					sendbufferlimit = 1024*1024;
+			if (sendbufferlimit > 1024*1024)
+				sendbufferlimit = 1024*1024;
 			else if (sendbufferlimit < 1024)
 				sendbufferlimit = 1024;
 			
 			if (m_uCurrentSendBufferSize != sendbufferlimit) {
-					m_uCurrentSendBufferSize = sendbufferlimit;
+				m_uCurrentSendBufferSize = sendbufferlimit;
 				sendbufferlimit = (sendbufferlimit<<1)+1;
-					SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
-					EMTrace("CEMSocket::Send SO_SNDBUF=%u", sendbufferlimit);
-				}
+				SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
+				EMTrace("CEMSocket::Send SO_SNDBUF=%u", sendbufferlimit);
+			}
 			maxNumberOfBytesToSend = min(sendbufferlimit, maxNumberOfBytesToSend);
 		}
 #endif

@@ -114,7 +114,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		if (!onlygreyrect && m_abyUpPartStatus && currequpfile) { 
 			UINT i;
 			//MORPH START - Changed by SiRoB, See chunk that we hide
-			for (i = 0;i < currequpfile->GetED2KPartCount();i++) {
+			for (i = 0;i < currequpfile->GetPartCount();i++) {
 				if (m_abyUpPartStatus[i] == 0)
 					continue;
 				COLORREF crChunk;
@@ -367,6 +367,12 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 			m_nUpDatarate = 0;
 			m_nSumForAvgUpDataRate = 0;
 			m_AvarageUDR_list.RemoveAll();
+			//MORPH START - ReadBlockFromFileThread
+			if (m_readblockthread) {
+				m_readblockthread->StopReadBlock();
+				m_readblockthread = NULL;
+			}
+			//MORPH END   - ReadBlockFromFileThread
 		}
 		if (eNewState == US_UPLOADING) {
 			m_fSentOutOfPartReqs = 0;
@@ -708,25 +714,25 @@ void CUpDownClient::CreateNextBlockPackage(){
 				CKnownFile* srcFile = theApp.sharedfiles->GetFileByID(currentBlock->FileID);
 				if (!srcFile)
 					throw GetResString(IDS_ERR_REQ_FNF);
-			uint64 i64uTogo;
+				uint64 i64uTogo;
 				if (currentBlock->StartOffset > currentBlock->EndOffset){
 					i64uTogo = currentBlock->EndOffset + (srcFile->GetFileSize() - currentBlock->StartOffset);
-			}
-			else{
-					i64uTogo = currentBlock->EndOffset - currentBlock->StartOffset;
-				//MORPH START - Changed by SiRoB, SLUGFILLER: SafeHash
-				/*
-					if (srcFile->IsPartFile() && !((CPartFile*)srcFile)->IsComplete(currentBlock->StartOffset,currentBlock->EndOffset-1, true))
-				*/
-					if (srcFile->IsPartFile() && !((CPartFile*)srcFile)->IsRangeShareable(currentBlock->StartOffset,currentBlock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
-				//MORPH END  - Changed by SiRoB, SLUGFILLER: SafeHash
-				{
-					CString error;
-						error.Format(_T("%s: %I64u = %I64u - %I64u "), GetResString(IDS_ERR_INCOMPLETEBLOCK), i64uTogo, currentBlock->EndOffset, currentBlock->StartOffset);
-					throw error;
 				}
-				//MORPH START - Added by SiRoB, Anti Anti HideOS & SOTN :p 
-				if (m_abyUpPartStatus) {
+				else{
+					i64uTogo = currentBlock->EndOffset - currentBlock->StartOffset;
+					//MORPH START - Changed by SiRoB, SLUGFILLER: SafeHash
+					/*
+					if (srcFile->IsPartFile() && !((CPartFile*)srcFile)->IsComplete(currentBlock->StartOffset,currentBlock->EndOffset-1, true))
+					*/
+					if (srcFile->IsPartFile() && !((CPartFile*)srcFile)->IsRangeShareable(currentBlock->StartOffset,currentBlock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
+					//MORPH END  - Changed by SiRoB, SLUGFILLER: SafeHash
+					{
+						CString error;
+						error.Format(_T("%s: %I64u = %I64u - %I64u "), GetResString(IDS_ERR_INCOMPLETEBLOCK), i64uTogo, currentBlock->EndOffset, currentBlock->StartOffset);
+						throw error;
+					}
+					//MORPH START - Added by SiRoB, Anti Anti HideOS & SOTN :p 
+					if (m_abyUpPartStatus) {
 						for (UINT i = (UINT)(currentBlock->StartOffset/PARTSIZE); i < (UINT)((currentBlock->EndOffset-1)/PARTSIZE+1); i++)
 						if (m_abyUpPartStatus[i]>SC_AVAILABLE)
 							{
@@ -734,12 +740,12 @@ void CUpDownClient::CreateNextBlockPackage(){
 									error.Format(_T("%s: Part %u, %I64u = %I64u - %I64u "), GetResString(IDS_ERR_HIDDENBLOCK), i, i64uTogo, currentBlock->EndOffset, currentBlock->StartOffset);
 								throw error;
 							}
-				}//MORPH END   - Added by SiRoB, Anti Anti HideOS & SOTN :p 
-			}
+					}//MORPH END   - Added by SiRoB, Anti Anti HideOS & SOTN :p 
+				}
 
-			if( i64uTogo > EMBLOCKSIZE*3 )
-				throw GetResString(IDS_ERR_LARGEREQBLOCK);
-			uint32 togo = (uint32)i64uTogo;
+				if( i64uTogo > EMBLOCKSIZE*3 )
+					throw GetResString(IDS_ERR_LARGEREQBLOCK);
+				uint32 togo = (uint32)i64uTogo;
 			
 				CSyncObject* lockhandle = NULL;  
 				CString fullname;
@@ -764,62 +770,66 @@ void CUpDownClient::CreateNextBlockPackage(){
 					fullname.Format(_T("%s\\%s"),srcFile->GetPath(),srcFile->GetFileName());
 				}
 
-				CReadBlockFromFileThread* readblockthread = (CReadBlockFromFileThread*) AfxBeginThread(RUNTIME_CLASS(CReadBlockFromFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
-				readblockthread->SetReadBlockFromFile(fullname, currentBlock->StartOffset, togo, this, lockhandle);
-				readblockthread->ResumeThread();
+				if (m_readblockthread == NULL) {
+					m_readblockthread = (CReadBlockFromFileThread*) AfxBeginThread(RUNTIME_CLASS(CReadBlockFromFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
+					m_readblockthread->SetReadBlockFromFile(fullname, currentBlock->StartOffset, togo, this, lockhandle);
+					m_readblockthread->ResumeThread();
+				} else {
+					m_readblockthread->SetReadBlockFromFile(fullname, currentBlock->StartOffset, togo, this, lockhandle);
+				}
 				SetUploadFileID(srcFile); //MORPH - Moved by SiRoB, Fix Filtered Block Request
 				m_abyfiledata = (byte*)-2;
 				m_utogo = togo;
 			}
 			if (filedata_ReadFromDisk) {
 				if (!srcfile_ReadFromDisk->IsPartFile())
-				bFromPF = false; // This is not a part file...
+					bFromPF = false; // This is not a part file...
 
-			//MORPH - Removed by SiRoB, Fix Filtered Block Request
-			/*
+				//MORPH - Removed by SiRoB, Fix Filtered Block Request
+				/*
 				SetUploadFileID(srcFile);
-			*/
+				*/
 
-			// MORPH START - Added by Commander, WebCache 1.2e
-			if (IsUploadingToWebCache()) // Superlexx - encryption: encrypt here
-			{
-				Crypt.RefreshLocalKey();
-				Crypt.encryptor.SetKey(Crypt.localKey, WC_KEYLENGTH);
-				Crypt.encryptor.DiscardBytes(16); // we must throw away 16 bytes of the key stream since they were already used once, 16 is the file hash length
+				// MORPH START - Added by Commander, WebCache 1.2e
+				if (IsUploadingToWebCache()) // Superlexx - encryption: encrypt here
+				{
+					Crypt.RefreshLocalKey();
+					Crypt.encryptor.SetKey(Crypt.localKey, WC_KEYLENGTH);
+					Crypt.encryptor.DiscardBytes(16); // we must throw away 16 bytes of the key stream since they were already used once, 16 is the file hash length
 					Crypt.encryptor.ProcessString(filedata_ReadFromDisk, togo_ReadFromDisk);
-			}
-			// MORPH END - Added by Commander, WebCache 1.2e
-			// check extension to decide whether to compress or not
+				}
+				// MORPH END - Added by Commander, WebCache 1.2e
+				// check extension to decide whether to compress or not
 				CString ext = srcfile_ReadFromDisk->GetFileName();
-			ext.MakeLower();
-			int pos = ext.ReverseFind(_T('.'));
-			if (pos>-1)
-				ext = ext.Mid(pos);
+				ext.MakeLower();
+				int pos = ext.ReverseFind(_T('.'));
+				if (pos>-1)
+					ext = ext.Mid(pos);
 				bool compFlag = GetDatarate()<EMBLOCKSIZE && (ext!=_T(".zip") && ext!=_T(".cbz") && ext!=_T(".rar") && ext!=_T(".ace") && ext!=_T(".ogm") && ext!=_T(".tar"));//no need to try compressing tar compressed files... [Yun.SF3]
-			if (ext==_T(".avi") && thePrefs.GetDontCompressAvi())
-				compFlag=false;
+				if (ext==_T(".avi") && thePrefs.GetDontCompressAvi())
+					compFlag=false;
 
-			// MORPH START - Modified by Commander, WebCache 1.2e
-			/*
-			if (!IsUploadingToPeerCache() && m_byDataCompVer == 1 && compFlag)
-			*/
-			if (!IsUploadingToPeerCache() && !IsUploadingToWebCache() && m_byDataCompVer == 1 && compFlag) // yonatan http
-			// MORPH END - Modified by Commander, WebCache 1.2e
+				// MORPH START - Modified by Commander, WebCache 1.2e
+				/*
+				if (!IsUploadingToPeerCache() && m_byDataCompVer == 1 && compFlag)
+				*/
+				if (!IsUploadingToPeerCache() && !IsUploadingToWebCache() && m_byDataCompVer == 1 && compFlag) // yonatan http
+				// MORPH END - Modified by Commander, WebCache 1.2e
 					CreatePackedPackets(filedata_ReadFromDisk,togo_ReadFromDisk,currentblock_ReadFromDisk,bFromPF);
-			else
+				else
 					CreateStandartPackets(filedata_ReadFromDisk,togo_ReadFromDisk,currentblock_ReadFromDisk,bFromPF);
-			// <-----khaos-
+				// <-----khaos-
 			
-			// file statistic
-			//MORPH START - Changed by IceCream SLUGFILLER: Spreadbars
-			/*
+				// file statistic
+				//MORPH START - Changed by IceCream SLUGFILLER: Spreadbars
+				/*
 				srcfile_ReadFromDisk->statistic.AddTransferred(togo_ReadFromDisk);
-			*/
+				*/
 				srcfile_ReadFromDisk->statistic.AddTransferred(currentblock_ReadFromDisk->StartOffset, togo_ReadFromDisk);
-			//MORPH END - Changed by IceCream SLUGFILLER: Spreadbars
+				//MORPH END - Changed by IceCream SLUGFILLER: Spreadbars
 				m_addedPayloadQueueSession += togo_ReadFromDisk;
 
-			m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
+				m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
 				delete[] filedata_ReadFromDisk;
 			}
 			//now process error from nextblock to read
@@ -1789,12 +1799,18 @@ void CReadBlockFromFileThread::SetReadBlockFromFile(LPCTSTR filepath, uint64 sta
 	togo = toread;
 	m_client = client;
 	m_lockhandle = lockhandle;
+	pauseEvent.SetEvent();
+} 
+
+void CReadBlockFromFileThread::StopReadBlock() {
+	doRun = false;
+	pauseEvent.SetEvent();
 } 
 
 int CReadBlockFromFileThread::Run() {
 	DbgSetThreadName("CReadBlockFromFileThread");
 	
-	//InitThreadLocale(); //Performance killer
+	//InitThreadLocale();
 	// SLUGFILLER: SafeHash
 	CReadWriteLock lock(&theApp.m_threadlock);
 	if (!lock.ReadLock(0))
@@ -1803,67 +1819,73 @@ int CReadBlockFromFileThread::Run() {
 
 	CFile file;
 	byte* filedata = NULL;
-	CSyncHelper lockFile;
-	try{
-		if (m_lockhandle) {
-			lockFile.m_pObject = m_lockhandle;
-			m_lockhandle->Lock();
-		}
-		
-		if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
-			throw GetResString(IDS_ERR_OPEN);
-
-		file.Seek(StartOffset,0);
+	doRun = true;
+	pauseEvent.Lock();
+	while(doRun) {
+		CSyncHelper lockFile;
+		try{
+			if (m_lockhandle) {
+				lockFile.m_pObject = m_lockhandle;
+				m_lockhandle->Lock();
+			}
 			
-		filedata = new byte[togo+500];
-		if (uint32 done = file.Read(filedata,togo) != togo){
-			file.SeekToBegin();
-			file.Read(filedata + done,togo-done);
+			if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
+				throw GetResString(IDS_ERR_OPEN);
+
+			file.Seek(StartOffset,0);
+				
+			filedata = new byte[togo+500];
+			if (uint32 done = file.Read(filedata,togo) != togo){
+				file.SeekToBegin();
+				file.Read(filedata + done,togo-done);
+			}
+			file.Close();
+			
+			if (lockFile.m_pObject){
+				lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
+				lockFile.m_pObject = NULL;
+			}
+			
+			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE, (WPARAM)filedata,(LPARAM)m_client);
+			else {
+				delete[] filedata;
+				filedata = NULL;
+			}
 		}
-		file.Close();
+		catch(CString error)
+		{
+			if (thePrefs.GetVerbose())
+				DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), m_client->GetUserName(), error);
+			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+				delete[] filedata;
+			return 1;
+		}
+		catch(CFileException* e)
+		{
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			e->GetErrorMessage(szError, ARRSIZE(szError));
+			if (thePrefs.GetVerbose())
+				DebugLogWarning(_T("Failed to create upload package for %s - %s"), m_client->GetUserName(), szError);
+			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+				delete[] filedata;
+			e->Delete();
+			return 2;
+		}
+		catch(...)
+		{
+			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
+			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+				delete[] filedata;
+			return 3;
+		}
 		
-		if (lockFile.m_pObject){
-			lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
-			lockFile.m_pObject = NULL;
-		}
-		
-		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
-			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE, (WPARAM)filedata,(LPARAM)m_client);
-		else {
-			delete[] filedata;
-			filedata = NULL;
-		}
-	}
-	catch(CString error)
-	{
-		if (thePrefs.GetVerbose())
-			DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), m_client->GetUserName(), error);
-		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
-			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
-		else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
-			delete[] filedata;
-		return 1;
-	}
-	catch(CFileException* e)
-	{
-		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		e->GetErrorMessage(szError, ARRSIZE(szError));
-		if (thePrefs.GetVerbose())
-			DebugLogWarning(_T("Failed to create upload package for %s - %s"), m_client->GetUserName(), szError);
-		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
-			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
-		else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
-			delete[] filedata;
-		e->Delete();
-		return 2;
-	}
-	catch(...)
-	{
-		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
-			PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
-		else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
-			delete[] filedata;
-		return 3;
+		pauseEvent.Lock();
 	}
 	return 0;
 }

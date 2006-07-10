@@ -2273,11 +2273,11 @@ bool CKnownFile::GetPowerShared() const
 }
 //MORPH END   - Added by SiRoB, Power Share
 
+//MORPH START - Revisited , we only get static Client PartCount now
 // SLUGFILLER: hideOS
-UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* client)
+void CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* client)
 {
-	UINT parts = GetED2KPartCount();
-	UINT realparts = GetPartCount();
+	UINT parts = GetPartCount();
 	uint64 min = (uint64)-1;
 	UINT mincount = 1;
 	UINT mincount2 = 1;
@@ -2287,9 +2287,6 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 
 	partspread.RemoveAll();
 
-	if (!parts)
-		return 0;
-	
 	CArray<bool, bool> partsavail;
 	bool usepartsavail = false;
 	
@@ -2303,33 +2300,30 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 	//MORPH - Removed by SiRoB, Share Only The Need
 	/*
 	if(statistic.spreadlist.IsEmpty())
-		return parts;
+		return;
 	*/
 	if (IsPartFile()) {
 		uint32 somethingtoshare = 0;
-		for (i = 0; i < realparts; i++)
+		for (i = 0; i < parts; i++)
 			if (!((CPartFile*)this)->IsPartShareable(i)){	// SLUGFILLER: SafeHash
 				partsavail[i] = false;
 				usepartsavail = true;
 			} else
 				++somethingtoshare;
 		if (somethingtoshare<=2)
-			return parts;
+			return;
 	}
 	if (client->m_abyUpPartStatus) {
 		uint32 somethingtoshare = 0;
-		for (i = 0; i < realparts; i++)
+		for (i = 0; i < parts; i++)
 			if (client->IsUpPartAvailable(i)) {
 				partsavail[i] = false;
 				usepartsavail = true;
 			} else if (partsavail[i])
 				++somethingtoshare;
 		if (somethingtoshare<=2)
-			return parts;
+			return;
 	}
-	
-	if (parts > realparts)
-		partsavail[parts-1] = false;	// Couldn't care less if a 0-sized part wasn't spread
 	
 	//MORPH START - Added by SiRoB, Share Only The Need
 	UINT hideOS = HideOSInWork();
@@ -2432,7 +2426,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 	}
 
 	if (!hideOS || ((GetSelectiveChunk()>=0)?!GetSelectiveChunk():!thePrefs.IsSelectiveShareEnabled()))
-		return parts;
+		return;
 
 	if (client->m_nSelectedChunk > 0 && (int)client->m_nSelectedChunk <= partspread.GetSize() && partsavail[client->m_nSelectedChunk-1]) {
 		for (i = 0; i < client->m_nSelectedChunk-1; i++) {
@@ -2449,7 +2443,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 				client->m_abyUpPartStatus[i] |= SC_HIDDENBYHIDEOS;
 			//MORPH END   - Added by SiRoB, See Chunk that we hide
 		}
-		return parts;
+		return;
 	}
 	else
 		client->m_nSelectedChunk = 0;
@@ -2492,7 +2486,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 				mincount++;
 		}
 		if (!mincount)
-		  return parts; // We're a no-needed source already
+		  return; // We're a no-needed source already
 	}
 
 	mincount = (rand() % mincount) + 1;
@@ -2509,7 +2503,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 	}
 	ASSERT(i < parts);
 	if (mincount)
-		return parts;
+		return;
 	m_PartSentCount[i]++;
 	client->m_nSelectedChunk = i+1;
 	mincount = i;
@@ -2524,7 +2518,7 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 			break;
 	}
 	if (mincount2)
-		return parts;
+		return;
 	m_PartSentCount[i]++;
 	mincount2 = i;
 	/*
@@ -2543,21 +2537,21 @@ UINT CKnownFile::CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* clien
 			//MORPH END   - Added by SiRoB, See Chunk that we hide
 		}
 	}
-	return parts;
+	return;
 };
+//MORPH END   - Revisited , we only get static Client PartCount now
 
+//MORPH START - Revised, static client m_npartcount
 bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	CArray<uint64> partspread;
-	//MORPH - Added 
+	UINT parts = GetPartCount();
 	if (client->m_abyUpPartStatus == NULL) {
-		uint16 nED2kPartCount = GetED2KPartCount();
-		client->SetPartCount(nED2kPartCount);
-		client->m_abyUpPartStatus = new uint8[nED2kPartCount];
-		memset(client->m_abyUpPartStatus,0,nED2kPartCount);
+		client->SetPartCount(parts);
+		client->m_abyUpPartStatus = new uint8[parts];
+		memset(client->m_abyUpPartStatus,0,parts);
 	}
-	UINT parts = CalcPartSpread(partspread, client);
-	if (!parts)
-		return FALSE;
+	CalcPartSpread(partspread, client);
+
 	uint64 max = partspread[0];
 	for (UINT i = 1; i < parts; i++)
 		if (partspread[i] > max)
@@ -2568,19 +2562,20 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 		hideOS = 1;
 	if (max < hideOS || !hideOS)
 		return FALSE;
-	file->WriteUInt16((uint16)parts);
+	UINT nED2kPartCount = GetED2KPartCount();
+	file->WriteUInt16((uint16)nED2kPartCount);
 	UINT done = 0;
-	while (done != parts){
+	while (done != nED2kPartCount){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (partspread[done] < hideOS) {
+			if (done < parts && partspread[done] < hideOS) {
 				towrite |= (1<<i);
 				//MORPH START - Added by SiRoB, See Chunk that we hide
 				client->m_abyUpPartStatus[done] &= SC_AVAILABLE;
 				//MORPH END   - Added by SiRoB, See Chunk that we hide
 			}
 			done++;
-			if (done == parts)
+			if (done == nED2kPartCount)
 				break;
 		}
 		file->WriteUInt8(towrite);

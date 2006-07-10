@@ -322,7 +322,10 @@ void CUpDownClient::Init()
 	m_bWebCacheSupportsMultiOHCBs = false;
 	// yonatan http end ////////////////////////////////////////////////////////////////////////////
 	// MORPH END - Added by Commander, WebCache 1.2e
-	m_abyfiledata = NULL; //MORPH - Added by SiRoB, ReadBlockFromFileThread
+	//MORPH START - ReadBlockFromFileThread
+	m_abyfiledata = NULL;
+	m_readblockthread =NULL;
+	//MORPH END   - ReadBlockFromFileThread
 }
 
 CUpDownClient::~CUpDownClient(){
@@ -3381,16 +3384,15 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 				s = m_pPCUpSocket;
 			else if (m_pWCUpSocket)
 				s = m_pWCUpSocket;
-            #ifdef BETAREL
+#ifdef BETAREL
 			// extra info not required in release
 			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
-			#endif BETAREL
-
+#endif BETAREL
 			DWORD busySince = s->GetBusyTimeSince();
 			if (s->GetBusyRatioTime() > 0)
-				strState.AppendFormat(_T(",BusyRat: %0.2f"), s->GetBusyRatioTime());
+				strState.AppendFormat(_T(",BR: %0.2f"), s->GetBusyRatioTime());
 			if (busySince > 0)
-				strState.AppendFormat(_T(",BusyTime:%ums"), GetTickCount() - busySince);
+				strState.AppendFormat(_T(",BT:%ums"), GetTickCount() - busySince);
 		}
 	}
 	return strState;
