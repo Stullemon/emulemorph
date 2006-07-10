@@ -1,5 +1,11 @@
 // PpgEastShare.cpp : implementation file
 //
+//this file is part of eMule morph
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation;
+//version 2 of the License
 
 #include "stdafx.h"
 #include "emule.h"
@@ -152,11 +158,11 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	//this is bad using enum for radio button...need (int &) ^*&^#*^$(, by AndCycle
 
 	//EastShare - added by AndCycle, IP to Country
-	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiIP2CountryName, (int &)m_iIP2CountryName);
+	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiIP2CountryName, /*(int &)*/ m_iIP2CountryName);
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiIP2CountryShowFlag, m_bIP2CountryShowFlag);
 	//EastShare - added by AndCycle, IP to Country
 
-	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiCreditSystem, (int &)m_iCreditSystem); //EastShare - added by linekin , CreditSystem
+	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiCreditSystem,  m_iCreditSystem); //EastShare - added by linekin , CreditSystem
 
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnableEqualChanceForEachFile, m_bEnableEqualChanceForEachFile);//Morph - added by AndCycle, Equal Chance For Each File
 
