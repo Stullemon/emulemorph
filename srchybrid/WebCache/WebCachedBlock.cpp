@@ -170,7 +170,11 @@ if( theApp.clientlist )
 		}
 		//MORPH START - Added by SiRoB, WebCache Fix PendingBlocks
 		if (file) {
+			//MORPH - Optimization
+			/*
 			file->RemoveBlockFromList(block->StartOffset, block->EndOffset);
+			*/
+			file->RemoveBlockFromList(block);
 			//MORPH START - Added by SiRoB, See WebCache Block
 			if (SINGLEProxyClient)
 				SINGLEProxyClient->RemoveWebCacheBlockToPartStatus(block,file);
