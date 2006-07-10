@@ -356,8 +356,8 @@ void CEMSocket::OnReceive(int nErrorCode){
 	}
 #if !defined DONT_USE_SOCKET_BUFFERING
 	uint32 recvbufferlimit = m_uCurrentRecvBufferSize;
-	if (ret<(m_uCurrentRecvBufferSize<<1)) {
 		if (ret<m_uCurrentRecvBufferSize) {
+		if (ret<(m_uCurrentRecvBufferSize>>1)) {
 			recvbufferlimit >>= 1;
 			if (recvbufferlimit < 1024)
 				recvbufferlimit = 1024;
@@ -837,7 +837,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
 		if(maxNumberOfBytesToSend == 0) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-			maxNumberOfBytesToSend = GetNeededBytes(sendblenWithoutControlPacket != sendblen, (sendblen>0)? m_currentPacket_is_controlpacket_list.GetHead()->packetsize:0, sendblenWithoutControlPacket, sendblen != 0 && m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket, lastCalledSend);
+			maxNumberOfBytesToSend = minFragSize;//GetNeededBytes(sendblenWithoutControlPacket != sendblen, (sendblen>0)? m_currentPacket_is_controlpacket_list.GetHead()->packetsize:0, sendblenWithoutControlPacket, sendblen != 0 && m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket, lastCalledSend);
 			if (maxNumberOfBytesToSend == 0) {
 				SocketSentBytes returnVal = { true, 0, 0 };
 				return returnVal;
@@ -857,7 +857,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 			
 			if (m_uCurrentSendBufferSize != sendbufferlimit) {
 				m_uCurrentSendBufferSize = sendbufferlimit;
-				sendbufferlimit = (sendbufferlimit<<1)+1;
+				sendbufferlimit = (sendbufferlimit<<1)-1;
 				SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
 				EMTrace("CEMSocket::Send SO_SNDBUF=%u", sendbufferlimit);
 			}

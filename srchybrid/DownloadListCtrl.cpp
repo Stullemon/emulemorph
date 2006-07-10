@@ -1386,11 +1386,11 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 							if ( lpUpDownClient->GetRemoteQueueRank()){
 								DWORD	estimatedTime = lpUpDownClient->GetRemoteQueueRankEstimatedTime();
 								if (estimatedTime == (DWORD)-1)
-									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(10,180,50));
+									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(240,125,10));
 								else if(estimatedTime == 0 || estimatedTime > GetTickCount()+FILEREASKTIME)
 									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(60,10,240));
 								else
-									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(240,125,10));
+									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(10,180,50));
 							}
 							else{
 								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(50,80,140));

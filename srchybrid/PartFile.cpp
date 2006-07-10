@@ -5725,8 +5725,12 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 					AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 			}
 
+			/*
 			if (!IsNormalFile() || uIncrease<2097152) 
-				forcewait=true;	// <2MB -> alloc it at once
+			*/
+			if (!IsNormalFile()) 
+				forcewait=true;
+			
 
 			// Allocate filesize
 			if (!forcewait) {
@@ -5962,7 +5966,7 @@ int CPartFileFlushThread::Run()
 	//theApp.QueueDebugLogLine(false,_T("FLUSH:Start (%s)"),m_partfile->GetFileName()/*, CastItoXBytes(myfile->m_iAllocinfo, false, false)*/ );
 
 	try{
-		CSingleLock sLock1(&(theApp.hashing_mut), TRUE); //SafeHash - wait a current hashing process end before read the chunk
+		CSingleLock sLock1(&(theApp.hashing_mut), TRUE); //MORPH - Wait any Read/Write access (hashing or download stuff) before flushing
 		// Flush to disk
 		m_partfile->m_hpartfile.Flush();
 	}
@@ -6075,6 +6079,7 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 	theApp.QueueDebugLogLine(false,_T("ALLOC:Start (%s) (%s)"),myfile->GetFileName(), CastItoXBytes(myfile->m_iAllocinfo, false, false) );
 
 	try{
+		CSingleLock sLock1(&(theApp.hashing_mut), TRUE); //MORPH - Wait any Read/Write access end before allocating space
 		// If this is a NTFS compressed file and the current block is the 1st one to be written and there is not 
 		// enough free disk space to hold the entire *uncompressed* file, windows throws a 'diskFull'!?
 		myfile->m_hpartfile.SetLength(myfile->m_iAllocinfo); // allocate disk space (may throw 'diskFull')
