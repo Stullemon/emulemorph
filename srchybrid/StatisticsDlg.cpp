@@ -730,7 +730,7 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 	CDownloadQueue::SDownloadStats myStats;
 	theApp.downloadqueue->GetDownloadStats(myStats);
 	m_dPlotDataMore[0]=theApp.listensocket->GetActiveConnections();
-	m_dPlotDataMore[1]=theApp.uploadqueue->GetActiveUploadsCount();
+	m_dPlotDataMore[1]=theApp.uploadqueue->GetTotalActiveUploadsCountStat();
 	m_dPlotDataMore[2]=theApp.uploadqueue->GetUploadQueueLength();
 	m_dPlotDataMore[3]=myStats.a[1];
 	m_Statistics.AppendPoints(m_dPlotDataMore);
@@ -1565,7 +1565,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				stattree.SetItemText(up_S[1], cbuffer);
 
 				// Set fully Active Uploads
-				cbuffer.Format(GetResString(IDS_STATS_ACTUL_ZZ), theApp.uploadqueue->GetActiveUploadsCount()); //theApp.uploadqueue->GetUploadQueueLength()
+				cbuffer.Format(GetResString(IDS_STATS_ACTUL_ZZ), theApp.uploadqueue->GetTotalActiveUploadsCountStat()); //theApp.uploadqueue->GetUploadQueueLength()
 				stattree.SetItemText(up_S[2], cbuffer);
 
                 // Set Set Total Uploads                
