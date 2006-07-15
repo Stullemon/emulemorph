@@ -570,6 +570,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
                             uint32 changeDelta = CalculateChangeDelta(numberOfConsecutiveDownChanges);
 
                             // Don't lower speed below 1 KBytes/s
+							// leuk_he don't move below minupload
                             if(nEstiminatedLimit < changeDelta + 1024*thePrefs.minupload) {
                                 if(nEstiminatedLimit > 1024*thePrefs.minupload) {
                                     changeDelta = nEstiminatedLimit - 1024*thePrefs.minupload;
@@ -577,7 +578,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
                                     changeDelta = 0;
                                 }
                             }
-                            ASSERT(nEstiminatedLimit >= changeDelta + 1024);
+                            ASSERT(nEstiminatedLimit >= changeDelta + 1024*thePrefs.minupload);
     						nEstiminatedLimit -= changeDelta;
 
                             if(thePrefs.GetVerbose() && estimateChangedLog) theApp.QueueDebugLogLine(false,_T("Throttler: REDUCED limit #%i with %i bytes to: %0.5f changesCount: %i loopsCount: %i"), numberOfConsecutiveDownChanges, changeDelta, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
@@ -681,11 +682,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if (realBytesToSpendClass[classID] > 999) {
 						m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
 						realBytesToSpendClass[classID] = 999;
-					}
+					} 
 					sint64 limit = -((sint64)(sleepTime + 2000)*allowedDataRate);
 					if (realBytesToSpendClass[classID] < limit)
 						realBytesToSpendClass[classID] = limit;
-									
+
 					if (_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
 						realBytesToSpendClass[classID] += allowedDataRate*min(sleepTime + 2000, timeSinceLastLoop);
 					} else {

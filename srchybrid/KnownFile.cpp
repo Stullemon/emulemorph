@@ -124,6 +124,9 @@ CKnownFile::CKnownFile()
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
 	InChangedSharedStatusBar = false;
 	//MORPH END   - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
+	// MORPH START leuk_he mergeKnown, for TAHO, .met file control
+    m_dwLastSeen=time(NULL); // intiliaze if a official is read in to prevent all known files lost.
+	// MORPH END leuk_he  mergeKnown, for TAHO, .met file control
 
 	// Mighty Knife: CRC32-Tag
 	m_sCRC32 [0] = '\0';

@@ -926,7 +926,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 #if !defined DONT_USE_SOCKET_BUFFERING
 	uint32 splittingsize = 10240;
 	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache()) 
-		splittingsize *= (GetDatarate()/EMBLOCKSIZE)+1;
+		splittingsize += GetDatarate();
 	if (togo > splittingsize) 
 		nPacketSize = togo/(uint32)(togo/splittingsize);
 	else
@@ -940,7 +940,8 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 	uint32 npacket = 0;
 	uint32 Size = togo;
-	Packet* apacket[EMBLOCKSIZE*3/10240];
+	//Packet* apacket[EMBLOCKSIZE*3/10240];
+	Packet** apacket = new Packet*[togo/nPacketSize];
 #endif
 	while (togo){
 		if (togo < nPacketSize*2)

@@ -704,29 +704,27 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
             newclient = queueNewclient;
         }
 		if(newclient) {
-            if(highPrioCheck == true) {
-                //MORPH START - Changed by , Upload Splitting Class
-				bool wanttoaddanewfriendslot = newclient->IsFriend() && newclient->GetFriendSlot();
-				if(wanttoaddanewfriendslot || newclient->GetPowerShared()) {
-					CUpDownClient* lastClient = FindLastUnScheduledForRemovalClientInUploadList(wanttoaddanewfriendslot?0:1);
-				//MORPH END   - Changed by , Upload Splitting Class
+            //MORPH START - Changed by , Upload Splitting Class
+			bool wanttoaddanewfriendslot = newclient->IsFriend() && newclient->GetFriendSlot();
+			if(wanttoaddanewfriendslot || newclient->GetPowerShared()) {
+				CUpDownClient* lastClient = FindLastUnScheduledForRemovalClientInUploadList(wanttoaddanewfriendslot?0:1);
+			//MORPH END   - Changed by , Upload Splitting Class
 
-					if(lastClient != NULL) {
-						//MORPH START - Upload Splitting Class, We don't need to make the check it's done into FindLastUnScheduledForRemovalClientInUploadList
-						/*
-						if (RightClientIsSuperior(lastClient, newclient) > 0)
-						*/
-							// Remove last client from ul list to make room for higher prio client
-		                    ScheduleRemovalFromUploadQueue(lastClient, _T("Ended upload to make room for higher prio client."), GetResString(IDS_UPLOAD_PREEMPTED), true);
-                        /*
-                        } else {
-                            return false;
-                        }
-						*/
+				if(lastClient != NULL) {
+					//MORPH START - Upload Splitting Class, We don't need to make the check it's done into FindLastUnScheduledForRemovalClientInUploadList
+					/*
+					if (RightClientIsSuperior(lastClient, newclient) > 0)
+					*/
+						// Remove last client from ul list to make room for higher prio client
+		                ScheduleRemovalFromUploadQueue(lastClient, _T("Ended upload to make room for higher prio client."), GetResString(IDS_UPLOAD_PREEMPTED), true);
+                    /*
+                    } else {
+                        return false;
                     }
-                } else {
-                    return false;
+					*/
                 }
+            } else if (highPrioCheck == true) {
+                return false;
             }
 
             if(!IsDownloading(newclient) && !newclient->IsScheduledForRemoval()) {
@@ -1076,7 +1074,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 	uint32 curUploadSlotsReal = m_aiSlotCounter[classID];
     if(!simulateScheduledClosingOfSlot || simulateScheduledClosingOfSlot && curUploadSlotsReal > 0) {
 		//Get number of slot from above class and cur class less scheduled slot of the cur class
-	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount(classID);
+		uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount(classID);
 
 		bool needtoaddslot = false;
 
