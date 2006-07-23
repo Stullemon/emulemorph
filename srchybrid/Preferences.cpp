@@ -3201,7 +3201,7 @@ void CPreferences::LoadPreferences()
 	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),3);
 	maxglobaldataratefriend=ini.GetInt(_T("MaxGlobalDataRateFriend"),100);
 	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);
-	maxglobaldataratepowershare=ini.GetInt(_T("MaxGlobalDataRatePowerShare"),85); // 85% leave al little bit for normal classes for file diversity.
+	maxglobaldataratepowershare=ini.GetInt(_T("MaxGlobalDataRatePowerShare"),100); 
 	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
 	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
 	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),0);
