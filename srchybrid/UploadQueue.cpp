@@ -859,14 +859,14 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
     // Save number of active clients for statistics
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
-		/*if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
+		if(thePrefs.GetLogUlDlEvents() && m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] > m_aiSlotCounter[classID]+1) {
         // debug info, will remove this when I'm done.
-        //AddDebugLogLine(false, _T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
+        AddDebugLogLine(false, _T("UploadQueue: Error! Throttler has more slots in class %i than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), classID, m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
 
-		if(tempHighest > (uint32)uploadinglist.GetSize()+1) {
-        	tempHighest = uploadinglist.GetSize()+1;
+			//if(tempHighest > (uint32)uploadinglist.GetSize()+1) {
+        	//	tempHighest = uploadinglist.GetSize()+1;
+			//}
 		}
-		}*/
 	
     // save some data about number of fully active clients
     uint32 tempMaxRemoved = 0;
@@ -1039,6 +1039,12 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	uint32 AllowedClientDatarate[NB_SPLITTING_CLASS];
 	theApp.lastCommonRouteFinder->GetClassByteToSend(AllowedDatarate,AllowedClientDatarate);
 	uint32 remaindatarateforcurrentclass = datarate;
+	uint32 TotalSlots =0;
+	for(uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
+	{ if (i ==classID) 
+	       TotalSlots +=curUploadSlots;
+   	  else TotalSlots +=GetEffectiveUploadListCount(classID);
+	}
 	switch (classID) {
 		case 2:
 			if (remaindatarateforcurrentclass>powershareDatarate)
@@ -1060,8 +1066,10 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 			curUploadSlots >= (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
 			||
 			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
+			||
+            TotalSlots >= 1+(theStats.GetAvgUploadRate(AVG_TIME)*1024/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting total by x minut average
 		 ) ||
-		 thePrefs.GetSlotLimitNumB() && curUploadSlots >= thePrefs.GetSlotLimitNum()
+		 thePrefs.GetSlotLimitNumB() && TotalSlots >= thePrefs.GetSlotLimitNum()
        ) // max number of clients to allow for all circumstances
 	   return false;
 
