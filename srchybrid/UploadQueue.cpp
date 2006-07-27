@@ -1043,7 +1043,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	for(uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
 	{ if (i ==classID) 
 	       TotalSlots +=curUploadSlots;
-   	  else TotalSlots +=GetEffectiveUploadListCount(classID);
+   	  else TotalSlots +=GetEffectiveUploadListCount(i);
 	}
 	switch (classID) {
 		case 2:
@@ -1067,7 +1067,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 			||
 			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
 			||
-            TotalSlots >= 1+(theStats.GetAvgUploadRate(AVG_TIME)*1024/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting total by x minut average
+            TotalSlots >NB_SPLITTING_CLASS+(theStats.GetAvgUploadRate(AVG_TIME)*1024/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting total by x minut average
 		 ) ||
 		 thePrefs.GetSlotLimitNumB() && TotalSlots >= thePrefs.GetSlotLimitNum()
        ) // max number of clients to allow for all circumstances
@@ -1092,7 +1092,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 		if(!AcceptNewClient(curUploadSlots, classID) || !theApp.lastCommonRouteFinder->AcceptNewClient()) // UploadSpeedSense can veto a new slot if USS enabled
 			needtoaddslot = false;
 		else {
-			if (curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && AcceptNewClient(curUploadSlots*2, classID) /*+1*/ ||
+			if (curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && AcceptNewClient(curUploadSlots*(2-(classID/2)), classID) /*+1*/ ||
     			curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10))
 					needtoaddslot = true;
 		}

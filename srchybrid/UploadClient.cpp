@@ -925,9 +925,9 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 	CMemFile memfile((BYTE*)data,togo);
 #if !defined DONT_USE_SOCKET_BUFFERING
 	uint32 splittingsize = 10240;
-	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache()) 
-		splittingsize += GetDatarate();
-	if (togo > splittingsize) 
+	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache())
+		splittingsize = ((GetDatarate()/10240)+1)*10240;
+	if (togo > splittingsize)
 		nPacketSize = togo/(uint32)(togo/splittingsize);
 	else
 		nPacketSize = togo;
@@ -1110,6 +1110,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			m_pWCUpSocket->SendPacket(apacket, npacket, true, false, Size);
 		else
 			socket->SendPacket(apacket, npacket, true, false, Size);
+		delete apacket;
 	}
 #endif
 }
@@ -1132,14 +1133,25 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 	uint32 oldSize = togo;
 	togo = newsize;
 	uint32 nPacketSize;
+#if !defined DONT_USE_SOCKET_BUFFERING
+	uint32 splittingsize = 10240;
+	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache())
+		splittingsize = ((GetDatarate()/10240)+1)*10240;
+	if (togo > splittingsize)
+		nPacketSize = togo/(uint32)(togo/splittingsize);
+	else
+		nPacketSize = togo;
+#else
 	if (togo > 10240) 
 		nPacketSize = togo/(uint32)(togo/10240);
 	else
 		nPacketSize = togo;
-	
+#endif
+
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 	uint32 npacket = 0;
-	Packet* apacket[EMBLOCKSIZE*3/10240];
+	//Packet* apacket[EMBLOCKSIZE*3/10240];
+	Packet** apacket = new Packet*[togo/nPacketSize];
 #else
 	uint32 totalPayloadSize = 0;
 #endif
@@ -1186,8 +1198,10 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 #endif
 	}
 #if !defined DONT_USE_SEND_ARRAY_PACKET
-	if (npacket)
-		socket->SendPacket(apacket, npacket, true, false, oldSize);	
+	if (npacket) {
+		socket->SendPacket(apacket, npacket, true, false, oldSize);
+		delete apacket;
+	}
 #endif
 	delete[] output;
 }
@@ -1405,12 +1419,17 @@ uint32 CUpDownClient::SendBlockData(){
 	}
 	//MORPH END   - Modified by SiRoB, Better Upload rate calcul
     // Check if it's time to update the display.
+	//MORPH START - UpdateItemThread
+	/*
 	if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {
         // Update display
 		theApp.emuledlg->transferwnd->uploadlistctrl.RefreshClient(this);
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 		m_lastRefreshedULDisplay = curTick;
-	}
+	}*/
+	theApp.emuledlg->transferwnd->uploadlistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+	//MORPH END - UpdateItemThread
 
     return (UINT)(sentBytesCompleteFile + sentBytesPartFile);
 }

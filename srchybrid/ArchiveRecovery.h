@@ -102,7 +102,7 @@ struct RAR_BlockFile
 	uint32	FTIME;
 	BYTE	UNP_VER;
 	BYTE	METHOD;
-	uint16	NAME_SIZE;
+	uint16	NAME_SIZE_var;	// MORPH leuk_he rename to prevent conflict with upnp lib define (dumb...)
 	uint32	ATTR;
 	uint32	HIGH_PACK_SIZE;
 	uint32	HIGH_UNP_SIZE;

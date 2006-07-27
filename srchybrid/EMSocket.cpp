@@ -150,8 +150,11 @@ CEMSocket::CEMSocket(void){
 	m_dwBusyDelta = 1;
 	m_hasSent = false;
 #if !defined DONT_USE_SOCKET_BUFFERING
-	m_uCurrentSendBufferSize = 0;
-	m_uCurrentRecvBufferSize = 0;
+	int ilen = sizeof(int);
+	if (GetSockOpt(SO_SNDBUF, &m_uCurrentSendBufferSize, &ilen, SOL_SOCKET) == FALSE)
+		m_uCurrentSendBufferSize = 4096;
+	if (GetSockOpt(SO_RCVBUF, &m_uCurrentRecvBufferSize, &ilen, SOL_SOCKET) == FALSE)
+		m_uCurrentRecvBufferSize = 4096;
 #endif
 }
 
@@ -261,10 +264,10 @@ void CEMSocket::ClearQueues(){
 	sendblen = 0;
 #if !defined DONT_USE_SOCKET_BUFFERING
 	sendblenWithoutControlPacket = 0;
-	for (POSITION pos = m_currentPacket_is_controlpacket_list.GetHeadPosition(); pos != NULL;) {
-		delete m_currentPacket_is_controlpacket_list.GetNext(pos);
+	for (POSITION pos = m_currentPacket_in_buffer_list.GetHeadPosition(); pos != NULL;) {
+		delete m_currentPacket_in_buffer_list.GetNext(pos);
 	}
-	m_currentPacket_is_controlpacket_list.RemoveAll();
+	m_currentPacket_in_buffer_list.RemoveAll();
 #endif
 	sent = 0;
 }
@@ -355,15 +358,14 @@ void CEMSocket::OnReceive(int nErrorCode){
 		return;
 	}
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 recvbufferlimit = m_uCurrentRecvBufferSize;
-	if (ret>recvbufferlimit) {
-		recvbufferlimit = ret;
-		if (recvbufferlimit < 1024)
-			recvbufferlimit = 1024;
-		else if (recvbufferlimit > 1024*1024)
-			recvbufferlimit = 1024*1024;
+	uint32 recvbufferlimit = ret;
+	if (recvbufferlimit > 10*1024*1024) {
+		recvbufferlimit = 10*1024*1024;
+	} else if (recvbufferlimit < 2600) {
+		recvbufferlimit = 2600;
 	}
-	if (recvbufferlimit!=m_uCurrentRecvBufferSize) {
+
+	if (recvbufferlimit != m_uCurrentRecvBufferSize) {
 		SetSockOpt(SO_RCVBUF, &recvbufferlimit, sizeof(recvbufferlimit), SOL_SOCKET);
 		int ilen = sizeof(int);
 		GetSockOpt(SO_RCVBUF, &recvbufferlimit, &ilen, SOL_SOCKET);
@@ -590,19 +592,6 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
         //if(m_startSendTick > 0) {
         //    m_lastSendLatency = ::GetTickCount() - m_startSendTick;
         //}
-#if !defined DONT_USE_SOCKET_BUFFERING
-		uint32 sendbufferlimit = m_uCurrentSendBufferSize;
-		if (packet->GetRealPacketSize() > m_uCurrentSendBufferSize>>1)
-			sendbufferlimit = packet->GetRealPacketSize();
-	
-		if (m_uCurrentSendBufferSize != sendbufferlimit) {
-			sendbufferlimit = sendbufferlimit;
-			SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
-			int ilen = sizeof(int);
-			GetSockOpt(SO_SNDBUF, &sendbufferlimit, &ilen, SOL_SOCKET);
-			m_uCurrentSendBufferSize = sendbufferlimit;
-		}
-#endif
         if (controlpacket) {
 	        controlpacket_queue.AddTail(packet);
 
@@ -655,19 +644,6 @@ void CEMSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, boo
         //if(m_startSendTick > 0) {
         //    m_lastSendLatency = ::GetTickCount() - m_startSendTick;
         //}
-#if !defined DONT_USE_SOCKET_BUFFERING
-		uint32 sendbufferlimit = m_uCurrentSendBufferSize;
-		if (packet[0]->GetRealPacketSize() > m_uCurrentSendBufferSize>>1)
-			sendbufferlimit = packet[0]->GetRealPacketSize();
-
-		if (m_uCurrentSendBufferSize != sendbufferlimit) {
-			sendbufferlimit = sendbufferlimit;
-			SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
-			int ilen = sizeof(int);
-			GetSockOpt(SO_SNDBUF, &sendbufferlimit, &ilen, SOL_SOCKET);
-			m_uCurrentSendBufferSize = sendbufferlimit;
-		}
-#endif
         if (controlpacket) {
 	        for (uint32 i = 0; i < npacket; i++) {
 				controlpacket_queue.AddTail(packet[i]);
@@ -753,7 +729,7 @@ void CEMSocket::OnSend(int nErrorCode){
 
 	//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
 #if !defined DONT_USE_SOCKET_BUFFERING
-	if(sendblen != sendblenWithoutControlPacket || !controlpacket_queue.IsEmpty()) {
+	if((sendblen-sent) != sendblenWithoutControlPacket || !controlpacket_queue.IsEmpty()) {
 #else
 	if(sendbuffer != NULL && m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()) {
 #endif
@@ -832,7 +808,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #endif
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 
-    if (maxNumberOfBytesToSend == 0 && (::GetTickCount() - lastCalledSend < SEC2MS(3))) {
+    if (maxNumberOfBytesToSend == 0 && (::GetTickCount() - lastCalledSend < SEC2MS(1))) {
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
     }
@@ -858,7 +834,8 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
 		if(maxNumberOfBytesToSend == 0) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-			maxNumberOfBytesToSend = GetNeededBytes(sendblenWithoutControlPacket != sendblen, (sendblen>0)? m_currentPacket_is_controlpacket_list.GetHead()->packetsize:0, sendblenWithoutControlPacket, sendblen != 0 && m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket, lastCalledSend);
+			ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
+			maxNumberOfBytesToSend = GetNeededBytes(sendblenWithoutControlPacket != sendblen-sent, sendblen, sendblenWithoutControlPacket, sendblen != 0 && m_currentPacket_in_buffer_list.GetHead()->iscontrolpacket, lastCalledSend);
 			if (maxNumberOfBytesToSend == 0) {
 				SocketSentBytes returnVal = { true, 0, 0 };
 				return returnVal;
@@ -867,32 +844,47 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #else
             maxNumberOfBytesToSend = GetNeededBytes(sendbuffer, sendblen, sent, m_currentPacket_is_controlpacket, lastCalledSend);
 		}
-		maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 #endif
+		maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
-		bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) >= 3000;
+		bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) >= 1000;
 
 		sendLocker.Lock();
 	
 #if !defined DONT_USE_SOCKET_BUFFERING
-		maxNumberOfBytesToSend = GetNextFragSize(min(m_uCurrentSendBufferSize, maxNumberOfBytesToSend), minFragSize);
-		while( sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 < maxNumberOfBytesToSend && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
+		if (bufferlimit != 0 && bufferlimit != _UI32_MAX) {
+			uint32 sendbufferlimit = bufferlimit;
+			if (sendbufferlimit > 10*1024*1024)
+				sendbufferlimit = 10*1024*1024;
+			else if (sendbufferlimit < (minFragSize<<1))
+				sendbufferlimit = minFragSize<<1;
+
+			if (m_uCurrentSendBufferSize != sendbufferlimit) {
+				sendbufferlimit = sendbufferlimit;
+				SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
+				int ilen = sizeof(int);
+				GetSockOpt(SO_SNDBUF, &sendbufferlimit, &ilen, SOL_SOCKET);
+				m_uCurrentSendBufferSize = sendbufferlimit;
+			}
+		}
+		ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
+		while( sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
               (sendblen/*sendbuffer*/ != NULL || !controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && // there must exist something to send
                (onlyAllowedToSendControlPacket == false || // this means we are allowed to send both types of packets, so proceed
-                sendblen/*sendbuffer*/ != NULL && m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/ == true || // We are in the progress of sending a control packet. We are always allowed to send those
-                sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 > 0 && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall+ (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40) % minFragSize != 0 ||
+                sendblen/*sendbuffer*/ != NULL && m_currentPacket_in_buffer_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/ == true || // We are in the progress of sending a control packet. We are always allowed to send those
+                sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall > 0 && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) % minFragSize != 0 ||
                 sendblen/*sendbuffer*/ == NULL && !controlpacket_queue.IsEmpty() || // There's a control packet in queue, and we are not currently sending anything, so we will handle the control packet next
-                sendblen/*sendbuffer*/ != NULL && m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/ == false && bWasLongTimeSinceSend && (!controlpacket_queue.IsEmpty() || sendblen != sendblenWithoutControlPacket) /*&& standartpacket_queue.IsEmpty()*/ && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40) < minFragSize // We have waited to long to clean the current packet (which may be a standard packet that is in the way). Proceed no matter what the value of onlyAllowedToSendControlPacket.
+                sendblen/*sendbuffer*/ != NULL && m_currentPacket_in_buffer_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/ == false && bWasLongTimeSinceSend && (!controlpacket_queue.IsEmpty() || sendblen-sent != sendblenWithoutControlPacket) /*&& standartpacket_queue.IsEmpty()*/ && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) < minFragSize // We have waited to long to clean the current packet (which may be a standard packet that is in the way). Proceed no matter what the value of onlyAllowedToSendControlPacket.
                 )
               ) {
 #else
-       while(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 < maxNumberOfBytesToSend && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
+       while(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend && anErrorHasOccured == false && // don't send more than allowed. Also, there should have been no error in earlier loop
               (sendbuffer != NULL || !controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && // there must exist something to send
                (onlyAllowedToSendControlPacket == false || // this means we are allowed to send both types of packets, so proceed
                 sendbuffer != NULL && m_currentPacket_is_controlpacket == true || // We are in the progress of sending a control packet. We are always allowed to send those
-                sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 > 0 && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) % minFragSize != 0 ||
+                sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall > 0 && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) % minFragSize != 0 ||
                 sendbuffer == NULL && !controlpacket_queue.IsEmpty() || // There's a control packet in queue, and we are not currently sending anything, so we will handle the control packet next
-                sendbuffer != NULL && m_currentPacket_is_controlpacket == false && bWasLongTimeSinceSend && !controlpacket_queue.IsEmpty() /*&& standartpacket_queue.IsEmpty()*/ && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40) < minFragSize // We have waited to long to clean the current packet (which may be a standard packet that is in the way). Proceed no matter what the value of onlyAllowedToSendControlPacket.
+                sendbuffer != NULL && m_currentPacket_is_controlpacket == false && bWasLongTimeSinceSend && !controlpacket_queue.IsEmpty() /*&& standartpacket_queue.IsEmpty()*/ && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) < minFragSize // We have waited to long to clean the current packet (which may be a standard packet that is in the way). Proceed no matter what the value of onlyAllowedToSendControlPacket.
                 )
               ) {
 #endif
@@ -900,7 +892,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
             // If we are currently not in the progress of sending a packet, we will need to find the next one to send
 #if !defined DONT_USE_SOCKET_BUFFERING
 			ASSERT(sendblen>=sent);
-			while ((!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && sendblen-sent < m_uCurrentSendBufferSize && sendblen-sent+sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 < maxNumberOfBytesToSend) {
+			while ((!controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty()) && sendblen-sent < m_uCurrentSendBufferSize && sendblen-sent+sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend) {
 				bool bcontrolpacket;
 				uint32 ipacketpayloadsize = 0;
 #else
@@ -980,12 +972,13 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 				}
 				if (bcontrolpacket == false)
 					sendblenWithoutControlPacket+=packetsize;
+				ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
 				BufferedPacket* newitem = new BufferedPacket;
-				newitem->packetsize = packetsize;
+				newitem->remainpacketsize = packetsize;
 				newitem->isforpartfile = curPacket->IsFromPF();
 				newitem->iscontrolpacket = bcontrolpacket;
 				newitem->packetpayloadsize = ipacketpayloadsize;
-				m_currentPacket_is_controlpacket_list.AddTail(newitem);
+				m_currentPacket_in_buffer_list.AddTail(newitem);
 #else
 				sendblen = curPacket->GetRealPacketSize();
 				sendbuffer = curPacket->DetachPacket();
@@ -1000,33 +993,33 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 			// is sent, or until we reach maximum bytes to send for this call, or until we get an error.
 			// NOTE! If send would block (returns WSAEWOULDBLOCK), we will return from this method INSIDE this loop.
 			while (sent < sendblen &&
-				sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 < maxNumberOfBytesToSend &&
+				sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend &&
 				(
 					onlyAllowedToSendControlPacket == false || // this means we are allowed to send both types of packets, so proceed
 #if !defined DONT_USE_SOCKET_BUFFERING
-					m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/ ||
+					m_currentPacket_in_buffer_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/ ||
 #else
 				m_currentPacket_is_controlpacket ||
 #endif
-					bWasLongTimeSinceSend && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40) < minFragSize ||
-					(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40) % minFragSize != 0
+					bWasLongTimeSinceSend && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) < minFragSize ||
+					(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) % minFragSize != 0
 				) &&
 				anErrorHasOccured == false) {
 				uint32 tosend = sendblen-sent;
 #if !defined DONT_USE_SOCKET_BUFFERING
-				if(!onlyAllowedToSendControlPacket || m_currentPacket_is_controlpacket_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/) {
+				if(!onlyAllowedToSendControlPacket || m_currentPacket_in_buffer_list.GetHead()->iscontrolpacket/*m_currentPacket_is_controlpacket*/) {
 #else
 				if(!onlyAllowedToSendControlPacket || m_currentPacket_is_controlpacket) {
 #endif
-    				if (maxNumberOfBytesToSend >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 && tosend > maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
-						tosend = maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40);
-				} else if(bWasLongTimeSinceSend && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40) < minFragSize) {
-    				if (minFragSize >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 && tosend > minFragSize-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
-						tosend = minFragSize-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40);
+					if (maxNumberOfBytesToSend >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall && tosend > maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
+						tosend = maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall);
+				} else if(bWasLongTimeSinceSend && (sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall) < minFragSize) {
+    				if (minFragSize >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall && tosend > minFragSize-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
+						tosend = minFragSize-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall);
 				} else {
-					uint32 nextFragMaxBytesToSent = GetNextFragSize(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40, minFragSize);
-    				if (nextFragMaxBytesToSent >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40 && tosend > nextFragMaxBytesToSent-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40))
-						tosend = nextFragMaxBytesToSent-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall + (((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)/1460)+(((sentControlPacketBytesThisCall+sentStandardPacketBytesThisCall)%1460)?1:0)) * 40);
+					uint32 nextFragMaxBytesToSent = GetNextFragSize(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall, minFragSize);
+   					if (nextFragMaxBytesToSent >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall && tosend > nextFragMaxBytesToSent-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
+						tosend = nextFragMaxBytesToSent-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall);
 				}
 				ASSERT (tosend != 0 && tosend <= sendblen-sent);
 		    	
@@ -1056,7 +1049,8 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 						if (onlyAllowedToSendControlPacket) {
 							sendLocker.Lock();
 #if !defined DONT_USE_SOCKET_BUFFERING
-							if(sendblen != sendblenWithoutControlPacket || !controlpacket_queue.IsEmpty()) {
+							ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
+							if(sendblen-sent != sendblenWithoutControlPacket || !controlpacket_queue.IsEmpty()) {
 #else
 							if(sendbuffer != NULL && m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()) {
 #endif
@@ -1099,12 +1093,12 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 					uint32 sumofpacketsizesent = 0;
 					uint32 sumofnocontrolpacketsizesent = 0;
 					uint32 sumofpacketpartfilesizesent = 0;
-					while (result > sumofpacketsizesent && result-sumofpacketsizesent >= m_currentPacket_is_controlpacket_list.GetHead()->packetsize) {
-						BufferedPacket* pPacket = m_currentPacket_is_controlpacket_list.RemoveHead();
+					while (result > sumofpacketsizesent && result-sumofpacketsizesent >= m_currentPacket_in_buffer_list.GetHead()->remainpacketsize) {
+						BufferedPacket* pPacket = m_currentPacket_in_buffer_list.RemoveHead();
 						if (pPacket->iscontrolpacket == false) {
-							sumofnocontrolpacketsizesent += pPacket->packetsize;
+							sumofnocontrolpacketsizesent += pPacket->remainpacketsize;
 							if (pPacket->isforpartfile)
-								sumofpacketpartfilesizesent += pPacket->packetsize;  
+								sumofpacketpartfilesizesent += pPacket->remainpacketsize;  
 						
 							if(0 < pPacket->packetpayloadsize) {
 								statsLocker.Lock();
@@ -1115,19 +1109,19 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 							}
 							lastFinishedStandard = ::GetTickCount(); // reset timeout
 							m_bAccelerateUpload = false; // Safe until told otherwise
-							sendblenWithoutControlPacket -= pPacket->packetsize;
+							sendblenWithoutControlPacket -= pPacket->remainpacketsize;
 						}
-						sumofpacketsizesent += pPacket->packetsize;
+						sumofpacketsizesent += pPacket->remainpacketsize;
 						delete pPacket;
 					}
 					if (result > sumofpacketsizesent) {
-						BufferedPacket* pPacket = m_currentPacket_is_controlpacket_list.GetHead();
+						BufferedPacket* pPacket = m_currentPacket_in_buffer_list.GetHead();
 						uint32 partialpacketsizesent = result-sumofpacketsizesent;
 						if (pPacket->iscontrolpacket == false) {
 							sumofnocontrolpacketsizesent += partialpacketsizesent;
 							if (pPacket->isforpartfile)
 								sumofpacketpartfilesizesent += partialpacketsizesent;
-							uint32 partialpayloadSentWithThisCall = (uint32)(((double)partialpacketsizesent/(double)(pPacket->packetsize))*pPacket->packetpayloadsize);
+							uint32 partialpayloadSentWithThisCall = (uint32)(((double)partialpacketsizesent/(double)(pPacket->remainpacketsize))*pPacket->packetpayloadsize);
 							if(partialpayloadSentWithThisCall <= pPacket->packetpayloadsize) {
 								statsLocker.Lock();
 								m_actualPayloadSizeSent += partialpayloadSentWithThisCall;
@@ -1138,7 +1132,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 							pPacket->packetpayloadsize -= partialpayloadSentWithThisCall;
 							sendblenWithoutControlPacket -= partialpacketsizesent;
 						}
-						pPacket->packetsize -= partialpacketsizesent;
+						pPacket->remainpacketsize -= partialpacketsizesent;
 					}
 #else
 					if(!m_currentPacket_is_controlpacket) {
@@ -1245,7 +1239,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 	if (onlyAllowedToSendControlPacket) {
 		sendLocker.Lock();
 #if !defined DONT_USE_SOCKET_BUFFERING
-		if(sendblen != sendblenWithoutControlPacket || !controlpacket_queue.IsEmpty()) {
+		if(sendblen-sent != sendblenWithoutControlPacket || !controlpacket_queue.IsEmpty()) {
 #else
 		if(sendbuffer != NULL && m_currentPacket_is_controlpacket || !controlpacket_queue.IsEmpty()) {
 #endif
@@ -1304,20 +1298,22 @@ uint32 CEMSocket::GetNeededBytes(const char* sendbuffer, const uint32 sendblen, 
 
 	uint32 sendgap = ::GetTickCount() - lastCalledSend;
 
-	uint64 timetotal = m_bAccelerateUpload?45000:90000;
+	uint64 timetotal = m_bAccelerateUpload?15000:30000;   //45000:90000;
 	uint64 timeleft = ::GetTickCount() - lastFinishedStandard;
 	uint64 sizeleft, sizetotal;
 #if !defined DONT_USE_SOCKET_BUFFERING
 	if (sendblen/*sendbuffer*/ && !currentPacket_is_controlpacket) {
-		sizeleft = sizetotal = sendblen;
+		sizeleft = m_currentPacket_in_buffer_list.GetHead()->remainpacketsize;
+		sizetotal = sendblen;
 	}
 	else {
 		if (sendblenWithoutControlPacket) {
-			POSITION pos = m_currentPacket_is_controlpacket_list.GetHeadPosition();
-			while (m_currentPacket_is_controlpacket_list.GetAt(pos)->iscontrolpacket) {
-				m_currentPacket_is_controlpacket_list.GetNext(pos);
+			POSITION pos = m_currentPacket_in_buffer_list.GetHeadPosition();
+			while (m_currentPacket_in_buffer_list.GetAt(pos)->iscontrolpacket) {
+				m_currentPacket_in_buffer_list.GetNext(pos);
 			}
-			sizeleft = sizetotal = m_currentPacket_is_controlpacket_list.GetAt(pos)->packetsize;
+			sizeleft = m_currentPacket_in_buffer_list.GetAt(pos)->remainpacketsize;
+			sizetotal = sendblen;
 		} else {
 			sizeleft = sizetotal = standartpacket_queue.GetHead().packet->GetRealPacketSize();
 		}
@@ -1523,7 +1519,7 @@ void CEMSocket::AssertValid() const
 	controlpacket_queue.AssertValid();
 	standartpacket_queue.AssertValid();
 #if !defined DONT_USE_SOCKET_BUFFERING
-	m_currentPacket_is_controlpacket_list.AssertValid();
+	m_currentPacket_in_buffer_list.AssertValid();
 #else
 	CHECK_BOOL(m_currentPacket_is_controlpacket);
 #endif

@@ -5725,15 +5725,14 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 					AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 			}
 
+			//Always use AllocateSpaceThread even if uIncrease is low
 			/*
 			if (!IsNormalFile() || uIncrease<2097152) 
-			*/
-			if (!IsNormalFile()) 
 				forcewait=true;
-			
+			*/
 
 			// Allocate filesize
-			if (!forcewait) {
+			if (!forcewait && IsNormalFile()) {
 				m_AllocateThread= AfxBeginThread(AllocateSpaceThread, this, THREAD_PRIORITY_LOWEST, 0, CREATE_SUSPENDED);
 				if (m_AllocateThread == NULL)
 				{
@@ -5747,7 +5746,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 				}
 			}
 			
-			if (forcewait) {
+			if (forcewait || !IsNormalFile()) {
 				bIncreasedFile=true;
 				// If this is a NTFS compressed file and the current block is the 1st one to be written and there is not 
 				// enough free disk space to hold the entire *uncompressed* file, windows throws a 'diskFull'!?
@@ -6079,7 +6078,6 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 	theApp.QueueDebugLogLine(false,_T("ALLOC:Start (%s) (%s)"),myfile->GetFileName(), CastItoXBytes(myfile->m_iAllocinfo, false, false) );
 
 	try{
-		CSingleLock sLock1(&(theApp.hashing_mut), TRUE); //MORPH - Wait any Read/Write access end before allocating space
 		// If this is a NTFS compressed file and the current block is the 1st one to be written and there is not 
 		// enough free disk space to hold the entire *uncompressed* file, windows throws a 'diskFull'!?
 		myfile->m_hpartfile.SetLength(myfile->m_iAllocinfo); // allocate disk space (may throw 'diskFull')

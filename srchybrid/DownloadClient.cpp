@@ -2245,6 +2245,8 @@ void CUpDownClient::UDPReaskForDownload()
 
 void CUpDownClient::UpdateDisplayedInfo(bool force)
 {
+	//MORPH START - UpdateItemThread
+	/*
 #ifdef _DEBUG
 	force = true;
 #endif
@@ -2255,6 +2257,11 @@ void CUpDownClient::UpdateDisplayedInfo(bool force)
 		theApp.emuledlg->transferwnd->downloadclientsctrl.RefreshClient(this);
         m_lastRefreshedDLDisplay = curTick;
     }
+	*/
+	theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(this);
+	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->downloadclientsctrl.RefreshClient(this);
+    //MORPH END   - UpdateItemThread
 }
 
 const bool CUpDownClient::IsInNoNeededList(const CPartFile* fileToCheck) const

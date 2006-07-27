@@ -152,7 +152,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
 			cur_socket_stat = new Socket_stat;
 			m_stat_list.SetAt(socket,cur_socket_stat);
 			cur_socket_stat->realBytesToSpend = _I64_MAX;
-			cur_socket_stat->dwLastBusySince = (DWORD)-1;
+			cur_socket_stat->dwLastBusySince = 0;
 		}
 		cur_socket_stat->scheduled = scheduled;
 		cur_socket_stat->classID = classID;
@@ -487,8 +487,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
     uint32 changesCount = 0;
     uint32 loopsCount = 0;
 
-    bool estimateChangedLog = false;
-	//bool estimateChangedLog = true;
+    //bool estimateChangedLog = false;
+	bool estimateChangedLog = true;
     bool lotsOfLog = false; 
 
     while(doRun) {
@@ -496,132 +496,142 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		theApp.lastCommonRouteFinder->GetClassByteToSend(allowedDataRateClass,ClientDataRate);
 
-	// check busy level for all the slots (WSAEWOULDBLOCK status)
-        uint32 cBusy = 0;
-        uint32 nCanSend = 0;
-
-        sendLocker.Lock();
-        /*
+		// check busy level for all the slots (WSAEWOULDBLOCK status)
+		uint32 cBusy = 0;
+		uint32 nCanSend = 0;
+		DWORD  cBusyTime = 0;
+		DWORD timeSinceLastLoop = timeGetTime() - lastLoopTick;
+		sendLocker.Lock();
+		/*
 		for (int i = 0; i < m_StandardOrder_list.GetSize() && (i < 3 || (UINT)i < GetSlotLimit(theApp.uploadqueue->GetDatarate())); i++){
-        */
-		for (int i = m_StandardOrder_list.GetSize()/2; i < m_StandardOrder_list.GetSize() && (i < 3 || (UINT)i < GetSlotLimit(theApp.uploadqueue->GetDatarate())); i++){
-			if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues()) {
-                nCanSend++;
+		*/
+		for (int i = m_StandardOrder_list.GetSize()/2; i < m_StandardOrder_list.GetSize(); i++){
+			Socket_stat* stat = NULL;
+			if (m_stat_list.Lookup(m_StandardOrder_list[i], stat)) {
+				if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues() && stat->scheduled == false) {
+					nCanSend++;
 				
-				Socket_stat* stat = NULL;
-				if (m_stat_list.Lookup(m_StandardOrder_list[i], stat)) {
-					DWORD oldLastBusySince = stat->dwLastBusySince;
-					stat->dwLastBusySince = m_StandardOrder_list[i]->GetBusyTimeSince();
-					if(stat->dwLastBusySince > 0 && stat->dwLastBusySince >= oldLastBusySince)
+					DWORD newBusySince = m_StandardOrder_list[i]->GetBusyTimeSince();
+					if(newBusySince > 0) {
 						cBusy++;
+						if (newBusySince == stat->dwLastBusySince)
+							cBusyTime += timeSinceLastLoop;
+						else
+							cBusyTime += timeGetTime() - newBusySince;
+						stat->dwLastBusySince = newBusySince;
+					}
 				}
-		}
-		}
-        sendLocker.Unlock();
-
-        // if this is kept, the loop above can be a little optimized (don't count nCanSend, just use nCanSend = GetSlotLimit(theApp.uploadqueue->GetDatarate())
-        if(theApp.uploadqueue) {
-            nCanSend = min(nCanSend, GetSlotLimit(theApp.uploadqueue->GetDatarate()));
-            //nCanSend = min(max(GetSlotLimit(theApp.uploadqueue->GetDatarate()),1), (UINT)m_StandardOrder_list.GetSize());
-        }
-
-	// When no upload limit has been set in options, try to guess a good upload limit.
-		bool bUploadUnlimited = (thePrefs.GetMaxUpload() == UNLIMITED);
-        if (bUploadUnlimited) {
-            loopsCount++;
-
-            //if(lotsOfLog) theApp.QueueDebugLogLine(false,_T("Throttler: busy: %i/%i nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount: %i loopsCount: %i"), cBusy, nCanSend, nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
-
-            if(nCanSend > 0) {
-			    float fBusyPercent = ((float)cBusy/(float)nCanSend) * 100;
-                if (cBusy > 2 && fBusyPercent > 75.00f && nSlotsBusyLevel < 255){
-				    nSlotsBusyLevel++;
-                    changesCount++;
-                    if(thePrefs.GetVerbose() && lotsOfLog && nSlotsBusyLevel%25==0) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount: %i loopsCount: %i"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
-			    }
-				else if ( (cBusy <= 2 || fBusyPercent < 25.00f) && nSlotsBusyLevel > (-255)){
-				    nSlotsBusyLevel--;
-                    changesCount++;
-                    if(thePrefs.GetVerbose() && lotsOfLog && nSlotsBusyLevel%25==0) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount %i loopsCount: %i"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
-                }
 			}
-
-            if(nUploadStartTime == 0) {
-		        if (m_StandardOrder_list.GetSize() >= 3)
-			        nUploadStartTime = timeGetTime();
-            } else if(timeGetTime()- nUploadStartTime > SEC2MS(60)) {
-			    if (theApp.uploadqueue){
-				    if (nEstiminatedLimit == 0){ // no autolimit was set yet
-					    if (nSlotsBusyLevel >= 250){ // sockets indicated that the BW limit has been reached
-						    nEstiminatedLimit = theApp.uploadqueue->GetDatarate();
-						    allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
-						    nSlotsBusyLevel = -200;
-                            if(thePrefs.GetVerbose() && estimateChangedLog) theApp.QueueDebugLogLine(false,_T("Throttler: Set inital estimated limit to %0.5f changesCount: %i loopsCount: %i"), (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
-                            changesCount = 0;
-                            loopsCount = 0;
-					    }
-				    }
-				    else{
-                        if (nSlotsBusyLevel > 250){
-                            if(changesCount > 500 || changesCount > 300 && loopsCount > 1000 || loopsCount > 2000) {
-                                numberOfConsecutiveDownChanges = 0;
-                            }
-                            numberOfConsecutiveDownChanges++;
-                            uint32 changeDelta = CalculateChangeDelta(numberOfConsecutiveDownChanges);
-
-                            // Don't lower speed below 1 KBytes/s
-							// leuk_he don't move below minupload
-                            if(nEstiminatedLimit < changeDelta + 1024*thePrefs.minupload) {
-                                if(nEstiminatedLimit > 1024*thePrefs.minupload) {
-                                    changeDelta = nEstiminatedLimit - 1024*thePrefs.minupload;
-                                } else {
-                                    changeDelta = 0;
-                                }
-                            }
-                            ASSERT(nEstiminatedLimit >= changeDelta + 1024*thePrefs.minupload);
-    						nEstiminatedLimit -= changeDelta;
-
-                            if(thePrefs.GetVerbose() && estimateChangedLog) theApp.QueueDebugLogLine(false,_T("Throttler: REDUCED limit #%i with %i bytes to: %0.5f changesCount: %i loopsCount: %i"), numberOfConsecutiveDownChanges, changeDelta, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
-
-                            numberOfConsecutiveUpChanges = 0;
-						    nSlotsBusyLevel = 0;
-                            changesCount = 0;
-                            loopsCount = 0;
-					    }
-                        else if (nSlotsBusyLevel < (-250)){
-                            if(changesCount > 500 || changesCount > 300 && loopsCount > 1000 || loopsCount > 2000) {
-                                numberOfConsecutiveUpChanges = 0;
-                            }
-                            numberOfConsecutiveUpChanges++;
-                            uint32 changeDelta = CalculateChangeDelta(numberOfConsecutiveUpChanges);
-
-                            // Don't raise speed unless we are under current allowedDataRate
-                            if(nEstiminatedLimit+changeDelta > allowedDataRateClass[LAST_CLASS]) {
-                                if(nEstiminatedLimit < allowedDataRateClass[LAST_CLASS]) {
-                                    changeDelta = allowedDataRateClass[LAST_CLASS] - nEstiminatedLimit;
-                                } else {
-                                    changeDelta = 0;
-                                }
-                            }
-                            ASSERT(nEstiminatedLimit < allowedDataRateClass[LAST_CLASS] && nEstiminatedLimit+changeDelta <= allowedDataRateClass[LAST_CLASS] || nEstiminatedLimit >= allowedDataRateClass[LAST_CLASS] && changeDelta == 0);
-                            nEstiminatedLimit += changeDelta;
-
-                            if(thePrefs.GetVerbose() && estimateChangedLog) theApp.QueueDebugLogLine(false,_T("Throttler: INCREASED limit #%i with %i bytes to: %0.5f changesCount: %i loopsCount: %i"), numberOfConsecutiveUpChanges, changeDelta, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
-
-                            numberOfConsecutiveDownChanges = 0;
-						    nSlotsBusyLevel = 0;
-                            changesCount = 0;
-                            loopsCount = 0;
-					    }
-
-					    allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
-				    } 
-			    }
-            }
-        } else {
-            nEstiminatedLimit = 0;
 		}
+		sendLocker.Unlock();
 
+/*
+		// if this is kept, the loop above can be a little optimized (don't count nCanSend, just use nCanSend = GetSlotLimit(theApp.uploadqueue->GetDatarate())
+		if(theApp.uploadqueue) {
+			nCanSend = min(nCanSend, GetSlotLimit(theApp.uploadqueue->GetDatarate()));
+			//nCanSend = min(max(GetSlotLimit(theApp.uploadqueue->GetDatarate()),1), (UINT)m_StandardOrder_list.GetSize());
+		}
+*/
+		bool bUploadUnlimited = (thePrefs.GetMaxUpload() == UNLIMITED);
+		// When no upload limit has been set in options, try to guess a good upload limit.
+		if (bUploadUnlimited) {
+			if (timeSinceLastLoop > 0) {
+				loopsCount++;
+
+				//if(lotsOfLog) theApp.QueueDebugLogLine(false,_T("Throttler: busy: %i/%i nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount: %i loopsCount: %i"), cBusy, nCanSend, nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
+
+				if(nCanSend > 0) {
+					float fBusyPercent = ((float)cBusyTime/(float)nCanSend/(float)timeSinceLastLoop) * 100;
+					if (cBusy > 2 && fBusyPercent > 75.00f && nSlotsBusyLevel < 255){
+						nSlotsBusyLevel++;
+						changesCount++;
+						if(thePrefs.GetVerbose() && lotsOfLog && nSlotsBusyLevel%25==0) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount: %i loopsCount: %i"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
+					}
+					else if ((cBusy <= 2 || fBusyPercent < 25.00f) && nSlotsBusyLevel > (-255)){
+						nSlotsBusyLevel--;
+						changesCount++;
+						if(thePrefs.GetVerbose() && lotsOfLog && nSlotsBusyLevel%25==0) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount %i loopsCount: %i"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
+					}
+				}
+
+				if(nUploadStartTime == 0) {
+					if (m_StandardOrder_list.GetSize() >= 3)
+						nUploadStartTime = timeGetTime();
+				} else if(timeGetTime()- nUploadStartTime > SEC2MS(60)) {
+					if (theApp.uploadqueue){
+						if (nEstiminatedLimit == 0){ // no autolimit was set yet
+							if (nSlotsBusyLevel >= 250){ // sockets indicated that the BW limit has been reached
+								nEstiminatedLimit = theApp.uploadqueue->GetDatarate();
+								allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
+								nSlotsBusyLevel = 0;
+								if(thePrefs.GetVerbose() && estimateChangedLog) theApp.QueueDebugLogLine(false,_T("Throttler: Set inital estimated limit to %0.5f changesCount: %i loopsCount: %i"), (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
+								changesCount = 0;
+								loopsCount = 0;
+							}
+						}
+						else{
+							if (nSlotsBusyLevel > 250){
+								if(changesCount > 500 || changesCount > 300 && loopsCount > 1000 || loopsCount > 2000) {
+									numberOfConsecutiveDownChanges = 0;
+								}
+								numberOfConsecutiveDownChanges++;
+								uint32 changeDelta = CalculateChangeDelta(numberOfConsecutiveDownChanges);
+
+								// Don't lower speed below 1 KBytes/s
+								// leuk_he don't move below minupload
+								if(nEstiminatedLimit < changeDelta + 1024*thePrefs.minupload) {
+									if(nEstiminatedLimit > 1024*thePrefs.minupload) {
+										changeDelta = nEstiminatedLimit - 1024*thePrefs.minupload;
+									} else {
+										changeDelta = 0;
+									}
+								}
+								ASSERT(nEstiminatedLimit >= changeDelta + 1024*thePrefs.minupload);
+    							nEstiminatedLimit -= changeDelta;
+
+								if(thePrefs.GetVerbose() && estimateChangedLog) theApp.QueueDebugLogLine(false,_T("Throttler: REDUCED limit #%i with %i bytes to: %0.5f changesCount: %i loopsCount: %i"), numberOfConsecutiveDownChanges, changeDelta, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
+
+								numberOfConsecutiveUpChanges = 0;
+								nSlotsBusyLevel = 0;
+								changesCount = 0;
+								loopsCount = 0;
+							}
+							else if (nSlotsBusyLevel < (-250)){
+								if(changesCount > 500 || changesCount > 300 && loopsCount > 1000 || loopsCount > 2000) {
+									numberOfConsecutiveUpChanges = 0;
+								}
+								numberOfConsecutiveUpChanges++;
+								uint32 changeDelta = CalculateChangeDelta(numberOfConsecutiveUpChanges);
+
+								// Don't raise speed unless we are under current allowedDataRate
+								if(nEstiminatedLimit+changeDelta > allowedDataRateClass[LAST_CLASS]) {
+									if(nEstiminatedLimit < allowedDataRateClass[LAST_CLASS]) {
+										changeDelta = allowedDataRateClass[LAST_CLASS] - nEstiminatedLimit;
+									} else {
+										changeDelta = 0;
+									}
+								}
+								ASSERT(nEstiminatedLimit < allowedDataRateClass[LAST_CLASS] && nEstiminatedLimit+changeDelta <= allowedDataRateClass[LAST_CLASS] || nEstiminatedLimit >= allowedDataRateClass[LAST_CLASS] && changeDelta == 0);
+								nEstiminatedLimit += changeDelta;
+
+								if(thePrefs.GetVerbose() && estimateChangedLog) theApp.QueueDebugLogLine(false,_T("Throttler: INCREASED limit #%i with %i bytes to: %0.5f changesCount: %i loopsCount: %i"), numberOfConsecutiveUpChanges, changeDelta, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
+
+								numberOfConsecutiveDownChanges = 0;
+								nSlotsBusyLevel = 0;
+								changesCount = 0;
+								loopsCount = 0;
+							}
+
+							allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
+						} 
+					}
+				}
+			} else if (nEstiminatedLimit) {
+				allowedDataRateClass[LAST_CLASS] = min(nEstiminatedLimit, allowedDataRateClass[LAST_CLASS]);
+			}
+		} else {
+			nEstiminatedLimit = 0;
+		}
 		uint32 minFragSize = 1300;
 		uint32 doubleSendSize = minFragSize*2; // send two packages at a time so they can share an ACK
 		if(allowedDataRateClass[LAST_CLASS] < 6*1024) {
@@ -629,30 +639,28 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			doubleSendSize = minFragSize; // don't send two packages at a time at very low speeds to give them a smoother load
 		}
 
-        if(cBusy >= nCanSend && realBytesToSpendClass[LAST_CLASS] > 999 /*&& m_StandardOrder_list.GetSize() > 0*/) {
-            //allowedDataRate = 0;
-            realBytesToSpendClass[LAST_CLASS] = min(realBytesToSpendClass[LAST_CLASS], 1024*1000);
-            //m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS] = max(m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS], (UINT)m_StandardOrder_list.GetSize()+1);
-            if(nSlotsBusyLevel < 125 && bUploadUnlimited) {
-                nSlotsBusyLevel = 125;
-                if(thePrefs.GetVerbose() && lotsOfLog) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount %i loopsCount: %i (set due to all slots busy)"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
-            }
+       	if(cBusy >= nCanSend && realBytesToSpendClass[LAST_CLASS] > 999 /*&& m_StandardOrder_list.GetSize() > 0*/) {
+				
+			if(nSlotsBusyLevel < 125 && bUploadUnlimited) {
+				nSlotsBusyLevel = 125;
+				if(thePrefs.GetVerbose() && lotsOfLog) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount %i loopsCount: %i (set due to all slots busy)"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
+			}
 
-            busyEvent.Lock(1);
-        }
-
-		/*
-		#define TIME_BETWEEN_UPLOAD_LOOPS 1
-        */
+			busyEvent.Lock(1);
+		}
+		
+		#define TIME_BETWEEN_UPLOAD_LOOPS 0
+        /*
 		uint32 TIME_BETWEEN_UPLOAD_LOOPS = 0;
         if(cBusy >= nCanSend) {
             TIME_BETWEEN_UPLOAD_LOOPS = 1;
         }
-		
+		*/
+
         uint32 sleepTime;
         if(allowedDataRateClass[LAST_CLASS] == _UI32_MAX || realBytesToSpendClass[LAST_CLASS] >= 1000 || allowedDataRateClass[LAST_CLASS] == 0 && nEstiminatedLimit == 0) {
             // we can send at once
-            sleepTime = 1;
+            sleepTime = TIME_BETWEEN_UPLOAD_LOOPS;
         } else if(allowedDataRateClass[LAST_CLASS] == 0) {
             sleepTime = max((uint32)ceil((double)1000*doubleSendSize/nEstiminatedLimit), TIME_BETWEEN_UPLOAD_LOOPS);
         } else {
@@ -660,8 +668,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
             sleepTime = max((uint32)ceil((double)(-realBytesToSpendClass[LAST_CLASS] + 1000)/allowedDataRateClass[LAST_CLASS]), TIME_BETWEEN_UPLOAD_LOOPS);
         }
 
-		DWORD timeSinceLastLoop = timeGetTime() - lastLoopTick;
-
+		timeSinceLastLoop = timeGetTime() - lastLoopTick;
+		
         if(timeSinceLastLoop < sleepTime) {
             //DWORD tickBeforeSleep = ::GetTickCount();
             //DWORD tickBeforeSleep2 = timeGetTime();
@@ -682,7 +690,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if (realBytesToSpendClass[classID] > 999) {
 						m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
 						realBytesToSpendClass[classID] = 999;
-					} 
+					}
 					sint64 limit = -((sint64)(sleepTime + 2000)*allowedDataRate);
 					if (realBytesToSpendClass[classID] < limit)
 						realBytesToSpendClass[classID] = limit;
@@ -697,7 +705,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				if (timeSinceLastLoop > 0) {
 					if (realBytesToSpendClass[classID] > 999)
 						m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-					realBytesToSpendClass[classID] = _I64_MAX;
+					realBytesToSpendClass[classID] = 1000;
 				}
 			}
 		}
@@ -785,7 +793,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								}
 								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend && stat->realBytesToSpend > 999) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, allowedclientdatarate);
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, allowedDataRateClass[LAST_CLASS]);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
 #endif
@@ -794,8 +802,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										stat->realBytesToSpend -= 1000*lastSpentBytes;
 										if(m_highestNumberOfFullyActivatedSlotsClass[classID] > slotCounter)
 											m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounter;
-										if (classID<LAST_CLASS)
+										if (classID<LAST_CLASS) {
 											realBytesToSpendClass[classID] -= 1000*socketSentBytes.sentBytesStandardPackets;
+											m_SentBytesSinceLastCallClass[classID] += lastSpentBytes;
+											m_SentBytesSinceLastCallOverheadClass[classID] += socketSentBytes.sentBytesControlPackets;
+										}
 										ControlspentBytes += lastSpentBytes;
 										ControlspentOverhead += socketSentBytes.sentBytesControlPackets;
 									}
@@ -817,9 +828,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			numberofclientinhigherclass = 0;
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 				if(slotCounterClass[classID]) {
-					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
+					/*if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
 						BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
-					else
+					else*/
 						BytesToSpend = realBytesToSpendClass[classID] / 1000;
 					uint32 allowedclientdatarate = _UI32_MAX;
 					if (allowedDataRateClass[LAST_CLASS])	
@@ -838,7 +849,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(max(doubleSendSize, allowedclientdatarate/m_StandardOrder_list.GetCount()), doubleSendSize, allowedclientdatarate);
+									uint32 BytesToSend = (UINT)(BytesToSpend - spentBytes);
+									if (allowedclientdatarate)
+										BytesToSend = min(allowedclientdatarate, BytesToSend);
+									if (BytesToSend < doubleSendSize)
+										BytesToSend = doubleSendSize;
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedDataRateClass[LAST_CLASS]);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
 #endif
@@ -862,7 +878,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket,stat)) {
 								if (stat->realBytesToSpend > 999) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize, allowedclientdatarate);
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize, allowedDataRateClass[LAST_CLASS]);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize);
 #endif

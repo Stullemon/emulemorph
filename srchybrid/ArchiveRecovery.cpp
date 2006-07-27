@@ -973,7 +973,7 @@ RAR_BlockFile *CArchiveRecovery::scanForRarFileHeader(CFile *input, uint32 avail
 					retVal->FTIME			= calcUInt32(&checkCRC[18]);
 					retVal->UNP_VER			= checkCRC[22];
 					retVal->METHOD			= checkCRC[23];
-					retVal->NAME_SIZE		= lenFileName;
+					retVal->NAME_SIZE_var   = lenFileName;	  // MORPH leuk_he rename to prevent conflict with upnp lib define (dumb...)
 					retVal->ATTR			= calcUInt32(&checkCRC[26]);
 					// Optional values, present only if bit 0x100 in HEAD_FLAGS is set.
 					if ((retVal->HEAD_FLAGS & 0x100) == 0x100) {
@@ -1047,7 +1047,7 @@ bool CArchiveRecovery::validateRarFileBlock(RAR_BlockFile *block)
 		default:
 			return false;
 	}
-	if (block->NAME_SIZE > MAX_PATH)
+	if (block->NAME_SIZE_var > MAX_PATH)   // MORPH leuk_he rename to prevent conflict with upnp lib define (dumb...)
 		return false;
 	// Check directory entry has no size
 	if (((block->HEAD_FLAGS & 0xE0) == 0xE0) && ((block->PACK_SIZE + block->UNP_SIZE + block->FILE_CRC) > 0))
@@ -1072,14 +1072,14 @@ void CArchiveRecovery::writeRarBlock(CFile *input, CFile *output, RAR_BlockFile 
 		writeUInt32(output, block->FTIME);
 		output->Write(&block->UNP_VER, 1);
 		output->Write(&block->METHOD, 1);
-		writeUInt16(output, block->NAME_SIZE);
+		writeUInt16(output, block->NAME_SIZE_var); // MORPH leuk_he rename to prevent conflict with upnp lib define (dumb...)
 		writeUInt32(output, block->ATTR);
 		// Optional values, present only if bit 0x100 in HEAD_FLAGS is set.
 		if ((block->HEAD_FLAGS & 0x100) == 0x100) {
 			writeUInt32(output, block->HIGH_PACK_SIZE);
 			writeUInt32(output, block->HIGH_UNP_SIZE);
 		}
-		output->Write(block->FILE_NAME, block->NAME_SIZE);
+		output->Write(block->FILE_NAME, block->NAME_SIZE_var);   // MORPH leuk_he rename to prevent conflict with upnp lib define (dumb...)
 		if (block->HEAD_FLAGS & 0x0400/*LHD_SALT*/)
 			output->Write(block->SALT, sizeof block->SALT);
 		output->Write(block->EXT_DATE, block->EXT_DATE_SIZE);

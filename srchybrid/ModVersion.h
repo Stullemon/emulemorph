@@ -1,4 +1,4 @@
-//this file is part of eMule
+//this file is part of eMule ifdefined
 //Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
 // PPgEmulespana.cpp - emulEspaña Mod: Added by Announ
@@ -21,11 +21,11 @@
 //START - This part should not be changed in anyway
 #define MOD_VERSION_MJR		8
 #define MOD_VERSION_MIN		13
-#define MOD_VERSION_BUILD   9
+#define MOD_VERSION_BUILD   10
 #define	MOD_VERSION			_T("MorphXT")
 #define	MOD_VERSION_LONG	_T("MorphXT v")
 //END - This part should not be changed in anyway
-#define BETAREL              _T("BETA9")
+#define BETAREL              _T("BETA10")
 
 #define	MOD_MOD_VERSION		_T("") //Use this to define your version based on MorphXT mod
 

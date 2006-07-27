@@ -38,7 +38,7 @@ struct StandardPacketQueueEntry {
 
 #if !defined DONT_USE_SOCKET_BUFFERING
 struct BufferedPacket {
-		UINT	packetsize;
+		UINT	remainpacketsize;
 		UINT	packetpayloadsize;
 		bool	iscontrolpacket;
 		bool	isforpartfile;
@@ -164,7 +164,7 @@ private:
     //       accessed WITHOUT LOCKING in that method, so it is important that they are only called
     //       from one thread.
 #if !defined DONT_USE_SOCKET_BUFFERING
-	CList<BufferedPacket*> m_currentPacket_is_controlpacket_list;
+	CList<BufferedPacket*> m_currentPacket_in_buffer_list;
 #else
 	bool m_currentPacket_is_controlpacket;
 	bool m_currentPackageIsFromPartFile;

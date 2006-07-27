@@ -1578,9 +1578,9 @@ int CUpdateItemThread::Run() {
 				int found = m_listctrl->FindItem(&find);
 				if (found != -1)
 					m_listctrl->Update(found);
-				update_info->dwUpdate = GetTickCount()+1000;
+				update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000));
 				wecanwait = min(wecanwait,1000);
-			} else if (GetTickCount()-update_info->dwWillUpdate <= 1000) {
+			} else if (GetTickCount()-update_info->dwWillUpdate <= MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE) {
 				wecanwait = min(wecanwait,GetTickCount()-update_info->dwUpdate);
 			} else {
 				ListItems.RemoveKey(item);
