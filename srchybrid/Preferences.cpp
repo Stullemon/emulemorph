@@ -147,9 +147,11 @@ uint64	CPreferences::sesUpData_SHAREAZA;
 uint64	CPreferences::cumUpDataPort_4662;
 uint64	CPreferences::cumUpDataPort_OTHER;
 uint64	CPreferences::cumUpDataPort_PeerCache;
+uint64	CPreferences::cumUpDataPort_WebCache; //MORPH - WebCache Statistic
 uint64	CPreferences::sesUpDataPort_4662;
 uint64	CPreferences::sesUpDataPort_OTHER;
 uint64	CPreferences::sesUpDataPort_PeerCache;
+uint64	CPreferences::sesUpDataPort_WebCache; //MORPH - WebCache Statistic
 uint64	CPreferences::cumUpData_File;
 uint64	CPreferences::cumUpData_Partfile;
 uint64	CPreferences::sesUpData_File;
@@ -195,9 +197,11 @@ uint32	CPreferences::ses_successfull_WCDOWNLOADS; //jp webcache statistics needs
 uint64	CPreferences::cumDownDataPort_4662;
 uint64	CPreferences::cumDownDataPort_OTHER;
 uint64	CPreferences::cumDownDataPort_PeerCache;
+uint64	CPreferences::cumDownDataPort_WebCache; //MORPH - WebCache Statistic
 uint64	CPreferences::sesDownDataPort_4662;
 uint64	CPreferences::sesDownDataPort_OTHER;
 uint64	CPreferences::sesDownDataPort_PeerCache;
+uint64	CPreferences::sesDownDataPort_WebCache; //MORPH - WebCache Statistic
 float	CPreferences::cumConnAvgDownRate;
 float	CPreferences::cumConnMaxAvgDownRate;
 float	CPreferences::cumConnMaxDownRate;
@@ -1211,13 +1215,11 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteUInt64(L"DownDataPort_4662", GetCumDownDataPort_4662());
 	ini.WriteUInt64(L"DownDataPort_OTHER", GetCumDownDataPort_OTHER());
 	ini.WriteUInt64(L"DownDataPort_PeerCache", GetCumDownDataPort_PeerCache());
+	ini.WriteUInt64(L"DownDataPort_WebCache", GetCumDownDataPort_WebCache()); //MORPH - WebCache Statistic
 	// MORPH START - Added by Commander, WebCache 1.2e
 	ini.WriteUInt64(L"DownData_WEBCACHE", GetCumDownData_WEBCACHE()); // Superlexx - webcache - statistics
 	// MORPH END - Added by Commander, WebCache 1.2e
-	ini.WriteUInt64(_T("DownDataPort_4662"), GetCumDownDataPort_4662());
-	ini.WriteUInt64(_T("DownDataPort_OTHER"), GetCumDownDataPort_OTHER());
-	ini.WriteUInt64(_T("DownDataPort_PeerCache"), GetCumDownDataPort_PeerCache());
-
+	
 	ini.WriteUInt64(L"DownOverheadTotal",theStats.GetDownDataOverheadFileRequest() +
 										theStats.GetDownDataOverheadSourceExchange() +
 										theStats.GetDownDataOverheadServer() +
@@ -1255,6 +1257,7 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteUInt64(L"UpDataPort_4662", GetCumUpDataPort_4662());
 	ini.WriteUInt64(L"UpDataPort_OTHER", GetCumUpDataPort_OTHER());
 	ini.WriteUInt64(L"UpDataPort_PeerCache", GetCumUpDataPort_PeerCache());
+	ini.WriteUInt64(L"UpDataPort_WebCache", GetCumUpDataPort_WebCache()); //MORPH - WebCache Statistic
 	ini.WriteUInt64(L"UpData_File", GetCumUpData_File());
 	ini.WriteUInt64(L"UpData_Partfile", GetCumUpData_Partfile());
 
@@ -1468,6 +1471,7 @@ void CPreferences::Add2SessionTransferData(UINT uClientID, UINT uClientPort, BOO
 				case 4662:				sesUpDataPort_4662+=bytes;		break;
 				case (UINT)-1:			sesUpDataPort_PeerCache+=bytes;	break;
 				//case (UINT)-2:		sesUpDataPort_URL+=bytes;		break;
+				case (UINT)-3:			sesUpDataPort_WebCache+=bytes;	break; //MORPH - WebCache Statistic
 				default:				sesUpDataPort_OTHER+=bytes;		break;
 			}
 
@@ -1508,6 +1512,7 @@ void CPreferences::Add2SessionTransferData(UINT uClientID, UINT uClientPort, BOO
 				case 4662:				sesDownDataPort_4662+=bytes;	break;
 				case (UINT)-1:			sesDownDataPort_PeerCache+=bytes;break;
 				//case (UINT)-2:		sesDownDataPort_URL+=bytes;		break;
+				case (UINT)-3:			sesDownDataPort_WebCache+=bytes;	break; //MORPH - WebCache Statistic
 				default:				sesDownDataPort_OTHER+=bytes;	break;
 			}
 
@@ -1560,6 +1565,7 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumUpDataPort_4662=0;
 	cumUpDataPort_OTHER=0;
 	cumUpDataPort_PeerCache=0;
+	cumUpDataPort_WebCache=0; //MORPH - WebCache Statistic
 	cumDownCompletedFiles=0;
 	cumDownSuccessfulSessions=0;
 	cumDownFailedSessions=0;
@@ -1581,6 +1587,7 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumDownDataPort_4662=0;
 	cumDownDataPort_OTHER=0;
 	cumDownDataPort_PeerCache=0;
+	cumDownDataPort_WebCache=0;	//MORPH - WebCache Statistic
 	cumConnAvgDownRate=0;
 	cumConnMaxAvgDownRate=0;
 	cumConnMaxDownRate=0;
@@ -1692,6 +1699,7 @@ bool CPreferences::LoadStats(int loadBackUp)
 	cumUpDataPort_4662				= ini.GetUInt64(L"UpDataPort_4662");
 	cumUpDataPort_OTHER				= ini.GetUInt64(L"UpDataPort_OTHER");
 	cumUpDataPort_PeerCache			= ini.GetUInt64(L"UpDataPort_PeerCache");
+	cumUpDataPort_WebCache			= ini.GetUInt64(L"UpDataPort_WebCache"); //MORPH - WebCache Statistic
 
 	// Load cumulative source breakdown stats for sent bytes
 	cumUpData_File					= ini.GetUInt64(L"UpData_File");
@@ -1725,6 +1733,7 @@ bool CPreferences::LoadStats(int loadBackUp)
 	cumDownDataPort_4662			= ini.GetUInt64(L"DownDataPort_4662");
 	cumDownDataPort_OTHER			= ini.GetUInt64(L"DownDataPort_OTHER");
 	cumDownDataPort_PeerCache		= ini.GetUInt64(L"DownDataPort_PeerCache");
+	cumDownDataPort_WebCache		= ini.GetUInt64(L"DownDataPort_WebCache"); //MORPH - WebCache Statistic
 
 	// Load stats for cumulative connection data
 	cumConnAvgDownRate				= ini.GetFloat(L"ConnAvgDownRate");
@@ -1815,7 +1824,8 @@ bool CPreferences::LoadStats(int loadBackUp)
 		sesUpDataPort_4662			= 0;
 		sesUpDataPort_OTHER			= 0;
 		sesUpDataPort_PeerCache		= 0;
-
+		sesUpDataPort_WebCache		= 0; //MORPH - WebCache Statistic
+		
 		sesDownData_EDONKEY			= 0;
 		sesDownData_EDONKEYHYBRID	= 0;
 		sesDownData_EMULE			= 0;
@@ -1836,7 +1846,8 @@ bool CPreferences::LoadStats(int loadBackUp)
 		sesDownDataPort_4662		= 0;
 		sesDownDataPort_OTHER		= 0;
 		sesDownDataPort_PeerCache	= 0;
-
+		sesDownDataPort_WebCache	= 0; //MORPH - WebCache Statistic
+		
 		sesDownSuccessfulSessions	= 0;
 		sesDownFailedSessions		= 0;
 		sesPartsSavedByICH			= 0;
@@ -3201,7 +3212,7 @@ void CPreferences::LoadPreferences()
 	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),3);
 	maxglobaldataratefriend=ini.GetInt(_T("MaxGlobalDataRateFriend"),100);
 	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);
-	maxglobaldataratepowershare=ini.GetInt(_T("MaxGlobalDataRatePowerShare"),100); 
+	maxglobaldataratepowershare=ini.GetInt(_T("MaxGlobalDataRatePowerShare"),85); 
 	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
 	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
 	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),0);
@@ -3484,7 +3495,7 @@ void CPreferences::LoadPreferences()
 	m_bPeerCacheWasFound = ini.GetBool(L"Found", false);
 	m_bPeerCacheEnabled = ini.GetBool(L"Enabled", true);
 	m_nPeerCachePort = (uint16)ini.GetInt(L"PCPort", 0);
-	m_bPeerCacheShow = ini.GetBool(L"Show", false);
+	m_bPeerCacheShow = true; //ini.GetBool(L"Show", false); //allways see peercache
 
     //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	m_bUPnPNat = ini.GetBool(_T("UPnPNAT"), false, _T("eMule"));

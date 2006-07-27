@@ -1318,7 +1318,7 @@ uint32 CUpDownClient::SendBlockData(){
         // MORPH START - Added by Commander, WebCache 1.2e
 		// Superlexx - 0.44a port attempt
 		if(m_pWCUpSocket && IsUploadingToWebCache()) {
-			uUpStatsPort = (UINT)-1; //<<0.45a
+			uUpStatsPort = (UINT)-3; //<<0.45a
 
             // Check if filedata has been sent via the normal socket since last call.
             uint64 sentBytesCompleteFileNormalSocket = socket->GetSentBytesCompleteFileSinceLastCallAndReset();

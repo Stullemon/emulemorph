@@ -1066,8 +1066,6 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 			curUploadSlots >= (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
 			||
 			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
-			||
-            TotalSlots >NB_SPLITTING_CLASS+(theStats.GetAvgUploadRate(AVG_TIME)*1024/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting total by x minut average
 		 ) ||
 		 thePrefs.GetSlotLimitNumB() && TotalSlots >= thePrefs.GetSlotLimitNum()
        ) // max number of clients to allow for all circumstances
@@ -1918,11 +1916,13 @@ void CUploadQueue::UpdateDatarates() {
 		avarage_overhead_dr_list.AddTail(sentBytesOverheadClass[LAST_CLASS]);
 		m_avarage_overhead_dr_sum += sentBytesOverheadClass[LAST_CLASS];
 
-		avarage_friend_dr_list.AddTail(sentBytesClass[0]);
-   		m_avarage_friend_dr_sum += sentBytesClass[0];
+		uint64 frienduploadwithoutoverhead = sentBytesClass[0]-sentBytesOverheadClass[0]; 
+		avarage_friend_dr_list.AddTail(frienduploadwithoutoverhead);
+   		m_avarage_friend_dr_sum += frienduploadwithoutoverhead;
 
-		avarage_powershare_dr_list.AddTail(sentBytesClass[1]);
-   		m_avarage_powershare_dr_sum += sentBytesClass[1];
+		uint64 powershareuploadwithoutoverhead = sentBytesClass[1]-sentBytesOverheadClass[1]; 
+		avarage_powershare_dr_list.AddTail(powershareuploadwithoutoverhead);
+   		m_avarage_powershare_dr_sum += powershareuploadwithoutoverhead;
 
 		// Save time beetween each speed snapshot
 		avarage_tick_list.AddTail(curTick);

@@ -246,10 +246,12 @@ public:
 	static	uint64	cumUpDataPort_4662;
 	static	uint64	cumUpDataPort_OTHER;
 	static	uint64	cumUpDataPort_PeerCache;
+	static	uint64	cumUpDataPort_WebCache; //MORPH - WebCache Statistic
 	// Session port breakdown stats for sent bytes...
 	static	uint64	sesUpDataPort_4662;
 	static	uint64	sesUpDataPort_OTHER;
 	static	uint64	sesUpDataPort_PeerCache;
+	static	uint64	sesUpDataPort_WebCache; //MORPH - WebCache Statistic
 
 	// Cumulative source breakdown stats for sent bytes...
 	static	uint64	cumUpData_File;
@@ -309,10 +311,12 @@ public:
 	static	uint64	cumDownDataPort_4662;
 	static	uint64	cumDownDataPort_OTHER;
 	static	uint64	cumDownDataPort_PeerCache;
+	static	uint64	cumDownDataPort_WebCache; //MORPH - WebCache Statistic
 	// Session port breakdown stats for received bytes...
 	static	uint64	sesDownDataPort_4662;
 	static	uint64	sesDownDataPort_OTHER;
 	static	uint64	sesDownDataPort_PeerCache;
+	static	uint64	sesDownDataPort_WebCache; //MORPH - WebCache Statistic
 
 	// Saved stats for cumulative connection data...
 	static	float	cumConnAvgDownRate;
@@ -1129,18 +1133,22 @@ public:
 	// Cumulative port breakdown stats for sent bytes...
 	static	uint64	GetUpTotalPortData()			{ return   GetCumUpDataPort_4662() 
 															 + GetCumUpDataPort_OTHER()
-															 + GetCumUpDataPort_PeerCache(); }
+															 + GetCumUpDataPort_PeerCache()
+															 + GetCumUpDataPort_WebCache(); } //MORPH - WecCache Statistic
 	static	uint64	GetCumUpDataPort_4662()			{ return (cumUpDataPort_4662 +		sesUpDataPort_4662 );}
 	static	uint64	GetCumUpDataPort_OTHER()		{ return (cumUpDataPort_OTHER +		sesUpDataPort_OTHER );}
 	static	uint64	GetCumUpDataPort_PeerCache()	{ return (cumUpDataPort_PeerCache +	sesUpDataPort_PeerCache );}
-
+	static	uint64	GetCumUpDataPort_WebCache()		{ return (cumUpDataPort_WebCache +	sesUpDataPort_WebCache );} //MORPH - WecCache Statistic
+	
 	// Session port breakdown stats for sent bytes...
 	static	uint64	GetUpSessionPortData()			{ return   sesUpDataPort_4662 
 															 + sesUpDataPort_OTHER
-															 + sesUpDataPort_PeerCache; }
+															 + sesUpDataPort_PeerCache
+															 + sesUpDataPort_WebCache; } //MORPH - WecCache Statistic
 	static	uint64	GetUpDataPort_4662()			{ return sesUpDataPort_4662;}
 	static	uint64	GetUpDataPort_OTHER()			{ return sesUpDataPort_OTHER;}
 	static	uint64	GetUpDataPort_PeerCache()		{ return sesUpDataPort_PeerCache; }
+	static	uint64	GetUpDataPort_WebCache()		{ return sesUpDataPort_WebCache; } //MORPH - WecCache Statistic
 
 	// Cumulative DS breakdown stats for sent bytes...
 	static	uint64	GetUpTotalDataFile()			{ return (GetCumUpData_File() +				GetCumUpData_Partfile() );}
@@ -1200,18 +1208,21 @@ public:
 	// Cumulative port breakdown stats for received bytes...
 	static	uint64	GetDownTotalPortData()			{ return   GetCumDownDataPort_4662() 
 															 + GetCumDownDataPort_OTHER()
-															 + GetCumDownDataPort_PeerCache(); }
+															 + GetCumDownDataPort_PeerCache()
+															 + GetCumDownDataPort_WebCache(); } //MORPH - WecCache Statistic
 	static	uint64	GetCumDownDataPort_4662()		{ return cumDownDataPort_4662		+ sesDownDataPort_4662; }
 	static	uint64	GetCumDownDataPort_OTHER()		{ return cumDownDataPort_OTHER		+ sesDownDataPort_OTHER; }
 	static	uint64	GetCumDownDataPort_PeerCache()	{ return cumDownDataPort_PeerCache	+ sesDownDataPort_PeerCache; }
-
+ 	static	uint64	GetCumDownDataPort_WebCache()	{ return cumDownDataPort_WebCache	+ sesDownDataPort_WebCache; } //MORPH - WecCache Statistic
 	// Session port breakdown stats for received bytes...
 	static	uint64	GetDownSessionDataPort()		{ return   sesDownDataPort_4662 
 															 + sesDownDataPort_OTHER
-															 + sesDownDataPort_PeerCache; }
+															 + sesDownDataPort_PeerCache
+															 + sesDownDataPort_WebCache; } //MORPH - WecCache Statistic
 	static	uint64	GetDownDataPort_4662()			{ return sesDownDataPort_4662;}
 	static	uint64	GetDownDataPort_OTHER()			{ return sesDownDataPort_OTHER;}
 	static	uint64	GetDownDataPort_PeerCache()		{ return sesDownDataPort_PeerCache; }
+	static	uint64	GetDownDataPort_WebCache()		{ return sesDownDataPort_WebCache; } //MORPH - WecCache Statistic
 
 	//		Saved stats for cumulative connection data
 	static	float	GetConnAvgDownRate()			{ return cumConnAvgDownRate;}

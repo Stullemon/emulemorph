@@ -683,7 +683,7 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
 				/*
 				sentBytes += cur_packet->packet->size+2; // ZZ:UploadBandWithThrottler (UDP)
 				*/
-				sentBytes += cur_packet->packet->size+2  + (((cur_packet->packet->size+2)/1480)+(((cur_packet->packet->size+2)%1480)?1:0)) * 20 ; // ZZ:UploadBandWithThrottler (UDP)
+				sentBytes += cur_packet->packet->size+2  + (cur_packet->packet->size+2)/1480 * 20 ; // ZZ:UploadBandWithThrottler (UDP)
 
 				controlpacket_queue.RemoveHead();
 				delete cur_packet->packet;

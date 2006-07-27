@@ -404,10 +404,17 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 	if (nEndPos == nStartPos || uSize != nEndPos - nStartPos)
 		throw CString(_T("Failed to process HTTP data block - Invalid block start/end offsets"));
 
+	//MORPH - Webcache Statistic
+	/*
 	thePrefs.Add2SessionTransferData(GetClientSoft(), (GetClientSoft()==SO_URL) ? (UINT)-2 : (UINT)-1, false, false, uSize);
+	*/
+	thePrefs.Add2SessionTransferData(GetClientSoft(), (GetClientSoft()==SO_URL) ? (UINT)-2 : (IsDownloadingFromWebCache()) ? (UINT)-3 : (UINT)-1, false, false, uSize);
 	m_nDownDataRateMS += uSize;
+	//MORPH - Avoid Credits Accumulate faker
+	/*
 	if (credits)
 		credits->AddDownloaded(uSize, GetIP());
+	*/
 	nEndPos--;
 
 	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != NULL; )
@@ -445,6 +452,10 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
             // MORPH END - Modified by Commander, WebCache 1.2e
 			if (lenWritten > 0)
 			{
+				//MORPH START - Avoid Credits Accumulate faker
+				if (credits)
+					credits->AddDownloaded(uSize, GetIP());
+				//MORPH END   - Avoid Credits Accumulate faker
 				m_nTransferredDown += uSize;
                 /*zz*/m_nCurSessionPayloadDown += lenWritten;
 				SetTransferredDownMini();

@@ -935,6 +935,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						uint64	PortDataDefault =	thePrefs.GetDownDataPort_4662();
 						uint64	PortDataOther =		thePrefs.GetDownDataPort_OTHER();
 						uint64	PortDataPeerCache =	thePrefs.GetDownDataPort_PeerCache();
+						uint64	PortDataWebCache =	thePrefs.GetDownDataPort_WebCache(); //MORPH - WebCache Statistic
 						uint64	PortDataTotal =		thePrefs.GetDownSessionDataPort();
 						double	percentPortTransferred = 0;
 
@@ -959,6 +960,15 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 						stattree.SetItemText( down_spb[i] , cbuffer );
 						i++;
+						//MORPH START - WebCache Statistic
+						if ( PortDataTotal!=0 && PortDataWebCache!=0 )
+							percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
+						else
+							percentPortTransferred = 0;
+						cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
+						stattree.SetItemText( down_spb[i] , cbuffer );
+						i++;
+						//MORPH END   - WebCache Statistic
 					}
 				}
 				// Completed Downloads
@@ -1297,6 +1307,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						uint64	PortDataDefault =	thePrefs.GetCumDownDataPort_4662();
 						uint64	PortDataOther =		thePrefs.GetCumDownDataPort_OTHER();
 						uint64	PortDataPeerCache =	thePrefs.GetCumDownDataPort_PeerCache();
+						uint64	PortDataWebCache =	thePrefs.GetCumDownDataPort_WebCache(); //MORPH - WebCache Statistic
 						uint64	PortDataTotal =		thePrefs.GetDownTotalPortData();
 						double	percentPortTransferred = 0;
 
@@ -1321,6 +1332,16 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 						stattree.SetItemText( down_tpb[i] , cbuffer );
 						i++;
+						
+						//MORPH START - WebCache Statistic
+						if ( PortDataTotal!=0 && PortDataWebCache!=0 )
+							percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
+						else
+							percentPortTransferred = 0;
+						cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
+						stattree.SetItemText( down_tpb[i] , cbuffer );
+						i++;
+						//MORPH END   - WebCache Statistic
 					}
 				}
 				// Set Cum Completed Downloads
@@ -1510,6 +1531,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						uint64	PortDataDefault =	thePrefs.GetUpDataPort_4662();
 						uint64	PortDataOther =		thePrefs.GetUpDataPort_OTHER();
 						uint64	PortDataPeerCache =	thePrefs.GetUpDataPort_PeerCache();
+						uint64	PortDataWebCache =	thePrefs.GetUpDataPort_WebCache(); //MORPH - WebCache Statistic
 						uint64	PortDataTotal =		thePrefs.GetUpSessionPortData();
 						double	percentPortTransferred = 0;
 
@@ -1534,6 +1556,15 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 						stattree.SetItemText( up_spb[i] , cbuffer );
 						i++;
+						//MORPH START - WebCache Statistic
+						if ( PortDataTotal!=0 && PortDataWebCache!=0 )
+							percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
+						else
+							percentPortTransferred = 0;
+						cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
+						stattree.SetItemText( up_spb[i] , cbuffer );
+						i++;
+						//MORPH END   - WebCache Statistic
 					}
 					// Uploaded Data By Source
 					if (forceUpdate || stattree.IsExpanded(hup_ssb)) 
@@ -1737,6 +1768,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						uint64	PortDataDefault =	thePrefs.GetCumUpDataPort_4662();
 						uint64	PortDataOther =		thePrefs.GetCumUpDataPort_OTHER();
 						uint64	PortDataPeerCache =	thePrefs.GetCumUpDataPort_PeerCache();
+						uint64	PortDataWebCache =	thePrefs.GetCumUpDataPort_WebCache(); //MORPH - WebCache Statistic
 						uint64	PortDataTotal =		thePrefs.GetUpTotalPortData();
 						double	percentPortTransferred = 0;
 
@@ -1761,6 +1793,16 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 						stattree.SetItemText( up_tpb[i] , cbuffer );
 						i++;
+						
+						//MORPH START - WebCache Statistic
+						if ( PortDataTotal!=0 && PortDataWebCache!=0 )
+							percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
+						else
+							percentPortTransferred = 0;
+						cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
+						stattree.SetItemText( up_tpb[i] , cbuffer );
+						i++;
+						//MORPH END  - WebCache Statistic
 					}
 					// Uploaded Data By Source
 					if (forceUpdate || stattree.IsExpanded(hup_tsb)) 
@@ -2218,6 +2260,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								uint64	PortDataDefault =	(uint64)(thePrefs.GetCumUpDataPort_4662() * avgModifier[mx]);
 								uint64	PortDataOther =		(uint64)(thePrefs.GetCumUpDataPort_OTHER() * avgModifier[mx]);
 								uint64	PortDataPeerCache =	(uint64)(thePrefs.GetCumUpDataPort_PeerCache() * avgModifier[mx]);
+								uint64	PortDataWebCache =	(uint64)(thePrefs.GetCumUpDataPort_WebCache() * avgModifier[mx]); //MORPH - WebCache Statistic
 								uint64	PortDataTotal =		(uint64)( thePrefs.GetUpTotalPortData() * avgModifier[mx]);
 								double	percentPortTransferred = 0;
 
@@ -2242,6 +2285,16 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 								stattree.SetItemText( time_aap_up_dp[mx][i] , cbuffer );
 								i++;
+								
+								//MORPH START - WebCache Statistic
+								if ( PortDataTotal!=0 && PortDataWebCache!=0 )
+									percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
+								else
+									percentPortTransferred = 0;
+								cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
+								stattree.SetItemText( time_aap_up_dp[mx][i] , cbuffer );
+								i++;
+								//MORPH END  - WebCache Statistic
 							}
 							// Uploaded Data By Source
 							if (forceUpdate || stattree.IsExpanded(time_aap_up_hd[mx][2])) 
@@ -2448,6 +2501,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								uint64	PortDataDefault =	(uint64)(thePrefs.GetCumDownDataPort_4662() * avgModifier[mx]);
 								uint64	PortDataOther =		(uint64)(thePrefs.GetCumDownDataPort_OTHER() * avgModifier[mx]);
 								uint64	PortDataPeerCache =	(uint64)(thePrefs.GetCumDownDataPort_PeerCache() * avgModifier[mx]);
+								uint64	PortDataWebCache =	(uint64)(thePrefs.GetCumDownDataPort_WebCache() * avgModifier[mx]); //MORPH - WebCache Statistic
 								uint64	PortDataTotal =		(uint64)(thePrefs.GetDownTotalPortData() * avgModifier[mx]);
 								double	percentPortTransferred = 0;
 
@@ -2472,6 +2526,16 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER), CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 								stattree.SetItemText( time_aap_down_dp[mx][i] , cbuffer );
 								i++;
+
+								//MORPH START - WebCache Statistic
+								if ( PortDataTotal!=0 && PortDataWebCache!=0 )
+									percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
+								else
+									percentPortTransferred = 0;
+								cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE), CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
+								stattree.SetItemText( time_aap_down_dp[mx][i] , cbuffer );
+								i++;
+								//MORPH END   - WebCache Statistic
 							}
 						}
 						// Set Cum Completed Downloads

@@ -751,7 +751,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if (lastSpentBytes) {
 						Socket_stat* stat = NULL;
 						if (m_stat_list.Lookup(socket, stat)) {
-							stat->realBytesToSpend -= lastSpentBytes*1000;
+							stat->realBytesToSpend -= socketSentBytes.sentBytesStandardPackets*1000;
 							if (stat->classID < LAST_CLASS) {
 								realBytesToSpendClass[stat->classID] -= 1000*socketSentBytes.sentBytesStandardPackets;
 								m_SentBytesSinceLastCallClass[stat->classID] += lastSpentBytes;
@@ -799,7 +799,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 #endif
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
-										stat->realBytesToSpend -= 1000*lastSpentBytes;
+										stat->realBytesToSpend -= 1000*socketSentBytes.sentBytesStandardPackets;
 										if(m_highestNumberOfFullyActivatedSlotsClass[classID] > slotCounter)
 											m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounter;
 										if (classID<LAST_CLASS) {
@@ -860,7 +860,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 #endif
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
-										stat->realBytesToSpend -= 1000*lastSpentBytes;
+										stat->realBytesToSpend -= 1000*socketSentBytes.sentBytesStandardPackets;
 										if(slotCounter+1 > m_highestNumberOfFullyActivatedSlotsClass[classID] && (socketSentBytes.sentBytesStandardPackets >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
 											m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounter+1;
 										spentBytes += lastSpentBytes;
@@ -884,7 +884,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 #endif
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
-										stat->realBytesToSpend -= 1000*lastSpentBytes;
+										stat->realBytesToSpend -= 1000*socketSentBytes.sentBytesStandardPackets;
 										if(slotCounter+1 > m_highestNumberOfFullyActivatedSlotsClass[classID] && (socketSentBytes.sentBytesStandardPackets >= doubleSendSize)) // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/))
 											m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounter+1;
 										spentBytes += lastSpentBytes;

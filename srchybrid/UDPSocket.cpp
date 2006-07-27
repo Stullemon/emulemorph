@@ -649,7 +649,7 @@ SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint3
 				/*
 				sentBytes += packet->size; // ZZ:UploadBandWithThrottler (UDP)
 				*/
-				sentBytes += packet->size  + ((packet->size/1480)+(packet->size%1480)?1:0) * 20; // ZZ:UploadBandWithThrottler (UDP)
+				sentBytes += packet->size  + ((packet->size/1480)+(packet->size<1480)?1:0) * 20; // ZZ:UploadBandWithThrottler (UDP)
 
             }
 
