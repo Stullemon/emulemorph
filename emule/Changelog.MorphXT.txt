@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.13
+Changelog for eMule 0.47a MorphXT v8.13rc
 -------------------------------------
 FIXED: MergeKnown: statistic merge from SlugFiller mod has been fixed to avoid crash
 - also fixes duplicate files
@@ -14,6 +14,12 @@ FIXED: Command line: Do not start after "emule exit" and emule was not running.
 ADDED: GUI: more mod icons [Stulle]
 ADDED: GUI: Extra infos in Client Tooltip
 ADDED: GUI: Remaining Available Data from a client in Remaining Size column of Transfer windows
+ADDED: Don't compress uploaded data if datarate is above 180kBytes/s
+ADDED: Split block package accorddingly to datarate speed (idea of zz)
+ADDED: KAD: Apply ip filter for send udp packets. No packets are send to ip that are ipfiltered on receive.[leuk_he]
+ADDED: Official fix to work arround Reask Answer dropped for lowid behind router with NAPT enabled (pointed by DavidXanatos)
+ADDED: Portugese braziallian (pt_br) translation [fabulous]
+ADDED: Chinese simplified translation (zh_CN) translation [pennyliu123]
 
 CHANGED: DCD: Display also current download chunk number and session completed download from a client
 CHANGED: Some tooltip spelling thx to fabulous (pt_br translator) [leuk_he] 
@@ -21,6 +27,11 @@ CHANGED: USC: Should now respect higher class number of slot and reduce as much 
 CHANGED: WAP: Removed some uneeded code
 CHANGED: FlushThread: Reviewed to work arround not flushed data at shutdown
 CHANGED: ReadBlockFromFileThread: Reviewed to be able to read data from disk and prepare block requested at the same time
+CHANGED: Unlimited upload now works on WSA_WOULDBLOCK corrreclty.  (No USC needed)
+CHANGED: Update upnp library to 1.4.x (thrunk version) 26/07/2006  http://www.libupnp.org/ 
+CHANGED: known.met format better compatible. (noted by david?)
+CHANGED: Drop lower class"pre-empt" slots more often when opehing higher class slot 
+
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA7
