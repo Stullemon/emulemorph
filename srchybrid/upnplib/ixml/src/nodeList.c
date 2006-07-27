@@ -75,6 +75,8 @@ ixmlNodeList_item( IXML_NodeList * nList,
         next = next->next;
     }
 
+    if( next == NULL ) return NULL;
+
     return next->nodeItem;
 
 }
@@ -82,7 +84,7 @@ ixmlNodeList_item( IXML_NodeList * nList,
 /*================================================================
 *   ixmlNodeList_addToNodeList
 *       Add a node to nodelist
-*       External function.
+*       Internal to parser only.
 *
 *=================================================================*/
 int

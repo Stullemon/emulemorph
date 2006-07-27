@@ -93,6 +93,8 @@ BOOL    Parser_isValidXmlName( DOMString name);
 int     Parser_setNodePrefixAndLocalName(IXML_Node *newIXML_NodeIXML_Attr);
 void    Parser_freeNodeContent( IXML_Node *IXML_Nodeptr);
 
+void    Parser_setErrorChar( char c );
+
 void    ixmlAttr_free(IXML_Attr *attrNode);
 void    ixmlAttr_init(IXML_Attr *attrNode);
 

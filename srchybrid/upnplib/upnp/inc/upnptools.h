@@ -43,6 +43,8 @@
 
 #include "upnp.h"
 
+// Function declarations only if tools compiled into the library
+#if UPNP_HAVE_TOOLS
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,8 +67,8 @@ extern "C" {
  */
 
 EXPORT_SPEC int UpnpResolveURL(
-    IN char * BaseURL,  /** The base URL to combine. */
-    IN char * RelURL,   /** The relative URL to {\bf BaseURL}. */
+    IN const char * BaseURL,  /** The base URL to combine. */
+    IN const char * RelURL,   /** The relative URL to {\bf BaseURL}. */
     OUT char * AbsURL   /** A pointer to a buffer to store the 
                             absolute URL. */
     );
@@ -81,11 +83,11 @@ EXPORT_SPEC int UpnpResolveURL(
  */
 
 EXPORT_SPEC IXML_Document* UpnpMakeAction(
-    IN char * ActionName,  /** The action name. */
-    IN char * ServType,    /** The service type.  */
-    IN int NumArg,         /** Number of argument pairs to be passed. */  
-    IN char * Arg,         /** Status variable name and value pair. */
-    IN ...                 /*  Other status variable name and value pairs. */
+    IN const char * ActionName, /** The action name. */
+    IN const char * ServType,   /** The service type.  */
+    IN int NumArg,              /** Number of argument pairs to be passed. */ 
+    IN const char * Arg,        /** Status variable name and value pair. */
+    IN ...                   /*  Other status variable name and value pairs. */
     );
 
 /** {\bf UpnpAddToAction} creates an action request packet based on its input 
@@ -109,10 +111,10 @@ EXPORT_SPEC int UpnpAddToAction(
         IN OUT IXML_Document ** ActionDoc, 
 	                              /** A pointer to store the action 
 				          document node. */
-        IN char * ActionName,         /** The action name. */
-        IN char * ServType,           /** The service type.  */
-        IN char * ArgName,            /** The status variable name. */
-        IN char * ArgVal              /** The status variable value.  */
+        IN const char * ActionName,   /** The action name. */
+        IN const char * ServType,     /** The service type.  */
+        IN const char * ArgName,      /** The status variable name. */
+        IN const char * ArgVal        /** The status variable value.  */
         );
 
 /** {\bf UpnpMakeActionResponse} creates an action response packet based 
@@ -125,11 +127,11 @@ EXPORT_SPEC int UpnpAddToAction(
  */
 
 EXPORT_SPEC IXML_Document* UpnpMakeActionResponse(
-    IN char * ActionName,  /** The action name. */
-    IN char * ServType,    /** The service type.  */
-    IN int NumArg,         /** The number of argument pairs passed. */  
-    IN char * Arg,         /** The status variable name and value pair. */
-    IN ...                 /*  Other status variable name and value pairs. */
+    IN const char * ActionName, /** The action name. */
+    IN const char * ServType,   /** The service type.  */
+    IN int NumArg,              /** The number of argument pairs passed. */  
+    IN const char * Arg,        /** The status variable name and value pair. */
+    IN ...                   /*  Other status variable name and value pairs. */
     );
 
 /** {\bf UpnpAddToActionResponse} creates an action response
@@ -155,10 +157,10 @@ EXPORT_SPEC int UpnpAddToActionResponse(
 	                                   /** Pointer to a document to 
 					       store the action document 
 					       node. */
-        IN char * ActionName,              /** The action name. */
-        IN char * ServType,                /** The service type.  */
-        IN char * ArgName,                 /** The status variable name. */
-        IN char * ArgVal                   /** The status variable value.  */
+        IN const char * ActionName,        /** The action name. */
+        IN const char * ServType,          /** The service type.  */
+        IN const char * ArgName,           /** The status variable name. */
+        IN const char * ArgVal             /** The status variable value.  */
         );
 
 /** {\bf UpnpAddToPropertySet} can be used when an application needs to 
@@ -183,8 +185,8 @@ EXPORT_SPEC int UpnpAddToPropertySet(
     IN OUT IXML_Document **PropSet,    
                                   /** A pointer to the document containing 
 				      the property set document node. */
-    IN char * ArgName,            /** The status variable name. */  
-    IN char * ArgVal              /** The status variable value.  */
+    IN const char * ArgName,      /** The status variable name. */  
+    IN const char * ArgVal        /** The status variable value.  */
     );
 
 /** {\bf UpnpCreatePropertySet} creates a property set  
@@ -198,8 +200,8 @@ EXPORT_SPEC int UpnpAddToPropertySet(
  */
 
 EXPORT_SPEC IXML_Document* UpnpCreatePropertySet(
-    IN int NumArg,  /** The number of argument pairs passed. */
-    IN char* Arg,   /** The status variable name and value pair. */
+    IN int NumArg,        /** The number of argument pairs passed. */
+    IN const char* Arg,   /** The status variable name and value pair. */
     IN ...
     );
 
@@ -217,7 +219,14 @@ EXPORT_SPEC const char * UpnpGetErrorMessage(
 
 //@}
 
+#include "ixmlparser.h"
+
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif // UPNP_HAVE_TOOLS
+
+#endif // UPNP_TOOLS_H
+
+

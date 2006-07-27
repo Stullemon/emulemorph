@@ -37,13 +37,13 @@
 //@{
 
 #include <stdio.h>
+#ifdef __FreeBSD__
+#include <time.h>
+#endif
 #include "ixml.h"
-#include "config.h"
-
-#ifndef _WIN32
-// conflicts with definitions in minmax.h
-#define max(a, b)   (((a)>(b))? (a):(b))
-#define min(a, b)   (((a)<(b))? (a):(b))
+#include "upnpconfig.h"
+#if UPNP_HAVE_DEBUG
+#	include "upnpdebug.h"
 #endif
 
 #ifndef UPNP_STATIC_LIB
@@ -58,40 +58,41 @@
 #endif
 
 
-#ifdef _WIN32
-// use the windows _stricmp
-#define strcasecmp _stricmp
+/*#ifdef WIN32
+ #ifdef LIBUPNP_EXPORTS
+  // set up declspec for dll export to make functions visible to library users
+  #define EXPORT_SPEC __declspec(dllexport)
+ #else
+  #define EXPORT_SPEC __declspec(dllimport)
+ #endif
+#else
+ #define EXPORT_SPEC
 #endif
+ */
 
-#ifndef _WIN32
-#define UpnpCloseSocket         close
+#ifndef WIN32
+ #define UpnpCloseSocket         close
 #else
-// winsock provides closesocket instead of close
-#define UpnpCloseSocket         closesocket
+ #define UpnpCloseSocket         closesocket
 #endif
-#ifdef _WIN32
-#define UPNP_SOCKETERROR        SOCKET_ERROR
-#define UPNP_INVALID_SOCKET     INVALID_SOCKET
-#else
 #define UPNP_SOCKETERROR        -1
 #define UPNP_INVALID_SOCKET     -1
-#endif
-#ifndef _WIN32
-// already defined in windows
-#define SOCKET                  int
+#ifndef WIN32
+ #define SOCKET                  int
 #endif
 
-#ifndef _WIN32
-#include <netinet/in.h>
+#ifndef WIN32
+ #include <netinet/in.h>
 #else
-#include <winsock2.h>
+ #include <winsock2.h>
+ #include <time.h>
 #endif
 
 #define NUM_HANDLE 200
 #define LINE_SIZE  180
-#define UPNP_NAME_SIZE  256
-#define MNFT_UPNP_NAME_SIZE  64
-#define MODL_UPNP_NAME_SIZE  32
+#define NAME_SIZE  256
+#define MNFT_NAME_SIZE  64
+#define MODL_NAME_SIZE  32
 #define SERL_NUMR_SIZE  64
 #define MODL_DESC_SIZE  64
 #define UPNP_INFINITE -1
@@ -354,13 +355,23 @@
 /** @name UPNP_E_SOCKET_ERROR [-208]
  *  {\tt UPNP_E_SOCKET_ERROR} is the generic socket error code for
  *  conditions not covered by other error codes.  This error can be returned
- *  by any functions that performs network operations.
+ *  by any function that performs network operations.
  */
 //@{
 #define UPNP_E_SOCKET_ERROR	    -208
 //@}
 
-#define UPNP_E_FILE_WRITE_ERROR       -209
+#define UPNP_E_FILE_WRITE_ERROR -209
+
+/** @name UPNP_E_CANCELED [-210]
+ *  {\tt UPNP_E_CANCELED} signifies that the operation was canceled. This
+ *  error can be returned by any function that allows for external
+ *  cancelation.
+ */
+//@{
+#define UPNP_E_CANCELED         -210
+//@}
+
 #define UPNP_E_EVENT_PROTOCOL         -300
 
 /** @name UPNP_E_SUBSCRIBE_UNACCEPTED [-301]
@@ -678,13 +689,13 @@ struct Upnp_Action_Request
   char ErrStr[LINE_SIZE];
 
  /** The Action Name. */
-  char ActionName[UPNP_NAME_SIZE];
+  char ActionName[NAME_SIZE];
 
   /** The unique device ID. */
-  char DevUDN[UPNP_NAME_SIZE];
+  char DevUDN[NAME_SIZE];
 
   /** The service ID. */
-  char ServiceID[UPNP_NAME_SIZE];
+  char ServiceID[NAME_SIZE];
 
   /** The DOM document describing the action. */
   IXML_Document *ActionRequest;
@@ -706,7 +717,7 @@ struct Upnp_Action_Complete
   int ErrCode;
 
   /** The control URL for service. */
-  char CtrlUrl[UPNP_NAME_SIZE];
+  char CtrlUrl[NAME_SIZE];
 
   /** The DOM document describing the action. */
   IXML_Document *ActionRequest;
@@ -731,13 +742,13 @@ struct Upnp_State_Var_Request
   char ErrStr[LINE_SIZE];
 
   /** The unique device ID. */
-  char DevUDN[UPNP_NAME_SIZE];
+  char DevUDN[NAME_SIZE];
 
   /** The  service ID. */
-  char ServiceID[UPNP_NAME_SIZE];
+  char ServiceID[NAME_SIZE];
 
   /** The name of the variable. */
-  char StateVarName[UPNP_NAME_SIZE];
+  char StateVarName[NAME_SIZE];
 
   /** IP address of sender requesting the state variable. */
   struct in_addr CtrlPtIPAddr;
@@ -756,10 +767,10 @@ struct Upnp_State_Var_Complete
   int ErrCode;
 
   /** The control URL for the service. */
-  char CtrlUrl[UPNP_NAME_SIZE];
+  char CtrlUrl[NAME_SIZE];
 
   /** The name of the variable. */
-  char StateVarName[UPNP_NAME_SIZE];
+  char StateVarName[NAME_SIZE];
 
   /** The current value of the variable or error string in case of error. */
   DOMString CurrentVal;
@@ -844,7 +855,7 @@ struct Upnp_Event_Subscribe {
   int ErrCode;              
 
   /** The event URL being subscribed to or removed from. */
-  char PublisherUrl[UPNP_NAME_SIZE]; 
+  char PublisherUrl[NAME_SIZE]; 
 
   /** The actual subscription time (for subscriptions only). */
   int TimeOut;              
@@ -994,7 +1005,7 @@ struct UpnpVirtualDirCallbacks
 typedef struct virtual_Dir_List
 {
     struct virtual_Dir_List *next;
-    char dirName[UPNP_NAME_SIZE];
+    char dirName[NAME_SIZE];
 } virtualDirList;
 
 /** All callback functions share the same prototype, documented below.
@@ -1318,28 +1329,32 @@ EXPORT_SPEC int UpnpUnRegisterRootDevice(
    );
 
 
-/** Sets the size of the receive buffer for incoming SOAP requests. This API 
- *  allows devices that have memory constraints to exhibit consistent 
- *  behaviour if the size of the incoming SOAP request exceeds the memory 
- *  that device can allocate for incoming SOAP messages. The default 
- *  value set by the SDK for the buffer is 16K bytes.  Trying to set a value 
- *  greater than 32K will result in an error.
+/** OBSOLETE METHOD : use {\bf UpnpSetMaxContentLength} instead.
+ * Warning: the Handle argument provided here is not used, so the effect
+ * of this function is global to the SDK (= same as 
+ * {\bf UpnpSetMaxContentLength} ).
+ */
+EXPORT_SPEC int UpnpSetContentLength(
+    IN UpnpClient_Handle Hnd,  
+    IN int contentLength       
+    );
+
+
+/** Sets the maximum content-length that the SDK will process on an incoming 
+ *  SOAP requests or responses. This API allows devices that have memory 
+ *  constraints to exhibit consistent behaviour if the size of the 
+ *  incoming SOAP message exceeds the memory that device can allocate. 
+ *  The default maximum content-length is {\tt DEFAULT_SOAP_CONTENT_LENGTH} 
+ *  = 16K bytes.
  *   
  *  @return [int] An integer representing one of the following:
  *    \begin{itemize}
  *      \item {\tt UPNP_E_SUCCESS}: The operation completed successfully.
- *      \item {\tt UPNP_E_INVALID_HANDLE}: The handle is not a valid 
- *              device handle.
- *      \item {\tt UPNP_E_LARGE_BUFFER_SIZE}: The buffer size requested was 
- *              too large.
  *    \end{itemize}
  */
-EXPORT_SPEC int UpnpSetContentLength(
-    IN UpnpClient_Handle Hnd,  /** The handle of the device instance 
-                                   for which the coincoming content length 
-				   needs to be set. */
-    IN int contentLength       /** The maximum permissible content length 
-			           for incoming SOAP actions. */
+EXPORT_SPEC int UpnpSetMaxContentLength(
+    IN size_t contentLength    /** The maximum permissible content length 
+			           for incoming SOAP actions, in bytes. */
     );
 
 //@} // Initialization and Registration
@@ -2256,6 +2271,54 @@ EXPORT_SPEC int UpnpOpenHttpGet(
 					the user. */		 
 	  );
 
+/** {\bf UpnpOpenHttpGetProxy} gets a file specified in a URL through the
+ * specified proxy.
+ *  The SDK allocates the memory for {\bf handle} and 
+ *  {\bf contentType}, the application is responsible for freeing this memory.
+ *
+ *  @return [int] An integer representing one of the following:
+ *    \begin{itemize}
+ *      \item {\tt UPNP_E_SUCCESS}: The operation completed successfully.
+ *      \item {\tt UPNP_E_INVALID_PARAM}: Either {\bf url}, {\bf handle},  
+ *              {\bf contentType}, {\bf contentLength} or {\bf httpStatus} 
+ *		is not a valid pointer.
+ *      \item {\tt UPNP_E_INVALID_URL}: The {\bf url} is not a valid 
+ *              URL.
+ *      \item {\tt UPNP_E_OUTOF_MEMORY}: Insufficient resources exist to 
+ *              download this file.
+ *      \item {\tt UPNP_E_NETWORK_ERROR}: A network error occurred.
+ *      \item {\tt UPNP_E_SOCKET_WRITE}: An error or timeout occurred writing 
+ *              to a socket.
+ *      \item {\tt UPNP_E_SOCKET_READ}: An error or timeout occurred reading 
+ *              from a socket.
+ *      \item {\tt UPNP_E_SOCKET_BIND}: An error occurred binding a socket.
+ *      \item {\tt UPNP_E_SOCKET_CONNECT}: An error occurred connecting a 
+ *              socket.
+ *      \item {\tt UPNP_E_OUTOF_SOCKET}: Too many sockets are currently 
+ *              allocated.
+ *	\item {\tt UPNP_E_BAD_RESPONSE}: A bad response was received from the 
+ *	        remote server.
+ *    \end{itemize}
+ */
+
+EXPORT_SPEC int UpnpOpenHttpGetProxy(
+	IN const char *url,	    /** The URL of an item to get. */
+    IN const char *proxy_str,    /** The URL of the proxy. */
+	IN OUT void **handle,       /** A pointer to store the handle for 
+				        this connection. */
+	IN OUT char **contentType,  /** A buffer to store the media type of 
+				        the item. */
+	IN OUT int *contentLength,  /** A pointer to store the length of the 
+				        item. */
+	IN OUT int *httpStatus,	    /** The status returned on receiving a 
+				        response message. */
+	IN int timeout		    /** The time out value sent with the 
+				        request during which a response is 
+					expected from the server, failing 
+					which, an error is reported back to 
+					the user. */		 
+	  );
+
 /** {\bf UpnpOpenHttpGetEx} gets specified number of bytes from a file 
  *  specified in the URL. The number of bytes is specified through a low 
  *  count and a high count which are passed as a range of bytes for the 
@@ -2316,10 +2379,11 @@ EXPORT_SPEC int UpnpOpenHttpGetEx(
  *      \item {\tt UPNP_E_SUCCESS}: The operation completed successfully.
  *      \item {\tt UPNP_E_INVALID_PARAM}: Either {\bf handle}, {\bf buf} 
  *              or {\bf size} is not a valid pointer.
- *	\item {\tt UPNP_E_BAD_RESPONSE}: A bad response was received from the 
- *	        remote server.
+ *	    \item {\tt UPNP_E_BAD_RESPONSE}: A bad response was received from the 
+ *	            remote server.
  *      \item {\tt UPNP_E_BAD_HTTPMSG}: Either the request or response was in 
  *              the incorrect format.
+ *      \item {\tt UPNP_E_CANCELED}: another thread called UpnpCancelHttpGet.
  *    \end{itemize}
  *
  *  Note: In case of return values, the status code parameter of the passed 
@@ -2338,6 +2402,37 @@ EXPORT_SPEC int UpnpReadHttpGet(
 				       which, an error is reported back to 
 				       the user. */
 	);
+
+/** {\bf UpnpHttpGetProgress} rettrieve progress information of a http-get 
+ *  transfer. 
+ *
+ *  @return [int] An integer representing one of the following:
+ *    \begin{itemize}
+ *      \item {\tt UPNP_E_SUCCESS}: The operation completed successfully.
+ *      \item {\tt UPNP_E_INVALID_PARAM}: Either {\bf handle}, {\bf length} 
+ *              or {\bf total} is not a valid pointer.
+ *    \end{itemize}
+ *
+ */
+EXPORT_SPEC int UpnpHttpGetProgress(
+    IN void *handle,           /** The token created by the call to
+				       {\bf UpnpOpenHttpGet}. */
+	OUT unsigned int *length, /** The number of bytes received. */
+	OUT unsigned int *total   /** The content length. */
+    );
+
+
+/** {\bf UpnpCancelHttpGet} set the cancel flag of the  {\bf handle}
+ * parameter. 
+ *
+ *  @return [int] An integer representing one of the following:
+ *    \begin{itemize}
+ *      \item {\tt UPNP_E_SUCCESS}: The operation completed successfully.
+ *      \item {\tt UPNP_E_INVALID_PARAM}: {\bf handle} is not a valid pointer.
+ *    \end{itemize}
+ */  
+
+EXPORT_SPEC int UpnpCancelHttpGet(IN void *handle);
 
 /** {\bf UpnpCloseHttpGet} closes the connection and frees memory that was 
  *	allocated for the {\bf handle} parameter.

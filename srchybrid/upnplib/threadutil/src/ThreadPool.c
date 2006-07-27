@@ -38,41 +38,6 @@
 #include <stdio.h>
 #endif
 
-//#ifndef _WIN32
-static char * _GetErrorCode(int aCode)
-{
-    if (aCode == EINVAL) {
-	return "EINVAL";
-    } else if (aCode == EPERM) {
-	return "EPERM";
-    } else if (aCode == ESRCH) {
-	return "ESRCH";
-    } else if (aCode == EFAULT) {
-	return "EFAULT";
-    } else {
-	return "UNKNOWN";
-    }
-}
-
-
-static void _SetSchedulingAndPriority(pthread_t aThread, int aPriority)
-{
-    struct sched_param schedParam;
-
-    int retVal;
-
-    if (aPriority == 0) {
-	schedParam.sched_priority = sched_get_priority_min(SCHED_FIFO);
-    } else {
-	schedParam.sched_priority = sched_get_priority_max(SCHED_FIFO);
-    }
-
-    if ((retVal = pthread_setschedparam(aThread, SCHED_FIFO, &schedParam))) {
-	printf("pthread_setschedparam returned %d - %s\n", retVal, _GetErrorCode(retVal));
-    }
-}
-//#endif
-
 /****************************************************************************
  * Function: CmpThreadPoolJob
  *
@@ -127,15 +92,15 @@ FreeThreadPoolJob( ThreadPool * tp,
 static int
 SetPolicyType( PolicyType in )
 {
-#ifndef _WIN32    
-    struct sched_param current;
+    #ifdef WIN32
+     return sched_setscheduler( 0, in);
+    #else
+     struct sched_param current;
 
-    sched_getparam( 0, &current );
-    current.sched_priority = DEFAULT_SCHED_PARAM;
-    return sched_setscheduler( 0, in, &current );
-#else
-    return sched_setscheduler( 0, in );
-#endif
+     sched_getparam( 0, &current );
+     current.sched_priority = DEFAULT_SCHED_PARAM;
+     return sched_setscheduler( 0, in, &current );
+    #endif
 }
 
 /****************************************************************************
@@ -324,7 +289,8 @@ SetRelTimeout( struct timespec *time,
  *  Parameters:
  *      ThreadPoolStats *stats must be valid non null stats structure
  *****************************************************************************/
-STATSONLY( static void StatsInit( ThreadPoolStats * stats ) {
+#ifdef STATS
+static void StatsInit( ThreadPoolStats * stats ) {
            assert( stats != NULL ); stats->totalIdleTime = 0; stats->totalJobsHQ = 0; stats->totalJobsLQ = 0; stats->totalJobsMQ = 0; stats->totalTimeHQ = 0; stats->totalTimeMQ = 0; stats->totalTimeLQ = 0; stats->totalWorkTime = 0; stats->totalIdleTime = 0; stats->avgWaitHQ = 0; //average wait in HQ
            stats->avgWaitMQ = 0;    //average wait in MQ
            stats->avgWaitLQ = 0;
@@ -332,7 +298,7 @@ STATSONLY( static void StatsInit( ThreadPoolStats * stats ) {
            stats->idleThreads = 0;
            stats->persistentThreads = 0;
            stats->maxThreads = 0; stats->totalThreads = 0;}
- )
+#endif
 
 /****************************************************************************
  * Function: CalcWaitTime
@@ -348,7 +314,8 @@ STATSONLY( static void StatsInit( ThreadPoolStats * stats ) {
  *      ThreadPriority p
  *      ThreadPoolJob *job
  *****************************************************************************/
-STATSONLY( static void CalcWaitTime( ThreadPool * tp,
+#ifdef STATS
+static void CalcWaitTime( ThreadPool * tp,
                                      ThreadPriority p,
                                      ThreadPoolJob * job ) {
            struct timeb now;
@@ -364,7 +331,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
            assert( 0 );}
            }
 
- )
+#endif
 
 /****************************************************************************
  * Function: SetSeed
@@ -376,14 +343,16 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
  *  Parameters:
  *      
  *****************************************************************************/
-    void SetSeed(  ) {
+    static void SetSeed(  ) {
     struct timeb t;
 
     ftime( &t );
-#ifndef _WIN32
-    srand( ( unsigned int )t.millitm + ithread_get_current_thread_id(  ) );
-#else
+#if defined(WIN32)
     srand( ( unsigned int )t.millitm + (unsigned int)ithread_get_current_thread_id(  ).p );
+#elif defined(__FreeBSD__)
+    srand( ( unsigned int )t.millitm + (unsigned int)ithread_get_current_thread_id(  ) );
+#else
+    srand( ( unsigned int )t.millitm + ithread_get_current_thread_id(  ) );
 #endif
     }
 
@@ -413,12 +382,13 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         int retCode = 0;
         int persistent = -1;
         ThreadPool *tp = ( ThreadPool * ) arg;
-		//leuk_he
+		//leuk_he allow static linking
 		#ifdef _WIN32
 		#ifdef PTW32_STATIC_LIB
 		pthread_win32_thread_attach_np();
 		#endif
 		#endif
+
 
         assert( tp != NULL );
 
@@ -427,8 +397,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         tp->totalThreads++;
         ithread_cond_broadcast( &tp->start_and_shutdown );
         ithread_mutex_unlock( &tp->mutex );
-        ithread_mutex_lock( &tp->mutex );
-        ithread_mutex_unlock( &tp->mutex );
+
 
         SetSeed(  );
 
@@ -494,6 +463,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
 	                pthread_win32_thread_detach_np ();
 	                #endif
 	                #endif
+
                     return NULL;
                 }
 
@@ -528,6 +498,8 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                 pthread_win32_thread_detach_np ();
                 #endif
                 #endif
+
+
                 return NULL;
             } else {
 
@@ -660,9 +632,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         }
 
         rc = ithread_create( &temp, NULL, WorkerThread, tp );
-#ifndef _WIN32
-	_SetSchedulingAndPriority( temp, 0 ); //MTY turn this on?
-#endif
+
         if( rc == 0 ) {
 
             rc = ithread_detach( temp );
@@ -756,12 +726,14 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         if( tp == NULL ) {
             return EINVAL;
         }
-		//leuk_he
+				//leuk_he
 		#ifdef _WIN32
 		#ifdef PTW32_STATIC_LIB
 		pthread_win32_process_attach_np();
 		#endif
 		#endif
+
+
         retCode += ithread_mutex_init( &tp->mutex, NULL );
         assert( retCode == 0 );
 
@@ -882,7 +854,7 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
 
         //Create A worker if less than max threads running
         if( tp->totalThreads < tp->attr.maxThreads ) {
-            CreateWorker( tp ); // MTY this gets stuck
+            CreateWorker( tp );
         } else {
             //if there is more than one worker thread
             //available then schedule job, otherwise fail
@@ -1519,19 +1491,24 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
         return 0;
     }
 
-    STATSONLY( void ThreadPoolPrintStats( ThreadPoolStats * stats ) {
+#ifdef STATS
+    void ThreadPoolPrintStats( ThreadPoolStats * stats ) {
                assert( stats != NULL ); if( stats == NULL ) {
                return;}
 
+	       #ifdef __FreeBSD__
+               printf( "ThreadPoolStats at Time: %d\n", time( NULL ) );
+	       #else
                printf( "ThreadPoolStats at Time: %ld\n", time( NULL ) );
+	       #endif
                printf
-               ( "Average Wait in High Priority Q in milliseconds: %lf\n",
+               ( "Average Wait in High Priority Q in milliseconds: %f\n",
                  stats->avgWaitHQ );
                printf
-               ( "Average Wait in Med Priority Q in milliseconds: %lf\n",
+               ( "Average Wait in Med Priority Q in milliseconds: %f\n",
                  stats->avgWaitMQ );
                printf
-               ( "Averate Wait in Low Priority Q in milliseconds: %lf\n",
+               ( "Averate Wait in Low Priority Q in milliseconds: %f\n",
                  stats->avgWaitLQ );
                printf( "Max Threads Active: %d\n", stats->maxThreads );
                printf( "Current Worker Threads: %d\n",
@@ -1540,11 +1517,11 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
                        stats->persistentThreads );
                printf( "Current Idle Threads: %d\n", stats->idleThreads );
                printf( "Total Threads : %d\n", stats->totalThreads );
-               printf( "Total Time spent Working in seconds: %lf\n",
+               printf( "Total Time spent Working in seconds: %f\n",
                        stats->totalWorkTime );
-               printf( "Total Time spent Idle in seconds : %lf\n",
+               printf( "Total Time spent Idle in seconds : %f\n",
                        stats->totalIdleTime );}
-     )
+#endif
 
 /****************************************************************************
  * Function: ThreadPoolGetStats
@@ -1559,7 +1536,8 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
  *  Returns:
  *      Always returns 0.
  *****************************************************************************/
-        STATSONLY( int
+#ifdef STATS
+int
                    ThreadPoolGetStats( ThreadPool * tp,
                                        ThreadPoolStats * stats ) {
 
@@ -1596,4 +1574,4 @@ tp->stats.totalJobsLQ++; tp->stats.totalTimeLQ += diff; break; default:
 
                    return 0;}
 
- )
+#endif

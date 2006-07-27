@@ -37,7 +37,7 @@
 *
 *
 *=================================================================*/
-void
+static void
 copy_with_escape( INOUT ixml_membuf * buf,
                   IN char *p )
 {
@@ -352,6 +352,32 @@ ixmlLoadDocument( IN char *xmlFile )
 }
 
 /*================================================================
+*   ixmlPrintDocument
+*       Prints entire document, prepending XML prolog first.
+*       Puts lots of white spaces.
+*       External function.
+*
+*=================================================================*/
+
+DOMString
+ixmlPrintDocument(IXML_Document *doc)
+{
+    IXML_Node* rootNode = ( IXML_Node * )doc;
+    ixml_membuf memBuf;
+    ixml_membuf *buf = &memBuf;
+
+    if( rootNode == NULL ) {
+        return NULL;
+    }
+
+    ixml_membuf_init( buf );
+    ixml_membuf_append_str( buf, "<?xml version=\"1.0\"?>\n" );
+    ixmlPrintDomTree( rootNode, buf );
+    return buf->buf;
+
+}
+
+/*================================================================
 *   ixmlPrintNode
 *       Print DOM tree under node. Puts lots of white spaces
 *       External function.
@@ -375,7 +401,33 @@ ixmlPrintNode( IN IXML_Node * node )
 }
 
 /*================================================================
-*   ixmlPrintNode
+*   ixmlDocumenttoString
+*       converts DOM tree under node to text string,
+*       prepending XML prolog first.
+*       External function.
+*
+*=================================================================*/
+
+DOMString
+ixmlDocumenttoString(IXML_Document *doc)
+{
+    IXML_Node* rootNode = ( IXML_Node * )doc;
+    ixml_membuf memBuf;
+    ixml_membuf *buf = &memBuf;
+
+    if( rootNode == NULL ) {
+        return NULL;
+    }
+
+    ixml_membuf_init( buf );
+    ixml_membuf_append_str( buf, "<?xml version=\"1.0\"?>\n" );
+    ixmlDomTreetoString( rootNode, buf );
+    return buf->buf;
+
+}
+
+/*================================================================
+*   ixmlNodetoString
 *       converts DOM tree under node to text string
 *       External function.
 *
@@ -396,6 +448,19 @@ ixmlNodetoString( IN IXML_Node * node )
     return buf->buf;
 
 }
+
+/*================================================================
+*   ixmlRelaxParser
+*       Makes the XML parser more tolerant to malformed text.
+*       External function.
+*
+*=================================================================*/
+void
+ixmlRelaxParser(char errorChar)
+{
+    Parser_setErrorChar( errorChar );
+}
+
 
 /*================================================================
 *   ixmlParseBufferEx

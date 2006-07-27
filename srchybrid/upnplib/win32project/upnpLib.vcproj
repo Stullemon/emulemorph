@@ -26,7 +26,7 @@
 				InlineFunctionExpansion="1"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\ixml\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\inc&quot;;&quot;$(ProjectDir)\..\threadutil\inc&quot;;&quot;$(ProjectDir)\..\ixml\inc&quot;;..\..\pthreads\pthreads\inc"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\ixml\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\src\inc&quot;;..\build\inc;&quot;$(ProjectDir)\..\upnp\inc&quot;;&quot;$(ProjectDir)\..\threadutil\inc&quot;;&quot;$(ProjectDir)\..\ixml\inc&quot;;..\..\pthreads\pthreads\inc"
 				PreprocessorDefinitions="UPNP_STATIC_LIB;INCLUDE_CLIENT_APIS;_WIN32;WIN32;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -82,11 +82,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\ixml\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\inc&quot;;&quot;$(ProjectDir)\..\threadutil\inc&quot;;&quot;$(ProjectDir)\..\ixml\inc&quot;;&quot;$(ProjectDir)\..\..\pthreads\pthreads\inc&quot;"
+				AdditionalIncludeDirectories="..\upnp\inc;..\ixml\src\inc;..\build\inc;..\upnp\src\inc;..\threadutil\inc;..\ixml\inc;..\..\pthreads\pthreads\inc"
 				PreprocessorDefinitions="UPNP_STATIC_LIB;INCLUDE_CLIENT_APIS;_WIN32;WIN32;_DEBUG;PTW32_STATIC_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug/upnpLib.pch"
+				PrecompiledHeaderFile=""
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
@@ -434,23 +434,7 @@
 					Name="api"
 					Filter=".c">
 					<File
-						RelativePath="..\upnp\src\api\config.c">
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="2"
-								AdditionalIncludeDirectories=""/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								Optimization="0"
-								AdditionalIncludeDirectories=""
-								BasicRuntimeChecks="3"
-								BrowseInformation="1"/>
-						</FileConfiguration>
+						RelativePath="..\upnp\src\inet_pton.c">
 					</File>
 					<File
 						RelativePath="..\upnp\src\api\upnpapi.c">

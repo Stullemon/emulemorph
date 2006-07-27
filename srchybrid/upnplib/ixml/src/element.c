@@ -454,9 +454,9 @@ ixmlElement_removeAttributeNode( IN IXML_Element * element,
             element->n.firstAttr = nextSib;
         }
 
-        ( IXML_Attr * ) attrNode->parentNode = NULL;
-        ( IXML_Attr * ) attrNode->prevSibling = NULL;
-        ( IXML_Attr * ) attrNode->nextSibling = NULL;
+        /* ( IXML_Attr * ) */ attrNode->parentNode = NULL;
+        /* ( IXML_Attr * ) */ attrNode->prevSibling = NULL;
+        /* ( IXML_Attr * ) */ attrNode->nextSibling = NULL;
         *rtAttr = ( IXML_Attr * ) attrNode;
         return IXML_SUCCESS;
 

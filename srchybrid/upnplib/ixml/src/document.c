@@ -148,7 +148,7 @@ ixmlDocument_importNode( IN IXML_Document * doc,
 *=================================================================*/
 int
 ixmlDocument_createElementEx( IN IXML_Document * doc,
-                              IN DOMString tagName,
+                              IN const DOMString tagName,
                               OUT IXML_Element ** rtElement )
 {
 
@@ -206,7 +206,7 @@ ixmlDocument_createElementEx( IN IXML_Document * doc,
 *=================================================================*/
 IXML_Element *
 ixmlDocument_createElement( IN IXML_Document * doc,
-                            IN DOMString tagName )
+                            IN const DOMString tagName )
 {
     IXML_Element *newElement = NULL;
 
@@ -292,7 +292,7 @@ ixmlDocument_createDocument(  )
 *=================================================================*/
 int
 ixmlDocument_createTextNodeEx( IN IXML_Document * doc,
-                               IN char *data,
+                               IN const char *data,
                                OUT IXML_Node ** textNode )
 {
     IXML_Node *returnNode;
@@ -351,7 +351,7 @@ ixmlDocument_createTextNodeEx( IN IXML_Document * doc,
 *=================================================================*/
 IXML_Node *
 ixmlDocument_createTextNode( IN IXML_Document * doc,
-                             IN char *data )
+                             IN const char *data )
 {
     IXML_Node *returnNode = NULL;
 

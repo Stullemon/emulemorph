@@ -35,17 +35,16 @@
 extern "C" {
 #endif
 
-#ifndef DEBUG_ONLY
-#ifdef _DEBUG
+
+#ifdef DEBUG
 #define DEBUG_ONLY(x) x
 #else
 #define DEBUG_ONLY(x)
 #endif
-#endif
 
 #include <pthread.h>
-#ifndef _WIN32
-#include <unistd.h>
+#ifndef WIN32
+ #include <unistd.h>
 #endif
 
 #define ITHREAD_MUTEX_FAST_NP PTHREAD_MUTEX_FAST_NP
@@ -239,23 +238,6 @@ extern "C" {
  *      See man page for pthread_mutex_lock
  *****************************************************************************/
 #define ithread_mutex_lock pthread_mutex_lock
-  
-
-// make mutex_trylock externally visible
- /* Function: ithread_mutex_trylock
- *
- *  Description:
- *      Locks mutex.
- *  Parameters:
- *      ithread_mutex_t * mutex (must be valid non NULL pointer to pthread_mutex_t)
- *      mutex must be initialized.
- *      
- *  Returns:
- *      0 on success
- *      EBUSY without blocking if the thread is locked
- *      See man page for pthread_mutex_trylock
- *****************************************************************************/
-#define ithread_mutex_trylock pthread_mutex_trylock
   
 
 /****************************************************************************
@@ -527,11 +509,7 @@ extern "C" {
  *		0 on success, Nonzero on failure.
  *              See man page for sleep (man 3 sleep)
  *****************************************************************************/
-#ifndef _WIN32
-#define isleep(x) sleep(x)
-#else
-#define isleep(x) SleepEx( x*1000, TRUE );
-#endif
+#define isleep sleep
 
 /****************************************************************************
  * Function: isleep
@@ -546,18 +524,22 @@ extern "C" {
  *		0 on success, Nonzero on failure.
  *              See man page for sleep (man 3 sleep)
  *****************************************************************************/
-#ifndef _WIN32
 #define imillisleep(x) usleep(1000*x)
+
+#ifndef UPNP_STATIC_LIB
+#ifdef UPNP_BUILD
+// set up declspec for dll export to make functions visible to library users
+#define EXPORT_SPEC __declspec(dllexport)
 #else
-#define imillisleep(x) SleepEx( x, TRUE );
+#define EXPORT_SPEC __declspec(dllimport)
+#endif
+#else
+#define EXPORT_SPEC
 #endif
 
 
-
-//NK: Added for satisfying the gcc compiler 
-#ifndef _WIN32
-int pthread_mutexattr_setkind_np(pthread_mutexattr_t *attr, int kind);
-#endif
+//NK: Added for satisfying the gcc compiler  
+EXPORT_SPEC int pthread_mutexattr_setkind_np(pthread_mutexattr_t *attr, int kind);
 
 #ifdef __cplusplus
 }
