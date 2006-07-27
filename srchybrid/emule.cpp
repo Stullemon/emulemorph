@@ -386,12 +386,11 @@ BOOL CemuleApp::InitInstance()
 		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg, true);
 		*/
         #ifdef BETAREL
-        #define DUMPSTR BETAREL
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion + BETAREL +_T("]"), true);
         #else
-        #define DUMPSTR T("")
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion +_T("]"), true);
         #endif
-		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion + DUMPSTR +_T("]"), true);
-
+		
 
 	///////////////////////////////////////////////////////////////////////////
 	// Locale initialization -- BE VERY CAREFUL HERE!!!
