@@ -2347,14 +2347,6 @@
     <persistentConn>1</persistentConn>
   </proxies>
   <proxies>
-    <hostName>*.veloxzone.com.br</hostName>
-    <proxyName>www.veloxzone.com.br</proxyName>
-    <proxyPort>8000</proxyPort>
-    <ISPName>Velox zone</ISPName>
-    <country>Brasil</country>
-    <active>0</active>
-  </proxies>
-  <proxies>
     <hostName>*.versanet.de</hostName>
     <proxyName>proxy.versatel-online.de</proxyName>
     <proxyPort>8080</proxyPort>
