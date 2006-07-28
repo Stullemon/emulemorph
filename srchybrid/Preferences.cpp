@@ -2064,8 +2064,8 @@ void CPreferences::SavePreferences()
 	// [end] Mighty Knife
 	ini.WriteInt(L"SplitterbarPositionServer",splitterbarPositionSvr);
 	ini.WriteInt(L"SplitterbarPositionStat",splitterbarPositionStat+1);
-	ini.WriteInt(L"SplitterbarPositionStat_HL",splitterbarPositionStat_HL+1);
-	ini.WriteInt(L"SplitterbarPositionStat_HR",splitterbarPositionStat_HR+1);
+	ini.WriteInt(L"SplitterbarPositionStat_HL",splitterbarPositionStat_HL/*+1 BSB prevent moving bars down*/);
+	ini.WriteInt(L"SplitterbarPositionStat_HR",splitterbarPositionStat_HR/*+1 BSB*/ );
 	ini.WriteInt(L"SplitterbarPositionFriend",splitterbarPositionFriend);
 	ini.WriteInt(L"SplitterbarPositionIRC",splitterbarPositionIRC+2);
 	ini.WriteInt(L"SplitterbarPositionShared",splitterbarPositionShared);
