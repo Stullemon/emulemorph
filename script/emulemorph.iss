@@ -37,6 +37,7 @@ Name: "spanish"; MessagesFile: "SpanishStd-2-5.1.0.isl" ;LicenseFile: "..\stagin
 Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
 Name: "french";  MessagesFile: "compiler:Languages\French.isl";LicenseFile: "..\staging\license-FR.txt"
 Name: "BrazilianPortuguese" ;MessagesFile: "compiler:Languages\BrazilianPortuguese.isl";LicenseFile: "..\staging\license-PT_BR.txt"
+Name: "ChineseSimpl" ;MessagesFile: "ChineseSimp-11-5.1.0.isl"
 
 [Files]
 ;todo show correct languge in startup
@@ -225,7 +226,16 @@ Begin
        begin
           SetIniString('eMule', 'Language','1036',pref );
        end;
-
+     if CompareText(activelanguage,'BrazilianPortuguese')=0 then
+       if  not IniKeyExists('eMule', 'Language', pref) then
+       begin
+          SetIniString('eMule', 'Language','1046',pref );
+       end;
+     if CompareText(activelanguage,'ChineseSimpl')=0 then
+       if  not IniKeyExists('eMule', 'Language', pref) then
+       begin
+          SetIniString('eMule', 'Language','2052',pref );
+       end;
       //
     if  not IniKeyExists('eMule', 'SetSystemACP', pref)  then
         if  not FileExists('{app}\known.met') then
