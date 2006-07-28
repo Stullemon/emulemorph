@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.47a MorphXT v8.13rc
+Changelog for eMule 0.47a MorphXT v8.13
 -------------------------------------
 FIXED: MergeKnown: statistic merge from SlugFiller mod has been fixed to avoid crash
 - also fixes duplicate files
@@ -20,6 +20,7 @@ ADDED: KAD: Apply ip filter for send udp packets. No packets are send to ip that
 ADDED: Official fix to work arround Reask Answer dropped for lowid behind router with NAPT enabled (pointed by DavidXanatos)
 ADDED: Portugese braziallian (pt_br) translation [fabulous]
 ADDED: Chinese simplified translation (zh_CN) translation [pennyliu123]
+ADDED: More Webcache statistics displayed. 
 
 CHANGED: DCD: Display also current download chunk number and session completed download from a client
 CHANGED: Some tooltip spelling thx to fabulous (pt_br translator) [leuk_he] 

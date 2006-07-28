@@ -295,11 +295,13 @@ within our distribution. You need the following libs:
 050718 zlib  zlib123.zip    1.2.3 http://www.gzip.org/zlib
 041017 CxImage  cximage599c_lite.zip   5.99c http://sourceforge.net/projects/cximage
 050604 Pthreads pthreads-w32-2-7-0-release.tar.gz 2.7.0 http://sources.redhat.com/pthreads-win32/index.html
-060305 upnplib  libupnp-1.3.1.tar.gz   1.3.1 http://upnp.sourceforge.net
+       upnplib  libupnp 1.4.1 (pre) http://www.libupnp.org/
 
 ----- Libs (old):
 050803 CrashRpt CrashRpt.v3.0.2.5.zip   3.0.2.5 http://www3.sympatico.ca/grant.mcdorman
 060407 ZipArchive ziparchive.v2.4.10.zip   2.4.10 http://www.artpol-software.com/index_zip.html
+( 060305 upnplib  libupnp-1.3.1.tar.gz   1.3.1 http://upnp.sourceforge.net)
+
 
 (for MobileMule only!)
 	DirectX SDK
