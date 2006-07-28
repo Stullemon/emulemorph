@@ -6,7 +6,7 @@
 
 [Setup]
 AppName=eMule
-AppVerName=eMule0.47a MorphXT 8.5
+AppVerName=morphemuleversion
 AppPublisher=Morph team
 AppPublisherURL=http://emulemorph.sourceforge.net/
 AppSupportURL=http://forum.emule-project.net/index.php?showforum=28
@@ -23,7 +23,7 @@ WizardImageStretch=no
 
 ; this dir:
 OutputDir=.
-OutputBaseFilename=setup
+OutputBaseFilename=morphemuleversion-installer
 SetupIconFile=..\srchybrid\res\ClientCompatible.ICO
 Compression=lzma
 SolidCompression=yes
@@ -36,6 +36,7 @@ Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl" ;LicenseFile: ".
 Name: "spanish"; MessagesFile: "SpanishStd-2-5.1.0.isl" ;LicenseFile: "..\staging\license-SP.txt"
 Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
 Name: "french";  MessagesFile: "compiler:Languages\French.isl";LicenseFile: "..\staging\license-FR.txt"
+Name: "BrazilianPortuguese" ;MessagesFile: "compiler:Languages\BrazilianPortuguese.isl";LicenseFile: "..\staging\license-PT_BR.txt"
 
 [Files]
 ;todo show correct languge in startup
@@ -59,11 +60,13 @@ Source: "..\staging\license-PT_PT.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license-RU.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license-SP.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license-TR.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\staging\eMule.chm"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\staging\eMule.1031.chm"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\staging\eMule.chm"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
+Source: "..\staging\eMule.1031.chm"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
 Source: "..\staging\readme.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\unrar.dll"; DestDir: "{app}"
 Source: "..\staging\unrarlicense.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\staging\mediainfo.dll"; DestDir: "{app}";  Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\mediainfo_ReadMe_DLL.txt"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
 Source: "..\staging\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion
 Source: "..\staging\config\countryflag.dll"; DestDir: "{app}\config"; Flags: ignoreversion
 Source: "..\staging\config\countryflag32.dll"; DestDir: "{app}\config"; Flags: ignoreversion
@@ -116,6 +119,9 @@ french.tasks_firewall=Ajouter une exception dans le Pare-feu Windows
 french.dialog_firewall=mpossible d'ajouter emule dans le firewall de windows.%nMerci d'ajouter  emule dans la liste du firewall de windows.
 german.tasks_firewall=Eine Ausnahme für Windows Firewall erstellen
 german.dialog_firewall=Setup konnte keine Ausnamhe für eMule in der Windows Firewall hinzufügen.%nBitte eMule manuell auf die Liste der Ausnahmen setzen.
+BrazilianPortuguese.tasks_firewall=Adiciona uma exceção ao Firewall do Windows
+BrazilianPortuguese.dialog_firewall=O Setup falhou ao adicionar o eMule ao Firewall do Windows.%nPor favor adicione o eMule na lista de exceções manualmente.
+
 
 
 ; Code sections need to be the last section in a script or the compiler will get confused
