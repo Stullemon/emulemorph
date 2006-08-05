@@ -238,7 +238,7 @@ BEGIN
     IDS_DL_LINK2            "Copiar link eD2k para a área de transferência (&HTML)"
     IDS_SHOWDETAILS         "Mostrar &Detalhes"
     IDS_SEND_MSG            "Enviar &Mensagem"
-    IDS_ASKING              "Buscando"
+    IDS_ASKING              "Pedindo"
     IDS_CONNVIASERVER       "Conectando via servidor"
 END
 
@@ -336,7 +336,7 @@ BEGIN
     IDS_STATS_AVGDL         "Média de Download (Sessão): %s"
     IDS_STATS_AVGUL         "Média de Upload (Sessão): %s"
     IDS_STATS_FOUNDSRC      "Fontes encontradas: %i"
-    IDS_STATS_ACTDL         "Downloads ativos (chunks): %i"
+    IDS_STATS_ACTDL         "Downloads ativos (blocos): %i"
     IDS_STATS_ACTUL         "Uploads ativos: %i"
     IDS_STATS_WAITINGUSERS  "Uploads esperando: %i"
     IDS_STATS_RECONNECTS    "Reconexões: %i"
@@ -696,7 +696,7 @@ BEGIN
     IDS_CHAT_START          "*** Sessão de Bate-papo Iniciada : "
     IDS_FILEPRIO            "Prioridade do Arquivo"
     IDS_SCORE               "Pontos"
-    IDS_ASKED               "Buscando"
+    IDS_ASKED               "Pedido"
     IDS_LASTSEEN            "Último Acesso"
     IDS_BANNED              "Banido"
     IDS_PRIOVERYHIGH        "Muito Alta"
@@ -837,7 +837,7 @@ BEGIN
     IDS_RECOVERY_SUCCESSFUL "Recuperação de arquivo: Bem sucedida."
     IDS_RECOVERY_FAILED     "Recuperação de arquivo: Falhou."
     IDS_STARTNEXTFILE       "Iniciar Download pausado após completar um arquivo"
-    IDS_FULLCHUNKTRANS      "Tentar transferir Chunks completos em todos os Uploads"
+    IDS_FULLCHUNKTRANS      "Tentar transferir blocos completos em todos os Uploads"
     IDS_MANUALSERVERHIGHPRIO 
                             "Ajustar manualmente serv. adicionados com prioridade alta"
     IDS_VERBOSE             "Detalhes (informações mais detalhadas do funcionamento do programa)"
@@ -1021,10 +1021,10 @@ BEGIN
     IDS_UDPDISABLED         "Desativado"
     IDS_CTINFO              "Selecione o tipo de sua conexão aqui:"
     IDS_WIZ_CTFRAME         "Tipo de Conexão"
-    IDS_CONCURDWL           "Downloads Concorrentes"
+    IDS_CONCURDWL           "Downloads Simultâneos"
     IDS_UNIT                "Unidade:"
-    IDS_WIZARD_CUSTOM       "Customizável"
-    IDS_WIZARD_ENTERBELOW   "(escolha baixo)"
+    IDS_WIZARD_CUSTOM       "Configurável"
+    IDS_WIZARD_ENTERBELOW   "(escolha abaixo)"
     IDS_STATS_MAXAVGDL      "Média máx. de Download: %s"
     IDS_USS_MIN             "Aviso: USS não suporta conexões menores que 10K. Se sua conexão não aguenta isso, desligue o USS."
 END
@@ -1146,10 +1146,10 @@ BEGIN
     IDS_IDLOW               "ID Baixa"
     IDS_IDHIGH              "ID Alta"
     IDS_UPSTATUS            "Partes Obtidas"
-    IDS_TOVERHEAD           "Desperdício Total (Pacotes): %s (%s)"
-    IDS_FROVERHEAD          "Desperdício na Requisição de Arquivos (Pacotes): %s (%s)"
-    IDS_SSOVERHEAD          "Desperdício na Troca de Fontes (Pacotes): %s (%s)"
-    IDS_SOVERHEAD           "Desperdício com o Servidor (Pacotes): %s (%s)"
+    IDS_TOVERHEAD           "Overhead Total (Pacotes): %s (%s)"
+    IDS_FROVERHEAD          "Overhead na Requisição de Arquivos (Pacotes): %s (%s)"
+    IDS_SSOVERHEAD          "Overhead na Troca de Fontes (Pacotes): %s (%s)"
+    IDS_SOVERHEAD           "Overhead com o Servidor (Pacotes): %s (%s)"
 END
 
 STRINGTABLE 
@@ -1186,7 +1186,7 @@ BEGIN
     IDS_FIRSTAUTODOWN       "Você deseja que o eMule controle as propriedades dos seus downloads?\n\nAtivando essa opção você permitirá que o eMule faça os downloads com muitas fontes não interferindo nos downloads que possuem poucas fontes.\n\nEssa opção terá efeito somente nos downloads futuros."
     IDS_FIRSTAUTOUP         "Você deseja que o eMule controle as propriedades dos seus uploads?\n\nAtivando essa opção você permitirá que o eMule impulsione os arquivos raros, dificultando que as pessoas baixem os arquivos populares. Desativando essa opção você permitirá que o eMule impulsione os arquivos populares, dificultando que as pessoas baixem os arquivos raros. Essa opção terá efeito somente nos compartilhamentos futuros."
     IDS_FIRSTCREDITSYSTEM   "Você deseja recompensar as pessoas que fazem upload para você?\n\nIsso é conhecido como Sistema de Créditos. Ativando essa opção você ajudará na luta contra os sugadores (leechers). Se você for um lançador de arquivos, você devera desabilitar esta opção."
-    IDS_FIRSTFULLCHUNK      "Você deseja fazer Upload de Chunks completos?\n\nEnviando Chunks completos você fará com que o receptor do Chunk comece logo a compartilhá-lo. Não utilizar esta função ajudará numa rotação mais rápida da sua fila. Se você for um lançador de arquivos, você DEVE ativar isso."
+    IDS_FIRSTFULLCHUNK      "Você deseja fazer Upload de blocos completos?\n\nEnviando blocos completos você fará com que o receptor do bloco comece logo a compartilhá-lo. Não utilizar esta função ajudará numa rotação mais rápida da sua fila. Se você for um lançador de arquivos, você DEVE ativar isso."
     IDS_FIRSTSAFECON        "Você deseja que o eMule utilize a Conexão Segura?\n\nDesativando essa opção você permitirá que o eMule conecte aos Servidores mais rapidamente, mas poderá fazer com que você conecte com ID Baixo."
     IDS_FIRSTRUNASSIST      "Você deseja iniciar o Assistente de Configuração inicial?"
     IDS_FIRSTAUTOCON        "Você deseja que o eMule conecte-se automaticamente ao iniciar?"
@@ -1290,7 +1290,7 @@ BEGIN
     IDS_WIZ1_END_TITLE      "Completando o Assistente"
     IDS_WIZ1                "Assistente de Início do eMule"
     IDS_WIZ1_END_BTN_HINT   "Para fechar o assistente, clique em Concluir."
-    IDS_WIZ1_UPLOAD_SUBTITLE "Transferência total de Chunks"
+    IDS_WIZ1_UPLOAD_SUBTITLE "Transferência total de blocos"
     IDS_DL_RESUMENEXT       "Continuar próximo pausado"
     IDS_DONTCHANGE          "Não alterar"
     IDS_STARTPRIO           "Prioridade para essa categoria"
@@ -1329,9 +1329,9 @@ BEGIN
     IDS_CHANGECATVIEW       "Modificar Filtro"
     IDS_STATUS_NOTCOMPLETED "Incompletos"
     IDS_STATS_CUMULATIVE    "Acumulativo"
-    IDS_STATS_OVRHD         "Desperdício"
+    IDS_STATS_OVRHD         "Overhead"
     IDS_STATS_RECORDS       "Recordes"
-    IDS_STATS_OVRHD2        "Desperdício: %s (%s Pacotes)"
+    IDS_STATS_OVRHD2        "Overhead: %s (%s Pacotes)"
     IDS_STATS_COMPDL        "Downloads Completos"
     IDS_STATS_SVRECWORKING  "Max. de Servidores funcionando"
     IDS_STATS_SVRECUSERS    "Max. de Usuários Online"
@@ -1591,7 +1591,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_IMP_FETCHSTATUS     "Buscando status..."
+    IDS_IMP_FETCHSTATUS     "Recebendo status..."
     IDS_IMP_INPROGR         "em progresso"
     IDS_IMP_ERR_DISKSP      "Erro: Maior que o espaço em disco"
     IDS_IMP_ERR_PARTMETIO   "Erro: Partmet não encontrado"
@@ -1645,7 +1645,7 @@ BEGIN
     IDS_WRN_FRIENDDUPLIPPORT 
                             "Amigo não adicionado.\r\n\r\nJá existe uma amigo com o mesmo Endereço IP e porta disponíveis."
     IDS_DYNUP               "Sensor de velocidade de Upload"
-    IDS_KADOVERHEAD         "Desperdício da rede Kademlia (Pacotes): %s (%s)"
+    IDS_KADOVERHEAD         "Overhead da rede Kademlia (Pacotes): %s (%s)"
     IDS_FIND                "Localizar..."
     IDS_LOG_BANNED_CLIENTS  "Registrar os usuarios banidos"
     IDS_LOG_RATING_RECV     "Registrar as avaliações recebidas dos arquivos"
@@ -1727,7 +1727,7 @@ BEGIN
     IDS_FO_TEMPTCP_F        "Falha ao abrir porta %u (TCP) no firewall interno do WinXP para essa sessão"
     IDS_FO_TEMPUDP_S        "Aberto porta %u (UDP) no firewall interno do WinXP para essa sessão"
     IDS_FO_TEMPUDP_F        "Falha ao abrir porta %u (UDP) no firewall interno do WinXP para essa sessão"
-    IDS_FO_PREFBUTTON       "Abra essas portas no firewall do WinXP"
+    IDS_FO_PREFBUTTON       "Abra estas portas no firewall do WinXP"
     IDS_FO_PREF_SUCCCEEDED  "Consegui abrir as portas selecionadas no firewall interno do WinXP.\nNote que outros firewalls e roteadores não são afetados por isso!"
 END
 
@@ -1736,9 +1736,9 @@ BEGIN
     IDS_IMP_ERR_BADFORMAT   "Formato de arquivo temporário desconhecido."
     IDS_SEARCH_INVALIDCHAR  "Expressão de busca contêm caracteres inválidos. Ou você usou um '?' ou caracteres que não podem ser usados nessa rede."
     IDS_PORTSCON            "Portas e Conexão"
-    IDS_PORTINFO            "O eMule usa duas portas para comunicar-se com clientes e servidores. Essas portas devem estar livres e disponíveis para conexão externa. A porta TCP precisa estar disponível para garantir a funcionalidade principal do eMule. A porta UDP é usado para a rede Kad (rede sem servidores) e para diminuir o uso da rede (desperdício).\n\nVocê pode alterar as portas aqui enquanto nenhuma atividade na rede começou."
+    IDS_PORTINFO            "O eMule usa duas portas para comunicar-se com clientes e servidores. Estas portas devem estar livres e disponíveis para conexão externa. A porta TCP precisa estar disponível para garantir a funcionalidade principal do eMule. A porta UDP é usada para a rede Kad (rede sem servidores) e para diminuir o overhead com os servidores.\n\nVocê pode alterar as portas aqui enquanto nenhuma atividade na rede começou."
     IDS_STARTTEST           "Testar Portas"
-    IDS_TESTINFO            "Aqui você pode testar se suas portas TCP e UDP podem receber conexões. O sucesso desse teste é necessário para que clientes e servidores conectem em você."
+    IDS_TESTINFO            "Aqui você pode testar se suas portas TCP e UDP podem receber conexões. O sucesso desse teste é necessário para que clientes e servidores conectem-se à você."
     IDS_CONNECTIONTEST      "Teste de conexão"
     IDS_NOPORTCHANGEPOSSIBLE 
                             "A mudança de portas não é possível depois de estar conectado a clientes ou enquanto conectado a um servidor/Kad!\n\nPor favor, reinicie o eMule para que surja efeito."
@@ -2038,7 +2038,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHUNK               "Detalhe de Chunk"
+    IDS_CHUNK               "Detalhe de Bloco"
     IDS_POWERSHARE_ACTIVATED "Ativado"
     IDS_POWERSHARE_DISABLED "Desligado"
     IDS_POWERSHARE_ON_LABEL "On"
@@ -2082,12 +2082,12 @@ BEGIN
     IDS_POWERSHARE_AUTO     "Auto"
     IDS_ST_ULPOWERSHARE     "Powershare"
     IDS_DYNUPLOAD           "Upload Dinâmico"
-    IDS_HIDEOVERSHARES      "Envíos de Chunks antes de escondê-los (0 = Desativado)"
+    IDS_HIDEOVERSHARES      "Envíos de blocos antes de escondê-los (0 = Desativado)"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SELECTIVESHARE      "Compartilhamento de Chunks seletivo"
+    IDS_SELECTIVESHARE      "Compartilhamento de blocos seletivo"
     IDS_ERR_HIDDENBLOCK     "Pediu por bloco escondido "
     IDS_SP_ULPOWERSHARE     "Slots de Upload PowerShare"
     IDS_SCHED_BACKUP        "Pasta CONFIG de Backup"
@@ -2352,8 +2352,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_HIDEOS              "Esconder Chunks Muito Enviados (HO)"
-    IDS_SHAREONLYTHENEED    "Compartilhar Somente Chunks Necessários (SOTN)"
+    IDS_HIDEOS              "Esconder Blocos Muito Enviados (HO)"
+    IDS_SHAREONLYTHENEED    "Compartilhar Somente Blocos Necessários (SOTN)"
     IDS_SFM                 "Gerenciamento dos Arquivos Compartilhados"
     IDS_IP2COUNTRY          "IP2Country"
 END 
@@ -2373,11 +2373,11 @@ BEGIN
     IDS_REMOVEALLFRIENDSLOT "Remover todos os Slots de Amigos" 
     IDS_INFINITEQUEUE       "Fila infinita"
     IDS_PAYBACKFIRSTLIMIT   "Quantidade antes de ligar (Padrão 10MB)"
-    IDS_ENABLE_CHUNKDOTS    "Mostrar pontos de blocos na barra de progresso"
+    IDS_ENABLE_CHUNKDOTS    "Mostrar pontos de Blocos na barra de progresso"
     IDS_COMMUNITY           "Comunidade"
     IDS_COMMUNITYTAG        "Comunidades (separadas por '|')"
     IDS_INVISIBLEMODE       "Modo invisível"
-    IDS_ICS_USEICS          "Usar seleção inteligente de blocos (ICS)"
+    IDS_ICS_USEICS          "Usar seleção inteligente de Blocos (ICS)"
 END
 
 STRINGTABLE 
@@ -2908,7 +2908,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_DM_TIP              "Ajustes relacionados a Download:\nCategorias, janela de download, IntelligentChunkSelection (seleção inteligente de Chunks)"
+    IDS_DM_TIP              "Ajustes relacionados a Download:\nCategorias, janela de download, IntelligentChunkSelection (seleção inteligente de Blocos)"
     IDS_SCC_TIP             "Como lidar com as Categorias na Tela de Transferências"
     IDS_SAC_TIP             "Como lidar com Fontes que tenham vários arquivos que você quer baixar.\nA4AF=<b>A</b>sked <b>4</b> for <b>A</b>nother <a>F</a>ile. (Pediu por Outro Arquivo)\n\nEsse tipo de tratamento precisa existir pois você só pode baixar um arquivo por vez de cada Fonte,\ne algumas vezes a mesma Fonte possui vários arquivos que você adicionou na sua lista de Downloads."
     IDS_DEFAULT_TIP         "IDS_DEFAULT_TIP"
@@ -2971,7 +2971,7 @@ BEGIN
     IDS_MAXCLIENTDATARATEPOWERSHARE_TIP 
                             "O máximo de velocidade que estará disponível para UM slot de PowerShare.\nPadrão = 0 = SlotFocus -> Usar toda a velocidade de PowerShare no menor slot.\nDefinindo um valor aqui fará o Morph trocar de SlotFocus para distribuição de banda."
     IDS_MAXCLIENTDATARATE_TIP 
-                            "O máximo de velocidade que UM slot normal poderá usar.\nPadrão = 0 = SlotFocus -> Toda a velocidade será usada no menor slot\npara completar um Chunk o mais rápido possível. Se um valor diferente de 0 for \nusado aqui, este será o limite máximo de cada slot normal e a velocidade total será DIVIDIDA entre eles.\nNote que essa velocidade pode ser excedida por um curto período de tempo até que todos os slots se ajustem."
+                            "O máximo de velocidade que UM slot normal poderá usar.\nPadrão = 0 = SlotFocus -> Toda a velocidade será usada no menor slot\npara completar um Bloco o mais rápido possível. Se um valor diferente de 0 for \nusado aqui, este será o limite máximo de cada slot normal e a velocidade total será DIVIDIDA entre eles.\nNote que essa velocidade pode ser excedida por um curto período de tempo até que todos os slots se ajustem."
     IDS_SLOT_LIMIT_GROUP_TIP 
                             "Última forma de limitar o número de slots.\nPrimeiro as classes de Upload serão aplicadas e\nisso será apenas uma última forma de limitar o número total\nde slots de Upload se os limites de velocidade não o fizerem antes."
     IDS_SLOT_LIMIT_NUM_TIP  "Limite máximo de slots de Upload."
@@ -3001,7 +3001,7 @@ BEGIN
     IDS_BOTH_TIP            "Mostra o tempo baseado na taxa atual de Download\ne o tempo médio estimado para finalizar transferência."
     IDS_REALTIME_TIP_TIP    "Mostra apenas o tempo baseado na taxa atual de Download."
     IDS_AVG_TIP             "Mostra apenas o tempo baseado na taxa média de Download."
-    IDS_ICS_USEICS_TIP      "Usa a informação da Barra de Difusão para selecionar\ninteligentemente a ordem das Chunks para fazer Download.\n\nCom essa opção ligada, seu Morph sempre dará prioridade para baixar as Chunks mais raras de cada arquivo.\nAssim você baixará primeiro as partes que quase ninguém tem, e depois as mais populares."
+    IDS_ICS_USEICS_TIP      "Usa a informação da Barra de Difusão para selecionar\ninteligentemente a ordem dos Blocos para fazer Download.\n\nCom essa opção ligada, seu Morph sempre dará prioridade para baixar os Blocos mais raros de cada arquivo.\nAssim você baixará primeiro as partes que quase ninguém tem, e depois as mais populares."
     IDS_HIGHPROCESS_TIP     "Executa o processo do eMule com prioridade alta,\nfazendo com que ele se torne mais responsivo a custo dos outros programas."
 END
 
@@ -3103,11 +3103,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SFM_TIP             "Opções sobre os arquivos que você compartilha."
-    IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP "Ativa a Barra de Difusão de Chunks para todos\nos arquivos compartilhados por padrão."
-    IDS_HIDEOVERSHARES_TIP  "Hide Overshares (HOS ou HideOS)\nBalancear o Upload de Chunks de um arquivo.\n\nEsconde Chunks que foram enviados significantemente mais vezes\nque outros Chunks. Isso faz com que os usuários peçam por\noutros Chunks, que foram menos compartilhados.\nSempre alguns chunks estarão visíveis aos usuários.\n\nA escolha dos Chunks é feita baseada nas informações da Barra de Difusão."
-    IDS_SELECTIVESHARE_TIP  "Selective Chunk Sharing (SCS)\n\nVocê pode tornar a opção acima mais rígida fazendo\ncom que apenas UM Chunk seja mostrado para cada usuário,\ncomeçando do Chunk com menos Uploads, e levando\nem consideração os Chunks que já foram oferecidos para\nescolher o próximo.\n\nA opção acima precisa estar ligada para que\nessa entre em vigor. (Desligado por padrão)"
+    IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP "Ativa a Barra de Difusão de Blocos para todos\nos arquivos compartilhados por padrão."
+    IDS_HIDEOVERSHARES_TIP  "Hide Overshares (HOS ou HideOS)\nBalancear o Upload de Blocos de um arquivo.\n\nEsconde Blocos que foram enviados significantemente mais vezes\nque outros Chunks. Isso faz com que os usuários peçam por\noutros Chunks, que foram menos compartilhados.\nSempre alguns chunks estarão visíveis aos usuários.\n\nA escolha dos Chunks é feita baseada nas informações da Barra de Difusão."
+    IDS_SELECTIVESHARE_TIP  "Selective Chunk Sharing (SCS)\n\nVocê pode tornar a opção acima mais rígida fazendo\ncom que apenas UM Bloco seja mostrado para cada usuário,\ncomeçando do Bloco com menos Uploads, e levando\nem consideração os Blocos que já foram oferecidos para\nescolher o próximo.\n\nA opção acima precisa estar ligada para que\nessa entre em vigor. (Desligado por padrão)"
     IDS_SHAREONLYTHENEED_TIP 
-                            "Share Only the Need (SON)\n\nEsconde Chunks que já foram pedidos por outros usuários da Fila.\nO eMule analiza sua Fila de Espera e percebe se todos os usuários\nestão querendo os mesmos Chunks. Se estiverem, ele esconde os\nChunks que pelo menos um usuário já tenha e mostra justamente\nos que *nenhum* usuário tem.\n\nOs Chunks escondidos são mostrados na Barra de Difusão com a cor Violeta."
+                            "Share Only the Need (SON)\n\nEsconde Blocos que já foram pedidos por outros usuários da Fila.\nO eMule analiza sua Fila de Espera e percebe se todos os usuários\nestão querendo os mesmos Blocos. Se estiverem, ele esconde os\nBlocos que pelo menos um usuário já tenha e mostra justamente\nos que *nenhum* usuário tem.\n\nOs Blocos escondidos são mostrados na Barra de Difusão com a cor Violeta."
     IDS_POWERSHARE_TIP2     "Opções do PowerShare, \ndá prioridade absoluta para\num arquivo sem que seja necessário\ndescompartilhar outros arquivos."
     IDS_POWERSHARE_DISABLED_TIP 
                             "O PowerShare ficará desligado por padrão,\nmas você poderá ativá-lo em arquivos individuais\nna tela de Arquivos Compartilhados."
