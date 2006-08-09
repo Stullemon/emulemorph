@@ -1368,25 +1368,28 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 	*/
 	uint32 numberofblocktorequest = 0;
 	while (pos){
-			Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-			if (pending->fQueued == 0) {
-				ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-				if (pending->block->StartOffset > 0xFFFFFFFF || pending->block->EndOffset > 0xFFFFFFFF){
-					bI64Offsets = true;
-					if (!SupportsLargeFiles()){
-						ASSERT( false );
-						SendCancelTransfer();
-						SetDownloadState(DS_ERROR);
+		Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
+		if (pending->fQueued == 0) {
+			ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
+			//MORPH - Official fix by Aw3
+			/*
+			if (pending->block->StartOffset > 0xFFFFFFFF || pending->block->EndOffset > 0xFFFFFFFF){
+			*/
+			if (pending->block->StartOffset > 0xFFFFFFFE || pending->block->EndOffset > 0xFFFFFFFE){
+				bI64Offsets = true;
+				if (!SupportsLargeFiles()){
+					ASSERT( false );
+					SendCancelTransfer();
+					SetDownloadState(DS_ERROR);
+					return;
 					}
 					break;
 				}
 			++numberofblocktorequest;
 		}
 	}
-
 	if (numberofblocktorequest == 0) //mean there is no request to do
 		return;
-
 	Packet* packet;
 	uint32 npacket = 0;
 	const UINT nbpackettosend = (numberofblocktorequest+2)/3;
