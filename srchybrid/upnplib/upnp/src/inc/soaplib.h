@@ -128,7 +128,6 @@ int SoapGetServiceVarStatus(
 				IN DOMString VarName, 
 				OUT DOMString *StVar) ;   
 
-extern const char *ContentTypeHeader;
-
+extern const char* ContentTypeHeader;
 
 #endif //SOAPLIB_H

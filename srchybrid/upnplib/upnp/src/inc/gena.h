@@ -44,12 +44,11 @@
 #include "httpparser.h"
 #include "sock.h"
 
-#ifndef EXTERN_C
-// make sure that EXTERN_C doesn't get defined multiple times
 #ifdef __cplusplus
 #define EXTERN_C extern "C"
 #else 
-#define EXTERN_C 
+#ifndef EXTERN_C
+ #define EXTERN_C 
 #endif
 #endif
 

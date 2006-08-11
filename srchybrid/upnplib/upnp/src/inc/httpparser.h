@@ -38,11 +38,9 @@
 
 #include "LinkedList.h"
 
-
-// Content Type Header
-extern const char *ContentTypeHeader;
-
 ////// private types ////////////
+
+
 //////////////////////
 // scanner
 ///////////////////////

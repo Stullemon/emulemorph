@@ -57,10 +57,10 @@
 #define DEFAULT_SOAP_CONTENT_LENGTH 16000
 #define MAX_SOAP_CONTENT_LENGTH 32000
 
-extern int g_maxContentLength;
+extern size_t g_maxContentLength;
 
 // 30-second timeout
-#define UPNP_TIMEOUT (30 + MINIMUM_DELAY)
+#define UPNP_TIMEOUT	30
 
 typedef enum {HND_INVALID=-1,HND_CLIENT,HND_DEVICE} Upnp_Handle_Type;
 
@@ -71,13 +71,11 @@ struct Handle_Info
     Upnp_FunPtr  Callback; // Callback function pointer.
     char * Cookie;
 
-    //DEVICEONLY(char  DescURL[LINE_SIZE];)   // URL for the use of SSDP
-    char  DescURL[LINE_SIZE];               // URL for the use of SSDP
+    DEVICEONLY(char  DescURL[LINE_SIZE];)   // URL for the use of SSDP
     DEVICEONLY(char  DescXML[LINE_SIZE];)   // XML file path for device 
                                             //description
 
-    //DEVICEONLY(int MaxAge;)                 // Advertisement timeout
-    int MaxAge;                             // Advertisement timeout
+    DEVICEONLY(int MaxAge;)                 // Advertisement timeout
     DEVICEONLY(IXML_Document *DescDocument;)     // Description parsed in 
                                             //terms of DOM document 
     DEVICEONLY(IXML_NodeList *DeviceList;)       // List of devices in the 
@@ -132,13 +130,13 @@ struct  UpnpNonblockParam
     UpnpFunName  FunName;
     int   Handle;
     int   TimeOut;
-    char  VarName[UPNP_NAME_SIZE];
-    char  NewVal[UPNP_NAME_SIZE];
-    char  DevType[UPNP_NAME_SIZE];
-    char  DevId[UPNP_NAME_SIZE];
-    char  ServiceType[UPNP_NAME_SIZE];
-    char  ServiceVer[UPNP_NAME_SIZE];
-    char  Url[UPNP_NAME_SIZE];
+    char  VarName[NAME_SIZE];
+    char  NewVal[NAME_SIZE];
+    char  DevType[NAME_SIZE];
+    char  DevId[NAME_SIZE];
+    char  ServiceType[NAME_SIZE];
+    char  ServiceVer[NAME_SIZE];
+    char  Url[NAME_SIZE];
     Upnp_SID   SubsId;
     char  *Cookie;
     Upnp_FunPtr Fun;

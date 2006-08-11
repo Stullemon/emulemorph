@@ -58,6 +58,10 @@
 #define EVENT_TERMINATE	-3
 
 
+#ifndef WIN32
+ #define max(a, b)   (((a)>(b))? (a):(b))
+ #define min(a, b)   (((a)<(b))? (a):(b))
+#endif
 
 
 // boolean type in C
@@ -100,17 +104,17 @@ void linecopy( OUT char dest[LINE_SIZE], IN const char* src );
 *	Function :	namecopy
 *
 *	Parameters :
-*		OUT char dest[UPNP_NAME_SIZE] ;	output buffer
+*		OUT char dest[NAME_SIZE] ;	output buffer
 *		IN const char* src ;	input buffer
 *
-*	Description : Copy no of bytes spcified by the UPNP_NAME_SIZE constant, 
+*	Description : Copy no of bytes spcified by the NAME_SIZE constant, 
 *		from the source buffer. Null terminate the destination buffer
 *
 *	Return : void ;
 *
 *	Note :
 ************************************************************************/
-void namecopy( OUT char dest[UPNP_NAME_SIZE], IN const char* src );
+void namecopy( OUT char dest[NAME_SIZE], IN const char* src );
 
 /************************************************************************
 *	Function :	linecopylen
@@ -142,10 +146,25 @@ void linecopylen( OUT char dest[LINE_SIZE], IN const char* src, IN size_t srclen
 // C specific
 #ifndef __cplusplus
 
-#ifndef _WIN32
-#define		XINLINE inline
+#ifndef WIN32
+ #define		XINLINE inline
 #else
-#define		XINLINE __inline
+
+ #ifndef S_ISREG
+ #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+ #endif
+ 
+ #ifndef S_ISDIR
+ #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+ #endif
+
+ #define EADDRINUSE WSAEADDRINUSE
+
+ #define strcasecmp stricmp
+ #define strncasecmp strnicmp
+
+ #define sleep Sleep
+ #define usleep(a) Sleep((a)/1000)
 #endif
 
 #endif // __cplusplus

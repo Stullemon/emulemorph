@@ -38,13 +38,16 @@
 #include "httpparser.h"
 
 // timeout in secs
-#define HTTP_DEFAULT_TIMEOUT (30 + MINIMUM_DELAY)
+#define HTTP_DEFAULT_TIMEOUT	30
 
 
 
 #ifdef __cplusplus
 #extern "C" {
 #endif
+
+int
+http_CancelHttpGet( IN void *Handle );
 
 /************************************************************************
 * Function: http_FixUrl													
@@ -318,6 +321,27 @@ int http_ReadHttpGet(IN void *Handle,
 					IN int timeout);
 
 /************************************************************************
+*   Function :  http_HttpGetProgress
+*
+*   Parameters :
+*       IN void *Handle :           Handle to the HTTP get object
+*       OUT unsigned int *length :  Buffer to get the read and parsed data
+*       OUT unsigned int *total :   Size of tge buffer passed
+*
+*   Description :   Extracts information from the Handle to the HTTP get
+*                   object.
+*
+*   Return : int ;
+*       UPNP_E_SUCCESS - On Sucess ;
+*       UPNP_E_INVALID_PARAM  - Invalid Parameter;
+*
+*   Note :
+************************************************************************/
+int http_HttpGetProgress(IN void *Handle,
+						OUT unsigned int *length,
+						OUT unsigned int *total );
+
+/************************************************************************
 *	Function :	http_CloseHttpGet
 *
 *	Parameters :
@@ -362,6 +386,42 @@ int http_CloseHttpGet(IN void *Handle);
 *
 ************************************************************************/
 int http_OpenHttpGet(IN const char *url_str,
+					IN OUT void **Handle,
+					IN OUT char **contentType,
+					OUT int *contentLength,
+					OUT int *httpStatus,
+					IN int timeout);
+
+/************************************************************************
+*	Function :	http_OpenHttpGetProxy
+*
+*	Parameters :
+*		IN const char *url_str :	String as a URL
+*		IN const char *proxy_str :	String as a URL to the proxy
+*		IN OUT void **Handle :		Pointer to buffer to store HTTP
+*									post handle
+*		IN OUT char **contentType :	Type of content
+*		OUT int *contentLength :	length of content
+*		OUT int *httpStatus :		HTTP status returned on receiving a
+*									response message
+*		IN int timeout :			time out value
+*
+*	Description :	Makes the HTTP GET message, connects to the peer, 
+*		sends the HTTP GET request, gets the response and parses the 
+*		response.
+*
+*	Return : int;
+*		UPNP_E_SUCCESS - On Success ;
+*		UPNP_E_INVALID_PARAM - Invalid Paramters ;
+*		UPNP_E_OUTOF_MEMORY ;
+*		UPNP_E_SOCKET_ERROR ;
+*		UPNP_E_BAD_RESPONSE ;
+*
+*	Note :
+*
+************************************************************************/
+int http_OpenHttpGetProxy(IN const char *url_str,
+					IN const char *proxy_str,
 					IN OUT void **Handle,
 					IN OUT char **contentType,
 					OUT int *contentLength,
@@ -418,7 +478,7 @@ int http_SendStatusResponse( IN SOCKINFO *info, IN int http_status_code,
 *		't':	arg = time_t * gmt_time	// appends time in RFC 1123 fmt
 *		'D':	(no args) appends HTTP DATE: header
 *		'S':	(no args) appends HTTP SERVER: header
-*		'U':	(no args) appends HTTP User-Agent: header
+*		'U':	(no args) appends HTTP USER-AGENT: header
 *		'C':	(no args) appends a HTTP CONNECTION: close header 
 *				depending on major,minor version
 *		'N':	arg1 = int content_length	// content-length header
@@ -502,20 +562,16 @@ int http_OpenHttpGetEx(IN const char *url_str,
 *	Function :	get_sdk_info
 *
 *	Parameters :
-*		OUT char *info :	buffer to store the operating system 
-*							information
-*		IN int buffSize:	buffer size
+*		OUT char *info ;	
 *
 *	Description :	Returns the server information for the operating 
 *		system
 *
-*	Return :	int;
-*				Number of characters (without '\0') copied to info;
-				If buffSize = 0, returns needed buffer size (including '\0');
+*	Return : void ;
 *
 *	Note :
 ************************************************************************/
-int get_sdk_info( OUT char *info, IN int buffSize);
+void get_sdk_info( OUT char *info );
 
 #ifdef __cplusplus
 }	// #extern "C"

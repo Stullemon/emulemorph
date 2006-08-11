@@ -40,15 +40,15 @@
 #include "httpparser.h"
 #include "httpreadwrite.h"
 #include "miniserver.h"
-#ifndef _WIN32
-#include <syslog.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netinet/ip_icmp.h>
-#include <sys/time.h>
-#include <arpa/inet.h>
+#ifndef WIN32
+ #include <syslog.h>
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+ #include <netinet/in_systm.h>
+ #include <netinet/ip.h>
+ #include <netinet/ip_icmp.h>
+ #include <sys/time.h>
+ #include <arpa/inet.h>
 #else
 #include <winsock2.h>
 #endif
@@ -83,6 +83,16 @@ typedef enum SsdpCmdType{SSDP_ERROR=-1,
 #define  NUM_COPY 2
 #define  THREAD_LIMIT 50
 #define  COMMAND_LEN  300
+
+#ifndef X_USER_AGENT // can be overwritten by configure CFLAGS argument
+/** @name X_USER_AGENT
+ *  The {\tt X_USER_AGENT} constant specifies the value of the X-User-Agent:
+ *  HTTP header. The value "redsonic" is needed for the DSM-320. See
+ *  https://sourceforge.net/forum/message.php?msg_id=3166856 for more
+ * information
+ */ 
+ #define X_USER_AGENT "redsonic"
+#endif
 
 //Error code
 #define NO_ERROR_FOUND    0
