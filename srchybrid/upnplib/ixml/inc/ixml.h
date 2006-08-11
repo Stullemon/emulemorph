@@ -34,19 +34,22 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
+//#include <malloc.h>
 #include <assert.h>
 
-#ifndef UPNP_STATIC_LIB
-#ifdef UPNP_BUILD
-// set up declspec for dll export to make functions visible to library users
-#define EXPORT_SPEC __declspec(dllexport)
-#else
-#define EXPORT_SPEC __declspec(dllimport)
+#ifdef WIN32
+ #ifndef UPNP_STATIC_LIB
+  #ifdef LIBUPNP_EXPORTS
+  // set up declspec for dll export to make functions visible to library users
+   #define EXPORT_SPEC __declspec(dllexport)
+  #else
+   #define EXPORT_SPEC __declspec(dllimport)
+  #endif
+ #else
+  #define EXPORT_SPEC
+ #endif
 #endif
-#else
-#define EXPORT_SPEC
-#endif
+
 
 typedef int BOOL;
 
@@ -303,7 +306,7 @@ ixmlNode_setNodeValue(IXML_Node *nodeptr,
    *          {\bf Node}.
    */
 
-EXPORT_SPEC const unsigned short    
+EXPORT_SPEC unsigned short    
 ixmlNode_getNodeType(IXML_Node *nodeptr  
 		       /** The {\bf Node} from which to retrieve the type. */
                     );
@@ -777,7 +780,7 @@ EXPORT_SPEC IXML_Document* ixmlDocument_createDocument();
 EXPORT_SPEC int
 ixmlDocument_createElementEx(IXML_Document *doc,  
 		               /** The owner {\bf Document} of the new node. */
-                             DOMString tagName,  
+                             const DOMString tagName,  
 			       /** The tag name of the new {\bf Element} 
 				   node. */
                              IXML_Element **rtElement
@@ -798,7 +801,7 @@ ixmlDocument_createElementEx(IXML_Document *doc,
 EXPORT_SPEC IXML_Element*
 ixmlDocument_createElement(IXML_Document *doc,  
 		             /** The owner {\bf Document} of the new node. */
-                           DOMString tagName    
+                           const DOMString tagName    
 			     /** The tag name of the new {\bf Element} node. */
                            );
 
@@ -821,7 +824,7 @@ ixmlDocument_createElement(IXML_Document *doc,
 EXPORT_SPEC int
 ixmlDocument_createTextNodeEx(IXML_Document *doc,  
 		                /** The owner {\bf Document} of the new node. */
-                              DOMString data,      
+                              const DOMString data,      
 			        /** The data to associate with the new {\bf 
 				    Text} node. */
                               IXML_Node** textNode 
@@ -838,7 +841,7 @@ ixmlDocument_createTextNodeEx(IXML_Document *doc,
 EXPORT_SPEC IXML_Node*
 ixmlDocument_createTextNode(IXML_Document *doc,  
 		              /** The owner {\bf Document} of the new node. */
-                            DOMString data       
+                            const DOMString data       
 			      /** The data to associate with the new {\bf Text} 
 			          node. */
                             );
@@ -1674,23 +1677,6 @@ ixmlNodeList_item(IXML_NodeList *nList,
 		    /** The index into the {\bf NodeList} to retrieve. */
                  );
 
-  /** Adds a {\bf Node} to a {\bf NodeList}
-   *
-   *  @return [int] An integer representing one of the following:
-   *    \begin{itemize}
-   *      \item {\tt IXML_SUCCESS}: The operation completed successfully.
-   *      \item {\tt IXML_FAILED}: {\bf add} is {\tt NULL}.
-   *      \item {\tt IXML_INSUFFICIENT_MEMORY}: Couldn't allocate memory.
-   *    \end{itemize}
-   */
-EXPORT_SPEC int
-ixmlNodeList_addToNodeList( IN IXML_NodeList ** nList,
-						/** The {\bf NodeList} to add the {\bf 
-							Node}. */
-                            IN IXML_Node * add
-						/** {\bf Node} to add.*/
-				);
-
   /** Returns the number of {\bf Nodes} in a {\bf NodeList}.
    *
    *  @return [unsigned long] The number of {\bf Nodes} in the {\bf NodeList}.
@@ -1732,9 +1718,27 @@ ixmlNodeList_free(IXML_NodeList *nList
 *
 *=================================================================*/
 
-#define     ixmlPrintDocument(doc)  ixmlPrintNode((IXML_Node *)doc)
+  /** Renders a {\bf Node} and all sub-elements into an XML document
+   *  representation.  The caller is required to free the {\bf DOMString}
+   *  returned from this function using {\bf ixmlFreeDOMString} when it
+   *  is no longer required.
+   *
+   *  Note that this function can be used for any {\bf Node}-derived
+   *  interface.  The difference between {\bf ixmlPrintDocument} and
+   *  {\bf ixmlPrintNode} is {\bf ixmlPrintDocument} includes the XML prolog
+   *  while {\bf ixmlPrintNode} only produces XML elements. An XML
+   *  document is not well formed unless it includes the prolog
+   *  and at least one element.
+   *
+   *  This function  introduces lots of white space to print the
+   *  {\bf DOMString} in readable  format.
+   * 
+   *  @return [DOMString] A {\bf DOMString} with the XML document representation 
+   *                      of the DOM tree or {\tt NULL} on an error.
+   */
 
-#define ixmlDocumenttoString(doc)	ixmlNodetoString((IXML_Node *)doc)
+DOMString
+ixmlPrintDocument(IXML_Document *doc);
 
   /** Renders a {\bf Node} and all sub-elements into an XML text
    *  representation.  The caller is required to free the {\bf DOMString}
@@ -1751,10 +1755,29 @@ ixmlNodeList_free(IXML_NodeList *nList
    *                      of the DOM tree or {\tt NULL} on an error.
    */
 
-EXPORT_SPEC DOMString   
+DOMString   
 ixmlPrintNode(IXML_Node *doc  
                 /** The root of the {\bf Node} tree to render to XML text. */
              );
+
+  /** Renders a {\bf Node} and all sub-elements into an XML document
+   *  representation.  The caller is required to free the {\bf DOMString}
+   *  returned from this function using {\bf ixmlFreeDOMString} when it
+   *  is no longer required.
+   *
+   *  Note that this function can be used for any {\bf Node}-derived
+   *  interface.  The difference between {\bf ixmlDocumenttoString} and
+   *  {\bf ixmlNodetoString} is {\bf ixmlDocumenttoString} includes the XML
+   *  prolog while {\bf ixmlNodetoString} only produces XML elements. An XML
+   *  document is not well formed unless it includes the prolog
+   *  and at least one element.
+   *
+   *  @return [DOMString] A {\bf DOMString} with the XML text representation 
+   *                      of the DOM tree or {\tt NULL} on an error.
+   */
+
+DOMString
+ixmlDocumenttoString(IXML_Document *doc);
 
   /** Renders a {\bf Node} and all sub-elements into an XML text
    *  representation.  The caller is required to free the {\bf DOMString}
@@ -1762,9 +1785,10 @@ ixmlPrintNode(IXML_Node *doc
    *  is no longer required.
    *
    *  Note that this function can be used for any {\bf Node}-derived
-   *  interface.  A similar {\bf ixmlPrintDocument} function is defined
-   *  to avoid casting when printing whole documents.
-   * 
+   *  interface.  The difference between {\bf ixmlNodetoString} and
+   *  {\bf ixmlDocumenttoString} is {\bf ixmlNodetoString} does not include
+   *  the XML prolog, it only produces XML elements.
+   *
    *  @return [DOMString] A {\bf DOMString} with the XML text representation 
    *                      of the DOM tree or {\tt NULL} on an error.
    */
@@ -1773,6 +1797,20 @@ EXPORT_SPEC DOMString
 ixmlNodetoString(IXML_Node *doc  
 		   /** The root of the {\bf Node} tree to render to XML text. */
                 );
+
+
+  /** Makes the XML parser more tolerant to malformed text.
+   *       
+   * If {\bf errorChar} is 0 (default), the parser is strict about XML 
+   * encoding : invalid UTF-8 sequences or "&" entities are rejected, and 
+   * the parsing aborts.
+   * If {\bf errorChar} is not 0, the parser is relaxed : invalid UTF-8 
+   * characters are replaced by the {\bf errorChar}, and invalid "&" entities 
+   * are left untranslated. The parsing is then allowed to continue.
+   */
+void
+ixmlRelaxParser(char errorChar);
+
 
   /** Parses an XML text buffer converting it into an IXML DOM representation.
    *
