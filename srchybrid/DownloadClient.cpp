@@ -1383,7 +1383,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 					SetDownloadState(DS_ERROR);
 					return;
 					}
-					break;
+				//break;
 				}
 			++numberofblocktorequest;
 		}
@@ -1832,7 +1832,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 		}
 	}
 	if (thePrefs.GetVerbose())
-		DebugLogError(LOG_MORPH, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+		DebugLogError(LOG_MORPH, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %uI64  because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 
 	TRACE("%s - Dropping packet\n", __FUNCTION__);
 }
