@@ -34,15 +34,13 @@
 *	buffers, allocation, re-allocation, and modification of the memory 
 ************************************************************************/
 
+#include "config.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <membuffer.h>
 #include "upnp.h"
-
-#ifdef _WIN32
-#define strncasecmp strnicmp
-#endif
+#include "unixutil.h"
 
 /************************************************************************
 *								 string									*

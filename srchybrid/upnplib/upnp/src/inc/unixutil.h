@@ -39,7 +39,7 @@
  #include <sys/socket.h>
 #else
  #define XINLINE
-
+// MORPH CHANGE: compile with vc 7.1
  //#define socklen_t int
  #define EAFNOSUPPORT 97
 #endif

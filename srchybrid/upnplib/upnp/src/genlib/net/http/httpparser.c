@@ -34,6 +34,7 @@
 * messages.
 ************************************************************************/
 
+#include "config.h"
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
@@ -867,11 +868,11 @@ match_int( INOUT scanner_t * scanner,
            OUT int *value )
 {
     memptr token;
-    token_type_t tok_type;
+    token_type_t   tok_type;
     parse_status_t status;
-    int num;
-    char *end_ptr;
-    size_t save_pos;
+    long           num;
+    char          *end_ptr;
+    size_t         save_pos;
 
     save_pos = scanner->cursor;
 
@@ -972,21 +973,21 @@ skip_to_end_of_header( INOUT scanner_t * scanner )
 }
 
 /************************************************************************
-* Function: match_char													
-*																		
-* Parameters:															
-*	INOUT scanner_t* scanner ;  Scanner Object											
-*	IN char c ;					Character to be compared with 															
-*	IN xboolean case_sensitive; Flag indicating whether comparison should 
+* Function: match_char
+*
+* Parameters:
+*	INOUT scanner_t* scanner ;  Scanner Object
+*	IN char c ;					Character to be compared with
+*	IN xboolean case_sensitive; Flag indicating whether comparison should
 *								be case sensitive
-*																		
-* Description: Compares a character to the next char in the scanner;	
-*	on error, scanner chars are not restored							
-*																		
-* Returns:																
-*   PARSE_OK															
-*   PARSE_NO_MATCH														
-*   PARSE_INCOMPLETE													
+*
+* Description: Compares a character to the next char in the scanner;
+*	on error, scanner chars are not restored
+*
+* Returns:
+*   PARSE_OK
+*   PARSE_NO_MATCH
+*   PARSE_INCOMPLETE
 ************************************************************************/
 static XINLINE parse_status_t
 match_char( INOUT scanner_t * scanner,
@@ -1683,6 +1684,7 @@ parser_parse_headers( INOUT http_parser_t * parser )
                 || membuffer_assign( &header->value, hdr_value.buf,
                                      hdr_value.length ) != 0 ) {
                 // not enuf mem
+		free (header);
                 parser->http_error_code = HTTP_INTERNAL_SERVER_ERROR;
                 return PARSE_FAILURE;
             }
@@ -1694,10 +1696,12 @@ parser_parse_headers( INOUT http_parser_t * parser )
             ListAddTail( &parser->msg.headers, header );
 
             //NNS:          ret = dlist_append( &parser->msg.headers, header );
+/** TODO: remove that? */
             if( ret == UPNP_E_OUTOF_MEMORY ) {
                 parser->http_error_code = HTTP_INTERNAL_SERVER_ERROR;
                 return PARSE_FAILURE;
             }
+/** end of remove that? */
         } else if( hdr_value.length > 0 ) {
             //
             // append value to existing header
@@ -2387,7 +2391,7 @@ int
 raw_to_int( IN memptr * raw_value,
             IN int base )
 {
-    int num;
+    long  num;
     char *end_ptr;
 
     if( raw_value->length == 0 ) {

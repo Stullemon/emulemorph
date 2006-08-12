@@ -29,9 +29,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "config.h"
 #if EXCLUDE_DOM == 0
 #include <stdarg.h>
-#include "config.h"
 #include "upnptools.h"
 #include "uri.h"
 #define HEADER_LENGTH 2000
@@ -63,6 +63,7 @@ struct ErrorString ErrorMessages[] = { {UPNP_E_SUCCESS, "UPNP_E_SUCCESS"},
 {UPNP_E_INVALID_ACTION, "UPNP_E_INVALID_ACTION"},
 {UPNP_E_FINISH, "UPNP_E_FINISH"},
 {UPNP_E_INIT_FAILED, "UPNP_E_INIT_FAILED"},
+{UPNP_E_BAD_HTTPMSG, "UPNP_E_BAD_HTTPMSG"},
 {UPNP_E_NETWORK_ERROR, "UPNP_E_NETWORK_ERROR"},
 {UPNP_E_SOCKET_WRITE, "UPNP_E_SOCKET_WRITE"},
 {UPNP_E_SOCKET_READ, "UPNP_E_SOCKET_READ"},
@@ -75,7 +76,8 @@ struct ErrorString ErrorMessages[] = { {UPNP_E_SUCCESS, "UPNP_E_SUCCESS"},
 {UPNP_E_UNSUBSCRIBE_UNACCEPTED, "UPNP_E_UNSUBSCRIBE_UNACCEPTED"},
 {UPNP_E_NOTIFY_UNACCEPTED, "UPNP_E_NOTIFY_UNACCEPTED"},
 {UPNP_E_INTERNAL_ERROR, "UPNP_E_INTERNAL_ERROR"},
-{UPNP_E_INVALID_ARGUMENT, "UPNP_E_INVALID_ARGUMENT"}
+{UPNP_E_INVALID_ARGUMENT, "UPNP_E_INVALID_ARGUMENT"},
+{UPNP_E_OUTOF_BOUNDS, "UPNP_E_OUTOF_BOUNDS"}
 };
 
 /************************************************************************
@@ -119,8 +121,8 @@ UpnpGetErrorMessage( IN int rc )
 *	return either UPNP_E_SUCCESS or appropriate error
 ***************************************************************************/
 int
-UpnpResolveURL( IN char *BaseURL,
-                IN char *RelURL,
+UpnpResolveURL( IN const char *BaseURL,
+                IN const char *RelURL,
                 OUT char *AbsURL )
 {
     // There is some unnecessary allocation and
@@ -135,7 +137,7 @@ UpnpResolveURL( IN char *BaseURL,
 
     tempRel = NULL;
 
-    tempRel = resolve_rel_url( BaseURL, RelURL );
+    tempRel = resolve_rel_url((char*) BaseURL, (char*) RelURL );
 
     if( tempRel ) {
         strcpy( AbsURL, tempRel );
@@ -171,10 +173,10 @@ UpnpResolveURL( IN char *BaseURL,
 static int
 addToAction( IN int response,
              INOUT IXML_Document ** ActionDoc,
-             IN char *ActionName,
-             IN char *ServType,
-             IN char *ArgName,
-             IN char *ArgValue )
+             IN const char *ActionName,
+             IN const char *ServType,
+             IN const char *ArgName,
+             IN const char *ArgValue )
 {
     char *ActBuff = NULL;
     IXML_Node *node = NULL;
@@ -247,13 +249,13 @@ addToAction( IN int response,
 ***************************************************************************/
 static IXML_Document *
 makeAction( IN int response,
-            IN char *ActionName,
-            IN char *ServType,
+            IN const char *ActionName,
+            IN const char *ServType,
             IN int NumArg,
-            IN char *Arg,
+            IN const char *Arg,
             IN va_list ArgList )
 {
-    char *ArgName,
+    const char *ArgName,
      *ArgValue;
     char *ActBuff;
     int Idx = 0;
@@ -294,7 +296,7 @@ makeAction( IN int response,
         //va_start(ArgList, Arg);
         ArgName = Arg;
         while( Idx++ != NumArg ) {
-            ArgValue = va_arg( ArgList, char * );
+            ArgValue = va_arg( ArgList, const char * );
 
             if( ArgName != NULL ) {
                 node = ixmlNode_getFirstChild( ( IXML_Node * ) ActionDoc );
@@ -308,7 +310,7 @@ makeAction( IN int response,
                 ixmlNode_appendChild( node, ( IXML_Node * ) Ele );
             }
 
-            ArgName = va_arg( ArgList, char * );
+            ArgName = va_arg( ArgList, const char * );
         }
         //va_end(ArgList);
     }
@@ -337,23 +339,18 @@ makeAction( IN int response,
 *	else returns NULL
 ***************************************************************************/
 IXML_Document *
-UpnpMakeAction( char *ActionName,
-                char *ServType,
+UpnpMakeAction( const char *ActionName,
+                const char *ServType,
                 int NumArg,
-                char *Arg,
+                const char *Arg,
                 ... )
 {
-    va_list ArgList = NULL;
+    va_list ArgList;
     IXML_Document *out = NULL;
 
-    if( NumArg > 0 ) {
-        va_start( ArgList, Arg );
-    }
-
+    va_start( ArgList, Arg );
     out = makeAction( 0, ActionName, ServType, NumArg, Arg, ArgList );
-    if( NumArg > 0 ) {
-        va_end( ArgList );
-    }
+    va_end( ArgList );
 
     return out;
 }
@@ -379,23 +376,18 @@ UpnpMakeAction( char *ActionName,
 *	else returns NULL
 ***************************************************************************/
 IXML_Document *
-UpnpMakeActionResponse( char *ActionName,
-                        char *ServType,
+UpnpMakeActionResponse( const char *ActionName,
+                        const char *ServType,
                         int NumArg,
-                        char *Arg,
+                        const char *Arg,
                         ... )
 {
     va_list ArgList;
     IXML_Document *out = NULL;
 
-    if( NumArg > 0 ) {
-        va_start( ArgList, Arg );
-    }
-
+    va_start( ArgList, Arg );
     out = makeAction( 1, ActionName, ServType, NumArg, Arg, ArgList );
-    if( NumArg > 0 ) {
-        va_end( ArgList );
-    }
+    va_end( ArgList );
 
     return out;
 }
@@ -421,10 +413,10 @@ UpnpMakeActionResponse( char *ActionName,
 ***************************************************************************/
 int
 UpnpAddToActionResponse( INOUT IXML_Document ** ActionResponse,
-                         IN char *ActionName,
-                         IN char *ServType,
-                         IN char *ArgName,
-                         IN char *ArgValue )
+                         IN const char *ActionName,
+                         IN const char *ServType,
+                         IN const char *ArgName,
+                         IN const char *ArgValue )
 {
     return addToAction( 1, ActionResponse, ActionName, ServType, ArgName,
                         ArgValue );
@@ -451,10 +443,10 @@ UpnpAddToActionResponse( INOUT IXML_Document ** ActionResponse,
 ***************************************************************************/
 int
 UpnpAddToAction( IXML_Document ** ActionDoc,
-                 char *ActionName,
-                 char *ServType,
-                 char *ArgName,
-                 char *ArgValue )
+                 const char *ActionName,
+                 const char *ServType,
+                 const char *ArgName,
+                 const char *ArgValue )
 {
 
     return addToAction( 0, ActionDoc, ActionName, ServType, ArgName,
@@ -477,8 +469,8 @@ UpnpAddToAction( IXML_Document ** ActionDoc,
 ***************************************************************************/
 int
 UpnpAddToPropertySet( INOUT IXML_Document ** PropSet,
-                      IN char *ArgName,
-                      IN char *ArgValue )
+                      IN const char *ArgName,
+                      IN const char *ArgValue )
 {
 
     char BlankDoc[] = "<e:propertyset xmlns:e=\"urn:schemas"
@@ -532,14 +524,14 @@ UpnpAddToPropertySet( INOUT IXML_Document ** PropSet,
 ***************************************************************************/
 IXML_Document *
 UpnpCreatePropertySet( IN int NumArg,
-                       IN char *Arg,
+                       IN const char *Arg,
                        ... )
 {
     va_list ArgList;
     int Idx = 0;
     char BlankDoc[] = "<e:propertyset xmlns:e=\"urn:schemas-"
         "upnp-org:event-1-0\"></e:propertyset>";
-    char *ArgName,
+    const char *ArgName,
      *ArgValue;
     IXML_Node *node;
     IXML_Element *Ele;
@@ -559,7 +551,7 @@ UpnpCreatePropertySet( IN int NumArg,
     ArgName = Arg;
 
     while( Idx++ != NumArg ) {
-        ArgValue = va_arg( ArgList, char * );
+        ArgValue = va_arg( ArgList, const char * );
 
         if( ArgName != NULL /*&& ArgValue != NULL */  ) {
             node = ixmlNode_getFirstChild( ( IXML_Node * ) PropSet );
@@ -575,7 +567,7 @@ UpnpCreatePropertySet( IN int NumArg,
             ixmlNode_appendChild( node, ( IXML_Node * ) Ele1 );
         }
 
-        ArgName = va_arg( ArgList, char * );
+        ArgName = va_arg( ArgList, const char * );
 
     }
     va_end( ArgList );
