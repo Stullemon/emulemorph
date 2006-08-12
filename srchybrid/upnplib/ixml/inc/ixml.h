@@ -48,8 +48,9 @@
  #else
   #define EXPORT_SPEC
  #endif
+#else
+ #define EXPORT_SPEC
 #endif
-
 
 typedef int BOOL;
 

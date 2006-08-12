@@ -17,14 +17,15 @@
    ** this software for any purpose.
    */
 
+#include "config.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#ifndef _WIN32
-#include <netinet/in.h>
+#ifndef WIN32
+ #include <netinet/in.h>
 #else
-#include "Winsock2.h"
+ #include <winsock2.h>
 #endif
 #include "sysdep.h"
 #include "uuid.h"
@@ -308,9 +309,9 @@ uuid_create_from_name( uuid_upnp * uid, /* resulting UUID */
        no matter what endian machine we're on 
      */
     net_nsid = nsid;
-    htonl( net_nsid.time_low );
-    htons( net_nsid.time_mid );
-    htons( net_nsid.time_hi_and_version );
+    net_nsid.time_low=htonl( net_nsid.time_low );
+    net_nsid.time_mid=htons( net_nsid.time_mid );
+    net_nsid.time_hi_and_version=htons( net_nsid.time_hi_and_version );
 
     MD5Init( &c );
     MD5Update( &c, &net_nsid, sizeof( uuid_upnp ) );
@@ -341,9 +342,9 @@ format_uuid_v3( uuid_upnp * uid,
     /*
        convert UUID to local byte order 
      */
-    ntohl( uid->time_low );
-    ntohs( uid->time_mid );
-    ntohs( uid->time_hi_and_version );
+    uid->time_low=ntohl( uid->time_low );
+    uid->time_mid=ntohs( uid->time_mid );
+    uid->time_hi_and_version=ntohs( uid->time_hi_and_version );
 
     /*
        put in the variant and version bits 

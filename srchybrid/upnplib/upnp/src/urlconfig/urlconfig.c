@@ -29,13 +29,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "config.h"
 #include <assert.h>
-#ifndef _WIN32
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#ifndef WIN32
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
 #else
-#include <winsock2.h>
+ #include <winsock2.h>
 #endif
 #include "upnp.h"
 #include "util.h"
@@ -43,6 +44,7 @@
 #include "uri.h"
 #include "membuffer.h"
 #include "urlconfig.h"
+#include "unixutil.h"
 
 /************************************************************************
 *	Function :	addrToString
@@ -401,7 +403,7 @@ configure_urlbase( INOUT IXML_Document * doc,
         goto error_handler;
     }
     // xml doc to str
-    xml_str = ixmlPrintDocument( ( IXML_Node * ) doc );
+    xml_str = ixmlPrintDocument( doc );
     if( xml_str == NULL ) {
         goto error_handler;
     }

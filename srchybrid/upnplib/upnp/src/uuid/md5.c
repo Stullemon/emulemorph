@@ -26,6 +26,7 @@
 
  */
 
+#include "config.h"
 #include "global.h"
 #include "md5.h"
 

@@ -17,12 +17,11 @@
  ** this software for any purpose.
  */
 
-#ifndef _WIN32
-#include <unistd.h>
+#include "config.h"
+#ifndef WIN32
+ #include <unistd.h>
 #else
-#include <time.h>
-#include <sys/types.h>
-#include <sys/timeb.h>
+ #include <winsock2.h>
 #endif
 #include <string.h>
 #include <stdio.h>
@@ -131,13 +130,6 @@ get_random_info( char seed[16] )
 void
 get_system_time( uuid_time_t * uuid_time )
 {
-#ifdef _WIN32
-	struct _timeb timeStruct;
-
-	_ftime( &timeStruct);
-    *uuid_time = (uuid_time_t)(( timeStruct.time * 10000000 ) + ( timeStruct.millitm * 10000 ) +
-        I64( 0x01B21DD213814000 ));
-#else
     struct timeval tp;
 
     gettimeofday( &tp, ( struct timezone * )0 );
@@ -149,7 +141,6 @@ get_system_time( uuid_time_t * uuid_time )
      */
     *uuid_time = ( tp.tv_sec * 10000000 ) + ( tp.tv_usec * 10 ) +
         I64( 0x01B21DD213814000 );
-#endif
 };
 
 /*-----------------------------------------------------------------------------*/
@@ -157,22 +148,18 @@ void
 get_random_info( char seed[16] )
 {
     MD5_CTX c;
-#ifndef _WIN32
     typedef struct {
-        struct sysinfo s;
+//        struct sysinfo s;
         struct timeval t;
         char hostname[257];
     } randomness;
     randomness r;
-#endif
 
     MD5Init( &c );
 
-#ifndef _WIN32
     gettimeofday( &r.t, ( struct timezone * )0 );
     gethostname( r.hostname, 256 );
     MD5Update( &c, &r, sizeof( randomness ) );
-#endif
     MD5Final( seed, &c );
 };
 
