@@ -1,4 +1,14 @@
 --------------------------------------
+Changelog for eMule 0.47a MorphXT v8.14
+-------------------------------------
+Date: 12-Aug 2006 
+ADDED: ionix advanced webserver (ionix/Aireoreion)
+ADDED: multi user webserver  in ef-mod style tabs. [leuk_he]
+FIXED: File completion of files over 4GB. 
+CHANGED: USC: take tcp/ip overhead more into account.
+CHANGED: Mulelistcontrol: change moment of update of display. 
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13
 -------------------------------------
 FIXED: MergeKnown: statistic merge from SlugFiller mod has been fixed to avoid crash
@@ -32,7 +42,6 @@ CHANGED: Unlimited upload now works on WSA_WOULDBLOCK corrreclty.  (No USC neede
 CHANGED: Update upnp library to 1.4.x (thrunk version) 26/07/2006  http://www.libupnp.org/ 
 CHANGED: known.met format better compatible. (noted by david?)
 CHANGED: Drop lower class"pre-empt" slots more often when opehing higher class slot 
-
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13 BETA7
