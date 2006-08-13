@@ -204,7 +204,7 @@ void CRoutingZone::ReadFile()
 					// IP Appears valid
 					if( byType < 4)
 					    {
-						#if 0
+						//MOPRH START ipfilter kad
 						if ( ::theApp.ipfilter->IsFiltered(ntohl(uIP))) 
 						{
 							if (::thePrefs.GetLogFilteredIPs())
@@ -212,15 +212,12 @@ void CRoutingZone::ReadFile()
 						}
 						else
 						{
-						#endif
    					    //MORPH END leuk_he ipfilter kad
 							// This was not a dead contact, Inc counter if add was successful
 							if( Add(uID, uIP, uUDPPort, uTCPPort, uContactVersion) )
 								uValidContacts++;
 						}
-					#if 0 
-					}
-					#endif 
+					} //MORPH leuk_he ipfilter
 					uNumContacts--;
 					}
 					AddLogLine( false, GetResString(IDS_KADCONTACTSREAD), uValidContacts);
