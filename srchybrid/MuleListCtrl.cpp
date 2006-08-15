@@ -1554,11 +1554,11 @@ int CUpdateItemThread::Run() {
 			LPARAM item = queueditem.RemoveHead();
 			update_info_struct* update_info;
 			if (ListItems.Lookup(item, update_info)) {
-				update_info->dwWillUpdate = dwUpdate;
+				update_info->bNeedToUpdate = true;
 			} else {
 				update_info = new update_info_struct;
 				update_info->dwUpdate = 0;
-				update_info->dwWillUpdate = dwUpdate;
+				update_info->bNeedToUpdate = true;
 				ListItems.SetAt(item, update_info);
 			}
 		}
@@ -1571,7 +1571,7 @@ int CUpdateItemThread::Run() {
 		while (pos != NULL)
 		{
 			ListItems.GetNextAssoc( pos, item, update_info );
-			if (update_info->dwUpdate < update_info->dwWillUpdate) {
+			if (update_info->dwUpdate < GetTickCount() && update_info->bNeedToUpdate) {
 				LVFINDINFO find;
 				find.flags = LVFI_PARAM;
 				find.lParam = (LPARAM)item;
@@ -1579,9 +1579,10 @@ int CUpdateItemThread::Run() {
 				if (found != -1)
 					m_listctrl->Update(found);
 				update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000));
+				update_info->bNeedToUpdate = false;
 				wecanwait = min(wecanwait,1000);
-			} else if (GetTickCount()-update_info->dwWillUpdate <= MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE) {
-				wecanwait = min(wecanwait,GetTickCount()-update_info->dwUpdate);
+			} else if (update_info->dwUpdate > GetTickCount()) {
+				wecanwait = min(wecanwait,update_info->dwUpdate-GetTickCount());
 			} else {
 				ListItems.RemoveKey(item);
 				delete update_info;

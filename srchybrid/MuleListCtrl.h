@@ -9,7 +9,7 @@ class CIni;
 //MORPH START - UpdateItemThread
 struct update_info_struct{
 	DWORD	  dwUpdate;
-	DWORD	  dwWillUpdate;
+	DWORD	  bNeedToUpdate;
 };
 class CUpdateItemThread : public CWinThread
 {
