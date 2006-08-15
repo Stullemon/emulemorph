@@ -384,6 +384,9 @@ COLORREF CPreferences::m_crLogUSC = RGB(10,180,50);
 	
 int		CPreferences::m_iExtractMetaData;
 bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
+//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+bool	CPreferences::m_bIonixWebsrv;
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 TCHAR	CPreferences::m_sWebPassword[256];
 TCHAR	CPreferences::m_sWebLowPassword[256];
 CUIntArray CPreferences::m_aAllowedRemoteAccessIPs;
@@ -2304,6 +2307,9 @@ void CPreferences::SavePreferences()
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "WebServer"
 	//
+	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	ini.WriteBool(_T("UseIonixWebsrv"), m_bIonixWebsrv);
+	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	ini.WriteString(L"Password", GetWSPass(), L"WebServer");
 	ini.WriteString(L"PasswordLow", GetWSLowPass());
 	ini.WriteInt(L"Port", m_nWebPort);
@@ -3460,6 +3466,9 @@ void CPreferences::LoadPreferences()
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "WebServer"
 	//
+	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	m_bIonixWebsrv=ini.GetBool(_T("UseIonixWebsrv"), false);
+	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	_stprintf(m_sWebPassword,L"%s",ini.GetString(L"Password", L"",L"WebServer"));
 	_stprintf(m_sWebLowPassword,L"%s",ini.GetString(L"PasswordLow", L""));
 	m_nWebPort=(uint16)ini.GetInt(L"Port", 4711);

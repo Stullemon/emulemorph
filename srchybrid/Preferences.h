@@ -537,6 +537,9 @@ public:
 	static  bool    m_bAllocFull;
 
 	// Web Server [kuchin]
+	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	static	bool	m_bIonixWebsrv;
+	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	static	TCHAR	m_sWebPassword[256];
 	static	TCHAR	m_sWebLowPassword[256];
 	static	uint16	m_nWebPort;
@@ -1525,6 +1528,9 @@ public:
 	// WebServer
 	static	uint16	GetWSPort()								{ return m_nWebPort; }
 	static	void	SetWSPort(uint16 uPort)					{ m_nWebPort=uPort; }
+	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	static	bool	UseIonixWebsrv()						{ return m_bIonixWebsrv; }
+	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	static	CString GetWSPass()								{ return CString(m_sWebPassword); }
 	static	void	SetWSPass(CString strNewPass);
 	static	bool	GetWSIsEnabled()						{ return m_bWebEnabled; }
