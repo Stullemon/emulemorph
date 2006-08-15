@@ -18,9 +18,25 @@ public:
 
 	void Localize(void);
 
+	bool bCreated; //>>> [ionix] - iONiX::Advanced WebInterface Account Management - needs to be public
+ // MORPH START  tabbed options [leuk_he]
+private:
+	enum eTab	{NONE, WEBSERVER,MULTIWEBSERVER};
+	CTabCtrl	m_tabCtr;
+	eTab		m_currentTab;
+	CImageList	m_imageList;
+	void		SetTab(eTab tab);
+public:
+	afx_msg void OnTcnSelchangeTab(NMHDR *pNMHDR, LRESULT *pResult);
+	void	InitTab(bool firstinit, int Page = 0);
+ // MORPH END tabbed options [leuk_he]
+
+
 protected:
 	BOOL m_bModified;
+	/* Moved to public 
 	bool bCreated;
+	*/
 	CHyperTextCtrl m_wndMobileLink;
 
 	void LoadSettings(void);
@@ -29,6 +45,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual BOOL OnSetActive(); //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 	void SetModified(BOOL bChanged = TRUE){
 		m_bModified = bChanged;
 		CPropertyPage::SetModified(bChanged);

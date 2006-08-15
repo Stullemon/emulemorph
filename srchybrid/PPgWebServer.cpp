@@ -24,6 +24,7 @@
 #include "Preferences.h"
 #include "ServerWnd.h"
 #include "HelpIDs.h"
+#include "PreferencesDlg.h" //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -53,6 +54,9 @@ BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_WS_GZIP, OnDataChange)
 	ON_BN_CLICKED(IDC_WS_ALLOWHILEVFUNC, OnDataChange)
 	ON_WM_HELPINFO()
+	// MORPH start tabbed option [leuk_he]
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_WEBSERVER1, OnTcnSelchangeTab)
+	// MORPH end tabbed option [leuk_he]
 END_MESSAGE_MAP()
 
 CPPgWebServer::CPPgWebServer()
@@ -64,6 +68,11 @@ CPPgWebServer::CPPgWebServer()
 // MORPH END leuk_he tooltipped
 {
 	bCreated = false;
+	// MORPH start tabbed option [leuk_he]
+	m_imageList.DeleteImageList();
+	m_imageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 14+1, 0);
+	m_imageList.Add(CTempIconLoader(_T("WEB")));
+	// MORPH end tabbed option [leuk_he]
 }
 
 CPPgWebServer::~CPPgWebServer()
@@ -72,7 +81,10 @@ CPPgWebServer::~CPPgWebServer()
 
 void CPPgWebServer::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+  	CPropertyPage::DoDataExchange(pDX);
+  // MORPH start tabbed options [leuk_he]
+    DDX_Control(pDX, IDC_TAB_WEBSERVER1 , m_tabCtr);
+  // MORPH end tabbed options [leuk_he]
 }
 
 BOOL CPPgWebServer::OnInitDialog()
@@ -82,6 +94,11 @@ BOOL CPPgWebServer::OnInitDialog()
 
 	((CEdit*)GetDlgItem(IDC_WSPASS))->SetLimitText(12);
 	((CEdit*)GetDlgItem(IDC_WSPORT))->SetLimitText(6);
+
+  // MORPH start tabbed options [leuk_he]
+	InitTab(true);
+	m_tabCtr.SetCurSel(0);
+  // MORPH end tabbed options [leuk_he]
 
 	LoadSettings();
 	InitTooltips(); // MORPH leuk_he tooltipped
@@ -337,3 +354,47 @@ BOOL CPPgWebServer::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 	OnHelp();
 	return TRUE;
 }
+
+//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+BOOL CPPgWebServer::OnSetActive()
+{
+	if ((theApp.emuledlg->preferenceswnd->m_wndIonixWebServer.GetSafeHwnd()== NULL
+	     &&	 (thePrefs.UseIonixWebsrv()) 
+	   ||(theApp.emuledlg->preferenceswnd->m_wndIonixWebServer.GetSafeHwnd()!= NULL
+	   && theApp.emuledlg->preferenceswnd->m_wndIonixWebServer.IsDlgButtonChecked(IDC_ADVADMINENABLED)!=0)))
+	{
+		GetDlgItem(IDC_WSPASS)->EnableWindow(FALSE);	
+		GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(FALSE);	
+		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(FALSE);	
+		GetDlgItem(IDC_WSPASSLOW)->EnableWindow(FALSE);	
+	}
+	else
+	{
+		GetDlgItem(IDC_WSPASS)->EnableWindow(TRUE);	
+		GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(TRUE);	
+		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(TRUE);	
+		GetDlgItem(IDC_WSPASSLOW)->EnableWindow(TRUE);	
+	}
+	return TRUE;
+}
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
+
+// MORPH start tabbed option [leuk_he]
+void CPPgWebServer::InitTab(bool firstinit, int Page)
+{
+	if (firstinit) {
+		m_tabCtr.DeleteAllItems();
+		m_tabCtr.SetImageList(&m_imageList);
+		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, WEBSERVER, _T("Web server"), 0, (LPARAM)WEBSERVER); 
+		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, MULTIWEBSERVER, _T("Multi user"), 0, (LPARAM)MULTIWEBSERVER); 
+	}
+
+	m_tabCtr.SetCurSel(Page);
+}
+void CPPgWebServer::OnTcnSelchangeTab(NMHDR * /* pNMHDR */, LRESULT *pResult)
+{
+	int cur_sel = m_tabCtr.GetCurSel();
+	theApp.emuledlg->preferenceswnd->SwitchTab(cur_sel);
+	*pResult = 0;
+}
+// MORPH end tabbed option [leuk_he]

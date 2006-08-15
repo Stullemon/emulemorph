@@ -1369,6 +1369,9 @@
 				RelativePath="PPgGeneral.cpp">
 			</File>
 			<File
+				RelativePath=".\PPgIonixWebServer.cpp">
+			</File>
+			<File
 				RelativePath="PPgIRC.cpp">
 			</File>
 			<File
@@ -2104,6 +2107,9 @@
 				RelativePath="res\Chat.ico">
 			</File>
 			<File
+				RelativePath=".\res\Mod\Client-Neo.ico">
+			</File>
+			<File
 				RelativePath="res\Client0.ico">
 			</File>
 			<File
@@ -2288,6 +2294,9 @@
 			</File>
 			<File
 				RelativePath="res\CycleView.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\Cyrex2001.ico">
 			</File>
 			<File
 				RelativePath="res\Delete.ico">
@@ -2530,6 +2539,12 @@
 				RelativePath="res\Help.ico">
 			</File>
 			<File
+				RelativePath=".\res\Mod\iconmax.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\iconstulle.ico">
+			</File>
+			<File
 				RelativePath="res\Import.ico">
 			</File>
 			<File
@@ -2546,6 +2561,9 @@
 			</File>
 			<File
 				RelativePath="res\Info.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\ionix.ico">
 			</File>
 			<File
 				RelativePath="res\IPFilter.ico">
@@ -2657,10 +2675,16 @@
 				RelativePath="res\mule_wiz_hdr.gif">
 			</File>
 			<File
+				RelativePath=".\res\Mod\mule_wiz_morph.gif">
+			</File>
+			<File
 				RelativePath="res\NavigateBack.ico">
 			</File>
 			<File
 				RelativePath="res\NavigateForward.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\nextEMF.ico">
 			</File>
 			<File
 				RelativePath="res\MOD\not.ico">
@@ -2699,10 +2723,10 @@
 				RelativePath="res\Proxy.ico">
 			</File>
 			<File
-				RelativePath="res\queue.ico">
+				RelativePath=".\res\Mod\queue.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\queue.ico">
+				RelativePath="res\queue.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\Rating-Excellent.ico">
@@ -2742,6 +2766,9 @@
 			</File>
 			<File
 				RelativePath="res\RestoreWindow.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\ScarAngel.ico">
 			</File>
 			<File
 				RelativePath="res\Scheduler.ico">
@@ -2947,6 +2974,9 @@
 			<File
 				RelativePath="res\Wizzard.ico">
 			</File>
+			<File
+				RelativePath=".\res\Mod\xtreme.ico">
+			</File>
 		</Filter>
 		<Filter
 			Name="Templates"
@@ -3005,7 +3035,7 @@
 				RelativePath="..\docs\readme.txt">
 			</File>
 			<File
-				RelativePath=".\todo.txt">
+				RelativePath="..\todo.txt">
 			</File>
 		</Filter>
 	</Files>

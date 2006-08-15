@@ -55,7 +55,8 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 	m_wndEmulespana.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, emulEspaña preferency
 	m_wndWebcachesettings.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, WebCache 1.2f
-#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+    //m_wndIonixWebServer.m_psp.dwFlags &= ~PSH_HASHELP;  //ionix advanced webserver
+#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
 	m_wndDebug.m_psp.dwFlags &= ~PSH_HASHELP;
 #endif
 
@@ -80,9 +81,10 @@ CPreferencesDlg::CPreferencesDlg()
 	CTreePropSheet::SetPageIcon(&m_wndEastShare, _T("EASTSHARE")); //EastShare - Added by Pretender, ES Prefs
 	CTreePropSheet::SetPageIcon(&m_wndEmulespana, _T("EMULESPANA")); //MORPH - Added by SiRoB, emulEspaña preferency
 	CTreePropSheet::SetPageIcon(&m_wndWebcachesettings, _T("WEBCACHE")); //MORPH - Added by SiRoB, WebCache 1.2f
-#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
 	CTreePropSheet::SetPageIcon(&m_wndDebug, _T("Preferences"));
-#endif
+    #endif
+    //CTreePropSheet::SetPageIcon(&m_wndIonixWebServer, _T("MORPH"));
 	
 	AddPage(&m_wndGeneral);
 	AddPage(&m_wndDisplay);
@@ -105,15 +107,22 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
 	AddPage(&m_wndWebcachesettings); //MORPH - Added by SiRoB, WebCache 1.2f
-#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
 	AddPage(&m_wndDebug);
 #endif
+     AddPage(&m_wndIonixWebServer); // Morph - ionix advanced webserver
+
 
 	SetTreeViewMode(TRUE, TRUE, TRUE);
 	SetTreeWidth(170);
 
 	m_pPshStartPage = NULL;
 	m_bSaveIniFile = false;
+	// MORPH start tabbed options [leuk_he]
+	ActivePageWebServer			= 0;
+	StartPageWebServer			= 0;
+	// end tabbed
+
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -141,9 +150,29 @@ BOOL CPreferencesDlg::OnInitDialog()
 	{
 		if (GetPage(i)->m_psp.pszTemplate == m_pPshStartPage)
 		{
+			// MORPH start tabbed options [leuk_he]
+			if (i==Multiwebserver)
+			{
+				if (i == Multiwebserver){	// webserver
+					SetActivePage(Webserver);
+				}
+				m_wndWebServer.InitTab(false,StartPageWebServer);
+				m_wndIonixWebServer.InitTab(false,StartPageWebServer);
+			
+				break;
+			}
+			else
+			{
+				SetActivePage(i);
+				break;
+			}
+			/*   commented out morph :
 			SetActivePage(i);
-			break;
+			break;*/
+		  // MORPH end tabbed options [leuk_he]
 		}
+		
+			
 	}
 
 	Localize();	
@@ -190,7 +219,7 @@ void CPreferencesDlg::Localize()
 	m_wndEastShare.Localize();
 	m_wndEmulespana.Localize(); //MORPH - Added by SiRoB, emulEspaña preferency
 	m_wndWebcachesettings.Localize(); //MORPH - Added by SiRoB, WebCache 1.2f
-
+    m_wndIonixWebServer.Localize(); //MORPH ionix advanced webserver
 	int c = 0;
 
 	CTreeCtrl* pTree = GetPageTreeControl();
@@ -208,7 +237,7 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_IRC)));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SECURITY))); 
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SCHEDULER)));
-		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WS)));
+		pTree->SetItemText(GetPageTreeItem(Webserver=c++), RemoveAmbersand(GetResString(IDS_PW_WS)));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_TWEAK)));
 		//	MOD group
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_BACKUP)));
@@ -218,9 +247,12 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("EastShare")));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("emulEspaña")));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WEBCACHE)));  //MORPH - Added by SiRoB, WebCache 1.2f
-	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+    	pTree->SetItemText(GetPageTreeItem(Multiwebserver=c++), RemoveAmbersand(_T(" ")));	// ionix advnaced webserver
+		#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
 		pTree->SetItemText(GetPageTreeItem(c++), _T("Debug"));
-	#endif
+	     #endif
+    //   pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("iONiX ") + GetResString(IDS_PW_WS))); // MORPH ionix advanced webserver
+	
 	}
 	m_banner.UpdateSize(); //Commander - Added: Preferences Banner [TPT]	
 	//MORPH START - Added by SiRoB, Adjust tabHeigh
@@ -276,3 +308,30 @@ void CPreferencesDlg::SetStartPage(UINT uStartPageID)
 {
 	m_pPshStartPage = MAKEINTRESOURCE(uStartPageID);
 }
+
+
+// MORPH start tabbed option [leuk_he]
+void CPreferencesDlg::SwitchTab(int Page)
+{
+	
+	if(m_hWnd && IsWindowVisible()){
+		CPropertyPage* activepage = GetActivePage();
+
+				// Server 1-2
+		if (activepage == &m_wndWebServer || activepage == &m_wndIonixWebServer){
+			if (Page == 0) {
+				SetActivePage(&m_wndWebServer);
+				ActivePageWebServer = 0;
+				StartPageWebServer = 0;
+				m_wndWebServer.InitTab(false,0);
+			}
+			if (Page == 1) {
+				SetActivePage(&m_wndIonixWebServer);
+				ActivePageWebServer = Webserver;
+				StartPageWebServer = 1;
+				m_wndIonixWebServer.InitTab(false,1);
+			}			
+		}
+	}
+}
+// MORPH end tabbed option [leuk_he]

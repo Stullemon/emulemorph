@@ -3454,6 +3454,68 @@
 #define IDS_SLOT_LIMIT_THREE            60382
 #define IDS_SLOT_LIMIT_NUM_B            60383
 #define IDS_SLOT_LIMIT_NUM              60384
+#define IDD_PPG_IONIXWEBSRV             60385
+#define IDS_ADVADMIN_GROUP              40000
+#define IDS_ADVADMIN_ACC                40001
+#define IDS_ADVADMIN_DELETE             40002
+#define IDS_ADVADMIN_NEW                40003
+#define IDS_ADVADMIN_KAD                40004
+#define IDS_ADVADMIN_TRANSFER           40005
+#define IDS_ADVADMIN_SEARCH             40006
+#define IDS_ADVADMIN_SERVER             40007
+#define IDS_ADVADMIN_SHARED             40008
+#define IDS_ADVADMIN_STATS              40009
+#define IDS_ADVADMIN_PREFS              40010
+#define IDS_ADVADMIN_PASS               40012
+#define IDS_ADVADMIN_USER               40013
+#define IDS_ADVADMIN_CAT                40014
+#define IDS_WS_COOKIE_LOGGEDIN          40015
+#define IDS_WS_COOKIE_LASTUSER          40016
+#define IDC_ACCOUNTSELECT               22730
+#define IDC_ADVADMIN_USERLEVEL          22731
+#define IDC_ADVADMIN_KAD                22732
+#define IDC_ADVADMIN_TRANSFER           22733
+#define IDC_ADVADMIN_SEARCH             22734
+#define IDC_ADVADMIN_SERVER             22735
+#define IDC_ADVADMIN_SHARED             22736
+#define IDC_ADVADMIN_STATS              22737
+#define IDC_ADVADMIN_PREFS              22738
+#define IDC_ADVADMIN_DELETE             22739
+#define IDC_ADVADMINENABLED             22729
+#define IDC_STATIC_ADVADMIN             22728
+#define IDC_STATIC_ADVADMIN_ACC         22727
+#define IDC_ADVADMIN_DESC2              22726
+#define IDC_STATIC_ADVADMIN_TRANSFER    22740
+#define IDC_STATIC_ADVADMIN_SEARCH      22741
+#define IDC_STATIC_ADVADMIN_SERVER      22742
+#define IDC_STATIC_ADVADMIN_SHARED      22743
+#define IDC_STATIC_ADVADMIN_STATS       22744
+#define IDC_STATIC_ADVADMIN_PREFS       22745
+#define IDC_STATIC_ADVADMIN_ADMIN       22746
+#define IDC_STATIC_ADVADMIN_CATS        22747
+#define IDC_STATIC_ADVADMIN_USER        22748
+#define IDC_STATIC_ADVADMIN_PASS        22749
+#define IDC_ADVADMIN_PASS               22750
+#define IDC_ADVADMIN_CATS               22751
+#define IDC_ADVADMIN_NEW                22752
+#define IDC_ADVADMIN_USER               22753
+#define IDC_ADVADMIN_NOTE               22754
+#define IDC_ADVADMIN_CAT				22755
+#define IDS_ADVADMINENABLE              22756
+#define IDS_ADVADMIN_NOTE               22757
+#define IDS_ADVADMIN_USERLEVEL          22758
+#define IDS_ADVADMIN_OPERATOR   22759
+#define IDS_ADVADMIN_ADMIN      22760
+#define IDS_ADVADMIN_HIADMIN    22761
+#define IDS_ADVADMINENABLED    22762
+#define IDS_ADVADMIN_GUEST      22764
+#define IDC_TAB_WEBSERVER1      284
+#define IDC_TAB_WEBSERVER2      285
+
+
+
+#define IDC_STATIC_ADVADMIN_USERLEVEL   22669
+
 
 // Next default values for new objects
 // 

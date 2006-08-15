@@ -27,9 +27,21 @@ typedef struct
 {
 	CTime	startTime;
 	long	lSession;
-	bool	admin;
+//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	//bool admin; 
+	uint8 admin;
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	int		lastcat;
-
+//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	CString	RightsToCategories;
+	bool RightsToKad;
+	bool RightsToPrefs;
+	bool RightsToSearch;
+	bool RightsToServers;
+	bool RightsToSharedList;
+	bool RightsToStats;
+	bool RightsToTransfered;
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 } Session;
 
 struct BadLogin {
@@ -239,6 +251,7 @@ typedef struct
 typedef struct
 {
 	CString			sURL;
+	CString			sCookie; // [ionix] - Aireoreion: Cookie settings
 	void			*pThis;
 	CWebSocket		*pSocket;
 	in_addr			inadr;
@@ -300,6 +313,23 @@ typedef struct
 	CString sCommentListLine;
 } WebTemplates;
 
+//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+struct WebServDef{
+	TCHAR	Pass[256];
+	TCHAR	User[256];
+	TCHAR	RightsToCategories[512];
+	uint8	RightsToAddRemove;
+	//bool RightsToAddRemove;
+	bool RightsToKad;
+	bool RightsToPrefs;
+	bool RightsToSearch;
+	bool RightsToServers;
+	bool RightsToSharedList;
+	bool RightsToStats;
+	bool RightsToTransfered;
+};
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
+
 class CWebServer 
 {
 	friend class CWebSocket;
@@ -320,6 +350,7 @@ public:
 protected:
 	static void		ProcessURL(ThreadData);
 	static void		ProcessFileReq(ThreadData Data);
+//static CString CookieExpireDateTime(); // [ionix] - Aireoreion: Cookie settings
 
 private:
 	static CString	_GetHeader(ThreadData, long lSession);
@@ -334,7 +365,7 @@ private:
 	static CString	_GetStats(ThreadData);
 	static CString  _GetKadDlg(ThreadData);
 	static CString	_GetPreferences(ThreadData);
-	static CString	_GetLoginScreen(ThreadData);
+	static CString	_GetLoginScreen(ThreadData, bool bLogout = false); // [ionix] - Aireoreion: Cookie settings - added , bool bLogout = false
 	//MORPH START - Added by SiRoB, Login Failed from eMule+
 	static CString  _GetFailedLoginScreen(ThreadData);
 	//MORPH END   - Added by SiRoB, Login Failed from eMule+
@@ -351,9 +382,10 @@ private:
 
 	static CString	_ParseURL(CString URL, CString fieldname); 
 	static CString	_ParseURLArray(CString URL, CString fieldname);
+	static CString	_ParseCookie(const CString& Cookie, const CString& Cookiename); // [ionix] - Aireoreion: Cookie settings
 	static void		_ConnectToServer(CString sIP, int nPort);
 	static bool		_IsLoggedIn(ThreadData Data, long lSession);
-	static void		_RemoveTimeOuts(ThreadData Data);
+	static void		_RemoveTimeOuts(ThreadData Data, long lSession);
 	static bool		_RemoveSession(ThreadData Data, long lSession);
 	static CString	_SpecialChars(CString str, bool noquote = true);
 	static CString	_GetPlainResString(UINT nID, bool noquote = true);
@@ -361,10 +393,15 @@ private:
 	static int		_GzipCompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen, int level);
 	CString			_LoadTemplate(CString sAll, CString sTemplateName);
 	static Session	GetSessionByID(ThreadData Data,long sessionID);
-	static bool		IsSessionAdmin(ThreadData Data, const CString &strSsessionID);
+//>>> [ionix] - iONiX::Advanced WebInterface Account Management - added bHiLvlFunc
+	static bool		IsSessionAdmin(ThreadData Data, const CString &strSsessionID, const uint8 bMinAdminLvl = 1); // 0 is user
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management - added bHiLvlFunc
 	static CString	GetPermissionDenied();
 	static CString	_GetDownloadGraph(ThreadData Data,CString filehash);
-	static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox=false);
+//>>> Advanced WebInterface Account Management
+	//static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox=false); 
+	static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox, const Session& Rights); 
+//<<< Advanced WebInterface Account Management
 	static CString	GetSubCatLabel(int iCat);
 	static CString  _GetRemoteLinkAddedOk(ThreadData Data);
 	static CString  _GetRemoteLinkAddedFailed(ThreadData Data);
@@ -391,4 +428,12 @@ private:
 	uint32			m_nStartTempDisabledTime;
 	bool			GetIsTempDisabled() { return m_bIsTempDisabled; }
 	ULONG			m_ulCurIP;
+
+//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+public:
+	static	bool	GetWebServLogin(const CString& user, const CString& pass, WebServDef& Def);
+	static	void	SaveWebServConf();
+	static	void	LoadWebServConf();
+	static	CRBMap<uint32, WebServDef>	AdvLogins; //unlimited logs
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 };

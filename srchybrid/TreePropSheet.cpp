@@ -8,9 +8,9 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.4 $
+* $Revision: 1.5 $
 * $Modtime:$
-* $Author: sirob $
+* $Author: pindakaasmod $
 *
 * Revision History:
 *	$History:$
@@ -27,6 +27,10 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+// MORPH START tabbed options
+#include "PreferencesDlg.h"
+#include "emuledlg.h"
+// MORPH END tabbed options
 
 
 //-------------------------------------------------------------------
@@ -357,7 +361,7 @@ void CTreePropSheet::RefillPageTree()
 
 		// Create an item in the tree for the page
 		HTREEITEM	hItem = CreatePageTreeItem(ti.pszText);
-		ASSERT(hItem);
+//		ASSERT(hItem);	tabbed options. 
 		if (hItem)
 		{
 			m_pwndPageTree->SetItemData(hItem, nPage);
@@ -395,7 +399,10 @@ HTREEITEM CTreePropSheet::CreatePageTreeItem(LPCTSTR lpszPath, HTREEITEM hParent
 	}
 
 	// If item with that text does not already exist, create a new one
-	if (!hItem)
+	// MORPH START tabbed options [leuk_he]
+	if (strTopMostItem != "Multi user" )   {
+    // MORPH END tabbed options [leuk_he]
+    if (!hItem)
 	{
 		hItem = m_pwndPageTree->InsertItem(strTopMostItem, hParent);
 		m_pwndPageTree->SetItemData(hItem, (DWORD_PTR)-1);
@@ -405,9 +412,10 @@ HTREEITEM CTreePropSheet::CreatePageTreeItem(LPCTSTR lpszPath, HTREEITEM hParent
 	}
 	if (!hItem)
 	{
-		ASSERT(FALSE);
+		// ASSERT(FALSE); // tabbed  options
 		return NULL;
 	}
+	} // Moprh tabbed options. 
 
 	if (strPath.IsEmpty())
 		return hItem;
@@ -971,7 +979,16 @@ void CTreePropSheet::OnPageTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResu
 	if (nPage<0 || (unsigned)nPage>=m_pwndPageTree->GetCount())
 		bResult = KillActiveCurrentPage();
 	else
+		// MORPH START tabbed options
+	{
+				if (nPage == 12 && theApp.emuledlg->preferenceswnd->ActivePageWebServer >= 1)
+			nPage = theApp.emuledlg->preferenceswnd->ActivePageWebServer;
+
+        //original line:
 		bResult = SetActivePage(nPage);
+	}
+		// MORPH ENDtabbed options
+
 
 	if (!bResult)
 		// prevent selection to change
