@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1083,15 +1083,16 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Web Server"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    CONTROL         "",IDC_TAB_WEBSERVER1,"SysTabControl32",0x0,0,0,229,284
     CONTROL         "Check1",IDC_WSENABLED,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,14,17,107,8
+                    BS_FLAT | WS_TABSTOP,14,24,107,8
     CONTROL         "Gzip",IDC_WS_GZIP,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,14,28,194,8
-    EDITTEXT        IDC_WSPORT,88,37,26,13,ES_AUTOHSCROLL | ES_NUMBER
-    EDITTEXT        IDC_TMPLPATH,88,53,118,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_TMPLBROWSE,208,53,13,12,BS_FLAT
-    PUSHBUTTON      "Reload",IDC_WSRELOADTMPL,160,68,61,12,BS_FLAT
-    EDITTEXT        IDC_WSTIMEOUT,88,80,26,13,ES_AUTOHSCROLL | ES_NUMBER
+                    WS_TABSTOP,14,35,194,8
+    EDITTEXT        IDC_WSPORT,88,44,26,13,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_TMPLPATH,88,60,118,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_TMPLBROWSE,208,60,13,12,BS_FLAT
+    PUSHBUTTON      "Reload",IDC_WSRELOADTMPL,160,75,61,12,BS_FLAT
+    EDITTEXT        IDC_WSTIMEOUT,88,87,26,13,ES_AUTOHSCROLL | ES_NUMBER
     EDITTEXT        IDC_WSPASS,88,112,120,13,ES_PASSWORD | ES_AUTOHSCROLL
     CONTROL         "Allow exit, reboot and shutdown",IDC_WS_ALLOWHILEVFUNC,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,126,
@@ -1107,9 +1108,9 @@ BEGIN
                     ES_NUMBER
     CONTROL         "",IDC_GUIDELINK,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,
                     14,222,130,10
-    GROUPBOX        "General",IDC_STATIC_GENERAL,7,7,216,93,BS_FLAT
-    LTEXT           "Port",IDC_WSPORT_LBL,14,40,42,8
-    LTEXT           "Template:",IDC_TEMPLATE,14,56,74,8
+    GROUPBOX        "General",IDC_STATIC_GENERAL,7,14,216,88,BS_FLAT
+    LTEXT           "Port",IDC_WSPORT_LBL,14,47,42,8
+    LTEXT           "Template:",IDC_TEMPLATE,14,63,74,8
     GROUPBOX        "Admin",IDC_STATIC_ADMIN,7,102,216,38,BS_FLAT
     LTEXT           "Password",IDC_WSPASS_LBL,14,114,74,8
     GROUPBOX        "low user",IDC_STATIC_LOWUSER,7,141,216,42,BS_FLAT
@@ -1117,8 +1118,8 @@ BEGIN
     GROUPBOX        "MobileMule",IDC_STATIC_MOBILEMULE,7,186,216,48,BS_FLAT
     LTEXT           "Password",IDC_MMPASSWORD,14,209,45,8
     LTEXT           "Port",IDC_MMPORT_LBL,148,210,27,8
-    LTEXT           "[TimeOut]",IDC_WSTIMEOUTLABEL,14,83,69,8
-    LTEXT           "mins",IDC_MINS,117,82,69,8
+    LTEXT           "[TimeOut]",IDC_WSTIMEOUTLABEL,14,90,69,8
+    LTEXT           "mins",IDC_MINS,117,89,69,8
 END
 
 IDD_PPG_SCHEDULER DIALOGEX 0, 0, 230, 241
@@ -1655,6 +1656,52 @@ BEGIN
     PUSHBUTTON      "Cance&l",IDC_CANCELS,198,36,58,14,BS_FLAT | WS_DISABLED
 END
 
+60385 DIALOGEX 0, 0, 230, 300
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Multi user"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TAB_WEBSERVER2,"SysTabControl32",0x0,0,0,229,300
+    CONTROL         "Check1",IDC_ADVADMINENABLED,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,13,20,195,8
+    GROUPBOX        "Advance Webserver Config",IDC_STATIC_ADVADMIN,9,32,219,
+                    155,BS_FLAT
+    COMBOBOX        IDC_ACCOUNTSELECT,119,49,103,12,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ADVADMIN_USER,57,63,47,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ADVADMIN_PASS,175,65,47,12,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    CONTROL         "Access - Kad?",IDC_ADVADMIN_KAD,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,15,79,100,8
+    CONTROL         "Access - Transfer?",IDC_ADVADMIN_TRANSFER,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,15,90,100,8
+    CONTROL         "Access - Search?",IDC_ADVADMIN_SEARCH,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,15,102,100,8
+    CONTROL         "Access - Server?",IDC_ADVADMIN_SERVER,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,15,113,100,8
+    CONTROL         "Access - SharedList?",IDC_ADVADMIN_SHARED,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,123,79,100,8
+    CONTROL         "Access - Stats?",IDC_ADVADMIN_STATS,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,123,90,100,8
+    CONTROL         "Access - Prefs?",IDC_ADVADMIN_PREFS,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,123,102,100,8
+    COMBOBOX        IDC_ADVADMIN_USERLEVEL,89,126,72,12,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ADVADMIN_CATS,89,145,120,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Delete Account",IDC_ADVADMIN_DELETE,31,162,59,14,
+                    WS_DISABLED
+    PUSHBUTTON      "New Account",IDC_ADVADMIN_NEW,137,162,56,14
+    LTEXT           "Account:",IDC_STATIC_ADVADMIN_ACC,15,50,74,8
+    LTEXT           "Categorys (sep. by |):",IDC_STATIC_ADVADMIN_CATS,15,146,
+                    74,9
+    LTEXT           "User:",IDC_STATIC_ADVADMIN_USER,15,66,39,10,0,
+                    WS_EX_RIGHT
+    CTEXT           "Password:",IDC_STATIC_ADVADMIN_PASS,119,67,51,10,0,
+                    WS_EX_RIGHT
+    LTEXT           "User Level:",IDC_STATIC_ADVADMIN_USERLEVEL,15,129,74,9
+    LTEXT           "Note",IDC_ADVADMIN_NOTE,8,190,217,111
+END
+
 IDD_NETWORK_INFO DIALOGEX 0, 0, 291, 333
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
@@ -2046,12 +2093,6 @@ BEGIN
                     WS_TABSTOP,14,161,201,14
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
 IDD_ASKEXIT DIALOGEX 0, 0, 186, 95
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
@@ -2066,8 +2107,6 @@ BEGIN
     CONTROL         "Do not ask me again",IDC_DONTASKMEAGAINCB,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,19,48,136,13
 END
-
-
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3159,12 +3198,12 @@ BEGIN
     VK_RETURN,      IDA_ENTER,              VIRTKEY, NOINVERT
 END
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5995,7 +6034,7 @@ BEGIN
     IDC_PROXYTYPE_TIP       "Set the protocol of the proxy.\nThe precedence of the proxy protocol performance is as follows.\n1. SOCKS 4a (highest performance because of least overhead)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (lowest performance because of most overhead)"
     IDC_PROXYNAME_TIP       "Hostname or ip address of proxy"
     IDC_PROXYPORT_TIP       "port number the proxy communicates on.\nTypical 1080 for socks and 80 or 8080 for http."
-    IDC_ENABLEAUTH_TIP      "Enable if you need to login into the proxy\nNot that for http only basic authentication\n(not microsoft NTLM) is supported"
+    IDC_ENABLEAUTH_TIP      "Enable this  if you need to login into the proxy\nNote that for http only basic authentication\n(not microsoft NTLM) is supported"
 END
 
 STRINGTABLE 
@@ -6003,7 +6042,7 @@ BEGIN
     IDS_PW_RDEAD_TIP        "The number of retries before a server is considered\ndead and removed from the list."
     IDS_PW_RETRIES_TIP      "The number of retries before a server is considered\ndead and removed from the list. (default 3)"
     IDS_PW_USC_TIP          "Update the serverlist with the url that is in address.dat (edit) on startup of eMule. (default: unchecked)"
-    IDS_PW_UCC_TIP          "When an other client connects use the server of to other client to add to the server list "
+    IDS_PW_UCC_TIP          "When another client connects to you, \nadd to your server list the server that\nthe other client is currently using "
     IDS_PW_USS_TIP          "When connecting to a server request a list of servers from that server"
     IDS_SMARTLOWIDCHECK_TIP "Will retry more times to connect if you previously had a high id"
     IDS_PW_FASTSRVCON_TIP   "disabling this setting will connect to servers slightly faster but might cause some false lowid's"
@@ -6079,7 +6118,7 @@ BEGIN
     IDS_UPLOADDATARATEAVERAGETIME_TIP 
                             "Time (in seconds) that is used to display the average uploadspeed in the graph screen"
     IDS_MINDATARATEFRIEND_TIP 
-                            "Total uploadspeed that is spend on friend slots.\nNote that if this speed exceeds 3kb/s the 1:3 session zzratio enabled \n(R/r next to up/download)"
+                            "Total uploadspeed that is spent on friend slots.\nNote that if this speed exceeds 3kb/s the 1:3 session zzratio\nwill be enabled. You can observe a r(ratio not reached) or R (ratio reached)\nnext to the up/down values in the bottom status bar. "
     IDS_MAXCLIENTDATARATEFRIEND_TIP 
                             "The max speed that is available for a single friend slot."
     IDS_MINDATARATEPOWERSHARE_TIP 
@@ -6218,11 +6257,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SFM_TIP             "Options about the files you share. "
-    IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP "Enable collection data for the spreadbar.\nTHis is is optimal for better releases but \ncan take some extra memeory"
+    IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP 
+                            "Enable collection data for the spreadbar.\nTHis is is optimal for better releases but \ncan take some extra memeory"
     IDS_HIDEOVERSHARES_TIP  "Balance the upload of chunks within a file. \nIt is hiding chunks, which were uploaded significantly\nmore than other chunks, from downloaders. This causes\ndownloaders to request other, less shared, chunks.\nAlways some chunks are visible "
     IDS_SELECTIVESHARE_TIP  "You can choose to make Hide Overshare stricter by only revealing\none chunk to each user, starting with the least uploaded chunks,\nand considering the chunks that were already offered when choosing\nthe next. Hide overshares must not be disabled for this to work\n(Off by default)."
-    IDS_SHAREONLYTHENEED_TIP "Share Only the Need hides Chunks which were already\nasked by other clients on your queue. eMule analyzes\nyour upload queue if every user are asking for the\nsame chunks. if true, eMule hides the chunks which\nat least one user has already got and shows just\nthe chunks that no one has.\nTHey are purple in the spreadbar.\nThere is always one visible."
-	IDS_POWERSHARE_TIP2     "Settings for powershare, \ngive absolute priority to\na file without the need\nfor unsharing other files"
+    IDS_SHAREONLYTHENEED_TIP 
+                            "Share Only the Need hides Chunks which were already\nasked by other clients on your queue. eMule analyzes\nyour upload queue if every user are asking for the\nsame chunks. if true, eMule hides the chunks which\nat least one user has already got and shows just\nthe chunks that no one has.\nTHey are purple in the spreadbar.\nThere is always one visible."
+    IDS_POWERSHARE_TIP2     "Settings for powershare, \ngive absolute priority to\na file without the need\nfor unsharing other files"
     IDS_POWERSHARE_DISABLED_TIP 
                             "No powersharing if not set on individual file."
     IDS_POWERSHARE_ACTIVATED_TIP 
@@ -6252,7 +6293,6 @@ STRINGTABLE
 BEGIN
     IDS_TCPIP_CONNS_TIP     "Tweak tcp/ip settings"
     IDS_MAXCON5SECLABEL_TIP "This is the number of new connections eMule MAY open\nduring 5 seconds. (Default is 20.) If you raise\nthis value you also have to raise the half open value"
-							 
     IDS_MAXHALFOPENCONS_TIP "Max number of not fully completed connections\nYou will have to increase this value together with conns/5sec\n set this value too high you will have to patch tcp/ip.sys(XPSP2)\nand your router may overload. Increasing this value\nmakes eMule connect faster to sources in \n'too many open connection' state."
     IDS_CONDTCPACCEPT_TIP   "Fast Connection Reject uses a more efficient method to \nreject incoming TCP connection attempts of banned clients\nand/or from clients which IPs are found in IP-filter list.\nIt's using a special Winsock feature called 'SO_CONDITIONAL_ACCEPT'\nwhich leads to less TCP overhead in case the TCP connection is rejected\nBut causes more ip lookups (cpu usage) if  the client is rejected"
 END
@@ -6407,11 +6447,13 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDC_UPDATEFAKES_TIP     "Download & reload the fakes.zip now.\nIf the fakesfile is newer than the previous download"
     IDC_RESETFAKESURL_TIP   "Reset the url field to the morph default:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
     IDC_UPDATE_URL_FAKELIST_TIP 
                             "Where to fetch the fakelist. Fakelist must be in\nzip format. Morph checks if the date on the file\nis newer than the previous download and will\nonly update if the file on the web is newer. "
     IDC_AUTOUPIPFILTER_TIP  "Try to update the list before connecting to the network"
     IDC_UPDATEIPFURL_TIP    "Download & reload the ipfilter.zip now.\nIf the ipfilter is newer than the previous download"
+    IDS_PW_TOOL_TIP         "If the mouse hovers on a download or  preference\na little note will appear with information on this item.\nSpecifies the delay until this tip pops up.\nThis text is is a tooltip."
     IDC_RESETIPFURL_TIP     "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
     IDC_UPDATE_URL_IPFILTER_TIP 
                             "Url where to download the ipfilter.dat (zip format)"
@@ -6420,40 +6462,73 @@ BEGIN
     IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP 
                             "Where to download the list.\n List will only be downloaded if the web version is newer than\nthe previous download"
     IDC_RESETIPCURL_TIP     "Reset the above url to\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
-
-   IDC_EXITQUESTION_TIP     "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
-   IDC_DONTASKMEAGAINCB_TIP "Check this option and eMule won't ask next time you do a shutdown of eMule\nYou can enable this option again in Options->general-> Prompt on exit"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_TRAY_TIP "eMule will not minimize to task bar\nbut to the tray if this option is checked.\nAn extra option is displayed in the windows\nbar to minimize to the tray if unchecked"
-    IDS_PW_DBLCLICK_TIP "This option toggles,\nwhether a double or single click in the download screenlist is needed to expand and show the sources"
-    IDS_PW_TOOL_TIP "If the mouse hovers on a download or  preference\na little note will appear with information on this item.\nSpecifies the delay until this tip pops up.\nThis text is is a tooltip."
-    IDS_3DDEP_TIP "The slider affects the amount of 3D shading of the Progress Bars."
-	IDS_UPDATEQUEUE_TIP "The information displayed in the queue list will be updated not as often\nwhich will save some CPU time."
-	IDS_SHOWRATEONTITLE_TIP "Displays current Down- and Upload speed in eMule's window title."
-	IDS_INDICATERATINGS_TIP "Shows the -icon (comment, positive rating)\nthe !-icon (negative rating) for downloads in the Transfers list."
-	IDS_DISABLEKNOWNLIST_TIP "eMule keeps track of all clients it connected to.\nTo save memory this list can be disabled with this option.\nTurn it off for low memory systems."
-	IDS_DISABLEQUEUELIST_TIP  "Similar to the Known Clients List the Queue List\nwill also consume system resources.\nDisable to save them."
-	IDS_SHOWCATINFO_TIP "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading) files\nand the second one (y) the total number of files for this  category."
-	IDS_REPAINTGRAPHS_TIP "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
-	IDC_SELECT_HYPERTEXT_FONT_TIP "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines  and IRC windows"
-	IDS_AUTOREMOVEFD_TIP "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
-	IDS_PW_RESET_TIP "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Reset button will clear all entries."
-	IDS_DISABLEHIST_TIP "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Enabled checkmark allows to turn off this option"
-	IDS_PW_SHOWTRANSTOOLBAR_TIP "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes\n:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queueDisplays all known clients"
-	IDC_SHOWDWLPERCENT_TIP "A %-completed value will be added for each download in its progress bar."
+    IDS_PW_RESET_TIP        "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Reset button will clear all entries."
+    IDS_DISABLEHIST_TIP     "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Enabled checkmark allows to turn off this option"
+    IDS_PW_SHOWTRANSTOOLBAR_TIP 
+                            "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes\n:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queueDisplays all known clients"
+    IDC_SHOWDWLPERCENT_TIP  "A %-completed value will be added for each download in its progress bar."
+    IDC_EXITQUESTION_TIP    "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
+    IDC_DONTASKMEAGAINCB_TIP 
+                            "Check this option and eMule won't ask next time you do a shutdown of eMule\nYou can enable this option again in Options->general-> Prompt on exit"
+    IDC_DONTASKMEAGAINCBSEL_TIP 
+                            "Do not pop up this category select dialog again. You can enable this again in \nOption -> Morph -> download management -> SCC -> Show the 'Select catagory' dialog"
+    IDS_CAT_SELDLGTXT_TIP   "You can organize the downloads in catagories.\nThese are the tabs in the download window.\nYou can add categories here by entering a\ncategory name or select one of the existing\ncatgories."
+    IDS_OKCANCELSEL_TIP     "Select the category and press ok to \ndownload in the category or\npress cancel not to download the\nfile(s)."
 END
 
 STRINGTABLE 
 BEGIN
-  IDC_DONTASKMEAGAINCBSEL_TIP "Do not pop up this category select dialog again. You can enable this again in \nOption -> Morph -> download management -> SCC -> Show the 'Select catagory' dialog"
-	IDS_CAT_SELDLGTXT_TIP "You can organize the downloads in catagories.\nThese are the tabs in the download window.\nYou can add categories here by entering a\ncategory name or select one of the existing\ncatgories."
-	IDS_OKCANCELSEL_TIP "Select the category and press ok to \ndownload in the category or\npress cancel not to download the\nfile(s)."
-END	
+    IDS_PW_TRAY_TIP         "eMule will not minimize to task bar\nbut to the tray if this option is checked.\nAn extra option is displayed in the windows\nbar to minimize to the tray if unchecked"
+    IDS_PW_DBLCLICK_TIP     "This option toggles,\nwhether a double or single click in the download screenlist is needed to expand and show the sources"
+    IDS_3DDEP_TIP           "The slider affects the amount of 3D shading of the Progress Bars."
+    IDS_UPDATEQUEUE_TIP     "The information displayed in the queue list will be updated not as often\nwhich will save some CPU time."
+    IDS_SHOWRATEONTITLE_TIP "Displays current Down- and Upload speed in eMule's window title."
+    IDS_INDICATERATINGS_TIP "Shows the -icon (comment, positive rating)\nthe !-icon (negative rating) for downloads in the Transfers list."
+    IDS_DISABLEKNOWNLIST_TIP 
+                            "eMule keeps track of all clients it connected to.\nTo save memory this list can be disabled with this option.\nTurn it off for low memory systems."
+    IDS_DISABLEQUEUELIST_TIP 
+                            "Similar to the Known Clients List the Queue List\nwill also consume system resources.\nDisable to save them."
+    IDS_SHOWCATINFO_TIP     "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading) files\nand the second one (y) the total number of files for this  category."
+    IDS_REPAINTGRAPHS_TIP   "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
+    IDC_SELECT_HYPERTEXT_FONT_TIP 
+                            "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines  and IRC windows"
+    IDS_AUTOREMOVEFD_TIP    "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
+END
 
-#endif    // Anglais (États-Unis) resources
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMIN_GROUP      "Advance Webserver Config"
+    IDS_ADVADMIN_ACC        "Account:"
+    IDS_ADVADMIN_DELETE     "Delete Account"
+    IDS_ADVADMIN_NEW        "New Account"
+    IDS_ADVADMIN_KAD        "Access - Kad?"
+    IDS_ADVADMIN_TRANSFER   "Access - Transfer?"
+    IDS_ADVADMIN_SEARCH     "Access - Search?"
+    IDS_ADVADMIN_SERVER     "Access - Server?"
+    IDS_ADVADMIN_SHARED     "Access - Shared?"
+    IDS_ADVADMIN_STATS      "Access - Stats?"
+    IDS_ADVADMIN_PREFS      "Access - Prefs?"
+    IDS_ADVADMIN_PASS       "Password:"
+    IDS_ADVADMIN_USER       "Username:"
+    IDS_ADVADMIN_CAT        "Categorys (sep. by |):"
+    IDS_WS_COOKIE_LOGGEDIN  "Remain Logged In:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMIN_NOTE       "Note: You have to use the iONiX Webtemplates, else it won't work\n\n-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all functions without the admin functions (same as Admin without Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system (same as Admin with Hi-Level functions in the original)"
+    IDS_ADVADMIN_OPERATOR   "Operator"
+    IDS_ADVADMIN_ADMIN      "Admin"
+    IDS_ADVADMIN_HIADMIN    "Hi-Admin"
+    IDS_ADVADMINENABLED     "Enalbe iONiX Webinterface right management"
+    IDS_ADVADMIN_GUEST      "Guest"
+END
+
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
