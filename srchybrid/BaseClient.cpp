@@ -3384,10 +3384,12 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 				s = m_pPCUpSocket;
 			else if (m_pWCUpSocket)
 				s = m_pWCUpSocket;
-#ifdef BETAREL
+#ifndef DONT_USE_SOCKET_BUFFERING
+#ifdef BETAREL 
 			// extra info not required in release
 			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
 #endif BETAREL
+#endif
 			DWORD busySince = s->GetBusyTimeSince();
 			if (s->GetBusyRatioTime() > 0)
 				strState.AppendFormat(_T(",BR: %0.2f"), s->GetBusyRatioTime());
