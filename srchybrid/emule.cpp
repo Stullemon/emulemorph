@@ -26,6 +26,7 @@
 #include "secrunasuser.h" // yonatan - moved up... // MORPH - Modified by Commander, WebCache 1.2e
 #include "emule.h"
 #include "opcodes.h"
+#include "ModVersion.h" // Morph - leuk_he  beta release
 #include "mdump.h"
 #include "Scheduler.h"
 #include "SearchList.h"
@@ -74,7 +75,6 @@
 #include "LangIDs.h"
 #include "HelpIDs.h"
 #include "fakecheck.h" //MORPH - Added by SiRoB
-#include "ModVersion.h" // Morph - leuk_he  beta release
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
 // Commander - Added: Custom incoming folder icon [emulEspaña] - End
