@@ -41,9 +41,9 @@ public:
 	uint16	GetConnectedPort()			{ return m_port; }
 	bool	SendPacket(Packet* packet, uint32 dwIP, uint16 nPort);
 #if !defined DONT_USE_SOCKET_BUFFERING
-    SocketSentBytes  SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0); // ZZ:UploadBandWithThrottler (UDP)
+     SocketSentBytes  SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0); // ZZ:UploadBandWithThrottler (UDP)
 #else
-	SocketSentBytes  SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
+	 SocketSentBytes  SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
 #endif
 protected:
 	bool	ProcessPacket(const BYTE* packet, UINT size, uint8 opcode, uint32 ip, uint16 port);
