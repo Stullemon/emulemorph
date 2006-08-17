@@ -19,9 +19,21 @@ typedef struct
 {
 	CTime	startTime;
 	uint64	lSession;
-	bool	admin;
 	int		lastcat;
-
+	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	/*
+	bool	admin;
+	*/
+	uint8 admin;
+	CString	RightsToCategories;
+	bool RightsToKad;
+	bool RightsToPrefs;
+	bool RightsToSearch;
+	bool RightsToServers;
+	bool RightsToSharedList;
+	bool RightsToStats;
+	bool RightsToTransfered;
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 } Session;
 
 struct BadLogin {
