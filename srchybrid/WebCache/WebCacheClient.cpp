@@ -1056,12 +1056,6 @@ void CUpDownClient::SetWebCacheDownState(EWebCacheDownState eState)
 {
 	if (m_eWebCacheDownState != eState)
 	{
-#if !defined DONT_USE_SOCKET_BUFFERING
-		if ((eState == WCDS_DOWNLOADINGFROM || eState == WCDS_DOWNLOADINGVIA) && m_pWCDownSocket != NULL) {
-			int buffer = 512*1024;
-			m_pWCDownSocket->SetSockOpt(SO_RCVBUF, &buffer , sizeof(buffer), SOL_SOCKET);
-		}
-#endif
 		m_eWebCacheDownState = eState;
 		UpdateDisplayedInfo();
 		if( eState == WCDS_WAIT_CLIENT_REPLY ) {
