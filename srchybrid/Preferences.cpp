@@ -4161,7 +4161,7 @@ void CPreferences::SetBindAddr(CStringW bindip)
  // MORPH END leuk_he bindaddr
  // MORPH START leuk_he upnp bindaddr
 void CPreferences::SetUpnpBindAddr(DWORD bindip) {
-		if (bindip== ntohl(inet_addr(GetBindAddrA())))
+		if ( GetBindAddrA() == NULL || bindip== ntohl(inet_addr(GetBindAddrA())))
 			m_dwUpnpBindAddr =0;
 		else 
 	    	m_dwUpnpBindAddr= bindip;
