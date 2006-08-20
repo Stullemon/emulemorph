@@ -3342,8 +3342,8 @@ UpnpDownloadXmlDoc( const char *url,
 	/* TODO: MoNKi: Do not check this?? Some routers (Linksys WRT54GS) sends
 	   "CONTENT-TYPE: application/octet-stream". If the data sended is not
 	   an xml file, ixmlParseBufferEx will fail and the function will return
-	   UPNP_E_INVALID_DESC too.*/
-
+	   UPNP_E_INVALID_DESC too.
+// leuk_he comment out again.
     if( strncasecmp( content_type, "text/xml", strlen( "text/xml" ) ) ) {
         free( xml_buf );
         DBGONLY( UpnpPrintf( UPNP_CRITICAL, API, __FILE__, __LINE__,
@@ -3352,6 +3352,7 @@ UpnpDownloadXmlDoc( const char *url,
             return UPNP_E_INVALID_DESC;
     }
     // end of TODO Do not check this
+	*/
 
     ret_code = ixmlParseBufferEx( xml_buf, xmlDoc );
     free( xml_buf );
