@@ -655,7 +655,12 @@ get_miniserver_sockets( MiniServerSockArray * out,
                               sizeof( struct sockaddr_in )
                  );
             if( sockError == UPNP_SOCKETERROR ) {
-                if( errno == EADDRINUSE )
+                #ifdef WIN32
+				errCode = WSAGetLastError();
+                #else
+				errCode = errno; 
+                #endif
+                if( errCode == EADDRINUSE )
                     errCode = 1;
             } else
                 errCode = 0;
