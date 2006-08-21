@@ -667,6 +667,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		const DWORD thisLoopTick = timeGetTime();
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
+        sint64 MaxControlByteToSpend = realBytesToSpendClass[LAST_CLASS] / 1000; //lh
+
 
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 			uint32 allowedDataRate = allowedDataRateClass[classID];
@@ -693,11 +695,16 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					realBytesToSpendClass[classID] = 1000;
 				}
 			}
+					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
+			
+		  if ( (realBytesToSpendClass[classID]) / 1000 > MaxControlByteToSpend )  //lh
+                MaxControlByteToSpend = realBytesToSpendClass[classID] / 1000; //lh
 		}
 			
 		lastLoopTick = thisLoopTick;
 
 		sint64 BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
+        
 		if(BytesToSpend >= 1 || allowedDataRateClass[LAST_CLASS] == 0) {
 			timeSinceLastLoop = thisLoopTick - lastLoopTickTryTosend;
 
@@ -721,7 +728,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			uint64 ControlspentOverhead = 0;
 
 			// Send any queued up control packets first
-			while((BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend|| allowedDataRateClass[LAST_CLASS] == 0 && ControlspentBytes < 500) && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
+			while((MaxControlByteToSpend  > 0 && ControlspentBytes < (uint64)MaxControlByteToSpend || allowedDataRateClass[LAST_CLASS] == 0 && ControlspentBytes < 500) && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
 				ThrottledControlSocket* socket = NULL;
 					
 				if(!m_ControlQueueFirst_list.IsEmpty()) {
@@ -731,7 +738,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
 
 				if (socket != NULL) {
-					SocketSentBytes socketSentBytes = socket->SendControlData(allowedDataRateClass[LAST_CLASS] > 0?(UINT)(BytesToSpend - ControlspentBytes):1, minFragSize);
+					SocketSentBytes socketSentBytes = socket->SendControlData(allowedDataRateClass[LAST_CLASS] > 0?(UINT)(MaxControlByteToSpend - ControlspentBytes):1, minFragSize);
 					uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 					if (lastSpentBytes) {
 						Socket_stat* stat = NULL;
@@ -776,7 +783,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									else
 										stat->realBytesToSpend = _I64_MAX;
 								}
-								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend && stat->realBytesToSpend > 999) {
+								if(MaxControlByteToSpend  > 0 && ControlspentBytes < (uint64)MaxControlByteToSpend  && stat->realBytesToSpend > 999) {
 #if !defined DONT_USE_SOCKET_BUFFERING
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, allowedclientdatarate);
 #else
@@ -813,9 +820,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			numberofclientinhigherclass = 0;
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 				if(slotCounterClass[classID]) {
-					/*if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
+				/*	if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
 						BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
-					else*/
+					else */
 						BytesToSpend = realBytesToSpendClass[classID] / 1000;
 					uint32 allowedclientdatarate = _UI32_MAX;
 					if (allowedDataRateClass[LAST_CLASS])	

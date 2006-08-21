@@ -171,6 +171,11 @@ private:
 	uint32		m_uTCPFlags;
 	uint32		m_uUDPFlags;
 	uint32		m_uLowIDUsers;
+// MORPH START dont send more than softlimit files 
+	uint32     m_uPublishedfiles ;
+    uint32     m_uLastpublishTick ;
+// MORPH END dont send more than softlimit files 
+
 
 //EastShare Start - added by AndCycle, IP to Country
 public:
