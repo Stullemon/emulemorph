@@ -250,6 +250,10 @@ void CWebServer::ReloadTemplates()
 			m_Templates.sProgressbarImgsPercent.Replace(_T("[PROGRESSGIFINTERNAL]"),_T("%i"));
 			m_Templates.sProgressbarImgs.Replace(_T("[PROGRESSGIFNAME]"),_T("%s"));
 			m_Templates.sProgressbarImgs.Replace(_T("[PROGRESSGIFINTERNAL]"),_T("%i"));
+   			// MORPH START Advanced WebInterface Account Management [leuk_he] 
+			CString sMultiVersion = _LoadTemplate(sAll,_T("TMPL_MULTIUSERVERSION"));
+    		iMultiUserversion= _tstol(sMultiVersion );
+			// MORPH END Advanced WebInterface Account Management [leuk_he] 
 		}
 	}
 	else if(m_bServerWorking)
@@ -5570,8 +5574,8 @@ void CWebServer::SaveWebServConf()
 	CString Filename;
 	Filename.Format(_T("%swebserv.conf"), thePrefs.GetConfigDir());
 
-	try
-	{
+//	try
+//	{
 		CStdioFile file;
 		if(file.Open(Filename, CFile::modeCreate | CFile::modeWrite))
 		{
@@ -5579,12 +5583,12 @@ void CWebServer::SaveWebServConf()
 				file.Write(&AdvLogins.GetValueAt(pos), sizeof(WebServDef));
 			file.Close();
 		}
-	}
-	catch(...)
-	{
+//	}
+//	catch(...)
+//	{
 		//in case of error, why should we kill our prefs?
 		//ZeroMemory(AdvLogins,sizeof(AdvLogins));
-	}
+//	}
 }
 void CWebServer::LoadWebServConf()
 {

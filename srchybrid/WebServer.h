@@ -431,6 +431,7 @@ private:
 
 //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 public:
+	int iMultiUserversion; // multiuser version of template [leuk_he]
 	static	bool	GetWebServLogin(const CString& user, const CString& pass, WebServDef& Def);
 	static	void	SaveWebServConf();
 	static	void	LoadWebServConf();

@@ -1656,7 +1656,7 @@ BEGIN
     PUSHBUTTON      "Cance&l",IDC_CANCELS,198,36,58,14,BS_FLAT | WS_DISABLED
 END
 
-60385 DIALOGEX 0, 0, 230, 300
+IDD_PPG_IONIXWEBSRV DIALOGEX 0, 0, 230, 300
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Multi user"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
@@ -6520,11 +6520,11 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ADVADMIN_NOTE       "Note: You have to use the iONiX Webtemplates, else it won't work\n\n-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all functions without the admin functions (same as Admin without Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system (same as Admin with Hi-Level functions in the original)"
+    IDS_ADVADMIN_NOTE       "Note: You have to use the multi user Webtemplates, else you cannot activate\n\n-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all functions without the admin functions (same as Admin without Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system (same as Admin with Hi-Level functions in the original)"
     IDS_ADVADMIN_OPERATOR   "Operator"
     IDS_ADVADMIN_ADMIN      "Admin"
     IDS_ADVADMIN_HIADMIN    "Hi-Admin"
-    IDS_ADVADMINENABLED     "Enalbe iONiX Webinterface right management"
+    IDS_ADVADMINENABLED     "Enable multi user Webinterface right management"
     IDS_ADVADMIN_GUEST      "Guest"
 END
 

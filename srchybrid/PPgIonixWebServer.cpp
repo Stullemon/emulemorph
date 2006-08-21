@@ -65,6 +65,9 @@ BEGIN_MESSAGE_MAP(CPPgIonixWebServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_ADVADMIN_NEW, OnBnClickedNew)	
 	ON_EN_CHANGE(IDC_ADVADMIN_PASS, OnSettingsChange)
 	ON_EN_CHANGE(IDC_ADVADMIN_CATS, OnSettingsChange)
+
+    ON_BN_CLICKED(IDC_ADVADMINENABLED,   OnEnableChange)
+
 //	ON_EN_CHANGE(IDC_ADVADMIN_USER, OnSettingsChange)
 //<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	// MORPH start tabbed option [leuk_he]
@@ -103,9 +106,22 @@ void CPPgIonixWebServer::LoadSettings(void)
 	}
 }
 
+
+void CPPgIonixWebServer::OnEnableChange() {
+	thePrefs.m_bIonixWebsrv= (IsDlgButtonChecked(IDC_ADVADMINENABLED)!=0);
+
+    SetBoxes();
+	if (!thePrefs.m_bIonixWebsrv) {
+	       		FillComboBox();
+	            FillUserlevelBox();
+	}
+    SetModified();
+}
+
+
+
 BOOL CPPgIonixWebServer::OnApply()
 {	
-	thePrefs.m_bIonixWebsrv= (IsDlgButtonChecked(IDC_ADVADMINENABLED)!=0);
 
 	theApp.webserver->SaveWebServConf(); //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 
@@ -118,7 +134,7 @@ BOOL CPPgIonixWebServer::OnApply()
 void CPPgIonixWebServer::Localize(void)
 {
 	if(m_hWnd){
-		SetWindowText(_T("iONiX ") + GetResString(IDS_PW_WS));
+		SetWindowText(_T("Multi user ") + GetResString(IDS_PW_WS));
 
 		GetDlgItem(IDC_ADVADMINENABLED)->SetWindowText(GetResString(IDS_ADVADMINENABLED));
 		GetDlgItem(IDC_ADVADMIN_NOTE)->SetWindowText(GetResString(IDS_ADVADMIN_NOTE));
@@ -202,7 +218,7 @@ afx_msg void CPPgIonixWebServer::SetBoxes()
 	}
 	else
 	{	
-		if(bWSEnalbed)
+		if(bWSEnalbed && theApp.webserver->iMultiUserversion)
 			GetDlgItem(IDC_ADVADMINENABLED)->EnableWindow(TRUE);
 		else
 			GetDlgItem(IDC_ADVADMINENABLED)->EnableWindow(FALSE);

@@ -45,6 +45,7 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 	afx_msg void OnSettingsChange();
+	afx_msg void OnEnableChange(); //lh 
 	afx_msg void OnSettingsChangeBox()			{ SetBoxes(); OnSettingsChange(); }
 	afx_msg void OnBnClickedNew();
 	afx_msg void OnBnClickedDel();
