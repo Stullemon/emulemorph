@@ -500,6 +500,7 @@ public:
 	static	ELogFileFormat m_iLogFileFormat;
 	static	bool	scheduler;
 	static	bool	dontcompressavi;
+	static  short   compresslevel;	 // MORPH setable compresslevel [leuk_he]
 	static	bool	msgonlyfriends;
 	static	bool	msgsecure;
 
@@ -1554,6 +1555,7 @@ public:
 	static	bool	IsSchedulerEnabled()					{ return scheduler;}
 	static	void	SetSchedulerEnabled(bool in)			{ scheduler=in;}
 	static	bool	GetDontCompressAvi()					{ return dontcompressavi;}
+	static	int  	GetCompressLevel()					    { return compresslevel;}   // MORPH setable compresslevel [leuk_he]
 
 	static	bool	MsgOnlyFriends()						{ return msgonlyfriends;}
 	static	bool	MsgOnlySecure()							{ return msgsecure;}

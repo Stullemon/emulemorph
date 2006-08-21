@@ -1118,7 +1118,12 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
 	BYTE* output = new BYTE[togo+300];
 	uLongf newsize = togo+300;
+	// MORPH START setable compresslevel [leuk_he]
+	UINT result = compress2(output, &newsize, data, togo, thePrefs.GetCompressLevel());
+	/* 
 	UINT result = compress2(output, &newsize, data, togo, 9);
+	*/
+	// MORPH END setable compresslevel [leuk_he]
 	if (result != Z_OK || togo <= newsize){
 		delete[] output;
 		CreateStandartPackets(data,togo,currentblock,bFromPF);

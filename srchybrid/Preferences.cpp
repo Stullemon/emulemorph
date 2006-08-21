@@ -357,6 +357,7 @@ UINT	CPreferences::uMaxLogFileSize;
 ELogFileFormat CPreferences::m_iLogFileFormat = Unicode;
 bool	CPreferences::scheduler;
 bool	CPreferences::dontcompressavi;
+short   	CPreferences::compresslevel;   // MORPH setable compresslevel [leuk_he]
 bool	CPreferences::msgonlyfriends;
 bool	CPreferences::msgsecure;
 UINT	CPreferences::filterlevel;
@@ -2874,6 +2875,10 @@ void CPreferences::LoadPreferences()
 	trafficOMeterInterval=ini.GetInt(L"StatGraphsInterval",3);
 	statsInterval=ini.GetInt(L"statsInterval",5);
 	dontcompressavi=ini.GetBool(L"DontCompressAvi",false);
+	// MORPH setable compresslevel [leuk_he]
+	compresslevel=ini.GetInt(L"CompressLevel",9);
+	if ((compresslevel > 9 )||(compresslevel < 1 )) compresslevel=9 ; // 1 = worst, but saves cpu, 9 = best, emule default
+	// MORPH setable compresslevel [leuk_he]
 	
 	m_uDeadServerRetries=ini.GetInt(L"DeadServerRetry",1);
 	if (m_uDeadServerRetries > MAX_SERVERFAILCOUNT)
