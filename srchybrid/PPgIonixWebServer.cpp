@@ -3,6 +3,7 @@
 #include "emule.h"
 #include "emuledlg.h"
 #include "otherfunctions.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "WebServer.h"
 #include "PPgIonixWebServer.h"
 #include "PreferencesDlg.h"
@@ -20,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CPPgIonixWebServer, CPropertyPage)
 CPPgIonixWebServer::CPPgIonixWebServer()
-	: CPropertyPage(CPPgIonixWebServer::IDD)
+	:  CPPgtooltipped(CPPgIonixWebServer::IDD)
 {
 	m_bIsInit = false;
 	// MORPH start tabbed option [leuk_he]
@@ -50,9 +51,9 @@ void CPPgIonixWebServer::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPPgIonixWebServer, CPropertyPage)
-	ON_BN_CLICKED(IDC_ADVADMINENABLED, OnSettingsChangeBox)	
 //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 	ON_CBN_SELCHANGE(IDC_ACCOUNTSELECT, UpdateSelection)
+	ON_BN_CLICKED(IDC_ADVADMINENABLED,   OnEnableChange)
 	ON_BN_CLICKED(IDC_ADVADMIN_KAD, OnSettingsChange)
 	ON_BN_CLICKED(IDC_ADVADMIN_TRANSFER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_ADVADMIN_SEARCH, OnSettingsChange)
@@ -65,8 +66,8 @@ BEGIN_MESSAGE_MAP(CPPgIonixWebServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_ADVADMIN_NEW, OnBnClickedNew)	
 	ON_EN_CHANGE(IDC_ADVADMIN_PASS, OnSettingsChange)
 	ON_EN_CHANGE(IDC_ADVADMIN_CATS, OnSettingsChange)
+    
 
-    ON_BN_CLICKED(IDC_ADVADMINENABLED,   OnEnableChange)
 
 //	ON_EN_CHANGE(IDC_ADVADMIN_USER, OnSettingsChange)
 //<<< [ionix] - iONiX::Advanced WebInterface Account Management
@@ -92,6 +93,8 @@ BOOL CPPgIonixWebServer::OnInitDialog()
     // MORPH end tabbed options [leuk_he]
 
 	LoadSettings();
+    InitTooltips(); //MORPH leuk_he tolltipped
+
 	Localize();
 
 	return TRUE;
@@ -155,6 +158,25 @@ void CPPgIonixWebServer::Localize(void)
 		GetDlgItem(IDC_STATIC_ADVADMIN_USER)->SetWindowText(GetResString(IDS_ADVADMIN_USER));
 		GetDlgItem(IDC_STATIC_ADVADMIN_CATS)->SetWindowText(GetResString(IDS_ADVADMIN_CAT));
 		//<<< [ionix] - iONiX::Advanced WebInterface Account Management
+		SetTool(IDC_ADVADMINENABLED,IDS_ADVADMINENABLED_TIP);
+		SetTool(IDC_ACCOUNTSELECT,IDS_ACCOUNTSELECT_TIP);
+		SetTool(IDC_ADVADMIN_USER,IDS_ADVADMIN_USER_TIP);
+		SetTool(IDC_ADVADMIN_PASS,IDS_ADVADMIN_PASS_TIP);
+		SetTool(IDC_ADVADMIN_KAD,IDS_ADVADMIN_KAD_TIP);
+		SetTool(IDC_ADVADMIN_TRANSFER,IDS_ADVADMIN_TRANSFER_TIP);
+		SetTool(IDC_ADVADMIN_SEARCH,IDS_ADVADMIN_SEARCH_TIP);
+		SetTool(IDC_ADVADMIN_SERVER,IDS_ADVADMIN_SERVER_TIP);
+		SetTool(IDC_ADVADMIN_SHARED,IDS_ADVADMIN_SHARED_TIP);
+		SetTool(IDC_ADVADMIN_STATS,IDS_ADVADMIN_STATS_TIP);
+		SetTool(IDC_ADVADMIN_PREFS,IDS_ADVADMIN_PREFS_TIP);
+		SetTool(IDC_ADVADMIN_USERLEVEL,IDS_ADVADMIN_USERLEVEL_TIP);
+		SetTool(IDC_ADVADMIN_CATS,IDS_ADVADMIN_CATS_TIP);
+		SetTool(IDC_ADVADMIN_DELETE,IDS_ADVADMIN_DELETE_TIP);
+		SetTool(IDC_STATIC_ADVADMIN_CATS,IDS_STATIC_ADVADMIN_CATS_TIP);
+		SetTool(IDC_STATIC_ADVADMIN_USER,IDS_STATIC_ADVADMIN_USER_TIP);
+		SetTool(IDC_STATIC_ADVADMIN_PASS,IDS_STATIC_ADVADMIN_PASS_TIP);
+		SetTool(IDC_STATIC_ADVADMIN_USERLEVEL,IDS_STATIC_ADVADMIN_USERLEVEL_TIP);
+		SetTool(IDC_ADVADMIN_NOTE,IDS_ADVADMIN_NOTE_TIP);
 	}
 }
 

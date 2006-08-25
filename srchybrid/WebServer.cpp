@@ -694,15 +694,15 @@ void CWebServer::ProcessURL(ThreadData Data)
 		CString sPage = _ParseURL(Data.sURL, _T("w"));
 //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 		Session Rights = GetSessionByID(Data, lSession);
-		if (thePrefs.UseIonixWebsrv() && 
-			(sPage == _T("server") && !Rights.RightsToServers)
+		if (thePrefs.UseIonixWebsrv() &&  (
+			   (sPage == _T("server") && !Rights.RightsToServers)
 			|| (sPage == _T("kad") && !Rights.RightsToKad)
 			|| (sPage == _T("transfer") && !Rights.RightsToTransfered)
 			|| (sPage == _T("search") && !Rights.RightsToSearch)
 			|| (sPage == _T("shared") && !Rights.RightsToSharedList)
 			|| (sPage == _T("graphs") && !Rights.RightsToStats)
 			|| (sPage == _T("options") && !Rights.RightsToPrefs)
-			|| (sPage == _T("stats") && !Rights.RightsToStats)) 
+			|| (sPage == _T("stats") && !Rights.RightsToStats) ) ) 
 			sPage = _T("access refused");
 		else //WiZaRd
 		{
@@ -5433,6 +5433,7 @@ void CWebServer::ProcessFileReq(ThreadData Data) {
 	}
 	else {
 		Data.pSocket->SendReply( "HTTP/1.1 404 File not found\r\n" );
+		AddDebugLogLine(false, _T("Webserver: 404: %s, file not found"),filename);
 	}
 }
 

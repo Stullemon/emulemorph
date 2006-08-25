@@ -317,7 +317,7 @@ void CPreferencesDlg::SwitchTab(int Page)
 	if(m_hWnd && IsWindowVisible()){
 		CPropertyPage* activepage = GetActivePage();
 
-				// Server 1-2
+				// webServer 1-2
 		if (activepage == &m_wndWebServer || activepage == &m_wndIonixWebServer){
 			if (Page == 0) {
 				SetActivePage(&m_wndWebServer);
@@ -327,7 +327,7 @@ void CPreferencesDlg::SwitchTab(int Page)
 			}
 			if (Page == 1) {
 				SetActivePage(&m_wndIonixWebServer);
-				ActivePageWebServer = Webserver;
+				ActivePageWebServer = Multiwebserver;
 				StartPageWebServer = 1;
 				m_wndIonixWebServer.InitTab(false,1);
 			}			

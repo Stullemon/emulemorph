@@ -1,7 +1,7 @@
 #pragma once
 //#include "HypertextCtrl.h"
 
-class CPPgIonixWebServer : public CPropertyPage
+class CPPgIonixWebServer : public CPPgtooltipped  
 {
 	DECLARE_DYNAMIC(CPPgIonixWebServer)
 
