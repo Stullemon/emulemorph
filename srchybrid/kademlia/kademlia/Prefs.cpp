@@ -132,21 +132,27 @@ void CPrefs::WriteFile()
 	}
 }
 
-void CPrefs::SetIPAddress(uint32 uVal)
+void CPrefs::SetIPAddress(uint32 uVal,uint32 uipreceivefrom)
 {
 	//This is our first check on connect, init our IP..
 	if( !uVal || !m_uIPLast )
-	{
+	{	// morph: added some extra logging, nothing else. 
 		m_uIP = uVal;
 		m_uIPLast = uVal;
 	}
 	//If the last check matches this one, reset our current IP.
 	//If the last check does not match, wait for our next incoming IP.
 	//This happens for two reasons.. We just changed our IP, or a client responsed with a bad IP.
-	if( uVal == m_uIPLast )
-		m_uIP = uVal;
-	else
+	if( uVal == m_uIPLast ){
+    	AddDebugLogLine(false, _T("Received my adress:%s from %s via KAD"),ipstr(ntohl(uVal)),ipstr(ntohl(  uipreceivefrom)));
+    	m_uIP = uVal;
+	}
+	else 
+	    {
+		// MORPH extra log line... where do those bad ip adresses com from? 
+		AddDebugLogLine(false, _T("Received suspicious my adress:%s from %s via KAD"),ipstr(ntohl(uVal)),ipstr(ntohl(  uipreceivefrom)));
 		m_uIPLast = uVal;
+		}
 }
 
 

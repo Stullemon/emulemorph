@@ -349,7 +349,7 @@ void CKademliaUDPListener::ProcessPacket(const byte* pbyData, uint32 uLenData, u
 		case KADEMLIA_FIREWALLED_RES:
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 				DebugRecv("KADEMLIA_FIREWALLED_RES", uIP, uUDPPort);
-			Process_KADEMLIA_FIREWALLED_RES(pbyPacketData, uLenPacket);
+			Process_KADEMLIA_FIREWALLED_RES(pbyPacketData, uLenPacket,uIP);
 			break;
 		case KADEMLIA_FIREWALLED_ACK_RES:
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
@@ -2100,7 +2100,7 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_REQ (const byte *pbyPacke
 }
 
 // Used by Kad1.0 and Kad2.0
-void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_RES (const byte *pbyPacketData, uint32 uLenPacket)
+void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 UipToLog)
 {
 	// Verify packet is expected size
 	if (uLenPacket != 4)
@@ -2116,7 +2116,7 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_RES (const byte *pbyPacke
 	//Update con state only if something changes.
 	if( CKademlia::GetPrefs()->GetIPAddress() != uFirewalledIP )
 	{
-		CKademlia::GetPrefs()->SetIPAddress(uFirewalledIP);
+		CKademlia::GetPrefs()->SetIPAddress(uFirewalledIP,UipToLog);
 		theApp.emuledlg->ShowConnectionState();
 	}
 	CKademlia::GetPrefs()->IncRecheckIP();

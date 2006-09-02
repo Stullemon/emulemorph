@@ -48,7 +48,7 @@ namespace Kademlia
 			void SetClientHash(const CUInt128 &puID);
 			CUInt128 GetClientHash() const;
 			uint32 GetIPAddress() const;
-			void SetIPAddress(uint32 uVal);
+			void SetIPAddress(uint32 uVal,uint32 Receivedfrom);
 			bool GetRecheckIP() const;
 			void SetRecheckIP();
 			void IncRecheckIP();
