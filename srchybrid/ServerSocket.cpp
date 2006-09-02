@@ -191,7 +191,16 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						}
 					}
 					if (bOutputMessage)
-						theApp.emuledlg->AddServerMessageLine(message);
+						// MORPH START filter gpl violating advertising server message: [leuk_he]
+					      {
+						    CString address;
+	                        address = pServer->GetAddress();
+                           	if (address.Left(11).Compare(_T("80.239.200."))) {
+								// original line:
+     							theApp.emuledlg->AddServerMessageLine(message);
+                             }
+						  } 
+  	                     // MORPH END filter gpl violating adverting server message: [leuk_he]
 
 					message = strMessages.Tokenize(_T("\r\n"), iPos);
 				}

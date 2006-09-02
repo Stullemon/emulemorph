@@ -52,7 +52,7 @@ bool CSourceSaver::Process(CPartFile* file, UINT maxSourcesToSave) // return fal
 		TCHAR szslsfilepath[_MAX_PATH];
 		_tmakepath(szslsfilepath,NULL,(CString)file->GetTempPath()+_T("\\Source Lists"), file->GetPartMetFileName(),_T(".txtsrc"));
 	
-		//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+		//MORPH - Changed by SiRoB, SLS keep only for rare files, reduce Saved Source and life time
 		//if (file->GetAvailableSrcCount() > 100 && file->GetDownPriority() < PR_HIGH)
 		if (file->GetAvailableSrcCount() > 25)
 		{
@@ -303,13 +303,13 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 CString CSourceSaver::CalcExpiration(int Minutes)
 {
 	CTime expiration = CTime::GetCurrentTime();
-	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//MORPH - Changed by SiRoB, SLS keep only for rare files, reduce Saved Source and life time
 	//CTimeSpan timediff(Days, 0, 0, 0);
 	CTimeSpan timediff(Minutes/1440, (Minutes/60) % 24, Minutes % 60, 0);
 	expiration += timediff;
     
 	CString strExpiration;
-	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//MORPH - Changed by SiRoB, SLS keep only for rare files, reduce Saved Source and life time
 	//strExpiration.Format("%02i%02i%02i", (expiration.GetYear() % 100), expiration.GetMonth(), expiration.GetDay());
 	strExpiration.Format(_T("%02i%02i%02i%02i%02i"), (expiration.GetYear() % 100), expiration.GetMonth(), expiration.GetDay(), expiration.GetHour(),expiration.GetMinute());
 
@@ -321,11 +321,11 @@ bool CSourceSaver::IsExpired(CString expirationdate)
 	int year = _tstoi(expirationdate.Mid(0, 2)) + 2000;
 	int month = _tstoi(expirationdate.Mid(2, 2));
 	int day = _tstoi(expirationdate.Mid(4, 2));
-	//MORPH - Added by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//MORPH - Added by SiRoB, SLS keep only for rare files, reduce Saved Source and life time
 	int hour = _tstoi(expirationdate.Mid(6, 2));
 	int minute = _tstoi(expirationdate.Mid(8, 2));
 	
-	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//MORPH - Changed by SiRoB, SLS keep only for rare files, reduce Saved Source and life time
 	//CTime expiration(year, month, day, 0, 0, 0);
 	CTime expiration(year, month, day, hour, minute, 0);
 	return (expiration < CTime::GetCurrentTime());

@@ -811,7 +811,8 @@ void CSharedFileList::SendListToServer(){
 	POSITION pos,pos2;
 	CTypedPtrList<CPtrList, CKnownFile*> sortedList;
 	bool added=false;
-
+	/* MORPH START OBEY softlimit start [leuk_he]
+   
 	for(pos=m_Files_map.GetStartPosition(); pos!=0;)
 	{
 		m_Files_map.GetNextAssoc(pos, bufKey, cur_file);
@@ -841,7 +842,56 @@ void CSharedFileList::SendListToServer(){
 	{
 		limit = 200;
 	}
-	if( (uint32)sortedList.GetCount() < limit )
+	end original code obey softlimit */
+	int ed2kSharedfiles=0;
+	ASSERT (pCurServer ); // why should thi ever be not null ?
+	int limit = pCurServer->GetSoftFiles() ;
+	if( limit ==0 )
+	{
+		limit = 5000; // server does not support softlimit? 
+	}
+
+
+	for(pos=m_Files_map.GetStartPosition(); pos!=0;)
+	{
+		m_Files_map.GetNextAssoc(pos, bufKey, cur_file);
+		added=false;
+		//insertsort into sortedList
+		if(!cur_file->GetPublishedED2K() ) {
+			if  (!cur_file->IsLargeFile() || (pCurServer != NULL && pCurServer->SupportsLargeFilesTCP()))
+			{
+				for (pos2 = sortedList.GetHeadPosition();pos2 != 0 && !added;sortedList.GetNext(pos2))
+				{
+					if (GetRealPrio(sortedList.GetAt(pos2)->GetUpPriority()) <= GetRealPrio(cur_file->GetUpPriority()) )
+					{
+						sortedList.InsertBefore(pos2,cur_file); // TODO: map would be efficient than ptrlist
+						added=true;
+					}
+				}
+				if (!added)
+				{
+					sortedList.AddTail(cur_file);
+				}
+			}
+		}
+		else {	// file is already published:
+			ed2kSharedfiles++;
+			if  (ed2kSharedfiles > limit) {
+				m_lastPublishED2KFlag = false;
+				return; // nothing to share over softlimit
+			}
+		}
+	}
+
+	// add to packet
+	limit = limit - ed2kSharedfiles;
+	if( limit > 200 )
+	{
+		limit = 200; // 200 files per publish so the server conenction is sooner available for search and so. 
+		             // note that this is 200 files PER MINUTE until softlimit is reached. 
+	}
+	// MORPH END obey softlimit [leuk_he]
+	if( sortedList.GetCount() < limit )
 	{
 		limit = sortedList.GetCount();
 		if (limit == 0)
@@ -851,7 +901,7 @@ void CSharedFileList::SendListToServer(){
 		}
 	}
 	files.WriteUInt32(limit);
-	uint32 count=0;
+	int count=0;
 	for (pos = sortedList.GetHeadPosition();pos != 0 && count<limit; )
 	{
 		count++;

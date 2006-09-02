@@ -1384,7 +1384,8 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 					return;
 					}
 				//break;
-				}
+
+			}
 			++numberofblocktorequest;
 		}
 	}
@@ -1832,7 +1833,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 		}
 	}
 	if (thePrefs.GetVerbose())
-		DebugLogError(LOG_MORPH, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %uI64  because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+		DebugLogError(LOG_MORPH, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %I64u  because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 
 	TRACE("%s - Dropping packet\n", __FUNCTION__);
 }
@@ -2219,7 +2220,7 @@ void CUpDownClient::UDPReaskForDownload()
 		}
 			m_nTotalUDPPackets++;
 		}
-		else if (HasLowID() && GetBuddyIP() && GetBuddyPort() && HasValidBuddyID())
+		/*else if (HasLowID() && GetBuddyIP() && GetBuddyPort() && HasValidBuddyID())
 		{
 			m_bUDPPending = true;
 			CSafeMemFile data(128);
@@ -2242,11 +2243,11 @@ void CUpDownClient::UDPReaskForDownload()
 			theApp.downloadqueue->AddUDPFileReasks();
 			theApp.clientudp->SendPacket(response, GetBuddyIP(), GetBuddyPort() );
 			m_nTotalUDPPackets++;
-		}
+		}*/
 	}
 }
 
-void CUpDownClient::UpdateDisplayedInfo(bool force)
+void CUpDownClient::UpdateDisplayedInfo(bool/* force */)
 {
 	//MORPH START - UpdateItemThread
 	/*

@@ -1549,7 +1549,6 @@ int CUpdateItemThread::Run() {
 	newitemEvent.Lock();
 	while(doRun) {
 		queueditemlocker.Lock();
-		DWORD dwUpdate = GetTickCount();
 		while (queueditem.GetCount()) {
 			LPARAM item = queueditem.RemoveHead();
 			update_info_struct* update_info;
