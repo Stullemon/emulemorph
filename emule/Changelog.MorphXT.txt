@@ -1,12 +1,32 @@
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.14
 -------------------------------------
-Date: 12-Aug 2006 
-ADDED: ionix advanced webserver (ionix/Aireoreion)
-ADDED: multi user webserver  in ef-mod style tabs. [leuk_he]
-FIXED: File completion of files over 4GB. 
+===4-sep-2006==
+Compiled with vs2003 sp1
+
+CHANGED: upload splitting class, allow more data to be send to lower latency clients
+         The upload is not as regular as you might have been used to because of
+         this higher latency . Short spikes in the upload are possible. 
+CHANGED: USC: Take allowed overhead out highest allowable class.              
 CHANGED: USC: take tcp/ip overhead more into account.
+CHANGED: Upnplib: reversed some check in upnplib to have better device detection again. [leuk_he]
+CHANGED: Upnplib: Allow 2nd instance to use also upnp [leuk_he]
+CHANGED: Some bindipadress in preferences could cause exceptions. 
 CHANGED: Mulelistcontrol: change moment of update of display. 
+
+ADDED: filter bigbang server messages because of gpl violation [leuk_he]
+ADDED: Setable CompressLevel. [leuk_he]
+     A new parameter in preferences.ini can be added:
+     CompressLevel=9
+     9 is best compression, slightly more cpu use (default in eMule)
+     1 is worst compression , save some cpu. Values in between also posisble 
+     for very high uploader (> 200 kb/s) and/or slow cpu some cpu can be saved.
+ADDED: ionix advanced webserver (ionix/Aireoreion)
+       You must select the multi user template to enable 
+       the muti user settings. 
+ADDED: multi user webserver  in ef-mod style tabs. [leuk_he]
+
+FIXED: File completion of files over 4GB. 
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.13
