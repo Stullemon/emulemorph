@@ -7,6 +7,8 @@
 #define SHORT_LENGTH_MAX		60	// Max size for strings maximum
 #define SHORT_LENGTH			40	// Max size for strings
 #define SHORT_LENGTH_MIN		30	// Max size for strings minimum
+#define BAN_TIME_SECS			900	// MORPH 15 minutes ban time 
+#define LOGIN_TRIES_LIMIT		4	// MORPH max number of tries to login before ban
 
 typedef struct
 {
@@ -37,6 +39,8 @@ typedef struct
 } Session;
 
 struct BadLogin {
+	CString ip;  // MORPH badlogin fix by dreamwalker 
+	uint32	tries;// MORPH badlogin fix by dreamwalker 
 	uint32	datalen;
 	DWORD	timestamp;
 };

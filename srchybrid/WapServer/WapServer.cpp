@@ -354,8 +354,8 @@ void CWapServer::ProcessURL(WapThreadData Data)
 				login=true;
 			} else {
 				AddLogLine(true,GetResString(IDS_WAP_BADLOGINATTEMPT)+_T(" (%s)"),ip);
-				BadLogin newban={inet_addr(T2CA(ip)), ::GetTickCount()};	// save failed attempt (ip,time)
-				pThis->m_Params.badlogins.Add(newban);
+				// TODO need to change htis. BadLogin newban={inet_addr(T2CA(ip)), ::GetTickCount()};	// save failed attempt (ip,time)
+				// TODO pThis->m_Params.badlogins.Add(newban);
 				login=false;
 			}
 
@@ -489,9 +489,11 @@ void CWapServer::ProcessURL(WapThreadData Data)
 				Out +=_T("</p></card></wml>");
 				
 				// set 15 mins ban by using the badlist
+				/* TODO need to change thie
 				BadLogin preventive={ip, ::GetTickCount() + (15*60*1000) };
 				for (int i=0;i<=5;i++)
 					pThis->m_Params.badlogins.Add(preventive);
+				*/
 
 			}
 			else
