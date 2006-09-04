@@ -415,7 +415,11 @@ private:
 	static CString  GetClientSummary(CUpDownClient* client);
 	static CString	_GetMyInfo(ThreadData Data);
 	static CString	GetClientversionImage(CUpDownClient* client);
-
+	// MORPH start badloging fix dreamwalker [leuk_he]
+	static BadLogin * RegisterFailedLogin(ThreadData Data);
+	static void		UpdateFailedLoginsList(ThreadData Data);
+	static BadLogin * FindBadLoginByIp(ThreadData Data,CString ip);
+	// MORPH end badloging fix dreamwalker [leuk_he]
 
 // Common data
 	GlobalParams	m_Params;
