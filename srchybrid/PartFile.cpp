@@ -373,7 +373,8 @@ CPartFile::~CPartFile()
 		SavePartFile();
 	}
 
-	for (POSITION pos = gaplist.GetHeadPosition();pos != 0;)
+	POSITION pos;
+	for (pos = gaplist.GetHeadPosition();pos != 0;)
 		delete gaplist.GetNext(pos);
 
 	pos = m_BufferedData_list.GetHeadPosition();
@@ -509,7 +510,7 @@ void CPartFile::CreatePartFile(UINT cat)
 			m_tCreated = fileinfo.st_ctime;
 		}
 		else
-			/*UNICODE FIX*/AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), partfull, _tcserror(errno));
+			AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %s"), partfull, _tcserror(errno));
 	}
 	m_dwFileAttributes = GetFileAttributes(partfull);
 	if (m_dwFileAttributes == INVALID_FILE_ATTRIBUTES)
@@ -802,11 +803,13 @@ uint8 CPartFile::ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename
 		error->Delete();
 		return false;
 	}
+#ifndef _DEBUG
 	catch(...){
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_METCORRUPT), in_filename, GetFileName());
 		ASSERT(0);
 		return false;
 	}
+#endif
 
 	// The part below would be a copy of the CPartFile::LoadPartFile, 
 	// so it is smarter to save and reload the file insta dof dougling the whole stuff
@@ -1308,11 +1311,13 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		error->Delete();
 		return false;
 	}
+#ifndef _DEBUG
 	catch(...){
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_METCORRUPT), m_partmetfilename, GetFileName());
 		ASSERT(0);
 		return false;
 	}
+#endif
 
 	if (m_nFileSize > (uint64)MAX_EMULE_FILE_SIZE) {
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_FILEERROR), m_partmetfilename, GetFileName(), _T("File size exceeds supported limit"));
@@ -1400,7 +1405,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		m_tCreated = fileinfo.st_ctime;
 	}
 	else
-		/*UNICODE FIX*/AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), searchpath, _tcserror(errno));
+		AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %s"), searchpath, _tcserror(errno));
 
 	try{
 		SetFilePath(searchpath);
@@ -1938,18 +1943,18 @@ bool CPartFile::SavePartFile()
 	// after successfully writing the temporary part.met file...
 	if (_tremove(m_fullname) != 0 && errno != ENOENT){
 		if (thePrefs.GetVerbose())
-			/*UNICODE FIX*/DebugLogError(_T("Failed to remove \"%s\" - %s"), m_fullname, _tcserror(errno));
+			DebugLogError(_T("Failed to remove \"%s\" - %s"), m_fullname, _tcserror(errno));
 	}
 
 	if (_trename(strTmpFile, m_fullname) != 0){
 		int iErrno = errno;
 		if (thePrefs.GetVerbose())
-			/*UNICODE FIX*/DebugLogError(_T("Failed to move temporary part.met file \"%s\" to \"%s\" - %s"), strTmpFile, m_fullname, _tcserror(iErrno));
+			DebugLogError(_T("Failed to move temporary part.met file \"%s\" to \"%s\" - %s"), strTmpFile, m_fullname, _tcserror(iErrno));
 
 		CString strError;
 		strError.Format(GetResString(IDS_ERR_SAVEMET), m_partmetfilename, GetFileName());
 		strError += _T(" - ");
-		/*UNICODE FIX*/strError += _tcserror(iErrno);
+		strError += _tcserror(iErrno);
 		LogError(_T("%s"), strError);
 		return false;
 	}
@@ -2237,7 +2242,7 @@ uint64 CPartFile::GetTotalGapSizeInPart(UINT uPart) const
 }
 
 // netfinity: DynamicBlockRequests - Added bytesToRequest
-bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struct *result, uint64 bytesToRequest) const
+bool CPartFile::GetNextEmptyBlockInPart(UINT partNumber, Requested_Block_Struct *result, uint64 bytesToRequest) const
 {
 	Gap_Struct *firstGap;
 	Gap_Struct *currentGap;
@@ -2245,11 +2250,11 @@ bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struc
 	uint64 blockLimit;
 
 	// Find start of this part
-	uint64 partStart = (PARTSIZE * (uint64)partNumber);
+	uint64 partStart = PARTSIZE * (uint64)partNumber;
 	uint64 start = partStart;
 
 	// What is the end limit of this block, i.e. can't go outside part (or filesize)
-	uint64 partEnd = (PARTSIZE * (uint64)(partNumber + 1)) - 1;
+	uint64 partEnd = PARTSIZE * (uint64)(partNumber + 1) - 1;
 	if (partEnd >= GetFileSize())
 		partEnd = GetFileSize() - (uint64)1;
 	ASSERT( partStart <= partEnd );
@@ -2286,7 +2291,7 @@ bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struc
 
 		// Find end, keeping within the max block size and the part limit
 		end = firstGap->end;
-		blockLimit = partStart + (EMBLOCKSIZE * (((start - partStart) / EMBLOCKSIZE) + 1)) - 1;
+		blockLimit = partStart + (uint64)((UINT)(start - partStart)/EMBLOCKSIZE + 1)*EMBLOCKSIZE - 1;
 		if (end > blockLimit)
 			end = blockLimit;
 		if (end > partEnd)
@@ -3405,25 +3410,42 @@ bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16
 	return true;
 }
 
-void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 serverport)
+void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 serverport, bool bWithObfuscationAndHash)
 {
 	UINT count = sources->ReadUInt8();
 
-	if (stopped)
-	{
-		// since we may received multiple search source UDP results we have to "consume" all data of that packet
-		sources->Seek(count*(4+2), SEEK_CUR);
-		return;
-	}
-
-	bool stopKadSearch = false; //MORPH - Added by Stulle, Source cache [Xman]
-
 	UINT debug_lowiddropped = 0;
 	UINT debug_possiblesources = 0;
+	uchar achUserHash[16];
+	bool bSkip = false;
 	for (UINT i = 0; i < count; i++)
 	{
 		uint32 userid = sources->ReadUInt32();
 		uint16 port = sources->ReadUInt16();
+		uint8 byCryptOptions = 0;
+		if (bWithObfuscationAndHash){
+			byCryptOptions = sources->ReadUInt8();
+			if ((byCryptOptions & 0x80) > 0)
+				sources->ReadHash16(achUserHash);
+
+			if ((thePrefs.IsClientCryptLayerRequested() && (byCryptOptions & 0x01/*supported*/) > 0 && (byCryptOptions & 0x80) == 0)
+				|| (thePrefs.IsClientCryptLayerSupported() && (byCryptOptions & 0x02/*requested*/) > 0 && (byCryptOptions & 0x80) == 0))
+				DebugLogWarning(_T("Server didn't provide UserhHash for source %u, even if it was expected to (or local obfuscationsettings changed during serverconnect"), userid);
+			else if (!thePrefs.IsClientCryptLayerRequested() && (byCryptOptions & 0x02/*requested*/) == 0 && (byCryptOptions & 0x80) != 0)
+				DebugLogWarning(_T("Server provided UserhHash for source %u, even if it wasn't expected to (or local obfuscationsettings changed during serverconnect"), userid);
+		}
+		
+		// since we may received multiple search source UDP results we have to "consume" all data of that packet
+		//MORPH START - Modified by Stulle, Source cache [Xman]
+		/*
+		if (stopped || bSkip)
+			continue;
+		*/
+		if (stopped || bSkip) {
+			AddToSourceCache(port,userid,serverip,serverport,SF_CACHE_SERVER,true,((byCryptOptions & 0x80) != 0)?achUserHash:NULL, byCryptOptions);
+			continue;
+		}
+		//MORPH END   - Modified by Stulle, Source cache [Xman]
 
 		// check the HighID(IP) - "Filter LAN IPs" and "IPfilter" the received sources IP addresses
 		if (!IsLowID(userid))
@@ -3469,25 +3491,23 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 		{
 			debug_possiblesources++;
 			CUpDownClient* newsource = new CUpDownClient(this,port,userid,serverip,serverport,true);
+			newsource->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
+			newsource->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
+			newsource->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+			if ((byCryptOptions & 0x80) != 0)
+				newsource->SetUserHash(achUserHash);
 			theApp.downloadqueue->CheckAndAddSource(this,newsource);
 		}
 		else
 		{
 			//MORPH START - Modified by Stulle, Source cache [Xman]
-			/*
+			AddToSourceCache(port,userid,serverip,serverport,SF_CACHE_SERVER,true,((byCryptOptions & 0x80) != 0)?achUserHash:NULL, byCryptOptions);
+			//MORPH END   - Modified by Stulle, Source cache [Xman]
 			// since we may received multiple search source UDP results we have to "consume" all data of that packet
-			sources->Seek(((count-1)-i)*(4+2), SEEK_CUR);
+			bSkip = true;
 			if(GetKadFileSearchID())
 				Kademlia::CSearchManager::StopSearch(GetKadFileSearchID(), false);
-			break;
-			*/
-			AddToSourceCache(port,userid,serverip,serverport,SF_SERVER,true);
-			if(stopKadSearch==false && GetKadFileSearchID())
-			{
-				Kademlia::CSearchManager::StopSearch(GetKadFileSearchID(), false);
-				stopKadSearch=true;
-			}
-			//MORPH END   - Modified by Stulle, Source cache [Xman]
+			continue;
 		}
 	}
 	if ( thePrefs.GetDebugSourceExchange() )
@@ -4353,7 +4373,7 @@ BOOL CPartFile::PerformFileComplete()
 
 	// remove part.met file
 	if (_tremove(m_fullname))
-		/*UNICODE FIX*/theApp.QueueLogLine(true,GetResString(IDS_ERR_DELETEFAILED) + _T(" - ") + CString(_tcserror(errno)),m_fullname);
+		theApp.QueueLogLine(true,GetResString(IDS_ERR_DELETEFAILED) + _T(" - ") + CString(_tcserror(errno)),m_fullname);
 	// khaos::kmod+ Save/Load Sources
 	else
 		m_sourcesaver.DeleteFile(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
@@ -4528,14 +4548,14 @@ void CPartFile::DeleteFile(){
 		m_hpartfile.Close();
 
 	if (_tremove(m_fullname))
-		/*UNICODE FIX*/LogError(LOG_STATUSBAR, GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(_tcserror(errno)),m_fullname);	
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(_tcserror(errno)),m_fullname);	
 	// khaos::kmod+ Save/Load Sources
 	else
 		m_sourcesaver.DeleteFile(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
 	// khaos::kmod-
 	CString partfilename(RemoveFileExtension(m_fullname));
 	if (_tremove(partfilename))
-		/*UNICODE FIX*/LogError(LOG_STATUSBAR, GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(_tcserror(errno)),partfilename);
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(_tcserror(errno)),partfilename);
 
 	CString BAKName(m_fullname);
 	BAKName.Append(PARTMET_BAK_EXT);
@@ -4609,18 +4629,15 @@ bool CPartFile::IsCorruptedPart(UINT partnumber) const
 bool CPartFile::IsArchive(bool onlyPreviewable) const
 {
 	if (onlyPreviewable){
-		CString extension = GetFileName().Right(4);
-		return (   extension.CompareNoCase(_T(".zip")) == 0 
-			    || extension.CompareNoCase(_T(".cbz")) == 0
-			    || extension.CompareNoCase(_T(".rar")) == 0
-				|| extension.CompareNoCase(_T(".cbr")) == 0);
+		EFileType ftype=GetFileTypeEx((CKnownFile*)this);
+		return (ftype==ARCHIVE_RAR || ftype==ARCHIVE_ZIP || ftype==ARCHIVE_ACE);
 	}
 
 	return (ED2KFT_ARCHIVE == GetED2KFileTypeID(GetFileName()));
 }
 
 bool CPartFile::IsPreviewableFileType() const {
-    return IsArchive() || IsMovie() || IsMusic();
+    return IsArchive(true) || IsMovie() || IsMusic();
 }
 
 void CPartFile::SetDownPriority(uint8 np, bool resort)
@@ -5051,37 +5068,25 @@ void CPartFile::PreviewFile()
 	if (thePrefs.IsMoviePreviewBackup()){
 		m_bPreviewing = true;
 		CPreviewThread* pThread = (CPreviewThread*) AfxBeginThread(RUNTIME_CLASS(CPreviewThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
-		pThread->SetValues(this,thePrefs.GetVideoPlayer());
+		pThread->SetValues(this, thePrefs.GetVideoPlayer(), thePrefs.GetVideoPlayerArgs());
 		pThread->ResumeThread();
 	}
 	else{
-		CString strLine = GetFullName();
+		if (!thePrefs.GetVideoPlayer().IsEmpty())
+			ExecutePartFile(this, thePrefs.GetVideoPlayer(), thePrefs.GetVideoPlayerArgs());
+		else {
+			CString strPartFilePath = GetFullName();
 		
 		// strip available ".met" extension to get the part file name.
-		if (strLine.GetLength()>4 && strLine.Right(4)==_T(".met"))
-			strLine.Delete(strLine.GetLength()-4,4);
+			if (strPartFilePath.GetLength()>4 && strPartFilePath.Right(4)==_T(".met"))
+				strPartFilePath.Delete(strPartFilePath.GetLength()-4,4);
 
 		// if the path contains spaces, quote the entire path
-		if (strLine.Find(_T(' ')) != -1)
-			strLine = _T('\"') + strLine + _T('\"');
+			if (strPartFilePath.Find(_T(' ')) != -1)
+				strPartFilePath = _T('\"') + strPartFilePath + _T('\"');
 
-		if (!thePrefs.GetVideoPlayer().IsEmpty())
-		{
-			// get directory of video player application
-			CString path = thePrefs.GetVideoPlayer();
-			int pos = path.ReverseFind(_T('\\'));
-			if (pos == -1)
-				path.Empty();
-			else
-				path = path.Left(pos + 1);
-
-			if (thePrefs.GetPreviewSmallBlocks())
-				FlushBuffer(true);
-
-			ShellExecute(NULL, _T("open"), thePrefs.GetVideoPlayer(), strLine, path, SW_SHOWNORMAL);
+			ShellExecute(NULL, NULL, strPartFilePath, NULL, NULL, SW_SHOWNORMAL);
 		}
-		else
-			ShellExecute(NULL, _T("open"), strLine, NULL, NULL, SW_SHOWNORMAL);
 	}
 }
 
@@ -5210,7 +5215,7 @@ void CPartFile::UpdateAvailablePartsCount()
 {
 	UINT availablecounter = 0;
 	UINT iPartCount = GetPartCount();
-	for (uint16 ixPart = 0; ixPart < iPartCount; ixPart++){
+	for (UINT ixPart = 0; ixPart < iPartCount; ixPart++){
 		for(POSITION pos = srclist.GetHeadPosition(); pos; ){
 			if (srclist.GetNext(pos)->IsPartAvailable(ixPart)){
 				availablecounter++; 
@@ -5307,7 +5312,7 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 		if( bNeeded ){
 			nCount++;
 			uint32 dwID;
-			if(forClient->GetSourceExchangeVersion() > 2)
+			if (forClient->GetSourceExchangeVersion() >= 3)
 				dwID = cur_src->GetUserIDHybrid();
 			else
 				dwID = ntohl(cur_src->GetUserIDHybrid());
@@ -5315,8 +5320,20 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 			data.WriteUInt16(cur_src->GetUserPort());
 			data.WriteUInt32(cur_src->GetServerIP());
 			data.WriteUInt16(cur_src->GetServerPort());
-			if (forClient->GetSourceExchangeVersion() > 1)
+			if (forClient->GetSourceExchangeVersion() >= 2)
 				data.WriteHash16(cur_src->GetUserHash());
+			if (forClient->GetSourceExchangeVersion() >= 4){
+				// CryptSettings - SourceExchange V4
+				// 5 Reserved (!)
+				// 1 CryptLayer Required
+				// 1 CryptLayer Requested
+				// 1 CryptLayer Supported
+				const uint8 uSupportsCryptLayer	= cur_src->SupportsCryptLayer() ? 1 : 0;
+				const uint8 uRequestsCryptLayer	= cur_src->RequestsCryptLayer() ? 1 : 0;
+				const uint8 uRequiresCryptLayer	= cur_src->RequiresCryptLayer() ? 1 : 0;
+				const uint8 byCryptOptions = (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
+				data.WriteUInt8(byCryptOptions);
+			}
 			if (nCount > 500)
 				break;
 		}
@@ -5328,7 +5345,7 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 
 	Packet* result = new Packet(&data, OP_EMULEPROT);
 	result->opcode = OP_ANSWERSOURCES;
-	// 16+2+501*(4+2+4+2+16) = 14046 bytes max.
+	// 16+2+501*(4+2+4+2+16+1) = 14547 bytes max.
 	if ( result->size > 354 )
 		result->PackPacket();
 	if ( thePrefs.GetDebugSourceExchange() )
@@ -5336,7 +5353,7 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 	return result;
 }
 
-void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion, const CUpDownClient* pClient)
+void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 uClientSXVersion, const CUpDownClient* pClient)
 {
 	if (stopped)
 		return;
@@ -5344,37 +5361,79 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 	UINT nCount = sources->ReadUInt16();
 
 	if (thePrefs.GetDebugSourceExchange()){
-		CString strSrc;
+		CString strDbgClientInfo;
 		if (pClient)
-			strSrc.Format(_T("%s, "), pClient->DbgGetClientInfo());
-		AddDebugLogLine(false, _T("SXRecv: Client source response; Count=%u, %sFile=\"%s\""), nCount, strSrc, GetFileName());
+			strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+		AddDebugLogLine(false, _T("SXRecv: Client source response; Count=%u, %sFile=\"%s\""), nCount, strDbgClientInfo, GetFileName());
 	}
 
 	// Check if the data size matches the 'nCount' for v1 or v2 and eventually correct the source
 	// exchange version while reading the packet data. Otherwise we could experience a higher
 	// chance in dealing with wrong source data, userhashs and finally duplicate sources.
+	UINT uPacketSXVersion = 0;
 	UINT uDataSize = (UINT)(sources->GetLength() - sources->GetPosition());
 	//Checks if version 1 packet is correct size
 	if (nCount*(4+2+4+2) == uDataSize)
 	{
-		if( sourceexchangeversion != 1 )
+		// Received v1 packet: Check if remote client supports at least v1
+		if (uClientSXVersion < 1) {
+			if (thePrefs.GetVerbose()) {
+				CString strDbgClientInfo;
+				if (pClient)
+					strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+				DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+			}
 			return;
+	}
+		uPacketSXVersion = 1;
 	}
 	//Checks if version 2&3 packet is correct size
 	else if (nCount*(4+2+4+2+16) == uDataSize)
 	{
-		if( sourceexchangeversion == 1 )
+		// Received v2,v3 packet: Check if remote client supports at least v2
+		if (uClientSXVersion < 2) {
+			if (thePrefs.GetVerbose()) {
+				CString strDbgClientInfo;
+				if (pClient)
+					strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+				DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+			}
 			return;
+	}
+		if (uClientSXVersion == 2)
+			uPacketSXVersion = 2;
+		else
+			uPacketSXVersion = 3;
+	}
+	// v4 packets
+	else if (nCount*(4+2+4+2+16+1) == uDataSize)
+	{
+		// Received v4 packet: Check if remote client supports at least v4
+		if (uClientSXVersion < 4) {
+			if (thePrefs.GetVerbose()) {
+				CString strDbgClientInfo;
+				if (pClient)
+					strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+				DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+			}
+			return;
+		}
+		uPacketSXVersion = 4;
 	}
 	else
 	{
-		// If v4 inserts additional data (like v2), the above code will correctly filter those packets.
-		// If v4 appends additional data after <count>(<Sources>)[count], we are in trouble with the 
-		// above code. Though a client which does not understand v4+ should never receive such a packet.
-		if (thePrefs.GetVerbose())
-			DebugLogWarning(_T("Received invalid source exchange packet (v%u) of data size %u for %s"), sourceexchangeversion, uDataSize, GetFileName());
+		// If v5+ inserts additional data (like v2), the above code will correctly filter those packets.
+		// If v5+ appends additional data after <count>(<Sources>)[count], we are in trouble with the 
+		// above code. Though a client which does not understand v5+ should never receive such a packet.
+		if (thePrefs.GetVerbose()) {
+			CString strDbgClientInfo;
+			if (pClient)
+				strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+			DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+		}
 		return;
 	}
+	ASSERT( uPacketSXVersion != 0 );
 
 	for (UINT i = 0; i < nCount; i++)
 	{
@@ -5384,11 +5443,15 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 		uint16 nServerPort = sources->ReadUInt16();
 
 		uchar achUserHash[16];
-		if (sourceexchangeversion > 1)
+		if (uPacketSXVersion >= 2)
 			sources->ReadHash16(achUserHash);
 
-		//Clients send ID's the the Hyrbid format so highID clients with *.*.*.0 won't be falsely switched to a lowID..
-		if (sourceexchangeversion == 3)
+		uint8 byCryptOptions = 0;
+		if (uPacketSXVersion >= 4)
+			byCryptOptions = sources->ReadUInt8();
+
+		// Clients send ID's in the Hyrbid format so highID clients with *.*.*.0 won't be falsely switched to a lowID..
+		if (uPacketSXVersion >= 3)
 		{
 			uint32 dwIDED2K = ntohl(dwID);
 
@@ -5473,12 +5536,19 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 		//MORPH END   - Modified by Stulle, Global Source Limit
 		{
 			CUpDownClient* newsource;
-			if( sourceexchangeversion == 3 )
+			if (uPacketSXVersion >= 3)
 				newsource = new CUpDownClient(this,nPort,dwID,dwServerIP,nServerPort,false);
 			else
 				newsource = new CUpDownClient(this,nPort,dwID,dwServerIP,nServerPort,true);
-			if (sourceexchangeversion > 1)
+			if (uPacketSXVersion >= 2)
 				newsource->SetUserHash(achUserHash);
+			if (uPacketSXVersion >= 4) {
+				newsource->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
+				newsource->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
+				newsource->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+				if (thePrefs.GetDebugSourceExchange()) // remove this log later
+					AddDebugLogLine(false, _T("Received CryptLayer aware (%u) source from V4 Sourceexchange (%s)"), byCryptOptions, newsource->DbgGetClientInfo());
+			}
 			newsource->SetSourceFrom(SF_SOURCE_EXCHANGE);
 			theApp.downloadqueue->CheckAndAddSource(this,newsource);
 		} 
@@ -5489,12 +5559,7 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 		*/
 		else
 		{
-			if(sourceexchangeversion==3)
-				AddToSourceCache(nPort,dwID,dwServerIP,nServerPort,SF_SOURCE_EXCHANGE,false,achUserHash);
-			else if(sourceexchangeversion>1)
-				AddToSourceCache(nPort,dwID,dwServerIP,nServerPort,SF_SOURCE_EXCHANGE,true,achUserHash);
-			else
-				AddToSourceCache(nPort,dwID,dwServerIP,nServerPort,SF_SOURCE_EXCHANGE,true);
+				AddToSourceCache(nPort,dwID,dwServerIP,nServerPort,SF_CACHE_SOURCE_EXCHANGE,(uPacketSXVersion<3),(uPacketSXVersion>=2)?achUserHash:NULL,byCryptOptions);
 		}
 		//MORPH END   - Modified by Stulle, Source cache [Xman]
 	}
@@ -5528,7 +5593,7 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start, uint64 end, Requested_Block_Struct *block, 
 								const CUpDownClient* client)
 {
-	ASSERT( transize > 0 );
+	ASSERT( (sint64)transize > 0 );
 	ASSERT( start <= end );
 
 	// Increment transferred bytes counter for this file
@@ -5537,7 +5602,7 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 
 	// This is needed a few times
 	uint32 lenData = (uint32)(end - start + 1);
-	ASSERT( lenData > 0 && (uint64)(end - start + 1) == lenData);
+	ASSERT( (int)lenData > 0 && (uint64)(end - start + 1) == lenData);
 
 	if( lenData > transize ) {
 		m_uCompressionGain += lenData - transize;
@@ -5720,7 +5785,6 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			{
 				// Normal files; check if increasing the file would reduce the amount of min. free space beyond the limit
 				// would need to use disk cluster sizes for more accuracy
-				
 				if (uIncrease + thePrefs.GetMinFreeDiskSpace() >= uFreeDiskSpace)
 					AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 			}
@@ -5978,6 +6042,7 @@ int CPartFileFlushThread::Run()
 		m_partfile->m_FlushThread = NULL;
 		return 1;
 	}
+#ifndef _DEBUG
 	catch(...)
 	{
 		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)m_partfile,0) );
@@ -5987,7 +6052,7 @@ int CPartFileFlushThread::Run()
 		m_partfile->m_FlushThread = NULL;
 		return 2;
 	}
-
+#endif
 	m_partfile->m_FlushThread = NULL;
 	VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FLUSHDONE,0,(LPARAM)m_partfile) );
 	//theApp.QueueDebugLogLine(false,_T("FLUSH:End (%s)"),m_partfile->GetFileName());
@@ -6089,7 +6154,7 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 		myfile->m_hpartfile.Flush();
 		x=0;
 		myfile->m_hpartfile.Seek(-1,CFile::end);
-		myfile->m_hpartfile.Write(&x,0);
+		myfile->m_hpartfile.Write(&x,1);
 		myfile->m_hpartfile.Flush();
 	}
 	catch (CFileException* error)
@@ -6099,6 +6164,7 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 
 		return 1;
 	}
+#ifndef _DEBUG
 	catch(...)
 	{
 
@@ -6106,6 +6172,7 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 		myfile->m_AllocateThread=NULL;
 		return 2;
 	}
+#endif
 
 	myfile->m_AllocateThread=NULL;
 	theApp.QueueDebugLogLine(false,_T("ALLOC:End (%s)"),myfile->GetFileName());
@@ -6119,7 +6186,7 @@ void CPartFile::GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled) cons
 	if (gaplist.GetHeadPosition() == NULL)
 		return;
 
-	Gap_Struct *gap;
+	Gap_Struct *gap=NULL;
 	Gap_Struct *best=NULL;
 	POSITION pos;
 	uint64 start = 0;
@@ -6136,7 +6203,7 @@ void CPartFile::GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled) cons
 		while (pos != NULL)
 		{
 			gap = gaplist.GetNext(pos);
-			if ((gap->start > start) && (gap->end < bestEnd))
+			if ( (gap->start >= start) && (gap->end < bestEnd))
 			{
 				best = gap;
 				bestEnd = best->end;
@@ -6153,14 +6220,18 @@ void CPartFile::GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled) cons
 
 		if (!finished)
 		{
+			if (best->start>0) {
 			// Invert this gap
 			gap = new Gap_Struct;
 			gap->start = start;
 			gap->end = best->start - 1;
+				filled->AddTail(gap);
 			start = best->end + 1;
-			filled->AddTail(gap);
+			} else 				
+				start = best->end + 1;
+
 		}
-		else if (best->end < m_nFileSize)
+		else if (best->end+1 < m_nFileSize)
 		{
 			gap = new Gap_Struct;
 			gap->start = best->end + 1;
@@ -6170,7 +6241,7 @@ void CPartFile::GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled) cons
 	}
 }
 
-void CPartFile::UpdateFileRatingCommentAvail()
+void CPartFile::UpdateFileRatingCommentAvail(bool bForceUpdate)
 {
 	bool bOldHasComment = m_bHasComment;
 	UINT uOldUserRatings = m_uUserRating;
@@ -6204,15 +6275,15 @@ void CPartFile::UpdateFileRatingCommentAvail()
 	}
 
 	if(uRatings)
-		m_uUserRating = uUserRatings / uRatings;
+		m_uUserRating = (uint32)ROUND((float)uUserRatings / uRatings);
 	else
 		m_uUserRating = 0;
 
-	if (bOldHasComment != m_bHasComment || uOldUserRatings != m_uUserRating)
+	if (bOldHasComment != m_bHasComment || uOldUserRatings != m_uUserRating || bForceUpdate)
 		UpdateDisplayedInfo(true);
 }
 
-void CPartFile::UpdateDisplayedInfo(bool force)
+void CPartFile::UpdateDisplayedInfo(bool /*force*/)
 {
 	//MORPH START - UpdateItemThread
 	/*
@@ -6260,9 +6331,8 @@ UINT CPartFile::GetCategory() const
 	return m_category > (UINT)(thePrefs.GetCatCount() - 1)?0:m_category;
 }
 
-
 // Ornis: Creating progressive presentation of the partfilestatuses - for webdisplay
-CString CPartFile::GetProgressString(int size) const
+CString CPartFile::GetProgressString(uint16 size) const
 {
 	char crProgress = '0';//green
 	char crHave = '1';	// black
@@ -6463,42 +6533,23 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	// edonkey network. The selection algorithm must insure the best spreading
 	// of files.
 	//  
-	// The selection is based on 4 criteria:
-	//  1.  Frequency of the chunk (availability), very rare chunks must be downloaded 
+	// The selection is based on several criteria:
+	//  -   Frequency of the chunk (availability), very rare chunks must be downloaded 
 	//      as quickly as possible to become a new available source.
-	//  2.  Parts used for preview (first + last chunk), preview or check a 
+	//  -   Parts used for preview (first + last chunk), preview or check a 
 	//      file (e.g. movie, mp3)
-	//  3.  Request state (downloading in process), try to ask each source for another 
-	//      chunk. Spread the requests between all sources.
-	//  4.  Completion (shortest-to-complete), partially retrieved chunks should be 
+	//  -   Completion (shortest-to-complete), partially retrieved chunks should be 
 	//      completed before starting to download other one.
 	//  
-	// The frequency criterion defines three zones: very rare (<10%), rare (<50%)
-	// and common (>30%). Inside each zone, the criteria have a specific ‘weight’, used 
+	// The frequency criterion defines several zones: very rare, rare, almost rare,
+	// and common. Inside each zone, the criteria have a specific ‘weight’, used 
 	// to calculate the priority of chunks. The chunk(s) with the highest 
 	// priority (highest=0, lowest=0xffff) is/are selected first.
 	//  
-	//          very rare   (preview)       rare                      common
-	//    0% <---- +0 pt ----> 10% <----- +10000 pt -----> 50% <---- +20000 pt ----> 100%
-	// 1.  <------- frequency: +25*frequency pt ----------->
-	// 2.  <- preview: +1 pt --><-------------- preview: set to 10000 pt ------------->
-	// 3.                       <------ request: download in progress +20000 pt ------>
-	// 4a. <- completion: 0% +100, 25% +75 .. 100% +0 pt --><-- !req => completion --->
-	// 4b.                                                  <--- req => !completion -->
-	//  
-	// Unrolled, the priority scale is:
-	//  
-	// 0..xxxx       unrequested and requested very rare chunks
-	// 10000..1xxxx  unrequested rare chunks + unrequested preview chunks
-	// 20000..2xxxx  unrequested common chunks (priority to the most complete)
-	// 30000..3xxxx  requested rare chunks + requested preview chunks
-	// 40000..4xxxx  requested common chunks (priority to the least complete)
-	//
 	// This algorithm usually selects first the rarest chunk(s). However, partially
 	// complete chunk(s) that is/are close to completion may overtake the priority 
-	// (priority inversion).
-	// For the common chuncks, the algorithm tries to spread the dowload between
-	// the sources
+	// (priority inversion). For common chunks, it also tries to put the transferring
+    // clients on the same chunk, to complete it sooner.
 	//
 
 	// Check input parameters
@@ -6506,6 +6557,10 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 		return false;
 	if(sender->GetPartStatus() == NULL)
 		return false;
+
+    //AddDebugLogLine(DLP_VERYLOW, false, _T("Evaluating chunks for file: \"%s\" Client: %s"), GetFileName(), sender->DbgGetClientInfo());
+    
+
 	//MORPH START - Added by SiRoB, ICS Optional
 	const bool isPreviewEnable = (thePrefs.GetPreviewPrio() || thePrefs.IsExtControlsEnabled() && GetPreviewPrio()) && IsPreviewableFileType();
 	uint16 countbackup = *count;
@@ -6559,13 +6614,19 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 #endif
 	// BEGIN netfinty: Dynamic Block Requests
 
+	uint16 tempLastPartAsked = (uint16)-1;
+    if(sender->m_lastPartAsked != ((uint16)-1) && sender->GetClientSoft() == SO_EMULE && sender->GetVersion() < MAKE_CLIENT_VERSION(0, 43, 1)){
+        tempLastPartAsked = sender->m_lastPartAsked;
+    }
+
 	// Main loop
 	uint16 newBlockCount = 0;
 	while(newBlockCount != *count){
 		// Create a request block stucture if a chunk has been previously selected
-		if(sender->m_lastPartAsked != (uint16)-1){
+		if(tempLastPartAsked  != (uint16)-1){
 			Requested_Block_Struct* pBlock = new Requested_Block_Struct;
-			if(GetNextEmptyBlockInPart(sender->m_lastPartAsked, pBlock, bytesPerRequest) == true){
+			if(GetNextEmptyBlockInPart(tempLastPartAsked, pBlock, bytesPerRequest) == true){
+				//AddDebugLogLine(false, _T("Got request block. Interval %i-%i. File %s. Client: %s"), pBlock->StartOffset, pBlock->EndOffset, GetFileName(), sender->DbgGetClientInfo());
 				// Keep a track of all pending requested blocks
 				requestedblocks_list.AddTail(pBlock);
 				// Update list of blocks to return
@@ -6577,12 +6638,12 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 				// All blocks for this chunk have been already requested
 				delete pBlock;
 				// => Try to select another chunk
-				sender->m_lastPartAsked = (uint16)-1;
+				sender->m_lastPartAsked = tempLastPartAsked = (uint16)-1;
 			}
 		}
 
 		// Check if a new chunk must be selected (e.g. download starting, previous chunk complete)
-		if(sender->m_lastPartAsked == (uint16)-1){
+		if(tempLastPartAsked == (uint16)-1){
 
 			// Quantify all chunks (create list of chunks to download) 
 			// This is done only one time and only if it is necessary (=> CPU load)
@@ -6603,15 +6664,14 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 					break; // Exit main loop while()
 				}
 
-				// Define the bounds of the three zones (very rare, rare)
+                // Define the bounds of the zones (very rare, rare etc)
 				// more depending on available sources
-				uint8 modif=10;
-				if (GetSourceCount()>800) modif=2; 	else if (GetSourceCount()>200) modif=5;
-				uint16 limit = (uint16)(modif*GetSourceCount()/ 100);
-				if (limit==0) limit=1;
+				uint16 limit = (uint16)ceil(GetSourceCount()/ 10.0);
+				if (limit<3) limit=3;
 
 				const uint16 veryRareBound = limit;
 				const uint16 rareBound = 2*limit;
+				const uint16 almostRareBound = 4*limit;
 
 				// Cache Preview state (Criterion 2)
                 const bool isPreviewEnable = (thePrefs.GetPreviewPrio() || thePrefs.IsExtControlsEnabled() && GetPreviewPrio()) && IsPreviewableFileType();
@@ -6631,7 +6691,8 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 					// MORPH END - Added by Commander, WebCache 1.2e
 
 					// Offsets of chunk
-					const uint64 uStart = (uint64)cur_chunk.part * PARTSIZE;
+					UINT uCurChunkPart = cur_chunk.part; // help VC71...
+					const uint64 uStart = (uint64)uCurChunkPart * PARTSIZE;
 					const uint64 uEnd  = ((GetFileSize() - (uint64)1) < (uStart + PARTSIZE - 1)) ? 
 										  (GetFileSize() - (uint64)1) : (uStart + PARTSIZE - 1);
 					ASSERT( uStart <= uEnd );
@@ -6657,16 +6718,18 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 					}
 
 					// Criterion 3. Request state (downloading in process from other source(s))
-					const bool critRequested = cur_chunk.frequency > veryRareBound &&  // => CPU load
-											IsAlreadyRequested(uStart, uEnd);
+					//const bool critRequested = IsAlreadyRequested(uStart, uEnd);
+                    bool critRequested = false; // <--- This is set as a part of the second critCompletion loop below
 
 					// Criterion 4. Completion
-					uint64 partSize = PARTSIZE;
+					uint64 partSize = uEnd - uStart + 1; //If all is covered by gaps, we have downloaded PARTSIZE, or possibly less for the last chunk;
+                    ASSERT(partSize <= PARTSIZE);
 					for(POSITION pos = gaplist.GetHeadPosition(); pos != NULL; ) {
 						const Gap_Struct* cur_gap = gaplist.GetNext(pos);
 						// Check if Gap is into the limit
 						if(cur_gap->start < uStart) {
 							if(cur_gap->end > uStart && cur_gap->end < uEnd) {
+                                ASSERT(partSize >= (cur_gap->end - uStart + 1));
 								partSize -= cur_gap->end - uStart + 1;
 							}
 						else if(cur_gap->end >= uEnd) {
@@ -6676,69 +6739,164 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 						}
 						else if(cur_gap->start <= uEnd) {
 							if(cur_gap->end < uEnd) {
+                                ASSERT(partSize >= (cur_gap->end - cur_gap->start + 1));
 								partSize -= cur_gap->end - cur_gap->start + 1;
 							}
 							else {
+                                ASSERT(partSize >= (uEnd - cur_gap->start + 1));
 								partSize -= uEnd - cur_gap->start + 1;
 							}
 						}
 					}
-					const uint16 critCompletion = (uint16)(partSize/(PARTSIZE/100)); // in [%]
+                    //ASSERT(partSize <= PARTSIZE && partSize <= (uEnd - uStart + 1));
+
+                    // requested blocks from sources we are currently downloading from is counted as if already downloaded
+                    // this code will cause bytes that has been requested AND transferred to be counted twice, so we can end
+                    // up with a completion number > PARTSIZE. That's ok, since it's just a relative number to compare chunks.
+                    for(POSITION reqPos = requestedblocks_list.GetHeadPosition(); reqPos != NULL; ) {
+                        const Requested_Block_Struct* reqBlock = requestedblocks_list.GetNext(reqPos);
+                        if(reqBlock->StartOffset < uStart) {
+                            if(reqBlock->EndOffset > uStart) {
+                                if(reqBlock->EndOffset < uEnd) {
+                                    //ASSERT(partSize + (reqBlock->EndOffset - uStart + 1) <= (uEnd - uStart + 1));
+								    partSize += reqBlock->EndOffset - uStart + 1;
+                                    critRequested = true;
+                                } else if(reqBlock->EndOffset >= uEnd) {
+                                    //ASSERT(partSize + (uEnd - uStart + 1) <= uEnd - uStart);
+                                    partSize += uEnd - uStart + 1;
+                                    critRequested = true;
+                                }
+							}
+                        } else if(reqBlock->StartOffset <= uEnd) {
+							if(reqBlock->EndOffset < uEnd) {
+                                //ASSERT(partSize + (reqBlock->EndOffset - reqBlock->StartOffset + 1) <= (uEnd - uStart + 1));
+								partSize += reqBlock->EndOffset - reqBlock->StartOffset + 1;
+                                critRequested = true;
+							} else {
+                                //ASSERT(partSize +  (uEnd - reqBlock->StartOffset + 1) <= (uEnd - uStart + 1));
+								partSize += uEnd - reqBlock->StartOffset + 1;
+                                critRequested = true;
+							}
+						}
+                    }
+                    //Don't check this (see comment above for explanation): ASSERT(partSize <= PARTSIZE && partSize <= (uEnd - uStart + 1));
+
+                    if(partSize > PARTSIZE) partSize = PARTSIZE;
+
+                    uint16 critCompletion = (uint16)ceil((double)(partSize*100)/PARTSIZE); // in [%]. Last chunk is always counted as a full size chunk, to not give it any advantage in this comparison due to smaller size. So a 1/3 of PARTSIZE downloaded in last chunk will give 33% even if there's just one more byte do download to complete the chunk.
+                    if(critCompletion > 100) critCompletion = 100;
+
+                    // Criterion 5. Prefer to continue the same chunk
+                    const bool sameChunk = (cur_chunk.part == sender->m_lastPartAsked);
+
+                    // Criterion 6. The more transferring clients that has this part, the better (i.e. lower).
+                    uint16 transferringClientsScore = (uint16)m_downloadingSourceList.GetSize();
+
+                    // Criterion 7. Sooner to completion (how much of a part is completed, how fast can be transferred to this part, if all currently transferring clients with this part are put on it. Lower is better.)
+                    uint16 bandwidthScore = 2000;
+
+                    // Calculate criterion 6 and 7
+                    if(m_downloadingSourceList.GetSize() > 1) {
+                        UINT totalDownloadDatarateForThisPart = 1;
+                        for(POSITION downloadingClientPos = m_downloadingSourceList.GetHeadPosition(); downloadingClientPos != NULL; ) {
+                            const CUpDownClient* downloadingClient = m_downloadingSourceList.GetNext(downloadingClientPos);
+                            if(downloadingClient->IsPartAvailable(cur_chunk.part)) {
+                                transferringClientsScore--;
+                                totalDownloadDatarateForThisPart += downloadingClient->GetDownloadDatarate() + 500; // + 500 to make sure that a unstarted chunk available at two clients will end up just barely below 2000 (max limit)
+                            }
+                        }
+
+                        bandwidthScore = (uint16)min((UINT)((PARTSIZE-partSize)/(totalDownloadDatarateForThisPart*5)), 2000);
+                        //AddDebugLogLine(DLP_VERYLOW, false,
+                        //    _T("BandwidthScore for chunk %i: bandwidthScore = %u = min((PARTSIZE-partSize)/(totalDownloadDatarateForThisChunk*5), 2000) = min((PARTSIZE-%I64u)/(%u*5), 2000)"),
+                        //    cur_chunk.part, bandwidthScore, partSize, totalDownloadDatarateForThisChunk);
+                    }
+
+                    //AddDebugLogLine(DLP_VERYLOW, false, _T("Evaluating chunk number: %i, SourceCount: %u/%i, critPreview: %s, critRequested: %s, critCompletion: %i%%, sameChunk: %s"), cur_chunk.part, cur_chunk.frequency, GetSourceCount(), ((critPreview == true) ? _T("true") : _T("false")), ((critRequested == true) ? _T("true") : _T("false")), critCompletion, ((sameChunk == true) ? _T("true") : _T("false")));
 
 					// Calculate priority with all criteria
-					if(cur_chunk.frequency <= veryRareBound){
-						// 0..xxxx unrequested + requested very rare chunks
-						cur_chunk.rank = (25 * cur_chunk.frequency) +      // Criterion 1
-										((critPreview == true) ? 0 : 1) + // Criterion 2
-										(100 - critCompletion);           // Criterion 4
-                                                // MORPH START - Added by Commander, WebCache 1.2e
+                    if(partSize > 0 && GetSourceCount() <= GetSrcA4AFCount()) {
+						// If there are too many a4af sources, the completion of blocks have very high prio
+						cur_chunk.rank = (cur_chunk.frequency) +                      // Criterion 1
+							             ((critPreview == true) ? 0 : 200) +          // Criterion 2
+										 ((critRequested == true) ? 0 : 1) +          // Criterion 3
+										 (100 - critCompletion) +                     // Criterion 4
+                                         ((sameChunk == true) ? 0 : 1) +              // Criterion 5
+                                         bandwidthScore;                              // Criterion 7
+                    } else if(cur_chunk.frequency <= veryRareBound){
+						// 3000..xxxx unrequested + requested very rare chunks
+						cur_chunk.rank = (75 * cur_chunk.frequency) +                 // Criterion 1
+							             ((critPreview == true) ? 0 : 1) +            // Criterion 2
+										 ((critRequested == true) ? 3000 : 3001) +    // Criterion 3
+										 (100 - critCompletion) +                     // Criterion 4
+                                         ((sameChunk == true) ? 0 : 1) +              // Criterion 5
+                                         transferringClientsScore;                    // Criterion 6
+    					// MORPH START - Added by Commander, WebCache 1.2e
 						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
 						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
-                                                // MORPH END - Added by Commander, WebCache 1.2e
-					
+    	                // MORPH END - Added by Commander, WebCache 1.2e
 					}
 					else if(critPreview == true){
 						// 10000..10100  unrequested preview chunks
-						// 30000..30100  requested preview chunks
-						cur_chunk.rank = ((critRequested == false) ? 10000 : 30000) + // Criterion 3
-										(100 - critCompletion);                      // Criterion 4
-                                                // MORPH START - Added by Commander, WebCache 1.2e
+						// 20000..20100  requested preview chunks
+						cur_chunk.rank = ((critRequested == true &&
+                                           sameChunk == false) ? 20000 : 10000) +     // Criterion 3
+										 (100 - critCompletion);                      // Criterion 4
+                        // MORPH START - Added by Commander, WebCache 1.2e
 						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
 						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
-                                                // MORPH END - Added by Commander, WebCache 1.2e
+                        // MORPH END - Added by Commander, WebCache 1.2e
+
 					}
 					else if(cur_chunk.frequency <= rareBound){
-						// 10101..1xxxx  unrequested rare chunks
-						// 30101..3xxxx  requested rare chunks
-						cur_chunk.rank = (25 * cur_chunk.frequency) +                 // Criterion 1 
-										((critRequested == false) ? 10101 : 30101) + // Criterion 3
-										(100 - critCompletion);                      // Criterion 4
-                                                // MORPH START - Added by Commander, WebCache 1.2e
+						// 10101..1xxxx  requested rare chunks
+						// 10102..1xxxx  unrequested rare chunks
+                        //ASSERT(cur_chunk.frequency >= veryRareBound);
+
+                        cur_chunk.rank = (25 * cur_chunk.frequency) +                 // Criterion 1 
+										 ((critRequested == true) ? 10101 : 10102) +  // Criterion 3
+										 (100 - critCompletion) +                     // Criterion 4
+                                         ((sameChunk == true) ? 0 : 1) +              // Criterion 5
+                                         transferringClientsScore;                    // Criterion 6
+ 						// MORPH START - Added by Commander, WebCache 1.2e
 						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
 						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
-                                                // MORPH END - Added by Commander, WebCache 1.2e
-					
+                        // MORPH END - Added by Commander, WebCache 1.2e
 					}
-					else { // common chunk
-						if(critRequested == false){ // Criterion 3
-							// 20000..2xxxx  unrequested common chunks
-							cur_chunk.rank = 20000 +                // Criterion 3
-											(100 - critCompletion); // Criterion 4
-                                                // MORPH START - Added by Commander, WebCache 1.2e
+					else if(cur_chunk.frequency <= almostRareBound){
+						// 20101..1xxxx  requested almost rare chunks
+						// 20150..1xxxx  unrequested almost rare chunks
+                        //ASSERT(cur_chunk.frequency >= rareBound);
+
+                        // used to slightly lessen the imporance of frequency
+                        uint16 randomAdd = 1 + (uint16)((((uint32)rand()*(almostRareBound-rareBound))+(RAND_MAX/2))/RAND_MAX);
+                        //AddDebugLogLine(DLP_VERYLOW, false, _T("RandomAdd: %i, (%i-%i=%i)"), randomAdd, rareBound, almostRareBound, almostRareBound-rareBound);
+
+                        cur_chunk.rank = (cur_chunk.frequency) +                      // Criterion 1
+										 ((critRequested == true) ? 20101 : (20201+almostRareBound-rareBound)) +  // Criterion 3
+                                         ((partSize > 0) ? 0 : 500) +                 // Criterion 4
+										 (5*100 - (5*critCompletion)) +               // Criterion 4
+                                         ((sameChunk == true) ? (uint16)0 : randomAdd) +  // Criterion 5
+                                         bandwidthScore;                             // Criterion 7
+						// MORPH START - Added by Commander, WebCache 1.2e
 						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
 						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
 						// MORPH END - Added by Commander, WebCache 1.2e
-						}
-						else{
-							// 40000..4xxxx  requested common chunks
-							// Remark: The weight of the completion criterion is inversed
-							//         to spead the requests over the completing chunks. 
-							//         Without this, the chunk closest to completion will  
-							//         received every new sources.
-							cur_chunk.rank = 40000 +                // Criterion 3
-											(critCompletion);       // Criterion 4				
-						}
 					}
+					else { // common chunk
+						// 30000..30100  requested common chunks
+						// 30001..30101  unrequested common chunks
+						cur_chunk.rank = ((critRequested == true) ? 30000 : 30001) +  // Criterion 3
+										 (100 - critCompletion) +                     // Criterion 4
+                                         ((sameChunk == true) ? 0 : 1) +              // Criterion 5
+                                         bandwidthScore;                              // Criterion 7
+						// MORPH START - Added by Commander, WebCache 1.2e
+						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
+						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
+						// MORPH END - Added by Commander, WebCache 1.2e
+					}
+
+                    //AddDebugLogLine(DLP_VERYLOW, false, _T("Rank: %u"), cur_chunk.rank);
 				}
 			}
 
@@ -6768,7 +6926,9 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 						randomness--; 
 						if(randomness == 0){
 							// Selection process is over 
-							sender->m_lastPartAsked = cur_chunk.part;
+                            sender->m_lastPartAsked = tempLastPartAsked = cur_chunk.part;
+                            //AddDebugLogLine(DLP_VERYLOW, false, _T("Chunk number %i selected. Rank: %u"), cur_chunk.part, cur_chunk.rank);
+
 							// Remark: this list might be reused up to ‘*count’ times
 							chunksList.RemoveAt(cur_pos);
 							break; // exit loop for()
@@ -7124,7 +7284,7 @@ void CPartFile::SetFileOpProgress(UINT uProgress)
     }
 }
 
-void CPartFile::RequestAICHRecovery(uint16 nPart)
+void CPartFile::RequestAICHRecovery(UINT nPart)
 {
 	if (!m_pAICHHashSet->HasValidMasterHash() || (m_pAICHHashSet->GetStatus() != AICH_TRUSTED && m_pAICHHashSet->GetStatus() != AICH_VERIFIED)){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
@@ -7132,9 +7292,9 @@ void CPartFile::RequestAICHRecovery(uint16 nPart)
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Unable to request AICH Recoverydata because we have no trusted Masterhash"));
 		return;
 	}
-	if (GetFileSize() <= (uint64)EMBLOCKSIZE || GetFileSize() - PARTSIZE*nPart <= (uint64)EMBLOCKSIZE)
+	if (GetFileSize() <= (uint64)EMBLOCKSIZE || GetFileSize() - PARTSIZE*(uint64)nPart <= (uint64)EMBLOCKSIZE)
 		return;
-	if (CAICHHashSet::IsClientRequestPending(this, nPart)){
+	if (CAICHHashSet::IsClientRequestPending(this, (uint16)nPart)){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("RequestAICHRecovery: Already a request for this part pending"));
@@ -7142,7 +7302,7 @@ void CPartFile::RequestAICHRecovery(uint16 nPart)
 	}
 
 	// first check if we have already the recoverydata, no need to rerequest it then
-	if (m_pAICHHashSet->IsPartDataAvailable(nPart*PARTSIZE)){
+	if (m_pAICHHashSet->IsPartDataAvailable((uint64)nPart*PARTSIZE)){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Found PartRecoveryData in memory"));
@@ -7205,10 +7365,10 @@ void CPartFile::RequestAICHRecovery(uint16 nPart)
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 	if(thePrefs.GetLogICHEvents()) //JP log ICH events
 	AddDebugLogLine(DLP_DEFAULT, false, _T("Requesting AICH Hash (%s) form client %s"),cAICHClients? _T("HighId"):_T("LowID"), pClient->DbgGetClientInfo());
-	pClient->SendAICHRequest(this, nPart);
+	pClient->SendAICHRequest(this, (uint16)nPart);
 }
 
-void CPartFile::AICHRecoveryDataAvailable(uint16 nPart)
+void CPartFile::AICHRecoveryDataAvailable(UINT nPart)
 {
 	if (GetPartCount() < nPart){
 		ASSERT( false );
@@ -7216,12 +7376,12 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart)
 	}
 	FlushBuffer(true, true, true);
 	uint32 length = PARTSIZE;
-	if ((ULONGLONG)PARTSIZE*(nPart+1) > m_hpartfile.GetLength()){
-		length = (UINT)(m_hpartfile.GetLength() - ((ULONGLONG)PARTSIZE*nPart));
+	if ((ULONGLONG)PARTSIZE*(uint64)(nPart+1) > m_hpartfile.GetLength()){
+		length = (UINT)(m_hpartfile.GetLength() - ((ULONGLONG)PARTSIZE*(uint64)nPart));
 		ASSERT( length <= PARTSIZE );
 	}	
 	// if the part was already ok, it would now be complete
-	if (IsComplete(nPart*PARTSIZE, ((nPart*PARTSIZE)+length)-1, true)){
+	if (IsComplete((uint64)nPart*PARTSIZE, (((uint64)nPart*PARTSIZE)+length)-1, true)){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Processing AICH Recovery data: The part (%u) is already complete, canceling"));
@@ -7230,7 +7390,7 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart)
 	
 
 
-	CAICHHashTree* pVerifiedHash = m_pAICHHashSet->m_pHashTree.FindHash(nPart*PARTSIZE, length);
+	CAICHHashTree* pVerifiedHash = m_pAICHHashSet->m_pHashTree.FindHash((uint64)nPart*PARTSIZE, length);
 	if (pVerifiedHash == NULL || !pVerifiedHash->m_bHashValid){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
@@ -7240,13 +7400,14 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart)
 	}
 	CAICHHashTree htOurHash(pVerifiedHash->m_nDataSize, pVerifiedHash->m_bIsLeftBranch, pVerifiedHash->m_nBaseSize);
 	try{
-		m_hpartfile.Seek((LONGLONG)PARTSIZE*nPart,0);
+		m_hpartfile.Seek((LONGLONG)PARTSIZE*(uint64)nPart,0);
 		CreateHash(&m_hpartfile,length, NULL, &htOurHash);
 	}
 	catch(...){
 		ASSERT( false );
 		return;
 	}
+
 	if (!htOurHash.m_bHashValid){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
@@ -8017,7 +8178,7 @@ void CPartFile::ClearSourceCache()
 	m_sourcecache.RemoveAll();
 }
 
-void CPartFile::AddToSourceCache(uint16 nPort, uint32 dwID, uint32 dwServerIP,uint16 nServerPort, ESourceFrom sourcefrom, bool ed2kIDFlag, const uchar* achUserHash)
+void CPartFile::AddToSourceCache(uint16 nPort, uint32 dwID, uint32 dwServerIP,uint16 nServerPort, ESourceFrom sourcefrom, bool ed2kIDFlag, const uchar* achUserHash, const uint8 byCryptOptions)
 {
 	PartfileSourceCache newsource;
 	newsource.nPort=nPort;
@@ -8027,6 +8188,7 @@ void CPartFile::AddToSourceCache(uint16 nPort, uint32 dwID, uint32 dwServerIP,ui
 	newsource.ed2kIDFlag=ed2kIDFlag;
 	newsource.sourcefrom=sourcefrom;
 	newsource.expires=::GetTickCount() + SOURCECACHELIFETIME;
+	newsource.byCryptOptions = byCryptOptions;
 	if(achUserHash!=NULL)
 	{
 		md4cpy(newsource.achUserHash,achUserHash);
@@ -8065,6 +8227,9 @@ void CPartFile::ProcessSourceCache()
 		{
 			PartfileSourceCache currentsource=m_sourcecache.RemoveHead();
 			CUpDownClient* newsource = new CUpDownClient(this,currentsource.nPort, currentsource.dwID,currentsource.dwServerIP,currentsource.nServerPort,currentsource.ed2kIDFlag);
+			newsource->SetCryptLayerSupport((currentsource.byCryptOptions & 0x01) != 0);
+			newsource->SetCryptLayerRequest((currentsource.byCryptOptions & 0x02) != 0);
+			newsource->SetCryptLayerRequires((currentsource.byCryptOptions & 0x04) != 0);
 			newsource->SetSourceFrom(currentsource.sourcefrom);
 			if(currentsource.withuserhash==true)
 				newsource->SetUserHash(currentsource.achUserHash);

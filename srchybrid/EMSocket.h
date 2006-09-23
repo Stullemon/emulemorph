@@ -15,15 +15,12 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "AsyncSocketEx.h"
+#include "EncryptedStreamSocket.h"
 #include "OtherFunctions.h"
 #include "ThrottledSocket.h" // ZZ:UploadBandWithThrottler (UDP)
 
 class CAsyncProxySocketLayer;
 class Packet;
-
-#define ERR_WRONGHEADER		0x01
-#define ERR_TOOBIG			0x02
 
 #define	ES_DISCONNECTED		0xFF
 #define	ES_NOTCONNECTED		0x00
@@ -45,17 +42,17 @@ struct BufferedPacket {
 };
 #endif
 
-class CEMSocket : public CAsyncSocketEx, public ThrottledFileSocket // ZZ:UploadBandWithThrottler (UDP)
+class CEMSocket : public CEncryptedStreamSocket, public ThrottledFileSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 	DECLARE_DYNAMIC(CEMSocket)
 public:
 	CEMSocket();
 	virtual ~CEMSocket();
 
-	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0, bool bForceImmediateSend = false);
     //MORPH START - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
 #if !defined DONT_USE_SEND_ARRAY_PACKET
-	virtual void 	SendPacket(Packet* packet[], uint32 npacket, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	virtual void 	SendPacket(Packet* packet[], uint32 npacket, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0, bool bForceImmediateSend = false);
 #endif
 	//MORPH END   - Added by SiRoB, Send Packet Array to prevent uploadbandwiththrottler lock
 	bool	IsConnected() const {return byConnected == ES_CONNECTED;}
@@ -140,7 +137,7 @@ private:
     bool    HasSent() { return m_hasSent; }
 
 #if !defined DONT_USE_SOCKET_BUFFERING
-    uint32	GetNeededBytes(const bool bcontrolpacketbuffered, const uint32 sendblen, const uint32 sendblenWithoutControlPacket, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
+    uint32	GetNeededBytes(const uint32 sendblen, const uint32 sendblenWithoutControlPacket, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
 #else
 	uint32	GetNeededBytes(const char* sendbuffer, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend);
 #endif
