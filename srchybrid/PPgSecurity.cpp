@@ -30,6 +30,8 @@
 #include "GZipFile.h"
 #include "RarFile.h"
 #include "Log.h"
+#include "ServerWnd.h"
+#include "ServerListCtrl.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -48,11 +50,6 @@ BEGIN_MESSAGE_MAP(CPPgSecurity, CPropertyPage)
 	ON_BN_CLICKED(IDC_RELOADFILTER, OnReloadIPFilter)
 	ON_BN_CLICKED(IDC_EDITFILTER, OnEditIPFilter)
 	ON_EN_CHANGE(IDC_FILTERLEVEL, OnSettingsChange)
-	ON_EN_CHANGE(IDC_FILTER, OnSettingsChange)
-	ON_EN_CHANGE(IDC_COMMENTFILTER, OnSettingsChange)
-	ON_BN_CLICKED(IDC_MSGONLYFRIENDS , OnSettingsChange) 
-	ON_BN_CLICKED(IDC_MSGONLYSEC, OnSettingsChange)
-	ON_BN_CLICKED(IDC_ADVSPAMFILTER , OnSettingsChange)
 	ON_BN_CLICKED(IDC_USESECIDENT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_LOADURL, OnLoadIPFFromURL)
 	ON_EN_CHANGE(IDC_UPDATEURL, OnEnChangeUpdateUrl)
@@ -60,6 +57,12 @@ BEGIN_MESSAGE_MAP(CPPgSecurity, CPropertyPage)
 	ON_WM_HELPINFO()
 	ON_BN_CLICKED(IDC_RUNASUSER, OnBnClickedRunAsUser)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_SEESHARE1, OnSettingsChange)
+	ON_BN_CLICKED(IDC_SEESHARE2, OnSettingsChange)
+	ON_BN_CLICKED(IDC_SEESHARE3, OnSettingsChange)
+	ON_BN_CLICKED(IDC_ENABLEOBFUSCATION, OnObfuscatedRequestedChange)
+	ON_BN_CLICKED(IDC_ONLYOBFUSCATED, OnSettingsChange)
+	ON_BN_CLICKED(IDC_DISABLEOBFUSCATION, OnObfuscatedDisabledChange)
 END_MESSAGE_MAP()
 
 CPPgSecurity::CPPgSecurity()
@@ -75,7 +78,6 @@ CPPgSecurity::CPPgSecurity()
 
 CPPgSecurity::~CPPgSecurity()
 {
-
 }
 
 void CPPgSecurity::DoDataExchange(CDataExchange* pDX)
@@ -95,21 +97,6 @@ void CPPgSecurity::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_FILTERSERVERBYIPFILTER,0);
 
-	if(thePrefs.msgonlyfriends)
-		CheckDlgButton(IDC_MSGONLYFRIENDS,1);
-	else
-		CheckDlgButton(IDC_MSGONLYFRIENDS,0);
-
-	if(thePrefs.msgsecure)
-		CheckDlgButton(IDC_MSGONLYSEC,1);
-	else
-		CheckDlgButton(IDC_MSGONLYSEC,0);
-
-	if(thePrefs.m_bAdvancedSpamfilter)
-		CheckDlgButton(IDC_ADVSPAMFILTER,1);
-	else
-		CheckDlgButton(IDC_ADVSPAMFILTER,0);
-
 	if(thePrefs.m_bUseSecureIdent)
 		CheckDlgButton(IDC_USESECIDENT,1);
 	else
@@ -125,8 +112,35 @@ void CPPgSecurity::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_RUNASUSER,0);
 
-	GetDlgItem(IDC_FILTER)->SetWindowText(thePrefs.messageFilter);
-	GetDlgItem(IDC_COMMENTFILTER)->SetWindowText(thePrefs.commentFilter);
+	if (!thePrefs.IsClientCryptLayerSupported()){
+		CheckDlgButton(IDC_DISABLEOBFUSCATION,1);
+		GetDlgItem(IDC_ENABLEOBFUSCATION)->EnableWindow(FALSE);
+		GetDlgItem(IDC_ONLYOBFUSCATED)->EnableWindow(FALSE);
+	}
+	else{
+		CheckDlgButton(IDC_DISABLEOBFUSCATION,0);
+		GetDlgItem(IDC_ENABLEOBFUSCATION)->EnableWindow(TRUE);
+		GetDlgItem(IDC_ONLYOBFUSCATED)->EnableWindow(TRUE);
+	}
+
+	if (thePrefs.IsClientCryptLayerRequested()){
+		CheckDlgButton(IDC_ENABLEOBFUSCATION,1);
+		GetDlgItem(IDC_ONLYOBFUSCATED)->EnableWindow(TRUE);
+	}
+	else{
+		CheckDlgButton(IDC_ENABLEOBFUSCATION,0);
+		GetDlgItem(IDC_ONLYOBFUSCATED)->EnableWindow(FALSE);
+	}
+
+	if (thePrefs.IsClientCryptLayerRequired())
+		CheckDlgButton(IDC_ONLYOBFUSCATED,1);
+	else
+		CheckDlgButton(IDC_ONLYOBFUSCATED,0);
+
+	ASSERT( vsfaEverybody == 0 );
+	ASSERT( vsfaFriends == 1 );
+	ASSERT( vsfaNobody == 2 );
+	CheckRadioButton(IDC_SEESHARE1, IDC_SEESHARE3, IDC_SEESHARE1 + thePrefs.m_iSeeShares);
 }
 
 BOOL CPPgSecurity::OnInitDialog()
@@ -162,12 +176,22 @@ BOOL CPPgSecurity::OnInitDialog()
 
 BOOL CPPgSecurity::OnApply()
 {
+	bool bIPFilterSettingsChanged = false;
+
 	TCHAR buffer[510];
-	if(GetDlgItem(IDC_FILTERLEVEL)->GetWindowTextLength())
-	{
+	if (GetDlgItem(IDC_FILTERLEVEL)->GetWindowTextLength()) {
 		GetDlgItem(IDC_FILTERLEVEL)->GetWindowText(buffer,4);
-		thePrefs.filterlevel=_tstoi(buffer);
+		int iNewFilterLevel = _tstoi(buffer);
+		if (iNewFilterLevel >= 0 && (UINT)iNewFilterLevel != thePrefs.filterlevel) {
+			thePrefs.filterlevel = iNewFilterLevel;
+			bIPFilterSettingsChanged = IsDlgButtonChecked(IDC_FILTERSERVERBYIPFILTER)!=0;
+		}
 	}
+	if (!thePrefs.filterserverbyip && IsDlgButtonChecked(IDC_FILTERSERVERBYIPFILTER)!=0)
+		bIPFilterSettingsChanged = true;
+	thePrefs.filterserverbyip = IsDlgButtonChecked(IDC_FILTERSERVERBYIPFILTER)!=0;
+	if (bIPFilterSettingsChanged)
+		theApp.emuledlg->serverwnd->serverlistctrl.RemoveAllFilteredServers();
 
 	thePrefs.filterserverbyip = IsDlgButtonChecked(IDC_FILTERSERVERBYIPFILTER)!=0;
 	thePrefs.msgonlyfriends = IsDlgButtonChecked(IDC_MSGONLYFRIENDS)!=0;
@@ -176,25 +200,17 @@ BOOL CPPgSecurity::OnApply()
 	thePrefs.m_bUseSecureIdent = IsDlgButtonChecked(IDC_USESECIDENT)!=0;
 	thePrefs.m_bRunAsUser = IsDlgButtonChecked(IDC_RUNASUSER)!=0;
 
-	GetDlgItem(IDC_FILTER)->GetWindowText(thePrefs.messageFilter);
+	thePrefs.m_bCryptLayerRequested = IsDlgButtonChecked(IDC_ENABLEOBFUSCATION) != 0;
+	thePrefs.m_bCryptLayerRequired = IsDlgButtonChecked(IDC_ONLYOBFUSCATED) != 0;
+	thePrefs.m_bCryptLayerSupported = IsDlgButtonChecked(IDC_DISABLEOBFUSCATION) == 0;
 
-	CString strCommentFilters;
-	GetDlgItem(IDC_COMMENTFILTER)->GetWindowText(strCommentFilters);
-	strCommentFilters.MakeLower();
-	CString strNewCommentFilters;
-	int curPos = 0;
-	CString strFilter(strCommentFilters.Tokenize(_T("|"), curPos));
-	while (!strFilter.IsEmpty())
-	{
-		strFilter.Trim();
-		if (!strNewCommentFilters.IsEmpty())
-			strNewCommentFilters += _T('|');
-		strNewCommentFilters += strFilter;
-		strFilter = strCommentFilters.Tokenize(_T("|"), curPos);
-	}
-	thePrefs.commentFilter = strNewCommentFilters;
-	if (thePrefs.commentFilter != strCommentFilters)
-		SetDlgItemText(IDC_COMMENTFILTER, thePrefs.commentFilter);
+
+	if (IsDlgButtonChecked(IDC_SEESHARE1))
+		thePrefs.m_iSeeShares = vsfaEverybody;
+	else if (IsDlgButtonChecked(IDC_SEESHARE2))
+		thePrefs.m_iSeeShares = vsfaFriends;
+	else
+		thePrefs.m_iSeeShares = vsfaNobody;
 
 	LoadSettings();
 	SetModified(FALSE);
@@ -212,23 +228,23 @@ void CPPgSecurity::Localize(void)
 		GetDlgItem(IDC_STATIC_FILTERLEVEL)->SetWindowText(GetResString(IDS_FILTERLEVEL)+_T(":"));
 		GetDlgItem(IDC_FILTERSERVERBYIPFILTER)->SetWindowText(GetResString(IDS_FILTERSERVERBYIPFILTER));
 
-		GetDlgItem(IDC_FILTERCOMMENTSLABEL)->SetWindowText(GetResString(IDS_FILTERCOMMENTSLABEL));
-		GetDlgItem(IDC_STATIC_COMMENTS)->SetWindowText(GetResString(IDS_COMMENT));
-
-		GetDlgItem(IDC_FILTERLABEL)->SetWindowText(GetResString(IDS_FILTERLABEL));
-		GetDlgItem(IDC_MSG)->SetWindowText(GetResString(IDS_CW_MESSAGES));
-
-		GetDlgItem(IDC_MSGONLYFRIENDS)->SetWindowText(GetResString(IDS_MSGONLYFRIENDS));
-		GetDlgItem(IDC_MSGONLYSEC)->SetWindowText(GetResString(IDS_MSGONLYSEC));
-
-		GetDlgItem(IDC_ADVSPAMFILTER)->SetWindowText(GetResString(IDS_ADVSPAMFILTER));
 		GetDlgItem(IDC_SEC_MISC)->SetWindowText(GetResString(IDS_PW_MISC));
 		GetDlgItem(IDC_USESECIDENT)->SetWindowText(GetResString(IDS_USESECIDENT));
+		SetDlgItemText(IDC_RUNASUSER,GetResString(IDS_RUNASUSER));
 
 		SetDlgItemText(IDC_STATIC_UPDATEFROM,GetResString(IDS_UPDATEFROM));
 		SetDlgItemText(IDC_LOADURL,GetResString(IDS_LOADURL));
 
-		SetDlgItemText(IDC_RUNASUSER,GetResString(IDS_RUNASUSER));
+GetDlgItem(IDC_SEEMYSHARE_FRM)->SetWindowText(GetResString(IDS_PW_SHARE));
+		GetDlgItem(IDC_SEESHARE1)->SetWindowText(GetResString(IDS_PW_EVER));
+		GetDlgItem(IDC_SEESHARE2)->SetWindowText(GetResString(IDS_FSTATUS_FRIENDSONLY));
+		GetDlgItem(IDC_SEESHARE3)->SetWindowText(GetResString(IDS_PW_NOONE));
+
+		GetDlgItem(IDC_DISABLEOBFUSCATION)->SetWindowText(GetResString(IDS_DISABLEOBFUSCATION));
+		GetDlgItem(IDC_ONLYOBFUSCATED)->SetWindowText(GetResString(IDS_ONLYOBFUSCATED));
+		GetDlgItem(IDC_ENABLEOBFUSCATION)->SetWindowText(GetResString(IDS_ENABLEOBFUSCATION));
+		GetDlgItem(IDC_SEC_OBFUSCATIONBOX)->SetWindowText(GetResString(IDS_PROTOCOLOBFUSCATION));
+
         // MORPH START leuk_he tooltipped
 		SetTool(IDC_FILTERLEVEL,IDC_STATIC_FILTERLEVE_TIP);
 		SetTool(IDC_FILTERSERVERBYIPFILTER,IDC_FILTERSERVERBYIPFILTE_TIP);
@@ -240,16 +256,15 @@ void CPPgSecurity::Localize(void)
 		SetTool(IDC_UPDATEURL,IDC_LOADUR_TIP);
 		SetTool(IDC_LOADURL,IDC_LOADUR_TIP);
 		SetTool(IDC_MSG,IDC_COMMENTFILTE_TIP);
-		SetTool(IDC_COMMENTFILTER,IDC_COMMENTFILTE_TIP);
-//		SetTool(IDC_FILTERLABEL,IDC_FILTERLABE_TIP);
-		SetTool(IDC_FILTER,IDC_FILTE_TIP);
-		SetTool(IDC_MSGONLYFRIENDS,IDC_MSGONLYFRIEND_TIP);
+/*	todo move	SetTool(IDC_COMMENTFILTER,IDC_COMMENTFILTE_TIP); */
+/* 		SetTool(IDC_FILTER,IDC_FILTE_TIP); */
+	/*	SetTool(IDC_MSGONLYFRIENDS,IDC_MSGONLYFRIEND_TIP);
 		SetTool(IDC_STATIC_COMMENTS,    IDC_COMMENTFILTE_TIP);
 		SetTool(IDC_FILTERCOMMENTSLABEL,IDC_COMMENTFILTE_TIP);
 		SetTool(IDC_MSGONLYSEC,IDC_MSGONLYSEC_SEC);
 		SetTool(IDC_ADVSPAMFILTER,IDC_ADVSPAMFILTER_TIP);
 		SetTool(IDC_SEC_MISC,IDC_SEC_MIS_TIP);
-		SetTool(IDC_RUNASUSER,IDC_RUNASUSER_TIP);
+		SetTool(IDC_RUNASUSER,IDC_RUNASUSER_TIP); */
 		// MORPH END leuk_he tooltipped
 	}
 }
@@ -258,6 +273,8 @@ void CPPgSecurity::OnReloadIPFilter()
 {
 	CWaitCursor curHourglass;
 	theApp.ipfilter->LoadFromDefaultFile();
+	if (thePrefs.GetFilterServerByIP())
+		theApp.emuledlg->serverwnd->serverlistctrl.RemoveAllFilteredServers();
 }
 
 void CPPgSecurity::OnEditIPFilter()
@@ -320,11 +337,11 @@ void CPPgSecurity::OnLoadIPFFromURL()
 					zfile = NULL;
 
 					if (_tremove(theApp.ipfilter->GetDefaultFilePath()) != 0)
-						TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %hs\n"), theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
+						TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %s\n"), theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
 					if (_trename(strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath()) != 0)
-						TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %hs\n"), strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
+						TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n"), strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
 					if (_tremove(strTempFilePath) != 0)
-						TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %hs\n"), strTempFilePath, _tcserror(errno));
+						TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n"), strTempFilePath, _tcserror(errno));
 					bUncompressed = true;
 					bHaveNewFilterFile = true;
 				}
@@ -361,11 +378,11 @@ void CPPgSecurity::OnLoadIPFFromURL()
 						rar.Close();
 
 						if (_tremove(theApp.ipfilter->GetDefaultFilePath()) != 0)
-							TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %hs\n"), theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
+							TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %s\n"), theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
 						if (_trename(strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath()) != 0)
-							TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %hs\n"), strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
+							TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n"), strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
 						if (_tremove(strTempFilePath) != 0)
-							TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %hs\n"), strTempFilePath, strerror(errno));
+							TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n"), strTempFilePath, _tcserror(errno));
 						bUncompressed = true;
 						bHaveNewFilterFile = true;
 					}
@@ -415,11 +432,11 @@ void CPPgSecurity::OnLoadIPFFromURL()
 					gz.Close();
 
 					if (_tremove(theApp.ipfilter->GetDefaultFilePath()) != 0)
-						TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %hs\n"), theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
+						TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %s\n"), theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
 					if (_trename(strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath()) != 0)
-						TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %hs\n"), strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
+						TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n"), strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
 					if (_tremove(strTempFilePath) != 0)
-						TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %hs\n"), strTempFilePath, _tcserror(errno));
+						TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n"), strTempFilePath, _tcserror(errno));
 					bUncompressed = true;
 					bHaveNewFilterFile = true;
 				}
@@ -579,6 +596,31 @@ void CPPgSecurity::OnBnClickedRunAsUser()
 	if ( ((CButton*)GetDlgItem(IDC_RUNASUSER))->GetCheck() == BST_CHECKED){
 		if (AfxMessageBox(GetResString(IDS_RAU_WARNING),MB_OKCANCEL | MB_ICONINFORMATION,0) == IDCANCEL)
 			((CButton*)GetDlgItem(IDC_RUNASUSER))->SetCheck(BST_UNCHECKED);
+	}
+	OnSettingsChange();
+}
+
+void CPPgSecurity::OnObfuscatedDisabledChange(){
+	if (IsDlgButtonChecked(IDC_DISABLEOBFUSCATION) != 0){
+		GetDlgItem(IDC_ENABLEOBFUSCATION)->EnableWindow(FALSE);
+		GetDlgItem(IDC_ONLYOBFUSCATED)->EnableWindow(FALSE);
+		CheckDlgButton(IDC_ENABLEOBFUSCATION, 0);
+		CheckDlgButton(IDC_ONLYOBFUSCATED, 0);
+	}
+	else{
+		GetDlgItem(IDC_ENABLEOBFUSCATION)->EnableWindow(TRUE);
+	}
+	OnSettingsChange();
+}
+
+void CPPgSecurity::OnObfuscatedRequestedChange(){
+	if (IsDlgButtonChecked(IDC_ENABLEOBFUSCATION) == 0){
+		GetDlgItem(IDC_ONLYOBFUSCATED)->EnableWindow(FALSE);
+		CheckDlgButton(IDC_ONLYOBFUSCATED, 0);
+	}
+	else{
+		GetDlgItem(IDC_ENABLEOBFUSCATION)->EnableWindow(TRUE);
+		GetDlgItem(IDC_ONLYOBFUSCATED)->EnableWindow(TRUE);
 	}
 	OnSettingsChange();
 }
