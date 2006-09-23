@@ -98,6 +98,7 @@
 				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
 				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				DebugInformationFormat="3"/>
@@ -106,7 +107,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthread.lib"
-				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
@@ -176,10 +176,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\Release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthread.lib"
-				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
-				DelayLoadDLLs="oleacc.dll;gdiplus.dll;WS2_32.dll"
+				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -280,6 +279,12 @@
 			</File>
 			<File
 				RelativePath="Emule.cpp">
+			</File>
+			<File
+				RelativePath="EncryptedDatagramSocket.cpp">
+			</File>
+			<File
+				RelativePath="EncryptedStreamSocket.cpp">
 			</File>
 			<File
 				RelativePath="fakecheck.cpp">
@@ -820,10 +825,19 @@
 				RelativePath="Emule.h">
 			</File>
 			<File
+				RelativePath="EncryptedDatagramSocket.h">
+			</File>
+			<File
+				RelativePath="EncryptedStreamSocket.h">
+			</File>
+			<File
 				RelativePath="Exceptions.h">
 			</File>
 			<File
 				RelativePath="fakecheck.h">
+			</File>
+			<File
+				RelativePath="fileformat.h">
 			</File>
 			<File
 				RelativePath=".\FileProcessing.h">
@@ -1171,6 +1185,9 @@
 				RelativePath="AddSourceDlg.cpp">
 			</File>
 			<File
+				RelativePath=".\ArchivePreviewDlg.cpp">
+			</File>
+			<File
 				RelativePath="BarShader.cpp">
 			</File>
 			<File
@@ -1241,6 +1258,9 @@
 			</File>
 			<File
 				RelativePath="ED2kLinkDlg.cpp">
+			</File>
+			<File
+				RelativePath="EditDelayed.cpp">
 			</File>
 			<File
 				RelativePath="EditX.cpp">
@@ -1375,6 +1395,9 @@
 				RelativePath="PPgIRC.cpp">
 			</File>
 			<File
+				RelativePath="PPgMessages.cpp">
+			</File>
+			<File
 				RelativePath="PPgMorph.cpp">
 			</File>
 			<File
@@ -1424,6 +1447,9 @@
 			</File>
 			<File
 				RelativePath="RichEditCtrlX.cpp">
+			</File>
+			<File
+				RelativePath="RichEditStream.cpp">
 			</File>
 			<File
 				RelativePath="SearchDlg.cpp">
@@ -1620,6 +1646,9 @@
 				RelativePath="AfxBeginMsgMapTemplate.h">
 			</File>
 			<File
+				RelativePath=".\ArchivePreviewDlg.h">
+			</File>
+			<File
 				RelativePath="BarShader.h">
 			</File>
 			<File
@@ -1693,6 +1722,9 @@
 			</File>
 			<File
 				RelativePath="ED2kLinkDlg.h">
+			</File>
+			<File
+				RelativePath="EditDelayed.h">
 			</File>
 			<File
 				RelativePath="EditX.h">
@@ -1887,6 +1919,9 @@
 				RelativePath="RichEditCtrlX.h">
 			</File>
 			<File
+				RelativePath="RichEditStream.h">
+			</File>
+			<File
 				RelativePath="Scanner.h">
 			</File>
 			<File
@@ -2071,7 +2106,16 @@
 				RelativePath="res\all.ico">
 			</File>
 			<File
+				RelativePath="res\all.ico">
+			</File>
+			<File
+				RelativePath=".\res\ArchivePreview.ico">
+			</File>
+			<File
 				RelativePath=".\res\Mod\backup.ico">
+			</File>
+			<File
+				RelativePath="res\bold.ico">
 			</File>
 			<File
 				RelativePath="res\Cancel.ico">
@@ -2105,6 +2149,12 @@
 			</File>
 			<File
 				RelativePath="res\Chat.ico">
+			</File>
+			<File
+				RelativePath="res\clear1.ico">
+			</File>
+			<File
+				RelativePath="res\clear2.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\Client-Neo.ico">
@@ -2164,7 +2214,16 @@
 				RelativePath="res\ClientMLDonkeyPlus.ico">
 			</File>
 			<File
+				RelativePath="res\Clientobfuovl.ICO">
+			</File>
+			<File
 				RelativePath="res\ClientSecureHashOvl.ico">
+			</File>
+			<File
+				RelativePath="res\ClientSecureHashOvl.ico">
+			</File>
+			<File
+				RelativePath="res\Clientsecurehasobfuhovl.ICO">
 			</File>
 			<File
 				RelativePath="res\ClientShareaza.ico">
@@ -2183,6 +2242,9 @@
 			</File>
 			<File
 				RelativePath="res\Collapse.ico">
+			</File>
+			<File
+				RelativePath="res\colour.ico">
 			</File>
 			<File
 				RelativePath="res\Comments.ico">
@@ -2666,12 +2728,6 @@
 				RelativePath="res\mule_wiz.gif">
 			</File>
 			<File
-				RelativePath="res\mule_wiz.gif">
-			</File>
-			<File
-				RelativePath="res\mule_wiz_hdr.gif">
-			</File>
-			<File
 				RelativePath="res\mule_wiz_hdr.gif">
 			</File>
 			<File
@@ -2723,10 +2779,10 @@
 				RelativePath="res\Proxy.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\queue.ico">
+				RelativePath="res\queue.ico">
 			</File>
 			<File
-				RelativePath="res\queue.ico">
+				RelativePath=".\res\Mod\queue.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\Rating-Excellent.ico">
@@ -2759,6 +2815,9 @@
 				RelativePath="res\Rename.ico">
 			</File>
 			<File
+				RelativePath="res\resetformat.ico">
+			</File>
+			<File
 				RelativePath="res\Restore.ico">
 			</File>
 			<File
@@ -2775,6 +2834,9 @@
 			</File>
 			<File
 				RelativePath="res\Search.ico">
+			</File>
+			<File
+				RelativePath=".\res\SearchEdit.ico">
 			</File>
 			<File
 				RelativePath="res\SearchGlobalActive.ico">
@@ -2882,10 +2944,10 @@
 				RelativePath="res\Transfer.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\transfers.ico">
+				RelativePath="res\transfers.ico">
 			</File>
 			<File
-				RelativePath="res\transfers.ico">
+				RelativePath=".\res\Mod\transfers.ico">
 			</File>
 			<File
 				RelativePath="res\TransferUpDown.ico">
@@ -2910,6 +2972,9 @@
 			</File>
 			<File
 				RelativePath="res\Tweak.ico">
+			</File>
+			<File
+				RelativePath="res\underline.ico">
 			</File>
 			<File
 				RelativePath="res\Up0down0.ico">
