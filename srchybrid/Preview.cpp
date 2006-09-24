@@ -73,7 +73,7 @@ BOOL CPreviewThread::Run()
 	try{
 		uint64 nSize = m_pPartfile->GetFileSize();
 		CString strExtension = CString(_tcsrchr(m_pPartfile->GetFileName(), _T('.')));
-		CString strPreviewName = m_pPartfile->GetTempPath() + _T("\\") + m_pPartfile->GetFileName().Mid(0, 5) + _T("_preview") + strExtension;
+		CString strPreviewName = m_pPartfile->GetTempPath() + m_pPartfile->GetFileName().Mid(0, 5) + _T("_preview") + strExtension;
 		bool bFullSized = true;
 		if (!strExtension.CompareNoCase(_T(".mpg")) || !strExtension.CompareNoCase(_T(".mpeg")))
 			bFullSized = false;
@@ -104,29 +104,47 @@ BOOL CPreviewThread::Run()
 		srcFile.Close();
 		m_pPartfile->m_bPreviewing = false;
 
-		SHELLEXECUTEINFO SE;
-		memset(&SE,0,sizeof(SE));
-		SE.fMask = SEE_MASK_NOCLOSEPROCESS ;
-		SE.lpVerb = _T("open");
-		
-		CString path;
-		if (!m_player.IsEmpty())
-		{
-			TCHAR shortPath[512]; //Cax2 short path for vlc
-			GetShortPathName(strPreviewName, shortPath, ARRSIZE(shortPath));
+		SHELLEXECUTEINFO SE = {0};
+		SE.fMask = SEE_MASK_NOCLOSEPROCESS;
 
-			path=thePrefs.GetVideoPlayer();
-			int pos = path.ReverseFind(_T('\\'));
-			if (pos == -1)
-				path.Empty();
+		CString strCommand;
+		CString strArgs;
+		CString strCommandDir;
+		if (!m_strCommand.IsEmpty())
+		{
+			SE.lpVerb = _T("open");	// "open" the specified video player
+
+			// get directory of video player application
+			strCommandDir = m_strCommand;
+			int iPos = strCommandDir.ReverseFind(_T('\\'));
+			if (iPos == -1)
+				strCommandDir.Empty();
 			else
-				path = path.Left(pos + 1);
-			SE.lpFile = m_player;
-			SE.lpParameters=shortPath;
-			SE.lpDirectory = path;
+				strCommandDir = strCommandDir.Left(iPos + 1);
+			PathRemoveBackslash(strCommandDir.GetBuffer());
+			strCommandDir.ReleaseBuffer();
+
+			strArgs = m_strCommandArgs;
+			if (!strArgs.IsEmpty())
+				strArgs += _T(' ');
+			if (strPreviewName.Find(_T(' ')) != -1)
+				strArgs += _T('\"') + strPreviewName + _T('\"');
+			else
+				strArgs += strPreviewName;
+
+			strCommand = m_strCommand;
+			ExpandEnvironmentStrings(strCommand);
+			ExpandEnvironmentStrings(strArgs);
+			ExpandEnvironmentStrings(strCommandDir);
+			SE.lpFile = strCommand;
+			SE.lpParameters = strArgs;
+			SE.lpDirectory = strCommandDir;
 		}
 		else
+		{
+			SE.lpVerb = NULL;	// use the default verb or the open verb for the document
 			SE.lpFile = strPreviewName;
+		}
 		SE.nShow = SW_SHOW;
 		SE.cbSize = sizeof(SE);
 		ShellExecuteEx(&SE);
@@ -135,7 +153,7 @@ BOOL CPreviewThread::Run()
 			CloseHandle(SE.hProcess);
 		}
 		CFile::Remove(strPreviewName);
-	}	
+	}
 	catch(CFileException* error){
 		m_pPartfile->m_bPreviewing = false;
 		error->Delete();
@@ -143,10 +161,11 @@ BOOL CPreviewThread::Run()
 	return TRUE;
 }
 
-void CPreviewThread::SetValues(CPartFile* pPartFile, CString player)
+void CPreviewThread::SetValues(CPartFile* pPartFile, LPCTSTR pszCommand, LPCTSTR pszCommandArgs)
 {
 	m_pPartfile = pPartFile;
-	m_player=player;
+	m_strCommand = pszCommand;
+	m_strCommandArgs = pszCommandArgs;
 }
 
 
@@ -303,7 +322,11 @@ int CPreviewApps::GetAllMenuEntries(CMenu& rMenu, const CPartFile* file)
 void CPreviewApps::RunApp(CPartFile* file, UINT uMenuID)
 {
 	const SPreviewApp& svc = m_aApps.GetAt(uMenuID - MP_PREVIEW_APP_MIN);
+	::ExecutePartFile(file, svc.strCommand, svc.strCommandArgs);
+}
 
+void ExecutePartFile(CPartFile* file, LPCTSTR pszCommand, LPCTSTR pszCommandArgs)
+{
 	CString strPartFilePath = file->GetFullName();
 
 	// strip available ".met" extension to get the part file name.
@@ -315,7 +338,7 @@ void CPreviewApps::RunApp(CPartFile* file, UINT uMenuID)
 		strPartFilePath = _T('\"') + strPartFilePath + _T('\"');
 
 	// get directory of video player application
-	CString strCommandDir = svc.strCommand;
+	CString strCommandDir = pszCommand;
 	int iPos = strCommandDir.ReverseFind(_T('\\'));
 	if (iPos == -1)
 		strCommandDir.Empty();
@@ -324,23 +347,50 @@ void CPreviewApps::RunApp(CPartFile* file, UINT uMenuID)
 	PathRemoveBackslash(strCommandDir.GetBuffer());
 	strCommandDir.ReleaseBuffer();
 
-	CString strArgs = svc.strCommandArgs;
+	CString strArgs = pszCommandArgs;
 	if (!strArgs.IsEmpty())
 		strArgs += _T(' ');
 	strArgs += strPartFilePath;
 
 	file->FlushBuffer(true);
 
-	CString strCommand = svc.strCommand;
+	CString strCommand = pszCommand;
 	ExpandEnvironmentStrings(strCommand);
 	ExpandEnvironmentStrings(strArgs);
 	ExpandEnvironmentStrings(strCommandDir);
 
-	TRACE("Starting preview application:\n");
-	TRACE("  Command =%s\n", strCommand);
-	TRACE("  Args    =%s\n", strArgs);
-	TRACE("  Dir     =%s\n", strCommandDir);
-	ShellExecute(NULL, _T("open"), strCommand, strArgs, strCommandDir, SW_SHOWNORMAL);
+	TRACE(_T("Starting preview application:\n"));
+	TRACE(_T("  Command =%s\n"), strCommand);
+	TRACE(_T("  Args    =%s\n"), strArgs);
+	TRACE(_T("  Dir     =%s\n"), strCommandDir);
+	DWORD_PTR dwError = (DWORD_PTR)ShellExecute(NULL, _T("open"), strCommand, strArgs, strCommandDir, SW_SHOWNORMAL);
+	if (dwError <= 32)
+	{
+		//
+		// Unfortunately, Windows may already have shown an error dialog which tells
+		// the user about the failed 'ShellExecute' call. *BUT* that error dialog is not
+		// shown in each case!
+		//
+		// Examples:
+		//	 -	Specifying an executeable which does not exist (e.g. APP.EXE)
+		//		-> (Error 2) -> No error is shown.
+		//
+		//   -	Executing a document (verb "open") which has an unregistered extension
+		//		-> (Error 31) -> Error is shown.
+		//
+		// I'm not sure whether this behaviour (showing an error dialog in cases of some
+		// specific errors) is handled the same way in all Windows version -> therefore I
+		// decide to always show an application specific error dialog!
+		//
+		CString strMsg;
+		strMsg.Format(_T("Failed to execute: %s %s"), strCommand, strArgs);
+
+		CString strSysErrMsg(GetShellExecuteErrMsg(dwError));
+		if (!strSysErrMsg.IsEmpty())
+			strMsg += _T("\r\n\r\n") + strSysErrMsg;
+
+		AfxMessageBox(strMsg, MB_ICONSTOP);
+	}
 }
 
 int CPreviewApps::GetPreviewApp(const CPartFile* file)

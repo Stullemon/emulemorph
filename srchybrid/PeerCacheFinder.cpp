@@ -24,7 +24,9 @@
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(disable:4100) // unreferenced formal parameter
+#pragma warning(disable:4702) // unreachable code
 #include <crypto51/rsa.h>
+#pragma warning(default:4702) // unreachable code
 #pragma warning(default:4100) // unreferenced formal parameter
 #pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
@@ -89,14 +91,16 @@ CPeerCacheFinder::~CPeerCacheFinder(void)
 void CPeerCacheFinder::Save(){
 	if (m_PCStatus > 10){ // permanent errorrange
 		if (!m_bNotReSearched){
-			thePrefs.SetPeerCacheLastSearch(mktime(CTime::GetCurrentTime().GetLocalTm()));
+			struct tm tmTemp;
+			thePrefs.SetPeerCacheLastSearch(mktime(CTime::GetCurrentTime().GetLocalTm(&tmTemp)));
 			thePrefs.SetPeerCacheWasFound(false);
 			thePrefs.SetPeerCachePort(0);
 		}
 	}
 	else if (m_PCStatus == PCS_READY){
 		if (!m_bNotReValdited){
-			thePrefs.SetPeerCacheLastSearch(mktime(CTime::GetCurrentTime().GetLocalTm()));
+			struct tm tmTemp;
+			thePrefs.SetPeerCacheLastSearch(mktime(CTime::GetCurrentTime().GetLocalTm(&tmTemp)));
 		}
 		thePrefs.SetPeerCachePort(m_nPCPort);
 		thePrefs.SetPeerCacheWasFound(true);
@@ -125,8 +129,9 @@ void CPeerCacheFinder::Init(uint32 dwLastSearch, bool bLastSearchSuccess, bool b
 
 		if (dwLastSearch != 0){
 			CTime last(dwLastSearch);
-			time_t tLast=safe_mktime(last.GetLocalTm());
-			time_t tNow=safe_mktime(CTime::GetCurrentTime().GetLocalTm());
+			struct tm tmTemp;
+			time_t tLast = safe_mktime(last.GetLocalTm(&tmTemp));
+			time_t tNow = safe_mktime(CTime::GetCurrentTime().GetLocalTm(&tmTemp));
 			if ( (difftime(tNow,tLast) / 86400) < RETRYDAYS ){
 				if (!bLastSearchSuccess){
 					// no retry to find the cache

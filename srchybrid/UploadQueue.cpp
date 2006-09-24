@@ -64,8 +64,6 @@ static UINT _uSaveStatistics = 0;
 static uint32 igraph, istats, iupdateconnstats;
 // <-----khaos-
 
-//TODO rewrite the whole networkcode, use overlapped sockets.. sure....
-
 CUploadQueue::CUploadQueue()
 {
 	VERIFY( (h_timer = SetTimer(0,0,100,UploadTimer)) != NULL );
@@ -88,6 +86,9 @@ CUploadQueue::CUploadQueue()
 	//Removed By SiRoB, Not used due to zz Upload System
 	/*
 	m_dwRemovedClientByScore = ::GetTickCount();
+	m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
+    m_MaxActiveClients = 0;
+    m_MaxActiveClientsShortTime = 0;
 	*/
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	memset(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass,0,sizeof(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass));
@@ -1112,13 +1113,25 @@ CUploadQueue::~CUploadQueue(){
 		KillTimer(0,h_timer);
 }
 
-CUpDownClient* CUploadQueue::GetWaitingClientByIP_UDP(uint32 dwIP, uint16 nUDPPort){
+CUpDownClient* CUploadQueue::GetWaitingClientByIP_UDP(uint32 dwIP, uint16 nUDPPort, bool bIgnorePortOnUniqueIP, bool* pbMultipleIPs){
+	CUpDownClient* pMatchingIPClient = NULL;
+	uint32 cMatches = 0;
 	for (POSITION pos = waitinglist.GetHeadPosition();pos != 0;){
 		CUpDownClient* cur_client = waitinglist.GetNext(pos);
 		if (dwIP == cur_client->GetIP() && nUDPPort == cur_client->GetUDPPort())
 			return cur_client;
+		else if (dwIP == cur_client->GetIP() && bIgnorePortOnUniqueIP){
+			pMatchingIPClient = cur_client;
+			cMatches++;
+		}
 	}
-	return 0;
+	if (pbMultipleIPs != NULL)
+		*pbMultipleIPs = cMatches > 1;
+
+	if (pMatchingIPClient != NULL && cMatches == 1)
+		return pMatchingIPClient;
+	else
+		return NULL;
 }
 
 CUpDownClient* CUploadQueue::GetWaitingClientByIP(uint32 dwIP){
@@ -1424,7 +1437,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 		CKnownFile* requestedFile = client->CheckAndGetReqUpFile();
 		//MORPH END   - Adde by SiRoB, Optimization requpfile
 		if (thePrefs.GetLogUlDlEvents())
-             AddDebugLogLine(DLP_VERYLOW, true,_T("Removing client in class %u from upload list: %s Client: %s Transfered: %s SessionUp: %s QueueSessionUp: %s QueueSessionPayload: %s File: %s"), classID, pszReason==NULL ? _T("") : pszReason, client->DbgGetClientInfo(), CastSecondsToHM( client->GetUpStartTimeDelay()/1000), CastItoXBytes(client->GetSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), (requestedFile)?requestedFile->GetFileName():_T(""));
+             AddDebugLogLine(DLP_DEFAULT, true,_T("Removing client from upload list: %s Client: %s Transferred: %s SessionUp: %s QueueSessionPayload: %s In buffer: %s Req blocks: %i File: %s"), pszReason==NULL ? _T("") : pszReason, client->DbgGetClientInfo(), CastSecondsToHM( client->GetUpStartTimeDelay()/1000), CastItoXBytes(client->GetSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetPayloadInBuffer()), client->GetNumberOfRequestedBlocksInQueue(), (theApp.sharedfiles->GetFileByID(client->GetUploadFileID())?theApp.sharedfiles->GetFileByID(client->GetUploadFileID())->GetFileName():_T("")));
        	client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
 		client->UnscheduleForRemoval();
 		//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -1704,7 +1717,26 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 		// ZZ:UploadSpeedSense -->
 		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(false)*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
 		*/
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(true)*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 5, thePrefs.IsUSSLog(), thePrefs.IsUSSUDP(), thePrefs.GetGlobalDataRateFriend(), thePrefs.GetMaxGlobalDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetGlobalDataRatePowerShare(), thePrefs.GetMaxGlobalDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(),
+			theApp.uploadqueue->GetDatarate(),
+			thePrefs.GetMinUpload()*1024,
+			(thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate(true)*1024,
+			thePrefs.IsDynUpUseMillisecondPingTolerance(),
+			(thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0,
+			thePrefs.GetDynUpPingToleranceMilliseconds(),
+			thePrefs.GetDynUpGoingUpDivider(),
+			thePrefs.GetDynUpGoingDownDivider(),
+			thePrefs.GetDynUpNumberOfPings(),
+			5,  // PENDING: Hard coded min pLowestPingAllowed
+			thePrefs.IsUSSLog(),
+			thePrefs.IsUSSUDP(),
+			thePrefs.GetGlobalDataRateFriend(),
+			thePrefs.GetMaxGlobalDataRateFriend(),
+			thePrefs.GetMaxClientDataRateFriend(),
+			thePrefs.GetGlobalDataRatePowerShare(),
+			thePrefs.GetMaxGlobalDataRatePowerShare(),
+			thePrefs.GetMaxClientDataRatePowerShare(),
+			thePrefs.GetMaxClientDataRate());
 		//MOPRH END   - Modified by SiRoB, Upload Splitting Class
 
 		theApp.uploadqueue->Process();
@@ -1736,7 +1768,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 				}
 			}
 			if( theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsSingleConnect() )
-				theApp.serverconnect->TryAnotherConnectionrequest();
+				theApp.serverconnect->TryAnotherConnectionRequest();
 
 			theApp.listensocket->UpdateConnectionsStatus();
 			if (thePrefs.WatchClipboard4ED2KLinks())

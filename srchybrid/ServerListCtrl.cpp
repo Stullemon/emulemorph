@@ -30,9 +30,9 @@
 #include "Opcodes.h"
 #include "Log.h"
 #include "ToolTipCtrlX.h"
+#include "IPFilter.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 #include "MemDC.h"
-#include "IPFilter.h" // MORPH  - leuke_he  ipfilter servers .
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -45,24 +45,22 @@ IMPLEMENT_DYNAMIC(CServerListCtrl, CMuleListCtrl)
 
 BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMLdblclk)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblClk)
 	ON_NOTIFY_REFLECT(LVN_GETINFOTIP, OnLvnGetInfoTip)
 	ON_WM_CONTEXTMENU()
 	ON_WM_SYSCOLORCHANGE()
-	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnNMCustomdraw)
+	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnNMCustomDraw)
 END_MESSAGE_MAP()
 
 CServerListCtrl::CServerListCtrl()
 {
-	server_list = NULL;
 	SetGeneralPurposeFind(true);
 	m_tooltip = new CToolTipCtrlX;
 }
 
-bool CServerListCtrl::Init(CServerList* in_list)
+bool CServerListCtrl::Init()
 {
 	SetName(_T("ServerListCtrl"));
-	server_list = in_list;
 	ModifyStyle(0,LVS_SINGLESEL|LVS_REPORT);
 	ModifyStyle(LVS_SINGLESEL|LVS_LIST|LVS_ICON|LVS_SMALLICON,LVS_REPORT); //here the CListCtrl is set to report-style
 	SetExtendedStyle(GetExtendedStyle() | LVS_EX_INFOTIP);
@@ -89,8 +87,9 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	InsertColumn(11,GetResString(IDS_HARDFILES),	LVCFMT_RIGHT, 50);
 	InsertColumn(12,GetResString(IDS_VERSION),		LVCFMT_LEFT,  50);
 	InsertColumn(13,GetResString(IDS_IDLOW),		LVCFMT_RIGHT, 50);
-	InsertColumn(14,GetResString(IDS_AUXPORTS),		LVCFMT_LEFT,  50);//Morph - added by AndCycle, aux Ports, by lugdunummaster
-    InsertColumn(15,GetResString(IDS_COUNTRY),      LVCFMT_LEFT, 100);// Commander - Added: IP2Country column
+	InsertColumn(14,GetResString(IDS_OBFUSCATION),	LVCFMT_RIGHT, 50);
+	InsertColumn(15,GetResString(IDS_AUXPORTS),		LVCFMT_LEFT,  50);//Morph - added by AndCycle, aux Ports, by lugdunummaster
+    InsertColumn(16,GetResString(IDS_COUNTRY),      LVCFMT_LEFT, 100);// Commander - Added: IP2Country column
 
 	SetAllIcons();
 	Localize();
@@ -104,7 +103,7 @@ bool CServerListCtrl::Init(CServerList* in_list)
     
 	// Commander - Added: IP2Country column - Start
 	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
-		HideColumn (15);
+		HideColumn (16);
 	// Commander - Added: IP2Country column - End
 
 	return true;
@@ -201,16 +200,20 @@ void CServerListCtrl::Localize()
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(13, &hdi);
 
+	strRes = GetResString(IDS_OBFUSCATION);
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
+	pHeaderCtrl->SetItem(14, &hdi);
+
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	strRes = GetResString(IDS_AUXPORTS);
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-	pHeaderCtrl->SetItem(14, &hdi);
+	pHeaderCtrl->SetItem(15, &hdi);
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 
 	// Commander - Added: IP2Country column - Start
 	strRes = GetResString(IDS_COUNTRY);
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-	pHeaderCtrl->SetItem(15, &hdi);
+	pHeaderCtrl->SetItem(16, &hdi);
     // Commander - Added: IP2Country column - End
 
 	int iItems = GetItemCount();
@@ -225,7 +228,7 @@ void CServerListCtrl::RemoveServer(const CServer* pServer)
 	find.lParam = (LPARAM)pServer;
 	int iItem = FindItem(&find);
 	if (iItem != -1) {
-		server_list->RemoveServer(pServer);
+		theApp.serverlist->RemoveServer(pServer);
 		DeleteItem(iItem); 
 		ShowServerCount();
 	}
@@ -234,15 +237,15 @@ void CServerListCtrl::RemoveServer(const CServer* pServer)
 void CServerListCtrl::RemoveAllDeadServers()
 {
 	ShowWindow(SW_HIDE); 
-	for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos))
+	for(POSITION pos = theApp.serverlist->list.GetHeadPosition(); pos != NULL; theApp.serverlist->list.GetNext(pos))
 	{
-		const CServer* cur_server = server_list->list.GetAt(pos);
+		const CServer* cur_server = theApp.serverlist->list.GetAt(pos);
 		// MORPH START - leuke_he  ipfilter servers .
 		/*
        	if (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries())
 		*/
 		if  ( (cur_server->GetFailedCount() >= thePrefs.GetDeadServerRetries())||
-		      (thePrefs.FilterServerByIP() && theApp.ipfilter->IsFiltered(cur_server->GetIP())))
+		      (thePrefs.GetFilterServerByIP() && theApp.ipfilter->IsFiltered(cur_server->GetIP())))
 		// MORPH END - leuke_he  ipfilter servers .
 		{
 			// Mighty Knife: Static server handling
@@ -250,7 +253,7 @@ void CServerListCtrl::RemoveAllDeadServers()
 			if ((!cur_server->IsStaticMember()) || (!thePrefs.GetDontRemoveStaticServers()))
 			{
 				RemoveServer(cur_server);
-				pos = server_list->list.GetHeadPosition();
+				pos = theApp.serverlist->list.GetHeadPosition();
 			}
 			// [end] Mighty Knife
 		}
@@ -258,9 +261,28 @@ void CServerListCtrl::RemoveAllDeadServers()
    ShowWindow(SW_SHOW); 
 }
 
+void CServerListCtrl::RemoveAllFilteredServers()
+{
+	if (!thePrefs.GetFilterServerByIP())
+		return;
+	ShowWindow(SW_HIDE);
+	for (POSITION pos = theApp.serverlist->list.GetHeadPosition(); pos != NULL; theApp.serverlist->list.GetNext(pos))
+	{
+		const CServer* cur_server = theApp.serverlist->list.GetAt(pos);
+		if (theApp.ipfilter->IsFiltered(cur_server->GetIP()))
+		{
+			if (thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Filtered server \"%s\" (IP=%s) - IP filter (%s)"), cur_server->GetListName(), ipstr(cur_server->GetIP()), theApp.ipfilter->GetLastHit());
+			RemoveServer(cur_server);
+			pos = theApp.serverlist->list.GetHeadPosition();
+		}
+	}
+	ShowWindow(SW_SHOW);
+}
+
 bool CServerListCtrl::AddServer(const CServer* pServer, bool bAddToList)
 {
-	if (!server_list->AddServer(pServer))
+	if (!theApp.serverlist->AddServer(pServer))
       return false; 
    if (bAddToList) 
    {
@@ -389,29 +411,35 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	//else
 	//	SetItemText(itemnr, 13,_T(""));
 
+	//// Obfuscation
+	//if (server->SupportsObfuscationTCP() && server->GetObfuscationPortTCP() != 0)
+	//	SetItemText(itemnr, 14, GetResString(IDS_YES));
+	//else
+	//	SetItemText(itemnr, 14, GetResString(IDS_NO));
+
 	////Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	//// aux Port
 	//if(server->GetConnPort() != server->GetPort()){
 	//	temp.Format(_T("%i"), server->GetConnPort());
-	//	SetItemText(itemnr, 14, temp);
+	//	SetItemText(itemnr, 15, temp);
 	//}
 	//else{
-	//	SetItemText(itemnr,14,_T(""));
+	//	SetItemText(itemnr,15,_T(""));
 	//}
 	////Morph End - added by AndCycle, aux Ports, by lugdunummaster
  //  
 	//// Commander - Added: IP2Country column - Start
 	////Countryname
-	//SetItemText(itemnr,15,server->GetCountryName());
+	//SetItemText(itemnr,16,server->GetCountryName());
 	//// Commander - Added: IP2Country column - End
 }
 
 //EastShare Start - added by AndCycle, IP to Country
 void CServerListCtrl::RefreshAllServer(){
 
-	for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;){
-		RefreshServer(server_list->list.GetAt(pos));
-		server_list->list.GetNext(pos);
+	for(POSITION pos = theApp.serverlist->list.GetHeadPosition(); pos != NULL;){
+		RefreshServer(theApp.serverlist->list.GetAt(pos));
+		theApp.serverlist->list.GetNext(pos);
 	}
 
 }
@@ -490,76 +518,68 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
 	wParam = LOWORD(wParam);
 
-   if (wParam==MP_REMOVEALL)
-   { 
-		if (AfxMessageBox( GetResString(IDS_REMOVEALLSERVERS) , MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) != IDYES)
-			return TRUE;
-	   if( theApp.serverconnect->IsConnecting() ){
-	       theApp.downloadqueue->StopUDPRequests(); 
-		   theApp.serverconnect->StopConnectionTry();
-  		   theApp.serverconnect->Disconnect();
-		   theApp.emuledlg->ShowConnectionState();
-	   }
-       ShowWindow(SW_HIDE); 
-       server_list->RemoveAllServers(); 
-       DeleteAllItems(); 
-       ShowWindow(SW_SHOW);
-		ShowServerCount();
-		return TRUE;
-   } 
-	else if (wParam == MP_FIND)
+	switch (wParam)
 	{
-		OnFindStart();
-		return TRUE;
-	}
-	else if (wParam == MP_PASTE)
-	{
-		if (theApp.IsEd2kServerLinkInClipboard())
-			theApp.emuledlg->serverwnd->PasteServerFromClipboard();
-		return TRUE;
-	}
-
-	int item = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	if (item != -1)
-	{
-		if (((CServer*)GetItemData(item)) != NULL)
-		{
-		  switch (wParam){ 
-            case MP_CONNECTTO: 
-			case IDA_ENTER:
-				if (GetSelectedCount() > 1)
-				{
-				CServer* aServer;
-
+		case MP_CONNECTTO: 
+		case IDA_ENTER:
+			if (GetSelectedCount() > 1)
+			{
 				theApp.serverconnect->Disconnect();
 				POSITION pos=GetFirstSelectedItemPosition();
 				while (pos!=NULL )
 				{ 
-					item = GetNextSelectedItem(pos);
-					if (item>-1) {
-						aServer=(CServer*)GetItemData(item);
-						theApp.serverlist->MoveServerDown(aServer);
+				int iItem = GetNextSelectedItem(pos);
+				if (iItem > -1) {
+					const CServer* pServer = (CServer*)GetItemData(iItem);
+					theApp.serverlist->MoveServerDown(pServer);
 					}
 				}
-				theApp.serverconnect->ConnectToAnyServer( theApp.serverlist->GetServerCount()-  this->GetSelectedCount(),false, false );
+			theApp.serverconnect->ConnectToAnyServer(theApp.serverlist->GetServerCount() - GetSelectedCount(), false, false);
 				}
-				else{
-					theApp.serverconnect->ConnectToServer((CServer*)GetItemData(item));
+		else
+		{
+			int iItem = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+			if (iItem > -1)
+				theApp.serverconnect->ConnectToServer((CServer*)GetItemData(iItem));
 			}
 			theApp.emuledlg->ShowConnectionState();
 			return TRUE;
 
+	case MP_CUT: {
+		CString strURLs = CreateSelectedServersURLs();
+		if (!strURLs.IsEmpty())
+			theApp.CopyTextToClipboard(strURLs);
+		DeleteSelectedServers();
+		return TRUE;
+	}
+	
+	case MP_COPYSELECTED:
+	case MP_GETED2KLINK:
+	case Irc_SetSendLink: {
+		CString strURLs = CreateSelectedServersURLs();
+		if (!strURLs.IsEmpty()) {
+			if (wParam == Irc_SetSendLink)
+				theApp.emuledlg->ircwnd->SetSendFileString(strURLs);
+			else
+				theApp.CopyTextToClipboard(strURLs);
+		}
+		return TRUE;
+	}
+
+	case MP_PASTE:
+		if (theApp.IsEd2kServerLinkInClipboard())
+			theApp.emuledlg->serverwnd->PasteServerFromClipboard();
+		return TRUE;
+
 			case MP_REMOVE:
-			case MPG_DELETE:
-				{
+	case MPG_DELETE: {
 					SetRedraw(FALSE);
-					POSITION pos;
 					while (GetFirstSelectedItemPosition() != NULL)
 					{ 
-					pos=GetFirstSelectedItemPosition();
-						item = GetNextSelectedItem(pos);
-						server_list->RemoveServer((CServer*)GetItemData(item));
-					DeleteItem(item);
+			POSITION pos = GetFirstSelectedItemPosition();
+			int iItem = GetNextSelectedItem(pos);
+			theApp.serverlist->RemoveServer((CServer*)GetItemData(iItem));
+			DeleteItem(iItem);
 					}
 					ShowServerCount();
 					SetRedraw(TRUE);
@@ -567,25 +587,45 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					AutoSelectItem();
 					return TRUE;
 				}
-			case MP_ADDTOSTATIC:
-				{
+
+	case MP_REMOVEALL:
+		if (AfxMessageBox(GetResString(IDS_REMOVEALLSERVERS), MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) != IDYES)
+			return TRUE;
+		if (theApp.serverconnect->IsConnecting()) {
+			theApp.downloadqueue->StopUDPRequests();
+			theApp.serverconnect->StopConnectionTry();
+			theApp.serverconnect->Disconnect();
+			theApp.emuledlg->ShowConnectionState();
+		}
+		ShowWindow(SW_HIDE);
+		theApp.serverlist->RemoveAllServers();
+		DeleteAllItems();
+		ShowWindow(SW_SHOW);
+		ShowServerCount();
+		return TRUE;
+
+	case MP_FIND:
+		OnFindStart();
+		return TRUE;
+
+	case MP_ADDTOSTATIC: {
 				POSITION pos=GetFirstSelectedItemPosition();
 				while( pos != NULL ){
-						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
-					if (!StaticServerFileAppend(change))
+			CServer* pServer = (CServer*)GetItemData(GetNextSelectedItem(pos));
+			if (!StaticServerFileAppend(pServer))
 							return FALSE;
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
+			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
 				}
 					return TRUE;
 			}
-			case MP_REMOVEFROMSTATIC:
-				{
+
+	case MP_REMOVEFROMSTATIC: {
 				POSITION pos=GetFirstSelectedItemPosition();
 				while( pos != NULL ){
-						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
-					if (!StaticServerFileRemove(change))
+			CServer* pServer = (CServer*)GetItemData(GetNextSelectedItem(pos));
+			if (!StaticServerFileRemove(pServer))
 							return FALSE;
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
+			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
 				}
 					return TRUE;
 			}
@@ -601,40 +641,38 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			case MP_PRIOHIGH:
 				SetSelectedServersPriority(SRV_PR_HIGH);
 				return TRUE;
-			
-			case MP_COPYSELECTED:
-			case MP_GETED2KLINK: 
-			{ 
-					POSITION pos = GetFirstSelectedItemPosition();
-					CString buffer, link; 
-					while( pos != NULL ){ 
-						const CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
-						buffer.Format(_T("ed2k://|server|%s|%d|/"), change->GetFullIP(), change->GetPort());
-						if (link.GetLength() > 0)
-							buffer = _T("\r\n") + buffer;
-						link += buffer; 
-					} 
-					theApp.CopyTextToClipboard(link); 
-					return TRUE;
-				}
-			case Irc_SetSendLink:
-				{
-					POSITION pos = GetFirstSelectedItemPosition();
-				CString buffer, link; 
-				while( pos != NULL ){ 
-						const CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
-						buffer.Format(_T("ed2k://|server|%s|%d|/"), change->GetFullIP(), change->GetPort());
-						if (link.GetLength() > 0)
-							buffer = _T("\r\n") + buffer;
-						link += buffer;
-					}
-					theApp.emuledlg->ircwnd->SetSendFileString(link);
-					return TRUE;
-				}
-			}
-		}
-  	}
+	}
 	return FALSE;
+}
+
+CString CServerListCtrl::CreateSelectedServersURLs()
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+	CString buffer, link;
+	while (pos != NULL) {
+		const CServer* pServer = (CServer*)GetItemData(GetNextSelectedItem(pos));
+		buffer.Format(_T("ed2k://|server|%s|%u|/"), pServer->GetAddress(), pServer->GetPort());
+		if (link.GetLength() > 0)
+			buffer = _T("\r\n") + buffer;
+		link += buffer;
+	}
+	return link;
+}
+
+void CServerListCtrl::DeleteSelectedServers()
+{
+	//SetRedraw(FALSE);
+	while (GetFirstSelectedItemPosition() != NULL)
+	{
+		POSITION pos = GetFirstSelectedItemPosition();
+		int iItem = GetNextSelectedItem(pos);
+		theApp.serverlist->RemoveServer((CServer*)GetItemData(iItem));
+		DeleteItem(iItem);
+	}
+	ShowServerCount();
+	//SetRedraw(TRUE);
+	SetFocus();
+	AutoSelectItem();
 }
 
 void CServerListCtrl::SetSelectedServersPriority(UINT uPriority)
@@ -653,10 +691,10 @@ void CServerListCtrl::SetSelectedServersPriority(UINT uPriority)
 		}
 	}
 	if (bUpdateStaticServersFile)
-		server_list->SaveStaticServers();
+		theApp.serverlist->SaveStaticServers();
 }
 
-void CServerListCtrl::OnNMLdblclk(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
+void CServerListCtrl::OnNMDblClk(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
@@ -668,7 +706,7 @@ void CServerListCtrl::OnNMLdblclk(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 bool CServerListCtrl::AddServerMetToList(const CString& strFile)
 { 
 	SetRedraw(FALSE);
-	bool bResult = server_list->AddServerMetToList(strFile, true);
+	bool bResult = theApp.serverlist->AddServerMetToList(strFile, true);
 	RemoveAllDeadServers();
 	ShowServerCount();
 	SetRedraw(TRUE);
@@ -808,14 +846,17 @@ int CServerListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		  UNDEFINED_INT_AT_BOTTOM(item1->GetLowIDUsers(), item2->GetLowIDUsers());
 		  iResult = CompareUnsigned(item1->GetLowIDUsers(), item2->GetLowIDUsers());
 		  break;
+	  case 14: 
+		 iResult = (int)(item1->SupportsObfuscationTCP() && item1->GetObfuscationPortTCP() != 0) - (int)(item2->SupportsObfuscationTCP() && item2->GetObfuscationPortTCP() != 0);
+		 break;
            // Commander - Added: AuxPort Sort - Start
-	  case 14:
+	  case 15:
 		  UNDEFINED_INT_AT_BOTTOM(item1->GetConnPort(), item2->GetConnPort());
 		  iResult = CompareUnsigned(item1->GetConnPort(), item2->GetConnPort());
 		  break;
 		  // Commander - Added: AuxPort Sort - End
           // Commander - Added: IP2Country column - Start
-      case 15:
+      case 16:
           UNDEFINED_STR_AT_BOTTOM(item1->GetCountryName(), item2->GetCountryName());
           iResult = item1->GetCountryName().CompareNoCase(item2->GetCountryName());
 		  break;
@@ -1022,7 +1063,7 @@ void CServerListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CServerListCtrl::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *plResult)
+void CServerListCtrl::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *plResult)
 {
 	LPNMLVCUSTOMDRAW pnmlvcd = (LPNMLVCUSTOMDRAW)pNMHDR;
 
@@ -1037,7 +1078,7 @@ void CServerListCtrl::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *plResult)
 		const CServer* pServer = (const CServer*)pnmlvcd->nmcd.lItemlParam;
 		const CServer* pConnectedServer = theApp.serverconnect->GetCurrentServer();
 		// the server which we are connected to always has a valid numerical IP member assigned,
-		// therefor we do not need to call CServer::IsEqual (which is little expensive)
+		// therefor we do not need to call CServer::IsEqual which would be expensive
 		//if (pConnectedServer && pConnectedServer->IsEqual(pServer))
 		if (pConnectedServer && pConnectedServer->GetIP() == pServer->GetIP() && pConnectedServer->GetPort() == pServer->GetPort())
 			pnmlvcd->clrText = RGB(32,32,255);
@@ -1085,7 +1126,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
     // leuke_he  ipfilter servers . 
 	COLORREF crOldTextColor ;
 	if ((server->GetFailedCount() >= thePrefs.GetDeadServerRetries()) || 
-		(thePrefs.FilterServerByIP()&& theApp.ipfilter->IsFiltered(server->GetIP())))  // Isfitlered is cpu intensive, possible optimization, but serverscreen is not drawn often anyway.
+		(thePrefs.GetFilterServerByIP()&& theApp.ipfilter->IsFiltered(server->GetIP())))  // Isfitlered is cpu intensive, possible optimization, but serverscreen is not drawn often anyway.
 		crOldTextColor = dc.SetTextColor(RGB(192,192,192)); //todo set color in template.
 	else if (server->GetFailedCount() >= 2)
 		crOldTextColor = dc.SetTextColor(RGB(128,128,128)); //todo set color in template.
@@ -1127,7 +1168,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//Draw Country Flag
 
 					POINT point2= {cur_rec.left,cur_rec.top+1};
-					if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(15)){
+					if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(16)){
 						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 					}
 					else
@@ -1240,7 +1281,6 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							}
                         break;
 						}
-				//Commander - Lowid Column
 				case 13:{
 					if (server->GetLowIDUsers()){
 						CString tempStr2;
@@ -1253,7 +1293,15 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 						}
 
+				// Obfuscation
 				case 14:{
+					if (server->SupportsObfuscationTCP() && server->GetObfuscationPortTCP() != 0)
+						Sbuffer = GetResString(IDS_YES); 
+					else
+						Sbuffer = GetResString(IDS_NO);
+					break;
+				}
+				case 15:{
 					if(server->GetConnPort() != server->GetPort())
 						Sbuffer.Format(_T("%i"), server->GetConnPort());
 					else
@@ -1262,7 +1310,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						}
 
 				//Commander - Country Column
-				case 15:{
+				case 16:{
 					Sbuffer.Format(_T("%s"), server->GetCountryName());
 					if(theApp.ip2country->ShowCountryFlag()){
 						POINT point2= {cur_rec.left,cur_rec.top+1};
@@ -1278,7 +1326,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 }//End of Switch
 				
-					if(iColumn != 0 && iColumn != 15)
+					if(iColumn != 0 && iColumn != 16)
 						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DT_LEFT);
 					cur_rec.left += GetColumnWidth(iColumn);
 				}

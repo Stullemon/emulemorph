@@ -250,7 +250,7 @@ bool Encrypt(const CStringA& rstrContentA, CByteArray& raEncrypted, LPCWSTR pwsz
 				}
 				catch (CMemoryException* ex){
 					ex->Delete();
-					DebugLogWarning(LOG_DONTNOTIFY, _T("E-Mail Encryption: Failed to encrypt message - %hs"), strerror(ENOMEM));
+					DebugLogWarning(LOG_DONTNOTIFY, _T("E-Mail Encryption: Failed to encrypt message - %s"), _tcserror(ENOMEM));
 				}
 			}
 			else {

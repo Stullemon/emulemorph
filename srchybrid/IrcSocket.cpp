@@ -189,13 +189,16 @@ int CIrcSocket::OnLayerCallback(const CAsyncSocketExLayer* pLayer, int nType, in
 			switch (nCode)
 			{
 				case PROXYERROR_NOCONN:
-				case PROXYERROR_REQUESTFAILED: {
+				case PROXYERROR_REQUESTFAILED:
+					{
 					CString strError(GetProxyError(nCode));
-					if (lParam) {
+						if (lParam)
+						{
 						strError += _T(" - ");
 						strError += (LPCSTR)lParam;
 					}
-					if (wParam) {
+						if (wParam)
+						{
 						CString strErrInf;
 						if (GetErrorMessage(wParam, strErrInf, 1))
 							strError += _T(" - ") + strErrInf;

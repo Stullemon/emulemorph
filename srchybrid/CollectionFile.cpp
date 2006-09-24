@@ -151,7 +151,7 @@ void CCollectionFile::WriteCollectionInfo(CFileDataIO *out_data)
 	}
 }
 
-void CCollectionFile::UpdateFileRatingCommentAvail()
+void CCollectionFile::UpdateFileRatingCommentAvail(bool /*bForceUpdate*/)
 {
 	m_bHasComment = false;
 	UINT uRatings = 0;

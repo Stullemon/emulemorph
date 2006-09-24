@@ -80,7 +80,7 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual int InsertItem(int nItem, TCITEM* pTabCtrlItem);
 	virtual BOOL DeleteItem(int nItem);
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	//virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	void AddTimeStamp(CChatItem*);
 	bool IsSpam(CString strMessage, CUpDownClient* client);

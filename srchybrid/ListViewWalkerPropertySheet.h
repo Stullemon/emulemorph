@@ -17,6 +17,10 @@ public:
 	CListViewWalkerPropertySheet(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 	virtual ~CListViewWalkerPropertySheet();
 
+	CPtrArray& GetPages() { return m_pages; }
+	const CSimpleArray<CObject*> &GetItems() const { return m_aItems; }
+	void InsertPage(int iIndex, CPropertyPage* pPage);
+
 protected:
 	CListCtrlItemWalk* m_pListCtrl;
 	CSimpleArray<CObject*> m_aItems;

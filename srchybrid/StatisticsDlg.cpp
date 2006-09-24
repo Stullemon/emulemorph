@@ -142,6 +142,7 @@ BOOL CStatisticsDlg::OnInitDialog()
 	CResizableDialog::OnInitDialog();
 	EnableWindow(FALSE);
 	SetAllIcons();
+	m_bTreepaneHidden=false;
 
 	if (theApp.m_fontSymbol.m_hObject)
 	{
@@ -448,6 +449,18 @@ void CStatisticsDlg::DoResize_V(int delta)
 	GetDlgItem(IDC_STATTREE)->GetWindowRect(rcspl);
 	ScreenToClient(rcspl);
 	thePrefs.SetSplitterbarPositionStat(rcspl.right*100/rcW.Width());
+
+	if (rcspl.left==rcspl.right) {
+		GetDlgItem(IDC_STATTREE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_BNMENU)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_STATIC_LASTRESET)->ShowWindow(SW_HIDE);
+		m_bTreepaneHidden=true;
+	} else if (m_bTreepaneHidden) {
+		m_bTreepaneHidden=false;
+		GetDlgItem(IDC_STATTREE)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_BNMENU)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_STATIC_LASTRESET)->ShowWindow(SW_SHOW);
+	}
 
 	initCSize();
 
@@ -3363,8 +3376,7 @@ void CStatisticsDlg::ShowInterval()
 		m_Statistics.m_nXPartial = m_DownloadOMeter.m_nXPartial = m_UploadOMeter.m_nXPartial = shownSecs % 3600;
 		m_Statistics.m_nXGrids = m_DownloadOMeter.m_nXGrids = m_UploadOMeter.m_nXGrids = shownSecs / 3600;
         
-		
-		if(shownSecs <= 0) // MORPH leuk_he show correct x-axis by bleusonicboy
+		if(shownSecs <= 0)
 		{
 			m_DownloadOMeter.SetXUnits(GetResString(IDS_STOPPED)); 
 			m_UploadOMeter.SetXUnits(GetResString(IDS_STOPPED)); 

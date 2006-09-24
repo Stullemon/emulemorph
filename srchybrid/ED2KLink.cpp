@@ -114,7 +114,7 @@ CED2KLink::LinkType CED2KServerListLink::GetKind() const
 CED2KServerLink::CED2KServerLink(const TCHAR* ip, const TCHAR* port)
 {
 	USES_CONVERSION;
-	m_ip = inet_addr(T2CA(ip));
+	m_strAddress = ip;
 	unsigned long ul = _tcstoul(port, 0, 10);
 	if (ul > 0xFFFF)
 		throw GetResString(IDS_ERR_BADPORT);
@@ -131,7 +131,7 @@ CED2KServerLink::~CED2KServerLink()
 
 void CED2KServerLink::GetLink(CString& lnk) const
 {
-	lnk.Format(_T("ed2k://|server|%s|%u|/"), ipstr(m_ip), (UINT)m_port);
+	lnk.Format(_T("ed2k://|server|%s|%u|/"), GetAddress(), (UINT)GetPort());
 }
 
 CED2KServerListLink* CED2KServerLink::GetServerListLink() 
@@ -185,7 +185,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 		throw GetResString(IDS_ERR_TOOLARGEFILE);
 	if (_tstoi64(pszSize)<=0)
 		throw GetResString(IDS_ERR_NOTAFILELINK);
-	if (_tstoi64(pszSize) >= OLD_MAX_EMULE_FILE_SIZE && !thePrefs.CanFSHandleLargeFiles())
+	if (_tstoi64(pszSize) > OLD_MAX_EMULE_FILE_SIZE && !thePrefs.CanFSHandleLargeFiles())
 		throw GetResString(IDS_ERR_FSCANTHANDLEFILE);
 	
 	for (int idx = 0; idx < 16; ++idx) {

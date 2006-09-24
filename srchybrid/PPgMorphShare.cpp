@@ -121,7 +121,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		
 		//MORPH START - Added by SiRoB, Show Permission
 		m_htiPermissions = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PERMISSION), iImgPerm, m_htiSFM);
-		m_htiPermAll = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_PUBLIC), m_htiPermissions, m_iPermissions == 0);
+		m_htiPermAll = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_PW_EVER), m_htiPermissions, m_iPermissions == 0);
 		m_htiPermFriend = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_FRIENDSONLY), m_htiPermissions, m_iPermissions == 1);
 		m_htiPermNone = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_HIDDEN), m_htiPermissions, m_iPermissions == 2);
 		// Mighty Knife: Community visible filelist
@@ -280,7 +280,7 @@ void CPPgMorphShare::Localize(void)
 		//Morph End - added by AndCyle, selective PS internal Prio
 		//MORPH START - Added by SiRoB, Show Permission
 		if (m_htiPermissions) m_ctrlTreeOptions.SetItemText(m_htiPermissions, GetResString(IDS_PERMISSION));
-		if (m_htiPermAll) m_ctrlTreeOptions.SetItemText(m_htiPermAll, GetResString(IDS_FSTATUS_PUBLIC));
+		if (m_htiPermAll) m_ctrlTreeOptions.SetItemText(m_htiPermAll, GetResString(IDS_PW_EVER));
 		if (m_htiPermFriend) m_ctrlTreeOptions.SetItemText(m_htiPermFriend, GetResString(IDS_FSTATUS_FRIENDSONLY));
 		if (m_htiPermNone) m_ctrlTreeOptions.SetItemText(m_htiPermNone, GetResString(IDS_HIDDEN));
 		// Mighty Knife: Community visible filelist
@@ -302,7 +302,7 @@ void CPPgMorphShare::Localize(void)
 		SetTool(m_htiPowerShareLimit ,IDS_POWERSHARE_LIMIT_TIP);
 		SetTool(m_htiPowershareInternalPrio ,IDS_POWERSHARE_INTERPRIO_TIP);
 		SetTool(m_htiPermissions ,IDS_PERMISSION_TIP);
-		SetTool(m_htiPermAll ,IDS_FSTATUS_PUBLIC_TIP);
+		SetTool(m_htiPermAll ,IDS_FSTATUS_EVER_TIP);
 		SetTool(m_htiPermFriend ,IDS_FSTATUS_FRIENDSONLY_TIP);
 		SetTool(m_htiPermNone ,IDS_HIDDEN_TIP);
 		SetTool(m_htiPermCommunity ,IDS_COMMUNITY_TIP);

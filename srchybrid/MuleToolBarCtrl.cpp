@@ -213,7 +213,7 @@ void CMuleToolbarCtrl::Init(void)
 	sepButton.iBitmap = -1;
 	
 	CString config = thePrefs.GetToolbarSettings();
-	for (i = 0; i < config.GetLength(); i += 2)
+	for (int i = 0; i < config.GetLength(); i += 2)
 	{
 		int index = _tstoi(config.Mid(i, 2));
 		if (index == 99)
@@ -342,7 +342,7 @@ void CMuleToolbarCtrl::SetAllButtonsWidth()
 	}
 	else
 	{
-		const int iSmallIconsButtonHeight = 28;
+		const int iSmallIconsButtonHeight = GetSystemMetrics(SM_CYSCREEN) <= 600 ? 16 : 28;
 
 		if (m_eLabelType == NoLabels)
 		{
@@ -702,7 +702,7 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		{
 			// we could also load "*.jpg" here, but because of the typical non solid background of JPGs this
 			// doesn't make sense here.
-			CString strFilter(_T("eMule Toolbar Bitmap Files ("));
+			CString strFilter=GetResString(IDS_LOADFILTER_EMTOOLBAR)+ _T(" (");
 			for (int f = 0; f < ARRSIZE(_apszTBFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
@@ -766,7 +766,7 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		}
 		case MP_SELECT_SKIN_FILE:
 		{
-			CString strFilter(_T("eMule Skin Files ("));
+			CString strFilter=GetResString(IDS_LOADFILTER_EMSKINFILES) + _T(" (");
 			for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
@@ -941,7 +941,7 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 	
 	// set default configuration 
 	CString config = strDefaultToolbar;
-	for (i = 0; i <config.GetLength(); i += 2)
+	for (int i = 0; i <config.GetLength(); i += 2)
 	{
 		int index = _tstoi(config.Mid(i, 2));
 		if (index == 99)

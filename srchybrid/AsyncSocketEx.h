@@ -191,6 +191,8 @@ public:
 	//Notifies a socket that it can send data by calling Send.
 	virtual void OnSend(int nErrorCode);
 
+	virtual BOOL OnHostNameResolved(const SOCKADDR_IN *pSockAddr);
+
 	////////////////////////
 	//Additional functions//
 	////////////////////////

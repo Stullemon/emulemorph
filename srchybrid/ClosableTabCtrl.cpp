@@ -20,6 +20,7 @@
 #include "OtherFunctions.h"
 #include "MenuCmds.h"
 #include "UserMsgs.h"
+#include "VisualStylesXP.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,8 +37,8 @@ static char THIS_FILE[] = __FILE__;
 		(static_cast< LRESULT (AFX_MSG_CALL CWnd::*)(void) > (_OnThemeChanged))		\
 	},
 
+///////////////////////////////////////////////////////////////////////////////
 // CClosableTabCtrl
-// by enkeyDEV(Ottavio84)
 
 IMPLEMENT_DYNAMIC(CClosableTabCtrl, CTabCtrl)
 
@@ -70,20 +71,34 @@ void CClosableTabCtrl::GetCloseButtonRect(const CRect& rcItem, CRect& rcCloseBut
 	rcCloseButton.left = rcCloseButton.right - (m_iiCloseButton.rcImage.right - m_iiCloseButton.rcImage.left);
 }
 
+int CClosableTabCtrl::GetTabUnderPoint(CPoint point) const
+{
+	int iTabs = GetItemCount();
+	for (int i = 0; i < iTabs; i++)
+	{
+		CRect rcItem;
+		GetItemRect(i, rcItem);
+		if (rcItem.PtInRect(point))
+			return i;
+	}
+	return -1;
+}
+
+int CClosableTabCtrl::GetTabUnderContextMenu() const
+{
+	if (m_ptCtxMenu.x == -1 || m_ptCtxMenu.y == -1)
+		return -1;
+	return GetTabUnderPoint(m_ptCtxMenu);
+}
+
 void CClosableTabCtrl::OnMButtonUp(UINT nFlags, CPoint point)
 {
 	if (m_bCloseable)
 	{
-		int iTabs = GetItemCount();
-		for (int i = 0; i < iTabs; i++)
-		{
-			CRect rcItem;
-			GetItemRect(i, rcItem);
-			if (rcItem.PtInRect(point))
-			{
-				GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)i);
-				return;
-			}
+		int iTab = GetTabUnderPoint(point);
+		if (iTab != -1) {
+			GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)iTab);
+			return;
 		}
 	}
 
@@ -94,20 +109,19 @@ void CClosableTabCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if (m_bCloseable)
 	{
-		int iTabs = GetItemCount();
-		for (int i = 0; i < iTabs; i++)
+		int iTab = GetTabUnderPoint(point);
+		if (iTab != -1)
 		{
 			CRect rcItem;
-			GetItemRect(i, rcItem);
+			GetItemRect(iTab, rcItem);
 			CRect rcCloseButton;
 			GetCloseButtonRect(rcItem, rcCloseButton);
 			rcCloseButton.top -= 2;
 			rcCloseButton.left -= 4;
 			rcCloseButton.right += 2;
 			rcCloseButton.bottom += 4;
-			if (rcCloseButton.PtInRect(point))
-			{
-				GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)i);
+			if (rcCloseButton.PtInRect(point)) {
+				GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)iTab);
 				return;
 			}
 		}
@@ -118,16 +132,10 @@ void CClosableTabCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CClosableTabCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-	int iTabs = GetItemCount();
-	for (int i = 0; i < iTabs; i++)
-	{
-		CRect rcItem;
-		GetItemRect(i, rcItem);
-		if (rcItem.PtInRect(point))
-		{
-			GetParent()->SendMessage(UM_DBLCLICKTAB, (WPARAM)i);
-			return;
-		}
+	int iTab = GetTabUnderPoint(point);
+	if (iTab != -1) {
+		GetParent()->SendMessage(UM_DBLCLICKTAB, (WPARAM)iTab);
+		return;
 	}
 	CTabCtrl::OnLButtonDblClk(nFlags, point);
 }
@@ -152,6 +160,9 @@ void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	if (!pDC)
 		return;
+
+	if (!g_xpStyle.IsThemeActive() || !g_xpStyle.IsAppThemed())
+		pDC->FillSolidRect(&lpDrawItemStruct->rcItem, GetSysColor(COLOR_BTNFACE));
 
 	int iOldBkMode = pDC->SetBkMode(TRANSPARENT);
 
@@ -251,18 +262,11 @@ BOOL CClosableTabCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	{
 		if (m_ptCtxMenu.x != -1 && m_ptCtxMenu.y != -1)
 		{
-			int iTabs = GetItemCount();
-			for (int i = 0; i < iTabs; i++)
-			{
-				CRect rcItem;
-				GetItemRect(i, rcItem);
-				if (rcItem.PtInRect(m_ptCtxMenu))
-				{
-					GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)i);
-					break;
-				}
+			int iTab = GetTabUnderPoint(m_ptCtxMenu);
+			if (iTab != -1) {
+				GetParent()->SendMessage(UM_CLOSETAB, (WPARAM)iTab);
+				return TRUE;
 			}
-			return TRUE;
 		}
 	}
 	return CTabCtrl::OnCommand(wParam, lParam);

@@ -28,6 +28,7 @@ public:
 	bool		Init();
 	void		Process();
 	void		Sort();
+	void		GetUserSortedServers();
 	void		MoveServerDown(const CServer* pServer);
 	void		AutoUpdate();
 	bool		AddServerMetToList(const CString& rstrFile, bool bMerge);
@@ -38,17 +39,21 @@ public:
 	bool		AddServer(const CServer* pServer);
 	void		RemoveServer(const CServer* pServer);
 	void		RemoveAllServers();
+	void		RemoveDuplicatesByAddress(const CServer* pExceptThis);
+	void		RemoveDuplicatesByIP(const CServer* pExceptThis);
 
-	uint32		GetServerCount() const { return list.GetCount(); }
-	CServer*	GetServerAt(uint32 pos) const { return list.GetAt(list.FindIndex(pos)); }
-	CServer*	GetNextServer(const CServer* lastserver) const;
+	UINT		GetServerCount() const { return list.GetCount(); }
+	CServer*	GetServerAt(UINT pos) const { return list.GetAt(list.FindIndex(pos)); }
+	CServer*	GetSuccServer(const CServer* lastserver) const;
+	CServer*	GetNextServer(bool bOnlyObfuscated);
 	CServer*	GetServerByAddress(LPCTSTR address, uint16 port) const;
 	CServer*	GetServerByIP(uint32 nIP) const;
-	CServer*	GetServerByIP(uint32 nIP, uint16 nPort) const;
+	CServer*	GetServerByIPTCP(uint32 nIP, uint16 nTCPPort) const;
+	CServer*	GetServerByIPUDP(uint32 nIP, uint16 nUDPPort, bool bObfuscationPorts = true) const;
+	int			GetPositionOfServer(const CServer* pServer) const;
 
-	void		SetServerPosition(uint32 newPosition);
-	uint32		GetServerPostion() const { return serverpos; }
-	CServer*	GetNextServer();
+	void		SetServerPosition(UINT newPosition);
+	UINT		GetServerPostion() const { return serverpos; }
 
 	void		ResetSearchServerPos() { searchserverpos = 0; }
 	CServer*	GetNextSearchServer();
@@ -61,22 +66,27 @@ public:
 						  uint32& totaluser, uint32& totalfile, float& occ) const;
 	void		GetAvgFile(uint32& average) const;
 	void		GetUserFileStatus(uint32& user, uint32& file) const;
-	uint32		GetDeletedServerCount() const { return delservercount; }
+	UINT		GetDeletedServerCount() const { return delservercount; }
 
     bool        GiveServersForTraceRoute();
 	//EastShare Start - PreferShareAll by AndCycle
 	void		PushBackNoShare();	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
 
+	void		CheckForExpiredUDPKeys();
+#ifdef _DEBUG
+	void		Dump();
+#endif
+
 private:
-	uint32		serverpos;
-	uint32		searchserverpos;
-	uint32		statserverpos;
+	UINT		serverpos;
+	UINT		searchserverpos;
+	UINT		statserverpos;
 	uint8		version;
-	uint32		servercount;
+	UINT		servercount;
 	CTypedPtrList<CPtrList, CServer*> list;
-	uint32		delservercount;
-	uint32		m_nLastSaved;
+	UINT		delservercount;
+	DWORD		m_nLastSaved;
 	
 //EastShare Start - added by AndCycle, IP to Country
 public:

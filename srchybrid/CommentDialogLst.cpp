@@ -18,14 +18,12 @@
 #include "emule.h"
 #include "CommentDialogLst.h"
 #include "PartFile.h"
-#include "OtherFunctions.h"
 #include "UpDownClient.h"
-#include "emuledlg.h"
-#include "ChatWnd.h"
 #include "UserMsgs.h"
 #include "kademlia/kademlia/kademlia.h"
 #include "kademlia/kademlia/SearchManager.h"
 #include "kademlia/kademlia/Search.h"
+#include "searchlist.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,22 +69,6 @@ void CCommentDialogLst::OnBnClickedApply()
 	CResizablePage::OnOK(); 
 } 
 
-void CCommentDialogLst::OnBnClickedSearchKad()
-{
-	if(Kademlia::CKademlia::IsConnected())
-	{
-	    for (int i = 0; i < m_paFiles->GetSize(); i++)
-	    {
-			CAbstractFile* file = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[i]);
-			if(file)
-			{
-				if( !Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::NOTES, true, Kademlia::CUInt128(file->GetFileHash())) )
-					AfxMessageBox(GetResString(IDS_KADSEARCHALREADY),MB_OK | MB_ICONINFORMATION,0);
-			}
-		}
-	}
-}
-
 void CCommentDialogLst::OnTimer(UINT /*nIDEvent*/)
 {
 	RefreshData(false);
@@ -99,10 +81,8 @@ BOOL CCommentDialogLst::OnInitDialog()
 
 	AddAnchor(IDC_LST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_SEARCHKAD,BOTTOM_RIGHT);
-	AddAnchor(IDC_CMSTATUS,BOTTOM_LEFT);
 
 	m_lstComments.Init();
-
 	Localize(); 
 
 	// start time for calling 'RefreshData'
@@ -140,21 +120,18 @@ void CCommentDialogLst::OnDestroy()
 void CCommentDialogLst::Localize(void)
 { 
 	GetDlgItem(IDC_SEARCHKAD)->SetWindowText(GetResString(IDS_SEARCHKAD));
-	if( Kademlia::CKademlia::IsConnected() )
-		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_SHOW);
-	else
-		GetDlgItem(IDC_SEARCHKAD)->ShowWindow(SW_HIDE);
 } 
 
 void CCommentDialogLst::RefreshData(bool deleteOld)
 {
-	if(deleteOld)
+	if (deleteOld)
 		m_lstComments.DeleteAllItems();
 
+	bool kadsearchable = true;
 	for (int i = 0; i < m_paFiles->GetSize(); i++)
     {
 		CAbstractFile* file = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[i]);
-		if(file->IsPartFile())
+		if (file->IsPartFile())
 		{
 			for (POSITION pos = ((CPartFile*)file)->srclist.GetHeadPosition(); pos != NULL; )
 			{ 
@@ -165,18 +142,53 @@ void CCommentDialogLst::RefreshData(bool deleteOld)
 		} 
 	
 		const CTypedPtrList<CPtrList, Kademlia::CEntry*>& list = file->getNotes();
-		for(POSITION pos = list.GetHeadPosition(); pos != NULL; )
+		for (POSITION pos = list.GetHeadPosition(); pos != NULL; )
 		{
 			Kademlia::CEntry* entry = list.GetNext(pos);
 			m_lstComments.AddItem(entry);
 		}
-		if(file->IsPartFile())
+		if (file->IsPartFile())
 			((CPartFile*)file)->UpdateFileRatingCommentAvail();
+
+		// check if note searches are running for this file(s)
+		if (Kademlia::CSearchManager::AlreadySearchingFor(Kademlia::CUInt128(file->GetFileHash())))
+			kadsearchable = false;
 	}
 
-	CString info;
-	if (m_lstComments.GetItemCount()==0)
-		info=_T("(") + GetResString(IDS_CMT_NONE) + _T(")");
-	GetDlgItem(IDC_CMSTATUS)->SetWindowText(info);
+	CWnd* pWndFocus = GetFocus();
+	if (Kademlia::CKademlia::IsConnected()) {
+		SetDlgItemText(IDC_SEARCHKAD, kadsearchable ? GetResString(IDS_SEARCHKAD) : GetResString(IDS_KADSEARCHACTIVE));
+		GetDlgItem(IDC_SEARCHKAD)->EnableWindow(kadsearchable);
+	}
+	else {
+		SetDlgItemText(IDC_SEARCHKAD, GetResString(IDS_SEARCHKAD));
+		GetDlgItem(IDC_SEARCHKAD)->EnableWindow(FALSE);
+	}
+	if (pWndFocus && pWndFocus->m_hWnd == GetDlgItem(IDC_SEARCHKAD)->m_hWnd)
+		m_lstComments.SetFocus();
 }
 
+void CCommentDialogLst::OnBnClickedSearchKad()
+{
+	if (Kademlia::CKademlia::IsConnected())
+	{
+		bool bSkipped = false;
+		int iMaxSearches = min(m_paFiles->GetSize(), KADEMLIATOTALFILE);
+	    for (int i = 0; i < iMaxSearches; i++)
+	    {
+			CAbstractFile* file = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[i]);
+ 			if (file)
+			{
+				if (!Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::NOTES, true, Kademlia::CUInt128(file->GetFileHash())))
+					bSkipped = true;
+				else{
+					theApp.searchlist->SetNotesSearchStatus(file->GetFileHash(), true);
+					file->SetKadCommentSearchRunning(true);
+				}
+			}
+		}
+		if (bSkipped)
+			AfxMessageBox(GetResString(IDS_KADSEARCHALREADY), MB_OK | MB_ICONINFORMATION);
+	}
+	RefreshData();
+}

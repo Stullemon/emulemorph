@@ -75,6 +75,7 @@ public:
 	CSearchFile* GetSearchFileByHash(const uchar* hash) const;
 	void	KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCTSTR name, uint64 size, LPCTSTR type, UINT numProperties, ...);
 	bool	AddNotes(Kademlia::CEntry* entry, const uchar* hash);
+	void	SetNotesSearchStatus(const uchar* pFileHash, bool bSearchRunning);
 
 	UINT GetFoundFiles(uint32 searchID) const {
 		UINT returnVal = 0;

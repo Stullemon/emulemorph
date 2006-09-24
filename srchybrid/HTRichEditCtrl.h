@@ -19,6 +19,7 @@ public:
 	void AddEntry(LPCTSTR pszMsg);
 	void Add(LPCTSTR pszMsg, int iLen = -1);
 	void AddTyped(LPCTSTR pszMsg, int iLen, UINT uFlags);
+	void AddLine(LPCTSTR pszMsg, int iLen = -1, bool bLink = false, COLORREF cr = CLR_DEFAULT,COLORREF bk = CLR_DEFAULT, DWORD mask = 0);
 	void Reset();
 	CString GetLastLogEntry();
 	CString GetAllLogEntries();
@@ -27,7 +28,7 @@ public:
 	void AppendText(const CString& sText);
 	void AppendHyperLink(const CString& sText, const CString& sTitle, const CString& sCommand, const CString& sDirectory);
 	void AppendKeyWord(const CString& sText, COLORREF cr);
-	void AppendColoredText(LPCTSTR pszText, COLORREF cr);
+	void AppendColoredText(LPCTSTR pszText, COLORREF cr, COLORREF bk = CLR_DEFAULT,DWORD mask = 0);
 
 	CString GetText() const;
 	bool IsAutoScroll() const { return m_bAutoScroll; }
@@ -54,13 +55,12 @@ protected:
 	bool m_bForceArrowCursor;
 	HCURSOR m_hArrowCursor;
 
-	void AddLine(LPCTSTR pszMsg, int iLen = -1, bool bLink = false, COLORREF cr = CLR_DEFAULT);
 	void SelectAllItems();
 	void CopySelectedItems();
 	int GetMaxSize();
-	void SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& nStartChar, long& nEndChar, bool bLink, COLORREF cr);
+	void SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& nStartChar, long& nEndChar, bool bLink, COLORREF cr, COLORREF bk, DWORD mask);
 	void FlushBuffer();
-	void AddString(int nPos, LPCTSTR pszString, bool bLink, COLORREF cr);
+	void AddString(int nPos, LPCTSTR pszString, bool bLink, COLORREF cr, COLORREF bk, DWORD mask);
 
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 

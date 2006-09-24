@@ -22,6 +22,7 @@
 #include "FileInfoDialog.h"
 #include "MetaDataDlg.h"
 #include "ED2kLinkDlg.h"
+#include "ArchivePreviewDlg.h"
 
 class CSearchFile;
 
@@ -40,6 +41,7 @@ protected:
 	CFileInfoDialog			m_wndMediaInfo;
 	CMetaDataDlg			m_wndMetaData;
 	CED2kLinkDlg			m_wndFileLink;
+	CArchivePreviewDlg		m_wndArchiveInfo;
 
 	UINT m_uPshInvokePage;
 	static LPCTSTR m_pPshStartPage;

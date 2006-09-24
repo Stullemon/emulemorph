@@ -116,6 +116,7 @@ struct PartfileSourceCache
 	uint32			dwServerIP;
 	uint16			nServerPort;
 	uchar			achUserHash[16];
+	uint8			byCryptOptions;
 	bool			withuserhash;
 	bool			ed2kIDFlag;
 	ESourceFrom		sourcefrom;
@@ -214,7 +215,7 @@ public:
 	//MORPH END   - Added by SiRoB, ICS Optional
 	void	WritePartStatus(CSafeMemFile* file, CUpDownClient* client = NULL) /*const*/; // SLUGFILLER: hideOS
 	void	WriteCompleteSourcesCount(CSafeMemFile* file) const;
-	void	AddSources(CSafeMemFile* sources,uint32 serverip, uint16 serverport);
+	void	AddSources(CSafeMemFile* sources,uint32 serverip, uint16 serverport, bool bWithObfuscationAndHash);
 	void	AddSource(LPCTSTR pszURL, uint32 nIP);
 	static bool CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped = NULL, bool Ed2kID = true);
 	
@@ -301,12 +302,12 @@ public:
 	uint64	GetCompressionGain() const { return m_uCompressionGain; }
 	uint32	GetRecoveredPartsByICH() const { return m_uPartsSavedDueICH; }
 
-	virtual void	UpdateFileRatingCommentAvail();
+	virtual void	UpdateFileRatingCommentAvail(bool bForceUpdate = false);
 
 	void	AddDownloadingSource(CUpDownClient* client);
 	void	RemoveDownloadingSource(CUpDownClient* client);
 
-	CString GetProgressString(int size) const;
+	CString GetProgressString(uint16 size) const;
 	CString GetInfoSummary() const;
 
 //	int		GetCommonFilePenalty() const;
@@ -333,12 +334,11 @@ public:
 	void	SetFileOpProgress(UINT uProgress);
 	UINT	GetFileOpProgress() const { return m_uFileOpProgress; }
 
-	void	RequestAICHRecovery(uint16 nPart);
-	void	AICHRecoveryDataAvailable(uint16 nPart);
+	void	RequestAICHRecovery(UINT nPart);
+	void	AICHRecoveryDataAvailable(UINT nPart);
 
 	uint32	m_LastSearchTime;
 	uint32	m_LastSearchTimeKad;
-	uint8	m_TotalSearchesKad;
 	uint64	m_iAllocinfo;
 	CUpDownClientPtrList srclist;
 	CUpDownClientPtrList A4AFsrclist; //<<-- enkeyDEV(Ottavio84) -A4AF-
@@ -352,6 +352,7 @@ public:
 	bool	m_bLocalSrcReqQueued;
 	bool	srcarevisible;				// used for downloadlistctrl
 	bool	hashsetneeded;
+	uint8	m_TotalSearchesKad;
     bool    AllowSwapForSourceExchange() { return ::GetTickCount()-lastSwapForSourceExchangeTick > 30*1000; } // ZZ:DownloadManager
     void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
 
@@ -401,7 +402,7 @@ public:
 #endif
 
 protected:
-	bool	GetNextEmptyBlockInPart(uint16 partnumber, Requested_Block_Struct* result, uint64 bytesToRequest = EMBLOCKSIZE) const;
+	bool	GetNextEmptyBlockInPart(UINT partnumber, Requested_Block_Struct* result, uint64 bytesToRequest = EMBLOCKSIZE) const;
 	void	CompleteFile(bool hashingdone);
 	void	CreatePartFile(UINT cat = 0);
 	void	Init();
@@ -571,7 +572,7 @@ public:
 
 	//MORPH START - Added by Stulle, Source cache [Xman]
 	void	ProcessSourceCache();
-	void	AddToSourceCache(uint16 nPort, uint32 dwID, uint32 dwServerIP,uint16 nServerPort,ESourceFrom sourcefrom, bool ed2kIDFlag=false,  const uchar* achUserHash=NULL);
+	void	AddToSourceCache(uint16 nPort, uint32 dwID, uint32 dwServerIP,uint16 nServerPort,ESourceFrom sourcefrom, bool ed2kIDFlag=false,  const uchar* achUserHash=NULL, const uint8 byCryptOptions = 0);
 	void	ClearSourceCache();
 	uint32	GetSourceCacheAmount() const { return m_sourcecache.GetCount();}
 private:

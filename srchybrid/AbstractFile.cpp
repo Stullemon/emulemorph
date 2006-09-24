@@ -43,6 +43,7 @@ CAbstractFile::CAbstractFile()
 	m_bCommentLoaded = false;
 	m_uUserRating = 0;
 	m_bHasComment = false;
+	m_bKadCommentSearchRunning = false;
 }
 
 CAbstractFile::CAbstractFile(const CAbstractFile* pAbstractFile)
@@ -56,6 +57,7 @@ CAbstractFile::CAbstractFile(const CAbstractFile* pAbstractFile)
 	m_uUserRating = pAbstractFile->m_uUserRating;
 	m_bHasComment = pAbstractFile->m_bHasComment;
 	m_strFileType = pAbstractFile->m_strFileType;
+	m_bKadCommentSearchRunning = pAbstractFile->m_bKadCommentSearchRunning;
 
 	const CTypedPtrList<CPtrList, Kademlia::CEntry*>& list = pAbstractFile->getNotes();
 	for(POSITION pos = list.GetHeadPosition(); pos != NULL; )
@@ -215,7 +217,7 @@ uint32 CAbstractFile::GetIntTagValue(uint8 tagname) const
 		if (pTag->GetNameID()==tagname && pTag->IsInt())
 			return pTag->GetInt();
 	}
-	return NULL;
+	return 0;
 }
 
 bool CAbstractFile::GetIntTagValue(uint8 tagname, uint32& ruValue) const
@@ -237,7 +239,7 @@ uint64 CAbstractFile::GetInt64TagValue(LPCSTR tagname) const
 		if (pTag->GetNameID()==0 && pTag->IsInt64(true) && CmpED2KTagName(pTag->GetName(), tagname)==0)
 			return pTag->GetInt64();
 	}
-	return NULL;
+	return 0;
 }
 
 uint64 CAbstractFile::GetInt64TagValue(uint8 tagname) const
@@ -247,7 +249,7 @@ uint64 CAbstractFile::GetInt64TagValue(uint8 tagname) const
 		if (pTag->GetNameID()==tagname && pTag->IsInt64(true))
 			return pTag->GetInt64();
 	}
-	return NULL;
+	return 0;
 }
 
 bool CAbstractFile::GetInt64TagValue(uint8 tagname, uint64& ruValue) const
@@ -269,7 +271,7 @@ uint32 CAbstractFile::GetIntTagValue(LPCSTR tagname) const
 		if (pTag->GetNameID()==0 && pTag->IsInt() && CmpED2KTagName(pTag->GetName(), tagname)==0)
 			return pTag->GetInt();
 	}
-	return NULL;
+	return 0;
 }
 
 void CAbstractFile::SetIntTagValue(uint8 tagname, uint32 uValue)
@@ -373,3 +375,32 @@ CTag* CAbstractFile::GetTag(LPCSTR tagname) const
 	return NULL;
 }
 
+void CAbstractFile::DeleteTag(CTag* pTag)
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		if (taglist[i] == pTag){
+			taglist.RemoveAt(i);
+			delete pTag;
+			return;
+		}
+	}
+}
+
+void CAbstractFile::DeleteTag(uint8 tagname)
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		CTag* pTag = taglist[i];
+		if (pTag->GetNameID()==tagname){
+			taglist.RemoveAt(i);
+			delete pTag;
+			return;
+		}
+	}
+}
+
+void CAbstractFile::SetKadCommentSearchRunning(bool bVal){
+	if (bVal != m_bKadCommentSearchRunning){
+		m_bKadCommentSearchRunning = bVal;
+		UpdateFileRatingCommentAvail(true);
+	}
+}

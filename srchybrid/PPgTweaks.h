@@ -68,6 +68,7 @@ protected:
     int m_iDynUpGoingDownDivider;
     int m_iDynUpNumberOfPings;
     bool m_bA4AFSaveCpu;
+	bool m_bAutoArchDisable;
 	int m_iExtractMetaData;
 	
 
@@ -134,6 +135,7 @@ protected:
 	HTREEITEM m_htiExtractMetaData;
 	HTREEITEM m_htiExtractMetaDataNever;
 	HTREEITEM m_htiExtractMetaDataID3Lib;
+	HTREEITEM m_htiAutoArch;
 	//HTREEITEM m_htiExtractMetaDataMediaDet;
 
 	virtual void DoDataExchange(CDataExchange* pDX);

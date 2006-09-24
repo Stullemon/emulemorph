@@ -138,3 +138,4 @@
 #define eMule_FAQ_Update_Server	138
 #define eMule_FAQ_WebServer	139
 #define eMule_part_file_access_module_for_VideoLAN_README	140
+#define eMule_FAQ_Preferences_Messages	141

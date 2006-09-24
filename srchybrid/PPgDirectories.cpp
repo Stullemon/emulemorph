@@ -198,6 +198,8 @@ BOOL CPPgDirectories::OnApply()
 				thePrefs.tempdir.Add(toadd);
 		}
 	}
+	if (thePrefs.tempdir.IsEmpty())
+		thePrefs.tempdir.Add(thePrefs.GetAppDir() + _T("temp"));
 
 	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
 	if(thePrefs.ShowFolderIcons()){

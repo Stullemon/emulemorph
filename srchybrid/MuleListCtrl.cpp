@@ -72,8 +72,8 @@ BEGIN_MESSAGE_MAP(CMuleListCtrl, CListCtrl)
 	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
-CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
-	
+CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort)
+{
 	m_SortProc = pfnCompare;
 	m_dwParamSort = dwParamSort;
 	UpdateSortHistory(m_dwParamSort, 0);	// SLUGFILLER: multiSort - fail-safe, ensure it's in the sort history(no inverse check)
@@ -101,6 +101,7 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
     m_iFindColumn = 0;
 	m_hAccel = NULL;
 	m_uIDAccel = IDR_LISTVIEW;
+	m_eUpdateMode = lazy;
 	//MORPH START - UpdateItemThread
 	m_updatethread = (CUpdateItemThread*) AfxBeginThread(RUNTIME_CLASS(CUpdateItemThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
 	m_updatethread->ResumeThread();
@@ -231,7 +232,10 @@ void CMuleListCtrl::ShowColumn(int iColumn) {
 void CMuleListCtrl::SaveSettings()
 {
 	ASSERT(!m_Name.IsEmpty());
-	if (m_Name.IsEmpty())
+	
+	ASSERT(GetHeaderCtrl()->GetItemCount() == m_iColumnsTracked);
+
+	if (m_Name.IsEmpty() || GetHeaderCtrl()->GetItemCount() != m_iColumnsTracked)
 		return;
 
 	CIni ini(thePrefs.GetConfigFile(), _T("ListControlSetup"));
@@ -699,8 +703,6 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 
 				CTitleMenu tmColumnMenu;
 				tmColumnMenu.CreatePopupMenu();
-				if(m_Name.GetLength() != 0)
-					tmColumnMenu.AddMenuTitle(m_Name);
 
 				CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 				int iCount = pHeaderCtrl->GetItemCount();
@@ -839,7 +841,10 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 			POSITION pos = m_Params.FindIndex(((LPLVITEM)lParam)->iItem);
 			if(pos) {
 				m_Params.SetAt(pos, MLC_MAGIC);
+			if (m_eUpdateMode == lazy)
 				PostMessage(LVM_UPDATE, ((LPLVITEM)lParam)->iItem);
+			else if (m_eUpdateMode == direct)
+				UpdateLocation(((LPLVITEM)lParam)->iItem);
 			}
 		break;
 	}
@@ -850,8 +855,12 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 	case LVM_SETITEMTEXT:
 		//need to check for movement
 		*pResult = DefWindowProc(message, wParam, lParam);
-		if(*pResult)
-			PostMessage(WM_COMMAND, MLC_IDC_UPDATE, wParam);
+		if (*pResult) {
+			if (m_eUpdateMode == lazy)
+				PostMessage(WM_COMMAND, MLC_IDC_UPDATE, wParam);
+			else if (m_eUpdateMode == direct)
+				UpdateLocation(wParam);
+		}
 		return *pResult;
 
 	case LVM_SORTITEMS:
@@ -965,20 +974,16 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 	case WM_DESTROY:
         // MORPH START leuk_he temp workarround to prevent a chrash on shutdown.
 		// Crash on beta's
-        #ifndef BETAREL 
 		try
 		{
-        #endif
 		// orginal line:
 	     SaveSettings();
-		 #ifndef BETAREL 
 		}
 		catch(...)
 		{
 			ASSERT(false);
 			//nope should not happen. Just silent... 
 		}
-        #endif
 		// MORPH ENDT leuk_he temp workarround to prevent a chrash on shutdown.
 		break;
 
@@ -1019,10 +1024,15 @@ void CMuleListCtrl::OnKeyDown(UINT nChar,UINT nRepCnt,UINT nFlags)
 		// Ctrl+C: Copy keycombo
 		SendMessage(WM_COMMAND, MP_COPYSELECTED);
 	}
-	if (nChar == 'V' && (GetKeyState(VK_CONTROL) & 0x8000))
+	else if (nChar == 'V' && (GetKeyState(VK_CONTROL) & 0x8000))
 	{
 		// Ctrl+V: Paste keycombo
 		SendMessage(WM_COMMAND, MP_PASTE);
+	}
+	else if (nChar == 'X' && (GetKeyState(VK_CONTROL) & 0x8000))
+	{
+		// Ctrl+X: Paste keycombo
+		SendMessage(WM_COMMAND, MP_CUT);
 	}
 	else if (m_bGeneralPurposeFind){
 		if (nChar == 'F' && (GetKeyState(VK_CONTROL) & 0x8000)){
@@ -1512,6 +1522,13 @@ int	CMuleListCtrl::GetNextSortOrder(int dwCurrentSortOrder) const{
 	// current one not found, shouldn't happen
 //	ASSERT( false );
 	return -1;
+}
+
+CMuleListCtrl::EUpdateMode CMuleListCtrl::SetUpdateMode(EUpdateMode eUpdateMode)
+{
+	EUpdateMode eCurUpdateMode = m_eUpdateMode;
+	m_eUpdateMode = eUpdateMode;
+	return eCurUpdateMode;
 }
 
 //MORPH START - UpdateItemThread

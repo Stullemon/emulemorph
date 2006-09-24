@@ -323,3 +323,19 @@ BOOL CRichEditCtrlX::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	}
 	return CRichEditCtrl::OnSetCursor(pWnd, nHitTest, message);
 }
+
+DWORD CALLBACK CRichEditCtrlX::StreamInCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb)
+{
+	CFile* pFile = (CFile*)dwCookie;
+	*pcb = pFile->Read(pbBuff, cb);
+	return 0;
+}
+
+void CRichEditCtrlX::SetRTFText(const CStringA& rstrTextA)
+{
+	CMemFile memFile((BYTE*)(LPCSTR)rstrTextA, rstrTextA.GetLength());
+	EDITSTREAM es = {0};
+	es.pfnCallback = StreamInCallback;
+	es.dwCookie = (DWORD_PTR)&memFile;
+	StreamIn(SF_RTF, es);
+}

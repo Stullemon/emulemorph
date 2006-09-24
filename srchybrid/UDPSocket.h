@@ -16,9 +16,11 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "UploadBandwidthThrottler.h" // ZZ:UploadBandWithThrottler (UDP)
+#include "EncryptedDatagramSocket.h"
 
 class CServerConnect;
 struct SServerUDPPacket;
+struct SServerDNSRequest;
 class CUDPSocket;
 class Packet;
 class CServer;
@@ -31,7 +33,7 @@ class CUDPSocketWnd : public CWnd
 {
 // Construction
 public:
-	CUDPSocketWnd();
+	CUDPSocketWnd() {};
 	CUDPSocket* m_pOwner;
 
 protected:
@@ -43,7 +45,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // CUDPSocket
 
-class CUDPSocket : public CAsyncSocket, public ThrottledControlSocket // ZZ:UploadBandWithThrottler (UDP)
+class CUDPSocket : public CAsyncSocket, public CEncryptedDatagramSocket, public ThrottledControlSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 	friend class CServerConnect;
 
@@ -57,35 +59,25 @@ public:
 #else
 	SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
 #endif
-	void	SendPacket(Packet* packet,CServer* host);
+	void SendPacket(Packet* packet, CServer* pServer, uint16 nSpecialPort = 0, BYTE* pRawPacket = 0, uint32 nRawLen = 0);
 	void	DnsLookupDone(WPARAM wp, LPARAM lp);
 
 protected:
-	void	AsyncResolveDNS(LPCSTR lpszHostAddress, UINT nHostPort);
-	HANDLE	m_DnsTaskHandle; // dns lookup handle
-	
 	virtual void OnSend(int nErrorCode);
 	virtual void OnReceive(int nErrorCode);
 
 private:
-	HWND m_hWndResolveMessage;	// where to send WM_DNSRESOLVED
-	SOCKADDR_IN m_SaveAddr;
+	HWND m_hWndResolveMessage;
 	CUDPSocketWnd m_udpwnd;
+	CTypedPtrList<CPtrList, SServerDNSRequest*> m_aDNSReqs;
 
-	void 	SendBuffer();
+	void SendBuffer(uint32 nIP, uint16 nPort, BYTE* pPacket, UINT uSize);
 	bool	ProcessPacket(const BYTE* packet, UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort);
-	void	ProcessPacketError(UINT size, UINT opcode, uint32 nIP, uint16 nTCPPort, LPCTSTR pszError);
-
-	uint8*	m_sendbuffer;
-	uint32	m_sendblen;
-	CServer* m_cur_server;
-	char	m_DnsHostBuffer[MAXGETHOSTSTRUCT];	// dns lookup structure
+	void ProcessPacketError(UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort, LPCTSTR pszError);
+	bool IsBusy() const { return m_bWouldBlock; }
+	int SendTo(BYTE* lpBuf, int nBufLen, uint32 dwIP, uint16 nPort);
 
 	bool	m_bWouldBlock;
 	CTypedPtrList<CPtrList, SServerUDPPacket*> controlpacket_queue;
-
-	bool	IsBusy() const { return m_bWouldBlock; }
-	int		SendTo(uint8* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort);
-
-    CCriticalSection sendLocker; // ZZ:UploadBandWithThrottler (UDP)
+	CCriticalSection sendLocker; // ZZ:UploadBandWithThrottler (UDP)
 };

@@ -558,6 +558,7 @@ CString CPartFileConvert::GetReturncodeText(int ret) {
 IMPLEMENT_DYNAMIC(CPartFileConvertDlg, CDialog)
 
 BEGIN_MESSAGE_MAP(CPartFileConvertDlg, CResizableDialog)
+	ON_WM_SYSCOLORCHANGE()
 	ON_BN_CLICKED(IDC_HIDECONVDLG, OnBnClickedOk)
 	ON_BN_CLICKED(IDC_ADDITEM, OnAddFolder)
 	ON_BN_CLICKED(IDC_RETRY,RetrySel)
@@ -741,4 +742,10 @@ void CPartFileConvertDlg::RetrySel(){
 	} 
 
 	CPartFileConvert::StartThread();
+}
+
+void CPartFileConvertDlg::OnSysColorChange()
+{
+	pb_current.SetBkColor(GetSysColor(COLOR_3DFACE));
+	CResizableDialog::OnSysColorChange();
 }

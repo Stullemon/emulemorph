@@ -389,7 +389,8 @@ public:
 				ASSERT( pWnd );
 
 				CAsyncSocketEx *pSocket = NULL;
-				for (int i = 0; i < pWnd->m_nWindowDataSize; i++)
+				int i;
+				for (i = 0; i < pWnd->m_nWindowDataSize; i++)
 				{
 					pSocket = pWnd->m_pAsyncSocketExWindowData[i].m_pSocket;
 					if (pSocket && pSocket->m_hAsyncGetHostByNameHandle &&
@@ -402,6 +403,10 @@ public:
 				int nErrorCode = lParam >> 16;
 				if (nErrorCode) {
 					pSocket->OnConnect(nErrorCode);
+					// Do *NOT* access 'pSocket', it may already have been deleted (CServerConnect)
+					//delete[] pSocket->m_pAsyncGetHostByNameBuffer;
+					//pSocket->m_pAsyncGetHostByNameBuffer = 0;
+					//pSocket->m_hAsyncGetHostByNameHandle = 0;
 					return 0;
 				}
 
@@ -409,6 +414,14 @@ public:
 				sockAddr.sin_family = AF_INET;
 				sockAddr.sin_addr.s_addr = ((LPIN_ADDR)((LPHOSTENT)pSocket->m_pAsyncGetHostByNameBuffer)->h_addr)->s_addr;
 				sockAddr.sin_port = htons((u_short)pSocket->m_nAsyncGetHostByNamePort);
+
+				if (!pSocket->OnHostNameResolved(&sockAddr)) {
+					// Do *NOT* access 'pSocket', it may already have been deleted (CServerConnect)
+					//delete[] pSocket->m_pAsyncGetHostByNameBuffer;
+					//pSocket->m_pAsyncGetHostByNameBuffer = 0;
+					//pSocket->m_hAsyncGetHostByNameHandle = 0;
+					return 0;
+				}
 
 				BOOL res = pSocket->Connect((SOCKADDR*)&sockAddr, sizeof(sockAddr));
 				delete[] pSocket->m_pAsyncGetHostByNameBuffer;
@@ -560,6 +573,11 @@ void CAsyncSocketEx::OnAccept(int /*nErrorCode*/)
 
 void CAsyncSocketEx::OnClose(int /*nErrorCode*/)
 {
+}
+
+BOOL CAsyncSocketEx::OnHostNameResolved(const SOCKADDR_IN * /*pSockAddr*/)
+{
+	return TRUE;
 }
 
 BOOL CAsyncSocketEx::Bind(UINT nSocketPort, LPCSTR lpszSocketAddress)

@@ -58,7 +58,7 @@ BOOL CDropDownButton::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, 
 	return Init(bSingleDropDownBtn);
 }
 
-BOOL CDropDownButton::Init(bool bSingleDropDownBtn)
+BOOL CDropDownButton::Init(bool bSingleDropDownBtn, bool bWholeDropDown)
 {
 	DeleteAllButtons();
 	m_bSingleDropDownBtn = bSingleDropDownBtn;
@@ -82,7 +82,7 @@ BOOL CDropDownButton::Init(bool bSingleDropDownBtn)
 		atb[0].iBitmap = -1;
 		atb[0].idCommand = GetWindowLong(m_hWnd, GWL_ID);
 		atb[0].fsState = TBSTATE_ENABLED;
-		atb[0].fsStyle = m_bSingleDropDownBtn ? BTNS_DROPDOWN : BTNS_BUTTON;
+		atb[0].fsStyle = m_bSingleDropDownBtn ? (bWholeDropDown ? BTNS_WHOLEDROPDOWN : BTNS_DROPDOWN) : BTNS_BUTTON;
 		atb[0].iString = -1;
 		VERIFY( AddButtons(1, atb) );
 

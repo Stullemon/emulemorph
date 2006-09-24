@@ -617,7 +617,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				if (_ParseURL(Data.sURL, _T("w")) == "close" && IsSessionAdmin(Data,sSession,2) )
 					//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 				{
-					theApp.m_app_state = APP_STATE_SHUTINGDOWN;
+					theApp.m_app_state = APP_STATE_SHUTTINGDOWN;
 					_RemoveSession(Data, lSession);
 
 					// send answer ...

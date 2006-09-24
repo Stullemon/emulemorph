@@ -16,6 +16,9 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "emuleDlg.h"
+#include "ServerWnd.h"
+#include "ServerListCtrl.h"
 #include "IPFilterDlg.h"
 #include "IPFilter.h"
 #include "OtherFunctions.h"
@@ -71,8 +74,8 @@ BEGIN_MESSAGE_MAP(CIPFilterDlg, CResizableDialog)
 	ON_COMMAND(MP_SELECTALL, OnSelectAllIPFilter)
 	ON_COMMAND(MP_FIND, OnFind)
 	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
-	ON_NOTIFY(LVN_GETDISPINFO, IDC_IPFILTER, OnLvnGetdispinfoIpfilter)
-	ON_NOTIFY(LVN_DELETEITEM, IDC_IPFILTER, OnLvnDeleteitemIpfilter)
+	ON_NOTIFY(LVN_GETDISPINFO, IDC_IPFILTER, OnLvnGetDispInfoIPFilter)
+	ON_NOTIFY(LVN_DELETEITEM, IDC_IPFILTER, OnLvnDeleteItemIPFilter)
 END_MESSAGE_MAP()
 
 CIPFilterDlg::CIPFilterDlg(CWnd* pParent /*=NULL*/)
@@ -255,7 +258,7 @@ void CIPFilterDlg::InitIPFilters()
 	SetDlgItemText(IDC_TOTAL_IPS, GetFormatedUInt(m_ulFilteredIPs));
 }
 
-void CIPFilterDlg::OnLvnGetdispinfoIpfilter(NMHDR *pNMHDR, LRESULT *pResult)
+void CIPFilterDlg::OnLvnGetDispInfoIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	NMLVDISPINFO* pDispInfo = reinterpret_cast<NMLVDISPINFO*>(pNMHDR);
 	if (pDispInfo->item.mask & LVIF_TEXT) // *have* to check that flag!!
@@ -335,7 +338,6 @@ void CIPFilterDlg::OnSelectAllIPFilter()
 {
 	m_ipfilter.SelectAllItems();
 }
-
 
 void CIPFilterDlg::OnBnClickedAppend()
 {
@@ -461,6 +463,8 @@ void CIPFilterDlg::OnBnClickedAppend()
 
 		if ((!bIsArchiveFile || bExtractedArchive) && theApp.ipfilter->AddFromFile(strFilePath, true))
 		{
+			if (thePrefs.GetFilterServerByIP())
+				theApp.emuledlg->serverwnd->serverlistctrl.RemoveAllFilteredServers();
 			InitIPFilters();
 			m_ipfilter.Update(-1);
 		}
@@ -470,7 +474,7 @@ void CIPFilterDlg::OnBnClickedAppend()
 	}
 }
 
-void CIPFilterDlg::OnLvnDeleteitemIpfilter(NMHDR *pNMHDR, LRESULT *pResult)
+void CIPFilterDlg::OnLvnDeleteItemIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 

@@ -99,6 +99,9 @@ protected:
 	CBitmap m_bitmapGrid;
 	CBitmap m_bitmapPlot;
 
+	static CFont	sm_fontAxis;
+	static LOGFONT	sm_logFontAxis;
+
 	bool m_bDoUpdate;
 	UINT m_nRedrawTimer;
 

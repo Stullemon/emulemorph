@@ -207,12 +207,14 @@ void CPPgScheduler::OnBnClickedApply()
 		CTime myTime;
 		DWORD result=m_time.GetTime(myTime);
 		if (result == GDT_VALID){
-			schedule->time=safe_mktime(myTime.GetLocalTm());
+			struct tm tmTemp;
+			schedule->time=safe_mktime(myTime.GetLocalTm(&tmTemp));
 		}
 		CTime myTime2;
 		DWORD result2=m_timeTo.GetTime(myTime2);
 		if (result2 == GDT_VALID){
-			schedule->time2=safe_mktime(myTime2.GetLocalTm());
+			struct tm tmTemp;
+			schedule->time2=safe_mktime(myTime2.GetLocalTm(&tmTemp));
 		}
 		if (IsDlgButtonChecked(IDC_CHECKNOENDTIME)) schedule->time2=0;
 

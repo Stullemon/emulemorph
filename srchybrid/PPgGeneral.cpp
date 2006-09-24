@@ -58,7 +58,8 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_WEBSVEDIT , OnBnClickedEditWebservices)
 	ON_BN_CLICKED(IDC_ONLINESIG, OnSettingsChange)
 	ON_BN_CLICKED(IDC_CHECK4UPDATE, OnBnClickedCheck4Update)
-        //Commander - Added: Invisible Mode [TPT] - Start
+    ON_BN_CLICKED(IDC_MINIMULE, OnSettingsChange)
+	//Commander - Added: Invisible Mode [TPT] - Start
 	ON_CBN_SELCHANGE(IDC_INVISIBLE_MODE_SELECT_COMBO, OnSettingsChange)
 	ON_CBN_SELCHANGE(IDC_INVISIBLE_MODE_KEY_COMBO, OnCbnSelchangeKeymodcombo)
 	ON_BN_CLICKED(IDC_INVISIBLE_MODE, OnBoxesChange)
@@ -156,6 +157,11 @@ void CPPgGeneral::LoadSettings(void)
 		CheckDlgButton(IDC_CHECK4UPDATE,1);
 	else
 		CheckDlgButton(IDC_CHECK4UPDATE,0);
+
+	if(thePrefs.m_bEnableMiniMule)
+		CheckDlgButton(IDC_MINIMULE,1);
+	else
+		CheckDlgButton(IDC_MINIMULE,0);
 
 	CString strBuffer;
 	strBuffer.Format(_T("%i %s"),thePrefs.versioncheckdays,GetResString(IDS_DAYS2));
@@ -301,6 +307,7 @@ BOOL CPPgGeneral::OnApply()
 	thePrefs.updatenotify = IsDlgButtonChecked(IDC_CHECK4UPDATE)!=0;
 	thePrefs.onlineSig= IsDlgButtonChecked(IDC_ONLINESIG)!=0;
 	thePrefs.versioncheckdays = ((CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS))->GetPos();
+	thePrefs.m_bEnableMiniMule = IsDlgButtonChecked(IDC_MINIMULE) != 0;
 	thePrefs.startupsound = IsDlgButtonChecked(IDC_STARTUPSOUNDON)!=0;//Commander - Added: Enable/Disable Startupsound
 
 	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
@@ -346,6 +353,7 @@ void CPPgGeneral::Localize(void)
 		GetDlgItem(IDC_CHECK4UPDATE)->SetWindowText(GetResString(IDS_CHECK4UPDATE));
 		GetDlgItem(IDC_STARTUP)->SetWindowText(GetResString(IDS_STARTUP));
 		GetDlgItem(IDC_STARTWIN)->SetWindowText(GetResString(IDS_STARTWITHWINDOWS));
+		GetDlgItem(IDC_MINIMULE)->SetWindowText(GetResString(IDS_ENABLEMINIMULE));
 
 		GetDlgItem(IDC_STARTUPSOUNDON)->SetWindowText(GetResString(IDS_PW_STARTUPSOUND));//Commander - Added: Enable/Disable Startupsound
 		//Commander - Added: Invisible Mode [TPT] - Start

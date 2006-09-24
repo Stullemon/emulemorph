@@ -235,7 +235,7 @@ BOOL CServerWnd::OnInitDialog()
 
 	SetAllIcons();
 	Localize();
-	serverlistctrl.Init(theApp.serverlist);
+	serverlistctrl.Init();
 
 	((CEdit*)GetDlgItem(IDC_SPORT))->SetLimitText(5);
 	GetDlgItem(IDC_SPORT)->SetWindowText(_T("4661"));
@@ -555,9 +555,8 @@ void CServerWnd::OnBnClickedAddserver()
 			if (pLink && pLink->GetKind() == CED2KLink::kServer){
 				CED2KServerLink* pServerLink = pLink->GetServerLink();
 				if (pServerLink){
-					uint32 nServerIP = pServerLink->GetIP();
+					serveraddr = pServerLink->GetAddress();
 					uPort = pServerLink->GetPort();
-					serveraddr = ipstr(nServerIP);
 					SetDlgItemText(IDC_IPADDRESS, serveraddr);
 					SetDlgItemInt(IDC_SPORT, uPort, FALSE);
 				}
@@ -605,7 +604,7 @@ void CServerWnd::PasteServerFromClipboard()
 	CString strTok = strServer.Tokenize(_T(" \t\r\n"), nPos);
 	while (!strTok.IsEmpty())
 	{
-		uint32 nIP = 0;
+		CString strAddress;
 		uint16 nPort = 0;
 		CED2KLink* pLink = NULL;
 		try{
@@ -613,7 +612,7 @@ void CServerWnd::PasteServerFromClipboard()
 			if (pLink && pLink->GetKind() == CED2KLink::kServer){
 				CED2KServerLink* pServerLink = pLink->GetServerLink();
 				if (pServerLink){
-					nIP = pServerLink->GetIP();
+					strAddress = pServerLink->GetAddress();
 					nPort = pServerLink->GetPort();
 				}
 			}
@@ -623,36 +622,38 @@ void CServerWnd::PasteServerFromClipboard()
 		}
 		delete pLink;
 
-		if (nIP == 0 || nPort == 0)
+		if (strAddress.IsEmpty() || nPort == 0)
 			break;
 
-		(void)AddServer(nPort, ipstr(nIP), _T(""), false);
+		(void)AddServer(nPort, strAddress, _T(""), false);
 		strTok = strServer.Tokenize(_T(" \t\r\n"), nPos);
 	}
 }
 
-bool CServerWnd::AddServer(uint16 nPort, CString strIP, CString strName, bool bShowErrorMB)
+bool CServerWnd::AddServer(uint16 nPort, CString strAddress, CString strName, bool bShowErrorMB)
 {
-	CServer* toadd = new CServer(nPort, strIP);
+	CServer* toadd = new CServer(nPort, strAddress);
 
 	// Barry - Default all manually added servers to high priority
 	if (thePrefs.GetManualAddedServersHighPriority())
 		toadd->SetPreference(SRV_PR_HIGH);
 
 	if (strName.IsEmpty())
-		strName = strIP;
+		strName = strAddress;
 	toadd->SetListName(strName);
 
 	if (!serverlistctrl.AddServer(toadd, true))
 	{
-		CServer* update = theApp.serverlist->GetServerByAddress(toadd->GetAddress(), toadd->GetPort());
-		if(update)
+		CServer* pFoundServer = theApp.serverlist->GetServerByAddress(toadd->GetAddress(), toadd->GetPort());
+		if (pFoundServer == NULL && toadd->GetIP() != 0)
+			pFoundServer = theApp.serverlist->GetServerByIPTCP(toadd->GetIP(), toadd->GetPort());
+		if (pFoundServer)
 		{
 			static const TCHAR _aszServerPrefix[] = _T("Server");
 			if (_tcsnicmp(toadd->GetListName(), _aszServerPrefix, ARRSIZE(_aszServerPrefix)-1) != 0)
 			{
-				update->SetListName(toadd->GetListName());
-				serverlistctrl.RefreshServer(update);
+				pFoundServer->SetListName(toadd->GetListName());
+				serverlistctrl.RefreshServer(pFoundServer);
 			}
 		}
 		else

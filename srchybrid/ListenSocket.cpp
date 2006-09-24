@@ -171,7 +171,7 @@ bool CClientReqSocket::CheckTimeOut()
 		if (::GetTickCount() - timeout_timer > CEMSocket::GetTimeOut()*4){
 			timeout_timer = ::GetTickCount();
 			CString str;
-			/*ZZ*/str.Format(_T("Timeout: State:%u = SS_Half"), m_nOnConnect);
+			str.Format(_T("Timeout: State:%u = SS_Half"), m_nOnConnect);
 			Disconnect(str);
 			return true;
 		}
@@ -182,14 +182,6 @@ bool CClientReqSocket::CheckTimeOut()
 	{
 		if (client->GetKadState() == KS_CONNECTED_BUDDY)
 		{
-			//We originally ignored the timeout here for buddies.
-			//This was a stupid idea on my part. There is now a ping/pong system
-			//for buddies. This ping/pong system now prevents timeouts.
-			//This release will allow lowID clients with KadVersion 0 to remain connected.
-			//But a soon future version needs to allow these older clients to time out to prevent dead connections from continuing.
-			//JOHNTODO: Don't forget to remove backward support in a future release.
-			if( client->GetKadVersion() == 0 )
-			return false;
 			uTimeout += MIN2MS(15);
 		}
 		if (client->GetChatState()!=MS_NONE)
@@ -201,7 +193,7 @@ bool CClientReqSocket::CheckTimeOut()
 	if (::GetTickCount() - timeout_timer > uTimeout){
 		timeout_timer = ::GetTickCount();
 		CString str;
-		/*ZZ*/str.Format(_T("Timeout: State:%u (0 = SS_Other, 1 = SS_Half, 2 = SS_Complete"), m_nOnConnect);
+		str.Format(_T("Timeout: State:%u (0 = SS_Other, 1 = SS_Half, 2 = SS_Complete"), m_nOnConnect);
 		Disconnect(str);
 		return true;
 	}
@@ -230,11 +222,10 @@ void CClientReqSocket::OnClose(int nErrorCode){
 void CClientReqSocket::Disconnect(LPCTSTR pszReason){
 	AsyncSelect(0);
 	byConnected = ES_DISCONNECTED;
-
 	if (!client)
 		Safe_Delete();
 	else
-        	/*ZZ*/if(client->Disconnected(CString(_T("CClientReqSocket::Disconnect(): ")) + pszReason, true)){
+        if(client->Disconnected(CString(_T("CClientReqSocket::Disconnect(): ")) + pszReason, true)){
 			CUpDownClient* temp = client;
 			client->socket = NULL;
 			client = NULL;
@@ -367,7 +358,6 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					if (client)
 						client->ConnectionEstablished();
 
-					// TODO: How does ConnectionEstablished() delete this client object????
 					ASSERT( client );
 					if(client)
 					{
@@ -377,7 +367,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 							client->InfoPacketsReceived();
 
 						if( client->GetKadPort() )
-							Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+							Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
 					}
 					break;
 				}
@@ -424,7 +414,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 							md4cpy(replypacket->pBuffer, reqfile->GetFileHash());
 							theStats.AddUpDataOverheadFileRequest(replypacket->size);
 							SendPacket(replypacket, true);
-							DebugLogWarning(_T("PartcountMismatch on requested file, sending FNF; %s, File=\"%s\""), client->DbgGetClientInfo(), reqfile->GetFileName());
+							DebugLogWarning(_T("Partcount mismatch on requested file, sending FNF; %s, File=\"%s\""), client->DbgGetClientInfo(), reqfile->GetFileName());
 							break;
 						}
 
@@ -765,8 +755,6 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 							}
 						}
 					}
-					if(client->GetUploadState() == US_UPLOADING)
-						client->CreateNextBlockPackage();
 					break;
 				}
 				case OP_CANCELTRANSFER:
@@ -937,13 +925,6 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 							AddDebugLogLine(false, _T("Message from '%s' (IP:%s) exceeds limit by %u chars, truncated."), client->GetUserName(), ipstr(client->GetConnectIP()), length - MAX_CLIENT_MSG_LEN);
 						length = MAX_CLIENT_MSG_LEN;
 					}
-
-					// MORPH START leuk_he -- filtered messages not in log
-					AddDebugLogLine(false, GetResString(IDS_NEWMSG), client->GetUserName(), ipstr(client->GetConnectIP()));
-					/* 
-					AddLogLine(true,GetResString(IDS_NEWMSG), client->GetUserName(), ipstr(client->GetConnectIP()));
-					*/
-					// MORPH END leuk_he -- filtered messages not in log
 
 					CString strMessage(data.ReadString(client->GetUnicodeSupport()!=utf8strNone, length));
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -1383,7 +1364,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					if( client->GetKadPort() )
-						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
 
 					CSafeMemFile data_in(packet, size);
 					uchar reqfilehash[16];
@@ -1475,7 +1456,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 										md4cpy(replypacket->pBuffer, reqfile->GetFileHash());
 										theStats.AddUpDataOverheadFileRequest(replypacket->size);
 										SendPacket(replypacket, true);
-										DebugLogWarning(_T("Partcount Mismatch on requested file, sending FNF; %s, File=\"%s\""), client->DbgGetClientInfo(), reqfile->GetFileName());
+										DebugLogWarning(_T("Partcount mismatch on requested file, sending FNF; %s, File=\"%s\""), client->DbgGetClientInfo(), reqfile->GetFileName());
 										bAnswerFNF = true;
 										break;
 								}
@@ -1685,7 +1666,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
 					if( client->GetKadPort() )
-						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
 
 					CSafeMemFile data_in(packet, size);
 					uchar reqfilehash[16];
@@ -2201,16 +2182,22 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_ReaskCallbackTCP", client, reqfilehash);
 					CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(reqfilehash);
+
+					bool bSenderMultipleIpUnknown = false;
+					CUpDownClient* sender = theApp.uploadqueue->GetWaitingClientByIP_UDP(destip, destport, true, &bSenderMultipleIpUnknown);					
 					if (!reqfile)
 					{
 						if (thePrefs.GetDebugClientUDPLevel() > 0)
 							DebugSend("OP__FileNotFound", NULL);
 						Packet* response = new Packet(OP_FILENOTFOUND,0,OP_EMULEPROT);
 						theStats.AddUpDataOverheadFileRequest(response->size);
-						theApp.clientudp->SendPacket(response, destip, destport);
+						if (sender != NULL)
+							theApp.clientudp->SendPacket(response, destip, destport, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash());
+						else
+							theApp.clientudp->SendPacket(response, destip, destport, false, NULL);
 						break;
 					}
-					CUpDownClient* sender = theApp.uploadqueue->GetWaitingClientByIP_UDP(destip, destport);
+
 					if (sender)
 					{
 						//Make sure we are still thinking about the same file
@@ -2253,7 +2240,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							Packet* response = new Packet(&data_out, OP_EMULEPROT);
 							response->opcode = OP_REASKACK;
 							theStats.AddUpDataOverheadFileRequest(response->size);
-							theApp.clientudp->SendPacket(response, destip, destport);
+							theApp.clientudp->SendPacket(response, destip, destport, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash());
 						}
 						else
 						{
@@ -2264,17 +2251,22 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					}
 					else
 					{
-						//Morph - modified by AndCycle, SLUGFILLER: infiniteQueue
-						/*
-						if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize())
-						*/
-						if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize() && !thePrefs.IsInfiniteQueueEnabled())
-						{
-							if (thePrefs.GetDebugClientUDPLevel() > 0)
-								DebugSend("OP__QueueFull", NULL);
-							Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
-							theStats.AddUpDataOverheadFileRequest(response->size);
-							theApp.clientudp->SendPacket(response, destip, destport);
+						if (!bSenderMultipleIpUnknown){
+							//Morph - modified by AndCycle, SLUGFILLER: infiniteQueue
+							/*
+							if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize())
+							*/
+							if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize() && !thePrefs.IsInfiniteQueueEnabled())
+							{
+								if (thePrefs.GetDebugClientUDPLevel() > 0)
+									DebugSend("OP__QueueFull", NULL);
+								Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
+								theStats.AddUpDataOverheadFileRequest(response->size);
+								theApp.clientudp->SendPacket(response, destip, destport, false, NULL);
+							}
+						}
+						else{
+							DebugLogWarning(_T("OP_REASKCALLBACKTCP Packet received - multiple clients with the same IP but different UDP port found. Possible UDP Portmapping problem, enforcing TCP connection. IP: %s, Port: %u"), ipstr(destip), destport); 
 						}
 					}
 					break;
@@ -2456,8 +2448,6 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							}
 						}
 					}
-					if(client->GetUploadState() == US_UPLOADING)
-						client->CreateNextBlockPackage();
 					break;
 				}
 				case OP_COMPRESSEDPART:
@@ -2558,7 +2548,8 @@ void CClientReqSocket::PacketToDebugLogLine(LPCTSTR protocol, const uchar* packe
 	{
 		CString buffer; 
 	    buffer.Format(_T("Unknown %s Protocol Opcode: 0x%02x, Size=%u, Data=["), protocol, opcode, size);
-		for (uint32 i = 0; i < size && i < 50; i++){
+		UINT i;
+		for (i = 0; i < size && i < 50; i++){
 			if (i > 0)
 				buffer += _T(' ');
 			TCHAR temp[3];
@@ -2636,6 +2627,10 @@ void CClientReqSocket::OnError(int nErrorCode)
 		strTCPError = _T("Error: Wrong header");
 	else if (nErrorCode == ERR_TOOBIG)
 		strTCPError = _T("Error: Too much data sent");
+	else if (nErrorCode == ERR_ENCRYPTION)
+		strTCPError = _T("Error: Encryption layer error");
+	else if (nErrorCode == ERR_ENCRYPTION_NOTALLOWED)
+		strTCPError = _T("Error: Unencrypted Connection when Encryption was required");
 	else
 		strTCPError = GetErrorMessage(nErrorCode);
 	if (thePrefs.GetVerbose())
@@ -2820,18 +2815,18 @@ SocketSentBytes CClientReqSocket::SendFileAndControlData(uint32 maxNumberOfBytes
     return returnStatus;
 }
 
-void CClientReqSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize)
+void CClientReqSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize, bool bForceImmediateSend)
 {
 	ResetTimeOutTimer();
-	CEMSocket::SendPacket(packet,delpacket,controlpacket, actualPayloadSize);
+	CEMSocket::SendPacket(packet, delpacket, controlpacket, actualPayloadSize, bForceImmediateSend);
 }
 
 //MORPH START - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
 #if !defined DONT_USE_SEND_ARRAY_PACKET
-void CClientReqSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, bool controlpacket, uint32 actualPayloadSize)
+void CClientReqSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, bool controlpacket, uint32 actualPayloadSize, bool bForceImmediateSend)
 {
 	ResetTimeOutTimer();
-	CEMSocket::SendPacket(packet, npacket, delpacket,controlpacket, actualPayloadSize);
+	CEMSocket::SendPacket(packet, npacket, delpacket,controlpacket, actualPayloadSize, bForceImmediateSend);
 }
 #endif
 //MORPH START - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
@@ -3339,17 +3334,34 @@ void CListenSocket::Debug_ClientDeleted(CUpDownClient* deleted)
 void CListenSocket::UpdateConnectionsStatus()
 {
 	activeconnections = GetOpenSockets();
+
+	// Update statistics for 'peak connections'
 	if( peakconnections < activeconnections )
 		peakconnections = activeconnections;
 	if (peakconnections>thePrefs.GetConnPeakConnections())
 		thePrefs.SetConnPeakConnections(peakconnections);
+
 	if (theApp.IsConnected())
 	{
 		totalconnectionchecks++;
-		float percent = (float)(totalconnectionchecks-1)/(float)totalconnectionchecks;
-		if (percent > 0.99F)
-			percent = 0.99F;
-		averageconnections = (averageconnections * percent) + (float)activeconnections * (1.0F - percent);
+		if (totalconnectionchecks == 0) {
+			 // wrap around occured, avoid division by zero
+			 totalconnectionchecks = 100;
+		}
+
+		// Get a weight for the 'avg. connections' value. The longer we run the higher 
+		// gets the weight (the percent of 'avg. connections' we use).
+		float fPercent = (float)(totalconnectionchecks - 1) / (float)totalconnectionchecks;
+		if (fPercent > 0.99F)
+			fPercent = 0.99F;
+
+		// The longer we run the more we use the 'avg. connections' value and the less we
+		// use the 'active connections' value. However, if we are running quite some time
+		// without any connections (except the server connection) we will eventually create 
+		// a floating point underflow exception.
+		averageconnections = averageconnections * fPercent + activeconnections * (1.0F - fPercent);
+		if (averageconnections < 0.001F)
+			averageconnections = 0.001F;	// avoid floating point underflow
 	}
 }
 

@@ -39,6 +39,7 @@
 #include "shahashset.h"
 #include "collection.h"
 #include "SafeFile.h"
+#include "FileFormat.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -92,7 +93,7 @@ CString CastItoXBytes(uint64 count, bool isK, bool isPerSec, uint32 decimal, boo
 	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
 }
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(USE_DEBUG_EMFILESIZE)
 CString CastItoXBytes(EMFileSize count, bool isK, bool isPerSec, uint32 decimal, bool isUS){
 	return CastItoXBytes((double)count, isK, isPerSec, decimal, isUS);
 }
@@ -310,7 +311,7 @@ CString URLEncode(const CString& sInT)
 		// do encoding
 		while (*pInBuf)
 		{
-			if (_istalnum((_TUCHAR)*pInBuf))
+			if (_ismbcalnum((BYTE)*pInBuf))
 				*pOutBuf++ = (BYTE)*pInBuf;
 			else
 			{
@@ -346,9 +347,9 @@ CString EncodeURLQueryParam(const CString& sInT)
 		// do encoding
 		while (*pInBuf)
 		{
-			if (_istalnum((_TUCHAR)*pInBuf))
+			if (_ismbcalnum((BYTE)*pInBuf))
 				*pOutBuf++ = (BYTE)*pInBuf;
-			else if (_istspace((_TUCHAR)*pInBuf))
+			else if (_ismbcspace((BYTE)*pInBuf))
 				*pOutBuf++ = _T('+');
 			else
 			{
@@ -653,7 +654,7 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 	else 
 	{
 		TCHAR cDrive[16];
-		TCHAR *p = _tcschr(pDirectory, _T('\\'));
+		const TCHAR *p = _tcschr(pDirectory, _T('\\'));
 		if(p)
 		{
 			memcpy(cDrive, pDirectory, (p-pDirectory)*sizeof(TCHAR));
@@ -679,9 +680,9 @@ CString GetRateString(UINT rate)
 	case 2: 
 		return GetResString(IDS_CMT_POOR); 
 	case 3: 
-		return GetResString(IDS_CMT_GOOD); 
-	case 4: 
 		return GetResString(IDS_CMT_FAIR); 
+	case 4: 
+		return GetResString(IDS_CMT_GOOD); 
 	case 5: 
 		return GetResString(IDS_CMT_EXCELLENT); 
 	} 
@@ -1338,7 +1339,6 @@ struct SED2KFileType
     { _T(".mp1"),   ED2KFT_AUDIO },
     { _T(".mp2"),   ED2KFT_AUDIO },
     { _T(".mp3"),   ED2KFT_AUDIO },
-    { _T(".mp4"),   ED2KFT_AUDIO },
     { _T(".mpa"),   ED2KFT_AUDIO },
     { _T(".mpc"),   ED2KFT_AUDIO },
     { _T(".mpp"),   ED2KFT_AUDIO },
@@ -1359,6 +1359,10 @@ struct SED2KFileType
     { _T(".wow"),   ED2KFT_AUDIO },
     { _T(".xm"),    ED2KFT_AUDIO },
 
+    { _T(".3g2"),   ED2KFT_VIDEO },
+    { _T(".3gp"),   ED2KFT_VIDEO },
+    { _T(".3gp2"),  ED2KFT_VIDEO },
+    { _T(".3gpp"),  ED2KFT_VIDEO },
     { _T(".asf"),   ED2KFT_VIDEO },
     { _T(".avi"),   ED2KFT_VIDEO },
     { _T(".divx"),  ED2KFT_VIDEO },
@@ -1368,6 +1372,7 @@ struct SED2KFileType
     { _T(".mov"),   ED2KFT_VIDEO },
     { _T(".mp1v"),  ED2KFT_VIDEO },
     { _T(".mp2v"),  ED2KFT_VIDEO },
+    { _T(".mp4"),   ED2KFT_VIDEO },
     { _T(".mpe"),   ED2KFT_VIDEO },
     { _T(".mpeg"),  ED2KFT_VIDEO },
     { _T(".mpg"),   ED2KFT_VIDEO },
@@ -1381,6 +1386,7 @@ struct SED2KFileType
     { _T(".rm"),    ED2KFT_VIDEO },
     { _T(".rv"),    ED2KFT_VIDEO },
     { _T(".rv9"),   ED2KFT_VIDEO },
+    { _T(".swf"),   ED2KFT_VIDEO },
     { _T(".ts"),    ED2KFT_VIDEO },
     { _T(".vivo"),  ED2KFT_VIDEO },
     { _T(".vob"),   ED2KFT_VIDEO },
@@ -1465,8 +1471,8 @@ struct SED2KFileType
     { _T(".ppt"),   ED2KFT_DOCUMENT },
     { _T(".ps"),    ED2KFT_DOCUMENT },
     { _T(".rtf"),   ED2KFT_DOCUMENT },
-    { _T(".wri"),   ED2KFT_DOCUMENT },
     { _T(".txt"),   ED2KFT_DOCUMENT },
+    { _T(".wri"),   ED2KFT_DOCUMENT },
     { _T(".xls"),   ED2KFT_DOCUMENT },
 	{ _T(".xml"),   ED2KFT_DOCUMENT },
 
@@ -1756,6 +1762,115 @@ CString GetErrorMessage(DWORD dwError, DWORD dwFlags)
 	CString strError;
 	GetErrorMessage(dwError, strError, dwFlags);
 	return strError;
+}
+
+LPCTSTR GetShellExecuteErrMsg(DWORD dwShellExecError)
+{
+	/* The error codes returned from 'ShellExecute' consist of the 'old' WinExec
+	 * error codes and some additional error codes.
+	 *
+	 * Error					Code							WinExec
+	 * ----------------------------------------------------------------------------
+	 * 0						0	"Out of memory"				Yes
+	 * ERROR_FILE_NOT_FOUND		2	(== SE_ERR_FNF)				Yes
+	 * SE_ERR_FNF				2	(== ERROR_FILE_NOT_FOUND)	Yes
+	 * ERROR_PATH_NOT_FOUND		3	(== SE_ERR_PNF)				Yes
+	 * SE_ERR_PNF				3	(== ERROR_PATH_NOT_FOUND)	Yes
+	 * SE_ERR_ACCESSDENIED		5								Yes
+	 * SE_ERR_OOM				8								Yes
+	 * ERROR_BAD_FORMAT			11								Yes
+	 * SE_ERR_SHARE				26								No
+	 * SE_ERR_ASSOCINCOMPLETE	27								No
+	 * SE_ERR_DDETIMEOUT		28								No
+	 * SE_ERR_DDEFAIL			29								No
+	 * SE_ERR_DDEBUSY			30								No
+	 * SE_ERR_NOASSOC			31								No
+	 * SE_ERR_DLLNOTFOUND		32								No
+	 *
+	 * Using "FormatMessage(FORMAT_MESSAGE_FROM_HMODULE, <shell32.dll>" does *not* work!
+	 */
+	static const struct _tagERRMSG
+	{
+		UINT	uId;
+		LPCTSTR	pszMsg;
+	} s_aszWinExecErrMsg[] =
+	{
+	  { 0,
+		_T("The operating system is out of memory or resources.")},
+	  { 1,								
+		_T("Call to MS-DOS Int 21 Function 4B00h was invalid.")},
+	  {/* 2*/SE_ERR_FNF,				
+		_T("The specified file was not found.")},
+	  {/* 3*/SE_ERR_PNF,				
+		_T("The specified path was not found.")},
+	  { 4,								
+		_T("Too many files were open.")},
+	  {/* 5*/SE_ERR_ACCESSDENIED,		
+		_T("The operating system denied access to the specified file.")},
+	  { 6,								
+		_T("Library requires separate data segments for each task.")},
+	  { 7,								
+		_T("There were MS-DOS Memory block problems.")},
+	  {/* 8*/SE_ERR_OOM,				
+		_T("There was insufficient memory to start the application.")},
+	  { 9,								
+		_T("There were MS-DOS Memory block problems.")},
+	  {10,								
+		_T("Windows version was incorrect.")},
+	  {11,								
+		_T("Executable file was invalid. Either it was not a Windows application or there was an error in the .EXE image.")},
+	  {12,								
+		_T("Application was designed for a different operating system.")},
+	  {13,								
+		_T("Application was designed for MS-DOS 4.0.")},
+	  {14,								
+		_T("Type of executable file was unknown.")},
+	  {15,								
+		_T("Attempt was made to load a real-mode application (developed for an earlier version of Windows).")},
+	  {16,								
+		_T("Attempt was made to load a second instance of an executable file containing multiple data segments that were not marked read-only.")},
+	  {17,								
+		_T("Attempt was made in large-frame EMS mode to load a second instance of an application that links to certain nonshareable DLLs that are already in use.")},
+	  {18,								
+		_T("Attempt was made in real mode to load an application marked for use in protected mode only.")},
+	  {19,								
+		_T("Attempt was made to load a compressed executable file. The file must be decompressed before it can be loaded.")},
+	  {20,								
+		_T("Dynamic-link library (DLL) file was invalid. One of the DLLs required to run this application was corrupt.")},
+	  {21,								
+		_T("Application requires Microsoft Windows 32-bit extensions.")},
+	  /*22-31	 RESERVED FOR FUTURE USE. NOT RETURNED BY VERSION 3.0.*/
+	  {24,								
+		_T("Command line too long.")}, // 30.03.99 []: Seen under WinNT 4.0/Win98 for a very long command line!
+
+	  /*non-WinExec error codes*/
+	  {/*26*/SE_ERR_SHARE,				
+		_T("A sharing violation occurred.")},
+	  {/*27*/SE_ERR_ASSOCINCOMPLETE,	
+		_T("The file name association is incomplete or invalid.")},
+	  {/*28*/SE_ERR_DDETIMEOUT,			
+		_T("The DDE transaction could not be completed because the request timed out.")},
+	  {/*29*/SE_ERR_DDEFAIL,			
+		_T("The DDE transaction failed.")},
+	  {/*30*/SE_ERR_DDEBUSY,			
+		_T("The DDE transaction could not be completed because other DDE transactions were being processed.")},
+	  {/*31*/SE_ERR_NOASSOC,			
+		_T("There is no application associated with the given file name extension.")},
+	  {/*32*/SE_ERR_DLLNOTFOUND,		
+		_T("The specified dynamic-link library was not found.")}
+	};
+
+	if (dwShellExecError > 32)
+		return _T("");	// No error
+
+	// Search error message
+	for (UINT i = 0; i < ARRSIZE(s_aszWinExecErrMsg); i++)
+	{
+		if (s_aszWinExecErrMsg[i].uId == dwShellExecError)
+			return s_aszWinExecErrMsg[i].pszMsg;
+	}
+
+	return _T("Unknown error.");
 }
 
 int GetDesktopColorDepth()
@@ -2120,17 +2235,16 @@ CString DbgGetBlockInfo(const Requested_Block_Struct* block)
 CString DbgGetBlockInfo(uint64 StartOffset, uint64 EndOffset)
 {
 	CString strInfo;
-	// netfinity: Fixed printing of offset and byte count (need to use 64 bit format codes)
 	strInfo.Format(_T("%I64u-%I64u (%I64u bytes)"), StartOffset, EndOffset, EndOffset - StartOffset + 1);
 
-	strInfo.AppendFormat(_T(", Part %u"), (unsigned int) StartOffset/PARTSIZE);
+	strInfo.AppendFormat(_T(", Part %I64u"), StartOffset/PARTSIZE);
 	if (StartOffset/PARTSIZE != EndOffset/PARTSIZE)
-		strInfo.AppendFormat(_T("-%u(**)"), (unsigned int) EndOffset/PARTSIZE);
+		strInfo.AppendFormat(_T("-%I64u(**)"), EndOffset/PARTSIZE);
 
-	strInfo.AppendFormat(_T(", Block %u"), (unsigned int) StartOffset/EMBLOCKSIZE);
+	strInfo.AppendFormat(_T(", Block %I64u"), StartOffset/EMBLOCKSIZE);
 	if (StartOffset/EMBLOCKSIZE != EndOffset/EMBLOCKSIZE)
 	{
-		strInfo.AppendFormat(_T("-%u"), (unsigned int) EndOffset/EMBLOCKSIZE);
+		strInfo.AppendFormat(_T("-%I64u"), EndOffset/EMBLOCKSIZE);
 		if (EndOffset/EMBLOCKSIZE - StartOffset/EMBLOCKSIZE > 1)
 			strInfo += _T("(**)");
 	}
@@ -2491,6 +2605,34 @@ CString StripInvalidFilenameChars(const CString& strText, bool bKeepSpaces)
 		}
 		pszSource++;
 	}
+
+	const LPCTSTR apszReservedFilenames[] = {
+		_T("NUL"), _T("CON"), _T("PRN"), _T("AUX"), _T("CLOCK$"),
+		_T("COM1"),_T("COM2"),_T("COM3"),_T("COM4"),_T("COM5"),_T("COM6"),_T("COM7"),_T("COM8"),_T("COM9"),
+		_T("LPT1"),_T("LPT2"),_T("LPT3"),_T("LPT4"),_T("LPT5"),_T("LPT6"),_T("LPT7"),_T("LPT8"),_T("LPT9")
+	};
+	for (int i = 0; i < _countof(apszReservedFilenames); i++)
+	{
+		int nPrefixLen = _tcslen(apszReservedFilenames[i]);
+		if (_tcsnicmp(strDest, apszReservedFilenames[i], nPrefixLen) == 0)
+		{
+			if (strDest.GetLength() == nPrefixLen) {
+				// Filename is a reserved file name:
+				// Append an underscore character
+				strDest += _T("_");
+				break;
+			}
+			else if (strDest[nPrefixLen] == _T('.')) {
+				// Filename starts with a reserved file name followed by a '.' character:
+				// Replace that ',' character with an '_' character.
+				LPTSTR pszDest = strDest.GetBuffer(strDest.GetLength());
+				pszDest[nPrefixLen] = _T('_');
+				strDest.ReleaseBuffer(strDest.GetLength());
+				break;
+			}
+		}
+	}
+
 	return strDest;
 }
 
@@ -2672,7 +2814,6 @@ bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath)
 
 	return false;
 }
-
 
 bool ExpandEnvironmentStrings(CString& rstrStrings)
 {
@@ -2908,6 +3049,10 @@ void TriggerPortTest(uint16 tcp, uint16 udp) {
 
 	// do not alter the connection test, this is a manual test only. If you want to change the behaviour, use your server!
 	m_sTestURL.Format(PORTTESTURL, tcp, udp , thePrefs.GetLanguageID());
+
+	// the portcheck will need to do an obfuscated callback too if obfuscation is requested, so we have to provide our userhash so it can create the key
+	if (thePrefs.IsClientCryptLayerRequested())
+		m_sTestURL += _T("&obfuscated_test=") + md4str(thePrefs.GetUserHash());
 
 	ShellOpenFile(m_sTestURL);
 }
@@ -3199,7 +3344,6 @@ bool DoCollectionRegFix(bool checkOnly)
 	return false;
 }
 
-
 bool gotostring(CFile &file, uchar *find, LONGLONG plen)
 {
 	bool found = false;
@@ -3222,6 +3366,219 @@ bool gotostring(CFile &file, uchar *find, LONGLONG plen)
 			return true;
 		i++;
 	}
+	return false;
+}
+
+static void swap_byte (uint8* a, uint8* b){
+	uint8 bySwap;
+	bySwap = *a;
+	*a = *b;
+	*b = bySwap;
+}
+
+RC4_Key_Struct* RC4CreateKey(const uchar* pachKeyData, uint32 nLen, RC4_Key_Struct* key, bool bSkipDiscard){
+	uint8 index1;
+	uint8 index2;
+	uint8* pabyState;
+
+	if (key == NULL)
+		key = new RC4_Key_Struct;
+
+	pabyState= &key->abyState[0];
+	for (int i = 0; i < 256; i++)
+		pabyState[i] = (uint8)i;
+
+	key->byX = 0;
+	key->byY = 0;
+	index1 = 0;
+	index2 = 0;
+	for (int i = 0; i < 256; i++){
+		index2 = (pachKeyData[index1] + pabyState[i] + index2) % 256;
+		swap_byte(&pabyState[i], &pabyState[index2]);
+		index1 = (uint8)((index1 + 1) % nLen);
+	}
+	if (!bSkipDiscard)
+		RC4Crypt(NULL, NULL, 1024, key);
+	return key;
+}
+
+void RC4Crypt(const uchar* pachIn, uchar* pachOut, uint32 nLen, RC4_Key_Struct* key){
+	ASSERT( key != NULL && nLen > 0 );
+	if (key == NULL)
+		return;
+	
+	uint8 byX = key->byX;;
+	uint8 byY = key->byY;
+	uint8* pabyState = &key->abyState[0];;
+	uint8 byXorIndex;
+
+	for (uint32 i = 0; i < nLen; i++)
+	{
+		byX = (byX + 1) % 256;
+		byY = (pabyState[byX] + byY) % 256;
+		swap_byte(&pabyState[byX], &pabyState[byY]);
+		byXorIndex = (pabyState[byX] + pabyState[byY]) % 256;
+		
+		if (pachIn != NULL)
+			pachOut[i] = pachIn[i] ^ pabyState[byXorIndex];
+    }
+	key->byX = byX;
+	key->byY = byY;
+}
+
+EFileType GetFileTypeEx(CKnownFile* kfile, bool checkextention, bool checkfileheader, bool nocached) {
+
+	if (!nocached && kfile->GetVerifiedFileType()!=FILETYPE_UNKNOWN)
+		return kfile->GetVerifiedFileType();
+
+	// check file header first
+	EFileType res=FILETYPE_UNKNOWN;
+
+	CPartFile* pfile=(CPartFile*)kfile;
+
+	bool test4iso=(kfile->IsPartFile()==false || ( (uint64)pfile->GetFileSize()>0x8000+HEADERCHECKSIZE &&
+		pfile->IsComplete(0x8000,0x8000+HEADERCHECKSIZE,true) )
+		);
+	if (checkfileheader && (!kfile->IsPartFile() || pfile->IsComplete(0,HEADERCHECKSIZE,true) || test4iso	)	){
+
+		unsigned char* headerbuf=headerbuf=(unsigned char*)calloc(HEADERCHECKSIZE,1);
+		if (headerbuf==NULL)
+			return FILETYPE_UNKNOWN;	// :-o
+
+		try {
+
+			CFile inFile;
+
+			if (inFile.Open(pfile->GetFilePath(), CFile::modeRead | CFile::shareDenyNone)){
+
+				if (kfile->IsPartFile()==false || pfile->IsComplete(0,HEADERCHECKSIZE,true)) {
+
+					int read=inFile.Read(headerbuf,HEADERCHECKSIZE);
+
+					if (read==HEADERCHECKSIZE){
+
+						if (memcmp(headerbuf,FILEHEADER_ZIP ,	sizeof(FILEHEADER_ZIP ))==0)
+							res=ARCHIVE_ZIP;
+						else if (memcmp(headerbuf,FILEHEADER_RAR, sizeof(FILEHEADER_RAR))==0)
+							res=ARCHIVE_RAR;
+						else if (memcmp(headerbuf+7,FILEHEADER_ACE_ID, sizeof(FILEHEADER_ACE_ID))==0)
+							res=ARCHIVE_ACE;
+						else if (memcmp(headerbuf,FILEHEADER_WM_ID, sizeof(FILEHEADER_WM_ID))==0)
+							res=WM;
+						else if (memcmp(headerbuf,FILEHEADER_AVI_ID, sizeof(FILEHEADER_AVI_ID))==0 &&
+							strncmp((const char*)headerbuf+8,"AVI",3)==0	)
+							res=VIDEO_AVI;
+						else if (memcmp(headerbuf,FILEHEADER_MP3_ID, sizeof(FILEHEADER_MP3_ID))==0 ||
+							memcmp(headerbuf,FILEHEADER_MP3_ID2, sizeof(FILEHEADER_MP3_ID2))==0		)
+							res=AUDIO_MPEG;
+						else if (memcmp(headerbuf,FILEHEADER_MPG_ID, sizeof(FILEHEADER_MPG_ID))==0)
+							res=VIDEO_MPG;
+						else if (memcmp(headerbuf,FILEHEADER_PDF_ID, sizeof(FILEHEADER_PDF_ID))==0)
+							res=DOCUMENT_PDF;
+						else if (memcmp(headerbuf,FILEHEADER_PNG_ID, sizeof(FILEHEADER_PNG_ID))==0)
+							res=PIC_PNG;
+						else if (memcmp(headerbuf,FILEHEADER_JPG_ID, sizeof(FILEHEADER_JPG_ID))==0 &&
+							( headerbuf[3]==0xe1 || headerbuf[3]==0xe0 ) )
+							res=PIC_JPG;
+						else if (memcmp(headerbuf,FILEHEADER_GIF_ID, sizeof(FILEHEADER_GIF_ID))==0 &&
+							headerbuf[5]==0x61 && (headerbuf[4]==0x37 || headerbuf[4]==0x39 ) )
+							res=PIC_JPG;
+						else if (memcmp(headerbuf,FILEHEADER_EXECUTABLE_ID, sizeof(FILEHEADER_EXECUTABLE_ID))==0 )
+							res=FILETYPE_EXECUTABLE;
+						else if (((headerbuf[0] & 0xFF) == 0xFF) && ((headerbuf[1] & 0xE0) == 0xE0)) {
+							res=AUDIO_MPEG;
+						}
+					}
+				}
+
+				if (res==FILETYPE_UNKNOWN && test4iso) {
+					inFile.Seek(0x8000 , CFile::begin);
+
+					int read=inFile.Read(headerbuf,HEADERCHECKSIZE);
+
+					if (read==HEADERCHECKSIZE) {
+						if (memcmp(headerbuf,FILEHEADER_ISO_ID, sizeof(FILEHEADER_ISO_ID))==0)
+							res=IMAGE_ISO;
+					}
+				}
+				inFile.Close();
+			}
+
+		} catch(...) {
+			ASSERT(0);
+		}
+		free(headerbuf);
+		
+		if (res!=FILETYPE_UNKNOWN) {
+			kfile->SetVerifiedFileType(res);
+			return res;
+		}
+	}
+
+	if (!checkextention)
+		return res;
+
+
+	CString extLC;
+	int posD=kfile->GetFileName().ReverseFind(_T('.'));
+	if (posD>=0)
+		extLC=kfile->GetFileName().Mid(posD+1).MakeUpper();
+	
+
+	SFileExts* ext = _fileexts;
+	if (ext){
+		while (ext->ftype!=FILETYPE_UNKNOWN) {
+
+			CString testext=ext->extlist;
+			if (testext.Find( _T('|') + extLC + _T('|') )!=-1)
+				return ext->ftype;
+
+			ext++;
+		}
+	}
+
+	// rar multivolume old naming
+	if (extLC.GetLength()==3 && extLC.GetAt(0)=='r' && isdigit(extLC.GetAt(1) && isdigit(extLC.GetAt(2) )))
+		return ARCHIVE_RAR;
+
+
+	return FILETYPE_UNKNOWN;
+}
+
+CString GetFiletypeName(EFileType ftype) {
+	
+	SFileExts* ext = _fileexts;
+	if (ext){
+		while (ext->ftype!=FILETYPE_UNKNOWN) {
+
+			if (ftype==ext->ftype)
+				return ext->label;
+
+			ext++;
+		}
+	}
+
+	return _T("?");
+}
+
+int IsExtentionTypeof(EFileType ftype, CString fext) {
+	
+	fext=_T('|') + fext + _T('|') ;
+
+	SFileExts* ext = _fileexts;
+	if (ext){
+		while (ext->ftype!=FILETYPE_UNKNOWN) {
+			CString testext=ext->extlist;
+			if (ftype==ext->ftype && testext.Find( fext )!=-1)	// type matches acceptable extention
+				return true;
+
+			if (ftype!=ext->ftype && testext.Find( fext )!=-1)	// not just unknown ext, but from a different type!
+				return -1;
+
+			ext++;
+		}
+	}
+
 	return false;
 }
 
@@ -3343,7 +3700,7 @@ ULONG CastXBytesToI(const CString& strExpr)
 			else if (strUnits.CompareNoCase(_T("g")) == 0 || strUnits.CompareNoCase(GetResString(IDS_GBYTES)) == 0 || strUnits.CompareNoCase(_T("g")+strBytes) == 0)
 				return ulNum * 1024U*1024U*1024U; // GBytes
 			else{
-				AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_INVALIDMINMAX));
+				AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR));
 				return 0;
 			}
 			//MORPH END - Fixed by SiRoB, Now Right For multilanguage

@@ -24,8 +24,25 @@ class CAICHHash;
 class CPartFile;
 class CSafeMemFile;
 
-#define ROUND(x) (floor((float)x+0.5f))
+enum EFileType { 
+		FILETYPE_UNKNOWN,
+		FILETYPE_EXECUTABLE,
+		ARCHIVE_ZIP,
+		ARCHIVE_RAR,
+		ARCHIVE_ACE,
+		IMAGE_ISO,
+		AUDIO_MPEG,
+		VIDEO_AVI,
+		VIDEO_MPG,
+		WM,
+		PIC_JPG,
+		PIC_PNG,
+		PIC_GIF,
+		DOCUMENT_PDF
+};
 
+
+#define ROUND(x) (floor((float)x+0.5f))
 
 ///////////////////////////////////////////////////////////////////////////////
 // Low level str
@@ -49,7 +66,7 @@ CString CastItoXBytes(uint32 count, bool isK = false, bool isPerSec = false, uin
 CString CastItoXBytes(uint64 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
 CString CastItoXBytes(float count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
 CString CastItoXBytes(double count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(USE_DEBUG_EMFILESIZE)
 CString CastItoXBytes(EMFileSize count, bool isK = false, bool isPerSec = false, uint32 decimal = 2, bool isUS = false);
 #endif
 //MOPRH END   - Changed by SiRoB, Add isUS option
@@ -129,6 +146,9 @@ void StripTrailingCollon(CString& rstr);
 bool IsUnicodeFile(LPCTSTR pszFilePath);
 UINT64	GetFreeTempSpace(int tempdirindex);
 int		GetPathDriveNumber(CString path);
+EFileType	GetFileTypeEx(CKnownFile* kfile, bool checkextention=true, bool checkfileheader=true, bool nocached=false);
+CString		GetFiletypeName(EFileType ftype);
+int			IsExtentionTypeof(EFileType type, CString ext);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GUI helpers
@@ -171,6 +191,7 @@ int GetSystemErrorString(DWORD dwError, CString &rstrError);
 int GetModuleErrorString(DWORD dwError, CString &rstrError, LPCTSTR pszModule);
 int GetErrorMessage(DWORD dwError, CString &rstrErrorMsg, DWORD dwFlags = 0);
 CString GetErrorMessage(DWORD dwError, DWORD dwFlags = 0);
+LPCTSTR	GetShellExecuteErrMsg(DWORD dwShellExecError);
 CString DbgGetHexDump(const uint8* data, UINT size);
 void DbgSetThreadName(LPCSTR szThreadName, ...);
 void Debug(LPCTSTR pszFmtMsg, ...);
@@ -378,6 +399,18 @@ bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath);
 //
 uint16 GetRandomUInt16();
 uint32 GetRandomUInt32();
+
+///////////////////////////////////////////////////////////////////////////////
+// RC4 Encryption
+//
+struct RC4_Key_Struct{
+	uint8 abyState[256];
+	uint8 byX;
+	uint8 byY;
+};
+
+RC4_Key_Struct* RC4CreateKey(const uchar* pachKeyData, uint32 nLen, RC4_Key_Struct* key = NULL, bool bSkipDiscard = false);
+void RC4Crypt(const uchar* pachIn, uchar* pachOut, uint32 nLen, RC4_Key_Struct* key);
 
 ULONGLONG FileSize(LPCTSTR fileName); //MORPH - Added by SiRoB, Used for Fake and ipfilter updater
 int getPrime(int lower_bound); //Morph - added by AndCycle, minor tweak - prime

@@ -35,7 +35,7 @@ protected:
 	afx_msg void OnEnKillFocus();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
-	afx_msg void OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnEndScroll(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnBeginScroll(NMHDR *pNMHDR, LRESULT *pResult);
 };

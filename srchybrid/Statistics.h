@@ -62,6 +62,7 @@ public:
 	void	AddDownDataOverheadKad(uint32 data)				{ m_nDownDataRateMSOverhead += data;
 															  m_nDownDataOverheadKad += data;
 															  m_nDownDataOverheadKadPackets++;}
+	void	AddDownDataOverheadCrypt(uint32 /*data*/)			{;}
 	uint32	GetDownDatarateOverhead()					{return m_nDownDatarateOverhead;}
 	uint64	GetDownDataOverheadSourceExchange()			{return m_nDownDataOverheadSourceExchange;}
 	uint64	GetDownDataOverheadFileRequest()			{return m_nDownDataOverheadFileRequest;}
@@ -95,6 +96,8 @@ public:
 	void	AddUpDataOverheadOther(uint32 data)				{ m_nUpDataRateMSOverhead += data;
 															  m_nUpDataOverheadOther += data;
 															  m_nUpDataOverheadOtherPackets++;}
+	void	AddUpDataOverheadCrypt(uint32 /*data*/)				{ ;}
+
 	uint32	GetUpDatarateOverhead()						{return m_nUpDatarateOverhead;}
 	uint64	GetUpDataOverheadSourceExchange()			{return m_nUpDataOverheadSourceExchange;}
 	uint64	GetUpDataOverheadFileRequest()				{return m_nUpDataOverheadFileRequest;}

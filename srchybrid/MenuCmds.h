@@ -175,6 +175,7 @@
 #define	MP_PASTE				10336
 #define MP_DOWNLOAD_ALPHABETICAL	10337
 #define MP_A4AF_CHECK_THIS_NOW	10338 
+#define	MPG_CUT					10339
 #define MP_GETKADSOURCELINK		10340
 #define MP_SHOWED2KLINK			10341
 #define MP_SETSOURCELIMIT		10342
@@ -187,6 +188,13 @@
 #define MP_UNSHAREDIRSUB		10349
 #define MP_SEARCHRELATED		10350
 #define MP_SEARCHAUTHOR			10351
+#define MP_RESTORESEARCHPARAMS	10352
+#define	MP_FILTER_RESET			10353
+#define	MP_FILTER_APPLY_ALL		10354
+#define	MP_FILTER_APPLY_SINGLE	10355
+#define	MP_SHOW_FILESIZE_DFLT	10356
+#define	MP_SHOW_FILESIZE_KBYTE	10357
+#define	MP_SHOW_FILESIZE_MBYTE	10358
 
 // khaos::categorymod+
 #define MP_CAT_SHOWHIDEPAUSED	10360
@@ -265,6 +273,7 @@
 #define	MP_SKIN_PROFILE			11100	// reserve 100 entries for skin profiles
 #define	MP_PREVIEW_APP_MIN		11200	// reserve 50 entries for preview apps
 #define	MP_PREVIEW_APP_MAX		(MP_PREVIEW_APP_MIN+49)
+#define MP_FILTERCOLUMNS		11300	// reserve 50 entries for filter columsn
 
 #define Irc_Version				"(SMIRCv00.69)"
 #define Irc_Join				10240

@@ -131,6 +131,7 @@ protected:
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
+	bool	m_bTreepaneHidden;
 	CToolTipCtrl* m_TimeToolTips;
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSysColorChange();

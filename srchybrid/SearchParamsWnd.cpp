@@ -402,7 +402,7 @@ void CSearchParamsWnd::OnSize(UINT nType, int cx, int cy)
 
 		CRect rcFileType;
 		m_ctlFileType.GetWindowRect(&rcFileType);
-		ScreenToClient(rcFileType);
+		ScreenToClient(&rcFileType);
 		m_ctlFileType.MoveWindow(rcClient.left, y, rcFileType.Width(), rcFileType.Height());
 
 		CRect rcReset;
@@ -420,7 +420,7 @@ void CSearchParamsWnd::OnSize(UINT nType, int cx, int cy)
 
 		CRect rcMethod;
 		m_ctlMethod.GetWindowRect(&rcMethod);
-		ScreenToClient(rcMethod);
+		ScreenToClient(&rcMethod);
 		m_ctlMethod.MoveWindow(rcClient.left, y, rcMethod.Width(), rcMethod.Height());
 		y += rcMethod.Height() + 8;
 
@@ -531,13 +531,17 @@ void CSearchParamsWnd::InitMethodsCtrl()
 class SFileTypeCbEntry
 {
 public:
+#if _MSC_VER>=1400
+	SFileTypeCbEntry() {
+	}
+#endif
 	SFileTypeCbEntry(const CString& strLabel, LPCSTR pszItemData, int iImage) {
 		m_strLabel = strLabel;
 		m_pszItemData = pszItemData;
 		m_iImage = iImage;
 	}
 
-	operator<(const SFileTypeCbEntry& e) const {
+	bool operator<(const SFileTypeCbEntry& e) const {
 		return (m_strLabel.Compare(e.m_strLabel) < 0);
 	}
 

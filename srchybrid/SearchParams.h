@@ -39,6 +39,7 @@ struct SSearchParams
 	}
 	DWORD dwSearchID;
 	bool bClientSharedFiles;
+	CString strSearchTitle;
 	CString strExpression;
 	CString strKeyword;
 	CString strBooleanExpr;

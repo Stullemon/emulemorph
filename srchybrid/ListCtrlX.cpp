@@ -718,7 +718,8 @@ void InitColumnOrders(CListCtrl& lv, int iColumns, const LCX_COLUMN_INIT* pColum
 	{
 		for (int iCol = 0; iCol < iColumns; iCol++)
 		{
-			for (int j = 0; j < iColumns; j++)
+			int j;
+			for (j = 0; j < iColumns; j++)
 			{
 				if (pColumns[j].iOrder == iCol)
 				{
@@ -733,7 +734,7 @@ void InitColumnOrders(CListCtrl& lv, int iColumns, const LCX_COLUMN_INIT* pColum
 			}
 		}
 		VERIFY( lv.SetColumnOrderArray(iColumns, piOrders) );
-		delete piOrders;
+		delete[] piOrders;
 	}
 }
 

@@ -137,10 +137,10 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 
 	if (theApp.serverconnect->IsConnected()){
 		rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T(":") ;
-		if (theApp.serverconnect->IsLowID())
+		if (theApp.serverconnect->IsLowID() && theApp.GetPublicIP(true) == 0)
 			buffer = GetResString(IDS_UNKNOWN);
 		else
-			buffer.Format(_T("%s:%u"), ipstr(theApp.serverconnect->GetClientID()), thePrefs.GetPort());
+			buffer.Format(_T("%s:%u"), ipstr(theApp.GetPublicIP(true)), thePrefs.GetPort());
 		rCtrl << _T("\t") << buffer << _T("\r\n");
 
 		rCtrl << GetResString(IDS_ID) << _T(":\t");
@@ -175,6 +175,13 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 			rCtrl << GetResString(IDS_VERSION) << _T(":\t") << srv->GetVersion() << _T("\r\n");
 			rCtrl << GetResString(IDS_UUSERS) << _T(":\t") << GetFormatedUInt(srv->GetUsers()) << _T("\r\n");
 			rCtrl << GetResString(IDS_PW_FILES) << _T(":\t") << GetFormatedUInt(srv->GetFiles()) << _T("\r\n");
+			rCtrl << GetResString(IDS_FSTAT_CONNECTION) << _T(":\t");
+			if (theApp.serverconnect->IsConnectedObfuscated())
+				rCtrl << GetResString(IDS_OBFUSCATED);
+			else
+				rCtrl << GetResString(IDS_PRIONORMAL);
+			rCtrl << _T("\r\n");
+			
 
 			if (bFullInfo)
 			{
@@ -211,7 +218,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 						rCtrl << GetResString(IDS_NO);
 					rCtrl << _T("\r\n");
 
-					rCtrl << _T("Integer type tags") << _T(": ");
+					rCtrl << GetResString(IDS_SERVERFEATURE_INTTYPETAGS) << _T(": ");
 					if (srv->GetTCPFlags() & SRV_TCPFLG_TYPETAGINTEGER)
 						rCtrl << GetResString(IDS_YES);
 					else
@@ -241,6 +248,20 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 
 					rCtrl << GetResString(IDS_SRV_LARGEFILES) << _T(": ");
 					if (srv->SupportsLargeFilesTCP() || srv->SupportsLargeFilesUDP())
+						rCtrl << GetResString(IDS_YES);
+					else
+						rCtrl << GetResString(IDS_NO);
+					rCtrl << _T("\r\n");
+
+					rCtrl << GetResString(IDS_PROTOCOLOBFUSCATION) << _T(" (UDP)") << _T(": ");
+					if (srv->SupportsObfuscationUDP())
+						rCtrl << GetResString(IDS_YES);
+					else
+						rCtrl << GetResString(IDS_NO);
+					rCtrl << _T("\r\n");
+
+					rCtrl << GetResString(IDS_PROTOCOLOBFUSCATION) << _T(" (TCP)") << _T(": ");
+					if (srv->SupportsObfuscationTCP())
 						rCtrl << GetResString(IDS_YES);
 					else
 						rCtrl << GetResString(IDS_NO);

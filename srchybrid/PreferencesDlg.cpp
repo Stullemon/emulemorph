@@ -48,6 +48,7 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndSecurity.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndScheduler.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndProxy.m_psp.dwFlags &= ~PSH_HASHELP;
+	m_wndMessages.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
 	m_wndMorphShare.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
@@ -56,7 +57,7 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndEmulespana.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, emulEspaña preferency
 	m_wndWebcachesettings.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, WebCache 1.2f
     //m_wndIonixWebServer.m_psp.dwFlags &= ~PSH_HASHELP;  //ionix advanced webserver
-#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	m_wndDebug.m_psp.dwFlags &= ~PSH_HASHELP;
 #endif
 
@@ -74,6 +75,7 @@ CPreferencesDlg::CPreferencesDlg()
 	CTreePropSheet::SetPageIcon(&m_wndScheduler, _T("SCHEDULER"));
 	CTreePropSheet::SetPageIcon(&m_wndWebServer, _T("WEB"));
 	CTreePropSheet::SetPageIcon(&m_wndTweaks, _T("TWEAK"));
+	CTreePropSheet::SetPageIcon(&m_wndMessages, _T("MESSAGES"));
 	CTreePropSheet::SetPageIcon(&m_wndBackup, _T("BACKUP")); //EastShare - Added by Pretender, TBH-AutoBackup
 	CTreePropSheet::SetPageIcon(&m_wndMorph, _T("MORPH")); //MORPH - Added by IceCream, Morph Prefs
 	CTreePropSheet::SetPageIcon(&m_wndMorphShare, _T("MORPH")); //MORPH - Added by SiRoB, Morph Prefs
@@ -81,7 +83,7 @@ CPreferencesDlg::CPreferencesDlg()
 	CTreePropSheet::SetPageIcon(&m_wndEastShare, _T("EASTSHARE")); //EastShare - Added by Pretender, ES Prefs
 	CTreePropSheet::SetPageIcon(&m_wndEmulespana, _T("EMULESPANA")); //MORPH - Added by SiRoB, emulEspaña preferency
 	CTreePropSheet::SetPageIcon(&m_wndWebcachesettings, _T("WEBCACHE")); //MORPH - Added by SiRoB, WebCache 1.2f
-	#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
+	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	CTreePropSheet::SetPageIcon(&m_wndDebug, _T("Preferences"));
     #endif
     //CTreePropSheet::SetPageIcon(&m_wndIonixWebServer, _T("MORPH"));
@@ -96,6 +98,7 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndNotify);
 	AddPage(&m_wndStats);
 	AddPage(&m_wndIRC);
+	AddPage(&m_wndMessages);
 	AddPage(&m_wndSecurity);
 	AddPage(&m_wndScheduler);
 	AddPage(&m_wndWebServer);
@@ -107,7 +110,7 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
 	AddPage(&m_wndWebcachesettings); //MORPH - Added by SiRoB, WebCache 1.2f
-#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	AddPage(&m_wndDebug);
 #endif
      AddPage(&m_wndIonixWebServer); // Morph - ionix advanced webserver
@@ -213,6 +216,7 @@ void CPreferencesDlg::Localize()
 	m_wndWebServer.Localize();
 	m_wndScheduler.Localize();
 	m_wndProxy.Localize();
+	m_wndMessages.Localize();
 	m_wndMorph.Localize();//MORPH - Added by IceCream, Morph Prefs
 	m_wndMorphShare.Localize();//MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.Localize();//MORPH - Added by SiRoB, Morph Prefs
@@ -235,6 +239,7 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_EKDEV_OPTIONS))); 
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_STATSSETUPINFO))); 
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_IRC)));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_MESSAGESCOMMENTS)));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SECURITY))); 
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SCHEDULER)));
 		pTree->SetItemText(GetPageTreeItem(Webserver=c++), RemoveAmbersand(GetResString(IDS_PW_WS)));
@@ -248,7 +253,7 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("emulEspaña")));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WEBCACHE)));  //MORPH - Added by SiRoB, WebCache 1.2f
     	pTree->SetItemText(GetPageTreeItem(Multiwebserver=c++), RemoveAmbersand(_T(" ")));	// ionix advnaced webserver
-		#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
+		#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 		pTree->SetItemText(GetPageTreeItem(c++), _T("Debug"));
 	     #endif
     //   pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("iONiX ") + GetResString(IDS_PW_WS))); // MORPH ionix advanced webserver

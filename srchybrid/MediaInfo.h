@@ -15,7 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-
+#include "RichEditStream.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CStringStream
@@ -31,10 +31,25 @@ public:
 	CStringStream& operator<<(int iVal);
 	CStringStream& operator<<(double fVal);
 
+	bool IsEmpty() const {
+		return str.IsEmpty();
+	}
+	void AppendFormat(LPCTSTR pszFmt, ...) {
+		va_list argp;
+		va_start(argp, pszFmt);
+		str.AppendFormatV(pszFmt, argp);
+		va_end(argp);
+	}
+	const CString& GetText() const {
+		return str;
+	}
+
+protected:
 	CString str;
 };
 
 // DirectShow MediaDet
+#if _MSC_VER<1400
 #include <strmif.h>
 //#include <uuids.h>
 #define _DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
@@ -56,6 +71,10 @@ _DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0
 //#define MMNOMMIO		// mmsystem: Multimedia file I/O support
 #define MMNOMMSYSTEM	// mmsystem: General MMSYSTEM functions
 #include <qedit.h>
+#else
+#include <mmsystem.h>
+typedef LONGLONG REFERENCE_TIME;
+#endif
 typedef struct tagVIDEOINFOHEADER {
 	RECT			rcSource;		   // The bit we really want to use
 	RECT			rcTarget;		   // Where the video should go
@@ -100,6 +119,7 @@ struct SMediaInfo
 		(void)strVideoFormat;
 		memset(&video, 0, sizeof video);
 		fVideoLengthSec = 0.0;
+		bVideoLengthEstimated = false;
 		fVideoFrameRate = 0.0;
 		fVideoAspectRatio = 0.0;
 
@@ -107,8 +127,47 @@ struct SMediaInfo
 		(void)strAudioFormat;
 		memset(&audio, 0, sizeof audio);
 		fAudioLengthSec = 0.0;
+		bAudioLengthEstimated = false;
+
+		bOutputFileName = true;
 	}
 
+	SMediaInfo& operator=(const SMediaInfo& strm)
+	{
+		strFileFormat = strm.strFileFormat;
+		strMimeType = strm.strMimeType;
+		ulFileSize = strm.ulFileSize;
+
+		iVideoStreams = strm.iVideoStreams;
+		strVideoFormat = strm.strVideoFormat;
+		video = strm.video;
+		fVideoLengthSec = strm.fVideoLengthSec;
+		bVideoLengthEstimated = strm.bVideoLengthEstimated;
+		fVideoFrameRate = strm.fVideoFrameRate;
+		fVideoAspectRatio = strm.fVideoAspectRatio;
+
+		iAudioStreams = strm.iAudioStreams;
+		strAudioFormat = strm.strAudioFormat;
+		audio = strm.audio;
+		fAudioLengthSec = strm.fAudioLengthSec;
+		bAudioLengthEstimated = strm.bAudioLengthEstimated;
+		strAudioLanguage = strm.strAudioLanguage;
+		return *this;
+	}
+
+	void OutputFileName()
+	{
+		if (bOutputFileName)
+		{
+			bOutputFileName = false;
+			if (!strInfo.IsEmpty())
+				strInfo << _T("\n");
+			strInfo.SetSelectionCharFormat(strInfo.m_cfBold);
+			strInfo << GetResString(IDS_FILE) << _T(": ") << strFileName << _T("\n");
+		}
+	}
+
+	CString			strFileName;
 	CString			strFileFormat;
 	CString			strMimeType;
 	EMFileSize		ulFileSize;
@@ -117,6 +176,7 @@ struct SMediaInfo
 	CString			strVideoFormat;
 	VIDEOINFOHEADER	video;
 	double			fVideoLengthSec;
+	bool			bVideoLengthEstimated;
 	double			fVideoFrameRate;
 	double			fVideoAspectRatio;
 
@@ -124,13 +184,16 @@ struct SMediaInfo
 	CString			strAudioFormat;
 	WAVEFORMAT		audio;
 	double			fAudioLengthSec;
+	bool			bAudioLengthEstimated;
 	CString			strAudioLanguage;
 
-	CStringStream	strInfo;
+	bool			bOutputFileName;
+	CRichEditStream	strInfo;
 };
 
 
 bool GetMimeType(LPCTSTR pszFilePath, CString& rstrMimeType);
+bool GetDRM(LPCTSTR pszFilePath);
 BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFullInfo = false);
 CString GetWaveFormatTagName(UINT uWavFmtTag, CString& rstrComment);
 CString GetWaveFormatTagName(UINT wFormatTag);

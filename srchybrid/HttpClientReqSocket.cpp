@@ -46,6 +46,7 @@ CHttpClientReqSocket::CHttpClientReqSocket(CUpDownClient* client)
 	: CClientReqSocket(client)
 {
 	SetHttpState(HttpStateUnknown);
+	SetConnectionEncryption(false, NULL, false); // just to make sure - disable protocol encryption explicit
 }
 
 CHttpClientReqSocket::~CHttpClientReqSocket()
@@ -66,18 +67,18 @@ void CHttpClientReqSocket::ClearHttpHeaders()
 	m_iHttpHeadersSize = 0;
 }
 
-void CHttpClientReqSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize)
+void CHttpClientReqSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize, bool bForceImmediateSend)
 {
 	// just for safety -- never send an ed2k/emule packet via HTTP.
 	if (packet->opcode != 0x00 || packet->prot != 0x00){
 		ASSERT(0);
 		return;
 	}
-	CClientReqSocket::SendPacket(packet, delpacket, controlpacket, actualPayloadSize);
+	CClientReqSocket::SendPacket(packet, delpacket, controlpacket, actualPayloadSize, bForceImmediateSend);
 }
 
 #if !defined DONT_USE_SEND_ARRAY_PACKET
-void CHttpClientReqSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, bool controlpacket, uint32 actualPayloadSize)
+void CHttpClientReqSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, bool controlpacket, uint32 actualPayloadSize, bool bForceImmediateSend)
 {
 	// just for safety -- never send an ed2k/emule packet via HTTP.
 	for (uint32 i = 0; i < npacket; i++) {
@@ -86,7 +87,7 @@ void CHttpClientReqSocket::SendPacket(Packet* packet[], uint32 npacket, bool del
 			return;
 		}
 	}
-	CClientReqSocket::SendPacket(packet, npacket, delpacket, controlpacket, actualPayloadSize);
+	CClientReqSocket::SendPacket(packet, npacket, delpacket, controlpacket, actualPayloadSize, bForceImmediateSend);
 }
 #endif
 void CHttpClientReqSocket::OnConnect(int nErrorCode)

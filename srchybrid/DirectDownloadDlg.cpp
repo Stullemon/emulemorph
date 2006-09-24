@@ -89,43 +89,47 @@ void CDirectDownloadDlg::OnOK()
 	CString strTok = strLinks.Tokenize(_T("\t\n\r"), curPos);
 	while (!strTok.IsEmpty())
 	{
-		if (strTok.Right(1) != _T("/"))
-			strTok += _T("/");
-		try
-		{
-			CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(strTok.Trim());
-			if (pLink)
+		strTok.Trim();
+		if (!strTok.IsEmpty()) {
+
+			if (strTok.Right(1) != _T("/"))
+				strTok += _T("/");
+			try
 			{
-				if (pLink->GetKind() == CED2KLink::kFile)
+				CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(strTok.Trim());
+				if (pLink)
 				{
+					if (pLink->GetKind() == CED2KLink::kFile)
+					{
 					
-					//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
-					/*
-					theApp.downloadqueue->AddFileLinkToDownload(pLink->GetFileLink(), 
-						(thePrefs.GetCatCount()==0)?0 : m_cattabs.GetCurSel() );
-					/*/
-					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(strTok.Trim());
-					theApp.downloadqueue->AddFileLinkToDownload(pFileLink,
-						 (thePrefs.GetCatCount()==0)?-1 : m_cattabs.GetCurSel(), true);
-					/**/
-					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
-				}
-				else
-				{
+						//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+						/*
+						theApp.downloadqueue->AddFileLinkToDownload(pLink->GetFileLink(), 
+							(thePrefs.GetCatCount()==0)?0 : m_cattabs.GetCurSel() );
+						/*/
+						CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(strTok.Trim());
+						theApp.downloadqueue->AddFileLinkToDownload(pFileLink,
+							 (thePrefs.GetCatCount()==0)?-1 : m_cattabs.GetCurSel(), true);
+						/**/
+						//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
+					}
+					else
+					{
+						delete pLink;
+						throw CString(_T("bad link"));
+					}
 					delete pLink;
-					throw CString(_T("bad link"));
 				}
-				delete pLink;
 			}
-		}
-		catch(CString error)
-		{
-			TCHAR szBuffer[200];
-			_sntprintf(szBuffer, ARRSIZE(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
-			CString strError;
-			strError.Format(GetResString(IDS_ERR_LINKERROR), szBuffer);
-			AfxMessageBox(strError);
-			return;
+			catch(CString error)
+			{
+				TCHAR szBuffer[200];
+				_sntprintf(szBuffer, ARRSIZE(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
+				CString strError;
+				strError.Format(GetResString(IDS_ERR_LINKERROR), szBuffer);
+				AfxMessageBox(strError);
+				return;
+			}
 		}
 		strTok = strLinks.Tokenize(_T("\t\n\r"), curPos);
 	}
@@ -149,9 +153,9 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 	EnableSaveRestore(PREF_INI_SECTION);
 
 	SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
-	m_ctrlDirectDlFrm.SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
 	m_ctrlDirectDlFrm.SetIcon(_T("Download"));
-    GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_DOWNLOAD));
+    m_ctrlDirectDlFrm.SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
+	GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_DOWNLOAD));
     GetDlgItem(IDC_FSTATIC2)->SetWindowText(GetResString(IDS_SW_LINK));
 	GetDlgItem(IDC_CATLABEL)->SetWindowText(GetResString(IDS_CAT)+_T(":"));
 

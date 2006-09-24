@@ -141,7 +141,7 @@ void CQueueListCtrl::SetAllIcons()
 	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	imagelist.SetBkColor(CLR_NONE);
 	imagelist.Add(CTempIconLoader(_T("ClientEDonkey")));
-	//MORPH START - Changed by SiRoB, More client & Credit overlay icon
+	//MORPH START - Changed by SiRoB, More client
 	imagelist.Add(CTempIconLoader(_T("ClientCompatible")));
 	//imagelist.Add(CTempIconLoader(_T("ClientEDonkeyPlus")));
 	//imagelist.Add(CTempIconLoader(_T("ClientCompatiblePlus")));
@@ -168,9 +168,9 @@ void CQueueListCtrl::SetAllIcons()
 	imagelist.Add(CTempIconLoader(_T("NEXTEMF")));
 	imagelist.Add(CTempIconLoader(_T("NEO")));
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);//10
-	//MORPH END   - Added by SiRoB, More client icone & Credit overlay icon
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("OverlayObfu"))), 2);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("OverlaySecureObfu"))), 3);
+	//MORPH END   - Added by SiRoB, More client icone
 
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
@@ -182,6 +182,11 @@ void CQueueListCtrl::SetAllIcons()
 	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendOvl")));
 	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendSlotOvl")));
 	//MORPH END   - Addded by SiRoB, Friend Addon
+	//MORPH START - Credit Overlay Icon
+	m_overlayimages.Add(CTempIconLoader(_T("ClientCreditOvl")));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientCreditSecureOvl")));
+	//MORPH END   - Credit Overlay Icon
+	
 }
 
 void CQueueListCtrl::Localize()
@@ -318,6 +323,12 @@ void CQueueListCtrl::RefreshClient(const CUpDownClient* client)
 	// someone points out what is going wrong.. Also, it will still assert in debug mode..
 	if( !theApp.emuledlg->IsRunning())
 		return;
+
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || theApp.emuledlg->transferwnd->queuelistctrl.IsWindowVisible() == false )
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
+	
 	//MORPH START- UpdateItemThread
 	/*
 	LVFINDINFO find;
@@ -425,21 +436,21 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else
 							image = 0;
 						//MORPH END   - Modified by SiRoB, More Icons
+						uint32 nOverlayImage = 0;
+						if ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED))
+							nOverlayImage |= 1;
+						if (client->IsObfuscatedConnectionEstablished())
+							nOverlayImage |= 2;
 						POINT point = {cur_rec.left, cur_rec.top+1};
-						//MORPH START - Modified by SiRoB, leecher icon
-						//imagelist.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
-						//MORPH START - Added by Stulle, fix score display
-						/*
-						UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->credits->GetScoreRatio(client->GetIP()) > 1) ? 2 : 0));
-						*/
-						UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->credits->GetHasScore(client->GetIP())) ? 2 : 0));
-						//MORPH END - Added by Stulle, fix score display
-						if (client->IsLeecher())
-							imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg, 0, RGB(255,64,64));//RGB(255-GetRValue(odc->GetBkColor()),255-GetGValue(odc->GetBkColor()),255-GetBValue(odc->GetBkColor())));
-						else
-							imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg, 0, odc->GetBkColor());
-						//MORPH END   - Modified by SiRoB, leecher icon
-					
+						imagelist.Draw(dc,image, point, ILD_NORMAL | INDEXTOOVERLAYMASK(nOverlayImage));
+
+						//MORPH START - Credit Overlay Icon
+						if (client->Credits() && client->Credits()->GetHasScore(client->GetIP())) {
+							if (nOverlayImage & 1)
+								m_overlayimages.Draw(dc, 4, point, ILD_TRANSPARENT);
+							else 
+								m_overlayimages.Draw(dc, 3, point, ILD_TRANSPARENT);
+						}
 						// Mighty Knife: Community visualization
 						if (client->IsCommunity())
 							m_overlayimages.Draw(dc,0, point, ILD_TRANSPARENT);
@@ -768,7 +779,7 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			}
 			case MP_BOOT:
 				if (client->GetKadPort())
-					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
 				break;
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			case MP_LIST_REQUESTED_FILES: { // added by sivka

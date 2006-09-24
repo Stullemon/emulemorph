@@ -383,10 +383,11 @@ void CPPgWiz1Ports::OnStartConTest() {
 	TriggerPortTest(tcp,udp);
 }
 
-
 BOOL CPPgWiz1Ports::OnInitDialog()
 {
 	CDlgPageWizard::OnInitDialog();
+	CheckDlgButton(IDC_UDPDISABLE, m_sUDP.IsEmpty() || m_sUDP == _T("0"));
+	GetDlgItem(IDC_UDP)->EnableWindow(IsDlgButtonChecked(IDC_UDPDISABLE) == 0);
 	InitWindowStyles(this);
 	
 	lastudp = m_sUDP;
@@ -807,12 +808,11 @@ BOOL FirstTimeWizard()
 	thePrefs.SetUpnpDetect(UPNP_NO_DETECTEDTION);// leuk_he add upnp to startup wizard no more detecion next time.
 	thePrefs.port=(uint16)_tstoi(page3.m_sTCP);
 	thePrefs.udpport=(uint16)_tstoi(page3.m_sUDP);
-	
-	ASSERT( thePrefs.port!=0 && thePrefs.udpport!=10 );
+	ASSERT( thePrefs.port!=0 && thePrefs.udpport!=0+10 );
 	if (thePrefs.port == 0)
-		thePrefs.port = DEFAULT_TCP_PORT;
-	if (thePrefs.udpport == 0 || thePrefs.udpport == 10)
-		thePrefs.udpport = DEFAULT_UDP_PORT;
+		thePrefs.port = thePrefs.GetRandomTCPPort();
+	if (thePrefs.udpport == 0+10)
+		thePrefs.udpport = thePrefs.GetRandomUDPPort();
 	if ( (thePrefs.port!=theApp.listensocket->GetConnectedPort()) || (thePrefs.udpport!=theApp.clientudp->GetConnectedPort()) )
 		if (!theApp.IsPortchangeAllowed())
 			AfxMessageBox(GetResString(IDS_NOPORTCHANGEPOSSIBLE));

@@ -749,21 +749,21 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 	}
 }
 
-void CSharedFileList::RemoveFile(CKnownFile* pFile)
+bool CSharedFileList::RemoveFile(CKnownFile* pFile)
 {
 	CSingleLock listlock(&m_mutWriteList);
 	listlock.Lock();
-	BOOL bResult = m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
+	bool bResult = (m_Files_map.RemoveKey(CCKey(pFile->GetFileHash())) != FALSE);
 	listlock.Unlock();
 
-	if (bResult == TRUE){
+	if (bResult) {
 		output->RemoveFile(pFile);
 		m_UnsharedFiles_map.SetAt(CSKey(pFile->GetFileHash()), true);
 		m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
 	}
 
 	m_keywords->RemoveKeywords(pFile);
-
+	return bResult;
 }
 
 void CSharedFileList::Reload()
@@ -1057,8 +1057,16 @@ void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file, CSafeMemFile
 
 	// eserver 17.6+ supports eMule file rating tag. There is no TCP-capabilities bit available to determine
 	// whether the server is really supporting it -- this is by intention (lug). That's why we always send it.
-	if (cur_file->GetFileRating())
-		tags.Add(new CTag(FT_FILERATING, cur_file->GetFileRating()));
+	if (cur_file->GetFileRating()) {
+		uint32 uRatingVal = cur_file->GetFileRating();
+		if (pClient) {
+			// eserver is sending the rating which it received in a different format (see
+			// 'CSearchFile::CSearchFile'). If we are creating the packet for an other client
+			// we must use eserver's format.
+			uRatingVal *= (255/5/*RatingExcellent*/);
+		}
+		tags.Add(new CTag(FT_FILERATING, uRatingVal));
+	}
 
 	// NOTE: Archives and CD-Images are published+searched with file type "Pro"
 	bool bAddedFileType = false;
@@ -1505,7 +1513,6 @@ void CSharedFileList::Publish()
 							if( count )
 							{
 								//Start our keyword publish
-								pSearch->PreparePacket();
 								pPubKw->SetNextPublishTime(tNow+(KADEMLIAREPUBLISHTIMEK));
 								pPubKw->IncPublishedCount();
 								Kademlia::CSearchManager::StartSearch(pSearch);
@@ -1583,7 +1590,7 @@ void CSharedFileList::RemoveKeywords(CKnownFile* pFile)
 void CSharedFileList::DeletePartFileInstances() const
 {
 	// this is only allowed during shut down
-	ASSERT( theApp.m_app_state == APP_STATE_SHUTINGDOWN );
+	ASSERT( theApp.m_app_state == APP_STATE_SHUTTINGDOWN );
 	ASSERT( theApp.knownfiles );
 
 	POSITION pos = m_Files_map.GetStartPosition();

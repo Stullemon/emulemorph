@@ -226,8 +226,8 @@ void CWebSocket::SendData(const void* pData, DWORD dwDataSize)
 
 void CWebSocket::SendReply(LPCSTR szReply) {
 	char szBuf[256];
-	int nLen = wsprintfA(szBuf, "%sr\n", szReply);
-	ASSERT(nLen<ARRSIZE(szBuf));
+	int nLen = _snprintf(szBuf, _countof(szBuf), "%s\r\n", szReply);
+	ASSERT( nLen < _countof(szBuf) );
 
 	SendData(szBuf, nLen);
 }
@@ -235,7 +235,7 @@ void CWebSocket::SendReply(LPCSTR szReply) {
 void CWebSocket::SendContent(LPCSTR szStdResponse, const void* pContent, DWORD dwContentSize)
 {
 	char szBuf[0x1000];
-	int nLen = wsprintfA(szBuf, "HTTP/1.1 200 OK\r\n%sContent-Length: %ld\r\n\r\n", szStdResponse, dwContentSize);
+	int nLen = _snprintf(szBuf, _countof(szBuf), "HTTP/1.1 200 OK\r\n%sContent-Length: %ld\r\n\r\n", szStdResponse, dwContentSize);
 	SendData(szBuf, nLen);
 	SendData(pContent, dwContentSize);
 }

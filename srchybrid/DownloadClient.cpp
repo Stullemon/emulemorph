@@ -457,11 +457,7 @@ bool CUpDownClient::Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash) c
 // true = client was not deleted!
 bool CUpDownClient::AskForDownload()
 {
-	//MORPH - Changed by SiRoB, Fix connection collision
-	/*
 	if (theApp.listensocket->TooManySockets() && !(socket && socket->IsConnected()) )
-	*/
-	if (theApp.listensocket->TooManySockets() && !(socket && (socket->IsConnected() || socket->GetConState() == ES_NOTCONNECTED)) )
 	{
 		if (GetDownloadState() != DS_TOOMANYCONNS)
 			SetDownloadState(DS_TOOMANYCONNS);
@@ -557,7 +553,8 @@ void CUpDownClient::SendFileRequest()
 
 	if (SupportMultiPacket())
 	{
-		if (SupportExtMultiPacket()){
+		bool bUseExtMultiPacket = SupportExtMultiPacket();
+		if (bUseExtMultiPacket){
 			dataFileReq.WriteUInt64(reqfile->GetFileSize());
 			if (thePrefs.GetDebugClientTCPLevel() > 0)
 				DebugSend("OP__MultiPacket_Ext", this, reqfile->GetFileHash());
@@ -634,7 +631,7 @@ void CUpDownClient::SendFileRequest()
 		}
 		// MORPH END - Added by Commander, WebCache 1.2e
 		Packet* packet = new Packet(&dataFileReq, OP_EMULEPROT);
-		packet->opcode = SupportExtMultiPacket() ? OP_MULTIPACKET_EXT : OP_MULTIPACKET;
+		packet->opcode = bUseExtMultiPacket ? OP_MULTIPACKET_EXT : OP_MULTIPACKET;
 		theStats.AddUpDataOverheadFileRequest(packet->size);
 		socket->SendPacket(packet, true);
 	}
@@ -784,11 +781,13 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 		{
 		    int iNeeded = 0;
-		    for (UINT i = 0; i < m_nPartCount; i++)
+			UINT i;
+			for (i = 0; i < m_nPartCount; i++) {
 			    if (!reqfile->IsComplete((uint64)i*PARTSIZE, ((uint64)(i+1)*PARTSIZE)-1, false))
 				    iNeeded++;
+			}
 			char* psz = new char[m_nPartCount + 1];
-			for (UINT i = 0; i < m_nPartCount; i++)
+			for (i = 0; i < m_nPartCount; i++)
 				//MORPH - Changed by SiRoB, ICS merged into partstatus
 				/*
 				psz[i] = m_abyPartStatus[i] ? '#' : '.';
@@ -897,7 +896,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		while (done != m_nPartCount)
 		{
 			uint8 toread = data->ReadUInt8();
-			for (uint8 i = 0;i != 8;i++)
+			for (UINT i = 0; i != 8; i++)
 			{
 				//MORPH - Changed by SiRoB, ICS merged into partstatus
 				/*
@@ -921,12 +920,13 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	if (bUdpPacket ? (thePrefs.GetDebugClientUDPLevel() > 0) : (thePrefs.GetDebugClientTCPLevel() > 0))
 	{
 		TCHAR* psz = new TCHAR[m_nPartCount + 1];
-		for (UINT i = 0; i < m_nPartCount; i++)
+		UINT i;
+		for (i = 0; i < m_nPartCount; i++)
 			//MORPH - Changed by SiRoB, ICS merged into partstatus
 			/*
-			psz[i] = m_abyPartStatus[i] ? '#' : '.';
+			psz[i] = m_abyPartStatus[i] ? _T('#') : _T('.');
 			*/
-			psz[i] = (m_abyPartStatus[i]&SC_AVAILABLE) ? '#' : '.';
+			psz[i] = (m_abyPartStatus[i]&SC_AVAILABLE) ? _T('#') : _T('.');
 		psz[i] = _T('\0');
 		Debug(_T("  Parts=%u  %s  Needed=%u\n"), m_nPartCount, psz, iNeeded);
 		delete[] psz;
@@ -1135,7 +1135,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			} 
 			//MORPH END   - Changed by SiRoB, don't overhide pszReason
             if(thePrefs.GetLogUlDlEvents())
-				AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Payload: %s, Transferred: %s."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionPayloadDown(), false, false), CastItoXBytes(GetSessionDown(), false, false));
+				AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Payload: %s, Transferred: %s, Req blocks not yet completed: %i."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionPayloadDown(), false, false), CastItoXBytes(GetSessionDown(), false, false), m_PendingBlocks_list.GetCount());
 			
 			m_fFailedDownload = 0; //MORPH - Added by SiRoB, Fix Connection Collision
 			ResetSessionDown();
@@ -1340,7 +1340,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
         // Only trust eMule clients to be able to handle less blocks than three
-        if(GetDownloadDatarate() < 1200 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Enhanced DBR 
+        if(GetDownloadDatarate() < 1200  || GetSessionPayloadDown() < 40*1024 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Enhanced DBR 
             blockCount = 1;
         }
     //}
@@ -1349,14 +1349,16 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 
 
 	if (m_PendingBlocks_list.IsEmpty()){
-		//MORPH - Moved by SiRoB, SendCancelTransfer if we can't find an other file to download
+		//MORPH START - SendCancelTransfer if we can't find an other file to download
 		/*
-		SetDownloadState(DS_NONEEDEDPARTS);
 		SendCancelTransfer();
+		SetDownloadState(DS_NONEEDEDPARTS);
+		SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
 		*/
 		SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. Client don't have any block for us or file is already fully requested."));
 		if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
 			SendCancelTransfer();
+		//MORPH END   - SendCancelTransfer if we can't find an other file to download
 		return;
 	}
 
@@ -1371,11 +1373,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
 		if (pending->fQueued == 0) {
 			ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-			//MORPH - Official fix by Aw3
-			/*
-			if (pending->block->StartOffset > 0xFFFFFFFF || pending->block->EndOffset > 0xFFFFFFFF){
-			*/
-			if (pending->block->StartOffset > 0xFFFFFFFE || pending->block->EndOffset > 0xFFFFFFFE){
+			if (pending->block->StartOffset > 0xFFFFFFFF || pending->block->EndOffset >= 0xFFFFFFFF){
 				bI64Offsets = true;
 				if (!SupportsLargeFiles()){
 					ASSERT( false );
@@ -1587,14 +1585,15 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 */
 void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool packed, bool bI64Offsets)
 {
-	/* TODO rewrite debugoutput
+	if (!bI64Offsets) {
 	uint32 nDbgStartPos = *((uint32*)(packet+16));
 	if (thePrefs.GetDebugClientTCPLevel() > 1){
 		if (packed)
 			Debug(_T("  Start=%u  BlockSize=%u  Size=%u  %s\n"), nDbgStartPos, *((uint32*)(packet + 16+4)), size-24, DbgGetFileInfo(packet));
 		else
 			Debug(_T("  Start=%u  End=%u  Size=%u  %s\n"), nDbgStartPos, *((uint32*)(packet + 16+4)), *((uint32*)(packet + 16+4)) - nDbgStartPos, DbgGetFileInfo(packet));
-	}*/
+	    }
+	}
 
 	// Ignore if no data required
 	if (!(GetDownloadState() == DS_DOWNLOADING || GetDownloadState() == DS_NONEEDEDPARTS)){
@@ -1795,7 +1794,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 			if (lenWritten > 0)
 			{
 				m_nTransferredDown += uTransferredFileDataSize;
-                /*zz*/m_nCurSessionPayloadDown += lenWritten;
+                m_nCurSessionPayloadDown += lenWritten;
 				SetTransferredDownMini();
 
 				// If finished reserved block
@@ -2016,10 +2015,16 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 		m_nDownDatarate = 0;
 	//MORPH END   - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 
-	if (++m_cShowDR == 30) {
+	//MORPH START - UpdateItemThread
+	/*
+	m_cShowDR++;
+	if (m_cShowDR == 30) {
 		m_cShowDR = 0;
 		UpdateDisplayedInfo();
 	}
+	*/
+	UpdateDisplayedInfo();
+	//MORPH END    - UpdateItemThread
 	return m_nDownDatarate;
 }
 
@@ -2199,28 +2204,28 @@ void CUpDownClient::UDPReaskForDownload()
 			if (GetUDPVersion() > 2)
 				data.WriteUInt16(reqfile->m_nCompleteSourcesCount);
 // WebCache //////////////////////////////////////////////////////////////////////////////
-		if (SupportsMultiOHCBs() &&	AttachMultiOHCBsRequest(data))
-		{
-			DebugSend("OP__MultiFileReask", this, reqfile->GetFileHash());
-			Packet* response = new Packet(&data, OP_WEBCACHEPROT);
-			response->opcode = OP_MULTI_FILE_REASK;
-			theStats.AddUpDataOverheadFileRequest(response->size);
-			theApp.downloadqueue->AddUDPFileReasks();
-			theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
-		}
-		else
-		{
-			if (thePrefs.GetDebugClientUDPLevel() > 0)
-			    DebugSend("OP__ReaskFilePing", this, reqfile->GetFileHash());
-			Packet* response = new Packet(&data, OP_EMULEPROT);
-			response->opcode = OP_REASKFILEPING;
-			theStats.AddUpDataOverheadFileRequest(response->size);
-			theApp.downloadqueue->AddUDPFileReasks();
-			theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
-		}
+			if (SupportsMultiOHCBs() &&	AttachMultiOHCBsRequest(data))
+			{
+				DebugSend("OP__MultiFileReask", this, reqfile->GetFileHash());
+				Packet* response = new Packet(&data, OP_WEBCACHEPROT);
+				response->opcode = OP_MULTI_FILE_REASK;
+				theStats.AddUpDataOverheadFileRequest(response->size);
+				theApp.downloadqueue->AddUDPFileReasks();
+				theApp.clientudp->SendPacket(response, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash());
+			}
+			else
+			{
+				if (thePrefs.GetDebugClientUDPLevel() > 0)
+				    DebugSend("OP__ReaskFilePing", this, reqfile->GetFileHash());
+				Packet* response = new Packet(&data, OP_EMULEPROT);
+				response->opcode = OP_REASKFILEPING;
+				theStats.AddUpDataOverheadFileRequest(response->size);
+				theApp.downloadqueue->AddUDPFileReasks();
+				theApp.clientudp->SendPacket(response, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash());
+			}
 			m_nTotalUDPPackets++;
 		}
-		/*else if (HasLowID() && GetBuddyIP() && GetBuddyPort() && HasValidBuddyID())
+		else if (HasLowID() && GetBuddyIP() && GetBuddyPort() && HasValidBuddyID())
 		{
 			m_bUDPPending = true;
 			CSafeMemFile data(128);
@@ -2241,9 +2246,9 @@ void CUpDownClient::UDPReaskForDownload()
 			response->opcode = OP_REASKCALLBACKUDP;
 			theStats.AddUpDataOverheadFileRequest(response->size);
 			theApp.downloadqueue->AddUDPFileReasks();
-			theApp.clientudp->SendPacket(response, GetBuddyIP(), GetBuddyPort() );
+			theApp.clientudp->SendPacket(response, GetBuddyIP(), GetBuddyPort(), false, NULL);  // kad doesnt supports obfuscation yet
 			m_nTotalUDPPackets++;
-		}*/
+		}
 	}
 }
 

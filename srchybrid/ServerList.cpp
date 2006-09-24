@@ -205,11 +205,8 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 			}
 
 			// set listname for server
-			if (newserver->GetListName().IsEmpty()){
-				CString listname;
-				listname.Format(_T("Server %s"), newserver->GetAddress());
-				newserver->SetListName(listname);
-			}
+			if (newserver->GetListName().IsEmpty())
+				newserver->SetListName(newserver->GetAddress());
 
 			if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(newserver, true))
 			{
@@ -252,24 +249,33 @@ bool CServerList::AddServer(const CServer* pServer)
 {
 	if (!IsGoodServerIP(pServer)){ // check for 0-IP, localhost and optionally for LAN addresses
 		if (thePrefs.GetLogFilteredIPs())
-			AddDebugLogLine(false, _T("Ignored server (IP=%s)"), ipstr(pServer->GetIP()));
+			AddDebugLogLine(false, _T("Filtered server \"%s\" (IP=%s) - Invalid IP or LAN address."), pServer->GetListName(), ipstr(pServer->GetIP()));
 		return false;
 	}
 
-	if (thePrefs.FilterServerByIP()){
-		if (pServer->HasDynIP())
-			return false;
+	if (thePrefs.GetFilterServerByIP()){
+		// IP-Filter: We don't need to reject dynIP-servers here. After the DN was
+		// resolved, the IP will get filtered and the server will get removed. This applies
+		// for TCP-connections as well as for outgoing UDP-packets because for both protocols
+		// we resolve the DN and filter the received IP.
+		//if (pServer->HasDynIP())
+		//	return false;
 		if (theApp.ipfilter->IsFiltered(pServer->GetIP())){
 			if (thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Ignored server (IP=%s) - IP filter (%s)"), ipstr(pServer->GetIP()), theApp.ipfilter->GetLastHit());
+				AddDebugLogLine(false, _T("Filtered server \"%s\" (IP=%s) - IP filter (%s)"), pServer->GetListName(), ipstr(pServer->GetIP()), theApp.ipfilter->GetLastHit());
 			return false;
 		}
 	}
 
-	CServer* test_server = GetServerByAddress(pServer->GetAddress(), pServer->GetPort());
-	if (test_server){
-		test_server->ResetFailedCount();
-		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( test_server );		
+	CServer* pFoundServer = GetServerByAddress(pServer->GetAddress(), pServer->GetPort());
+	// Avoid duplicate (dynIP) servers: If the server which is to be added, is a dynIP-server
+	// but we don't know yet it's DN, we need to search for an already available server with
+	// that IP.
+	if (pFoundServer == NULL && pServer->GetIP() != 0)
+		pFoundServer = GetServerByIPTCP(pServer->GetIP(), pServer->GetPort());
+	if (pFoundServer){
+		pFoundServer->ResetFailedCount();
+		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pFoundServer);
 		return false;
 	}
 	list.AddTail(const_cast<CServer*>(pServer));
@@ -300,6 +306,8 @@ void CServerList::ServerStats()
 			if( ping_server == test )
 				return;
 		}
+		// IP-filter: We do not need to IP-filter any servers here, even dynIP-servers are not
+		// needed to get filtered here. See also comments in 'CServerSocket::ConnectTo'.
 		if (ping_server->GetFailedCount() >= thePrefs.GetDeadServerRetries()) {
 			// Mighty Knife: Static server handling
 			// Static servers can be prevented from being removed from the list.
@@ -309,40 +317,55 @@ void CServerList::ServerStats()
 			}
 			// [end] Mighty Knife
 		}
-		Packet* packet = new Packet(OP_GLOBSERVSTATREQ, 4);
 		srand(tNow);
-		uint32 uChallenge = 0x55AA0000 + GetRandomUInt16();
-		ping_server->SetChallenge(uChallenge);
-		PokeUInt32(packet->pBuffer, uChallenge);
-		ping_server->SetLastPinged(GetTickCount());
-		ping_server->SetLastPingedTime(tNow - (rand()%HR2S(1)));
-		ping_server->AddFailedCount();
-		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(ping_server);
-		if (thePrefs.GetDebugServerUDPLevel() > 0)
-			Debug(_T(">>> Sending OP__GlobServStatReq to server %s:%u\n"), ping_server->GetAddress(), ping_server->GetPort());
-		theStats.AddUpDataOverheadServer(packet->size);
-		theApp.serverconnect->SendUDPPacket(packet, ping_server, true);
+		ping_server->SetRealLastPingedTime(tNow); // this is not used to calcualte the next ping, but only to ensure a minimum delay for premature pings
+		if (!ping_server->GetCryptPingReplyPending() && (tNow - ping_server->GetLastPingedTime()) >= UDPSERVSTATREASKTIME && theApp.GetPublicIP() != 0 && thePrefs.IsServerCryptLayerUDPEnabled()){
+			// we try a obfsucation ping first and wait 20 seconds for an answer
+			// if it doesn'T get responsed, we don't count it as error but continue with a normal ping
+			ping_server->SetCryptPingReplyPending(true);
+			uint32 nPacketLen = 4 + (uint8)(rand() % 16); // max padding 16 bytes
+			BYTE* pRawPacket = new BYTE[nPacketLen];
+			uint32 dwChallenge = (rand() << 17) | (rand() << 2) | (rand() & 0x03);
+			if (dwChallenge == 0)
+				dwChallenge++;
+			PokeUInt32(pRawPacket, dwChallenge);
+			for (uint32 i = 4; i < nPacketLen; i++) // fillung up the remaining bytes with random data
+				pRawPacket[i] = (uint8)rand();
 
-		ping_server->SetLastDescPingedCount(false);
-		if (ping_server->GetLastDescPingedCount() < 2)
-		{
-			// eserver 16.45+ supports a new OP_SERVER_DESC_RES answer, if the OP_SERVER_DESC_REQ contains a uint32
-			// challenge, the server returns additional info with OP_SERVER_DESC_RES. To properly distinguish the
-			// old and new OP_SERVER_DESC_RES answer, the challenge has to be selected carefully. The first 2 bytes 
-			// of the challenge (in network byte order) MUST NOT be a valid string-len-int16!
-			packet = new Packet(OP_SERVER_DESC_REQ, 4);
-			uint32 uDescReqChallenge = ((uint32)GetRandomUInt16() << 16) + INV_SERV_DESC_LEN; // 0xF0FF = an 'invalid' string length.
-			ping_server->SetDescReqChallenge(uDescReqChallenge);
-			PokeUInt32(packet->pBuffer, uDescReqChallenge);
-			theStats.AddUpDataOverheadServer(packet->size);
+			ping_server->SetChallenge(dwChallenge);
+			ping_server->SetLastPinged(GetTickCount());
+			ping_server->SetLastPingedTime((tNow - (uint32)UDPSERVSTATREASKTIME) + 20); // give it 20 seconds to respond
+			
 			if (thePrefs.GetDebugServerUDPLevel() > 0)
-				Debug(_T(">>> Sending OP__ServDescReq     to server %s:%u, challenge %08x\n"), ping_server->GetAddress(), ping_server->GetPort(), uDescReqChallenge);
+				Debug(_T(">>> Sending OP__GlobServStatReq (obfuscated) to server %s:%u\n"), ping_server->GetAddress(), ping_server->GetPort());
+
+			theStats.AddUpDataOverheadServer(nPacketLen);
+			theApp.serverconnect->SendUDPPacket(NULL, ping_server, true, ping_server->GetPort() + 12, pRawPacket, nPacketLen);
+		}
+		else if (ping_server->GetCryptPingReplyPending() || theApp.GetPublicIP() == 0 || !thePrefs.IsServerCryptLayerUDPEnabled()){
+			// our obfsucation ping request was not answered, so probably the server doesn'T supports obfuscation
+			// continue with a normal request
+			if (ping_server->GetCryptPingReplyPending() && thePrefs.IsServerCryptLayerUDPEnabled())
+				DEBUG_ONLY(DebugLog(_T("CryptPing failed for server %s"), ping_server->GetListName()));
+			else if (thePrefs.IsServerCryptLayerUDPEnabled())
+				DEBUG_ONLY(DebugLog(_T("CryptPing skipped because our public IP is unknown for server %s"), ping_server->GetListName()));
+			
+			ping_server->SetCryptPingReplyPending(false);			
+			Packet* packet = new Packet(OP_GLOBSERVSTATREQ, 4);
+			uint32 uChallenge = 0x55AA0000 + GetRandomUInt16();
+			ping_server->SetChallenge(uChallenge);
+			PokeUInt32(packet->pBuffer, uChallenge);
+			ping_server->SetLastPinged(GetTickCount());
+			ping_server->SetLastPingedTime(tNow - (rand()%HR2S(1)));
+			ping_server->AddFailedCount();
+			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(ping_server);
+			if (thePrefs.GetDebugServerUDPLevel() > 0)
+				Debug(_T(">>> Sending OP__GlobServStatReq (not obfuscated) to server %s:%u\n"), ping_server->GetAddress(), ping_server->GetPort());
+			theStats.AddUpDataOverheadServer(packet->size);
 			theApp.serverconnect->SendUDPPacket(packet, ping_server, true);
 		}
 		else
-		{
-			ping_server->SetLastDescPingedCount(true);
-		}
+			ASSERT( false );
 	}
 }
 
@@ -459,14 +482,14 @@ void CServerList::GetUserFileStatus(uint32& user, uint32& file) const
 	}
 }
 
-void CServerList::MoveServerDown(const CServer* aServer)
+void CServerList::MoveServerDown(const CServer* pServer)
 {
    POSITION pos1, pos2;
-   uint16 i = 0;
+	int i = 0;
    for( pos1 = list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
 	   list.GetNext(pos1);
 	   CServer* cur_server = list.GetAt(pos2);
-	   if (cur_server==aServer){
+		if (cur_server == pServer) {
 		   list.AddTail(cur_server);
 		   list.RemoveAt(pos2);
 		   return;
@@ -480,7 +503,7 @@ void CServerList::MoveServerDown(const CServer* aServer)
 void CServerList::Sort()
 {
    POSITION pos1, pos2;
-   uint16 i = 0;
+	int i = 0;
    for( pos1 = list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
 	   list.GetNext(pos1);
 	   CServer* cur_server = list.GetAt(pos2);
@@ -520,30 +543,58 @@ void CServerList::PushBackNoShare(){
 // SLUGFILLER: preferShareAll
 //EastShare End - PreferShareAll by AndCycle
 
-void CServerList::SetServerPosition(uint32 newPosition)
+void CServerList::GetUserSortedServers()
 {
-	if (newPosition < (uint32)list.GetCount())
+	CServerListCtrl& serverListCtrl = theApp.emuledlg->serverwnd->serverlistctrl;
+	ASSERT( serverListCtrl.GetItemCount() == list.GetCount() );
+	list.RemoveAll();
+	int iServers = serverListCtrl.GetItemCount();
+	for (int i = 0; i < iServers; i++)
+		list.AddTail((CServer*)serverListCtrl.GetItemData(i));
+}
+
+#ifdef _DEBUG
+void CServerList::Dump()
+{
+	int i = 1;
+	POSITION pos = list.GetHeadPosition();
+	while (pos)
+	{
+		const CServer* pServer = list.GetNext(pos);
+		TRACE(_T("%3u: Pri=%s \"%s\"\n"), i, pServer->GetPreference() == SRV_PR_HIGH ? _T("Hi") : (pServer->GetPreference() == SRV_PR_LOW ? _T("Lo") : _T("No")), pServer->GetListName());
+		i++;
+	}
+}
+#endif
+
+void CServerList::SetServerPosition(UINT newPosition)
+{
+	if (newPosition < (UINT)list.GetCount())
 		serverpos = newPosition;
 	else
 		serverpos = 0;
 }
 
-CServer* CServerList::GetNextServer()
+CServer* CServerList::GetNextServer(bool bOnlyObfuscated)
 {
-	if (serverpos >= (uint32)list.GetCount())
+	if (serverpos >= (UINT)list.GetCount())
 		return NULL;
 
 	CServer* nextserver = NULL;
-	uint32 i = 0;
-	while (!nextserver && i < (uint32)list.GetCount()){
+	int i = 0;
+	while (!nextserver && i < list.GetCount()){
 		POSITION posIndex = list.FindIndex(serverpos);
 		if (posIndex == NULL) {	// check if search position is still valid (could be corrupted by server delete operation)
 			posIndex = list.GetHeadPosition();
 			serverpos = 0;
 		}
-		nextserver = list.GetAt(posIndex);
+
 		serverpos++;
 		i++;
+		if (!bOnlyObfuscated || ((CServer*)list.GetAt(posIndex))->SupportsObfuscationTCP())
+			nextserver = list.GetAt(posIndex);
+		else if (serverpos >= (UINT)list.GetCount())
+			return NULL;
 	}
 	return nextserver;
 }
@@ -551,8 +602,8 @@ CServer* CServerList::GetNextServer()
 CServer* CServerList::GetNextSearchServer()
 {
 	CServer* nextserver = NULL;
-	uint32 i = 0;
-	while (!nextserver && i < (uint32)list.GetCount()){
+	int i = 0;
+	while (!nextserver && i < list.GetCount()){
 		POSITION posIndex = list.FindIndex(searchserverpos);
 		if (posIndex == NULL) {	// check if search position is still valid (could be corrupted by server delete operation)
 			posIndex = list.GetHeadPosition();
@@ -570,8 +621,8 @@ CServer* CServerList::GetNextSearchServer()
 CServer* CServerList::GetNextStatServer()
 {
 	CServer* nextserver = NULL;
-	uint32 i = 0;
-	while (!nextserver && i < (uint32)list.GetCount()){
+	int i = 0;
+	while (!nextserver && i < list.GetCount()){
 		POSITION posIndex = list.FindIndex(statserverpos);
 		if (posIndex == NULL) {	// check if search position is still valid (could be corrupted by server delete operation)
 			posIndex = list.GetHeadPosition();
@@ -586,7 +637,7 @@ CServer* CServerList::GetNextStatServer()
 	return nextserver;
 }
 
-CServer* CServerList::GetNextServer(const CServer* lastserver) const
+CServer* CServerList::GetSuccServer(const CServer* lastserver) const
 {
 	if (list.IsEmpty())
 		return NULL;
@@ -622,11 +673,22 @@ CServer* CServerList::GetServerByIP(uint32 nIP) const
 	return NULL;
 }
 
-CServer* CServerList::GetServerByIP(uint32 nIP, uint16 nPort) const
+CServer* CServerList::GetServerByIPTCP(uint32 nIP, uint16 nTCPPort) const
 {
 	for (POSITION pos = list.GetHeadPosition();pos != 0;){
         CServer* s = list.GetNext(pos);
-		if (s->GetIP() == nIP && s->GetPort() == nPort)
+		if (s->GetIP() == nIP && s->GetPort() == nTCPPort)
+			return s;
+	}
+	return NULL;
+}
+
+CServer* CServerList::GetServerByIPUDP(uint32 nIP, uint16 nUDPPort, bool bObfuscationPorts) const
+{
+	for (POSITION pos = list.GetHeadPosition();pos != 0;){
+        CServer* s = list.GetNext(pos);
+		if (s->GetIP() == nIP && (s->GetPort() == nUDPPort-4 ||
+			(bObfuscationPorts && (s->GetObfuscationPortUDP() == nUDPPort) || (s->GetPort() == nUDPPort - 12))))
 			return s; 
 	}
 	return NULL;
@@ -663,14 +725,16 @@ bool CServerList::SaveServermetToFile()
 		{
 			const CServer* nextserver = GetServerAt(j);
 
-			servermet.WriteUInt32(nextserver->GetIP());
+			// don't write potential out-dated IPs of dynIP-servers
+			servermet.WriteUInt32(nextserver->HasDynIP() ? 0 : nextserver->GetIP());
 			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 			/*
 			servermet.WriteUInt16(nextserver->GetPort());
 			*/
 			servermet.WriteUInt16(nextserver->GetConnPort());
 			//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-			uint32 uTagCount = 0;
+
+			UINT uTagCount = 0;
 			ULONG uTagCountFilePos = (ULONG)servermet.GetPosition();
 			servermet.WriteUInt32(uTagCount);
 
@@ -776,6 +840,30 @@ bool CServerList::SaveServermetToFile()
 			if (nextserver->GetLowIDUsers()){
 				CTag tagLowIDUsers(ST_LOWIDUSERS, nextserver->GetLowIDUsers());
 				tagLowIDUsers.WriteTagToFile(&servermet);
+				uTagCount++;
+			}
+
+			if (nextserver->GetServerKeyUDP(true)){
+				CTag tagServerKeyUDP(ST_UDPKEY, nextserver->GetServerKeyUDP(true));
+				tagServerKeyUDP.WriteTagToFile(&servermet);
+				uTagCount++;
+			}
+
+			if (nextserver->GetServerKeyUDPIP()){
+				CTag tagServerKeyUDPIP(ST_UDPKEYIP, nextserver->GetServerKeyUDPIP());
+				tagServerKeyUDPIP.WriteTagToFile(&servermet);
+				uTagCount++;
+			}
+
+			if (nextserver->GetObfuscationPortTCP()){
+				CTag tagObfuscationPortTCP(ST_TCPPORTOBFUSCATION, nextserver->GetObfuscationPortTCP());
+				tagObfuscationPortTCP.WriteTagToFile(&servermet);
+				uTagCount++;
+			}
+
+			if (nextserver->GetObfuscationPortUDP()){
+				CTag tagObfuscationPortUDP(ST_UDPPORTOBFUSCATION, nextserver->GetObfuscationPortUDP());
+				tagObfuscationPortUDP.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 
@@ -919,6 +1007,83 @@ void CServerList::Process()
 {
 	if (::GetTickCount() - m_nLastSaved > MIN2MS(17))
 		SaveServermetToFile();
+}
+
+int CServerList::GetPositionOfServer(const CServer* pServer) const
+{
+	int iPos = -1;
+	for (POSITION pos = list.GetHeadPosition(); pos != NULL; ){
+		iPos++;
+		if (pServer == list.GetNext(pos))
+			break;
+	}
+	return iPos;
+}
+
+void CServerList::RemoveDuplicatesByAddress(const CServer* pExceptThis)
+{
+	POSITION pos = list.GetHeadPosition();
+	while (pos)
+	{
+		CServer* pServer = list.GetNext(pos);
+		if (pServer == pExceptThis)
+			continue;
+		if (   _tcsicmp(pServer->GetAddress(), pExceptThis->GetAddress()) == 0
+			&& pServer->GetPort() == pExceptThis->GetPort())
+		{
+			theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(pServer);
+			return;
+		}
+	}
+}
+
+void CServerList::RemoveDuplicatesByIP(const CServer* pExceptThis)
+{
+	POSITION pos = list.GetHeadPosition();
+	while (pos)
+	{
+		CServer* pServer = list.GetNext(pos);
+		if (pServer == pExceptThis)
+			continue;
+		if (pServer->GetIP() == pExceptThis->GetIP() && pServer->GetPort() == pExceptThis->GetPort())
+		{
+			theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(pServer);
+			return;
+		}
+	}
+}
+
+void CServerList::CheckForExpiredUDPKeys() {
+	
+	if (!thePrefs.IsServerCryptLayerUDPEnabled())
+		return;
+
+	uint32 cKeysTotal = 0;
+	uint32 cKeysExpired = 0;
+	uint32 cPingDelayed = 0;
+	const uint32 dwIP = theApp.GetPublicIP();
+	const uint32 tNow = (uint32)time(NULL);
+	ASSERT( dwIP != 0 );
+
+	for (POSITION pos = list.GetHeadPosition();pos != 0;){
+        CServer* pServer = list.GetNext(pos);
+		if (pServer->SupportsObfuscationUDP() && pServer->GetServerKeyUDP(true) != 0 && pServer->GetServerKeyUDPIP() != dwIP){
+			cKeysTotal++;
+			cKeysExpired++;
+			if (tNow - pServer->GetRealLastPingedTime() < UDPSERVSTATMINREASKTIME){
+				cPingDelayed++;
+				// next ping: Now + (MinimumDelay - already elapsed time)
+				pServer->SetLastPingedTime((tNow - (uint32)UDPSERVSTATREASKTIME) + (UDPSERVSTATMINREASKTIME - (tNow - pServer->GetRealLastPingedTime())));
+			}
+			else
+				pServer->SetLastPingedTime(0);
+		}
+		else if (pServer->SupportsObfuscationUDP() && pServer->GetServerKeyUDP(false) != 0)
+			cKeysTotal++;
+	}
+
+	DebugLog(_T("Possible IP Change - Checking for expired Server UDP-Keys: %u UDP Keys total, %u UDP Keys expired, %u immediate UDP Pings forced, %u delayed UDP Pings forced"),
+		cKeysTotal, cKeysExpired, cKeysExpired - cPingDelayed, cPingDelayed); 
 }
 
 //EastShare Start - added by AndCycle, IP to Country

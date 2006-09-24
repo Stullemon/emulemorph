@@ -439,6 +439,8 @@ static BOOL ParseStreamHeader(int hAviFile, DWORD dwLengthLeft, STREAMHEADER* pS
 
 BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFullInfo)
 {
+	ASSERT( !bFullInfo || mi->strInfo.m_hWnd != NULL );
+
 	BOOL bResult = FALSE;
 
 	// Open AVI file
@@ -482,12 +484,20 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 		goto cleanup;
 
 	// We need to read almost all streams (regardless of 'bFullInfo' mode) because we need to get the 'dwMovieChunkSize'
-	BOOL bReadAllStreams;
-	bReadAllStreams = FALSE;
-	while (!bReadAllStreams && dwLengthLeft >= sizeof(DWORD)*2)
+	BOOL bHaveReadAllStreams;
+	bHaveReadAllStreams = FALSE;
+	while (!bHaveReadAllStreams && dwLengthLeft >= sizeof(DWORD)*2)
 	{
 		if (!ReadChunkHeader(hAviFile, &fccType, &dwLength))
 			goto inv_format_errno;
+		if (fccType == 0 && dwLength == 0) {
+			// We jumped right into a gap which is (still) filled with 0-bytes. If we 
+			// continue reading this until EOF we throw an error although we may have
+			// already read valid data.
+			if (mi->iVideoStreams > 0 || mi->iAudioStreams > 0)
+				break; // already have valid data
+			goto cleanup;
+		}
 
 		BOOL bInvalidLength = FALSE;
 		if (!bSizeInvalid)
@@ -550,10 +560,12 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 									if (strmhdr.dwFormatLen >= sizeof(*strmhdr.fmt.wav) && strmhdr.fmt.wav)
 										dwAllNonVideoAvgBytesPerSec += strmhdr.fmt.wav->wf.nAvgBytesPerSec;
 
-									if (bFullInfo)
+									if (bFullInfo && mi->strInfo.m_hWnd)
 									{
-										if (!mi->strInfo.str.IsEmpty())
+										if (!mi->strInfo.IsEmpty())
 											mi->strInfo << _T("\n");
+										mi->OutputFileName();
+										mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfBold);
 										mi->strInfo << GetResString(IDS_AUDIO) << _T(" #") << mi->iAudioStreams;
 										if (strmhdr.nam && strmhdr.nam[0] != '\0')
 											mi->strInfo << _T(": \"") << strmhdr.nam << _T("\"");
@@ -619,10 +631,12 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 								}
 								else
 								{
-									if (bFullInfo)
+									if (bFullInfo && mi->strInfo.m_hWnd)
 									{
-										if (!mi->strInfo.str.IsEmpty())
+										if (!mi->strInfo.IsEmpty())
 											mi->strInfo << _T("\n");
+										mi->OutputFileName();
+										mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfBold);
 										mi->strInfo << GetResString(IDS_VIDEO) << _T(" #") << mi->iVideoStreams;
 										if (strmhdr.nam && strmhdr.nam[0] != '\0')
 											mi->strInfo << _T(": \"") << strmhdr.nam << _T("\"");
@@ -649,10 +663,12 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 							else
 							{
 								iNonAVStreams++;
-								if (bFullInfo)
+								if (bFullInfo && mi->strInfo.m_hWnd)
 								{
-									if (!mi->strInfo.str.IsEmpty())
+									if (!mi->strInfo.IsEmpty())
 										mi->strInfo << _T("\n");
+									mi->OutputFileName();
+									mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfBold);
 									mi->strInfo << _T("Unknown Stream #") << iStream;
 									if (strmhdr.nam && strmhdr.nam[0] != '\0')
 										mi->strInfo << _T(": \"") << strmhdr.nam << _T("\"");
@@ -678,11 +694,11 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 					case listtypeAVIMOVIE:
 						dwMovieChunkSize = dwLength;
 						if (!bFullInfo)
-							bReadAllStreams = TRUE;
+							bHaveReadAllStreams = TRUE;
 						break;
 					case mmioFOURCC('I', 'N', 'F', 'O'):
 					{
-						if (bFullInfo && dwLength < 0x10000)
+						if (bFullInfo && mi->strInfo.m_hWnd && dwLength < 0x10000)
 						{
 							bool bError = false;
 							BYTE* pChunk = new BYTE[dwLength];
@@ -690,8 +706,10 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 							{
 								CSafeMemFile ck(pChunk, dwLength);
 								try {
-									if (!mi->strInfo.str.IsEmpty())
+									if (!mi->strInfo.IsEmpty())
 										mi->strInfo << _T("\n");
+									mi->OutputFileName();
+									mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfBold);
 									mi->strInfo << GetResString(IDS_FD_GENERAL) << _T("\n");
 
 									while (ck.GetPosition() < ck.GetLength())
@@ -710,6 +728,8 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 											ck.Seek(ckLen, CFile::current);
 											strValue.Empty();
 										}
+										strValue.Replace(_T("\r"), _T(" "));
+										strValue.Replace(_T("\n"), _T(" "));
 										switch (ckId)
 										{
 											case mmioFOURCC('I', 'N', 'A', 'M'):
@@ -750,12 +770,12 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 							delete[] pChunk;
 
 							if (bError) {
-								bReadAllStreams = TRUE;
+								bHaveReadAllStreams = TRUE;
 							}
 							else {
 								if (dwLength & 1) {
 									if (lseek(hAviFile, 1, SEEK_CUR) == -1)
-										bReadAllStreams = TRUE;
+										bHaveReadAllStreams = TRUE;
 								}
 								dwLength = 0;
 							}
@@ -781,7 +801,7 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 
 			case ckidAVINEWINDEX:	// idx1
 				if (!bFullInfo)
-					bReadAllStreams = TRUE;
+					bHaveReadAllStreams = TRUE;
 				break;
 
 			case mmioFOURCC('f', 'm', 't', ' '):
@@ -819,12 +839,12 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 					delete[] strmhdr.nam;
 					iStream++;
 					if (!bFullInfo)
-						bReadAllStreams = TRUE;
+						bHaveReadAllStreams = TRUE;
 				}
 				break;
 		}
 
-		if (bReadAllStreams)
+		if (bHaveReadAllStreams)
 			break;
 		if (dwLength)
 		{
@@ -914,6 +934,37 @@ bool GetMimeType(LPCTSTR pszFilePath, CString& rstrMimeType)
 				rstrMimeType = _T("application/x-lha-compressed");
 				return true;
 			}
+		}
+	}
+	return false;
+}
+
+const BYTE *FindPattern(const BYTE *pucBuff, int iBuffSize, const BYTE *pucPattern, int iPatternSize)
+{
+	int iSearchRange = iBuffSize - iPatternSize;
+	while (iSearchRange-- >= 0) {
+		if (memcmp(pucBuff, pucPattern, iPatternSize) == 0)
+			return pucBuff;
+		pucBuff++;
+	}
+	return NULL;
+}
+
+bool GetDRM(LPCTSTR pszFilePath)
+{
+	int fd = _topen(pszFilePath, O_RDONLY | O_BINARY);
+	if (fd != -1)
+	{
+		BYTE aucBuff[8192];
+		int iRead = read(fd, aucBuff, sizeof aucBuff);
+		close(fd);
+		fd = -1;
+
+		if (iRead > 0)
+		{
+			static const WCHAR wszWrmHdr[] = L"<WRMHEADER";
+			if (FindPattern(aucBuff, sizeof aucBuff, (const BYTE *)wszWrmHdr, sizeof(wszWrmHdr) - sizeof(wszWrmHdr[0])))
+				return true;
 		}
 	}
 	return false;

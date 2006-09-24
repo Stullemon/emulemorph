@@ -29,6 +29,104 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
+
+//////////////////////////////////////////////////////////////////////////////
+// Helper Functions for FileDetail and SharedFileDetailsSheet dialogs
+
+bool NeedArchiveInfoPage(const CSimpleArray<CObject*>* paItems)
+{
+	if (paItems->GetSize() == 1)
+	{
+		CKnownFile *pFile = STATIC_DOWNCAST(CKnownFile, (*paItems)[0]);
+		EFileType eFileType = GetFileTypeEx(pFile);
+		switch (eFileType) {
+			case ARCHIVE_ZIP:
+			case ARCHIVE_RAR:
+			case ARCHIVE_ACE:
+				return true;
+		}
+	}
+	return false;
+}
+
+void UpdateFileDetailsPages(CListViewWalkerPropertySheet *pSheet,
+							CResizablePage *pArchiveInfo, CResizablePage *pMediaInfo)
+{
+	if (pSheet->GetItems().GetSize() == 1)
+	{
+		bool bUpdateWindow = false;
+		CPropertyPage *pActivePage = pSheet->GetActivePage();
+		bool bNeedArchiveInfoPage = NeedArchiveInfoPage(&pSheet->GetItems());
+		if (bNeedArchiveInfoPage)
+		{
+			bool bFound = false;
+			for (int i = 0; !bFound && i < pSheet->GetPages().GetSize(); i++) {
+				if (pSheet->GetPages()[i] == pArchiveInfo)
+					bFound = true;
+			}
+
+			int iMediaInfoPage = pSheet->GetPageIndex(pMediaInfo);
+			bool bMediaInfoPageWasActive = false;
+			if (iMediaInfoPage >= 0) {
+				if (pActivePage == pMediaInfo)
+					bMediaInfoPageWasActive = true;
+				if (!bUpdateWindow) {
+					pSheet->SetRedraw(FALSE);
+					bUpdateWindow = true;
+				}
+				pSheet->RemovePage(pMediaInfo);
+			}
+
+			if (!bFound) {
+				ASSERT( iMediaInfoPage >= 0 );
+				if (!bUpdateWindow) {
+					pSheet->SetRedraw(FALSE);
+					bUpdateWindow = true;
+				}
+				pSheet->InsertPage(iMediaInfoPage, pArchiveInfo);
+				if (bMediaInfoPageWasActive)
+					pSheet->SetActivePage(iMediaInfoPage);
+			}
+		}
+		else
+		{
+			bool bFound = false;
+			for (int i = 0; !bFound && i < pSheet->GetPages().GetSize(); i++) {
+				if (pSheet->GetPages()[i] == pMediaInfo)
+					bFound = true;
+			}
+
+			int iArchiveInfoPage = pSheet->GetPageIndex(pArchiveInfo);
+			bool bArchiveInfoPageWasActive = false;
+			if (iArchiveInfoPage >= 0) {
+				if (pActivePage == pArchiveInfo)
+					bArchiveInfoPageWasActive = true;
+				if (!bUpdateWindow) {
+					pSheet->SetRedraw(FALSE);
+					bUpdateWindow = true;
+				}
+				pSheet->RemovePage(pArchiveInfo);
+			}
+
+			if (!bFound) {
+				ASSERT( iArchiveInfoPage >= 0 );
+				if (!bUpdateWindow) {
+					pSheet->SetRedraw(FALSE);
+					bUpdateWindow = true;
+				}
+				pSheet->InsertPage(iArchiveInfoPage, pMediaInfo);
+				if (bArchiveInfoPageWasActive)
+					pSheet->SetActivePage(pMediaInfo);
+			}
+		}
+		if (bUpdateWindow) {
+			pSheet->SetRedraw(TRUE);
+			pSheet->Invalidate();
+			pSheet->UpdateWindow();
+		}
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // CFileDetailDialog
 
@@ -70,15 +168,22 @@ CFileDetailDialog::CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, UI
 	m_wndComments.SetFiles(&m_aItems);
 	AddPage(&m_wndComments);
 
+	m_wndArchiveInfo.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndArchiveInfo.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndArchiveInfo.m_psp.pszIcon = _T("ARCHIVE_PREVIEW");
+	m_wndArchiveInfo.SetFiles(&m_aItems);
 	m_wndMediaInfo.m_psp.dwFlags &= ~PSP_HASHELP;
 	m_wndMediaInfo.m_psp.dwFlags |= PSP_USEICONID;
 	m_wndMediaInfo.m_psp.pszIcon = _T("MEDIAINFO");
 	m_wndMediaInfo.SetFiles(&m_aItems);
-	AddPage(&m_wndMediaInfo);
+	if (NeedArchiveInfoPage(&m_aItems))
+		AddPage(&m_wndArchiveInfo);
+	else
+		AddPage(&m_wndMediaInfo);
 
 	if (m_aItems.GetSize() == 1)
 	{
-		if (thePrefs.IsExtControlsEnabled()){
+		if (thePrefs.IsExtControlsEnabled()) {
 			m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
 			m_wndMetaData.m_psp.dwFlags |= PSP_USEICONID;
 			m_wndMetaData.m_psp.pszIcon = _T("METADATA");
@@ -126,12 +231,14 @@ BOOL CFileDetailDialog::OnInitDialog()
 	InitWindowStyles(this);
 	EnableSaveRestore(_T("FileDetailDialog")); // call this after(!) OnInitDialog
 	UpdateTitle();
+
 	return bResult;
 }
 
 LRESULT CFileDetailDialog::OnDataChanged(WPARAM, LPARAM)
 {
 	UpdateTitle();
+	UpdateFileDetailsPages(this, &m_wndArchiveInfo, &m_wndMediaInfo);
 	return 1;
 }
 

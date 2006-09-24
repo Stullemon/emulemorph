@@ -52,6 +52,12 @@ CServer::CServer(const ServerMet_Struct* in_data)
 	m_uDescReqChallenge = 0;
 	m_uLowIDUsers = 0;
 	challenge = 0;
+	m_dwServerKeyUDP = 0;
+	m_bCryptPingReplyPending = false;
+	m_dwIPServerKeyUDP = 0;
+	m_nObfuscationPortTCP = 0;
+	m_nObfuscationPortUDP = 0;
+	m_dwRealLastPingedTime = 0;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
@@ -83,6 +89,12 @@ CServer::CServer(uint16 in_port, LPCTSTR i_addr)
 	m_uDescReqChallenge = 0;
 	m_uLowIDUsers = 0;
 	challenge = 0;
+	m_dwServerKeyUDP = 0;
+	m_bCryptPingReplyPending = false;
+	m_dwIPServerKeyUDP = 0;
+	m_nObfuscationPortTCP = 0;
+	m_nObfuscationPortUDP = 0;
+	m_dwRealLastPingedTime = 0;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
@@ -113,6 +125,12 @@ CServer::CServer(const CServer* pOld)
 	m_uDescReqChallenge = pOld->m_uDescReqChallenge;
 	m_uLowIDUsers = pOld->m_uLowIDUsers;
 	challenge = pOld->challenge;
+	m_dwServerKeyUDP = pOld->m_dwServerKeyUDP;
+	m_bCryptPingReplyPending = pOld->m_bCryptPingReplyPending;
+	m_dwIPServerKeyUDP = pOld->m_dwIPServerKeyUDP;
+	m_nObfuscationPortTCP = pOld->m_nObfuscationPortTCP;
+	m_nObfuscationPortUDP = pOld->m_nObfuscationPortUDP;
+	m_dwRealLastPingedTime = pOld->m_dwRealLastPingedTime;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
@@ -155,9 +173,12 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 		break;
 	case ST_DYNIP:
 		ASSERT( tag->IsStr() );
-		if (tag->IsStr()){
-			if (m_strDynIP.IsEmpty())
-				m_strDynIP = tag->GetStr();
+		if (tag->IsStr() && !tag->GetStr().IsEmpty()){
+			if (m_strDynIP.IsEmpty()) {
+				// set dynIP and reset available (out-dated) IP
+				SetDynIP(tag->GetStr());
+				SetIP(0);
+			}
 		}
 		break;
 	case ST_MAXUSERS:
@@ -186,7 +207,7 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 				m_strVersion = tag->GetStr();
 		}
 		else if (tag->IsInt())
-			m_strVersion.Format(_T("%u.%u"), tag->GetInt() >> 16, tag->GetInt() & 0xFFFF);
+			m_strVersion.Format(_T("%u.%02u"), tag->GetInt() >> 16, tag->GetInt() & 0xFFFF);
 		else
 			ASSERT(0);
 		break;
@@ -205,6 +226,26 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 		break;
 	case ST_IP:
 		ASSERT( tag->IsInt() );
+		break;
+	case ST_UDPKEY:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
+			m_dwServerKeyUDP = tag->GetInt();
+		break;
+	case ST_UDPKEYIP:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
+			m_dwIPServerKeyUDP = tag->GetInt();
+		break;
+	case ST_TCPPORTOBFUSCATION:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
+			m_nObfuscationPortTCP = (uint16)tag->GetInt();
+		break;
+	case ST_UDPPORTOBFUSCATION:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
+			m_nObfuscationPortUDP = (uint16)tag->GetInt();
 		break;
 	default:
 		if (tag->GetNameID()==0 && !CmpED2KTagName(tag->GetName(), "files")){
@@ -277,6 +318,19 @@ bool CServer::IsEqual(const CServer* pServer) const
 	if (HasDynIP() || pServer->HasDynIP())
 		return false;
 	return (GetIP() == pServer->GetIP());
+}
+
+uint32 CServer::GetServerKeyUDP(bool bForce) const{
+	if (m_dwIPServerKeyUDP != 0 && m_dwIPServerKeyUDP == theApp.GetPublicIP() || bForce)
+		return m_dwServerKeyUDP;
+	else
+		return 0;
+}
+
+void CServer::SetServerKeyUDP(uint32 dwServerKeyUDP){
+	ASSERT( theApp.GetPublicIP() != 0 || dwServerKeyUDP == 0 );
+	m_dwServerKeyUDP = dwServerKeyUDP;
+	m_dwIPServerKeyUDP = theApp.GetPublicIP();
 }
 
 //EastShare Start - added by AndCycle, IP to Country

@@ -240,30 +240,31 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("Server")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientAMule")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientLPhant")));
-	m_ImageList.Add(CTempIconLoader(_T("RATING_NOTRATED")));
-	m_ImageList.Add(CTempIconLoader(_T("RATING_FAKE")));
-	m_ImageList.Add(CTempIconLoader(_T("RATING_POOR")));
-	m_ImageList.Add(CTempIconLoader(_T("RATING_FAIR")));
-	m_ImageList.Add(CTempIconLoader(_T("RATING_GOOD")));
-	m_ImageList.Add(CTempIconLoader(_T("RATING_EXCELLENT")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_NotRated")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Fake")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Poor")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Fair")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Good")));
+	m_ImageList.Add(CTempIconLoader(_T("Rating_Excellent")));
+	m_ImageList.Add(CTempIconLoader(_T("Collection_Search"))); // rating for comments are searched on kad
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
-	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
-	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey"))); //21
-	m_ImageList.Add(CTempIconLoader(_T("Morph"))); //22
-	m_ImageList.Add(CTempIconLoader(_T("SCARANGEL"))); //23
-	m_ImageList.Add(CTempIconLoader(_T("STULLE"))); //24
-	m_ImageList.Add(CTempIconLoader(_T("MAXMOD"))); //25
-	m_ImageList.Add(CTempIconLoader(_T("XTREME"))); //26
-	m_ImageList.Add(CTempIconLoader(_T("EASTSHARE"))); //27
-	m_ImageList.Add(CTempIconLoader(_T("IONIX"))); //28
-	m_ImageList.Add(CTempIconLoader(_T("CYREX"))); //29
-	m_ImageList.Add(CTempIconLoader(_T("NEXTEMF"))); //30
-	m_ImageList.Add(CTempIconLoader(_T("NEO"))); //31
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2); //32
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3); //33
-	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("OverlayObfu"))), 2);
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("OverlaySecureObfu"))), 3);
+	//MORPH START - Added by SiRoB, More client
+	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey"))); //24
+	m_ImageList.Add(CTempIconLoader(_T("Morph"))); //25
+	m_ImageList.Add(CTempIconLoader(_T("SCARANGEL"))); //26
+	m_ImageList.Add(CTempIconLoader(_T("STULLE"))); //27
+	m_ImageList.Add(CTempIconLoader(_T("MAXMOD"))); //28
+	m_ImageList.Add(CTempIconLoader(_T("XTREME"))); //29
+	m_ImageList.Add(CTempIconLoader(_T("EASTSHARE"))); //30
+	m_ImageList.Add(CTempIconLoader(_T("IONIX"))); //31
+	m_ImageList.Add(CTempIconLoader(_T("CYREX"))); //32
+	m_ImageList.Add(CTempIconLoader(_T("NEXTEMF"))); //33
+	m_ImageList.Add(CTempIconLoader(_T("NEO"))); //34
+	//MORPH END   - Added by SiRoB, More client
 	//MORPH START - Added by SiRoB, WebCache 1.2f
-	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE"))); // 34// jp webcacheclient icon
+	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE"))); // 35// jp webcacheclient icon
 	//MORPH END   - Added by SiRoB, WebCache 1.2
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
@@ -275,7 +276,10 @@ void CDownloadListCtrl::SetAllIcons()
 	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendOvl")));
 	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendSlotOvl")));
 	//MORPH END   - Addded by SiRoB, Friend Addon
-	
+	//MORPH START - Credit Overlay Icon
+	m_overlayimages.Add(CTempIconLoader(_T("ClientCreditOvl")));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientCreditSecureOvl")));
+	//MORPH END   - Credit Overlay Icon
 }
 
 void CDownloadListCtrl::Localize()
@@ -559,10 +563,8 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 				::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc->GetSafeHdc(), rcDraw.left, rcDraw.top, ILD_NORMAL|ILD_TRANSPARENT);
 			rcDraw.left += theApp.GetSmallSytemIconSize().cx;
 			if ( thePrefs.ShowRatingIndicator() ){
-				if  (lpPartFile->HasComment() || lpPartFile->HasRating()){
- 					if (thePrefs.ShowRatingIndicator() && (lpPartFile->HasComment() || lpPartFile->HasRating()))
-						m_ImageList.Draw(dc, lpPartFile->UserRating()+14, rcDraw.TopLeft(), ILD_NORMAL);
-				}
+				if (lpPartFile->HasComment() || lpPartFile->HasRating() || lpPartFile->IsKadCommentSearchRunning())
+					m_ImageList.Draw(dc, lpPartFile->UserRating(true)+14, rcDraw.TopLeft(), ILD_NORMAL);
 				rcDraw.left += RATING_ICON_WIDTH;
 			}
 
@@ -983,53 +985,65 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					m_ImageList.Draw(dc, 3, point, ILD_NORMAL);
 				}
 				cur_rec.left += 20;
-				//MORPH START - Modified by SiRoB, More client & ownCredit overlay icon
-				UINT uOvlImg = INDEXTOOVERLAYMASK(((lpUpDownClient->Credits() && lpUpDownClient->Credits()->GetCurrentIdentState(lpUpDownClient->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((lpUpDownClient->Credits() && lpUpDownClient->Credits()->GetMyScoreRatio(lpUpDownClient->GetIP()) > 1) ? 2 : 0));
+				UINT uOvlImg = 0;
+				if ((lpUpDownClient->Credits() && lpUpDownClient->Credits()->GetCurrentIdentState(lpUpDownClient->GetIP()) == IS_IDENTIFIED))
+					uOvlImg |= 1;
+				if (lpUpDownClient->IsObfuscatedConnectionEstablished())
+					uOvlImg |= 2;
+
 				POINT point2= {cur_rec.left,cur_rec.top+1};
+				//MORPH START - Modified by SiRoB, More client & ownCredit overlay icon
 				//MORPH - Removed by SiRoB, Friend Addon
 				/*
 				if (lpUpDownClient->IsFriend())
-					m_ImageList.Draw(dc, 6, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 6, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else*/ if (lpUpDownClient->GetClientSoft() == SO_EDONKEYHYBRID)
-					m_ImageList.Draw(dc, 9, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 9, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else if (lpUpDownClient->GetClientSoft() == SO_MLDONKEY)
-					m_ImageList.Draw(dc, 8, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 8, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else if (lpUpDownClient->GetClientSoft() == SO_SHAREAZA)
-					m_ImageList.Draw(dc, 10, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 10, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else if (lpUpDownClient->GetClientSoft() == SO_URL)
-					m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else if (lpUpDownClient->GetClientSoft() == SO_AMULE)
-					m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else if (lpUpDownClient->GetClientSoft() == SO_LPHANT)
-					m_ImageList.Draw(dc, 13, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 13, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				//MORPH START - Added by SiRoB, WebCache 1.2f
 				// jp webcacheclient icon START 
 				else if (lpUpDownClient->GetClientSoft() == SO_WEBCACHE)
-					m_ImageList.Draw(dc, 34, point2, ILD_NORMAL | uOvlImg);
+					m_ImageList.Draw(dc, 35, point2, ILD_NORMAL | uOvlImg);
 				// jp webcacheclient icon END
 				//MORPH END   - Added by SiRoB, WebCache 1.2f
 				else if (lpUpDownClient->ExtProtocolAvailable())
 				//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
 				{
 					if(lpUpDownClient->GetModClient() == MOD_NONE)
-						m_ImageList.Draw(dc, 5, point2, ILD_NORMAL | uOvlImg);
+						m_ImageList.Draw(dc, 5, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 					else
-						m_ImageList.Draw(dc, lpUpDownClient->GetModClient()+21, point2, ILD_NORMAL | uOvlImg);
+						m_ImageList.Draw(dc, lpUpDownClient->GetModClient()+24, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				}
 				//MORPH END   - Modified by SiRoB, More client icon & Credit overlay icon
 				else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEY)
-						m_ImageList.Draw(dc, 21, point2, ILD_NORMAL | uOvlImg);
+						m_ImageList.Draw(dc, 21, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else
-					m_ImageList.Draw(dc, 7, point2, ILD_NORMAL | uOvlImg);
-
+					m_ImageList.Draw(dc, 7, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
+				//MORPH START - Credit Overlay Icon
+				if (lpUpDownClient->Credits() && lpUpDownClient->Credits()->GetMyScoreRatio(lpUpDownClient->GetIP()) > 1) {
+					if (uOvlImg & 1)
+						m_overlayimages.Draw(dc, 4, point2, ILD_TRANSPARENT);
+					else
+						m_overlayimages.Draw(dc, 3, point2, ILD_TRANSPARENT);
+				}
+				//MORPH END   - Credit Overlay Icon
+				//MORPH START - Friend Addon
+				if (lpUpDownClient->IsFriend())
+					m_overlayimages.Draw(dc, lpUpDownClient->GetFriendSlot()?2:1,point2, ILD_TRANSPARENT);
+				//MORPH END   - Friend Addon
 				// Mighty Knife: Community visualization
 				if (lpUpDownClient->IsCommunity())
 					m_overlayimages.Draw(dc,0, point2, ILD_TRANSPARENT);
 				// [end] Mighty Knife
-				//MORPH START - Added by SiRoB, Friend Addon
-				if (lpUpDownClient->IsFriend())
-					m_overlayimages.Draw(dc, lpUpDownClient->GetFriendSlot()?2:1,point2, ILD_TRANSPARENT);
-				//MORPH END   - Added by SiRoB, Friend Addon
 				cur_rec.left += 20;
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
@@ -1060,12 +1074,22 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				case SF_SERVER:
 					buffer = _T("eD2K Server");
 					break;
+				//MORPH - Source cache
+				case SF_CACHE_SERVER:
+					buffer = _T("eD2K Server (SC)");
+					break;
+				//MORPH - Source cache
 				case SF_KADEMLIA:
 					buffer = GetResString(IDS_KADEMLIA);
 					break;
 				case SF_SOURCE_EXCHANGE:
 					buffer = GetResString(IDS_SE);
 					break;
+				//MORPH - Source cache
+				case SF_CACHE_SOURCE_EXCHANGE:
+					buffer = GetResString(IDS_SE) + _T(" (SC)");
+					break;
+				//MORPH - Source cache
 				case SF_PASSIVE:
 					buffer = GetResString(IDS_PASSIVE);
 					break;
@@ -2033,7 +2057,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			CString buffer;
 			switch (thePrefs.GetPermissions()){
 				case PERM_ALL:
-				buffer.Format(_T(" (%s)"),GetResString(IDS_FSTATUS_PUBLIC));
+				buffer.Format(_T(" (%s)"),GetResString(IDS_PW_EVER));
 					break;
 				case PERM_FRIENDS:
 				buffer.Format(_T(" (%s)"),GetResString(IDS_FSTATUS_FRIENDSONLY));
@@ -2142,9 +2166,11 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			A4AFMenu.CreateMenu();
 			if (thePrefs.IsExtControlsEnabled()) {
 // ZZ:DownloadManager -->
+#ifdef _DEBUG
                 if (content->type == UNAVAILABLE_SOURCE) {
                     A4AFMenu.AppendMenu(MF_STRING,MP_A4AF_CHECK_THIS_NOW,GetResString(IDS_A4AF_CHECK_THIS_NOW));
                 }
+# endif
 // <-- ZZ:DownloadManager
 				if (A4AFMenu.GetMenuItemCount()>0)
 					ClientMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
@@ -2260,8 +2286,8 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			CPartFile* file = (CPartFile*)content->value;
 			switch (wParam)
 			{
-				case MPG_DELETE: // keyboard del will continue to remove completed files from the screen while cancel will now also be available for complete files
 				case MP_CANCEL:
+				case MPG_DELETE: // keyboard del will continue to remove completed files from the screen while cancel will now also be available for complete files
 				{
 					if (selectedCount > 0)
 					{
@@ -2847,7 +2873,6 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		}
 		else{
 			CUpDownClient* client = (CUpDownClient*)content->value;
-			CPartFile* file = (CPartFile*)content->owner; // added by sivka
 
 			switch (wParam){
 				case MP_SHOWLIST:
@@ -2895,10 +2920,12 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					break;
 				case MP_BOOT:
 					if (client->GetKadPort())
-						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
 					break;
 // ZZ:DownloadManager -->
-				case MP_A4AF_CHECK_THIS_NOW:
+#ifdef _DEBUG
+				case MP_A4AF_CHECK_THIS_NOW: {
+					CPartFile* file = (CPartFile*)content->owner;
 					if (file->GetStatus(false) == PS_READY || file->GetStatus(false) == PS_EMPTY)
 					{
 						if (client->GetDownloadState() != DS_DOWNLOADING)
@@ -2908,6 +2935,8 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 						}
 					}
 					break;
+				}
+#endif
 // <-- ZZ:DownloadManager
 				//MORPH START - Added by Yun.SF3, List Requested Files
 				case MP_LIST_REQUESTED_FILES: { // added by sivka
@@ -3460,7 +3489,7 @@ void CDownloadListCtrl::OnNMDblclkDownloadlist(NMHDR* /*pNMHDR*/, LRESULT* pResu
 						{
 							CPartFile* file = (CPartFile*)content->value;
 							if (thePrefs.ShowRatingIndicator() 
-								&& (file->HasComment() || file->HasRating()) 
+								&& (file->HasComment() || file->HasRating() || file->IsKadCommentSearchRunning()) 
 								&& pt.x >= FILE_ITEM_MARGIN_X+theApp.GetSmallSytemIconSize().cx 
 								&& pt.x <= FILE_ITEM_MARGIN_X+theApp.GetSmallSytemIconSize().cx+RATING_ICON_WIDTH)
 								ShowFileDialog(IDD_COMMENTLST);
@@ -3523,7 +3552,7 @@ void CDownloadListCtrl::CreateMenues()
 	// Mighty Knife: Community visible filelist
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,GetResString(IDS_COMMUNITY));
 	// [end] Mighty Knife
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_PW_EVER));
 	// xMule_MOD: showSharePermissions
 
 	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION), _T("FILEPERMISSION"));	// xMule_MOD: showSharePermissions
@@ -3662,7 +3691,7 @@ void CDownloadListCtrl::ShowSelectedFileDetails()
 	{
 		CPartFile* file = (CPartFile*)content->value;
 		if (thePrefs.ShowRatingIndicator() 
-			&& (file->HasComment() || file->HasRating()) 
+			&& (file->HasComment() || file->HasRating() || file->IsKadCommentSearchRunning()) 
 			&& pt.x >= FILE_ITEM_MARGIN_X+theApp.GetSmallSytemIconSize().cx 
 			&& pt.x <= FILE_ITEM_MARGIN_X+theApp.GetSmallSytemIconSize().cx+RATING_ICON_WIDTH)
 			ShowFileDialog(IDD_COMMENTLST);

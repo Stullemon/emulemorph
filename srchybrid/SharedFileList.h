@@ -45,7 +45,7 @@ public:
 	bool	SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd = false);
 	void	RepublishFile(CKnownFile* pFile);
 	void	SetOutputCtrl(CSharedFilesCtrl* in_ctrl);
-	void	RemoveFile(CKnownFile* toremove);
+	bool	RemoveFile(CKnownFile* toremove);
 	CKnownFile* GetFileByID(const uchar* filehash) const;
 	CKnownFile*	GetFileByIndex(int index);
 	bool	IsFilePtrInList(const CKnownFile* file) const;

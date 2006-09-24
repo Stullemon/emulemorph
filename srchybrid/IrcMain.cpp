@@ -134,7 +134,7 @@ void CIrcMain::ProcessLink( CString sED2KLink )
 					CString sDefName;
 					CED2KServerLink* pSrvLink = pLink->GetServerLink();
 					_ASSERT( pSrvLink !=0 );
-					CServer* pSrv = new CServer(pSrvLink->GetPort(),ipstr(pSrvLink->GetIP()));
+					CServer* pSrv = new CServer(pSrvLink->GetPort(), pSrvLink->GetAddress());
 					_ASSERT( pSrv !=0 );
 					pSrvLink->GetDefaultName(sDefName);
 					pSrv->SetListName(sDefName);
@@ -320,8 +320,8 @@ void CIrcMain::ParseMessage( CString sRawMessage )
 					SetVerify();
 					uint32 uNewClientID = _tstoi(sRawMessage.Tokenize(_T(":"), iIndex));
 					uint16 uNewClientPort = (uint16)_tstoi(sRawMessage.Tokenize(_T("|"), iIndex));
-					/*uint32 newClientServerIP = _tstoi(*/sRawMessage.Tokenize(_T(":"), iIndex)/*)*/;
-					/*uint16 newClientServerPort = (uint16)_tstoi(*/sRawMessage.Tokenize(_T("|"), iIndex)/*)*/;
+					sRawMessage.Tokenize(_T(":"), iIndex);
+					sRawMessage.Tokenize(_T("|"), iIndex);
 					CString sHash = sRawMessage.Tokenize(_T("|"), iIndex);
 					uchar ucharUserID[16];
 					if (!strmd4(sHash,ucharUserID))

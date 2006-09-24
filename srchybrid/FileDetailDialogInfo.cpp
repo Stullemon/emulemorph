@@ -48,7 +48,7 @@ CFileDetailDialogInfo::CFileDetailDialogInfo()
 {
 	m_paFiles = NULL;
 	m_bDataChanged = false;
-	m_strCaption = GetResString(IDS_FILEINFORMATION);
+	m_strCaption = GetResString(IDS_FD_GENERAL);
 	m_psp.pszTitle = m_strCaption;
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_timer = 0;
@@ -76,6 +76,7 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 	AddAnchor(IDC_FD_X0, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_FD_X6, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_FD_X8, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_FD_X11, TOP_LEFT, TOP_RIGHT);
 
 	AddAnchor(IDC_FNAME, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_METFILE, TOP_LEFT, TOP_RIGHT);
@@ -171,7 +172,8 @@ void CFileDetailDialogInfo::RefreshData()
 		SetDlgItemText(IDC_DL_ACTIVE_TIME, str);
 
 		// last seen complete
-		struct tm* ptimLastSeenComplete = file->lastseencomplete.GetLocalTm();
+		struct tm tmTemp;
+		struct tm* ptimLastSeenComplete = file->lastseencomplete.GetLocalTm(&tmTemp);
 		if (file->lastseencomplete == NULL || ptimLastSeenComplete == NULL)
 			str.Format(GetResString(IDS_NEVER));
 		else{
@@ -218,6 +220,44 @@ void CFileDetailDialogInfo::RefreshData()
 			default:
 				SetDlgItemText(IDC_FD_AICHHASH, GetResString(IDS_UNKNOWN));
 		}
+
+		// file type
+		CString ext;
+		bool showwarning=false;
+		int pos=file->GetFileName().ReverseFind(_T('.'));
+		if (file->GetFileName().ReverseFind(_T('\\'))<pos){
+			ext=file->GetFileName().Mid(pos+1);
+			ext.MakeUpper();
+		}
+		
+		EFileType bycontent=GetFileTypeEx((CKnownFile*)file, false, true);
+		if (bycontent!=FILETYPE_UNKNOWN ) {
+			str=GetFiletypeName(bycontent) + _T("  (");
+			str.Append( GetResString(IDS_VERIFIED) + _T(')') );
+
+			int extLevel=IsExtentionTypeof(bycontent, ext);
+			if (extLevel==-1) {
+				showwarning=true;
+				str.Append(_T(" - "));
+				str.Append(GetResString(IDS_INVALIDFILEEXT) + _T(": "));
+				str.Append(ext);
+			} else if (extLevel==0) {
+				str.Append(_T(" - "));
+				str.Append(GetResString(IDS_UNKNOWNFILEEXT) + _T(": "));
+				str.Append(ext);
+			}
+		} else {
+			// not verified
+			if (pos!=-1) {
+				str=file->GetFileName().Mid(pos+1);
+				str.MakeUpper();
+				str.Append(_T("  (") );
+				str.Append( GetResString(IDS_UNVERIFIED) +_T(')') );
+			} else
+				str=GetResString(IDS_UNKNOWN);
+		}
+		GetDlgItem(IDC_EXT_WARNING)->ShowWindow(showwarning?SW_SHOW:SW_HIDE);
+		SetDlgItemText(IDC_FD_X11,str);
 	}
 	else
 	{
@@ -227,6 +267,9 @@ void CFileDetailDialogInfo::RefreshData()
 
 		SetDlgItemText(IDC_PFSTATUS, sm_pszNotAvail);
 		SetDlgItemText(IDC_PARTCOUNT, sm_pszNotAvail);
+
+		GetDlgItem(IDC_EXT_WARNING)->ShowWindow(SW_HIDE);
+		SetDlgItemText(IDC_FD_X11, sm_pszNotAvail);
 
 		SetDlgItemText(IDC_FILECREATED, sm_pszNotAvail);
 		SetDlgItemText(IDC_DL_ACTIVE_TIME, sm_pszNotAvail);
@@ -353,7 +396,8 @@ void CFileDetailDialogInfo::Localize()
 	GetDlgItem(IDC_FD_RECOV)->SetWindowText(GetResString(IDS_FD_RECOV)+_T(':'));
 	GetDlgItem(IDC_FD_COMPR)->SetWindowText(GetResString(IDS_FD_COMPR)+_T(':'));
 	GetDlgItem(IDC_FD_XAICH)->SetWindowText(GetResString(IDS_IACHHASH)+_T(':'));
-    	SetDlgItemText(IDC_REMAINING_TEXT, GetResString(IDS_DL_REMAINS)+_T(':'));
+   	SetDlgItemText(IDC_REMAINING_TEXT, GetResString(IDS_DL_REMAINS)+_T(':'));
+	SetDlgItemText(IDC_FD_X10, GetResString(IDS_TYPE)+_T(':') );
 	GetDlgItem(IDC_WC_REQ_SUCC)->SetWindowText(GetResString(IDS_WC_REQ_SUCC));
     GetDlgItem(IDC_WC_DOWNLOADED)->SetWindowText(GetResString(IDS_WC_DOWNLOADED));
 }

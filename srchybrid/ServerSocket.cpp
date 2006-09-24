@@ -40,7 +40,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -51,39 +51,72 @@ struct LoginAnswer_Struct {
 #pragma pack()
 
 
-CServerSocket::CServerSocket(CServerConnect* in_serverconnect){
+CServerSocket::CServerSocket(CServerConnect* in_serverconnect)
+{
 	serverconnect = in_serverconnect;
-	connectionstate = 0;
-	cur_server = 0;
+	connectionstate = CS_NOTCONNECTED;
+	cur_server = NULL;
 	m_bIsDeleting = false;
 	m_dwLastTransmission = 0;
+	m_bStartNewMessageLog = true;
 }
 
-CServerSocket::~CServerSocket(){
+CServerSocket::~CServerSocket()
+{
 	delete cur_server;
 }
 
-void CServerSocket::OnConnect(int nErrorCode){
-	CEMSocket::OnConnect(nErrorCode);
-	//CAsyncSocketEx::OnConnect(nErrorCode); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
-	switch (nErrorCode){
-		case 0:{
-			if (cur_server->HasDynIP()){
-				SOCKADDR_IN sockAddr = {0};
-				int nSockAddrLen = sizeof(sockAddr);
-				GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);
-				cur_server->SetIP(sockAddr.sin_addr.S_un.S_addr);
-				CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
-				if (pServer)
-					pServer->SetIP(sockAddr.sin_addr.S_un.S_addr);
-			}
+BOOL CServerSocket::OnHostNameResolved(const SOCKADDR_IN *pSockAddr)
+{
+	// If we are connecting to a dynIP-server by DN, we will get this callback after the
+	// DNS query finished.
+	//
+	if (cur_server->HasDynIP())
+	{
+		// Update the IP of this dynIP-server
+		//
+		cur_server->SetIP(pSockAddr->sin_addr.S_un.S_addr);
+		CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort());
+		if (pServer) {
+			pServer->SetIP(pSockAddr->sin_addr.S_un.S_addr);
+			// If we already have entries in the server list (dynIP-servers without a DN)
+			// with the same IP as this dynIP-server, remove the duplicates.
+			theApp.serverlist->RemoveDuplicatesByIP(pServer);
+		}
+		DEBUG_ONLY( DebugLog(_T("Resolved DN for server '%s': IP=%s"), cur_server->GetAddress(), ipstr(cur_server->GetIP())) );
+
+		// As this is a dynIP-server, we need to check the IP against the IP-filter
+		// and eventually disconnect and delete that server.
+		//
+		if (thePrefs.GetFilterServerByIP() && theApp.ipfilter->IsFiltered(cur_server->GetIP())) {
+			if (thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Filtered server \"%s\" (IP=%s) - IP filter (%s)"), pServer ? pServer->GetAddress() : cur_server->GetAddress(), ipstr(cur_server->GetIP()), theApp.ipfilter->GetLastHit());
+			if (pServer)
+				theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(pServer);
+			m_bIsDeleting = true;
+			SetConnectionState(CS_ERROR);
+			serverconnect->DestroySocket(this);
+			return FALSE;	// Do *NOT* connect to this server
+		}
+	}
+	return TRUE; // Connect to this server
+}
+
+void CServerSocket::OnConnect(int nErrorCode)
+{
+	/*MORPH*/CEMSocket::OnConnect(nErrorCode);
+	//CAsyncSocketEx::OnConnect(nErrorCode);
+
+	switch (nErrorCode)
+	{
+		case 0:
 			SetConnectionState(CS_WAITFORLOGIN);
 			break;
-		}
+
 		case WSAEADDRNOTAVAIL:
 		case WSAECONNREFUSED:
-		//case WSAENETUNREACH:	// let this error default to 'fatal error' as it does not inrease the server's failed count
-		case WSAETIMEDOUT: 	
+		//case WSAENETUNREACH:	// let this error default to 'fatal error' as it does not increase the server's failed count
+		case WSAETIMEDOUT:
 		case WSAEADDRINUSE:
 			if (thePrefs.GetVerbose())
 				DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetFullErrorMessage(nErrorCode));
@@ -91,7 +124,7 @@ void CServerSocket::OnConnect(int nErrorCode){
 			SetConnectionState(CS_SERVERDEAD);
 			serverconnect->DestroySocket(this);
 			return;
-		// deadlake PROXYSUPPORT
+
 		case WSAECONNABORTED:
 			if (m_bProxyConnectFailed)
 			{
@@ -103,14 +136,15 @@ void CServerSocket::OnConnect(int nErrorCode){
 				serverconnect->DestroySocket(this);
 				return;
 			}
-		default:	
+			/* fall through */
+		default:
 			if (thePrefs.GetVerbose())
 				DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetFullErrorMessage(nErrorCode));
 			m_bIsDeleting = true;
 			SetConnectionState(CS_FATALERROR);
 			serverconnect->DestroySocket(this);
 			return;
-	}	 
+	}
 }
 
 void CServerSocket::OnReceive(int nErrorCode){
@@ -122,14 +156,17 @@ void CServerSocket::OnReceive(int nErrorCode){
 	m_dwLastTransmission = GetTickCount();
 }
 
-bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode){
-	try{
-		switch(opcode){
+bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
+{
+	try
+	{
+		switch (opcode)
+		{
 			case OP_SERVERMESSAGE:{
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
 					Debug(_T("ServerMsg - OP_ServerMessage\n"));
 
-				CServer* pServer = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort()) : NULL;
+				CServer* pServer = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort()) : NULL;
 				CSafeMemFile data(packet, size);
 				CString strMessages(data.ReadString(pServer ? pServer->GetUnicodeSupport() : false));
 
@@ -153,6 +190,9 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						strVer.Trim();
 						strVer = strVer.Left(64); // truncate string to avoid misuse by servers in showing ads
 						if (pServer){
+							UINT nVerMaj, nVerMin;
+							if (_stscanf(strVer, _T("%u.%u"), &nVerMaj, &nVerMin) == 2)
+								strVer.Format(_T("%u.%02u"), nVerMaj, nVerMin);
 							pServer->SetVersion(strVer);
 							theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
 							theApp.emuledlg->serverwnd->UpdateMyInfo();
@@ -179,10 +219,20 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 
 					if (message.Find(_T("[emDynIP: ")) != -1 && message.Find(_T("]")) != -1 && message.Find(_T("[emDynIP: ")) < message.Find(_T("]"))){
 						CString dynip = message.Mid(message.Find(_T("[emDynIP: ")) + 10, message.Find(_T("]")) - (message.Find(_T("[emDynIP: ")) + 10));
-						dynip.Trim(_T(" "));
-						if ( dynip.GetLength() && dynip.GetLength() < 51){
-							if (pServer){
+						dynip.Trim();
+						if (dynip.GetLength() && dynip.GetLength() < 51){
+							// Verify that we really received a DN.
+							if (pServer && inet_addr(CStringA(dynip)) == INADDR_NONE){
+								// Update the dynIP of this server, but do not reset it's IP
+								// which we just determined during connecting.
+								CString strOldDynIP = pServer->GetDynIP();
 								pServer->SetDynIP(dynip);
+								// If a dynIP-server changed its address or, if this is the
+								// first time we get the dynIP-address for a server which we
+								// already have as non-dynIP in our list, we need to remove
+								// an already available server with the same 'dynIP:port'.
+								if (strOldDynIP.CompareNoCase(pServer->GetDynIP()) != 0)
+									theApp.serverlist->RemoveDuplicatesByAddress(pServer);
 								if (cur_server)
 									cur_server->SetDynIP(dynip);
 								theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
@@ -190,17 +240,27 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 							}
 						}
 					}
-					if (bOutputMessage)
+
+					if (bOutputMessage) {
+						if (m_bStartNewMessageLog) {
+							m_bStartNewMessageLog = false;
+							theApp.emuledlg->AddServerMessageLine(LOG_INFO, _T(""));
+							CString strMsg;
+							if (IsObfusicating())
+								strMsg.Format(_T("%s: ") + GetResString(IDS_CONNECTEDTOOBFUSCATED) + _T(" (%s:%u)"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetObfuscationPortTCP());
+							else
+								strMsg.Format(_T("%s: ") + GetResString(IDS_CONNECTEDTO) + _T(" (%s:%u)"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetPort());
+							theApp.emuledlg->AddServerMessageLine(LOG_SUCCESS, strMsg);
+						}
+
 						// MORPH START filter gpl violating advertising server message: [leuk_he]
-					      {
-						    CString address;
-	                        address = pServer->GetAddress();
-                           	if (address.Left(11).Compare(_T("80.239.200."))) {
-								// original line:
-     							theApp.emuledlg->AddServerMessageLine(message);
-                             }
-						  } 
-  	                     // MORPH END filter gpl violating adverting server message: [leuk_he]
+					    CString address;
+	                    address = pServer->GetAddress();
+                        if (address.Left(11).Compare(_T("80.239.200.")))
+  	                    // MORPH END filter gpl violating adverting server message: [leuk_he]
+   							theApp.emuledlg->AddServerMessageLine(LOG_INFO, message);
+
+					}
 
 					message = strMessages.Tokenize(_T("\r\n"), iPos);
 				}
@@ -215,6 +275,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 				LoginAnswer_Struct* la = (LoginAnswer_Struct*)packet;
 
 				// save TCP flags in 'cur_server'
+				CServer* pServer = NULL;
 				ASSERT( cur_server );
 				if (cur_server){
 					//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
@@ -226,7 +287,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						if (thePrefs.GetDebugServerTCPLevel() > 0){
 							CString strInfo;
 							strInfo.AppendFormat(_T("  TCP Flags=0x%08x"), dwFlags);
-							const DWORD dwKnownBits = SRV_TCPFLG_COMPRESSION | SRV_TCPFLG_NEWTAGS | SRV_TCPFLG_UNICODE | SRV_TCPFLG_RELATEDSEARCH | SRV_TCPFLG_TYPETAGINTEGER | SRV_TCPFLG_LARGEFILES;
+							const DWORD dwKnownBits = SRV_TCPFLG_COMPRESSION | SRV_TCPFLG_NEWTAGS | SRV_TCPFLG_UNICODE | SRV_TCPFLG_RELATEDSEARCH | SRV_TCPFLG_TYPETAGINTEGER | SRV_TCPFLG_LARGEFILES | SRV_TCPFLG_TCPOBFUSCATION;
 							if (dwFlags & ~dwKnownBits)
 								strInfo.AppendFormat(_T("  ***UnkBits=0x%08x"), dwFlags & ~dwKnownBits);
 							if (dwFlags & SRV_TCPFLG_COMPRESSION)
@@ -241,6 +302,8 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 								strInfo.AppendFormat(_T("  IntTypeTags=1"));
 							if (dwFlags & SRV_TCPFLG_LARGEFILES)
 								strInfo.AppendFormat(_T("  LargeFiles=1"));
+							if (dwFlags & SRV_TCPFLG_TCPOBFUSCATION)
+								strInfo.AppendFormat(_T("  TCP_Obfscation=1"));
 							Debug(_T("%s\n"), strInfo);
 						}
 						cur_server->SetTCPFlags(dwFlags);
@@ -258,7 +321,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					// copy TCP flags into the server in the server list
 					//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 					/*
-					CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort());
+					pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort());
 					if (pServer)
 						pServer->SetTCPFlags(cur_server->GetTCPFlags());
 					*/
@@ -270,6 +333,23 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 							theApp.emuledlg->serverwnd->UpdateMyInfo();
 					}
 					//Morph End - added by AndCycle, aux Ports, by lugdunummaster
+				}
+
+				uint32 dwServerReportedIP = 0;
+				uint32 dwObfuscationTCPPort = 0;
+				if (size >= 20){
+					dwServerReportedIP = *((uint32*)(packet + 12));
+					if (::IsLowID(dwServerReportedIP)){
+						ASSERT( false );
+						dwServerReportedIP = 0;
+					}
+					ASSERT( dwServerReportedIP == la->clientid || ::IsLowID(la->clientid) );
+					dwObfuscationTCPPort = *((uint32*)(packet + 16));
+					if (cur_server != NULL && dwObfuscationTCPPort != 0)
+						cur_server->SetObfuscationPortTCP((uint16)dwObfuscationTCPPort);
+					if (pServer != NULL && dwObfuscationTCPPort != 0)
+						pServer->SetObfuscationPortTCP((uint16)dwObfuscationTCPPort);
+
 				}
 
 				if (la->clientid == 0){
@@ -316,7 +396,9 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					theApp.OnlineSig();       // Added By Bouc7 
 				}
 				serverconnect->SetClientID(la->clientid);
-				AddLogLine(false,GetResString(IDS_NEWCLIENTID),la->clientid);
+				if (::IsLowID(la->clientid) && dwServerReportedIP != 0)
+					theApp.SetPublicIP(dwServerReportedIP);
+				AddLogLine(false, GetResString(IDS_NEWCLIENTID), la->clientid);
 
 				theApp.downloadqueue->ResetLocalServerRequests();
 				break;
@@ -332,9 +414,11 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 				theApp.emuledlg->searchwnd->LocalEd2kSearchEnd(uSearchResults, bMoreResultsAvailable);
 				break;
 			}
+			case OP_FOUNDSOURCES_OBFU:
 			case OP_FOUNDSOURCES:{
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
-					Debug(_T("ServerMsg - OP_FoundSources; Sources=%u  %s\n"), (UINT)packet[16], DbgGetFileInfo(packet));
+					Debug(_T("ServerMsg - OP_FoundSources%s; Sources=%u  %s\n"), (opcode == OP_FOUNDSOURCES_OBFU) ? _T("_OBFU") : _T(""), (UINT)packet[16], DbgGetFileInfo(packet));
+
 				ASSERT( cur_server );
 				if (cur_server)
 				{
@@ -342,7 +426,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					uchar fileid[16];
 					sources.ReadHash16(fileid);
 					if (CPartFile* file = theApp.downloadqueue->GetFileByID(fileid))
-						file->AddSources(&sources,cur_server->GetIP(), cur_server->GetPort());
+						file->AddSources(&sources,cur_server->GetIP(), cur_server->GetPort(), (opcode == OP_FOUNDSOURCES_OBFU));
 				}
 				break;
 			}
@@ -354,12 +438,12 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					break;//throw "Invalid status packet";
 				uint32 cur_user = PeekUInt32(packet);
 				uint32 cur_files = PeekUInt32(packet+4);
-				CServer* update = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort()) : NULL;
-				if (update){
-					update->SetUserCount(cur_user); 
-					update->SetFileCount(cur_files);
+				CServer* pServer = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort()) : NULL;
+				if (pServer){
+					pServer->SetUserCount(cur_user);
+					pServer->SetFileCount(cur_files);
 					theApp.emuledlg->ShowUserCount();
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
 					theApp.emuledlg->serverwnd->UpdateMyInfo();
 				}
 				if (thePrefs.GetDebugServerTCPLevel() > 0){
@@ -374,7 +458,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 				// OP_SERVERIDENT - this is sent by the server only if we send a OP_GETSERVERLIST
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
 					Debug(_T("ServerMsg - OP_ServerIdent\n"));
-				if (size<16+4+2+4) {
+				if (size<16+4+2+4){
 					if (thePrefs.GetVerbose())
 						DebugLogError(_T("%s"), GetResString(IDS_ERR_KNOWNSERVERINFOREC));
 					break;// throw "Invalid server info received"; 
@@ -431,20 +515,22 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 				if (pServer){
 					pServer->SetListName(strName);
 					pServer->SetDescription(strDescription);
-						if (((uint32*)aucHash)[0] == 0x2A2A2A2A){
+					if (((uint32*)aucHash)[0] == 0x2A2A2A2A){
 						const CString& rstrVersion = pServer->GetVersion();
-							if (!rstrVersion.IsEmpty())
+						if (!rstrVersion.IsEmpty())
 							pServer->SetVersion(_T("eFarm ") + rstrVersion);
-							else
+						else
 							pServer->SetVersion(_T("eFarm"));
-						}
-						theApp.emuledlg->ShowConnectionState(); 
-						theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer); 
 					}
+					theApp.emuledlg->ShowConnectionState(); 
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer); 
+				}
 				break;
 			} 
 			// tecxx 1609 2002 - add server's serverlist to own serverlist
 			case OP_SERVERLIST:{
+				if (!thePrefs.GetAddServersFromServer())
+					break;
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
 					Debug(_T("ServerMsg - OP_ServerList\n"));
 				try{
@@ -460,6 +546,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						uint16 port = servers.ReadUInt16();
 						CServer* srv = new CServer(port, ipstr(ip));
 						srv->SetListName(srv->GetFullIP());
+						srv->SetPreference(SRV_PR_LOW);
 						if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(srv, true))
 							delete srv;
 						else
@@ -467,7 +554,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						count--;
 					}
 					if (addcount)
-						AddLogLine(false,GetResString(IDS_NEWSERVERS), addcount);
+						AddLogLine(false, GetResString(IDS_NEWSERVERS), addcount);
 					if (thePrefs.GetDebugServerTCPLevel() > 0){
 						UINT uAddData = (UINT)(servers.GetLength() - servers.GetPosition());
 						if (uAddData > 0){
@@ -485,8 +572,8 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 			}
 			case OP_CALLBACKREQUESTED:{
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
-					Debug(_T("ServerMsg - OP_CallbackRequested\n"));
-				if (size == 6)
+					Debug(_T("ServerMsg - OP_CallbackRequested: %s\n"), (size >= 23) ? _T("With Cryptflag and Userhash") : _T("Without Cryptflag and Userhash"));
+				if (size >= 6)
 				{
 					uint32 dwIP = PeekUInt32(packet);
 
@@ -506,22 +593,43 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					}
 
 					uint16 nPort = PeekUInt16(packet+4);
-					CUpDownClient* client = theApp.clientlist->FindClientByIP(dwIP,nPort);
-					//MORPH START - Changed by SiRoB, Force TryToConnect for OP_CALLBACKREQUESTED
-					/*
-					if (client)
-						client->TryToConnect();
-					else
-					{
-						client = new CUpDownClient(0,nPort,dwIP,0,0,true);
-						theApp.clientlist->AddClient(client);
-						client->TryToConnect();
+					uint8 byCryptOptions = 0;
+					uchar achUserHash[16];
+					if (size >= 23){
+						byCryptOptions = packet[6];
+						md4cpy(achUserHash, packet + 7);
 					}
-					*/
-					if (client == NULL)	{
+					
+					CUpDownClient* client = theApp.clientlist->FindClientByIP(dwIP,nPort);
+					if (client == NULL)
+					{
 						client = new CUpDownClient(0,nPort,dwIP,0,0,true);
 						theApp.clientlist->AddClient(client, true); //MOPRH - Changed by SiRoB, Optimization
 					}
+					if (size >= 23 && client->HasValidHash()){
+						if (md4cmp(client->GetUserHash(), achUserHash) != 0){
+							DebugLogError(_T("Reported Userhash from OP_CALLBACKREQUESTED differs with our stored hash"));
+							// disable crypt support since we dont know which hash is true
+							client->SetCryptLayerRequest(false);
+							client->SetCryptLayerSupport(false);
+							client->SetCryptLayerRequires(false);
+						}
+						else{
+							client->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
+							client->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
+							client->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+						}
+					}
+					else if (size >= 23){
+						client->SetUserHash(achUserHash);
+						client->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
+						client->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
+						client->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+					}
+					//MORPH START - Changed by SiRoB, Force TryToConnect for OP_CALLBACKREQUESTED
+					/*
+					client->TryToConnect();
+					*/
 					client->TryToConnect(true);
 					//MORPH END   - Changed by SiRoB, Force TryToConnect for OP_CALLBACKREQUESTED
 				}
@@ -556,86 +664,114 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
 			error->m_strFileName = _T("server packet");
 			error->GetErrorMessage(szError, ARRSIZE(szError));
-		    DebugLogError(GetResString(IDS_ERR_PACKAGEHANDLING), szError);
+			ProcessPacketError(size, opcode, szError);
 		}
-		error->Delete();
 		ASSERT(0);
+		error->Delete();
 		if (opcode==OP_SEARCHRESULT || opcode==OP_FOUNDSOURCES)
 			return true;
 	}
 	catch(CMemoryException* error)
 	{
-		if (thePrefs.GetVerbose())
-			DebugLogError(GetResString(IDS_ERR_PACKAGEHANDLING), _T("CMemoryException"));
-		error->Delete();
+		ProcessPacketError(size, opcode, _T("CMemoryException"));
 		ASSERT(0);
+		error->Delete();
 		if (opcode==OP_SEARCHRESULT || opcode==OP_FOUNDSOURCES)
 			return true;
 	}
 	catch(CString error)
 	{
-		if (thePrefs.GetVerbose())
-			DebugLogError(GetResString(IDS_ERR_PACKAGEHANDLING), error);
+		ProcessPacketError(size, opcode, error);
 		ASSERT(0);
 	}
+#ifndef _DEBUG
 	catch(...)
 	{
-		if (thePrefs.GetVerbose())
-			DebugLogError(GetResString(IDS_ERR_PACKAGEHANDLING), _T("Unknown exception"));
+		ProcessPacketError(size, opcode, _T("Unknown exception"));
 		ASSERT(0);
 	}
+#endif
 
 	SetConnectionState(CS_DISCONNECTED);
 	return false;
 }
 
-void CServerSocket::ConnectToServer(CServer* server){
+void CServerSocket::ProcessPacketError(UINT size, UINT opcode, LPCTSTR pszError)
+{
+	if (thePrefs.GetVerbose())
+	{
+		CString strServer;
+		try{
+			if (cur_server)
+				strServer.Format(_T("%s:%u"), cur_server->GetAddress(), cur_server->GetPort());
+			else
+				strServer = _T("Unknown");
+		}
+		catch(...){
+		}
+		DebugLogWarning(false, _T("Error: Failed to process server TCP packet from %s: opcode=0x%02x size=%u - %s"), strServer, opcode, size, pszError);
+	}
+}
+
+void CServerSocket::ConnectTo(CServer* server, bool bNoCrypt)
+{
 	if (cur_server){
 		ASSERT(0);
 		delete cur_server;
 		cur_server = NULL;
 	}
 
-   // MORPH START - leuke_he  ipfilter servers .
-   if(thePrefs.FilterServerByIP()&& theApp.ipfilter->IsFiltered(server->GetIP()))
-    {
-		AddLogLine(true,GetResString(IDS_LOG_SERVER_FILTERED ),ipstr(server->GetIP()), server->GetDescription(),theApp.ipfilter->GetLastHit() );
-        theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(server);
-        SetConnectionState(CS_ERROR);
-        return;
-    }
-   // MORPH END - leuke_he  ipfilter servers .
+	uint16 nPort = 0;
 	cur_server = new CServer(server);
-	Log(GetResString(IDS_CONNECTINGTO), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort());
+	if ( !bNoCrypt && thePrefs.IsServerCryptLayerTCPRequested() && server->GetObfuscationPortTCP() != 0 && server->SupportsObfuscationTCP()){
+		Log(GetResString(IDS_CONNECTINGTOOBFUSCATED), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetObfuscationPortTCP());
+		nPort = cur_server->GetObfuscationPortTCP();
+		SetConnectionEncryption(true, NULL, true);
+	}
+	else{
+		Log(GetResString(IDS_CONNECTINGTO), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetPort());
+		nPort = cur_server->GetPort();
+		SetConnectionEncryption(false, NULL, true);
+	}
 
+	// IP-filter: We do not need to IP-filter any servers here, even dynIP-servers are not
+	// needed to get filtered here.
+	//	1.) Non dynIP-servers were already IP-filtered when they were added to the server
+	//		list.
+	//	2.) Whenever the IP-filter is updated all servers for which an IP is known (this
+	//		includes also dynIP-servers for which we received already an IP) get filtered.
+	//	3.)	dynIP-servers get filtered after their DN was resolved. For TCP-connections this
+	//		is done in OnConnect. For outgoing UDP packets this is done when explicitly
+	//		resolving the DN right before sending the UDP packet.
+	//
 	SetConnectionState(CS_CONNECTING);
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	/*
-	if (!Connect(CStringA(server->GetAddress()), server->GetPort())){
+	if (!Connect(CStringA(server->GetAddress()), nPort)){
 	*/
 	if (!Connect(CStringA(server->GetAddress()),server->GetConnPort())){
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 		DWORD dwError = GetLastError();
-		if ( dwError != WSAEWOULDBLOCK){
-			LogError(GetResString(IDS_ERR_CONNECTIONERROR), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort(), GetFullErrorMessage(dwError));
+		if (dwError != WSAEWOULDBLOCK){
+			LogError(GetResString(IDS_ERR_CONNECTIONERROR), cur_server->GetListName(), cur_server->GetAddress(), nPort, GetFullErrorMessage(dwError));
 			SetConnectionState(CS_FATALERROR);
 			return;
 		}
 	}
-	SetConnectionState(CS_CONNECTING);
 }
 
 void CServerSocket::OnError(int nErrorCode)
 {
 	SetConnectionState(CS_DISCONNECTED);
 	if (thePrefs.GetVerbose())
-		DebugLogError(GetResString(IDS_ERR_SOCKET), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort(), GetFullErrorMessage(nErrorCode));
+		DebugLogError(GetResString(IDS_ERR_SOCKET), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetPort(), GetFullErrorMessage(nErrorCode));
 }
 
 bool CServerSocket::PacketReceived(Packet* packet)
 {
-	try
-	{
+#ifndef _DEBUG
+	try {
+#endif
 		theStats.AddDownDataOverheadServer(packet->size);
 		if (packet->prot == OP_PACKEDPROT)
 		{
@@ -659,6 +795,7 @@ bool CServerSocket::PacketReceived(Packet* packet)
 			if (thePrefs.GetVerbose())
 				DebugLogWarning(_T("Received server TCP packet with unknown protocol: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
 		}
+#ifndef _DEBUG
 	}
 	catch(...)
 	{
@@ -667,25 +804,26 @@ bool CServerSocket::PacketReceived(Packet* packet)
 		ASSERT(0);
 		return false;
 	}
+#endif
 	return true;
 }
 
 void CServerSocket::OnClose(int /*nErrorCode*/)
 {
 	CEMSocket::OnClose(0);
-	if (connectionstate == CS_WAITFORLOGIN){	 	
+	if (connectionstate == CS_WAITFORLOGIN){
 		SetConnectionState(CS_SERVERFULL);
 	}
 	else if (connectionstate == CS_CONNECTED){
-		SetConnectionState(CS_DISCONNECTED);		
+		SetConnectionState(CS_DISCONNECTED);
 	}
 	else{
 		SetConnectionState(CS_NOTCONNECTED);
 	}
-	serverconnect->DestroySocket(this);	
+	serverconnect->DestroySocket(this);
 }
 
-void CServerSocket::SetConnectionState(sint8 newstate){
+void CServerSocket::SetConnectionState(int newstate){
 	connectionstate = newstate;
 	if (newstate < 1){
 		serverconnect->ConnectionFailed(this);
@@ -696,7 +834,7 @@ void CServerSocket::SetConnectionState(sint8 newstate){
 	}
 }
 
-void CServerSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize){
+void CServerSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize, bool bForceImmediateSend){
 	m_dwLastTransmission = GetTickCount();
-	CEMSocket::SendPacket(packet, delpacket, controlpacket, actualPayloadSize);
+	CEMSocket::SendPacket(packet, delpacket, controlpacket, actualPayloadSize, bForceImmediateSend);
 }

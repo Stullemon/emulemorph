@@ -28,14 +28,15 @@ class CPreviewThread : public CWinThread
 public:
 	virtual	BOOL	InitInstance();
 	virtual int		Run();
-	void	SetValues(CPartFile* pPartFile,CString player);
+	void	SetValues(CPartFile* pPartFile, LPCTSTR pszCommand, LPCTSTR pszCommandArgs);
 
 protected:
 	CPreviewThread();			// protected constructor used by dynamic creation
 	virtual ~CPreviewThread();
 
 	CPartFile*  m_pPartfile;
-	CString		m_player;
+	CString		m_strCommand;
+	CString		m_strCommandArgs;
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -96,3 +97,5 @@ protected:
 };
 
 extern CPreviewApps thePreviewApps;
+
+void ExecutePartFile(CPartFile* file, LPCTSTR pszCommand, LPCTSTR pszCommandArgs);

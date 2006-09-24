@@ -32,5 +32,5 @@ public:
 
 	bool	InitFromLink(CString sLink);
 	void	WriteCollectionInfo(CFileDataIO* out_data);
-	virtual void UpdateFileRatingCommentAvail();
+	virtual void UpdateFileRatingCommentAvail(bool bForceUpdate = false);
 };

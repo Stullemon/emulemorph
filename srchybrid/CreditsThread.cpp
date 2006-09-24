@@ -590,9 +590,9 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Maltese: Reuben"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Norwegian (Bokmal): Hallvor"));
+	m_arCredits.Add(_T("01:06:Norwegian (Bokmal): Iznogood"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Norwegian (Nynorsk): Iznogood"));
+	m_arCredits.Add(_T("01:06:Norwegian (Nynorsk): Hallvor"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Polish: Tomasz \"TMouse\" Broniarek"));
 	m_arCredits.Add(_T("S:05"));
@@ -613,6 +613,8 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("01:06:Turkish: Burak Y."));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Ukrainian: Kex"));
+	m_arCredits.Add(_T("S:05"));
+	m_arCredits.Add(_T("01:06:Vietnamese: Paul Tran HQ Loc"));
 
 	m_arCredits.Add(_T("S:50"));
 	m_arCredits.Add(_T("02:04:Part of eMule is based on Kademlia:"));

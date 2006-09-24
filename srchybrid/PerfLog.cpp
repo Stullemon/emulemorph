@@ -38,6 +38,7 @@ CPerfLog thePerfLog;
 CPerfLog::CPerfLog()
 {
 	m_eMode = None;
+	m_eFileFormat = CSV;
 	m_dwInterval = MIN2MS(5);
 	m_bInitialized = false;
 	m_dwLastSampled = 0;
@@ -52,26 +53,48 @@ void CPerfLog::Startup()
 	if (m_bInitialized)
 		return;
 
-	// set default log file path
-	TCHAR szAppPath[MAX_PATH];
-	GetModuleFileName(NULL, szAppPath, MAX_PATH);
-	PathRemoveFileSpec(szAppPath);
-	CString strDefFilePath = szAppPath;
-	strDefFilePath += _T("\\perflog.csv");
-
 	CIni ini(thePrefs.GetConfigFile(), _T("PerfLog"));
 
 	m_eMode = (ELogMode)ini.GetInt(_T("Mode"), None);
 	if (m_eMode != None && m_eMode != OneSample && m_eMode != AllSamples)
 		m_eMode = None;
+	if (m_eMode != None)
+	{
+		m_eFileFormat = (ELogFileFormat)ini.GetInt(_T("FileFormat"), CSV);
 
-	m_dwInterval = MIN2MS(ini.GetInt(_T("Interval"), 5));
-	if ((int)m_dwInterval <= 0)
-		m_dwInterval = MIN2MS(5);
+		// set default log file path
+		TCHAR szAppPath[MAX_PATH];
+		GetModuleFileName(NULL, szAppPath, MAX_PATH);
+		PathRemoveFileSpec(szAppPath);
+		CString strDefFilePath = szAppPath;
+		if (m_eFileFormat == CSV)
+			strDefFilePath += _T("\\perflog.csv");
+		else
+			strDefFilePath += _T("\\perflog.mrtg");
 
-	m_strFilePath = ini.GetString(_T("File"), strDefFilePath);
-	if (m_strFilePath.IsEmpty())
-		m_strFilePath = strDefFilePath;
+		m_strFilePath = ini.GetString(_T("File"), strDefFilePath);
+		if (m_strFilePath.IsEmpty())
+			m_strFilePath = strDefFilePath;
+
+		if (m_eFileFormat == MRTG)
+		{
+			TCHAR drv[_MAX_DRIVE];
+			TCHAR dir[_MAX_DIR];
+			TCHAR nam[_MAX_FNAME];
+			_tsplitpath(m_strFilePath, drv, dir, nam, NULL);
+			m_strFilePath.Empty();
+
+			_tmakepath(m_strMRTGDataFilePath.GetBuffer(MAX_PATH), drv, dir, CString(nam) + _T("_data"), _T("mrtg"));
+			m_strMRTGDataFilePath.ReleaseBuffer();
+
+			_tmakepath(m_strMRTGOverheadFilePath.GetBuffer(MAX_PATH), drv, dir, CString(nam) + _T("_overhead"), _T("mrtg"));
+			m_strMRTGOverheadFilePath.ReleaseBuffer();
+		}
+
+		m_dwInterval = MIN2MS(ini.GetInt(_T("Interval"), 5));
+		if ((int)m_dwInterval <= 0)
+			m_dwInterval = MIN2MS(5);
+	}
 
 	m_bInitialized = true;
 
@@ -83,6 +106,8 @@ void CPerfLog::WriteSamples(UINT nCurDn, UINT nCurUp, UINT nCurDnOH, UINT nCurUp
 {
 	ASSERT( m_bInitialized );
 
+	if (m_eFileFormat == CSV)
+	{
 	time_t tNow = time(NULL);
 	char szTime[40];
 	// do not localize this date/time string!
@@ -90,7 +115,7 @@ void CPerfLog::WriteSamples(UINT nCurDn, UINT nCurUp, UINT nCurDnOH, UINT nCurUp
 
 	FILE* fp = _tfsopen(m_strFilePath, (m_eMode == OneSample) ? _T("wt") : _T("at"), _SH_DENYWR);
 	if (fp == NULL){
-		/*UNICODE FIX*/LogError(false, _T("Failed to open performance log file \"%s\" - %hs"), m_strFilePath, _tcserror(errno));
+			LogError(false, _T("Failed to open performance log file \"%s\" - %s"), m_strFilePath, _tcserror(errno));
 		return;
 	}
 	setvbuf(fp, NULL, _IOFBF, 16384); // ensure that all lines are written to file with one call
@@ -98,6 +123,29 @@ void CPerfLog::WriteSamples(UINT nCurDn, UINT nCurUp, UINT nCurDnOH, UINT nCurUp
 		fprintf(fp, "\"(PDH-CSV 4.0)\",\"DatDown\",\"DatUp\",\"OvrDown\",\"OvrUp\"\n");
 	fprintf(fp, "\"%s\",\"%u\",\"%u\",\"%u\",\"%u\"\n", szTime, nCurDn, nCurUp, nCurDnOH, nCurUpOH);
 	fclose(fp);
+}
+	else
+	{
+		ASSERT( m_eFileFormat == MRTG );
+
+		FILE* fp = _tfsopen(m_strMRTGDataFilePath, (m_eMode == OneSample) ? _T("wt") : _T("at"), _SH_DENYWR);
+		if (fp != NULL) {
+			fprintf(fp, "%u\n%u\n\n\n", nCurDn, nCurUp);
+			fclose(fp);
+		}
+		else {
+			LogError(false, _T("Failed to open performance log file \"%s\" - %s"), m_strMRTGDataFilePath, _tcserror(errno));
+		}
+
+		fp = _tfsopen(m_strMRTGOverheadFilePath, (m_eMode == OneSample) ? _T("wt") : _T("at"), _SH_DENYWR);
+		if (fp != NULL) {
+			fprintf(fp, "%u\n%u\n\n\n", nCurDnOH, nCurUpOH);
+			fclose(fp);
+		}
+		else {
+			LogError(false, _T("Failed to open performance log file \"%s\" - %s"), m_strMRTGOverheadFilePath, _tcserror(errno));
+		}
+	}
 }
 
 void CPerfLog::LogSamples()

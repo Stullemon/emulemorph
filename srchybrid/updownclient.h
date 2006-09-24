@@ -193,7 +193,11 @@ enum ESourceFrom{
 	SF_SOURCE_EXCHANGE	= 2,
 	SF_PASSIVE			= 3,
 	SF_LINK				= 4,
-	SF_SLS				= 5 //MORPH - Added by SiRoB, Save Load Sources (SLS)
+	//MORPH - Source cache
+	SF_CACHE_SERVER			= 5,
+	SF_CACHE_SOURCE_EXCHANGE = 6,
+	//MORPH - Source cache
+	SF_SLS				= 7 //MORPH - Added by SiRoB, Save Load Sources (SLS)
 };
 //MORPH START - Added by SiRoB, See chunk that we hide
 enum EChunkStatus{
@@ -427,6 +431,16 @@ public:
 	bool			GetViewSharedFilesSupport() const				{ return m_fNoViewSharedFiles==0; }
 	bool			SafeSendPacket(Packet* packet);
 	void			CheckForGPLEvilDoer();
+	// Encryption / Obfuscation
+	bool			SupportsCryptLayer() const						{ return m_fSupportsCryptLayer; }
+	bool			RequestsCryptLayer() const						{ return SupportsCryptLayer() && m_fRequestsCryptLayer; }
+	bool			RequiresCryptLayer() const						{ return RequestsCryptLayer() && m_fRequiresCryptLayer; }
+	void			SetCryptLayerSupport(bool bVal)					{ m_fSupportsCryptLayer = bVal ? 1 : 0; }
+	void			SetCryptLayerRequest(bool bVal)					{ m_fRequestsCryptLayer = bVal ? 1 : 0; }
+	void			SetCryptLayerRequires(bool bVal)				{ m_fRequiresCryptLayer = bVal ? 1 : 0; }
+	bool			IsObfuscatedConnectionEstablished() const;
+	bool			ShouldReceiveCryptUDPPackets() const;
+
 	//upload
 	EUploadState	GetUploadState() const							{ return (EUploadState)m_nUploadState; }
 	void			SetUploadState(EUploadState news);
@@ -441,6 +455,7 @@ public:
 	uint32			GetWaitTime() const								{ return (uint32)(m_dwUploadTime - GetWaitStartTime()); }
 	bool			IsDownloading() const							{ return (m_nUploadState == US_UPLOADING); }
 	bool			HasBlocks() const								{ return !m_BlockRequests_queue.IsEmpty(); }
+    UINT            GetNumberOfRequestedBlocksInQueue() const       { return m_BlockRequests_queue.GetCount(); }
 	UINT			GetDatarate() const								{ return m_nUpDatarate; }	
 	UINT			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false) const;
 	void			AddReqBlock(Requested_Block_Struct* reqblock);
@@ -492,7 +507,7 @@ public:
 					} 
 
 	UINT			GetSessionDown() const							{ return m_nTransferredDown - m_nCurSessionDown; }
-    /*zz*/UINT            GetSessionPayloadDown() const                   { return m_nCurSessionPayloadDown; }
+    UINT            GetSessionPayloadDown() const                   { return m_nCurSessionPayloadDown; }
 	void			ResetSessionDown() {
 						m_nCurSessionDown = m_nTransferredDown;
                         //m_nCurSessionPayloadDown = 0;
@@ -628,10 +643,10 @@ public:
     uint32          GetTimeUntilReask() const;
     uint32          GetTimeUntilReask(const CPartFile* file) const;
     uint32			GetTimeUntilReask(const CPartFile* file, const bool allowShortReaskTime, const bool useGivenNNP = false, const bool givenNNP = false) const;
-	bool			IsUDPPending() {return m_bUDPPending;} //MORPH - NAPT Tempory Fix
 	void			UDPReaskACK(uint16 nNewQR);
 	void			UDPReaskFNF();
 	void			UDPReaskForDownload();
+	bool			UDPPacketPending() const						{ return m_bUDPPending; }
 	bool			IsSourceRequestAllowed() const;
     bool            IsSourceRequestAllowed(CPartFile* partfile, bool sourceExchangeCheck = false) const; // ZZ:DownloadManager
 
@@ -1094,7 +1109,7 @@ protected:
 	uint8*		m_abyPartStatus;
 	CString		m_strClientFilename;
 	UINT		m_nTransferredDown;
-    /*zz*/UINT        m_nCurSessionPayloadDown;
+    UINT        m_nCurSessionPayloadDown;
 	uint32		m_dwDownStartTime;
 	uint64		m_nLastBlockOffset;
 	uint32		m_dwLastBlockReceived;
@@ -1147,7 +1162,10 @@ protected:
 	static CBarShader s_StatusBar;
 	static CBarShader s_UpStatusBar;
 
+	//MORPH START - UpdateItemThread
+	/*
 	DWORD		m_lastRefreshedDLDisplay;
+	*/
     DWORD		m_lastRefreshedULDisplay;
     uint32      m_random_update_wait;
 
@@ -1171,6 +1189,9 @@ protected:
 		 m_fSentOutOfPartReqs : 1,
 		 m_fSupportsLargeFiles: 1,
 		 m_fExtMultiPacket	  : 1,
+		 m_fRequestsCryptLayer: 1,
+	     m_fSupportsCryptLayer: 1,
+		 m_fRequiresCryptLayer: 1,
 		 m_fFailedDownload	  : 1; //MORPH - Added by SiRoB, Fix Connection Collision
 
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;

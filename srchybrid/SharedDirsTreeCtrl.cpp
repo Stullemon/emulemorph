@@ -113,15 +113,6 @@ void CSharedDirsTreeCtrl::Initalize(CSharedFilesCtrl* pSharedFilesCtrl){
 	//WORD wWinVer = thePrefs.GetWindowsVersion();
 	m_bUseIcons = true;/*(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_);*/
 	SetAllIcons();
-
-	COLORREF crBk = GetSysColor(COLOR_WINDOW);
-	COLORREF crFg = GetSysColor(COLOR_WINDOWTEXT);
-
-	theApp.LoadSkinColorAlt(_T("SharedDirsTvBk"), _T("DefLvBk"), crBk);
-	theApp.LoadSkinColorAlt(_T("SharedDirsTvFg"), _T("DefLvFg"), crFg);
-
-	SetBkColor(crBk);
-	SetTextColor(crFg);
 	InitalizeStandardItems();
 	FilterTreeReloadTree();
 	CreateMenues();
@@ -160,6 +151,13 @@ void CSharedDirsTreeCtrl::SetAllIcons()
 	SetImageList(&iml, TVSIL_NORMAL);
 	m_imlTree.DeleteImageList();
 	m_imlTree.Attach(iml.Detach());
+
+	COLORREF crBk = GetSysColor(COLOR_WINDOW);
+	COLORREF crFg = GetSysColor(COLOR_WINDOWTEXT);
+	theApp.LoadSkinColorAlt(_T("SharedDirsTvBk"), _T("DefLvBk"), crBk);
+	theApp.LoadSkinColorAlt(_T("SharedDirsTvFg"), _T("DefLvFg"), crFg);
+	SetBkColor(crBk);
+	SetTextColor(crFg);
 }
 
 void CSharedDirsTreeCtrl::Localize(){
@@ -385,6 +383,8 @@ void CSharedDirsTreeCtrl::CreateMenues()
 	m_ShareDirsMenu.AppendMenu(MF_STRING|MF_SEPARATOR);	
 	m_ShareDirsMenu.AppendMenu(MF_STRING,MP_UNSHAREDIR,GetResString(IDS_UNSHAREDIR));
 	m_ShareDirsMenu.AppendMenu(MF_STRING,MP_UNSHAREDIRSUB,GetResString(IDS_UNSHAREDIRSUB));
+	m_ShareDirsMenu.AppendMenu(MF_STRING|MF_SEPARATOR);	
+	m_ShareDirsMenu.AppendMenu(MF_STRING,MP_OPENFOLDER,GetResString(IDS_OPENFOLDER));
 }
 
 void CSharedDirsTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
@@ -440,7 +440,7 @@ void CSharedDirsTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PrioMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 		m_PrioMenu.CheckMenuRadioItem(MP_PRIOVERYLOW, MP_PRIOAUTO, uPrioMenuItem, 0);
 
-		m_SharedFilesMenu.EnableMenuItem(MP_OPENFOLDER, (pSelectedDir != NULL && pSelectedDir->m_eItemType == SDI_NO) ? MF_ENABLED : MF_GRAYED);
+		m_SharedFilesMenu.EnableMenuItem(MP_OPENFOLDER, (pSelectedDir != NULL ) ? MF_ENABLED : MF_GRAYED);
 		m_SharedFilesMenu.EnableMenuItem(MP_REMOVE, (iCompleteFileSelected > 0 && !bWideRangeSelection) ? MF_ENABLED : MF_GRAYED);
 		m_SharedFilesMenu.EnableMenuItem(MP_CMT, (iSelectedItems > 0 && !bWideRangeSelection) ? MF_ENABLED : MF_GRAYED);
 		m_SharedFilesMenu.EnableMenuItem(MP_DETAIL, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
@@ -497,7 +497,7 @@ BOOL CSharedDirsTreeCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 	if (pSelectedDir != NULL){
 		switch (wParam){
 			case MP_OPENFOLDER:
-				if (pSelectedDir && pSelectedDir->m_eItemType == SDI_NO){
+				if (pSelectedDir && !pSelectedDir->m_strFullPath.IsEmpty() /*&& pSelectedDir->m_eItemType == SDI_NO*/){
 					ShellExecute(NULL, _T("open"), pSelectedDir->m_strFullPath, NULL, NULL, SW_SHOW);
 				}
 				break;

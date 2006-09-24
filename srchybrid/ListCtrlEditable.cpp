@@ -33,7 +33,7 @@ BEGIN_MESSAGE_MAP(CEditableListCtrl, CListCtrl)
 	ON_EN_KILLFOCUS(LV_EDIT_CTRL_ID, OnEnKillFocus)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_SETFOCUS()
-	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnNMCustomdraw)
+	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnNMCustomDraw)
 	ON_NOTIFY_REFLECT(LVN_ENDSCROLL, OnLvnEndScroll)
 	ON_NOTIFY_REFLECT(LVN_BEGINSCROLL, OnLvnBeginScroll)
 END_MESSAGE_MAP()
@@ -438,7 +438,7 @@ void CEditableListCtrl::OnDestroy()
 	CListCtrl::OnDestroy();
 }
 
-void CEditableListCtrl::OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult)
+void CEditableListCtrl::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLVCUSTOMDRAW pNMCD = reinterpret_cast<LPNMLVCUSTOMDRAW>(pNMHDR);
 

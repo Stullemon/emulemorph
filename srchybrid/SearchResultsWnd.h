@@ -20,6 +20,7 @@
 #include "ClosableTabCtrl.h"
 #include "IconStatic.h"
 #include "EditX.h"
+#include "EditDelayed.h"
 #include "ComboBoxEx2.h"
 #include "ListCtrlEditable.h"
 
@@ -28,7 +29,23 @@ class Packet;
 class CSafeMemFile;
 class CSearchParamsWnd;
 struct SSearchParams;
+class CDropDownButton;
 
+
+///////////////////////////////////////////////////////////////////////////////
+// CSearchResultsSelector
+
+class CSearchResultsSelector : public CClosableTabCtrl
+{
+public:
+	CSearchResultsSelector(){}
+
+protected:
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // CSearchResultsWnd dialog
@@ -44,8 +61,9 @@ public:
 	enum { IDD = IDD_SEARCH };
 
 	CSearchListCtrl searchlistctrl;
-	CClosableTabCtrl searchselect;
+	CSearchResultsSelector searchselect;
 	CSearchParamsWnd* m_pwndParams;
+	CStringArray m_astrFilter;
 
 	void	Localize();
 
@@ -79,7 +97,7 @@ public:
 	int		GetSelectedCat() { return m_cattabs.GetCurSel(); }
 	void	UpdateCatTabs();
 
-	virtual void OnInitialUpdate();
+	uint32	GetFilterColumn() const				{ return m_nFilterColumn; }
 
 protected:
 	Packet*		searchpacket;
@@ -87,14 +105,17 @@ protected:
 	UINT_PTR	global_search_timer;
 	UINT		m_uTimerLocalServer;
 	CProgressCtrl searchprogress;
+	CEditDelayed m_ctlFilter;
+	CButton		m_ctlOpenParamsWnd;
 	bool		canceld;
 	uint16		servercount;
 	bool		globsearch;
 	uint32		m_nEd2kSearchID;
 	CImageList	m_imlSearchResults;
 	CTabCtrl	m_cattabs;
-	HICON		icon_search;
+	CDropDownButton* m_btnSearchListMenu;
 	int			m_iSentMoreReq;
+	uint32		m_nFilterColumn;
 
 	bool StartNewSearch(SSearchParams* pParams);
 	void SearchStarted();
@@ -107,6 +128,8 @@ protected:
 	void SetInactiveSearchResultsIcon(UINT uSearchID);
 	SSearchParams* GetSearchResultsParams(UINT uSearchID) const;
 
+	virtual void OnInitialUpdate();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
@@ -125,5 +148,8 @@ protected:
 	afx_msg LRESULT OnIdleUpdateCmdUI(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnBnClickedOpenParamsWnd();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg LRESULT OnChangeFilter(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnSearchListMenuBtnDropDown(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMClickCattab2(NMHDR *pNMHDR, LRESULT *pResult); //MORPH - Added by SiRoB, Selection category support
+
 };

@@ -111,6 +111,7 @@ CPPgTweaks::CPPgTweaks()
     m_iDynUpNumberOfPings = 0;
     m_bA4AFSaveCpu = false;
 	m_iExtractMetaData = 0;
+	m_bAutoArchDisable=true;
 
 	m_bInitializedTreeOpts = false;
 	m_htiTCPGroup = NULL;
@@ -168,6 +169,7 @@ CPPgTweaks::CPPgTweaks()
     m_htiA4AFSaveCpu = NULL;
 	m_htiLogA4AF = NULL;
 	m_htiExtractMetaData = NULL;
+	m_htiAutoArch = NULL;
 
 	// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	m_bLogUPnP = false;
@@ -233,6 +235,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiFilterLANIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PW_FILTER), TVI_ROOT, m_bFilterLANIPs);
 		m_htiExtControls = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHOWEXTSETTINGS), TVI_ROOT, m_bExtControls);
         m_htiA4AFSaveCpu = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SAVE_CPU), TVI_ROOT, m_bA4AFSaveCpu); // ZZ:DownloadManager
+		m_htiAutoArch  = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLE_AUTOARCHPREV), TVI_ROOT, m_bAutoArchDisable);
 		m_htiYourHostname = m_ctrlTreeOptions.InsertItem(GetResString(IDS_YOURHOSTNAME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
 		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEditEx));
 		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), TVI_ROOT, m_bDisablePeerCache);
@@ -348,6 +351,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiA4AFSaveCpu, m_bA4AFSaveCpu);
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDisablePeerCache, m_bDisablePeerCache);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoArch, m_bAutoArchDisable);
 
 	/////////////////////////////////////////////////////////////////////////////
 	// File related group
@@ -473,6 +477,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	*/
 	// End emulEspaña
 	m_bDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
+	m_bAutoArchDisable = !thePrefs.m_bAutomaticArcPreviewStart;
 
     m_bDynUpEnabled = thePrefs.m_bDynUpEnabled;
     m_iDynUpMinUpload = thePrefs.GetMinUpload();
@@ -641,6 +646,7 @@ BOOL CPPgTweaks::OnApply()
     thePrefs.m_iDynUpGoingUpDivider = m_iDynUpGoingUpDivider;
     thePrefs.m_iDynUpGoingDownDivider = m_iDynUpGoingDownDivider;
     thePrefs.m_iDynUpNumberOfPings = m_iDynUpNumberOfPings;
+	thePrefs.m_bAutomaticArcPreviewStart = !m_bAutoArchDisable;
 
     thePrefs.m_bA4AFSaveCpu = m_bA4AFSaveCpu;
 
@@ -740,6 +746,7 @@ void CPPgTweaks::Localize(void)
         if (m_htiDynUpNumberOfPings) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpNumberOfPings, GetResString(IDS_DYNUP_NUMBEROFPINGS));
 	if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
         if (m_htiFullAlloc) m_ctrlTreeOptions.SetItemText(m_htiFullAlloc, GetResString(IDS_FULLALLOC));
+		if (m_htiAutoArch) m_ctrlTreeOptions.SetItemText(m_htiAutoArch, GetResString(IDS_DISABLE_AUTOARCHPREV));
 
         CString temp;
 		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
@@ -846,6 +853,7 @@ void CPPgTweaks::OnDestroy()
     m_htiExtractMetaData = NULL;
 	m_htiExtractMetaDataNever = NULL;
 	m_htiExtractMetaDataID3Lib = NULL;
+	m_htiAutoArch = NULL;
 	//m_htiExtractMetaDataMediaDet = NULL;
     
     CPropertyPage::OnDestroy();

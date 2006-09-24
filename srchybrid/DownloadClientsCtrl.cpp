@@ -126,7 +126,6 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("ClientAMule")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientLPhant")));
 	m_ImageList.Add(CTempIconLoader(_T("ClientLPhant")));
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey")));
 	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE")));
@@ -141,11 +140,11 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("CYREX")));
 	m_ImageList.Add(CTempIconLoader(_T("NEXTEMF")));
 	m_ImageList.Add(CTempIconLoader(_T("NEO")));
-
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
-
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("OverlayObfu"))), 2);
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("OverlaySecureObfu"))), 3);
+	
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -156,6 +155,10 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendOvl")));
 	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendSlotOvl")));
 	//MORPH END   - Addded by SiRoB, Friend Addon
+	//MORPH START - Credit Overlay Icon
+	m_overlayimages.Add(CTempIconLoader(_T("ClientCreditOvl")));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientCreditSecureOvl")));
+	//MORPH END   - Credit Overlay Icon
 }
 
 void CDownloadClientsCtrl::Localize()
@@ -262,7 +265,12 @@ void CDownloadClientsCtrl::RefreshClient(CUpDownClient* client)
 {
 	if( !theApp.emuledlg->IsRunning() )
 		return;
-	
+
+	//MORPH START - SiRoB, Don't Refresh item if not needed 
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd  || theApp.emuledlg->transferwnd->downloadclientsctrl.IsWindowVisible() == false ) 
+		return; 
+	//MORPH END   - SiRoB, Don't Refresh item if not needed 
+
 	//MORPH START - UpdateItemThread
 	/*
 	LVFINDINFO find;
@@ -335,7 +343,6 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 			{
 			//MORPH END   - Added by SiRoB, Don't draw hidden columns
-				dc->SetTextColor(m_crWindowText);
 				switch(iColumn){
 				case 0:{
 					uint8 image;
@@ -361,12 +368,12 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					}
 					//MORPH START - Added by Stulle, Server Icon
 					else if(client->GetClientSoft() == SO_URL){
-						image = 18;
+						image = 17;
 					}
 					//MORPH END   - Added by Stulle, Server Icon
 					//MORPH START - Added by SiRoB, WebCache
 					else if (client->GetClientSoft() == SO_WEBCACHE) {
-						image = 17;
+						image = 16;
 					}
 					//MORPH END   - Added by SiRoB, WebCache
 					else if (client->ExtProtocolAvailable()){
@@ -374,30 +381,39 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						if(client->GetModClient() == MOD_NONE)
 							image = 1;
 						else
-							image = (uint8)(client->GetModClient() + 18);
+							image = (uint8)(client->GetModClient() + 17);
 						//MORPH END   - Added by SiRoB, More client icon
 					}
 					else if (client->GetClientSoft() == SO_EDONKEY){
 						image = 15;
 					}
-					else{
+					else
 						image = 0;
-					}
 
-					UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->Credits() && client->Credits()->GetMyScoreRatio(client->GetIP()) > 1) ? 2 : 0));
+					uint32 nOverlayImage = 0;
+					if ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED))
+						nOverlayImage |= 1;
+					if (client->IsObfuscatedConnectionEstablished())
+						nOverlayImage |= 2;
 					POINT point = {cur_rec.left, cur_rec.top+1};
-					/*
-					m_ImageList.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
-					*/
-					m_ImageList.Draw(dc,image, point, ILD_NORMAL | uOvlImg);
-					// Mighty Knife: Community visualization
-					if (client->IsCommunity())
-						m_overlayimages.Draw(dc,0, point, ILD_TRANSPARENT);
-					// [end] Mighty Knife
+					m_ImageList.Draw(dc,image, point, ILD_NORMAL | INDEXTOOVERLAYMASK(nOverlayImage));
+					
+					//MORPH START - Credit Overlay Icon
+					if (client->Credits() && client->Credits()->GetMyScoreRatio(client->GetIP()) > 1) {
+						if (nOverlayImage & 1)
+							m_overlayimages.Draw(dc, 4, point, ILD_TRANSPARENT);
+						else
+							m_overlayimages.Draw(dc, 3, point, ILD_TRANSPARENT);
+					}
+					//MORPH END - Credit Overlay Icon
 					//MORPH START - Added by SiRoB, Friend Addon
 					if (client->IsFriend())
 						m_overlayimages.Draw(dc, client->GetFriendSlot()?2:1,point, ILD_TRANSPARENT);
 					//MORPH END   - Added by SiRoB, Friend Addon
+					// Mighty Knife: Community visualization
+					if (client->IsCommunity())
+						m_overlayimages.Draw(dc,0, point, ILD_TRANSPARENT);
+					// [end] Mighty Knife
 					//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
 					Sbuffer = client->GetUserName();
@@ -495,12 +511,22 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						case SF_SERVER:
 							Sbuffer = _T("eD2K Server");
 							break;
+						//MORPH - Source cache
+						case SF_CACHE_SERVER:
+							Sbuffer = _T("eD2K Server (SC)");
+							break;
+						//MORPH - Source cache
 						case SF_KADEMLIA:
 							Sbuffer = GetResString(IDS_KADEMLIA);
 							break;
 						case SF_SOURCE_EXCHANGE:
 							Sbuffer = GetResString(IDS_SE);
 							break;
+						//MORPH - Source cache
+						case SF_CACHE_SOURCE_EXCHANGE:
+							Sbuffer = GetResString(IDS_KADEMLIA) + _T(" (SC)");
+							break;
+						//MORPH - Source cache
 						case SF_PASSIVE:
 							Sbuffer = GetResString(IDS_PASSIVE);
 							break;
@@ -646,7 +672,7 @@ BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			}
 			case MP_BOOT:
 				if (client->GetKadPort())
-					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
 				break;
 			//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 			case MP_REMOVEFRIEND:{
@@ -702,12 +728,10 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 		case 1:
 	    case 101:
 			if (item1->GetClientSoft() == item2->GetClientSoft())
-				if (item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
+				if (item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE)
 					iResult=CompareOptLocaleStringNoCase(item2->GetClientSoftVer(), item1->GetClientSoftVer());
-				}
-				else {
+				else
 					iResult=item2->GetVersion() - item1->GetVersion();
-				}
 			else
 				iResult=item1->GetClientSoft() - item2->GetClientSoft();
 			break;

@@ -12,13 +12,14 @@ public:
 	CServerListCtrl();
 	virtual ~CServerListCtrl();
 
-	bool	Init(CServerList* in_list);
+	bool	Init();
 	bool	AddServer(const CServer* pServer, bool bAddToList = true);
 	void	RemoveServer(const CServer* pServer);
 	bool	AddServerMetToList(const CString& strFile);
 	void	RefreshServer(const CServer* pServer);
 	void	RefreshAllServer();//EastShare - added by AndCycle, IP to Country
 	void	RemoveAllDeadServers();
+	void	RemoveAllFilteredServers();
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	Localize();
@@ -27,8 +28,10 @@ public:
 	bool	StaticServerFileRemove(CServer* pServer);
 
 protected:
-	CServerList*	server_list;
 	CToolTipCtrlX*	m_tooltip;
+
+	CString CreateSelectedServersURLs();
+	void DeleteSelectedServers();
 
 	void SetSelectedServersPriority(UINT uPriority);
 	void SetAllIcons();
@@ -46,7 +49,7 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg	void OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnNMLdblclk (NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMDblClk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdraw(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult);
 };

@@ -162,9 +162,9 @@ _CRT_ALLOC_HOOK g_pfnPrevCrtAllocHook = NULL;
 CMap<const unsigned char*, const unsigned char*, UINT, UINT> g_allocations;
 int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long lRequest, const unsigned char* pszFileName, int nLine);
 
-//CString _strCrtDebugReportFilePath(_T("eMule CRT Debug Log.txt"));
+//CString _strCrtDebugReportFilePath(_T("eMule CRT Debug Log.log"));
 // don't use a CString for that memory - it will not be available on application termination!
-#define APP_CRT_DEBUG_LOG_FILE _T("eMule CRT Debug Log.txt")
+#define APP_CRT_DEBUG_LOG_FILE _T("eMule CRT Debug Log.log")
 static TCHAR _szCrtDebugReportFilePath[MAX_PATH] = APP_CRT_DEBUG_LOG_FILE;
 #endif //_DEBUG
 
@@ -197,12 +197,14 @@ void CALLBACK myLogHandler(LPCSTR lpMsg)
 
 const static UINT UWM_ARE_YOU_EMULE=RegisterWindowMessage(EMULE_GUID);
 
+BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType);
+
+///////////////////////////////////////////////////////////////////////////////
 // CemuleApp
 
 BEGIN_MESSAGE_MAP(CemuleApp, CWinApp)
 	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
-
 
 CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	:CWinApp(lpszAppName)
@@ -239,13 +241,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-// MORPH START leuk_he mod beta version
-#ifdef BETAREL 
-	m_strCurVersionLong += BETAREL; // MOD beta version 
-#else // 
-	m_strCurVersionLong += _T(" BETA");
-#endif BETAREL
-// MORPH END leuk_he mod beta version	 
+	m_strCurVersionLong += _T(" BETA1");
 #endif
 
 	// create the protocol version number
@@ -284,7 +280,7 @@ CemuleApp theApp(_T("eMule"));
 
 
 // Workaround for buggy 'AfxSocketTerm' (needed at least for MFC 7.0)
-#if _MFC_VER==0x0700 || _MFC_VER==0x0710
+#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800
 void __cdecl __AfxSocketTerm()
 {
 #if defined(_AFXDLL) && (_MFC_VER==0x0700 || _MFC_VER==0x0710)
@@ -385,12 +381,7 @@ BOOL CemuleApp::InitInstance()
 		/*
 		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg, true);
 		*/
-        #ifdef BETAREL
-		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion + BETAREL +_T("]"), true);
-        #else
-		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion +_T("]"), true);
-        #endif
-		
+        theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion +_T("]"), true);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Locale initialization -- BE VERY CAREFUL HERE!!!
@@ -470,7 +461,7 @@ BOOL CemuleApp::InitInstance()
 	}
 		}
 	//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
-#if _MFC_VER==0x0700 || _MFC_VER==0x0710
+#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800
 	atexit(__AfxSocketTerm);
 #else
 #error "You are using an MFC version which may require a special version of the above function!"
@@ -532,6 +523,8 @@ BOOL CemuleApp::InitInstance()
 		theVerboseLog.Log(_T("\r\n"));
 	}
 	Log(_T("Starting eMule v%s"), m_strCurVersionLong);
+
+	SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE);
 
 	CemuleDlg dlg;
 	emuledlg = &dlg;
@@ -634,20 +627,21 @@ BOOL CemuleApp::InitInstance()
         }
     }
 
+	ipfilter 	= new CIPFilter();
+	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
+	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+
 	// ZZ:UploadSpeedSense -->
     lastCommonRouteFinder = new LastCommonRouteFinder();
     uploadBandwidthThrottler = new UploadBandwidthThrottler();
 	// ZZ:UploadSpeedSense <--
 
-	ipfilter 	= new CIPFilter();
-	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
-	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	clientlist = new CClientList();
 	friendlist = new CFriendList();
 	searchlist = new CSearchList();
 	knownfiles = new CKnownFileList();
 	serverlist = new CServerList();
-	serverconnect = new CServerConnect(serverlist);
+	serverconnect = new CServerConnect();
 	sharedfiles = new CSharedFileList(serverconnect);
 	listensocket = new CListenSocket();
 	clientudp	= new CClientUDPSocket();
@@ -774,7 +768,7 @@ bool CemuleApp::ProcessCommandline()
 	// If we create our TCP listen socket with SO_REUSEADDR, we have to ensure that there are
 	// not 2 emules are running using the same port.
 	// NOTE: This will not prevent from some other application using that port!
-	UINT uTcpPort = GetProfileInt(_T("eMule"), _T("Port"), DEFAULT_TCP_PORT);
+	UINT uTcpPort = GetProfileInt(_T("eMule"), _T("Port"), DEFAULT_TCP_PORT_OLD);
 	CString strMutextName;
 	strMutextName.Format(_T("%s:%u"), EMULE_GUID, uTcpPort);
 	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);
@@ -1077,7 +1071,7 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 
 			file.Write("|",1); 
 			if(serverconnect->IsConnected()){
-				strBuff = serverconnect->GetCurrentServer()->GetFullIP();
+				strBuff = serverconnect->GetCurrentServer()->GetAddress();
 				file.Write(strBuff,strBuff.GetLength()); 
 			}
 			else{
@@ -1314,8 +1308,8 @@ uint32 CemuleApp::GetID(){
 	return ID;
 }
 
-uint32 CemuleApp::GetPublicIP() const {
-	if (m_dwPublicIP == 0 && Kademlia::CKademlia::IsConnected() && Kademlia::CKademlia::GetIPAddress() )
+uint32 CemuleApp::GetPublicIP(bool bIgnoreKadIP) const {
+	if (m_dwPublicIP == 0 && Kademlia::CKademlia::IsConnected() && Kademlia::CKademlia::GetIPAddress() && !bIgnoreKadIP)
 		return ntohl(Kademlia::CKademlia::GetIPAddress());
 	return m_dwPublicIP;
 }
@@ -1324,6 +1318,7 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 	if (dwIP != 0){
 		ASSERT ( !IsLowID(dwIP));
 		ASSERT ( m_pPeerCache );
+
 		if ( GetPublicIP() == 0)
 			AddDebugLogLine(DLP_VERYLOW, false, _T("My public IP Address is: %s"),ipstr(dwIP));
 		else if (Kademlia::CKademlia::IsConnected() && Kademlia::CKademlia::GetPrefs()->GetIPAddress())
@@ -1334,7 +1329,12 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 	else
 		AddDebugLogLine(DLP_VERYLOW, false, _T("Deleted public IP"));
 	
-	m_dwPublicIP = dwIP;
+	if (dwIP != 0 && dwIP != m_dwPublicIP && serverlist != NULL){
+		m_dwPublicIP = dwIP;
+		serverlist->CheckForExpiredUDPKeys();
+	}
+	else
+		m_dwPublicIP = dwIP;
 
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 	// jp detect Webcache on Startup START
@@ -2044,6 +2044,76 @@ void CemuleApp::UpdateDesktopColorDepth()
 
 	// Doesn't help..
 	//m_aExtToSysImgIdx.RemoveAll();
+}
+
+BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType)
+{
+	// *) This function is invoked by the system from within a *DIFFERENT* thread !!
+	//
+	// *) This function is invoked only, if eMule was started with "RUNAS"
+	//		- when user explicitly/manually logs off from the system (CTRL_LOGOFF_EVENT).
+	//		- when user explicitly/manually does a reboot or shutdown (also: CTRL_LOGOFF_EVENT).
+	//		- when eMule issues a ExitWindowsEx(EWX_LOGOFF/EWX_REBOOT/EWX_SHUTDOWN)
+	//
+	// NOTE: Windows will in each case forcefully terminate the process after 20 seconds!
+	// Every action which is started after receiving this notification will get forcefully
+	// terminated by Windows after 20 seconds.
+
+	if (thePrefs.GetDebug2Disk()) {
+		static TCHAR szCtrlType[40];
+		LPCTSTR pszCtrlType = NULL;
+		if (dwCtrlType == CTRL_C_EVENT)				pszCtrlType = _T("CTRL_C_EVENT");
+		else if (dwCtrlType == CTRL_BREAK_EVENT)	pszCtrlType = _T("CTRL_BREAK_EVENT");
+		else if (dwCtrlType == CTRL_CLOSE_EVENT)	pszCtrlType = _T("CTRL_CLOSE_EVENT");
+		else if (dwCtrlType == CTRL_LOGOFF_EVENT)	pszCtrlType = _T("CTRL_LOGOFF_EVENT");
+		else if (dwCtrlType == CTRL_SHUTDOWN_EVENT)	pszCtrlType = _T("CTRL_SHUTDOWN_EVENT");
+		else {
+			_sntprintf(szCtrlType, _countof(szCtrlType), _T("0x%08x"), dwCtrlType);
+			pszCtrlType = szCtrlType;
+		}
+		theVerboseLog.Logf(_T("%hs: CtrlType=%s"), __FUNCTION__, pszCtrlType);
+
+		// Default ProcessShutdownParameters: Level=0x00000280, Flags=0x00000000
+		// Setting 'SHUTDOWN_NORETRY' does not prevent from getting terminated after 20 sec.
+		//DWORD dwLevel = 0, dwFlags = 0;
+		//GetProcessShutdownParameters(&dwLevel, &dwFlags);
+		//theVerboseLog.Logf(_T("%hs: ProcessShutdownParameters #0: Level=0x%08x, Flags=0x%08x"), __FUNCTION__, dwLevel, dwFlags);
+		//SetProcessShutdownParameters(dwLevel, SHUTDOWN_NORETRY);
+	}
+
+	if (dwCtrlType==CTRL_CLOSE_EVENT || dwCtrlType==CTRL_LOGOFF_EVENT || dwCtrlType==CTRL_SHUTDOWN_EVENT)
+	{
+		if (theApp.emuledlg && theApp.emuledlg->m_hWnd)
+		{
+			if (thePrefs.GetDebug2Disk())
+				theVerboseLog.Logf(_T("%hs: Sending TM_CONSOLETHREADEVENT to main window"), __FUNCTION__);
+
+			// Use 'SendMessage' to send the message to the (different) main thread. This is
+			// done by intention because it lets this thread wait as long as the main thread
+			// has called 'ExitProcess' or returns from processing the message. This is
+			// needed to not let Windows terminate the process before the 20 sec. timeout.
+			if (!theApp.emuledlg->SendMessage(TM_CONSOLETHREADEVENT, dwCtrlType, (LPARAM)GetCurrentThreadId()))
+			{
+				theApp.m_app_state = APP_STATE_SHUTTINGDOWN; // as a last attempt
+				if (thePrefs.GetDebug2Disk())
+					theVerboseLog.Logf(_T("%hs: Error: Failed to send TM_CONSOLETHREADEVENT to main window - error %u"), __FUNCTION__, GetLastError());
+			}
+		}
+	}
+
+	// Returning FALSE does not cause Windows to immediatly terminate the process. Though,
+	// that only depends on the next registered console control handler. The default seems
+	// to wait 20 sec. until the process has terminated. After that timeout Windows
+	// nevertheless terminates the process.
+	//
+	// For whatever unknown reason, this is *not* always true!? It may happen that Windows
+	// terminates the process *before* the 20 sec. timeout if (and only if) the console
+	// control handler thread has already terminated. So, we have to take care that we do not
+	// exit this thread before the main thread has called 'ExitProcess' (in a synchronous
+	// way) -- see also the 'SendMessage' above.
+	if (thePrefs.GetDebug2Disk())
+		theVerboseLog.Logf(_T("%hs: returning"), __FUNCTION__);
+	return FALSE; // FALSE: Let the system kill the process with the default handler.
 }
 
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start

@@ -105,6 +105,7 @@ BOOL InputBox::OnInitDialog()
 	// khaos::categorymod-
 	SetWindowText(m_title);
 
+	SetDlgItemText(IDOK, GetResString(IDS_TREEOPTIONS_OK) );
 	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 	SetDlgItemText(IDC_CLEANFILENAME,GetResString(IDS_CLEANUP));
 	GetDlgItem(IDC_CLEANFILENAME)->ShowWindow(m_bFilenameMode ? SW_NORMAL : SW_HIDE);

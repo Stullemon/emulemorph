@@ -25,6 +25,12 @@ class CSearchList;
 class CSearchFile;
 class CToolTipCtrlX;
 
+enum EFileSizeFormat {
+	fsizeDefault,
+	fsizeKByte,
+	fsizeMByte
+};
+
 struct SearchCtrlItem_Struct{
    CSearchFile*		value;
    CSearchFile*     owner;
@@ -59,6 +65,8 @@ public:
 	void	ClearResultViewState(uint32 nResultsID);
 	void	NoTabs()	{ m_nResultsID = 0; }
 	void	UpdateSearch(CSearchFile* toupdate);
+	EFileSizeFormat GetFileSizeFormat() const { return m_eFileSizeFormat; }
+	void	SetFileSizeFormat(EFileSizeFormat eFormat);
 
 protected:
 	uint32		m_nResultsID;
@@ -72,6 +80,7 @@ protected:
 	COLORREF	m_crSearchResultShareing;
 	COLORREF	m_crSearchResultCancelled;
 	COLORREF	m_crShades[AVBLYSHADECOUNT];
+	EFileSizeFormat m_eFileSizeFormat;
 
 	CMap<int,int, CSortSelectionState*, CSortSelectionState*> 	m_mapSortSelectionStates;
 
@@ -82,6 +91,9 @@ protected:
 	void	SetStyle();
 	void	SetHighlightColors();
 	void	SetAllIcons();
+	CString	FormatFileSize(ULONGLONG ullFileSize) const;
+	void	GetItemDisplayText(const CSearchFile* src, int iSubItem, LPTSTR pszText, int cchTextMax) const;
+	bool	IsFilteredItem(const CSearchFile* pSearchFile) const;
 
 	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
 	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
@@ -97,10 +109,12 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
-	afx_msg void OnLvnDeleteallitems(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnDeleteAllItems(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnDblClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnLvnKeydown(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnKeyDown(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnDestroy();
 };

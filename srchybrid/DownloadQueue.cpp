@@ -191,7 +191,7 @@ void CDownloadQueue::AddSearchToDownload(CSearchFile* toadd, uint8 paused, int c
 		return;
 
 	if (toadd->GetFileSize() > OLD_MAX_EMULE_FILE_SIZE && !thePrefs.CanFSHandleLargeFiles()){
-		LogError(GetResString(IDS_ERR_FSCANTHANDLEFILE));
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_FSCANTHANDLEFILE));
 		return;
 	}
 
@@ -213,7 +213,7 @@ void CDownloadQueue::AddSearchToDownload(CSearchFile* toadd, uint8 paused, int c
 			sources.WriteUInt32(toadd->GetClientID());
 			sources.WriteUInt16(toadd->GetClientPort());
 		    sources.SeekToBegin();
-		    newfile->AddSources(&sources, toadd->GetClientServerIP(), toadd->GetClientServerPort());
+		    newfile->AddSources(&sources, toadd->GetClientServerIP(), toadd->GetClientServerPort(), false);
 		}
 		catch(CFileException* error){
 			ASSERT(0);
@@ -230,7 +230,7 @@ void CDownloadQueue::AddSearchToDownload(CSearchFile* toadd, uint8 paused, int c
 			sources.WriteUInt32(aClients[i].m_nIP);
 			sources.WriteUInt16(aClients[i].m_nPort);
 		    sources.SeekToBegin();
-			newfile->AddSources(&sources,aClients[i].m_nServerIP, aClients[i].m_nServerPort);
+			newfile->AddSources(&sources,aClients[i].m_nServerIP, aClients[i].m_nServerPort, false);
 	    }
 		catch(CFileException* error){
 			ASSERT(0);
@@ -1143,6 +1143,17 @@ bool CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
 		return false;
 	}
 
+	// filter sources which are incompatible with our encryption setting (one requires it, and the other one doesn't supports it)
+	if ( (source->RequiresCryptLayer() && (!thePrefs.IsClientCryptLayerSupported() || !source->HasValidHash())) || (thePrefs.IsClientCryptLayerRequired() && (!source->SupportsCryptLayer() || !source->HasValidHash())))
+	{
+#if defined(_DEBUG) || defined(_BETA)
+		//if (thePrefs.GetDebugSourceExchange()) // TODO: Uncomment after testing
+			AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because CryptLayer-Setting (Obfuscation) was incompatible for file %s : %s"), sender->GetFileName(), source->DbgGetClientInfo() );
+#endif
+		delete source;
+		return false;
+	}
+
 	// "Filter LAN IPs" and/or "IPfilter" is not required here, because it was already done in parent functions
 
 	// uses this only for temp. clients
@@ -1214,13 +1225,25 @@ bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* sou
 		return false;
 	}
 
-	// filter sources which are known to be dead/useless
+	// filter sources which are known to be temporarily dead/useless
 	if ( (theApp.clientlist->m_globDeadSourceList.IsDeadSource(source) && !bIgnoreGlobDeadList) || sender->m_DeadSourceList.IsDeadSource(source)){
 		//if (thePrefs.GetLogFilteredIPs())
 		//	AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
 		//	,sender->m_DeadSourceList.IsDeadSource(source)? _T("Local") : _T("Global"), sender->GetFileName(), source->DbgGetClientInfo() );
 		if (doThrow)
 			throw CString(_T("found on the dead source list"));
+		return false;
+	}
+
+	// filter sources which are incompatible with our encryption setting (one requires it, and the other one doesn't supports it)
+	if ( (source->RequiresCryptLayer() && (!thePrefs.IsClientCryptLayerSupported() || !source->HasValidHash())) || (thePrefs.IsClientCryptLayerRequired() && (!source->SupportsCryptLayer() || !source->HasValidHash())))
+	{
+#if defined(_DEBUG) || defined(_BETA)
+		//if (thePrefs.GetDebugSourceExchange()) // TODO: Uncomment after testing
+			AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because CryptLayer-Setting (Obfuscation) was incompatible for file %s : %s"), sender->GetFileName(), source->DbgGetClientInfo() );
+#endif
+		if (doThrow)
+			throw CString(_T("found as incompatible with our emcryption settingon"));
 		return false;
 	}
 
@@ -1421,7 +1444,9 @@ bool CDownloadQueue::SendGlobGetSourcesUDPPacket(CSafeMemFile* data, bool bExt2P
 
 	if (cur_udpserver)
 	{
+#ifdef _DEBUG
 		int iPacketSize = (int)data->GetLength();
+#endif
 		Packet packet(data);
 		data = NULL;
 		if (bExt2Packet){
@@ -1449,7 +1474,8 @@ bool CDownloadQueue::SendNextUDPPacket()
 {
 	if (   filelist.IsEmpty()
         || !theApp.serverconnect->IsUDPSocketAvailable()
-        || !theApp.serverconnect->IsConnected())
+        || !theApp.serverconnect->IsConnected()
+		|| thePrefs.IsClientCryptLayerRequired()) // we cannot use sources received without userhash, so dont ask
 		return false;
 
 	CServer* pConnectedServer = theApp.serverconnect->GetCurrentServer();
@@ -1458,7 +1484,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 
 	if (!cur_udpserver)
 	{
-		while ((cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver)) != NULL) {
+		while ((cur_udpserver = theApp.serverlist->GetSuccServer(cur_udpserver)) != NULL) {
 			if (cur_udpserver == pConnectedServer)
 				continue;
 			if (cur_udpserver->GetFailedCount() >= thePrefs.GetDeadServerRetries())
@@ -1517,7 +1543,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 						}
 
 						// get next server to ask
-						while ((cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver)) != NULL) {
+						while ((cur_udpserver = theApp.serverlist->GetSuccServer(cur_udpserver)) != NULL) {
 							if (cur_udpserver == pConnectedServer)
 								continue;
 							if (cur_udpserver->GetFailedCount() >= thePrefs.GetDeadServerRetries())
@@ -1601,7 +1627,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 		}
 
 		// and next server
-		while ((cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver)) != NULL) {
+		while ((cur_udpserver = theApp.serverlist->GetSuccServer(cur_udpserver)) != NULL) {
 			if (cur_udpserver == pConnectedServer)
 				continue;
 			if (cur_udpserver->GetFailedCount() >= thePrefs.GetDeadServerRetries())
@@ -1839,16 +1865,29 @@ CUpDownClient* CDownloadQueue::GetDownloadClientByIP(uint32 dwIP){
 	return NULL;
 }
 
-CUpDownClient* CDownloadQueue::GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort){
+CUpDownClient* CDownloadQueue::GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort, bool bIgnorePortOnUniqueIP, bool* pbMultipleIPs){
+	CUpDownClient* pMatchingIPClient = NULL;
+	uint32 cMatches = 0;
+
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		for (POSITION pos2 = cur_file->srclist.GetHeadPosition();pos2 != 0;){
 			CUpDownClient* cur_client = cur_file->srclist.GetNext(pos2);
-			if (dwIP == cur_client->GetIP() && (nUDPPort == cur_client->GetUDPPort() || cur_client->HasLowID() && cur_client->IsUDPPending())){ //MORPH - NAPT Tempory Fix
+			if (dwIP == cur_client->GetIP() && nUDPPort == cur_client->GetUDPPort()){
 				return cur_client;
 			}
+			else if (dwIP == cur_client->GetIP() && bIgnorePortOnUniqueIP && cur_client != pMatchingIPClient){
+				pMatchingIPClient = cur_client;
+				cMatches++;
 		}
 	}
+	}
+	if (pbMultipleIPs != NULL)
+		*pbMultipleIPs = cMatches > 1;
+
+	if (pMatchingIPClient != NULL && cMatches == 1)
+		return pMatchingIPClient;
+	else
 	return NULL;
 }
 
@@ -2170,9 +2209,16 @@ void CDownloadQueue::ProcessLocalRequests()
 					smPacket.WriteUInt32(0); // indicates that this is a large file and a uint64 follows
 					smPacket.WriteUInt64(cur_file->GetFileSize());
 				}
-				Packet* packet = new Packet(&smPacket, OP_EDONKEYPROT, OP_GETSOURCES);
+
+				uint8 byOpcode = 0;
+				if (thePrefs.IsClientCryptLayerSupported() && theApp.serverconnect->GetCurrentServer() != NULL && theApp.serverconnect->GetCurrentServer()->SupportsGetSourcesObfuscation())
+					byOpcode = OP_GETSOURCES_OBFU;
+				else
+					byOpcode = OP_GETSOURCES;
+	
+				Packet* packet = new Packet(&smPacket, OP_EDONKEYPROT, byOpcode);
 				if (thePrefs.GetDebugServerTCPLevel() > 0)
-					Debug(_T(">>> Sending OP__GetSources(%2u/%2u); %s\n"), iFiles, iMaxFilesPerTcpFrame, DbgGetFileInfo(cur_file->GetFileHash()));
+					Debug(_T(">>> Sending OP__GetSources%s(%2u/%2u); %s\n"), (byOpcode == OP_GETSOURCES) ? _T("") : _T("_OBFU"), iFiles, iMaxFilesPerTcpFrame, DbgGetFileInfo(cur_file->GetFileHash()));
 				dataTcpFrame.Write(packet->GetPacket(), packet->GetRealPacketSize());
 				delete packet;
 
@@ -2299,7 +2345,7 @@ LRESULT CSourceHostnameResolveWnd::OnHostnameResolved(WPARAM /*wParam*/, LPARAM 
 					    sources.WriteUInt32(nIP);
 					    sources.WriteUInt16(resolved->port);
 					    sources.SeekToBegin();
-					    file->AddSources(&sources,0,0);
+					    file->AddSources(&sources,0,0, false);
 				    }
 					else
 					{
@@ -2328,7 +2374,7 @@ bool CDownloadQueue::DoKademliaFileRequest()
 	return ((::GetTickCount() - lastkademliafilerequest) > KADEMLIAASKTIME);
 }
 
-void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, const Kademlia::CUInt128* pbuddyID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport)
+void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, const Kademlia::CUInt128* pbuddyID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint8 byCryptOptions)
 {
 	//Safty measure to make sure we are looking for these sources
 	CPartFile* temp = GetFileByKadFileSearchID(searchID);
@@ -2401,8 +2447,14 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 		}
 	}
 
-	if (ctemp)
+	if (ctemp != NULL){
+		// add encryption settings
+		ctemp->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
+		ctemp->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
+		ctemp->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+
 		CheckAndAddSource(temp, ctemp);
+	}
 }
 
 void CDownloadQueue::ExportPartMetFilesOverview() const

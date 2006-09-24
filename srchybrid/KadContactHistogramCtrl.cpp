@@ -111,7 +111,8 @@ void CKadContactHistogramCtrl::OnPaint()
 	GetClientRect(&rcClnt);
 	if (rcClnt.IsRectEmpty())
 		return;
-	dc.FillSolidRect(rcClnt, RGB(255,255,255));
+	dc.FillSolidRect(rcClnt, GetSysColor(COLOR_WINDOW));
+	COLORREF crOldTextColor = dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
 	CFont* pOldFont = dc.SelectObject(&m_fontLabel);
 	if (!m_bInitializedFontMetrics)
@@ -140,13 +141,15 @@ void CKadContactHistogramCtrl::OnPaint()
 	UINT uHistWidth = rcClnt.Width() - iLeftBorder - iRightBorder;
 	if (uHistWidth > ARRSIZE(m_aHist))
 		uHistWidth = ARRSIZE(m_aHist);
-	else if (uHistWidth == 0){
+	else if (uHistWidth == 0) {
 		dc.SelectObject(pOldFont);
+		dc.SetTextColor(crOldTextColor);
 		return;
 	}
 	UINT uHistHeight = rcClnt.Height() - iTopBorder - iBottomBorder;
-	if (uHistHeight == 0){
+	if (uHistHeight == 0) {
 		dc.SelectObject(pOldFont);
+		dc.SetTextColor(crOldTextColor);
 		return;
 	}
 
@@ -168,6 +171,7 @@ void CKadContactHistogramCtrl::OnPaint()
 	UINT uLabels = uHistHeight / (m_iMaxLabelHeight + m_iMaxLabelHeight/2);
 	if (uLabels == 0){
 		dc.SelectObject(pOldFont);
+		dc.SetTextColor(crOldTextColor);
 		return;
 	}
 	UINT uStep = ((uMax / uLabels + 5) / 10) * 10;
@@ -233,4 +237,5 @@ void CKadContactHistogramCtrl::OnPaint()
 
 	dc.SelectObject(pOldPen);
 	dc.SelectObject(pOldFont);
+	dc.SetTextColor(crOldTextColor);
 }

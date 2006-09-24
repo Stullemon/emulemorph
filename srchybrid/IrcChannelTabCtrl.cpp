@@ -109,7 +109,7 @@ void CIrcChannelTabCtrl::SetAllIcons()
 	SetImageList(&imlist);
 	m_imlistIRC.DeleteImageList();
 	m_imlistIRC.Attach(imlist.Detach());
-	SetPadding(CSize(10, 0));
+	SetPadding(CSize(10, 3));
 }
 
 void CIrcChannelTabCtrl::OnContextMenu(CWnd*, CPoint point)

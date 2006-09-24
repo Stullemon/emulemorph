@@ -161,6 +161,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_WM_SYSCOLORCHANGE()
 	ON_MESSAGE(WM_COPYDATA, OnWMData)
 	ON_MESSAGE(WM_KICKIDLE, OnKickIdle)
+	ON_MESSAGE(WM_USERCHANGED, OnUserChanged)
 	ON_WM_SHOWWINDOW()
 	ON_WM_DESTROY()
 	ON_WM_SETTINGCHANGE()
@@ -225,6 +226,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_FRAMEGRABFINISHED, OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
 	ON_MESSAGE(TM_FILECOMPLETED, OnFileCompleted)
+	ON_MESSAGE(TM_CONSOLETHREADEVENT, OnConsoleThreadEvent)
 END_MESSAGE_MAP()
 
 CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
@@ -657,8 +659,9 @@ void CemuleDlg::DoVersioncheck(bool manual) {
 
 	if (!manual && thePrefs.GetLastVC()!=0) {
 		CTime last(thePrefs.GetLastVC());
-		time_t tLast=safe_mktime(last.GetLocalTm());
-		time_t tNow=safe_mktime(CTime::GetCurrentTime().GetLocalTm());
+		struct tm tmTemp;
+		time_t tLast = safe_mktime(last.GetLocalTm(&tmTemp));
+		time_t tNow = safe_mktime(CTime::GetCurrentTime().GetLocalTm(&tmTemp));
 #ifndef _BETA
 		if ( (difftime(tNow,tLast) / 86400) < thePrefs.GetUpdateDays() ){
 #else
@@ -976,7 +979,7 @@ void CemuleDlg::AddLogText(UINT uFlags, LPCTSTR pszText)
 	{
         if (statusbar->m_hWnd /*&& ready*/)
 		{
-			if (theApp.m_app_state != APP_STATE_SHUTINGDOWN)
+			if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN)
 				statusbar->SetText(pszText, SBarLog, 0);
 		}
 		else
@@ -995,7 +998,7 @@ void CemuleDlg::AddLogText(UINT uFlags, LPCTSTR pszText)
 	{
 		if (!(uFlags & LOG_DEBUG))
 		{
-			serverwnd->logbox->AddTyped(temp, iLen, uFlags);
+			serverwnd->logbox->AddTyped(temp, iLen, uFlags & LOGMSGTYPEMASK);
 			if (IsWindow(serverwnd->StatusSelector) && serverwnd->StatusSelector.GetCurSel() != CServerWnd::PaneLog)
 				serverwnd->StatusSelector.HighlightItem(CServerWnd::PaneLog, TRUE);
 			if (!(uFlags & LOG_DONTNOTIFY) && ready)
@@ -1006,7 +1009,7 @@ void CemuleDlg::AddLogText(UINT uFlags, LPCTSTR pszText)
 		//MORPH START - Added by SiRoB, Morph Log
 		if (uFlags & LOG_MORPH)
 		{
-			serverwnd->morphlog->AddTyped(temp, iLen, uFlags);
+			serverwnd->morphlog->AddTyped(temp, iLen, uFlags & LOGMSGTYPEMASK);
 			if (IsWindow(serverwnd->StatusSelector) && (thePrefs.GetVerbose() && serverwnd->StatusSelector.GetCurSel() != CServerWnd::PaneMorphLog || !thePrefs.GetVerbose() && serverwnd->StatusSelector.GetCurSel()+1 != CServerWnd::PaneMorphLog))
 				serverwnd->StatusSelector.HighlightItem(CServerWnd::PaneMorphLog, TRUE);
 			/*
@@ -1017,7 +1020,7 @@ void CemuleDlg::AddLogText(UINT uFlags, LPCTSTR pszText)
 		//MORPH END   - Added by SiRoB, Morph Log
 		if (thePrefs.GetVerbose() && ((uFlags & LOG_DEBUG) || thePrefs.GetFullVerbose()))
 		{
-			serverwnd->debuglog->AddTyped(temp, iLen, uFlags);
+			serverwnd->debuglog->AddTyped(temp, iLen, uFlags & LOGMSGTYPEMASK);
 			if (IsWindow(serverwnd->StatusSelector) && serverwnd->StatusSelector.GetCurSel() != CServerWnd::PaneVerboseLog)
 				serverwnd->StatusSelector.HighlightItem(CServerWnd::PaneVerboseLog, TRUE);
 
@@ -1051,9 +1054,14 @@ CString CemuleDlg::GetServerInfoText()
 	return serverwnd->servermsgbox->GetText();
 }
 
-void CemuleDlg::AddServerMessageLine(LPCTSTR pszLine)
+void CemuleDlg::AddServerMessageLine(UINT uFlags, LPCTSTR pszLine)
 {
-	serverwnd->servermsgbox->AppendText(pszLine + CString(_T('\n')));
+	CString strMsgLine(pszLine);
+	strMsgLine += _T('\n');
+	if ((uFlags & LOGMSGTYPEMASK) == LOG_INFO)
+		serverwnd->servermsgbox->AppendText(strMsgLine);
+	else
+		serverwnd->servermsgbox->AddTyped(strMsgLine, strMsgLine.GetLength(), uFlags & LOGMSGTYPEMASK);
 	if (IsWindow(serverwnd->StatusSelector) && serverwnd->StatusSelector.GetCurSel() != CServerWnd::PaneServerInfo)
 		serverwnd->StatusSelector.HighlightItem(CServerWnd::PaneServerInfo, TRUE);
 }
@@ -1475,7 +1483,7 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 				CString defName;
 				CED2KServerLink* pSrvLink = pLink->GetServerLink();
 				_ASSERT( pSrvLink !=0 );
-				CServer* pSrv = new CServer(pSrvLink->GetPort(), ipstr(pSrvLink->GetIP()));
+				CServer* pSrv = new CServer(pSrvLink->GetPort(), pSrvLink->GetAddress());
 				_ASSERT( pSrv !=0 );
 				pSrvLink->GetDefaultName(defName);
 				pSrv->SetListName(defName);
@@ -1629,7 +1637,7 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 
 LRESULT CemuleDlg::OnFileHashed(WPARAM wParam, LPARAM lParam)
 {
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
 		return FALSE;
 
 	CKnownFile* result = (CKnownFile*)lParam;
@@ -1665,7 +1673,7 @@ LRESULT CemuleDlg::OnFileHashed(WPARAM wParam, LPARAM lParam)
 
 LRESULT CemuleDlg::OnFileOpProgress(WPARAM wParam, LPARAM lParam)
 {
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
 		return FALSE;
 
 	CKnownFile* pKnownFile = (CKnownFile*)lParam;
@@ -1685,7 +1693,7 @@ LRESULT CemuleDlg::OnFileOpProgress(WPARAM wParam, LPARAM lParam)
 LRESULT CemuleDlg::OnHashFailed(WPARAM /*wParam*/, LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN) {
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN) {
 		UnknownFile_Struct* hashed = (UnknownFile_Struct*)lParam;
 		delete hashed;
 		return FALSE;
@@ -1698,7 +1706,7 @@ LRESULT CemuleDlg::OnHashFailed(WPARAM /*wParam*/, LPARAM lParam)
 LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
 		return FALSE;
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
@@ -1710,7 +1718,7 @@ LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
 		return FALSE;
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
@@ -1722,7 +1730,7 @@ LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnPartHashedOKAICHRecover(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
 		return FALSE;
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
@@ -1734,7 +1742,7 @@ LRESULT CemuleDlg::OnPartHashedOKAICHRecover(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
 		return FALSE;
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
@@ -1748,9 +1756,9 @@ LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 {
 	CUpDownClient* client = (CUpDownClient*) lParam;
-	if (theApp.m_app_state != APP_STATE_SHUTINGDOWN && theApp.uploadqueue->IsDownloading(client)) {	// could have been canceled
+	if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN && theApp.uploadqueue->IsDownloading(client)) {	// could have been canceled
 		client->SetReadBlockFromFileBuffer((byte*)wParam);
-		client->CreateNextBlockPackage();
+		//client->CreateNextBlockPackage();
 	}
 	else if (wParam != -1 && wParam != -2 && wParam != NULL)
 		delete[] (byte*)wParam;
@@ -1761,7 +1769,7 @@ LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnFlushDone(WPARAM /*wParam*/ ,LPARAM lParam)
 {
 	CPartFile* partfile = (CPartFile*) lParam;
-	if (theApp.m_app_state != APP_STATE_SHUTINGDOWN && theApp.downloadqueue->IsPartFile(partfile))	// could have been canceled
+	if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN && theApp.downloadqueue->IsPartFile(partfile))	// could have been canceled
 		partfile->FlushDone();
 	return 0;
 }
@@ -1770,7 +1778,7 @@ LRESULT CemuleDlg::OnFlushDone(WPARAM /*wParam*/ ,LPARAM lParam)
 LRESULT CemuleDlg::OnImportPart(WPARAM wParam,LPARAM lParam)
 {
 	CPartFile* partfile = (CPartFile*) lParam;
-	if (theApp.m_app_state != APP_STATE_SHUTINGDOWN && theApp.downloadqueue->IsPartFile(partfile)) {	// could have been canceled 
+	if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN && theApp.downloadqueue->IsPartFile(partfile)) {	// could have been canceled 
 		ImportPart_Struct* importpart = (ImportPart_Struct*)wParam;
 		partfile->WriteToBuffer(importpart->end-importpart->start+1, importpart->data,importpart->start, importpart->end, NULL, NULL);
 	}
@@ -1784,7 +1792,7 @@ LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
 	CFileException* error = (CFileException*)lParam;
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN || !theApp.downloadqueue->IsPartFile((CPartFile*)wParam)) { //MORPH - Flush Thread
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN || !theApp.downloadqueue->IsPartFile((CPartFile*)wParam)) { //MORPH - Flush Thread
 		if (error != NULL)
 			error->Delete();
 		return FALSE;
@@ -1800,7 +1808,7 @@ LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnFileCompleted(WPARAM wParam, LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
-	if (theApp.m_app_state == APP_STATE_SHUTINGDOWN)
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
 		return FALSE;
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* partfile = (CPartFile*)lParam;
@@ -1810,9 +1818,20 @@ LRESULT CemuleDlg::OnFileCompleted(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+#ifdef _DEBUG
+void BeBusy(UINT uSeconds, LPCSTR pszCaller)
+{
+	UINT s = 0;
+	while (uSeconds--) {
+		theVerboseLog.Logf(_T("%hs: called=%hs, waited %u sec."), __FUNCTION__, pszCaller, s++);
+		Sleep(1000);
+	}
+}
+#endif
+
 BOOL CemuleDlg::OnQueryEndSession()
 {
-	AddDebugLogLine(DLP_VERYLOW, _T("%hs: start"), __FUNCTION__);
+	AddDebugLogLine(DLP_VERYLOW, _T("%hs"), __FUNCTION__);
 	if (!CTrayDialog::OnQueryEndSession())
 		return FALSE;
 
@@ -1825,16 +1844,102 @@ void CemuleDlg::OnEndSession(BOOL bEnding)
 	AddDebugLogLine(DLP_VERYLOW, _T("%hs: bEnding=%d"), __FUNCTION__, bEnding);
 	if (bEnding && theApp.m_app_state == APP_STATE_RUNNING)
 	{
-		theApp.m_app_state	= APP_STATE_SHUTINGDOWN;
+		// If eMule was *not* started with "RUNAS":
+		// When user is logging of (or reboots or shutdown system), Windows sends the
+		// WM_QUERYENDSESSION/WM_ENDSESSION to all top level windows.
+		// Here we can consume as much time as we need to perform our shutdown. Even if we
+		// take longer than 20 seconds, Windows will just show a dialog box that 'emule'
+		// is not terminating in time and gives the user a chance to cancel that. If the user
+		// does not cancel the Windows dialog, Windows will though wait until eMule has 
+		// terminated by itself - no data loss, no file corruption, everything is fine.
+		theApp.m_app_state = APP_STATE_SHUTTINGDOWN;
 		OnClose();
 	}
 
 	CTrayDialog::OnEndSession(bEnding);
+	AddDebugLogLine(DLP_VERYLOW, _T("%hs: returning"), __FUNCTION__);
+}
+
+LRESULT CemuleDlg::OnUserChanged(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	AddDebugLogLine(DLP_VERYLOW, _T("%hs"), __FUNCTION__);
+	// Just want to know if we ever get this message. Maybe it helps us to handle the
+	// logoff/reboot/shutdown problem when eMule was started with "RUNAS".
+	return Default();
+}
+
+LRESULT CemuleDlg::OnConsoleThreadEvent(WPARAM wParam, LPARAM lParam)
+{
+	AddDebugLogLine(DLP_VERYLOW, _T("%hs: nEvent=%u, nThreadID=%u"), __FUNCTION__, wParam, lParam);
+
+	// If eMule was started with "RUNAS":
+	// This message handler receives a 'console event' from the concurrently and thus
+	// asynchronously running console control handler thread which was spawned by Windows
+	// in case the user logs off/reboots/shutdown. Even if the console control handler thread
+	// is waiting on the result from this message handler (is waiting until the main thread
+	// has finished processing this inter-application message), the application will get
+	// forcefully terminated by Windows after 20 seconds! There is no known way to prevent
+	// that. This means, that if we would invoke our standard shutdown code ('OnClose') here
+	// and the shutdown takes longer than 20 sec, we will get forcefully terminated by 
+	// Windows, regardless of what we are doing. This means, MET-file and PART-file corruption
+	// may occure. Because the shutdown code in 'OnClose' does also shutdown Kad (which takes
+	// a noticeable amount of time) it is not that unlikely that we run into problems with
+	// not being finished with our shutdown in 20 seconds.
+	// 
+	if (theApp.m_app_state == APP_STATE_RUNNING)
+	{
+#if 1
+		// And it really should be OK to expect that emule can shutdown in 20 sec on almost
+		// all computers. So, use the proper shutdown.
+		theApp.m_app_state = APP_STATE_SHUTTINGDOWN;
+		OnClose();	// do not invoke if shutdown takes longer than 20 sec, read above
+#else
+		// As a minimum action we at least set the 'shutting down' flag, this will help e.g.
+		// the CUploadQueue::UploadTimer to not start any file save actions which could get
+		// interrupted by windows and which would then lead to corrupted MET-files.
+		// Setting this flag also helps any possible running threads to stop their work.
+		theApp.m_app_state = APP_STATE_SHUTTINGDOWN;
+
+#ifdef _DEBUG
+		// Simulate some work.
+		//
+		// NOTE: If the console thread has already exited, Windows may terminate the process
+		// even before the 20 sec. timeout!
+		//BeBusy(70, __FUNCTION__);
+#endif
+
+		// Actually, just calling 'ExitProcess' should be the most safe thing which we can
+		// do here. Because we received this message via the main message queue we are 
+		// totally in-sync with the application and therefore we know that we are currently
+		// not within a file save action and thus we simply can not cause any file corruption
+		// when we exit right now.
+		//
+		// Of course, there may be some data loss. But it's the same amount of data loss which
+		// could occure if we keep running. But if we keep running and wait until Windows
+		// terminates us after 20 sec, there is also the chance for file corruption.
+		if (thePrefs.GetDebug2Disk()) {
+			theVerboseLog.Logf(_T("%hs: ExitProcess"), __FUNCTION__);
+			theVerboseLog.Close();
+		}
+		ExitProcess(0);
+#endif
+	}
+
+	AddDebugLogLine(DLP_VERYLOW, _T("%hs: returning"), __FUNCTION__);
+	return 1;
 }
 
 void CemuleDlg::OnDestroy()
 {
 	AddDebugLogLine(DLP_VERYLOW, _T("%hs"), __FUNCTION__);
+
+	// If eMule was started with "RUNAS":
+	// When user is logging of (or reboots or shutdown system), Windows may or may not send 
+	// a WM_DESTROY (depends on how long the application needed to process the 
+	// CTRL_LOGOFF_EVENT). But, regardless of what happened and regardless of how long any
+	// application specific shutdown took, Windows fill forcefully terminate the process 
+	// after 1-2 seconds after WM_DESTROY! So, we can not use WM_DESTROY for any lengthy
+	// shutdown actions in that case.
 	CTrayDialog::OnDestroy();
 }
 
@@ -1864,7 +1969,7 @@ void CemuleDlg::OnClose()
 	Log(_T("Closing eMule"));
 	CloseTTS();
 	m_pDropTarget->Revoke();
-	theApp.m_app_state = APP_STATE_SHUTINGDOWN;
+	theApp.m_app_state = APP_STATE_SHUTTINGDOWN;
 	theApp.serverconnect->Disconnect();
 	theApp.OnlineSig(); // Added By Bouc7 
 
@@ -1902,7 +2007,7 @@ void CemuleDlg::OnClose()
 		}
 	}
 
-	Kademlia::CKademlia::Stop();
+	Kademlia::CKademlia::Stop();	// couple of data files are written
 
 	// try to wait untill the hashing thread notices that we are shutting down
 	CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
@@ -1919,7 +2024,7 @@ void CemuleDlg::OnClose()
 
 /*	theApp.emuledlg->preferenceswnd->m_wndSecurity.DeleteDDB();
 
-	theApp.knownfiles->Save();
+	theApp.knownfiles->Save();										// CKnownFileList::Save
 	//transferwnd->downloadlistctrl.SaveSettings();
 	//transferwnd->downloadclientsctrl.SaveSettings();
 	//transferwnd->uploadlistctrl.SaveSettings();
@@ -1989,16 +2094,16 @@ void CemuleDlg::OnClose()
 	delete theApp.clientudp;		theApp.clientudp = NULL;
 	delete theApp.sharedfiles;		theApp.sharedfiles = NULL;
 	delete theApp.serverconnect;	theApp.serverconnect = NULL;
-	delete theApp.serverlist;		theApp.serverlist = NULL;
+	delete theApp.serverlist;		theApp.serverlist = NULL;		// CServerList::SaveServermetToFile
 	delete theApp.knownfiles;		theApp.knownfiles = NULL;
 	delete theApp.searchlist;		theApp.searchlist = NULL;
-	delete theApp.clientcredits;	theApp.clientcredits = NULL;
-	delete theApp.downloadqueue;	theApp.downloadqueue = NULL;
+	delete theApp.clientcredits;	theApp.clientcredits = NULL;	// CClientCreditsList::SaveList
+	delete theApp.downloadqueue;	theApp.downloadqueue = NULL;	// N * (CPartFile::FlushBuffer + CPartFile::SavePartFile)
 	delete theApp.uploadqueue;		theApp.uploadqueue = NULL;
 	delete theApp.clientlist;		theApp.clientlist = NULL;
-	delete theApp.friendlist;		theApp.friendlist = NULL;
+	delete theApp.friendlist;		theApp.friendlist = NULL;		// CFriendList::SaveList
 	delete theApp.scheduler;		theApp.scheduler = NULL;
-	delete theApp.ipfilter;			theApp.ipfilter = NULL;
+	delete theApp.ipfilter;			theApp.ipfilter = NULL;			// CIPFilter::SaveToDefaultFile
 	delete theApp.webserver;		theApp.webserver = NULL;
 	delete theApp.m_pPeerCache;		theApp.m_pPeerCache = NULL;
 	delete theApp.m_pFirewallOpener;theApp.m_pFirewallOpener = NULL;
@@ -2027,8 +2132,9 @@ void CemuleDlg::DestroyMiniMule()
 	{
 		if (!m_pMiniMule->IsInCallback()) // for safety
 		{
+			TRACE("%s - m_pMiniMule->DestroyWindow();\n", __FUNCTION__);
 			m_pMiniMule->DestroyWindow();
-			delete m_pMiniMule;
+			ASSERT( m_pMiniMule == NULL );
 			m_pMiniMule = NULL;
 		}
 		else
@@ -2038,6 +2144,7 @@ void CemuleDlg::DestroyMiniMule()
 
 LRESULT CemuleDlg::OnCloseMiniMule(WPARAM wParam, LPARAM /*lParam*/)
 {
+	TRACE("%s -> DestroyMiniMule();\n", __FUNCTION__);
 	DestroyMiniMule();
 	if (wParam)
 		RestoreWindow();
@@ -2058,6 +2165,7 @@ void CemuleDlg::OnTrayLButtonUp(CPoint /*pt*/)
 	}
 
 	if (m_pMiniMule) {
+		TRACE("%s - m_pMiniMule->ShowWindow(SW_SHOW);\n", __FUNCTION__);
 		m_pMiniMule->ShowWindow(SW_SHOW);
 		m_pMiniMule->SetForegroundWindow();
 		m_pMiniMule->BringWindowToTop();
@@ -2068,6 +2176,8 @@ void CemuleDlg::OnTrayLButtonUp(CPoint /*pt*/)
 	{
 		try
 		{
+			TRACE("%s - m_pMiniMule = new CMiniMule(this);\n", __FUNCTION__);
+			ASSERT( m_pMiniMule == NULL );
 		m_pMiniMule = new CMiniMule(this);
 		m_pMiniMule->Create(CMiniMule::IDD, this);
 		//m_pMiniMule->ShowWindow(SW_SHOW);	// do not explicitly show the window, it will do that for itself when it's ready..
@@ -2098,7 +2208,10 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 	if (m_pMiniMule)
 	{
 		if (m_pMiniMule->GetAutoClose())
+		{
+			TRACE("%s - m_pMiniMule->GetAutoClose() -> DestroyMiniMule();\n", __FUNCTION__);
 			DestroyMiniMule();
+		}
 		else
 		{
 			// Avoid reentrancy problems with main window, options dialog and mini mule window
@@ -2200,33 +2313,22 @@ void CemuleDlg::AddSpeedSelectorMenus(CMenu* addToMenu)
 	addToMenu->AppendMenu(MF_STRING, MP_DISCONNECT, GetResString(IDS_MAIN_BTN_DISCONNECT)); 
 }
 
-void CemuleDlg::StartConnection(){
-	if (!Kademlia::CKademlia::IsRunning() ||
-		(!theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsConnected() )
-		){
-
+void CemuleDlg::StartConnection()
+{
+	if (   (!theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsConnected())
+		|| !Kademlia::CKademlia::IsRunning())
+	{
 		AddLogLine(true, GetResString(IDS_CONNECTING));
 
 		// ed2k
-		if( thePrefs.GetNetworkED2K() && 
-			!theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsConnected() ){
-
-			if ( serverwnd->serverlistctrl.GetSelectedCount()>1 )
-			{
-				serverwnd->serverlistctrl.PostMessage(WM_COMMAND,MP_CONNECTTO,0L);
-			}
-			else
-			{
+		if (thePrefs.GetNetworkED2K() && !theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsConnected()) {
 				theApp.serverconnect->ConnectToAnyServer();
-			}
 		}
-		
+
 		// kad
-		if( thePrefs.GetNetworkKademlia() && !Kademlia::CKademlia::IsRunning())
-		{
+		if (thePrefs.GetNetworkKademlia() && !Kademlia::CKademlia::IsRunning()) {
 			Kademlia::CKademlia::Start();
 		}
-
 
 		ShowConnectionState();
 	}
@@ -2948,7 +3050,7 @@ LRESULT CemuleDlg::OnFrameGrabFinished(WPARAM wParam,LPARAM lParam){
 	CKnownFile* pOwner = (CKnownFile*)wParam;
 	FrameGrabResult_Struct* result = (FrameGrabResult_Struct*)lParam;
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
-	if (theApp.m_app_state != APP_STATE_SHUTINGDOWN) {
+	if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN) {
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 		if (theApp.knownfiles->IsKnownFile(pOwner) || theApp.downloadqueue->IsPartFile(pOwner) ){
 			pOwner->GrabbingFinished(result->imgResults,result->nImagesGrabbed, result->pSender);
@@ -3170,7 +3272,7 @@ LRESULT CemuleDlg::OnKickIdle(UINT /*nWhy*/, long /*lIdleCount*/)
 
 	if (searchwnd && searchwnd->m_hWnd)
 	{
-		if (theApp.m_app_state != APP_STATE_SHUTINGDOWN)
+		if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN)
 		{
 			//extern void Mfc_IdleUpdateCmdUiTopLevelFrameList(CWnd* pMainFrame);
 			//Mfc_IdleUpdateCmdUiTopLevelFrameList(this);
@@ -3447,7 +3549,8 @@ BOOL CemuleDlg::OnChevronPushed(UINT id, NMHDR* pNMHDR, LRESULT* plResult)
 
 	// search the first toolbar button which is not fully visible
 	int iButtons = toolbar->GetButtonCount();
-	for (int i = 0; i < iButtons; i++)
+	int i;
+	for (i = 0; i < iButtons; i++)
 	{
 		CRect rcButton;
 		toolbar->GetItemRect(i, &rcButton);
@@ -3687,7 +3790,8 @@ LRESULT CemuleDlg::OnWebGUIInteraction(WPARAM wParam, LPARAM lParam) {
 			if (pos!=-1) {
 				uint16 port = (uint16)_tstoi(dest.Right(dest.GetLength() - pos - 1));
 				CString ip=dest.Left(pos);
-				Kademlia::CKademlia::Bootstrap(ip, port);
+				// JOHNTODO - Switch between Kad1 and Kad2
+				Kademlia::CKademlia::Bootstrap(ip, port, true);
 			}
 			break;
 		}

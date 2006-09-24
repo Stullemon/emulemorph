@@ -39,6 +39,11 @@ struct PORTANDHASH{
 	void* pHash;
 };
 
+struct IPANDTICS{
+	uint32 dwIP;
+	uint32 dwInserted;
+};
+
 class CDeletedClient{
 public:
 	CDeletedClient(const CUpDownClient* pClient);
@@ -111,6 +116,9 @@ public:
 	uint8	GetBuddyStatus()			{ return m_nBuddyStatus; }
 	CUpDownClient* GetBuddy()			{ return m_pBuddy; }
 
+	void	AddKadFirewallRequest(uint32 dwIP);
+	bool	IsKadFirewallCheckIP(uint32 dwIP) const;
+
 	void	Process();
 	bool	IsValidClient(CUpDownClient* tocheck) const;
 	void	Debug_SocketDeleted(CClientReqSocket* deleted) const;
@@ -146,6 +154,7 @@ private:
 	CUpDownClient* m_pBuddy;
 	uint8 m_nBuddyStatus;
 	CUpDownClientPtrList m_KadList;
+	CList<IPANDTICS> listFirewallCheckRequests;
 //EastShare Start - added by AndCycle, IP to Country
 public:
 	void ResetIP2Country();

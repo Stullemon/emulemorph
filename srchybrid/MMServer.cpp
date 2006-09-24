@@ -462,7 +462,7 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	theStats.AddUpDataOverheadServer(searchpacket->size);
 	theApp.serverconnect->SendPacket(searchpacket,true);
 	char buffer[500];
-	wsprintfA(buffer, "HTTP/1.1 200 OK\r\nConnection: Close\r\nContent-Type: %s\r\n", GetContentType());
+	_snprintf(buffer, _countof(buffer), "HTTP/1.1 200 OK\r\nConnection: Close\r\nContent-Type: %s\r\n", GetContentType());
 	sender->Send(buffer,strlen(buffer));
 }
 
@@ -672,7 +672,7 @@ VOID CALLBACK CMMServer::CommandTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /*i
 					break;
 			}
 			case MMT_SDEMULE:
-				theApp.m_app_state	= APP_STATE_SHUTINGDOWN;
+				theApp.m_app_state = APP_STATE_SHUTTINGDOWN;
 				SendMessage(theApp.emuledlg->m_hWnd,WM_CLOSE,0,0);
 				break;
 			case MMT_SEARCH:

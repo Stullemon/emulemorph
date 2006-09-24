@@ -47,10 +47,10 @@ public:
 	virtual void Safe_Delete();
 	
 	bool	Create();
-	virtual void SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	virtual void SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0, bool bForceImmediateSend = false);
     //MORPH START - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
 #if !defined DONT_USE_SEND_ARRAY_PACKET
-	virtual void SendPacket(Packet* packet[], uint32 npacket, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	virtual void SendPacket(Packet* packet[], uint32 npacket, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0, bool bForceImmediateSend = false);
 #endif
 	//MORPH END   - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
 #if !defined DONT_USE_SOCKET_BUFFERING

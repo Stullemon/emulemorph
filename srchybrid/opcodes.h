@@ -20,7 +20,10 @@
 #define	EMULE_PROTOCOL			0x01
 // MOD Note: end
 #define	EDONKEYVERSION			0x3C
-#define KADEMLIA_VERSION				0x02
+#define KADEMLIA_VERSION1_46c			0x01 /*45b - 46c*/
+#define KADEMLIA_VERSION2_47a			0x02 /*47a*/
+#define KADEMLIA_VERSION3_47b			0x03 /*47b*/
+#define KADEMLIA_VERSION				0x04 /*47c*/
 #define PREFFILE_VERSION		0x14	//<<-- last change: reduced .dat, by using .ini
 #define PARTFILE_VERSION		0xe0
 #define PARTFILE_SPLITTEDVERSION		0xe1
@@ -78,25 +81,24 @@
 #define	KADEMLIAMAXENTRIES		60000		//Total keyword entries.
 #define KADEMLIAMAXSOUCEPERFILE 1000		//Max number of sources per file in index.
 #define KADEMLIAMAXNOTESPERFILE	150			//Max number of notes per entry in index.
+#define KADEMLIAFIREWALLCHECKS	4			//Firewallcheck Request at a time
+
 
 #define ED2KREPUBLISHTIME		MIN2MS(1)	//1 min
 #define MINCOMMONPENALTY		4
 #define UDPSERVERSTATTIME		SEC2MS(5)	//5 secs
 #define UDPSERVSTATREASKTIME	HR2S(4.5)	//4.5 hours (A random time of up to one hour is reduced during runtime after each ping)
+#define UDPSERVSTATMINREASKTIME	MIN2S(20)	//minimum time between two pings even when trying to force a premature ping for a new UDP key
 #define	UDPSERVERPORT			4665	//default udp port
 #define UDPMAXQUEUETIME			SEC2MS(30)	//30 Seconds
 #define RSAKEYSIZE				384		//384 bits
 #define	MAX_SOURCES_FILE_SOFT	750
 #define	MAX_SOURCES_FILE_UDP	50
-#define SESSIONMAXTRANS			(9.3*1024*1024) // 9.3 Mbytes. "Try to send complete chunks" always sends this amount of data
+#define SESSIONMAXTRANS			(PARTSIZE+20*1024) // "Try to send complete chunks" always sends this amount of data
 #define SESSIONMAXTIME			HR2MS(1)	//1 hour
 #define	MAXFILECOMMENTLEN		50
 #define	PARTSIZE				9728000ui64
-#ifdef SUPPORT_LARGE_FILES
-	#define	MAX_EMULE_FILE_SIZE	0x4000000000ui64 // = 2^38 = 256GB
-#else
-	#define	MAX_EMULE_FILE_SIZE	4290048000ui64	// (4294967295/PARTSIZE)*PARTSIZE = ~4GB
-#endif
+#define	MAX_EMULE_FILE_SIZE	0x4000000000ui64 // = 2^38 = 256GB
 #define OLD_MAX_EMULE_FILE_SIZE	4290048000ui64	// (4294967295/PARTSIZE)*PARTSIZE = ~4GB
 // MOD Note: end
 
@@ -140,6 +142,8 @@
 #define OP_EDONKEYPROT			OP_EDONKEYHEADER
 #define OP_PACKEDPROT			0xD4
 #define OP_EMULEPROT			0xC5
+#define OP_UDPRESERVEDPROT1		0xA3	// reserved for later UDP headers (important for EncryptedDatagramSocket)
+#define OP_UDPRESERVEDPROT2		0xB2	// reserved for later UDP headers (important for EncryptedDatagramSocket)
 #define OP_MLDONKEYPROT			0x00
 //MORPH START - Added by SiRoB, WebCache 1.2f
 // yonatan http start //////////////////////////////////////////////////////////////////////////
@@ -186,10 +190,12 @@
 #define OP_CHAT_USER_JOIN       0x3B    // (deprecated not supported by server any longer)
 #define OP_CHAT_USER_LEAVE      0x3C    // (deprecated not supported by server any longer)
 #define OP_CHAT_USER            0x3D    // (deprecated not supported by server any longer)
-#define OP_IDCHANGE				0x40	// <NEW_ID 4>
+#define OP_IDCHANGE				0x40	// <NEW_ID 4><server_flags 4><primary_tcp_port 4 (unused)><client_IP_address 4>
 #define OP_SERVERIDENT		    0x41	// <HASH 16><IP 4><PORT 2>{1 TAG_SET}
 #define OP_FOUNDSOURCES			0x42	// <HASH 16><count 1>(<ID 4><PORT 2>)[count]
 #define OP_USERS_LIST           0x43    // <count 4>(<HASH 16><ID 4><PORT 2><1 Tag_set>)[count]
+#define OP_GETSOURCES_OBFU		0x23
+#define OP_FOUNDSOURCES_OBFU	0x44    // <HASH 16><count 1>(<ID 4><PORT 2><obf settings 1>(UserHash16 if obf&0x08))[count]
 
 //client <-> UDP server
 #define	OP_GLOBSEARCHREQ3		0x90	// <1 tag set><search_tree>
@@ -322,6 +328,10 @@
 #define	ST_UDPFLAGS				0x92	// <uint32>
 #define	ST_AUXPORTSLIST			0x93	// <string>
 #define	ST_LOWIDUSERS			0x94	// <uint32>
+#define	ST_UDPKEY				0x95	// <uint32>
+#define	ST_UDPKEYIP				0x96	// <uint32>
+#define	ST_TCPPORTOBFUSCATION	0x97	// <uint16>
+#define	ST_UDPPORTOBFUSCATION	0x98	// <uint16>
 
 //file tags
 #define FT_FILENAME				 0x01	// <string>
@@ -437,6 +447,7 @@
 #define	TAG_MEDIA_BITRATE		"\xD4"	// <uint32>
 #define	 FT_MEDIA_CODEC			 0xD5	// <string>
 #define	TAG_MEDIA_CODEC			"\xD5"	// <string>
+#define TAG_ENCRYPTION			"\xF3"	// <uint8>
 #define TAG_USER_COUNT			"\xF4"	// <uint32>
 #define TAG_FILE_COUNT			"\xF5"	// <uint32>
 #define  FT_FILECOMMENT			 0xF6	// <string>
@@ -550,12 +561,15 @@
 #define CT_SERVER_UDPSEARCH_FLAGS 0x0E
 
 // values for CT_SERVER_FLAGS (server capabilities)
-#define SRVCAP_ZLIB				0x01
-#define SRVCAP_IP_IN_LOGIN		0x02
-#define SRVCAP_AUXPORT			0x04
-#define SRVCAP_NEWTAGS			0x08
-#define	SRVCAP_UNICODE			0x10
-#define	SRVCAP_LARGEFILES		0x100
+#define SRVCAP_ZLIB				0x0001
+#define SRVCAP_IP_IN_LOGIN		0x0002
+#define SRVCAP_AUXPORT			0x0004
+#define SRVCAP_NEWTAGS			0x0008
+#define	SRVCAP_UNICODE			0x0010
+#define	SRVCAP_LARGEFILES		0x0100
+#define SRVCAP_SUPPORTCRYPT     0x0200
+#define SRVCAP_REQUESTCRYPT     0x0400
+#define SRVCAP_REQUIRECRYPT     0x0800
 
 // values for CT_SERVER_UDPSEARCH_FLAGS
 #define SRVCAP_UDP_NEWTAGS_LARGEFILES	0x01

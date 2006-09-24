@@ -44,6 +44,6 @@ protected:
 	afx_msg void OnDeleteIPFilter();
 	afx_msg void OnSelectAllIPFilter();
 	afx_msg void OnFind();
-	afx_msg void OnLvnGetdispinfoIpfilter(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnDeleteitemIpfilter(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetDispInfoIPFilter(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnDeleteItemIPFilter(NMHDR *pNMHDR, LRESULT *pResult);
 };

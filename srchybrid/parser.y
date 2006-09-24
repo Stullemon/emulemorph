@@ -22,6 +22,7 @@ int yyerrorf(LPCTSTR errstr, ...);
 #pragma warning(disable:4102) // 'yyerrlab1' : unreferenced label
 #pragma warning(disable:4127) // conditional expression is constant
 #pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4702) // unreachable code
 
 %}
 
@@ -76,7 +77,7 @@ action			: and_searchexpr TOK_EOF
 					}
 				| TOK_ED2K_LINK TOK_EOF
 					{
-						CSearchExpr* pexpr = new CSearchExpr(new CSearchAttr($1));
+						CSearchExpr* pexpr = new CSearchExpr(&CSearchAttr($1));
 						ParsedSearchExpression(pexpr);
 						delete pexpr;
 						delete $1;

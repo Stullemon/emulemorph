@@ -33,6 +33,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COScopeCtrl
 
+CFont	COScopeCtrl::sm_fontAxis;
+LOGFONT	COScopeCtrl::sm_logFontAxis;
+
 BEGIN_MESSAGE_MAP(COScopeCtrl, CWnd)
 	ON_WM_PAINT()
 	ON_WM_SIZE()
@@ -45,7 +48,7 @@ END_MESSAGE_MAP()
 COScopeCtrl::COScopeCtrl(int NTrends)
 {
 	int i;
-	COLORREF PresetColor[16] = 
+	static const COLORREF PresetColor[16] = 
 	{
 		RGB(0xFF, 0x00, 0x00),
 		RGB(0xFF, 0xC0, 0xC0),
@@ -69,6 +72,21 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 		RGB(0xFF, 0xFF, 0xFF),
 		RGB(0x80, 0x80, 0x80)
 	};
+
+	//  *)	Using "Arial" or "MS Sans Serif" gives a more accurate small font,
+	//		but does not work for Korean fonts.
+	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
+	//		does work for all languages which are currently supported by eMule.
+	// 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
+	if (sm_fontAxis.m_hObject == NULL) {
+		if (sm_fontAxis.CreatePointFont(8*10, _T("MS Shell Dlg")))
+			sm_fontAxis.GetLogFont(&sm_logFontAxis);
+		else if (sm_logFontAxis.lfHeight == 0) {
+			memset(&sm_logFontAxis, 0, sizeof sm_logFontAxis);
+			sm_logFontAxis.lfHeight = 10;
+		}
+	}
+
 	// since plotting is based on a LineTo for each new point
 	// we need a starting point (i.e. a "previous" point)
 	// use 0.0 as the default first point.
@@ -294,7 +312,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	int nCharacters;
 	CPen *oldPen;
 	CPen solidPen(PS_SOLID, 0, m_crGridColor);
-	CFont axisFont, yUnitFont, *oldFont, LegendFont;
+	CFont yUnitFont, *oldFont;
 	CString strTemp;
 	
 	CClientDC dc(this);  
@@ -345,8 +363,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	m_nPlotWidth    = m_rectPlot.Width();
 	
 	//MORPH START - Dynamic axis legend reservation
-	LegendFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
-	oldFont = m_dcGrid.SelectObject(&LegendFont);
+	oldFont = m_dcGrid.SelectObject(&sm_fontAxis);
 	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
 
 	int xoffset = m_rectPlot.left + 2;
@@ -437,18 +454,11 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		}
 	}
 
-	// create some fonts (horizontal and vertical)
-	// ---
-	//  *)	Using "Arial" or "MS Sans Serif" gives a more accurate small font,
-	//		but does not work for Korean fonts.
-	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
-	//		does work for all languages which are currently supported by eMule.
-	axisFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
 	yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
 						 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("MS Shell Dlg"));
 
 	// grab the horizontal font
-	oldFont = m_dcGrid.SelectObject(&axisFont);
+	oldFont = m_dcGrid.SelectObject(&sm_fontAxis);
 	
 	// y max
 	m_dcGrid.SetTextColor(crLabelFg);
@@ -496,16 +506,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 					 m_str.YUnits);
 	m_dcGrid.SelectObject(oldFont);
 
-	//  *)	Using "Arial" or "MS Sans Serif" gives a more accurate small font,
-	//		but does not work for Korean fonts.
-	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
-	//		does work for all languages which are currently supported by eMule.
-	
-	//MORPH - Font created on top
-	/*
-	LegendFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
-	oldFont = m_dcGrid.SelectObject(&LegendFont);
-	*/
+	oldFont = m_dcGrid.SelectObject(&sm_fontAxis);
 	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
 
 	int xpos = m_rectPlot.left + 2;
@@ -858,7 +859,7 @@ void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 	m_rectPlot.left   = 20; 
 	m_rectPlot.top    = 10;
 	m_rectPlot.right  = m_rectClient.right - 10;
-	m_rectPlot.bottom = m_rectClient.bottom - 25;
+	m_rectPlot.bottom = m_rectClient.bottom - 3 - (abs(sm_logFontAxis.lfHeight) + 2)*2 - 3;
 	
 	m_nPlotHeight = m_rectPlot.Height();
 	m_nPlotWidth  = m_rectPlot.Width();

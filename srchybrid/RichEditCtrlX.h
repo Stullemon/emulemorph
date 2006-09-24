@@ -18,6 +18,8 @@ public:
 	CRichEditCtrlX& operator<<(int iVal);
 	CRichEditCtrlX& operator<<(double fVal);
 
+	void SetRTFText(const CStringA& rstrText);
+
 protected:
 	bool m_bDisableSelectOnFocus;
 	bool m_bSelfUpdate;
@@ -29,6 +31,7 @@ protected:
 	CHARFORMAT m_cfKeyword;
 
 	void UpdateSyntaxColoring();
+	static DWORD CALLBACK StreamInCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb);
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 

@@ -41,6 +41,7 @@ struct ServerMet_Struct {
 #define SRV_TCPFLG_RELATEDSEARCH	0x00000040
 #define SRV_TCPFLG_TYPETAGINTEGER	0x00000080
 #define SRV_TCPFLG_LARGEFILES		0x00000100
+#define SRV_TCPFLG_TCPOBFUSCATION	0x00000400
 
 // Server UDP flags
 #define	SRV_UDPFLG_EXT_GETSOURCES	0x00000001
@@ -49,6 +50,8 @@ struct ServerMet_Struct {
 #define	SRV_UDPFLG_UNICODE			0x00000010
 #define	SRV_UDPFLG_EXT_GETSOURCES2	0x00000020
 #define SRV_UDPFLG_LARGEFILES		0x00000100
+#define SRV_UDPFLG_UDPOBFUSCATION	0x00000200
+#define SRV_UDPFLG_TCPOBFUSCATION	0x00000400
 
 class CServer{
 public:
@@ -105,6 +108,9 @@ public:
 	uint32	GetLastPingedTime() const				{return lastpingedtime;}
 	void	SetLastPingedTime(uint32 in_lastpingedtime)	{lastpingedtime = in_lastpingedtime;}
 
+	uint32	GetRealLastPingedTime() const					{return m_dwRealLastPingedTime;} // last pinged time without any random modificator
+	void	SetRealLastPingedTime(uint32 in_lastpingedtime)	{m_dwRealLastPingedTime = in_lastpingedtime;}
+
 	uint32	GetLastPinged() const					{return lastpinged;}
 	void	SetLastPinged(uint32 in_lastpinged)		{lastpinged = in_lastpinged;}
 
@@ -138,10 +144,27 @@ public:
 	uint32	GetLowIDUsers() const					{return m_uLowIDUsers;}
 	void	SetLowIDUsers(uint32 uLowIDUsers)		{m_uLowIDUsers = uLowIDUsers;}
 
+	uint16	GetObfuscationPortTCP() const			{return m_nObfuscationPortTCP;}
+	void	SetObfuscationPortTCP(uint16 nPort)		{m_nObfuscationPortTCP = nPort;}
+
+	uint16	GetObfuscationPortUDP() const			{return m_nObfuscationPortUDP;}
+	void	SetObfuscationPortUDP(uint16 nPort)		{m_nObfuscationPortUDP = nPort;}
+
+	uint32	GetServerKeyUDP(bool bForce = false) const;
+	void	SetServerKeyUDP(uint32 dwServerKeyUDP);
+
+	bool	GetCryptPingReplyPending() const		{return m_bCryptPingReplyPending;}
+	void	SetCryptPingReplyPending(bool bVal)		{m_bCryptPingReplyPending = bVal;}
+
+	uint32	GetServerKeyUDPIP() const				{return m_dwIPServerKeyUDP;}
+
 	bool	GetUnicodeSupport() const				{return (GetTCPFlags() & SRV_TCPFLG_UNICODE)!=0;}
 	bool	GetRelatedSearchSupport() const			{return (GetTCPFlags() & SRV_TCPFLG_RELATEDSEARCH)!=0;}
 	bool	SupportsLargeFilesTCP() const			{return (GetTCPFlags() & SRV_TCPFLG_LARGEFILES)!=0;}
 	bool	SupportsLargeFilesUDP() const			{return (GetUDPFlags() & SRV_UDPFLG_LARGEFILES)!=0;}
+	bool	SupportsObfuscationUDP() const			{return (GetUDPFlags() & SRV_UDPFLG_UDPOBFUSCATION)!=0;}
+	bool	SupportsObfuscationTCP() const			{return GetObfuscationPortTCP() != 0 && ((GetUDPFlags() & SRV_UDPFLG_TCPOBFUSCATION)!=0 || (GetTCPFlags() & SRV_TCPFLG_TCPOBFUSCATION)!=0);}
+	bool	SupportsGetSourcesObfuscation() const	{return (GetTCPFlags() & SRV_TCPFLG_TCPOBFUSCATION)!=0;} // mapped to TCPFLAG_TCPOBFU
 
 	bool	IsEqual(const CServer* pServer) const;
 
@@ -166,16 +189,21 @@ private:
 	uint16		port;
 	uint16		realport;//Morph - added by AndCycle, aux Ports, by lugdunummaster
 	bool		staticservermember;
+	bool		m_bCryptPingReplyPending;
 	uint32		failedcount; 
 	CString		m_strVersion;
 	uint32		m_uTCPFlags;
 	uint32		m_uUDPFlags;
 	uint32		m_uLowIDUsers;
+	uint32		m_dwServerKeyUDP;
+	uint32		m_dwIPServerKeyUDP;
+	uint16		m_nObfuscationPortTCP;
+	uint16		m_nObfuscationPortUDP;
+	uint32		m_dwRealLastPingedTime;
 // MORPH START dont send more than softlimit files 
 	uint32     m_uPublishedfiles ;
     uint32     m_uLastpublishTick ;
 // MORPH END dont send more than softlimit files 
-
 
 //EastShare Start - added by AndCycle, IP to Country
 public:

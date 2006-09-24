@@ -13,6 +13,7 @@
 #include "PPgWebServer.h"
 #include "PPgScheduler.h"
 #include "PPgProxy.h"
+#include "PPgMessages.h"
 #include "PPgIonixWebServer.h"
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 #include "PPgDebug.h"
@@ -52,17 +53,18 @@ public:
 	CPPgWebServer	m_wndWebServer;
 	CPPgScheduler	m_wndScheduler;
 	CPPgProxy		m_wndProxy;
-// START ionix advanced webserver
-CPPgIonixWebServer	m_wndIonixWebServer;
-// END ionix advanced webserver
-// MORPH start tabbed options [leuk_he]
+	CPPgMessages	m_wndMessages;
+	// START ionix advanced webserver
+	CPPgIonixWebServer	m_wndIonixWebServer;
+	// END ionix advanced webserver
+	// MORPH start tabbed options [leuk_he]
     void SwitchTab(int page);
  	int ActivePageWebServer;
 	int StartPageWebServer;
 	short Webserver; 
 	short Multiwebserver;
-// MORPH end tabbed option [leuk_he]
-#if defined(x_DEBUG) || defined(USE_DEBUG_DEVICE)
+	// MORPH end tabbed option [leuk_he]
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	CPPgDebug		m_wndDebug;
 #endif
 	CPPgMorph		m_wndMorph; //MORPH - Added by IceCream, Morph Prefs

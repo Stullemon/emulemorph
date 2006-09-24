@@ -26,6 +26,8 @@
 #include "SharedFileList.h"
 #include "HighColorTab.hpp"
 #include "UserMsgs.h"
+#include "ListenSocket.h"
+#include "preferences.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
@@ -49,6 +51,9 @@ CClientDetailPage::CClientDetailPage()
 {
 	m_paClients = NULL;
 	m_bDataChanged = false;
+	m_strCaption	= GetResString(IDS_CD_TITLE);
+	m_psp.pszTitle	= m_strCaption;
+	m_psp.dwFlags  |= PSP_USETITLE;
 }
 
 CClientDetailPage::~CClientDetailPage()
@@ -70,6 +75,9 @@ BOOL CClientDetailPage::OnInitDialog()
 	AddAnchor(IDC_STATIC50, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_DDOWNLOADING, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_UPLOADING, TOP_LEFT, TOP_RIGHT);
+
+	AddAnchor(IDC_OBFUSCATION_STAT, TOP_LEFT, TOP_RIGHT);
+
 	//MORPH - Added by SiRoB, WebCache
 	AddAnchor(IDC_STATIC57, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_WCSTATISTICS, TOP_LEFT, TOP_RIGHT);
@@ -116,14 +124,27 @@ BOOL CClientDetailPage::OnSetActive()
 	
 		GetDlgItem(IDC_DSOFT)->SetWindowText(client->GetClientSoftVer());
 
+		if (client->SupportsCryptLayer() && thePrefs.IsClientCryptLayerSupported() && (client->RequestsCryptLayer() || thePrefs.IsClientCryptLayerRequested()) 
+			&& (client->IsObfuscatedConnectionEstablished() || !(client->socket != NULL && client->socket->IsConnected())))
+		{
+			buffer = GetResString(IDS_ENABLED);
+		}
+		else if (client->SupportsCryptLayer())
+			buffer = GetResString(IDS_SUPPORTED);
+		else
+			buffer = GetResString(IDS_IDENTNOSUPPORT);
+#if defined(_DEBUG) || defined(_BETA)
+		if (client->IsObfuscatedConnectionEstablished())
+			buffer += _T("(In Use)");
+#endif
+		GetDlgItem(IDC_OBFUSCATION_STAT)->SetWindowText(buffer);
+
 		buffer.Format(_T("%s"),(client->HasLowID() ? GetResString(IDS_IDLOW):GetResString(IDS_IDHIGH)));
 		GetDlgItem(IDC_DID)->SetWindowText(buffer);
 	
 		if (client->GetServerIP()){
-			CString strServerIP = ipstr(client->GetServerIP());
-			GetDlgItem(IDC_DSIP)->SetWindowText(strServerIP);
-		
-			CServer* cserver = theApp.serverlist->GetServerByAddress(strServerIP, client->GetServerPort()); 
+			GetDlgItem(IDC_DSIP)->SetWindowText(ipstr(client->GetServerIP()));
+			CServer* cserver = theApp.serverlist->GetServerByIPTCP(client->GetServerIP(), client->GetServerPort());
 			if (cserver)
 				GetDlgItem(IDC_DSNAME)->SetWindowText(cserver->GetListName());
 			else
@@ -295,6 +316,7 @@ void CClientDetailPage::Localize()
 	GetDlgItem(IDC_STATIC33)->SetWindowText(GetResString(IDS_CD_CSOFT) + _T(':'));
 	GetDlgItem(IDC_STATIC35)->SetWindowText(GetResString(IDS_CD_SIP));
 	GetDlgItem(IDC_STATIC38)->SetWindowText(GetResString(IDS_CD_SNAME));
+	GetDlgItem(IDC_STATIC_OBF_LABEL)->SetWindowText(GetResString(IDS_OBFUSCATION) + _T(':'));
 
 	GetDlgItem(IDC_STATIC40)->SetWindowText(GetResString(IDS_CD_TRANS));
 	GetDlgItem(IDC_STATIC41)->SetWindowText(GetResString(IDS_CD_CDOWN));

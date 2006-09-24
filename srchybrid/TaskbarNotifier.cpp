@@ -86,7 +86,7 @@ CTaskbarNotifier::CTaskbarNotifier()
 	m_nAnimStatus=IDT_HIDDEN;
 	m_rcText.SetRect(0,0,0,0);
 	m_rcCloseBtn.SetRect(0,0,0,0);
-	m_uTextFormat=DT_MODIFYSTRING | DT_WORDBREAK | DT_PATH_ELLIPSIS | DT_END_ELLIPSIS; // Default Text format (see DrawText in the win32 API for the different values)
+	m_uTextFormat=DT_MODIFYSTRING | DT_WORDBREAK | DT_PATH_ELLIPSIS | DT_END_ELLIPSIS | DT_NOPREFIX; // Default Text format (see DrawText in the win32 API for the different values)
 	m_hCursor = ::LoadCursor(NULL, MAKEINTRESOURCE(32649)); // System Hand cursor
 	m_nHistoryPosition = 0;
 	m_nActiveMessageType  = TBN_NULL;
@@ -667,7 +667,7 @@ HRGN CTaskbarNotifier::CreateRgnFromBitmap(HBITMAP hBmp, COLORREF color)
 				if ( pRgnData->nCount >= cBlocks * MAXBUF ){
 					LPBYTE pRgnDataNew = new BYTE[ RDHDR + ++cBlocks * MAXBUF * sizeof(RECT) ];
 					memcpy( pRgnDataNew, pRgnData, RDHDR + (cBlocks - 1) * MAXBUF * sizeof(RECT) );
-					delete pRgnData;
+					delete[] pRgnData;
 					pRgnData = (RGNDATAHEADER*)pRgnDataNew;
 				}
 				wasfirst = false;
@@ -695,7 +695,7 @@ HRGN CTaskbarNotifier::CreateRgnFromBitmap(HBITMAP hBmp, COLORREF color)
 	ASSERT( hRgn!=NULL );
 	/* } ExtCreateRegion replacement */
 
-	delete pRgnData;
+	delete[] pRgnData;
 	ReleaseDC(pDC);
 	return hRgn;
 }

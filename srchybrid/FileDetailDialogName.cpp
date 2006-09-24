@@ -50,7 +50,7 @@ CFileDetailDialogName::CFileDetailDialogName()
 {
 	m_paFiles = NULL;
 	m_bDataChanged = false;
-	m_strCaption = GetResString(IDS_DL_FILENAME);
+	m_strCaption = GetResString(IDS_SW_NAME);
 	m_psp.pszTitle = m_strCaption;
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_timer = 0;

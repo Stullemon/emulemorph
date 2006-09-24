@@ -48,6 +48,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
+extern UINT _uMainThreadId;
+
 class CCounter {
 public:
 	CCounter(int& ri)
@@ -98,6 +100,7 @@ END_DHTML_EVENT_MAP()
 CMiniMule::CMiniMule(CWnd* pParent /*=NULL*/)
 	: CDHtmlDialog(CMiniMule::IDD, CMiniMule::IDH, pParent)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	m_iInCallback = 0;
 	m_bResolveImages = true;
 	m_bRestoreMainWnd = false;
@@ -116,6 +119,7 @@ CMiniMule::~CMiniMule()
 
 STDMETHODIMP CMiniMule::GetOptionKeyPath(LPOLESTR* /*pchKey*/, DWORD /*dw*/)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	TRACE(_T("%hs\n"), __FUNCTION__);
 
 //OpenKey		HKCU\Software\eMule\IE
@@ -177,6 +181,7 @@ void CMiniMule::DoDataExchange(CDataExchange* pDX)
 
 BOOL CMiniMule::CreateControlSite(COleControlContainer* pContainer, COleControlSite** ppSite, UINT /*nID*/, REFCLSID /*clsid*/)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	CMuleBrowserControlSite *pBrowserSite = new CMuleBrowserControlSite(pContainer, this);
 	if (!pBrowserSite)
 		return FALSE;
@@ -186,29 +191,38 @@ BOOL CMiniMule::CreateControlSite(COleControlContainer* pContainer, COleControlS
 
 CString CreateFilePathUrl(LPCTSTR pszFilePath, int nProtocol)
 {
-	// Create encoded version of local file path URLs, this is needed at least in cases where
-	// the directories contain special characters. like "c:\#emule#\emule.exe"
-	TCHAR szEncodedFilePath[INTERNET_MAX_URL_LENGTH];
-	DWORD dwLen = ARRSIZE(szEncodedFilePath);
+	// Do *not* use 'AtlCanonicalizeUrl' (or similar function) to convert a file path into
+	// an encoded URL. Basically this works, but if the file path contains special characters
+	// like e.g. Umlaute, the IE control can not open the encoded URL.
+	//
+	// The file path "D:\dir_ä#,.-_öäü#'+~´`ß}=])[({&%$!^°\Kopie von ### MiniMule3CyanSnow.htm"
+	// can get opened successfully by the IE control *without* using any URL encoding.
+	//
+	// Though, regardless of using 'AtlCanonicalizeUrl' or not, there is still one special
+	// case where the IE control can not open the URL. If the file starts with something like
+	//	"c:\#dir\emule.exe". For any unknown reason the sequence "c:\#" causes troubles for
+	// the IE control. It does not help to escape that sequence. It always fails.
+	//
+	CString strEncodedFilePath;
 	if (nProtocol == INTERNET_SCHEME_RES)
 	{
-		VERIFY( AtlCanonicalizeUrl(CString(_T("file:///")) + pszFilePath, szEncodedFilePath, &dwLen) );
-		CString strEncodedFilePath(szEncodedFilePath);
 		// "res://" protocol has to be specified with 2 slashes ("res:///" does not work)
-		strEncodedFilePath.Replace(_T("file:///"), _T("res://"));
-		return strEncodedFilePath;
+		strEncodedFilePath = _T("res://");
+		strEncodedFilePath += pszFilePath;
 	}
 	else
 	{
 		ASSERT( nProtocol == INTERNET_SCHEME_FILE );
 		// "file://" protocol has to be specified with 3 slashes
-		VERIFY( AtlCanonicalizeUrl(CString(_T("file:///")) + pszFilePath, szEncodedFilePath, &dwLen) );
-		return szEncodedFilePath;
+		strEncodedFilePath = _T("file:///");
+		strEncodedFilePath += pszFilePath;
 	}
+	return strEncodedFilePath;
 }
 
 BOOL CMiniMule::OnInitDialog()
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	ASSERT( m_iInCallback == 0 );
 	CString strHtmlFile = theApp.GetSkinFileItem(_T("MiniMule"), _T("HTML"));
 	if (!strHtmlFile.IsEmpty())
@@ -258,6 +272,8 @@ BOOL CMiniMule::OnInitDialog()
 
 void CMiniMule::OnClose()
 {
+	TRACE("%s\n", __FUNCTION__);
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	ASSERT( m_iInCallback == 0 );
 	KillAutoCloseTimer();
 
@@ -270,14 +286,45 @@ void CMiniMule::OnClose()
 	}
 
 	CDHtmlDialog::OnClose();
-	theApp.emuledlg->PostMessage(UM_CLOSE_MINIMULE, (WPARAM)m_bRestoreMainWnd);
+
+	///////////////////////////////////////////////////////////////////////////
+	// Destroy the MiniMule window
+
+	// Solution #1: Posting a close-message to main window (can not be done with 'SendMessage') may
+	// create message queue sync. problems when having high system load.
+	//theApp.emuledlg->PostMessage(UM_CLOSE_MINIMULE, (WPARAM)m_bRestoreMainWnd);
+
+	// Solution #2: 'DestroyModeless' -- posts a 'destroy' message to 'this' which will have a very 
+	// similar effect (and most likely problems) than using PostMessage(<main-window>).
+	//DestroyModeless();
+
+	// Solution #3: 'DestroyWindow' -- destroys the window and *deletes* 'this'. On return of 
+	// 'DestroyWindow' the 'this' is no longer valid! However, this should be safe because MFC
+	// is also using the same 'technique' for several window classes.
+	theApp.emuledlg->m_pMiniMule = NULL;
+	bool bRestoreMainWnd = m_bRestoreMainWnd;
+	DestroyWindow();
+	//NOTE: 'this' IS NO LONGER VALID!
+	if (bRestoreMainWnd)
+		theApp.emuledlg->RestoreWindow();
 }
 
 void CMiniMule::OnDestroy()
 {
+	TRACE("%s\n", __FUNCTION__);
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	ASSERT( m_iInCallback == 0 );
 	KillAutoCloseTimer();
 	CDHtmlDialog::OnDestroy();
+}
+
+void CMiniMule::PostNcDestroy()
+{
+	TRACE("%s\n", __FUNCTION__);
+	CDHtmlDialog::PostNcDestroy();
+	if (theApp.emuledlg)
+		theApp.emuledlg->m_pMiniMule = NULL;
+	delete this;
 }
 
 void CMiniMule::Localize()
@@ -325,6 +372,7 @@ void CMiniMule::Localize()
 
 void CMiniMule::UpdateContent(UINT uUpDatarate, UINT uDownDatarate)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	if (m_bResolveImages)
 	{
 		static const LPCTSTR _apszConnectedImgs[] = 
@@ -376,6 +424,7 @@ void CMiniMule::UpdateContent(UINT uUpDatarate, UINT uDownDatarate)
 
 STDMETHODIMP CMiniMule::TranslateUrl(DWORD /*dwTranslate*/, OLECHAR* pchURLIn, OLECHAR** ppchURLOut)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	UNREFERENCED_PARAMETER(pchURLIn);
 	TRACE(_T("%hs: %ls\n"), __FUNCTION__, pchURLIn);
 	*ppchURLOut = NULL;
@@ -384,6 +433,7 @@ STDMETHODIMP CMiniMule::TranslateUrl(DWORD /*dwTranslate*/, OLECHAR* pchURLIn, O
 
 void CMiniMule::_OnBeforeNavigate2(LPDISPATCH pDisp, VARIANT* URL, VARIANT* /*Flags*/, VARIANT* /*TargetFrameName*/, VARIANT* /*PostData*/, VARIANT* /*Headers*/, BOOL* Cancel)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	CString strURL(V_BSTR(URL));
 	TRACE(_T("%hs: %s\n"), __FUNCTION__, strURL);
 
@@ -409,12 +459,14 @@ void CMiniMule::_OnBeforeNavigate2(LPDISPATCH pDisp, VARIANT* URL, VARIANT* /*Fl
 
 void CMiniMule::OnBeforeNavigate(LPDISPATCH pDisp, LPCTSTR pszUrl)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	TRACE(_T("%hs: %s\n"), __FUNCTION__, pszUrl);
 	CDHtmlDialog::OnBeforeNavigate(pDisp, pszUrl);
 }
 
 void CMiniMule::OnNavigateComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	TRACE(_T("%hs: %s\n"), __FUNCTION__, pszUrl);
 	// If the HTML file contains 'OnLoad' scripts, the HTML DOM is fully accessible 
 	// only after 'DocumentComplete', but not after 'OnNavigateComplete'
@@ -423,6 +475,14 @@ void CMiniMule::OnNavigateComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 
 void CMiniMule::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR pszUrl)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
+	if (theApp.emuledlg->m_pMiniMule == NULL){
+		// FIX ME
+		// apperently in some rare cases (high cpu load, fast double clicks) this function is called when the object is destroyed already
+		ASSERT(0);
+		return;
+	}
+
 	CCounter cc(m_iInCallback);
 
 	TRACE(_T("%hs: %s\n"), __FUNCTION__, pszUrl);
@@ -588,6 +648,7 @@ void CMiniMule::KillAutoCloseTimer()
 
 void CMiniMule::OnTimer(UINT nIDEvent)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	if (m_bAutoClose && nIDEvent == m_uAutoCloseTimer)
 	{
 		KillAutoCloseTimer();
@@ -628,6 +689,7 @@ void CMiniMule::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 
 HRESULT CMiniMule::OnRestoreMainWindow(IHTMLElement* /*pElement*/)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	CCounter cc(m_iInCallback);
 	RestoreMainWindow();
 	return S_OK;
@@ -635,6 +697,7 @@ HRESULT CMiniMule::OnRestoreMainWindow(IHTMLElement* /*pElement*/)
 
 HRESULT CMiniMule::OnOpenIncomingFolder(IHTMLElement* /*pElement*/)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	CCounter cc(m_iInCallback);
 	if (theApp.emuledlg->IsRunning())
 	{
@@ -647,6 +710,7 @@ HRESULT CMiniMule::OnOpenIncomingFolder(IHTMLElement* /*pElement*/)
 
 HRESULT CMiniMule::OnOptions(IHTMLElement* /*pElement*/)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	CCounter cc(m_iInCallback);
 	if (theApp.emuledlg->IsRunning())
 	{
@@ -662,6 +726,7 @@ HRESULT CMiniMule::OnOptions(IHTMLElement* /*pElement*/)
 
 STDMETHODIMP CMiniMule::ShowContextMenu(DWORD /*dwID*/, POINT* /*ppt*/, IUnknown* /*pcmdtReserved*/, IDispatch* /*pdispReserved*/)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	CCounter cc(m_iInCallback);
 	// Avoid IE context menu
 	return S_OK;	// S_OK = Host displayed its own user interface (UI). MSHTML will not attempt to display its UI.
@@ -669,6 +734,7 @@ STDMETHODIMP CMiniMule::ShowContextMenu(DWORD /*dwID*/, POINT* /*ppt*/, IUnknown
 
 STDMETHODIMP CMiniMule::TranslateAccelerator(LPMSG lpMsg, const GUID* /*pguidCmdGroup*/, DWORD /*nCmdID*/)
 {
+	ASSERT( GetCurrentThreadId() == _uMainThreadId );
 	CCounter cc(m_iInCallback);
 	// Allow only some basic keys
 	//

@@ -250,7 +250,7 @@ bool CClientList::GiveClientsForTraceRoute() {
 void CClientList::RemoveClient(CUpDownClient* toremove, LPCTSTR pszReason){
 	POSITION pos = list.Find(toremove);
 	if (pos){
-		theApp.uploadqueue->RemoveFromUploadQueue(toremove, pszReason);
+        theApp.uploadqueue->RemoveFromUploadQueue(toremove, CString(_T("CClientList::RemoveClient: ")) + pszReason);
 		theApp.uploadqueue->RemoveFromWaitingQueue(toremove);
 		 // EastShare START - Added by TAHO, modified SUQWT
 		if ( toremove != NULL && toremove->Credits() != NULL) {
@@ -702,7 +702,9 @@ void CClientList::Process()
 	{
 		if( Kademlia::CKademlia::IsFirewalled() )
 		{
-			if( m_nBuddyStatus == Disconnected && Kademlia::CKademlia::GetPrefs()->GetFindBuddy() )
+			//TODO: Kad buddies won'T work with RequireCrypt, so it is disabled for now but should (and will)
+			//be fixed in later version
+			if( m_nBuddyStatus == Disconnected && Kademlia::CKademlia::GetPrefs()->GetFindBuddy() && !thePrefs.IsClientCryptLayerRequired())
 			{
 				//We are a firewalled client with no buddy. We have also waited a set time 
 				//to try to avoid a false firewalled status.. So lets look for a buddy..
@@ -951,6 +953,25 @@ void CClientList::ProcessA4AFClients() const {
     //if(thePrefs.GetLogA4AF()) AddDebugLogLine(false, _T(">>> Done with A4AF check"));
 }
 // <-- ZZ:DownloadManager
+
+void CClientList::AddKadFirewallRequest(uint32 dwIP){
+	IPANDTICS add = {dwIP, ::GetTickCount()};
+	listFirewallCheckRequests.AddHead(add);
+	while (!listFirewallCheckRequests.IsEmpty()){
+		if (::GetTickCount() - listFirewallCheckRequests.GetTail().dwInserted > SEC2MS(180))
+			listFirewallCheckRequests.RemoveTail();
+		else
+			break;
+	}
+}
+
+bool CClientList::IsKadFirewallCheckIP(uint32 dwIP) const{
+	for (POSITION pos = listFirewallCheckRequests.GetHeadPosition(); pos != NULL; listFirewallCheckRequests.GetNext(pos)){
+		if (listFirewallCheckRequests.GetAt(pos).dwIP == dwIP && ::GetTickCount() - listFirewallCheckRequests.GetAt(pos).dwInserted < SEC2MS(180))
+			return true;
+	}
+	return false;
+}
 
 //EastShare Start - added by AndCycle, IP to Country
 void CClientList::ResetIP2Country(){

@@ -18,6 +18,8 @@ protected:
 	void InternalInit();
 	void SetAllIcons();
 	void GetCloseButtonRect(const CRect& rcItem, CRect& rcCloseButton);
+	int GetTabUnderContextMenu() const;
+	int GetTabUnderPoint(CPoint point) const;
 
 	virtual void PreSubclassWindow();
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);

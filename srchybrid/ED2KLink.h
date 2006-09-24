@@ -62,7 +62,7 @@ public:
 	virtual CED2KServerLink* GetServerLink();
 	virtual CED2KFileLink* GetFileLink();
 
-	uint32 GetIP() const { return m_ip;}
+	const CString& GetAddress() const { return m_strAddress; }
 	uint16 GetPort() const { return m_port;}
 	void GetDefaultName(CString& defName) const { defName = m_defaultName; }
 
@@ -71,7 +71,7 @@ private:
 	CED2KServerLink(const CED2KServerLink&);
 	CED2KServerLink& operator=(const CED2KServerLink&);
 
-	uint32 m_ip;
+	CString m_strAddress;
 	uint16 m_port;
 	CString m_defaultName;
 };

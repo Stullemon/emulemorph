@@ -30,6 +30,7 @@ class CCollection;
 class CSafeMemFile;	// SLUGFILLER: hideOS
 
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
+enum EFileType;
 
 class CKnownFile : public CAbstractFile
 {
@@ -65,6 +66,9 @@ public:
 	bool	SR13_ImportParts();
 	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 	bool	CreateAICHHashSetOnly();
+
+	EFileType GetVerifiedFileType() { return m_verifiedFileType; }
+	void	  SetVerifiedFileType(EFileType in) { m_verifiedFileType=in; }
 
 	// last file modification time in (DST corrected, if NTFS) real UTC format
 	// NOTE: this value can *not* be compared with NT's version of the UTC time
@@ -238,7 +242,7 @@ protected:
 	/*
 	bool	CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	*/
-	virtual void	UpdateFileRatingCommentAvail();
+	virtual void	UpdateFileRatingCommentAvail(bool bForceUpdate = false);
 	//MORPH START - Revisited , we only get static Client PartCount now
 	void	CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	//MORPH END   - Revisited , we only get static Client PartCount now
@@ -261,6 +265,7 @@ private:
 	uint32	m_lastBuddyIP;
 	Kademlia::WordList wordlist;
 	UINT	m_uMetaDataVer;
+	EFileType m_verifiedFileType;
 	uint32	m_dwLastSeen;	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation

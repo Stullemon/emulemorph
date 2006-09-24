@@ -128,7 +128,8 @@ static SLanguage _aLanguages[] =
 	{LANGID_TR_TR,	_T("turkish"),		FALSE,	_T("tr_TR"),	1254,	_T("windows-1254")},	// Turkish
 	{LANGID_UA_UA,	_T(""),				FALSE,	_T("ua_UA"),	1251,	_T("windows-1251")},	// Ukrainian
 	{LANGID_ZH_CN,	_T("chs"),			FALSE,	_T("zh_CN"),	 936,	_T("gb2312")},			// Chinese (P.R.C.)
-	{LANGID_ZH_TW,	_T("cht"),			FALSE,	_T("zh_TW"),	 950,	_T("big5")},			// Chinese (Taiwan)
+	{LANGID_ZH_TW,	_T("cht"),			FALSE,	_T("zh_TW"),	 950,	_T("big5")}, 			// Chinese (Taiwan)
+	{LANGID_VI_VN,	_T(""),				FALSE,	_T("vi_VN"),	1258,	_T("windows-1258")},	// Vietnamese
 	{0, NULL, 0, 0}
 };
 
@@ -345,7 +346,7 @@ void CPreferences::InitThreadLocale()
 	{
 		//LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
 
-		// get the ANSI codepage which is to be used for all non-Unicode conversions.
+		// get the ANSI code page which is to be used for all non-Unicode conversions.
 		LANGID lidSystem = m_wLanguageID;
 
 		// get user's sorting preferences
@@ -362,7 +363,7 @@ void CPreferences::InitThreadLocale()
 		SetThreadLocale(lcid);
 
 		// if we set the thread locale (see comments above) we also have to specify the proper
-		// codepage for the C-RTL, otherwise we may not be able to store some strings as MBCS
+		// code page for the C-RTL, otherwise we may not be able to store some strings as MBCS
 		// (Unicode->MBCS conversion may fail)
 		SetRtlLocale(lcid);
 	}
@@ -371,7 +372,7 @@ void CPreferences::InitThreadLocale()
 		LCID lcidSystem = GetSystemDefaultLCID();	// Installation, or altered by user in control panel (WinXP)
 		//LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
 
-		// get the ANSI codepage which is to be used for all non-Unicode conversions.
+		// get the ANSI code page which is to be used for all non-Unicode conversions.
 		LANGID lidSystem = LANGIDFROMLCID(lcidSystem);
 
 		// get user's sorting preferences
@@ -391,7 +392,7 @@ void CPreferences::InitThreadLocale()
 			SetThreadLocale(lcid);
 
 			// if we set the thread locale (see comments above) we also have to specify the proper
-			// codepage for the C-RTL, otherwise we may not be able to store some strings as MBCS
+			// code page for the C-RTL, otherwise we may not be able to store some strings as MBCS
 			// (Unicode->MBCS conversion may fail)
 			SetRtlLocale(lcid);
 		}
@@ -401,6 +402,27 @@ void CPreferences::InitThreadLocale()
 void InitThreadLocale()
 {
 	thePrefs.InitThreadLocale();
+}
+
+CString GetCodePageNameForLocale(LCID lcid)
+{
+	CString strCodePage;
+	int iResult = GetLocaleInfo(lcid, LOCALE_IDEFAULTANSICODEPAGE, strCodePage.GetBuffer(6), 6);
+	strCodePage.ReleaseBuffer();
+
+	if (iResult > 0 && !strCodePage.IsEmpty())
+	{
+		UINT uCodePage = _tcstoul(strCodePage, NULL, 10);
+		if (uCodePage != ULONG_MAX)
+		{
+			CPINFOEXW CPInfoEx = {0};
+			BOOL (WINAPI *pfnGetCPInfoEx)(UINT, DWORD, LPCPINFOEXW);
+			(FARPROC&)pfnGetCPInfoEx = GetProcAddress(GetModuleHandle(_T("kernel32")), "GetCPInfoExW");
+			if (pfnGetCPInfoEx&& (*pfnGetCPInfoEx)(uCodePage, 0, &CPInfoEx))
+				strCodePage = CPInfoEx.CodePageName;
+		}
+	}
+	return strCodePage;
 }
 
 bool CheckThreadLocale()
@@ -415,7 +437,7 @@ bool CheckThreadLocale()
 	LCID lcidSystem = GetSystemDefaultLCID();	// Installation, or altered by user in control panel (WinXP)
 	//LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
 
-	// get the ANSI codepage which is to be used for all non-Unicode conversions.
+	// get the ANSI code page which is to be used for all non-Unicode conversions.
 	LANGID lidSystem = LANGIDFROMLCID(lcidSystem);
 
 	// get user's sorting preferences
@@ -427,19 +449,30 @@ bool CheckThreadLocale()
 
 	// create a thread locale which gives full backward compability for users which had run ANSI emule on 
 	// a system where the system's code page did not match the user's language..
-	LCID lcid = MAKESORTLCID(lidSystem, uSortIdUser, uSortVerUser);
-	LCID lcidThread = GetThreadLocale();
-	if (lcidThread != lcid)
+	LCID lcidSys = MAKESORTLCID(lidSystem, uSortIdUser, uSortVerUser);
+	LCID lcidUsr = GetThreadLocale();
+	if (lcidUsr != lcidSys)
 	{
-		CString str =
-			_T("eMule has detected that your system's codepage is not the same as eMule's current codepage. Do you want eMule to use your system's codepage for converting non-Unicode data to Unicode?\r\n")
+		CString strUsrCP = GetCodePageNameForLocale(lcidUsr);
+		if (!strUsrCP.IsEmpty())
+			strUsrCP = _T(" \"") + strUsrCP + _T('\"');
+		
+		CString strSysCP = GetCodePageNameForLocale(lcidSys);
+		if (!strSysCP.IsEmpty())
+			strSysCP = _T(" \"") + strSysCP + _T('\"');
+
+		static const TCHAR szMsg[] =
+			_T("eMule has detected that your current code page%s is not the same as your system's code page%s. For converting non-Unicode data to Unicode, you need to specify which code page to use.\r\n")
 			_T("\r\n")
-			_T("If you want eMule to use the current codepage for converting non-Unicode data, click 'Yes'. (If you are using eMule the first time or if you don't care about this issue at all, chose this option. This is recommended.)\r\n")
+			_T("If you want eMule to use your current code page for converting non-Unicode data, click 'Yes'. (If you are using eMule for the first time or if you don't care about this issue at all, choose this option. This is the recommended setting.)\r\n")
 			_T("\r\n")
-			_T("If you want eMule to use your system's codepage for converting non-Unicode data, click 'No'. (This will give you more backward compatibility when reading older *.met files created with non-Unicode eMule versions.)\r\n")
+			_T("If you want eMule to use your system's code page for converting non-Unicode data, click 'No'. (This will give you more backward compatibility when reading older *.met files created with non-Unicode eMule versions.)\r\n")
 			_T("\r\n")
-			_T("If you want to cancel and create backup of all your config files or visit our forum to learn more about this issue, click 'Cancel'.\r\n");
-		int iAnswer = AfxMessageBox(str, MB_ICONSTOP | MB_YESNOCANCEL | MB_DEFBUTTON1);
+			_T("If you want to cancel and create backup of all your configuration files or visit our forum to learn more about this issue, click 'Cancel'.\r\n")
+			;
+		CString strFullMsg;
+		strFullMsg.Format(szMsg, strUsrCP, strSysCP);
+		int iAnswer = AfxMessageBox(strFullMsg, MB_ICONSTOP | MB_YESNOCANCEL | MB_DEFBUTTON1);
 		if (iAnswer == IDCANCEL)
 			return false;
 		if (iAnswer == IDNO)
@@ -469,7 +502,7 @@ CString CPreferences::GetHtmlCharset()
 	{
 		ASSERT(0); // should never come here
 
-		// try to get charset from codepage
+		// try to get charset from code page
 		LPCTSTR pszLcLocale = _tsetlocale(LC_CTYPE, NULL);
 		if (pszLcLocale)
 		{

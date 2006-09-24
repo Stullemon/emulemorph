@@ -145,6 +145,8 @@ void CClientListCtrl::SetAllIcons()
 	imagelist.Add(CTempIconLoader(_T("NEO")));
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("OverlayObfu"))), 2);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("OverlaySecureObfu"))), 3);
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -155,6 +157,10 @@ void CClientListCtrl::SetAllIcons()
 	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendOvl")));
 	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendSlotOvl")));
 	//MORPH END   - Addded by SiRoB, Friend Addon
+	//MORPH START - Credit Overlay Icon
+	m_overlayimages.Add(CTempIconLoader(_T("ClientCreditOvl")));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientCreditSecureOvl")));
+	//MORPH END   - Credit Overlay Icon
 }
 
 void CClientListCtrl::Localize()
@@ -375,14 +381,28 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else
 							image = 0;
 
+						uint32 nOverlayImage = 0;
+						if ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED))
+							nOverlayImage |= 1;
+						if (client->IsObfuscatedConnectionEstablished())
+							nOverlayImage |= 2;
 						POINT point = {cur_rec.left, cur_rec.top+1};
-						imagelist.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
+						imagelist.Draw(dc,image, point, ILD_NORMAL | INDEXTOOVERLAYMASK(nOverlayImage));
+
+						//MORPH START - Credit Overlay Icon
+						if (client->Credits() && client->Credits()->GetHasScore(client->GetIP())) {
+							if (nOverlayImage & 1)
+								m_overlayimages.Draw(dc, 4, point, ILD_TRANSPARENT);
+							else 
+								m_overlayimages.Draw(dc, 3, point, ILD_TRANSPARENT);
+						}
 						// Mighty Knife: Community visualization
 						if (client->IsCommunity())
-							m_overlayimages.Draw(dc,0, point, ILD_NORMAL/*ILD_TRANSPARENT*/);
+							m_overlayimages.Draw(dc,0, point, ILD_TRANSPARENT);
 						// [end] Mighty Knife
+						//MORPH END   - Credit Overlay Icon
 						if (client->IsFriend())
-							m_overlayimages.Draw(dc,client->GetFriendSlot()?2:1, point, ILD_NORMAL);
+							m_overlayimages.Draw(dc,client->GetFriendSlot()?2:1, point, ILD_TRANSPARENT);
 						//MORPH END - Modified by SiRoB, More client icon
 						if (client->GetUserName()==NULL)
 							Sbuffer.Format(_T("(%s)"), GetResString(IDS_UNKNOWN));
@@ -580,7 +600,7 @@ BOOL CClientListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			}
 			case MP_BOOT:
 				if (client->GetKadPort())
-					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
+					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
 				break;
 			//MORPH START - Added by SIRoB, Friend Addon
             		//Xman friendhandling

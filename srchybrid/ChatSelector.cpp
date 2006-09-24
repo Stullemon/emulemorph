@@ -41,7 +41,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-#define URLINDICATOR	_T("http:|www.|.de |.net |.com |.org |.to |.tk |.cc |.fr |ftp:|ed2k:|https:")
+#define URLINDICATOR	_T("http:|www.|.de |.net |.com |.org |.to |.tk |.cc |.fr |ftp:|ed2k:|https:|ftp.|.info|.biz|.uk|.eu|.es|.tv|.cn|.tw|.ws|.nu|.jp")
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ BEGIN_MESSAGE_MAP(CChatSelector, CClosableTabCtrl)
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnTcnSelchangeChatsel)
 	ON_BN_CLICKED(IDC_CCLOSE, OnBnClickedCclose)
 	ON_BN_CLICKED(IDC_CSEND, OnBnClickedCsend)
-	ON_WM_CONTEXTMENU()
+	//ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 CChatSelector::CChatSelector()
@@ -141,16 +141,8 @@ void CChatSelector::UpdateFonts(CFont* pFont)
 
 CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 {
-	// MORPH START raccoonI: eMule steals focus when message from new client is received - [leuk_he]
      if (show)
-     {
         ::SetFocus(m_hwndMessageBox);
-     }
- 	 /*
-     ::SetFocus(m_hwndMessageBox);
-	 */
-     // MORPH END  raccoonI: eMule steals focus when message from new client is received <--
-     
 	if (GetTabByClient(client) != -1){
 		if (show){
 			SetCurSel(GetTabByClient(client));
@@ -246,8 +238,6 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 		resToken = thePrefs.GetMessageFilter().Tokenize(_T("|"), curPos);
 	}
 
-
-
 	// advanced spamfilter check
 	if (IsSpam(strMessage, sender))
 	{
@@ -260,9 +250,8 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 			EndSession(sender);
 		return;
 	}
-	// MORPH START leuk_he -- filtered messages not in log
-    AddLogLine(true, GetResString(IDS_NEWMSG), sender->GetUserName(), ipstr(sender->GetConnectIP())); // Avi3k:
-    // MORPH END leuk_he -- filtered messages not in log
+
+    AddLogLine(true, GetResString(IDS_NEWMSG), sender->GetUserName(), ipstr(sender->GetConnectIP()));
 
 	bool isNewChatWindow = false;
 	if (!ci)
@@ -677,7 +666,7 @@ void CChatSelector::OnDestroy()
 	CClosableTabCtrl::OnDestroy();
 }
 
-BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
+/*BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam){
 		case MP_DETAIL:{
@@ -714,9 +703,13 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 		}
 	}
 	return CClosableTabCtrl::OnCommand(wParam, lParam);
-}
+}*/
 
-void CChatSelector::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
+// This does not work! This offers context menu entries which always
+// work for the selected tab item only! The offered context menu entries have to work for
+// the item which is under the cursor. Thus one can e.g. no longer use the 'Close' function
+// for other (non-selected) items.
+/*void CChatSelector::OnContextMenu(CWnd*, CPoint point)
 {
 	const CChatItem* ci = GetCurrentChatItem();
 	if (ci == NULL)
@@ -741,3 +734,4 @@ void CChatSelector::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	ScreenToClient(&m_ptCtxMenu);
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }
+*/

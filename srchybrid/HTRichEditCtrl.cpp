@@ -190,7 +190,7 @@ void CHTRichEditCtrl::AddTyped(LPCTSTR pszMsg, int iLen, UINT eMsgType)
 	}
 }
 
-void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
+void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr, COLORREF bk, DWORD mask)
 {
 	int iMsgLen = (iLen == -1) ? _tcslen(pszMsg) : iLen;
 	if (iMsgLen == 0)
@@ -214,7 +214,7 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 		if (m_bAutoScroll && GetScrollInfo(SB_VERT, &si) && si.nPos >= (int)(si.nMax - si.nPage + 1))
 		{
 			// Not scrolled away
-			SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr);
+			SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr, bk, mask);
 			if (m_bAutoScroll && !IsWindowVisible())
 				ScrollToLastLine();
 		}
@@ -231,7 +231,7 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 		
 			// Select at the end of text and replace the selection
 			// This is a very fast way to add text to an edit control
-			SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr);
+			SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr, bk, mask);
 			//if (m_bAutoScroll && lStartChar == lEndChar)
 			//	lStartChar = lEndChar = -1;
 			SetSel(lStartChar, lEndChar); // Restore our previous selection
@@ -298,7 +298,7 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
 		
 		// Select at the end of text and replace the selection
 		// This is a very fast way to add text to an edit control
-		SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr/*, &ptScrollPos*/);
+		SafeAddLine(iSize, pszMsg, iLen, lStartChar, lEndChar, bLink, cr, bk, mask);
 		//if (m_bAutoScroll && lStartChar == lEndChar)
 		//	lStartChar = lEndChar = -1;
 		SetSel(lStartChar, lEndChar); // Restore our previous selection
@@ -349,7 +349,7 @@ void CHTRichEditCtrl::ScrollToLastLine(bool bForceLastLineAtBottom)
 	}
 }
 
-void CHTRichEditCtrl::AddString(int nPos, LPCTSTR pszString, bool bLink, COLORREF cr)
+void CHTRichEditCtrl::AddString(int nPos, LPCTSTR pszString, bool bLink, COLORREF cr,COLORREF bk, DWORD mask)
 {
 	bool bRestoreFormat = false;
 	m_bEnErrSpace = false;
@@ -363,13 +363,36 @@ void CHTRichEditCtrl::AddString(int nPos, LPCTSTR pszString, bool bLink, COLORRE
 		cf.dwEffects |= CFE_LINK;
 		SetSelectionCharFormat(cf);
 	}
-	else if (cr != CLR_DEFAULT)
+	else if (cr != CLR_DEFAULT || bk != CLR_DEFAULT)
 	{
-		CHARFORMAT cf;
+		CHARFORMAT2 cf;
+		memset(&cf, 0, sizeof(cf));
 		GetSelectionCharFormat(cf);
+		if(cr != CLR_DEFAULT)
+		{
 		cf.dwMask |= CFM_COLOR;
 		cf.dwEffects &= ~CFE_AUTOCOLOR;
 		cf.crTextColor = cr;
+		}
+		if(bk != CLR_DEFAULT)
+		{
+			cf.dwMask |= CFM_BACKCOLOR;
+			cf.dwEffects &= ~CFE_AUTOBACKCOLOR;
+			cf.crBackColor = bk;
+		}
+		cf.dwMask |= mask;
+		if(mask & CFM_BOLD)
+			cf.dwEffects |= CFE_BOLD; //Checks if bold is set in the mask and then sets it in effects if it is
+		else if(cf.dwEffects & CFE_BOLD)
+			cf.dwEffects ^= CFE_BOLD; //Unset bold
+		if(mask & CFM_ITALIC)
+			cf.dwEffects |= CFE_ITALIC; //Checks if italic is set in the mask and then sets it in effects if it is
+		else if(cf.dwEffects & CFE_ITALIC)
+			cf.dwEffects ^= CFE_ITALIC; //Unset bold
+		if(mask & CFM_UNDERLINE)
+			cf.dwEffects |= CFE_UNDERLINE; //Checks if underlined is set in the mask and then sets it in effects if it is
+		else if(cf.dwEffects & CFE_UNDERLINE)
+			cf.dwEffects ^= CFE_UNDERLINE; //Unset italic
 		SetSelectionCharFormat(cf);
 		bRestoreFormat = true;
 	}
@@ -381,7 +404,7 @@ void CHTRichEditCtrl::AddString(int nPos, LPCTSTR pszString, bool bLink, COLORRE
 	m_bRestoreFormat = bRestoreFormat;
 }
 
-void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& lStartChar, long& lEndChar, bool bLink, COLORREF cr)
+void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& lStartChar, long& lEndChar, bool bLink, COLORREF cr, COLORREF bk, DWORD mask)
 {
 	// EN_ERRSPACE and EN_MAXTEXT are not working for rich edit control (at least not same as for standard control),
 	// need to explicitly check the log buffer limit..
@@ -427,12 +450,12 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& lSt
 	{
 		TCHAR Date[21]=_T("\0");
 		_tcsncpy(Date,pszLine,20);
-		AddString(nPos, Date, false, CLR_DEFAULT);
-		AddString(nPos+20, pszLine+20, bLink, cr);
+		AddString(nPos, Date, false, CLR_DEFAULT, bk, mask);
+		AddString(nPos+20, pszLine+20, bLink, cr, bk, mask);
 	}
 	else
 	//MORPH END   - Added by SiRoB, Draw date adn time with defaultcolor
-		AddString(nPos, pszLine, bLink, cr);
+		AddString(nPos, pszLine, bLink, cr, bk, mask);
 	
 	if (m_bEnErrSpace)
 	{
@@ -465,7 +488,7 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int iLen, long& lSt
 
 			// add the new line again
 			nPos = GetWindowTextLength();
-			AddString(nPos, pszLine, bLink, cr);
+			AddString(nPos, pszLine, bLink, cr, bk, mask);
 
 			if (m_bEnErrSpace && nPos == 0){
 				// should never happen: if we tried to add the line another time in the 1st line, there 
@@ -577,7 +600,7 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 			fwrite(strText, sizeof(TCHAR), strText.GetLength(), fp);
 			if (ferror(fp)){
 				CString strError;
-				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
+				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), _tcserror(errno));
 				AfxMessageBox(strError, MB_ICONERROR);
 			}
 			else
@@ -586,7 +609,7 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 		}
 		else{
 			CString strError;
-			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
+			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), _tcserror(errno));
 			AfxMessageBox(strError, MB_ICONERROR);
 		}
 	}
@@ -712,9 +735,9 @@ void CHTRichEditCtrl::AppendHyperLink(const CString& sText, const CString& sTitl
 	AddLine(sCommand, sCommand.GetLength(), true);
 }
 
-void CHTRichEditCtrl::AppendColoredText(LPCTSTR pszText, COLORREF cr)
+void CHTRichEditCtrl::AppendColoredText(LPCTSTR pszText, COLORREF cr, COLORREF bk, DWORD mask)
 {
-	AddLine(pszText, -1, false, cr);
+	AddLine(pszText, -1, false, cr, bk, mask);
 }
 
 void CHTRichEditCtrl::AppendKeyWord(const CString& str, COLORREF cr)

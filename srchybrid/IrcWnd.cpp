@@ -28,6 +28,7 @@
 #include "./opcodes.h"
 #include "./InputBox.h"
 #include "./UserMsgs.h"
+#include "./ColourPopup.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,14 +66,16 @@ struct Channel
 IMPLEMENT_DYNAMIC(CIrcWnd, CDialog)
 
 BEGIN_MESSAGE_MAP(CIrcWnd, CResizableDialog)
-	// Tab control
-	ON_WM_SIZE()
-	ON_WM_CREATE()
-	ON_WM_CONTEXTMENU()
-	ON_WM_SYSCOLORCHANGE()
-	ON_WM_HELPINFO()
-	ON_MESSAGE(UM_CLOSETAB, OnCloseTab)
-	ON_MESSAGE(UM_QUERYTAB, OnQueryTab)
+// Tab control
+ON_WM_SIZE()
+ON_WM_CREATE()
+ON_WM_CONTEXTMENU()
+ON_WM_SYSCOLORCHANGE()
+ON_WM_HELPINFO()
+ON_MESSAGE(UM_CLOSETAB, OnCloseTab)
+ON_MESSAGE(UM_QUERYTAB, OnQueryTab)
+ON_MESSAGE(UM_CPN_SELENDOK, OnSelEndOK)
+ON_MESSAGE(UM_CPN_SELENDCANCEL, OnSelEndCancel)
 END_MESSAGE_MAP()
 
 CIrcWnd::CIrcWnd(CWnd* pParent ) : CResizableDialog(CIrcWnd::IDD, pParent)
@@ -84,6 +87,7 @@ CIrcWnd::CIrcWnd(CWnd* pParent ) : CResizableDialog(CIrcWnd::IDD, pParent)
 	m_listctrlServerChannelList.m_pParent = this;
 	m_tabctrlChannelSelect.m_bCloseable = true;
 	m_tabctrlChannelSelect.m_pParent = this;
+	m_pToolTip = NULL;
 }
 
 CIrcWnd::~CIrcWnd()
@@ -95,6 +99,9 @@ CIrcWnd::~CIrcWnd()
 	}
 	//Delete our core client..
 	delete m_pIrcMain;
+	//destroy tooltips if they were created
+	if(m_pToolTip!=NULL)
+		m_pToolTip->DestroyToolTipCtrl();
 }
 
 void CIrcWnd::OnSysColorChange()
@@ -114,6 +121,16 @@ void CIrcWnd::Localize()
 	m_listctrlServerChannelList.Localize();
 	m_tabctrlChannelSelect.Localize();
 	m_listctrlNickList.Localize();
+
+	if (m_pToolTip)
+		m_pToolTip->DestroyToolTipCtrl();
+	m_pToolTip = new CToolTipCtrl();
+	m_pToolTip->Create(this);
+	m_pToolTip->AddTool(GetDlgItem(IDC_BOLD),	GetResString(IDS_BOLD) );
+	m_pToolTip->AddTool(GetDlgItem(IDC_COLOUR),	GetResString(IDS_COLOUR) );
+	m_pToolTip->AddTool(GetDlgItem(IDC_RESET),	GetResString(IDS_RESETFORMAT) );
+	m_pToolTip->AddTool(GetDlgItem(IDC_UNDERLINE),GetResString(IDS_UNDERLINE) );
+	m_pToolTip->Activate(TRUE);
 }
 
 BOOL CIrcWnd::OnInitDialog()
@@ -157,12 +174,21 @@ BOOL CIrcWnd::OnInitDialog()
 	AddAnchor(IDC_BN_IRCCONNECT,BOTTOM_LEFT);
 	AddAnchor(IDC_CLOSECHAT,BOTTOM_LEFT);
 	AddAnchor(IDC_CHATSEND,BOTTOM_RIGHT);
+	AddAnchor(IDC_BOLD,BOTTOM_LEFT);
+	AddAnchor(IDC_RESET,BOTTOM_LEFT);
+	AddAnchor(IDC_COLOUR,BOTTOM_LEFT);
+	AddAnchor(IDC_UNDERLINE,BOTTOM_LEFT);
 	AddAnchor(IDC_INPUTWINDOW,BOTTOM_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_NICKLIST,TOP_LEFT,BOTTOM_LEFT);
 	AddAnchor(IDC_TITLEWINDOW,TOP_LEFT,TOP_RIGHT);
 	AddAnchor(IDC_SERVERCHANNELLIST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_TAB2,TOP_LEFT, TOP_RIGHT);
 	AddAnchor(m_wndSplitterIRC,TOP_LEFT, BOTTOM_LEFT);
+
+	((CButton*)GetDlgItem(IDC_BOLD))->SetIcon(theApp.LoadIcon(_T("BOLD")));
+	((CButton*)GetDlgItem(IDC_COLOUR))->SetIcon(theApp.LoadIcon(_T("COLOUR")));
+	((CButton*)GetDlgItem(IDC_RESET))->SetIcon(theApp.LoadIcon(_T("RESETFORMAT")));
+	((CButton*)GetDlgItem(IDC_UNDERLINE))->SetIcon(theApp.LoadIcon(_T("UNDERLINE")));
 
 	int iPosStatInit = rcSpl.left;
 	int iPosStatNew = thePrefs.GetSplitterbarPositionIRC();
@@ -193,6 +219,10 @@ void CIrcWnd::DoResize(int iDelta)
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_SERVERCHANNELLIST), -iDelta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_STATUSWINDOW), -iDelta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_TAB2), -iDelta, CW_RIGHTALIGN);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_BOLD), -iDelta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_RESET), -iDelta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_COLOUR), -iDelta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_UNDERLINE), -iDelta, 0);
 
 	CRect rcChannel;
 	m_listctrlServerChannelList.GetWindowRect(&rcChannel);
@@ -214,6 +244,14 @@ void CIrcWnd::DoResize(int iDelta)
 	AddAnchor(IDC_BN_IRCCONNECT,BOTTOM_LEFT);
 	RemoveAnchor(IDC_CLOSECHAT);
 	AddAnchor(IDC_CLOSECHAT,BOTTOM_LEFT);
+	RemoveAnchor(IDC_BOLD);
+	AddAnchor(IDC_BOLD,BOTTOM_LEFT);
+	RemoveAnchor(IDC_RESET);
+	AddAnchor(IDC_RESET,BOTTOM_LEFT);
+	RemoveAnchor(IDC_COLOUR);
+	AddAnchor(IDC_COLOUR,BOTTOM_LEFT);
+	RemoveAnchor(IDC_UNDERLINE);
+	AddAnchor(IDC_UNDERLINE,BOTTOM_LEFT);
 	RemoveAnchor(IDC_INPUTWINDOW);
 	AddAnchor(IDC_INPUTWINDOW,BOTTOM_LEFT,BOTTOM_RIGHT);
 	RemoveAnchor(IDC_NICKLIST);
@@ -358,12 +396,35 @@ BOOL CIrcWnd::OnCommand(WPARAM wParam, LPARAM)
 				OnBnClickedClosechat();
 				return true;
 			}
+		case IDC_BOLD:
+			{
+				OnBnClickedBold();
+				return true;
+			}
+		case IDC_COLOUR:
+			{
+				OnBnClickedColour();
+				return true;
+			}
+		case IDC_UNDERLINE:
+			{
+				OnBnClickedUnderline();
+				return true;
+			}
+		case IDC_RESET:
+			{
+				OnBnClickedReset();
+				return true;
+			}
 	}
 	return true;
 }
 
 BOOL CIrcWnd::PreTranslateMessage(MSG* pMsg)
 {
+	if(NULL != m_pToolTip)
+		m_pToolTip->RelayEvent(pMsg);
+
 	if (pMsg->message == WM_KEYDOWN)
 	{
 		// Don't handle Ctrl+Tab in this window. It will be handled by main window.
@@ -527,36 +588,34 @@ void CIrcWnd::AddStatus( CString sLine,...)
 	CString sTemp;
 	sTemp.FormatV(sLine, argptr);
 	va_end(argptr);
-	CString sTimeStamp;
-	if( thePrefs.GetIRCAddTimestamp() )
-	{
-		//Append time stamp..
-		sTimeStamp = CTime::GetCurrentTime().Format(_T("%X: "));
-	}
-	Channel* pUpdateChannel = (Channel*)(m_tabctrlChannelSelect.m_ptrlistChannel).GetHead();
-	if( !pUpdateChannel )
-	{
-		//This should never happen!
-		return;
-	}
-	//We do not support color codes..
-	sLine = StripMessageOfFontCodes( sTemp );
-	sLine += _T("\r\n");
+	sLine = sTemp + _T("\r\n");
 	//Now that incoming arguments are finished, it's now safe to put back the % chars.
 	sLine.Replace( _T("\004"), _T("%") );
+
+	CString sTimeStamp;
+	if( thePrefs.GetIRCAddTimestamp() )
+		sTimeStamp = CTime::GetCurrentTime().Format(_T("%X: "));
+
+	Channel* pUpdateChannel = (Channel*)(m_tabctrlChannelSelect.m_ptrlistChannel).GetHead();
+
+	//This should never happen!
+	if( !pUpdateChannel )
+		return;
+
+	//This allows for us to add blank lines to the status..
 	if (sLine == _T("\r\n") )
-	{
-		//This allows for us to add blank lines to the status..
 		pUpdateChannel->m_editctrlLog.AppendText(sLine);
-	}
 	else if (sLine.Mid(0,1) == _T("*"))
 	{
-		pUpdateChannel->m_editctrlLog.AppendText(sTimeStamp);
+		AddColourLine(CString((TCHAR)0x03)+CString(_T("02"))+sTimeStamp,pUpdateChannel);
 		pUpdateChannel->m_editctrlLog.AppendKeyWord(sLine.Left(2),RGB(255,0,0));
-		pUpdateChannel->m_editctrlLog.AppendText(sLine.Mid(1) );
+		AddColourLine(sLine.Mid(1),pUpdateChannel);
 	}
 	else
-		pUpdateChannel->m_editctrlLog.AppendText(sTimeStamp + sLine);
+	{
+		AddColourLine(CString((TCHAR)0x03)+CString(_T("02"))+sTimeStamp,pUpdateChannel);
+		AddColourLine(sLine,pUpdateChannel);
+	}
 	if( m_tabctrlChannelSelect.m_pCurrentChannel == pUpdateChannel )
 		return;
 	m_tabctrlChannelSelect.SetActivity( pUpdateChannel->m_sName, true );
@@ -571,9 +630,14 @@ void CIrcWnd::AddInfoMessage( CString sChannelName, CString sLine,...)
 	CString sTemp;
 	sTemp.FormatV(sLine, argptr);
 	va_end(argptr);
-	CString sTimeStamp = _T("");
+	sLine = sTemp + _T("\r\n");
+	//Now that incoming arguments are finished, it's now safe to put back the % chars.
+	sLine.Replace( _T("\004"), _T("%") );
+
+	CString sTimeStamp;
 	if( thePrefs.GetIRCAddTimestamp() )
 		sTimeStamp = CTime::GetCurrentTime().Format(_T("%X: "));
+
 	Channel* pUpdateChannel = m_tabctrlChannelSelect.FindChannelByName(sChannelName);
 	if( !pUpdateChannel )
 	{
@@ -582,25 +646,24 @@ void CIrcWnd::AddInfoMessage( CString sChannelName, CString sLine,...)
 		else
 			pUpdateChannel = m_tabctrlChannelSelect.NewChannel( sChannelName, 5);
 	}
-	sLine = StripMessageOfFontCodes( sTemp );
-	sLine += _T("\r\n");
-	sLine.Replace( _T("\004"), _T("%") );
 	if (sLine.Mid(0,1) == _T("*"))
 	{
-		pUpdateChannel->m_editctrlLog.AppendText(sTimeStamp);
+		AddColourLine(CString((TCHAR)0x03)+CString(_T("02"))+sTimeStamp,pUpdateChannel);
 		pUpdateChannel->m_editctrlLog.AppendKeyWord(sLine.Left(2),RGB(255,0,0));
-		pUpdateChannel->m_editctrlLog.AppendText(sLine.Mid(1) );
+		AddColourLine(sLine.Mid(1),pUpdateChannel);
 	}
 	else if (sLine.Mid(0,1) == _T("-") && sLine.Find( _T("-"), 1 ) != -1)
 	{
 		int iIndex = sLine.Find( _T("-"), 1 );
-		pUpdateChannel->m_editctrlLog.AppendText(sTimeStamp);
+		AddColourLine(CString((TCHAR)0x03)+CString(_T("02"))+sTimeStamp,pUpdateChannel);
 		pUpdateChannel->m_editctrlLog.AppendKeyWord(sLine.Left(iIndex),RGB(150,0,0));
-		pUpdateChannel->m_editctrlLog.AppendText(sLine.Mid(iIndex) );
+		AddColourLine(sLine.Mid(iIndex),pUpdateChannel);
 	}
 	else
-		pUpdateChannel->m_editctrlLog.AppendText(sTimeStamp + sLine);
-
+	{
+		AddColourLine(CString((TCHAR)0x03)+CString(_T("02"))+sTimeStamp,pUpdateChannel);
+		AddColourLine(sLine,pUpdateChannel);
+	}
 	if( m_tabctrlChannelSelect.m_pCurrentChannel == pUpdateChannel )
 		return;
 	m_tabctrlChannelSelect.SetActivity( pUpdateChannel->m_sName, true );
@@ -614,11 +677,15 @@ void CIrcWnd::AddMessage( CString sChannelName, CString sTargetName, CString sLi
 	va_start(argptr, sLine);
 	CString sTemp;
 	sTemp.FormatV(sLine, argptr);
-	sLine = sTemp;
 	va_end(argptr);
-	CString sTimeStamp = _T("");
+	sLine = sTemp + _T("\r\n");
+	//Now that incoming arguments are finished, it's now safe to put back the % chars.
+	sLine.Replace( _T("\004"), _T("%") );
+
+	CString sTimeStamp;
 	if( thePrefs.GetIRCAddTimestamp() )
 		sTimeStamp = CTime::GetCurrentTime().Format(_T("%X: "));
+
 	Channel* pUpdateChannel = m_tabctrlChannelSelect.FindChannelByName(sChannelName);
 	if( !pUpdateChannel )
 	{
@@ -627,21 +694,235 @@ void CIrcWnd::AddMessage( CString sChannelName, CString sTargetName, CString sLi
 		else
 			pUpdateChannel = m_tabctrlChannelSelect.NewChannel( sChannelName, 5);
 	}
-	sLine = StripMessageOfFontCodes( sLine );
-	sLine += _T("\r\n");
-	sLine.Replace( _T("\004"), _T("%") );
 	COLORREF color;
 	if (m_pIrcMain->GetNick() == sTargetName)
 		color = RGB(1,100,1);
 	else
 		color = RGB(1,20,130);
 	sTargetName = CString(_T("<"))+ sTargetName + CString(_T(">"));
-	pUpdateChannel->m_editctrlLog.AppendText(sTimeStamp);
+	AddColourLine(CString((TCHAR)0x03)+CString(_T("02"))+sTimeStamp,pUpdateChannel);
 	pUpdateChannel->m_editctrlLog.AppendKeyWord(sTargetName, color);
-	pUpdateChannel->m_editctrlLog.AppendText(CString(_T(" "))+sLine);
+	AddColourLine(CString(_T(" "))+sLine,pUpdateChannel);
 	if( m_tabctrlChannelSelect.m_pCurrentChannel == pUpdateChannel )
 		return;
 	m_tabctrlChannelSelect.SetActivity( pUpdateChannel->m_sName, true );
+}
+
+//To add colour functionality we need to isolate hyperlinks and send them to AppendColoredText! :)
+static const struct
+{
+	LPCTSTR pszScheme;
+	int iLen;
+}
+_apszSchemes[] =
+    {
+        { _T("ed2k://"),  7 },
+        { _T("http://"),  7 },
+        { _T("https://"), 8 },
+        { _T("ftp://"),   6 },
+        { _T("www."),     4 },
+        { _T("ftp."),     4 },
+        { _T("mailto:"),  7 }
+    };
+
+//colours in an array
+static const COLORREF _colours[16] =
+    {
+        RGB(0xff,0xff,0xff),//white
+        RGB(0x0,0x0,0x0),   //black
+        RGB(0x0,0x0,0xb8),  //dark blue
+        RGB(0x0,0x64,0x0),  //dark green
+        RGB(0xff,0x0,0x0),  //red
+        RGB(0xa5,0x2a,0x2a),//brown
+        RGB(0x80,0x0,0x80), //purple
+        RGB(0xff,0xa5,0x00),//orange
+        RGB(0xff,0xff,0x0), //yellow
+        RGB(0x0,0xff,0x0),  //green
+        RGB(0x0,0x80,0x80), //teal
+        RGB(0x0,0xff,0xff), //cyan
+        RGB(0x0,0x0,0xff),  //blue
+        RGB(0xff,0x69,0xb4),//pink
+        RGB(0x80,0x80,0x80),//dark grey
+        RGB(0xd3,0xd3,0xd3) //light grey
+    };
+
+//New Colour functionality + Bold & Italic
+void CIrcWnd::AddColourLine(CString line,Channel* pUpdateChannel)
+{//write a colour line to the screen
+	TCHAR aChar;
+	DWORD dwMask = 0;//text characteristics
+	int index = 0;
+	int linkfoundat = 0;//This variable is to save needless costly string manipulation
+	COLORREF foregroundColour = GetSysColor(COLOR_WINDOWTEXT);//default foreground colour
+	COLORREF cr = foregroundColour;//set start foreground colour
+	COLORREF backgroundColour = GetSysColor(COLOR_WINDOW);//default background colour
+	COLORREF bgcr = backgroundColour;//set start background colour COMMENTED left for possible future use
+	CString text("");
+	while(line.GetLength() > index)
+	{
+		aChar = line[index];//get TCHAR at point index
+		//find any hyperlinks
+		if(index == linkfoundat)//only run the link finding code once it a line with no links
+		{
+			for(int i = 0; i < ARRSIZE(_apszSchemes);)
+			{
+				CString CStr = line.Right(line.GetLength() - index);//make a string of what we have left
+				int foundat = CStr.Find(_apszSchemes[i].pszScheme);//get position of link -1 == not found
+				if(foundat==0)//link starts at this character
+				{//link found
+					if(!text.IsEmpty())
+					{
+						pUpdateChannel->m_editctrlLog.AppendColoredText(text, cr, bgcr, dwMask);//if any preceeding data write it
+						text.Empty();//clear written text
+					}
+					int iLen = CStr.FindOneOf(_T(" \n\r\t"));//return URL length  // search next space or EOL
+					if(iLen==-1)
+					{
+						pUpdateChannel->m_editctrlLog.AddLine(CStr, -1, true);//len = -1 add it all
+						index = line.GetLength();//the whole line has been written
+					}
+					else
+					{
+						CString str= CStr.Left(iLen);//create a string of the URL
+						pUpdateChannel->m_editctrlLog.AddLine(str, -1, true);//add it
+						index+=iLen;//update our point in the line
+						i = 0;//searh from the new position, using the whole array hence 'i' RESET to 0
+						foundat = -1;//do not record this processed location as a future target location
+						linkfoundat = index;//reset previous finds as i=0 we re-search
+						aChar = line[index];//get a new char
+					}
+				}//end if scope
+				else
+				{//no link at this exact location
+					i++;//only increment if not found at this position so if we find http at this position we check for further http occurances
+					//foundat A Valid Position && (no valid position recorded || a farther position previously recorded)
+					if(foundat!=-1 && (linkfoundat==index || (index + foundat)<linkfoundat))
+						linkfoundat = index + foundat;//set the next closest link to process
+				}
+			}//end for scope
+		}//end if scope
+		switch ((int)aChar)
+		{
+			case 0x02://Bold toggle
+				{
+					if(!text.IsEmpty())
+					{
+						pUpdateChannel->m_editctrlLog.AppendColoredText(text, cr, bgcr, dwMask);//if any preceeding data write it
+						text.Empty();//clear written text
+					}
+					index++;  //get next char
+					if(dwMask & CFM_BOLD)
+						dwMask ^= CFM_BOLD;//remove bold
+					else
+						dwMask |= CFM_BOLD;//add bold
+					break;
+				}
+			case 0x03://foreground & background colour
+				{
+					if(!text.IsEmpty())
+					{
+						pUpdateChannel->m_editctrlLog.AppendColoredText(text, cr, bgcr, dwMask);//if any preceeding data write it
+						text.Empty();//clear written text
+					}
+					index++;//get next char
+					int iColour = (int)(line[index] - 0x30);//convert to a number
+					if(iColour>=0 && iColour<10)//IS VALID. we include white the reset to default colour later to reset any colour in effect
+					{
+						if(iColour == 0x01 && line[index + 1]>=_T('0') && line[index + 1]<=_T('5'))//is there a second digit
+						{
+							index++;//get next char
+							iColour = 0x0a + (int)(line[index] - 0x30);//make a two digit number
+						} else if(iColour == 0x0 && line[index + 1]>=_T('0') && line[index + 1]<=_T('9'))//if first digit is zero and there is a second digit eg: 3 in 03
+						{
+							index++;//get next char
+							iColour = (int)(line[index] - 0x30);//make a two digit number
+						}
+
+						if(iColour>=0 && iColour<16)
+						{//If the first colour is not valid don't look for a second background colour!
+							cr = _colours[iColour];//if the number is a valid colour index set new foreground colour
+							index++;              //get next char
+							if(line[index]==_T(',') && line[index + 1]>=_T('0') && line[index + 1]<=_T('9'))//is there a background colour
+							{
+								index++;//get next char
+								int iColour = (int)(line[index] - 0x30);//convert to a number
+								if(iColour == 0x01 && line[index + 1]>=_T('0') && line[index + 1]<=_T('5'))//is there a second digit
+								{
+									index++;//get next char
+									iColour = 0x0a + (int)(line[index] - 0x30);//make a two digit number
+								} else if(iColour == 0x0 && line[index + 1]>=_T('0') && line[index + 1]<=_T('9'))//if first digit is zero and there is a second digit eg: 3 in 03
+								{
+									index++;//get next char
+									iColour = (int)(line[index] - 0x30);//make a two digit number
+								}
+								index++;//get next char
+								if(iColour>=0 && iColour<16)
+									bgcr = _colours[iColour];//if the number is a valid colour index set new foreground colour
+							}
+						}
+					}//end of valid first colour scope
+					break;
+				}
+			case 0x0F://attributes reset
+				{
+					if(!text.IsEmpty())
+					{
+						pUpdateChannel->m_editctrlLog.AppendColoredText(text, cr, bgcr, dwMask);//if any preceeding data write it
+						text.Empty();//clear written text
+					}
+					index++;   //get next char
+					dwMask = 0;//reset attributes mask
+					cr   = foregroundColour;//reset foreground colour
+					bgcr = backgroundColour;//reset background colour
+					break;
+				}
+			case 0x16://Reverse (as per Mirc) toggle
+				{         //NOTE:This does not reset the bold/underline,(dwMask = 0), attributes but does reset colours 'As per mIRC 6.16!!'
+					if(!text.IsEmpty())
+					{
+						pUpdateChannel->m_editctrlLog.AppendColoredText(text, cr, bgcr, dwMask);//if any preceeding data write it
+						text.Empty();//clear written text
+					}
+					index++;  //get next char
+					if(cr != backgroundColour || bgcr != foregroundColour)
+					{//set inverse
+						cr   = backgroundColour;//foreground = background colour
+						bgcr = foregroundColour;//background = foreground colour
+					}
+					else
+					{
+						cr   = foregroundColour;//reset foreground colour
+						bgcr = backgroundColour;//reset background colour
+					}
+					//this tag used to represent italic?
+					// if(dwMask & CFM_ITALIC) dwMask ^= CFM_ITALIC;//remove italic
+					// else                    dwMask |= CFM_ITALIC;//add italic
+					break;
+				}
+			case 0x1f://Underlined toggle
+				{
+					if(!text.IsEmpty())
+					{
+						pUpdateChannel->m_editctrlLog.AppendColoredText(text, cr, bgcr, dwMask);//if any preceeding data write it
+						text.Empty();//clear written text
+					}
+					index++;  //get next char
+					if(dwMask & CFM_UNDERLINE)
+						dwMask ^= CFM_UNDERLINE;//remove underlined
+					else
+						dwMask |= CFM_UNDERLINE;//add underlined
+					break;
+				}
+			default:
+				{
+					text += aChar;//add TCHAR to TCHAR array
+					index++;      //get next char
+				}
+		}
+
+	}
+	if(text.GetLength()!=0)
+		pUpdateChannel->m_editctrlLog.AppendColoredText(text, cr, bgcr, dwMask);//write the remainder if any
 }
 
 void CIrcWnd::SetConnectStatus( bool bFlag )
@@ -698,11 +979,11 @@ void CIrcWnd::NoticeMessage( CString sSource, CString sTarget, CString sMessage 
 CString CIrcWnd::StripMessageOfFontCodes( CString sTemp )
 {
 	sTemp = StripMessageOfColorCodes( sTemp );
-	sTemp.Replace(_T("\002"),_T(""));
-	sTemp.Replace(_T("\003"),_T(""));
-	sTemp.Replace(_T("\017"),_T(""));
-	sTemp.Replace(_T("\026"),_T(""));
-	sTemp.Replace(_T("\037"),_T(""));
+	sTemp.Replace(_T("\002"),_T(""));//0x02 - BOLD
+	sTemp.Replace(_T("\003"),_T(""));//0x03 - COLOUR
+	sTemp.Replace(_T("\017"),_T(""));//0x0f - RESET
+	sTemp.Replace(_T("\026"),_T(""));//0x16 - REVERSE/INVERSE was once italic?
+	sTemp.Replace(_T("\037"),_T(""));//0x1f - UNDERLINE
 	return sTemp;
 }
 
@@ -763,7 +1044,10 @@ void CIrcWnd::SetTitle( CString sChannel, CString sTitle )
 		return;
 	pCurrChannel->m_sTitle = StripMessageOfFontCodes(sTitle);
 	if( pCurrChannel == m_tabctrlChannelSelect.m_pCurrentChannel )
+	{
+		pCurrChannel->m_sTitle.Replace(_T("\004"), _T("%"));
 		m_editTitleWindow.SetWindowText( pCurrChannel->m_sTitle );
+	}
 }
 
 void CIrcWnd::OnBnClickedChatsend()
@@ -813,7 +1097,7 @@ void CIrcWnd::ParseChangeMode( CString sChannel, CString sChanger, CString sComm
 				{
 					CString sCommand = sCommands.Left(1);
 					sCommands = sCommands.Right(sCommands.GetLength()-1);
-					
+
 					if(m_listctrlNickList.m_sUserModeSettings.Find(sCommand) != -1 )
 					{
 						//This is a user mode change and must have a param!
@@ -913,4 +1197,198 @@ CString CIrcWnd::GetSendFileString()
 bool CIrcWnd::IsConnected()
 {
 	return m_bConnected;
+}
+
+void CIrcWnd::OnBnClickedColour()
+{
+	CRect rDraw;
+	int iColor = 0;
+	GetDlgItem(IDC_COLOUR)->GetWindowRect(rDraw);
+	new CColourPopup(CPoint(rDraw.left+1, rDraw.bottom-89),	// Point to display popup
+	                 iColor,	 				            // Selected colour
+	                 this,									// parent
+	                 GetResString(IDS_DEFAULT),				// "Default" text area
+	                 NULL,                                  // Custom Text
+	                 (COLORREF *)&_colours,                 // Pointer to a COLORREF array
+	                 16);                                   // Size of the array
+
+	CWnd *pParent = GetParent();
+	if(pParent)
+		pParent->SendMessage(UM_CPN_DROPDOWN, (LPARAM)iColor, (WPARAM) GetDlgCtrlID());
+
+	return;
+}
+
+LONG CIrcWnd::OnSelEndOK(UINT lParam, LONG /*wParam*/)
+{
+	if(lParam != CLR_DEFAULT)
+	{
+		int iColour = 0;
+
+		while(iColour<16 && (COLORREF)lParam!=_colours[iColour])
+			iColour++;
+
+		if(iColour>=0 && iColour<16)//iColour in valid range
+		{
+			CString sAddAttribute;
+			int	iSelStart;
+			int	iSelEnd;
+			TCHAR iSelEnd3Char;
+			TCHAR iSelEnd6Char;
+
+			m_editInputWindow.GetSel(iSelStart, iSelEnd);//get selection area
+			m_editInputWindow.GetWindowText(sAddAttribute);//get the whole line
+			if(iSelEnd > iSelStart)
+			{
+				sAddAttribute.Insert(iSelEnd, _T('1'));//if a selection add default black colour tag
+				sAddAttribute.Insert(iSelEnd, _T('0'));//add first half of colour tag
+				sAddAttribute.Insert(iSelEnd, _T('\x03'));//if a selection add 'end' tag
+			}
+			iColour += 0x30;
+			//a number greater than 9
+			if(iColour>0x39)
+			{
+				sAddAttribute.Insert(iSelStart, (TCHAR)(iColour-10));//add second half of colour tag 1 for range 10 to 15
+				sAddAttribute.Insert(iSelStart,  _T('1'));          //add first half of colour tag
+			}
+			else
+			{
+				sAddAttribute.Insert(iSelStart, (TCHAR)(iColour));//add second half of colour tag 1 for range 0 to 9
+				sAddAttribute.Insert(iSelStart,  _T('0'));       //add first half of colour tag
+			}
+			//if this is the start of the line not a selection in the line and a colour has already just been set allow background to be set
+			if(iSelEnd>2)
+				iSelEnd3Char = sAddAttribute[iSelEnd-3];
+			else
+				iSelEnd3Char = _T(' ');
+			if(iSelEnd>5)
+				iSelEnd6Char = sAddAttribute[iSelEnd-6];
+			else
+				iSelEnd6Char = _T(' ');
+			if(iSelEnd == iSelStart &&  iSelEnd3Char == _T('\x03') && iSelEnd6Char!= _T('\x03'))
+				sAddAttribute.Insert(iSelStart, _T(','));//separator for background colour
+			else
+				sAddAttribute.Insert(iSelStart, _T('\x03'));//add start tag
+			iSelStart+=3;//add 3 to start position
+			iSelEnd+=3;//add 3 to end position
+			m_editInputWindow.SetWindowText(sAddAttribute);//write new line to edit control
+			m_editInputWindow.SetSel(iSelStart, iSelEnd);//update selection info
+			m_editInputWindow.SetFocus();//set focus (from button) to edit control
+		}
+	}
+	else
+	{//Default button clicked set black
+		CString sAddAttribute;
+		int iSelStart;
+		int iSelEnd;
+		TCHAR iSelEnd3Char;
+		TCHAR iSelEnd6Char;
+
+		m_editInputWindow.GetSel(iSelStart, iSelEnd);//get selection area
+		m_editInputWindow.GetWindowText(sAddAttribute);//get the whole line
+		//if this is the start of the line not a selection in the line and a colour has already just been set allow background to be set
+		if(iSelEnd>2)
+			iSelEnd3Char = sAddAttribute[iSelEnd-3];
+		else
+			iSelEnd3Char = _T(' ');
+		if(iSelEnd>5)
+			iSelEnd6Char = sAddAttribute[iSelEnd-6];
+		else
+			iSelEnd6Char = _T(' ');
+		if(iSelEnd == iSelStart &&  iSelEnd3Char == _T('\x03') && iSelEnd6Char!= _T('\x03'))
+		{//Set DEFAULT white background
+			sAddAttribute.Insert(iSelStart, _T('0'));//add second half of colour tag 0 for range 0 to 9
+			sAddAttribute.Insert(iSelStart, _T('0'));//add first half of colour tag
+			sAddAttribute.Insert(iSelStart, _T(','));//separator for background colour
+		}
+		else
+		{//Set DEFAULT black foreground
+			sAddAttribute.Insert(iSelStart, _T('1'));//add second half of colour tag 1 for range 0 to 9
+			sAddAttribute.Insert(iSelStart, _T('0'));//add first half of colour tag
+			sAddAttribute.Insert(iSelStart, _T('\x03'));//add start tag
+		}
+		iSelStart+=3;//add 2 to start position
+		iSelEnd+=3;
+		m_editInputWindow.SetWindowText(sAddAttribute);//write new line to edit control
+		m_editInputWindow.SetSel(iSelStart, iSelEnd);//update selection info
+		m_editInputWindow.SetFocus();//set focus (from button) to edit control
+	}
+
+	CWnd *pParent = GetParent();
+	if(pParent)
+	{
+		pParent->SendMessage(UM_CPN_CLOSEUP, lParam, (WPARAM) GetDlgCtrlID());
+		pParent->SendMessage(UM_CPN_SELENDOK, lParam, (WPARAM) GetDlgCtrlID());
+	}
+
+	return TRUE;
+}
+
+LONG CIrcWnd::OnSelEndCancel(UINT lParam, LONG /*wParam*/)
+{
+	CWnd *pParent = GetParent();
+	if(pParent)
+	{
+		pParent->SendMessage(UM_CPN_CLOSEUP, lParam, (WPARAM) GetDlgCtrlID());
+		pParent->SendMessage(UM_CPN_SELENDCANCEL, lParam, (WPARAM) GetDlgCtrlID());
+	}
+	return TRUE;
+}
+
+void CIrcWnd::OnBnClickedUnderline()
+{
+	CString sAddAttribute;
+	int	iSelStart;
+	int	iSelEnd;
+
+	m_editInputWindow.GetSel(iSelStart, iSelEnd);//get selection area
+	m_editInputWindow.GetWindowText(sAddAttribute);//get the whole line
+	if(iSelEnd > iSelStart)
+		sAddAttribute.Insert(iSelEnd, _T('\x1f'));//if a selection add end tag
+	sAddAttribute.Insert(iSelStart, _T('\x1f'));//add start tag
+	iSelStart++;//increment start position
+	iSelEnd++;//increment end position
+	m_editInputWindow.SetWindowText(sAddAttribute);//write new line to edit control
+	m_editInputWindow.SetSel(iSelStart, iSelEnd);//update selection info
+	m_editInputWindow.SetFocus();//set focus (from button) to edit control
+}
+
+void CIrcWnd::OnBnClickedBold()
+{
+	CString sAddAttribute;
+	int	iSelStart;
+	int	iSelEnd;
+
+	m_editInputWindow.GetSel(iSelStart, iSelEnd);//get selection area
+	m_editInputWindow.GetWindowText(sAddAttribute);//get the whole line
+	if(iSelEnd > iSelStart)
+		sAddAttribute.Insert(iSelEnd, _T('\x02'));//if a selection add end tag
+	sAddAttribute.Insert(iSelStart, _T('\x02'));//add start tag
+	iSelStart++;//increment start position
+	iSelEnd++;//increment end position
+	m_editInputWindow.SetWindowText(sAddAttribute);//write new line to edit control
+	m_editInputWindow.SetSel(iSelStart, iSelEnd);//update selection info
+	m_editInputWindow.SetFocus();//set focus (from button) to edit control
+}
+
+void CIrcWnd::OnBnClickedReset()
+{
+	CString sAddAttribute;
+	int iSelStart;
+	int	iSelEnd;
+
+	m_editInputWindow.GetSel(iSelStart, iSelEnd);//get selection area
+	if(!iSelStart)
+		return;//reset is not a first character
+	m_editInputWindow.GetWindowText(sAddAttribute);//get the whole line
+	//Note the 'else' below! this tag resets all atttribute so only one tag needed at current position or end of selection
+	if(iSelEnd > iSelStart)
+		sAddAttribute.Insert(iSelEnd, _T('\x0f'));//if a selection add end tag
+	else
+		sAddAttribute.Insert(iSelStart, _T('\x0f'));//add start tag
+	iSelStart++;//increment start position
+	iSelEnd++;//increment end position
+	m_editInputWindow.SetWindowText(sAddAttribute);//write new line to edit control
+	m_editInputWindow.SetSel(iSelStart, iSelEnd);//update selection info
+	m_editInputWindow.SetFocus();//set focus (from button) to edit control
 }

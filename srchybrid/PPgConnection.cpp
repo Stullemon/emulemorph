@@ -367,7 +367,7 @@ BOOL CPPgConnection::OnApply()
 	if(GetDlgItem(IDC_PORT)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_PORT)->GetWindowText(buffer,20);
-		uint16 nNewPort = ((uint16)_tstoi(buffer)) ? (uint16)_tstoi(buffer) : (uint16)DEFAULT_TCP_PORT;
+		uint16 nNewPort = ((uint16)_tstoi(buffer)) ? (uint16)_tstoi(buffer) : (uint16)thePrefs.port;
 		if (nNewPort != thePrefs.port){
 			thePrefs.port = nNewPort;
 			if (theApp.IsPortchangeAllowed())

@@ -77,7 +77,7 @@ public:
 
 	// Logging
 	void AddLogText(UINT uFlags, LPCTSTR pszText);
-	void AddServerMessageLine(LPCTSTR pszText);
+	void AddServerMessageLine(UINT uFlags, LPCTSTR pszText);
 	void ResetLog();
 	void ResetDebugLog();
 	void ResetServerInfo();
@@ -220,6 +220,7 @@ protected:
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnEndSession(BOOL bEnding);
+	afx_msg LRESULT OnUserChanged(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnKickIdle(UINT nWhy, long lIdleCount);
 	afx_msg void OnShowWindow( BOOL bShow, UINT nStatus );
 	afx_msg BOOL OnChevronPushed(UINT id, NMHDR *pnm, LRESULT *pResult);
@@ -278,6 +279,8 @@ protected:
 	// Mini Mule
 	afx_msg LRESULT OnCloseMiniMule(WPARAM wParam, LPARAM lParam);
 
+	// Terminal Services
+	afx_msg LRESULT OnConsoleThreadEvent(WPARAM wParam, LPARAM lParam);
 //Commander - Added: Invisible Mode [TPT] - Start	
 public:
 	BOOL	RegisterInvisibleHotKey();
@@ -323,7 +326,8 @@ enum EEMuleAppMsgs
 	TM_FRAMEGRABFINISHED,
 	TM_FILEALLOCEXC,
 	TM_FILECOMPLETED,
-	TM_FILEOPPROGRESS
+	TM_FILEOPPROGRESS,
+	TM_CONSOLETHREADEVENT
 };
 
 enum EWebinterfaceOrders

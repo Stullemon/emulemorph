@@ -144,7 +144,6 @@ void CIrcNickListCtrl::OnContextMenu(CWnd*, CPoint point)
 		return;
 	}
 
-	//TODO - Create resource strings for these!
 	CTitleMenu menuNick;
 	menuNick.CreatePopupMenu();
 	menuNick.AddMenuTitle(GetResString(IDS_IRC_NICK) + _T(" : ") + pNick->m_sNick);

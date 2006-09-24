@@ -157,6 +157,7 @@ public:
 	static	bool	m_bConditionalTCPAccept;
 	static	bool	reconnect;
 	static	bool	m_bUseServerPriorities;
+	static	bool	m_bUseUserSortedServerList;
 	static	TCHAR	incomingdir[MAX_PATH];
 	static	CStringArray	tempdir;
 	static	bool	ICH;
@@ -480,8 +481,9 @@ public:
 	static	UINT	versioncheckdays;
 	static	bool	showRatesInTitle;
 
-	static	TCHAR	TxtEditor[256];
-	static	TCHAR	VideoPlayer[256];
+	static	TCHAR	TxtEditor[MAX_PATH];
+	static	CString	m_strVideoPlayer;
+	static	CString	m_strVideoPlayerArgs;
 	static	bool	moviePreviewBackup;
 	static	int		m_iPreviewSmallBlocks;
 	static	bool	m_bPreviewCopiedArchives;
@@ -592,6 +594,7 @@ public:
 
 	//preview
 	static	bool	m_bPreviewEnabled;
+	static	bool	m_bAutomaticArcPreviewStart;
 
 	static bool	enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	static bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
@@ -861,6 +864,11 @@ public:
 	static CString	m_strNotifierMailSender;
 	static CString	m_strNotifierMailReceiver;
 
+	// encryption / obfuscation
+	static bool		m_bCryptLayerRequested;
+	static bool		m_bCryptLayerSupported;
+	static bool		m_bCryptLayerRequired;
+
 	// MORPH START - Added by Commander, WebCache 1.2f
 	static	bool	m_bHighIdPossible; // JP detect fake HighID (from netfinity)
 	static	bool	WebCacheDisabledThisSession; //JP temp disabler
@@ -972,6 +980,7 @@ public:
 	static	void	SaveCats();
 
 	static	bool	GetUseServerPriorities()		{return m_bUseServerPriorities;}
+	static	bool	GetUseUserSortedServerList()		{return m_bUseUserSortedServerList;}
 	static	bool	Reconnect()						{return reconnect;}
 	static	const CString& GetUserNick()			{return strNick;}
 	static	void	SetUserNick(LPCTSTR pszNick);
@@ -1422,7 +1431,8 @@ public:
 	static	void	SetCreditSystem(bool m_bInCreditSystem)	{m_bCreditSystem = m_bInCreditSystem;}
 
 	static	TCHAR*	GetTxtEditor()						{return TxtEditor;}
-	static	CString	GetVideoPlayer()					{if (_tcslen(VideoPlayer)==0) return _T(""); else return CString(VideoPlayer);}
+	static	const CString& GetVideoPlayer()				{return m_strVideoPlayer;}
+	static	const CString& GetVideoPlayerArgs()			{return m_strVideoPlayerArgs;}
 
 	static	UINT	GetFileBufferSize()					{return m_iFileBufferSize;}
 	static	UINT	GetQueueSize()						{return m_iQueueSize;}
@@ -1518,7 +1528,7 @@ public:
 	static	bool	ShowRatingIndicator()	{ return indicateratings;}
 	static	bool	WatchClipboard4ED2KLinks()	{ return watchclipboard;}
 	static	bool	GetRemoveToBin()			{ return m_bRemove2bin;}
-	static	bool	FilterServerByIP()		{ return filterserverbyip;}
+	static	bool	GetFilterServerByIP()				{return filterserverbyip;}
 
 	static	bool	GetLog2Disk()							{ return log2disk;}
 	static	bool	GetDebug2Disk()							{ return m_bVerbose && debug2disk;}
@@ -1663,7 +1673,7 @@ public:
 	static	bool	IsPreferingRestrictedOverUser()				{return m_bPreferRestrictedOverUser;}
 
 	// PeerCache
-	static	bool	IsPeerCacheDownloadEnabled()				{ return m_bPeerCacheEnabled; }
+	static	bool	IsPeerCacheDownloadEnabled()		{return (m_bPeerCacheEnabled && !IsClientCryptLayerRequested());}
 	static	uint32	GetPeerCacheLastSearch()					{ return m_uPeerCacheLastSearch; }
 	static	bool	WasPeerCacheFound()							{ return m_bPeerCacheWasFound; }
 	static	void	SetPeerCacheLastSearch(uint32 dwLastSearch) { m_uPeerCacheLastSearch = dwLastSearch; }
@@ -1721,6 +1731,17 @@ public:
 	static	void	EstimateMaxUploadCap(uint32 nCurrentUpload);
 	static  bool	GetAllocCompleteMode()				{return m_bAllocFull;}
 	static  void	SetAllocCompleteMode(bool in)		{m_bAllocFull=in;}
+
+	// encryption
+	static bool		IsClientCryptLayerSupported()		{return m_bCryptLayerSupported;}
+	static bool		IsClientCryptLayerRequested()		{return IsClientCryptLayerSupported() && m_bCryptLayerRequested;}
+	static bool		IsClientCryptLayerRequired()		{return IsClientCryptLayerRequested() && m_bCryptLayerRequired;}
+	static bool		IsClientCryptLayerRequiredStrict()	{return false;} // not even incoming test connections will be answered
+	static bool		IsServerCryptLayerUDPEnabled()		{return IsClientCryptLayerSupported();}
+	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerRequested();}
+
+	static uint16	GetRandomTCPPort();
+	static uint16	GetRandomUDPPort();
 
 	static	bool	IsUSSLog() {return m_bDynUpLog;} //MORPH - Added by SiRoB, ZZ Upload system (USS)
 	static	bool	IsUSSUDP() {return m_bUSSUDP;} //MORPH - Added by SiRoB, USS UDP preferency

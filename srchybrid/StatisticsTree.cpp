@@ -347,9 +347,9 @@ CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theIte
 	if (firstItem)
 		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
 		/*
-		strBuffer.Format(_T("<font face=\"Tahoma,Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		strBuffer.Format(_T("<font face=\"Tahoma,Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br /><br />\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		*/
-		strBuffer.Format(_T("<font face=\"Tahoma,Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s [%s] %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		strBuffer.Format(_T("<font face=\"Tahoma,Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s [%s] %s [%s]</b>\r\n<br /><br />\r\n"), theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 
 	while (hCurrent != NULL)
@@ -363,7 +363,7 @@ CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theIte
 			strBuffer += _T("&nbsp;&nbsp;&nbsp;");
 		if (theItemLevel == 0)
 			strBuffer.Append(_T("\n"));
-		strBuffer += strItem + _T("<br>");
+		strBuffer += strItem + _T("<br />");
 		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
 			strBuffer += GetHTML(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
@@ -564,7 +564,7 @@ CString CStatisticsTree::GetHTMLForExport(HTREEITEM theItem, int theItemLevel, b
 			strItem += GetItemText(hCurrent);
 
 		if (theItemLevel==0) strBuffer .Append(_T("\n"));
-		strBuffer += strItem + _T("<br>");
+		strBuffer += strItem + _T("<br />");
 
 		if (ItemHasChildren(hCurrent))
 		{
@@ -628,7 +628,7 @@ void CStatisticsTree::ExportHTML()
 			"</script>\r\n"
 			"<body id=\"bdy\">\r\n"
 
-			"<span id=\"pghdr\"><b>eMule %s</b></span><br><span id=\"pghdr2\">%s %s</span>\r\n<br><br>\r\n"
+			"<span id=\"pghdr\"><b>eMule %s</b></span><br /><span id=\"pghdr2\">%s %s</span>\r\n<br /><br />\r\n"
 			"%s</body></html>") ,
 			GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick(),
 			GetResString(IDS_SF_STATISTICS), GetResString(IDS_CD_UNAME), thePrefs.GetUserNick(),

@@ -139,7 +139,8 @@ int CScheduler::Check(bool forcecheck){
 		|| !theApp.emuledlg->IsRunning()) return -1;
 
 	Schedule_Struct* schedule;
-	CTime tNow=CTime(safe_mktime(CTime::GetCurrentTime().GetLocalTm()));
+	struct tm tmTemp;
+	CTime tNow = CTime(safe_mktime(CTime::GetCurrentTime().GetLocalTm(&tmTemp)));
 	
 	if (!forcecheck && tNow.GetMinute()==m_iLastCheckedMinute) return -1;
 

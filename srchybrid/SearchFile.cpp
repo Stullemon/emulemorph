@@ -225,19 +225,29 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8,
 	const CString& rstrFileType = GetStrTagValue(FT_FILETYPE);
 	SetFileName(GetStrTagValue(FT_FILENAME), false, rstrFileType.IsEmpty());
 
-	uint64 ui64FileSize = GetInt64TagValue(FT_FILESIZE);
-	uint64 uFileSize_Hi = GetIntTagValue(FT_FILESIZE_HI);
-	if (uFileSize_Hi > 0){
-		if (ui64FileSize <= OLD_MAX_EMULE_FILE_SIZE){
-			ui64FileSize += (uFileSize_Hi << 32);
-			SetInt64TagValue(FT_FILESIZE, ui64FileSize);
+	uint64 ui64FileSize = 0;
+	CTag* pTagFileSize = GetTag(FT_FILESIZE);
+	if (pTagFileSize)
+	{
+		if (pTagFileSize->IsInt())
+		{
+			ui64FileSize = pTagFileSize->GetInt();
+			CTag* pTagFileSizeHi = GetTag(FT_FILESIZE_HI);
+			if (pTagFileSizeHi) {
+				if (pTagFileSizeHi->IsInt())
+					ui64FileSize |= (uint64)pTagFileSizeHi->GetInt() << 32;
+				DeleteTag(pTagFileSizeHi);
+			}
+			pTagFileSize->SetInt64(ui64FileSize);
 		}
-		else
-			ASSERT( false );
-
-		SetIntTagValue(FT_FILESIZE_HI, 0);
+		else if (pTagFileSize->IsInt64(false))
+		{
+			ui64FileSize = pTagFileSize->GetInt64();
+			DeleteTag(FT_FILESIZE_HI);
+		}
 	}
 	SetFileSize(ui64FileSize);
+
 	if (!rstrFileType.IsEmpty())
 	{
 		if (_tcscmp(rstrFileType, _T(ED2KFTSTR_PROGRAM))==0)
@@ -279,7 +289,7 @@ CSearchFile::~CSearchFile()
 		delete m_listImages[i];
 }
 
-void CSearchFile::UpdateFileRatingCommentAvail()
+void CSearchFile::UpdateFileRatingCommentAvail(bool bForceUpdate)
 {
 	bool bOldHasComment = m_bHasComment;
 	UINT uOldUserRatings = m_uUserRating;
@@ -301,12 +311,12 @@ void CSearchFile::UpdateFileRatingCommentAvail()
 		}
 	}
 
+	// searchfile specific
+	// the file might have had a serverrating, don't change the rating if no kad ratings were found
 	if(uRatings)
-		m_uUserRating = uUserRatings / uRatings;
-	else
-		m_uUserRating = 0;
+		m_uUserRating = (uint32)ROUND((float)uUserRatings / uRatings);
 
-	if (bOldHasComment != m_bHasComment || uOldUserRatings != m_uUserRating)
+	if (bOldHasComment != m_bHasComment || uOldUserRatings != m_uUserRating || bForceUpdate)
 		theApp.emuledlg->searchwnd->UpdateSearch(this);
 }
 

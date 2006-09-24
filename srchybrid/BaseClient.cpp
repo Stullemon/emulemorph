@@ -190,7 +190,7 @@ void CUpDownClient::Init()
 	m_cMessagesSent = 0;
 	m_nCurSessionUp = 0;
 	m_nCurSessionDown = 0;
-	/*zz*/m_nCurSessionPayloadDown = 0;
+	m_nCurSessionPayloadDown = 0;
 	/*zz*/m_nCurQueueSessionUp = 0;
 	/*FIX*/m_nCurSessionPayloadUp = 0;
 	m_nSumForAvgDownDataRate = 0;
@@ -216,9 +216,12 @@ void CUpDownClient::Init()
 	m_fSharedDirectories = 0;
 	m_fSentCancelTransfer = 0;
 	m_nClientVersion = 0;
+	//MORPH START - UpdateItemThread
+	/*
 	m_lastRefreshedDLDisplay = 0;
+	*/
 	m_dwDownStartTime = 0;
-	m_nLastBlockOffset = (uint64)-1; //MORPH - Changed by SiRoB, Fix False Downlaoded Chunk Display 
+	m_nLastBlockOffset = (uint64)-1;
 	m_bUnicodeSupport = false;
 	m_SecureIdentState = IS_UNAVAILABLE;
 	m_dwLastSignatureIP = 0;
@@ -276,6 +279,10 @@ void CUpDownClient::Init()
 	m_bCollectionUploadSlot = false;
 	m_fSupportsLargeFiles = 0;
 	m_fExtMultiPacket = 0;
+	m_fRequestsCryptLayer = 0;
+	m_fSupportsCryptLayer = 0;
+	m_fRequiresCryptLayer = 0;
+
 	m_fFailedDownload = 0; //MORPH - Added by SiRoB, Fix Connection Collision
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
 	m_bScheduledForRemoval = false;
@@ -561,6 +568,9 @@ void CUpDownClient::ClearHelloProperties()
 	m_byKadVersion = 0;
 	m_fSupportsLargeFiles = 0;
 	m_fExtMultiPacket = 0;
+	m_fRequestsCryptLayer = 0;
+	m_fSupportsCryptLayer = 0;
+	m_fRequiresCryptLayer = 0;
 }
 
 bool CUpDownClient::ProcessHelloPacket(const uchar* pachPacket, uint32 nSize)
@@ -859,17 +869,28 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 
 			case CT_EMULE_MISCOPTIONS2:
-				//	26 Reserved
+				//	22 Reserved
+				//	 1 Requires CryptLayer
+				//	 1 Requests CryptLayer
+				//	 1 Supports CryptLayer
+				//	 1 Reserved (ModBit)
 				//   1 Ext Multipacket (Hash+Size instead of Hash)
 				//   1 Large Files (includes support for 64bit tags)
 				//   4 Kad Version
 				if (temptag.IsInt()) {
+					m_fRequiresCryptLayer	= (temptag.GetInt() >>  9) & 0x01;
+					m_fRequestsCryptLayer	= (temptag.GetInt() >>  8) & 0x01;
+					m_fSupportsCryptLayer	= (temptag.GetInt() >>  7) & 0x01;
+					// reserved 1
 					m_fExtMultiPacket		= (temptag.GetInt() >>  5) & 0x01;
 					m_fSupportsLargeFiles   = (temptag.GetInt() >>  4) & 0x01;
 					m_byKadVersion			= (uint8)((temptag.GetInt() >>  0) & 0x0f);
 					dwEmuleTags |= 8;
 					if (bDbgInfo)
-						m_strHelloInfo.AppendFormat(_T("\n  KadVersion=%u, m_fSupportsLargeFiles=%u m_fExtMultiPacket=%u"), m_byKadVersion, m_fSupportsLargeFiles, m_fExtMultiPacket);
+						m_strHelloInfo.AppendFormat(_T("\n  KadVersion=%u, LargeFiles=%u ExtMultiPacket=%u CryptLayerSupport=%u CryptLayerRequest=%u CryptLayerRequires=%u"), m_byKadVersion, m_fSupportsLargeFiles, m_fExtMultiPacket, m_fSupportsCryptLayer, m_fRequestsCryptLayer, m_fRequiresCryptLayer);
+					m_fRequestsCryptLayer &= m_fSupportsCryptLayer;
+					m_fRequiresCryptLayer &= m_fRequestsCryptLayer;
+
 				}
 				else if (bDbgInfo)
 					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
@@ -994,6 +1015,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	if (thePrefs.GetAddServersFromClients() && m_dwServerIP && m_nServerPort){
 		CServer* addsrv = new CServer(m_nServerPort, ipstr(m_dwServerIP));
 		addsrv->SetListName(addsrv->GetAddress());
+		addsrv->SetPreference(SRV_PR_LOW);
 		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(addsrv, true))
 			delete addsrv;
 	}
@@ -1499,7 +1521,11 @@ void CUpDownClient::SendHelloAnswer(){
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__HelloAnswer", this);
 	theStats.AddUpDataOverheadOther(packet->size);
-	socket->SendPacket(packet,true);
+
+	// Servers send a FIN right in the data packet on check connection, so we need to force the response immediate
+	bool bForceSend = theApp.serverconnect->AwaitingTestFromIP(GetConnectIP());
+	socket->SendPacket(packet, true, true, 0, bForceSend);
+
 	m_byHelloPacketState |= HP_HELLOANSWER; //MORPH - Added by SiRoB, Fix Connection Collision
 }
 
@@ -1563,7 +1589,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	const UINT uUdpVer				= 4;
 	const UINT uDataCompVer			= 1;
 	const UINT uSupportSecIdent		= theApp.clientcredits->CryptoAvailable() ? 3 : 0;
-	const UINT uSourceExchangeVer	= 3;
+	const UINT uSourceExchangeVer	= 4;
 	const UINT uExtendedRequestsVer	= 2;
 	const UINT uAcceptCommentVer	= 1;
 	const UINT uNoViewSharedFiles	= (thePrefs.CanSeeShares() == vsfaNobody) ? 1 : 0; // for backward compatibility this has to be a 'negative' flag
@@ -1590,11 +1616,19 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	// eMule Misc. Options #2
 	const UINT uKadVersion			= KADEMLIA_VERSION;
-	const UINT uSupportLargeFiles	= (OLD_MAX_EMULE_FILE_SIZE < MAX_EMULE_FILE_SIZE) ? 1 : 0;
+	const UINT uSupportLargeFiles	= 1;
 	const UINT uExtMultiPacket		= 1;
+	const UINT uReserved			= 0; // mod bit
+	const UINT uSupportsCryptLayer	= thePrefs.IsClientCryptLayerSupported() ? 1 : 0;
+	const UINT uRequestsCryptLayer	= thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
+	const UINT uRequiresCryptLayer	= thePrefs.IsClientCryptLayerRequired() ? 1 : 0;
 
 	CTag tagMisOptions2(CT_EMULE_MISCOPTIONS2, 
 //				(RESERVED				     ) 
+				(uRequiresCryptLayer	<<  9) |
+				(uRequestsCryptLayer	<<  8) |
+				(uSupportsCryptLayer	<<  7) |
+				(uReserved				<<  6) |
 				(uExtMultiPacket		<<  5) |
 				(uSupportLargeFiles		<<  4) |
 				(uKadVersion			<<  0) 
@@ -1718,9 +1752,9 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	
 	if (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING || GetUploadState() == US_BANNED) //MORPH - Changed by SiRoB
 	{
-		if (thePrefs.GetLogUlDlEvents() && GetUploadState()==US_UPLOADING && m_fSentOutOfPartReqs==0 && !theApp.uploadqueue->IsOnUploadQueue(this))
-			DebugLog(_T("Disconnected client removed from upload queue and waiting list: %s"), DbgGetClientInfo());
-		theApp.uploadqueue->RemoveFromUploadQueue(this, pszReason);
+		//if (thePrefs.GetLogUlDlEvents() && GetUploadState()==US_UPLOADING && m_fSentOutOfPartReqs==0 && !theApp.uploadqueue->IsOnUploadQueue(this))
+		//	DebugLog(_T("Disconnected client removed from upload queue and waiting list: %s"), DbgGetClientInfo());
+		theApp.uploadqueue->RemoveFromUploadQueue(this, CString(_T("CUpDownClient::Disconnected: ")) + pszReason);
 	}
 
 	// 28-Jun-2004 [bc]: re-applied this patch which was in 0.30b-0.30e. it does not seem to solve the bug but
@@ -1925,6 +1959,21 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 			return true;
 		}
 
+	// do not try to connect to source which are incompatible with our encryption setting (one requires it, and the other one doesn't supports it)
+	if ( (RequiresCryptLayer() && !thePrefs.IsClientCryptLayerSupported()) || (thePrefs.IsClientCryptLayerRequired() && !SupportsCryptLayer()) ){
+#if defined(_DEBUG) || defined(_BETA)
+		// TODO: Remove after testing
+		AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected outgoing connection because CryptLayer-Setting (Obfuscation) was incompatible %s"), DbgGetClientInfo() );
+#endif
+		if (filtered) *filtered = true;
+		if(Disconnected(_T("CryptLayer-Settings (Obfuscation) incompatible"))){
+			delete this;
+			return false;
+		}
+		else
+			return true;
+	}
+
 		uint32 uClientIP = GetIP();
 		if (uClientIP == 0 && !HasLowID())
 			uClientIP = ntohl(m_nUserIDHybrid);
@@ -2007,7 +2056,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				}
 			}
 		}
-		//Useless
+		//MORPH - Fix connection collision 
 		/*
 		if (!socket || !socket->IsConnected())
 		*/
@@ -2025,12 +2074,15 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				return true;
 			}
 		}
-		//Useless 
+		//MORPH - Fix connection collision 
 		/*
 		else {
-			ConnectionEstablished();
+			if (CheckHandshakeFinished())
+				ConnectionEstablished();
+			else
+				DEBUG_ONLY( DebugLogWarning( _T("TryToConnect found connected socket, but without Handshake finished - %s"), DbgGetClientInfo()) );
+		
 			return true;
-		}
 		*/
 		// MOD Note: Do not change this part - Merkur
 		if (HasLowID())
@@ -2098,7 +2150,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 							Packet* packet = new Packet(&bio, OP_KADEMLIAHEADER);
 							packet->opcode = KADEMLIA_CALLBACK_REQ;
 							theStats.AddUpDataOverheadKad(packet->size);
-							theApp.clientudp->SendPacket(packet, GetBuddyIP(), GetBuddyPort());
+							theApp.clientudp->SendPacket(packet, GetBuddyIP(), GetBuddyPort(), false, NULL);  // kad doesnt supports obfuscation yet
 							SetDownloadState(DS_WAITCALLBACKKAD);
 						}
 						else
@@ -2151,6 +2203,14 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 
 bool CUpDownClient::Connect()
 {
+	// enable or disable crypting based on our and the remote clients preference
+	if (HasValidHash() && SupportsCryptLayer() && thePrefs.IsClientCryptLayerSupported() && (RequestsCryptLayer() || thePrefs.IsClientCryptLayerRequested())){
+		DebugLog(_T("Enabling CryptLayer on outgoing connection to client %s"), DbgGetClientInfo()); // to be removed later
+		socket->SetConnectionEncryption(true, GetUserHash(), false);
+	}
+	else
+		socket->SetConnectionEncryption(false, NULL, false);
+
 	//Try to always tell the socket to WaitForOnConnect before you call Connect.
 	socket->WaitForOnConnect();
 	SOCKADDR_IN sockAddr = {0};
@@ -2168,7 +2228,7 @@ void CUpDownClient::ConnectionEstablished()
 	// ok we have a connection, lets see if we want anything from this client
 	
 	// check if we should use this client to retrieve our public IP
-	if (theApp.GetPublicIP() == 0 && theApp.serverconnect->IsConnected() && m_fPeerCache)
+	if (theApp.GetPublicIP() == 0 && theApp.IsConnected() && m_fPeerCache)
 		SendPublicIPRequest();
 
 	switch(GetKadState())
@@ -2985,7 +3045,10 @@ void CUpDownClient::AssertValid() const
 	(void)m_byCompatibleClient;
 	m_WaitingPackets_list.AssertValid();
 	m_DontSwap_list.AssertValid();
+	//MORPH START - UpdateItemThread
+	/*
 	(void)m_lastRefreshedDLDisplay;
+	*/
 	ASSERT( m_SecureIdentState >= IS_UNAVAILABLE && m_SecureIdentState <= IS_KEYANDSIGNEEDED );
 	(void)m_dwLastSignatureIP;
 	ASSERT( (m_byInfopacketsReceived & ~IP_BOTH) == 0 );
@@ -3185,6 +3248,7 @@ void CUpDownClient::CheckForGPLEvilDoer()
 {
 	if (!m_strModVersion.IsEmpty()){
 		LPCTSTR pszModVersion = (LPCTSTR)m_strModVersion;
+
 		// skip leading spaces
 		while (*pszModVersion == _T(' '))
 			pszModVersion++;
@@ -3310,7 +3374,7 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 			s = m_pPCDownSocket;
 		else if (m_pWCDownSocket)
 			s = m_pWCDownSocket;
-#ifdef  BETAREL
+#ifdef _DEBUG
 		strState.AppendFormat(_T(",BUF:%u"), socket->GetRecvBufferSize());
 #endif 
 	}
@@ -3346,14 +3410,16 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 		case US_UPLOADING:
             if(IsScheduledForRemoval()) {
 				strState = GetScheduledRemovalDisplayReason();
-			} else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID)) {
+			} else if(GetPayloadInBuffer() == 0 && GetNumberOfRequestedBlocksInQueue() == 0 && thePrefs.IsExtControlsEnabled()) {
+				strState = GetResString(IDS_US_STALLEDW4BR);
+            } else if(GetPayloadInBuffer() == 0 && thePrefs.IsExtControlsEnabled()) {
+				strState = GetResString(IDS_US_STALLEDREADINGFDISK);
+            } else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID)) {
 				strState = GetResString(IDS_TRANSFERRING);
             } else {
                 strState = GetResString(IDS_TRICKLING);
             }
-            //CString strStateTemp = strState;
-            //strState.Format(_T("%i: %s"), GetSlotNumber(), strStateTemp);
-			break;
+            break;
 	}
 /*
 	if (thePrefs.GetPeerCacheShow())
@@ -3385,10 +3451,8 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 			else if (m_pWCUpSocket)
 				s = m_pWCUpSocket;
 #ifndef DONT_USE_SOCKET_BUFFERING
-#ifdef BETAREL 
 			// extra info not required in release
 			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
-#endif BETAREL
 #endif
 			DWORD busySince = s->GetBusyTimeSince();
 			if (s->GetBusyRatioTime() > 0)
@@ -3460,6 +3524,18 @@ void CUpDownClient::SetSpammer(bool bVal){
 
 void  CUpDownClient::SetMessageFiltered(bool bVal)	{
 	m_fMessageFiltered = bVal ? 1 : 0;
+}
+
+bool  CUpDownClient::IsObfuscatedConnectionEstablished() const {
+	if (socket != NULL && socket->IsConnected())
+		return socket->IsObfusicating();
+	else
+		return false;
+}
+
+bool CUpDownClient::ShouldReceiveCryptUDPPackets() const {
+	return (thePrefs.IsClientCryptLayerSupported() && SupportsCryptLayer() && theApp.GetPublicIP() != 0
+		&& HasValidHash() && (thePrefs.IsClientCryptLayerRequested() || RequestsCryptLayer()) );
 }
 
 //MORPH START - Added by SiRoB, ZZUL_20040904

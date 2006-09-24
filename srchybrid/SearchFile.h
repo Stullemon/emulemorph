@@ -56,7 +56,7 @@ public:
 	void	SetClientServerPort(uint16 nPort) { m_nClientServerPort = nPort; }
 	int		GetClientsCount() const			{ return ((GetClientID() && GetClientPort()) ? 1 : 0) + m_aClients.GetSize(); }
 
-	virtual void	UpdateFileRatingCommentAvail();
+	virtual void	UpdateFileRatingCommentAvail(bool bForceUpdate = false);
 
 	// GUI helpers
 	CSearchFile* GetListParent() const		{ return m_list_parent; }

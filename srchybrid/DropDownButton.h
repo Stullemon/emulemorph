@@ -25,7 +25,7 @@ public:
 	virtual ~CDropDownButton();
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, bool bSingleDropDownBtn = true);
-	BOOL Init(bool bSingleDropDownBtn = true);
+	BOOL Init(bool bSingleDropDownBtn = true, bool bWholeDropDown = false);
 
 	void SetWindowText(LPCTSTR pszString);
 	void SetIcon(LPCTSTR pszResourceID);
