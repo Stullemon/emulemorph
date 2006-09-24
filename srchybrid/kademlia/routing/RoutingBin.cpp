@@ -90,21 +90,19 @@ bool CRoutingBin::AddContact(CContact *pContact)
 	return false;
 }
 
-void CRoutingBin::SetAlive(uint32 uIP, uint16 uUDPPort)
+void CRoutingBin::SetAlive(CContact *pContact)
 {
-	// Find contact with IP/Port
-	for (ContactList::iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+	ASSERT(pContact != NULL);
+	// Check if we already have a contact with this ID in the list.
+	CContact *pContactTest = GetContact(pContact->GetClientID());
+	ASSERT(pContact == pContactTest);
+	if (pContactTest)
 	{
-		CContact* pContact = *itContactList;
-		if ((uIP == pContact->GetIPAddress()) && (uUDPPort == pContact->GetUDPPort()))
-		{
-			// Mark contact as being alive.
-			pContact->UpdateType();
-			// Move to the end of the list
-			RemoveContact(pContact);
-			m_listEntries.push_back(pContact);
-			return;
-		}
+		// Mark contact as being alive.
+		pContactTest->UpdateType();
+		// Move to the end of the list
+		RemoveContact(pContactTest);
+		m_listEntries.push_back(pContactTest);
 	}
 }
 
@@ -205,5 +203,6 @@ void CRoutingBin::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 
 		// remove from results
 		pmapResult->erase(--pmapResult->end());
 	}
+	// Return result count to the caller.
 	return;
 }

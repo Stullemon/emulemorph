@@ -61,7 +61,7 @@ there client on the eMule forum..
 #include "../../kademliawnd.h"
 #include "../../SafeFile.h"
 #include "../../Log.h"
-#include "../../ipfilter.h" // MORPH ipfilter kad
+#include "../../ipfilter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -203,27 +203,29 @@ void CRoutingZone::ReadFile()
 						byType = file.ReadUInt8();
 					// IP Appears valid
 					if( byType < 4)
-					    {
-						//MOPRH START ipfilter kad
-						if ( ::theApp.ipfilter->IsFiltered(ntohl(uIP))) 
+					{
+						uint32 uhostIP = ntohl(uIP);
+						if (::IsGoodIPPort(uhostIP, uUDPPort))
 						{
-							if (::thePrefs.GetLogFilteredIPs())
-								AddDebugLogLine(false, _T("Ignored kad contact(IP=%s)--read known.dat -- - IP filter (%s)") , ipstr(ntohl(uIP)), ::theApp.ipfilter->GetLastHit());
+							if (::theApp.ipfilter->IsFiltered(uhostIP))
+							{
+								if (::thePrefs.GetLogFilteredIPs())
+									AddDebugLogLine(false, _T("Ignored kad contact (IP=%s)--read known.dat -- - IP filter (%s)") , ipstr(uhostIP), ::theApp.ipfilter->GetLastHit());
+							}
+							else
+							{
+								// This was not a dead contact, Inc counter if add was successful
+								if (AddUnfiltered(uID, uIP, uUDPPort, uTCPPort, uContactVersion, false))
+									uValidContacts++;
+							}
 						}
-						else
-						{
-   					    //MORPH END leuk_he ipfilter kad
-							// This was not a dead contact, Inc counter if add was successful
-							if( Add(uID, uIP, uUDPPort, uTCPPort, uContactVersion) )
-								uValidContacts++;
-						}
-					} //MORPH leuk_he ipfilter
-					uNumContacts--;
 					}
-					AddLogLine( false, GetResString(IDS_KADCONTACTSREAD), uValidContacts);
+					uNumContacts--;
 				}
-				file.Close();
+				AddLogLine( false, GetResString(IDS_KADCONTACTSREAD), uValidContacts);
 			}
+			file.Close();
+		}
 	}
 	catch (CFileException* e)
 	{
@@ -287,32 +289,57 @@ bool CRoutingZone::CanSplit() const
 	return false;
 }
 
-bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion )
+bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate)
 {
-	if(::IsGoodIPPort(ntohl(uIP), uUDPPort))
+	uint32 uhostIP = ntohl(uIP);
+	if (::IsGoodIPPort(uhostIP, uUDPPort))
 	{
-		if(uID != uMe)
-		{  
-			// JOHNTODO -- How do these end up leaking at times?
-			CContact* pContact = new CContact(uID, uIP, uUDPPort, uTCPPort, uVersion);
-			if(Add(pContact))
-				return true;
-			delete pContact;
+		if (!::theApp.ipfilter->IsFiltered(uhostIP)) {
+			return AddUnfiltered(uID, uIP, uUDPPort, uTCPPort, uVersion, bUpdate);
 		}
+		else if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s) - IP filter (%s)"), ipstr(uhostIP), ::theApp.ipfilter->GetLastHit());
 	}
-return false;
+	else if (::thePrefs.GetLogFilteredIPs())
+		AddDebugLogLine(false, _T("Ignored kad contact (IP=%s) - Bad IP"), ipstr(uhostIP));
+	return false;
 }
 
-bool CRoutingZone::Add(CContact* pContact)
+bool CRoutingZone::AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate)
+{
+	if (uID != uMe)
+	{
+		// JOHNTODO -- How do these end up leaking at times?
+		CContact* pContact = new CContact(uID, uIP, uUDPPort, uTCPPort, uVersion);
+		if (Add(pContact, bUpdate))
+			return true;
+		delete pContact;
+	}
+	return false;
+}
+
+bool CRoutingZone::Add(CContact* pContact, bool bUpdate)
 {
 	// If we are not a leaf, call add on the correct branch.
 	if (!IsLeaf())
-		return m_pSubZones[pContact->GetDistance().GetBitNumber(m_uLevel)]->Add(pContact);
+		return m_pSubZones[pContact->GetDistance().GetBitNumber(m_uLevel)]->Add(pContact, bUpdate);
 	else
 	{
 		// Do we already have a contact with this KadID?
-		if (m_pBin->GetContact(pContact->GetClientID()))
+		CContact* pContactUpdate = m_pBin->GetContact(pContact->GetClientID());
+		if (pContactUpdate)
+		{
+			if(bUpdate)
+			{
+				pContactUpdate->SetIPAddress(pContact->GetIPAddress());
+				pContactUpdate->SetUDPPort(pContact->GetUDPPort());
+				pContactUpdate->SetTCPPort(pContact->GetTCPPort());
+				pContactUpdate->SetVersion(pContact->GetVersion());
+				m_pBin->SetAlive(pContactUpdate);
+				theApp.emuledlg->kademliawnd->ContactRef(pContactUpdate);
+			}
 			return false;
+		}
 		else if (m_pBin->GetRemaining())
 		{
 			// This bin is not full, so add the new contact.
@@ -329,21 +356,10 @@ bool CRoutingZone::Add(CContact* pContact)
 		{
 			// This bin was full and split, call add on the correct branch.
 			Split();
-			return m_pSubZones[pContact->GetDistance().GetBitNumber(m_uLevel)]->Add(pContact);
+			return m_pSubZones[pContact->GetDistance().GetBitNumber(m_uLevel)]->Add(pContact, bUpdate);
 		}
 		else
 			return false;
-	}
-}
-
-void CRoutingZone::SetAlive(uint32 uIP, uint16 uUDPPort)
-{
-	if (IsLeaf())
-		m_pBin->SetAlive(uIP, uUDPPort);
-	else
-	{
-		m_pSubZones[0]->SetAlive(uIP, uUDPPort);
-		m_pSubZones[1]->SetAlive(uIP, uUDPPort);
 	}
 }
 
@@ -369,7 +385,7 @@ void CRoutingZone::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, const 
 	m_pSubZones[iCloser]->GetClosestTo(uMaxType, uTarget, uDistance, uMaxRequired, pmapResult, bEmptyFirst, bInUse);
 
 	// if still not enough tokens found, recurse in the other subzone too
-	if (pmapResult->size()  < uMaxRequired)
+	if (pmapResult->size() < uMaxRequired)
 		m_pSubZones[1-iCloser]->GetClosestTo(uMaxType, uTarget, uDistance, uMaxRequired, pmapResult, false, bInUse);
 }
 
@@ -517,7 +533,7 @@ uint32 CRoutingZone::EstimateCount()
 	if( !IsLeaf() )
 		return 0;
 	if( m_uLevel < KBASE )
-		return (UINT)(pow(2, m_uLevel)*K);
+		return (UINT)(pow(2.0F, (int)m_uLevel)*K);
 	CRoutingZone* pCurZone = m_pSuperZone->m_pSuperZone->m_pSuperZone;
 	// Find out how full this part of the tree is.
 	float fModify = ((float)pCurZone->GetNumContacts())/(float)(K*2);
@@ -525,7 +541,7 @@ uint32 CRoutingZone::EstimateCount()
 	// Modify count by bin size.
 	// Modify count by how full the tree is.
 	// Modify count by assuming 20% of the users are firewalled and can't be a contact.
-	return (UINT)((pow( 2, m_uLevel-2))*(float)K*fModify*(1.20F));
+	return (UINT)((pow(2.0F, (int)m_uLevel-2))*(float)K*fModify*(1.20F));
 }
 
 void CRoutingZone::OnSmallTimer()
@@ -569,17 +585,23 @@ void CRoutingZone::OnSmallTimer()
 	if(pContact != NULL)
 	{
 		pContact->CheckingType();
-		if(pContact->GetVersion() != 0)
+		if (pContact->GetVersion() >= 2/*47a*/)
 		{
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 				DebugSend("KADEMLIA2_HELLO_REQ", pContact->GetIPAddress(), pContact->GetUDPPort());
-			CKademlia::GetUDPListener()->SendMyDetails_KADEMLIA2(KADEMLIA2_HELLO_REQ, pContact->GetIPAddress(), pContact->GetUDPPort());
+			CKademlia::GetUDPListener()->SendMyDetails(KADEMLIA2_HELLO_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), true);
 		}
 		else
 		{
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 				DebugSend("KADEMLIA_HELLO_REQ", pContact->GetIPAddress(), pContact->GetUDPPort());
-			CKademlia::GetUDPListener()->SendMyDetails(KADEMLIA_HELLO_REQ, pContact->GetIPAddress(), pContact->GetUDPPort());
+			CKademlia::GetUDPListener()->SendMyDetails(KADEMLIA_HELLO_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), false);
+			if(pContact->CheckIfKad2())
+			{
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+					DebugSend("KADEMLIA2_HELLO_REQ", pContact->GetIPAddress(), pContact->GetUDPPort());
+				CKademlia::GetUDPListener()->SendMyDetails(KADEMLIA2_HELLO_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), true);
+			}
 		}
 	}
 }

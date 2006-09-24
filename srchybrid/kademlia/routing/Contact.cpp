@@ -100,6 +100,7 @@ void CContact::InitContact()
 	m_bGuiRefs = 0;
 	m_uInUse = 0;
 	m_tCreated = time(NULL);
+	m_bCheckKad2 = true;
 }
 
 void CContact::GetClientID(CUInt128 *puId) const
@@ -272,4 +273,14 @@ uint8 CContact::GetVersion() const
 void CContact::SetVersion(uint8 uVersion)
 {
 	m_uVersion = uVersion;
+}
+
+bool CContact::CheckIfKad2()
+{
+	if(m_bCheckKad2)
+	{
+		m_bCheckKad2 = false;
+		return true;
+	}
+	return false;
 }

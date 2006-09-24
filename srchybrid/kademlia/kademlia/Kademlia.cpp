@@ -350,16 +350,16 @@ bool CKademlia::GetPublish()
 	return 0;
 }
 
-void CKademlia::Bootstrap(LPCTSTR szHost, uint16 uPort)
+void CKademlia::Bootstrap(LPCTSTR szHost, uint16 uPort, bool bKad2)
 {
 	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > MIN2S(1) )
-		m_pInstance->m_pUDPListener->Bootstrap( szHost, uPort);
+		m_pInstance->m_pUDPListener->Bootstrap( szHost, uPort, bKad2 );
 }
 
-void CKademlia::Bootstrap(uint32 uIP, uint16 uPort)
+void CKademlia::Bootstrap(uint32 uIP, uint16 uPort, bool bKad2)
 {
 	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > MIN2S(1) )
-		m_pInstance->m_pUDPListener->Bootstrap( uIP, uPort);
+		m_pInstance->m_pUDPListener->Bootstrap( uIP, uPort, bKad2 );
 }
 
 void CKademlia::RecheckFirewalled()

@@ -1004,12 +1004,16 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 			if( uCountLeft )
 			{
 				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-				memcpy(byPacket+18, &uCountLeft, 2);
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				if(bKad2)
 				{
-					if(bKad2)
+					memcpy(byPacket+18+16, &uCountLeft, 2);
+					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-					else
+				}
+				else
+				{
+					memcpy(byPacket+18, &uCountLeft, 2);
+					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
 				}
 				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
@@ -1089,12 +1093,16 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 			if( uCountLeft )
 			{
 				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-				memcpy(byPacket+18, &uCountLeft, 2);
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				if(bKad2)
 				{
-					if(bKad2)
+					memcpy(byPacket+18+16, &uCountLeft, 2);
+					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-					else
+				}
+				else
+				{
+					memcpy(byPacket+18, &uCountLeft, 2);
+					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
 				}
 				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
@@ -1122,7 +1130,6 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 			else
 				byIO.WriteByte(KADEMLIA_SEARCH_NOTES_RES);
 			byIO.WriteUInt128(uKeyID);
-			if(bKad2)
 			byIO.WriteUInt16(50);
 			uint16 uMaxResults = 150;
 			uint16 uCount = 0;
@@ -1173,12 +1180,16 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 			if( uCountLeft )
 			{
 				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-				memcpy(byPacket+18, &uCountLeft, 2);
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				if(bKad2)
 				{
-					if(bKad2)
+					memcpy(byPacket+18+16, &uCountLeft, 2);
+					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-					else
+				}
+				else
+				{
+					memcpy(byPacket+18, &uCountLeft, 2);
+					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_NOTES_RES", uIP, uPort);
 				}
 				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
@@ -1187,7 +1198,7 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, _T("Exception in CIndexed::SendValidSourceResult"));
+		AddDebugLogLine(false, _T("Exception in CIndexed::SendValidNoteResult"));
 	}
 }
 

@@ -74,8 +74,7 @@ bool CSearchManager::IsSearching(uint32 uSearchID)
 void CSearchManager::StopSearch(uint32 uSearchID, bool bDelayDelete)
 {
 	// Stop a specific searchID
-	SearchMap::iterator itSearchMap = m_mapSearches.begin();
-	while( itSearchMap != m_mapSearches.end())
+	for (SearchMap::iterator itSearchMap = m_mapSearches.begin(); itSearchMap != m_mapSearches.end(); ++itSearchMap)
 	{
 		if (itSearchMap->second->m_uSearchID == uSearchID)
 		{
@@ -85,12 +84,13 @@ void CSearchManager::StopSearch(uint32 uSearchID, bool bDelayDelete)
 			else
 			{
 				// Delete this search now.
+				// If this method is changed to continue looping, take care of the iterator as we will already
+				// be pointing to the next entry and the for-loop could cause you to iterate past the end.
 				delete itSearchMap->second;
-				itSearchMap = --m_mapSearches.erase(itSearchMap);
+				m_mapSearches.erase(itSearchMap);
 			}
 			return;
 		}
-		++itSearchMap;
 	}
 }
 
@@ -156,41 +156,7 @@ CSearch* CSearchManager::PrepareFindKeywords(bool bUnicode, LPCTSTR szKeyword, U
 			throw strError;
 		}
 
-		// Write complete packet
-		pSearch->m_pfileSearchTerms = new CSafeMemFile();
-		pSearch->m_pfileSearchTerms->WriteUInt128(&pSearch->m_uTarget);
-		/*if(bKad2) // Need to add a swtich between Kad1.0 and Kad2.0
-		{
-			if (uSearchTermsSize == 0)
-			{
-				// JOHNTODO - Need to add ability to change start position.
-				// Start position range (0x0 to 0x7FFF)
-				pSearch->m_pfileSearchTerms->WriteUInt16((uint16)0x0000);
-			}
-			else
-			{
-				// JOHNTODO - Need to add ability to change start position.
-				// Start position range (0x8000 to 0xFFFF)
-				pSearch->m_pfileSearchTerms->WriteUInt16((uint16)0x8000);
-				pSearch->m_pfileSearchTerms->Write(pucSearchTermsData, uSearchTermsSize);
-			}
-		}
-		else*/
-		{
-			if (uSearchTermsSize == 0)
-			{
-				pSearch->m_pfileSearchTerms->WriteUInt8(0);
-				// We send this extra byte to flag we handle large files.
-				pSearch->m_pfileSearchTerms->WriteUInt8(0);
-			}
-			else
-			{
-				// Set to 2 to flag we handle handle large files.
-				pSearch->m_pfileSearchTerms->WriteUInt8(2);
-				pSearch->m_pfileSearchTerms->Write(pucSearchTermsData, uSearchTermsSize);
-			}
-		}
-
+		pSearch->SetSearchTermData( uSearchTermsSize, pucSearchTermsData );
 		// Inc our searchID
 		pSearch->m_uSearchID = ++m_uNextID;
 		// Insert search into map.
@@ -257,15 +223,6 @@ CSearch* CSearchManager::PrepareLookup(uint32 uType, bool bStart, const CUInt128
 					return NULL;
 				}
 				break;
-			case CSearch::FINDBUDDY:
-				pSearch->m_pfileSearchTerms = new CSafeMemFile();
-				// Send the ID we used to find our buddy. Used for checks later and allows users to callback someone if they change buddies.
-				pSearch->m_pfileSearchTerms->WriteUInt128(&pSearch->m_uTarget);
-				// Send client hash so they can do a callback.
-				pSearch->m_pfileSearchTerms->WriteUInt128(&CKademlia::GetPrefs()->GetClientHash());
-				// Send client port so they can do a callback
-				pSearch->m_pfileSearchTerms->WriteUInt16(thePrefs.GetPort());
-				break;
 		}
 
 		// Inc search ID.
@@ -302,7 +259,6 @@ void CSearchManager::FindNode(const CUInt128 &uID, bool bComplete)
 	else
 		pSearch->m_uType = CSearch::NODE;
 	pSearch->m_uTarget = uID;
-	pSearch->m_pfileSearchTerms = NULL;
 	StartSearch(pSearch);
 }
 
@@ -353,7 +309,7 @@ void CSearchManager::JumpStart()
 	// This will also prune all searches.
 	time_t tNow = time(NULL);
 	SearchMap::iterator itSearchMap = m_mapSearches.begin();
-	while (itSearchMap != m_mapSearches.end())
+	while(itSearchMap != m_mapSearches.end())
 	{
 		// Each type has it's own criteria for being deleted or jumpstarted.
 		switch(itSearchMap->second->GetSearchTypes())
@@ -364,6 +320,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if (itSearchMap->second->GetAnswers() >= SEARCHFILE_TOTAL || itSearchMap->second->m_tCreated + SEARCHFILE_LIFETIME - SEC(20) < tNow)
@@ -381,6 +338,7 @@ void CSearchManager::JumpStart()
 							theApp.emuledlg->searchwnd->CancelKadSearch(itSearchMap->second->GetSearchID());
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if (itSearchMap->second->GetAnswers() >= SEARCHKEYWORD_TOTAL || itSearchMap->second->m_tCreated + SEARCHKEYWORD_LIFETIME - SEC(20) < tNow)
@@ -395,6 +353,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if (itSearchMap->second->GetAnswers() >= SEARCHNOTES_TOTAL || itSearchMap->second->m_tCreated + SEARCHNOTES_LIFETIME - SEC(20) < tNow)
@@ -409,6 +368,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if (itSearchMap->second->GetAnswers() >= SEARCHFINDBUDDY_TOTAL || itSearchMap->second->m_tCreated + SEARCHFINDBUDDY_LIFETIME - SEC(20) < tNow)
@@ -423,6 +383,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if (itSearchMap->second->GetAnswers() >= SEARCHFINDSOURCE_TOTAL || itSearchMap->second->m_tCreated + SEARCHFINDSOURCE_LIFETIME - SEC(20) < tNow)
@@ -437,6 +398,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else
@@ -451,6 +413,7 @@ void CSearchManager::JumpStart()
 						CKademlia::GetPrefs()->SetPublish(true);
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if ((itSearchMap->second->m_tCreated + SEARCHNODECOMP_LIFETIME < tNow) && (itSearchMap->second->GetAnswers() >= SEARCHNODECOMP_TOTAL))
@@ -459,6 +422,7 @@ void CSearchManager::JumpStart()
 						CKademlia::GetPrefs()->SetPublish(true);
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else
@@ -471,6 +435,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if (itSearchMap->second->GetAnswers() >= SEARCHSTOREFILE_TOTAL || itSearchMap->second->m_tCreated + SEARCHSTOREFILE_LIFETIME - SEC(20) < tNow)
@@ -485,6 +450,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if (itSearchMap->second->GetAnswers() >= SEARCHSTOREKEYWORD_TOTAL || itSearchMap->second->m_tCreated + SEARCHSTOREKEYWORD_LIFETIME - SEC(20)< tNow)
@@ -499,6 +465,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else if (itSearchMap->second->GetAnswers() >= SEARCHSTORENOTES_TOTAL || itSearchMap->second->m_tCreated + SEARCHSTORENOTES_LIFETIME - SEC(20)< tNow)
@@ -513,6 +480,7 @@ void CSearchManager::JumpStart()
 					{
 						delete itSearchMap->second;
 						itSearchMap = m_mapSearches.erase(itSearchMap);
+						//Don't do anything after this.. We are already at the next entry.
 						continue;
 					}
 					else

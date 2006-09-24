@@ -77,6 +77,7 @@ namespace Kademlia
 			time_t GetCreatedTime() const;
 			time_t GetExpireTime() const;
 			time_t GetLastTypeSet() const;
+			bool CheckIfKad2();
 		private:
 			void InitContact(); // Common var initialization goes here
 			CUInt128 m_uClientID;
@@ -84,12 +85,13 @@ namespace Kademlia
 			uint32 m_uIp;
 			uint16 m_uTcpPort;
 			uint16 m_uUdpPort;
-			byte m_byType;
-			bool m_bGuiRefs;
+			uint32 m_uInUse;
 			time_t m_tLastTypeSet;
 			time_t m_tExpires;
-			uint32 m_uInUse;
 			time_t m_tCreated;
+			byte m_byType;
 			uint8 m_uVersion;
+			bool m_bGuiRefs;
+			bool m_bCheckKad2;
 	};
 }

@@ -50,23 +50,17 @@ namespace Kademlia
 			uint32 GetKadPacketSent() const;
 			uint32 GetRequestAnswer() const;
 			void StorePacket();
-			byte byPacket1[1024*50];
-			byte byPacket2[1024*50];
-			byte byPacket3[1024*50];
-			CByteIO *pbyIO1;
-			CByteIO *pbyIO2;
-			CByteIO *pbyIO3;
 			const CString& GetFileName() const;
 			void SetFileName(const CString& sFileName);
 			CUInt128 GetTarget() const;
 			void AddFileID(const CUInt128& uID);
-			void PreparePacket();
 			void PreparePacketForTags( CByteIO* pbyPacket, CKnownFile* pFile );
 			bool Stoping() const;
 			uint32 GetNodeLoad() const;
 			uint32 GetNodeLoadResonse() const;
 			uint32 GetNodeLoadTotal() const;
 			void UpdateNodeLoad( uint8 uLoad );
+			void SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTermsData );
 			enum
 			{
 			    NODE,
@@ -105,8 +99,9 @@ namespace Kademlia
 			uint32 m_uTotalLoadResponses;
 			uint32 m_uLastResponse;
 			uint32 m_uSearchID;
+			uint32 m_uSearchTermsDataSize;
+			LPBYTE m_pucSearchTermsData;
 			CUInt128 m_uTarget;
-			CSafeMemFile *m_pfileSearchTerms;
 			WordList m_listWords;
 			CString m_sFileName;
 			UIntList m_listFileIDs;

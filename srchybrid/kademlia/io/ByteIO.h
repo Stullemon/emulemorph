@@ -42,6 +42,8 @@ namespace Kademlia
 			void ReadArray(LPVOID lpResult, uint32 uByteCount);
 			void WriteArray(LPCVOID lpVal, uint32 uByteCount);
 			UINT GetAvailable() const;
+			void Seek(uint32 newpos);
+			uint32 GetUsed() const { return m_uUsed; }
 			void Reset();
 		private:
 			bool m_bReadOnly;

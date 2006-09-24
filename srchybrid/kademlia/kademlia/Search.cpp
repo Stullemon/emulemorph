@@ -52,6 +52,7 @@ there client on the eMule forum..
 #include "../../ClientList.h"
 #include "../../UpDownClient.h"
 #include "../../Log.h"
+#include "../../KnownFileList.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -66,7 +67,6 @@ void DebugSend(LPCTSTR pszMsg, uint32 uIP, uint16 uUDPPort);
 CSearch::CSearch()
 {
 	m_tCreated = time(NULL);
-	m_pfileSearchTerms = NULL;
 	m_uType = (uint32)-1;
 	m_uAnswers = 0;
 	m_uTotalRequestAnswers = 0;
@@ -76,11 +76,10 @@ CSearch::CSearch()
 	m_bStoping = false;
 	m_uTotalLoad = 0;
 	m_uTotalLoadResponses = 0;
-	pbyIO1 = NULL;
-	pbyIO2 = NULL;
-	pbyIO3 = NULL;
 	theApp.emuledlg->kademliawnd->searchList->SearchAdd(this);
 	m_uLastResponse = time(NULL);
+	m_pucSearchTermsData = NULL;
+	m_uSearchTermsDataSize = 0;
 }
 
 CSearch::~CSearch()
@@ -92,11 +91,20 @@ CSearch::~CSearch()
 	CPartFile* pPartFile = theApp.downloadqueue->GetFileByKadFileSearchID(GetSearchID());
 
 	// Reset the searchID if a source search is currently being done.
-	if(pPartFile)
+	if(pPartFile){
 		pPartFile->SetKadFileSearchID(0);
+	}
+	if (m_uType == NOTES){
+		CAbstractFile* pAbstractFile = theApp.knownfiles->FindKnownFileByID(CUInt128(GetTarget().GetData()).GetData());
+		if (pAbstractFile != NULL)
+			pAbstractFile->SetKadCommentSearchRunning(false);
 
-	// Delete any search terms.
-	delete m_pfileSearchTerms;
+		pAbstractFile = theApp.downloadqueue->GetFileByID(CUInt128(GetTarget().GetData()).GetData());
+		if (pAbstractFile != NULL)
+			pAbstractFile->SetKadCommentSearchRunning(false);
+
+		theApp.searchlist->SetNotesSearchStatus(CUInt128(GetTarget().GetData()).GetData(), false);
+	}
 
 	// Decrease the use count for any contacts that are in your contact list.
 	for (ContactMap::iterator itContactMap = m_mapInUse.begin(); itContactMap != m_mapInUse.end(); ++itContactMap)
@@ -105,11 +113,6 @@ CSearch::~CSearch()
 	// Delete any temp contacts..
 	for (ContactList::const_iterator itContactList = m_listDelete.begin(); itContactList != m_listDelete.end(); ++itContactList)
 		delete *itContactList;
-
-	// Delete any storage packages
-	delete pbyIO1;
-	delete pbyIO2;
-	delete pbyIO3;
 
 	// Check if this search was contacting a overload node and adjust time of next time we use that node.
 	if(CKademlia::IsRunning() && GetNodeLoad() > 20)
@@ -121,6 +124,8 @@ CSearch::~CSearch()
 				break;
 		}
 	}
+	if(m_pucSearchTermsData)
+		delete[] m_pucSearchTermsData;
 }
 
 void CSearch::Go()
@@ -139,7 +144,6 @@ void CSearch::Go()
 			m_mapInUse[itContactMap->first] = itContactMap->second;
 
 		ASSERT(m_mapPossible.size() == m_mapInUse.size());
-		//ASSERT(m_mapPossible.size() != 50);
 
 		// Take top ALPHA_QUERY to start search with.
 		int iCount;
@@ -156,8 +160,6 @@ void CSearch::Go()
 			CContact* pContact = itContactMap2->second;
 			// Move to tried
 			m_mapTried[itContactMap2->first] = pContact;
-			// Mark contact that we tried to contact it.
-//			pContact->CheckingType();
 			// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
 			// Send request
 			SendFindValue(pContact);
@@ -252,8 +254,6 @@ void CSearch::JumpStart()
 		{
 			// Add to tried list.
 			m_mapTried[m_mapPossible.begin()->first] = pContact;
-			// Mark contact that we tried to contact it.
-//			pContact->CheckingType();
 			// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
 			// Send request
 			SendFindValue(pContact);
@@ -301,7 +301,7 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 				m_mapResponded[uFromDistance] = pFromContact;
 
 				// Loop through their responses
-				for (itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
+				for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 				{
 					// Get next result
 					CContact* pContact = *itContactList;
@@ -347,8 +347,6 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 							// We determined this contact is a canditate for a request.
 							// Add to the tried list.
 							m_mapTried[uDistance] = pContact;
-							// Mark contact that we tried to contact it.
-//							pContact->CheckingType();
 							// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
 							// Send request
 							SendFindValue(pContact);
@@ -386,32 +384,41 @@ void CSearch::StorePacket()
 	if(thePrefs.FilterLANIPs() && uFromDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
 		return;
 
-	// What kind of store are we doing?
+	// What kind of search are we doing?
 	switch(m_uType)
 	{
 		case FILE:
 			{
-				if(m_pfileSearchTerms)
-					delete m_pfileSearchTerms;
-				m_pfileSearchTerms = new CSafeMemFile();
-				m_pfileSearchTerms->WriteUInt128(&m_uTarget);
-				/*if(pFromContact->GetVersion()) // JOHNTODO -- Add ability to switch betweek Kad1.0 and Kad2.0
+				CSafeMemFile m_pfileSearchTerms;
+				m_pfileSearchTerms.WriteUInt128(&m_uTarget);
+				if (pFromContact->GetVersion() >= 3/*47b*/)
 				{
-					// JOHNTODO -- Add start position
-					// Start Position range (0x0 to 0x7FFF)
-					m_pfileSearchTerms->WriteUInt16(0);
-					// JOHNTODO -- Add File Size
-					m_pfileSearchTerms->WriteUInt64(0);
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA2_SEARCH_SOURCE_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(m_pfileSearchTerms->GetBuffer(), (UINT)m_pfileSearchTerms->GetLength(), KADEMLIA2_SEARCH_SOURCE_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					// Find file we are storing info about.
+					uchar ucharFileid[16];
+					m_uTarget.ToByteArray(ucharFileid);
+					CKnownFile* pFile = theApp.downloadqueue->GetFileByID(ucharFileid);
+					if(pFile)
+					{
+						// JOHNTODO -- Add start position
+						// Start Position range (0x0 to 0x7FFF)
+						m_pfileSearchTerms.WriteUInt16(0);
+						m_pfileSearchTerms.WriteUInt64(pFile->GetFileSize());
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+							DebugSend("KADEMLIA2_SEARCH_SOURCE_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_SOURCE_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					}
+					else
+					{
+						PrepareToStop();
+						break;
+					}
 				}
-				else*/
+				else
 				{
-					m_pfileSearchTerms->WriteUInt8(1);
+					m_pfileSearchTerms.WriteUInt8(1);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_REQ(File)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(m_pfileSearchTerms->GetBuffer(), (UINT)m_pfileSearchTerms->GetLength(), KADEMLIA_SEARCH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -423,17 +430,51 @@ void CSearch::StorePacket()
 			{
 				//JOHNTODO -- We cannot precreate these packets as we do not know
 				// before hand if we are talking to Kad1.0 or Kad2.0..
-				/*if(pFromContact->GetVersion()) // JOHNTODO -- Add ability to switch betweek Kad1.0 and Kad2.0
+				CSafeMemFile m_pfileSearchTerms;
+				m_pfileSearchTerms.WriteUInt128(&m_uTarget);
+				if (pFromContact->GetVersion() >= 3/*47b*/)
+				{
+					if (m_uSearchTermsDataSize == 0)
+					{
+						// JOHNTODO - Need to add ability to change start position.
+						// Start position range (0x0 to 0x7FFF)
+						m_pfileSearchTerms.WriteUInt16((uint16)0x0000);
+					}
+					else
+					{
+						// JOHNTODO - Need to add ability to change start position.
+						// Start position range (0x8000 to 0xFFFF)
+						m_pfileSearchTerms.WriteUInt16((uint16)0x8000);
+						m_pfileSearchTerms.Write(m_pucSearchTermsData, m_uSearchTermsDataSize);
+					}
+				}
+				else
+				{
+					if (m_uSearchTermsDataSize == 0)
+					{
+						m_pfileSearchTerms.WriteUInt8(0);
+						// We send this extra byte to flag we handle large files.
+						m_pfileSearchTerms.WriteUInt8(0);
+					}
+					else
+					{
+						// Set to 2 to flag we handle handle large files.
+						m_pfileSearchTerms.WriteUInt8(2);
+						m_pfileSearchTerms.Write(m_pucSearchTermsData, m_uSearchTermsDataSize);
+					}
+				}
+
+				if (pFromContact->GetVersion() >= 3/*47b*/)
 				{
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_KEY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(m_pfileSearchTerms->GetBuffer(), (UINT)m_pfileSearchTerms->GetLength(), KADEMLIA2_SEARCH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
 				}
-				else*/
+				else
 				{
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_REQ(KEYWORD)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(m_pfileSearchTerms->GetBuffer(), (UINT)m_pfileSearchTerms->GetLength(), KADEMLIA_SEARCH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -444,25 +485,34 @@ void CSearch::StorePacket()
 		case NOTES:
 			{
 				// Write complete packet
-				if(m_pfileSearchTerms)
-					delete m_pfileSearchTerms;
-				m_pfileSearchTerms = new CSafeMemFile();
-				m_pfileSearchTerms->WriteUInt128(&m_uTarget);
+				CSafeMemFile m_pfileSearchTerms;
+				m_pfileSearchTerms.WriteUInt128(&m_uTarget);
 
-				/*if(pFromContact->GetVersion()) // JOHNTODO -- Add ability to switch betweek Kad1.0 and Kad2.0
+				if (pFromContact->GetVersion() >= 3/*47b*/)
 				{
-					// JOHNTODO -- Add File Size
-					m_pfileSearchTerms->WriteUInt64(0);
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA2_SEARCH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(m_pfileSearchTerms->GetBuffer(), (UINT)m_pfileSearchTerms->GetLength(), KADEMLIA2_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					// Find file we are storing info about.
+					uchar ucharFileid[16];
+					m_uTarget.ToByteArray(ucharFileid);
+					CKnownFile* pFile = theApp.sharedfiles->GetFileByID(ucharFileid);
+					if(pFile)
+					{
+						m_pfileSearchTerms.WriteUInt64(pFile->GetFileSize());
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+							DebugSend("KADEMLIA2_SEARCH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					}
+					else
+					{
+						PrepareToStop();
+						break;
+					}
 				}
-				else*/
+				else
 				{
-					m_pfileSearchTerms->WriteUInt128(&CKademlia::GetPrefs()->GetKadID());
+					m_pfileSearchTerms.WriteUInt128(&CKademlia::GetPrefs()->GetKadID());
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(m_pfileSearchTerms->GetBuffer(), (UINT)m_pfileSearchTerms->GetLength(), KADEMLIA_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -517,6 +567,10 @@ void CSearch::StorePacket()
 							listTag.push_back(new CKadTagUInt(TAG_SERVERPORT, theApp.clientlist->GetBuddy()->GetUDPPort()));
 							listTag.push_back(new CKadTagStr(TAG_BUDDYHASH, CStringW(md4str(uBuddyID.GetData()))));
 							listTag.push_back(new CKadTagUInt(TAG_SOURCEPORT, thePrefs.GetPort()));
+							if (pFromContact->GetVersion() >= 2/*47a*/)
+							{
+								listTag.push_back(new CKadTagUInt(TAG_FILESIZE, pFile->GetFileSize()));
+							}
 						}
 						else
 						{
@@ -533,14 +587,26 @@ void CSearch::StorePacket()
 						else
 							listTag.push_back(new CKadTagUInt(TAG_SOURCETYPE, 1));
 						listTag.push_back(new CKadTagUInt(TAG_SOURCEPORT, thePrefs.GetPort()));
-						/*if(bKad2)
+						if (pFromContact->GetVersion() >= 2/*47a*/)
 						{
 							listTag.push_back(new CKadTagUInt(TAG_FILESIZE, pFile->GetFileSize()));
-						}*/
+						}
 					}
 
+					// Encryption options Tag
+					// 5 Reserved (!)
+					// 1 CryptLayer Required
+					// 1 CryptLayer Requested
+					// 1 CryptLayer Supported
+					const uint8 uSupportsCryptLayer	= thePrefs.IsClientCryptLayerSupported() ? 1 : 0;
+					const uint8 uRequestsCryptLayer	= thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
+					const uint8 uRequiresCryptLayer	= thePrefs.IsClientCryptLayerRequired() ? 1 : 0;
+					const uint8 byCryptOptions = (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
+					listTag.push_back(new CKadTagUInt8(TAG_ENCRYPTION, byCryptOptions));
+					
+
 					// Send packet
-					CKademlia::GetUDPListener()->SendPublishSourcePacket(pFromContact->GetIPAddress(), pFromContact->GetUDPPort(),m_uTarget,uID, listTag);
+					CKademlia::GetUDPListener()->SendPublishSourcePacket(pFromContact, m_uTarget, uID, listTag);
 					// Inc total request answers
 					m_uTotalRequestAnswers++;
 					// Update search in the GUI
@@ -549,13 +615,12 @@ void CSearch::StorePacket()
 					for (TagList::const_iterator itTagList = listTag.begin(); itTagList != listTag.end(); ++itTagList)
 						delete *itTagList;
 				}
+				else
+					PrepareToStop();
 				break;
 			}
 		case STOREKEYWORD:
 			{
-				//JOHNTODO -- We cannot precreate these packets as we do not know
-				// before hand if we are talking to Kad1.0 or Kad2.0..
-
 				// Try to store keywords to a Node.
 				// As a safe guard, check to see if we already stored to the Max Nodes
 				if( m_uAnswers > SEARCHSTOREKEYWORD_TOTAL )
@@ -564,24 +629,60 @@ void CSearch::StorePacket()
 					break;
 				}
 
-				// The store can be up to 3 packets, 50 keywords each.
-				if( pbyIO1 )
+				uint16 iCount = (uint16)m_listFileIDs.size();
+
+				if(iCount == 0)
 				{
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA_PUBLISH_REQ(packet1)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket( byPacket1, ((1024*50)-pbyIO1->GetAvailable()), pFromContact->GetIPAddress(), pFromContact->GetUDPPort() );
+					PrepareToStop();
+					break;
 				}
-				if( pbyIO2 )
+				else if(iCount > 150)
+					iCount = 150;
+
+				UIntList::const_iterator itListFileID = m_listFileIDs.begin();
+				uchar ucharFileid[16];
+
+				while(iCount && (itListFileID != m_listFileIDs.end()))
 				{
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA_PUBLISH_REQ(packet2)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket( byPacket2, ((1024*50)-pbyIO2->GetAvailable()), pFromContact->GetIPAddress(), pFromContact->GetUDPPort() );
-				}
-				if( pbyIO3 )
-				{
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA_PUBLISH_REQ(packet3)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket( byPacket3, ((1024*50)-pbyIO3->GetAvailable()), pFromContact->GetIPAddress(), pFromContact->GetUDPPort() );
+					uint16 iPacketCount = 0;
+					byte byPacket[1024*50];
+					CByteIO byIO(byPacket,sizeof(byPacket));
+					byIO.WriteUInt128(m_uTarget);
+					byIO.WriteUInt16(0); // Will be corrected before sending.
+					while((iPacketCount < 50) && (itListFileID != m_listFileIDs.end()))
+					{
+						CUInt128 iID = *itListFileID;
+						iID.ToByteArray(ucharFileid);
+						CKnownFile* pFile = theApp.sharedfiles->GetFileByID(ucharFileid);
+						if(pFile)
+						{
+							iCount--;
+							iPacketCount++;
+							byIO.WriteUInt128(iID);
+							PreparePacketForTags( &byIO, pFile );
+						}
+						++itListFileID;
+					}
+					
+					// Correct file count.
+					uint32 current_pos = byIO.GetUsed();
+					byIO.Seek(16);
+					byIO.WriteUInt16(iPacketCount);
+					byIO.Seek(current_pos);
+					
+					// Send packet
+					if (pFromContact->GetVersion() >= 2/*47a*/)
+					{
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+							DebugSend("KADEMLIA2_PUBLISH_KEY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					}
+					else
+					{
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+							DebugSend("KADEMLIA_PUBLISH_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					}
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -591,8 +692,6 @@ void CSearch::StorePacket()
 			}
 		case STORENOTES:
 			{
-				// JOHNTODO - Need to add Kad2.0 support
-
 				// Find file we are storing info about.
 				uchar ucharFileid[16];
 				m_uTarget.ToByteArray(ucharFileid);
@@ -615,10 +714,23 @@ void CSearch::StorePacket()
 						listTag.push_back(new CKadTagUInt(TAG_FILERATING, pFile->GetFileRating()));
 					if(pFile->GetFileComment() != "")
 						listTag.push_back(new CKadTagStr(TAG_DESCRIPTION, pFile->GetFileComment()));
+					if (pFromContact->GetVersion() >= 2/*47a*/)
+						listTag.push_back(new CKadTagUInt(TAG_FILESIZE, pFile->GetFileSize()));
 					byIO.WriteTagList(listTag);
 
 					// Send packet
-					CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					if (pFromContact->GetVersion() >= 2/*47a*/)
+					{
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+							DebugSend("KADEMLIA2_PUBLISH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					}
+					else
+					{
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+							DebugSend("KADEMLIA_PUBLISH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					}
 					// Inc total request answers
 					m_uTotalRequestAnswers++;
 					// Update search in the GUI
@@ -627,6 +739,8 @@ void CSearch::StorePacket()
 					for (TagList::const_iterator itTagList = listTag.begin(); itTagList != listTag.end(); ++itTagList)
 						delete *itTagList;
 				}
+				else
+					PrepareToStop();
 				break;
 			}
 		case FINDBUDDY:
@@ -638,13 +752,20 @@ void CSearch::StorePacket()
 					PrepareToStop();
 					break;
 				}
+
+				CSafeMemFile m_pfileSearchTerms;
+				// Send the ID we used to find our buddy. Used for checks later and allows users to callback someone if they change buddies.
+				m_pfileSearchTerms.WriteUInt128(&m_uTarget);
+				// Send client hash so they can do a callback.
+				m_pfileSearchTerms.WriteUInt128(&CKademlia::GetPrefs()->GetClientHash());
+				// Send client port so they can do a callback
+				m_pfileSearchTerms.WriteUInt16(thePrefs.GetPort());
+
 				// Do a keyword/source search request to this Node.
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-				{
-					DebugSend("KADEMLIA_FINDBUDDY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-				}
 				// Send packet
-				CKademlia::GetUDPListener()->SendPacket(m_pfileSearchTerms->GetBuffer(), (UINT)m_pfileSearchTerms->GetLength(), KADEMLIA_FINDBUDDY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+					DebugSend("KADEMLIA_FINDBUDDY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+				CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_FINDBUDDY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
 				// Inc total request answers
 				m_uAnswers++;
 				// Update search in the GUI
@@ -671,6 +792,8 @@ void CSearch::StorePacket()
 				// Send our port so the callback works.
 				fileIO.WriteUInt16(thePrefs.GetPort());
 				// Send packet
+				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+					DebugSend("KADEMLIA_CALLBACK_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
 				CKademlia::GetUDPListener()->SendPacket( &fileIO, KADEMLIA_CALLBACK_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
 				// Inc total request answers
 				m_uAnswers++;
@@ -713,6 +836,7 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 	//    uint32 uClientID = 0;
 	uchar ucharBuddyHash[16];
 	CUInt128 uBuddy;
+	uint8 byCryptOptions = 0; // 0 = not supported
 
 	for (TagList::const_iterator itTagList = plistInfo->begin(); itTagList != plistInfo->end(); ++itTagList)
 	{
@@ -736,6 +860,8 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 			strmd4(pTag->GetStr(), ucharBuddyHash);
 			md4cpy(uBuddy.GetDataPtr(), ucharBuddyHash);
 		}
+		else if (!pTag->m_name.Compare(TAG_ENCRYPTION))
+			byCryptOptions = (uint8)pTag->GetInt();
 
 		delete pTag;
 	}
@@ -750,7 +876,7 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 		case 5:
 			m_uAnswers++;
 			theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
-			theApp.downloadqueue->KademliaSearchFile(m_uSearchID, &uAnswer, &uBuddy, uType, uIP, uTCPPort, uUDPPort, uServerIP, uServerPort);
+			theApp.downloadqueue->KademliaSearchFile(m_uSearchID, &uAnswer, &uBuddy, uType, uIP, uTCPPort, uUDPPort, uServerIP, uServerPort, byCryptOptions);
 			break;
 	}
 }
@@ -1016,7 +1142,7 @@ void CSearch::SendFindValue(CContact* pContact)
 		// Update the search for the GUI.
 		theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 
-		/*if(pContact->GetVersion() != 0) // JOHNTODO -- Add ability to switch betweek Kad1.0 and Kad2.0
+		if (pContact->GetVersion() >= 2/*47a*/)
 		{
 			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA2_REQ, pContact->GetIPAddress(), pContact->GetUDPPort());
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
@@ -1052,7 +1178,7 @@ void CSearch::SendFindValue(CContact* pContact)
 				}
 			}
 		}
-		else*/
+		else
 		{
 			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA_REQ, pContact->GetIPAddress(), pContact->GetUDPPort());
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
@@ -1110,12 +1236,11 @@ void CSearch::AddFileID(const CUInt128& uID)
 void CSearch::PreparePacketForTags( CByteIO *byIO, CKnownFile *pFile)
 {
 	// We are going to publish a keyword, setup the tag list.
+	TagList listTag;
 	try
 	{
 		if( pFile && byIO )
 		{
-			TagList listTag;
-
 			// Name, Size
 			listTag.push_back(new CKadTagStr(TAG_FILENAME, pFile->GetFileName()));
 			if(pFile->GetFileSize() > OLD_MAX_EMULE_FILE_SIZE)
@@ -1188,8 +1313,6 @@ void CSearch::PreparePacketForTags( CByteIO *byIO, CKnownFile *pFile)
 				}
 			}
 			byIO->WriteTagList(listTag);
-			for (TagList::const_iterator itTagList = listTag.begin(); itTagList != listTag.end(); ++itTagList)
-				delete *itTagList;
 		}
 		else
 		{
@@ -1206,82 +1329,8 @@ void CSearch::PreparePacketForTags( CByteIO *byIO, CKnownFile *pFile)
 	{
 		AddDebugLogLine(false, _T("Exception in CSearch::PreparePacketForTags"));
 	}
-}
-
-void CSearch::PreparePacket()
-{
-	// JOHNTODO -- This needs fixed so that it can support Kad2.0..
-	// We are setting up packets for a keyword publish.
-	try
-	{
-		// Get the file count as this packet can be split up into set of 50.
-		int iCount = m_listFileIDs.size();
-		uchar ucharFileid[16];
-		// We split up the keywords into 50 per packet.
-		// Never send more then 150 keywords or 3 packets.
-		if( iCount > 150 )
-			iCount = 150;
-		if( iCount > 100 )
-		{
-			pbyIO3 = new CByteIO(byPacket3,sizeof(byPacket3));
-			pbyIO3->WriteByte(OP_KADEMLIAHEADER);
-			pbyIO3->WriteByte(KADEMLIA_PUBLISH_REQ);
-			pbyIO3->WriteUInt128(m_uTarget);
-			pbyIO3->WriteUInt16((uint16)(iCount-100));
-			while ( iCount > 100 )
-			{
-				iCount--;
-				pbyIO3->WriteUInt128(m_listFileIDs.front());
-				m_listFileIDs.front().ToByteArray(ucharFileid);
-				m_listFileIDs.pop_front();
-				CKnownFile* pFile = theApp.sharedfiles->GetFileByID(ucharFileid);
-				PreparePacketForTags( pbyIO3, pFile );
-			}
-		}
-		if( iCount > 50 )
-		{
-			pbyIO2 = new CByteIO(byPacket2,sizeof(byPacket2));
-			pbyIO2->WriteByte(OP_KADEMLIAHEADER);
-			pbyIO2->WriteByte(KADEMLIA_PUBLISH_REQ);
-			pbyIO2->WriteUInt128(m_uTarget);
-			pbyIO2->WriteUInt16((uint16)(iCount-50));
-			while ( iCount > 50 )
-			{
-				iCount--;
-				pbyIO2->WriteUInt128(m_listFileIDs.front());
-				m_listFileIDs.front().ToByteArray(ucharFileid);
-				m_listFileIDs.pop_front();
-				CKnownFile* pFile = theApp.sharedfiles->GetFileByID(ucharFileid);
-				PreparePacketForTags( pbyIO2, pFile );
-			}
-		}
-		if( iCount > 0 )
-		{
-			pbyIO1 = new CByteIO(byPacket1,sizeof(byPacket1));
-			pbyIO1->WriteByte(OP_KADEMLIAHEADER);
-			pbyIO1->WriteByte(KADEMLIA_PUBLISH_REQ);
-			pbyIO1->WriteUInt128(m_uTarget);
-			pbyIO1->WriteUInt16((uint16)iCount);
-			while ( iCount > 0 )
-			{
-				iCount--;
-				pbyIO1->WriteUInt128(m_listFileIDs.front());
-				m_listFileIDs.front().ToByteArray(ucharFileid);
-				m_listFileIDs.pop_front();
-				CKnownFile* pFile = theApp.sharedfiles->GetFileByID(ucharFileid);
-				PreparePacketForTags( pbyIO1, pFile );
-			}
-		}
-	}
-	catch ( CIOException *ioe )
-	{
-		AddDebugLogLine( false, _T("Exception in CSearch::PreparePacket (IO error(%i))"), ioe->m_iCause);
-		ioe->Delete();
-	}
-	catch (...)
-	{
-		AddDebugLogLine(false, _T("Exception in CSearch::PreparePacket"));
-	}
+	for (TagList::const_iterator itTagList = listTag.begin(); itTagList != listTag.end(); ++itTagList)
+		delete *itTagList;
 }
 
 uint32 CSearch::GetNodeLoad() const
@@ -1312,13 +1361,10 @@ void CSearch::SetTargetID( CUInt128 uVal )
 }
 uint32 CSearch::GetAnswers() const
 {
-	// If we sent more then one packet per node, we have to average the answers for the real count.
-	if(pbyIO2 == NULL)
+	if(m_listFileIDs.size() == 0)
 		return m_uAnswers;
-	else if(pbyIO3 == NULL)
-		return m_uAnswers/2;
-	else
-		return m_uAnswers/3;
+	// If we sent more then one packet per node, we have to average the answers for the real count.
+	return m_uAnswers/((m_listFileIDs.size()+49)/50);
 }
 uint32 CSearch::GetKadPacketSent() const
 {
@@ -1358,4 +1404,11 @@ void CSearch::UpdateNodeLoad( uint8 uLoad )
 	// Since all nodes do not return a load value, keep track of total responses and total load.
 	m_uTotalLoad += uLoad;
 	m_uTotalLoadResponses++;
+}
+
+void CSearch::SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTermsData )
+{
+	m_uSearchTermsDataSize = uSearchTermDataSize;
+	m_pucSearchTermsData = new BYTE[uSearchTermDataSize];
+	memcpy(m_pucSearchTermsData, pucSearchTermsData, uSearchTermDataSize);
 }

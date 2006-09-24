@@ -44,8 +44,6 @@ namespace Kademlia
 	typedef std::map<CUInt128, CContact*> ContactMap;
 	typedef std::list<CContact*> ContactList;
 	typedef std::list<CUInt128> UIntList;
-	typedef std::set
-		<CUInt128> UIntSet;
 	typedef std::list<CKadTag*> TagList;
 	typedef std::list<CStringW> WordList;
 	typedef std::map<CUInt128, CSearch*> SearchMap;

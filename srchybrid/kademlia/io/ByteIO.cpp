@@ -92,3 +92,17 @@ void CByteIO::Reset()
 	m_pbyBuffer -= m_uUsed;
 	m_uUsed = 0;
 }
+
+void CByteIO::Seek(uint32 newpos)
+{
+	if (newpos > (m_uUsed + m_uAvailable))
+		throw new CIOException(ERR_BUFFER_TOO_SMALL);
+
+	// Position the buffer
+	m_pbyBuffer -= m_uUsed;
+	m_pbyBuffer += newpos;
+	// Update available
+	m_uAvailable = (m_uUsed + m_uAvailable) - newpos;
+	// The used bytes are the new pos.
+	m_uUsed = newpos;
+}

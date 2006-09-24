@@ -148,11 +148,11 @@ void CPrefs::SetIPAddress(uint32 uVal,uint32 uipreceivefrom)
     	m_uIP = uVal;
 	}
 	else 
-	    {
+	{
 		// MORPH extra log line... where do those bad ip adresses com from? 
 		AddDebugLogLine(false, _T("Received suspicious my adress:%s from %s via KAD"),ipstr(ntohl(uVal)),ipstr(ntohl(  uipreceivefrom)));
 		m_uIPLast = uVal;
-		}
+	}
 }
 
 
@@ -293,7 +293,7 @@ uint32 CPrefs::GetIPAddress() const
 
 bool CPrefs::GetRecheckIP() const
 {
-	return (m_uRecheckip<4);
+	return (m_uRecheckip < KADEMLIAFIREWALLCHECKS);
 }
 
 void CPrefs::SetRecheckIP()
