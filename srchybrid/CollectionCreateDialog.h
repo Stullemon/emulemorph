@@ -74,5 +74,9 @@ private:
 	CButton m_CollectionViewShareButton;
 	CButton m_CollectionCreateFormatCheck;
 	HICON	m_icoWnd;
+	HICON	m_icoForward;
+	HICON	m_icoBack;
+	HICON	m_icoColl;
+	HICON	m_icoFiles;
 	bool	m_bCreatemode;
 };

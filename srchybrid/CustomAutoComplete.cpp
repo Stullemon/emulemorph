@@ -243,7 +243,8 @@ STDMETHODIMP CCustomAutoComplete::Next(ULONG celt, LPOLESTR* rgelt, ULONG* pcelt
 
 	if (!celt)
 		celt = 1;
-	for (ULONG i = 0; i < celt; i++)
+	ULONG i;
+	for (i = 0; i < celt; i++)
 	{
 		if (m_nCurrentElement == (ULONG)m_asList.GetSize())
 			break;

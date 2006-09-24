@@ -58,12 +58,16 @@ CCollectionViewDialog::CCollectionViewDialog(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CCollectionViewDialog::IDD, pParent)
 	, m_pCollection(NULL)
 {
+	m_icoWnd = NULL;
+	m_icoColl = NULL;
 }
 
 CCollectionViewDialog::~CCollectionViewDialog()
 {
-	if (m_icovWnd)
-		VERIFY( DestroyIcon(m_icovWnd) );
+	if (m_icoWnd)
+		VERIFY( DestroyIcon(m_icoWnd) );
+	if (m_icoColl)
+		VERIFY( DestroyIcon(m_icoColl) );
 }
 
 void CCollectionViewDialog::DoDataExchange(CDataExchange* pDX)
@@ -100,13 +104,13 @@ BOOL CCollectionViewDialog::OnInitDialog(void)
 	}
 
 	m_CollectionViewList.Init(_T("CollectionView"));
-	SetIcon(m_icovWnd = theApp.LoadIcon(_T("Collection_View")), FALSE);
+	SetIcon(m_icoWnd = theApp.LoadIcon(_T("Collection_View")), FALSE);
 
 	m_AddNewCatagory.SetCheck(false);
 
 	SetWindowText(m_pCollection->m_sCollectionName);
 
-	m_CollectionViewListIcon.SetIcon(theApp.LoadIcon(_T("COLLECTION")));
+	m_CollectionViewListIcon.SetIcon(m_icoColl = theApp.LoadIcon(_T("COLLECTION")));
 	m_CollectionDownload.SetWindowText(GetResString(IDS_DOWNLOAD));
 	m_CollectionExit.SetWindowText(GetResString(IDS_CW_CLOSE));
 	m_CollectionViewListLabel.SetWindowText(GetResString(IDS_COLLECTIONLIST));

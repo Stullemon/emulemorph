@@ -161,7 +161,7 @@ void CBarShader::Draw(CDC* dc, int iLeft, int iTop, bool bFlat) {
 	rectSpan.bottom = iTop + m_iHeight;
 	rectSpan.right = iLeft;
 
-	sint64 iBytesInOnePixel = (sint64)(m_dBytesPerPixel + 0.5f);
+	uint64 uBytesInOnePixel = (uint64)(m_dBytesPerPixel + 0.5f);
 	uint64 start = 0;//bsCurrent->start;
 	// SLUGFILLER: speedBarShader
 	COLORREF color = m_Spans.GetValueAt(pos);
@@ -169,18 +169,17 @@ void CBarShader::Draw(CDC* dc, int iLeft, int iTop, bool bFlat) {
 	// SLUGFILLER: speedBarShader
 	while(pos != NULL && rectSpan.right < (iLeft + m_iWidth)) {	// SLUGFILLER: speedBarShader
 		uint64 uSpan = m_Spans.GetKeyAt(pos) - start;	// SLUGFILLER: speedBarShader
-		sint64 iPixels = (sint64)(uSpan * m_dPixelsPerByte + 0.5f);
-		if(iPixels > 0) {
+		uint64 uPixels = (uint64)(uSpan * m_dPixelsPerByte + 0.5f);
+		if (uPixels > 0) {
 			rectSpan.left = rectSpan.right;
-			rectSpan.right += (int)iPixels;
+			rectSpan.right += (int)uPixels;
 			FillRect(dc, &rectSpan, color, bFlat);	// SLUGFILLER: speedBarShader
-
-			start += (uint64)(iPixels * m_dBytesPerPixel + 0.5f);
+			start += (uint64)(uPixels * m_dBytesPerPixel + 0.5f);
 		} else {
 			float fRed = 0;
 			float fGreen = 0;
 			float fBlue = 0;
-			uint64 iEnd = start + iBytesInOnePixel;
+			uint64 iEnd = start + uBytesInOnePixel;
 			uint64 iLast = start;
 			// SLUGFILLER: speedBarShader
 			do {
@@ -201,7 +200,7 @@ void CBarShader::Draw(CDC* dc, int iLeft, int iTop, bool bFlat) {
 				FillRect(dc, &rectSpan, color, bFlat);
 			else
 				FillRect(dc, &rectSpan, fRed, fGreen, fBlue, bFlat);
-			start += iBytesInOnePixel;
+			start += uBytesInOnePixel;
 		}
 		// SLUGFILLER: speedBarShader
 		while(pos != NULL && m_Spans.GetKeyAt(pos) < start) {

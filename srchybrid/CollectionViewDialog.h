@@ -47,7 +47,8 @@ private:
 
 	CCollectionListCtrl m_CollectionViewList;
 	CCollection* m_pCollection;
-	HICON	m_icovWnd;
+	HICON	m_icoWnd;
+	HICON	m_icoColl;
 
 	afx_msg void OnNMDblclkCollectionvewlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedViewcollectiondl();

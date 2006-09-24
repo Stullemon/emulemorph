@@ -365,7 +365,7 @@ HRESULT CMainFrameDropTarget::PasteHTML(COleDataObject& data)
 		if ((pszClipboard = (LPCSTR)GlobalLock(hMem)) != NULL)
 		{
 			hrPasteResult = S_FALSE; // default: nothing was pasted
-			LPSTR pszHTML = strchr(pszClipboard, '<');
+			LPCSTR pszHTML = strchr(pszClipboard, '<');
 			if (pszHTML != NULL)
 			{
 				USES_CONVERSION;

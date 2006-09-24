@@ -99,7 +99,7 @@ void CCorruptionBlackBox::TransferredData(uint64 nStartPos, uint64 nEndPos, cons
 	// we store records seperated for each part, so we don't have to search all entries everytime
 	
 	// convert pos to relative block pos
-	uint16 nPart = (uint16)(nStartPos / PARTSIZE);
+	UINT nPart = (UINT)(nStartPos / PARTSIZE);
 	uint64 nRelStartPos = nStartPos - (uint64)nPart*PARTSIZE;
 	uint64 nRelEndPos = nEndPos - (uint64)nPart*PARTSIZE;
 	if (nRelEndPos >= PARTSIZE){
@@ -178,7 +178,7 @@ void CCorruptionBlackBox::VerifiedData(uint64 nStartPos, uint64 nEndPos){
 		return;
 	}
 	// convert pos to relative block pos
-	uint16 nPart = (uint16)(nStartPos / PARTSIZE);
+	UINT nPart = (UINT)(nStartPos / PARTSIZE);
 	uint64 nRelStartPos = nStartPos - (uint64)nPart*PARTSIZE;
 	uint64 nRelEndPos = nEndPos - (uint64)nPart*PARTSIZE;
 	if (nRelEndPos >= PARTSIZE){
@@ -253,7 +253,7 @@ void CCorruptionBlackBox::CorruptedData(uint64 nStartPos, uint64 nEndPos){
 		return;
 	}
 	// convert pos to relative block pos
-	uint16 nPart = (uint16)(nStartPos / PARTSIZE);
+	UINT nPart = (UINT)(nStartPos / PARTSIZE);
 	uint64 nRelStartPos = nStartPos - (uint64)nPart*PARTSIZE;
 	uint64 nRelEndPos = nEndPos - (uint64)nPart*PARTSIZE;
 	if (nRelEndPos >= PARTSIZE){

@@ -36,7 +36,11 @@ protected:
     virtual BOOL OnInitDialog();
     afx_msg void OnNcPaint();
     afx_msg BOOL OnNcActivate(BOOL bActive);
-    afx_msg UINT OnNcHitTest(CPoint point);
+#if _MFC_VER>=0x0800
+	afx_msg LRESULT OnNcHitTest(CPoint point);
+#else
+	afx_msg UINT OnNcHitTest(CPoint point);
+#endif
     afx_msg void OnNcLButtonDown(UINT nHitTest, CPoint point);
     afx_msg void OnNcRButtonDown(UINT nHitTest, CPoint point);
     afx_msg void OnMouseMove(UINT nFlags, CPoint point);

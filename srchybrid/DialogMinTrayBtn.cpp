@@ -70,11 +70,18 @@ TEMPLATE const TCHAR *CDialogMinTrayBtn<BASE>::m_pszMinTrayBtnBmpName[] = { BMP_
 
 // _WIN32_WINNT >= 0x0501 (XP only)
 #define _WM_THEMECHANGED                0x031A	
+#if _MFC_VER>=0x0800
+#define _ON_WM_THEMECHANGED() \
+	{ _WM_THEMECHANGED, 0, 0, 0, AfxSig_l, \
+		(AFX_PMSG)(AFX_PMSGW) \
+		(static_cast< LRESULT (AFX_MSG_CALL CWnd::*)(void) > ( &ThisClass :: _OnThemeChanged)) },
+#else
 #define _ON_WM_THEMECHANGED()														\
 	{	_WM_THEMECHANGED, 0, 0, 0, AfxSig_l,										\
 		(AFX_PMSG)(AFX_PMSGW)														\
 		(static_cast< LRESULT (AFX_MSG_CALL CWnd::*)(void) > (_OnThemeChanged))		\
 	},
+#endif
 
 
 BEGIN_MESSAGE_MAP_TEMPLATE(TEMPLATE, CDialogMinTrayBtn<BASE>, CDialogMinTrayBtn, BASE)
@@ -153,7 +160,13 @@ TEMPLATE BOOL CDialogMinTrayBtn<BASE>::OnNcActivate(BOOL bActive)
     return bResult;
 }
 
-TEMPLATE UINT CDialogMinTrayBtn<BASE>::OnNcHitTest(CPoint point)
+TEMPLATE
+#if _MFC_VER>=0x0800
+LRESULT
+#else
+UINT
+#endif
+CDialogMinTrayBtn<BASE>::OnNcHitTest(CPoint point)
 {
     BOOL bPreviousHitTest = m_bMinTrayBtnHitTest;
     m_bMinTrayBtnHitTest = MinTrayBtnHitTest(point);

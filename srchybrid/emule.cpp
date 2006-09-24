@@ -267,6 +267,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 		m_strModVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	m_strModLongVersion = CemuleApp::m_szMVersionLong;
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
+    #ifdef _BETA
+	m_strModLongVersion.AppendFormat(_T(".%u"), CemuleApp::m_nMVersionBld); // leuk_he: build version for
+    #endif
 	if (CemuleApp::m_szMMVersion[0]!=0)
 		m_strModLongVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	//MORPH END   - Added by SiRoB, [-modname-]
@@ -381,7 +384,7 @@ BOOL CemuleApp::InitInstance()
 		/*
 		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg, true);
 		*/
-        theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion +_T("]"), true);
+        theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion+ _T("]"), true);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Locale initialization -- BE VERY CAREFUL HERE!!!
