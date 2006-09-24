@@ -33,6 +33,16 @@
 // Disable some warnings which get fired with /W4 for Windows/MFC/ATL headers
 #pragma warning(disable:4127) // conditional expression is constant
 
+#if _MSC_VER>=1400
+#define _SECURE_ATL	0		  //TODO: resolve
+#if !_SECURE_ATL
+#pragma warning(disable:4996) // 'foo' was declared deprecated
+#endif
+#ifndef _USE_32BIT_TIME_T
+#define _USE_32BIT_TIME_T
+#endif
+#endif
+
 #ifdef _DEBUG
 #define	_ATL_DEBUG
 #define _ATL_DEBUG_QI
@@ -109,6 +119,10 @@
 // when using warning level 4
 #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union (not worth to mess with, it's due to MIDL created code)
 #pragma warning(disable:4238) // nonstandard extension used : class rvalue used as lvalue
+#if _MSC_VER>=1400
+#pragma warning(disable:4996) // '_swprintf' was declared deprecated
+#pragma warning(disable:4127) // conditional expression is constant
+#endif
 
 #include "types.h"
 

@@ -57,6 +57,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL CreateControlSite(COleControlContainer* pContainer, COleControlSite** ppSite, UINT nID, REFCLSID clsid);
+	virtual void PostNcDestroy();
 	
 	virtual void OnBeforeNavigate(LPDISPATCH pDisp, LPCTSTR szUrl);
 	virtual void OnNavigateComplete(LPDISPATCH pDisp, LPCTSTR szUrl);

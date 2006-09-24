@@ -1114,7 +1114,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 					uint32 sumofnocontrolpacketsizesent = 0;
 					uint32 sumofpacketpartfilesizesent = 0;
 					sendLocker.Lock();
-					while (result > sumofpacketsizesent && result-sumofpacketsizesent >= m_currentPacket_in_buffer_list.GetHead()->remainpacketsize) {
+					while (result > sumofpacketsizesent && result-sumofpacketsizesent >= m_currentPacket_in_buffer_list.IsEmpty()?(uint32)0:m_currentPacket_in_buffer_list.GetHead()->remainpacketsize) {
 						BufferedPacket* pPacket = m_currentPacket_in_buffer_list.RemoveHead();
 						if (pPacket->iscontrolpacket == false) {
 							sumofnocontrolpacketsizesent += pPacket->remainpacketsize;

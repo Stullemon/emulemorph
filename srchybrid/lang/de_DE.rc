@@ -70,8 +70,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION "Erfrage Dateiinformationen"
-    IDS_HTTPDOWNLOAD_FAIL_PARSE_ERROR 
-                            "Ein Fehler trat auf beim Verarbeiten von: %s"
     IDS_HTTPDOWNLOAD_GENERIC_ERROR 
                             "Beim Versuch die Datei herunterzuladen ist ein Fehler aufgetreten - Fehler:%s"
     IDS_HTTPDOWNLOAD_FAIL_CONNECT_SERVER 
@@ -119,8 +117,6 @@ STRINGTABLE
 BEGIN
     IDS_MAIN_SOCKETERROR    "Schwerer Fehler: An Port %i konnte kein Socket erstellt werden"
     IDS_MAIN_BTN_DISCONNECT "T&rennen"
-    IDS_MAIN_BTN_DISCONNECT_TOOLTIP 
-                            "Verbindung zum derzeitigen Server trennen"
     IDS_ERR_WRONGFILEID     "Eine falsche Datei-ID wurde gesendet"
     IDS_ERR_BADHASHSET      "Korruptes oder ungültiges Hashset wurde empfangen"
     IDS_ERR_BADDATABLOCK    "Korrupter oder ungültiger Datenblock wurde empfangen"
@@ -129,17 +125,31 @@ BEGIN
     IDS_ERR_NOSLLINK        "Kein eD2K Server- oder Dateilink"
     IDS_ERR_WRONGPACKAGESIZE "Ungültige OP_FILEREQUEST Paketgrösse"
     IDS_ERR_WRONGHPACKAGESIZE "Ungültige OP_HASHSETREQUEST Paketgrösse"
-    IDS_ERR_BADCLIENTACTION "Ein Client verursachte einen Fehler oder verhält sich ungewöhnlich: %s Verbindung wurde getrennt!"
     IDS_ERR_UNKNOWNCLIENTACTION 
                             "Unbekannter Client sendet ein Paket des erweiterten Protokolls."
     IDS_ERR_OPENMET         "Fehler: part.met Datei konnte nicht geöffnet werden! (%s => %s)"
     IDS_ERR_BADMETVERSION   "Fehler: ungültige part.met Dateiversion! (%s => %s)"
-    IDS_ERR_BADGAP          "Ungültiges Gap-Tag in part.met Datei"
+    IDS_ERR_METCORRUPT      "Fehler: %s (%s) ist beschädigt, Datei kann nicht geladen werden"
+    IDS_ERR_FILEERROR       "Unerwarteter Dateifehler beim Lesen von %s (%s): %s"
+    IDS_ERR_FILEOPEN        "Datei konnte nicht geöffnet werden: %s (%s)"
+    IDS_SEL_SKINDIR         "Wähle Skin-Verzeichnis..."
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_EMPTYADRESSESDAT_TITLE "Serverliste konnte nicht empfangen werden"
+    IDS_ERR_HASHERRORWARNING 
+                            "Warnung: geladener Teil der Datei könnte nicht geprüft werden - Hashset unvollständig (%s)"
+    IDS_ERR_INCOMPLETEHASH  "Fehler: geladener Teil der Datei konnte nicht geprüft werden - Hashset unvollständig (%s). Dies sollte niemals vorkommen"
+    IDS_DOWNLOADING         "Ladend"
+    IDS_WAITING             "Warte"
+    IDS_HASHING             "Überprüfe"
+    IDS_COMPLETING          "Wird beendet"
+    IDS_COMPLETE            "Vollständig"
+    IDS_PAUSED              "Angehalten"
+    IDS_ERRORLIKE           "Fehlerhaft"
+    IDS_ASSIGNED2K          "eD2K-Links sind momentan nicht eMule zugewiesen. Möchten Sie eMule nun die eD2K-Links zuweisen? (empfohlen)"
+    IDS_ERR_EMPTYADRESSESDAT 
+                            "Keine Serverlisten-Adresse gefunden in adresses.dat. Bitte fügen Sie eine gültige URL zu einer Serverliste in diese Datei ein, um ein automatisches Update Ihrer Serverliste beim Start zu ermöglichen."
     IDS_ERR_BADSERVERMETVERSION "Ungültiges Versiontag in server.met (0x%X)!"
     IDS_SERVERSFOUND        "%i Server gefunden in server.met"
     IDS_SERVERSADDED        "%d Server hinzugefügt, %d nicht Hinzugefügt (bereits gelistet/ungültig)"
@@ -148,7 +158,6 @@ BEGIN
                             "Unerwarteter Dateifehler beim Lesen von server.met: %s, Serverliste konnte nicht geladen werden"
     IDS_ERR_SAVESERVERMET   "Speichern von server.met fehlgeschlagen!"
     IDS_PASSIVE             "Passiv"
-    IDS_MAIN_CONNECTEDTO    "Verbindung hergestellt auf:"
     IDS_MAIN_BTN_CANCEL     "A&bbruch"
     IDS_AVAIL               "Dateiteile: %d , verfügbar: %d (%.1f%%)\n\n"
     IDS_TYPE                "Typ"
@@ -167,9 +176,10 @@ BEGIN
     IDS_PREFERENCE          "Präferenz"
     IDS_PRIONOPREF          "Keine Präferenz"
     IDS_CONNECTTHIS         "Verbindung zum gewählten Server herstellen"
-    IDS_CHAT_WELCOME        "Sofortmitteilungen\n \nRechtsklicken Sie auf einen Client und wählen 'Mitteilung senden', um einen Chat einzuleiten"
-    IDS_MAIN_BTN_CANCEL_TOOLTIP 
-                            "Unterbricht die gegenwärtigen Verbindungsversuche"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_MAIN_BTN_CONNECT    "&Verbinden"
     IDS_ERR_SAVESERVERMET2  "Fehler beim Speichern von server.met! Eventuell müssen Sie die Datei server.met löschen, und server.met.old umbenennen in server.met"
     IDS_NOTCONNECTED        "Nicht verbunden"
@@ -177,36 +187,8 @@ BEGIN
     IDS_USERS               "Benutzer: %i"
     IDS_UPDOWN              "Up: %.1f(%.1f) | Down: %.1f(%.1f)"
     IDS_CONNECTED           "Verbunden"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_ERR_WRITEERROR      "Unerwarteter Dateifehler beim Schreiben %s : %s"
-    IDS_ERR_COMPLETIONFAILED 
-                            "Unerwarteter Dateifehler beim Fertigstellen von %s. Datei wird pausiert; starten Sie eMule neu, um das Fertigstellen erneut zu versuchen."
-    IDS_ERR_DELETEFAILED    "%s konnte nicht gelöscht werden, Sie müssen dies manuell nachholen"
-    IDS_DOWNLOADDONE        "Download von %s ist komplett :-)"
-    IDS_ERR_DELETE          "%s konnte nicht gelöscht werden"
-    IDS_ERR_HASHERRORWARNING 
-                            "Warnung: geladener Teil der Datei könnte nicht geprüft werden - Hashset unvollständig (%s)"
-    IDS_ERR_INCOMPLETEHASH  "Fehler: geladener Teil der Datei konnte nicht geprüft werden - Hashset unvollständig (%s). Dies sollte niemals vorkommen"
-    IDS_DOWNLOADING         "Ladend"
-    IDS_WAITING             "Warte"
-    IDS_HASHING             "Überprüfe"
-    IDS_COMPLETING          "Wird beendet"
-    IDS_COMPLETE            "Vollständig"
-    IDS_PAUSED              "Angehalten"
-    IDS_ERRORLIKE           "Fehlerhaft"
-    IDS_ASSIGNED2K          "eD2K-Links sind momentan nicht eMule zugewiesen. Möchten Sie eMule nun die eD2K-Links zuweisen? (empfohlen)"
-    IDS_ERR_EMPTYADRESSESDAT 
-                            "Keine Serverlisten-Adresse gefunden in adresses.dat. Bitte fügen Sie eine gültige URL zu einer Serverliste in diese Datei ein, um ein automatisches Update Ihrer Serverliste beim Start zu ermöglichen."
-END
-
-STRINGTABLE 
-BEGIN
     IDS_LINKNOTADDED        "Konnte Link nicht hinzufügen"
     IDS_MAIN_EXIT           "Wollen Sie eMule wirklich beenden?"
-    IDS_MAIN_EXITTITLE      "Bestätigung"
     IDS_MAIN_POPUP_RESTORE  "Wiederherstellen"
     IDS_CONNECTTOANYSERVER  "Verbinden zu einem Server"
     IDS_EXIT                "&Beenden"
@@ -214,7 +196,32 @@ BEGIN
     IDS_FAILED              "Fehlgeschlagen"
     IDS_ERR_BADSERVERREPLY  "Ungültige oder beschädigte Login-Antwort vom Server empfangen"
     IDS_NEWCLIENTID         "Neue Client-ID ist %u"
-    IDS_NOSHAREDFOLDERS     "Keine shared Ordner"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_REHASH          "Warnung: %s ist möglicherweise beschädigt, vollständig geladene Teile werden überprüft"
+    IDS_SKIN_PROF           "Skin Profile"
+    IDS_ERR_PART_FNF        ".part Datei konnte nicht gefunden werden"
+    IDS_KADOPEN             "Offen"
+    IDS_ERR_SAVEMET         "FEHLER beim Speichern der part-Datei: %s (%s)"
+    IDS_ERR_FOUNDCORRUPTION "Beschädigter Teil (%i) gefunden in %s"
+    IDS_HASHINGDONE         "Überprüfung von %s abgeschlossen, Datei scheint in Ordnung zu sein"
+    IDS_ERR_PARTCORRUPT     "Heruntergeladener Teil %i ist beschädigt :(  (%s)"
+    IDS_ICHWORKED           "ICH: beschädigter Teil %i wurde wiederhergestellt (%s), gerettet: %s"
+    IDS_ERR_OUTOFSPACE      "Nicht genügend freier Festplattenspeicher für %s!"
+    IDS_SE                  "Quellenaustausch"
+    IDS_ERR_WRITEERROR      "Unerwarteter Dateifehler beim Schreiben %s : %s"
+    IDS_ERR_COMPLETIONFAILED 
+                            "Unerwarteter Dateifehler beim Fertigstellen von %s. Datei wird pausiert; starten Sie eMule neu, um das Fertigstellen erneut zu versuchen."
+    IDS_ERR_DELETEFAILED    "%s konnte nicht gelöscht werden, Sie müssen dies manuell nachholen"
+    IDS_DOWNLOADDONE        "Download von %s ist komplett :-)"
+    IDS_ERR_DELETE          "%s konnte nicht gelöscht werden"
+    
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SHAREDFOLDERS       "Freigegebene Verzeichnisse"
     IDS_VIEW1               "Ansehen "
     IDS_VIEW2               " (Nicht geshared)"
@@ -253,13 +260,8 @@ BEGIN
     IDS_ASKED4ANOTHERFILE   "Andere Datei angefordert"
     IDS_Q_CANCELDL          "Sollen diese Downloads wirklich abgebrochen und gelöscht werden?\n"
     IDS_Q_CANCELDL2         "Soll dieser Download wirklich abgebrochen und gelöscht werden?\n"
-    IDS_COPIED2CB           "In Zwischenablage kopiert: \n"
-    IDS_PROCDONE            "% fertig"
-    IDS_SELECTINCOMINGDIR   "Wähle Ordner für eingehende Dateien"
-    IDS_SELECTTEMPDIR       "Wähle Ordner für Temp Dateien"
     IDS_DL_FILENAME         "Dateiname"
     IDS_DL_SIZE             "Größe"
-    IDS_DL_TRANSF           "Übertragen"
 END
 
 STRINGTABLE 
@@ -274,7 +276,6 @@ BEGIN
     IDS_QL_USERNAME         "Benutzername"
     IDS_LOADURL             "Laden"
     IDS_DELETEAFTERALLOC    "Datei '%s' reserviert gerade Festplattenplatz. Sie wird anschließend gelöscht werden."
-    IDS_ERR_PACKAGEHANDLING "Nicht behandelter Fehler beim Verarbeiten eines Paketes vom Server (%s)"
     IDS_QL_RATING           "Bewertung"
     IDS_CONNECTINGTO        "Verbinde zu %s (%s:%i)..."
     IDS_CLIENTS             "Clients"
@@ -297,7 +298,6 @@ BEGIN
     IDS_SRV_ADDR            "Bitte geben Sie eine Serveradresse ein"
     IDS_SRV_PORT            "Unvollständiger Serverport: Bitte geben Sie einen Serverport ein"
     IDS_SRV_NOTADDED        "Server nicht hinzugefügt!"
-    IDS_SRV_READD           "Server war als tot markiert, er wurde wieder hinzugefügt!"
     IDS_SRV_NOURLAV         "Keine URL verfügbar."
     IDS_INVALIDURL          "Ungültige URL"
 END
@@ -310,23 +310,12 @@ BEGIN
     IDS_PRIOVERYLOW         "Sehr niedrig"
     IDS_PRIORELEASE         "Release"
     IDS_TRAYDLG_SPEED       "eMule Geschwindigkeit"
-    IDS_FSTATUS_LOCKED      "Gesperrt"
-    IDS_KADALPHA            "Die Kademlia-Implementierung ist im frühen Entwicklungsstadium. Wir empfehlen es nur denen zu aktivieren, die Interesse am Testen haben."
     IDS_FSTATUS_FRIENDSONLY "Nur Freunde"
-    IDS_VIAPASSIVE          "via Passive"
-    IDS_FSTATUS_PUBLIC      "Öffentlich"
-    IDS_ERR_RENAMESF        "Fehler beim Umbenennen der Datei\r\n   ""%s""\r\nin\r\n   ""%s""\r\n\r\n%hs"
-    IDS_PRIOHIGHEST         "Höchste"
+    IDS_VIAPASSIVE          "via passiv"
+    IDS_ERR_RENAMESF        "Fehler beim Umbenennen der Datei\r\n    ""%s""\r\nin\r\n    ""%s""\r\n\r\n%s"
     IDS_AVAILABLE           "Verfügbar"
-    IDS_ERR_NOPRIMCHANGE    "Sie können die Berechtigung nicht ändern während die Datei gerade heruntergeladen wird!"
-    IDS_HIDDEN              "Versteckt"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_FSTAT_TRANSFER      "Transfer"
     IDS_FSTAT_CONNECTION    "Verbindung"
-    IDS_FSTAT_CLIENTS       "Clients"
     IDS_FSTAT_SERVERS       "Server"
     IDS_FSTAT_WAITING       "Warte..."
     IDS_TIME                "Zeit"
@@ -339,32 +328,23 @@ BEGIN
     IDS_STATS_ACTUL         "Aktive Uploads: %i"
     IDS_STATS_WAITINGUSERS  "Wartende Uploads: %i"
     IDS_STATS_RECONNECTS    "Erneute Serververbindungen: %i"
-    IDS_STATS_WAITTRANSF    "Auf Transfer wartend..."
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_STATS_WAITCONN      "Auf Verbindung wartend..."
-    IDS_STATS_CONNECTEDSINCE "Verbunden zum Server seit: %s"
-    IDS_STATS_RATIO         "UL:DL Verhältnis (Session (Total)):"
     IDS_STATS_UNKNOWNCLIENT "Unbekannt: %i"
     IDS_STATS_TOTAL         "Insgesamt: %i"
-    IDS_STATS_WORKING       "Funktionierend: %i"
-    IDS_STATS_DEAD          "Tot/gelöscht: %i"
     IDS_DISABLED            "Ausgeschaltet"
     IDS_STOPPED             "Gestoppt"
     IDS_STATS_UPDATELABEL   "Update Verzögerung: %i sec"
-    IDS_QUEUECOUNT          "%u (%u verbannt)"
-    IDS_NICKNAME            "Spitzname: "
-    IDS_CLIENTSFILENAME     "\nDateiname beim Client: "
     IDS_ASKEDFAF            "\nAndere Datei angefordert"
     IDS_WAITED              "Wartezeit"
     IDS_ERR_LOADCREDITFILE  "Creditfile konnte nicht geladen werden, ein neues wird erstellt"
+    IDS_ERR_CREDITFILEOLD   "Creditfile ist veraltet und wird ersetzt"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_CREDITFILEOLD   "Creditfile ist veraltet und wird ersetzt"
     IDS_CREDITFILELOADED    "Creditfile geladen, %u Clients sind bekannt"
     IDS_CREDITFILECORRUPT   "Fehler: das Creditfile ist beschädigt und wird ersetzt!"
     IDS_ERR_CREDITFILEREAD  "Unerwarteter Dateifehler beim Lesen des Creditfile: %s"
@@ -381,6 +361,7 @@ BEGIN
     IDS_ERR_SOCKET          "Fehler im Serversocket: %s (%s:%i): %s"
     IDS_SHAREDFOUND         "%i bekannte freigegebene Dateien gefunden"
     IDS_SHAREDFOUNDHASHING  "%i bekannte freigegebene Dateien gefunden, %i neue Dateien warten aufs Hashing"
+    IDS_ERR_INCOMPLETEBLOCK "Unvollständiger Block wurde angefordert"
 END
 
 STRINGTABLE 
@@ -1972,6 +1953,72 @@ STRINGTABLE
 BEGIN
     IDS_CRASHRPT_DONE       "Crash Report wurde erstellt."
     IDS_CRASHRPT_AV         "Crash Reporter ist verfügbar und läuft."
+IDS_BOLD                "Schaltet Fettschrift an/aus"
+    IDS_UNDERLINE           "Schaltet Unterstreichung ein/aus"
+    IDS_COLOUR              "Wählt Vordergrundfarbe (optional Hintergrundfarbe)"
+    IDS_RESETFORMAT         "Löscht vorige Formatierungen (sendet Reset-Tag)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_RESTORESEARCHPARAMS "Suchparameter wiederherstellen"
+    IDS_COMMAND             "Kommando"
+    IDS_ARGUMENTS           "Argumente"
+    IDS_ARCPREV_PLEASEWAIT  "Durchsuche Archiv..."
+    IDS_AP_CREATEPREVCOPY   "Erstelle Vorschau-Datei"
+    IDS_ARCHIVEDETAILS      "Archiv-Details"
+    IDS_ARCHTYPE            "Archiv-Typ"
+    IDS_ATTRIBUTES          "Attribute"
+    IDS_LASTMODIFIED        "zuletzt geändert"
+    IDS_RARFULLENCR         "Inhaltsverzeichnis ist verschlüsselt und kann nicht ausgelesen werden"
+    IDS_ARCPARSED           "Archiv durchsucht."
+    IDS_ARCPREV_LISTMAYBEINCOMPL "Inhaltsangabe kann unvollständig sein."
+    IDS_ARCPREV_DIRNOTFOUND "Inhaltsverzeichnis nicht gefunden."
+    IDS_ARCPREV_INSUFFDATA  "Nicht ausreichend Daten vorhanden."
+    IDS_PASSWPROT           "Passwortschutz"
+    IDS_ARCPREV_DIRSUCCREAD "Inhaltsverzeichnis erfolgreich eingelesen."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ARCPREV_UNKNOWNFORMAT "(unbekannt/nicht unterstützt)"
+    IDS_KADSEARCHACTIVE     "(Kad-Suche aktiv...)"
+    IDS_OBFUSCATION         "Obfuskation"
+    IDS_SUPPORTED           "unterstützt"
+    IDS_ESTIMATED           "geschätzt"
+    IDS_MEDIAINFO_DLLMISSING 
+                            "Es ist keine MediaInfo-Bibliothek installiert. Wenn du in diesem Dialog mehr Informationen über Audio- und Videodateien erhalten möchtest,\r\nlade die MediaInfo-Bibliothek von http://sourceforge.net/projects/mediainfo/ herunter und kopiere die Datei ""MediaInfo.dll"" in\r\ndas eMule-Installationsverzeichnis ""%s"".\r\n"
+    IDS_WARNING_WRONGFILEEXTENTION 
+                            "Warnung: Die Dateiendung von ""%s"" stimmt nicht mit der typischen Dateiendung für dieses Dateiformat überein.\r\nUm diese Datei korrekt zu nutzen oder anzusehen ist es empfehlenswert, die Datei umzubenennen\r\nund eine der folgenden Dateiendungen zu nutzen: ""%s"".\r\n"
+    IDS_MEDIAINFO_DRMWARNING 
+                            "Warnung: Die Datei ""%s"" scheint mit Digitalem Rechtemanagement geschützt zu sein.\r\nWahrscheinlich kann die Datei ohne eine Lizenz vom Inhaber nicht benutzt werden!\r\n"
+    IDS_ARCHPREV_ATTRIBINFO "Erklärung möglicher Dateiattribute:\r\n\r\nP\tDatei ist passwortgeschützt\r\nD\tist ein Verzeichnis\r\nC\tbesitzt Kommentar\r\nLx\tKompressionsstufe x\r\nM\tkomprimierte Daten liegen noch nicht komplett vor\r\n<\tDatei wird aus vorigem Teilarchiv fortgeführt\r\n>\tDatei wird im nächsten Teilarchiv fortgesetzt\r\n"
+    IDS_LOADFILTER_EMTOOLBAR "eMule Werkzeugleiste Bildateien"
+    IDS_LOADFILTER_EMSKINFILES "eMule Skindateien"
+    IDS_CONTENT_INFO        "Inhaltsinformation"
+    IDS_MESSAGESCOMMENTS    "Nachrichten, Kommentare"
+    IDS_PROTOCOLOBFUSCATION "Protokoll Obfuskation (Verschleierung)"
+    IDS_ONLYOBFUSCATED      "Erlaube nur obfuskierte Verbindungen (nicht empfohlen)"
+    IDS_DISABLEOBFUSCATION  "Deaktiviere Unterstützung für obfuskierte Verbindungen"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ENABLEOBFUSCATION   "Aktiviere Protokoll-Obfuskation"
+    IDS_CONNECTINGTOOBFUSCATED 
+                            "Verbinde zu %s (%s:%i - nutze Protokoll-Obfuskation) ..."
+    IDS_CONNECTEDTOOBFUSCATED "Obfuskierte Verbindung zu: %s aufgebaut"
+    IDS_VERIFIED            "bestätigt"
+    IDS_OBFUSCATED          "obfuskiert"
+    IDS_UNVERIFIED          "unbestätigt"
+    IDS_INVALIDFILEEXT      "ungültige Dateiendung"
+    IDS_UNKNOWNFILEEXT      "unbekanne Dateiendung"
+    IDS_ENABLEMINIMULE      "MiniMule aktivieren"
+    IDS_DISABLE_AUTOARCHPREV 
+                            "deaktiviere automatische Archivvorschau in den Dateidetails"
+    IDS_US_STALLEDW4BR      "Wartet auf Blockanfrage."
+    IDS_US_STALLEDREADINGFDISK "Wartet. Lese von Disk."
+    IDS_SERVERFEATURE_INTTYPETAGS "Integer type Tags"
 END
 
 STRINGTABLE 

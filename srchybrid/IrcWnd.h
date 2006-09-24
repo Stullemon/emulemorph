@@ -41,6 +41,7 @@ class CIrcWnd : public CResizableDialog
 		void ParseChangeMode( CString sChannel, CString sChanger, CString sCommands, CString sParams );
 		void AddStatus( CString sReceived, ... );
 		void AddInfoMessage( CString sChannelName, CString sReceived, ... );
+		void AddColourLine(CString line, Channel* update_channel);//Interprets colour and other formatting tags
 		void AddMessage( CString sChannelName, CString sTargetname, CString sLine,...);
 		void SetConnectStatus( bool bConnected );
 		void NoticeMessage( CString sSource, CString sTarget, CString sMessage );
@@ -53,6 +54,7 @@ class CIrcWnd : public CResizableDialog
 		CEdit m_editTitleWindow;
 		CEdit m_editInputWindow;
 		CIrcMain* m_pIrcMain;
+		CToolTipCtrl* m_pToolTip;
 		CIrcChannelTabCtrl m_tabctrlChannelSelect;
 		CIrcNickListCtrl m_listctrlNickList;
 		CIrcChannelListCtrl m_listctrlServerChannelList;
@@ -70,6 +72,12 @@ class CIrcWnd : public CResizableDialog
 		afx_msg void OnBnClickedChatsend();
 		afx_msg LRESULT OnCloseTab(WPARAM wParam, LPARAM lParam);
 		afx_msg LRESULT OnQueryTab(WPARAM wParam, LPARAM lParam);
+		afx_msg void OnBnClickedColour();
+		afx_msg void OnBnClickedUnderline();
+		afx_msg void OnBnClickedBold();
+		afx_msg void OnBnClickedReset();
+		afx_msg LONG OnSelEndOK(UINT lParam, LONG /*wParam*/);
+		afx_msg LONG OnSelEndCancel(UINT lParam, LONG /*wParam*/);
 		void DoResize(int iDelta);
 		virtual LRESULT DefWindowProc(UINT uMessage, WPARAM wParam, LPARAM lParam);
 		CSplitterControl m_wndSplitterIRC;

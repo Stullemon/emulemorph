@@ -70,6 +70,7 @@ protected:
 	virtual void PostNcDestroy();
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSysColorChange();
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnAddFolder();
 	afx_msg void OnCancel();

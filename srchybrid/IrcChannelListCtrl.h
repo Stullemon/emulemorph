@@ -29,6 +29,8 @@ class CIrcChannelListCtrl : public CMuleListCtrl
 		void JoinChannels();
 		void Localize();
 		void Init();
+		virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
 	protected:
 		friend class CIrcWnd;
 		static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);

@@ -32,6 +32,7 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNAMIC(CIconStatic, CStatic)
 
 BEGIN_MESSAGE_MAP(CIconStatic, CStatic)
+	//ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 CIconStatic::CIconStatic()
@@ -89,7 +90,8 @@ void CIconStatic::SetIcon(LPCTSTR pszIconID)
 
 	MemDC.FillSolidRect(rCaption, GetSysColor(COLOR_BTNFACE));
 	
-	VERIFY( DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(pszIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL) );
+	if (!m_strIconID.IsEmpty())
+		VERIFY( DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(m_strIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL) );
 
 	// clear all alpha channel data
 	BITMAP bmMem;
@@ -131,8 +133,8 @@ void CIconStatic::SetIcon(LPCTSTR pszIconID)
 		g_xpStyle.CloseThemeData(hTheme);
 	}
 	else
-	{	
-		MemDC.SetTextColor(pDC->GetTextColor());
+	{
+		MemDC.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 		MemDC.DrawText(m_strText, rCaption, DT_SINGLELINE | DT_LEFT | DT_END_ELLIPSIS);
 	}
 

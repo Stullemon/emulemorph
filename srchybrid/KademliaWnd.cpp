@@ -198,7 +198,10 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 		theApp.emuledlg->ShowConnectionState();
 	}
 	if (!strIP.IsEmpty() && nPort)
-		Kademlia::CKademlia::Bootstrap(strIP, nPort);
+	{
+		// JOHNTODO - Switch between Kad1 and Kad2
+		Kademlia::CKademlia::Bootstrap(strIP, nPort, true);
+	}
 }
 
 void CKademliaWnd::OnBnClickedFirewallcheckbutton()

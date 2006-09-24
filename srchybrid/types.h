@@ -15,6 +15,7 @@ typedef   signed __int64	sint64;
 
 #ifdef _DEBUG
 #include "Debug_FileSize.h"
+#define USE_DEBUG_EMFILESIZE
 typedef CEMFileSize			EMFileSize;
 #else
 typedef unsigned __int64	EMFileSize;

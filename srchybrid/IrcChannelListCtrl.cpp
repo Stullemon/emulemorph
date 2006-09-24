@@ -22,6 +22,8 @@
 #include "./MenuCmds.h"
 #include "./IrcWnd.h"
 #include "./IrcMain.h"
+#include "./emule.h"
+#include "./MemDC.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -160,6 +162,7 @@ void CIrcChannelListCtrl::AddChannelToList( CString sName, CString sUser, CStrin
 	plistToAdd->m_sUsers = sUser;
 	//Strip any color codes out of the description..
 	plistToAdd->m_sDesc = m_pParent->StripMessageOfFontCodes(sDescription);
+	plistToAdd->m_sDesc.Replace(_T("\004"), _T("%"));
 	//Add to tail and update list.
 	m_ptrlistChannel.AddTail( plistToAdd);
 	int itemnr = GetItemCount();
@@ -230,4 +233,126 @@ BOOL CIrcChannelListCtrl::OnCommand(WPARAM wParam, LPARAM)
 			}
 	}
 	return true;
+}
+
+void  CIrcChannelListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	if( !theApp.emuledlg->IsRunning() )
+		return;
+	if (!lpDrawItemStruct->itemData)
+		return;
+
+	RECT clientRect;
+	GetClientRect(&clientRect);
+	RECT cur_rec = lpDrawItemStruct->rcItem;
+	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
+		return;
+
+	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
+	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
+
+	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED ))
+	{
+		if(bCtrlFocused)
+			odc->SetBkColor(m_crHighlight);
+		else
+			odc->SetBkColor(m_crNoHighlight);
+	}
+	else
+		odc->SetBkColor(GetBkColor());
+
+	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
+	CFont* pOldFont = dc.SelectObject(GetFont());
+	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE)
+	{
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
+
+	CString Sbuffer;
+	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
+	int iCount = pHeaderCtrl->GetItemCount();
+	cur_rec.right = cur_rec.left - 8;
+	cur_rec.left += 4;
+
+	for(int iCurrent = 0; iCurrent < iCount; iCurrent++)
+	{
+		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
+		if( !IsColumnHidden(iColumn) )
+		{
+			cur_rec.right += GetColumnWidth(iColumn);
+			ChannelList* toadd =(ChannelList*)lpDrawItemStruct->itemData;
+			LOGFONT lfFont;
+			CFont fontCustom;
+			GetFont()->GetLogFont(&lfFont);
+
+			switch(iColumn)
+			{
+
+				case 0:
+					{
+						lfFont.lfWeight = FW_BOLD;
+						fontCustom.CreateFontIndirect(&lfFont);
+						dc.SelectObject(&fontCustom);
+						dc->SetTextColor(RGB(0,0,130));
+						Sbuffer.Format(_T("%s"), toadd->m_sName);
+						break;
+					}
+				case 1:
+					{
+
+						lfFont.lfWeight = FW_NORMAL;
+						fontCustom.CreateFontIndirect(&lfFont);
+						dc.SelectObject(&fontCustom);
+						int usercount = _wtoi(toadd->m_sUsers);
+						if(usercount<10)
+							dc->SetTextColor(RGB(0,0,130));
+						else if(usercount<100)
+							dc->SetTextColor(RGB(0,0,200));
+						else
+							dc->SetTextColor(RGB(0,0,255));
+						Sbuffer.Format(_T("%s"), toadd->m_sUsers);
+						break;
+					}
+				case 2:
+					{
+						lfFont.lfWeight = FW_NORMAL;
+						fontCustom.CreateFontIndirect(&lfFont);
+						dc.SelectObject(&fontCustom);
+						dc->SetTextColor(RGB(0,0,130));
+						Sbuffer.Format(_T("%s"), toadd->m_sDesc);
+						break;
+					}
+
+			}//End of Switch
+
+			dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DT_LEFT);
+			cur_rec.left += GetColumnWidth(iColumn);
+		}
+	}
+	//draw rectangle around selected item(s)
+	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
+	{
+		RECT outline_rec = lpDrawItemStruct->rcItem;
+		outline_rec.top--;
+		outline_rec.bottom++;
+		dc->FrameRect(&outline_rec, &CBrush(GetBkColor()));
+		outline_rec.top++;
+		outline_rec.bottom--;
+		outline_rec.left++;
+		outline_rec.right--;
+		if(bCtrlFocused)
+			dc->FrameRect(&outline_rec, &CBrush(m_crFocusLine));
+		else
+			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
+	}
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
+	dc.SelectObject(pOldFont);
+	dc.SetTextColor(crOldTextColor);
 }

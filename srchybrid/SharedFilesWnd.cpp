@@ -93,9 +93,6 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	GetFont()->GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
 	bold.CreateFontIndirect(&lf);
-	m_ctrlStatisticsFrm.SetIcon(_T("StatsDetail"));
-    //m_ctrlStatisticsFrm.SetFont(&bold); // should run 'SetIcon' *first* before setting bold font
-    m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
 
 	CRect rc;
 	GetDlgItem(IDC_SHAREDDIRSTREE)->GetWindowRect(rc);
@@ -121,7 +118,6 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	m_wndSplitter.MoveWindow(rcSpl);
 
 	DoResize(PosStatVnew - PosStatVinit);
-
     
 	Localize();
 
@@ -139,8 +135,6 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	AddAnchor(IDC_SACCEPTED2,BOTTOM_RIGHT);
 	AddAnchor(IDC_TRAFFIC_TEXT, TOP_LEFT);
 
-	
-	
 	return TRUE;
 }
 
@@ -365,12 +359,17 @@ BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg)
 
 void CSharedFilesWnd::OnSysColorChange()
 {
+	pop_bar.SetBkColor(GetSysColor(COLOR_3DFACE));
+	pop_baraccept.SetBkColor(GetSysColor(COLOR_3DFACE));
+	pop_bartrans.SetBkColor(GetSysColor(COLOR_3DFACE));
 	CResizableDialog::OnSysColorChange();
 	SetAllIcons();
 }
 
 void CSharedFilesWnd::SetAllIcons()
 {
+	m_ctrlStatisticsFrm.SetIcon(_T("StatsDetail"));
+
 	if (icon_files)
 		VERIFY( DestroyIcon(icon_files) );
 	icon_files = theApp.LoadIcon(_T("SharedFilesList"), 16, 16);
