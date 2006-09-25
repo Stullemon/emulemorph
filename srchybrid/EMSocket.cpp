@@ -16,7 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #ifdef _DEBUG
-#include "DebugHelpers.h"
+#include "DebugHelpers.h" 
 #endif
 #include "emule.h"
 #include "emsocket.h"
@@ -34,7 +34,6 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
 
 namespace {
 	inline void EMTrace(char* fmt, ...) {
@@ -1114,7 +1113,10 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 					uint32 sumofnocontrolpacketsizesent = 0;
 					uint32 sumofpacketpartfilesizesent = 0;
 					sendLocker.Lock();
-					while (result > sumofpacketsizesent && result-sumofpacketsizesent >= m_currentPacket_in_buffer_list.IsEmpty()?(uint32)0:m_currentPacket_in_buffer_list.GetHead()->remainpacketsize) {
+					while (result > sumofpacketsizesent &&
+						       result-sumofpacketsizesent >= 
+						        ((!m_currentPacket_in_buffer_list.IsEmpty())?
+						           m_currentPacket_in_buffer_list.GetHead()->remainpacketsize:0)) {
 						BufferedPacket* pPacket = m_currentPacket_in_buffer_list.RemoveHead();
 						if (pPacket->iscontrolpacket == false) {
 							sumofnocontrolpacketsizesent += pPacket->remainpacketsize;
