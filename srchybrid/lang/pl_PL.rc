@@ -14,7 +14,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Polonais resources
+// Polish resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PLK)
 #ifdef _WIN32
@@ -55,6 +55,7 @@ END
 // String Table
 //
 
+
 STRINGTABLE 
 BEGIN
     IDS_SOCKETS_INIT_FAILED "B≥πd inicjalizacji gniazd Windows."
@@ -70,8 +71,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION "Pobieranie informacji o pliku"
-    IDS_HTTPDOWNLOAD_FAIL_PARSE_ERROR 
-                            "Wystπpi≥ b≥πd podczas przekazywania adresu URL: %s"
     IDS_HTTPDOWNLOAD_GENERIC_ERROR 
                             "Wystπpi≥ b≥πd podczas prÛby pobrania pliku, BL•D:%s"
     IDS_HTTPDOWNLOAD_FAIL_CONNECT_SERVER 
@@ -96,7 +95,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LD_ADDHTML          "Dodaj HTML-Tags"
+IDS_LD_ADDHTML          "Dodaj HTML-Tags"
     IDS_HTTP_CAPTION        "Aktualizacja listy serwerÛw"
     IDS_HTTPDOWNLOAD_TIMELEFT "%s (%s skopiowano)"
     IDS_LD_ADDHASHSET       "Dodaj kompletny hashset"
@@ -120,7 +119,6 @@ STRINGTABLE
 BEGIN
     IDS_MAIN_SOCKETERROR    "B≥πd krytyczny: Nie moøna utworzyÊ gniazda na porcie %i"
     IDS_MAIN_BTN_DISCONNECT "&Od≥acz"
-    IDS_MAIN_BTN_DISCONNECT_TOOLTIP "Od≥πcz siÍ od bieøπcego serwera"
     IDS_ERR_WRONGFILEID     "przes≥ano z≥y ID pliku"
     IDS_ERR_BADHASHSET      "otrzymano z≥y lub uszkodzony hashset"
     IDS_ERR_BADDATABLOCK    "otrzymano z≥y lub uszkodzony blok danych"
@@ -129,17 +127,14 @@ BEGIN
     IDS_ERR_NOSLLINK        "Link nie jest typu ED2K"
     IDS_ERR_WRONGPACKAGESIZE "z≥y OP_FILEREQUEST rozmiar pakietu"
     IDS_ERR_WRONGHPACKAGESIZE "b≥Ídny rozmiar pakietu OP_HASHSETREQUEST"
-    IDS_ERR_BADCLIENTACTION "Klient spowodowa≥ b≥πd lub zrobi≥ coú brzydkiego: %s. Od≥πczono go."
     IDS_ERR_UNKNOWNCLIENTACTION 
                             "Nierozpoznany klient wysy≥a rozszerzony pakiet protoko≥u"
     IDS_ERR_OPENMET         "B≥πd: Nie uda≥o siÍ otworzyÊ pliku part.met! (%s => %s)"
     IDS_ERR_BADMETVERSION   "B≥πd: Niew≥aúciwa wersja pliku part.met! (%s => %s)"
-    IDS_ERR_BADGAP          "B≥πd: Niew≥aúciwy 'Gap-Tag' w pliku part.met"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_EMPTYADRESSESDAT_TITLE "Nie moøna pobraÊ listy serwerÛw"
     IDS_ERR_BADSERVERMETVERSION "B≥Ídny znacznik wersji w server.met (0x%X)!"
     IDS_SERVERSFOUND        "Znaleziono %i serwerÛw w pliku server.met"
     IDS_SERVERSADDED        "dodano %d serwerÛw, %d odrzucono"
@@ -148,7 +143,6 @@ BEGIN
                             "Nieoczekiwany b≥πd podczas wczytywania pliku server.met: %s, nie moøna za≥adowaÊ listy serwerÛw"
     IDS_ERR_SAVESERVERMET   "Nie uda≥o siÍ zapisaÊ pliku server.met!"
     IDS_PASSIVE             "Pasywna"
-    IDS_MAIN_CONNECTEDTO    "Po≥πczenie ustanowione: "
     IDS_MAIN_BTN_CANCEL     "&Anuluj"
     IDS_AVAIL               "CzÍúci: %d , dostÍpne: %d (%.1f%%)\n\n"
     IDS_TYPE                "Typ"
@@ -167,8 +161,6 @@ BEGIN
     IDS_PREFERENCE          "Preferencja"
     IDS_PRIONOPREF          "Bez Pref"
     IDS_CONNECTTHIS         "Pod≥πcz siÍ do wybranego serwera"
-    IDS_CHAT_WELCOME        "Wiadomoúci\n  \nKliknij prawym klawiszem na dowolnym uøytkowniku i wybierz opcjÍ 'Wyúlij wiadomoúÊ' aby rozpoczπÊ rozmowÍ."
-    IDS_MAIN_BTN_CANCEL_TOOLTIP "Zatrzymuje prÛby pod≥πczenia siÍ do serwerÛw"
     IDS_MAIN_BTN_CONNECT    "&Pod≥πcz"
     IDS_ERR_SAVESERVERMET2  "Plik server.met nie zosta≥ zapisany! Moøliwe, øe bÍdziesz musia≥ usunπÊ istniejπcy plik i zmieniÊ nazwÍ server.met.old na server.met!"
     IDS_NOTCONNECTED        "Nie pod≥πczony"
@@ -205,15 +197,13 @@ STRINGTABLE
 BEGIN
     IDS_LINKNOTADDED        "Link nie mÛg≥ byÊ dodany"
     IDS_MAIN_EXIT           "Jesteú pewien øe chcesz wyjúÊ z eMule'a?"
-    IDS_MAIN_EXITTITLE      "Potwierdzenie zamkniÍcia"
     IDS_MAIN_POPUP_RESTORE  "PrzywrÛÊ"
     IDS_CONNECTTOANYSERVER  "Pod≥πcz do dowolnego serwera"
     IDS_EXIT                "Wyjdü"
     IDS_CONNECTING          "Pod≥πczanie"
     IDS_FAILED              "nieudane"
     IDS_ERR_BADSERVERREPLY  "Uszkodzona lub b≥Ídna odpowiedü na prÛbÍ logowania"
-    IDS_NEWCLIENTID         "Nowy klientid to %u"
-    IDS_NOSHAREDFOLDERS     "Brak udostÍpnionych folderÛw"
+    IDS_NEWCLIENTID         "Nowe ID klienta to %u"
     IDS_SHAREDFOLDERS       "UdostÍpnione foldery"
     IDS_VIEW1               "widok "
     IDS_VIEW2               " (nie udostÍpnione)"
@@ -252,10 +242,6 @@ BEGIN
     IDS_ASKED4ANOTHERFILE   "Zapytanie o inny plik"
     IDS_Q_CANCELDL          "Jesteú pewien, øe chcesz zatrzymaÊ pobieranie i usunπÊ pliki z dysku?\n"
     IDS_Q_CANCELDL2         "Jesteú pewien, øe chcesz zatrzymaÊ pobieranie i usunπÊ plik z dysku?\n"
-    IDS_COPIED2CB           "Skopiowano do schowka: \n"
-    IDS_PROCDONE            "% ukoÒczone"
-    IDS_SELECTINCOMINGDIR   "Wybierz folder dla pobranych plikÛw"
-    IDS_SELECTTEMPDIR       "Wybierz folder dla plikÛw tymczasowych"
     IDS_DL_FILENAME         "Nazwa pliku"
     IDS_DL_SIZE             "Rozmiar"
     IDS_DL_TRANSF           "Przes≥ano"
@@ -265,7 +251,7 @@ STRINGTABLE
 BEGIN
     IDS_DL_SPEED            "PrÍdkoúÊ"
     IDS_DL_PROGRESS         "Stan pobierania"
-    IDS_DL_SOURCES          "ürÛde≥"
+    IDS_DL_SOURCES          "?rÛde≥"
     IDS_ERR_BADSERVERLISTRECEIVED 
                             "Otrzymano niew≥aúciwy pakiet z listπ serwerÛw"
     IDS_STATUS              "Status"
@@ -274,7 +260,6 @@ BEGIN
     IDS_QL_USERNAME         "Uøytkownik"
     IDS_LOADURL             "£adowaÊ"
     IDS_DELETEAFTERALLOC    "Plikowi '%s' Jest w≥asnie przydzielane wolne miejsce na dysku po czym zostanie wykasowany poüniej"
-    IDS_ERR_PACKAGEHANDLING "Nie obs≥uøony b≥πd podczas obrÛbki pakietu z serwera (%s)"
     IDS_QL_RATING           "Ranking"
     IDS_CONNECTINGTO        "Pod≥πczanie do %s (%s:%i)..."
     IDS_CLIENTS             "Uøytkownicy"
@@ -297,7 +282,6 @@ BEGIN
     IDS_SRV_ADDR            "Wpisz adres serwera"
     IDS_SRV_PORT            "Niew≥aúciwy port serwera, wprowadü poprawny."
     IDS_SRV_NOTADDED        "Serwer nie zosta≥ dodany!"
-    IDS_SRV_READD           "Serwer oznaczony jako nieczynny zosta≥ ponownie dodany do listy!"
     IDS_SRV_NOURLAV         "Nie ma dostÍpnego URL"
     IDS_INVALIDURL          "B≥Ídny URL"
 END
@@ -309,23 +293,17 @@ BEGIN
     IDS_SHAREDFILES         "Pliki"
     IDS_PRIOVERYLOW         "Bardzo niski"
     IDS_PRIORELEASE         "Release"
-    IDS_FSTATUS_LOCKED      "Zablokowany"
-    IDS_KADALPHA            "Kademlia jest we wczesnym stadium developmentu. Rekomendujemy w≥πczenie tylko jeúli jesteú zainteresowany w jej testowaniu."
     IDS_FSTATUS_FRIENDSONLY "Tylko znajomi"
     IDS_VIAPASSIVE          "przez Pasywne"
-    IDS_FSTATUS_PUBLIC      "Publiczny"
     IDS_ERR_RENAMESF        "Zmiana nazwy niedudana\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
-    IDS_PRIOHIGHEST         "Najwyøszy"
     IDS_AVAILABLE           "dostÍpny"
-    IDS_ERR_NOPRIMCHANGE    "Nie moøesz zmieniÊ praw dostÍpu podczas pobierania pliku!"
-    IDS_HIDDEN              "Ukryty"
+
 END
 
 STRINGTABLE 
 BEGIN
     IDS_FSTAT_TRANSFER      "Transfer"
     IDS_FSTAT_CONNECTION    "Po≥πczenie"
-    IDS_FSTAT_CLIENTS       "Uøytkownicy"
     IDS_FSTAT_SERVERS       "Serwery"
     IDS_FSTAT_WAITING       "Czekam..."
     IDS_TIME                "Czas"
@@ -338,24 +316,17 @@ BEGIN
     IDS_STATS_ACTUL         "Aktywne kana≥y wysy≥ania: %i"
     IDS_STATS_WAITINGUSERS  "Oczekujπcy uøytkownicy: %i"
     IDS_STATS_RECONNECTS    "Po≥πczeÒ: %i"
-    IDS_STATS_WAITTRANSF    "czeka na dane..."
+
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_STATS_WAITCONN      "czeka na po≥πczenie..."
-    IDS_STATS_CONNECTEDSINCE "Pod≥πczony do Serwera od: %s"
-    IDS_STATS_RATIO         "Ratio UL:DL :"
+
     IDS_STATS_UNKNOWNCLIENT "Nieznany: %i"
     IDS_STATS_TOTAL         "Liczba znanych: %i"
-    IDS_STATS_WORKING       "Dzia≥ajπce: %i"
-    IDS_STATS_DEAD          "Wy≥πczone/UsuniÍte: %i"
     IDS_DISABLED            "Wy≥πczony"
     IDS_STOPPED             "Zatrzymany"
     IDS_STATS_UPDATELABEL   "Odúwieøanie co: %i sek."
-    IDS_QUEUECOUNT          "%u (%u zabanowanych)"
-    IDS_NICKNAME            "Nick: "
-    IDS_CLIENTSFILENAME     "\nNazwa pliku u klienta: "
     IDS_ASKEDFAF            "\nZapyta≥ o inny plik"
     IDS_WAITED              "Oczekiwa≥"
     IDS_ERR_LOADCREDITFILE  "Nie uda≥o siÍ za≥adowaÊ pliku z danymi transferÛw (creditfile), zostanie utworzony nowy plik."
@@ -385,19 +356,16 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_UDPEXT          "B≥πd podczas obs≥ugi przychodzπcego rozszerzonego pakietu UDP"
+
     IDS_ERR_INCOMPLETEBLOCK "zapytano o niekompletnπ czÍúÊ "
     IDS_ERR_OPEN            "Nie uda≥o siÍ otworzyÊ øπdanego pliku"
     IDS_ERR_CLIENTERRORED   "Klient '%s' spowodowa≥ b≥πd przy tworzeniu pakietu (%s) - od≥πczono go"
     IDS_ERR_REQ_FNF         "øπdany plik nie odnaleziony"
-    IDS_CLIENTBLOCKED       "Klient '%s' dzia≥a w sposÛb agresywny, zosta≥ zabanowany :P"
-    IDS_LUSERS              "uøytkownikÛw"
-    IDS_LFILES              "plikÛw"
     IDS_DESC                "Opis: %s"
     IDS_PORT                "Port"
     IDS_ERR_NOVALIDSERVERSFOUND 
                             "Na liúcie serwerÛw do pod≥πczenia nie znaleziono poprawnych wpisÛw"
-    IDS_CONNECTEDTOREQ      "Pod≥πczony do %s (%s:%i), wys≥ano proúbÍ o zalogowanie"
+    IDS_CONNECTEDTOREQ      "Pod≥πczanie do %s (%s:%i), wys≥ano proúbÍ o zalogowanie"
     IDS_ERR_FATAL           "B≥πd krytyczny przy pod≥πczaniu, upewnij siÍ øe masz po≥πczenie z internetem"
     IDS_ERR_LOSTC           "Utracono po≥πczenie z %s (%s:%i)"
     IDS_ERR_DEAD            "%s (%s:%i) wyglπda na wy≥πczony"
@@ -413,7 +381,7 @@ BEGIN
     IDS_ERR_REHASH          "Uwaga: Plik %s moøe byÊ uszkodzony, sprawdzany jest hash juø pobranych czÍúci"
     IDS_SKIN_PROF           "Profile skÛrek"
     IDS_ERR_PART_FNF        "plik .part nie znaleziony"
-    IDS_ERR_OPENMETFILE     "Nie uda≥o siÍ otworzyÊ pliku part.met"
+
     IDS_KADOPEN             "Otwarta"
     IDS_ERR_SAVEMET         "B≥πd przy zapisywaniu pliku czÍúci: %s (%s)"
     IDS_ERR_FOUNDCORRUPTION "Znaleziono uszkodzonπ czÍúÊ pliku (%i) w %s"
@@ -426,19 +394,17 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_NOSERVERSC      "Na liúcie serwerÛw do pod≥πczenia nie znaleziono poprawnych wpisÛw"
+
     IDS_CONNECTEDTO         "Po≥πczono z %s"
     IDS_DL_PREVIEW          "Podglπd"
     IDS_VIEWQUEUE           "Pokaø kolejkÍ"
-    IDS_VIEWUPLOADS         "Pokaø wysy≥anie"
     IDS_TW_UPLOADS          "Wysy≥anie"
     IDS_TW_DOWNLOADS        "Pobieranie"
     IDS_TW_QUEUE            "KlientÛw w kolejce:"
     IDS_SW_SEARCHBOX        "Szukaj"
     IDS_SW_NAME             "Nazwa"
     IDS_SW_GLOBAL           "Szukaj globalnie"
-    IDS_SW_TYPE             "Typ"
-    IDS_SW_DIRECTDOWNLOAD   "Bezpoúrednie pobieranie"
+    IDS_SW_DIRECTDOWNLOAD   "Wklej link eD2k ze schowka"
     IDS_SW_LINK             "Link ED2K"
     IDS_SW_START            "Start"
     IDS_SCHEDULER           "Harmonogram"
@@ -447,7 +413,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_IRC                 "IRC"
-    IDS_SW_RESULT           "Wynik szukania"
+    IDS_SW_RESULT           "Wynik wyszukiwania"
     IDS_SW_DOWNLOAD         "Pobierz wybrany plik"
     IDS_SV_SERVERLIST       "Lista serwerÛw"
     IDS_SV_SERVERINFO       "Informacja o serwerze"
@@ -459,15 +425,13 @@ BEGIN
     IDS_SV_MET              "Aktualizuj plik server.met z URL"
     IDS_SV_UPDATE           "Aktualizuj"
     IDS_SF_FILES            "UdostÍpnione pliki"
-    IDS_SF_STATISTICS       "Statystyka"
+    IDS_SF_STATISTICS       "Statystyki"
     IDS_SF_RELOAD           "Prze≥aduj"
     IDS_SF_CURRENT          "Bieøπca sesja"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PRIORITY_UP         "ZwiÍksz priorytet"
-    IDS_PRIORITY_DOWN       "Zmniejsz priorytet"
     IDS_SPEED_LIMITS        "Limity prÍdkoúci"
     IDS_CAPACITY_LIMITS     "Limity prÍdkoúci"
     IDS_ADMIN               "Administrator"
@@ -476,10 +440,6 @@ BEGIN
     IDS_WEB_ERR_CANTLOAD    "Nie mozna za≥adowaÊ szablonÛw: Plik %s"
     IDS_GLOBALSEARCH        "Globalny (Serwer)"
     IDS_METHOD              "Metoda"
-    IDS_SW_WEBBASED         "Szukaj przez WWW"
-    IDS_NOTHING             "nic"
-    IDS_SETUPSPEED          "ustaw limit wysy≥ania"
-    IDS_SETDOWNSPEED        "ustaw limit pobierania"
     IDS_UNDO                "Undo"
     IDS_DAYLY               "dziennie"
 END
@@ -516,9 +476,8 @@ BEGIN
     IDS_ST_SESSION          "årednia sesji"
     IDS_ST_ACTIVED          "Kana≥y pobierania"
     IDS_ST_ACTIVEU          "Kana≥y wysy≥ania"
-    IDS_ST_WAITINGU         "Oczekujπcych na wys≥anie danych"
     IDS_CW_MESSAGES         "Wiadomoúci"
-    IDS_CW_FRIENDS          "Znajomych"
+    IDS_CW_FRIENDS          "Lista znajomych"
     IDS_CW_SEND             "Wyúlij"
     IDS_CW_CLOSE            "Zamknij"
     IDS_PW_GENERAL          "OgÛlne"
@@ -533,9 +492,7 @@ BEGIN
     IDS_PW_BROWSE           "Wybierz"
     IDS_PW_SHARED           "UdostÍpnione foldery"
     IDS_PW_CONNECTION       "Parametry ≥πcza"
-    IDS_PW_DOWNC            "Max pobierania"
     IDS_PW_DOWNL            "Limit pobierania"
-    IDS_PW_UPC              "Max wysy≥ania"
     IDS_PW_UPL              "Limit wysy≥ania"
     IDS_PW_MAXC             "IloúÊ po≥πczeÒ"
     IDS_PW_CLIENTPORT       "Port klienta"
@@ -551,7 +508,7 @@ BEGIN
     IDS_PW_SCORE            "Uøywaj systemu priorytetÛw"
     IDS_PW_USC              "Aktualizuj listÍ serwerÛw przy pod≥πczeniu"
     IDS_PW_UCC              "Aktualizuj listÍ serwerÛw przy pod≥πczeniu klienta"
-    IDS_PW_FILTER           "Filter server and client LAN IPs"
+    IDS_PW_FILTER           "Filtruj IP serwera i klientÛw LAN"
     IDS_PW_USS              "Aktualizuj listÍ serwerÛw podczas uruchamiania"
     IDS_PW_MISC             "RÛøne opcje"
     IDS_PW_TRAY             "Minimalizuj do ikonki"
@@ -567,7 +524,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_PW_FILES            "Pliki"
-    IDS_PW_ICH              "&Inteligentna obs≥uga uszkodzeÒ"
     IDS_PW_SHARE            "Widzπ moje pliki"
     IDS_PW_EVER             "Wszyscy"
     IDS_PW_FRIENDS          "Znajomi"
@@ -581,23 +537,19 @@ BEGIN
     IDS_EM_MESSAGES         "Wiadomoúci"
     IDS_EM_STATISTIC        "Statystyka"
     IDS_EM_PREFS            "Ustawienia"
-    IDS_MB_LANGUAGEINFO     "Zosta≥ wybrany domyúlny jÍzyk. Moøesz zmieniÊ to ustawienie na zak≥adce UstawieÒ"
+    IDS_MB_LANGUAGEINFO     "Zosta≥ wybrany domyúlny jÍzyk. Moøesz zmieniÊ to ustawienie na zak≥adce UstawieÒ."
 END
 
 STRINGTABLE 
 BEGIN
     IDS_FD_GENERAL          "Informacje ogÛlne"
-    IDS_FD_NAME             "Pe≥na nazwa:"
     IDS_FD_MET              "plik-met:"
     IDS_FD_HASH             "Hash:"
     IDS_FD_SIZE             "Rozmiar:"
-    IDS_FD_STATUS           "Stan:"
     IDS_FD_TRANSFER         "Transfer"
-    IDS_FD_SOURCES          "Znaleziono ürÛde≥:"
     IDS_FD_PARTS            "CzÍúci:"
     IDS_FD_TRANS            "Przes≥ano:"
     IDS_FD_DATARATE         "PrÍdkoúÊ:"
-    IDS_FD_TRANSI           "Przesy≥anie:"
     IDS_FD_COMPSIZE         "Ca≥k. rozmiar:"
     IDS_FD_CLOSE            "Zamknij"
     IDS_FD_TITLE            "Opis pliku"
@@ -612,7 +564,6 @@ BEGIN
     IDS_CD_UIP              "IP klienta:"
     IDS_CD_SIP              "IP serwera:"
     IDS_CD_VERSION          "Wersja klienta:"
-    IDS_CD_UID              "ID:"
     IDS_CD_SNAME            "Nazwa serwera:"
     IDS_CD_CDOWN            "Aktualnie pobiera:"
     IDS_CD_DOWN             "Pobra≥ (ta sesja):"
@@ -637,7 +588,6 @@ BEGIN
     IDS_PW_MAXSOURCES       "IloúÊ ürÛde≥ na plik"
     IDS_SHAREDFILESCOUNT    "Liczba udostÍpnianych plikÛw: %i"
     IDS_SF_SIZE             "Ca≥kowity rozmiar udostÍpnianych plikÛw: %s"
-    IDS_ERR_WRONGPARTNUMBER "z≥y numer czÍúci"
     IDS_ERR_BADPORT         "z≥y numer portu"
     IDS_ERR_NOHELLO         "Zapyta≥ o coú bez przedstawienia siÍ"
     IDS_ERR_INVALIDPACKAGE  "Otrzymano z≥y lub uszkodzony pakiet"
@@ -647,17 +597,14 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_BADSIZE         "z≥y rozmiar (OP_QUEUERANKING)"
-    IDS_ERR_BADCLIENT2      "Klient '%s' (IP:%s) spowodowa≥ b≥πd: %u. Od≥πczam go!"
     IDS_ERR_NOTAFILELINK    "Nie jest linkiem do pliku"
     IDS_ERR_CREATEPARTFILE  "B≥πd: Nie uda≥o siÍ utworzyÊ pliku z czÍúciami"
-    IDS_ERR_UDP_MISCONF     "Wystπpi≥ b≥πd przy przetwarzaniu przychodzπcego pakietu UDP (przyczynπ jest najprawdopodobniej üle skonfigurowany serwer"
     IDS_CHAT_START          "*** Rozmowa rozpoczÍta : "
     IDS_FILEPRIO            "Priorytet pliku"
     IDS_SCORE               "Wynik"
     IDS_ASKED               "Zapytano"
     IDS_LASTSEEN            "Ostatnio by≥"
-    IDS_BANNED              "Zabanowanych"
-    IDS_PRIOVERYHIGH        "Bardzo wysoki"
+    IDS_BANNED              "Zbanowanych"
     IDS_UUSERS              "Uøytkownicy"
     IDS_UFAILED             "Nieudana"
     IDS_OPENFILE            "OtwÛrz plik"
@@ -677,7 +624,6 @@ BEGIN
     IDS_FILESTATS_SESSION   "Statystyka dla sesji: Zaakceptowano %d z %d po≥πczeÒ, przes≥ano %s\n"
     IDS_FILESTATS_TOTAL     "Statystyka dla wszystkich sesji: Zaakceptowano %d z %d po≥πczeÒ, przes≥ano %s\n"
     IDS_REQ_UNKNOWNFILE     "Zaøπdano nieznanego pliku"
-    IDS_TRANSFERTIME        "Czas od pierwszego transferu: %s"
     IDS_SF_AVERAGESIZE      "åredni rozmiar pliku: %s"
     IDS_SF_REQUESTS         "ØπdaÒ"
     IDS_SF_ACCEPTS          "Zaakcept."
@@ -690,7 +636,7 @@ BEGIN
     IDS_REMOVESELECTED      "UsuÒ wybrane"
     IDS_REMOVEALLSEARCH     "UsuÒ wszystkie"
     IDS_ENTERQUEUE          "Wprowadzono do kolejki"
-    IDS_SF_FAIL             "Nie dzia≥ajπce serwery"
+    IDS_SF_FAIL             "Niedzia≥ajπce serwery"
     IDS_SF_WUSER            "UøytkownikÛw na dzia≥ajπcych serwerach"
     IDS_SF_WFILE            "PlikÛw na dzia≥ajπcych serwerach"
     IDS_SF_USER             "Ca≥kowita liczba uøytkownikÛw"
@@ -709,7 +655,6 @@ BEGIN
     IDS_ADDED2SSF           "Serwer zosta≥ dodany do statycznej listy."
     IDS_STATICSERVER        "Statyczny"
     IDS_ERROR_SSF           "Nie uda≥o siÍ otworzyÊ pliku staticservers.dat"
-    IDS_ERR_PACKAGEERROR    "B≥πd krytyczny podczas przetwarzania pakietu %s (z≥y rozmiar) - odrzucono blok danych."
     IDS_SF_ACTIVECON        "Aktywne po≥aczenia (przybliøenie)"
     IDS_SF_MAXCONLIMITREACHED "OsiπgniÍto maksymalnπ iloúÊ po≥πczeÒ"
     IDS_SF_AVGCON           "årednia iloúÊ po≥πczeÒ (przybliøona)"
@@ -756,7 +701,6 @@ BEGIN
     IDS_PW_AUTOCONNECTSTATICONLY 
                             "Pod≥πczaj automatycznie tylko to statycznych serwerÛw"
     IDS_PW_CON_LIMITFRM     "Limity"
-    IDS_PW_FILE_ICH         "I.C.H w≥πczona"
     IDS_STATS_AVGLABEL      "Czas dla uúrednionego wykresu: %i mins"
     IDS_GRAPHS              "Wykresy"
     IDS_STREE               "Drzewo statystyk"
@@ -769,11 +713,9 @@ STRINGTABLE
 BEGIN
     IDS_HARDLIMIT           "Ostateczny limit"
     IDS_COL_MORECOLORS      "wiÍcej..."
-    IDS_KBYTESEC            "kB/s"
     IDS_TOOMANYCONNS        "Zbyt wiele po≥πczeÒ"
     IDS_DOWNLOADRENAMED     "Plik o takiej nazwie juø istnieje, plik zosta≥ zapisany jako %s"
     IDS_TBN_DOWNLOADDONE    "Pobrano:"
-    IDS_TBN_DOWNLOADADDED   "Umieszczono na liúcie do pobrania:"
     IDS_PW_TBN_USESOUND     "Uøyj düwiÍkÛw"
     IDS_PW_TBN_ONLOG        "Nowa pozycja w logu"
     IDS_PW_TBN_ONCHAT       "Rozpoczyna nowπ rozmowÍ"
@@ -788,12 +730,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_PW_CON_CAPFRM       "Moøliwoúci"
-    IDS_IRC_STATUSLOG       "Stan logÛw"
-    IDS_IRC_STATUS          "Stan"
     IDS_IRC_PRIVATECHANSTART "* RozpoczÍto prywatnπ rozmowÍ"
     IDS_IRC_SLAPMSG         "* %s przywalil %s z bejsbola!"
     IDS_IRC_PRIVMESSAGE     "WiadomoúÊ prywatna"
-    IDS_SOURCEEXCHANGESWAP  "Tymczasowa wymiana ürÛde≥"
     IDS_DL_TRY_TO_GET_PREVIEW_PARTS "CzÍúci potrzebne do podglπdu"
     IDS_IRC_KICK            "Kick"
     IDS_IRC_SLAP            "Walnij"
@@ -808,7 +747,6 @@ BEGIN
     IDS_IRC_HASJOINED       "* %s przyszed≥ na %s"
     IDS_IRC_HASPARTED       "* %s poszed≥ z %s (%s)"
     IDS_IRC_WASKICKEDBY     "* %s zosta≥ wykopany przez %s (%s)"
-    IDS_IRC_NICKUSED        "Twoj nick jest juø uøywany na serwerze. Wybierz inny z zak≥adki ustawieÒ."
     IDS_DOWNLOAD_ALPHABETICAL "Pobieraj w porzπdku alfabetycznym"
     IDS_IRC_HASQUIT         "* %s wy≥πczy≥ siÍ (%s)"
     IDS_IRC_NOWKNOWNAS      "* %s zmieni≥ nicka na %s"
@@ -860,12 +798,10 @@ BEGIN
     IDS_SP_ACTCON           "Aktywne po≥πczenia"
     IDS_SP_ACTDL            "Aktywne pobierania"
     IDS_SP_ACTUL            "Aktywne wysy≥ania"
-    IDS_PW_TIT_UP           "Ustaw limit prÍdkoúci wysy≥ania"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_TIT_DOWN         "Ustaw limit prÍdkoúci pobierania"
     IDS_PW_UNLIMITED        "Bez limitu"
     IDS_PW_MINREC           "rekomendowane minimum\t%i "
     IDS_PW_UA               "Pe≥na prÍdkoúÊ przesy≥ania"
@@ -873,10 +809,7 @@ BEGIN
     IDS_IRC_IGNOREINFOMESSAGE "Igonruj wiadomosci."
     IDS_CONNECTIONLOST      "Utracono po≥πczenie"
     IDS_WIZ_OS_FRAME        "System operacyjny"
-    IDS_WIZ_CONCURENTDOWN_FRAME "Ile plikÛw naraz zwykle pobierasz?"
     IDS_HASHINGFILE         "Hashowanie pliku:"
-    IDS_WIZ_CUSTOM_FRAME    "Jeúli przetestowa≥eú prÍdkoúÊ swojego po≥πczenia, wpisz tu rezultatu."
-    IDS_WIZ_HOTBUTTON_FRAME "Predefiniowane przyciski"
     IDS_WIZ_TRUEUPLOAD_TEXT "Prawdziwa przepustowoúÊ wysy≥ania"
     IDS_WIZ_TRUEDOWNLOAD_TEXT "Prawdziwa przepustowoúÊ pobierania"
     IDS_FRIENDLIST          "Znajomi"
@@ -888,7 +821,6 @@ BEGIN
     IDS_WIZARD              "Wizard"
     IDS_ADDFRIEND           "Dodaj do listy znajomych"
     IDS_REMOVEFRIEND        "usuÒ z listy"
-    IDS_REMOVEFROMSTOK      "usuniÍty z listy statycznej"
     IDS_REMOVEFROMSTATIC    "usuÒ z listy statycznej"
     IDS_LENGTH              "D≥ugoúÊ"
     IDS_VIDEO               "Wideo"
@@ -900,7 +832,6 @@ BEGIN
     IDS_FPS                 "Fps"
     IDS_CHANNELS            "Kana≥y"
     IDS_SAMPLERATE          "CzÍst.prÛbk."
-    IDS_ROUNDBITRATE        "Zaokr.prÛbk."
 END
 
 STRINGTABLE 
@@ -911,33 +842,27 @@ BEGIN
     IDS_VIEWFILES           "Obejrzyj pliki"
     IDS_FRIENDSLOT          "UstanÛw slot dla znajomych"
     IDS_FRIENDDETAIL        "(Slot znajomych)"
-    IDS_ASCWOP_PROXYSUPPORT "Automatyczne pod≥πczenie do serwera bez proxy"
     IDS_UDPDISABLED         "wy≥πcz"
-    IDS_CTINFO              "Wybierz typ twojego po≥πczenia:"
     IDS_WIZ_CTFRAME         "Typ po≥πczenia"
     IDS_CONCURDWL           "RÛwnoleg≥e pobierania"
-    IDS_UNIT                "Jednostka:"
     IDS_WIZARD_CUSTOM       "W≥asne"
     IDS_WIZARD_ENTERBELOW   "(wpisz poniøej!)"
     IDS_STATS_MAXAVGDL      "Maksymalna úrednia prÍdkoúÊ pobierania dla sesji: %s"
-    IDS_USS_MIN             "Uwaga: USS nie moøe obecnie utrzymaÊ prÍdkoúci wysy≥anie mniejszej niø 10kB. Jeúli znasz swoje ≥πcze i wiesz, øe nie wytrzyma tego, prosze wy≥πcz USS."
 END
 
 STRINGTABLE 
 BEGIN
     IDS_STATS_MAXDL         "Maksymalna prÍdkoúÊ pobierania dla sesji: %s"
     IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
-                            "Ignoruj protokÛ≥ eMula dodwania do znajomych"
+                            "Ignoruj protokÛ≥ eMula dodawania do znajomych"
     IDS_PW_FASTSRVCON       "Bezpieczne pod≥πczanie"
     IDS_SOURCELINKFAILED    "Musisz miec wysokie ID aby utworzyc link ürÛd≥a"
-    IDS_CREATESOURCELINK    "Kopiuj link ED2k do schowka (ürÛd≥o)"
     IDS_ERR_LOADSERVERMET   "Nie uda≥o siÍ za≥adowaÊ pliku server.met!"
     IDS_ERR_CORRUPTCOMPRPKG "Otrzymano uszkodzony skompresowany pakiet dla %s (b≥πd %i)"
     IDS_ERR_EMFRIENDSINVALID "Plik emfriends.met jest uszkodzony lub b≥Ídny!"
     IDS_ERR_READEMFRIENDS   "Wystπpi≥ nieznany b≥πd podczas ≥adowania pliku emfriends.met: %s"
     IDS_ERR_KNOWNSERVERINFOREC 
                             "Otrzymano nierozpoznane informacje o serwerze!"
-    IDS_ERR_TIMERCREATEFAILED "B≥πd krytyczny: nie uda≥o sie utworzyÊ Timera"
     IDS_WIZ_DOWN            "Pobr. (kbit/s)"
     IDS_WIZ_UP              "Wys≥. (kbit/s)"
     IDS_SELECT_INCOMINGDIR  "Wybierz folder dla plikÛw pobranych"
@@ -952,7 +877,6 @@ BEGIN
     IDS_PRIOAUTORELEASE     "Auto [Re]"
     IDS_PRIOAUTOLOW         "Auto [Ni]"
     IDS_ERR_CONTIMEOUT      "PrÛba pod≥πczenia do ""%s"" (%s:%i ) przedawni≥a siÍ"
-    IDS_ERR_CONFAILED       "PrÛba pod≥πczenia do ""%s"" (%s:%i ) nie powiod≥a siÍ."
     IDS_OUTOFSERVERS        "Nie uda≥o siÍ pod≥aczyÊ do øadnego serwera na liúcie. Wykonuje kolejnπ prÛbÍ."
     IDS_PW_CONLIMITS        "Limity Po≥πczeÒ"
     IDS_MAXCON5SECLABEL     "Liczba nowych po≥aczeÒ na 5sek"
@@ -972,15 +896,11 @@ BEGIN
     IDS_RECOVERED_PARTMET   "Odzyskano plik part.met dla: %s"
     IDS_CMT_QUEST           "Dodaj komentarz do pliku! (BÍdzie on widoczny dla wszystkich uøytkownikÛw)"
     IDS_CMT_AIDE            "Dla filmu, moøesz podaÊ d≥ugoúÊ, jÍzyk, opis. Mozesz poinformowaÊ jesli jest to fake."
-    IDS_CMT_TITLE           "Komentarz pliku %s"
     IDS_CMT_ADD             "ZmieÒ komentarz dla tego pliku ..."
     IDS_CMT_NONE            "bez komentarza"
     IDS_CMT_READ            "Komentarz pliku:"
-    IDS_CMT_NOTCONNECTED    "Jeszcze bez komentarzy..."
     IDS_CMT_SHOWALL         "Pokaø komentarze"
-    IDS_CMT_REFRESH         "Odúwieø"
     IDS_CMT_READALL         "Wszystkie komentarze"
-    IDS_CMT_NOCOMMENT       "Nie wprowadzono komentarzy..."
     IDS_CMT_RATEQUEST       "JakoúÊ pliku"
     IDS_CMT_RATEHELP        "Wybierz jakoúÊ pliku lub poinformuj o problemach"
 END
@@ -1028,7 +948,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FD_STATS            "Utracono przez uszkodzenia: %s       Zyskano przez kompresje: %s\nCzÍúci uratowane przez I.C.H.: %i"
     IDS_ERR_NOHELP          "Zajrzyj na naszπ strone domowπ po najnowszπ wersje pliku pomocy!\n\nCZy chcesz teraz obejrzeÊ pomoc online?"
     IDS_SHOWOVERHEAD        "Pokaø narzut przepustowoúci"
     IDS_UPDOWNSMALL         "Wys≥.: %.1f | Pobr.: %.1f"
@@ -1055,14 +974,13 @@ BEGIN
     IDS_VISITVERSIONCHECK   "\n\nCzy chcesz odwiedziÊ teraz strone informacyjnπ?"
     IDS_PW_VIDEOPLAYER      "Odtwarzacz wideo"
     IDS_VIDEOBACKUP         "TwÛrz kopie do podglπdu"
-    IDS_STATIC_EMPTY        "(puste=domyúlne)"
     IDS_MYINFO              "Moje Info"
     IDS_ID                  "ID"
     IDS_IDLOW               "Low ID"
     IDS_IDHIGH              "High ID"
     IDS_UPSTATUS            "Otrzymane czÍúci"
     IDS_TOVERHEAD           "Narzut ca≥kowity (Sesji): %s"
-    IDS_FROVERHEAD          "Narzut prÛüb o pliki (Sesji): %s"
+    IDS_FROVERHEAD          "Narzut prÛúb o pliki (Sesji): %s"
     IDS_SSOVERHEAD          "Narzut wymiany ürÛde≥ (Sesji): %s"
     IDS_SOVERHEAD           "Narzut serwera (Sesji): %s"
 END
@@ -1099,8 +1017,6 @@ BEGIN
     IDS_COLOR               "Kolor"
     IDS_DEFAULT             "Domyúlny"
     IDS_PW_DISPLAY          "Wyúwietl"
-    IDS_CAT_INVADD          "Pokaø wszystkie nieprzydzielone"
-    IDS_CAT_REINVADD        "Pokaø wszystkie"
     IDS_INDICATERATINGS     "Pokazuj ikonki komentarzy przy plikach"
     IDS_ALLOTHERS           "Wszystkie inne"
     IDS_TOCAT               "Przydziel do kategorii"
@@ -1110,7 +1026,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ADDDOWNLOADSFROMCB  "DodaÊ te linki ED2k do pobierania?\n"
-    IDS_ADDDOWNLOADSFROMCBTITLE "Link ED2k jest w schowku"
     IDS_PF_WATCHCB          "Szukaj linkÛw ED2k w schowku"
     IDS_SECURITY            "BezpieczeÒstwo"
     IDS_IPFILTERLOADED      "%i FiltrÛw IP za≥adowano"
@@ -1140,10 +1055,8 @@ BEGIN
     IDS_USECREDITSYSTEM     "Uøyj systemu kredytÛw (Nagradzaj wysy≥ajπcych dane)"
     IDS_FIRSTAUTODOWN       "W≥πcz tπ opcje jesli checesz, aby eMule zarzπdza≥ twoimi priorytetami sciπgania.\n\nW≥πczenie tej opcji pozwoli upewniÊ siÍ ze pliki z duøπ iloúciπ ürÛde≥ nie bÍdπ blokowac transferu plikom z ma≥a iloúciπ. Opcja ta zacznie dzia≥πÊ przy nastÍpnych úciπgniÍciach."
     IDS_FIRSTAUTOUP         "W≥πcz tπ opcje jesli checesz, aby eMule zarzπdza≥ twoimi priorytetami wysy≥ania.\n\nW≥πczenie tej opcji spowoduje wspomaganie plikÛw rzadkich bardziej niø popularnych, wy≥πczenie jej da odwrotny rezultat. Opcja zacznie dzia≥aÊ przy nastÍpnych udostÍpnieniach"
-    IDS_FIRSTCREDITSYSTEM   "Czy chcesz nagradzaÊ userÛw wysy≥ajπcych do ciebie?\n\nTo jest powszechenie znane jako System Kredytowy. W≥πczenie tej opcji poprawi walke przeciwko leecherom. Jeúli jesteú oddanym releaserem, bÍdiesz chcia≥ wy≥πczyÊ tπ opcje."
     IDS_FIRSTFULLCHUNK      "W≥πcz tπ opcje jeúli chcesz wysy≥aÊ pe≥ne czÍúci plikÛw.\n\nW≥πczenie tej opcji zwiÍksza szanse pobrania ca≥ej czÍsci przez uøytkownika. Wy≥πczenie spowoduje szybszπ rotacje userÛw w kolejce. Jeúli jesteú releaserem w≥πcz to."
     IDS_FIRSTSAFECON        "W≥πcz tÍ opcjÍ jeúli chcesz uøywaÊ Bezpiecznego Pod≥πczania.\n\nWy≥πczenie pozwla siÍ ≥πczyÊ z serwerami troszkÍ szybciej, ale moøe spowodowaÊ b≥Ídne przydzielanie LowID."
-    IDS_FIRSTRUNASSIST      "Czy chesz uruchomiÊ wizarda konfiguracji poczπtkowej?"
     IDS_FIRSTAUTOCON        "W≥πcz tπ opcjÍ jeúli chcesz aby eMule ≥πczy≥ siÍ przy starcie"
     IDS_FIRSTCOMPLETE       "ZakoÒczy≥eú pracÍ z wizardem konfiguracyjnym.\r\rWszystkie ustawienia ( i wiecej) mogπ byÊ zmieniane na ekranie Preferencji. Opis opcji znajduje siÍ w pomocy (F1)!"
 END
@@ -1175,18 +1088,14 @@ END
 STRINGTABLE 
 BEGIN
     IDS_WEB_SHOW_UPLOAD_QUEUE "Pokaø kolejkÍ"
-    IDS_WEB_HIDE_UPLOAD_QUEUE "Ukryj kolejkÍ"
     IDS_WEB_GZIP_COMPRESSION "Kompresja Gzip"
     IDS_WEB_GZIP_COMMENT    "Zapisz ruch na ≥πczach, w wykresach."
-    IDS_WEB_UPLOAD_QUEUE_COMMENT 
-                            "W≥πcz lub wy≥πcz wyúwietlanie kolejki oczekujπcych na stronie transferÛw."
     IDS_WEB_REFRESH_TIME    "CzÍstotliwoúÊ odúwiezania"
     IDS_WEB_REFRESH_COMMENT "Czas w sekundach (zero=wy≥πczone):"
     IDS_SV_URL              "URL"
     IDS_WS_RELOAD_TMPL      "Szablony"
     IDS_SV_DEBUGLOG         "Log Debug"
     IDS_WS_PASS             "Has≥o"
-    IDS_WEB_FILESETTINGS    "ustawienia plikÛw"
     IDS_WS_ERR_LOADTEMPLATE "Nie moge za≥adowaÊ szablonu: wymieÒ plik %s na nowszy!"
     IDS_WEB_CONLIMITS       "Limity po≥πczeÒ"
     IDS_INFLST_USER_TOTALDOWNLOAD "Pobrano w sumie"
@@ -1220,7 +1129,6 @@ BEGIN
     IDS_WEBSRV              "Webserver"
     IDS_SW_REFETCHRES       "Rezultat pobraÒ"
     IDS_FILEHASH            "Hash Pliku"
-    IDS_GLOBALSEARCH2       "Szukanie globalne"
     IDS_PW_PROXY            "Proxy"
     IDS_PROXY_ENABLE        "W≥πcz proxy"
     IDS_PROXY_TYPE          "Typ proxy:"
@@ -1246,7 +1154,6 @@ BEGIN
     IDS_WIZ1_END_BTN_HINT   "Aby zakoÒczyÊ dzia≥anie kreatora, naciúnij 'ZakoÒcz'."
     IDS_WIZ1_UPLOAD_SUBTITLE "Przesy≥anie pe≥nych kawa≥kÛw"
     IDS_DL_RESUMENEXT       "Podejmij nastÍpny wtrzymany"
-    IDS_DONTCHANGE          "Nie zmieinaj"
     IDS_STARTPRIO           "Priorytet dla tej kategorii"
     IDS_PREF_STARTNEXTFILECAT "preferuj tπ samπ kategorie"
     IDS_REPAINTGRAPHS       "Nie odtwarzaj wykresÛw statystyk po zmianie rozmiaru"
@@ -1275,7 +1182,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SHAREDREQDENIED     "Uøytkownik %s (%u) odmÛwi≥ dostÍpu do listty udostÍpnianych zasobÛw"
+    IDS_SHAREDREQDENIED     "Uøytkownik %s (%u) odmÛwi≥ dostÍpu do listy udostÍpnianych zasobÛw"
     IDS_AUTOCLEANUPFN       "Czyszczenie nazw plikÛw"
     IDS_ONNEWDOWNLOAD       "Inicjalizacje"
     IDS_FILTERFILENAMEWORD  "wpisz s≥owa, ktÛre chcesz odfiltrowaÊ, seperated by |"
@@ -1285,7 +1192,6 @@ BEGIN
     IDS_STATS_CUMULATIVE    "Kumulacyjny"
     IDS_STATS_OVRHD         "Narzut"
     IDS_STATS_RECORDS       "Rekordy"
-    IDS_STATS_OVRHD2        "Narzut: %s (%s PakietÛw)"
     IDS_STATS_COMPDL        "ZakoÒczonych pobraÒ"
     IDS_STATS_SVRECWORKING  "Max. Dzia≥ajπcych SerwerÛw"
     IDS_STATS_SVRECUSERS    "Max. UøytkownikÛw Online"
@@ -1299,7 +1205,6 @@ BEGIN
     IDS_SEARCH_COLUMN       "Szukaj w kolumnie"
     IDS_STATS_SHRECSIZE     "NajwiÍkszy udostÍpniany rozmiar"
     IDS_STATS_SHRECASIZE    "NajwiÍkszy åredni rozmiar pliku"
-    IDS_STATS_MYRUNTIME     "Czas pracy: %s"
     IDS_STATS_SESSION       "Sesja"
     IDS_STATS_SRATIO        "Ratio sesji UL:DL:"
     IDS_STATS_CRATIO        "Ratio ca≥k. UL:DL:"
@@ -1321,15 +1226,12 @@ BEGIN
     IDS_STATS_AVGDATAULSES  "årednio wys≥ano w sesji"
     IDS_STATS_ICHSAVED      "CøÍúci uratowane przez I.C.H: %u"
     IDS_STATS_MBRESET_TXT   "Czy jesteú pewien ze chcesz wyczyúciÊ swoje statystyki?\n\nJeúli zechcesz, bÍdziesz mÛg≥ je pÛüniej odtworzyÊ."
-    IDS_STATS_MBRESET_CAP   "Potwierdü czyszczenie"
     IDS_STATS_MBRESTORE_TXT "Czy jesteú pewien, øe chcesz odtworzyÊ swoje statystyki z pliku?"
-    IDS_STATS_MBRESTORE_CAP "Potwierdü odtworzenie"
     IDS_ERR_NOSTATBKUP      "B£•D: Plik ze statystykami nie odnaleziony..."
     IDS_STATS_NFOLOADEDBKUP "Za≥adowano dane statystyczne..."
     IDS_STATS_NFORESET      "Statystyka zosta≥a wyczyszczona!"
     IDS_STATS_BNRESET       "Wyczyúc statystyki"
     IDS_STATS_BNRESTORE     "PrzywrÛÊ statystyki"
-    IDS_CONNECTIONSTATISTICS "Statystyki po≥aczeÒ"
     IDS_PPGSTATS_YSCALE     "Statystyki po≥πczeÒ skala Osi Y:"
 END
 
@@ -1355,7 +1257,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_STATS_OLDCLIENTS    "Stare"
     IDS_STATS_PRTDEF        "Domyúlne"
     IDS_STATS_PRTOTHER      "Inne"
     IDS_STATS_MNUTREETITLE  "Drzewo statystyk"
@@ -1363,7 +1264,6 @@ BEGIN
     IDS_STATS_MNUTREECPYALL "Kopiuj wszystkie statystyki"
     IDS_STATS_MNUTREEHTML   "HTML"
     IDS_STATS_EXPORT2HTML   "Eksportuj wszystkie statystyki"
-    IDS_CONDTCPACCEPT       "Szybkie odrzucanie po≥πczenia"
     IDS_STATS_MNUTREECPYVIS "Kopiuj widoczne statystyki"
     IDS_STATS_MNUTREEEXPANDALL "RozwiÒ wszystkie sekcje"
     IDS_STATS_MNUTREECOLLAPSEALL "ZwiÒ wszystkie sekcje"
@@ -1389,7 +1289,7 @@ BEGIN
     IDS_ALWAYS              "Zawsze"
     IDS_ONSHUTDOWN          "Przy wy≥πczeniu"
     IDS_UNCFOLDERS          "Katalogi UNC"
-    IDS_USESECIDENT         "Uzyj bezpiecznej identyfikacji"
+    IDS_USESECIDENT         "Uøyj bezpiecznej identyfikacji"
     IDS_ADVSPAMFILTER       "Zaawansowany filtr spamu"
 END
 
@@ -1405,12 +1305,8 @@ BEGIN
     IDS_SEARCH_MISSINGNOTRIGHT "Brak prawej strony przy operatorze NOT"
     IDS_SEARCH_MISSINGEXPRPARANT "Brak wyraøenia dla '(' ')'"
     IDS_SEARCH_MISSINGCLOSINGPARANT "Brakujπcy zamykajπcy nawias ')'"
-    IDS_SEARCH_MISSINGANDLEFT "Brak lewej strony przy operatorze AND"
-    IDS_SEARCH_MISSINGORLEFT "Brak lewej strony przy operatorze OR"
-    IDS_SEARCH_MISSINGNOTLEFT "Brak lewej strony przy operatorze NOT"
     IDS_SEARCH_EXPRERROR    "Nie uda≥o siÍ przetworzyÊ szukanego wyraøenia"
     IDS_SEARCH_TOOCOMPLEX   "Wyraøenie zbyt skomplikowane"
-    IDS_SEARCH_INVALIDMINMAX "B≥Ídne jednostki dla rozmiatu pliku"
 END
 
 STRINGTABLE 
@@ -1418,11 +1314,6 @@ BEGIN
     IDS_VERSION             "Wersja"
     IDS_OPTIONS             "Opcje"
     IDS_PASTE               "Wklej"
-    IDS_SEARCHAUTHORCOLLECTION "Przeszukaj Kolekcje Autora"
-    IDS_ERR_DUPL_FILES      "Powielane (zduplikowane) pliki: \\'%s\\' and \\'%s\\'"
-    IDS_USS_TRACEROUTEOFTENFAILED 
-                            "UploadSpeedSense: Tracerouting nie powiÛd≥ siÍ zbyt wiele razy. Wy≥aczanie Upload SpeedSense."
-    IDS_USS_STARTING        "UploadSpeedSense: Wykonane zgodnie z ustawieniami.Start automatycznej czu≥oúci wysy≥ania. Pierwsze 60 sekund jest w trybie 'szybkiej reakcji'"
     IDS_A4AF                "Zarzπdzanie ürÛd≥ami"
     IDS_MOBILEMULE          "MobileMule"
     IDS_ENABLEMM            "w≥πcz MobileMule"
@@ -1438,7 +1329,6 @@ STRINGTABLE
 BEGIN
     IDS_SELECT_FONT         "Wybierz czcionkÍ"
     IDS_SERVER_LIMITS       "Limit plikÛw MiÍkki i Twardy"
-    IDS_SERVERINFO          "Informacja o Serwerze"
     IDS_KBITSSEC            "kBits/sek"
     IDS_KBYTESSEC           "kBytes/sek"
     IDS_ERR_CREATE_DIR      "Nieuda≥o siÍ utworzyÊ %s w katalogu ""%s"" - %s"
@@ -1463,14 +1353,13 @@ BEGIN
                             "W celu aktywacji zmian, musisz zrestarowaÊ eMule!"
     IDS_CREDITSEXPIRED      ", %i klientÛw usuniÍto (nie widziano przez 5 miesiecy)"
     IDS_SOURCESINFO         "%i  (Uøyteczne: %i, NNP: %i, A4AF: %i)"
-    IDS_SHOW_META_DATA      "Pokaø Dane &Meta ..."
     IDS_META_DATA           "Dane Meta"
     IDS_TIMEBEFORE          "(%s temu)"
     IDS_FD_TIMEDATE         "Daty"
     IDS_FILEINFORMATION     "Informacja o pliku"
     IDS_STATS_FREESPACE     "Wolne miejsce"
     IDS_IRC_HELPCHANNEL     "Pod≥πcz siÍ do kana≥Ûw pomocy."
-    IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-polish"
+    IDS_IRC_HELPCHANNELPERFORM "/join #emule-polish"
     IDS_IRC_ACCEPTLINKSFRIENDS "Tylko od znajomych."
     IDS_COMPLSOURCES        "ZakoÒczone ürÛd≥a"
     IDS_CHECKNOENDTIME      "brak czasu zak."
@@ -1479,7 +1368,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MATCH_KEYWORDS      "S≥owa klucze"
     IDS_FAILEDREOPEN        "B≥πd krytyczny: Nie uda≥o siÍ otworzyÊ pliku czÍúci '%s' (%s)!"
     IDS_ERR_PREVIEWALREADY  "Øπdanie podglπdu od tego klienta jest juø przyjÍte"
     IDS_ERR_PREVIEWFAILED   "Podglπd od Uøytkownika '%s' nieudany"
@@ -1487,7 +1375,7 @@ BEGIN
     IDS_DWTOT_NR            "Liczba pobraÒ: %d"
     IDS_DWTOT_TSD           "Ca≥kowita wielkoúÊ pobraÒ: %s"
     IDS_DWTOT_TCS           "Rozmiar zakoÒczonych plikÛw: %s (%.0f%%)"
-    IDS_DWTOT_TSL           "Pozosta≥o to probrania: %s"
+    IDS_DWTOT_TSL           "Pozosta≥o to pobrania: %s"
     IDS_DWTOT_TSN           "Miejsce potrzebne na pobierane pliki: %s"
     IDS_DWTOT_FS            "Wolne miejsce na dysku tymczasowym: %s"
     IDS_NEEDFREEDISKSPACE   "%s (potrzeba zwolnic %s!)"
@@ -1500,7 +1388,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CREATEHOSTNAMESRCLINK "Kopiuj link eD2K do schowka (Nazwa hosta)"
     IDS_HASHINGFILESCOUNT   " (%u hashuje)"
     IDS_CHECKDISKSPACE      "Sprawdü miejsce na dysku"
     IDS_YOURHOSTNAME        "Nazwa hosta dla w≥asnych linkÛw eD2K"
@@ -1544,7 +1431,7 @@ BEGIN
     IDS_DYNUP_GOINGUPDIVIDER "Spowolnienie w gÛrÍ"
     IDS_DYNUP_GOINGDOWNDIVIDER "Spowolnienie w dÛ≥"
     IDS_DYNUP_NUMBEROFPINGS "NajwiÍksza iloúÊ pingÛw - úrednia"
-    IDS_DYNUP_MINUPLOAD     "Najniøsza dozwolona prÍdkoúÊ pobierania"
+    IDS_DYNUP_MINUPLOAD     "Najniøsza dozwolona prÍdkoúÊ wysy≥ania"
     IDS_ESTTIMELEFT         "Przewidywany czas:"
     IDS_TRANSFER_RATE_LABEL "PrÍdkoúÊ transferu:"
     IDS_SAVELOG             "Zapisz log"
@@ -1593,7 +1480,7 @@ BEGIN
     IDS_VIAED2KSQ           "przez ED2K Serwer/KolejkÍ"
     IDS_EM_KADEMLIA         "&Kad"
     IDS_VIAKAD              "przez Kad"
-    IDS_VIASE               "przez Wymiane èrÛde≥"
+    IDS_VIASE               "przez Wymiane ?rÛde≥"
     IDS_SELECTTOOLBARBITMAP "Wybierz Bitmap dla paska narzÍdziowego"
     IDS_SELECTTOOLBARBITMAPDIR "Wybierz katalog dla obrazkÛw"
     IDS_TOOLBARSKINS        "SkÛrki paska narzÍdziowego"
@@ -1609,7 +1496,6 @@ BEGIN
     IDS_MINBITRATE          "Min. bitrate [kBit/s]"
     IDS_KAD_RECHECKFW       "Sprawdz Firewall"
     IDS_SHAREDTITLE         "UdostÍpniane ED2K|Kad"
-    IDS_WARNINGNOBS         "Bootstrapping wy≥πczony (Kad wylπczona lub pod≥πczona)."
     IDS_FIREWALLED          "Firewalled"
     IDS_KADEMLIA            "Kad"
     IDS_KADCONTACTLAB       "Kontakty"
@@ -1622,10 +1508,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_SECURE_IDENT    "Loguj bezbiecznπ identyfikacje (ident)"
+    IDS_LOG_SECURE_IDENT    "Loguj bezpiecznπ identyfikacje (ident)"
     IDS_LOG_FILTERED_IPS    "Loguj filtrowane lub ignorowane adresy IP"
     IDS_LOG_FILE_SAVING     "Loguj operacje zapisu plikÛw"
-    IDS_IPFILTERFILES       "All IP Filter Files (*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz)|*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2b;*.p2p;*.p2p.txt)|*.p2b;*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|ZIP Files (*.zip;*.gz)|*.zip;*.gz|All Files (*.*)|*.*||"
     IDS_DELETEIPFILTERS     "Czy chcesz usunπÊ wybrane filtry IP?"
     IDS_TOTAL_IPFILTER_LABEL "IloúÊ filtrÛw IP:"
     IDS_TOTAL_IPS_LABEL     "IloúÊ IP:"
@@ -1654,13 +1539,13 @@ BEGIN
     IDS_METATAGS            "IloúÊ znacznikÛw Meta:"
     IDS_FILEFORMAT          "Format pliku"
     IDS_UDPREASKS           "Ponowne zapytania UDP o plik"
-    IDS_DYNUP_PINGTOLERANCE_MS "Odchylenie Ping (ms)"
-    IDS_DYNUP_RADIO_PINGTOLERANCE_HEADER "Metoda obliczania odchylenia"
-    IDS_DYNUP_RADIO_PINGTOLERANCE_MS "Millisekundy (ms)"
-    IDS_DYNUP_RADIO_PINGTOLERANCE_PERCENT "Procent (%)"
+    IDS_DYNUP_PINGTOLERANCE_MS 			"Odchylenie Ping (ms)"
+    IDS_DYNUP_RADIO_PINGTOLERANCE_HEADER 	"Metoda obliczania odchylenia"
+    IDS_DYNUP_RADIO_PINGTOLERANCE_MS 		"Millisekundy (ms)"
+    IDS_DYNUP_RADIO_PINGTOLERANCE_PERCENT 	"Procent (%)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_LOG_A4AF            "Loguj akcje A4AF"
     IDS_A4AF_SAVE_CPU       "Wy≥πcz sprawdzanie A4AF - oszczÍdza procesor"
@@ -1671,8 +1556,7 @@ BEGIN
                             "Nie uda≥o siÍ utworzyÊ katalogu ""%s"" dla skÛrki eMule - %s"
     IDS_INSTALL_SKIN_FILE_ERROR 
                             "Nie uda≥o siÍ wydobuÊ pliku ""%s"" ze skÛrki EMule do lokalnego pliku ""%s"" - %s"
-    IDS_INSTALL_SKIN_PKG_ERROR 
-                            "To nie jest prawid≥owy pakiet ze skÛrkπ eMule'a."
+    IDS_INSTALL_SKIN_PKG_ERROR "To nie jest prawid≥owy pakiet ze skÛrkπ eMule'a."
     IDS_NEXT_REASK          "NastÍpne zapytanie do tego klienta"
     IDS_A4AF_FILES          "pliki A4AF"
     IDS_FO_TEMPTCP_S        "Otwarto port %u (TCP) w wewnÍtrznym firewallu WinXP na czas trwania sesji eMule"
@@ -1681,6 +1565,9 @@ BEGIN
     IDS_FO_TEMPUDP_F        "Nie uda≥o siÍ otwarcie portu %u (UDP) w wewnÍtrznym firewallu WinXP na czas trwania sesji eMule"
     IDS_FO_PREFBUTTON       "OtwÛrz te porty w wewnÍtrznym firewallu WinXP"
     IDS_FO_PREF_SUCCCEEDED  "Uda≥o siÍ otworzyÊ wybrane porty w wewnÍtrznym firewallu WinXP"
+
+
+
 END
 
 STRINGTABLE 
@@ -1691,17 +1578,16 @@ BEGIN
     IDS_LOG_LEVEL           "Poziom Logowania"
     IDS_DISABLEPEERACHE     "Wy≥πcz pobieranie z PeerCache"
     IDS_NEWMSG              "Nowa wiadomoúÊ od '%s' (IP:%s)"
-    IDS_PREF_STARTNEXTFILECATONLY "tylko w tej samej kategori"
+    IDS_PREF_STARTNEXTFILECATONLY "tylko w tej samej kategorii"
     IDS_LOG_ULDL_EVENTS     "Loguj zdarzenia pobierania/wysy≥ania"
     IDS_PEERCACHE_ENABLED   "TwÛj dostawca ISP wspiera technologie PeerCache, umoøliwiajπc szybsze pobieranie!"
-    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND 
-                            "PozwÛl uøytkownikowi dodaÊ ciÍ do listy znajomych."
+    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "PozwÛl uøytkownikowi dodaÊ ciÍ do listy znajomych."
     IDS_SOURCESWAPBLOCKED   "Wymiana zablokowana"
     IDS_TRICKLING           "Standby"
     IDS_A4AF_CHECK_THIS_NOW "Sprawdü to ürÛd≥o (debug)"
-    IDS_PR_SHORT_HIGH       "[Hi]"
     IDS_STATS_FRATIO        "Ratio UL:DL sesji (wysy≥anie do znajomych wy≥πczone):"
     IDS_STATS_UDATA_FRIENDS "Dane wys≥ane do przyjaciÛ≥ (Sesja): %s"
+
 END
 
 STRINGTABLE 
@@ -1718,8 +1604,7 @@ BEGIN
     IDS_NETWORK_INFO        "Informacja o Sieci"
     IDS_SP_TOTALUL          "Ca≥kowita liczba wysy≥aÒ"
     IDS_SP_ULFRIENDS        "Sloty dla Znajomych"
-    IDS_SP_ULSLOTSNOOVERHEAD 
-                            "aktualne wysy≥anie bez narzutu (UL- tylko sloty)"
+    IDS_SP_ULSLOTSNOOVERHEAD "aktualne wysy≥anie bez narzutu (UL- tylko sloty)"
     IDS_ST_ACTIVEU_ZZ       "Aktywne Wysy≥ania"
     IDS_ST_ULCURRENT        "Wysy≥anie+Narzut"
     IDS_ST_ULSLOTSNOOVERHEAD "Wysy≥anie"
@@ -1733,23 +1618,23 @@ BEGIN
     IDS_CHAT_DOWNLOADED     "Pobrano:"
     IDS_CHAT_UPLOADED       "Wys≥ano:"
     IDS_CHAT_IDENT          "Identyfikacja:"
-    IDS_CHAT_CLIENT         "Klient:"
-    IDS_MAXHALFOPENCONS     "Max. pÛ≥-otwartych po≥πczeÒ"
-    IDS_WIZ_STARTWITHWINDOWS "W≥πczanie eMula przy starcie Windowsa"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MAXHALFOPENCONS     "Max. pÛ≥otwartych po≥πczeÒ"
+    IDS_WIZ_STARTWITHWINDOWS 
+                            "W≥πczanie eMula przy starcie Windowsa"
     IDS_KAD_WAITCBK         "Oczekiw. odp. KAD"
     IDS_KAD_TOOMANDYKADLKPS "Za duøo poszuka. KAD"
     IDS_PCDS_CLIENTWAIT     "Oczek.klient"
     IDS_PCDS_CACHEWAIT      "Oczek.Cache"
     IDS_CACHE               "Cache"
     IDS_INDEXED             "Indeksowanie"
-    IDS_KADINFO_SRC         "\tèrÛd≥o: %u\r\n"
+    IDS_KADINFO_SRC         "\t?rÛd≥o: %u\r\n"
     IDS_KADINFO_KEYW        "\tFraza: %u\r\n"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_STARTWITHWINDOWS    "Startuj z Windows"
-    IDS_ADDSRCMANUALLY      "RÍcznie dodaj èrÛd≥o"
+    IDS_STARTWITHWINDOWS    "W≥πczanie eMula przy starcie Windowsa"
+    IDS_ADDSRCMANUALLY      "RÍcznie dodaj ?rÛd≥o"
     IDS_BUDDY               "Buddy"
     IDS_BUDDYNONE           "None"
     IDS_INFO                "Info"
@@ -1757,6 +1642,10 @@ BEGIN
     IDS_CONCOMPL            "Kompl."
     IDS_KADSTATUS_STOPPING  "Zatrzymywanie"
     IDS_KADSTATUS_ACTIVE    "Aktywne"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_FORMAT              "Format"
     IDS_META_COLLECTION     "Kolekcja"
     IDS_META_PARTPATH       "åcieøka czÍúci"
@@ -1764,41 +1653,41 @@ BEGIN
     IDS_META_GAPSTART       "Gap start"
     IDS_META_GAPEND         "Gap koniec"
     IDS_FAIL                "Niepowodz."
-END
-
-STRINGTABLE 
-BEGIN
     IDS_META_PREFERENCES    "Ustawienias"
     IDS_META_VERSION        "Wersja"
     IDS_META_TEMPFILE       "Plik tymczasowy"
     IDS_META_SERVERPORT     "Port Serwera"
     IDS_META_SERVERIP       "IP Serwera"
-    IDS_META_SRCUDPPORT     "Port UDP èrÛd≥a"
-    IDS_META_SRCTCPPORT     "Port TCP èrÛd≥a"
-    IDS_META_SRCIP          "IP èrÛd≥a"
-    IDS_META_SRCTYPE        "Typ èrÛd≥a"
+    IDS_META_SRCUDPPORT     "Port UDP ?rÛd≥a"
+    IDS_META_SRCTCPPORT     "Port TCP ?rÛd≥a"
+    IDS_META_SRCIP          "IP ?rÛd≥a"
+    IDS_META_SRCTYPE        "Typ ?rÛd≥a"
     IDS_SEARCH_UNICODE      "Unicode"
-    IDS_PF_ADVANCEDCALC     "Uøyj zaawansowanej kalkulacji dla pozosta≥ego czasu"
-    IDS_PERSEC              "/s"
-    IDS_LD_ED2KLINK         "Link eD2K"
-    IDS_LD_COPYCLIPBOARD    "Kopiuj do Schowka"
-    IDS_LD_HOSTNAME         "Uøyj nazwy hosta (z ustawieÒ) zamiast IP przy ≥πczeniu ze ØrÛd≥em"
-    IDS_SAVEACFAILED        "B≥πd przy zapisie AICH Hashsetu!"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_LD_ED2KLINK         "Link eD2K"
+    IDS_LD_COPYCLIPBOARD    "Kopiuj do Schowka"
+    IDS_LD_HOSTNAME         "Uøyj nazwy hosta (z ustawieÒ) zamiast IP przy ≥πczeniu ze ØrÛd≥em"
+    IDS_SAVEACFAILED        "B≥πd przy zapisie AICH Hashsetu!"
     IDS_IACHHASH            "AICH Hash"
     IDS_BYTESPERSEC         "B/s"
     IDS_KBYTESPERSEC        "KB/s"
     IDS_MBYTESPERSEC        "MB/s"
     IDS_GBYTESPERSEC        "GB/s"
     IDS_TBYTESPERSEC        "TB/s"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_STATS_MINORCLIENTS  "Nieliczne"
+    IDS_PF_ADVANCEDCALC     "Uøyj zaawansowanej kalkulacji dla pozosta≥ego czasu"
     IDS_AICH_SYNCTOTAL      "Znaleziono %i plikÛw bez poprawnego AICH Hashsetu, sumy zostanπ ponownie wyliczone"
     IDS_AICH_CALCFILE       "Trwa liczenie AICH Hash dla pliku %s"
     IDS_AICH_WARNUSER       "Od wer. 0.44a eMule uøywa dodatkowego hashu, ktÛry bardzo pomaga uniknπÊ straty danych po wykryciu b≥Ídu. Poniewaø korzysta≥eú ze starszej wersji, eMule musi ponownie wyliczyÊ hash Twoich plikÛw. To moøe trochÍ potrwaÊ, ale jest wykonywane raz.  "
     IDS_AICH_WORKED         "AICH odzyska≥ %s z %s czÍúci %u z %s"
+
     IDS_SOURCECLIENT        "Klient ürÛd≥owy"
     IDS_USERSIP             "IP Uøytkownika"
     IDS_FEATURES            "Opcje"
@@ -1814,7 +1703,7 @@ BEGIN
     IDS_SEENCOMPL           "Widziany ca≥y (kiedykolwiek)"
     IDS_SELSKINPROFILEDIR   "Wybierz katalog 'skÛrek'"
     IDS_ASKDLINCOMPLETE     "Potencjalnie niekompletny file:\n\n%s\n\nThis jest prawdopodobnie niekompletny w sieci i najprawdopodobniej nie da siÍ go pobraÊ! Czy na pewno chcesz pobraÊ ten plik?"
-    IDS_DEADSOURCES         "Martwe èrÛd≥a"
+    IDS_DEADSOURCES         "Martwe ?rÛd≥a"
     IDS_LARGEICONS          "Duøe Ikony"
     IDS_SMALLICONS          "Ma≥e Ikony"
     IDS_SHORTTAGS           "KrÛtkie znaczniki"
@@ -1828,7 +1717,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_COMCTRL32_DLL_TOOOLD 
+    IDS_COMCTRL32_DLL_TOOOLD            
                             "Windows Common Controls library (COMCTL32.DLL) jest za stara!\n\neMule wykry≥ wersjÍ ""Windows Common Controls library (COMCTL32.DLL)"" ktÛra jest za stara do poprawnego dzia≥ania eMule. By zapewniÊ stabilnπ pracÍ eMule zalecamy aktualizacjÍ ""Windows Common Controls library (COMCTL32.DLL)"" przynajmniej do wersji 5.8.\n\nPobierz i zainstaluj ""Windows Common Controls library (COMCTL32.DLL)"" z Microsoft (R) Download Center. Czy chcesz teraz otworzyÊ URL?"
     IDS_ASREGEXPR           "Jako zwyk≥e wyraøenie"
     IDS_STATIC_REGEXP       "Regularne wyraøenie dla filtra widoku:"
@@ -1844,12 +1733,13 @@ BEGIN
     IDS_STORENOTES          "Zapisz uwagi"
     IDS_NOTES               "Uwagi"
     IDS_KADSEARCHALREADY    "Trwa inne wyszukiwanie. SprÛbuj pÛüniej!"
-    IDS_WEB_SHUTDOWN        "Zamknij eMula"
-    IDS_WEB_REBOOT          "Zrestartuj system"
+
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_WEB_SHUTDOWN        "Zamknij eMula"
+    IDS_WEB_REBOOT          "Zrestartuj system"
     IDS_WEB_SHUTDOWNSYSTEM  "Zamknij system"
     IDS_WEB_ADMINMENU       "Admin Menu"
     IDS_WEB_MAIN_CLOSE      "Czy na pewno chcesz zamknπÊ eMule?"
@@ -1859,43 +1749,42 @@ BEGIN
     IDS_WEB_SHOW_UPLOAD_QUEUE_FRIEND "Pokaø Znajomych w kolejce"
     IDS_WEB_SESSIONTIMEOUT  "Timeout Sesji"
     IDS_WEB_ALLOWHILEVFUNC  "PozwÛl Admin'owi zamkn. eMule, zamkn. system"
-    IDS_SETPFSLIMIT         "Limit èrÛde≥..."
+    IDS_SETPFSLIMIT         "Limit ?rÛde≥..."
     IDS_SETPFSLIMITEXPLAINED 
                             "ProszÍ wprowadziÊ nowy limit ürÛde≥ dla wybranych plikÛw ! \n(wpisz 0 by uøyÊ opcji globalnych)"
     IDS_UPDATECATINCOMINGDIRS 
                             "Czy chcesz by pliki zosta≥y przeniesione ze starego folderu 'Odebrane'??"
     IDS_USESPEECH           "TCP/IP po≥πczeÒ"
+    IDS_CONDTCPACCEPT       "Szybkie odrzucanie po≥πczenia"
     IDS_TCPIP_CONNS         "TCP/IP po≥πczeÒ"
+    IDS_ERR_DELFILE         "Nie uda≥o siÍ skasowaÊ ""%s"""
     IDS_MANUAL_FILENAMECLEANUP "Czy chcesz usunπÊ nazwy wybranych plikÛw?"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_DELFILE         "Nie uda≥o siÍ skasowaÊ ""%s"""
     IDS_ERR_CONFIGCORRUPT   "%s wydaje siÍ byÊ uszkodzony i zostanie zastπpiony"
     IDS_UPLOADING           "Wysy≥anie"
     IDS_CANCELLED           "Anulowano"
     IDS_PW_REMEMBERDOWNLOADED "PamiÍtaj pobrane pliki"
     IDS_PW_REMEMBERCANCELLED "PamiÍtaj anulowane pliki"
-    IDS_PW_EMAILNOTIFICATIONS "Powiadomienie mailem"
-    IDS_PW_SMTPSERVER       "SMTP-Serwer:"
-    IDS_PW_SENDERADDRESS    "Wysy≥ajπcy:"
     IDS_AVAILABLEPARTS      "DostÍpne CzÍúci"
     IDS_NOSOUND             "Bez düwiÍku"
     IDS_PW_RECEIVERADDRESS  "Adresat:"
     IDS_PW_ENABLEEMAIL      "W≥πcz powiadomienie mailem"
     IDS_EMULENOTIFICATION   "eMule - Powiadomienie"
+    IDS_PW_EMAILNOTIFICATIONS "Powiadomienie mailem"
+    IDS_PW_SMTPSERVER       "SMTP-Serwer:"
+    IDS_PW_SENDERADDRESS    "Wysy≥ajπcy:"
     IDS_PW_SHOWTRANSTOOLBAR "Pokaø dodatkowy pasek narzÍdzi w oknie transferu"
-    IDS_SHARED_STATUS       "UdostÍpaniane CzÍúci"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SEARCH_EMULECOLLECTION "Kolekcja"
+    IDS_SHARED_STATUS       "UdostÍpaniane CzÍúci"
     IDS_INCOMING_FILES      "Pobierane Pliki"
     IDS_INCOMPLETE_FILES    "Niekompletne Pliki"
     IDS_SHARED_DIRECTORIES  "UdostÍpnione Foldery"
-    IDS_COLLECTIONLIST      "Lista Kolekcji"
     IDS_SHAREDIR            "Folder udostÍpniony"
     IDS_SHAREDIRSUB         "UdostÍpnij podfoldery"
     IDS_UNSHAREDIR          "Wstrzymaj udostÍpnianie"
@@ -1904,20 +1793,27 @@ BEGIN
     IDS_ALLDIRECTORIES      "Wszystkie Foldery"
     IDS_SEARCHRELATED       "Znajdü podobne pliki"
     IDS_RELATED             "Podobne"
-    IDS_COLL_REPLACEEXISTING "Czy chcesz zastπpiÊ plik?"
-    IDS_COLL_ERR_DELETING   "Nieznany b≥πd przy usuwaniu starego pliku. WyjúÊ bez zapisania?"
-    IDS_CREATECOLLECTION    "UtwÛrz KolekcjÍ"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_MODIFYCOLLECTION    "Zmodyfikuj KolekcjÍ"
+    IDS_COLLECTIONLIST      "Lista Kolekcji"
+    IDS_SEARCH_EMULECOLLECTION "Kolekcja"
+    IDS_COLL_REPLACEEXISTING "Czy chcesz zastπpiÊ plik?"
+    IDS_COLL_ERR_DELETING   "Nieznany b≥πd przy usuwaniu starego pliku. WyjúÊ bez zapisania?"
+    IDS_CREATECOLLECTION    "UtwÛrz KolekcjÍ"
     IDS_COLL_SIGN           "Podpisz KolekcjÍ nazwπ i kluczem"
     IDS_AUTHOR              "Autor"
     IDS_AUTHORKEY           "Autor klucz"
     IDS_COLL_ADDINCAT       "Dodaj nowe pliki do Kolekcji"
+    IDS_MODIFYCOLLECTION    "Zmodyfikuj KolekcjÍ"
     IDS_VIEWCOLLECTION      "Przejrzyj KolekcjÍ"
     IDS_COLL_TEXTFORMAT     "Zapisz KolekcjÍ w pliku testowym"
+    IDS_SEARCHAUTHORCOLLECTION "Przeszukaj Kolekcje Autora"
+    IDS_ERR_DUPL_FILES      "Powielane (zduplikowane) pliki: \'%s\' and \'%s\'"
+    IDS_USS_TRACEROUTEOFTENFAILED 
+                            "UploadSpeedSense: åledzenie trasy pingu nie powiÛd≥o siÍ zbyt wiele razy. Wy≥πczanie Upload SpeedSense."
+    IDS_USS_STARTING        "UploadSpeedSense: Wykonane zgodnie z ustawieniami.Start automatycznej czu≥oúci wysy≥ania. Pierwsze 60 sekund jest w trybie 'szybkiej reakcji'"
     IDS_USS_MANUALUPLOADLIMITDETECTED 
                             "UploadSpeedSense: Samoczynnie podnosi limit wysy≥ania. (przez 60 sekund czujnik jest w trybie szybkiej reakcji)"
     IDS_USS_STATE_PREPARING "Przygotownie..."
@@ -1936,10 +1832,10 @@ BEGIN
     IDS_DOWNLOAD_LANGFILE   "åciπgnie pliku jÍzykowego"
     IDS_DOWNLOADING_SERVERMET_FROM "åciπganie server.met z %s"
     IDS_DOWNLOADING_SERVERMET "åciπganie server.met..."
-    IDS_FULLALLOC           "Umieszczanie pe≥nego rozmaru pliku dla nierozrastajπcych siÍ czÍúci pliku"
+    IDS_FULLALLOC           "Umieszczanie pe≥nego rozmiaru pliku dla nierozrastajπcych siÍ czÍúci pliku"
     IDS_X_SHAREAZA_IMPORT_NO_HASH "Hash nie znaleziony."
-    IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "Gap list uszkodzony."
-    IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Gap list nie znaleziony."
+    IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "Gap lista uszkodzony."
+    IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Gap lista nie znaleziony."
     IDS_X_SHAREAZA_IMPORT_HASH_SET_CORRUPT "Hash set uszkodzny."
     IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "Hash set nie znaleziony."
     IDS_CONVERTINGKNOWN2MET "Konwertowanie %s na %s øeby wesprzeÊ wielkie pliki..."
@@ -1949,6 +1845,81 @@ BEGIN
     IDS_ERR_MET_BAD         "B≥πd: Plik %s jest uszkodzony, nie moøe za≥adowaÊ znanych plikÛw"
     IDS_SRV_LARGEFILES      "Wsparcie dla duøych plikÛw"
 END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_FSCANTHANDLEFILE 
+                            "Nie moøesz sciπgaÊ tego pliku, poniewaø twÛj system nie obs≥uguje plikÛw wiÍkszych niø 4GB, rozwaø przekonwertowanie dysku na NTFS"
+
+
+    IDS_TRAYDLG_SPEED       "eMule Speed"
+    IDS_WEB_REMOTE_LINK_ADDED "Dodano link: "
+    IDS_WEB_REMOTE_LINK_NOT_ADDED "Link nie dodany. Z≥e has≥o."
+    IDS_ERR_FAILEDTOLOAD    "Nie uda≥o sie za≥adowaÊ %s: %s "
+    IDS_RUNNINGRESTRICTED   "eMule jest uruchomiony z mniejszymi uprawnieniami"
+    IDS_ARCPREV_PLEASEWAIT  "Skanowanie archiwum.."
+    IDS_NEWVERSIONAVLBETA   "Ta beta wersja jest nieaktualna. Wersja ta moøe zawieraÊ b≥edy, dlatego uaktualnij eMula do najnowszej stabilnej wersji"
+    IDS_KADSEARCHACTIVE     "(Szukanie KAD trwa...)"
+    IDS_BOLD                "W≥πcz pogrubiony tekst"
+    IDS_UNDERLINE           "W≥πcz pokreúlony tekst"
+    IDS_COLOUR              "Wybierz kolor tekstu,(Kolor t≥a domyúlny)."
+    IDS_RESETFORMAT         "Zamknij otwarte formatowania"
+    IDS_RESTORESEARCHPARAMS "PrzywrÛÊ szukane parametry"
+    IDS_COMMAND             "Polecenie"
+    IDS_ARGUMENTS           "Argumenty"
+    IDS_AP_CREATEPREVCOPY   "StwÛrz podglπdany plik"
+    IDS_ARCHIVEDETAILS      "SzczegÛ≥y archiuwm"
+    IDS_ARCHTYPE            "Typ archiwum"
+    IDS_ATTRIBUTES          "Atrybuty"
+    IDS_LASTMODIFIED        "Ostatnio zmodyfikowany"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_RARFULLENCR         "Katalog zaszyfrowany - nie moøna odczytaÊ"
+    IDS_ARCPARSED           "Archiuwm przeskanowane"
+    IDS_ARCPREV_LISTMAYBEINCOMPL "Lista plikÛw moøe byÊ niekompletna"
+    IDS_ARCPREV_DIRNOTFOUND "Nie znaleziono katalogu"
+    IDS_ARCPREV_INSUFFDATA  "Niewystarczajπce dane"
+    IDS_PASSWPROT           "Chronione has≥o"
+    IDS_ARCPREV_DIRSUCCREAD "Uda≥o sie wczytaÊ katalog"
+    IDS_ARCPREV_UNKNOWNFORMAT "(nieznane/niewspierane)"
+    IDS_OBFUSCATION         "Maskowanie"
+    IDS_SUPPORTED           "Wspierane"
+    IDS_ESTIMATED           "Oszacowany"
+    IDS_MEDIAINFO_DLLMISSING 
+                            "Nie masz zainstalowanej biblioteki MediaInfo. Jesli chcez zdobyÊ wiecej informacji na temat plikÛw audio/video,\r\núciπgnij biblioteke MediaInfo z http://sourceforge.net/projects/mediainfo/ i skopiuj plik MediaInfo.dll do\r\nfolderu eMula ""%s"".\r\n"
+    IDS_WARNING_WRONGFILEEXTENTION 
+                            "Uwaga: Rozszerzenie ""%s"" nie pasuje do rozszerzenia \r\ntypowaego pliku uøywanego przez ten format. Moøesz chcieÊ przemieniÊ nazwe øeby \r\nzmieniÊ na jedno z rozszerzeÒ ""%s""\r\nw≥aúciwych dla tego formatu.\r\n"
+    IDS_MEDIAINFO_DRMWARNING 
+                            "Uwaga: Plik ""%s"" moøe byÊ chroniony przez Digital Rights Management (DRM).\r\nTwÛrca nie chce abyú uzywa≥ tego pliku bez wykupienia odpowiedniej licencji.\r\n"
+    IDS_ARCHPREV_ATTRIBINFO "Atrybuty pliku moga zawieraÊ:\r\n\r\nP\tplik jest chroniony has≥em\r\nD\tfolder jest\r\nC\tKomentarz\r\nLx\tpoziom kompresji x\r\nM\tkompresja nie sciπgniÍtych danych\r\n<\tplik kontynuowany w poprzedniej objÍtoúci\r\n>\tplik jest kontynuowany w nastÍpnej objÍtoúci\r\n"
+    IDS_LOADFILTER_EMTOOLBAR "eMule Toolbar Bitmap Files "
+    IDS_LOADFILTER_EMSKINFILES "Pliki skÛrek eMula"
+    IDS_CONTENT_INFO        "ZawartoúÊ"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MESSAGESCOMMENTS    "Wiadomoúci i komentarze"
+    IDS_DISABLEOBFUSCATION  "Wy≥πcz wsparcie dla zamaskowanych po≥aczeÒ"
+    IDS_ONLYOBFUSCATED      "DopuúÊ tylko zamaskowane po≥πczenia (niezalecane)"
+    IDS_ENABLEOBFUSCATION   "W≥πcz maskowanie"
+    IDS_PROTOCOLOBFUSCATION "ProtokÛ≥ Maskowania"
+    IDS_CONNECTINGTOOBFUSCATED 
+                            "Pod≥πczanie do %s (%s:%i - uøywajπc protoko≥u maskowania) ..."
+    IDS_CONNECTEDTOOBFUSCATED "Po≥πczono siÍ przy pomocy protoko≥u maskowania z: %s"
+    IDS_VERIFIED            "Zweryfikowany"
+    IDS_OBFUSCATED          "Zamaskowany"
+    IDS_UNVERIFIED          "Niezweryfikowany"
+    IDS_INVALIDFILEEXT      "Niepoprawny rozmiar pliku"
+    IDS_UNKNOWNFILEEXT      "Nieznany rozmiar pliku"
+    IDS_ENABLEMINIMULE      "W≥πcz MiniMule"
+    IDS_DISABLE_AUTOARCHPREV 
+                            "Wy≥πcz automatyczny podglπd zawartoúci archiwÛw"
+END
+
 
 STRINGTABLE 
 BEGIN
@@ -2855,7 +2826,7 @@ BEGIN
     IDS_GLOBAL_HL_LIMIT     "Globalny Twardy Limit"
     IDS_SLOT_LIMIT_NUM      "Maks. # slotÛw (60-255)"   
    
-    
+
 END
 
 
@@ -2874,4 +2845,3 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-
