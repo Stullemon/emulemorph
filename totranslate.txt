@@ -1,4 +1,5 @@
 
+// Note: this are only the morph string, official strings will also be added to the file. 
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_DONE       "Crash report has been generated."
@@ -1412,19 +1413,45 @@ BEGIN
     IDS_ADVADMIN_PREFS      "Access - Prefs?"
     IDS_ADVADMIN_PASS       "Password:"
     IDS_ADVADMIN_USER       "Username:"
-    IDS_ADVADMIN_CAT        "Categorys (sep. by |):"
+    IDS_ADVADMIN_CAT        "Categories (sep. by |):"
     IDS_WS_COOKIE_LOGGEDIN  "Remain Logged In:"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ADVADMIN_NOTE       "Note: You have to use the iONiX Webtemplates, else it won't work\n\n-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all functions without the admin functions (same as Admin without Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system (same as Admin with Hi-Level functions in the original)"
+    IDS_ADVADMIN_NOTE       "Note: You have to use the multi user Webtemplates, else you cannot activate\n\n"
+    IDS_ADVADMIN_USERLEVEL  "User level:"
     IDS_ADVADMIN_OPERATOR   "Operator"
     IDS_ADVADMIN_ADMIN      "Admin"
     IDS_ADVADMIN_HIADMIN    "Hi-Admin"
-    IDS_ADVADMINENABLED     "Enalbe iONiX Webinterface right management"
+    IDS_ADVADMINENABLED     "Enable multi user Webinterface right management"
     IDS_ADVADMIN_GUEST      "Guest"
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMINENABLED_TIP "Enable the multi user component of the webserver."
+    IDS_ACCOUNTSELECT_TIP   "Select the account name from the dropdownlist."
+    IDS_ADVADMIN_USER_TIP   "Username to enter at the webinterface"
+    IDS_ADVADMIN_PASS_TIP   "password"
+    IDS_ADVADMIN_KAD_TIP    "Allowed to display the kad screen"
+    IDS_ADVADMIN_TRANSFER_TIP "Allow acces to the transer (up/down) tab"
+    IDS_ADVADMIN_SEARCH_TIP "Allow acces to the search. Note that only one system wide websearch can be active."
+    IDS_ADVADMIN_SERVER_TIP "Allows acces to the server tab"
+    IDS_ADVADMIN_SHARED_TIP "allow access to the files shared tab"
+    IDS_ADVADMIN_STATS_TIP  "allow acces to the statiscis"
+    IDS_ADVADMIN_PREFS_TIP  "Allow access to the emule preferences"
+    IDS_ADVADMIN_USERLEVEL_TIP 
+                            "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all functions without the admin functions (same as Admin without Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system (same as Admin with Hi-Level functions in the original)"
+    IDS_ADVADMIN_CATS_TIP   "Categories the user has acces to. Leave blank for all. \nSeperate categorie names with a pipe symbol (|)"
+    IDS_ADVADMIN_DELETE_TIP "Delete the current displayed account"
+    IDS_STATIC_ADVADMIN_CATS_TIP "IDS_STATIC_ADVADMIN_CATS_TIPs"
+END
 
-
+STRINGTABLE 
+BEGIN
+    IDS_STATIC_ADVADMIN_USER_TIP "IDS_STATIC_ADVADMIN_USER"
+    IDS_STATIC_ADVADMIN_PASS_TIP "IDS_STATIC_ADVADMIN_PASS"
+    IDS_STATIC_ADVADMIN_USERLEVEL_TIP "IDS_STATIC_ADVADMIN_USERLEVEL"
+    IDS_ADVADMIN_NOTE_TIP   "IDS_ADVADMIN_NOTE"
+END
