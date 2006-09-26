@@ -1976,6 +1976,7 @@ BEGIN
 END
 
 STRINGTABLE 
+
 BEGIN
     IDS_CHUNK               "文件段详情"
     IDS_POWERSHARE_ACTIVATED "启用"
@@ -2805,6 +2806,40 @@ BEGIN
     IDS_GLOBAL_HL_LIMIT     "全局硬性限制"
 END
 
+// leuk_he tooltipped
+// Format of string:
+//  <b> text </b> - The bold string
+//  <i> text </i> - The italic string 
+//  <u> text </u> - The underline string
+//  <s> text </s> - The strike out string
+//
+//  <cb=0x123456> text </cb> - The background color (RGB (12,34,56))
+//  <ct=0x123456> text </ct> - The text color (RGB (12,34,56))
+//
+//  <cbi=1> text </cbi> - The index background color(0 - F)
+//  <cti=1> text </cti> - The index text color(0 - F)
+//
+//	<al> or <al_l> - sets align to left edge
+//  <al_c> - sets align to the center 
+//  <al_r> - sets align to the right edge
+//
+//	<hr=100%> - the horizontal line with length 100%
+//  <hr=32> - the horizontal line with length 32 pixels.
+//
+//	<a="link"> text </a> - The hyperlink 
+//
+//  <h=1> text </h> - hot zone (number of zone)
+//
+//	<br[=1]> - new line (numbers of the lines)
+//  <t[=1]> - tabulation (number of tabulations)
+//
+//  <img[=0x0000] [cx=0] [cy=0]>				 - draws the image by his name
+//  <ilst[=0x0000]>								 - draws the image from image list
+//  <bmp[=0x0000] mask[=0xFF00FF] [cx=0] [cy=0]> - draws bitmap
+//  <icon[=0x0000] [cx=0] [cy=0]>				 - draws the icon
+//ppgserver:
+
+
 STRINGTABLE 
 BEGIN
     IDC_FILTE_TIP           "包括这些词语的消息将被视为垃圾信息而过滤\n发送消息的用户将被屏蔽(好友除外)"
@@ -3275,6 +3310,66 @@ BEGIN
 	IDS_CAT_SELDLGTXT_TIP "你可以将下载的文件分类存放.\n这些是下载窗口中可选的分类.\n你可以通过输入分类名称建立新的类别\n也可以选择一个已有的类别."
 	IDS_OKCANCELSEL_TIP "选择文件类别并点击确定\n将文件下载到指定类别\n或者点击取消放弃下载文件."
 END	
+
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMIN_GROUP      "Advance Webserver Config"
+    IDS_ADVADMIN_ACC        "Account:"
+    IDS_ADVADMIN_DELETE     "Delete Account"
+    IDS_ADVADMIN_NEW        "New Account"
+    IDS_ADVADMIN_KAD        "Access - Kad?"
+    IDS_ADVADMIN_TRANSFER   "Access - Transfer?"
+    IDS_ADVADMIN_SEARCH     "Access - Search?"
+    IDS_ADVADMIN_SERVER     "Access - Server?"
+    IDS_ADVADMIN_SHARED     "Access - Shared?"
+    IDS_ADVADMIN_STATS      "Access - Stats?"
+    IDS_ADVADMIN_PREFS      "Access - Prefs?"
+    IDS_ADVADMIN_PASS       "Password:"
+    IDS_ADVADMIN_USER       "Username:"
+    IDS_ADVADMIN_CAT        "Categories (sep. by |):"
+    IDS_WS_COOKIE_LOGGEDIN  "Remain Logged In:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMIN_NOTE       "Note: You have to use the multi user Webtemplates, else you cannot activate\n\n"
+    IDS_ADVADMIN_USERLEVEL  "User level:"
+    IDS_ADVADMIN_OPERATOR   "Operator"
+    IDS_ADVADMIN_ADMIN      "Admin"
+    IDS_ADVADMIN_HIADMIN    "Hi-Admin"
+    IDS_ADVADMINENABLED     "Enable multi user Webinterface right management"
+    IDS_ADVADMIN_GUEST      "Guest"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMINENABLED_TIP "Enable the multi user component of the webserver."
+    IDS_ACCOUNTSELECT_TIP   "Select the account name from the dropdownlist."
+    IDS_ADVADMIN_USER_TIP   "Username to enter at the webinterface"
+    IDS_ADVADMIN_PASS_TIP   "password"
+    IDS_ADVADMIN_KAD_TIP    "Allowed to display the kad screen"
+    IDS_ADVADMIN_TRANSFER_TIP "Allow acces to the transer (up/down) tab"
+    IDS_ADVADMIN_SEARCH_TIP "Allow acces to the search. Note that only one system wide websearch can be active."
+    IDS_ADVADMIN_SERVER_TIP "Allows acces to the server tab"
+    IDS_ADVADMIN_SHARED_TIP "allow access to the files shared tab"
+    IDS_ADVADMIN_STATS_TIP  "allow acces to the statiscis"
+    IDS_ADVADMIN_PREFS_TIP  "Allow access to the emule preferences"
+    IDS_ADVADMIN_USERLEVEL_TIP 
+                            "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all functions without the admin functions (same as Admin without Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system (same as Admin with Hi-Level functions in the original)"
+    IDS_ADVADMIN_CATS_TIP   "Categories the user has acces to. Leave blank for all. \nSeperate categorie names with a pipe symbol (|)"
+    IDS_ADVADMIN_DELETE_TIP "Delete the current displayed account"
+    IDS_STATIC_ADVADMIN_CATS_TIP "IDS_STATIC_ADVADMIN_CATS_TIPs"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATIC_ADVADMIN_USER_TIP "IDS_STATIC_ADVADMIN_USER"
+    IDS_STATIC_ADVADMIN_PASS_TIP "IDS_STATIC_ADVADMIN_PASS"
+    IDS_STATIC_ADVADMIN_USERLEVEL_TIP "IDS_STATIC_ADVADMIN_USERLEVEL"
+    IDS_ADVADMIN_NOTE_TIP   "IDS_ADVADMIN_NOTE"
+END
+
+
 
 
 
