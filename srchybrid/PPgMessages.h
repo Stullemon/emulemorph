@@ -17,7 +17,14 @@
 
 #pragma once
 
+
+// MORPH START leuk_he tooltipped
+/*
 class CPPgMessages : public CPropertyPage
+*/
+class CPPgMessages : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
+
 {
 	DECLARE_DYNAMIC(CPPgMessages)
 

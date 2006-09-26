@@ -6572,6 +6572,15 @@ BEGIN
     IDS_ADVADMIN_NOTE_TIP   "IDS_ADVADMIN_NOTE"
 END
 
+STRINGTABLE 
+BEGIN
+   IDC_ENABLEOBFUSCATION_TIP "If you think that eMule is throttled (slowed down by isp) on your\nnetwork, you should enable this function. Whenever possible eMule\nwill use obfuscated connections and will ask other clients\nto do the same when connecting to your client. When connecting \nto a server, eMule will try to establish an obfuscated connection\nfirst and only if this fails choose a normal one. There are\nin general no disadvantages by using this option, except\ninsignificant higher CPU usage and very few bytes more overhead,\nso you can't really do anything wrong by enabling this setting.\n (default: off)" 
+   IDC_ONLYOBFUSCATED_TIP   "If you enable this option, eMule will only establish and accept obfuscated connections.\n Clients which do not support obfuscations are ignored, incoming plaintext connections\nrejected and the automatic server connect will only allow obfuscated connections to a\nserver. You should only choose this setting if you know that the ED2K Protocol is completely\nblocked on your network, otherwise you will loose sources and therefore slow down your eMule.\nHowever if you know that eMule is blocked, then enabling this option is recommended, because  \nit saves connection tries which are guaranteed to fail and therefore would waste time,\noverhead and resources. Only enable this option if you canno receive dataq otherwise! (default: off)"
+   IDC_DISABLEOBFUSCATION_TIP "If for some reason you want to disable the whole obfuscation \nfeature completely you can choose this option. In general for most users there is no reason nor advantage in doing this. (default: off)"
+   
+END
+        
+
 #endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 

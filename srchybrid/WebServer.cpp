@@ -735,7 +735,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 					|| (sPage == _T("graphs") && !Rights.RightsToStats)
 					|| (sPage == _T("options") && !Rights.RightsToPrefs)
 					|| (sPage == _T("stats") && !Rights.RightsToStats) ) ) 
-					sPage = _T("access refused");
+					sPage = _T("accessrefused");
 				else //WiZaRd
 				{
 					///MORPH END [ionix] - iONiX::Advanced WebInterface Account Management

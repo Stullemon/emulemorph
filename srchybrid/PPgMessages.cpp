@@ -17,6 +17,7 @@
 #include "stdafx.h"
 #include <share.h>
 #include "emule.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PPgMessages.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
@@ -46,7 +47,12 @@ BEGIN_MESSAGE_MAP(CPPgMessages, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgMessages::CPPgMessages()
+//MORPH START leuk_he tooltipped
+	: CPPgtooltipped(CPPgMessages::IDD)
+/*
 	: CPropertyPage(CPPgMessages::IDD)
+	*/
+//MORPH END leuk_he tooltipped
 {
 }
 
@@ -93,6 +99,7 @@ BOOL CPPgMessages::OnInitDialog()
 	InitWindowStyles(this);
 
 	LoadSettings();
+	InitTooltips();  //MORPH leuk_he tooltipped;
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -137,7 +144,7 @@ void CPPgMessages::Localize(void)
 	if (m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_MESSAGESCOMMENTS));
-
+					 
 		GetDlgItem(IDC_FILTERCOMMENTSLABEL)->SetWindowText(GetResString(IDS_FILTERCOMMENTSLABEL));
 		GetDlgItem(IDC_STATIC_COMMENTS)->SetWindowText(GetResString(IDS_COMMENT));
 		GetDlgItem(IDC_INDICATERATINGS)->SetWindowText(GetResString(IDS_INDICATERATINGS));
@@ -149,7 +156,26 @@ void CPPgMessages::Localize(void)
 		GetDlgItem(IDC_MSGONLYSEC)->SetWindowText(GetResString(IDS_MSGONLYSEC));
 
 		GetDlgItem(IDC_ADVSPAMFILTER)->SetWindowText(GetResString(IDS_ADVSPAMFILTER));
+	
+
+	// MORPH START leuk_he tooltipped
+		
+        SetTool(IDC_FILTERCOMMENTSLABEL,IDC_COMMENTFILTE_TIP); 
+		SetTool(IDC_COMMENTFILTER      ,IDC_COMMENTFILTE_TIP); 
+		SetTool(IDC_STATIC_COMMENTS,    IDC_COMMENTFILTE_TIP);
+
+		
+    	SetTool(IDC_FILTER,IDC_FILTE_TIP); 
+		SetTool(IDC_MSGONLYFRIENDS,IDC_MSGONLYFRIEND_TIP);
+		SetTool(IDC_FILTERCOMMENTSLABEL,IDC_COMMENTFILTE_TIP);
+		SetTool(IDC_MSGONLYSEC,IDC_MSGONLYSEC_SEC);
+		SetTool(IDC_ADVSPAMFILTER,IDC_ADVSPAMFILTER_TIP);
+		SetTool(IDC_MSG,IDC_COMMENTFILTE_TIP);
+		//SetTool(IDC_SEC_MISC,IDC_SEC_MIS_TIP);
+	
+		// MORPH END leuk_he tooltipped
 	}
+
 }
 
 
@@ -160,6 +186,8 @@ void CPPgMessages::OnDestroy()
 
 BOOL CPPgMessages::PreTranslateMessage(MSG* pMsg) 
 {  
+	m_Tip.RelayEvent(pMsg); // MORPH leuk_he tooltipped. 
+
 	return CPropertyPage::PreTranslateMessage(pMsg);
 }
 
