@@ -61,8 +61,8 @@ public:
     void SwitchTab(int page);
  	int ActivePageWebServer;
 	int StartPageWebServer;
-	short Webserver; 
-	short Multiwebserver;
+	int Webserver; 
+	int Multiwebserver;
 	// MORPH end tabbed option [leuk_he]
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	CPPgDebug		m_wndDebug;

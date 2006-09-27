@@ -321,7 +321,7 @@ void CPreferencesDlg::SwitchTab(int Page)
 	
 	if(m_hWnd && IsWindowVisible()){
 		CPropertyPage* activepage = GetActivePage();
-
+								   
 				// webServer 1-2
 		if (activepage == &m_wndWebServer || activepage == &m_wndIonixWebServer){
 			if (Page == 0) {
