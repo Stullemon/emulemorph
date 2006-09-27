@@ -36,7 +36,12 @@
  #define strncasecmp strnicmp
 #endif
 
-static char g_error_char = '\0';
+// MORPH: RELAX [leuk_he]
+// TODO: this should be in the configuration
+static char g_error_char = 'x'   ;
+//static char g_error_char = '\0'
+// END RELAX
+
 
 static const char LESSTHAN = '<';
 static const char GREATERTHAN = '>';
