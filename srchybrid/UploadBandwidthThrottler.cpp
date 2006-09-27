@@ -767,20 +767,21 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							if (m_stat_list.Lookup(socket, stat)) {
 								ASSERT(stat->classID == classID);
 								if (timeSinceLastLoop > 0 && socket->IsBusy() == false) {
+									if (stat->realBytesToSpend > (sint64)1000*((allowedclientdatarate == _UI32_MAX)?doubleSendSize:allowedclientdatarate))
+										stat->realBytesToSpend = (sint64)1000*((allowedclientdatarate == _UI32_MAX)?doubleSendSize:allowedclientdatarate);
 									sint64 limit = -((sint64)(sleepTime + 2000)*((allowedclientdatarate == _UI32_MAX)?doubleSendSize:allowedclientdatarate));
 									if (stat->realBytesToSpend < limit)
 										stat->realBytesToSpend = limit;
-									if (_I64_MAX/1000 > allowedclientdatarate && stat->realBytesToSpend > 1000*allowedclientdatarate)
-										stat->realBytesToSpend = 1000*allowedclientdatarate;
-										
+
 									if (_I64_MAX/timeSinceLastLoop > stat->realBytesToSpend && _I64_MAX-allowedclientdatarate*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += allowedclientdatarate*min(sleepTime + 2000, timeSinceLastLoop);
 									else
 										stat->realBytesToSpend = _I64_MAX;
 								}
-								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend && stat->realBytesToSpend > 999) {
+								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, (uint32)(BytesToSpend-ControlspentBytes));
+									//SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, (uint32)(BytesToSpend-ControlspentBytes));
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
 #endif
@@ -826,9 +827,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						allowedclientdatarate = min(allowedclientdatarate,allowedDataRateClass[classID]); 
 					if (ClientDataRate[classID])
 						allowedclientdatarate = min(allowedclientdatarate,ClientDataRate[classID]);
+					if (BytesToSpend < ((allowedclientdatarate==_UI32_MAX)?doubleSendSize:allowedclientdatarate)/4) {
+						numberofclientinhigherclass += slotCounterClass[classID];
+						continue;
+					}
+					
 					uint64 spentBytes = 0;
 					uint64 spentOverhead = 0;
-					for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend; slotCounter++) {
+					for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes + ((allowedclientdatarate==_UI32_MAX)?doubleSendSize:allowedclientdatarate/4) < (uint64)BytesToSpend; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(numberofclientinhigherclass+slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
@@ -836,7 +842,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								//Try to send client allowed data for a client but not more than class allowed data
 								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									uint32 BytesToSend = min(allowedclientdatarate,(UINT)(BytesToSpend - spentBytes));
+									uint32 BytesToSend = min(allowedclientdatarate/4,(UINT)(BytesToSpend - spentBytes));
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
@@ -854,15 +860,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						}
 					}
 					//send remain data to scheduled slot
-					uint32 slotCounter = 0;
-					for(; slotCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes < (uint64)BytesToSpend; slotCounter++) {
+					for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes + ((allowedclientdatarate==_UI32_MAX)?doubleSendSize:allowedclientdatarate/4)< (uint64)BytesToSpend; slotCounter++) {
 						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(numberofclientinhigherclass+slotCounter);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
 								if (stat->realBytesToSpend > 999) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									uint32 BytesToSend = min(allowedclientdatarate,(UINT)(BytesToSpend - spentBytes));
+									uint32 BytesToSend = min(allowedclientdatarate/4,(UINT)(BytesToSpend - spentBytes));
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate);
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize);
@@ -879,27 +884,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							}
 						}
 					}
-#if !defined DONT_USE_SOCKET_BUFFERING
-					//Remove over sent data from each client
-					if ((uint64)BytesToSpend < spentBytes) {
-						uint64 oversentdata = spentBytes - (uint64)BytesToSpend;
-						for(uint32 slot = 0; slot < slotCounterClass[classID]; slot++) {
-							if (slot == slotCounter)
-								continue;
-							ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(numberofclientinhigherclass+slot);
-							if(socket != NULL) {
-								Socket_stat* stat = NULL;
-								if (m_stat_list.Lookup(socket,stat)) {
-									//if (stat->realBytesToSpend > 999) {
-										stat->realBytesToSpend -= 1000*oversentdata;
-										if (stat->realBytesToSpend < 999)
-											stat->realBytesToSpend = 999;
-									//}
-								}
-							}
-						}
-					}
-#endif
+
 					if (spentBytes) {
 						if (classID < LAST_CLASS) {
 							for (uint32 i = 0; i < LAST_CLASS; i++) {
@@ -915,9 +900,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] += spentOverhead;
 					}
 					numberofclientinhigherclass += slotCounterClass[classID];
-					if (timeSinceLastLoop > 0 && realBytesToSpendClass[classID] > 1000*doubleSendSize) {
+					if (timeSinceLastLoop > 0 && realBytesToSpendClass[classID] > 200*((allowedclientdatarate==_UI32_MAX)?doubleSendSize:allowedclientdatarate)) {
 						m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-						realBytesToSpendClass[classID] = 1000*doubleSendSize;
+						realBytesToSpendClass[classID] = 200*((allowedclientdatarate==_UI32_MAX)?doubleSendSize:allowedclientdatarate);
 					}
 				}
 			}

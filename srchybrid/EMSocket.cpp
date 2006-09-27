@@ -16,7 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #ifdef _DEBUG
-#include "DebugHelpers.h" 
+#include "DebugHelpers.h"
 #endif
 #include "emule.h"
 #include "emsocket.h"
@@ -34,6 +34,7 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
 
 namespace {
 	inline void EMTrace(char* fmt, ...) {
@@ -233,7 +234,6 @@ void CEMSocket::InitProxySupport()
 void CEMSocket::ClearQueues(){
 	EMTrace("CEMSocket::ClearQueues on %d",(SOCKET)this);
 
-	sendLocker.Lock();
 	for(POSITION pos = controlpacket_queue.GetHeadPosition(); pos != NULL; )
 		delete controlpacket_queue.GetNext(pos);
 	controlpacket_queue.RemoveAll();
@@ -242,13 +242,11 @@ void CEMSocket::ClearQueues(){
 		delete standartpacket_queue.GetNext(pos).packet;
 	standartpacket_queue.RemoveAll();
 #if !defined DONT_USE_SOCKET_BUFFERING
-	sendblenWithoutControlPacket = 0;
 	for (POSITION pos = m_currentPacket_in_buffer_list.GetHeadPosition(); pos != NULL;) {
 		delete m_currentPacket_in_buffer_list.GetNext(pos);
 	}
 	m_currentPacket_in_buffer_list.RemoveAll();
 #endif
-	sendLocker.Unlock();
 
 	// Download (pseudo) rate control	
 	downloadLimit = 0;
@@ -831,7 +829,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         return returnVal;
     }
 
+	sendLocker.Lock();
 	if (byConnected == ES_DISCONNECTED) {
+		sendLocker.Unlock();
 		SocketSentBytes returnVal = { false, 0, 0 };
 		return returnVal;
 	}
@@ -853,10 +853,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 		if(maxNumberOfBytesToSend == 0) {
 #if !defined DONT_USE_SOCKET_BUFFERING
 			ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
-			sendLocker.Lock();
 			maxNumberOfBytesToSend = GetNeededBytes(sendblen, sendblenWithoutControlPacket, sendblenWithoutControlPacket != sendblen-sent, lastCalledSend);
-			sendLocker.Unlock();
 			if (maxNumberOfBytesToSend == 0) {
+				sendLocker.Unlock();
 				SocketSentBytes returnVal = { true, 0, 0 };
 				return returnVal;
 			} else if (maxNumberOfBytesToSend > bufferlimit) {
@@ -871,8 +870,6 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 		maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
 		bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) >= 10000;
-
-		sendLocker.Lock();
 
 #if !defined DONT_USE_SOCKET_BUFFERING
 		ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
@@ -1016,8 +1013,6 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #endif
 			}
 
-			sendLocker.Unlock();
-
 			// At this point we've got a packet to send in sendbuffer. Try to send it. Loop until entire packet
 			// is sent, or until we reach maximum bytes to send for this call, or until we get an error.
 			// NOTE! If send would block (returns WSAEWOULDBLOCK), we will return from this method INSIDE this loop.
@@ -1076,7 +1071,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 						busyLocker.Unlock();
 
 						//m_wasBlocked = true;
-						//sendLocker.Unlock();
+						sendLocker.Unlock();
 						//MORPH - Changed by SiRoB, Take into account IP+TCP Header
 						/*
 						SocketSentBytes returnVal = { true, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
@@ -1112,11 +1107,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 					uint32 sumofpacketsizesent = 0;
 					uint32 sumofnocontrolpacketsizesent = 0;
 					uint32 sumofpacketpartfilesizesent = 0;
-					sendLocker.Lock();
-					while (result > sumofpacketsizesent &&
-						       result-sumofpacketsizesent >= 
-						        ((!m_currentPacket_in_buffer_list.IsEmpty())?
-						           m_currentPacket_in_buffer_list.GetHead()->remainpacketsize:-1)) {
+					while (result > sumofpacketsizesent && result-sumofpacketsizesent >= m_currentPacket_in_buffer_list.GetHead()->remainpacketsize) {
 						BufferedPacket* pPacket = m_currentPacket_in_buffer_list.RemoveHead();
 						if (pPacket->iscontrolpacket == false) {
 							sumofnocontrolpacketsizesent += pPacket->remainpacketsize;
@@ -1137,9 +1128,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 						sumofpacketsizesent += pPacket->remainpacketsize;
 						delete pPacket;
 					}
-					sendLocker.Unlock();
 					if (result > sumofpacketsizesent) {
-						sendLocker.Lock();
 						BufferedPacket* pPacket = m_currentPacket_in_buffer_list.GetHead();
 						uint32 partialpacketsizesent = result-sumofpacketsizesent;
 						if (pPacket->iscontrolpacket == false) {
@@ -1158,7 +1147,6 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 							sendblenWithoutControlPacket -= partialpacketsizesent;
 						}
 						pPacket->remainpacketsize -= partialpacketsizesent;
-						sendLocker.Unlock();
 					}
 #else
 					if(!m_currentPacket_is_controlpacket) {
@@ -1255,15 +1243,14 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 			}
 
 			// lock before checking the loop condition
-			sendLocker.Lock();
+//			sendLocker.Lock();
 		}
 
-        sendLocker.Unlock();
+//        sendLocker.Unlock();
 	}
 
 	//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
 	if (onlyAllowedToSendControlPacket) {
-		sendLocker.Lock();
 #if !defined DONT_USE_SOCKET_BUFFERING
 		if(sendblenWithoutControlPacket != sendblen - sent /*m_currentPacket_is_controlpacket*/ == true || !controlpacket_queue.IsEmpty()) {
 #else
@@ -1271,9 +1258,9 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #endif
 			theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
 		}
-        sendLocker.Unlock();
 	}
-    //MORPH - Changed by SiRoB, Take into account IP+TCP Header
+    sendLocker.Unlock();
+	//MORPH - Changed by SiRoB, Take into account IP+TCP Header
     /*
     SocketSentBytes returnVal = { !anErrorHasOccured, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
     */

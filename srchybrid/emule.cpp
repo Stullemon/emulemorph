@@ -267,7 +267,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 		m_strModVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	m_strModLongVersion = CemuleApp::m_szMVersionLong;
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
-    #ifdef _BETA
+    #ifndef _RELEASE
 	m_strModLongVersion.AppendFormat(_T(".%u"), CemuleApp::m_nMVersionBld); // leuk_he: build version for
     #endif
 	if (CemuleApp::m_szMMVersion[0]!=0)
