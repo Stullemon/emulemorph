@@ -1116,7 +1116,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 					while (result > sumofpacketsizesent &&
 						       result-sumofpacketsizesent >= 
 						        ((!m_currentPacket_in_buffer_list.IsEmpty())?
-						           m_currentPacket_in_buffer_list.GetHead()->remainpacketsize:0)) {
+						           m_currentPacket_in_buffer_list.GetHead()->remainpacketsize:-1)) {
 						BufferedPacket* pPacket = m_currentPacket_in_buffer_list.RemoveHead();
 						if (pPacket->iscontrolpacket == false) {
 							sumofnocontrolpacketsizesent += pPacket->remainpacketsize;
