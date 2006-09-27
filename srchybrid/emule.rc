@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -388,7 +388,7 @@ BEGIN
     CONTROL         "Startup Minimized",IDC_STARTMIN,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,141,190,10
     CONTROL         "Start with Windows",IDC_STARTWIN,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,152,75,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,152,188,10
     PUSHBUTTON      "Edit Web Services...",IDC_WEBSVEDIT,14,257,100,12,
                     BS_FLAT
     PUSHBUTTON      "eD2K Links",IDC_ED2KFIX,155,257,62,12,BS_FLAT
@@ -1674,8 +1674,8 @@ BEGIN
                     BS_FLAT | WS_TABSTOP,13,20,195,8
     GROUPBOX        "Advance Webserver Config",IDC_STATIC_ADVADMIN,9,32,219,
                     155,BS_FLAT
-    COMBOBOX        IDC_ACCOUNTSELECT,119,49,103,12,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_ACCOUNTSELECT,119,49,103,12,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     EDITTEXT        IDC_ADVADMIN_USER,57,63,47,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_ADVADMIN_PASS,175,65,47,12,ES_PASSWORD | 
                     ES_AUTOHSCROLL
@@ -3298,12 +3298,12 @@ BEGIN
     VK_RETURN,      IDA_ENTER,              VIRTKEY, NOINVERT
 END
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -6493,6 +6493,11 @@ BEGIN
                             "Do not pop up this category select dialog again. You can enable this again in \nOption -> Morph -> download management -> SCC -> Show the 'Select catagory' dialog"
     IDS_CAT_SELDLGTXT_TIP   "You can organize the downloads in catagories.\nThese are the tabs in the download window.\nYou can add categories here by entering a\ncategory name or select one of the existing\ncatgories."
     IDS_OKCANCELSEL_TIP     "Select the category and press ok to \ndownload in the category or\npress cancel not to download the\nfile(s)."
+    IDC_DISABLEOBFUSCATION_TIP 
+                            "If for some reason you want to disable the whole obfuscation \nfeature completely you can choose this option. In general for most users there is no reason nor advantage in doing this. (default: off)"
+    IDC_ONLYOBFUSCATED_TIP  "If you enable this option, eMule will only establish and accept obfuscated connections.\n Clients which do not support obfuscations are ignored, incoming plaintext connections\nrejected and the automatic server connect will only allow obfuscated connections to a\nserver. You should only choose this setting if you know that the ED2K Protocol is completely\nblocked on your network, otherwise you will loose sources and therefore slow down your eMule.\nHowever if you know that eMule is blocked, then enabling this option is recommended, because  \nit saves connection tries which are guaranteed to fail and therefore would waste time,\noverhead and resources. Only enable this option if you canno receive dataq otherwise! (default: off)"
+    IDC_ENABLEOBFUSCATION_TIP 
+                            "If you think that eMule is throttled (slowed down by isp) on your\nnetwork, you should enable this function. Whenever possible eMule\nwill use obfuscated connections and will ask other clients\nto do the same when connecting to your client. When connecting \nto a server, eMule will try to establish an obfuscated connection\nfirst and only if this fails choose a normal one. There are\nin general no disadvantages by using this option, except\ninsignificant higher CPU usage and very few bytes more overhead,\nso you can't really do anything wrong by enabling this setting.\n (default: off)"
 END
 
 STRINGTABLE 
@@ -6572,16 +6577,7 @@ BEGIN
     IDS_ADVADMIN_NOTE_TIP   "IDS_ADVADMIN_NOTE"
 END
 
-STRINGTABLE 
-BEGIN
-   IDC_ENABLEOBFUSCATION_TIP "If you think that eMule is throttled (slowed down by isp) on your\nnetwork, you should enable this function. Whenever possible eMule\nwill use obfuscated connections and will ask other clients\nto do the same when connecting to your client. When connecting \nto a server, eMule will try to establish an obfuscated connection\nfirst and only if this fails choose a normal one. There are\nin general no disadvantages by using this option, except\ninsignificant higher CPU usage and very few bytes more overhead,\nso you can't really do anything wrong by enabling this setting.\n (default: off)" 
-   IDC_ONLYOBFUSCATED_TIP   "If you enable this option, eMule will only establish and accept obfuscated connections.\n Clients which do not support obfuscations are ignored, incoming plaintext connections\nrejected and the automatic server connect will only allow obfuscated connections to a\nserver. You should only choose this setting if you know that the ED2K Protocol is completely\nblocked on your network, otherwise you will loose sources and therefore slow down your eMule.\nHowever if you know that eMule is blocked, then enabling this option is recommended, because  \nit saves connection tries which are guaranteed to fail and therefore would waste time,\noverhead and resources. Only enable this option if you canno receive dataq otherwise! (default: off)"
-   IDC_DISABLEOBFUSCATION_TIP "If for some reason you want to disable the whole obfuscation \nfeature completely you can choose this option. In general for most users there is no reason nor advantage in doing this. (default: off)"
-   
-END
-        
-
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
