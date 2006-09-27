@@ -97,12 +97,22 @@ CSharedDirsTreeCtrl::CSharedDirsTreeCtrl()
 	m_pSharedFilesCtrl = NULL;
 	m_pRootUnsharedDirectries = NULL;
 	m_pDraggingItem = NULL;
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	pHistory=NULL;
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 }
 
 CSharedDirsTreeCtrl::~CSharedDirsTreeCtrl()
 {
 	delete m_pRootDirectoryItem;
 	delete m_pRootUnsharedDirectries;
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	delete pHistory;
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 }
 
 void CSharedDirsTreeCtrl::Initalize(CSharedFilesCtrl* pSharedFilesCtrl){
@@ -146,6 +156,13 @@ void CSharedDirsTreeCtrl::SetAllIcons()
 	else{
 		iml.Add(CTempIconLoader(_T("OPENFOLDER")));
 	}
+
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	iml.Add(CTempIconLoader(_T("DOWNLOAD")));
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 	iml.SetOverlayImage(iml.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 
 	SetImageList(&iml, TVSIL_NORMAL);
@@ -171,6 +188,11 @@ void CSharedDirsTreeCtrl::InitalizeStandardItems(){
 	DeleteAllItems();
 	delete m_pRootDirectoryItem;
 	delete m_pRootUnsharedDirectries;
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	delete pHistory;
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 
 	FetchSharedDirsList();
 
@@ -193,6 +215,13 @@ void CSharedDirsTreeCtrl::InitalizeStandardItems(){
 
 	m_pRootUnsharedDirectries = new CDirectoryItem(CString(""), TVI_ROOT, SDI_FILESYSTEMPARENT);
 	m_pRootUnsharedDirectries->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_CHILDREN, GetResString(IDS_ALLDIRECTORIES), 4, 4, 0, 0, (LPARAM)m_pRootUnsharedDirectries, TVI_ROOT, TVI_LAST);
+
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	pHistory = new CDirectoryItem(CString(""), TVI_ROOT, SDI_DIRECTORY);
+	pHistory->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_STATE, GetResString(IDS_DOWNHISTORY), 6, 6, TVIS_EXPANDED, TVIS_EXPANDED, (LPARAM)pHistory, TVI_ROOT, TVI_LAST);
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 }
 
 bool CSharedDirsTreeCtrl::FilterTreeIsSubDirectory(CString strDir, CString strRoot, CStringList& liDirs){
@@ -390,6 +419,14 @@ void CSharedDirsTreeCtrl::CreateMenues()
 void CSharedDirsTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {	
 	CDirectoryItem* pSelectedDir = GetSelectedFilter();
+
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	if(pSelectedDir==pHistory)
+		return; //no context menu
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 	if (pSelectedDir != NULL && pSelectedDir->m_eItemType != SDI_UNSHAREDDIRECTORY && pSelectedDir->m_eItemType != SDI_FILESYSTEMPARENT){
 		int iSelectedItems = m_pSharedFilesCtrl->GetItemCount();
 		int iCompleteFileSelected = -1;

@@ -49,6 +49,13 @@ BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
 	ON_STN_DBLCLK(IDC_FILES_ICO, OnStnDblclickFilesIco)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_SHAREDDIRSTREE, OnTvnSelchangedShareddirstree)
 	ON_WM_SIZE()
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_DOWNHISTORYLIST, OnLvnItemActivateHistorylist)
+	ON_NOTIFY(NM_CLICK, IDC_DOWNHISTORYLIST, OnNMClickHistorylist)
+	ON_WM_SHOWWINDOW() 
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 END_MESSAGE_MAP()
 
 CSharedFilesWnd::CSharedFilesWnd(CWnd* pParent /*=NULL*/)
@@ -72,6 +79,11 @@ void CSharedFilesWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_POPBAR3, pop_bartrans);
 	DDX_Control(pDX, IDC_STATISTICS, m_ctrlStatisticsFrm);
 	DDX_Control(pDX, IDC_SHAREDDIRSTREE, m_ctlSharedDirTree);
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	DDX_Control(pDX, IDC_DOWNHISTORYLIST, historylistctrl);
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 }
 
 BOOL CSharedFilesWnd::OnInitDialog()
@@ -117,6 +129,20 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	rcSpl.right = PosStatVnew + SPLITTER_WIDTH;
 	m_wndSplitter.MoveWindow(rcSpl);
 
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	{
+		CRect tmpRect;
+		sharedfilesctrl.GetWindowRect(tmpRect);
+		ScreenToClient(tmpRect);
+		historylistctrl.MoveWindow(tmpRect,true);
+		historylistctrl.ShowWindow(false);
+		//historylistctrl.Init(); //Xman SLUGFILLER: SafeHash - moved
+		AddAnchor(IDC_DOWNHISTORYLIST,TOP_LEFT,BOTTOM_RIGHT);
+	}
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 	DoResize(PosStatVnew - PosStatVinit);
     
 	Localize();
@@ -158,6 +184,13 @@ void CSharedFilesWnd::DoResize(int delta)
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_STATISTICS), -delta);
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_SFLIST), -delta);
 	
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	CSplitterControl::ChangePos(GetDlgItem(IDC_DOWNHISTORYLIST), -delta, 0);
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_DOWNHISTORYLIST), -delta);
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 	CSplitterControl::ChangePos(GetDlgItem(IDC_POPBAR), -delta, 0);
 	CSplitterControl::ChangePos(GetDlgItem(IDC_POPBAR2), -delta, 0);
 	CSplitterControl::ChangePos(GetDlgItem(IDC_POPBAR3), -delta, 0);
@@ -177,6 +210,11 @@ void CSharedFilesWnd::DoResize(int delta)
 	RemoveAnchor(m_wndSplitter);
 	AddAnchor(m_wndSplitter, TOP_LEFT);
 
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	RemoveAnchor(IDC_DOWNHISTORYLIST);
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	RemoveAnchor(IDC_SFLIST);
 	RemoveAnchor(IDC_STATISTICS);
 	RemoveAnchor(IDC_CURSESSION_LBL);
@@ -191,7 +229,11 @@ void CSharedFilesWnd::DoResize(int delta)
 	RemoveAnchor(IDC_POPBAR3);
 	RemoveAnchor(IDC_SHAREDDIRSTREE);
 
-
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	AddAnchor(IDC_DOWNHISTORYLIST,TOP_LEFT,BOTTOM_RIGHT);
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	AddAnchor(IDC_SFLIST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_STATISTICS,BOTTOM_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_CURSESSION_LBL, BOTTOM_LEFT);
@@ -239,7 +281,13 @@ void CSharedFilesWnd::OnLvnItemActivateSflist(NMHDR* /*pNMHDR*/, LRESULT* /*pRes
 	ShowSelectedFilesSummary();
 }
 
+//MORPH START - Changed, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 void CSharedFilesWnd::ShowSelectedFilesSummary()
+#else
+void CSharedFilesWnd::ShowSelectedFilesSummary(bool bHistory /*=false*/)
+#endif
+//MORPH END   - Changed, Downloaded History [Monki/Xman]
 {
 	const CKnownFile* pTheFile = NULL;
 	int iFiles = 0;
@@ -249,11 +297,35 @@ void CSharedFilesWnd::ShowSelectedFilesSummary()
 	uint64 uAllTimeTransferred = 0;
 	UINT uAllTimeRequests = 0;
 	UINT uAllTimeAccepted = 0;
+	//MORPH START - Changed, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 	POSITION pos = sharedfilesctrl.GetFirstSelectedItemPosition();
 	while (pos)
 	{
 		int iItem = sharedfilesctrl.GetNextSelectedItem(pos);
 		const CKnownFile* pFile = (CKnownFile*)sharedfilesctrl.GetItemData(iItem);
+#else
+	POSITION pos;
+	if(bHistory){
+		pos = historylistctrl.GetFirstSelectedItemPosition();
+	}
+	else{
+		pos = sharedfilesctrl.GetFirstSelectedItemPosition();
+	}
+	while (pos)
+	{
+		int iItem;
+		const CKnownFile* pFile;
+		if(bHistory){
+			iItem = historylistctrl.GetNextSelectedItem(pos);
+			pFile = (CKnownFile*)historylistctrl.GetItemData(iItem);
+		}
+		else{
+			iItem = sharedfilesctrl.GetNextSelectedItem(pos);
+			pFile = (CKnownFile*)sharedfilesctrl.GetItemData(iItem);
+		}
+#endif
+	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 		iFiles++;
 		if (iFiles == 1)
 			pTheFile = pFile;
@@ -372,17 +444,41 @@ void CSharedFilesWnd::SetAllIcons()
 
 	if (icon_files)
 		VERIFY( DestroyIcon(icon_files) );
+	//MORPH START - Changed, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 	icon_files = theApp.LoadIcon(_T("SharedFilesList"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_FILES_ICO))->SetIcon(icon_files);
+#else
+	if(!historylistctrl.IsWindowVisible())
+	{
+		icon_files = theApp.LoadIcon(_T("SharedFilesList"), 16, 16);
+		((CStatic*)GetDlgItem(IDC_FILES_ICO))->SetIcon(icon_files);
+	}
+	else
+	{
+		icon_files = theApp.LoadIcon(_T("DOWNLOAD"), 16, 16);
+		((CStatic*)GetDlgItem(IDC_FILES_ICO))->SetIcon(icon_files);
+	}
+#endif
+	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 }
 
 void CSharedFilesWnd::Localize()
 {
 	sharedfilesctrl.Localize();
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	historylistctrl.Localize();
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	m_ctlSharedDirTree.Localize();
 	sharedfilesctrl.SetDirectoryFilter(NULL,true);
 
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 	GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES));
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	GetDlgItem(IDC_RELOADSHAREDFILES)->SetWindowText(GetResString(IDS_SF_RELOAD));
 	m_ctrlStatisticsFrm.SetWindowText(GetResString(IDS_SF_STATISTICS));
 	GetDlgItem(IDC_CURSESSION_LBL)->SetWindowText(GetResString(IDS_SF_CURRENT));
@@ -397,7 +493,37 @@ void CSharedFilesWnd::Localize()
 
 void CSharedFilesWnd::OnTvnSelchangedShareddirstree(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
+	//MORPH START - Changed, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 	sharedfilesctrl.SetDirectoryFilter(m_ctlSharedDirTree.GetSelectedFilter(), !m_ctlSharedDirTree.IsCreatingTree());
+#else
+	if(m_ctlSharedDirTree.GetSelectedFilter() == m_ctlSharedDirTree.pHistory)
+	{
+		if(!historylistctrl.IsWindowVisible())
+		{
+			sharedfilesctrl.ShowWindow(false);
+			historylistctrl.ShowWindow(true);
+			SetAllIcons();
+			CString str;
+			str.Format(_T(" (%i)"),historylistctrl.GetItemCount());
+			GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_DOWNHISTORY) + str);
+			GetDlgItem(IDC_RELOADSHAREDFILES)->ShowWindow(false);
+		}
+	}
+	else
+	{
+		if(!sharedfilesctrl.IsWindowVisible()) 
+		{
+			sharedfilesctrl.ShowWindow(true);
+			historylistctrl.ShowWindow(false);
+			SetAllIcons();
+			GetDlgItem(IDC_RELOADSHAREDFILES)->ShowWindow(true);
+			sharedfilesctrl.ShowFilesCount(); //MORPH - Added, Code Improvement for ShowFilesCount [Xman]
+		}
+		sharedfilesctrl.SetDirectoryFilter(m_ctlSharedDirTree.GetSelectedFilter(), !m_ctlSharedDirTree.IsCreatingTree());
+	}
+#endif
+	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 	*pResult = 0;
 }
 
@@ -460,3 +586,31 @@ LRESULT CSharedFilesWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lPara
 void CSharedFilesWnd::OnSize(UINT nType, int cx, int cy){
 	CResizableDialog::OnSize(nType, cx, cy);
 }
+
+//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+void CSharedFilesWnd::OnNMClickHistorylist(NMHDR *pNMHDR, LRESULT *pResult){
+	OnLvnItemActivateHistorylist(pNMHDR,pResult);
+	*pResult = 0;
+}
+
+void CSharedFilesWnd::OnLvnItemActivateHistorylist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
+{
+	ShowSelectedFilesSummary(true);
+}
+
+void CSharedFilesWnd::OnShowWindow( BOOL bShow,UINT /*nStatus*/ )
+{
+	if(bShow && m_ctlSharedDirTree.GetSelectedFilter() == m_ctlSharedDirTree.pHistory)
+	{
+		CString str;
+		str.Format(_T(" (%i)"),historylistctrl.GetItemCount());
+		GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_DOWNHISTORY) + str);
+	}
+	//MORPH START - Added, Code Improvement for ShowFilesCount [Xman]
+	else if(bShow)
+		sharedfilesctrl.ShowFilesCount();
+	//MORPH END   - Added, Code Improvement for ShowFilesCount [Xman]
+}
+#endif
+//MORPH END   - Added, Downloaded History [Monki/Xman]

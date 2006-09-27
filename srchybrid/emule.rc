@@ -639,6 +639,14 @@ BEGIN
                     WS_TABSTOP,5,23,113,260,WS_EX_STATICEDGE
     CONTROL         "",IDC_SPLITTER_SHAREDFILES,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,119,23,3,261
+//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+    CONTROL         "",IDC_DOWNHISTORYLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | 
+                    LVS_ALIGNLEFT | WS_TABSTOP,391,221,107,62,
+                    WS_EX_STATICEDGE
+#endif
+//MORPH END   - Added, Downloaded History [Monki/Xman]
 END
 
 IDD_PPG_NOTIFY DIALOGEX 0, 0, 229, 246
@@ -6575,6 +6583,26 @@ BEGIN
     IDS_STATIC_ADVADMIN_PASS_TIP "IDS_STATIC_ADVADMIN_PASS"
     IDS_STATIC_ADVADMIN_USERLEVEL_TIP "IDS_STATIC_ADVADMIN_USERLEVEL"
     IDS_ADVADMIN_NOTE_TIP   "IDS_ADVADMIN_NOTE"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNHISTORY         "Downloaded history"
+    IDS_DOWNHISTORY_CHECK1  "eMule has found a file already downloaded with the same file ID:\n"
+    IDS_DOWNHISTORY_CHECK2  "eMule has found %i files already downloaded with the same file name (%s):\n"
+    IDS_DOWNHISTORY_CHECK3  "Do you want to download the file anyway?"
+    IDS_DOWNHISTORY_CHECK4  "eMule has found a file already cancelled with the same file ID:\n"
+    IDS_DOWNHISTORY_REMOVE  "Remove from history"
+    IDS_DOWNHISTORY_REMOVE_QUESTION 
+                            "Do you really want to remove ""%s"" from downloaded history?"
+    IDS_DOWNHISTORY_REMOVE_QUESTION_MULTIPLE 
+                            "Do you really want to remove selected files from downloaded history?"
+    IDS_DOWNHISTORY_SHARED  "Shared"
+    IDS_DOWNHISTORY_CLEAR   "Clear downloaded history"
+    IDS_DOWNHISTORY_SHOWSHARED "Show shared files"
+    IDS_DOWNHISTORY_ACTIONS "Actions"
+    IDS_DOWNHISTORY_CLEAR_QUESTION 
+                            "Are you sure you want to clear download history?"
 END
 
 #endif    // English (U.S.) resources

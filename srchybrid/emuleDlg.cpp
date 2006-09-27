@@ -785,6 +785,12 @@ void CALLBACK CemuleDlg::StartupTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEv
 				theApp.emuledlg->status++;
 				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd->sharedfilesctrl);
 				
+				//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+				theApp.emuledlg->sharedfileswnd->historylistctrl.Init();
+#endif
+				//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 				//MORPH START - Moved by SiRoB, SafeHash fix originaly in OnInitDialog (delay load shared files)
 				// start aichsyncthread
 				AfxBeginThread(RUNTIME_CLASS(CAICHSyncThread), THREAD_PRIORITY_BELOW_NORMAL,0);
@@ -2069,6 +2075,11 @@ void CemuleDlg::OnClose()
 	transferwnd->clientlistctrl.DeleteAllItems();
 	transferwnd->uploadlistctrl.DeleteAllItems();
 	serverwnd->serverlistctrl.DeleteAllItems();
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	sharedfileswnd->historylistctrl.DeleteAllItems();
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 
 	CPartFileConvert::CloseGUI();
 	CPartFileConvert::RemoveAllJobs();

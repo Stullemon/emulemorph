@@ -21,6 +21,7 @@
 #include "IconStatic.h"
 #include "SharedDirsTreeCtrl.h"
 #include "SplitterControl.h"
+#include "HistoryListCtrl.h" //MORPH - Added, Downloaded History [Monki/Xman]
 
 class CSharedFilesWnd : public CResizableDialog
 {
@@ -31,7 +32,13 @@ public:
 	virtual ~CSharedFilesWnd();
 
 	void Localize();
+	//MORPH START - Changed, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 	void ShowSelectedFilesSummary();
+#else
+	void ShowSelectedFilesSummary(bool bHistory =false);
+#endif
+	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 	void Reload();
 
 // Dialog Data
@@ -66,4 +73,14 @@ protected:
 	afx_msg void OnStnDblclickFilesIco();
 	afx_msg void OnTvnSelchangedShareddirstree(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	afx_msg void OnShowWindow( BOOL bShow,UINT nStatus  );
+public:
+	CHistoryListCtrl historylistctrl;
+protected:
+	afx_msg void OnLvnItemActivateHistorylist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMClickHistorylist(NMHDR *pNMHDR, LRESULT *pResult);
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 };

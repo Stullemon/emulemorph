@@ -48,6 +48,14 @@ public:
 	const CKnownFilesMap& GetKnownFiles() const { return m_Files_map; }
 	void	CopyKnownFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> &Files_Map);
 
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	CKnownFilesMap* GetDownloadedFiles();
+	bool RemoveKnownFile(CKnownFile *toRemove);
+	void ClearHistory();
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 private:
 	bool	LoadKnownFiles();
 	bool	LoadCancelledFiles();

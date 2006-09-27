@@ -23,6 +23,8 @@
 #include "Preferences.h"
 #include "UserMsgs.h"
 
+#include "SharedFileList.h" //MORPH - Added, Downloaded History [Monki/Xman]
+
 // id3lib
 #pragma warning(disable:4100) // unreferenced formal parameter
 #include <id3/tag.h>
@@ -806,6 +808,15 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 {
 	if (!pFile)
 		return false;
+
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+	if(!pFile->IsPartFile() && !theApp.sharedfiles->IsFilePtrInList(pFile)){
+		return false;
+	}
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 	ASSERT( !pFile->GetFilePath().IsEmpty() );
 
 	bool bHasDRM = false;

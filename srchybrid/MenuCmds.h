@@ -296,3 +296,9 @@
 #define MP_GETHTMLFRIENDED2KLINK	15009
 #define MP_GETEMFRIENDMETFROMURL	15010
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
+
+//MORPH START - Added, Downloaded History [Monki/Xman]
+#define MP_VIEWSHAREDFILES			150011
+#define MP_CLEARHISTORY				150012
+#define MP_MERGEHISTORY				150013
+//MORPH END   - Added, Downloaded History [Monki/Xman]

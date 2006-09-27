@@ -69,6 +69,8 @@ public:
 	void			EditSharedDirectories(CDirectoryItem* pDir, bool bAdd, bool bSubDirectories);
 	void			Reload(bool bFore = false);
 
+	CDirectoryItem*		pHistory; //MORPH - Added, Downloaded History [Monki/Xman]
+
 protected:
 	virtual BOOL	OnCommand(WPARAM wParam, LPARAM lParam);
 	void			CreateMenues();

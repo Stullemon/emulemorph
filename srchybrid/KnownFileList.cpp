@@ -32,6 +32,8 @@
 #include "packets.h"
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
 
+#include "SharedFilesWnd.h" //MORPH - Added, Downloaded History [Monki/Xman]
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -390,6 +392,12 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 		if (theApp.emuledlg && theApp.emuledlg->transferwnd && theApp.emuledlg->transferwnd->downloadlistctrl.m_hWnd)
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveFile((CPartFile*)pFileInMap);
 
+		//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+		theApp.emuledlg->sharedfileswnd->historylistctrl.RemoveFileFromView(pFileInMap);
+#endif
+		//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 		delete pFileInMap;
 	}
 	m_Files_map.SetAt(key, toadd);
@@ -514,3 +522,56 @@ void CKnownFileList::CopyKnownFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKnown
 		}
 	}
 }
+
+//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+CKnownFilesMap* CKnownFileList::GetDownloadedFiles(){
+	CKnownFilesMap *filesFound;
+	filesFound = new CKnownFilesMap;
+
+	POSITION pos = m_Files_map.GetStartPosition();					
+	while(pos){
+		CKnownFile* cur_file;
+		CCKey key;
+		m_Files_map.GetNextAssoc( pos, key, cur_file );
+		if (!theApp.sharedfiles->IsFilePtrInList(cur_file)){
+			CCKey key2(cur_file->GetFileHash());
+			CKnownFile* pFileInMap;
+			if (!filesFound->Lookup(key2, pFileInMap))
+				filesFound->SetAt(key2, cur_file);
+		}
+	}
+	return filesFound;
+}
+
+bool CKnownFileList::RemoveKnownFile(CKnownFile *toRemove){
+	if (toRemove){
+		POSITION pos = m_Files_map.GetStartPosition();
+		while (pos){
+			CCKey key;
+			CKnownFile* cur_file;
+			m_Files_map.GetNextAssoc(pos, key, cur_file);
+			if (toRemove == cur_file){
+				m_Files_map.RemoveKey(key);
+				delete cur_file;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void CKnownFileList::ClearHistory(){
+	POSITION pos = m_Files_map.GetStartPosition();					
+	while(pos){
+		CKnownFile* cur_file;
+		CCKey key;
+		m_Files_map.GetNextAssoc( pos, key, cur_file );
+		if (!theApp.sharedfiles->IsFilePtrInList(cur_file)){
+			m_Files_map.RemoveKey(key);
+			delete cur_file;
+		}
+	}	
+}
+#endif
+//MORPH END   - Added, Downloaded History [Monki/Xman]

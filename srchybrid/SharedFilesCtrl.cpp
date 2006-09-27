@@ -492,6 +492,7 @@ void CSharedFilesCtrl::AddFile(const CKnownFile* file)
 	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM, GetItemCount(), LPSTR_TEXTCALLBACK, 0, 0, 0, (LPARAM)file);
 	if (iItem >= 0)
 		Update(iItem);
+	ShowFilesCount(); //MORPH - Added, Code Improvement for ShowFilesCount [Xman]
 }
 
 void CSharedFilesCtrl::RemoveFile(const CKnownFile* file)
@@ -537,7 +538,13 @@ int CSharedFilesCtrl::FindFile(const CKnownFile* pFile)
 void CSharedFilesCtrl::ReloadFileList()
 {
 	DeleteAllItems();
+	//MORPH START - Changed, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 	//theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+#else
+	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+#endif
+	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 
 	CCKey bufKey;
 	CKnownFile* cur_file;
@@ -548,6 +555,8 @@ void CSharedFilesCtrl::ReloadFileList()
 	ShowFilesCount();
 }
 
+//MORPH START - Changed, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 void CSharedFilesCtrl::ShowFilesCount()
 {
 	CString str;
@@ -557,6 +566,21 @@ void CSharedFilesCtrl::ShowFilesCount()
 		str.Format(_T(" (%i)"), theApp.sharedfiles->GetCount());
 	theApp.emuledlg->sharedfileswnd->GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES) + str);
 }
+#else
+void CSharedFilesCtrl::ShowFilesCount()
+{
+	if(!theApp.emuledlg->sharedfileswnd->historylistctrl.IsWindowVisible()) //MORPH - Added, Code Improvement for ShowFilesCount [Xman]
+	{	
+		CString str;
+		if (theApp.sharedfiles->GetHashingCount() + nAICHHashing)
+			str.Format(_T(" (%i, %s %i)"), theApp.sharedfiles->GetCount(), GetResString(IDS_HASHING), theApp.sharedfiles->GetHashingCount() + nAICHHashing);
+		else
+			str.Format(_T(" (%i)"), theApp.sharedfiles->GetCount());
+		theApp.emuledlg->sharedfileswnd->GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES) + str);
+	}
+}
+#endif
+	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 
@@ -931,7 +955,11 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
+	//MORPH START - Removed, Code Improvement for ShowFilesCount [Xman]
+	/*
 	ShowFilesCount();
+	*/
+	//MORPH END   - Removed, Code Improvement for ShowFilesCount [Xman]
 	if (lpDrawItemStruct->itemState & ODS_SELECTED)
 	{
 		RECT outline_rec = lpDrawItemStruct->rcItem;

@@ -615,7 +615,17 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 	if (bOnlyAdd)
 		return bAdded;
 	if (bAdded && output)
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
 		output->AddFile(toadd);
+#else
+	{
+		output->AddFile(toadd);
+		if(!toadd->IsPartFile())
+			theApp.emuledlg->sharedfileswnd->historylistctrl.AddFile(toadd); 
+	}
+#endif
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	m_lastPublishED2KFlag = true;
 	return bAdded;
 }

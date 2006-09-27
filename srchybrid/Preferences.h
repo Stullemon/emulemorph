@@ -926,6 +926,11 @@ public:
 		tableFilenames,
 		tableIrcMain,
 		tableIrcChannels,
+		//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+		tableHistory,
+#endif
+		//MORPH END   - Added, Downloaded History [Monki/Xman]
 		tableDownloadClients
 	};
 
@@ -1038,6 +1043,12 @@ public:
 	static	void	SaveCompletedDownloadsStat();
 	static	bool	LoadStats(int loadBackUp = 0);
 	static	void	ResetCumulativeStatistics();
+
+	//MORPH Start - Added, Downloaded History [Monki/Xman]
+	static bool		m_bHistoryShowShared;
+	static bool		GetShowSharedInHistory()		{ return m_bHistoryShowShared; }
+	static void		SetShowSharedInHistory(bool on)	{ m_bHistoryShowShared = on; }
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 
 	static	void	Add2DownCompletedFiles()			{ cumDownCompletedFiles++; }
 	static	void	SetConnMaxAvgDownRate(float in)		{ cumConnMaxAvgDownRate = in; }

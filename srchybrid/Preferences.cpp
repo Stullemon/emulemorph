@@ -766,6 +766,10 @@ UINT	CPreferences::m_uGlobalHL;
 bool	CPreferences::m_bGlobalHL;
 //MORPH END   - Added by Stulle, Global Source Limit
 
+//MORPH START - Added, Downloaded History [Monki/Xman]
+bool	CPreferences::m_bHistoryShowShared;
+//MORPH END   - Added, Downloaded History [Monki/Xman]
+
 CPreferences::CPreferences()
 {
 #ifdef _DEBUG
@@ -2594,6 +2598,10 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("GlobalHL"), m_bGlobalHL);
 	ini.WriteInt(_T("GlobalHLvalue"), m_uGlobalHL);
 	//MORPH END   - Added by Stulle, Global Source Limit
+
+	//MORPH START - Added, Downloaded History [Monki/Xman]
+	ini.WriteBool(_T("ShowSharedInHistory"), m_bHistoryShowShared);
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
 }
 
 void CPreferences::ResetStatsColor(int index)
@@ -3625,7 +3633,11 @@ void CPreferences::LoadPreferences()
 	m_uGlobalHL = (m_uTemp >= 1000 && m_uTemp <= MAX_GSL) ? m_uTemp : m_uGlobalHlStandard;
 	//MORPH END   - Added by Stulle, Global Source Limit
 
-    LoadCats();
+ 	//MORPH START - Added, Downloaded History [Monki/Xman]
+	m_bHistoryShowShared = ini.GetBool(_T("ShowSharedInHistory"), false);
+	//MORPH END   - Added, Downloaded History [Monki/Xman]
+
+   LoadCats();
 	SetLanguage();
 }
 

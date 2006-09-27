@@ -61,6 +61,7 @@
 #include "Log.h"
 #include "CollectionViewDialog.h"
 #include "Collection.h"
+#include "SharedFilesWnd.h" //MORPH - Added, Downloaded History [Monki/Xman]
 
 // MORPH START - Added by Commander, WebCache 1.2e
 #include "WebCache/WebCacheSocket.h" // yonatan http
@@ -4428,6 +4429,13 @@ void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 	{
 		SetStatus(PS_COMPLETE); // (set status and) update status-modification related GUI elements
 		ClearSourceCache(); //MORPH - Added by Stulle, Source cache [Xman]
+
+		//MORPH START - Added, Downloaded History [Monki/Xman]
+#ifndef NO_HISTORY
+		if(theApp.emuledlg && theApp.emuledlg->IsRunning())
+			theApp.emuledlg->sharedfileswnd->historylistctrl.AddFile(this);
+#endif
+		//MORPH END   - Added, Downloaded History [Monki/Xman]
 
 		if (isShared)	// SLUGFILLER: mergeKnown
 			theApp.knownfiles->SafeAddKFile(this);
