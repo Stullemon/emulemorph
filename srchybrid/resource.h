@@ -3493,7 +3493,9 @@
 #define IDS_SLOT_LIMIT_NUM_B            60383
 #define IDS_SLOT_LIMIT_NUM              60384
 #define IDD_PPG_IONIXWEBSRV             60385
-#define PPG_                            -5151
+#define IDC_ENABLEOBFUSCATION_TIP       40200
+#define IDC_ONLYOBFUSCATED_TIP          40201
+#define IDC_DISABLEOBFUSCATION_TIP      40202
 
 // Next default values for new objects
 // 
