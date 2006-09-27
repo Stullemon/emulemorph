@@ -72,7 +72,8 @@ void CWebCacheMFRList::AddFiles(CSafeMemFile* data, CUpDownClient* client)
 		if (thePrefs.GetLogWebCacheEvents()) 
 		{
 			char* psz = new char[newFile->partCount + 1];
-			for (int i = 0; i < newFile->partCount; i++)
+			int i = 0;
+			for (; i < newFile->partCount; i++)
 				psz[i] = newFile->partStatus.GetAt(i) ? '#' : 'o';
 			psz[i] = '\0';
 			if (sourceAdded)

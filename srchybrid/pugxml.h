@@ -335,8 +335,9 @@ inline static bool strwnorm(TCHAR** s)
 	}
 	free(norm); //Don't need this anymore.
 	--n; //Start from the last string TCHAR.
-	for(i=n; (i > -1) && (*s)[i] > 0 && (*s)[i] < _T('!'); --i); //Find the first non-whitespace from the end.
-	if(i<n) (*s)[i+1] = 0; //Truncate it.
+	int iTemp=n;
+	for(int i=n; (i > -1) && (*s)[i] > 0 && (*s)[i] < _T('!'); --i){iTemp=i;} //Find the first non-whitespace from the end.
+	if(iTemp<n) (*s)[iTemp+1] = 0; //Truncate it.
 	return true;
 
 }
@@ -3436,7 +3437,8 @@ public:
 		{
 			xml_node_struct* p = _root->child[i]; //Keep a pointer to this node so we can free it.
 			--n;
-			for(unsigned int j=i; j<n; ++j) //Shift everything left from this point on.
+			unsigned int j=i;
+			for(; j<n; ++j) //Shift everything left from this point on.
 				_root->child[j] = _root->child[j+1];
 			_root->child[j] = NULL; //Mark the last element null.
 			--_root->children; //One less children.

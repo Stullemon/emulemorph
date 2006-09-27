@@ -1509,7 +1509,7 @@ CSize CPPToolTip::PrintTitleString(CDC * pDC, CRect rect, CString str, BOOL bCal
 	font.DeleteObject();
 
 	//Adds the percent's length to the line's length
-	for (i = 0; i < percent.GetSize(); i++)
+	for (int i = 0; i < percent.GetSize(); i++)
 	{
 		if (percent.GetAt(i))
 			m_nLengthLines.SetAt(i, m_nLengthLines.GetAt(i) + ::MulDiv(percent.GetAt(i), sz.cx, 100));
