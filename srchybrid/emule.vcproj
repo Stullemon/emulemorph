@@ -1557,6 +1557,9 @@
 					RelativePath="FriendListCtrl.cpp">
 				</File>
 				<File
+					RelativePath=".\HistoryListCtrl.cpp">
+				</File>
+				<File
 					RelativePath="KadContactListCtrl.cpp">
 				</File>
 				<File
@@ -2037,6 +2040,9 @@
 				</File>
 				<File
 					RelativePath="FriendListCtrl.h">
+				</File>
+				<File
+					RelativePath=".\HistoryListCtrl.h">
 				</File>
 				<File
 					RelativePath="KadContactListCtrl.h">
