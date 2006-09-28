@@ -39,11 +39,7 @@ public:
 	void	Init(void);
 	void	AddFile(CKnownFile* toadd);
 	void	Localize();
-	// ==> XP Style Menus [TPT] - Stulle
-	/*
 	void	CreateMenues();
-	*/
-	// <== XP Style Menus [TPT] - Stulle
 	void	Reload(void);
 	void	ShowComments(CKnownFile* file);
 	void	RemoveFile(CKnownFile* toremove);
@@ -56,7 +52,6 @@ protected:
 
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct); // XP Style Menus [TPT] - Stulle
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	void ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFiles, UINT uPshInvokePage = 0);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
@@ -64,12 +59,8 @@ protected:
 	int FindFile(const CKnownFile* pFile);
 
 private:
-	// ==> XP Style Menus [TPT] - Stulle
-	/*
 	CTitleMenu	m_HistoryMenu;
 	CTitleMenu	m_HistoryOpsMenu;
-	*/
-	// <== XP Style Menus [TPT] - Stulle
 	void		OpenFile(CKnownFile* file);
 };
 

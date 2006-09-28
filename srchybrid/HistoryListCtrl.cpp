@@ -206,19 +206,14 @@ CHistoryListCtrl::CHistoryListCtrl()
 
 CHistoryListCtrl::~CHistoryListCtrl()
 {
-	// ==> XP Style Menus [TPT] - Stulle
-	/*
 	if (m_HistoryOpsMenu) VERIFY( m_HistoryOpsMenu.DestroyMenu() );
 	if (m_HistoryMenu)  VERIFY( m_HistoryMenu.DestroyMenu() );
-	*/
-	// <== XP Style Menus [TPT] - Stulle
 }
 
 
 BEGIN_MESSAGE_MAP(CHistoryListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_WM_CONTEXTMENU()
-	ON_WM_MEASUREITEM() // XP Style Menus [TPT] - Stulle
 END_MESSAGE_MAP()
 
 
@@ -680,15 +675,9 @@ void CHistoryListCtrl::Localize() {
 		pHeaderCtrl->SetItem(i, &hdi);
 	}
 
-	// ==> XP Style Menus [TPT] - Stulle
-	/*
 	CreateMenues();
-	*/
-	// <== XP Style Menus [TPT] - Stulle
 }
 
-// ==> XP Style Menus [TPT] - Stulle
-/*
 void CHistoryListCtrl::CreateMenues()
 {
 	if (m_HistoryOpsMenu) VERIFY( m_HistoryOpsMenu.DestroyMenu() );
@@ -721,8 +710,6 @@ void CHistoryListCtrl::CreateMenues()
 	m_HistoryMenu.AppendMenu(MF_POPUP,(UINT_PTR)m_HistoryOpsMenu.m_hMenu, GetResString(IDS_DOWNHISTORY_ACTIONS));
 	m_HistoryMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 }
-*/
-// <== XP Style Menus [TPT] - Stulle
 
 void CHistoryListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
@@ -731,8 +718,6 @@ void CHistoryListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	int iSelectedItems = GetSelectedCount();
 	if (GetSelectionMark()!=-1) file=(CKnownFile*)GetItemData(GetSelectionMark());
 
-	// ==> XP Style Menus [TPT] - Stulle
-	/*
 	if(file && theApp.sharedfiles->IsFilePtrInList(file)){
 		m_HistoryMenu.EnableMenuItem(MP_OPEN, MF_ENABLED);
 		m_HistoryMenu.EnableMenuItem(MP_REMOVESELECTED, MF_GRAYED);
@@ -763,81 +748,6 @@ void CHistoryListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 
 	m_HistoryMenu.RemoveMenu(m_HistoryMenu.GetMenuItemCount()-1,MF_BYPOSITION);
 	VERIFY( WebMenu.DestroyMenu() );
-	*/
-	// Menu Configuration
-	CMenuXP	*pHistoryMenu = new CMenuXP;
-	pHistoryMenu->CreatePopupMenu();
-	pHistoryMenu->SetMenuStyle(CMenuXP::STYLE_STARTMENU);
-	pHistoryMenu->AddSideBar(new CMenuXPSideBar(17, GetResString(IDS_DOWNHISTORY)));
-	pHistoryMenu->SetSideBarStartColor(RGB(149,190,223));
-	pHistoryMenu->SetSideBarEndColor(RGB(230,230,230));
-	pHistoryMenu->SetSelectedBarColor(RGB(120,180,225));
-
-	CMenuXP	*pHistoryOpsMenu = new CMenuXP;
-	pHistoryOpsMenu->CreatePopupMenu();
-	pHistoryOpsMenu->SetMenuStyle(CMenuXP::STYLE_STARTMENU);
-	pHistoryOpsMenu->SetSelectedBarColor(RGB(120,180,225));
-
-	CMenuXP	*pWebMenu = new CMenuXP;
-	pWebMenu->CreatePopupMenu();
-	pWebMenu->SetMenuStyle(CMenuXP::STYLE_STARTMENU);
-	pWebMenu->SetSelectedBarColor(RGB(120,180,225));
-
-	pHistoryOpsMenu->AppendODMenu(MF_STRING, new CMenuXPText(MP_CLEARHISTORY, GetResString(IDS_DOWNHISTORY_CLEAR), theApp.LoadIcon(_T("CLEARCOMPLETE"), 16, 16)));
-
-	pHistoryMenu->AppendODMenu(MF_STRING, new CMenuXPText(MP_OPEN, GetResString(IDS_OPENFILE), theApp.LoadIcon(_T("OPENFILE"), 16, 16)));
-	
-	pHistoryMenu->AppendODMenu(MF_STRING, new CMenuXPText(MP_CMT, GetResString(IDS_CMT_ADD), theApp.LoadIcon(_T("FILECOMMENTS"), 16, 16)));
-	pHistoryMenu->AppendODMenu(MF_STRING, new CMenuXPText(MP_DETAIL, GetResString(IDS_SHOWDETAILS), theApp.LoadIcon(_T("FILEINFO"), 16, 16)));
-	pHistoryMenu->AppendSeparator();
-
-	pHistoryMenu->AppendODMenu(MF_STRING, new CMenuXPText(MP_VIEWSHAREDFILES, GetResString(IDS_DOWNHISTORY_SHOWSHARED)));
-	pHistoryMenu->AppendSeparator();
-
-	pHistoryMenu->AppendODMenu(MF_STRING, new CMenuXPText(MP_SHOWED2KLINK, GetResString(IDS_DL_SHOWED2KLINK), theApp.LoadIcon(_T("ED2KLINK"), 16, 16)));
-	pHistoryMenu->AppendSeparator();
-	
-	pHistoryMenu->AppendODMenu(MF_STRING, new CMenuXPText(MP_REMOVESELECTED, GetResString(IDS_DOWNHISTORY_REMOVE), theApp.LoadIcon(_T("DELETESELECTED"), 16, 16)));
-	pHistoryMenu->AppendSeparator();
-
-	pHistoryMenu->AppendODMenu(MF_STRING, new CMenuXPText(Irc_SetSendLink, GetResString(IDS_IRC_ADDLINKTOIRC), theApp.LoadIcon(_T("IRCCLIPBOARD"), 16, 16)));
-	pHistoryMenu->AppendSeparator();
-
-	pHistoryMenu->AppendODPopup(MF_STRING | MF_POPUP, pHistoryOpsMenu, new CMenuXPText(0,GetResString(IDS_DOWNHISTORY_ACTIONS), theApp.LoadIcon(_T("QUICKSTART"), 16, 16)));
-	pHistoryMenu->AppendSeparator();
-
-	int iWebMenuEntries = theWebServices.GetFileMenuEntries(pWebMenu);
-	UINT flag = (iWebMenuEntries == 0 || iSelectedItems != 1) ? MF_GRAYED : MF_ENABLED;
-	pHistoryMenu->AppendODPopup(MF_STRING | MF_POPUP | flag, pWebMenu, new CMenuXPText(0,GetResString(IDS_WEBSERVICES), theApp.LoadIcon(_T("SEARCHMETHOD_GLOBAL"), 16, 16)));
-
-	if(file && theApp.sharedfiles->IsFilePtrInList(file)){
-		pHistoryMenu->EnableMenuItem(MP_OPEN, MF_ENABLED);
-		pHistoryMenu->EnableMenuItem(MP_REMOVESELECTED, MF_GRAYED);
-	}
-	else {
-		pHistoryMenu->EnableMenuItem(MP_OPEN, MF_GRAYED);
-		if(file && GetSelectedCount()>0)
-			pHistoryMenu->EnableMenuItem(MP_REMOVESELECTED, MF_ENABLED);
-        else
-			pHistoryMenu->EnableMenuItem(MP_REMOVESELECTED, MF_GRAYED);
-    }
-
-	if(thePrefs.GetShowSharedInHistory())
-		pHistoryMenu->CheckMenuItem(MP_VIEWSHAREDFILES, MF_CHECKED);
-	else
-		pHistoryMenu->CheckMenuItem(MP_VIEWSHAREDFILES, MF_UNCHECKED);
-
-	pHistoryMenu->EnableMenuItem(Irc_SetSendLink, (iSelectedItems == 1 && theApp.emuledlg->ircwnd->IsConnected()) ? MF_ENABLED : MF_GRAYED);
-
-
-	pHistoryMenu->TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
-
-	delete pWebMenu;
-	delete pHistoryOpsMenu;
-	pHistoryMenu->RemoveMenu(pHistoryMenu->GetMenuItemCount()-1,MF_BYPOSITION);
-	delete pHistoryMenu;
-	// <== XP Style Menus [TPT] - Stulle
-
 }
 
 void CHistoryListCtrl::OnNMDblclk(NMHDR* /*pNMHDR*/, LRESULT *pResult)
@@ -1056,14 +966,3 @@ void CHistoryListCtrl::ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFil
 		dialog.DoModal();
 	}
 }
-
-// ==> XP Style Menus [TPT] - Stulle
-void CHistoryListCtrl::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
-{
-	HMENU hMenu = AfxGetThreadState()->m_hTrackingMenu;
-	CMenu	*pMenu = CMenu::FromHandle(hMenu);
-	pMenu->MeasureItem(lpMeasureItemStruct);
-	
-	CWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
-}
-// <== XP Style Menus [TPT] - Stulle
