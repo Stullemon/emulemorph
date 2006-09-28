@@ -163,6 +163,17 @@ void CSharedDirsTreeCtrl::SetAllIcons()
 #endif
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 
+	//MORPH START - Added, SharedView Ed2kType [Avi3k]
+	iml.Add(CTempIconLoader(_T("SearchFileType_Audio"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Video"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Picture"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Program"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Document"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Archive"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_CDImage"), 16, 16));
+	iml.Add(CTempIconLoader(_T("SearchFileType_EmuleCollection"), 16, 16));
+	//MORPH END   - Added, SharedView Ed2kType [Avi3k]
+
 	iml.SetOverlayImage(iml.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 
 	SetImageList(&iml, TVSIL_NORMAL);
@@ -277,6 +288,23 @@ void CSharedDirsTreeCtrl::FilterTreeAddSubDirectories(CDirectoryItem* pDirectory
 	}
 }
 
+//MORPH START - Added, SharedView Ed2kType [Avi3k]
+struct SEd2kTypeView
+{
+	int eType;
+	UINT uStringId;
+} _aEd2kTypeView[] =
+{
+	{ ED2KFT_AUDIO, IDS_SEARCH_AUDIO },
+	{ ED2KFT_VIDEO, IDS_SEARCH_VIDEO },
+	{ ED2KFT_IMAGE, IDS_SEARCH_PICS },
+	{ ED2KFT_PROGRAM, IDS_SEARCH_PRG },
+	{ ED2KFT_DOCUMENT, IDS_SEARCH_DOC },
+	{ ED2KFT_ARCHIVE, IDS_SEARCH_ARC },
+	{ ED2KFT_CDIMAGE, IDS_SEARCH_CDIMG },
+	{ ED2KFT_EMULECOLLECTION, IDS_SEARCH_EMULECOLLECTION }
+};
+//MORPH END   - SharedView Ed2kType [Avi3k]
 
 void CSharedDirsTreeCtrl::FilterTreeReloadTree(){
 	m_bCreatingTree = true;
@@ -297,6 +325,17 @@ void CSharedDirsTreeCtrl::FilterTreeReloadTree(){
 		switch( pCurrent->m_eItemType ){
 
 			case SDI_ALL:
+				//MORPH START - Added, SharedView Ed2kType [Avi3]
+				{
+					for (int i = 0; i < ARRSIZE(_aEd2kTypeView); i++)
+					{
+						CDirectoryItem* pEd2kType = new CDirectoryItem(CString(""), 0, SDI_ED2KFILETYPE, _aEd2kTypeView[i].eType);
+						pEd2kType->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE, GetResString(_aEd2kTypeView[i].uStringId), i+7, i+7, 0, 0, (LPARAM)pEd2kType, pCurrent->m_htItem, TVI_LAST);
+						pCurrent->liSubDirectories.AddTail(pEd2kType);
+					}
+					break;
+				}
+				//MORPH END   - Added, SharedView Ed2kType [Avi3]
 				break;
 			case SDI_INCOMING:{
 				CString strMainIncDir = thePrefs.GetIncomingDir();

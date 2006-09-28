@@ -485,6 +485,14 @@ void CSharedFilesCtrl::AddFile(const CKnownFile* file)
 				// hard choice, will only show the main for now
 				break;
 
+				//MORPH START - Added, SharedView Ed2kType [Avi3k]
+			case SDI_ED2KFILETYPE:
+				{
+					if (m_pDirectoryFilter->m_nCatFilter == -1 || m_pDirectoryFilter->m_nCatFilter != GetED2KFileTypeID(file->GetFileName()))
+						return;
+					break;
+				}
+				//MORPH END   - Added, SharedView Ed2kType [Avi3k]
 		}
 	}
 	if (FindFile(file) != -1)
