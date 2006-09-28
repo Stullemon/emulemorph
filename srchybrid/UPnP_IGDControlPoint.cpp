@@ -55,6 +55,7 @@ CUPnP_IGDControlPoint::CUPnP_IGDControlPoint(void)
 	m_bInit = false;
 	m_bStopAtFirstService = false;
 	m_bClearOnClose = false;
+	UpnpAcceptsPorts = true;
 }
 
 CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
@@ -91,6 +92,22 @@ CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 	m_devListLock.Unlock();
 }
 
+// Eanble or disbale upnp. Note that this is indepednge of accepting ports to map. 
+bool CUPnP_IGDControlPoint::SetUPnPNat(bool upnpNat)
+{
+	if (upnpNat==true && thePrefs.IsUPnPEnabled()==false ) {
+		thePrefs.m_bUPnPNat=true;
+		Init(thePrefs.GetUPnPLimitToFirstConnection()); 
+		UpdateAllMappings(true,false); // send any queued mappings to device. 
+	}
+	else if (upnpNat==false && thePrefs.IsUPnPEnabled()==false ){
+   		DeleteAllPortMappingsOnClose(); // idependand of setting thePrefs.GetUPnPClearOnClose
+	    // Note that devices are not removed. 
+		thePrefs.m_bUPnPNat=false;
+	    }
+  return thePrefs.m_bUPnPNat;
+}
+
 // Initialize all UPnP thing
 bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	if(m_bInit)
@@ -123,6 +140,7 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 		AddLogLine(false, GetResString(IDS_UPNP_PUBLICIP));
 		UpnpFinish();
 		thePrefs.SetUpnpDetect(UPNP_NOT_NEEDED)	;//leuk_he autodetect upnp in wizard
+		UpnpAcceptsPorts=false; 
 		return false;
 	}
 
@@ -256,9 +274,9 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 // Returns: 
 //		UNAT_OK:	If the mapping has been added to our mapping list.
 //					(Maybe not to the device, because it runs in a different thread).
-//		UNAT_ERROR: If you have not Init() the class.
+//		UNAT_ERROR: init did fail, not UpnpAcceptsPorts allowed.
 CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping){
-	if(!m_bInit)
+	if (UpnpAcceptsPorts==False)
 		return UNAT_ERROR;
 
 	if(mapping->externalPort == 0){
@@ -278,6 +296,18 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 			found = true;
 			pos = NULL;
 		}
+	}
+	if(!m_bInit ||thePrefs.IsUPnPEnabled()==false){ // if not initialized then just note the mappings for later adding. 
+
+	   if(!found ){
+			//If we do not have this mapping, add it to our list when enabled
+		   //TODO use getresstring.
+		   theApp.QueueDebugLogLine(false, _T("Upnp:queuing port for when upnpis enabled: %s"), mapping->description);
+		    m_Mappings.AddTail(*mapping);
+		}
+	   m_MappingsLock.Unlock();
+       m_devListLock.Unlock();
+	   return UNAT_OK;  
 	}
 
 	//Checks if we have devices
@@ -338,10 +368,8 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(WORD
 // Returns: 
 //		UNAT_OK:	If the mapping has been removed from our mapping list.
 //					(Maybe not from the device, because it runs in a different thread).
-//		UNAT_ERROR: If you have not Init() the class.
+//		UNAT_ERROR: 
 CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMapping(CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping, bool removeFromList){
-	if(!m_bInit)
-		return UNAT_ERROR;
 
 	m_devListLock.Lock();
 	m_MappingsLock.Lock();
@@ -349,10 +377,26 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMapping(C
 		mapping.externalPort = mapping.internalPort;
 	}
 
+	UPNPNAT_MAPPING item;
+	if(!m_bInit || thePrefs.IsUPnPEnabled()==false) {
+		// remove the queued mapping (only in queue, not in device) 
+		m_MappingsLock.Lock();
+        POSITION pos = m_Mappings.GetHeadPosition();
+		if (pos) (item = m_Mappings.GetNext(pos));
+	    while(pos && item.externalPort != mapping.externalPort  ){
+  		   item = m_Mappings.GetNext(pos);
+		}
+	   if( pos && removeFromList)
+			m_Mappings.RemoveAt(pos);
+	   	m_MappingsLock.Unlock();
+       m_devListLock.Unlock();
+       return UNAT_OK;
+	}
+
+
 	POSITION old_pos, pos = m_Mappings.GetHeadPosition();
 	while(pos){
 		old_pos = pos;
-		UPNPNAT_MAPPING item;
 		item = m_Mappings.GetNext(pos);
 		if(item.externalPort == mapping.externalPort){
 			POSITION srvpos = m_knownServices.GetHeadPosition();
@@ -425,6 +469,9 @@ bool CUPnP_IGDControlPoint::DeleteAllPortMappings(){
 }
 
 bool CUPnP_IGDControlPoint::UpdateAllMappings( bool bLockDeviceList, bool bUpdating){
+    if (thePrefs.IsUPnPEnabled()==false) // upnp portmapping disabled. 
+		return true;
+
 	if(bLockDeviceList)
 		m_devListLock.Lock();
 

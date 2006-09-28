@@ -360,7 +360,7 @@ void CPPgWiz1Ports::OnStartConTest() {
 	uint16 tcp=GetTCPPort();
 	uint16 udp=GetUDPPort();
 
-	thePrefs.SetUPnPNat(IsDlgButtonChecked(IDC_ENABLE_PNP)==BST_CHECKED); // add upnp to startup wizard
+	theApp.m_UPnP_IGDControlPoint->SetUPnPNat(IsDlgButtonChecked(IDC_ENABLE_PNP)==BST_CHECKED); // add upnp to startup wizard [leuk_he]
 
 	if (tcp==0)
 		return;
@@ -803,7 +803,7 @@ BOOL FirstTimeWizard()
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
 
-	thePrefs.SetUPnPNat(page3.uPnPNAT!=0); // leuk_he add upnp to startup wizard
+	theApp.m_UPnP_IGDControlPoint->SetUPnPNat(page3.uPnPNAT!=0); // leuk_he add upnp to startup wizard
 	// set ports
 	thePrefs.SetUpnpDetect(UPNP_NO_DETECTEDTION);// leuk_he add upnp to startup wizard no more detecion next time.
 	thePrefs.port=(uint16)_tstoi(page3.m_sTCP);

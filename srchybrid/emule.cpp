@@ -267,7 +267,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 		m_strModVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	m_strModLongVersion = CemuleApp::m_szMVersionLong;
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
-    #ifndef _RELEASE
+    #ifdef _BETA
 	m_strModLongVersion.AppendFormat(_T(".%u"), CemuleApp::m_nMVersionBld); // leuk_he: build version for
     #endif
 	if (CemuleApp::m_szMMVersion[0]!=0)
@@ -553,7 +553,7 @@ BOOL CemuleApp::InitInstance()
 	m_pFirewallOpener->Init(true); // we need to init it now (even if we may not use it yet) because of CoInitializeSecurity - which kinda ruins the sense of the class interface but ooohh well :P
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
-	if(!thePrefs.GetICFSupport() && thePrefs.GetICFSupportFirstTime() && m_pFirewallOpener->DoesFWConnectionExist()){ 	 
+	if(!thePrefs.GetICFSupport()&& !IsRunningXPSP2() && thePrefs.GetICFSupportFirstTime() && m_pFirewallOpener->DoesFWConnectionExist()){ 	 
 		if(MessageBox(NULL, GetResString(IDS_ICFSUPPORTFIRST), _T("eMule"), MB_YESNO | MB_ICONQUESTION) == IDYES){ 	 
 			thePrefs.SetICFSupport(true); 	 
         } 	 

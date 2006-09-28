@@ -835,7 +835,7 @@ bool CClientUDPSocket::Create()
 					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_F), thePrefs.GetUDPPort());
 			}
 
-			if(thePrefs.IsUPnPEnabled())
+			if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts())
 				theApp.m_UPnP_IGDControlPoint->AddPortMapping(m_port, CUPnP_IGDControlPoint::UNAT_UDP, _T("UDP Port"));
 		}
 	}
@@ -860,7 +860,7 @@ bool CClientUDPSocket::Rebind(){
 		return false;
 
 	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	if(thePrefs.IsUPnPEnabled()){
+	if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts()){
 		theApp.m_UPnP_IGDControlPoint->DeletePortMapping(m_port, CUPnP_IGDControlPoint::UNAT_UDP, _T("UDP Port"));
 	}
 	// End -UPnPNAT Support-

@@ -431,7 +431,7 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 					mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
 					mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 					mapping.description = "Web Interface";
-					if(thePrefs.IsUPnPEnabled() && thePrefs.GetUPnPNatWeb())
+					if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts() && thePrefs.GetUPnPNatWeb())
 						UPnP = theApp.m_UPnP_IGDControlPoint->AddPortMapping(&mapping);
 					// End -UPnPNAT Support-
 

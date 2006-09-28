@@ -40,7 +40,8 @@ class CUPnP_IGDControlPoint
 {
 public:
 	bool Init(bool bStopAtFirstConnFound = false);
-
+	bool IsUpnpAcceptsPorts() {return UpnpAcceptsPorts;};
+    bool SetUPnPNat(bool upnpNat);
 	//Commented for a possible future use.
 	/*
 	typedef struct UPNP_INFO_VAR{
@@ -161,6 +162,7 @@ public:
 	static CUPnP_IGDControlPoint *	GetInstance();
 	static void						RemoveInstance();
 private:
+	bool UpnpAcceptsPorts; // Accepts ports, even when upnp is not enabled.  So not restart is required on enableing [leuk_he]
 	typedef enum{
 		UPNPNAT_ACTION_ADD,
 		UPNPNAT_ACTION_DELETE

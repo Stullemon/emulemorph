@@ -143,7 +143,7 @@ bool CUDPSocket::Create()
 		// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 		// Don't add UPnP port mapping if is a random port and we don't want
 		// to clear mappings on close
-		if(thePrefs.IsUPnPEnabled() &&
+		if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts() &&
 			(!(thePrefs.GetServerUDPPort()==0xFFFF && !thePrefs.GetUPnPClearOnClose())))
 		{
 			CString client;

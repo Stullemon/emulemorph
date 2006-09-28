@@ -348,7 +348,7 @@ bool  CListenMMSocket::Create(){
 	return CAsyncSocket::Create(thePrefs.GetMMPort(),SOCK_STREAM,FD_ACCEPT) && Listen();;
 	*/
 	if(CAsyncSocket::Create(thePrefs.GetMMPort(),SOCK_STREAM,FD_ACCEPT) && Listen()){
-		if(thePrefs.IsUPnPEnabled()){
+		if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts()){
 			theApp.m_UPnP_IGDControlPoint->AddPortMapping(thePrefs.GetMMPort(),
 				CUPnP_IGDControlPoint::UNAT_TCP,
 				_T("MobileMule"));

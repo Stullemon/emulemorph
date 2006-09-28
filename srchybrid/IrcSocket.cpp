@@ -82,7 +82,7 @@ BOOL CIrcSocket::Create(UINT uSocketPort, int uSocketType, long lEvent, LPCSTR l
 	return CAsyncSocketEx::Create(uSocketPort, uSocketType, lEvent, lpszSocketAddress);
 	*/
 	if(CAsyncSocketEx::Create(uSocketPort, uSocketType, lEvent, lpszSocketAddress)){
-		if(thePrefs.IsUPnPEnabled()){
+		if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts()){
 			CString client;
 			UINT port;
 

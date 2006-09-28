@@ -684,9 +684,8 @@ BOOL CPPgEmulespana::OnApply()
 	if((BOOL)thePrefs.IsUPnPEnabled() != m_bUPnP ||
 		(BOOL)thePrefs.GetUPnPNatWeb() != m_bUPnPWeb)
 	{
-		thePrefs.SetUPnPNat(m_bUPnP);
+		theApp.m_UPnP_IGDControlPoint->SetUPnPNat(m_bUPnP); // and start/stop nat. 
 		thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
-		bRestartApp = true;
 	}
 	// MORPH START leuk_he upnp bindaddr
 	thePrefs.SetUpnpBindAddr(m_dwUpnpBindAddr);// Note: read code in thePrefs..

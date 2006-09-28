@@ -2888,7 +2888,7 @@ bool CListenSocket::Rebind()
 		return false;
 
 	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
-	if(thePrefs.IsUPnPEnabled()){
+	if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts()){
 		theApp.m_UPnP_IGDControlPoint->DeletePortMapping(m_port, CUPnP_IGDControlPoint::UNAT_TCP, _T("TCP Port"));
 	}
 	// End -UPnPNAT Support-
@@ -2998,7 +2998,7 @@ bool CListenSocket::StartListening()
 				theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_F), thePrefs.GetPort());
 		}
 
-		if(thePrefs.IsUPnPEnabled()){
+		if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts()){
 			theApp.m_UPnP_IGDControlPoint->AddPortMapping(m_port, CUPnP_IGDControlPoint::UNAT_TCP, _T("TCP Port"));
 		}
 	

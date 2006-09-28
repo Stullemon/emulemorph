@@ -1978,7 +1978,6 @@ protected:
 public:
 	//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 	static	bool	IsUPnPEnabled()						{ return m_bUPnPNat; }
-	static	void	SetUPnPNat(bool on)					{ m_bUPnPNat = on; }
 	static	bool	GetUPnPNatWeb()						{ return m_bUPnPNatWeb; }
 	static	void	SetUPnPNatWeb(bool on)				{ m_bUPnPNatWeb = on; }
 	static	void	SetUPnPVerboseLog(bool on)			{ m_bUPnPVerboseLog = on; }
