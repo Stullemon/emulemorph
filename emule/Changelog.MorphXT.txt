@@ -1,4 +1,20 @@
 --------------------------------------
+Changelog for eMule 0.47c MorphXT v8.x
+-------------------------------------
+-- 28 sep 2006
+Merged to emule 0.47c
+-
+CHANGED: upload code removed the lower latency patch..
+FIX: an official bug in source-exchange (Xanatos)
+CHANGE: Do not recommend ICF firewall opener on sp2 installation. [leuk_he]
+CHANGE: upnp: Do not require restart for enabling upnp. [leuk_he] 
+CHANGED: upnp, relax xml parsing [leuk_he]
+ADDED: Downloaded History (Monki/Xman)
+ADDED: Code Improvement for ShowFilesCount (Xman)
+ADDED: SharedView Ed2kType (Avi3k)
+
+
+--------------------------------------
 Changelog for eMule 0.47a MorphXT v8.14
 -------------------------------------
 ===4-sep-2006==
@@ -21,9 +37,9 @@ ADDED: Setable CompressLevel. [leuk_he]
      9 is best compression, slightly more cpu use (default in eMule)
      1 is worst compression , save some cpu. Values in between also posisble 
      for very high uploader (> 200 kb/s) and/or slow cpu some cpu can be saved.
-ADDED: ionix advanced webserver (ionix/Aireoreion)
+ADDED: ionix advanced webserver (ionix/Aireoreion/wizard)
        You must select the multi user template to enable 
-       the muti user settings. 
+       the multi user settings. 
 ADDED: multi user webserver  in ef-mod style tabs. [leuk_he]
 
 FIXED: File completion of files over 4GB. 
