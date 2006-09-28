@@ -2,11 +2,277 @@
         http://emule-project.net
         ========================
 
+v0.47c Hotfix
+-----------------------
+- Sep, 14. 2006       -
+-----------------------
+.: Einige größere Bugs im Kad 2.0 Quellen/Schlüsselwort-Publishing wurden behoben
+
+-----------------------
+- Sep, 13. 2006       -
+-----------------------
+.: Ein Bug beim verarbeiten von Kad1.0-Paketen, von dem wir annehmen das er von außen ausgenutzt werden kann und daher ein potentielles Risiko darstellt wenn Kad aktiviert ist [entdeckt von tHeWiZaRdOfDoS]
+.: Ein Fehler beim speichern der Einstellungen für einen deaktivierten UDP-Port wurde behoben
+.: Ein Bug im First Runtime Wizzard der den UDP port deaktivierte wurde behoben
+.: Mehr Kontrollen für Kad-Pakete wurden hinzugefügt so dass alle unangeforderten Antworten ignoriert werden
+
+-----------------------
+- Sep, 11. 2006       -
+-----------------------
+.: Ein Speicherleck in einem Fehlerhandler wurde behoeben [tHeWiZaRdOfDoS]
+.: Das lesen von "addresses.dat" und "shareddir.dat" Dateien wurde verbessert um Leerzeichen und leere Zeilen zu ignorieren
+.: Ein Bug bei der Warnung vor falschen Dateiendungen, der auftreten konnte wenn mehrer Dateien markiert waren wurde behoben
+
+0.47b
+-----------------------
+- Sep, 7. 2006        -
+-----------------------
+Ornis: Fortschrittsanzeige zur Archivdurchsuchung hinzugefügt (bei Live Archivvorschau)
+
+-----------------------
+- Sep, 5. 2006        -
+-----------------------
+.: eMule achtet darauf dass die zufällig gewählten Ports nicht bereits belegt sind
+.: Ein mögliches Problem beim Suchen von Kad-Buddies wurde behoben [DavidXanatos]
+.: Ein kleiner Bug im Sanitycheck für bestimmte Kadantworten wurde behoben [WiZardofDoS]
+
+-----------------------
+- Sep, 1. 2006        -
+-----------------------
+.: mehrere Optimierungen für IP-Filterung in Kad.
+.: Fehlerkorrektur bzgl. Senden falscher Kad 1.0 Kommentar-Pakete
+.: Korrektur eines Fehlers, welcher MiniMule nicht öffnen lies, wenn eMule in ein Verzeichnis mit Sonderzeichen installiert wurde.
+
+
+0.47b BETA1
+-----------------------
+- Aug, 31. 2006       -
+-----------------------
+.: Korrektur eines Fehlers beim Verbinden zu einem gewählten Server - wenn dieser nicht rechtzeitig antwortet versucht eMule nicht mehr, sich zu anderen Servern zu  verbinden.
+.: Korrektur eines Fehlers, welcher auftrat, wenn ED2K UDP Pakete von einem Client empfangen wurde, welcher sich hinter einem UDP portmapping router befindet.
+Ornis: Vietnamesische Übersetzung von Paul Tran HQ Loc hinzugefügt
+
+-----------------------
+- Aug, 26. 2006       -
+-----------------------
+Ornis: Anzeige des Dateityps im Dateidetail-Dialog hinzugefügt. Für die meist verbreiteten Formate wird der heruntergeladene Dateikopf geprüft und mit der Dateiendung verglichen. Ein Warnicon erscheint, wenn die Endung zu einem anderen Format gehört.
+Ornis: Korrektur eines Fehlers im Webinterface beim Bannen von IPs nach zu vielen fehlerhaften Loginversuchen [thx DreamWalker]
+
+-----------------------
+- Aug, 24. 2006       -
+-----------------------
+.: Bei einer KAD-Suche nach Kommentaren weist nun ein entsprechendes Icon (am Platz des Bewertungsicons) auf die aktive Suche hin.
+   Der Knopf um in Kad nach Kommentaren zu suchen ist deaktiviert solange eine Suche aktiv ist.
+   
+-----------------------
+- Aug, 21. 2006       -
+-----------------------
+.: Korrektur mehrerer möglicher Speicherlecks [WiZardofDoS]
+.: Bei einer neuen Installation von eMule werden nun Zufallsports (TCP/UDP) ausgewählt, anstatt der Standardports 4662 and 4672. Die Ports werden bei existierenden Installationen nicht geändert (und bleiben auch nach Neustarts). Die Hilfedateien werden entsprechend aktualisiert.
+
+-----------------------
+- Aug, 20. 2006       -
+-----------------------
+.: Korrektur einer fehlenden IP-Filter-Prüfung für ausgehende UDP Pakete von KAD / KAD Knoten [leuk he]
+.: Eingehende ED2K UDP Antwortpakete werden jetzt ignoriert wenn sie nicht angefordert wurden.
+.: Eine Option zum An- und Ausschalten des MiniMule wurde zur Hauptseite des Optionsdialoges hinzugefügt.
+.: (sehr seltener) potentieller Integerüberlauf wurde korrigiert, der Probleme bereiten konnte, wenn sehr große Dateien heruntergeladen wurden. [avi-3k]
+
+-----------------------
+- Aug, 17. 2006       -
+-----------------------
+.: Korrektur eines potentiellen Fehlers in TryToConnect (verfrühtes Send) [eklm]
+.: Server, welche von anderen Clients oder Servern geschickt wurden erhalten nun standardmäßig die niedrige Priorität
+.: Server werden nun mit dem IPFilter verglichen, auch wenn sie bereits in der Serverliste waren (im Gegensatz zum Prüfen von nur neu hinzugefügten Servern) [BlueSonicBoy]
+
+-----------------------
+- Aug, 15. 2006       -
+-----------------------
+.: Überarbeitung des Dateikommentar-Fensters: Bewertungsicons, Netzwerkinformation und sortierbare Kommentarliste hinzugefügt.
+
+-----------------------
+- Aug, 12. 2006       -
+-----------------------
+Ornis: 2 Fehlerkorrekturen im Statistikfenster, wenn der vertikale Splitter (Fensterteiler) nach ganz links oder recht bewegt wurde. [BlueSonicBoy]
+Ornis: Korrektur eines Fehlers in der Transferliste der Weboberfläche, bei Dateien mit Apostroph (führte zur fehlendem Javascript Popupmenü)
+
+-----------------------
+- Aug, 5. 2006        -
+-----------------------
+Ornis: Live-Vorschau für ZIP,RAR und ACE-Archive implementiert. Die Seite "Inhaltsangabe" des Dateidetails-Dialoges (Tempdateien & freigegebene Dateien)) listet den Inhalt des Archivs auf (Dateinamen & -pfade, Dateigrößen, CRC,...) und Archivangaben wie vorhandener Passwortschutz und weitere Attribute...
+       Vollständigkeit dieser Liste hängt vom Downloadstatus ab. Heruntergeladene Bereiche werden gescannt und das ZIP-Zentraldirectory wird ausgelesen sofern bereits heruntergeladen (Dateiende).
+Ornis: Hinzugefügt: Archivwiederherstellung für ACE-Archive. (Wie bereits für ZIP & RAR: es wird eine Version des Archivs erstellt, welches nur die bereits komplett verfügbaren (heruntergeladenen) Dateien enthält.)
+       Einige Korrekturen bei Archivwiederherstellungen, inklusive Löschen einer zusätzlichen Tempdatei, wenn Wiederherstellung fehlschlug.
+Ornis: Verbesserung der Verarbeitung von eingefügten Links in den Ed2k-Link-Dialog, wenn diese Leerzeilen und Whitespaces enthalten [zoom]
+
+-----------------------
+- Jul, 26. 2006        -
+-----------------------
+.: Obfuskation (Protokoll-Verschleierung) für ED2K/Kad TCP, ED2K UDP, Server TCP und Server UDP Verbindungen implementiert. Kad UDP ist noch nicht verschleierbar (obfuskierbar) . Für eine detaillierte Erklärung dieses Features, siehe folgende Seite unserer Onlinehilfe: http://www.emule-project.net/home/perl/help.cgi?l=2&rm=show_topic&topic_id=848
+.: Einstellungsdialog: die Sicherheitsoptionsseite wurde geteilt und enthält nun auch Einstellungen zur Obfuskation. Einstellungen zu Kommentaren und Nachrichten haben nun eine eigene Seite.
+
+-----------------------
+- Jun, 24. 2006       -
+-----------------------
+zz: Verbesserung in der Chunkauswahl des Downloads: starke Verbesserung für sehr seltene Dateien (weniger als 5 Quellen), und auch Verbesserungen für normale Dateien und Vorschau-Chunks
+
+-----------------------
+- Jun, 21. 2006       -
+-----------------------
+.: Unterstützung der MediaInfoLib v0.7.1+ hinzugefügt
+
+-----------------------
+- Jun, 7. 2006        -
+-----------------------
+.: Korrektur eines Fehler in der Funktion zum Aufrufen des Standardplayers in der Vorschaufunktion - die Standardanwendung wurde für manche Dateitypen nicht gestartet.
+.: Option hinzugefügt, um die Vorschau-Kommandozeile anzugeben.
+
+-----------------------
+- Jun, 6. 2006        -
+-----------------------
+.: Korrektur eines Fehler beim Umbenennen von Dateien in der Liste freigegebener Dateien [SiRoB]
+
+-----------------------
+- Jun, 4. 2006        -
+-----------------------
+.: Korrektur eines Fehlers, der u.U. zu Dateikorruption führen konnte, wenn eMule als 'sicherer Benutzer' lief und ein Systemlogoff/Reboot stattfand.
+
+-----------------------
+- May, 31. 2006       -
+-----------------------
+.: Fehlerkorrektur im Verbindungsmanagement.
+
+-----------------------
+- May, 29. 2006       -
+-----------------------
+.: zusätzliches Informationsfenster im MediaInfo-Dialog überarbeitet.
+
+-----------------------
+- May, 26. 2006       -
+-----------------------
+.: Mediainfo-Dialog (Inhaltsinformation) zeigt Hinweis für Dateien, welche mit DRM geschützt sind.
+.: Korrektur eines Fehlers im Mediainfo-Dialoges (Inhaltsinformation) für manche Tempdateien beim Abfragen von AVI-Eigenschaften
+.: Hinzugefügt: Workaround für den Mediainfo-Dialog hinzugefügt, um verlässlichere Angaben zur Spieldauer bei MPEG Datei zu machen, wenn die MediaInfoLib benutzt wird.
+
+-----------------------
+- May, 21. 2006       -
+-----------------------
+.: Hinzugefügt: Suchergebnis-spezifisches Menü (achte auf den Titel über der Suchergebnislist!) für folgende Funktionen:
+- spezifiziere das Format/Einheit für Angaben der Dateigröße der Suchresultate (KB = zeigte Größen in Kilobyte im selben Format wie der Windows Explorer, MB = zeigt Größen in Megabyte, Voreinstellung = freier Stil)
+- Suchergebnisfilter zurücksetzen
+
+-----------------------
+- May, 17. 2006       -
+-----------------------
+.: Korrektur eines Fehlers in der "Suche" Funktion wenn für nicht-Dateinamenfelder benutzt.
+
+-----------------------
+- May, 16. 2006       -
+-----------------------
+.: Hinzugefügt: Einfacher On-the-fly Filter für Suchergebnisse um die erhaltenen Resultate zu filtern.
+   Der Filter wird automatisch angewendet, wenn bei Tippen in der Filtereingabe pausiert wird.
+   Alle mit Leerzeichen getrennten Terme werden mit UND verbunden ausgewertet. Akzeptierte Suchergebnisse
+   müssen also diese Zeichenketten im Dateinamen enthalten, 
+   Terme mit vorangestelltem '-' (Negativ-Filter) dürfen darin nicht vorkommen.
+   Beispiel: -xyz -abc cool file
+   Dies wird nur noch die Sucheinträge angezeigt lassen, welche die Wörter "cool" und
+   "file" enthält, aber weder "xyz" noch "abc".
+
+-----------------------
+- May, 13. 2006       -
+-----------------------
+.: Kontextmenü von Suchergebnis-Reitern bietet nun die Option an, alle benutzen Suchparameter dieser Suche wiederherzustellen
+
+-----------------------
+- May, 12. 2006       -
+-----------------------
+.: Server Infoanzeige zeigt die mit Zeitangabe versehene "Verbunden mit..." Nachricht vor der Server-Info-Nachricht.
+.: Korrektur eines Fehlers im Server UDP-Socket bzgl ignorierter empfangener Server Statistiken von dynIP-Servers.
+.: Korrektur eines Fehlers im Server UDP-Socket bei der Behandlung von DNS Anfragen und ausgehenden UDP Paketen (für dynIP-Server).
+.: Server können aus der Serverliste mit Strg+X "ausgeschnitten" werden
+
+-----------------------
+- May, 11. 2006       -
+-----------------------
+.: IP-Filter: dynIP-Servers werden nicht mehr abgewiesen wenn die Sicherheits-Option "Server anhand der IP filtern" aktiviert ist. Sie werden evtl gefiltert nachdem der DN aufgelöst wurde.
+.: IP-Filter: Nicht-dynIP-Server und dynIP-Servers mit bereits bekannter IP werden gefiltert wenn die IP-Filterliste oder eine entsprechende IP-Filter-Option geändert werden.
+.: Korrektur eines Fehlers im Webinterface bzgl. Serversortierung und dynIP-Servern.
+.: Korrektur eines Fehlers mit ed2k-Server-URLs und dynIP Servern
+.: Korrektur eines Fehlers beim automatischen Serververbindens, welcher dazu führen konnte, dass zu keinem Server verbunden wurde.
+.: Korrektur mehrerer Fehler bzgl. doppelter DynIP-Servereinträge in Serverliste
+
+-----------------------
+- May, 8. 2006        -
+-----------------------
+.: Fehlerkorrektur einiger Unicode Fehlermeldungen [Xman1]
+.: Korrektur eines Fehlers bzgl. nicht fertigstellbarer Dateien aufgrund ungültigen Dateinamenprefixes
+
+-----------------------
+- Apr, 27. 2006       -
+-----------------------
+Unk: Korrektur eines Absturzfehlers in Kad [Hinweis von Ani]
+
+-----------------------
+- Apr, 10. 2006       -
+-----------------------
+.: Korrektur eines GUI-Problems in der Download-Fortschrittsanzeige für Cients [SiRoB]
+
+-----------------------
+- Apr, 1st 2006      :->
+-----------------------
+.: Korrektur eines Fehlers bzgl. erneut heruntergeladener und erneut freigegebener Dateien.
+.: Korrektur eines Fehlers bzgl. "Zusammenfassung nicht aktualisiert, nachdem eine freigegebene Datei gelöscht wurde" [raccoon.i]
+.: Hinzugefügt: preferences.ini Einstellung: "UserSortedServerList=1". Wenn aktiviert, wird beim Verbinden zu Servern die selbe Reihenfolge angewendet wie in der GUI dargestellt.
+	
+-----------------------
+- Mar, 26. 2006       -
+-----------------------
+.: Korrektur eines Fehlers, welcher eMule von minimiert in den Vordergrund holte, wenn eine Chatnachricht empfangen wurde [raccoon.i]
+.: Korrektur eines Win2K-spezifischen GUI Problems bei den Suchergebnissen
+
+-----------------------
+- Mar, 25. 2006       -
+-----------------------
+.: Korrektur einiger Icon Ressource-Lecks
+.: Korrektur eines Fehlers beim Wechseln des Windows Farbeschemas während der Laufzeit und für das Schema "Hoher Kontrast"
+.: Korrektur eines Fehlers bzgl. ausgetauschter Bewertungs-Strings [Aenarion[ITA]]
+.: Korrektur fehlender Einträge im Verbindungsassistenten [FrankyFive]
+.: Korrektur eines Fehlers im Webinterface bei Dateien >4GB [zAxel]
+.: Korrektur eines Fehlers im Webinterface in Verbindung mit HTTP Fehlerantwort.
+
+-----------------------
+- Mar, 9. 2006        -
+-----------------------
+Unk: Schlüsselwortsuche für Kad2.0 mit Kad1.0 Integration funktioniert.
+Unk: Korrektur eines u.U. auftretenden Speicherlecks in Kad
+
+-----------------------
+- Mar, 4. 2006        -
+-----------------------
+Unk: Schlüsselwort speichern Kommentar Suche für Kad2.0 mit Kad1.0 Integration funktioniert. Kad2.0/1.0 Integration fertig.
+
+-----------------------
+- Feb, 4. 2006        -
+-----------------------
+Unk: SMIRC unterstützt nun Farben (BlueSonicBoy-TK4)
+Unk: Fix: GetClosestTo gab nicht die Anzahl der gewünschten Resultate zurück (tatikiran)
+.: Korrektur eines Absturzfehlers in Verbindung mit MiniMule
+.: Quellcode für VS2005 portiert
+.: Mehrere Laufzeit-Performanceverbesserungen für 64bit-Arithmetik
+.: Korrektur eines Fehlers bei großen Suchergebnismengen
+
+-----------------------
+- Jan, 29. 2006       -
+-----------------------
+Unk: Beginne Kad2.0 mit Kad1.0 Integration... Hello Pakete, Knotensuche, BootStraps, Quellen Speichern/Suchen, Kommentare speichern fertig.
+
+
+
 0.47a
 -----------------------
 - Jan, 25. 2006       -
 -----------------------
-Unk: Ein Bug bei Kud während des suchen eines Buddy wurde korrigiert [leuk_he]
+Unk: Ein Bug bei Kad während des Suchens eines Buddy wurde korrigiert [leuk_he]
 .: Ein Problem welches known2_64.met korrupiert wenn die "Merke heruntergeladene Dateien"-Funktion abgeschaltet ist wurde behoben
 
 -----------------------

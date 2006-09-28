@@ -2,6 +2,273 @@
 	http://emule-project.net
 	========================
 
+v0.47c Hotfix
+-----------------------
+- Sep, 14. 2006       -
+-----------------------
+.: Fixed some major bugs in Kad 2.0 source/keyword publishing
+
+-----------------------
+- Sep, 13. 2006       -
+-----------------------
+.: Fixed Kad bug with processing Kad1.0-Packets which is believed to be remotely exploitable and therefore a potential risk if Kad is enabled [found by tHeWiZaRdOfDoS]
+.: Fixed bug with lost setting for disabled UDP port.
+.: Fixed bug in First Runtime Wizard with previously disabled UDP port.
+.: Added more sanitizing for Kad packages to ignore all unrequested packets
+
+-----------------------
+- Sep, 11. 2006       -
+-----------------------
+.: Fixed some Kad memory leaks in exception handlers [tHeWiZaRdOfDoS]
+.: Tweaked reading of "addresses.dat" and "shareddir.dat" files to skip spaces and empty lines.
+.: Fixed bug with wrong file type mismatch warning for multiple selected part files.
+
+v0.47b
+-----------------------
+- Sep, 7. 2006        -
+-----------------------
+Ornis: Added progressbar during archive scanning for live archive preview
+
+-----------------------
+- Sep, 5. 2006        -
+-----------------------
+.: eMule will take care that the random choosen ports are not used already
+.: Added a fix for a possible problem when search Kad-Buddies [DavidXanatos]
+.: Fixed a small bug in a kad response sanitycheck [WiZardofDoS]
+
+-----------------------
+- Sep, 1. 2006        -
+-----------------------
+.: Some optimizations for IP-filtering in Kad.
+.: Fixed a bug where wrong Kad 1.0 Notes packets were sent.
+.: Fixed bug with MiniMule which failed to open when eMule was installed in folders with special characters.
+
+
+0.47b BETA1
+-----------------------
+- Aug, 31. 2006       -
+-----------------------
+.: Bugfix: When trying to connect to a selected server which times out, eMule will no longer try to conenct to other servers instead
+.: Added a fix for receiving ED2K UDP packets when the remote client is behind a UDP portmapping router  
+Ornis: Added vietnamese translation, by Paul Tran HQ Loc
+.: Fixed a small rounding error on the filerateing icon 
+
+-----------------------
+- Aug, 26. 2006       -
+-----------------------
+Ornis: Added filetype display to Filedetail Dialog. For most common filestypes, the downloaded header is checked to match the file extention. A warning icon is shown if its file extention matches a different file type.
+Ornis: Fixed a bug in the webserver with banning IPs after too many logintries[DreamWalker]
+
+-----------------------
+- Aug, 24. 2006       -
+-----------------------
+.: When doing a search for comments on Kad, an icon (in the place of the rateing icon) will indicate that a search is in progress
+   The button to search for comments on Kad will be disabled while a search is in progress.
+
+-----------------------
+- Aug, 21. 2006       -
+-----------------------
+.: Several minor possible memleaks have been corrected [WiZardofDoS]
+.: On a fresh installation eMule will now select random ports instead the default port 4662 and 4672. The ports won't be changed on existing installations and stay the same after restarts. The helpfiles will be updated to reflect this.
+
+-----------------------
+- Aug, 20. 2006       -
+-----------------------
+.: Fixed missing IPFilter checks for outgoing UDP packets from KAD / Kad Nodes [leuk he]
+.: Incoming ED2K and some Kad UDP response packets are now ignored if they were not requested.
+.: An option to enable or disable MiniMule has been added to the General options dialog
+.: (extrem rare) possible integer overflow causing problems when downloading large files has been fixed [avi-3k]
+
+-----------------------
+- Aug, 17. 2006       -
+-----------------------
+.: A possible premature send bug on TryToConnect has been fixed [eklm]
+.: Servers added from other clients or servers will now get low priority by default
+
+-----------------------
+- Aug, 15. 2006       -
+-----------------------
+.: Reworked file comment dialogs: added rating icons, network info and sortable comment list
+
+-----------------------
+- Aug, 12. 2006       -
+-----------------------
+Ornis: 2 fixes for statistic dialog when moving vertical splitter to minimum or maximum position [BlueSonicBoy]
+Ornis: Fixed bug in webserver to deal with filenames with apostrophes in transfer list (missing javascript controlled popupmenue)
+
+-----------------------
+- Aug, 5. 2006        -
+-----------------------
+Ornis: Added live archive preview for ZIP,RAR and ACE. The Content-tab of the file detail dialog (partfiles and completed files) will list content of the archive (file name & path, size, CRC,...) and information like existing password protection, archive atttributes,...
+       Completeness of the list depends on download status. Downloaded parts are scanned, ZIP central directory is read if fileend was downloaded.
+Ornis: Added archive recovery for ACE archives. (As for ZIP & RAR already present: create a version of the downloading archive containing the files that are already available.)
+       Some minor fixes in archive recovery, including remove tempfile when recovery failed.
+Ornis: Fix for better handling of pasted links in the ed2k-link dialog to process empty lines and whitespaces [zoom]
+
+-----------------------
+- Jul, 26. 2006        -
+-----------------------
+.: Added Obfuscation Layer for ED2K/Kad TCP, ED2K UDP, Server TCP and Server UDP connections. Kad UDP is not obuscatable yet. For a detailed explanation of this feature, please check this topic of our onlinehelp: http://www.emule-project.net/home/perl/help.cgi?l=2&rm=show_topic&topic_id=848
+.: The security options page has been split and now contains also obfuscation settings. Comments and message related setting have now there own page.
+
+-----------------------
+- Jun, 24. 2006       -
+-----------------------
+zz: Improved chunk chooser: major improvements for very rare files (less than 5 sources), but also includes tweaks for common files and for preview chunks
+
+-----------------------
+- Jun, 21. 2006       -
+-----------------------
+.: Added support for MediaInfoLib v0.7.1+
+
+-----------------------
+- Jun, 7. 2006        -
+-----------------------
+.: Fixed bug with default preview function which did not open default application for certain file types.
+.: Added option to specify preview command line.
+
+-----------------------
+- Jun, 6. 2006        -
+-----------------------
+.: Fixed bug with renameing files in shared files window [SiRoB]
+
+-----------------------
+- Jun, 4. 2006        -
+-----------------------
+.: Fixed problem with possible file corruption when eMule is run as 'secure user' and system logoff/reboot.
+
+-----------------------
+- May, 31. 2006       -
+-----------------------
+.: Fixed bug in connection management.
+
+-----------------------
+- May, 29. 2006       -
+-----------------------
+.: Reworked Media Info dialog's additional information window.
+
+-----------------------
+- May, 26. 2006       -
+-----------------------
+.: Media Info dialog shows hint about files which are protected with DRM.
+.: Fixed bug in Media Info dialog with getting AVI properties for some part files.
+.: Added workaround to Media Info dialog to show more reliable play length for MPEG files when used with MediaInfoLib.
+
+-----------------------
+- May, 21. 2006       -
+-----------------------
+.: Added search results specific menu (look closely to the label above the search results list) for some minor important functions:
+- specify the format of file size numbers for search results (KB = shows sizes in KByte with same format as used by Windows Explorer, MB = shows sizes in MByte, Default = free style)
+- reset search results filter
+
+-----------------------
+- May, 17. 2006       -
+-----------------------
+.: Fixed bug with 'Find' function in search results list when used for non-filename fields.
+
+-----------------------
+- May, 16. 2006       -
+-----------------------
+.: Added simple on-the-fly filter for search results to filter already received results. The
+filter will be invoked automatically after you stopped typing in the filter control.
+Generally all specified strings (separated by space) are ANDed. Strings which do not
+start with a '-' character (positive filter) must be found in the filename of the
+search results while strings which are starting with '-' characters (negative filter)
+must not be found in the filename of the search results.
+
+Example: -xyz -abc cool file
+This will show only search entries where the filename contains the words "cool" and
+"file" and which are not containing the strings "xyz" nor "abc".
+
+
+-----------------------
+- May, 13. 2006       -
+-----------------------
+.: Search results pane tab context menu offers function to restore all used search parameters for that particular search.
+
+-----------------------
+- May, 12. 2006       -
+-----------------------
+.: Server Info pane shows time stamped "connected" messages before now server info messages.
+.: Fixed bug in server UDP socket with ignoring received servers stats from dynIP-servers.
+.: Fixed bugs in server UDP socket with race conditions of DNS queries and outgoing UDP packets (for dynIP-servers).
+.: Servers can get cutted with Ctrl+X
+
+-----------------------
+- May, 11. 2006       -
+-----------------------
+.: IP-Filter: dynIP-servers are no longer rejected when enableing "Filter servers too" and get eventually IP-filtered after the DN was resolved.
+.: IP-Filter: Non-dynIP-servers and dynIP-servers with an already known IP are filtered whenever the IP-filter list or a related IP-filter option was changed.
+.: Fixed bug in Webinterface with server sorting and dynIP servers.
+.: Fixed bug with ed2k-server URLs and dynIP servers.
+.: Fixed bug in auto server connecting which could lead to not connecting to any server at all.
+.: Fixed several bugs related to duplicate dynIP-server entries in server list.
+
+-----------------------
+- May, 8. 2006        -
+-----------------------
+.: Fixed some Unicode error message bugs [Xman1]
+.: Fixed bug with not completing files due to invalid filename prefixes.
+
+-----------------------
+- Apr, 27. 2006       -
+-----------------------
+Unk: Corrected Kad crash bug. (Pointed out by Ani)
+
+-----------------------
+- Apr, 10. 2006       -
+-----------------------
+.: Fixed GUI glitch in download client progressbar [SiRoB]
+
+-----------------------
+- Apr, 1st 2006      :->
+-----------------------
+.: Fixed bug with re-downloaded and re-shared files.
+.: Fixed bug with "Summary Not Updated After Deleting Shared File" [raccoon.i]
+.: Added preferences.ini setting "UserSortedServerList=1". When enabled this will use the same server list sorting as shown in GUI when trying to connect to a server.
+	
+-----------------------
+- Mar, 26. 2006       -
+-----------------------
+.: Fixed bug with eMule getting focus on received chat message when minimized [raccoon.i]
+.: Fixed Win2K specific GUI glitches in search results.
+
+-----------------------
+- Mar, 25. 2006       -
+-----------------------
+.: Fixed some icon resource leaks.
+.: Fixed bugs with changing Windows color schemes on-the-fly and for Windows "High Contrast" color schemes.
+.: Fixed bug with exchanged rating strings [Aenarion[ITA]]
+.: Fixed missing entries in connection wizard dialog [FrankyFive]
+.: Fixed bug in webserver for files >4GB [zAxel]
+.: Fixed bug in webserver related to HTTP error reply.
+
+-----------------------
+- Mar, 9. 2006        -
+-----------------------
+Unk: Keyword search for Kad2.0 with Kad1.0 integration working.
+Unk: Fixed possible mem leak in Kad..
+
+-----------------------
+- Mar, 4. 2006        -
+-----------------------
+Unk: Keyword store Note search for Kad2.0 with Kad1.0 integration working. Kad2.0/1.0 integration completed.
+
+-----------------------
+- Feb, 4. 2006        -
+-----------------------
+Unk: SMIRC now supports color. (BlueSonicBoy-TK4)
+Unk: Fixed GetClosestTo not return the number of results wanted.. (tatikiran)
+.: Fixed potential crash with MiniMule.
+.: Ported sources code to VS2005.
+.: Several runtime performance optimizations for 64-bit arithmetics.
+.: Fixed a minor bug with large file search results.
+
+-----------------------
+- Jan, 29. 2006       -
+-----------------------
+Unk: Starting to use Kad2.0 with Kad1.0 integration... Hello Packets, Node Lookups, BootStraps, Source Store/Search, Note Store working.
+
 0.47a
 -----------------------
 - Jan, 25. 2006       -
@@ -4724,4 +4991,3 @@ Merkur:  fixed a bug with fileids (checksum was wrong sometimes)
 - July 7th, 2002   -
 --------------------
 Merkur:  first (source only) Release
-
