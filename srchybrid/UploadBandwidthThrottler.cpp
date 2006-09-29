@@ -780,8 +780,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								}
 								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									//SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, (uint32)(BytesToSpend-ControlspentBytes));
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
+									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize, (UINT)(BytesToSpend - ControlspentBytes));
 #else
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
 #endif
@@ -840,7 +839,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket,stat)) {
 								//Try to send client allowed data for a client but not more than class allowed data
-								if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
+								if (stat->realBytesToSpend > 999) {
 #if !defined DONT_USE_SOCKET_BUFFERING
 									uint32 BytesToSend = min(allowedclientdatarate/4,(UINT)(BytesToSpend - spentBytes));
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize, allowedclientdatarate);
@@ -884,7 +883,17 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							}
 						}
 					}
-
+					for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && BytesToSpend <= 0; slotCounter++) {
+						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(numberofclientinhigherclass+slotCounter);
+						if(socket != NULL) {
+							Socket_stat* stat = NULL;
+							if (m_stat_list.Lookup(socket,stat)) {
+								if (stat->realBytesToSpend > 999) {
+									stat->realBytesToSpend = 999;
+								}
+							}
+						}
+					}
 					if (spentBytes) {
 						if (classID < LAST_CLASS) {
 							for (uint32 i = 0; i < LAST_CLASS; i++) {

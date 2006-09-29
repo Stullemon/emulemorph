@@ -746,9 +746,10 @@ BOOL FirstTimeWizard()
 	
 	CPPgWiz1UlPrio page4(IDD_WIZ1_ULDL_PRIO, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_DOWNLBL) + _T(" / ") + GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_PRIORITY));
 	sheet.AddPage(&page4);
-	
+	/*   leuk_he: full chunks is not fucntional in zz upload system
 	CPPgWiz1Upload page5(IDD_WIZ1_UPLOAD, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_WIZ1_UPLOAD_SUBTITLE));
 	sheet.AddPage(&page5);
+	*/ 
 	
 	CPPgWiz1Server page6(IDD_WIZ1_SERVER, GetResString(IDS_WIZ1), GetResString(IDS_PW_SERVER), GetResString(IDS_NETWORK));
 	sheet.AddPage(&page6);
@@ -765,7 +766,7 @@ BOOL FirstTimeWizard()
 	page3.m_sUDP.Format(_T("%u"), thePrefs.GetUDPPort());
 	page4.m_iDAP = 1;
 	page4.m_iUAP = 1;
-	page5.m_iULFullChunks = 1;
+//	page5.m_iULFullChunks = 1;	  // MORPH not needed full chunk due to zz upload
 	page6.m_iSafeServerConnect = 0;
 	page6.m_iKademlia = 1;
 	page6.m_iED2K = 1;
@@ -798,7 +799,7 @@ BOOL FirstTimeWizard()
 		RemAutoStart();
 	thePrefs.SetNewAutoDown(page4.m_iDAP!=0);
 	thePrefs.SetNewAutoUp(page4.m_iUAP!=0);
-	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks!=0);
+//	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks!=0);
 	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect!=0);
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);

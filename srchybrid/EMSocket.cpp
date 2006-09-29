@@ -16,7 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #ifdef _DEBUG
-#include "DebugHelpers.h"
+#include "DebugHelpers.h" 
 #endif
 #include "emule.h"
 #include "emsocket.h"
@@ -34,7 +34,6 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
 
 namespace {
 	inline void EMTrace(char* fmt, ...) {
@@ -129,7 +128,12 @@ CEMSocket::CEMSocket(void){
     m_numberOfSentBytesPartFile = 0;
     m_numberOfSentBytesControlPacket = 0;
 
-    lastCalledSend = ::GetTickCount();
+    //MORPH - 
+	/*
+	lastCalledSend = ::GetTickCount();
+	*/
+	lastCalledSend = ::GetTickCount()-SEC2MS(1);
+	lastFinishedStandard = 0;
 
 	m_bAccelerateUpload = false;
 
@@ -242,6 +246,7 @@ void CEMSocket::ClearQueues(){
 		delete standartpacket_queue.GetNext(pos).packet;
 	standartpacket_queue.RemoveAll();
 #if !defined DONT_USE_SOCKET_BUFFERING
+	sendblenWithoutControlPacket = 0;
 	for (POSITION pos = m_currentPacket_in_buffer_list.GetHeadPosition(); pos != NULL;) {
 		delete m_currentPacket_in_buffer_list.GetNext(pos);
 	}
@@ -824,7 +829,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #endif
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 
-    if (maxNumberOfBytesToSend == 0 && (::GetTickCount() - lastCalledSend < SEC2MS(10))) {
+    if (maxNumberOfBytesToSend == 0 && (::GetTickCount() - lastCalledSend < SEC2MS(1))) {
         SocketSentBytes returnVal = { true, 0, 0 };
         return returnVal;
     }
@@ -861,7 +866,8 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 			} else if (maxNumberOfBytesToSend > bufferlimit) {
 				maxNumberOfBytesToSend = bufferlimit;
 			}
-			bufferlimit = 0;
+			if (maxNumberOfBytesToSend > m_uCurrentSendBufferSize)
+				bufferlimit = maxNumberOfBytesToSend;
 		}
 #else
             maxNumberOfBytesToSend = GetNeededBytes(sendbuffer, sendblen, sent, m_currentPacket_is_controlpacket, lastCalledSend);
@@ -869,7 +875,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #endif
 		maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
-		bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) >= 10000;
+		bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) >= 1000;
 
 #if !defined DONT_USE_SOCKET_BUFFERING
 		ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
@@ -1129,6 +1135,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 						delete pPacket;
 					}
 					if (result > sumofpacketsizesent) {
+						sendLocker.Lock();
 						BufferedPacket* pPacket = m_currentPacket_in_buffer_list.GetHead();
 						uint32 partialpacketsizesent = result-sumofpacketsizesent;
 						if (pPacket->iscontrolpacket == false) {
@@ -1147,6 +1154,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 							sendblenWithoutControlPacket -= partialpacketsizesent;
 						}
 						pPacket->remainpacketsize -= partialpacketsizesent;
+						sendLocker.Unlock();
 					}
 #else
 					if(!m_currentPacket_is_controlpacket) {
@@ -1286,7 +1294,7 @@ uint32 CEMSocket::GetNeededBytes(const uint32 sendblen, const uint32 sendblenWit
 #else
 uint32 CEMSocket::GetNeededBytes(const char* sendbuffer, const uint32 sendblen, const uint32 sent, const bool currentPacket_is_controlpacket, const DWORD lastCalledSend) {
 #endif
-	sendLocker.Lock();
+	//sendLocker.Lock();
 	//if (byConnected == ES_DISCONNECTED) {
 	//	sendLocker.Unlock();
 	//	return 0;
@@ -1298,7 +1306,7 @@ uint32 CEMSocket::GetNeededBytes(const char* sendbuffer, const uint32 sendblen, 
     if (!((sendbuffer && !currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty())) {
 #endif
     	// No standard packet to send. Even if data needs to be sent to prevent timout, there's nothing to send.
-        sendLocker.Unlock();
+        //sendLocker.Unlock();
 		return 0;
 	}
 
@@ -1340,7 +1348,6 @@ uint32 CEMSocket::GetNeededBytes(const char* sendbuffer, const uint32 sendblen, 
 		sizeleft = sizetotal = standartpacket_queue.GetHead().packet->GetRealPacketSize();
 	}
 #endif
-	sendLocker.Unlock();
 
 	if (timeleft >= timetotal)
 		return (UINT)sizeleft;
