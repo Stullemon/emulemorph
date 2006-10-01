@@ -186,10 +186,10 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 
 	ASSERT(srcstosave.IsEmpty());
 
-	POSITION pos2;
+	POSITION pos2,pos;
 	CUpDownClient* cur_src;
 	// Choose best sources for the file
-	for(POSITION pos = file->srclist.GetHeadPosition();pos!=0;){
+	for(pos = file->srclist.GetHeadPosition();pos!=0;){
 		cur_src = file->srclist.GetNext(pos);
 		if (cur_src->GetDownloadState() != DS_ONQUEUE &&
 			cur_src->GetDownloadState() != DS_DOWNLOADING &&
