@@ -12,11 +12,7 @@ struct SocketSentBytes {
 class ThrottledControlSocket
 {
 public:
-#if !defined DONT_USE_SOCKET_BUFFERING
-    virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0) = 0;
-#else
 	virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) = 0;
-#endif
 	/*
 	virtual DWORD GetBusyTimeSince() const = 0;
 	virtual float GetBusyRatioTime() const = 0;
@@ -26,11 +22,7 @@ public:
 class ThrottledFileSocket : public ThrottledControlSocket
 {
 public:
-#if !defined DONT_USE_SOCKET_BUFFERING
-    virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0) = 0;
-#else
 	virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) = 0;
-#endif
 	//virtual DWORD GetLastCalledSend() = 0;
     //virtual uint32	GetNeededBytes() = 0;
 	virtual bool	IsBusy() const = 0;

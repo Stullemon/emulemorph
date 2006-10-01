@@ -99,6 +99,11 @@ int CEncryptedDatagramSocket::DecryptReceivedClient(BYTE* pbyBufIn, int nBufLen,
 		case OP_UDPRESERVEDPROT1:
 		case OP_UDPRESERVEDPROT2:
 		case OP_PACKEDPROT:
+// MORPH START: webcache 
+		case  OP_WEBCACHEPROT:
+		case  OP_WEBCACHEPACKEDPROT:
+		case  OP_THE_LETTER_G:			// yonatan http - first byte in an http GET header
+// MORPH end : webcache
 			return nResult; // no encrypted packet (see description on top)
 	}
 	// might be an encrypted packet, try to decrypt
@@ -171,6 +176,11 @@ int CEncryptedDatagramSocket::EncryptSendClient(uchar** ppbyBuf, int nBufLen, co
 			case OP_UDPRESERVEDPROT1:
 			case OP_UDPRESERVEDPROT2:
 			case OP_PACKEDPROT:
+// MORPH START: webcache 
+			case  OP_WEBCACHEPROT:
+			case  OP_WEBCACHEPACKEDPROT:	
+			case  OP_THE_LETTER_G:			// yonatan http - first byte in an http GET header
+// MORPH end : webcache
 				break;
 			default:
 				bOk = true;

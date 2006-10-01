@@ -43,11 +43,7 @@ public:
 	bool	Rebind();
 	uint16	GetConnectedPort()			{ return m_port; }
 	bool	SendPacket(Packet* packet, uint32 dwIP, uint16 nPort, bool bEncrypt, const uchar* pachTargetClientHash);
-#if !defined DONT_USE_SOCKET_BUFFERING
-     SocketSentBytes  SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0); // ZZ:UploadBandWithThrottler (UDP)
-#else
 	 SocketSentBytes  SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
-#endif
 protected:
 	bool	ProcessPacket(const BYTE* packet, UINT size, uint8 opcode, uint32 ip, uint16 port);
 	//MORPH START - Added by SiRoB, Webcache 1.2f

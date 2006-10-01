@@ -26,7 +26,6 @@
 #include "secrunasuser.h" // yonatan - moved up... // MORPH - Modified by Commander, WebCache 1.2e
 #include "emule.h"
 #include "opcodes.h"
-#include "ModVersion.h" // Morph - leuk_he  beta release
 #include "mdump.h"
 #include "Scheduler.h"
 #include "SearchList.h"
@@ -267,10 +266,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 		m_strModVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	m_strModLongVersion = CemuleApp::m_szMVersionLong;
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
-    #ifndef _RELEASE
-	m_strModLongVersion.AppendFormat(_T(".%u"), CemuleApp::m_nMVersionBld); // leuk_he: build version for
-    #endif
-	if (CemuleApp::m_szMMVersion[0]!=0)
+   if (CemuleApp::m_szMMVersion[0]!=0)
 		m_strModLongVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	//MORPH END   - Added by SiRoB, [-modname-]
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]

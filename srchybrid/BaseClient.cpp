@@ -60,7 +60,6 @@
 #include "shahashset.h"
 #include "Log.h"
 #include "WebCache/WebCacheSocket.h" // MORPH - Added by Commander, WebCache 1.2e
-#include "modversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -90,13 +90,9 @@ public:
     uint64 GetSentPayloadSinceLastCallAndReset();
     void TruncateQueues();
 
-#if !defined DONT_USE_SOCKET_BUFFERING
-    virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0) { return Send(maxNumberOfBytesToSend, minFragSize, true, bufferlimit); };
-	virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize, uint32 bufferlimit = 0) { return Send(maxNumberOfBytesToSend, minFragSize, false, bufferlimit); };
-#else
 	virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, true); };
 	virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
-#endif
+
     virtual	DWORD	GetBusyTimeSince() const { return m_dwBusy; }; //MORPH - Added by SiRoB, Show busyTime
 	virtual float	GetBusyRatioTime() const { return (float)(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))/(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)); };
 #if !defined DONT_USE_SOCKET_BUFFERING
@@ -125,11 +121,7 @@ protected:
 	CAsyncProxySocketLayer* m_pProxyLayer;
 	CString m_strLastProxyError;
 private:
-#if !defined DONT_USE_SOCKET_BUFFERING
-    virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket, uint32 bufferlimit = 0);
-#else
     virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket);
-#endif
 	void	ClearQueues();	
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
 
