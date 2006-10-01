@@ -207,16 +207,19 @@ int CEncryptedStreamSocket::Receive(void* lpBuf, int nBufLen, int nFlags){
 			return m_nObfusicationBytesReceived;
 		case ECS_UNKNOWN:{
 			uint32 nRead = 1;
+			// MORPH START - WebCache
+			/*
 			bool bNormalHeader = false;
+			*/
+			bool bNormalHeader =  ((*(int*)lpBuf) == ' TEG' );
 			switch (((uchar*)lpBuf)[0]){
 				case OP_EDONKEYPROT:
 				case OP_PACKEDPROT:
 				case OP_EMULEPROT:
-                // MORPH START webcache
-                case OP_WEBCACHEPACKEDPROT:
-				case OP_WEBCACHEPROT: // yonatan - webcache protocol packets
-                case OP_THE_LETTER_G: //// yonatan http - first byte in an http GET header
-                // MORPH END webcache
+			// MORPH START - WebCache
+				case OP_WEBCACHEPACKEDPROT:
+				case OP_WEBCACHEPROT:
+			// MORPH END   - WebCache
 					bNormalHeader = true;
 					break;
 			}

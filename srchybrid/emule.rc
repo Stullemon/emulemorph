@@ -1372,8 +1372,8 @@ BEGIN
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     CONTROL         "Static",IDC_CLIENTDETAIL_KADCON,"Static",
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,219,57,92,8
-    RTEXT           "Obfuscation:",IDC_STATIC_OBF_LABEL,163,67,52,8
-    LTEXT           "Static",IDC_OBFUSCATION_STAT,219,67,94,8,SS_ENDELLIPSIS
+    RTEXT           "Obfuscation:",IDC_STATIC_OBF_LABEL,163,69,52,8
+    LTEXT           "Static",IDC_OBFUSCATION_STAT,219,69,94,8,SS_ENDELLIPSIS
     LTEXT           "Country:",IDC_DLOC2,19,69,49,8
     CONTROL         "Static",IDC_DLOC,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,69,79,8
