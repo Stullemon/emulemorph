@@ -1,18 +1,18 @@
 --------------------------------------
-Changelog for eMule 0.47c MorphXT v8.x
+Changelog for eMule 0.47c MorphXT v9.0
 -------------------------------------
--- 28 sep 2006
-Merged to emule 0.47c
+-- 1 oct 2006
+Merged to emule 0.47c 
 -
-CHANGED: upload code removed the lower latency patch..
-FIX: an official bug in source-exchange (Xanatos)
-CHANGE: Do not recommend ICF firewall opener on sp2 installation. [leuk_he]
-CHANGE: upnp: Do not require restart for enabling upnp. [leuk_he] 
-CHANGED: upnp, relax xml parsing [leuk_he]
-ADDED: Downloaded History (Monki/Xman)
-ADDED: Code Improvement for ShowFilesCount (Xman)
-ADDED: SharedView Ed2kType (Avi3k)
-
+CHANGED: USC, reviewed upload code.
+CHANGED: source-cache modified. 
+FIX:     an official bug in source-exchange (Xanatos)
+CHANGED: Do not recommend ICF firewall opener on sp2 installation. 
+CHANGED: upnp: Do not require restart for enabling upnp.  
+CHANGED: upnp, relax xml parsing 
+ADDED:   Downloaded History (Monki/Xman) 
+ADDED:   Code Improvement for ShowFilesCount(Xman)
+ADDED:   SharedView Ed2kType (Avi3k)
 
 --------------------------------------
 Changelog for eMule 0.47a MorphXT v8.14
