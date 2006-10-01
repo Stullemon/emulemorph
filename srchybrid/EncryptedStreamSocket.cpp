@@ -212,6 +212,11 @@ int CEncryptedStreamSocket::Receive(void* lpBuf, int nBufLen, int nFlags){
 				case OP_EDONKEYPROT:
 				case OP_PACKEDPROT:
 				case OP_EMULEPROT:
+                // MORPH START webcache
+                case OP_WEBCACHEPACKEDPROT:
+				case OP_WEBCACHEPROT: // yonatan - webcache protocol packets
+                case OP_THE_LETTER_G: //// yonatan http - first byte in an http GET header
+                // MORPH END webcache
 					bNormalHeader = true;
 					break;
 			}
@@ -698,7 +703,13 @@ uint8 CEncryptedStreamSocket::GetSemiRandomNotProtocolMarker() const{
 		switch (bySemiRandomNotProtocolMarker){ // not allowed values
 				case OP_EDONKEYPROT:
 				case OP_PACKEDPROT:
-				case OP_EMULEPROT:
+    			case OP_EMULEPROT:
+	            // MORPH START webcache
+                case OP_WEBCACHEPACKEDPROT:
+				case OP_WEBCACHEPROT: // yonatan - webcache protocol packets
+                case OP_THE_LETTER_G: //// yonatan http - first byte in an http GET header
+                // MORPH END webcache
+
 					break;
 				default:
 					bOk = true;

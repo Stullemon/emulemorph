@@ -464,6 +464,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 				case OP_WEBCACHEPACKEDPROT:
 				case OP_WEBCACHEPROT: // yonatan - webcache protocol packets
+                case OP_THE_LETTER_G: //leuk_he#define OP_THE_LETTER_G			0x47	// yonatan http - first byte in an http GET header
 // MORPH END   - Added by SiRoB, WebCache 1.2f
 					break;
 				default:

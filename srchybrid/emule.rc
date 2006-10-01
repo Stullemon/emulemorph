@@ -639,14 +639,10 @@ BEGIN
                     WS_TABSTOP,5,23,113,260,WS_EX_STATICEDGE
     CONTROL         "",IDC_SPLITTER_SHAREDFILES,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,119,23,3,261
-//MORPH START - Added, Downloaded History [Monki/Xman]
-#ifndef NO_HISTORY
     CONTROL         "",IDC_DOWNHISTORYLIST,"SysListView32",LVS_REPORT | 
                     LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | WS_TABSTOP,391,221,107,62,
                     WS_EX_STATICEDGE
-#endif
-//MORPH END   - Added, Downloaded History [Monki/Xman]
 END
 
 IDD_PPG_NOTIFY DIALOGEX 0, 0, 229, 246
@@ -1329,7 +1325,7 @@ BEGIN
                     SS_NOPREFIX | WS_GROUP,231,25,79,8
     LTEXT           "Software:",IDC_STATIC33,19,36,63,8
     CONTROL         "Static",IDC_DSOFT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,84,36,71,8
+                    SS_NOPREFIX | WS_GROUP,84,36,215,8
     LTEXT           "Server IP:",IDC_STATIC35,19,47,60,8
     LTEXT           "Static",IDC_DSIP,84,47,61,8,SS_NOPREFIX
     RTEXT           "Server Name:",IDC_STATIC38,147,47,68,8
@@ -1376,11 +1372,11 @@ BEGIN
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     CONTROL         "Static",IDC_CLIENTDETAIL_KADCON,"Static",
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,219,57,92,8
-    RTEXT           "Obfuscation:",IDC_STATIC_OBF_LABEL,163,36,52,8
-    LTEXT           "Static",IDC_OBFUSCATION_STAT,219,36,94,8,SS_ENDELLIPSIS
+    RTEXT           "Obfuscation:",IDC_STATIC_OBF_LABEL,163,67,52,8
+    LTEXT           "Static",IDC_OBFUSCATION_STAT,219,67,94,8,SS_ENDELLIPSIS
     LTEXT           "Country:",IDC_DLOC2,19,69,49,8
     CONTROL         "Static",IDC_DLOC,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,84,69,224,8
+                    SS_NOPREFIX | WS_GROUP,84,69,79,8
     LTEXT           "WebCache:",IDC_STATIC56,19,226,64,10
     CONTROL         "Static",IDC_Webcache,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,226,197,10
@@ -1391,7 +1387,7 @@ BEGIN
     LTEXT           "Is trusted OHCB sender:",IDC_STATIC55,19,252,100,10
     CONTROL         "Static",IDC_TRUSTEDOHCBSENDER,"Static",
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,110,252,197,8
-    ICON            "",IDC_COUNTRYFLAG,68,68,21,20,NOT WS_VISIBLE
+    ICON            "",IDC_COUNTRYFLAG,68,68,20,20,NOT WS_VISIBLE
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -5810,6 +5806,11 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_DOWNHISTORY         "Downloaded history"
+    IDS_DOWNHISTORY_CHECK1  "eMule has found a file already downloaded with the same file ID:\n"
+    IDS_DOWNHISTORY_CHECK2  "eMule has found %i files already downloaded with the same file name (%s):\n"
+    IDS_DOWNHISTORY_CHECK3  "Do you want to download the file anyway?"
+    IDS_DOWNHISTORY_CHECK4  "eMule has found a file already cancelled with the same file ID:\n"
     IDS_USER_ALREADY_FRIEND "User ""%s"" is already in your friend list"
     IDS_GETFRIENDED2KLINK   "Copy friend link to clipboard"
     IDS_GETHTMLFRIENDED2KLINK "Copy friend link to clipboard (HTML)"
@@ -6587,11 +6588,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_DOWNHISTORY         "Downloaded history"
-    IDS_DOWNHISTORY_CHECK1  "eMule has found a file already downloaded with the same file ID:\n"
-    IDS_DOWNHISTORY_CHECK2  "eMule has found %i files already downloaded with the same file name (%s):\n"
-    IDS_DOWNHISTORY_CHECK3  "Do you want to download the file anyway?"
-    IDS_DOWNHISTORY_CHECK4  "eMule has found a file already cancelled with the same file ID:\n"
     IDS_DOWNHISTORY_REMOVE  "Remove from history"
     IDS_DOWNHISTORY_REMOVE_QUESTION 
                             "Do you really want to remove ""%s"" from downloaded history?"
