@@ -1818,7 +1818,7 @@ BEGIN
     IDS_DOWNLOAD_LANGFILE   "正在下载语言文件..."
     IDS_DOWNLOADING_SERVERMET_FROM "正在下载来自 %s 的 server.met 文件..."
     IDS_DOWNLOADING_SERVERMET "正在下载 server.met 文件..."
-    IDS_FULLALLOC           "为非稀疏文件分配硬盘空间"
+    IDS_FULLALLOC           "为临时文件足额分配硬盘空间"
     IDS_X_SHAREAZA_IMPORT_NO_HASH "Hash 没有找到."
     IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "Gap 列表已损坏."
     IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Gap 列表未找到."
@@ -2110,7 +2110,7 @@ BEGIN
     IDS_A4AF_BALANCE        "均分来源"
     IDS_A4AF_STACK          "集中来源"
     IDS_A4AF_DISABLED       "禁用"
-    IDS_A4AF_ADVMODE        "高级A4AF操作"
+    IDS_A4AF_ADVMODE        "高级A4AF控制"
     IDS_CAT_STARTFILESONADD "指定为新类别时开始下载的文件数"
 END
 
@@ -2315,6 +2315,7 @@ BEGIN
     IDS_PAYBACKFIRSTLIMIT   "触发数量 (Default 10MB)"
     IDS_ENABLE_CHUNKDOTS    "在传播条上显示段点"
     IDS_COMMUNITY           "社团"
+    IDS_HIDDEN              "隐藏"
     IDS_COMMUNITYTAG        "社团标签 (以 '|' 分隔)"
     IDS_INVISIBLEMODE       "隐藏模式"
     IDS_ICS_USEICS          "使用智能分段选择 (ICS)"
@@ -2322,7 +2323,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_AUXPORTS            "Aux Ports"
+    IDS_AUXPORTS            "辅助端口"
     IDS_SOLIDGRAPH          "显示实心图形"
     IDS_POWERSHARE_LIMITED  "限量"
     IDS_POWERSHARE_LIMIT    "完整源数量"
@@ -2348,7 +2349,7 @@ STRINGTABLE
 BEGIN
     IDS_MORPH_RFHA          "报告文件hash活动"
     IDS_MORPH_RAIF          "报告好友名单变动"
-    IDS_MORPH_KSSERV        "在运行时不将静态服务器从列表中删除"
+    IDS_MORPH_KSSERV        "在运行时不删除静态服务器"
     IDS_MORPH_LOG           "Morph日志"
 END
 
@@ -2359,7 +2360,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_COUNTRY             "国别"
+    IDS_COUNTRY             "国家或地区"
     IDS_MISSING_STARTUPSOUND 
                             "startupsound.wav丢失! 注意: 'startupsound.wav'必须放在config目录下"
     IDS_PW_STARTUPSOUND     "播放启动音乐"
@@ -2468,7 +2469,7 @@ STRINGTABLE
 BEGIN
     IDS_CRC32_ABORT         "停止计算"
     IDS_DONTREMOVESPARETRICKLESLOT "不要删除空闲通道"
-    IDS_MINDATARATEFRIEND   "全局速度 (0kB/s = 不限, 1－3kB/s = 无特别比率)"
+    IDS_MINDATARATEFRIEND   "全局速度 (0kB/s = 不限, 1－3kB/s = 取消ZZratio)"
     IDS_MINDATARATEPOWERSHARE "全局速度 (0kB/s = 不限)"
     IDS_MAXCLIENTDATARATEFRIEND "单一客户最大速度 (0kB/s = 不限)"
     IDS_MAXCLIENTDATARATEPOWERSHARE "单一客户最大速度 (0kB/s = 不限)"
@@ -2754,10 +2755,10 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ZZRATIO             "特别比率"
+    IDS_ZZRATIO             "ZZratio(智能速度均衡)"
     IDS_ZZRATIO_ENABLED     "已激活"
     IDS_ZZRATIO_DISABLED    "未激活"
-    IDS_ZZRATIO_CHECK1      "比率达到1/3"
+    IDS_ZZRATIO_CHECK1      "上传下载速度比为1:3"
     IDS_ZZRATIO_CHECK2      "强力分享未完成文件"
     IDS_ZZRATIO_CHECK3      "使用好友通道且全局速度大于3KB/s"
     IDS_ZZRATIO_CHECK4      "上传上限低于10KB/s"
@@ -3221,7 +3222,7 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "登陆代理服务器的用户名"
     IDC_PASSWORD_TIP        "登陆代理服务器的密码"
-    IDC_WEBCACHENAME_TIP    "hostname of the proxy of your isp. Use 'transperant@yourisp' for a transperant proxy"
+    IDC_WEBCACHENAME_TIP    "你的ISP提供的代理服务器的域名. 如果使用的是透明代理(凡是80端口传输的数据都通过代理)则使用'transparent@你的isp'"
     IDC_WEBCACHEPORT_TIP    "端口号 (通常为80或8080)"
     IDC_STATIC_ADDRESS_TIP  "静态地址相关设置"
     IDC_STATIC_CONTROLS_TIP "网络缓存相关设置"
