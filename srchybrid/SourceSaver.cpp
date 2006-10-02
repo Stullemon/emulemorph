@@ -186,7 +186,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 
 	ASSERT(srcstosave.IsEmpty());
 
-	POSITION pos2,pos;
+	POSITION pos2,pos;								
 	CUpDownClient* cur_src;
 	// Choose best sources for the file
 	for(pos = file->srclist.GetHeadPosition();pos!=0;){
