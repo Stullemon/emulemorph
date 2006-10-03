@@ -902,6 +902,7 @@
 #define IDS_STATS_SHRECNUM              972
 #define IDS_SEARCH_COLUMN               973
 #define IDD_PPG_SCHEDULER               974
+#define IDD_PPG_IONIXWEBSRV             975
 #define IDS_STATS_SHRECSIZE             974
 #define IDS_STATS_SHRECASIZE            975
 #define IDS_STATS_SESSION               976
@@ -3505,12 +3506,12 @@
 #define IDS_MORPH_KSSERV                51543
 #define IDS_MORPH_LOG                   51544
 #define IDS_WEBSERVER_LINK              51561
-#define IDS_SLOT_LIMIT_GROUP            60380
-#define IDS_SLOT_LIMIT_NONE             60381
-#define IDS_SLOT_LIMIT_THREE            60382
-#define IDS_SLOT_LIMIT_NUM_B            60383
-#define IDS_SLOT_LIMIT_NUM              60384
-#define IDD_PPG_IONIXWEBSRV             60385
+#define IDS_SLOT_LIMIT_GROUP            40380
+#define IDS_SLOT_LIMIT_NONE             40381
+#define IDS_SLOT_LIMIT_THREE            40382
+#define IDS_SLOT_LIMIT_NUM_B            40383
+#define IDS_SLOT_LIMIT_NUM              40384
+
 
 // Next default values for new objects
 // 

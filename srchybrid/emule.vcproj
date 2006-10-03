@@ -30,6 +30,7 @@
 				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
 				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="3"
 				WarningLevel="4"
 				DebugInformationFormat="3"/>
@@ -37,13 +38,14 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib pthreads\pthreads\debug\pthread.lib"
+				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\projects\visualc71\Win32_LIB_ASM_Debug\libpngd.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib pthreads\pthreads\debug\pthread.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames=""
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
+				OptimizeForWindows98="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -86,7 +88,7 @@
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="2"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="2"
@@ -106,7 +108,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthread.lib"
+				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\projects\visualc71\Win32_LIB_ASM_Release\libpng.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthread.lib"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
@@ -2950,10 +2952,10 @@
 				RelativePath="res\Transfer.ico">
 			</File>
 			<File
-				RelativePath="res\transfers.ico">
+				RelativePath=".\res\Mod\transfers.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\transfers.ico">
+				RelativePath="res\transfers.ico">
 			</File>
 			<File
 				RelativePath="res\TransferUpDown.ico">
