@@ -86,6 +86,7 @@ BOOL CPPgIonixWebServer::OnInitDialog()
 	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
 	FillComboBox();
 	FillUserlevelBox();
+	m_cbAccountSelector.SetCurSel(0); // new account
 	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
     // MORPH start tabbed options [leuk_he]
 	InitTab(true,1);
@@ -265,9 +266,9 @@ afx_msg void CPPgIonixWebServer::SetBoxes()
 //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 void CPPgIonixWebServer::UpdateSelection()
 {
-	const int i = m_cbAccountSelector.GetCurSel();
+	int accountsel = m_cbAccountSelector.GetCurSel();
 	WebServDef tmp;
-	if(i == -1 || !theApp.webserver->AdvLogins.Lookup(i, tmp))
+	if(accountsel == -1 || !theApp.webserver->AdvLogins.Lookup(accountsel , tmp))
 	{
 		//reset all if no selection possible
 		GetDlgItem(IDC_ADVADMIN_DELETE)->EnableWindow(FALSE);
@@ -329,9 +330,9 @@ void CPPgIonixWebServer::OnSettingsChange()
 {
 	SetModified();
 
-	const int i = m_cbAccountSelector.GetCurSel();
+	int accountsel  = m_cbAccountSelector.GetCurSel();
 	WebServDef tmp;
-	if(i == -1 || !theApp.webserver->AdvLogins.Lookup(i, tmp))
+	if(accountsel  == -1 || !theApp.webserver->AdvLogins.Lookup(accountsel , tmp))
 		return;
 
 	tmp.RightsToKad = IsDlgButtonChecked(IDC_ADVADMIN_KAD)!=0;
@@ -345,7 +346,6 @@ void CPPgIonixWebServer::OnSettingsChange()
 	int j = m_cbUserlevel.GetCurSel();
 	ASSERT(j <= 3); //only 0,1,2,3 allowed
 	tmp.RightsToAddRemove = (uint8) j;
-
 	
 	CString buffer;
 	GetDlgItem(IDC_ADVADMIN_PASS)->GetWindowText(buffer);
@@ -358,17 +358,17 @@ void CPPgIonixWebServer::OnSettingsChange()
 	GetDlgItem(IDC_ADVADMIN_CATS)->GetWindowText(buffer);
 	SET_TCHAR_TO_STRING(tmp.RightsToCategories, buffer);
 
-	theApp.webserver->AdvLogins.SetAt(i, tmp);
+	theApp.webserver->AdvLogins.SetAt(accountsel , tmp);
 
 	FillComboBox();
-	m_cbAccountSelector.SetCurSel(i);
+	m_cbAccountSelector.SetCurSel(accountsel );
 }
 
 void CPPgIonixWebServer::OnBnClickedNew()
 {
 	SetModified();
 
-	const int i = theApp.webserver->AdvLogins.IsEmpty() ? 1 : theApp.webserver->AdvLogins.GetCount()+1;
+	int i = theApp.webserver->AdvLogins.IsEmpty() ? 1 : theApp.webserver->AdvLogins.GetCount()+1;
 
 	WebServDef tmp;
 	tmp.RightsToKad = IsDlgButtonChecked(IDC_ADVADMIN_KAD)!=0;
@@ -398,6 +398,8 @@ void CPPgIonixWebServer::OnBnClickedNew()
 
 	FillComboBox();
 	m_cbAccountSelector.SetCurSel(i);
+    UpdateSelection();
+
 
 	GetDlgItem(IDC_ADVADMIN_DELETE)->EnableWindow(TRUE);
 	GetDlgItem(IDC_ADVADMIN_NEW)->EnableWindow(FALSE);
@@ -434,9 +436,12 @@ void CPPgIonixWebServer::OnBnClickedDel()
 	//reinsert all "wrong" entries correctly
 	for(POSITION pos = tmpmap.GetHeadPosition(); pos; tmpmap.GetNext(pos))
 		theApp.webserver->AdvLogins.SetAt(tmpmap.GetKeyAt(pos), tmpmap.GetValueAt(pos));
-
+	
 	FillComboBox();
 	m_cbAccountSelector.SetCurSel(0); //set to the empty field
+	UpdateSelection();
+
+	
 }
 //<<< [ionix] - iONiX::Advanced WebInterface Account Management
 
