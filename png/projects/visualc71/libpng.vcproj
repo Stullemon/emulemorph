@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="libpng"
+	ProjectGUID="{3E1649FA-0B0F-460D-9AE4-7B702737B13D}"
 	RootNamespace="libpng">
 	<Platforms>
 		<Platform
@@ -299,8 +300,8 @@
 		</Configuration>
 		<Configuration
 			Name="LIB Debug|Win32"
-			OutputDirectory="..\..\Debug"
-			IntermediateDirectory="..\..\Debug"
+			OutputDirectory=".\Win32_LIB_Debug"
+			IntermediateDirectory=".\Win32_LIB_Debug"
 			ConfigurationType="4">
 			<Tool
 				Name="VCCLCompilerTool"
@@ -308,7 +309,7 @@
 				AdditionalIncludeDirectories="..\..;..\..\..\zlib"
 				PreprocessorDefinitions="WIN32;_DEBUG;DEBUG;PNG_DEBUG=1"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="png.h"
 				WarningLevel="3"
@@ -318,8 +319,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\..\Debug\png.lib"
-				IgnoreAllDefaultLibraries="TRUE"/>
+				OutputFile="$(OutDir)/libpngd.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -343,14 +343,15 @@
 			Name="LIB ASM Release|Win32"
 			OutputDirectory=".\Win32_LIB_ASM_Release"
 			IntermediateDirectory=".\Win32_LIB_ASM_Release"
-			ConfigurationType="4">
+			ConfigurationType="4"
+			UseOfMFC="1">
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..,..\..\..\zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD"
 				StringPooling="TRUE"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="png.h"
@@ -384,14 +385,15 @@
 			Name="LIB ASM Debug|Win32"
 			OutputDirectory=".\Win32_LIB_ASM_Debug"
 			IntermediateDirectory=".\Win32_LIB_ASM_Debug"
-			ConfigurationType="4">
+			ConfigurationType="4"
+			UseOfMFC="1">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..,..\..\..\zlib"
 				PreprocessorDefinitions="WIN32;_DEBUG;DEBUG;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="png.h"
 				WarningLevel="3"

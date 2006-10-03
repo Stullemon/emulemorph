@@ -114,7 +114,7 @@
 			OutputDirectory="..\..\..\Release"
 			IntermediateDirectory="..\..\..\Release"
 			ConfigurationType="4"
-			UseOfMFC="0"
+			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
@@ -258,9 +258,6 @@
 			</File>
 			<File
 				RelativePath="..\..\minizip\zip.c">
-			</File>
-			<File
-				RelativePath=".\zlib.rc">
 			</File>
 			<File
 				RelativePath="..\..\..\zutil.c">
