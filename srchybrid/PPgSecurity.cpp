@@ -194,9 +194,6 @@ BOOL CPPgSecurity::OnApply()
 		theApp.emuledlg->serverwnd->serverlistctrl.RemoveAllFilteredServers();
 
 	thePrefs.filterserverbyip = IsDlgButtonChecked(IDC_FILTERSERVERBYIPFILTER)!=0;
-	thePrefs.msgonlyfriends = IsDlgButtonChecked(IDC_MSGONLYFRIENDS)!=0;
-	thePrefs.msgsecure = IsDlgButtonChecked(IDC_MSGONLYSEC)!=0;
-	thePrefs.m_bAdvancedSpamfilter = IsDlgButtonChecked(IDC_ADVSPAMFILTER)!=0;
 	thePrefs.m_bUseSecureIdent = IsDlgButtonChecked(IDC_USESECIDENT)!=0;
 	thePrefs.m_bRunAsUser = IsDlgButtonChecked(IDC_RUNASUSER)!=0;
 
