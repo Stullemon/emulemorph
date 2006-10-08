@@ -100,7 +100,7 @@ bool CUPnP_IGDControlPoint::SetUPnPNat(bool upnpNat)
 		Init(thePrefs.GetUPnPLimitToFirstConnection()); 
 		UpdateAllMappings(true,false); // send any queued mappings to device. 
 	}
-	else if (upnpNat==false && thePrefs.IsUPnPEnabled()==false ){
+	else if (upnpNat==false && thePrefs.IsUPnPEnabled()==true ){
    		DeleteAllPortMappingsOnClose(); // idependand of setting thePrefs.GetUPnPClearOnClose
 	    // Note that devices are not removed. 
 		thePrefs.m_bUPnPNat=false;
