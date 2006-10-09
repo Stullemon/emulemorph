@@ -253,6 +253,7 @@ void CWebServer::ReloadTemplates()
    			// MORPH START Advanced WebInterface Account Management [leuk_he] 
 			CString sMultiVersion = _LoadTemplate(sAll,_T("TMPL_MULTIUSERVERSION"));
     		iMultiUserversion= _tstol(sMultiVersion );
+			if	(iMultiUserversion==0) { thePrefs.m_bIonixWebsrv=0; }
 			// MORPH END Advanced WebInterface Account Management [leuk_he] 
 		}
 	}

@@ -252,11 +252,11 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("EastShare")));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("emulEspaña")));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WEBCACHE)));  //MORPH - Added by SiRoB, WebCache 1.2f
-    	pTree->SetItemText(GetPageTreeItem(Multiwebserver=c++), RemoveAmbersand(_T(" ")));	// ionix advnaced webserver
-		#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+    	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 		pTree->SetItemText(GetPageTreeItem(c++), _T("Debug"));
 	     #endif
-    //   pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("iONiX ") + GetResString(IDS_PW_WS))); // MORPH ionix advanced webserver
+		pTree->SetItemText(GetPageTreeItem(Multiwebserver=c++), RemoveAmbersand(_T(" ")));	// MORPH ionix advanced webserver must be last!
+    //  
 	
 	}
 	m_banner.UpdateSize(); //Commander - Added: Preferences Banner [TPT]	

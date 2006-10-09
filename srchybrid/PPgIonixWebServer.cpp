@@ -171,7 +171,6 @@ void CPPgIonixWebServer::Localize(void)
 		SetTool(IDC_ADVADMIN_STATS,IDS_ADVADMIN_STATS_TIP);
 		SetTool(IDC_ADVADMIN_PREFS,IDS_ADVADMIN_PREFS_TIP);
 		SetTool(IDC_ADVADMIN_USERLEVEL,IDS_ADVADMIN_USERLEVEL_TIP);
-		SetTool(IDC_STATIC_ADVADMIN2,IDS_ADVADMIN_USERLEVEL_TIP);
 		SetTool(IDC_ADVADMIN_CATS,IDS_ADVADMIN_CATS_TIP);
 		SetTool(IDC_ADVADMIN_DELETE,IDS_ADVADMIN_DELETE_TIP);
 		SetTool(IDC_STATIC_ADVADMIN_CATS,IDS_STATIC_ADVADMIN_CATS_TIP);
@@ -217,10 +216,12 @@ afx_msg void CPPgIonixWebServer::SetBoxes()
 	bool bWSEnalbed = (
 		( (theApp.emuledlg->preferenceswnd->m_wndWebServer.GetSafeHwnd()  == NULL) ||
 		    theApp.emuledlg->preferenceswnd->m_wndWebServer.GetDlgItem(IDC_WSENABLED) == NULL) 
-		   && thePrefs.GetWSIsEnabled()) ||
+		   && thePrefs.GetWSIsEnabled()) && theApp.webserver->iMultiUserversion>0 ||
 		((theApp.emuledlg->preferenceswnd->m_wndWebServer.GetSafeHwnd()!=  NULL) &&
 		theApp.emuledlg->preferenceswnd->m_wndWebServer.GetDlgItem(IDC_WSENABLED) != NULL 
-		&& theApp.emuledlg->preferenceswnd->m_wndWebServer.IsDlgButtonChecked(IDC_WSENABLED));
+		&& theApp.emuledlg->preferenceswnd->m_wndWebServer.IsDlgButtonChecked(IDC_WSENABLED) &&
+		theApp.webserver->iMultiUserversion>0 )
+		;
 
 	if(bWSEnalbed && IsDlgButtonChecked(IDC_ADVADMINENABLED)!=0)
 	{

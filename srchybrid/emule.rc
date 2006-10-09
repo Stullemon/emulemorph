@@ -6571,7 +6571,7 @@ BEGIN
     IDS_ADVADMIN_STATS_TIP  "allow acces to the statiscis"
     IDS_ADVADMIN_PREFS_TIP  "Allow access to the emule preferences"
     IDS_ADVADMIN_USERLEVEL_TIP 
-                            "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all functions without the admin functions (same as Admin without Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system (same as Admin with Hi-Level functions in the original)"
+                            "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all\n		    functions without the admin functions (same as Admin without\n			Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system\n     (same as Admin with Hi-Level functions in the original)"
     IDS_ADVADMIN_CATS_TIP   "Categories the user has acces to. Leave blank for all. \nSeperate categorie names with a pipe symbol (|)"
     IDS_ADVADMIN_DELETE_TIP "Delete the current displayed account"
     IDS_STATIC_ADVADMIN_CATS_TIP "IDS_STATIC_ADVADMIN_CATS_TIPs"

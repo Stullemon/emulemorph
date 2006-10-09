@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.5 $
+* $Revision: 1.6 $
 * $Modtime:$
 * $Author: pindakaasmod $
 *
@@ -981,7 +981,7 @@ void CTreePropSheet::OnPageTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResu
 	else
 		// MORPH START tabbed options
 	{
-				if (nPage == 12 && theApp.emuledlg->preferenceswnd->ActivePageWebServer >= 1)
+		if (nPage == theApp.emuledlg->preferenceswnd->Webserver && theApp.emuledlg->preferenceswnd->ActivePageWebServer >= 1)
 			nPage = theApp.emuledlg->preferenceswnd->ActivePageWebServer;
 
         //original line:
