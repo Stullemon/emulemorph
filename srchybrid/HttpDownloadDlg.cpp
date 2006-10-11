@@ -19,6 +19,7 @@ All rights reserved.
 #include "stdafx.h"
 #include "emule.h"
 #include "HttpDownloadDlg.h"
+#include "Preferences.h" // morph 
 #include "OtherFunctions.h"
 #include "Log.h"
 
@@ -442,7 +443,14 @@ void CHttpDownloadDlg::DownloadThread()
 	ENCODING_INIT;
 	//Create the Internet session handle
 	ASSERT(m_hInternetSession == NULL);
+	// MORPH START, send user agent as firefox if obfuscated....
+    m_hInternetSession = ::InternetOpen(
+  	   thePrefs.IsClientCryptLayerRequested()?_T("Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.0.7) Gecko/20060909 Firefox/1.5.0.7"):AfxGetAppName(),
+       INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	/*	original 
 	m_hInternetSession = ::InternetOpen(AfxGetAppName(), INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	*/
+	// MORPH END , send user agent as firefox if obfuscated....
 	if (m_hInternetSession == NULL)
 	{
 		TRACE(_T("Failed in call to InternetOpen, Error:%d\n"), ::GetLastError());
