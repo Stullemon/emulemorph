@@ -365,8 +365,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 		delete file->gaplist.GetAt(file->gaplist.GetHeadPosition());
 		file->gaplist.RemoveAt(file->gaplist.GetHeadPosition());
 	}
-
-	if (!file->LoadPartFile(thePrefs.GetTempDir(),file->GetPartMetFileName(),false)) {
+	if (!file->LoadPartFile(file->GetTempPath(),file->GetPartMetFileName(),false)) {
 		//delete file;
 		file->DeleteFile();
 		return CONV_BADFORMAT;
