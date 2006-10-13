@@ -1331,7 +1331,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 	}
 
 	// Now to flush the map into the list (Slugfiller)
-	if (!gap_map.IsEmpty()) m_uTotalGaps =0;// leuk_he: temp fix import ??? 
+	 m_uTotalGaps =0;
 
 	for (POSITION pos = gap_map.GetStartPosition(); pos != NULL; ){
 		Gap_Struct* gap;
