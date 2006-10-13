@@ -2834,7 +2834,7 @@ void CPreferences::LoadPreferences()
 			maxGraphUploadRate = nOldUploadCapacity; // use old custoum value
 	}
 
-	minupload=(uint16)ini.GetInt(L"MinUpload", 1);
+	minupload=(uint16)ini.GetInt(L"MinUpload", 5);    // also used for unlimited... 
 
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
 	minupload = (uint16)min(max(minupload,1),maxGraphUploadRate);
@@ -2913,7 +2913,7 @@ void CPreferences::LoadPreferences()
 	statsInterval=ini.GetInt(L"statsInterval",5);
 	dontcompressavi=ini.GetBool(L"DontCompressAvi",false);
 	// MORPH setable compresslevel [leuk_he]
-	compresslevel=ini.GetInt(L"CompressLevel",9);
+	compresslevel=(short) ini.GetInt(L"CompressLevel",9);
 	if ((compresslevel > 9 )||(compresslevel < 1 )) compresslevel=9 ; // 1 = worst, but saves cpu, 9 = best, emule default
 	// MORPH setable compresslevel [leuk_he]
 	
