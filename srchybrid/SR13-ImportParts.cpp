@@ -106,7 +106,7 @@ bool CAddFileThread::SR13_ImportParts(){
 	
 	Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTSTART), m_PartsToImport.GetSize(), strFilePath);
 
-	BYTE* partData=new BYTE[PARTSIZE];
+	BYTE* partData=NULL;
 	for (UINT i = 0; i < (UINT)m_PartsToImport.GetSize(); i++){
 		uint16 partnumber = m_PartsToImport[i];
 		if (PARTSIZE*partnumber > fileSize) {
@@ -114,12 +114,14 @@ bool CAddFileThread::SR13_ImportParts(){
 		}
 		try {
 			try {
+				if (partData==NULL ) 
+					 partData=new BYTE[PARTSIZE];
 				CSingleLock sLock1(&(theApp.hashing_mut), TRUE);	//SafeHash - wait a current hashing process end before read the chunk
 				f.Seek((LONGLONG)PARTSIZE*partnumber,0);
 				partSize=f.Read(partData, PARTSIZE);
 			} catch (...) {
 				LogWarning(LOG_STATUSBAR, _T("Part %i: Not accessible (You may have to run scandisk to correct a bad cluster on your harddisk)."), partnumber);
-				delete[] partData;
+				delete[] partData;	 partData = NULL;
 				continue;
 			}
 			kfcall->CreateHash(partData, partSize, hash);
@@ -129,6 +131,7 @@ bool CAddFileThread::SR13_ImportParts(){
 				importpart->end = (uint64)partnumber*PARTSIZE+partSize-1;
 				importpart->data = partData;
 				VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_IMPORTPART,(WPARAM)importpart,(LPARAM)m_partfile) );
+				partData = NULL; // Delete will happen in async write thread.
 				//Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD), partnumber);
 				partsuccess++;
 			} else {
@@ -139,6 +142,8 @@ bool CAddFileThread::SR13_ImportParts(){
 			if (theApp.emuledlg->IsRunning()){
 				UINT uProgress = (UINT)(i * 100 / m_DesiredHashes.GetSize());
 				VERIFY( PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)m_partfile) );
+				Sleep(100); // sleep very short to give write time to write (or else mem grows!)
+
 			}
 			
 			if(!theApp.emuledlg->IsRunning() || partSize!=PARTSIZE || m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS) {
@@ -146,11 +151,11 @@ bool CAddFileThread::SR13_ImportParts(){
 			}
 		} catch (...) {
 			if (partData != NULL)
-				delete[] partData;
+			  {delete[] partData;partData = NULL;}
 			continue;
 		}
 	}
-	delete[] partData;
+	if (partData) {delete[] partData;partData = NULL;}
 	try {
 		bool importaborted = m_partfile->GetFileOp() == PFOP_NONE || !theApp.emuledlg->IsRunning();
 		if (m_partfile->GetFileOp() == PFOP_SR13_IMPORTPARTS)
