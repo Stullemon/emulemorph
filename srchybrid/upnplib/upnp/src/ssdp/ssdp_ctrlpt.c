@@ -38,21 +38,16 @@
 #include "upnpapi.h"
 #include <stdio.h>
 #include "ThreadPool.h"
+#ifdef _WIN32
+#include <winsock2.h>
+#include <WS2TCPIP.h>
+#endif
 
 #include "httpparser.h"
 #include "httpreadwrite.h"
 #include "statcodes.h"
 
 #include "unixutil.h"
-
-#ifdef WIN32
- #include <ws2tcpip.h>
- #include <winsock2.h>
- #ifndef imillisleep
- #define imillisleep Sleep
- #endif
-#endif
-
 
 /************************************************************************
 * Function : send_search_result											
@@ -78,18 +73,18 @@ send_search_result( IN void *data )
 }
 
 /************************************************************************
-* Function : ssdp_handle_ctrlpt_msg
-*
-* Parameters:
+* Function : ssdp_handle_ctrlpt_msg											
+*																	
+* Parameters:														
 *	IN http_message_t* hmsg: SSDP message from the device
 *	IN struct sockaddr_in* dest_addr: Address of the device
-*	IN xboolean timeout: timeout kept by the control point while
-*		sending search message
+*	IN xboolean timeout: timeout kept by the control point while sending 
+*						search message
 *	IN void* cookie: Cookie stored by the control point application. 
-*		This cookie will be returned to the control point
-*		in the callback 
-*
-* Description:
+*					This cookie will be returned to the control point
+*					in the callback 
+*																	
+* Description:														
 *	This function handles the ssdp messages from the devices. These 
 *	messages includes the search replies, advertisement of device coming 
 *	alive and bye byes.
@@ -147,9 +142,8 @@ ssdp_handle_ctrlpt_msg( IN http_message_t * hmsg,
     // MAX-AGE
     param.Expires = -1;         // assume error
     if( httpmsg_find_hdr( hmsg, HDR_CACHE_CONTROL, &hdr_value ) != NULL ) {
-        if( matchstr( hdr_value.buf, hdr_value.length,
-                      "%imax-age = %d%0", &param.Expires ) != PARSE_OK )
-            return;
+        matchstr( hdr_value.buf, hdr_value.length,
+                  "%imax-age = %d%0", &param.Expires );
     }
 
     // DATE
@@ -409,12 +403,17 @@ CreateClientRequestPacket( IN char *RqstBuf,
                            IN char *SearchTarget )
 {
     char TempBuf[COMMAND_LEN];
+    int Port;
 
     strcpy( RqstBuf, "M-SEARCH * HTTP/1.1\r\n" );
 
-    sprintf( TempBuf, "HOST: %s:%d\r\n", SSDP_IP, SSDP_PORT );
+    Port = SSDP_PORT;
+    strcpy( TempBuf, "Host: " );    //Added space NK.
+    strcat( TempBuf, SSDP_IP );
+    sprintf( TempBuf, "%s:%d\r\n", TempBuf, Port );
     strcat( RqstBuf, TempBuf );
-    strcat( RqstBuf, "MAN: \"ssdp:discover\"\r\n" );
+
+    strcat( RqstBuf, "Man: \"ssdp:discover\"\r\n" );
 
     if( Mx > 0 ) {
         sprintf( TempBuf, "MX: %d\r\n", Mx );
@@ -493,15 +492,17 @@ searchExpired( void *arg )
 }
 
 /************************************************************************
-* Function : SearchByTarget
+* Function : SearchByTarget											
+*																	
+* Parameters:														
+*		IN int Mx:Number of seconds to wait, to collect all the 
+*					responses.
+*		char *St: Search target.
+*		void *Cookie: cookie provided by control point application. This
+*						cokie will be returned to application in the 
+*						callback.
 *
-* Parameters:
-*	IN int Mx:Number of seconds to wait, to collect all the	responses.
-*	IN char *St: Search target.
-*	IN void *Cookie: cookie provided by control point application.
-*		This cokie will be returned to application in the callback.
-*
-* Description:
+* Description:														
 *	This function creates and send the search request for a specific URL.
 *
 * Returns: int
@@ -536,11 +537,7 @@ SearchByTarget( IN int Mx,
     if( ReqBuf == NULL )
         return UPNP_E_OUTOF_MEMORY;
 
-    DBGONLY( UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
-                         ">>> SSDP SEND >>>\n%s\n", ReqBuf );
-         )
-
-        timeTillRead = Mx;
+    timeTillRead = Mx;
 
     if( timeTillRead < MIN_SEARCH_TIME ) {
         timeTillRead = MIN_SEARCH_TIME;
@@ -549,6 +546,11 @@ SearchByTarget( IN int Mx,
     }
 
     CreateClientRequestPacket( ReqBuf, timeTillRead, St );
+
+    DBGONLY( UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
+                         ">>> SSDP SEND >>>\n%s\n", ReqBuf );
+         )
+
     memset( ( char * )&destAddr, 0, sizeof( struct sockaddr_in ) );
 
     destAddr.sin_family = AF_INET;
@@ -607,8 +609,8 @@ SearchByTarget( IN int Mx,
                  UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
                              "SSDP_LIB : RequestHandler:select was unable to "
                              "allocate memory for internal tables.\n" );}
- )
-shutdown( gSsdpReqSocket, SD_BOTH );
+        )
+        shutdown( gSsdpReqSocket, SD_BOTH );
         UpnpCloseSocket( gSsdpReqSocket );
         free( ReqBuf );
         return UPNP_E_INTERNAL_ERROR;

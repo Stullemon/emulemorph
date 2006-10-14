@@ -35,13 +35,10 @@
 #define	GENLIB_NET_UNIXUTIL_H
 
 #include <sys/types.h>
-#ifndef WIN32
- #include <sys/socket.h>
+#ifndef _WIN32
+#include <sys/socket.h>
 #else
- #define XINLINE
-// MORPH CHANGE: compile with vc 7.1
- //#define socklen_t int
- #define EAFNOSUPPORT 97
+#include <winsock2.h>
 #endif
 
 #endif // GENLIB_NET_UNIXUTIL_H

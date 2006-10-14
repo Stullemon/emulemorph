@@ -34,7 +34,6 @@
 * an http message and then matches the data with XML data.				*
 ************************************************************************/
 
-#include "config.h"
 #include <assert.h>
 #include "util.h"
 #include "membuffer.h"

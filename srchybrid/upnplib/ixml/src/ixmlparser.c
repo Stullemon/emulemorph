@@ -32,16 +32,9 @@
 #include <string.h>
 #include "ixmlparser.h"
 
-#ifdef WIN32
- #define strncasecmp strnicmp
+#ifdef _WIN32
+#define strncasecmp strnicmp
 #endif
-
-// MORPH: RELAX [leuk_he]
-// TODO: this should be in the configuration
-static char g_error_char = 'x'   ;
-//static char g_error_char = '\0'
-// END RELAX
-
 
 static const char LESSTHAN = '<';
 static const char GREATERTHAN = '>';
@@ -340,24 +333,6 @@ Parser_isValidXmlName( IN DOMString name )
 }
 
 /*==============================================================================*
-*   Parser_setErrorChar:	
-*       If 'c' is 0 (default), the parser is strict about XML encoding :
-*       invalid UTF-8 sequences or "&" entities are rejected, and the parsing 
-*       aborts.
-*       If 'c' is not 0, the parser is relaxed : invalid UTF-8 characters
-*       are replaced by this character, and invalid "&" entities are left
-*       untranslated. The parsing is then allowed to continue.
-*       External function.
-*   
-*===============================================================================*/
-void
-Parser_setErrorChar( IN char c )
-{
-     g_error_char = c;
-}
-
-
-/*==============================================================================*
 *   Parser_intToUTF8:	
 *       Encoding a character to its UTF-8 character string, and return its length
 *       internal function.
@@ -456,13 +431,8 @@ Parser_UTF8ToInt( IN char *ss,
                  ( ( s[2] & 0x3f ) << 18 ) | ( ( s[3] & 0x3f ) << 12 ) |
                  ( ( s[4] & 0x3f ) << 6 ) | ( s[5] & 0x3f ) );
     } else {                    // none of above, error
-        if (g_error_char) {
-            *len = 1;
-            return g_error_char;
-        } else {
-            *len = 0;
-            return -1;
-        }
+        *len = 0;
+        return -1;
     }
 }
 
@@ -1144,7 +1114,7 @@ Parser_getChar( IN char *src,
 
         i = Parser_UTF8ToInt( src, cLen );
         if( !Parser_isXmlChar( i ) ) {
-            return ( g_error_char ? g_error_char : -1 );
+            return -1;
         }
         return i;
     } else if( strncasecmp( src, QUOT, strlen( QUOT ) ) == 0 ) {
@@ -1179,7 +1149,7 @@ Parser_getChar( IN char *src,
         }
 
         if( ( pnum == src ) || *pnum != ';' || !Parser_isXmlChar( sum ) ) {
-            goto fail_entity;
+            return -1;
         }
 
         *cLen = pnum - src + 1;
@@ -1195,18 +1165,13 @@ Parser_getChar( IN char *src,
         }
 
         if( ( pnum == src ) || *pnum != ';' || !Parser_isXmlChar( sum ) ) {
-            goto fail_entity;
+            return -1;
         }
 
         *cLen = pnum - src + 1;
         return sum;
     }
 
-fail_entity:
-    if (g_error_char) {
-        *cLen = 1;
-        return '&';
-    }
     return -1;
 }
 
@@ -1721,13 +1686,11 @@ Parser_xmlNamespace( IN Parser * xmlParser,
         if( pCur->namespaceUri != NULL ) {
             free( pCur->namespaceUri );
         }
-///here it goes to segfault on "" when not copying
-	if(newNode->nodeValue){
-         pCur->namespaceUri = strdup( newNode->nodeValue );
-         if( pCur->namespaceUri == NULL ) {
-             return IXML_INSUFFICIENT_MEMORY;
-         }
-    }
+
+        pCur->namespaceUri = strdup( newNode->nodeValue );
+        if( pCur->namespaceUri == NULL ) {
+            return IXML_INSUFFICIENT_MEMORY;
+        }
 
     } else if( strncmp( newNode->nodeName, "xmlns:", strlen( "xmlns:" ) ) == 0 ) {  // namespace definition
         rc = Parser_setNodePrefixAndLocalName( newNode );
@@ -1965,7 +1928,7 @@ Parser_processCDSect( IN char **pSrc,
 
     pCDataStart = *pSrc + strlen( CDSTART );
     pEnd = pCDataStart;
-    while( ( Parser_isXmlChar( *pEnd ) == TRUE ) && ( *pEnd != '\0' ) ) {
+    while( ( Parser_isXmlChar( *pEnd ) == TRUE ) && ( *pEnd != '0' ) ) {
         if( strncmp( pEnd, CDEND, strlen( CDEND ) ) == 0 ) {
             break;
         } else {
@@ -1973,7 +1936,7 @@ Parser_processCDSect( IN char **pSrc,
         }
     }
 
-    if( ( pEnd - pCDataStart > 0 ) && ( *pEnd != '\0' ) ) {
+    if( ( pEnd - pCDataStart > 0 ) && ( *pEnd != '0' ) ) {
         tokenLength = pEnd - pCDataStart;
         node->nodeValue = ( char * )malloc( tokenLength + 1 );
         if( node->nodeValue == NULL ) {
@@ -2382,12 +2345,8 @@ Parser_processAttribute( IN Parser * xmlParser,
         if( node->nodeValue == NULL ) {
             return IXML_INSUFFICIENT_MEMORY;
         }
-    }else{
-       // if attribute doesn't have value, like a=""
-        ///somewhere on other places is this copied
-       node->nodeValue = malloc(sizeof(char));
-       *(node->nodeValue) = '\0';
     }
+    // if attribute doesn't have value, like a="", fine
     node->nodeType = eATTRIBUTE_NODE;
 
     // check whether this is a new namespace definition
@@ -2469,8 +2428,7 @@ Parser_getNextNode( IN Parser * xmlParser,
             *bETag = TRUE;
 
             return IXML_SUCCESS;
-        } else if( (xmlParser->state == eATTRIBUTE) && 
-                   (xmlParser->pCurElement != NULL) ) {
+        } else if( xmlParser->state == eATTRIBUTE ) {
             if( Parser_processAttribute( xmlParser, node ) !=
                 IXML_SUCCESS ) {
                 return IXML_SYNTAX_ERR;

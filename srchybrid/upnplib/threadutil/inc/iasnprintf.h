@@ -49,18 +49,8 @@ extern "C" {
 EXPORT int iasnprintf(char **ret,
 	       int incr,
 	       int max,
-	       const char * fmt, ...)
-#ifndef SPARC_SOLARIS
- #if (__GNUC__ >= 3)
-	__attribute__((format (__printf__, 4, 5)));
- #else
- ;
- #endif
- EXPORT void iasnprintfFree(char *);
-#else
-;
-#endif
-
+	       const char * fmt, ...);
+EXPORT void iasnprintfFree(char *);
 #ifdef __cplusplus
 }
 #endif

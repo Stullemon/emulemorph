@@ -32,6 +32,14 @@
 #include "config.h"
 #if EXCLUDE_SSDP == 0
 
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#endif
+
+#ifdef _WIN32
+#define strncasecmp strnicmp
+#endif
+
 #include "membuffer.h"
 #include "ssdplib.h"
 #include <stdio.h>
@@ -42,10 +50,8 @@
 #include "httpparser.h"
 #include "httpreadwrite.h"
 
-#ifdef WIN32
- #include <winsock2.h>
- #include <ws2tcpip.h>
- #include "unixutil.h"
+#ifdef _WIN32
+#include "ws2tcpip.h"
 #endif
 
 #define MAX_TIME_TOREAD  45
@@ -134,7 +140,7 @@ CLIENTONLY( SOCKET gSsdpReqSocket = 0;
 
     //get server info
 
-    get_sdk_info( SERVER );
+    get_sdk_info( SERVER, 200 );
 
     // parse the device list and send advertisements/replies 
     for( i = 0;; i++ ) {
@@ -461,17 +467,19 @@ CLIENTONLY( SOCKET gSsdpReqSocket = 0;
 int
 Make_Socket_NoBlocking( int sock )
 {
-#ifdef WIN32
-     u_long val=1;
-     return ioctlsocket(sock, FIONBIO, &val);
-#else
+
     int val;
 
+#ifndef _WIN32
     val = fcntl( sock, F_GETFL, 0 );
     if( fcntl( sock, F_SETFL, val | O_NONBLOCK ) == -1 ) {
         return -1;
     }
+#else
+	unsigned long ctlVal = 1;
+	val = ioctlsocket(sock, FIONBIO, &ctlVal);
 #endif
+
     return 0;
 }
 
@@ -818,7 +826,7 @@ readFromSSDPSocket( SOCKET socket )
     struct sockaddr_in clientAddr;
     ThreadPoolJob job;
     ssdp_thread_data *data = NULL;
-    socklen_t socklen = 0;
+    int socklen = 0;
     int byteReceived = 0;
 
     requestBuf = staticBuf;
@@ -960,22 +968,6 @@ get_ssdp_sockets( MiniServerSockArray * out )
         UpnpCloseSocket( ssdpSock );
         return UPNP_E_SOCKET_ERROR;
     }
-    
-    #ifdef __FreeBSD__
-    if( setsockopt( ssdpSock, SOL_SOCKET, SO_REUSEPORT,
-                    ( char * )&onOff, sizeof( onOff ) ) != 0 ) {
-
-        DBGONLY( UpnpPrintf( UPNP_CRITICAL,
-                             SSDP, __FILE__, __LINE__,
-                             "Error in set reuse port !!!\n" );
-             )
-            CLIENTONLY( shutdown( ssdpReqSock, SD_BOTH ) );
-        CLIENTONLY( UpnpCloseSocket( ssdpReqSock ) );
-        shutdown( ssdpSock, SD_BOTH );
-        UpnpCloseSocket( ssdpSock );
-        return UPNP_E_SOCKET_ERROR;
-    }
-    #endif
 
     memset( ( void * )&ssdpAddr, 0, sizeof( struct sockaddr_in ) );
     ssdpAddr.sin_family = AF_INET;

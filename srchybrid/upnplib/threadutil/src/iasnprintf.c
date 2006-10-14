@@ -31,20 +31,12 @@
 
 #include <stdarg.h>
 #include <assert.h>
-#ifdef __FreeBSD__
-#include <stdlib.h>
-#else
 #include <malloc.h>
-#endif
 #include <stdio.h>
 #include "iasnprintf.h"
 
 #ifndef NULL
 #define NULL 0
-#endif
-
-#ifdef WIN32
- #define vsnprintf _vsnprintf
 #endif
 
 /**
@@ -72,11 +64,13 @@ iasnprintf( char **ret,
     assert( fmt );
     ( *ret ) = ( char * )malloc( incr );
 
-    if( ( *ret ) == NULL ) return -1;
-
     while( 1 ) {
         va_start( ap, fmt );
+#ifndef _WIN32
         retc = vsnprintf( ( *ret ), size, fmt, ap );
+#else
+        retc = _vsnprintf( ( *ret ), size, fmt, ap );
+#endif
         va_end( ap );
 
         if( retc < 0 ) {

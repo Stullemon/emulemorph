@@ -34,9 +34,7 @@
 * operations of the Web Server.										
 ************************************************************************/
 
-#include "config.h"
 #include <assert.h>
-#include <fcntl.h>
 #include "util.h"
 #include "strintmap.h"
 #include "membuffer.h"
@@ -45,11 +43,11 @@
 #include "statcodes.h"
 #include "webserver.h"
 #include "upnp.h"
+#include "config.h"
 #include "upnpapi.h"
-#include "ssdplib.h"
 
-#ifndef WIN32
- #include <unistd.h>
+#ifndef _WIN32
+#include <unistd.h>
 #endif
 #include <sys/stat.h>
 #include "ithread.h"
@@ -252,7 +250,11 @@ search_extension( IN const char *extension,
 
     while( top <= bot ) {
         mid = ( top + bot ) / 2;
+#ifndef _WIN32
         cmp = strcasecmp( extension, gMediaTypeList[mid].file_ext );
+#else
+        cmp = _stricmp( extension, gMediaTypeList[mid].file_ext );
+#endif
 
         if( cmp > 0 ) {
             top = mid + 1;      // look below mid
@@ -347,10 +349,10 @@ glob_alias_init( void )
 {
     struct xml_alias_t *alias = &gAliasDoc;
 
-    membuffer_init( &alias->doc );
-    membuffer_init( &alias->name );
-    alias->ct = NULL;
-    alias->last_modified = 0;
+	membuffer_init( &alias->doc );
+	membuffer_init( &alias->name );
+	alias->ct = NULL;
+	alias->last_modified = 0;
 }
 
 /************************************************************************
@@ -494,7 +496,7 @@ web_server_set_alias( IN const char *alias_name,
 
         // save in module var
         ithread_mutex_lock( &gWebMutex );
-        gAliasDoc = alias;
+	gAliasDoc = alias;
         ithread_mutex_unlock( &gWebMutex );
 
         return 0;
@@ -611,9 +613,17 @@ get_file_info( IN const char *filename,
         return -1;
     }
 
+#ifndef _WIN32
     if( S_ISDIR( s.st_mode ) ) {
+#else
+    if( S_IFDIR & s.st_mode ) {
+#endif
         info->is_directory = TRUE;
+#ifndef _WIN32
     } else if( S_ISREG( s.st_mode ) ) {
+#else
+    } else if( S_IFREG & s.st_mode ) {
+#endif
         info->is_directory = FALSE;
     } else {
         return -1;
@@ -751,15 +761,15 @@ isFileInVirtualDir( IN char *filePath )
 }
 
 /************************************************************************
-* Function: ToUpperCase
-*
-* Parameters:
-*	INOUT char * Str ; Input string to be converted
-*
-* Description: Converts input string to upper case
-*
-* Returns:
-*	int
+* Function: ToUpperCase													
+*																		
+* Parameters:															
+*	INOUT char * Str ; Input string to be converted					
+*																		
+* Description: Converts input string to upper case						
+*																		
+* Returns:																
+*	int																	
 ************************************************************************/
 int
 ToUpperCase( char *Str )
@@ -773,15 +783,15 @@ ToUpperCase( char *Str )
 }
 
 /************************************************************************
-* Function: StrStr
-*
-* Parameters:
+* Function: StrStr														
+*																		
+* Parameters:															
 *	IN char * S1 ; Input string
-*	IN char * S2 ; Input sub-string
-*
-* Description: Finds a substring from a string
-*
-* Returns:
+*	IN char * S2 ; Input sub-string										
+*																		
+* Description: Finds a substring from a string							
+*																		
+* Returns:																
 *	char * ptr - pointer to the first occurence of S2 in S1				
 ************************************************************************/
 char *
@@ -795,13 +805,9 @@ StrStr( char *S1,
     int Pos;
 
     Str1 = ( char * )malloc( strlen( S1 ) + 2 );
-    if(!Str1) return NULL;
     Str2 = ( char * )malloc( strlen( S2 ) + 2 );
-    if (!Str2)
-       {
-       free(Str1);
-       return NULL;
-       }
+    if( !Str1 || !Str2 )
+        return NULL;
 
     strcpy( Str1, S1 );
     strcpy( Str2, S2 );
@@ -1376,22 +1382,16 @@ process_request( IN http_message_t * req,
     }
 
     if( RespInstr->IsRangeActive && RespInstr->IsChunkActive ) {
-
-/* - PATCH START - Sergey 'Jin' Bostandzhyan <jin_eld at users.sourceforge.net>
- * added X-User-Agent header
- */
-        
         //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RTGKDstcSXcCc", HTTP_PARTIAL_CONTENT, // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RTGKDstcSCc", HTTP_PARTIAL_CONTENT, // status code
                               // RespInstr->ReadSendSize,// content length
                               finfo.content_type,
                               //     content_type.buf,            // content type
                               RespInstr,    // Range
                               "LAST-MODIFIED: ",
-                              &finfo.last_modified,
-                              X_USER_AGENT) != 0 ) {
+                              &finfo.last_modified ) != 0 ) {
             goto error_handler;
         }
     } else if( RespInstr->IsRangeActive && !RespInstr->IsChunkActive ) {
@@ -1399,14 +1399,13 @@ process_request( IN http_message_t * req,
         //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RNTGDstcSXcCc", HTTP_PARTIAL_CONTENT, // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RNTGDstcSCc", HTTP_PARTIAL_CONTENT, // status code
                               RespInstr->ReadSendSize,  // content length
                               finfo.content_type,
                               //content_type.buf,            // content type
                               RespInstr,    //Range Info
                               "LAST-MODIFIED: ",
-                              &finfo.last_modified,
-                              X_USER_AGENT) != 0 ) {
+                              &finfo.last_modified ) != 0 ) {
             goto error_handler;
         }
 
@@ -1415,13 +1414,12 @@ process_request( IN http_message_t * req,
         //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
         //Transfer-Encoding: chunked
         // K means add chunky header ang G means range header.
-        if( http_MakeMessage( headers, resp_major, resp_minor, "RKTDstcSXcCc", HTTP_OK,   // status code
+        if( http_MakeMessage( headers, resp_major, resp_minor, "RKTDstcSCc", HTTP_OK,   // status code
                               //RespInstr->ReadSendSize,// content length
                               finfo.content_type,
                               // content_type.buf,            // content type
                               "LAST-MODIFIED: ",
-                              &finfo.last_modified,
-                              X_USER_AGENT) != 0 ) {
+                              &finfo.last_modified ) != 0 ) {
             goto error_handler;
         }
 
@@ -1430,31 +1428,28 @@ process_request( IN http_message_t * req,
             //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
             //Transfer-Encoding: chunked
             // K means add chunky header ang G means range header.
-            if( http_MakeMessage( headers, resp_major, resp_minor, "RNTDstcSXcCc", HTTP_OK,   // status code
+            if( http_MakeMessage( headers, resp_major, resp_minor, "RNTDstcSCc", HTTP_OK,   // status code
                                   RespInstr->ReadSendSize,  // content length
                                   finfo.content_type,
                                   //content_type.buf,          // content type
                                   "LAST-MODIFIED: ",
-                                  &finfo.last_modified,
-                                  X_USER_AGENT) != 0 ) {
+                                  &finfo.last_modified ) != 0 ) {
                 goto error_handler;
             }
         } else {
             //Content-Range: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT
             //Transfer-Encoding: chunked
             // K means add chunky header ang G means range header.
-            if( http_MakeMessage( headers, resp_major, resp_minor, "RTDstcSXcCc", HTTP_OK,    // status code
+            if( http_MakeMessage( headers, resp_major, resp_minor, "RTDstcSCc", HTTP_OK,    // status code
                                   //RespInstr->ReadSendSize,// content length
                                   finfo.content_type,
                                   //content_type.buf,          // content type
                                   "LAST-MODIFIED: ",
-                                  &finfo.last_modified,
-                                  X_USER_AGENT) != 0 ) {
+                                  &finfo.last_modified ) != 0 ) {
                 goto error_handler;
             }
         }
     }
-/* -- PATCH END -- */
 
     if( req->method == HTTPMETHOD_HEAD ) {
         *rtype = RESP_HEADERS;
@@ -1552,7 +1547,6 @@ http_RecvPostMessage( http_parser_t * parser,
                    && ( status != PARSE_CONTINUE_1 )
                    && ( status != PARSE_INCOMPLETE ) ) {
             //error
-            fclose( Fp );
             return HTTP_BAD_REQUEST;
         }
         //read more if necessary entity
@@ -1675,7 +1669,7 @@ web_server_callback( IN http_parser_t * parser,
 {
     int ret;
     int timeout = 0;
-    enum resp_type rtype = 0;
+    enum resp_type rtype;
     membuffer headers;
     membuffer filename;
     struct xml_alias_t xmldoc;
@@ -1737,14 +1731,8 @@ web_server_callback( IN http_parser_t * parser,
                     http_RecvPostMessage( parser, info, filename.buf,
                                           &RespInstr );
                 //Send response.
-
-/* - PATCH START - Sergey 'Jin' Bostandzhyan <jin_eld at users.sourceforge.net>
- * added X-User-Agent header
- */
-                http_MakeMessage( &headers, 1, 1, "RTDSXcCc", ret,
-                                  "text/html", X_USER_AGENT );
-/* - PATCH END --- */
-
+                http_MakeMessage( &headers, 1, 1, "RTDSCc", ret,
+                                  "text/html" );
                 http_SendMessage( info, &timeout, "b", headers.buf,
                                   headers.length );
                 break;

@@ -34,7 +34,6 @@
 * different options.
 ************************************************************************/
 
-#include "config.h"
 #include "upnp.h"
 #include "util.h"
 
@@ -64,10 +63,10 @@ linecopy( OUT char dest[LINE_SIZE],
 *	Function :	namecopy
 *
 *	Parameters :
-*		OUT char dest[NAME_SIZE] ;	output buffer
+*		OUT char dest[UPNP_NAME_SIZE] ;	output buffer
 *		IN const char* src ;	input buffer
 *
-*	Description : Copy no of bytes spcified by the NAME_SIZE constant, 
+*	Description : Copy no of bytes spcified by the UPNP_NAME_SIZE constant, 
 *		from the source buffer. Null terminate the destination buffer
 *
 *	Return : void ;
@@ -75,11 +74,11 @@ linecopy( OUT char dest[LINE_SIZE],
 *	Note :
 ************************************************************************/
 void
-namecopy( OUT char dest[NAME_SIZE],
+namecopy( OUT char dest[UPNP_NAME_SIZE],
           IN const char *src )
 {
-    strncpy( dest, src, NAME_SIZE - 1 );
-    dest[NAME_SIZE - 1] = '\0'; // null-terminate if len(src) >= NAME_SIZE
+    strncpy( dest, src, UPNP_NAME_SIZE - 1 );
+    dest[UPNP_NAME_SIZE - 1] = '\0'; // null-terminate if len(src) >= UPNP_NAME_SIZE
 }
 
 /************************************************************************

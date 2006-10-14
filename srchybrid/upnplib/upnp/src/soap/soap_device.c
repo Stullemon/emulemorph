@@ -29,27 +29,24 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "config.h"
+const char *ContentTypeHeader =
+    "Content-Type: text/xml; charset=\"utf-8\"\r\n";
+
 #ifdef INCLUDE_DEVICE_APIS
 #if EXCLUDE_SOAP == 0
 
 #define SOAP_BODY "Body"
-#define SOAP_URN "http:/""/schemas.xmlsoap.org/soap/envelope/"
+#define SOAP_URN "http://schemas.xmlsoap.org/soap/envelope/"
 
 #define QUERY_STATE_VAR_URN "urn:schemas-upnp-org:control-1-0"
 
+#include "config.h"
 #include "upnpapi.h"
 #include "parsetools.h"
 #include "statcodes.h"
 #include "httpparser.h"
 #include "httpreadwrite.h"
 #include "unixutil.h"
-#include "soaplib.h"
-#include "ssdplib.h"
-
-#ifdef WIN32
- #define snprintf _snprintf
-#endif
 
 // timeout duration in secs for transmission/reception
 #define SOAP_TIMEOUT UPNP_TIMEOUT
@@ -68,9 +65,6 @@ static const char *Soap_Invalid_Action = "Invalid Action";
 //static const char* Soap_Invalid_Args = "Invalid Args";
 static const char *Soap_Action_Failed = "Action Failed";
 static const char *Soap_Invalid_Var = "Invalid Var";
-
-const char *ContentTypeHeader =
-    "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n";
 
 /****************************************************************************
 *	Function :	get_request_type
@@ -122,7 +116,7 @@ get_request_type( IN http_message_t * request,
                                 ns_value.buf, ns_value.length )
               == UPNP_E_OUTOF_MEMORY ) ||
             ( membuffer_append_str( &soap_action_name,
-                                    "-SOAPACTION" ) ==
+                                    "-SOAPAction" ) ==
               UPNP_E_OUTOF_MEMORY )
              ) {
             membuffer_destroy( &soap_action_name );
@@ -194,7 +188,7 @@ send_error_response( IN SOCKINFO * info,
     int major,
       minor;
     const char *start_body =
-//		"<?xml version=\"1.0\"?>\n" required??
+		"<?xml version=\"1.0\"?>\n"
         "<s:Envelope "
         "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
         "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
@@ -228,20 +222,17 @@ send_error_response( IN SOCKINFO * info,
 
     // make headers
     membuffer_init( &headers );
-/* -- PATCH START - Sergey 'Jin' Bostandzhyan <jin_eld at users.sourceforge.net> */    
     if( http_MakeMessage( &headers, major, minor,
-                          "RNsDsSXc" "sssss",
+                          "RNsDsSc" "sssss",
                           500,
                           content_length,
                           ContentTypeHeader,
-                          "EXT:\r\n",
-                          X_USER_AGENT,
+                          "Ext:\r\n",
                           start_body, err_code_str, mid_body, err_msg,
                           end_body ) != 0 ) {
         membuffer_destroy( &headers );
         return;                 // out of mem
     }
-/*-- PATCH END - */
     // send err msg
     http_SendMessage( info, &timeout_secs, "b",
                       headers.buf, headers.length );
@@ -273,7 +264,7 @@ send_var_query_response( IN SOCKINFO * info,
     int major,
       minor;
     const char *start_body =
-//		"<?xml version=\"1.0\"?>\n" required??
+		"<?xml version=\"1.0\"?>\n"
         "<s:Envelope "
         "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
         "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
@@ -296,21 +287,16 @@ send_var_query_response( IN SOCKINFO * info,
 
     // make headers
     membuffer_init( &response );
-    
-/* -- PATCH START - Sergey 'Jin' Bostandzhyan <jin_eld at users.sourceforge.net> */
     if( http_MakeMessage( &response, major, minor,
-                          "RNsDsSXcc" "sss",
+                          "RNsDsSc" "sss",
                           HTTP_OK,
                           content_length,
                           ContentTypeHeader,
-                          "EXT:\r\n",
-                          X_USER_AGENT,
+                          "Ext:\r\n",
                           start_body, var_value, end_body ) != 0 ) {
         membuffer_destroy( &response );
         return;                 // out of mem
     }
-/* -- PATCH END - */
-    
     // send msg
     http_SendMessage( info, &timeout_secs, "b",
                       response.buf, response.length );
@@ -385,7 +371,7 @@ get_action_node( IN IXML_Document * TempDoc,
     if( strstr( nodeName, NodeName ) == NULL ) {
         goto error_handler;
     } else {
-        ActNodeName = ixmlPrintNode( ActNode );
+        ActNodeName = ixmlPrintDocument( ActNode );
         if( ActNodeName == NULL ) {
             goto error_handler;
         }
@@ -540,7 +526,7 @@ check_soap_action_header( IN http_message_t * request,
         return ret_code;
     }
 
-    snprintf( ns_compare, tempSize, "\"%s", urn );
+    _snprintf( ns_compare, tempSize, "\"%s", urn );
 
     if( strcmp( temp_header_value, ns_compare ) ) {
         ret_code = UPNP_E_INVALID_ACTION;
@@ -699,11 +685,10 @@ send_action_response( IN SOCKINFO * info,
     int ret_code;
     int timeout_secs = SOAP_TIMEOUT;
     static char *start_body =
-//        "<?xml version=\"1.0\"?>" required??
-        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap."
+        "<?xml version=\"1.0\"?>\n<s:Envelope xmlns:s=\"http://schemas.xmlsoap."
         "org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap."
-        "org/soap/encoding/\"><s:Body>\n";
-    static char *end_body = "</s:Body> </s:Envelope>";
+        "org/soap/encoding/\">\n<s:Body>\n";
+    static char *end_body = "</s:Body>\n</s:Envelope>\n\n";
 
     // init
     http_CalcResponseVersion( request->major_version,
@@ -712,7 +697,7 @@ send_action_response( IN SOCKINFO * info,
     err_code = UPNP_E_OUTOF_MEMORY; // one error only
 
     // get xml
-    xml_response = ixmlPrintNode( ( IXML_Node * ) action_resp );
+    xml_response = ixmlPrintDocument( ( IXML_Node * ) action_resp );
     if( xml_response == NULL ) {
         goto error_handler;
     }
@@ -721,14 +706,11 @@ send_action_response( IN SOCKINFO * info,
         strlen( end_body );
 
     // make headers
-/* -- PATCH START - Sergey 'Jin' Bostandzhyan <jin_eld at users.sourceforge.net> */    
-    if( http_MakeMessage( &headers, major, minor, "RNsDsSXcc", HTTP_OK,   // status code
-                          content_length, ContentTypeHeader, "EXT:\r\n", X_USER_AGENT // EXT header
+    if( http_MakeMessage( &headers, major, minor, "RNsDsSc", HTTP_OK,   // status code
+                          content_length, ContentTypeHeader, "Ext:\r\n" // EXT header
          ) != 0 ) {
         goto error_handler;
     }
-/* -- PATCH END - */
-
     // send whole msg
     ret_code = http_SendMessage( info, &timeout_secs, "bbbb",
                                  headers.buf, headers.length,

@@ -33,7 +33,6 @@
 * Purpose: This file implements the sockets functionality 
 ************************************************************************/
 
-#include "config.h"
 #include <assert.h>
 #include <errno.h>
 #include <time.h>
@@ -41,20 +40,20 @@
 
 #include "sock.h"
 #include "upnp.h"
-#ifndef WIN32
- #include <arpa/inet.h>
- #include <netinet/in.h>
- #include <sys/types.h>
- #include <sys/socket.h>
- #include <sys/time.h>
- #include <unistd.h>
+#ifndef _WIN32
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <unistd.h>
 #else
- #include <winsock2.h>
+#include <winsock2.h>
 #endif
 #include "unixutil.h"
 
 #ifndef MSG_NOSIGNAL
- #define MSG_NOSIGNAL 0
+#define MSG_NOSIGNAL 0
 #endif
 
 /************************************************************************
@@ -150,7 +149,7 @@ sock_destroy( INOUT SOCKINFO * info,
               int ShutdownMethod )
 {
     shutdown( info->socket, ShutdownMethod );
-    if( UpnpCloseSocket( info->socket ) == -1 ) {
+    if( UpnpCloseSocket( info->socket ) == UPNP_SOCKETERROR ) {
         return UPNP_E_SOCKET_ERROR;
     }
 
@@ -222,7 +221,7 @@ sock_read_write( IN SOCKINFO * info,
         if( retCode == 0 ) {
             return UPNP_E_TIMEDOUT;
         }
-        if( retCode == -1 ) {
+        if( retCode == UPNP_SOCKETERROR ) {
             if( errno == EINTR )
                 continue;
             return UPNP_E_SOCKET_ERROR; // error
@@ -233,7 +232,7 @@ sock_read_write( IN SOCKINFO * info,
 
     if( bRead ) {
         // read data
-        numBytes = recv( sockfd, buffer, bufsize,MSG_NOSIGNAL);
+        numBytes = recv( sockfd, buffer, bufsize, MSG_NOSIGNAL );
     } else {
         byte_left = bufsize;
         bytes_sent = 0;
@@ -241,8 +240,8 @@ sock_read_write( IN SOCKINFO * info,
             // write data
             num_written =
                 send( sockfd, buffer + bytes_sent, byte_left,
-                      MSG_DONTROUTE|MSG_NOSIGNAL);
-            if( num_written == -1 ) {
+                      MSG_DONTROUTE | MSG_NOSIGNAL );
+            if( num_written == UPNP_SOCKETERROR ) {
                 return num_written;
             }
 

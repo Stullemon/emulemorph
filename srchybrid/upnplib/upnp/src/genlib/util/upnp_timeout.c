@@ -34,10 +34,8 @@
 *		wuth a upnp time out event.
 ************************************************************************/
 
-#include "config.h"
 #include "upnp_timeout.h"
-
-#include <stdlib.h>
+#include <malloc.h>
 
 /************************************************************************
 *	Function :	free_upnp_timeout

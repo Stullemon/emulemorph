@@ -34,8 +34,10 @@
 
 #include "util.h"
 
-#ifndef WIN32
- #include <netinet/in.h>
+#ifndef _WIN32
+#include <netinet/in.h>
+#else
+#include <winsock2.h>
 #endif
 
 //Following variable is not defined under winsock.h

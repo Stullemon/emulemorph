@@ -34,23 +34,22 @@
 * used by the Miniserver module.
 ************************************************************************/
 
-#include "config.h"
-#ifndef WIN32
- #include <arpa/inet.h>
- #include <netinet/in.h>
- #include <sys/socket.h>
- #include <sys/wait.h>
- #include <unistd.h>
- #include <sys/time.h>
+#ifndef _WIN32
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 #else
- #include <winsock2.h>
-
-//MOPRH START compile wit vc7.1
- #include <ws2tcpip.h>
-
-// #define socklen_t int
-// MORPH END
- #define EAFNOSUPPORT 97
+#include <winsock2.h>
+#include <Ws2tcpip.h>
 #endif
 #include "unixutil.h"
 #include "ithread.h"
@@ -72,7 +71,11 @@
 #include "upnp.h"
 #include "upnpapi.h"
 
-#define APPLICATION_LISTENING_PORT 49152
+#ifdef _WIN32
+#define EADDRINUSE WSAEADDRINUSE
+#endif
+
+#define APPLICATION_LISTENING_PORT 0 //Old 49152, New 0 for random port
 
 struct mserv_request_t {
     int connfd;                 // connection handle
@@ -405,7 +408,7 @@ static void
 RunMiniServer( MiniServerSockArray * miniSock )
 {
     struct sockaddr_in clientAddr;
-    socklen_t clientLen;
+    int clientLen;
     SOCKET miniServSock,
       connectHnd;
     SOCKET miniServStopSock;
@@ -548,13 +551,13 @@ static int
 get_port( int sockfd )
 {
     struct sockaddr_in sockinfo;
-    socklen_t len;
+    int len;
     int code;
     int port;
 
     len = sizeof( struct sockaddr_in );
     code = getsockname( sockfd, ( struct sockaddr * )&sockinfo, &len );
-    if( code == -1 ) {
+    if( code == UPNP_SOCKETERROR ) {
         return -1;
     }
 
@@ -595,16 +598,16 @@ get_miniserver_sockets( MiniServerSockArray * out,
                         unsigned short listen_port )
 {
     struct sockaddr_in serverAddr;
-    int listenfd;
+    SOCKET listenfd;
     int success;
     unsigned short actual_port;
     int reuseaddr_on = 0;
     int sockError = UPNP_E_SUCCESS;
     int errCode = 0;
-    int miniServerStopSock;
-
+    SOCKET miniServerStopSock;
+    
     listenfd = socket( AF_INET, SOCK_STREAM, 0 );
-    if( listenfd < 0 ) {
+    if( listenfd == UPNP_INVALID_SOCKET || listenfd == 0) {
         return UPNP_E_OUTOF_SOCKET; // error creating socket
     }
     // As per the IANA specifications for the use of ports by applications
@@ -653,7 +656,8 @@ get_miniserver_sockets( MiniServerSockArray * out,
             sockError = bind( listenfd,
                               ( struct sockaddr * )&serverAddr,
                               sizeof( struct sockaddr_in )
-                 );
+                );
+			// MORPH START windows...
             if( sockError == UPNP_SOCKETERROR ) {
                 #ifdef WIN32
 				errCode = WSAGetLastError();
@@ -661,6 +665,7 @@ get_miniserver_sockets( MiniServerSockArray * out,
 				errCode = errno; 
                 #endif
                 if( errCode == EADDRINUSE )
+			 // MORPH END
                     errCode = 1;
             } else
                 errCode = 0;
@@ -793,13 +798,11 @@ StartMiniServer( unsigned short listen_port )
 
     if( ( success = get_ssdp_sockets( miniSocket ) ) != UPNP_E_SUCCESS ) {
 
+        free( miniSocket );
         shutdown( miniSocket->miniServerSock, SD_BOTH );
         UpnpCloseSocket( miniSocket->miniServerSock );
         shutdown( miniSocket->miniServerStopSock, SD_BOTH );
         UpnpCloseSocket( miniSocket->miniServerStopSock );
-
-        free( miniSocket );
-
         return success;
     }
 
@@ -827,7 +830,11 @@ StartMiniServer( unsigned short listen_port )
     // wait for miniserver to start
     count = 0;
     while( gMServState != MSERV_RUNNING && count < max_count ) {
+#ifndef _WIN32
         usleep( 50 * 1000 );    // 0.05s
+#else
+        SleepEx( 50, TRUE );
+#endif
         count++;
     }
 
@@ -868,8 +875,8 @@ int
 StopMiniServer( void )
 {
 
-    int socklen = sizeof( struct sockaddr_in ),
-      sock;
+    int socklen = sizeof( struct sockaddr_in );
+    SOCKET sock;
     struct sockaddr_in ssdpAddr;
     char buf[256] = "ShutDown";
     int bufLen = strlen( buf );
@@ -894,10 +901,18 @@ StopMiniServer( void )
         ssdpAddr.sin_port = htons( miniStopSockPort );
         sendto( sock, buf, bufLen, 0, ( struct sockaddr * )&ssdpAddr,
                 socklen );
-        usleep( 1000 );
+#ifndef _WIN32
+        usleep( 1000 );    // 0.05s
+#else
+        SleepEx( 1, TRUE );
+#endif
         if( gMServState == MSERV_IDLE )
             break;
+#ifndef _WIN32
         isleep( 1 );
+#else
+        SleepEx( 1000, TRUE );
+#endif
     }
     shutdown( sock, SD_BOTH );
     UpnpCloseSocket( sock );

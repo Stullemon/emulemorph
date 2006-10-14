@@ -18,10 +18,10 @@
   */
 
 #include <sys/types.h>
-#ifndef WIN32
- #include <sys/time.h>
+#ifndef _WIN32
+#include <sys/time.h>
+#include <sys/sysinfo.h>
 #endif
-//#include <sys/sysinfo.h>
 #include "ithread.h"
 
 /* change to point to where MD5 .h's live */
@@ -47,10 +47,11 @@ typedef unsigned char   unsigned8;
 typedef unsigned char   byte;
 
 /* Set this to what your compiler uses for 64 bit data type */
-#ifndef WIN32
- #define unsigned64_t unsigned long long
+#ifndef _WIN32
+#define unsigned64_t unsigned long long
 #else
- #define unsigned64_t __int64
+// no long long for windows
+#define unsigned64_t unsigned long
 #endif
 #define I64(C) C##LL
 

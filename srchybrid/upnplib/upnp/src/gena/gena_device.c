@@ -7,7 +7,7 @@
 // modification, are permitted provided that the following conditions are met: 
 //
 // * Redistributions of source code must retain the above copyright notice, 
-// this list of conditions and the following disclaimer. 
+// this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice, 
 // this list of conditions and the following disclaimer in the documentation 
 // and/or other materials provided with the distribution. 
@@ -41,7 +41,6 @@
 #include "statcodes.h"
 #include "httpparser.h"
 #include "httpreadwrite.h"
-#include "ssdplib.h"
 
 #include "unixutil.h"
 
@@ -521,7 +520,7 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
     }
 
     DBGONLY( UpnpPrintf( UPNP_INFO, GENA, __FILE__, __LINE__,
-                         "FOUND SERVICE IN INIT NOTFY: UDN %s, ServID: %s ",
+                         "FOUND SERVICE IN INIT NOTFY: UDN %s, ServID: %d ",
                          UDN, servId ) );
 
     if( ( ( sub = GetSubscriptionSID( sid, service ) ) == NULL ) ||
@@ -554,8 +553,8 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
                          "GENERATED PROPERY SET IN INIT NOTIFY: \n'%s'\n",
                          propertySet ) );
 
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
+    headers_size = strlen( "Content-Type text/xml\r\n" ) +
+        strlen( "Content-Length: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
 
@@ -570,7 +569,7 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
         return UPNP_E_OUTOF_MEMORY;
     }
 
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: "
+    sprintf( headers, "Content-Type: text/xml\r\nContent-Length: "
              "%d\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
              strlen( propertySet ) + 1 );
 
@@ -710,7 +709,7 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
         return GENA_E_BAD_SERVICE;
     }
     DBGONLY( UpnpPrintf( UPNP_INFO, GENA, __FILE__, __LINE__,
-                         "FOUND SERVICE IN INIT NOTFY EXT: UDN %s, ServID: %s\n",
+                         "FOUND SERVICE IN INIT NOTFY EXT: UDN %s, ServID: %d\n",
                          UDN, servId ) );
 
     if( ( ( sub = GetSubscriptionSID( sid, service ) ) == NULL ) ||
@@ -727,7 +726,7 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
 
     sub->active = 1;
 
-    propertySet = ixmlPrintNode( ( IXML_Node * ) PropSet );
+    propertySet = ixmlPrintDocument( PropSet );
     if( propertySet == NULL ) {
         free( UDN_copy );
         free( reference_count );
@@ -740,8 +739,8 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
                          "GENERATED PROPERY SET IN INIT EXT NOTIFY: %s",
                          propertySet ) );
 
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
+    headers_size = strlen( "Content-Type text/xml\r\n" ) +
+        strlen( "Content-Length: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
 
@@ -755,9 +754,9 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
         return UPNP_E_OUTOF_MEMORY;
     }
 
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: "
-             "%ld\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
-             (long) strlen( propertySet ) + 1 );
+    sprintf( headers, "Content-Type: text/xml\r\nContent-Length: "
+             "%d\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
+             strlen( propertySet ) + 1 );
 
     //schedule thread for initial notification
 
@@ -869,7 +868,7 @@ genaNotifyAllExt( IN UpnpDevice_Handle device_handle,
     strcpy( UDN_copy, UDN );
     strcpy( servId_copy, servId );
 
-    propertySet = ixmlPrintNode( ( IXML_Node * ) PropSet );
+    propertySet = ixmlPrintDocument( PropSet );
     if( propertySet == NULL ) {
         free( UDN_copy );
         free( servId_copy );
@@ -877,8 +876,8 @@ genaNotifyAllExt( IN UpnpDevice_Handle device_handle,
         return UPNP_E_INVALID_PARAM;
     }
 
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
+    headers_size = strlen( "Content-Type text/xml\r\n" ) +
+        strlen( "Content-Length: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
 
@@ -892,9 +891,9 @@ genaNotifyAllExt( IN UpnpDevice_Handle device_handle,
     }
     //changed to add null terminator at end of content
     //content length = (length in bytes of property set) + null char
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: "
-             "%ld\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
-             (long) strlen( propertySet ) + 1 );
+    sprintf( headers, "Content-Type: text/xml\r\nContent-Length: "
+             "%d\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
+             strlen( propertySet ) + 1 );
 
     HandleLock(  );
 
@@ -1039,8 +1038,8 @@ genaNotifyAll( IN UpnpDevice_Handle device_handle,
         return return_code;
     }
 
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
+    headers_size = strlen( "Content-Type text/xml\r\n" ) +
+        strlen( "Content-Length: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
 
@@ -1054,9 +1053,9 @@ genaNotifyAll( IN UpnpDevice_Handle device_handle,
     }
     //changed to add null terminator at end of content
     //content length = (length in bytes of property set) + null char
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: %ld\r\nNT:"
+    sprintf( headers, "Content-Type: text/xml\r\nContent-Length: %d\r\nNT:"
              " upnp:event\r\nNTS: upnp:propchange\r\n",
-             (long) strlen( propertySet ) + 1 );
+             strlen( propertySet ) + 1 );
 
     HandleLock(  );
 
@@ -1166,8 +1165,8 @@ respond_ok( IN SOCKINFO * info,
     membuffer_init( &response );
     response.size_inc = 30;
     if( http_MakeMessage( &response, major, minor,
-                          "R" "D" "S" "N" "Xc" "ssc" "sc" "c",
-                          HTTP_OK, 0, X_USER_AGENT,
+                          "R" "D" "S" "ssc" "sc" "c",
+                          HTTP_OK,
                           "SID: ", sub->sid, timeout_str ) != 0 ) {
         membuffer_destroy( &response );
         error_respond( info, HTTP_INTERNAL_SERVER_ERROR, request );
@@ -1316,7 +1315,7 @@ gena_process_subscription_request( IN SOCKINFO * info,
     if( httpmsg_find_hdr( request, HDR_NT, &nt_hdr ) == NULL ) {
         error_respond( info, HTTP_BAD_REQUEST, request );
         return;
-    }
+    }  
 
     // check NT header
     //Windows Millenium Interoperability:

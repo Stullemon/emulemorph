@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-//#include <malloc.h>
+#include <malloc.h>
 
 
 #include "ithread.h"

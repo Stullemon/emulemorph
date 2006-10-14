@@ -159,7 +159,7 @@ ScheduleGenaAutoRenew( IN int client_handle,
     strcpy( RenewEventStruct->Sid, sub->sid );
     RenewEventStruct->ErrCode = UPNP_E_SUCCESS;
     strncpy( RenewEventStruct->PublisherUrl, sub->EventURL,
-             NAME_SIZE - 1 );
+             UPNP_NAME_SIZE - 1 );
     RenewEventStruct->TimeOut = TimeOut;
 
     //RenewEvent->EventType=UPNP_EVENT_SUBSCRIPTION_EXPIRE;
@@ -283,11 +283,9 @@ gena_subscribe( IN char *url,
     *sid = NULL;                // init
 
     // request timeout to string
-    if ( timeout == NULL ) {
-        timeout = (int *)malloc(sizeof(int));
-        if(timeout == 0) return  UPNP_E_OUTOF_MEMORY;
-        sprintf( timeout_str, "%d", CP_MINIMUM_SUBSCRIPTION_TIME );
-    } else if( ( *timeout > 0 )&& ( *timeout < CP_MINIMUM_SUBSCRIPTION_TIME ) ) {
+    if( ( timeout == NULL ) ||
+        ( ( *timeout > 0 )
+          && ( *timeout < CP_MINIMUM_SUBSCRIPTION_TIME ) ) ) {
         sprintf( timeout_str, "%d", CP_MINIMUM_SUBSCRIPTION_TIME );
     } else if( *timeout >= 0 ) {
         sprintf( timeout_str, "%d", *timeout );
@@ -417,11 +415,11 @@ genaUnregisterClient( IN UpnpClient_Handle client_handle )
 
         HandleUnlock(  );
 
-        return_code = gena_unsubscribe( sub_copy.EventURL,
-                                        sub_copy.ActualSID, &response );
-        if( return_code == 0 ) {
-            httpmsg_destroy( &response.msg );
-        }
+		return_code = gena_unsubscribe( sub_copy.EventURL,
+										sub_copy.ActualSID, &response );
+		if( return_code == 0 ) {
+			httpmsg_destroy( &response.msg );
+		}
 
         free_client_subscription( &sub_copy );
     }

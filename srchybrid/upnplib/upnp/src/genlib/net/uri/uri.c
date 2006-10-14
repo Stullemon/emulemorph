@@ -33,16 +33,11 @@
 * Purpose: This file contains functions for uri, url parsing utility. 
 ************************************************************************/
 
-#ifdef __FreeBSD__
-#include <lwres/netdb.h>
-#endif
-#include "config.h"
 #include "uri.h"
-
-#ifdef WIN32
- #include "inet_pton.h"
+#ifdef _WIN32
+#include "ws2tcpip.h"
+#define strncasecmp strnicmp
 #endif
-
 
 /************************************************************************
 *	Function :	is_reserved
@@ -514,6 +509,25 @@ parse_port( int max,
     return finger - port;
 }
 
+#ifdef _WIN32
+void
+copy_port_name(int max,
+		 char *inport,
+		 char *outport )
+{
+    char *finger = inport; // current location
+    char *max_ptr = finger + max;
+
+    while( ( finger < max_ptr ) && ( isdigit( *finger ) ) ) {
+		*outport = *finger;
+		outport++;
+        finger++;
+    }
+	*outport = 0;
+
+}
+#endif
+
 /************************************************************************
 *	Function :	parse_hostport
 *
@@ -543,21 +557,32 @@ parse_hostport( char *in,
     int begin_port;
     int hostport_size = 0;
     int host_size = 0;
-#ifndef WIN32
+#ifndef _WIN32
+	struct hostent h_buf;
     char temp_hostbyname_buff[BUFFER_SIZE];
-    struct hostent h_buf;
 #endif
     struct hostent *h = NULL;
     int errcode = 0;
     char *temp_host_name = NULL;
     int last_dot = -1;
+#ifdef _WIN32
+	struct addrinfo *addrInfoPtr;
+	struct sockaddr_in * saiPtr;
+	char port_name[32];
+	unsigned long temp;
+#endif
 
     out->text.size = 0;
     out->text.buff = NULL;
 
-    out->IPv4address.sin_port = htons( 80 );    //default port is 80
+	out->IPv4address.sin_port = htons( 80 );    //default port is 80
     memset( &out->IPv4address.sin_zero, 0, 8 );
+#ifdef _WIN32
+	sprintf(port_name, "%d", 80); //default port is 80
+#endif
 
+	// look at the input string, up to the first ":" or "/"
+	// and find the last "."
     while( ( i < max ) && ( in[i] != ':' ) && ( in[i] != '/' )
            && ( ( isalnum( in[i] ) ) || ( in[i] == '.' )
                 || ( in[i] == '-' ) ) ) {
@@ -567,9 +592,12 @@ parse_hostport( char *in,
         }
     }
 
+    // this is where in the in string the host name ends
     host_size = i;
 
+	// what is hostport_size?
     if( ( i < max ) && ( in[i] == ':' ) ) {
+	// there is a port in the address
         begin_port = i + 1;
         //convert port
         if( !( hostport_size = parse_port( max - begin_port,
@@ -578,9 +606,12 @@ parse_hostport( char *in,
         {
             return UPNP_E_INVALID_URL;
         }
-        hostport_size += begin_port;
+        hostport_size += begin_port; // hostport_size is the offset past the port
+#ifdef _WIN32
+		copy_port_name(max - begin_port, &in[begin_port], port_name);
+#endif
     } else
-        hostport_size = host_size;
+        hostport_size = host_size; // hostport_size is the offset past the port
 
     //convert to temporary null terminated string
     temp_host_name = ( char * )malloc( host_size + 1 );
@@ -591,11 +622,15 @@ parse_hostport( char *in,
     memcpy( temp_host_name, in, host_size );
     temp_host_name[host_size] = '\0';
 
+    // now temp_host_name has the whole host name, less the port if there is one
+
     //check to see if host name is an ipv4 address
     if( ( last_dot != -1 ) && ( last_dot + 1 < host_size )
         && ( isdigit( temp_host_name[last_dot + 1] ) ) ) {
+	// has a ., so it is a dotted quad
         //must be ipv4 address
 
+#ifndef _WIN32
         errcode = inet_pton( AF_INET,
                              temp_host_name, &out->IPv4address.sin_addr );
         if( errcode == 1 ) {
@@ -607,33 +642,41 @@ parse_hostport( char *in,
             temp_host_name = NULL;
             return UPNP_E_INVALID_URL;
         }
+#else
+	saiPtr = (struct sockaddr_in *) &(out->IPv4address);
+	saiPtr->sin_port = htons(atoi(port_name));
+	temp = inet_addr(temp_host_name);
+	saiPtr->sin_addr.S_un.S_addr = inet_addr(temp_host_name);
+	out->IPv4address.sin_family = AF_INET;
+#endif
     } else {
+	// it is not ipv4
         int errCode = 0;
 
         //call gethostbyname_r (reentrant form of gethostbyname)
-#if defined(WIN32)
-        h=gethostbyname(temp_host_name);
-#elif defined(SPARC_SOLARIS)
-        errCode = gethostbyname_r( temp_host_name,
-                                   &h,
-                                   temp_hostbyname_buff,
-                                   BUFFER_SIZE, &errcode );
-#elif defined(__FreeBSD__)
-        h = lwres_gethostbyname_r( temp_host_name,
-                                   &h_buf,
-                                   temp_hostbyname_buff,
-                                   BUFFER_SIZE, &errcode );
-        if ( h == NULL ) {
-            errCode = 1;
+#ifdef _WIN32
+        errcode = getaddrinfo( temp_host_name, port_name, 0, &addrInfoPtr);
+
+		if (errCode == 0 ) {
+			if ((addrInfoPtr->ai_family == PF_INET) && ( addrInfoPtr->ai_addrlen == 4 )) {
+				out->IPv4address.sin_addr = *((struct in_addr*)(addrInfoPtr->ai_addr));
+				out->IPv4address.sin_family = AF_INET;
+			}
+        } else {
+            out->IPv4address.sin_addr.s_addr = 0;
+            out->IPv4address.sin_family = AF_INET;
+            free( temp_host_name );
+            temp_host_name = NULL;
+            return UPNP_E_INVALID_URL;
         }
+		freeaddrinfo(addrInfoPtr);
 #else
-        errCode = gethostbyname_r( temp_host_name,
+        errcode = gethostbyname_r( temp_host_name,
                                    &h_buf,
                                    temp_hostbyname_buff,
                                    BUFFER_SIZE, &h, &errcode );
-#endif 
 
-        if( errCode == 0 ) {
+        if( errcode == 0 ) {
             if( h ) {
                 if( ( h->h_addrtype == AF_INET ) && ( h->h_length == 4 ) ) {
                     out->IPv4address.sin_addr =
@@ -649,6 +692,7 @@ parse_hostport( char *in,
             temp_host_name = NULL;
             return UPNP_E_INVALID_URL;
         }
+#endif
     }
 
     if( temp_host_name ) {

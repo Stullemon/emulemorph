@@ -29,11 +29,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "config.h"
 #ifdef INCLUDE_DEVICE_APIS
 #if EXCLUDE_SSDP == 0
 #include <assert.h>
 #include <stdio.h>
+#include "config.h"
 #include "ssdplib.h"
 #include "upnpapi.h"
 #include "ThreadPool.h"
@@ -41,10 +41,9 @@
 #include "httpreadwrite.h"
 #include "statcodes.h"
 #include "unixutil.h"
-
-#ifdef WIN32
- #include <ws2tcpip.h>
- #include <winsock2.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#include <Ws2tcpip.h>
 #endif
 
 #define MSGTYPE_SHUTDOWN		0
@@ -211,8 +210,8 @@ NewRequestHandler( IN struct sockaddr_in *DestAddr,
                    IN int NumPacket,
                    IN char **RqPacket )
 {
-    int ReplySock,
-      socklen = sizeof( struct sockaddr_in );
+    int socklen = sizeof( struct sockaddr_in );
+	SOCKET ReplySock;
     int NumCopy,
       Index;
     unsigned long replyAddr = inet_addr( LOCAL_HOST );
@@ -295,16 +294,12 @@ CreateServicePacket( IN int msg_type,
     *packet = NULL;
 
     if( msg_type == MSGTYPE_REPLY ) {
-/* -- PATCH START - Sergey 'Jin' Bostandzhyan <jin_eld at users.sourceforge.net> */
         ret_code = http_MakeMessage( &buf, 1, 1,
-                                     "R" "sdc" "D" "s" "ssc" "S" "Xc" "ssc"
+                                     "R" "sdc" "D" "s" "ssc" "S" "ssc"
                                      "ssc" "c", HTTP_OK,
-                                     "CACHE-CONTROL: max-age=", duration,
-                                     "EXT:\r\n", "LOCATION: ", location,
-                                     X_USER_AGENT,
+                                     "Cache-Control: max-age=", duration,
+                                     "Ext:\r\n", "Location: ", location,
                                      "ST: ", nt, "USN: ", usn );
-/* -- PATCH END - */
-        
         if( ret_code != 0 ) {
             return;
         }
@@ -319,16 +314,14 @@ CreateServicePacket( IN int msg_type,
 
         // NOTE: The CACHE-CONTROL and LOCATION headers are not present in
         //  a shutdown msg, but are present here for MS WinMe interop.
-        
-/* -- PATCH START - Sergey 'Jin' Bostandzhyan <jin_eld at users.sourceforge.net> */
+
         ret_code = http_MakeMessage( &buf, 1, 1,
                                      "Q" "sssdc" "sdc" "ssc" "ssc" "ssc"
-                                     "S" "Xc" "ssc" "c", HTTPMETHOD_NOTIFY, "*",
-                                     1, "HOST: ", SSDP_IP, ":", SSDP_PORT,
-                                     "CACHE-CONTROL: max-age=", duration,
-                                     "LOCATION: ", location, "NT: ", nt,
-                                     "NTS: ", nts, X_USER_AGENT, "USN: ", usn );
-/* -- PATCH END - */        
+                                     "S" "ssc" "c", HTTPMETHOD_NOTIFY, "*",
+                                     1, "Host: ", SSDP_IP, ":", SSDP_PORT,
+                                     "Cache-Control: max-age=", duration,
+                                     "Location: ", location, "NT: ", nt,
+                                     "NTS: ", nts, "USN: ", usn );
         if( ret_code != 0 ) {
             return;
         }
