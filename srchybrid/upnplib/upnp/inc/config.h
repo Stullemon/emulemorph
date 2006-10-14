@@ -29,16 +29,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef INTERNAL_CONFIG_H
-#define INTERNAL_CONFIG_H 
+#ifndef CONFIG_H
+#define CONFIG_H 
 
-#include "autoconfig.h"
-
+#include <stdio.h>
+#define _strdup strdup
+#include "ithread.h"
 
 /** @name Compile time configuration options
  *  The Linux SDK for UPnP Devices contains some compile-time parameters 
  *  that effect the behavior of the SDK.  All configuration options are 
- *  located in {\tt src/inc/config.h}.
+ *  located in {\tt inc/config.h}.
  */
  
 //@{
@@ -95,14 +96,14 @@
 #define MAX_THREADS 12 
 //@}
 
-/** @name DEFAULT_SOAP_CONTENT_LENGTH
- * SOAP messages will read at most {\tt DEFAULT_SOAP_CONTENT_LENGTH} bytes.  
- * This prevents devices that have a misbehaving web server to send 
- * a large amount of data to the control point causing it to crash.  
- * This can be adjusted dynamically with {\tt UpnpSetMaxContentLength}.
+/** @name HTTP_READ_BYTES
+ * HTTP responses will read at most {\tt HTTP_READ_BYTES}.  This prevents 
+ * devices that have a misbehaving web server to send a large amount of data to
+ * the control point causing it to crash.  A value of -1 means there is no 
+ * max.  The default is -1.
  */
 //@{
-#define DEFAULT_SOAP_CONTENT_LENGTH 16000
+#define HTTP_READ_BYTES       -1
 //@}
 
 /** @name NUM_SSDP_COPY
@@ -128,7 +129,7 @@
  * webserver.  The default value is 1MB.
  */
 //@{
-#define WEB_SERVER_BUF_SIZE  (1024*1024)
+#define WEB_SERVER_BUF_SIZE  1024*1024
 //@}
 
 /** @name AUTO_RENEW_TIME
@@ -154,7 +155,7 @@
  */
 
 //@{
-#define CP_MINIMUM_SUBSCRIPTION_TIME (AUTO_RENEW_TIME + 5)
+#define CP_MINIMUM_SUBSCRIPTION_TIME AUTO_RENEW_TIME + 5
 //@}
 
 /** @name MAX_SEARCH_TIME 
@@ -214,7 +215,6 @@
  *    \item {\tt EXCLUDE_GENA[0,1]}
  *    \item {\tt EXCLUDE_SSDP[0,1]}
  *    \item {\tt EXCLUDE_DOM [0,1]}
- *    \item {\tt EXCLUDE_MINISERVER[0,1]}
  *    \item {\tt EXCLUDE_WEB_SERVER[0,1]}
  *    \item {\tt EXCLUDE_JNI[0,1]}
  *  \end{itemize}
@@ -229,12 +229,33 @@
 #define EXCLUDE_MINISERVER 0
 #define EXCLUDE_WEB_SERVER 0
 #ifdef USE_JNI
-#	define EXCLUDE_JNI 0
+#define EXCLUDE_JNI 0
 #else
-#	define EXCLUDE_JNI 1
+#define EXCLUDE_JNI 1
 #endif
 //@}
 
+/** @name DEBUG_LEVEL
+ *  The user has the option to select 4 different types of debugging levels. 
+ *  The critical level (3) will show only those messages which can halt the 
+ *  normal processing of the library, like memory allocation errors. The 
+ *  remaining three levels are just for debugging purposes.  Packet level 
+ *  will display all the incoming and outgoing packets that are flowing 
+ *  between the control point and the device. Info Level displays the 
+ *  other important operational information regarding the working of 
+ *  the library. If the user selects All, then the library displays all the 
+ *  debugging information that it has.
+ *  \begin{itemize}
+ *    \item {\tt Critical [0]}
+ *    \item {\tt Packet Level [1]}
+ *    \item {\tt Info Level [2]}
+ *    \item {\tt All [3]}
+ *  \end{itemize}
+ */
+
+//@{
+ #define DEBUG_LEVEL	     3
+//@}
     
 /** @name DEBUG_TARGET
  *  The user has the option to redirect the library output debug messages 
@@ -244,16 +265,16 @@
  */
 
 //@{
-#define DEBUG_TARGET		1   
+#define DEBUG_TARGET	    1
 //@}
 
+//@} // Compile time configuration options
 
-/** @name Other debugging features
-          The UPnP SDK contains other features to aid in debugging:
-	  see <upnp/upnpdebug.h>
- */
-
-#define DEBUG_ALL		1   
+#ifdef _DEBUG
+#define DEBUG_ALL		1
+#else
+#define DEBUG_ALL		0
+#endif
 #define DEBUG_SSDP		0    
 #define DEBUG_SOAP		0    
 #define DEBUG_GENA		0    
@@ -263,35 +284,16 @@
 #define DEBUG_HTTP		0
 #define DEBUG_API		0    
 
-//@} // Compile time configuration options
-
-
-/***************************************************************************
- * Do not change, Internal purpose only!!! 
- ***************************************************************************/ 
+/** @name Other debugging features
+          The UPnP SDK contains other features to aid in debugging.
+ */
 
 //@{
 
-/*
- * Set additional defines based on requested configuration 
- */
+// Do not change, Internal purpose only!!! 
 
-// configure --enable-client
-#if UPNP_HAVE_CLIENT
-#	define INCLUDE_CLIENT_APIS	1
-#endif
-
-// configure --enable-device
-#if UPNP_HAVE_DEVICE
-#	define INCLUDE_DEVICE_APIS	1
-#endif
-
-// configure --enable-webserver --enable-device
-#if UPNP_HAVE_WEBSERVER
-#	define INTERNAL_WEB_SERVER	1
-#endif
-
-
+// normally, this should be 0; adds extra seconds to delay
+#define MINIMUM_DELAY 10
 
 /** @name DBGONLY
           The {\bf DBGONLY} macro allows code to be marked so that it 
@@ -305,56 +307,183 @@
   */
 
 //@{
-#ifdef DEBUG
-#	define DBGONLY(x) x
+#ifdef _DEBUG
+#define DBGONLY(x) x
 #else
-#	define DBGONLY(x)  
+#define DBGONLY(x)  
 #endif
 //@}
 
+typedef enum Upnp_Module {SSDP,SOAP,GENA,TPOOL,MSERV,DOM,API, HTTP} Dbg_Module;
+typedef enum DBG_LVL {UPNP_CRITICAL,UPNP_PACKET,UPNP_INFO,UPNP_ALL} Dbg_Level;
+DBGONLY(extern ithread_mutex_t GlobalDebugMutex;)
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  DBGONLY(
+	  // Function declarations only for debug 
+/************************************************************************
+* Function : InitLog											
+*																	
+* Parameters:	void													
+*																	
+* Description:														
+*	This functions initializes the log files
+* Returns: int
+*	-1 : If fails
+*	UPNP_E_SUCCESS : if success
+***************************************************************************/
+  int InitLog();
+
+/************************************************************************
+* Function : CloseLog											
+*																	
+* Parameters:	void													
+*																	
+* Description:														
+*	This functions closes the log files
+* Returns: void
+***************************************************************************/
+  void CloseLog();
+
+/************************************************************************
+* Function : SetLogFileNames											
+*																	
+* Parameters:														
+*	IN const char* ErrFileName: name of the error file
+*	IN const char *InfoFileName: name of the information file
+*	IN int size: Size of the buffer
+*	IN int starLength: This parameter provides the width of the banner
+*																	
+* Description:														
+*	This functions takes the buffer and writes the buffer in the file as 
+*	per the requested banner											
+* Returns: void
+***************************************************************************/
+  void SetLogFileNames(const char *ErrFileName,const char *InfoFileName);
+
+
+/**************************************************************************
+* Function : GetDebugFile											
+*																	
+* Parameters:														
+*	IN Dbg_Level DLevel: The level of the debug logging. It will decide 
+*		whether debug statement will go to standard output, or any of the 
+*		log files.
+*	IN Dbg_Module Module: debug will go in the name of this module
+*																	
+* Description:
+*	This function checks if the module is turned on for debug 
+*	and returns the file descriptor corresponding to the debug level
+* Returns: FILE *
+*	NULL : if the module is turn off for debug 
+*	else returns the right file descriptor
+***************************************************************************/
+  FILE * GetDebugFile(Dbg_Level level, Dbg_Module module);
+
+/**************************************************************************
+* Function : UpnpPrintf											
+*																	
+* Parameters:														
+*	IN Dbg_Level DLevel: The level of the debug logging. It will decide 
+*		whether debug statement will go to standard output, or any of the 
+*		log files.
+*	IN Dbg_Module Module: debug will go in the name of this module
+*	IN char *DbgFileName: Name of the file from where debug statement is
+*							coming
+*	IN int DbgLineNo : Line number of the file from where debug statement is
+*							coming
+*	IN char * FmtStr, ...: Variable number of arguments that will go in the 
+*			debug statement
+*																	
+* Description:														
+*	This functions prints the debug statement either on the startdard output
+*	or log file along with the information from where this debug statement 
+*	is coming
+* Returns: void
+***************************************************************************/ 
+  void UpnpPrintf(Dbg_Level DLevel, Dbg_Module Module,char
+			*DbgFileName, int DbgLineNo,char * FmtStr,
+			...);
+
+/************************************************************************
+* Function : UpnpDisplayBanner											
+*																	
+* Parameters:														
+*	IN FILE *fd: file descriptor where the banner will be written
+*	IN char **lines: The buffer that will be written
+*	IN int size: Size of the buffer
+*	IN int starLength: This parameter provides the width of the banner
+*																	
+* Description:														
+*	This functions takes the buffer and writes the buffer in the file as 
+*	per the requested banner											
+* Returns: void
+***************************************************************************/
+  void UpnpDisplayBanner(FILE *fd,
+			 char **lines, int size, int starlength);
+
+/**************************************************************************
+* Function : UpnpDisplayFileAndLine											
+*																	
+* Parameters:														
+*	IN FILE *fd: File descriptor where line number and file name will be 
+*			written 
+*	IN char *DbgFileName: Name of the file  
+*	IN int DbgLineNo : Line number of the file
+*																	
+* Description:
+*	This function writes the file name and file number from where
+*		debug statement is coming to the log file
+* Returns: void
+***************************************************************************/
+  void UpnpDisplayFileAndLine(FILE *fd,char *DbgFileName, int DbgLineNo);)
+
+       //End of function declarations only for debug
+#ifdef __cplusplus
+}
+#endif
+
+
+
+#ifdef  INTERNAL_WEB_SERVER
 #undef  EXCLUDE_WEB_SERVER 
 #undef  EXCLUDE_MINISERVER 
-#ifdef  INTERNAL_WEB_SERVER
-#	define EXCLUDE_WEB_SERVER 0
-#	define EXCLUDE_MINISERVER 0
-#else
-#	define EXCLUDE_WEB_SERVER 1
-#	define EXCLUDE_MINISERVER 1
+#define EXCLUDE_WEB_SERVER 0
+#define EXCLUDE_MINISERVER 0
 #endif
 
 #if EXCLUDE_GENA == 1 && EXCLUDE_SOAP == 1 && EXCLUDE_WEB_SERVER == 1
-#	undef  EXCLUDE_MINISERVER 
-#	define EXCLUDE_MINISERVER 1
-#	if INTERNAL_WEB_SERVER
-#		error "conflicting settings: use configure --disable-webserver"
-#	endif
+#undef  EXCLUDE_MINISERVER 
+#undef  INTERNAL_WEB_SERVER
+#define EXCLUDE_MINISERVER 1
 #endif
 
 #if EXCLUDE_GENA == 0 || EXCLUDE_SOAP == 0 || EXCLUDE_WEB_SERVER == 0
-#	undef  EXCLUDE_MINISERVER 
-#	define EXCLUDE_MINISERVER 0
-#	if EXCLUDE_WEB_SERVER == 0 && !defined INTERNAL_WEB_SERVER
-#		error "conflicting settings : use configure --enable-webserver"
-#	endif
+#undef  EXCLUDE_MINISERVER 
+#define EXCLUDE_MINISERVER 0
 #endif
 
+#ifndef INTERNAL_WEB_SERVER
+#if EXCLUDE_WEB_SERVER == 0
+#define INTERNAL_WEB_SERVER
+#endif
+#endif
 
 
 #ifdef INCLUDE_CLIENT_APIS
-#	define CLIENTONLY(x) x
+#define CLIENTONLY(x) x
 #else 
-#	define CLIENTONLY(x)
+#define CLIENTONLY(x)
 #endif
 
 #ifdef INCLUDE_DEVICE_APIS
-#	define DEVICEONLY(x) x
+#define DEVICEONLY(x) x
 #else 
-#	define DEVICEONLY(x) 
+#define DEVICEONLY(x) 
 #endif
 
 //@}
 #endif
-
-
