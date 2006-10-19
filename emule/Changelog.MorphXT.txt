@@ -1,9 +1,13 @@
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.x
 -------------------------------------
+13-Oct-2006
+Changed:review usc code. 
 Changed:preferences for adding users in multiuser webserver reviewed. [leuk_he]
 Changed:upnp reverted to 8.10 intel library of better compatibly. 
 Fixed:loosing prefs in messages preferences when security tab opened. 
+Added: Send user agent as firefox for http downloads when obfucscation enabled. 
+Fixed: import & sr13 import. 
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.0
