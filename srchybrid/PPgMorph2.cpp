@@ -11,6 +11,7 @@
 #include "Fakecheck.h"
 #include "IPFilter.h"
 #include "IP2Country.h"
+#include "Scheduler.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,12 +47,14 @@ BEGIN_MESSAGE_MAP(CPPgMorph2, CPropertyPage)
 	ON_BN_CLICKED(IDC_RESETFAKESURL, OnBnClickedResetfakes)
 	ON_BN_CLICKED(IDC_UPDATEFAKES, OnBnClickedUpdatefakes)
 	ON_EN_CHANGE(IDC_UPDATE_URL_FAKELIST, OnSettingsChange)
+	ON_BN_CLICKED(IDC_UPDATEFAKELISTWEEK, OnSettingsChange)
 	//MORPH END - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	ON_EN_CHANGE(IDC_UPDATE_URL_IPFILTER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UPDATEIPFURL, OnBnClickedUpdateipfurl)
 	ON_BN_CLICKED(IDC_RESETIPFURL, OnBnClickedResetipfurl)
 	ON_BN_CLICKED(IDC_AUTOUPIPFILTER , OnSettingsChange)
+	ON_BN_CLICKED(IDC_AUTOUPIPFILTERWEEK, OnSettingsChange)
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
 	//Commander - Added: IP2Country Auto-updating - Start
 	ON_EN_CHANGE(IDC_UPDATE_URL_IP2COUNTRY, OnSettingsChange)
@@ -95,6 +98,10 @@ void CPPgMorph2::LoadSettings(void)
 		CheckDlgButton(IDC_UPDATEFAKELISTSTART,1);
 	else
 		CheckDlgButton(IDC_UPDATEFAKELISTSTART,0);
+    if (theApp.scheduler->HasWeekly(ACTION_UPDFAKES)) // check in schedule.
+ 		CheckDlgButton(IDC_UPDATEFAKELISTWEEK,1);
+	else
+		CheckDlgButton(IDC_UPDATEFAKELISTWEEK,0);
 	//MORPH END - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
@@ -103,6 +110,10 @@ void CPPgMorph2::LoadSettings(void)
 		CheckDlgButton(IDC_AUTOUPIPFILTER,1);
 	else
 		CheckDlgButton(IDC_AUTOUPIPFILTER,0);
+    if (theApp.scheduler->HasWeekly(ACTION_UPDIPCONF)) // check in schedule.
+ 		CheckDlgButton(IDC_AUTOUPIPFILTERWEEK,1);
+	else
+		CheckDlgButton(IDC_AUTOUPIPFILTERWEEK,0);
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//Commander - Added: IP2Country Auto-updating - Start
@@ -142,12 +153,14 @@ BOOL CPPgMorph2::OnApply()
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->GetWindowText(buffer);
 	_tcscpy(thePrefs.UpdateURLFakeList, buffer);
 	thePrefs.UpdateFakeStartup = IsDlgButtonChecked(IDC_UPDATEFAKELISTSTART)!=0;
+	theApp.scheduler->SetWeekly(ACTION_UPDFAKES,IsDlgButtonChecked(IDC_UPDATEFAKELISTWEEK)!=0);
 	//MORPH END   - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 
 	//MORPH START - Added by Yun.SF3: Ipfilter.dat update
 	GetDlgItem(IDC_UPDATE_URL_IPFILTER)->GetWindowText(buffer);
 	_tcscpy(thePrefs.UpdateURLIPFilter, buffer);
 	thePrefs.AutoUpdateIPFilter = IsDlgButtonChecked(IDC_AUTOUPIPFILTER)!=0;
+	theApp.scheduler->SetWeekly(ACTION_UPDIPCONF,IsDlgButtonChecked(IDC_AUTOUPIPFILTERWEEK)!=0);
 	//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
 
     //Commander - Added: IP2Country Auto-updating - Start
@@ -173,6 +186,7 @@ void CPPgMorph2::Localize(void)
 		GetDlgItem(IDC_UPDATEFAKES)->SetWindowText(GetResString(IDS_UPDATEFAKES));
 		GetDlgItem(IDC_URL_FOR_UPDATING)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING));
 		GetDlgItem(IDC_RESETFAKESURL)->SetWindowText(GetResString(IDS_RESET));
+		GetDlgItem(IDC_UPDATEFAKELISTWEEK)->SetWindowText(GetResString(IDS_UPDATEFAKELISTWEEK));
 		//MORPH END   - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 		
 		//MORPH START - Added by Yun.SF3: Ipfilter.dat update
@@ -181,6 +195,7 @@ void CPPgMorph2::Localize(void)
 		GetDlgItem(IDC_UPDATEIPFURL)->SetWindowText(GetResString(IDS_UPDATEIPCURL));
 		GetDlgItem(IDC_URL_FOR_UPDATING2)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING));
 		GetDlgItem(IDC_RESETIPFURL)->SetWindowText(GetResString(IDS_RESET));
+		GetDlgItem(IDC_AUTOUPIPFILTERWEEK)->SetWindowText(GetResString(IDS_AUTOUPIPFILTERWEEK));
 		//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
 
 		//MORPH START - Added by Commander: IP2Country update
@@ -197,12 +212,14 @@ void CPPgMorph2::Localize(void)
 		SetTool(IDC_URL_FOR_UPDATING,IDC_UPDATE_URL_FAKELIST_TIP );
 		SetTool(IDC_RESETFAKESURL,IDC_RESETFAKESURL_TIP);
 		SetTool(IDC_UPDATEFAKES,IDC_UPDATEFAKES_TIP);
+        SetTool(IDC_UPDATEFAKELISTWEEK,IDS_UPDATEFAKELISTWEEK_TIP);		         
 		//SetTool(IDC_MORPH2_SECURITY,IDC_MORPH2_SECURITY_TIP);
 		SetTool(IDC_AUTOUPIPFILTER,IDC_AUTOUPIPFILTER_TIP);
 		SetTool(IDC_UPDATEIPFURL,IDC_UPDATEIPFURL_TIP);
 		SetTool(IDC_URL_FOR_UPDATING2,IDC_UPDATE_URL_IPFILTER_TIP);
 		SetTool(IDC_RESETIPFURL,IDC_RESETIPFURL_TIP);
 		SetTool(IDC_UPDATE_URL_IPFILTER,IDC_UPDATE_URL_IPFILTER_TIP);
+		 SetTool(IDC_AUTOUPIPFILTERWEEK,IDS_UPDATEIPFILTERWEEK_TIP);
 		//SetTool(IDC_MORPH2_COUNTRY,IDC_MORPH2_COUNTRY_TIP);
 		SetTool(IDC_AUTOUPIP2COUNTRY,IDC_MORPH2_COUNTRY_TIP);
 		SetTool(IDC_UPDATEIPCURL,IDC_UPDATEIPCURL_TIP);

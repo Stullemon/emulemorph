@@ -78,6 +78,8 @@ public:
 	void	SaveOriginals();
 	void	RestoreOriginals();
 	void	ActivateSchedule(int index,bool makedefault=false);
+	bool  HasWeekly(int action); // MORPH leuk_he : automatic weekly ipfilter/fakefilter update. 
+	void    SetWeekly(int action,bool activate); // MORPH leuk_he : automatic weekly ipfilter/fakefilter update. 
 	
 	uint16	original_upload;
 	uint16	original_download;

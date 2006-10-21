@@ -1668,7 +1668,6 @@ BEGIN
     PUSHBUTTON      "Cance&l",IDC_CANCELS,198,36,58,14,BS_FLAT | WS_DISABLED
 END
 
-
 IDD_PPG_IONIXWEBSRV DIALOGEX 0, 0, 230, 243
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Multi user"
@@ -1927,16 +1926,16 @@ CAPTION "Morph2"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "Update fakelist on startup",IDC_UPDATEFAKELISTSTART,
-                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,16,
-                    202,8
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,17,
+                    109,8
     PUSHBUTTON      "Update",IDC_UPDATEFAKES,168,53,48,14,BS_FLAT
     EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,202,12,ES_AUTOHSCROLL
     LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,14,28,202,8,0,
                     WS_EX_TRANSPARENT
     PUSHBUTTON      "Update",IDC_UPDATEIPFURL,168,125,48,14,BS_FLAT
     CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
-                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,87,
-                    202,10
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,90,
+                    115,10
     EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,110,202,12,ES_AUTOHSCROLL
     LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,99,202,8,0,
                     WS_EX_TRANSPARENT
@@ -1956,6 +1955,10 @@ BEGIN
     PUSHBUTTON      "Reset",IDC_RESETFAKESURL,115,53,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPFURL,114,125,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPCURL,115,197,48,14,BS_FLAT
+    CONTROL         "Update Weekly",IDC_UPDATEFAKELISTWEEK,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,137,18,79,8
+    CONTROL         "Update Weekly",IDC_AUTOUPIPFILTERWEEK,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,137,90,77,10
 END
 
 IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
@@ -6571,7 +6574,7 @@ BEGIN
     IDS_ADVADMIN_STATS_TIP  "allow acces to the statiscis"
     IDS_ADVADMIN_PREFS_TIP  "Allow access to the emule preferences"
     IDS_ADVADMIN_USERLEVEL_TIP 
-                            "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all\n		    functions without the admin functions (same as Admin without\n			Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system\n     (same as Admin with Hi-Level functions in the original)"
+                            "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all\n              functions without the admin functions (same as Admin without\n                      Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system\n     (same as Admin with Hi-Level functions in the original)"
     IDS_ADVADMIN_CATS_TIP   "Categories the user has acces to. Leave blank for all. \nSeperate categorie names with a pipe symbol (|)"
     IDS_ADVADMIN_DELETE_TIP "Delete the current displayed account"
     IDS_STATIC_ADVADMIN_CATS_TIP "IDS_STATIC_ADVADMIN_CATS_TIPs"
@@ -6598,6 +6601,13 @@ BEGIN
     IDS_DOWNHISTORY_ACTIONS "Actions"
     IDS_DOWNHISTORY_CLEAR_QUESTION 
                             "Are you sure you want to clear download history?"
+    IDS_UPDATEFAKELISTWEEK  "Update weekly"
+    IDS_AUTOUPIPFILTERWEEK  "Update weekly"
+    IDS_UPDATEFAKELISTWEEK_TIP 
+                            "Add a entry to the schedule to update the\nfakelist.dat form the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
+    IDS_UPDATEIPFILTERWEEK_TIP 
+                            "Add a entry to the schedule to update the\nipfilter.dat form the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
+    IDS_SCHEDTEXT           "Added by morph autoupdate"
 END
 
 #endif    // English (U.S.) resources

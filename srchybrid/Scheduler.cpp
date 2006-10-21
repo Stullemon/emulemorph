@@ -327,3 +327,69 @@ void CScheduler::ActivateSchedule(int index,bool makedefault) {
 		}
 	}
 }
+
+
+// MORPH START leuk_he automatic weekly ipfilter/fakefilter update. 
+bool CScheduler::HasWeekly(int par_action) // MORPH 
+{
+	if (GetCount()==0) return false; 
+	Schedule_Struct* curschedule;
+
+	for (uint8 si=0;si< GetCount();si++) {
+		curschedule=  GetSchedule(si);
+		if (curschedule->actions[0]==0 || !curschedule->enabled) continue;
+		if (curschedule->day!=DAY_DAYLY) { // nt daily, so must be weekly ( or montly, good also) 
+			for (int ai=0;ai<16;ai++) {
+				if (curschedule->actions[ai]==par_action) 
+					return true;
+			}
+		}
+	}
+	// not found? then schedule does not exit.
+    return false;
+}
+
+
+void    CScheduler::SetWeekly(int action,bool activate) // MORPH leuk_he : automatic weekly ipfilter/fakefilter update. 
+{
+	bool Currentactivated = HasWeekly(action);
+    if (  Currentactivated == activate) 
+		 return; // nothing to do. 
+
+	if ( ( Currentactivated == false )&& (activate == true)) { // must we isnert a new? 
+     	Schedule_Struct* newschedule=new Schedule_Struct();
+		struct tm tmTemp;
+	    CTime tNow = CTime(safe_mktime(CTime::GetCurrentTime().GetLocalTm(&tmTemp)));
+	
+	    newschedule->day=tNow.GetDayOfWeek();  // 
+	    newschedule->enabled=true;
+	    newschedule->time=time(NULL);
+	    newschedule->time2=time(NULL);
+	    newschedule->title=GetResString(IDS_SCHEDTEXT);
+	    newschedule->ResetActions();
+		newschedule->actions[0]=action;
+		newschedule->values[0]=L"update";
+		AddSchedule(newschedule);
+		thePrefs.scheduler=true; // enable scheduler
+	}
+	if ((Currentactivated == true )&& (activate == false)) { // we must delete
+
+	Schedule_Struct* curschedule;
+	for (uint8 si=0;si< GetCount();si++) {
+		curschedule=  GetSchedule(si);
+		if (curschedule->actions[0]==0 || !curschedule->enabled) continue;
+		if (curschedule->day!=DAY_DAYLY) { // nt daily, so must be weekly ( or montly, good also) 
+			for (int ai=0;ai<16;ai++) {
+				if (curschedule->actions[ai]==action) {
+					RemoveSchedule(si);
+				    return ;
+				}
+			}
+		}
+	}
+	// not found? then schedule does not exist. ASSERT()?;
+    return ;
+	}
+};
+
+// MORPH END leuk_he automatic weekly ipfilter/fakefilter update. 

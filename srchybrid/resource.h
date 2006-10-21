@@ -902,8 +902,8 @@
 #define IDS_STATS_SHRECNUM              972
 #define IDS_SEARCH_COLUMN               973
 #define IDD_PPG_SCHEDULER               974
-#define IDD_PPG_IONIXWEBSRV             975
 #define IDS_STATS_SHRECSIZE             974
+#define IDD_PPG_IONIXWEBSRV             975
 #define IDS_STATS_SHRECASIZE            975
 #define IDS_STATS_SESSION               976
 #define IDS_STATS_SRATIO                977
@@ -2614,6 +2614,7 @@
 #define IDC_UPDATEFAKELISTSTART         4873
 #define IDC_EASTSHARE_OPTS              4874
 #define IDC_UPDATE_VER_URL_IP2COUNTRY   4874
+#define IDC_UPDATEFAKELISTWEEK          4874
 #define IDC_WARNINGEASTSHARE            4875
 #define IDC_WARNINGEAST                 4876
 #define IDC_DLOC                        4877
@@ -2865,6 +2866,7 @@
 #define IDC_RICHEDIT22                  6201
 #define IDS_CRC_CALCULATED              6202
 #define IDC_EXITQUESTION                6202
+#define IDC_AUTOUPIPFILTERWEEK          6202
 #define IDS_CRC_CHECKOK                 6203
 #define IDS_CRC_FORCEADDING             6204
 #define IDS_CRC_FORCEUPPERCASE          6205
@@ -2963,6 +2965,20 @@
 #define IDS_IGNOREALL                   9017
 #define IDS_SKIP                        9018
 #define IDS_SKIPALL                     9019
+#define IDS_DOWNHISTORY_REMOVE          10066
+#define IDS_DOWNHISTORY_REMOVE_QUESTION 10067
+#define IDS_DOWNHISTORY_REMOVE_QUESTION_MULTIPLE 10068
+#define IDS_DOWNHISTORY_SHARED          10069
+#define IDS_DOWNHISTORY_CLEAR           10070
+#define IDS_DOWNHISTORY_MERGE           10071
+#define IDS_DOWNHISTORY_SHOWSHARED      10072
+#define IDS_DOWNHISTORY_ACTIONS         10073
+#define IDS_DOWNHISTORY_CLEAR_QUESTION  10074
+#define IDS_UPDATEFAKELISTWEEK          10075
+#define IDS_AUTOUPIPFILTERWEEK          10076
+#define IDS_UPDATEFAKELISTWEEK_TIP      10077
+#define IDS_UPDATEIPFILTERWEEK_TIP      10078
+#define IDS_SCHEDTEXT                   10079
 #define IDS_WrongPortforWebcache        11387
 #define IDD_PPG_WEBCACHESETTINGS        12787
 #define IDC_Webcache                    12847
@@ -3000,6 +3016,7 @@
 #define IDC_MAXPORT                     20106
 #define IDC_SPIN_MAX                    20107
 #define IDC_SPIN_MIN                    20108
+#define IDC_DOWNHISTORYLIST             20118
 #define IDC_BTN_MENU                    20120
 #define IDS_PW_WEBCACHE                 20646
 #define IDS_UPNP                        21001
@@ -3031,16 +3048,6 @@
 #define IDS_ICFSUPPORTFIRST             21028
 #define IDS_ICF                         21029
 #define IDS_ICF_SERVERUDP               21030
-#define IDS_DOWNHISTORY_REMOVE          10066
-#define IDS_DOWNHISTORY_REMOVE_QUESTION 10067
-#define IDS_DOWNHISTORY_REMOVE_QUESTION_MULTIPLE 10068
-#define IDS_DOWNHISTORY_SHARED          10069
-#define IDS_DOWNHISTORY_CLEAR           10070
-#define IDS_DOWNHISTORY_MERGE           10071
-#define IDS_DOWNHISTORY_SHOWSHARED      10072
-#define IDS_DOWNHISTORY_ACTIONS         10073
-#define IDS_DOWNHISTORY_CLEAR_QUESTION  10074
-#define IDC_DOWNHISTORYLIST             20118
 #define IDS_DOWNHISTORY                 21057
 #define IDS_DOWNHISTORY_CHECK1          21058
 #define IDS_DOWNHISTORY_CHECK2          21059
@@ -3255,7 +3262,7 @@
 #define IDS_POWERSHARE_LIMIT_TIP        30210
 #define IDS_POWERSHARE_INTERPRIO_TIP    30211
 #define IDS_PERMISSION_TIP              30212
-#define IDS_FSTATUS_EVER_TIP          30213
+#define IDS_FSTATUS_EVER_TIP            30213
 #define IDS_FSTATUS_FRIENDSONLY_TIP     30214
 #define IDS_HIDDEN_TIP                  30215
 #define IDS_COMMUNITY_TIP               30216
@@ -3444,9 +3451,9 @@
 #define IDC_DONTASKMEAGAINCBSEL_TIP     30598
 #define IDS_CAT_SELDLGTXT_TIP           30599
 #define IDS_OKCANCELSEL_TIP             30600
-#define IDC_DISABLEOBFUSCATION_TIP		30601
-#define IDC_ONLYOBFUSCATED_TIP			30602
-#define IDC_ENABLEOBFUSCATION_TIP		30603
+#define IDC_DISABLEOBFUSCATION_TIP      30601
+#define IDC_ONLYOBFUSCATED_TIP          30602
+#define IDC_ENABLEOBFUSCATION_TIP       30603
 #define IDA_ENTER                       32771
 #define IDS_ADVADMIN_GROUP              40000
 #define IDS_ADVADMIN_ACC                40001
@@ -3484,6 +3491,11 @@
 #define IDS_STATIC_ADVADMIN_USERLEVEL_TIP 40034
 #define IDS_ADVADMIN_NOTE_TIP           40035
 #define IDC_EDTINFO                     40125
+#define IDS_SLOT_LIMIT_GROUP            40380
+#define IDS_SLOT_LIMIT_NONE             40381
+#define IDS_SLOT_LIMIT_THREE            40382
+#define IDS_SLOT_LIMIT_NUM_B            40383
+#define IDS_SLOT_LIMIT_NUM              40384
 #define IDC_BACKUP_FILEFRAME            50501
 #define IDC_BACKUP_AUTO                 50503
 #define IDC_BACKUP_NOTE                 50505
@@ -3504,12 +3516,6 @@
 #define IDS_MORPH_KSSERV                51543
 #define IDS_MORPH_LOG                   51544
 #define IDS_WEBSERVER_LINK              51561
-#define IDS_SLOT_LIMIT_GROUP            40380
-#define IDS_SLOT_LIMIT_NONE             40381
-#define IDS_SLOT_LIMIT_THREE            40382
-#define IDS_SLOT_LIMIT_NUM_B            40383
-#define IDS_SLOT_LIMIT_NUM              40384
-
 
 // Next default values for new objects
 // 
@@ -3517,7 +3523,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        6208
 #define _APS_NEXT_COMMAND_VALUE         32773
-#define _APS_NEXT_CONTROL_VALUE         6202
+#define _APS_NEXT_CONTROL_VALUE         6203
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif
