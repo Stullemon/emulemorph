@@ -228,7 +228,7 @@ afx_msg void CPPgIonixWebServer::SetBoxes()
 		GetDlgItem(IDC_ADVADMINENABLED)->EnableWindow(TRUE);
 		m_cbAccountSelector.EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_DELETE)->EnableWindow(TRUE);
-		GetDlgItem(IDC_ADVADMIN_NEW)->EnableWindow(TRUE);
+		GetDlgItem(IDC_ADVADMIN_NEW)->EnableWindow(FALSE);
 		GetDlgItem(IDC_ADVADMIN_KAD)->EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_TRANSFER)->EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_SEARCH)->EnableWindow(TRUE);
@@ -240,6 +240,7 @@ afx_msg void CPPgIonixWebServer::SetBoxes()
 		GetDlgItem(IDC_ADVADMIN_PASS)->EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_USER)->EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_CATS)->EnableWindow(TRUE);
+		UpdateSelection();
 	}
 	else
 	{	
@@ -367,11 +368,18 @@ void CPPgIonixWebServer::OnSettingsChange()
 
 void CPPgIonixWebServer::OnBnClickedNew()
 {
+
+    WebServDef tmp;
+	CString buffer;
+	GetDlgItem(IDC_ADVADMIN_USER)->GetWindowText(buffer);
+	SET_TCHAR_TO_STRING(tmp.User, buffer);
+    if (_tcslen(tmp.User)==0) // username not filled?
+       return; 
+
 	SetModified();
 
 	int i = theApp.webserver->AdvLogins.IsEmpty() ? 1 : theApp.webserver->AdvLogins.GetCount()+1;
 
-	WebServDef tmp;
 	tmp.RightsToKad = IsDlgButtonChecked(IDC_ADVADMIN_KAD)!=0;
 	tmp.RightsToTransfered = IsDlgButtonChecked(IDC_ADVADMIN_TRANSFER)!=0;
 	tmp.RightsToSearch = IsDlgButtonChecked(IDC_ADVADMIN_SEARCH)!=0;
@@ -384,7 +392,6 @@ void CPPgIonixWebServer::OnBnClickedNew()
 	ASSERT(j <= 3); //only 0,1,2,3 allowed
 	tmp.RightsToAddRemove = (uint8) j;
 
-	CString buffer;
 	GetDlgItem(IDC_ADVADMIN_PASS)->GetWindowText(buffer);
 	if(buffer != HIDDEN_PASSWORD)
 		SET_TCHAR_TO_STRING(tmp.Pass, MD5Sum(buffer).GetHash());
@@ -396,7 +403,7 @@ void CPPgIonixWebServer::OnBnClickedNew()
 	SET_TCHAR_TO_STRING(tmp.RightsToCategories, buffer);
 
 	theApp.webserver->AdvLogins.SetAt(i, tmp);
-
+	theApp.webserver->SaveWebServConf(); //DEBUG should only be done at apply?
 	FillComboBox();
 	m_cbAccountSelector.SetCurSel(i);
     UpdateSelection();

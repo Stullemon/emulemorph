@@ -47,8 +47,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-#define HTTPInit _T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\n")
-#define HTTPInitGZ _T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n")
+#define HTTPInit thePrefs.IsClientCryptLayerRequested()?_T("Server: embedded\r\nConnection: close\r\nContent-Type: text/html\r\n"):_T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\n")
+#define HTTPInitGZ thePrefs.IsClientCryptLayerRequested()?_T("Server: embedded\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n"):_T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n")
 #define HTTPENCODING _T("utf-8")
 
 #define WEB_SERVER_TEMPLATES_VERSION	7
@@ -4594,7 +4594,7 @@ bool CWebServer::_IsLoggedIn(ThreadData Data, long lSession)
 /* ionix advanced webserver 
 void CWebServer::_RemoveTimeOuts(ThreadData Data)
 */
-void CWebServer::_RemoveTimeOuts(ThreadData Data, long lSession)
+void CWebServer::_RemoveTimeOuts(ThreadData Data, long /*lSession*/)
 {
 	// remove expired sessions
 	CWebServer *pThis = (CWebServer *)Data.pThis;
@@ -5608,39 +5608,72 @@ bool CWebServer::GetWebServLogin(const CString& user, const CString& pass, WebSe
 void CWebServer::SaveWebServConf()
 {
 	CString Filename;
-	Filename.Format(_T("%swebserv.conf"), thePrefs.GetConfigDir());
+	
+	CString fullpath(thePrefs.GetConfigDir());
+	fullpath += L"Webserver.ini";
+	CIni ini(fullpath, L"Users");
+	int userno=1;
 
-//	try
-//	{
-		CStdioFile file;
-		if(file.Open(Filename, CFile::modeCreate | CFile::modeWrite))
-		{
-			for (POSITION pos = AdvLogins.GetHeadPosition(); pos; AdvLogins.GetNext(pos))
-				file.Write(&AdvLogins.GetValueAt(pos), sizeof(WebServDef));
-			file.Close();
+	for (POSITION pos = AdvLogins.GetHeadPosition(); pos;  AdvLogins.GetNext(pos)){
+		CString User;
+		User.Format(_T("User%d"),userno);
+		ini.WriteString(L"Pass",AdvLogins.GetValueAt(pos).Pass,User)	;
+		ini.WriteString(L"Name",AdvLogins.GetValueAt(pos).User,User)	;
+		ini.WriteString(L"Categories",AdvLogins.GetValueAt(pos).RightsToCategories,User);
+		ini.WriteInt(L"RightsToAddRemove",AdvLogins.GetValueAt(pos).RightsToAddRemove,User);
+		ini.WriteBool(L"RightsToKad",AdvLogins.GetValueAt(pos).RightsToKad,User)   ;
+		ini.WriteBool(L"RightsToPrefs",AdvLogins.GetValueAt(pos).RightsToPrefs,User)   ;
+		ini.WriteBool(L"RightsToSearch",AdvLogins.GetValueAt(pos).RightsToSearch,User) ;
+		ini.WriteBool(L"RightsToServers",AdvLogins.GetValueAt(pos).RightsToServers,User)	 ;
+		ini.WriteBool(L"RightsToSharedList",AdvLogins.GetValueAt(pos).RightsToSharedList,User)  ;
+		ini.WriteBool(L"RightsToStats",AdvLogins.GetValueAt(pos).RightsToStats,User)   ;
+		ini.WriteBool(L"RightsToTransfered",AdvLogins.GetValueAt(pos).RightsToTransfered,User);
+		userno++;
 		}
-//	}
-//	catch(...)
-//	{
-		//in case of error, why should we kill our prefs?
-		//ZeroMemory(AdvLogins,sizeof(AdvLogins));
-//	}
 }
 void CWebServer::LoadWebServConf()
 {
 	CString Filename;
-	Filename.Format(_T("%swebserv.conf"), thePrefs.GetConfigDir());
+	Filename.Format(_T("%swebserv.conf"), thePrefs.GetConfigDir()); // convert webserv.conf
 
 	try
 	{
 		CStdioFile file;
-		if(file.Open(Filename, CFile::modeRead))
+		if(file.Open(Filename, CFile::modeRead)) // should faild.
 		{
 			WebServDef tmp;
 			uint32 i = 1;
 			while(file.Read(&tmp, sizeof(WebServDef)))
                 AdvLogins.SetAt(i++, tmp);				
 			file.Close();
+			SaveWebServConf();
+			file.Remove(Filename); // we now have a ini file.....
+		}
+		else {	// read the Webserver.ini
+			CString fullpath(thePrefs.GetConfigDir());
+	        fullpath += L"Webserver.ini";
+	         CIni ini(fullpath, L"Users");
+         	int userno=1;
+			CString User ;
+			User.Format(_T("User%d"),userno);
+			WebServDef tmp;
+			while ((tmp.RightsToAddRemove=(uint8)ini.GetInt(L"RightsToAddRemove",255,User)) !=255) 
+			{
+				_tcsncpy(tmp.Pass,ini.GetString(L"Pass",NULL,User),255);
+				_tcsncpy(tmp.RightsToCategories,ini.GetString(L"Categories",NULL,User),511);
+				_tcsncpy(tmp.User,ini.GetString(L"Name",NULL,User),255)	;
+				tmp.RightsToKad=ini.GetBool(L"RightsToKad",false,User);
+				tmp.RightsToPrefs=ini.GetBool(L"RightsToPrefs",false,User);
+				tmp.RightsToSearch=ini.GetBool(L"RightsToSearch",false,User);
+				tmp.RightsToServers=ini.GetBool(L"RightsToServers",false,User);
+				tmp.RightsToSharedList=ini.GetBool(L"RightsToSharedList",false,User);
+				tmp.RightsToStats=ini.GetBool(L"RightsToStats",false,User);
+				tmp.RightsToTransfered=ini.GetBool(L"RightsToTransfered",false,User);
+				AdvLogins.SetAt(userno, tmp);		
+				userno++;
+         		User.Format(_T("User%d"),userno);
+
+			}
 		}
 	}
 	catch(...)
