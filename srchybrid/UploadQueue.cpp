@@ -1020,7 +1020,7 @@ bool CUploadQueue::AcceptNewClient(uint32 classID)
 bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 // check if we can allow a new client to start downloading from us
 
-	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
+	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED) // alwasy 2 or 3 slots per class. 
 		return true;
 
     uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads(classID); 
@@ -1039,7 +1039,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	uint32 AllowedDatarate[NB_SPLITTING_CLASS];
 	uint32 AllowedClientDatarate[NB_SPLITTING_CLASS];
 	theApp.lastCommonRouteFinder->GetClassByteToSend(AllowedDatarate,AllowedClientDatarate);
-	uint32 remaindatarateforcurrentclass = datarate;
+	uint32 remaindatarateforcurrentclass = datarate_USS;   //datarate is too fast;
 	uint32 TotalSlots =0;
 	for(uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
 	{ if (i ==classID) 
@@ -1064,9 +1064,9 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	if (
 		 thePrefs.GetSlotLimitThree() &&
 	    (
-			curUploadSlots >= (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
+			curUploadSlots > (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
 			||
-			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
+			curUploadSlots -1 > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
 		 ) ||
 		 thePrefs.GetSlotLimitNumB() && TotalSlots >= thePrefs.GetSlotLimitNum()
        ) // max number of clients to allow for all circumstances
