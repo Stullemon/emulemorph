@@ -915,12 +915,12 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                 } else if(!standartpacket_queue.IsEmpty()) {
                     // There's a standard packet to send
 #if !defined DONT_USE_SOCKET_BUFFERING
-					uint32 sendbufferlimit = (standartpacket_queue.GetTail().packet->GetRealPacketSize())<<2;
+					uint32 sendbufferlimit = (standartpacket_queue.GetTail().packet->GetRealPacketSize())<<1;
 					if (sendbufferlimit > 10*1024*1024)
 						sendbufferlimit = 10*1024*1024;
 					else if (sendbufferlimit < minFragSize)
 						sendbufferlimit = minFragSize;
-					if (m_uCurrentSendBufferSize != sendbufferlimit) {
+					if (m_uCurrentSendBufferSize < sendbufferlimit) {
 						SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
 						int ilen = sizeof(int);
 						GetSockOpt(SO_SNDBUF, &sendbufferlimit, &ilen, SOL_SOCKET);
