@@ -226,7 +226,7 @@ void CWebServer::ReloadTemplates()
 			m_Templates.sPreferences = _LoadTemplate(sAll,_T("TMPL_PREFERENCES"));
 			m_Templates.sLogin = _LoadTemplate(sAll,_T("TMPL_LOGIN"));
 			//MORPH START - Added by SiRoB/Commander, Login Failed from eMule+
-			m_Templates.sFailedLogin = _LoadTemplate(sAll,_T("TMPL_FAILEDLOGIN"));
+			//m_Templates.sFailedLogin = _LoadTemplate(sAll,_T("TMPL_FAILEDLOGIN")); 9.1 removed because not effective
 			//MORPH END   - Added by SiRoB/Commander, Login Failed from eMule+
 			m_Templates.sAddServerBox = _LoadTemplate(sAll,_T("TMPL_ADDSERVERBOX"));
 			m_Templates.sSearch = _LoadTemplate(sAll,_T("TMPL_SEARCH"));
