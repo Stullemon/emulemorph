@@ -68,20 +68,21 @@ Source: "..\staging\unrar.dll"; DestDir: "{app}"
 Source: "..\staging\unrarlicense.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\mediainfo.dll"; DestDir: "{app}";  Flags: ignoreversion onlyifdoesntexist
 Source: "..\staging\mediainfo_ReadMe_DLL.txt"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
-Source: "..\staging\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\countryflag.dll"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\countryflag32.dll"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\eMule Light.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\eMule.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\startup.wav"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\webcaches.xml"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\webservices.dat"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\XMLNews.dat"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\config\server.met"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\config\addresses.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\config\ip-to-country.csv"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\config\ipfilter.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\config\staticservers.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\countryflag.dll"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\countryflag32.dll"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\eMule Light.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\Multiuser eMule.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\eMule.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\startup.wav"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\webcaches.xml"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\webservices.dat"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\XMLNews.dat"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\server.met"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\emule\config\addresses.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\emule\config\ip-to-country.csv"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\emule\config\ipfilter.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\emule\config\staticservers.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
 Source: "..\staging\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\staging\webserver\*"; DestDir: "{app}\webserver"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\staging\wapserver\*"; DestDir: "{app}\wapserver"; Flags: ignoreversion recursesubdirs createallsubdirs
