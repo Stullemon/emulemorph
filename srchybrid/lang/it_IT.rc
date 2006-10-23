@@ -109,6 +109,7 @@ BEGIN
     IDS_FD_COMPR            "Compressione"
     IDS_WIZARD_NETWORK      "Scegli le reti da usare."
     IDS_MAIN_READY          "eMule v%s è pronto"
+    IDS_TRANSVERSION        "Traduzione Italiana f5"
     IDS_WIZARD_ED2K         "Impostazioni eD2K"
     IDS_SEL_SKIN            "Scegli una Skin..."
     IDS_MAIN_SOCKETERROR    "Errore Fatale: Impossibile creare un Socket sulla porta %i"
@@ -1147,7 +1148,7 @@ BEGIN
     IDS_WEB_REFRESH_TIME    "Aggiorna finestre ogni"
     IDS_WEB_REFRESH_COMMENT "Tempo in secondi (0 = Disattivato):"
     IDS_SV_URL              "URL"
-    IDS_WS_RELOAD_TMPL      "Stile del WebServer"
+    IDS_WS_RELOAD_TMPL      "Stile del WS"
     IDS_SV_DEBUGLOG         "Registro Approfondito"
 END
 
@@ -1871,6 +1872,7 @@ BEGIN
     IDS_SERVERFEATURE_INTTYPETAGS "Tag di tipo intero"
 END
 
+//////////////////////////// MorphXT strings //////////////////////////////////
 
 STRINGTABLE 
 BEGIN
@@ -1884,6 +1886,7 @@ BEGIN
     IDS_DISPLAYFUNNYNICK    "Attiva il 'FunnyNick'"
     IDS_MAXDATARATEFRIEND   "Limite Max Velocità Globale (% della velocità di Upload)"
     IDS_MAXDATARATEPOWERSHARE "Limite Max Velocità Globale (% della velocità di Upload)"
+    IDS_HIDDEN              "Nascosto"
 END
 
 STRINGTABLE 
@@ -2794,7 +2797,7 @@ BEGIN
     IDC_PROXYTYPE_TIP       "Imposta il protocollo del Proxy. Le precedenze per le performance del\nprotocollo del Proxy sono le seguenti:\n1. SOCKS 4a (le più alte performance perchè meno OverHead)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (le più basse performance perchè più OverHead)"
     IDC_PROXYNAME_TIP       "Nome Host o indirizzo IP del Proxy"
     IDC_PROXYPORT_TIP       "Il numero della porta su cui comunica il Proxy.\nTipicamente 1080 per Socks e 80 o 8080 per HTTP"
-    IDC_ENABLEAUTH_TIP      "Attivalo se hai bisogno di effettuare il Login nel Proxy. Per HTTP è\nsupportata soltanto l'autenticazione di base (NTLM non Microsoft)"
+    IDC_ENABLEAUTH_TIP      "Attivalo se hai bisogno di effettuare il Login nel Proxy. Nota che per l'HTTP\nè supportata soltanto l'autenticazione di base (non la Microsoft NTLM)"
 END
 
 STRINGTABLE 
@@ -2802,7 +2805,7 @@ BEGIN
     IDS_PW_RDEAD_TIP        "Il numero di tentativi prima che un Server venga considerato\ninattivo e rimosso dalla lista (Default: 3)"
     IDS_PW_RETRIES_TIP      "Il numero di tentativi prima che un Server venga considerato\ninattivo e rimosso dalla lista (Default: 3)"
     IDS_PW_USC_TIP          "Aggiorna la lista Server all'avvio di eMule con gli URL presenti nel\nFile 'address.dat' (da editare) (Default: non selezionato)"
-    IDS_PW_UCC_TIP          "Quando ti connetti ad un Client vienne aggiunto il Server al quale è\nconnesso alla tua lista Server"
+    IDS_PW_UCC_TIP          "Quando ti connetti ad un Client viene aggiunto il Server al quale è\nconnesso alla tua lista Server"
     IDS_PW_USS_TIP          "Quando ti connetti ad un Server gli viene richiesta una lista di Server"
     IDS_SMARTLOWIDCHECK_TIP "Verranno effettuati più tentativi di connessione se in precedenza\nsi disponeva di un ID Alto"
     IDS_PW_FASTSRVCON_TIP   "Disattivando questa impostazione la connessione ai Server sarà più\nveloce ma potranno verificarsi dei falsi ID Basso"
@@ -3222,14 +3225,27 @@ BEGIN
     IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP 
                             "L'URL dove scaricare il file 'ip-to-country.csv' (in formato zip).\nLa Morph andrà a verificare se la data del File sul Web è più recente del\nDownload precedente ed effettuerà l'aggiornamento soltanto se il File sul\nWeb è più recente"
     IDC_RESETIPCURL_TIP     "Ripristina l'URL predefinito della Morph:\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
+END
 
+STRINGTABLE 
+BEGIN
+    IDS_PW_RESET_TIP        "La funzione Cronologia salva tutte le voci inserite per la ricerca, gli IP\nper il BootStrap Kademlia, gli URL inseriti per l'aggiornamento dei Server e\ngli URL inseriti per l'IPfilter, e suggerisce il completemento della voce che\nsi sta inserendo se viene trovato qualcosa nelle voci memorizzate. Il tasto\n'Azzera' cancellerà tutti i valori memorizzati."
+    IDS_DISABLEHIST_TIP     "La funzione Cronologia salva tutte le voci inserite per la ricerca, gli IP\nper il BootStrap Kademlia, gli URL inseriti per l'aggiornamento dei Server e\ngli URL inseriti per l'IPfilter, e suggerisce il completemento della voce che\nsi sta inserendo se viene trovato qualcosa nelle voci memorizzate. Disabilitando\nquesta opzione non verrà memorizzata alcuna voce"
+    IDS_PW_SHOWTRANSTOOLBAR_TIP
+                            "Verranno attivati nuovi pulsanti/icone nella finestra Trasferimenti. Daranno la\npossibilità di passare velocemente tra le varie modalità di visualizzazione:\n\n- Vista condivisa: Verranno mostrati tutti i File nella lista Download e la\nlista dei Client in Upload\n- Verranno mostrati solo i file nella lista Download\n- Mostra gli attuali Upload attivi\n- Mostra la lista dei Download attivi\n- Mostra la coda in Upload\n- Mostra tutti i Client conosciuti"
+    IDC_SHOWDWLPERCENT_TIP  "Un valore in % di completamento verrà aggiunto per ogni\nDownload nella propria barra del progresso"
     IDC_EXITQUESTION_TIP     "Puoi ora chiudere eMule ('Si') e fermare così il Download e l'Upload.\nSe lascerai eMule in esecuzione guadagnerai crediti che ti consentiranno\nin futuro di scaricare più velocemente. (Scegli 'No'!)"
-    IDC_DONTASKMEAGAINCB_TIP "Selezionando questa opzione eMule non ti farà più questa domanda la prossima volta.\nPuoi abilitarla nuovamente tramite 'Opzioni->Generale->Chiedi Conferma prima di Uscire'"
+    IDC_DONTASKMEAGAINCB_TIP
+                            "Selezionando questa opzione eMule non ti farà più questa domanda la prossima volta.\nPuoi abilitarla nuovamente tramite 'Opzioni->Generale->Chiedi Conferma prima di Uscire'"
+    IDC_DONTASKMEAGAINCBSEL_TIP
+                            "Selezionando questa opzione non ti verrà più mostrata questa finestra Pop Up\nper la scelta della Categoria. Puoi abilitarla nuovamente tramite\n'Opzioni->Morph->Gestione Download->SCC->Mostra la finestra di dialogo della Selezione Categoria'"
+    IDS_CAT_SELDLGTXT_TIP   "Puoi organizzare i Download in Categorie.\nQuesti sono i Tab nella finestra Download.\nPuoi aggiungere altre Categorie inserendo il\nnome della Categoria o selezionando una\nCategoria esistente"
+    IDS_OKCANCELSEL_TIP     "Seleziona la Categoria e premi 'OK' per\nscaricare nella Categoria selezionata o\npremi 'Annulla' per non scaricare il File"
     IDC_DISABLEOBFUSCATION_TIP 
                             "Se per qualche ragione vuoi disabilitare completamente la funzione di offuscamento\npuoi selezionare questa opzione. In generale, per la maggiorparte degli utenti,\nnon c'è motivo o vantaggio nel farlo. (Default: off)"
     IDC_ONLYOBFUSCATED_TIP  "Se abiliti questa opzione eMule stabilirà e accetterà soltanto connessioni offuscate.\nI Client che non supportano l'offuscamento saranno ignorati, le connessioni in ingresso\nda essi rifiutate e la connessione automatica ai Server funzionerà soltanto con quelli\nche supportano le connessioni offuscate. Dovresti selezionare questa opzione soltanto\nse sai che il protocollo eD2K è completamente bloccato sulla tua rete, altrimenti perderai\nfonti e, di conseguenza, rallenterai il tuo eMule. Se sai che eMule è bloccato,\nl'abilitazione di questa opzione è raccomandata, perché risparmierà inutili tentativi\ndi connessione che non andranno a buon fine, OverHead e risorse. Abilita questa opzione\nsoltanto se non riesci a ricevere dati in alcun modo! (Default: off)"
     IDC_ENABLEOBFUSCATION_TIP 
-                            "Se pensi che eMule è filtrato (rallentato dall'ISP) sulla tua rete, dovresti abilitare\nquesta opzione. Ogni qualvolta sarà possibile, eMule utilizzerà connessioni offuscate\ne chiederà agli altri Client di fare lo stesso quando si connetteranno al tuo Client.\nQuando tenterai di connetterti ad un Server, eMule proverà a stabilire prima una\nconnessione offuscata e, solo in caso di fallimento, sceglierà quella normale. In generale\nnon ci sono svantaggi dall'utilizzare questa opzione, eccetto un insignificante utilizzo\nmaggiore della CPU e pochissimi byte di OverHead in più, così non farai nulla di sbagliato\nabilitando questa opzione. (Default: off)"
+                            "Se pensi che eMule è filtrato (rallentato dall'ISP) sulla tua rete, dovresti abilitare\nquesta opzione. Ogni qualvolta sarà possibile, eMule utilizzerà connessioni offuscate\ne chiederà agli altri Client di fare lo stesso quando si connetteranno al tuo Client.\nQuando tenterai di connetterti ad un Server, eMule proverà a stabilire prima una\nconnessione offuscata e, solo in caso di fallimento, sceglierà quella normale. In generale\nnon ci sono svantaggi dall'utilizzare questa opzione, eccetto un insignificante utilizzo\nmaggiore della CPU e pochissimi byte di OverHead in più, così non farai nulla di sbagliato\nabilitando questa opzione. Inoltre, i trasferimenti http invieranno un UserAgent FireFox invece\nche uno eMule. (Default: off)"
 END
 
 STRINGTABLE 
@@ -3240,21 +3256,19 @@ BEGIN
     IDS_UPDATEQUEUE_TIP     "Le informazioni mostrate nella coda di attesa non verranno aggiornate\nfrequentemente, utilizzando meno risorse della CPU"
     IDS_SHOWRATEONTITLE_TIP "Mostra le attuali velocità di Download e Upload\nnella barra del titolo di eMule"
     IDS_INDICATERATINGS_TIP "Mostra le icone dei commenti per i Download nella finestra Trasferimenti"
-    IDS_DISABLEKNOWNLIST_TIP "eMule tiene traccia di tutti i Client ai quali ti sei connesso. Per risparmiare\nmemoria questa lista può essere disabilitata con questa opzione.\nDisattivare questa opzione su sistemi con poca memoria"
-    IDS_DISABLEQUEUELIST_TIP "Come per la lista dei Client Conoscouti anche la lista dei Client in\nCoda consuma risorse di sistema. Disabilitala per risparmiarle."
+    IDS_DISABLEKNOWNLIST_TIP
+                            "eMule tiene traccia di tutti i Client ai quali ti sei connesso. Per risparmiare\nmemoria questa lista può essere disabilitata con questa opzione.\nDisattivare questa opzione su sistemi con poca memoria"
+    IDS_DISABLEQUEUELIST_TIP
+                            "Come per la lista dei Client Conoscouti anche la lista dei Client in\nCoda consuma risorse di sistema. Disabilitala per risparmiarle."
     IDS_SHOWCATINFO_TIP     "Verranno mostrati due valori (x/y) dopo il nome della Categoria.\nIl primo valore (x) è il numero dei File attivi (in Download) in\nquesto momento e il secondo (y) il numero totale di File per\nquella categoria"
     IDS_REPAINTGRAPHS_TIP   "eMule potrebbe per un istante non rispondere ai comandi quando la finestra\nviene ridimensionata. Questo è causato dal ridisegno dei grafici utilizzando\ni dati memorizzati. Se questa opzione è selezionata, i grafici non verranno\nricreati e ripartiranno da zero"
-    IDC_SELECT_HYPERTEXT_FONT_TIP "Questo pulsante apre una finestra di dialogo per selezionare il carattere,\nlo stile e il colore del testo mostrato nelle informazioni del Server, dei\nmessagggi e nella finestra IRC"
+    IDC_SELECT_HYPERTEXT_FONT_TIP
+                            "Questo pulsante apre una finestra di dialogo per selezionare il carattere,\nlo stile e il colore del testo mostrato nelle informazioni del Server, dei\nmessagggi e nella finestra IRC"
     IDS_AUTOREMOVEFD_TIP    "eMule mostra i Download completati con una barra del progresso di colore verde.\nQuesta opzione li rimuoverà automaticamente dalla lista dei Download"
-    IDS_PW_RESET_TIP        "La funzione Cronologia salva tutte le voci inserite per la ricerca, gli IP\nper il BootStrap Kademlia, gli URL inseriti per l'aggiornamento dei Server e\ngli URL inseriti per l'IPfilter, e suggerisce il completemento della voce che\nsi sta inserendo se viene trovato qualcosa nelle voci memorizzate. Il tasto\n'Azzera' cancellerà tutti i valori memorizzati."
-    IDS_DISABLEHIST_TIP     "La funzione Cronologia salva tutte le voci inserite per la ricerca, gli IP\nper il BootStrap Kademlia, gli URL inseriti per l'aggiornamento dei Server e\ngli URL inseriti per l'IPfilter, e suggerisce il completemento della voce che\nsi sta inserendo se viene trovato qualcosa nelle voci memorizzate. Disabilitando\nquesta opzione non verrà memorizzata alcuna voce"
-    IDS_PW_SHOWTRANSTOOLBAR_TIP "Verranno attivati nuovi pulsanti/icone nella finestra Trasferimenti. Daranno la\npossibilità di passare velocemente tra le varie modalità di visualizzazione:\n\n- Vista condivisa: Verranno mostrati tutti i File nella lista Download e la\nlista dei Client in Upload\n- Verranno mostrati solo i file nella lista Download\n- Mostra gli attuali Upload attivi\n- Mostra la lista dei Download attivi\n- Mostra la coda in Upload\n- Mostra tutti i Client conosciuti"
-    IDC_SHOWDWLPERCENT_TIP  "Un valore in % di completamento verrà aggiunto per ogni\nDownload nella propria barra del progresso"
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_DONTASKMEAGAINCBSEL_TIP "Selezionando questa opzione non ti verrà più mostrata questa finestra Pop Up\nper la scelta della Categoria. Puoi abilitarla nuovamente tramite\n'Opzioni->Morph->Gestione Download->SCC->Mostra la finestra di dialogo della Selezione Categoria'"
     IDS_ADVADMIN_GROUP      "Configurazione Avanzata WebServer"
     IDS_ADVADMIN_ACC        "Account:"
     IDS_ADVADMIN_DELETE     "Cancella Account"
@@ -3324,11 +3338,14 @@ BEGIN
     IDS_DOWNHISTORY_ACTIONS "Azioni"
     IDS_DOWNHISTORY_CLEAR_QUESTION 
                             "Vuoi veramente azzerare lo Storico dei File Scaricati?"
-    IDS_CAT_SELDLGTXT_TIP   "Puoi organizzare i Download in Categorie.\nQuesti sono i Tab nella finestra Download.\nPuoi aggiungere altre Categorie inserendo il\nnome della Categoria o selezionando una\nCategoria esistente"
-    IDS_OKCANCELSEL_TIP     "Seleziona la Categoria e premi 'OK' per\nscaricare nella Categoria selezionata o\npremi 'Annulla' per non scaricare il File"
+    IDS_UPDATEFAKELISTWEEK  "Agg. settimanale"
+    IDS_AUTOUPIPFILTERWEEK  "Agg. settimanale"
+    IDS_UPDATEFAKELISTWEEK_TIP 
+                            "Aggiunge un parametro nelle operazioni pianificate per aggiornare una volta alla settimana\nil File ""fakelist.dat"" tramite l'URL specificato. L'operazione pianificata è attivata.\nNota bene: tale funzione andrà a buon fine soltanto se la Morph sarà in esecuzione all'orario\nstabilito. Puoi modificare l'orario dell'aggiornamento tramite la sezione 'Operazioni Pianificate'"
+    IDS_UPDATEIPFILTERWEEK_TIP 
+                            "Aggiunge un parametro nelle operazioni pianificate per aggiornare una volta alla settimana\nil File ""ipfilter.dat"" tramite l'URL specificato. L'operazione pianificata è attivata.\nNota bene: tale funzione andrà a buon fine soltanto se la Morph sarà in esecuzione all'orario\nstabilito. Puoi modificare l'orario dell'aggiornamento tramite la sezione 'Operazioni Pianificate'"
+    IDS_SCHEDTEXT           "Aggiunto dall'autoaggiornamento MorphXT"
 END
-
-
 
 #endif    // Italian (Italy) resources
 /////////////////////////////////////////////////////////////////////////////
