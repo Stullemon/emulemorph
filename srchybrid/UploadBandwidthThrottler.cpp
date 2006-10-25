@@ -667,7 +667,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		const DWORD thisLoopTick = timeGetTime();
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
-				    
+        // Loop 1 : reload				    
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 			uint32 allowedDataRate = allowedDataRateClass[classID];
 			if(allowedDataRate > 0 && allowedDataRate != _UI32_MAX) {
@@ -713,7 +713,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	    
 			uint64 ControlspentBytes = 0;
 			uint64 ControlspentOverhead = 0;
-
+			// loop 2
 			// Send any queued up control packets first
 			while((BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend|| allowedDataRateClass[LAST_CLASS] == 0 && ControlspentBytes < 500) && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
 				ThrottledControlSocket* socket = NULL;
@@ -746,6 +746,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
        			}
 			}
 			uint32 numberofclientinhigherclass = 0;
+			//loop 3
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 				if (slotCounterClass[classID]) {
 					uint32 allowedclientdatarate = _UI32_MAX;
@@ -756,7 +757,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if (ClientDataRate[classID])
 						allowedclientdatarate = min(allowedclientdatarate,ClientDataRate[classID]);
 					for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID]; slotCounter++) {
-						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(numberofclientinhigherclass+slotCounter);
+						ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter+numberofclientinhigherclass);
 						if(socket != NULL) {
 							Socket_stat* stat = NULL;
 							if (m_stat_list.Lookup(socket, stat)) {
@@ -800,7 +801,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				m_SentBytesSinceLastCallClass[LAST_CLASS] += ControlspentBytes;
 				m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] += ControlspentOverhead;
 			}
-			
+			//loop 4
 			numberofclientinhigherclass = 0;
 			for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 				uint32 allowedclientdatarate = _UI32_MAX;
@@ -822,18 +823,21 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						uint64 spentBytes = 0;
 						uint64 spentOverhead = 0;
 						uint32 slotCounter;
-						for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes + allowedclientdatarate < (uint64)BytesToSpend; slotCounter++) {
-							ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(numberofclientinhigherclass+slotCounter);
+						// loop 4.1
+						for(slotCounter = 0 ; 
+							slotCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes + allowedclientdatarate < (uint64)BytesToSpend; 
+							slotCounter++) {
+							ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter+numberofclientinhigherclass );
 							if(socket != NULL) {
 								Socket_stat* stat = NULL;
 								if (m_stat_list.Lookup(socket,stat)) {
 									//Try to send client allowed data for a client but not more than class allowed data
 									if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
-	#if !defined DONT_USE_SOCKET_BUFFERING
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(allowedclientdatarate, doubleSendSize);
-	#else
+#if !defined DONT_USE_SOCKET_BUFFERING
+										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(allowedclientdatarate, doubleSendSize);
+#else
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
-	#endif
+#endif
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
 											stat->realBytesToSpend -= 1000*lastSpentBytes;
@@ -846,19 +850,19 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								}
 							}
 						}
-						//send remain data to scheduled slot
-						for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes + allowedclientdatarate < (uint64)BytesToSpend; slotCounter++) {
-							ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(numberofclientinhigherclass+slotCounter);
+						// loop 4.2 send remain data to scheduled slot
+						for(slotCounter = 0; slotCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes + allowedclientdatarate < (uint64)BytesToSpend; slotCounter++) {
+							ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(numberofclientinhigherclass +slotCounter);
 							if(socket != NULL) {
 								Socket_stat* stat = NULL;
 								if (m_stat_list.Lookup(socket,stat)) {
 									if (stat->realBytesToSpend > 999) {
-	#if !defined DONT_USE_SOCKET_BUFFERING
-									uint32 BytesToSend = min(allowedclientdatarate, stat->realBytesToSpend/1000);
-									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
-	#else
+#if !defined DONT_USE_SOCKET_BUFFERING
+										uint32 BytesToSend = min(allowedclientdatarate, stat->realBytesToSpend/1000);
+										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
+#else
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize);
-	#endif
+#endif
 										uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 										if (lastSpentBytes) {
 											stat->realBytesToSpend -= 1000*lastSpentBytes;
