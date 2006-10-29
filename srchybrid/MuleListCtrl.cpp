@@ -1591,7 +1591,7 @@ int CUpdateItemThread::Run() {
 				LVFINDINFO find;
 				find.flags = LVFI_PARAM;
 				find.lParam = (LPARAM)item;
-				int found = m_listctrl->FindItem(&find);
+				int found = m_listctrl->FindItem(&find);   // assert on shutdown? 
 				if (found != -1)
 					m_listctrl->Update(found);
 				update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000));
