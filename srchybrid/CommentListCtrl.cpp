@@ -186,7 +186,7 @@ BOOL CCommentListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case MP_COPYSELECTED:
-			theApp.CopyTextToClipboard(GetItemText(iSel, 3));
+			theApp.CopyTextToClipboard(GetItemText(iSel, colComment)); // MORPH leuk_he 3 --> colcoment. Copy the comment, not the username. 
 			return TRUE;
 		}
 	}
