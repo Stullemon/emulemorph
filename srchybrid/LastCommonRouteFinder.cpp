@@ -327,8 +327,8 @@ void LastCommonRouteFinder::GetClassByteToSend(uint32* AllowedDataRate,uint32* C
 	else 
 		*AllowedDataRate = maxlimit;
 
-	//maxlimit = min(m_upload, m_iMaxGlobalDataRatePowerShare*m_upload/100);
-    maxlimit = min(m_upload*95/100, m_iMaxGlobalDataRatePowerShare*m_upload/100); //leuk_he 9.1:powershare is max 95% to work arround always normal slot bug in uploadbadwitd throttler.
+	maxlimit = min(m_upload, m_iMaxGlobalDataRatePowerShare*m_upload/100);
+    //maxlimit = min(m_upload*95/100, m_iMaxGlobalDataRatePowerShare*m_upload/100); //leuk_he 9.1:powershare is max 95% to work arround always normal slot bug in uploadbadwitd throttler.
 	if (maxlimit < 1024) maxlimit = 1024;
 	if (m_iGlobalDataRatePowerShare > 0 && m_iGlobalDataRatePowerShare < maxlimit)
 		*++AllowedDataRate = m_iGlobalDataRatePowerShare;

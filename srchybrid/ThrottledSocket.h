@@ -29,6 +29,8 @@ public:
     virtual bool    HasQueues() const = 0;
 	virtual DWORD GetBusyTimeSince() const = 0;
 	virtual float GetBusyRatioTime() const = 0;
+
+
 };
 
 // <-- ZZ:UploadBandWithThrottler (UDP)
