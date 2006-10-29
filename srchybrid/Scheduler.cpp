@@ -332,10 +332,10 @@ void CScheduler::ActivateSchedule(int index,bool makedefault) {
 // MORPH START leuk_he automatic weekly ipfilter/fakefilter update. 
 bool CScheduler::HasWeekly(int par_action) // MORPH 
 {
-	if (GetCount()==0) return false; 
+	if (theApp.scheduler->GetCount()==0) return false; 
 	Schedule_Struct* curschedule;
 
-	for (uint8 si=0;si< GetCount();si++) {
+	for (uint8 si=0;si< theApp.scheduler->GetCount();si++) {
 		curschedule=  GetSchedule(si);
 		if (curschedule->actions[0]==0 || !curschedule->enabled) continue;
 		if (curschedule->day!=DAY_DAYLY) { // nt daily, so must be weekly ( or montly, good also) 
