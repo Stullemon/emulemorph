@@ -806,11 +806,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
 			}
 			if (ControlspentBytes) {
-				for (uint32 i = 0; i <= LAST_CLASS; i++) {
-        			realBytesToSpendClass[i] -= 1000*ControlspentBytes;
-		    		m_SentBytesSinceLastCallClass[i] += ControlspentBytes;
-			    	m_SentBytesSinceLastCallOverheadClass[i] += ControlspentOverhead;
-				}
+        			realBytesToSpendClass[LAST_CLASS] -= 1000*ControlspentBytes;
+		    		m_SentBytesSinceLastCallClass[LAST_CLASS] += ControlspentBytes;
+			    	m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] += ControlspentOverhead;
 			}
 			//loop 4
 			numberofclientinhigherclass = 0;
@@ -825,8 +823,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				allowedclientdatarate = (allowedclientdatarate==_UI32_MAX || bUploadUnlimited)?doubleSendSize:allowedclientdatarate/4;
 				if (allowedclientdatarate < doubleSendSize)
 					allowedclientdatarate = doubleSendSize;
+				BytesToSpend = realBytesToSpendClass[classID] / 1000;
 				if(slotCounterClass[classID]) {
-					BytesToSpend = realBytesToSpendClass[classID] / 1000;
 					if (BytesToSpend >= 1) {
 					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
 						BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
@@ -911,10 +909,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 				if (timeSinceLastLoop > 0) {
 					brealBytesFullySpentClass[classID] = false;
-					if (realBytesToSpendClass[classID] > 250*allowedDataRateClass[LAST_CLASS]) {
+					if (BytesToSpend > allowedDataRateClass[LAST_CLASS]/4) {
 					m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
 						realBytesToSpendClass[classID] = 250*allowedDataRateClass[LAST_CLASS];
-					} else if (realBytesToSpendClass[classID]<=999) {
+					} else if (BytesToSpend<=0) {
 						brealBytesFullySpentClass[classID] = true;
 					}
 				}
