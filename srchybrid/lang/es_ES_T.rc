@@ -1849,6 +1849,29 @@ BEGIN
     IDS_LASTMODIFIED        "Última modificación"
 END
 
+    IDS_MESSAGESCOMMENTS    "Mensajes y Comentarios"
+    IDS_DISABLEOBFUSCATION  "No permitir conexiones ofuscadas"
+    IDS_ONLYOBFUSCATED      "Sólo permitir conexiones ofuscadas (no recomendado)"
+    IDS_ENABLEOBFUSCATION   "Activar la Ofuscación de Protocolo"
+    IDS_PROTOCOLOBFUSCATION "Ofuscación de Protocolo"
+    IDS_CONNECTINGTOOBFUSCATED 
+                            "Conectando con %s (%s:%i - utilizando Ofuscación de Protocolo) ..."
+    IDS_CONNECTEDTOOBFUSCATED "Conexión ofuscada establecida con: %s"
+    IDS_VERIFIED            "verificado"
+    IDS_OBFUSCATED          "Ofuscado"
+    IDS_UNVERIFIED          "no verificado"
+    IDS_INVALIDFILEEXT      "La extensión del archivo no es válida"
+    IDS_UNKNOWNFILEEXT      "Extensión del archivo desconocida"
+    IDS_ENABLEMINIMULE      "Activar MiniMule"
+    IDS_DISABLE_AUTOARCHPREV 
+                            "Desact. inicio autom. de previsualiz. de archivos en detalles del archivo"
+    IDS_US_STALLEDW4BR      "¡Pausado! Esperando un bloque que se ha solicitado."
+    IDS_US_STALLEDREADINGFDISK "¡Pausado! Leyendo disco."
+    IDS_SERVERFEATURE_INTTYPETAGS "Etiquetas de tipo entero"
+END
+
+
+
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_DONE       "El informe de errores ha sido generado."
