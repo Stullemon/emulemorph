@@ -302,7 +302,7 @@ public:
 	void			CheckFailedFileIdReqs(const uchar* aucFileHash);
 	uint32			GetUserIDHybrid() const							{ return m_nUserIDHybrid; }
 	void			SetUserIDHybrid(uint32 val)						{ m_nUserIDHybrid = val; }
-	/*FunnyNick*/LPCTSTR	GetUserName() const								{ return (thePrefs.DisplayFunnyNick() && m_pszFunnyNick)?m_pszFunnyNick:m_pszUsername; }
+	/*FunnyNick*/LPCTSTR	GetUserName(bool bNoFunnyNick = true) const								{ return (thePrefs.DisplayFunnyNick() && m_pszFunnyNick && bNoFunnyNick)?m_pszFunnyNick:m_pszUsername; }
 	/*FunnyNick*/void	UpdateFunnyNick();
 	void			SetUserName(LPCTSTR pszNewName);
 	uint32			GetIP() const									{ return m_dwUserIP; }

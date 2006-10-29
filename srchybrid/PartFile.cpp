@@ -1331,7 +1331,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 	}
 
 	// Now to flush the map into the list (Slugfiller)
-	 m_uTotalGaps =0;
+	m_uTotalGaps =0; //MORPH - Optimization, completedsize
 
 	for (POSITION pos = gap_map.GetStartPosition(); pos != NULL; ){
 		Gap_Struct* gap;
