@@ -1091,7 +1091,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 		if(!AcceptNewClient(curUploadSlots, classID) || !theApp.lastCommonRouteFinder->AcceptNewClient()) // UploadSpeedSense can veto a new slot if USS enabled
 			needtoaddslot = false;
 		else {
-			if (curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && AcceptNewClient(curUploadSlots*(2-(classID/2)), classID) /*+1*/ ||
+			if (curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && AcceptNewClient(curUploadSlots/**(2-(classID/2))*/, classID) /*+1*/ ||
     			curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10))
 					needtoaddslot = true;
 		}
