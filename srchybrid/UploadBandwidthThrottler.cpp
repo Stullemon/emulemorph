@@ -839,7 +839,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									//Try to send client allowed data for a client but not more than class allowed data
 									if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									uint32 BytesToSend = min((UINT)(BytesToSpend - spentBytes),stat->realBytesToSpend/1000);
+									uint32 BytesToSend = (uint32) min((BytesToSpend - (sint64) spentBytes),stat->realBytesToSpend/1000);
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 #else
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
@@ -864,7 +864,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								if (m_stat_list.Lookup(socket,stat)) {
 									if (stat->realBytesToSpend > 999) {
 #if !defined DONT_USE_SOCKET_BUFFERING
-									uint32 BytesToSend = min((UINT)(BytesToSpend - spentBytes),stat->realBytesToSpend/1000);
+									uint32 BytesToSend = (uint32)min(((sint64)BytesToSpend - (sint64)spentBytes),stat->realBytesToSpend/1000);
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 #else
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize);
@@ -909,14 +909,26 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 				if (timeSinceLastLoop > 0) {
 					brealBytesFullySpentClass[classID] = false;
-					if (BytesToSpend > allowedDataRateClass[LAST_CLASS]/4) {
-					m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-						realBytesToSpendClass[classID] = 250*allowedDataRateClass[LAST_CLASS];
-					} else if (BytesToSpend<=0) {
-						brealBytesFullySpentClass[classID] = true;
+					if (classID==LAST_CLASS) {
+						if (realBytesToSpendClass[classID] > 250*allowedDataRateClass[LAST_CLASS]) { // 0.25 secs undersending...
+							m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
+							realBytesToSpendClass[classID] = 250*allowedDataRateClass[LAST_CLASS];
+						} 
+						else if ( realBytesToSpendClass[classID]<=999)  {
+							brealBytesFullySpentClass[classID] = true;
+
+						}
 					}
-				}
-			}
+					else {// not last class
+						if (BytesToSpend*4 > allowedDataRateClass[LAST_CLASS]) { // 0.25 secs undersending...
+							m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
+							realBytesToSpendClass[classID] = 250*allowedDataRateClass[LAST_CLASS];
+						} else if (BytesToSpend<=0) {
+							brealBytesFullySpentClass[classID] = true;
+						}
+					}
+				} // if timesincelastloop > 0
+			} // for classID
 			sendLocker.Unlock();
 			lastLoopTickTryTosend = thisLoopTick;
 		}
