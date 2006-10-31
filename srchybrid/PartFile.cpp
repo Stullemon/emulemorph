@@ -7538,7 +7538,7 @@ void CPartFile::PerformFirstHash()
 	parthashthread->ResumeThread();
 }
 
-bool CPartFile::IsPartShareable(uint16 partnumber) const
+bool CPartFile::IsPartShareable(UINT partnumber) const
 {
 	if (partnumber < GetPartCount())
 		return m_PartsShareable[partnumber];

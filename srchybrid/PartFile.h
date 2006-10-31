@@ -185,7 +185,7 @@ public:
 	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
 	void	PartHashFinished(uint16 partnumber, bool corrupt);
 	void	PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt);
-	bool	IsPartShareable(uint16 partnumber) const;
+	bool	IsPartShareable(UINT partnumber) const;
 	bool	IsRangeShareable(uint64 start, uint64 end) const;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
 
