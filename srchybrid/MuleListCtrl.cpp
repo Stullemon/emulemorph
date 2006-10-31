@@ -1605,7 +1605,7 @@ int CUpdateItemThread::Run() {
 			}
 		}
 		if(doRun) {
-			if (ListItems.GetCount() == 0)
+			if ((ListItems.GetCount() == 0) || (theApp.m_app_state == APP_STATE_SHUTTINGDOWN))
 				newitemEvent.Lock();
 			else
 				newitemEvent.Lock(wecanwait);
