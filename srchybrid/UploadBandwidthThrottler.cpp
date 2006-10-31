@@ -737,7 +737,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						Socket_stat* stat = NULL;
 						if (m_stat_list.Lookup(socket, stat)) {
 							stat->realBytesToSpend -= 1000*lastSpentBytes;
-							if (stat->classID < LAST_CLASS) {
+							if (stat->classID < LAST_CLASS-1) {
 								realBytesToSpendClass[stat->classID] -= 1000*socketSentBytes.sentBytesStandardPackets;
 								m_SentBytesSinceLastCallClass[stat->classID] += lastSpentBytes;
 								m_SentBytesSinceLastCallOverheadClass[stat->classID] += socketSentBytes.sentBytesControlPackets;
@@ -789,7 +789,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										stat->realBytesToSpend -= 1000*lastSpentBytes;
 										if (classID<LAST_CLASS) {
 											realBytesToSpendClass[classID] -= 1000*lastSpentBytes;
-											for (uint32 i = classID+1; i < LAST_CLASS; i++)
+											for (uint32 i =min(classID,1) /* classID+1 */; i < LAST_CLASS; i++) //lh take it out of all classes except friend
 												realBytesToSpendClass[i] -= 1000*socketSentBytes.sentBytesControlPackets;
 				
 											m_SentBytesSinceLastCallClass[classID] += lastSpentBytes;
@@ -806,9 +806,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
 			}
 			if (ControlspentBytes) {
-        			realBytesToSpendClass[LAST_CLASS] -= 1000*ControlspentBytes;
-		    		m_SentBytesSinceLastCallClass[LAST_CLASS] += ControlspentBytes;
-			    	m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] += ControlspentOverhead;
+				 // take control bytes it out of PS class & normal class
+				for(uint32 i = 1; i<LAST_CLASS;i++) {
+        			realBytesToSpendClass[i] -= 1000*ControlspentBytes;
+		    		m_SentBytesSinceLastCallClass[i] += ControlspentBytes;
+			    	m_SentBytesSinceLastCallOverheadClass[i] += ControlspentOverhead;
+				}
 			}
 			//loop 4
 			numberofclientinhigherclass = 0;
@@ -909,16 +912,15 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 				if (timeSinceLastLoop > 0) {
 					brealBytesFullySpentClass[classID] = false;
-					if (classID==LAST_CLASS) {
-						if (realBytesToSpendClass[classID] > 250*allowedDataRateClass[LAST_CLASS]) { // 0.25 secs undersending...
+				//	if (classID==LAST_CLASS) {
+						if (realBytesToSpendClass[classID] > thePrefs.m_iSlotdelayms*allowedDataRateClass[LAST_CLASS]) { // Slotdelayms = 250
 							m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-							realBytesToSpendClass[classID] = 250*allowedDataRateClass[LAST_CLASS];
+							realBytesToSpendClass[classID] = thePrefs.m_iSlotdelayms*allowedDataRateClass[LAST_CLASS];
 						} 
 						else if ( realBytesToSpendClass[classID]<=999)  {
 							brealBytesFullySpentClass[classID] = true;
-
 						}
-					}
+				/*	}
 					else {// not last class
 						if (BytesToSpend*4 > allowedDataRateClass[LAST_CLASS]) { // 0.25 secs undersending...
 							m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
@@ -926,7 +928,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						} else if (BytesToSpend<=0) {
 							brealBytesFullySpentClass[classID] = true;
 						}
-					}
+					} */
 				} // if timesincelastloop > 0
 			} // for classID
 			sendLocker.Unlock();
