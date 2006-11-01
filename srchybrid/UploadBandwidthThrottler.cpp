@@ -787,7 +787,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 									if (lastSpentBytes) {
 										stat->realBytesToSpend -= 1000*lastSpentBytes;
-										if (classID<LAST_CLASS-1) { /* == freind & PS */
+										if (classID<LAST_CLASS-1) { /* == freind  */
 											realBytesToSpendClass[classID] -= 1000*lastSpentBytes;
 											//if (classID == 0)
 											 // realBytesToSpendClass[1] -= 1000*socketSentBytes.sentBytesControlPackets;
@@ -806,7 +806,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			}
 			if (ControlspentBytes) {
 				 // take control bytes it out of normal class
-				 for (int i=1; i< LAST_CLASS; i++)
+				 for (int i=1; i<= LAST_CLASS; i++)
                    realBytesToSpendClass[i] -= 1000*ControlspentBytes;
 		    	 m_SentBytesSinceLastCallClass[LAST_CLASS] += ControlspentBytes;
 			     m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] += ControlspentOverhead;
