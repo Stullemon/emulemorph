@@ -190,7 +190,7 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
             m_dwLastSeen = time(NULL);
             m_dwLastUsedIP = linkedClient->GetIP();
             m_nLastUsedPort = linkedClient->GetUserPort();
-			/*FunnyNick*/m_strName = linkedClient->GetUserName(false);
+			/*FunnyNick*/m_strName = linkedClient->GetUserName(false); // MORPH funnynick
             md4cpy(m_abyUserhash,linkedClient->GetUserHash());
             m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
 
