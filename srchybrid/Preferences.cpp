@@ -440,6 +440,7 @@ int		CPreferences::m_iDynUpPingToleranceMilliseconds;
 bool	CPreferences::m_bDynUpUseMillisecondPingTolerance;
 //MORPH START - Added by SiRoB, USSLog
 bool	CPreferences::m_bDynUpLog;
+sint64   CPreferences::m_iSlotdelayms;  // leuk_he temporary tuning UBWT
 //MORPH END   - Added by SiRoB, USSLog
 bool	CPreferences::m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 //MORPH START - Added by Commander, ClientQueueProgressBar
@@ -3158,10 +3159,10 @@ void CPreferences::LoadPreferences()
 	m_strVideoPlayerArgs = ini.GetString(L"VideoPlayerArgs",L"");
 	_snwprintf(m_sTemplateFile,_countof(m_sTemplateFile),L"%s",ini.GetString(L"WebTemplateFile", GetConfigDir()+L"eMule.tmpl"));
 	
-	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed");
+	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed|DI-Emule|eMule FX|ZamBoR 2"); // leuk_he: add some known spammers
 	commentFilter = ini.GetStringLong(L"CommentFilter",L"http://|https://|ftp://|www.|ftp.");
 	commentFilter.MakeLower();
-	filenameCleanups=ini.GetStringLong(L"FilenameCleanups",L"http|www.|.com|.de|.org|.net|shared|powered|sponsored|sharelive|filedonkey|");
+	filenameCleanups=ini.GetStringLong(L"FilenameCleanups",L"http|www.|.com|.de|.org|.net|shared|powered|sponsored|sharelive|filedonkey|saugstube|eselfilme|eseldownloads|emulemovies|spanishare|eselpsychos.de|saughilfe.de|goldesel.6x.to|freedivx.org|elitedivx|deviance|-ftv|ftv|-flt|flt");
 	m_iExtractMetaData = ini.GetInt(L"ExtractMetaData", 1); // 0=disable, 1=mp3, 2=MediaDet
 	if (m_iExtractMetaData > 1)
 		m_iExtractMetaData = 1;
@@ -3339,7 +3340,7 @@ void CPreferences::LoadPreferences()
 	m_bPayBackFirst=ini.GetBool(_T("IsPayBackFirst"),false);//EastShare - added by AndCycle, Pay Back First
 	m_iPayBackFirstLimit=(uint8)min(ini.GetInt(_T("PayBackFirstLimit"),10),255);//MORPH - Added by SiRoB, Pay Back First Tweak
 	m_bOnlyDownloadCompleteFiles = ini.GetBool(_T("OnlyDownloadCompleteFiles"), false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), false/*true changed by sirob*/);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), true );//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	m_bDontRemoveSpareTrickleSlot = ini.GetBool(_T("DontRemoveSpareTrickleSlot"), true);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	m_bFunnyNick = ini.GetBool(_T("DisplayFunnyNick"), true);//MORPH - Added by SiRoB, Optionnal funnynick display
 	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
@@ -3417,6 +3418,7 @@ void CPreferences::LoadPreferences()
 
 	//MORPH START - Added by SiRoB,  USS log flag
 	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
+	m_iSlotdelayms = min(max(ini.GetInt(_T("Slotdelayms"),250),50),3000); // leuk_he temporary tuning flag, max value = 3000 min = 50, values 200 till 1000 are ok.
 	//MORPH END   - Added by SiRoB,  USS log flag
 	m_bUSSUDP = ini.GetBool(_T("USSUDP_FORCE"), false); //MORPH - Added by SiRoB, USS UDP preferency
 	m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager

@@ -770,7 +770,8 @@ public:
 	static  int		m_iDynUpPingToleranceMilliseconds;
 	static  bool	m_bDynUpUseMillisecondPingTolerance;
 	static bool		m_bDynUpLog;
-	static bool		m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
+    static bool		m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
+	static sint64   m_iSlotdelayms;  //leuk_he temporary tunne UWB
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 
 	static bool		m_bSolidGraph; //MORPH - Added by SiRoB, New Graph
