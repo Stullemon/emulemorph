@@ -423,7 +423,7 @@ bool CFirewallOpener::ReadFromICFdat(CFile &file, CICSRuleInfo &mapping){
 	if(uiBRead == sizeof(uint16)){
 		uiBRead = file.Read(&(newMapping.m_byProtocol), sizeof(uint8));
 		if(uiBRead == sizeof(uint8)){
-			int iDescLen = 0;
+			UINT iDescLen = 0;
 			uiBRead = file.Read(&iDescLen, sizeof(int));
 			if(uiBRead == sizeof(int)){
 				char *cDesc;
