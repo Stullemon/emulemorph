@@ -500,7 +500,7 @@ void CPPgWebcachesettings::OnBnClickedTestProxy()
 			{
 				thePrefs.WebCachePingSendTime = ::GetTickCount();
 				thePrefs.expectingWebCachePing = true;
-				AfxMessageBox(GetResString(IDC_MSG_WEBCACHE_TESTRUNNING  )); // leuk_he to rc
+				AfxMessageBox(GetResString(IDC_MSG_WEBCACHE_TESTRUNNING  )); // leuk_he to resource 
 				//Performing Proxy Test! Please check the log in the serverwindow for the results!
 			}
 			else
