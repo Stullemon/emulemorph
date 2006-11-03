@@ -1848,7 +1848,8 @@ BEGIN
     IDS_ATTRIBUTES          "Atributos"
     IDS_LASTMODIFIED        "Última modificación"
 END
-
+STRINGTABLE 
+BEGIN
     IDS_MESSAGESCOMMENTS    "Mensajes y Comentarios"
     IDS_DISABLEOBFUSCATION  "No permitir conexiones ofuscadas"
     IDS_ONLYOBFUSCATED      "Sólo permitir conexiones ofuscadas (no recomendado)"
