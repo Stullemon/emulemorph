@@ -3168,6 +3168,48 @@ BEGIN
     IDC_RESETIPCURL_TIP     "Reseta o campo de URL para o padrão do Morph:\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_PW_RESET_TIP        "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Reset button will clear all entries."
+    IDS_DISABLEHIST_TIP     "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Enabled checkmark allows to turn off this option"
+    IDS_PW_SHOWTRANSTOOLBAR_TIP 
+                            "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes\n:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queueDisplays all known clients"
+    IDC_SHOWDWLPERCENT_TIP  "A %-completed value will be added for each download in its progress bar."
+    IDC_EXITQUESTION_TIP    "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
+    IDC_DONTASKMEAGAINCB_TIP 
+                            "Check this option and eMule won't ask next time you do a shutdown of eMule\nYou can enable this option again in Options->general-> Prompt on exit"
+    IDC_DONTASKMEAGAINCBSEL_TIP 
+                            "Do not pop up this category select dialog again. You can enable this again in \nOption -> Morph -> download management -> SCC -> Show the 'Select catagory' dialog"
+    IDS_CAT_SELDLGTXT_TIP   "You can organize the downloads in catagories.\nThese are the tabs in the download window.\nYou can add categories here by entering a\ncategory name or select one of the existing\ncatgories."
+    IDS_OKCANCELSEL_TIP     "Select the category and press ok to \ndownload in the category or\npress cancel not to download the\nfile(s)."
+    IDC_DISABLEOBFUSCATION_TIP 
+                            "If for some reason you want to disable the whole obfuscation \nfeature completely you can choose this option. In general for most users there is no reason nor advantage in doing this. (default: off)"
+    IDC_ONLYOBFUSCATED_TIP  "If you enable this option, eMule will only establish and accept obfuscated connections.\n Clients which do not support obfuscations are ignored, incoming plaintext connections\nrejected and the automatic server connect will only allow obfuscated connections to a\nserver. You should only choose this setting if you know that the ED2K Protocol is completely\nblocked on your network, otherwise you will loose sources and therefore slow down your eMule.\nHowever if you know that eMule is blocked, then enabling this option is recommended, because  \nit saves connection tries which are guaranteed to fail and therefore would waste time,\noverhead and resources. Only enable this option if you canno receive dataq otherwise! (default: off)"
+    IDC_ENABLEOBFUSCATION_TIP 
+                            "If you think that eMule is throttled (slowed down by isp) on your\nnetwork, you should enable this function. Whenever possible eMule\nwill use obfuscated connections and will ask other clients\nto do the same when connecting to your client. When connecting \nto a server, eMule will try to establish an obfuscated connection\nfirst and only if this fails choose a normal one. There are\nin general no disadvantages by using this option, except\ninsignificant higher CPU usage and very few bytes more overhead,\nso you can't really do anything wrong by enabling this setting.\nAlso http transfers will send useragent firefox instead of emule\n(default: off) "
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_TRAY_TIP         "eMule will not minimize to task bar\nbut to the tray if this option is checked.\nAn extra option is displayed in the windows\nbar to minimize to the tray if unchecked"
+    IDS_PW_DBLCLICK_TIP     "This option toggles,\nwhether a double or single click in the download screenlist is needed to expand and show the sources"
+    IDS_3DDEP_TIP           "The slider affects the amount of 3D shading of the Progress Bars."
+    IDS_UPDATEQUEUE_TIP     "The information displayed in the queue list will be updated not as often\nwhich will save some CPU time."
+    IDS_SHOWRATEONTITLE_TIP "Displays current Down- and Upload speed in eMule's window title."
+    IDS_INDICATERATINGS_TIP "Shows the -icon (comment, positive rating)\nthe !-icon (negative rating) for downloads in the Transfers list."
+    IDS_DISABLEKNOWNLIST_TIP 
+                            "eMule keeps track of all clients it connected to.\nTo save memory this list can be disabled with this option.\nTurn it off for low memory systems."
+    IDS_DISABLEQUEUELIST_TIP 
+                            "Similar to the Known Clients List the Queue List\nwill also consume system resources.\nDisable to save them."
+    IDS_SHOWCATINFO_TIP     "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading) files\nand the second one (y) the total number of files for this  category."
+    IDS_REPAINTGRAPHS_TIP   "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
+    IDC_SELECT_HYPERTEXT_FONT_TIP 
+                            "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines  and IRC windows"
+    IDS_AUTOREMOVEFD_TIP    "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
+END
+
+
+
 #endif    // Portuguese (Brazil) resources
 /////////////////////////////////////////////////////////////////////////////
 
