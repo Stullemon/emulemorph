@@ -1921,11 +1921,6 @@ BEGIN
 END
 
 
-STRINGTABLE 
-BEGIN
-    IDS_ERR_FSCANTHANDLEFILE 
-                            "Nie mo¿esz sci¹gaæ tego pliku, poniewa¿ twój system nie obs³uguje plików wiêkszych ni¿ 4GB, rozwa¿ przekonwertowanie dysku na NTFS"
-END
 
 STRINGTABLE 
 BEGIN

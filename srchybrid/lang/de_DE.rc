@@ -3031,7 +3031,7 @@ BEGIN
     IDS_POWERSHARE_INTERPRIO_TIP 
                             "Benutze die normale Prioritätsstufung \ninnerhalb der Powershare Dateien \n(Standard: deaktiviert)"
     IDS_PERMISSION_TIP      "Bestimmten Gruppen kann gestattet werden \neine Liste eurer gesharten Dateien einzusehen. "
-    IDS_FSTATUS_PUBLIC_TIP  "Eine Liste eurer gesharten Dateien \nwird allen Usern auf Anfrage zugesendet."
+    //IDS_FSTATUS_PUBLIC_TIP  "Eine Liste eurer gesharten Dateien \nwird allen Usern auf Anfrage zugesendet."
     IDS_FSTATUS_FRIENDSONLY_TIP 
                             "Eine Liste eurer gesharten Dateien wird \nnur den Usern aus eurer Freunde Liste auf Anfrage zugesendet."
     IDS_HIDDEN_TIP          "Niemand kann die gesharten Dateen einsehen"
