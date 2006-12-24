@@ -292,7 +292,8 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 	while(pos){
 		UPNPNAT_MAPPING item;
 		item = m_Mappings.GetNext(pos);
-		if(item.externalPort == mapping->externalPort){
+		if(item.externalPort == mapping->externalPort &&
+		   item.protocol== mapping->protocol	){	  // 9.3: fix same port tcp/udp
 			found = true;
 			pos = NULL;
 		}
@@ -383,7 +384,8 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMapping(C
 		m_MappingsLock.Lock();
         POSITION pos = m_Mappings.GetHeadPosition();
 		if (pos) (item = m_Mappings.GetNext(pos));
-	    while(pos && item.externalPort != mapping.externalPort  ){
+	    while(pos && (item.externalPort != mapping.externalPort 
+			          ||item.protocol != mapping.protocol)		){
   		   item = m_Mappings.GetNext(pos);
 		}
 	   if( pos && removeFromList)
@@ -398,7 +400,8 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMapping(C
 	while(pos){
 		old_pos = pos;
 		item = m_Mappings.GetNext(pos);
-		if(item.externalPort == mapping.externalPort){
+		if(item.externalPort == mapping.externalPort &&
+			item.protocol== mapping.protocol ){
 			POSITION srvpos = m_knownServices.GetHeadPosition();
 			while(srvpos){
 				UPNP_SERVICE *srv;
