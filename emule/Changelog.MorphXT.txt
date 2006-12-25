@@ -1,3 +1,6 @@
+Fix: Upnp: using same port for tcp & udp now possible.
+Fix: sr13 import: Chash on cancel during running import. 
+
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.2
 -------------------------------------
