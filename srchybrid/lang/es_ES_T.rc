@@ -2104,7 +2104,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPDATEIPFILTER      "Actualizar"
-    IDS_UPDATEIPFILTERONSTART "Actualizar IPFilter.dat al iniciar"
+    IDS_UPDATEIPFILTERONSTART "Actualizar IPFilter.dat al inicio"
     IDS_UPDATEIPFILTERERROR "Error actualizando IPFilter.dat"
     IDS_HTTP_IPFILTERCAPTION "Actualizando IPFilter.dat"
     IDS_IPFILTER_PERCENTAGE "Actualizando IPFilter.dat: %s%% de %s completado"
@@ -2242,7 +2242,7 @@ BEGIN
     IDS_BACKUP              "Backup"
     IDS_USS_MAXPING         "Valor de ping máximo (ms) (Por Defecto %i)"
     IDS_PAYBACKFIRST        "Dar Primero"
-    IDS_USS_USEMAXPING      "usar máximo valor de ping"
+    IDS_USS_USEMAXPING      "Usar máximo valor de ping"
     IDS_CREDIT_SYSTEM       "Sistema de Créditos"
     IDS_OFFICIAL_CREDIT     "Crédito Oficial"
     IDS_LOVELACE_CREDIT     "Crédito por Fidelidad"
@@ -2786,7 +2786,7 @@ BEGIN
     IDC_MSGONLYFRIEND_TIP   "Mensajes provinientes de clientes que no estén en tu lista de amigos no se mostrarán"
     IDC_COMMENTFILTE_TIP    "Comentarios de archivos que contengan estas\npalabras serán considerados spam y no serán mostradas\nen los detalles del archivo"
     IDC_SEC_MIS_TIP         "La identificación segura siempre está activada en MorphXT.\nFuncionar como usuario seguro sólo está disponible en sistema basados en Windows NT (NT/2000/XP)"
-    IDC_RUNASUSER_TIP       "Ejecutar el eMule como usuario restringido. eMule creará un usuario\n'eMule_secure' que sólo tiene permitido escribir en las carpetas temp, incoming y la de instalación. Nota:\nEjecutar previsualizar desde el eMule puede que no funcione,\nla asociación del eMule con los links eD2K está restringida.\nTu sistema está más seguro contra hackeos.\nMira a ver en el administrador de tareas si el eMule está siendo ejecutado con el nombre de 'eMule_secure'."
+    IDC_RUNASUSER_TIP       "Ejecutar el eMule como usuario restringido. eMule creará un usuario\n'eMule_secure' que sólo tiene permitido escribir en las carpetas temp,\n incoming y la de instalación. Nota:\nEjecutar previsualizar desde el eMule puede que no funcione,\nla asociación del eMule con los links eD2K está restringida.\nTu sistema está más seguro contra hackeos.\nMira a ver en el administrador de tareas si el eMule está siendo\nejecutado con el nombre de 'eMule_secure'."
     IDC_MSGONLYSEC_SEC      "Sólo serán aceptados los mensajes de clientes con una identificación segura."
     IDC_ADVSPAMFILTER_TIP   "Mensajes duplicados o mensajes a los que no contestas tras unos pocos mensajes serán considerados como spam y se baneará al cliente."
     IDS_LOG_SERVER_FILTERED "Servidor eliminado en %s de la lista '%s': en ipfilter '%s'"
@@ -2813,7 +2813,7 @@ BEGIN
     IDS_PW_AUTOCONNECTSTATICONLY_TIP 
                             "Sólo se conecta a servidores que están marcados como estáticos. Si no hay servidores estáticos en la lista la conexión automática dará error."
     IDS_MAXCONNECTIONSSWITCHBORDER_TIP 
-                            "Límite máximo para pasar de USS a SUC y viceversa\nUSS es mejor con cuando hay pocos slots abiertos, SUC necesita abrir muchos slots para determinar una buena media."
+                            "Límite máximo para pasar de USS a SUC y viceversa\nUSS es mejor con cuando hay pocos slots abiertos,\nSUC necesita abrir muchos slots para determinar una buena media."
     IDS_SUC_TIP             "Usar el Control de Subida Inteligente (SUC)\nPros: Sin tráfico extra (no hace pings)\nContras: necesita clientes activos para poder encontrar la velocidad óptima."
     IDC_USS_TIP             "Hace pings al último\nrouter límite común de tu ISP (para tres clientes aleatorios)\npara determinar el tiempo de reacción de tu conexión."
     IDC_SUC_LOG_TIP         "Loguear en el log del verbose (información extra avanzada)"
@@ -2824,7 +2824,7 @@ STRINGTABLE
 BEGIN
     IDS_DM_TIP              "Configuraciones extras relacionadas con la Descarga:\nCategorías, ventana de descarga, SelecciónInteligenteDeTrozos (ICS)"
     IDS_SCC_TIP             "Cómo manejar las categorías en la ventana de transferencias"
-    IDS_SAC_TIP             "Dirección de las fuentes que tienen archivos múltiples (<b>A</b>sked <b>4</b> for <b>A</b>nother <a>F</a>ile)\n&Pequeño control af4f.\nLA traducción literal es preguntar por otro archivo."
+    IDS_SAC_TIP             "Dirección de las fuentes que tienen archivos múltiples (<b>A</b>sked <b>4</b> for <b>A</b>nother <b>F</b>ile)\n&Pequeño control af4f.\nLa traducción literal es preguntar por otro archivo."
     IDS_DEFAULT_TIP         "IDS_DEFAULT_TIP"
     IDS_UM_TIP              "Direccion de la subida:\ncontrol de slot, deteccion de la\nanchura de banda de subida"
     IDS_DYNUPLOAD_TIP       "Variar la velocidad de subida de forma automatica\ndetectando la anchura de banda disponible."
@@ -2873,7 +2873,7 @@ BEGIN
     IDS_COUNTWCSESSIONSTATS_TIP 
                             "Mantener separadas las estadísticas para el tráfico por Webcaché"
     IDS_CLIENTQUEUEPROGRESSBAR_TIP 
-                            "Mostrar una barra en el fondo de las \ntransfer ventanas con el número de los clientes en cola"
+                            "Mostrar una barra en el fondo de la ventana de\ntransferencias con el número de los clientes en cola"
     IDS_DOWNLOADDATARATEAVERAGETIME_TIP 
                             "Tiempo (en segundos) que se muestra el promedio de la velocidad de descarga en la ventana de Gráfico"
     IDS_UPLOADDATARATEAVERAGETIME_TIP 
@@ -2885,12 +2885,12 @@ BEGIN
     IDS_MINDATARATEPOWERSHARE_TIP 
                             "Velocidad total que es gastada en todos los PowerShare slots. (Por defecto:todo)"
     IDS_MAXCLIENTDATARATEPOWERSHARE_TIP 
-                            "Máxima velocidad de subida permitida para 1 slot en estado de PowerShare.\nPor defecto = 0, enfocando toda la velocidad del powershared para el número mas bajo de ranuras.\nConfigurando un valor aquí hace que el interruptor del Morph distribuya el ancho de banda."
+                            "Máxima velocidad de subida permitida para 1 slot en estado de PowerShare.\nPor defecto = 0, enfocando toda la velocidad del PowerShared para el número mas bajo de ranuras.\nConfigurando un valor aquí hace que el interruptor del Morph distribuya el ancho de banda."
     IDS_MAXCLIENTDATARATE_TIP 
                             "Velocidad Máxima de subida que 1 slot de un cliente normal puede recibir.\nPor defecto = 0, Velocidad para acabar de completar el slot lo mas rapidamente posible,\nEl valor que se pone aqui, sirve para limitar las subidas y distribuir la anchura de banda entre un\nmáximo de slot posibles. Puede ser que durante breves periodos de tiempo, esta velocidad\nse puede superar para completar tu ancho de banda."
     IDS_SLOT_LIMIT_GROUP_TIP 
                             "Opción que se debe tomar como último recurso para limitar el número de slots.\nPrimero se aplican los diferentes metodos de subida y esta opcion tan solo sirve\npara limitar el numero de slot, si los limites de velocidad no se pueden\najustar correctamente."
-    IDS_SLOT_LIMIT_NUM_TIP  "El límite superior de los slots abiertos es un número configurable. Esto es únicamente útil en clientes con una velocidad de subida alta."
+    IDS_SLOT_LIMIT_NUM_TIP  "El límite superior de los slots abiertos es un número configurable.\nEsto es únicamente útil en clientes con una velocidad de subida alta."
     IDS_CAT_SHOWCATNAME_TIP "Muestra el nombre completo de la categoría o el número de la categoría\nen la columna de Categoría en la ventana de transferencias."
     IDS_CAT_SHOWSELCATDLG_TIP 
                             "Muestra el diálogo de la selección/adición de categorías\ncada vez que un fichero es añadido a eMule"
@@ -2901,13 +2901,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CAT_AUTORESUMEORD_TIP 
-                            "Asigna una <b>P</b>rioridad <b>L</b>Lineal/na cada descarga para resumirlos a archivos pausados y poder hacerlos en el mismo orden"
+                            "Asigna una Prioridad Lineal\na cada descarga para resumirlos a archivos pausados y poder hacerlos en el mismo orden"
     IDS_CAT_SMALLFILEDLPUSH_TIP 
                             "Asigna una Prioridad Lineal 0 a archivos menores a 154624 bytes"
     IDS_CAT_STARTFILESONADD_TIP 
                             "Si creas una nueva categoría en el diálogo de\nSeleccionar Categoría, cuando agregue múltiples archivos en el estado pausado\nlos archivos añadidos serán comenzados (Por defecto=0, desactivado)"
-    IDS_A4AF_SMARTSWAP_TIP  "Si esta Activado,<b>P</b>reguntará la dirección para <b>O</b>tro <b>A</b>rchivo"
-    IDS_A4AF_SHOWDEBUG_TIP  "Mostrar mensajes sobre A4AF en el registro de Información Extra si el registro de la respuesta el programa (Información Extra) está activado"
+    IDS_A4AF_SMARTSWAP_TIP  "Si esta Activado, Preguntará la dirección para Otro Archivo"
+    IDS_A4AF_SHOWDEBUG_TIP  "Mostrar mensajes sobre A4AF en el registro de Información Extra\n si el registro de la respuesta el programa (Información Extra) está activado"
     IDS_A4AF_ADVMODE_TIP    "Opciones de cómo manipular si una fuente tiene múltiples fuentes."
     IDS_A4AF_DISABLED_TIP   "Desactivar manejo adicional del A4AF"
     IDS_A4AF_BALANCE_TIP    "Divide la fuente del A4AF igualmente sobre los archivos."
@@ -2933,7 +2933,7 @@ BEGIN
     IDS_MAXDATARATEFRIEND_TIP 
                             "Flujo maximo de datos para los amigos (% de la subida)\ncuando usemos USS/SUC. Si la subida a los amigos sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro."
     IDS_MAXDATARATEPOWERSHARE_TIP 
-                            "Flujo maximo de datos para el powershare (% de la subida),\nsi la subida con powershare sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro."
+                            "Flujo maximo de datos para el PowerShare (% de la subida),\nsi la subida con PowerShare sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro."
 END
 
 STRINGTABLE 
@@ -3020,26 +3020,26 @@ BEGIN
     IDS_SFM_TIP             "Opciones sobre los archivos que compartes. "
     IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP 
                             "Permitir los datos de la coleccion en la SpreadBar.\nEsto es óptimo para mejorar los lanzamientos\npero puede incrementar el uso de memoria RAM"
-    IDS_HIDEOVERSHARES_TIP  "Cambiar la subida de partes dentro de un mismo archivo. \nSe ocultan las partes que mas se han subido, respecto a las que mas se han bajado. Esto causa\nque se soliciten las partes menos descargadas.\nAlgunas partes estan siempre visibles. "
-    IDS_SELECTIVESHARE_TIP  "Puedes cambiarlo para que a usuario solo vea una parte\nempezando con los menos subidos, y viendo que partes se han ofrecido\n elegir el siguiente. No se debe deshabilitar la ocultacion de las partes mas compartidas para que esto funcione (Por defecto)."
+    IDS_HIDEOVERSHARES_TIP  "Cambiar la subida de partes dentro de un mismo archivo. \nSe ocultan las partes que mas se han subido, respecto a las\nque mas se han bajado. Esto causa\nque se soliciten las partes menos descargadas.\nAlgunas partes estan siempre visibles. "
+    IDS_SELECTIVESHARE_TIP  "Puedes cambiarlo para que a usuario solo vea una parte\nempezando con los menos subidos, y viendo que partes se han ofrecido\nelegir el siguiente. No se debe deshabilitar la ocultacion de las partes\nmás compartidas para que esto funcione (Por defecto)."
     IDS_SHAREONLYTHENEED_TIP 
                             "Solamente se ocultan las partes que ya fueron\npedidas por otros clientes de tu cola. eMule analiza\n tu cola de subida si cada usuario esta pidiendo las mismas\npartes. Si esta activado, eMule oculta las partes que ya has subido por lo menos\na un cliente, y muestra los que nadie tiene. Estan de color morado en la\nSpreadBar.Siempre hay uno visible."
-    IDS_POWERSHARE_TIP2     "Ajustes para el powershare, \ndan prioridad absoluta a un archivo\n sin la necesidad de compartir\notros archivos"
+    IDS_POWERSHARE_TIP2     "Ajustes para el PowerShare, \ndan prioridad absoluta a un archivo\n sin la necesidad de compartir\notros archivos"
     IDS_POWERSHARE_DISABLED_TIP 
-                            "No esta activado el powershare\na no ser que lo hagas de forma\nindividual."
+                            "No esta activado el PowerShare\na no ser que lo hagas de forma\nindividual."
     IDS_POWERSHARE_ACTIVATED_TIP 
                             "El Powershare esta activado\nexcepto si el archivo lo tienes\nen otro modo."
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_POWERSHARE_AUTO_TIP "Decidir si el powershare es util, dependiendo de las peticiones y si tiene pocas fuentes el archivo."
+    IDS_POWERSHARE_AUTO_TIP "Decidir si el PowerShare es útil, dependiendo de las peticiones y si tiene pocas fuentes el archivo."
     IDS_POWERSHARE_LIMITED_TIP 
-                            "Limite de powershare hasta las xx fuentes completas"
+                            "Limite de PowerShare hasta las xx fuentes completas"
     IDS_POWERSHARE_LIMIT_TIP 
                             "Cantidad de fuentes (fuentes virtuales) para activar el limite"
     IDS_POWERSHARE_INTERPRIO_TIP 
-                            "Utilizar otras prioridades en el powershare, como las prioridades individuales.\nPor ejemplo: Prioridad alta simpre va antes que prioridad normal en vez de un factor (por defecto deshabilitado)."
+                            "Utilizar otras prioridades en el PowerShare, como las prioridades individuales.\nPor ejemplo: Prioridad alta simpre va antes que prioridad normal en vez de un factor (por defecto deshabilitado)."
     IDS_PERMISSION_TIP      "Permisos para que la gente vea la lista de todos tus archivos."
     IDS_FSTATUS_EVER_TIP    "Todos los archivos son publicos, si el permiso\nindividual de cada archivo esta permitido"
     IDS_FSTATUS_FRIENDSONLY_TIP 
@@ -3144,7 +3144,7 @@ BEGIN
     IDS_PAWCIO_CREDIT_TIP   "Inicio:3 Min:1 Max:100.\nRatio = 3 * Descargado / Subido - Para nuevos clientes (Datos descargados y subidos menor que 1MB)\nratio = 3.0 (en vez de 1.0) - Si has recibido mas de 1MB de alguien pero no han dado cualquier cosa al usuario, este\nconsigue un ratio = 100.0 - Pequeña prima para aquellos clientes que te han dado muchos MB:\n- Si tu recibes 100MB entonces el usuario recibe un ratio = 50.0"
     IDS_EASTSHARE_CREDIT_TIP 
                             "Inicio:100 min: 10 max: 5000\nRatio = +6 por MB subido y -2 por descargado\nbonus  +100 si subes 1MB+\nvalor bajo si subes por debajo de tus posibilidades 1MB+, ratio = 50"
-    IDS_PAYBACKFIRST_TIP    "Abrir un slot con powershare para subir datos inmediatamente a un cliente.\nTrabaja solo sobre archivos descargados completamente y no sobre los que estan parcialmente descargados."
+    IDS_PAYBACKFIRST_TIP    "Abrir un slot con PowerShare para subir datos inmediatamente a un cliente.\nTrabaja solo sobre archivos descargados completamente y no sobre los que estan parcialmente descargados."
     IDS_PAYBACKFIRSTLIMI_TIP 
                             "Sube el nivel de MB que tenemos que dar al cliente antes de que nosotros\nempecemos a descargar de el."
     IDS_EXPIRED_KNOWN_TIP   "Limpiar los archivos .met despues de que el archivo no se haya modificado por x dias\npara ahorra espacio en el disco duro. Solicitar known*.met. No poner un valor muy pequeño,\npor debajo de 30."
@@ -3158,7 +3158,7 @@ BEGIN
                             "Nivel de las entradas del filtro son aplicadas.\nCada entrada del ipfilter.dat tiene un (posible) valor,\nintroduciendo el valor 0, desactiva temporalmente el filtro de IPs.\n0 Se recomienda para testear puertos abiertos, o elimina\nipfilter.dat para preservar memoria. (El valor por defecto es 127)\nLa lista usada para el filtro en Morph es de meuh4567\nlos siguientes niveles permiten\nel máximo número de fuentes para el valor 0, 254 para algo de paranoia"
     IDC_RELOADFILTE_TIP     "Carga el archivo otra vez en memoria."
     IDC_EDITFILTE_TIP       "Edita ipfilter.dat con el block de notas."
-    IDC_LOADUR_TIP          "Carga un flitro de IPs desde la dirección http mostrada aquí.\nPuesdes encontrar una lista de bloqueados en<a=""http://www.bluetack.co.uk""> http://bluetack.co.uk</a>\nMorph update ofrece una lista completa de bloqueados también.\nzip & rar (necesario el archivo unrar.dll) es también soportado\n(Utilizar solamente uno de éstos)"
+    IDC_LOADUR_TIP          "Carga un flitro de IPs desde la dirección http mostrada aquí.\nPuesdes encontrar una lista de bloqueados en<a=""http://www.bluetack.co.uk""> http://bluetack.co.uk</a>\nMorph Update ofrece una lista completa de bloqueados también.\nzip & rar (necesario el archivo unrar.dll) es también soportado\n(Utilizar solamente uno de éstos)"
 END
 
 STRINGTABLE 
@@ -3242,10 +3242,10 @@ BEGIN
     IDS_CAT_SELDLGTXT_TIP   "Puedes organizar las descargas por categorías.\nSon las etiquetas que aparecen en la pantalla de descargas.\nPuedes añadir categorías poniendo\nel nombre de la categoría o seleccionando una de las \nexistentes."
     IDS_OKCANCELSEL_TIP     "Selecciona la categoría y pulsa ok para \ndescargar en esa categoría o\npulsa cancelar para no\ndescargarla(s)."
     IDC_DISABLEOBFUSCATION_TIP 
-                            "Si por alguna razón quieres desactivar la ofuscación\ncompletamente selecciónalo. En general no tienes por\nqué activarlo. (por defecto: quitado)"
+                            "Si por alguna razón quieres desactivar la ofuscación\ncompletamente selecciónalo. En general no tienes por\nqué activarlo. (Por defecto: Desactivado)"
     IDC_ONLYOBFUSCATED_TIP  "Si activas esta opcion, eMule solo aceptará y establecerá conexiones ofuscadas. Los clientes que no tengan\nsoporte para las conexiones ofuscadas serán rechazados y en la conexion a un servidor automaticamente\nsolo se conectará a los que tengan soporte para la ofuscacion. Tan solo debes elegir esta opcion si\nsufres algun tipo de capado completo del protocolo eD2K en tu red, ya que sino rechazas fuentes\ninnecesariamente y tu eMule sufre un rendimiento menor. Sin embargo si tu estas seguro de que sufres\nun bloqueo, entonces activa esta opcion, porque ahorra los intentos en las conexiones que fallan y\npor lo tanto pierdes tiempo, recursos y gastos innecesarios.\n\n¡Tan solo activa esta opcion si no puedes recibir datos de ninguna manera! Por defecto desactivado."
     IDC_ENABLEOBFUSCATION_TIP 
-                            "Si piensas que el eMule esta sufriendo una priorizacion de paquetes por tu ISP, activa esta opcion. Siempre\nque el eMule tenga la capacidad de una conexion ofuscada y el otro cliente tambien lo permita, este se\nconectará de forma ofucada. Al conectar con un servidor, primero lo intentara de forma ofuscada y tan\nsolo si no es posible se conectará de forma norma. En general no existen deventajas activando esta\nopcion, tan solo un insignificante aumento de CPU y unos pocos bytes de mas de gastos indirectos\nasi que realmente no haces nada malo activando esta opcion, con lo que se recomienda activarlo.\nPor defecto desactivado."
+                            "Si piensas que el eMule está sufriendo una priorización de paquetes por tu ISP, activa esta opción. Siempre\nque el eMule tenga la capacidad de una conexión ofuscada y el otro cliente tambien lo permita, este se\nconectará de forma ofucada. Al conectar con un servidor, primero lo intentará de forma ofuscada y tan\nsólo si no es posible se conectará de forma norma. En general no existen deventajas activando esta\nopción, tan sólo un insignificante aumento de CPU y unos pocos bytes de más de gastos indirectos\nasí que realmente no haces nada malo activando esta opción, con lo que se recomienda activarlo.\n(Por defecto: Desactivado)"
 END
 
 STRINGTABLE 
@@ -3299,7 +3299,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ADVADMINENABLED_TIP "Permite el componente de multiusuario en el Servidor Web"
+    IDS_ADVADMINENABLED_TIP "Permite el componente de MultiUsuario en el Servidor Web"
     IDS_ACCOUNTSELECT_TIP   "Selecciona el nombre de la Cuenta de la lista desplegable"
     IDS_ADVADMIN_USER_TIP   "Usuario que entra en la interfaz Web"
     IDS_ADVADMIN_PASS_TIP   "Contraseña"
@@ -3312,7 +3312,7 @@ BEGIN
     IDS_ADVADMIN_STATS_TIP  "Permite acceder a la ventana de estadísticas"
     IDS_ADVADMIN_PREFS_TIP  "Permite acceder a las Preferencias del eMule"
     IDS_ADVADMIN_USERLEVEL_TIP 
-                            "-- Niveles de Usuarios --\nInvitado: Sólo tiene acceso a las páginas permitidas, pero no tiene permisos para modificarlas.\nOperador: tiene acceso a las páginas permitidas y puede utilizar todas las funciones menos las de Administrador (parecido al Administrador sin tener permisos de Alto Nivel que el original)\nAdministrador: es como el Operador, pero puede apagar el eMule\nHi-Administrador: es como el Administrador pero puede apagar y reiniciar el sistema (parecido al Administrador con funciones de Alto Nivel original)"
+                            "-- Niveles de Usuarios --\n<b>Invitado</b>: Sólo tiene acceso a las páginas permitidas, pero no tiene permisos para modificarlas.\n<b>Operador</b>: tiene acceso a las páginas permitidas y puede utilizar todas las funciones menos las de Administrador (parecido al Administrador sin tener permisos de Alto Nivel que el original)\n<b>Administrador</b>: es como el Operador, pero puede apagar el eMule\n<b>Hi-Administrador</b>: es como el Administrador pero puede apagar y reiniciar el sistema (parecido al Administrador con funciones de Alto Nivel original)"
     IDS_ADVADMIN_CATS_TIP   "El usuario tiene acceso a las Categorías. Deje en blanco para todos los usuarios.\nSepare los nombres de las Categorías con el símbolo ( | )"
     IDS_ADVADMIN_DELETE_TIP "Suprimir la Cuenta mostrada"
     IDS_STATIC_ADVADMIN_CATS_TIP "IDS_STATIC_ADVADMIN_CATS_TIPs"
@@ -3325,6 +3325,31 @@ BEGIN
     IDS_STATIC_ADVADMIN_USERLEVEL_TIP "IDS_STATIC_ADVADMIN_USERLEVEL"
     IDS_ADVADMIN_NOTE_TIP   "IDS_ADVADMIN_NOTE"
 END
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNHISTORY_REMOVE  "Eliminar del historial"
+    IDS_DOWNHISTORY_REMOVE_QUESTION 
+                            "¿Está seguro de querer eliminar ""%s"" del historial de descargas?"
+    IDS_DOWNHISTORY_REMOVE_QUESTION_MULTIPLE 
+                            "¿Está seguro de querer eliminar los archivos seleccionados del historial de descargas?"
+    IDS_DOWNHISTORY_SHARED  "Compartidos"
+    IDS_DOWNHISTORY_CLEAR   "Limpiar el historial de descargas"
+    IDS_DOWNHISTORY_SHOWSHARED "Mostrar archivos compartidos"
+    IDS_DOWNHISTORY_ACTIONS "Acciones"
+    IDS_DOWNHISTORY_CLEAR_QUESTION 
+                            "¿Está seguro de querer limpiar el historial de descargas?"
+    IDS_UPDATEFAKELISTWEEK  "Actualizar semanalmente"
+    IDS_AUTOUPIPFILTERWEEK  "Actualizar semanalmente"
+    IDS_UPDATEFAKELISTWEEK_TIP 
+                            "Añadir una entrada en el Programador para actualizar el\n<b>fakelist.dat</b> desde la URL una vez por semana.\nEl Programador está activado.\nEsto funcionará solamente si Morph se está ejecutando al mismo tiempo.\nPuedes modificar la hora en la que lo actualizará\nen las preferencias del Programador"
+    IDS_UPDATEIPFILTERWEEK_TIP 
+                            "Añadir una entrada en el Programador para actualizar el\n<b>ipfilter.dat</b> desde la URL una vez por semana.\nEl Programador está activado.\nEsto funcionará solamente si Morph se está ejecutando al mismo tiempo.\nPuedes modificar la hora en la que lo actualizará\nen las preferencias del Programador"
+    IDS_SCHEDTEXT           "Añadido por el Morph AutoUpdate"
+END
+
+
+
 
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////
