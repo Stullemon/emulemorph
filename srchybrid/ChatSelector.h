@@ -80,7 +80,7 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual int InsertItem(int nItem, TCITEM* pTabCtrlItem);
 	virtual BOOL DeleteItem(int nItem);
-	//virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam); 
 
 	void AddTimeStamp(CChatItem*);
 	bool IsSpam(CString strMessage, CUpDownClient* client);
@@ -95,4 +95,11 @@ private:
 	HWND m_hwndCloseBtn;
 	HWND m_hwndSendBtn;
 	CImageList m_imlChat;
+
+//MORPH WiZaRd::Context-FiX START
+public:
+	CChatItem* GetChatItemUnderMouse(); 
+private:
+	CChatItem* m_contextItem;
+//MORPH WiZaRd::Context-FiX END
 };

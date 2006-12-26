@@ -73,7 +73,7 @@ BEGIN_MESSAGE_MAP(CChatSelector, CClosableTabCtrl)
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnTcnSelchangeChatsel)
 	ON_BN_CLICKED(IDC_CCLOSE, OnBnClickedCclose)
 	ON_BN_CLICKED(IDC_CSEND, OnBnClickedCsend)
-	//ON_WM_CONTEXTMENU()
+	ON_WM_CONTEXTMENU() // context-fix
 END_MESSAGE_MAP()
 
 CChatSelector::CChatSelector()
@@ -666,11 +666,15 @@ void CChatSelector::OnDestroy()
 	CClosableTabCtrl::OnDestroy();
 }
 
-/*BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
+BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam){
 		case MP_DETAIL:{
-			const CChatItem* ci = GetCurrentChatItem();
+			//Xman
+			//WiZaRd::Context-FiX
+			//const CChatItem* ci = GetCurrentChatItem();
+			const CChatItem* ci = m_contextItem;
+			//Xman end
 			if (ci) {
 				CClientDetailDialog dialog(ci->client);
 				dialog.DoModal();
@@ -678,7 +682,11 @@ void CChatSelector::OnDestroy()
 			return TRUE;
 		}
 		case MP_ADDFRIEND:{
-			const CChatItem* ci = GetCurrentChatItem();
+			//MORPH WiZaRd::Context-FiX START
+			//const CChatItem* ci = GetCurrentChatItem();
+			const CChatItem* ci = m_contextItem;
+			//MORPH WiZaRd::Context-FiX END
+
 			if (ci) {
 				CFriend* fr = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
 				if (!fr)
@@ -687,7 +695,11 @@ void CChatSelector::OnDestroy()
 			return TRUE;
 		}
 		case MP_REMOVEFRIEND:{
-			const CChatItem* ci = GetCurrentChatItem();
+			//WiZaRd::Context-FiX START
+			//const CChatItem* ci = GetCurrentChatItem();
+			const CChatItem* ci = m_contextItem;
+			//WiZaRd::Context-FiX END
+
 			if (ci) {
 				CFriend* fr = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
 				if (fr)
@@ -696,22 +708,33 @@ void CChatSelector::OnDestroy()
 			return TRUE;
 		}
 		case MP_REMOVE:{
+			//WiZaRd::Context-FiX START
+            /*
 			const CChatItem* ci = GetCurrentChatItem();
+			*/
+			const CChatItem* ci = m_contextItem;
+			//WiZaRd::Context-FiX END
+
 			if (ci)
 				EndSession(ci->client);
 			return TRUE;
 		}
 	}
 	return CClosableTabCtrl::OnCommand(wParam, lParam);
-}*/
+} // context fix
 
 // This does not work! This offers context menu entries which always
 // work for the selected tab item only! The offered context menu entries have to work for
 // the item which is under the cursor. Thus one can e.g. no longer use the 'Close' function
 // for other (non-selected) items.
-/*void CChatSelector::OnContextMenu(CWnd*, CPoint point)
+void CChatSelector::OnContextMenu(CWnd*, CPoint point) // context fix
 {
-	const CChatItem* ci = GetCurrentChatItem();
+	//MORPH WiZaRd::Context-FiX START
+	//const CChatItem* ci = GetCurrentChatItem();
+	CChatItem* ci = GetChatItemUnderMouse();
+	m_contextItem = ci;
+	//MORPH WiZaRd::Context-FiX END
+
 	if (ci == NULL)
 		return;
 	CFriend* pFriend = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
@@ -734,4 +757,19 @@ void CChatSelector::OnDestroy()
 	ScreenToClient(&m_ptCtxMenu);
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }
-*/
+
+//MORPH WiZaRd::Context-FiX START
+CChatItem* CChatSelector::GetChatItemUnderMouse()
+{
+	CPoint pt;
+	GetCursorPos(&pt);
+	ScreenToClient(&pt);
+	int i = GetTabUnderPoint(pt);
+	CChatItem* item = NULL;
+	TCITEM cur_item;
+	cur_item.mask = TCIF_PARAM;
+	if (GetItem(i, &cur_item))
+		item = (CChatItem*)cur_item.lParam;
+	return item;
+}
+//MORPH WiZaRd::Context-FiX END
