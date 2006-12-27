@@ -126,6 +126,5 @@ private:
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
 	CString          m_strImport;
 	CArray<uint16,uint16>	m_PartsToImport;
-	CArray<uchar*,uchar*>	m_DesiredHashes;
 	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 };

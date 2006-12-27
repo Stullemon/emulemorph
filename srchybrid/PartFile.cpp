@@ -5652,7 +5652,6 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 		uint32 lenDataClipped = (uint32)(item->end - item->start + 1);
 		ASSERT(lenDataClipped <= end - start + 1);
 		// log transferinformation in our "blackbox"
-		if(client) //MORPH - Changed by SiRoB, Import Part
 		m_CorruptionBlackBox.TransferredData(item->start, item->end, client);
 
 		// Create copy of data as new buffer

@@ -34,11 +34,14 @@ bool CKnownFile::SR13_ImportParts(){
 		partfile->SetFileOp(PFOP_NONE);
 		return false;
 	}
+	//MORPH - Import Part, not needed we import every thing we can now.
+	/*
 	// Disallow files without hashset, unless it is one part long file
 	if (GetPartCount() != 1 && GetHashCount() < GetPartCount()){
 		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE), GetFileName(), GetHashCount(), GetPartCount()); // do not try to import to files without hashset.
 		return false;
 	}
+
 
 	// Disallow very small files
 	// Maybe I make them allowed in future when I make my program insert slices in partially downloaded parts.
@@ -46,7 +49,7 @@ bool CKnownFile::SR13_ImportParts(){
 		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_FILETOOSMALL)); // do not try to import to files without hashset.
 		return false;
 	}
-
+	*/
 	CFileDialog dlg(true, NULL, NULL, OFN_FILEMUSTEXIST|OFN_HIDEREADONLY);
 	if(dlg.DoModal()!=IDOK)
 		return false;
@@ -75,11 +78,7 @@ uint16 CAddFileThread::SetPartToImport(LPCTSTR import)
 
 	for (uint16 i = 0; i < m_partfile->GetPartCount(); i++)
 		if (!m_partfile->IsComplete((uint64)i*PARTSIZE,(uint64)(i+1)*PARTSIZE-1,false)){
-			uchar* cur_hash = new uchar[16];
-			md4cpy(cur_hash, m_partfile->GetPartHash(i));
-
 			m_PartsToImport.Add(i);
-			m_DesiredHashes.Add(cur_hash);
 		}
 	return (uint16)m_PartsToImport.GetSize();
 }
@@ -87,8 +86,8 @@ uint16 CAddFileThread::SetPartToImport(LPCTSTR import)
 bool CAddFileThread::SR13_ImportParts(){
 
 	uint16 partsuccess=0;
-//	uint16 badpartsuccess=0;
-	
+	//	uint16 badpartsuccess=0;
+
 	CFile f;
 	if(!f.Open(m_strImport, CFile::modeRead  | CFile::shareDenyWrite)){
 		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE), m_strImport);
@@ -103,7 +102,7 @@ bool CAddFileThread::SR13_ImportParts(){
 	CString strFilePath;
 	_tmakepath(strFilePath.GetBuffer(MAX_PATH), NULL, m_strDirectory, m_strFilename, NULL);
 	strFilePath.ReleaseBuffer();
-	
+
 	Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_IMPORTSTART), m_PartsToImport.GetSize(), strFilePath);
 
 	BYTE* partData=NULL;
@@ -115,7 +114,7 @@ bool CAddFileThread::SR13_ImportParts(){
 		try {
 			try {
 				if (partData==NULL ) 
-					 partData=new BYTE[PARTSIZE];
+					partData=new BYTE[PARTSIZE];
 				CSingleLock sLock1(&(theApp.hashing_mut), TRUE);	//SafeHash - wait a current hashing process end before read the chunk
 				f.Seek((LONGLONG)PARTSIZE*partnumber,0);
 				partSize=f.Read(partData, PARTSIZE);
@@ -125,7 +124,6 @@ bool CAddFileThread::SR13_ImportParts(){
 				continue;
 			}
 			kfcall->CreateHash(partData, partSize, hash);
-			if (md4cmp(hash,m_DesiredHashes[i])==0){
 				ImportPart_Struct* importpart = new ImportPart_Struct;
 				importpart->start = (uint64)partnumber*PARTSIZE;
 				importpart->end = (uint64)partnumber*PARTSIZE+partSize-1;
@@ -134,24 +132,20 @@ bool CAddFileThread::SR13_ImportParts(){
 				partData = NULL; // Delete will happen in async write thread.
 				//Log(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD), partnumber);
 				partsuccess++;
-			} else {
-				delete[] partData;
-				partData = NULL;
-			}
 
 			if (theApp.emuledlg->IsRunning()){
-				UINT uProgress = (UINT)(i * 100 / m_DesiredHashes.GetSize());
+				UINT uProgress = (UINT)(i * 100 / m_PartsToImport.GetSize());
 				VERIFY( PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)m_partfile) );
 				Sleep(100); // sleep very short to give write time to write (or else mem grows!)
 
 			}
-			
+
 			if(!theApp.emuledlg->IsRunning() || partSize!=PARTSIZE || m_partfile->GetFileOp() != PFOP_SR13_IMPORTPARTS) {
 				break;
 			}
 		} catch (...) {
 			if (partData != NULL)
-			  {delete[] partData;partData = NULL;}
+			{delete[] partData;partData = NULL;}
 			continue;
 		}
 	}
@@ -167,9 +161,6 @@ bool CAddFileThread::SR13_ImportParts(){
 	} catch (...) {
 		//This could happen if we delete the part instance
 	}
-	
-	for (UINT i = 0; i < (UINT)m_DesiredHashes.GetSize(); i++)
-		delete m_DesiredHashes[i];
 
 	f.Close();
 	delete kfcall;

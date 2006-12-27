@@ -680,7 +680,7 @@ void CUpDownClient::CreateNextBlockPackage(){
     if(m_BlockRequests_queue.IsEmpty() || // There is no new blocks requested
        m_abyfiledata == (byte*)-2 || //we are still waiting for a block read from disk
 	   m_abyfiledata != (byte*)-1 && //Make sur we don't have something to do
-	   m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > max(GetDatarate()>>2, 50*1024)) { // the buffered data is large enough already according to client datarate
+	   m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > max(GetDatarate()<<1, 50*1024)) { // the buffered data is large enough already according to client datarate
 		return;
 	}
 	CString fullname;
@@ -740,7 +740,13 @@ void CUpDownClient::CreateNextBlockPackage(){
 									error.Format(_T("%s: Part %u, %I64u = %I64u - %I64u "), GetResString(IDS_ERR_HIDDENBLOCK), i, i64uTogo, currentBlock->EndOffset, currentBlock->StartOffset);
 								throw error;
 							}
-					}//MORPH END   - Added by SiRoB, Anti Anti HideOS & SOTN :p 
+					} else {
+						CString	error;
+						error.Format(_T("%s: Part %u, %I64u = %I64u - %I64u "), GetResString(IDS_ERR_HIDDENSOURCE), (UINT)(currentBlock->StartOffset/PARTSIZE), i64uTogo, currentBlock->EndOffset, currentBlock->StartOffset);
+						throw error;
+					
+					}
+					//MORPH END   - Added by SiRoB, Anti Anti HideOS & SOTN :p 
 				}
 
 				if( i64uTogo > EMBLOCKSIZE*3 )

@@ -110,7 +110,7 @@ public:
 	uint64	GetUpDataOverheadKadPackets()				{return m_nUpDataOverheadKadPackets;}
 	uint64	GetUpDataOverheadOtherPackets()				{return m_nUpDataOverheadOtherPackets;}
 
-	//Morph - start
+	//Morph - ZZ start
 	uint64  GetTotalCompletedBytes() { return m_nTotalCompletedBytes; }
     void    IncTotalCompletedBytes(uint64 toAdd) { m_nTotalCompletedBytes += toAdd; }
     void    DecTotalCompletedBytes(uint64 toDec) {
@@ -119,7 +119,7 @@ public:
         else
             m_nTotalCompletedBytes = 0;
     }
-	//Morph - end
+	//Morph - ZZ end
 
 public:
 	//	Cumulative Stats

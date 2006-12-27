@@ -5279,6 +5279,7 @@ BEGIN
     IDS_SELECTIVESHARE      "Selective chunk sharing"
     IDS_ERR_HIDDENBLOCK     "Asked for hidden block "
     IDS_SP_ULPOWERSHARE     "Upload powershare slots"
+    IDS_ERR_HIDDENSOURCE    "Asked Block without telling us what he need"
     IDS_SCHED_BACKUP        "Backup CONFIG-folder"
     IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT-file"
     IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT-file"

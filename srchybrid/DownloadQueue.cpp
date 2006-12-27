@@ -2658,12 +2658,10 @@ CString CDownloadQueue::GetOptimalTempDir(UINT nCat, EMFileSize nFileSize){
 //MORPH START - Added by SiRoB, ZZ Ratio
 bool CDownloadQueue::IsFilesPowershared()
 {
-	if (!filelist.IsEmpty()) {
 		for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
 			CPartFile* cur_file =  filelist.GetNext(pos);
 			if (cur_file && cur_file->IsPartFile()&& (cur_file->GetStatus() > PS_EMPTY) && ((cur_file->GetPowerSharedMode()>=0)?cur_file->GetPowerSharedMode():thePrefs.GetPowerShareMode())&1)
 				return true;
-		}
 	}
 	return false;
 }

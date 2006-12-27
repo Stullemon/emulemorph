@@ -1635,7 +1635,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					{ // Blackholes are when God divided by 0
 						percentSessions = (double) 100*statGoodSessions/(statGoodSessions+statBadSessions);
 						/*ZZ
-						cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDATAULSES), CastItoXBytes( (uint64) theStats.GetTotalCompletedBytes() / statGoodSessions, false, false) ); 
+						cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDATAULSES), CastItoXBytes( theStats.sessionSentBytes / statGoodSessions, false, false) ); 
 						*/cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDATAULSES), CastItoXBytes( (uint64) theStats.GetTotalCompletedBytes() / statGoodSessions, false, false) ); 
 					}
 					else 
