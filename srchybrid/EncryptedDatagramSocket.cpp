@@ -102,7 +102,6 @@ int CEncryptedDatagramSocket::DecryptReceivedClient(BYTE* pbyBufIn, int nBufLen,
 // MORPH START: webcache 
 		case  OP_WEBCACHEPROT:
 		case  OP_WEBCACHEPACKEDPROT:
-		case  OP_THE_LETTER_G:			// yonatan http - first byte in an http GET header
 // MORPH end : webcache
 			return nResult; // no encrypted packet (see description on top)
 	}
@@ -179,7 +178,6 @@ int CEncryptedDatagramSocket::EncryptSendClient(uchar** ppbyBuf, int nBufLen, co
 // MORPH START: webcache 
 			case  OP_WEBCACHEPROT:
 			case  OP_WEBCACHEPACKEDPROT:	
-			case  OP_THE_LETTER_G:			// yonatan http - first byte in an http GET header
 // MORPH end : webcache
 				break;
 			default:
