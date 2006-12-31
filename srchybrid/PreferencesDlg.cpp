@@ -114,6 +114,7 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndDebug);
 #endif
      AddPage(&m_wndIonixWebServer); // Morph - ionix advanced webserver
+	 AddPage(&m_wndNTService); // MORPH leuk_he:run as ntservice v1..
 
 
 	SetTreeViewMode(TRUE, TRUE, TRUE);
@@ -124,6 +125,7 @@ CPreferencesDlg::CPreferencesDlg()
 	// MORPH start tabbed options [leuk_he]
 	ActivePageWebServer			= 0;
 	StartPageWebServer			= 0;
+	NTService                   = 0; //MORPH leuk_he:run as ntservice v1..
 	// end tabbed
 
 }
@@ -154,14 +156,12 @@ BOOL CPreferencesDlg::OnInitDialog()
 		if (GetPage(i)->m_psp.pszTemplate == m_pPshStartPage)
 		{
 			// MORPH start tabbed options [leuk_he]
-			if (i==Multiwebserver)
+			if ((i==Multiwebserver)||(i==NTService) ) //MORPH leuk_he:run as ntservice v1..
 			{
-				if (i == Multiwebserver){	// webserver
 					SetActivePage(Webserver);
-				}
 				m_wndWebServer.InitTab(false,StartPageWebServer);
 				m_wndIonixWebServer.InitTab(false,StartPageWebServer);
-			
+			    m_wndNTService.InitTab(false,StartPageWebServer);//MORPH leuk_he:run as ntservice v1..
 				break;
 			}
 			else
@@ -224,6 +224,7 @@ void CPreferencesDlg::Localize()
 	m_wndEmulespana.Localize(); //MORPH - Added by SiRoB, emulEspaña preferency
 	m_wndWebcachesettings.Localize(); //MORPH - Added by SiRoB, WebCache 1.2f
     m_wndIonixWebServer.Localize(); //MORPH ionix advanced webserver
+	m_wndNTService.Localize(); //MORPH leuk_he:run as ntservice v1..
 	int c = 0;
 
 	CTreeCtrl* pTree = GetPageTreeControl();
@@ -256,6 +257,7 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(c++), _T("Debug"));
 	     #endif
 		pTree->SetItemText(GetPageTreeItem(Multiwebserver=c++), RemoveAmbersand(_T(" ")));	// MORPH ionix advanced webserver must be last!
+		pTree->SetItemText(GetPageTreeItem(NTService=c++), RemoveAmbersand(_T(" "))); // MORPH leuk_he:run as ntservice v1..
     //  
 	
 	}
@@ -322,8 +324,8 @@ void CPreferencesDlg::SwitchTab(int Page)
 	if(m_hWnd && IsWindowVisible()){
 		CPropertyPage* activepage = GetActivePage();
 								   
-				// webServer 1-2
-		if (activepage == &m_wndWebServer || activepage == &m_wndIonixWebServer){
+		// webServer 1-2 -3
+		if (activepage == &m_wndWebServer || activepage == &m_wndIonixWebServer || activepage == &m_wndNTService){
 			if (Page == 0) {
 				SetActivePage(&m_wndWebServer);
 				ActivePageWebServer = 0;
@@ -336,6 +338,14 @@ void CPreferencesDlg::SwitchTab(int Page)
 				StartPageWebServer = 1;
 				m_wndIonixWebServer.InitTab(false,1);
 			}			
+			// MORPH leuk_he:run as ntservice v1..
+			if (Page == 2) {
+				SetActivePage(&m_wndNTService);
+				ActivePageWebServer = NTService;
+				StartPageWebServer = 2;
+				m_wndNTService.InitTab(false,2);
+			}		
+			// MORPH leuk_he:run as ntservice v1..
 		}
 	}
 }

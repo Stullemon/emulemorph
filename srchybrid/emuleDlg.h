@@ -175,9 +175,10 @@ protected:
 	// Startup Timer
 	UINT_PTR m_hTimer;
 	static void CALLBACK StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
-
+	public://MORPH leuk_he:run as ntservice v1.. 
 	void StartConnection();
 	void CloseConnection();
+	protected://MORPH leuk_he:run as ntservice v1.. 
 	void MinimizeWindow();
 	void PostStartupMinimized();
 	void UpdateTrayIcon(int iPercent);
@@ -266,6 +267,8 @@ protected:
 	afx_msg LRESULT OnWebAddDownloads(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnWebSetCatPrio(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAddRemoveFriend(WPARAM wParam, LPARAM lParam);
+
+	afx_msg LRESULT  OnServiceStatus(WPARAM wParam, LPARAM lParam); // MORPH leuk_he run as a service v1.
 
 	// VersionCheck DNS
 	afx_msg LRESULT OnVersionCheckResponse(WPARAM wParam, LPARAM lParam);

@@ -48,6 +48,7 @@
 #include "MassRename.h" //SLAHAM: ADDED MassRename DownloadList
 #include "log.h" //MassRename DownloadList
 #include "SR13-ImportParts.h"//MORPH - Added by SiRoB, Import Parts [SR13]
+#include "Ntservice.h" 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -110,6 +111,7 @@ CDownloadListCtrl::~CDownloadListCtrl()
 		delete m_ListItems.begin()->second; // second = CtrlItem_Struct*
 		m_ListItems.erase(m_ListItems.begin());
 	}
+	if (!RunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
 	delete m_tooltip;
 }
 

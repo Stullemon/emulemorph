@@ -5858,11 +5858,8 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			m_hpartfile.Write(item->data, lenData);
 			previouspos = item->end + 1; //MORPH - Optimization
 			
-			//MORPH - Optimization
-			/*
 			// Remove item from queue
 			m_BufferedData_list.RemoveHead();
-			*/
 
 			// Decrease buffer size
 			m_nTotalBufferData -= lenData;
@@ -5871,9 +5868,6 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			delete [] item->data;
 			delete item;
 		}
-
-		m_BufferedData_list.RemoveAll(); //MORPH - Optimization
-
 
 		// Partfile should never be too large
  		if (m_hpartfile.GetLength() > m_nFileSize){

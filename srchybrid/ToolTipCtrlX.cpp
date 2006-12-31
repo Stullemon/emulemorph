@@ -17,6 +17,7 @@
 #include "stdafx.h"
 #include "ToolTipCtrlX.h"
 #include "OtherFunctions.h"
+#include "NTService.h" // MORPH leuk_he:run as ntservice v1..
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,6 +68,13 @@ void CToolTipCtrlX::ResetSystemMetrics()
 	m_rcScreen.right = GetSystemMetrics(SM_CXSCREEN);
 	m_rcScreen.bottom = GetSystemMetrics(SM_CYSCREEN);
 	m_iScreenWidth4 = m_rcScreen.Width() / 4;
+	// MORPH leuk_he:run as ntservice v1.. 
+	if (RunningAsService()) {
+		DWORD dwProcessId;
+		DWORD dwThreadId= GetWindowThreadProcessId(m_hWnd,&dwProcessId);
+		EnumThreadWindows(dwThreadId, EnumProc,(LPARAM) dwThreadId);
+	}
+	// MORPH leuk_he:run as ntservice v1..
 }
 
 void CToolTipCtrlX::OnNMThemeChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)

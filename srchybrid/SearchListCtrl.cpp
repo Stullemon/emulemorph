@@ -50,7 +50,7 @@
 #include "server.h"
 #include "CommentDialogLst.h"
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
-
+#include "NTService.h" // MORPH leuk_he:run as ntservice v1..
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -295,7 +295,9 @@ CSearchListCtrl::~CSearchListCtrl()
 		delete pValue;
 	}
 	m_mapSortSelectionStates.RemoveAll();
-	delete m_tooltip;
+    if (!RunningAsService()) { // MORPH leuk_he:run as ntservice v1.. workarround.
+		delete m_tooltip;
+	}
 }
 
 void CSearchListCtrl::Localize()

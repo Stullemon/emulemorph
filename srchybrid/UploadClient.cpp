@@ -1145,9 +1145,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 	togo = newsize;
 	uint32 nPacketSize;
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 splittingsize = 10240;
-	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache())
-		splittingsize = ((GetDatarate()/10240)+1)*10240;
+	uint32 splittingsize = ((GetDatarate()/10240)+1)*10240;
 	if (togo > splittingsize)
 		nPacketSize = togo/(uint32)(togo/splittingsize);
 	else
@@ -1179,6 +1177,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 			PokeUInt64(&packet->pBuffer[16], statpos);
 			PokeUInt32(&packet->pBuffer[24], newsize);
 			memfile.Read(&packet->pBuffer[28],nPacketSize);
+			/*FIX*/theStats.AddUpDataOverheadFileRequest(28); //Moved
 		}
 		else{
 			packet = new Packet(OP_COMPRESSEDPART,nPacketSize+24,OP_EMULEPROT,bFromPF);
@@ -1186,6 +1185,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 			PokeUInt32(&packet->pBuffer[16], (uint32)statpos);
 			PokeUInt32(&packet->pBuffer[20], newsize);
 			memfile.Read(&packet->pBuffer[24],nPacketSize);
+			/*FIX*/theStats.AddUpDataOverheadFileRequest(24); //Moved
 		}
 
 		if (thePrefs.GetDebugClientTCPLevel() > 0){
@@ -1204,7 +1204,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 		totalPayloadSize += payloadSize;
 
         // put packet directly on socket
-		theStats.AddUpDataOverheadFileRequest(24);
+		/*FIX*///theStats.AddUpDataOverheadFileRequest(24); //moved above
 		socket->SendPacket(packet,true,false, payloadSize);
 #endif
 	}
@@ -1298,6 +1298,7 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 	}
 
 	m_BlockRequests_queue.AddTail(reqblock);
+	/*MORPH*/CreateNextBlockPackage(); //Used to not wait uploadqueue timer (110ms) capping upload to 1ReadBlock/110ms~1.6MB/s
 }
 
 uint32 CUpDownClient::SendBlockData(){

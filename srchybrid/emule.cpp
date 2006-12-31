@@ -77,6 +77,8 @@
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
 // Commander - Added: Custom incoming folder icon [emulEspaña] - End
+#include "ntservice.h" // MORPH leuk_he:run as ntservice v1.. 
+
 
 CLogFile theLog;
 CLogFile theVerboseLog;
@@ -523,6 +525,7 @@ BOOL CemuleApp::InitInstance()
 	}
 	Log(_T("Starting eMule v%s"), m_strCurVersionLong);
 
+	if (!RunningAsService())  //MORPH leuk_he:run as ntservice v1.. use service control handler instead 
 	SetConsoleCtrlHandler(ConsoleCtrlHandler, TRUE);
 
 	CemuleDlg dlg;
@@ -742,7 +745,11 @@ bool CemuleApp::ProcessCommandline()
 		// MORPH START prevent startup on "emule exit" dos command
 		}
 		//MORPH END prevent startup on "emule exit" dos command
-
+    	//MORPH leuk_he:run as ntservice v1..
+		if (_tcscmp(pszParam, _T("install"))==0)  {CmdInstallService();bExitParam = true; }
+        if (_tcscmp(pszParam, _T("uninstall"))==0){CmdRemoveService();bExitParam = true; }
+		if (_tcscmp(pszParam, _T("AsAService"))==0){OnStartAsService();} // NTservice entry point registation.
+		//MORPH leuk_he:run as ntservice v1..
 #ifdef _DEBUG
 			if (_tcscmp(pszParam, _T("assertfile")) == 0)
 				_CrtSetReportHook(CrtDebugReportCB);
@@ -791,6 +798,11 @@ bool CemuleApp::ProcessCommandline()
       			return true; 
 			} 
     		else 
+				// MORPH leuk_he:run as ntservice v1.. START
+				if (bAlreadyRunning) 
+					PassLinkToWebService(sendstruct.dwData,*command);
+				else
+                // MORPH leuk_he:run as ntservice v1.. END
       			pstrPendingLink = command;
 		}
 		else if (CCollection::HasCollectionExtention(*command)){
@@ -803,6 +815,11 @@ bool CemuleApp::ProcessCommandline()
 				return true; 
 			} 
     		else 
+				// MORPH leuk_he:run as ntservice v1.. START
+				if (bAlreadyRunning) 
+					PassLinkToWebService(sendstruct.dwData,*command);
+				else
+                // MORPH leuk_he:run as ntservice v1.. END
       			pstrPendingLink = command;
 		}
 		else {
@@ -814,12 +831,26 @@ bool CemuleApp::ProcessCommandline()
       			delete command;
 				return true; 
 			}
+			// MORPH leuk_he:run as ntservice v1.. START
+			else if (bAlreadyRunning) 
+				PassLinkToWebService(sendstruct.dwData,*command);
+                // MORPH leuk_he:run as ntservice v1.. END
 			// MORPH START prevent startup on "emule exit" dos command
-			else if (bExitParam)
+			if (bExitParam)
 				  return true;
 		  // MORPH  END prevent startup on "emule exit"
 		}
     }
+	else // MORPH leuk_he:run as ntservice v1.. Start
+		if (maininst == NULL && bAlreadyRunning== true){ // mutex locked, but could not find window: must be service....
+			if (InterfaceToService()== false)	{
+				  m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);  // 
+				  return bAlreadyRunning = ( ::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);
+			}
+			  else return true; // let browser do GUI 
+		} // MORPH leuk_he:run as ntservice v1.. End
+				  
+
     return (maininst || bAlreadyRunning);
 }
 

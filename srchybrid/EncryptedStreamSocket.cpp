@@ -708,7 +708,7 @@ uint8 CEncryptedStreamSocket::GetSemiRandomNotProtocolMarker() const{
 				case OP_PACKEDPROT:
     			case OP_EMULEPROT:
 	            // MORPH START webcache
-                case OP_THE_LETTER_G: //// yonatan http - first byte in an http GET header
+                //case OP_THE_LETTER_G: //// yonatan http - first byte in an http GET header   change is 1/ (2^24) .... duh
                 // MORPH END webcache
 
 					break;

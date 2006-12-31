@@ -19,6 +19,7 @@ enum EUserWndMessages
 	WEB_ADDDOWNLOADS,
 	WEB_CATPRIO,
 	WEB_ADDREMOVEFRIEND,
+    WEB_COPYDATA, // MORPH leuk_he:run as ntservice v1..
 
 	// VC
 	UM_VERSIONCHECK_RESPONSE,
@@ -50,6 +51,9 @@ enum EUserWndMessages
 	UM_CRC32_UPDATEFILE,
 	// [end] Mighty Knife
 	//MORPH START - Added by SiRoB, Version check
-	UM_MVERSIONCHECK_RESPONSE
+	UM_MVERSIONCHECK_RESPONSE,
 	//MORPH END   - Added by SiRoB, Version check
+	//MORPH START leuk_he run as a service v1
+	UM_SERVERSTATUS
+	//MORPH START leuk_he run as a service v1
 };

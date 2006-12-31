@@ -461,6 +461,7 @@ void CPPgIonixWebServer::InitTab(bool firstinit, int Page)
 		m_tabCtr.SetImageList(&m_imageList);
 		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, WEBSERVER, _T("Web server"), 0, (LPARAM)WEBSERVER); 
 		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, MULTIWEBSERVER, _T("Multi user"), 0, (LPARAM)MULTIWEBSERVER); // note that the string Multi user is REAL HARD coded 
+		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, NTSERVICE, _T("NT service"), 0, (LPARAM)MULTIWEBSERVER); // note that the string Multi user is REAL HARD coded 
 	}
     if (m_tabCtr.GetSafeHwnd() != NULL     )
 	   m_tabCtr.SetCurSel(Page);

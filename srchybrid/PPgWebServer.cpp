@@ -387,6 +387,7 @@ void CPPgWebServer::InitTab(bool firstinit, int Page)
 		m_tabCtr.SetImageList(&m_imageList);
 		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, WEBSERVER, _T("Web server"), 0, (LPARAM)WEBSERVER); 
 		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, MULTIWEBSERVER, _T("Multi user"), 0, (LPARAM)MULTIWEBSERVER); 
+		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, NTSERVICE, _T("NT Service"), 0, (LPARAM)NTSERVICE); 
 	}
 
 	m_tabCtr.SetCurSel(Page);

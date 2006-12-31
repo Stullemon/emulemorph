@@ -915,6 +915,7 @@ public:
 	static	bool	m_bGlobalHL;
 	//MORPH END   - Added by Stulle, Global Source Limit
 
+	static int m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
 	enum Table
 	{
 		tableDownload, 
@@ -1548,8 +1549,13 @@ public:
 	static	UINT	GetMaxLogFileSize()						{ return uMaxLogFileSize; }
 	static	ELogFileFormat GetLogFileFormat()				{ return m_iLogFileFormat; }
 
+	static int      GetServiceStartupMode(); // MORPH leuk_he:run as ntservice v1..
+
 	// WebServer
+	/*
 	static	uint16	GetWSPort()								{ return m_nWebPort; }
+	*/
+	static	uint16	GetWSPort()	;							// MORPH leuk_he:run as ntservice v1..: may be required before init! 
 	static	void	SetWSPort(uint16 uPort)					{ m_nWebPort=uPort; }
 	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
 	static	bool	UseIonixWebsrv()						{ return m_bIonixWebsrv; }

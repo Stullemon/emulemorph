@@ -34,6 +34,7 @@
 #include "kademlia/net/KademliaUDPListener.h"
 #include "UploadQueue.h"
 #include "ToolTipCtrlX.h"
+#include "Ntservice.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -138,7 +139,8 @@ void CUploadListCtrl::Init()
 
 CUploadListCtrl::~CUploadListCtrl()
 {
-	delete m_tooltip;
+	if (!RunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
+		delete m_tooltip;
 }
 
 void CUploadListCtrl::OnSysColorChange()

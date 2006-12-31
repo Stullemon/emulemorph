@@ -33,6 +33,7 @@
 #include "IPFilter.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 #include "MemDC.h"
+#include "NTService.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -111,7 +112,8 @@ bool CServerListCtrl::Init()
 
 CServerListCtrl::~CServerListCtrl()
 {
-	delete m_tooltip;
+	if (!RunningAsService()) // MORPH leuk_he:run as ntservice v1.. workaaround running MFC as service. 
+		delete m_tooltip;
 }
 
 void CServerListCtrl::OnSysColorChange()

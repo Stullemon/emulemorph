@@ -16,7 +16,7 @@ public:
 	BOOL m_bIsInit;
 	// MORPH START  tabbed options [leuk_he]
 private:
-	enum eTab	{NONE, WEBSERVER,MULTIWEBSERVER};
+	enum eTab	{NONE, WEBSERVER,MULTIWEBSERVER,NTSERVICE};
 	CTabCtrl	m_tabCtr;
 	eTab		m_currentTab;
 	CImageList	m_imageList;

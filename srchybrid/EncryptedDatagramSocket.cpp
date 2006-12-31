@@ -99,10 +99,6 @@ int CEncryptedDatagramSocket::DecryptReceivedClient(BYTE* pbyBufIn, int nBufLen,
 		case OP_UDPRESERVEDPROT1:
 		case OP_UDPRESERVEDPROT2:
 		case OP_PACKEDPROT:
-// MORPH START: webcache 
-		case  OP_WEBCACHEPROT:
-		case  OP_WEBCACHEPACKEDPROT:
-// MORPH end : webcache
 			return nResult; // no encrypted packet (see description on top)
 	}
 	// might be an encrypted packet, try to decrypt
@@ -137,6 +133,13 @@ int CEncryptedDatagramSocket::DecryptReceivedClient(BYTE* pbyBufIn, int nBufLen,
 		return nResult; // done
 	}
 	else{
+		// MORPH START: webcache
+		switch (pbyBufIn[0]) {
+			case  OP_WEBCACHEPROT:
+			case  OP_WEBCACHEPACKEDPROT:
+				return nResult; // no encrypted packet (see description on top)
+		}
+		// MORPH end : webcache
 		DebugLogWarning(_T("Obfuscated packet expected but magicvalue mismatch on UDP packet from clientIP: %s"), ipstr(dwIP));
 		return nBufLen; // pass through, let the Receivefunction do the errorhandling on this junk
 	}
@@ -175,10 +178,6 @@ int CEncryptedDatagramSocket::EncryptSendClient(uchar** ppbyBuf, int nBufLen, co
 			case OP_UDPRESERVEDPROT1:
 			case OP_UDPRESERVEDPROT2:
 			case OP_PACKEDPROT:
-// MORPH START: webcache 
-			case  OP_WEBCACHEPROT:
-			case  OP_WEBCACHEPACKEDPROT:	
-// MORPH end : webcache
 				break;
 			default:
 				bOk = true;

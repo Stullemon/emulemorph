@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.6 $
+* $Revision: 1.7 $
 * $Modtime:$
 * $Author: pindakaasmod $
 *
@@ -400,7 +400,7 @@ HTREEITEM CTreePropSheet::CreatePageTreeItem(LPCTSTR lpszPath, HTREEITEM hParent
 
 	// If item with that text does not already exist, create a new one
 	// MORPH START tabbed options [leuk_he]
-	if (strTopMostItem != "Multi user" )   {
+	if (strTopMostItem != "Multi user" && strTopMostItem != "NT Service"  )   { // MORPH leuk_he:run as ntservice v1..
     // MORPH END tabbed options [leuk_he]
     if (!hItem)
 	{
@@ -415,7 +415,7 @@ HTREEITEM CTreePropSheet::CreatePageTreeItem(LPCTSTR lpszPath, HTREEITEM hParent
 		// ASSERT(FALSE); // tabbed  options
 		return NULL;
 	}
-	} // Moprh tabbed options. 
+	} // Morph tabbed options. 
 
 	if (strPath.IsEmpty())
 		return hItem;

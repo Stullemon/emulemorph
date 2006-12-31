@@ -30,6 +30,7 @@
 #include "WebCache\PPgWebcachesettings.h" //MORPH - Added by SiRoB, WebCache 1.2f
 #include "KCSideBannerWnd.h" //Commander - Added: Preferences Banner [TPT]
 #include "SlideBar.h" //MORPH - Added by SiRoB, ePLus Group
+#include "PPGNTServer.h" //MORPH leuk_he:run as ntservice v1.. 
 
 class CPreferencesDlg : public CTreePropSheet
 {
@@ -57,12 +58,14 @@ public:
 	// START ionix advanced webserver
 	CPPgIonixWebServer	m_wndIonixWebServer;
 	// END ionix advanced webserver
+	CPPgNTService	m_wndNTService; //MORPH leuk_he:run as ntservice v1..
 	// MORPH start tabbed options [leuk_he]
     void SwitchTab(int page);
  	int ActivePageWebServer;
 	int StartPageWebServer;
 	int Webserver; 
 	int Multiwebserver;
+	int NTService; // MORPH leuk_he:run as ntservice v1..
 	// MORPH end tabbed option [leuk_he]
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	CPPgDebug		m_wndDebug;

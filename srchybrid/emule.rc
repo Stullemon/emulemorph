@@ -203,33 +203,36 @@ BEGIN
     DEFPUSHBUTTON   "Send",IDC_CSEND,397,262,50,14,BS_FLAT
     PUSHBUTTON      "Close",IDC_CCLOSE,449,262,50,14,BS_FLAT
     CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | 
-                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,5,17,132,
-                    174,WS_EX_STATICEDGE
+                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,4,17,132,
+                    127,WS_EX_STATICEDGE
     CONTROL         "Messages",IDC_MESSAGES_LBL,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,157,6,236,8
-    ICON            "",IDC_MESSAGEICON,144,4,20,20
+    ICON            "",IDC_MESSAGEICON,144,4,21,20
     PUSHBUTTON      "v",IDC_BTN_MENU,5,3,14,13,BS_NOTIFY | BS_FLAT
     CONTROL         "Friends",IDC_FRIENDS_LBL,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,34,6,90,8
-    ICON            "",IDC_FRIENDSICON,21,5,20,20,SS_NOTIFY
-    GROUPBOX        "Info",IDC_FRIENDS_MSG,5,195,132,89
-    LTEXT           "Hash:",IDC_FRIENDS_USERHASH,10,216,61,8
-    LTEXT           "Software:",IDC_FRIENDS_CLIENT,10,227,61,8
-    LTEXT           "Uploaded:",IDC_FRIENDS_UPLOADED,10,250,61,8
-    LTEXT           "Downloaded:",IDC_FRIENDS_DOWNLOADED,10,260,61,8
-    LTEXT           "ID:",IDC_FRIENDS_IDENT,10,239,61,8
-    LTEXT           "Name:",IDC_FRIENDS_NAME,10,205,61,8
-    LTEXT           "-",IDC_FRIENDS_NAME_EDIT,73,204,60,8,SS_NOPREFIX
-    LTEXT           "-",IDC_FRIENDS_USERHASH_EDIT,73,217,60,8,SS_NOPREFIX
-    LTEXT           "-",IDC_FRIENDS_CLIENTE_EDIT,73,227,60,8,SS_NOPREFIX
-    LTEXT           "-",IDC_FRIENDS_IDENTIFICACION_EDIT,73,239,60,8,
+    ICON            "",IDC_FRIENDSICON,21,5,21,20,SS_NOTIFY
+    GROUPBOX        "Info",IDC_FRIENDS_MSG,4,146,132,138
+    LTEXT           "Hash:",IDC_FRIENDS_USERHASH,10,170,60,8
+    LTEXT           "Software:",IDC_FRIENDS_CLIENT,10,183,60,8
+    LTEXT           "Uploaded:",IDC_FRIENDS_UPLOADED,10,209,60,8
+    LTEXT           "Downloaded:",IDC_FRIENDS_DOWNLOADED,10,222,60,8
+    LTEXT           "ID:",IDC_FRIENDS_IDENT,10,196,60,8
+    LTEXT           "Name:",IDC_FRIENDS_NAME,10,157,60,8
+    LTEXT           "-",IDC_FRIENDS_NAME_EDIT,70,158,60,8,SS_NOPREFIX
+    LTEXT           "-",IDC_FRIENDS_USERHASH_EDIT,70,171,60,8,SS_NOPREFIX
+    LTEXT           "-",IDC_FRIENDS_CLIENTE_EDIT,70,184,60,8,SS_NOPREFIX
+    LTEXT           "-",IDC_FRIENDS_IDENTIFICACION_EDIT,70,197,60,8,
                     SS_NOPREFIX
-    LTEXT           "-",IDC_FRIENDS_SUBIDO_EDIT,73,249,60,8,SS_NOPREFIX
-    LTEXT           "-",IDC_FRIENDS_DESCARGADO_EDIT,73,260,60,8,SS_NOPREFIX
+    LTEXT           "-",IDC_FRIENDS_SUBIDO_EDIT,70,210,60,8,SS_NOPREFIX
+    LTEXT           "-",IDC_FRIENDS_DESCARGADO_EDIT,70,223,60,8,SS_NOPREFIX
     CONTROL         "",IDC_SPLITTER_FRIEND,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,139,5,3,278
-    LTEXT           "Country:",IDC_FRIENDS_COUNTRY,10,271,60,8
-    LTEXT           "-",IDC_FRIENDS_COUNTRY_EDIT,73,271,60,8,SS_NOPREFIX
+    LTEXT           "Country:",IDC_FRIENDS_COUNTRY,10,237,60,8
+    LTEXT           "-",IDC_FRIENDS_COUNTRY_EDIT,70,236,60,8,SS_NOPREFIX
+    EDITTEXT        IDC_FRIENDNOTE_EDIT,9,249,124,31,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_DISABLED,
+                    WS_EX_STATICEDGE
 END
 
 IDD_STATISTICS DIALOGEX 0, 35, 511, 289
@@ -2173,6 +2176,34 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,19,48,136,13
 END
 
+IDD_PPG_NTSERVER DIALOGEX 0, 0, 230, 243
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "NT Service"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TAB_SERVICE3,"SysTabControl32",WS_TABSTOP,7,7,219,
+                    229
+    LTEXT           "Current status:",IDC_STATIC,19,26,168,14
+    EDITTEXT        IDC_SVC_CURRENT_STATUS,20,44,166,14,ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Install",IDC_SVC_INSTALLSERVICE,23,64,80,14
+    PUSHBUTTON      "Unnistall",IDC_SVC_SERVERUNINSTALL,112,64,71,13
+    GROUPBOX        "Startup",IDC_SVC_STARTUPBOX,20,84,167,48
+    CONTROL         "Start with system startup",IDC_SVC_STARTWITHSYSTEM,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,26,
+                    97,143,10
+    CONTROL         "Manual start",IDC_SVC_MANUALSTART,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,26,113,125,10
+    CONTROL         "Set setting appropiate for service use ",
+                    IDC_SVC_SETTINGS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    22,145,163,10
+    GROUPBOX        "On start of eMule.",IDC_SVC_ONSTARTBOX,20,159,173,48
+    CONTROL         "Browse to webservice",IDC_SVC_RUNBROWSER,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,26,172,163,10
+    CONTROL         "Stop service and start gui",IDC_SVC_REPLACESERVICE,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,26,190,159,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2244,7 +2275,7 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 506
         VERTGUIDE, 10
-        VERTGUIDE, 71
+        VERTGUIDE, 70
         VERTGUIDE, 111
         VERTGUIDE, 121
         VERTGUIDE, 133
@@ -6609,6 +6640,48 @@ BEGIN
     IDS_UPDATEIPFILTERWEEK_TIP 
                             "Add a entry to the schedule to update the\nipfilter.dat form the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
     IDS_SCHEDTEXT           "Added by morph autoupdate"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SVC_RUNNINGASSERVICE "Currently running as service."
+    IDS_SVC_ACCESSDENIED    "Access to services denied."
+    IDS_SVC_NOTINSTALLED    "Service not installed."
+    IDS_SVC_INSTALLED       "Service installed."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SVC_INSTALLFAILED   "Install failed, check log."
+    IDS_SVC_UNINSTALLFAILED "UnInstall failed, check log."
+    IDS_SVC_INSTALLED_DISABLED "Service disabled. (marked for deletion?)."
+    IDS_SVC_OSTOOOLD        "Not supported on windows 95"
+    IDS_SVC_INSTALLSERVICE  "Install"
+    IDS_SVC_SERVERUNINSTALL "Uninstall"
+    IDS_SVC_STARTWITHSYSTEM "Start with system startup"
+    IDS_SVC_SETTINGS        "Set setting appropiate for service use"
+    IDS_SVC_RUNBROWSER      "Browse to webservice"
+    IDS_SVC_REPLACESERVICE  "Stop service and start gui "
+    IDS_SVC_INSTALLSERVICE_TIP 
+                            "Install a eMule service in the NT Service. \nThis service will Use the exact configufation \nof this eMule, but will not interact with the desktop.\nYou can start a service from 'services.msc' Make sure\nthat the webservice is enabled."
+    IDS_SVC_SERVERUNINSTALL_TIP 
+                            "stop/Uninstall the previous installed service."
+    IDS_SVC_STARTWITHSYSTEM_TIP 
+                            "eMule service will start when windows starts. There is no need to login into windows. "
+    IDS_SVC_MANUALSTART_TIP "You will start the eMule service manually."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SVC_SETTINGS_TIP    "Apply a range of settings that are useful for when running as a service:\nConnect on startup, no sounds, enable webservice, no notification, \nno autostart with windows (auto start with windows conflicts!)\nNote that you need to reload the preferences to see and that unchecking \nthis option does not restore the old settings once set."
+    IDS_SVC_RUNBROWSER_TIP  "When starting eMule.exe from the desktop a browser\nwindow to the webservice is started instead of the\neMule gui,if the service is running."
+    IDS_SVC_REPLACESERVICE_TIP 
+                            "If the service is running it will be stopped and\na normal gui version of the gui will be started."
+    IDS_SVC_CURRENT_STATUS_TIP 
+                            "This show the current status of eMule as a NT service"
+    IDS_SVC_ONSTARTBOX      "On start of eMule."
+    IDS_SVC_STARTUPBOX      "Startup"
+    IDS_SVC_MANUALSTART     "Manual start"
 END
 
 #endif    // English (U.S.) resources

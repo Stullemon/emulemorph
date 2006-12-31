@@ -109,6 +109,8 @@
 #include "Friend.h"
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
+#include "NTservice.h" // MORPH leuk_he:run as ntservice v1..
+
 #ifndef RBBS_USECHEVRON
 #define RBBS_USECHEVRON     0x00000200  // display drop-down button for this band if it's sized smaller than ideal width
 #endif
@@ -199,6 +201,10 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(WEB_ADDDOWNLOADS, OnWebAddDownloads)
 	ON_MESSAGE(WEB_CATPRIO, OnWebSetCatPrio)
 	ON_MESSAGE(WEB_ADDREMOVEFRIEND, OnAddRemoveFriend)
+
+	ON_MESSAGE(WEB_COPYDATA, OnWMData) // run as a service v1
+	ON_MESSAGE(UM_SERVERSTATUS, OnServiceStatus) // run as a service v1
+
 
 	// Version Check DNS
 	ON_MESSAGE(UM_VERSIONCHECK_RESPONSE, OnVersionCheckResponse)
@@ -343,7 +349,7 @@ BOOL CemuleDlg::OnInitDialog()
 	if (!m_bStartMinimized)
 		m_bStartMinimized = theApp.DidWeAutoStart();
 	//MORPH - Added by SiRoB, Invisible Mode
-	if (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart())
+	if (RunningAsService() || (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart()))
 		m_bStartMinimized = true;
 	//MORPH - Added by SiRoB, Invisible Mode
 	
@@ -440,7 +446,7 @@ BOOL CemuleDlg::OnInitDialog()
 	SetStatusBarPartsSize();
 
 	// create main window dialog pages
-	serverwnd->Create(IDD_SERVER);
+	VERIFY(serverwnd->Create(IDD_SERVER));
 	sharedfileswnd->Create(IDD_FILES);
 	searchwnd->Create(this);
 	chatwnd->Create(IDD_CHAT);
@@ -1163,6 +1169,9 @@ void CemuleDlg::ShowConnectionState()
 
 	if (theApp.IsConnected())
 	{
+		//MORPH leuk_he:run as ntservice v1.. Set nt server from RUNNING to started 
+		if (RunningAsService())ServiceStartedSuccesfully();  // when connected( multiple calls not a problem)
+        //MORPH leuk_he:run as ntservice v1..
 		CString strPane(GetResString(IDS_MAIN_BTN_DISCONNECT));
 		TBBUTTONINFO tbi;
 		tbi.cbSize = sizeof(TBBUTTONINFO);
@@ -1764,7 +1773,7 @@ LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 	CUpDownClient* client = (CUpDownClient*) lParam;
 	if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN && theApp.uploadqueue->IsDownloading(client)) {	// could have been canceled
 		client->SetReadBlockFromFileBuffer((byte*)wParam);
-		//client->CreateNextBlockPackage();
+		client->CreateNextBlockPackage(); //Used to not wait uploadqueue timer (110ms) capping upload to 1ReadBlock/110ms~1.6MB/s
 	}
 	else if (wParam != -1 && wParam != -2 && wParam != NULL)
 		delete[] (byte*)wParam;
@@ -2135,6 +2144,8 @@ void CemuleDlg::OnClose()
 	UnregisterHotKey(this->m_hWnd,100); 
 	//EastShare, Added by linekin HotKey
 	AddDebugLogLine(DLP_VERYLOW, _T("Closed eMule"));
+	if (RunningAsService()) // MORPH leuk_he:run as ntservice v1..
+		ServiceStop(); //MORPH leuk_he:run as ntservice v1..
 }
 
 void CemuleDlg::DestroyMiniMule()
@@ -3189,6 +3200,15 @@ LRESULT CemuleDlg::OnVersionCheckResponse(WPARAM /*wParam*/, LPARAM lParam)
 	LogWarning(LOG_STATUSBAR,GetResString(IDS_NEWVERSIONFAILED));
 	return 0;
 }
+
+//MORPH START leuk_he run as a service v1
+LRESULT CemuleDlg::OnServiceStatus(WPARAM ServiceStatus, LPARAM /*lParam */)
+{
+	return ReportStatusToSCMgr(ServiceStatus, NO_ERROR, 0); // tell servicecrtrk we are alive.
+}
+//MORPH END leuk_he run as a service v1
+
+
 //MORPH START - Added by SiRoB, New Version check
 LRESULT CemuleDlg::OnMVersionCheckResponse(WPARAM /*wParam*/, LPARAM lParam)
 {

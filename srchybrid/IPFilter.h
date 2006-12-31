@@ -33,6 +33,7 @@ struct SIPFilter
 };
 
 #define	DFLT_IPFILTER_FILENAME	_T("ipfilter.dat")
+#define	DFLT_STATIC_IPFILTER_FILENAME	_T("ipfilter_static.dat") // Static IP Filter - Stulle
 
 // 'CArray' would give us more cach hits, but would also be slow in array element creation 
 // (because of the implicit ctor in 'SIPFilter'
@@ -70,4 +71,9 @@ private:
 
 	bool ParseFilterLine1(const CStringA& rstrBuffer, uint32& ip1, uint32& ip2, UINT& level, CStringA& rstrDesc) const;
 	bool ParseFilterLine2(const CStringA& rstrBuffer, uint32& ip1, uint32& ip2, UINT& level, CStringA& rstrDesc) const;
+
+	// ==> Static IP Filter - Stulle
+	void AddFromFile2(LPCTSTR pszFilePath);
+	CString GetDefaultStaticFilePath() const;
+	// <== Static IP Filter - Stulle
 };

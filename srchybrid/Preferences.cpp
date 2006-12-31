@@ -771,6 +771,7 @@ bool	CPreferences::m_bGlobalHL;
 bool	CPreferences::m_bHistoryShowShared;
 //MORPH END   - Added, Downloaded History [Monki/Xman]
 
+int CPreferences::m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
 CPreferences::CPreferences()
 {
 #ifdef _DEBUG
@@ -2603,6 +2604,7 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added, Downloaded History [Monki/Xman]
 	ini.WriteBool(_T("ShowSharedInHistory"), m_bHistoryShowShared);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
+	ini.WriteInt(_T("ServiceStartupMode"),m_iServiceStartupMode); // MORPH leuk_he:run as ntservice v1..
 }
 
 void CPreferences::ResetStatsColor(int index)
@@ -4347,6 +4349,18 @@ void CPreferences::SetUpnpBindAddr(DWORD bindip) {
 	}
 	// MORPH END leuk_he upnp bindaddr
  
+// MORPH leuk_he:run as ntservice v1. START (startup and ws port) 
+int CPreferences::GetServiceStartupMode(){
+	if (m_iServiceStartupMode == 0) // may be called before LoadPreferences()
+	   m_iServiceStartupMode=theApp.GetProfileInt(_T("StulleMule"), _T("ServiceStartupMode"),1);
+   return m_iServiceStartupMode;
+}
+uint16	CPreferences::GetWSPort()							
+{	if (m_nWebPort==0)
+		m_nWebPort=(WORD) theApp.GetProfileInt(_T("WebServer"), _T("Port"),4711);
+	return m_nWebPort; 
+}
+// MORPH leuk_he:run as ntservice v1.. (startup and ws port) 
 
 
 
