@@ -35,6 +35,7 @@
 #include "InputBox.h"
 #include "MenuCmds.h"
 #include "Log.h"
+#include ".\chatwnd.h"
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 #ifdef _DEBUG
@@ -53,6 +54,11 @@ static char THIS_FILE[] = __FILE__;
 
 // CChatWnd dialog
 
+// MORPH (CB) Friendnote START
+// Used to acess latest selected entry data, even when the list has changed (add/remove actions)
+CFriend *pFriend = NULL;
+// MORPH (CB) Friendnote END
+
 IMPLEMENT_DYNAMIC(CChatWnd, CDialog)
 
 BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
@@ -65,9 +71,6 @@ BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_LIST2, OnLvnItemActivateFrlist)
 	ON_NOTIFY(NM_CLICK, IDC_LIST2, OnNMClickFrlist)
     ON_STN_DBLCLK(IDC_FRIENDSICON, OnStnDblclickFriendsicon)
-	// MORPH START - Added by Commander, Friendlinks [emulEspaña]
-	ON_BN_CLICKED(IDC_BTN_MENU, OnBnClickedBnmenu)
-    // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 END_MESSAGE_MAP()
 
 CChatWnd::CChatWnd(CWnd* pParent /*=NULL*/)
@@ -92,17 +95,39 @@ void CChatWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST2, m_FriendListCtrl);
 	DDX_Control(pDX, IDC_CMESSAGE, inputtext);
 	DDX_Control(pDX, IDC_FRIENDS_MSG, m_cUserInfo);
+
+	// MORPH (CB) Friendnote START
+	DDX_Control(pDX, IDC_FRIENDNOTE_EDIT, m_FriendNote);
+	// MORPH (CB) Friendnote END
+
 }
 
 void CChatWnd::OnLvnItemActivateFrlist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	int iSel = m_FriendListCtrl.GetSelectionMark();
+
 	if (iSel != -1) {
+/* official:
+
 		CFriend* pFriend = (CFriend*)m_FriendListCtrl.GetItemData(iSel);
 		ShowFriendMsgDetails(pFriend);
 	}
 	else
+*/
+		// MORPH (CB) Friendnote START
+		m_FriendNote.EnableWindow(true);
+		// MORPH (CB) Friendnote END
+		pFriend = (CFriend*)m_FriendListCtrl.GetItemData(iSel);
+		ShowFriendMsgDetails(pFriend);
+	}
+	else {
+		// MORPH (CB) Friendnote START
+		m_FriendNote.EnableWindow(false);
+		// MORPH (CB) Friendnote END
+
+
 		ShowFriendMsgDetails(NULL);
+	}
 }
 
 void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
@@ -184,6 +209,12 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 		else
 			GetDlgItem(IDC_FRIENDS_COUNTRY_EDIT)->SetWindowText(_T("?"));
 		//Commander - Added: IP2Country - End
+		// MORPH (CB) Friendnote START
+		if (!pFriend->m_frNote.IsEmpty())
+			m_FriendNote.SetWindowText(pFriend->m_frNote);
+		else
+			m_FriendNote.SetWindowText(_T(""));
+		// MORPH (CB) Friendnote END
 	}
 	else
 	{
@@ -193,6 +224,7 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 		GetDlgItem(IDC_FRIENDS_IDENTIFICACION_EDIT)->SetWindowText(_T("-"));
 		GetDlgItem(IDC_FRIENDS_DESCARGADO_EDIT)->SetWindowText(_T("-"));
 		GetDlgItem(IDC_FRIENDS_SUBIDO_EDIT)->SetWindowText(_T("-"));
+		GetDlgItem(IDC_FRIENDNOTE_EDIT)->SetWindowText(_T("")); //Friendnote
 	}
 }
 
@@ -275,6 +307,10 @@ void CChatWnd::DoResize(int delta)
 	CSplitterControl::ChangePos(GetDlgItem(IDC_MESSAGES_LBL), -delta, 0);
 	CSplitterControl::ChangePos(GetDlgItem(IDC_MESSAGEICON), -delta, 0);
 
+	// MORPH (CB) Friendnote START
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_FRIENDNOTE_EDIT), delta);
+	// MORPH (CB) Friendnote END
+
 	CRect rcW;
 	GetWindowRect(rcW);
 	ScreenToClient(rcW);
@@ -301,6 +337,11 @@ void CChatWnd::DoResize(int delta)
 
 	RemoveAnchor(IDC_MESSAGEICON);
 	AddAnchor(IDC_MESSAGEICON, TOP_LEFT);
+
+	// MORPH (CB) Friendnote START
+	RemoveAnchor(IDC_FRIENDNOTE_EDIT);
+	AddAnchor(IDC_FRIENDNOTE_EDIT, BOTTOM_LEFT, BOTTOM_LEFT);
+	// MORPH (CB) Friendnote END
 
 	RemoveAnchor(IDC_FRIENDS_NAME_EDIT);
 	RemoveAnchor(IDC_FRIENDS_USERHASH_EDIT);
@@ -413,6 +454,15 @@ BOOL CChatWnd::PreTranslateMessage(MSG* pMsg)
 	{
 		if (pMsg->hwnd == GetDlgItem(IDC_LIST2)->m_hWnd)
 			OnLvnItemActivateFrlist(0,0);
+
+		// MORPH (CB) Friendnote START
+		// Save friend note whenever it is changed
+		else if (pMsg->hwnd == GetDlgItem(IDC_FRIENDNOTE_EDIT)->m_hWnd) {
+			if (pFriend) {
+				m_FriendNote.GetWindowText(pFriend->m_frNote);
+			}
+		}
+		// MORPH (CB) Friendnote END
 	}
 
 	return CResizableDialog::PreTranslateMessage(pMsg);
@@ -593,3 +643,4 @@ void CChatWnd::OnBnClickedBnmenu()
 	VERIFY( tmColumnMenu.DestroyMenu() );
 }
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
+

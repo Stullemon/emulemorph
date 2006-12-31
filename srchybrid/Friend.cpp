@@ -44,6 +44,10 @@ CFriend::CFriend(void)
 	m_dwHasHash = 0;
 
     m_friendSlot = false;
+
+	// MORPH (CB) Friendnote START
+	m_frNote.Empty();
+	// MORPH (CB) Friendnote END
 }
 
 //Added this to work with the IRC.. Probably a better way to do it.. But wanted this in the release..
@@ -114,6 +118,16 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 				break;
 			}
 			//MORPH END - Added by Yun.SF3, ZZ Upload System
+		// MORPH (CB) Friendnote START
+		case FF_FRIENDNOTE: {
+			ASSERT( newtag->IsStr() );
+			if (newtag->IsStr()) {
+				if (m_frNote.IsEmpty())
+				m_frNote = newtag->GetStr();
+			}
+			break;
+		}
+		// MORPH (CB) Friendnote END
 		}
 		delete newtag;
 	}
@@ -147,6 +161,15 @@ void CFriend::WriteToFile(CFileDataIO* file)
 		uTagCount++;
     }
 	//MORPH END   - Added by SiRoB, Slot Friend
+	// MORPH START CB: FriendNote	 START
+	if (!m_frNote.IsEmpty()) {
+		if (WriteOptED2KUTF8Tag(file, m_frNote, FF_FRIENDNOTE))
+			uTagCount++;
+		CTag nametag(FF_FRIENDNOTE, m_frNote); // repeating string in file if the above is executed?
+		nametag.WriteTagToFile(file);
+		uTagCount++;
+	}
+	// // MORPH END CB: FriendNote END
 	file->Seek(uTagCountFilePos, CFile::begin);
 	file->WriteUInt32(uTagCount);
 	file->Seek(0, CFile::end);

@@ -23,6 +23,9 @@ class CFileDataIO;
 //MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 #define FF_FRIENDSLOT 0x02
 //MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+// MORPH (CB) Friendnote
+#define FF_FRIENDNOTE 0x77
+// MORPH (CB) Friendnote END
 
 class CFriend
 {
@@ -40,6 +43,10 @@ public:
 	uint32	m_dwLastChatted;
 	uint32	m_dwHasHash;
 	CString m_strName;
+
+	// MORPH (CB) Friendnote
+	CString m_frNote;
+	// MORPH (CB) Friendnote END
 
     CUpDownClient* GetLinkedClient() const { return m_LinkedClient; };
     void SetLinkedClient(CUpDownClient* linkedClient);

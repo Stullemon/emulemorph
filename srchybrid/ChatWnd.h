@@ -40,6 +40,10 @@ public:
 
 	CFriendListCtrl m_FriendListCtrl;
 
+	// MORPH (CB) Friendnote START
+	CEdit m_FriendNote;
+	// MORPH (CB) Friendnote END
+
 private:
 	void ShowFriendMsgDetails(CFriend* pFriend); // [TPT] - New friend message window
 	CIconStatic m_cUserInfo;
