@@ -103,6 +103,7 @@ BEGIN_MESSAGE_MAP(CSearchResultsWnd, CResizableFormView)
 	ON_WM_SYSCOMMAND()
 	ON_MESSAGE(UM_DELAYED_EVALUATE, OnChangeFilter)
 	ON_NOTIFY(TBN_DROPDOWN, IDC_SEARCHLST_ICO, OnSearchListMenuBtnDropDown)
+	ON_NOTIFY(NM_CLICK, IDC_CATTAB2, OnNMClickCattab2) //MORPH - Added by SiRoB, Selection category support
 END_MESSAGE_MAP()
 
 CSearchResultsWnd::CSearchResultsWnd(CWnd* /*pParent*/)
