@@ -1,11 +1,12 @@
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.3
 -------------------------------------
-dd-mm-200y
-Add: Friendnote. Noting area for adding notes about friendlist. Will be automatically saved and reloaded at each start-up. (CB mod)
-Add: Static IP Filter (Stulle)
-	 remark: save "ipfilter_static.dat" in config dir
-Add: run as NT service v1. [leuk_he]
+dd-mm-2007
+ADD:	http links in ed2k links like linkcreator (MoNKi)
+ADD:	Friendnote. Noting area for adding notes about friendlist. Will be automatically saved and reloaded at each start-up. (CB mod)
+ADD:	Static IP Filter (Stulle)
+		remark: save "ipfilter_static.dat" in config dir
+ADD:	run as NT service v1. [leuk_he]
     -No need to login into XP.
     -keeps running after logging out/ switching users
     -new command line options:
@@ -14,22 +15,22 @@ Add: run as NT service v1. [leuk_he]
     -make sure all settings are correct before installing as a service. 
     -links as passed to webservice. 
     remark: Not meant to save cpu/memory. 
-Changed: USC: better slotfocus.
-Changed: sr-13 import, Also use AICH hash when required.  
-Add: Context menu on chat context. (wizard codesnippet)
-Fix: Upnp: using same port for tcp & udp now possible.
-CHanged: uPnP moved most logging to verbose level. 
-Fix: sr-13 import: Chash on cancel during running import. 
-Fix: Chrash on low diskspace resume.  
+ADD:	 Context menu on chat context. (wizard codesnippet) 
+CHANGED: USC: better slotfocus.
+CHANGED: sr-13 import, Also use AICH hash when required.  
+FIX:	 Upnp: using same port for tcp & udp now possible.
+CHANGED: uPnP moved most logging to verbose level. 
+FIX:     sr-13 import: Chash on cancel during running import. 
+FIX:     Chrash on low diskspace resume.  
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.2
 -------------------------------------
 3 nov-2006
-Changed: USC review:
+CHANGED: USC review:
          Powersharing 100% is working again. 
-Changed: (minor) Friendslot logging with funnynick more consistent. 
-Changed: (minor) Copy comment, not username, on file details (pacobell) 
+CHANGED: (minor) Friendslot logging with funnynick more consistent. 
+CHANGED: (minor) Copy comment, not username, on file details (pacobell) 
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.1
