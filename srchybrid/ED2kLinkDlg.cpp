@@ -24,6 +24,10 @@
 #include "shahashset.h"
 #include "UserMsgs.h"
 
+//emulEspaña. [MoNKi: -HTTP Sources in eLinks-]
+#include "StringConversion.h"
+//End emulEspaña
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -44,6 +48,12 @@ BEGIN_MESSAGE_MAP(CED2kLinkDlg, CResizablePage)
 	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 	ON_BN_CLICKED(IDC_LD_PHPBBCHE, OnSettingsChange)
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	ON_BN_CLICKED(IDC_HTTP_SRC, OnSettingsChange)
+	ON_BN_CLICKED(IDC_BTN_HTTP_ADD, OnBtnAddHttp)
+	ON_BN_CLICKED(IDC_BTN_HTTP_REMOVE, OnBtnRemoveHttp)
+	ON_BN_CLICKED(IDC_BTN_HTTP_CLEAR, OnBtnClearHttp)
+	//End emulEspaña
 END_MESSAGE_MAP() 
 
 CED2kLinkDlg::CED2kLinkDlg() 
@@ -84,6 +94,17 @@ BOOL CED2kLinkDlg::OnInitDialog()
 	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 	AddAnchor(IDC_LD_PHPBBCHE,BOTTOM_LEFT,BOTTOM_LEFT);
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	AddAnchor(IDC_HTTP_SRC,BOTTOM_LEFT,BOTTOM_RIGHT);
+	AddAnchor(IDC_EDIT_HTTP,BOTTOM_LEFT,BOTTOM_RIGHT);
+	AddAnchor(IDC_BTN_HTTP_ADD,BOTTOM_RIGHT,BOTTOM_RIGHT);
+	AddAnchor(IDC_LIST_HTTP,BOTTOM_LEFT,BOTTOM_RIGHT);
+	AddAnchor(IDC_BTN_HTTP_REMOVE,BOTTOM_RIGHT,BOTTOM_RIGHT);
+	AddAnchor(IDC_BTN_HTTP_CLEAR,BOTTOM_RIGHT,BOTTOM_RIGHT);
+	if(m_paFiles->GetSize() > 1){
+		GetDlgItem(IDC_HTTP_SRC)->EnableWindow(FALSE);
+	}
+	//End emulEspaña
 
 	// enabled/disable checkbox depending on situation
 	if (theApp.IsConnected() && !theApp.IsFirewalled())
@@ -151,6 +172,11 @@ BOOL CED2kLinkDlg::OnSetActive()
 
 LRESULT CED2kLinkDlg::OnDataChanged(WPARAM, LPARAM)
 {
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	CListBox *httpList = (CListBox *) GetDlgItem(IDC_LIST_HTTP);
+	if(httpList)
+		httpList->ResetContent(); 
+	//End emulEspaña
 	m_bDataChanged = true;
 	return 1;
 }
@@ -170,6 +196,12 @@ void CED2kLinkDlg::Localize(void)
 	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 	GetDlgItem(IDC_LD_PHPBBCHE)->SetWindowText(GetResString(IDS_LD_ADDPHPBB));
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	GetDlgItem(IDC_HTTP_SRC)->SetWindowText(GetResString(IDS_HTTP_SRC)); 
+	GetDlgItem(IDC_BTN_HTTP_ADD)->SetWindowText(GetResString(IDS_ADD)); 
+	GetDlgItem(IDC_BTN_HTTP_REMOVE)->SetWindowText(GetResString(IDS_REMOVE)); 
+	GetDlgItem(IDC_BTN_HTTP_CLEAR)->SetWindowText(GetResString(IDS_CLEAR)); 
+	//End emulEspaña
 }
 
 void CED2kLinkDlg::UpdateLink()
@@ -204,7 +236,6 @@ void CED2kLinkDlg::UpdateLink()
 			tempED2kLink.Replace(_T("]"), _T(")"));
 
 			strLinks += tempED2kLink;
-			delete tempED2kLink;
 		}
 		else //  *!!! beware of this ELSE !!!*
 		//EastShare End - added by AndCycle, phpBB URL-Tags style link
@@ -227,6 +258,23 @@ void CED2kLinkDlg::UpdateLink()
 			strBuffer.Format(_T("h=%s|"), file->GetAICHHashset()->GetMasterHash().GetString() );
 			strLinks += strBuffer;			
 		}
+
+		//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+		const bool bHTTP = ((CButton*)GetDlgItem(IDC_HTTP_SRC))->GetCheck() == BST_CHECKED;
+		if(bHTTP){
+			CListBox *httpList = (CListBox *) GetDlgItem(IDC_LIST_HTTP);
+			if(httpList){
+				for(int j=0; j < httpList->GetCount(); j++){
+					CString httpSrc;
+					httpList->GetText(j, httpSrc);
+					if(httpSrc.Right(1) == _T("/")){
+						httpSrc += StripInvalidFilenameChars(file->GetFileName(), false);
+					}
+					strLinks += _T("s=") + EncodeUrlUtf8(httpSrc) + _T("|");
+				}
+			}
+		}			
+		//End emulEspaña
 
 		strLinks += _T('/');
 		if (bHostname){
@@ -251,7 +299,6 @@ void CED2kLinkDlg::UpdateLink()
 			tempFileName.Replace(_T("]"), _T(")"));
 
 			strLinks += _T("]") + tempFileName + _T("[/url]");
-			delete tempFileName;
 		}
 		//EastShare End - added by AndCycle, phpBB URL-Tags style link
 	}
@@ -278,6 +325,14 @@ void CED2kLinkDlg::OnSettingsChange()
 	else 
 		GetDlgItem(IDC_LD_PHPBBCHE)->EnableWindow(TRUE);
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	const bool bHTTP = ((CButton*)GetDlgItem(IDC_HTTP_SRC))->GetCheck() == BST_CHECKED;
+	GetDlgItem(IDC_EDIT_HTTP)->EnableWindow(bHTTP);
+	GetDlgItem(IDC_LIST_HTTP)->EnableWindow(bHTTP);
+	GetDlgItem(IDC_BTN_HTTP_ADD)->EnableWindow(bHTTP);
+	GetDlgItem(IDC_BTN_HTTP_REMOVE)->EnableWindow(bHTTP);
+	GetDlgItem(IDC_BTN_HTTP_CLEAR)->EnableWindow(bHTTP);
+	//End emulEspaña
 	UpdateLink();
 }
 
@@ -287,3 +342,47 @@ BOOL CED2kLinkDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		return ::SendMessage(::GetParent(m_hWnd), WM_COMMAND, wParam, lParam);
 	return CResizablePage::OnCommand(wParam, lParam);
 }
+
+//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+void CED2kLinkDlg::OnBtnAddHttp()
+{
+	CListBox *httpList = (CListBox *) GetDlgItem(IDC_LIST_HTTP);
+	if(httpList){
+		CString httpSrc;
+		GetDlgItem(IDC_EDIT_HTTP)->GetWindowText(httpSrc);
+		if(!httpSrc.IsEmpty()){
+			if(httpSrc.Left(7).CompareNoCase(_T("http://")) == 0){
+				httpList->AddString(httpSrc);
+				GetDlgItem(IDC_EDIT_HTTP)->SetWindowText(_T(""));
+			}
+			else{
+				MessageBox(GetResString(IDS_INVALID_HTTP_SRC), 0, MB_OK | MB_ICONEXCLAMATION);
+			}
+		}
+	}
+
+	UpdateLink();
+}
+
+void CED2kLinkDlg::OnBtnRemoveHttp()
+{
+	CListBox *httpList = (CListBox *) GetDlgItem(IDC_LIST_HTTP);
+	if(httpList){
+		httpList->DeleteString(httpList->GetCurSel());
+	}	
+//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	UpdateLink();
+}
+
+void CED2kLinkDlg::OnBtnClearHttp()
+{
+	if(MessageBox(GetResString(IDS_HTTP_LIST_CLEAR), 0, MB_YESNO | MB_ICONQUESTION) == IDYES){
+		CListBox *httpList = (CListBox *) GetDlgItem(IDC_LIST_HTTP);
+		if(httpList){
+			httpList->ResetContent(); 
+		}		
+
+		UpdateLink();
+	}
+}
+

@@ -3556,6 +3556,17 @@
 #define IDS_MORPH_KSSERV                51543
 #define IDS_MORPH_LOG                   51544
 #define IDS_WEBSERVER_LINK              51561
+#define IDC_HTTP_SRC                    20121
+#define IDC_BTN_HTTP_ADD                20122
+#define IDC_LIST_HTTP                   20123
+#define IDC_BTN_HTTP_REMOVE             20124
+#define IDC_BTN_HTTP_CLEAR              20125
+#define IDC_EDIT_HTTP                   20126
+#define IDS_HTTP_SRC					21076
+#define IDS_CLEAR						21077
+#define IDS_INVALID_HTTP_SRC			21078
+#define IDS_HTTP_LIST_CLEAR				21079
+
 
 // Next default values for new objects
 // 

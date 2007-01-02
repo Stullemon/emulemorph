@@ -54,4 +54,10 @@ protected:
 	afx_msg void OnBnClickedClipboard();
 	afx_msg void OnSettingsChange();
 	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
+
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	afx_msg void OnBtnAddHttp();
+	afx_msg void OnBtnRemoveHttp();
+	afx_msg void OnBtnClearHttp();
+	//End emulEspaña
 };
