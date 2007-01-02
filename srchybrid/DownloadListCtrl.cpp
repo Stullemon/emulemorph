@@ -86,7 +86,8 @@ END_MESSAGE_MAP()
 CDownloadListCtrl::CDownloadListCtrl()
 	: CDownloadListListCtrlItemWalk(this)
 {
-	m_tooltip = new CToolTipCtrlX;
+	if (!RunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
+		m_tooltip = new CToolTipCtrlX;
 	SetGeneralPurposeFind(true, false);
 }
 
@@ -112,7 +113,7 @@ CDownloadListCtrl::~CDownloadListCtrl()
 		m_ListItems.erase(m_ListItems.begin());
 	}
 	if (!RunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
-	delete m_tooltip;
+		delete m_tooltip;
 }
 
 void CDownloadListCtrl::Init()
@@ -126,13 +127,14 @@ void CDownloadListCtrl::Init()
 
 	SetStyle();
 	ModifyStyle(LVS_SINGLESEL,0);
-	
+	if (!RunningAsService()) { // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
 	CToolTipCtrl* tooltip = GetToolTips();
-	if (tooltip){
-		m_tooltip->SubclassWindow(*tooltip);
-		tooltip->ModifyStyle(0, TTS_NOPREFIX);
-		tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
-		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
+		if (tooltip){
+			m_tooltip->SubclassWindow(*tooltip);
+			tooltip->ModifyStyle(0, TTS_NOPREFIX);
+			tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
+			tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
+		}
 	}
 
 	InsertColumn(0,GetResString(IDS_DL_FILENAME),LVCFMT_LEFT, 260);
