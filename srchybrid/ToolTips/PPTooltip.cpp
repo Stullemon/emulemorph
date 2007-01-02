@@ -1975,7 +1975,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 			for(j = 0; j < sXSize; j++) {
 				d=posDst[j]+((a*i)/sYSize+(a*(sXSize-j))/sXSize);
 				posDst[j]=(BYTE)d;
-				posDst[j]+=((BYTE)(rand()/grainx2));
+				posDst[j]= posDst[j]+ (BYTE) ((int)(rand()/grainx2));
 			}
 			posDst+=bytes;
 		}
@@ -1990,7 +1990,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 			k=(k*(128-granularity*2))/128+128;
 			for(j = 0; j < sXSize; j++) {
 				posDst[j]=(BYTE)k;
-				posDst[j]+=(BYTE) (rand()/grainx2-granularity);
+				posDst[j]= posDst[j]+ (BYTE)  (rand()/grainx2-granularity);
 			}
 			posDst+=bytes;
 		}
@@ -2005,7 +2005,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 				xs=sXSize/2-d+(y*y*d)/a;
 				if (x>xs) posDst[j]=(BYTE) (idxmin+(((sXSize-j)*128)/d));
 				if ((x+xs)<0) posDst[j]=(BYTE)(idxmax-(BYTE)((j*128)/d));
-				posDst[j]+=(BYTE)(rand()/grainx2-(int)granularity);
+				posDst[j]= posDst[j]+ (BYTE) (rand()/grainx2-(int)granularity);
 			}
 			posDst+=bytes;
 		}
@@ -2021,7 +2021,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 				if (k<idxmin) k=idxmin;
 				if (k>idxmax) k=idxmax;
 				posDst[j]=(BYTE)k;
-				posDst[j]+=(BYTE)(rand()/grainx2-granularity);
+				posDst[j]= posDst[j]+ (BYTE) (rand()/grainx2-granularity);
 			}
 			posDst+=bytes;
 		}
@@ -2034,7 +2034,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 			k=(k*(128-granularity))/128+128;
 			for(i = 0; i < sYSize; i++) {
 				posDst[j+i*bytes]=(BYTE)k;
-				posDst[j+i*bytes]+=(BYTE)(rand()/grainx2-granularity);
+				posDst[j+i*bytes]=posDst[j+i*bytes]+(BYTE)(rand()/grainx2-granularity);
 			}
 		}
 		break;
@@ -2046,7 +2046,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 			k=(k*(128-granularity))/128+128;
 			for(j = 0; j < sXSize; j++) {
 				posDst[j]=(BYTE)k;
-				posDst[j]+=(BYTE)(rand()/grainx2-granularity);
+				posDst[j]=posDst[j]+(BYTE)(rand()/grainx2-granularity);
 			}
 			posDst+=bytes;
 		}
@@ -2057,7 +2057,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 		for(i = 0; i < sYSize; i++) {
 			for(j = 0; j < sXSize; j++) {
 				posDst[j]=(BYTE)(idxmin+a*i/sYSize+a*(sXSize-j)/sXSize);
-				posDst[j]+=(BYTE)(rand()/grainx2-granularity);
+				posDst[j]=posDst[j]+(BYTE)(rand()/grainx2-granularity);
 			}
 			posDst+=bytes;
 		}
@@ -2069,7 +2069,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 			k=a*i/sYSize+idxmin;
 			for(j = 0; j < sXSize; j++) {
 				posDst[j]=(BYTE)k;
-				posDst[j]+=(BYTE)(rand()/grainx2-granularity);
+				posDst[j]=posDst[j]+(BYTE)(rand()/grainx2-granularity);
 			}
 			posDst+=bytes;
 		}
@@ -2081,7 +2081,7 @@ void CPPToolTip::SetShade(CRect rect, UINT shadeID /* = 0 */, BYTE granularity /
 			k=a*(sXSize-j)/sXSize+idxmin;
 			for(i = 0; i < sYSize; i++) {
 				posDst[j+i*bytes]=(BYTE)k;
-				posDst[j+i*bytes]+=(BYTE)(rand()/grainx2-granularity);
+				posDst[j+i*bytes]=posDst[j+i*bytes]+(BYTE)(rand()/grainx2-granularity);
 			}
 		}
 		break;
@@ -2355,7 +2355,7 @@ void CPPToolTip::GetGradientColors(COLORREF & crBegin, COLORREF & crMid, COLORRE
 
 void CPPToolTip::SetMaskTool(int nIndexTool, UINT nMask /* = 0 */)
 {
-	ModifyMaskTool(nIndexTool, nMask, -1);
+	ModifyMaskTool(nIndexTool, nMask, !0);
 }
 
 void CPPToolTip::ModifyMaskTool(int nIndexTool, UINT nAddMask, UINT nRemoveMask)
