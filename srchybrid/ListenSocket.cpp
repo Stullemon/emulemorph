@@ -755,6 +755,10 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 							}
 						}
 					}
+					//MORPH START -  Used to not wait uploadqueue timer (110ms) capping upload to 1ReadBlock/110ms~1.6MB/s
+					if (client->GetUploadState() == US_UPLOADING)
+						client->CreateNextBlockPackage();
+					//MORPH END
 					break;
 				}
 				case OP_CANCELTRANSFER:
@@ -2448,6 +2452,10 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							}
 						}
 					}
+					//MORPH START -  Used to not wait uploadqueue timer (110ms) capping upload to 1ReadBlock/110ms~1.6MB/s
+					if (client->GetUploadState() == US_UPLOADING)
+						client->CreateNextBlockPackage();
+					//MORPH END
 					break;
 				}
 				case OP_COMPRESSEDPART:

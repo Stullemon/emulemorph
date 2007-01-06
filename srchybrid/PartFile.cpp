@@ -5803,9 +5803,11 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			if (!IsNormalFile() || uIncrease<2097152) 
 				forcewait=true;
 			*/
+			if (!IsNormalFile() || uIncrease<2097152) 
+				forcewait=true;
 
 			// Allocate filesize
-			if (!forcewait && IsNormalFile()) {
+			if (!forcewait) {
 				m_AllocateThread= AfxBeginThread(AllocateSpaceThread, this, THREAD_PRIORITY_LOWEST, 0, CREATE_SUSPENDED);
 				if (m_AllocateThread == NULL)
 				{
@@ -5819,7 +5821,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 				}
 			}
 			
-			if (forcewait || !IsNormalFile()) {
+			if (forcewait) {
 				bIncreasedFile=true;
 				// If this is a NTFS compressed file and the current block is the 1st one to be written and there is not 
 				// enough free disk space to hold the entire *uncompressed* file, windows throws a 'diskFull'!?

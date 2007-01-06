@@ -364,14 +364,14 @@ void CEMSocket::OnReceive(int nErrorCode){
 		return;
 	}
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 recvbufferlimit = ret;
+	uint32 recvbufferlimit = 180*1024*2;
 	if (recvbufferlimit > 10*1024*1024) {
 		recvbufferlimit = 10*1024*1024;
 	} else if (recvbufferlimit < 2600) {
 		recvbufferlimit = 2600;
 	}
 
-	if (recvbufferlimit != m_uCurrentRecvBufferSize) {
+	if (recvbufferlimit > m_uCurrentRecvBufferSize) {
 		SetSockOpt(SO_RCVBUF, &recvbufferlimit, sizeof(recvbufferlimit), SOL_SOCKET);
 		int ilen = sizeof(int);
 		GetSockOpt(SO_RCVBUF, &recvbufferlimit, &ilen, SOL_SOCKET);
@@ -915,7 +915,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                 } else if(!standartpacket_queue.IsEmpty()) {
                     // There's a standard packet to send
 #if !defined DONT_USE_SOCKET_BUFFERING
-					uint32 sendbufferlimit = (standartpacket_queue.GetTail().packet->GetRealPacketSize())<<2;
+					uint32 sendbufferlimit = (standartpacket_queue.GetTail().packet->GetRealPacketSize())<<1;
 					if (sendbufferlimit > 10*1024*1024)
 						sendbufferlimit = 10*1024*1024;
 					else if (sendbufferlimit < minFragSize)

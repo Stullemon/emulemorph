@@ -1142,6 +1142,8 @@ protected:
 	// Upload data rate computation
 	//
 	UINT		m_nUpDatarate;
+	UINT		m_nUpDatarateBlockBased; //MORPH - Determine Remote Speed based on new requested block request
+	DWORD		m_dwLastDoneBlock; //MORPH - Determine Remote Speed based on new requested block request
 	UINT		m_nSumForAvgUpDataRate;
 	CList<TransferredData> m_AvarageUDR_list;
 	DWORD		m_AvarageUDRLastRemovedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed

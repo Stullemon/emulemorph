@@ -137,6 +137,7 @@ int CEncryptedDatagramSocket::DecryptReceivedClient(BYTE* pbyBufIn, int nBufLen,
 		switch (pbyBufIn[0]) {
 			case  OP_WEBCACHEPROT:
 			case  OP_WEBCACHEPACKEDPROT:
+			case  OP_THE_LETTER_G:
 				return nResult; // no encrypted packet (see description on top)
 		}
 		// MORPH end : webcache
