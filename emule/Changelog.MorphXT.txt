@@ -2,6 +2,8 @@
 Changelog for eMule 0.47c MorphXT v9.3
 -------------------------------------
 dd-mm-2007
+ADD:    Lost preferences. Most official preferences that got an prefereces.ini setting but no gui are 
+		Added in preferences->extented->Advanced preferneces. 
 ADD:	http links in ed2k links like linkcreator (MoNKi)
 ADD:	Friendnote. Noting area for adding notes about friendlist. Will be automatically saved and reloaded at each start-up. (CB mod)
 ADD:	Static IP Filter (Stulle)
@@ -10,10 +12,11 @@ ADD:	run as NT service v1. [leuk_he]
     -No need to login into XP.
     -keeps running after logging out/ switching users
     -new command line options:
-       "emule install" --> install as as ervice
-       "emule uninstall"  -- unisntall as a service.
+       "emule install"    --> install as as ervice
+       "emule uninstall"  --> uninsntall as a service.
     -make sure all settings are correct before installing as a service. 
     -links as passed to webservice. 
+    -See Preferences->Webserver->NTservice tab
     remark: Not meant to save cpu/memory. 
 ADD:	 Context menu on chat context. (wizard codesnippet) 
 CHANGED: USC: better slotfocus.
