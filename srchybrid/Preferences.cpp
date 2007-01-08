@@ -52,9 +52,9 @@ CPreferences thePrefs;
 
 int		CPreferences::m_iDbgHeap;
 CString	CPreferences::strNick;
-uint16	CPreferences::minupload;
-uint16	CPreferences::maxupload;
-uint16	CPreferences::maxdownload;
+UINT     CPreferences::minupload;  //MORPH very fast
+UINT	CPreferences::maxupload;
+UINT	CPreferences::maxdownload;
 LPCSTR	CPreferences::m_pszBindAddrA;
 CStringA CPreferences::m_strBindAddrA;
 LPCWSTR	CPreferences::m_pszBindAddrW;
@@ -360,7 +360,7 @@ UINT	CPreferences::uMaxLogFileSize;
 ELogFileFormat CPreferences::m_iLogFileFormat = Unicode;
 bool	CPreferences::scheduler;
 bool	CPreferences::dontcompressavi;
-short   	CPreferences::compresslevel;   // MORPH setable compresslevel [leuk_he]
+int   CPreferences::m_iCompressLevel;   // MORPH setable compresslevel [leuk_he]
 bool	CPreferences::msgonlyfriends;
 bool	CPreferences::msgsecure;
 UINT	CPreferences::filterlevel;
@@ -766,6 +766,20 @@ bool	CPreferences::UpdateWebcacheReleaseAllowed()
 UINT	CPreferences::m_uGlobalHL; 
 bool	CPreferences::m_bGlobalHL;
 //MORPH END   - Added by Stulle, Global Source Limit
+
+// lhs AP
+bool CPreferences::bMiniMuleAutoClose;
+int  CPreferences::iMiniMuleTransparency; 
+bool CPreferences::bCreateCrashDump;
+bool CPreferences::bCheckComctl32 ;
+bool CPreferences::bCheckShell32;
+bool CPreferences::bIgnoreInstances;
+CString CPreferences::sNotifierMailEncryptCertName;
+CString CPreferences::sMediaInfo_MediaInfoDllPath ;
+bool CPreferences::bMediaInfo_RIFF;
+bool CPreferences::bMediaInfo_ID3LIB ;
+CString CPreferences::sInternetSecurityZone;
+// lhe AP 
 
 //MORPH START - Added, Downloaded History [Monki/Xman]
 bool	CPreferences::m_bHistoryShowShared;
@@ -2305,6 +2319,40 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("SlotLimitNum"), m_iSlotLimitNum);
 	// <== Slot Limit - Stulle
 
+	// lhs AP
+	ini.WriteBool(_T("MiniMuleAutoClose"),bMiniMuleAutoClose);
+	ini.WriteInt(_T("MiniMuleTransparency"),iMiniMuleTransparency);
+	ini.WriteBool(_T("CreateCrashDump"),bCreateCrashDump);
+	ini.WriteBool(_T("CheckComctl32"),bCheckComctl32 );
+	ini.WriteBool(_T("CheckShell32"),bCheckShell32);
+	ini.WriteBool(_T("IgnoreInstance"),bIgnoreInstances);
+	ini.WriteString(_T("NotifierMailEncryptCertName"),sNotifierMailEncryptCertName);
+	ini.WriteString(_T("MediaInfo_MediaInfoDllPath"),sMediaInfo_MediaInfoDllPath);
+	ini.WriteBool(_T("MediaInfo_RIFF"),bMediaInfo_RIFF);
+	ini.WriteBool(_T("MediaInfo_ID3LIB"),bMediaInfo_ID3LIB);
+	ini.WriteInt(_T("MaxLogBuff"),iMaxLogBuff/1024);
+	ini.WriteInt(_T("MaxChatHistoryLines"),m_iMaxChatHistory);
+	ini.WriteInt(_T("PreviewSmallBlocks"),m_iPreviewSmallBlocks);
+	ini.WriteBool(_T("RestoreLastMainWndDlg"),m_bRestoreLastMainWndDlg);
+	ini.WriteBool(_T("RestoreLastLogPane"),m_bRestoreLastLogPane);
+	ini.WriteBool(_T("PreviewCopiedArchives"),m_bPreviewCopiedArchives);
+	ini.WriteInt(_T("StraightWindowStyles"),m_iStraightWindowStyles);
+	ini.WriteInt(_T("LogFileFormat"),m_iLogFileFormat);
+	ini.WriteBool(_T("RTLWindowsLayout"),m_bRTLWindowsLayout);
+	ini.WriteBool(_T("PreviewOnIconDblClk"),m_bPreviewOnIconDblClk);
+	ini.WriteString(_T("InternetSecurityZone"),sInternetSecurityZone);
+	ini.WriteInt(L"InspectAllFileTypes",m_iInspectAllFileTypes);
+    ini.WriteInt(L"MaxMessageSessions",maxmsgsessions);
+    ini.WriteBool(L"PreferRestrictedOverUser",m_bPreferRestrictedOverUser);
+	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
+	CString WriteAllowedIPs ;
+	if (GetAllowedRemoteAccessIPs().GetCount() > 0)
+		for (int i = 0; i <  GetAllowedRemoteAccessIPs().GetCount(); i++)
+           WriteAllowedIPs = WriteAllowedIPs  + _T(";") + ipstr(GetAllowedRemoteAccessIPs()[i]);
+    ini.WriteString(L"AllowedIPs",WriteAllowedIPs);  // End Seciotn Webserver
+	// lhe AP 
+
+
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "Proxy"
 	//
@@ -2333,9 +2381,6 @@ void CPreferences::SavePreferences()
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "WebServer"
 	//
-	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
-	ini.WriteBool(_T("UseIonixWebsrv"), m_bIonixWebsrv);
-	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	ini.WriteString(L"Password", GetWSPass(), L"WebServer");
 	ini.WriteString(L"PasswordLow", GetWSLowPass());
 	ini.WriteInt(L"Port", m_nWebPort);
@@ -2345,6 +2390,10 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"UseLowRightsUser", m_bWebLowEnabled);
 	ini.WriteBool(L"AllowAdminHiLevelFunc",m_bAllowAdminHiLevFunc);
 	ini.WriteInt(L"WebTimeoutMins", m_iWebTimeoutMins);
+	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	ini.WriteBool(_T("UseIonixWebsrv"), m_bIonixWebsrv);
+	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
+
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -2837,10 +2886,10 @@ void CPreferences::LoadPreferences()
 			maxGraphUploadRate = nOldUploadCapacity; // use old custoum value
 	}
 
-	minupload=(uint16)ini.GetInt(L"MinUpload", 5);    // also used for unlimited... 
+	minupload=ini.GetInt(L"MinUpload", 5);    // also used for unlimited... 
 
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
-	minupload = (uint16)min(max(minupload,1),maxGraphUploadRate);
+	minupload = min(max(minupload,1),maxGraphUploadRate);
 	//MORPH END   - Added by SiRoB, (SUC) & (USS)
 	maxupload=(uint16)ini.GetInt(L"MaxUpload",UNLIMITED);
 	if (maxupload > maxGraphUploadRate && maxupload != UNLIMITED)
@@ -2916,8 +2965,8 @@ void CPreferences::LoadPreferences()
 	statsInterval=ini.GetInt(L"statsInterval",5);
 	dontcompressavi=ini.GetBool(L"DontCompressAvi",false);
 	// MORPH setable compresslevel [leuk_he]
-	compresslevel=(short) ini.GetInt(L"CompressLevel",9);
-	if ((compresslevel > 9 )||(compresslevel < 1 )) compresslevel=9 ; // 1 = worst, but saves cpu, 9 = best, emule default
+	m_iCompressLevel=(short) ini.GetInt(L"CompressLevel",9,L"eMule" );
+	if ((m_iCompressLevel > 9 )||(m_iCompressLevel < 1 )) m_iCompressLevel=9 ; // 1 = worst, but saves cpu, 9 = best, emule default
 	// MORPH setable compresslevel [leuk_he]
 	
 	m_uDeadServerRetries=ini.GetInt(L"DeadServerRetry",1);
@@ -3637,6 +3686,21 @@ void CPreferences::LoadPreferences()
 	m_uGlobalHL = (m_uTemp >= 1000 && m_uTemp <= MAX_GSL) ? m_uTemp : m_uGlobalHlStandard;
 	//MORPH END   - Added by Stulle, Global Source Limit
 
+	//lhs AP
+	bMiniMuleAutoClose=ini.GetBool(_T("MiniMuleAutoClose"),0,_T("eMule"));
+	iMiniMuleTransparency=ini.GetInt(_T("MiniMuleTransparency"),0);
+	bCreateCrashDump=ini.GetBool(_T("CreateCrashDump"),0);
+	bCheckComctl32 =ini.GetBool(_T("CheckComctl32"),true);
+	bCheckShell32=ini.GetBool(_T("CheckShell32"),true);
+	bIgnoreInstances=ini.GetBool(_T("IgnoreInstance"),false);
+	sNotifierMailEncryptCertName=ini.GetString(_T("NotifierMailEncryptCertName"),L"");
+	sMediaInfo_MediaInfoDllPath=ini.GetString(L"MediaInfo_MediaInfoDllPath",_T("MEDIAINFO.DLL")) ;
+	bMediaInfo_RIFF=ini.GetBool(_T("MediaInfo_RIF"),false);
+	bMediaInfo_ID3LIB =ini.GetBool(_T("MediaInfo_ID3LIB"),false);
+	sInternetSecurityZone=ini.GetString(_T("InternetSecurityZone"),_T("Untrusted"));
+	// lhe AP 
+
+
  	//MORPH START - Added, Downloaded History [Monki/Xman]
 	m_bHistoryShowShared = ini.GetBool(_T("ShowSharedInHistory"), false);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
@@ -3961,8 +4025,8 @@ void CPreferences::SetMMPass(CString strNewPass)
 
 void CPreferences::SetMaxUpload(UINT in)
 {
-	uint16 oldMaxUpload = (uint16)in;
-	maxupload = (oldMaxUpload) ? oldMaxUpload : (uint16)UNLIMITED;
+	UINT  oldMaxUpload = in;
+	maxupload = (oldMaxUpload) ? oldMaxUpload : UNLIMITED;
 }
 
 void CPreferences::SetMaxDownload(UINT in)

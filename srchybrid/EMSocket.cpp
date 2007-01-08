@@ -364,9 +364,9 @@ void CEMSocket::OnReceive(int nErrorCode){
 		return;
 	}
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 recvbufferlimit = 180*1024*2;
-	if (recvbufferlimit > 10*1024*1024) {
-		recvbufferlimit = 10*1024*1024;
+	uint32 recvbufferlimit = (ret + m_uCurrentRecvBufferSize)/2;
+	if (recvbufferlimit > (10*1024*1024)) {
+		recvbufferlimit = (10*1024*1024);
 	} else if (recvbufferlimit < 2600) {
 		recvbufferlimit = 2600;
 	}

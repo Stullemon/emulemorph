@@ -1130,7 +1130,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 	BYTE* output = new BYTE[togo+300];
 	uLongf newsize = togo+300;
 	// MORPH START setable compresslevel [leuk_he]
-	UINT result = compress2(output, &newsize, data, togo, thePrefs.GetCompressLevel());
+	UINT result = compress2(output, &newsize, data, togo, thePrefs.m_iCompressLevel);
 	/* 
 	UINT result = compress2(output, &newsize, data, togo, 9);
 	*/
@@ -1872,7 +1872,11 @@ int CReadBlockFromFileThread::Run() {
 				m_lockhandle->Lock();
 			}
 			
+			//MORPH - Optimization
+			/*
 			if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
+			*/
+			if (!file.Open(fullname,CFile::modeRead|CFile::osRandomAccess|CFile::shareDenyNone))
 				throw GetResString(IDS_ERR_OPEN);
 
 			file.Seek(StartOffset,0);

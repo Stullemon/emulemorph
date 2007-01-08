@@ -38,6 +38,7 @@ static char THIS_FILE[]=__FILE__;
 
 
 bool RunningAsServiceStat;
+bool NtserviceStartwhenclose=false;
 
 SERVICE_STATUS          ssStatus;       // current status of the service
 SERVICE_STATUS_HANDLE   sshStatusHandle;
@@ -663,6 +664,30 @@ bool  InterfaceToService() {
 	return false; // 
 }
 
+
+int NtServiceStart(){
+		SC_HANDLE   schService;
+		SC_HANDLE   schSCManager;
+
+	schSCManager = OpenSCManager(
+			NULL,                   // machine (NULL == local)
+			NULL,                   // database (NULL == default)
+			SC_MANAGER_ALL_ACCESS   // access required --> start sevice, todo, maybe less rights required. 
+			);
+		if ( schSCManager )
+		{
+			schService = OpenService(schSCManager, TEXT(SZSERVICENAME), SERVICE_ALL_ACCESS);
+
+			if (schService)
+			{   LPCWSTR args[1]= {_T("AsAService")};
+				// try to start  the service (fire and forget.., no error handling)
+				StartService( schService,  1, args );
+                CloseServiceHandle(schService);
+			}
+			CloseServiceHandle(schSCManager);
+		}
+		return 0;
+}
 
 
 

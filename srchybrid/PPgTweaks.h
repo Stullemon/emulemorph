@@ -70,6 +70,74 @@ protected:
     bool m_bA4AFSaveCpu;
 	bool m_bAutoArchDisable;
 	int m_iExtractMetaData;
+	// lhs AP
+	bool bMiniMuleAutoClose;
+	int iMiniMuleTransparency;
+	bool bCreateCrashDump;
+	bool bCheckComctl32 ;
+	bool bCheckShell32;
+	bool bIgnoreInstances;
+	CString sNotifierMailEncryptCertName;
+	CString  sMediaInfo_MediaInfoDllPath;
+	bool bMediaInfo_RIFF;
+	bool bMediaInfo_ID3LIB;
+	int iMaxLogBuff;
+	int m_iMaxChatHistory;
+	int m_iPreviewSmallBlocks;
+	bool m_bRestoreLastMainWndDlg;
+	bool m_bRestoreLastLogPane;
+	bool m_bPreviewCopiedArchives;
+	int m_iStraightWindowStyles;
+	int m_iLogFileFormat;
+	bool m_bRTLWindowsLayout;
+	bool m_bPreviewOnIconDblClk;
+	CString sInternetSecurityZone;
+	CString sTxtEditor;
+	CString sdatetimeformat;
+	int iServerUDPPort; // really a unsigned int 16
+	bool m_bRemoveFilesToBin;
+    bool m_bHighresTimer;
+	bool m_bTrustEveryHash;
+    int m_iInspectAllFileTypes;
+    int  m_umaxmsgsessions;
+    bool m_bPreferRestrictedOverUser;
+    int m_iWebFileUploadSizeLimitMB;
+    CString m_sAllowedIPs;
+    // continue extra official preferences....
+	HTREEITEM m_hti_advanced;
+    HTREEITEM m_hti_bMiniMuleAutoClose;
+	HTREEITEM m_hti_iMiniMuleTransparency;
+	HTREEITEM m_hti_bCreateCrashDump;
+	HTREEITEM m_hti_bCheckComctl32 ;
+	HTREEITEM m_hti_bCheckShell32;
+	HTREEITEM m_hti_bIgnoreInstances;
+	HTREEITEM m_hti_sNotifierMailEncryptCertName;
+	HTREEITEM m_hti_sMediaInfo_MediaInfoDllPath;
+	HTREEITEM m_hti_bMediaInfo_RIFF;
+	HTREEITEM m_hti_bMediaInfo_ID3LIB;
+	HTREEITEM m_hti_iMaxLogBuff;
+	HTREEITEM m_hti_m_iMaxChatHistory;
+	HTREEITEM m_hti_m_iPreviewSmallBlocks;
+	HTREEITEM m_hti_m_bRestoreLastMainWndDlg;
+	HTREEITEM m_hti_m_bRestoreLastLogPane;
+	HTREEITEM m_hti_m_bPreviewCopiedArchives;
+	HTREEITEM m_hti_m_iStraightWindowStyles;
+	HTREEITEM m_hti_m_iLogFileFormat;
+	HTREEITEM m_hti_m_bRTLWindowsLayout;
+	HTREEITEM m_hti_m_bPreviewOnIconDblClk;
+	HTREEITEM m_hti_sInternetSecurityZone;
+	HTREEITEM m_hti_sTxtEditor;
+	HTREEITEM m_hti_sdatetimeformat;
+	HTREEITEM m_hti_iServerUDPPort;
+	HTREEITEM m_hti_m_bRemoveFilesToBin;
+	HTREEITEM m_hti_HighresTimer;
+	HTREEITEM m_hti_TrustEveryHash;
+	HTREEITEM m_hti_InspectAllFileTypes;
+	HTREEITEM m_hti_maxmsgsessions;
+	HTREEITEM m_hti_PreferRestrictedOverUser;
+	HTREEITEM m_hti_WebFileUploadSizeLimitMB ;
+	HTREEITEM m_hti_AllowedIPs;
+	// lhe AP 
 	
 
 	CSliderCtrl m_ctlFileBuffSize;

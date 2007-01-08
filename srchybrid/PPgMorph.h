@@ -44,6 +44,7 @@ protected:
 	bool m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	bool m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	bool m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+    int  m_iCompressLevel; // MORPH compresslevel
 	bool m_bFunnyNick; //MORPH - Added by SiRoB, Optionnal funnynick display
 	bool m_bClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
 	bool m_bCountWCSessionStats; // MORPH - Added by Commander, Show WC stats
@@ -123,6 +124,7 @@ protected:
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	HTREEITEM m_htiInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	HTREEITEM m_htiDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	HTREEITEM m_htiCompressLevel; //Morph - compresslevel
 	HTREEITEM m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	HTREEITEM m_htiCountWCSessionStats;//MORPH - Added by Commander, Show WC stats
 	HTREEITEM m_htiClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
@@ -230,5 +232,7 @@ protected:
 public:
 	afx_msg void OnBnClickedYes();
 	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedYesservice();
+	afx_msg void OnBnClickedNominimize();
 };
 //MORPH END leuk_he ask on exit

@@ -175,6 +175,65 @@ CPPgTweaks::CPPgTweaks()
 	m_bLogUPnP = false;
 	m_htiLogUPnP = NULL;
 	// End emulEspaña
+	 
+	//lhs AP
+	bMiniMuleAutoClose=false;
+	iMiniMuleTransparency=0;
+	bCreateCrashDump=false;
+	bCheckComctl32 =false;
+	bCheckShell32=false;
+	bIgnoreInstances=false;
+	bMediaInfo_RIFF=false;
+	bMediaInfo_ID3LIB=false;
+	iMaxLogBuff=0;
+	m_iMaxChatHistory=0;
+	m_iPreviewSmallBlocks=0;
+	m_bRestoreLastMainWndDlg=false;
+	m_bRestoreLastLogPane=false;
+	m_bPreviewCopiedArchives=false;
+	m_iStraightWindowStyles=0;
+	m_iLogFileFormat=0;
+	m_bRTLWindowsLayout=false;
+	m_bPreviewOnIconDblClk=false;
+	iServerUDPPort=65535;
+	m_bRemoveFilesToBin=false;
+	// continue extra official preferences....
+	m_hti_advanced=NULL;
+	m_hti_bMiniMuleAutoClose=NULL;
+	m_hti_iMiniMuleTransparency=NULL;
+	m_hti_bCreateCrashDump=NULL;
+	m_hti_bCheckComctl32 =NULL;
+	m_hti_bCheckShell32=NULL;
+	m_hti_bIgnoreInstances=NULL;
+	m_hti_sNotifierMailEncryptCertName=NULL;
+	m_hti_sMediaInfo_MediaInfoDllPath=NULL;
+	m_hti_bMediaInfo_RIFF=NULL;
+	m_hti_bMediaInfo_ID3LIB=NULL;
+	m_hti_iMaxLogBuff=NULL;
+	m_hti_m_iMaxChatHistory=NULL;
+	m_hti_m_iPreviewSmallBlocks=NULL;
+	m_hti_m_bRestoreLastMainWndDlg=NULL;
+	m_hti_m_bRestoreLastLogPane=NULL;
+	m_hti_m_bPreviewCopiedArchives=NULL;
+	m_hti_m_iStraightWindowStyles=NULL;
+	m_hti_m_iLogFileFormat=NULL;
+	m_hti_m_bRTLWindowsLayout=NULL;
+	m_hti_m_bPreviewOnIconDblClk=NULL;
+	m_hti_sInternetSecurityZone=NULL;
+	m_hti_sTxtEditor=NULL;
+	m_hti_sdatetimeformat=NULL;
+	m_hti_iServerUDPPort=NULL;
+	m_hti_m_bRemoveFilesToBin=NULL;
+	m_hti_HighresTimer=NULL;
+	m_hti_TrustEveryHash=NULL;
+	m_hti_InspectAllFileTypes=NULL;
+	m_hti_maxmsgsessions=NULL;
+	m_hti_PreferRestrictedOverUser=NULL;
+	m_hti_WebFileUploadSizeLimitMB =NULL;
+	m_hti_AllowedIPs=NULL;
+	//lhe AP
+
+
 }
 
 CPPgTweaks::~CPPgTweaks()
@@ -307,6 +366,72 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
         m_htiDynUpNumberOfPings = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_NUMBEROFPINGS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
 		m_ctrlTreeOptions.AddEditBox(m_htiDynUpNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
 
+		//lhs AP
+		m_hti_advanced = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_ADVANCEDPREFS), iImgLog, TVI_ROOT);
+		m_hti_bMiniMuleAutoClose=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MINIMULEAUTOCLOSE),m_hti_advanced,bMiniMuleAutoClose);
+		m_hti_iMiniMuleTransparency= m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINIMULETRANSPARENCY),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_iMiniMuleTransparency, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+		m_hti_bCreateCrashDump=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CREATECRASHDUMP),m_hti_advanced,bCreateCrashDump);
+		m_hti_bCheckComctl32 =m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHECKCOMCTL32 ),m_hti_advanced,bCheckComctl32 );
+		m_hti_bCheckShell32=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHECKSHELL32),m_hti_advanced,bCheckShell32);
+		m_hti_bIgnoreInstances=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IGNOREINSTANCES),m_hti_advanced,bIgnoreInstances);
+
+		m_hti_sNotifierMailEncryptCertName= m_ctrlTreeOptions.InsertItem(GetResString(IDS_NOTIFIERMAILENCRYPTCERTNAME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_sNotifierMailEncryptCertName, RUNTIME_CLASS(CTreeOptionsEditEx));
+		
+
+		m_hti_sMediaInfo_MediaInfoDllPath= m_ctrlTreeOptions.InsertItem(GetResString(IDS_MEDIAINFO_MEDIAINFODLLPATH), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddFileEditBox(m_hti_sMediaInfo_MediaInfoDllPath,RUNTIME_CLASS(CTreeOptionsEdit), RUNTIME_CLASS(CTreeOptionsBrowseButton));
+
+		m_hti_bMediaInfo_RIFF=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MEDIAINFO_RIFF),m_hti_advanced,bMediaInfo_RIFF);
+		m_hti_bMediaInfo_ID3LIB=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MEDIAINFO_ID3LIB),m_hti_advanced,bMediaInfo_ID3LIB);
+		m_hti_iMaxLogBuff= m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXLOGBUFF),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_iMaxLogBuff, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_hti_m_iMaxChatHistory= m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCHATHISTORY),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_m_iMaxChatHistory, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+		m_hti_m_iPreviewSmallBlocks=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREVIEWSMALLBLOCKS),m_hti_advanced,m_iPreviewSmallBlocks);
+		m_hti_m_bRestoreLastMainWndDlg=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_RESTORELASTMAINWNDDLG),m_hti_advanced,m_bRestoreLastMainWndDlg);
+		m_hti_m_bRestoreLastLogPane=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_RESTORELASTLOGPANE),m_hti_advanced,m_bRestoreLastLogPane);
+		m_hti_m_bPreviewCopiedArchives=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREVIEWCOPIEDARCHIVES),m_hti_advanced,m_bPreviewCopiedArchives);
+		m_hti_m_iStraightWindowStyles=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_STRAIGHTWINDOWSTYLES),m_hti_advanced,m_iStraightWindowStyles);
+		m_hti_m_iLogFileFormat=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOGFILEFORMAT),m_hti_advanced,m_iLogFileFormat);
+		m_hti_m_bRTLWindowsLayout=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_RTLWINDOWSLAYOUT),m_hti_advanced,m_bRTLWindowsLayout);
+		m_hti_m_bPreviewOnIconDblClk=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREVIEWONICONDBLCLK),m_hti_advanced,m_bPreviewOnIconDblClk);
+
+		m_hti_sInternetSecurityZone= m_ctrlTreeOptions.InsertItem(GetResString(IDS_INTERNETSECURITYZONE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_sInternetSecurityZone, RUNTIME_CLASS(CTreeOptionsEditEx));
+
+		m_hti_sTxtEditor= m_ctrlTreeOptions.InsertItem(GetResString(IDS_TXTEDITOR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddFileEditBox(m_hti_sTxtEditor,RUNTIME_CLASS(CTreeOptionsEdit), RUNTIME_CLASS(CTreeOptionsBrowseButton));
+
+		m_hti_sNotifierMailEncryptCertName= m_ctrlTreeOptions.InsertItem(GetResString(IDS_NOTIFIERMAILENCRYPTCERTNAME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_sNotifierMailEncryptCertName, RUNTIME_CLASS(CTreeOptionsEditEx));
+
+		m_hti_sdatetimeformat= m_ctrlTreeOptions.InsertItem(GetResString(IDS_DATETIMEFORMAT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_sdatetimeformat, RUNTIME_CLASS(CTreeOptionsEditEx));
+
+		m_hti_iServerUDPPort= m_ctrlTreeOptions.InsertItem(GetResString(IDS_SERVERUDPPORT),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_iServerUDPPort, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+		m_hti_m_bRemoveFilesToBin=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_REMOVEFILESTOBIN),m_hti_advanced,m_bRemoveFilesToBin);
+
+		m_hti_HighresTimer=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHRESTIMER),m_hti_advanced,m_bHighresTimer);
+		m_hti_TrustEveryHash=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_TRUSTEVERYHASH),m_hti_advanced,m_bTrustEveryHash);
+
+		m_hti_InspectAllFileTypes=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INSPECTALLFILETYPES),m_hti_advanced,m_iInspectAllFileTypes);
+		m_hti_maxmsgsessions=m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXMSGSESSIONS),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_maxmsgsessions, RUNTIME_CLASS(CNumTreeOptionsEdit));													   
+
+		m_hti_PreferRestrictedOverUser=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFERRESTRICTEDOVERUSER),m_hti_advanced,m_bPreferRestrictedOverUser);
+		m_hti_WebFileUploadSizeLimitMB=m_ctrlTreeOptions.InsertItem(GetResString(IDS_WEBFILEUPLOADSIZELIMITMB),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_WebFileUploadSizeLimitMB, RUNTIME_CLASS(CNumTreeOptionsEdit));													   										   
+		m_hti_AllowedIPs=m_ctrlTreeOptions.InsertItem(GetResString(IDS_ALLOWEDIPS),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_AllowedIPs, RUNTIME_CLASS(CTreeOptionsEditEx));
+		if (m_bExtControls) // show more controls --> still possible to manully expand. 
+			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
+		// lhe AP
 
 	    m_ctrlTreeOptions.Expand(m_htiTCPGroup, TVE_EXPAND);
 		if (m_htiVerboseGroup)
@@ -422,6 +547,50 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_iDynUpGoingDownDivider, 1, INT_MAX);
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpNumberOfPings, m_iDynUpNumberOfPings);
 	DDV_MinMaxInt(pDX, m_iDynUpNumberOfPings, 1, INT_MAX);
+    // lhs AP
+	if (m_hti_bMiniMuleAutoClose) DDX_TreeCheck(pDX, IDC_EXT_OPTS,m_hti_bMiniMuleAutoClose,bMiniMuleAutoClose);
+	if (m_hti_iMiniMuleTransparency) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_iMiniMuleTransparency, iMiniMuleTransparency);
+								   DDV_MinMaxInt(pDX, iMiniMuleTransparency, 0, 100);}
+	if(m_hti_bCreateCrashDump) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_bCreateCrashDump,bCreateCrashDump);
+	if(m_hti_bCheckComctl32 ) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_bCheckComctl32 ,bCheckComctl32 );
+	if(m_hti_bCheckShell32) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_bCheckShell32,bCheckShell32);
+	if(m_hti_bIgnoreInstances) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_bIgnoreInstances,bIgnoreInstances);
+	if (m_hti_sNotifierMailEncryptCertName) DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sNotifierMailEncryptCertName, sNotifierMailEncryptCertName);
+
+	if(m_hti_bMediaInfo_RIFF) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_bMediaInfo_RIFF,bMediaInfo_RIFF);
+	if(m_hti_bMediaInfo_ID3LIB) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_bMediaInfo_ID3LIB,bMediaInfo_ID3LIB);
+	if (m_hti_iMaxLogBuff) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_iMaxLogBuff, iMaxLogBuff);
+										 DDV_MinMaxInt(pDX, iMaxLogBuff, 64, 512);}
+	if (m_hti_m_iMaxChatHistory) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_m_iMaxChatHistory, m_iMaxChatHistory);
+										 DDV_MinMaxInt(pDX, m_iMaxChatHistory, 3, 2048);}
+	if(m_hti_m_iPreviewSmallBlocks) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_iPreviewSmallBlocks,m_iPreviewSmallBlocks);
+	if(m_hti_m_bRestoreLastMainWndDlg) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_bRestoreLastMainWndDlg,m_bRestoreLastMainWndDlg);
+	if(m_hti_m_bRestoreLastLogPane) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_bRestoreLastLogPane,m_bRestoreLastLogPane);
+	if(m_hti_m_bPreviewCopiedArchives) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_bPreviewCopiedArchives,m_bPreviewCopiedArchives);
+	if(m_hti_m_iStraightWindowStyles) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_iStraightWindowStyles,m_iStraightWindowStyles);
+	if(m_hti_m_iLogFileFormat) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_iLogFileFormat,m_iLogFileFormat);
+	if(m_hti_m_bRTLWindowsLayout) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_bRTLWindowsLayout,m_bRTLWindowsLayout);
+	if(m_hti_m_bPreviewOnIconDblClk) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_bPreviewOnIconDblClk,m_bPreviewOnIconDblClk);
+
+	if (m_hti_sInternetSecurityZone) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sInternetSecurityZone, sInternetSecurityZone);}
+									  //TODO only allow  Untrusted|Internet|Intranet|Trusted|LocalMachine 
+	if (m_hti_sNotifierMailEncryptCertName) DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sNotifierMailEncryptCertName, sNotifierMailEncryptCertName);
+  	if (m_hti_sdatetimeformat) DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sdatetimeformat, sdatetimeformat);
+	if (m_hti_iServerUDPPort) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_iServerUDPPort, iServerUDPPort);
+										 DDV_MinMaxInt(pDX, iServerUDPPort, 0,65535);}
+	if(m_hti_m_bRemoveFilesToBin) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_bRemoveFilesToBin,m_bRemoveFilesToBin);
+   
+	if(m_hti_HighresTimer) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_HighresTimer,m_bHighresTimer);
+	if(m_hti_TrustEveryHash) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_TrustEveryHash,m_bTrustEveryHash);
+    if(m_hti_InspectAllFileTypes) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_InspectAllFileTypes,m_iInspectAllFileTypes);
+	if(m_hti_maxmsgsessions) {DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_maxmsgsessions,(int)m_umaxmsgsessions);
+						DDV_MinMaxInt(pDX, m_umaxmsgsessions, 0, 6000);}
+    if(m_hti_PreferRestrictedOverUser) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_PreferRestrictedOverUser,m_bPreferRestrictedOverUser);
+	if(m_hti_WebFileUploadSizeLimitMB) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_WebFileUploadSizeLimitMB,m_iWebFileUploadSizeLimitMB);
+										DDV_MinMaxInt(pDX, m_iWebFileUploadSizeLimitMB, 0, INT_MAX);}
+    if(m_hti_AllowedIPs) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_AllowedIPs,m_sAllowedIPs); //TODO: check string for ip
+    // lhe AP
+
 }
 
 BOOL CPPgTweaks::OnInitDialog()
@@ -489,6 +658,44 @@ BOOL CPPgTweaks::OnInitDialog()
     m_iDynUpNumberOfPings = thePrefs.GetDynUpNumberOfPings();
 
     m_bA4AFSaveCpu = thePrefs.GetA4AFSaveCpu();
+
+	// lhs AP
+	bMiniMuleAutoClose=thePrefs.bMiniMuleAutoClose;
+	iMiniMuleTransparency=thePrefs.iMiniMuleTransparency;
+	bCreateCrashDump=thePrefs.bCreateCrashDump;
+	bCheckComctl32 =thePrefs.bCheckComctl32 ;
+	bCheckShell32=thePrefs.bCheckShell32;
+	bIgnoreInstances=thePrefs.bIgnoreInstances;
+	sNotifierMailEncryptCertName=thePrefs.sNotifierMailEncryptCertName;
+	sMediaInfo_MediaInfoDllPath=thePrefs.sMediaInfo_MediaInfoDllPath;
+	bMediaInfo_RIFF=thePrefs.bMediaInfo_RIFF;
+	bMediaInfo_ID3LIB=thePrefs.bMediaInfo_ID3LIB;
+	iMaxLogBuff=thePrefs.GetMaxLogBuff()/1024;
+	m_iMaxChatHistory=thePrefs.m_iMaxChatHistory;
+	m_iPreviewSmallBlocks=thePrefs.m_iPreviewSmallBlocks;
+	m_bRestoreLastMainWndDlg=thePrefs.m_bRestoreLastMainWndDlg;
+	m_bRestoreLastLogPane=thePrefs.m_bRestoreLastLogPane;
+	m_bPreviewCopiedArchives=thePrefs.m_bPreviewCopiedArchives;
+	m_iStraightWindowStyles=thePrefs.m_iStraightWindowStyles;
+	m_iLogFileFormat=thePrefs.m_iLogFileFormat;
+	m_bRTLWindowsLayout=thePrefs.m_bRTLWindowsLayout;
+	m_bPreviewOnIconDblClk=thePrefs.m_bPreviewOnIconDblClk;
+	sInternetSecurityZone=thePrefs.sInternetSecurityZone;
+	sTxtEditor=thePrefs.GetTxtEditor();
+	sdatetimeformat=thePrefs.GetDateTimeFormat();
+	iServerUDPPort=thePrefs.GetServerUDPPort();
+	m_bRemoveFilesToBin=thePrefs.GetRemoveToBin();
+	m_bHighresTimer=thePrefs.m_bHighresTimer;
+	m_bTrustEveryHash=thePrefs.m_bTrustEveryHash;
+	m_iInspectAllFileTypes=thePrefs.m_iInspectAllFileTypes;
+	m_umaxmsgsessions=thePrefs.maxmsgsessions;
+	m_bPreferRestrictedOverUser=thePrefs.m_bPreferRestrictedOverUser;
+	m_iWebFileUploadSizeLimitMB=thePrefs.m_iWebFileUploadSizeLimitMB;
+	m_sAllowedIPs=_T("");
+	if (thePrefs.GetAllowedRemoteAccessIPs().GetCount() > 0)
+		for (int i = 0; i <  thePrefs.GetAllowedRemoteAccessIPs().GetCount(); i++)
+           m_sAllowedIPs= m_sAllowedIPs+ _T(";") + ipstr(thePrefs.GetAllowedRemoteAccessIPs()[i]);
+	// lhe AP
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
     CPropertyPage::OnInitDialog();
@@ -649,6 +856,51 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bAutomaticArcPreviewStart = !m_bAutoArchDisable;
 
     thePrefs.m_bA4AFSaveCpu = m_bA4AFSaveCpu;
+	//lhs AP
+	thePrefs.bMiniMuleAutoClose=bMiniMuleAutoClose;
+	thePrefs.iMiniMuleTransparency=iMiniMuleTransparency;
+	thePrefs.bCreateCrashDump=bCreateCrashDump;
+	thePrefs.bCheckComctl32 =bCheckComctl32 ;
+	thePrefs.bCheckShell32=bCheckShell32;
+	thePrefs.bIgnoreInstances=bIgnoreInstances;
+	thePrefs.sNotifierMailEncryptCertName=sNotifierMailEncryptCertName;
+	thePrefs.sMediaInfo_MediaInfoDllPath=sMediaInfo_MediaInfoDllPath;
+	thePrefs.bMediaInfo_RIFF=bMediaInfo_RIFF;
+	thePrefs.bMediaInfo_ID3LIB=bMediaInfo_ID3LIB;
+	thePrefs.iMaxLogBuff=iMaxLogBuff*1024;
+	thePrefs.m_iMaxChatHistory=m_iMaxChatHistory;
+	thePrefs.m_iPreviewSmallBlocks=m_iPreviewSmallBlocks;
+	thePrefs.m_bRestoreLastMainWndDlg=m_bRestoreLastMainWndDlg;
+	thePrefs.m_bRestoreLastLogPane=m_bRestoreLastLogPane;
+	thePrefs.m_bPreviewCopiedArchives=m_bPreviewCopiedArchives;
+	thePrefs.m_iStraightWindowStyles=m_iStraightWindowStyles;
+	thePrefs.m_iLogFileFormat=(ELogFileFormat)m_iLogFileFormat;
+	thePrefs.m_bRTLWindowsLayout=m_bRTLWindowsLayout;
+	thePrefs.m_bPreviewOnIconDblClk=m_bPreviewOnIconDblClk;
+	thePrefs.sInternetSecurityZone=sInternetSecurityZone;
+	_tcsncpy(thePrefs.TxtEditor,sTxtEditor,MAX_PATH);
+	_tcsncpy(thePrefs.datetimeformat,sdatetimeformat,63); // 63 or 64?
+	thePrefs.nServerUDPPort=(uint16) iServerUDPPort; 
+	thePrefs.m_bRemove2bin=m_bRemoveFilesToBin;
+	thePrefs.m_bHighresTimer=m_bHighresTimer;
+	thePrefs.m_bTrustEveryHash=m_bTrustEveryHash;
+	thePrefs.m_iInspectAllFileTypes=m_iInspectAllFileTypes;
+	thePrefs.maxmsgsessions=m_umaxmsgsessions;
+	thePrefs.m_bPreferRestrictedOverUser=m_bPreferRestrictedOverUser;
+	thePrefs.m_iWebFileUploadSizeLimitMB=m_iWebFileUploadSizeLimitMB;
+	int iPos = 0;
+	CString strIP = m_sAllowedIPs.Tokenize(L";", iPos);
+	thePrefs.m_aAllowedRemoteAccessIPs.RemoveAll();
+	while (!strIP.IsEmpty())
+	{
+		u_long nIP = inet_addr(CStringA(strIP));
+		if (nIP != INADDR_ANY && nIP != INADDR_NONE)
+			thePrefs.m_aAllowedRemoteAccessIPs.Add(nIP);
+		strIP = m_sAllowedIPs.Tokenize(L";", iPos);
+	}
+	//lhe AP
+
+
 
 	if (thePrefs.GetEnableVerboseOptions())
 	{
@@ -783,6 +1035,40 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiVerboseGroup,IDS_VERBOSE_TIP);
 		SetTool(m_htiVerbose,IDS_ENABLED_TIP);
 		SetTool(m_htiLogLevel,IDS_LOG_LEVEL_TIP);
+// lhs AP
+SetTool(m_hti_advanced,IDS_ADVANCEDPREFS_TIP);
+SetTool(m_hti_bMiniMuleAutoClose,IDS_MINIMULEAUTOCLOSE_TIP);
+SetTool(m_hti_iMiniMuleTransparency,IDS_MINIMULETRANSPARENCY_TIP);
+SetTool(m_hti_bCreateCrashDump,IDS_CREATECRASHDUMP_TIP);
+SetTool(m_hti_bCheckComctl32 ,IDS_CHECKCOMCTL32_TIP);
+SetTool(m_hti_bCheckShell32,IDS_CHECKSHELL32_TIP);
+SetTool(m_hti_bIgnoreInstances,IDS_IGNOREINSTANCES_TIP);
+SetTool(m_hti_sNotifierMailEncryptCertName,IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP);
+SetTool(m_hti_sMediaInfo_MediaInfoDllPath,IDS_MEDIAINFO_MEDIAINFODLLPATH_TIP);
+SetTool(m_hti_bMediaInfo_RIFF,IDS_MEDIAINFO_RIFF_TIP);
+SetTool(m_hti_bMediaInfo_ID3LIB,IDS_MEDIAINFO_ID3LIB_TIP);
+SetTool(m_hti_iMaxLogBuff,IDS_MAXLOGBUFF_TIP);
+SetTool(m_hti_m_iMaxChatHistory,IDS_MAXCHATHISTORY_TIP);
+SetTool(m_hti_m_iPreviewSmallBlocks,IDS_PREVIEWSMALLBLOCKS_TIP);
+SetTool(m_hti_m_bRestoreLastMainWndDlg,IDS_RESTORELASTMAINWNDDLG_TIP);
+SetTool(m_hti_m_bRestoreLastLogPane,IDS_RESTORELASTLOGPANE_TIP);
+SetTool(m_hti_m_bPreviewCopiedArchives,IDS_PREVIEWCOPIEDARCHIVES_TIP);
+SetTool(m_hti_m_iStraightWindowStyles,IDS_STRAIGHTWINDOWSTYLES_TIP);
+SetTool(m_hti_m_iLogFileFormat,IDS_LOGFILEFORMAT_TIP);
+SetTool(m_hti_m_bRTLWindowsLayout,IDS_RTLWINDOWSLAYOUT_TIP);
+SetTool(m_hti_m_bPreviewOnIconDblClk,IDS_PREVIEWONICONDBLCLK_TIP);
+SetTool(m_hti_sInternetSecurityZone,IDS_INTERNETSECURITYZONE_TIP);
+SetTool(m_hti_sTxtEditor,IDS_TXTEDITOR_TIP);
+SetTool(m_hti_sdatetimeformat,IDS_DATETIMEFORMAT_TIP);
+SetTool(m_hti_iServerUDPPort,IDS_SERVERUDPPORT_TIP);
+SetTool(m_hti_m_bRemoveFilesToBin,IDS_REMOVEFILESTOBIN_TIP);
+SetTool(m_hti_HighresTimer,IDS_HIGHRESTIMER_TIP);
+SetTool(m_hti_TrustEveryHash,IDS_TRUSTEVERYHASH_TIP);
+SetTool(m_hti_InspectAllFileTypes,IDS_INSPECTALLFILETYPES_TIP);
+SetTool(m_hti_maxmsgsessions,IDS_MAXMSGSESSIONS_TIP);
+SetTool(m_hti_PreferRestrictedOverUser,IDS_PREFERRESTRICTEDOVERUSER_TIP);
+SetTool(m_hti_WebFileUploadSizeLimitMB ,IDS_WEBFILEUPLOADSIZELIMITMB_TIP);
+SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS);
         //MORPH END leuk_he tooltipped
 
 	}

@@ -258,6 +258,7 @@ public:
 	uint32	WriteToBuffer(uint64 transize, const BYTE *data, uint64 start, uint64 end, Requested_Block_Struct *block, const CUpDownClient* client);
 	void	FlushBuffer(bool forcewait=false, bool bForceICH = false, bool bNoAICH = false);
 	//MORPH START - Added by SiRoB, Flush Thread
+	void	WriteToDisk();
 	void	FlushDone();
 	//MORPH END   - Added by SiRoB, Flush Thread
 
@@ -488,6 +489,7 @@ private:  //morph
 	
 	//MORPH START - Added by SiRoB, Flush Thread
 	FlushDone_Struct* m_FlushSetting;
+	CCriticalSection m_BufferedData_list_Locker;
 	//MORPH END   - Added by SiRoB, Flush Thread
 
 	// khaos::categorymod+

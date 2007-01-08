@@ -332,15 +332,15 @@ BOOL CPPgConnection::OnApply()
 	SetRateSliderTicks(m_ctlMaxUp);
 
     {
-        uint16 ulSpeed;
+        UINT ulSpeed;   // max speed > 65000
 
 		if (!IsDlgButtonChecked(IDC_ULIMIT_LBL))
 		    ulSpeed = UNLIMITED;
 		else
-		    ulSpeed = (uint16)m_ctlMaxUp.GetPos();
+		    ulSpeed = m_ctlMaxUp.GetPos();
 
 	    if (thePrefs.GetMaxGraphUploadRate(true) < ulSpeed && ulSpeed != UNLIMITED)
-		    ulSpeed = (uint16)(thePrefs.GetMaxGraphUploadRate(true) * 0.8);
+		    ulSpeed = (thePrefs.GetMaxGraphUploadRate(true) * 0.8);
 
         if(ulSpeed > thePrefs.GetMaxUpload()) {
             // make USS go up to higher ul limit faster
@@ -359,7 +359,7 @@ BOOL CPPgConnection::OnApply()
 		thePrefs.SetMaxDownload(m_ctlMaxDown.GetPos());
 
 	if( thePrefs.GetMaxGraphDownloadRate() < thePrefs.GetMaxDownload() && thePrefs.GetMaxDownload()!=UNLIMITED )
-		thePrefs.SetMaxDownload((uint16)(thePrefs.GetMaxGraphDownloadRate() * 0.8));
+		thePrefs.SetMaxDownload((thePrefs.GetMaxGraphDownloadRate() * 0.8));
 
 	if (thePrefs.GetMaxDownload()!=UNLIMITED)
 		m_ctlMaxDown.SetPos(thePrefs.GetMaxDownload());

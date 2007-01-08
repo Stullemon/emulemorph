@@ -1254,13 +1254,15 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 		}
 		delete[] toadd;
 	}
+	/*
 	while (!m_DownloadBlocks_list.IsEmpty())
 	{
 		Pending_Block_Struct* pblock = new Pending_Block_Struct;
 		pblock->block = m_DownloadBlocks_list.RemoveHead();
 		m_PendingBlocks_list.AddTail(pblock);
 	}
-//MORPH END  - Proper number of needed requested block
+	*/
+	//MORPH END  - Proper number of needed requested block
 }
 
 //MORPH - Changed by SiRoB, WebCache Retry by edk2
@@ -1340,15 +1342,14 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
         // Only trust eMule clients to be able to handle less blocks than three
-        if(GetDownloadDatarate() < 1200  || GetSessionPayloadDown() < 40*1024 || reqfile->GetDatarate() > GetDownloadDatarate()*reqfile->GetSrcStatisticsValue(DS_DOWNLOADING) ) { //MORPH - Enhanced DBR 
+        if(GetDownloadDatarate() < 1200  || GetSessionPayloadDown() < 40*1024) {
             blockCount = 1;
         }
     //}
-	blockCount = max(blockCount, (GetDownloadDatarate()/EMBLOCKSIZE+2));
 	CreateBlockRequests(blockCount);
 
 
-	if (m_PendingBlocks_list.IsEmpty()){
+	if (m_PendingBlocks_list.IsEmpty() && m_DownloadBlocks_list.IsEmpty()){
 		//MORPH START - SendCancelTransfer if we can't find an other file to download
 		/*
 		SendCancelTransfer();
@@ -1361,42 +1362,41 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		//MORPH END   - SendCancelTransfer if we can't find an other file to download
 		return;
 	}
+	
+	//Is there block to request
+	if (m_DownloadBlocks_list.IsEmpty())
+		return;
 
 	bool bI64Offsets = false;
-	POSITION pos = m_PendingBlocks_list.GetHeadPosition();
+	POSITION pos = m_DownloadBlocks_list.GetHeadPosition();
 //MORPH START - Changed by SiRoB, Official fix to prevent sending same requested block
 	/*
 	for (uint32 i = 0; i != 3; i++){
 	*/
 	uint32 numberofblocktorequest = 0;
-	while (pos){
-		Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-		if (pending->fQueued == 0) {
-			ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-			if (pending->block->StartOffset > 0xFFFFFFFF || pending->block->EndOffset >= 0xFFFFFFFF){
-				bI64Offsets = true;
-				if (!SupportsLargeFiles()){
-					ASSERT( false );
-					SendCancelTransfer();
-					SetDownloadState(DS_ERROR);
-					return;
-					}
-				//break;
-
+	while (pos && numberofblocktorequest < 3){
+		Requested_Block_Struct* block = m_DownloadBlocks_list.GetNext(pos);
+		ASSERT( block->StartOffset <= block->EndOffset );
+		if (block->StartOffset > 0xFFFFFFFF || block->EndOffset >= 0xFFFFFFFF){
+			bI64Offsets = true;
+			if (!SupportsLargeFiles()){
+				ASSERT( false );
+				SendCancelTransfer();
+				SetDownloadState(DS_ERROR);
+				return;
 			}
-			++numberofblocktorequest;
 		}
+		++numberofblocktorequest;
 	}
-	if (numberofblocktorequest == 0) //mean there is no request to do
-		return;
+
 	Packet* packet;
 	uint32 npacket = 0;
-	const UINT nbpackettosend = (numberofblocktorequest+2)/3;
+	const UINT nbpackettosend = 1;//(numberofblocktorequest+2)/3;
 	if (bI64Offsets){
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
-		pos = m_PendingBlocks_list.GetHeadPosition();
+		pos = m_DownloadBlocks_list.GetHeadPosition();
 		while (npacket<nbpackettosend) {
 		const int iPacketSize = 16+(3*8)+(3*8); // 64
 		packet = new Packet(OP_REQUESTPARTS_I64, iPacketSize, OP_EMULEPROT);
@@ -1406,55 +1406,49 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		pos = m_PendingBlocks_list.GetHeadPosition();
 		for (uint32 i = 0; i != 3; i++){
 		*/
-		POSITION initialpos = pos;
 		uint32 i = 0;
 		while (i != 3){
 			if (pos){
-				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-				if (pending->fQueued == 0) {
-					ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-					//ASSERT( pending->zStream == NULL );
-					//ASSERT( pending->totalUnzipped == 0 );
-					pending->fZStreamError = 0;
-					pending->fRecovered = 0;
-					pending->fQueued = 1;
-					data.WriteUInt64(pending->block->StartOffset);
-					++i;
-				}
+				Requested_Block_Struct* block = m_DownloadBlocks_list.GetNext(pos);
+				ASSERT(block->StartOffset <= block->EndOffset );
+				data.WriteUInt64(block->StartOffset);
+				++i;
 			}
 			else {
 				data.WriteUInt64(0);
 				++i;
 			}
 		}
-		pos = initialpos;
+
 		/*
 		for (uint32 i = 0; i != 3; i++){
 		*/
 		i = 0;
 		while (i != 3){
-			if (pos){
-				/*
-				Requested_Block_Struct* block = m_PendingBlocks_list.GetNext(pos)->block;
-				*/
-				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-				if (pending->fQueued == 1) {
-					pending->fQueued = 2;
-					Requested_Block_Struct* block = pending->block;
-					uint64 endpos = block->EndOffset+1;
-					data.WriteUInt64(endpos);
-					if (thePrefs.GetDebugClientTCPLevel() > 0){
-						CString strInfo;
-						strInfo.Format(_T("  Block request %u: "), i);
-						strInfo += DbgGetBlockInfo(block);
-						strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset, false) ? _T("Yes(NOTE:)") : _T("No"));
-						strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
-						strInfo.AppendFormat(_T(",  AlreadyReq=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
-						strInfo += _T('\n');
-						Debug(strInfo);
-					}
-					++i;
+			if (!m_DownloadBlocks_list.IsEmpty()){
+				Pending_Block_Struct* pending = new Pending_Block_Struct;
+				pending->block = m_DownloadBlocks_list.RemoveHead();
+				//ASSERT( pending->zStream == NULL );
+				//ASSERT( pending->totalUnzipped == 0 );
+				pending->fZStreamError = 0;
+				pending->fRecovered = 0;
+				pending->fQueued = 0;
+				m_PendingBlocks_list.AddTail(pending);
+				
+				Requested_Block_Struct* block = pending->block;
+				uint64 endpos = block->EndOffset+1;
+				data.WriteUInt64(endpos);
+				if (thePrefs.GetDebugClientTCPLevel() > 0){
+					CString strInfo;
+					strInfo.Format(_T("  Block request %u: "), i);
+					strInfo += DbgGetBlockInfo(block);
+					strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset, false) ? _T("Yes(NOTE:)") : _T("No"));
+					strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+					strInfo.AppendFormat(_T(",  AlreadyReq=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+					strInfo += _T('\n');
+					Debug(strInfo);
 				}
+				++i;
 			}
 			else
 			{
@@ -1483,7 +1477,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
-		pos = m_PendingBlocks_list.GetHeadPosition();
+		pos = m_DownloadBlocks_list.GetHeadPosition();
 		while (npacket<nbpackettosend) {
 		const int iPacketSize = 16+(3*4)+(3*4); // 40
 		packet = new Packet(OP_REQUESTPARTS,iPacketSize);
@@ -1493,55 +1487,48 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		pos = m_PendingBlocks_list.GetHeadPosition();
 		for (uint32 i = 0; i != 3; i++){
 		*/
-		POSITION initalpos = pos;
 		uint32 i = 0;
 		while (i != 3){
 			if (pos){
-				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-				if (pending->fQueued == 0) {
-					ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
-					//ASSERT( pending->zStream == NULL );
-					//ASSERT( pending->totalUnzipped == 0 );
-					pending->fZStreamError = 0;
-					pending->fRecovered = 0;
-					pending->fQueued = 1;
-					data.WriteUInt32((uint32)pending->block->StartOffset);
-					++i;
-				}
+				Requested_Block_Struct* block = m_DownloadBlocks_list.GetNext(pos);
+				data.WriteUInt32((uint32)block->StartOffset);
+				++i;
 			}
 			else {
 				data.WriteUInt32(0);
 				++i;
 			}
 		}
-		pos = initalpos;
+
 		/*
 		for (uint32 i = 0; i != 3; i++){
 		*/
 		i = 0;
 		while (i != 3){
-			if (pos){
-				/*
-				Requested_Block_Struct* block = m_PendingBlocks_list.GetNext(pos)->block;
-				*/
-				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-				if (pending->fQueued == 1) {
-					pending->fQueued = 2;
-					Requested_Block_Struct* block = pending->block;
-					uint64 endpos = block->EndOffset+1;
-					data.WriteUInt32((uint32)endpos);
-					if (thePrefs.GetDebugClientTCPLevel() > 0){
-						CString strInfo;
-						strInfo.Format(_T("  Block request %u: "), i);
-						strInfo += DbgGetBlockInfo(block);
-						strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset, false) ? _T("Yes(NOTE:)") : _T("No"));
-						strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
-						strInfo.AppendFormat(_T(",  AlreadyReq=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
-						strInfo += _T('\n');
-						Debug(strInfo);
-					}
-					++i;
+			if (!m_DownloadBlocks_list.IsEmpty()){
+				Pending_Block_Struct* pending = new Pending_Block_Struct;
+				pending->block = m_DownloadBlocks_list.RemoveHead();
+				//ASSERT( pending->zStream == NULL );
+				//ASSERT( pending->totalUnzipped == 0 );
+				pending->fZStreamError = 0;
+				pending->fRecovered = 0;
+				pending->fQueued = 0;
+				m_PendingBlocks_list.AddTail(pending);
+			
+				Requested_Block_Struct* block = pending->block;
+				uint64 endpos = block->EndOffset+1;
+				data.WriteUInt32((uint32)endpos);
+				if (thePrefs.GetDebugClientTCPLevel() > 0){
+					CString strInfo;
+					strInfo.Format(_T("  Block request %u: "), i);
+					strInfo += DbgGetBlockInfo(block);
+					strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset, false) ? _T("Yes(NOTE:)") : _T("No"));
+					strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+					strInfo.AppendFormat(_T(",  AlreadyReq=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+					strInfo += _T('\n');
+					Debug(strInfo);
 				}
+				++i;
 			}
 			else
 			{
@@ -1716,8 +1703,8 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 				// Create space to store unzipped data, the size is only an initial guess, will be resized in unzip() if not big enough
 				uint32 lenUnzipped = (size * 2); 
 				// Don't get too big
-				if (lenUnzipped > (EMBLOCKSIZE + 300))
-					lenUnzipped = (EMBLOCKSIZE + 300);
+				if (lenUnzipped > (3*EMBLOCKSIZE + 300)) //MORPH - enhanced DBR
+					lenUnzipped = (3*EMBLOCKSIZE + 300); //MORPH - enhanced DBR
 				BYTE *unzipped = new BYTE[lenUnzipped];
 
 				// Try to unzip the packet

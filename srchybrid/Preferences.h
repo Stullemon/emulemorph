@@ -137,10 +137,10 @@ class CPreferences
 public:
 	static	CString	strNick;
 	// ZZ:UploadSpeedSense -->
-	static	uint16	minupload;
+	static	UINT	minupload;
 	// ZZ:UploadSpeedSense <--
-	static	uint16	maxupload;
-	static	uint16	maxdownload;
+	static	UINT maxupload;
+	static	UINT 	maxdownload;
 	static	LPCSTR	m_pszBindAddrA;
 	static	CStringA m_strBindAddrA;
 	static	LPCWSTR	m_pszBindAddrW;
@@ -502,7 +502,8 @@ public:
 	static	ELogFileFormat m_iLogFileFormat;
 	static	bool	scheduler;
 	static	bool	dontcompressavi;
-	static  short   compresslevel;	 // MORPH setable compresslevel [leuk_he]
+	static  int   m_iCompressLevel;	 // MORPH setable compresslevel [leuk_he]
+	
 	static	bool	msgonlyfriends;
 	static	bool	msgsecure;
 
@@ -914,6 +915,21 @@ public:
 	static  UINT	m_uGlobalHL;
 	static	bool	m_bGlobalHL;
 	//MORPH END   - Added by Stulle, Global Source Limit
+    // lhs AP
+	static bool bMiniMuleAutoClose;
+	static int  iMiniMuleTransparency ;
+	static bool bCreateCrashDump;
+	static bool bCheckComctl32 ;
+	static bool bCheckShell32;
+	static bool bIgnoreInstances;
+	static CString sNotifierMailEncryptCertName;
+	static CString sMediaInfo_MediaInfoDllPath ;
+	static bool bMediaInfo_RIFF ;
+	static bool bMediaInfo_ID3LIB; 
+	static CString sInternetSecurityZone;
+   // lhe AP 
+
+
 
 	static int m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
 	enum Table
@@ -1022,9 +1038,9 @@ public:
 	static	uint16	GetServerUDPPort(){return nServerUDPPort;}
 	static	uchar*	GetUserHash()	{return userhash;}
 	// ZZ:UploadSpeedSense -->
-	static	uint16	GetMinUpload()	{return minupload;}
+	static	UINT GetMinUpload()	{return minupload;}	  // MORPH  uint16 -> 16 bits is only 65.000 Kb/s
 	// ZZ:UploadSpeedSense <--
-	static	uint16	GetMaxUpload()	{return maxupload;}
+	static	UINT GetMaxUpload()	{return maxupload;} // MORPH  uint16 -> 16 bits is only 65.000 Kb/s
 	static	bool	IsICHEnabled()	{return ICH;}
 	static	bool	GetAutoUpdateServerList()		{return m_bAutoUpdateServerList;}
 	static	bool	UpdateNotify()	{return updatenotify;}
@@ -1583,8 +1599,7 @@ public:
 	static	bool	IsSchedulerEnabled()					{ return scheduler;}
 	static	void	SetSchedulerEnabled(bool in)			{ scheduler=in;}
 	static	bool	GetDontCompressAvi()					{ return dontcompressavi;}
-	static	int  	GetCompressLevel()					    { return compresslevel;}   // MORPH setable compresslevel [leuk_he]
-
+	
 	static	bool	MsgOnlyFriends()						{ return msgonlyfriends;}
 	static	bool	MsgOnlySecure()							{ return msgsecure;}
 	static	UINT	GetMsgSessionsMax()					{return maxmsgsessions;}

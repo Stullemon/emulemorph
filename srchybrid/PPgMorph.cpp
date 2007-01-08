@@ -14,6 +14,8 @@
 #include "UserMsgs.h"
 #include "Log.h" //MORPH - Added by Stulle, Global Source Limit
 #include "DownloadQueue.h" //MORPH - Added by Stulle, Global Source Limit
+#include ".\ppgmorph.h"
+#include "Ntservice.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -108,6 +110,7 @@ CPPgMorph::CPPgMorph()
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	m_htiInfiniteQueue = NULL;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_htiDontRemoveSpareTrickleSlot = NULL; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	m_htiCompressLevel =NULL ;// morph settable compresslevel
 	m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	m_htiCountWCSessionStats		= NULL; //MORPH - added by Commander, Show WC Session stats
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
@@ -346,6 +349,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 
 		m_htiInfiniteQueue = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INFINITEQUEUE), m_htiUM, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 		m_htiDontRemoveSpareTrickleSlot = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DONTREMOVESPARETRICKLESLOT), m_htiUM, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+		
+		m_htiCompressLevel = m_ctrlTreeOptions.InsertItem(_T("CompressLevel"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
+		m_ctrlTreeOptions.AddEditBox(m_htiCompressLevel, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
 		m_htiCountWCSessionStats = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTWCSESSIONSTATS), TVI_ROOT, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_bHighProcess);
@@ -398,6 +405,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDontRemoveSpareTrickleSlot, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCompressLevel, m_iCompressLevel); //Morph - Compresslevel
+	DDV_MinMaxInt(pDX, m_iCompressLevel,1,9);//Morph - Compresslevel
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplayFunnyNick, m_bFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCountWCSessionStats, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiClientQueueProgressBar, m_bClientQueueProgressBar); //MORPH - Added by Commander, ClientQueueProgressBar
@@ -494,6 +503,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
 	m_bInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_bDontRemoveSpareTrickleSlot = thePrefs.m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+    m_iCompressLevel = thePrefs.m_iCompressLevel; //Compresslevel
 	m_bFunnyNick = thePrefs.m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	m_bCountWCSessionStats = thePrefs.m_bCountWCSessionStats; //MORPH - added by Commander, Show WC Session stats
 	m_bClientQueueProgressBar = thePrefs.m_bClientQueueProgressBar;//MORPH - Added by Commander, ClientQueueProgressBar
@@ -615,6 +625,7 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	thePrefs.infiniteQueue = m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	thePrefs.m_bDontRemoveSpareTrickleSlot = m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	thePrefs.m_iCompressLevel = m_iCompressLevel; // morph settable compression
 	thePrefs.m_bFunnyNick = m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	thePrefs.m_bClientQueueProgressBar = m_bClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 	thePrefs.m_bCountWCSessionStats		   = m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
@@ -1091,17 +1102,37 @@ BOOL CAskExit::OnInitDialog()
 		GetDlgItem(IDC_DONTASKMEAGAINCB)->SetWindowText(GetResString(IDS_DONOTASKAGAIN));
 		GetDlgItem(IDYES)->SetWindowText(GetResString(IDS_YES));
 		GetDlgItem(IDNO)->SetWindowText(GetResString(IDS_NO));
-        SetTool (IDC_EXITQUESTION,IDC_EXITQUESTION_TIP);
-        SetTool (IDYES,IDC_EXITQUESTION_TIP);
-        SetTool (IDNO,IDC_EXITQUESTION_TIP);
+		GetDlgItem(IDYESSERVICE)->SetWindowText(GetResString(IDS_YESSERVICE));
+		GetDlgItem(IDNOMINIMIZE)->SetWindowText(GetResString(IDS_NOMINIMIZE));
+
+        SetTool(IDC_EXITQUESTION,IDC_EXITQUESTION_TIP);
+        SetTool(IDYES,IDC_EXITQUESTION_TIP);
+        SetTool(IDNO,IDC_EXITQUESTION_TIP);
 		SetTool(IDC_DONTASKMEAGAINCB,IDC_DONTASKMEAGAINCB_TIP);
+		SetTool(IDYESSERVICE,IDS_YESSERVICETIP);
+		SetTool(IDNOMINIMIZE,IDS_NOMINIMIZETIP);
 
 	}
    if(thePrefs.confirmExit)
 		CheckDlgButton(IDC_DONTASKMEAGAINCB,0);
 	else
 		CheckDlgButton(IDC_DONTASKMEAGAINCB,1);
-   return TRUE;                     
+   int b_installed;
+	int  i_startupmode;
+	int rights;
+
+	if (afxData.bWin95) {
+		GetDlgItem( IDYESSERVICE)->EnableWindow(false);
+	} 
+	else {
+		NTServiceGet(b_installed,i_startupmode,	rights);
+		if (b_installed == 1) 
+			GetDlgItem( IDYESSERVICE)->EnableWindow(true);
+		else
+			GetDlgItem( IDYESSERVICE)->EnableWindow(false);
+	}   
+   return TRUE;  
+
 }
 
 
@@ -1119,6 +1150,8 @@ void CAskExit::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAskExit, CDialog)
 	ON_BN_CLICKED(IDYES, OnBnClickedYes)
 	ON_BN_CLICKED(IDNO, OnBnClickedCancel)
+	ON_BN_CLICKED(IDYESSERVICE, OnBnClickedYesservice)
+	ON_BN_CLICKED(IDNOMINIMIZE, OnBnClickedNominimize)
 END_MESSAGE_MAP()
 
 
@@ -1137,3 +1170,17 @@ void CAskExit::OnBnClickedCancel()
 
 //MORPH END leuk_he ask on exit
 
+
+void CAskExit::OnBnClickedYesservice()
+{   NtserviceStartwhenclose=true;
+    EndDialog(IDYES);
+}
+
+void CAskExit::OnBnClickedNominimize()
+{
+	if (thePrefs.GetMinToTray())
+		theApp.emuledlg->PostMessage(WM_SYSCOMMAND , SC_MINIMIZE, 0);
+	else
+	    theApp.emuledlg->PostMessage(WM_SYSCOMMAND, MP_MINIMIZETOTRAY, 0);
+	 EndDialog(IDNO);
+}

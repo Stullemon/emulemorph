@@ -27,6 +27,7 @@ int NTServiceSetStartupMode(int i_startupmode);
 int CmdInstallService(bool b_autostart=false);
 int CmdRemoveService();
 VOID ServiceStop();
+extern bool NtserviceStartwhenclose;
 
 void WINAPI ServiceMain();
 VOID WINAPI service_ctrl(DWORD dwCtrlCode);
@@ -35,6 +36,7 @@ void ServiceStartedPaused(); // when started but not connected.
 BOOL CALLBACK EnumProc( HWND hWnd, LPARAM lParam) ;    // for MFC as a service workarround
 BOOL PassLinkToWebService(int iCommand,CString & StrData);
 bool InterfaceToService();
+int NtServiceStart();
 BOOL ReportStatusToSCMgr(DWORD dwCurrentState,
                          DWORD dwWin32ExitCode,
                          DWORD dwWaitHint);

@@ -474,8 +474,8 @@ void  CMMServer::ProcessChangeLimitRequest(CMMData* data, CMMSocket* sender){
 	thePrefs.SetMaxDownload(nNewDownload);
 
 	CMMPacket* packet = new CMMPacket(MMP_CHANGELIMITANS);
-	packet->WriteShort((uint16)((thePrefs.GetMaxUpload() >= UNLIMITED) ? 0 : thePrefs.GetMaxUpload()));
-	packet->WriteShort((uint16)((thePrefs.GetMaxDownload() >= UNLIMITED) ? 0 : thePrefs.GetMaxDownload()));
+	packet->WriteShort(((thePrefs.GetMaxUpload() >= (uint16)UNLIMITED) ? 0 : thePrefs.GetMaxUpload()));
+	packet->WriteShort(((thePrefs.GetMaxDownload() >= (uint16)UNLIMITED) ? 0 : thePrefs.GetMaxDownload()));
 	sender->SendPacket(packet);
 }
 

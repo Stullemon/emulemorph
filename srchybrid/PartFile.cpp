@@ -381,6 +381,7 @@ CPartFile::~CPartFile()
 	pos = m_BufferedData_list.GetHeadPosition();
 	while (pos){
 		PartFileBufferedData *item = m_BufferedData_list.GetNext(pos);
+		if (item->data) //MORPH - Flush Thread
 		delete[] item->data;
 		delete item;
 	}
@@ -488,7 +489,11 @@ void CPartFile::CreatePartFile(UINT cat)
 
 	CString partfull(RemoveFileExtension(m_fullname));
 	SetFilePath(partfull);
+	//MORPH - Optimization
+	/*
 	if (!m_hpartfile.Open(partfull,CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan)){
+	*/
+	if (!m_hpartfile.Open(partfull,CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osRandomAccess)){
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_CREATEPARTFILE));
 		SetStatus(PS_ERROR);
 	}
@@ -1389,7 +1394,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 	// open permanent handle
 	CString searchpath(RemoveFileExtension(m_fullname));
 	CFileException fexpPart;
-	if (!m_hpartfile.Open(searchpath, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan, &fexpPart)){
+	if (!m_hpartfile.Open(searchpath, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osRandomAccess, &fexpPart)){
 		CString strError;
 		strError.Format(GetResString(IDS_ERR_FILEOPEN), searchpath, GetFileName());
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -2084,18 +2089,22 @@ bool CPartFile::IsComplete(uint64 start, uint64 end, bool bIgnoreBufferedData) c
 	}
 
 	if (bIgnoreBufferedData){
+		((CPartFile*)this)->m_BufferedData_list_Locker.Lock(); //MORPH - Flush Thread
 		for (POSITION pos = m_BufferedData_list.GetHeadPosition();pos != 0;)
 		{
 			const PartFileBufferedData* cur_gap = m_BufferedData_list.GetNext(pos);
+			if (cur_gap->data) //MORPH - Flush Thread
 			if (   (cur_gap->start >= start          && cur_gap->end   <= end)
 				|| (cur_gap->start >= start          && cur_gap->start <= end)
 				|| (cur_gap->end   <= end            && cur_gap->end   >= start)
 				|| (start          >= cur_gap->start && end            <= cur_gap->end)
 			)
 			{
+				((CPartFile*)this)->m_BufferedData_list_Locker.Unlock();//MORPH - Flush Thread
 				return false;	
 			}
 		}
+		((CPartFile*)this)->m_BufferedData_list_Locker.Unlock();//MORPH - Flush Thread
 	}
 	return true;
 }
@@ -2294,7 +2303,11 @@ bool CPartFile::GetNextEmptyBlockInPart(UINT partNumber, Requested_Block_Struct 
 
 		// Find end, keeping within the max block size and the part limit
 		end = firstGap->end;
+		//MORPH - Enhanced DBR 
+		/*
 		blockLimit = partStart + (uint64)((UINT)(start - partStart)/EMBLOCKSIZE + 1)*EMBLOCKSIZE - 1;
+        */
+		blockLimit = partStart + (uint64)((UINT)(start - partStart)/(3*EMBLOCKSIZE) + 1)*(3*EMBLOCKSIZE) - 1;
 		if (end > blockLimit)
 			end = blockLimit;
 		if (end > partEnd)
@@ -2305,7 +2318,11 @@ bool CPartFile::GetNextEmptyBlockInPart(UINT partNumber, Requested_Block_Struct 
 #if !defined DONT_USE_DBR
 		bytesToRequest -= bytesToRequest % 10240; 
 		if (bytesToRequest < 10240) bytesToRequest = 10240;
+		//MORPH - Enhanced DBR 
+		/*
 		else if (bytesToRequest > EMBLOCKSIZE) bytesToRequest = EMBLOCKSIZE;
+		*/
+		else if (bytesToRequest > 3*EMBLOCKSIZE) bytesToRequest = 3*EMBLOCKSIZE;
 		if((start + bytesToRequest) <= end && (end - start) > (bytesToRequest + 3072)) // Avoid creating small fragments
 			end = start + bytesToRequest - 1;
 #endif
@@ -3845,7 +3862,7 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
 
-	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
+	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / (*count);
 	//MORPH START - Enhanced DBR
 	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
 	if (bytesPerRequest > sourcealreadyreserveddata)
@@ -3854,12 +3871,11 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 		return false;
 	//MORPH END   - Enhanced DBR
 
-	if (bytesPerRequest > EMBLOCKSIZE) {
-		*count = min((uint16)(bytesPerRequest/EMBLOCKSIZE), *count); //MORPH - Added by SiRoB, Enhanced DBR
-		bytesPerRequest = EMBLOCKSIZE;
+	if (bytesPerRequest > 3*EMBLOCKSIZE) {
+		*count = min((uint16)(bytesPerRequest/(3*EMBLOCKSIZE)), *count); //MORPH - Added by SiRoB, Enhanced DBR
+		bytesPerRequest = 3*EMBLOCKSIZE;
 	}
-	else
-		*count = 1; //MORPH - Added by SiRoB, Enhanced DBR
+
 	if (bytesPerRequest < 10240)
 	{
 		// Let an other client request this packet if we are close to completion and source is slow
@@ -4348,7 +4364,7 @@ BOOL CPartFile::PerformFileComplete()
 		paused = true;
 		stopped = true;
 		//MORPH START - Added by SiRoB, Make the permanent handle open again
-		if (!m_hpartfile.Open(strPartfilename, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan))
+		if (!m_hpartfile.Open(strPartfilename, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osRandomAccess))
 			LogError(LOG_STATUSBAR, _T("Failed to reopen partfile: %s"),strPartfilename);
 		//MORPH END   - Added by SiRoB, Make the permanent handle open again
 		SetStatus(PS_ERROR);
@@ -5663,6 +5679,7 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 		// Add to the queue in the correct position (most likely the end)
 		PartFileBufferedData *queueItem;
 		bool added = false;
+		m_BufferedData_list_Locker.Lock(); //MORPH - Flush Thread
 		POSITION pos = m_BufferedData_list.GetTailPosition();
 		while (pos != NULL)
 		{	
@@ -5674,17 +5691,20 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 				m_BufferedData_list.InsertAfter(posLast, item);
 				break;
 			}
+
 		}
 		if (!added)
 			m_BufferedData_list.AddHead(item);
-
+		m_nTotalBufferData += lenDataClipped;
+		m_BufferedData_list_Locker.Unlock(); //MORPH - Flush Thread
 	// SLUGFILLER: SafeHash
 		lenData += lenDataClipped;	// calculate actual added data
+		
 	}
 	// SLUGFILLER: SafeHash
 
 	// Increment buffer size marker
-	m_nTotalBufferData += lenData;
+//	m_nTotalBufferData += lenData; //MORPH - Flush Thread, Moved above
 
 	// Mark this small section of the file as filled
 	FillGap(start, end);	// SLUGFILLER: SafeHash - clean coding, removed "item->"
@@ -5764,6 +5784,27 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 
 	try
 	{
+		//MORPH START - Flush Thread
+		// SLUGFILLER: SafeHash
+		CSingleLock sLock(&ICH_mut,true);	// ICH locks the file - otherwise it may be written to while being checked
+		ParseICHResult();	// Check result from ICH
+		// SLUGFILLER: SafeHash
+
+		//Creating the Thread to flush to disk
+		m_FlushSetting = new FlushDone_Struct;
+		m_FlushSetting->bIncreasedFile = bIncreasedFile;
+		m_FlushSetting->bForceICH = bForceICH;
+		m_FlushSetting->changedPart = changedPart;
+		if (forcewait == false) {
+			m_FlushThread = AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+			if (m_FlushThread) {
+				((CPartFileFlushThread*) m_FlushThread)->SetPartFile(this);
+				((CPartFileFlushThread*) m_FlushThread)->ResumeThread();
+				return;
+			}
+		}
+	
+		//MORPH END   - Flush Thread
 		bool bCheckDiskspace = thePrefs.IsCheckDiskspaceEnabled() && thePrefs.GetMinFreeDiskSpace() > 0;
 		ULONGLONG uFreeDiskSpace = bCheckDiskspace ? GetFreeDiskSpaceX(GetTempPath()) : 0;
 
@@ -5776,11 +5817,6 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			if (m_nTotalBufferData + thePrefs.GetMinFreeDiskSpace() >= uFreeDiskSpace)
 				AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 		}
-
-		// SLUGFILLER: SafeHash
-		CSingleLock sLock(&ICH_mut,true);	// ICH locks the file - otherwise it may be written to while being checked
-		ParseICHResult();	// Check result from ICH
-		// SLUGFILLER: SafeHash
 
 		// Ensure file is big enough to write data to (the last item will be the furthest from the start)
 		PartFileBufferedData *item = m_BufferedData_list.GetTail();
@@ -5798,11 +5834,6 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 					AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 			}
 
-			//Always use AllocateSpaceThread even if uIncrease is low
-			/*
-			if (!IsNormalFile() || uIncrease<2097152) 
-				forcewait=true;
-			*/
 			if (!IsNormalFile() || uIncrease<2097152) 
 				forcewait=true;
 
@@ -5831,20 +5862,18 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		}
 
 		// Loop through queue
-		//MORPH - Optimization
-		/*
-		for (int i = m_BufferedData_list.GetCount(); i>0; i--)
-		*/
 		uint64 previouspos = (uint64)-1;
-		for (POSITION pos = m_BufferedData_list.GetHeadPosition(); pos != NULL;)
+		for (int i = m_BufferedData_list.GetCount(); i>0; i--)
 		{
 			// Get top item
-			//MORPH - Optimization
-			/*
 			item = m_BufferedData_list.GetHead();
-			*/
-			item = m_BufferedData_list.GetNext(pos);
-
+			//MORPH - Flush Thread
+			if (item->data == NULL) {
+				m_BufferedData_list.RemoveHead();
+				delete item;
+				continue;
+			}
+			//MORPH - Flush Thread
 			// This is needed a few times
 			uint32 lenData = (uint32)(item->end - item->start + 1);
 
@@ -5878,23 +5907,9 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			m_hpartfile.SetLength(m_nFileSize);
 		}
 
-		//Creating the Thread to flush to disk
-		m_FlushSetting = new FlushDone_Struct;
+		m_hpartfile.Flush();
+
 		m_FlushSetting->bIncreasedFile = bIncreasedFile;
-		m_FlushSetting->bForceICH = bForceICH;
-		m_FlushSetting->changedPart = changedPart;
-		if (forcewait == false) {
-			m_FlushThread = AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-			if (m_FlushThread) {
-				((CPartFileFlushThread*) m_FlushThread)->SetPartFile(this);
-				((CPartFileFlushThread*) m_FlushThread)->ResumeThread();
-				return;
-			} else {
-				m_hpartfile.Flush();
-			}
-		} else {
-			m_hpartfile.Flush();
-		}
 		FlushDone();
 	}
 	catch (CFileException* error)
@@ -5914,6 +5929,94 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 }
 
 //MORPH START - Added by SiRoB, Flush Thread
+void CPartFile::WriteToDisk() { //Called by Flush Thread
+	bool bCheckDiskspace = thePrefs.IsCheckDiskspaceEnabled() && thePrefs.GetMinFreeDiskSpace() > 0;
+	ULONGLONG uFreeDiskSpace = bCheckDiskspace ? GetFreeDiskSpaceX(GetTempPath()) : 0;
+
+	// Check free diskspace for compressed/sparse files before possibly increasing the file size
+	if (bCheckDiskspace && !IsNormalFile())
+	{
+		// Compressed/sparse files; regardless whether the file is increased in size, 
+		// check the amount of data which will be written
+		// would need to use disk cluster sizes for more accuracy
+		if (m_nTotalBufferData + thePrefs.GetMinFreeDiskSpace() >= uFreeDiskSpace)
+			AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
+	}
+
+	// Ensure file is big enough to write data to (the last item will be the furthest from the start)
+	m_BufferedData_list_Locker.Lock();
+	PartFileBufferedData *item = m_BufferedData_list.GetTail();
+	m_BufferedData_list_Locker.Unlock();
+	
+	if (m_hpartfile.GetLength() <= item->end)
+	{
+		uint64 newsize=thePrefs.GetAllocCompleteMode()? GetFileSize() : (item->end+1);
+		ULONGLONG uIncrease = newsize - m_hpartfile.GetLength();
+
+		// Check free diskspace for normal files before increasing the file size
+		if (bCheckDiskspace && IsNormalFile())
+		{
+			// Normal files; check if increasing the file would reduce the amount of min. free space beyond the limit
+			// would need to use disk cluster sizes for more accuracy
+			if (uIncrease + thePrefs.GetMinFreeDiskSpace() >= uFreeDiskSpace)
+				AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
+		}
+
+		m_FlushSetting->bIncreasedFile = true;
+		// If this is a NTFS compressed file and the current block is the 1st one to be written and there is not 
+		// enough free disk space to hold the entire *uncompressed* file, windows throws a 'diskFull'!?
+		if (IsNormalFile())
+			m_hpartfile.SetLength(newsize); // allocate disk space (may throw 'diskFull')
+	}
+
+	// Loop through queue
+	uint64 previouspos = (uint64)-1;
+	bool *changedPart = m_FlushSetting->changedPart;
+	uint64 uWrotetodisk = 0;
+	m_BufferedData_list_Locker.Lock();
+	for (int i = m_BufferedData_list.GetCount(); i>0 && uWrotetodisk < thePrefs.GetFileBufferSize(); i--)
+	{
+		item = m_BufferedData_list.GetHead();
+		if (item->data == NULL) {
+			m_BufferedData_list.RemoveHead();
+			delete item;
+			continue;
+		}
+		m_BufferedData_list_Locker.Unlock();
+		// This is needed a few times
+		uint32 lenData = (uint32)(item->end - item->start + 1);
+
+		// SLUGFILLER: SafeHash - could be more than one part
+		for (uint32 curpart = (uint32)(item->start/PARTSIZE); curpart <= item->end/PARTSIZE; curpart++)
+			changedPart[curpart] = true;
+		// SLUGFILLER: SafeHash
+
+		// Go to the correct position in file and write block of data
+		
+		if (previouspos != item->start) //MORPH - Optimization
+			m_hpartfile.Seek(item->start, CFile::begin);
+		m_hpartfile.Write(item->data, lenData);
+		previouspos = item->end + 1; //MORPH - Optimization
+		
+		// Release memory used by this item
+		delete [] item->data;
+		item->data = NULL;
+		m_BufferedData_list_Locker.Lock();
+		// Decrease buffer size
+		m_nTotalBufferData -= lenData;
+		uWrotetodisk+=lenData;
+	}
+	m_BufferedData_list_Locker.Unlock();
+
+	// Partfile should never be too large
+ 	if (m_hpartfile.GetLength() > m_nFileSize){
+		// it's "last chance" correction. the real bugfix has to be applied 'somewhere' else
+		TRACE(_T("Partfile \"%s\" is too large! Truncating %I64u bytes.\n"), GetFileName(), m_hpartfile.GetLength() - m_nFileSize);
+		m_hpartfile.SetLength(m_nFileSize);
+	}
+	// Flush to disk
+	m_hpartfile.Flush();
+}
 void CPartFile::FlushDone()
 {
 	if (m_FlushSetting == NULL) //Already do in normal process
@@ -6035,8 +6138,7 @@ int CPartFileFlushThread::Run()
 
 	try{
 		CSingleLock sLock1(&(theApp.hashing_mut), TRUE); //MORPH - Wait any Read/Write access (hashing or download stuff) before flushing
-		// Flush to disk
-		m_partfile->m_hpartfile.Flush();
+		m_partfile->WriteToDisk();
 	}
 	catch (CFileException* error)
 	{
@@ -6591,7 +6693,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
 
-	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
+	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / (*count);
 	//MORPH START - Enhanced DBR
 	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
 	if (bytesPerRequest > sourcealreadyreserveddata)
@@ -6600,11 +6702,12 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 		return false;
 	//MORPH END   - Enhanced DBR
 
-	if (bytesPerRequest > EMBLOCKSIZE) {
-		*count = min((uint16)(bytesPerRequest/EMBLOCKSIZE), *count); //MORPH - Added by SiRoB, Enhanced DBR
-		bytesPerRequest = EMBLOCKSIZE;
-	} else
-		*count = 1; //MORPH - Added by SiRoB, Enhanced DBR
+	if (bytesPerRequest > 3*EMBLOCKSIZE) {
+		*count = min((uint16)(bytesPerRequest/(3*EMBLOCKSIZE)), *count); //MORPH - Added by SiRoB, Enhanced DBR
+		bytesPerRequest = 3*EMBLOCKSIZE;
+	}
+
+	//MORPH END   - Enhanced DBR
 	if (bytesPerRequest < 10240)
 	{
 		// Let an other client request this packet if we are close to completion and source is slow
@@ -7831,7 +7934,11 @@ int CPartHashThread::Run()
 	CSingleLock sLock(&(m_pOwner->ICH_mut)); // ICH locks the file
 	if (m_ICHused)
 		sLock.Lock();
+	//MORPH - Optimization
+	/*
 	if (file.Open(directory+_T("\\")+filename,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone)){
+	*/
+	if (file.Open(directory+_T("\\")+filename,CFile::modeRead|CFile::osRandomAccess|CFile::shareDenyNone)){
 		for (UINT i = 0; i < (UINT)m_PartsToHash.GetSize(); i++){
 			uint16 partnumber = m_PartsToHash[i];
 			uchar hashresult[16];

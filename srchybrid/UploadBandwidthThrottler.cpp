@@ -811,11 +811,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			numberofclientinhigherclass = 0;
 			if (realBytesToSpendClass[LAST_CLASS] >= 1000*doubleSendSize) {
 				for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
-					if(slotCounterClass[classID]) {
-						BytesToSpend = realBytesToSpendClass[classID] / 1000;
-						if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
-							BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
-						if (BytesToSpend >= doubleSendSize) {
+					BytesToSpend = realBytesToSpendClass[classID] / 1000;
+					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
+						BytesToSpend = realBytesToSpendClass[LAST_CLASS] / 1000;
+					if (BytesToSpend >= doubleSendSize) {
+						if(slotCounterClass[classID]) {						
 							uint64 spentBytes = 0;
 							uint64 spentOverhead = 0;
 							if (ClientDataRate[classID] == 0)
@@ -839,7 +839,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 											uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 											if (lastSpentBytes) {
 												stat->realBytesToSpend -= 1000*lastSpentBytes;
-												if(rememberSlotCounter[classID]+1 > m_highestNumberOfFullyActivatedSlotsClass[classID] && lastSpentBytes > doubleSendSize)
+												if(rememberSlotCounter[classID]+1 > m_highestNumberOfFullyActivatedSlotsClass[classID])
 													m_highestNumberOfFullyActivatedSlotsClass[classID] = rememberSlotCounter[classID]+1;
 												spentBytes += lastSpentBytes;
 												spentOverhead += socketSentBytes.sentBytesControlPackets;
@@ -865,7 +865,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 											uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 											if (lastSpentBytes) {
 												stat->realBytesToSpend -= 1000*lastSpentBytes;
-												if(slotCounter+1 > m_highestNumberOfFullyActivatedSlotsClass[classID] && lastSpentBytes > doubleSendSize)
+												if(slotCounter+1 > m_highestNumberOfFullyActivatedSlotsClass[classID])
 													m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounter+1;
 												spentBytes += lastSpentBytes;
 												spentOverhead += socketSentBytes.sentBytesControlPackets;
@@ -894,14 +894,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
 								realBytesToSpendClass[classID] = 999;
 							}
-						}
-						numberofclientinhigherclass += slotCounterClass[classID];
-					} else {
-						if (realBytesToSpendClass[classID] > 999) {
-							m_highestNumberOfFullyActivatedSlotsClass[classID] = 1;
-							realBytesToSpendClass[classID] = 999;
+						} else {
+							if (realBytesToSpendClass[classID] > doubleSendSize) {
+								m_highestNumberOfFullyActivatedSlotsClass[classID] = 1;
+								realBytesToSpendClass[classID] = doubleSendSize;
+							}
 						}
 					} 
+					numberofclientinhigherclass += slotCounterClass[classID];
 				}
 			}
 			sendLocker.Unlock();
