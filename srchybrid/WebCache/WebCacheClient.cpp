@@ -833,7 +833,10 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 	md4cpy(reqblock->FileID, aucUploadFileID);
 	reqblock->transferred = 0;
 	AddReqBlock(reqblock);
-
+	//MORPH START -  Used to not wait uploadqueue timer (110ms) capping upload to 1ReadBlock/110ms~1.6MB/s
+	if (GetUploadState() == US_UPLOADING)
+		CreateNextBlockPackage();
+	//MORPH END
 	return HTTP_STATUS_OK;
 }
 
