@@ -242,7 +242,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" BETA1");
+	m_strCurVersionLong += _T(" ALPHA3");
 #endif
 
 	// create the protocol version number
@@ -681,6 +681,11 @@ BOOL CemuleApp::InitInstance()
 
 	emuledlg = NULL;
 
+	//MORPH START leuk_he:run as ntservice v1..
+	if (NtserviceStartwhenclose)
+		NtServiceStart(); // how to handle errors...? 
+	//MORPH START leuk_he:run as ntservice v1..
+	
 	ClearDebugLogQueue(true);
 	ClearLogQueue(true);
 
@@ -745,11 +750,11 @@ bool CemuleApp::ProcessCommandline()
 		// MORPH START prevent startup on "emule exit" dos command
 		}
 		//MORPH END prevent startup on "emule exit" dos command
-    	//MORPH leuk_he:run as ntservice v1..
+    	//MORPH START leuk_he:run as ntservice v1..
 		if (_tcscmp(pszParam, _T("install"))==0)  {CmdInstallService();bExitParam = true; }
         if (_tcscmp(pszParam, _T("uninstall"))==0){CmdRemoveService();bExitParam = true; }
 		if (_tcscmp(pszParam, _T("AsAService"))==0){OnStartAsService();} // NTservice entry point registation.
-		//MORPH leuk_he:run as ntservice v1..
+		//MORPH END leuk_he:run as ntservice v1..
 #ifdef _DEBUG
 			if (_tcscmp(pszParam, _T("assertfile")) == 0)
 				_CrtSetReportHook(CrtDebugReportCB);
