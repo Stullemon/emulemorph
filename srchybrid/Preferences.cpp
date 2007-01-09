@@ -50,11 +50,14 @@ static char THIS_FILE[]=__FILE__;
 
 CPreferences thePrefs;
 
+bool CPreferences::m_bUseCompression;//Xman disable compression
+//Xman disable compression
+
 int		CPreferences::m_iDbgHeap;
 CString	CPreferences::strNick;
-UINT     CPreferences::minupload;  //MORPH very fast
-UINT	CPreferences::maxupload;
-UINT	CPreferences::maxdownload;
+UINT     CPreferences::minupload;  //MORPH  uint16 is not enough
+UINT	CPreferences::maxupload; //MORPH  uint16 is not enough
+UINT	CPreferences::maxdownload; //MORPH  uint16 is not enough
 LPCSTR	CPreferences::m_pszBindAddrA;
 CStringA CPreferences::m_strBindAddrA;
 LPCWSTR	CPreferences::m_pszBindAddrW;
@@ -767,7 +770,7 @@ UINT	CPreferences::m_uGlobalHL;
 bool	CPreferences::m_bGlobalHL;
 //MORPH END   - Added by Stulle, Global Source Limit
 
-// lhs AP
+// MORPH START leuk_he Advanced official preferences.
 bool CPreferences::bMiniMuleAutoClose;
 int  CPreferences::iMiniMuleTransparency; 
 bool CPreferences::bCreateCrashDump;
@@ -779,7 +782,7 @@ CString CPreferences::sMediaInfo_MediaInfoDllPath ;
 bool CPreferences::bMediaInfo_RIFF;
 bool CPreferences::bMediaInfo_ID3LIB ;
 CString CPreferences::sInternetSecurityZone;
-// lhe AP 
+// MORPH END  leuk_he Advanced official preferences. 
 
 //MORPH START - Added, Downloaded History [Monki/Xman]
 bool	CPreferences::m_bHistoryShowShared;
@@ -1159,8 +1162,8 @@ uint8 CPreferences::IsZZRatioDoesWork(){
 }
 //MORPH - Added by SiRoB, ZZ ratio
 
-uint16 CPreferences::GetMaxDownload(){
-    return (uint16)(GetMaxDownloadInBytesPerSec()/1024);
+UINT CPreferences::GetMaxDownload(){	 //MORPH  uint16 is not enough
+    return (GetMaxDownloadInBytesPerSec()/1024); //MORPH  uint16 is not enough
 }
 
 uint64 CPreferences::GetMaxDownloadInBytesPerSec(bool dynamic){
@@ -2062,6 +2065,8 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"Port",port);
 	ini.WriteInt(L"UDPPort",udpport);
 	ini.WriteInt(L"ServerUDPPort", nServerUDPPort);
+
+	ini.WriteBool(L"UseCompression",m_bUseCompression);	// xman use compressionL
 	// MORPH START - Added by Commander, WebCache 1.2e
 	ini.WriteString(L"webcacheName", webcacheName);
 	ini.WriteInt(L"webcachePort", webcachePort);
@@ -2319,7 +2324,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("SlotLimitNum"), m_iSlotLimitNum);
 	// <== Slot Limit - Stulle
 
-	// lhs AP
+	// MORPH START leuk_he Advanced official preferences.
 	ini.WriteBool(_T("MiniMuleAutoClose"),bMiniMuleAutoClose);
 	ini.WriteInt(_T("MiniMuleTransparency"),iMiniMuleTransparency);
 	ini.WriteBool(_T("CreateCrashDump"),bCreateCrashDump);
@@ -2350,7 +2355,7 @@ void CPreferences::SavePreferences()
 		for (int i = 0; i <  GetAllowedRemoteAccessIPs().GetCount(); i++)
            WriteAllowedIPs = WriteAllowedIPs  + _T(";") + ipstr(GetAllowedRemoteAccessIPs()[i]);
     ini.WriteString(L"AllowedIPs",WriteAllowedIPs);  // End Seciotn Webserver
-	// lhe AP 
+	// MORPH END  leuk_he Advanced official preferences. 
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -2889,15 +2894,15 @@ void CPreferences::LoadPreferences()
 	minupload=ini.GetInt(L"MinUpload", 5);    // also used for unlimited... 
 
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
-	minupload = min(max(minupload,1),maxGraphUploadRate);
+	minupload = min(max(minupload,1),maxGraphUploadRate); //MORPH uint16 is not enoug
 	//MORPH END   - Added by SiRoB, (SUC) & (USS)
-	maxupload=(uint16)ini.GetInt(L"MaxUpload",UNLIMITED);
+	maxupload=ini.GetInt(L"MaxUpload",UNLIMITED); //MORPH uint16 is not enoug
 	if (maxupload > maxGraphUploadRate && maxupload != UNLIMITED)
-		maxupload = (uint16)(maxGraphUploadRate * .8);
+		maxupload = (maxGraphUploadRate * .8); //MORPH uint16 is not enoug
 	
-	maxdownload=(uint16)ini.GetInt(L"MaxDownload", UNLIMITED);
+	maxdownload=ini.GetInt(L"MaxDownload", UNLIMITED); //MORPH uint16 is not enoug
 	if (maxdownload > maxGraphDownloadRate && maxdownload != UNLIMITED)
-		maxdownload = (uint16)(maxGraphDownloadRate * .8);
+		maxdownload = (maxGraphDownloadRate * .8); //MORPH uint16 is not enoug
 	maxconnections=ini.GetInt(L"MaxConnections",GetRecommendedMaxConnections());
 	maxhalfconnections=ini.GetInt(L"MaxHalfConnections",9);
 	m_bConditionalTCPAccept = ini.GetBool(L"ConditionalTCPAccept", false);
@@ -3686,7 +3691,7 @@ void CPreferences::LoadPreferences()
 	m_uGlobalHL = (m_uTemp >= 1000 && m_uTemp <= MAX_GSL) ? m_uTemp : m_uGlobalHlStandard;
 	//MORPH END   - Added by Stulle, Global Source Limit
 
-	//lhs AP
+	//MORPH START leuk_he Advanced official preferences.
 	bMiniMuleAutoClose=ini.GetBool(_T("MiniMuleAutoClose"),0,_T("eMule"));
 	iMiniMuleTransparency=ini.GetInt(_T("MiniMuleTransparency"),0);
 	bCreateCrashDump=ini.GetBool(_T("CreateCrashDump"),0);
@@ -3698,12 +3703,14 @@ void CPreferences::LoadPreferences()
 	bMediaInfo_RIFF=ini.GetBool(_T("MediaInfo_RIF"),false);
 	bMediaInfo_ID3LIB =ini.GetBool(_T("MediaInfo_ID3LIB"),false);
 	sInternetSecurityZone=ini.GetString(_T("InternetSecurityZone"),_T("Untrusted"));
-	// lhe AP 
+	// MORPH END  leuk_he Advanced official preferences. 
 
 
  	//MORPH START - Added, Downloaded History [Monki/Xman]
 	m_bHistoryShowShared = ini.GetBool(_T("ShowSharedInHistory"), false);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
+//Xman disable compression
+	m_bUseCompression=ini.GetBool(L"UseCompression",true);
 
    LoadCats();
 	SetLanguage();
@@ -4025,8 +4032,8 @@ void CPreferences::SetMMPass(CString strNewPass)
 
 void CPreferences::SetMaxUpload(UINT in)
 {
-	UINT  oldMaxUpload = in;
-	maxupload = (oldMaxUpload) ? oldMaxUpload : UNLIMITED;
+	UINT  oldMaxUpload = in; //MORPH uint16 is not enough
+	maxupload = (oldMaxUpload) ? oldMaxUpload : UNLIMITED; //MORPH uint16 is not enough
 }
 
 void CPreferences::SetMaxDownload(UINT in)

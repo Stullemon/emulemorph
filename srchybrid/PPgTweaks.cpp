@@ -176,7 +176,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiLogUPnP = NULL;
 	// End emulEspaña
 	 
-	//lhs AP
+	//MORPH START leuk_he Advanced official preferences.
 	bMiniMuleAutoClose=false;
 	iMiniMuleTransparency=0;
 	bCreateCrashDump=false;
@@ -231,7 +231,7 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_PreferRestrictedOverUser=NULL;
 	m_hti_WebFileUploadSizeLimitMB =NULL;
 	m_hti_AllowedIPs=NULL;
-	//lhe AP
+	//MORPH END  leuk_he Advanced official preferences.
 
 
 }
@@ -366,7 +366,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
         m_htiDynUpNumberOfPings = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_NUMBEROFPINGS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
 		m_ctrlTreeOptions.AddEditBox(m_htiDynUpNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
 
-		//lhs AP
+		//MORPH START leuk_he Advanced official preferences.
 		m_hti_advanced = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_ADVANCEDPREFS), iImgLog, TVI_ROOT);
 		m_hti_bMiniMuleAutoClose=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MINIMULEAUTOCLOSE),m_hti_advanced,bMiniMuleAutoClose);
 		m_hti_iMiniMuleTransparency= m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINIMULETRANSPARENCY),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
@@ -431,7 +431,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_hti_AllowedIPs, RUNTIME_CLASS(CTreeOptionsEditEx));
 		if (m_bExtControls) // show more controls --> still possible to manully expand. 
 			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
-		// lhe AP
+		// MORPH END  leuk_he Advanced official preferences.
 
 	    m_ctrlTreeOptions.Expand(m_htiTCPGroup, TVE_EXPAND);
 		if (m_htiVerboseGroup)
@@ -547,7 +547,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_iDynUpGoingDownDivider, 1, INT_MAX);
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpNumberOfPings, m_iDynUpNumberOfPings);
 	DDV_MinMaxInt(pDX, m_iDynUpNumberOfPings, 1, INT_MAX);
-    // lhs AP
+    // MORPH START leuk_he Advanced official preferences.
 	if (m_hti_bMiniMuleAutoClose) DDX_TreeCheck(pDX, IDC_EXT_OPTS,m_hti_bMiniMuleAutoClose,bMiniMuleAutoClose);
 	if (m_hti_iMiniMuleTransparency) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_iMiniMuleTransparency, iMiniMuleTransparency);
 								   DDV_MinMaxInt(pDX, iMiniMuleTransparency, 0, 100);}
@@ -589,7 +589,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if(m_hti_WebFileUploadSizeLimitMB) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_WebFileUploadSizeLimitMB,m_iWebFileUploadSizeLimitMB);
 										DDV_MinMaxInt(pDX, m_iWebFileUploadSizeLimitMB, 0, INT_MAX);}
     if(m_hti_AllowedIPs) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_AllowedIPs,m_sAllowedIPs); //TODO: check string for ip
-    // lhe AP
+    // MORPH END  leuk_he Advanced official preferences.
 
 }
 
@@ -659,7 +659,7 @@ BOOL CPPgTweaks::OnInitDialog()
 
     m_bA4AFSaveCpu = thePrefs.GetA4AFSaveCpu();
 
-	// lhs AP
+	// MORPH START leuk_he Advanced official preferences.
 	bMiniMuleAutoClose=thePrefs.bMiniMuleAutoClose;
 	iMiniMuleTransparency=thePrefs.iMiniMuleTransparency;
 	bCreateCrashDump=thePrefs.bCreateCrashDump;
@@ -695,7 +695,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	if (thePrefs.GetAllowedRemoteAccessIPs().GetCount() > 0)
 		for (int i = 0; i <  thePrefs.GetAllowedRemoteAccessIPs().GetCount(); i++)
            m_sAllowedIPs= m_sAllowedIPs+ _T(";") + ipstr(thePrefs.GetAllowedRemoteAccessIPs()[i]);
-	// lhe AP
+	// MORPH END  leuk_he Advanced official preferences.
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
     CPropertyPage::OnInitDialog();
@@ -856,7 +856,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bAutomaticArcPreviewStart = !m_bAutoArchDisable;
 
     thePrefs.m_bA4AFSaveCpu = m_bA4AFSaveCpu;
-	//lhs AP
+	//MORPH START leuk_he Advanced official preferences.
 	thePrefs.bMiniMuleAutoClose=bMiniMuleAutoClose;
 	thePrefs.iMiniMuleTransparency=iMiniMuleTransparency;
 	thePrefs.bCreateCrashDump=bCreateCrashDump;
@@ -898,7 +898,7 @@ BOOL CPPgTweaks::OnApply()
 			thePrefs.m_aAllowedRemoteAccessIPs.Add(nIP);
 		strIP = m_sAllowedIPs.Tokenize(L";", iPos);
 	}
-	//lhe AP
+	//MORPH END  leuk_he Advanced official preferences.
 
 
 
@@ -1035,7 +1035,7 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiVerboseGroup,IDS_VERBOSE_TIP);
 		SetTool(m_htiVerbose,IDS_ENABLED_TIP);
 		SetTool(m_htiLogLevel,IDS_LOG_LEVEL_TIP);
-// lhs AP
+// MORPH START leuk_he Advanced official preferences.
 SetTool(m_hti_advanced,IDS_ADVANCEDPREFS_TIP);
 SetTool(m_hti_bMiniMuleAutoClose,IDS_MINIMULEAUTOCLOSE_TIP);
 SetTool(m_hti_iMiniMuleTransparency,IDS_MINIMULETRANSPARENCY_TIP);

@@ -111,6 +111,8 @@ CPPgMorph::CPPgMorph()
 	m_htiInfiniteQueue = NULL;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_htiDontRemoveSpareTrickleSlot = NULL; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	m_htiCompressLevel =NULL ;// morph settable compresslevel
+	m_htiUseCompression=NULL ;// morph Use compress 
+
 	m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	m_htiCountWCSessionStats		= NULL; //MORPH - added by Commander, Show WC Session stats
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
@@ -352,7 +354,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		
 		m_htiCompressLevel = m_ctrlTreeOptions.InsertItem(_T("CompressLevel"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
 		m_ctrlTreeOptions.AddEditBox(m_htiCompressLevel, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
+		m_htiUseCompression= m_ctrlTreeOptions.InsertCheckBox(_T("USeCOmpression"), m_htiUM, m_bUseCompression); //MORPH - added by Commander, Show WC Session stats
 		m_htiCountWCSessionStats = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTWCSESSIONSTATS), TVI_ROOT, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_bHighProcess);
@@ -405,7 +407,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDontRemoveSpareTrickleSlot, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCompressLevel, m_iCompressLevel); //Morph - Compresslevel
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiCompressLevel, m_iCompressLevel); //Morph - Compresslevel
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseCompression, m_bUseCompression); //Morph - Compresslevel
 	DDV_MinMaxInt(pDX, m_iCompressLevel,1,9);//Morph - Compresslevel
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplayFunnyNick, m_bFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCountWCSessionStats, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
@@ -504,6 +507,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_bDontRemoveSpareTrickleSlot = thePrefs.m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
     m_iCompressLevel = thePrefs.m_iCompressLevel; //Compresslevel
+	m_bUseCompression = thePrefs.m_bUseCompression; // use compression
 	m_bFunnyNick = thePrefs.m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	m_bCountWCSessionStats = thePrefs.m_bCountWCSessionStats; //MORPH - added by Commander, Show WC Session stats
 	m_bClientQueueProgressBar = thePrefs.m_bClientQueueProgressBar;//MORPH - Added by Commander, ClientQueueProgressBar
@@ -626,6 +630,7 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.infiniteQueue = m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	thePrefs.m_bDontRemoveSpareTrickleSlot = m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	thePrefs.m_iCompressLevel = m_iCompressLevel; // morph settable compression
+	thePrefs.m_bUseCompression = m_bUseCompression; // use compression
 	thePrefs.m_bFunnyNick = m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	thePrefs.m_bClientQueueProgressBar = m_bClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 	thePrefs.m_bCountWCSessionStats		   = m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats

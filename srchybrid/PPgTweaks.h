@@ -70,7 +70,7 @@ protected:
     bool m_bA4AFSaveCpu;
 	bool m_bAutoArchDisable;
 	int m_iExtractMetaData;
-	// lhs AP
+	// MORPH START leuk_he Advanced official preferences.
 	bool bMiniMuleAutoClose;
 	int iMiniMuleTransparency;
 	bool bCreateCrashDump;
@@ -137,7 +137,7 @@ protected:
 	HTREEITEM m_hti_PreferRestrictedOverUser;
 	HTREEITEM m_hti_WebFileUploadSizeLimitMB ;
 	HTREEITEM m_hti_AllowedIPs;
-	// lhe AP 
+	// MORPH END  leuk_he Advanced official preferences. 
 	
 
 	CSliderCtrl m_ctlFileBuffSize;

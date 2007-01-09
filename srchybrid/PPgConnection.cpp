@@ -332,15 +332,15 @@ BOOL CPPgConnection::OnApply()
 	SetRateSliderTicks(m_ctlMaxUp);
 
     {
-        UINT ulSpeed;   // max speed > 65000
+        UINT ulSpeed;   //MORPH uint16 is not enough
 
 		if (!IsDlgButtonChecked(IDC_ULIMIT_LBL))
 		    ulSpeed = UNLIMITED;
 		else
-		    ulSpeed = m_ctlMaxUp.GetPos();
+		    ulSpeed = m_ctlMaxUp.GetPos(); //MORPH uint16 is not enough
 
 	    if (thePrefs.GetMaxGraphUploadRate(true) < ulSpeed && ulSpeed != UNLIMITED)
-		    ulSpeed = (thePrefs.GetMaxGraphUploadRate(true) * 0.8);
+		    ulSpeed = ((thePrefs.GetMaxGraphUploadRate(true) * 4)  /5); //MORPH uint16 is not enough  
 
         if(ulSpeed > thePrefs.GetMaxUpload()) {
             // make USS go up to higher ul limit faster
@@ -359,7 +359,7 @@ BOOL CPPgConnection::OnApply()
 		thePrefs.SetMaxDownload(m_ctlMaxDown.GetPos());
 
 	if( thePrefs.GetMaxGraphDownloadRate() < thePrefs.GetMaxDownload() && thePrefs.GetMaxDownload()!=UNLIMITED )
-		thePrefs.SetMaxDownload((thePrefs.GetMaxGraphDownloadRate() * 0.8));
+		thePrefs.SetMaxDownload((thePrefs.GetMaxGraphDownloadRate() * 4 / 5));	//MORPH uint16 is not enough.
 
 	if (thePrefs.GetMaxDownload()!=UNLIMITED)
 		m_ctlMaxDown.SetPos(thePrefs.GetMaxDownload());

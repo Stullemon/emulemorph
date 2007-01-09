@@ -129,7 +129,7 @@ void CConnectionWizardDlg::OnBnClickedApply()
 
 	if (upload > 0 && download > 0)
 	{
-		thePrefs.maxupload = (uint16)((upload * 4L) / 5);
+		thePrefs.maxupload = ((upload * 4L) / 5); //MORPH uint16 is not enough
 		if (upload < 4 && download > upload*3) {
 			thePrefs.maxdownload = thePrefs.maxupload * 3;
 			download = upload * 3;
@@ -140,7 +140,7 @@ void CConnectionWizardDlg::OnBnClickedApply()
 			download = upload * 4;
 		}
 		else
-			thePrefs.maxdownload = (uint16)((download * 9L) / 10);
+			thePrefs.maxdownload = ((download * 9L) / 10); //MORPH uint16 is not enough
 
 		theApp.emuledlg->statisticswnd->SetARange(false, thePrefs.maxGraphUploadRate);
 		theApp.emuledlg->statisticswnd->SetARange(true, thePrefs.maxGraphDownloadRate);

@@ -137,10 +137,10 @@ class CPreferences
 public:
 	static	CString	strNick;
 	// ZZ:UploadSpeedSense -->
-	static	UINT	minupload;
+	static	UINT	minupload; //MORPH uint16 is not enough
 	// ZZ:UploadSpeedSense <--
-	static	UINT maxupload;
-	static	UINT 	maxdownload;
+	static	UINT maxupload; //MORPH uint16 is not enough
+	static	UINT 	maxdownload; //MORPH uint16 is not enough
 	static	LPCSTR	m_pszBindAddrA;
 	static	CStringA m_strBindAddrA;
 	static	LPCWSTR	m_pszBindAddrW;
@@ -915,7 +915,7 @@ public:
 	static  UINT	m_uGlobalHL;
 	static	bool	m_bGlobalHL;
 	//MORPH END   - Added by Stulle, Global Source Limit
-    // lhs AP
+    // MORPH START leuk_he Advanced official preferences.
 	static bool bMiniMuleAutoClose;
 	static int  iMiniMuleTransparency ;
 	static bool bCreateCrashDump;
@@ -927,7 +927,7 @@ public:
 	static bool bMediaInfo_RIFF ;
 	static bool bMediaInfo_ID3LIB; 
 	static CString sInternetSecurityZone;
-   // lhe AP 
+   // MORPH END  leuk_he Advanced official preferences. 
 
 
 
@@ -1038,9 +1038,9 @@ public:
 	static	uint16	GetServerUDPPort(){return nServerUDPPort;}
 	static	uchar*	GetUserHash()	{return userhash;}
 	// ZZ:UploadSpeedSense -->
-	static	UINT GetMinUpload()	{return minupload;}	  // MORPH  uint16 -> 16 bits is only 65.000 Kb/s
+	static	UINT GetMinUpload()	{return minupload;}	  //MORPH uint16 is not enough
 	// ZZ:UploadSpeedSense <--
-	static	UINT GetMaxUpload()	{return maxupload;} // MORPH  uint16 -> 16 bits is only 65.000 Kb/s
+	static	UINT GetMaxUpload()	{return maxupload;} //MORPH uint16 is not enough
 	static	bool	IsICHEnabled()	{return ICH;}
 	static	bool	GetAutoUpdateServerList()		{return m_bAutoUpdateServerList;}
 	static	bool	UpdateNotify()	{return updatenotify;}
@@ -1061,6 +1061,9 @@ public:
 	static	void	SaveCompletedDownloadsStat();
 	static	bool	LoadStats(int loadBackUp = 0);
 	static	void	ResetCumulativeStatistics();
+
+   //Xman disable compression
+	static bool m_bUseCompression;
 
 	//MORPH Start - Added, Downloaded History [Monki/Xman]
 	static bool		m_bHistoryShowShared;
@@ -1322,7 +1325,7 @@ public:
 	static	void	SetMaxGraphUploadRate(int in);
 	static	void	SetMaxGraphDownloadRate(int in) {maxGraphDownloadRate=(in)?in:96;}
 
-	static	uint16	GetMaxDownload();
+	static	UINT 	GetMaxDownload();	//MORPH uint16 is not enough
 	static	uint64	GetMaxDownloadInBytesPerSec(bool dynamic = false);
 	static	UINT	GetMaxConnections()					{return maxconnections;}
 	static	UINT	GetMaxHalfConnections()				{return maxhalfconnections;}

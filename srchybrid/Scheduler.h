@@ -81,8 +81,8 @@ public:
 	bool	HasWeekly(int action); // MORPH leuk_he : automatic weekly ipfilter/fakefilter update. 
 	void 	SetWeekly(int action,bool activate); // MORPH leuk_he : automatic weekly ipfilter/fakefilter update. 
 	
-	UINT	original_upload; // MORPH uint16 -> UINT
-	UINT    original_download;
+	UINT	original_upload; //MORPH uint16 is not enough
+	UINT    original_download; //MORPH uint16 is not enough
 	UINT	original_connections;
 	UINT	original_cons5s;
 	UINT	original_sources;
@@ -90,7 +90,7 @@ public:
 	int	original_ussmaxping;
 	int	original_ussgoup;
 	int	original_ussgodown;
-	UINT original_ussminup;
+	UINT original_ussminup; //MORPH uint16 is not enough
 	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 
 private:

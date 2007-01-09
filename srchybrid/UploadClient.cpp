@@ -814,6 +814,10 @@ void CUpDownClient::CreateNextBlockPackage(){
 				bool compFlag = GetDatarate()<EMBLOCKSIZE && (ext!=_T(".zip") && ext!=_T(".cbz") && ext!=_T(".rar") && ext!=_T(".ace") && ext!=_T(".ogm") && ext!=_T(".tar"));//no need to try compressing tar compressed files... [Yun.SF3]
 				if (ext==_T(".avi") && thePrefs.GetDontCompressAvi())
 					compFlag=false;
+				//Xman disable compression
+				if(thePrefs.m_bUseCompression==false)
+					compFlag=false;
+				//Xman end
 
 				// MORPH START - Modified by Commander, WebCache 1.2e
 				/*
