@@ -2804,6 +2804,159 @@ WAPLOWPASS_TIP          "Mot de passe pour l'invité."
 WAPPASS_TIP             "Mot de passe pour l'accès complet."
 WPAPORT_TIP             "Port utilisé par le serveur WAP en réception."
 
+STRINGTABLE 
+BEGIN
+    IDS_MAXPORT             "Port maxi"
+    IDS_RANDOMPORTSRESETTIME 
+                            "Temps de libération des ports aléatoires (en secondes)"
+    IDS_ICFSUPPORT          "Activer le support du pare-feu de Windows (ICF)"
+    IDS_ICFSUPPORTFIRST     "eMule a détecté que le pare-feu de Windows (ICF) est activé sur ton PC,\nVeux-tu qu'eMule le configure automatiquement ? (Recommandé)"
+    IDS_ICF                 "Windows Internet Connexion Firewall (ICF)"
+    IDS_ICF_SERVERUDP       "Ajouter une règle pour le ""port UDP du serveur"""
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IMPORTPARTS         "Importer des Parties aux fichiers..."
+    IDS_IMPORTPARTS_STOP    "Stopper l'import des fichiers parts"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LOG_CRC32_CALC      "Calcul en cours du CRC32 du fichier '%s'..."
+    IDS_LOG_CRC32_ADORT     "Calcul du CRC32 annulé."
+    IDS_LOG_CRC32_COMPLETED "Calcul du CRC32 du fichier '%s' terminé. Fichier CRC: %s"
+    IDS_IP2COUNTRY_MSG1     "IP2Country utilise la base de donnée IP-to-Country provenant de serveurs Internet."
+    IDS_IP2COUNTRY_MSG2     "(http://www.webhosting.info), disponibile sur http://ip-to-country.webhosting.info"
+    IDS_IP2COUNTRY_LOADED   "IP2Country chargés"
+    IDS_IP2COUNTRY_UNLOADED "IP2Country déchargés"
+    IDS_IP2COUNTRY_ERROR1   "Nombre de ligne erroné: %i"
+    IDS_IP2COUNTRY_ERROR3   "Impossible de chargé dans"
+    IDS_IP2COUNTRY_ERROR4   "Drapeaux des pays désactivé, impossible à charger"
+    IDS_IP2COUNTRY_ERROR5   "ID non valide, essayez de mettre à jour votre fichier DLL d'icônes des drapeaux,"
+    IDS_IP2COUNTRY_ERROR6   "Erreur durant le téléchargement du fichier IP2Country"
+    IDS_IP2COUNTRY_ERROR7   "Impossible d'extraire le fichier IP2Country du fichier ZIP ""%s""."
+    IDS_IP2COUNTRY_ERROR8   "Le fichier IP2Country téléchargé ""%s"" est un fichier ZIP contenant des données erronées."
+    IDS_IP2COUNTRY_LOADED2  "Charger le fichier IP2Country de ""%s"" dans %ums"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LOG_WCEVENTS        "Enregistrer les évènements WebCache"
+    IDS_LOG_IACH            "Enregistrer les évènements IACH"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UPNP_DEVICEREMOVED  "UPnP: Dispositif supprimé: %s"
+    IDS_UPNP_PORTINUSE      "UPnP: Ajout impossible de map: ""%s"". Le port %d est déjà routé par une autre application (""%s"" à %s:%d). [%s]"
+    IDS_UPNP_ALREADYUPDATED "UPnP: Le port routé ""%s"" n'a pas besoin d'être mis à jour. [%s]"
+    IDS_UPNP_STATIC         "Statique"
+    IDS_UPNP_DYNAMIC        "Dynamique"
+    IDS_UPNP_PORTUPDATED    "UPnP: Port routé mis à jour ""%s"" (%s). [%s]"
+    IDS_UPNP_PORTADDED      "UPnP: Port routé ajouté ""%s"" (%s). [%s]"
+    IDS_UPNP_ADDFAILED      "UPnP: Echec d'ajout de port routé ""%s"" [%s] [%s]"
+    IDS_UPNP_DELETEFAILED   "UPnP: Echec de suppression de pot routé ""%s"". [%s] [%s]"
+    IDS_UPNP_PORTDELETED    "UPnP: Ports routé supprimés ""%s"". [%s]"
+    IDS_UPNP_LOGEVENTS      "Historiser les évènements UPnP"
+    IDS_UPNP_ENABLE         "Activer UPnP"
+    IDS_UPNP_ENABLEWEB      "Activer UPnP sur le port de l'interface WEB"
+    IDS_RANDOMPORTS         "Ports aléatoires"
+    IDS_MINPORT             "Port mini"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MORPH_RFHA          "Enregistrer les activités de hachage de fichiers"
+    IDS_MORPH_RAIF          "Enregistrer les activités de la liste d'amis"
+    IDS_MORPH_KSSERV        "Ne pas enlever les serveurs statiques de la liste des serveurs pant leurs utilisations"
+    IDS_MORPH_LOG           "Journal Morph"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_CON_CAPFRM_TIP   "Dans ce bloc, vous indiquez les capacités réelles de votre connexion internet.\nCe n'est pas utilisé pour les connexions aux serveurs ou aux clients\nmais pour tracer correctement les graphiques dans les statistiques."
+    IDS_PW_CON_LIMITFRM_TIP "Dans ce bloc, vous indiquez la quantité de bande passante que vous autorisez à eMule.\\Plus votre émission est importante, plus vous gagnez de crédit qui vous sert à remonter\nrapidement les files d'attentes sur les clients."
+    IDS_PW_DOWNL_TIP        "Fixe la limite de téléchargement.\neMule ne pourra pas télécharger plus vite que cette valeur.\nNotez que si votre émission est inférieure à 10ko/s, votre réception sera fortement limitée (ratio)."
+    IDS_PW_UPL_TIP          "Fixe la limite de d'émission.\n(si désactivé, eMule va essayer de déterminer votre débit d'envoi optimum).\nMettez cette valeur à 80% de la vitesse théorique de votre ligne internet.\nSi vous réglez trop haut, votre connexion va devenir instable.\nSi vous réglez trop bas, vous n'allez pas gagner le maximum de crédits qui vous serviront ensuite,\\en téléchargement, à avancer plus vite dans les files d'attente.\nUne valeur inférieure à 10ko/s en émission limite vos téléchargements (ratio)."
+    IDS_NETWORK_TIP         "Activez au moins un réseau pour qu'eMule trouve des clients et publie sur internet vos fichiers partagés."
+    IDS_SHOWOVERHEAD_TIP    "Montrer le surplus de bande passante entre parenthèses dans la barre de statut.\nLe surplus de bande passante du réseau eD2K n'est pas utilisé pour transférer\nles fichiers mais des informations telles que les positions de file d'attente, ce qu'il faut transférer, etc ..."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_POWERSHARE_ACTIVATED "Activé"
+    IDS_POWERSHARE_DISABLED "Désactivé"
+    IDS_POWERSHARE_ON_LABEL "Marche"
+    IDS_POWERSHARE_OFF_LABEL "Arrêt"
+    IDS_POWERSHARE_COLUMN_LABEL "Powershare"
+    IDS_POWERSHARE_PREFIX   "PS"
+    IDS_POWERSHARE          "Powershare"
+    IDS_SF_UPLOADED_PARTS   "Barre de diffusion (Historique des parties envoyées)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_POWERSHARE_INTERPRIO "Activer la priorité de fichier interne au PS"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WAPSRV              "Serveur Wap"
+    IDS_PW_WAP              "Serveur Wap"
+    IDS_WAP_ADMINLOGIN      "Accès au Serveur Wap de l'Administrateur"
+    IDS_WAP_GUESTLOGIN      "Accès au Serveur Wap de l'Invité"
+    IDS_WAP_SESSIONEND      "Interface WAP: déconnexion"
+    IDS_WAP_CONTROL         "Configuration du Serveur Wap"
+    IDS_WAP_BADLOGINATTEMPT "Serveur Wap: Tentative d' accès échouée"
+    IDS_WAP_ON              "On"
+    IDS_WAP_OFF             "Off"
+    IDS_WAP_SENDIMAGES      "Envoi des images"
+    IDS_WAP_SENDGRAPHS      "Envoi des graphiques"
+    IDS_WAP_SENDPROGRESSBARS "Envoi de la barre de progression"
+    IDS_WAP_SENDBWIMAGES    "Toujours envoyer les images en noir et blanc"
+    IDS_WAP_GRAPHSWIDTH     "Largeur des graphiques"
+    IDS_WAP_GRAPHSHEIGHT    "Hauteur des graphiques"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_WEBCACHE         "Webcache"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_RECONNECTONLOWID    "Nombre d'essai(s) en cas de Low ID"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_RESET               "Mise à 0"
+    IDS_SPREADBAR           "Barre de Diffusion"
+    IDS_SPREADBAR_DEFAULT_CHECKBOX "Activer la Barre de Diffusion par défaut"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SCHED_BACKUP_LOG    "Sauvegarde de la copie de secours planifiée."
+    IDS_SCHED_UPDATE_IPCONFIG_LOG "Mise à jour planifiée de ipfilter.dat"
+    IDS_SCHED_UPDATE_FAKES_LOG "Mise à jour planifiée de fakes.dat"
+    IDS_SCHED_UPDATE_WARNING 
+                            "Evitez de planifier les mises à jour trop fréquemment pour limiter le trafic réseau.\nUne mise à jour hebdomadaire devrait suffire"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SELECTIVESHARE      "Partage sélectif de morceau"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SLOT_LIMIT_GROUP    "Limiteur de slot"
+    IDS_SLOT_LIMIT_NONE     "Sans limite"
+    IDS_SLOT_LIMIT_THREE    "Vitesse d'envoi / 3ko/s"
+    IDS_SLOT_LIMIT_NUM_B    "Limiter à x slots"
+END
 
 END
 

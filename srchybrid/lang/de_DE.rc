@@ -3165,6 +3165,348 @@ BEGIN
     IDC_RUNASUSER_TIP       "eMule wird mit eingeschränkten Benutzerrechten gestartet. Dazu wird ein neuer Benutzer 'eMule Secure' angelegt \nder nur in den eMule-Installations, Temp und Incoming Ordner schreiben darf. \nHinweis: Dateivorschau sowie das Verbinden von eMule mir ed2k Links funktioniert in eMule nicht mehr. \nIm Taskmanager kann überprüft werden ob eMule als 'eMule_secure' läuft."
 END
 
+STRINGTABLE 
+BEGIN
+    IDC_USERNAME_A_TIP      "Username at the proxy"
+    IDC_PASSWORD_TIP        "Password at the proxy"
+    IDC_WEBCACHENAME_TIP    "hostname of the proxy of your isp. Use 'transperant@yourisp' for a transperant proxy"
+    IDC_WEBCACHEPORT_TIP    "port number (typically 80 or 8080)"
+    IDC_STATIC_ADDRESS_TIP  "IDC_STATIC_ADDRESS_TIP"
+    IDC_STATIC_CONTROLS_TIP "IDC_STATIC_CONTROLS_TIP"
+    IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP 
+                            "Activate usage of your isp webcache proxy\nIf your isp support a webcache proxy this proxy will\nbe used to cache your downloads. If more people within\nyour isp request the same data from a webcache enabled\nmod the data will be transfered via the proxy. So this\nway the peer will only have to upload the data once.\nThis will only work if the uploader uses a webcache mod,\nand more people in your isp set the same proxy.\n Note: sending to webcache can not be disabled"
+    IDC_DETECTWEBCACHE_TIP  "Use the webcaches.xml in your config dir\nto lookup the proxy of your isp."
+    IDC_STATIC_BLOCKS_TIP   "Amount of data that determines if the connection should be reset."
+    IDC_EXTRATIMEOUT_TIP    "Wait 400 seconds instead of 130 seconds for a timeout of a 180 kb block"
+    IDC_LOCALTRAFFIC_TIP    "Data within the same isp is excluded by the proxy\nand webcache will be disabled for those. loopback\ntest might fail for the same reason."
+    IDC_PERSISTENT_PROXY_CONNS_TIP "Use persistant (http 1.1) flag for proxy"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_ADVANCEDCONTROLS_TIP "Show advanced options. "
+    IDC_TESTPROXY_TIP       "Test the proxy. This option tests if the proxy is reachable\nand the proxy can reach your emule port. It does NOT test\nif the proxy does actually caches(stores) data (required!)\nrequirements:\n1. connected to server\n2. You need to have a valid public IP\n3. You need to have a real high ID\n4. Test does not work if you have too\n   many open connections (too much downloads)"
+    IDC_UPDATE_WCSETTINGS_TIP 
+                            "Automatically reload webcache.xml on startup\n(<b>disabled</b> in source until someone picks up the project)"
+    IDC_MSG_WEBCACHEFAIL    "Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until a new proxy is tested!"
+    IDC_MSG_WEBCACHE_NOAUTODEC 
+                            "Sorry, your ISP is not in the database,\nyour ISP identifier is %s\nTo enable autodetection, please find out and submit your ISPs proxy."
+    IDC_MSG_WEBCACHE_NOIP   "No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"
+    IDC_MSG_WEBCACHE_CONFIGALT 
+                            "Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until a new proxy is tested.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."
+    IDC_MSG_WEBCACHE_NOACTIVE 
+                            "Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."
+    IDC_MSG_WEBCACHE_ERRRESOLVE 
+                            "WebCache Error - Failed to resolve HTTP proxy address:\n%s\nPlease review your webcache settings"
+    IDC_MSG_WEBCACHE_TRANSPAR 
+                            "Proxy Test can not test Transparent proxies. Test Canceled!"
+    IDC_MSG_WEBCACHE_TESTRUNNING 
+                            "Performing Proxy Test! Please check the log in the serverwindow for the results!"
+    IDC_MSG_WEBCACHE_TESTERR "Proxy Test Error!"
+    IDC_MSG_WEBCACHE_ALREADYRUNNING 
+                            "No New Test Started. There is already a Test in progress"
+    IDC_MSG_WEBCACHE_TESTREQ 
+                            "No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"
+    IDC_UPDATEFAKELISTSTART_TIP 
+                            "Try to update the list before connecting to the network"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_UPDATEFAKES_TIP     "Download & reload the fakes.zip now.\nIf the fakesfile is newer than the previous download"
+    IDC_RESETFAKESURL_TIP   "Reset the url field to the morph default:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
+    IDC_UPDATE_URL_FAKELIST_TIP 
+                            "Where to fetch the fakelist. Fakelist must be in\nzip format. Morph checks if the date on the file\nis newer than the previous download and will\nonly update if the file on the web is newer. "
+    IDC_AUTOUPIPFILTER_TIP  "Try to update the list before connecting to the network"
+    IDC_UPDATEIPFURL_TIP    "Download & reload the ipfilter.zip now.\nIf the ipfilter is newer than the previous download"
+    IDS_PW_TOOL_TIP         "If the mouse hovers on a download or  preference\na little note will appear with information on this item.\nSpecifies the delay until this tip pops up.\nThis text is is a tooltip."
+    IDC_RESETIPFURL_TIP     "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
+    IDC_UPDATE_URL_IPFILTER_TIP 
+                            "Url where to download the ipfilter.dat (zip format)"
+    IDC_MORPH2_COUNTRY_TIP  "Download the countrylist for the flags on startup"
+    IDC_UPDATEIPCURL_TIP    "Download the ip ranges per country to be displayed in the countryflag column"
+    IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP 
+                            "Where to download the list.\n List will only be downloaded if the web version is newer than\nthe previous download"
+    IDC_RESETIPCURL_TIP     "Reset the above url to\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_RESET_TIP        "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Reset button will clear all entries."
+    IDS_DISABLEHIST_TIP     "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Enabled checkmark allows to turn off this option"
+    IDS_PW_SHOWTRANSTOOLBAR_TIP 
+                            "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes\n:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queueDisplays all known clients"
+    IDC_SHOWDWLPERCENT_TIP  "A %-completed value will be added for each download in its progress bar."
+   IDC_EXITQUESTION_TIP     "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
+    IDC_DONTASKMEAGAINCB_TIP 
+                            "Check this option and eMule won't ask next time you do a shutdown of eMule\nYou can enable this option again in Options->general-> Prompt on exit"
+    IDC_DONTASKMEAGAINCBSEL_TIP 
+                            "Do not pop up this category select dialog again. You can enable this again in \nOption -> Morph -> download management -> SCC -> Show the 'Select catagory' dialog"
+    IDS_CAT_SELDLGTXT_TIP   "You can organize the downloads in catagories.\nThese are the tabs in the download window.\nYou can add categories here by entering a\ncategory name or select one of the existing\ncatgories."
+    IDS_OKCANCELSEL_TIP     "Select the category and press ok to \ndownload in the category or\npress cancel not to download the\nfile(s)."
+    IDC_DISABLEOBFUSCATION_TIP 
+                            "If for some reason you want to disable the whole obfuscation \nfeature completely you can choose this option. In general for most users there is no reason nor advantage in doing this. (default: off)"
+    IDC_ONLYOBFUSCATED_TIP  "If you enable this option, eMule will only establish and accept obfuscated connections.\n Clients which do not support obfuscations are ignored, incoming plaintext connections\nrejected and the automatic server connect will only allow obfuscated connections to a\nserver. You should only choose this setting if you know that the ED2K Protocol is completely\nblocked on your network, otherwise you will loose sources and therefore slow down your eMule.\nHowever if you know that eMule is blocked, then enabling this option is recommended, because  \nit saves connection tries which are guaranteed to fail and therefore would waste time,\noverhead and resources. Only enable this option if you canno receive dataq otherwise! (default: off)"
+    IDC_ENABLEOBFUSCATION_TIP 
+                            "If you think that eMule is throttled (slowed down by isp) on your\nnetwork, you should enable this function. Whenever possible eMule\nwill use obfuscated connections and will ask other clients\nto do the same when connecting to your client. When connecting \nto a server, eMule will try to establish an obfuscated connection\nfirst and only if this fails choose a normal one. There are\nin general no disadvantages by using this option, except\ninsignificant higher CPU usage and very few bytes more overhead,\nso you can't really do anything wrong by enabling this setting.\nAlso http transfers will send useragent firefox instead of emule\n(default: off) "
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_TRAY_TIP "eMule will not minimize to task bar\nbut to the tray if this option is checked.\nAn extra option is displayed in the windows\nbar to minimize to the tray if unchecked"
+    IDS_PW_DBLCLICK_TIP "This option toggles,\nwhether a double or single click in the download screenlist is needed to expand and show the sources"
+    IDS_3DDEP_TIP "The slider affects the amount of 3D shading of the Progress Bars."
+	IDS_UPDATEQUEUE_TIP "The information displayed in the queue list will be updated not as often\nwhich will save some CPU time."
+	IDS_SHOWRATEONTITLE_TIP "Displays current Down- and Upload speed in eMule's window title."
+	IDS_INDICATERATINGS_TIP "Shows the -icon (comment, positive rating)\nthe !-icon (negative rating) for downloads in the Transfers list."
+    IDS_DISABLEKNOWNLIST_TIP 
+                            "eMule keeps track of all clients it connected to.\nTo save memory this list can be disabled with this option.\nTurn it off for low memory systems."
+    IDS_DISABLEQUEUELIST_TIP 
+                            "Similar to the Known Clients List the Queue List\nwill also consume system resources.\nDisable to save them."
+	IDS_SHOWCATINFO_TIP "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading) files\nand the second one (y) the total number of files for this  category."
+	IDS_REPAINTGRAPHS_TIP "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
+    IDC_SELECT_HYPERTEXT_FONT_TIP 
+                            "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines  and IRC windows"
+	IDS_AUTOREMOVEFD_TIP "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
+END	
+
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMIN_GROUP      "Advance Webserver Config"
+    IDS_ADVADMIN_ACC        "Account:"
+    IDS_ADVADMIN_DELETE     "Delete Account"
+    IDS_ADVADMIN_NEW        "New Account"
+    IDS_ADVADMIN_KAD        "Access - Kad?"
+    IDS_ADVADMIN_TRANSFER   "Access - Transfer?"
+    IDS_ADVADMIN_SEARCH     "Access - Search?"
+    IDS_ADVADMIN_SERVER     "Access - Server?"
+    IDS_ADVADMIN_SHARED     "Access - Shared?"
+    IDS_ADVADMIN_STATS      "Access - Stats?"
+    IDS_ADVADMIN_PREFS      "Access - Prefs?"
+    IDS_ADVADMIN_PASS       "Password:"
+    IDS_ADVADMIN_USER       "Username:"
+    IDS_ADVADMIN_CAT        "Categories (sep. by |):"
+    IDS_WS_COOKIE_LOGGEDIN  "Remain Logged In:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMIN_NOTE       "Note: You have to use the multi user Webtemplates, else you cannot activate\n\n"
+    IDS_ADVADMIN_USERLEVEL  "User level:"
+    IDS_ADVADMIN_OPERATOR   "Operator"
+    IDS_ADVADMIN_ADMIN      "Admin"
+    IDS_ADVADMIN_HIADMIN    "Hi-Admin"
+    IDS_ADVADMINENABLED     "Enable multi user Webinterface right management"
+    IDS_ADVADMIN_GUEST      "Guest"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ADVADMINENABLED_TIP "Enable the multi user component of the webserver."
+    IDS_ACCOUNTSELECT_TIP   "Select the account name from the dropdownlist."
+    IDS_ADVADMIN_USER_TIP   "Username to enter at the webinterface"
+    IDS_ADVADMIN_PASS_TIP   "password"
+    IDS_ADVADMIN_KAD_TIP    "Allowed to display the kad screen"
+    IDS_ADVADMIN_TRANSFER_TIP "Allow acces to the transer (up/down) tab"
+    IDS_ADVADMIN_SEARCH_TIP "Allow acces to the search. Note that only one system wide websearch can be active."
+    IDS_ADVADMIN_SERVER_TIP "Allows acces to the server tab"
+    IDS_ADVADMIN_SHARED_TIP "allow access to the files shared tab"
+    IDS_ADVADMIN_STATS_TIP  "allow acces to the statiscis"
+    IDS_ADVADMIN_PREFS_TIP  "Allow access to the emule preferences"
+    IDS_ADVADMIN_USERLEVEL_TIP 
+                            "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all\n              functions without the admin functions (same as Admin without\n                      Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system\n     (same as Admin with Hi-Level functions in the original)"
+    IDS_ADVADMIN_CATS_TIP   "Categories the user has acces to. Leave blank for all. \nSeperate categorie names with a pipe symbol (|)"
+    IDS_ADVADMIN_DELETE_TIP "Delete the current displayed account"
+    IDS_STATIC_ADVADMIN_CATS_TIP "IDS_STATIC_ADVADMIN_CATS_TIPs"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATIC_ADVADMIN_USER_TIP "IDS_STATIC_ADVADMIN_USER"
+    IDS_STATIC_ADVADMIN_PASS_TIP "IDS_STATIC_ADVADMIN_PASS"
+    IDS_STATIC_ADVADMIN_USERLEVEL_TIP "IDS_STATIC_ADVADMIN_USERLEVEL"
+    IDS_ADVADMIN_NOTE_TIP   "IDS_ADVADMIN_NOTE"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNHISTORY_REMOVE  "Remove from history"
+    IDS_DOWNHISTORY_REMOVE_QUESTION 
+                            "Do you really want to remove ""%s"" from downloaded history?"
+    IDS_DOWNHISTORY_REMOVE_QUESTION_MULTIPLE 
+                            "Do you really want to remove selected files from downloaded history?"
+    IDS_DOWNHISTORY_SHARED  "Shared"
+    IDS_DOWNHISTORY_CLEAR   "Clear downloaded history"
+    IDS_DOWNHISTORY_SHOWSHARED "Show shared files"
+    IDS_DOWNHISTORY_ACTIONS "Actions"
+    IDS_DOWNHISTORY_CLEAR_QUESTION 
+                            "Are you sure you want to clear download history?"
+    IDS_UPDATEFAKELISTWEEK  "Update weekly"
+    IDS_AUTOUPIPFILTERWEEK  "Update weekly"
+    IDS_UPDATEFAKELISTWEEK_TIP 
+                            "Add a entry to the schedule to update the\nfakelist.dat form the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
+    IDS_UPDATEIPFILTERWEEK_TIP 
+                            "Add a entry to the schedule to update the\nipfilter.dat form the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
+    IDS_SCHEDTEXT           "Added by morph autoupdate"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SVC_RUNNINGASSERVICE "Currently running as service."
+    IDS_SVC_ACCESSDENIED    "Access to services denied."
+    IDS_SVC_NOTINSTALLED    "Service not installed."
+    IDS_SVC_INSTALLED       "Service installed."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SVC_INSTALLFAILED   "Install failed, check log."
+    IDS_SVC_UNINSTALLFAILED "UnInstall failed, check log."
+    IDS_SVC_INSTALLED_DISABLED "Service disabled. (marked for deletion?)."
+    IDS_SVC_OSTOOOLD        "Not supported on windows 95"
+    IDS_SVC_INSTALLSERVICE  "Install"
+    IDS_SVC_SERVERUNINSTALL "Uninstall"
+    IDS_SVC_STARTWITHSYSTEM "Start with system startup"
+    IDS_SVC_SETTINGS        "Set setting appropiate for service use"
+    IDS_SVC_RUNBROWSER      "Browse to webservice"
+    IDS_SVC_REPLACESERVICE  "Stop service and start gui "
+    IDS_SVC_INSTALLSERVICE_TIP 
+                            "Install a eMule service in the NT Service. \nThis service will Use the exact configufation \nof this eMule, but will not interact with the desktop.\nYou can start a service from 'services.msc' Make sure\nthat the webservice is enabled."
+    IDS_SVC_SERVERUNINSTALL_TIP 
+                            "stop/Uninstall the previous installed service."
+    IDS_SVC_STARTWITHSYSTEM_TIP 
+                            "eMule service will start when windows starts. There is no need to login into windows. "
+    IDS_SVC_MANUALSTART_TIP "You will start the eMule service manually."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SVC_SETTINGS_TIP    "Apply a range of settings that are useful for when running as a service:\nConnect on startup, no sounds, enable webservice, no notification, \nno autostart with windows (auto start with windows conflicts!)\nNote that you need to reload the preferences to see and that unchecking \nthis option does not restore the old settings once set."
+    IDS_SVC_RUNBROWSER_TIP  "When starting eMule.exe from the desktop a browser\nwindow to the webservice is started instead of the\neMule gui,if the service is running."
+    IDS_SVC_REPLACESERVICE_TIP 
+                            "If the service is running it will be stopped and\na normal gui version of the gui will be started."
+    IDS_SVC_CURRENT_STATUS_TIP 
+                            "This show the current status of eMule as a NT service"
+    IDS_SVC_ONSTARTBOX      "On start of eMule."
+    IDS_SVC_STARTUPBOX      "Startup"
+    IDS_SVC_MANUALSTART     "Manual start"
+    IDS_YESSERVICE          "Yes, and start eMule service"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_HTTP_SRC            "Add HTTP sources"
+    IDS_CLEAR               "Clear"
+    IDS_INVALID_HTTP_SRC    "Invalid HTTP source. Make sure the URL starts with ""http://"""
+    IDS_HTTP_LIST_CLEAR     "This will remove all http sources. Are you sure?"
+    IDS_MINIMULEAUTOCLOSE   "MiniMuleAutoClose"
+    IDS_MINIMULETRANSPARENCY "MiniMuleTransparency"
+    IDS_CREATECRASHDUMP     "CreateCrashDump"
+    IDS_CHECKCOMCTL32       "CheckComctl32 "
+    IDS_CHECKSHELL32        "CheckShell32"
+    IDS_IGNOREINSTANCES     "IgnoreInstances"
+    IDS_NOTIFIERMAILENCRYPTCERTNAME "NotifierMailEncryptCertName"
+    IDS_MEDIAINFO_MEDIAINFODLLPATH "MediaInfo_MediaInfoDllPath"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NOMINIMIZE          "No, To tray"
+    IDS_YESSERVICETIP       "If the eMule service is installed this sessions is stopped\nAnd the eMule as a service is started instead to run in the \nbackground as a windows service (use RUN->SERVICE.MSC to control"
+    IDS_NOMINIMIZETIP       "Do not shutdown, but minimize to the system tray."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_RESTORELASTLOGPANE_TIP 
+                            "remember which of the log panes (Log, Verbose)\nhas been used the last session."
+    IDS_PREVIEWCOPIEDARCHIVES_TIP 
+                            "When this option is disabled (=0), eMule will use a new preview\nmethod which is faster and uses less disk space in the temporary\nfolder. Feedbacks for this new version are welcome."
+    IDS_STRAIGHTWINDOWSTYLES_TIP 
+                            "Changes the look of the statistic graph window and some other minor \nstyles stuff. (might require restart)"
+    IDS_LOGFILEFORMAT_TIP   "Changes the data format of the log files from unicode to UTF8 when set to 1."
+    IDS_RTLWINDOWSLAYOUT_TIP 
+                            "Adds right-to-left reading support to eMule. \nUseful for languages  like Hebrew etc."
+    IDS_PREVIEWONICONDBLCLK_TIP 
+                            "If this setting is enabled a double click on a file's icon in the\ntransfer list will invoke the preview command. This will only work\nif 'Download list  doubelclick to expand'  is turned off in\n'Preferences -> Display'"
+    IDS_INTERNETSECURITYZONE_TIP 
+                            "Security Zones as per Internet Explorer Security settings. Defines\nwhich features are allowed in HTML code. Relevant for the MiniMule\nwindow.\nAllowed=<b>Untrusted</b>|Internet|Intranet|Trusted|LocalMachine"
+    IDS_TXTEDITOR_TIP       "The default program for editing the Webservices and IPFilter.dat\nmay be entered here. Provide the complete path to the new\nexecutable if not using the default notepad.exe."
+    IDS_DATETIMEFORMAT_TIP  "DateTimeFormat=%A, %x, %X\nthis string defines how date and time is displayed in eMule.\n%a,%A  Abbreviated,FULL weekday name\n%b,%B  Abbreviated,FULL month name\n%c  Date and time representation appropriate for locale\n%d  Day of month number (01 – 31)\n%H      Hour in 24-hour format (00 – 23)\n%I  Hour in 12-hour format (01 – 12)\n%j  Day of year as decimal number (001 – 366)\n%m  Month as decimal number (01 – 12)\n%M  Minute as decimal number (00 – 59)\n%p  A.M./P.M.\n%S  Seconds as number \n%U  Week of year number, \n%w  Weekday as number (0 – 6; Sunday is 0)\n%x Date representation for current locale\n%X  Time representation for current locale\n%y  Year without century\n%Y  Year with century\n%z, %Z  Either the time-zone name or time zone abbreviation"
+    IDS_SERVERUDPPORT_TIP   "Normally the local port for asking servers for sources or\nsearching files on them is randomly chosen . If eMule is run on a machine in a more\ncomplex network, especially when routers are used, it may be\nnecessary to fix this port to a defined value or to deactivate it\nat all. Disabling this port means that eMule will no longer be\nable to update the status of the servers in its server list and\nwill also not be able to receive sources from them nor do a\nglobal search. Exempt from this is the server eMule is actually\nconnected to. Usually the default setting should not be\nchanged.\nPossible values for ServerUDPPort are:\n0                   Disabled\n1 - 65534  fixed local UDP port\n<b>65535</b> random port (default)"
+    IDS_REMOVEFILESTOBIN_TIP 
+                            "This setting affects the Delete From Disk function in the right click menu \nof the Shared Files main window. If disabled then files will be permanently\ndeleted from disk without moving them to the recycle bin."
+    IDS_ADVANCEDPREFS       "Advanced Preferences"
+    IDS_ADVANCEDPREFS_TIP   "Minor Preferences for advanced tweaking.\nAlso supported in official by editing \npreferences.ini"
+    IDS_TRUSTEVERYHASH      "aichTrustEveryHash(current session)"
+    IDS_INSPECTALLFILETYPES "InspectAllFileTypes"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MEDIAINFO_RIFF      "MediaInfo_RIFF"
+    IDS_MEDIAINFO_ID3LIB    "MediaInfo_ID3LIB"
+    IDS_MAXLOGBUFF          "MaxLogBuff"
+    IDS_MAXCHATHISTORY      "MaxChatHistory"
+    IDS_PREVIEWSMALLBLOCKS  "PreviewSmallBlocks"
+    IDS_RESTORELASTMAINWNDDLG "RestoreLastMainWndDlg"
+    IDS_RESTORELASTLOGPANE  "RestoreLastLogPane"
+    IDS_PREVIEWCOPIEDARCHIVES "PreviewCopiedArchives"
+    IDS_STRAIGHTWINDOWSTYLES "StraightWindowStyles"
+    IDS_LOGFILEFORMAT       "LogFileFormat"
+    IDS_RTLWINDOWSLAYOUT    "RTLWindowsLayout"
+    IDS_PREVIEWONICONDBLCLK "PreviewOnIconDblClk"
+    IDS_INTERNETSECURITYZONE "InternetSecurityZone"
+    IDS_TXTEDITOR           "TxtEditor"
+    IDS_DATETIMEFORMAT      "datetimeformat"
+    IDS_SERVERUDPPORT       "ServerUDPPort"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MAXMSGSESSIONS      "maxmsgsessions(Chat sessions)"
+    IDS_PREFERRESTRICTEDOVERUSER "PreferRestrictedOverUser"
+    IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(default 5,0=all)"
+    IDS_HIGHRESTIMER        "HighresTimer"
+    IDS_HIGHRESTIMER_TIP    "?"
+    IDS_TRUSTEVERYHASH_TIP  "(Session only not saved). DEBUG ONLY. disable voting "
+    IDS_INSPECTALLFILETYPES_TIP 
+                            "To determine the file format of downloading/shared\nfiles by evaluating the headers\n(most usefull when MediaInfo Lib is installed)"
+    IDS_MAXMSGSESSIONS_TIP  "max open chat sessions"
+    IDS_PREFERRESTRICTEDOVERUSER_TIP 
+                            "Do not create a new eMule_secure account but.\nRestrict the rights of the current account. \nMight be an alternative for securemode if you \nAre running in a limited account"
+    IDS_WEBFILEUPLOADSIZELIMITMB_TIP 
+                            "Amounts of MB that are allowed to be downloaded over http from the webserver(default=5)"
+    IDS_ALLOWEDIPS          "AllowedIPs webserver (seperated by ;)"
+    IDS_ALLOWEDIPS_TIP      "Ip's that are allowed to connect to the webserver, seperated by ';'"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_REMOVEFILESTOBIN    "RemoveFilesToBin"
+    IDS_MINIMULEAUTOCLOSE_TIP 
+                            "The MiniMule window will usually remain visible until closed.\nSetting this value to 0 will automatically close the window when\nthe cursor is moved out of the window. Similar to a tooltip.\n(default=1)"
+    IDS_MINIMULETRANSPARENCY_TIP 
+                            "Controls the transparency of the MiniMule window. 0 means opaque\nand 100 is translucent.\n(default=0),might require restart."
+    IDS_CREATECRASHDUMP_TIP "When this key is enabled eMule will automatically save a crash\ndump should eMule unexpectedly crash. This can help the developers\nto track down the problem. The dump is saved in eMule's\ninstallation folder, called 'eMule-version-number-Modversion.dmp'\nShould you have crash problems set this key to 1 and report at the\nmorph forum (or mailto leukhe\\@gmail.com) with details\nDefault=unchecked"
+    IDS_CHECKCOMCTL32_TIP   "Suppress the warning about a old version of the common dialog dll. This\ncan be the case if you run a version of Windows that is not updated.\neMule might work without the update but might look bad. You can download \n the updated dll at Microsoft\ndefault=1"
+    IDS_CHECKSHELL32_TIP    "Suppress the warning about a old version of the windows shell (pre internet explorer 4)\nSome windows shell integrations functions might not work. The preferred solution is to update\nthe shell.dll which comes as a part of internet explorer. \n Default =1"
+    IDS_IGNOREINSTANCES_TIP "Allows the execution of multiple eMule instances.\nNote:\nFor two eMules running on the same machine they must\nbe installed to different folders, must have different\ntemp folders and also the ports used by each eMule have\nto be unique. It is not recommended to run two eMules \nconcurrently apart from testing purposes.\ndefault:0"
+    IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP 
+                            "Name of the certificate for the encryption of email notifications with S/MIME. The certificate will be looked up in the local windows address book"
+    IDS_MEDIAINFO_MEDIAINFODLLPATH_TIP 
+                            "This setting will tell emule where to find the mediainfo dll. Default it is the\neMule directory. You will need to set this preferences if you want to save the dll\nin a different directory.\nDefault: MEDIAINFO.DLL"
+    IDS_MEDIAINFO_RIFF_TIP  "Use the mediainfo dll to find out if the file is a 'avi' file.\nDefault=1"
+    IDS_MEDIAINFO_ID3LIB_TIP 
+                            "Instructs emule to check mpeg (mp1,mp2,mp3,mpa) files for the\nmpeg header. meta data that is displayed in   the file detail \ndialog window. id3lib or media info dll is used for this. \ndefault=1"
+    IDS_MAXLOGBUFF_TIP      "Defines the amount of system memory eMule uses to display the logs.\nFor Windows 98 | ME a default of 64 kB is reserved, for Win 2k|XP\nit is 128 kB. In Win98|ME the buffer may not be larger than 64 kB.\nThe logs are rotating, i.e. if the buffer is filled up to its limit\nan old message is purged when a new one arrives (FIFO)."
+    IDS_MAXCHATHISTORY_TIP  "Defines the maximum number of lines saved in the history of the irc\nmessages. After this value is reached the oldest message is\npurged on new entry (FIFO - First In First Out).\ndefault =100"
+    IDS_PREVIEWSMALLBLOCKS_TIP 
+                            "This function should be only activated (=1) when using VLC -\nVideoLAN Client to preview files. It allows to preview multimedia\n \nfiles when at least 16 kB data for .mpeg files or 256 kB data for\nall other multimedia content (.avi, CD-Images with multimedia\ncontent) has been downloaded.  Using this option the 'Create backup\nfor preview' setting has to be deactivated in the 'Video\nPlayer' dialog. Note that vlc version 8.5 and higher seem to \nhave some problems with broken indexes"
+    IDS_RESTORELASTMAINWNDDLG_TIP 
+                            "eMule remembers which of the main windows \n(Kademlia, Server, Transfer, was open, when before application exit \nand restores it. (default = unchecked)"
+END
+
 #endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
