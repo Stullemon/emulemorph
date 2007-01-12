@@ -281,7 +281,12 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam)
 	{
 		if ((nID & 0xFFF0) == SC_MINIMIZE)
 		{
+			//MORPH START - Added, Static Tray Icon
+			/*
 			if (TrayShow())
+			*/
+			if (thePrefs.GetStaticIcon() || TrayShow())
+			//MORPH END   - Added, Static Tray Icon
 				ShowWindow(SW_HIDE);
 		}
 		else
@@ -289,7 +294,12 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 	else if ((nID & 0xFFF0) == MP_MINIMIZETOTRAY)
 	{
+		//MORPH START - Added, Static Tray Icon
+		/*
 		if (TrayShow())
+		*/
+		if (thePrefs.GetStaticIcon() || TrayShow())
+		//MORPH END   - Added, Static Tray Icon
 			ShowWindow(SW_HIDE);
 	}
 	else

@@ -789,6 +789,9 @@ bool	CPreferences::m_bHistoryShowShared;
 //MORPH END   - Added, Downloaded History [Monki/Xman]
 
 int CPreferences::m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
+
+bool CPreferences::m_bStaticIcon; //MORPH - Added, Static Tray Icon
+
 CPreferences::CPreferences()
 {
 #ifdef _DEBUG
@@ -2659,6 +2662,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("ShowSharedInHistory"), m_bHistoryShowShared);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	ini.WriteInt(_T("ServiceStartupMode"),m_iServiceStartupMode); // MORPH leuk_he:run as ntservice v1..
+	ini.WriteBool(_T("StaticIcon"),m_bStaticIcon); //MORPH - Added, Static Tray Icon
 }
 
 void CPreferences::ResetStatsColor(int index)
@@ -3711,6 +3715,7 @@ void CPreferences::LoadPreferences()
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 //Xman disable compression
 	m_bUseCompression=ini.GetBool(L"UseCompression",true);
+	m_bStaticIcon=ini.GetBool(L"StaticIcon",false); //MORPH - Added, Static Tray Icon
 
    LoadCats();
 	SetLanguage();

@@ -63,6 +63,7 @@ CPPgMorphShare::CPPgMorphShare()
 	//MORPH END   - Added by SiRoB, Show Permission
 	m_htiFolderIcons = NULL;
 	m_htiDisplay = NULL;
+	m_htiStaticIcon = NULL; //MORPH - Added, Static Tray Icon
 }
 
 CPPgMorphShare::~CPPgMorphShare()
@@ -133,6 +134,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 
 		m_htiDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, TVI_ROOT);
 		m_htiFolderIcons = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLDERICONS),m_htiDisplay, m_bFolderIcons);
+		m_htiStaticIcon = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_STATIC_ICON),m_htiDisplay, m_bStaticIcon); //MORPH - Added, Static Tray Icon
 
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiSpreadbar, TVE_EXPAND);
@@ -171,6 +173,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	// [end] Mighty Knife
 	//MORPH END   - Added by SiRoB, Show Permission
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFolderIcons, m_bFolderIcons);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiStaticIcon, m_bStaticIcon); //MORPH - Added, Static Tray Icon
 }
 
 
@@ -188,6 +191,7 @@ BOOL CPPgMorphShare::OnInitDialog()
 	m_sCommunityName = thePrefs.m_sCommunityName;
 	// [end] Mighty Knife
 	m_bFolderIcons = thePrefs.m_bShowFolderIcons;
+	m_bStaticIcon = thePrefs.GetStaticIcon(); //MORPH - Added, Static Tray Icon
 	CPropertyPage::OnInitDialog();
 	//InitTooltips(); //leuk_he tooltipped
 
@@ -244,6 +248,16 @@ BOOL CPPgMorphShare::OnApply()
 		}
 	}
 	thePrefs.m_bShowFolderIcons = m_bFolderIcons;
+	//MORPH START - Added, Static Tray Icon
+	if(m_bStaticIcon != thePrefs.m_bStaticIcon)
+	{
+		if(m_bStaticIcon)
+			theApp.emuledlg->TrayShow(false);
+		else if(theApp.emuledlg->IsWindowVisible()) //only hide when window visible
+			theApp.emuledlg->TrayHide();
+	}
+	thePrefs.m_bStaticIcon = m_bStaticIcon;
+	//MORPH END   - Added, Static Tray Icon
 	
 	//theApp.scheduler->SaveOriginals(); //Removed by SiRoB, no scheduler param in this ppg //Added by SiRoB, Fix for Param used in scheduler
 
@@ -288,6 +302,7 @@ void CPPgMorphShare::Localize(void)
 		// [end] Mighty Knife
 		//MORPH END   - Added by SiRoB, Show Permission
 		if (m_htiFolderIcons) m_ctrlTreeOptions.SetItemText(m_htiFolderIcons, GetResString(IDS_FOLDERICONS));
+		if (m_htiStaticIcon) m_ctrlTreeOptions.SetItemText(m_htiStaticIcon, GetResString(IDS_STATIC_ICON)); //MORPH - Added, Static Tray Icon
         // MORPH START leuk_he tooltipped
        SetTool(m_htiSFM ,IDS_SFM_TIP);
        SetTool(m_htiSpreadbar ,IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP);
@@ -342,6 +357,7 @@ void CPPgMorphShare::OnDestroy()
 	//MORPH END   - Added by SiRoB, Show Permission
 	m_htiFolderIcons = NULL;
 	m_htiDisplay = NULL;
+	m_htiStaticIcon = NULL; //MORPH - Added, Static Tray Icon
 
 	CPropertyPage::OnDestroy();
 }

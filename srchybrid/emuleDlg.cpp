@@ -361,6 +361,11 @@ BOOL CemuleDlg::OnInitDialog()
 	if (thePrefs.UseSplashScreen() && !m_bStartMinimized)
 		ShowSplash();
 
+	//MORPH START - Added, Static Tray Icon
+	if(thePrefs.GetStaticIcon() && !m_bStartMinimized)
+		TrayShow(false);
+	//MORPH END   - Added, Static Tray Icon
+
 	//Commander - Added: Startupsound - Start
 	if (thePrefs.UseStartupSound()){
 		if(PathFileExists(thePrefs.GetConfigDir() + _T("startup.wav"))) 
@@ -1373,6 +1378,7 @@ void CemuleDlg::MinimizeWindow()
 {
 	if (*thePrefs.GetMinTrayPTR())
 	{
+		if(thePrefs.GetStaticIcon() == false) //MORPH - Added, Static Tray Icon
 		TrayShow();
 		ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, Invisible Mode On Start up
@@ -1564,7 +1570,12 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 			FlashWindow(TRUE);
 			if (IsIconic())
 				ShowWindow(SW_SHOWNORMAL);
+			//MORPH START - Added, Static Tray Icon
+			/*
 			else if (TrayHide())
+			*/
+			else if (thePrefs.GetStaticIcon() || TrayHide())
+			//MORPH END   - Added, Static Tray Icon
 				RestoreWindow();
 			else
 				SetForegroundWindow();
@@ -1575,7 +1586,12 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 		FlashWindow(TRUE);
 		if (IsIconic())
 			ShowWindow(SW_SHOWNORMAL);
+		//MORPH START - Added, Static Tray Icon
+		/*
 		else if (TrayHide())
+		*/
+		else if (thePrefs.GetStaticIcon() || TrayHide())
+		//MORPH END   - Added, Static Tray Icon
 			RestoreWindow();
 		else
 			SetForegroundWindow();
@@ -2382,6 +2398,7 @@ void CemuleDlg::RestoreWindow()
 	/*
 	if (TrayIsVisible())
 	*/
+	if (thePrefs.GetStaticIcon() == false) //MORPH - Added, Static Tray Icon
 		TrayHide();
 
 	DestroyMiniMule();

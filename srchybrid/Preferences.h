@@ -929,6 +929,7 @@ public:
 	static CString sInternetSecurityZone;
    // MORPH END  leuk_he Advanced official preferences. 
 
+	static bool m_bStaticIcon; //MORPH - Added, Static Tray Icon
 
 
 	static int m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
@@ -2083,6 +2084,8 @@ public:
 	static UINT		GetGlobalHL()				{return m_uGlobalHL;} 
 	static bool		IsUseGlobalHL()				{return m_bGlobalHL;} 
 	//MORPH END   - Added by Stulle, Global Source Limit
+
+	static bool		GetStaticIcon()				{return m_bStaticIcon;} //MORPH - Added, Static Tray Icon
 };
 
 extern CPreferences thePrefs;

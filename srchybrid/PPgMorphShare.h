@@ -31,6 +31,7 @@ protected:
 	// [end] Mighty Knife
 	bool m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	bool m_bFolderIcons;
+	bool m_bStaticIcon;
 	
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
@@ -64,6 +65,7 @@ protected:
 	//MORPH END   - Added by SiRoB, Show Permission
 	HTREEITEM m_htiDisplay;
 	HTREEITEM m_htiFolderIcons;
+	HTREEITEM m_htiStaticIcon; //MORPH - Added, Static Tray Icon
 	
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);

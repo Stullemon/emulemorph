@@ -6811,7 +6811,7 @@ BEGIN
 	IDS_PREFERRESTRICTEDOVERUSER_TIP "Do not create a new eMule secure but. "
 	IDS_WEBFILEUPLOADSIZELIMITMB_TIP "Amounts of MB that are allowed to be downloaded over http from the webserver(default=5)"
 	IDS_ALLOWEDIPS_TIP "Ip's that are allowed to connect to the webserver, seperated by ';'"
-
+    IDS_STATIC_ICON         "Always display Tray Icon"
 END
 
 #endif    // English (U.S.) resources
