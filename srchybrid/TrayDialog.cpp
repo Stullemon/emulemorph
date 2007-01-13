@@ -20,6 +20,7 @@
 #include "emuledlg.h"
 #include "MenuCmds.h"
 #include "UserMsgs.h"
+#include "Preferences.h"//MORPH - Added, Static Tray Icon
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
