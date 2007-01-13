@@ -439,6 +439,8 @@ void CSharedFilesCtrl::Localize()
 
 void CSharedFilesCtrl::AddFile(const CKnownFile* file)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+
 	if (!theApp.emuledlg->IsRunning())
 		return;
 	// check filter conditions if we should show this file right now
@@ -529,6 +531,8 @@ void CSharedFilesCtrl::UpdateFile(const CKnownFile* file)
 */
 void CSharedFilesCtrl::UpdateFile(const CKnownFile* file)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	
 	if(!file || !theApp.emuledlg->IsRunning())
 		return;
 	m_updatethread->AddItemToUpdate((LPARAM)file);

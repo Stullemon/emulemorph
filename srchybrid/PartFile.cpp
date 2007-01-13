@@ -3855,20 +3855,21 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	//MORPH START - Enhanced DBR
 	/*
 	uint64 bytesLeftToDownload = GetFileSize() - GetCompletedSize();
-	*/
-	uint64	bytesLeftToDownload = GetRemainingAvailableData(sender);
-	//MORPH END   - Enhanced DBR
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
-
-	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / (*count);
-	//MORPH START - Enhanced DBR
+	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
+	*/
+	uint64	bytesLeftToDownload = GetRemainingAvailableData(sender);
+	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
+	uint32	sourceDatarate = max(sender->GetDownloadDatarateBlockBased(), 10); // Always assume client is uploading at atleast 10 B/s
+	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
+	bytesPerRequest = min(max(2*sender->GetSessionPayloadDown(),10240), sourceDatarate * timeToFileCompletion);
 	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
 	if (bytesPerRequest > sourcealreadyreserveddata)
 		bytesPerRequest -= sourcealreadyreserveddata;
 	else
-		return false;
+		bytesPerRequest = 0;
 	//MORPH END   - Enhanced DBR
 
 	if (bytesPerRequest > 3*EMBLOCKSIZE) {
@@ -6686,28 +6687,28 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	//MORPH START - Enhanced DBR
 	/*
 	uint64 bytesLeftToDownload = GetFileSize() - GetCompletedSize();
-	*/
-	uint64	bytesLeftToDownload = GetRemainingAvailableData(sender);
-	//MORPH END   - Enhanced DBR
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarate(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
-
-	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / (*count);
-	//MORPH START - Enhanced DBR
+	bytesPerRequest = (sourceDatarate * timeToFileCompletion) / 2;
+	*/
+	uint64	bytesLeftToDownload = GetRemainingAvailableData(sender);
+	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
+	uint32	sourceDatarate = max(sender->GetDownloadDatarateBlockBased(), 10); // Always assume client is uploading at atleast 10 B/s
+	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
+	bytesPerRequest = min(max(2*sender->GetSessionPayloadDown(),10240), sourceDatarate * timeToFileCompletion);
 	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
 	if (bytesPerRequest > sourcealreadyreserveddata)
 		bytesPerRequest -= sourcealreadyreserveddata;
 	else
-		return false;
+		bytesPerRequest = 0;
 	//MORPH END   - Enhanced DBR
 
 	if (bytesPerRequest > 3*EMBLOCKSIZE) {
-		*count = min((uint16)(bytesPerRequest/(3*EMBLOCKSIZE)), *count); //MORPH - Added by SiRoB, Enhanced DBR
+		*count = min((uint16)(bytesPerRequest/(3*EMBLOCKSIZE)),*count); //MORPH - Added by SiRoB, Enhanced DBR
 		bytesPerRequest = 3*EMBLOCKSIZE;
 	}
 
-	//MORPH END   - Enhanced DBR
 	if (bytesPerRequest < 10240)
 	{
 		// Let an other client request this packet if we are close to completion and source is slow

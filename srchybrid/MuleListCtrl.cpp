@@ -102,6 +102,7 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort)
 	m_hAccel = NULL;
 	m_uIDAccel = IDR_LISTVIEW;
 	m_eUpdateMode = lazy;
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
 	//MORPH START - UpdateItemThread
 	m_updatethread = (CUpdateItemThread*) AfxBeginThread(RUNTIME_CLASS(CUpdateItemThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
 	m_updatethread->ResumeThread();
@@ -111,6 +112,7 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort)
 
 CMuleListCtrl::~CMuleListCtrl() {
 	delete[] m_aColumns;
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
 	m_updatethread->EndThread(); //MORPH - UpdateItemThread
 }
 

@@ -160,15 +160,15 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		    for(POSITION pos=m_DoneBlocks_list.GetTailPosition();pos!=0; ){
 			    Requested_Block_Struct* block = m_DoneBlocks_list.GetPrev(pos);
     
-                /*FIX*/if(total + (block->EndOffset-block->StartOffset) <= GetSessionPayloadUp()) {
+                /*MORPH - FIX for zz code*/if(total + (block->EndOffset-block->StartOffset) <= GetSessionPayloadUp()) {
                     // block is sent
 			        s_UpStatusBar.FillRange((uint64)block->StartOffset, (uint64)block->EndOffset, crProgress);
                     total += block->EndOffset-block->StartOffset;
                 }
-                /*FIX*/else if (total < GetSessionPayloadUp()){
+                /*MORPH - FIX for zz code*/else if (total < GetSessionPayloadUp()){
                     // block partly sent, partly in buffer
                     total += block->EndOffset-block->StartOffset;
-                    /*FIX*/uint64 rest = total - GetSessionPayloadUp();
+                    /*MORPH - FIX for zz code*/uint64 rest = total - GetSessionPayloadUp();
                     uint64 newEnd = (block->EndOffset-rest);
     
     			    s_UpStatusBar.FillRange((uint64)block->StartOffset, (uint64)newEnd, crSending);
@@ -1125,7 +1125,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			m_pWCUpSocket->SendPacket(apacket, npacket, true, false, Size);
 		else
 			socket->SendPacket(apacket, npacket, true, false, Size);
-		delete apacket;
+		delete[] apacket;
 	}
 #endif
 }
@@ -1186,7 +1186,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 			PokeUInt64(&packet->pBuffer[16], statpos);
 			PokeUInt32(&packet->pBuffer[24], newsize);
 			memfile.Read(&packet->pBuffer[28],nPacketSize);
-			/*FIX*/theStats.AddUpDataOverheadFileRequest(28); //Moved
+			/*MORPH - Offcial FIX*/theStats.AddUpDataOverheadFileRequest(28); //Moved
 		}
 		else{
 			packet = new Packet(OP_COMPRESSEDPART,nPacketSize+24,OP_EMULEPROT,bFromPF);
@@ -1194,7 +1194,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 			PokeUInt32(&packet->pBuffer[16], (uint32)statpos);
 			PokeUInt32(&packet->pBuffer[20], newsize);
 			memfile.Read(&packet->pBuffer[24],nPacketSize);
-			/*FIX*/theStats.AddUpDataOverheadFileRequest(24); //Moved
+			/*MORPH - Official FIX*/theStats.AddUpDataOverheadFileRequest(24); //Moved
 		}
 
 		if (thePrefs.GetDebugClientTCPLevel() > 0){
@@ -1213,14 +1213,14 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 		totalPayloadSize += payloadSize;
 
         // put packet directly on socket
-		/*FIX*///theStats.AddUpDataOverheadFileRequest(24); //moved above
+		/*MORPH - Official FIX*///theStats.AddUpDataOverheadFileRequest(24); //moved above
 		socket->SendPacket(packet,true,false, payloadSize);
 #endif
 	}
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 	if (npacket) {
 		socket->SendPacket(apacket, npacket, true, false, oldSize);
-		delete apacket;
+		delete[] apacket;
 	}
 #endif
 	delete[] output;

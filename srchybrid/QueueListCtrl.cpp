@@ -288,6 +288,8 @@ void CQueueListCtrl::AddClient(/*const*/CUpDownClient* client, bool resetclient)
 	//MORPH END - Added by SiRoB, ZZ Upload System
 	}
 
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+
 	if (!theApp.emuledlg->IsRunning())
 		return;
 	if(thePrefs.IsQueueListDisabled())
@@ -316,6 +318,8 @@ void CQueueListCtrl::RemoveClient(const CUpDownClient* client)
 
 void CQueueListCtrl::RefreshClient(const CUpDownClient* client)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	
 	// There is some type of timing issue here.. If you click on item in the queue or upload and leave
 	// the focus on it when you exit the cient, it breaks on line 854 of emuleDlg.cpp.. 
 	// I added this IsRunning() check to this function and the DrawItem method and

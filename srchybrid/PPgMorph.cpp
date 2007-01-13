@@ -354,7 +354,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		
 		m_htiCompressLevel = m_ctrlTreeOptions.InsertItem(_T("CompressLevel"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
 		m_ctrlTreeOptions.AddEditBox(m_htiCompressLevel, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		m_htiUseCompression= m_ctrlTreeOptions.InsertCheckBox(_T("USeCOmpression"), m_htiUM, m_bUseCompression); //MORPH - added by Commander, Show WC Session stats
+		m_htiUseCompression= m_ctrlTreeOptions.InsertCheckBox(_T("UseCOmpression(session only)"), m_htiUM, m_bUseCompression); //MORPH - added by Commander, Show WC Session stats
 		m_htiCountWCSessionStats = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTWCSESSIONSTATS), TVI_ROOT, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_bHighProcess);

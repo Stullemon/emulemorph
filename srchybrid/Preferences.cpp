@@ -2068,8 +2068,8 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"Port",port);
 	ini.WriteInt(L"UDPPort",udpport);
 	ini.WriteInt(L"ServerUDPPort", nServerUDPPort);
-
-	ini.WriteBool(L"UseCompression",m_bUseCompression);	// xman use compressionL
+    //ini.WriteBool(L"UseCompression",m_bUseCompression);	// xman use compression, not saved you must manualy edit to disable it to prevent misuse
+	 
 	// MORPH START - Added by Commander, WebCache 1.2e
 	ini.WriteString(L"webcacheName", webcacheName);
 	ini.WriteInt(L"webcachePort", webcachePort);

@@ -363,7 +363,7 @@ BOOL CemuleDlg::OnInitDialog()
 
 	//MORPH START - Added, Static Tray Icon
 	if(thePrefs.GetStaticIcon() && !m_bStartMinimized)
-		TrayShow(false);
+		TrayShow(/*false */);
 	//MORPH END   - Added, Static Tray Icon
 
 	//Commander - Added: Startupsound - Start
@@ -817,8 +817,11 @@ void CALLBACK CemuleDlg::StartupTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEv
 				// SLUGFILLER: SafeHash
 				theApp.emuledlg->status = 255;
 				//autoconnect only after emule loaded completely
-				if(thePrefs.DoAutoConnect())
+				if(thePrefs.DoAutoConnect()) {
+				    if (thePrefs.IsUPnPEnabled()) // MOPRH lh: -UPnPNAT- : prevent race condition between upnp& first connection
+					   theApp.m_UPnP_IGDControlPoint->PauseForUpnpCompletion();// MOPRH lh : -UPnPNAT- : prevent race condition between upnp& first connection
 					theApp.emuledlg->OnBnClickedButton2();
+				}
 				// wait until emule is ready before opening the wizard
 				if (thePrefs.IsFirstStart())
 				{
@@ -1615,6 +1618,7 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 		if (clcommand==_T("disconnect")) {theApp.serverconnect->Disconnect(); return true;}
 		if (clcommand==_T("resume")) {theApp.downloadqueue->StartNextFile(); return true;}
 		if (clcommand==_T("exit")) {OnClose(); return true;}
+		if (clcommand==_T("uninstall")) {OnClose(); return true;} // // MORPH run as service v1, quit on uninstaller
 		if (clcommand==_T("restore")) {RestoreWindow();return true;}
 		if (clcommand==_T("reloadipf")) {theApp.ipfilter->LoadFromDefaultFile(); return true;}
 		if (clcommand.Left(7).MakeLower()==_T("limits=") && clcommand.GetLength()>8) {

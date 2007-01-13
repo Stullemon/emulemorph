@@ -160,6 +160,8 @@ void CUpDownClient::Init()
 	m_dwUploadTime = 0;
 	m_nTransferredDown = 0;
 	m_nDownDatarate = 0;
+	m_nDownDatarateBlockBased = 0;	//MORPH - Determine Remote Speed based on new requested block request
+	m_dwLastRequestedBlock = 0; //MORPH - Determine Remote Speed based on new requested block request
 	m_nDownDataRateMS = 0;
 	m_nUploadState = US_NONE;
 	m_dwLastBlockReceived = 0;
@@ -192,7 +194,7 @@ void CUpDownClient::Init()
 	m_nCurSessionDown = 0;
 	m_nCurSessionPayloadDown = 0;
 	/*zz*/m_nCurQueueSessionUp = 0;
-	/*FIX*/m_nCurSessionPayloadUp = 0;
+	/*MORPH - FIX for zz code*/m_nCurSessionPayloadUp = 0;
 	m_nSumForAvgDownDataRate = 0;
 	m_clientSoft=SO_UNKNOWN;
 	m_bRemoteQueueFull = false;
@@ -3059,7 +3061,7 @@ void CUpDownClient::AssertValid() const
 	(void)m_cAsked;
 	(void)m_dwLastUpRequest;
 	(void)m_nCurSessionUp;
-    /*FIX*/(void)m_nCurSessionPayloadUp;
+    /*MORPH - FIX for zz code*/(void)m_nCurSessionPayloadUp;
     (void)m_nCurQueueSessionPayloadUp;
     (void)m_addedPayloadQueueSession;
 	(void)m_nUpPartCount;

@@ -231,6 +231,8 @@ void CDownloadClientsCtrl::Localize()
 
 void CDownloadClientsCtrl::AddClient(CUpDownClient* client)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+
 	if(!theApp.emuledlg->IsRunning())
 		return;
        
@@ -263,6 +265,8 @@ void CDownloadClientsCtrl::RemoveClient(CUpDownClient* client)
 
 void CDownloadClientsCtrl::RefreshClient(CUpDownClient* client)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	
 	if( !theApp.emuledlg->IsRunning() )
 		return;
 

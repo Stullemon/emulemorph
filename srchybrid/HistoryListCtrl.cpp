@@ -943,6 +943,8 @@ void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
 */
 void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	
 	if(!file || !theApp.emuledlg->IsRunning())
 		return;
 	m_updatethread->AddItemToUpdate((LPARAM)file);

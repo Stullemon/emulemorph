@@ -252,7 +252,7 @@ BOOL CPPgMorphShare::OnApply()
 	if(m_bStaticIcon != thePrefs.m_bStaticIcon)
 	{
 		if(m_bStaticIcon)
-			theApp.emuledlg->TrayShow(false);
+			theApp.emuledlg->TrayShow(/*false */);
 		else if(theApp.emuledlg->IsWindowVisible()) //only hide when window visible
 			theApp.emuledlg->TrayHide();
 	}

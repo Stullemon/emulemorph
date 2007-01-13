@@ -486,11 +486,11 @@ public:
 	bool			HasCollectionUploadSlot() const					{ return m_bCollectionUploadSlot; }
 
 	UINT			GetSessionUp() const							{ return m_nTransferredUp - m_nCurSessionUp; }
-/*FIX*/UINT			GetSessionPayloadUp() const						{ return GetQueueSessionPayloadUp() - m_nCurSessionPayloadUp; }
+/*MORPH - FIX for zz code*/UINT			GetSessionPayloadUp() const						{ return GetQueueSessionPayloadUp() - m_nCurSessionPayloadUp; }
 	void			ResetSessionUp(){
 						m_nCurSessionUp = m_nTransferredUp;
 						m_addedPayloadQueueSession = GetQueueSessionPayloadUp(); 
-			   /*FIX*/m_nCurSessionPayloadUp = m_addedPayloadQueueSession;
+			   /*MORPH - FIX for zz code*/m_nCurSessionPayloadUp = m_addedPayloadQueueSession;
 						//m_nCurQueueSessionPayloadUp = 0;
 					}
 
@@ -596,6 +596,7 @@ public:
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	uint16			GetPartCount() const							{ return m_nPartCount; }
 	UINT			GetDownloadDatarate() const						{ return m_nDownDatarate; }
+	UINT			GetDownloadDatarateBlockBased() const						{ return m_nDownDatarateBlockBased; }	//MORPH START - Determine Remote Speed based on new requested block request
 	UINT			GetRemoteQueueRank() const						{ return m_nRemoteQueueRank; }
 	void			SetRemoteQueueRank(UINT nr, bool bUpdateDisplay = false);
 	bool			IsRemoteQueueFull() const						{ return m_bRemoteQueueFull; }
@@ -1068,7 +1069,7 @@ protected:
 	UINT		m_cAsked;
 	uint32		m_dwLastUpRequest;
 	UINT		m_nCurSessionUp;
-/*FIX*/UINT		m_nCurSessionPayloadUp;
+/*MORPH - FIX for zz code*/UINT		m_nCurSessionPayloadUp;
 	UINT		m_nCurSessionDown;
     uint32      m_nCurQueueSessionUp;
     UINT		m_nCurQueueSessionPayloadUp;
@@ -1151,6 +1152,8 @@ protected:
 	// Download data rate computation
 	//
 	UINT		m_nDownDatarate;
+	UINT		m_nDownDatarateBlockBased;	//MORPH START - Determine Remote Speed based on new requested block request
+	DWORD		m_dwLastRequestedBlock;	//MORPH START - Determine Remote Speed based on new requested block request
 	uint32		m_nAvDownDatarate; //Wistily
 	uint32		m_nDownTotalTime;// wistily total lenght of this client's downloads during this session in ms
 	UINT		m_nDownDataRateMS;

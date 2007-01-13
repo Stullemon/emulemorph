@@ -213,6 +213,8 @@ void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search
 
 void CKadSearchListCtrl::SearchAdd(const Kademlia::CSearch* search)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+
 	try
 	{
 		ASSERT( search != NULL );

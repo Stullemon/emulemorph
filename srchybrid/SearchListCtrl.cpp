@@ -335,6 +335,8 @@ void CSearchListCtrl::Localize()
 
 void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+
 	bool bFilterActive = !theApp.emuledlg->searchwnd->m_pwndResults->m_astrFilter.IsEmpty();
 	bool bItemFiltered = bFilterActive ? IsFilteredItem(toshow) : false;
 
@@ -434,6 +436,8 @@ void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
 
 void CSearchListCtrl::UpdateSearch(CSearchFile* toupdate)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	
 	if (!toupdate || !theApp.emuledlg->IsRunning())
 		return;
 	//MORPH START - UpdateItemThread

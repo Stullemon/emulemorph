@@ -86,7 +86,7 @@ END_MESSAGE_MAP()
 CDownloadListCtrl::CDownloadListCtrl()
 	: CDownloadListListCtrlItemWalk(this)
 {
-	if (!RunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
+	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
 		m_tooltip = new CToolTipCtrlX;
 	SetGeneralPurposeFind(true, false);
 }
@@ -127,7 +127,7 @@ void CDownloadListCtrl::Init()
 
 	SetStyle();
 	ModifyStyle(LVS_SINGLESEL,0);
-	if (!RunningAsService()) { // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
+	if (!theApp.IsRunningAsService()) { // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
 	CToolTipCtrl* tooltip = GetToolTips();
 		if (tooltip){
 			m_tooltip->SubclassWindow(*tooltip);
@@ -381,6 +381,8 @@ void CDownloadListCtrl::Localize()
 
 void CDownloadListCtrl::AddFile(CPartFile* toadd)
 {
+	//if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+
 	// Create new Item
     CtrlItem_Struct* newitem = new CtrlItem_Struct;
     int itemnr = GetItemCount();
@@ -402,6 +404,8 @@ void CDownloadListCtrl::AddFile(CPartFile* toadd)
 
 void CDownloadListCtrl::AddSource(CPartFile* owner, CUpDownClient* source, bool notavailable)
 {
+	//if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	
 	// Create new Item
     CtrlItem_Struct* newitem = new CtrlItem_Struct;
     newitem->owner = owner;
@@ -524,6 +528,8 @@ bool CDownloadListCtrl::RemoveFile(const CPartFile* toremove)
 
 void CDownloadListCtrl::UpdateItem(void* toupdate)
 {
+	//if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	
 	if (!theApp.emuledlg->IsRunning())
 		return;
 	
@@ -1230,7 +1236,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 		case 4:		// speed
 			if (lpCtrlItem->type == AVAILABLE_SOURCE && lpUpDownClient->GetDownloadDatarate()){
 				if (lpUpDownClient->GetDownloadDatarate())
-					buffer.Format(_T("%s"), CastItoXBytes(lpUpDownClient->GetDownloadDatarate(), false, true));
+					buffer.Format(_T("(%s) %s"), CastItoXBytes(lpUpDownClient->GetDownloadDatarateBlockBased(), false, true), CastItoXBytes(lpUpDownClient->GetDownloadDatarate(), false, true));
 				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 			}
 			break;

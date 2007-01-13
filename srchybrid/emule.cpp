@@ -781,7 +781,25 @@ bool CemuleApp::ProcessCommandline()
 	// NOTE: This will not prevent from some other application using that port!
 	UINT uTcpPort = GetProfileInt(_T("eMule"), _T("Port"), DEFAULT_TCP_PORT_OLD);
 	CString strMutextName;
+	// MORPH start some vista stuff	 (ts awareness) 
+	/* original:
 	strMutextName.Format(_T("%s:%u"), EMULE_GUID, uTcpPort);
+	             */ 
+	{OSVERSIONINFOEX osvi;
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	if(!GetVersionEx((OSVERSIONINFO*)&osvi))
+	{
+		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+		GetVersionEx((OSVERSIONINFO*)&osvi); 
+	}
+	if (osvi.dwMajorVersion >= 5 ) // win2000 and above? use global\ prefix for ts awareness. 
+		strMutextName.Format(_T("Global\\%s:%u"), EMULE_GUID, uTcpPort);
+	else
+		strMutextName.Format(_T("%s:%u"), EMULE_GUID, uTcpPort); 
+	}
+	// MORPH end some vista stuff
+
 	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);
 	
 	HWND maininst = NULL;
@@ -2252,3 +2270,8 @@ bool CemuleApp::IsEd2kFriendLinkInClipboard()
 	return IsEd2kLinkInClipboard(_szEd2kFriendLink, ARRSIZE(_szEd2kFriendLink)-1);
 }
 // Commander - Added: FriendLinks [emulEspaña] - End
+
+// MORPH leuk_he:run as ntservice v1..
+bool CemuleApp::IsRunningAsService() {
+	return RunningAsService();
+}

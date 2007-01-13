@@ -112,7 +112,7 @@ bool CServerListCtrl::Init()
 
 CServerListCtrl::~CServerListCtrl()
 {
-	if (!RunningAsService()) // MORPH leuk_he:run as ntservice v1.. workaaround running MFC as service. 
+	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1.. workaaround running MFC as service. 
 		delete m_tooltip;
 }
 
@@ -286,6 +286,9 @@ bool CServerListCtrl::AddServer(const CServer* pServer, bool bAddToList)
 {
 	if (!theApp.serverlist->AddServer(pServer))
       return false; 
+
+	if (theApp.IsRunningAsService()) return true;// MORPH leuk_he:run as ntservice v1..
+
    if (bAddToList) 
    {
 		InsertItem(LVIF_TEXT | LVIF_PARAM, GetItemCount(), pServer->GetListName(), 0, 0, 1, (LPARAM)pServer);
@@ -297,6 +300,8 @@ bool CServerListCtrl::AddServer(const CServer* pServer, bool bAddToList)
 
 void CServerListCtrl::RefreshServer(const CServer* server)
 {
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	
 	if (!server || !theApp.emuledlg->IsRunning())
 		return;
 

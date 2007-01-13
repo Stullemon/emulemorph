@@ -6698,13 +6698,19 @@ END
 
 STRINGTABLE 
 BEGIN
- 	IDS_HTTP_SRC            "Add HTTP sources"
+    IDS_HTTP_SRC            "Add HTTP sources"
     IDS_CLEAR               "Clear"
     IDS_INVALID_HTTP_SRC    "Invalid HTTP source. Make sure the URL starts with ""http://"""
     IDS_HTTP_LIST_CLEAR     "This will remove all http sources. Are you sure?"
+    IDS_MINIMULEAUTOCLOSE   "MiniMuleAutoClose"
+    IDS_MINIMULETRANSPARENCY "MiniMuleTransparency"
+    IDS_CREATECRASHDUMP     "CreateCrashDump"
+    IDS_CHECKCOMCTL32       "CheckComctl32 "
+    IDS_CHECKSHELL32        "CheckShell32"
+    IDS_IGNOREINSTANCES     "IgnoreInstances"
+    IDS_NOTIFIERMAILENCRYPTCERTNAME "NotifierMailEncryptCertName"
+    IDS_MEDIAINFO_MEDIAINFODLLPATH "MediaInfo_MediaInfoDllPath"
 END
-
-
 
 STRINGTABLE 
 BEGIN
@@ -6735,18 +6741,8 @@ BEGIN
                             "This setting affects the Delete From Disk function in the right click menu \nof the Shared Files main window. If disabled then files will be permanently\ndeleted from disk without moving them to the recycle bin."
     IDS_ADVANCEDPREFS       "Advanced Preferences"
     IDS_ADVANCEDPREFS_TIP   "Minor Preferences for advanced tweaking.\nAlso supported in official by editing \npreferences.ini"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_MINIMULEAUTOCLOSE   "MiniMuleAutoClose"
-    IDS_MINIMULETRANSPARENCY "MiniMuleTransparency"
-    IDS_CREATECRASHDUMP     "CreateCrashDump"
-    IDS_CHECKCOMCTL32       "CheckComctl32 "
-    IDS_CHECKSHELL32        "CheckShell32"
-    IDS_IGNOREINSTANCES     "IgnoreInstances"
-    IDS_NOTIFIERMAILENCRYPTCERTNAME "NotifierMailEncryptCertName"
-    IDS_MEDIAINFO_MEDIAINFODLLPATH "MediaInfo_MediaInfoDllPath"
+    IDS_TRUSTEVERYHASH      "aichTrustEveryHash(current session)"
+    IDS_INSPECTALLFILETYPES "InspectAllFileTypes"
 END
 
 STRINGTABLE 
@@ -6767,15 +6763,25 @@ BEGIN
     IDS_TXTEDITOR           "TxtEditor"
     IDS_DATETIMEFORMAT      "datetimeformat"
     IDS_SERVERUDPPORT       "ServerUDPPort"
-	IDS_HIGHRESTIMER "HighresTimer"
-	IDS_TRUSTEVERYHASH "aichTrustEveryHash(current session)"
-	IDS_INSPECTALLFILETYPES "InspectAllFileTypes"
-	IDS_MAXMSGSESSIONS "maxmsgsessions(Chat sessions)"
-	IDS_PREFERRESTRICTEDOVERUSER "PreferRestrictedOverUser"
-	IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(default 5,0=all)"
-	IDS_ALLOWEDIPS "AllowedIPs(Webserver, seperated by ;)"
+END
 
-
+STRINGTABLE 
+BEGIN
+    IDS_MAXMSGSESSIONS      "maxmsgsessions(Chat sessions)"
+    IDS_PREFERRESTRICTEDOVERUSER "PreferRestrictedOverUser"
+    IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(default 5,0=all)"
+    IDS_HIGHRESTIMER        "HighresTimer"
+    IDS_HIGHRESTIMER_TIP    "?"
+    IDS_TRUSTEVERYHASH_TIP  "(Session only not saved). DEBUG ONLY. disable voting "
+    IDS_INSPECTALLFILETYPES_TIP 
+                            "To determine the file format of downloading/shared\nfiles by evaluating the headers\n(most usefull when MediaInfo Lib is installed)"
+    IDS_MAXMSGSESSIONS_TIP  "max open chat sessions"
+    IDS_PREFERRESTRICTEDOVERUSER_TIP 
+                            "Do not create a new eMule_secure account but.\nRestrict the rights of the current account. \nMight be an alternative for securemode if you \nAre running in a limited account"
+    IDS_WEBFILEUPLOADSIZELIMITMB_TIP 
+                            "Amounts of MB that are allowed to be downloaded over http from the webserver(default=5)"
+    IDS_ALLOWEDIPS          "AllowedIPs webserver (seperated by ;)"
+    IDS_ALLOWEDIPS_TIP      "Ip's that are allowed to connect to the webserver, seperated by ';'"
 END
 
 STRINGTABLE 
@@ -6784,7 +6790,7 @@ BEGIN
     IDS_MINIMULEAUTOCLOSE_TIP 
                             "The MiniMule window will usually remain visible until closed.\nSetting this value to 0 will automatically close the window when\nthe cursor is moved out of the window. Similar to a tooltip.\n(default=1)"
     IDS_MINIMULETRANSPARENCY_TIP 
-                            "Controls the transparency of the MiniMule window. 0 means opaque\nand 100 is translucent.\n(default=0),might require restart"
+                            "Controls the transparency of the MiniMule window. 0 means opaque\nand 100 is translucent.\n(default=0),might require restart."
     IDS_CREATECRASHDUMP_TIP "When this key is enabled eMule will automatically save a crash\ndump should eMule unexpectedly crash. This can help the developers\nto track down the problem. The dump is saved in eMule's\ninstallation folder, called 'eMule-version-number-Modversion.dmp'\nShould you have crash problems set this key to 1 and report at the\nmorph forum (or mailto leukhe\\@gmail.com) with details\nDefault=unchecked"
     IDS_CHECKCOMCTL32_TIP   "Suppress the warning about a old version of the common dialog dll. This\ncan be the case if you run a version of Windows that is not updated.\neMule might work without the update but might look bad. You can download \n the updated dll at Microsoft\ndefault=1"
     IDS_CHECKSHELL32_TIP    "Suppress the warning about a old version of the windows shell (pre internet explorer 4)\nSome windows shell integrations functions might not work. The preferred solution is to update\nthe shell.dll which comes as a part of internet explorer. \n Default =1"
@@ -6795,7 +6801,7 @@ BEGIN
                             "This setting will tell emule where to find the mediainfo dll. Default it is the\neMule directory. You will need to set this preferences if you want to save the dll\nin a different directory.\nDefault: MEDIAINFO.DLL"
     IDS_MEDIAINFO_RIFF_TIP  "Use the mediainfo dll to find out if the file is a 'avi' file.\nDefault=1"
     IDS_MEDIAINFO_ID3LIB_TIP 
-                            "Instructs emule to check mpeg (mp1,mp2,mp3,mpa) files for the\nmpeg header meate data that is displayed in   the file detail \ndialog window. id3lib or media info dll is used for this. \ndefault=1"
+                            "Instructs emule to check mpeg (mp1,mp2,mp3,mpa) files for the\nmpeg header. meta data that is displayed in   the file detail \ndialog window. id3lib or media info dll is used for this. \ndefault=1"
     IDS_MAXLOGBUFF_TIP      "Defines the amount of system memory eMule uses to display the logs.\nFor Windows 98 | ME a default of 64 kB is reserved, for Win 2k|XP\nit is 128 kB. In Win98|ME the buffer may not be larger than 64 kB.\nThe logs are rotating, i.e. if the buffer is filled up to its limit\nan old message is purged when a new one arrives (FIFO)."
     IDS_MAXCHATHISTORY_TIP  "Defines the maximum number of lines saved in the history of the irc\nmessages. After this value is reached the oldest message is\npurged on new entry (FIFO - First In First Out).\ndefault =100"
     IDS_PREVIEWSMALLBLOCKS_TIP 
@@ -6803,14 +6809,6 @@ BEGIN
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "eMule remembers which of the main windows \n(Kademlia, Server, Transfer, was open, when before application exit \nand restores it. (default = unchecked)"
 
-
-	IDS_HIGHRESTIMER_TIP "?"
-	IDS_TRUSTEVERYHASH_TIP "Session only not saved. DEBUG ONLY. disbale voting "
-	IDS_INSPECTALLFILETYPES_TIP "to determine the file format of downloading/shared\nfiles by evaluating the headers\n(most usefull when MediaInfo Lib is installed)"
-	IDS_MAXMSGSESSIONS_TIP "max open chat sessions"
-	IDS_PREFERRESTRICTEDOVERUSER_TIP "Do not create a new eMule secure but. "
-	IDS_WEBFILEUPLOADSIZELIMITMB_TIP "Amounts of MB that are allowed to be downloaded over http from the webserver(default=5)"
-	IDS_ALLOWEDIPS_TIP "Ip's that are allowed to connect to the webserver, seperated by ';'"
     IDS_STATIC_ICON         "Always display Tray Icon"
 END
 
