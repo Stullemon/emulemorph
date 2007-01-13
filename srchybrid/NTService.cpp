@@ -596,7 +596,7 @@ BOOL PassLinkToWebService(int iCommand,CString & StrData)
 		AddLogLine(false,_T("pass link to webservice: Internetopen error"));
 
 	Url.Format(_T("http://%s:%d/?w=nologin&c=%s&commandData=%d"),_T("127.0.0.1"),
-		                    thePrefs.GetWSPort,
+		                    thePrefs.GetWSPort(),
 							StrData,iCommand);
 
     // Open the url.
