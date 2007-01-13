@@ -346,6 +346,7 @@ bool CRoutingZone::Add(CContact* pContact, bool bUpdate)
 			if(m_pBin->AddContact(pContact))
 			{
 				// Add was successful, add to the GUI and let contact know it's listed in the gui.
+				if (theApp.IsRunningAsService()) return true;// MORPH leuk_he:run as ntservice v1..
 				if (theApp.emuledlg->kademliawnd->ContactAdd(pContact))
 					pContact->SetGuiRefs(true);
 				return true;
