@@ -3646,6 +3646,11 @@
 #define 	IDS_ALLOWEDIPS_TIP 21148
 #define IDS_STATIC_ICON                 21149
 
+#define 	IDS_COMPRESSLEVEL       21150
+#define 	IDS_COMPRESSLEVEL_TIP   21151
+#define     IDS_USECOMPRESS         21152
+#define 	IDS_USECOMPRESS_TIP     21153
+
 
 
 

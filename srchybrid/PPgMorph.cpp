@@ -352,9 +352,9 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiInfiniteQueue = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INFINITEQUEUE), m_htiUM, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 		m_htiDontRemoveSpareTrickleSlot = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DONTREMOVESPARETRICKLESLOT), m_htiUM, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 		
-		m_htiCompressLevel = m_ctrlTreeOptions.InsertItem(_T("CompressLevel"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
+		m_htiCompressLevel = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMPRESSLEVEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
 		m_ctrlTreeOptions.AddEditBox(m_htiCompressLevel, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		m_htiUseCompression= m_ctrlTreeOptions.InsertCheckBox(_T("UseCOmpression(session only)"), m_htiUM, m_bUseCompression); //MORPH - added by Commander, Show WC Session stats
+		m_htiUseCompression= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USECOMPRESS), m_htiUM, m_bUseCompression); //MORPH - added by Commander, Show WC Session stats
 		m_htiCountWCSessionStats = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTWCSESSIONSTATS), TVI_ROOT, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_bHighProcess);
@@ -956,7 +956,8 @@ void CPPgMorph::Localize(void)
 		SetTool(m_htiGlobalHlLimit,IDS_GLOBAL_HL_LIMIT_TIP);
 	    SetTool(m_htiMaxGlobalDataRateFriend,IDS_MAXDATARATEFRIEND_TIP);
         SetTool(m_htiGlobalDataRatePowerShare,IDS_DATARATEPOWERSHARE_TIP);
-	                                          
+		SetTool(m_htiCompressLevel,IDS_COMPRESSLEVEL_TIP);
+        SetTool(m_htiUseCompression,IDS_USECOMPRESS_TIP);
 	}
 
 }

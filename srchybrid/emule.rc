@@ -6810,6 +6810,11 @@ BEGIN
                             "eMule remembers which of the main windows \n(Kademlia, Server, Transfer, was open, when before application exit \nand restores it. (default = unchecked)"
 
     IDS_STATIC_ICON         "Always display Tray Icon"
+	IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
+	IDS_COMPRESSLEVEL_TIP   "Reduce the compresslevel of compressable data\nSome cpu is saved, but more data needs to be send\nUseful for very high speed lines. \n1=use less cpu,compress less\n9=best compression(default)"
+    IDS_USECOMPRESS         "UseCompression (session)"
+	IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
+
 END
 
 #endif    // English (U.S.) resources
