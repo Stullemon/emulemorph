@@ -404,7 +404,7 @@ void CDownloadListCtrl::AddFile(CPartFile* toadd)
 
 void CDownloadListCtrl::AddSource(CPartFile* owner, CUpDownClient* source, bool notavailable)
 {
-	//if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
 	
 	// Create new Item
     CtrlItem_Struct* newitem = new CtrlItem_Struct;
@@ -528,7 +528,7 @@ bool CDownloadListCtrl::RemoveFile(const CPartFile* toremove)
 
 void CDownloadListCtrl::UpdateItem(void* toupdate)
 {
-	//if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
 	
 	if (!theApp.emuledlg->IsRunning())
 		return;
