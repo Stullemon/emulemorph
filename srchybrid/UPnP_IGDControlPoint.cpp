@@ -46,6 +46,7 @@ CCriticalSection						CUPnP_IGDControlPoint::m_MappingsLock;
 CCriticalSection						CUPnP_IGDControlPoint::m_ActionThreadCS;
 bool									CUPnP_IGDControlPoint::m_bStopAtFirstService;
 bool									CUPnP_IGDControlPoint::m_bClearOnClose;
+CEvent *								CUPnP_IGDControlPoint::InitializingEvent;
 
 CUPnP_IGDControlPoint::CUPnP_IGDControlPoint(void)
 {
@@ -56,6 +57,7 @@ CUPnP_IGDControlPoint::CUPnP_IGDControlPoint(void)
 	m_bStopAtFirstService = false;
 	m_bClearOnClose = false;
 	UpnpAcceptsPorts = true;
+	InitializingEvent = NULL;
 }
 
 CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
@@ -73,6 +75,9 @@ CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 		UpnpFinish();
 	}
 
+    if (InitializingEvent)
+	{  InitializingEvent->SetEvent(); 
+		delete InitializingEvent; InitializingEvent=NULL;}
 	//Remove devices/services
 	POSITION pos = m_devices.GetHeadPosition();
 	while(pos){
@@ -152,6 +157,8 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 		thePrefs.SetUpnpDetect(UPNP_NOT_DETECTED);//leuk_he autodetect upnp in wizard
 		return false;
 	}
+    InitializingEvent = new CEvent(True,True); //Wait for upnp init completion to preven false low
+
 
 	//Starts timer thread
 	AfxBeginThread(TimerThreadFunc, this);
@@ -185,6 +192,25 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 
 	return m_bInit;
 }
+
+
+// Give upnp a little bit of time to startup before doing outbound connections
+// giving a unintend lowid:
+// return nonzero if succesful. 
+int CUPnP_IGDControlPoint::PauseForUpnpCompletion()
+{
+if(!m_bInit)
+	return 0; 
+if(thePrefs.GetUPnPVerboseLog())
+	AddDebugLogLine(false, _T("Waiting short for upnp to complete registaration.") );
+
+if (InitializingEvent) 
+         return (bool)InitializingEvent->Lock((MINIMUM_DELAY*1000)+1) ; // 10 secs...  (should be UPNPTIMEOUT, btu 40 seconds is too long....)
+
+return 0;
+}
+
+
 
 // Returns the port used by UPnP
 unsigned int CUPnP_IGDControlPoint::GetPort(){
@@ -239,6 +265,7 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 			if (thePrefs.GetUpnpDetect() != UPNP_DETECTED) {	  	 //leuk_he autodetect upnp in wizard
 				 	thePrefs.SetUpnpDetect(UPNP_NOT_DETECTED);//leuk_he autodetect upnp in wizard
 			}
+			InitializingEvent->SetEvent();
 			break;
 		case UPNP_DISCOVERY_ADVERTISEMENT_BYEBYE:
 		{
@@ -1343,6 +1370,7 @@ UINT CUPnP_IGDControlPoint::ActionThreadFunc( LPVOID pParam ){
 		}
 		delete action;
 	}
+	if (InitializingEvent) InitializingEvent->SetEvent();// ports added, tell main thead to continue. 
 	m_ActionThreadCS.Unlock();
 	return 1;
 }

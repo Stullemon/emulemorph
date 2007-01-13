@@ -41,6 +41,7 @@ class CUPnP_IGDControlPoint
 public:
 	bool Init(bool bStopAtFirstConnFound = false);
 	bool IsUpnpAcceptsPorts() {return UpnpAcceptsPorts;};
+	int  PauseForUpnpCompletion();
     bool SetUPnPNat(bool upnpNat);
 	//Commented for a possible future use.
 	/*
@@ -245,6 +246,8 @@ private:
 	static CString			GetLocalIPStr();
 	static bool				IsLANIP(unsigned long nIP);
 	static bool				IsLANIP(char *cIP);
+   	static CEvent*          InitializingEvent;
+
 };
 
 #endif //__CUPNP_IGDCONTROLPOINT_H__

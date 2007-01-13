@@ -384,9 +384,10 @@ int CmdRemoveService() //  Stops and removes the service
             // now remove the service
             if( DeleteService(schService) )
 				AddLogLine(true,_T("Service deleted"));
-			else {
+			else {CString FullErrorStr;
 				GetSystemErrorString(GetLastError(),ErrString);
-				AddLogLine(true,_T("Service deletion failed:%s"),ErrString);
+				FullErrorStr.Format(_T("Service deletion failed:%s"),ErrString);
+				AddLogLine(true,FullErrorStr);
 				retval=10;
 			}
 			

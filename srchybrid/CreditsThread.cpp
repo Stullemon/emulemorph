@@ -463,6 +463,9 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("01:06:Wistily (inactive)"));
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Yun.SF3 (inactive)"));
+	m_arCredits.Add(_T("S:5"));
+		// as required by the upnp library licence:
+	m_arCredits.Add(_T("01:06:(c) 2000-2003 Intel Corporation "));
 	m_arCredits.Add(_T("S:50"));
     //Commander - Added: MorphTeam - End
 

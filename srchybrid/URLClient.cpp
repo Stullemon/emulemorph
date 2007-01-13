@@ -462,6 +462,10 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 
 				if (nEndPos >= cur_block->block->EndOffset)
 				{
+					//MORPH START - Determine Remote Speed based on new requested block request
+					m_nDownDatarateBlockBased = 1000*(cur_block->block->EndOffset-cur_block->block->StartOffset)/(GetTickCount()+1 - m_dwLastRequestedBlock);
+					//MORPH END   - Determine Remote Speed based on new requested block request
+
 					//MORPH START- Optimization
 					/*
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
