@@ -300,6 +300,7 @@ private:
 	void	ToggleShow();
 	void	ToggleHide();
 	BOOL	b_TrayWasVisible;
+	BOOL	b_WindowWasVisible;
 	bool	b_HideApp;
 	//MORPH - Added by SiRoB, Toggle Show Hide window
 
