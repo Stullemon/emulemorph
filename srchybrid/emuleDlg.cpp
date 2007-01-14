@@ -367,7 +367,7 @@ BOOL CemuleDlg::OnInitDialog()
 		if(!m_bStartMinimized)
 			TrayShow();
 		else
-			b_TrayWasVisible == true;
+			b_TrayWasVisible = true;
 	}
 	b_WindowWasVisible = true; // always set true after startup
 	//MORPH END   - Added, Static Tray Icon
