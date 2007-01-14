@@ -363,13 +363,7 @@ BOOL CemuleDlg::OnInitDialog()
 
 	//MORPH START - Added, Static Tray Icon
 	if(thePrefs.GetStaticIcon())
-	{
-		if(!m_bStartMinimized)
-			TrayShow();
-		else
-			b_TrayWasVisible = true;
-	}
-	b_WindowWasVisible = true; // always set true after startup
+		TrayShow();
 	//MORPH END   - Added, Static Tray Icon
 
 	//Commander - Added: Startupsound - Start
@@ -1387,7 +1381,6 @@ void CemuleDlg::MinimizeWindow()
 {
 	if (*thePrefs.GetMinTrayPTR())
 	{
-		if(thePrefs.GetStaticIcon() == false) //MORPH - Added, Static Tray Icon
 		TrayShow();
 		ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, Invisible Mode On Start up
