@@ -3004,7 +3004,7 @@ BEGIN
     IDS_PW_FRONT_TIP        "Poner el eMule en segundo o en primer plano\nsi añades un link desde tu explorador."
     IDS_PREF_ONLINESIG_TIP  "Escribir onlinesig.dat en el directorio del eMule donde\notras aplicaciones lo pueden leer y traducir en una bandera\no una firma para un foro. (Solamente visible en opciones\nadicionales-> mostrar mas controles)"
     IDS_PREF_STARTMIN_TIP   "Cuando el eMule se inicia, empezar con la ventana minimizada.\nSi el modo invisible esta activado en el arranque estaran ocultas y tendras\npinchar en la llave invisible para mostrar tu eMule."
-    IDS_WEBSVEDIT_TIP       "Editar el archivo webservices.dat para asociar un articulo de menu\nen el archivo con un servicio web en linea."
+    IDS_WEBSVEDIT_TIP       "Editar el archivo webservices.dat para asociar un articulo de menu\nen el archivo con un Servicio Web en linea."
     IDS_ED2KLINKFIX_TIP     "Reasociar los link eD2K de todas las ventanas para abrirse con esta aplicacion\n.Si esto falla una primera vez 'linkkiller.exe' presionar este boton otra vez.\nEsto puede fallar si el eMule funciona en modo seguro."
     IDS_CHECK4UPDATE_TIP    "Dejar que el eMule compruebe cada x dias para saber si hay nuevas\nversiones de eMule y Morph."
     IDS_STARTWITHWINDOWS_TIP 
@@ -3350,55 +3350,55 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SVC_RUNNINGASSERVICE "Currently running as service."
-    IDS_SVC_ACCESSDENIED    "Access to services denied."
-    IDS_SVC_NOTINSTALLED    "Service not installed."
-    IDS_SVC_INSTALLED       "Service installed."
+    IDS_SVC_RUNNINGASSERVICE "Ejecutándose actualmente como servicio del sistema."
+    IDS_SVC_ACCESSDENIED    "Acceso a los servicios del sistema denegado."
+    IDS_SVC_NOTINSTALLED    "Servicio no instalado."
+    IDS_SVC_INSTALLED       "Servicio instalado."
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SVC_INSTALLFAILED   "Install failed, check log."
-    IDS_SVC_UNINSTALLFAILED "UnInstall failed, check log."
-    IDS_SVC_INSTALLED_DISABLED "Service disabled. (marked for deletion?)."
-    IDS_SVC_OSTOOOLD        "Not supported on windows 95"
-    IDS_SVC_INSTALLSERVICE  "Install"
-    IDS_SVC_SERVERUNINSTALL "Uninstall"
-    IDS_SVC_STARTWITHSYSTEM "Start with system startup"
-    IDS_SVC_SETTINGS        "Set setting appropiate for service use"
-    IDS_SVC_RUNBROWSER      "Browse to webservice"
-    IDS_SVC_REPLACESERVICE  "Stop service and start gui "
+    IDS_SVC_INSTALLFAILED   "Instalación fallida, comprueba el registro."
+    IDS_SVC_UNINSTALLFAILED "Desinstalación fallida, comprueba el registro."
+    IDS_SVC_INSTALLED_DISABLED "Servicio desactivado. (¿Seleccionar para eliminar?)"
+    IDS_SVC_OSTOOOLD        "No soportado en Windows 95"
+    IDS_SVC_INSTALLSERVICE  "Instalar"
+    IDS_SVC_SERVERUNINSTALL "Desinstalar"
+    IDS_SVC_STARTWITHSYSTEM "Abrir al inciar el sistema"
+    IDS_SVC_SETTINGS        "Opciones apropiadas para el Servicio"
+    IDS_SVC_RUNBROWSER      "Navegar al Servicio Web"
+    IDS_SVC_REPLACESERVICE  "Parar el servicio e iniciar el GUI"
     IDS_SVC_INSTALLSERVICE_TIP 
-                            "Install a eMule service in the NT Service. \nThis service will Use the exact configufation \nof this eMule, but will not interact with the desktop.\nYou can start a service from 'services.msc' Make sure\nthat the webservice is enabled."
+                            "Instalar un servicio de eMule en el Servicio NT.\nEste servicio usará la configuración exacta \nde este eMule, pero no interactuará en el escritorio.\nPuedes comenzar el servicio desde 'services.msc'. Compruebe\nque el Servicio Web está activado"
     IDS_SVC_SERVERUNINSTALL_TIP 
-                            "stop/Uninstall the previous installed service."
+                            "Parar/Desinstalar el servicio instalado anteriormente."
     IDS_SVC_STARTWITHSYSTEM_TIP 
-                            "eMule service will start when windows starts. There is no need to login into windows. "
-    IDS_SVC_MANUALSTART_TIP "You will start the eMule service manually."
+                            "El servicio de eMule comenzará cuando Windows arranque. No es necesario logearte en Windows."
+    IDS_SVC_MANUALSTART_TIP "El servicio de eMule comenzará manualmente."
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SVC_SETTINGS_TIP    "Apply a range of settings that are useful for when running as a service:\nConnect on startup, no sounds, enable webservice, no notification, \nno autostart with windows (auto start with windows conflicts!)\nNote that you need to reload the preferences to see and that unchecking \nthis option does not restore the old settings once set."
-    IDS_SVC_RUNBROWSER_TIP  "When starting eMule.exe from the desktop a browser\nwindow to the webservice is started instead of the\neMule gui,if the service is running."
+    IDS_SVC_SETTINGS_TIP    "Aplicar una gama de ajustes puede ser útil cuando el servicio se está ejecutando:\nConectar al iniciar, sin sonidos, habilitar el Servicio Web, sin notificaciones,\nno iniciar con Windows (¡Iniciar automáticamente puede crear conflictos con Windows!)\nComprueba que necesita recargar las preferencias, y desactivar\nesta opción, no restaura los ajustes anteriores fijados anteriormente."
+    IDS_SVC_RUNBROWSER_TIP  "Al comenzar eMule.exe desde el escritorio en una ventana\ndel navegador se comienza el Servicio Web en vez del modo GUI\ndel eMule, si el servicio está ejecutándose."
     IDS_SVC_REPLACESERVICE_TIP 
-                            "If the service is running it will be stopped and\na normal gui version of the gui will be started."
+                            "Si el servicio se está ejecutando, será detenido y \n la versión normal del GUI será arrancada"
     IDS_SVC_CURRENT_STATUS_TIP 
-                            "This show the current status of eMule as a NT service"
-    IDS_SVC_ONSTARTBOX      "On start of eMule."
-    IDS_SVC_STARTUPBOX      "Startup"
-    IDS_SVC_MANUALSTART     "Manual start"
-    IDS_YESSERVICE          "Yes, and start eMule service"
+                            "Mostrará el estado actual de eMule como servicio NT"
+    IDS_SVC_ONSTARTBOX      "En el comienzo de eMule"
+    IDS_SVC_STARTUPBOX      "Arranque"
+    IDS_SVC_MANUALSTART     "Arranque manual"
+    IDS_YESSERVICE          "Si, y comenzar el servicio de eMule"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_HTTP_SRC            "Add HTTP sources"
-    IDS_CLEAR               "Clear"
-    IDS_INVALID_HTTP_SRC    "Invalid HTTP source. Make sure the URL starts with ""http://"""
-    IDS_HTTP_LIST_CLEAR     "This will remove all http sources. Are you sure?"
-    IDS_MINIMULEAUTOCLOSE   "MiniMuleAutoClose"
-    IDS_MINIMULETRANSPARENCY "MiniMuleTransparency"
+    IDS_HTTP_SRC            "Añadir fuentes HTTP"
+    IDS_CLEAR               "Limpiar"
+    IDS_INVALID_HTTP_SRC    "Fuente HTTP no válida. Compruebe que la URL comience con ""http://"""
+    IDS_HTTP_LIST_CLEAR     "Se eliminarán todas las fuentes HTTP. ¿Está seguro?"
+    IDS_MINIMULEAUTOCLOSE   "MiniMuleAutoCierre"
+    IDS_MINIMULETRANSPARENCY "MiniMuleTransparente"
     IDS_CREATECRASHDUMP     "CreateCrashDump"
     IDS_CHECKCOMCTL32       "CheckComctl32 "
     IDS_CHECKSHELL32        "CheckShell32"
@@ -3409,34 +3409,34 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_NOMINIMIZE          "No, To tray"
-    IDS_YESSERVICETIP       "If the eMule service is installed this sessions is stopped\nAnd the eMule as a service is started instead to run in the \nbackground as a windows service (use RUN->SERVICE.MSC to control"
-    IDS_NOMINIMIZETIP       "Do not shutdown, but minimize to the system tray."
+    IDS_NOMINIMIZE          "No, a la bandeja"
+    IDS_YESSERVICETIP       "Si el servicio de eMule está instalado en esta sesión, es detenido\ny eMule comenzará a ejecutarse como un servicio de ventanas\nen segundo plano (use RUN->SERVICE.MSC para controlarlo)"
+    IDS_NOMINIMIZETIP       "No apagar, pero minimizar a la bandeja del sistema"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_RESTORELASTLOGPANE_TIP 
-                            "remember which of the log panes (Log, Verbose)\nhas been used the last session."
+                            "Recordar qué pestaña de registro\nha sido usada en la última sesión"
     IDS_PREVIEWCOPIEDARCHIVES_TIP 
-                            "When this option is disabled (=0), eMule will use a new preview\nmethod which is faster and uses less disk space in the temporary\nfolder. Feedbacks for this new version are welcome."
+                            "Cuando esta opción esté desactivada (=0), eMule usará un nuevo método\nde vista preliminar que sea más rápido y use menos espacio en el disco en la carpeta temporal.\nLas regeneraciones de esta versión son bienvenidas."
     IDS_STRAIGHTWINDOWSTYLES_TIP 
-                            "Changes the look of the statistic graph window and some other minor \nstyles stuff. (might require restart)"
-    IDS_LOGFILEFORMAT_TIP   "Changes the data format of the log files from unicode to UTF8 when set to 1."
+                            "Cambia el aspecto de la ventana gráfica de estadísticas y alguna otra cosa de estilo\nde menor importancia. (Puede requerir reiniciar el eMule)"
+    IDS_LOGFILEFORMAT_TIP   "Cambia el formato de datos de los archivos de registro de UniCode a UTF8 cuando se configura a 1"
     IDS_RTLWINDOWSLAYOUT_TIP 
-                            "Adds right-to-left reading support to eMule. \nUseful for languages  like Hebrew etc."
+                            "Agrega la lectura de la ayuda en eMule right-to-left. \nÚtil para idiomas como el Hebreo, etc."
     IDS_PREVIEWONICONDBLCLK_TIP 
-                            "If this setting is enabled a double click on a file's icon in the\ntransfer list will invoke the preview command. This will only work\nif 'Download list  doubelclick to expand'  is turned off in\n'Preferences -> Display'"
+                            "Si se activa esta opción, haciendo doble click en el icono de lso archivos en\nla lista de transfecencia, abrirá una vista preliminar. Sólo funcionará si\nla opción 'Doble click para expandir la lista  de descargas' está desactivada en\n'Preferencias -> Mostrar"
     IDS_INTERNETSECURITYZONE_TIP 
-                            "Security Zones as per Internet Explorer Security settings. Defines\nwhich features are allowed in HTML code. Relevant for the MiniMule\nwindow.\nAllowed=<b>Untrusted</b>|Internet|Intranet|Trusted|LocalMachine"
-    IDS_TXTEDITOR_TIP       "The default program for editing the Webservices and IPFilter.dat\nmay be entered here. Provide the complete path to the new\nexecutable if not using the default notepad.exe."
-    IDS_DATETIMEFORMAT_TIP  "DateTimeFormat=%A, %x, %X\nthis string defines how date and time is displayed in eMule.\n%a,%A  Abbreviated,FULL weekday name\n%b,%B  Abbreviated,FULL month name\n%c  Date and time representation appropriate for locale\n%d  Day of month number (01 – 31)\n%H      Hour in 24-hour format (00 – 23)\n%I  Hour in 12-hour format (01 – 12)\n%j  Day of year as decimal number (001 – 366)\n%m  Month as decimal number (01 – 12)\n%M  Minute as decimal number (00 – 59)\n%p  A.M./P.M.\n%S  Seconds as number \n%U  Week of year number, \n%w  Weekday as number (0 – 6; Sunday is 0)\n%x Date representation for current locale\n%X  Time representation for current locale\n%y  Year without century\n%Y  Year with century\n%z, %Z  Either the time-zone name or time zone abbreviation"
-    IDS_SERVERUDPPORT_TIP   "Normally the local port for asking servers for sources or\nsearching files on them is randomly chosen . If eMule is run on a machine in a more\ncomplex network, especially when routers are used, it may be\nnecessary to fix this port to a defined value or to deactivate it\nat all. Disabling this port means that eMule will no longer be\nable to update the status of the servers in its server list and\nwill also not be able to receive sources from them nor do a\nglobal search. Exempt from this is the server eMule is actually\nconnected to. Usually the default setting should not be\nchanged.\nPossible values for ServerUDPPort are:\n0                   Disabled\n1 - 65534  fixed local UDP port\n<b>65535</b> random port (default)"
+                            "Zonas de Seguridad configuradas del mismo modo que los ajustes de Internet Explorer. Define\nqué características son permitidas en el código HTML. Relevante para la ventana de MiniMule.\nPermitido = <b>Sitios Restringidos</b>|Internet|Intranet|Sitios de Confianza|Ordenador del usuario"
+    IDS_TXTEDITOR_TIP       "El programa por defecto para editar los Servicios Web y el IPFilter.dat\npuede añadirse aquí. Proveer la ruta completa del nuevo editor ejecutable\nsi no se usa el establecido por defecto, Notepad.exe."
+    IDS_DATETIMEFORMAT_TIP  "DateTimeFormat=%A, %x, %X\n Esta secuencia define cómo se mostrará la fecha y la hora en el eMule.\n%a,%A  Abreviado, nombre de la semana COMPLETO\n%b,%B  Abreviado, nombre del mes COMPLETO\n%c  Representación de la fecha y la hora apropiada de modo local\n%d  Día del mes (01 – 31)\n%H      Hora en el formato de 24 horas (00 – 23)\n%I  Hora en el formato de 12 horas (01 – 12)\n%j  Año en decimal (001 – 366)\n%m  Mes en decimal (01 – 12)\n%M  Minutos en decimal (00 – 59)\n%p  A.M./P.M.\n%S  Segundos\n%U  Número de la semana del año, \n%w  Número del día de la semana (0 – 6; Domingo es el 0)\n%x Fecha representada en modo local\n%X  Hora representada en modo local\n%y  Año sin siglo\n%Y  Año con siglo\n%z, %Z  Nombre de la zona horaria, o la abreviatura"
+    IDS_SERVERUDPPORT_TIP   "Normalmente, el puerto local usado para preguntar a los servidores por fuentes o\n para buscar archivos en ellos, es elegido al azar. Si eMule es abierto en una máquina con una red más\ncompleja, especialmente cuando se usan routers, puede ser necesario\nfijar este puerto a un valor fijo, o desactivarlo completamente.\nDeshabilitando este puerto, significa que eMule no será capaz\nde actualizar el estado de los servidores en la lista de servidores y\nno podrá recibir fuentes de ellos, tampoco podrá\nhacer una búsqueda global. Eximir de esto es lo que mantiene al eMule conectado al servidor actualmente.\nGeneralmente el valor por defecto no se debe cambiar.\nPossibles valores para ServerUDPPort son:\n0                   Desactivado\n1 - 65534 UDP fijado como puerto local\n<b>65535</b> puerto al azar (por defecto)"
     IDS_REMOVEFILESTOBIN_TIP 
-                            "This setting affects the Delete From Disk function in the right click menu \nof the Shared Files main window. If disabled then files will be permanently\ndeleted from disk without moving them to the recycle bin."
-    IDS_ADVANCEDPREFS       "Advanced Preferences"
-    IDS_ADVANCEDPREFS_TIP   "Minor Preferences for advanced tweaking.\nAlso supported in official by editing \npreferences.ini"
-    IDS_TRUSTEVERYHASH      "aichTrustEveryHash(current session)"
+                            "Esta opción afecta a la función Borrar del disco del menu del botón derecho\nde la ventana de Compartidos. Si está desactivada, los archivos son eliminados permanentemente\ndel disco sin moverlos a la Papelera de Reciclaje."
+    IDS_ADVANCEDPREFS       "Preferencias Avanzadas"
+    IDS_ADVANCEDPREFS_TIP   "Preferencias de menor importancia para la optimización avanzada.\nTambién soportado en el eMule Oficial editando el archivo\npreferences.ini"
+    IDS_TRUSTEVERYHASH      "AICHTrustEveryHash(sesión actual)"
     IDS_INSPECTALLFILETYPES "InspectAllFileTypes"
 END
 
@@ -3462,48 +3462,54 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MAXMSGSESSIONS      "maxmsgsessions(Chat sessions)"
+    IDS_MAXMSGSESSIONS      "maxmsgsessions(Sesiones de Chat)"
     IDS_PREFERRESTRICTEDOVERUSER "PreferRestrictedOverUser"
-    IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(default 5,0=all)"
+    IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(por defecto 5,0 = todos)"
     IDS_HIGHRESTIMER        "HighresTimer"
     IDS_HIGHRESTIMER_TIP    "?"
-    IDS_TRUSTEVERYHASH_TIP  "(Session only not saved). DEBUG ONLY. disable voting "
+    IDS_TRUSTEVERYHASH_TIP  "(Sesión únicamente no salvada). DEBUG ONLY. disable voting "
     IDS_INSPECTALLFILETYPES_TIP 
-                            "To determine the file format of downloading/shared\nfiles by evaluating the headers\n(most usefull when MediaInfo Lib is installed)"
-    IDS_MAXMSGSESSIONS_TIP  "max open chat sessions"
+                            "Para determinar el formato del archivo a descargar/compartir\nevaluando las cabeceras\n(muy útil cuando está instalada la Librería MediaInfo Lib)"
+    IDS_MAXMSGSESSIONS_TIP  "Máximo de sesiones abiertas de Chat"
     IDS_PREFERRESTRICTEDOVERUSER_TIP 
-                            "Do not create a new eMule_secure account but.\nRestrict the rights of the current account. \nMight be an alternative for securemode if you \nAre running in a limited account"
+                            "No crea una cuenta eMule_secure nueva pero\nrestringe los permisos de la cuenta actual.\nPuede ser una alternativa al Modo Seguro si está\nejecutándose en una cuenta limitada"
     IDS_WEBFILEUPLOADSIZELIMITMB_TIP 
-                            "Amounts of MB that are allowed to be downloaded over http from the webserver(default=5)"
-    IDS_ALLOWEDIPS          "AllowedIPs webserver (seperated by ;)"
-    IDS_ALLOWEDIPS_TIP      "Ip's that are allowed to connect to the webserver, seperated by ';'"
+                            "Cantidad de MB que se permiten descargar por HTTP desde el servidor Web (por defecto = 5)"
+    IDS_ALLOWEDIPS          "IP's de servidores Web permitidas (separado por ;)"
+    IDS_ALLOWEDIPS_TIP      "IP's que son permitidas para conectarse con el servidor Web, separadas por ';'"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_REMOVEFILESTOBIN    "RemoveFilesToBin"
     IDS_MINIMULEAUTOCLOSE_TIP 
-                            "The MiniMule window will usually remain visible until closed.\nSetting this value to 0 will automatically close the window when\nthe cursor is moved out of the window. Similar to a tooltip.\n(default=1)"
+                            "La ventana de MiniMule seguirá siendo visible hasta que se cierre.\nConfigurar este valor a 0 para que se cierre automáticamente la ventana cuando\nel cursor es movido fuera de la ventana. Parecido a un tooltip.\n(Por defecto = 1)"
     IDS_MINIMULETRANSPARENCY_TIP 
-                            "Controls the transparency of the MiniMule window. 0 means opaque\nand 100 is translucent.\n(default=0),might require restart."
-    IDS_CREATECRASHDUMP_TIP "When this key is enabled eMule will automatically save a crash\ndump should eMule unexpectedly crash. This can help the developers\nto track down the problem. The dump is saved in eMule's\ninstallation folder, called 'eMule-version-number-Modversion.dmp'\nShould you have crash problems set this key to 1 and report at the\nmorph forum (or mailto leukhe\\@gmail.com) with details\nDefault=unchecked"
-    IDS_CHECKCOMCTL32_TIP   "Suppress the warning about a old version of the common dialog dll. This\ncan be the case if you run a version of Windows that is not updated.\neMule might work without the update but might look bad. You can download \n the updated dll at Microsoft\ndefault=1"
-    IDS_CHECKSHELL32_TIP    "Suppress the warning about a old version of the windows shell (pre internet explorer 4)\nSome windows shell integrations functions might not work. The preferred solution is to update\nthe shell.dll which comes as a part of internet explorer. \n Default =1"
-    IDS_IGNOREINSTANCES_TIP "Allows the execution of multiple eMule instances.\nNote:\nFor two eMules running on the same machine they must\nbe installed to different folders, must have different\ntemp folders and also the ports used by each eMule have\nto be unique. It is not recommended to run two eMules \nconcurrently apart from testing purposes.\ndefault:0"
+                            "Controla la transparencia de la ventana de MiniMule. 0 significa opacidad\ny 100 es translúcida.\n(Por defecto = 0), posiblemente requiera reiniciar."
+    IDS_CREATECRASHDUMP_TIP "Cuando esta llave es activada, eMule automáticamente guarda un registro de\ndesplome si eMule sufre una caída inexplicable. Esto puede ayudar a los desarrolladores\npara solucionar el problema. El registro del desplome es guardado en la carpeta de instalación\nde eMule, llamada 'eMule-version-number-Modversion.dmp'\nSi sufre problemas de desplome de eMule, configura a 1 esta llame y reporta al foro del\nMorph (o envíalo a leukhe\\@gmail.com) con los detalles\nPor defecto = deseleccionado"
+    IDS_CHECKCOMCTL32_TIP   "Suprime la advertencia sobre una versión antigua del dll.\nEsto puede suceder cuando se está usando una versión de Windows que no ha sido actualizada.\neMule puede trabajar sin la actualización, pero no es lo correcto. Puedes descargar la\nactualización del dll en Microsoft.\nPor defecto = 1"
+    IDS_CHECKSHELL32_TIP    "Suprime la advertencia sobre una versión antigua del Windows Shell (pre Internet Explorer 4)\nAlgunas funciones integradas del Windows Shell pueden no funcionar. La mejor solución, es actualizar el\nthe shell.dll que viene como parte del Internet Explorer.\nPor defecto = 1"
+    IDS_IGNOREINSTANCES_TIP "Permite la ejecución de varios eMule a la vez.\nNota:\nPara ejecutar 2 eMules en la misma máquina, deben estar\ninstaladas en diferentes carpetas, deben tener carpetas\ntemporales diferentes y también los puertos usados por cada eMule deben\nser diferentes y únicos. No es recomendable ejecutar 2 eMules\na no ser que sea con propósitos de pruebas.\nPor defecto = 0"
     IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP 
-                            "Name of the certificate for the encryption of email notifications with S/MIME. The certificate will be looked up in the local windows address book"
+                            "Nombre del certificado para la encriptación de las notificaciones por email con S/MIME. Los certificados serán bloqueados en las ventanas de direcciones locales"
     IDS_MEDIAINFO_MEDIAINFODLLPATH_TIP 
-                            "This setting will tell emule where to find the mediainfo dll. Default it is the\neMule directory. You will need to set this preferences if you want to save the dll\nin a different directory.\nDefault: MEDIAINFO.DLL"
-    IDS_MEDIAINFO_RIFF_TIP  "Use the mediainfo dll to find out if the file is a 'avi' file.\nDefault=1"
+                            "Este ajuste indicará a eMule dónde encontrar el mediainfo dll. Por defecto está en el\ndirectorio de eMule. Necesitarás ajustar estar preferencias si quieres salvar el DLL\nen un directorio diferente.\nPor defecto = MEDIAINFO.DLL"
+    IDS_MEDIAINFO_RIFF_TIP  "Usa el mediainfo dll para encontrar si el archivo es un archivo 'avi'.\nPor defecto = 1"
     IDS_MEDIAINFO_ID3LIB_TIP 
-                            "Instructs emule to check mpeg (mp1,mp2,mp3,mpa) files for the\nmpeg header. meta data that is displayed in   the file detail \ndialog window. id3lib or media info dll is used for this. \ndefault=1"
-    IDS_MAXLOGBUFF_TIP      "Defines the amount of system memory eMule uses to display the logs.\nFor Windows 98 | ME a default of 64 kB is reserved, for Win 2k|XP\nit is 128 kB. In Win98|ME the buffer may not be larger than 64 kB.\nThe logs are rotating, i.e. if the buffer is filled up to its limit\nan old message is purged when a new one arrives (FIFO)."
-    IDS_MAXCHATHISTORY_TIP  "Defines the maximum number of lines saved in the history of the irc\nmessages. After this value is reached the oldest message is\npurged on new entry (FIFO - First In First Out).\ndefault =100"
+                            "Manda al eMule comprobar los archivos mpeg (mp1,mp2,mp3,mpa) por la cabecera mpeg.\nMeta data es mostrado en los detalles del archivo de\nla ventana de diálogo. ID3Lib o Media Info Dll es usado para esto.\nPor defecto = 1"
+    IDS_MAXLOGBUFF_TIP      "Define la cantidad de memoria del sistema que eMule usa para mostrar los registros.\nPara Windows 98 | ME un valor por defecto de 64 kB es reservado, para Win 2k|XP\nes de 128 kB. En Win98|ME el buffer no ha de ser mayor de 64 kB.\nLos registros son rotatorios, es decir, si el buffer está casi completo\nun mensaje antiguo es eliminado cuando llega uno nuevo (FIFO)."
+    IDS_MAXCHATHISTORY_TIP  "Define el número máximo de líneas salvadas en el historial de mensajes del IRC.\nDespués de este valor, es eliminado el mensaje más antiguo\ncuando llega uno nuevo (FIFO - First In First Out).\nPor defecto = 100"
     IDS_PREVIEWSMALLBLOCKS_TIP 
-                            "This function should be only activated (=1) when using VLC -\nVideoLAN Client to preview files. It allows to preview multimedia\n \nfiles when at least 16 kB data for .mpeg files or 256 kB data for\nall other multimedia content (.avi, CD-Images with multimedia\ncontent) has been downloaded.  Using this option the 'Create backup\nfor preview' setting has to be deactivated in the 'Video\nPlayer' dialog. Note that vlc version 8.5 and higher seem to \nhave some problems with broken indexes"
+                            "Esta función sólo debe activarse (=1) si se usa VLC -\nVideoLAN Client para la vista previa de archivos. Permite una vista previa multimedia\nen archivos de por lo menos 16 kB de .mpeg o 256 kB\npara los demás formatos multimedia (.avi, CD-Images con contenido\nmultimedia) que ha sido descargada. Usando esta opción, la opción de 'Crear una copia de seguridad\npara previsualizar' ha de ser descativada en el diálogo 'Reproductor de Video'.\nCompruebe que la versión de VLC sea 8.5 o mayor parece que\ntiene algunos problemas con los índices rotos."
     IDS_RESTORELASTMAINWNDDLG_TIP 
-                            "eMule remembers which of the main windows \n(Kademlia, Server, Transfer, was open, when before application exit \nand restores it. (default = unchecked)"
+                            "El eMule recuerda que ventana\n(KAD, Servidores, Tráfico, ha sido abierta, antes de que la aplicación sea cerrada\ny la restaura. Por defecto = deseleccionada"
+    IDS_STATIC_ICON         "Always display Tray Icon"
+	IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
+	IDS_COMPRESSLEVEL_TIP   "Reduce the compresslevel of compressable data\nSome cpu is saved, but more data needs to be send\nUseful for very high speed lines. \n1=use less cpu,compress less\n9=best compression(default)"
+    IDS_USECOMPRESS         "UseCompression (session)"
+	IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
 END
+
 
 
 
@@ -3522,4 +3528,3 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-
