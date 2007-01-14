@@ -1236,7 +1236,11 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 		case 4:		// speed
 			if (lpCtrlItem->type == AVAILABLE_SOURCE && lpUpDownClient->GetDownloadDatarate()){
 				if (lpUpDownClient->GetDownloadDatarate())
-					buffer.Format(_T("(%s) %s"), CastItoXBytes(lpUpDownClient->GetDownloadDatarateBlockBased(), false, true), CastItoXBytes(lpUpDownClient->GetDownloadDatarate(), false, true));
+					if (thePrefs.IsExtControlsEnabled()) // show more controls? 
+				     	buffer.Format(_T("(%s) %s"), CastItoXBytes(lpUpDownClient->GetDownloadDatarateBlockBased(), false, true)
+						                           , CastItoXBytes(lpUpDownClient->GetDownloadDatarate(), false, true));
+                	else
+						buffer.Format(_T("%s"),  CastItoXBytes(lpUpDownClient->GetDownloadDatarate(), false, true));
 				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 			}
 			break;
