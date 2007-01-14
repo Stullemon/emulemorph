@@ -1283,6 +1283,11 @@ BEGIN
     IDS_VERSION             "Versión"
     IDS_OPTIONS             "Opciones"
     IDS_PASTE               "Pegar"
+    IDS_SEARCHAUTHORCOLLECTION "Buscar el Autor de la Colección"
+    IDS_ERR_DUPL_FILES      "Archivos compartidos duplicados: ""%s"" y ""%s"""
+    IDS_USS_TRACEROUTEOFTENFAILED 
+                            "Sensor de Velodidad de Subida: Tracerouting fallido varias veces. Desactivando el Sensor de Velocidad de Subida."
+    IDS_USS_STARTING        "Sensor de Velodidad de Subida: Hecho con las preparaciones. Comenzando el control de la Velocidad de Subida. (Los primeros 60 segundos estarán en modo rápido de reacción)"
     IDS_A4AF                "Fuentes"
     IDS_MOBILEMULE          "eMuleMóvil"
     IDS_ENABLEMM            "Activar eMuleMóvil"
@@ -1817,6 +1822,9 @@ BEGIN
     IDS_ALLDIRECTORIES      "Todos los directorios"
     IDS_SEARCHRELATED       "Encontrar archivos relacionados"
     IDS_RELATED             "Relacionado"
+    IDS_COLL_REPLACEEXISTING "¿Quiere reemplazar el archivo existente?"
+    IDS_COLL_ERR_DELETING   "Ha habido un cierto error desconocido al suprimir el viejo archivo. ¿Salir sin guardar?"
+    IDS_CREATECOLLECTION    "Crear Colección"
     IDS_MODIFYCOLLECTION    "Modificar colección"
     IDS_COLL_SIGN           "Firmar colección con nombre y clave"
     IDS_AUTHOR              "Autor"
@@ -2444,6 +2452,7 @@ BEGIN
     IDS_MAXDATARATEFRIEND   "Límite de flujo de datos Global máximo (% respecto a la velocidad de subida)"
     IDS_MAXDATARATEPOWERSHARE 
                             "Límite de flujo de datos Global máximo (% respecto a la velocidad de subida)"
+    IDS_HIDDEN              "Oculto"
 END
 
 STRINGTABLE 
@@ -2543,6 +2552,11 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_DOWNHISTORY         "Historial de Descargas"
+    IDS_DOWNHISTORY_CHECK1  "eMule ha encontrado un archivo que ha sido descargado con el mismo ID de archivo:\n"
+    IDS_DOWNHISTORY_CHECK2  "eMule ha encontrado %i archivos que han sido descargados con el mismo nombre (%s):\n"
+    IDS_DOWNHISTORY_CHECK3  "¿Deseas descargar el archivo de todos modos?"
+    IDS_DOWNHISTORY_CHECK4  "eMule has found a file already cancelled with the same file ID:\n"
     IDS_USER_ALREADY_FRIEND "Usuario ""%s"" ya esta en tu lista de amigos"
     IDS_GETFRIENDED2KLINK   "Copiar link de amigo en el portapapeles"
     IDS_GETHTMLFRIENDED2KLINK "Copiar link de amigo en el portapapeles (HTML)"
@@ -3388,7 +3402,7 @@ BEGIN
     IDS_SVC_ONSTARTBOX      "En el comienzo de eMule"
     IDS_SVC_STARTUPBOX      "Arranque"
     IDS_SVC_MANUALSTART     "Arranque manual"
-    IDS_YESSERVICE          "Si, y comenzar el servicio de eMule"
+    IDS_YESSERVICE          "Si. Arrancar el servicio de eMule"
 END
 
 STRINGTABLE 
@@ -3467,7 +3481,7 @@ BEGIN
     IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(por defecto 5,0 = todos)"
     IDS_HIGHRESTIMER        "HighresTimer"
     IDS_HIGHRESTIMER_TIP    "?"
-    IDS_TRUSTEVERYHASH_TIP  "(Sesión únicamente no salvada). DEBUG ONLY. disable voting "
+    IDS_TRUSTEVERYHASH_TIP  "(Sesión únicamente no salvada). ELIMINAR ERRORES ÚNICAMENTE. Desactivar la votación "
     IDS_INSPECTALLFILETYPES_TIP 
                             "Para determinar el formato del archivo a descargar/compartir\nevaluando las cabeceras\n(muy útil cuando está instalada la Librería MediaInfo Lib)"
     IDS_MAXMSGSESSIONS_TIP  "Máximo de sesiones abiertas de Chat"
@@ -3503,11 +3517,12 @@ BEGIN
                             "Esta función sólo debe activarse (=1) si se usa VLC -\nVideoLAN Client para la vista previa de archivos. Permite una vista previa multimedia\nen archivos de por lo menos 16 kB de .mpeg o 256 kB\npara los demás formatos multimedia (.avi, CD-Images con contenido\nmultimedia) que ha sido descargada. Usando esta opción, la opción de 'Crear una copia de seguridad\npara previsualizar' ha de ser descativada en el diálogo 'Reproductor de Video'.\nCompruebe que la versión de VLC sea 8.5 o mayor parece que\ntiene algunos problemas con los índices rotos."
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "El eMule recuerda que ventana\n(KAD, Servidores, Tráfico, ha sido abierta, antes de que la aplicación sea cerrada\ny la restaura. Por defecto = deseleccionada"
-    IDS_STATIC_ICON         "Always display Tray Icon"
-	IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
-	IDS_COMPRESSLEVEL_TIP   "Reduce the compresslevel of compressable data\nSome cpu is saved, but more data needs to be send\nUseful for very high speed lines. \n1=use less cpu,compress less\n9=best compression(default)"
-    IDS_USECOMPRESS         "UseCompression (session)"
-	IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
+  	IDS_STATIC_ICON         "Mostrar siempre el icono de la bandeja de sistema"
+		IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
+		IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
+    IDS_USECOMPRESS         "Usar la Compresión (sesión)"
+		IDS_USECOMPRESS_TIP     "Opción que desactiva cualquier tipo de compresión de datos del usuario.\nMuy útil para velocidaddes MUY RÁPIDAS con el servidor (>~ 100mbit)\nEsta opción no se guarda, para fijarlo permanentemente\nnecesitas añadir el código 'UseCompression =' en el fichero preferences.ini\nPor defecto = activado (¡Recomendado!)"
+	IDC_SVC_CURRENT_STATUS_LABEL "Current Status"
 END
 
 
