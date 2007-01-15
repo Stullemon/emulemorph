@@ -11,6 +11,8 @@ AppPublisher=Morph team
 AppPublisherURL=http://emulemorph.sourceforge.net/
 AppSupportURL=http://forum.emule-project.net/index.php?showforum=28
 AppUpdatesURL=http://sourceforge.net/project/showfiles.php?group_id=72158&package_id=107495
+AppCopyright=(c) 2007 Morph team.
+
 UsePreviousAppDir=yes
 DirExistsWarning=No
 DefaultDirName={pf}\eMule
@@ -30,7 +32,7 @@ SolidCompression=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
+;Name: "dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
 Name: "german"; MessagesFile: "compiler:Languages\German.isl";LicenseFile: "..\staging\license-GER.txt"
 Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl" ;LicenseFile: "..\staging\license-IT.txt"
 Name: "spanish"; MessagesFile: "SpanishStd-2-5.1.0.isl" ;LicenseFile: "..\staging\license-SP.txt"
@@ -42,7 +44,7 @@ Name: "ChineseSimpl" ;MessagesFile: "ChineseSimp-11-5.1.0.isl"
 [Files]
 ;todo show correct languge in startup
 Source: "..\staging\emule.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\staging\\Template.eMuleSkin.ini"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\staging\Template.eMuleSkin.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\changelog.ger.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\Changelog.MorphXT.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\changelog.txt"; DestDir: "{app}"; Flags: ignoreversion
@@ -68,7 +70,8 @@ Source: "..\staging\unrar.dll"; DestDir: "{app}"
 Source: "..\staging\unrarlicense.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\mediainfo.dll"; DestDir: "{app}";  Flags: ignoreversion onlyifdoesntexist
 Source: "..\staging\mediainfo_ReadMe_DLL.txt"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
-Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion
+Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\emule\config\AC_SearchStrings.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
 Source: "..\staging\emule\config\countryflag.dll"; DestDir: "{app}\config"; Flags: ignoreversion
 Source: "..\staging\emule\config\countryflag32.dll"; DestDir: "{app}\config"; Flags: ignoreversion
 Source: "..\staging\emule\config\eMule Light.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
@@ -90,7 +93,7 @@ Source: "..\staging\wapserver\*"; DestDir: "{app}\wapserver"; Flags: ignoreversi
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; flags: unchecked
-Name: "firewall"; Description: "{cm:tasks_firewall}"; MinVersion: 0,5.01sp2
+Name: "firewall"; Description: "{cm:tasks_firewall}"; MinVersion: 0,5.01sp2 ; OnlyBelowVersion: 0,6;
 
 [INI]
 Filename: "{app}\emulemorphhome.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://emulemorph.sourceforge.net/"
@@ -102,7 +105,11 @@ Name: "{group}\{cm:UninstallProgram,eMule}"; Filename: "{uninstallexe}"
 Name: "{userdesktop}\eMule"; Filename: "{app}\emule.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\emule.exe"; Description: "{cm:LaunchProgram,eMule}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\emule.exe"; Description: "{cm:LaunchProgram,eMule}"; Flags: nowait postinstall skipifsilent ;OnlyBelowVersion: 0,6;
+
+[uninstallrun]
+;Not in vista because install runs as admin.
+Filename: "{app}\emule.exe"; Parameters: "uninstall"
 
 [UninstallDelete]
 Type: files; Name: "{app}\emulemorphhome.url"
@@ -113,8 +120,8 @@ Type: files; Name: "{app}\emulemorphhome.url"
 ; English
 tasks_firewall=Add an exception to the Windows Firewall
 dialog_firewall=Setup failed to add eMule to the Windows Firewall.%nPlease add eMule to the exception list manually.
-dutch.tasks_firewall=Voeg een uitzonderings regel toe aan de windows firewall.
-dutch.dialog_firewall=Setup heeft emule niet als uitzondering aan de Windows Firewall kunnen toevoegen .%nWellicht moet u dit nog handmatig doen.
+;dutch.tasks_firewall=Voeg een uitzonderings regel toe aan de windows firewall.
+;dutch.dialog_firewall=Setup heeft emule niet als uitzondering aan de Windows Firewall kunnen toevoegen .%nWellicht moet u dit nog handmatig doen.
 spanish.tasks_firewall=Añadir una excepción al Cortafuegos de Windows
 spanish.dialog_firewall=No se pudo añadir eMule al Cortafuegos de Windows.%nAñada el eMule a la lista del cortafuegos manualmente.
 french.tasks_firewall=Ajouter une exception dans le Pare-feu Windows
