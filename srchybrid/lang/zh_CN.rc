@@ -3474,7 +3474,7 @@ BEGIN
     IDS_INTERNETSECURITYZONE_TIP 
                             "Security Zones as per Internet Explorer Security settings. Defines\nwhich features are allowed in HTML code. Relevant for the MiniMule\nwindow.\nAllowed=<b>Untrusted</b>|Internet|Intranet|Trusted|LocalMachine"
     IDS_TXTEDITOR_TIP       "The default program for editing the Webservices and IPFilter.dat\nmay be entered here. Provide the complete path to the new\nexecutable if not using the default notepad.exe."
-    IDS_DATETIMEFORMAT_TIP  "DateTimeFormat=%A, %x, %X\nthis string defines how date and time is displayed in eMule.\n%a,%A  Abbreviated,FULL weekday name\n%b,%B  Abbreviated,FULL month name\n%c  Date and time representation appropriate for locale\n%d  Day of month number (01 – 31)\n%H      Hour in 24-hour format (00 – 23)\n%I  Hour in 12-hour format (01 – 12)\n%j  Day of year as decimal number (001 – 366)\n%m  Month as decimal number (01 – 12)\n%M  Minute as decimal number (00 – 59)\n%p  A.M./P.M.\n%S  Seconds as number \n%U  Week of year number, \n%w  Weekday as number (0 – 6; Sunday is 0)\n%x Date representation for current locale\n%X  Time representation for current locale\n%y  Year without century\n%Y  Year with century\n%z, %Z  Either the time-zone name or time zone abbreviation"
+    IDS_DATETIMEFORMAT_TIP  "DateTimeFormat=%A, %x, %X\nthis string defines how date and time is displayed in eMule.\n%a,%A  Abbreviated,FULL weekday name\n%b,%B  Abbreviated,FULL month name\n%c  Date and time representation appropriate for locale\n%d  Day of month number (01 ?31)\n%H      Hour in 24-hour format (00 ?23)\n%I  Hour in 12-hour format (01 ?12)\n%j  Day of year as decimal number (001 ?366)\n%m  Month as decimal number (01 ?12)\n%M  Minute as decimal number (00 ?59)\n%p  A.M./P.M.\n%S  Seconds as number \n%U  Week of year number, \n%w  Weekday as number (0 ?6; Sunday is 0)\n%x Date representation for current locale\n%X  Time representation for current locale\n%y  Year without century\n%Y  Year with century\n%z, %Z  Either the time-zone name or time zone abbreviation"
     IDS_SERVERUDPPORT_TIP   "Normally the local port for asking servers for sources or\nsearching files on them is randomly chosen . If eMule is run on a machine in a more\ncomplex network, especially when routers are used, it may be\nnecessary to fix this port to a defined value or to deactivate it\nat all. Disabling this port means that eMule will no longer be\nable to update the status of the servers in its server list and\nwill also not be able to receive sources from them nor do a\nglobal search. Exempt from this is the server eMule is actually\nconnected to. Usually the default setting should not be\nchanged.\nPossible values for ServerUDPPort are:\n0                   Disabled\n1 - 65534  fixed local UDP port\n<b>65535</b> random port (default)"
     IDS_REMOVEFILESTOBIN_TIP 
                             "This setting affects the Delete From Disk function in the right click menu \nof the Shared Files main window. If disabled then files will be permanently\ndeleted from disk without moving them to the recycle bin."
@@ -3547,7 +3547,13 @@ BEGIN
                             "This function should be only activated (=1) when using VLC -\nVideoLAN Client to preview files. It allows to preview multimedia\n \nfiles when at least 16 kB data for .mpeg files or 256 kB data for\nall other multimedia content (.avi, CD-Images with multimedia\ncontent) has been downloaded.  Using this option the 'Create backup\nfor preview' setting has to be deactivated in the 'Video\nPlayer' dialog. Note that vlc version 8.5 and higher seem to \nhave some problems with broken indexes"
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "eMule remembers which of the main windows \n(Kademlia, Server, Transfer, was open, when before application exit \nand restores it. (default = unchecked)"
-END
+
+    IDS_STATIC_ICON         "Always display Tray Icon"
+	IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
+	IDS_COMPRESSLEVEL_TIP   "Reduce the compresslevel of compressable data\nSome cpu is saved, but more data needs to be send\nUseful for very high speed lines. \n1=use less cpu,compress less\n9=best compression(default)"
+    IDS_USECOMPRESS         "UseCompression (session)"
+	IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
+ END
 
 
 
