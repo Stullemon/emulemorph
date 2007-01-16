@@ -3503,11 +3503,11 @@ BEGIN
                             "Questa funzione può essere attivata (=1) solo quando si usa VLC -\nVideoLAN Client per l'anteprima dei files. Essa permette l'anteprima dei files\nmultimediali quando sono scaricati almeno 16kb per i files .mpeg  o 256 kB per\ntutti gli altri contenuti multimediali (.avi, CD-Images con contenuti\nmultimediali).  Usando questa opzione, il settaggio 'Crea backup\nper l'anteprima' è disattivato nella finestra di dialogo 'Video\nPlayer'. Nota: vlc versione 8.5 o superiori sembrerebbero\navere qualche problema con gli indici danneggiati"
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "eMule ricorda quale delle finestre principali \n(Kademlia, Server, Trasferimenti), era aperta prima della chiusura dell'applicazione \ne la ripristina. (default = non selezionata)"
-    IDS_STATIC_ICON         "Always display Tray Icon"
-    IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
-	IDS_COMPRESSLEVEL_TIP   "Riduce il livello di compressione dei dati comprimibili. L'utilizzo di CPU è leggermente\nridotto, ma saranno richiesti più dati da inviare. Utile per reti ad altissima velocità.\n1 = usa meno CPU, compressione minore\n9 = usa più CPU, migliore compressione.\n(Default=9)"
-    IDS_USECOMPRESS         "UseCompression (sessione)"
-	IDS_USECOMPRESS_TIP     "Opzione per disabilitare la compressione per tutti i dati utente. Utile per reti\nad altissima velocità (>~ 100mbit). Questa opzione non verrà salvata, per renderla\npermanente devi aggiungere 'UseCompression=' nel File 'preferences.ini'.\n(Default=attivato - raccomandato!)"
+	IDS_STATIC_ICON         "TrayIcon sempre visibile"
+    IDS_COMPRESSLEVEL       "Livello compressione (1-9)"
+    IDS_COMPRESSLEVEL_TIP   "Riduce il livello di compressione dei dati comprimibili. L'utilizzo di CPU è leggermente\nridotto, ma saranno richiesti più dati da inviare. Utile per reti ad altissima velocità.\n1 = usa meno CPU, compressione minore\n9 = usa più CPU, migliore compressione.\n(Default=9)"
+    IDS_USECOMPRESS         "UsaCompressione (sessione)"
+    IDS_USECOMPRESS_TIP     "Opzione per disabilitare la compressione per tutti i dati utente. Utile per reti\nad altissima velocità (>~ 100mbit). Questa opzione non verrà salvata, per renderla\npermanente devi aggiungere 'UseCompression=' nel File 'preferences.ini'.\n(Default=attivato - raccomandato!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Stato Attuale"
 END
 
