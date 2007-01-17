@@ -44,6 +44,7 @@ protected:
 	CMenu m_mnuTrayMenu;
 	UINT m_nDefaultMenuItem;
 	UINT m_uSingleClickTimer;
+	BOOL m_bMaximized; // Restore maximized patch - Stulle
 
 	void KillSingleClickTimer();
 

@@ -62,6 +62,7 @@ CTrayDialog::CTrayDialog(UINT uIDD,CWnd* pParent /*=NULL*/)
     m_bCurIconDelete = false;
 	m_bdoubleclicked = false;
 	m_uSingleClickTimer = 0;
+	m_bMaximized = false; //MORPH - Added, Static Tray Icon
 }
 
 int CTrayDialog::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -286,6 +287,7 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam)
 			/*
 			if (TrayShow())
 			*/
+			m_bMaximized = IsZoomed();
 			if (thePrefs.GetStaticIcon() || TrayShow())
 			//MORPH END   - Added, Static Tray Icon
 				ShowWindow(SW_HIDE);
@@ -299,6 +301,7 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam)
 		/*
 		if (TrayShow())
 		*/
+		m_bMaximized = IsZoomed();
 		if (thePrefs.GetStaticIcon() || TrayShow())
 		//MORPH END   - Added, Static Tray Icon
 			ShowWindow(SW_HIDE);
@@ -360,5 +363,13 @@ LRESULT CTrayDialog::OnTaskBarCreated(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 void CTrayDialog::RestoreWindow()
 {
+	//MORPH START - Added, Static Tray Icon
+	/*
 	ShowWindow(SW_SHOW);
+	*/
+	if(m_bMaximized)
+		ShowWindow(SW_SHOWMAXIMIZED);
+	else
+		ShowWindow(SW_SHOW);
+	//MORPH END   - Added, Static Tray Icon
 }

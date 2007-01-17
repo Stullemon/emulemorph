@@ -361,11 +361,6 @@ BOOL CemuleDlg::OnInitDialog()
 	if (thePrefs.UseSplashScreen() && !m_bStartMinimized)
 		ShowSplash();
 
-	//MORPH START - Added, Static Tray Icon
-	if(thePrefs.GetStaticIcon())
-		TrayShow();
-	//MORPH END   - Added, Static Tray Icon
-
 	//Commander - Added: Startupsound - Start
 	if (thePrefs.UseStartupSound()){
 		if(PathFileExists(thePrefs.GetConfigDir() + _T("startup.wav"))) 
@@ -382,6 +377,12 @@ BOOL CemuleDlg::OnInitDialog()
 	CTrayDialog::OnInitDialog();
 	InitWindowStyles(this);
 	CreateToolbarCmdIconMap();
+
+	//MORPH START - Added, Static Tray Icon
+	if(thePrefs.GetStaticIcon())
+		TrayShow();
+	//MORPH END   - Added, Static Tray Icon
+
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu != NULL){
@@ -1381,6 +1382,7 @@ void CemuleDlg::MinimizeWindow()
 {
 	if (*thePrefs.GetMinTrayPTR())
 	{
+		m_bMaximized = IsZoomed(); //MORPH - Added, Static Tray Icon
 		TrayShow();
 		ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, Invisible Mode On Start up
@@ -1576,7 +1578,7 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 			/*
 			else if (TrayHide())
 			*/
-			else if (thePrefs.GetStaticIcon() || TrayHide())
+			else if ((thePrefs.GetStaticIcon() && !IsWindowVisible()) || TrayHide())
 			//MORPH END   - Added, Static Tray Icon
 				RestoreWindow();
 			else
@@ -1592,7 +1594,7 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 		/*
 		else if (TrayHide())
 		*/
-		else if (thePrefs.GetStaticIcon() || TrayHide())
+		else if ((thePrefs.GetStaticIcon() && !IsWindowVisible()) || TrayHide())
 		//MORPH END   - Added, Static Tray Icon
 			RestoreWindow();
 		else
@@ -3910,6 +3912,7 @@ LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM /*lParam*/)
 //MORPH - Added by SiRoB, Toggle Show Hide window
 void CemuleDlg::ToggleHide()
 {
+	m_bMaximized = IsZoomed(); //MORPH - Added, Static Tray Icon
 	b_HideApp = true;
 	b_TrayWasVisible = TrayHide();
 	b_WindowWasVisible = IsWindowVisible();
@@ -3921,7 +3924,17 @@ void CemuleDlg::ToggleShow()
 	if(b_TrayWasVisible)
 		TrayShow();
 	if(b_WindowWasVisible)
+	//MORPH START - Added, Static Tray Icon
+	/*
 		ShowWindow(SW_SHOW);
+	*/
+	{
+		if(m_bMaximized)
+			ShowWindow(SW_SHOWMAXIMIZED);
+		else
+		ShowWindow(SW_SHOW);
+	}
+	//MORPH END   - Added, Static Tray Icon
 }
 //MORPH - Added by SiRoB, Toggle Show Hide window
 BOOL CemuleDlg::RegisterInvisibleHotKey()
