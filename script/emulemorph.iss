@@ -41,6 +41,11 @@ Name: "french";  MessagesFile: "compiler:Languages\French.isl";LicenseFile: "..\
 Name: "BrazilianPortuguese" ;MessagesFile: "compiler:Languages\BrazilianPortuguese.isl";LicenseFile: "..\staging\license-PT_BR.txt"
 Name: "ChineseSimpl" ;MessagesFile: "ChineseSimp-11-5.1.0.isl"
 
+[Dirs]
+Name: "{app}\config"        ; Permissions:users-modify
+Name: "{app}\temp"          ; Permissions:users-modify
+Name: "{app}\incoming"      ; Permissions:users-modify
+
 [Files]
 ;todo show correct languge in startup
 Source: "..\staging\emule.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -70,8 +75,8 @@ Source: "..\staging\unrar.dll"; DestDir: "{app}"
 Source: "..\staging\unrarlicense.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\mediainfo.dll"; DestDir: "{app}";  Flags: ignoreversion onlyifdoesntexist
 Source: "..\staging\mediainfo_ReadMe_DLL.txt"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
-Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\emule\config\AC_SearchStrings.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
+Source: "..\staging\emule\config\AC_SearchStrings.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist  ; Permissions:users-modify
 Source: "..\staging\emule\config\countryflag.dll"; DestDir: "{app}\config"; Flags: ignoreversion
 Source: "..\staging\emule\config\countryflag32.dll"; DestDir: "{app}\config"; Flags: ignoreversion
 Source: "..\staging\emule\config\eMule Light.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
@@ -81,11 +86,13 @@ Source: "..\staging\emule\config\startup.wav"; DestDir: "{app}\config"; Flags: i
 Source: "..\staging\emule\config\webcaches.xml"; DestDir: "{app}\config"; Flags: ignoreversion
 Source: "..\staging\emule\config\webservices.dat"; DestDir: "{app}\config"; Flags: ignoreversion
 Source: "..\staging\emule\config\XMLNews.dat"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\server.met"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\emule\config\addresses.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\emule\config\ip-to-country.csv"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\emule\config\ipfilter.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\emule\config\staticservers.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist
+Source: "..\staging\emule\config\server.met"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
+Source: "..\staging\emule\config\addresses.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
+Source: "..\staging\emule\config\ip-to-country.csv"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
+Source: "..\staging\emule\config\ipfilter.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
+Source: "..\staging\emule\config\staticservers.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
+; to assing correct rights:
+Source: "..\staging\emule\config\preferences.ini"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist uninsneveruninstall  ; Permissions:users-modify
 Source: "..\staging\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\staging\webserver\*"; DestDir: "{app}\webserver"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\staging\wapserver\*"; DestDir: "{app}\wapserver"; Flags: ignoreversion recursesubdirs createallsubdirs
