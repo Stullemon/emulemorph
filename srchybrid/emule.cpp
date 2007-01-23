@@ -785,19 +785,10 @@ bool CemuleApp::ProcessCommandline()
 	/* original:
 	strMutextName.Format(_T("%s:%u"), EMULE_GUID, uTcpPort);
 	             */ 
-	{OSVERSIONINFOEX osvi;
-	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	if(!GetVersionEx((OSVERSIONINFO*)&osvi))
-	{
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		GetVersionEx((OSVERSIONINFO*)&osvi); 
-	}
-	if (osvi.dwMajorVersion >= 5 ) // win2000 and above? use global\ prefix for ts awareness. 
+	if (Is_Terminal_Services()) // Terminal services active? use global\ prefix for ts awareness. 
 		strMutextName.Format(_T("Global\\%s:%u"), EMULE_GUID, uTcpPort);
 	else
 		strMutextName.Format(_T("%s:%u"), EMULE_GUID, uTcpPort); 
-	}
 	// MORPH end some vista stuff
 
 	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);
@@ -822,7 +813,7 @@ bool CemuleApp::ProcessCommandline()
 			} 
     		else 
 				// MORPH leuk_he:run as ntservice v1.. START
-				if (bAlreadyRunning) 
+				if (IsServiceRunningMutexActive()) 
 					PassLinkToWebService(sendstruct.dwData,*command);
 				else
                 // MORPH leuk_he:run as ntservice v1.. END
@@ -839,7 +830,7 @@ bool CemuleApp::ProcessCommandline()
 			} 
     		else 
 				// MORPH leuk_he:run as ntservice v1.. START
-				if (bAlreadyRunning) 
+				if (IsServiceRunningMutexActive()) 
 					PassLinkToWebService(sendstruct.dwData,*command);
 				else
                 // MORPH leuk_he:run as ntservice v1.. END
@@ -855,7 +846,7 @@ bool CemuleApp::ProcessCommandline()
 				return true; 
 			}
 			// MORPH leuk_he:run as ntservice v1.. START
-			else if (bAlreadyRunning) 
+			else if (IsServiceRunningMutexActive()) 
 				PassLinkToWebService(sendstruct.dwData,*command);
                 // MORPH leuk_he:run as ntservice v1.. END
 			// MORPH START prevent startup on "emule exit" dos command
@@ -865,9 +856,9 @@ bool CemuleApp::ProcessCommandline()
 		}
     }
 	else // MORPH leuk_he:run as ntservice v1.. Start
-		if (maininst == NULL && bAlreadyRunning== true){ // mutex locked, but could not find window: must be service....
-			if (InterfaceToService()== false)	{
-				  m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);  // 
+		if (maininst == NULL && bAlreadyRunning== true){ // mutex locked, but could not find window: could be service....
+			if (InterfaceToService()== false)	{ // stop service or start browser to 127.0.0.1....
+				  m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);  // gui..so create mutex to prevent 2nd startup. 
 				  return bAlreadyRunning = ( ::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);
 			}
 			  else return true; // let browser do GUI 
