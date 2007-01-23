@@ -1560,6 +1560,8 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
+	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+		m_updatethread->AddItemUpdated((LPARAM)content); //MORPH - UpdateItemThread
 }
 
 COLORREF CSearchListCtrl::GetSearchItemColor(/*const*/ CSearchFile* src)

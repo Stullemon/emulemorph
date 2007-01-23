@@ -624,6 +624,8 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
+	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+		m_updatethread->AddItemUpdated((LPARAM)client); //MORPH - UpdateItemThread
 }
 
 void CDownloadClientsCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){

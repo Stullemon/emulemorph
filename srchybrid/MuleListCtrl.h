@@ -23,12 +23,15 @@ public:
 	void	EndThread();
 	void	SetListCtrl(CListCtrl* listctrl);
 	void	AddItemToUpdate(LPARAM item);
+	void	AddItemUpdated(LPARAM item);
 private:
 	CListCtrl* m_listctrl;
 	CList<LPARAM>	queueditem;
+	CList<LPARAM>	updateditem;
 	CMap<LPARAM, LPARAM, update_info_struct*, update_info_struct*> ListItems;
 	CCriticalSection	listitemlocker;
 	CCriticalSection	queueditemlocker;
+	CCriticalSection	updateditemlocker;
 	CEvent	newitemEvent;
 	CEvent*	threadEndedEvent;
 	bool	doRun;

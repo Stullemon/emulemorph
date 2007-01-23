@@ -599,11 +599,21 @@ int IsRunningXPSP2(){
 		if(!GetVersionEx((OSVERSIONINFO*)&osvi)) 
 			return 0;
 	}
-
+// MORPH START. XP SP2 shoudl be SP or greater.....
+	/* org:
 	if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1){
 		if (osvi.wServicePackMajor >= 2)
 			return 1;
 	}
+	*/
+	if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT &&
+			(  (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1 && osvi.wServicePackMajor >= 2)  //xp sp2
+			 ||(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2 && osvi.wServicePackMajor >= 1)  //2003 sp1
+			 ||(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion >2 )  // 2003 product line... 
+			 ||(osvi.dwMajorVersion > 5 )) )  //vista and above...
+			return 1;
+	// MORPH END. SP2 shoudl be XP or greater.....
+
 	return 0;
 }
 

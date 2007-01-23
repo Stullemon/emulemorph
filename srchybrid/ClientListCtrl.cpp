@@ -532,6 +532,8 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
+	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+		m_updatethread->AddItemUpdated((LPARAM)client); //MORPH - UpdateItemThread
 }
 
 void CClientListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)

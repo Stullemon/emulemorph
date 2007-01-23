@@ -1035,7 +1035,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				}
 				//MORPH END   - Modified by SiRoB, More client icon & Credit overlay icon
 				else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEY)
-						m_ImageList.Draw(dc, 21, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
+						m_ImageList.Draw(dc, 24, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else
 					m_ImageList.Draw(dc, 7, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				//MORPH START - Credit Overlay Icon
@@ -1795,6 +1795,8 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
+	if (!theApp.IsRunningAsService() && (content->type == FILE_TYPE || content->type == UNAVAILABLE_SOURCE || content->type == AVAILABLE_SOURCE)) // MORPH leuk_he:run as ntservice v1..
+		m_updatethread->AddItemUpdated((LPARAM)content->value); //MORPH - UpdateItemThread
 }
 
 void CDownloadListCtrl::HideSources(CPartFile* toCollapse)

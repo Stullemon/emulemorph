@@ -1545,6 +1545,12 @@ void CUpdateItemThread::AddItemToUpdate(LPARAM item) {
 	newitemEvent.SetEvent();
 }
 
+void CUpdateItemThread::AddItemUpdated(LPARAM item) {
+	updateditemlocker.Lock();
+	updateditem.AddTail(item);
+	updateditemlocker.Unlock();
+}
+
 CUpdateItemThread::CUpdateItemThread() {
 	threadEndedEvent = new CEvent(0, 1);
 	doRun = true;
@@ -1581,7 +1587,18 @@ int CUpdateItemThread::Run() {
 			}
 		}
 		queueditemlocker.Unlock();
-
+		updateditemlocker.Lock();
+		while (updateditem.GetCount()) {
+			LPARAM item = updateditem.RemoveHead();
+			update_info_struct* update_info;
+			if (!ListItems.Lookup(item, update_info)) {
+				update_info = new update_info_struct;
+				update_info->bNeedToUpdate = false;
+				ListItems.SetAt(item, update_info);
+			}
+			update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000));
+		}
+		updateditemlocker.Unlock();
 		DWORD wecanwait = (DWORD)-1;
 		POSITION pos = ListItems.GetStartPosition();
 		LPARAM item;

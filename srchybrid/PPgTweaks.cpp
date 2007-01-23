@@ -195,6 +195,7 @@ CPPgTweaks::CPPgTweaks()
 	m_iLogFileFormat=0;
 	m_bRTLWindowsLayout=false;
 	m_bPreviewOnIconDblClk=false;
+	m_bUseUserSortedServerList=false;
 	iServerUDPPort=65535;
 	m_bRemoveFilesToBin=false;
 	// continue extra official preferences....
@@ -229,6 +230,7 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_InspectAllFileTypes=NULL;
 	m_hti_maxmsgsessions=NULL;
 	m_hti_PreferRestrictedOverUser=NULL;
+	m_hti_UseUserSortedServerList=NULL;
 	m_hti_WebFileUploadSizeLimitMB =NULL;
 	m_hti_AllowedIPs=NULL;
 	//MORPH END  leuk_he Advanced official preferences.
@@ -425,6 +427,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_hti_maxmsgsessions, RUNTIME_CLASS(CNumTreeOptionsEdit));													   
 
 		m_hti_PreferRestrictedOverUser=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFERRESTRICTEDOVERUSER),m_hti_advanced,m_bPreferRestrictedOverUser);
+		m_hti_UseUserSortedServerList=m_ctrlTreeOptions.InsertCheckBox(_T("UseUserSortedServerList"),m_hti_advanced,m_bUseUserSortedServerList);
 		m_hti_WebFileUploadSizeLimitMB=m_ctrlTreeOptions.InsertItem(GetResString(IDS_WEBFILEUPLOADSIZELIMITMB),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_hti_WebFileUploadSizeLimitMB, RUNTIME_CLASS(CNumTreeOptionsEdit));													   										   
 		m_hti_AllowedIPs=m_ctrlTreeOptions.InsertItem(GetResString(IDS_ALLOWEDIPS),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
@@ -586,6 +589,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if(m_hti_maxmsgsessions) {DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_maxmsgsessions,(int)m_umaxmsgsessions);
 						DDV_MinMaxInt(pDX, m_umaxmsgsessions, 0, 6000);}
     if(m_hti_PreferRestrictedOverUser) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_PreferRestrictedOverUser,m_bPreferRestrictedOverUser);
+	if(m_hti_UseUserSortedServerList) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_UseUserSortedServerList,m_bUseUserSortedServerList);
 	if(m_hti_WebFileUploadSizeLimitMB) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_WebFileUploadSizeLimitMB,m_iWebFileUploadSizeLimitMB);
 										DDV_MinMaxInt(pDX, m_iWebFileUploadSizeLimitMB, 0, INT_MAX);}
     if(m_hti_AllowedIPs) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_AllowedIPs,m_sAllowedIPs); //TODO: check string for ip
@@ -690,6 +694,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iInspectAllFileTypes=thePrefs.m_iInspectAllFileTypes;
 	m_umaxmsgsessions=thePrefs.maxmsgsessions;
 	m_bPreferRestrictedOverUser=thePrefs.m_bPreferRestrictedOverUser;
+	m_bUseUserSortedServerList=thePrefs.m_bUseUserSortedServerList;
 	m_iWebFileUploadSizeLimitMB=thePrefs.m_iWebFileUploadSizeLimitMB;
 	m_sAllowedIPs=_T("");
 	if (thePrefs.GetAllowedRemoteAccessIPs().GetCount() > 0)
@@ -887,6 +892,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_iInspectAllFileTypes=m_iInspectAllFileTypes;
 	thePrefs.maxmsgsessions=m_umaxmsgsessions;
 	thePrefs.m_bPreferRestrictedOverUser=m_bPreferRestrictedOverUser;
+	thePrefs.m_bUseUserSortedServerList=m_bUseUserSortedServerList;
 	thePrefs.m_iWebFileUploadSizeLimitMB=m_iWebFileUploadSizeLimitMB;
 	int iPos = 0;
 	CString strIP = m_sAllowedIPs.Tokenize(L";", iPos);
@@ -1066,6 +1072,7 @@ SetTool(m_hti_HighresTimer,IDS_HIGHRESTIMER_TIP);
 SetTool(m_hti_TrustEveryHash,IDS_TRUSTEVERYHASH_TIP);
 SetTool(m_hti_InspectAllFileTypes,IDS_INSPECTALLFILETYPES_TIP);
 SetTool(m_hti_maxmsgsessions,IDS_MAXMSGSESSIONS_TIP);
+SetTool(m_hti_UseUserSortedServerList,IDS_USEUSERSORTEDSERVERLIST_TIP);
 SetTool(m_hti_PreferRestrictedOverUser,IDS_PREFERRESTRICTEDOVERUSER_TIP);
 SetTool(m_hti_WebFileUploadSizeLimitMB ,IDS_WEBFILEUPLOADSIZELIMITMB_TIP);
 SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS);

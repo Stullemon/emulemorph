@@ -101,6 +101,7 @@ protected:
     int m_iInspectAllFileTypes;
     int  m_umaxmsgsessions;
     bool m_bPreferRestrictedOverUser;
+	bool m_bUseUserSortedServerList;
     int m_iWebFileUploadSizeLimitMB;
     CString m_sAllowedIPs;
     // continue extra official preferences....
@@ -137,6 +138,7 @@ protected:
 	HTREEITEM m_hti_PreferRestrictedOverUser;
 	HTREEITEM m_hti_WebFileUploadSizeLimitMB ;
 	HTREEITEM m_hti_AllowedIPs;
+	HTREEITEM m_hti_UseUserSortedServerList;
 	// MORPH END  leuk_he Advanced official preferences. 
 	
 

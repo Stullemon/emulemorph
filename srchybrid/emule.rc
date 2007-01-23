@@ -1680,7 +1680,7 @@ BEGIN
                     BS_FLAT | WS_TABSTOP,13,20,195,8
     GROUPBOX        "Advance Webserver Config",IDC_STATIC_ADVADMIN,9,32,219,
                     155,BS_FLAT
-    COMBOBOX        IDC_ACCOUNTSELECT,119,49,103,12,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ACCOUNTSELECT,119,49,103,110,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     EDITTEXT        IDC_ADVADMIN_USER,57,63,47,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_ADVADMIN_PASS,175,65,47,12,ES_PASSWORD | 
@@ -1699,7 +1699,7 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,123,90,100,8
     CONTROL         "Access - Prefs?",IDC_ADVADMIN_PREFS,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,123,102,100,8
-    COMBOBOX        IDC_ADVADMIN_USERLEVEL,89,126,72,12,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ADVADMIN_USERLEVEL,89,126,72,110,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     EDITTEXT        IDC_ADVADMIN_CATS,89,145,120,13,ES_AUTOHSCROLL
     PUSHBUTTON      "Delete Account",IDC_ADVADMIN_DELETE,31,162,59,14,
@@ -1939,26 +1939,26 @@ BEGIN
     CONTROL         "Update fakelist on startup",IDC_UPDATEFAKELISTSTART,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,17,
                     109,8
-    PUSHBUTTON      "Update",IDC_UPDATEFAKES,168,53,48,14,BS_FLAT
-    EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,202,12,ES_AUTOHSCROLL
-    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,14,28,202,8,0,
+    PUSHBUTTON      "Update",IDC_UPDATEFAKES,173,53,48,14,BS_FLAT
+    EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,207,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,14,28,207,8,0,
                     WS_EX_TRANSPARENT
-    PUSHBUTTON      "Update",IDC_UPDATEIPFURL,168,125,48,14,BS_FLAT
+    PUSHBUTTON      "Update",IDC_UPDATEIPFURL,173,125,48,14,BS_FLAT
     CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,90,
                     115,10
-    EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,110,202,12,ES_AUTOHSCROLL
-    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,99,202,8,0,
+    EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,110,207,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,99,207,8,0,
                     WS_EX_TRANSPARENT
     GROUPBOX        "File",IDC_MORPH2_FILE,7,6,217,67,BS_FLAT
     GROUPBOX        "Security",IDC_MORPH2_SECURITY,7,76,217,69,BS_FLAT
-    PUSHBUTTON      "Update",IDC_UPDATEIPCURL,168,197,48,14,BS_FLAT
+    PUSHBUTTON      "Update",IDC_UPDATEIPCURL,173,197,48,14,BS_FLAT
     CONTROL         "Update Ip-to-country.csv on startup",
                     IDC_AUTOUPIP2COUNTRY,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,14,159,202,10
-    EDITTEXT        IDC_UPDATE_URL_IP2COUNTRY,14,182,202,12,ES_AUTOHSCROLL
+                    WS_TABSTOP,14,159,207,10
+    EDITTEXT        IDC_UPDATE_URL_IP2COUNTRY,14,182,207,12,ES_AUTOHSCROLL
     LTEXT           "File-URL for updating",IDC_URL_FOR_UPDATING_IP2COUNTRY,
-                    14,171,202,8,0,WS_EX_TRANSPARENT
+                    14,171,207,8,0,WS_EX_TRANSPARENT
     GROUPBOX        "Country",IDC_MORPH2_COUNTRY,7,148,217,69,BS_FLAT
     LTEXT           "Static",IDC_IP2COUNTRY_VERSION,14,202,96,8
     LTEXT           "Static",IDC_IPFILTER_VERSION,14,131,93,8
@@ -1967,9 +1967,9 @@ BEGIN
     PUSHBUTTON      "Reset",IDC_RESETIPFURL,114,125,48,14,BS_FLAT
     PUSHBUTTON      "Reset",IDC_RESETIPCURL,115,197,48,14,BS_FLAT
     CONTROL         "Update Weekly",IDC_UPDATEFAKELISTWEEK,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,137,18,79,8
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,127,18,94,8
     CONTROL         "Update Weekly",IDC_AUTOUPIPFILTERWEEK,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,137,90,77,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,127,90,94,10
 END
 
 IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
@@ -2169,7 +2169,7 @@ BEGIN
                     WS_TABSTOP,14,161,201,14
 END
 
-IDD_ASKEXIT DIALOGEX 0, 0, 232, 119
+IDD_ASKEXIT DIALOGEX 0, 0, 232, 122
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "eMule"
@@ -2178,13 +2178,13 @@ BEGIN
     LTEXT           "Do you really want to exit eMule?",IDC_EXITQUESTION,62,
                     16,117,23,SS_CENTERIMAGE
     ICON            "SEARCHMETHOD_FILEDONKEY",IDC_STATIC,14,16,21,20
-    DEFPUSHBUTTON   "Yes",IDYES,18,48,50,14
-    PUSHBUTTON      "No",IDNO,19,66,50,14
-    PUSHBUTTON      "No, minimize",IDNOMINIMIZE,19,86,98,14
-    LTEXT           "->",IDC_STATIC,75,50,10,8
+    DEFPUSHBUTTON   "Yes",IDYES,18,42,50,14
+    PUSHBUTTON      "No",IDNO,18,62,50,14
+    PUSHBUTTON      "No, minimize",IDNOMINIMIZE,18,82,98,14
+    LTEXT           "->",IDC_STATIC,77,44,10,8
     CONTROL         "Do not ask me again",IDC_DONTASKMEAGAINCB,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,96,49,126,13
-    PUSHBUTTON      "Yes, and start service.",IDYESSERVICE,18,103,100,14
+                    BS_AUTOCHECKBOX | WS_TABSTOP,95,43,126,13
+    PUSHBUTTON      "Yes, and start service.",IDYESSERVICE,18,102,100,14
 END
 
 IDD_PPG_NTSERVER DIALOGEX 0, 0, 230, 243
@@ -2194,7 +2194,8 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_TAB_SERVICE3,"SysTabControl32",WS_TABSTOP,7,7,219,
                     229
-    LTEXT           "Current status:",IDC_SVC_CURRENT_STATUS_LABEL,19,26,168,14
+    LTEXT           "Current status:",IDC_SVC_CURRENT_STATUS_LABEL,19,26,168,
+                    14
     EDITTEXT        IDC_SVC_CURRENT_STATUS,20,44,166,14,ES_AUTOHSCROLL | 
                     WS_DISABLED | NOT WS_TABSTOP,WS_EX_CLIENTEDGE
     PUSHBUTTON      "Install",IDC_SVC_INSTALLSERVICE,23,64,80,14
@@ -2205,7 +2206,7 @@ BEGIN
                     97,143,10
     CONTROL         "Manual start",IDC_SVC_MANUALSTART,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,26,113,125,10
-    CONTROL         "Set setting appropiate for service use ",
+    CONTROL         "Set setting appropriate for service use ",
                     IDC_SVC_SETTINGS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     22,145,163,10
     GROUPBOX        "On start of eMule.",IDC_SVC_ONSTARTBOX,20,159,173,48
@@ -2884,7 +2885,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 224
         VERTGUIDE, 14
-        VERTGUIDE, 216
+        VERTGUIDE, 221
         HORZGUIDE, 39
         HORZGUIDE, 53
         HORZGUIDE, 67
@@ -6538,7 +6539,7 @@ BEGIN
     IDS_PW_RESET_TIP        "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Reset button will clear all entries."
     IDS_DISABLEHIST_TIP     "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Enabled checkmark allows to turn off this option"
     IDS_PW_SHOWTRANSTOOLBAR_TIP 
-                            "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes\n:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queueDisplays all known clients"
+                            "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes\n:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queue\nDisplays all known clients"
     IDC_SHOWDWLPERCENT_TIP  "A %-completed value will be added for each download in its progress bar."
     IDC_EXITQUESTION_TIP    "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
     IDC_DONTASKMEAGAINCB_TIP 
@@ -6549,7 +6550,7 @@ BEGIN
     IDS_OKCANCELSEL_TIP     "Select the category and press ok to \ndownload in the category or\npress cancel not to download the\nfile(s)."
     IDC_DISABLEOBFUSCATION_TIP 
                             "If for some reason you want to disable the whole obfuscation \nfeature completely you can choose this option. In general for most users there is no reason nor advantage in doing this. (default: off)"
-    IDC_ONLYOBFUSCATED_TIP  "If you enable this option, eMule will only establish and accept obfuscated connections.\n Clients which do not support obfuscations are ignored, incoming plaintext connections\nrejected and the automatic server connect will only allow obfuscated connections to a\nserver. You should only choose this setting if you know that the ED2K Protocol is completely\nblocked on your network, otherwise you will loose sources and therefore slow down your eMule.\nHowever if you know that eMule is blocked, then enabling this option is recommended, because  \nit saves connection tries which are guaranteed to fail and therefore would waste time,\noverhead and resources. Only enable this option if you canno receive dataq otherwise! (default: off)"
+    IDC_ONLYOBFUSCATED_TIP  "If you enable this option, eMule will only establish and accept obfuscated connections.\n Clients which do not support obfuscations are ignored, incoming plaintext connections\nrejected and the automatic server connect will only allow obfuscated connections to a\nserver. You should only choose this setting if you know that the ED2K Protocol is completely\nblocked on your network, otherwise you will loose sources and therefore slow down your eMule.\nHowever if you know that eMule is blocked, then enabling this option is recommended, because  \nit saves connection tries which are guaranteed to fail and therefore would waste time,\noverhead and resources. Only enable this option if you cannot receive data otherwise! (default: off)"
     IDC_ENABLEOBFUSCATION_TIP 
                             "If you think that eMule is throttled (slowed down by isp) on your\nnetwork, you should enable this function. Whenever possible eMule\nwill use obfuscated connections and will ask other clients\nto do the same when connecting to your client. When connecting \nto a server, eMule will try to establish an obfuscated connection\nfirst and only if this fails choose a normal one. There are\nin general no disadvantages by using this option, except\ninsignificant higher CPU usage and very few bytes more overhead,\nso you can't really do anything wrong by enabling this setting.\nAlso http transfers will send useragent firefox instead of emule\n(default: off) "
 END
@@ -6566,10 +6567,10 @@ BEGIN
                             "eMule keeps track of all clients it connected to.\nTo save memory this list can be disabled with this option.\nTurn it off for low memory systems."
     IDS_DISABLEQUEUELIST_TIP 
                             "Similar to the Known Clients List the Queue List\nwill also consume system resources.\nDisable to save them."
-    IDS_SHOWCATINFO_TIP     "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading) files\nand the second one (y) the total number of files for this  category."
+    IDS_SHOWCATINFO_TIP     "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading)\nfiles and the second one (y) the total number of files for this category."
     IDS_REPAINTGRAPHS_TIP   "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
     IDC_SELECT_HYPERTEXT_FONT_TIP 
-                            "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines  and IRC windows"
+                            "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines and IRC windows"
     IDS_AUTOREMOVEFD_TIP    "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
 END
 
@@ -6610,15 +6611,15 @@ BEGIN
     IDS_ADVADMIN_USER_TIP   "Username to enter at the webinterface"
     IDS_ADVADMIN_PASS_TIP   "password"
     IDS_ADVADMIN_KAD_TIP    "Allowed to display the kad screen"
-    IDS_ADVADMIN_TRANSFER_TIP "Allow acces to the transer (up/down) tab"
-    IDS_ADVADMIN_SEARCH_TIP "Allow acces to the search. Note that only one system wide websearch can be active."
-    IDS_ADVADMIN_SERVER_TIP "Allows acces to the server tab"
+    IDS_ADVADMIN_TRANSFER_TIP "Allow access to the transer (up/down) tab"
+    IDS_ADVADMIN_SEARCH_TIP "Allow access to the search. Note that only one system wide websearch can be active."
+    IDS_ADVADMIN_SERVER_TIP "Allows access to the server tab"
     IDS_ADVADMIN_SHARED_TIP "allow access to the files shared tab"
-    IDS_ADVADMIN_STATS_TIP  "allow acces to the statiscis"
+    IDS_ADVADMIN_STATS_TIP  "allow access to the statiscis"
     IDS_ADVADMIN_PREFS_TIP  "Allow access to the emule preferences"
     IDS_ADVADMIN_USERLEVEL_TIP 
                             "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all\n              functions without the admin functions (same as Admin without\n                      Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system\n     (same as Admin with Hi-Level functions in the original)"
-    IDS_ADVADMIN_CATS_TIP   "Categories the user has acces to. Leave blank for all. \nSeperate categorie names with a pipe symbol (|)"
+    IDS_ADVADMIN_CATS_TIP   "Categories the user has access to. Leave blank for all. \nSeperate categorie names with a pipe symbol (|)"
     IDS_ADVADMIN_DELETE_TIP "Delete the current displayed account"
     IDS_STATIC_ADVADMIN_CATS_TIP "IDS_STATIC_ADVADMIN_CATS_TIPs"
 END
@@ -6647,7 +6648,7 @@ BEGIN
     IDS_UPDATEFAKELISTWEEK  "Update weekly"
     IDS_AUTOUPIPFILTERWEEK  "Update weekly"
     IDS_UPDATEFAKELISTWEEK_TIP 
-                            "Add a entry to the schedule to update the\nfakelist.dat form the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
+                            "Add a entry to the schedule to update the\nfakelist.dat from the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
     IDS_UPDATEIPFILTERWEEK_TIP 
                             "Add a entry to the schedule to update the\nipfilter.dat form the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
     IDS_SCHEDTEXT           "Added by morph autoupdate"
@@ -6670,11 +6671,11 @@ BEGIN
     IDS_SVC_INSTALLSERVICE  "Install"
     IDS_SVC_SERVERUNINSTALL "Uninstall"
     IDS_SVC_STARTWITHSYSTEM "Start with system startup"
-    IDS_SVC_SETTINGS        "Set setting appropiate for service use"
+    IDS_SVC_SETTINGS        "Set setting appropriate for service use"
     IDS_SVC_RUNBROWSER      "Browse to webservice"
     IDS_SVC_REPLACESERVICE  "Stop service and start gui "
     IDS_SVC_INSTALLSERVICE_TIP 
-                            "Install a eMule service in the NT Service. \nThis service will Use the exact configufation \nof this eMule, but will not interact with the desktop.\nYou can start a service from 'services.msc' Make sure\nthat the webservice is enabled."
+                            "Install a eMule service in the NT Service.\nThis service will Use the exact configuration\nof this eMule, but will not interact with the desktop.\nYou can start a service from 'services.msc' Make sure\nthat the webservice is enabled to control eMule."
     IDS_SVC_SERVERUNINSTALL_TIP 
                             "stop/Uninstall the previous installed service."
     IDS_SVC_STARTWITHSYSTEM_TIP 
@@ -6715,7 +6716,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_NOMINIMIZE          "No, To tray"
-    IDS_YESSERVICETIP       "If the eMule service is installed this sessions is stopped\nAnd the eMule as a service is started instead to run in the \nbackground as a windows service (use RUN->SERVICE.MSC to control"
+    IDS_YESSERVICETIP       "If the eMule service is installed this session is stopped\nAnd the eMule as a service is started instead to run in the \nbackground as a windows service (use RUN->SERVICE.MSC to control)"
     IDS_NOMINIMIZETIP       "Do not shutdown, but minimize to the system tray."
 END
 
@@ -6729,9 +6730,9 @@ BEGIN
                             "Changes the look of the statistic graph window and some other minor \nstyles stuff. (might require restart)"
     IDS_LOGFILEFORMAT_TIP   "Changes the data format of the log files from unicode to UTF8 when set to 1."
     IDS_RTLWINDOWSLAYOUT_TIP 
-                            "Adds right-to-left reading support to eMule. \nUseful for languages  like Hebrew etc."
+                            "Adds right-to-left reading support to eMule. \nUseful for languages like Hebrew etc."
     IDS_PREVIEWONICONDBLCLK_TIP 
-                            "If this setting is enabled a double click on a file's icon in the\ntransfer list will invoke the preview command. This will only work\nif 'Download list  doubelclick to expand'  is turned off in\n'Preferences -> Display'"
+                            "If this setting is enabled a double click on a file's icon in the\ntransfer list will invoke the preview command. This will only work\nif 'Download list doubleclick to expand' is turned off in\n'Preferences -> Display'"
     IDS_INTERNETSECURITYZONE_TIP 
                             "Security Zones as per Internet Explorer Security settings. Defines\nwhich features are allowed in HTML code. Relevant for the MiniMule\nwindow.\nAllowed=<b>Untrusted</b>|Internet|Intranet|Trusted|LocalMachine"
     IDS_TXTEDITOR_TIP       "The default program for editing the Webservices and IPFilter.dat\nmay be entered here. Provide the complete path to the new\nexecutable if not using the default notepad.exe."
@@ -6772,16 +6773,19 @@ BEGIN
     IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(default 5,0=all)"
     IDS_HIGHRESTIMER        "HighresTimer"
     IDS_HIGHRESTIMER_TIP    "?"
-    IDS_TRUSTEVERYHASH_TIP  "(Session only not saved). DEBUG ONLY. disable voting "
+    IDS_TRUSTEVERYHASH_TIP  "(Session only,not saved). DEBUG ONLY. disable voting "
     IDS_INSPECTALLFILETYPES_TIP 
                             "To determine the file format of downloading/shared\nfiles by evaluating the headers\n(most usefull when MediaInfo Lib is installed)"
     IDS_MAXMSGSESSIONS_TIP  "max open chat sessions"
     IDS_PREFERRESTRICTEDOVERUSER_TIP 
-                            "Do not create a new eMule_secure account but.\nRestrict the rights of the current account. \nMight be an alternative for securemode if you \nAre running in a limited account"
+                            "Do not create a new eMule_secure account but\nrestrict the rights of the current account. \nMight be an alternative for securemode if you \nare running in a limited account."
     IDS_WEBFILEUPLOADSIZELIMITMB_TIP 
                             "Amounts of MB that are allowed to be downloaded over http from the webserver(default=5)"
     IDS_ALLOWEDIPS          "AllowedIPs webserver (seperated by ;)"
     IDS_ALLOWEDIPS_TIP      "Ip's that are allowed to connect to the webserver, seperated by ';'"
+    IDS_STATIC_ICON         "Always display Tray Icon"
+    IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
+    IDS_COMPRESSLEVEL_TIP   "Set the compresslevel of compressable data\nSome cpu is saved, but more data needs to be send\nUseful for very high speed lines. \n1=use less cpu,compress less\n9=best compression(default, recommended)"
 END
 
 STRINGTABLE 
@@ -6791,9 +6795,9 @@ BEGIN
                             "The MiniMule window will usually remain visible until closed.\nSetting this value to 0 will automatically close the window when\nthe cursor is moved out of the window. Similar to a tooltip.\n(default=1)"
     IDS_MINIMULETRANSPARENCY_TIP 
                             "Controls the transparency of the MiniMule window. 0 means opaque\nand 100 is translucent.\n(default=0),might require restart."
-    IDS_CREATECRASHDUMP_TIP "When this key is enabled eMule will automatically save a crash\ndump should eMule unexpectedly crash. This can help the developers\nto track down the problem. The dump is saved in eMule's\ninstallation folder, called 'eMule-version-number-Modversion.dmp'\nShould you have crash problems set this key to 1 and report at the\nmorph forum (or mailto leukhe\\@gmail.com) with details\nDefault=unchecked"
-    IDS_CHECKCOMCTL32_TIP   "Suppress the warning about a old version of the common dialog dll. This\ncan be the case if you run a version of Windows that is not updated.\neMule might work without the update but might look bad. You can download \n the updated dll at Microsoft\ndefault=1"
-    IDS_CHECKSHELL32_TIP    "Suppress the warning about a old version of the windows shell (pre internet explorer 4)\nSome windows shell integrations functions might not work. The preferred solution is to update\nthe shell.dll which comes as a part of internet explorer. \n Default =1"
+    IDS_CREATECRASHDUMP_TIP "When this key is enabled eMule will automatically save a crash\ndump should eMule unexpectedly crash. This can help the developers\nto track down the problem. The dump is saved in eMule's\ninstallation folder, called 'eMule-version-number-Modversion.dmp'\nShould you have crash problems set this check this key and report at the\nmorph forum (or mailto leukhe\\@gmail.com) with details\nDefault=unchecked"
+    IDS_CHECKCOMCTL32_TIP   "Suppress the warning about a old version of the common dialog dll. This\ncan be the case if you run a version of Windows that is not updated.\neMule might work without the update but might look bad. You can download \n the updated dll at Microsoft\ndefault=checked"
+    IDS_CHECKSHELL32_TIP    "Suppress the warning about a old version of the windows shell (pre internet explorer 4)\nSome windows shell integrations functions might not work. The preferred solution is to update\nthe shell.dll which comes as a part of internet explorer. \n Default=checked"
     IDS_IGNOREINSTANCES_TIP "Allows the execution of multiple eMule instances.\nNote:\nFor two eMules running on the same machine they must\nbe installed to different folders, must have different\ntemp folders and also the ports used by each eMule have\nto be unique. It is not recommended to run two eMules \nconcurrently apart from testing purposes.\ndefault:0"
     IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP 
                             "Name of the certificate for the encryption of email notifications with S/MIME. The certificate will be looked up in the local windows address book"
@@ -6801,20 +6805,21 @@ BEGIN
                             "This setting will tell emule where to find the mediainfo dll. Default it is the\neMule directory. You will need to set this preferences if you want to save the dll\nin a different directory.\nDefault: MEDIAINFO.DLL"
     IDS_MEDIAINFO_RIFF_TIP  "Use the mediainfo dll to find out if the file is a 'avi' file.\nDefault=1"
     IDS_MEDIAINFO_ID3LIB_TIP 
-                            "Instructs emule to check mpeg (mp1,mp2,mp3,mpa) files for the\nmpeg header. meta data that is displayed in   the file detail \ndialog window. id3lib or media info dll is used for this. \ndefault=1"
+                            "Instructs emule to check mpeg (mp1,mp2,mp3,mpa) files for the\nmpeg header. The meta data that is displayed in the file detail\ndialog window. id3lib or media info dll is used for this.\ndefault=checked"
     IDS_MAXLOGBUFF_TIP      "Defines the amount of system memory eMule uses to display the logs.\nFor Windows 98 | ME a default of 64 kB is reserved, for Win 2k|XP\nit is 128 kB. In Win98|ME the buffer may not be larger than 64 kB.\nThe logs are rotating, i.e. if the buffer is filled up to its limit\nan old message is purged when a new one arrives (FIFO)."
     IDS_MAXCHATHISTORY_TIP  "Defines the maximum number of lines saved in the history of the irc\nmessages. After this value is reached the oldest message is\npurged on new entry (FIFO - First In First Out).\ndefault =100"
     IDS_PREVIEWSMALLBLOCKS_TIP 
-                            "This function should be only activated (=1) when using VLC -\nVideoLAN Client to preview files. It allows to preview multimedia\n \nfiles when at least 16 kB data for .mpeg files or 256 kB data for\nall other multimedia content (.avi, CD-Images with multimedia\ncontent) has been downloaded.  Using this option the 'Create backup\nfor preview' setting has to be deactivated in the 'Video\nPlayer' dialog. Note that vlc version 8.5 and higher seem to \nhave some problems with broken indexes"
+                            "This function should be only activated when using VLC -\nVideoLAN Client to preview files. It allows to preview multimedia\nfiles when at least 16 kB data for .mpeg files or 256 kB data for\nall other multimedia content (.avi, CD-Images with multimedia\ncontent) has been downloaded. Using this option the 'Create backup\nfor preview' setting has to be deactivated in the 'Video\nPlayer' dialog. Note that vlc version 8.5 and higher seem to\nhave some problems with broken indexes"
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "eMule remembers which of the main windows \n(Kademlia, Server, Transfer, was open, when before application exit \nand restores it. (default = unchecked)"
+END
 
-    IDS_STATIC_ICON         "Always display Tray Icon"
-	IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
-	IDS_COMPRESSLEVEL_TIP   "Reduce the compresslevel of compressable data\nSome cpu is saved, but more data needs to be send\nUseful for very high speed lines. \n1=use less cpu,compress less\n9=best compression(default)"
+STRINGTABLE 
+BEGIN
     IDS_USECOMPRESS         "UseCompression (session)"
-	IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
+    IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Current Status"
+	IDS_USEUSERSORTEDSERVERLIST_TIP "When enabled this will use the same server list sorting\nas shown in GUI when trying to connect to a server."
 END
 
 #endif    // English (U.S.) resources

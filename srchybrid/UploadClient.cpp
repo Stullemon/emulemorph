@@ -841,7 +841,6 @@ void CUpDownClient::CreateNextBlockPackage(){
 
 				m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
 				delete[] filedata_ReadFromDisk;
-				m_dwLastDoneBlock = GetTickCount(); //MORPH - Determine Remote Speed based on new requested block request
 			}
 			//now process error from nextblock to read
 
@@ -941,7 +940,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 #if !defined DONT_USE_SOCKET_BUFFERING
 	uint32 splittingsize = 10240;
 	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache())
-		splittingsize = m_nUpDatarateBlockBased+10240; //MORPH - Determine Remote Speed based on new requested block request
+		splittingsize = m_nUpDatarateBlockBased+10240; //MORPH - Determine Remote Speed
 	if (togo > splittingsize)
 		nPacketSize = togo/(uint32)(togo/splittingsize);
 	else
@@ -1154,7 +1153,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 	togo = newsize;
 	uint32 nPacketSize;
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 splittingsize = m_nUpDatarateBlockBased+10240; //MORPH - Determine Remote Speed based on new requested block request
+	uint32 splittingsize = m_nUpDatarateBlockBased+10240; //MORPH - Determine Remote Speed
 	if (togo > splittingsize)
 		nPacketSize = togo/(uint32)(togo/splittingsize);
 	else
@@ -1307,13 +1306,14 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 	}
 
 	m_BlockRequests_queue.AddTail(reqblock);
-	//MORPH START - Determine Remote Speed based on new requested block request
+	//MORPH START - Determine Remote Speed
 	if (m_DoneBlocks_list.GetCount() > 0) {
 		DWORD curTick = GetTickCount();
-		const Requested_Block_Struct* pLastdoneBlock = m_DoneBlocks_list.GetHead();
-		m_nUpDatarateBlockBased = 1000*(pLastdoneBlock->EndOffset-pLastdoneBlock->StartOffset)/(curTick+1 - m_dwLastDoneBlock);
+		m_nUpDatarateBlockBased = max(m_nUpDatarateBlockBased, 1000*(m_nTransferredUp-m_nTransferredUpSinceLastDoneBlock)/(curTick+1 - m_dwLastDoneBlock));
+		m_nTransferredUpSinceLastDoneBlock = m_nTransferredUp;
+		m_dwLastDoneBlock = curTick;
 	}
-	//MORPH END   - Determine Remote Speed based on new requested block request
+	//MORPH END   - Determine Remote Speed
 }
 
 uint32 CUpDownClient::SendBlockData(){

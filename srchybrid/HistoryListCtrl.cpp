@@ -511,6 +511,8 @@ void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	pDC.SetTextColor(crOldTextColor);
 	pDC.SetBkColor(crOldBckColor);
 	oDC->SetBkColor(crOldDCBkColor);
+	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+		m_updatethread->AddItemUpdated((LPARAM)file); //MORPH - UpdateItemThread
 }
 
 void CHistoryListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){

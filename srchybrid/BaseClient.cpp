@@ -134,7 +134,10 @@ void CUpDownClient::Init()
 	m_cAsked = 0;
 	m_cDownAsked = 0;
 	m_nUpDatarate = 0;
-	m_nUpDatarateBlockBased = 0; //MORPH - Determine Remote Speed based on new requested block request
+	//MORPH START - Determine Remote Speed based
+	m_nUpDatarateBlockBased = 0;
+	m_nTransferredUpSinceLastDoneBlock = 0;
+	//MORPH END   - Determine Remote Speed based
 	m_pszUsername = 0;
 	m_pszFunnyNick = 0; //MORPH - Added by SiRoB, Dynamic FunnyNick
 	m_nUserIDHybrid = 0;
@@ -160,8 +163,11 @@ void CUpDownClient::Init()
 	m_dwUploadTime = 0;
 	m_nTransferredDown = 0;
 	m_nDownDatarate = 0;
-	m_nDownDatarateBlockBased = 0;	//MORPH - Determine Remote Speed based on new requested block request
-	m_dwLastRequestedBlock = 0; //MORPH - Determine Remote Speed based on new requested block request
+	//MORPH START - Determine Remote Speed based on requested block finished
+	m_nDownDatarateBlockBased = 0;
+	m_dwLastRequestedBlockFinished = 0; 
+	m_nTransferredDownSinceLastBlockFinished = 0;
+	//MORPH END   - Determine Remote Speed based on requested block finished
 	m_nDownDataRateMS = 0;
 	m_nUploadState = US_NONE;
 	m_dwLastBlockReceived = 0;

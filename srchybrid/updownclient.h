@@ -596,7 +596,7 @@ public:
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	uint16			GetPartCount() const							{ return m_nPartCount; }
 	UINT			GetDownloadDatarate() const						{ return m_nDownDatarate; }
-	UINT			GetDownloadDatarateBlockBased() const						{ return m_nDownDatarateBlockBased; }	//MORPH START - Determine Remote Speed based on new requested block request
+	UINT			GetDownloadDatarateBlockBased() const						{ return m_nDownDatarateBlockBased; }	//MORPH START - Determine Remote Speed based on requested block finished
 	UINT			GetRemoteQueueRank() const						{ return m_nRemoteQueueRank; }
 	void			SetRemoteQueueRank(UINT nr, bool bUpdateDisplay = false);
 	bool			IsRemoteQueueFull() const						{ return m_bRemoteQueueFull; }
@@ -1143,8 +1143,11 @@ protected:
 	// Upload data rate computation
 	//
 	UINT		m_nUpDatarate;
-	UINT		m_nUpDatarateBlockBased; //MORPH - Determine Remote Speed based on new requested block request
-	DWORD		m_dwLastDoneBlock; //MORPH - Determine Remote Speed based on new requested block request
+	//MORPH - Determine Remote Speed
+	UINT		m_nUpDatarateBlockBased;
+	DWORD		m_dwLastDoneBlock;
+	UINT		m_nTransferredUpSinceLastDoneBlock;
+	//MORPH - Determine Remote Speed
 	UINT		m_nSumForAvgUpDataRate;
 	CList<TransferredData> m_AvarageUDR_list;
 	DWORD		m_AvarageUDRLastRemovedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
@@ -1152,8 +1155,12 @@ protected:
 	// Download data rate computation
 	//
 	UINT		m_nDownDatarate;
-	UINT		m_nDownDatarateBlockBased;	//MORPH START - Determine Remote Speed based on new requested block request
-	DWORD		m_dwLastRequestedBlock;	//MORPH START - Determine Remote Speed based on new requested block request
+	//MORPH START - Determine Remote Speed based on requested block finished
+	UINT		m_nDownDatarateBlockBased;
+	DWORD		m_dwLastRequestedBlockFinished;
+	UINT		m_nTransferredDownSinceLastBlockFinished;
+	//MORPH END   - Determine Remote Speed based on requested block finished
+
 	uint32		m_nAvDownDatarate; //Wistily
 	uint32		m_nDownTotalTime;// wistily total lenght of this client's downloads during this session in ms
 	UINT		m_nDownDataRateMS;

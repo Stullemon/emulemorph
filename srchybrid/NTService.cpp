@@ -46,10 +46,12 @@ HANDLE  hServerStopEvent = NULL;
 HANDLE  hWaitForServiceToStart=NULL;
 CWinThread* pThread ;
 CWinApp* pApp ;
+static HANDLE s_hServiceMutex;
 
 void terminateService(int wincode);
 BOOL StartServiceThread();
  extern int AFXAPI AfxWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPTSTR lpCmdLine, int nCmdShow);
+ static void  SetSeviceMutex(); 
 
  void CALLBACK ServiceMain( DWORD dwArgc,  LPTSTR* lpszArgv);
 UINT ServiceExecutionThread( int  pParam );
@@ -105,6 +107,7 @@ void CALLBACK ServiceMain( DWORD ,  LPTSTR* )
       return;
    }
     
+   SetSeviceMutex(); //tell any gui versions starting.
    // Now create the our service termination event to block on
    hServerStopEvent = CreateEvent (0, TRUE, FALSE, 0);
    if (!hServerStopEvent )
@@ -426,6 +429,7 @@ VOID ServiceStop()
 void terminateService(int wincode)
 {   CString ErrString;
 	GetSystemErrorString(wincode,ErrString);
+	if(s_hServiceMutex) CloseHandle(s_hServiceMutex); // close mutex 
 	AddLogLine(false,_T("Terminate service. Error code %d:%s"),wincode,ErrString);
 	if (wincode)
 		ReportStatusToSCMgr(SERVICE_STOPPED, ERROR_SERVICE_SPECIFIC_ERROR, 0);
@@ -620,12 +624,17 @@ BOOL PassLinkToWebService(int iCommand,CString & StrData)
 
 }
 
+
+/* InterfaceToService()															*/ 
+/* Depending on a setting either stops the running service (returning false) or */
+/* run a webbroser settion to 127.0.0.1										    */
+
 bool  InterfaceToService() {
 	if (thePrefs.GetServiceStartupMode() == 1){
 		CString LocalWs;
 		LocalWs.Format(_T("http://127.0.0.1:%d"),(int)thePrefs.GetWSPort());
 		ShellExecute(NULL, NULL,LocalWs, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
-		return true; // no start of emule dui
+		return true; // no start of emule gui
 	}
 	if (thePrefs.GetServiceStartupMode() == 2){
 		SC_HANDLE   schService;
@@ -691,10 +700,104 @@ int NtServiceStart(){
 }
 
 
+// should be really in otherfunctions.cpp, but this merges simpler... 
+BOOL Is_Terminal_Services () 
+{
+  BOOL    bResult = FALSE;
+  DWORD   dwVersion;
+  OSVERSIONINFOEXA osVersion;
+  DWORDLONG dwlCondition = 0;
+  HMODULE hmodK32 = NULL;
+  HMODULE hmodNtDll = NULL;
+  typedef ULONGLONG (WINAPI *PFnVerSetCondition) (ULONGLONG, ULONG, UCHAR);
+  typedef BOOL (WINAPI *PFnVerifyVersionA) (POSVERSIONINFOEXA, DWORD, DWORDLONG);
+  PFnVerSetCondition pfnVerSetCondition;
+  PFnVerifyVersionA pfnVerifyVersionA;
+
+  dwVersion = GetVersion();
+
+  // Is Windows NT running?
+
+  if (!(dwVersion & 0x80000000)) 
+  {
+    // Is it Windows 2000 or greater?
+    
+    if (LOBYTE(LOWORD(dwVersion)) > 4) 
+    {
+      // On Windows 2000 and later, use the VerifyVersionInfo and 
+      // VerSetConditionMask functions. Don't static link because 
+      // it won't load on earlier systems.
+
+      hmodNtDll = GetModuleHandleA( "ntdll.dll" );
+      if (hmodNtDll) 
+	  {	MessageBox(NULL,L"Loadingvercondionmask",L"DEBUG",0);
+        pfnVerSetCondition = (PFnVerSetCondition) GetProcAddress( 
+            hmodNtDll, "VerSetConditionMask");
+        if (pfnVerSetCondition != NULL) 
+        {
+          dwlCondition = (*pfnVerSetCondition) (dwlCondition, 
+              VER_SUITENAME, VER_AND);
+
+          // Get a VerifyVersionInfo pointer.
+
+          hmodK32 = GetModuleHandleA( "KERNEL32.DLL" );
+          if (hmodK32 != NULL) 
+          {
+            pfnVerifyVersionA = (PFnVerifyVersionA) GetProcAddress(
+               hmodK32, "VerifyVersionInfoA") ;
+            if (pfnVerifyVersionA != NULL) 
+            {
+              ZeroMemory(&osVersion, sizeof(osVersion));
+              osVersion.dwOSVersionInfoSize = sizeof(osVersion);
+              osVersion.wSuiteMask = VER_SUITE_TERMINAL;
+              bResult = (*pfnVerifyVersionA) (&osVersion,
+                  VER_SUITENAME, dwlCondition);
+            }
+          }
+        }
+      }
+    }
+  //  else  // This is Windows NT 4.0 or earlier.
+  //
+  //    bResult = false ;// false  ValidateProductSuite( "Terminal Server" );
+  }
+
+  return bResult;
+
+}
 
 
+static void SetSeviceMutex()
+{
+	CString strMutextName;
+	if (Is_Terminal_Services())
+		strMutextName.Format(_T("Global\\%s_SERVICE"), EMULE_GUID);
+	else
+		strMutextName.Format(_T("%s:%us_SERVICE"), EMULE_GUID); 
+	// TODO? security? 
+	s_hServiceMutex=CreateMutex(NULL, FALSE, strMutextName);
+}
 
 
+// check if there is a eMule is running as service. 
+int IsServiceRunningMutexActive() 
+{	HANDLE CanOpen;
+	CString strMutextName;
+	if (Is_Terminal_Services())
+		strMutextName.Format(_T("Global\\%s_SERVICE"), EMULE_GUID);
+	else
+		strMutextName.Format(_T("%s:%us_SERVICE:%u"), EMULE_GUID); 
+
+    CanOpen=OpenMutex(READ_CONTROL,	false,strMutextName); 
+	if  (CanOpen!=NULL) {
+	    CloseHandle(CanOpen);
+		return 1;
+	}
+	#ifdef DEBUG
+	int LastError=::GetLastError();
+	#endif
+    return 0; // we might just not have enough rights?
+}
 
 
 

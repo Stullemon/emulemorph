@@ -1000,6 +1000,8 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
+	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+		m_updatethread->AddItemUpdated((LPARAM)file); //MORPH - UpdateItemThread
 }
 
 void CSharedFilesCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)

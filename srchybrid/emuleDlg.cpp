@@ -2002,7 +2002,7 @@ void CemuleDlg::OnClose()
 	if (!CanClose() )
 		return;
 
-	Log(_T("Closing eMule"));
+	AddLogLine(true,_T("Closing eMule")); // morph log to status bar. 
 	CloseTTS();
 	m_pDropTarget->Revoke();
 	theApp.m_app_state = APP_STATE_SHUTTINGDOWN;

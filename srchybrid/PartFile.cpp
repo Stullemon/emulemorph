@@ -5755,7 +5755,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 	bool bIncreasedFile=false;
 
 	m_nLastBufferFlushTime = GetTickCount();
-	if (m_BufferedData_list.IsEmpty())
+	if (m_nTotalBufferData==0)
 		return;
 
 	if (m_AllocateThread!=NULL) {

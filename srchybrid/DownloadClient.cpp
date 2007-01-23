@@ -1264,9 +1264,13 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 		pblock->block = m_DownloadBlocks_list.RemoveHead();
 		m_PendingBlocks_list.AddTail(pblock);
 	}
-	
 	//MORPH END  - Proper number of needed requested block
-	m_dwLastRequestedBlock = GetTickCount(); //MORPH - Determine Remote Speed based on new requested block request
+	//MORPH START - Determine Remote Speed
+	DWORD curTick = GetTickCount();
+	m_nDownDatarateBlockBased = max(m_nDownDatarateBlockBased, 1000*(m_nTransferredDown-m_nTransferredDownSinceLastBlockFinished)/(curTick+1 - m_dwLastRequestedBlockFinished));
+	m_nTransferredDownSinceLastBlockFinished = m_nTransferredDown;
+	m_dwLastRequestedBlockFinished = curTick;
+	//MORPH END   - Determine Remote Speed
 }
 
 //MORPH - Changed by SiRoB, WebCache Retry by edk2
@@ -1805,10 +1809,6 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 				// If finished reserved block
 				if (nEndPos == cur_block->block->EndOffset)
 				{
-					//MORPH START - Determine Remote Speed based on new requested block request
-					m_nDownDatarateBlockBased = 1000*(cur_block->block->EndOffset-cur_block->block->StartOffset)/(GetTickCount()+1 - m_dwLastRequestedBlock);
-					//MORPH END   - Determine Remote Speed based on new requested block request
-
 					//MORPH - Optimization
 					/*
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);

@@ -40,5 +40,7 @@ int NtServiceStart();
 BOOL ReportStatusToSCMgr(DWORD dwCurrentState,
                          DWORD dwWin32ExitCode,
                          DWORD dwWaitHint);
+BOOL Is_Terminal_Services () ;
+int IsServiceRunningMutexActive() ;
 
 #endif // !defined(_NTSERVICE123_INCLUDED)

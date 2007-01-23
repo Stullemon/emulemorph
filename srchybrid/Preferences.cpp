@@ -2352,6 +2352,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"InspectAllFileTypes",m_iInspectAllFileTypes);
     ini.WriteInt(L"MaxMessageSessions",maxmsgsessions);
     ini.WriteBool(L"PreferRestrictedOverUser",m_bPreferRestrictedOverUser);
+	ini.WriteBool(L"UserSortedServerList",m_bUseUserSortedServerList);
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
 	if (GetAllowedRemoteAccessIPs().GetCount() > 0)
@@ -3096,6 +3097,10 @@ void CPreferences::LoadPreferences()
 	log2disk = ini.GetBool(L"SaveLogToDisk",false);
 	uMaxLogFileSize = ini.GetInt(L"MaxLogFileSize", 1024*1024);
 	iMaxLogBuff = ini.GetInt(L"MaxLogBuff",64) * 1024;
+	// MORPH START leuk_he Advanced official preferences.
+	if (iMaxLogBuff  < 64*1024)  iMaxLogBuff =  64*1024;
+	if (iMaxLogBuff  > 512*1024) iMaxLogBuff =512*1024;
+	// MORPH END leuk_he Advanced official preferences.
 	m_iLogFileFormat = (ELogFileFormat)ini.GetInt(L"LogFileFormat", Unicode);
 	m_bEnableVerboseOptions=ini.GetBool(L"VerboseOptions", true);
 	if (m_bEnableVerboseOptions)
@@ -3209,9 +3214,12 @@ void CPreferences::LoadPreferences()
 	m_bShowCopyEd2kLinkCmd=ini.GetBool(L"ShowCopyEd2kLinkCmd",false);
 
 	m_iMaxChatHistory=ini.GetInt(L"MaxChatHistoryLines",100);
-	if (m_iMaxChatHistory < 1)
-		m_iMaxChatHistory = 100;
+	if (m_iMaxChatHistory < 1)  m_iMaxChatHistory = 100;
+	if (m_iMaxChatHistory > 2048)  m_iMaxChatHistory = 2048;// MORPH leuk_he Advanced official preferences.
 	maxmsgsessions=ini.GetInt(L"MaxMessageSessions",50);
+	if (maxmsgsessions > 6000)  maxmsgsessions = 6000;// MORPH leuk_he Advanced official preferences.
+	if (maxmsgsessions < 0 )  maxmsgsessions = 0;     // MORPH leuk_he Advanced official preferences.
+
 	m_bShowActiveDownloadsBold = ini.GetBool(L"ShowActiveDownloadsBold", false);
 
 	_snwprintf(TxtEditor,_countof(TxtEditor),L"%s",ini.GetString(L"TxtEditor",L"notepad.exe"));
@@ -3697,7 +3705,7 @@ void CPreferences::LoadPreferences()
 
 	//MORPH START leuk_he Advanced official preferences.
 	bMiniMuleAutoClose=ini.GetBool(_T("MiniMuleAutoClose"),0,_T("eMule"));
-	iMiniMuleTransparency=ini.GetInt(_T("MiniMuleTransparency"),0);
+	iMiniMuleTransparency=min(ini.GetInt(_T("MiniMuleTransparency"),0),100); // range 0..100
 	bCreateCrashDump=ini.GetBool(_T("CreateCrashDump"),0);
 	bCheckComctl32 =ini.GetBool(_T("CheckComctl32"),true);
 	bCheckShell32=ini.GetBool(_T("CheckShell32"),true);
@@ -4428,7 +4436,7 @@ void CPreferences::SetUpnpBindAddr(DWORD bindip) {
 // MORPH leuk_he:run as ntservice v1. START (startup and ws port) 
 int CPreferences::GetServiceStartupMode(){
 	if (m_iServiceStartupMode == 0) // may be called before LoadPreferences()
-	   m_iServiceStartupMode=theApp.GetProfileInt(_T("StulleMule"), _T("ServiceStartupMode"),1);
+	   m_iServiceStartupMode=theApp.GetProfileInt(_T("StulleMule"), _T("ServiceStartupMode"),0); // default = stop service and start
    return m_iServiceStartupMode;
 }
 uint16	CPreferences::GetWSPort()							

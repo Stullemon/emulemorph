@@ -892,7 +892,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							
 							if ((uint64)BytesToSpend >= doubleSendSize+spentBytes) {
 								m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-								realBytesToSpendClass[classID] = 999;
+								realBytesToSpendClass[classID] = doubleSendSize;
 							}
 						} else {
 							if (realBytesToSpendClass[classID] > doubleSendSize) {
