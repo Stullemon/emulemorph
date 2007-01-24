@@ -3862,7 +3862,7 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	*/
 	uint64	bytesLeftToDownload = GetRemainingAvailableData(sender);
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
-	uint32	sourceDatarate = max(sender->GetDownloadDatarateBlockBased(), 10); // Always assume client is uploading at atleast 10 B/s
+	uint32	sourceDatarate = max(sender->GetDownloadDatarateAVG(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
 	bytesPerRequest = min(max(2*sender->GetSessionPayloadDown(),10240), sourceDatarate * timeToFileCompletion);
 	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
@@ -6694,7 +6694,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	*/
 	uint64	bytesLeftToDownload = GetRemainingAvailableData(sender);
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
-	uint32	sourceDatarate = max(sender->GetDownloadDatarateBlockBased(), 10); // Always assume client is uploading at atleast 10 B/s
+	uint32	sourceDatarate = max(sender->GetDownloadDatarateAVG(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
 	bytesPerRequest = min(max(2*sender->GetSessionPayloadDown(),10240), sourceDatarate * timeToFileCompletion);
 	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();

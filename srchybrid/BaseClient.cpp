@@ -135,8 +135,9 @@ void CUpDownClient::Init()
 	m_cDownAsked = 0;
 	m_nUpDatarate = 0;
 	//MORPH START - Determine Remote Speed based
-	m_nUpDatarateBlockBased = 0;
-	m_nTransferredUpSinceLastDoneBlock = 0;
+	m_dwUpDatarateAVG = GetTickCount();
+	m_nUpDatarateAVG = 0;
+	m_nTransferredUpDatarateAVG = 0;
 	//MORPH END   - Determine Remote Speed based
 	m_pszUsername = 0;
 	m_pszFunnyNick = 0; //MORPH - Added by SiRoB, Dynamic FunnyNick
@@ -163,11 +164,11 @@ void CUpDownClient::Init()
 	m_dwUploadTime = 0;
 	m_nTransferredDown = 0;
 	m_nDownDatarate = 0;
-	//MORPH START - Determine Remote Speed based on requested block finished
-	m_nDownDatarateBlockBased = 0;
-	m_dwLastRequestedBlockFinished = 0; 
-	m_nTransferredDownSinceLastBlockFinished = 0;
-	//MORPH END   - Determine Remote Speed based on requested block finished
+	//MORPH START - Determine Remote Speed
+	m_nDownDatarateAVG = 0;
+	m_dwDownDatarateAVG = GetTickCount(); 
+	m_nTransferredDownDatarateAVG = 0;
+	//MORPH END   - Determine Remote Speed
 	m_nDownDataRateMS = 0;
 	m_nUploadState = US_NONE;
 	m_dwLastBlockReceived = 0;
@@ -1791,7 +1792,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		// ensure that all possible block requests are removed from the partfile
 		ClearDownloadBlockRequests();
 
-		if(GetDownloadState() == DS_CONNECTED){
+		if(GetDownloadState() == DS_CONNECTED || GetDownloadState() == DS_WAITCALLBACKKAD){
 		    //MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
 			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo <= 1  || IsFriend() || IsProxy())
 				SetDownloadState(DS_ONQUEUE);

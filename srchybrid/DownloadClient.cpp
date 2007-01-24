@@ -1267,9 +1267,11 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	//MORPH END  - Proper number of needed requested block
 	//MORPH START - Determine Remote Speed
 	DWORD curTick = GetTickCount();
-	m_nDownDatarateBlockBased = max(m_nDownDatarateBlockBased, 1000*(m_nTransferredDown-m_nTransferredDownSinceLastBlockFinished)/(curTick+1 - m_dwLastRequestedBlockFinished));
-	m_nTransferredDownSinceLastBlockFinished = m_nTransferredDown;
-	m_dwLastRequestedBlockFinished = curTick;
+	if (curTick - m_dwDownDatarateAVG > SEC2MS(10)) {
+		m_nDownDatarateAVG = max(m_nDownDatarateAVG, 1000*(m_nTransferredDown-m_nTransferredDownDatarateAVG)/(curTick+1 - m_dwDownDatarateAVG));
+		m_nTransferredDownDatarateAVG = m_nTransferredDown;
+		m_dwDownDatarateAVG = curTick;
+	}
 	//MORPH END   - Determine Remote Speed
 }
 
@@ -1345,7 +1347,7 @@ void CUpDownClient::SendBlockRequests(bool ed2krequest)
 		return;
 
     // prevent locking of too many blocks when we are on a slow (probably standby/trickle) slot
-	int blockCount = GetDownloadDatarateBlockBased()/(3*EMBLOCKSIZE)+2;
+	int blockCount = GetDownloadDatarateAVG()/(3*EMBLOCKSIZE)+2;
     //if(IsEmuleClient() && m_byCompatibleClient==0 && reqfile->GetFileSize()-reqfile->GetCompletedSize() <= (uint64)PARTSIZE*4) {
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.

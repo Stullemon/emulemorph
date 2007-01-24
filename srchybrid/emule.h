@@ -116,7 +116,7 @@ public:
 	UINT				m_uCurVersionShort;
 	UINT				m_uCurVersionCheck;
 	ULONGLONG			m_ullComCtrlVer;
-	AppState			m_app_state; // defines application state for shutdown 
+	volatile AppState	m_app_state; // defines application state for shutdown 
 	CMutex				hashing_mut;
 	CReadWriteLock		m_threadlock;	// SLUGFILLER: SafeHash - This will ensure eMule goes last
 	CString*			pstrPendingLink;

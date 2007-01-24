@@ -328,7 +328,7 @@ int CmdInstallService(bool b_autostart)
     }
 	else {
 		GetSystemErrorString(GetLastError(),ErrString);
-		AddLogLine(true,_T("Failed to connect to Service control:%s"));
+		AddLogLine(true,_T("Failed to connect to Service control:%s"),ErrString);
 		retval=11;
 	}
 	return retval;
@@ -548,13 +548,13 @@ int NTServiceSetStartupMode(int i_startupmode){
 		}
 		else {
 			GetSystemErrorString(GetLastError(),ErrString);
-			AddLogLine(false,_T("Failed to open service to change startup mode:"),ErrString);
+			AddLogLine(false,_T("Failed to open service to change startup mode:%s"),ErrString);
 		}
 		CloseServiceHandle(schSCManager);
 	}
 	else {
 		GetSystemErrorString(GetLastError(),ErrString);
-		AddLogLine(false,_T("Failed to open servicemanager to change startup mode:"),ErrString);
+		AddLogLine(false,_T("Failed to open servicemanager to change startup mode:%s"),ErrString);
 	}
 	return 0; 
 }
@@ -730,7 +730,7 @@ BOOL Is_Terminal_Services ()
 
       hmodNtDll = GetModuleHandleA( "ntdll.dll" );
       if (hmodNtDll) 
-	  {	MessageBox(NULL,L"Loadingvercondionmask",L"DEBUG",0);
+	  {	
         pfnVerSetCondition = (PFnVerSetCondition) GetProcAddress( 
             hmodNtDll, "VerSetConditionMask");
         if (pfnVerSetCondition != NULL) 
@@ -786,7 +786,7 @@ int IsServiceRunningMutexActive()
 	if (Is_Terminal_Services())
 		strMutextName.Format(_T("Global\\%s_SERVICE"), EMULE_GUID);
 	else
-		strMutextName.Format(_T("%s:%us_SERVICE:%u"), EMULE_GUID); 
+		strMutextName.Format(_T("%s_SERVICE"), EMULE_GUID); 
 
     CanOpen=OpenMutex(READ_CONTROL,	false,strMutextName); 
 	if  (CanOpen!=NULL) {

@@ -940,7 +940,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 #if !defined DONT_USE_SOCKET_BUFFERING
 	uint32 splittingsize = 10240;
 	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache())
-		splittingsize = m_nUpDatarateBlockBased+10240; //MORPH - Determine Remote Speed
+		splittingsize = m_nUpDatarateAVG+10240; //MORPH - Determine Remote Speed
 	if (togo > splittingsize)
 		nPacketSize = togo/(uint32)(togo/splittingsize);
 	else
@@ -1153,7 +1153,7 @@ void CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_
 	togo = newsize;
 	uint32 nPacketSize;
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 splittingsize = m_nUpDatarateBlockBased+10240; //MORPH - Determine Remote Speed
+	uint32 splittingsize = m_nUpDatarateAVG+10240; //MORPH - Determine Remote Speed
 	if (togo > splittingsize)
 		nPacketSize = togo/(uint32)(togo/splittingsize);
 	else
@@ -1307,11 +1307,11 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 
 	m_BlockRequests_queue.AddTail(reqblock);
 	//MORPH START - Determine Remote Speed
-	if (m_DoneBlocks_list.GetCount() > 0) {
 		DWORD curTick = GetTickCount();
-		m_nUpDatarateBlockBased = max(m_nUpDatarateBlockBased, 1000*(m_nTransferredUp-m_nTransferredUpSinceLastDoneBlock)/(curTick+1 - m_dwLastDoneBlock));
-		m_nTransferredUpSinceLastDoneBlock = m_nTransferredUp;
-		m_dwLastDoneBlock = curTick;
+	if (curTick - m_dwUpDatarateAVG > SEC2MS(10)) {
+		m_nUpDatarateAVG = max(m_nUpDatarateAVG, 1000*(m_nTransferredUp-m_nTransferredUpDatarateAVG)/(curTick+1 - m_dwUpDatarateAVG));
+		m_nTransferredUpDatarateAVG = m_nTransferredUp;
+		m_dwUpDatarateAVG = curTick;
 	}
 	//MORPH END   - Determine Remote Speed
 }

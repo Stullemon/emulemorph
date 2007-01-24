@@ -457,6 +457,7 @@ public:
 	bool			HasBlocks() const								{ return !m_BlockRequests_queue.IsEmpty(); }
     UINT            GetNumberOfRequestedBlocksInQueue() const       { return m_BlockRequests_queue.GetCount(); }
 	UINT			GetDatarate() const								{ return m_nUpDatarate; }	
+	UINT			GetDatarateAVG() const								{ return m_nUpDatarateAVG; } //MORPH - Determine Remote Speed
 	UINT			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false) const;
 	void			AddReqBlock(Requested_Block_Struct* reqblock);
 	void			CreateNextBlockPackage();
@@ -596,7 +597,7 @@ public:
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	uint16			GetPartCount() const							{ return m_nPartCount; }
 	UINT			GetDownloadDatarate() const						{ return m_nDownDatarate; }
-	UINT			GetDownloadDatarateBlockBased() const						{ return m_nDownDatarateBlockBased; }	//MORPH START - Determine Remote Speed based on requested block finished
+	UINT			GetDownloadDatarateAVG() const						{ return m_nDownDatarateAVG; }	//MORPH - Determine Remote Speed
 	UINT			GetRemoteQueueRank() const						{ return m_nRemoteQueueRank; }
 	void			SetRemoteQueueRank(UINT nr, bool bUpdateDisplay = false);
 	bool			IsRemoteQueueFull() const						{ return m_bRemoteQueueFull; }
@@ -1143,11 +1144,11 @@ protected:
 	// Upload data rate computation
 	//
 	UINT		m_nUpDatarate;
-	//MORPH - Determine Remote Speed
-	UINT		m_nUpDatarateBlockBased;
-	DWORD		m_dwLastDoneBlock;
-	UINT		m_nTransferredUpSinceLastDoneBlock;
-	//MORPH - Determine Remote Speed
+	//MORPH START - Determine Remote Speed
+	UINT		m_nUpDatarateAVG;
+	DWORD		m_dwUpDatarateAVG;
+	UINT		m_nTransferredUpDatarateAVG;
+	//MORPH END   - Determine Remote Speed
 	UINT		m_nSumForAvgUpDataRate;
 	CList<TransferredData> m_AvarageUDR_list;
 	DWORD		m_AvarageUDRLastRemovedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
@@ -1155,11 +1156,11 @@ protected:
 	// Download data rate computation
 	//
 	UINT		m_nDownDatarate;
-	//MORPH START - Determine Remote Speed based on requested block finished
-	UINT		m_nDownDatarateBlockBased;
-	DWORD		m_dwLastRequestedBlockFinished;
-	UINT		m_nTransferredDownSinceLastBlockFinished;
-	//MORPH END   - Determine Remote Speed based on requested block finished
+	//MORPH START - Determine Remote Speed
+	UINT		m_nDownDatarateAVG;
+	DWORD		m_dwDownDatarateAVG;
+	UINT		m_nTransferredDownDatarateAVG;
+	//MORPH END   - Determine Remote Speed
 
 	uint32		m_nAvDownDatarate; //Wistily
 	uint32		m_nDownTotalTime;// wistily total lenght of this client's downloads during this session in ms
