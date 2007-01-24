@@ -723,10 +723,11 @@ BOOL Is_Terminal_Services ()
     // Is it Windows 2000 or greater?
     
     if (LOBYTE(LOWORD(dwVersion)) > 4) 
-    {
+    { return true;
       // On Windows 2000 and later, use the VerifyVersionInfo and 
       // VerSetConditionMask functions. Don't static link because 
       // it won't load on earlier systems.
+  /* does not work for fast user swtiching = ts..... *
 
       hmodNtDll = GetModuleHandleA( "ntdll.dll" );
       if (hmodNtDll) 
@@ -755,7 +756,7 @@ BOOL Is_Terminal_Services ()
             }
           }
         }
-      }
+      }			  */
     }
   //  else  // This is Windows NT 4.0 or earlier.
   //

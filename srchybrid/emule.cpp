@@ -781,7 +781,7 @@ bool CemuleApp::ProcessCommandline()
 	// NOTE: This will not prevent from some other application using that port!
 	UINT uTcpPort = GetProfileInt(_T("eMule"), _T("Port"), DEFAULT_TCP_PORT_OLD);
 	CString strMutextName;
-	// MORPH start some vista stuff	 (ts awareness) 
+	// MORPH start some (ts awareness) 
 	/* original:
 	strMutextName.Format(_T("%s:%u"), EMULE_GUID, uTcpPort);
 	             */ 
@@ -856,7 +856,7 @@ bool CemuleApp::ProcessCommandline()
 		}
     }
 	else // MORPH leuk_he:run as ntservice v1.. Start
-		if (maininst == NULL && bAlreadyRunning== true){ // mutex locked, but could not find window: could be service....
+		if (maininst == NULL && bAlreadyRunning== true && IsServiceRunningMutexActive() ){ // should be service....
 			if (InterfaceToService()== false)	{ // stop service or start browser to 127.0.0.1....
 				  m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);  // gui..so create mutex to prevent 2nd startup. 
 				  return bAlreadyRunning = ( ::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);

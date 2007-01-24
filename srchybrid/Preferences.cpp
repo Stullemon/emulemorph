@@ -3721,8 +3721,8 @@ void CPreferences::LoadPreferences()
  	//MORPH START - Added, Downloaded History [Monki/Xman]
 	m_bHistoryShowShared = ini.GetBool(_T("ShowSharedInHistory"), false);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
-//Xman disable compression
-	m_bUseCompression=ini.GetBool(L"UseCompression",true);
+   	m_bUseCompression=ini.GetBool(L"UseCompression",true);//Xman disable compression
+	GetServiceStartupMode(); //inistialize m_iServiceStartupMode  MORPH run as a service v1 
 	m_bStaticIcon=ini.GetBool(L"StaticIcon",false); //MORPH - Added, Static Tray Icon
 
    LoadCats();
@@ -4436,7 +4436,7 @@ void CPreferences::SetUpnpBindAddr(DWORD bindip) {
 // MORPH leuk_he:run as ntservice v1. START (startup and ws port) 
 int CPreferences::GetServiceStartupMode(){
 	if (m_iServiceStartupMode == 0) // may be called before LoadPreferences()
-	   m_iServiceStartupMode=theApp.GetProfileInt(_T("StulleMule"), _T("ServiceStartupMode"),0); // default = stop service and start
+	   m_iServiceStartupMode=theApp.GetProfileInt(_T("eMule"), _T("ServiceStartupMode"),2); // default = stop service and start
    return m_iServiceStartupMode;
 }
 uint16	CPreferences::GetWSPort()							
