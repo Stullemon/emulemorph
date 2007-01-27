@@ -1250,8 +1250,8 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			buffer = _T(" (?)");
 			break;
 	}
-	m_SharedFilesMenu.ModifyMenu(MP_SPREADBAR_DEFAULT, MF_STRING, MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
-	m_SharedFilesMenu.CheckMenuRadioItem(MP_SPREADBAR_DEFAULT, MP_SPREADBAR_ON, uSpreadbarMenuItem, 0);
+	m_SpreadbarMenu.ModifyMenu(MP_SPREADBAR_DEFAULT, MF_STRING, MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
+	m_SpreadbarMenu.CheckMenuRadioItem(MP_SPREADBAR_DEFAULT, MP_SPREADBAR_ON, uSpreadbarMenuItem, 0);
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	
 	//MORPH START - Added by SiRoB, HIDEOS
