@@ -174,6 +174,8 @@ void CPPgNotify::Localize(void)
 		GetDlgItem(IDC_TXT_RECEIVER)->SetWindowText(GetResString(IDS_PW_RECEIVERADDRESS));
 		GetDlgItem(IDC_TXT_SENDER)->SetWindowText(GetResString(IDS_PW_SENDERADDRESS));
 		GetDlgItem(IDC_CB_ENABLENOTIFICATIONS)->SetWindowText(GetResString(IDS_PW_ENABLEEMAIL));
+		GetDlgItem(IDC_TEST_NOTIFICATION)->SetWindowText(GetResString(IDS_TEST_NOTIFICATION)); //MORPH: add translation for test
+
 	}
 }
 

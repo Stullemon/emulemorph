@@ -1267,7 +1267,7 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 	//MORPH END  - Proper number of needed requested block
 	//MORPH START - Determine Remote Speed
 	DWORD curTick = GetTickCount();
-	if (curTick - m_dwDownDatarateAVG > SEC2MS(10)) {
+	if (curTick - m_dwDownDatarateAVG > SEC2MS(1)) {
 		m_nDownDatarateAVG = max(m_nDownDatarateAVG, 1000*(m_nTransferredDown-m_nTransferredDownDatarateAVG)/(curTick+1 - m_dwDownDatarateAVG));
 		m_nTransferredDownDatarateAVG = m_nTransferredDown;
 		m_dwDownDatarateAVG = curTick;
@@ -1831,6 +1831,29 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 					SendBlockRequests();	
 				}
 			}
+			//MORPH START - Work arround I.C.H and other recovering processing responsible of stalled download 
+			else { 
+				DebugLog(LOG_MORPH|LOG_SUCCESS,_T("[FIX STALLED DOWNLOAD] Often due to Data recovery, for '%s' with client: %s"), reqfile->GetFileName(), DbgGetClientInfo());
+				//MORPH - Optimization
+				/*
+				reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+				*/
+				reqfile->RemoveBlockFromList(cur_block->block);
+				delete cur_block->block;
+				// Not always allocated
+				if (cur_block->zStream){
+					inflateEnd(cur_block->zStream);
+					delete cur_block->zStream;
+				}
+				delete cur_block;
+				m_PendingBlocks_list.RemoveAt(posLast);
+				
+				// Request next block
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+					DebugSend("More block requests", this);
+				SendBlockRequests();	
+			}
+			//MORPH END   - Work arround I.C.H and other recovering processing responsible of stalled download
 			//MORPH - Avoid Credits Accumulate faker
 			if (bpacketusefull){
 				if (credits)

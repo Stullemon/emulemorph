@@ -356,9 +356,12 @@ CPartFile::~CPartFile()
 		if (m_AllocateThread != NULL){
 			HANDLE hThread = m_AllocateThread->m_hThread;
 			// 2 minutes to let the thread finish
-			if (WaitForSingleObject(hThread, 120000) == WAIT_TIMEOUT)
+			m_AllocateThread->SetThreadPriority(THREAD_PRIORITY_NORMAL);  // MORPH like flushthread
+			if (WaitForSingleObject(hThread, 120000) == WAIT_TIMEOUT){
 				TerminateThread(hThread, 100);
-		}
+				ASSERT(0); // did this happen why? 
+			}
+       	}
 
 		if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE)
 			FlushBuffer(true);
@@ -366,6 +369,7 @@ CPartFile::~CPartFile()
 	catch(CFileException* e){
 		e->Delete();
 	}
+	ASSERT(m_FlushSetting == NULL); // flush was reported done but thread not properly ended?
 	
 	if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE){
 		// commit file and directory entry
@@ -1603,11 +1607,12 @@ bool CPartFile::SavePartFile()
 	CFileException fexp;
 	if (!file.Open(strTmpFile, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		CString strError;
-		strError.Format(GetResString(IDS_ERR_SAVEMET), m_partmetfilename, GetFileName());
+		strError.Format(GetResString(IDS_ERR_SAVEMET), strTmpFile, GetFileName());	 // MORPH: report strTmpFile not the .met file
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
+			ASSERT(0); // DEBUG: leuk_he:IF it fails i want to knwo what other thread is access this. 
 		}
 		LogError(_T("%s"), strError);
 		return false;
@@ -4608,8 +4613,6 @@ void CPartFile::DeleteFile(){
 	delete this;
 }
 
-// SLUGFILLER: SafeHash remove - removed HashSinglePart completely.
-/*
 bool CPartFile::HashSinglePart(UINT partnumber)
 {
 	if ((GetHashCount() <= partnumber) && (GetPartCount() > 1)){
@@ -4646,7 +4649,7 @@ bool CPartFile::HashSinglePart(UINT partnumber)
 		}
 	}
 }
-*/
+
 bool CPartFile::IsCorruptedPart(UINT partnumber) const
 {
 	return (corrupted_list.Find((uint16)partnumber) != NULL);
@@ -5742,8 +5745,11 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		if (pThread != NULL) { //We are flushing something to disk
 			HANDLE hThread = pThread->m_hThread;
 			// 2 minutes to let the thread finish
+			pThread->SetThreadPriority(THREAD_PRIORITY_NORMAL); 
 			if (WaitForSingleObject(hThread, 120000) == WAIT_TIMEOUT) {
+				AddDebugLogLine(true, _T("Flushing (force=true) failed.(%s)"), GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), m_uTransferred, m_nLastBufferFlushTime);
 				TerminateThread(hThread, 100); // Should never happen
+				ASSERT(0);
 			}
 		}
 		if (m_FlushSetting != NULL) //We noramly flushed something to disk
@@ -5908,6 +5914,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			m_hpartfile.SetLength(m_nFileSize);
 		}
 
+		// Flush to disk
 		m_hpartfile.Flush();
 
 		m_FlushSetting->bIncreasedFile = bIncreasedFile;
@@ -5917,15 +5924,19 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 	{
 		FlushBuffersExceptionHandler(error);	
 		delete[] changedPart;
-		if (m_FlushSetting)
+		if (m_FlushSetting) {
 			delete m_FlushSetting;
+			m_FlushSetting = NULL;
+		}
 	}
 	catch(...)
 	{
 		FlushBuffersExceptionHandler();
 		delete[] changedPart;
-		if (m_FlushSetting)
+		if (m_FlushSetting) {
 			delete m_FlushSetting;
+			m_FlushSetting = NULL;
+		}
 	}
 }
 
@@ -6048,15 +6059,33 @@ void CPartFile::FlushDone()
 				// Is part corrupt
 				// Let's check in another thread
 				m_PartsHashing++;
+				if (theApp.emuledlg->IsRunning()) { //MORPH - Flush Thread
 				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 				parthashthread->SetSinglePartHash(this, (uint16)partNumber);
 				parthashthread->ResumeThread();
+				//MORPH START - Flush Thread
+				} else { 
+					if (!HashSinglePart(partNumber))
+						PartHashFinished(partNumber, true);
+					else
+						PartHashFinished(partNumber, false);
+				}
+				//MORPH END   - Flush Thread
 			}
 			else if (IsCorruptedPart(partNumber) && (thePrefs.IsICHEnabled() || m_FlushSetting->bForceICH))
 			{
+				if (theApp.emuledlg->IsRunning()) { //MORPH - Flush Thread
 				CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 				parthashthread->SetSinglePartHash(this, (uint16)partNumber, true);	// Special case, doesn't increment hashing parts, since part isn't really complete
 				parthashthread->ResumeThread();
+				//MORPH START - Flush Thread
+				} else { 
+					if (!HashSinglePart(partNumber))
+						PartHashFinishedAICHRecover(partNumber, true);
+					else
+						PartHashFinishedAICHRecover(partNumber, false);
+				}
+				//MORPH END   - Flush Thread
 			}
 		}
 	}

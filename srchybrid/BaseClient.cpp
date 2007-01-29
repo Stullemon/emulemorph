@@ -135,7 +135,7 @@ void CUpDownClient::Init()
 	m_cDownAsked = 0;
 	m_nUpDatarate = 0;
 	//MORPH START - Determine Remote Speed based
-	m_dwUpDatarateAVG = GetTickCount();
+	m_dwUpDatarateAVG = 0;
 	m_nUpDatarateAVG = 0;
 	m_nTransferredUpDatarateAVG = 0;
 	//MORPH END   - Determine Remote Speed based
@@ -166,7 +166,7 @@ void CUpDownClient::Init()
 	m_nDownDatarate = 0;
 	//MORPH START - Determine Remote Speed
 	m_nDownDatarateAVG = 0;
-	m_dwDownDatarateAVG = GetTickCount(); 
+	m_dwDownDatarateAVG = 0; 
 	m_nTransferredDownDatarateAVG = 0;
 	//MORPH END   - Determine Remote Speed
 	m_nDownDataRateMS = 0;

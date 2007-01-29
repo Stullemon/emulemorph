@@ -6819,6 +6819,7 @@ BEGIN
     IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Current Status"
 	IDS_USEUSERSORTEDSERVERLIST_TIP "When enabled this will use the same server list sorting\nas shown in GUI when trying to connect to a server."
+	IDS_TEST_NOTIFICATION   "Test"
 END
 
 #endif    // English (U.S.) resources
