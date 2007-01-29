@@ -14,7 +14,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Portuguese (Brazil) resources. 06/2006 trans by heiler.bemerguy@gmail.com (msn too)
+// Portuguese (Brazil) resources. 01/2007 trans by heiler.bemerguy@gmail.com (msn too)
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PTB)
 #ifdef _WIN32
@@ -3440,13 +3440,12 @@ BEGIN
     IDS_MAXLOGBUFF_TIP      "Define o quanto de memória o eMule usará pra mostrar os logs.\nPara Windows 98 | ME um padrão de 64kB é reservado, para Win 2k|XP\nit é 128 kB. No Win98|ME o buffer não pode ser maior que 64 kB.\nOs logs são rotativos, i.e. se o buffer encher até o limite\numa mensagem velha será excluída para uma nova aparecer (FIFO)."
     IDS_MAXCHATHISTORY_TIP  "Defines the maximum number of lines saved in the history of the irc\nmessages. After this value is reached the oldest message is\npurged on new entry (FIFO - First In First Out).\ndefault =100"
     IDS_PREVIEWSMALLBLOCKS_TIP "Essa opção só deve ser ativada se você estiver usando VLC (VideoLAN Client)\npara previsualizar arquivos. Ela permite previsualizar arquivos multimídia\nmesmo quando tem somente 16kB baixados para arquivos .mpeg ou 256kB\npara outros arquivos. Com essa opção ativada, o 'Criar backup para preview'\ndeve ser desabilitado na janela 'Vídeo Player'."
-    IDS_RESTORELASTMAINWNDDLG_TIP 
-                            "eMule remembers which of the main windows \n(Kademlia, Server, Transfer, was open, when before application exit \nand restores it. (default = unchecked)"
-						    IDS_STATIC_ICON         "Always display Tray Icon"
-    IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
-    IDS_COMPRESSLEVEL_TIP   "Reduce the compresslevel of compressable data\nSome cpu is saved, but more data needs to be send\nUseful for very high speed lines. \n1=use less cpu,compress less\n9=best compression(default)"
-    IDS_USECOMPRESS         "UseCompression (session)"
-	IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
+    IDS_RESTORELASTMAINWNDDLG_TIP "O eMule lembrará quais das principais janelas \n(Kademlia, Servidor, Transferência) estavam abertas quando ele foi fechado\ne as abrirá quando for executado novamente. (Padrão: Desativado)"
+    IDS_STATIC_ICON         "Sempre mostrar o ícone na bandeja(tray)"
+    IDS_COMPRESSLEVEL       "Nível de compressão (1-9) "
+    IDS_COMPRESSLEVEL_TIP   "Define o nível de compressão para dados comprimíveis.\nDiminuindo a compressão fará com que o eMule use menos CPU,\nmas mais dados serão enviados pela rede. Útil para conexões super velozes.\n1 = Usa menos CPU, comprime menos\n9 = Melhor compressão (padrão)"
+    IDS_USECOMPRESS         "UseCompression (sessão)"
+    IDS_USECOMPRESS_TIP     "Opção para desligar completamente a compressão.\nÚtil para conexões ultra-rápidas (>~ 100mbit)\nEssa opção não é salva. Para torná-la permanente\nvocê precisará adicionar UseCompression= no preferences.ini\n(Padrão: Ativado) (recomendado!)"
 
 END
 

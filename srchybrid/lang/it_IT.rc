@@ -109,7 +109,7 @@ BEGIN
     IDS_FD_COMPR            "Compressione"
     IDS_WIZARD_NETWORK      "Scegli le reti da usare."
     IDS_MAIN_READY          "eMule v%s è pronto"
-    IDS_TRANSVERSION        "Traduzione Italiana Idro182"
+    IDS_TRANSVERSION        "Traduzione Italiana f5"
     IDS_WIZARD_ED2K         "Impostazioni eD2K"
     IDS_SEL_SKIN            "Scegli una Skin..."
     IDS_MAIN_SOCKETERROR    "Errore Fatale: Impossibile creare un Socket sulla porta %i"
@@ -3397,14 +3397,14 @@ BEGIN
     IDS_CLEAR               "Pulisci"
     IDS_INVALID_HTTP_SRC    "Fonte HTTP non valida. Controlla che l'URL cominci con ""http://"""
     IDS_HTTP_LIST_CLEAR     "Questo rimuoverà tutte le fonti http. Sei sicuro?"
-    IDS_MINIMULEAUTOCLOSE   "AutoChiusuraMiniMule"
-    IDS_MINIMULETRANSPARENCY "TrasparenzaMiniMule"
-    IDS_CREATECRASHDUMP     "CreaUnCrashDump"
-    IDS_CHECKCOMCTL32       "ControllaComctl32 "
-    IDS_CHECKSHELL32        "ControllaShell32"
-    IDS_IGNOREINSTANCES     "IgnoraIstanze"
-    IDS_NOTIFIERMAILENCRYPTCERTNAME "NomeCertCriptNotificaMail"
-    IDS_MEDIAINFO_MEDIAINFODLLPATH "PercorsoDllMediaInfo"
+    IDS_MINIMULEAUTOCLOSE   "Chiusura automatica miniMule"
+    IDS_MINIMULETRANSPARENCY "Trasparenza miniMule"
+    IDS_CREATECRASHDUMP     "Crea un crash dump"
+    IDS_CHECKCOMCTL32       "Disabilita controllo Comctl32"
+    IDS_CHECKSHELL32        "Disabilita controllo Shell32"
+    IDS_IGNOREINSTANCES     "Ignora istanze multiple"
+    IDS_NOTIFIERMAILENCRYPTCERTNAME "Nome certificato per la criptaggio della notifica via email"
+    IDS_MEDIAINFO_MEDIAINFODLLPATH "Percorso della dll MediaInfo"
 END
 
 STRINGTABLE 
@@ -3419,7 +3419,7 @@ BEGIN
     IDS_RESTORELASTLOGPANE_TIP 
                             "Ricorda quale dei pannelli log (Log, Verbose)\nè stato usato nell'ultima sessione."
     IDS_PREVIEWCOPIEDARCHIVES_TIP 
-                            "Quando questa opzione è disabilitata (=0), eMule userà un nuovo metodo\nper l'alteprima più veloce e che usa meno spazio su disco nella cartella\ntemporanea. Feedbacks per questa nuova versione sono benvenuti."
+                            "Quando questa opzione è disabilitata (=0), eMule userà un nuovo metodo\nper l'anteprima più veloce e che usa meno spazio su disco nella cartella\ntemporanea. Feedbacks per questa nuova versione sono benvenuti."
     IDS_STRAIGHTWINDOWSTYLES_TIP 
                             "Cambia il look della finestra dei grafici delle statistiche e di qualche altra\ncosa minore. (richiede il riavvio)"
     IDS_LOGFILEFORMAT_TIP   "Cambia il formato del file log da unicode a UTF8 quando è impostato ad 1."
@@ -3467,7 +3467,7 @@ BEGIN
     IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(default 5,0=all)"
     IDS_HIGHRESTIMER        "HighresTimer"
     IDS_HIGHRESTIMER_TIP    "?"
-    IDS_TRUSTEVERYHASH_TIP  "(Sessione non salvata). SOLO DEBUG. Disattivazione votazione"
+    IDS_TRUSTEVERYHASH_TIP  "(Solo per la sessione, non verrà salvato). SOLO DEBUG. voto disabilitato "
     IDS_INSPECTALLFILETYPES_TIP 
                             "Per determinare il formato dei files scaricati/condivisi\nvalutando le intestazioni\n(molto utile quando la MediaInfo Lib è installata)"
     IDS_MAXMSGSESSIONS_TIP  "Numero massimo delle sessioni di chat"
@@ -3481,7 +3481,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_REMOVEFILESTOBIN    "RemoveFilesToBin"
+    IDS_REMOVEFILESTOBIN    "File rimossi Nel cestino"
     IDS_MINIMULEAUTOCLOSE_TIP 
                             "La finestra del MiniMule si solito resterà visibile fino alla sua chiusura.\nImpostando questo valore a 0 sarà automaticamente chiusa quando\nil cursore uscirà fuori dalla finestra. In un modo simile ad un tooltip.\n(default=1)"
     IDS_MINIMULETRANSPARENCY_TIP 
@@ -3506,9 +3506,10 @@ BEGIN
 	IDS_STATIC_ICON         "TrayIcon sempre visibile"
     IDS_COMPRESSLEVEL       "Livello compressione (1-9)"
     IDS_COMPRESSLEVEL_TIP   "Riduce il livello di compressione dei dati comprimibili. L'utilizzo di CPU è leggermente\nridotto, ma saranno richiesti più dati da inviare. Utile per reti ad altissima velocità.\n1 = usa meno CPU, compressione minore\n9 = usa più CPU, migliore compressione.\n(Default=9)"
-    IDS_USECOMPRESS         "UsaCompressione (sessione)"
+    IDS_USECOMPRESS         "Usa la compressione (sessione)"
     IDS_USECOMPRESS_TIP     "Opzione per disabilitare la compressione per tutti i dati utente. Utile per reti\nad altissima velocità (>~ 100mbit). Questa opzione non verrà salvata, per renderla\npermanente devi aggiungere 'UseCompression=' nel File 'preferences.ini'.\n(Default=attivato - raccomandato!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Stato Attuale"
+	IDS_USEUSERSORTEDSERVERLIST_TIP "Quando attivo questo userà lo stesso ordinamento della lista server\nvisualizzata nella GUI quando si prova a connettersi ad un server."
 END
 
 #endif    // Italian (Italy) resources

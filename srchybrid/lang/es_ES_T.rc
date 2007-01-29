@@ -216,7 +216,7 @@ BEGIN
     IDS_ERR_COMPLETIONFAILED 
                             "Error de archivo completando %s. Archivo pausado, reinicia eMule para reintentar completarlo"
     IDS_ERR_DELETEFAILED    "Error al borrar %s, tendrás que hacerlo a mano"
-    IDS_DOWNLOADDONE        "Descarga finalizada de %s :)"
+    IDS_DOWNLOADDONE        "Descarga finalizada de %s"
     IDS_ERR_DELETE          "Error al borrar %s"
 END
 
@@ -1934,7 +1934,7 @@ BEGIN
     IDS_DATEFILENAMELOG     "Logear Nombre de Archivo en fecha "
     IDS_ECFEF               "Mismas Posibilidades Para Cada Archivo"
     IDS_ALL_TIME            "Todo El Tiempo"
-    IDS_COPYFEEDBACK        "Copiar Respuestas Al Portapapeles"
+    IDS_COPYFEEDBACK        "Copiar Respuestas al Portapapeles"
     IDS_ANTILEECHERLOG      "[Anti-leechermods] El usuario %s ha sido baneado temporalmente por tener una actividad sospechosamente parecida a la de un leecher"
 END
 
@@ -3518,11 +3518,12 @@ BEGIN
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "El eMule recuerda que ventana\n(KAD, Servidores, Tráfico, ha sido abierta, antes de que la aplicación sea cerrada\ny la restaura. Por defecto = deseleccionada"
   	IDS_STATIC_ICON         "Mostrar siempre el icono de la bandeja de sistema"
-		IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
-		IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
+	IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
+	IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
     IDS_USECOMPRESS         "Usar la Compresión (sesión)"
-		IDS_USECOMPRESS_TIP     "Opción que desactiva cualquier tipo de compresión de datos del usuario.\nMuy útil para velocidaddes MUY RÁPIDAS con el servidor (>~ 100mbit)\nEsta opción no se guarda, para fijarlo permanentemente\nnecesitas añadir el código 'UseCompression =' en el fichero preferences.ini\nPor defecto = activado (¡Recomendado!)"
-	IDC_SVC_CURRENT_STATUS_LABEL "Current Status"
+	IDS_USECOMPRESS_TIP     "Opción que desactiva cualquier tipo de compresión de datos del usuario.\nMuy útil para velocidaddes MUY RÁPIDAS con el servidor (>~ 100mbit)\nEsta opción no se guarda, para fijarlo permanentemente\nnecesitas añadir el código 'UseCompression =' en el fichero preferences.ini\nPor defecto = activado (¡Recomendado!)"
+	IDC_SVC_CURRENT_STATUS_LABEL "Estado actual"
+	IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, usa el mismo criterio que clasifica a los servidores\nen la pestaña de Servidores en el GUI cuando se intenta conectar a un servidor."
 END
 
 

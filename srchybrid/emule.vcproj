@@ -31,7 +31,7 @@
 				EnableFunctionLevelLinking="TRUE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
-				UsePrecompiledHeader="3"
+				UsePrecompiledHeader="2"
 				WarningLevel="4"
 				DebugInformationFormat="3"/>
 			<Tool
@@ -158,7 +158,7 @@
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
-				FavorSizeOrSpeed="1"
+				FavorSizeOrSpeed="2"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="2"
@@ -166,11 +166,12 @@
 				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
+				BasicRuntimeChecks="0"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
 				TreatWChar_tAsBuiltInType="TRUE"
-				UsePrecompiledHeader="3"
+				UsePrecompiledHeader="1"
 				WarningLevel="3"
 				DebugInformationFormat="3"/>
 			<Tool
@@ -425,6 +426,9 @@
 			</File>
 			<File
 				RelativePath=".\ModVersion.cpp">
+			</File>
+			<File
+				RelativePath=".\NTService.cpp">
 			</File>
 			<File
 				RelativePath="OtherFunctions.cpp">
@@ -1410,6 +1414,9 @@
 			</File>
 			<File
 				RelativePath="PPgNotify.cpp">
+			</File>
+			<File
+				RelativePath=".\PPgNTServer.cpp">
 			</File>
 			<File
 				RelativePath="PPgProxy.cpp">

@@ -41,7 +41,7 @@
  * If using the default (no __CLEANUP_* defined), pthread.h will define it
  * as __CLEANUP_C.
  */
-
+ /*
 #ifdef PTW32_RC_MSC
 #  if defined(__CLEANUP_C)
 #    define PTW32_VERSIONINFO_NAME "pthreadVC\0"
@@ -382,3 +382,5 @@ string-name
 			present only if VS_FF_SPECIALBUILD is specified in
 			the fileflags parameter of the root block.
  */
+
+*/

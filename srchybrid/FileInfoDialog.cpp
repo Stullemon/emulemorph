@@ -861,7 +861,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 	// Check for AVI file
 	//
 	bool bIsAVI = false;
-	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF"), 1))
+	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF"), 1)) //MORPH add a _ to rename temporary
 	{
 		try
 		{
@@ -884,7 +884,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 	////////////////////////////////////////////////////////////////////////////
 	// Check for MPEG Audio file
 	//
-	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_ID3LIB"), 1) &&
+	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_ID3LIB_"), 1) &&
 		(_tcscmp(szExt, _T(".mp3"))==0 || _tcscmp(szExt, _T(".mp2"))==0 || _tcscmp(szExt, _T(".mp1"))==0 || _tcscmp(szExt, _T(".mpa"))==0))
 	{
 		try

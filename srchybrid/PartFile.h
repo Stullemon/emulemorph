@@ -182,6 +182,7 @@ public:
 
 	bool	SavePartFile();
 	void	PartFileHashFinished(CKnownFile* result);
+	bool	HashSinglePart(UINT partnumber); // true = ok , false = corrupted //MORPH - Flush Thread
 	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
 	void	PartHashFinished(uint16 partnumber, bool corrupt);
 	void	PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt);

@@ -578,7 +578,7 @@ void CPPToolTip::PrepareDisplayToolTip(CPoint * pt)
 	if (!(m_pToolInfo.nMask & PPTOOLTIP_MASK_EFFECT))
 	{
 		m_pToolInfo.nEffect = m_nEffect;
-		m_pToolInfo.nGranularity = m_nGranularity;
+		m_pToolInfo.nGranularity =(BYTE) m_nGranularity;
 	}
 	if (!(m_pToolInfo.nMask & PPTOOLTIP_MASK_COLORS))
 	{

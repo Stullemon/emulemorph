@@ -933,6 +933,7 @@ void CUploadQueue::Process() {
 	
 	//MORPH START - Upload Splitting Class
 	uint32 needToaddmoreslot = false;
+	bool bCanAddNewSlot = theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections();
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 	//Morph Start - changed by AndCycle, Dont Remove Spare Trickle Slot
 	/*
@@ -967,7 +968,7 @@ void CUploadQueue::Process() {
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
             //AddClientToQueue(lastClient,true, true);
         }
-		} else if (ForceNewClient(false, classID)){
+		} else if (ForceNewClient(false, classID) && bCanAddNewSlot){
 			// There's not enough open uploads. Open another one.
 			needToaddmoreslot = true;
 		}
@@ -1096,9 +1097,6 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 					needtoaddslot = true;
 		}
 		if (!simulateScheduledClosingOfSlot) {
-			//Delay Slot open every 1 second
-			if (uploadinglist.GetCount() != 0 && ::GetTickCount() - m_nLastStartUpload < max(SEC2MS(1),(UINT)(SEC2MS(3)/uploadinglist.GetCount())) /* && datarate < 102400*/)
-    			needtoaddslot = false;
 			//Mark the class to be able to receive a slot or not
 			m_abAddClientOfThisClass[classID] = needtoaddslot;
 		}

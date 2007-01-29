@@ -78,7 +78,7 @@
  */
 
 //@{
-#define MIN_THREADS 2 
+#define MIN_THREADS 1 
 //@}
 
 /** @name MAX_THREADS

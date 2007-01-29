@@ -1307,8 +1307,8 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 
 	m_BlockRequests_queue.AddTail(reqblock);
 	//MORPH START - Determine Remote Speed
-		DWORD curTick = GetTickCount();
-	if (curTick - m_dwUpDatarateAVG > SEC2MS(10)) {
+	DWORD curTick = GetTickCount();
+	if (curTick - m_dwUpDatarateAVG > SEC2MS(1)) {
 		m_nUpDatarateAVG = max(m_nUpDatarateAVG, 1000*(m_nTransferredUp-m_nTransferredUpDatarateAVG)/(curTick+1 - m_dwUpDatarateAVG));
 		m_nTransferredUpDatarateAVG = m_nTransferredUp;
 		m_dwUpDatarateAVG = curTick;

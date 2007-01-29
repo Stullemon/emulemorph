@@ -464,6 +464,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	uint32 rememberSlotCounter[NB_SPLITTING_CLASS];
 	sint64 realBytesToSpendClass[NB_SPLITTING_CLASS];
 	memset(realBytesToSpendClass,0,sizeof(realBytesToSpendClass));
+	DWORD	dwLastFullBandwidthSpent = timeGetTime();
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	uint32 nEstiminatedLimit = 0;
 	int nSlotsBusyLevel = 0;
@@ -891,8 +892,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							}
 							
 							if ((uint64)BytesToSpend >= doubleSendSize+spentBytes) {
-								m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-								realBytesToSpendClass[classID] = doubleSendSize;
+								if ((GetTickCount() - dwLastFullBandwidthSpent) > 1000) {
+									m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
+									realBytesToSpendClass[classID] = doubleSendSize;
+									dwLastFullBandwidthSpent = timeGetTime();
+								}
+							} else {
+								dwLastFullBandwidthSpent = timeGetTime();
 							}
 						} else {
 							if (realBytesToSpendClass[classID] > doubleSendSize) {
