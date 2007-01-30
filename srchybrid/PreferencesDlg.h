@@ -19,7 +19,12 @@
 #include "PPgDebug.h"
 #endif
 #include "otherfunctions.h"
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 #include "TreePropSheet.h"
+*/
+#include "ListBoxST.h"
+//MORPH END   - Preferences groups [ePlus/Sirob]
 #include "PPgMorph.h" //MORPH - Added by IceCream, Morph Prefs
 #include "PPgMorphShare.h" //MORPH - Added by SiRoB, Morph Prefs
 #include "PPgMorph2.h" //MORPH - Added by SiRoB, Morph Prefs
@@ -32,7 +37,12 @@
 #include "SlideBar.h" //MORPH - Added by SiRoB, ePLus Group
 #include "PPGNTServer.h" //MORPH leuk_he:run as ntservice v1.. 
 
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 class CPreferencesDlg : public CTreePropSheet
+*/
+class CPreferencesDlg : public CPropertySheet
+//MORPH END   - Preferences groups [ePlus/Sirob]
 {
 	DECLARE_DYNAMIC(CPreferencesDlg)
 
@@ -94,4 +104,17 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 public:
 	CKCSideBannerWnd m_banner;	//Commander - Added: Preferences Banner [TPT]	
+
+//MORPH START - Preferences groups [ePlus/Sirob]
+	CListBoxST		m_listbox;
+	CButton			m_groupbox;
+	CImageList		ImageList;
+	int				m_iPrevPage;
+	CSlideBar	 	m_slideBar;
+	void OpenPage(UINT uResourceID);
+protected:
+	UINT m_nActiveWnd;
+	afx_msg LRESULT		OnSlideBarSelChanged(WPARAM wParam, LPARAM lParam);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+//MORPH END   - Preferences groups [ePlus/Sirob]
 };

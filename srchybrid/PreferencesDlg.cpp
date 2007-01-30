@@ -25,10 +25,20 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 IMPLEMENT_DYNAMIC(CPreferencesDlg, CTreePropSheet)
 
 BEGIN_MESSAGE_MAP(CPreferencesDlg, CTreePropSheet)
 	ON_WM_DESTROY()
+*/
+IMPLEMENT_DYNAMIC(CPreferencesDlg, CPropertySheet)
+
+BEGIN_MESSAGE_MAP(CPreferencesDlg, CPropertySheet)
+	ON_WM_DESTROY()
+		ON_MESSAGE(WM_SBN_SELCHANGED, OnSlideBarSelChanged) //MORPH - Changed by SiRoB, ePlus Group
+	ON_WM_CTLCOLOR()
+//MORPH END   - Preferences groups [ePlus/Sirob]
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
@@ -49,6 +59,10 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndScheduler.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndProxy.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndMessages.m_psp.dwFlags &= ~PSH_HASHELP;
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	m_wndDebug.m_psp.dwFlags &= ~PSH_HASHELP;
+#endif
+
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
 	m_wndMorphShare.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
@@ -56,11 +70,8 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 	m_wndEmulespana.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, emulEspaña preferency
 	m_wndWebcachesettings.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, WebCache 1.2f
-    //m_wndIonixWebServer.m_psp.dwFlags &= ~PSH_HASHELP;  //ionix advanced webserver
-#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
-	m_wndDebug.m_psp.dwFlags &= ~PSH_HASHELP;
-#endif
-
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 	CTreePropSheet::SetPageIcon(&m_wndGeneral, _T("Preferences"));
 	CTreePropSheet::SetPageIcon(&m_wndDisplay, _T("DISPLAY"));
 	CTreePropSheet::SetPageIcon(&m_wndConnection, _T("CONNECTION"));
@@ -76,17 +87,13 @@ CPreferencesDlg::CPreferencesDlg()
 	CTreePropSheet::SetPageIcon(&m_wndWebServer, _T("WEB"));
 	CTreePropSheet::SetPageIcon(&m_wndTweaks, _T("TWEAK"));
 	CTreePropSheet::SetPageIcon(&m_wndMessages, _T("MESSAGES"));
-	CTreePropSheet::SetPageIcon(&m_wndBackup, _T("BACKUP")); //EastShare - Added by Pretender, TBH-AutoBackup
-	CTreePropSheet::SetPageIcon(&m_wndMorph, _T("MORPH")); //MORPH - Added by IceCream, Morph Prefs
-	CTreePropSheet::SetPageIcon(&m_wndMorphShare, _T("MORPH")); //MORPH - Added by SiRoB, Morph Prefs
-	CTreePropSheet::SetPageIcon(&m_wndMorph2, _T("MORPH")); //MORPH - Added by SiRoB, Morph Prefs
-	CTreePropSheet::SetPageIcon(&m_wndEastShare, _T("EASTSHARE")); //EastShare - Added by Pretender, ES Prefs
-	CTreePropSheet::SetPageIcon(&m_wndEmulespana, _T("EMULESPANA")); //MORPH - Added by SiRoB, emulEspaña preferency
-	CTreePropSheet::SetPageIcon(&m_wndWebcachesettings, _T("WEBCACHE")); //MORPH - Added by SiRoB, WebCache 1.2f
 	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	CTreePropSheet::SetPageIcon(&m_wndDebug, _T("Preferences"));
     #endif
-    //CTreePropSheet::SetPageIcon(&m_wndIonixWebServer, _T("MORPH"));
+*/
+    m_wndIonixWebServer.m_psp.dwFlags &= ~PSH_HASHELP;  //ionix advanced webserver
+    m_wndNTService.m_psp.dwFlags &= ~PSH_HASHELP; 
+//MORPH END   - Preferences groups [ePlus/Sirob]
 	
 	AddPage(&m_wndGeneral);
 	AddPage(&m_wndDisplay);
@@ -103,6 +110,9 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndScheduler);
 	AddPage(&m_wndWebServer);
 	AddPage(&m_wndTweaks);
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	AddPage(&m_wndDebug);
+#endif
 	AddPage(&m_wndBackup); //EastShare - Added by Pretender, TBH-AutoBackup
 	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
 	AddPage(&m_wndMorphShare); //MORPH - Added by SiRoB, Morph Prefs
@@ -110,15 +120,18 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
 	AddPage(&m_wndWebcachesettings); //MORPH - Added by SiRoB, WebCache 1.2f
-#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
-	AddPage(&m_wndDebug);
-#endif
      AddPage(&m_wndIonixWebServer); // Morph - ionix advanced webserver
 	 AddPage(&m_wndNTService); // MORPH leuk_he:run as ntservice v1..
 
 
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 	SetTreeViewMode(TRUE, TRUE, TRUE);
 	SetTreeWidth(170);
+*/
+	m_nActiveWnd = 0;
+	m_iPrevPage = -1;
+//MORPH END   - Preferences groups [ePlus/Sirob]
 
 	m_pPshStartPage = NULL;
 	m_bSaveIniFile = false;
@@ -136,19 +149,52 @@ CPreferencesDlg::~CPreferencesDlg()
 
 void CPreferencesDlg::OnDestroy()
 {
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 	CTreePropSheet::OnDestroy();
+*/
+	CPropertySheet::OnDestroy();
+//MORPH END   - Preferences groups [ePlus/Sirob]
 	if (m_bSaveIniFile)
 	{
 		thePrefs.Save();
 		m_bSaveIniFile = false;
 	}
+	m_nActiveWnd = GetActiveIndex(); //MORPH - Preferences groups [ePlus/Sirob]
+
 	m_pPshStartPage = GetPage(GetActiveIndex())->m_psp.pszTemplate;
 }
 
 BOOL CPreferencesDlg::OnInitDialog()
 {		
 	ASSERT( !m_bSaveIniFile );
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 	BOOL bResult = CTreePropSheet::OnInitDialog();
+*/
+	EnableStackedTabs(FALSE);
+	BOOL bResult = CPropertySheet::OnInitDialog();
+	m_slideBar.CreateEx(WS_EX_CLIENTEDGE, WS_CHILD | WS_VISIBLE | WS_BORDER, CRect(0, 0, 0, 0), this, 111);
+	m_slideBar.SetImageList(&ImageList);
+	m_slideBar.SetHAlignCaption(DT_CENTER);
+	m_groupbox.Create(0,BS_GROUPBOX|WS_CHILD|WS_VISIBLE|BS_FLAT,CRect(0,0,0,0),this,666);
+	::SendMessage(m_groupbox.m_hWnd, WM_SETFONT, (WPARAM) ::GetStockObject(DEFAULT_GUI_FONT),0);
+
+	//sets a bold font for the group buttons
+	CFont* pGroupFont = m_slideBar.GetGroupFont();
+	ASSERT_VALID(pGroupFont);
+	LOGFONT logFont;
+	pGroupFont->GetLogFont(&logFont);
+	logFont.lfWeight *= 2;
+	if (logFont.lfWeight > FW_BLACK)
+	{
+		logFont.lfWeight = FW_BLACK;
+	}
+	pGroupFont->DeleteObject();
+	pGroupFont->CreateFontIndirect(&logFont);
+	ASSERT_VALID(pGroupFont);
+
+//MORPH END   - Preferences groups [ePlus/Sirob]
 	InitWindowStyles(this);
 
 	for (int i = 0; i < m_pages.GetSize(); i++)
@@ -179,6 +225,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 	}
 
 	Localize();	
+	m_slideBar.SetFocus(); //MORPH - Preferences groups [ePlus/Sirob]
 
 	//MORPH START - Added by SiRoB, Load a jpg
 	CBitmap bmp;
@@ -200,7 +247,40 @@ BOOL CPreferencesDlg::OnInitDialog()
 
 void CPreferencesDlg::Localize()
 {
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 	SetTitle(RemoveAmbersand(GetResString(IDS_EM_PREFS))); 
+*/
+	ImageList.DeleteImageList();
+	ImageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+	ImageList.Add(CTempIconLoader(_T("PREFERENCES")));			//0
+	ImageList.Add(CTempIconLoader(_T("DISPLAY")));				//1
+	ImageList.Add(CTempIconLoader(_T("CONNECTION")));			//2
+	ImageList.Add(CTempIconLoader(_T("PROXY")));				//3
+	ImageList.Add(CTempIconLoader(_T("SERVER")));				//4
+	ImageList.Add(CTempIconLoader(_T("FOLDERS")));				//5
+	ImageList.Add(CTempIconLoader(_T("TRANSFER")));				//6
+	ImageList.Add(CTempIconLoader(_T("NOTIFICATIONS")));		//7
+	ImageList.Add(CTempIconLoader(_T("STATISTICS")));			//8
+	ImageList.Add(CTempIconLoader(_T("IRC")));					//9
+	ImageList.Add(CTempIconLoader(_T("MESSAGES")));				//10
+	ImageList.Add(CTempIconLoader(_T("SECURITY")));				//11
+	ImageList.Add(CTempIconLoader(_T("SCHEDULER")));			//12
+	ImageList.Add(CTempIconLoader(_T("WEB")));					//13
+	ImageList.Add(CTempIconLoader(_T("TWEAK")));				//14
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	ImageList.Add(CTempIconLoader(_T("PREFERENCES")));			//15
+#endif
+	ImageList.Add(CTempIconLoader(_T("BACKUP"))); //EastShare - Added by Pretender, TBH-AutoBackup
+	ImageList.Add(CTempIconLoader(_T("MORPH")));  //MORPH - Added by IceCream, Morph Prefs
+	ImageList.Add(CTempIconLoader(_T("MORPH")));  //MORPH - Added by SiRoB, Morph Prefs
+	ImageList.Add(CTempIconLoader(_T("MORPH")));  //MORPH - Added by SiRoB, Morph Prefs
+	ImageList.Add(CTempIconLoader(_T("EASTSHARE")));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
+	ImageList.Add(CTempIconLoader(_T("EMULESPANA")));  //MORPH - Added by IceCream, eMulEspaña Preferency
+	ImageList.Add(CTempIconLoader(_T("WEBCACHE")));  //MORPH - Added by SiRoB, WebCache 1.2f
+	
+	m_slideBar.SetImageList(&ImageList);
+//MORPH END   - Preferences groups [ePlus/Sirob]
 
 	m_wndGeneral.Localize();
 	m_wndDisplay.Localize();
@@ -225,8 +305,11 @@ void CPreferencesDlg::Localize()
 	m_wndWebcachesettings.Localize(); //MORPH - Added by SiRoB, WebCache 1.2f
     m_wndIonixWebServer.Localize(); //MORPH ionix advanced webserver
 	m_wndNTService.Localize(); //MORPH leuk_he:run as ntservice v1..
+	m_slideBar.ResetContent(); //MORPH - Preferences groups [ePlus/Sirob]
 	int c = 0;
 
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 	CTreeCtrl* pTree = GetPageTreeControl();
 	if (pTree)
 	{
@@ -243,37 +326,115 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_MESSAGESCOMMENTS)));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SECURITY))); 
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SCHEDULER)));
-		pTree->SetItemText(GetPageTreeItem(Webserver=c++), RemoveAmbersand(GetResString(IDS_PW_WS)));
+		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WS)));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_TWEAK)));
-		//	MOD group
-		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_BACKUP)));
-		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("Morph")));
-		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("Morph Share")));
-		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("Morph Update")));
-		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("EastShare")));
-		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(_T("emulEspaña")));
-		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WEBCACHE)));  //MORPH - Added by SiRoB, WebCache 1.2f
     	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 		pTree->SetItemText(GetPageTreeItem(c++), _T("Debug"));
 	     #endif
-		pTree->SetItemText(GetPageTreeItem(Multiwebserver=c++), RemoveAmbersand(_T(" ")));	// MORPH ionix advanced webserver must be last!
-		pTree->SetItemText(GetPageTreeItem(NTService=c++), RemoveAmbersand(_T(" "))); // MORPH leuk_he:run as ntservice v1..
-    //  
-	
 	}
-	m_banner.UpdateSize(); //Commander - Added: Preferences Banner [TPT]	
-	//MORPH START - Added by SiRoB, Adjust tabHeigh
-	CRect rectTab,rectClient;
-	pTree->GetWindowRect(rectTab);
-	GetClientRect(rectClient);
-	pTree->SetWindowPos(NULL,-1,-1,rectTab.Width(),rectClient.Height()-13,SWP_NOZORDER | SWP_NOMOVE);
-	//MORPH END   - Added by SiRoB, Adjust tabHeigh
+
 	UpdateCaption();
+*/
+//	Official group
+	int iGroup = m_slideBar.AddGroup(GetResString(IDS_PW_GENERAL)/*, 1*/);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_GENERAL), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_DISPLAY), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_CONNECTION), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_PROXY), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_SERVER), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_DIR), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_FILES), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_EKDEV_OPTIONS), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_STATSSETUPINFO), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_IRC), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_MESSAGESCOMMENTS), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_SECURITY), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_SCHEDULER), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_WS), iGroup, Webserver=c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_TWEAK), iGroup, c++);
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	m_slideBar.AddGroupItem(_T("Debug"), iGroup, c++);
+#endif
+
+	//	MOD group
+	iGroup = m_slideBar.AddGroup(_T("Mod"));
+	m_slideBar.AddGroupItem(GetResString(IDS_BACKUP), iGroup, c++);
+	m_slideBar.AddGroupItem(_T("Morph"), iGroup, c++);
+	m_slideBar.AddGroupItem(_T("Morph Share"), iGroup, c++);
+	m_slideBar.AddGroupItem(_T("Morph Update"), iGroup, c++);
+	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, c++);
+	m_slideBar.AddGroupItem(_T("emulEspaña"), iGroup, c++); //MORPH - Added by SiRoB, emulEspaña preferency
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_WEBCACHE), iGroup, c++); //MORPH - Added by SiRoB, WebCache 1.2f
+	//m_slideBar.AddGroupItem(_T(" "), iGroup, Multiwebserver=c++); // ionix advnaced webserver
+	Multiwebserver=c++;
+	NTService=c++;
+
+	//	Determines the width needed to the slidebar, and its position
+	int width = m_slideBar.GetGreaterStringWidth();
+	CTabCtrl* tab = GetTabControl();
+	width += 60;
+	CRect rectOld;
+
+	m_slideBar.GetWindowRect(rectOld);
+
+	int xoffset, yoffset;
+	if(IsWindowVisible())
+	{
+		yoffset=0;
+		xoffset=width-rectOld.Width();
+	}
+	else
+	{
+		xoffset=width-rectOld.Width()+10;
+		GetActivePage()->GetWindowRect(rectOld);
+		tab->GetItemRect(0,rectOld);
+		yoffset=-rectOld.Height();
+	}
+	GetWindowRect(rectOld);
+	SetWindowPos(NULL,0,0,rectOld.Width()+xoffset,rectOld.Height()+yoffset,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+	tab->GetWindowRect (rectOld);
+	ScreenToClient (rectOld);
+	tab->SetWindowPos(NULL,rectOld.left+xoffset+2,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+	CPropertyPage* activepage = GetActivePage();
+	activepage->GetWindowRect(rectOld);
+	ScreenToClient (rectOld);
+	activepage->SetWindowPos(NULL,rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+	activepage->GetWindowRect(rectOld);
+	ScreenToClient (rectOld);
+	m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10,SWP_NOZORDER|SWP_NOACTIVATE);
+	m_groupbox.GetWindowRect(rectOld);
+	ScreenToClient(rectOld);
+	GetClientRect(rectOld);
+	m_slideBar.SetWindowPos(NULL, 6, 6, width, rectOld.Height() - 12, SWP_NOZORDER | SWP_NOACTIVATE);
+	int _PropSheetButtons[] = {IDOK, IDCANCEL, ID_APPLY_NOW, IDHELP };
+	CWnd* PropSheetButton;
+	for (int i = 0; i < sizeof (_PropSheetButtons) / sizeof(_PropSheetButtons[0]); i++)
+	{
+		if ((PropSheetButton = GetDlgItem(_PropSheetButtons[i])) != NULL)
+		{
+			PropSheetButton->GetWindowRect (rectOld);
+			ScreenToClient (rectOld);
+			PropSheetButton->SetWindowPos (NULL, rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+		}
+	}
+	tab->ShowWindow(SW_HIDE);
+	m_slideBar.SelectGlobalItem(GetActiveIndex());
+	OnSlideBarSelChanged(NULL, NULL);
+	m_banner.UpdateSize(); //Commander - Added: Preferences Banner [TPT]
+	CenterWindow();
+	Invalidate();
+	RedrawWindow();
+//MORPH END   - Preferences groups [ePlus/Sirob]
 }
 
 void CPreferencesDlg::OnHelp()
 {
+//MORPH START - Preferences groups [ePlus/Sirob]
+/*
 	int iCurSel = GetActiveIndex();
+*/
+	int iCurSel = m_listbox.GetCurSel();
+//MORPH END   - Preferences groups [ePlus/Sirob]
 	if (iCurSel >= 0)
 	{
 		CPropertyPage* pPage = GetPage(iCurSel);
@@ -350,3 +511,58 @@ void CPreferencesDlg::SwitchTab(int Page)
 	}
 }
 // MORPH end tabbed option [leuk_he]
+
+//MORPH START - Preferences groups [ePlus/Sirob]
+LRESULT CPreferencesDlg::OnSlideBarSelChanged(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	int iCurrentGlobalSel	= m_slideBar.GetGlobalSelectedItem();
+
+	SetActivePage(iCurrentGlobalSel);
+
+	CListBoxST* pListBox = m_slideBar.GetGroupListBox(m_slideBar.GetSelectedGroupIndex());
+	ASSERT_VALID(pListBox);
+
+	CString strCurrentItemText;
+	pListBox->GetText(pListBox->GetCurSel(), strCurrentItemText);
+
+	CString strCurrentGroupText = m_slideBar.GetGroupName(m_slideBar.GetSelectedGroupIndex());
+	strCurrentGroupText.Remove('&');
+
+	CString strTitle = GetResString(IDS_EM_PREFS);
+	strTitle.Remove('&');
+	SetWindowText(strTitle + _T(" -> ") + strCurrentGroupText + _T(" -> ") + strCurrentItemText);
+
+//	m_groupbox.SetWindowText(strCurrentItemText);
+
+	pListBox->SetFocus();
+
+	return true;
+}
+
+HBRUSH CPreferencesDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CPropertySheet::OnCtlColor(pDC, pWnd, nCtlColor);
+	if (m_groupbox.m_hWnd == pWnd->m_hWnd) 
+	{
+		pDC->SetBkColor(GetSysColor(COLOR_BTNFACE));
+		hbr = GetSysColorBrush(COLOR_BTNFACE);
+	}
+	return hbr;
+}
+
+void CPreferencesDlg::OpenPage(UINT uResourceID)
+{
+	int iCurActiveWnd = m_nActiveWnd;
+	for (int i = 0; i < m_pages.GetSize(); i++)
+	{
+		CPropertyPage* pPage = GetPage(i);
+		if (pPage->m_psp.pszTemplate == MAKEINTRESOURCE(uResourceID))
+		{
+			m_nActiveWnd = i;
+			break;
+		}
+	}
+	DoModal();
+	m_nActiveWnd = iCurActiveWnd;
+}
+//MORPH END   - Preferences groups [ePlus/Sirob]
