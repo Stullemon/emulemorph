@@ -348,6 +348,24 @@ CSearchFile* CSearchList::DetachNextFile(uint32 nSearchID)
 
 bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 {
+
+	// MORPH START SLUGFILLER: searchCatch
+	CPartFile *file = theApp.downloadqueue->GetFileByID(toadd->GetFileHash());
+	if (file){
+		if (toadd->GetClientID() && toadd->GetClientPort()){
+			// pre-filter sources which would be dropped in CPartFile::AddSources
+			if (CPartFile::CanAddSource(toadd->GetClientID(), toadd->GetClientPort(), toadd->GetClientServerIP(), toadd->GetClientServerPort())){
+				CSafeMemFile sources(1+4+2);
+				sources.WriteUInt8(1);
+				sources.WriteUInt32(toadd->GetClientID());
+				sources.WriteUInt16(toadd->GetClientPort());
+				sources.SeekToBegin();
+				file->AddSources(&sources,toadd->GetClientServerIP(),toadd->GetClientServerPort(),false);
+			}
+		}
+	}
+	// MORPH END SLUGFILLER: searchCatch
+
 	if (!bClientResponse && !m_strResultFileType.IsEmpty() && _tcscmp(m_strResultFileType, toadd->GetFileType()) != 0)
 	{
 		delete toadd;

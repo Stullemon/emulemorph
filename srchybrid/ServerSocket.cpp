@@ -723,12 +723,14 @@ void CServerSocket::ConnectTo(CServer* server, bool bNoCrypt)
 
 	uint16 nPort = 0;
 	cur_server = new CServer(server);
+	 
 	if ( !bNoCrypt && thePrefs.IsServerCryptLayerTCPRequested() && server->GetObfuscationPortTCP() != 0 && server->SupportsObfuscationTCP()){
 		Log(GetResString(IDS_CONNECTINGTOOBFUSCATED), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetObfuscationPortTCP());
 		nPort = cur_server->GetObfuscationPortTCP();
 		SetConnectionEncryption(true, NULL, true);
 	}
 	else{
+		ASSERT((thePrefs.IsServerCryptLayerRequiredStrict()==false)); // lh csc It should net even try if the option is set. 
 		Log(GetResString(IDS_CONNECTINGTO), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetPort());
 		nPort = cur_server->GetPort();
 		SetConnectionEncryption(false, NULL, true);
@@ -771,8 +773,15 @@ bool CServerSocket::PacketReceived(Packet* packet)
 {
 #ifndef _DEBUG
 	try {
-#endif
+#endif	
+		
 		theStats.AddDownDataOverheadServer(packet->size);
+		// START lh csc
+		if	(thePrefs.IsServerCryptLayerRequiredStrict()&&!IsServerCryptEnabledConnection()){
+				DebugLogError(_T("Connection not obfuscated. DO not process data"));
+			    return false;
+		}
+		// END lh csc
 		if (packet->prot == OP_PACKEDPROT)
 		{
 			uint32 uComprSize = packet->size;
@@ -785,7 +794,6 @@ bool CServerSocket::PacketReceived(Packet* packet)
 			if (thePrefs.GetDebugServerTCPLevel() > 1)
 				Debug(_T("Received compressed server TCP packet; opcode=0x%02x  size=%u  uncompr size=%u\n"), packet->opcode, uComprSize, packet->size);
 		}
-
 		if (packet->prot == OP_EDONKEYPROT)
 		{
 			ProcessPacket((const BYTE*)packet->pBuffer, packet->size, packet->opcode);

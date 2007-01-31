@@ -180,6 +180,7 @@ void CUDPSocket::OnReceive(int nErrorCode)
 			DebugLogError(_T("Error: Server UDP socket: Receive failed - %s"), GetErrorMessage(nErrorCode, 1));
 	}
 
+	bool IsEncrypted=false; // MORPH lh require obfuscated server connection 
 	BYTE buffer[5000];
 	BYTE* pBuffer = buffer;
 	SOCKADDR_IN sockAddr = {0};
@@ -201,12 +202,19 @@ void CUDPSocket::OnReceive(int nErrorCode)
 
 			ASSERT( dwKey != 0 );
 			nPayLoadLen = DecryptReceivedServer(buffer, length, &pBuffer, dwKey,sockAddr.sin_addr.S_un.S_addr);
+			
+			if (nPayLoadLen < length) IsEncrypted=true; // MORPH lh require obfuscated server connection 
 			if (nPayLoadLen == length)
 				DebugLogWarning(_T("Expected encrypted packet, but received unencrytped from server %s, UDPKey %u, Challenge: %u"), pServer->GetListName(), pServer->GetServerKeyUDP(), pServer->GetChallenge());
 			else
 				DEBUG_ONLY(DebugLog(_T("Received encrypted packet from server %s, UDPKey %u, Challenge: %u"), pServer->GetListName(), pServer->GetServerKeyUDP(), pServer->GetChallenge()));
 		}
-
+		// START MORPH lh require obfuscated server connection  
+		if (IsEncrypted== false &&thePrefs.IsServerCryptLayerRequiredStrict()) {
+				DebugLogWarning(_T("server %s obfuscation required, Ignored udp packet lenght=%d"), ipstr(sockAddr.sin_addr),length );
+		}
+		else
+		// END MORPH lh require obfuscated server connection  
 		if (pBuffer[0] == OP_EDONKEYPROT)
 			ProcessPacket(pBuffer+2, nPayLoadLen-2, pBuffer[1], sockAddr.sin_addr.S_un.S_addr, ntohs(sockAddr.sin_port));
 		else if (thePrefs.GetDebugServerUDPLevel() > 0)

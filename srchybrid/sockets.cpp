@@ -52,7 +52,7 @@ void CServerConnect::TryAnotherConnectionRequest()
 		{
 			if (connectionattemps.GetCount() == 0)
 			{
-				if (m_bTryObfuscated && !thePrefs.IsClientCryptLayerRequired()){
+				if (m_bTryObfuscated && !(thePrefs.IsClientCryptLayerRequired()||thePrefs.IsServerCryptLayerRequiredStrict())){ // MORPH lh require obfuscated server connection    
 					// try all servers on the non-obfuscated port next
 					m_bTryObfuscated = false;
 					ConnectToAnyServer(0, true, true, true);
@@ -98,7 +98,7 @@ void CServerConnect::ConnectToAnyServer(UINT startAt, bool prioSort, bool isAuto
 		bool anystatic = false;
 		CServer *next_server;
 		theApp.serverlist->SetServerPosition(startAt);
-		while ((next_server = theApp.serverlist->GetNextServer(false)) != NULL)
+		while ((next_server = theApp.serverlist->GetNextServer(thePrefs.IsServerCryptLayerRequiredStrict())) != NULL) //MORPH lh require obfuscated server connection  ServerCryptrequired instead of false.
 		{
 			if (next_server->IsStaticMember()) {
 				anystatic = true;
@@ -133,6 +133,15 @@ void CServerConnect::ConnectToAnyServer(UINT startAt, bool prioSort, bool isAuto
 
 void CServerConnect::ConnectToServer(CServer* server, bool multiconnect, bool bNoCrypt)
 {
+	//START MORPH lh require obfuscated server connection  
+	if (thePrefs.IsServerCryptLayerRequiredStrict() && 
+		(bNoCrypt ||!(server->SupportsObfuscationTCP()))) {
+		ASSERT(thePrefs.IsServerCryptLayerRequiredStrict()==true); // IsServerCryptLayerRequiredStrict, obfuscation required for server should have been handled elsewere. stacktrace!
+		return;
+	}
+	//END MORPH lh require obfuscated server connection 
+
+
 	if (!multiconnect) {
 		StopConnectionTry();
 		Disconnect();
@@ -212,10 +221,14 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 		uint32 dwCryptFlags = 0;
 		if (thePrefs.IsClientCryptLayerSupported())
 			dwCryptFlags |= SRVCAP_SUPPORTCRYPT;
-		if (thePrefs.IsClientCryptLayerRequested())
+		if (thePrefs.IsClientCryptLayerRequested() ||	   //MORPH lh require obfuscated server connection 
+			thePrefs.IsServerCryptLayerRequiredStrict() )  // MORPH lh require obfuscated server connection 
 			dwCryptFlags |= SRVCAP_REQUESTCRYPT;
 		if (thePrefs.IsClientCryptLayerRequired())
 			dwCryptFlags |= SRVCAP_REQUIRECRYPT;
+		if (thePrefs.IsServerCryptLayerRequiredStrict()) //MORPH lh require obfuscated server connection 
+			dwCryptFlags |= SRVCAP_REQUIRECRYPT;		 // lh scs
+		
 
 		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 		/*
@@ -398,6 +411,7 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender)
 			if (singleconnecting){
 				if (pServer != NULL && sender->IsServerCryptEnabledConnection() && !thePrefs.IsClientCryptLayerRequired()){
 					// try reconnecting without obfuscation
+					if (!thePrefs.IsServerCryptLayerRequiredStrict()) // MORPH lh require obfuscated server connection 
 					ConnectToServer(pServer, false, true);
 					break;
 				}

@@ -198,6 +198,7 @@ CPPgTweaks::CPPgTweaks()
 	m_bUseUserSortedServerList=false;
 	iServerUDPPort=65535;
 	m_bRemoveFilesToBin=false;
+	m_iDebugSearchResultDetailLevel=0;
 	// continue extra official preferences....
 	m_hti_advanced=NULL;
 	m_hti_bMiniMuleAutoClose=NULL;
@@ -233,6 +234,7 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_UseUserSortedServerList=NULL;
 	m_hti_WebFileUploadSizeLimitMB =NULL;
 	m_hti_AllowedIPs=NULL;
+	m_hti_DebugSearchResultDetailLevel;
 	//MORPH END  leuk_he Advanced official preferences.
 
 
@@ -427,11 +429,15 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_hti_maxmsgsessions, RUNTIME_CLASS(CNumTreeOptionsEdit));													   
 
 		m_hti_PreferRestrictedOverUser=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFERRESTRICTEDOVERUSER),m_hti_advanced,m_bPreferRestrictedOverUser);
-		m_hti_UseUserSortedServerList=m_ctrlTreeOptions.InsertCheckBox(_T("UseUserSortedServerList"),m_hti_advanced,m_bUseUserSortedServerList);
+		m_hti_UseUserSortedServerList=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USEUSERSORTEDSERVERLIST),m_hti_advanced,m_bUseUserSortedServerList);
 		m_hti_WebFileUploadSizeLimitMB=m_ctrlTreeOptions.InsertItem(GetResString(IDS_WEBFILEUPLOADSIZELIMITMB),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_hti_WebFileUploadSizeLimitMB, RUNTIME_CLASS(CNumTreeOptionsEdit));													   										   
 		m_hti_AllowedIPs=m_ctrlTreeOptions.InsertItem(GetResString(IDS_ALLOWEDIPS),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_hti_AllowedIPs, RUNTIME_CLASS(CTreeOptionsEditEx));
+
+		m_hti_DebugSearchResultDetailLevel=m_ctrlTreeOptions.InsertItem(L"DebugSearchResultDetailLevel",TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_hti_DebugSearchResultDetailLevel, RUNTIME_CLASS(CTreeOptionsEditEx));
+
 		if (m_bExtControls) // show more controls --> still possible to manully expand. 
 			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
 		// MORPH END  leuk_he Advanced official preferences.
@@ -593,6 +599,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if(m_hti_WebFileUploadSizeLimitMB) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_WebFileUploadSizeLimitMB,m_iWebFileUploadSizeLimitMB);
 										DDV_MinMaxInt(pDX, m_iWebFileUploadSizeLimitMB, 0, INT_MAX);}
     if(m_hti_AllowedIPs) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_AllowedIPs,m_sAllowedIPs); //TODO: check string for ip
+	if(m_hti_DebugSearchResultDetailLevel) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_DebugSearchResultDetailLevel,m_iDebugSearchResultDetailLevel); //TODO: check string for ip
     // MORPH END  leuk_he Advanced official preferences.
 
 }
@@ -700,6 +707,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	if (thePrefs.GetAllowedRemoteAccessIPs().GetCount() > 0)
 		for (int i = 0; i <  thePrefs.GetAllowedRemoteAccessIPs().GetCount(); i++)
            m_sAllowedIPs= m_sAllowedIPs+ _T(";") + ipstr(thePrefs.GetAllowedRemoteAccessIPs()[i]);
+	m_iDebugSearchResultDetailLevel=thePrefs.GetDebugSearchResultDetailLevel();
 	// MORPH END  leuk_he Advanced official preferences.
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
@@ -904,6 +912,7 @@ BOOL CPPgTweaks::OnApply()
 			thePrefs.m_aAllowedRemoteAccessIPs.Add(nIP);
 		strIP = m_sAllowedIPs.Tokenize(L";", iPos);
 	}
+	thePrefs.m_iDebugSearchResultDetailLevel=m_iDebugSearchResultDetailLevel;
 	//MORPH END  leuk_he Advanced official preferences.
 
 
@@ -1041,42 +1050,43 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiVerboseGroup,IDS_VERBOSE_TIP);
 		SetTool(m_htiVerbose,IDS_ENABLED_TIP);
 		SetTool(m_htiLogLevel,IDS_LOG_LEVEL_TIP);
-// MORPH START leuk_he Advanced official preferences.
-SetTool(m_hti_advanced,IDS_ADVANCEDPREFS_TIP);
-SetTool(m_hti_bMiniMuleAutoClose,IDS_MINIMULEAUTOCLOSE_TIP);
-SetTool(m_hti_iMiniMuleTransparency,IDS_MINIMULETRANSPARENCY_TIP);
-SetTool(m_hti_bCreateCrashDump,IDS_CREATECRASHDUMP_TIP);
-SetTool(m_hti_bCheckComctl32 ,IDS_CHECKCOMCTL32_TIP);
-SetTool(m_hti_bCheckShell32,IDS_CHECKSHELL32_TIP);
-SetTool(m_hti_bIgnoreInstances,IDS_IGNOREINSTANCES_TIP);
-SetTool(m_hti_sNotifierMailEncryptCertName,IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP);
-SetTool(m_hti_sMediaInfo_MediaInfoDllPath,IDS_MEDIAINFO_MEDIAINFODLLPATH_TIP);
-SetTool(m_hti_bMediaInfo_RIFF,IDS_MEDIAINFO_RIFF_TIP);
-SetTool(m_hti_bMediaInfo_ID3LIB,IDS_MEDIAINFO_ID3LIB_TIP);
-SetTool(m_hti_iMaxLogBuff,IDS_MAXLOGBUFF_TIP);
-SetTool(m_hti_m_iMaxChatHistory,IDS_MAXCHATHISTORY_TIP);
-SetTool(m_hti_m_iPreviewSmallBlocks,IDS_PREVIEWSMALLBLOCKS_TIP);
-SetTool(m_hti_m_bRestoreLastMainWndDlg,IDS_RESTORELASTMAINWNDDLG_TIP);
-SetTool(m_hti_m_bRestoreLastLogPane,IDS_RESTORELASTLOGPANE_TIP);
-SetTool(m_hti_m_bPreviewCopiedArchives,IDS_PREVIEWCOPIEDARCHIVES_TIP);
-SetTool(m_hti_m_iStraightWindowStyles,IDS_STRAIGHTWINDOWSTYLES_TIP);
-SetTool(m_hti_m_iLogFileFormat,IDS_LOGFILEFORMAT_TIP);
-SetTool(m_hti_m_bRTLWindowsLayout,IDS_RTLWINDOWSLAYOUT_TIP);
-SetTool(m_hti_m_bPreviewOnIconDblClk,IDS_PREVIEWONICONDBLCLK_TIP);
-SetTool(m_hti_sInternetSecurityZone,IDS_INTERNETSECURITYZONE_TIP);
-SetTool(m_hti_sTxtEditor,IDS_TXTEDITOR_TIP);
-SetTool(m_hti_sdatetimeformat,IDS_DATETIMEFORMAT_TIP);
-SetTool(m_hti_iServerUDPPort,IDS_SERVERUDPPORT_TIP);
-SetTool(m_hti_m_bRemoveFilesToBin,IDS_REMOVEFILESTOBIN_TIP);
-SetTool(m_hti_HighresTimer,IDS_HIGHRESTIMER_TIP);
-SetTool(m_hti_TrustEveryHash,IDS_TRUSTEVERYHASH_TIP);
-SetTool(m_hti_InspectAllFileTypes,IDS_INSPECTALLFILETYPES_TIP);
-SetTool(m_hti_maxmsgsessions,IDS_MAXMSGSESSIONS_TIP);
-SetTool(m_hti_UseUserSortedServerList,IDS_USEUSERSORTEDSERVERLIST_TIP);
-SetTool(m_hti_PreferRestrictedOverUser,IDS_PREFERRESTRICTEDOVERUSER_TIP);
-SetTool(m_hti_WebFileUploadSizeLimitMB ,IDS_WEBFILEUPLOADSIZELIMITMB_TIP);
-SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS);
-        //MORPH END leuk_he tooltipped
+		// MORPH START leuk_he Advanced official preferences.
+		SetTool(m_hti_advanced,IDS_ADVANCEDPREFS_TIP);
+		SetTool(m_hti_bMiniMuleAutoClose,IDS_MINIMULEAUTOCLOSE_TIP);
+		SetTool(m_hti_iMiniMuleTransparency,IDS_MINIMULETRANSPARENCY_TIP);
+		SetTool(m_hti_bCreateCrashDump,IDS_CREATECRASHDUMP_TIP);
+		SetTool(m_hti_bCheckComctl32 ,IDS_CHECKCOMCTL32_TIP);
+		SetTool(m_hti_bCheckShell32,IDS_CHECKSHELL32_TIP);
+		SetTool(m_hti_bIgnoreInstances,IDS_IGNOREINSTANCES_TIP);
+		SetTool(m_hti_sNotifierMailEncryptCertName,IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP);
+		SetTool(m_hti_sMediaInfo_MediaInfoDllPath,IDS_MEDIAINFO_MEDIAINFODLLPATH_TIP);
+		SetTool(m_hti_bMediaInfo_RIFF,IDS_MEDIAINFO_RIFF_TIP);
+		SetTool(m_hti_bMediaInfo_ID3LIB,IDS_MEDIAINFO_ID3LIB_TIP);
+		SetTool(m_hti_iMaxLogBuff,IDS_MAXLOGBUFF_TIP);
+		SetTool(m_hti_m_iMaxChatHistory,IDS_MAXCHATHISTORY_TIP);
+		SetTool(m_hti_m_iPreviewSmallBlocks,IDS_PREVIEWSMALLBLOCKS_TIP);
+		SetTool(m_hti_m_bRestoreLastMainWndDlg,IDS_RESTORELASTMAINWNDDLG_TIP);
+		SetTool(m_hti_m_bRestoreLastLogPane,IDS_RESTORELASTLOGPANE_TIP);
+		SetTool(m_hti_m_bPreviewCopiedArchives,IDS_PREVIEWCOPIEDARCHIVES_TIP);
+		SetTool(m_hti_m_iStraightWindowStyles,IDS_STRAIGHTWINDOWSTYLES_TIP);
+		SetTool(m_hti_m_iLogFileFormat,IDS_LOGFILEFORMAT_TIP);
+		SetTool(m_hti_m_bRTLWindowsLayout,IDS_RTLWINDOWSLAYOUT_TIP);
+		SetTool(m_hti_m_bPreviewOnIconDblClk,IDS_PREVIEWONICONDBLCLK_TIP);
+		SetTool(m_hti_sInternetSecurityZone,IDS_INTERNETSECURITYZONE_TIP);
+		SetTool(m_hti_sTxtEditor,IDS_TXTEDITOR_TIP);
+		SetTool(m_hti_sdatetimeformat,IDS_DATETIMEFORMAT_TIP);
+		SetTool(m_hti_iServerUDPPort,IDS_SERVERUDPPORT_TIP);
+		SetTool(m_hti_m_bRemoveFilesToBin,IDS_REMOVEFILESTOBIN_TIP);
+		SetTool(m_hti_HighresTimer,IDS_HIGHRESTIMER_TIP);
+		SetTool(m_hti_TrustEveryHash,IDS_TRUSTEVERYHASH_TIP);
+		SetTool(m_hti_InspectAllFileTypes,IDS_INSPECTALLFILETYPES_TIP);
+		SetTool(m_hti_maxmsgsessions,IDS_MAXMSGSESSIONS_TIP);
+		SetTool(m_hti_UseUserSortedServerList,IDS_USEUSERSORTEDSERVERLIST_TIP);
+		SetTool(m_hti_PreferRestrictedOverUser,IDS_PREFERRESTRICTEDOVERUSER_TIP);
+		SetTool(m_hti_WebFileUploadSizeLimitMB ,IDS_WEBFILEUPLOADSIZELIMITMB_TIP);
+		SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS);
+		SetTool(m_hti_DebugSearchResultDetailLevel,IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP); // TODO tooltip
+		//MORPH END leuk_he tooltipped
 
 	}
 

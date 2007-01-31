@@ -358,7 +358,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					if (client)
 						client->ConnectionEstablished();
 
-					ASSERT( client );
+					ASSERT(client);
 					if(client)
 					{
 						// start secure identification, if

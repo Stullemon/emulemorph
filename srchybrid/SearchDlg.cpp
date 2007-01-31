@@ -103,7 +103,7 @@ int CSearchDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CSearchDlg::OnClose()
 {
 	SaveBarState(SEARCH_PARAMS_PROFILE);
-	// MORPH leuk_he:run as ntservice v1..
+	// MORPH leuk_he:run as ntservice v1.. workarround a mfc bug
 	if (RunningAsService()) {
 		DWORD dwProcessId;
 		DWORD dwThreadId= GetWindowThreadProcessId(m_hWnd,&dwProcessId);

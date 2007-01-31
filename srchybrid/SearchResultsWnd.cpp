@@ -258,6 +258,12 @@ void CSearchResultsWnd::OnTimer(UINT nIDEvent)
 					toask = NULL;
 					continue;
 				}
+				// START MORPH lh require obfuscated server connection 
+				if (toask->GetServerKeyUDP() ==0 && thePrefs.IsServerCryptLayerRequiredStrict()){ // skip servers we do not have a encryption key for. 
+					toask = NULL;
+				    continue; 
+				}
+				// START MORPH lh require obfuscated server connection 
 				break;
 			}
     

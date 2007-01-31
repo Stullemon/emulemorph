@@ -637,7 +637,7 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 
     sendLocker.Unlock();
 	if (bForceImmediateSend){
-		ASSERT( controlpacket_queue.GetSize() == 1 );
+	//	ASSERT( controlpacket_queue.GetSize() == 1 );   // when this assert fires in debug you will chrash becuase the messagepump might process dsiconnect event.
 		Send(1024, 0, true);
 	}
 }

@@ -870,6 +870,9 @@ public:
 	static bool		m_bCryptLayerRequested;
 	static bool		m_bCryptLayerSupported;
 	static bool		m_bCryptLayerRequired;
+	static bool		m_bCryptLayerRequiredStrictServer; // MORPH lh require obfuscated server connection 
+
+
 
 	// MORPH START - Added by Commander, WebCache 1.2f
 	static	bool	m_bHighIdPossible; // JP detect fake HighID (from netfinity)
@@ -1775,7 +1778,9 @@ public:
 	static bool		IsClientCryptLayerRequired()		{return IsClientCryptLayerRequested() && m_bCryptLayerRequired;}
 	static bool		IsClientCryptLayerRequiredStrict()	{return false;} // not even incoming test connections will be answered
 	static bool		IsServerCryptLayerUDPEnabled()		{return IsClientCryptLayerSupported();}
-	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerRequested();}
+	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerRequested() ||m_bCryptLayerRequiredStrictServer;} // MORPH lh require obfuscated server connection  automatic assume requested encryption
+	static bool     IsServerCryptLayerRequiredStrict()  {return m_bCryptLayerRequiredStrictServer;} // MORPH lh require obfuscated server connection 
+	
 
 	static uint16	GetRandomTCPPort();
 	static uint16	GetRandomUDPPort();

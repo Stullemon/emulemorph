@@ -48,6 +48,7 @@ BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_MANUALSERVERHIGHPRIO, OnSettingsChange)
 	ON_BN_CLICKED(IDC_EDITADR, OnBnClickedEditadr)
 	ON_WM_HELPINFO()
+	ON_BN_CLICKED(IDC_SERVER_REQUIREOBFUSCATION, OnSettingsChange) // MORPH lh require obfuscated server connection 
 END_MESSAGE_MAP()
 
 CPPgServer::CPPgServer()
@@ -90,6 +91,7 @@ void CPPgServer::LoadSettings(void)
 	CheckDlgButton(IDC_SAFESERVERCONNECT, thePrefs.m_bSafeServerConnect);
 	CheckDlgButton(IDC_AUTOCONNECTSTATICONLY, thePrefs.m_bAutoConnectToStaticServersOnly);
 	CheckDlgButton(IDC_MANUALSERVERHIGHPRIO, thePrefs.m_bManualAddedServersHighPriority);
+	CheckDlgButton(IDC_SERVER_REQUIREOBFUSCATION, thePrefs.IsServerCryptLayerRequiredStrict()); // MORPH lh require obfuscated server connection 
 }
 
 BOOL CPPgServer::OnApply()
@@ -112,7 +114,7 @@ BOOL CPPgServer::OnApply()
 	thePrefs.SetSafeServerConnectEnabled(IsDlgButtonChecked(IDC_SAFESERVERCONNECT)!=0);
 	thePrefs.m_bAutoConnectToStaticServersOnly = IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY)!=0;
 	thePrefs.m_bManualAddedServersHighPriority = IsDlgButtonChecked(IDC_MANUALSERVERHIGHPRIO)!=0;
-
+    thePrefs.m_bCryptLayerRequiredStrictServer= IsDlgButtonChecked(IDC_SERVER_REQUIREOBFUSCATION)!=0; // MORPH lh require obfuscated server connection 
 	LoadSettings();
 
 	SetModified();
@@ -135,6 +137,7 @@ void CPPgServer::Localize(void)
 		GetDlgItem(IDC_MANUALSERVERHIGHPRIO)->SetWindowText(GetResString(IDS_MANUALSERVERHIGHPRIO));
 		GetDlgItem(IDC_EDITADR)->SetWindowText(GetResString(IDS_EDITLIST));
 		GetDlgItem(IDC_AUTOCONNECTSTATICONLY)->SetWindowText(GetResString(IDS_PW_AUTOCONNECTSTATICONLY));
+		GetDlgItem(IDC_SERVER_REQUIREOBFUSCATION)->SetWindowText(GetResString(IDS_SERVER_REQUIREOBFUSCATION)); // MORPH lh require obfuscated server connection 
         // leuk_he tooltipped start
 		SetTool(IDC_SERVERRETRIES,IDS_PW_RDEAD_TIP);
         SetTool(IDC_REMOVEDEAD,IDS_PW_RDEAD_TIP);
@@ -148,6 +151,7 @@ void CPPgServer::Localize(void)
 		SetTool(IDC_MANUALSERVERHIGHPRIO,IDS_MANUALSERVERHIGHPRIO_TIP);
 		SetTool(IDC_EDITADR,IDS_EDITLIST_TIP);
 		SetTool(IDC_AUTOCONNECTSTATICONLY,IDS_PW_AUTOCONNECTSTATICONLY_TIP);
+		SetTool(IDC_SERVER_REQUIREOBFUSCATION, IDS_SERVER_REQUIREOBFUSCATION_TIP); // MORPH lh require obfuscated server connection 
 		//leuk_he tooltipped end
 
 	}

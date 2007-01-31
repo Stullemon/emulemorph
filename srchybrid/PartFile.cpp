@@ -1615,6 +1615,7 @@ bool CPartFile::SavePartFile()
 			ASSERT(0); // DEBUG: leuk_he:IF it fails i want to knwo what other thread is access this. 
 		}
 		LogError(_T("%s"), strError);
+		ASSERT(0); // leuk_he: if the creation of of part.met_tmp faild i want to know what other thread/callstack is writing this file.
 		return false;
 	}
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
@@ -5754,7 +5755,9 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		}
 		if (m_FlushSetting != NULL) //We noramly flushed something to disk
 			FlushDone();
-	} else if (m_FlushSetting != NULL) { //Some thing is going to be flushed or allready flushed wait the window call back to call FlushDone()
+	} else 
+	if (m_FlushSetting != NULL) { //Some thing is going to be flushed or already flushed 
+		                          //wait the window call back to call FlushDone()
 		return;
 	}
 	//MORPH END   - Flush Thread

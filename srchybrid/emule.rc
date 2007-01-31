@@ -356,6 +356,9 @@ BEGIN
                     IDC_MANUALSERVERHIGHPRIO,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,119,216,10
     LTEXT           "Remove dead servers after",IDC_REMOVEDEAD,7,8,106,8
+    CONTROL         "Require server data to be obfuscated",
+                    IDC_SERVER_REQUIREOBFUSCATION,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT,7,133,216,10
 END
 
 IDD_PPG_GENERAL DIALOGEX 0, 0, 230, 279
@@ -6819,7 +6822,11 @@ BEGIN
     IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Current Status"
 	IDS_USEUSERSORTEDSERVERLIST_TIP "When enabled this will use the same server list sorting\nas shown in GUI when trying to connect to a server."
+	IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
 	IDS_TEST_NOTIFICATION   "Test"
+	IDS_SERVER_REQUIREOBFUSCATION      "Require obfuscated connection to servers"
+    IDS_SERVER_REQUIREOBFUSCATION_TIP  "Requires obfuscated connections to servers\nany servers that do not support obfuscating \nwill be ignored. And it happens that fake server\ndo not support obfuscation when this option\nis introduced. Note that it is impossible to connect \nto server until you get a valid cryptping" 
+	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Show some extra logging when searching.\n Also does nto merge all search results. \n (Default:0, not saved, edit preferences.ini to make a change permanent)"
 END
 
 #endif    // English (U.S.) resources

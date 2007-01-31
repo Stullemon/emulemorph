@@ -661,6 +661,7 @@ bool	CPreferences::m_bWinaTransToolbar;
 bool	CPreferences::m_bCryptLayerRequested;
 bool	CPreferences::m_bCryptLayerSupported;
 bool	CPreferences::m_bCryptLayerRequired;
+bool    CPreferences::m_bCryptLayerRequiredStrictServer; // MORPH lh require obfuscated server connection 
 
 //MORPH START - Added by SiRoB, XML News [O²]
 CString	CPreferences::m_strFeedsDir;
@@ -2318,7 +2319,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"CryptLayerRequested", m_bCryptLayerRequested);
 	ini.WriteBool(L"CryptLayerRequired", m_bCryptLayerRequired);
 	ini.WriteBool(L"CryptLayerSupported", m_bCryptLayerSupported);
-
+	ini.WriteBool(L"CryptLayerRequiredStrictServer",IsServerCryptLayerRequiredStrict()); // MORPH lh require obfuscated server connection 
 
 
     // ==> Slot Limit - Stulle
@@ -3513,6 +3514,7 @@ void CPreferences::LoadPreferences()
 	m_bCryptLayerRequested = ini.GetBool(L"CryptLayerRequested", false);
 	m_bCryptLayerRequired = ini.GetBool(L"CryptLayerRequired", false);
 	m_bCryptLayerSupported = ini.GetBool(L"CryptLayerSupported", true);
+   m_bCryptLayerRequiredStrictServer = ini.GetBool(L"CryptLayerRequiredStrictServer",false); // MORPH lh require obfuscated server connection 
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 	_stprintf (m_sCommunityName,_T("%s"),ini.GetString (_T("CommunityName")));
@@ -3715,6 +3717,7 @@ void CPreferences::LoadPreferences()
 	bMediaInfo_RIFF=ini.GetBool(_T("MediaInfo_RIF"),true);
 	bMediaInfo_ID3LIB =ini.GetBool(_T("MediaInfo_ID3LIB_"),true);
 	sInternetSecurityZone=ini.GetString(_T("InternetSecurityZone"),_T("Untrusted"));
+    m_iDebugSearchResultDetailLevel = ini.GetInt(L"DebugSearchResultDetailLevel", 0); // NOTE: this variable is also initialized to 0 above! 
 	// MORPH END  leuk_he Advanced official preferences. 
 
 
