@@ -929,11 +929,14 @@ void CUploadQueue::Process() {
 
 	UpdateActiveClientsInfo(curTick);
 
-	CheckForHighPrioClient();
+	//MORPH START - Upload Splitting Class
+	bool bCanAddNewSlot = theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections();
+	if (bCanAddNewSlot)
+	//MORPH END   - Upload Splitting Class
+		CheckForHighPrioClient();
 	
 	//MORPH START - Upload Splitting Class
 	uint32 needToaddmoreslot = false;
-	bool bCanAddNewSlot = theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections();
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 	//Morph Start - changed by AndCycle, Dont Remove Spare Trickle Slot
 	/*
@@ -1021,7 +1024,7 @@ bool CUploadQueue::AcceptNewClient(uint32 classID)
 bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 // check if we can allow a new client to start downloading from us
 
-	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED) // alwasy 2 or 3 slots per class. 
+	if (uploadinglist.GetCount() < MIN_UP_CLIENTS_ALLOWED) // alwasy 2 or 3 slots per class. 
 		return true;
 
     uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads(classID); 
@@ -1067,7 +1070,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	    (
 			curUploadSlots > (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
 			||
-			curUploadSlots -1 > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
+			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
 		 ) ||
 		 thePrefs.GetSlotLimitNumB() && TotalSlots >= thePrefs.GetSlotLimitNum()
        ) // max number of clients to allow for all circumstances

@@ -2214,7 +2214,7 @@ bool CUpDownClient::Connect()
 {
 	// enable or disable crypting based on our and the remote clients preference
 	if (HasValidHash() && SupportsCryptLayer() && thePrefs.IsClientCryptLayerSupported() && (RequestsCryptLayer() || thePrefs.IsClientCryptLayerRequested())){
-		DebugLog(_T("Enabling CryptLayer on outgoing connection to client %s"), DbgGetClientInfo()); // to be removed later
+		//DebugLog(_T("Enabling CryptLayer on outgoing connection to client %s"), DbgGetClientInfo()); // to be removed later
 		socket->SetConnectionEncryption(true, GetUserHash(), false);
 	}
 	else

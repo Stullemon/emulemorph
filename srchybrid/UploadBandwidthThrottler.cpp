@@ -464,7 +464,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	uint32 rememberSlotCounter[NB_SPLITTING_CLASS];
 	sint64 realBytesToSpendClass[NB_SPLITTING_CLASS];
 	memset(realBytesToSpendClass,0,sizeof(realBytesToSpendClass));
-	DWORD	dwLastFullBandwidthSpent = timeGetTime();
+	DWORD dwLastFullBandwidthSpent[NB_SPLITTING_CLASS];
+	memset(dwLastFullBandwidthSpent,0,sizeof(dwLastFullBandwidthSpent));
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	uint32 nEstiminatedLimit = 0;
 	int nSlotsBusyLevel = 0;
@@ -492,10 +493,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		/*
 		for (int i = 0; i < m_StandardOrder_list.GetSize() && (i < 3 || (UINT)i < GetSlotLimit(theApp.uploadqueue->GetDatarate())); i++){
 		*/
-		for (int i = m_StandardOrder_list.GetSize()/2; i < m_StandardOrder_list.GetSize(); i++){
+		for (int i = 0; i < m_StandardOrder_list.GetSize(); i++){
 			Socket_stat* stat = NULL;
 			if (m_stat_list.Lookup(m_StandardOrder_list[i], stat)) {
-				if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues() && stat->scheduled == false) {
+				if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues() && m_StandardOrder_list[i]->GetBusyRatioTime()) {
 					nCanSend++;
 				
 					DWORD newBusySince = m_StandardOrder_list[i]->GetBusyTimeSince();
@@ -627,7 +628,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		}
 
        	if(cBusy >= nCanSend && realBytesToSpendClass[LAST_CLASS] > 999 /*&& m_StandardOrder_list.GetSize() > 0*/) {
-				
+			//allowedDataRate = 0;
+            //realBytesToSpend = min(realBytesToSpend, 1024*1000);
+            realBytesToSpendClass[LAST_CLASS] = 999;
 			if(nSlotsBusyLevel < 125 && bUploadUnlimited) {
 				nSlotsBusyLevel = 125;
 				if(thePrefs.GetVerbose() && lotsOfLog) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount %i loopsCount: %i (set due to all slots busy)"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
@@ -678,6 +681,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					sint64 limit = -((sint64)(sleepTime + 2000)*allowedDataRate);
 					if (realBytesToSpendClass[classID] < limit)
 						realBytesToSpendClass[classID] = limit;
+					if (realBytesToSpendClass[classID] > 1000*max(doubleSendSize, allowedDataRate/max(1,m_StandardOrder_list.GetCount())) && realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
+						realBytesToSpendClass[classID] = realBytesToSpendClass[LAST_CLASS];
 					if (_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
 						realBytesToSpendClass[classID] += allowedDataRate*min(sleepTime + 2000, timeSinceLastLoop);
 					} else {
@@ -685,11 +690,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 				}
 			} else {
-				if (timeSinceLastLoop > 0) {
-					if (realBytesToSpendClass[classID] > 999)
-						m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-					realBytesToSpendClass[classID] = _I64_MAX;
-				}
+				realBytesToSpendClass[classID] = _I64_MAX;
 			}
 		}
 			
@@ -810,7 +811,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			}
 			//loop 4
 			numberofclientinhigherclass = 0;
-			if (realBytesToSpendClass[LAST_CLASS] >= 1000*doubleSendSize) {
+			if (realBytesToSpendClass[LAST_CLASS] >= 1000*max(doubleSendSize, allowedDataRateClass[LAST_CLASS]/max(1,m_StandardOrder_list.GetCount()))) {
 				for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 					BytesToSpend = realBytesToSpendClass[classID] / 1000;
 					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
@@ -819,7 +820,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						if(slotCounterClass[classID]) {						
 							uint64 spentBytes = 0;
 							uint64 spentOverhead = 0;
-							if (ClientDataRate[classID] == 0)
+							if (ClientDataRate[classID] == 0 || thePrefs.DoRemoveSpareTrickleSlot())
 								rememberSlotCounter[classID] = 0;
 							// loop 4.1
 							for(uint32 maxCounter = 0; maxCounter < slotCounterClass[classID] && BytesToSpend > 0 && spentBytes + doubleSendSize <= (uint64)BytesToSpend; maxCounter++) {
@@ -892,23 +893,26 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							}
 							
 							if ((uint64)BytesToSpend >= doubleSendSize+spentBytes) {
-								if ((GetTickCount() - dwLastFullBandwidthSpent) > 1000) {
+								if (spentBytes > 0 && (GetTickCount() - dwLastFullBandwidthSpent[classID]) > 1000) {
 									m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
-									realBytesToSpendClass[classID] = doubleSendSize;
-									dwLastFullBandwidthSpent = timeGetTime();
+									realBytesToSpendClass[classID] = 1000*doubleSendSize;
+									dwLastFullBandwidthSpent[classID] = timeGetTime();
 								}
 							} else {
-								dwLastFullBandwidthSpent = timeGetTime();
+								dwLastFullBandwidthSpent[classID] = timeGetTime();
 							}
 						} else {
-							if (realBytesToSpendClass[classID] > doubleSendSize) {
+							if (realBytesToSpendClass[classID] > 1000*doubleSendSize) {
 								m_highestNumberOfFullyActivatedSlotsClass[classID] = 1;
-								realBytesToSpendClass[classID] = doubleSendSize;
+								realBytesToSpendClass[classID] = 1000*doubleSendSize;
 							}
 						}
 					} 
 					numberofclientinhigherclass += slotCounterClass[classID];
 				}
+			} else {
+				for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
+				dwLastFullBandwidthSpent[classID] = timeGetTime();
 			}
 			sendLocker.Unlock();
 			lastLoopTickTryTosend = thisLoopTick;
