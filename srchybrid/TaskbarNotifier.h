@@ -91,7 +91,8 @@ protected:
 	int m_nAnimStatus;
 	int m_nTaskbarPlacement;
 	DWORD m_dwTimerPrecision;
-	DWORD m_dwTimeToStay;
+	//DWORD m_dwTimeToStay;
+	UINT m_dwTimeToStay; //MORPH SetTime uses UINT. ( simulate permanent message becomes possible) 
 	DWORD m_dwShowEvents;
 	DWORD m_dwHideEvents;
 	DWORD m_dwTimeToShow;

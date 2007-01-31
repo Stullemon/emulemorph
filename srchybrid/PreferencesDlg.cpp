@@ -94,21 +94,24 @@ CPreferencesDlg::CPreferencesDlg()
     m_wndIonixWebServer.m_psp.dwFlags &= ~PSH_HASHELP;  //ionix advanced webserver
     m_wndNTService.m_psp.dwFlags &= ~PSH_HASHELP; 
 //MORPH END   - Preferences groups [ePlus/Sirob]
-	
+
+
+
 	AddPage(&m_wndGeneral);
 	AddPage(&m_wndDisplay);
 	AddPage(&m_wndConnection);
-	AddPage(&m_wndProxy);
 	AddPage(&m_wndServer);
 	AddPage(&m_wndDirectories);
 	AddPage(&m_wndFiles);
 	AddPage(&m_wndNotify);
-	AddPage(&m_wndStats);
-	AddPage(&m_wndIRC);
 	AddPage(&m_wndMessages);
 	AddPage(&m_wndSecurity);
-	AddPage(&m_wndScheduler);
-	AddPage(&m_wndWebServer);
+
+	AddPage(&m_wndProxy);
+	AddPage(&m_wndIRC);	 // moved, morph
+	AddPage(&m_wndStats); // moved, morph
+	AddPage(&m_wndScheduler); // moved, morph
+	AddPage(&m_wndWebServer); // moved, morph
 	AddPage(&m_wndTweaks);
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	AddPage(&m_wndDebug);
@@ -120,8 +123,8 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
 	AddPage(&m_wndWebcachesettings); //MORPH - Added by SiRoB, WebCache 1.2f
-     AddPage(&m_wndIonixWebServer); // Morph - ionix advanced webserver
-	 AddPage(&m_wndNTService); // MORPH leuk_he:run as ntservice v1..
+     AddPage(&m_wndIonixWebServer); // Morph - ionix advanced webserver	  tab
+	 AddPage(&m_wndNTService); // MORPH leuk_he:run as ntservice v1.. tab
 
 
 //MORPH START - Preferences groups [ePlus/Sirob]
@@ -256,15 +259,16 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader(_T("PREFERENCES")));			//0
 	ImageList.Add(CTempIconLoader(_T("DISPLAY")));				//1
 	ImageList.Add(CTempIconLoader(_T("CONNECTION")));			//2
-	ImageList.Add(CTempIconLoader(_T("PROXY")));				//3
 	ImageList.Add(CTempIconLoader(_T("SERVER")));				//4
 	ImageList.Add(CTempIconLoader(_T("FOLDERS")));				//5
 	ImageList.Add(CTempIconLoader(_T("TRANSFER")));				//6
 	ImageList.Add(CTempIconLoader(_T("NOTIFICATIONS")));		//7
-	ImageList.Add(CTempIconLoader(_T("STATISTICS")));			//8
-	ImageList.Add(CTempIconLoader(_T("IRC")));					//9
 	ImageList.Add(CTempIconLoader(_T("MESSAGES")));				//10
 	ImageList.Add(CTempIconLoader(_T("SECURITY")));				//11
+
+	ImageList.Add(CTempIconLoader(_T("PROXY")));				//3
+	ImageList.Add(CTempIconLoader(_T("IRC")));					//9
+	ImageList.Add(CTempIconLoader(_T("STATISTICS")));			//8
 	ImageList.Add(CTempIconLoader(_T("SCHEDULER")));			//12
 	ImageList.Add(CTempIconLoader(_T("WEB")));					//13
 	ImageList.Add(CTempIconLoader(_T("TWEAK")));				//14
@@ -336,28 +340,32 @@ void CPreferencesDlg::Localize()
 	UpdateCaption();
 */
 //	Official group
-	int iGroup = m_slideBar.AddGroup(GetResString(IDS_PW_GENERAL)/*, 1*/);
+	int iGroup = m_slideBar.AddGroup(GetResString(IDS_PW_GENERAL)+_T(" ")+GetResString(IDS_OPTIONS)/*, 1*/);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_GENERAL), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_DISPLAY), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_CONNECTION), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_PROXY), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_SERVER), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_DIR), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_FILES), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_EKDEV_OPTIONS), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_STATSSETUPINFO), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_IRC), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_MESSAGESCOMMENTS), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_SECURITY), iGroup, c++);
+// advanced...	official. 
+	iGroup = m_slideBar.AddGroup(GetResString(IDS_PW_TWEAK)+_T(" ")+GetResString(IDS_OPTIONS));
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_PROXY), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_IRC), iGroup, c++);
+	m_slideBar.AddGroupItem(GetResString(IDS_STATSSETUPINFO), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_SCHEDULER), iGroup, c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_WS), iGroup, Webserver=c++);
 	m_slideBar.AddGroupItem(GetResString(IDS_PW_TWEAK), iGroup, c++);
+
+
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	m_slideBar.AddGroupItem(_T("Debug"), iGroup, c++);
 #endif
 
 	//	MOD group
-	iGroup = m_slideBar.AddGroup(_T("Mod"));
+	iGroup = m_slideBar.AddGroup(_T("MorphXT ")+GetResString(IDS_OPTIONS));
 	m_slideBar.AddGroupItem(GetResString(IDS_BACKUP), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("Morph"), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("Morph Share"), iGroup, c++);
