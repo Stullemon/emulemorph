@@ -2337,8 +2337,13 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("IgnoreInstance"),bIgnoreInstances);
 	ini.WriteString(_T("NotifierMailEncryptCertName"),sNotifierMailEncryptCertName);
 	ini.WriteString(_T("MediaInfo_MediaInfoDllPath"),sMediaInfo_MediaInfoDllPath);
-	ini.WriteBool(_T("MediaInfo_RIFF_"),bMediaInfo_RIFF);
-	ini.WriteBool(_T("MediaInfo_ID3LIB_"),bMediaInfo_ID3LIB);
+	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF_FIX"), 1)==1){ // fix morph 9.3 bad default once.
+		bMediaInfo_RIFF=true;
+		bMediaInfo_ID3LIB=true;
+		ini.WriteInt(_T("MediaInfo_RIFF_FIX"),0); //once
+	}
+	ini.WriteBool(_T("MediaInfo_RIFF"),bMediaInfo_RIFF);
+	ini.WriteBool(_T("MediaInfo_ID3LIB"),bMediaInfo_ID3LIB);
 	ini.WriteInt(_T("MaxLogBuff"),iMaxLogBuff/1024);
 	ini.WriteInt(_T("MaxChatHistoryLines"),m_iMaxChatHistory);
 	ini.WriteInt(_T("PreviewSmallBlocks"),m_iPreviewSmallBlocks);
@@ -3714,8 +3719,8 @@ void CPreferences::LoadPreferences()
 	bIgnoreInstances=ini.GetBool(_T("IgnoreInstance"),false);
 	sNotifierMailEncryptCertName=ini.GetString(_T("NotifierMailEncryptCertName"),L"");
 	sMediaInfo_MediaInfoDllPath=ini.GetString(L"MediaInfo_MediaInfoDllPath",_T("MEDIAINFO.DLL")) ;
-	bMediaInfo_RIFF=ini.GetBool(_T("MediaInfo_RIF"),true);
-	bMediaInfo_ID3LIB =ini.GetBool(_T("MediaInfo_ID3LIB_"),true);
+	bMediaInfo_RIFF=ini.GetBool(_T("MediaInfo_RIFF"),true);
+	bMediaInfo_ID3LIB =ini.GetBool(_T("MediaInfo_ID3LIB"),true);
 	sInternetSecurityZone=ini.GetString(_T("InternetSecurityZone"),_T("Untrusted"));
     m_iDebugSearchResultDetailLevel = ini.GetInt(L"DebugSearchResultDetailLevel", 0); // NOTE: this variable is also initialized to 0 above! 
 	// MORPH END  leuk_he Advanced official preferences. 

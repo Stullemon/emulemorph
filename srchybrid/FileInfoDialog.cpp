@@ -861,7 +861,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 	// Check for AVI file
 	//
 	bool bIsAVI = false;
-	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF"), 1)) //MORPH add a _ to rename temporary
+	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF"), 1)) 
 	{
 		try
 		{
