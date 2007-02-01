@@ -1,30 +1,88 @@
 --------------------------------------
+Changelog for eMule 0.47c MorphXT v9.5
+--------------------------------------
+02-02-2007
+ADD:	Servers ->obfuscated connection to server required preference. 
+		 -Only obfuscated connections to servers are made.
+		 -fake/spy servers do no support obfuscation 8-) 
+ADD:     New obfuscation required option to servers in startup wizard.
+ADD:     Startup wizard, show more controls and option to start import after wizard.
+REMOVE:  Startup wizard, Set auto up/down file priority. 
+ADD:	 Preferences groups (ePlus/Sirob)
+CHANGED: Complete pending hashing at shutdown like official to prevent rehash. 
+ADDED  : USC: limiting of opening slots with exponential delay based on the number of new connecting slot.
+ADDED  : USC: Don't allow new slot to be opened if number of half connection reached the limit.
+CHANGED: USC: Reviewed to allow high latency remote client to download at a higher speed.
+
+
+
+FIX:     Default for advanced preference MEDIAINFO_RIFF/ID3LIB (avi/mp3) detection was unchecked, should be enabled.
+--------------------------------------
+Changelog for eMule 0.47c MorphXT v9.4 installer
+--------------------------------------
+26-01-2007
+ADD: Option for ed2k:// association. 
+ADD: close windows firewall on uninstall.
+
+--------------------------------------
+Changelog for eMule 0.47c MorphXT v9.4
+--------------------------------------
+24-01-2007
+CHANGED:DBR: tuned for finishing downloads faster.
+CHANGED:Advanced preferences. Fix wrong values during reading.
+CHANGED:Advanced preferences. Add UseUserSortedServerList preference.
+CHANGED:Run As service, startup service detection.
+CHANDED:Vista/X64/win2003 detection to lower number of half open connenctions. 
+CHANGED:Upload: smooth socket buffer when remote client is fast.
+CHANGED:Avoid GUI glitches due to Static Tray Icon
+UPDATE :Simplified chinese tranlation [pennyliu123]
+
+--------------------------------------
+Changelog for eMule 0.47c MorphXT v9.3 installer
+--------------------------------------
+20-01-2007
+REMOVED: run from installer on vista because it runs under wrong account.
+ADD    : exit and uninstall service on uninstall.
+ADD    : example AC_SearchStrings.dat on new install. 
+CHANGE : Apply ACL on config/temp/incoming dir. 
+UPDATE : Italian translation. [idro182]
+UPDATE : Portugese (brazialian) translation updated. [heiler bemerguy]
+--------------------------------------
 Changelog for eMule 0.47c MorphXT v9.3
 -------------------------------------
-dd-mm-2007
-ADD:    Lost preferences. Most official preferences that got an prefereces.ini setting but no gui are 
-		Added in preferences->extented->Advanced preferneces. 
-ADD:	http links in ed2k links like linkcreator (MoNKi)
-ADD:	Friendnote. Noting area for adding notes about friendlist. Will be automatically saved and reloaded at each start-up. (CB mod)
+14-01-2007
+ADD:    Always show as trayicon option.
+ADD:	Http links in ed2k links like linkcreator (MoNKi)
+ADD:	Friendnote. Noting area for adding notes about friendlist. (CB mod)
+		-Will be automatically saved and reloaded at each start-up. 
 ADD:	Static IP Filter (Stulle)
 		remark: save "ipfilter_static.dat" in config dir
 ADD:	run as NT service v1. [leuk_he]
-    -No need to login into XP.
-    -keeps running after logging out/ switching users
-    -new command line options:
-       "emule install"    --> install as as ervice
-       "emule uninstall"  --> uninsntall as a service.
-    -make sure all settings are correct before installing as a service. 
-    -links as passed to webservice. 
-    -See Preferences->Webserver->NTservice tab
-    remark: Not meant to save cpu/memory. 
+	    -No need to login into XP.
+		-keeps running after logging out/ switching users
+		-new command line options:
+		"emule install"    --> install as a service
+		"emule uninstall"  --> uninstall as a service.
+		-make sure all settings are correct before installing as a service. 
+		-links as passed to webservice. 
+		-See Preferences->Webserver->NTservice tab
+		remark: Not meant to save cpu/memory. 
 ADD:	 Context menu on chat context. (wizard codesnippet) 
-CHANGED: USC: better slotfocus.
-CHANGED: sr-13 import, Also use AICH hash when required.  
-FIX:	 Upnp: using same port for tcp & udp now possible.
-CHANGED: uPnP moved most logging to verbose level. 
-FIX:     sr-13 import: Chash on cancel during running import. 
-FIX:     Chrash on low diskspace resume.  
+ADD:    Lost preferences. Most official preferences that got an prefereces.ini setting but no gui are 
+		Added in preferences->extented->Advanced preferneces. 
+CHANGED:USC: better slotfocus.
+CHANGED:More upload speed for webcache requester. (no 100ms delay)
+CHANGED:And also DBR reviewed for high bandwidth transfer.
+CHANGED:Flush thread, improved.
+CHANGED:Better requested block queuing
+CHANGED:Sr-13 import, Also use AICH hash when required.  
+FIX:	Upnp: using same port for tcp & udp now possible.
+CHANGED:uPnP moved most logging to verbose level. 
+FIX:    sr-13 import: Chrash on cancel during running import. 
+FIX:    Chrash on low diskspace resume.  
+ADDED:	Official fix arround CreatePackedPackets (missed overhead filerequest value for file >4GB)
+		  24 instead of 28
+UPDATE: Updated spanish lang translation [guijarrelson]
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.2
