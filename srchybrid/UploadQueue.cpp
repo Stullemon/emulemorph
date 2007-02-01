@@ -930,7 +930,16 @@ void CUploadQueue::Process() {
 	UpdateActiveClientsInfo(curTick);
 
 	//MORPH START - Upload Splitting Class
-	bool bCanAddNewSlot = theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections();
+	DWORD waitingtimebeforeopeningnewslot = 1000;
+	// The loop that feeds the upload slots with data.
+	POSITION Pos = uploadinglist.GetHeadPosition();
+	while(Pos != NULL){
+        // Get the client. Note! Also updates pos as a side effect.
+		CUpDownClient* cur_client = uploadinglist.GetNext(Pos);
+		if (cur_client->GetUploadState() != US_UPLOADING)
+			waitingtimebeforeopeningnewslot <<= 1;
+	}
+	bool bCanAddNewSlot = (theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections()) && (GetTickCount() - m_nLastStartUpload > waitingtimebeforeopeningnewslot);
 	if (bCanAddNewSlot)
 	//MORPH END   - Upload Splitting Class
 		CheckForHighPrioClient();

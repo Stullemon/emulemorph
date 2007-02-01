@@ -730,7 +730,7 @@ void CServerSocket::ConnectTo(CServer* server, bool bNoCrypt)
 		SetConnectionEncryption(true, NULL, true);
 	}
 	else{
-		ASSERT((thePrefs.IsServerCryptLayerRequiredStrict()==false)); // lh csc It should net even try if the option is set. 
+		ASSERT((thePrefs.IsServerCryptLayerRequiredStrict()==false)); // // MORPH lh require obfuscated server connection It should net even try if the option is set. 
 		Log(GetResString(IDS_CONNECTINGTO), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetPort());
 		nPort = cur_server->GetPort();
 		SetConnectionEncryption(false, NULL, true);
@@ -776,12 +776,12 @@ bool CServerSocket::PacketReceived(Packet* packet)
 #endif	
 		
 		theStats.AddDownDataOverheadServer(packet->size);
-		// START lh csc
+		// START // MORPH lh require obfuscated server connection
 		if	(thePrefs.IsServerCryptLayerRequiredStrict()&&!IsServerCryptEnabledConnection()){
 				DebugLogError(_T("Connection not obfuscated. DO not process data"));
 			    return false;
 		}
-		// END lh csc
+		// END // MORPH lh require obfuscated server connection
 		if (packet->prot == OP_PACKEDPROT)
 		{
 			uint32 uComprSize = packet->size;

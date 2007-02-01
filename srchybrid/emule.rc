@@ -1247,10 +1247,35 @@ BEGIN
                     BS_FLAT | WS_TABSTOP,8,14,144,10
     CONTROL         "Kad",IDC_WIZARD_NETWORK_KADEMLIA,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,158,14,145,10
-    GROUPBOX        "eD2K Setting",IDC_WIZARD_ED2K,0,38,317,63,BS_FLAT
+    GROUPBOX        "eD2K Setting",IDC_WIZARD_ED2K,0,38,317,98,BS_FLAT
     CONTROL         "Do you want eMule to connect using Safe Connect?\n\nTurning this feature off allows eMule to connect to servers a little faster, but can cause you to get more false lowID connects.",
                     IDC_SAFESERVERCONNECT,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,8,50,289,48
+                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,7,47,289,48
+    CONTROL         "Required obfuscated connection to server.\nTurn on to prevent connecting to bad maintained/fake server",
+                    IDC_WIZARDREQUIREOBFUSCATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,7,96,289,27
+END
+
+IDD_WIZ8_MORPH DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "MorphXT Settings"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Mod Options",IDC_MORPHWIZ_GUI,0,0,317,56,BS_FLAT
+    CONTROL         "Show more controls (advanced)",IDC_MORPHWIZ_SHOWMORE,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,13,144,
+                    10
+    CONTROL         "Show less controls",IDC_MORPHWIZ_SHOWLESS,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,
+                    7,32,144,10
+    GROUPBOX        "On Finishing of wizard",IDC_MORPHWIZ_NEXT,0,68,317,72,
+                    BS_FLAT
+    CONTROL         "Run network wizard to configure up/down internet speed.",
+                    IDC_MORPHWIZ_NET1,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,7,83,289,20
+    CONTROL         "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule",
+                    IDC_MORPHWIZ_IMPORT,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,7,103,289,29
 END
 
 IDD_WIZ1_END DIALOGEX 0, 0, 317, 193
@@ -6827,6 +6852,29 @@ BEGIN
 	IDS_SERVER_REQUIREOBFUSCATION      "Require obfuscated connection to servers"
     IDS_SERVER_REQUIREOBFUSCATION_TIP  "Requires obfuscated connections to servers\nany servers that do not support obfuscating \nwill be ignored. And it happens that fake server\ndo not support obfuscation when this option\nis introduced. Note that it is impossible to connect \nto server until you get a valid cryptping" 
 	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Show some extra logging when searching.\n Also does nto merge all search results. \n (Default:0, not saved, edit preferences.ini to make a change permanent)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WIZARDREQUIREOBFUSCATED 
+                            "Required obfuscated connection to server.\nTurn on to prevent connecting to bad maintained/fake server"
+    IDS_WIZ8_MORPH          "MorphXT Settings"
+    IDS_MORPHWIZ_GUI        "Mod Options"
+    IDS_MORPHWIZ_SHOWMORE   "Show more controls (advanced)"
+    IDS_MORPHWIZ_SHOWLESS   "Show less controls"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MORPHWIZ_NEXT       "On Finishing of wizard"
+    IDS_MORPHWIZ_NET1       "Run network wizard to configure up/down internet speed."
+    IDS_MORPHWIZ_IMPORT     "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule"
+END
+STRINGTABLE 
+BEGIN
+	IDS_PREF_GROUPGENERAL "General options"
+	IDS_PREF_GROUPEXTENDED "Advanced options"
+	IDS_PREF_GROUPMOD "Mod options"
 END
 
 #endif    // English (U.S.) resources

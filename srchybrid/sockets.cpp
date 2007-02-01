@@ -221,14 +221,10 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 		uint32 dwCryptFlags = 0;
 		if (thePrefs.IsClientCryptLayerSupported())
 			dwCryptFlags |= SRVCAP_SUPPORTCRYPT;
-		if (thePrefs.IsClientCryptLayerRequested() ||	   //MORPH lh require obfuscated server connection 
-			thePrefs.IsServerCryptLayerRequiredStrict() )  // MORPH lh require obfuscated server connection 
+		if (thePrefs.IsClientCryptLayerRequested() )  
 			dwCryptFlags |= SRVCAP_REQUESTCRYPT;
 		if (thePrefs.IsClientCryptLayerRequired())
 			dwCryptFlags |= SRVCAP_REQUIRECRYPT;
-		if (thePrefs.IsServerCryptLayerRequiredStrict()) //MORPH lh require obfuscated server connection 
-			dwCryptFlags |= SRVCAP_REQUIRECRYPT;		 // lh scs
-		
 
 		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 		/*

@@ -92,6 +92,7 @@ void CPPgServer::LoadSettings(void)
 	CheckDlgButton(IDC_AUTOCONNECTSTATICONLY, thePrefs.m_bAutoConnectToStaticServersOnly);
 	CheckDlgButton(IDC_MANUALSERVERHIGHPRIO, thePrefs.m_bManualAddedServersHighPriority);
 	CheckDlgButton(IDC_SERVER_REQUIREOBFUSCATION, thePrefs.IsServerCryptLayerRequiredStrict()); // MORPH lh require obfuscated server connection 
+	if (!thePrefs.IsClientCryptLayerSupported()) GetDlgItem(IDC_SERVER_REQUIREOBFUSCATION)->EnableWindow(FALSE); // MORPH lh require obfuscated server connection 
 }
 
 BOOL CPPgServer::OnApply()

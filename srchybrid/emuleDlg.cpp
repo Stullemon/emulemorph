@@ -826,12 +826,17 @@ void CALLBACK CemuleDlg::StartupTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEv
 				// wait until emule is ready before opening the wizard
 				if (thePrefs.IsFirstStart())
 				{
-					extern BOOL FirstTimeWizard();
-					if (FirstTimeWizard()){
+					extern int FirstTimeWizard(); // MORPH first start wizard
+					int whatnext= FirstTimeWizard(); // return 0,1,2,3
+					if (whatnext&1) { 
 						// start connection wizard
 						CConnectionWizardDlg conWizard;
 						conWizard.DoModal();
 					}
+					if (whatnext&2) {
+						// start import tool.
+						CPartFileConvert::ShowGUI();
+					 }     // MORPH first start wizard
 				}
 				// SLUGFILLER: SafeHash
 				theApp.emuledlg->StopTimer();
@@ -2944,12 +2949,23 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			theApp.scheduler->Check(true);
 			break;
 		case MP_HM_1STSWIZARD:
+			/*
 			extern BOOL FirstTimeWizard();
-			if (FirstTimeWizard()){
+			*/
+			// MORPH START first time wizrd modification
+			extern int FirstTimeWizard(); // MORPH first start wizard
+			{int whatnext= FirstTimeWizard(); // return 0,1 ,2,3
+			if (whatnext&1) { 
 				// start connection wizard
 				CConnectionWizardDlg conWizard;
 				conWizard.DoModal();
 			}
+			if (whatnext&2) {
+				// start import tool.
+				CPartFileConvert::ShowGUI();
+			}     
+			}
+			// MORPH END first time wizrd modification
 			break;
 		case MP_HM_IPFILTER:{
 			CIPFilterDlg dlg;

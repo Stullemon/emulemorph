@@ -1778,8 +1778,8 @@ public:
 	static bool		IsClientCryptLayerRequired()		{return IsClientCryptLayerRequested() && m_bCryptLayerRequired;}
 	static bool		IsClientCryptLayerRequiredStrict()	{return false;} // not even incoming test connections will be answered
 	static bool		IsServerCryptLayerUDPEnabled()		{return IsClientCryptLayerSupported();}
-	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerRequested() ||m_bCryptLayerRequiredStrictServer;} // MORPH lh require obfuscated server connection  automatic assume requested encryption
-	static bool     IsServerCryptLayerRequiredStrict()  {return m_bCryptLayerRequiredStrictServer;} // MORPH lh require obfuscated server connection 
+	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerSupported() && (IsClientCryptLayerRequested() ||m_bCryptLayerRequiredStrictServer);} // MORPH lh require obfuscated server connection  automatic assume requested encryption
+	static bool     IsServerCryptLayerRequiredStrict()  {return IsClientCryptLayerSupported() && m_bCryptLayerRequiredStrictServer;} // MORPH lh require obfuscated server connection 
 	
 
 	static uint16	GetRandomTCPPort();

@@ -280,7 +280,7 @@ bool CDownloadQueue::StartNextFile(int cat, bool force){
 	if (cat != -1) {
         //MORPH START - Added by SiRoB, Per cat Resume file only in the same category
 		Category_Struct* cur_cat = thePrefs.GetCategory(cat);
-		force &= !(cur_cat && cur_cat->bResumeFileOnlyInSameCat);
+		force = force && !(cur_cat && cur_cat->bResumeFileOnlyInSameCat);
 		//MORPH END  - Added by SiRoB, Per cat Resume file only in the same category
 		// try to find in specified category
 		for (pos = filelist.GetHeadPosition();pos != 0;){

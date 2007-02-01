@@ -2905,13 +2905,13 @@ void CPreferences::LoadPreferences()
 	minupload=ini.GetInt(L"MinUpload", 5);    // also used for unlimited... 
 
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
-	minupload = min(max(minupload,1),maxGraphUploadRate); //MORPH uint16 is not enoug
+	minupload = min(max(minupload,1),maxGraphUploadRate); //MORPH uint16 is not enough
 	//MORPH END   - Added by SiRoB, (SUC) & (USS)
-	maxupload=ini.GetInt(L"MaxUpload",UNLIMITED); //MORPH uint16 is not enoug
+	maxupload=ini.GetInt(L"MaxUpload",UNLIMITED); //MORPH uint16 is not enough
 	if (maxupload > maxGraphUploadRate && maxupload != UNLIMITED)
-		maxupload = (maxGraphUploadRate * .8); //MORPH uint16 is not enoug
+		maxupload = (maxGraphUploadRate * .8); //MORPH uint16 is not enough
 	
-	maxdownload=ini.GetInt(L"MaxDownload", UNLIMITED); //MORPH uint16 is not enoug
+	maxdownload=ini.GetInt(L"MaxDownload", UNLIMITED); //MORPH uint16 is not enough
 	if (maxdownload > maxGraphDownloadRate && maxdownload != UNLIMITED)
 		maxdownload = (maxGraphDownloadRate * .8); //MORPH uint16 is not enoug
 	maxconnections=ini.GetInt(L"MaxConnections",GetRecommendedMaxConnections());

@@ -572,6 +572,7 @@ public:
 		m_iSafeServerConnect = 0;
 		m_iKademlia = 1;
 		m_iED2K = 1;
+		m_iReqObfus = 1; // // MORPH lh require obfuscated server connection
 	}
 	virtual ~CPPgWiz1Server();
 	virtual BOOL OnInitDialog();
@@ -582,6 +583,7 @@ public:
 	int m_iSafeServerConnect;
 	int m_iKademlia;
 	int m_iED2K;
+	int m_iReqObfus; // // MORPH lh require obfuscated server connection
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -600,6 +602,7 @@ CPPgWiz1Server::CPPgWiz1Server()
 	m_iSafeServerConnect = 0;
 	m_iKademlia = 1;
 	m_iED2K = 1;
+	m_iReqObfus = 1; // // MORPH lh require obfuscated server connection
 }
 
 CPPgWiz1Server::~CPPgWiz1Server()
@@ -612,6 +615,7 @@ void CPPgWiz1Server::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SAFESERVERCONNECT, m_iSafeServerConnect);
 	DDX_Check(pDX, IDC_WIZARD_NETWORK_KADEMLIA, m_iKademlia);
 	DDX_Check(pDX, IDC_WIZARD_NETWORK_ED2K, m_iED2K);
+	DDX_Check(pDX, IDC_WIZARDREQUIREOBFUSCATED, m_iReqObfus); // // MORPH lh require obfuscated server connection
 }
 
 BOOL CPPgWiz1Server::OnInitDialog()
@@ -621,8 +625,105 @@ BOOL CPPgWiz1Server::OnInitDialog()
 	GetDlgItem(IDC_SAFESERVERCONNECT)->SetWindowText(GetResString(IDS_FIRSTSAFECON));
 	GetDlgItem(IDC_WIZARD_NETWORK)->SetWindowText(GetResString(IDS_WIZARD_NETWORK));
 	GetDlgItem(IDC_WIZARD_ED2K)->SetWindowText(GetResString(IDS_WIZARD_ED2K));
+	GetDlgItem(IDC_WIZARDREQUIREOBFUSCATED)->SetWindowText(GetResString(IDS_WIZARDREQUIREOBFUSCATED)); //// MORPH lh require obfuscated server connection
 	return TRUE;
 }
+
+// MORPH START startup wizard
+///////////////////////////////////////////////////////////////////////////////
+// CPPgWiz7Morphdialog
+
+class CPPgWiz7Morph: public CDlgPageWizard
+{
+	DECLARE_DYNAMIC(CPPgWiz7Morph)
+
+public:
+	CPPgWiz7Morph();
+	CPPgWiz7Morph(UINT nIDTemplate, LPCTSTR pszCaption = NULL, LPCTSTR pszHeaderTitle = NULL, LPCTSTR pszHeaderSubTitle = NULL)
+		: CDlgPageWizard(nIDTemplate, pszCaption, pszHeaderTitle, pszHeaderSubTitle)
+	{
+		m_iShowMoreControls=0;
+		m_iShowLessControls=0;
+		m_iRunNetworkWizard=1;
+		m_iRunImportTool=0;
+	}
+	virtual ~CPPgWiz7Morph();
+	virtual BOOL OnInitDialog();
+	afx_msg void OnShowMoreClicked();
+	afx_msg void OnShowLessClicked();
+
+
+// Dialog Data
+	enum { IDD = IDD_WIZ8_MORPH };
+
+	int m_iShowMoreControls;
+	int m_iShowLessControls;
+	int m_iRunNetworkWizard;
+	int m_iRunImportTool;
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	DECLARE_MESSAGE_MAP()
+};
+
+IMPLEMENT_DYNAMIC(CPPgWiz7Morph, CDlgPageWizard)
+
+BEGIN_MESSAGE_MAP(CPPgWiz7Morph, CDlgPageWizard)
+	ON_BN_CLICKED(IDC_STARTTEST, OnShowMoreClicked)
+	ON_BN_CLICKED(IDC_STARTTEST, OnShowLessClicked)
+END_MESSAGE_MAP()
+
+CPPgWiz7Morph::CPPgWiz7Morph()
+	: CDlgPageWizard(CPPgWiz7Morph::IDD)
+{
+	m_iShowMoreControls=0;
+	m_iShowLessControls=0;
+	m_iRunNetworkWizard=1;
+	m_iRunImportTool=0;
+}
+
+CPPgWiz7Morph::~CPPgWiz7Morph()
+{
+}
+
+void CPPgWiz7Morph::DoDataExchange(CDataExchange* pDX)
+{
+	CDlgPageWizard::DoDataExchange(pDX);
+	DDX_Check(pDX, IDC_MORPHWIZ_SHOWMORE, m_iShowMoreControls);
+	DDX_Check(pDX, IDC_MORPHWIZ_SHOWLESS, m_iShowLessControls);
+	DDX_Check(pDX, IDC_MORPHWIZ_NET1	, m_iRunNetworkWizard);
+	DDX_Check(pDX, IDC_MORPHWIZ_IMPORT  , m_iRunImportTool); // // MORPH lh require obfuscated server connection
+}
+
+BOOL CPPgWiz7Morph::OnInitDialog()
+{
+	CDlgPageWizard::OnInitDialog();
+	InitWindowStyles(this);
+	GetDlgItem(IDC_MORPHWIZ_SHOWMORE)->SetWindowText(GetResString(IDS_MORPHWIZ_SHOWMORE));
+	GetDlgItem(IDC_MORPHWIZ_SHOWLESS)->SetWindowText(GetResString(IDS_MORPHWIZ_SHOWLESS));
+	GetDlgItem(IDC_MORPHWIZ_NET1)->SetWindowText(GetResString(IDS_MORPHWIZ_NET1));
+	GetDlgItem(IDC_MORPHWIZ_IMPORT)->SetWindowText(GetResString(IDS_MORPHWIZ_IMPORT)); 
+	return TRUE;
+}
+
+void CPPgWiz7Morph::OnShowMoreClicked()
+{
+	if (IsDlgButtonChecked(IDC_MORPHWIZ_SHOWMORE) )
+		CheckDlgButton(IDS_MORPHWIZ_SHOWLESS,BST_UNCHECKED);
+}
+	   
+void CPPgWiz7Morph::OnShowLessClicked()
+{
+	if (IsDlgButtonChecked(IDC_MORPHWIZ_SHOWLESS) )
+		CheckDlgButton(IDS_MORPHWIZ_SHOWMORE,BST_UNCHECKED);
+}
+// MORPH END startup wizard
+  
+
+
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -721,7 +822,10 @@ CPShtWiz1::~CPShtWiz1()
 {
 }
 
+/*
 BOOL FirstTimeWizard()
+*/
+int FirstTimeWizard() //lh ftw
 {
 	CEnBitmap bmWatermark;
 	VERIFY( bmWatermark.LoadImage(IDR_WIZ1_WATERMARK, _T("GIF"), NULL, GetSysColor(COLOR_WINDOW)) );
@@ -744,19 +848,32 @@ BOOL FirstTimeWizard()
 	CPPgWiz1Ports page3(IDD_WIZ1_PORTS, GetResString(IDS_WIZ1), GetResString(IDS_PORTSCON), GetResString(IDS_PW_CONNECTION));
 	sheet.AddPage(&page3);
 	
+	/* MORPH replace priorities with some other zird things.
 	CPPgWiz1UlPrio page4(IDD_WIZ1_ULDL_PRIO, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_DOWNLBL) + _T(" / ") + GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_PRIORITY));
 	sheet.AddPage(&page4);
-	/*   leuk_he: full chunks is not fucntional in zz upload system
+	*/
+	/*MORPH   leuk_he: full chunks is not fucntional in zz upload system
 	CPPgWiz1Upload page5(IDD_WIZ1_UPLOAD, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_WIZ1_UPLOAD_SUBTITLE));
 	sheet.AddPage(&page5);
-	*/ 
+	  MORPH */ 
 	
 	CPPgWiz1Server page6(IDD_WIZ1_SERVER, GetResString(IDS_WIZ1), GetResString(IDS_PW_SERVER), GetResString(IDS_NETWORK));
 	sheet.AddPage(&page6);
 	
+	// MORPH START startup wizard
+//	CEnBitmap bmHeader_mor;
+//	VERIFY( bmHeader_mor.LoadImage(IDR_WIZ1_HEADER_MORPH, _T("GIF"), NULL, GetSysColor(COLOR_WINDOW)) );
+	CPPgWiz7Morph page6b(IDD_WIZ8_MORPH, GetResString(IDS_WIZ1), GetResString(IDS_WIZ8_MORPH),NULL);
+//	page6b.m_psh.hbmHeader = bmHeader_mor;
+	sheet.AddPage(&page6b);
+	// MORPH END startup wizard
+
+
 	CPPgWiz1End page7(IDD_WIZ1_END, GetResString(IDS_WIZ1));
 	page7.m_psp.dwFlags |= PSP_HIDEHEADER;
 	sheet.AddPage(&page7);
+
+
 
 	page2.m_strNick = thePrefs.GetUserNick();
 	if (page2.m_strNick.IsEmpty())
@@ -764,12 +881,14 @@ BOOL FirstTimeWizard()
 	page2.m_iAutoConnectAtStart = 0;
 	page3.m_sTCP.Format(_T("%u"), thePrefs.GetPort());
 	page3.m_sUDP.Format(_T("%u"), thePrefs.GetUDPPort());
-	page4.m_iDAP = 1;
-	page4.m_iUAP = 1;
+//	page4.m_iDAP = 1; // MORPH less is more
+//	page4.m_iUAP = 1; // MORPH less is more
 //	page5.m_iULFullChunks = 1;	  // MORPH not needed full chunk due to zz upload
 	page6.m_iSafeServerConnect = 0;
 	page6.m_iKademlia = 1;
 	page6.m_iED2K = 1;
+	//page6.m_iReqObfus = thePrefs.IsServerCryptLayerRequiredStrict(); // // MORPH lh require obfuscated server connection
+    page6b.m_iShowMoreControls = thePrefs.IsExtControlsEnabled(); // MORPH startup wizard
 
 	uint16 oldtcpport=thePrefs.GetPort();
 	uint16 oldudpport=thePrefs.GetUDPPort();
@@ -797,12 +916,14 @@ BOOL FirstTimeWizard()
 		AddAutoStart();
 	else
 		RemAutoStart();
-	thePrefs.SetNewAutoDown(page4.m_iDAP!=0);
-	thePrefs.SetNewAutoUp(page4.m_iUAP!=0);
-//	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks!=0);
+//	thePrefs.SetNewAutoDown(page4.m_iDAP!=0); // MORPH Less is more
+//	thePrefs.SetNewAutoUp(page4.m_iUAP!=0); // MORPH less is more
+//	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks!=0); // MORPH less is more
 	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect!=0);
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
+	thePrefs.m_bCryptLayerRequiredStrictServer =(page6.m_iReqObfus!=0); // // MORPH lh require obfuscated server connection
+	thePrefs.SetExtControls(page6b.m_iShowMoreControls!=0 );
 
 	theApp.m_UPnP_IGDControlPoint->SetUPnPNat(page3.uPnPNAT!=0); // leuk_he add upnp to startup wizard
 	// set ports
@@ -822,5 +943,8 @@ BOOL FirstTimeWizard()
 			theApp.clientudp->Rebind();
 		}
 	
-	return TRUE;
+	/* MORPH
+    return True
+	*/
+	return page6b.m_iRunNetworkWizard + 2* page6b.m_iRunImportTool ; // MORPH  startup wizard (1= run net, 2= run improt , 3 = both) 
 }

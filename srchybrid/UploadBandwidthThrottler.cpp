@@ -496,7 +496,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		for (int i = 0; i < m_StandardOrder_list.GetSize(); i++){
 			Socket_stat* stat = NULL;
 			if (m_stat_list.Lookup(m_StandardOrder_list[i], stat)) {
-				if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues() && m_StandardOrder_list[i]->GetBusyRatioTime()) {
+				if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues() && stat->scheduled == false && m_StandardOrder_list[i]->GetBusyRatioTime()) {
 					nCanSend++;
 				
 					DWORD newBusySince = m_StandardOrder_list[i]->GetBusyTimeSince();
@@ -630,8 +630,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
        	if(cBusy >= nCanSend && realBytesToSpendClass[LAST_CLASS] > 999 /*&& m_StandardOrder_list.GetSize() > 0*/) {
 			//allowedDataRate = 0;
             //realBytesToSpend = min(realBytesToSpend, 1024*1000);
-            realBytesToSpendClass[LAST_CLASS] = 999;
-			if(nSlotsBusyLevel < 125 && bUploadUnlimited) {
+            if(nSlotsBusyLevel < 125 && bUploadUnlimited) {
 				nSlotsBusyLevel = 125;
 				if(thePrefs.GetVerbose() && lotsOfLog) theApp.QueueDebugLogLine(false,_T("Throttler: nSlotsBusyLevel: %i Guessed limit: %0.5f changesCount %i loopsCount: %i (set due to all slots busy)"), nSlotsBusyLevel, (float)nEstiminatedLimit/1024.00f, changesCount, loopsCount);
 			}
@@ -833,7 +832,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 										//Try to send client allowed data for a client but not more than class allowed data
 										if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
 	#if !defined DONT_USE_SOCKET_BUFFERING
-										uint32 BytesToSend = (uint32) min((BytesToSpend - (sint64) spentBytes),stat->realBytesToSpend/1000);
+										uint32 BytesToSend = (uint32) min((BytesToSpend - (sint64) spentBytes - doubleSendSize),stat->realBytesToSpend/1000);
 										SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 	#else
 											SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
@@ -859,7 +858,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									if (m_stat_list.Lookup(socket,stat)) {
 										if (stat->realBytesToSpend > 999) {
 	#if !defined DONT_USE_SOCKET_BUFFERING
-											uint32 BytesToSend = (uint32)min(((sint64)BytesToSpend - (sint64)spentBytes),stat->realBytesToSpend/1000);
+											uint32 BytesToSend = (uint32)min(((sint64)BytesToSpend - (sint64)spentBytes - doubleSendSize),stat->realBytesToSpend/1000);
+											BytesToSend = min(doubleSendSize,BytesToSend);
 											SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
 	#else
 											SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize);
