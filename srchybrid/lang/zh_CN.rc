@@ -3560,7 +3560,7 @@ BEGIN
     IDC_ONLYOBFUSCATED_TIP  "如果启用此选项, eMule将仅建立和接受协议加密的连接.\n不支持协议加密的客户将被忽略, 普通的连接将被阻止,\n自动连接到服务器功能也将仅适用于支持加密连接的服务器.\n除非你确定ED2K协议已经被ISP完全封杀,\n不要启用这个选项, 否则将失去许多来源并使eMule速度下降.\n但如果eMule确实已被你的ISP封杀, 则推荐勾选此项,\n以便节约时间, 带宽消耗和资源. 总之, 完全不能下载时才用!\n(默认设置: 关闭)"
     IDC_ENABLEOBFUSCATION_TIP 
                             "如果你认为eMule被网络服务商(ISP)封杀了,\n那么就应该启用此项功能.\neMule将尽可能使用加密协议进行连接,\n同时也会要求连接到你的其它客户也这样做.\n连接到服务器时, eMule也会首先尝试使用加密连接,\n仅当加密连接失败时才会使用普通连接.\n启用加密连接基本上没有什么不良影响,\n只会略微增加CPU负担和极少的带宽消耗,\n因此, 启用此项功能不会有坏处.\n而http协议的传输也将用firefox代替eMule作为客户端名称\n(默认设置: 关闭) "
-	IDS_USEUSERSORTEDSERVERLIST "使用用户整理的服务器列表"
+    IDS_USEUSERSORTEDSERVERLIST    "使用用户整理的服务器列表"
     IDS_USEUSERSORTEDSERVERLIST_TIP "如果启用此项, 连接到服务器时\n将使用与图形界面相同的服务器列表"
     IDS_USECOMPRESS_TIP     "可以对所有客户均禁用数据压缩.\n适用于速度<b>非常快</b>的服务器(>~ 100mbit)\n如果禁用此项设置, 在退出程序时不会保存.\n除非在preferences.ini中手动加入一行UseCompression= into\n默认设置: 启用 (推荐!)"
     IDS_COMPRESSLEVEL_TIP   "对可以压缩的数据设置压缩级别.\n有些cpu可以自动保存设置, 但需要传输更多数据\n适用于速度非常快的机器. \n1=cpu占用最少, 压缩程度最低\n9=最大压缩(默认, 推荐)"
@@ -3570,6 +3570,9 @@ BEGIN
     IDS_TEST_NOTIFICATION "测试"
     IDS_SERVER_REQUIREOBFUSCATION "连接到支持加密的服务器"
     IDS_SERVER_REQUIREOBFUSCATION_TIP "连接到支持加密连接的服务器,\n任何不支持加密的服务器将被忽略.\n启用此功能可过滤一些假的间谍服务器."
+    IDS_PREF_GROUPGENERAL "常规设置"
+    IDS_PREF_GROUPEXTENDED "高级设置"
+    IDS_PREF_GROUPMOD "Morph设置"
 END
 
 
