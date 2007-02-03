@@ -207,8 +207,8 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 			// set listname for server
 			if (newserver->GetListName().IsEmpty())
 				newserver->SetListName(newserver->GetAddress());
-
 			if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(newserver, true))
+//			if (!theApp.serverlist->AddServer(newserver))   // morph run as service
 			{
 				CServer* update = theApp.serverlist->GetServerByAddress(newserver->GetAddress(), newserver->GetPort());
 				if (update)

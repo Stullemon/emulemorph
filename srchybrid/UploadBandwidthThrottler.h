@@ -27,6 +27,7 @@ struct Socket_stat{
 	uint32	classID;
 	sint64	realBytesToSpend;
 	DWORD	dwLastBusySince;
+	DWORD	dwLastBytesSent;
 	bool	scheduled;
 };
 //MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class

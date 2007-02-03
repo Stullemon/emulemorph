@@ -611,7 +611,7 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 			}
 	    } else {
 #if !defined DONT_USE_SOCKET_BUFFERING
-			uint32 sendbufferlimit = packet->GetRealPacketSize()<<1;
+			uint32 sendbufferlimit = packet->GetRealPacketSize()<<2;
 			if (sendbufferlimit > 10*1024*1024)
 				sendbufferlimit = 10*1024*1024;
 			else if (sendbufferlimit < 3000)
@@ -687,7 +687,7 @@ void CEMSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpacket, boo
 					payloadSize += actualPayloadSize;
 				}
 #if !defined DONT_USE_SOCKET_BUFFERING
-				uint32 sendbufferlimit = (*packet)->GetRealPacketSize()<<1;
+				uint32 sendbufferlimit = (*packet)->GetRealPacketSize()<<2;
 				if (sendbufferlimit > 10*1024*1024)
 					sendbufferlimit = 10*1024*1024;
 				else if (sendbufferlimit < 3000)
@@ -851,10 +851,10 @@ void CEMSocket::OnSend(int nErrorCode){
 SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket) {
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
 
-    if (maxNumberOfBytesToSend == 0 && (::GetTickCount() - lastCalledSend < SEC2MS(1))) {
-        SocketSentBytes returnVal = { true, 0, 0 };
-        return returnVal;
-    }
+//    if (maxNumberOfBytesToSend == 0 && (::GetTickCount() - lastCalledSend < SEC2MS(1))) {
+//        SocketSentBytes returnVal = { true, 0, 0 };
+//	      return returnVal;
+//    }
 
 	sendLocker.Lock();
 	if (byConnected == ES_DISCONNECTED) {
@@ -877,15 +877,10 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
             minFragSize = 1;
         }
 
-		if(maxNumberOfBytesToSend == 0) {
+	    if ((::GetTickCount() - lastCalledSend > SEC2MS(15))) {
 #if !defined DONT_USE_SOCKET_BUFFERING
 			ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
-			maxNumberOfBytesToSend = GetNeededBytes(sendblen, sendblenWithoutControlPacket, sendblenWithoutControlPacket != sendblen-sent, lastCalledSend);
-			if (maxNumberOfBytesToSend == 0) {
-				sendLocker.Unlock();
-				SocketSentBytes returnVal = { true, 0, 0 };
-				return returnVal;
-			}
+			maxNumberOfBytesToSend = max(maxNumberOfBytesToSend, GetNeededBytes(sendblen, sendblenWithoutControlPacket, sendblenWithoutControlPacket != sendblen-sent, lastCalledSend));
 		}
 #else
             maxNumberOfBytesToSend = GetNeededBytes(sendbuffer, sendblen, sent, m_currentPacket_is_controlpacket, lastCalledSend);

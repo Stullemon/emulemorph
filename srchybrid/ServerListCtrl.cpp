@@ -66,6 +66,7 @@ bool CServerListCtrl::Init()
 	ModifyStyle(LVS_SINGLESEL|LVS_LIST|LVS_ICON|LVS_SMALLICON,LVS_REPORT); //here the CListCtrl is set to report-style
 	SetExtendedStyle(GetExtendedStyle() | LVS_EX_INFOTIP);
 
+	if (!theApp.IsRunningAsService()) { // MORPH leuk_he running as a service 
 	CToolTipCtrl* tooltip = GetToolTips();
 	if (tooltip) {
 		m_tooltip->SubclassWindow(*tooltip);
@@ -73,6 +74,7 @@ bool CServerListCtrl::Init()
 		tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
 		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 	}
+	} // MORPH leuk_he running as a service 
 
 	InsertColumn(0, GetResString(IDS_SL_SERVERNAME),LVCFMT_LEFT, 150);
 	InsertColumn(1, GetResString(IDS_IP),			LVCFMT_LEFT, 140);
