@@ -2985,7 +2985,7 @@ void CPreferences::LoadPreferences()
 	if ((m_iCompressLevel > 9 )||(m_iCompressLevel < 1 )) m_iCompressLevel=9 ; // 1 = worst, but saves cpu, 9 = best, emule default
 	// MORPH setable compresslevel [leuk_he]
 	
-	m_uDeadServerRetries=ini.GetInt(L"DeadServerRetry",1);
+	m_uDeadServerRetries=ini.GetInt(L"DeadServerRetry",3);	// morph 1 --> 3 for no fallback from obfuscated -> normal. 
 	if (m_uDeadServerRetries > MAX_SERVERFAILCOUNT)
 		m_uDeadServerRetries = MAX_SERVERFAILCOUNT;
 	m_dwServerKeepAliveTimeout=ini.GetInt(L"ServerKeepAliveTimeout",0);
