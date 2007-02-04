@@ -1,22 +1,22 @@
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.5
 --------------------------------------
-02-02-2007
+04-02-2007
 ADD:	Servers ->obfuscated connection to server required preference. 
 		 -Only obfuscated connections to servers are made.
 		 -fake/spy servers do no support obfuscation 8-) 
-ADD:     New obfuscation required option to servers in startup wizard.
+		 Note: you may have to increase server retries if you enable this option and 
+		 enable serverlist from servers again....
+ADD:     startup wizard, New obfuscation required option to servers added.
 ADD:     Startup wizard, show more controls and option to start import after wizard.
-REMOVE:  Startup wizard, Set auto up/down file priority. 
+REMOVE:  Startup wizard, Set auto up/down file priority (default still is enabled..)
 ADD:	 Preferences groups (ePlus/Sirob)
 CHANGED: Complete pending hashing at shutdown like official to prevent rehash. 
 ADDED  : USC: limiting of opening slots with exponential delay based on the number of new connecting slot.
 ADDED  : USC: Don't allow new slot to be opened if number of half connection reached the limit.
 CHANGED: USC: Reviewed to allow high latency remote client to download at a higher speed.
-
-
-
 FIX:     Default for advanced preference MEDIAINFO_RIFF/ID3LIB (avi/mp3) detection was unchecked, should be enabled.
+
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.4 installer
 --------------------------------------
