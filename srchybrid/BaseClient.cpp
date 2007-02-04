@@ -1792,7 +1792,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		// ensure that all possible block requests are removed from the partfile
 		ClearDownloadBlockRequests();
 
-		if(GetDownloadState() == DS_CONNECTED || GetDownloadState() == DS_WAITCALLBACKKAD){
+		if(GetDownloadState() == DS_CONNECTED){
 		    //MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
 			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo <= 1  || IsFriend() || IsProxy())
 				SetDownloadState(DS_ONQUEUE);
@@ -3459,15 +3459,18 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 				s = m_pPCUpSocket;
 			else if (m_pWCUpSocket)
 				s = m_pWCUpSocket;
-#ifndef DONT_USE_SOCKET_BUFFERING
-			// extra info not required in release
-			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
-#endif
 			DWORD busySince = s->GetBusyTimeSince();
 			if (s->GetBusyRatioTime() > 0)
 				strState.AppendFormat(_T(",BR: %0.2f"), s->GetBusyRatioTime());
 			if (busySince > 0)
 				strState.AppendFormat(_T(",BT:%ums"), GetTickCount() - busySince);
+#ifndef DONT_USE_SOCKET_BUFFERING
+#ifndef _RELEASE
+ 		   // extra info not required in release
+			strState.AppendFormat(_T(",BUF:%u"), s->GetSendBufferSize());		
+#endif			
+#endif
+
 		}
 	}
 	return strState;

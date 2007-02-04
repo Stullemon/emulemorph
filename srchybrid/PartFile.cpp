@@ -3870,11 +3870,14 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarateAVG(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
-	bytesPerRequest = min(max(2*sender->GetSessionPayloadDown(),10240), sourceDatarate * timeToFileCompletion);
+	bytesPerRequest = sourceDatarate * timeToFileCompletion;
+	if (bytesPerRequest > bytesLeftToDownload)
+		bytesPerRequest = bytesLeftToDownload;
 	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
-	if (bytesPerRequest > sourcealreadyreserveddata)
+	if (bytesPerRequest > sourcealreadyreserveddata) {
 		bytesPerRequest -= sourcealreadyreserveddata;
-	else
+		bytesPerRequest = min(max(sender->GetSessionPayloadDown(), 10240),bytesPerRequest/2);
+	} else
 		bytesPerRequest = 0;
 	//MORPH END   - Enhanced DBR
 
@@ -6728,11 +6731,14 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarateAVG(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
-	bytesPerRequest = min(max(2*sender->GetSessionPayloadDown(),10240), sourceDatarate * timeToFileCompletion);
+	bytesPerRequest = sourceDatarate * timeToFileCompletion;
+	if (bytesPerRequest > bytesLeftToDownload)
+		bytesPerRequest = bytesLeftToDownload;
 	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
-	if (bytesPerRequest > sourcealreadyreserveddata)
+	if (bytesPerRequest > sourcealreadyreserveddata) {
 		bytesPerRequest -= sourcealreadyreserveddata;
-	else
+		bytesPerRequest = min(max(sender->GetSessionPayloadDown(), 10240),bytesPerRequest/2);
+	} else
 		bytesPerRequest = 0;
 	//MORPH END   - Enhanced DBR
 
