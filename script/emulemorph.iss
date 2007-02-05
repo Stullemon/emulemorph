@@ -23,7 +23,7 @@ WizardImageStretch=no
 ; this dir:
 OutputDir=.
 OutputBaseFilename=morphemuleversion-installer
-SetupIconFile=..\srchybrid\res\ClientCompatible.ICO
+SetupIconFile=..\srchybrid\res\mod\installerico.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -116,13 +116,16 @@ Root: HKCR; Subkey: "ed2k\Shell"; ValueType: string; Flags: uninsdeletekey;  Tas
 Root: HKCR; Subkey: "ed2k\Shell\open"; ValueType: string; Flags: uninsdeletekey;  Tasks: urlassoc
 Root: HKCR; Subkey: "ed2k\Shell\open\Command"; ValueType: string; ValueData: "{app}\emule.exe ""%1"""; Flags: uninsdeletekey;  Tasks: urlassoc
 
+Root: HKCR; Subkey: ".emulecollection"; ValueType: string; ValueName: ""; ValueData: "eMule"; Flags: uninsdeletevalue;Tasks: urlassoc
+Root: HKCR; Subkey: "eMule"; ValueType: string; ValueName: ""; ValueData: "eMule"; Flags: uninsdeletekey;  Tasks: urlassoc
+Root: HKCR; Subkey: "eMule\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMule.exe,1";  Tasks: urlassoc
+Root: HKCR; Subkey: "eMule\shell\open\Command"; ValueType: string; ValueData: "{app}\emule.exe ""%1"""; Flags: uninsdeletekey;  Tasks: urlassoc
+
+
 [Run]
 ;Not in vista because install runs as admin.
 Filename: "{app}\emule.exe"; Description: "{cm:LaunchProgram,eMule}"; Flags: nowait postinstall skipifsilent ;OnlyBelowVersion: 0,6;
 Filename: "netsh"; PArameters:"firewall add allowedprogram ""{app}\emule.exe"" eMuleMorphXT enable all" ; flags: runminimized; Tasks: firewall
-
-[UninstallRun]
-
 
 [uninstallrun]
 Filename: "{app}\emule.exe"; Parameters: "uninstall"
@@ -153,9 +156,8 @@ tasks_assocurl=Registers eMule to take ed2k-Links.
 spanish.assocurl=Capturar enlaces Ed2k
 french.assocurl=Associer avec les liens Ed2k
 german.assocurl=Ed2k-Links nehmen
-BrazilianPortuguese.assocurl=Pegar Links Ed2k
+BrazilianPortuguese.assocurl=BrazilianPortuguese.assocurl=Associar com links ED2K e arquivos .emulecollection
 ChineseSimpl.assocurl="和 Ed2k 連結產生關聯"
-
 
 ; Code sections need to be the last section in a script or the compiler will get confused
 [Code]
