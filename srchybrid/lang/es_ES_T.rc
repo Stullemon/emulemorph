@@ -3402,7 +3402,7 @@ BEGIN
     IDS_SVC_ONSTARTBOX      "En el comienzo de eMule"
     IDS_SVC_STARTUPBOX      "Arranque"
     IDS_SVC_MANUALSTART     "Arranque manual"
-    IDS_YESSERVICE          "Si. Arrancar el servicio de eMule"
+    IDS_YESSERVICE          "Si, arrancar como servicio"
 END
 
 STRINGTABLE 
@@ -3521,8 +3521,8 @@ BEGIN
 	IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
 	IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
 	IDC_SVC_CURRENT_STATUS_LABEL "Estado actual"
-	IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, usa el mismo criterio que clasifica a los servidores\nen la pestaña de Servidores en el GUI cuando se intenta conectar a un servidor."
 END
+
 STRINGTABLE
 BEGIN
 	IDS_USECOMPRESS_TIP "Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPOr defecto = activado (¡¡Recomendado!!)"
@@ -3539,7 +3539,7 @@ STRINGTABLE
  BEGIN
       IDS_WIZARDREQUIREOBFUSCATED  "Requerida conexión ofuscada al servidor.\nHabilitar para prevenir la conexión a servidores mal mantenidos/falsos."
       IDS_WIZ8_MORPH          "Configuraciones del MorphXT"
-      IDS_MORPHWIZ_GUI        "Opciones del Mod"
+      IDS_MORPHWIZ_GUI        "Opciones del MorphXT"
       IDS_MORPHWIZ_SHOWMORE   "Mostrar menos controles (Avanzado)"
       IDS_MORPHWIZ_SHOWLESS   "Mostrar menos controles"
 END
@@ -3552,9 +3552,9 @@ BEGIN
 END
 STRINGTABLE
 BEGIN
-      IDS_PREF_GROUPGENERAL "Opcioens Generales"
+      IDS_PREF_GROUPGENERAL 	"Opciones Generales"
       IDS_PREF_GROUPEXTENDED "Opciones Avanzadas"
-      IDS_PREF_GROUPMOD "Opciones del Mod"
+      IDS_PREF_GROUPMOD 			"Opciones del MorphXT"
 END
 
 #endif    // Spanish (Castilian) resources

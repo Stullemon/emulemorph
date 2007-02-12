@@ -3510,6 +3510,28 @@ BEGIN
     IDS_USECOMPRESS_TIP     "Opzione per disabilitare la compressione per tutti i dati utente. Utile per reti\nad altissima velocità (>~ 100mbit). Questa opzione non verrà salvata, per renderla\npermanente devi aggiungere 'UseCompression=' nel File 'preferences.ini'.\n(Default=attivato - raccomandato!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Stato Attuale"
 	IDS_USEUSERSORTEDSERVERLIST_TIP "Quando attivo questo userà lo stesso ordinamento della lista server\nvisualizzata nella GUI quando si prova a connettersi ad un server."
+
+	IDS_USEUSERSORTEDSERVERLIST "Lista server ordinata dall'utente"
+	IDS_TEST_NOTIFICATION "Test"
+	IDS_SERVER_REQUIREOBFUSCATION "Richiedi connessione offuscata ai server"
+	IDS_SERVER_REQUIREOBFUSCATION_TIP "Richiedi connessione offuscata ai server\ntutti i server che non supportano l'offuscamento\nsaranno ignorati. Questo accade con i fake server\nche non supportano l'offuscamento, quando\mquesta opzione è attiva. Nota che sarà impossibile connettersi\nad un server finchè non avrai un criptaggio valido"
+	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Viasualizza qualche extra logging quando cerca.\nInoltre non fonde tutti i risultati della ricerca. \n (Default:0, non salvato, modificare il preferences.ini per modificarlo permanentemente)"
+
+	IDS_WIZARDREQUIREOBFUSCATED
+								"Connessione offuscata richiesta per i server.\nAttivare per prevenire di connettersi a dei fake server"
+	IDS_WIZ8_MORPH "Opzioni MorphXT"
+	IDS_MORPHWIZ_GUI "Opzioni Mod"
+	IDS_MORPHWIZ_SHOWMORE "Visualizza più controlli (avanzati)"
+	IDS_MORPHWIZ_SHOWLESS "Visualizza meno controlli" 
+	 IDS_MORPHWIZ_NEXT "Terminando il wizard"
+	IDS_MORPHWIZ_NET1 "Avvia il network wizard per configurare la velocità di up/down della connessione internet"
+	IDS_MORPHWIZ_IMPORT "Avvia l'import tool per importare i downloads incompleti\nda eDonkey/shareaza/eMule"
+
+	IDS_PREF_GROUPGENERAL "Opzioni Generali"
+	IDS_PREF_GROUPEXTENDED "Opzioni Avanzate"
+	IDS_PREF_GROUPMOD "Opzioni Mod"
+
+
 END
 
 #endif    // Italian (Italy) resources

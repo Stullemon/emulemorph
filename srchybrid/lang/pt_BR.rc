@@ -3417,6 +3417,9 @@ BEGIN
                             "Quantidade de MB que são permitidos baixar pelo http do webserver. (Padrão: 5)"
     IDS_ALLOWEDIPS          "AllowedIPs webserver (seperated by ;)"
     IDS_ALLOWEDIPS_TIP      "IPs que poderão conectar ao webserver, separados por ';'"
+    IDS_STATIC_ICON         "Sempre mostrar o ícone na bandeja(tray)"
+    IDS_COMPRESSLEVEL       "Nível de compressão (1-9) "
+    IDS_COMPRESSLEVEL_TIP   "Define o nível de compressão para dados comprimíveis.\nDiminuindo a compressão fará com que o eMule use menos CPU,\nmas mais dados serão enviados pela rede. Útil para conexões super velozes.\n1 = Usa menos CPU, comprime menos\n9 = Melhor compressão (padrão)"
 END
 
 STRINGTABLE 
@@ -3439,14 +3442,45 @@ BEGIN
                             "Instrui o eMule para verificar arquivos mpeg (mp1,mp2,mp3,mpa)\nem busca do cabeçalho mpeg. As informações serão mostradas na janela\nde detalhes do arquivo. Id3lib ou a dll mediainfo será usada pra isso. (Padrão: Ativado)"
     IDS_MAXLOGBUFF_TIP      "Define o quanto de memória o eMule usará pra mostrar os logs.\nPara Windows 98 | ME um padrão de 64kB é reservado, para Win 2k|XP\nit é 128 kB. No Win98|ME o buffer não pode ser maior que 64 kB.\nOs logs são rotativos, i.e. se o buffer encher até o limite\numa mensagem velha será excluída para uma nova aparecer (FIFO)."
     IDS_MAXCHATHISTORY_TIP  "Defines the maximum number of lines saved in the history of the irc\nmessages. After this value is reached the oldest message is\npurged on new entry (FIFO - First In First Out).\ndefault =100"
-    IDS_PREVIEWSMALLBLOCKS_TIP "Essa opção só deve ser ativada se você estiver usando VLC (VideoLAN Client)\npara previsualizar arquivos. Ela permite previsualizar arquivos multimídia\nmesmo quando tem somente 16kB baixados para arquivos .mpeg ou 256kB\npara outros arquivos. Com essa opção ativada, o 'Criar backup para preview'\ndeve ser desabilitado na janela 'Vídeo Player'."
+    IDS_PREVIEWSMALLBLOCKS_TIP "Essa opção só deve ser ativada se você estiver usando VLC (VideoLAN Client)\npara pre-visualizar arquivos. Ela permite previsualizar arquivos multimídia\nmesmo quando tem somente 16kB baixados para arquivos .mpeg ou 256kB\npara outros arquivos. Com essa opção ativada, o 'Criar backup para preview'\ndeve ser desabilitado na janela 'Vídeo Player'."
     IDS_RESTORELASTMAINWNDDLG_TIP "O eMule lembrará quais das principais janelas \n(Kademlia, Servidor, Transferência) estavam abertas quando ele foi fechado\ne as abrirá quando for executado novamente. (Padrão: Desativado)"
-    IDS_STATIC_ICON         "Sempre mostrar o ícone na bandeja(tray)"
-    IDS_COMPRESSLEVEL       "Nível de compressão (1-9) "
-    IDS_COMPRESSLEVEL_TIP   "Define o nível de compressão para dados comprimíveis.\nDiminuindo a compressão fará com que o eMule use menos CPU,\nmas mais dados serão enviados pela rede. Útil para conexões super velozes.\n1 = Usa menos CPU, comprime menos\n9 = Melhor compressão (padrão)"
+
+END
+
+STRINGTABLE
+BEGIN
     IDS_USECOMPRESS         "UseCompression (sessão)"
     IDS_USECOMPRESS_TIP     "Opção para desligar completamente a compressão.\nÚtil para conexões ultra-rápidas (>~ 100mbit)\nEssa opção não é salva. Para torná-la permanente\nvocê precisará adicionar UseCompression= no preferences.ini\n(Padrão: Ativado) (recomendado!)"
+    IDS_SVC_CURRENT_STATUS_LABEL "Status Atual"
+    IDS_USEUSERSORTEDSERVERLIST_TIP "Quando ligado, isso fará com que o eMule tente conectar\nnos servidores da lista na mesma ordem que eles aparecem lá."
+    IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
+    IDS_TEST_NOTIFICATION   "Test"
+    IDS_SERVER_REQUIREOBFUSCATION      "Requerer conexão ofuscada com servidores"
+    IDS_SERVER_REQUIREOBFUSCATION_TIP  "Você só se conectará a servidores que aceitem conexões ofuscadas.\nPor enquanto os servidores falsos ainda não aceitam\nofuscação, então é mais seguro ligar essa opção." 
+    IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Mostra mais algumas informações quando fazer pesquisa.\nTambém não une todos os resultados de buscas. \n(Padrão: Desligado, não salvo, edite preferences.ini para mudar permanentemente)"
+END
 
+STRINGTABLE 
+BEGIN
+    IDS_WIZARDREQUIREOBFUSCATED 
+                            "Requerer conexão ofuscada com o servidor.\nLigue para prevenir conectar em servidores falsos e antigos."
+    IDS_WIZ8_MORPH          "Opções do MorphXT"
+    IDS_MORPHWIZ_GUI        "Opções do Mod"
+    IDS_MORPHWIZ_SHOWMORE   "Mostrar mais controles (avançados!)"
+    IDS_MORPHWIZ_SHOWLESS   "Mostrar menos controles"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MORPHWIZ_NEXT       "Ao finalizar o Assistente"
+    IDS_MORPHWIZ_NET1       "Executar o Assistente de rede para configurar a velocidade da Internet."
+    IDS_MORPHWIZ_IMPORT     "Executar a ferramenta de importação para importar downloads\ndo eDonkey/shareaza/eMule"
+END
+STRINGTABLE 
+BEGIN
+	IDS_PREF_GROUPGENERAL "Opções Gerais"
+	IDS_PREF_GROUPEXTENDED "Opções Avançadas"
+	IDS_PREF_GROUPMOD "Opções do Mod"
 END
 
 
