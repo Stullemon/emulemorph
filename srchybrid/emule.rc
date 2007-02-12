@@ -2983,7 +2983,9 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
+
 AAAEMULEAPP             ICON                    "res\\Mule.ico"
+//AAAEMULEAPP             ICON                    "res\\MOD\\AAMorph.ico"
 COLOUR                  ICON                    "res\\colour.ico"
 BOLD                    ICON                    "res\\bold.ico"
 UNDERLINE               ICON                    "res\\underline.ico"
@@ -6566,7 +6568,7 @@ BEGIN
     IDS_PW_RESET_TIP        "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Reset button will clear all entries."
     IDS_DISABLEHIST_TIP     "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Enabled checkmark allows to turn off this option"
     IDS_PW_SHOWTRANSTOOLBAR_TIP 
-                            "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes\n:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queue\nDisplays all known clients"
+                            "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queue\nDisplays all known clients"
     IDC_SHOWDWLPERCENT_TIP  "A %-completed value will be added for each download in its progress bar."
     IDC_EXITQUESTION_TIP    "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
     IDC_DONTASKMEAGAINCB_TIP 
@@ -6851,7 +6853,7 @@ BEGIN
 	IDS_TEST_NOTIFICATION   "Test"
 	IDS_SERVER_REQUIREOBFUSCATION      "Require obfuscated connection to servers"
     IDS_SERVER_REQUIREOBFUSCATION_TIP  "Requires obfuscated connections to servers\nany servers that do not support obfuscating \nwill be ignored. And it happens that fake server\ndo not support obfuscation when this option\nis introduced. Note that it is impossible to connect \nto server until you get a valid cryptping" 
-	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Show some extra logging when searching.\n Also does nto merge all search results. \n (Default:0, not saved, edit preferences.ini to make a change permanent)"
+	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Show some extra logging when searching.\n Also does not merge all search results. \n (Default:0, not saved, edit preferences.ini to make a change permanent)"
 END
 
 STRINGTABLE 
