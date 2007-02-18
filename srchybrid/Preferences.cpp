@@ -3591,9 +3591,6 @@ void CPreferences::LoadPreferences()
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "WebServer"
 	//
-	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
-	m_bIonixWebsrv=ini.GetBool(_T("UseIonixWebsrv"), false);
-	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	_stprintf(m_sWebPassword,L"%s",ini.GetString(L"Password", L"",L"WebServer"));
 	_stprintf(m_sWebLowPassword,L"%s",ini.GetString(L"PasswordLow", L""));
 	m_nWebPort=(uint16)ini.GetInt(L"Port", 4711);
@@ -3614,6 +3611,10 @@ void CPreferences::LoadPreferences()
 			m_aAllowedRemoteAccessIPs.Add(nIP);
 		strIP = buffer2.Tokenize(L";", iPos);
 	}
+	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+	m_bIonixWebsrv=ini.GetBool(_T("UseIonixWebsrv"), false);
+	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
+	
 
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "MobileMule"
@@ -4434,7 +4435,7 @@ void CPreferences::SetBindAddr(CStringW bindip)
  // MORPH END leuk_he bindaddr
  // MORPH START leuk_he upnp bindaddr
 void CPreferences::SetUpnpBindAddr(DWORD bindip) {
-		if ( GetBindAddrA() != NULL || bindip== ntohl(inet_addr(GetBindAddrA())))
+		if ( GetBindAddrA() != NULL && bindip== ntohl(inet_addr(GetBindAddrA())))
 			m_dwUpnpBindAddr =0;
 		else 
 	    	m_dwUpnpBindAddr= bindip;
