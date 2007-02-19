@@ -19,6 +19,7 @@
 #include <vector>
 #include <algorithm>
 #include "KnownFile.h"
+#include "ResizableLib/ResizableDialog.h"
 
 class CMassRenameEdit : public CEdit
 {
@@ -35,7 +36,7 @@ public:
 	afx_msg LRESULT OnUndo(WPARAM wParam, LPARAM lParam);
 };
 
-class CMassRenameDialog : public CDialog
+class CMassRenameDialog : public CResizableDialog
 {
 	DECLARE_DYNAMIC(CMassRenameDialog)
 

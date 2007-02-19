@@ -47,7 +47,7 @@ IMPLEMENT_DYNAMIC(CMassRenameEdit, CEdit)
 
 IMPLEMENT_DYNAMIC(CMassRenameDialog, CDialog)
 CMassRenameDialog::CMassRenameDialog(CWnd* pParent /*=NULL*/)
-	: CDialog(CMassRenameDialog::IDD, pParent)
+	: CResizableDialog(CMassRenameDialog::IDD, pParent)
 {
 }
 void CMassRenameEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
@@ -92,10 +92,10 @@ CMassRenameDialog::~CMassRenameDialog()
 
 void CMassRenameDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CResizableDialog::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CMassRenameDialog, CDialog)
+BEGIN_MESSAGE_MAP(CMassRenameDialog, CResizableDialog)
 	ON_EN_VSCROLL(IDC_OLDFILENAMESEDIT, OnEnVscrollOldfilenamesedit)
 	ON_EN_VSCROLL(IDC_NEWFILENAMESEDITLEFT, OnEnVscrollNewfilenameseditLeft)
 	ON_EN_VSCROLL(IDC_NEWFILENAMESEDITRIGHT, OnEnVscrollNewfilenameseditRight)
@@ -137,7 +137,7 @@ void CMassRenameDialog::Localize() {
 }
 
 BOOL CMassRenameDialog::OnInitDialog() {
-	CDialog::OnInitDialog();
+	CResizableDialog::OnInitDialog();
 
 	Localize ();
 
@@ -200,12 +200,29 @@ BOOL CMassRenameDialog::OnInitDialog() {
 	NFNRight->SetEventMask(NFNRight->GetEventMask() | ENM_SCROLL);
 	OldFN->SetEventMask(OldFN->GetEventMask() | ENM_SCROLL);
 
+    AddAnchor(IDOK, BOTTOM_RIGHT);
+	AddAnchor(IDCANCEL, BOTTOM_RIGHT);
+	AddAnchor(IDC_MR_STATIC1, TOP_LEFT);
+	AddAnchor(IDC_FILENAMEMASKEDITTEMPLATE , TOP_LEFT, TOP_CENTER);
+	AddAnchor(IDC_MR_STATIC2, CSize(50,0)); //Original filenames
+	AddAnchor(IDC_MR_STATIC3, TOP_LEFT);//  "New filenames:"
+	AddAnchor(IDC_FILENAMELEFT, TOP_LEFT);
+	AddAnchor(IDC_FILENAMERIGHT, TOP_LEFT);
+	AddAnchor(IDC_RESETBUTTON, TOP_RIGHT);
+	AddAnchor(IDC_NEWFILENAMESEDITLEFT, TOP_LEFT, CSize(50,100));
+	AddAnchor(IDC_NEWFILENAMESEDITRIGHT, TOP_LEFT, CSize(50,100));
+	AddAnchor(IDC_OLDFILENAMESEDIT, CSize(50,0), BOTTOM_RIGHT);
+	
+	AddAnchor(IDC_BUTTONSTRIP, BOTTOM_LEFT);
+	AddAnchor(IDC_SIMPLECLEANUP, BOTTOM_LEFT);
+	AddAnchor(IDC_INSERTTEXTCOLUMN, BOTTOM_LEFT);
+	
 	return TRUE;
 }
 
 void CMassRenameDialog::OnClose()
 {
-	CDialog::OnClose();
+	CResizableDialog::OnClose();
 }
 
 void CMassRenameDialog::OnEnVscrollOldfilenamesedit()
@@ -261,10 +278,10 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	POSITION fpos = m_FileList.GetHeadPosition();
 	int i = 0;
 	while (fpos != NULL) {
-		CString FName;
-		NFNEdit->GetLine (i,FName.GetBuffer (MAX_PATH),MAX_PATH);
-		FName.ReleaseBuffer ();
-		FName.Trim ('\r');
+		CString FName; int newcount;
+		newcount=NFNEdit->GetLine (i,FName.GetBuffer (MAX_PATH+1),MAX_PATH);
+		FName.ReleaseBuffer (newcount);
+		FName.Trim (_T("\r"));
 		FName.Trim (' ');
 		if ((FName=="") || (FName==".") || (FName=="..") || (FName.FindOneOf (_T(":\\?*")) >= 0)){
 			CString er;
@@ -381,7 +398,7 @@ void CMassRenameDialog::OnBnClickedReset()
 
 void CMassRenameDialog::OnShowWindow(BOOL bShow, UINT nStatus)
 {
-	CDialog::OnShowWindow(bShow, nStatus);
+	CResizableDialog::OnShowWindow(bShow, nStatus);
 
 	if (bShow) GetDlgItem(IDC_FILENAMEMASKEDIT)->SetFocus ();
 }
@@ -516,9 +533,9 @@ void CMassRenameDialog::OnBnClickedButtonStrip()
 	// Now process through each line and cleanup that filename
 	for (int i=0; i < NFNEdit->GetLineCount (); i++) {
 		// Get the filename
-		CString filename;
-		NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
-		filename.ReleaseBuffer();
+		CString filename;int newcount;
+		newcount=NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
+		filename.ReleaseBuffer(newcount);
 		// Clean it up
 		filename = CleanupFilename (filename);
 		// and add it to the current list of filenames
@@ -612,9 +629,9 @@ void CMassRenameDialog::OnBnClickedSimplecleanup()
 		// Now process through each line and cleanup that filename
 		for (int i=0; i < NFNEdit->GetLineCount (); i++) {
 			// Get the filename
-			CString filename;
-			NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
-			filename.ReleaseBuffer();
+			CString filename;int newcount;
+			newcount=NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
+			filename.ReleaseBuffer(newcount);
 			// Clean it up
 			filename = SimpleCleanupFilename (filename.SpanExcluding (_T("\r\n")),
 											  options,source,dest,
@@ -717,9 +734,9 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 		// Now process through each line and cleanup that filename
 		for (int i=0; i < NFNEdit->GetLineCount (); i++) {
 			// Get the filename
-			CString filename;
-			NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
-			filename.ReleaseBuffer();
+			CString filename;int newcount;
+			newcount=NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
+			filename.ReleaseBuffer(newcount);
 
 			// Remove "\r\n" from the current filename if necessary
 			filename = filename.SpanExcluding (_T("\r\n"));
