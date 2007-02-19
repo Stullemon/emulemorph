@@ -71,6 +71,9 @@ BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_LIST2, OnLvnItemActivateFrlist)
 	ON_NOTIFY(NM_CLICK, IDC_LIST2, OnNMClickFrlist)
     ON_STN_DBLCLK(IDC_FRIENDSICON, OnStnDblclickFriendsicon)
+	// MORPH START - Added by Commander, Friendlinks [emulEspaa] 	 
+	ON_BN_CLICKED(IDC_BTN_MENU, OnBnClickedBnmenu) 	 
+	// MORPH END - Added by Commander, Friendlinks [emulEspaa]
 END_MESSAGE_MAP()
 
 CChatWnd::CChatWnd(CWnd* pParent /*=NULL*/)
