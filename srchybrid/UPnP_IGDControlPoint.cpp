@@ -712,6 +712,7 @@ CUPnP_IGDControlPoint * CUPnP_IGDControlPoint::GetInstance(){
 
 void CUPnP_IGDControlPoint::RemoveInstance(){
 	delete m_IGDControlPoint;
+	m_IGDControlPoint=0;
 }
 
 void CUPnP_IGDControlPoint::AddDevice( IXML_Document * doc, CString location, int expires){
