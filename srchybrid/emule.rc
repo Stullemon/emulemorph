@@ -1236,7 +1236,7 @@ BEGIN
                     BS_MULTILINE | BS_FLAT,0,0,317,60
 END
 
-IDD_WIZ1_SERVER DIALOGEX 0, 0, 317, 143
+	IDD_WIZ1_SERVER DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Server Settings"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
@@ -1266,8 +1266,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,13,144,
                     10
     CONTROL         "Show less controls",IDC_MORPHWIZ_SHOWLESS,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | NOT WS_VISIBLE | WS_TABSTOP,
-                    7,32,144,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,32,144,10
     GROUPBOX        "On Finishing of wizard",IDC_MORPHWIZ_NEXT,0,68,317,72,
                     BS_FLAT
     CONTROL         "Run network wizard to configure up/down internet speed.",
@@ -1363,7 +1362,7 @@ BEGIN
                     SS_NOPREFIX | WS_GROUP,219,47,92,8
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8
     CONTROL         "Static",IDC_CDIDENT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,84,58,106,8
+                    SS_NOPREFIX | WS_GROUP,84,58,79,8
     GROUPBOX        "Transfer",IDC_STATIC40,7,88,308,69,BS_FLAT
     LTEXT           "User is downloading",IDC_STATIC41,19,98,86,8
     CONTROL         "Static",IDC_DDOWNLOADING,"Static",SS_LEFTNOWORDWRAP | 
@@ -1399,7 +1398,7 @@ BEGIN
     LTEXT           "Requested for upload:",IDC_STATIC48,19,109,86,8
     CONTROL         "Static",IDC_UPLOADING,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,109,202,8
-    RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
+    RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,172,57,43,8
     CONTROL         "Static",IDC_CLIENTDETAIL_KADCON,"Static",
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,219,57,92,8
     RTEXT           "Obfuscation:",IDC_STATIC_OBF_LABEL,163,69,52,8
@@ -2984,8 +2983,8 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 
-AAAEMULEAPP             ICON                    "res\\Mule.ico"
-//AAAEMULEAPP             ICON                    "res\\MOD\\AAMorph.ico"
+//AAAEMULEAPP             ICON                    "res\\Mule.ico"
+AAAEMULEAPP             ICON                    "res\\MOD\\AAMorph.ico"
 COLOUR                  ICON                    "res\\colour.ico"
 BOLD                    ICON                    "res\\bold.ico"
 UNDERLINE               ICON                    "res\\underline.ico"
@@ -6878,6 +6877,20 @@ BEGIN
 	IDS_PREF_GROUPEXTENDED "Advanced options"
 	IDS_PREF_GROUPMOD "Mod options"
 END
+STRINGTABLE 
+BEGIN
+    IDS_UPNP_NETSTATUS      "Upnp"
+    IDS_UPNP_ENABLE_WEB     "Enable UPnP on web interface port"
+    IDS_UPNP_INFO_NONEED    "Failed or not needed"
+    IDS_UPNP_INFOUNINIT     ",not initialized\r\n"
+    
+    IDS_UPNP_INFOENABLED    ",enabled\r\n"
+    IDS_UPNP_INFODISABLED   ",disabled\r\n"
+    IDS_UPNP_INFOSTANDBY    "No Device detected\r\n"
+END
+
+
+
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
