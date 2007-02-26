@@ -53,7 +53,7 @@ enum EUserWndMessages
 	//MORPH START - Added by SiRoB, Version check
 	UM_MVERSIONCHECK_RESPONSE,
 	//MORPH END   - Added by SiRoB, Version check
-	//MORPH START leuk_he run as a service v1
+	//MORPH START leuk_he run as a ntservice v1
 	UM_SERVERSTATUS
-	//MORPH START leuk_he run as a service v1
+	//MORPH START leuk_he run as a ntservice v1
 };

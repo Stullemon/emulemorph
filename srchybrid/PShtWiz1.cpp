@@ -670,8 +670,8 @@ protected:
 IMPLEMENT_DYNAMIC(CPPgWiz7Morph, CDlgPageWizard)
 
 BEGIN_MESSAGE_MAP(CPPgWiz7Morph, CDlgPageWizard)
-	ON_BN_CLICKED(IDC_STARTTEST, OnShowMoreClicked)
-	ON_BN_CLICKED(IDC_STARTTEST, OnShowLessClicked)
+	ON_BN_CLICKED(IDC_MORPHWIZ_SHOWMORE, OnShowMoreClicked)
+	ON_BN_CLICKED(IDC_MORPHWIZ_SHOWLESS, OnShowLessClicked)
 END_MESSAGE_MAP()
 
 CPPgWiz7Morph::CPPgWiz7Morph()
@@ -710,13 +710,13 @@ BOOL CPPgWiz7Morph::OnInitDialog()
 void CPPgWiz7Morph::OnShowMoreClicked()
 {
 	if (IsDlgButtonChecked(IDC_MORPHWIZ_SHOWMORE) )
-		CheckDlgButton(IDS_MORPHWIZ_SHOWLESS,BST_UNCHECKED);
+		CheckDlgButton(IDC_MORPHWIZ_SHOWLESS,BST_UNCHECKED);
 }
 	   
 void CPPgWiz7Morph::OnShowLessClicked()
 {
 	if (IsDlgButtonChecked(IDC_MORPHWIZ_SHOWLESS) )
-		CheckDlgButton(IDS_MORPHWIZ_SHOWMORE,BST_UNCHECKED);
+		CheckDlgButton(IDC_MORPHWIZ_SHOWMORE,BST_UNCHECKED);
 }
 // MORPH END startup wizard
   
@@ -887,7 +887,8 @@ int FirstTimeWizard() //lh ftw
 	page6.m_iSafeServerConnect = 0;
 	page6.m_iKademlia = 1;
 	page6.m_iED2K = 1;
-	//page6.m_iReqObfus = thePrefs.IsServerCryptLayerRequiredStrict(); // // MORPH lh require obfuscated server connection
+	page6.m_iReqObfus = thePrefs.IsServerCryptLayerRequiredStrict(); // 
+	page6b.m_iShowLessControls = thePrefs.IsLessControls(); // MORPH START show less controls
     page6b.m_iShowMoreControls = thePrefs.IsExtControlsEnabled(); // MORPH startup wizard
 
 	uint16 oldtcpport=thePrefs.GetPort();
@@ -924,6 +925,7 @@ int FirstTimeWizard() //lh ftw
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
 	thePrefs.m_bCryptLayerRequiredStrictServer =(page6.m_iReqObfus!=0); // // MORPH lh require obfuscated server connection
 	thePrefs.SetExtControls(page6b.m_iShowMoreControls!=0 );
+	thePrefs.SetLessControls(page6b.m_iShowLessControls!=0); // MORPH START show less controls
 
 	theApp.m_UPnP_IGDControlPoint->SetUPnPNat(page3.uPnPNAT!=0); // leuk_he add upnp to startup wizard
 	// set ports

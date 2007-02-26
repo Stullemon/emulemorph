@@ -17,6 +17,10 @@
 #pragma once
 
 const CString strDefaultToolbar = _T("0099010203040506070899091011");
+// MORPH START show less controls
+const CString strDefaultLessControlsToolbar = _T("0099020304059909991011");
+// MORPH END  show less controls
+
 
 enum EViewSharedFilesAccess{
 	vsfaEverybody = 0,
@@ -476,6 +480,9 @@ public:
 	static	bool	m_bDisableKnownClientList;
 	static	bool	m_bDisableQueueList;
 	static	bool	m_bExtControls;
+	// MORPH START show less controls
+	static	bool	m_bShowLessControls;
+	// MORPH END  show less controls
 	static	bool	m_bTransflstRemain;
 
 	static	UINT	versioncheckdays;
@@ -1642,6 +1649,10 @@ public:
 	static	bool	IsGraphRecreateDisabled()					{ return dontRecreateGraphs;}
 	static	bool	IsExtControlsEnabled()						{ return m_bExtControls;}
 	static	void	SetExtControls(bool in)						{ m_bExtControls=in;}
+	// MORPH START show less controls
+	static	bool	IsLessControls()						   { return m_bShowLessControls;}
+	static  bool    SetLessControls(bool newvalue);
+	// MORPH START show less controls 
 	static	bool	GetRemoveFinishedDownloads()				{ return m_bRemoveFinishedDownloads;}
 
 	static	UINT	GetMaxChatHistoryLines()			{return m_iMaxChatHistory;}

@@ -268,7 +268,7 @@ protected:
 	afx_msg LRESULT OnWebSetCatPrio(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAddRemoveFriend(WPARAM wParam, LPARAM lParam);
 
-	afx_msg LRESULT  OnServiceStatus(WPARAM wParam, LPARAM lParam); // MORPH leuk_he run as a service v1.
+	afx_msg LRESULT  OnServiceStatus(WPARAM wParam, LPARAM lParam); // MORPH leuk_he run as a ntservice v1.
 
 	// VersionCheck DNS
 	afx_msg LRESULT OnVersionCheckResponse(WPARAM wParam, LPARAM lParam);
@@ -310,6 +310,9 @@ private:
 public:
 	void SaveSettings (bool _shutdown=false);
 	// [end] Mighty Knife
+	// MORPH START show less controls
+	void ShowLessControls(bool enable);
+	// MORPH START show less controls
 };
 
 

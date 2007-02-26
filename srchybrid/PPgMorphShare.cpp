@@ -64,6 +64,7 @@ CPPgMorphShare::CPPgMorphShare()
 	m_htiFolderIcons = NULL;
 	m_htiDisplay = NULL;
 	m_htiStaticIcon = NULL; //MORPH - Added, Static Tray Icon
+	m_htiShowLessControls = NULL; // show less controls
 }
 
 CPPgMorphShare::~CPPgMorphShare()
@@ -135,6 +136,10 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		m_htiDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, TVI_ROOT);
 		m_htiFolderIcons = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLDERICONS),m_htiDisplay, m_bFolderIcons);
 		m_htiStaticIcon = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_STATIC_ICON),m_htiDisplay, m_bStaticIcon); //MORPH - Added, Static Tray Icon
+		// MORPH START show less controls
+		m_htiShowLessControls= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MORPHWIZ_SHOWLESS),m_htiDisplay, m_bShowLessControls);
+		// MORPH END  show less controls
+
 
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiSpreadbar, TVE_EXPAND);
@@ -174,6 +179,10 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	//MORPH END   - Added by SiRoB, Show Permission
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFolderIcons, m_bFolderIcons);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiStaticIcon, m_bStaticIcon); //MORPH - Added, Static Tray Icon
+	// MORPH START show less controls
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowLessControls, m_bShowLessControls); //MORPH - Added, Static Tray Icon
+	// MORPH END  show less controls
+
 }
 
 
@@ -192,6 +201,10 @@ BOOL CPPgMorphShare::OnInitDialog()
 	// [end] Mighty Knife
 	m_bFolderIcons = thePrefs.m_bShowFolderIcons;
 	m_bStaticIcon = thePrefs.GetStaticIcon(); //MORPH - Added, Static Tray Icon
+	// MORPH START show less controls
+    m_bShowLessControls = thePrefs.IsLessControls();
+	// MORPH END  show less controls
+
 	CPropertyPage::OnInitDialog();
 	//InitTooltips(); //leuk_he tooltipped
 
@@ -258,6 +271,9 @@ BOOL CPPgMorphShare::OnApply()
 	}
 	thePrefs.m_bStaticIcon = m_bStaticIcon;
 	//MORPH END   - Added, Static Tray Icon
+	// MORPH START show less controls
+    thePrefs.SetLessControls(m_bShowLessControls);
+	// MORPH END  show less controls
 	
 	//theApp.scheduler->SaveOriginals(); //Removed by SiRoB, no scheduler param in this ppg //Added by SiRoB, Fix for Param used in scheduler
 
@@ -303,6 +319,9 @@ void CPPgMorphShare::Localize(void)
 		//MORPH END   - Added by SiRoB, Show Permission
 		if (m_htiFolderIcons) m_ctrlTreeOptions.SetItemText(m_htiFolderIcons, GetResString(IDS_FOLDERICONS));
 		if (m_htiStaticIcon) m_ctrlTreeOptions.SetItemText(m_htiStaticIcon, GetResString(IDS_STATIC_ICON)); //MORPH - Added, Static Tray Icon
+		// MORPH START show less controls
+		if (m_htiShowLessControls) m_ctrlTreeOptions.SetItemText(m_htiShowLessControls, GetResString(IDS_MORPHWIZ_SHOWLESS)); 
+		// MORPH END  show less controls
         // MORPH START leuk_he tooltipped
        SetTool(m_htiSFM ,IDS_SFM_TIP);
        SetTool(m_htiSpreadbar ,IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP);
@@ -358,7 +377,7 @@ void CPPgMorphShare::OnDestroy()
 	m_htiFolderIcons = NULL;
 	m_htiDisplay = NULL;
 	m_htiStaticIcon = NULL; //MORPH - Added, Static Tray Icon
-
+    m_htiShowLessControls = NULL; // MORPH show less controls
 	CPropertyPage::OnDestroy();
 }
 LRESULT CPPgMorphShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM /*lParam*/)

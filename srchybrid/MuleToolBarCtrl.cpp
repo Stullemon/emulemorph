@@ -941,6 +941,12 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 	
 	// set default configuration 
 	CString config = strDefaultToolbar;
+	// MORPH START show less controls
+	if (thePrefs.IsLessControls())
+		config=strDefaultLessControlsToolbar;
+	// MORPH END  show less controls
+
+
 	for (int i = 0; i <config.GetLength(); i += 2)
 	{
 		int index = _tstoi(config.Mid(i, 2));

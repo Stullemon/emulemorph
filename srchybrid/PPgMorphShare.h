@@ -32,6 +32,10 @@ protected:
 	bool m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	bool m_bFolderIcons;
 	bool m_bStaticIcon;
+	// MORPH START show less controls
+	bool m_bShowLessControls;
+	// MORPH END  show less controls
+
 	
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
@@ -66,6 +70,7 @@ protected:
 	HTREEITEM m_htiDisplay;
 	HTREEITEM m_htiFolderIcons;
 	HTREEITEM m_htiStaticIcon; //MORPH - Added, Static Tray Icon
+	HTREEITEM m_htiShowLessControls ;// Show less controls
 	
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);

@@ -340,6 +340,9 @@ bool	CPreferences::m_bUAP;
 bool	CPreferences::m_bDisableKnownClientList;
 bool	CPreferences::m_bDisableQueueList;
 bool	CPreferences::m_bExtControls;
+// MORPH START show less controls
+bool	CPreferences::m_bShowLessControls;
+// MORPH END  show less controls
 bool	CPreferences::m_bTransflstRemain;
 UINT	CPreferences::versioncheckdays;
 bool	CPreferences::showRatesInTitle;
@@ -2256,6 +2259,9 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"DontRecreateStatGraphsOnResize",dontRecreateGraphs);
 	ini.WriteBool(L"AutoFilenameCleanup",autofilenamecleanup);
 	ini.WriteBool(L"ShowExtControls",m_bExtControls);
+	// MORPH START show less controls
+	ini.WriteBool(L"ShowLessControls",m_bShowLessControls);
+    // MORPH END  show less controls
 	ini.WriteBool(L"UseAutocompletion",m_bUseAutocompl);
 	ini.WriteBool(L"NetworkKademlia",networkkademlia);
 	ini.WriteBool(L"NetworkED2K",networked2k);
@@ -3197,7 +3203,9 @@ void CPreferences::LoadPreferences()
 //	resumeSameCat=ini.GetBool(L"ResumeNextFromSameCat",false);
 	dontRecreateGraphs =ini.GetBool(L"DontRecreateStatGraphsOnResize",false);
 	m_bExtControls =ini.GetBool(L"ShowExtControls",false);
-
+	// MORPH START show less controls
+	m_bShowLessControls =ini.GetBool(L"ShowLessControls",false);
+    // MORPH END  show less controls
 	versioncheckLastAutomatic=ini.GetInt(L"VersionCheckLastAutomatic",0);
 	//MORPH START - Added by SiRoB, New Version check
 	mversioncheckLastAutomatic=ini.GetInt(_T("MVersionCheckLastAutomatic"),0);
@@ -4435,9 +4443,10 @@ void CPreferences::SetBindAddr(CStringW bindip)
  // MORPH END leuk_he bindaddr
  // MORPH START leuk_he upnp bindaddr
 void CPreferences::SetUpnpBindAddr(DWORD bindip) {
-		if ( GetBindAddrA() != NULL && bindip== ntohl(inet_addr(GetBindAddrA())))
+   /* wine workarround		if ( GetBindAddrA() != NULL && bindip== ntohl(inet_addr(GetBindAddrA())))
 			m_dwUpnpBindAddr =0;
 		else 
+		*/
 	    	m_dwUpnpBindAddr= bindip;
 	}
 	// MORPH END leuk_he upnp bindaddr
@@ -4454,6 +4463,21 @@ uint16	CPreferences::GetWSPort()
 	return m_nWebPort; 
 }
 // MORPH leuk_he:run as ntservice v1.. (startup and ws port) 
+
+// MORPH START show less controls
+
+
+bool CPreferences::SetLessControls(bool newvalue)
+{
+	if (newvalue ==  m_bShowLessControls)
+	 return m_bShowLessControls;  // no change
+	m_bShowLessControls = newvalue ; 
+	theApp.emuledlg->ShowLessControls(newvalue);
+}
+// MORPH END  show less controls
+ 
+  
+
 
 
 
