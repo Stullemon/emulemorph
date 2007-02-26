@@ -2210,6 +2210,36 @@ uint64 CPartFile::GetRemainingAvailableData(const uint8* srcstatus) const
 				uTotalGapSizeInCommun += pGap->end%PARTSIZE + 1;
 		}
 	}
+
+	for (POSITION pos = requestedblocks_list.GetHeadPosition(); pos != NULL;) {
+		const Requested_Block_Struct* block = requestedblocks_list.GetNext(pos);
+		uint16 i = (uint16)(block->StartOffset/PARTSIZE);
+		uint16 end_chunk = (uint16)(block->EndOffset/PARTSIZE);
+		if (i == end_chunk) {
+			if (srcstatus[i]&SC_AVAILABLE)
+				uTotalGapSizeInCommun -= block->EndOffset - block->StartOffset + 1 - block->transferred;
+		} else {
+			uint64 reservedblock = PARTSIZE - block->StartOffset%PARTSIZE;
+			if (reservedblock > block->transferred) {
+				reservedblock = reservedblock - block->transferred;
+				if (srcstatus[i]&SC_AVAILABLE)
+					uTotalGapSizeInCommun -= reservedblock;
+				reservedblock = 0;
+			} else
+				reservedblock = block->transferred - reservedblock;
+			while (++i < end_chunk) {
+				if (PARTSIZE > reservedblock) {
+					reservedblock = PARTSIZE - reservedblock;
+					if (srcstatus[i]&SC_AVAILABLE)
+						uTotalGapSizeInCommun -= reservedblock;
+					reservedblock = 0;
+				} else
+					reservedblock = reservedblock - PARTSIZE;
+			}
+			if (srcstatus[end_chunk]&SC_AVAILABLE)
+				uTotalGapSizeInCommun -= block->EndOffset%PARTSIZE + 1 - reservedblock;
+		}
+	}
 	return uTotalGapSizeInCommun;
 }
 //MORPH - Enhanced DBR
@@ -3870,15 +3900,7 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarateAVG(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
-	bytesPerRequest = sourceDatarate * timeToFileCompletion;
-	if (bytesPerRequest > bytesLeftToDownload)
-		bytesPerRequest = bytesLeftToDownload;
-	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
-	if (bytesPerRequest > sourcealreadyreserveddata) {
-		bytesPerRequest -= sourcealreadyreserveddata;
-		bytesPerRequest = min(max(sender->GetSessionPayloadDown(), 10240),bytesPerRequest/2);
-	} else
-		bytesPerRequest = 0;
+	bytesPerRequest = min(max(sender->GetSessionPayloadDown(), 10240), sourceDatarate * timeToFileCompletion / 2);
 	//MORPH END   - Enhanced DBR
 
 	if (bytesPerRequest > 3*EMBLOCKSIZE) {
@@ -6731,15 +6753,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	uint32	fileDatarate = max(GetDatarate(), UPLOAD_CLIENT_DATARATE); // Always assume file is being downloaded at atleast 3 kB/s
 	uint32	sourceDatarate = max(sender->GetDownloadDatarateAVG(), 10); // Always assume client is uploading at atleast 10 B/s
 	uint32	timeToFileCompletion = max((uint32) (bytesLeftToDownload / (uint64) fileDatarate) + 1, 10); // Always assume it will take atleast 10 seconds to complete
-	bytesPerRequest = sourceDatarate * timeToFileCompletion;
-	if (bytesPerRequest > bytesLeftToDownload)
-		bytesPerRequest = bytesLeftToDownload;
-	uint64 sourcealreadyreserveddata = sender->GetRemainingReservedDataToDownload();
-	if (bytesPerRequest > sourcealreadyreserveddata) {
-		bytesPerRequest -= sourcealreadyreserveddata;
-		bytesPerRequest = min(max(sender->GetSessionPayloadDown(), 10240),bytesPerRequest/2);
-	} else
-		bytesPerRequest = 0;
+	bytesPerRequest = min(max(sender->GetSessionPayloadDown(), 10240), sourceDatarate * timeToFileCompletion / 2);
 	//MORPH END   - Enhanced DBR
 
 	if (bytesPerRequest > 3*EMBLOCKSIZE) {

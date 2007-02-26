@@ -608,7 +608,7 @@ BOOL CemuleApp::InitInstance()
 
 	// Highres scheduling gives better resolution for Sleep(...) calls, and timeGetTime() calls
     m_wTimerRes = 0;
-    if(true /*thePrefs.GetHighresTimer()*/) {
+    if(thePrefs.GetHighresTimer()) {
         TIMECAPS tc;
         if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == TIMERR_NOERROR) 
         {

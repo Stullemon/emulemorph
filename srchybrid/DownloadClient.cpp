@@ -351,6 +351,24 @@ void CUpDownClient::DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* fi
 				}
 			}
 		}
+		if (IsProxy()) {
+			for (POSITION pos = WebCachedBlockList.GetHeadPosition();pos !=  0;){
+				CWebCachedBlock* WCBlock = WebCachedBlockList.GetNext(pos);
+				if (md4cmp(WCBlock->block->FileID, file->GetFileHash()) == 0) {
+					block = WCBlock->block;
+					if (block->StartOffset <= end && block->EndOffset >= start) {
+						if (block->StartOffset >= start) {
+							if (block->EndOffset <= end) {
+								s_StatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+								s_StatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+							} else
+								s_StatusBar.Draw(dc,rect->left+(int)((double)(block->StartOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+						} else if (block->EndOffset <= end)
+							s_StatusBar.Draw(dc,rect->left+(int)((double)(block->EndOffset%PARTSIZE)*w/PARTSIZE), rect->top, bFlat);
+					}
+				}
+			}
+		}
 		if (!m_PendingBlocks_list.IsEmpty()){
 			for(POSITION pos=m_PendingBlocks_list.GetHeadPosition();pos!=0;){
 				block = m_PendingBlocks_list.GetNext(pos)->block;

@@ -30,6 +30,7 @@
 #include "WebCache\WebCacheProxyClient.h"
 #include "WebCache\WebCachedBlockList.h"
 #include "WebCache\WebCacheSocket.h"	// Superlexx - block transfer limiter
+#include "log.h"
 // MORPH END   - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
@@ -516,7 +517,44 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 //				else
 //					TRACE("%hs - %d bytes missing\n", __FUNCTION__, cur_block->block->EndOffset - nEndPos);
 			}
-
+			//MORPH START - Work arround I.C.H and other recovering processing responsible of stalled download 
+			else { 
+				DebugLog(LOG_MORPH|LOG_SUCCESS,_T("[FIX STALLED DOWNLOAD] Often due to Data recovery, for '%s' with client: %s"), reqfile->GetFileName(), DbgGetClientInfo());
+				/*
+				reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+				*/
+				reqfile->RemoveBlockFromList(cur_block->block);
+				//MORPH END - Optimization
+                // MORPH START - Added by Commander, WebCache 1.2e
+				if (m_pWCDownSocket)
+					m_pWCDownSocket->blocksloaded++; //count downloaded blocks for this socket
+				if (IsProxy())
+					SINGLEProxyClient->DeleteBlock();
+                // MORPH END - Added by Commander, WebCache 1.2e
+				delete cur_block->block;
+				delete cur_block;
+				m_PendingBlocks_list.RemoveAt(posLast);
+                // MORPH START - Added by Commander, WebCache 1.2e
+				if( IsProxy() ) {
+					SetDownloadState( DS_NONE );
+					SetWebCacheDownState( WCDS_NONE );
+					WebCachedBlockList.TryToDL();
+					return;
+				}
+                // MORPH END - Added by Commander, WebCache 1.2e
+				if (m_PendingBlocks_list.IsEmpty())
+				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugSend("More block requests", this);
+					m_nUrlStartPos = (uint64)-1;
+					// MORPH START - Added by Commander, WebCache 1.2e
+					if( GetWebCacheDownState() == WCDS_NONE )
+						SendHttpBlockRequests(); // original emule code
+					else
+						SendBlockRequests();
+					// MORPH END - Added by Commander, WebCache 1.2e
+				}
+			}
 			return;
 		}
 	}
