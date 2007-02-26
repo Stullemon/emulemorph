@@ -1,4 +1,23 @@
 --------------------------------------
+Changelog for eMule 0.47c MorphXT v9.6
+--------------------------------------
+dd-mm-2007
+ADD: Startup wizard, Show less controls: custimize toolbar and columns to show some less. Useful for beginners.
+FIX: load of multiuser web interface preferences in [webserver] section. 
+FIX: mass rename:Unicode issue .
+CHANGED: massrename: resizeable diablog. 
+CHANGED: STartup method "started" reported earlier. 
+CHANGED: workarround failing to startup under wine. 
+Changed: icon. 
+CHANGEd: upnp "my info" displayed. 
+
+--------------------------------------
+Changelog for eMule 0.47c MorphXT v9.5 installer
+--------------------------------------
+07-02-2007
+ADD: also associate .emulecollection extension
+UPDATE: languages: portugese_brazilian (also fo installer), spanish, italian,chinese(simplified).
+--------------------------------------
 Changelog for eMule 0.47c MorphXT v9.5
 --------------------------------------
 04-02-2007
