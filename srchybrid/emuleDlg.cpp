@@ -202,8 +202,8 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(WEB_CATPRIO, OnWebSetCatPrio)
 	ON_MESSAGE(WEB_ADDREMOVEFRIEND, OnAddRemoveFriend)
 
-	ON_MESSAGE(WEB_COPYDATA, OnWMData) // run as a service v1
-	ON_MESSAGE(UM_SERVERSTATUS, OnServiceStatus) // run as a service v1
+	ON_MESSAGE(WEB_COPYDATA, OnWMData) // run as a ntservice v1
+	ON_MESSAGE(UM_SERVERSTATUS, OnServiceStatus) // run as a ntservice v1
 
 
 	// Version Check DNS
@@ -652,6 +652,9 @@ BOOL CemuleDlg::OnInitDialog()
 		}
 		*/
 	}
+	//MORPH leuk_he:run as ntservice v1.. Set nt server from RUNNING to started 
+	if (RunningAsService())ServiceStartedSuccesfully();  //when started( multiple calls not a problem)
+    //MORPH leuk_he:run as ntservice v1..
 
 	if(thePrefs.GetInvisibleMode()) RegisterInvisibleHotKey();//Commander - Added: Invisible Mode [TPT]
 	VERIFY( m_pDropTarget->Register(this) );
@@ -2126,10 +2129,9 @@ void CemuleDlg::OnClose()
 	CPartFileConvert::CloseGUI();
 	CPartFileConvert::RemoveAllJobs();
 
-	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	theApp.m_UPnP_IGDControlPoint->RemoveInstance();
-	// End emulEspaña
-
+	// ==> UPnP support [MoNKi] - leuk_he
+	AfxBeginThread(theApp.m_UPnP_IGDControlPoint->RemoveInstance,NULL); // seperate thread since devic may have hickups...
+	// <== UPnP support [MoNKi] - leuk_he
     theApp.uploadBandwidthThrottler->EndThread();
     theApp.lastCommonRouteFinder->EndThread();
 
@@ -3246,12 +3248,12 @@ LRESULT CemuleDlg::OnVersionCheckResponse(WPARAM /*wParam*/, LPARAM lParam)
 	return 0;
 }
 
-//MORPH START leuk_he run as a service v1
+//MORPH START leuk_he run as a ntservice v1
 LRESULT CemuleDlg::OnServiceStatus(WPARAM ServiceStatus, LPARAM /*lParam */)
 {
 	return ReportStatusToSCMgr(ServiceStatus, NO_ERROR, 0); // tell servicecrtrk we are alive.
 }
-//MORPH END leuk_he run as a service v1
+//MORPH END leuk_he run as a ntservice v1
 
 
 //MORPH START - Added by SiRoB, New Version check
@@ -4061,3 +4063,41 @@ void CemuleDlg::SaveSettings (bool _shutdown) {
 	theApp.scheduler->SaveToFile();
 }
 // [end] Mighty Knife
+
+// MORPH START show less controls
+void setcolumns(CMuleListCtrl * control,CString Columnstohide, bool Show)
+ {
+	 int pos=0;
+	 int count=0;
+	 CString foundString;
+	 do {
+         foundString=Columnstohide.Tokenize(_T(","),pos);
+		 if ((foundString==_T("1")) && Show==false
+			 && control->IsColumnHidden(count))
+			 control->ShowColumn(count); // show the ",0" columns if disabled showlesscontrol
+		 if (foundString==_T("1") && Show==true
+			 && (control->IsColumnHidden(count))==false)
+			 control->HideColumn(count); // show less controls. 
+         count++;
+	 }
+	 while (foundString != "");
+ }
+
+void CemuleDlg::ShowLessControls (bool enable) {
+
+// toolbar:
+  NMHDR nmh;
+ nmh.code = TBN_RESET;
+  nmh.hwndFrom = theApp.emuledlg->toolbar->GetSafeHwnd();
+ nmh.idFrom = theApp.emuledlg->toolbar->GetDlgCtrlID();
+ theApp.emuledlg->toolbar->SendMessage(WM_NOTIFY, nmh.idFrom, (LPARAM)&nmh);
+ // Listcontrols. 
+ // note, the settings are eqaul to the xxxCtrlcolumnHidden=0,1... line in preferences.ini when less controls are displayed
+ setcolumns(&(transferwnd->downloadlistctrl),_T("1,0,0,1,0,0,0,0,1,0,1,1,1,1,1,1,1,1"),enable);
+ setcolumns(&(transferwnd->uploadlistctrl), _T("0,0,0,0,1,1,0,1,1,1,1,0,1,1,0,1,1"),enable);
+ /* maybe todo: queuelistctrl;	clientlistctrl;	downloadclientsctrl; */
+ setcolumns(&(serverwnd->serverlistctrl),_T("0,0,1,1,0,0,0,0,1,1,1,1,1,1,0,1,1"),enable);
+ setcolumns(&(searchwnd->m_pwndResults->searchlistctrl),_T("0,0,0,0,0,0,1,1,1,1,1,1,1,0,1"),enable);
+ setcolumns(&( sharedfileswnd->sharedfilesctrl),_T("0,0,0,0,0,1,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,1"),enable);
+}
+// MORPH END show less controls

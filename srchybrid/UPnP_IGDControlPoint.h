@@ -43,6 +43,7 @@ public:
 	bool IsUpnpAcceptsPorts() {return UpnpAcceptsPorts;};
 	int  PauseForUpnpCompletion();
     bool SetUPnPNat(bool upnpNat);
+	int  GetStatusString(CString & displaystring,bool verbose=false);
 	//Commented for a possible future use.
 	/*
 	typedef struct UPNP_INFO_VAR{
@@ -161,7 +162,7 @@ public:
 
 	// Singleton
 	static CUPnP_IGDControlPoint *	GetInstance();
-	static void						RemoveInstance();
+	static UINT  RemoveInstance(LPVOID /*pParam*/ );
 private:
 	bool UpnpAcceptsPorts; // Accepts ports, even when upnp is not enabled.  So not restart is required on enableing [leuk_he]
 	typedef enum{

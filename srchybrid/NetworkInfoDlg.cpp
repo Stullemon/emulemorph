@@ -357,6 +357,28 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		rCtrl << _T("URL:\t") << _T("http://") << strHostname << _T(":") << thePrefs.GetWSPort() << _T("/\r\n");
 	}
 	
+	
+	// ==> UPnP support [MoNKi] - leuk_he
+	rCtrl << _T("\r\n");
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
+	// upnp																								//
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	rCtrl.SetSelectionCharFormat(rcfBold);
+	rCtrl << GetResString(IDS_UPNP_NETSTATUS) << _T("\r\n");
+	rCtrl.SetSelectionCharFormat(rcfDef);
+	rCtrl << GetResString(IDS_STATUS) << _T(":\t");
+	if (thePrefs.IsUPnPEnabled())
+	{
+		CString upnpStatusString;
+		theApp.m_UPnP_IGDControlPoint-> GetStatusString(upnpStatusString,bFullInfo);
+		rCtrl  << upnpStatusString;
+	}
+	else
+		rCtrl << GetResString(IDS_DISABLED) << _T("\r\n");
+	// <== UPnP support [MoNKi] - leuk_he
+
+	
+	
     //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	///////////////////////////////////////////////////////////////////////////
 	// Wap Interface
