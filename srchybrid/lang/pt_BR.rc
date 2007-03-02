@@ -69,7 +69,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION "Obtendo informação do arquivo"
+    IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION "Obtendo informações do arquivo"
     IDS_HTTPDOWNLOAD_GENERIC_ERROR 
                             "Um erro ocorreu ao tentar efetuar download do arquivo, Erro:%s"
     IDS_HTTPDOWNLOAD_FAIL_CONNECT_SERVER 
@@ -79,7 +79,7 @@ BEGIN
     IDS_HTTPDOWNLOAD_INVALID_HTTP_RESPONSE 
                             "Falha ao receber uma resposta de HTTP válida do servidor"
     IDS_HTTPDOWNLOAD_ERROR_READFILE 
-                            "Um erro ocorreu ao baixar o arquivo, Erro:%s"
+                            "Um erro ocorreu ao tentar baixar o arquivo, Erro:%s"
     IDS_HTTPDOWNLOAD_PERCENTAGE 
                             "Atualizando lista de servidores: %s%% de %s concluído"
     IDS_HTTPDOWNLOAD_RETREIVEING_FILE "Baixando arquivo"
@@ -115,14 +115,14 @@ BEGIN
     IDS_ERR_BADHASHSET      "Hashset corrompido ou inválido recebido"
     IDS_ERR_BADDATABLOCK    "Bloco de dados corrompido ou inválido recebido"
     IDS_ERR_ILLFORMEDHASH   "Hash mal formado"
-    IDS_ERR_BADED2KLINK     "Não é um link do eD2k corretamente formado"
-    IDS_ERR_NOSLLINK        "Não é um servidor do eD2k ou arquivo de link"
+    IDS_ERR_BADED2KLINK     "Não é um link eD2k corretamente formado"
+    IDS_ERR_NOSLLINK        "Não é um servidor eD2k ou arquivo de link"
     IDS_ERR_WRONGPACKAGESIZE "Tamanho inválido do pacote OP_FILEREQUEST "
     IDS_ERR_WRONGHPACKAGESIZE "Tamanho inválido de pacote OP_HASHSETREQUEST"
     IDS_ERR_UNKNOWNCLIENTACTION 
                             "Cliente desconhecido mandou um pacote de protocolo extendido"
     IDS_ERR_OPENMET         "Erro: Falha ao abrir o arquivo part.met! (%s => %s)"
-    IDS_ERR_BADMETVERSION   "Erro: Versão de arquivos inválido do part.met! (%s => %s)"
+    IDS_ERR_BADMETVERSION   "Erro: Versão inválida de arquivo part.met! (%s => %s)"
 END
 
 STRINGTABLE 
@@ -153,7 +153,7 @@ BEGIN
     IDS_FILES               "Arquivos"
     IDS_PREFERENCE          "Prioridade"
     IDS_PRIONOPREF          "Nenhuma Pref."
-    IDS_CONNECTTHIS         "Conectar à"
+    IDS_CONNECTTHIS         "Conectar ao servidor selecionado"
     IDS_MAIN_BTN_CONNECT    "&Conectar"
     IDS_ERR_SAVESERVERMET2  "Falha ao salvar o arquivo server.met! Você terá que deletar o server.met e renomear o server.met.old para server.met!"
     IDS_NOTCONNECTED        "Não Conectado"
@@ -429,7 +429,7 @@ BEGIN
     IDS_SW_DIRECTDOWNLOAD   "Adicionar/colar link"
     IDS_SW_LINK             "Link eD2k"
     IDS_SW_START            "Iniciar"
-    IDS_SCHEDULER           "Programador"
+    IDS_SCHEDULER           "Agendador de Tarefas"
 END
 
 STRINGTABLE 
@@ -455,7 +455,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SPEED_LIMITS        "Limites de Velocidade"
-    IDS_CAPACITY_LIMITS     "Limites de Banda"
+    IDS_CAPACITY_LIMITS     "Limites de banda"
     IDS_ADMIN               "Administrador"
     IDS_ACCESSDENIED        "Acesso negado!"
     IDS_WEB_LOWUSER         "Convidado"
@@ -469,7 +469,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DAY_MO_FR           "Seg-Sex"
-    IDS_DAY_SA_SO           "Sab-Dom"
+    IDS_DAY_SA_SO           "Sáb-Dom"
     IDS_MO                  "Segunda-feira"
     IDS_DI                  "Terça-feira"
     IDS_MI                  "Quarta-feira"
@@ -533,7 +533,7 @@ BEGIN
     IDS_PW_FILTER           "Filtrar IPs de servidores e clientes LAN"
     IDS_PW_USS              "Atualizar a lista de servidores ao iniciar"
     IDS_PW_MISC             "Opções Variadas"
-    IDS_PW_TRAY             "Minimi&zar para ícone de bandeja do sistema"
+    IDS_PW_TRAY             "Minimi&zar para ícone de bandeja"
     IDS_PW_BEEP             "Emitir som se houver erro"
     IDS_PW_PROMPT           "Confirmar ao Sair"
     IDS_PW_SPLASH           "Exibir tela de abertura"
@@ -588,10 +588,10 @@ BEGIN
     IDS_CD_VERSION          "Versão do Cliente:"
     IDS_CD_SNAME            "Nome do Servidor:"
     IDS_CD_CDOWN            "Usuário está baixando:"
-    IDS_CD_DOWN             "Baixou (nessa sessão):"
+    IDS_CD_DOWN             "Baixado (nessa sessão):"
     IDS_CD_ADOWN            "Taxa Média de Download:"
     IDS_CD_TDOWN            "Total Baixado:"
-    IDS_CD_UP               "Enviou (nessa sessão):"
+    IDS_CD_UP               "Enviado (nessa sessão):"
     IDS_CD_AUP              "Taxa Média de Upload:"
     IDS_CD_TUP              "Total Enviado:"
     IDS_CD_TRANS            "Transferências"
@@ -664,7 +664,7 @@ BEGIN
     IDS_SF_USER             "Total de Usuários"
     IDS_SF_FILE             "Total de Arquivos"
     IDS_UPLOADTIME          "Tempo de Upload"
-    IDS_LASTSEENCOMPL       "Visto Arquivo Completo:"
+    IDS_LASTSEENCOMPL       "Visto completo em:"
     IDS_YES                 "Sim"
     IDS_NO                  "Não"
     IDS_UNBAN               "Desbanir"
@@ -724,11 +724,11 @@ BEGIN
                             "Autoconectar somente nos Servidores Estáticos"
     IDS_PW_CON_LIMITFRM     "Limites"
     IDS_STATS_AVGLABEL      "Limite de tempo para o Gráfico: %i min."
-    IDS_GRAPHS              "Estatísticas"
+    IDS_GRAPHS              "Gráficos"
     IDS_STREE               "Estrutura das Estátisticas"
     IDS_IRC_IGNOREQUITMESSAGE "Ignorar mensagens de Saída"
     IDS_STATSSETUPINFO      "Estatísticas"
-    IDS_IRC_SOUNDEVENTS     "Tocar som de eventos"
+    IDS_IRC_SOUNDEVENTS     "Ativar eventos sonoros"
 END
 
 STRINGTABLE 
@@ -754,7 +754,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DOWNLOADMOVIECHUNKS "Baixar logo as primeiras/últimas partes do arquivo"
-    IDS_UPDATEQUEUE         "Atualizar lista de filas em tempo real"
+    IDS_UPDATEQUEUE         "Não atualizar fila de espera em tempo real"
     IDS_RECOVER_SINGLE      "Recuperação de arquivo: 1 arquivo recuperado."
     IDS_RECOVER_MULTIPLE    "Recuperação de arquivo: %ld arquivos recuperados."
     IDS_ATTEMPTING_RECOVERY "Recuperação de arquivo: Iniciada"
@@ -764,8 +764,8 @@ BEGIN
     IDS_FULLCHUNKTRANS      "Tentar transferir blocos completos em todos os Uploads"
     IDS_MANUALSERVERHIGHPRIO 
                             "Ajustar manualmente serv. adicionados com prioridade alta"
-    IDS_VERBOSE             "Detalhes (informações mais detalhadas do funcionamento do programa)"
-    IDS_FLAT                "plano"
+    IDS_VERBOSE             "Detalhes (informações mais detalhadas do eMule)"
+    IDS_FLAT                "Plano"
     IDS_ROUND               "3D"
     IDS_SAMEUSERHASH        "Cliente '%s' e '%s' tem o mesmo userhash ou IP - removido '%s'"
     IDS_SEARCHEXTENTION     "Extensão"
@@ -1346,8 +1346,8 @@ BEGIN
     IDS_CLIENTCOL           "Atenção: Cliente encontrado, para um cliente atualmente conectado: %s (%s) e %s (%s)"
     IDS_SEARCH_UNTERMSTRING "String não determinada"
     IDS_SEARCH_GENERALERROR "Erro Geral"
-    IDS_SEARCH_MISSINGORRIGHT "Falta lado direito do operador OR"
-    IDS_SEARCH_MISSINGNOTRIGHT "Falta lado direito do operador NOT"
+    IDS_SEARCH_MISSINGORRIGHT "Falta lado direito para operador OR"
+    IDS_SEARCH_MISSINGNOTRIGHT "Falta lado direito para operador NOT"
     IDS_SEARCH_MISSINGEXPRPARANT "Faltando expressão para '(' ')'"
     IDS_SEARCH_MISSINGCLOSINGPARANT "Faltando finalização ')'"
     IDS_SEARCH_EXPRERROR    "Falha ao analisar a expressão da procura"
@@ -1402,14 +1402,14 @@ BEGIN
     IDS_SETTINGCHANGED_RESTART 
                             "Para que as alterações façam efeito, por favor reinicie o eMule!"
     IDS_CREDITSEXPIRED      ", %i usuários deletados (não visto em 5 meses)"
-    IDS_SOURCESINFO         "%i  (Útil: %i, NNP: %i, A4AF: %i)"
+    IDS_SOURCESINFO         "%i  (Úteis: %i, NNP: %i, A4AF: %i)"
     IDS_META_DATA           "Meta Dados"
     IDS_TIMEBEFORE          "(%s atrás)"
     IDS_FD_TIMEDATE         "Datas"
     IDS_FILEINFORMATION     "Informação do Arquivo"
     IDS_STATS_FREESPACE     "Espaço Livre no Drive Temporário: "
     IDS_IRC_HELPCHANNEL     "Conectar ao canal de ajuda."
-    IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-poruguese"
+    IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-portuguese"
     IDS_IRC_ACCEPTLINKSFRIENDS "Somente de Amigos."
     IDS_COMPLSOURCES        "Fontes Completas"
     IDS_CHECKNOENDTIME      "Sem tempo final"
@@ -1419,7 +1419,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_FAILEDREOPEN        "Erro Fatal: Falha ao reabrir o Arquivo Part '%s' (%s)!"
-    IDS_ERR_PREVIEWALREADY  "Há um pedido de inspecção prévia pendente para este usuário"
+    IDS_ERR_PREVIEWALREADY  "Há um pedido de inspeção prévia pendente para este usuário"
     IDS_ERR_PREVIEWFAILED   "Inspeção prévia do Usuário '%s' falhou"
     IDS_DWTOT               "Espaço em Disco"
     IDS_DWTOT_NR            "Número de Downloads: %d"
@@ -1433,7 +1433,7 @@ BEGIN
                             "Intervalo de atualização da Conexão ao Servidor [min.]"
     IDS_MORE                "&Mais"
     IDS_TOOLS               "F&erramentas"
-    IDS_SEARCHPARAMS        "Parâmetros de Busca"
+    IDS_SEARCHPARAMS        "Parâmetros de Procura"
 END
 
 STRINGTABLE 
@@ -1444,7 +1444,7 @@ BEGIN
     IDS_INSUFFICIENT        "Espaço Insuficiente em disco"
     IDS_MINFREEDISKSPACE    "Espaço Min. em disco [MB]"
     IDS_WARNING             "Atenção"
-    IDS_IMPORTSPLPF         "Importar arquivos part (eM, eD, ON)"
+    IDS_IMPORTSPLPF         "Importar arquivos part (eMule, eDonkey, OverNet)"
     IDS_IMP_STEPREADPF      "Lendo pasta de arquivos part"
     IDS_IMP_STEPBASICINF    "Recebendo informações básicas do arquivo part"
     IDS_IMP_STEPCRDESTFILE  "Criando destino do arquivo part"
@@ -1461,7 +1461,7 @@ BEGIN
     IDS_IMP_INPROGR         "em progresso"
     IDS_IMP_ERR_DISKSP      "Erro: Maior que o espaço em disco"
     IDS_IMP_ERR_PARTMETIO   "Erro: Partmet não encontrado"
-    IDS_IMP_ERR_IO          "Erro: Erro IO!"
+    IDS_IMP_ERR_IO          "Erro: Erro E/S!"
     IDS_IMP_ERR_FAILED      "Erro: Falhou!"
     IDS_IMP_STATUSQUEUED    "Na Fila"
     IDS_IMP_ALRDWL          "Já Fazendo Download"
@@ -1469,7 +1469,7 @@ BEGIN
     IDS_IMP_RETRYBTN        "&Tentar novamente"
     IDS_IMP_REMOVEBTN       "Re&mover selecionados"
     IDS_IMP_SELFOLDER       "Por favor escolha uma única pasta partmet ou sua antiga pasta temporária com todas as sub-pastas partmet!"
-    IDS_IMP_DELSRC          "Você deseja que a fonte dos arquivos part baixados e importados com sucesso seja deletada?"
+    IDS_IMP_DELSRC          "Você deseja que a fonte dos arquivos part baixados e importados com sucesso seja excluída?"
     IDS_IMP_SIZE            "%s (Disco:%s)"
     IDS_IMP_STATUS          "Importando %s: %s"
     IDS_DYNUPENABLED        "Encontrar o melhor limite de Upload automaticamente"
@@ -1520,7 +1520,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_MM_NEWUSER          "Novo usuário logado com sucesso no Servidor MobileMule"
-    IDS_RADCLIENTS          "dos clientes conhecidos"
+    IDS_RADCLIENTS          "dos usuários conhecidos"
     IDS_KADUDPPORTERR       "A porta UDP do Kademlia conflitou com alguma porta externa ou porta UDP de Servidor do eMule. A porta foi modificada para %u."
     IDS_CONFIRM_FILEDELETE  "Você realmente deseja remover todos arquivos selecionados do disco?"
     IDS_OPENFOLDER          "Abrir pasta"
@@ -1543,10 +1543,10 @@ BEGIN
     IDS_ENABLETEXTLABELS    "Mostrar Rótulos"
     IDS_CUSTOMIZETOOLBAR    "Personalizar Barra de Ferramentas"
     IDS_MINBITRATE          "Min. bitrate [kBit/s]"
-    IDS_KAD_RECHECKFW       "Reverificar Firewall"
+    IDS_KAD_RECHECKFW       "Verificar Firewall"
     IDS_SHAREDTITLE         "Compart. eD2k|Kad"
     IDS_FIREWALLED          "Sob Firewall"
-    IDS_KADEMLIA            "Kademlia"
+    IDS_KADEMLIA            "Kad"
     IDS_KADCONTACTLAB       "Contatos"
     IDS_KADDISTANCE         "Distância"
     IDS_KEY                 "Chave"
@@ -1587,12 +1587,12 @@ BEGIN
     IDS_INSTALL_SKIN_PKG_ERROR "Esse não é um pacote de Skin válido."
     IDS_NEXT_REASK          "Próxima re-pedida"
     IDS_A4AF_FILES          "Arquivos A4AF"
-    IDS_FO_TEMPTCP_S        "Aberto porta %u (TCP) no firewall interno do WinXP para essa sessão"
-    IDS_FO_TEMPTCP_F        "Falha ao abrir porta %u (TCP) no firewall interno do WinXP para essa sessão"
-    IDS_FO_TEMPUDP_S        "Aberto porta %u (UDP) no firewall interno do WinXP para essa sessão"
-    IDS_FO_TEMPUDP_F        "Falha ao abrir porta %u (UDP) no firewall interno do WinXP para essa sessão"
-    IDS_FO_PREFBUTTON       "Abra estas portas no firewall do WinXP"
-    IDS_FO_PREF_SUCCCEEDED  "Consegui abrir as portas selecionadas no firewall interno do WinXP.\nNote que outros firewalls e roteadores não são afetados por isso!"
+    IDS_FO_TEMPTCP_S        "Aberto porta %u (TCP) no Firewall interno do WinXP para essa sessão"
+    IDS_FO_TEMPTCP_F        "Falha ao abrir porta %u (TCP) no Firewall interno do WinXP para essa sessão"
+    IDS_FO_TEMPUDP_S        "Aberto porta %u (UDP) no Firewall interno do WinXP para essa sessão"
+    IDS_FO_TEMPUDP_F        "Falha ao abrir porta %u (UDP) no Firewall interno do WinXP para essa sessão"
+    IDS_FO_PREFBUTTON       "Abra estas portas no Firewall do WinXP"
+    IDS_FO_PREF_SUCCCEEDED  "Consegui abrir as portas selecionadas no Firewall interno do WinXP.\nNote que outros firewalls e roteadores não são afetados por isso!"
 END
 
 STRINGTABLE 
@@ -1623,7 +1623,7 @@ BEGIN
     IDS_CHAT_DOWNLOADED     "Baixado:"
     IDS_CHAT_UPLOADED       "Enviado:"
     IDS_CHAT_IDENT          "Identificação:"
-    IDS_MAXHALFOPENCONS     "Conexões meio-abertas (máx)"
+    IDS_MAXHALFOPENCONS     "Conexões semi-abertas (máx)"
     IDS_WIZ_STARTWITHWINDOWS 
                             "Abrir o eMule automaticamente ao iniciar o Windows?"
     IDS_KAD_WAITCBK         "Esperando resposta do Kad"
@@ -1643,7 +1643,7 @@ BEGIN
     IDS_BUDDY               "Companheiro"
     IDS_BUDDYNONE           "Nenhum"
     IDS_INFO                "Info"
-    IDS_HALF                "Meio"
+    IDS_HALF                "Semi"
     IDS_CONCOMPL            "Compl"
     IDS_KADSTATUS_STOPPING  "Parando"
     IDS_KADSTATUS_ACTIVE    "Ativo"
@@ -1733,7 +1733,7 @@ BEGIN
     IDS_STORENOTES          "Armazenar Notas"
     IDS_NOTES               "Notas"
     IDS_KADSEARCHALREADY    "Uma outra busca está em progresso. Tente novamente depois!"
-    IDS_WEB_SHUTDOWN        "Desligar eMule"
+    IDS_WEB_SHUTDOWN        "Fechar eMule"
     IDS_WEB_REBOOT          "Reiniciar sistema"
 END
 
@@ -1793,7 +1793,7 @@ BEGIN
     IDS_USS_STATE_WAITING   "Esperando..."
     IDS_USS_STATE_ERROR     "Erro!"
     IDS_SHAREWARNING        "(Pasta será compartilhada!)"
-    IDS_REMOVEALLSERVERS    "Você realmente deseja removar todos os servidores?"
+    IDS_REMOVEALLSERVERS    "Você realmente deseja remover todos os servidores?"
     IDS_SEARCH_UNKATTR      "Atributo de busca desconhecido: '%s'"
     IDS_SEARCH_ATTRERR      "Erro de sintaxe no atributo de busca '%s'"
 END
@@ -3200,7 +3200,7 @@ BEGIN
     IDS_DISABLEKNOWNLIST_TIP 
                             "O eMule mantém uma lista de todos os clientes que ele está conectado ou conectou.\nPara salvar memória essa lista pode ser desligada.\nDesligue-a em sistemas com pouca memória."
     IDS_DISABLEQUEUELIST_TIP 
-                            "Similar à lista de clientes conhecidos, a fila de espera\ntambém consome recursos.\nDesligue para reduzir o consumo."
+                            "Similar à lista de usuários conhecidos, a fila de espera\ntambém consome recursos.\nDesligue para reduzir o consumo."
     IDS_SHOWCATINFO_TIP     "Irá mostrar dois valores (x/y) depois do nome da categoria.\nO primeiro valor (x) é o número de arquivos atualmente ativos(baixando)\e o segundo (y) é o número total de arquivos para essa categoria."
     IDS_REPAINTGRAPHS_TIP   "O eMule pode congelar parcialmente quando a janela é redimensionada.\nIsso é causado pelo redesenhamento dos gráficos com dados salvos.\nSe essa opção estiver marcada, os gráficos não serão redesenhados."
     IDC_SELECT_HYPERTEXT_FONT_TIP 
@@ -3404,7 +3404,7 @@ STRINGTABLE
 BEGIN
     IDS_MAXMSGSESSIONS      "maxmsgsessions(Chat sessions)"
     IDS_PREFERRESTRICTEDOVERUSER "PreferRestrictedOverUser"
-    IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(default 5,0=all)"
+    IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(Padrão: 5, 0=sem lim.)"
     IDS_HIGHRESTIMER        "HighresTimer"
     IDS_HIGHRESTIMER_TIP    "?"
     IDS_TRUSTEVERYHASH_TIP  "(Nessa sessão apenas, não é salvo). SÓ PARA DEBUG. desliga a votação de hash "
@@ -3441,7 +3441,7 @@ BEGIN
     IDS_MEDIAINFO_ID3LIB_TIP 
                             "Instrui o eMule para verificar arquivos mpeg (mp1,mp2,mp3,mpa)\nem busca do cabeçalho mpeg. As informações serão mostradas na janela\nde detalhes do arquivo. Id3lib ou a dll mediainfo será usada pra isso. (Padrão: Ativado)"
     IDS_MAXLOGBUFF_TIP      "Define o quanto de memória o eMule usará pra mostrar os logs.\nPara Windows 98 | ME um padrão de 64kB é reservado, para Win 2k|XP\nit é 128 kB. No Win98|ME o buffer não pode ser maior que 64 kB.\nOs logs são rotativos, i.e. se o buffer encher até o limite\numa mensagem velha será excluída para uma nova aparecer (FIFO)."
-    IDS_MAXCHATHISTORY_TIP  "Defines the maximum number of lines saved in the history of the irc\nmessages. After this value is reached the oldest message is\npurged on new entry (FIFO - First In First Out).\ndefault =100"
+    IDS_MAXCHATHISTORY_TIP  "Define o número máximo de linhas salvas no histórico\nde mensagens do IRC. Depois de alcançar esse valor, a mensagem mais antiga\né apagada quando houver nova. (FIFO - First In First Out).\nPadrão: 100"
     IDS_PREVIEWSMALLBLOCKS_TIP "Essa opção só deve ser ativada se você estiver usando VLC (VideoLAN Client)\npara pre-visualizar arquivos. Ela permite previsualizar arquivos multimídia\nmesmo quando tem somente 16kB baixados para arquivos .mpeg ou 256kB\npara outros arquivos. Com essa opção ativada, o 'Criar backup para preview'\ndeve ser desabilitado na janela 'Vídeo Player'."
     IDS_RESTORELASTMAINWNDDLG_TIP "O eMule lembrará quais das principais janelas \n(Kademlia, Servidor, Transferência) estavam abertas quando ele foi fechado\ne as abrirá quando for executado novamente. (Padrão: Desativado)"
 
