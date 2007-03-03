@@ -1827,8 +1827,9 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 				SetTransferredDownMini();
 
 				// If finished reserved block
-				if (nEndPos == cur_block->block->EndOffset)
+				if (nEndPos >= cur_block->block->EndOffset)
 				{
+					ASSERT(nEndPos == cur_block->block->EndOffset);
 					//MORPH - Optimization
 					/*
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
@@ -1850,7 +1851,8 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 				}
 			}
 			//MORPH START - Work arround I.C.H and other recovering processing responsible of stalled download 
-			else { 
+			else if (nEndPos >= cur_block->block->EndOffset) { 
+				ASSERT (nEndPos == cur_block->block->EndOffset);
 				DebugLog(LOG_MORPH|LOG_SUCCESS,_T("[FIX STALLED DOWNLOAD] Often due to Data recovery, for '%s' with client: %s"), reqfile->GetFileName(), DbgGetClientInfo());
 				//MORPH - Optimization
 				/*

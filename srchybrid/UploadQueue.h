@@ -182,6 +182,7 @@ private:
 	uint64  m_avarage_friend_dr_sum; //MORPH - Added by SiRoB, Upload Friend from uploadbandwidththrottler
 	uint64  m_avarage_powershare_dr_sum; //MORPH - Added by SiRoB, Upload Powershare from uploadbandwidththrottler
     uint64  m_avarage_dr_USS_sum; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
+	DWORD   m_lastproccesstick;	 //MORPH -- lh use same tick to check al slots. 
     DWORD   m_dwLastResortedUploadSlots;
 
 	DWORD   m_dwLastCheckedForHighPrioClient;

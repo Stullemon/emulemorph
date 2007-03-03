@@ -641,7 +641,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bExtControls = thePrefs.m_bExtControls;
 	m_uServerKeepAliveTimeout = thePrefs.m_dwServerKeepAliveTimeout / 60000;
 	//MORPH START leuk_he bindaddr 
-	if (inet_addr(thePrefs.GetBindAddrA())!= INADDR_NONE)
+	if ((thePrefs.GetBindAddrA()!= NULL)  && inet_addr(thePrefs.GetBindAddrA())!= INADDR_NONE)
 	     m_dwBindAddr = ntohl(inet_addr(thePrefs.GetBindAddrA())); 
 	else 
 		m_dwBindAddr = 0;

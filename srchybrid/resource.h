@@ -2805,6 +2805,7 @@
 #define IDS_ZZRATIO_CHECK3              5755
 #define IDS_ZZRATIO_CHECK4              5756
 #define IDS_ZZRATIO_CHECK5              5757
+#define IDS_ZZRATIO_TIP                 5758
 #define IDD_PPG_EMULESPANA1             6000
 #define IDS_WAPSRV                      6001
 #define IDS_PW_WAP                      6002
@@ -2894,9 +2895,12 @@
 #define IDS_CD_WCSUCCFAIL               6211
 #define IDYESSERVICE                    6211
 #define IDS_CD_WCTRUSTSENDER            6212
+#define IDC_ZZRATIOICON                 6212
 #define IDS_WCDOWNL                     6213
+#define IDC_ZZRATIOISACTIVE             6213
 #define IDC_SVC_SETTINGS                6214
 #define IDS_WC_REQ_SUCC                 6214
+#define IDC_ZZRATIOISACTIVTEXT          6214
 #define IDS_WC_DOWNLOADED               6215
 #define IDS_CRC32_TITLE                 6216
 #define IDS_LOG_IPFILTER_LOADED         6217

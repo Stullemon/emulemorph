@@ -55,4 +55,8 @@ private:
 	CSpinButtonCtrl m_minRndPortSpin;
 	CSpinButtonCtrl m_maxRndPortSpin;
 //MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+// MORPH START leuk_he zzratio active warning
+	CStatic	m_ZZratioIcon;
+// MORPH END
+
 };

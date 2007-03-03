@@ -926,7 +926,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 void CUploadQueue::Process() {
 
     DWORD curTick = ::GetTickCount();
-
+	m_lastproccesstick =curTick;
 	UpdateActiveClientsInfo(curTick);
 
 	//MORPH START - Upload Splitting Class
@@ -1011,13 +1011,13 @@ void CUploadQueue::Process() {
 			/*
 			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
 			*/
-			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID()) || ForceNewClient(true, cur_client->GetClassID())) {
+			if(!cur_client->IsScheduledForRemoval() || m_lastproccesstick-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID()) || ForceNewClient(true, cur_client->GetClassID())) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
 				RemoveFromUploadQueue(cur_client, (CString)_T("Scheduled for removal: ") + cur_client->GetScheduledRemovalDebugReason(), true, keepWaitingTime);
 				AddClientToQueue(cur_client,keepWaitingTime,keepWaitingTime);
-                m_nLastStartUpload = ::GetTickCount()-SEC2MS(9);
+                m_nLastStartUpload = m_lastproccesstick-SEC2MS(9);
 			}
 		}
 	}
@@ -1105,7 +1105,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 			needtoaddslot = false;
 		else {
 			if (curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && AcceptNewClient(curUploadSlots/**(2-(classID/2))*/, classID) /*+1*/ ||
-    			curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10))
+    			curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && m_lastproccesstick - m_nLastStartUpload > SEC2MS(10))
 					needtoaddslot = true;
 		}
 		if (!simulateScheduledClosingOfSlot) {
@@ -2138,18 +2138,20 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 }
 
 void CUploadQueue::CheckForHighPrioClient() {
+    //NO Pending
+	/*
     // PENDING: Each 3 seconds
     DWORD curTick = ::GetTickCount();
     if(curTick - m_dwLastCheckedForHighPrioClient >= 3*1000) {
         m_dwLastCheckedForHighPrioClient = curTick;
-
+	*/
         bool added = true;
         while(added) {
 			for (uint32 classID = 0; classID < LAST_CLASS; classID++)
 				ForceNewClient(false, classID);
             added = AddUpNextClient(_T("High prio client (i.e. friend/powershare)."), NULL, true);
         }
-	}
+	//}
 }
 // MORPH START - Added by Commander, WebCache 1.2e
 CUpDownClient*	CUploadQueue::FindClientByWebCacheUploadId(const uint32 id) // Superlexx - webcache - can be made more efficient

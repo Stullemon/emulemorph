@@ -4470,9 +4470,10 @@ uint16	CPreferences::GetWSPort()
 bool CPreferences::SetLessControls(bool newvalue)
 {
 	if (newvalue ==  m_bShowLessControls)
-	 return m_bShowLessControls;  // no change
+		return m_bShowLessControls;  // no change
 	m_bShowLessControls = newvalue ; 
 	theApp.emuledlg->ShowLessControls(newvalue);
+	return m_bShowLessControls;  //  change
 }
 // MORPH END  show less controls
  

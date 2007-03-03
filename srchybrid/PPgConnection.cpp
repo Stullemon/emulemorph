@@ -38,6 +38,7 @@
 #include "ListenSocket.h"
 #include "ClientUDPSocket.h"
 #include "LastCommonRouteFinder.h"
+#include "downloadqueue.h" //MORPH -  zzRatio activation 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -108,6 +109,16 @@ void CPPgConnection::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN_MIN, m_minRndPortSpin);
 	DDX_Control(pDX, IDC_SPIN_MAX, m_maxRndPortSpin);
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+	// MORPH START leuk_he zz ratio active warning
+	DDX_Control(pDX, IDC_ZZRATIOICON, m_ZZratioIcon);
+	if (theApp.downloadqueue->IsZZRatioInWork()){ 
+		GetDlgItem(IDC_ZZRATIOISACTIVTEXT )->SetWindowText(GetResString(IDS_ZZRATIO)+_T(" ")+GetResString(IDS_ZZRATIO_ENABLED ));
+	}
+	else {
+		GetDlgItem(IDC_ZZRATIOISACTIVTEXT )->SetWindowText(L" "); // clear text, not icon. 
+	}
+	// MORPH END leuk_he zz ratio active warning
+
 }
 
 void CPPgConnection::OnEnChangeTCP()
@@ -188,7 +199,18 @@ BOOL CPPgConnection::OnInitDialog()
 	m_maxRndPortSpin.SetBuddy(&m_maxRndPort);
 	m_maxRndPortSpin.SetRange32(1,0xffff);
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
-
+    // MORPH START  luek_he zzratio warning
+	if (theApp.downloadqueue->IsZZRatioInWork()){ 
+		// NEVER DISTRIBUTE a version with the ratio disabled. 
+		// you will hurt the network and your OWN download
+		// if you want faster downloads distribute a version
+		// that has a stricter (1:2.5 always) ratio that forces everyone to upload
+		// faster, so your and their download will get faster.
+		HICON h_zzratioicon= theApp.LoadIcon(_T("ZZRATIO"));
+        m_ZZratioIcon.SetIcon(h_zzratioicon);
+		GetDlgItem(IDC_ZZRATIOISACTIVTEXT )->SetWindowText(GetResString(IDS_ZZRATIO)+_T(" ")+GetResString(IDS_ZZRATIO_ENABLED ));
+	}
+	// MORPH END leuk_he zzratio warning
 	LoadSettings();
 	InitTooltips(); // MORPH leuk_he tooltipped
 	Localize();
@@ -586,6 +608,10 @@ void CPPgConnection::Localize(void)
 		//MORPH END   - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
         //MORPH START leuk_he tooltipped
 		SetTool(IDC_CAPACITIES_FRM,IDS_PW_CON_CAPFRM_TIP);
+		if (theApp.downloadqueue->IsZZRatioInWork()){ 
+			SetTool(IDC_ZZRATIOICON,IDS_ZZRATIO_TIP    );
+			SetTool(IDC_ZZRATIOISACTIVTEXT,IDS_ZZRATIO_TIP);
+		}
 		SetTool(IDC_DCAP_LBL,IDS_PW_CON_DOWNLBL_TIP);
 		SetTool(IDC_UCAP_LBL,IDS_PW_CON_UPLBL_TIP);
 		SetTool(IDC_LIMITS_FRM,IDS_PW_CON_LIMITFRM_TIP);

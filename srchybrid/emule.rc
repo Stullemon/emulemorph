@@ -491,77 +491,79 @@ BEGIN
     PUSHBUTTON      "+",IDC_SELTEMPDIRADD,212,49,9,14,BS_CENTER | BS_FLAT
 END
 
-IDD_PPG_CONNECTION DIALOGEX 0, 0, 230, 244
+IDD_PPG_CONNECTION DIALOGEX 0, 0, 230, 284
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Connection"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    ICON            "",IDC_ZZRATIOICON,86,42,20,20,SS_REALSIZEIMAGE
+    LTEXT           "",IDC_ZZRATIOISACTIVTEXT,113,44,103,10
     EDITTEXT        IDC_DOWNLOAD_CAP,14,28,32,12,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_NUMBER
-    EDITTEXT        IDC_UPLOAD_CAP,14,57,32,12,ES_RIGHT | ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_UPLOAD_CAP,14,67,32,12,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Downloadlimit",IDC_DLIMIT_LBL,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,86,18,70,10
     CONTROL         "",IDC_MAXDOWN_SLIDER,"msctls_trackbar32",WS_TABSTOP,85,
                     30,131,11,WS_EX_STATICEDGE
     CONTROL         "Uploadlimit",IDC_ULIMIT_LBL,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,86,48,70,10
-    CONTROL         "",IDC_MAXUP_SLIDER,"msctls_trackbar32",WS_TABSTOP,86,60,
+                    BS_FLAT | WS_TABSTOP,86,58,70,10
+    CONTROL         "",IDC_MAXUP_SLIDER,"msctls_trackbar32",WS_TABSTOP,86,70,
                     130,11,WS_EX_STATICEDGE
-    EDITTEXT        IDC_PORT,41,89,38,12,ES_AUTOHSCROLL | ES_NUMBER
-    EDITTEXT        IDC_UDPPORT,41,106,38,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_PORT,41,101,38,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_UDPPORT,41,118,38,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "disable",IDC_UDPDISABLE,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,83,108,51,9
-    PUSHBUTTON      "Test ports",IDC_STARTTEST,14,120,71,14,BS_FLAT
-    EDITTEXT        IDC_MAXSOURCEPERFILE,14,176,38,12,ES_AUTOHSCROLL | 
+                    BS_FLAT | WS_TABSTOP,83,120,51,9
+    PUSHBUTTON      "Test ports",IDC_STARTTEST,14,132,71,14,BS_FLAT
+    EDITTEXT        IDC_MAXSOURCEPERFILE,14,188,38,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    EDITTEXT        IDC_MAXCON,120,176,38,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_MAXCON,120,188,38,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Autoconnect on startup",IDC_AUTOCONNECT,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,199,138,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,211,138,10
     CONTROL         "Reconnect on loss",IDC_RECONN,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,7,211,140,10
+                    BS_FLAT | WS_TABSTOP,7,223,140,10
     CONTROL         "Show overhead bandwidth",IDC_SHOWOVERHEAD,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,223,139,10
-    PUSHBUTTON      "Wizard...",IDC_WIZARD,7,239,50,14,BS_FLAT
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,235,139,10
+    PUSHBUTTON      "Wizard...",IDC_WIZARD,7,251,65,14,BS_FLAT
     CONTROL         "Kad",IDC_NETWORK_KADEMLIA,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,158,215,57,10
+                    BS_FLAT | WS_TABSTOP,158,227,57,10
     CONTROL         "eD2K",IDC_NETWORK_ED2K,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,158,229,58,10
-    GROUPBOX        "Clientport:",IDC_CLIENTPORT_FRM,7,79,216,73,BS_FLAT
-    GROUPBOX        "Max sources/file",IDC_MAXSRC_FRM,7,153,93,40,BS_FLAT
-    GROUPBOX        "Max. connections:",IDC_MAXCONN_FRM,113,153,110,40,
+                    BS_FLAT | WS_TABSTOP,158,241,58,10
+    GROUPBOX        "Clientport:",IDC_CLIENTPORT_FRM,7,91,216,73,BS_FLAT
+    GROUPBOX        "Max sources/file",IDC_MAXSRC_FRM,7,165,93,40,BS_FLAT
+    GROUPBOX        "Max. connections:",IDC_MAXCONN_FRM,113,165,110,40,
                     BS_FLAT
-    GROUPBOX        "Capacities:",IDC_CAPACITIES_FRM,7,7,67,70,BS_FLAT
+    GROUPBOX        "Capacities:",IDC_CAPACITIES_FRM,7,7,67,80,BS_FLAT
     CONTROL         "Download",IDC_DCAP_LBL,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,14,18,58,8
     LTEXT           "KB/s",IDC_KBS2,48,30,22,8
-    LTEXT           "KB/s",IDC_KBS3,48,59,22,8
+    LTEXT           "KB/s",IDC_KBS3,48,69,22,8
     CONTROL         "Upload",IDC_UCAP_LBL,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,47,58,8
-    GROUPBOX        "Limits:",IDC_LIMITS_FRM,80,7,143,70,BS_FLAT
+                    WS_GROUP,14,57,58,8
+    GROUPBOX        "Limits:",IDC_LIMITS_FRM,80,7,143,80,BS_FLAT
     RTEXT           "KB/s",IDC_KBS1,188,18,33,8
-    RTEXT           "KB/s",IDC_KBS4,188,48,33,8
-    LTEXT           "Hard limit",IDC_MAXSRCHARD_LBL,14,164,82,8
-    LTEXT           "UDP",IDC_UDPPORTLABEL,14,108,23,8
-    LTEXT           "Static",IDC_MAXCONLABEL,120,164,86,8
-    LTEXT           "TCP",IDC_STATIC,14,91,24,8
-    GROUPBOX        "Network",IDC_CONNECTION_NETWORK,149,197,74,56,BS_FLAT
+    RTEXT           "KB/s",IDC_KBS4,188,58,33,8
+    LTEXT           "Hard limit",IDC_MAXSRCHARD_LBL,14,176,82,8
+    LTEXT           "UDP",IDC_UDPPORTLABEL,14,120,23,8
+    LTEXT           "Static",IDC_MAXCONLABEL,120,176,86,8
+    LTEXT           "TCP",IDC_STATIC,14,103,24,8
+    GROUPBOX        "Network",IDC_CONNECTION_NETWORK,149,209,74,56,BS_FLAT
     PUSHBUTTON      "Open these ports on internal WinXP firewall",
-                    IDC_OPENPORTS,14,137,202,12,BS_FLAT | WS_DISABLED
+                    IDC_OPENPORTS,14,149,202,12,BS_FLAT | WS_DISABLED
     CONTROL         "IDS_RANDOMPORTS",IDC_RANDOMPORTS,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,120,90,96,10
-    EDITTEXT        IDC_MINPORT,176,105,38,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,120,102,96,10
+    EDITTEXT        IDC_MINPORT,176,117,38,12,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_NUMBER
-    EDITTEXT        IDC_MAXPORT,176,121,38,12,ES_RIGHT | ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_MAXPORT,176,133,38,12,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "",IDC_SPIN_MIN,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_ARROWKEYS | UDS_NOTHOUSANDS,205,105,
+                    UDS_ALIGNRIGHT | UDS_ARROWKEYS | UDS_NOTHOUSANDS,205,117,
                     11,12
     CONTROL         "",IDC_SPIN_MAX,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_ARROWKEYS | UDS_NOTHOUSANDS,205,121,
+                    UDS_ALIGNRIGHT | UDS_ARROWKEYS | UDS_NOTHOUSANDS,205,133,
                     11,12
-    LTEXT           "IDS_MAXPORT",IDC_LBL_MAX,136,123,39,8
-    LTEXT           "IDS_MINPORT",IDC_LBL_MIN,136,107,39,8
+    LTEXT           "IDS_MAXPORT",IDC_LBL_MAX,136,135,39,8
+    LTEXT           "IDS_MINPORT",IDC_LBL_MIN,136,119,39,8
 END
 
 IDD_IRC DIALOGEX 0, 35, 511, 289
@@ -1236,7 +1238,7 @@ BEGIN
                     BS_MULTILINE | BS_FLAT,0,0,317,60
 END
 
-	IDD_WIZ1_SERVER DIALOGEX 0, 0, 317, 143
+IDD_WIZ1_SERVER DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Server Settings"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
@@ -2085,18 +2087,15 @@ BEGIN
     CONTROL         "Filenames right-justified",IDC_FILENAMERIGHT,"Button",
                     BS_AUTORADIOBUTTON | BS_FLAT,100,32,96,10
     PUSHBUTTON      "&Reset",IDC_RESETBUTTON,319,16,50,14
-    CONTROL         "",IDC_NEWFILENAMESEDITLEFT,"RichEdit20W",ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | 
-                    WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,4,53,
-                    180,178
-    CONTROL         "",IDC_NEWFILENAMESEDITRIGHT,"RichEdit20W",ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | 
-                    WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,4,53,
-                    180,178,WS_EX_RIGHT
-    CONTROL         "",IDC_OLDFILENAMESEDIT,"RichEdit20W",ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
-                    ES_WANTRETURN | WS_BORDER | WS_VSCROLL | WS_HSCROLL | 
-                    WS_TABSTOP,196,53,173,178
+    CONTROL         "",IDC_NEWFILENAMESEDITLEFT,"RichEdit20W",WS_BORDER | 
+                    WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | 0x10c4,4,53,180,
+                    178
+    CONTROL         "",IDC_NEWFILENAMESEDITRIGHT,"RichEdit20W",WS_BORDER | 
+                    WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | 0x10c4,4,53,180,
+                    178,WS_EX_RIGHT
+    CONTROL         "",IDC_OLDFILENAMESEDIT,"RichEdit20W",WS_BORDER | 
+                    WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | 0x18c4,196,53,173,
+                    178
     PUSHBUTTON      "&Cleanup",IDC_BUTTONSTRIP,4,235,58,14,BS_FLAT
     PUSHBUTTON      "&Simple Cleanup",IDC_SIMPLECLEANUP,64,235,59,14,BS_FLAT
     PUSHBUTTON      "Insert text column from clipboard",IDC_INSERTTEXTCOLUMN,
@@ -2412,7 +2411,7 @@ BEGIN
         VERTGUIDE, 188
         VERTGUIDE, 216
         TOPMARGIN, 7
-        BOTTOMMARGIN, 237
+        BOTTOMMARGIN, 277
         HORZGUIDE, 101
         HORZGUIDE, 118
         HORZGUIDE, 127
@@ -2982,8 +2981,6 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-
-//AAAEMULEAPP             ICON                    "res\\Mule.ico"
 AAAEMULEAPP             ICON                    "res\\MOD\\AAMorph.ico"
 COLOUR                  ICON                    "res\\colour.ico"
 BOLD                    ICON                    "res\\bold.ico"
@@ -3232,6 +3229,7 @@ NEXTEMF                 ICON                    "res\\MOD\\nextEMF.ico"
 NEO                     ICON                    "res\\MOD\\Client-Neo.ico"
 XTREME                  ICON                    "res\\MOD\\xtreme.ico"
 SCARANGEL               ICON                    "res\\MOD\\ScarAngel.ico"
+ZZRATIO                 ICON                    "res\\mod\\zzratio.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -6074,6 +6072,7 @@ BEGIN
     IDS_ZZRATIO_CHECK3      "Using friend slot and globaldatarate>3KB/s"
     IDS_ZZRATIO_CHECK4      "Upload limit under 10KB/s"
     IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
+    IDS_ZZRATIO_TIP         "ZZRatio is active at this moment. This session ratio is visible by \na 'R' in the statusbar. Your <b>average</b> download will not exceed\n3 times your upload when this is active.\nSolution:<b>Upload more</b> or upload longer.\nThe reason for the active ratio can be seen by hovering the mouse over\nthe R in the status bar. "
 END
 
 STRINGTABLE 
@@ -6847,50 +6846,51 @@ BEGIN
     IDS_USECOMPRESS         "UseCompression (session)"
     IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Current Status"
-	IDS_USEUSERSORTEDSERVERLIST_TIP "When enabled this will use the same server list sorting\nas shown in GUI when trying to connect to a server."
-	IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
-	IDS_TEST_NOTIFICATION   "Test"
-	IDS_SERVER_REQUIREOBFUSCATION      "Require obfuscated connection to servers"
-    IDS_SERVER_REQUIREOBFUSCATION_TIP  "Requires obfuscated connections to servers\nany servers that do not support obfuscating \nwill be ignored. And it happens that fake server\ndo not support obfuscation when this option\nis introduced. Note that it is impossible to connect \nto server until you get a valid cryptping" 
-	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Show some extra logging when searching.\n Also does not merge all search results. \n (Default:0, not saved, edit preferences.ini to make a change permanent)"
+    IDS_USEUSERSORTEDSERVERLIST_TIP 
+                            "When enabled this will use the same server list sorting\nas shown in GUI when trying to connect to a server."
+    IDS_TEST_NOTIFICATION   "Test"
+    IDS_SERVER_REQUIREOBFUSCATION "Require obfuscated connection to servers"
+    IDS_SERVER_REQUIREOBFUSCATION_TIP 
+                            "Requires obfuscated connections to servers\nany servers that do not support obfuscating \nwill be ignored. And it happens that fake server\ndo not support obfuscation when this option\nis introduced. Note that it is impossible to connect \nto server until you get a valid cryptping"
+    IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP 
+                            "Show some extra logging when searching.\n Also does not merge all search results. \n (Default:0, not saved, edit preferences.ini to make a change permanent)"
+    IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
+    IDS_WIZ8_MORPH          "MorphXT Settings"
+    IDS_MORPHWIZ_GUI        "Mod Options"
+    IDS_MORPHWIZ_SHOWMORE   "Show more controls (advanced)"
+    IDS_MORPHWIZ_SHOWLESS   "Show less controls (simpler/beginner)"
+    IDS_MORPHWIZ_NEXT       "On Finishing of wizard"
+    IDS_MORPHWIZ_NET1       "Run network wizard to configure up/down internet speed."
 END
 
 STRINGTABLE 
 BEGIN
     IDS_WIZARDREQUIREOBFUSCATED 
                             "Required obfuscated connection to server.\nTurn on to prevent connecting to bad maintained/fake server"
-    IDS_WIZ8_MORPH          "MorphXT Settings"
-    IDS_MORPHWIZ_GUI        "Mod Options"
-    IDS_MORPHWIZ_SHOWMORE   "Show more controls (advanced)"
-    IDS_MORPHWIZ_SHOWLESS   "Show less controls"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_MORPHWIZ_NEXT       "On Finishing of wizard"
-    IDS_MORPHWIZ_NET1       "Run network wizard to configure up/down internet speed."
     IDS_MORPHWIZ_IMPORT     "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule"
+    IDS_PREF_GROUPGENERAL   "General options"
+    IDS_PREF_GROUPEXTENDED  "Advanced options"
+    IDS_PREF_GROUPMOD       "Mod options"
 END
-STRINGTABLE 
-BEGIN
-	IDS_PREF_GROUPGENERAL "General options"
-	IDS_PREF_GROUPEXTENDED "Advanced options"
-	IDS_PREF_GROUPMOD "Mod options"
-END
+
 STRINGTABLE 
 BEGIN
     IDS_UPNP_NETSTATUS      "Upnp"
     IDS_UPNP_ENABLE_WEB     "Enable UPnP on web interface port"
-    IDS_UPNP_INFO_NONEED    "Failed or not needed"
     IDS_UPNP_INFOUNINIT     ",not initialized\r\n"
-    
     IDS_UPNP_INFOENABLED    ",enabled\r\n"
     IDS_UPNP_INFODISABLED   ",disabled\r\n"
     IDS_UPNP_INFOSTANDBY    "No Device detected\r\n"
 END
 
-
-
+STRINGTABLE 
+BEGIN
+    IDS_UPNP_INFO_NONEED    "Failed or not needed"
+END
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////

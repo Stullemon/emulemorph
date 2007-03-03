@@ -992,7 +992,12 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 
 		// those tooltips are very nice for debugging/testing but pretty annoying for general usage
 		// enable tooltips only if Shift+Ctrl is currently pressed
+		/* MORPH leuk_he also take GetDebugSearchResultDetailLevelinto account... to show tooltips on search results
 		bool bShowInfoTip = GetSelectedCount() > 1 || ((GetKeyState(VK_SHIFT) & 0x8000) && (GetKeyState(VK_CONTROL) & 0x8000));
+		*/
+		bool bShowInfoTip = GetSelectedCount() > 1 || ((GetKeyState(VK_SHIFT) & 0x8000) && (GetKeyState(VK_CONTROL) & 0x8000)) || thePrefs.GetDebugSearchResultDetailLevel()!= 0  ;
+    	// MORPH END leuk_he also take GetDebugSearchResultDetailLevel into account... to show tooltips on search results
+
 
 		if (!bShowInfoTip){
 			if (!bOverMainItem){
@@ -1103,7 +1108,8 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 				}
 			}
 
-    #ifdef USE_DEBUG_DEVICE
+		//ifdef USE_DEBUG_DEVICE	   mprph 
+		if (thePrefs.GetDebugSearchResultDetailLevel()  ) // MORPH leuk_he instead of #ifddef debug device show server in tooltip
 			if (file->GetClientsCount()){
 					bool bFirst = true;
 				if (file->GetClientID() && file->GetClientPort()){
@@ -1158,7 +1164,7 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 						break;
 				}
 			}
-#endif
+//#endif
 			_tcsncpy(pGetInfoTip->pszText, strInfo, pGetInfoTip->cchTextMax);
 			pGetInfoTip->pszText[pGetInfoTip->cchTextMax-1] = _T('\0');
 		}
@@ -1984,6 +1990,7 @@ void CSearchListCtrl::GetItemDisplayText(const CSearchFile* src, int iSubItem,
 			break;
 		//MORPH START - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 		case 14:
+			if (src-> GetFakeComment())
 			_tcsncpy(pszText, src->GetFakeComment(), cchTextMax);
 		//MORPH END   - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	}

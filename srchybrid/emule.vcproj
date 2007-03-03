@@ -2115,6 +2115,9 @@
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest;gif">
 			<File
+				RelativePath=".\res\MOD\AAMorph.ico">
+			</File>
+			<File
 				RelativePath="res\all.ico">
 			</File>
 			<File
@@ -2794,10 +2797,10 @@
 				RelativePath="res\Proxy.ico">
 			</File>
 			<File
-				RelativePath="res\queue.ico">
+				RelativePath=".\res\Mod\queue.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\queue.ico">
+				RelativePath="res\queue.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\Rating-Excellent.ico">
@@ -2959,10 +2962,10 @@
 				RelativePath="res\Transfer.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\transfers.ico">
+				RelativePath="res\transfers.ico">
 			</File>
 			<File
-				RelativePath="res\transfers.ico">
+				RelativePath=".\res\Mod\transfers.ico">
 			</File>
 			<File
 				RelativePath="res\TransferUpDown.ico">
@@ -3056,6 +3059,9 @@
 			</File>
 			<File
 				RelativePath=".\res\Mod\xtreme.ico">
+			</File>
+			<File
+				RelativePath=".\res\MOD\zzratio.ico">
 			</File>
 		</Filter>
 		<Filter
