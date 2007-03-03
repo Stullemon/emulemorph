@@ -788,20 +788,6 @@
     <country>Poland</country>
   </proxies>
   <proxies>
-    <hostName>*.inetia.pl</hostName>
-    <proxyName>w3cache.internetia.pl</proxyName>
-    <proxyPort>8080</proxyPort>
-    <ISPName>Internetia</ISPName>
-    <country>Poland</country>
-  </proxies>
-  <proxies>
-    <hostName>*.netia.com.pl</hostName>
-    <proxyName>w3cache.internetia.pl</proxyName>
-    <proxyPort>8080</proxyPort>
-    <ISPName>Internetia</ISPName>
-    <country>Poland</country>
-  </proxies>
-  <proxies>
     <hostName>*.internode.on.net</hostName>
     <proxyName>www.proxy.on.net</proxyName>
     <proxyPort>8080</proxyPort>
