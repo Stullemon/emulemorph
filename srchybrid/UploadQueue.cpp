@@ -1110,7 +1110,10 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 		}
 		if (!simulateScheduledClosingOfSlot) {
 			//Mark the class to be able to receive a slot or not
-			m_abAddClientOfThisClass[classID] = needtoaddslot;
+			if ((classID==2) & (thePrefs.GetMaxGlobalDataRatePowerShare()>=100))
+				m_abAddClientOfThisClass[1] = needtoaddslot; //if PS % =100 force powershare slots... 
+			else
+				m_abAddClientOfThisClass[classID] = needtoaddslot;
 		}
 		return needtoaddslot;
 	} else
