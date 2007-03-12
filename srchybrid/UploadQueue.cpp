@@ -652,7 +652,7 @@ CUpDownClient* CUploadQueue::FindBestScheduledForRemovalClientInUploadListThatCa
 		}
 	}
 
-    return NULL;
+     return NULL;
 }
 
 //MORPH - Upload Splitting Class
@@ -1112,8 +1112,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 			//Mark the class to be able to receive a slot or not
 			if ((classID==2) & (thePrefs.GetMaxGlobalDataRatePowerShare()>=100))
 				m_abAddClientOfThisClass[1] = needtoaddslot; //if PS % =100 force powershare slots... 
-			else
-				m_abAddClientOfThisClass[classID] = needtoaddslot;
+			m_abAddClientOfThisClass[classID] = needtoaddslot;
 		}
 		return needtoaddslot;
 	} else

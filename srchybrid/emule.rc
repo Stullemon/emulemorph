@@ -3002,9 +3002,9 @@ IRCCLIPBOARD            ICON                    "res\\IRCClipboard.ico"
 PREFERENCES             ICON                    "res\\Preferences.ico"
 TOOLS                   ICON                    "res\\Tools.ico"
 HELP                    ICON                    "res\\Help.ico"
-TRAYCONNECTED           ICON                    "res\\TrayConnected.ico"
-TRAYNOTCONNECTED        ICON                    "res\\TrayDisconnected.ico"
-TRAYLOWID               ICON                    "res\\TrayLowID.ico"
+TRAYCONNECTED           ICON                    "res\\mod\\TrayConnected.ico"
+TRAYNOTCONNECTED        ICON                    "res\\mod\\TrayDisconnected.ico"
+TRAYLOWID               ICON                    "res\\mod\\TrayLowID.ico"
 DISPLAY                 ICON                    "res\\Display.ico"
 SECURITY                ICON                    "res\\Security.ico"
 WEB                     ICON                    "res\\Web.ico"
@@ -6890,6 +6890,12 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPNP_INFO_NONEED    "Failed or not needed"
+    IDS_ERR_NOVALIDSTATICSERVERSFOUND 
+                           "No valid static servers to connect in serverlist found"
+    IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
+	"No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
+
+
 END
 
 #endif    // English (U.S.) resources

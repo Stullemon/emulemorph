@@ -161,7 +161,7 @@ namespace Kademlia
 			}
 			virtual uint64 GetInt() const
 			{
-				ASSERT(0);
+				//ASSERT(0); morph?leuk_he why this is a pain in the debug! 
 				return 0;
 			}
 			virtual float GetFloat() const

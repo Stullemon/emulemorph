@@ -242,7 +242,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" ALPHA5");
+	m_strCurVersionLong += _T(" upnp5");
 #endif
 
 	// create the protocol version number
@@ -2262,7 +2262,11 @@ bool CemuleApp::IsEd2kFriendLinkInClipboard()
 }
 // Commander - Added: FriendLinks [emulEspaña] - End
 
-// MORPH leuk_he:run as ntservice v1..
-bool CemuleApp::IsRunningAsService() {
-	return RunningAsService();
+// MORPH START leuk_he:run as ntservice v1..
+bool CemuleApp::IsRunningAsService(int OptimizeLevel ){
+   if (OptimizeLevel < 5)	// 5: all optmization except server list : need an option for preferneces. 
+		return RunningAsService();
+   else
+	   return false;  // disable optimizations
 }
+// MORPH END leuk_he:run as ntservice v1..

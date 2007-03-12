@@ -261,7 +261,11 @@ public:
 	public:
 		bool	IsEd2kFriendLinkInClipboard();
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
-		bool	IsRunningAsService();// MORPH leuk_he:run as ntservice v1..
+		#define  SVC_NO_OPT 0
+		#define	 SVC_LIST_OPT 4
+		#define  SVC_SVR_OPT 6
+		#define SVC_FULL_OPT 10
+				bool	IsRunningAsService(int OptimizeLevel = SVC_NO_OPT );// MORPH leuk_he:run as ntservice v1..
 };
 
 extern CemuleApp theApp;

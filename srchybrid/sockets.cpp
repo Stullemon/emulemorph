@@ -107,7 +107,7 @@ void CServerConnect::ConnectToAnyServer(UINT startAt, bool prioSort, bool isAuto
 		}
 		if (!anystatic) {
 			connecting = false;
-			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_NOVALIDSERVERSFOUND));
+			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_NOVALIDSTATICSERVERSFOUND)); // MORPH: more specific error message
 			return;
 		}
 	}
@@ -123,7 +123,12 @@ void CServerConnect::ConnectToAnyServer(UINT startAt, bool prioSort, bool isAuto
 	//EastShare End - PreferShareAll by AndCycle
 	if (theApp.serverlist->GetServerCount() == 0) {
 		connecting = false;
-		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_NOVALIDSERVERSFOUND));
+		// MORPH START more specific error message
+		if (thePrefs.IsServerCryptLayerRequiredStrict())
+			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND));
+		else
+        //	MORPH END more specific error message 
+			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_NOVALIDSERVERSFOUND));
 		return;
 	}
 	theApp.listensocket->Process();
@@ -405,9 +410,8 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender)
 			if (!connecting)
 				break;
 			if (singleconnecting){
-				if (pServer != NULL && sender->IsServerCryptEnabledConnection() && !thePrefs.IsClientCryptLayerRequired()){
-					// try reconnecting without obfuscation
-					if (!thePrefs.IsServerCryptLayerRequiredStrict()) // MORPH lh require obfuscated server connection 
+				if (pServer != NULL && sender->IsServerCryptEnabledConnection() && !thePrefs.IsClientCryptLayerRequired()
+					 && (!thePrefs.IsServerCryptLayerRequiredStrict()) ){// MORPH lh require obfuscated server connection 
 					ConnectToServer(pServer, false, true);
 					break;
 				}

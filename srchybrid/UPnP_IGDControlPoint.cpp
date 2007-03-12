@@ -68,21 +68,22 @@ CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 {
 	if(m_bClearOnClose)
 		DeleteAllPortMappings();
-
-	//Lock devices and mappings before use it
-	m_devListLock.Lock();
-	m_MappingsLock.Lock();
-
+    
 	//Unregister control point and finish UPnP
 	if(m_ctrlPoint){
 		UpnpUnRegisterClient(m_ctrlPoint);
-		UpnpFinish();
+        UpnpFinish();
 	}
 
     if (InitializingEvent)
 	{  InitializingEvent->SetEvent(); 
 		delete InitializingEvent; InitializingEvent=NULL;}
 	//Remove devices/services
+    //Lock devices and mappings before use it
+	m_devListLock.Lock(); 
+	m_MappingsLock.Lock();
+
+
 	POSITION pos = m_devices.GetHeadPosition();
 	while(pos){
 		UPNP_DEVICE *item;
