@@ -139,7 +139,7 @@ void CUploadListCtrl::Init()
 
 CUploadListCtrl::~CUploadListCtrl()
 {
-	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
+	if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
 		delete m_tooltip;
 }
 
@@ -300,7 +300,7 @@ void CUploadListCtrl::Localize()
 
 void CUploadListCtrl::AddClient(const CUpDownClient* client)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 
 	if (!theApp.emuledlg->IsRunning())
 		return;
@@ -328,7 +328,7 @@ void CUploadListCtrl::RemoveClient(const CUpDownClient* client)
 
 void CUploadListCtrl::RefreshClient(const CUpDownClient* client)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 	
 	// There is some type of timing issue here.. If you click on item in the queue or upload and leave
 	// the focus on it when you exit the cient, it breaks on line 854 of emuleDlg.cpp
@@ -736,7 +736,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
-	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+	if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1..
 		m_updatethread->AddItemUpdated((LPARAM)client); //MORPH - UpdateItemThread
 }
 

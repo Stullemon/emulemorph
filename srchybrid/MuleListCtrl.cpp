@@ -102,8 +102,10 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort)
 	m_hAccel = NULL;
 	m_uIDAccel = IDR_LISTVIEW;
 	m_eUpdateMode = lazy;
-// not for server list and download list	
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+    // not for server list and download list	
+	// MORPH START leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_SVR_OPT )) return; // THIS SHOULD BE SVC_LIST_OPT for other than server	TODO.
+	// MORPH END leuk_he:run as ntservice v1..
 	//MORPH START - UpdateItemThread
 	m_updatethread = (CUpdateItemThread*) AfxBeginThread(RUNTIME_CLASS(CUpdateItemThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
 	m_updatethread->ResumeThread();
@@ -113,8 +115,10 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort)
 
 CMuleListCtrl::~CMuleListCtrl() {
 	delete[] m_aColumns;
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
-	m_updatethread->EndThread(); //MORPH - UpdateItemThread
+	// MORPH START leuk_he:run as ntservice v1..
+   	if (theApp.IsRunningAsService(SVC_SVR_OPT)) return;
+	// MORPH END leuk_he:run as ntservice v1..
+		m_updatethread->EndThread(); //MORPH - UpdateItemThread
 }
 
 int CMuleListCtrl::SortProc(LPARAM /*lParam1*/, LPARAM /*lParam2*/, LPARAM /*lParamSort*/)
@@ -1645,3 +1649,4 @@ int CUpdateItemThread::Run() {
 	return 0;
 }
 //MORPH END    - UpdateItemThread
+

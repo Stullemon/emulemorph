@@ -56,7 +56,10 @@ END_MESSAGE_MAP()
 CServerListCtrl::CServerListCtrl()
 {
 	SetGeneralPurposeFind(true);
-	m_tooltip = new CToolTipCtrlX;
+	if (!theApp.IsRunningAsService()) {		 // MORPH RUNNING As a ntservice. 
+		m_tooltip = new CToolTipCtrlX;
+	}
+	else m_tooltip =NULL; // runnin as a ntservice
 }
 
 bool CServerListCtrl::Init()
@@ -289,7 +292,7 @@ bool CServerListCtrl::AddServer(const CServer* pServer, bool bAddToList)
 	if (!theApp.serverlist->AddServer(pServer))
       return false; 
 
-	if (theApp.IsRunningAsService()) return true;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_SVR_OPT)) return true;// MORPH leuk_he:run as ntservice v1..
 
    if (bAddToList) 
    {
@@ -302,7 +305,7 @@ bool CServerListCtrl::AddServer(const CServer* pServer, bool bAddToList)
 
 void CServerListCtrl::RefreshServer(const CServer* server)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_SVR_OPT )) return;// MORPH leuk_he:run as ntservice v1..
 	
 	if (!server || !theApp.emuledlg->IsRunning())
 		return;
@@ -1360,7 +1363,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
-	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+	if (!theApp.IsRunningAsService(SVC_SVR_OPT)) // MORPH leuk_he:run as ntservice v1..
 		m_updatethread->AddItemUpdated((LPARAM)server); //MORPH - UpdateItemThread
 }
 //Commander - Added: CountryFlag - End

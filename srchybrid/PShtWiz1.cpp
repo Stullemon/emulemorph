@@ -887,7 +887,6 @@ int FirstTimeWizard() //lh ftw
 	page6.m_iSafeServerConnect = 0;
 	page6.m_iKademlia = 1;
 	page6.m_iED2K = 1;
-	page6.m_iReqObfus = thePrefs.IsServerCryptLayerRequiredStrict(); // 
 	page6b.m_iShowLessControls = thePrefs.IsLessControls(); // MORPH START show less controls
     page6b.m_iShowMoreControls = thePrefs.IsExtControlsEnabled(); // MORPH startup wizard
 

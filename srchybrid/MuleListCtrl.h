@@ -248,6 +248,7 @@ private:
 		return ((CMuleListCtrl*)lParamSort)->MultiSortProc(lParam1, lParam2);
 	}
 	// SLUGFILLER: multiSort
+
 };
 
 void GetContextMenuPosition(CListCtrl& lv, CPoint& point);

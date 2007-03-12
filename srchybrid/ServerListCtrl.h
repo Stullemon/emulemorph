@@ -44,7 +44,6 @@ protected:
 	CImageList imagelist;
         //Commander - Added: CountryFlag - End
 
-
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSysColorChange();
 	afx_msg	void OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);

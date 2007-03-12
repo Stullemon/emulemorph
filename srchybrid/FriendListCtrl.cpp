@@ -153,7 +153,7 @@ void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
 
 void CFriendListCtrl::AddFriend(const CFriend* pFriend)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 
 	//MORPH START - Added by SiRoB, HotFix to avoid crash at shutdown
 	if (!theApp.emuledlg->IsRunning())

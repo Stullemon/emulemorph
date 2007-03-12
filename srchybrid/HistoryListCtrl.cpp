@@ -511,7 +511,7 @@ void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	pDC.SetTextColor(crOldTextColor);
 	pDC.SetBkColor(crOldBckColor);
 	oDC->SetBkColor(crOldDCBkColor);
-	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+	if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1..
 		m_updatethread->AddItemUpdated((LPARAM)file); //MORPH - UpdateItemThread
 }
 
@@ -945,7 +945,7 @@ void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
 */
 void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 	
 	if(!file || !theApp.emuledlg->IsRunning())
 		return;

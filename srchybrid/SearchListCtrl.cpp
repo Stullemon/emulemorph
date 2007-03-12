@@ -335,7 +335,7 @@ void CSearchListCtrl::Localize()
 
 void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 
 	bool bFilterActive = !theApp.emuledlg->searchwnd->m_pwndResults->m_astrFilter.IsEmpty();
 	bool bItemFiltered = bFilterActive ? IsFilteredItem(toshow) : false;
@@ -436,7 +436,7 @@ void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
 
 void CSearchListCtrl::UpdateSearch(CSearchFile* toupdate)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 	
 	if (!toupdate || !theApp.emuledlg->IsRunning())
 		return;
@@ -1566,7 +1566,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
-	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+	if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1..
 		m_updatethread->AddItemUpdated((LPARAM)content); //MORPH - UpdateItemThread
 }
 

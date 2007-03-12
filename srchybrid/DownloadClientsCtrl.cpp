@@ -231,7 +231,7 @@ void CDownloadClientsCtrl::Localize()
 
 void CDownloadClientsCtrl::AddClient(CUpDownClient* client)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 
 	if(!theApp.emuledlg->IsRunning())
 		return;
@@ -265,7 +265,7 @@ void CDownloadClientsCtrl::RemoveClient(CUpDownClient* client)
 
 void CDownloadClientsCtrl::RefreshClient(CUpDownClient* client)
 {
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 	
 	if( !theApp.emuledlg->IsRunning() )
 		return;
@@ -624,7 +624,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
-	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1..
+	if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1..
 		m_updatethread->AddItemUpdated((LPARAM)client); //MORPH - UpdateItemThread
 }
 

@@ -15,11 +15,11 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
-#include "CommentListCtrl.h"
 #include "OtherFunctions.h"
 #include "MenuCmds.h"
 #include "TitleMenu.h"
 #include "emule.h"
+#include "CommentListCtrl.h"
 #include "UpDownClient.h"
 #include "kademlia/kademlia/Entry.h"
 
