@@ -1660,34 +1660,39 @@ BEGIN
     IDS_USECOMPRESS         "UseCompression (session)"
 	IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Current Status"
-	IDS_USEUSERSORTEDSERVERLIST_TIP "When enabled this will use the same server list sorting\nas shown in GUI when trying to connect to a server."
+    IDS_USEUSERSORTEDSERVERLIST_TIP 
+                            "When enabled this will use the same server list sorting\nas shown in GUI when trying to connect to a server."
 	IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
 	IDS_TEST_NOTIFICATION   "Test"
 	IDS_SERVER_REQUIREOBFUSCATION      "Require obfuscated connection to servers"
-    IDS_SERVER_REQUIREOBFUSCATION_TIP  "Requires obfuscated connections to servers\nany servers that do not support obfuscating \nwill be ignored. And it happens that fake server\ndo not support obfuscation when this option\nis introduced. Note that it is impossible to connect \nto server until you get a valid cryptping" 
-	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Show some extra logging when searching.\n Also does not merge all search results. \n (Default:0, not saved, edit preferences.ini to make a change permanent)"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WIZARDREQUIREOBFUSCATED 
-                            "Required obfuscated connection to server.\nTurn on to prevent connecting to bad maintained/fake server"
+    IDS_SERVER_REQUIREOBFUSCATION_TIP 
+                            "Requires obfuscated connections to servers\nany servers that do not support obfuscating \nwill be ignored. And it happens that fake server\ndo not support obfuscation when this option\nis introduced. Note that it is impossible to connect \nto server until you get a valid cryptping"
+    IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP 
+                            "Show some extra logging when searching.\n Also does not merge all search results. \n (Default:0, not saved, edit preferences.ini to make a change permanent)"
+    IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
     IDS_WIZ8_MORPH          "MorphXT Settings"
     IDS_MORPHWIZ_GUI        "Mod Options"
     IDS_MORPHWIZ_SHOWMORE   "Show more controls (advanced)"
-    IDS_MORPHWIZ_SHOWLESS   "Show less controls"
-END
-
-STRINGTABLE 
-BEGIN
+    IDS_MORPHWIZ_SHOWLESS   "Show less controls (simpler/beginner)"
     IDS_MORPHWIZ_NEXT       "On Finishing of wizard"
     IDS_MORPHWIZ_NET1       "Run network wizard to configure up/down internet speed."
+    IDS_WIZARDREQUIREOBFUSCATED 
+                            "Required obfuscated connection to server.\nTurn on to prevent connecting to bad maintained/fake server"
     IDS_MORPHWIZ_IMPORT     "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule"
-END
-STRINGTABLE 
-BEGIN
 	IDS_PREF_GROUPGENERAL "General options"
 	IDS_PREF_GROUPEXTENDED "Advanced options"
 	IDS_PREF_GROUPMOD "Mod options"
+    IDS_UPNP_NETSTATUS      "Upnp"
+    IDS_UPNP_ENABLE_WEB     "Enable UPnP on web interface port"
+    IDS_UPNP_INFOUNINIT     ",not initialized\r\n"
+    IDS_UPNP_INFOENABLED    ",enabled\r\n"
+    IDS_UPNP_INFODISABLED   ",disabled\r\n"
+    IDS_UPNP_INFOSTANDBY    "No Device detected\r\n"
+    IDS_UPNP_INFO_NONEED    "Failed or not needed"
+    IDS_ERR_NOVALIDSTATICSERVERSFOUND 
+                           "No valid static servers to connect in serverlist found"
+    IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
+	"No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
+	IDS_ZZRATIO_TIP         "ZZRatio is active at this moment. This session ratio is visible by \na 'R' in the statusbar. Your <b>average</b> download will not exceed\n3 times your upload when this is active.\nSolution:<b>Upload more</b> or upload longer.\nThe reason for the active ratio can be seen by hovering the mouse over\nthe R in the status bar. "
 END
 
