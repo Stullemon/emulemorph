@@ -1,6 +1,6 @@
-echo running for relese in:
+echo running for release in:
 muleversion/muleversion
-echo contirnue = enter Break=stop
+echo continue = enter Break=stop
 read conti
 set -x
 ./ufind crypto51 srchybrid id3lib png Resizablelib zlib  -type d -print|grep -vi CVS|grep -vi Release|grep -vi Debug|grep -vi BETA |grep -v .svn >dirlist.txt
@@ -18,7 +18,7 @@ do
 cp -p $i $DESTDIR/$i
 done
 cp srchybrid/ptreads/pthreads/*.* $DESTDIR/srchybrid/pthreads/pthreads/
-cp emule/Changelog.MorphXT.txt emule/license.txt readme.txt $DESTDIR
+cp emule/Changelog.MorphXT.txt emule/license.txt readme.txt Packag_Licences_Readme.htm $DESTDIR
 cp -Rp eMule $DESTDIR
 cp -Rp emule/*.*  staging
 rm -rf $DESTDIR/emule/CVS $DESTDIR/emule/config/CVS $DESTDIR/emule/webserver/CVS $DESTDIR/emule/wapserver/CVS 
