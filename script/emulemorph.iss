@@ -151,11 +151,11 @@ german.tasks_firewall=Eine Ausnahme für Windows Firewall erstellen
 german.dialog_firewall=Setup konnte keine Ausnamhe für eMule in der Windows Firewall hinzufügen.%nBitte eMule manuell auf die Liste der Ausnahmen setzen.
 BrazilianPortuguese.tasks_firewall=Adiciona uma exceção ao Firewall do Windows
 BrazilianPortuguese.dialog_firewall=O Setup falhou ao adicionar o eMule ao Firewall do Windows.%nPor favor adicione o eMule na lista de exceções manualmente.
-tasks_assocurl=Registers eMule to take ed2k-Links.
+tasks_assocurl=Registers eMule to take ed2k-Links and .emulecollection.
 ;dutch.assocurl=eD2K links doorsturen naar eMule.
-spanish.assocurl=Capturar enlaces Ed2k
-french.assocurl=Associer avec les liens Ed2k
-german.assocurl=Ed2k-Links nehmen
+spanish.assocurl=Capturar enlaces Ed2k and .emulecollection.
+french.assocurl=Associer avec les liens Ed2k et .emulecollection.
+german.assocurl=Ed2k-Links nehmen und  .emulecollection.
 BrazilianPortuguese.assocurl=BrazilianPortuguese.assocurl=Associar com links ED2K e arquivos .emulecollection
 ChineseSimpl.assocurl="©M Ed2k ³sµ²²£¥ÍÃöÁp"
 

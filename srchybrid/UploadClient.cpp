@@ -732,7 +732,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 						throw error;
 					}
 					//MORPH START - Added by SiRoB, Anti Anti HideOS & SOTN :p 
-					if (m_abyUpPartStatus && thePrefs.GetEnableAntiLeecher()) {
+					if (m_abyUpPartStatus) {
 						for (UINT i = (UINT)(currentBlock->StartOffset/PARTSIZE); i < (UINT)((currentBlock->EndOffset-1)/PARTSIZE+1); i++)
 						if (m_abyUpPartStatus[i]>SC_AVAILABLE)
 							{

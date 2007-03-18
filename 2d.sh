@@ -31,7 +31,7 @@ cp -p srchybrid/Release/emule.exe staging/eMule.exe
 cp srchybrid/Release/emule.pdb $DESTDIR
 cd $DESTDIR
 (echo 'srchybrid/*.*' ;echo 'srchybrid/flag/*.*' ;echo 'srchybrid/flag/res24/*.*' ;echo 'srchybrid/flag/res32/*.*' ;echo 'srchybrid/kademlia/io/*.*' ;echo 'srchybrid/kademlia/kademlia/*.*' ;echo 'srchybrid/kademlia/net/*.*' ;echo 'srchybrid/kademlia/routing/*.*' ;echo 'srchybrid/kademlia/utils/*.*' ;echo 'srchybrid/lang/*.*' ;echo 'srchybrid/lang/mod/*.*' ;echo 'srchybrid/Optimizer/*.*' ;echo 'srchybrid/res/*.*' ;echo 'srchybrid/res/MOD/*.*' ;echo 'srchybrid/ToolTips/*.*' ;echo 'srchybrid/TreeOptsPrefs/*.*' ;echo 'srchybrid/WapServer/*.*' ;echo 'srchybrid/WebCache/*.*' ;echo 'Changelog.MorphXT.txt' ;echo 'license.txt') |zip -9@ ${DESTDIR}-src.zip 
-zip -9rm ${DESTDIR}-src_and_libs.zip srchybrid id3lib png Resizablelib zlib  crypto51 Changelog.MorphXT.txt license.txt README.TXT
+zip -9rm ${DESTDIR}-src_and_libs.zip srchybrid id3lib png Resizablelib zlib  crypto51 Changelog.MorphXT.txt license.txt README.TXT Packag_Licences_Readme.htm
 zip -9rm ${DESTDIR}-bin.zip emule
 zip -m emule.pdb.zip emule.pdb
 cd ..

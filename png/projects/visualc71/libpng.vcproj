@@ -256,7 +256,9 @@
 			Name="LIB Release|Win32"
 			OutputDirectory="..\..\Release"
 			IntermediateDirectory="..\..\Release"
-			ConfigurationType="4">
+			ConfigurationType="4"
+			UseOfMFC="1"
+			CharacterSet="1">
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
@@ -265,6 +267,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
 				UsePrecompiledHeader="3"
 				PrecompiledHeaderThrough="png.h"
 				PrecompiledHeaderFile="..\..\release/libpng.pch"

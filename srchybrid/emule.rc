@@ -6072,7 +6072,6 @@ BEGIN
     IDS_ZZRATIO_CHECK3      "Using friend slot and globaldatarate>3KB/s"
     IDS_ZZRATIO_CHECK4      "Upload limit under 10KB/s"
     IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
-    IDS_ZZRATIO_TIP         "ZZRatio is active at this moment. This session ratio is visible by \na 'R' in the statusbar. Your <b>average</b> download will not exceed\n3 times your upload when this is active.\nSolution:<b>Upload more</b> or upload longer.\nThe reason for the active ratio can be seen by hovering the mouse over\nthe R in the status bar. "
 END
 
 STRINGTABLE 
@@ -6894,7 +6893,7 @@ BEGIN
                            "No valid static servers to connect in serverlist found"
     IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
 	"No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
-
+	IDS_ZZRATIO_TIP         "ZZRatio is active at this moment. This session ratio is visible by \na 'R' in the statusbar. Your <b>average</b> download will not exceed\n3 times your upload when this is active.\nSolution:<b>Upload more</b> or upload longer.\nThe reason for the active ratio can be seen by hovering the mouse over\nthe R in the status bar. "
 
 END
 

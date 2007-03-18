@@ -3511,7 +3511,6 @@ BEGIN
     IDS_SVC_CURRENT_STATUS_LABEL "Stato Attuale"
 	IDS_USEUSERSORTEDSERVERLIST_TIP "Quando attivo questo userà lo stesso ordinamento della lista server\nvisualizzata nella GUI quando si prova a connettersi ad un server."
 
-	IDS_USEUSERSORTEDSERVERLIST "Lista server ordinata dall'utente"
 	IDS_TEST_NOTIFICATION "Test"
 	IDS_SERVER_REQUIREOBFUSCATION "Richiedi connessione offuscata ai server"
 	IDS_SERVER_REQUIREOBFUSCATION_TIP "Richiedi connessione offuscata ai server\ntutti i server che non supportano l'offuscamento\nsaranno ignorati. Questo accade con i fake server\nche non supportano l'offuscamento, quando\mquesta opzione è attiva. Nota che sarà impossibile connettersi\nad un server finchè non avrai un criptaggio valido"
@@ -3522,7 +3521,6 @@ BEGIN
 	IDS_WIZ8_MORPH "Opzioni MorphXT"
 	IDS_MORPHWIZ_GUI "Opzioni Mod"
 	IDS_MORPHWIZ_SHOWMORE "Visualizza più controlli (avanzati)"
-	IDS_MORPHWIZ_SHOWLESS "Visualizza meno controlli" 
 	 IDS_MORPHWIZ_NEXT "Terminando il wizard"
 	IDS_MORPHWIZ_NET1 "Avvia il network wizard per configurare la velocità di up/down della connessione internet"
 	IDS_MORPHWIZ_IMPORT "Avvia l'import tool per importare i downloads incompleti\nda eDonkey/shareaza/eMule"
@@ -3530,8 +3528,24 @@ BEGIN
 	IDS_PREF_GROUPGENERAL "Opzioni Generali"
 	IDS_PREF_GROUPEXTENDED "Opzioni Avanzate"
 	IDS_PREF_GROUPMOD "Opzioni Mod"
+END
 
-
+STRINGTABLE 
+BEGIN
+	IDS_USEUSERSORTEDSERVERLIST "Lista server ordinata dall'utente"
+	IDS_MORPHWIZ_SHOWLESS   "Visualizza meno controlli (più semplice/principiante)"
+	IDS_UPNP_NETSTATUS      "Upnp" 
+	IDS_UPNP_ENABLE_WEB     "Attiva UPnP sulla porta dell'interfaccia web" 
+	IDS_UPNP_INFOUNINIT     ",non inizializzato\r\n" 
+	IDS_UPNP_INFOENABLED    ",attivo\r\n" 
+	IDS_UPNP_INFODISABLED   ",disattivato\r\n" 
+	IDS_UPNP_INFOSTANDBY    "Nessun dispositivo rilevato\r\n" 
+	IDS_UPNP_INFO_NONEED    "Fallito o non necessario" 
+	IDS_ERR_NOVALIDSTATICSERVERSFOUND  
+            "Nessun server statico trovato per la connessione nella serverlist"
+	IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
+            "Nessun server offuscato valido con chiave su cui connettersi trovato nella serverlist (aggiorna la serverlist o attiva l'udp)"
+	IDS_ZZRATIO_TIP         "ZZRatio è attivo in questo momento. Questa sessione della ratio è indicata dalla 'R' inella barra di stato. Il tuo download <b>medio</b> non potrà superare di 3 volte il tuo upload quando è attivo.\nSoluzione:<b>dare più banda di Upload</b> o dare upload per maggior tempo.\nLa ragione per l'attivazione della ratio può essere vista portando il cursore del mouse sulla 'R' nella barra di stato"
 END
 
 #endif    // Italian (Italy) resources

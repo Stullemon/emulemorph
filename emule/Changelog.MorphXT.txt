@@ -5,13 +5,15 @@ dd-03-2007
 ADD: Startup wizard, Show less controls: custimize toolbar and columns to show some less. Useful for beginners.
 FIX: load of multiuser web interface preferences in [webserver] section. 
 FIX: mass rename:Unicode issue .
+FIX: Upnp: hang on close of upnp. 
 CHANGED: massrename: resizeable diablog. 
 CHANGED: Run as service. method "started" reported earlier. 
+CHANGED: Run as service. Disabled some optimizations to fix 100% load issue. 
 CHANGED: workarround failing to startup under wine. 
-Changed: icon. 
-CHANGEd: upnp "my info" displayed. 
-CHanged: upload splitting class: review code.
-Changed: zzratio is active display in connection options. 
+CHANGED: icon & tray icon. 
+CHANGED: upnp "my info" displayed. 
+CHANGED: upload splitting class: review code.
+CHANGED: zzratio is active display in connection options. 
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.5 installer
