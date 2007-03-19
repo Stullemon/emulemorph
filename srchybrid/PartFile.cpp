@@ -5978,7 +5978,8 @@ void CPartFile::WriteToDisk() { //Called by Flush Thread
 	{
 		// Compressed/sparse files; regardless whether the file is increased in size, 
 		// check the amount of data which will be written
-		// would need to use disk cluster sizes for more accuracy		if (m_nTotalBufferData + thePrefs.GetMinFreeDiskSpace() >= uFreeDiskSpace)
+		// would need to use disk cluster sizes for more accuracy	
+			if (m_nTotalBufferData + thePrefs.GetMinFreeDiskSpace() >= uFreeDiskSpace)
 			AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 	}
 
