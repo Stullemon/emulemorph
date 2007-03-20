@@ -370,8 +370,8 @@ BEGIN
     IDS_VIDEOBACKUP         "Crear copia de seguridad para previsualizar"
     IDS_MYINFO              "Información propia"
     IDS_ID                  "ID"
-    IDS_IDLOW               "ID baja"
-    IDS_IDHIGH              "ID alta"
+    IDS_IDLOW               "ID Baja"
+    IDS_IDHIGH              "ID Alta"
     IDS_UPSTATUS            "Partes"
     IDS_TOVERHEAD           "Total por tráfico excedente (Paquetes): %s (%s)"
     IDS_FROVERHEAD          "Excedente por peticiones de archivo (Paquetes): %s (%s)"
@@ -936,7 +936,7 @@ BEGIN
     IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
                             "Ignorar mensajes de eMule de añadir como amigo"
     IDS_PW_FASTSRVCON       "Conexión segura"
-    IDS_SOURCELINKFAILED    "Necesitas una ID alta para crear un enlace de fuente válido"
+    IDS_SOURCELINKFAILED    "Necesitas una ID Alta para crear un enlace de fuente válido"
     IDS_ERR_LOADSERVERMET   "¡Error al cargar server.met!"
     IDS_ERR_CORRUPTCOMPRPKG "Paquete recibido corrupto de %s  (error %i)"
     IDS_ERR_EMFRIENDSINVALID 
@@ -3528,33 +3528,45 @@ BEGIN
 	IDS_USECOMPRESS_TIP "Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPOr defecto = activado (¡¡Recomendado!!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Estado actual"
 	IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, se utiliza la misma clasificación de la lista de servidores\nque se muestra en el GUI cuando se intenta conectar a un servidor."
-    IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
     IDS_TEST_NOTIFICATION   "Test"
     IDS_SERVER_REQUIREOBFUSCATION "Requiere conexión ofuscada a los servidores"
 	IDS_SERVER_REQUIREOBFUSCATION_TIP "Requiere conexiones ofuscadas con los servidores.\nCualquier servidor que no soporta la ofuscación\nserá ignorado. Y sucede que el servidor falso\nno soporta la conexión ofuscada cuando se introduce\nesta opción. Compruebe que es imposible conectar\na un servidor hasta que no se consiga un encriptado válido."
 	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Muestra un registro extra cuando se busca.\nTambién se incluye en el resultado de la búsqueda.\n(Por defecto = 0, no se guarda, edite el archivo preferences.ini para hacer del cambio permanente)"
+		IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
 END
   
 STRINGTABLE
  BEGIN
-      IDS_WIZARDREQUIREOBFUSCATED  "Requerida conexión ofuscada al servidor.\nHabilitar para prevenir la conexión a servidores mal mantenidos/falsos."
       IDS_WIZ8_MORPH          "Configuraciones del MorphXT"
       IDS_MORPHWIZ_GUI        "Opciones del MorphXT"
-      IDS_MORPHWIZ_SHOWMORE   "Mostrar menos controles (Avanzado)"
-      IDS_MORPHWIZ_SHOWLESS   "Mostrar menos controles"
+      IDS_MORPHWIZ_SHOWMORE   "Mostrar más controles (Avanzado)"
+      IDS_MORPHWIZ_SHOWLESS   "Mostrar menos controles (Principiante/Simple)"
 END
   
 STRINGTABLE
 BEGIN
       IDS_MORPHWIZ_NEXT       "En la finalización del Asistente"
       IDS_MORPHWIZ_NET1       "Ejecutar el Asistente de conexión para configurar\nla velocidad de descarga."
+      IDS_WIZARDREQUIREOBFUSCATED  "Requerida conexión ofuscada al servidor.\nHabilitar para prevenir la conexión a servidores mal mantenidos/falsos."
       IDS_MORPHWIZ_IMPORT     "Ejecutar la herramienta de importación, para importar descargas pendientes\ndesde eDonkey/Shareaza/eMule"
 END
+
 STRINGTABLE
 BEGIN
       IDS_PREF_GROUPGENERAL 	"Opciones Generales"
       IDS_PREF_GROUPEXTENDED "Opciones Avanzadas"
       IDS_PREF_GROUPMOD 			"Opciones del MorphXT"
+      
+      IDS_UPNP_NETSTATUS      "UPnP"
+	  IDS_UPNP_ENABLE_WEB     "Activar el UPnP en el puerto de la interfaz web"
+	  IDS_UPNP_INFOUNINIT     ",no iniciado\r\n"
+	  IDS_UPNP_INFOENABLED    ",activado\r\n"
+	  IDS_UPNP_INFODISABLED   ",desactivado\r\n"
+	  IDS_UPNP_INFOSTANDBY    "No se ha detectado ningún dispositivo\r\n"
+	  IDS_UPNP_INFO_NONEED    "Fallido o no necesario"
+	  IDS_ERR_NOVALIDSTATICSERVERSFOUND  "Servidores estáticos no válidos en la búsqueda de la lista de servidores"
+	  IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND  "Servidores ofuscados no válidos al intentar conectarse con la llave en la búsquedas (actualizar la lista de servidores o activa el UDP)"
+	  IDS_ZZRATIO_TIP         "ZZRatio está activado a partir de este momento. El ratio de esta sesión está visible por\nuna 'R' en la barra de estado. Tu descarga <b>media</b>no excederá\n3 veces tu subida cuando esté activado.\nSolución:<b>Sube más</b> o sube durantemás tiempo.\nLa razón por la cuál se activa el ratio, se puede ver pasando el ratón por encima de la R\nen la barra de estado."
 END
 
 #endif    // Spanish (Castilian) resources
