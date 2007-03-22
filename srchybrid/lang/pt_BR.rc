@@ -3473,14 +3473,24 @@ END
 STRINGTABLE 
 BEGIN
     IDS_MORPHWIZ_NEXT       "Ao finalizar o Assistente"
-    IDS_MORPHWIZ_NET1       "Executar o Assistente de rede para configurar a velocidade da Internet."
-    IDS_MORPHWIZ_IMPORT     "Executar a ferramenta de importação para importar downloads\ndo eDonkey/shareaza/eMule"
+    IDS_MORPHWIZ_NET1       "Executar o Assistente de Rede para configurar a velocidade da Internet."
+    IDS_MORPHWIZ_IMPORT     "Executar a Ferramenta de Importação para importar Downloads\ndo eDonkey/shareaza/eMule"
 END
 STRINGTABLE 
 BEGIN
 	IDS_PREF_GROUPGENERAL "Opções Gerais"
 	IDS_PREF_GROUPEXTENDED "Opções Avançadas"
 	IDS_PREF_GROUPMOD "Opções do Mod"
+	IDS_UPNP_NETSTATUS      "Upnp"
+	IDS_UPNP_ENABLE_WEB     "Ligar UPnP na porta da interface Web"
+	IDS_UPNP_INFOUNINIT     ",não inicializado\r\n"
+	IDS_UPNP_INFOENABLED    ",ligado\r\n"
+	IDS_UPNP_INFODISABLED   ",desligado\r\n"
+	IDS_UPNP_INFOSTANDBY    "Nenhum dispositivo detectado\r\n"
+	IDS_UPNP_INFO_NONEED    "Falhou ou não necessário"
+	IDS_ERR_NOVALIDSTATICSERVERSFOUND "Nenhum servidor estático válido encontrado para conectar na lista de servidores"
+	IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND "Nenhum servidor com ofuscação com chave válida encontrado para conectar na lista de servidores(recarregue a lista de servidores ou ative UDP)"
+	IDS_ZZRATIO_TIP         "ZZRatio está ativo no momento. O 'R' na barra de status indica isso.\nSua taxa de Download <b>média</b> não irá exceder 3 vezes sua\ntaxa de Upload quando isso está ativo.\nSolução:<b>Aumente seu limite de Upload</b> ou fique fazendo Upload por mais tempo.\nO motivo para essa razão de 3:1 estar ativa pode ser visto\npassando o mouse no 'R' da barra de upload."
 END
 
 

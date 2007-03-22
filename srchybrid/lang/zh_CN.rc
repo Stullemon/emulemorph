@@ -3569,13 +3569,13 @@ BEGIN
     IDS_COMPRESSLEVEL "压缩级别 (1-9) "
     IDS_TEST_NOTIFICATION "测试"
     IDS_SERVER_REQUIREOBFUSCATION "仅连接到支持加密的服务器"
-    IDS_SERVER_REQUIREOBFUSCATION_TIP "仅连接到支持加密连接的服务器,\n任何不支持加密的服务器将被忽略.\n启用此功能可过滤一些假的间谍服务器.\n注意: 如果没有有效的cryptping，将不能连接到任何服务器."
+    IDS_SERVER_REQUIREOBFUSCATION_TIP "仅连接到支持加密连接的服务器,\n任何不支持加密的服务器将被忽略.\n启用此功能可过滤一些假的间谍服务器.\n注意: 如果没有启用加密协议，将不能连接到任何服务器."
     IDS_PREF_GROUPGENERAL "常规设置"
     IDS_PREF_GROUPEXTENDED "高级设置"
     IDS_PREF_GROUPMOD "Morph设置"
-    IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "搜索时显示更详细的日志.\n 不会整合所有的搜索结果.\n (默认设置: 禁用, 不自动保存更改, 除非修改preferences.ini)"
+    IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "搜索时显示更详细的记录, 不对搜索结果进行整合.\n (默认设置: 禁用, 不自动保存更改, 除非修改preferences.ini)"
     IDS_MORPHWIZ_SHOWLESS   "隐藏部分选项 (适合初学者)"
-    IDS_MORPHWIZ_NEXT       "退出向导"
+    IDS_MORPHWIZ_NEXT       "退出向导时"
     IDS_MORPHWIZ_NET1       "运行网络设置向导设定上传下载的网速."
     IDS_WIZARDREQUIREOBFUSCATED "仅连接到支持加密连接的服务器.\n启用此选项将不会连接到恶意的/虚假的服务器"
     IDS_MORPHWIZ_IMPORT     "运行导入工具来导入\neDonkey/shareaza/eMule中的未完成下载"
@@ -3589,6 +3589,9 @@ BEGIN
     IDS_ERR_NOVALIDSTATICSERVERSFOUND     "服务器列表中没有有效的静态服务器"
     IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND "服务器列表中没有有效的加密服务器(请刷新服务器列表或启用udp)"
     IDS_ZZRATIO_TIP         "ZZRatio(智能速度均衡)已经激活, 在状态栏以'R'显示. \n你的<b>平均下载速度</b>将不会超过上传速度的三倍.\n解决办法: <b>增加上传速度</b>或持续上传.\n此项功能激活的原因可以通过\n用鼠标指向状态栏的 R 来观看. "
+    IDS_MORPHWIZ_SHOWMORE "显示高级选项(适合高级用户)"
+    IDS_WIZ8_MORPH "MorphXT 设置"
+    IDS_MORPHWIZ_GUI "选项设置"
 END
 
 
