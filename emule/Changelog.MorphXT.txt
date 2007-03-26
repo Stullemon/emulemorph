@@ -1,19 +1,30 @@
 --------------------------------------
+Changelog for eMule 0.47c MorphXT v9.6 installer
+--------------------------------------
+22-03-2007
+ADD: emule shell extention 1.0.3 : see http://www.emule-project.net/home/perl/news.cgi?l=1&rm=id&news_id=174
+UPDATED:Italian(idro), 
+        Simplified chinese(pennyliu123), 
+        Portugese_braziallian(heiler bemerguy), 
+        Spanish(guijarrelson))
+
+--------------------------------------
 Changelog for eMule 0.47c MorphXT v9.6
 --------------------------------------
-dd-03-2007
+19-03-2007
 ADD: Startup wizard, Show less controls: custimize toolbar and columns to show some less. Useful for beginners.
 FIX: load of multiuser web interface preferences in [webserver] section. 
 FIX: mass rename:Unicode issue .
 FIX: Upnp: hang on close of upnp. 
-CHANGED: massrename: resizeable diablog. 
+CHANGED: massrename: resizeable dialog. 
 CHANGED: Run as service. method "started" reported earlier. 
 CHANGED: Run as service. Disabled some optimizations to fix 100% load issue. 
 CHANGED: workarround failing to startup under wine. 
 CHANGED: icon & tray icon. 
 CHANGED: upnp "my info" displayed. 
 CHANGED: upload splitting class: review code.
-CHANGED: zzratio is active display in connection options. 
+CHANGED: ZZratio is active display in connection options. 
+CHANGES: iMaxFilesPerTcpFrame in local server request tuned. 
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.5 installer
