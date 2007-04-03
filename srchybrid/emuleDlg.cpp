@@ -1586,7 +1586,7 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 			/*
 			else if (TrayHide())
 			*/
-			else if ((thePrefs.GetStaticIcon() && !IsWindowVisible()) || TrayHide())
+			else if (thePrefs.GetStaticIcon() || TrayHide())
 			//MORPH END   - Added, Static Tray Icon
 				RestoreWindow();
 			else
@@ -1602,7 +1602,7 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 		/*
 		else if (TrayHide())
 		*/
-		else if ((thePrefs.GetStaticIcon() && !IsWindowVisible()) || TrayHide())
+		else if (thePrefs.GetStaticIcon() || TrayHide())
 		//MORPH END   - Added, Static Tray Icon
 			RestoreWindow();
 		else
