@@ -2151,7 +2151,11 @@ void CDownloadQueue::ProcessLocalRequests()
 	if ( (!m_localServerReqQueue.IsEmpty()) && (m_dwNextTCPSrcReq < ::GetTickCount()) )
 	{
 		CSafeMemFile dataTcpFrame(22);
+		/* MORPH START leuk_he: 7 seems to work better with eserver 7.13
 		const int iMaxFilesPerTcpFrame = 15;
+		*/
+		const int iMaxFilesPerTcpFrame = 7;
+		// MORPH END leuk_he: 7 seems to work better with eserver 7.13
 		int iFiles = 0;
 		while (!m_localServerReqQueue.IsEmpty() && iFiles < iMaxFilesPerTcpFrame)
 		{
