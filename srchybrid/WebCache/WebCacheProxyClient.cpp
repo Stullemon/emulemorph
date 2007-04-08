@@ -33,8 +33,10 @@ void CWebCacheProxyClient::UpdateClient(CWebCachedBlock* iBlock) // don't delete
 		theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource( this, reqfile );        
 		theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this); // MORPH - Added by Commander, DownloadClientsCtrl ProxyClient
 		POSITION pos = SINGLEProxyClient->reqfile->srclist.Find(this);
-		if( pos )
+		if( pos ) {
+			reqfile->RemoveSourceFileName(reqfile->srclist.GetAt(pos)); // EastShare       - FollowTheMajority by AndCycle
 			reqfile->srclist.RemoveAt(pos);
+		}
 	}
 	if( block )
 		delete block;
@@ -86,8 +88,10 @@ CWebCacheProxyClient::~CWebCacheProxyClient(void)
 		theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource( this, reqfile );
 		theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this); // MORPH - Added by Commander, DownloadClientsCtrl ProxyClient
 		POSITION pos = SINGLEProxyClient->reqfile->srclist.Find(this);
-		if( pos )
+		if( pos ) {
+			reqfile->RemoveSourceFileName(reqfile->srclist.GetAt(pos)); // EastShare       - FollowTheMajority by AndCycle
 			reqfile->srclist.RemoveAt(pos);
+		}
 	}
 	if( block )
 		delete block;

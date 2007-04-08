@@ -529,6 +529,7 @@ private:  //morph
 	// MOD END netfinity
 */
 	// JP added handling of proxy-sources on pause/cancel/resume START
+
 	public:
 	void CancelProxyDownloads();
 	void PauseProxyDownloads();
@@ -582,6 +583,18 @@ private:
 	CList<PartfileSourceCache>	m_sourcecache;
 	uint32						m_lastSoureCacheProcesstime;
 	//MORPH END   - Added by Stulle, Source cache [Xman]
+
+	// EastShare Start - FollowTheMajority by AndCycle
+private:
+	bool	m_bFollowTheMajority;
+	CMap<CUpDownClient*, CUpDownClient*, CString, CString> m_mapSrcFilename;
+	CMap<CString, LPCTSTR, int, int> m_mapFilenameCount;
+public:
+	void	UpdateSourceFileName(CUpDownClient* src);
+	void	RemoveSourceFileName(CUpDownClient* src);
+	bool	DoFollowTheMajority() const { return this->m_bFollowTheMajority; }
+	void	SetFollowTheMajority(bool val) { this->m_bFollowTheMajority = val; }
+	// EastShare End   - FollowTheMajority by AndCycle
 };
 
 // SLUGFILLER: SafeHash

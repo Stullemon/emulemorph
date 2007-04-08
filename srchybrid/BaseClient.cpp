@@ -2853,6 +2853,8 @@ void CUpDownClient::ResetFileStatusInfo()
 	//MORPH START - Added by SiRoB, HotFix Due Complete Source Feature
 	m_nUpCompleteSourcesCount = 0;
 	//MORPH END   - Added by SiRoB, HotFix Due Complete Source Feature
+
+	if(this->reqfile != NULL) this->reqfile->RemoveSourceFileName(this); // EastShare       - FollowTheMajority by AndCycle
 }
 
 bool CUpDownClient::IsBanned() const

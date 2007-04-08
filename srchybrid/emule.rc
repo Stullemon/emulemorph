@@ -17,7 +17,7 @@
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
+#pragma code_page(950)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2118,7 +2118,7 @@ BEGIN
     CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
                     IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,7,37,197,10
-    CONTROL         "Convert wrong apostrophes ""’"", ""`"" to standard apostrophes "" ' """,
+    CONTROL         "Convert wrong apostrophes ""¡¦"", ""`"" to standard apostrophes "" ' """,
                     IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
@@ -5280,6 +5280,7 @@ BEGIN
     IDS_ECFEF               "Equal Chance For Each File"
     IDS_ALL_TIME            "All Time"
     IDS_COPYFEEDBACK        "Copy feedback to clipboard"
+    IDS_FOLLOW_THE_MAJORITY "Follow the Majority"
     IDS_ANTILEECHERLOG      "[Anti-leechermods] Client %s has been temporary banned because of suspicious leech action"
 END
 
@@ -6072,6 +6073,7 @@ BEGIN
     IDS_ZZRATIO_CHECK3      "Using friend slot and globaldatarate>3KB/s"
     IDS_ZZRATIO_CHECK4      "Upload limit under 10KB/s"
     IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
+    IDS_ZZRATIO_TIP         "ZZRatio is active at this moment. This session ratio is visible by \na 'R' in the statusbar. Your <b>average</b> download will not exceed\n3 times your upload when this is active.\nSolution:<b>Upload more</b> or upload longer.\nThe reason for the active ratio can be seen by hovering the mouse over\nthe R in the status bar. "
 END
 
 STRINGTABLE 
@@ -6482,6 +6484,8 @@ BEGIN
     IDS_PAYBACKFIRSTLIMI_TIP 
                             "Amount the peer must have upload more to us\nthen we downloaded from him before PBF starts"
     IDS_EXPIRED_KNOWN_TIP   "Clean up .met files after file \nhas not been seen for xxx days\nSaves diskspace. Applies for\nknown*.met. Never set a very\nlow value (less than 30) here"
+    IDS_FOLLOW_THE_MAJORITY_TIP 
+                            "Auto rename your file with majority used, \ncan be direct active from right click or disable by any rename operation."
 END
 
 STRINGTABLE 
@@ -6874,6 +6878,10 @@ BEGIN
     IDS_PREF_GROUPGENERAL   "General options"
     IDS_PREF_GROUPEXTENDED  "Advanced options"
     IDS_PREF_GROUPMOD       "Mod options"
+    IDS_ERR_NOVALIDSTATICSERVERSFOUND 
+                            "No valid static servers to connect in serverlist found"
+    IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
+                            "No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
 END
 
 STRINGTABLE 
@@ -6889,12 +6897,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPNP_INFO_NONEED    "Failed or not needed"
-    IDS_ERR_NOVALIDSTATICSERVERSFOUND 
-                           "No valid static servers to connect in serverlist found"
-    IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
-	"No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
-	IDS_ZZRATIO_TIP         "ZZRatio is active at this moment. This session ratio is visible by \na 'R' in the statusbar. Your <b>average</b> download will not exceed\n3 times your upload when this is active.\nSolution:<b>Upload more</b> or upload longer.\nThe reason for the active ratio can be seen by hovering the mouse over\nthe R in the status bar. "
-
 END
 
 #endif    // English (U.S.) resources

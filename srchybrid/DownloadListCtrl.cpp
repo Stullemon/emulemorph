@@ -1918,6 +1918,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			int iFileForceAllA4AF = 0; //MORPH - Added by SiRoB, A4AF
 			int iFileForceA4AFOff = 0; //MORPH - Added by SiRoB, A4AF
 			int iFileNotSeenCompleteSource = 0; //MORPH - Added by SiRoB, Only download complete files v2.1 (shadow)
+			int iFileFollowTheMajority = 0; // EastShare       - FollowTheMajority by AndCycle
 			int	iFilesToImport = 0; //MORPH START - Added by SiRoB, Import Part
 
 			UINT uPrioMenuItem = 0;
@@ -1950,6 +1951,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 				//MORPH START - Added by SiRoB, Only download complete files v2.1 (shadow)
 				iFileNotSeenCompleteSource += pFile->notSeenCompleteSource() && pFile->GetStatus() != PS_ERROR && !bFileDone;
 				//MORPH END   - Added by SiRoB, Only download complete files v2.1 (shadow)
+				iFileFollowTheMajority += pFile->DoFollowTheMajority() ? 1 : 0; // EastShare       - FollowTheMajority by AndCycle
 				//MORPH START - Added by SiRoB, A4AF
 				iFileForceAllA4AF += (theApp.downloadqueue->forcea4af_file == pFile)?1:0;
 				iFileForceA4AF += pFile->ForceAllA4AF()?1:0;
@@ -2017,8 +2019,10 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_RESUME, iFilesToResume > 0 ? MF_ENABLED : MF_GRAYED);
 
 			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-			m_FileMenu.EnableMenuItem(MP_FORCE,iFileNotSeenCompleteSource > 0 ? MF_ENABLED : MF_GRAYED);
+			m_FileMenu.EnableMenuItem(MP_FORCE,iFileNotSeenCompleteSource > 0 ? MF_GRAYED : MF_ENABLED);
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+
+			m_FileMenu.EnableMenuItem(MP_FOLLOW_THE_MAJORITY, iFileFollowTheMajority > 0 ? MF_GRAYED : MF_ENABLED); // EastShare       - FollowTheMajority by AndCycle
 
 			bool bOpenEnabled = (iSelectedItems == 1 && iFilesToOpen == 1);
 			m_FileMenu.EnableMenuItem(MP_OPEN, bOpenEnabled ? MF_ENABLED : MF_GRAYED);
@@ -2473,6 +2477,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 								// CString.Format+AddLogLine, because if "%"-characters are
 								// in the string they would be misinterpreted as control sequences!
 								AddLogLine(false,_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
+								file->SetFollowTheMajority(false); // EastShare       - FollowTheMajority by AndCycle
 								file->SetFileName(newname);
 								file->SetFilePath(newpath);
 								file->SetFullName(newpath);
@@ -2481,6 +2486,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 								// CString.Format+AddLogLine, because if "%"-characters are
 								// in the string they would be misinterpreted as control sequences!
 								AddLogLine(false,_T("Successfully renamed .part file '%s' to '%s'"), file->GetFileName(), newname);
+								file->SetFollowTheMajority(false); // EastShare       - FollowTheMajority by AndCycle
 								file->SetFileName(newname, true);
 								file->SetFilePath(newpath);
 								file->SavePartFile(); 
@@ -2532,6 +2538,17 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					SetRedraw(true);
 					break;
 				//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+				// EastShare Start - FollowTheMajority by AndCycle
+				case MP_FOLLOW_THE_MAJORITY:
+					SetRedraw(false);
+					while(!selectedList.IsEmpty()) {
+						CPartFile* partfile = selectedList.GetHead();
+						partfile->SetFollowTheMajority(true);
+						selectedList.RemoveHead();
+					}
+					SetRedraw(true);
+					break;
+				// EastShare End   - FollowTheMajority by AndCycle
 				case MP_STOP:
 					SetRedraw(false);
 					while (!selectedList.IsEmpty()){
@@ -2557,6 +2574,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 							while (!selectedList.IsEmpty()){
 								CPartFile *partfile = selectedList.GetHead();
 								if (partfile->IsPartFile()) {
+									partfile->SetFollowTheMajority(false); // EastShare       - FollowTheMajority by AndCycle
 									partfile->SetFileName(CleanupFilename(partfile->GetFileName()));
 								}
 								selectedList.RemoveHead();
@@ -2571,6 +2589,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 							inputbox.SetEditFilenameMode();
 							if (inputbox.DoModal()==IDOK && !inputbox.GetInput().IsEmpty() && IsValidEd2kString(inputbox.GetInput()))
 							{
+								file->SetFollowTheMajority(false); // EastShare       - FollowTheMajority by AndCycle
 								file->SetFileName(inputbox.GetInput(), true);
 								file->UpdateDisplayedInfo();
 								file->SavePartFile();
@@ -3592,6 +3611,7 @@ void CDownloadListCtrl::CreateMenues()
  	//m_FileMenu.AppendMenu(MF_STRING,MP_SR13_InitiateRehash, GetResString(IDS_INITIATEREHASH), _T("FILEINITIATEREHASH"));
 	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 	if (thePrefs.IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR), _T("FILEMASSRENAME"));//Commander - Added: MassRename [Dragon]
+	m_FileMenu.AppendMenu(MF_STRING, MP_FOLLOW_THE_MAJORITY, GetResString(IDS_FOLLOW_THE_MAJORITY)); // EastShare       - FollowTheMajority by AndCycle
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING, MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR), _T("CLEARCOMPLETE"));
 

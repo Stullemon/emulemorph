@@ -80,6 +80,8 @@ CPPgEastShare::CPPgEastShare()
 	m_htiEnableEqualChanceForEachFile = NULL;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
+	m_htiFollowTheMajority = NULL; // EastShare       - FollowTheMajority by AndCycle
+
 	//EastShare START - Added by TAHO, .met control
 	m_htiMetControl = NULL;
 	m_htiKnownMet = NULL;
@@ -113,6 +115,10 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		//Morph - added by AndCycle, Equal Chance For Each File
 		m_htiEnableEqualChanceForEachFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ECFEF), TVI_ROOT, m_bEnableEqualChanceForEachFile);
 		//Morph - added by AndCycle, Equal Chance For Each File
+
+		// EastShare Start - FollowTheMajority by AndCycle
+		m_htiFollowTheMajority = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLLOW_THE_MAJORITY), TVI_ROOT, m_bFollowTheMajority);
+		// EastShare End   - FollowTheMajority by AndCycle
 
 		//EastShare Start - added by AndCycle, IP to Country
 		m_htiIP2CountryName = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_IP2COUNTRY), iImgIP2Country, TVI_ROOT);
@@ -166,6 +172,8 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnableEqualChanceForEachFile, m_bEnableEqualChanceForEachFile);//Morph - added by AndCycle, Equal Chance For Each File
 
+	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiFollowTheMajority, m_bFollowTheMajority); // EastShare       - FollowTheMajority by AndCycle
+
 	// EastShare START - Added by TAHO, .met flies Control
 	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiKnownMet, m_iKnownMetDays);
 	// EastShare END - Added by TAHO, .met flies Control
@@ -196,6 +204,7 @@ BOOL CPPgEastShare::OnInitDialog()
 
 	m_iCreditSystem = thePrefs.GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
 	m_bEnableEqualChanceForEachFile = thePrefs.IsEqualChanceEnable();//Morph - added by AndCycle, Equal Chance For Each File
+	m_bFollowTheMajority = thePrefs.IsFollowTheMajorityEnabled(); // EastShare       - FollowTheMajority by AndCycle
 
 	m_iKnownMetDays = thePrefs.GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
 	
@@ -268,6 +277,8 @@ BOOL CPPgEastShare::OnApply()
 	thePrefs.m_bEnableEqualChanceForEachFile = m_bEnableEqualChanceForEachFile;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
+	thePrefs.m_bFollowTheMajority = m_bFollowTheMajority; // EastShare       - FollowTheMajority by AndCycle
+
 	thePrefs.SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
 
 	SetModified(FALSE);
@@ -308,6 +319,7 @@ void CPPgEastShare::Localize(void)
 		SetTool(m_htiSaveUploadQueueWaitTime,IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP);
 		SetTool(m_htiEnableChunkDots,IDS_ENABLE_CHUNKDOTS_TIP);
 		SetTool(m_htiEnableEqualChanceForEachFile,IDS_ECFEF_TIP);
+		SetTool(m_htiFollowTheMajority, IDS_FOLLOW_THE_MAJORITY_TIP); // EastShare       - FollowTheMajority by AndCycle
 		SetTool(m_htiIP2CountryName,IDS_IP2COUNTRY_TIP);
 		SetTool(m_htiIP2CountryName_DISABLE,IDS_DISABLED_TIP);
 		SetTool(m_htiIP2CountryShowFlag,IDS_COUNTRYNAME_SHOWFLAG_TIP);
@@ -360,6 +372,8 @@ void CPPgEastShare::OnDestroy()
 	//Morph - added by AndCycle, Equal Chance For Each File
 	m_htiEnableEqualChanceForEachFile = NULL;
 	//Morph - added by AndCycle, Equal Chance For Each File
+
+	m_htiFollowTheMajority = NULL; // EastShare       - FollowTheMajority by AndCycle
 
 	//EastShare START - Added by TAHO, .met control
 	m_htiMetControl = NULL;

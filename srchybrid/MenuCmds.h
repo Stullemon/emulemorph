@@ -129,6 +129,7 @@
 #define MP_VIEW1_CLIENTS		10260
 #define MP_VIEW1_DOWNLOADCLIENT	10261 //MORPH - Added by SiRoB, DownloadClientList
 #define MP_VIEW2_DOWNLOADCLIENT	10262 //MORPH - Added by SiRoB, DownloadClientList
+#define MP_FOLLOW_THE_MAJORITY  10263 // EastShare       - FollowTheMajority by AndCycle
 
 #define MP_PRIOVERYLOW			10300
 #define MP_PRIOLOW				10301

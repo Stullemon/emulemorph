@@ -334,6 +334,7 @@ void CFileDetailDialogName::RenameFile()
 		if (strNewFileName.IsEmpty() || !IsValidEd2kString(strNewFileName))
 			return;
 		CPartFile* file = STATIC_DOWNCAST(CPartFile, (*m_paFiles)[0]);
+		file->SetFollowTheMajority(false); // EastShare       - FollowTheMajority by AndCycle
 		file->SetFileName(strNewFileName, true);
 		file->UpdateDisplayedInfo();
 		file->SavePartFile();

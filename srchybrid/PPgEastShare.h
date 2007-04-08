@@ -66,6 +66,11 @@ protected:
 	HTREEITEM m_htiEnableEqualChanceForEachFile;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
+	// EastShare Start - FollowTheMajority by AndCycle
+	bool	m_bFollowTheMajority;
+	HTREEITEM m_htiFollowTheMajority;
+	// EastShare End   - FollowTheMajority by AndCycle
+
 	// EastShare START - Added by TAHO, .met control
 	HTREEITEM m_htiMetControl;
 	int m_iKnownMetDays;

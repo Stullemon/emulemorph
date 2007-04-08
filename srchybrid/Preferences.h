@@ -609,6 +609,7 @@ public:
 	static bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 	static int	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	static bool	m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
+	static bool m_bFollowTheMajority; // EastShare       - FollowTheMajority by AndCycle
 	static bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static int	m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	static bool m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
@@ -1817,6 +1818,7 @@ public:
 	
 	static	int		GetCreditSystem()	{return creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
 	static	bool	IsEqualChanceEnable()	{ return m_bEnableEqualChanceForEachFile;}	//Morph - added by AndCycle, Equal Chance For Each File
+	static	bool	IsFollowTheMajorityEnabled() { return m_bFollowTheMajority;}// EastShare       - FollowTheMajority by AndCycle
 	static	int  GetKnownMetDays()	{return m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	static	bool IsAutoDynUpSwitching()	{return isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static	int  GetPowerShareMode()	{return m_iPowershareMode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing

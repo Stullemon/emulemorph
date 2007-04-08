@@ -1320,6 +1320,7 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate)
 		for (POSITION pos2 = cur_file->srclist.GetHeadPosition();pos2 != 0; cur_file->srclist.GetNext(pos2)){
 			if (toremove == cur_file->srclist.GetAt(pos2)){
 				cur_file->srclist.RemoveAt(pos2);
+				cur_file->RemoveSourceFileName(toremove); // EastShare       - FollowTheMajority by AndCycle
 				bRemovedSrcFromPartFile = true;
 				if ( bDoStatsUpdate ){
 					cur_file->RemoveDownloadingSource(toremove);

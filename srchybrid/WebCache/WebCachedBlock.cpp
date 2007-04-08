@@ -310,9 +310,11 @@ void CWebCachedBlock::UpdateProxyClient()
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource( SINGLEProxyClient, SINGLEProxyClient->reqfile );
 			theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(SINGLEProxyClient); // MORPH - Added by SiRoB, DownloadClientsCtrl ProxyClient
 			POSITION pos = SINGLEProxyClient->reqfile->srclist.Find(SINGLEProxyClient);
-			if( pos )
+			if( pos ) {
+				SINGLEProxyClient->reqfile->RemoveSourceFileName(SINGLEProxyClient->reqfile->srclist.GetAt(pos)); // EastShare       - FollowTheMajority by AndCycle
 				SINGLEProxyClient->reqfile->srclist.RemoveAt(pos);
-	}
+			}
+		}
 	}
 }
 //MORPH END   - Changed By SiRoB, WebCache Fix Requestblocks

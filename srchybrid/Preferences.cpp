@@ -473,6 +473,7 @@ bool	CPreferences::enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLee
 bool	CPreferences::enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 int	CPreferences::creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 bool	CPreferences::m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
+bool	CPreferences::m_bFollowTheMajority; // EastShare       - FollowTheMajority by AndCycle
 bool	CPreferences::isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 int	CPreferences::m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 bool	CPreferences::m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
@@ -2505,6 +2506,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("EnableAntiCreditHack"), enableAntiCreditHack,_T("eMule")); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteBool(_T("FollowTheMajority"), m_bFollowTheMajority, _T("eMule")); // EastShare       - FollowTheMajority by AndCycle
 
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	ini.WriteInt(_T("DownloadDataRateAverageTime"),max(1,m_iDownloadDataRateAverageTime/1000),_T("eMule"));
@@ -3297,6 +3299,7 @@ void CPreferences::LoadPreferences()
 	if (    (creditSystemMode <0 )  || (creditSystemMode >3)) // MORPH leuk_he only valid credit systems in morph
        creditSystemMode =0;  // MORPH leuk_he only valid credit systems in morph 
 	m_bEnableEqualChanceForEachFile = ini.GetBool(_T("EqualChanceForEachFile"), false);//Morph - added by AndCycle, Equal Chance For Each File
+	m_bFollowTheMajority = ini.GetBool(_T("FollowTheMajority"), true); // EastShare       - FollowTheMajority by AndCycle
         
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	LPBYTE pst = NULL;

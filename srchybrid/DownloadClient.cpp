@@ -761,6 +761,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 	if (file != reqfile)
 		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileInfo; reqfile!=file)");
 	m_strClientFilename = data->ReadString(GetUnicodeSupport()!=utf8strNone);
+	reqfile->UpdateSourceFileName(this); // EastShare       - FollowTheMajority by AndCycle
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		Debug(_T("  Filename=\"%s\"\n"), m_strClientFilename);
 	// 26-Jul-2003: removed requesting the file status for files <= PARTSIZE for better compatibility with ed2k protocol (eDonkeyHybrid).
@@ -2707,6 +2708,7 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR re
 	POSITION pos = reqfile->srclist.Find(this);
 	if(pos)
     {
+		reqfile->RemoveSourceFileName(reqfile->srclist.GetAt(pos)); // EastShare       - FollowTheMajority by AndCycle
     	reqfile->srclist.RemoveAt(pos);
     } else {
         AddDebugLogLine(DLP_HIGH, true, _T("o-o Unsync between parfile->srclist and client otherfiles list. Swapping client where client has file as reqfile, but file doesn't have client in srclist. %s Remove = %s '%s'   -->   '%s'  SwapReason: %s"), DbgGetClientInfo(), (bRemoveCompletely ? _T("Yes") : _T("No") ), (this->reqfile)?this->reqfile->GetFileName():_T("null"), SwapTo->GetFileName(), reason);

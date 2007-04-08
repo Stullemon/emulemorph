@@ -334,6 +334,7 @@ void CPartFile::Init(){
 	InChangedSharedStatusBar = false;
 	//MORPH END   - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	m_ics_filemode = 0;	// enkeyDEV: ICS //Morph - added by AndCycle, ICS
+	m_bFollowTheMajority = thePrefs.IsFollowTheMajorityEnabled(); // EastShare       - FollowTheMajority by AndCycle
 
 	//MORPH START - Added by Stulle, Global Source Limit
 	InitHL();
@@ -6707,7 +6708,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	//      completed before starting to download other one.
 	//  
 	// The frequency criterion defines several zones: very rare, rare, almost rare,
-	// and common. Inside each zone, the criteria have a specific ‘weight’, used 
+	// and common. Inside each zone, the criteria have a specific ‘weight? used 
 	// to calculate the priority of chunks. The chunk(s) with the highest 
 	// priority (highest=0, lowest=0xffff) is/are selected first.
 	//  
@@ -7090,7 +7091,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
                             sender->m_lastPartAsked = tempLastPartAsked = cur_chunk.part;
                             //AddDebugLogLine(DLP_VERYLOW, false, _T("Chunk number %i selected. Rank: %u"), cur_chunk.part, cur_chunk.rank);
 
-							// Remark: this list might be reused up to ‘*count’ times
+							// Remark: this list might be reused up to ?count?times
 							chunksList.RemoveAt(cur_pos);
 							break; // exit loop for()
 						}  
@@ -8406,3 +8407,70 @@ void CPartFile::ProcessSourceCache()
 	}
 }
 //MORPH END   - Added by Stulle, Source cache [Xman]
+
+// EastShare Start - FollowTheMajority by AndCycle
+void CPartFile::UpdateSourceFileName(CUpDownClient* src) {
+	
+	//remove from list
+	CString filename;
+	int count;
+	if (this->m_mapSrcFilename.Lookup(src, filename)) {
+		this->m_mapFilenameCount.Lookup(filename, count);
+		this->m_mapFilenameCount.SetAt(filename, count-1);
+		this->m_mapSrcFilename.RemoveKey(src);
+	}
+
+	//then adding again
+	if (this->srclist.Find(src)) {
+		CString filename = src->GetClientFilename();
+		int count;
+		this->m_mapSrcFilename.SetAt(src, filename);
+		if (this->m_mapFilenameCount.Lookup(filename, count)) {
+			this->m_mapFilenameCount.SetAt(filename, count+1);
+		} else {
+			this->m_mapFilenameCount.SetAt(filename, 1);
+		}
+	}
+
+	if (this->m_bFollowTheMajority) {
+		CString theMajorityFilename, filename;
+		int maxcount = -1, count;
+		for (POSITION pos = this->m_mapFilenameCount.GetStartPosition(); pos;) {
+			this->m_mapFilenameCount.GetNextAssoc(pos, filename, count);
+			if (count > maxcount) {
+				maxcount = count;
+				theMajorityFilename = filename;
+			}
+		}
+
+		if (!theMajorityFilename.IsEmpty()) {
+			SetFileName(theMajorityFilename, true);
+		}
+	}
+}
+void CPartFile::RemoveSourceFileName(CUpDownClient* src) {
+	CString filename;
+	int count;
+	if (this->m_mapSrcFilename.Lookup(src, filename)) {
+		this->m_mapFilenameCount.Lookup(filename, count);
+		this->m_mapFilenameCount.SetAt(filename, count-1);
+		this->m_mapSrcFilename.RemoveKey(src);
+	}
+
+	if (this->m_bFollowTheMajority) {
+		CString theMajorityFilename, filename;
+		int maxcount = -1, count;
+		for (POSITION pos = this->m_mapFilenameCount.GetStartPosition(); pos;) {
+			this->m_mapFilenameCount.GetNextAssoc(pos, filename, count);
+			if (count > maxcount) {
+				maxcount = count;
+				theMajorityFilename = filename;
+			}
+		}
+
+		if (!theMajorityFilename.IsEmpty()) {
+			SetFileName(theMajorityFilename, true);
+		}
+	}
+}
+// EastShare End   - FollowTheMajority by AndCycle
