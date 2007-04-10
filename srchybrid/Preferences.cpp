@@ -3299,7 +3299,7 @@ void CPreferences::LoadPreferences()
 	if (    (creditSystemMode <0 )  || (creditSystemMode >3)) // MORPH leuk_he only valid credit systems in morph
        creditSystemMode =0;  // MORPH leuk_he only valid credit systems in morph 
 	m_bEnableEqualChanceForEachFile = ini.GetBool(_T("EqualChanceForEachFile"), false);//Morph - added by AndCycle, Equal Chance For Each File
-	m_bFollowTheMajority = ini.GetBool(_T("FollowTheMajority"), true); // EastShare       - FollowTheMajority by AndCycle
+	m_bFollowTheMajority = ini.GetBool(_T("FollowTheMajority"), false); // EastShare       - FollowTheMajority by AndCycle
         
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	LPBYTE pst = NULL;
