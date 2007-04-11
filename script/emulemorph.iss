@@ -93,12 +93,20 @@ Source: "..\staging\emule\config\preferences.ini"; DestDir: "{app}\config"; Flag
 Source: "..\staging\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\staging\webserver\*"; DestDir: "{app}\webserver"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\staging\wapserver\*"; DestDir: "{app}\wapserver"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\eMuleShellExt\Release\eMuleShellExt.dll"; DestDir: "{app}" ; Flags: regserver ignoreversion ;Tasks: shellextention
+Source: "..\eMuleShellExt\doc\eMule Shell Extension.htm"; DestDir: "{app}" ; Flags: ignoreversion;Tasks: shellextention
+Source: "..\eMuleShellExt\doc\eMule Shell Extension-DE.PNG"; DestDir: "{app}" ; Flags: ignoreversion;Tasks: shellextention
+
+
+
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; flags: unchecked
 Name: "firewall"; Description: "{cm:tasks_firewall}"; MinVersion: 0,5.01sp2
 Name: "urlassoc"; Description: "{cm:tasks_assocurl}"; GroupDescription: "Other tasks:"
+Name: "shellextention"; Description: "{cm:shellextention}"; GroupDescription: "Other tasks:" ; Flags: unchecked ;MinVersion: 0,5.01
+
 
 [INI]
 Filename: "{app}\emulemorphhome.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://emulemorph.sourceforge.net/"
@@ -107,6 +115,7 @@ Filename: "{app}\emulemorphhome.url"; Section: "InternetShortcut"; Key: "URL"; S
 Name: "{group}\eMule MorphXT"; Filename: "{app}\emule.exe" ; Comment: "eMule MorphXT"
 Name: "{group}\{cm:ProgramOnTheWeb,eMule Morph}"; Filename: "{app}\emulemorphhome.url"
 Name: "{group}\{cm:UninstallProgram,eMule}"; Filename: "{uninstallexe}"
+Name: "{group}\Shell extension doc" ; Filename: "{app}\eMule Shell Extension.htm"; Tasks: shellextention
 Name: "{userdesktop}\eMule"; Filename: "{app}\emule.exe"; Tasks: desktopicon
 
 [Registry]
@@ -120,6 +129,23 @@ Root: HKCR; Subkey: ".emulecollection"; ValueType: string; ValueName: ""; ValueD
 Root: HKCR; Subkey: "eMule"; ValueType: string; ValueName: ""; ValueData: "eMule"; Flags: uninsdeletekey;  Tasks: urlassoc
 Root: HKCR; Subkey: "eMule\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMule.exe,1";  Tasks: urlassoc
 Root: HKCR; Subkey: "eMule\shell\open\Command"; ValueType: string; ValueData: "{app}\emule.exe ""%1"""; Flags: uninsdeletekey;  Tasks: urlassoc
+; shell extension uninstall:
+Root: HKCR; Subkey: ".met"; ValueType: string; ValueName: ""; ValueData: "metfile "; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: ".part"; ValueType: string; ValueName: ""; ValueData: "partfile "; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}"; ValueName: ""; ValueData: "eMule shell extension";  ValueType: string; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}\InprocServer32"; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll";  ValueType: string; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}\InprocServer32"; ValueName: "ThreadingModel"; ValueData: "Both";  ValueType: string; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "Details"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "infoTip"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "Tileinfo"; ValueData: "prop:DocTitle;Size"; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "metfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll,-201"; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "partfile\ShellEx\PropertyHandler"; ValueType: string; ValueName: "" ;ValueData: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}}";   Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "Details"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "infoTip"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "Tileinfo"; ValueData: "prop:DocTitle;Size"; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "partfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll,-202"; Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "partfile\ShellEx\PropertyHandler"; ValueType: string; ValueName: "" ;ValueData: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}";   Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: "Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved"; ValueType: string; ValueName: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}" ;ValueData: "eMule shell extension";   Flags: uninsdeletevalue;Tasks: shellextention
 
 
 [Run]
@@ -143,21 +169,26 @@ tasks_firewall=Add an exception to the Windows Firewall
 dialog_firewall=Setup failed to add eMule to the Windows Firewall.%nPlease add eMule to the exception list manually.
 ;dutch.tasks_firewall=Voeg een uitzonderings regel toe aan de windows firewall.
 ;dutch.dialog_firewall=Setup heeft emule niet als uitzondering aan de Windows Firewall kunnen toevoegen .%nWellicht moet u dit nog handmatig doen.
-spanish.tasks_firewall=A馻dir una excepci髇 al Cortafuegos de Windows
-spanish.dialog_firewall=No se pudo a馻dir eMule al Cortafuegos de Windows.%nA馻da el eMule a la lista del cortafuegos manualmente.
+spanish.tasks_firewall=A?adir una excepción al Cortafuegos de Windows
+spanish.dialog_firewall=No se pudo a?adir eMule al Cortafuegos de Windows.%nA?ada el eMule a la lista del cortafuegos manualmente.
 french.tasks_firewall=Ajouter une exception dans le Pare-feu Windows
 french.dialog_firewall=mpossible d'ajouter emule dans le firewall de windows.%nMerci d'ajouter  emule dans la liste du firewall de windows.
-german.tasks_firewall=Eine Ausnahme f黵 Windows Firewall erstellen
-german.dialog_firewall=Setup konnte keine Ausnamhe f黵 eMule in der Windows Firewall hinzuf黦en.%nBitte eMule manuell auf die Liste der Ausnahmen setzen.
-BrazilianPortuguese.tasks_firewall=Adiciona uma exce玢o ao Firewall do Windows
-BrazilianPortuguese.dialog_firewall=O Setup falhou ao adicionar o eMule ao Firewall do Windows.%nPor favor adicione o eMule na lista de exce珲es manualmente.
+german.tasks_firewall=Eine Ausnahme für Windows Firewall erstellen
+german.dialog_firewall=Setup konnte keine Ausnamhe für eMule in der Windows Firewall hinzufügen.%nBitte eMule manuell auf die Liste der Ausnahmen setzen.
+BrazilianPortuguese.tasks_firewall=Adiciona uma exce??o ao Firewall do Windows
+BrazilianPortuguese.dialog_firewall=O Setup falhou ao adicionar o eMule ao Firewall do Windows.%nPor favor adicione o eMule na lista de exce??es manualmente.
 tasks_assocurl=Registers eMule to take ed2k-Links and .emulecollection.
 ;dutch.assocurl=eD2K links doorsturen naar eMule.
 spanish.assocurl=Capturar enlaces Ed2k and .emulecollection.
 french.assocurl=Associer avec les liens Ed2k et .emulecollection.
 german.assocurl=Ed2k-Links nehmen und  .emulecollection.
 BrazilianPortuguese.assocurl=BrazilianPortuguese.assocurl=Associar com links ED2K e arquivos .emulecollection
-ChineseSimpl.assocurl="㎝ Ed2k 硈挡玻ネ闽羛"
+ChineseSimpl.assocurl="?M Ed2k 3sμ22￡￥í??áp"
+shellextention=Install shell extention for .met and .part files.
+italian.shellextention=Installa shell extention per i file .met e .part.
+spanish.shellextention=en el núcleo, los archivos con extensiones .met y .part.
+BrazilianPortuguese.shellextention=Instalar a extens鉶 shell para os ficheiros .met e .part
+ChineseSimpl.shellextention=让游览器为.met和.part文件显示更多信息。
 
 ; Code sections need to be the last section in a script or the compiler will get confused
 [Code]
