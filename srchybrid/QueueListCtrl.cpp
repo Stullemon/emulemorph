@@ -524,7 +524,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 							//Morph Start - added by AndCycle, Equal Chance For Each File
 							if(thePrefs.IsEqualChanceEnable()){
-								if(client->GetPowerShared(file)){
+								if(file->GetPowerShared()){
 									Sbuffer.Append(_T(" "));
 									Sbuffer.Append(file->statistic.GetEqualChanceValueString());
 								}
@@ -534,8 +534,14 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							}
 							//Morph End - added by AndCycle, Equal Chance For Each File
 
+							//EastShare	Start - FairPlay by AndCycle
+							if (file->statistic.GetFairPlay()) {
+								Sbuffer.Append(_T(",FairPlay"));
+							}
+							//EastShare	End   - FairPlay by AndCycle
+
 							//MORPH START - Added by SiRoB, ZZ Upload System
-							if(client->GetPowerShared(file)) {
+							if(file->GetPowerShared()) {
 								CString tempString = GetResString(IDS_POWERSHARE_PREFIX);
 								tempString.Append(_T(","));
 								tempString.Append(Sbuffer);
@@ -889,10 +895,10 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			//MORPH END   - Adde by SiRoB, Optimization requpfile
 			if( (file1 != NULL) && (file2 != NULL)){
 				//only file priority
-				if (item1->GetPowerShared(file1)) ++iResult;
- 				if (item2->GetPowerShared(file2)) --iResult;
+				if (file1->GetPowerShared() || file1->statistic.GetFairPlay()) ++iResult;
+ 				if (file2->GetPowerShared() || file1->statistic.GetFairPlay()) --iResult;
 				//Morph Start - added by AndCycle, Equal Chance For Each File
-				if(iResult == 0 && (!thePrefs.IsEqualChanceEnable() || (item1->GetPowerShared(file1) && item2->GetPowerShared(file2))))
+				if(iResult == 0 && (!thePrefs.IsEqualChanceEnable() || ((file1->GetPowerShared() || file1->statistic.GetFairPlay()) && (file2->GetPowerShared() || file1->statistic.GetFairPlay()))))
 					iResult = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
 				if (iResult == 0 && file1 != file2 && thePrefs.IsEqualChanceEnable()){
 					iResult =

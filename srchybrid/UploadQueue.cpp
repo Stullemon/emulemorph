@@ -707,7 +707,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		if(newclient) {
             //MORPH START - Changed by , Upload Splitting Class
 			bool wanttoaddanewfriendslot = newclient->IsFriend() && newclient->GetFriendSlot();
-			if(wanttoaddanewfriendslot || newclient->GetPowerShared()) {
+			if(wanttoaddanewfriendslot || newclient->IsPBForPS()) {
 				CUpDownClient* lastClient = FindLastUnScheduledForRemovalClientInUploadList(wanttoaddanewfriendslot?0:1);
 			//MORPH END   - Changed by , Upload Splitting Class
 

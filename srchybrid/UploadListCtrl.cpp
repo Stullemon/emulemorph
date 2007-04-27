@@ -551,7 +551,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							else if(file)
 								if(client->IsMoreUpThanDown(file) && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (sint32)((client->Credits()->GetDownloadedTotal() - client->Credits()->GetUploadedTotal())/UpDatarate);
 							// [end] Mighty Knife
-								else if(client->GetPowerShared(file) && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
+								else if(file->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
 								else if (file->GetFileSize() > (uint64)SESSIONMAXTRANS)	timeleft = (sint32)((SESSIONMAXTRANS - client->GetQueueSessionUp())/UpDatarate);
 								else timeleft = (sint32)(((uint64)file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate);
 							Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), (timeleft>=0)?CastSecondsToHM(timeleft):_T("?"));
@@ -627,7 +627,12 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 									CastItoXBytes((float)client->Credits()->GetDownloadedTotal()-
 												(float)client->Credits()->GetUploadedTotal(),false,false));
 							}
-							if (client->GetPowerShared(file))
+							//EastShare	Start - FairPlay by AndCycle
+							if (file->statistic.GetFairPlay()) {
+								Sbuffer.Append(_T(",FairPlay"));
+							}
+							//EastShare	End   - FairPlay by AndCycle
+							if (file->GetPowerShared())
 								Sbuffer.Append(_T(",PS"));
 
 							CString tempFilePrio;

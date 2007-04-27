@@ -71,6 +71,11 @@ protected:
 	HTREEITEM m_htiFollowTheMajority;
 	// EastShare End   - FollowTheMajority by AndCycle
 
+	// EastShare	Start - FairPlay by AndCycle
+	bool	m_bFairPlay;
+	HTREEITEM m_htiFairPlay;
+	// EastShare	End   - FairPlay by AndCycle
+
 	// EastShare START - Added by TAHO, .met control
 	HTREEITEM m_htiMetControl;
 	int m_iKnownMetDays;

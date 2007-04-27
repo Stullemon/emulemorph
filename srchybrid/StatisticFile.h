@@ -75,12 +75,15 @@ public:
 	uint64	GetAllTimeTransferred() const	{return alltimetransferred;}
 	
 	CKnownFile* fileParent;
-//Morph Start - Added by AndCycle, Equal Chance For Each File
+	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue();
 	CString	GetEqualChanceValueString(bool detail = true);
 	DWORD	GetSessionShareTime()		{ return time(NULL) - m_dwSessionShareTime; }
 	void	SetSessionShareTime()		{ m_dwSessionShareTime = time(NULL); }
 	//Morph End - Added by AndCycle, Equal Chance For Each File
+	//EastShare	Start - FairPlay by AndCycle
+	bool	GetFairPlay();
+	//EastShare	End   - FairPlay by AndCycle
 private:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
 	CRBMap<uint64, uint64> spreadlist;

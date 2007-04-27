@@ -5282,6 +5282,7 @@ BEGIN
     IDS_COPYFEEDBACK        "Copy feedback to clipboard"
     IDS_FOLLOW_THE_MAJORITY "Follow the Majority"
     IDS_ANTILEECHERLOG      "[Anti-leechermods] Client %s has been temporary banned because of suspicious leech action"
+    IDS_FAIR_PLAY           "FairPlay"
 END
 
 STRINGTABLE 
@@ -6486,6 +6487,7 @@ BEGIN
     IDS_EXPIRED_KNOWN_TIP   "Clean up .met files after file \nhas not been seen for xxx days\nSaves diskspace. Applies for\nknown*.met. Never set a very\nlow value (less than 30) here"
     IDS_FOLLOW_THE_MAJORITY_TIP 
                             "Auto rename your file with majority used, \ncan be direct active from right click or disable by any rename operation."
+    IDS_FAIR_PLAY_TIP       "at least upload one copy of downloaded file with priority."
 END
 
 STRINGTABLE 

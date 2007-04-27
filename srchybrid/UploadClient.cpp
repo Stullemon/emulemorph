@@ -629,35 +629,15 @@ bool CUpDownClient::IsPBForPS() const
 	if (currentReqFile == NULL)
 		return false;
 	//-->Commun to both call
-	if (currentReqFile->GetPowerShared() || !currentReqFile->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure())
+	if (
+		currentReqFile->GetPowerShared() || 
+		!currentReqFile->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure() ||
+		currentReqFile->statistic.GetFairPlay() // EastShare - FairPlay by AndCycle
+		)
 		return true;
 	return false;
 }
 //MORPH END   - Added by SiRoB, Code Optimization PBForPS()
-
-//MORPH START - Added by Yun.SF3, ZZ Upload System
-/**
-* Checks if the file this client has requested has release priority.
-*
-* @return true if the requested file has release priority
-*/
-bool CUpDownClient::GetPowerShared() const {
-//Comment : becarefull when changing this function don't forget to change IsPBForPS() 
-	//MORPH - Changed by SiRoB, Optimization requpfile
-	/*
-	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
-	*/
-	CKnownFile* currentReqFile = CheckAndGetReqUpFile();
-	//MORPH - Changed by SiRoB, Optimization requpfile
-	return currentReqFile && currentReqFile->GetPowerShared();
-}
-//MORPH END - Added by Yun.SF3, ZZ Upload System
-
-//MORPH START - Added by SiRoB, Code Optimization
-bool CUpDownClient::GetPowerShared(const CKnownFile* file) const {
-	return file->GetPowerShared();
-}
-//MORPH END   - Added by SiRoB, Code Optimization
 
 class CSyncHelper
 {

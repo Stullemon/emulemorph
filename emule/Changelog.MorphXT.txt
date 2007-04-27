@@ -2,7 +2,8 @@
 Changelog for eMule 0.47c MorphXT v9.7
 --------------------------------------
 xx-xx-2007
-ADD:     FollowTheMajority, a new feature that will auto rename your file with majority used, default action can be changed from ModOptions->EastShare->FollowTheMajority, can be direct active from right click or disable by any rename operation. [AndCycle]
+ADD: FollowTheMajority, a new feature that will auto rename your file with majority used, default action can be changed from ModOptions->EastShare->FollowTheMajority, can be direct active from right click or disable by any rename operation per file based. [AndCycle]
+ADD: FairPlay, at least upload one copy of downloaded file with priority [AndCycle]
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.6 installer

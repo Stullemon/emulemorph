@@ -342,3 +342,9 @@ CString CStatisticFile::GetEqualChanceValueString(bool detail){
 	return tempString;
 }
 //Morph End - added by AndCycle, Equal Chance For Each File
+
+//EastShare	Start - FairPlay by AndCycle
+bool	CStatisticFile::GetFairPlay() {
+	return !fileParent->IsPartFile() && ((this->GetAllTimeTransferred()/fileParent->GetFileSize()) < thePrefs.GetFairPlay());
+}
+//EastShare	End   - FairPlay by AndCycle

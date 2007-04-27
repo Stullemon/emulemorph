@@ -2288,6 +2288,7 @@
 #define IDS_FOLLOW_THE_MAJORITY         3533
 #define IDS_ANTILEECHERLOG              3534
 #define IDI_SUC                         3535
+#define IDS_FAIR_PLAY                   3535
 #define IDS_DOWNLOAD_IN_RED             3537
 #define IDS_UPSLOTNUMBER                3538
 #define IDS_STATS_LEECHERCLIENTS        3539
@@ -3479,6 +3480,7 @@
 #define IDS_MET_FILE_CONTROL_TIP        30486
 #define IDS_EXPIRED_KNOWN_TIP           30487
 #define IDS_FOLLOW_THE_MAJORITY_TIP     30488
+#define IDS_FAIR_PLAY_TIP               30489
 #define IDC_FILTERSERVERBYIPFILTE_TIP   30500
 #define IDC_STATIC_FILTERLEVE_TIP       30502
 #define IDC_RELOADFILTE_TIP             30504
@@ -3694,7 +3696,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6211
+#define _APS_NEXT_RESOURCE_VALUE        6225
 #define _APS_NEXT_COMMAND_VALUE         32773
 #define _APS_NEXT_CONTROL_VALUE         6212
 #define _APS_NEXT_SYMED_VALUE           106

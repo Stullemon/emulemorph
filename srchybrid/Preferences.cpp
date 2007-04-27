@@ -474,6 +474,7 @@ bool	CPreferences::enableAntiCreditHack; //MORPH - Added by IceCream, enableAnti
 int	CPreferences::creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 bool	CPreferences::m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
 bool	CPreferences::m_bFollowTheMajority; // EastShare       - FollowTheMajority by AndCycle
+int		CPreferences::m_iFairPlay; //EastShare	- FairPlay by AndCycle
 bool	CPreferences::isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 int	CPreferences::m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 bool	CPreferences::m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
@@ -2507,6 +2508,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
 	ini.WriteBool(_T("FollowTheMajority"), m_bFollowTheMajority, _T("eMule")); // EastShare       - FollowTheMajority by AndCycle
+	ini.WriteInt(_T("FairPlay"), m_iFairPlay, _T("eMule")); //EastShare	- FairPlay by AndCycle
 
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	ini.WriteInt(_T("DownloadDataRateAverageTime"),max(1,m_iDownloadDataRateAverageTime/1000),_T("eMule"));
@@ -3300,6 +3302,7 @@ void CPreferences::LoadPreferences()
        creditSystemMode =0;  // MORPH leuk_he only valid credit systems in morph 
 	m_bEnableEqualChanceForEachFile = ini.GetBool(_T("EqualChanceForEachFile"), false);//Morph - added by AndCycle, Equal Chance For Each File
 	m_bFollowTheMajority = ini.GetBool(_T("FollowTheMajority"), false); // EastShare       - FollowTheMajority by AndCycle
+	m_iFairPlay = ini.GetInt(_T("FairPlay"), 0); //EastShare	- FairPlay by AndCycle
         
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	LPBYTE pst = NULL;
