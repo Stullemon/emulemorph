@@ -345,6 +345,7 @@ CString CStatisticFile::GetEqualChanceValueString(bool detail){
 
 //EastShare	Start - FairPlay by AndCycle
 bool	CStatisticFile::GetFairPlay() {
-	return !fileParent->IsPartFile() && ((this->GetAllTimeTransferred()/fileParent->GetFileSize()) < thePrefs.GetFairPlay());
+	//should only judge simple UL or is there any better replacement?
+	return (this->GetAllTimeTransferred()/fileParent->GetFileSize()) < thePrefs.GetFairPlay();
 }
 //EastShare	End   - FairPlay by AndCycle
