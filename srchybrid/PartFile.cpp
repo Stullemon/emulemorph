@@ -8410,7 +8410,13 @@ void CPartFile::ProcessSourceCache()
 
 // EastShare Start - FollowTheMajority by AndCycle
 void CPartFile::UpdateSourceFileName(CUpDownClient* src) {
-	
+
+
+	if (status == PS_COMPLETE || status == PS_COMPLETING) {
+		//hold on if file is completing, prevent random choise filename
+		return;
+	}
+
 	//remove from list
 	CString filename;
 	int count;
@@ -8449,6 +8455,12 @@ void CPartFile::UpdateSourceFileName(CUpDownClient* src) {
 	}
 }
 void CPartFile::RemoveSourceFileName(CUpDownClient* src) {
+
+	if (status == PS_COMPLETE || status == PS_COMPLETING) {
+		//hold on if file is completing, prevent random choise filename
+		return;
+	}
+
 	CString filename;
 	int count;
 	if (this->m_mapSrcFilename.Lookup(src, filename)) {
