@@ -700,6 +700,7 @@ void CStatisticsDlg::RepaintMeters()
 	m_Statistics.SetYUnits(GetResString(IDS_FSTAT_CONNECTION));
 	Buffer.Format(_T("%s (1:%u)"), GetResString(IDS_ST_ACTIVEC), thePrefs.GetStatsConnectionsGraphRatio());
 	m_Statistics.SetLegendLabel(Buffer, 0);										// Active Connections
+	m_Statistics.SetBarsPlot(thePrefs.GetFillGraphs(),0);//Commander - Added: Draw Active Connections Graph solid
 	m_Statistics.SetLegendLabel(GetResString(IDS_ST_ACTIVEU_ZZ), 1);			// Active Uploads
 	m_Statistics.SetLegendLabel(GetResString(IDS_SP_TOTALUL), 2);				// Total Uploads
 	m_Statistics.SetLegendLabel(GetResString(IDS_ST_ACTIVED), 3);				// Active Downloads
